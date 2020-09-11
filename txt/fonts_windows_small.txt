@@ -1,0 +1,158 @@
+
+// 06-Apr-2020
+// fonts_windows_small
+
+// EMOJI
+EmojiOne Mozilla
+Twemoji Mozilla
+
+// TB WHITELIST
+Arial
+Batang
+Cambria Math
+Courier New
+Euphemia
+Gautami
+Georgia
+Gulim
+GulimChe
+Iskoola Pota
+Kalinga
+Kartika
+Latha
+Lucida Console
+MS Gothic
+MS Mincho
+MS PGothic
+MS PMincho
+MV Boli
+Malgun Gothic
+Mangal
+Meiryo
+Meiryo UI
+Microsoft Himalaya
+Microsoft JhengHei
+Microsoft JhengHei UI
+Microsoft YaHei
+Microsoft YaHei UI
+MingLiU
+Noto Sans Buginese
+Noto Sans Khmer
+Noto Sans Lao
+Noto Sans Myanmar
+Noto Sans Yi
+Nyala
+PMingLiU
+Plantagenet Cherokee
+Raavi
+Segoe UI
+Shruti
+SimSun
+Sylfaen
+Tahoma
+Times New Roman
+Tunga
+Verdana
+Vrinda
+Yu Gothic UI
+宋体
+微软雅黑
+新細明體
+細明體
+굴림
+굴림체
+바탕
+ＭＳ ゴシック
+ＭＳ 明朝
+ＭＳ Ｐゴシック
+ＭＳ Ｐ明朝
+
+// OTHER: can't block: whitelist only one imaginary font
+Courier
+Helvetica
+MS Sans Serif
+MS Serif
+Roman
+Small Fonts
+Times
+
+// EXPAND WHITELIST: font families [GDI vs DirectWrite?)
+Arial Black
+Arial Bold
+Arial Bold Italic
+Arial Italic
+Arial Narrow
+Arial Narrow Bold
+Arial Narrow Bold Italic
+Arial Narrow Italic
+Arial Unicode MS
+Cambria Bold
+Cambria Bold Italic
+Cambria Italic
+Courier New Bold
+Courier New Bold Italic
+Courier New Italic
+Gautami Bold
+Georgia Bold
+Georgia Bold Italic
+Georgia Italic
+Iskoola Pota Bold
+Kalinga Bold
+Kartika Bold
+Latha Bold
+Malgun Gothic Bold
+Malgun Gothic Semilight
+Mangal Bold
+Meiryo Bold
+Meiryo Bold Italic
+Meiryo Italic
+Meiryo UI Bold
+Meiryo UI Bold Italic
+Meiryo UI Italic
+Microsoft JhengHei Bold
+Microsoft JhengHei Light
+Microsoft JhengHei Regular
+Microsoft JhengHei UI Bold
+Microsoft JhengHei UI Light
+Microsoft JhengHei UI Regular
+Microsoft YaHei Bold
+Microsoft YaHei Light
+Microsoft YaHei UI Bold
+Microsoft YaHei UI Light
+MingLiU-ExtB
+MingLiU_HKSCS
+MingLiU_HKSCS-ExtB
+PMingLiU-ExtB
+Raavi Bold
+Segoe UI
+Segoe UI Black
+Segoe UI Black Italic
+Segoe UI Bold
+Segoe UI Bold Italic
+Segoe UI Emoji
+Segoe UI Historic
+Segoe UI Italic
+Segoe UI Light
+Segoe UI Light Italic
+Segoe UI Semibold
+Segoe UI Semibold Italic
+Segoe UI Semilight
+Segoe UI Semilight Italic
+Segoe UI Symbol
+Shruti Bold
+SimSun-ExtB
+Tahoma Bold
+Times New Roman Bold
+Times New Roman Bold Italic
+Times New Roman Italic
+Tunga Bold
+Verdana Bold
+Verdana Bold Italic
+Verdana Italic
+Vrinda Bold
+Yu Gothic
+Yu Gothic UI Bold
+Yu Gothic UI Light
+Yu Gothic UI Regular
+Yu Gothic UI Semibold
+Yu Gothic UI Semilight

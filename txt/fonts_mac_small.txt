@@ -1,0 +1,119 @@
+// 30-May-2020
+// fonts_mac_small
+
+// EMOJI
+EmojiOne Mozilla
+Twemoji Mozilla
+
+// TB WHITELIST
+.Helvetica Neue DeskInterface
+AppleGothic
+Apple Chancery
+Apple Color Emoji
+Arial
+Courier
+Geneva
+Georgia
+Heiti TC
+Helvetica
+Helvetica Neue
+Hiragino Kaku Gothic ProN
+Lucida Grande
+Monaco
+Noto Sans Armenian
+Noto Sans Bengali
+Noto Sans Buginese
+Noto Sans Canadian Aboriginal
+Noto Sans Cherokee
+Noto Sans Devanagari
+Noto Sans Ethiopic
+Noto Sans Gujarati
+Noto Sans Gurmukhi
+Noto Sans Kannada
+Noto Sans Khmer
+Noto Sans Lao
+Noto Sans Malayalam
+Noto Sans Mongolian
+Noto Sans Myanmar
+Noto Sans Oriya
+Noto Sans Sinhala
+Noto Sans Tamil
+Noto Sans Telugu
+Noto Sans Thaana
+Noto Sans Tibetan
+Noto Sans Yi
+Papyrus
+STHeiti
+STIX Math
+Tahoma
+Thonburi
+Times
+Times New Roman
+Verdana
+
+// EXPAND
+.Helvetica Neue Desk UI
+.Helvetica Neue Desk UI Bold
+.Helvetica Neue Desk UI Bold Italic
+.Helvetica Neue Desk UI Italic
+AppleGothic Regular
+Arial Black
+Arial Bold
+Arial Bold Italic
+Arial Italic
+Arial Narrow
+Arial Narrow Bold
+Arial Narrow Bold Italic
+Arial Narrow Italic
+Arial Rounded MT Bold
+Arial Unicode MS
+Courier Bold
+Courier Bold Oblique
+Courier New
+Courier New Bold
+Courier New Bold Italic
+Courier New Italic
+Courier Oblique
+Geneva CY
+Heiti TC Light
+Heiti TC Medium
+Helvetica Bold
+Helvetica Bold Oblique
+Helvetica CY Bold
+Helvetica CY BoldOblique
+Helvetica CY Oblique
+Helvetica CY Plain
+Helvetica Light
+Helvetica Light Oblique
+Helvetica Neue Bold
+Helvetica Neue Bold Italic
+Helvetica Neue Condensed Black
+Helvetica Neue Condensed Bold
+Helvetica Neue Italic
+Helvetica Neue Light
+Helvetica Neue Light Italic
+Helvetica Neue Medium
+Helvetica Neue Medium Italic
+Helvetica Neue Thin
+Helvetica Neue Thin Italic
+Helvetica Neue UltraLight
+Helvetica Neue UltraLight Italic
+Helvetica Oblique
+Hiragino Kaku Gothic ProN W3
+Hiragino Kaku Gothic ProN W6
+Lucida Grande Bold
+Papyrus Condensed
+Tahoma Bold
+Tahoma Negreta
+Thonburi Bold
+Thonburi Light
+Times Bold
+Times Bold Italic
+Times Italic
+Times New Roman Bold
+Times New Roman Bold Italic
+Times New Roman Italic
+Times Roman
+Verdana Bold
+Verdana Bold Italic
+Verdana Italic

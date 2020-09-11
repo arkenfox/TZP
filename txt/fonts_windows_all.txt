@@ -1,0 +1,498 @@
+
+// 06-Apr-2020
+// fonts_windows_all
+// https://docs.microsoft.com/en-us/typography/fonts/font-faq
+
+// EMOJI
+EmojiOne Mozilla
+Twemoji Mozilla
+
+// TB WHITELIST (not in Windows combined)
+Noto Sans Buginese
+Noto Sans Khmer
+Noto Sans Lao
+Noto Sans Myanmar
+Noto Sans Yi
+
+// OTHER: not listed by MS but can't block: e.g. whitelist only one imaginary font
+Courier
+Helvetica
+MS Sans Serif
+MS Serif
+Roman
+Small Fonts
+Times
+宋体
+微软雅黑
+新細明體
+細明體
+굴림
+굴림체
+바탕
+ＭＳ ゴシック
+ＭＳ 明朝
+ＭＳ Ｐゴシック
+ＭＳ Ｐ明朝
+
+// WINDOWS: combined 7 + 8 + 8.1 + 10
+Aharoni Bold
+Aldhabi
+AlternateGothic2 BT
+Andalus
+Angsana New
+Angsana New Bold
+Angsana New Bold Italic
+Angsana New Italic
+AngsanaUPC
+AngsanaUPC Bold
+AngsanaUPC Bold Italic
+AngsanaUPC Italic
+Aparajita
+Aparajita Bold
+Aparajita Bold Italic
+Aparajita Italic
+Arabic Typesetting
+Arial
+Arial Black
+Arial Bold
+Arial Bold Italic
+Arial Italic
+Arial Narrow
+Arial Narrow Bold
+Arial Narrow Bold Italic
+Arial Narrow Italic
+Arial Nova
+Arial Nova Bold
+Arial Nova Bold Italic
+Arial Nova Cond
+Arial Nova Cond Bold
+Arial Nova Cond Bold Italic
+Arial Nova Cond Italic
+Arial Nova Cond Light
+Arial Nova Cond Light Italic
+Arial Nova Italic
+Arial Nova Light
+Arial Nova Light Italic
+Arial Unicode MS
+BIZ UDGothic
+BIZ UDGothic Bold
+BIZ UDMincho
+BIZ UDMincho Medium
+BIZ UDPGothic
+BIZ UDPGothic Bold
+BIZ UDPMincho
+BIZ UDPMincho Medium
+Bahnschrift
+Bahnschrift Light
+Bahnschrift SemiBold
+Bahnschrift SemiLight
+Batang
+BatangChe
+Browallia New
+Browallia New Bold
+Browallia New Bold Italic
+Browallia New Italic
+BrowalliaUPC
+BrowalliaUPC Bold
+BrowalliaUPC Bold Italic
+BrowalliaUPC Italic
+Calibri
+Calibri Bold
+Calibri Bold Italic
+Calibri Italic
+Calibri Light
+Calibri Light Italic
+Cambria
+Cambria Bold
+Cambria Bold Italic
+Cambria Italic
+Cambria Math
+Candara
+Candara Bold
+Candara Bold Italic
+Candara Italic
+Candara Light
+Candara Light Italic
+Comic Sans MS
+Comic Sans MS Bold
+Comic Sans MS Bold Italic
+Comic Sans MS Italic
+Consolas
+Consolas Bold
+Consolas Bold Italic
+Consolas Italic
+Constantia
+Constantia Bold
+Constantia Bold Italic
+Constantia Italic
+Corbel
+Corbel Bold
+Corbel Bold Italic
+Corbel Italic
+Corbel Light
+Corbel Light Italic
+Cordia New
+Cordia New Bold
+Cordia New Bold Italic
+Cordia New Italic
+CordiaUPC
+CordiaUPC Bold
+CordiaUPC Bold Italic
+CordiaUPC Italic
+Courier New
+Courier New Bold
+Courier New Bold Italic
+Courier New Italic
+DFKai-SB
+DaunPenh
+David
+David Bold
+DengXian
+DengXian Bold
+DengXian Light
+DilleniaUPC
+DilleniaUPC Bold
+DilleniaUPC Bold Italic
+DilleniaUPC Italic
+DokChampa
+Dotum
+DotumChe
+Ebrima
+Ebrima Bold
+Estrangelo Edessa
+EucrosiaUPC
+EucrosiaUPC Bold
+EucrosiaUPC Bold Italic
+EucrosiaUPC Italic
+Euphemia
+FangSong
+FrankRuehl
+Franklin Gothic Medium
+Franklin Gothic Medium Italic
+FreesiaUPC
+FreesiaUPC Bold
+FreesiaUPC Bold Italic
+FreesiaUPC Italic
+Gabriola
+Gadugi
+Gadugi Bold
+Gautami
+Gautami Bold
+Georgia
+Georgia Bold
+Georgia Bold Italic
+Georgia Italic
+Georgia Pro
+Georgia Pro Black
+Georgia Pro Black Italic
+Georgia Pro Bold
+Georgia Pro Bold Italic
+Georgia Pro Cond
+Georgia Pro Cond Black
+Georgia Pro Cond Black Italic
+Georgia Pro Cond Bold
+Georgia Pro Cond Bold Italic
+Georgia Pro Cond Italic
+Georgia Pro Cond Light
+Georgia Pro Cond Light Italic
+Georgia Pro Cond Semibold
+Georgia Pro Cond Semibold Italic
+Georgia Pro Italic
+Georgia Pro Light
+Georgia Pro Light Italic
+Georgia Pro Semibold
+Georgia Pro Semibold Italic
+Gill Sans Nova
+Gill Sans Nova Bold
+Gill Sans Nova Bold Italic
+Gill Sans Nova Cond
+Gill Sans Nova Cond Bold
+Gill Sans Nova Cond Bold Italic
+Gill Sans Nova Cond Italic
+Gill Sans Nova Cond Lt
+Gill Sans Nova Cond Lt Italic
+Gill Sans Nova Cond Ultra Bold
+Gill Sans Nova Cond XBd
+Gill Sans Nova Cond XBd Italic
+Gill Sans Nova Italic
+Gill Sans Nova Light
+Gill Sans Nova Light Italic
+Gill Sans Nova Ultra Bold
+Gisha
+Gisha Bold
+Gulim
+GulimChe
+Gungsuh
+GungsuhChe
+HoloLens MDL2 Assets
+Impact
+Ink Free
+IrisUPC
+IrisUPC Bold
+IrisUPC Bold Italic
+IrisUPC Italic
+Iskoola Pota
+Iskoola Pota Bold
+JasmineUPC
+JasmineUPC Bold
+JasmineUPC Bold Italic
+JasmineUPC Italic
+Javanese Text
+KaiTi
+Kalinga
+Kalinga Bold
+Kartika
+Kartika Bold
+Khmer UI
+Khmer UI Bold
+KodchiangUPC
+KodchiangUPC Bold
+KodchiangUPC Bold Italic
+KodchiangUPC Italic
+Kokila
+Kokila Bold
+Kokila Bold Italic
+Kokila Italic
+Lao UI
+Lao UI Bold
+Latha
+Latha Bold
+Leelawadee
+Leelawadee Bold
+Leelawadee UI
+Leelawadee UI Bold
+Leelawadee UI Leelawadee UI
+Leelawadee UI Semilight
+Levenim MT
+Levenim MT Bold
+LilyUPC
+LilyUPC Bold
+LilyUPC Bold Italic
+LilyUPC Italic
+Lucida Console
+Lucida Sans Unicode
+MS Gothic
+MS Mincho
+MS PGothic
+MS PMincho
+MS UI Gothic
+MV Boli
+Malgun Gothic
+Malgun Gothic Bold
+Malgun Gothic Semilight
+Mangal
+Mangal Bold
+Marlett
+Meiryo
+Meiryo Bold
+Meiryo Bold Italic
+Meiryo Italic
+Meiryo UI
+Meiryo UI Bold
+Meiryo UI Bold Italic
+Meiryo UI Italic
+Microsoft Himalaya
+Microsoft JhengHei
+Microsoft JhengHei Bold
+Microsoft JhengHei Light
+Microsoft JhengHei Regular
+Microsoft JhengHei UI
+Microsoft JhengHei UI Bold
+Microsoft JhengHei UI Light
+Microsoft JhengHei UI Regular
+Microsoft New Tai Lue
+Microsoft New Tai Lue Bold
+Microsoft PhagsPa
+Microsoft PhagsPa Bold
+Microsoft Sans Serif
+Microsoft Tai Le
+Microsoft Tai Le Bold
+Microsoft Uighur
+Microsoft Uighur Bold
+Microsoft YaHei
+Microsoft YaHei Bold
+Microsoft YaHei Light
+Microsoft YaHei UI
+Microsoft YaHei UI Bold
+Microsoft YaHei UI Light
+Microsoft Yi Baiti
+MingLiU
+MingLiU-ExtB
+MingLiU_HKSCS
+MingLiU_HKSCS-ExtB
+Miriam
+Miriam Fixed
+Mongolian Baiti
+MoolBoran
+Myanmar Text
+Myanmar Text Bold
+NSimSun
+Narkisim
+Neue Haas Grotesk Text Pro
+Neue Haas Grotesk Text Pro Bold
+Neue Haas Grotesk Text Pro Bold Italic
+Neue Haas Grotesk Text Pro Italic
+Neue Haas Grotesk Text Pro Medium
+Neue Haas Grotesk Text Pro Medium Italic
+Nirmala UI
+Nirmala UI Bold
+Nirmala UI Semilight
+Nyala
+PMingLiU
+PMingLiU-ExtB
+Palatino Linotype
+Palatino Linotype Bold
+Palatino Linotype Bold Italic
+Palatino Linotype Italic
+Plantagenet Cherokee
+Raavi
+Raavi Bold
+Rockwell Nova
+Rockwell Nova Bold
+Rockwell Nova Bold Italic
+Rockwell Nova Cond
+Rockwell Nova Cond Bold
+Rockwell Nova Cond Bold Italic
+Rockwell Nova Cond Italic
+Rockwell Nova Cond Light
+Rockwell Nova Cond Light Italic
+Rockwell Nova Extra Bold
+Rockwell Nova Extra Bold Italic
+Rockwell Nova Italic
+Rockwell Nova Light Italic
+Rockwell Nova Rockwell
+Rod
+Sakkal Majalla
+Sakkal Majalla Bold
+Sanskrit Text
+Segoe MDL2 Assets
+Segoe Print
+Segoe Print Bold
+Segoe Pseudo
+Segoe Script
+Segoe Script Bold
+Segoe UI
+Segoe UI Black
+Segoe UI Black Italic
+Segoe UI Bold
+Segoe UI Bold Italic
+Segoe UI Emoji
+Segoe UI Historic
+Segoe UI Italic
+Segoe UI Light
+Segoe UI Light Italic
+Segoe UI Semibold
+Segoe UI Semibold Italic
+Segoe UI Semilight
+Segoe UI Semilight Italic
+Segoe UI Symbol
+Shonar Bangla
+Shonar Bangla Bold
+Shruti
+Shruti Bold
+SimHei
+SimSun
+SimSun-ExtB
+Simplified Arabic
+Simplified Arabic Bold
+Simplified Arabic Fixed
+Sitka Banner
+Sitka Banner Bold
+Sitka Banner Bold Italic
+Sitka Banner Italic
+Sitka Display
+Sitka Display Bold
+Sitka Display Bold Italic
+Sitka Display Italic
+Sitka Heading
+Sitka Heading Bold
+Sitka Heading Bold Italic
+Sitka Heading Italic
+Sitka Small
+Sitka Small Bold
+Sitka Small Bold Italic
+Sitka Small Italic
+Sitka Subheading
+Sitka Subheading Bold
+Sitka Subheading Bold Italic
+Sitka Subheading Italic
+Sitka Text
+Sitka Text Bold
+Sitka Text Bold Italic
+Sitka Text Italic
+Sylfaen
+Symbol
+Tahoma
+Tahoma Bold
+Times New Roman
+Times New Roman Bold
+Times New Roman Bold Italic
+Times New Roman Italic
+Traditional Arabic
+Traditional Arabic Bold
+Trebuchet MS
+Trebuchet MS Bold
+Trebuchet MS Bold Italic
+Trebuchet MS Italic
+Tunga
+Tunga Bold
+UD Digi Kyokasho
+UD Digi Kyokasho N-B
+UD Digi Kyokasho N-R
+UD Digi Kyokasho NK-B
+UD Digi Kyokasho NK-R
+UD Digi Kyokasho NP-B
+UD Digi Kyokasho NP-R
+Urdu Typesetting
+Urdu Typesetting Bold
+Utsaah
+Utsaah Bold
+Utsaah Bold Italic
+Utsaah Italic
+Vani
+Vani Bold
+Verdana
+Verdana Bold
+Verdana Bold Italic
+Verdana Italic
+Verdana Pro
+Verdana Pro Black
+Verdana Pro Black Italic
+Verdana Pro Bold
+Verdana Pro Bold Italic
+Verdana Pro Cond
+Verdana Pro Cond Black
+Verdana Pro Cond Black Italic
+Verdana Pro Cond Bold
+Verdana Pro Cond Bold Italic
+Verdana Pro Cond Italic
+Verdana Pro Cond Light
+Verdana Pro Cond Light Italic
+Verdana Pro Cond SemiBold
+Verdana Pro Cond SemiBold Italic
+Verdana Pro Italic
+Verdana Pro Light
+Verdana Pro Light Italic
+Verdana Pro SemiBold
+Verdana Pro SemiBold Italic
+Vijaya
+Vijaya Bold
+Vrinda
+Vrinda Bold
+Webdings
+Wingdings
+Yu Gothic
+Yu Gothic Bold
+Yu Gothic Light
+Yu Gothic Medium
+Yu Gothic Regular
+Yu Gothic UI
+Yu Gothic UI Bold
+Yu Gothic UI Light
+Yu Gothic UI Regular
+Yu Gothic UI Semibold
+Yu Gothic UI Semilight
+Yu Mincho
+Yu Mincho Demibold
+Yu Mincho Light
+Yu Mincho Regular
