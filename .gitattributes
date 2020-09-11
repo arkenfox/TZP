@@ -1,0 +1,14 @@
+* text=auto
+
+*.md text
+
+*.eps binary
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.svg binary
+*.tif binary
+*.tiff binary
+*.ttf binary
