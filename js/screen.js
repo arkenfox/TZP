@@ -1910,11 +1910,11 @@ function outputMath() {
 		if (m1 == "A" | m1 == "H") {
 			// A or H: always 64bit WIN on 64bit FF
 			fdMath1="Windows [64-bit]"
-			fdMath6=zFF+" [64-bit]"
+			fdMath6=zSDK64
 		} else if (m1 == "C") {
 			// C: always 32bit FF on WIN (32bit or 64bit)
 			fdMath1="Windows"
-			fdMath6=zFF+" [32-bit]"
+			fdMath6=zSDK32
 		} else if (m1 == "D") {
 			// D: always Linux (Mint, Debian, OpenSUSE)
 			fdMath1="Linux"
@@ -1940,19 +1940,18 @@ function outputMath() {
 			// F: always Android
 			fdMath1="Android"
 		} else if (m1 == "B") {
-			// B: always TB on WIN
+			// B: always WIN, always mingw
 			fdMath1="Windows"
-			isTB = true; debug_page("tb","math 1st edition = letter B")
 			if (m6 == "1") {
 				// ESR60: 1B: always 64bit TB: thus 64bit WIN
-				fdMath6=zTB+" [64-bit]"
+				fdMath6=zMingw64
 				fdMath1="Windows [64-bit]"
 			} else if (m6 == "2") {
 				// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
-				fdMath6=zTB+" [32-bit]"
+				fdMath6=zMingw32
 			} else if (m6 == "3") {
 				// ESR68: 3B: 32bit TB on 32/64 WIN and 64bit TB on WIN64: now all the same
-				fdMath6=zTB
+				fdMath6=zMingw
 			}
 		}
 	}
