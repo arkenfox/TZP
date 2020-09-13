@@ -1248,16 +1248,22 @@ function get_version() {
 	}
 	// run
 	function v75plus() {
+		// 82: 1655947
+		// ToDo: If backported to ESR78* then COMBINE a 79/80/81 test
+		if (go) {
+			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
+			if (test82 == 1) {verNo = "82+"; go = false}
+		}
 		// 81
 		if (go) {
 			try {
 				// 81: 1650607
 				let file81 = new File(["bits"], "a/b.txt")
-				if (file81.name == "a/b.txt") {verNo = "81+"; go = false}
+				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
 			} catch(e) {
 				try {
 					// 81: 1657437
-					if (dom.test81a.offsetWidth < dom.test81b.offsetWidth) {verNo = "81+" + alt1; go = false}
+					if (dom.test81a.offsetWidth < dom.test81b.offsetWidth) {verNo = "81" + alt1; go = false}
 				} catch(e) {}
 			}
 		}
