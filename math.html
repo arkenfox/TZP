@@ -24,6 +24,12 @@
 			</td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
+		<tr><td colspan="3"><span id="perfE" class="mono"></span> 
+			<button class="btn0 btn" onClick="copyclip(`engine`)">[ copy to clipboard ]</button> [WIP] ENGINE</td></tr>
+		<tr><td colspan="2">engine</td><td class="mono spaces" id="engine"></td></tr>
+		<tr><td colspan="3"></td></tr>
+
+		<tr><td colspan="3"><hr></td></tr>
 		<tr><td colspan="3"><span id="perf" class="c mono"></span> 
 			<button class="btn0 btn" onClick="copyclip(`report`)">[ copy to clipboard ]</button> SHORT REPORT</td></tr>
 		<tr><td colspan="2"></td><td class="c mono spaces" id="report"></td></tr>
@@ -70,6 +76,50 @@ var setSafari = [
 ]
 
 var fns = []
+
+
+function get_engine() {
+	let et0 = performance.now()
+	function cbrt(x) {
+		try {
+			let y = Math.pow(Math.abs(x), 1 / 3)
+			return x < 0 ? -y : y
+		} catch(e) {
+			return "error"
+		}
+	}
+	let fns2 = [['log10', [7*Math.LOG10E]],['log10', [2*Math.SQRT1_2]],['acos', [0.123]],['acosh', [Math.SQRT2]],['atan', [2]]]
+	let res = [], engine = zNEW.trim()
+	// polyfill
+	res.push(cbrt(Math.PI))
+	// the other 5
+	for(let i=0; i < fns2.length; i++) {
+		try {
+			let fn = fns2[i]
+			let fnResult = (Math[fn[0]](...fn[1]))
+			res.push(fnResult)
+		} catch(e) {
+			res.push("error")
+		}
+	}
+	let hash = sha1(res.join())
+	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = "blink"
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = "webkit"
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko(view)"}
+
+	dom.perfE.innerHTML = (performance.now()-et0) + " ms"
+	dom.engine.innerHTML = s12 + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
+		+ "<br>" + s12 + "engine: " + sc + engine
+	// FF
+	//let teststrA = "1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030247,0.881373587019543,1.1071487177940904"
+	//console.debug(sha1(teststrA), "gecko(view)")
+	// chromium
+	//let teststrB = "1.4645918875615234,0.4828823513147936,0.1505149978319906,1.4474840516030247,0.881373587019543,1.1071487177940904"
+	//console.debug(sha1(teststrB), "blink")
+	// safari
+	//let teststrC = "1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030245,0.8813735870195432,1.1071487177940906"
+	//console.debug(sha1(teststrC), "webkit")
+}
 
 function build_controlset(engine) {
 	let c = []
@@ -549,6 +599,8 @@ function outputMath(control) {
 		get_results()
 	}, 200)
 }
+
+get_engine()
 
 </script>
 </body>
