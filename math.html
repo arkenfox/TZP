@@ -5,9 +5,7 @@
 	<meta name="viewport" content="width=1024">
   <title>math</title>
   <link rel="stylesheet" type="text/css" href="css/index.css">
-  <script src="js/generic.js"></script>
   <script src="js/globals.js"></script>
-  <script src="js/main.js"></script>
 </head>
 <body>
 	<br>
@@ -58,6 +56,53 @@
 <script>
 'use strict';
 
+function copyclip(element) {
+	if (document.selection) {
+		let range = document.body.createTextRange()
+		range.moveToElementText(document.getElementById(element))
+		range.select().createTextRange()
+		document.execCommand("copy")
+	} else if (window.getSelection) {
+		let range = document.createRange()
+		range.selectNode(document.getElementById(element))
+		window.getSelection().addRange(range)
+		document.execCommand("copy")
+	}
+}
+
+function sha1(str1){
+	for (var blockstart=0,
+		i = 0,
+		W = [],
+		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+		A, B, C, D, F, G,
+		word_array = [],
+		temp2,
+		s = unescape(encodeURI(str1)),
+		str_len = s.length;
+		i<=str_len;){
+		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+	}
+	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
+	for (; blockstart <= temp2; blockstart += 16) {
+		A = H,i=0;
+		for (; i < 80;
+			A = [[
+				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+				F = G + (B ^ C ^ D) + 341275144,
+				G + (B & C | B & D | C & D) + 882459459,
+				F + 1535694389
+			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
+		) {
+			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+		}
+		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
+	}
+	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+	return str1
+}
+
+
 var t0 // perf
 var fns = [] // what tests to run
 var n = 0.123
@@ -107,8 +152,8 @@ function get_engine() {
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = "webkit"
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko(view)"}
 
-	dom.perfE.innerHTML = (performance.now()-et0) + " ms"
-	dom.engine.innerHTML = s12 + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
+	document.getElementById("perfE").innerHTML = (performance.now()-et0) + " ms"
+	document.getElementById("engine").innerHTML = s12 + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
 		+ "<br>" + s12 + "engine: " + sc + engine
 	// FF
 	//let teststrA = "1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030247,0.881373587019543,1.1071487177940904"
@@ -483,7 +528,7 @@ function get_results() {
 		}
 		numstr = numdisplay.join("<br>")
 	}
-	dom.numbers.innerHTML = numstr
+	document.getElementById("numbers").innerHTML = numstr
 
 	// DIFFS FUNCTION
 	function output_diffs(array, type) {
@@ -523,17 +568,17 @@ function get_results() {
 		+ "<br>" + s12.trim() + " func: " + sc + hash1
 		+ "<br>" + s12.trim() + " poly: " + sc + hash2
 		+ "<br>" + numstr
-	dom.report.innerHTML = report
+	document.getElementById("report").innerHTML = report
 	// LONG REPORT
 	output_diffs(diffs, 0)
 	output_diffs(fnmatch, 1)
 	output_diffs(polymatch, 2)
 	// DATA
-	dom.mathdata.innerHTML = report
+	document.getElementById("mathdata").innerHTML = report
 		+ "<br><br>" + bigNstr.padStart(52)
 		+ "<br>" + display.join("<br>")
 	// PERF
-	dom.perf = (performance.now()-t0) + " ms"
+	document.getElementById("perf").innerHTML = (performance.now()-t0) + " ms"
 
 }
 
@@ -546,7 +591,7 @@ function get_code(hash) {
 	else if (hash == "06f9ca0df07d4836116143158b670c9d3a417cd4") {r="F3"} // Win7 64bit: TB68-78 64bit
 	else if (hash == "dd277bcf4a12289404b0aab1ae43be060be5a12a") {r="F4"} // Win7 64bit: TB68-78 32bit
 
-		// pending windows10 VM and windows machine no 2 tests
+		// pending windows machine no 2 tests
 		// rampaa
 	//else if (hash == "b0130c424be28aac4ed155c679c9baf951349b75") {r="something"} // Win10 64bit: FF80 64bit
 	// hash: b0130c424be28aac4ed155c679c9baf951349b75 [NEW]
@@ -579,7 +624,6 @@ function get_code(hash) {
 	// NEW
 	if (r == "") {r = zNEW} else {r = s12+"["+ r +"]"+sc}
 	return r
-
 }
 
 function outputMath(control) {
