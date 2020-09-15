@@ -156,16 +156,25 @@ function get_engine() {
 		}
 	}
 	let hash = sha1(res.join())
-	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = "blink"
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = "webkit"
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko/view"
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = "edgeHTML"
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = "trident"}
-
+	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s3+"blink"+sc
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3+"webkit"+sc
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3+"edgeHTML"+sc
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3+"trident"+sc // also presto if we don't use `let`
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = s3+"gecko"+sc
+		// 53: 1317307
+		try {
+			Object.defineProperty([], "length", {get(){}})
+		} catch(e) {
+			if (e.name == "RangeError") {
+				// FF53+: TypeError: can't redefine non-configurable property "length"
+				// PM28+ (esr52): RangeError: invalid array length
+				engine += " math signature but you're"+s3+"goanna"+sc
+			}
+		}
+	}
 	document.getElementById("perfE").innerHTML = (performance.now()-et0) + " ms"
-	document.getElementById("engine").innerHTML = s12 + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
-		+ "<br>" + s12 + "engine: " + sc + engine
-
+	document.getElementById("engine").innerHTML = s12.trim() + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
+		+ "<br>" + s12.trim() + "engine:" + sc + engine
 }
 
 function build_controlset(engine) {
