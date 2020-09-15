@@ -133,15 +133,23 @@ function get_engine() {
 			return "error"
 		}
 	}
-	let fns2 = [['log10', [7*Math.LOG10E]],['log10', [2*Math.SQRT1_2]],['acos', [0.123]],['acosh', [Math.SQRT2]],['atan', [2]]]
 	let res = [], engine = zNEW.trim()
-	// polyfill
-	res.push(cbrt(Math.PI))
-	// the other 5
-	for(let i=0; i < fns2.length; i++) {
+	for(let i=0; i < 6; i++) {
 		try {
-			let fn = fns2[i]
-			let fnResult = (Math[fn[0]](...fn[1]))
+			let fnResult = "unknown"
+			if (i == 0) {
+				fnResult = cbrt(Math.PI) // polyfill
+			} else if (i == 1) {
+				fnResult = Math.log10(7*Math.LOG10E)
+			} else if (i == 2) {
+				fnResult = Math.log10(2*Math.SQRT1_2)
+			} else if (i == 3) {
+				fnResult = Math.acos(0.123)
+			} else if (i == 4) {
+				fnResult = Math.acosh(Math.SQRT2)
+			} else if (i == 5) {
+				fnResult = Math.atan(2)
+			}
 			res.push(fnResult)
 		} catch(e) {
 			res.push("error")
@@ -150,20 +158,14 @@ function get_engine() {
 	let hash = sha1(res.join())
 	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = "blink"
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = "webkit"
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko(view)"}
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko/view"
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = "edgeHTML"
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = "trident"}
 
 	document.getElementById("perfE").innerHTML = (performance.now()-et0) + " ms"
 	document.getElementById("engine").innerHTML = s12 + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
 		+ "<br>" + s12 + "engine: " + sc + engine
-	// FF
-	//let teststrA = "1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030247,0.881373587019543,1.1071487177940904"
-	//console.debug(sha1(teststrA), "gecko(view)")
-	// chromium
-	//let teststrB = "1.4645918875615234,0.4828823513147936,0.1505149978319906,1.4474840516030247,0.881373587019543,1.1071487177940904"
-	//console.debug(sha1(teststrB), "blink")
-	// safari
-	//let teststrC = "1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030245,0.8813735870195432,1.1071487177940906"
-	//console.debug(sha1(teststrC), "webkit")
+
 }
 
 function build_controlset(engine) {
