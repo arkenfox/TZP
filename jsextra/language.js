@@ -228,7 +228,7 @@ function outputAppLanguage() {
 	// global vars
 	if ((location.protocol) == "file:") {isFile = true; note_file = sn+"[file:]"+sc}
 	if ((location.protocol) == "https:") {isSecure = true}
-	if (isNaN(window.mozInnerScreenX) === false) {isFF = true}
+	if ("undefined" != typeof InstallTrigger) {isFF = true}
 	// FF only
 	if (isFF) {
 		// dom.properties
