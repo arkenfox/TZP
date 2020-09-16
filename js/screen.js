@@ -46,8 +46,11 @@ function get_chrome() {
 	if (isTB2 == "") {list.push('resource://torbutton-assets/aboutTor.css')}
 	// output
 	function output(r) {
-		// os-check (runS already sets isOS ="")
-		if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+		if (isVer < 60) {r = zNA
+		} else {
+			// os-check (runS already sets isOS ="")
+			if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+		}
 		dom.fdChromeOS.innerHTML = r
 		if (logPerf) {debug_log("chrome [ua]",t0)}
 	}
@@ -922,7 +925,9 @@ function get_resources() {
 			result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
 		} else {
 			//none: red=desktop orange=android
-			result = (isOS == "android" ? s2 : sb) +nob+sc
+			if (isVer > 59) {
+				result = (isOS == "android" ? s2 : sb) +nob+sc
+			}
 		}
 	}
 	// TB
@@ -948,7 +953,9 @@ function get_resources() {
 			result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
 		} else {
 			//none: red=desktop orange=android
-			result = (isOS == "android" ? s2 : sb) +nob+sc
+			if (isVer > 59) {
+				result = (isOS == "android" ? s2 : sb) +nob+sc
+			}
 		}
 	}
 	function run() {
