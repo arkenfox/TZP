@@ -161,20 +161,34 @@ function get_engine() {
 	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3+"edgeHTML"+sc
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3+"trident"+sc // also presto if we don't use `let`
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = s3+"gecko"+sc
-		// 53: 1317307
+
+		// 52: 837961
+		// only check for PM28+
 		try {
-			Object.defineProperty([], "length", {get(){}})
-		} catch(e) {
-			if (e.name == "RangeError") {
-				// FF53+: TypeError: can't redefine non-configurable property "length"
-				// PM28+ (esr52): RangeError: invalid array length
-				engine += " math signature but you're"+s3+"goanna"+sc
+			let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
+			// 53: 1317307
+			// eliminate FF53+
+			try {
+				Object.defineProperty([], "length", {get(){}})
+			} catch(e) {
+				if (e.name == "RangeError") {
+					// 61
+					// catch something PM did that ESR52 didn't
+					// note: this would only apply to later v28 releases
+					try {
+						let test61 = (" a").trimStart()
+						engine += "<br><br>" + "but wait.. I did some extra tests"
+							+ "<br>" + s12.trim() + "real engine:" + sc + s3+"goanna [52esr]"+sc
+					} catch(e) {}
+				}
 			}
-		}
+		} catch(e) {}
 	}
+
 	document.getElementById("perfE").innerHTML = (performance.now()-et0) + " ms"
 	document.getElementById("engine").innerHTML = s12.trim() + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
 		+ "<br>" + s12.trim() + "engine:" + sc + engine
+
 }
 
 function build_controlset(engine) {
