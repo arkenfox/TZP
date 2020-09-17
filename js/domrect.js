@@ -64,19 +64,14 @@ function outputDomRect() {
 		try {
 			createTest("dr1", runtype, runarray, function(element){return element.getClientRects()[0]})
 		} catch(e) {
-			console.debug(e.name, e.message)
-			if (runtype < 2) {
-				runarray.push(runtype+":dr1:blocked")
-				if (runtype == 0) {dom.dr1.innerHTML = zB}
-			}
+			runarray.push("dr1:blocked")
+			if (runtype == 0) {dom.dr1.innerHTML = zB}
 		}
 		try {
 			createTest("dr2", runtype, runarray, function(element){return element.getBoundingClientRect()})
 		} catch(e) {
-			if (runtype < 2) {
-				runarray.push(runtype+":dr2:blocked")
-				if (runtype == 0) {dom.dr2.innerHTML = zB}
-			}
+			runarray.push("dr2:blocked")
+			if (runtype == 0) {dom.dr2.innerHTML = zB}
 		}
 		try {
 			createTest("dr3", runtype, runarray, function(element){
@@ -85,10 +80,8 @@ function outputDomRect() {
 				return range.getClientRects()[0]
 			})
 		} catch(e) {
-			if (runtype < 2) {
-				runarray.push(runtype+":dr1:blocked")
-				if (runtype == 0) {dom.dr3.innerHTML = zB}
-			}
+			runarray.push("dr3:blocked")
+			if (runtype == 0) {dom.dr3.innerHTML = zB}
 		}
 		try {
 			createTest("dr4", runtype, runarray, function(element){
@@ -97,16 +90,13 @@ function outputDomRect() {
 				return range.getBoundingClientRect()
 			})
 		} catch(e) {
-			if (runtype < 2) {
-				runarray.push(runtype+":dr4:blocked")
-				if (runtype == 0) {dom.dr4.innerHTML = zB}
-			}
+			runarray.push("dr4:blocked")
+			if (runtype == 0) {dom.dr4.innerHTML = zB}
 		}
 	}
 
 	let t0 = performance.now()
-	let run0 = [], run1 = [], run2 = []
-	let compare = [], analysis = []
+	let run0 = [], run1 = [], run2 = [], compare = []
 
 	// reset div
 	dom.divrect.classList.add("divrect1");
@@ -121,14 +111,14 @@ function outputDomRect() {
 
 	setTimeout(function(){
 		// debugging
+		run0.sort()
 		run1.sort()
-		run2.sort()
 		console.log("run0\n - " + run0.join("\n - "))
 		console.log("run1\n - " + run1.join("\n - "))
 
 		// compare
 		compare.sort()
-		let prev_item = "", prev_value, random = []
+		let analysis = [], prev_item = "", prev_value, random = []
 		compare.forEach(function(item) {
 			let delim = item.split(":")
 				if (prev_item == delim[0] + delim[1]) {
@@ -143,7 +133,7 @@ function outputDomRect() {
 			prev_value = delim[3]
 		})
 		if (analysis.length > 0) {
-			console.log("DOMRect analysis [item, diff, diff from 0.25, 1st measurement, 2nd measurement]", analysis)
+			console.log("DOMRect analysis [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + analysis.join("\n - "))
 		}
 		random = random.filter(function(item, position) {return random.indexOf(item) === position})
 		if (isFF) {
