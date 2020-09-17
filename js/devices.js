@@ -129,8 +129,8 @@ function get_plugins() {
 						// ToDo: better gibberish detection: e.g mixed alphanumeric
 							// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
 						let str = p[i].name
-						if (str.indexOf(" ") > 0) {
-							// the logic is that anyone not messing with plgins would show PDF
+						if (str.indexOf(" PDF ") > 0) {
+							// the logic is that anyone not messing with plugins would show PDF
 							gibbers = false
 						}
 					}
