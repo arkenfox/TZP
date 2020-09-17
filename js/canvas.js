@@ -45,8 +45,8 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 		}
 		// noise: used only if not isRandom
 		let noise = "noise detected " + s9 +" [both] "+ sc + value1.substring(0,40) + ".."
-		// only use noise for FF for now
-		if (!isFF) {value3 = "true"}
+		// only use noise for FF & blink
+		if (isFF || isEngine == "blink") {} else {value3 = "true"}
 
 		// hashes: static
 		if (sname == "isPo") {
@@ -555,10 +555,14 @@ function outputCanvas() {
 	t0canvas = performance.now()
 	let t0 = performance.now(),
 		main0 = [], main1 = [], main2 = []
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed",
+	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // gecko toDataURL, toBlob
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",
 		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"
+
+	if (isEngine == "blink") {
+		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"
+	}
 
 	Promise.all([
 		canvas.createHashes(window),
