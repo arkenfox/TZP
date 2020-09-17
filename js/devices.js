@@ -80,12 +80,13 @@ function get_mimetypes() {
 		try {
 			let m = navigator.mimeTypes
 			if (m.length > 0) {
-				let s=""
+				let res = []
 				for (let i=0; i < m.length; i++) {
-					s += m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
-						+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) + "<br>"
+					res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
+						+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 				}
-				dom.mimeTypes.innerHTML = s
+				res.sort()
+				dom.mimeTypes.innerHTML = res.join("<br>")
 			} else {
 				dom.mimeTypes.innerHTML = "none"
 			}
@@ -120,14 +121,24 @@ function get_mm_pointer(type){
 function get_plugins() {
 	if ("plugins" in navigator) {
 		try {
+			let res = [], gibbers = true
 			let p = navigator.plugins
 			if (p.length > 0) {
-				let s=""
 				for (let i=0; i < p.length; i++) {
-					s += p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
-						+ (p[i].description == "" ? ": *" : ": " + p[i].description) + "<br>"
+					if (isEngine == "blink") {
+						// ToDo: better gibberish detection: e.g mixed alphanumeric
+							// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
+						let str = p[i].name
+						if (str.indexOf(" ") > 0) {
+							// the logic is that anyone not messing with plgins would show PDF
+							gibbers = false
+						}
+					}
+					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
+						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 				}
-				dom.plugins.innerHTML = s
+				res.sort()
+				dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
 			} else {
 				dom.plugins.innerHTML = "none"
 			}
