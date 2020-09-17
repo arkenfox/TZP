@@ -157,6 +157,40 @@ function get_color() {
 	dom.mmC.innerHTML = (r == 8 ? r+rfp_green : r+rfp_red)
 }
 
+function get_engine() {
+	function cbrt(x) {
+		try {
+			let y = Math.pow(Math.abs(x), 1 / 3)
+			return x < 0 ? -y : y
+		} catch(e) {
+			return "error"
+		}
+	}
+	let res = []
+	for(let i=0; i < 6; i++) {
+		try {
+			let fnResult = "unknown"
+			if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
+			} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
+			} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+			} else if (i == 3) {fnResult = Math.acos(0.123)
+			} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+			} else if (i == 5) {fnResult = Math.atan(2)
+			}
+			res.push(fnResult)
+		} catch(e) {
+			res.push("error")
+		}
+	}
+	let hash = sha1(res.join())
+	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
+	}
+}
+
 function get_errors() {
 	let res = [],
 		test = "",
@@ -2070,6 +2104,7 @@ function outputStart() {
 	if ((location.protocol) == "file:") {isFile = true; note_file = sn+"[file:]"+sc}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("undefined" != typeof InstallTrigger) {isFF = true}
+	get_engine()
 	// sim = FF only
 	if (isFF == false) {runS = false}
 	// run UA first: checks isFF; sets isOS, isTB*, isVer
