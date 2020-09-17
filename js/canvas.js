@@ -36,6 +36,11 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 			// blocked
 			value1 = zB
 			pushvalue = "blocked"
+		} else if (value1== "42c4b0e3141cfc98c8f4fb9a24b96f99e441ae274c939b641b9995a455b85278") {
+			// sha256 of undefined
+			value1 = zU
+			value2 = zU
+			pushvalue = zU
 		} else if (value1 !== value2) {
 			// randomness
 			isRandom = true
@@ -157,8 +162,7 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 	Promise.all([
 		sha256_str(chash1.join())
 	]).then(function(hash){
-		console.log("canvas\n - " + chash1.join("\n - "))
-
+		//console.log("canvas\n - " + chash1.join("\n - "))
 		dom.chash1.innerHTML = hash[0] + (isFile ? note_file : "")
 		// perf
 		if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
