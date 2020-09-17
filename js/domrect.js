@@ -17,79 +17,115 @@ function outputDomRect() {
 	function getElements(){
 		return Array.from(document.querySelectorAll(".testRect"))
 	}
-	function createTest(method, runtype, callback){
+	function createTest(method, runtype, runarray, callback){
 		const properties = ["x","y","width","height","top","left","right","bottom"]
 		function performTest(runtype){
 			const rects = getElements().map(callback)
 			const data = new Float64Array(rects.length * properties.length)
-				rects.forEach(function(rect, i){
-					properties.forEach(function(property, j){
-						// select rect: "top","left","right","bottom"
+			rects.forEach(function(rect, i){
+				properties.forEach(function(property, j){
+					data[i * properties.length + j] = rect[property]
+					// 1st and last runs grab values to compare: 
+					// select rect: "top","left","right","bottom"
+					if (runtype == 0 || runtype == 2) {
 						if (i == 3 && j > 3) {
 							compare.push(method+":"+ j +":"+ runtype +":"+ rect[property])
 						}
-						data[i * properties.length + j] = rect[property]
-					})
+					}
 				})
-				// hash
-				if (runtype == 1) {
-					crypto.subtle.digest("SHA-256", data).then(function(hash){
-						document.getElementById(method).innerHTML = byteArrayToHex(hash)
-					})
-				}
-				// results
+			})
+			// run0 details
+			if (runtype == 0) {
 				let item=0
 				properties.map(function(property){
 					return rects.map(function(rect, i){
 						item++
-						if (runtype == 1) {
-							document.getElementById(method+item).textContent = rect[property]
-						}
+						document.getElementById(method+item).textContent = rect[property]
 						return rect[property]
 					}).join("")
 				}).join("")
+			}
+			// hashes
+			if (runtype < 2) {
+				crypto.subtle.digest("SHA-256", data).then(function(hash){
+					let tmp = byteArrayToHex(hash)
+					runarray.push(method+":"+tmp)
+					if (runtype == 0) {
+						document.getElementById(method).innerHTML = tmp
+					}
+				})
+			}
 		}
 		performTest(runtype)
 	}
 
-	let t0 = performance.now()
-	let compare = [], analysis = []
-
 	// run
-	function run(runtype) {
+	function run(runtype, runarray) {
 		try {
-			createTest("dr1", runtype, function(element){return element.getClientRects()[0]})
-		} catch(e) {if (runtype == 1) {dom.dr1.innerHTML = zB}}
+			createTest("dr1", runtype, runarray, function(element){return element.getClientRects()[0]})
+		} catch(e) {
+			console.debug(e.name, e.message)
+			if (runtype < 2) {
+				runarray.push(runtype+":dr1:blocked")
+				if (runtype == 0) {dom.dr1.innerHTML = zB}
+			}
+		}
 		try {
-			createTest("dr2", runtype, function(element){return element.getBoundingClientRect()})
-		} catch(e) {if (runtype == 2) {dom.dr2.innerHTML = zB}}
+			createTest("dr2", runtype, runarray, function(element){return element.getBoundingClientRect()})
+		} catch(e) {
+			if (runtype < 2) {
+				runarray.push(runtype+":dr2:blocked")
+				if (runtype == 0) {dom.dr2.innerHTML = zB}
+			}
+		}
 		try {
-			createTest("dr3", runtype, function(element){
+			createTest("dr3", runtype, runarray, function(element){
 				let range = document.createRange()
 				range.selectNode(element)
 				return range.getClientRects()[0]
 			})
-		} catch(e) {if (runtype == 1) {dom.dr3.innerHTML = zB}}
+		} catch(e) {
+			if (runtype < 2) {
+				runarray.push(runtype+":dr1:blocked")
+				if (runtype == 0) {dom.dr3.innerHTML = zB}
+			}
+		}
 		try {
-			createTest("dr4", runtype, function(element){
+			createTest("dr4", runtype, runarray, function(element){
 				let range = document.createRange()
 				range.selectNode(element)
 				return range.getBoundingClientRect()
 			})
-		} catch(e) {if (runtype == 1) {dom.dr4.innerHTML = zB}}
+		} catch(e) {
+			if (runtype < 2) {
+				runarray.push(runtype+":dr4:blocked")
+				if (runtype == 0) {dom.dr4.innerHTML = zB}
+			}
+		}
 	}
+
+	let t0 = performance.now()
+	let run0 = [], run1 = [], run2 = []
+	let compare = [], analysis = []
 
 	// reset div
 	dom.divrect.classList.add("divrect1");
 	dom.divrect.classList.remove("divrect2");
-	run(1)
+	run(0, run0)
+	run(1, run1)
 
 	// move div
 	dom.divrect.classList.add("divrect2");
 	dom.divrect.classList.remove("divrect1");
-	run(2)
+	run(2, run2)
 
 	setTimeout(function(){
+		// debugging
+		run1.sort()
+		run2.sort()
+		console.log("run0\n - " + run0.join("\n - "))
+		console.log("run1\n - " + run1.join("\n - "))
+
 		// compare
 		compare.sort()
 		let prev_item = "", prev_value, random = []
