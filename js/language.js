@@ -169,7 +169,7 @@ function get_lang_datetime() {
 						+ ", "+ ((Date.parse(r3) - Date.parse(c3))/k) + ", "+ ((Date.parse(r4) - Date.parse(c4))/k)
 					tzarray.push(yr+ ":"+ tzstr)
 				}
-				console.log("TESTING: multi-timezones: " + sha1(tzarray.join()) + "\n - " + tzarray.join("\n - "))
+				//console.log("TESTING: multi-timezones: " + sha1(tzarray.join()) + "\n - " + tzarray.join("\n - "))
 				// return current year only for now
 				return tzstr
 
