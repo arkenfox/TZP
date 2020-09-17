@@ -60,6 +60,7 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 			value1 += (value1 == control ? rfp_green : rfp_red)
 		}
 		if (sname == "mozG" && isVer < 74) {
+			if (!isFF) {value3 = "true"}
 			if (isRandom) {value1 = combined
 			} else if (value3 == "false" && value1 !== control) {
 				value1 = noise
