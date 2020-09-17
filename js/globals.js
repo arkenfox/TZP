@@ -112,6 +112,7 @@ let avh = "",
 	isChannel = "",
 	isFile = false,
 	isSecure = false,
+	isEngine = "",
 // dev
 	gt0,
 	logExtra = false,
