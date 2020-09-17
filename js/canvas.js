@@ -43,10 +43,14 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 			combined = "random " + s9 +" [1] "+ sc + value1.substring(0,22) + ".."
 				+ s9 +" [2] "+ sc + value2.substring(0,22) + ".."
 		}
+
 		// noise: used only if not isRandom
 		let noise = "noise detected " + s9 +" [both] "+ sc + value1.substring(0,40) + ".."
 		// only use noise for FF & blink
 		if (isFF || isEngine == "blink") {} else {value3 = "true"}
+		// only apply to hashes
+		if (value1.length !== 64) {value3 = "true"}
+		if (value1.indexOf(" ") > 0) {value3 = "true"}
 
 		// hashes: static
 		if (sname == "isPo") {
@@ -60,7 +64,6 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 			value1 += (value1 == control ? rfp_green : rfp_red)
 		}
 		if (sname == "mozG" && isVer < 74) {
-			if (!isFF) {value3 = "true"}
 			if (isRandom) {value1 = combined
 			} else if (value3 == "false" && value1 !== control) {
 				value1 = noise
@@ -154,6 +157,8 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 	Promise.all([
 		sha256_str(chash1.join())
 	]).then(function(hash){
+		console.log("canvas\n - " + chash1.join("\n - "))
+
 		dom.chash1.innerHTML = hash[0] + (isFile ? note_file : "")
 		// perf
 		if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
