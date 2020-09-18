@@ -628,12 +628,20 @@ function get_code(hash) {
 
 		// android
 	else if (hash == "571b9a318869bd09dab3fd83fd88883a66188011") {r="F20"} // aarch64
-		// linux
-	else if (hash == "e6c7b364678e8ecec909088314318acb8430ee47") {r="F30"} // Linux 64bit
-	else if (hash == "05ea8b9bed51553711e3bbaa552449d8ea40c4be") {r="F31"} // Linux 64bit
+		// linux 64bit
+	else if (hash == "e6c7b364678e8ecec909088314318acb8430ee47") {r="F30"}
+	else if (hash == "05ea8b9bed51553711e3bbaa552449d8ea40c4be") {r="F31"}
+
+		// Linux 32bit
+	else if (hash == "ac4f01ae0d298a6ef48bb20aa594a77fb14b0968") {r="F40"} // mint32bit
+
 		// mac
-	else if (hash == "84ad7bbb52342b6c224c0fe45977184bc943bb92") {r="F50"} // macOS
-		// TB
+	else if (hash == "84ad7bbb52342b6c224c0fe45977184bc943bb92") {r="F50"}
+
+		// obsolete linux
+	else if (hash == "2047b6e1afc4c6bbe55d061e33fa8026c7afd648") {r="F80"} // mint32: FF60-67
+
+		// obsolete windows
 	else if (hash == "3ada7d492e4fa7a7a6acea446fa24ec3ff370556") {r="F96"} // Win7 64bit: FF60-67 64bit [obsolete versions]
 	else if (hash == "a8b5e74f336489c1df701a95650ab091ff6de436") {r="F97"} // Win7 64bit: FF60-67 32bit [obsolete versions]
 	else if (hash == "8d09688f127d62709bbb5d47f7fc8c959ae151a8") {r="F98"} // Win7 64bit: TB60 64bit [obsolete versions]
