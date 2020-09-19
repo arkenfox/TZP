@@ -46,7 +46,7 @@ function store_data(section, key, value) {
 		fp_ua.push(key+":"+value)
 		if (fp_ua.length == 5) {
 			fp_ua.sort()
-			//console.debug(fp_ua.join())
+			//console.debug(fp_ua.join("\n"))
 			dom.sectionUA9.innerHTML = sha1(fp_ua.join()) + s2+"[unspoofable?]"+sc
 		}
 	}
@@ -84,12 +84,12 @@ function debug_page(target, str1, str2, str3, str4) {
 			e = document.getElementById("debug"+target)
 
 		if (target == "perf") {
-			let time1 = (t0-str2).toString()
+			let time1 = Math.round(t0-str2).toString()
 			str = str1.padStart(12) + ": " + sn + time1.padStart(4) + sc + " ms"
 			if (str3 !== undefined && str3 !== "") {
 				// output running time if not a section rerun
 				if (gRerun == false) {
-					let time2 = (t0-str3).toString()
+					let time2 = Math.round(t0-str3).toString()
 					str = str + " | " + so + time2.padStart(4) + sc + " ms"
 				}
 			}
@@ -98,6 +98,11 @@ function debug_page(target, str1, str2, str3, str4) {
 				str += " |" + sb+ str4 + sc
 			}
 			e.innerHTML = e.innerHTML + "<br>" + str
+			// display in section title
+			try {
+				document.getElementById("perf"+str1).innerHTML = "  "+ time1 +" ms"
+			} catch(e) {}
+
 		} else {
 			if (gRerun == false) {
 				str = str1
