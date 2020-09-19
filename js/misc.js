@@ -30,7 +30,7 @@ function get_iframe_props() {
 		// remove iframe
 		iframe.parentNode.removeChild(iframe)
 		// output
-    dom.iProps.innerHTML = sha1(props.join()) + s18 +"["+ props.length +"]"+sc
+		dom.iProps.innerHTML = sha1(props.join()) + s18 +"["+ props.length +"]"+sc
 	} catch(e) {
 		dom.iProps.innerHTML = error_iframe
 	}
@@ -77,7 +77,7 @@ function get_nav_prototype() {
 }
 
 function get_recursion() {
-	var level = 0
+	let level = 0, test1 = 0
 	function recurse() {
     level++
     recurse()
@@ -85,13 +85,14 @@ function get_recursion() {
 	try {
     recurse()
 	} catch (e) {
-		console.log("recursion 1:", level)
+		test1 = level
 	}
 	level = 0
 	try {
     recurse()
 	} catch (e) {
-		console.log("recursion 2:", level)
+		// 2nd test is more accurate/stable
+		console.log("recursion:", test1, level)
 	}
 }
 
@@ -113,10 +114,10 @@ function get_perf() {
 	let i = 0,
 		result = true,
 		times = [],
-		p0 = performance.now()
+		p0 = Math.round(performance.now())
 	function run() {
 		if (i < 10) {
-			let p1 = performance.now()
+			let p1 = Math.round(performance.now())
 			times.push((p1-p0) % 100)
 			if ((p1-p0) % 100 > 0) {result = false}
 			i++
