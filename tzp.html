@@ -88,7 +88,7 @@
 		<col width="50%"><a name="screen"></a><col width="50%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#screen">Screen</a>
-			<div class="nav-up"><a href="#top">&#9650;</a></div>
+			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfscreen"></span></div>
 			<div class="nav-down"><a href="#useragentd">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
@@ -154,7 +154,7 @@
 		<col width="37%"><a name="useragent"></a><col width="63%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#useragent">User Agent</a>
-			<div class="nav-up"><a href="#screen">&#9650;</a></div>
+			<div class="nav-up"><a href="#screen">&#9650;</a> <span class="c perf" id="perfua"></span></div>
 			<div class="nav-down"><a href="#mathd">&#9660;</a></div>
 			<div class="nav-right"><a name="useragentd"></a></div></div>
 		</th></tr></thead>
@@ -251,7 +251,7 @@
 		<col width="37%"><a name="math"></a><col width="63%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#math">Math</a>
-			<div class="nav-up"><a href="#useragent">&#9650;</a></div>
+			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perfmath"></span></div>
 			<div class="nav-down"><a href="#languaged">&#9660;</a></div>
 			<div class="nav-right"><a name="mathd"></a></div></div>
 		</th></tr></thead>
@@ -288,7 +288,7 @@
 		<col width="37%"><a name="language"></a><col width="63%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#language">Language & Locale / Date/Time & Format / Geolocation</a>
-			<div class="nav-up"><a href="#math">&#9650;</a></div>
+			<div class="nav-up"><a href="#math">&#9650;</a> <span class="c perf" id="perflanguage"></span></div>
 			<div class="nav-down"><a href="#headersd">&#9660;</a></div>
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
@@ -358,7 +358,7 @@
 		<col width="50%"><a name="headers"></a><col width="50%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#headers">HTTP Headers</a>
-			<div class="nav-up"><a href="#language">&#9650;</a></div>
+			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
 			<div class="nav-down"><a href="#cookiesd">&#9660;</a></div>
 			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
@@ -384,7 +384,7 @@
 		<col width="50%"><a name="cookies"></a><col width="50%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#cookies">Cookies & Storage</a>
-			<div class="nav-up"><a href="#headers">&#9650;</a></div>
+			<div class="nav-up"><a href="#headers">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
 			<div class="nav-right"><a name="cookiesd"></a></div></div>
 		</th></tr></thead>
@@ -428,7 +428,7 @@
 		<col width="29%"><a name="devices"></a><col width="71%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#devices">Devices & Hardware</a>
-			<div class="nav-up"><a href="#cookies">&#9650;</a></div>
+			<div class="nav-up"><a href="#cookies">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
 			<div class="nav-down"><a href="#domrectd">&#9660;</a></div>
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
@@ -475,7 +475,7 @@
 		<col width="7%"><a name="domrect"></a><col width="15%"><col width="7%"><col width="8%"><col width="15%"><col width="15%"><col width="15%"><col width="18%">
 		<thead><tr><th colspan="8">
 			<div class="nav-title"><a href="#domrect">DOMRect / SVG</a>
-			<div class="nav-up"><a href="#devices">&#9650;</a></div>
+			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfdomrect"></span></div>
 			<div class="nav-down"><a href="#canvasd">&#9660;</a></div>
 			<div class="nav-right"><a name="domrectd"></a></div></div>
 		</th></tr></thead>
@@ -545,7 +545,7 @@
 		<col width="29%"><a name="canvas"></a><col width="71%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#canvas">Canvas</a>
-			<div class="nav-up"><a href="#domrect">&#9650;</a></div>
+			<div class="nav-up"><a href="#domrect">&#9650;</a> <span class="c perf" id="perfcanvas"></span></div>
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
@@ -572,7 +572,7 @@
 		<col width="29%"><a name="webgl"></a><col width="71%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#webgl">WebGL</a>
-			<div class="nav-up"><a href="#canvas">&#9650;</a></div>
+			<div class="nav-up"><a href="#canvas">&#9650;</a> <span class="c perf" id="perfwebgl"></span></div>
 			<div class="nav-down"><a href="#audiod">&#9660;</a></div>
 			<div class="nav-right"><a name="webgld"></a></div></div>
 		</th></tr></thead>
@@ -598,7 +598,7 @@
 		<col width="29%"><a name="audio"></a><col width="71%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#audio">Audio</a>
-			<div class="nav-up"><a href="#webgl">&#9650;</a></div>
+			<div class="nav-up"><a href="#webgl">&#9650;</a> <span class="c perf" id="perfaudio"></span></div>
 			<div class="nav-down"><a href="#fontsd">&#9660;</a></div>
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
@@ -636,7 +636,7 @@
 		<col width="1%"><a name="fonts"></a><col width="36%"><col width="63%">
 		<thead><tr><th colspan="3">
 			<div class="nav-title"><a href="#fonts">Fonts</a>
-			<div class="nav-up"><a href="#audio">&#9650;</a></div>
+			<div class="nav-up"><a href="#audio">&#9650;</a> <span class="c perf" id="perffonts"></span></div>
 			<div class="nav-down"><a href="#mediad">&#9660;</a></div>
 			<div class="nav-right"><a name="fontsd"></a></div></div>
 		</th></tr></thead>
@@ -734,7 +734,7 @@
 		<col width="10%"><col width="27%"><a name="media"></a><col width="63%">
 		<thead><tr><th colspan="3">
 			<div class="nav-title"><a href="#media">Media</a>
-			<div class="nav-up"><a href="#fonts">&#9650;</a></div>
+			<div class="nav-up"><a href="#fonts">&#9650;</a> <span class="c perf" id="perfmedia"></span></div>
 			<div class="nav-down"><a href="#cssd">&#9660;</a></div>
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
@@ -759,7 +759,7 @@
 		<col width="37%"><a name="css"></a><col width="63%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#css">CSS</a>
-			<div class="nav-up"><a href="#media">&#9650;</a></div>
+			<div class="nav-up"><a href="#media">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
 			<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
@@ -843,7 +843,7 @@
 		<col width="10%"><a name="misc"></a><col width="27%"><col width="63%">
 		<thead><tr><th colspan="3">
 			<div class="nav-title"><a href="#misc">Miscellaneous</a>
-			<div class="nav-up"><a href="#spare2">&#9650;</a></div>
+			<div class="nav-up"><a href="#spare2">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
 			<div class="nav-down"><a href="#theend">&#9660;</a></div>
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
