@@ -14,141 +14,122 @@ function reset_domrect() {
 }
 
 function outputDomRect() {
+
+	// analyze and output
+	function analyze() {
+		// also add an overall hash: i.e hash / random / tampered / blocked
+		// each of the four tests can be
+			//     hash: hash
+			//   random: random [1] hash1.. [2] hash2..
+			// tampered: noise detected [both] hash..
+			//  blocked: or error name
+
+		// debug
+		//results.sort()
+		//console.log("domrect timeout results: " + (performance.now()-t0) + "ms\n - " + results.join("\n - "))
+		
+		// cleanup details
+		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
+		// perf
+		debug_page("perf","domrect",t0,gt0)
+	}
+
 	function getElements(){
 		return Array.from(document.querySelectorAll(".testRect"))
 	}
-	function createTest(method, runtype, runarray, callback){
+	function createTest(method, runtype, callback){
 		const properties = ["x","y","width","height","top","left","right","bottom"]
 		function performTest(runtype){
-			const rects = getElements().map(callback)
-			const data = new Float64Array(rects.length * properties.length)
-			rects.forEach(function(rect, i){
-				properties.forEach(function(property, j){
-					data[i * properties.length + j] = rect[property]
-					// 1st and last runs grab values to compare: 
-					// select rect: "top","left","right","bottom"
-					if (runtype == 0 || runtype == 2) {
-						if (i == 3 && j > 3) {
-							compare.push(method+":"+ j +":"+ runtype +":"+ rect[property])
+			try {
+				const rects = getElements().map(callback)
+				const data = new Float64Array(rects.length * properties.length)
+				rects.forEach(function(rect, i){
+					properties.forEach(function(property, j){
+						data[i * properties.length + j] = rect[property]
+						// 1st and last runs grab values to compare: 
+						// select rect: "top","left","right","bottom"
+						if (runtype == 0 || runtype == 2) {
+							if (i == 3 && j > 3) {
+								compare.push(method+":"+ j +":"+ runtype +":"+ rect[property])
+							}
 						}
-					}
+					})
 				})
-			})
-			// run0 details
-			if (runtype == 0) {
-				let item=0
-				properties.map(function(property){
-					return rects.map(function(rect, i){
-						item++
-						document.getElementById(method+item).textContent = rect[property]
-						return rect[property]
+				// run0 details
+				if (runtype == 0) {
+					let item=0
+					properties.map(function(property){
+						return rects.map(function(rect, i){
+							item++
+							document.getElementById(method+item).textContent = rect[property]
+							return rect[property]
+						}).join("")
 					}).join("")
-				}).join("")
-			}
-			// hashes
-			if (runtype < 2) {
+				}
+				// store hashes
 				crypto.subtle.digest("SHA-256", data).then(function(hash){
 					let tmp = byteArrayToHex(hash)
-					runarray.push(method+":"+tmp)
-					if (runtype == 0) {
-						document.getElementById(method).innerHTML = tmp
-					}
+					results.push(runtype+":"+method+":"+tmp)
+					// temp output to be replaced in analyze()
+					if (runtype == 0) {	document.getElementById(method).innerHTML = tmp	}
 				})
+			} catch(e) {
+				results.push(runtype+":"+method+":"+e.name)
+				// temp output to be replaced in analyze()
+				if (runtype == 0) {	document.getElementById(method).innerHTML = e.name }
 			}
 		}
 		performTest(runtype)
 	}
 
 	// run
-	function run(runtype, runarray) {
-		try {
-			createTest("dr1", runtype, runarray, function(element){return element.getClientRects()[0]})
-		} catch(e) {
-			runarray.push("dr1:blocked")
-			if (runtype == 0) {dom.dr1.innerHTML = zB}
-		}
-		try {
-			createTest("dr2", runtype, runarray, function(element){return element.getBoundingClientRect()})
-		} catch(e) {
-			runarray.push("dr2:blocked")
-			if (runtype == 0) {dom.dr2.innerHTML = zB}
-		}
-		try {
-			createTest("dr3", runtype, runarray, function(element){
+	function run(runtype) {
+		return new Promise(function(resolve, reject) {
+			//div position
+			if (runtype == 0) {
+				// reset div
+				dom.divrect.classList.add("divrect1");
+				dom.divrect.classList.remove("divrect2");
+			} else if (runtype == 2) {
+				// move div
+				dom.divrect.classList.add("divrect2");
+				dom.divrect.classList.remove("divrect1");
+			}
+			// tests
+			createTest("dr1", runtype, function(element){return element.getClientRects()[0]})
+			createTest("dr2", runtype, function(element){return element.getBoundingClientRect()})
+			createTest("dr3", runtype, function(element){
 				let range = document.createRange()
 				range.selectNode(element)
 				return range.getClientRects()[0]
 			})
-		} catch(e) {
-			runarray.push("dr3:blocked")
-			if (runtype == 0) {dom.dr3.innerHTML = zB}
-		}
-		try {
-			createTest("dr4", runtype, runarray, function(element){
+			createTest("dr4", runtype, function(element){
 				let range = document.createRange()
 				range.selectNode(element)
 				return range.getBoundingClientRect()
 			})
-		} catch(e) {
-			runarray.push("dr4:blocked")
-			if (runtype == 0) {dom.dr4.innerHTML = zB}
-		}
+			resolve()
+		})
 	}
 
 	let t0 = performance.now()
-	let run0 = [], run1 = [], run2 = [], compare = []
+	let results = [], compare = []
 
-	// reset div
-	dom.divrect.classList.add("divrect1");
-	dom.divrect.classList.remove("divrect2");
-	run(0, run0)
-	run(1, run1)
-
-	// move div
-	dom.divrect.classList.add("divrect2");
-	dom.divrect.classList.remove("divrect1");
-	run(2, run2)
+	Promise.all([
+		run(0),
+		run(1),
+		run(2)
+	]).then(function(){
+		// debugging
+		//results.sort()
+		//console.log("domrect promise results: "
+		//	+ (performance.now()-t0) + "ms\n - " + results.join("\n - "))
+	})
 
 	setTimeout(function(){
-		// debugging
-		run0.sort()
-		run1.sort()
-		console.log("run0\n - " + run0.join("\n - "))
-		console.log("run1\n - " + run1.join("\n - "))
-
-		// compare
-		compare.sort()
-		let analysis = [], prev_item = "", prev_value, random = []
-		compare.forEach(function(item) {
-			let delim = item.split(":")
-				if (prev_item == delim[0] + delim[1]) {
-				let diff = (delim[3]-prev_value)
-				if (diff !== 0.25) {
-					random.push(delim[0])
-					let margin = (0.25 - diff)
-					analysis.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value + ", "+ delim[3])
-				}
-			}
-			prev_item = delim[0] + delim[1]
-			prev_value = delim[3]
-		})
-		if (analysis.length > 0) {
-			console.log("DOMRect analysis [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + analysis.join("\n - "))
-		}
-		random = random.filter(function(item, position) {return random.indexOf(item) === position})
-		if (isFF) {
-			random.forEach(function(item) {
-				document.getElementById(item).innerHTML = document.getElementById(item).textContent + s8 + note_random
-			})
-		}
+		analyze()
 	}, 100)
 
-	// cleanup details
-	setTimeout(function(){
-		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
-	}, 50)
-	// perf
-	debug_page("perf","domrect",t0,gt0)
 }
 
 outputDomRect()
