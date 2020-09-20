@@ -6,7 +6,6 @@
 
 function reset_domrect() {
 	for (let i=0; i < 4; i++) {
-		document.getElementById("dr"+i).innerHTML = "&nbsp"
 		for (let j=1; j < 49; j++) {
 			document.getElementById("dr"+i+j).innerHTML = "&nbsp"
 		}
