@@ -136,7 +136,7 @@ function showhide(togType, togID, togWord) {
 	}
 	// domrect show/hide extra sections & change drFirstHeader text
 	if (togID == "D") {
-		let drArray = [dom.dr1.innerHTML, dom.dr2.innerHTML, dom.dr3.innerHTML, dom.dr4.innerHTML]
+		let drArray = [dom.dr0.innerHTML, dom.dr1.innerHTML, dom.dr2.innerHTML, dom.dr3.innerHTML]
 		let xyz = document.getElementsByClassName("togD1"); let abc
 		if (drArray.every( (val, i, arr) => val === arr[0] )) {
 			// hide last three

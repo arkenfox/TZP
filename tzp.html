@@ -92,7 +92,7 @@
 			<div class="nav-down"><a href="#useragentd">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`, `c`, `m`)">[ re-run ]</button></div>
 			<div><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
 			&nbsp [css min-device-] screen resolution <sup>1</sup></div></div></td><td id="S"></td></tr>
 		<tr><td>[matchMedia] screen resolution <sup>2</sup></td><td class="c" id="ScrMM"></td></tr>
@@ -164,7 +164,7 @@
 			such as math hashes, branding dimensions, and pixel values. Each test is independent of the others.</span>
 		</td></tr>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`, `c`, `m`)">[ re-run ]</button></div>
 			<div>[header] http_user_agent</div></div></td><td class="faint"></td>
 		</tr>
 		<tr><td>hash</td><td class="c mono" id="sectionUA1"></td></tr>
@@ -256,7 +256,7 @@
 			<div class="nav-right"><a name="mathd"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`, `c`, `m`)">[ re-run ]</button></div>
 			<div>6th edition</div></div></td><td class="c mono" id="math6hash"></td>
 		</tr>
 		<tr><td>1st edition</td><td class="c mono" id="math1hash"></td></tr>
@@ -293,7 +293,7 @@
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`, `c`, `m`)">[ re-run ]</button></div>
 			<div>language & locale</div></div></td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="lHash2"></td></tr>
@@ -363,7 +363,7 @@
 			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`, `c`, `m`)">[ re-run ]</button></div>
 			<div>[navigator] doNotTrack</div></div></td><td class="c" id="nDNT"></td>
 		</tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -393,7 +393,7 @@
 			new random name and value, and then to read them back. Only when it successfully reads back a matching value
 			is it deemed to be available and working.</span></td></tr>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`, `c`, `m`)">[ re-run ]</button></div>
 			<div>[navigator] cookieEnabled</div></div></td><td class="c" id="ctest0"></td>
 		</tr>
 		<tr><td>[javascript 1st party cookie] session | persistent</td>
@@ -433,7 +433,7 @@
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`, `c`, `m`)">[ re-run ]</button></div>
 			<div>plugins</div></div></td><td id="plugins"></td>
 		</tr>
 		<tr><td>mimeTypes</td><td id="mimeTypes"></td></tr>
@@ -472,7 +472,8 @@
 
 	<!--domrect.js-->
 	<table id="tb8">
-		<col width="7%"><a name="domrect"></a><col width="15%"><col width="7%"><col width="8%"><col width="15%"><col width="15%"><col width="15%"><col width="18%">
+		<col width="7%"><a name="domrect"></a>
+			<col width="15%"><col width="7%"><col width="8%"><col width="15%"><col width="15%"><col width="15%"><col width="18%">
 		<thead><tr><th colspan="8">
 			<div class="nav-title"><a href="#domrect">DOMRect / SVG</a>
 			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfdomrect"></span></div>
@@ -480,32 +481,45 @@
 			<div class="nav-right"><a name="domrectd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="3"><div>
-			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`, `c1`, `m`)">[ re-run tests ]</button></div>
-			<div>Element.getClientRects</div></div></td><td colspan="5" class="mono" id="dr1"></td>
+			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`, `c1`, `m`)">[ re-run ]</button></div>
+			<div>hash</div></div></td><td colspan="5" class="mono" id="drhash"></td>
 		</tr>
-		<tr><td colspan="3">Element.getBoundingClientRect</td><td colspan="5" class="mono" id="dr2"></td></tr>
-		<tr><td colspan="3">Range.getClientRects</td><td colspan="5" class="mono" id="dr3"></td></tr>
-		<tr><td colspan="3">Range.getBoundingClientRect</td><td colspan="5" class="mono" id="dr4"></td></tr>
+		<tr><td colspan="3">Element.getClientRects</td><td colspan="5" class="mono" id="dr0"></td></tr>
+		<tr><td colspan="3">Element.getBoundingClientRect</td><td colspan="5" class="mono" id="dr1"></td></tr>
+		<tr><td colspan="3">Range.getClientRects</td><td colspan="5" class="mono" id="dr2"></td></tr>
+		<tr><td colspan="3">Range.getBoundingClientRect</td><td colspan="5" class="mono" id="dr3"></td></tr>
 		<tr><td colspan="8"></td></tr>
 		<tr><td colspan="8" class="center"><a target="_blank" class="blue" href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
 		<tr><td colspan="8" class="showhide">
 			<input id="collapseD" class="toggle" type="checkbox" checked onchange="toggleitems(this, `D`)"/>
 			<label for="collapseD" class="lbl-toggle" id="labelD">&#9660; show details</label>
 		</td></tr>
-		<tr class="togD"><td></td><td>[ *browserleaks* ]</td><td colspan="2">[ *getClientRects* ]</td><td>[ Fingerprinting? ]</td><td>[ select ]</td><td>[ progress bar ]</td><td>[ empty button ]</td></tr>
-		<tr class="togD"><td></td><td colspan="7" class="s8" id="drFirstHeader">Element.getClientRects<br>[note: the other three methods have the same hash and values]</td></tr>
+		<tr class="togD"><td></td><td>[ *browserleaks* ]</td><td colspan="2">[ *getClientRects* ]</td>
+			<td>[ Fingerprinting? ]</td><td>[ select ]</td><td>[ progress bar ]</td><td>[ empty button ]</td></tr>
+		<tr class="togD"><td></td><td colspan="7" class="s8" id="drFirstHeader">Element.getClientRects
+			<br>[note: the other three methods have the same hash and values]</td></tr>
 			<!-- ^^ Element.getClientRects -->
-			<tr class="togD"><td>x</td><td id="dr11"></td><td colspan="2" id="dr12"></td><td id="dr13"></td><td id="dr14"></td><td id="dr15"></td><td id="dr16"></td></tr>
-			<tr class="togD"><td>y</td><td id="dr17"></td><td colspan="2" id="dr18"></td><td id="dr19"></td><td id="dr110"></td><td id="dr111"></td><td id="dr112"></td></tr>
-			<tr class="togD"><td>width</td><td id="dr113"></td><td colspan="2" id="dr114"></td><td id="dr115"></td><td id="dr116"></td><td id="dr117"></td><td id="dr118"></td></tr>
-			<tr class="togD"><td>height</td><td id="dr119"></td><td colspan="2" id="dr120"></td><td id="dr121"></td><td id="dr122"></td><td id="dr123"></td><td id="dr124"></td></tr>
-			<tr class="togD"><td>top</td><td id="dr125"></td><td colspan="2" id="dr126"></td><td id="dr127"></td><td id="dr128"></td><td id="dr129"></td><td id="dr130"></td></tr>
-			<tr class="togD"><td>left</td><td id="dr131"></td><td colspan="2" id="dr132"></td><td id="dr133"></td><td id="dr134"></td><td id="dr135"></td><td id="dr136"></td></tr>
-			<tr class="togD"><td>right</td><td id="dr137"></td><td colspan="2" id="dr138"></td><td id="dr139"></td><td id="dr140"></td><td id="dr141"></td><td id="dr142"></td></tr>
-			<tr class="togD"><td>bottom</td><td id="dr143"></td><td colspan="2" id="dr144"></td><td id="dr145"></td><td id="dr146"></td><td id="dr147"></td><td id="dr148"></td></tr>
+			<tr class="togD"><td>x</td><td id="dr01"></td><td colspan="2" id="dr02"></td><td id="dr03"></td><td id="dr04"></td><td id="dr05"></td><td id="dr06"></td></tr>
+			<tr class="togD"><td>y</td><td id="dr07"></td><td colspan="2" id="dr08"></td><td id="dr09"></td><td id="dr010"></td><td id="dr011"></td><td id="dr012"></td></tr>
+			<tr class="togD"><td>width</td><td id="dr013"></td><td colspan="2" id="dr014"></td><td id="dr015"></td><td id="dr016"></td><td id="dr017"></td><td id="dr018"></td></tr>
+			<tr class="togD"><td>height</td><td id="dr019"></td><td colspan="2" id="dr020"></td><td id="dr021"></td><td id="dr022"></td><td id="dr023"></td><td id="dr024"></td></tr>
+			<tr class="togD"><td>top</td><td id="dr025"></td><td colspan="2" id="dr026"></td><td id="dr027"></td><td id="dr028"></td><td id="dr029"></td><td id="dr030"></td></tr>
+			<tr class="togD"><td>left</td><td id="dr031"></td><td colspan="2" id="dr032"></td><td id="dr033"></td><td id="dr034"></td><td id="dr035"></td><td id="dr036"></td></tr>
+			<tr class="togD"><td>right</td><td id="dr037"></td><td colspan="2" id="dr038"></td><td id="dr039"></td><td id="dr040"></td><td id="dr041"></td><td id="dr042"></td></tr>
+			<tr class="togD"><td>bottom</td><td id="dr043"></td><td colspan="2" id="dr044"></td><td id="dr045"></td><td id="dr046"></td><td id="dr047"></td><td id="dr048"></td></tr>
 			<tr class="togD"><td colspan="8"></td></tr>
 		<!-- D1 only shown if hashes differ -->
 		<tr class="togD1"><td></td><td colspan="7" class="s8">Element.getBoundingClientRect</td></tr>
+			<tr class="togD1"><td>x</td><td id="dr11"></td><td colspan="2" id="dr12"></td><td id="dr13"></td><td id="dr14"></td><td id="dr15"></td><td id="dr16"></td></tr>
+			<tr class="togD1"><td>y</td><td id="dr17"></td><td colspan="2" id="dr18"></td><td id="dr19"></td><td id="dr110"></td><td id="dr111"></td><td id="dr112"></td></tr>
+			<tr class="togD1"><td>width</td><td id="dr113"></td><td colspan="2" id="dr114"></td><td id="dr115"></td><td id="dr116"></td><td id="dr117"></td><td id="dr118"></td></tr>
+			<tr class="togD1"><td>height</td><td id="dr119"></td><td colspan="2" id="dr120"></td><td id="dr121"></td><td id="dr122"></td><td id="dr123"></td><td id="dr124"></td></tr>
+			<tr class="togD1"><td>top</td><td id="dr125"></td><td colspan="2" id="dr126"></td><td id="dr127"></td><td id="dr128"></td><td id="dr129"></td><td id="dr130"></td></tr>
+			<tr class="togD1"><td>left</td><td id="dr131"></td><td colspan="2" id="dr132"></td><td id="dr133"></td><td id="dr134"></td><td id="dr135"></td><td id="dr136"></td></tr>
+			<tr class="togD1"><td>right</td><td id="dr137"></td><td colspan="2" id="dr138"></td><td id="dr139"></td><td id="dr140"></td><td id="dr141"></td><td id="dr142"></td></tr>
+			<tr class="togD1"><td>bottom</td><td id="dr143"></td><td colspan="2" id="dr144"></td><td id="dr145"></td><td id="dr146"></td><td id="dr147"></td><td id="dr148"></td></tr>
+			<tr class="togD1"><td colspan="8"></td></tr>
+		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getClientRects</td></tr>
 			<tr class="togD1"><td>x</td><td id="dr21"></td><td colspan="2" id="dr22"></td><td id="dr23"></td><td id="dr24"></td><td id="dr25"></td><td id="dr26"></td></tr>
 			<tr class="togD1"><td>y</td><td id="dr27"></td><td colspan="2" id="dr28"></td><td id="dr29"></td><td id="dr210"></td><td id="dr211"></td><td id="dr212"></td></tr>
 			<tr class="togD1"><td>width</td><td id="dr213"></td><td colspan="2" id="dr214"></td><td id="dr215"></td><td id="dr216"></td><td id="dr217"></td><td id="dr218"></td></tr>
@@ -515,7 +529,7 @@
 			<tr class="togD1"><td>right</td><td id="dr237"></td><td colspan="2" id="dr238"></td><td id="dr239"></td><td id="dr240"></td><td id="dr241"></td><td id="dr242"></td></tr>
 			<tr class="togD1"><td>bottom</td><td id="dr243"></td><td colspan="2" id="dr244"></td><td id="dr245"></td><td id="dr246"></td><td id="dr247"></td><td id="dr248"></td></tr>
 			<tr class="togD1"><td colspan="8"></td></tr>
-		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getClientRects</td></tr>
+		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getBoundingClientRect</td></tr>
 			<tr class="togD1"><td>x</td><td id="dr31"></td><td colspan="2" id="dr32"></td><td id="dr33"></td><td id="dr34"></td><td id="dr35"></td><td id="dr36"></td></tr>
 			<tr class="togD1"><td>y</td><td id="dr37"></td><td colspan="2" id="dr38"></td><td id="dr39"></td><td id="dr310"></td><td id="dr311"></td><td id="dr312"></td></tr>
 			<tr class="togD1"><td>width</td><td id="dr313"></td><td colspan="2" id="dr314"></td><td id="dr315"></td><td id="dr316"></td><td id="dr317"></td><td id="dr318"></td></tr>
@@ -524,16 +538,6 @@
 			<tr class="togD1"><td>left</td><td id="dr331"></td><td colspan="2" id="dr332"></td><td id="dr333"></td><td id="dr334"></td><td id="dr335"></td><td id="dr336"></td></tr>
 			<tr class="togD1"><td>right</td><td id="dr337"></td><td colspan="2" id="dr338"></td><td id="dr339"></td><td id="dr340"></td><td id="dr341"></td><td id="dr342"></td></tr>
 			<tr class="togD1"><td>bottom</td><td id="dr343"></td><td colspan="2" id="dr344"></td><td id="dr345"></td><td id="dr346"></td><td id="dr347"></td><td id="dr348"></td></tr>
-			<tr class="togD1"><td colspan="8"></td></tr>
-		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getBoundingClientRect</td></tr>
-			<tr class="togD1"><td>x</td><td id="dr41"></td><td colspan="2" id="dr42"></td><td id="dr43"></td><td id="dr44"></td><td id="dr45"></td><td id="dr46"></td></tr>
-			<tr class="togD1"><td>y</td><td id="dr47"></td><td colspan="2" id="dr48"></td><td id="dr49"></td><td id="dr410"></td><td id="dr411"></td><td id="dr412"></td></tr>
-			<tr class="togD1"><td>width</td><td id="dr413"></td><td colspan="2" id="dr414"></td><td id="dr415"></td><td id="dr416"></td><td id="dr417"></td><td id="dr418"></td></tr>
-			<tr class="togD1"><td>height</td><td id="dr419"></td><td colspan="2" id="dr420"></td><td id="dr421"></td><td id="dr422"></td><td id="dr423"></td><td id="dr424"></td></tr>
-			<tr class="togD1"><td>top</td><td id="dr425"></td><td colspan="2" id="dr426"></td><td id="dr427"></td><td id="dr428"></td><td id="dr429"></td><td id="dr430"></td></tr>
-			<tr class="togD1"><td>left</td><td id="dr431"></td><td colspan="2" id="dr432"></td><td id="dr433"></td><td id="dr434"></td><td id="dr435"></td><td id="dr436"></td></tr>
-			<tr class="togD1"><td>right</td><td id="dr437"></td><td colspan="2" id="dr438"></td><td id="dr439"></td><td id="dr440"></td><td id="dr441"></td><td id="dr442"></td></tr>
-			<tr class="togD1"><td>bottom</td><td id="dr443"></td><td colspan="2" id="dr444"></td><td id="dr445"></td><td id="dr446"></td><td id="dr447"></td><td id="dr448"></td></tr>
 			<tr class="togD"><td colspan="8"></td></tr>
 		<tr><td colspan="8"><span class="no_color">domrect code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -550,7 +554,7 @@
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run ]</button></div>
 			<div>hash</div></div></td><td class="c mono" id="chash1"></td></tr>
 		<tr><td>getContext</td><td class="c mono getContext"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
@@ -603,7 +607,7 @@
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c1`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c1`, `m`)">[ re-run ]</button></div>
 			<div><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.webaudio.enabled</span></div> &nbsp [api] web audio</div></div></td>
 			<td class="c1 mono" id="audioSupport"></td></tr>
@@ -612,7 +616,7 @@
 		<tr><td>sum <sup>1</sup></td><td class="c1 mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td>
-			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c2`, `m`)">[ run tests ]</button></div>
+			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c2`, `m`)">[ run ]</button></div>
 			<div>audioContext <sup>2</sup></div></td><td class="c2 mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 mono" id="audio2hash"></td></tr>
 		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 mono" id="audio3hash"></td></tr>
@@ -646,7 +650,7 @@
 			while the	<code>os</code> tests are to get metrics on stable fonts per os.</span>
 		</td></tr>
 		<tr><td colspan="2"><div>
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c1`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c1`, `m`)">[ re-run ]</button></div>
 			<div>default proportional font</div></div></td><td class="c1" id="fontFCprop"></td></tr>
 		<tr><td colspan="2">default font sizes</td><td class="c1" id="fontFCsize"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
@@ -688,7 +692,7 @@
 		<!--WHITELIST: c2: small -->
 		<tr><td colspan="3" class="center">------</td></tr>
 		<tr><td colspan="2"><div>
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c2`, `m`)">[run whitelist tests ]</button></div>
+			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c2`, `m`)">[run whitelist ]</button></div>
 			<div>font list</div></div></td><td class="mono" id="small_fontList"></td></tr>
 		<tr><td colspan="2">fingerprintjs2 <sup>2</sup></td><td class="c2 mono" id="small_fontFPJS2"></td></tr>
 		<tr><td colspan="2">font fallback <sup>3</sup></td><td class="c2 mono" id="small_fontFB"></td></tr>
@@ -696,7 +700,7 @@
 		<!--OS: c3: all -->
 		<tr><td colspan="3" class="center">------</td></tr>
 		<tr><td colspan="2"><div>
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c3`, `m`)">[ run os tests ]</button></div>
+			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c3`, `m`)">[ run os ]</button></div>
 			<div>font list</div></div></td><td class="mono" id="all_fontList"></td></tr>
 		<tr><td colspan="2">fingerprintjs2 <sup>2</sup></td><td class="c3 mono" id="all_fontFPJS2"></td></tr>
 		<tr><td colspan="2">font fallback <sup>3</sup></td><td class="c3 mono" id="all_fontFB"></td></tr>
@@ -739,7 +743,7 @@
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2"><div>
-			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`, `c`, `m`)">[ re-run ]</button></div>
 			<div><div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxtb">media.media-capabilities.enabled</span></div> &nbsp mediaCapabilities</div></div></td>
 			<td class="c" id="nMediaC"></td></tr>
@@ -764,7 +768,7 @@
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`, `c`, `m`)">[ re-run ]</button></div>
 			<div>&nbsp [-moz-] colors</div></div></td><td class="c mono" id="mColorHash"></td></tr>
 		<tr><td>[system] colors</td><td class="c mono" id="sColorHash"></td></tr>
 		<tr><td>[CSS4 system] colors</td><td class="c mono" id="sColorHashNew"></td></tr>
@@ -848,7 +852,7 @@
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2"><div>
-			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`, `c`, `m`)">[ re-run tests ]</button></div>
+			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`, `c`, `m`)">[ re-run ]</button></div>
 			<div><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">beacon.enabled</span></div>
 			&nbsp [navigator] beacon</div></div></td><td class="c" id="nBeacon"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
@@ -925,6 +929,7 @@
 	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>
 	<script src="js/devices.js"></script>
+	<script src="js/domrect.js"></script>
 	<script src="js/media.js"></script>
 	<script src="js/css.js"></script>
 	<script src="js/misc.js"></script>
@@ -933,8 +938,6 @@
 	<script src="js/audio.js"></script>
 	<script src="js/canvas.js"></script>
 	<script src="js/webgl.js"></script>
-	<!--start after other heavier scripts-->
-	<script src="js/domrect.js"></script>
 
 	<!--500kb, load last-->
 	<link rel="stylesheet" type="text/css" href="css/media.css">
