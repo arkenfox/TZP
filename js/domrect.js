@@ -54,7 +54,7 @@ function outputDomRect() {
 					}
 					if (compare.length > 0) {
 						compare.sort()
-						//console.debug(compare.join("\n"))
+						//console.log(compare.join("\n"))
 						let diffs = [], prev_item = "", prev_value = ""
 						compare.forEach(function(item) {
 							let delim = item.split(":")
@@ -82,7 +82,7 @@ function outputDomRect() {
 		}
 		// overall hash
 		dom.drhash = sha1(hash.join())
-		console.debug("domrect hash\n - " + hash.join("\n - "))
+		console.log("domrect hash\n - " + hash.join("\n - "))
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// perf
