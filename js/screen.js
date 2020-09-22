@@ -243,7 +243,7 @@ function get_errors() {
 		} else {
 			dom.errh = hash
 		}
-		store_data("ua","1 err",hash)
+		store_data("ua","error hash",hash)
 		if (logPerf) {debug_log("errors [ua]",t0)}
 	}
 	// run
@@ -350,7 +350,6 @@ function get_fullscreen() {
 		r = "no: "+e.name; dom.fsLeak = zNA
 	}
 	dom.fsSupport = r
-	store_data("sc","fs-api",r)
 }
 
 function get_line_scrollbar() {
@@ -897,7 +896,6 @@ function get_pbmode() {
 	let t0 = performance.now()
 	function output(r) {
 		dom.IsPBMode = r
-		store_data("sc","pbm",r)
 		if (logPerf) {debug_log("pbmode [screen]",t0)}
 	}
 	try {
@@ -927,7 +925,7 @@ function get_resources() {
 		isChannel = channel
 		// output
 		dom.fdResource.innerHTML = browser + " " + result
-		store_data("ua","2 res",browser+" "+wFF+"x"+hFF+" "+extra)
+		store_data("ua","resources",browser+" "+wFF+"x"+hFF+" "+extra)
 		if (logPerf) {debug_log("resource [ua]",t0)}
 	}
 	// FF
@@ -1267,7 +1265,7 @@ function get_version() {
 			if (start !== -1) {isVer = isVer.substring(0,start)}
 		}
 		dom.versionNo.innerHTML = verNo + (isNew ? zNEW : "") + (runS ? zSIM : "")
-		store_data("ua","3 ver",verNo)
+		store_data("ua","version",verNo)
 		if (logPerf) {debug_log("version [ua]",t0)}
 	}
 	// use isErr
@@ -1524,7 +1522,7 @@ function get_widgets() {
 	// output
 	dom.widgetH = sha1(hash.join()) + (runS ? zSIM : "")
 	dom.widgetOS.innerHTML = os + (runS ? zSIM : "")
-	store_data("ua","4 wid",sha1(hash.join()))
+	store_data("ua","widget hash",sha1(hash.join()))
 	if (logPerf) {debug_log("widgets [ua]",t0)}
 }
 
@@ -1748,7 +1746,7 @@ function goNW() {
 					changesi++;	strInner += s1+" &#9654 <b>["+k+"]</b> "+sc+sizesi[k]
 				}
 				prev = sizesi[k]
-			};
+			}
 			prev = sizeso[0]
 			let strOuter = s1+"outer: "+sc+ow+" x "+oh
 			for (let k=0; k < sizeso.length; k++) {
@@ -1868,7 +1866,6 @@ function outputMath() {
 		mchash = "",
 		m1 = "", // short codes
 		m6 = "",
-		mc = "",
 		fdMath1 = "", // strings for browser/os
 		fdMath6 = "",
 		strNew = zNEW + (runS ? zSIM : ""),
@@ -1926,7 +1923,7 @@ function outputMath() {
 			//m6hash = sha1("c"), mchash = sha1("d") // emca6
 			m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
 		}
-		store_data("ua","5 mth",mchash)
+		store_data("ua","math hash",mchash)
 	}
 
 	function get_codes() {
@@ -1943,7 +1940,6 @@ function outputMath() {
 		else if (m1hash == "ae434b101452888b756da5916d81f68adeb2b6ae") {m1="F"}
 		else if (m1hash == "19df0b54c852f35f011187087bd3a0dce12b4071") {m1="G"}
 		else if (m1hash == "8ee641f01271d500e5c1d40e831232214c0bbbdc") {m1="H"}
-		mc = m6+m1
 	}
 
 	function build_output() {
@@ -2008,7 +2004,7 @@ function outputMath() {
 			// new
 			if (m1 == "") {m1hash += strNew} else {m1hash += s3+" ["+m1+"]"+sc}
 			if (m6 == "") {m6hash += strNew} else {m6hash += s3+" ["+m6+"]"+sc}
-			if (mc.length < 2) {mchash += strNew} else {mchash += s3+" ["+mc+"]"+sc}
+
 			if (scriptBlock) {
 				strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
 			} else {
@@ -2101,7 +2097,7 @@ function outputStart() {
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
 	// run once
 	dom.debugperf = "       start:    screen.js loaded"
-	if ((location.protocol) == "file:") {isFile = true; note_file = sn+"[file:]"+sc}
+	if ((location.protocol) == "file:") {isFile = true; note_file = " [FILE:///]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("undefined" != typeof InstallTrigger) {isFF = true}
 	get_engine()
