@@ -180,17 +180,34 @@ function get_computed_styles() {
 		styleVersion(1),
 		styleVersion(2)
 	]).then(res => {
+		let isSame = true, first_value = "", value = ""
 		// loop
 		for (let i=0; i < 3; i=i+1) {
 			let el = document.getElementById("cStyles"+i)
 			try {
 				let results = res[i],
 					array = res[i].keys
-				if (!isFF) {array.sort()}
-				el.innerHTML = sha1(array.join()) + s14+"["+ array.length +"|"+ res[i].moz +"|"+ res[i].webkit +"]"+sc
+				//if (!isFF) {array.sort()}
+				value = sha1(array.join()) + s14+"["+ array.length +"|"+ res[i].moz +"|"+ res[i].webkit +"]"+sc
 			} catch(e) {
-				el.innerHTML = "error"
+				value = "error"
 			}
+			el.innerHTML = value
+			if (i == 0) {
+				first_value = value
+			} else {
+				if (value != first_value) {isSame = false}
+			}
+		}
+		// show/hide rows
+		document.getElementById("togCSSb").style.display = (isSame ? "none" : "table-row")
+		document.getElementById("togCSSc").style.display = (isSame ? "none" : "table-row")
+		// label
+		if (!isSame) {
+			dom.togCSSa = "getComputedStyle"
+		} else {
+			dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>" +
+				"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div>	&nbsp computed styles"
 		}
 		if (logPerf) {debug_log("computed styles [css]",t0)}
 		// perf
@@ -198,38 +215,6 @@ function get_computed_styles() {
 	}).catch(error => {
 		console.error(error)
 	})
-}
-
-function get_computed_styles_old() {
-	/* https://github.com/abrahamjuliot/creepjs */
-	try {
-		if ('getComputedStyle' in window) {
-			let body = document.querySelector('body'),
-				computedStyle = getComputedStyle(body),
-				keys = []
-			Object.keys(computedStyle).forEach(key => {
-				let numericKey = !isNaN(key),
-					value = computedStyle[key],
-					cssVar = /^--.*$/,
-					customPropKey = cssVar.test(key),
-					customPropValue = cssVar.test(value)
-				if (numericKey && !customPropValue) {
-					keys.push(value)
-				} else if (!numericKey && !customPropKey) {
-					keys.push(key)
-				}
-			})
-			let moz = keys.filter(key => (/-moz-/).test(key)).length,
-				webkit = keys.filter(key => (/-webkit-/).test(key)).length
-			dom.cStyles4.innerHTML = sha1(keys.join()) + s14 +"["+ keys.length +"|" + moz +"|"+ webkit +"]"+sc
-		}
-	} catch(e) {
-		let msg = ""
-		if (e.name == "ReferenceError") {msg = zB1
-		} else if (e.name == "TypeError") {msg = zB2
-		} else {msg = zB3}
-		dom.sCStyles.innerHTML = msg
-	}
 }
 
 function get_mm_prefers() {
@@ -336,7 +321,6 @@ function outputCSS() {
 	get_colors("n")
 	get_colors("m")
 	get_system_fonts()
-	get_computed_styles_old()
 	get_computed_styles()
 }
 
