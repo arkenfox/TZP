@@ -159,15 +159,12 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 	}
 	// overall hash
 	chash1.sort()
-	Promise.all([
-		sha256_str(chash1.join())
-	]).then(function(hash){
-		console.log("canvas\n - " + chash1.join("\n - "))
-		dom.chash1.innerHTML = hash[0] + (isFile ? note_file : "")
-		// perf
-		if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
-		debug_page("perf","canvas",t0canvas,gt0)
-	})
+	console.log("canvas\n - " + chash1.join("\n - "))
+	dom.chash1.innerHTML = sha1(chash1.join()) + (isFile ? note_file : "")
+	// perf
+	if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
+	debug_page("perf","canvas",t0canvas,gt0)
+
 }
 
 function outputCanvas() {
