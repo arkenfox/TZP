@@ -36,13 +36,9 @@ function outputWebGL_param() {
 		// make sure to detect if they're missing
 
 	// hash
-	Promise.all([
-		sha256_str(glhash.join())
-	]).then(function(result){
-		dom.glhash0.innerHTML = result[0] + (isFile ? note_file : "")
-		// perf
-		if (logPerf) {debug_log("parameters [webgl]",t0)}
-	})
+	dom.glhash0.innerHTML = sha1(glhash.join()) + (isFile ? note_file : "")
+	// perf
+	if (logPerf) {debug_log("parameters [webgl]",t0)}
 }
 
 function analyzeWebGL(runtype, res1, res2) {
