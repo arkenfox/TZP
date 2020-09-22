@@ -91,8 +91,10 @@
 			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfscreen"></span></div>
 			<div class="nav-down"><a href="#useragentd">&#9660;</a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`, `c`, `m`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="screenhash"></span></td></tr>
+		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
 			&nbsp [css min-device-] screen resolution <sup>1</sup></td><td id="S"></td></tr>
 		<tr><td>[matchMedia] screen resolution <sup>2</sup></td><td class="c" id="ScrMM"></td></tr>
@@ -163,11 +165,11 @@
 			detect them via other means. They don't have to be "correct"; the measurements provide the real entropy,
 			such as math hashes, branding dimensions, and pixel values. Each test is independent of the others.</span>
 		</td></tr>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`, `c`, `m`)">[ re-run ]</button></div>
-			[header] http_user_agent</td><td class="faint"></td>
-		</tr>
+			<span class="hashtocome" id="uahash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="sectionUA1"></td></tr>
+		<tr><td>[header] http_user_agent</td><td class="faint"></td></tr>
 		<tr><td id="UA00">userAgent</td><td class="c spaces" id="nUA00"></td></tr>
 		<tr><td id="UA01">appCodeName</td><td class="c spaces" id="nUA01"></td></tr>
 		<tr><td id="UA02">appName</td><td class="c spaces" id="nUA02"></td></tr>
@@ -255,12 +257,11 @@
 			<div class="nav-down"><a href="#languaged">&#9660;</a></div>
 			<div class="nav-right"><a name="mathd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`, `c`, `m`)">[ re-run ]</button></div>
-			6th edition</td><td class="c mono" id="math6hash"></td>
-		</tr>
+			<span class="c" id="mathhash"></span></td></tr>
+		<tr><td>6th edition</td><td class="c mono" id="math6hash"></td></tr>
 		<tr><td>1st edition</td><td class="c mono" id="math1hash"></td></tr>
-		<tr><td>combined</td><td class="c mono" id="mathhash"></td></tr>
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseM" class="toggle" type="checkbox" checked onchange="toggleitems(this, `M`)">
 			<label for="collapseM" class="lbl-toggle" id="labelM">&#9660; show details</label>
@@ -292,9 +293,10 @@
 			<div class="nav-down"><a href="#headersd">&#9660;</a></div>
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`, `c`, `m`)">[ re-run ]</button></div>
-			language & locale</td><td class="c mono" id="lHash0"></td></tr>
+			<span class="hashtocome" id="languagehash"></span></td></tr>
+		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="lHash2"></td></tr>
 		<tr><td>geolocation</td><td class="c mono" id="lHash3"></td></tr>
@@ -359,13 +361,13 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#headers">HTTP Headers</a>
 			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
-			<div class="nav-down"><a href="#cookiesd">&#9660;</a></div>
+			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
 			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`, `c`, `m`)">[ re-run ]</button></div>
-			[navigator] doNotTrack</td><td class="c" id="nDNT"></td>
-		</tr>
+			<span class="hashtocome" id="headershash"></span></td></tr>
+		<tr><td>[navigator] doNotTrack</td><td class="c" id="nDNT"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.netinfo.enabled</span></div>
 			&nbsp [api] network information</td><td class="c" id="nNetwork"></td></tr>
@@ -379,23 +381,23 @@
 		<tr><td>server_protocol</td><td class="faint"></td></tr>
 	</table>
 
-	<!--cookies.js-->
+	<!--storage.js-->
 	<table id="tb6">
-		<col width="50%"><a name="cookies"></a><col width="50%">
+		<col width="50%"><a name="storage"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#cookies">Cookies & Storage</a>
+			<div class="nav-title"><a href="#storage">Cookies & Storage</a>
 			<div class="nav-up"><a href="#headers">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
-			<div class="nav-right"><a name="cookiesd"></a></div></div>
+			<div class="nav-right"><a name="storaged"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">The <code>[cookie]</code>, <code>[localStorage]</code>, 
 			<code>[sessionStorage]</code> and <code> [indexedDB]</code> tests, on each run, individually attempt to set a
 			new random name and value, and then to read them back. Only when it successfully reads back a matching value
 			is it deemed to be available and working.</span></td></tr>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`, `c`, `m`)">[ re-run ]</button></div>
-			[navigator] cookieEnabled</td><td class="c" id="ctest0"></td>
-		</tr>
+			<span class="hashtocome" id="storagehash"></span> <span id="tempIsFile"><span></td></tr>
+		<tr><td>[navigator] cookieEnabled</td><td class="c" id="ctest0"></td></tr>
 		<tr><td>[javascript 1st party cookie] session | persistent</td>
 			<td><span class="c" id="ctest1"></span> | <span class="c" id="ctest2"></span></td></tr>
 		<tr><td>localStorage | test</td><td>
@@ -428,14 +430,14 @@
 		<col width="29%"><a name="devices"></a><col width="71%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#devices">Devices & Hardware</a>
-			<div class="nav-up"><a href="#cookies">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
+			<div class="nav-up"><a href="#storage">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
 			<div class="nav-down"><a href="#domrectd">&#9660;</a></div>
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`, `c`, `m`)">[ re-run ]</button></div>
-			plugins</td><td id="plugins"></td>
-		</tr>
+			<span class="hashtocome" id="deviceshash"></span></td></tr>
+		<tr><td>plugins</td><td id="plugins"></td></tr>
 		<tr><td>mimeTypes</td><td id="mimeTypes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
@@ -480,10 +482,9 @@
 			<div class="nav-down"><a href="#canvasd">&#9660;</a></div>
 			<div class="nav-right"><a name="domrectd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="3">
+		<tr><td colspan="8" class="secthash">
 			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`, `c`, `m`)">[ re-run ]</button></div>
-			hash</td><td colspan="5" class="c mono" id="drhash"></td>
-		</tr>
+			<span class="c" id="drhash"></span></td></tr>
 		<tr><td colspan="3">Element.getClientRects</td><td colspan="5" class="c mono" id="dr0"></td></tr>
 		<tr><td colspan="3">Element.getBoundingClientRect</td><td colspan="5" class="c mono" id="dr1"></td></tr>
 		<tr><td colspan="3">Range.getClientRects</td><td colspan="5" class="c mono" id="dr2"></td></tr>
@@ -553,9 +554,13 @@
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run ]</button></div>
+			<span class="c" id="chash1"></span></td></tr>
+		<!--<tr><td>
 			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run ]</button></div>
 			hash</td><td class="c mono" id="chash1"></td></tr>
+		-->
 		<tr><td>getContext</td><td class="c mono getContext"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
 		<tr><td>toBlob</td><td class="c mono toBlob"></td></tr>
@@ -580,9 +585,9 @@
 			<div class="nav-down"><a href="#audiod">&#9660;</a></div>
 			<div class="nav-right"><a name="webgld"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn10 btn" onClick="outputSection(`10`, `c`, `m`)">[ re-run ]</button></div>
-			hash</td><td class="c mono" id="glhash0"></td></tr>
+			<span class="c" id="glhash0"></span></td></tr>
 		<tr><td>getContext</td><td class="c mono" id="glsupport"></td></tr>
 		<tr><td>vendor | unmasked</td><td class="faint mono" id="glvend"></td></tr>
 		<tr><td>renderer | unmasked</td><td class="faint mono" id="glrend"></td></tr>
@@ -606,18 +611,21 @@
 			<div class="nav-down"><a href="#fontsd">&#9660;</a></div>
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c1`, `m`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="audiohash1"></span></td></tr>
+		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.webaudio.enabled</span></div>
-			&nbsp [api] web audio</td>
-			<td class="c1 mono" id="audioSupport"></td></tr>
+			&nbsp [api] web audio</td><td class="c1 mono" id="audioSupport"></td></tr>
 		<tr><td>getChannelData <sup>1</sup></td><td class="c1 mono" id="audioGet"></td></tr>
 		<tr><td>copyFromChannel <sup>1</sup></td><td class="c1 mono" id="audioCopy"></td></tr>
 		<tr><td>sum <sup>1</sup></td><td class="c1 mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c2`, `m`)">[ run ]</button></div>
-			audioContext <sup>2</sup></td><td class="c2 mono" id="audio1hash"></td></tr>
+			<span class="c2" id="audiohash2"></span></td></tr>
+		<tr><td>
+		<tr><td>audioContext <sup>2</sup></td><td class="c2 mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 mono" id="audio2hash"></td></tr>
 		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 mono" id="audio3hash"></td></tr>
 		<tr><td colspan="2" class="showhide">
@@ -649,8 +657,10 @@
 			<code>whitelist</code> tests are smaller, faster tests trying to determine entropy within each whitelist,
 			while the	<code>os</code> tests are to get metrics on stable fonts per os.</span>
 		</td></tr>
-		<tr><td colspan="2">
+		<tr><td colspan="3" class="secthash">
 			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c1`, `m`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="fontshash"></span><span></td></tr>
+		<tr><td colspan="2">
 			default proportional font</td><td class="c1" id="fontFCprop"></td></tr>
 		<tr><td colspan="2">default font sizes</td><td class="c1" id="fontFCsize"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
@@ -742,8 +752,10 @@
 			<div class="nav-down"><a href="#cssd">&#9660;</a></div>
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2">
+		<tr><td colspan="3" class="secthash">
 			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`, `c`, `m`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="mediahash"></span></td></tr>
+		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">media.media-capabilities.enabled</span></div>
 			&nbsp mediaCapabilities</td><td class="c" id="nMediaC"></td></tr>
 		<tr><td colspan="2">[canPlayType] audio</td><td class="c mono" id="audiocan"></td></tr>
@@ -766,9 +778,10 @@
 			<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>
+		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`, `c`, `m`)">[ re-run ]</button></div>
-			&nbsp [-moz-] colors</td><td class="c mono" id="mColorHash"></td></tr>
+			<span class="hashtocome" id="csshash"></span></td></tr>
+		<tr><td>[-moz-] colors</td><td class="c mono" id="mColorHash"></td></tr>
 		<tr><td>[system] colors</td><td class="c mono" id="sColorHash"></td></tr>
 		<tr><td>[CSS4 system] colors</td><td class="c mono" id="sColorHashNew"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="sFontsHash"></td></tr>
@@ -849,8 +862,10 @@
 			<div class="nav-down"><a href="#theend">&#9660;</a></div>
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2">
+		<tr><td colspan="3" class="secthash">
 			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`, `c`, `m`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="mischash"></span></td></tr>
+		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">beacon.enabled</span></div>
 			&nbsp [navigator] beacon</td><td class="c" id="nBeacon"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
