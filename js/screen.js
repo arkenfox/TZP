@@ -2092,15 +2092,19 @@ function outputUA(runtype) {
 function outputStart() {
 	// perf
 	gt0 = performance.now()
-	// not-coded
-	let items = document.getElementsByClassName("faint")
-	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
 	// run once
 	dom.debugperf = "       start:    screen.js loaded"
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("undefined" != typeof InstallTrigger) {isFF = true}
 	get_engine()
+	// not-coded
+	let items = document.getElementsByClassName("faint")
+	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
+	// section hash to come
+	items = document.getElementsByClassName("hashtocome")
+	for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
+	if (isFile) {dom.tempIsFile = note_file}
 	// sim = FF only
 	if (isFF == false) {runS = false}
 	// run UA first: checks isFF; sets isOS, isTB*, isVer
