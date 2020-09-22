@@ -1165,7 +1165,7 @@ function get_ua_nav_checks() {
 	// workers
 	if (isFile) {
 		// file
-		exit(zNA + note_file)
+		exit(zNA)
 	} else if (typeof(Worker) == "undefined") {
 		// none
 		exit(zF)
@@ -1209,7 +1209,7 @@ function get_ua_nav_checks() {
 	// service
 	let el5 = dom.sectionUA5, test5 = ""
 	if (isFile) {
-		el5.innerHTML = zNA + note_file
+		el5.innerHTML = zNA
 	} else if (isSecure) {
 		if ("serviceWorker" in navigator) {
 			// assume failure
@@ -2097,7 +2097,7 @@ function outputStart() {
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
 	// run once
 	dom.debugperf = "       start:    screen.js loaded"
-	if ((location.protocol) == "file:") {isFile = true; note_file = " [FILE:///]"}
+	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("undefined" != typeof InstallTrigger) {isFF = true}
 	get_engine()
