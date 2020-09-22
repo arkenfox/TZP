@@ -31,6 +31,7 @@ function get_iframe_props() {
 		iframe.parentNode.removeChild(iframe)
 		// output
 		dom.iProps.innerHTML = sha1(props.join()) + s18 +"["+ props.length +"]"+sc
+		//console.debug(props.join("\n"))
 	} catch(e) {
 		dom.iProps.innerHTML = error_iframe
 	}
@@ -93,6 +94,7 @@ function get_recursion() {
 	} catch (e) {
 		// 2nd test is more accurate/stable
 		console.log("recursion:", test1, level)
+		dom.recursion = level
 	}
 }
 
