@@ -45,7 +45,7 @@ function store_data(section, key, value) {
 		fp_ua.push(key+": "+value)
 		if (fp_ua.length == 5) {
 			fp_ua.sort()
-			console.log("ua feature detection\n - " + fp_ua.join("\n - "))
+			console.log("ua", fp_ua)
 			dom.sectionUA9.innerHTML = sha1(fp_ua.join()) + s2+"[unspoofable?]"+sc
 		}
 	}
