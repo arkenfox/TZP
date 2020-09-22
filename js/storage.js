@@ -206,8 +206,8 @@ function get_workers() {
 		dom.work1 = zE
 		if (isFile) {
 			// isFile
-			dom.work2.innerHTML= zNA + note_file
-			dom.work3.innerHTML= zNA + note_file
+			dom.work2.innerHTML= zNA
+			dom.work3.innerHTML= zNA
 		} else {
 			// web worker
 			try {
@@ -292,7 +292,7 @@ function get_service_workers() {
 		}
 	}	else {
 		// isFile
-		output = zNA + note_file
+		output = zNA
 		dom.swork1.innerHTML = output; dom.swork2.innerHTML = output
 		dom.swork3.innerHTML = output; dom.swork4.innerHTML = output
 		dom.notif1.innerHTML = output; dom.notif2.innerHTML = output
@@ -317,8 +317,8 @@ function get_storage_manager() {
 	if ("storage" in navigator) {
 		dom.storageMSupport = zE
 		if (isFile) {
-			dom.storageMProp.innerHTML = zNA + note_file
-			dom.storageMTest.innerHTML = zNA + note_file
+			dom.storageMProp.innerHTML = zNA
+			dom.storageMTest.innerHTML = zNA
 		} else {
 			// properties
 			try {
