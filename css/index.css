@@ -88,7 +88,8 @@ input[type='checkbox'] {display: none;}
 
 /* buttons & section color */
 .btn {background-color: #1a1a1a; border-width: 0px; text-align: center;
-	display: inline-block; font-size: 12px; font-weight: bold; cursor: pointer; outline: none}
+	display: inline-block; font-size: 12px; font-family: monospace, "Courier New";
+	font-weight: bold; cursor: pointer; outline: none}
 .btn0 {border-color: #b3b3b3; color: #b3b3b3;}
 .btn1, .s1 {border-color: var(--test1); color: var(--test1);}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
