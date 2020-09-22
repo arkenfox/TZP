@@ -300,11 +300,16 @@ function get_service_workers() {
 }
 
 function get_permissions() {
-	if (isFF) {
+	try {
 		navigator.permissions.query({name:"notifications"}).then(e => dom.pNote=e.state)
+	} catch(e) {dom.pNote = e.name}
+	try {
+		dom.pPush=zNA
 		navigator.permissions.query({name:"push"}).then(e => dom.pPush=e.state)
-	}
-	navigator.permissions.query({name:"persistent-storage"}).then(e => dom.pStore=e.state)
+	} catch(e) {dom.pPush = e.name}
+	try {
+		navigator.permissions.query({name:"persistent-storage"}).then(e => dom.pStore=e.state)
+	} catch(e) {dom.pStore = e.name}
 }
 
 function get_storage_manager() {
