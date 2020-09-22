@@ -108,7 +108,7 @@ input[type='checkbox'] {display: none;}
 .btn16, .s16 {border-color: var(--test16); color: var(--test16);}
 .btn17, .s17 {border-color: var(--test17); color: var(--test17);}
 .btn18, .s18 {border-color: var(--test18); color: var(--test18);}
-.btn-left {float: left; position: relative; left: -10px; top: -2px;}
+.btn-left {float: left; position: relative; left: -10px; top: 0px;}
 
 /* tooltips */
 .icon {font-size: 10px; font-weight: bold; color: #b3b3b3; cursor: default;}
@@ -143,6 +143,14 @@ table td:first-child { text-align: right; vertical-align: top;}
 table td.blurb {text-align: center; line-height: 1.5em;}
 table td.center {text-align: center;}
 table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
+table td.secthash {
+	text-align: left;
+	vertical-align: top;
+	line-height: 1.5em;
+	padding-bottom: 10px;
+	font-family: monospace, "Courier New";
+	font-size: 12px;
+}
 table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 
 #tb1 th {background-color: #f07878;}
