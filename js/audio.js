@@ -187,9 +187,21 @@ function get_audio2_oscillator() {
 	oscillator.start(0)
 }
 
+function outputDisabled(runtype) {
+	// until I rebuild and promisify
+	if (runtype == 1) {
+		dom.audiohash1 = sha1("disabled,n/a,n/a,n/a")
+	} else if (runtype == 2) {
+		dom.audiohash2 = sha1("n/a,n/a,n/a")
+	}
+
+}
+
 function outputAudio2() {
 	t0audio = performance.now()
 	latencyTries = 0
+	// temp
+	dom.audiohash2 = "section-hash-will-be-coming-just-hold-on"
 	try {
 		let test = new window.AudioContext
 		// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
@@ -200,6 +212,7 @@ function outputAudio2() {
 		// no webaudio
 		dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
+		outputDisabled(2)
 	}
 }
 
@@ -250,8 +263,10 @@ function outputAudio1(runtype) {
 	} catch(error) {
 		dom.audioSupport = zD
 		dom.audioCopy = zNA, dom.audioGet = zNA, dom.audioSum = zNA
+		outputDisabled(1)
 		if (runtype == "load") {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
+			outputDisabled(2)
 		}
 		// perf
 		debug_page("perf","audio",t0,gt0)
