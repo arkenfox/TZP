@@ -1302,18 +1302,23 @@ function get_version() {
 			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
 			if (test82 == 1) {verNo = "82+"; go = false}
 		}
-		// 81
+		// 81: 1650607
 		if (go) {
 			try {
-				// 81: 1650607
+				// 81: 
 				let file81 = new File(["bits"], "a/b.txt")
 				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
-			} catch(e) {
-				try {
-					// 81: 1657437
-					if (dom.test81a.offsetWidth < dom.test81b.offsetWidth) {verNo = "81" + alt1; go = false}
-				} catch(e) {}
-			}
+			} catch(e) {}
+		}
+		// 81: 1657437
+		if (go) {
+			try {
+				dom.test81a = "AB"
+				dom.test81b.innerHTML = "A &#013;B"
+				if (dom.test81a.offsetWidth < dom.test81b.offsetWidth) {verNo = "81" + alt1; go = false}
+				dom.test81a = ""
+				dom.test81b = ""
+			} catch(e) {}
 		}
 		// 80: 1651732
 		if (go) {
@@ -1332,25 +1337,26 @@ function get_version() {
 				if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
 			}
 		}
-		//78
+		//78: 1589095
 		if (go) {
 			try {
-				//78: 1589095
 				let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
 				verNo = "78"; go = false
-			} catch(e) {
-				try {
-				//78: 1633836
-					let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
-					verNo = "78" + alt1; go = false
-				} catch(e) {
-					try {
-					//78: 1634135
-						let regex78b = new RegExp('b')
-						if (regex78b.dotAll == false) {verNo = "78" + alt2; go = false}
-					} catch(e) {}
-				}
-			}
+			} catch(e) {}
+		}
+		//78: 1633836
+		if (go) {
+			try {
+				let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
+				verNo = "78" + alt1; go = false
+			} catch(e) {}
+		}
+		//78: 1634135
+		if (go) {
+			try {
+				let regex78b = new RegExp('b')
+				if (regex78b.dotAll == false) {verNo = "78" + alt2; go = false}
+			} catch(e) {}
 		}
 		//77: 1627285
 		if (go) {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}}
