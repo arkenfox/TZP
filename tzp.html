@@ -46,8 +46,6 @@
 		<div id="svgDiv"></div>
 		<div id="tScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
-		<div><span id="test81a">AB</span></div>
-		<div><span id="test81b">A &#013;B</span></div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
@@ -201,9 +199,11 @@
 		<tr><td>[error messages] browser</td><td class="c" id="fdError"></td></tr>
 		<tr><td>[resource://] browser</td><td class="c" id="fdResource"></td></tr>
 		<tr><td>[math] browser</td><td class="c" id="fdMath"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			 <span class="ttxt">Firefox 60+ only</span></div>
-			 &nbsp [feature detection] version</td><td class="c" id="versionNo"></td></tr>
+		<tr><td>
+			<span id="test81a"></span><span id="test81b"></span>
+			<div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">Firefox 60+ only</span></div>
+			&nbsp [feature detection] version</td><td class="c" id="versionNo"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c" id="fdChromeOS"></td></tr>
 		<tr><td>[math] os</td><td class="c" id="fdMathOS"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">Linux, Mac or Windows<br>
@@ -390,7 +390,7 @@
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
 			<div class="nav-right"><a name="storaged"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">The <code>[cookie]</code>, <code>[localStorage]</code>, 
+		<tr><td colspan="2" class="intro"><span class="no_color">The <code>[cookie]</code>, <code>[localStorage]</code>,
 			<code>[sessionStorage]</code> and <code> [indexedDB]</code> tests, on each run, individually attempt to set a
 			new random name and value, and then to read them back. Only when it successfully reads back a matching value
 			is it deemed to be available and working.</span></td></tr>
@@ -416,7 +416,7 @@
 			<span class="ttxt">dom.caches.enabled</span></div> &nbsp service worker cache | test</td>
 			<td><span class="c" id="swork3"></span> | <span class="c" id="swork4"></span></td></tr>
 		<tr><td>notifications | test</td><td><span class="c" id="notif1"></span> | <span class="c" id="notif2"></span></td></tr>
-		<tr><td>[permission] notifications | push | persistent storage</td><td>	
+		<tr><td>[permission] notifications | push | persistent storage</td><td>
 			<span class="c" id="pNote"></span> | <span class="c" id="pPush"></span> | <span class="c" id="pStore"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.storageManager.enabled</span></div>
@@ -446,7 +446,7 @@
 		<tr><td>[css | matchMedia] any-hover | hover</td>
 			<td><span id="cssAH"></span> | <span id="cssH"></span> | <span class="c" id="mmH"></span></td></tr>
 		<tr><td>[css | matchMedia] any-pointer | pointer</td>
-			<td><span id="cssAP"></span> | <span id="cssP"></span> | <span class="c" id="mmP"></span></td></tr>		
+			<td><span id="cssAP"></span> | <span id="cssP"></span> | <span class="c" id="mmP"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">media.webspeech.recognition.enable</span></div>
 			&nbsp speech recognition</td><td class="c" id="sRec"></td></tr>
