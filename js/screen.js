@@ -971,8 +971,17 @@ function get_resources() {
 			channel = "alpha"
 			result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
 			debug_page("tb","    css branding = 270 x 48 px = alpha")
+		} else if (wFF == 336 && hFF == 48) {
+			if (isVer > 77) {
+				//78+ therefore release
+				channel = "release"
+				result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+			} else {
+				//idk
+				result = " ["+wFF+" x "+hFF+"]"
+			}
 		} else if (wFF == 300 && hFF == 38) {
-			if (isVer > 67) {
+			if (isVer > 67 && isVer < 78) {
 				//68+ therefore release
 				channel = "release"
 				result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
