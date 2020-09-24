@@ -1305,19 +1305,8 @@ function get_version() {
 		// 81: 1650607
 		if (go) {
 			try {
-				// 81: 
 				let file81 = new File(["bits"], "a/b.txt")
 				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
-			} catch(e) {}
-		}
-		// 81: 1657437
-		if (go) {
-			try {
-				dom.test81a = "AB"
-				dom.test81b.innerHTML = "A &#013;B"
-				if (dom.test81a.offsetWidth < dom.test81b.offsetWidth) {verNo = "81" + alt1; go = false}
-				dom.test81a = ""
-				dom.test81b = ""
 			} catch(e) {}
 		}
 		// 80: 1651732
