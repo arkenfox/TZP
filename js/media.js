@@ -74,8 +74,8 @@ function get_media(runtype) {
 		prev = list[i]
 	}
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	// log pretty list for dev
-	// console.log(runtype + " list [" + list.length + " items]\n" + list.join("\n"))
+	// full list
+	//console.log(runtype + " list [" + list.length + " items]\n" + list.join("\n"))
 
 	// run
 	let canm = [], canp = [], src = [], rec = []
@@ -96,7 +96,7 @@ function get_media(runtype) {
 	})
 	// ToDo: media: remove audio/video element?
 
-	// output elements
+	// elements
 	let ecan = document.getElementById(runtype+"can"),
 		etype = document.getElementById(runtype+"type"),
 		edata = document.getElementById(runtype+"data")
@@ -105,40 +105,61 @@ function get_media(runtype) {
 		block2 = (canp.length == 0),
 		block3 = (src.length == 0),
 		block4 = (rec.length == 0)
-	// output
+	// output detail
 	let hashcan = s13+"maybe: "+sc + (block1 ? "blocked" :canm.join(", "))
 		+ s13+" probably: "+sc + (block2 ? "blocked" :canp.join(", "))
 	let hashtype = s13+"mediasource: "+sc + (block3 ? "blocked" :src.join(", "))
 		+ s13+" mediarecoder: "+sc + (block4 ? "blocked" : rec.join(", "))
-	// play
+	edata.innerHTML = hashcan + hashtype
+	edata.style.color = zshow
+	// merged hashes
+	hashcan = ['maybe']; hashcan = hashcan.concat(canm)
+	hashcan.push("probably"); hashcan = hashcan.concat(canp)
+	hashtype = ['mediasource']; hashtype = hashtype.concat(src)
+	hashtype.push("mediarecorder"); hashtype = hashtype.concat(rec)
+	hashcan = sha1(hashcan)
+	hashtype = sha1(hashtype)
+	// output play
 	let notation = s13 +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
 		blockP = block1 + block2,
-		partblock = sb+"[partial block]"+sc
+		partblock = sb+"[partly blocked]"+sc
 	if (blockP == 2) {notation = zB}
 	if (blockP == 1) {notation += partblock}
-	ecan.innerHTML = sha1(hashcan) + notation
-	// type
+	ecan.innerHTML = hashcan + notation
+	// output type
 	notation = s13 +" ["+ src.length +"|"+ rec.length +"/"+ list.length +"]"+ sc
 	let blockT = block3 + block4
 	if (blockT == 2) {notation = zB}
 	if (blockT == 1) {notation += partblock}
-	etype.innerHTML = sha1(hashtype) + notation
-	// details
-	edata.innerHTML = hashcan + hashtype
-	edata.style.color = zshow
+	etype.innerHTML = hashtype + notation
 	// perf
 	if (logPerf) {debug_log(runtype +" [media]",t0)}
+	return (runtype+": " + hashcan + ", " + hashtype)
 }
 
 function outputMedia() {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		media = [], r = ""
+
 	// mediaCapabilities: FF63+
-	dom.nMediaC = ("mediaCapabilities" in navigator ? zE : (Symbol.for(`foo`).description == "foo" ? zD : zNS))
+	if (isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
+	dom.nMediaC = r
+	media.push("media capabilities: " + r)
+
 	// other
-	get_media("audio")
-	get_media("video")
-	// perf
-	debug_page("perf","media",t0,gt0)
+	Promise.all([
+		get_media("audio"),
+		get_media("video")
+	]).then(function(result){
+		for (let i=0; i < 2; i++) {
+			media.push(result[i])
+		}
+		media.sort()
+		console.log("media", media)
+		dom.mediahash = sha1(media.join())
+		// perf
+		debug_page("perf","media",t0,gt0)
+	})
 }
 
 outputMedia()
