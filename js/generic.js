@@ -96,7 +96,7 @@ function debug_page(target, str1, str2, str3, str4) {
 				// warning
 				str += " |" + sb+ str4 + sc
 			}
-			e.innerHTML = e.innerHTML + "<br>" + str
+			e.innerHTML = e.innerHTML + (str1 == "setup" ? "" : "<br>") + str
 			// display in section title
 			try {
 				document.getElementById("perf"+str1).innerHTML = "  "+ time1 +" ms"
