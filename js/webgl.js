@@ -36,7 +36,7 @@ function outputWebGL_param() {
 		// make sure to detect if they're missing
 
 	// hash
-	dom.glhash0.innerHTML = sha1(glhash.join()) + (isFile ? note_file : "")
+	dom.glhash0.innerHTML = sha1(glhash.join())
 	// perf
 	if (logPerf) {debug_log("parameters [webgl]",t0)}
 }
