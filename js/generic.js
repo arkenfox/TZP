@@ -51,6 +51,15 @@ function store_data(section, key, value) {
 	}
 }
 
+function section_hash(name, data, addnote) {
+	if (addnote == undefined) {addnote = false}
+	data.sort(Intl.Collator("en-US").compare) // always sort the same for all users
+	let hash = sha1(data)
+	let el = document.getElementById(name + "hash")
+	el.innerHTML = hash + (addnote ? note_file : "")
+	console.log(name + ": " + hash + "\n", data)
+}
+
 function debug_log(str, time1, time2) {
 	// log dev info
 	let t0 = performance.now()
