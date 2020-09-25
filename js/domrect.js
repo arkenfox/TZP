@@ -81,8 +81,7 @@ function outputDomRect() {
 			document.getElementById("dr"+i).innerHTML = display
 		}
 		// overall hash
-		dom.drhash = sha1(hash.join())
-		console.log("domrect", hash)
+		section_hash("domrect", hash)
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// perf
