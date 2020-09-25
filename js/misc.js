@@ -257,31 +257,31 @@ function get_windowcontent() {
 
 function outputMisc(type) {
 	let t0 = performance.now()
-	let misc = [], r = ""
+	let section = [], r = ""
 
 	try {r = (navigator.sendBeacon ? zE : zD)} catch(e) {r = zB0}
 	dom.nBeacon = r
-	misc.push("beacon: " + r)
+	section.push("beacon: " + r)
 
 	try {r = (navigator.share ? zE : zD)} catch(e) {r = zB0}
 	dom.webshare = r
-	misc.push("web share: " + r)
+	section.push("web share: " + r)
 	
 	r = ("clipboard" in navigator ? zE: zD) // FF63+
 	dom.nClipboard = r
-	misc.push("clipboard: " + r)
+	section.push("clipboard: " + r)
 
 	r = ("requestIdleCallback" in window ? zE: zD)
 	dom.reqIdleCB = r
-	misc.push("requestIdleCallback: " + r)
+	section.push("requestIdleCallback: " + r)
 
 	r = ("mediaSession" in navigator ? zE: zD) // FF71+
 	dom.mediaSession = r
-	misc.push("mediaSession: " + r)
+	section.push("mediaSession: " + r)
 
 	r = ("credentials" in navigator ? zE: zD) +" | "+ ("u2f" in window ? zE: zD)
 	dom.webauth = r
-	misc.push("webauth + u2f: " + r)
+	section.push("webauth + u2f: " + r)
 
 	// other
 	Promise.all([
@@ -299,11 +299,9 @@ function outputMisc(type) {
 		get_svg()
 	]).then(function(result){
 		for (let i=0; i < 11; i++) {
-			misc.push(result[i])
+			section.push(result[i])
 		}
-		misc.sort()
-		console.log("misc", misc)
-		dom.mischash = sha1(misc.join())
+		section_hash("misc", section)
 		// perf
 		debug_page("perf","misc",t0,gt0)
 	})
