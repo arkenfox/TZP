@@ -1,7 +1,5 @@
 'use strict';
 
-var t0css
-
 function reset_css() {
 	dom.sColorHashData.style.color = zhide
 	dom.sFontsHashData.style.color = zhide
@@ -75,6 +73,7 @@ function get_colors(runtype) {
 	} else {
 		dom.mColorHash.innerHTML = error + (error == "" ? hash + notation : "")
 	}
+	return "colors " + runtype + ": " + hash
 }
 
 function get_computed_styles() {
@@ -210,56 +209,65 @@ function get_computed_styles() {
 				"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div>	&nbsp computed styles"
 		}
 		if (logPerf) {debug_log("computed styles [css]",t0)}
-		// perf
-		debug_page("perf","css",t0css,gt0)
 	}).catch(error => {
 		console.error(error)
 	})
 }
 
-function get_mm_prefers() {
+function get_mm_css() {
+	let res = []
+
 	// FF63+: reduced-motion
-	let x=zNS, q="(prefers-reduced-motion: ", n="no-preference", r="reduce"
+	let x = zNS, clean = x, q="(prefers-reduced-motion: ",	n="no-preference", r="reduce"
 	try {
-		if (window.matchMedia(q+r+")").matches) x = r+rfp_red
-		if (window.matchMedia(q+n+")").matches) x = n+rfp_green
-	} catch(e) {x = get_css_block(e.name)}
+		if (window.matchMedia(q+r+")").matches) {x = r+rfp_red; clean = r}
+		if (window.matchMedia(q+n+")").matches) {x = n+rfp_green; clean = n}
+	} catch(e) {x = get_css_block(e.name); clean = zBO}
 	if (isFF) {
-		if (x == zNS && isVer > 62) {x = zB6}
+		if (x == zNS && isVer > 62) {x = zB6; clean = zBO}
 	}
 	dom.mmPRM.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
+	res.push("prm: " + clean)
+
 	// FF67+: color-scheme
-	x=zNS, q="(prefers-color-scheme: "
+	x=zNS, clean = x, q="(prefers-color-scheme: "
 	let l="light", d="dark"
 	try {
-		if (window.matchMedia(q+l+")").matches) x = l+rfp_green
-		if (window.matchMedia(q+d+")").matches) x = d+rfp_red
-		if (window.matchMedia(q+n+")").matches) x = n+rfp_red
-	} catch(e) {x = get_css_block(e.name)}
+		if (window.matchMedia(q+l+")").matches) {x = l+rfp_green; clean = l}
+		if (window.matchMedia(q+d+")").matches) {x = d+rfp_red; clean = d}
+		if (window.matchMedia(q+n+")").matches) {x = n+rfp_red; clean = n}
+	} catch(e) {x = get_css_block(e.name); clean = zBO}
 	if (isFF) {
-		if (x == zNS && isVer > 66) {x = zB6}
+		if (x == zNS && isVer > 66) {x = zB6; clean = zBO}
 	}
 	dom.mmPCS.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
+	res.push("pcs: " + clean)
+
 	// contrast
-		// ToDo: notation: 1506364: layout.css.prefers-contrast.enabled
+		// ToDo: RFP notation & version check: 1506364: layout.css.prefers-contrast.enabled
 		// browser.display.prefers_low_contrast boolean [hidden]
-	x=zNS, q="(prefers-contrast: "
+	x=zNS, clean = x, q="(prefers-contrast: "
 	try {
-		if (window.matchMedia(q+n+")").matches) x = n
-		if (window.matchMedia(q+"forced)").matches) x = "forced"
-		if (window.matchMedia(q+"high)").matches) x = "high"
-		if (window.matchMedia(q+"low)").matches) x = "low"
-	} catch(e) {x = get_css_block(e.name)}
+		if (window.matchMedia(q+n+")").matches) {x = n; clean = n}
+		if (window.matchMedia(q+"forced)").matches) {x = "forced"; clean = "forced"}
+		if (window.matchMedia(q+"high)").matches) {x = "high"; clean = "high"}
+		if (window.matchMedia(q+"low)").matches) {x = "low"; clean = "low"}
+	} catch(e) {x = get_css_block(e.name); clean = zBO}
 	dom.mmPC.innerHTML = x
+	res.push("pc: " + clean)
+
 	// forced-colors
-		// ToDo: notation: 1659511: layout.css.forced-colors.enabled
-	x=zNS, q="(prefers-forced-colors: "
+		// ToDo: RFP notation & version check: 1659511: layout.css.forced-colors.enabled
+	x=zNS, clean = x, q="(prefers-forced-colors: "
 	try {
-		if (window.matchMedia(q+n+")").matches) x = n
-		if (window.matchMedia(q+"active)").matches) x = "active"
-		if (window.matchMedia(q+"none)").matches) x = "none"
-	} catch(e) {x = get_css_block(e.name)}
+		if (window.matchMedia(q+n+")").matches) {x = n; clean = n}
+		if (window.matchMedia(q+"active)").matches) {x = "active"; clean = "active"}
+		if (window.matchMedia(q+"none)").matches) {x = "none"; clean = "none"}
+	} catch(e) {x = get_css_block(e.name); clean = zBO}
 	dom.mmFC.innerHTML = x
+	res.push("pfc: " + clean)
+
+	return "mm: " + res.join(", ")
 }
 
 function get_system_fonts() {
@@ -311,17 +319,26 @@ function get_system_fonts() {
 	dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
 	dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
 	dom.sFontsHashData.style.color = zshow
+	return "fonts: " + hash
 }
 
 function outputCSS() {
-	t0css = performance.now()
-	// functions
-	get_mm_prefers()
-	get_colors("s")
-	get_colors("n")
-	get_colors("m")
-	get_system_fonts()
-	get_computed_styles()
+	let t0 = performance.now(),
+		section = []
+	Promise.all([
+		get_mm_css(),
+		get_colors("s"),
+		get_colors("n"),
+		get_colors("m"),
+		get_system_fonts(),
+		get_computed_styles(), //ToDo
+	]).then(function(result){
+		for (let i=0; i < 6; i++) {
+			section.push(result[i])
+		}
+		section_hash("css", section)
+		debug_page("perf","css",t0,gt0)
+	})
 }
 
 outputCSS()
