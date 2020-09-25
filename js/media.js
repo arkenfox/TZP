@@ -139,12 +139,12 @@ function get_media(runtype) {
 
 function outputMedia() {
 	let t0 = performance.now(),
-		media = [], r = ""
+		section = [], r = ""
 
 	// mediaCapabilities: FF63+
 	if (isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
 	dom.nMediaC = r
-	media.push("media capabilities: " + r)
+	section.push("media capabilities: " + r)
 
 	// other
 	Promise.all([
@@ -152,12 +152,9 @@ function outputMedia() {
 		get_media("video")
 	]).then(function(result){
 		for (let i=0; i < 2; i++) {
-			media.push(result[i])
+			section.push(result[i])
 		}
-		media.sort()
-		console.log("media", media)
-		dom.mediahash = sha1(media.join())
-		// perf
+		section_hash("media", section)
 		debug_page("perf","media",t0,gt0)
 	})
 }
