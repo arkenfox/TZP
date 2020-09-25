@@ -157,11 +157,8 @@ function analyzeCanvas(runtype, res1, res2, res3) {
 			value3 = str3.substring(delim+1, str3.length)
 		display_value(display, value1, value2, value3)
 	}
-	// overall hash
-	chash1.sort()
-	console.log("canvas", chash1)
-	dom.chash1.innerHTML = sha1(chash1.join()) + (isFile ? note_file : "")
-	// perf
+	// section
+	section_hash("canvas", chash1, true)
 	if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
 	debug_page("perf","canvas",t0canvas,gt0)
 }
