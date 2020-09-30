@@ -13,7 +13,8 @@ function reset_media() {
 
 function get_media(runtype) {
 	let list = [],
-		t0 = performance.now()
+		t0 = performance.now(),
+		sColor = s13
 	// list
 	if (runtype == "video") {
 		let v = 'video/', v4 = v+'mp4; codecs="', vm = v+'mpeg; codec="',
@@ -106,10 +107,10 @@ function get_media(runtype) {
 		block3 = (src.length == 0),
 		block4 = (rec.length == 0)
 	// output detail
-	let hashcan = s13+"maybe: "+sc + (block1 ? "blocked" :canm.join(", "))
-		+ s13+" probably: "+sc + (block2 ? "blocked" :canp.join(", "))
-	let hashtype = s13+"mediasource: "+sc + (block3 ? "blocked" :src.join(", "))
-		+ s13+" mediarecoder: "+sc + (block4 ? "blocked" : rec.join(", "))
+	let hashcan = sColor +"maybe: "+sc + (block1 ? "blocked" :canm.join(", "))
+		+ sColor +" probably: "+sc + (block2 ? "blocked" :canp.join(", "))
+	let hashtype = sColor +"mediasource: "+sc + (block3 ? "blocked" :src.join(", "))
+		+ sColor +" mediarecoder: "+sc + (block4 ? "blocked" : rec.join(", "))
 	edata.innerHTML = hashcan + hashtype
 	edata.style.color = zshow
 	// merged hashes
@@ -120,14 +121,14 @@ function get_media(runtype) {
 	hashcan = sha1(hashcan)
 	hashtype = sha1(hashtype)
 	// output play
-	let notation = s13 +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
+	let notation = sColor +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
 		blockP = block1 + block2,
 		partblock = sb+"[partly blocked]"+sc
 	if (blockP == 2) {notation = zB}
 	if (blockP == 1) {notation += partblock}
 	ecan.innerHTML = hashcan + notation
 	// output type
-	notation = s13 +" ["+ src.length +"|"+ rec.length +"/"+ list.length +"]"+ sc
+	notation = sColor +" ["+ src.length +"|"+ rec.length +"/"+ list.length +"]"+ sc
 	let blockT = block3 + block4
 	if (blockT == 2) {notation = zB}
 	if (blockT == 1) {notation += partblock}
@@ -146,16 +147,14 @@ function outputMedia() {
 	dom.nMediaC = r
 	section.push("media capabilities: " + r)
 
-	// other
 	Promise.all([
 		get_media("audio"),
 		get_media("video")
-	]).then(function(result){
-		for (let i=0; i < 2; i++) {
-			section.push(result[i])
-		}
-		section_hash("media", section)
-		debug_page("perf","media",t0,gt0)
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section.push(currentResult)
+		})
+		section_info("media", t0, gt0, section)
 	})
 }
 
