@@ -36,69 +36,75 @@ function return_mm_dpi(type) {
 }
 
 function get_chrome() {
-	let c = "chrome://browser/content/extension-",
-		p = "-panel.css",
-		list = [c+'win'+p, c+'mac'+p],
-		os = "Linux",
-		x = 0,
-		t0 = performance.now()
-	// run isTB2 once
-	if (isTB2 == "") {list.push('resource://torbutton-assets/aboutTor.css')}
-	// output
-	function output(r) {
-		if (isVer < 60) {r = zNA
-		} else {
-			// os-check (runS already sets isOS ="")
-			if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+	return new Promise(resolve => {
+		let c = "chrome://browser/content/extension-",
+			p = "-panel.css",
+			list = [c+'win'+p, c+'mac'+p],
+			os = "Linux",
+			x = 0,
+			t0 = performance.now()
+		// run isTB2 once: put it at the start so we get it early
+		if (isTB2 == "") {
+			list.push('resource://torbutton-assets/aboutTor.css')
+			list.sort((a,b) => b-a)
 		}
-		dom.fdChromeOS.innerHTML = r
-		if (logPerf) {debug_log("chrome [ua]",t0)}
-	}
-	// run
-	function run() {
-		// win/mac
-		list.forEach(function(item) {
-			let css = document.createElement("link")
-			css.href = item
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				if (item === c+"win"+p) {os="Windows"; x++; output(os)}
-				if (item === c+"mac"+p) {os="Mac"; x++; output(os)}
-				// isTB2
-				if (item.substring(0,3) === "res") {
-					isTB = true; debug_page("tb","     resource:// = aboutTor.css")
-					isTB2 = "y"
-					if (logPerf) {debug_log("[yes] tb resource [ua]",t0)}
+		// output
+		function output(r) {
+			if (isVer < 60) {r = zNA
+			} else {
+				// os-check (runS already sets isOS ="")
+				if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+			}
+			dom.fdChrome.innerHTML = r
+			if (logPerf) {debug_log("chrome [fd]",t0)}
+			return resolve("ignoreme")
+		}
+		// run
+		function run() {
+			// win/mac
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.href = item
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				document.head.appendChild(css)
+				css.onload = function() {
+					if (item === c+"win"+p) {os="Windows"; x++; output(os)}
+					if (item === c+"mac"+p) {os="Mac"; x++; output(os)}
+					// isTB2
+					if (item.substring(0,3) === "res") {
+						isTB = true; debug_page("tb","     resource:// = aboutTor.css")
+						isTB2 = "y"
+						if (logPerf) {debug_log("[yes] tb resource [fd]",t0)}
+					}
+				}
+				css.onerror = function() {
+					if (item.substring(0,3) === "res") {
+						isTB2 = "n"
+						if (logPerf) {debug_log("[no] tb resource [fd]",t0)}
+					} else {x++}
+				}
+				document.head.removeChild(css)
+			})
+			// android
+			let img = new Image()
+			img.src = "chrome://branding/content/icon64.png"
+			img.style.visibility = "hidden"
+			document.body.appendChild(img)
+			img.onload = function() {x++}
+			img.onerror = function() {os="Android"; x++; output(os)}
+			document.body.removeChild(img)
+			// linux: default
+			function check_linux() {
+				if (x == 3) {
+					clearInterval(checking)
+					if (os == "Linux") {output(os)}
 				}
 			}
-			css.onerror = function() {
-				if (item.substring(0,3) === "res") {
-					isTB2 = "n"
-					if (logPerf) {debug_log("[no] tb resource [ua]",t0)}
-				} else {x++}
-			}
-			document.head.removeChild(css)
-		})
-		// android
-		let img = new Image()
-		img.src = "chrome://branding/content/icon64.png"
-		img.style.visibility = "hidden"
-		document.body.appendChild(img)
-		img.onload = function() {x++}
-		img.onerror = function() {os="Android"; x++; output(os)}
-		document.body.removeChild(img)
-		// linux: default
-		function check_linux() {
-			if (x == 3) {
-				clearInterval(checking)
-				if (os == "Linux") {output(os)}
-			}
+			let checking = setInterval(check_linux, 20)
 		}
-		let checking = setInterval(check_linux, 20)
-	}
-	run()
+		run()
+	})
 }
 
 function get_collation() {
@@ -125,7 +131,7 @@ function get_collation() {
 			r = not_seen+" collation combo before"+sc + c + (runS ? zSIM : "")
 		}
 		dom.fdCollation.innerHTML = r
-		if (logPerf) {debug_log("collation [ua]",t0)}
+		if (logPerf) {debug_log("collation [fd]",t0)}
 	}
 	// run
 	let control = sha1(chars.sort(Intl.Collator("en-US").compare))
@@ -192,150 +198,159 @@ function get_engine() {
 }
 
 function get_errors() {
-	let res = [],
-		test = "",
-		hash = "",
-		code = "",
-		ff = "",
-		isBlock = false,
-		t0 = performance.now()
-	// output
-	function output() {
-		hash = sha1(res.join())
-		let temp = hash.substring(0,10)
-		if (isErr == "") {isErr = hash.substring(0,4)}
-		if (isErr == "X") {
-			code = "X"; ff = "[FF59 or lower]"
-		} else if (temp == "e09e23efbf") {	
-			code = "A"; ff = "[FF60-67]"
-		} else if (temp == "9be311282c") {
-			code = "B"; ff = "[FF68-69]"
-		} else if (temp == "1492f1bd13") {
-			code = "C"; ff = "[FF70]"
-		} else if (temp == "7121c507d7") {
-			code = "D"; ff = "[FF71]"
-		// 74+: 1259822: pref alters err2: 2 outcomes
-		} else if (temp == "fa8efa5727") {
-			code = "E1"; ff = "[FF72-74]"
-		} else if (temp == "fb19e1bedb") {
-			code = "E2"; ff = "[FF74]"
-		} else if (temp == "214fc55f92") {
-			code = "F1"; ff = "[FF75+]"
-		} else if (temp == "5186bfbb76") {
-			code = "F2"; ff = "[FF75+]"
-		} else if (temp == "0dc5e92b7d") {
-			code = "G1"; ff = "[FF78+]"
-		} else if (temp == "b75bad7247") {
-			code = "G2"; ff = "[FF78+]"
-		}
-		if (code !== "") {
-			isFF = true
-			dom.fdError.innerHTML = zFF +" " + ff
-			dom.errh.innerHTML = hash + s2+"["+code+"]"+sc + (runS ? zSIM : "")
-		} else if (isFF) {
-			code = zNEW
-			dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
-			if (isBlock) {
-				dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+sc + (runS ? zSIM : "")
-			} else {
-				dom.fdError.innerHTML = not_seen+" error combo before"+sc + (runS ? zSIM : "")
-			}
-		} else {
-			dom.errh = hash
-		}
-		store_data("ua","error hash",hash)
-		if (logPerf) {debug_log("errors [ua]",t0)}
-	}
-	// run
-	function run() {
-		isErr = ""
-		//1
-		try {eval("alert('A)")} catch(e) {
-			dom.err1=e; res.push(e)
-			if (e.message == "unterminated string literal") {isErr = "X"}
-		}
-		//2
-		try {
-			function foobar() {let foo = document.getElementById("bar"); foo.value = screen.width}
-			window.onload = foobar()
-		} catch(e) {
-			if (runS) {e += zSIM}
-			dom.err2=e; res.push(e)
-		}
-		//3
-		try {
-			test = BigInt(2.5)
-		} catch(e) {
+	return new Promise(resolve => {
+
+		let res = [],
+			test = "",
+			hash = "",
+			code = "",
+			ff = "",
+			isBlock = false,
+			t0 = performance.now()
+		// output
+		function output() {
+			hash = sha1(res.join())
 			if (isFF) {
-				test = e.message.substring(0,3)
-				if (test == "2.5") {
-					// 75+
-					test = e.name+": "+ e.message
-				} else if (test == "can") {
-					// 68-74: trap NumberFormat
-					try {
-						test = eval("987654321987654321n")
-						let num = new Intl.NumberFormat(undefined)
-						test = num.format(test)
-						test = e.name+": "+ e.message
-					} catch (e) {
-						if (e.name == "ReferenceError") {
-							test = zB4; isBlock = true
-						} else if (e.message.substring(0,5) == "Intl.") {
-							test = zB5; isBlock = true
-						} else if (e.name == "TypeError") {
-							// 68-69 expected
-							test = e.name+": "+ e.message
-						} else {
-							test = zB6; isBlock = true
-						}
-					}
-				} else if (e.name == "ReferenceError") {
-					if (test == "Big") {
-						// 60-67
-						test = e.name+": "+ e.message
+				let temp = hash.substring(0,10)
+				if (isErr == "") {isErr = hash.substring(0,4)}
+				if (isErr == "X") {
+					code = "X"; ff = "[FF59 or lower]"
+				} else if (temp == "e09e23efbf") {	
+					code = "A"; ff = "[FF60-67]"
+				} else if (temp == "9be311282c") {
+					code = "B"; ff = "[FF68-69]"
+				} else if (temp == "1492f1bd13") {
+					code = "C"; ff = "[FF70]"
+				} else if (temp == "7121c507d7") {
+					code = "D"; ff = "[FF71]"
+				// 74+: 1259822: pref alters err2: 2 outcomes
+				} else if (temp == "fa8efa5727") {
+					code = "E1"; ff = "[FF72-74]"
+				} else if (temp == "fb19e1bedb") {
+					code = "E2"; ff = "[FF74]"
+				} else if (temp == "214fc55f92") {
+					code = "F1"; ff = "[FF75+]"
+				} else if (temp == "5186bfbb76") {
+					code = "F2"; ff = "[FF75+]"
+				} else if (temp == "0dc5e92b7d") {
+					code = "G1"; ff = "[FF78+]"
+				} else if (temp == "b75bad7247") {
+					code = "G2"; ff = "[FF78+]"
+				}
+				if (code !== "") {
+					isFF = true
+					dom.fdError.innerHTML = zFF +" " + ff
+					dom.errh.innerHTML = hash + s3+"["+code+"]"+sc + (runS ? zSIM : "")
+				} else if (isFF) {
+					code = zNEW
+					dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
+					if (isBlock) {
+						dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+sc + (runS ? zSIM : "")
 					} else {
-						test = zB1; isBlock = true
+						dom.fdError.innerHTML = not_seen+" error combo before"+sc + (runS ? zSIM : "")
 					}
 				} else {
-					if (e.name == "TypeError") {
+					dom.errh = hash
+				}
+				if (logPerf) {debug_log("errors [fd]",t0)}
+				return resolve("errors: " + hash)
+			} else {
+				dom.errh = hash; dom.fdError = hash
+				return resolve("errors: " + hash)
+			}
+		}
+		// run
+		function run() {
+			isErr = ""
+			//1
+			try {eval("alert('A)")} catch(e) {
+				dom.err1=e; res.push(e)
+				if (e.message == "unterminated string literal") {isErr = "X"}
+			}
+			//2
+			try {
+				function foobar() {let foo = document.getElementById("bar"); foo.value = screen.width}
+				window.onload = foobar()
+			} catch(e) {
+				if (runS) {e += zSIM}
+				dom.err2=e; res.push(e)
+			}
+			//3
+			try {
+				test = BigInt(2.5)
+			} catch(e) {
+				if (isFF) {
+					test = e.message.substring(0,3)
+					if (test == "2.5") {
+						// 75+
+						test = e.name+": "+ e.message
+					} else if (test == "can") {
+						// 68-74: trap NumberFormat
+						try {
+							test = eval("987654321987654321n")
+							let num = new Intl.NumberFormat(undefined)
+							test = num.format(test)
+							test = e.name+": "+ e.message
+						} catch (e) {
+							if (e.name == "ReferenceError") {
+								test = zB4; isBlock = true
+							} else if (e.message.substring(0,5) == "Intl.") {
+								test = zB5; isBlock = true
+							} else if (e.name == "TypeError") {
+								// 68-69 expected
+								test = e.name+": "+ e.message
+							} else {
+								test = zB6; isBlock = true
+							}
+						}
+					} else if (e.name == "ReferenceError") {
+						if (test == "Big") {
+							// 60-67
+							test = e.name+": "+ e.message
+						} else {
+							test = zB1; isBlock = true
+						}
+					} else {
+						if (e.name == "TypeError") {
+							test = zB2; isBlock = true
+						} else {
+							test = zB3; isBlock = true
+						}
+					}
+				} else {
+					test = e.name+": "+ e.message
+				}
+				dom.err3=test; res.push(test)
+			}
+			//4
+			try {test = eval("let a = 1_00_;")
+			} catch(e) {
+				test = e.name+": "+e.message; dom.err4=test; res.push(test)
+			}
+			//5
+			try {
+				test = new Intl.NumberFormat("en", {style:"unit", unit:"percent"}).format(1/2)
+			} catch(e) {
+				if (isFF) {
+					if (e.name == "RangeError") {
+						test = e.name+": "+e.message
+					} else if (e.name == "ReferenceError") {
+						test = zB1; isBlock = true
+					} else if (e.name == "TypeError") {
 						test = zB2; isBlock = true
 					} else {
 						test = zB3; isBlock = true
 					}
-				}
-			} else {
-				test = e.name+": "+ e.message
-			}
-			dom.err3=test; res.push(test)
-		}
-		//4
-		try {test = eval("let a = 1_00_;")
-		} catch(e) {
-			test = e.name+": "+e.message; dom.err4=test; res.push(test)
-		}
-		//5
-		try {
-			test = new Intl.NumberFormat("en", {style:"unit", unit:"percent"}).format(1/2)
-		} catch(e) {
-			if (isFF) {
-				if (e.name == "RangeError") {
-					test = e.name+": "+e.message
-				} else if (e.name == "ReferenceError") {
-					test = zB1; isBlock = true
-				} else if (e.name == "TypeError") {
-					test = zB2; isBlock = true
 				} else {
-					test = zB3; isBlock = true
+					test = e.name+": "+e.message
 				}
-			} else {
-				test = e.name+": "+e.message
+				dom.err5=test; res.push(test)
 			}
-			dom.err5=test; res.push(test)
+			output()
 		}
-		output()
-	}
-	run()
+		run()
+
+	})
 }
 
 function get_fullscreen() {
@@ -353,326 +368,531 @@ function get_fullscreen() {
 }
 
 function get_line_scrollbar() {
-	let osW = "[Windows]",
-		osWL = "[Windows or Linux]",
-		osWM = "[Windows or Mac]",
-		osWLM = "[Windows, Linux or Mac]",
-		osL = "[Linux]",
-		osLA = "[Linux or Android]",
-		osLM = "[Linux or Mac]",
-		osM = "[Mac]",
-		osTBL = " [Linux]"+tb_green,
-		os = "",
-		sbZoom = ""
+	return new Promise(resolve => {
 
-	// scrollbar
-	function run_scrollbar() {
-		let t0 = performance.now()
-		// recalc zoom/viewport
-		get_zoom("ua")
-		let vw = get_viewport("ua")
-		// get width, remember it for later
-		let w = (window.innerWidth-vw),
-			wZoom = w
-		// start
-		if (w == 0) {
-			os= "[Mac OS X, mobile or floating scrollbars]"
-		} else if (w < 0) {
-			os= "[mobile]"
-		}	else {
-		// known metrics
-			if (jsZoom == 100) {
-				if (w==17) {os=osW};
-				if (w==16) {os=osL}
-				if (w==15) {os=osM}
-				if (w==12) {os=osL}
-			} else if (jsZoom == 300) {
-				if (w==6) {os=osWL}
-				if (w==5) {os=osWM}
-				if (w==4) {os=osL}
-			} else if (jsZoom == 240) {
-				if (w==7) {os=osWM}
-				if (w==6) {os=osL}
-				if (w==5) {os=osL}
-			} else if (jsZoom == 200) {
-				if (w==9) {os=osW}
-				if (w==8) {os=osWLM}
-				if (w==7) {os=osM}
-				if (w==6) {os=osL}
-			} else if (jsZoom == 170) {
-				if (w==10) {os=osWL}
-				if (w==8) {os=osM}
-				if (w==7) {os=osL}
-			} else if (jsZoom == 150) {
-				if (w==12) {os=osW}
-				if (w==11) {os=osW}
-				if (w==10) {os=osLM}
-				if (w==8) {os=osL}
-			} else if (jsZoom == 133) {
-				if (w==13) {os=osW}
-				if (w==12) {os=osWL}
-				if (w==11) {os=osM}
-				if (w==9) {os=osL}
-			} else if (jsZoom == 120) {
-				if (w==15) {os=osW}
-				if (w==14) {os=osWL}
-				if (w==12) {os=osM}
-				if (w==10) {os=osL}
-			} else if (jsZoom == 110) {
-				if (w==16) {os=osW}
-				if (w==15) {os=osW}
-				if (w==14) {os=osLM}
-				if (w==11) {os=osL}
-			} else if (jsZoom == 90) {
-				if (w==19) {os=osW}
-				if (w==18) {os=osL}
-				if (w==17) {os=osM}
-				if (w==16) {os=osM}
-				if (w==13) {os=osL}
-			} else if (jsZoom == 80) {
-				if (w==21) {os=osW}
-				if (w==20) {os=osL}
-				if (w==19) {os=osM}
-				if (w==15) {os=osL}
-			} else if (jsZoom == 67) {
-				if (w==26) {os=osW}
-				if (w==25) {os=osW}
-				if (w==24) {os=osL}
-				if (w==23) {os=osM}
-				if (w==22) {os=osM}
-				if (w==18) {os=osL}
-			} else if (jsZoom == 50) {
-				if (w==34) {os=osW}
-				if (w==32) {os=osL}
-				if (w==30) {os=osM}
-				if (w==24) {os=osL}
-			} else if (jsZoom == 30) {
-				if (w==57) {os=osW}
-				if (w==56) {os=osW}
-				if (w==54) {os=osL}
-				if (w==50) {os=osM}
-				if (w==40) {os=osL}
-			}
-			if (os != "") {
-				// known
-				os += " [known metric]"
+		let osW = "[Windows]",
+			osWL = "[Windows or Linux]",
+			osWM = "[Windows or Mac]",
+			osWLM = "[Windows, Linux or Mac]",
+			osL = "[Linux]",
+			osLA = "[Linux or Android]",
+			osLM = "[Linux or Mac]",
+			osM = "[Mac]",
+			osTBL = " [Linux]"+tb_green,
+			os = "",
+			sbZoom = ""
+
+		let finalresolve = ""
+
+		// scrollbar
+		function run_scrollbar() {
+			let t0 = performance.now()
+			// recalc zoom/viewport
+			get_zoom("fd")
+			let vw = get_viewport("fd")
+			// get width, remember it for later
+			let w = (window.innerWidth-vw),
+				wZoom = w
+
+			// what I want to resolve for fd hash
+			if (w > 0) {
+				finalresolve = "not zero"
 			} else {
-				// still unknown
-				if (jsZoom !== 100) {
-					// recalc scrollbar at 100% for final guess: not perfect
-					if (window.devicePixelRatio !== 1 || dpi_y == 0) {
-						// RFP is off or css is blocked
-						wZoom = w * window.devicePixelRatio
-					} else {
-						wZoom = w * (((varDPI/dpi_x)*100)/100)
-					}
-				}
-				// final guess
-				if (wZoom >= 16.5) {
-					os=osW // in testing = windows only
-				} else {
-					os=osL // guess linux (andoid s/be 0, mac s/be covered)
-				}
-				// guess
-				os += " [logical guess]"
+				finalresolve = "zero"
 			}
-		}
-		// output
-		if (jsZoom !== 100) {sbZoom=" at "+jsZoom+"% "}
-		dom.vScroll = w+"px "+sbZoom+os
-		// element scrollbar
-		let eW = (100-dom.tScroll.scrollWidth)
-		if (jsZoom == 100) {
-			eW += "px" + (eW == w ? "" : sb+"[!= viewport scrollbar]"+sc)
-		}
-		dom.eScroll.innerHTML = eW
-		// perf
-		if (logPerf) {debug_log("scrollbar [ua]",t0)}
-	}
 
-	// css lineheight
-	function run_lineheight() {
-		let method = "computedstyle",
-			strFont = "",
-			t0 = performance.now()
-		os = ""
-		// computedStyle
-		let element = dom.spanLH,
-			lh = "normal"
-		try {lh = getComputedStyle(element).getPropertyValue("line-height")} catch(e) {}
-		// font
-		let font = "", fontProp = false, isTNR = false
-		try {
-			font = getComputedStyle(element).getPropertyValue("font-family")
-			fontProp = true
-			if (font.slice(1,16) == "Times New Roman") {
-				isTNR = true
-			} else {
-				strFont = sb+"[document fonts are disabled]"+sc
-			}
-		} catch(e) {
-			strFont = sb+"[font property is blocked]" +sc
-			fontProp = false
-		}
-		// clientrect
-		if (lh == "normal") {
-			element = dom.divLH
-			try {
-				let elDiv = element.getBoundingClientRect()
-				lh = elDiv.height
-				// trim decimals
-				if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
-				lh = lh.toString()
-				method = "clientrect"
-			} catch(err) {
-				method = "none"
-			}
-		}
-
-		// simulate
-		let simulate = 10
-		if (simulate == 1) {
-			// no clientrect
-			method = "none"
-		} else if (simulate == 2) {
-			// no font property
-			strFont = sb+"[font property is blocked]"+sc
-			fontProp = false
-		} else if (simulate == 3) {
-			// doc fonts blocked
-			strFont = sb+"[document fonts are disabled]"+sc
-			isTNR = false
-		} else if (simulate == 4) {
-			// 1+2
-			method = "none"
-			strFont = sb+"[font property is blocked]"+sc
-			fontProp = false
-		} else if (simulate == 5) {
-			// 1+3
-			method = "none"
-			strFont = sb+"[document fonts are disabled]"+sc
-			isTNR = false
-		}
-
-		// build
-		if (method !== "none") {
-			// trim
-			if (lh.substr(-2) == "px") {lh = lh.slice(0, -2)}
-			// check font
-			if (strFont !== "") {
-				os = strFont
-			} else if (lh == "19.2" || lh == "19.2000") {
-				// TB DESKTOP: 19.2 seems TB unique any-zoom/any-platform
-				os = tb_green
-				isTB = true; debug_page("tb"," css line height = 19.2")
-			} else {
-				// isTNR + not 19.2
-				// WINDOWS / LINUX: some known metrics
+			// start
+			if (w == 0) {
+				os= "[Mac OS X, mobile or floating scrollbars]"
+			} else if (w < 0) {
+				os= "[mobile]"
+			}	else {
+				// known metrics
 				if (jsZoom == 100) {
-					if (lh=="20") {os=osW}
-					if (lh=="19") {os=osL}
-					if (lh=="18") {os=osW}
-					if (lh=="17") {os=osL}
+					if (w==17) {os=osW};
+					if (w==16) {os=osL}
+					if (w==15) {os=osM}
+					if (w==12) {os=osL}
 				} else if (jsZoom == 300) {
-					if (lh=="19") {os=osW}
-					if (lh=="18.6667") {os=osW}
-					if (lh=="18") {os=osL}
-					if (lh=="17.6667") {os=osL}
+					if (w==6) {os=osWL}
+					if (w==5) {os=osWM}
+					if (w==4) {os=osL}
 				} else if (jsZoom == 240) {
-					if (lh=="19.1667") {os=osW}
-					if (lh=="19") {os=osTBL}
-					if (lh=="18.3333") {os=osWL}
-					if (lh=="17.5") {os=osL}
+					if (w==7) {os=osWM}
+					if (w==6) {os=osL}
+					if (w==5) {os=osL}
 				} else if (jsZoom == 200) {
-					if (lh=="19") {os=osW}
-					if (lh=="18") {os=osL}
+					if (w==9) {os=osW}
+					if (w==8) {os=osWLM}
+					if (w==7) {os=osM}
+					if (w==6) {os=osL}
 				} else if (jsZoom == 170) {
-					if (lh=="19.25") {os=osW}
-					if (lh=="18.9") {os=osTBL}
-					if (lh=="18.6667") {os=osW}
-					if (lh=="18.0833") {os=osL}
-					if (lh=="17.5") {os=osL}
+					if (w==10) {os=osWL}
+					if (w==8) {os=osM}
+					if (w==7) {os=osL}
 				} else if (jsZoom == 150) {
-					if (lh=="20") {os=osW}
-					if (lh=="18.6667") {os=osWL}
-					if (lh=="17.3333") {os=osL}
+					if (w==12) {os=osW}
+					if (w==11) {os=osW}
+					if (w==10) {os=osLM}
+					if (w==8) {os=osL}
 				} else if (jsZoom == 133) {
-					if (lh=="19.5") {os=osW}
-					if (lh=="18.9") {os=osTBL}
-					if (lh=="18") {os=osL}
-					if (lh=="18.75") {os=osW}
+					if (w==13) {os=osW}
+					if (w==12) {os=osWL}
+					if (w==11) {os=osM}
+					if (w==9) {os=osL}
 				} else if (jsZoom == 120) {
-					if (lh=="20") {os=osW}
-					if (lh=="19.1667") {os=osL}
-					if (lh=="19") {os=osTBL}
-					if (lh=="18.3333") {os=osW}
-					if (lh=="17.5") {os=osL}
+					if (w==15) {os=osW}
+					if (w==14) {os=osWL}
+					if (w==12) {os=osM}
+					if (w==10) {os=osL}
 				} else if (jsZoom == 110) {
-					if (lh=="19.25") {os=osW}
-					if (lh=="18.7") {os=osTBL}
-					if (lh=="18.3333") {os=osL}
-					if (lh=="17.4167") {os=osL}
+					if (w==16) {os=osW}
+					if (w==15) {os=osW}
+					if (w==14) {os=osLM}
+					if (w==11) {os=osL}
 				} else if (jsZoom == 90) {
-					if (lh=="20.1") {os=osW}
-					if (lh=="18.9833") {os=osWL}
-					if (lh=="18.7667") {os=osTBL}
-					if (lh=="16.75") {os=osL}
+					if (w==19) {os=osW}
+					if (w==18) {os=osL}
+					if (w==17) {os=osM}
+					if (w==16) {os=osM}
+					if (w==13) {os=osL}
 				} else if (jsZoom == 80) {
-					if (lh=="20") {os=osW}
-					if (lh=="19.5") {os=osTBL}
-					if (lh=="18.75") {os=osWL}
+					if (w==21) {os=osW}
+					if (w==20) {os=osL}
+					if (w==19) {os=osM}
+					if (w==15) {os=osL}
 				} else if (jsZoom == 67) {
-					if (lh=="21") {os=osW}
-					if (lh=="19.8") {os=osTBL}
-					if (lh=="19.5") {os=osWL}
-					if (lh=="18") {os=osL}
+					if (w==26) {os=osW}
+					if (w==25) {os=osW}
+					if (w==24) {os=osL}
+					if (w==23) {os=osM}
+					if (w==22) {os=osM}
+					if (w==18) {os=osL}
 				} else if (jsZoom == 50) {
-					if (lh=="22") {os=osW}
-					if (lh=="20") {os=osWL}
-					if (lh=="18") {os=osL}
+					if (w==34) {os=osW}
+					if (w==32) {os=osL}
+					if (w==30) {os=osM}
+					if (w==24) {os=osL}
 				} else if (jsZoom == 30) {
-					if (lh=="20") {os=osWL}
-					if (lh=="26.6667") {os=osW}
+					if (w==57) {os=osW}
+					if (w==56) {os=osW}
+					if (w==54) {os=osL}
+					if (w==50) {os=osM}
+					if (w==40) {os=osL}
 				}
-			}
-			// MAC
-			if (os == "") {
-			/*  unique: .0167 .05 .0833 .1833 .35 .4333 .6833 .8333 .85
-			not unique: .7667 .6667 (but unique at those zoom values)
-			hackernews: .5167 (can't repro) */
-				let lhDec = (lh+"").split(".")[1]
-				if (lhDec=="0167" | lhDec=="05" | lhDec=="0833" | lhDec=="1833" | lhDec=="35" | lhDec=="4333" | lhDec=="6833"
-					| lhDec=="8333" | lhDec=="85" | lhDec=="7667" | lhDec=="6667" | lhDec=="5167") {os=osM}
-			}
-			// ANDROID
-			if (os == "") {
-				// ToDo: css line height: Android affected by devicePixelRatio
-			}
-			if (os == "") {
-				// guess
-				os = osLA+" [logical guess]"
-			} else {
-				if (isTNR && fontProp) {
+				if (os != "") {
 					// known
 					os += " [known metric]"
+				} else {
+					// still unknown
+					if (jsZoom !== 100) {
+						// recalc scrollbar at 100% for final guess: not perfect
+						if (window.devicePixelRatio !== 1 || dpi_y == 0) {
+							// RFP is off or css is blocked
+							wZoom = w * window.devicePixelRatio
+						} else {
+							wZoom = w * (((varDPI/dpi_x)*100)/100)
+						}
+					}
+					// final guess
+					if (wZoom >= 16.5) {
+						os=osW // in testing = windows only
+					} else {
+						os=osL // guess linux (andoid s/be 0, mac s/be covered)
+					}
+					// guess
+					os += " [logical guess]"
+				}
+			}
+			// output
+			if (jsZoom !== 100) {sbZoom=" at "+jsZoom+"% "}
+			dom.fdScrollV = w+"px "+sbZoom+os
+			// element scrollbar
+			let eW = (100-dom.fdScroll.scrollWidth)
+			if (jsZoom == 100) {
+				eW += "px" + (eW == w ? "" : sb+"[!= viewport scrollbar]"+sc)
+			}
+			dom.fdScrollE.innerHTML = eW
+			// perf
+			if (logPerf) {debug_log("scrollbar [fd]",t0)}
+		}
+
+		// css lineheight
+		function run_lineheight() {
+			let method = "computedstyle",
+				strFont = "",
+				t0 = performance.now()
+			os = ""
+			// computedStyle
+			let element = dom.spanLH,
+				lh = "normal"
+			try {lh = getComputedStyle(element).getPropertyValue("line-height")} catch(e) {}
+			// font
+			let font = "", fontProp = false, isTNR = false
+			try {
+				font = getComputedStyle(element).getPropertyValue("font-family")
+				fontProp = true
+				if (font.slice(1,16) == "Times New Roman") {
+					isTNR = true
+				} else {
+					strFont = sb+"[document fonts are disabled]"+sc
+				}
+			} catch(e) {
+				strFont = sb+"[font property is blocked]" +sc
+				fontProp = false
+			}
+			// clientrect
+			if (lh == "normal") {
+				element = dom.divLH
+				try {
+					let elDiv = element.getBoundingClientRect()
+					lh = elDiv.height
+					// trim decimals
+					if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
+					lh = lh.toString()
+					method = "clientrect"
+				} catch(err) {
+					method = "none"
+				}
+			}
+
+			// simulate
+			let simulate = 10
+			if (simulate == 1) {
+				// no clientrect
+				method = "none"
+			} else if (simulate == 2) {
+				// no font property
+				strFont = sb+"[font property is blocked]"+sc
+				fontProp = false
+			} else if (simulate == 3) {
+				// doc fonts blocked
+				strFont = sb+"[document fonts are disabled]"+sc
+				isTNR = false
+			} else if (simulate == 4) {
+				// 1+2
+				method = "none"
+				strFont = sb+"[font property is blocked]"+sc
+				fontProp = false
+			} else if (simulate == 5) {
+				// 1+3
+				method = "none"
+				strFont = sb+"[document fonts are disabled]"+sc
+				isTNR = false
+			}
+
+			// build
+			if (method !== "none") {
+				// trim
+				if (lh.substr(-2) == "px") {lh = lh.slice(0, -2)}
+				// check font
+				if (strFont !== "") {
+					os = strFont
+				} else if (lh == "19.2" || lh == "19.2000") {
+					// TB DESKTOP: 19.2 seems TB unique any-zoom/any-platform
+					os = tb_green
+					isTB = true; debug_page("tb"," css line height = 19.2")
+				} else {
+					// isTNR + not 19.2
+					// WINDOWS / LINUX: some known metrics
+					if (jsZoom == 100) {
+						if (lh=="20") {os=osW}
+						if (lh=="19") {os=osL}
+						if (lh=="18") {os=osW}
+						if (lh=="17") {os=osL}
+					} else if (jsZoom == 300) {
+						if (lh=="19") {os=osW}
+						if (lh=="18.6667") {os=osW}
+						if (lh=="18") {os=osL}
+						if (lh=="17.6667") {os=osL}
+					} else if (jsZoom == 240) {
+						if (lh=="19.1667") {os=osW}
+						if (lh=="19") {os=osTBL}
+						if (lh=="18.3333") {os=osWL}
+						if (lh=="17.5") {os=osL}
+					} else if (jsZoom == 200) {
+						if (lh=="19") {os=osW}
+						if (lh=="18") {os=osL}
+					} else if (jsZoom == 170) {
+						if (lh=="19.25") {os=osW}
+						if (lh=="18.9") {os=osTBL}
+						if (lh=="18.6667") {os=osW}
+						if (lh=="18.0833") {os=osL}
+						if (lh=="17.5") {os=osL}
+					} else if (jsZoom == 150) {
+						if (lh=="20") {os=osW}
+						if (lh=="18.6667") {os=osWL}
+						if (lh=="17.3333") {os=osL}
+					} else if (jsZoom == 133) {
+						if (lh=="19.5") {os=osW}
+						if (lh=="18.9") {os=osTBL}
+						if (lh=="18") {os=osL}
+						if (lh=="18.75") {os=osW}
+					} else if (jsZoom == 120) {
+						if (lh=="20") {os=osW}
+						if (lh=="19.1667") {os=osL}
+						if (lh=="19") {os=osTBL}
+						if (lh=="18.3333") {os=osW}
+						if (lh=="17.5") {os=osL}
+					} else if (jsZoom == 110) {
+						if (lh=="19.25") {os=osW}
+						if (lh=="18.7") {os=osTBL}
+						if (lh=="18.3333") {os=osL}
+						if (lh=="17.4167") {os=osL}
+					} else if (jsZoom == 90) {
+						if (lh=="20.1") {os=osW}
+						if (lh=="18.9833") {os=osWL}
+						if (lh=="18.7667") {os=osTBL}
+						if (lh=="16.75") {os=osL}
+					} else if (jsZoom == 80) {
+						if (lh=="20") {os=osW}
+						if (lh=="19.5") {os=osTBL}
+						if (lh=="18.75") {os=osWL}
+					} else if (jsZoom == 67) {
+						if (lh=="21") {os=osW}
+						if (lh=="19.8") {os=osTBL}
+						if (lh=="19.5") {os=osWL}
+						if (lh=="18") {os=osL}
+					} else if (jsZoom == 50) {
+						if (lh=="22") {os=osW}
+						if (lh=="20") {os=osWL}
+						if (lh=="18") {os=osL}
+					} else if (jsZoom == 30) {
+						if (lh=="20") {os=osWL}
+						if (lh=="26.6667") {os=osW}
+					}
+				}
+				// MAC
+				if (os == "") {
+				/*  unique: .0167 .05 .0833 .1833 .35 .4333 .6833 .8333 .85
+				not unique: .7667 .6667 (but unique at those zoom values)
+				hackernews: .5167 (can't repro) */
+					// not necessarily unique given various dpr e.g. android
+					// also RFP affects this on android
+					let lhDec = (lh+"").split(".")[1]
+					if (lhDec=="0167" | lhDec=="05" | lhDec=="0833" | lhDec=="1833" | lhDec=="35" | lhDec=="4333" | lhDec=="6833"
+						| lhDec=="8333" | lhDec=="85" | lhDec=="7667" | lhDec=="6667" | lhDec=="5167") {os=osM}
+				}
+				// ANDROID
+				if (os == "") {
+					// ToDo: css line height: Android affected by devicePixelRatio
+					// line height affected by RFP
+				}
+				if (os == "") {
+					// guess
+					os = osLA+" [logical guess]"
+				} else {
+					if (isTNR && fontProp) {
+						// known
+						os += " [known metric]"
+					}
+				}
+			}
+			// output
+			if (method == "none") {
+				if (fontProp) {
+					dom.fdLH.innerHTML = sb+"[clientrect blocked" + (isTNR ? strFont : " | document fonts disabled")  + "]"+sc 
+				} else {
+					dom.fdLH.innerHTML = sb+"[clientrect + font properties blocked]"+sc
+				}
+			} else {
+				dom.fdLH.innerHTML = lh + "px "+ sbZoom + os + s3+"["+method+"]"+sc
+			}
+			if (logPerf) {debug_log("css line height [fd]",t0)}
+		}
+
+		run_scrollbar()
+		run_lineheight()
+		return resolve("scrollbar: " + finalresolve)
+	})
+}
+
+function get_math() {
+	return new Promise(resolve => {	
+		let t0 = performance.now()
+		// 1= ecma1, 6= ecma6, c= combined
+		let m1hash = "",
+			m6hash = "",
+			mchash = "",
+			m1 = "", // short codes
+			m6 = "",
+			fdMath1 = "", // strings for browser/os
+			fdMath6 = "",
+			strNew = zNEW + (runS ? zSIM : ""),
+			scriptBlock = false
+
+		function get_hashes() {
+			let h1 = "", h6 = "", r = ""
+			// 1st
+			let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
+				res = []
+			for (let i=0; i < list.length; i++) {
+				try {
+					r = Math.cos(list[i])
+				} catch(e) {
+					r = (e.name == "ReferenceError" ? zB1 :zB2)
+					scriptBlock = true
+				}
+				res.push(r)
+			}
+			h1 = res.join("-")
+			// 6th
+			let x, y
+			x = 0.5
+			try {
+				r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
+			} catch(e) {
+				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				scriptBlock = true
+			}
+			h6 = r
+			x=1
+			try {
+				r = Math.exp(x) - 1 // expm1(1)
+			} catch(e) {
+				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				scriptBlock = true
+			}
+			h6 += "-"+r
+			x = 1
+			try {
+				y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
+			} catch(e) {
+				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				scriptBlock = true
+			}
+			h6 += "-"+r
+			// hashes
+			m1hash = sha1(h1)
+			m6hash = sha1(h6)
+			mchash = sha1(h1+"-"+h6)
+			// sim
+			if (runS) {
+				//m1hash = sha1("a"), mchash = sha1("b") // emca1
+				//m6hash = sha1("c"), mchash = sha1("d") // emca6
+				m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
+			}
+		}
+
+		function get_codes() {
+			// known FF hashes (browser)
+			if (m6hash == "7a73daaff1955eef2c88b1e56f8bfbf854d52486") {m6="1"}
+			else if (m6hash == "0eb76fed1c087ebb8f80ce1c571b2f26a8724365") {m6="2"}
+			else if (m6hash == "9251136865b8509cc22f8773503288d106104634") {m6="3"} // 68+ exmp1(1) 1380031
+			// known FF hashes (os)
+			if (m1hash == "46f7c2bbe55a2cd28252d059604f8c3bac316c23") {m1="A"}
+			else if (m1hash == "8464b989070dcff22c136e4d0fe21d466b708ece") {m1="B"}
+			else if (m1hash == "97eee44856b0d2339f7add0d22feb01bcc0a430e") {m1="C"}
+			else if (m1hash == "96895e004b623552b9543dcdc030640d1b108816") {m1="D"}
+			else if (m1hash == "06a01549b5841e0ac26c875b456a33f95b5c5c11") {m1="E"}
+			else if (m1hash == "ae434b101452888b756da5916d81f68adeb2b6ae") {m1="F"}
+			else if (m1hash == "19df0b54c852f35f011187087bd3a0dce12b4071") {m1="G"}
+			else if (m1hash == "8ee641f01271d500e5c1d40e831232214c0bbbdc") {m1="H"}
+		}
+
+		function build_output() {
+			// browser
+			if (m6 == "1" | m6 == "3") {
+				fdMath6=zFF
+			} else if (m6 == "2") {
+				fdMath6=zFF+" [32-bit]"
+			}
+			// os, refine browser
+			if (m1 == "A" | m1 == "H") {
+				// A or H: always 64bit WIN on 64bit FF
+				fdMath1="Windows [64-bit]"
+				fdMath6=zSDK64
+			} else if (m1 == "C") {
+				// C: always 32bit FF on WIN (32bit or 64bit)
+				fdMath1="Windows"
+				fdMath6=zSDK32
+			} else if (m1 == "D") {
+				// D: always Linux (Mint, Debian, OpenSUSE)
+				fdMath1="Linux"
+				if (m6 == "1") {
+					// 60-67: 1D : always 64bit Linux -> 64bit FF
+					fdMath1="Linux [64-bit]"
+					fdMath6=zFF+" [64-bit]"
+				}	else if (m6 == "3") {
+					// 68+: 3D : can be FF64bit or TB32/64bit
+					// values already set
+				}	else if (m6 == "2") {
+					// D2: always 32bit Linux (32bit FF set earlier)
+					fdMath1="Linux [32-bit]"
+				}
+			} else if (m1 == "G") {
+				// G: always Linux (Ubuntu)
+				fdMath1="Linux"
+			} else if (m1 == "E") {
+				// E: always Mac: and thus 64bit FF
+				fdMath1="Mac"
+				fdMath6=zFF+" [64-bit]"
+			} else if (m1 == "F") {
+				// F: always Android
+				fdMath1="Android"
+			} else if (m1 == "B") {
+				// B: always WIN, always mingw
+				fdMath1="Windows"
+				if (m6 == "1") {
+					// ESR60: 1B: always 64bit TB: thus 64bit WIN
+					fdMath6=zMingw64
+					fdMath1="Windows [64-bit]"
+				} else if (m6 == "2") {
+					// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
+					fdMath6=zMingw32
+				} else if (m6 == "3") {
+					// ESR68: 3B: 32bit TB on 32/64 WIN and 64bit TB on WIN64: now all the same
+					fdMath6=zMingw
 				}
 			}
 		}
-		// output
-		if (method == "none") {
-			if (fontProp) {
-				dom.cssLH.innerHTML = sb+"[clientrect blocked" + (isTNR ? strFont : " | document fonts disabled")  + "]"+sc 
-			} else {
-				dom.cssLH.innerHTML = sb+"[clientrect + font properties blocked]"+sc
-			}
-		} else {
-			dom.cssLH.innerHTML = lh + "px "+ sbZoom + os + s2+"["+method+"]"+sc
-		}
-		if (logPerf) {debug_log("css line height [ua]",t0)}
-	}
 
-	run_scrollbar()
-	run_lineheight()
+		function output() {
+			if (isFF) {
+				let mc = ""
+				// new
+				if (m1 == "") {m1hash += strNew} else {m1hash += s3+" ["+m1+"]"+sc}
+				if (m6 == "") {m6hash += strNew} else {m6hash += s3+" ["+m6+"]"+sc}
+				if (m1 !== "" && m6 !== "") { mc = s3 + "[" + m1+m6 + "]" + sc } // we have a code
+				if (scriptBlock) {
+					strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
+				} else {
+					strNew = not_seen+" math combo before"+sc + (runS ? zSIM : "")
+				}
+				// runS: alternate new vs os-check (runS sets isOS ="")
+				if (runS) {if (stateSIM) {fdMath1 = "Windows"}}
+				// os-check
+				if (fdMath1 !== "") {
+					let check = fdMath1.replace(" [32-bit]","")
+					check = check.replace(" [64-bit]","")
+					check = check.toLowerCase()
+					if (isOS !== check) {fdMath1 += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+				}
+				// output
+				dom.fdMathOS.innerHTML = (fdMath1 == "" ? strNew : fdMath1 + mc)
+				dom.fdMath.innerHTML = (fdMath6 == "" ? strNew : fdMath6)
+			}
+			// output hashes
+			dom.math1hash.innerHTML = m1hash
+			dom.math6hash.innerHTML = m6hash
+			dom.mathhash.innerHTML = mchash
+			// perf
+			if (logPerf) {debug_log("math [fd]", t0, gt0)}
+			return resolve("math: " + mchash)
+		}
+		get_hashes()
+		if (isFF) {
+			get_codes()
+			build_output()
+			output()
+		} else {
+			dom.math1hash = m1hash
+			dom.math6hash = m6hash
+			dom.mathhash = mchash
+			dom.fdMath = mchash
+			return resolve("math: " + mchash)
+		}
+	})
 }
 
 function get_mm_metrics(runtype) {
@@ -908,153 +1128,158 @@ function get_pbmode() {
 }
 
 function get_resources() {
-	let t0 = performance.now(),
-		browser = "",
-		branding = "",
-		channel = "",
-		result = "",
-		wFF = "",
-		hFF = "",
-		extra = "n",
-		nob = "[no branding detected]",
-		el = dom.branding
+	return new Promise(resolve => {
 
-	// output
-	function output() {
-		// set isChannel
-		isChannel = channel
+		let t0 = performance.now(),
+			browser = "",
+			branding = "",
+			channel = "",
+			result = "",
+			wFF = "",
+			hFF = "",
+			extra = "n",
+			nob = "[no branding detected]",
+			el = dom.branding
+
 		// output
-		dom.fdResource.innerHTML = browser + " " + result
-		store_data("ua","resources",browser+" "+wFF+"x"+hFF+" "+extra)
-		if (logPerf) {debug_log("resource [ua]",t0)}
-	}
-	// FF
-	function build_FF(wFF, hFF) {
-		browser = zFF
-		if (wFF == 336 && hFF == 48) {
-			//70+
-			branding = "Browser"
-			channel = "Release/Beta"
-		} else if (wFF == 336 && hFF == 64) {
-			//70+
-			branding = "Browser"
-			channel = "Developer/Nightly"
-		} else if (wFF == 300 && hFF == 38) {
-			//60-69, ESR60/68
-			branding = "Quantum"
-			channel = "Release/Beta"
-		} else if (wFF == 132 && hFF == 62) {
-			//60-69
-			channel = "Developer Edition"
-		} else if (wFF == 270 && hFF == 48) {
-			//60-69
-			channel = "Nightly"
+		function output() {
+			// set isChannel
+			isChannel = channel
+			// output
+			dom.fdResource.innerHTML = browser + " " + result
+			if (logPerf) {debug_log("resources [fd]",t0)}
+			return resolve("resources: " + browser+" "+wFF+"x"+hFF+" "+extra)
 		}
-		if (channel !== "") {
-			result = branding+" - "+channel+" ["+wFF+" x "+hFF+"]"
-		} else if (hFF > 0) {
-			//new
-			result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
-		} else {
-			//none: red=desktop orange=android
-			if (isVer > 59) {
-				result = (isOS == "android" ? s2 : sb) +nob+sc
+		// FF
+		function build_FF(wFF, hFF) {
+			browser = zFF
+			if (wFF == 336 && hFF == 48) {
+				//70+
+				branding = "Browser"
+				channel = "Release/Beta"
+			} else if (wFF == 336 && hFF == 64) {
+				//70+
+				branding = "Browser"
+				channel = "Developer/Nightly"
+			} else if (wFF == 300 && hFF == 38) {
+				//60-69, ESR60/68
+				branding = "Quantum"
+				channel = "Release/Beta"
+			} else if (wFF == 132 && hFF == 62) {
+				//60-69
+				channel = "Developer Edition"
+			} else if (wFF == 270 && hFF == 48) {
+				//60-69
+				channel = "Nightly"
 			}
-		}
-	}
-	// TB
-	function build_TB(wFF, hFF) {
-		browser = zTB
-		channel = ""
-		if (wFF == 270 && hFF == 48) {
-			//alpha: 8.5a7+ [60.5.0esr]
-			channel = "alpha"
-			result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
-			debug_page("tb","    css branding = 270 x 48 px = alpha")
-		} else if (wFF == 336 && hFF == 48) {
-			if (isVer > 77) {
-				//78+ therefore release
-				channel = "release"
-				result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+			if (channel !== "") {
+				result = branding+" - "+channel+" ["+wFF+" x "+hFF+"]"
+			} else if (hFF > 0) {
+				//new
+				result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
 			} else {
-				//idk
-				result = " ["+wFF+" x "+hFF+"]"
-			}
-		} else if (wFF == 300 && hFF == 38) {
-			if (isVer > 67 && isVer < 78) {
-				//68+ therefore release
-				channel = "release"
-				result = s2+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
-			} else {
-				//idk
-				result = " ["+wFF+" x "+hFF+"]"
-			}
-		} else if (hFF > 0) {
-			//new
-			result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
-		} else {
-			//none: red=desktop orange=android
-			if (isVer > 59) {
-				result = (isOS == "android" ? s2 : sb) +nob+sc
-			}
-		}
-	}
-	function run() {
-		// load about:logo
-		let imgA = new Image()
-		imgA.src = "about:logo"
-		imgA.style.visibility = "hidden"
-		document.body.appendChild(imgA)
-		imgA.addEventListener("load", function() {
-			if (imgA.width == 300) {
-				// desktop = 300x236: -> icon64
-				dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/icon64.png')"
-			} else {
-				// android = 258x99: -> favicon64 (which gives us tor's icon)
-				dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/favicon64.png')"
-			}
-			if (imgA.width > 0) {
-				// brand: get after logo loaded by js: allows time for
-				// the two branding images (set by html) to be loaded
-				wFF = el.width
-				hFF = el.height
-				el = dom.torbranding
-				let wTB = el.width, hTB = el.height
-
-				if (runS) {
-					wFF = 110, hFF = 50 // new to both TB and FF
-					//wFF = 336, hFF = 48 // new TB but not new FF
-					// to simulate missing, change html img src
+				//none: red=desktop orange=android
+				if (isVer > 59) {
+					result = (isOS == "android" ? s3 : sb) +nob+sc
 				}
-
-				// FF
-				build_FF(wFF, hFF)
-				// TB
-				if (wTB > 0) {
-					isTB = true; debug_page("tb","     resource:// = tor-watermark.png")
-					extra = "y"
+				dom.fdBrandingCss = "none"
+			}
+		}
+		// TB
+		function build_TB(wFF, hFF) {
+			browser = zTB
+			channel = ""
+			if (wFF == 270 && hFF == 48) {
+				//alpha: 8.5a7+ [60.5.0esr]
+				channel = "alpha"
+				result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+				debug_page("tb","    css branding = 270 x 48 px = alpha")
+			} else if (wFF == 336 && hFF == 48) {
+				if (isVer > 77) {
+					//78+ therefore release
+					channel = "release"
+					result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+				} else {
+					//idk
+					result = " ["+wFF+" x "+hFF+"]"
 				}
-				function check_TB2() {
-					if (isTB2 !== "") {
-						clearInterval(checking)
-						extra += isTB2 // "", "n" or "y"
-						if (isTB) {
-							build_TB(wFF, hFF)
-							if (isOS !== "android" && wTB < 1) {
-								result += sb+"[missing tor-watermark.png]"+sc
-							}
-						}
-						// now we output
-						output()
+			} else if (wFF == 300 && hFF == 38) {
+				if (isVer > 67 && isVer < 78) {
+					//68+ therefore release
+					channel = "release"
+					result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+				} else {
+					//idk
+					result = " ["+wFF+" x "+hFF+"]"
+				}
+			} else if (hFF > 0) {
+				//new
+				result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + " TB " + (runS ? zSIM : "")
+			} else {
+				//none: red=desktop orange=android
+				if (isVer > 59) {
+					result = (isOS == "android" ? s3 : sb) +nob+sc
+				}
+				dom.fdBrandingCss = "none"
+			}
+		}
+		function run() {
+			// load about:logo
+			let imgA = new Image()
+			imgA.src = "about:logo"
+			imgA.style.visibility = "hidden"
+			document.body.appendChild(imgA)
+			imgA.addEventListener("load", function() {
+				if (imgA.width == 300) {
+					// desktop = 300x236: -> icon64
+					dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/icon64.png')"
+				} else {
+					// android = 258x99: -> favicon64 (which gives us tor's icon)
+					dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/favicon64.png')"
+				}
+				if (imgA.width > 0) {
+					// brand: get after logo loaded by js: allows time for
+					// the two branding images (set by html) to be loaded
+					wFF = el.width
+					hFF = el.height
+					el = dom.torbranding
+					let wTB = el.width, hTB = el.height
+
+					if (runS) {
+						wFF = 110, hFF = 50 // new to both TB and FF
+						//wFF = 336, hFF = 48 // new TB but not new FF
+						// to simulate missing, change html img src
 					}
+
+					// FF
+					build_FF(wFF, hFF)
+					// TB
+					if (wTB > 0) {
+						isTB = true; debug_page("tb","     resource:// = tor-watermark.png")
+						extra = "y"
+					}
+					function check_TB2() {
+						if (isTB2 !== "") {
+							clearInterval(checking)
+							extra += isTB2 // "", "n" or "y"
+							if (isTB) {
+								build_TB(wFF, hFF)
+								if (isOS !== "android" && wTB < 1) {
+									result += sb+"[missing tor-watermark.png]"+sc
+								}
+							}
+							// now we output
+							output()
+						}
+					}
+					// wait for isTB2
+					let checking = setInterval(check_TB2, 10)
 				}
-				// wait for isTB2
-				let checking = setInterval(check_TB2, 10)
-			}
-		})
-		document.body.removeChild(imgA)
-	}
-	run()
+			})
+			document.body.removeChild(imgA)
+		}
+		run()
+	})
 }
 
 function get_screen_metrics(runtype) {
@@ -1104,37 +1329,232 @@ function get_screen_metrics(runtype) {
 			if (jsZoom == 100) {strTemp += return_lb_nw(w,h)} else {strTemp += "<br>"+lb_orange}
 		}
 		dom.WndIn.innerHTML = strTemp
-		if (logExtra) {console.log("C [must follow zoom]: ", runtype, ": screen_metrics")}
+		if (logExtra) {
+			let strC = (runtype.type == undefined ? runtype : runtype.type)
+			console.log("C [must follow zoom]: ", strC, ": screen_metrics")
+		}
 	}
 	// the rest
 	try {dom.fsState = window.fullScreen} catch(e) {dom.fsState.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)}
 	get_orientation(runtype)
 	get_mm_metrics(runtype)
-	if (logExtra) {console.log("D [must follow zoom]: ", runtype, ": mm_metrics, orientation, fullscreen")}
+	if (logExtra) {
+		let strD = (runtype.type == undefined ? runtype : runtype.type)
+		console.log("D [must follow zoom]: ", strD, ": mm_metrics, orientation, fullscreen")
+	}
 }
 
 function get_ua_nav() {
-	let list = ['userAgent','appCodeName','appName','product','appVersion',
-		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
-		res = [],
-		r = ""
-	for(let i=0; i < list.length; i++) {
-		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
-		if (r == "") {r = zU}
-		if (r == undefined && isFF) {r = zB3}
-		let n = (i).toString().padStart(2,"0")
-		res.push(n+" "+r)
-		document.getElementById("nUA"+n).innerHTML = r
-		// show/hide vendor* if not undefined
-		if (n == "09" || n == "10") {
-			document.getElementById("togUA"+n).style.display = (r == "undefined" ? "none" : "table-row")
-		}
-	}
-	res.sort()
-	dom.sectionUA1.innerHTML = sha1(res.join()) + (isFF ? s2+"[spoofable + detectable]"+sc : "")
+	let res = [],
+		str = "",
+		go = false,
+		lies = 0,
+		t0 = performance.now()
 
-	// start nav checks
-	get_ua_nav_checks()
+	// ToDo: if isOS is broken: e.g. widgets is broken: we can try to fallback
+		// on something else just for this function
+	// what do we have for math etc
+	if (isOS == "") {
+
+	}
+
+	// FF78+ only
+	if (isFF && isVer > 77) {go = true}
+
+	// EASY
+	function get_property(id, property, good) {
+		str = ""
+		if (go && runS) {
+			// simulate lies
+			if (id == "01") {str = "MoZilla"} // match * case
+			if (id == "02") {str = " Netscape"} // leading space
+			if (id == "03") {str = "Gecko "} // trailing space
+			if (id == "07") {str = ""} // empty string: unexpected
+			if (id == "08") {str = " "} // single space
+			if (id == "09") {str = undefined} // undefined
+			if (id == "10") {str = "Moz://a"} // unexpected
+		} else {
+			try {str = navigator[property]} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+		}
+		if (str == "") {str = zU}
+		if (str == undefined && isFF) {str = zB3}
+		// stash
+		res.push(id+": "+str)
+		document.getElementById("nUA"+id).innerHTML = str
+		// show/hide vendor*
+		if (id == "09" || id == "10") {
+			document.getElementById("togUA"+id).style.display = (str == good ? "none" : "table-row")
+		}
+		// isBS: ignored blocked items
+		if (go && str.substring(0,6) !== "script") {
+			if (str !== good) {str = sb+"&#9654"+sc; lies++} else {str = ""}
+		} else {
+			str = ""
+		}
+		document.getElementById("UA"+id).innerHTML = property + str
+	}
+	get_property("01", "appCodeName", "Mozilla")
+	get_property("02", "appName", "Netscape")
+	get_property("03", "product", "Gecko")
+	get_property("07", "buildID", "20181001000000")
+	get_property("08", "productSub", "20100101")
+	get_property("09", "vendor", zU)
+	get_property("10", "vendorSub", zU)
+
+
+	// arrows
+	function addArrow(id, state) {
+		let title = ""
+		if (id == "00") {title = "userAgent"}
+		if (id == "04") {title = "appVersion"}
+		if (id == "05") {title = "oscpu"}
+		if (id == "06") {title = "platform"}
+		if (state) {
+			if (isPartial == false && go == true) {lies++}
+			title += (isPartial ? sn : sb) +"&#9654"+sc
+		}
+		document.getElementById("UA"+id).innerHTML = title
+	}
+
+	// MORE COMPLEX: per OS
+	let pre = "",
+		spoof = false,
+		match = false,
+		myOS = isOS,
+		isPartial = false
+
+	if (myOS == "" && go) {isPartial = true}
+
+	// ToDo: if runS = true I end up with no os
+		// => isPartial = true => I always output yellow arrows
+		// I think this desired behaviour
+		// i.e it indicates we only did a partial check so show that with words as well
+		// e.g. "yellow arrow" - "can't tell: only partial BS dection due to uncertainly over your OS"
+
+	// appVersion
+	try {str = navigator.appVersion} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	if (str == "") {str = zU}
+	if (str == undefined && isFF) {str = zB3}
+	res.push("04: "+str)
+	dom.nUA04.innerHTML = str
+	if (go && str.substring(0,5) !== "script") {
+		spoof = false
+		if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
+		if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
+		if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
+		if (myOS == "android") {
+			// tighten this up to be more specific
+			if (str.substring(0,13) == "5.0 (Android ") {match = true}
+			spoof = !match
+		}
+		if (spoof || isPartial) {addArrow("04", true)}
+	} else {
+		addArrow("04", false)
+	}
+
+	// platform
+	// ToDo: specific linux distro strings?
+	// ToDo: android: `Linux ${OSArch}` <-- any others
+	try {str = navigator.platform} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	if (str == "") {str = zU}
+	if (str == undefined && isFF) {str = zB3}
+	res.push("06: "+str)
+	dom.nUA06.innerHTML = str
+	if (go && str.substring(0,5) !== "script") {
+		spoof = false
+		match = false
+		if (myOS == "windows") {spoof = (str !== "Win32")}
+		if (myOS == "mac") {spoof = (str !== "MacIntel")}
+		if (myOS == "linux") {
+			if (str == "Linux i686") {match = true}
+			else if (str == "Linux i686 on x86_64") {match = true}
+			else if (str == "Linux x86_64") {match = true}
+			spoof = !match
+		}
+		if (myOS == "android") {
+			if (str.substring(0,10) == "Linux armv") {match = true}
+			if (str.substring(0,11) == "Linux aarch") {match = true}
+			spoof = !match
+		}
+		if (spoof || isPartial) {addArrow("06", true)}
+	} else {
+		addArrow("06", false)
+	}
+
+	// oscpu
+	try {str = navigator.oscpu} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	if (str == "") {str = zU}
+	if (str == undefined && isFF) {str = zB3}
+	res.push("05: "+str)
+	dom.nUA05.innerHTML = str
+	if (go && str.substring(0,5) !== "script") {
+		spoof = false
+		if (myOS == "windows") {
+			pre = "Windows NT "
+			// app64 + win64
+			if (str == pre+"10.0; Win64; x64") {match = true}
+			else if (str == pre+"6.3; Win64; x64") {match = true}
+			else if (str == pre+"6.1; Win64; x64") {match = true}
+			// app32 + win64
+			else if (str == pre+"10.0; WOW64") {match = true}
+			else if (str == pre+"6.3; WOW64") {match = true}
+			else if (str == pre+"6.1; WOW64") {match = true}
+			// app32 + win32
+			else if (str == pre+"10.0") {match = true}
+			else if (str == pre+"6.3") {match = true}
+			else if (str == pre+"6.1") {match = true}
+			spoof = !match
+		}
+		if (myOS == "linux") {
+			// ToDo: specific linux distro strings?
+			pre = "Linux "
+			if (str == pre+"i686") {match = true}
+			else if (str == pre+"i686 on x86_64") {match = true}
+			else if (str == pre+"x86_64") {match = true}
+			spoof = !match
+		}
+		if (myOS == "mac") {
+			if (str.substring(0,14) == "Intel Mac OS X") {match = true}
+			spoof = !match
+		}
+		if (myOS == "android") {
+			pre = "Linux "
+			if (str.substring(0,10) == pre+"armv") {match = true}
+			if (str.substring(0,11) == pre+"aarch") {match = true}
+			spoof = !match
+		}
+		if (spoof || isPartial) {addArrow("05", true)}
+	} else {
+		addArrow("05", false)
+	}
+
+	// userAgent
+	// ways this can be inconsistent
+	// 1: if full ua = not consistent with known os etc
+	// 2: if full ua = not the same as individual nav parts
+	// 3: if RFP version but are not using RFP
+	try{str = navigator.userAgent} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	if (str == "") {str = zU}
+	if (str == undefined && isFF) {str = zB3}
+	res.push("00: "+str)
+	dom.nUA00.innerHTML = str
+
+	// show
+	if (lies > 0) {
+		//console.debug("lies", lies)
+		lies += " pinocchio" + (lies > 1 ? "s": "")
+		dom.UA11.innerHTML = sb+"absolute BS detected "+" &#9654"+sc
+		dom.UA12.innerHTML = sb+ lies + sc + " [based only on feature detection]"
+		dom.togUA11.style.display = "table-row"
+	} else {
+		dom.togUA11.style.display = "none"
+	}
+	if (go && runS) {
+		console.debug("Simulated UA Lies\n - " + res.join("\n - "))
+	}
+
+	// hash
+	section_info("ua", t0, gt0, res)
 }
 
 function get_ua_nav_checks() {
@@ -1146,7 +1566,7 @@ function get_ua_nav_checks() {
 		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
 		if (r == "") {r = "undefined"}
 		if (r == undefined && isFF) {r = zB3}
-		res.push((i).toString().padStart(2,"0")+" "+r)
+		res.push((i).toString().padStart(2,"0")+": "+r)
 	}
 	let control = sha1(res.join())
 
@@ -1155,7 +1575,7 @@ function get_ua_nav_checks() {
 		let target = "", output = ""
 		for (let i=0; i < res.length; i++) {
 			if (res[i] !== data[i]) {
-				output = data[i].slice(3, data[i].length)
+				output = data[i].slice(4, data[i].length)
 				target = data[i].substring(0,2)
 				// match to correct element: nUAxx
 				if (target == "05") {target = "06"}
@@ -1258,180 +1678,182 @@ function get_ua_nav_checks() {
 }
 
 function get_version() {
-	let go = true,
-		verNo = "",
-		isNew = false,
-		alt0 = sb+" [fallback test ",
-		alt1 = alt0 +"1]"+sc,
-		alt2 = alt0 +"2]"+sc,
-		alt3 = alt0 +"3]"+sc,
-		t0 = performance.now()
-	function output(){
-		// set isVer
-		if (isVer == "") {
-			isVer = verNo.replace(/\D/g,',')
-			let start = isVer.indexOf(",")
-			if (start !== -1) {isVer = isVer.substring(0,start)}
-		}
-		dom.versionNo.innerHTML = verNo + (isNew ? zNEW : "") + (runS ? zSIM : "")
-		store_data("ua","version",verNo)
-		if (logPerf) {debug_log("version [ua]",t0)}
-	}
-	// use isErr
-	if (isErr == "X") { verNo = "59 or lower"
-	} else if (isErr == "e09e") { v67minus()
-	} else if (isErr == "9be3") { v69minus()
-	} else if (isErr == "1492") { verNo = "70"
-	} else if (isErr == "7121") { verNo = "71"
-	// 74+: 1259822: pref alters err2: now 2 outcomes per bucket
-	// javascript.options.property_error_message_fix
-	} else if (isErr == "fa8e" || isErr == "fb19") { v74minus()
-	} else if (isErr == "214f" || isErr == "5186") { v75plus()
-	} else if (isErr == "0dc5" || isErr == "b75b") { v75plus()
-	} else {
-		// new: cascade down all tests: this helps covers the error
-		// hash being meddled with: e.g. aopr script blocking
-		isNew = true
-		v75plus()
-	}
-	// run
-	function v75plus() {
-		// 82: 1655947
-		// ToDo: If backported to ESR78* then COMBINE a 79/80/81 test
-		if (go) {
-			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-			if (test82 == 1) {verNo = "82+"; go = false}
-		}
-		// 81: 1650607
-		if (go) {
-			try {
-				let file81 = new File(["bits"], "a/b.txt")
-				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
-			} catch(e) {}
-		}
-		// 80: 1651732
-		if (go) {
-			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
-			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-			try {
-				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
-				verNo = "80"; go = false
-			} catch (e) {}
-		}
-		//79: 1644878
-		if (go) {
-			try {
-				Map.prototype.entries.call(true)
-			} catch(e) {
-				if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
+	return new Promise(resolve => {
+		let go = true,
+			verNo = "",
+			isNew = false,
+			alt0 = sb+" [fallback test ",
+			alt1 = alt0 +"1]"+sc,
+			alt2 = alt0 +"2]"+sc,
+			alt3 = alt0 +"3]"+sc,
+			t0 = performance.now()
+		function output(){
+			// set isVer
+			if (isVer == "") {
+				isVer = verNo.replace(/\D/g,',')
+				let start = isVer.indexOf(",")
+				if (start !== -1) {isVer = isVer.substring(0,start)}
 			}
+			dom.fdVersion.innerHTML = verNo + (isNew ? zNEW : "") + (runS ? zSIM : "")
+			if (logPerf) {debug_log("version [fd]",t0)}
+			return resolve("version: " + verNo)
 		}
-		//78: 1589095
-		if (go) {
-			try {
-				let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
-				verNo = "78"; go = false
-			} catch(e) {}
+		// use isErr
+		if (isErr == "X") { verNo = "59 or lower"
+		} else if (isErr == "e09e") { v67minus()
+		} else if (isErr == "9be3") { v69minus()
+		} else if (isErr == "1492") { verNo = "70"
+		} else if (isErr == "7121") { verNo = "71"
+		// 74+: 1259822: pref alters err2: now 2 outcomes per bucket
+		// javascript.options.property_error_message_fix
+		} else if (isErr == "fa8e" || isErr == "fb19") { v74minus()
+		} else if (isErr == "214f" || isErr == "5186") { v75plus()
+		} else if (isErr == "0dc5" || isErr == "b75b") { v75plus()
+		} else {
+			// new: cascade down all tests: this helps covers the error
+			// hash being meddled with: e.g. aopr script blocking
+			isNew = true
+			v75plus()
 		}
-		//78: 1633836
-		if (go) {
-			try {
-				let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
-				verNo = "78" + alt1; go = false
-			} catch(e) {}
-		}
-		//78: 1634135
-		if (go) {
-			try {
-				let regex78b = new RegExp('b')
-				if (regex78b.dotAll == false) {verNo = "78" + alt2; go = false}
-			} catch(e) {}
-		}
-		//77: 1627285
-		if (go) {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}}
-		//76: 1608010
-		if (go) {if (test76.validity.rangeOverflow) {} else {verNo = "76"; go = false}}
-		//75: 1615600
-		if (isNew && go) {
-			try {let test75 = BigInt(2.5)} catch(e) {
-				if (e.message.substring(0,3) == "2.5") {verNo = "75"} else {v74minus()}
+		// run
+		function v75plus() {
+			// 82: 1655947
+			// ToDo: If backported to ESR78* then COMBINE a 79/80/81 test
+			if (go) {
+				let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
+				if (test82 == 1) {verNo = "82+"; go = false}
 			}
-		} else if (go) {verNo = "75"}
-	}
-	function v74minus () {
-		//74: 1605835
-		if (go) {try {eval("let t = ({ 1n: 1 })"); verNo = "74"; go = false;} catch(e) {}}
-		//73: 1605803
-		if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
-		//new
-		if (isNew && go) {
-			//72: 1589072
-			try {let test72 = eval('let a = 100_00_;')} catch(e) {
-				if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
-			}
-			//71: 1575980
+			// 81: 1650607
 			if (go) {
 				try {
-					let test71 = new StaticRange()
+					let file81 = new File(["bits"], "a/b.txt")
+					if (file81.name == "a/b.txt") {verNo = "81"; go = false}
+				} catch(e) {}
+			}
+			// 80: 1651732
+			if (go) {
+				let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
+				let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
+				try {
+					for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
+					verNo = "80"; go = false
+				} catch (e) {}
+			}
+			//79: 1644878
+			if (go) {
+				try {
+					Map.prototype.entries.call(true)
 				} catch(e) {
-					if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {verNo = "71"; go = false}
+					if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
 				}
 			}
-			//70: 1435818
+			//78: 1589095
 			if (go) {
-				try {eval("let t = 1_050"); verNo = "70"} catch(e) {v69minus()}
+				try {
+					let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
+					verNo = "78"; go = false
+				} catch(e) {}
 			}
-		} else if (go) {verNo = "72"}
-	}
-	function v69minus() {
-		//69: 1558387
-		if (go) {try {let test69 = new DOMError('a'); verNo = "68"} catch(e) {verNo = "69"; go = false}}
-		if (isNew && go) {
-			//68: 1548773
-			if (dom.test68.typeMustMatch == false) {v67minus()} else {verNo = "68"}
-		} else if (go) {verNo = "68"}
-	}
-	function v67minus() {
-		//67: 1531830
-		if (go) {if (!Symbol.hasOwnProperty('matchAll')) {} else {verNo="67"; go = false}}
-		//66
-		if (go) {
-			try {
-				let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-				let test66 = txt.encodeInto("a", utf8)
-				verNo="66"; go = false
-			} catch(e) {}
+			//78: 1633836
+			if (go) {
+				try {
+					let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
+					verNo = "78" + alt1; go = false
+				} catch(e) {}
+			}
+			//78: 1634135
+			if (go) {
+				try {
+					let regex78b = new RegExp('b')
+					if (regex78b.dotAll == false) {verNo = "78" + alt2; go = false}
+				} catch(e) {}
+			}
+			//77: 1627285
+			if (go) {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}}
+			//76: 1608010
+			if (go) {if (test76.validity.rangeOverflow) {} else {verNo = "76"; go = false}}
+			//75: 1615600
+			if (isNew && go) {
+				try {let test75 = BigInt(2.5)} catch(e) {
+					if (e.message.substring(0,3) == "2.5") {verNo = "75"} else {v74minus()}
+				}
+			} else if (go) {verNo = "75"}
 		}
-		//65
-		if (go) {
-			try {
-				let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); verNo="65"; go = false
-			} catch(e) {}
+		function v74minus () {
+			//74: 1605835
+			if (go) {try {eval("let t = ({ 1n: 1 })"); verNo = "74"; go = false;} catch(e) {}}
+			//73: 1605803
+			if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
+			//new
+			if (isNew && go) {
+				//72: 1589072
+				try {let test72 = eval('let a = 100_00_;')} catch(e) {
+					if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
+				}
+				//71: 1575980
+				if (go) {
+					try {
+						let test71 = new StaticRange()
+					} catch(e) {
+						if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {verNo = "71"; go = false}
+					}
+				}
+				//70: 1435818
+				if (go) {
+					try {eval("let t = 1_050"); verNo = "70"} catch(e) {v69minus()}
+				}
+			} else if (go) {verNo = "72"}
 		}
-		//64
-		if (go) {if (window.screenLeft == undefined){} else {verNo="64"; go = false}}
-		//63
-		if (go) {if (Symbol.for(`a`).description == "a") {verNo="63"; go = false}}
-		//62
-		if (go) {
-			console.time("v62")
-			try {console.timeLog("v62"); verNo="62"; go = false} catch(e) {}
-			console.timeEnd("v62")
+		function v69minus() {
+			//69: 1558387
+			if (go) {try {let test69 = new DOMError('a'); verNo = "68"} catch(e) {verNo = "69"; go = false}}
+			if (isNew && go) {
+				//68: 1548773
+				if (dom.test68.typeMustMatch == false) {v67minus()} else {verNo = "68"}
+			} else if (go) {verNo = "68"}
 		}
-		//61
-		if (go) {try {let test61 = (" a").trimStart(); verNo="61"; go = false} catch(e) {}}
-		//60
-		if (go) {
-			try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-				|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-					"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-				verNo = "60"
-			} catch(e) {
-				verNo = "59 or lower"
+		function v67minus() {
+			//67: 1531830
+			if (go) {if (!Symbol.hasOwnProperty('matchAll')) {} else {verNo="67"; go = false}}
+			//66
+			if (go) {
+				try {
+					let txt = new TextEncoder(), utf8 = new Uint8Array(1)
+					let test66 = txt.encodeInto("a", utf8)
+					verNo="66"; go = false
+				} catch(e) {}
+			}
+			//65
+			if (go) {
+				try {
+					let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); verNo="65"; go = false
+				} catch(e) {}
+			}
+			//64
+			if (go) {if (window.screenLeft == undefined){} else {verNo="64"; go = false}}
+			//63
+			if (go) {if (Symbol.for(`a`).description == "a") {verNo="63"; go = false}}
+			//62
+			if (go) {
+				console.time("v62")
+				try {console.timeLog("v62"); verNo="62"; go = false} catch(e) {}
+				console.timeEnd("v62")
+			}
+			//61
+			if (go) {try {let test61 = (" a").trimStart(); verNo="61"; go = false} catch(e) {}}
+			//60
+			if (go) {
+				try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
+					|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
+						"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
+					verNo = "60"
+				} catch(e) {
+					verNo = "59 or lower"
+				}
 			}
 		}
-	}
-	output()
+		output()
+	})
 }
 
 function get_viewport(runtype) {
@@ -1449,7 +1871,7 @@ function get_viewport(runtype) {
 	// this s/be with toolbar visible (not FS)
 	if (avh == "") {avh = vh}
 	// return
-	if (runtype == "ua") {
+	if (runtype == "fd") {
 		return vw // scrollbar
 	} else {
 		return vh // android tests
@@ -1457,77 +1879,83 @@ function get_viewport(runtype) {
 }
 
 function get_widgets() {
-	let list = ['button','checkbox','color','combobox','datetime-local','radio','text'],
-		font = "",
-		font0 = "",
-		fontdiff = false,
-		size = "",
-		size0 = "",
-		sizediff = false,
-		output = "",
-		os = "",
-		hash = [],
-		combined = [],
-		t0 = performance.now()
+	return new Promise(resolve => {
 
-	// loop elements
-	for (let i=0; i < 9; i++) {
-		let el = document.getElementById("widget"+i)
-		try {
-			font = getComputedStyle(el).getPropertyValue("font-family")
-		} catch(e) {font = "unknown"}
-		try {
-			size = getComputedStyle(el).getPropertyValue("font-size")
-		} catch(e) {size = "unknown"}
-		if (runS) {
-			if (i == 1) {font = "-apple-system"; size="11px"} // font + size
-			//if (i == 4) {font = "-apple-system"} // font
-			//if (i == 2) {size="13px"} // size
-		}
-		output = font+", "+size
-		// 1-7: compare to 1
-		if (i < 7) {
-			combined.push(list[i].padStart(14) + ": "+output)
-			if (i == 0) {size0 = size; font0 = font}
-			if (i > 0) {if (size !== size0) {sizediff = true}}
-			if (i > 0) {if (font !== font0) {fontdiff = true}}
-		}
-		// all
-		document.getElementById("wid"+i).innerHTML = output
-		hash.push(output)
-	}
-	// output
-	if (fontdiff + sizediff > 0) {
-		// combined
-		dom.widfirst.innerHTML = "various"
-		dom.wid0.innerHTML = combined.join("<br>")
-		dom.wid0.style.fontFamily = "monospace, monospace"
-	} else {
-		// individual
-		dom.widfirst.innerHTML = list.join("|")
-		dom.wid0.style.fontFamily = ""
-	}
-	// os
-	if (sizediff) {size0 = "mixed sizes"}
-	if (fontdiff) {
-		font0 = "mixed fonts";
-		os = not_seen+" mix before"+sc
-	} else {
-			// set isOS
-			if (font0.slice(0,12) == "MS Shell Dlg") {os="Windows"}
-			else if (font0 == "Roboto") {os="Android"}
-			else if (font0 == "-apple-system") {os="Mac"}
-			else if (font0 == "unknown") {os = ""}
-			else {os="Linux"}
-			isOS = os.toLowerCase()
-	}
-	os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
+		let list = ['button','checkbox','color','combobox','datetime-local','radio','text'],
+			font = "",
+			font0 = "",
+			fontdiff = false,
+			size = "",
+			size0 = "",
+			sizediff = false,
+			output = "",
+			os = "",
+			hash = [],
+			combined = [],
+			t0 = performance.now()
 
-	// output
-	dom.widgetH = sha1(hash.join()) + (runS ? zSIM : "")
-	dom.widgetOS.innerHTML = os + (runS ? zSIM : "")
-	store_data("ua","widget hash",sha1(hash.join()))
-	if (logPerf) {debug_log("widgets [ua]",t0)}
+		// loop elements
+		for (let i=0; i < 9; i++) {
+			let el = document.getElementById("widget"+i)
+			try {
+				font = getComputedStyle(el).getPropertyValue("font-family")
+			} catch(e) {font = "unknown"}
+			try {
+				size = getComputedStyle(el).getPropertyValue("font-size")
+			} catch(e) {size = "unknown"}
+			if (runS) {
+				if (i == 1) {font = "-apple-system"; size="11px"} // font + size
+				//if (i == 4) {font = "-apple-system"} // font
+				//if (i == 2) {size="13px"} // size
+			}
+			output = font+", "+size
+			// 1-7: compare to 1
+			if (i < 7) {
+				combined.push(list[i].padStart(14) + ": "+output)
+				if (i == 0) {size0 = size; font0 = font}
+				if (i > 0) {if (size !== size0) {sizediff = true}}
+				if (i > 0) {if (font !== font0) {fontdiff = true}}
+			}
+			// all
+			document.getElementById("wid"+i).innerHTML = output
+			hash.push(output)
+		}
+		// overall hash
+		let whash = sha1(hash.join())
+		// output
+		if (fontdiff + sizediff > 0) {
+			// combined
+			dom.widfirst.innerHTML = "various"
+			dom.wid0.innerHTML = combined.join("<br>")
+		} else {
+			// individual
+			dom.widfirst.innerHTML = list.join("|")
+		}
+		if (isFF) {
+			// os
+			if (sizediff) {size0 = "mixed sizes"}
+			if (fontdiff) {
+				font0 = "mixed fonts";
+				os = not_seen+" mix before"+sc
+			} else {
+					// set isOS
+					if (font0.slice(0,12) == "MS Shell Dlg") {os="Windows"}
+					else if (font0 == "Roboto") {os="Android"}
+					else if (font0 == "-apple-system") {os="Mac"}
+					else if (font0 == "unknown") {os = ""}
+					else {os="Linux"}
+					isOS = os.toLowerCase()
+			}
+			os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
+			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
+		} else {
+			dom.fdWidget = whash
+		}
+		dom.widgetH = whash + (runS ? zSIM : "")
+		// perf & resolve
+		if (logPerf) {debug_log("widgets [fd]",t0)}
+		return resolve("widgets: " + whash)
+	})
 }
 
 function get_zoom(runtype) {
@@ -1723,7 +2151,7 @@ function goNW() {
 		strError = ""
 
 	// open
-	let newWin = window.open("newwin.html","","width=9000,height=9000")
+	let newWin = window.open("tests/newwin.html","","width=9000,height=9000")
 	let iw = newWin.innerWidth,
 		ih = newWin.innerHeight,
 		ow = newWin.outerWidth,
@@ -1819,13 +2247,13 @@ function goNW_UA() {
 		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
 		if (r == "") {r = zU}
 		if (r == undefined && isFF) {r = zB3}
-		res.push((i).toString().padStart(2,"0")+" "+r)
+		res.push((i).toString().padStart(2,"0")+": "+r)
 	}
 	newWin.close()
 	// hash
-	res.sort()
+	res.sort(Intl.Collator("en-US").compare)
 	let hash = sha1(res.join())
-	let hash2 = (dom.sectionUA1.textContent).substring(0,40)
+	let hash2 = (dom.uahash.textContent).substring(0,40)
 	// output
 	if (hash == hash2) {
 		dom.sectionUA8.innerHTML = hash + match_green
@@ -1859,200 +2287,41 @@ function outputScreen(runtype) {
 	get_color()
 	get_screen_metrics(runtype) // calls the rest, also used on resize
 	// perf
-	debug_page("perf","screen",t0,gt0)
+	section_info("screen", t0, gt0)
 }
 
-function outputMath() {
+function outputUA() {
 	let t0 = performance.now()
-	// 1= ecma1, 6= ecma6, c= combined
-	let m1hash = "",
-		m6hash = "",
-		mchash = "",
-		m1 = "", // short codes
-		m6 = "",
-		fdMath1 = "", // strings for browser/os
-		fdMath6 = "",
-		strNew = zNEW + (runS ? zSIM : ""),
-		scriptBlock = false
-
-	function get_hashes() {
-		let h1 = "", h6 = "", r = ""
-		// 1st
-		let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
-			res = []
-		for (let i=0; i < list.length; i++) {
-			try {
-				r = Math.cos(list[i])
-			} catch(e) {
-				r = (e.name == "ReferenceError" ? zB1 :zB2)
-				scriptBlock = true
-			}
-			res.push(r)
-			document.getElementById("cos"+i).innerHTML = r
-		}
-		h1 = res.join("-")
-		// 6th
-		let x, y
-		x = 0.5
-		try {
-			r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
-		} catch(e) {
-			r = (e.name == "ReferenceError" ? zB1 :zB2)
-			scriptBlock = true
-		}
-		dom.math1 = r; h6 = r
-		x=1
-		try {
-			r = Math.exp(x) - 1 // expm1(1)
-		} catch(e) {
-			r = (e.name == "ReferenceError" ? zB1 :zB2)
-			scriptBlock = true
-		}
-		dom.math2 = r; h6 += "-"+r
-		x = 1
-		try {
-			y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
-		} catch(e) {
-			r = (e.name == "ReferenceError" ? zB1 :zB2)
-			scriptBlock = true
-		}
-		dom.math3 = r; h6 += "-"+r
-		// hashes
-		m1hash = sha1(h1)
-		m6hash = sha1(h6)
-		mchash = sha1(h1+"-"+h6)
-		// sim
-		if (runS) {
-			//m1hash = sha1("a"), mchash = sha1("b") // emca1
-			//m6hash = sha1("c"), mchash = sha1("d") // emca6
-			m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
-		}
-		store_data("ua","math hash",mchash)
-	}
-
-	function get_codes() {
-		// known FF hashes (browser)
-		if (m6hash == "7a73daaff1955eef2c88b1e56f8bfbf854d52486") {m6="1"}
-		else if (m6hash == "0eb76fed1c087ebb8f80ce1c571b2f26a8724365") {m6="2"}
-		else if (m6hash == "9251136865b8509cc22f8773503288d106104634") {m6="3"} // 68+ exmp1(1) 1380031
-		// known FF hashes (os)
-		if (m1hash == "46f7c2bbe55a2cd28252d059604f8c3bac316c23") {m1="A"}
-		else if (m1hash == "8464b989070dcff22c136e4d0fe21d466b708ece") {m1="B"}
-		else if (m1hash == "97eee44856b0d2339f7add0d22feb01bcc0a430e") {m1="C"}
-		else if (m1hash == "96895e004b623552b9543dcdc030640d1b108816") {m1="D"}
-		else if (m1hash == "06a01549b5841e0ac26c875b456a33f95b5c5c11") {m1="E"}
-		else if (m1hash == "ae434b101452888b756da5916d81f68adeb2b6ae") {m1="F"}
-		else if (m1hash == "19df0b54c852f35f011187087bd3a0dce12b4071") {m1="G"}
-		else if (m1hash == "8ee641f01271d500e5c1d40e831232214c0bbbdc") {m1="H"}
-	}
-
-	function build_output() {
-		// browser
-		if (m6 == "1" | m6 == "3") {
-			fdMath6=zFF
-		} else if (m6 == "2") {
-			fdMath6=zFF+" [32-bit]"
-		}
-		// os, refine browser
-		if (m1 == "A" | m1 == "H") {
-			// A or H: always 64bit WIN on 64bit FF
-			fdMath1="Windows [64-bit]"
-			fdMath6=zSDK64
-		} else if (m1 == "C") {
-			// C: always 32bit FF on WIN (32bit or 64bit)
-			fdMath1="Windows"
-			fdMath6=zSDK32
-		} else if (m1 == "D") {
-			// D: always Linux (Mint, Debian, OpenSUSE)
-			fdMath1="Linux"
-			if (m6 == "1") {
-				// 60-67: 1D : always 64bit Linux -> 64bit FF
-				fdMath1="Linux [64-bit]"
-				fdMath6=zFF+" [64-bit]"
-			}	else if (m6 == "3") {
-				// 68+: 3D : can be FF64bit or TB32/64bit
-				// values already set
-			}	else if (m6 == "2") {
-				// D2: always 32bit Linux (32bit FF set earlier)
-				fdMath1="Linux [32-bit]"
-			}
-		} else if (m1 == "G") {
-			// G: always Linux (Ubuntu)
-			fdMath1="Linux"
-		} else if (m1 == "E") {
-			// E: always Mac: and thus 64bit FF
-			fdMath1="Mac"
-			fdMath6=zFF+" [64-bit]"
-		} else if (m1 == "F") {
-			// F: always Android
-			fdMath1="Android"
-		} else if (m1 == "B") {
-			// B: always WIN, always mingw
-			fdMath1="Windows"
-			if (m6 == "1") {
-				// ESR60: 1B: always 64bit TB: thus 64bit WIN
-				fdMath6=zMingw64
-				fdMath1="Windows [64-bit]"
-			} else if (m6 == "2") {
-				// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
-				fdMath6=zMingw32
-			} else if (m6 == "3") {
-				// ESR68: 3B: 32bit TB on 32/64 WIN and 64bit TB on WIN64: now all the same
-				fdMath6=zMingw
-			}
-		}
-	}
-
-	function output() {
-		if (isFF) {
-			// new
-			if (m1 == "") {m1hash += strNew} else {m1hash += s3+" ["+m1+"]"+sc}
-			if (m6 == "") {m6hash += strNew} else {m6hash += s3+" ["+m6+"]"+sc}
-
-			if (scriptBlock) {
-				strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
-			} else {
-				strNew = not_seen+" math combo before"+sc + (runS ? zSIM : "")
-			}
-			// runS: alternate new vs os-check (runS sets isOS ="")
-			if (runS) {if (stateSIM) {fdMath1 = "Windows"}}
-			// os-check
-			if (fdMath1 !== "") {
-				let check = fdMath1.replace(" [32-bit]","")
-				check = check.replace(" [64-bit]","")
-				check = check.toLowerCase()
-				if (isOS !== check) {fdMath1 += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
-			}
-			// output
-			dom.fdMathOS.innerHTML = (fdMath1 == "" ? strNew : fdMath1)
-			dom.fdMath.innerHTML = (fdMath6 == "" ? strNew : fdMath6)
-		}
-		// output hashes
-		dom.math1hash.innerHTML = m1hash
-		dom.math6hash.innerHTML = m6hash
-		dom.mathhash.innerHTML = mchash
-		// perf
-		debug_page("perf","math",t0,gt0)
-	}
-
-	get_hashes()
-	get_codes()
-	build_output()
-	output()
+	get_ua_nav()
+	get_ua_nav_checks()
 }
 
-function outputUA(runtype) {
-	let t0 = performance.now()
-	fp_ua = []
-	// start
-	get_errors() // isFF (2nd check)
+function outputFD(runtype) {
+	let t0 = performance.now(),
+		section = []
+
 	// FF only
 	if (isFF) {
-		get_widgets() // isOS
-		get_version() // isVer
-		get_chrome() // isTB*
-		get_resources() // isTB
-		get_line_scrollbar() // calls zoom & viewport
+		Promise.all([
+			get_errors(), // isFF (2nd check), needed for version
+			get_widgets(), // isOS
+			get_version(), // isVer - needed early for resources
+			get_chrome(), // isTB*
+			get_resources(), // isTB
+			get_line_scrollbar(), // calls zoom & viewport
+			get_math(), // must come after widget
+		]).then(function(results){
+			results.forEach(function(currentResult) {
+				// ignore chrome: which we need to run sammiched in there
+				if (currentResult !== "ignoreme") {
+					section.push(currentResult)
+				}
+			})
+			section_info("feature", t0, gt0, section)
+		})
+		// not used in hash
+		get_collation()
+
 	} else {
 		// don't notate
 		tb_green = ""
@@ -2084,13 +2353,35 @@ function outputUA(runtype) {
 			get_zoom("load")
 			get_viewport("load")
 		}
+		// run some for the info factor and so we output a section hash
+		Promise.all([
+			get_errors(),
+			get_widgets(),
+			get_math()
+		]).then(function(results){
+			results.forEach(function(currentResult) {
+				section.push(currentResult)
+			})
+			dom.fdBrandingCss = zNA
+			dom.fdResourceCss = zNA
+			dom.fdCollation = zNA
+			dom.fdResource = zNA
+			dom.fdChrome = zNA
+			dom.fdVersion = zNA
+			dom.fdMathOS = zNA
+			dom.fdLH = zNA
+			dom.fdScrollV = zNA
+			dom.fdScrollE = zNA
+			section_info("feature", t0, gt0, section)
+		})
 	}
 	// all
-	get_collation()
-	get_ua_nav()
 	stateSIM = !stateSIM
-	// perf
-	debug_page("perf","ua",t0,gt0)
+	// perf: only on load to account for missing time
+		// is this in the right place
+	if (runtype == "load" & isFF) {
+		section_info("part-feature", t0, gt0)
+	}
 }
 
 function outputStart() {
@@ -2104,19 +2395,21 @@ function outputStart() {
 		// not-coded
 		let items = document.getElementsByClassName("faint")
 		for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
+		// isFile
+		items = document.getElementsByClassName("isFile")
+		for (let i=0; i < items.length; i++) {items[i].textContent = note_file}
 		// section hash to come
 		items = document.getElementsByClassName("hashtocome")
 		for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
-		if (isFile) {dom.tempIsFile = note_file}
 		// sim = FF only
-		if (isFF == false) {runS = false}
-		debug_page("perf","setup",t0,gt0)
+		if (!isFF) {runS = false}
+		section_info("setup", t0, gt0)
 	}
 	// functions
 	gt0 = performance.now()
 	run_checks()
-	outputUA("load") // run UA first: checks isFF; sets isOS, isTB*, isVer
-	outputMath()
+	outputFD("load") // run FD first: checks isFF; sets isOS, isTB*, isVer
+	outputUA()
 	outputScreen("load")
 	run_os() // per os tweaks
 }
