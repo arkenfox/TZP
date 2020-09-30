@@ -40,24 +40,81 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function store_data(section, key, value) {
-	if (section == "ua") {
-		fp_ua.push(key+": "+value)
-		if (fp_ua.length == 5) {
-			fp_ua.sort()
-			console.log("ua", fp_ua)
-			dom.sectionUA9.innerHTML = sha1(fp_ua.join()) + s2+"[unspoofable?]"+sc
+function section_info(name, time1, time2, data) {
+	// fp
+	if (data !== undefined && data !== "") {
+		data.sort(Intl.Collator("en-US").compare)
+		let hash = sha1(data.join())
+		// checks: everything should be a "metric: value"
+		for (let i=0; i < data.length; i++) {
+			let check = data[i]
+			if (check == undefined) {
+				fpAllCheck.push(name +": contains undefined")
+			} else {
+				let metric = check.split(":")[0]
+				let value = check.split(":")[1]
+				if (value == "") {
+					fpAllCheck.push(name +" - " + metric + ": not set")
+				} else if (value == undefined) {
+					fpAllCheck.push(name +" - " + metric + ": undefined")
+				}
+			}
+		}
+		// store
+		if (gRerun) {
+			console.log(name + ": " + hash, data)
+		} else {
+			// yay!
+			fpAllHash.push(name + ": " + hash)
+			fpAllData.push([name +": " + hash, data])
+			if (fpAllHash.length == 10) {
+				fpAllHash.sort(Intl.Collator("en-US").compare)
+				fpAllData.sort(Intl.Collator("en-US").compare)
+				let hash2 = sha1(fpAllHash.join())
+				if (fpAllCheck.length > 0) {
+					fpAllCheck.sort()
+					// remove dupes: we only need one
+					fpAllCheck = fpAllCheck.filter(function(item, position) {return fpAllCheck.indexOf(item) === position})
+					console.error("section hash issues\n", fpAllCheck)
+				}
+				console.log("fingerprint: " + hash2 + "\n", fpAllData)
+			}
+		}
+		// append + output
+		try {
+			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
+			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
+			document.getElementById(name + "hash").innerHTML = hash
+		} catch(e) {}
+	} else {
+		if (name !=="setup" && name !== "part-feature") {
+			fpAllCheck.push(name +": data is missing")
 		}
 	}
+	// perf
+	let t0 = performance.now()
+	time1 = Math.round(t0-time1).toString()
+	try {
+		document.getElementById("perf"+name).innerHTML = "  "+ time1 +" ms"
+	} catch(e) {}
+	// combined perf
+	let el = dom.debugperf
+	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
+	// time2 is only for first run
+	if (gRerun == false) {
+		if (time2 !== undefined && time2 !== "") {
+			time2 = Math.round(t0-time2).toString()
+			pretty += " | " + so + time2.padStart(4) + sc + " ms"
+		}
+	}
+	el.innerHTML = el.innerHTML + (name == "setup" ? "" : "<br>") + pretty
 }
 
-function section_hash(name, data, addnote) {
-	if (addnote == undefined) {addnote = false}
-	data.sort(Intl.Collator("en-US").compare) // always sort the same for all users
-	let hash = sha1(data)
-	let el = document.getElementById(name + "hash")
-	el.innerHTML = hash + (addnote ? note_file : "")
-	console.log(name + ": " + hash + "\n", data)
+function debug_page(target, str) {
+	let el = document.getElementById("debug"+target)
+	if (gRerun == false) {
+		el.innerHTML = el.innerHTML + str + "<br>"
+	}
 }
 
 function debug_log(str, time1, time2) {
@@ -84,41 +141,6 @@ function debug_log(str, time1, time2) {
 	console.log(str.padStart(29) + ": "+ time1.padStart(4) + " ms" + time2)
 }
 
-function debug_page(target, str1, str2, str3, str4) {
-	if (isPage == "main") {
-		// vars
-		let t0 = performance.now(),
-			str="",
-			e = document.getElementById("debug"+target)
-
-		if (target == "perf") {
-			let time1 = Math.round(t0-str2).toString()
-			str = str1.padStart(12) + ": " + sn + time1.padStart(4) + sc + " ms"
-			if (str3 !== undefined && str3 !== "") {
-				// output running time if not a section rerun
-				if (gRerun == false) {
-					let time2 = Math.round(t0-str3).toString()
-					str = str + " | " + so + time2.padStart(4) + sc + " ms"
-				}
-			}
-			if (str4 !== undefined && str4 !== "") {
-				// warning
-				str += " |" + sb+ str4 + sc
-			}
-			e.innerHTML = e.innerHTML + (str1 == "setup" ? "" : "<br>") + str
-			// display in section title
-			try {
-				document.getElementById("perf"+str1).innerHTML = "  "+ time1 +" ms"
-			} catch(e) {}
-
-		} else {
-			if (gRerun == false) {
-				str = str1
-				e.innerHTML = e.innerHTML + str + "<br>"
-			}
-		}
-	}
-}
 
 function showhide(togType, togID, togWord) {
 	var xyz = document.getElementsByClassName("tog"+togID);
@@ -126,13 +148,12 @@ function showhide(togType, togID, togWord) {
 	for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
 	// change label
 	if (togWord !== "") {
-		if (togID == "Z") {
-			document.getElementById("label"+togID).innerHTML = togWord+" debugging"
-		} else if (togID == "L2") {
-			document.getElementById("label"+togID).innerHTML = togWord+" application language tests"
-		} else {
-			document.getElementById("label"+togID).innerHTML = togWord+" details"
-		}
+		let descript = "details"
+		if (togID == "F1") {descript = "fonts"}
+		if (togID == "F3") {descript = "textmetrics"}
+		if (togID == "F4") {descript = "unicode glyphs"}
+		if (togID == "Z") {descript = "debugging"}
+		document.getElementById("label"+togID).innerHTML = togWord +" "+ descript
 	}
 	// errors
 	if (togID == "E") {
@@ -156,49 +177,19 @@ function showhide(togType, togID, togWord) {
 			for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
 		}
 	}
-	// font lists show/hide if same hash or not, and change label text
-	if (togID == "F") {
-		if (isPage == "main") {
-			let fontA = dom.small_fontFPJS2.innerHTML
-			let fontB = dom.small_fontFB.innerHTML
-			if (fontA == fontB) {
-				// same: hide the second
-				dom.small_fontlabel = "whitelist"
-				dom.fontB1.style.display = "none"
-				dom.fontB2.style.display = "none"
-			} else {
-				// different: show both
-				dom.small_fontlabel = "fingerprintjs2 [whitelist]"
-				dom.fontB1.style.display = togType
-				dom.fontB2.style.display = togType
-			}
-			let fontC = dom.all_fontFPJS2.innerHTML
-			let fontD = dom.all_fontFB.innerHTML
-			if (fontC == fontD) {
-				// same: hide the second
-				dom.all_fontlabel = "os";
-				dom.fontD1.style.display = "none"
-				dom.fontD2.style.display = "none"
-			} else {
-				// different: show both
-				dom.all_fontlabel = "fingerprintjs2 [os]"
-				dom.fontD1.style.display = togType
-				dom.fontD2.style.display = togType
-			}
-		} else if (isPage == "extra") {
-			let fontE = dom.monsta_fontFPJS2.innerHTML
-			let fontF = dom.monsta_fontFB.innerHTML
-			if (fontE == fontF) {
-				// same: hide the second
-				dom.monsta_fontlabel = "monsta"
-				dom.fontF1.style.display = "none"
-				dom.fontF2.style.display = "none"
-			} else {
-				// different: show both
-				dom.monsta_fontlabel = "fingerprintjs2 [monsta]"
-				dom.fontF1.style.display = togType
-				dom.fontF2.style.display = togType
-			}
+	// fonts show/hide if font fallback has been run + it differs
+	if (togID == "F1") {
+		let fontA = dom.fontFPJS2label.textContent
+		let fontB = dom.fontFBlabel.textContent
+		if (fontB == "") {fontB = fontA}
+		if (fontA == fontB) {
+			// same: hide the second
+			dom.fontB1.style.display = "none"
+			dom.fontB2.style.display = "none"
+		} else {
+			// different: show both
+			dom.fontB1.style.display = togType
+			dom.fontB2.style.display = togType
 		}
 	}
 }
@@ -206,11 +197,11 @@ function showhide(togType, togID, togWord) {
 function toggleitems(chkbxState, chkbxID) {
 	if (chkbxState.checked) {
 		if (chkbxID=="D") {stateDR = false}
-		if (chkbxID=="F") {stateFNT = false}
+		if (chkbxID=="F1") {stateFNT = false}
 		showhide("none",chkbxID,"&#9660; show")
 	} else {
 		if (chkbxID=="D") {stateDR = true}
-		if (chkbxID=="F") {stateFNT = true}
+		if (chkbxID=="F1") {stateFNT = true}
 		showhide("table-row",chkbxID,"&#9650; hide")
 	}
 }
@@ -291,59 +282,44 @@ function byteArrayToHex(arrayBuffer){
 }
 
 /* BUTTONS: (re)GENERATE SECTIONS */
-function outputSection(id, cls, page) {
+function outputSection(id, cls) {
 	gRerun = true
+	// clear results
+	if (cls == undefined || cls == "") {cls = "c"}
 	// clear elements, &nbsp stops line height jitter
 	let tbl = document.getElementById("tb"+id)
 	tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
 	// clear details
-	if (page == "m") {
-		if (id=="1") {dom.kbt.value = ""}
-		if (id=="7") {reset_devices()}
-		if (id=="8") {reset_domrect()}
-		if (id=="11" && cls=="c2") {reset_audio2()}
-		if (id=="12" && cls=="c1") {reset_unicode()}
-		if (id=="13") {reset_media()}
-		if (id=="14") {reset_css()}
-		if (id=="18") {reset_misc()}
-	}
+	if (id=="1") {dom.kbt.value = ""}
+	if (id=="7") {reset_devices()}
+	if (id=="8") {reset_domrect()}
+	if (id=="11" && cls=="c2") {reset_audio2()}
+	if (id=="12") {reset_fonts()}
+	if (id=="13") {reset_media()}
+	if (id=="14") {reset_css()}
+	if (id=="18") {reset_misc()}
 
 	// wait so users see change
 	function call_output() {
 		clearInterval(checking)
 		// reset timer
 		gt0 = performance.now()
-		if (page=="m") {
-			if (id=="1") {outputScreen("screen")}
-			if (id=="2") {outputUA(); outputMath()}
-			if (id=="3") {outputMath()}
-			if (id=="4" && cls=="c") {outputLanguage()}
-			if (id=="5") {outputHeaders()}
-			if (id=="6") {outputStorage()}
-			if (id=="7") {outputDevices()}
-			if (id=="8") {outputDomRect()}
-			if (id=="9") {outputCanvas()}
-			if (id=="10") {outputWebGL()}
-			if (id=="11" && cls=="c1") {outputAudio1()}
-			if (id=="11" && cls=="c2") {outputAudio2()}
-			if (id=="12" && cls=="c1") {outputFonts1()}
-			if (id=="13") {outputMedia()}
-			if (id=="14") {outputCSS()}
-			if (id=="18") {outputMisc()}
-		} else if (page=="e") {
-			if (id=="4" && cls=="c2") {outputAppLanguage()}
-			if (id=="6") {outputWidgets()}
-		}
+		if (id=="1") {outputScreen("screen")}
+		if (id=="2") {outputUA()}
+		if (id=="3") {outputFD()}
+		if (id=="4") {outputLanguage()}
+		if (id=="5") {outputHeaders()}
+		if (id=="6") {outputStorage()}
+		if (id=="7") {outputDevices()}
+		if (id=="8") {outputDomRect()}
+		if (id=="9") {outputCanvas()}
+		if (id=="10") {outputWebGL()}
+		if (id=="11" && cls=="c1") {outputAudio1()}
+		if (id=="11" && cls=="c2") {outputAudio2()}
+		if (id=="12") {outputFonts()}
+		if (id=="13") {outputMedia()}
+		if (id=="14") {outputCSS()}
+		if (id=="18") {outputMisc()}
 	}
 	let checking = setInterval(call_output, 170)
-
-	// don't wait
-	if (page=="m") {
-		if (id=="12" && cls=="c2") {outputFonts2("small")}
-		if (id=="12" && cls=="c3") {outputFonts2("all")}
-	} else if (page=="e") {
-		isPage = "extra"
-		if (id=="3") {outputChrome()}
-		if (id=="5") {outputFonts2("monsta")}
-	}
 }
