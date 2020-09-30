@@ -1,19 +1,106 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>TZP</title>
-<style>
-body {background-color: #1a1a1a; color: #b3b3b3;}
-a {color: #8abfda; text-decoration: none;}
-.s1 {color: #dc8c8c;}
-</style>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>tzp index</title>
+	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<!-- custom -->
+	<style>
+		table {width: 580px;}
+	</style>
 </head>
 <body>
-<center>
-<br>
-<p class="s1">testing<p>
-<p>hello</p>
-</center><br>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="tzp.html">take me to the main test</a></td></tr>
+	</table>
+
+	<!--
+		very short intro
+			TZP is designed for current Firefox / ESR (v78+) and Tor Browser (v10+) only
+			tried to maintain backward compat to FF60+
+			the rest are various tests, PoCs, research, experiments, tools and concepts created during protoyping
+	-->
+
+	<table id="tb99">
+		<col width="1%"><col width="19%"><col width="80%">
+		<thead><tr><th colspan="3">index</th></tr></thead>
+		<tr><td colspan="3" class="intro"><span class="no_color"><span class="s12">NOTE:</span>
+			If a link is <code>404</code>, then I haven't cleaned it up, applied tzp's styling and uploaded it yet.
+			This is a work in progress and there are more tests than just those listed. Give me a few weeks</span><td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="no_color"><b>GITHUB</b></span><td></tr>
+		<tr><td colspan="2"><a class="blue" href="https://github.com/arkenfox/TZP/">repo</a></td><td>come and say hi</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3" class="intro"><span class="s3">FEATURE DETECTION</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/collation.html">collation</a></td>
+				<td>description</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/math.html">math</a></td>
+				<td>research: computes a set of math functions and polyfills
+						<ul><li>compares all results to a control set, to build a list that provides entropy</li>
+							<li>compares polyfill to function results</li>
+							<li>engine detection using math</li>
+						</ul>
+				</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/versions.html">versions</a></td>
+				<td>a history of firefox version-specific PoCs tzp uses or considered</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s4">LANGUAGE</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/pluralrules.html">pluralrules</a></td>
+				<td>description</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s6">COOKIES & STORAGE</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/sanitizing.html">sanitizing</a></td>
+				<td>description</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s8">DOMRECT / SVG</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/domrectnoise.html">domrect noise</a></td>
+				<td>an example using one domrect method (getClientRects) to detect fake results</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s9">CANVAS</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/canvasnoise.html">canvas noise</a></td>
+				<td>detect fake canvas by comparing against known results, and an example of fingerprinting
+				noise characteristics against random canvas</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s12">FONTS</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/textmetrics.html">textmetrics noise</a></td>
+				<td>description</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="s18">MISC</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/timing.html">timing</a></td><td>description</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+		<tr><td colspan="3" class="intro"><span class="no_color">OTHER</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/historylength.html">history.length</a></td>
+				<td>description</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/listmaker.html">list maker</a></td>
+				<td>paste, click, copy: de-dupe and sort lists</td></tr>
+		<tr><td colspan="3"></td></tr> <!--spacer-->
+
+	</table>
+	<br>
+
+	<!-- preload for main test:
+		ToDo: test if it has an impact
+		ToDo: what about resources:// chrome:// ?
+		ToDo: we could preload the js files just not autorun outputX unless location is tzp.html
+	-->
+	<div class="offscreen">
+		<div><span class="woffyes">&#xe800;</span></div>
+	<div>
+	<link rel="stylesheet" type="text/css" href="css/media.css">
+	<link rel="stylesheet" type="text/css" href="css/window_size.css">
+	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
+	<link rel="stylesheet" type="text/css" href="css/dpi.css">
+
 </body>
 </html>
