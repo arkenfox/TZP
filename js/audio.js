@@ -19,7 +19,8 @@ function reset_audio2() {
 }
 
 function get_audio2_context(attempt) {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		sColor = s11
 	latencyTries++
 
 	function a(a, b, c) {
@@ -29,8 +30,7 @@ function get_audio2_context(attempt) {
 	}
 	let f = new window.AudioContext
 	let obj
-	let hash = [],
-		results = [],
+	let results = [],
 		samplerate = ""
 
 	let	d = f.createAnalyser()
@@ -40,7 +40,6 @@ function get_audio2_context(attempt) {
 	obj = a(obj, d, "an-")
 	// build key+value array
 	for (const [key, value] of Object.entries(obj)) {
-		hash.push(key + value)
 		results.push(key + ": " + value)
 		if (key == "ac-sampleRate") {samplerate = value}
 	}
@@ -76,12 +75,12 @@ function get_audio2_context(attempt) {
 		dom.audio1data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256_str(hash.join())
+			sha256_str(results.join())
 		]).then(function(result){
-			dom.audio1hash.innerHTML = result[0] + s11 + "["+ results.length +" keys]" + sc
+			dom.audio1hash.innerHTML = result[0] + sColor + "["+ results.length +" keys]" + sc
 			// perf
-			if (logPerf) {debug_log("context [audio]",t0,t0audio)}
-			if (latencyTries == 2) {debug_page("perf","audio 2",t0audio)}
+			if (logPerf) {debug_log("context [audio]", t0, t0audio)}
+			if (latencyTries == 2) {section_info("audio2", t0audio)}
 		})
 	}
 	// next test
@@ -120,7 +119,7 @@ function get_audio2_hybrid() {
 	scriptProcessor.onaudioprocess = function(bins) {
 		bins = new Float32Array(analyser.frequencyBinCount)
 		analyser.getFloatFrequencyData(bins)
-		for (let i=0; i < bins.length; i=i+1) {
+		for (let i=0; i < bins.length; i++) {
 			results.push(" " + bins[i])
 		}
 		analyser.disconnect()
@@ -136,7 +135,7 @@ function get_audio2_hybrid() {
 			dom.audio3hash = result[0]
 			// perf
 			if (logPerf) {debug_log("hybrid [audio]",t0,t0audio)}
-			if (showperf) {debug_page("perf","audio 2",t0audio)}
+			if (showperf) {section_info("audio2", t0audio)}
 		})
 		// re-test context
 		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
@@ -164,7 +163,7 @@ function get_audio2_oscillator() {
 	scriptProcessor.onaudioprocess = function(bins) {
 		bins = new Float32Array(analyser.frequencyBinCount)
 		analyser.getFloatFrequencyData(bins)
-		for (let i=0; i < bins.length; i=i+1) {
+		for (let i=0; i < bins.length; i++) {
 			cc_output.push(" " + bins[i])
 		}
 		analyser.disconnect()
@@ -187,16 +186,6 @@ function get_audio2_oscillator() {
 	oscillator.start(0)
 }
 
-function outputDisabled(runtype) {
-	// until I rebuild and promisify
-	if (runtype == 1) {
-		dom.audiohash1 = sha1("disabled,n/a,n/a,n/a")
-	} else if (runtype == 2) {
-		dom.audiohash2 = sha1("n/a,n/a,n/a")
-	}
-
-}
-
 function outputAudio2() {
 	t0audio = performance.now()
 	latencyTries = 0
@@ -212,7 +201,6 @@ function outputAudio2() {
 		// no webaudio
 		dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
-		outputDisabled(2)
 	}
 }
 
@@ -258,18 +246,16 @@ function outputAudio1(runtype) {
 				dom.audioSum = sum
 				pxi_compressor.disconnect()
 				// perf
-				debug_page("perf","audio",t0,gt0)
+				section_info("audio", t0, gt0)
 		}
 	} catch(error) {
 		dom.audioSupport = zD
 		dom.audioCopy = zNA, dom.audioGet = zNA, dom.audioSum = zNA
-		outputDisabled(1)
 		if (runtype == "load") {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
-			outputDisabled(2)
 		}
 		// perf
-		debug_page("perf","audio",t0,gt0)
+		section_info("audio", t0, gt0)
 	}
 }
 
