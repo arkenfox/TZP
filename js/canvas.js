@@ -4,166 +4,172 @@
 https://canvasblocker.kkapsner.de/test/
 https://github.com/kkapsner/CanvasBlocker */
 
-var t0canvas
-
-function analyzeCanvas(runtype, res1, res2, res3) {
+function outputCanvas() {
 	// vars
-	let chash1 = [],
-		diff78 = false,
-		is78rfp = false,
-		error_string = "error while testing",
-		t0 = performance.now()
-
-	// RFP
-	if (isVer > 77) {
-		if (get_RFP() == true) {is78rfp = true}
+	let t0 = performance.now(),
+		main0 = [], main1 = [], main2 = [],
+		sColor = s9
+	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // gecko toDataURL, toBlob
+		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",
+		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",
+		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"
+	if (isEngine == "blink") {
+		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"
 	}
 
-	function display_value(item, value1, value2, value3) {
+	// analysis after promsies
+	function analyzeCanvas(runtype, res1, res2, res3) {
 		// vars
-		let isRandom = false,
-			pushvalue = value1,
-			control = "d87b36e65e37d411ac204db663f0ec05fe94bf7b6df537bab3f11052d1621ecc", // white RFP
-			combined = "",
-			sname = item.substring(0,4)
-		let element = dom.tb9.querySelector("." + item)
-		// cleanup
-		if (value1 == error_string || value2 == error_string) {
-			// not two valid results
-			value1 = error_string
-			pushvalue = value1
-		} else if (value1.substring(0,14) == "ReferenceError") {
-			// blocked
-			value1 = zB
-			pushvalue = "blocked"
-		} else if (value1== "42c4b0e3141cfc98c8f4fb9a24b96f99e441ae274c939b641b9995a455b85278") {
-			// sha256 of undefined
-			value1 = zU
-			value2 = zU
-			pushvalue = zU
-		} else if (value1 !== value2) {
-			// randomness
-			isRandom = true
-			pushvalue = "random"
-			combined = "random " + s9 +" [1] "+ sc + value1.substring(0,22) + ".."
-				+ s9 +" [2] "+ sc + value2.substring(0,22) + ".."
+		let chash1 = [],
+			diff78 = false,
+			is78rfp = false,
+			error_string = "error while testing"
+		// RFP
+		if (isVer > 77) {
+			if (get_RFP() == true) {is78rfp = true}
 		}
 
-		// noise: used only if not isRandom
-		let noise = "noise detected " + s9 +" [both] "+ sc + value1.substring(0,40) + ".."
-		// only use noise for FF & blink
-		if (isFF || isEngine == "blink") {} else {value3 = "true"}
-		// only apply to hashes
-		if (value1.length !== 64) {value3 = "true"}
-		if (value1.indexOf(" ") > 0) {value3 = "true"}
+		function display_value(item, value1, value2, value3) {
+			// vars
+			let isRandom = false,
+				pushvalue = value1,
+				control = "d87b36e65e37d411ac204db663f0ec05fe94bf7b6df537bab3f11052d1621ecc", // white RFP
+				combined = "",
+				sname = item.substring(0,4)
+			let element = dom.tb9.querySelector("." + item)
+			// cleanup
+			if (value1 == error_string || value2 == error_string) {
+				// not two valid results
+				value1 = error_string
+				pushvalue = value1
+			} else if (value1.substring(0,14) == "ReferenceError") {
+				// blocked
+				value1 = zB0
+				pushvalue = zB0
+			} else if (value1== "42c4b0e3141cfc98c8f4fb9a24b96f99e441ae274c939b641b9995a455b85278") {
+				// sha256 of undefined
+				value1 = zU
+				value2 = zU
+				pushvalue = zU
+			} else if (value1 !== value2) {
+				// randomness
+				isRandom = true
+				pushvalue = "random"
+				combined = "random " + sColor +" [1] "+ sc + value1.substring(0,22) + ".."
+					+ sColor +" [2] "+ sc + value2.substring(0,22) + ".."
+			}
 
-		// hashes: static
-		if (sname == "isPo") {
-			control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
-			if (isRandom) {value1 = combined
-			} else if (value1 == control) {
-			} else if (value3 == "false") {
-				value1 = noise
-				pushvalue = "tampered"
+			// noise: used only if !isRandom
+			let noise = "noise detected " + sColor +" [both] "+ sc + value1.substring(0,40) + ".."
+			// only use noise for FF & blink
+			if (isFF || isEngine == "blink") {} else {value3 = "true"}
+			// only apply to hashes
+			if (value1.length !== 64) {value3 = "true"}
+			if (value1.indexOf(" ") > 0) {value3 = "true"}
+
+			// hashes: static
+			if (sname == "isPo") {
+				control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
+				if (isRandom) {value1 = combined
+				} else if (value1 == control) {
+				} else if (value3 == "false") {
+					value1 = noise
+					pushvalue = "tampered"
+				}
+				value1 += (value1 == control ? rfp_green : rfp_red)
 			}
-			value1 += (value1 == control ? rfp_green : rfp_red)
-		}
-		if (sname == "mozG" && isVer < 74) {
-			if (isRandom) {value1 = combined
-			} else if (value3 == "false" && value1 !== control) {
-				value1 = noise
-				pushvalue = "tampered"
+			if (sname == "mozG" && isVer < 74) {
+				if (isRandom) {value1 = combined
+				} else if (value3 == "false" && value1 !== control) {
+					value1 = noise
+					pushvalue = "tampered"
+				}
+				value1 += (value1 == control ? rfp_green : rfp_red)
 			}
-			value1 += (value1 == control ? rfp_green : rfp_red)
-		}
-		// hashes: randomized/static
-		if (sname == "toDa" || sname == "toBl" || sname == "getI") {
-			// control
-			if (sname == "getI") {
-				control = "ae8d89f4cb47814af5d79e63a1a60b3f3f28d9309189b7518f1ecc23d8bda282"
-			}
-			if (value1 == error_string) {
-				value1 += (isVer > 77 ? rfp_random_red : rfp_red)
-			} else {
-				if (isRandom) {value1 = combined}
-				if (isVer > 77) {
-					// 78+: random
-					if (isRandom) {
-						if (is78rfp) {
-							pushvalue = "random rfp"
-							// toDataURL vs toBlob
-							if (sname == "toDa" || sname == "toBl") {
-								if (!diff78) {pushvalue = "random ext"}
-							}
-						} else {
-							pushvalue = "random ext"
-						}
-						value1 += (pushvalue == "random rfp" ? rfp_random_green : rfp_random_red)
-					} else {
-						// 78+: not random
-						if (value3 == "false") {
-							// noise
-							pushvalue = "tampered"
-							value1 = noise + rfp_random_red
-						} else {
-							// no-noise
-							value1 += rfp_random_red
-						}
-					}
+			// hashes: randomized/static
+			if (sname == "toDa" || sname == "toBl" || sname == "getI") {
+				// control
+				if (sname == "getI") {
+					control = "ae8d89f4cb47814af5d79e63a1a60b3f3f28d9309189b7518f1ecc23d8bda282"
+				}
+				if (value1 == error_string) {
+					value1 += (isVer > 77 ? rfp_random_red : rfp_red)
 				} else {
-					// <78: static
-					if (value1 !== control) {
-						// noise
-						if (isRandom == false && value3 == "false") {
-							pushvalue = "tampered"
-							value1 = noise
+					if (isRandom) {value1 = combined}
+					if (isVer > 77) {
+						// 78+: random
+						if (isRandom) {
+							if (is78rfp) {
+								pushvalue = "random rfp"
+								// toDataURL vs toBlob
+								if (sname == "toDa" || sname == "toBl") {
+									if (!diff78) {pushvalue = "random ext"}
+								}
+							} else {
+								pushvalue = "random ext"
+							}
+							value1 += (pushvalue == "random rfp" ? rfp_random_green : rfp_random_red)
+						} else {
+							// 78+: not random
+							if (value3 == "false") {
+								// noise
+								pushvalue = "tampered"
+								value1 = noise + rfp_random_red
+							} else {
+								// no-noise
+								value1 += rfp_random_red
+							}
 						}
+					} else {
+						// <78: static
+						if (value1 !== control) {
+							// noise
+							if (isRandom == false && value3 == "false") {
+								pushvalue = "tampered"
+								value1 = noise
+							}
+						}
+						value1 += (value1 == control ? rfp_green : rfp_red)
 					}
-					value1 += (value1 == control ? rfp_green : rfp_red)
 				}
 			}
+			// push + display
+			chash1.push(item+": "+pushvalue)
+			element.innerHTML = value1
 		}
-		// push + display
-		chash1.push(item+", "+pushvalue)
-		element.innerHTML = (pushvalue == "blocked" ? zB : value1)
-	}
 
-	// 78+: track toDataURL vs toBlob randomness
-	let valueB = "", valueD = ""
-	for (let i=0; i < res1.length; i++) {
-		let str1 = res1[i],
-			delim = str1.search(","),
-			display = str1.substring(0,delim)
-		if (display == "toBlob") {
-			valueB = str1.substring(delim+1, str1.length)
-		} else if (display == "toDataURL") {
-			valueD = str1.substring(delim+1, str1.length)
+		// 78+: track toDataURL vs toBlob randomness
+		let valueB = "", valueD = ""
+		for (let i=0; i < res1.length; i++) {
+			let str1 = res1[i],
+				delim = str1.search(","),
+				display = str1.substring(0,delim)
+			if (display == "toBlob") {
+				valueB = str1.substring(delim+1, str1.length)
+			} else if (display == "toDataURL") {
+				valueD = str1.substring(delim+1, str1.length)
+			}
 		}
-	}
-	if (valueB !== valueD) {diff78 = true}
+		if (valueB !== valueD) {diff78 = true}
 
-	// sort arrays, output values
-	res1.sort()
-	res2.sort()
-	res3.sort()
-	for (let i=0; i < res1.length; i++) {
-		let str1 = res1[i],
-			str2 = res2[i],
-			str3 = res3[i],
-			delim = str1.search(","),
-			display = str1.substring(0,delim),
-			value1 = str1.substring(delim+1, str1.length),
-			value2 = str2.substring(delim+1, str2.length),
-			value3 = str3.substring(delim+1, str3.length)
-		display_value(display, value1, value2, value3)
+		// sort arrays, output values
+		res1.sort()
+		res2.sort()
+		res3.sort()
+		for (let i=0; i < res1.length; i++) {
+			let str1 = res1[i],
+				str2 = res2[i],
+				str3 = res3[i],
+				delim = str1.search(","),
+				display = str1.substring(0,delim),
+				value1 = str1.substring(delim+1, str1.length),
+				value2 = str2.substring(delim+1, str2.length),
+				value3 = str3.substring(delim+1, str3.length)
+			display_value(display, value1, value2, value3)
+		}
+		// section
+		section_info("canvas", t0, gt0, chash1)
 	}
-	// section
-	section_hash("canvas", chash1, true)
-	if (logPerf) {debug_log("analyze " + runtype + " [canvas]",t0)}
-	debug_page("perf","canvas",t0canvas,gt0)
-}
-
-function outputCanvas() {
 
 	var canvas = {
 		createHashes: function(window){
@@ -552,19 +558,6 @@ function outputCanvas() {
 			}))
 			return finished
 		}
-	}
-
-	// vars
-	t0canvas = performance.now()
-	let t0 = performance.now(),
-		main0 = [], main1 = [], main2 = []
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // gecko toDataURL, toBlob
-		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",
-		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",
-		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"
-
-	if (isEngine == "blink") {
-		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"
 	}
 
 	Promise.all([
