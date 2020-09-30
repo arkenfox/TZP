@@ -1,0 +1,425 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=1024">
+  <title>canvas noise</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+</head>
+<body>
+
+<br>
+
+<h3>known Firefox hashes</h3>
+<div><button onClick="run_known()">re-run</button> <span id="perfknown"></span></div><br>
+<div>
+	<canvas id="control" width="16" height="16" style="border:5px solid white;"></canvas> &#9664 control &nbsp
+	<canvas id="control2" width="16" height="16" style="border:5px solid white;"></canvas> &#9664 isPoint* &nbsp
+<br><br>
+<div class="mono spaces"><span>   getImageData: </span><span id="hash1"></span></div>
+<div class="mono spaces"><span>      toDataURL: </span><span id="hash2"></span></div>
+<div class="mono spaces"><span>         toBlob: </span><span id="hash3"></span></div>
+<div class="mono spaces"><span>   mozGetAsFile: </span><span id="hash4"></span></div>
+<div class="mono spaces"><span>  isPointInPath: </span><span id="hash5"></span></div>
+<div class="mono spaces"><span>isPointInStroke: </span><span id="hash6"></span></div>
+
+<br>
+<hr>
+<h3>noise fingerprinting</h3>
+<div><button onClick="run()">re-run</button> <span id="perf"></span></div><br>
+<div>
+	<canvas id="cnv" width="100" height="100" style="border:5px solid white;"></canvas> &#9664 view &nbsp
+	<canvas id="cnv3" width="119" height="119" style="border:5px solid white;"></canvas> &#9664 isPointInStroke &nbsp
+<br><br>
+	<canvas id="cnv1" width="20" height="20" style="border:5px solid white;"></canvas> &#9664 control &nbsp
+	<canvas id="cnv2" width="20" height="20" style="border:5px solid white;"></canvas> &#9664 isPointInPath &nbsp
+	<image id="cnv4" width="20" height="20"  style="border:5px solid white;" src=""></image> &#9664 toDataURL &nbsp
+	<image id="cnv5" width="20" height="20"  style="border:5px solid white;" src=""></image> &#9664 toBlob &nbsp
+	<image id="cnv6" width="20" height="20"  style="border:5px solid white;" src=""></image> &#9664 mozGetAsFile
+
+</div>
+<br>
+<div class="s9">control</div>
+<div><span>hash: </span><span class="mono" id="sethash"></span></div>
+
+<br>
+<div class="s9">read: getImageData</div>
+<div><span>hash: </span><span class="mono" id="readhash"></span></div>
+<div>stats:<div>
+<div class="mono spaces" id="readstats"></div>
+<div>diffs: unique diffs [spread] [-/+] ... absolute</div>
+<div class="mono spaces" id="readdiff"></div>
+<br>
+
+<script>
+
+function run_known() {
+	// clear
+	document.getElementById("hash1").innerHTML = "&nbsp"
+	document.getElementById("hash2").innerHTML = "&nbsp"
+	document.getElementById("hash3").innerHTML = "&nbsp"
+	document.getElementById("hash4").innerHTML = "&nbsp"
+	document.getElementById("hash5").innerHTML = "&nbsp"
+	document.getElementById("hash6").innerHTML = "&nbsp"
+
+	setTimeout(function(){
+		try {
+			let t0 = performance.now()
+			let canvas = document.getElementById("control")
+
+			if (canvas.getContext) {
+				// set canvas
+				let ctx = canvas.getContext('2d')
+				for (let x=0; x < 16; x++) {
+					for (let y=0; y < 16; y++) {
+						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) + ","+ (y*16) + ",255)"
+						ctx.fillRect(x, y, 1, 1)
+					}
+				}
+
+				// set path
+				let canvas2 = document.getElementById("control2")
+				let ctx2 = canvas2.getContext('2d')
+				ctx2.fillStyle = "rgba(255,255,255,255)"
+				ctx2.beginPath()
+				ctx2.rect(2,5,8,7)
+				ctx2.closePath()
+				ctx2.fill()
+
+				// get hashes
+				// getImageData
+				let data = []
+				for (let x=0; x < 16; x++) {
+					for (let y=0; y < 16; y++) {
+						let pixel = ctx.getImageData(x,y,1,1)
+						data.push(pixel.data)
+					}
+				}
+				// 67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0
+				let hash1 = sha1(data.join())
+				document.getElementById("hash1").innerHTML =
+					(hash1 == "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0" ? sg : sb) + hash1 + sc
+
+				// toDataURL
+				// 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
+				let dataURL = canvas.toDataURL("image/png")
+				let hash2 = sha1(dataURL)
+				document.getElementById("hash2").innerHTML =
+					(hash2 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? sg : sb) + hash2 + sc
+
+				// toBlob
+				// 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
+				let hash3 = ""
+				canvas.toBlob(function(blob) {
+					let reader = new FileReader()
+					reader.onload = function(){
+						hash3 = sha1(reader.result)
+						//console.debug(reader.result)
+						document.getElementById("hash3").innerHTML =
+							(hash3 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? sg : sb) + hash3 + sc
+					}
+					reader.onerror = function(){
+						document.getElementById("hash3").innerHTML = "error"
+					}
+					reader.readAsDataURL(blob)
+				})
+
+				// mozGetAsFile
+				let hash4 = ""
+				try {
+					let file = canvas.mozGetAsFile("moz.png")
+					let reader = new FileReader()
+					reader.onload = function(){
+						hash4 = sha1(reader.result)
+						document.getElementById("hash4").innerHTML =
+							(hash4 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? sg : sb) + hash4 + sc
+					}
+					reader.onerror = function(){
+						document.getElementById("hash4").innerHTML = "error"
+					}
+					reader.readAsDataURL(file)
+				} catch(e) {
+					//console.log(e.name, e.message)
+					document.getElementById("hash4").innerHTML = "error"
+				}
+
+				// isPointInPath
+				try {
+					let hash5 = []
+					for (let x = 0; x < 16; x++){
+						for (let y = 0; y < 16; y++){
+							hash5.push(ctx2.isPointInPath(x, y))
+						}
+					}
+					hash5 = sha1(hash5)
+					document.getElementById("hash5").innerHTML =
+						(hash5 == "f44c70171a197cc26df382603e76f4ba581e2d8f" ? sg : sb) + hash5 + sc
+				} catch(e) {}
+
+				// isPointInStroke
+				try {
+					let hash6 = []
+					for (let x = 0; x < 16; x++){
+						for (let y = 0; y < 16; y++){
+							hash6.push(ctx2.isPointInStroke(x, y))
+						}
+					}
+					hash6 = sha1(hash6)
+					document.getElementById("hash6").innerHTML =
+						(hash6 == "1b636fb26edee73d7ca832edd1112e0021566a50" ? sg : sb) + hash6 + sc
+				} catch(e) {}
+
+				// perf
+				let t1 = performance.now()
+				document.getElementById("perfknown").innerHTML = (t1-t0 + "ms")
+
+			}
+		} catch(e) {
+			console.debug("catchall known", e.name, e.message)
+		}
+	}, 170)
+
+
+}
+
+function run(runtype) {
+
+	let clrSet = [], cellSet = [],
+		clrRead = [], cellRead = [],
+		hashSet = "",
+		hashGetImage = ""
+	// clear
+	document.getElementById("sethash").innerHTML = "&nbsp"
+	document.getElementById("readhash").innerHTML = "&nbsp"
+	document.getElementById("readstats").innerHTML = "&nbsp"
+	document.getElementById("readdiff").innerHTML = "&nbsp"
+	document.getElementById("perf").innerHTML = ""
+
+	// delay so user can see things being reset
+	setTimeout(function(){
+		try {
+			let t0 = performance.now()
+
+			let canvas = document.getElementById("cnv"),
+				canvas1 = document.getElementById("cnv1"),
+				canvas2 = document.getElementById("cnv2"),
+				canvas3 = document.getElementById("cnv3"),
+				canvas4 = document.getElementById("cnv4")
+
+			if (canvas.getContext) {
+				let ctx = canvas.getContext('2d'),
+					ctx1 = canvas1.getContext('2d'),
+					ctx2 = canvas2.getContext('2d'),
+					ctx3 = canvas3.getContext('2d')
+
+				// set
+				for (let x=0; x < 20; x++) {
+					for (let y=0; y < 20; y++) {
+						// get random color
+						let clrR = Math.floor(Math.random()*256),
+							clrG = Math.floor(Math.random()*256),
+							clrB = Math.floor(Math.random()*256)
+						let clrs = clrR +","+ clrG + ","+ clrB + ",255"
+						clrSet.push(clrR)
+						clrSet.push(clrG)
+						clrSet.push(clrB)
+						clrSet.push(255)
+						cellSet.push(clrs)
+						// view
+						ctx.fillStyle = "rgba(" + clrs + ")"
+						ctx.fillRect(x*5, y*5, 5, 5)
+						// ?
+						ctx1.fillStyle = "rgba(" + clrs + ")"
+						ctx1.fillRect(x, y, 1, 1)
+						// isPointInPath
+						let sq = new Path2D()
+						sq.rect(x,y,1,1)
+						ctx2.fillStyle = "rgba(" + clrs + ")"
+						ctx2.fill(sq)
+						// isPointInStroke
+						let line = new Path2D()
+						line.rect((x*6)+2,(y*6)+2,1,1)
+						ctx3.lineWidth = 4
+						ctx3.strokeStyle = "rgba(" + clrs + ")"
+						ctx3.stroke(line)
+					}
+				}
+				hashSet = sha1(clrSet.join())
+				document.getElementById("sethash").innerHTML = sg + hashSet + sc
+
+				// toDataURL
+				let dataURL = cnv1.toDataURL("image/png")
+				cnv4.src = dataURL
+
+				// toBlob
+				cnv1.toBlob(function(blob) {
+					let url = URL.createObjectURL(blob)
+					cnv5.src = url
+				})
+
+				// mozGetAsFile
+				try {
+					let moz = cnv1.mozGetAsFile("moz.png")
+					let reader = new FileReader()
+					reader.readAsDataURL(moz)
+					reader.onloadend = function() {
+					 cnv6.src = reader.result;
+					}
+				} catch(err) {}
+
+				// non canvas, read pixels, 20x20
+				let img4 = cnv4,
+					imgW = img4.width,
+					imgH = img4.height
+				//console.debug(imgW, imgH)
+				// test just do the first four pixels on first row
+				for (let x=0; x < 4; x++) {
+					for (let y=0; y < 1; y++) {
+						//console.debug(x,y)
+					}
+				}
+
+				// read: getImageData
+				for (let x=0; x < 20; x++) {
+					for (let y=0; y < 20; y++) {
+						let pixel = ctx1.getImageData(x,y,1,1)
+						clrRead.push(pixel.data[0])
+						clrRead.push(pixel.data[1])
+						clrRead.push(pixel.data[2])
+						clrRead.push(pixel.data[3])
+						cellRead.push(pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3])
+					}
+				}
+				hashGetImage = sha1(clrRead.join())
+				if (hashGetImage == hashSet) {
+					document.getElementById("readhash").innerHTML = sg + hashGetImage + sc
+				} else {
+					document.getElementById("readhash").innerHTML = sb + hashGetImage + sc
+
+					// analyze
+					let changeR = [], changeG = [], changeB = [], changeA = [], changeC = [], channels = []
+					let absR = [], absG = [], absB = []
+					let negR = 0, negG = 0, negB = 0, z = 0
+					let chan = ""
+
+					for (let i=0; i < clrSet.length; i++) {
+						let diff = clrRead[i] - clrSet[i]
+						if (z==0) {
+							if (diff !== 0) {chan += "r"; changeR.push(diff); absR.push(Math.abs(diff)); if(diff < 0) {negR++}}
+							z = 1
+						} else if (z==1) {
+							if (diff !== 0) {chan += "g"; changeG.push(diff); absG.push(Math.abs(diff)); if(diff < 0) {negG++}}
+							z = 2
+						} else if (z==2) {
+							if (diff !== 0) {chan += "b"; changeB.push(diff); absB.push(Math.abs(diff)); if(diff < 0) {negB++}}
+							z = 3
+						} else {
+							if (diff !== 0) {chan += "a"; changeA.push(diff)}
+							if (chan !== "") {channels.push(chan)}
+							z = 0
+							chan = ""
+						}
+					}
+					for (let i=0; i < cellSet.length; i++) {
+						if (cellSet[i] !== cellRead[i]) {
+							changeC.push(i)
+							// x = i % 10, y = Math.floor(i/10)
+						}
+					}
+
+					// channels
+					let counts = {}
+					channels.forEach(function(c) {
+						counts[c] = (counts[c] || 0) + 1
+					})
+					let tmpchan = channels.filter(function(item, position) {return channels.indexOf(item) === position})
+					tmpchan.sort()
+
+					let chancount = 0, chanstring = ""
+					if (changeR.length > 0) {chancount++; chanstring = "r"}
+					if (changeG.length > 0) {chancount++; chanstring += "g"}
+					if (changeB.length > 0) {chancount++; chanstring += "b"}
+					if (changeA.length > 0) {chancount++; chanstring += "a"}
+
+					// stats
+					document.getElementById("readstats").innerHTML = "    cells changed: " + changeC.length
+						+ "<br> channels changed: "+ chancount + " [" + chanstring + "]"
+						+ "<br>   channel counts: r: "+ changeR.length
+						+ ", g: "+ changeG.length
+						+ ", b: "+ changeB.length
+						+ ", a: "+ changeA.length
+						+ "<br>   combos altered: " + tmpchan.length + " [" + tmpchan.join(", ") + "]"
+						+ "<br>     combo counts: " + JSON.stringify(counts)
+
+					// diffs
+					let tmpR = changeR.filter(function(item, position) {return changeR.indexOf(item) === position})
+					let tmpG = changeG.filter(function(item, position) {return changeG.indexOf(item) === position})
+					let tmpB = changeB.filter(function(item, position) {return changeB.indexOf(item) === position})
+					let tmpA = changeA.filter(function(item, position) {return changeA.indexOf(item) === position})
+					// sort diffs numerically
+					tmpR.sort(function(a, b){return a-b})
+					tmpG.sort(function(a, b){return a-b})
+					tmpB.sort(function(a, b){return a-b})
+					tmpA.sort(function(a, b){return a-b})
+					// for each we want a count and a spread (max/min)
+					// +/- split (ignore a)
+					let strR = "n/a", strG = "n/a", strB = "n/a", strA = "n/a"
+					if (tmpR.length > 0) {
+						strR = tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] + ", " + (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+						strR += " " + negR + "/" + (changeR.length-negR)
+					}
+					if (tmpG.length > 0) {
+						strG = tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] + ", " + (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+						strG += " " + negG + "/" + (changeG.length-negG)
+					}
+					if (tmpB.length > 0) {
+						strB = tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] + ", " + (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+						strB += " " + negB + "/" + (changeB.length-negB)
+					}
+					if (tmpA.length > 0) {
+						strA = tmpA.length +" ["+ tmpA[0] +" to "+ tmpA[tmpA.length-1] + ", " + (tmpA[tmpA.length-1]-tmpA[0]) +"]"
+					}
+				
+					// absolute stats (ignore a)
+					tmpR = absR.filter(function(item, position) {return absR.indexOf(item) === position})
+					tmpG = absG.filter(function(item, position) {return absG.indexOf(item) === position})
+					tmpB = absB.filter(function(item, position) {return absB.indexOf(item) === position})
+					tmpR.sort(function(a, b){return a-b})
+					tmpG.sort(function(a, b){return a-b})
+					tmpB.sort(function(a, b){return a-b})
+					if (tmpR.length > 0) {
+						strR += " ... " + tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] + ", " + (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+					}
+					if (tmpG.length > 0) {
+						strG += " ... " + tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] + ", " + (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+					}
+					if (tmpB.length > 0) {
+						strB += " ... " + tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] + ", " + (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+					}
+
+					document.getElementById("readdiff").innerHTML = "  r: "+ strR
+						+ "<br>  g: "+ strG + "<br>  b: "+ strB + "<br>  a: "+ strA 
+
+				}
+
+				// perf
+				let t1 = performance.now()
+				document.getElementById("perf").innerHTML = (t1-t0 + "ms")
+
+			}
+		} catch(e) {
+			console.debug("catchall", e.name, e.message)
+		}
+	}, 170)
+
+}
+
+run_known()
+run()
+
+</script>
+</body>
+</html>

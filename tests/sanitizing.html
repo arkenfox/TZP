@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=700">
+	<title>sanitizing</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 680px;}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb6">
+		<col width="37%"><col width="63%">
+		<thead><tr><th colspan="2">sanitizing</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">Checks for specific existing persistent
+			local web storage entries. If no such data is found, it creates it. If at least one is found,
+			it will propagate to any others that do not exist.</span></td></tr>
+		<tr><td><div>
+				<div class="btn-left"><button class="btn6 btn" onClick="run_sanitize_check()">[ re-run ]</button></div>
+				<div>[navigator] cookieEnabled</div></div></td><td class="c" id="ckieE"></td>
+		</tr>
+		<tr><td>[session] JS 1st party cookie</td><td class="faint" id="ckieS"></td></tr>
+		<tr><td>[persistent] JS 1st party cookie</td><td class="c" id="ckieP"></td></tr>
+		<tr><td>localStorage</td><td class="c" id="ls"></td></tr>
+		<tr><td>indexedDB</td><td class="c" id="idb"></td></tr>
+		<tr><td>service worker cache</td><td class="faint" id="swc"></td></tr>
+		<tr><td colspan="2" class="center">------</td></tr>
+		<tr><td>debugging</td><td class="c" id="debug"></td></tr>
+	</table>
+	<br>
+<script>
+
+var ckie = false, // are these storage mechanisms actually working
+	ls = false, 
+	idb = false,
+	cookieStored = "", // remember any existing values
+	lsStored = "",
+	idbStored = "",
+	debug = "" // keep track of what is happening
+
+// value to use: new if nothing found
+// otherwise we re-use the existing one, cuz ZOMBIE!!
+var rndStrX = ""
+
+function rnd_string(type) {
+	return type + Math.random().toString(36).substring(2, 15)
+}
+
+function rnd_number() {
+	return Math.floor((Math.random() * (99999 - 10000)) + 10000)
+}
+
+function lookup_cookie(name) {
+	name = name + "="
+	let decodedCookie = decodeURIComponent(document.cookie)
+	let ca = decodedCookie.split(';')
+	for(let i = 0 ; i < ca.length; i++) {
+		let c = ca[i]
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1)
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length)
+		}
+	}
+	return ""
+}
+
+function check_cookie(name) {
+	if (ckie == true) {
+		// we already checked that cookies work with no errors
+		cookieStored = lookup_cookie(name)
+		if (cookieStored != "") {
+			// we found something
+			debug = debug + "<br>zombie " + name + " cookie found"
+			dom.ckieP.innerHTML = "<span class='bad'>zombie " + name
+				+ " cookie found:</span> value " + "<span class='bad'>" + cookieStored + "</span>"
+		} else {
+			// nothing found
+			debug = debug + "<br>zombie " + name + " cookie: nothing found"
+		}
+	}
+}
+
+function test_cookie() {
+	// cookie support
+	if (navigator.cookieEnabled == true) {
+		debug = "cookies: enabled"
+		dom.ckieE = "enabled"
+		// random
+		let rndStrC = rnd_string("ptest_")
+		let rndStrD = rnd_string("")
+		let d = new Date()
+		d.setTime(d.getTime() + 86400000) // 1 day
+		let expires = "expires="+ d.toUTCString()
+		// set cookie
+		document.cookie = rndStrC + "=" + rndStrD + ";" + expires
+		// look it up
+		let pcookievalue = lookup_cookie(rndStrC)
+		if (pcookievalue != "") {
+			if (pcookievalue == rndStrD) {
+				// value matches
+				debug = debug + "<br>cookies: test successful"
+				ckie = true
+			} else {
+				// value doesn't match: this should never happen?
+				debug = debug + "<br>cookies: test failed: values do not match"
+			}
+		} else {
+			debug = debug + "<br>cookies: test failed"
+		}
+	} else {
+		debug = "cookies: disabled"
+		dom.ckieE = "disabled"
+	}
+}
+
+function set_zombie_cookie(name, value) {
+		// set cookie
+		let d = new Date()
+		d.setTime(d.getTime() + 86400000) // 1 day
+		let expires = "expires="+ d.toUTCString()
+		document.cookie = name + "=" + value + ";" + expires
+		// look it up
+		let pcookievalue = lookup_cookie(name)
+		if (pcookievalue != "") {
+			if (pcookievalue == value) {
+				// value matches
+				debug = debug + "<br>zombie " + name + " cookie: successfully set"
+				dom.ckieP.innerHTML = "<span class='good'>nothing found:</span> setting new zombie " + name
+					+ " cookie: value " + "<span class='good'>" + value + "</span>"
+			} else {
+				// value doesn't match: this should never happen?
+				debug = debug + "<br>zombie " + name + " cookie: test failed: values do not match"
+			}
+		} else {
+			debug = debug + "<br>zombie " + name + " cookie: test failed"
+		}
+}
+
+function check_storage(key) {
+	if (ls == true) {
+		// we already checked that localStorage works with no errors
+		lsStored = localStorage.getItem(key)
+		if (lsStored == null) {
+			// nothing found
+			debug = debug + "<br>zombie " + key + " key: nothing found"
+		} else {
+			// we found something
+			debug = debug + "<br>zombie " + key + " key found"
+			dom.ls.innerHTML = "<span class='bad'>zombie " + key + " key found:</span> value "
+				+ "<span class='bad'>" + lsStored + "</span>"
+		}
+	}
+}
+
+function test_storage() {
+	debug = debug + "<br>---"
+	try {
+		if (typeof(localStorage) != "undefined") {
+			debug = debug + "<br>localStorage: enabled"
+			// localStorage test
+			try {
+				let rndStrE = rnd_string("test_")
+				let rndStrF = rnd_string("")
+				localStorage.setItem(rndStrE, rndStrF)
+				let lsvalue = localStorage.getItem(rndStrE)
+				if (lsvalue == null) {
+					debug = debug + "<br>" + "localStorage: test failed"
+				} else {
+					if (lsvalue == rndStrF) {
+						// values match
+						ls = true
+						debug = debug + "<br>" + "localStorage: test successful"
+					} else {
+						// value doesn't match: this should never happen?
+						debug = debug + "<br>" + "localStorage: test failed: values do not match"
+					}
+				}
+			} catch(e) {
+				debug = debug + "<br>" + "localStorage: test failed: " + e.name
+			}
+		}	else {
+			debug = debug + "<br>localStorage: disabled: undefined"
+		}
+	} catch(e) {
+		debug = debug + "<br>localStorage: disabled: " + e.name
+	}
+}
+
+function set_zombie_storage(key, value) {
+	try {
+		localStorage.setItem(key, value)
+		let lsvalue = localStorage.getItem(key)
+		if (lsvalue == null) {
+			debug = debug + "<br>zombie " + key + " key: failed"
+		} else {
+			if (lsvalue == value) {
+				// values match
+				debug = debug + "<br>zombie " + key + " key: successfully set"
+				dom.ls.innerHTML = "<span class='good'>nothing found:</span> setting new zombie " + key
+					+ " key: value " + "<span class='good'>" + value + "</span>"
+			} else {
+				// value doesn't match: this should never happen?
+				debug = debug + "<br>zombie " + key + " key: failed: values do not match"
+			}
+		}
+	} catch(e) {
+		debug = debug + "<br>zombie " + key + " key: failed: " + e.name
+	}
+}
+
+function check_idb(name, object, id) {
+	//   name: TZP
+	// object: zombie
+	//     id: 1
+	if (idb == true) {
+		// we already checked that idb works with no errors
+		let check = indexedDB.open(name)
+		// create objectStore
+		check.onupgradeneeded = function(event){
+			let db = event.target.result
+			let store = db.createObjectStore(object, {keyPath: "id"})
+		}
+		check.onsuccess = function(event) {
+			let db = event.target.result
+			// start transaction
+			let transaction = db.transaction(object, "readwrite")
+			let store = transaction.objectStore(object)
+			let request = store.get(id)
+			// query the data
+			let getStr = store.get(id)
+			getStr.onsuccess = function() {
+				try {
+					idbStored = getStr.result.value
+					// we found something
+					debug = debug + "<br>zombie " + name + " store found"
+					dom.idb.innerHTML = "<span class='bad'>zombie " + name + " store found:</span> value "
+						+ "<span class='bad'>" + idbStored + "<span>"
+				} catch (e) {
+					// the value doesn't exist?
+					debug = debug + "<br>zombie " + name + " store: nothing found"
+				}
+			}
+			// close transaction
+			db.oncomplete = function() {object.close()}
+		}
+	}
+}
+
+function test_idb() {
+	debug = debug + "<br>---"
+	// idb support
+	try {
+		if (!window.indexedDB) {
+			debug = debug + "<br>idb: disabled"
+		} else {
+			debug = debug + "<br>idb: enabled"
+			// idb test
+			try {
+				let dbIDB = indexedDB.open("_testPBMode")
+				dbIDB.onerror = function() {
+					// current pb mode
+					debug = debug + "<br>idb: test failed: onerror"
+				}
+				dbIDB.onsuccess = function() {
+					idb = true
+					let rndStrI = rnd_string("test_")
+					// normal mode
+					try {
+						let openIDB = indexedDB.open(rndStrI)
+						// create objectStore
+						openIDB.onupgradeneeded = function(event){
+							let dbObject = event.target.result
+							let dbStore = dbObject.createObjectStore("testIDB", {keyPath: "id"})
+						}
+						// test
+						openIDB.onsuccess = function(event) {
+							let dbObject = event.target.result
+							// start transaction
+							let dbTx = dbObject.transaction("testIDB", "readwrite")
+							let dbStore = dbTx.objectStore("testIDB")
+							// add some data
+							let rndIndex = rnd_number()
+							let rndValue = rnd_string("")
+							dbStore.put({id: rndIndex, value: rndValue})
+							// query the data
+							let getStr = dbStore.get(rndIndex)
+							getStr.onsuccess = function() {
+								if (getStr.result.value == rndValue) {
+									// values match
+									debug = debug + "<br>" + "idb: test successful"
+								} else {
+									// value doesn't match: this should never happen?
+									debug = debug + "<br>" + "idb: test failed: values didn't match"
+								}
+							}
+							// close transaction
+							dbTx.oncomplete = function() {dbObject.close()}
+						}
+					} catch(e) {
+						debug = debug + "<br>" + "idb: test failed: " + e.name
+					}
+				}
+			} catch(e) {
+				// blocking cookies or something
+				debug = debug + "<br>idb: failed: .open: " + e.name
+			}
+		}
+	} catch(e) {
+		debug = debug + "<br>idb: disabled: " + e.name
+	}
+}
+
+function set_zombie_idb(name, object, zid, zvalue) {
+
+	let openIDB = indexedDB.open(name)
+	// create objectStore
+	openIDB.onupgradeneeded = function(event){
+		let dbObject = event.target.result
+		let dbStore = dbObject.createObjectStore(object, {keyPath: "id"})
+	}
+	// test
+	openIDB.onsuccess = function(event) {
+		let dbObject = event.target.result
+		// start transaction
+		let dbTx = dbObject.transaction(object, "readwrite")
+		let dbStore = dbTx.objectStore(object)
+		// add the data
+		dbStore.put({id: zid, value: zvalue})
+		// query the data
+		let getStr = dbStore.get(zid)
+		getStr.onsuccess = function() {
+			if (getStr.result.value == zvalue) {
+				// values match
+				debug = debug + "<br>zombie " + name + " store: successfully set"
+				dom.idb.innerHTML = "<span class='good'>nothing found:</span> setting new zombie " + name
+					+ " store: value " + "<span class='good'>" + zvalue + "</span>"
+			} else {
+				// value doesn't match: this should never happen?
+				debug = debug + "<br>zombie " + name + " store: failed: values do not match"
+			}
+		}
+		// close transaction
+		dbTx.oncomplete = function() {dbObject.close()}
+	}
+}
+
+function populate_data() {
+	debug = debug + "<br>---"
+	// lsStored is a pita: can be a null: convert that
+	if (lsStored == null) {
+		lsStored = ""
+	}
+
+	// unique string for kicks
+	rndStrX = rnd_string("")
+	// any zombies: use that instead
+	// if multiple: they should always be the same: maybe I can check that in the future
+	if (cookieStored !== "") {rndStrX = cookieStored}
+	if (lsStored !== "") {rndStrX = lsStored}
+	if (idbStored !== "") {rndStrX = idbStored}
+
+	// repopulate
+	if (ckie == true) {
+		if (cookieStored == "") {
+			set_zombie_cookie("TZP", rndStrX)
+		}
+	}
+	if (ls == true) {
+		if (lsStored == "") {
+			set_zombie_storage("TZP", rndStrX)
+		}
+	}
+	if (idb == true) {
+		if (idbStored == "") {
+			set_zombie_idb("TZP", "zombie", "1", rndStrX)
+		}
+	}
+}
+
+function run_sanitize_check() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+	// not coded yet
+	items = document.getElementsByClassName("faint")
+	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
+
+
+	// use a delay so user can see things are cleared
+	setTimeout(function() {
+		// reset
+		ckie = false, ls = false, idb = false, cookieStored = "", lsStored = "", idbStored = "", debug = ""
+
+		// tests
+		test_cookie()
+		check_cookie("TZP")
+
+		test_storage()
+		check_storage("TZP")
+
+		test_idb()
+		setTimeout(function() {check_idb("TZP", "zombie", "1")}, 200)
+
+		// wait for idb tests to finish
+		setTimeout(function() {
+			// ToDo: use promises, put results into an array, output after promise.all, output perf
+
+			if (ckie == false) {dom.ckieP = zNA}
+			if (ls == false) {dom.ls = zNA}
+			if (idb == false) {dom.idb = zNA}
+			populate_data()
+			// we have to wait for idb again, godamnit
+			setTimeout(function() {
+				dom.debug.innerHTML = debug
+			}, 700)
+		}, 700)
+	}, 170)
+}
+
+run_sanitize_check()
+</script>
+
+</body>
+</html>

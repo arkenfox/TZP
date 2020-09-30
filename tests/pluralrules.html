@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>pluralrules</title>
+<style>
+body {background-color: #1a1a1a; color: #b3b3b3;}
+a {color: #8abfda; text-decoration: none;}
+code {color: #8abfda;}
+.orange {color: #dca78c; font-size: 14px; font-weight: bold;}
+.orange2 {color: #dca78c; font-weight: bold;}
+.green {color: #8cdc8c; font-size: 14px; font-weight: bold;}
+.green2 {color: #8cdc8c; font-weight: bold;}
+.bad {color: #ff4f4f; font-size: 14px; font-weight: bold;}
+.bad2 {color: #ff4f4f; font-weight: bold;}
+.mono {font-family: monospace, "Courier New"; font-size: 11px;}
+.spaces {white-space: pre-wrap;}
+
+table {width: 100%; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
+td {
+  text-align: left
+  padding: 8px;
+	vertical-align: top;
+}
+</style>
+</head>
+<body>
+
+<table>
+	<col width="30%"><col width="70%">
+	<!-- column one -->
+	<tr><td>
+		<table>
+			<tr><td class="mono spaces">
+				<span id="legend"><span>
+			</td></tr>
+		</table>
+	</td>
+	<!-- column two -->
+	<td>
+		<table>
+				<tr><td>
+					<span id="button"><br><p><button onClick="run()">run</button></p></span>
+					<br><span class="mono spaces" id="stats"></span>
+						<span id="perf0"></span><span id="perf1"></span><span id="perf2"></span>
+					<br><span class="mono spaces" id="title1"></span>
+					<br><span class="mono spaces" id="numbers1"></span>
+					<br><span class="mono spaces" id="results1"></span>
+					<br><span class="mono spaces" id="numbers2"></span>
+					<br><span class="mono spaces" id="results2"></span>
+					<br><span class="mono spaces" id="numbers0"></span>
+					<br><span class="mono spaces" id="results0"></span>
+				</td></tr>
+		</table>
+	</td></tr>
+</table>
+<br>
+<br>
+
+<script>
+var locales = [],
+	list = [],
+	list_one = [], // first change of each result
+	list_all = [], // all numbers that changed
+	main_count = 0,
+	main_result = "",
+	main_code = ""
+
+var sb = "<span class='bad'>",
+	sb2 = "<span class='bad2'>",
+	so = "<span class='orange'>",
+	so2 = "<span class='orange2'>",
+	sg = "<span class='green'>",
+	sg2 = "<span class='green2'>",
+	sc = "</span>"
+
+function sha1(str1){
+	for (var blockstart=0,
+		i = 0,
+		W = [],
+		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+		A, B, C, D, F, G,
+		word_array = [],
+		temp2,
+		s = unescape(encodeURI(str1)),
+		str_len = s.length;
+		i<=str_len;){
+		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+	}
+	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
+	for (; blockstart <= temp2; blockstart += 16) {
+		A = H,i=0;
+		for (; i < 80;
+			A = [[
+				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+				F = G + (B ^ C ^ D) + 341275144,
+				G + (B & C | B & D | C & D) + 882459459,
+				F + 1535694389
+			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
+		) {
+			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+		}
+		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
+	}
+	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+	return str1;
+}
+
+function start() {
+	// builds locales array and outputs a legend
+	try {
+		let detailed = [
+			"aa,afar","ab,abkhazian","ach,acholi","ae,avestan","af,afrikans","ak,akan","am,amharic","an,arahonese","ar,arabic",
+			"as,assamese","ast,asturian","av,avaric","ay,aymara","az,azerbijani","ba,bashkir","be,belarusian","bg,bulgarian",
+			"bh,bihari","bi,bislama","bm,bambara","bn,bengali","bo,tibetan","br,breton","bs,bosnian","ca,catalan","cak,kaqchikel",
+			"ce,chechen","ch,chamorro","ckb,central kurdish","co,corsican","cr,cree","crh,crimean tatar","cs,czech",
+			"csb,kashubian","cu,church slavic","cv,chuvash","cy,welsh","da,danish","de,german","dsb,lower sorbian",
+			"dv,divehi","dz,dzongkha","ee,ewe","el,greek","en,english","eo,esperanto","es,spanish","et,estonian","eu,basque",
+			"fa,persian","ff,fulah","fi,finnish","fj,fijian","fo,faroese","fr,french","fur,friulian","fy,frisian","ga,irish",
+			"gd,scottish gaelic","gl,galician","gn,guarani","gu,gujarati","gv,manx","ha,hausa","haw,hawaiian","he,hebrew",
+			"hi,hindi","hil,hiligaynon","ho,hiri motu","hr,croatian","hsb,upper sorbian","ht,haitian","hu,hungarian",
+			"hy,armenian","hye,eastern armenian","hz,herero","ia,interlingua","id,indonesian","ie,interlingue","ig,igbo",
+			"ii,sichuan yi","ik,inupiaq","io,ido","is,icelandic","it,italian","iu,inuktitut","ja,japanese","jv,javanese","ka,georgian",
+			"kab,kabyle","kg,kongo","ki,kikuyu","kk,kazakh","kl,greenlandic","km,khmer","kn,kannada","ko,korean","kok,konkani",
+			"kr,kanuri","ks,kasmiri","ku,kurdish","kv,komi","kw,cornish","ky,kirghiz","la,latin","lb,luxembourgish","lg,ganda",
+			"li,limburgan","lij,ligurian","ln,lingala","lo,lao","lt,lithuanian","ltg,latgalian","lu,luba-katanga","lv,latvian",
+			"mai,maithili","meh,mixteco tucuhiti","mg,malagasy","mh,marshallese","mi,maori","mix,mixtepec mixtec",
+			"mk,macedonian","ml,malayalam","mn,mongolian","mr,marathi","ms,malay","mt,maltese","my,burmese","na,nauru",
+			"nb,norwegian bokmal","nd,ndebele north","ne,nepali","ng,ndonga","nl,dutch","nn,norwegian nynorsk","no,norwegian",
+			"nr,ndebele south","nso,sotho northern","nv,navajo","ny,chichewa","oc,occitan","oj,ojibwa","om,oromo","or,odia",
+			"os,ossetian","pa,punjabi","pi,pali","pl,polish","ps,pashto","pt,portuguese","qu,quechua","rm,rhaeto-romantic",
+			"rn,kirundi","ro,romanian","ru,russian","rw,kinyarwanda","sa,sanskrit","sc,sardinian","sd,sindhi","sg,sango",
+			"si,singhalese","sk,slovak","sl,slovenian","sm,samoan","so,somalian","son,songhay","sq,albanian","sr,serbian",
+			"ss,siswati","st,sotho southern","su,sudanese","sv,swedish","sw,swahili","ta,tamil","te,teluga","tg,tajik",
+			"th,thai","ti,tigrinya","tig,tigre","tk,turkmen","tlh,klingon","tn,tswana","to,tonga","tr,turkish","trs,triqui",
+			"ts,tsonga","tt,tatar","tw,twi","ty,tahitian","ug,uighur","uk,ukranian","ur,urdu","uz,uzbek","ve,venda",
+			"vi,vietnamese","vo,volapuk","wa,walloon","wo,wolof","xh,xhosa","yi,yiddish","yo,yoruba","za,zhuang",
+			"zam,miahuatlan zapotec","zh,chinese","zh-cn,chinese china","zh-Hans,chinese simple","zh-Hant,chinese traditional",
+			"zh-hk,chinese hong kong","zh-sg,chinese singapore","zh-tw,chinese taiwan","zu,zulu",
+		]
+		detailed.sort()
+
+		let legend = []
+		for (let i = 0 ; i < detailed.length; i++) {
+			// split: A (code), B (name)
+			let listA = detailed[i].split(",")[0]
+			let listB = detailed[i].split(",")[1]
+			locales.push(listA)
+			legend.push( listA.padStart(7) + ": " + listB  )
+		}
+		document.getElementById("legend").innerHTML = sg + "<br>    LEGEND" + sc
+			+ "<br><br>" + legend.join("<br>")
+	} catch(e) {
+		console.debug("aww crap", e.name, e.message)
+	}
+}
+
+function run_test(type) {
+	// vars
+	let t0 = performance.now()
+	let test_array = [],
+		tmp_res = [], // result per locale
+		test_all = [], // result hash + locale code + result
+		go = true,
+		perfname = "main"
+		str = ""
+
+	let	element = document.getElementById("results" + type)
+	let	elperf = document.getElementById("perf" + type)
+
+	// main test
+	if (type == "0") {
+		// reset
+		list = []
+		list_one = []
+		list_all = []
+		main_count = 0,
+		main_reshash = "",
+		main_codehash = ""
+		// build
+		for (let i=0; i < 101; i++) {list.push(i)}
+
+		// temp smaller tests
+		//list = [0,1,2,3,4,6,7,11,20,21,100]
+		//list = [1,2,3,4,5,25,134,910293019,12,1412,15,2931,31231,3123,13231,91,0,231,33,728,2,291,24,479,291,778,919,93]
+		//locales = ['ar','br','bs','cs','cy','en','fr','ga','gd','gv','he','is','kw','lt','lv','mt','pl','ro','ru','sl','zh',]
+		//locales = ['ar','bo','bn','dz','en','fa','fi','gd','he','kw','ku','lv','sl','ss',]
+
+		test_array = list
+	}
+	// subsequent tests
+	if (list.length == 0) {
+		go = false
+		console.debug("ABORTED: run the main test first")
+	}
+
+	if (go) {
+		// always sort the array
+		test_array.sort((a,b) => a-b)
+
+		// subsequent tests
+		if (type == "1") {
+			test_array = list_one
+			perfname = "first"
+		} else if (type == "2") {
+			test_array = list_all
+			perfname = "all"
+		}
+
+		// for each locale
+		for (let j=0; j < locales.length; j++) {
+			// reset
+			let prev = "", current = "", tmp_result = []
+			f0 = true, f1 = true, f2 = true, f3 = true, f4 = true, f5 = true
+			let code = locales[j]
+
+			// list
+			for (let k=0; k < test_array.length; k++) {
+				let n = test_array[k]
+				try {
+					current = new Intl.PluralRules(code).select(n)
+					if (type == "0") {
+						// catch first
+						if (f0 && current == "zero") {f0 = false; list_one.push(n);}
+						if (f1 && current == "one") {f1 = false; list_one.push(n);}
+						if (f2 && current == "two") {f2 = false; list_one.push(n);}
+						if (f3 && current == "few") {f3 = false; list_one.push(n);}
+						if (f4 && current == "many") {f4 = false; list_one.push(n);}
+						if (f5 && current == "other") {f5 = false; list_one.push(n);}
+					}
+				} catch(e) {
+					current = "error"
+				}
+				// record all changes
+				if (prev !== current) {
+					tmp_result.push(n + ": "+ current)
+					// main test, record all numbers that change
+					if (type == "0") {
+						list_all.push(n)
+					}
+				}
+				prev = current
+			}
+			// array: hash + code + result
+			let tmpR = tmp_result.join(", ")
+			let tmpH = sha1(tmpR)
+			test_all.push(sha1(tmp_result.join()) + "~" + code + "~" + tmpR)
+		}
+
+		// set things in main test for subsequent tests
+		if (type == "0") {
+			// first changes
+			list_one = list_one.filter(function(item, position) {return list_one.indexOf(item) === position})
+			list_one.sort((a,b) => a-b)
+			// all changes
+			list_all = list_all.filter(function(item, position) {return list_all.indexOf(item) === position})
+			list_all.sort((a,b) => a-b)
+			// output
+			document.getElementById("stats").innerHTML = so + "<br>STATS" + sc + "<br><br>"
+				+ "   locales tested: " + locales.length + "<br>"
+				+ "  numbers checked: " + list.length + "<br>"
+				+ "             perf: "
+
+			document.getElementById("title1").innerHTML = sg + "<br>NUMBERS CHECK" + sc
+			document.getElementById("numbers1").innerHTML = so + "<br>NUMBERS: FIRST of EACH TYPE ("
+				+ list_one.length + ")" + sc + "<br><br>" + list_one.join(", ") + "<br>"
+			document.getElementById("numbers2").innerHTML = so + "NUMBERS: ALL CHANGES ("
+				+ list_all.length + ")" + sc + "<br><br>" + list_all.join(", ") + "<br>"
+		}
+		// perf
+		let perf = perfname + " " + so2 + (performance.now()-t0) + sc +" ms"
+		elperf.innerHTML = (type == "0" ? "" : so2 + " | " + sc) + perf
+
+		// sort array & loop: get hash + code + result buckets, and code_total
+		test_all.sort()
+		let bucket_hash = [], bucket_code = [], bucket_res = []
+		let tmp_code = [], nextHash = "", code_total = 0
+
+		for (let i=0; i < test_all.length; i++) {
+			let part1 = test_all[i].split("~")[0],
+				part2 = test_all[i].split("~")[1],
+				part3 = test_all[i].split("~")[2]
+			// build code string
+			tmp_code.push(part2)
+			// grab next item
+			if (i < test_all.length - 1) {
+				nextHash = test_all[(i+1)].split("~")[0]
+			} else {
+				nextHash = "end"
+			}
+			// next hash is diff: write data
+			if (nextHash !== part1) {
+				bucket_hash.push(part1 + sg2 +" ("+ tmp_code.length + ")"+sc)
+				bucket_res.push(part3)
+				bucket_code.push(tmp_code.join(", "))
+				code_total += tmp_code.length
+				tmp_code = [] // reset tmp_code
+			}
+		}
+
+		// main
+		if (type == "0") {
+			// build pretty BEFORE sorting
+			let pretty = []
+			for (let i=0; i < bucket_hash.length; i++) {
+				let part1 = sg2 + "hash: " + sc + bucket_hash[i]
+				let part2 = "<ul><li>" + so2 + "result: "  + sc + bucket_res[i] + "</li>"
+				let part3 = "<li>" + so2 + "locale: " + sc + bucket_code[i] + "</li></ul>"
+				pretty.push(part1 + part2 + part3)
+			}
+			// sort and set globals
+			main_count = bucket_hash.length
+			bucket_res.sort()
+			main_result = sha1(bucket_res.join())
+			bucket_code.sort()
+			main_code = sha1(bucket_code.join())
+			// output
+			str = code_total + (code_total == locales.length ? sg2 : sb2) + " [match]" + sc
+			str = sg + "MAIN TEST (" + list.length + ")"  + sc + "<br>"
+				+ "<ul><li>" + so2 + "unique hashes: " + sc + main_count + "</li>"
+				+ "<li>" + so2 + " results hash: " + sc + main_result + "</li>"
+				+ "<li>" + so2 + " locales hash: " + sc + main_code + "</li>"
+				+ "<li>" + so2 + " locale check: " + sc + str + "</li></ul>"
+			document.getElementById("numbers0").innerHTML = str
+			element.innerHTML = pretty.join("")
+
+		} else {
+			// set vars to compare to main
+			let check_count = bucket_hash.length
+			bucket_res.sort()
+			let check_result = sha1(bucket_res.join())
+			bucket_code.sort()
+			let check_code = sha1(bucket_code.join())
+
+			// append results
+			let matchbad = sb2 + " [match]" + sc, matchgood = sg2 + " [match]" + sc
+			str = "test rerun with just these numbers: <br><ul><li>unique hashes:"
+			if (check_count == main_count) {
+				str += sg2 + " (" + check_count + ")" + matchgood
+			} else {
+				str += sb2 + " (" + check_count + ")" + matchbad
+			}
+			str += "</li><li>results hash: " + check_result + (check_result == main_result ? matchgood : matchbad)
+			str += "</li><li>locales hash: " + check_code + (check_code == main_code ? matchgood : matchbad)
+			str += "</li></ul>"
+			element.innerHTML = str
+		}
+	}
+}
+
+function run() {
+	document.getElementById("button").innerHTML = ""
+	run_test("0") // main test
+	run_test("1")
+	run_test("2")
+}
+
+start()
+
+</script>
+</body>
+</html>

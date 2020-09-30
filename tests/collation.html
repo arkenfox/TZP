@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>collation</title>
+<style>
+body {background-color: #1a1a1a; color: #b3b3b3;}
+a {color: #8abfda; text-decoration: none;}
+code {color: #8abfda;}
+.good {color: #8cdc8c;}
+.bad {color: #ff4f4f;}
+.mono {font-family: monospace, "Courier New"; font-size: 12px}
+</style>
+</head>
+<body>
+
+<br>
+<div>Output is limited to results that do not match <code>en</code>
+	<br>&nbsp &nbsp  - e.g. <code>a</code> and <code>A</code> should only return <code>da</code> (Danish) and <code>mt</code> (Maltese)</div>
+<div>The name of the game is:
+	<br>&nbsp  - to get every locale to be different to <code>en</code>
+	<br>&nbsp  - bonus if every locale is unique
+
+<br>
+<hr>
+<input type="text" id="strA"> &nbsp <input type="text" id="strB">
+ &nbsp <button onClick="run_compare()"> run localeCompare </button>
+<br><br>
+<div>
+	<span id="output1" style="white-space: pre;" class="mono"></span>
+</div>
+<br>
+<hr>
+
+<input type="text" placeholder="comma delimited values: e.g: a,A,th,tw" id="strC" style="width: 75%">
+	&nbsp <button onClick="run_collator('test')"> run Intl.Collator </button>
+<br><br>
+<div><span id="output2" style="white-space: pre;" class="mono"></span></div>
+<br>
+<hr>
+
+<button onClick="run_collator('example')"> run example </button><br><br>
+<span id="output3" style="white-space: pre;" class="mono"></span>
+</div>
+<br>
+<br>
+
+<script>
+	var list = [
+		"aa,afar","ab,abkhazian","ach,acholi","ae,avestan","af,afrikans","ak,akan","am,amharic","an,arahonese","ar,arabic",
+		"as,assamese","ast,asturian","av,avaric","ay,aymara","az,azerbijani","ba,bashkir","be,belarusian","bg,bulgarian",
+		"bh,bihari","bi,bislama","bm,bambara","bn,bengali","bo,tibetan","br,breton","bs,bosnian","ca,catalan","cak,kaqchikel",
+		"ce,chechen","ch,chamorro","ckb,central kurdish","co,corsican","cr,cree","crh,crimean tatar","cs,czech",
+		"csb,kashubian","cu,church slavic","cv,chuvash","cy,welsh","da,danish","de,german","dsb,lower sorbian",
+		"dv,divehi","dz,dzongkha","ee,ewe","el,greek","eo,esperanto","es,spanish","et,estonian","eu,basque",
+		"fa,persian","ff,fulah","fi,finnish","fj,fijian","fo,faroese","fr,french","fur,friulian","fy,frisian","ga,irish",
+		"gd,scottish gaelic","gl,galician","gn,guarani","gu,gujarati","gv,manx","ha,hausa","haw,hawaiian","he,hebrew",
+		"hi,hindi","hil,hiligaynon","ho,hiri motu","hr,croatian","hsb,upper sorbian","ht,haitian","hu,hungarian",
+		"hy,armenian","hye,eastern armenian","hz,herero","ia,interlingua","id,indonesian","ie,interlingue","ig,igbo",
+		"ii,sichuan yi","ik,inupiaq","io,ido","is,icelandic","it,italian","iu,inuktitut","ja,japanese","jv,javanese","ka,georgian",
+		"kab,kabyle","kg,kongo","ki,kikuyu","kk,kazakh","kl,greenlandic","km,khmer","kn,kannada","ko,korean","kok,konkani",
+		"kr,kanuri","ks,kasmiri","ku,kurdish","kv,komi","kw,cornish","ky,kirghiz","la,latin","lb,luxembourgish","lg,ganda",
+		"li,limburgan","lij,ligurian","ln,lingala","lo,lao","lt,lithuanian","ltg,latgalian","lu,luba-katanga","lv,latvian",
+		"mai,maithili","meh,mixteco tucuhiti","mg,malagasy","mh,marshallese","mi,maori","mix,mixtepec mixtec",
+		"mk,macedonian","ml,malayalam","mn,mongolian","mr,marathi","ms,malay","mt,maltese","my,burmese","na,nauru",
+		"nb,norwegian bokmal","nd,ndebele north","ne,nepali","ng,ndonga","nl,dutch","nn,norwegian nynorsk","no,norwegian",
+		"nr,ndebele south","nso,sotho northern","nv,navajo","ny,chichewa","oc,occitan","oj,ojibwa","om,oromo","or,odia",
+		"os,ossetian","pa,punjabi","pi,pali","pl,polish","ps,pashto","pt,portuguese","qu,quechua","rm,rhaeto-romantic",
+		"rn,kirundi","ro,romanian","ru,russian","rw,kinyarwanda","sa,sanskrit","sc,sardinian","sd,sindhi","sg,sango",
+		"si,singhalese","sk,slovak","sl,slovenian","sm,samoan","so,somalian","son,songhay","sq,albanian","sr,serbian",
+		"ss,siswati","st,sotho southern","su,sudanese","sv,swedish","sw,swahili","ta,tamil","te,teluga","tg,tajik",
+		"th,thai","ti,tigrinya","tig,tigre","tk,turkmen","tlh,klingon","tn,tswana","to,tonga","tr,turkish","trs,triqui",
+		"ts,tsonga","tt,tatar","tw,twi","ty,tahitian","ug,uighur","uk,ukranian","ur,urdu","uz,uzbek","ve,venda",
+		"vi,vietnamese","vo,volapuk","wa,walloon","wo,wolof","xh,xhosa","yi,yiddish","yo,yoruba","za,zhuang",
+		"zam,miahuatlan zapotec","zh,chinese","zh-cn,chinese china","zh-Hans,chinese simple","zh-Hant,chinese traditional",
+		"zh-hk,chinese hong kong","zh-sg,chinese singapore","zh-tw,chinese taiwan","zu,zulu","en,english","en-US,english us",
+		// new
+	];
+
+	var testmissing = [
+	'aa,afar','ab,abkhazian','ach,acholi','ae,avestan','ak,akan','an,arahonese','ast,asturian','av,avaric','ay,aymara',
+	'ba,bashkir','bh,bihari','bi,bislama','bm,bambara','bo,tibetan','br,breton','ca,catalan','cak,kaqchikel',
+	'ce,chechen','ch,chamorro','ckb,central kurdish','co,corsican','cr,cree','crh,crimean tatar','csb,kashubian','cu,church slavic',
+	'cv,chuvash','de,german','dv,divehi','dz,dzongkha','en,english','en-US,english us','eu,basque','ff,fulah',
+	'fj,fijian','fr,french','fur,friulian','fy,frisian','ga,irish','gd,scottish gaelic','gn,guarani','gv,manx',
+	'hil,hiligaynon','ho,hiri motu','ht,haitian',	'hz,herero','ia,interlingua','id,indonesian','ie,interlingue',
+	'ii,sichuan yi','ik,inupiaq','io,ido','kr,kanuri','ks,kasmiri','kv,komi','kw,cornish','la,latin','lb,luxembourgish',
+	'lg,ganda','li,limburgan','lij,ligurian','ltg,latgalian','lu,luba-katanga','mai,maithili',
+	'meh,mixteco tucuhiti','mg,malagasy','mh,marshallese','mi,maori','mix,mixtepec mixtec',
+	'ms,malay','na,nauru','nd,ndebele north','ng,ndonga','nl,dutch','nr,ndebele south','nso,sotho northern','nv,navajo',
+	'ny,chichewa','oc,occitan','oj,ojibwa','os,ossetian','pi,pali','pt,portuguese','qu,quechua','rm,rhaeto-romantic',
+	'rn,kirundi','rw,kinyarwanda','sa,sanskrit','sc,sardinian','sd,sindhi','sg,sango','sm,samoan','so,somalian',
+	'son,songhay','ss,siswati','st,sotho southern','su,sudanese','sw,swahili','tg,tajik','ti,tigrinya','tig,tigre',
+	'tlh,klingon','tn,tswana','trs,triqui','ts,tsonga','tt,tatar','tw,twi','ty,tahitian','ve,venda','vo,volapuk',
+	'wa,walloon','xh,xhosa','za,zhuang','zam,miahuatlan zapotec','zu,zulu',
+
+	]
+
+	// test list
+	var testfound = [
+	'af,afrikans','am,amharic','ar,arabic','as,assamese','az,azerbijani','be,belarusian','bg,bulgarian','bn,bengali',
+	'bs,bosnian','cs,czech','cy,welsh','da,danish','dsb,lower sorbian','ee,ewe','el,greek','eo,esperanto','es,spanish',
+	'et,estonian','fa,persian','fi,finnish','fo,faroese','gl,galician','gu,gujarati','ha,hausa','haw,hawaiian',
+	'he,hebrew','hi,hindi','hr,croatian','hsb,upper sorbian','hu,hungarian','hy,armenian','hye,eastern armenian','ig,igbo',
+	'is,icelandic','it,italian','iu,inuktitut','ja,japanese','jv,javanese','ka,georgian','kab,kabyle','kg,kongo',
+	'ki,kikuyu','kk,kazakh','kl,greenlandic','km,khmer','kn,kannada','ko,korean','kok,konkani','ku,kurdish','ky,kirghiz',
+	'ln,lingala','lo,lao','lt,lithuanian','lv,latvian','mk,macedonian','ml,malayalam','mn,mongolian','mr,marathi',
+	'mt,maltese','my,burmese','nb,norwegian bokmal','ne,nepali','nn,norwegian nynorsk','no,norwegian','om,oromo',
+	'or,odia','pa,punjabi','pl,polish','ps,pashto','ro,romanian','ru,russian','si,singhalese','sk,slovak','sl,slovenian',
+	'sq,albanian','sr,serbian','sv,swedish','ta,tamil','te,teluga','th,thai','tk,turkmen','to,tonga','tr,turkish',
+	'ug,uighur','uk,ukranian','ur,urdu','uz,uzbek','vi,vietnamese','wo,wolof','yi,yiddish','yo,yoruba','zh,chinese',
+	'zh-cn,chinese china','zh-Hans,chinese simple','zh-Hant,chinese traditional','zh-hk,chinese hong kong',
+	'zh-sg,chinese singapore','zh-tw,chinese taiwan',
+
+	'en','en-US',
+	]
+
+	// must keep ku, no, tk
+	var listTZP = ['ka','ku','lo','no','pa','tk']
+	var charsTZP = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A']
+
+	var sb = " <span class='bad'>", sg = " <span class='good'>", sc = "</span>";
+
+	function sha1(str1){
+		for (var blockstart=0,
+			i = 0,
+			W = [],
+			H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+			A, B, C, D, F, G,
+			word_array = [],
+			temp2,
+			s = unescape(encodeURI(str1)),
+			str_len = s.length;
+			i<=str_len;){
+			word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+		}
+		word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
+		for (; blockstart <= temp2; blockstart += 16) {
+			A = H,i=0;
+			for (; i < 80;
+				A = [[
+					(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+					F = G + (B ^ C ^ D) + 341275144,
+					G + (B & C | B & D | C & D) + 882459459,
+					F + 1535694389
+				][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
+			) {
+				G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+			}
+			for(i=5;i;) H[--i] = H[i] + A[i] | 0;
+		}
+		for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+		return str1;
+	};
+
+	function run_compare() {
+		let el = document.getElementById("output1");
+		el.innerHTML = "";
+		let control = "", test = "", strA = "", strB = "", output = "", listA = "", listB;
+		list.sort();
+		strA = document.getElementById("strA").value
+		strB = document.getElementById("strB").value
+		if (strA.length > 0 && strB.length > 0) {
+			for (let i = 0 ; i < list.length; i++) {
+				control = strA.localeCompare(strB, "en-US");
+				listA = list[i].split(",")[0];
+				listB = list[i].split(",")[1];
+				test = strA.localeCompare(strB, listA);
+				if ( control !== test) {
+					output += listB.padStart(30) + sg + listA.padStart(3) + sc + ": " + test.toString().padStart(2) + "<br>"
+				};
+				el.innerHTML = output;
+			}
+		} else {
+			el.innerHTML = "umm, dude .. we need at least two strings";
+		}
+	}
+
+	function run_collator(type) {
+
+		// chars
+		// known baddies
+		//'\u00E6', '\u210F'
+
+		let chars = [
+		'a',
+		'A',
+		'aa',
+		'ch', // cs,sk,sq,uz
+		'ez',
+		'kz',
+		'ng',
+		'ph',
+		'ts','tt', // ew, ha
+		'y',
+
+		// latin small
+		'\u00E2',   // a + CIRCUMFLEX
+		'\u00E4',   // a + DIAERESIS
+		'\u01FB',   // a + RING ABOVE + ACUTE
+		'\u0107',   // c + ACUTE
+		'\u0109',   // c + CIRCUMFLEX
+		'\u00E7\a', // c + CEDILLA
+		'\u00EB',   // e + DIAERESIS
+		'\u00ED',   // i + ACUTE
+		'\u00EE',   // i + CIRCUMFLEX
+		'\u0137\a', // k + CEDILLA
+		'\u0144',   // n + ACUTE
+		'\u00F1',   // n + TILDE
+		'\u1ED9',   // o + CIRCUMFLEX + DOT BELOW
+		'\u00F6',   // o + DIAERESIS
+		'\u1EE3',   // o + HORN + DOT BELOW
+
+		// other
+		'\u0627',  //     ARABIC ALEF
+		'\u0649',  //     ARABIC ALEF MAKSURA
+		'\u06CC',  //     ARABIC FARSI YEH
+		'\u06C6',  //     ARABIC OE
+		'\u06C7',  //     ARABIC U
+		'\u06FD',  //     ARABIC SINDHI AMPERSAND
+		'\u0561',  //   ARMENIAN AYB small
+		'\u09A4',  //    BENGALI TA
+		'\u09CE',  //    BENGALI KHANDA TA
+		'\u311A',  //   BOPOMOFO A
+		'\u0453',  //   CYRILLIC GJE small
+		'\uA647',  //   CYRILLIC IOTA small
+		'\u0503',  //   CYRILLIC KOMI DJE small
+		'\u0439',  //   CYRILLIC SHORT I small
+		'\u0457',  //   CYRILLIC YI small
+		'\u040E',  //   CYRILLIC SHORT U capital
+		'\u04F0',  //   CYRILLIC U + DIAERESIS capital
+		'\u4E2D',  //        CJK Ideograph
+		'\u0934',  // DEVANAGARI LLLA
+		'\u0935',  // DEVANAGARI VA
+		'\u1208',  //   ETHIOPIC SYLLABLE LA (amharic)
+		'\u10D0',  // 	GEORGIAN AN
+		'\u03B1',  //      GREEK ALPHA small
+		'\u0A85',  //   GUJARATI A
+		'\u3147',  //     HANGUL IEUNG
+		'\u05EA',  //     HEBREW TAV
+		'\uFB4A',  //     HEBREW TAV + DAGESH
+		'\u0C85',  //    KANNADA A
+		'\u1780',  //      KHMER KA
+		'\u0E9A',  //        LAO BO
+		'\u1D95',  //      LATIN SCHWA + RETROFLEX HOOK
+		'\u025B',  //      LATIN SMALL OPEN E
+		'\u0149',  //      LATIN SMALL N PRECEDED BY APOSTROPHE
+		'\u00F0',  //      LATIN SMALL ETH small
+		'\u1DD9',  // COMBINING LATIN SMALL LETTER ETH
+		'\u1820',  //  MONGOLIAN A
+		'\u10350', // OLD PERMIC AN
+		'\u0B05',  //      ORIYA A
+		'\u0D85',  //    SINHALA AYANNA
+		'\u0B85',  //      TAMIL A
+		'\u0C05',  //     TELUGU A
+		'\u0E24',  //       THAI RU
+
+// 80 from 98
+// 915e25fb74d06adee887b780c7574e16e7748f34
+		];
+
+		//list = testfound;
+		//list = testmissing;
+		//list = listTZP
+		//chars = charsTZP
+
+		let el = document.getElementById("output3")
+		// test vs example
+		let isValid = true
+		if (type == "test") {
+			el = document.getElementById("output2")
+			el.innerHTML = ""
+			// build a new array
+			let strC = document.getElementById("strC").value;
+			if (strC.length > 0) {
+				// temporary array
+				let tmpArr = strC.split(",")
+				// reset chars
+				chars = [];
+				// trim and push
+				let trimmed = ""
+				for (let i = 0 ; i < tmpArr.length; i++) {
+					trimmed = tmpArr[i].trim()
+					if (trimmed.length > 0) {
+						chars.push(trimmed)
+					}
+				}
+			} else {
+				isValid = false
+				el.innerHTML = "you need to provide comma delimited values";
+			}
+		}
+
+		if (isValid) {
+
+			// remove dupes
+			let dupeA = chars.length
+			chars = chars.filter(function (item, position) {
+				return chars.indexOf(item) === position
+			})
+			let msgdupe = ""
+			if (dupeA > chars.length) {
+				msgdupe = "   note: there " + (dupeA-chars.length > 1 ? "are" : "is")
+					+ sb + (dupeA-chars.length) + " duplicate" + (dupeA-chars.length > 1 ? "s" : "") + sc
+					+ " in your array"
+			}
+			if (chars.length < 2) {
+				el.innerHTML = "you need to provide more than one unique value";
+			} else {
+				// vars
+				let control = "",
+					test = "",
+					listA = "",
+					listB = "",
+					results = [],
+					missing = [],
+					codes = []
+
+				// set control
+				chars = chars.sort(Intl.Collator("en-US").compare)
+				control = chars.join()
+
+				// chars: nice output, sorted
+				let output = "  items:" + sg + chars.length + sc + " ";
+				for (let i = 0 ; i < chars.length; i++) {
+					if (Number.isInteger(i/40) && i>0) {output += "<br>            "}
+					output += chars[i] + ","
+				}
+				output = output.slice(0, -1) + "<br><br>";
+
+				// sort chars for each locale
+				let enMissing = true;
+				for (let i = 0 ; i < list.length; i++) {
+					// split: A (code), B (name)
+					listA = list[i].split(",")[0]
+					listB = list[i].split(",")[1]
+					chars.sort(Intl.Collator(listA).compare)
+					test = chars.join();
+					if (test !== control) {
+						results.push(sha1(test) + ":" + sg + listA + sc + " (" + listB + ")")
+					} else {
+						if (listA == "en" || listA == "en-US") {enMissing = false}
+						missing.push(listA)
+						//missing.push("'"+list[i]+"'")
+					}
+					// build a list of locale codes
+					codes.push("'"+listA+"'")
+				}
+				codes.sort()
+				//console.debug(codes.join(","))
+
+				// get one line per hash
+				let tmpH = "", tmpL = "", tmpStr = "";
+				let nxtH = "", locales = "";
+				let newArr = [];
+
+				results = results.sort();
+				//console.debug(results.join("\n")) // hash + code + locale name (that don't match en-US)
+
+				for (let i = 0 ; i < results.length; i++) {
+					// get current item
+					tmpStr = results[i];
+					tmpH = tmpStr.substring(0,40) // first 40 chars = sha1 hash
+					tmpL = tmpStr.substring(41, tmpStr.length) // skip colon and get the locale
+					locales += tmpL + ","
+					// grab next item
+					if (i < results.length - 1) {
+						nxtH = results[(i+1)].substring(0,40)
+					} else {
+						nxtH = "end"
+					}
+					// build new item
+					if (nxtH !== tmpH) {
+						locales = locales.slice(0, -1)
+						newArr.push(locales + ":" + tmpH)
+						locales = ""; // reset
+					}
+				}
+
+				// sort newArr (i.e order by first locale), parse, output
+				newArr.sort()
+				//console.debug(newArr.join("\n"))
+				tmpH = "", tmpL = "", tmpStr = "", len = 0, displayHash = "";
+
+				for (let i = 0 ; i < newArr.length; i++) {
+					tmpStr = newArr[i];
+					len = tmpStr.length;
+					tmpH = tmpStr.substring(len-40,len);
+					tmpL = tmpStr.substring(0,len-41)
+					tmpStr = "";
+					displayHash += i + "-" + tmpL + "~";
+					output += (i + 1).toString().padStart(3) + ": " + tmpL + "<br>"
+				}
+				displayHash = sha1(displayHash)
+
+				// prepend if there were dupe codepoints
+				if (msgdupe !== "") {output = msgdupe + "<br>" + output}
+				// prefix some info
+				if (type == "example") {
+					tmpStr = "missing:" + sb + missing.length + sc + " "
+					missing.sort()
+					// limit to 30 per line
+					for (let i = 0 ; i < missing.length; i++) {
+						if (Number.isInteger(i/30) && i>0) {
+							tmpStr += "<br>             "
+						}
+						tmpStr += missing[i]+","
+					}
+					tmpStr = tmpStr.slice(0, -1)
+					// color up en/en-US so it's easy to track
+					tmpStr = tmpStr.replace("en","<span class='good'>en</span>")
+					tmpStr = tmpStr.replace("en-US","<span class='good'>en-US</span>")
+					// warn if they're missing
+					if (enMissing == true) {
+						tmpStr += "<br>           " + sb + "warning: en (english) is not in the missing list" + sc
+					}
+					output = tmpStr + "<br>" + output
+				}
+				// hash of displayed results
+				output = "display: " + displayHash + "<br>" + output
+				//
+				output = "  hashs:" + sg + newArr.length + " unique" + sc + " hashes comprising"
+					+ sg + results.length + " locales" + sc + " [detected from"
+					+ sg + list.length + " total" + sc + "]<br>" + output;
+
+				//console.debug(missing.join())
+
+				// output
+				el.innerHTML = output
+			}
+		}
+	}
+
+</script>
+</body>
+</html>
