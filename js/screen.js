@@ -365,6 +365,7 @@ function get_fullscreen() {
 		r = "no: "+e.name; dom.fsLeak = zNA
 	}
 	dom.fsSupport = r
+	return r
 }
 
 function get_line_scrollbar() {
@@ -1561,6 +1562,11 @@ function get_ua_nav() {
 
 	// section hash will change when we modify it to also account for worker results
 	// just use a blanket boolean BS since that's stable
+		// ToDO: logic with worker + isBS re section hash
+		// if no BS + worker matches = use original result
+		// if no BS but worker doesn't match = use worker
+		// if BS + no worker - use isBS
+		// if BS + worker = use worker
 	if (isBS) {
 		section_info("ua", t0, gt0, ["ua: lies"])
 	} else {
@@ -2116,39 +2122,41 @@ function get_android_kbh() {
 
 function goFS() {
 	if (isFF) {
-		dom.fsLeak = ""
-		let ih1 = window.innerHeight,
-			delay = 1, n = 1,
-			sizeS = [], sizeE = []
-		function exitFS() {
-			if (isVer > 63) {document.exitFullscreen()} else {document.mozCancelFullScreen()}
-			document.removeEventListener("mozfullscreenchange", getFS)
-		}
-		function getFS() {
-			if (document.mozFullScreen) {
-				setTimeout(function() {
-					let iw = document.mozFullScreenElement.clientWidth,
-						ih = document.mozFullScreenElement.clientHeight
-					dom.fsLeak = screen.width+" x "+screen.height+" [screen] "+iw+" x "+ih+" [mozFullScreenElement client]"
-					exitFS()
-					// TB desktop warning panel
-					if (isTB == true && isOS !== "android") {
-						setTimeout(function(){
-						let ih2 = window.innerHeight
-							let panel = ih1-ih2
-							if (panel !== 0) {
-								dom.fsLeak.innerHTML = dom.fsLeak.textContent+"<br>"+panel+"px [warning panel height]"
-							}
-						}, 600)
-					}
-				}, delay)
+		if (get_fullscreen() == zE) {
+			dom.fsLeak = ""
+			let ih1 = window.innerHeight,
+				delay = 1, n = 1,
+				sizeS = [], sizeE = []
+			function exitFS() {
+				if (isVer > 63) {document.exitFullscreen()} else {document.mozCancelFullScreen()}
+				document.removeEventListener("mozfullscreenchange", getFS)
 			}
-		}
-		if (document.mozFullScreenEnabled) {
-			let element = dom.imageFS
-			if (isOS == "android") {delay = 1000}
-			element.mozRequestFullScreen()
-			document.addEventListener("mozfullscreenchange", getFS)
+			function getFS() {
+				if (document.mozFullScreen) {
+					setTimeout(function() {
+						let iw = document.mozFullScreenElement.clientWidth,
+							ih = document.mozFullScreenElement.clientHeight
+						dom.fsLeak = screen.width+" x "+screen.height+" [screen] "+iw+" x "+ih+" [mozFullScreenElement client]"
+						exitFS()
+						// TB desktop warning panel
+						if (isTB == true && isOS !== "android") {
+							setTimeout(function(){
+							let ih2 = window.innerHeight
+								let panel = ih1-ih2
+								if (panel !== 0) {
+									dom.fsLeak.innerHTML = dom.fsLeak.textContent+"<br>"+panel+"px [warning panel height]"
+								}
+							}, 600)
+						}
+					}, delay)
+				}
+			}
+			if (document.mozFullScreenEnabled) {
+				let element = dom.imageFS
+				if (isOS == "android") {delay = 1000}
+				element.mozRequestFullScreen()
+				document.addEventListener("mozfullscreenchange", getFS)
+			}
 		}
 	}
 }
