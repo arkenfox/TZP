@@ -1372,10 +1372,11 @@ function get_ua_nav() {
 			if (id == "07") {str = ""} // empty string: unexpected
 			if (id == "08") {str = " "} // single space
 			if (id == "09") {str = undefined} // undefined
-			if (id == "10") {str = "Moz://a"} // unexpected
+			if (id == "10") {str = "undefined"} // undefined string
 		} else {
 			try {str = navigator[property]} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 		}
+		if (str == zU) {str = "undefined as a string"}
 		if (str == "") {str = zU}
 		if (str == undefined && isFF) {str = zB3}
 		// stash
@@ -1385,8 +1386,8 @@ function get_ua_nav() {
 		if (id == "09" || id == "10") {
 			document.getElementById("togUA"+id).style.display = (str == good ? "none" : "table-row")
 		}
-		// isBS: ignored blocked items
-		if (go && str.substring(0,6) !== "script") {
+		// isBS
+		if (go) {
 			if (str !== good) {str = sb+"&#9654"+sc; lies++} else {str = ""}
 		} else {
 			str = ""
@@ -1558,6 +1559,9 @@ function get_ua_nav() {
 	dom.nUAinitial = sha1(res.join())
 
 	// section hash will change when we modify it to account for lies and worker results
+
+	// temp lies
+	if (lies > 0) {res = ["ua: pinocchio"]}
 	section_info("ua", t0, gt0, res)
 }
 
