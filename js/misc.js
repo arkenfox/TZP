@@ -297,13 +297,11 @@ function outputMisc(type) {
 		get_wasm(),
 		get_mathml(type),
 		get_svg()
-	]).then(function(result){
-		for (let i=0; i < 11; i++) {
-			section.push(result[i])
-		}
-		section_hash("misc", section)
-		// perf
-		debug_page("perf","misc",t0,gt0)
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section.push(currentResult)
+		})
+		section_info("misc", t0, gt0, section)
 	})
 
 	// perf2 is not needed in the hash as performance.mark is RFP unique
