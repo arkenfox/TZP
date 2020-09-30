@@ -2166,8 +2166,7 @@ function goNW() {
 	let sizesi = [], // inner history
 		sizeso = [], // outer history
 		n = 1, // setInterval counter
-		newWinLeak = "",
-		strError = ""
+		newWinLeak = ""
 
 	// open
 	let newWin = window.open("tests/newwin.html","","width=9000,height=9000")
@@ -2182,14 +2181,12 @@ function goNW() {
 
 	// DESKTOP
 	if (isOS !== "android") {
-
 		function check_newwin() {
 			let diffsi = [], // 4 inner sizes
 				diffso = [], // 4 outer sizes
 				changesi = 0,
 				changeso = 0
-
-			// step1: detect changes
+			// detect changes
 			let prev = sizesi[0]
 			let strInner = s1+"inner: "+sc+iw+" x "+ih
 			for (let k=0; k < sizesi.length; k++) {
@@ -2210,12 +2207,9 @@ function goNW() {
 			if (changesi > 0 || changeso > 0) {
 				newWinLeak = strInner+"<br>"+strOuter
 			}
-			// append file:/// error debug
-			if (strError !== "") {newWinLeak = newWinLeak+"<br>"+strError}
 			// output
 			dom.newWinLeak.innerHTML = newWinLeak
 		}
-
 		function build_newwin() {
 			// check n times as "fast" as we can/dare
 			if (n == 150) {
@@ -2236,7 +2230,6 @@ function goNW() {
 			n++
 		}
 		let checking = setInterval(build_newwin, 3)
-
 	}
 
 	// ANDROID
