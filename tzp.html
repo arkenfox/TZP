@@ -27,10 +27,9 @@
 		<progress class="testRect" id="rect4">test</progress>
 		<button class="testRect" id="rect5"></button>
 	</div>
-
-	<img id="imageFS" width=0 height=0></img>
 	<!--offscreen-->
 	<div class="offscreen">
+		<img id="imageFS" width=0 height=0></img>
 		<div><span id="woffno" class="woffno">&#xe800;</span></div>
 		<div><span id="woffyes" class="woffyes">&#xe800;</span></div>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
@@ -44,7 +43,7 @@
 		</div>
 		<div id="iframes"></div>
 		<div id="svgDiv"></div>
-		<div id="tScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
+		<div id="fdScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
 	</div>
 	<!--hidden-->
@@ -74,10 +73,7 @@
 
 	<table>
 	<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb">TZP is only designed for Firefox <code>[<b>v60+</b>]</code> and the Tor Browser <code>[<b>v8+</b>]</code>.
-	<a target="_blank" class="blue" href="extra.html">Here</a> are additonal tests, and <a target="_blank" class="blue"
-	href="https://github.com/arkenfox/TZP/">here</a> is the repo [feel free to drop in]. When re-testing
-	sections, be aware that some pref/option changes may require a page refresh [<b>F5</b>] or even a new browser session.
+	<tr><td class="blurb"><a class="return" href="index.html">return to TZP index</a></td></tr>
 	</td></tr>
 	</table>
 
@@ -85,12 +81,12 @@
 	<table id="tb1">
 		<col width="50%"><a name="screen"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#screen">Screen</a>
+			<div class="nav-title"><a href="#screen">screen</a>
 			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfscreen"></span></div>
 			<div class="nav-down"><a href="#useragentd">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`)">[ re-run ]</button></div>
 			<span class="hashtocome" id="screenhash"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
@@ -153,21 +149,14 @@
 	<table id="tb2">
 		<col width="37%"><a name="useragent"></a><col width="63%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#useragent">User Agent</a>
+			<div class="nav-title"><a href="#useragent">user agent</a>
 			<div class="nav-up"><a href="#screen">&#9650;</a> <span class="c perf" id="perfua"></span></div>
-			<div class="nav-down"><a href="#mathd">&#9660;</a></div>
+			<div class="nav-down"><a href="#featured">&#9660;</a></div>
 			<div class="nav-right"><a name="useragentd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">
-			The extra <code>browser</code>, <code>version</code> & <code>os</code> tests are to show how easy it is to
-			detect them via other means. They don't have to be "correct"; the measurements provide the real entropy,
-			such as math hashes, branding dimensions, and pixel values. Each test is independent of the others.</span>
-		</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="hashtocome" id="uahash"></span></td></tr>
-		<tr><td>hash</td><td class="c mono" id="sectionUA1"></td></tr>
-		<tr><td>[header] http_user_agent</td><td class="faint"></td></tr>
+			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</button></div>
+			<span class="c" id="uahash"></span></td></tr>
 		<tr><td id="UA00">userAgent</td><td class="c spaces" id="nUA00"></td></tr>
 		<tr><td id="UA01">appCodeName</td><td class="c spaces" id="nUA01"></td></tr>
 		<tr><td id="UA02">appName</td><td class="c spaces" id="nUA02"></td></tr>
@@ -189,10 +178,25 @@
 		<tr class="hidden"><td>[nested iframe] hash</td><td class="c mono" id="sectionUA7"></td></tr>
 		<tr><td><button class="btn0 btn" onClick="goNW_UA()">[ click here ]</button>
 			window.open</td><td class="c mono" id="sectionUA8"></td></tr>
-		<tr><td colspan="2" class="center">--- browser, version, os ---</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			 <span class="ttxt">uses <b>some</b> feature<br>detection results</span></div>
-			 &nbsp hash</td><td class="c mono" id="sectionUA9"></td></tr>
+	</table>
+
+	<!--screen.js-->
+	<table id="tb3">
+		<col width="37%"><a name="feature"></a><col width="63%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title"><a href="#feature">feature detection</a>
+			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perffeature"></span></div>
+			<div class="nav-down"><a href="#languaged">&#9660;</a></div>
+			<div class="nav-right"><a name="featured"></a></div></div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">
+			These tests, tailored for <code>Firefox</code>, are to show that you cannot hide your	<code>browser</code>,
+			<code>version</code> or <code>OS</code>. Some OS "guesses" don't have to be "correct"; the measurements provide
+			the real entropy, such as math hashes, branding dimensions, and pixel values.	Each test is independent of the others.</span>
+		</td></tr>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</button></div>
+			<span class="c" id="featurehash"></span></td></tr>
 		<tr><td>[css] branding</td><td id="fdBrandingCss"></td></tr>
 		<tr><td>[css] browser</td><td id="fdResourceCss"></td></tr>
 		<tr><td>[collation] browser</td><td class="c" id="fdCollation"></td></tr>
@@ -201,8 +205,8 @@
 		<tr><td>[math] browser</td><td class="c" id="fdMath"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">Firefox 60+ only</span></div>
-			&nbsp [feature detection] version</td><td class="c" id="versionNo"></td></tr>
-		<tr><td>[chrome://] os</td><td class="c" id="fdChromeOS"></td></tr>
+			&nbsp [feature detection] version</td><td class="c" id="fdVersion"></td></tr>
+		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
 		<tr><td>[math] os</td><td class="c" id="fdMathOS"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">Linux, Mac or Windows<br>
 			if <b>none</b> show = Android<br>if <b>all</b> show = fonts are blocked</span>
@@ -210,25 +214,29 @@
 			<td><span style="font-family: Arimo, DejaVu Serif, ABR;">Linux</span>
 			<span style="font-family: Lucida Grande, ABR;">Mac</span>
 			<span style="font-family: Segoe UI, ABR;">Windows</span></td></tr>
-		<tr><td>[css line-height] os</td><td class="c" id="cssLH"></td></tr>
-		<tr><td>[viewport scrollbar width] os <sup>2, 3</sup></td><td class="c" id="vScroll"></td></tr>
-		<tr><td>[element scrollbar width] os</td><td class="c" id="eScroll"></td></tr>
-		<tr><td>[widgets] os</td><td class="c" id="widgetOS"></td></tr>
+		<tr><td>[css line-height] os</td><td class="c" id="fdLH"></td></tr>
+		<tr><td>[viewport scrollbar width] os <sup>2, 3</sup></td><td class="c" id="fdScrollV"></td></tr>
+		<tr><td>[element scrollbar width] os</td><td class="c" id="fdScrollE"></td></tr>
+		<tr><td>[widgets] os</td><td class="c" id="fdWidget"></td></tr>
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseE" class="toggle" type="checkbox" checked onchange="toggleitems(this, `E`)">
 			<label for="collapseE" class="lbl-toggle" id="labelE">&#9660; show details</label>
 		</td></tr>
-		<tr class="togE"><td></td><td class="s2">error messages</td></tr>
-		<tr class="togE"><td>hash</td><td class="c mono" id="errh"></td></tr>
+		<tr class="togE"><td></td><td class="s3">error messages</td></tr>
+			<tr class="togE"><td>hash</td><td class="c mono" id="errh"></td></tr>
 			<tr class="togE"><td>error1</td><td class="c" id="err1"></td></tr>
 			<tr class="togE"><td>error2</td><td class="c" id="err2"></td></tr>
 			<tr class="togE"><td>error3</td><td class="c" id="err3"></td></tr>
 			<tr class="togE"><td>error4</td><td class="c" id="err4"></td></tr>
 			<tr class="togE" id="togE5"><td>error5</td><td class="c" id="err5"></td></tr>
-		<tr class="togE"><td></td><td class="s2">widgets</td></tr>
+		<tr class="togE"><td></td><td class="s3">math</td></tr>
+			<tr class="togE"><td>hash</td><td class="c mono" id="mathhash"></td></tr>
+			<tr class="togE"><td>1st edition</td><td class="c mono" id="math1hash"></td></tr>
+			<tr class="togE"><td>polyfills: 6th edition</td><td class="c mono" id="math6hash"></td></tr>
+		<tr class="togE"><td></td><td class="s3">widgets</td></tr>
 			<tr class="togE"><td>hash</td><td class="c mono" id="widgetH"></td></tr>
 			<tr class="togE"><td id="widfirst">button|checkbox|color|combobox|datetime-local|radio|text</td>
-				<td class="c spaces" id="wid0"></td></tr> <!-- button -->
+				<td class="c mono spaces" id="wid0"></td></tr> <!-- button -->
 			<tr class="hidden"><td>checkbox</td><td id="wid1"></td></tr>
 			<tr class="hidden"><td>color</td><td id="wid2"></td></tr>
 			<tr class="hidden"><td>combobox</td><td id="wid3"></td></tr>
@@ -246,53 +254,17 @@
 			<a target="_blank" class="blue" href="https://github.com/earthlng/testpages">earthlng</a> <sup>3</sup></td></tr>
 	</table>
 
-	<!--screen.js-->
-	<table id="tb3">
-		<col width="37%"><a name="math"></a><col width="63%">
-		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#math">Math</a>
-			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perfmath"></span></div>
-			<div class="nav-down"><a href="#languaged">&#9660;</a></div>
-			<div class="nav-right"><a name="mathd"></a></div></div>
-		</th></tr></thead>
-		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="c" id="mathhash"></span></td></tr>
-		<tr><td>6th edition</td><td class="c mono" id="math6hash"></td></tr>
-		<tr><td>1st edition</td><td class="c mono" id="math1hash"></td></tr>
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseM" class="toggle" type="checkbox" checked onchange="toggleitems(this, `M`)">
-			<label for="collapseM" class="lbl-toggle" id="labelM">&#9660; show details</label>
-		</td></tr>
-		<tr class="togM"><td></td><td class="s3">ECMAScript 6th Edition</td></tr>
-			<tr class="togM"><td>atanh(0.5)</td><td class="c mono" id="math1"></td></tr>
-			<tr class="togM"><td>expm1(1)</td><td class="c mono" id="math2"></td></tr>
-			<tr class="togM"><td>sinh(1)</td><td class="c mono" id="math3"></td></tr>
-		<tr class="togM"><td></td><td class="s3">ECMAScript 1st Edition</td></tr>
-			<tr class="togM"><td>cos(1e251)</td><td class="c mono" id="cos0"></td></tr>
-			<tr class="togM"><td>cos(1e140)</td><td class="c mono" id="cos1"></td></tr>
-			<tr class="togM"><td>cos(1e12)</td><td class="c mono" id="cos2"></td></tr>
-			<tr class="togM"><td>cos(1e130)</td><td class="c mono" id="cos3"></td></tr>
-			<tr class="togM"><td>cos(1e272)</td><td class="c mono" id="cos4"></td></tr>
-			<tr class="togM"><td>cos(1e0)</td><td class="c mono" id="cos5"></td></tr>
-			<tr class="togM"><td>cos(1e284)</td><td class="c mono" id="cos6"></td></tr>
-			<tr class="togM"><td>cos(1e75)</td><td class="c mono" id="cos7"></td></tr>
-		<tr class="togM"><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">ECMAScript 6th edition math code provided by </span>
-			<a target="_blank" class="blue" href="https://fpcentral.tbb.torproject.org/">Fingerprint Central</a></td></tr>
-	</table>
-
 	<!--language.js-->
 	<table id="tb4">
 		<col width="37%"><a name="language"></a><col width="63%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#language">Language & Locale / Date/Time & Format / Geolocation</a>
-			<div class="nav-up"><a href="#math">&#9650;</a> <span class="c perf" id="perflanguage"></span></div>
+			<div class="nav-title"><a href="#language">language & locale / date/time & format / geolocation</a>
+			<div class="nav-up"><a href="#feature">&#9650;</a> <span class="c perf" id="perflanguage"></span></div>
 			<div class="nav-down"><a href="#headersd">&#9660;</a></div>
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</button></div>
 			<span class="hashtocome" id="languagehash"></span></td></tr>
 		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
@@ -304,7 +276,6 @@
 			<label for="collapseL" class="lbl-toggle" id="labelL">&#9660; show details</label>
 		</td></tr>
 		<tr class="togL"><td></td><td class="s4">language & locale</td></tr>
-			<tr class="togL"><td>http_accept_language</td><td class="faint"></td></tr>
 			<tr class="togL"><td>languages | language | languages[0]</td><td class="c" id="ldt2"></td></tr>
 			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat
@@ -357,14 +328,14 @@
 	<table id="tb5">
 		<col width="50%"><a name="headers"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#headers">HTTP Headers</a>
+			<div class="nav-title"><a href="#headers">http headers</a>
 			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
 			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
 			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="hashtocome" id="headershash"></span></td></tr>
+			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</button></div>
+			<span class="c" id="headershash"></span></td></tr>
 		<tr><td>[navigator] doNotTrack</td><td class="c" id="nDNT"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.netinfo.enabled</span></div>
@@ -374,8 +345,10 @@
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td>http_accept</td><td class="faint"></td></tr>
 		<tr><td>http_accept_encoding</td><td class="faint"></td></tr>
+		<tr><td>http_accept_language</td><td class="faint"></td></tr>
 		<tr><td>http_dnt</td><td class="faint"></td></tr>
 		<tr><td>http_upgrade_insecure_requests</td><td class="faint"></td></tr>
+		<tr><td>http_user_agent</td><td class="faint"></td></tr>
 		<tr><td>server_protocol</td><td class="faint"></td></tr>
 	</table>
 
@@ -383,7 +356,7 @@
 	<table id="tb6">
 		<col width="50%"><a name="storage"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#storage">Cookies & Storage</a>
+			<div class="nav-title"><a href="#storage">cookies & storage</a>
 			<div class="nav-up"><a href="#headers">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
 			<div class="nav-right"><a name="storaged"></a></div></div>
@@ -393,8 +366,8 @@
 			new random name and value, and then to read them back. Only when it successfully reads back a matching value
 			is it deemed to be available and working.</span></td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="hashtocome" id="storagehash"></span> <span id="tempIsFile"><span></td></tr>
+			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`)">[ re-run ]</button></div>
+			<span class="hashtocome" id="storagehash"></span> <span class="isFile"><span></td></tr>
 		<tr><td>[navigator] cookieEnabled</td><td class="c" id="ctest0"></td></tr>
 		<tr><td>[javascript 1st party cookie] session | persistent</td>
 			<td><span class="c" id="ctest1"></span> | <span class="c" id="ctest2"></span></td></tr>
@@ -427,14 +400,14 @@
 	<table id="tb7">
 		<col width="29%"><a name="devices"></a><col width="71%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#devices">Devices & Hardware</a>
+			<div class="nav-title"><a href="#devices">devices & hardware</a>
 			<div class="nav-up"><a href="#storage">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
 			<div class="nav-down"><a href="#domrectd">&#9660;</a></div>
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="hashtocome" id="deviceshash"></span></td></tr>
+			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</button></div>
+			<span class="c" id="deviceshash"></span></td></tr>
 		<tr><td>plugins</td><td id="plugins"></td></tr>
 		<tr><td>mimeTypes</td><td id="mimeTypes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -475,13 +448,13 @@
 		<col width="7%"><a name="domrect"></a>
 			<col width="15%"><col width="7%"><col width="8%"><col width="15%"><col width="15%"><col width="15%"><col width="18%">
 		<thead><tr><th colspan="8">
-			<div class="nav-title"><a href="#domrect">DOMRect / SVG</a>
+			<div class="nav-title"><a href="#domrect">domrect / svg</a>
 			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfdomrect"></span></div>
 			<div class="nav-down"><a href="#canvasd">&#9660;</a></div>
 			<div class="nav-right"><a name="domrectd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="8" class="secthash">
-			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`)">[ re-run ]</button></div>
 			<span class="c" id="domrecthash"></span></td></tr>
 		<tr><td colspan="3">Element.getClientRects</td><td colspan="5" class="c mono" id="dr0"></td></tr>
 		<tr><td colspan="3">Element.getBoundingClientRect</td><td colspan="5" class="c mono" id="dr1"></td></tr>
@@ -547,18 +520,14 @@
 	<table id="tb9">
 		<col width="29%"><a name="canvas"></a><col width="71%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#canvas">Canvas</a>
+			<div class="nav-title"><a href="#canvas">canvas</a>
 			<div class="nav-up"><a href="#domrect">&#9650;</a> <span class="c perf" id="perfcanvas"></span></div>
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run ]</button></div>
-			<span class="c" id="canvashash"></span></td></tr>
-		<!--<tr><td>
-			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`, `c`, `m`)">[ re-run ]</button></div>
-			hash</td><td class="c mono" id="chash1"></td></tr>
-		-->
+			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</button></div>
+			<span class="c" id="canvashash"></span> <span class="isFile"><span></td></tr>
 		<tr><td>getContext</td><td class="c mono getContext"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
 		<tr><td>toBlob</td><td class="c mono toBlob"></td></tr>
@@ -578,13 +547,13 @@
 	<table id="tb10">
 		<col width="29%"><a name="webgl"></a><col width="71%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#webgl">WebGL</a>
+			<div class="nav-title"><a href="#webgl">webgl</a>
 			<div class="nav-up"><a href="#canvas">&#9650;</a> <span class="c perf" id="perfwebgl"></span></div>
 			<div class="nav-down"><a href="#audiod">&#9660;</a></div>
 			<div class="nav-right"><a name="webgld"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn10 btn" onClick="outputSection(`10`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn10 btn" onClick="outputSection(`10`)">[ re-run ]</button></div>
 			<span class="hashtocome" id="webglhash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="glhash0"></td></tr>
 		<tr><td>getContext</td><td class="c mono" id="glsupport"></td></tr>
@@ -605,13 +574,13 @@
 	<table id="tb11">
 		<col width="29%"><a name="audio"></a><col width="71%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#audio">Audio</a>
+			<div class="nav-title"><a href="#audio">audio</a>
 			<div class="nav-up"><a href="#webgl">&#9650;</a> <span class="c perf" id="perfaudio"></span></div>
 			<div class="nav-down"><a href="#fontsd">&#9660;</a></div>
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c1`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c1`)">[ re-run ]</button></div>
 			<span class="hashtocome" id="audiohash1"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.webaudio.enabled</span></div>
@@ -621,7 +590,7 @@
 		<tr><td>sum <sup>1</sup></td><td class="c1 mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c2`, `m`)">[ run ]</button></div>
+			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c2`)">[ run ]</button></div>
 			<span class="c2" id="audiohash2"></span></td></tr>
 		<tr><td>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 mono" id="audio1hash"></td></tr>
@@ -644,101 +613,83 @@
 
 	<!--fonts.js-->
 	<table id="tb12">
-		<col width="1%"><a name="fonts"></a><col width="36%"><col width="63%">
-		<thead><tr><th colspan="3">
-			<div class="nav-title"><a href="#fonts">Fonts</a>
+		<col width="37%"><a name="fonts"></a><col width="63%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title"><a href="#fonts">fonts</a>
 			<div class="nav-up"><a href="#audio">&#9650;</a> <span class="c perf" id="perffonts"></span></div>
 			<div class="nav-down"><a href="#mediad">&#9660;</a></div>
 			<div class="nav-right"><a name="fontsd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="3" class="intro"><span class="no_color">We already know we can enumerate fonts: see the
-			<a target="_blank" class="blue" href="extra.html">monsta</a> test. These font list tests are more refined:
-			<code>whitelist</code> tests are smaller, faster tests trying to determine entropy within each whitelist,
-			while the	<code>os</code> tests are to get metrics on stable fonts per os.</span>
+		<tr><td colspan="2" class="intro"><span class="no_color">The font enumeration tests are Firefox only and OS
+			based to get metrics on stable fonts per os. The <code>font fallback</code> test is a slower method that
+			may produce more results</span>
 		</td></tr>
-		<tr><td colspan="3" class="secthash">
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c1`, `m`)">[ re-run ]</button></div>
-			<span class="hashtocome" id="fontshash"></span><span></td></tr>
-		<tr><td colspan="2">
-			default proportional font</td><td class="c1" id="fontFCprop"></td></tr>
-		<tr><td colspan="2">default font sizes</td><td class="c1" id="fontFCsize"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</button></div>
+			<span class="c" id="fontshash"></span><span></td></tr>
+		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
+		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">layout.css.font-loading-api.enabled</span></div>
-			&nbsp css font loading api</td><td class="c1" id="fontCSS"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
+			&nbsp css font loading api</td><td class="c" id="fontCSS"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
-			&nbsp document fonts</td><td class="c1" id="fontDoc"></td></tr>
-		<tr><td colspan="2">[offset] unicode glyphs <sup>1</sup></td><td class="c1 mono" id="ug1"></td></tr>
-		<tr><td colspan="2">[textmetrics] unicode glyphs <sup>1</sup></td><td class="c1 mono" id="ug2"></td></tr>
-		<tr><td colspan="2">[<span id="labelUG">clientrect</span>] unicode glyphs <sup>1</sup></td><td class="c1 mono" id="ug3"></td></tr>
-		<tr id="togUG"><td colspan="2">[getClientRects] unicode glyphs <sup>1</sup></td><td class="c1 mono" id="ug4"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
+			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
+		<tr><td>fonts <sup>1</sup></td><td class="c mono" id="fontFPJS2"></td></tr>
+		<tr><td><button class="btn0 btn" onClick="outputFontsFB()">[ click here ]</button>
+				font fallback <sup>2</sup></td><td class="mono" id="fontFB"></td></tr>
+		<tr><td>[offset] unicode glyphs <sup>3</sup></td><td class="c mono" id="ug1"></td></tr>
+		<tr><td>[textmetrics] unicode glyphs <sup>3</sup></td><td class="c mono" id="ug2"></td></tr>
+		<tr><td>[<span id="labelUG">clientrect</span>] unicode glyphs <sup>3</sup></td><td class="c mono" id="ug3"></td></tr>
+		<tr id="togUG"><td colspan="2">[getClientRects] unicode glyphs <sup>1</sup></td><td class="c mono" id="ug4"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">gfx.downloadable_fonts.woff2.enabled<br>Firefox 68 or lower</span></div>
-			&nbsp WOFF2</td><td class="c1" id="fontWoff2"></td></tr>
-		<tr><td colspan="3" class="showhide">
-			<input id="collapseF2" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F2`)">
-			<label for="collapseF2" class="lbl-toggle" id="labelF2">&#9660; show details</label>
+			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
+		<!--DETAILS: FONTS -->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseF1" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F1`)">
+			<label for="collapseF1" class="lbl-toggle" id="labelF1">&#9660; show fonts</label></td></tr>
+		<tr class="togF1"><td id="fontFPJS2label">fonts</td><td>
+			 <button class="btn0 btn" onClick="copyclip(`fontFPJS2Found`)">[ copy to clipboard ]</button></td></tr>
+		<tr class="togF1"><td colspan="2" class="intro" id="fontFPJS2Found"></td></tr>
+		<tr id="fontB1" class="togF2"><td id="fontFBlabel"></td><td>
+			 <button class="btn0 btn" onClick="copyclip(`fontFBFound`)">[ copy to clipboard ]</button></td></tr>
+		<tr id="fontB2" class="togF2"><td colspan="2" class="intro" id="fontFBFound"></td></tr>
+		<!-- DETAILS TM -->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseF3" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F3`)">
+			<label for="collapseF3" class="lbl-toggle" id="labelF3">&#9660; show textmetrics</label>
 		</td></tr>
-		<tr class="togF2 togTM"><td colspan="2"></td><td class="s12">textMetrics</td></tr>
-			<tr class="togF2"><td colspan="2" id="labelTM">width</td><td class="c1 mono" id="tm00"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">actualBoundingBoxAscent</td><td class="c1 mono" id="tm01"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">actualBoundingBoxDescent</td><td class="c1 mono" id="tm02"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">actualBoundingBoxLeft</td><td class="c1 mono" id="tm03"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">actualBoundingBoxRight</td><td class="c1 mono" id="tm04"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">alphabeticBaseline</td><td class="c1 mono" id="tm05"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">emHeightAscent</td><td class="c1 mono" id="tm06"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">emHeightDescent</td><td class="c1 mono" id="tm07"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">fontBoundingBoxAscent</td><td class="c1 mono" id="tm08"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">fontBoundingBoxDescent</td><td class="c1 mono" id="tm09"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">hangingBaseline</td><td class="c1 mono" id="tm10"></td></tr>
-			<tr class="togF2 togTM"><td colspan="2">ideographicBaseline</td><td class="c1 mono" id="tm11"></td></tr>
-			<tr class="togF2 togTM"><td colspan="3"></td></tr>
-		<tr class="togF2"><td colspan="2" class="s12">[offset] unicode glyphs</td><td>
+		<tr class="togF3 togTM"><td></td><td class="s12">textMetrics</td></tr>
+			<tr class="togF3"><td id="labelTM">width</td><td class="c mono" id="tm00"></td></tr>
+			<tr class="togF3 togTM"><td>actualBoundingBoxAscent</td><td class="c mono" id="tm01"></td></tr>
+			<tr class="togF3 togTM"><td>actualBoundingBoxDescent</td><td class="c mono" id="tm02"></td></tr>
+			<tr class="togF3 togTM"><td>actualBoundingBoxLeft</td><td class="c mono" id="tm03"></td></tr>
+			<tr class="togF3 togTM"><td>actualBoundingBoxRight</td><td class="c mono" id="tm04"></td></tr>
+			<tr class="togF3 togTM"><td>alphabeticBaseline</td><td class="c mono" id="tm05"></td></tr>
+			<tr class="togF3 togTM"><td>emHeightAscent</td><td class="c mono" id="tm06"></td></tr>
+			<tr class="togF3 togTM"><td>emHeightDescent</td><td class="c mono" id="tm07"></td></tr>
+			<tr class="togF3 togTM"><td>fontBoundingBoxAscent</td><td class="c mono" id="tm08"></td></tr>
+			<tr class="togF3 togTM"><td>fontBoundingBoxDescent</td><td class="c mono" id="tm09"></td></tr>
+			<tr class="togF3 togTM"><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
+			<tr class="togF3 togTM"><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
+			<tr class="togF3 togTM"><td colspan="2"></td></tr>
+		<!-- DETAILS GLYPHS -->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
+			<label for="collapseF4" class="lbl-toggle" id="labelF4">&#9660; show unicode glyphs</label>
+		</td></tr>
+		<tr class="togF4"><td>[offset] unicode glyphs</td><td>
 			 <button class="btn0 btn" onClick="copyclip(`ug10`)">[ copy to clipboard ]</button></td></tr>
-		<tr class="togF2"><td></td><td colspan="2" class="mono spaces" id="ug10"></td></tr>
-		<tr class="togF2"><td colspan="3"></td></tr>
-
-		<!--WHITELIST: c2: small -->
-		<tr><td colspan="3" class="center">------</td></tr>
-		<tr><td colspan="2">
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c2`, `m`)">[run whitelist ]</button></div>
-			font list</td><td class="mono" id="small_fontList"></td></tr>
-		<tr><td colspan="2">fingerprintjs2 <sup>2</sup></td><td class="c2 mono" id="small_fontFPJS2"></td></tr>
-		<tr><td colspan="2">font fallback <sup>3</sup></td><td class="c2 mono" id="small_fontFB"></td></tr>
-		<tr><td colspan="3"></td></tr>
-		<!--OS: c3: all -->
-		<tr><td colspan="3" class="center">------</td></tr>
-		<tr><td colspan="2">
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`, `c3`, `m`)">[ run os ]</button></div>
-			font list</td><td class="mono" id="all_fontList"></td></tr>
-		<tr><td colspan="2">fingerprintjs2 <sup>2</sup></td><td class="c3 mono" id="all_fontFPJS2"></td></tr>
-		<tr><td colspan="2">font fallback <sup>3</sup></td><td class="c3 mono" id="all_fontFB"></td></tr>
-		<!--DETAILS-->
-		<tr><td colspan="3" class="showhide">
-			<input id="collapseF" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F`)">
-			<label for="collapseF" class="lbl-toggle" id="labelF">&#9660; show details</label></td></tr>
-		<!--WHITELIST: c2-->
-		<tr class="togF"><td colspan="2" class="s12" id="small_fontlabel">whitelist</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`small_fontFPJS2Found`)">[ copy to clipboard ]</button></td></tr>
-		<tr class="togF"><td></td><td colspan="2" class="intro" id="small_fontFPJS2Found"></td></tr>
-		<tr id="fontB1" class="togF1"><td colspan="2" class="s12">font fallback [whitelist]</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`small_fontFBFound`)">[ copy to clipboard ]</button></td></tr>
-		<tr id="fontB2" class="togF1"><td></td><td colspan="2" class="intro" id="small_fontFBFound"></td></tr>
-		<!--OS: c3-->
-		<tr class="togF"><td colspan="2" class="s12" id="all_fontlabel">os</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`all_fontFPJS2Found`)">[ copy to clipboard ]</button></td></tr>
-		<tr class="togF"><td></td><td colspan="2" class="intro" id="all_fontFPJS2Found"></td></tr>
-		<tr id="fontD1" class="togF1"><td colspan="2" class="s12">font fallback [os]</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`all_fontFBFound`)">[ copy to clipboard ]</button></td></tr>
-		<tr id="fontD2" class="togF1"><td></td><td colspan="2" class="intro" id="all_fontFBFound"></td></tr>
-		<tr class="togF"><td colspan="3"></td></tr>
+		<tr class="togF4"><td colspan="2" class="mono spaces intro"><span class="no_color" id="ug10"></span></td></tr>
+		<tr class="togF4"><td colspan="2"></td></tr>
 		<!--creds-->
-		<tr><td colspan="3"><span class="no_color">code based on work by </span>
-			<a target="_blank" class="blue" href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>1</sup>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span>
+			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>1</sup>
 			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>2</sup>
+			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>2</sup>
 			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>3</sup>
+			<a target="_blank" class="blue" href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>3</sup>
 		</td></tr>
 	</table>
 
@@ -746,13 +697,13 @@
 	<table id="tb13">
 		<col width="10%"><col width="27%"><a name="media"></a><col width="63%">
 		<thead><tr><th colspan="3">
-			<div class="nav-title"><a href="#media">Media</a>
+			<div class="nav-title"><a href="#media">media</a>
 			<div class="nav-up"><a href="#fonts">&#9650;</a> <span class="c perf" id="perfmedia"></span></div>
 			<div class="nav-down"><a href="#cssd">&#9660;</a></div>
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="3" class="secthash">
-			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`)">[ re-run ]</button></div>
 			<span class="c" id="mediahash"></span></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">media.media-capabilities.enabled</span></div>
@@ -772,13 +723,13 @@
 	<table id="tb14">
 		<col width="37%"><a name="css"></a><col width="63%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#css">CSS</a>
+			<div class="nav-title"><a href="#css">css</a>
 			<div class="nav-up"><a href="#media">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
 			<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`)">[ re-run ]</button></div>
 			<span class="c" id="csshash"></span></td></tr>
 		<tr><td>[-moz-] colors</td><td class="c mono" id="mColorHash"></td></tr>
 		<tr><td>[system] colors</td><td class="c mono" id="sColorHash"></td></tr>
@@ -820,7 +771,7 @@
 	<table id="tb15">
 		<col width="50%"><a name="ciphers"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#ciphers">Ciphers / TLS</a>
+			<div class="nav-title"><a href="#ciphers">ciphers / tls</a>
 			<div class="nav-up"><a href="#css">&#9650;</a></div>
 			<div class="nav-down"><a href="#spared">&#9660;</a></div>
 			<div class="nav-right"><a name="ciphersd"></a></div></div>
@@ -856,13 +807,13 @@
 	<table id="tb18">
 		<col width="10%"><a name="misc"></a><col width="27%"><col width="63%">
 		<thead><tr><th colspan="3">
-			<div class="nav-title"><a href="#misc">Miscellaneous</a>
+			<div class="nav-title"><a href="#misc">miscellaneous</a>
 			<div class="nav-up"><a href="#spare2">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
 			<div class="nav-down"><a href="#theend">&#9660;</a></div>
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="3" class="secthash">
-			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`, `c`, `m`)">[ re-run ]</button></div>
+			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</button></div>
 			<span class="c" id="mischash"></span></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">beacon.enabled</span></div>
@@ -946,10 +897,10 @@
 	<script src="js/css.js"></script>
 	<script src="js/misc.js"></script>
 	<!--slower-->
-	<script src="js/fonts.js"></script>
-	<script src="js/audio.js"></script>
 	<script src="js/canvas.js"></script>
+	<script src="js/fonts.js"></script>
 	<script src="js/webgl.js"></script>
+	<script src="js/audio.js"></script>
 
 	<!--500kb, load last-->
 	<link rel="stylesheet" type="text/css" href="css/media.css">
