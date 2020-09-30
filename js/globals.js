@@ -2,7 +2,9 @@
 
 var dom;
 
-let fp_ua = []
+let fpAllHash = [],
+	fpAllData = [],
+	fpAllCheck = []
 
 // android
 let avh = "",
@@ -55,12 +57,12 @@ let avh = "",
 	zU = "undefined",
 	zFF = "Firefox",
 	zTB = "Tor Browser",
-	zMingw64 = "Firefox [64bit]" + s2+"[mingw]"+sc,
-	zMingw32 = "Firefox [32bit]" + s2+"[mingw]"+sc,
-	zMingw = "Firefox" + s2+"[mingw]"+sc,
-	zSDK64 = "Firefox [64bit]" + s2+"[winsdk]"+sc,
-	zSDK32 = "Firefox [32bit]" + s2+"[winsdk]"+sc,
-	zSDK = "Firefox" + s2+"[winsdk]"+sc,
+	zMingw64 = "Firefox [64bit]" + s3+"[mingw]"+sc,
+	zMingw32 = "Firefox [32bit]" + s3+"[mingw]"+sc,
+	zMingw = "Firefox" + s3+"[mingw]"+sc,
+	zSDK64 = "Firefox [64bit]" + s3+"[winsdk]"+sc,
+	zSDK32 = "Firefox [32bit]" + s3+"[winsdk]"+sc,
+	zSDK = "Firefox" + s3+"[winsdk]"+sc,
 	zSIM = " [simulated]",
 	zNEW = sb+"[NEW]"+sc,
 // notes
@@ -104,7 +106,6 @@ let avh = "",
 	stateDR = false,
 	stateFNT = false,
 // other
-	isPage = "main",
 	isFF = false,
 	isTB = false,
 	isTB2 = "",
