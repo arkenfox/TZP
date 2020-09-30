@@ -358,7 +358,7 @@ function outputStorage() {
 	get_permissions()
 	get_storage_manager()
 	// perf
-	debug_page("perf","storage",t0,gt0)
+	section_info("storage", t0, gt0)
 }
 
 outputStorage()
