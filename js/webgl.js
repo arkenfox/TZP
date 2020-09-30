@@ -42,7 +42,9 @@ function outputWebGL_param() {
 }
 
 function analyzeWebGL(runtype, res1, res2) {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		sColor = s10
+
 	let pushvalue = res1
 	if (res1.substring(0,14) == "ReferenceError") {
 		// blocked
@@ -50,8 +52,8 @@ function analyzeWebGL(runtype, res1, res2) {
 		pushvalue = "blocked"
 	} else if (res1 !== res2) {
 		pushvalue = "random"
-		res1 = "random " + s10 +" [1] "+ sc + res1.substring(0,22) + ".."
-			+ s10 +" [2] "+ sc + res2.substring(0,22) + ".."
+		res1 = "random " + sColor +" [1] "+ sc + res1.substring(0,22) + ".."
+			+ sColor +" [2] "+ sc + res2.substring(0,22) + ".."
 	} else {
 		if (sha1(res1) == "47bf7060be2764c531da228da96bd771b14917a1") {
 			// NotSupportedError: Operation is not supported
@@ -63,10 +65,8 @@ function analyzeWebGL(runtype, res1, res2) {
 	}
 	// output
 	dom.glreadPixels.innerHTML = res1
-	// perf
-	if (logPerf) {debug_log("analyze " + runtype + " [webgl]",t0)}
 	// section perf here for now
-	debug_page("perf","webgl",t0webgl,gt0)
+	section_info("webgl", t0webgl, gt0)
 }
 
 function outputWebGL_render() {
