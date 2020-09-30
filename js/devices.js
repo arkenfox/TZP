@@ -20,17 +20,23 @@ function get_gamepads() {
 }
 
 function get_hardware_concurrency() {
+	let h = "", h2 = ""
 	if ("hardwareConcurrency" in navigator) {
 		try {
-			let h = navigator.hardwareConcurrency
+			h = navigator.hardwareConcurrency
+			h2 = h
 			h = (h == undefined ? zB2 : h + (h == "2" ? rfp_green : rfp_red))
+			h2 = (h2 == undefined ? zB0 : h2)
 			dom.nHWC.innerHTML = h
 		} catch(e) {
 			dom.nHWC.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+			h2 = zBO
 		}
 	} else {
 		dom.nHWC = zD
+		h2 = zD
 	}
+	return "hardware concurrency: " + h2
 }
 
 function get_media_devices() {
@@ -85,16 +91,20 @@ function get_mimetypes() {
 					res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
 						+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 				}
-				res.sort()
+				res.sort(Intl.Collator("en-US").compare)
 				dom.mimeTypes.innerHTML = res.join("<br>")
+				return "mimeTypes: " + sha1(res.join())
 			} else {
 				dom.mimeTypes.innerHTML = "none"
+				return "mimeTypes: none"
 			}
 		} catch(e) {
 			dom.mimeTypes.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+			return "mimeTypes: blocked"
 		}
 	} else {
 		dom.mimeTypes = zD
+		return "mimeTypes: disabled"
 	}
 	dom.mimeTypes.style.color = zshow
 }
@@ -137,16 +147,20 @@ function get_plugins() {
 					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
 						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 				}
-				res.sort()
+				res.sort(Intl.Collator("en-US").compare)
 				dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
+				return "plugins: " + (gibbers ? "gibberish" : sha1(res.join()))
 			} else {
 				dom.plugins.innerHTML = "none"
+				return "plugins: none"
 			}
 		} catch(e) {
 			dom.plugins.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+			return "plugins: blocked"
 		}
 	} else {
 		dom.plugins.innerHTML = zD
+		return "plugins: disabled"
 	}
 	dom.plugins.style.color = zshow
 }
@@ -178,7 +192,7 @@ function get_speech_synth() {
 		dom.sSynth = zE
 		// speech engines
 		function populateVoiceList() {
-			let s=""
+			let s="", res = []
 			try {
 				if(typeof speechSynthesis == "undefined") {
 					return
@@ -186,6 +200,7 @@ function get_speech_synth() {
 				let v = speechSynthesis.getVoices()
 				for (let i=0; i < v.length; i++) {
 					s += v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : "") + "<br>"
+					res.push(v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : ""))
 				}
 				if (s == "") {
 					s = "none" + rfp_green // RFP: 1333641
@@ -193,8 +208,14 @@ function get_speech_synth() {
 					s = s.replace("<br>", rfp_red + "<br>")
 				}
 				dom.sEngines.innerHTML = s
+				// return
+				//res.sort(Intl.Collator("en-US").compare)
+				//console.debug("engines", res.join(", "))
+				//return "speech synth: " + zE + ", " + sha1(res.join()) // cleanup
+
 			} catch(e) {
 				dom.sEngines.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+				//return "speech synth: " + zE + ", " + zBO
 			}
 		}
 		try {
@@ -205,12 +226,15 @@ function get_speech_synth() {
 				}
 			} else if (speechSynthesis.onvoiceschanged == undefined) {
 				dom.sEngines.innerHTML = zB4
+				//return "speech synth: " + zE + ", " + zBO
 			}
 		} catch(e) {
 			dom.sEngines.innerHTML = zB3
+			//return "speech synth: " + zE + ", " + zBO
 		}
 	} else {
 		dom.sSynth = zD; dom.sEngines = zNA
+		//return "speech synth: " + zD + ", " + zNA
 	}
 }
 
@@ -229,41 +253,50 @@ function get_speech_rec() {
 
 function get_touch() {
 	// vars
-	let m = zNS, p = "", t = false,
+	let m = zNS, m2 = m, p = zNS, p2 = p, t = false,
 		q="(-moz-touch-enabled:"
 	// m
 	try {
-		if (window.matchMedia(q+"0)").matches) m=0
-		if (window.matchMedia(q+"1)").matches) m=1
-	} catch(e) {m = (e.name == "ReferenceError" ? zB1 : zB2)}
+		if (window.matchMedia(q+"0)").matches) {m=0; m2=0}
+		if (window.matchMedia(q+"1)").matches) {m=1; m2=1}
+	} catch(e) {
+		m = (e.name == "ReferenceError" ? zB1 : zB2)
+		m2 = zBO
+	}
 	// t
 	try {document.createEvent("TouchEvent"); t = true} catch (e) {}
 	// p
 	if ("maxTouchPoints" in navigator) {
 		try {
 			p = navigator.maxTouchPoints
-			if (p == undefined) {p = zB3}
+			p2 = p
+			if (p == undefined) {p = zB3; p2 = zBO}
 		} catch(e) {
 			p = (e.name == "ReferenceError" ? zB1 : zB2)
+			p2 = zBO
 		}
-	} else {
-		p = zNS
 	}
+	let t2 = ("ontouchstart" in window)
+	let t3 = ("ontouchend" in window)
 	// output
-	dom.touch.innerHTML = p +" | "+ m +" | "+("ontouchstart" in window)+" | "+("ontouchend" in window)+" | "+ t
+	dom.touch.innerHTML = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
+	return "touch: "+ p2 +", "+ m2 +", "+ t +", "+ t2 +", "+ t3
 }
 
 function get_vr() {
+	let r1 = "", r2 = ""
 	if ("getVRDisplays" in navigator) {
 		dom.nVR = zE
 		if ("activeVRDisplays" in navigator) {
 			try {
 				let d = navigator.activeVRDisplays
 				if (d.length == 0) {
+					r2 = "none"
 					dom.aVR = "none"
 				} else {
 					// ToDo: VR: enum
 					let items = " item" + (d.length == 1 ? "" : "s") + "]"
+					r2 = note_ttc
 					dom.aVR.innerHTML = note_ttc+" ["+d.length + items
 					for (let i=0; i < d.length; i++) {
 						// console.debug(d[i].displayId)
@@ -272,27 +305,37 @@ function get_vr() {
 			} catch(e) {
 				dom.aVR.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
 			}
+			return "vr: " + zE + ", " + r2
+		} else {
+			return "vr: " + zE + ", " + zD
 		}
 	}	else {
-		dom.nVR = zD; dom.aVR = zNA
+		dom.nVR = zD;	dom.aVR = zNA
+		return "vr: " + zD + ", " + zNA
 	}
 }
 
 function outputDevices() {
-	let t0 = performance.now()
-	// run
-	get_gamepads()
-	get_hardware_concurrency()
-	get_media_devices()
-	get_mimetypes()
-	get_plugins()
-	get_pointer_hover()
-	get_speech_rec()
-	get_speech_synth()
-	get_touch()
-	get_vr()
-	// perf
-	debug_page("perf","devices",t0,gt0)
+	let t0 = performance.now(),
+		section = []
+
+	Promise.all([
+		get_gamepads(),
+		get_hardware_concurrency(),
+		get_media_devices(),
+		get_mimetypes(),
+		get_plugins(),
+		get_pointer_hover(),
+		get_speech_rec(),
+		get_speech_synth(),
+		get_touch(),
+		get_vr(),
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section.push(currentResult)
+		})
+		section_info("devices", t0, gt0, section)
+	})
 }
 
 outputDevices()
