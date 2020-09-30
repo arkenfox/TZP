@@ -1,9 +1,15 @@
 'use strict';
 
 let bTZ = false
+let geoHash = "",
+	lanHash = "",
+	wrkHash = ""
 
 function outputHeaders() {
 	let t0 = performance.now()
+	let section = []
+	// note just record "blocked" for stability
+
 	// online
 	let r2 = ""
 	try {
@@ -11,6 +17,9 @@ function outputHeaders() {
 		if (r2 == undefined) {r2 = zB2}
 	} catch(e) {r2 = zB1}
 	dom.nOnLine.innerHTML = r2
+	if (r2 == zB1 || r2 == zB2) {r2 = zB0}
+	section.push("nav.online: " + r2)
+
 	// FF
 	if (isFF) {
 		// DNT
@@ -60,8 +69,7 @@ function outputHeaders() {
 			dom.nNetwork = zD; dom.nConnection = navigator.connection
 		}
 	}
-	// perf
-	debug_page("perf","headers",t0,gt0)
+	section_info("headers", t0, gt0, section)
 }
 
 function get_geo() {
@@ -622,11 +630,15 @@ function get_lang_datetime() {
 
 function outputLanguage() {
 	let t0 = performance.now()
+	// reset
+	geoHash = ""
+	lanHash = ""
+	wrkHash = ""
 	// run
 	get_lang_datetime()
 	get_geo()
 	// perf
-	debug_page("perf","language",t0,gt0)
+	section_info("language", t0, gt0)
 }
 
 outputHeaders()
