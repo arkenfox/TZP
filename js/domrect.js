@@ -13,6 +13,7 @@ function reset_domrect() {
 }
 
 function outputDomRect() {
+	let sColor = s8
 
 	// analyze and output
 	function analyze() {
@@ -39,19 +40,14 @@ function outputDomRect() {
 			} else if (value1 !== value2) {
 				// random on each pass
 				push = "random"
-				display = s8+"[1] "+sc + value1.substring(0,13) + ".. "
-					+ s8+"[2] "+sc + value2.substring(0,14) + ".."
-					+ s8 + note_random
+				display = sColor +"[1] "+sc + value1.substring(0,13) + ".. "
+					+ sColor +"[2] "+sc + value2.substring(0,14) + ".."
+					+ sColor + note_random
 			} else {
 				// same value
 				// check for noise
 				if (isFF || isEngine == "blink") {
-					let compare = []
-					if (i == 0) { compare = chk0
-					} else if (i == 1) {compare = chk1
-					} else if (i == 2) {compare = chk2
-					} else if (i == 3) {compare = chk3
-					}
+					let compare = chk["dr"+i]
 					if (compare.length > 0) {
 						compare.sort()
 						//console.log(compare.join("\n"))
@@ -71,7 +67,7 @@ function outputDomRect() {
 						if (diffs.length > 0) {
 							//console.log("DOMRect diffs [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + diffs.join("\n - "))
 							push = "tampered"
-							display = value1 + s8 + note_noise
+							display = value1 + sColor + note_noise
 						}
 					}
 				}
@@ -80,12 +76,10 @@ function outputDomRect() {
 			hash.push("dr"+i+":"+push)
 			document.getElementById("dr"+i).innerHTML = display
 		}
-		// overall hash
-		section_hash("domrect", hash)
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
-		// perf
-		debug_page("perf","domrect",t0,gt0)
+		// section
+		section_info("domrect", t0, gt0, hash)
 	}
 
 	function getElements(){
@@ -105,11 +99,7 @@ function outputDomRect() {
 							if (j == 4 || j == 7) {
 								// we could also use 5+6 in FF
 								let str = method+":"+j +":"+ runtype +":"+ rect[property]
-								if (method == "dr0") {chk0.push(str)
-								} else if (method == "dr1") {chk1.push(str)
-								} else if (method == "dr2") {chk2.push(str)
-								} else if (method == "dr3") {chk3.push(str)
-								}
+								chk[method].push(str)
 							}
 						}
 					})
@@ -168,7 +158,7 @@ function outputDomRect() {
 
 	let t0 = performance.now()
 	let run0 = [], run1 = [], run2 = []
-	let chk0 = [], chk1 = [], chk2 = [], chk3 = []
+	let chk = {dr0: [ ], dr1: [ ], dr2: [ ], dr3: [ ]}
 
 	Promise.all([
 		run(0, run0),
