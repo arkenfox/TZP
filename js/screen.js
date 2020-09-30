@@ -1554,6 +1554,10 @@ function get_ua_nav() {
 	}
 
 	// hash
+	res.sort(Intl.Collator("en-US").compare)
+	dom.nUAinitial = sha1(res.join())
+
+	// section hash will change when we modify it to account for lies and worker results
 	section_info("ua", t0, gt0, res)
 }
 
@@ -2253,7 +2257,7 @@ function goNW_UA() {
 	// hash
 	res.sort(Intl.Collator("en-US").compare)
 	let hash = sha1(res.join())
-	let hash2 = (dom.uahash.textContent).substring(0,40)
+	let hash2 = (dom.nUAinitial.textContent).substring(0,40)
 	// output
 	if (hash == hash2) {
 		dom.sectionUA8.innerHTML = hash + match_green
