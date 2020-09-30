@@ -1540,13 +1540,18 @@ function get_ua_nav() {
 	res.push("00: "+str)
 	dom.nUA00.innerHTML = str
 
+	// hash
+	res.sort(Intl.Collator("en-US").compare)
+	dom.nUAinitial = sha1(res.join())
+
 	// show
+	let isBS = false
 	if (lies > 0) {
-		//console.debug("lies", lies)
 		lies += " pinocchio" + (lies > 1 ? "s": "")
 		dom.UA11.innerHTML = sb+"absolute BS detected "+" &#9654"+sc
 		dom.UA12.innerHTML = sb+ lies + sc + " [based only on feature detection]"
 		dom.togUA11.style.display = "table-row"
+		isBS = true
 	} else {
 		dom.togUA11.style.display = "none"
 	}
@@ -1554,15 +1559,13 @@ function get_ua_nav() {
 		console.debug("Simulated UA Lies\n - " + res.join("\n - "))
 	}
 
-	// hash
-	res.sort(Intl.Collator("en-US").compare)
-	dom.nUAinitial = sha1(res.join())
-
-	// section hash will change when we modify it to account for lies and worker results
-
-	// temp lies
-	if (lies > 0) {res = ["ua: pinocchio"]}
-	section_info("ua", t0, gt0, res)
+	// section hash will change when we modify it to also account for worker results
+	// just use a blanket boolean BS since that's stable
+	if (isBS) {
+		section_info("ua", t0, gt0, ["ua: lies"])
+	} else {
+		section_info("ua", t0, gt0, res)
+	}
 }
 
 function get_ua_nav_checks() {
