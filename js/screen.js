@@ -1351,14 +1351,6 @@ function get_ua_nav() {
 		go = false,
 		lies = 0,
 		t0 = performance.now()
-
-	// ToDo: if isOS is broken: e.g. widgets is broken: we can try to fallback
-		// on something else just for this function
-	// what do we have for math etc
-	if (isOS == "") {
-
-	}
-
 	// FF78+ only
 	if (isFF && isVer > 77) {go = true}
 
@@ -1367,17 +1359,17 @@ function get_ua_nav() {
 		str = ""
 		if (go && runS) {
 			// simulate lies
-			if (id == "01") {str = "MoZilla"} // match * case
+			if (id == "01") {str = "MoZilla"} // case
 			if (id == "02") {str = " Netscape"} // leading space
 			if (id == "03") {str = "Gecko "} // trailing space
 			if (id == "07") {str = ""} // empty string: unexpected
-			if (id == "08") {str = " "} // single space
-			if (id == "09") {str = undefined} // undefined
+			if (id == "08") {str = undefined} // undefined
+			if (id == "09") {str = " "} // single space
 			if (id == "10") {str = "undefined"} // undefined string
 		} else {
 			try {str = navigator[property]} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 		}
-		if (str == zU) {str = "undefined as a string"}
+		if (str == zU) {str = "\"undefined\""}
 		if (str == "") {str = zU}
 		if (str == undefined && isFF) {str = zB3}
 		// stash
@@ -1403,7 +1395,6 @@ function get_ua_nav() {
 	get_property("09", "vendor", zU)
 	get_property("10", "vendorSub", zU)
 
-
 	// arrows
 	function addArrow(id, state) {
 		let title = ""
@@ -1419,22 +1410,35 @@ function get_ua_nav() {
 	}
 
 	// MORE COMPLEX: per OS
+	// https://dxr.mozilla.org/mozilla-central/source/browser/components/resistfingerprinting/test/browser/browser_navigator.js
+	// ToDo: check I have the right 78 info since original code was done for 68
+		// note: I'm not actually checking if RFP is correct, I'm checking for lies
+		// for some lies I can then check if RFP is on and discard: such as the version number
 	let pre = "",
 		spoof = false,
 		match = false,
 		myOS = isOS,
 		isPartial = false
 
-	if (myOS == "" && go) {isPartial = true}
+	// ToDo: if isOS =""
+		// currently only set by widgets test. can we fall strengthen it (e.g. also set it during math)
+	if (isOS == "" && go) {
+		// ToDo: if runS = isOS = ""
+			// isPartial => output yellow arrows to indicates we only did a partial check
+			// add yellow arrow info text somewhere?
+			// we can still detect some BS by checking all possibles
+			// i.e if oscpu = "undefined" or script blocked, or contains gibberish
 
-	// ToDo: if runS = true I end up with no os
-		// => isPartial = true => I always output yellow arrows
-		// I think this desired behaviour
-		// i.e it indicates we only did a partial check so show that with words as well
-		// e.g. "yellow arrow" - "can't tell: only partial BS dection due to uncertainly over your OS"
+		// toggle these to test partial
+		//isPartial = true
+		myOS = "windows" // use your real OS
+	}
 
 	// appVersion
 	try {str = navigator.appVersion} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	// simulate lies
+	if (go && runS) {str = "5.0 (Windows NT 6.1; Win64; x64) AppleWebKit BLAH BLAH"}
+	if (str == zU) {str = "\"undefined\""}
 	if (str == "") {str = zU}
 	if (str == undefined && isFF) {str = zB3}
 	res.push("04: "+str)
@@ -1458,6 +1462,9 @@ function get_ua_nav() {
 	// ToDo: specific linux distro strings?
 	// ToDo: android: `Linux ${OSArch}` <-- any others
 	try {str = navigator.platform} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	// simulate lies
+	if (go && runS) {str = "win32"}
+	if (str == zU) {str = "\"undefined\""}
 	if (str == "") {str = zU}
 	if (str == undefined && isFF) {str = zB3}
 	res.push("06: "+str)
@@ -1485,6 +1492,9 @@ function get_ua_nav() {
 
 	// oscpu
 	try {str = navigator.oscpu} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	// simulate lies
+	if (go && runS) {str = "undefined"}
+	if (str == zU) {str = "\"undefined\""}
 	if (str == "") {str = zU}
 	if (str == undefined && isFF) {str = zB3}
 	res.push("05: "+str)
@@ -1531,11 +1541,14 @@ function get_ua_nav() {
 	}
 
 	// userAgent
-	// ways this can be inconsistent
-	// 1: if full ua = not consistent with known os etc
-	// 2: if full ua = not the same as individual nav parts
-	// 3: if RFP version but are not using RFP
+		// ToDo: userAgent lies: ways this can be inconsistent
+		// 1: if full ua = not consistent with known os etc
+		// 2: if full ua = not the same as individual parts
+		// 3: the syntax/formula doesn't match
+		// 4: if version doesn't match isVer (allow for isRFP and 78)
+			// note: allow for + symbol on verNo (make global)
 	try{str = navigator.userAgent} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
+	if (str == zU) {str = "\"undefined\""}
 	if (str == "") {str = zU}
 	if (str == undefined && isFF) {str = zB3}
 	res.push("00: "+str)
@@ -1556,17 +1569,16 @@ function get_ua_nav() {
 	} else {
 		dom.togUA11.style.display = "none"
 	}
-	if (go && runS) {
-		console.debug("Simulated UA Lies\n - " + res.join("\n - "))
-	}
 
-	// section hash will change when we modify it to also account for worker results
-	// just use a blanket boolean BS since that's stable
-		// ToDO: logic with worker + isBS re section hash
-		// if no BS + worker matches = use original result
-		// if no BS but worker doesn't match = use worker
+	// ToDo: section hash to also account for worker results
+		// note: use a boolean for isBS for stability
+		// logic:
+		// if no BS + no worker = use original
+		// if no BS + worker matches = use original
+		// if no BS + worker doesn't match = use worker
 		// if BS + no worker - use isBS
-		// if BS + worker = use worker
+		// if BS + worker matches = use isBS
+		// if BS + worker doesn't matches = use worker
 	if (isBS) {
 		section_info("ua", t0, gt0, ["ua: lies"])
 	} else {
@@ -2257,6 +2269,7 @@ function goNW_UA() {
 	let navigator = newWin.navigator
 	for(let i=0; i < list.length; i++) {
 		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
+		if (r == zU) {r = "\"undefined\""}
 		if (r == "") {r = zU}
 		if (r == undefined && isFF) {r = zB3}
 		res.push((i).toString().padStart(2,"0")+": "+r)
