@@ -879,7 +879,7 @@ function get_math() {
 			dom.mathhash.innerHTML = mchash
 			// perf
 			if (logPerf) {debug_log("math [fd]", t0, gt0)}
-			return resolve("math: " + mchash)
+			return resolve("math: " + mchash.substring(0,40))
 		}
 		get_hashes()
 		if (isFF) {
