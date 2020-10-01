@@ -769,9 +769,9 @@ function get_math() {
 			mchash = sha1(h1+"-"+h6)
 			// sim
 			if (runS) {
-				//m1hash = sha1("a"), mchash = sha1("b") // emca1
+				m1hash = sha1("a"), mchash = sha1("b") // emca1
 				//m6hash = sha1("c"), mchash = sha1("d") // emca6
-				m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
+				//m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
 			}
 		}
 
@@ -850,11 +850,11 @@ function get_math() {
 
 		function output() {
 			if (isFF) {
-				let mc = ""
 				// new
+				let mc = ""
 				if (m1 == "") {m1hash += strNew} else {m1hash += s3+" ["+m1+"]"+sc}
 				if (m6 == "") {m6hash += strNew} else {m6hash += s3+" ["+m6+"]"+sc}
-				if (m1 !== "" && m6 !== "") { mc = s3 + "[" + m1+m6 + "]" + sc } // we have a code
+				if (m1 !== "" && m6 !== "") {mc = s3 + "[" + m1+m6 + "]" + sc; mchash += mc} else {mchash += strNew}
 				if (scriptBlock) {
 					strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
 				} else {
