@@ -1369,9 +1369,9 @@ function get_ua_nav() {
 		} else {
 			try {str = navigator[property]} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 		}
-		if (str == zU) {str = "\"undefined\""}
-		if (str == "") {str = zU}
-		if (str == undefined && isFF) {str = zB3}
+		if (str == "") {str = "empty string"}
+		if (str == "undefined") {str = "undefined string"}
+		if (str == undefined) {str = "undefined value"}
 		// stash
 		res.push(id+": "+str)
 		document.getElementById("nUA"+id).innerHTML = str
@@ -1392,8 +1392,8 @@ function get_ua_nav() {
 	get_property("03", "product", "Gecko")
 	get_property("07", "buildID", "20181001000000")
 	get_property("08", "productSub", "20100101")
-	get_property("09", "vendor", zU)
-	get_property("10", "vendorSub", zU)
+	get_property("09", "vendor", "empty string")
+	get_property("10", "vendorSub", "empty string")
 
 	// arrows
 	function addArrow(id, state) {
@@ -1438,9 +1438,9 @@ function get_ua_nav() {
 	try {str = navigator.appVersion} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 	// simulate lies
 	if (go && runS) {str = "5.0 (Windows NT 6.1; Win64; x64) AppleWebKit BLAH BLAH"}
-	if (str == zU) {str = "\"undefined\""}
-	if (str == "") {str = zU}
-	if (str == undefined && isFF) {str = zB3}
+	if (str == "") {str = "empty string"}
+	if (str == "undefined") {str = "undefined string"}
+	if (str == undefined) {str = "undefined value"}
 	res.push("04: "+str)
 	dom.nUA04.innerHTML = str
 	if (go && str.substring(0,5) !== "script") {
@@ -1464,9 +1464,9 @@ function get_ua_nav() {
 	try {str = navigator.platform} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 	// simulate lies
 	if (go && runS) {str = "win32"}
-	if (str == zU) {str = "\"undefined\""}
-	if (str == "") {str = zU}
-	if (str == undefined && isFF) {str = zB3}
+	if (str == "") {str = "empty string"}
+	if (str == "undefined") {str = "undefined string"}
+	if (str == undefined) {str = "undefined value"}
 	res.push("06: "+str)
 	dom.nUA06.innerHTML = str
 	if (go && str.substring(0,5) !== "script") {
@@ -1494,9 +1494,9 @@ function get_ua_nav() {
 	try {str = navigator.oscpu} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
 	// simulate lies
 	if (go && runS) {str = "undefined"}
-	if (str == zU) {str = "\"undefined\""}
-	if (str == "") {str = zU}
-	if (str == undefined && isFF) {str = zB3}
+	if (str == "") {str = "empty string"}
+	if (str == "undefined") {str = "undefined string"}
+	if (str == undefined) {str = "undefined value"}
 	res.push("05: "+str)
 	dom.nUA05.innerHTML = str
 	if (go && str.substring(0,5) !== "script") {
@@ -1548,9 +1548,9 @@ function get_ua_nav() {
 		// 4: if version doesn't match isVer (allow for isRFP and 78)
 			// note: allow for + symbol on verNo (make global)
 	try{str = navigator.userAgent} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-	if (str == zU) {str = "\"undefined\""}
-	if (str == "") {str = zU}
-	if (str == undefined && isFF) {str = zB3}
+	if (str == "") {str = "empty string"}
+	if (str == "undefined") {str = "undefined string"}
+	if (str == undefined) {str = "undefined value"}
 	res.push("00: "+str)
 	dom.nUA00.innerHTML = str
 
@@ -2269,9 +2269,9 @@ function goNW_UA() {
 	let navigator = newWin.navigator
 	for(let i=0; i < list.length; i++) {
 		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
-		if (r == zU) {r = "\"undefined\""}
-		if (r == "") {r = zU}
-		if (r == undefined && isFF) {r = zB3}
+		if (r == "") {r = "empty string"}
+		if (r == "undefined") {r = "undefined string"}
+		if (r == undefined) {r = "undefined value"}
 		res.push((i).toString().padStart(2,"0")+": "+r)
 	}
 	newWin.close()
