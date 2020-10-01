@@ -119,8 +119,11 @@ function get_engine() {
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3+"webkit"+sc
 	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3+"edgeHTML"+sc
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3+"trident"+sc // also presto if we don't use `let`
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = s3+"gecko"+sc
-
+	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko" // abraham
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko" // me
+	}
+	if (engine == "gecko") {
+		engine = s3+"gecko"+sc
 		// 52: 837961
 		// only check for PM28+
 		try {
@@ -143,7 +146,6 @@ function get_engine() {
 			}
 		} catch(e) {}
 	}
-
 	dom.perfE.innerHTML = (performance.now()-et0) + " ms"
 	dom.engine.innerHTML = s12.trim() + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
 		+ "<br>" + s12.trim() + "engine:" + sc + engine
@@ -575,7 +577,7 @@ function get_code(hash) {
 	else if (hash == "06f9ca0df07d4836116143158b670c9d3a417cd4") {r="F3"} // Win7 64bit: TB68-78 64bit
 	else if (hash == "dd277bcf4a12289404b0aab1ae43be060be5a12a") {r="F4"} // Win7 64bit: TB68-78 32bit
 
-		// pending windows machine no 2 tests
+		// pending windows machine no 2 tests (which I know provide more entropy)
 		// rampaa
 	//else if (hash == "b0130c424be28aac4ed155c679c9baf951349b75") {r="something"} // Win10 64bit: FF80 64bit
 	// hash: b0130c424be28aac4ed155c679c9baf951349b75 [NEW]
@@ -586,7 +588,14 @@ function get_code(hash) {
 	//  tan: 12
 
 		// android
-	else if (hash == "571b9a318869bd09dab3fd83fd88883a66188011") {r="F20"} // aarch64
+	else if (hash == "571b9a318869bd09dab3fd83fd88883a66188011") {r="F20"}
+		// ^^ F20: me: real samsung galaxy 9, aarch64 | abraham browserstacks: android 10, 11
+	else if (hash == "56c05c3f03fb55c3c046ad1b68d05d2392fe0c54") {r="F21"} // abraham browserstacks: android 6,7,7.1,8,9
+	else if (hash == "da130b6da16b5ddffc42ebf56259c4746d01a3b6") {r="F22"} // abraham browserstacks: android 9
+	else if (hash == "d246b2f0103139eb4407a7dfe4dda2af0bcca4e6") {r="F23"} // abraham browserstacks: android 10
+	else if (hash == "a624571a642dbcb468f6d2d8203d0659d351bdc1") {r="F24"} // abraham browserstacks: android 5
+	else if (hash == "02e1298182c58da58956df1342b525bd5aecfd7e") {r="F25"} // abraham browserstacks: android 4.4
+
 		// linux
 	else if (hash == "e6c7b364678e8ecec909088314318acb8430ee47") {r="F30"}
 	else if (hash == "05ea8b9bed51553711e3bbaa552449d8ea40c4be") {r="F31"}
