@@ -78,7 +78,7 @@ function get_mathml(type) {
 	let pre = " | offsetHeight difference: ",
 		post = (diff < 10 ? tb_safer : tb_standard)
 	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + post
-	return "mathml: " + diff
+	return "mathml: " + (diff < 10 ?	zD : diff) 
 }
 
 function get_nav_prototype() {
