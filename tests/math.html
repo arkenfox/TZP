@@ -119,8 +119,8 @@ function get_engine() {
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3+"webkit"+sc
 	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3+"edgeHTML"+sc
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3+"trident"+sc // also presto if we don't use `let`
-	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko" // abraham
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko" // me
+	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko [a]" // abraham
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko [b]" // me
 	}
 	if (engine == "gecko") {
 		engine = s3+"gecko"+sc
@@ -595,6 +595,7 @@ function get_code(hash) {
 	else if (hash == "d246b2f0103139eb4407a7dfe4dda2af0bcca4e6") {r="F23"} // abraham browserstacks: android 10
 	else if (hash == "a624571a642dbcb468f6d2d8203d0659d351bdc1") {r="F24"} // abraham browserstacks: android 5
 	else if (hash == "02e1298182c58da58956df1342b525bd5aecfd7e") {r="F25"} // abraham browserstacks: android 4.4
+	else if (hash == "66b3de14094fec47652f8ad203e6d8e6c9ee418f") {r="F26"} // abraham 8.1, browserstacks: android 9 chromeOS-32bit
 
 		// linux
 	else if (hash == "e6c7b364678e8ecec909088314318acb8430ee47") {r="F30"}
