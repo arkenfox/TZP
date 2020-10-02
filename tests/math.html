@@ -23,6 +23,11 @@
 	<table id="tb3">
 		<col width="1%"><col width="9%"><col width="90%">
 		<thead><tr><th colspan="3">math: version 2.5</th></tr></thead>
+		<tr><td colspan="3" class="intro">
+			<span class="no_color">Hashes all results, and compares those results to a control set, to build a list
+				of tests that provides entropy. The (ongoing) results are <a class="blue" href="mathdata.html">here</a>.</span>
+		</td></tr>
+
 		<tr><td colspan="2"></td>
 			<td>
 				<button onClick="outputMath(`firefox`)">firefox</button>
@@ -32,13 +37,13 @@
 
 		<tr><td colspan="3"><hr></td></tr>
 		<tr><td colspan="3"><span id="perfE" class="mono"></span> 
-			<button class="btn0 btn" onClick="copyclip(`engine`)">[ copy to clipboard ]</button> [WIP] ENGINE</td></tr>
+			<button class="btn0 btn" onClick="copyclip(`engine`)">[ copy ]</button> ENGINE</td></tr>
 		<tr><td colspan="2">engine</td><td class="mono spaces" id="engine"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
 		<tr><td colspan="3"><span id="perf" class="c mono"></span> 
-			<button class="btn0 btn" onClick="copyclip(`report`)">[ copy to clipboard ]</button> SHORT REPORT</td></tr>
+			<button class="btn0 btn" onClick="copyclip(`report`)">[ copy ]</button> SHORT REPORT</td></tr>
 		<tr><td colspan="2"></td><td class="c mono spaces" id="report"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
@@ -57,7 +62,7 @@
 		<tr><td colspan="3"></td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
-		<tr><td colspan="3"><button class="btn0 btn" onClick="copyclip(`mathdata`)">[ copy to clipboard ]</button> DATA</td></tr>
+		<tr><td colspan="3"><button class="btn0 btn" onClick="copyclip(`mathdata`)">[ copy ]</button> DATA</td></tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="mathdata"></td></tr>
 	</table>
 	<br>
@@ -588,19 +593,16 @@ function get_code(hash) {
 	//  tan: 12
 
 		// android
-	else if (hash == "571b9a318869bd09dab3fd83fd88883a66188011") {r="F20"}
-		// ^^ F20: me: real samsung galaxy 9, aarch64 | abraham browserstacks: android 10, 11
-	else if (hash == "56c05c3f03fb55c3c046ad1b68d05d2392fe0c54") {r="F21"} // abraham browserstacks: android 6,7,7.1,8,9
-	else if (hash == "da130b6da16b5ddffc42ebf56259c4746d01a3b6") {r="F22"} // abraham browserstacks: android 9
-	else if (hash == "d246b2f0103139eb4407a7dfe4dda2af0bcca4e6") {r="F23"} // abraham browserstacks: android 10
-	else if (hash == "a624571a642dbcb468f6d2d8203d0659d351bdc1") {r="F24"} // abraham browserstacks: android 5
-	else if (hash == "02e1298182c58da58956df1342b525bd5aecfd7e") {r="F25"} // abraham browserstacks: android 4.4
-	else if (hash == "66b3de14094fec47652f8ad203e6d8e6c9ee418f") {r="F26"} // abraham 8.1, browserstacks: android 9 chromeOS-32bit
-
+	else if (hash == "571b9a318869bd09dab3fd83fd88883a66188011") {r="F20"} // android 9 aarch64 | browserstacks: android 10, 11
+	else if (hash == "56c05c3f03fb55c3c046ad1b68d05d2392fe0c54") {r="F21"} // browserstacks: android 6,7,7.1,8,9
+	else if (hash == "da130b6da16b5ddffc42ebf56259c4746d01a3b6") {r="F22"} // browserstacks: android 9
+	else if (hash == "d246b2f0103139eb4407a7dfe4dda2af0bcca4e6") {r="F23"} // browserstacks: android 10
+	else if (hash == "a624571a642dbcb468f6d2d8203d0659d351bdc1") {r="F24"} // browserstacks: android 5
+	else if (hash == "02e1298182c58da58956df1342b525bd5aecfd7e") {r="F25"} // browserstacks: android 4.4
+	else if (hash == "66b3de14094fec47652f8ad203e6d8e6c9ee418f") {r="F26"} // android 8, browserstacks 8.1, chromeOS-32bit android 9
 		// linux
 	else if (hash == "e6c7b364678e8ecec909088314318acb8430ee47") {r="F30"}
 	else if (hash == "05ea8b9bed51553711e3bbaa552449d8ea40c4be") {r="F31"}
-
 		// mac
 	else if (hash == "84ad7bbb52342b6c224c0fe45977184bc943bb92") {r="F50"}
 		// obsolete linux
