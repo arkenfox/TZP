@@ -62,7 +62,7 @@ function section_info(name, time1, time2, data) {
 		}
 		// store
 		if (gRerun) {
-			console.log(name + ": " + hash, data)
+			console.log(name + ": " + hash +"\n", data)
 		} else {
 			// yay!
 			fpAllHash.push(name + ": " + hash)
