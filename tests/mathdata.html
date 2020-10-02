@@ -213,7 +213,7 @@ var dataset = [
 		"tests: Win7/Win10-vm 64bit: TB60 32bit | Win7-vm 32bit: TB60 32bit",
 	],
 // non FF
-	['C1', "hash",
+	['C1', "42550bb913168ddbb8be40f970adc51344017cad",
 		"cbrt: 1p1",
 		"cos: 2, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 20",
 		"cosh: 2, 3",
@@ -225,7 +225,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: chrome: everywhere (windows, android, mac...) & everything (edge, opera, brave...)",
 	],
-	['S1', "hash",
+	['S1', "4423be6d9bec5550ad38ea9dde7ef2daf0609e0f",
 		"acos: 0",
 		"acosh: 2",
 		"atan: 0",
@@ -242,7 +242,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: macOS Catalina Safari",
 	],
-	['iOS1', "hash",
+	['iOS1', "2e9162520d6f90c28e24d0f2e538f79f503f8a66",
 		"acos: 0",
 		"acosh: 2",
 		"atan: 0",
@@ -259,7 +259,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: webkit: Safari, Firefox, Chrome",
 	],
-	['E99', "hash",
+	['E99', "a53608a3ac4caf531014dcd4cfaac425db405398",
 		"acosh: 1, 1p1",
 		"atanh: 0, 0p1",
 		"atan2: 1",
@@ -337,9 +337,6 @@ function outputData() {
 	firefox.sort()
 	obsolete.sort()
 	firefoxall.sort()
-
-	console.debug(numbers.length, firefox.length, obsolete.length, firefoxall.length)
-
 	numbers = numbers.filter(function(item, position) {return numbers.indexOf(item) === position})
 	firefox = firefox.filter(function(item, position) {return firefox.indexOf(item) === position})
 	obsolete = obsolete.filter(function(item, position) {return obsolete.indexOf(item) === position})
