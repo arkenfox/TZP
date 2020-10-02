@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+  <title>math data</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb3">
+		<col width="7%"><col width="93%">
+		<thead><tr><th colspan="3">math data</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A record of which tests for each unique hash [or short code] differ
+			from the Firefox control in <a href="math.html" class="blue">this</a> test</span>
+		</td></tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2">UNIQUE TESTS</td></tr>
+		<tr><td><span class="s12">FUNC</span></td><td>test numbers</span></td></tr>
+		<tr id-"unique"></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer-->
+
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2">RESULTS</td></tr>
+		<tr><td><span class="s12">CODE</span></td><td colspan="2">test numbers</td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer-->
+		<!-- insert rows here for results -->
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var dataset = [
+	// keep it clean and ", ". I trim for number crunching but not the result strings
+
+// windows
+	// F1 is the control
+	['F1', "97c37c8c3b1de92333bf1993a7350cf785b2715d",
+		"nos: none, i'm the control",
+		"tests: Win7/Win10-vm 64bit: FF68-82 64bit",
+	],
+	['F2', "d9e8b78b68a5d1086af27ceec9315f0797ccec7c",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 11, 12, 14",
+		"tan: 0, 1, 2, 3, 4, 6, 7, 8, 10, 15",
+		"tests: Win7/Win10-vm 64bit**: FF68-82 32bit | Win7-vm 32bit: FF68-82 32bit",
+	],
+	['F3', "06f9ca0df07d4836116143158b670c9d3a417cd4",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 14",
+		"tests: Win7/Win10-vm 64bit: TB68-78 64bit",
+	],
+	['F4', "dd277bcf4a12289404b0aab1ae43be060be5a12a",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 14",
+		"tan: 0, 1, 2, 3, 4, 6, 7, 8, 10, 15",
+		"tests: Win7/Win10-vm 64bit: B68-78 32bit | Win7-vm 32bit: TB68-78 32bit",
+	],
+// android
+	['F20', "571b9a318869bd09dab3fd83fd88883a66188011",
+		"cos: 5, 6, 13, 14, 15, 16, 17, 18, 20",
+		"sin: 13, 14",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 9 aarch64 FF80 | android 10, 11 (browserstacks)",
+	],
+	['F21', "56c05c3f03fb55c3c046ad1b68d05d2392fe0c54",
+		"cbrt: 1p1",
+		"cos: 5, 6, 13, 14, 15 ,16, 17, 18, 20",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 13, 14",
+		"sinh: 0p1",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 6, 7, 7.1, 8, 9 (browserstacks)",
+	],
+	['F22', "da130b6da16b5ddffc42ebf56259c4746d01a3b6",
+		"cos: 5, 6, 13, 15 ,16, 17, 18, 20",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 13, 14",
+		"sinh: 0p1",
+		"tan: 10, 11, 13, 14, 15",
+		"tests: android 9 (browserstacks)",
+	],
+	['F23', "d246b2f0103139eb4407a7dfe4dda2af0bcca4e6",
+		"cos: 5, 6, 13, 14, 15 ,16, 17, 18, 20",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 13, 14",
+		"sinh: 0p1",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 10 (browserstacks)",
+	],
+	['F24', "a624571a642dbcb468f6d2d8203d0659d351bdc1",
+		"cbrt: 1p1",
+		"cos: 5, 6, 7, 13, 14, 15 ,16, 17, 18, 20",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 13, 14",
+		"sinh: 0p1",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 5 (browserstacks)",
+	],
+	['F25', "02e1298182c58da58956df1342b525bd5aecfd7e",
+		"cos: 5, 6, 7, 13, 14, 15 ,16, 17, 18, 20",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 13, 14",
+		"sinh: 0p1",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 4.4 (browserstacks)",
+	],
+	['F26', "66b3de14094fec47652f8ad203e6d8e6c9ee418f",
+		"cbrt: 1p1",
+		"cos: 5, 6, 13, 14, 15, 16, 17, 18, 20",
+		"sin: 13, 14",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"tests: android 8 | android 9 chromeOS-32bit | android 8.1 (browserstacks)",
+	],
+// linux
+	['F30', "e6c7b364678e8ecec909088314318acb8430ee47",
+		"cos: 3, 4, 5, 6, 7, 13, 15, 16, 17, 18, 19, 20, 21",
+		"sin: 11, 12, 14",
+		"tan: 1, 10, 15",
+		"tests: Linux 64bit: Debian (Buster) Fedora (v32), Manjaro (20.1), MX Linux: all FF80+",
+	],
+	['F31', "05ea8b9bed51553711e3bbaa552449d8ea40c4be",
+		"cos: 4, 5, 6, 7, 13, 15, 16, 17, 18, 19, 20, 21",
+		"sin: 11, 12, 14",
+		"tan: 1, 10, 15",
+		"tests: Mint 64bit FF78 | Mint-32bit FF68-82, TB68-78",
+	],
+// mac
+	['F50', "84ad7bbb52342b6c224c0fe45977184bc943bb92",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 15, 16, 17, 18, 20",
+		"sin: 0, 1, 10, 12, 13, 15",
+		"tan: 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12",
+		"tests: macOS Catalina: FF80, TB68",
+	],
+// linux FF67 or lower: obsolete
+	['F80', "2047b6e1afc4c6bbe55d061e33fa8026c7afd648",
+		"cos: 4, 5, 6, 7, 13, 15, 16, 17, 18, 19, 20, 21",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 11, 12, 14",
+		"sinh: 0p1",
+		"tan: 1, 10, 15",
+		"tests: Mint 32bit : FF60-67",
+	],
+	['F81', "ac4f01ae0d298a6ef48bb20aa594a77fb14b0968",
+		"asinh: 0",
+		"atan: 1",
+		"atanh: 0, 0p1",
+		"cos: 4, 5, 6, 7, 13, 15, 16, 17, 18, 19, 20, 21",
+		"expm1: 0",
+		"sin: 11, 12, 14",
+		"sinh: 1, 8",
+		"tan: 1, 10, 15",
+		"tanh: 0",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: Mint 32bit : TB60",
+	],
+// windows FF67 or lower: obsolete
+	['F96', "3ada7d492e4fa7a7a6acea446fa24ec3ff370556",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+ 		"sinh: 0p1",
+		"tests: Win7/Win10-vm 64bit: FF60-67 64bit",
+	],
+	['F97', "a8b5e74f336489c1df701a95650ab091ff6de436",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 11, 12, 14",
+		"sinh: 0p1",
+		"tan: 0, 1, 2, 3, 4, 6, 7, 8, 10, 15",
+		"tests: Win7/Win10-vm 64bit: FF60-67 32bit | Win7-vm 32bit: FF60-67 32bit",
+	],
+	['F98', "8d09688f127d62709bbb5d47f7fc8c959ae151a8",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"cosh: 0, 0p1",
+		"expm1: 0p1",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 14",
+		"sinh: 0p1",
+		"tests: Win7/Win10-vm 64bit: TB60 64bit",
+	],
+	['F99', "4796b1d067dd047768dcd2e9ecd740c0ef353d31",
+		"asinh: 0",
+		"atan: 1",
+		"atanh: 0, 0p1",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 13, 15, 16, 17, 18, 19, 20, 21",
+		"expm1: 0",
+		"sin: 0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 14",
+		"sinh: 1, 8",
+		"tan: 0, 1, 2, 3, 4, 6, 7, 8, 10, 15",
+		"tanh: 0",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: Win7/Win10-vm 64bit: TB60 32bit | Win7-vm 32bit: TB60 32bit",
+	],
+// non FF
+	['C1', "hash",
+		"cbrt: 1p1",
+		"cos: 2, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 20",
+		"cosh: 2, 3",
+		"hypot: 1, 2, 3, 4, 5, 6, 7, 8",
+		"log10: 1, 3, 5, 7, 9, 11, 12",
+		"sin: 10, 11, 12, 13, 14, 15",
+		"sinh: 5, 9",
+		"tan: 10, 11, 12, 13, 14, 15",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: chrome: everywhere (windows, android, mac...) & everything (edge, opera, brave...)",
+	],
+	['S1', "hash",
+		"acos: 0",
+		"acosh: 2",
+		"atan: 0",
+		"atanh: 0, 0p1",
+		"cbrt: 1",
+		"cos: 0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 15, 16, 17, 18, 20",
+		"cosh: 2, 3",
+		"expm1: 0",
+		"hypot: 1, 2, 3, 4, 5, 6, 7, 8",
+		"sin: 0, 1, 10, 12, 13, 15",
+		"sinh: 1, 5, 8, 9",
+		"tan: 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12",
+		"tanh: 0",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: macOS Catalina Safari",
+	],
+	['iOS1', "hash",
+		"acos: 0",
+		"acosh: 2",
+		"atan: 0",
+		"atanh: 0, 0p1",
+		"cbrt: 1",
+		"cos: 1, 2, 4, 5, 6, 12, 13, 14, 15, 16, 17, 18, 20, 21",
+		"cosh: 2, 3",
+		"expm1: 0",
+		"hypot: 1, 2, 3, 4, 5, 6, 7, 8",
+		"sin: 11, 13, 14, 15",
+		"sinh: 1, 5, 8, 9",
+		"tan: 2, 3, 4, 5, 6, 7, 8, 11, 12",
+		"tanh: 0",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: webkit: Safari, Firefox, Chrome",
+	],
+	['E99', "hash",
+		"acosh: 1, 1p1",
+		"atanh: 0, 0p1",
+		"atan2: 1",
+		"cbrt: 1",
+		"cos: 0, 5, 7, 10, 11, 13, 16, 17, 18, 21",
+		"cosh: 1, 1p1, 2, 3",
+		"hypot: 1p1, 5p1, 6p1",
+		"log: 1",
+		"log10: 8, 9",
+		"sin: 14",
+		"sinh: 0, 0p1, 1, 4, 4p1, 5, 8p1, 9",
+		"sqrt: 1",
+		"tanh: 0",
+		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
+		"tests: Win10-vm 64bit EdgeHTML",
+	],
+]
+
+
+function outputData() {
+	var numbers = [],
+		firefox = [], // firefox only numbers
+		obsolete = [], // FF67- results
+		firefoxall = [], // out of interest: FFonly vs FFall
+		table = dom.tb3
+
+	dataset.forEach(function(data) {
+		let code = data[0]
+		let lines = [s12 + "hash: "+ sc + data[1]]
+
+		for (let i=2; i < data.length; i++) {
+			let fnc = data[i].split(":")[0]
+			let fncPad = s12.trim() + fnc.padStart(5) + ":" + sc
+			let str = data[i].split(":")[1]
+
+			if (fnc == "tests") {
+				// configs tested
+				lines.push(s10.trim() + data[i] + sc)
+			} else {
+				// results
+				lines.push(fncPad + str)
+				// numbers
+				let tmp = str.split(",")
+				tmp.forEach(function(num) {
+					num = num.trim()
+					// all
+					numbers.push(fnc + " " + num)
+					// FF
+					if (code.substring(0,1) == "F") {
+						let second = code.substring(1,2)
+						if (second == "8" || second == "9") {
+							// obsolete FF
+							obsolete.push(fnc + " " + num)
+						} else {
+							// FF68+
+							firefox.push(fnc + " " + num)
+						}
+						firefoxall.push(fnc + " " + num)
+					}
+				})
+			}
+
+		}
+		// add table row
+		let row = table.insertRow(-1)
+		let a = row.insertCell(0)
+		let b = row.insertCell(1)
+		a.innerHTML = code
+		b.setAttribute("class", "mono spaces")
+		b.innerHTML = lines.join("<br>")
+	})
+
+	// number crunching: sort them, de-dupe them, pretty output them
+	numbers.sort()
+	firefox.sort()
+	obsolete.sort()
+	firefoxall.sort()
+
+	console.debug(numbers.length, firefox.length, obsolete.length, firefoxall.length)
+
+	numbers = numbers.filter(function(item, position) {return numbers.indexOf(item) === position})
+	firefox = firefox.filter(function(item, position) {return firefox.indexOf(item) === position})
+	obsolete = obsolete.filter(function(item, position) {return obsolete.indexOf(item) === position})
+	firefoxall = firefoxall.filter(function(item, position) {return firefoxall.indexOf(item) === position})
+
+	console.debug(numbers.length, firefox.length, obsolete.length, firefoxall.length)
+
+}
+outputData()
+
+</script>
+</body>
+</html>
