@@ -1746,11 +1746,18 @@ function get_version() {
 		}
 		// run
 		function v75plus() {
+			// 83: 1667094
+			if (go) {
+				try {
+					let obj83 = {exec() {return function(){}}}
+					let test83 = RegExp.prototype.test.call(obj83, "")
+					verNo = "83+"; go = false
+				} catch(e) {}
+			}
 			// 82: 1655947
-			// ToDo: If backported to ESR78* then COMBINE a 79/80/81 test
 			if (go) {
 				let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-				if (test82 == 1) {verNo = "82+"; go = false}
+				if (test82 == 1) {verNo = "82"; go = false}
 			}
 			// 81: 1650607
 			if (go) {
