@@ -53,6 +53,7 @@ var dataset = [
 	// keep it clean and ", ". I trim for number crunching but not the result strings
 
 // windows
+	['group', 'firefox 68+'],
 	['header', 'windows'],
 	['F1', "97c37c8c3b1de92333bf1993a7350cf785b2715d",
 		"nos: none, i'm the control",
@@ -159,8 +160,10 @@ var dataset = [
 		"tan: 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12",
 		"tests: macOS Catalina: FF80, TB68",
 	],
+
 // linux FF67 or lower: obsolete
-	['header', 'linux obsolete'],
+	['group', 'firefox 67-'],
+	['header', 'linux 67-'],
 	['F80', "2047b6e1afc4c6bbe55d061e33fa8026c7afd648",
 		"cos: 4, 5, 6, 7, 13, 15, 16, 17, 18, 19, 20, 21",
 		"cosh: 0, 0p1",
@@ -184,7 +187,7 @@ var dataset = [
 		"tests: Mint 32bit : TB60",
 	],
 // windows FF67 or lower: obsolete
-	['header', 'windows obsolete'],
+	['header', 'windows 67-'],
 	['F96', "3ada7d492e4fa7a7a6acea446fa24ec3ff370556",
 		"cosh: 0, 0p1",
 		"expm1: 0p1",
@@ -221,8 +224,10 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: Win7/Win10-vm 64bit: TB60 32bit | Win7-vm 32bit: TB60 32bit",
 	],
+
 // non FF
-	['header', 'non-Firefox'],
+	['group', 'non-firefox'],
+	['header', 'chrome / chromium'],
 	['C1', "42550bb913168ddbb8be40f970adc51344017cad",
 		"cbrt: 1p1",
 		"cos: 2, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 20",
@@ -235,6 +240,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: chrome: everywhere (windows, android, mac...) & everything (edge, opera, brave...)",
 	],
+	['header', 'safari'],
 	['S1', "4423be6d9bec5550ad38ea9dde7ef2daf0609e0f",
 		"acos: 0",
 		"acosh: 2",
@@ -252,6 +258,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: macOS Catalina Safari",
 	],
+	['header', 'iOS'],
 	['iOS1', "2e9162520d6f90c28e24d0f2e538f79f503f8a66",
 		"acos: 0",
 		"acosh: 2",
@@ -269,6 +276,7 @@ var dataset = [
 		"pow: 0, 1, 2, 3, 4, 5, 6, 7, 8",
 		"tests: webkit: Safari, Firefox, Chrome",
 	],
+	['header', 'EdgeHTML'],
 	['E99', "a53608a3ac4caf531014dcd4cfaac425db405398",
 		"acosh: 1, 1p1",
 		"atanh: 0, 0p1",
@@ -296,29 +304,41 @@ function outputData() {
 		firefoxall = [], // out of interest: FFonly vs FFall
 		table = dom.tb3
 
+	var sColor1 = s17.trim(), // subheader: 17 was nice
+		sColor3 = s12.trim(), // hash, nos
+		sColor4 = s14.trim() // tests
+
 	dataset.forEach(function(data) {
-		let code = data[0]
+		let code = data[0],
+			str = data[1]
 		if (code == "header") {
-			let str = data[1]
-			str = s15.trim() + "<u>" + str.toUpperCase() + "</u>" + sc
+			str = sColor1 + str.toLowerCase() + sc
 			let row = table.insertRow(-1)
 			let a = row.insertCell(0)
 			let b = row.insertCell(1)
 			b.setAttribute("class", "mono spaces")
 			b.innerHTML = str
+		} else if (code == "group") {
+			str = "<u>" + str.toUpperCase() + "</u>"
+			let row = table.insertRow(-1)
+			let a = row.insertCell(0)
+			a.setAttribute("class", "mono spaces intro")
+			a.colSpan = "2"
+			a.innerHTML = str
 		} else {
-			let lines = [s12 + "hash: "+ sc + data[1]]
+			let lines = [sColor3 + " hash: "+ sc + data[1]]
 			for (let i=2; i < data.length; i++) {
 				let fnc = data[i].split(":")[0]
 				let fncPad = s12.trim() + fnc.padStart(5) + ":" + sc
-				let str = data[i].split(":")[1]
+				str = data[i].split(":")[1]
 
 				if (fnc == "tests") {
 					// configs tested
-					lines.push(s10.trim() + data[i] + sc)
+					lines.push(sColor4 + data[i] + sc)
 				} else {
 					// results
-					lines.push(fncPad + str)
+					let strpretty = str.replace(/p1/g, sColor3 + "p1"+ sc)
+					lines.push(fncPad + strpretty)
 					// numbers: ignore F1 notation line ("nos")
 					if (fnc !== "nos") {
 						let tmp = str.split(",")
@@ -352,7 +372,7 @@ function outputData() {
 		}
 	})
 
-	// number crunching: sort them, de-dupe them, pretty output them
+	// test number: sort them, de-dupe them, output them
 	numbers.sort()
 	firefox.sort()
 	obsolete.sort()
@@ -361,15 +381,21 @@ function outputData() {
 	firefox = firefox.filter(function(item, position) {return firefox.indexOf(item) === position})
 	obsolete = obsolete.filter(function(item, position) {return obsolete.indexOf(item) === position})
 	firefoxall = firefoxall.filter(function(item, position) {return firefoxall.indexOf(item) === position})
-
 	//console.debug(numbers.length, firefox.length, obsolete.length, firefoxall.length)
 	// 110 55 61 72
+	// ToDo: maybe abraham wants all numbers excluding FF67-
 
-	dom.numbers.innerHTML = numbers.join(", ")
+	let strpretty = numbers.join(", ")
+	strpretty = strpretty.replace(/p1/g, sColor3 + "p1"+ sc)
+	dom.numbers.innerHTML = strpretty
 	dom.countAll = numbers.length
-	dom.firefox.innerHTML = firefox.join(", ")
+
+	strpretty = firefox.join(", ")
+	strpretty = strpretty.replace(/p1/g, sColor3 + "p1"+ sc)
+	dom.firefox.innerHTML = strpretty
 	dom.countFF = firefox.length
 
+	// ToDo: number crunch a number set to bare minimum
 
 }
 outputData()
