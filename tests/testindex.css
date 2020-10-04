@@ -100,7 +100,8 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 	border-style: solid; border-color: transparent #b3b3b3 transparent transparent;}
 
 /* table nav */
-div.nav-title {position: relative; width: 900px;}
+div.nav-title {position: relative;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 50px; text-align: left;}
 
 /* tables */
 table {width: 900px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
