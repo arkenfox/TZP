@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=500">
+	<meta name="viewport" content="width=420">
 	<title>tzp index</title>
 	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<!-- custom -->
 	<style>
-		table {width: 480px;}
+		table {width: 400px;}
 	</style>
 </head>
 <body>
@@ -25,62 +25,59 @@
 	-->
 
 	<table id="tb99">
-		<col width="1%"><col width="19%"><col width="80%">
+		<col width="1%"><col width="29%"><col width="70%">
 		<thead><tr><th colspan="3">index</th></tr></thead>
 		<tr><td colspan="3" class="intro"><span class="no_color"><span class="s12">NOTE:</span>
-			If a link is <code>404</code>, then I haven't cleaned it up, applied tzp's styling and uploaded it yet.
-			This is a work in progress and there are more tests than just those listed. Give me a few weeks</span><td></tr>
+			If a link is <code>404</code>, then I haven't cleaned it up and uploaded it yet</span><td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="no_color"><b>GITHUB</b></span><td></tr>
 		<tr><td colspan="2"><a class="blue" href="https://github.com/arkenfox/TZP/">repo</a></td><td>come and say hi</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 		<tr><td colspan="3" class="intro"><span class="s3">FEATURE DETECTION</span><td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/collation.html">collation</a></td>
-				<td>description</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/math.html">math</a></td>
-				<td>research: computes a set of math functions and polyfills
-						<ul><li>compares all results to a control set, to build a list that provides entropy</li>
-							<li>compares polyfill to function results</li>
-							<li>engine detection using math</li>
-						</ul>
-				</td></tr>
+				<td>research: likely math functions and polyfills</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/mathdata.html">math data</a></td>
-				<td>a record of which tests for each unique hash differ from the control</td></tr>
+				<td>research: ongoing results</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/versions.html">versions</a></td>
-				<td>a history of firefox version-specific PoCs tzp uses or considered</td></tr>
+				<td>a history of version pocs tzp uses or considered</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s4">LANGUAGE</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/collation.html">collation</a></td>
+				<td>tool: localecompare & intl.collation</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/pluralrules.html">pluralrules</a></td>
-				<td>description</td></tr>
+				<td>proof: min numbers needed for max entropy</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s6">COOKIES & STORAGE</span><td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/sanitizing.html">sanitizing</a></td>
-				<td>description</td></tr>
+				<td>... with zombies!</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s8">DOMRECT / SVG</span><td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/domrectnoise.html">domrect noise</a></td>
-				<td>an example using one domrect method (getClientRects) to detect fake results</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/domrectspoof.html">domrect spoof</a></td>
+				<td>domrect spoof detection</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s9">CANVAS</span><td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/canvasspoof.html">canvas spoof</a></td>
+				<td>canvas spoof detection</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/canvasnoise.html">canvas noise</a></td>
-				<td>detect fake canvas by comparing against known results, and an example of fingerprinting
-				noise characteristics against random canvas</td></tr>
+				<td>canvas spoof fingerprinting</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s12">FONTS</span><td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/textmetrics.html">textmetrics noise</a></td>
-				<td>description</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/tmspoof.html">textmetric spoof</a></td>
+				<td>textmetric spoof detection</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
 		<tr><td colspan="3" class="intro"><span class="s18">MISC</span><td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/timing.html">timing</a></td><td>description</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/timing.html">timing</a></td>
+				<td>various RFP and timing tests</td></tr>
 		<tr><td colspan="3"></td></tr> <!--spacer-->
 
+		<!--
 		<tr><td colspan="3" class="intro"><span class="no_color">OTHER</span><td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/historylength.html">history.length</a></td>
 				<td>description</td></tr>
@@ -92,17 +89,13 @@
 	<br>
 
 	<!-- preload for main test:
-		ToDo: test if it has an impact
+		ToDo: test if it has an impact: css files (seems to), font (maybe)
 		ToDo: what about resources:// chrome:// ?
 		ToDo: we could preload the js files just not autorun outputX unless location is tzp.html
-	-->
 	<div class="offscreen">
 		<div><span class="woffyes">&#xe800;</span></div>
 	<div>
-	<link rel="stylesheet" type="text/css" href="css/media.css">
-	<link rel="stylesheet" type="text/css" href="css/window_size.css">
-	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
-	<link rel="stylesheet" type="text/css" href="css/dpi.css">
+	-->
 
 </body>
 </html>
