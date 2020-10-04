@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+  <title>canvas spoof detection</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<style>
+		table {width: 580px;}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb9">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title"><a href="#screen">canvas spoofing detection</a>
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">
+				Sets canvas with known results and reads them back. If it differs, <span class="s1">denoted in 
+				pale red</span>, then it's being spoofed.
+				<!--<p>
+				Not to be confused with detecting randomness on every pass (Firefox) or randomness which uses
+				a per-execution per-origin seed to avoid repeat calls that average out the random value
+				(CanvasBlocker). That distinction is a noise fingerprint in itself.</p>
+				-->
+				</span>
+		</td></tr>
+		<tr><td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>control</td>
+			<td><canvas id="control1" width="16" height="16" style="border:5px solid white;"></canvas></td></tr>
+
+		<tr><td>getImageData</td><td class="c mono" id="hash1"></td></tr>
+		<tr><td>toDataURL</td><td class="c mono" id="hash2"></td></tr>
+		<tr><td>toBlob</td><td class="c mono" id="hash3"></td></tr>
+		<tr><td>mozGetAsFile</td><td class="c mono" id="hash4"></td></tr>
+
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td></td><td class="s9">------</td></tr> <!-- spacer -->
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+
+		<tr><td>control</td><td>
+				<canvas id="control2" width="16" height="16" style="border:5px solid white;"></canvas>
+			</td>
+		</tr>
+		<tr><td>isPointInPath</td><td class="c mono" id="hash5"></td></tr>
+		<tr><td>isPointInStroke</td><td class="c mono" id="hash6"></td></tr>
+
+	</table>
+	<br>
+<script>
+
+function run() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = "&nbsp"
+	}
+
+	// pause so users see change
+	setTimeout(function(){
+		try {
+			let t0 = performance.now()
+			let canvas = dom.control1
+
+			if (canvas.getContext) {
+				// set control1
+				let ctx = canvas.getContext('2d')
+				for (let x=0; x < 16; x++) {
+					for (let y=0; y < 16; y++) {
+						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) + ","+ (y*16) + ",255)"
+						ctx.fillRect(x, y, 1, 1)
+					}
+				}
+
+				// set path
+				let canvas2 = dom.control2
+				let ctx2 = canvas2.getContext('2d')
+				ctx2.fillStyle = "rgba(255,255,255,255)"
+				ctx2.beginPath()
+				ctx2.rect(2,5,8,7)
+				ctx2.closePath()
+				ctx2.fill()
+
+				// get hashes
+				// getImageData
+				let data = []
+				for (let x=0; x < 16; x++) {
+					for (let y=0; y < 16; y++) {
+						let pixel = ctx.getImageData(x,y,1,1)
+						data.push(pixel.data)
+					}
+				}
+				// 67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0
+				let hash1 = sha1(data.join())
+				dom.hash1.innerHTML =
+					(hash1 == "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0" ? "" : sb) + hash1 + sc
+
+				// toDataURL
+				// 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
+				let dataURL = canvas.toDataURL("image/png")
+				let hash2 = sha1(dataURL)
+				dom.hash2.innerHTML =
+					(hash2 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? "" : sb) + hash2 + sc
+
+				// toBlob
+				// 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
+				let hash3 = ""
+				canvas.toBlob(function(blob) {
+					let reader = new FileReader()
+					reader.onload = function(){
+						hash3 = sha1(reader.result)
+						//console.debug(reader.result)
+						dom.hash3.innerHTML =
+							(hash3 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? "" : sb) + hash3 + sc
+					}
+					reader.onerror = function(){
+						dom.hash3.innerHTML = "error"
+					}
+					reader.readAsDataURL(blob)
+				})
+
+				// mozGetAsFile
+				let hash4 = ""
+				try {
+					let file = canvas.mozGetAsFile("moz.png")
+					let reader = new FileReader()
+					reader.onload = function(){
+						hash4 = sha1(reader.result)
+						dom.hash4.innerHTML =
+							(hash4 == "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed" ? "" : sb) + hash4 + sc
+					}
+					reader.onerror = function(){
+						dom.hash4 = "n/a"
+					}
+					reader.readAsDataURL(file)
+				} catch(e) {
+					if (e.message == "canvas.mozGetAsFile is not a function") {
+						dom.hash4 = "n/a"
+					} else {
+						dom.hash4 = e.name + ": " + e.message
+					}
+				}
+
+				// isPointInPath
+				try {
+					let hash5 = []
+					for (let x = 0; x < 16; x++){
+						for (let y = 0; y < 16; y++){
+							hash5.push(ctx2.isPointInPath(x, y))
+						}
+					}
+					hash5 = sha1(hash5)
+					dom.hash5.innerHTML =
+						(hash5 == "f44c70171a197cc26df382603e76f4ba581e2d8f" ? "" : sb) + hash5 + sc
+				} catch(e) {}
+
+				// isPointInStroke
+				try {
+					let hash6 = []
+					for (let x = 0; x < 16; x++){
+						for (let y = 0; y < 16; y++){
+							hash6.push(ctx2.isPointInStroke(x, y))
+						}
+					}
+					hash6 = sha1(hash6)
+					dom.hash6.innerHTML =
+						(hash6 == "1b636fb26edee73d7ca832edd1112e0021566a50" ? "" : sb) + hash6 + sc
+				} catch(e) {}
+
+				// perf
+				let t1 = performance.now()
+				dom.perf.innerHTML = Math.round(t1-t0) + " ms"
+
+			}
+		} catch(e) {
+			console.debug("catchall known", e.name, e.message)
+		}
+	}, 170)
+
+}
+
+run()
+
+</script>
+</body>
+</html>
