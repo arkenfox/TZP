@@ -151,7 +151,7 @@ function get_engine() {
 			}
 		} catch(e) {}
 	}
-	dom.perfE.innerHTML = (performance.now()-et0) + " ms"
+	dom.perfE.innerHTML = Math.round(performance.now()-et0) + " ms"
 	dom.engine.innerHTML = s12.trim() + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
 		+ "<br>" + s12.trim() + "engine:" + sc + engine
 
@@ -569,7 +569,7 @@ function get_results() {
 		+ "<br><br>" + bigNstr.padStart(52)
 		+ "<br>" + display.join("<br>")
 	// PERF
-	dom.perf.innerHTML = (performance.now()-t0) + " ms"
+	dom.perf.innerHTML = Math.round(performance.now()-t0) + " ms"
 
 }
 
