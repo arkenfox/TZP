@@ -30,7 +30,7 @@ function get_hardware_concurrency() {
 			dom.nHWC.innerHTML = h
 		} catch(e) {
 			dom.nHWC.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-			h2 = zBO
+			h2 = zB0
 		}
 	} else {
 		dom.nHWC = zD
@@ -215,7 +215,7 @@ function get_speech_synth() {
 
 			} catch(e) {
 				dom.sEngines.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-				//return "speech synth: " + zE + ", " + zBO
+				//return "speech synth: " + zE + ", " + zB0
 			}
 		}
 		try {
@@ -226,11 +226,11 @@ function get_speech_synth() {
 				}
 			} else if (speechSynthesis.onvoiceschanged == undefined) {
 				dom.sEngines.innerHTML = zB4
-				//return "speech synth: " + zE + ", " + zBO
+				//return "speech synth: " + zE + ", " + zB0
 			}
 		} catch(e) {
 			dom.sEngines.innerHTML = zB3
-			//return "speech synth: " + zE + ", " + zBO
+			//return "speech synth: " + zE + ", " + zB0
 		}
 	} else {
 		dom.sSynth = zD; dom.sEngines = zNA
@@ -261,7 +261,7 @@ function get_touch() {
 		if (window.matchMedia(q+"1)").matches) {m=1; m2=1}
 	} catch(e) {
 		m = (e.name == "ReferenceError" ? zB1 : zB2)
-		m2 = zBO
+		m2 = zB0
 	}
 	// t
 	try {document.createEvent("TouchEvent"); t = true} catch (e) {}
@@ -270,10 +270,10 @@ function get_touch() {
 		try {
 			p = navigator.maxTouchPoints
 			p2 = p
-			if (p == undefined) {p = zB3; p2 = zBO}
+			if (p == undefined) {p = zB3; p2 = zB0}
 		} catch(e) {
 			p = (e.name == "ReferenceError" ? zB1 : zB2)
-			p2 = zBO
+			p2 = zB0
 		}
 	}
 	let t2 = ("ontouchstart" in window)
