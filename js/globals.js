@@ -121,6 +121,5 @@ let avh = "",
 	logPerf = false,
 	logStorage = false,
 	runS = false,
-	stateSIM = false,
 // rerun
 	gRerun = false
