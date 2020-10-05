@@ -135,7 +135,6 @@ function run() {
 				//} catch(err) {}
 
 				// read: getImageData
-				//cnvGet.
 				for (let x=0; x < 20; x++) {
 					for (let y=0; y < 20; y++) {
 						let pixel = ctxCtrl.getImageData(x,y,1,1)
@@ -146,14 +145,20 @@ function run() {
 						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
 						cellRead.push(pixel)
 						// output visual for user
+						if (x == 0 && y == 0) {
+							console.debug(pixel)
+						}
 						ctxGet.fillStyle = "rgba(" + pixel + ")"
 						ctxGet.fillRect(x, y, 1, 1)
 					}
 				}
 				hashGetImage = sha1(clrRead.join())
+
+				console.debug(clrSet)
+				console.debug(clrRead)
+
 				if (hashGetImage == hashSet) {
 					dom.readhash.innerHTML = hashGetImage + s9 + "[matches]" + sc
-					
 				} else {
 					dom.readhash.innerHTML = sb + hashGetImage + sc
 
