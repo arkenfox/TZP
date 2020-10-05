@@ -40,4 +40,5 @@ let s0 = " <span class='",
 	note_ttc = sf+"test to come"+sc,
 // other
 	isFF = false,
-	isFile = false
+	isFile = false,
+	isEngine = ""
