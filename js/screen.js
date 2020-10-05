@@ -115,6 +115,7 @@ function get_collation() {
 		t0 = performance.now()
 	// output
 	function output(hash) {
+		if (runS) {hash = sha1(hash)}
 		let r = "",
 			c = ""
 		if (missing.length > 0) {
@@ -128,7 +129,8 @@ function get_collation() {
 		} else if (hash == "78c0998f75b0da6b11dd55e2f29dc054e14aae9e") {
 			r = zFF + " [FF64 or lower]" + c
 		} else if (isFF) {
-			r = not_seen+" collation combo before"+sc + c + (runS ? zSIM : "")
+			r = hash + c + zNEW + (runS ? zSIM : "")
+			dom.fdCollation.setAttribute("class", "c mono")
 		}
 		dom.fdCollation.innerHTML = r
 		if (logPerf) {debug_log("collation [fd]",t0)}
@@ -141,7 +143,7 @@ function get_collation() {
 		results.push(test)
 		if (control == test) {missing.push("<code>" + i + "</code>")}
 	})
-	output(sha1(results.join()) + (runS ? "a" : ""))
+	output(sha1(results.join()))
 }
 
 function get_color() {
@@ -247,7 +249,8 @@ function get_errors() {
 					if (isBlock) {
 						dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+sc + (runS ? zSIM : "")
 					} else {
-						dom.fdError.innerHTML = not_seen+" error combo before"+sc + (runS ? zSIM : "")
+						dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "")
+						dom.fdError.setAttribute("class", "c mono")
 					}
 				} else {
 					dom.errh = hash
@@ -858,7 +861,8 @@ function get_math() {
 				if (scriptBlock) {
 					strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
 				} else {
-					strNew = not_seen+" math combo before"+sc + (runS ? zSIM : "")
+					strNew = mchash
+					dom.fdMathOS.setAttribute("class", "c mono")
 				}
 				// runS: alternate new vs os-check (runS sets isOS ="")
 				if (runS) {if (stateSIM) {fdMath1 = "Windows"}}
@@ -1177,7 +1181,7 @@ function get_resources() {
 				result = branding+" - "+channel+" ["+wFF+" x "+hFF+"]"
 			} else if (hFF > 0) {
 				//new
-				result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + (runS ? zSIM : "")
+				result = "["+wFF+" x "+hFF+"]" + zNEW + (runS ? zSIM : "")
 			} else {
 				//none: red=desktop orange=android
 				if (isVer > 59) {
@@ -1215,7 +1219,7 @@ function get_resources() {
 				}
 			} else if (hFF > 0) {
 				//new
-				result = "["+wFF+" x "+hFF+"]" + not_seen+" branding before"+sc + " TB " + (runS ? zSIM : "")
+				result = "["+wFF+" x "+hFF+"]" + zNEW + (runS ? zSIM : "")
 			} else {
 				//none: red=desktop orange=android
 				if (isVer > 59) {
@@ -1969,10 +1973,12 @@ function get_widgets() {
 		}
 		if (isFF) {
 			// os
-			if (sizediff) {size0 = "mixed sizes"}
+			if (sizediff) {size0 = "sizes"}
+			if (fontdiff) {font0 = "fonts" }
+			let strdiff = "[mixed " + (sizediff && fontdiff ? font0 +" & "+ size0 : font0 + size0) + "]"
 			if (fontdiff) {
-				font0 = "mixed fonts";
-				os = not_seen+" mix before"+sc
+				os = whash + zNEW
+				dom.fdWidget.setAttribute("class", "c mono")
 			} else {
 					// set isOS
 					if (font0.slice(0,12) == "MS Shell Dlg") {os="Windows"}
@@ -1982,7 +1988,7 @@ function get_widgets() {
 					else {os="Linux"}
 					isOS = os.toLowerCase()
 			}
-			os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
+			os = (os == "" ? zB0 : os) + strdiff
 			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
 		} else {
 			dom.fdWidget = whash
