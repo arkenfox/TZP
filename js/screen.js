@@ -1944,9 +1944,9 @@ function get_widgets() {
 				size = getComputedStyle(el).getPropertyValue("font-size")
 			} catch(e) {size = "unknown"}
 			if (runS) {
-				if (i == 1) {font = "-apple-system"; size="11px"} // font + size
+				//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
 				//if (i == 4) {font = "-apple-system"} // font
-				//if (i == 2) {size="13px"} // size
+				if (i == 2) {size="13px"} // size
 			}
 			output = font+", "+size
 			// 1-7: compare to 1
@@ -1967,16 +1967,11 @@ function get_widgets() {
 			// combined
 			dom.widfirst.innerHTML = "various"
 			dom.wid0.innerHTML = combined.join("<br>")
-		} else {
-			// individual
-			dom.widfirst.innerHTML = list.join("|")
 		}
 		if (isFF) {
-			// os
-			if (sizediff) {size0 = "sizes"}
-			if (fontdiff) {font0 = "fonts" }
-			let strdiff = "[mixed " + (sizediff && fontdiff ? font0 +" & "+ size0 : font0 + size0) + "]"
+			if (sizediff) {size0 = "mixed sizes"}
 			if (fontdiff) {
+				font0 = "mixed fonts";
 				os = whash + zNEW
 				dom.fdWidget.setAttribute("class", "c mono")
 			} else {
@@ -1988,7 +1983,7 @@ function get_widgets() {
 					else {os="Linux"}
 					isOS = os.toLowerCase()
 			}
-			os = (os == "" ? zB0 : os) + strdiff
+			os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
 			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
 		} else {
 			dom.fdWidget = whash
