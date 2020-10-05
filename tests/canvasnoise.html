@@ -33,16 +33,16 @@
 		</td></tr>
 		<tr><td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>visual</td>
 			<td>
-				<canvas id="cnvBig" width="100" height="100" style="border:5px solid white;"></canvas> &nbsp
+				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
 					&nbsp <span class="s9"> &#9664 what we set</span>
 			</td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td>getImageData</td>
 			<td>
-				<canvas id="cnvBig2" width="100" height="100" style="border:5px solid white;"></canvas> &nbsp
+				<canvas id="cnvBig2" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
-					&nbsp <span class="s9"> &#9664 what we read</span>
+					&nbsp <span class="s9"> &#9664 what we read back</span>
 			</td>
 		</tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -73,7 +73,9 @@ function run() {
 	let clrSet = [], cellSet = [],
 		clrRead = [], cellRead = [],
 		hashSet = "",
-		hashGetImage = ""
+		hashGetImage = "",
+		m = 9 // multplier for large visuals
+
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
@@ -106,7 +108,7 @@ function run() {
 						clrSet.push(255)
 						cellSet.push(clrs)
 						ctxBig.fillStyle = "rgba(" + clrs + ")"
-						ctxBig.fillRect(x*5, y*5, 5, 5)
+						ctxBig.fillRect(x*m, y*m, m, m)
 						ctxCtrl.fillStyle = "rgba(" + clrs + ")"
 						ctxCtrl.fillRect(x, y, 1, 1)
 					}
@@ -146,7 +148,7 @@ function run() {
 						cellRead.push(pixel)
 						// output READ visuals
 						ctxBig2.fillStyle = "rgba(" + pixel + ")"
-						ctxBig2.fillRect(x*5, y*5, 5, 5)
+						ctxBig2.fillRect(x*m, y*m, m, m)
 						ctxGet.fillStyle = "rgba(" + pixel + ")"
 						ctxGet.fillRect(x, y, 1, 1)
 					}
