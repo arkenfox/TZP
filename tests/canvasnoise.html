@@ -31,15 +31,26 @@
 				the	differences. <code>getImageData</code> is being tested, but <code>toDataURL</code> and
 				<code>toBlob</code> can also be "decoded" (albeit a little differently)</span>
 		</td></tr>
-		<tr><td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>large visual</td>
-			<td><canvas id="cnv" width="100" height="100" style="border:5px solid white;"></canvas></td></tr>
+		<tr><td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>visual</td>
+			<td>
+				<canvas id="cnvBig" width="100" height="100" style="border:5px solid white;"></canvas> &nbsp
+				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
+					&nbsp <span class="s9"> &#9664 what we set</span>
+			</td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td>getImageData</td>
-			<td><canvas id="cnv1" width="20" height="20" style="border:5px solid white;"></canvas></td>
+			<td>
+				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
+					&nbsp <span class="s9"> &#9664 what we read back</span>
+			</td>
 		</tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td>toDataURL | toBlob</td>
 			<td>
-				<image id="cnv4" width="20" height="20"  style="border:5px solid white;" src=""></image> &nbsp
-				<image id="cnv5" width="20" height="20"  style="border:5px solid white;" src=""></image> &nbsp
+				<image id="cnvURL" width="20" height="20"  style="border:1px solid white;" src=""></image> &nbsp
+				<image id="cnvBlob" width="20" height="20"  style="border:1px solid white;" src=""></image>
+					&nbsp <span class="s9"> &#9664 PNGs</span>
+			</td>
 		</tr>
 
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -57,7 +68,7 @@
 <script>
 
 function run() {
-
+	// vars
 	let clrSet = [], cellSet = [],
 		clrRead = [], cellRead = [],
 		hashSet = "",
@@ -73,15 +84,13 @@ function run() {
 		try {
 			let t0 = performance.now()
 
-			let canvas = dom.cnv,
-				canvas1 = dom.cnv1,
-				canvas4 = dom.cnv4
+			let cnvBig = dom.cnvBig
+			if (cnvBig.getContext) {
+				let ctxBig = cnvBig.getContext('2d'),
+					ctxCtrl = dom.cnvCtrl.getContext('2d'),
+					ctxGet = dom.cnvGet.getContext('2d')
 
-			if (canvas.getContext) {
-				let ctx = canvas.getContext('2d'),
-					ctx1 = canvas1.getContext('2d')
-
-				// set
+				// set visuals
 				for (let x=0; x < 20; x++) {
 					for (let y=0; y < 20; y++) {
 						// get random color
@@ -95,62 +104,56 @@ function run() {
 						clrSet.push(255)
 						cellSet.push(clrs)
 						// view
-						ctx.fillStyle = "rgba(" + clrs + ")"
-						ctx.fillRect(x*5, y*5, 5, 5)
-						// ?
-						ctx1.fillStyle = "rgba(" + clrs + ")"
-						ctx1.fillRect(x, y, 1, 1)
+						ctxBig.fillStyle = "rgba(" + clrs + ")"
+						ctxBig.fillRect(x*5, y*5, 5, 5)
+						// ctrl
+						ctxCtrl.fillStyle = "rgba(" + clrs + ")"
+						ctxCtrl.fillRect(x, y, 1, 1)
 					}
 				}
 				hashSet = sha1(clrSet.join())
 				dom.sethash = hashSet
 
 				// toDataURL
-				let dataURL = cnv1.toDataURL("image/png")
-				cnv4.src = dataURL
+				let dataURL = cnvCtrl.toDataURL("image/png")
+				cnvURL.src = dataURL
 
 				// toBlob
-				cnv1.toBlob(function(blob) {
+				cnvCtrl.toBlob(function(blob) {
 					let url = URL.createObjectURL(blob)
-					cnv5.src = url
+					cnvBlob.src = url
 				})
 
 				// mozGetAsFile
 				//try {
-				//	let moz = cnv1.mozGetAsFile("moz.png")
+				//	let moz = cnvCtrl.mozGetAsFile("moz.png")
 				//	let reader = new FileReader()
 				//	reader.readAsDataURL(moz)
 				//	reader.onloadend = function() {
-				//	 cnv6.src = reader.result;
+				//	 cnvMoz.src = reader.result;
 				//	}
 				//} catch(err) {}
 
-				// non canvas, read pixels, 20x20
-				let img4 = cnv4,
-					imgW = img4.width,
-					imgH = img4.height
-				//console.debug(imgW, imgH)
-				// test just do the first four pixels on first row
-				for (let x=0; x < 4; x++) {
-					for (let y=0; y < 1; y++) {
-						//console.debug(x,y)
-					}
-				}
-
 				// read: getImageData
+				//cnvGet.
 				for (let x=0; x < 20; x++) {
 					for (let y=0; y < 20; y++) {
-						let pixel = ctx1.getImageData(x,y,1,1)
+						let pixel = ctxCtrl.getImageData(x,y,1,1)
 						clrRead.push(pixel.data[0])
 						clrRead.push(pixel.data[1])
 						clrRead.push(pixel.data[2])
 						clrRead.push(pixel.data[3])
-						cellRead.push(pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3])
+						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
+						cellRead.push(pixel)
+						// output visual for user
+						ctxGet.fillStyle = "rgba(" + pixel + ")"
+						ctxGet.fillRect(x, y, 1, 1)
 					}
 				}
 				hashGetImage = sha1(clrRead.join())
 				if (hashGetImage == hashSet) {
-					dom.readhash = hashGetImage
+					dom.readhash.innerHTML = hashGetImage + s9 + "[matches]" + sc
+					
 				} else {
 					dom.readhash.innerHTML = sb + hashGetImage + sc
 
@@ -266,6 +269,7 @@ function run() {
 
 			}
 		} catch(e) {
+			// ToDo: output some errors or something
 			console.debug("catchall", e.name, e.message)
 		}
 	}, 170)
