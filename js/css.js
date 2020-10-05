@@ -227,9 +227,9 @@ function get_mm_css() {
 	try {
 		if (window.matchMedia(q+r+")").matches) {x = r+rfp_red; clean = r}
 		if (window.matchMedia(q+n+")").matches) {x = n+rfp_green; clean = n}
-	} catch(e) {x = get_css_block(e.name); clean = zBO}
+	} catch(e) {x = get_css_block(e.name); clean = zB0}
 	if (isFF) {
-		if (x == zNS && isVer > 62) {x = zB6; clean = zBO}
+		if (x == zNS && isVer > 62) {x = zB6; clean = zB0}
 	}
 	dom.mmPRM.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
 	res.push("prm: " + clean)
@@ -241,9 +241,9 @@ function get_mm_css() {
 		if (window.matchMedia(q+l+")").matches) {x = l+rfp_green; clean = l}
 		if (window.matchMedia(q+d+")").matches) {x = d+rfp_red; clean = d}
 		if (window.matchMedia(q+n+")").matches) {x = n+rfp_red; clean = n}
-	} catch(e) {x = get_css_block(e.name); clean = zBO}
+	} catch(e) {x = get_css_block(e.name); clean = zB0}
 	if (isFF) {
-		if (x == zNS && isVer > 66) {x = zB6; clean = zBO}
+		if (x == zNS && isVer > 66) {x = zB6; clean = zB0}
 	}
 	dom.mmPCS.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
 	res.push("pcs: " + clean)
@@ -257,7 +257,7 @@ function get_mm_css() {
 		if (window.matchMedia(q+"forced)").matches) {x = "forced"; clean = "forced"}
 		if (window.matchMedia(q+"high)").matches) {x = "high"; clean = "high"}
 		if (window.matchMedia(q+"low)").matches) {x = "low"; clean = "low"}
-	} catch(e) {x = get_css_block(e.name); clean = zBO}
+	} catch(e) {x = get_css_block(e.name); clean = zB0}
 	dom.mmPC.innerHTML = x
 	res.push("pc: " + clean)
 
@@ -268,7 +268,7 @@ function get_mm_css() {
 		if (window.matchMedia(q+n+")").matches) {x = n; clean = n}
 		if (window.matchMedia(q+"active)").matches) {x = "active"; clean = "active"}
 		if (window.matchMedia(q+"none)").matches) {x = "none"; clean = "none"}
-	} catch(e) {x = get_css_block(e.name); clean = zBO}
+	} catch(e) {x = get_css_block(e.name); clean = zB0}
 	dom.mmFC.innerHTML = x
 	res.push("pfc: " + clean)
 
