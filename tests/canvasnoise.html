@@ -40,8 +40,9 @@
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td>getImageData</td>
 			<td>
+				<canvas id="cnvBig2" width="100" height="100" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
-					&nbsp <span class="s9"> &#9664 what we read back</span>
+					&nbsp <span class="s9"> &#9664 what we read</span>
 			</td>
 		</tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -89,8 +90,9 @@ function run() {
 				let ctxBig = cnvBig.getContext('2d'),
 					ctxCtrl = dom.cnvCtrl.getContext('2d'),
 					ctxGet = dom.cnvGet.getContext('2d')
+					ctxBig2 = dom.cnvBig2.getContext('2d')
 
-				// set visuals
+				// output SET visuals
 				for (let x=0; x < 20; x++) {
 					for (let y=0; y < 20; y++) {
 						// get random color
@@ -103,10 +105,8 @@ function run() {
 						clrSet.push(clrB)
 						clrSet.push(255)
 						cellSet.push(clrs)
-						// view
 						ctxBig.fillStyle = "rgba(" + clrs + ")"
 						ctxBig.fillRect(x*5, y*5, 5, 5)
-						// ctrl
 						ctxCtrl.fillStyle = "rgba(" + clrs + ")"
 						ctxCtrl.fillRect(x, y, 1, 1)
 					}
@@ -144,18 +144,14 @@ function run() {
 						clrRead.push(pixel.data[3])
 						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
 						cellRead.push(pixel)
-						// output visual for user
-						if (x == 0 && y == 0) {
-							console.debug(pixel)
-						}
+						// output READ visuals
+						ctxBig2.fillStyle = "rgba(" + pixel + ")"
+						ctxBig2.fillRect(x*5, y*5, 5, 5)
 						ctxGet.fillStyle = "rgba(" + pixel + ")"
 						ctxGet.fillRect(x, y, 1, 1)
 					}
 				}
 				hashGetImage = sha1(clrRead.join())
-
-				console.debug(clrSet)
-				console.debug(clrRead)
 
 				if (hashGetImage == hashSet) {
 					dom.readhash.innerHTML = hashGetImage + s9 + "[matches]" + sc
