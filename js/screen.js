@@ -721,10 +721,13 @@ function get_math() {
 			mchash = "",
 			m1 = "", // short codes
 			m6 = "",
+			mc = "",
 			fdMath1 = "", // strings for browser/os
 			fdMath6 = "",
 			strNew = zNEW + (runS ? zSIM : ""),
-			scriptBlock = false
+			block1 = false,
+			block6 = false
+			//strBlock = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
 
 		function get_hashes() {
 			let h1 = "", h6 = "", r = ""
@@ -736,7 +739,7 @@ function get_math() {
 					r = Math.cos(list[i])
 				} catch(e) {
 					r = (e.name == "ReferenceError" ? zB1 :zB2)
-					scriptBlock = true
+					block1 = true
 				}
 				res.push(r)
 			}
@@ -748,7 +751,7 @@ function get_math() {
 				r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
 			} catch(e) {
 				r = (e.name == "ReferenceError" ? zB1 :zB2)
-				scriptBlock = true
+				block6 = true
 			}
 			h6 = r
 			x=1
@@ -756,7 +759,7 @@ function get_math() {
 				r = Math.exp(x) - 1 // expm1(1)
 			} catch(e) {
 				r = (e.name == "ReferenceError" ? zB1 :zB2)
-				scriptBlock = true
+				block6 = true
 			}
 			h6 += "-"+r
 			x = 1
@@ -764,7 +767,7 @@ function get_math() {
 				y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
 			} catch(e) {
 				r = (e.name == "ReferenceError" ? zB1 :zB2)
-				scriptBlock = true
+				block6 = true
 			}
 			h6 += "-"+r
 			// hashes
@@ -773,12 +776,13 @@ function get_math() {
 			mchash = sha1(h1+"-"+h6)
 			// sim
 			if (runS) {
-				m1hash = sha1("a"), mchash = sha1("b") // emca1
+				//m1hash = sha1("a"), mchash = sha1("b") // emca1
 				//m6hash = sha1("c"), mchash = sha1("d") // emca6
-				//m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
+				m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
+				//block1 = true
+				//block6 = true
 			}
 		}
-
 		function get_codes() {
 			// known FF hashes (browser)
 			if (m6hash == "7a73daaff1955eef2c88b1e56f8bfbf854d52486") {m6="1"}
@@ -796,6 +800,9 @@ function get_math() {
 		}
 
 		function build_output() {
+			if (block1) {m1=""} // for runS
+			if (block6) {m6=""} // for runS
+
 			// browser
 			if (m6 == "1" | m6 == "3") {
 				fdMath6=zFF
@@ -851,32 +858,57 @@ function get_math() {
 				}
 			}
 		}
-
 		function output() {
 			if (isFF) {
-				// new
-				let mc = ""
-				if (m1 == "") {m1hash += strNew} else {m1hash += s3+" ["+m1+"]"+sc}
-				if (m6 == "") {m6hash += strNew} else {m6hash += s3+" ["+m6+"]"+sc}
-				if (m1 !== "" && m6 !== "") {mc = s3 + "[" + m1+m6 + "]" + sc; mchash += mc} else {mchash += strNew}
-				if (scriptBlock) {
-					strNew = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
+				//browser
+				if (m1 == "") {
+					if (block1) {
+						// blocked
+						m1hash = zB
+						fdMath1 = zB
+					} else {
+						// new
+						m1hash += strNew
+						fdMath1 = m1hash // os
+						dom.fdMathOS.setAttribute("class", "c mono")
+					}
 				} else {
-					strNew = mchash
-					dom.fdMathOS.setAttribute("class", "c mono")
+					// known: add code
+					m1hash += s3+" ["+m1+"]"+sc
 				}
-				// runS: alternate new vs os-check (runS sets isOS ="")
-				if (runS) {if (stateSIM) {fdMath1 = "Windows"}}
-				// os-check
-				if (fdMath1 !== "") {
-					let check = fdMath1.replace(" [32-bit]","")
-					check = check.replace(" [64-bit]","")
-					check = check.toLowerCase()
-					if (isOS !== check) {fdMath1 += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+				// os
+				if (m6 == "") {
+					if (block6) {
+						// blocked
+						m6hash = zB
+						fdMath6 = zB
+					} else {
+						m6hash += strNew
+						fdMath6 = m6hash
+						dom.fdMath.setAttribute("class", "c mono")
+					}
+				} else {
+					// known: add code
+					m6hash += s3+" ["+m6+"]"+sc
+				}
+				// combined
+				if (m1 !== "" && m6 !== "") {
+					// both known: add codes
+					mc = s3 + "[" + m1+m6 + "]" + sc
+					mchash += mc
+					fdMath1 += mc
+				} else {
+					if (block1 || block6) {
+					// blocked
+						mchash = zB
+					} else {
+						// new
+						mchash += strNew
+					}
 				}
 				// output
-				dom.fdMathOS.innerHTML = (fdMath1 == "" ? strNew : fdMath1 + mc)
-				dom.fdMath.innerHTML = (fdMath6 == "" ? strNew : fdMath6)
+				dom.fdMathOS.innerHTML = fdMath1
+				dom.fdMath.innerHTML = fdMath6
 			}
 			// output hashes
 			dom.math1hash.innerHTML = m1hash
@@ -884,6 +916,9 @@ function get_math() {
 			dom.mathhash.innerHTML = mchash
 			// perf
 			if (logPerf) {debug_log("math [fd]", t0, gt0)}
+			// blockage
+			if (block1 || block6) {mchash = zB0}
+			// return
 			return resolve("math: " + mchash.substring(0,40))
 		}
 		get_hashes()
@@ -1728,7 +1763,7 @@ function get_version() {
 				let start = isVer.indexOf(",")
 				if (start !== -1) {isVer = isVer.substring(0,start)}
 			}
-			dom.fdVersion.innerHTML = verNo + (isNew ? zNEW : "") + (runS ? zSIM : "")
+			dom.fdVersion.innerHTML = verNo
 			if (logPerf) {debug_log("version [fd]",t0)}
 			return resolve("version: " + verNo)
 		}
@@ -2409,10 +2444,7 @@ function outputFD(runtype) {
 			section_info("feature", t0, gt0, section)
 		})
 	}
-	// all
-	stateSIM = !stateSIM
 	// perf: only on load to account for missing time
-		// is this in the right place
 	if (runtype == "load" & isFF) {
 		section_info("part-feature", t0, gt0)
 	}
