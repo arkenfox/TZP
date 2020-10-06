@@ -30,13 +30,7 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">
 				Sets canvas with known results and reads them back. If it differs, denoted in
-				<span class="s1">pale red</span>, then it's being spoofed.
-				<!--<p>
-				Not to be confused with detecting randomness on every pass (Firefox) or randomness which uses
-				a per-execution per-origin seed to avoid repeat calls that average out the random value
-				(CanvasBlocker). That distinction is a noise fingerprint in itself.</p>
-				-->
-				</span>
+				<span class="s1">pale red</span>, then it's being spoofed.</span>
 		</td></tr>
 		<tr>
 			<td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>visuals</td>
@@ -50,7 +44,11 @@
 		<tr><td>getImageData</td><td class="c mono" id="getImageData"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
 		<tr><td>toBlob</td><td class="c mono" id="toBlob"></td></tr>
-		<!--<tr><td>mozGetAsFile</td><td class="c mono" id="hash4"></td></tr>-->
+		<!-- unknown notation -->
+		<tr class="hidden" id="unknown">
+			<td><span class="s1">unknown <sup>1</sup></span></td>
+			<td class="mono">These differ per engine. The test is unable to<br>
+				confirm, and limited to, gecko, blink or webkit.<br><td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 
 		<tr><td></td><td class="s9">------</td></tr> <!-- spacer -->
@@ -78,7 +76,11 @@ function run() {
 		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"    // isPointInStroke
 	if (isEngine == "blink") {
 		known2 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"    // toDataURL, toBlob [blink]
+	} else if (isEngine == "webkit") {
+		known2 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
 	}
+
+	dom.unknown.style.display = "none" // rehide
 
 	var known = {
 		createHashes: function(window){
@@ -232,6 +234,10 @@ function run() {
 			outputs[0].forEach(function(output){
 				results.push(output.name+","+output.displayValue)
 			})
+
+			// test unknown PNGs
+			//isFF = false; engine = ""
+
 			// output
 			//console.debug(results.join("\n"))
 			for (let i=0; i < results.length; i++) {
@@ -240,39 +246,37 @@ function run() {
 				let delim = data.search(",") // start of first comma
 				let display = data.substring(delim+1, data.length)
 
-				// limit toDataURL / toBlob PNG hashes
-				let isNoise = true
+				let isHash = true
 				// only apply to hashes
-				if (display == "d5d4cd07616a542891b7ec2d0257b3a24b69856e") {display = "undefined"; isNoise = false} // toDataURL
-				if (display == "35917794d0d204f4549e352f8152f553279e68a9") {display = "blocked"; isNoise = false} // isPoint*
-				if (display.length !== 40) {isNoise = false}
-				if (display.indexOf(" ") > 0) {isNoise = false}
+				if (display == "d5d4cd07616a542891b7ec2d0257b3a24b69856e") {display = "undefined"; isHash = false} // toDataURL
+				if (display == "35917794d0d204f4549e352f8152f553279e68a9") {display = "blocked"; isHash = false} // isPoint*
+				if (display.length !== 40) {isHash = false}
+				if (display.indexOf(" ") > 0) {isHash = false}
+				// PNG differs between engines: limit to known results
+				let checkPNG = false
+				if (isFF || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
 
 				// cleanup output
 				if (name == "getImageData") {
-					if (isNoise) {
+					if (isHash) {
 						if (display !== known1) { display = sb + display + sc}
 					}
-				} else if (name == "toDataURL") {
-					if (isNoise) {
-						// PNGs differ between FF vs blink: NFI about webkit etc
-						if (isFF || isEngine == "blink") {
+				} else if (name == "toDataURL" || name == "toBlob") {
+					if (isHash) {
+						if (checkPNG) {
 							if (display !== known2) { display = sb + display + sc}
-						}
-					}
-				} else if (name == "toBlob") {
-					if (isNoise) {
-						if (isFF || isEngine == "blink") {
-							// PNGs differ between FF vs blink: NFI about webkit etc
-							if (display !== known2) { display = sb + display + sc}
+						} else {
+							display += sb + "<sup>1</sup>" + sc
+							// unhide unkown notation row
+							dom.unknown.style.display = "table-row"
 						}
 					}
 				} else if (name == "isPointInPath") {
-					if (isNoise) {
+					if (isHash) {
 						if (display !== known3) { display = sb + display + sc}
 					}
 				} else if (name == "isPointInStroke") {
-					if (isNoise) {
+					if (isHash) {
 						if (display !== known4) { display = sb + display + sc}
 					}
 				}
