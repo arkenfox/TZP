@@ -312,7 +312,7 @@ function get_permissions() {
 	} catch(e) {dom.pStore = e.name}
 }
 
-function get_storage_manager() {
+function get_storage_manager(runtype) {
 	// support
 	if ("storage" in navigator) {
 		dom.storageMSupport = zE
@@ -321,22 +321,20 @@ function get_storage_manager() {
 			dom.storageMTest.innerHTML = zNA
 		} else {
 			// properties
-			try {
-				navigator.storage.persist().then(function(persistent) {
-					if (persistent) dom.storageMProp="persistent"
-					else dom.storageMProp="not persistent"
-					navigator.storage.estimate().then(estimate => {
-						dom.storageMProp.textContent += ` (${estimate.usage} of ${estimate.quota} bytes)`
+			if (runtype == "click") {
+				try {
+					navigator.storage.persist().then(function(persistent) {
+						if (persistent) dom.storageMProp="persistent"
+						else dom.storageMProp="not persistent"
+						navigator.storage.estimate().then(estimate => {
+							dom.storageMProp.textContent += ` (${estimate.usage} of ${estimate.quota} bytes)`
+						})
 					})
-				})
-			} catch(e) {
-				dom.storageMProp = zF+": " + e.name
-			}
-			// test
-			try {
+				} catch(e) {
+					dom.storageMProp = zF+": " + e.name
+				}
+				// ToDo: test
 				dom.storageMTest.innerHTML = note_ttc
-			} catch(e) {
-				dom.storageMTest = zF+": " + e.name
 			}
 		}
 	}
