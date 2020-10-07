@@ -9,12 +9,14 @@ function outputCanvas() {
 	let t0 = performance.now(),
 		main0 = [], main1 = [], main2 = [],
 		sColor = s9
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // gecko toDataURL, toBlob
-		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",
-		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",
-		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"
+	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL, toBlob, mozGetAsFile [gecko]
+		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",   // getImageData
+		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",   // isPointInPath
+		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"    // isPointInStroke
 	if (isEngine == "blink") {
-		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"
+		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"    // toDataURL, toBlob [blink]
+	} else if (isEngine == "webkit") {
+		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
 	}
 
 	// analysis after promsies
@@ -61,8 +63,8 @@ function outputCanvas() {
 
 			// noise: used only if !isRandom
 			let noise = "noise detected " + sColor +" [both] "+ sc + value1.substring(0,40) + ".."
-			// only use noise for FF & blink
-			if (isFF || isEngine == "blink") {} else {value3 = "true"}
+			// only use noise for FF & blink & webkit
+			if (isFF || isEngine == "blink" || isEngine == "webkit") {} else {value3 = "true"}
 			// only apply to hashes
 			if (value1.length !== 64) {value3 = "true"}
 			if (value1.indexOf(" ") > 0) {value3 = "true"}
