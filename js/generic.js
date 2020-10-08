@@ -84,6 +84,9 @@ function section_info(name, time1, time2, data) {
 		try {
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
+			if (name == "fonts" || name == "headers" || name == "devices") {
+				hash += " [incomplete: work in progress]"
+			}
 			document.getElementById(name + "hash").innerHTML = hash
 		} catch(e) {}
 	} else {
