@@ -151,7 +151,7 @@ code {color: #8abfda;}
 		}
 		for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
 		return str1;
-	};
+	}
 
 	function run_compare() {
 		let el = document.getElementById("output1");
@@ -255,14 +255,16 @@ code {color: #8abfda;}
 		'\u0C05',  //     TELUGU A
 		'\u0E24',  //       THAI RU
 
-// 80 from 98
-// 915e25fb74d06adee887b780c7574e16e7748f34
+// 79 from 92
+// 2727b894d4931bfe272efa7e19caa8101c5e2bb7
 		];
 
 		//list = testfound;
 		//list = testmissing;
 		//list = listTZP
 		//chars = charsTZP
+
+		//list = ['en,english','it,italian','ro,romanian',]
 
 		let el = document.getElementById("output3")
 		// test vs example
@@ -317,6 +319,7 @@ code {color: #8abfda;}
 					codes = []
 
 				// set control
+				chars.sort()
 				chars = chars.sort(Intl.Collator("en-US").compare)
 				control = chars.join()
 
@@ -329,13 +332,18 @@ code {color: #8abfda;}
 				output = output.slice(0, -1) + "<br><br>";
 
 				// sort chars for each locale
-				let enMissing = true;
+				let enMissing = true
 				for (let i = 0 ; i < list.length; i++) {
+					// important: reset to original order
+						// sounds weird but I found icelandic affected the immediate following six tests
+						// it (italian), iu (inuktitut), jv (javanese), kab (kabyle), kg (kongo), ki (kikuyu)
+					chars.sort()
+
 					// split: A (code), B (name)
 					listA = list[i].split(",")[0]
 					listB = list[i].split(",")[1]
 					chars.sort(Intl.Collator(listA).compare)
-					test = chars.join();
+					test = chars.join()
 					if (test !== control) {
 						results.push(sha1(test) + ":" + sg + listA + sc + " (" + listB + ")")
 					} else {
