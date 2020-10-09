@@ -43,7 +43,7 @@ function count_decimals(value) {
 function section_info(name, time1, time2, data) {
 	// fp
 	if (data !== undefined && data !== "") {
-		data.sort(Intl.Collator("en-US").compare)
+		data.sort()
 		let hash = sha1(data.join())
 		// checks: everything should be a "metric: value"
 		for (let i=0; i < data.length; i++) {
@@ -68,8 +68,8 @@ function section_info(name, time1, time2, data) {
 			fpAllHash.push(name + ": " + hash)
 			fpAllData.push([name +": " + hash, data])
 			if (fpAllHash.length == 10) {
-				fpAllHash.sort(Intl.Collator("en-US").compare)
-				fpAllData.sort(Intl.Collator("en-US").compare)
+				fpAllHash.sort()
+				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
 				if (fpAllCheck.length > 0) {
 					fpAllCheck.sort()
