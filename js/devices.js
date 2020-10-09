@@ -91,7 +91,7 @@ function get_mimetypes() {
 					res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
 						+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 				}
-				res.sort(Intl.Collator("en-US").compare)
+				res.sort()
 				dom.mimeTypes.innerHTML = res.join("<br>")
 				return "mimeTypes: " + sha1(res.join())
 			} else {
@@ -147,7 +147,7 @@ function get_plugins() {
 					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
 						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 				}
-				res.sort(Intl.Collator("en-US").compare)
+				res.sort()
 				dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
 				return "plugins: " + (gibbers ? "gibberish" : sha1(res.join()))
 			} else {
@@ -209,7 +209,7 @@ function get_speech_synth() {
 				}
 				dom.sEngines.innerHTML = s
 				// return
-				//res.sort(Intl.Collator("en-US").compare)
+				//res.sort()
 				//console.debug("engines", res.join(", "))
 				//return "speech synth: " + zE + ", " + sha1(res.join()) // cleanup
 
