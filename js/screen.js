@@ -1595,7 +1595,7 @@ function get_ua_nav() {
 	dom.nUA00.innerHTML = str
 
 	// hash
-	res.sort(Intl.Collator("en-US").compare)
+	res.sort()
 	dom.nUAinitial = sha1(res.join())
 
 	// show
@@ -2320,7 +2320,7 @@ function goNW_UA() {
 	}
 	newWin.close()
 	// hash
-	res.sort(Intl.Collator("en-US").compare)
+	res.sort()
 	let hash = sha1(res.join())
 	let hash2 = (dom.nUAinitial.textContent).substring(0,40)
 	// output
