@@ -47,12 +47,17 @@ let chars = [
 	'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',
 ]
 
+chars.sort
 dom.chars = chars.join(", ")
+
 let lang = navigator.language
 dom.language = lang
 dom.lang = lang
 
-dom.control.innerHTML = s12 + sha1(chars.sort()) + sc
+let control = sha1(chars)
+control = (control == "0afcef6c49a93566e6e7b5d082697c8f4e8227c0" ? sg : sb) + control + sc
+
+dom.control.innerHTML = control + " [control]"
 dom.en = sha1(chars.sort(Intl.Collator("en").compare))
 dom.undefined = sha1(chars.sort(Intl.Collator(undefined).compare))
 dom.gibbers = sha1(chars.sort(Intl.Collator("gibbers").compare))
