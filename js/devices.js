@@ -148,8 +148,17 @@ function get_plugins() {
 						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 				}
 				res.sort()
-				dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
-				return "plugins: " + (gibbers ? "gibberish" : sha1(res.join()))
+				console.debug("plugins\n - " + res.join("\n - "))
+				// return
+				if (isEngine == "blink") {
+					// chromium: gibbers
+					dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
+					return "plugins: " + (gibbers ? "gibberish" : sha1(res.join()))
+				} else {
+					// ToDo: if isFF it should be limited to Flash
+					dom.plugins.innerHTML = res.join("<br>")
+					return "plugins: " + sha1(res.join())
+				}
 			} else {
 				dom.plugins.innerHTML = "none"
 				return "plugins: none"
