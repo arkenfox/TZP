@@ -131,31 +131,37 @@ function get_mm_pointer(type){
 function get_plugins() {
 	if ("plugins" in navigator) {
 		try {
-			let res = [], gibbers = true
+			let res = [], isLies = true
 			let p = navigator.plugins
 			if (p.length > 0) {
 				for (let i=0; i < p.length; i++) {
+					// ToDo: better lie detection: e.g mixed alphanumeric
+						// logic is anyone not messing with plugins would show " PDF "
+						// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
 					if (isEngine == "blink") {
-						// ToDo: better gibberish detection: e.g mixed alphanumeric
-							// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
 						let str = p[i].name
-						if (str.indexOf(" PDF ") > 0) {
-							// the logic is that anyone not messing with plugins would show PDF
-							gibbers = false
-						}
+						if (str.indexOf(" PDF ") > 0) {isLies = false}
 					}
 					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
 						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 				}
 				res.sort()
 				console.debug("plugins\n - " + res.join("\n - "))
-				// return
-				if (isEngine == "blink") {
-					// chromium: gibbers
-					dom.plugins.innerHTML = (gibbers ? "gibberish" : res.join("<br>"))
-					return "plugins: " + (gibbers ? "gibberish" : sha1(res.join()))
+				// FF: limited to Flash
+					// ToDo: add flash EOL version check Dec2020/Jan2021
+				if (isFF) {
+					isLies = false
+					if (res.length > 1) {
+						isLies = true
+					} else if (res.length == 1) {
+						if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
+					}
+				}
+
+				if (isFF || isEngine == "blink") {
+					dom.plugins.innerHTML = (isLies ? "fake" : res.join("<br>"))
+					return "plugins: " + (isLies ? "lies" : sha1(res.join()))
 				} else {
-					// ToDo: if isFF it should be limited to Flash
 					dom.plugins.innerHTML = res.join("<br>")
 					return "plugins: " + sha1(res.join())
 				}
