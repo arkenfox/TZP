@@ -242,7 +242,7 @@ function get_errors() {
 				}
 				if (code !== "") {
 					isFF = true
-					dom.fdError.innerHTML = zFF +" " + ff
+					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
 					dom.errh.innerHTML = hash + s3+"["+code+"]"+sc + (runS ? zSIM : "")
 				} else if (isFF) {
 					code = zNEW
@@ -701,7 +701,7 @@ function get_line_scrollbar() {
 					dom.fdLH.innerHTML = sb+"[clientrect + font properties blocked]"+sc
 				}
 			} else {
-				dom.fdLH.innerHTML = lh + "px "+ sbZoom + os + s3+"["+method+"]"+sc
+				dom.fdLH.innerHTML = lh + "px "+ sbZoom + os // + s3+"["+method+"]"+sc
 			}
 			if (logPerf) {debug_log("css line height [fd]",t0)}
 		}
