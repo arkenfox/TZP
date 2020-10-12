@@ -136,8 +136,10 @@ function get_collation() {
 		if (logPerf) {debug_log("collation [fd]",t0)}
 	}
 	// run
+	chars.sort() // set
 	let control = sha1(chars.sort(Intl.Collator("en-US").compare))
 	list.forEach(function(i) {
+		chars.sort() // reset
 		chars.sort(Intl.Collator(i).compare)
 		let test = sha1(chars.join())
 		results.push(test)
