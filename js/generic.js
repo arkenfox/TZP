@@ -294,9 +294,11 @@ function byteArrayToHex(arrayBuffer){
 /* BUTTONS: (re)GENERATE SECTIONS */
 function outputSection(id, cls) {
 	sRerun = true
+	let delay = 170
 	if (cls == undefined || cls == "") {cls = "c"}
 	// clear everything
 	if (id == "all") {
+		delay = 10
 		let items = document.getElementsByClassName("c")
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 		items = document.getElementsByClassName("gc")
@@ -349,5 +351,5 @@ function outputSection(id, cls) {
 		if (id=="all" || id=="14") {outputCSS()}
 		if (id=="all" || id=="18") {outputMisc()}
 	}
-	let checking = setInterval(call_output, 170)
+	let checking = setInterval(call_output, delay)
 }
