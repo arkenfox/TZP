@@ -78,9 +78,8 @@ function section_info(name, time1, time2, data) {
 					console.error("section hash issues\n", fpAllCheck)
 				}
 				console.log("fingerprint: " + hash2 + "\n", fpAllData)
-
 				dom.allhash = hash2 + " [incomplete]"
-				dom.perfall = Math.round(performance.now() - gt0) + " ms"
+				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
 		}
 		// append + output
