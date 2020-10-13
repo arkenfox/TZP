@@ -62,7 +62,7 @@ function get_int_observer() {
 	return "int observer: " + r
 }
 
-function get_mathml(type) {
+function get_mathml() {
 	// build
 	let str = "<math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>"+
 		"<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>"+
@@ -295,7 +295,7 @@ function outputMisc(type) {
 		get_nav_prototype(),
 		get_reporting_api(),
 		get_wasm(),
-		get_mathml(type),
+		get_mathml(),
 		get_svg()
 	]).then(function(results){
 		results.forEach(function(currentResult) {
@@ -311,4 +311,4 @@ function outputMisc(type) {
 
 }
 
-outputMisc("load")
+outputMisc()
