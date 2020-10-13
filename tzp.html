@@ -72,12 +72,11 @@
 	</div>
 
 	<table>
-	<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="index.html">return to TZP index</a></td></tr>
-	</td></tr>
+		<tr><td><a name="top"></a><h2>TorZillaPrint</h2></td></tr>
+		<tr><td class="blurb"><a class="return" href="index.html">return to TZP index</a></td></tr>
 	</table>
 
-		<!-- just an idea -->
+		<!-- FPs -->
 	<table id="tb99">
 		<col width="29%"><a name="finger"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -89,7 +88,12 @@
 			<div class="btn-left"><button class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</button></div>
 			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>stable</td><td class="faint" id="stablehash"></td></tr>
-		<tr><td>
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
+			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show debugging</label>
+		<tr class="togZ"><td>section perf</td><td class="mono gc spaces" id="debugperf"></td></tr>
+		<tr class="togZ"><td>tor browser detection points</td><td class="mono gc spaces" id="debugtb"></td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
 	<!--screen.js-->
@@ -896,16 +900,6 @@
 		<tr><td colspan="3"><span class="no_color">code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
-	</table>
-
-	<!--perf-->
-	<table id="tb99">
-		<col width="29%"><col width="71%">
-		<thead><tr><th colspan="2" class="showhide">
-			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
-			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show debugging</label></th></tr></thead>
-		<tr class="togZ"><td>section perf</td><td class="mono gc spaces" id="debugperf"></td></tr>
-		<tr class="togZ"><td>tor browser detection points</td><td class="mono gc spaces" id="debugtb"></td></tr>
 	</table>
 
 	<a name="theend"></a><br>
