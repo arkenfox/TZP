@@ -61,7 +61,7 @@ function section_info(name, time1, time2, data) {
 			}
 		}
 		// store
-		if (gRerun) {
+		if (sRerun && gRerun == false) {
 			console.log(name + ": " + hash +"\n", data)
 		} else {
 			// yay!
@@ -78,6 +78,9 @@ function section_info(name, time1, time2, data) {
 					console.error("section hash issues\n", fpAllCheck)
 				}
 				console.log("fingerprint: " + hash2 + "\n", fpAllData)
+
+				dom.allhash = hash2 + " [incomplete]"
+				dom.perfall = Math.round(performance.now() - gt0) + " ms"
 			}
 		}
 		// append + output
@@ -104,18 +107,22 @@ function section_info(name, time1, time2, data) {
 	let el = dom.debugperf
 	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
 	// time2 is only for first run
-	if (gRerun == false) {
+	if (sRerun == false || gRerun == true) {
 		if (time2 !== undefined && time2 !== "") {
 			time2 = Math.round(t0-time2).toString()
 			pretty += " | " + so + time2.padStart(4) + sc + " ms"
 		}
 	}
-	el.innerHTML = el.innerHTML + (name == "setup" ? "" : "<br>") + pretty
+	if (name == "setup") {
+		el.innerHTML = pretty
+	} else {
+		el.innerHTML = el.innerHTML +"<br>"+ pretty
+	}
 }
 
 function debug_page(target, str) {
 	let el = document.getElementById("debug"+target)
-	if (gRerun == false) {
+	if (sRerun == false) {
 		el.innerHTML = el.innerHTML + str + "<br>"
 	}
 }
@@ -124,7 +131,7 @@ function debug_log(str, time1, time2) {
 	// log dev info
 	let t0 = performance.now()
 	time1 = (t0-time1).toString()
-	if (gRerun) {
+	if (sRerun) {
 		// manual
 		if (time2 == undefined && time2 !== "" || time2 == "ignore") {
 			time2 = ""
@@ -286,18 +293,34 @@ function byteArrayToHex(arrayBuffer){
 
 /* BUTTONS: (re)GENERATE SECTIONS */
 function outputSection(id, cls) {
-	gRerun = true
-	// clear results
+	sRerun = true
 	if (cls == undefined || cls == "") {cls = "c"}
-	// clear elements, &nbsp stops line height jitter
-	let tbl = document.getElementById("tb"+id)
-	tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+	// clear everything
+	if (id == "all") {
+		let items = document.getElementsByClassName("c")
+		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+		items = document.getElementsByClassName("gc")
+		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+		// hide font fallback rows
+		items = document.getElementsByClassName("togF1")
+		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+		// reset global FP
+		fpAllHash = []
+		fpAllData = []
+		fpAllCheck = []
+		gRerun = true
+	} else {
+		// clear table elements, &nbsp stops line height jitter
+		let tbl = document.getElementById("tb"+id)
+		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+		gRerun = false
+	}
 	// clear details
-	if (id=="1") {dom.kbt.value = ""}
+	if (id=="all" || id=="1") {dom.kbt.value = ""}
 	if (id=="7") {reset_devices()}
-	if (id=="8") {reset_domrect()}
+	if (id=="all" || id=="8") {reset_domrect()}
 	if (id=="11" && cls=="c2") {reset_audio2()}
-	if (id=="12") {reset_fonts()}
+	if (id=="all" || id=="12") {reset_fonts()}
 	if (id=="13") {reset_media()}
 	if (id=="14") {reset_css()}
 	if (id=="18") {reset_misc()}
@@ -307,22 +330,24 @@ function outputSection(id, cls) {
 		clearInterval(checking)
 		// reset timer
 		gt0 = performance.now()
+		if (id=="all") {outputStart()}
 		if (id=="1") {outputScreen("screen")}
 		if (id=="2") {outputUA()}
 		if (id=="3") {outputFD()}
-		if (id=="4") {outputLanguage()}
-		if (id=="5") {outputHeaders()}
-		if (id=="6") {outputStorage()}
-		if (id=="7") {outputDevices()}
-		if (id=="8") {outputDomRect()}
-		if (id=="9") {outputCanvas()}
-		if (id=="10") {outputWebGL()}
-		if (id=="11" && cls=="c1") {outputAudio1()}
+		if (id=="all" || id=="4") {outputLanguage()}
+		if (id=="all" || id=="5") {outputHeaders()}
+		if (id=="all" || id=="6") {outputStorage()}
+		if (id=="all" || id=="7") {outputDevices()}
+		if (id=="all" || id=="8") {outputDomRect()}
+		if (id=="all" || id=="9") {outputCanvas()}
+		if (id=="all" || id=="10") {outputWebGL()}
+		if (id=="all") {outputAudio1("load")}
+		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
-		if (id=="12") {outputFonts()}
-		if (id=="13") {outputMedia()}
-		if (id=="14") {outputCSS()}
-		if (id=="18") {outputMisc()}
+		if (id=="all" || id=="12") {outputFonts()}
+		if (id=="all" || id=="13") {outputMedia()}
+		if (id=="all" || id=="14") {outputCSS()}
+		if (id=="all" || id=="18") {outputMisc()}
 	}
 	let checking = setInterval(call_output, 170)
 }
