@@ -7,6 +7,12 @@ function reset_devices() {
 	let str = dom.eMD.innerHTML
 	str = str.replace(/\[RFP\]/g, "")
 	dom.eMD.innerHTML = str
+	str = dom.plugins.innerHTML
+	str = str.replace(/\[RFP\]/g, "")
+	dom.plugins.innerHTML = str
+	str = dom.mimeTypes.innerHTML
+	str = str.replace(/\[RFP\]/g, "")
+	dom.mimeTypes.innerHTML = str
 }
 
 function get_gamepads() {
@@ -82,31 +88,49 @@ function get_media_devices() {
 }
 
 function get_mimetypes() {
-	if ("mimeTypes" in navigator) {
-		try {
-			let m = navigator.mimeTypes
-			if (m.length > 0) {
-				let res = []
-				for (let i=0; i < m.length; i++) {
-					res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
-						+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
-				}
-				res.sort()
-				dom.mimeTypes.innerHTML = res.join("<br>")
-				return "mimeTypes: " + sha1(res.join())
+	return new Promise(resolve => {
+		let res = []
+		function display(output) {
+			if (output == "none") {
+				output += rfp_green
 			} else {
-				dom.mimeTypes.innerHTML = "none"
-				return "mimeTypes: none"
+				if (res.length == 1) {
+					output += rfp_red
+				} else {
+					output = output.replace("<br>", rfp_red + "<br>")
+				}
 			}
-		} catch(e) {
-			dom.mimeTypes.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-			return "mimeTypes: blocked"
+			dom.mimeTypes.innerHTML = output
+			dom.mimeTypes.style.color = zshow
 		}
-	} else {
-		dom.mimeTypes = zD
-		return "mimeTypes: disabled"
-	}
-	dom.mimeTypes.style.color = zshow
+		if ("mimeTypes" in navigator) {
+			try {
+				let m = navigator.mimeTypes
+				if (m.length > 0) {
+					let res = []
+					for (let i=0; i < m.length; i++) {
+						res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
+							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
+					}
+					// flash examples in FF
+						// application/futuresplash: application/futuresplash: spl
+						// application/x-shockwave-flash: application/x-shockwave-flash: swf
+					res.sort()
+					display(res.join("<br>"))
+					return resolve("mimeTypes: " + sha1(res.join()))
+				} else {
+					display("none")
+					return resolve("mimeTypes: none")
+				}
+			} catch(e) {
+				display((e.name == "ReferenceError" ? zB1 : zB2))
+				return resolve("mimeTypes: blocked")
+			}
+		} else {
+			display(zD)
+			return resolve("mimeTypes: disabled")
+		}
+	})
 }
 
 function get_mm_hover(type){
@@ -129,55 +153,69 @@ function get_mm_pointer(type){
 }
 
 function get_plugins() {
-	if ("plugins" in navigator) {
-		try {
-			let res = [], isLies = true
-			let p = navigator.plugins
-			if (p.length > 0) {
-				for (let i=0; i < p.length; i++) {
-					// ToDo: better lie detection: e.g mixed alphanumeric
-						// logic is anyone not messing with plugins would show " PDF "
-						// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
-					if (isEngine == "blink") {
-						let str = p[i].name
-						if (str.indexOf(" PDF ") > 0) {isLies = false}
-					}
-					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
-						+ (p[i].description == "" ? ": *" : ": " + p[i].description))
-				}
-				res.sort()
-				console.debug("plugins\n - " + res.join("\n - "))
-				// FF: limited to Flash
-					// ToDo: add flash EOL version check Dec2020/Jan2021
-				if (isFF) {
-					isLies = false
-					if (res.length > 1) {
-						isLies = true
-					} else if (res.length == 1) {
-						if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
-					}
-				}
-
-				if (isFF || isEngine == "blink") {
-					dom.plugins.innerHTML = (isLies ? "fake" : res.join("<br>"))
-					return "plugins: " + (isLies ? "lies" : sha1(res.join()))
-				} else {
-					dom.plugins.innerHTML = res.join("<br>")
-					return "plugins: " + sha1(res.join())
-				}
+	return new Promise(resolve => {
+		let res = [], isLies = true
+		function display(output) {
+			if (output == "none") {
+				output += rfp_green
 			} else {
-				dom.plugins.innerHTML = "none"
-				return "plugins: none"
+				if (res.length == 1) {
+					output += rfp_red
+				} else {
+					output = output.replace("<br>", rfp_red + "<br>")
+				}
 			}
-		} catch(e) {
-			dom.plugins.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-			return "plugins: blocked"
+			dom.plugins.innerHTML = output
+			dom.plugins.style.color = zshow
 		}
-	} else {
-		dom.plugins.innerHTML = zD
-		return "plugins: disabled"
-	}
-	dom.plugins.style.color = zshow
+		if ("plugins" in navigator) {
+			try {
+				let p = navigator.plugins
+				if (p.length > 0) {
+					for (let i=0; i < p.length; i++) {
+						// ToDo: better lie detection: e.g mixed alphanumeric
+							// logic is anyone not messing with plugins would show " PDF "
+							// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
+						if (isEngine == "blink") {
+							let str = p[i].name
+							if (str.indexOf(" PDF ") > 0) {isLies = false}
+						}
+						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
+							+ (p[i].description == "" ? ": *" : ": " + p[i].description))
+					}
+					res.sort()
+					//console.debug("plugins\n - " + res.join("\n - "))
+					// FF: limited to Flash
+						// ToDo: add flash EOL version check Dec2020/Jan2021
+					if (isFF) {
+						isLies = false
+						if (res.length > 1) {
+							isLies = true
+						} else if (res.length == 1) {
+							if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
+						}
+					}
+					if (isFF || isEngine == "blink") {
+						display((isLies ? "fake" : res.join("<br>")))
+						return resolve("plugins: " + (isLies ? "lies" : sha1(res.join())))
+					} else {
+						display(res.join("<br>"))
+						return resolve("plugins: " + sha1(res.join()))
+					}
+				} else {
+					display("none")
+					return resolve("plugins: none")
+				}
+			} catch(e) {
+				console.debug(e.name, e.message)
+				dom.plugins.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+				return resolve("plugins: blocked")
+			}
+		} else {
+			display(zD)
+			return resolve("plugins: disabled")
+		}
+	})
 }
 
 function get_pointer_hover() {
