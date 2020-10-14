@@ -190,7 +190,7 @@ function outputAudio2() {
 	t0audio = performance.now()
 	latencyTries = 0
 	// temp
-	dom.audiohash2 = "section-hash-will-be-coming-just-hold-on"
+	dom.audiohash2 = "not coded yet"
 	try {
 		let test = new window.AudioContext
 		// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
