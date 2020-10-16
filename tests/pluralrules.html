@@ -4,58 +4,49 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>pluralrules</title>
 <style>
-body {background-color: #1a1a1a; color: #b3b3b3;}
-a {color: #8abfda; text-decoration: none;}
-code {color: #8abfda;}
-.orange {color: #dca78c; font-size: 14px; font-weight: bold;}
-.orange2 {color: #dca78c; font-weight: bold;}
-.green {color: #8cdc8c; font-size: 14px; font-weight: bold;}
-.green2 {color: #8cdc8c; font-weight: bold;}
-.bad {color: #ff4f4f; font-size: 14px; font-weight: bold;}
-.bad2 {color: #ff4f4f; font-weight: bold;}
-.mono {font-family: monospace, "Courier New"; font-size: 11px;}
-.spaces {white-space: pre-wrap;}
-
-table {width: 100%; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
-td {
-  text-align: left
-  padding: 8px;
-	vertical-align: top;
-}
 </style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+  <title>pluralrules</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+	</style>
 </head>
 <body>
 
-<table>
-	<col width="30%"><col width="70%">
-	<!-- column one -->
-	<tr><td>
-		<table>
-			<tr><td class="mono spaces">
-				<span id="legend"><span>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">pluralrules</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color" id="intro"></span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<div id="button" class="btn"><button class="btn4 btn" onClick="run()">[ run ]</button></div>
+				<span class="spaces" id="perf0"></span><span id="perf2"></span><span id="perf1"></span>
+				<br><span class="spaces" id="numbers1"></span>
+				<br><span class="spaces" id="results1"></span>
+				<br><span class="spaces" id="numbers2"></span>
+				<br><span class="spaces" id="results2"></span>
+				<br><span class="spaces" id="numbers0"></span>
+				<br><span class="spaces" id="results0"></span>
 			</td></tr>
-		</table>
-	</td>
-	<!-- column two -->
-	<td>
-		<table>
-				<tr><td>
-					<span id="button"><br><p><button onClick="run()">run</button></p></span>
-					<br><span class="mono spaces" id="stats"></span>
-						<span id="perf0"></span><span id="perf1"></span><span id="perf2"></span>
-					<br><span class="mono spaces" id="title1"></span>
-					<br><span class="mono spaces" id="numbers1"></span>
-					<br><span class="mono spaces" id="results1"></span>
-					<br><span class="mono spaces" id="numbers2"></span>
-					<br><span class="mono spaces" id="results2"></span>
-					<br><span class="mono spaces" id="numbers0"></span>
-					<br><span class="mono spaces" id="results0"></span>
-				</td></tr>
-		</table>
-	</td></tr>
-</table>
-<br>
-<br>
+	</table>
+	<br>
 
 <script>
 var locales = [],
@@ -65,46 +56,6 @@ var locales = [],
 	main_count = 0,
 	main_result = "",
 	main_code = ""
-
-var sb = "<span class='bad'>",
-	sb2 = "<span class='bad2'>",
-	so = "<span class='orange'>",
-	so2 = "<span class='orange2'>",
-	sg = "<span class='green'>",
-	sg2 = "<span class='green2'>",
-	sc = "</span>"
-
-function sha1(str1){
-	for (var blockstart=0,
-		i = 0,
-		W = [],
-		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
-		A, B, C, D, F, G,
-		word_array = [],
-		temp2,
-		s = unescape(encodeURI(str1)),
-		str_len = s.length;
-		i<=str_len;){
-		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
-	}
-	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
-	for (; blockstart <= temp2; blockstart += 16) {
-		A = H,i=0;
-		for (; i < 80;
-			A = [[
-				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
-				F = G + (B ^ C ^ D) + 341275144,
-				G + (B & C | B & D | C & D) + 882459459,
-				F + 1535694389
-			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
-		) {
-			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
-		}
-		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
-	}
-	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
-	return str1;
-}
 
 function start() {
 	// builds locales array and outputs a legend
@@ -148,11 +99,18 @@ function start() {
 			locales.push(listA)
 			legend.push( listA.padStart(7) + ": " + listB  )
 		}
-		document.getElementById("legend").innerHTML = sg + "<br>    LEGEND" + sc
-			+ "<br><br>" + legend.join("<br>")
-	} catch(e) {
-		console.debug("aww crap", e.name, e.message)
-	}
+		dom.legend.innerHTML = s4 + "   LEGEND" + sc	+ "<br><br>" + legend.join("<br>")
+		// intro
+		let introstr = "A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules<br></br>"
+		introstr += "Takes"+ s4 + legend.length + " locales" + sc + " and enumerates the unique hashes generated"
+			+ " (and lists the locales per hash) when checking all the numbers from" + s4 +"0-101" + sc
+		introstr += ". It then discards all numbers that did not change a preceeding result, and re-runs the test to see if "
+			+ " the results change in any way. "
+		introstr += "And lastly, it reduces the numbers to only those that cause the first change of each result"
+			+ " and re-runs the test, checking that the number of unique hashes, and the locales in them, hasn't changed"
+		dom.intro.innerHTML = introstr
+
+	} catch(e) {}
 }
 
 function run_test(type) {
@@ -162,8 +120,9 @@ function run_test(type) {
 		tmp_res = [], // result per locale
 		test_all = [], // result hash + locale code + result
 		go = true,
-		perfname = "main"
-		str = ""
+		perfname = "all"
+		str = "",
+		sColor = s12
 
 	let	element = document.getElementById("results" + type)
 	let	elperf = document.getElementById("perf" + type)
@@ -201,14 +160,14 @@ function run_test(type) {
 		// subsequent tests
 		if (type == "1") {
 			test_array = list_one
-			perfname = "first"
+			perfname = "first changes only"
 		} else if (type == "2") {
 			test_array = list_all
-			perfname = "all"
+			perfname = "changes only"
 		}
 
 		// for each locale
-		for (let j=0; j < locales.length; j++) {
+	for (let j=0; j < locales.length; j++) {
 			// reset
 			let prev = "", current = "", tmp_result = []
 			f0 = true, f1 = true, f2 = true, f3 = true, f4 = true, f5 = true
@@ -255,21 +214,17 @@ function run_test(type) {
 			// all changes
 			list_all = list_all.filter(function(item, position) {return list_all.indexOf(item) === position})
 			list_all.sort((a,b) => a-b)
-			// output
-			document.getElementById("stats").innerHTML = so + "<br>STATS" + sc + "<br><br>"
-				+ "   locales tested: " + locales.length + "<br>"
-				+ "  numbers checked: " + list.length + "<br>"
-				+ "             perf: "
-
-			document.getElementById("title1").innerHTML = sg + "<br>NUMBERS CHECK" + sc
-			document.getElementById("numbers1").innerHTML = so + "<br>NUMBERS: FIRST of EACH TYPE ("
-				+ list_one.length + ")" + sc + "<br><br>" + list_one.join(", ") + "<br>"
-			document.getElementById("numbers2").innerHTML = so + "NUMBERS: ALL CHANGES ("
-				+ list_all.length + ")" + sc + "<br><br>" + list_all.join(", ") + "<br>"
+		} else if ( type == "1") {
+			dom.numbers1.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() + " ("
+				+ list_one.length + ")" + sc + "<br><br>" + list_one.join(", ")
+		} else {
+			dom.numbers2.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() + " ("
+				+ list_all.length + ")" + sc + "<br><br>" + list_all.join(", ")
 		}
 		// perf
-		let perf = perfname + " " + so2 + (performance.now()-t0) + sc +" ms"
-		elperf.innerHTML = (type == "0" ? "" : so2 + " | " + sc) + perf
+		let perf = perfname + " " + s4.trim() + Math.round(performance.now()-t0) + sc +" ms"
+		elperf.innerHTML = (type == "0" ? s4.trim() + "PERF: " + sc : s4 + " | " + sc) + perf
+			+ (type == "1" ? "<br>" : "")
 
 		// sort array & loop: get hash + code + result buckets, and code_total
 		test_all.sort()
@@ -290,7 +245,7 @@ function run_test(type) {
 			}
 			// next hash is diff: write data
 			if (nextHash !== part1) {
-				bucket_hash.push(part1 + sg2 +" ("+ tmp_code.length + ")"+sc)
+				bucket_hash.push(part1 + s4 +"("+ tmp_code.length + ")"+sc)
 				bucket_res.push(part3)
 				bucket_code.push(tmp_code.join(", "))
 				code_total += tmp_code.length
@@ -303,9 +258,9 @@ function run_test(type) {
 			// build pretty BEFORE sorting
 			let pretty = []
 			for (let i=0; i < bucket_hash.length; i++) {
-				let part1 = sg2 + "hash: " + sc + bucket_hash[i]
-				let part2 = "<ul><li>" + so2 + "result: "  + sc + bucket_res[i] + "</li>"
-				let part3 = "<li>" + so2 + "locale: " + sc + bucket_code[i] + "</li></ul>"
+				let part1 = s4 + "hash: " + sc + bucket_hash[i]
+				let part2 = "<ul><li>" + sColor.trim() + "result: "  + sc + bucket_res[i] + "</li>"
+				let part3 = "<li>" + sColor.trim() + "locale: " + sc + bucket_code[i] + "</li></ul>"
 				pretty.push(part1 + part2 + part3)
 			}
 			// sort and set globals
@@ -315,13 +270,13 @@ function run_test(type) {
 			bucket_code.sort()
 			main_code = sha1(bucket_code.join())
 			// output
-			str = code_total + (code_total == locales.length ? sg2 : sb2) + " [match]" + sc
-			str = sg + "MAIN TEST (" + list.length + ")"  + sc + "<br>"
-				+ "<ul><li>" + so2 + "unique hashes: " + sc + main_count + "</li>"
-				+ "<li>" + so2 + " results hash: " + sc + main_result + "</li>"
-				+ "<li>" + so2 + " locales hash: " + sc + main_code + "</li>"
-				+ "<li>" + so2 + " locale check: " + sc + str + "</li></ul>"
-			document.getElementById("numbers0").innerHTML = str
+			str = code_total + (code_total == locales.length ? sg : sb) + "[match]" + sc
+			str = "<hr><br>" + s4.trim() + "ALL NUMBERS (" + list.length + ")"  + sc + "<br>"
+				+ "<ul><li>" + sColor.trim() + "unique hashes: " + sc + main_count + "</li>"
+				+ "<li>" + sColor.trim() + " results hash: " + sc + main_result + "</li>"
+				+ "<li>" + sColor.trim() + " locales hash: " + sc + main_code + "</li>"
+				+ "<li>" + sColor.trim() + " locale check: " + sc + str + "</li></ul>"
+			dom.numbers0.innerHTML = str
 			element.innerHTML = pretty.join("")
 
 		} else {
@@ -331,17 +286,21 @@ function run_test(type) {
 			let check_result = sha1(bucket_res.join())
 			bucket_code.sort()
 			let check_code = sha1(bucket_code.join())
-
 			// append results
-			let matchbad = sb2 + " [match]" + sc, matchgood = sg2 + " [match]" + sc
-			str = "test rerun with just these numbers: <br><ul><li>unique hashes:"
+			let matchbad = sb + "[match]" + sc, matchgood = sg + "[match]" + sc
+			str = "<ul><li>" + sColor.trim() + "unique hashes:" + sc
 			if (check_count == main_count) {
-				str += sg2 + " (" + check_count + ")" + matchgood
+				str += sg + " (" + check_count + ")" + matchgood
 			} else {
-				str += sb2 + " (" + check_count + ")" + matchbad
+				str += sb + " (" + check_count + ")" + matchbad
 			}
-			str += "</li><li>results hash: " + check_result + (check_result == main_result ? matchgood : matchbad)
-			str += "</li><li>locales hash: " + check_code + (check_code == main_code ? matchgood : matchbad)
+			if (type == "2") {
+				str += "</li><li>" + sColor.trim() + " results hash: " + sc + check_result + (check_result == main_result ? matchgood : matchbad)
+			} else {
+				// we know the results hash changes: that's not what we testing for
+				str += "</li><li>" + sColor.trim() + " results hash: " + sc + check_result
+			}
+			str += "</li><li>" + sColor.trim() + " locales hash: " + sc + check_code + (check_code == main_code ? matchgood : matchbad)
 			str += "</li></ul>"
 			element.innerHTML = str
 		}
@@ -349,7 +308,7 @@ function run_test(type) {
 }
 
 function run() {
-	document.getElementById("button").innerHTML = ""
+	dom.button.remove()
 	run_test("0") // main test
 	run_test("1")
 	run_test("2")
