@@ -122,7 +122,7 @@ function run_test(type) {
 		go = true,
 		perfname = "all"
 		str = "",
-		sColor = s12
+		sColor = s12.trim()
 
 	let	element = document.getElementById("results" + type)
 	let	elperf = document.getElementById("perf" + type)
@@ -223,7 +223,7 @@ function run_test(type) {
 		}
 		// perf
 		let perf = perfname + " " + s4.trim() + Math.round(performance.now()-t0) + sc +" ms"
-		elperf.innerHTML = (type == "0" ? s4.trim() + "PERF: " + sc : s4 + " | " + sc) + perf
+		elperf.innerHTML = (type == "0" ? s4.trim() + "PERF: " + sc : " | ") + perf
 			+ (type == "1" ? "<br>" : "")
 
 		// sort array & loop: get hash + code + result buckets, and code_total
@@ -259,8 +259,8 @@ function run_test(type) {
 			let pretty = []
 			for (let i=0; i < bucket_hash.length; i++) {
 				let part1 = s4 + "hash: " + sc + bucket_hash[i]
-				let part2 = "<ul><li>" + sColor.trim() + "result: "  + sc + bucket_res[i] + "</li>"
-				let part3 = "<li>" + sColor.trim() + "locale: " + sc + bucket_code[i] + "</li></ul>"
+				let part2 = "<ul><li>" + sColor + "result: "  + sc + bucket_res[i] + "</li>"
+				let part3 = "<li>" + sColor + "locale: " + sc + bucket_code[i] + "</li></ul>"
 				pretty.push(part1 + part2 + part3)
 			}
 			// sort and set globals
@@ -272,10 +272,10 @@ function run_test(type) {
 			// output
 			str = code_total + (code_total == locales.length ? sg : sb) + "[match]" + sc
 			str = "<hr><br>" + s4.trim() + "ALL NUMBERS (" + list.length + ")"  + sc + "<br>"
-				+ "<ul><li>" + sColor.trim() + "unique hashes: " + sc + main_count + "</li>"
-				+ "<li>" + sColor.trim() + " results hash: " + sc + main_result + "</li>"
-				+ "<li>" + sColor.trim() + " locales hash: " + sc + main_code + "</li>"
-				+ "<li>" + sColor.trim() + " locale check: " + sc + str + "</li></ul>"
+				+ "<ul><li>" + sColor + "unique hashes: " + sc + main_count + "</li>"
+				+ "<li>" + sColor + " results hash: " + sc + main_result + "</li>"
+				+ "<li>" + sColor + " locales hash: " + sc + main_code + "</li>"
+				+ "<li>" + sColor + " locale check: " + sc + str + "</li></ul>"
 			dom.numbers0.innerHTML = str
 			element.innerHTML = pretty.join("")
 
@@ -288,19 +288,15 @@ function run_test(type) {
 			let check_code = sha1(bucket_code.join())
 			// append results
 			let matchbad = sb + "[match]" + sc, matchgood = sg + "[match]" + sc
-			str = "<ul><li>" + sColor.trim() + "unique hashes:" + sc
-			if (check_count == main_count) {
-				str += sg + " (" + check_count + ")" + matchgood
-			} else {
-				str += sb + " (" + check_count + ")" + matchbad
-			}
+			str = "<ul><li>" + sColor + "unique hashes:" + sc
+			str += " " + check_count + (check_count == main_count ? matchgood : matchbad)
 			if (type == "2") {
-				str += "</li><li>" + sColor.trim() + " results hash: " + sc + check_result + (check_result == main_result ? matchgood : matchbad)
+				str += "</li><li>" + sColor + " results hash: " + sc + check_result + (check_result == main_result ? matchgood : matchbad)
 			} else {
 				// we know the results hash changes: that's not what we testing for
-				str += "</li><li>" + sColor.trim() + " results hash: " + sc + check_result
+				str += "</li><li>" + sColor + " results hash: " + sc + check_result
 			}
-			str += "</li><li>" + sColor.trim() + " locales hash: " + sc + check_code + (check_code == main_code ? matchgood : matchbad)
+			str += "</li><li>" + sColor + " locales hash: " + sc + check_code + (check_code == main_code ? matchgood : matchbad)
 			str += "</li></ul>"
 			element.innerHTML = str
 		}
