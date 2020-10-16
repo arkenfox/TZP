@@ -39,6 +39,7 @@
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
 		<tr><td>83</td><td id="n83"></td><td class="c mono" id="v83"></td></tr>
+		<tr><td>83</td><td id="n83a"></td><td class="c mono" id="v83a"></td></tr>
 		<tr><td>82</td><td id="n82"></td><td class="c mono" id="v82"></td></tr>
 		<tr><td>81</td><td id="n81"></td><td class="c mono" id="v81"></td></tr>
 		<tr><td>81<span id="test81a"></span><span id="test81b"></span></td><td id="n81a"></td><td class="c mono" id="v81a"></td></tr>
@@ -137,6 +138,18 @@ function outputVersion() {
 		ver83 = xS
 	} catch(e) {}
 	output("83", "1667094", ver83, performance.now()-t83)
+
+	// 83a: 1665746
+	let t83a = performance.now(), ver83a = xF
+	try {
+		let a83 = new Set([1,2,3]);
+		let b83 = new Set([2,3,4]);
+		let c83 = new Set(...a83, ...b83);
+		ver83a = xS
+	} catch(e) {
+		if (e.message == "1 is not iterable") {ver83a = xS}
+	}
+	output("83a", "1665746", ver83a, performance.now()-t83a)
 
 	// 82: 1655947
 	let t82 = performance.now(), ver82 = xF
