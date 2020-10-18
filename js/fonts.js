@@ -32,7 +32,7 @@ function set_fntList() {
 		if (isOS == "mac") {fntList = fntListMac}
 		if (isOS == "linux") {fntList = fntListLinux}
 		if (isOS == "android") {fntList = fntListAndroid}
-		// sort, de-dupe
+		// sort + keep en-US order, de-dupe
 		fntList.sort(Intl.Collator("en-US").compare)
 		fntList = fntList.filter(function(font, position) {
 			return fntList.indexOf(font) === position
@@ -510,10 +510,11 @@ function get_unicode() {
 				// set
 				slot.style.fontFamily = (j == 0 ? "" : styles[j])
 				slot.textContent = c
-				// offset: w=span h=div
+				// offsets: w=span h=div, append glyph at end
 				let w = span.offsetWidth, h = div.offsetHeight
 				offset.push((j==0 ? cp+"-" : "" ) + w+"x"+h)
 				display += (w.toString()).padStart(8) +" x "+ (h.toString()).padStart(4)
+				if (j == 5) {display += "    " + c}
 				// measureText
 				if (mgo) {
 					try {
