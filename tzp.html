@@ -85,7 +85,7 @@
 			<div class="nav-down"><a href="#screend">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td>
-			<div class="btn-left"><button class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</span></div>
 			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>stable</td><td class="faint" id="stablehash"></td></tr>
 		<tr><td colspan="2" class="showhide">
@@ -106,7 +106,7 @@
 			<div class="nav-right"><a name="screend"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn1 btn" onClick="outputSection(`1`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn1 btn" onClick="outputSection(`1`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="screenhash"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
@@ -126,11 +126,11 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">full-screen-api.enabled</span></div>
 			&nbsp [api] full screen</td><td class="c" id="fsSupport"></td></tr>
-		<tr><td><button class="btn0 btn" onClick="goFS()">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="goFS()">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span></div>
 			&nbsp [test] full screen <sup>4</sup></td><td class="c" id="fsLeak"></td></tr>
-		<tr><td><button class="btn0 btn" onClick="goNW()">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="goNW()">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">will attempt to open a new<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c" id="newWinLeak"></td></tr>
@@ -175,7 +175,7 @@
 			<div class="nav-right"><a name="useragentd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</span></div>
 			<span class="c" id="uahash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="nUAinitial"></td></tr>
 		<tr><td id="UA00">userAgent</td><td class="c spaces" id="nUA00"></td></tr>
@@ -197,7 +197,7 @@
 		<tr><td>service worker</td><td class="c mono" id="sectionUA5"></td></tr>
 		<tr class="hidden"><td>[iframe] hash</td><td class="c mono" id="sectionUA6"></td></tr>
 		<tr class="hidden"><td>[nested iframe] hash</td><td class="c mono" id="sectionUA7"></td></tr>
-		<tr><td><button class="btn0 btn" onClick="goNW_UA()">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="goNW_UA()">[ click here ]</span>
 			window.open</td><td class="c mono" id="sectionUA8"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
@@ -217,7 +217,7 @@
 			the real entropy, such as math hashes, branding dimensions, and pixel values.	Each test is independent of the others.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</span></div>
 			<span class="c" id="featurehash"></span></td></tr>
 		<tr><td>[css] branding</td><td id="fdBrandingCss"></td></tr>
 		<tr><td>[css] browser</td><td id="fdResourceCss"></td></tr>
@@ -289,7 +289,7 @@
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="languagehash"></span></td></tr>
 		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
@@ -359,7 +359,7 @@
 			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span></td></tr>
 		<tr><td>[navigator] doNotTrack</td><td class="c" id="nDNT"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -392,7 +392,7 @@
 			new random name and value, and then to read them back. Only when it successfully reads back a matching value
 			is it deemed to be available and working.</span></td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn6 btn" onClick="outputSection(`6`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn6 btn" onClick="outputSection(`6`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="storagehash"></span> <span class="isFile"><span></td></tr>
 		<tr><td>[navigator] cookieEnabled</td><td class="c" id="ctest0"></td></tr>
 		<tr><td>[javascript 1st party cookie] session | persistent</td>
@@ -418,7 +418,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.storageManager.enabled</span></div>
 			&nbsp storage manager</td><td class="c" id="storageMSupport"></td></tr>
-		<tr><td><button class="btn0 btn" onClick="get_storage_manager(`click`)">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="get_storage_manager(`click`)">[ click here ]</span>
 			[properties | test] storage manager</td>
 			<td><span class="c" id="storageMProp"></span> | <span class="c" id="storageMTest"></span></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -434,7 +434,7 @@
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</span></div>
 			<span class="c" id="deviceshash"></span></td></tr>
 		<tr><td>plugins</td><td class="gc" id="plugins"></td></tr>
 		<tr><td>mimeTypes</td><td class="gc" id="mimeTypes"></td></tr>
@@ -452,7 +452,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
 			&nbsp speech synthesis</td><td class="c" id="sSynth"></td></tr>
-		<tr><td>speech engines</td><td class="c" id="sEngines"></td></tr>
+		<tr><td>speech engines</td><td class="c gc" id="sEngines"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">maxTouchPoints<br>-moz-touch-enabled<br>ontouchstart<br>ontouchend<br>TouchEvent</span>
 			</div>&nbsp touch</td><td class="c" id="touch"></td></tr>
@@ -460,7 +460,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.gamepad.enabled</span></div>
 			&nbsp [api] gamepad</td><td class="c" id="nGP"></td></tr>
-		<tr><td>gamepads</td><td class="c" id="eGP"></td></tr>
+		<tr><td>gamepads</td><td class="c gc" id="eGP"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">media.navigator.enabled</span></div>
 			&nbsp mediaDevices</td><td class="c" id="nMD"></td></tr>
@@ -468,7 +468,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.vr.enabled</span></div>
 			&nbsp [api] webvr</td><td class="c" id="nVR"></td></tr>
-		<tr><td>activeVRDisplays</td><td class="c" id="aVR"></td></tr>
+		<tr><td>activeVRDisplays</td><td class="c gc" id="aVR"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
@@ -483,7 +483,7 @@
 			<div class="nav-right"><a name="domrectd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="8" class="secthash">
-			<div class="btn-left"><button class="btn8 btn" onClick="outputSection(`8`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn8 btn" onClick="outputSection(`8`)">[ re-run ]</span></div>
 			<span class="c" id="domrecthash"></span></td></tr>
 		<tr><td colspan="3">Element.getClientRects</td><td colspan="5" class="c mono" id="dr0"></td></tr>
 		<tr><td colspan="3">Element.getBoundingClientRect</td><td colspan="5" class="c mono" id="dr1"></td></tr>
@@ -555,7 +555,7 @@
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</span></div>
 			<span class="c" id="canvashash"></span> <span class="isFile"><span></td></tr>
 		<tr><td>getContext</td><td class="c mono getContext"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
@@ -582,7 +582,7 @@
 			<div class="nav-right"><a name="webgld"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn10 btn" onClick="outputSection(`10`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn10 btn" onClick="outputSection(`10`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="webglhash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="glhash0"></td></tr>
 		<tr><td>getContext</td><td class="c mono" id="glsupport"></td></tr>
@@ -609,7 +609,7 @@
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn11 btn" onClick="outputSection(`11`, `c`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(`11`, `c`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="audiohash1"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.webaudio.enabled</span></div>
@@ -618,7 +618,7 @@
 		<tr><td>copyFromChannel <sup>1</sup></td><td class="c mono" id="audioCopy"></td></tr>
 		<tr><td>sum <sup>1</sup></td><td class="c mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><button class="btn0 btn" onClick="outputSection(`11`, `c2`)">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="outputSection(`11`, `c2`)">[ click here ]</span>
 			hash</td><td class="faint c2 mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
@@ -652,7 +652,7 @@
 			may produce different results</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
 			<span class="c" id="fontshash"></span><span></td></tr>
 		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
 		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
@@ -663,7 +663,7 @@
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
 			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
 		<tr><td>fonts <sup>1</sup></td><td class="c mono" id="fontFPJS2"></td></tr>
-		<tr><td><button class="btn0 btn" onClick="outputFontsFB()">[ click here ]</button>
+		<tr><td><span class="btn0 btn" onClick="outputFontsFB()">[ click here ]</span>
 				font fallback <sup>2</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<tr><td>[offset] unicode glyphs <sup>3</sup></td><td class="c mono" id="ug1"></td></tr>
 		<tr><td>[textmetrics] unicode glyphs <sup>3</sup></td><td class="c mono" id="ug2"></td></tr>
@@ -677,10 +677,10 @@
 			<input id="collapseF1" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F1`)">
 			<label for="collapseF1" class="lbl-toggle" id="labelF1">&#9660; show fonts</label></td></tr>
 		<tr class="togF1"><td id="fontFPJS2label">fonts</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`fontFPJS2Found`)">[ copy to clipboard ]</button></td></tr>
+			 <span class="btn0 btn" onClick="copyclip(`fontFPJS2Found`)">[ copy to clipboard ]</span></td></tr>
 		<tr class="togF1"><td colspan="2" class="gc intro" id="fontFPJS2Found"></td></tr>
 		<tr id="fontB1" class="togF2"><td id="fontFBlabel"></td><td>
-			 <button class="btn0 btn" onClick="copyclip(`fontFBFound`)">[ copy to clipboard ]</button></td></tr>
+			 <span class="btn0 btn" onClick="copyclip(`fontFBFound`)">[ copy to clipboard ]</span></td></tr>
 		<tr id="fontB2" class="togF2"><td colspan="2" class="gc intro" id="fontFBFound"></td></tr>
 		<!-- DETAILS TM -->
 		<tr><td colspan="2" class="showhide">
@@ -707,7 +707,7 @@
 			<label for="collapseF4" class="lbl-toggle" id="labelF4">&#9660; show unicode glyphs</label>
 		</td></tr>
 		<tr class="togF4"><td>[offset] unicode glyphs</td><td>
-			 <button class="btn0 btn" onClick="copyclip(`ug10`)">[ copy to clipboard ]</button></td></tr>
+			 <span class="btn0 btn" onClick="copyclip(`ug10`)">[ copy to clipboard ]</span></td></tr>
 		<tr class="togF4"><td colspan="2" class="mono spaces intro"><span class="no_color" id="ug10"></span></td></tr>
 		<tr class="togF4"><td colspan="2"></td></tr>
 		<!--creds-->
@@ -730,7 +730,7 @@
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="3" class="secthash">
-			<div class="btn-left"><button class="btn13 btn" onClick="outputSection(`13`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(`13`)">[ re-run ]</span></div>
 			<span class="c" id="mediahash"></span></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">media.media-capabilities.enabled</span></div>
@@ -756,7 +756,7 @@
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><button class="btn14 btn" onClick="outputSection(`14`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn14 btn" onClick="outputSection(`14`)">[ re-run ]</span></div>
 			<span class="c" id="csshash"></span></td></tr>
 		<tr><td>[-moz-] colors</td><td class="c mono" id="mColorHash"></td></tr>
 		<tr><td>[system] colors</td><td class="c mono" id="sColorHash"></td></tr>
@@ -840,7 +840,7 @@
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="3" class="secthash">
-			<div class="btn-left"><button class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</button></div>
+			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">beacon.enabled</span></div>
