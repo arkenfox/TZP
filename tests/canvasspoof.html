@@ -33,7 +33,7 @@
 				<span class="s1">pale red</span>, then it's being spoofed.</span>
 		</td></tr>
 		<tr>
-			<td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>visuals</td>
+			<td><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span></div>visuals</td>
 			<td>
 				<canvas id="visual" width="96" height="96" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="control1" width="16" height="16" style="border:1px solid white;"></canvas>
@@ -48,7 +48,7 @@
 		<tr class="hidden" id="unknown">
 			<td><span class="s1">unknown <sup>1</sup></span></td>
 			<td class="mono">These differ per engine. The test is limited to<br>
-				gecko, blink and webkit, and unable to confirm.<br><td></tr>
+				gecko, blink and webkit, and unable to confirm.<td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 
 		<tr><td></td><td class="s9">------</td></tr> <!-- spacer -->
@@ -64,6 +64,7 @@
 <script>
 
 function run() {
+
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
@@ -79,6 +80,7 @@ function run() {
 	} else if (isEngine == "webkit") {
 		known2 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
 	}
+	// FYI: 2d61dc2efc6f46be7b1ddf1977a308ac3bbc91e5 = edgeHTML toDataURL
 
 	dom.unknown.style.display = "none" // rehide
 
@@ -254,7 +256,7 @@ function run() {
 				if (display.indexOf(" ") > 0) {isHash = false}
 				// PNG differs between engines: limit to known results
 				let checkPNG = false
-				if (isFF || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
+				if (isFF == true || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
 
 				// cleanup output
 				if (name == "getImageData") {

@@ -31,12 +31,12 @@
 		<col width="30%"><col width="70%">
 		<thead><tr><th colspan="2">pluralrules</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color" id="intro"></span>
+			<span class="no_color">A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<div id="button" class="btn"><button class="btn4 btn" onClick="run()">[ run ]</button></div>
+				<div id="button" class="btn"><span class="btn4 btn" onClick="run()">[ run ]</span></div>
 				<span class="spaces" id="perf0"></span><span id="perf2"></span><span id="perf1"></span>
 				<br><span class="spaces" id="numbers1"></span>
 				<br><span class="spaces" id="results1"></span>
@@ -99,17 +99,7 @@ function start() {
 			locales.push(listA)
 			legend.push( listA.padStart(7) + ": " + listB  )
 		}
-		dom.legend.innerHTML = s4 + "   LEGEND" + sc	+ "<br><br>" + legend.join("<br>")
-		// intro
-		let introstr = "A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules<br></br>"
-		introstr += "Takes"+ s4 + legend.length + " locales" + sc + " and enumerates the unique hashes generated"
-			+ " (and lists the locales per hash) when checking all the numbers from" + s4 +"0-101" + sc
-		introstr += ". It then discards all numbers that did not change a preceeding result, and re-runs the test to see if "
-			+ " the results change in any way. "
-		introstr += "And lastly, it reduces the numbers to only those that cause the first change of each result"
-			+ " and re-runs the test, checking that the number of unique hashes, and the locales in them, hasn't changed"
-		dom.intro.innerHTML = introstr
-
+		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length + ")"+ sc	+"<br><br>"+ legend.join("<br>")
 	} catch(e) {}
 }
 

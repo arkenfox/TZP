@@ -31,7 +31,7 @@
 				the	differences. <code>getImageData</code> is being tested, but <code>toDataURL</code> and
 				<code>toBlob</code> can also be "decoded" (albeit a little differently)</span>
 		</td></tr>
-		<tr><td><div class="btn-left"><button class="btn9 btn" onClick="run()">[ re-run ]</button></div>visual</td>
+		<tr><td><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span></div>visuals</td>
 			<td>
 				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
@@ -86,7 +86,6 @@ function run() {
 	setTimeout(function(){
 		try {
 			let t0 = performance.now()
-
 			let cnvBig = dom.cnvBig
 			if (cnvBig.getContext) {
 				let ctxBig = cnvBig.getContext('2d'),
@@ -269,14 +268,12 @@ function run() {
 				// perf
 				let t1 = performance.now()
 				dom.perf.innerHTML = Math.round(t1-t0) + "ms"
-
 			}
 		} catch(e) {
 			// ToDo: output some errors or something
 			console.debug("catchall", e.name, e.message)
 		}
 	}, 170)
-
 }
 
 run()
