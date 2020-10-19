@@ -87,10 +87,16 @@ input[type='checkbox'] {display: none;}
 .togA, .togD, .togD1, .togC, .togCSS, .togE, .togF1, .togF2, .togF3, .togF4, .togL,
 .togM2, .togM3, .togOS1, .togR, .togUA, .togUG, .togW, .togW2, .togZ {display: none;}
 
-/* buttons & section color */
-.btn {background-color: #1a1a1a; border-width: 0px; text-align: center;
-	display: inline-block; font-size: 12px; font-family: monospace, "Courier New";
-	font-weight: bold; cursor: pointer; outline: none}
+/* not-really-buttons & section color */
+.btn {background-color: #1a1a1a;
+	display: inline-block;
+	font-size: 12px;
+	font-family: monospace, "Courier New";
+	font-weight: bold;
+	padding-left: 8px;
+	padding-right: 8px;
+	cursor: pointer;
+}
 .btn0 {border-color: #b3b3b3; color: #b3b3b3;}
 .btn1, .s1 {border-color: var(--test1); color: var(--test1);}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
