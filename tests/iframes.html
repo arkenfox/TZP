@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+  <title>iframes ua</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb2">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">iframes ua</th></tr></thead>
+		<tr><td>document root</td><td class="mono" id="iframe0"></td></tr>
+		<tr><td>with URL</td><td class="mono" id="iframe1"></td></tr>
+		<tr><td>violating SOP</td><td class="mono" id="iframe2"></td></tr>
+		<tr><td>access 1</td><td class="mono" id="iframe3"></td></tr>
+		<tr><td>access 2</td><td class="mono" id="iframe4"></td></tr>
+		<tr><td>access 3</td><td class="mono" id="iframe5"></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+function getDynamicIframeWindow({
+	context,
+	source = '',
+	test = '',
+	nestIframeInContainerDiv = false,
+	violateSameOriginPolicy = true,
+	display = false
+}) {
+	const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
+	const length = context.length
+	const element = document.createElement(elementName)
+	document.body.appendChild(element)
+	if (!display) {
+		//element.setAttribute('style', 'display:none')
+	}
+	if (nestIframeInContainerDiv) {
+	const attributes = `
+		${source ? `src=${source}` : ''}
+			${violateSameOriginPolicy ? '' : `sandbox="allow-same-origin"`}
+		`
+		element.innerHTML = `<iframe ${attributes}></iframe>`
+	} else if (!violateSameOriginPolicy) {
+		element.setAttribute('sandbox', 'allow-same-origin')
+		if (source) {
+			element.setAttribute('src', source)
+		}
+	} else if (source) {
+		element.setAttribute('src', source)
+	}
+	const iframeWindow = context[length]
+	let res = []
+
+	if (test == "ua") {
+		let list = ['userAgent','appCodeName','appName','product','appVersion',
+			'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+			r = ''
+		let navigator = iframeWindow.navigator
+		for(let i=0; i < list.length; i++) {
+			try {r = navigator[list[i]]} catch(e) {r = (e.name == 'ReferenceError' ? zB1 : zB2)}
+			if (r == '') {r = 'empty string'}
+			if (r == 'undefined') {r = 'undefined string'}
+			if (r == undefined) {r = 'undefined value'}
+			res.push((i).toString().padStart(2,'0')+': '+r)
+		}
+	}
+	document.body.removeChild(element)
+	//return iframeWindow
+	return res
+}
+
+	Promise.all([
+		getDynamicIframeWindow({
+			context: window,
+			violateSameOriginPolicy: false,
+			test: "ua"
+		}), // DocumentRoot
+		getDynamicIframeWindow({
+			context: window,
+			source: '?',
+			violateSameOriginPolicy: false,
+			test: "ua"
+		}), // with URL
+		getDynamicIframeWindow({
+			context: window,
+			source: '//example.org',
+			test: "ua"
+		}), // violating SOP
+		getDynamicIframeWindow({
+			context: window,
+			test: "ua"
+		}), // access 1
+		getDynamicIframeWindow({
+			context: frames,
+			test: "ua"
+		}), // access 2
+		getDynamicIframeWindow({
+			context: window,
+			nestIframeInContainerDiv: true,
+			test: "ua"
+		}), // access 3
+	]).then(function(results){
+
+		for(let i=0; i < 6; i++) {
+			let el = document.getElementById("iframe"+i)
+			el.innerHTML = sha1(results[0]) + "<br> - " + results[0].join("<br> - ")
+		}
+		//results.forEach(function(currentResult) {
+		//	
+		//})
+	})
+
+</script>
+</body>
+</html>
