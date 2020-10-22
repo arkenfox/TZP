@@ -23,6 +23,7 @@
 	<table id="tb2">
 		<col width="15%"><col width="85%">
 		<thead><tr><th colspan="2">iframes ua</th></tr></thead>
+		<tr><td>document</td><td class="mono" id="doc"></td></tr>
 		<tr><td>document root</td><td class="mono" id="iframe0"></td></tr>
 		<tr><td>with URL</td><td class="mono" id="iframe1"></td></tr>
 		<tr><td>violating SOP</td><td class="mono" id="iframe2"></td></tr>
@@ -34,6 +35,25 @@
 
 <script>
 'use strict';
+
+var control = ""
+
+function getUA() {
+	let list = ['userAgent','appCodeName','appName','product','appVersion',
+		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+		res = [],
+		r = ''
+	for(let i=0; i < list.length; i++) {
+		try {r = navigator[list[i]]} catch(e) {r = (e.name == 'ReferenceError' ? zB1 : zB2)}
+		if (r == '') {r = 'empty string'}
+		if (r == 'undefined') {r = 'undefined string'}
+		if (r == undefined) {r = 'undefined value'}
+		res.push((i).toString().padStart(2,'0')+': '+r)
+	}
+	control = sha1(res.join())
+	dom.doc.innerHTML = sg + control + sc
+	 + "<br> - " + res.join("<br> - ")
+}
 
 function getDynamicIframeWindow({
 	context,
@@ -85,6 +105,8 @@ function getDynamicIframeWindow({
 	return res
 }
 
+	getUA()
+
 	Promise.all([
 		getDynamicIframeWindow({
 			context: window,
@@ -119,7 +141,9 @@ function getDynamicIframeWindow({
 
 		for(let i=0; i < 6; i++) {
 			let el = document.getElementById("iframe"+i)
-			el.innerHTML = sha1(results[0]) + "<br> - " + results[0].join("<br> - ")
+			let testhash = sha1(results[i])
+			testhash = (testhash == control ? sg.trim() : sb.trim()) + testhash + sc
+			el.innerHTML = testhash + "<br> - " + results[i].join("<br> - ")
 		}
 		//results.forEach(function(currentResult) {
 		//	
