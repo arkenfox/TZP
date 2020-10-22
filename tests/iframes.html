@@ -40,7 +40,7 @@ var control = ""
 
 function getUA() {
 	let list = ['userAgent','appCodeName','appName','product','appVersion',
-		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+		'oscpu','platform','buildID','productSub','vendor','vendorSub','hardwareConcurrency'],
 		res = [],
 		r = ''
 	for(let i=0; i < list.length; i++) {
@@ -89,7 +89,7 @@ function getDynamicIframeWindow({
 
 	if (test == "ua") {
 		let list = ['userAgent','appCodeName','appName','product','appVersion',
-			'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+			'oscpu','platform','buildID','productSub','vendor','vendorSub','hardwareConcurrency'],
 			r = ''
 		let navigator = iframeWindow.navigator
 		for(let i=0; i < list.length; i++) {
