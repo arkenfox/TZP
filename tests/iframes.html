@@ -48,7 +48,7 @@ function getDynamicIframeWindow({
 	const element = document.createElement(elementName)
 	document.body.appendChild(element)
 	if (!display) {
-		//element.setAttribute('style', 'display:none')
+		element.setAttribute('style', 'display:none')
 	}
 	if (nestIframeInContainerDiv) {
 	const attributes = `
