@@ -322,19 +322,23 @@ function get_storage_manager(runtype) {
 		} else {
 			// properties
 			if (runtype == "click") {
-				try {
-					navigator.storage.persist().then(function(persistent) {
-						if (persistent) dom.storageMProp="persistent"
-						else dom.storageMProp="not persistent"
-						navigator.storage.estimate().then(estimate => {
-							dom.storageMProp.textContent += ` (${estimate.usage} of ${estimate.quota} bytes)`
+				dom.storageMProp = "&nbsp"
+				dom.storageMTest = "&nbsp"
+				setTimeout(function() {
+					try {
+						navigator.storage.persist().then(function(persistent) {
+							if (persistent) dom.storageMProp="persistent"
+							else dom.storageMProp="not persistent"
+							navigator.storage.estimate().then(estimate => {
+								dom.storageMProp.textContent += ` (${estimate.usage} of ${estimate.quota} bytes)`
+							})
 						})
-					})
-				} catch(e) {
-					dom.storageMProp = zF+": " + e.name
-				}
-				// ToDo: test
-				dom.storageMTest.innerHTML = note_ttc
+					} catch(e) {
+						dom.storageMProp = zF+": " + e.name
+					}
+					// ToDo: test
+					dom.storageMTest.innerHTML = note_ttc
+				}, 170)
 			}
 		}
 	}
