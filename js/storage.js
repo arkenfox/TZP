@@ -322,8 +322,8 @@ function get_storage_manager(runtype) {
 		} else {
 			// properties
 			if (runtype == "click") {
-				dom.storageMProp = "&nbsp"
-				dom.storageMTest = "&nbsp"
+				dom.storageMProp.innerHTML = "&nbsp"
+				dom.storageMTest.innerHTML = "&nbsp"
 				setTimeout(function() {
 					try {
 						navigator.storage.persist().then(function(persistent) {
