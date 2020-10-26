@@ -21,7 +21,7 @@
 	</table>
 
 	<table id="tb9">
-		<col width="25%"><col width="75%">
+		<col width="24%"><col width="76%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#screen">canvas spoof fingerprinting</a>
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -67,8 +67,9 @@
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td></td><td class="s9">------</td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td>set value</td><td class="c mono" id="sethash"></td></tr>
-		<tr><td>read value</td><td class="c mono" id="readhash"></td></tr>
+		<tr><td>control</td><td class="c mono" id="sethash"></td></tr>
+		<tr><td>1st read</td><td class="c mono" id="readhash"></td></tr>
+		<tr><td>2nd read</td><td class="c mono" id="readhash2"></td></tr>
 
 		<tr><td>stats</td><td class="c mono" id="readstats"></td></tr>
 		<tr><td>diffs</td><td class="c mono" id="readdiff"></td></tr>
@@ -84,6 +85,7 @@ function run() {
 		clrRead = [], cellRead = [],
 		hashSet = "",
 		hashGetImage = "",
+		hashGetImage2 = "",
 		m = 9 // multplier for large visuals
 
 	// clear
@@ -166,6 +168,26 @@ function run() {
 					}
 				}
 				hashGetImage = sha1(clrRead.join())
+
+				// second read
+				let clrRead2 = []
+				for (let x=0; x < 20; x++) {
+					for (let y=0; y < 20; y++) {
+						let pixel = ctxCtrl.getImageData(x,y,1,1)
+						clrRead2.push(pixel.data[0])
+						clrRead2.push(pixel.data[1])
+						clrRead2.push(pixel.data[2])
+						clrRead2.push(pixel.data[3])
+					}
+				}
+				hashGetImage2 = sha1(clrRead2.join())
+				if (hashGetImage2 == hashSet) {
+					dom.readhash2.innerHTML = hashGetImage2 + s9 + "[matches]" + sc
+				} else {
+					dom.readhash2.innerHTML = sb+ hashGetImage2 + sc
+						+ (hashGetImage2 == hashGetImage ? " [cached]" : " [per-execution]")
+					
+				}
 
 				if (hashGetImage == hashSet) {
 					dom.readhash.innerHTML = hashGetImage + s9 + "[matches]" + sc
