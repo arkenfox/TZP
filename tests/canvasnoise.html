@@ -10,6 +10,7 @@
 	<script src="testmain.js"></script>
 	<style>
 		table {width: 580px;}
+		.pad {line-height: 2.5em}
 	</style>
 </head>
 <body>
@@ -31,21 +32,23 @@
 				the	differences. <code>getImageData</code> is being tested, but <code>toDataURL</code> and
 				<code>toBlob</code> can also be "decoded" (albeit a little differently)</span>
 		</td></tr>
-		<tr><td><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span></div>visuals</td>
+		<tr><td><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span>
+			</div>visuals<br><br><br><br><br>control</td>
 			<td>
 				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
 					&nbsp <span class="s9"> &#9664 what we set</span>
+					<br><span class="pad">The control that we read values from, pixel by pixel</span>
 			</td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td>getImageData</td>
+
+		<tr><td>getImageData<br><br><br><br><br>test<br>result</td>
 			<td>
 				<canvas id="cnvBig2" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
-					&nbsp <span class="s9"> &#9664 what we read back pixel by pixel</span>
+					&nbsp <span class="s9"> &#9664 what we got back</span>
+					<br><span class="pad">What we have read back from the control, pixel by pixel</span>
 			</td>
 		</tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td>getImageData</td>
 			<td>
 				<image id="cnvGet2" width="20" height="20"  style="border:1px solid white;" src=""></image> &nbsp
