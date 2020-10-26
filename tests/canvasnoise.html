@@ -42,7 +42,14 @@
 			<td>
 				<canvas id="cnvBig2" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
-					&nbsp <span class="s9"> &#9664 what we read back</span>
+					&nbsp <span class="s9"> &#9664 what we read back pixel by pixel</span>
+			</td>
+		</tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td>getImageData</td>
+			<td>
+				<image id="cnvGet2" width="20" height="20"  style="border:1px solid white;" src=""></image> &nbsp
+					&nbsp <span class="s9"> &#9664 PNG</span>
 			</td>
 		</tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -114,6 +121,9 @@ function run() {
 				}
 				hashSet = sha1(clrSet.join())
 				dom.sethash = hashSet
+
+				// getImageData
+				//cnvGet2.src = whatever
 
 				// toDataURL
 				let dataURL = cnvCtrl.toDataURL("image/png")
