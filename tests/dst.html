@@ -8,7 +8,7 @@
 </head>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=600">
   <title>dst</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
@@ -16,7 +16,7 @@
 	<script src="testmain.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 780px;}
+		table {width: 580px;}
 		hr {color: #dcdc8c}
 	</style>
 </head>
@@ -29,21 +29,21 @@
 
 	<table id="tb4">
 		<col width="40%"><col width="60%">
-		<thead><tr><th colspan="2">dst & timezones</th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">dst & timezones
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color" id="intro"></span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span class="s4" id=>UNDEFINED</span>
-				<br>
-				<br><span class="spaces" id="you"></span>
-				<br>
-				<span class="s4" id=>RESULTS</span>
-				<br>
-				<br><span class="spaces" id="output"></span>
-
+				<div id="button" class="btn"><span class="btn4 btn" onClick="run()">[ run ]</span></div>
+				<span id="resolved"></span><br><br>
+				<span id="pass1"></span><br><br>
+				<span id="pass2"></span>
 			</td></tr>
 	</table>
 	<br>
@@ -54,10 +54,9 @@
  IANA time zone database
  https://www.iana.org/time-zones
  https://github.com/vvo/tzdb/
- https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 */
 
-var list = [
+var listBig = [
 "Africa/Abidjan",
 "Africa/Accra",
 "Africa/Addis_Ababa",
@@ -485,273 +484,146 @@ var list = [
 "Pacific/Wallis"
 ]
 
-var code = [
-'ACST',
-'ACT',
-'ACWST',
-'AEST',
-'AFT',
-'AKST',
-'AMT',
-'ART',
-'AST',
-'AWST',
-'AZOT',
-'AZT',
-'BNT',
-'BOT',
-'BRT',
-'BST',
-'BTT',
-'CAT',
-'CCT',
-'CET',
-'CHUT',
-'CKT',
-'CLT',
-'COT',
-'CST',
-'CVT',
-'CXT',
-'ChST',
-'DAVT',
-'EAST',
-'EAT',
-'ECT',
-'EET',
-'EGT',
-'EST',
-'FJT',
-'FKT',
-'FNT',
-'GALT',
-'GAMT',
-'GET',
-'GFT',
-'GMT',
-'GMT+10',
-'GMT+12',
-'GMT+13',
-'GMT+13:45',
-'GMT+14',
-'GMT+5',
-'GMT+6',
-'GMT+7',
-'GMT+8',
-'GMT+9',
-'GMT-3',
-'GMT-7',
-'GST',
-'GYT',
-'HKT',
-'HOVT',
-'HST',
-'ICT',
-'IRKT',
-'IRST',
-'IST',
-'JST',
-'KGT',
-'KOST',
-'LHST',
-'LINT',
-'MART',
-'MAWT',
-'MHT',
-'MMT',
-'MSK',
-'MST',
-'MUT',
-'MVT',
-'MYT',
-'NCT',
-'NOVT',
-'NPT',
-'NRT',
-'NST',
-'NUT',
-'NZST',
-'OMST',
-'PET',
-'PGT',
-'PHT',
-'PKT',
-'PST',
-'PWT',
-'PYT',
-'RET',
-'SAKT',
-'SAMT',
-'SAST',
-'SBT',
-'SCT',
-'SGT',
-'SRT',
-'SST',
-'SYOT',
-'TAHT',
-'TFT',
-'TJT',
-'TKT',
-'TLT',
-'TMT',
-'TOT',
-'TRT',
-'TVT',
-'ULAT',
-'UYT',
-'UZT',
-'VET',
-'VLAT',
-'VOST',
-'VUT',
-'WAT',
-'WET',
-'WGT',
-'WITA',
-'YAKT',
-'YEKT',
+// datesSmall's purpose is to get a smaller subset
+var datesSmall = [
+	"January 1, 2020 13:00:00 UTC",
+	//"April 1, 2020 13:00:00 UTC",
+	"July 1, 2020 13:00:00 UTC",
+	//"October 1, 2020 13:00:00 UTC"
 ]
-
+var datesBig = []
 
 function fill_legend() {
 	// trim some vars
 	sg = sg.trim()
+	sb = sb.trim()
 	s4 = s4.trim()
 	// sort, header
-	list.sort()
-	let header = s4 +"TIMEZONES ("+ list.length	+ ") " + sc
+	listBig.sort()
+	let header = s4 +"TIMEZONES ("+ listBig.length	+ ") " + sc
 	header += "<a class='blue' target='blank' "
 		+ "href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>"
-		+ "source</a>"
-		+ "<br><br>"
-	// https://github.com/vvo/tzdb/blob/master/raw-time-zones.json - abbreviations
-
-	// group
-	let grouped = [], prev = ""
-	for (let i = 0 ; i < list.length; i++) {
-		let parts = list[i].split("/")
-		let group = parts[0]
-		let name = parts.slice(1).join("/")
-		if (group == prev) {
-			grouped.push("  " + name)
+		+ "source</a><br>"
+	// group location by area
+	let output = [], prev = ""
+	for (let i = 0 ; i < listBig.length; i++) {
+		let parts = listBig[i].split("/")
+		let area = parts[0]
+		let location = parts.slice(1).join("/")
+		if (area == prev) {
+			output.push("  " + location)
 		} else {
-			grouped.push(s4 + group + sc)
-			grouped.push("  " + name)
+			output.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
 		}
-		prev = group
+		prev = area
 	}
 	// output
-	dom.legend.innerHTML = header + grouped.join("<br>")
+	dom.legend.innerHTML = header + output.join("<br>")
+}
 
-	code.sort()
-	console.debug(code.length)
+function build_dates(startyear) {
+	// temp function to see what running lots of dates is like
+		// vs getting select dates from IANA
 
+	// vars
+	datesBig = []
+	let days = [
+		"January 1",
+		//"April 1",
+		"July 1",
+		//"October 1"
+	]
+	let suffix = " 13:00:00 UTC"
+	// build
+	for (let i = startyear; i < 2021; i++) {
+		//example: "October 1, 2020 13:00:00 UTC"
+		for (let j = 0; j < days.length; j++) {
+			datesBig.push(days[j] + ", " + i + " " + suffix )
+		}
+	}
 }
 
 function run() {
+	dom.button.remove()
 	// vars
 	let sColor = s12.trim(),
 		k = 60000,
-		yr = 2020,
-		yrs = []
+		t0 = performance.now()
+	let tzControl = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-	function test(array, type) {
-		let results = [],
-			tzmatch = []
+	function test(listArray, dateArray) {
+		return new Promise(resolve => {
+			let results = [],
+				tzmatch = []
+			// loop each timezone
+			for (let i = 0 ; i < listArray.length; i++) {
+				let tz = listArray[i]
+				let tzresults = []
 
-		for (let i = 0 ; i < array.length; i++) {
-			let tz = array[i]
-			let r1, r2, r3, r4, tzstr
-
-			// dates
-			let d1 = new Date("January 1, "+yr+" 13:00:00"),
-				d2 = new Date("April 1, "+yr+" 13:00:00"),
-				d3 = new Date("July 1, "+yr+" 13:00:00"),
-				d4 = new Date("October 1, "+yr+" 13:00:00")
-
-			// control/UTC
-			let c1 = new Date("January 1, "+yr+" 13:00:00 UTC"),
-				c2 = new Date("April 1, "+yr+" 13:00:00 UTC"),
-				c3 = new Date("July 1, "+yr+" 13:00:00 UTC"),
-				c4 = new Date("October 1, "+yr+" 13:00:00 UTC")
-
-			// apply a timezone
-			if (type == "Date.parse") {
-				// names like Asia/Dubai
-					// this is returning diffs relative to my own tz
-						// not sure if this is useful: I would need to check each day
-						// of the year to pick up the changes
-					/*
-					RFP on as UTC 0
-						Pacific/Auckland 780, 780, 720, 780
-						America/Chicago -360, -300, -300, -300
-						Australia/Perth 480, 480, 480, 480
-						Europe/Moscow 180, 180, 180, 180
-					No Spoofing
-						Pacific/Auckland 0, 0, 0, 0
-						America/Chicago -1140, -1080, -1020, -1080
-						Australia/Perth -300, -300, -240, -300
-						Europe/Moscow -600, -600, -540, -600
-					*/
-
-				try {
-					r1 = c1.toLocaleString('en', { timeZone: tz })
-				} catch(e) {}
-				try {
-					r2 = c2.toLocaleString('en', { timeZone: tz })
-				} catch(e) {}
-				try {
-					r3 = c3.toLocaleString('en', { timeZone: tz })
-				} catch(e) {}
-				try {
-					r4 = c4.toLocaleString('en', { timeZone: tz })
-				} catch(e) {}
-				// Date.parse
-				tzstr = ((Date.parse(r1) - Date.parse(c1))/k) + ", "+ ((Date.parse(r2) - Date.parse(c2))/k)
-					+ ", "+ ((Date.parse(r3) - Date.parse(c3))/k) + ", "+ ((Date.parse(r4) - Date.parse(c4))/k)
-
-				if (tzstr == "0, 0, 0, 0") {
-					tzmatch.push(tz)
+				// loop each date
+				for (let i = 0 ; i < dateArray.length; i++) {
+					let control = new Date(dateArray[i])
+					let test = control.toLocaleString('en', { timeZone: tz })
+					tzresults.push(((Date.parse(test) - Date.parse(control))/k))
 				}
-
-			} else {
-				// codes like EST, PST
-					// these don't return different values
-					// e.g. PST 480, 480, 480, 480 <-- DST is lost?
-				r1 = new Date("January 1, "+yr+" 13:00:00 " + tz)
-				r2 = new Date("April 1, "+yr+" 13:00:00 " + tz)
-				r3 = new Date("July 1, "+yr+" 13:00:00 " + tz)
-				r4 = new Date("October 1, "+yr+" 13:00:00 " + tz)
-				// getTime
-				tzstr = ((r1.getTime() - c1.getTime())/k) + ", "+ ((r2.getTime() - c2.getTime())/k)
-					+ ", "+ ((r3.getTime() - c3.getTime())/k) + ", "+ ((r4.getTime() - c4.getTime())/k)
+				// track all results
+				results.push(tz +" "+ tzresults.join(", "))
+				// track matches
+				tzresults = tzresults.filter(function(item, position) {
+					return tzresults.indexOf(item) === position
+				})
+				if (tzresults.length == 1) {
+					if (tzresults[0] == "0") {
+						tzmatch.push(tz)
+					}
+				}
 			}
-			
-			// results
-			results.push(tz + " " + tzstr)
-		}
-		if (tzmatch.length > 0) {
-			console.debug("matches", tzmatch)
-		}
-		console.debug(type + ":", sha1(results.join()) + "\n", results)
-
+			return resolve(tzmatch)
+		})
 	}
 
-	// temp small test
-	//list = ["Avengers/Wakanda","Pacific/Auckland","America/Chicago","Australia/Perth","Europe/Moscow",]
-	//code = ['MADEUP','EST','MST','PST',]
+	// temp list to check changes to pacific time
+	//listBig = ["America/Dawson","America/Los_Angeles","America/Tijuana","America/Vancouver","America/Whitehorse"]
 
-	test(list, "Date.parse")
-	//test(code, "getTime")
+	Promise.all([
+		test(listBig, datesSmall)
+	]).then(function(result){
+		listSmall = result[0]
+		// output
+		dom.resolved.innerHTML = s4 + "RESOLVED OPTIONS"+ sc + "<br><br>" + tzControl
 
-	// try something whacky
-	//test(code, "Date.parse") // PST = NaN = weird
-
+		if (listSmall.length > 0) {
+			if (listSmall.length == 1) {
+				let loneResult = listSmall[0]
+				dom.pass1.innerHTML = s4 +"PASS ONE"+ sc +"<br><br>"
+					+ loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
+				dom.perf = Math.round(performance.now() - t0) + " ms"
+			} else {
+				dom.pass1.innerHTML = s4 +"PASS ONE"+ sc +"<br><br>"+ listSmall.join("<br>")
+				// run second test
+				Promise.all([
+					test(listSmall, datesBig)
+				]).then(function(result){
+					listSmall = result[0]
+					if (listSmall.length == 1) {
+						let loneResult = listSmall[0]
+						dom.pass2.innerHTML = s4 +"PASS TWO"+ sc +"<br><br>"
+							+ loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
+					} else {
+						dom.pass2.innerHTML = s4 +"PASS TWO"+ sc +"<br><br>"+ listSmall.join("<br>")
+					}
+					dom.perf = Math.round(performance.now() - t0) + " ms"
+				})
+			}
+		} else {
+			dom.pass1.innerHTML = "no matches"
+		}
+	})
 }
 
 fill_legend()
-run()
+build_dates(1940)
+//run()
 
 </script>
 </body>
