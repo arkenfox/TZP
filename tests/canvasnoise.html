@@ -10,7 +10,8 @@
 	<script src="testmain.js"></script>
 	<style>
 		table {width: 580px;}
-		.pad {line-height: 2.5em}
+		table td.bottom {vertical-align: bottom;}
+		hr {color: #8cdcc1}
 	</style>
 </head>
 <body>
@@ -21,7 +22,7 @@
 	</table>
 
 	<table id="tb9">
-		<col width="24%"><col width="76%">
+		<col width="18%"><col width="82%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#screen">canvas spoof fingerprinting</a>
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -32,45 +33,46 @@
 				the	differences. <code>getImageData</code> is being tested, but <code>toDataURL</code> and
 				<code>toBlob</code> can also be "decoded" (albeit a little differently)</span>
 		</td></tr>
-		<tr><td><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span>
-			</div>visuals<br><br><br><br><br>control</td>
+
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2"><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span></div>VISUALS</td></tr>
+		<tr><td class="bottom">control</td>
 			<td>
 				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
 					&nbsp <span class="s9"> &#9664 what we set</span>
-					<br><span class="pad">The control that we read values from, pixel by pixel</span>
 			</td></tr>
-
-		<tr><td>getImageData<br><br><br><br><br>test<br>result</td>
+		<tr><td></td><td><span class="intro">The control that we read values from, pixel by pixel</span></td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td class="bottom">1st read<br>getImageData</td>
 			<td>
 				<canvas id="cnvBig2" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
 				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
-					&nbsp <span class="s9"> &#9664 what we got back</span>
-					<br><span class="pad">What we have read back from the control, pixel by pixel</span>
-			</td>
-		</tr>
-		<tr><td>getImageData</td>
-			<td>
-				<image id="cnvGet2" width="20" height="20"  style="border:1px solid white;" src=""></image> &nbsp
-					&nbsp <span class="s9"> &#9664 PNG</span>
-			</td>
-		</tr>
+					&nbsp <span class="s9"> &#9664 what we got back</span></td></tr>
+		<tr><td></td><td><span class="intro">What we have read back from the control, pixel by pixel</span></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td>toDataURL | toBlob</td>
+		<tr>
+			<td class="bottom">results</td>
 			<td>
-				<image id="cnvURL" width="20" height="20"  style="border:1px solid white;" src=""></image> &nbsp
+				<span class="s9">
+				<canvas id="cnvGet2" width="20" height="20"  style="border:1px solid white;" src=""></canvas>
+					&nbsp	&#9664 getImageData &nbsp
+				<image id="cnvURL" width="20" height="20"  style="border:1px solid white;" src=""></image>
+					&nbsp	<span class="s9">	&#9664 toDataURL &nbsp
 				<image id="cnvBlob" width="20" height="20"  style="border:1px solid white;" src=""></image>
-					&nbsp <span class="s9"> &#9664 PNGs</span>
+					&nbsp	&#9664 toBlob
+				</span>
 			</td>
 		</tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
 
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td></td><td class="s9">------</td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<!-- DATA -->
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2">DATA ANALYSIS</td></tr>
 		<tr><td>control</td><td class="c mono" id="sethash"></td></tr>
 		<tr><td>1st read</td><td class="c mono" id="readhash"></td></tr>
 		<tr><td>2nd read</td><td class="c mono" id="readhash2"></td></tr>
-
 		<tr><td>stats</td><td class="c mono" id="readstats"></td></tr>
 		<tr><td>diffs</td><td class="c mono" id="readdiff"></td></tr>
 
@@ -102,7 +104,8 @@ function run() {
 			if (cnvBig.getContext) {
 				let ctxBig = cnvBig.getContext('2d'),
 					ctxCtrl = dom.cnvCtrl.getContext('2d'),
-					ctxGet = dom.cnvGet.getContext('2d')
+					ctxGet = dom.cnvGet.getContext('2d'),
+					ctxGet2 = dom.cnvGet2.getContext('2d'),
 					ctxBig2 = dom.cnvBig2.getContext('2d')
 
 				// output SET visuals
@@ -128,7 +131,8 @@ function run() {
 				dom.sethash = hashSet
 
 				// getImageData
-				//cnvGet2.src = whatever
+				let imageData = ctxCtrl.getImageData(0,0, cnvCtrl.width, cnvCtrl.height)
+				ctxGet2.putImageData(imageData, 0, 0)
 
 				// toDataURL
 				let dataURL = cnvCtrl.toDataURL("image/png")
