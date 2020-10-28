@@ -38,6 +38,7 @@
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
+		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
 		<tr><td>83</td><td id="n83"></td><td class="c mono" id="v83"></td></tr>
 		<tr><td>83</td><td id="n83a"></td><td class="c mono" id="v83a"></td></tr>
 		<tr><td>82</td><td id="n82"></td><td class="c mono" id="v82"></td></tr>
@@ -129,6 +130,15 @@ function outputVersion() {
 			t0 = performance.now()
 		}
 	}
+
+	// 84: 1673440
+	let t84 = performance.now(), ver84 = xF
+	try {
+		eval("var x = @")
+	} catch(e) {
+		if (e.message == "illegal character U+0040") {ver84 = xS}
+	}
+	output("84", "1673440", ver84, performance.now()-t84)
 
 	// 83: 1667094
 	let t83 = performance.now(), ver83 = xF
@@ -470,7 +480,6 @@ function outputVersion() {
 	let test42 = new Date("19999-11-11").toString()
 	if (test42 !== "Invalid Date") {ver42 = xOMG}
 	output("42", "", ver42, performance.now()-t42)
-
 }
 
 function rerunVersion() {
