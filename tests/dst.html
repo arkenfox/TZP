@@ -521,11 +521,8 @@ function fill_legend() {
 	dom.legend.innerHTML = header + output.join("<br>")
 }
 
-function build_dates(startyear) {
-	// temp function to see what running lots of dates is like
-		// vs getting select dates from IANA
-
-	// vars
+function build_dates(startyear, endyear, step) {
+	// programatically build a wider set of dates
 	datesBig = []
 	let days = [
 		"January 1",
@@ -535,7 +532,7 @@ function build_dates(startyear) {
 	]
 	let suffix = " 13:00:00 UTC"
 	// build
-	for (let i = startyear; i < 2021; i++) {
+	for (let i = startyear; i < (endyear + 1); i = i + step) {
 		//example: "October 1, 2020 13:00:00 UTC"
 		for (let j = 0; j < days.length; j++) {
 			datesBig.push(days[j] + ", " + i + " " + suffix )
@@ -547,8 +544,7 @@ function run() {
 	dom.button.remove()
 	// vars
 	let sColor = s12.trim(),
-		k = 60000,
-		t0 = performance.now()
+		k = 60000
 	let tzControl = Intl.DateTimeFormat().resolvedOptions().timeZone
 
 	function test(listArray, dateArray) {
@@ -585,45 +581,56 @@ function run() {
 	// temp list to check changes to pacific time
 	//listBig = ["America/Dawson","America/Los_Angeles","America/Tijuana","America/Vancouver","America/Whitehorse"]
 
+
+	let t1 = performance.now()
 	Promise.all([
 		test(listBig, datesSmall)
 	]).then(function(result){
 		listSmall = result[0]
-		// output
+		let perf1 = Math.round(performance.now() - t1) + " ms"
 		dom.resolved.innerHTML = s4 + "RESOLVED OPTIONS"+ sc + "<br><br>" + tzControl
+		let header1 = s4 +"PASS ONE"+ sc +"<br><br>"
 
 		if (listSmall.length > 0) {
 			if (listSmall.length == 1) {
+				// ONLY ONE PASS NEEDED
 				let loneResult = listSmall[0]
-				dom.pass1.innerHTML = s4 +"PASS ONE"+ sc +"<br><br>"
-					+ loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
-				dom.perf = Math.round(performance.now() - t0) + " ms"
+				dom.pass1.innerHTML = header1	+ loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
+				dom.perf = perf1
 			} else {
-				dom.pass1.innerHTML = s4 +"PASS ONE"+ sc +"<br><br>"+ listSmall.join("<br>")
-				// run second test
+				// RUN A SECOND PASS
+				dom.pass1.innerHTML = s4 +"PASS ONE"+ sc +"   (" + perf1
+					+ ", " + listSmall.length +" results)<br><br>" + listSmall.join("<br>")
+				let t2 = performance.now()
 				Promise.all([
 					test(listSmall, datesBig)
 				]).then(function(result){
 					listSmall = result[0]
-					if (listSmall.length == 1) {
+					let perf2 = Math.round(performance.now() - t2) + " ms"
+					let header2 = s4 +"PASS TWO"+ sc +"   (" + perf2
+						+ (listSmall.length > 1 ? ", " + listSmall.length + " results": "") + ")<br><br>"
+					if (listSmall.length == 0) {
+						dom.pass2.innerHTML = header2 + "no matches"
+					} else if (listSmall.length == 1) {
 						let loneResult = listSmall[0]
-						dom.pass2.innerHTML = s4 +"PASS TWO"+ sc +"<br><br>"
-							+ loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
+						dom.pass2.innerHTML = header2 + loneResult + (loneResult == tzControl ? sg : sb) + " [MATCH]"+ sc
 					} else {
-						dom.pass2.innerHTML = s4 +"PASS TWO"+ sc +"<br><br>"+ listSmall.join("<br>")
+						dom.pass2.innerHTML = header2 + listSmall.join("<br>")
 					}
-					dom.perf = Math.round(performance.now() - t0) + " ms"
+					// overall perf
+					dom.perf = Math.round(performance.now() - t1) + " ms"
 				})
 			}
 		} else {
-			dom.pass1.innerHTML = "no matches"
+			dom.pass1.innerHTML = header1 + "no matches"
+			dom.perf = Math.round(performance.now() - t1) + " ms"
 		}
 	})
 }
 
 fill_legend()
-build_dates(1940)
-//run()
+build_dates(1945, 2019, 2)
+
 
 </script>
 </body>
