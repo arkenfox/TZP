@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>timezones & years</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+  <title>dst</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">timezones & years
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color" id="intro"></span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>	<span class="btn4 btn" onClick="run(`true`)">[ compare years ]</span></div>
+
+				<br><span><hr></span>
+				<span id="outputdates"></span><br><br>
+				<span id="outputA"></span>
+				<span class="spaces" id="data"></span>
+
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+
+/*
+ IANA time zone database
+ https://www.iana.org/time-zones
+ https://github.com/vvo/tzdb/
+*/
+
+var list = [
+"Africa/Abidjan",
+"Africa/Accra",
+"Africa/Addis_Ababa",
+"Africa/Algiers",
+"Africa/Asmara",
+"Africa/Bamako",
+"Africa/Bangui",
+"Africa/Banjul",
+"Africa/Bissau",
+"Africa/Blantyre",
+"Africa/Brazzaville",
+"Africa/Bujumbura",
+"Africa/Cairo",
+"Africa/Casablanca",
+"Africa/Ceuta",
+"Africa/Conakry",
+"Africa/Dakar",
+"Africa/Dar_es_Salaam",
+"Africa/Djibouti",
+"Africa/Douala",
+"Africa/El_Aaiun",
+"Africa/Freetown",
+"Africa/Gaborone",
+"Africa/Harare",
+"Africa/Johannesburg",
+"Africa/Juba",
+"Africa/Kampala",
+"Africa/Khartoum",
+"Africa/Kigali",
+"Africa/Kinshasa",
+"Africa/Lagos",
+"Africa/Libreville",
+"Africa/Lome",
+"Africa/Luanda",
+"Africa/Lubumbashi",
+"Africa/Lusaka",
+"Africa/Malabo",
+"Africa/Maputo",
+"Africa/Maseru",
+"Africa/Mbabane",
+"Africa/Mogadishu",
+"Africa/Monrovia",
+"Africa/Nairobi",
+"Africa/Ndjamena",
+"Africa/Niamey",
+"Africa/Nouakchott",
+"Africa/Ouagadougou",
+"Africa/Porto-Novo",
+"Africa/Sao_Tome",
+"Africa/Tripoli",
+"Africa/Tunis",
+"Africa/Windhoek",
+"America/Adak",
+"America/Anchorage",
+"America/Anguilla",
+"America/Antigua",
+"America/Araguaina",
+"America/Argentina/Buenos_Aires",
+"America/Argentina/Catamarca",
+"America/Argentina/Cordoba",
+"America/Argentina/Jujuy",
+"America/Argentina/La_Rioja",
+"America/Argentina/Mendoza",
+"America/Argentina/Rio_Gallegos",
+"America/Argentina/Salta",
+"America/Argentina/San_Juan",
+"America/Argentina/San_Luis",
+"America/Argentina/Tucuman",
+"America/Argentina/Ushuaia",
+"America/Aruba",
+"America/Asuncion",
+"America/Atikokan",
+"America/Bahia",
+"America/Bahia_Banderas",
+"America/Barbados",
+"America/Belem",
+"America/Belize",
+"America/Blanc-Sablon",
+"America/Boa_Vista",
+"America/Bogota",
+"America/Boise",
+"America/Cambridge_Bay",
+"America/Campo_Grande",
+"America/Cancun",
+"America/Caracas",
+"America/Cayenne",
+"America/Cayman",
+"America/Chicago",
+"America/Chihuahua",
+"America/Costa_Rica",
+"America/Creston",
+"America/Cuiaba",
+"America/Curacao",
+"America/Danmarkshavn",
+"America/Dawson",
+"America/Dawson_Creek",
+"America/Denver",
+"America/Detroit",
+"America/Dominica",
+"America/Edmonton",
+"America/Eirunepe",
+"America/El_Salvador",
+"America/Fort_Nelson",
+"America/Fortaleza",
+"America/Glace_Bay",
+"America/Godthab",
+"America/Goose_Bay",
+"America/Grand_Turk",
+"America/Grenada",
+"America/Guadeloupe",
+"America/Guatemala",
+"America/Guayaquil",
+"America/Guyana",
+"America/Halifax",
+"America/Havana",
+"America/Hermosillo",
+"America/Indiana/Indianapolis",
+"America/Indiana/Knox",
+"America/Indiana/Marengo",
+"America/Indiana/Petersburg",
+"America/Indiana/Tell_City",
+"America/Indiana/Vevay",
+"America/Indiana/Vincennes",
+"America/Indiana/Winamac",
+"America/Inuvik",
+"America/Iqaluit",
+"America/Jamaica",
+"America/Juneau",
+"America/Kentucky/Louisville",
+"America/Kentucky/Monticello",
+"America/Kralendijk",
+"America/La_Paz",
+"America/Lima",
+"America/Los_Angeles",
+"America/Lower_Princes",
+"America/Maceio",
+"America/Managua",
+"America/Manaus",
+"America/Marigot",
+"America/Martinique",
+"America/Matamoros",
+"America/Mazatlan",
+"America/Menominee",
+"America/Merida",
+"America/Metlakatla",
+"America/Mexico_City",
+"America/Miquelon",
+"America/Moncton",
+"America/Monterrey",
+"America/Montevideo",
+"America/Montserrat",
+"America/Nassau",
+"America/New_York",
+"America/Nipigon",
+"America/Nome",
+"America/Noronha",
+"America/North_Dakota/Beulah",
+"America/North_Dakota/Center",
+"America/North_Dakota/New_Salem",
+"America/Ojinaga",
+"America/Panama",
+"America/Pangnirtung",
+"America/Paramaribo",
+"America/Phoenix",
+"America/Port-au-Prince",
+"America/Port_of_Spain",
+"America/Porto_Velho",
+"America/Puerto_Rico",
+"America/Punta_Arenas",
+"America/Rainy_River",
+"America/Rankin_Inlet",
+"America/Recife",
+"America/Regina",
+"America/Resolute",
+"America/Rio_Branco",
+"America/Santarem",
+"America/Santiago",
+"America/Santo_Domingo",
+"America/Sao_Paulo",
+"America/Scoresbysund",
+"America/Sitka",
+"America/St_Barthelemy",
+"America/St_Johns",
+"America/St_Kitts",
+"America/St_Lucia",
+"America/St_Thomas",
+"America/St_Vincent",
+"America/Swift_Current",
+"America/Tegucigalpa",
+"America/Thule",
+"America/Thunder_Bay",
+"America/Tijuana",
+"America/Toronto",
+"America/Tortola",
+"America/Vancouver",
+"America/Whitehorse",
+"America/Winnipeg",
+"America/Yakutat",
+"America/Yellowknife",
+"Antarctica/Casey",
+"Antarctica/Davis",
+"Antarctica/DumontDUrville",
+"Antarctica/Macquarie",
+"Antarctica/Mawson",
+"Antarctica/McMurdo",
+"Antarctica/Palmer",
+"Antarctica/Rothera",
+"Antarctica/Syowa",
+"Antarctica/Troll",
+"Antarctica/Vostok",
+"Arctic/Longyearbyen",
+"Asia/Aden",
+"Asia/Almaty",
+"Asia/Amman",
+"Asia/Anadyr",
+"Asia/Aqtau",
+"Asia/Aqtobe",
+"Asia/Ashgabat",
+"Asia/Atyrau",
+"Asia/Baghdad",
+"Asia/Bahrain",
+"Asia/Baku",
+"Asia/Bangkok",
+"Asia/Barnaul",
+"Asia/Beirut",
+"Asia/Bishkek",
+"Asia/Brunei",
+"Asia/Chita",
+"Asia/Choibalsan",
+"Asia/Colombo",
+"Asia/Damascus",
+"Asia/Dhaka",
+"Asia/Dili",
+"Asia/Dubai",
+"Asia/Dushanbe",
+"Asia/Famagusta",
+"Asia/Gaza",
+"Asia/Hebron",
+"Asia/Ho_Chi_Minh",
+"Asia/Hong_Kong",
+"Asia/Hovd",
+"Asia/Irkutsk",
+"Asia/Jakarta",
+"Asia/Jayapura",
+"Asia/Jerusalem",
+"Asia/Kabul",
+"Asia/Kamchatka",
+"Asia/Karachi",
+"Asia/Kathmandu",
+"Asia/Khandyga",
+"Asia/Kolkata",
+"Asia/Krasnoyarsk",
+"Asia/Kuala_Lumpur",
+"Asia/Kuching",
+"Asia/Kuwait",
+"Asia/Macau",
+"Asia/Magadan",
+"Asia/Makassar",
+"Asia/Manila",
+"Asia/Muscat",
+"Asia/Nicosia",
+"Asia/Novokuznetsk",
+"Asia/Novosibirsk",
+"Asia/Omsk",
+"Asia/Oral",
+"Asia/Phnom_Penh",
+"Asia/Pontianak",
+"Asia/Pyongyang",
+"Asia/Qatar",
+"Asia/Qostanay",
+"Asia/Qyzylorda",
+"Asia/Riyadh",
+"Asia/Sakhalin",
+"Asia/Samarkand",
+"Asia/Seoul",
+"Asia/Shanghai",
+"Asia/Singapore",
+"Asia/Srednekolymsk",
+"Asia/Taipei",
+"Asia/Tashkent",
+"Asia/Tbilisi",
+"Asia/Tehran",
+"Asia/Thimphu",
+"Asia/Tokyo",
+"Asia/Tomsk",
+"Asia/Ulaanbaatar",
+"Asia/Urumqi",
+"Asia/Ust-Nera",
+"Asia/Vientiane",
+"Asia/Vladivostok",
+"Asia/Yakutsk",
+"Asia/Yangon",
+"Asia/Yekaterinburg",
+"Asia/Yerevan",
+"Atlantic/Azores",
+"Atlantic/Bermuda",
+"Atlantic/Canary",
+"Atlantic/Cape_Verde",
+"Atlantic/Faroe",
+"Atlantic/Madeira",
+"Atlantic/Reykjavik",
+"Atlantic/South_Georgia",
+"Atlantic/St_Helena",
+"Atlantic/Stanley",
+"Australia/Adelaide",
+"Australia/Brisbane",
+"Australia/Broken_Hill",
+"Australia/Currie",
+"Australia/Darwin",
+"Australia/Eucla",
+"Australia/Hobart",
+"Australia/Lindeman",
+"Australia/Lord_Howe",
+"Australia/Melbourne",
+"Australia/Perth",
+"Australia/Sydney",
+"Europe/Amsterdam",
+"Europe/Andorra",
+"Europe/Astrakhan",
+"Europe/Athens",
+"Europe/Belgrade",
+"Europe/Berlin",
+"Europe/Bratislava",
+"Europe/Brussels",
+"Europe/Bucharest",
+"Europe/Budapest",
+"Europe/Busingen",
+"Europe/Chisinau",
+"Europe/Copenhagen",
+"Europe/Dublin",
+"Europe/Gibraltar",
+"Europe/Guernsey",
+"Europe/Helsinki",
+"Europe/Isle_of_Man",
+"Europe/Istanbul",
+"Europe/Jersey",
+"Europe/Kaliningrad",
+"Europe/Kiev",
+"Europe/Kirov",
+"Europe/Lisbon",
+"Europe/Ljubljana",
+"Europe/London",
+"Europe/Luxembourg",
+"Europe/Madrid",
+"Europe/Malta",
+"Europe/Mariehamn",
+"Europe/Minsk",
+"Europe/Monaco",
+"Europe/Moscow",
+"Europe/Oslo",
+"Europe/Paris",
+"Europe/Podgorica",
+"Europe/Prague",
+"Europe/Riga",
+"Europe/Rome",
+"Europe/Samara",
+"Europe/San_Marino",
+"Europe/Sarajevo",
+"Europe/Saratov",
+"Europe/Simferopol",
+"Europe/Skopje",
+"Europe/Sofia",
+"Europe/Stockholm",
+"Europe/Tallinn",
+"Europe/Tirane",
+"Europe/Ulyanovsk",
+"Europe/Uzhgorod",
+"Europe/Vaduz",
+"Europe/Vatican",
+"Europe/Vienna",
+"Europe/Vilnius",
+"Europe/Volgograd",
+"Europe/Warsaw",
+"Europe/Zagreb",
+"Europe/Zaporozhye",
+"Europe/Zurich",
+"Indian/Antananarivo",
+"Indian/Chagos",
+"Indian/Christmas",
+"Indian/Cocos",
+"Indian/Comoro",
+"Indian/Kerguelen",
+"Indian/Mahe",
+"Indian/Maldives",
+"Indian/Mauritius",
+"Indian/Mayotte",
+"Indian/Reunion",
+"Pacific/Apia",
+"Pacific/Auckland",
+"Pacific/Bougainville",
+"Pacific/Chatham",
+"Pacific/Chuuk",
+"Pacific/Easter",
+"Pacific/Efate",
+"Pacific/Enderbury",
+"Pacific/Fakaofo",
+"Pacific/Fiji",
+"Pacific/Funafuti",
+"Pacific/Galapagos",
+"Pacific/Gambier",
+"Pacific/Guadalcanal",
+"Pacific/Guam",
+"Pacific/Honolulu",
+"Pacific/Kiritimati",
+"Pacific/Kosrae",
+"Pacific/Kwajalein",
+"Pacific/Majuro",
+"Pacific/Marquesas",
+"Pacific/Midway",
+"Pacific/Nauru",
+"Pacific/Niue",
+"Pacific/Norfolk",
+"Pacific/Noumea",
+"Pacific/Pago_Pago",
+"Pacific/Palau",
+"Pacific/Pitcairn",
+"Pacific/Pohnpei",
+"Pacific/Port_Moresby",
+"Pacific/Rarotonga",
+"Pacific/Saipan",
+"Pacific/Tahiti",
+"Pacific/Tarawa",
+"Pacific/Tongatapu",
+"Pacific/Wake",
+"Pacific/Wallis"
+]
+
+var legendclean = [],
+	dates = [],
+	days = ["January 1","July 1",],
+	years = [],
+	loopYear = "",
+	loopData = [],
+	sColor = s12.trim()
+
+sg = sg.trim()
+sb = sb.trim()
+s4 = s4.trim()
+
+function build_dates(year) {
+	// reset
+	years = []
+	dates = []
+	let suffix = " 13:00:00 UTC"
+	if (year !== undefined && year !== "") {
+		// single year
+		years.push(year)
+	} else {
+		// ALL
+			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d
+			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
+		// ACCUMULATIVE
+			//  pre: - redundant i think
+			// 1879: 328/305 : 4ff6e0102815efa2c53c9bf30917fecf229299b0
+			// 1884: 329/306 : 162085bf7a6a55f2579b998a1385e0eac289c137
+			// 1894: 330/308 : 064ca8f8939d410eea043df278824543356cebdf
+			// 1900: 331/309 : 2955cacc954c16e2deb41a941308d460f5225a80
+			// 1921: 334/311 : be8b7c883170709b71496856d5682993a320832d
+			// 1952: 339/316 : bea10d244bad3da0e3d922991a72ab17469c5416
+			// 1957: 344/321 : e0826a258ad175e883b305ce7e415b305b2a142d
+			// 1976: 347/324 : c08021ce47b41cf4a81b52b66d0e9199f1e4556c
+			// 2018: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d
+
+		// 1879+
+		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
+
+		// sort & unique
+		years.sort()
+		years = years.filter(function(item, position) {return years.indexOf(item) === position})
+	}
+	// build
+	for (let i = 0; i < years.length; i++) {
+		for (let j = 0; j < days.length; j++) {
+			dates.push(days[j] + ", " + years[i] + " " + suffix )
+		}
+	}
+}
+
+function legend(array) {
+	let header = s4.trim() +"TIMEZONES ("+ list.length	+ ") " + sc + "<a class='blue' target='blank' "
+		+ "href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>source</a><br><br>"
+		+ "<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
+	let prev = ""
+	// build once
+	if (array == undefined) {
+		if (legendclean.length == 0) {
+			list.sort()
+			// group location by area
+			for (let i = 0 ; i < list.length; i++) {
+				let parts = list[i].split("/")
+				let area = parts[0]
+				let location = parts.slice(1).join("/")
+				if (area == prev) {
+					legendclean.push("  " + location)
+				} else {
+					legendclean.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+				}
+				prev = area
+			}
+		}
+		dom.legend.innerHTML = header + legendclean.join("<br>")
+	} else {
+		let legendnew = []
+		array.sort()
+		let matchparts = array[0].split("/"),
+			match = matchparts.slice(1).join("/"),
+			counter = 0
+		for (let i = 0 ; i < list.length; i++) {
+			let parts = list[i].split("/")
+			let area = parts[0]
+			let location = parts.slice(1).join("/")
+			if (location == match) {
+				location = sg + location + sc
+				counter++
+				try {
+					matchparts = array[counter].split("/")
+					match = matchparts.slice(1).join("/")
+				} catch(e) {}
+			}
+			if (area == prev) {
+				legendnew.push("  " + location)
+			} else {
+				legendnew.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+			}
+			prev = area
+		}
+		dom.legend.innerHTML = header + legendnew.join("<br>")
+
+	}
+}
+
+function run(isLoopy) {
+
+	// reset legend
+	legend()
+	dom.data = ""
+	// rebuild dates
+	build_dates()
+
+	// loop each timezone
+	function test() {
+		// vars
+		let k = 60000,
+			results = [], // one line per timezone: everything
+			buckets = [], // locales per unique values
+			unique = [], // one line per values hash
+			bucketsizes = [],
+			data = [] //
+		 
+
+		for (let i = 0 ; i < list.length; i++) {
+			let tz = list[i]
+			let tzresults = []
+			// loop each date
+			for (let i = 0 ; i < dates.length; i++) {
+				let control = new Date(dates[i])
+				let test = control.toLocaleString('en', { timeZone: tz })
+				let number = ((Date.parse(test) - Date.parse(control))/k)
+				// don't floor in this PoC, which is about max entropy, not specific detection
+				tzresults.push(number)
+			}
+			// one result for every timezone
+			results.push(sha1(tzresults.join()) + ":"+ tz +":"+ tzresults.join(", "))
+		}
+
+		// sort + loop results, get locales per hash
+		results.sort()
+		let nxtH = "", timezones = "", tmpTZ = []
+		for (let i = 0 ; i < results.length; i++) {
+			// get current item
+			let currentHash = results[i].split(":")[0]
+			let currentTZ = results[i].split(":")[1]
+			let currentValues = results[i].split(":")[2]
+			tmpTZ.push(currentTZ)
+			// grab next item
+			if (i < results.length - 1) {
+				nextHash = results[(i+1)].split(":")[0]
+			} else {
+				nextHash = "end"
+			}
+			if (nextHash !== currentHash) {
+				let padCount = tmpTZ.length.toString()
+				padCount = padCount.padStart(3)
+				unique.push(
+					padCount
+					+ ":" + currentHash
+					+ ":" + tmpTZ.join(", ")
+					+ ":" + currentValues
+					)
+				buckets.push(tmpTZ.join())
+				bucketsizes.push(tmpTZ.length)
+				tmpTZ = [] // reset
+			}
+		}
+		// hash of locales in buckets
+		buckets.sort()
+		//console.debug(buckets.join("\n"))
+		let buckethash = sha1(buckets.join("~")) // always include a unique bucket delimiter
+		// buckets
+		bucketsizes.sort((b,a) => b-a)
+		function checkOnes(count) { return count == 1}
+		let bucketOnes = bucketsizes.filter(checkOnes)
+		let uniqueTZs = bucketOnes.length
+
+		// Loopy
+		if (isLoopy == "true") {
+			loopData.push(
+				sColor + loopYear + sc + " "
+				+ buckethash + s4 + " [" + bucketsizes.length + "] " + sc
+				+ sg + "[" + uniqueTZs + "]" + sc
+			)
+		}
+
+		// non Loopy
+		if (isLoopy == "false") {
+			// sum of bucketsizes
+			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
+
+			console.debug(buckethash, bucketsizes.length, uniqueTZs)
+
+			// unique results
+			unique.sort()
+			let counter = 1,
+				singles = [],
+				singlesclean = []
+				groupData = ""
+
+			for(let i = (unique.length - 1); i > -1; i = i-1) {
+				// four parts
+				let line = unique[i]
+				let groupCount = line.split(":")[0].trim(),
+					groupHash = line.split(":")[1],
+					groupTZ = line.split(":")[2],
+					groupNumber = counter.toString()
+
+				groupData = line.split(":")[3]
+				groupNumber = groupNumber.padStart(3)
+
+				// color up the group data, add year
+				if (years.length > 1) {
+					let parts = groupData.split(", ")
+					let prettyStr = ""
+					let prettyData = []
+
+				for (let i = 0; i < years.length; i++) {
+						prettyStr = s4 + years[i] + sc +":"
+						for (let j = 0; j < days.length; j++) {
+							prettyStr += " "+ parts[i * (j + 1)] + ","
+							// last item per year
+							if ( ((j+1)/days.length) == 1 ) {
+								prettyStr = prettyStr.slice(0, -1)
+								prettyData.push(prettyStr)
+							}
+						}
+					}
+					groupData = prettyData.join("<br>")
+				}
+
+				// build output
+				if (groupCount > 1) {
+					data.push(
+						sColor + groupNumber +": "+ groupHash + sc +" "
+						+ s4 +"["+ groupCount +"]"+ sc + "<br>"
+						+ "<ul><li>" + groupTZ + "</li>"
+						+ "<li>" + groupData + "</li></ul>"
+					)
+				} else {
+					// combine unique TZz into ont
+					singles.push(groupTZ + "<ul><li>"+ groupData + "</li></ul>")
+					singlesclean.push(groupTZ)
+				}
+				counter ++
+			}
+			if (singles.length > 0) {
+				singles.sort()
+				data.push(
+					sColor + (unique.length - singles.length + 1) + "-" + unique.length + sc + ": "
+					+ "are all unique" + " " + s4 +"["+ singles.length +"]"+ sc + "<br><br>"
+						+ singles.join("")
+				)
+			}
+
+			// output data
+			dom.data.innerHTML = data.join("<br>")
+
+			// color up unique
+			if (singles.length > 0) {
+				legend(singlesclean)
+			}
+			// perf ?
+		}
+
+	}
+
+	if (isLoopy == "true") {
+		// reset loopData
+		loopData = []
+		loopData.push(
+			sColor + "year" + sc + " "
+			+ "hash-of-locales/groups"
+			+ s4 + " [groups] " + sc
+			+ sg + "[unique]" + sc + "<br>"
+		)
+		// loop
+		let loopYears = years
+		for (let i = 0; i < loopYears.length; i++) {
+			results = []
+			loopYear = loopYears[i]
+			build_dates(loopYears[i])
+			test()
+		}
+		// output loopData
+		dom.data.innerHTML = loopData.join("<br>")
+	} else {
+		test()
+	}
+
+}
+
+legend()
+build_dates()
+
+</script>
+</body>
+</html>
