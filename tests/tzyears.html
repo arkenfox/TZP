@@ -493,7 +493,8 @@ var legendclean = [],
 	years = [],
 	loopYear = "",
 	loopData = [],
-	sColor = s12.trim()
+	sColor = s12.trim(),
+	sColor2 = s14.trim()
 
 sg = sg.trim()
 sb = sb.trim()
@@ -691,44 +692,41 @@ function run(isLoopy) {
 				// four parts
 				let line = unique[i]
 				let groupCount = line.split(":")[0].trim(),
-					groupHash = line.split(":")[1],
+					valuesHash = line.split(":")[1],
 					groupTZ = line.split(":")[2],
 					groupNumber = counter.toString()
-
 				groupData = line.split(":")[3]
 				groupNumber = groupNumber.padStart(3)
-
 				// color up the group data, add year
-				if (years.length > 1) {
-					let parts = groupData.split(", ")
-					let prettyStr = ""
-					let prettyData = []
-
+				let parts = groupData.split(", "),
+					prettyStr = "",
+					prettyData = []
 				for (let i = 0; i < years.length; i++) {
-						prettyStr = s4 + years[i] + sc +":"
-						for (let j = 0; j < days.length; j++) {
-							prettyStr += " "+ parts[i * (j + 1)] + ","
-							// last item per year
-							if ( ((j+1)/days.length) == 1 ) {
-								prettyStr = prettyStr.slice(0, -1)
-								prettyData.push(prettyStr)
-							}
+					prettyStr = s4 +"  "+ years[i] + sc +":"
+					for (let j = 0; j < days.length; j++) {
+						prettyStr += " "+ parts[i * (j + 1)] + ","
+						// last item per year
+						if ( ((j+1)/days.length) == 1 ) {
+							prettyStr = prettyStr.slice(0, -1)
+							prettyData.push(prettyStr)
 						}
 					}
-					groupData = prettyData.join("<br>")
 				}
+				groupData = prettyData.join("<br>")
 
 				// build output
 				if (groupCount > 1) {
+					let groupHash = sha1(groupTZ)
 					data.push(
 						sColor + groupNumber +": "+ groupHash + sc +" "
 						+ s4 +"["+ groupCount +"]"+ sc + "<br>"
 						+ "<ul><li>" + groupTZ + "</li>"
+						+ "<li>" + sColor2 + "values: " + valuesHash + sc + " [not years]</li>"
 						+ "<li>" + groupData + "</li></ul>"
 					)
 				} else {
-					// combine unique TZz into ont
-					singles.push(groupTZ + "<ul><li>"+ groupData + "</li></ul>")
+					// combine unique TZz into one
+					singles.push(groupTZ + "<ul><li>" + sColor2 + "values: " + valuesHash + sc + "</li><li>"+ groupData + "</li></ul>")
 					singlesclean.push(groupTZ)
 				}
 				counter ++
