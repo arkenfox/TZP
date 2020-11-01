@@ -494,7 +494,9 @@ var legendclean = [],
 	loopYear = "",
 	loopData = [],
 	sColor = s12.trim(),
-	sColor2 = s14.trim()
+	sColor2 = s14.trim(),
+	sColor3 = s16.trim(),
+	autoZero = false
 
 sg = sg.trim()
 sb = sb.trim()
@@ -510,7 +512,7 @@ function build_dates(year) {
 		years.push(year)
 	} else {
 		// ALL
-			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d
+			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d <- stable
 			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
 		// ACCUMULATIVE
 			//  pre: - redundant i think
@@ -523,9 +525,11 @@ function build_dates(year) {
 			// 1957: 344/321 : e0826a258ad175e883b305ce7e415b305b2a142d
 			// 1976: 347/324 : c08021ce47b41cf4a81b52b66d0e9199f1e4556c
 			// 2018: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d
-
-		// 1879+
 		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
+
+		// test flips
+		//days = ["January 1","April 1","July 1","October 1"]
+		//for (let i = 1879; i < 2021; i++) {years.push(i)}
 
 		// sort & unique
 		years.sort()
@@ -592,13 +596,7 @@ function legend(array) {
 	}
 }
 
-function run(isLoopy) {
-
-	// reset legend
-	legend()
-	dom.data = ""
-	// rebuild dates
-	build_dates()
+function run_test(isLoopy) {
 
 	// loop each timezone
 	function test() {
@@ -608,22 +606,58 @@ function run(isLoopy) {
 			buckets = [], // locales per unique values
 			unique = [], // one line per values hash
 			bucketsizes = [],
-			data = [] //
-		 
+			data = [], //
+			tzzero = [],
+			matches = []
 
 		for (let i = 0 ; i < list.length; i++) {
-			let tz = list[i]
-			let tzresults = []
+			let tz = list[i],
+				tzresults = []
 			// loop each date
 			for (let i = 0 ; i < dates.length; i++) {
 				let control = new Date(dates[i])
 				let test = control.toLocaleString('en', { timeZone: tz })
-				let number = ((Date.parse(test) - Date.parse(control))/k)
-				// don't floor in this PoC, which is about max entropy, not specific detection
-				tzresults.push(number)
+				let diff = ((Date.parse(test) - Date.parse(control))/k)
+				let prezero = diff
+
+				/*
+				//force integers
+					// we do it for every single value so it doesn't affect entropy
+					// BAD IDEA: we lose stability + some entropy
+				if (Number.isInteger(diff) == false) {
+					// option 1: strip decimals
+					if (diff > 0) {
+						diff = Math.floor(diff)
+					} else {
+						diff = Math.ceil(diff)
+					}
+					// option 2: always floor
+						// c7ed43efe7da9688bcb6e1c5a3fab3522bb55d88 344/320
+						//diff = Math.floor(diff)
+					// option 2: always ceil
+						// c7ed43efe7da9688bcb6e1c5a3fab3522bb55d88 344/320
+						//diff = Math.ceil(diff)
+				}
+				*/
+
+				// autoZero close results
+				if (autoZero) {
+					// eg: 1921 Amercia/Chihuahua is 0.3333333333333333
+					// eg: 1919 Amercia/Mexico_City is 0.6
+					// eg: many Amercia/Berlin is -0.4666666666666667, or even -1
+					if (diff < 1.01 && diff > -1.01 && diff !== 0) {
+						diff = 0
+						tzzero.push(tz + ": " + test + ": was " + prezero)
+					}
+				}
+				tzresults.push(diff)
 			}
 			// one result for every timezone
 			results.push(sha1(tzresults.join()) + ":"+ tz +":"+ tzresults.join(", "))
+		}
+		// auto-zero
+		if (tzzero.length > 0) {
+			console.debug("auto-zeroed\n - " + tzzero.join("\n - "))
 		}
 
 		// sort + loop results, get locales per hash
@@ -657,8 +691,9 @@ function run(isLoopy) {
 		}
 		// hash of locales in buckets
 		buckets.sort()
-		//console.debug(buckets.join("\n"))
 		let buckethash = sha1(buckets.join("~")) // always include a unique bucket delimiter
+		//console.debug(buckets.join("\n"))
+
 		// buckets
 		bucketsizes.sort((b,a) => b-a)
 		function checkOnes(count) { return count == 1}
@@ -678,7 +713,6 @@ function run(isLoopy) {
 		if (isLoopy == "false") {
 			// sum of bucketsizes
 			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
-
 			console.debug(buckethash, bucketsizes.length, uniqueTZs)
 
 			// unique results
@@ -687,6 +721,10 @@ function run(isLoopy) {
 				singles = [],
 				singlesclean = []
 				groupData = ""
+			// get a hash of what all zeros is
+			let zeroArray = []
+			for (i = 0; i < dates.length; i++) {zeroArray.push(0)}
+			let zeroHash = sha1(zeroArray.join())
 
 			for(let i = (unique.length - 1); i > -1; i = i-1) {
 				// four parts
@@ -696,16 +734,27 @@ function run(isLoopy) {
 					groupTZ = line.split(":")[2],
 					groupNumber = counter.toString()
 				groupData = line.split(":")[3]
-				groupNumber = groupNumber.padStart(3)
+
+				// color up valuesHash, track matches
+				if (valuesHash == zeroHash) {
+					valuesHash = sColor3 + valuesHash +" [you match this]"+ sc
+					matches.push(groupTZ)
+				} else {
+					valuesHash = sColor2 + valuesHash + sc
+				}
+
 				// color up the group data, add year
+				groupNumber = groupNumber.padStart(3)
 				let parts = groupData.split(", "),
 					prettyStr = "",
-					prettyData = []
+					prettyData = [],
+					partCounter = 0
 				for (let i = 0; i < years.length; i++) {
-					prettyStr = s4 +"  "+ years[i] + sc +":"
+					prettyStr = s4 + years[(i)] + sc +":"
 					for (let j = 0; j < days.length; j++) {
-						prettyStr += " "+ parts[i * (j + 1)] + ","
-						// last item per year
+						prettyStr += " "+ parts[partCounter] + ","
+						partCounter++
+						//last item per year
 						if ( ((j+1)/days.length) == 1 ) {
 							prettyStr = prettyStr.slice(0, -1)
 							prettyData.push(prettyStr)
@@ -721,12 +770,12 @@ function run(isLoopy) {
 						sColor + groupNumber +": "+ groupHash + sc +" "
 						+ s4 +"["+ groupCount +"]"+ sc + "<br>"
 						+ "<ul><li>" + groupTZ + "</li>"
-						+ "<li>" + sColor2 + "values: " + valuesHash + sc + " [not years]</li>"
+						+ "<li>" + valuesHash + "</li>"
 						+ "<li>" + groupData + "</li></ul>"
 					)
 				} else {
 					// combine unique TZz into one
-					singles.push(groupTZ + "<ul><li>" + sColor2 + "values: " + valuesHash + sc + "</li><li>"+ groupData + "</li></ul>")
+					singles.push(groupTZ + "<ul><li>" + valuesHash + "</li><li>"+ groupData + "</li></ul>")
 					singlesclean.push(groupTZ)
 				}
 				counter ++
@@ -739,17 +788,19 @@ function run(isLoopy) {
 						+ singles.join("")
 				)
 			}
-
 			// output data
 			dom.data.innerHTML = data.join("<br>")
 
-			// color up unique
+			// color up unique in legend
 			if (singles.length > 0) {
 				legend(singlesclean)
 			}
+			// ToDo: resolvedOptions timezone + matches
+			if (matches.length > 0) {
+				console.debug("matches", matches)
+			}
 			// perf ?
 		}
-
 	}
 
 	if (isLoopy == "true") {
@@ -774,6 +825,21 @@ function run(isLoopy) {
 	} else {
 		test()
 	}
+
+}
+
+function run(isLoopy) {
+	// reset legend
+	legend()
+	dom.data = "calculating..."
+	// rebuild dates
+	build_dates()
+	// pause for repaint
+	function test() {
+		clearInterval(checking)
+		run_test(isLoopy)
+	}
+	let checking = setInterval(test, 10)
 
 }
 
