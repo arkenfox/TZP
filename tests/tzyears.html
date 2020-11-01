@@ -41,10 +41,8 @@
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>	<span class="btn4 btn" onClick="run(`true`)">[ compare years ]</span></div>
-
 				<br><span><hr></span>
-				<span id="outputdates"></span><br><br>
-				<span id="outputA"></span>
+				<br><span class="spaces" id="info"></span>
 				<span class="spaces" id="data"></span>
 
 			</td></tr>
@@ -59,7 +57,11 @@
  https://github.com/vvo/tzdb/
 */
 
-var list = [
+var list = []
+var listMISC = [
+'UTC'
+]
+var listIANA = [
 "Africa/Abidjan",
 "Africa/Accra",
 "Africa/Addis_Ababa",
@@ -487,7 +489,8 @@ var list = [
 "Pacific/Wallis"
 ]
 
-var legendclean = [],
+var legendIANA = [],
+	legendMISC = []
 	dates = [],
 	days = ["January 1","July 1",],
 	years = [],
@@ -496,7 +499,8 @@ var legendclean = [],
 	sColor = s12.trim(),
 	sColor2 = s14.trim(),
 	sColor3 = s16.trim(),
-	autoZero = false
+	autoZero = false,
+	tzResolved = ""
 
 sg = sg.trim()
 sb = sb.trim()
@@ -515,7 +519,9 @@ function build_dates(year) {
 			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d <- stable
 			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
 		// ACCUMULATIVE
-			//  pre: - redundant i think
+				// anything prior to 1879 is redundant
+					// tested: every year since and including the year 0
+					// tested: negative years
 			// 1879: 328/305 : 4ff6e0102815efa2c53c9bf30917fecf229299b0
 			// 1884: 329/306 : 162085bf7a6a55f2579b998a1385e0eac289c137
 			// 1894: 330/308 : 064ca8f8939d410eea043df278824543356cebdf
@@ -528,11 +534,14 @@ function build_dates(year) {
 		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
 
 		// test flips
-		//days = ["January 1","April 1","July 1","October 1"]
-		//for (let i = 1879; i < 2021; i++) {years.push(i)}
+		//days = ["January 1","April 1","July 1","October 1"]  // do four days
+		//for (let i = 1879; i < 2021; i++) {years.push(i)}    // 1879+
+		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
+		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
+		//autoZero = true // this can affect entropy: e.g. UTC + Africa/Accra
 
-		// sort & unique
-		years.sort()
+		// sort numerically & dedupe
+		years.sort((b,a) => b-a)
 		years = years.filter(function(item, position) {return years.indexOf(item) === position})
 	}
 	// build
@@ -544,36 +553,56 @@ function build_dates(year) {
 }
 
 function legend(array) {
-	let header = s4.trim() +"TIMEZONES ("+ list.length	+ ") " + sc + "<a class='blue' target='blank' "
+	let prev = ""
+	// do once
+	if (list.length == 0) {
+		// merge
+		list = listIANA.concat(listMISC)
+		list.sort()
+		// build MISC part of legend
+		listMISC.sort()
+		legendMISC.push("<br>"+s4 + "MISC" + sc + "<br>")
+		for (let i = 0 ; i < listMISC.length; i++) {
+			legendMISC.push("  " + listMISC[i])
+		}
+		// build IANA part of legend
+		listIANA.sort()
+		for (let i = 0 ; i < listIANA.length; i++) {
+			let parts = listIANA[i].split("/")
+			let area = parts[0]
+			let location = parts.slice(1).join("/")
+			if (area == prev) {
+				legendIANA.push("  " + location)
+			} else {
+				legendIANA.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+			}
+			prev = area
+		}
+	}
+
+	let header = s4.trim() +"TIMEZONES ("+ list.length + ") " + sc + "<a class='blue' target='blank' "
 		+ "href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>source</a><br><br>"
 		+ "<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
-	let prev = ""
-	// build once
+
 	if (array == undefined) {
-		if (legendclean.length == 0) {
-			list.sort()
-			// group location by area
-			for (let i = 0 ; i < list.length; i++) {
-				let parts = list[i].split("/")
-				let area = parts[0]
-				let location = parts.slice(1).join("/")
-				if (area == prev) {
-					legendclean.push("  " + location)
-				} else {
-					legendclean.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
-				}
-				prev = area
-			}
-		}
-		dom.legend.innerHTML = header + legendclean.join("<br>")
+		dom.legend.innerHTML = header + legendMISC.join("<br>") + "<br>" + legendIANA.join("<br>")
 	} else {
-		let legendnew = []
+		// ToDo: need a new way to color the list when I add items out of alphabetical order
+			// like Etc/GMT+11 or America/Nuuk
+			// currently UTC works because alphabetically it's last
+		let legendNEW = []
+		// build MISC
+		legendNEW.push("<br>"+s4 + "MISC" + sc + "<br>")
+		for (let i = 0 ; i < listMISC.length; i++) {
+			legendNEW.push("  " + listMISC[i])
+		}
+		// build IANA
 		array.sort()
 		let matchparts = array[0].split("/"),
 			match = matchparts.slice(1).join("/"),
 			counter = 0
-		for (let i = 0 ; i < list.length; i++) {
-			let parts = list[i].split("/")
+		for (let i = 0 ; i < listIANA.length; i++) {
+			let parts = listIANA[i].split("/")
 			let area = parts[0]
 			let location = parts.slice(1).join("/")
 			if (location == match) {
@@ -585,13 +614,13 @@ function legend(array) {
 				} catch(e) {}
 			}
 			if (area == prev) {
-				legendnew.push("  " + location)
+				legendNEW.push("  " + location)
 			} else {
-				legendnew.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+				legendNEW.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
 			}
 			prev = area
 		}
-		dom.legend.innerHTML = header + legendnew.join("<br>")
+		dom.legend.innerHTML = header + legendNEW.join("<br>")
 
 	}
 }
@@ -606,7 +635,7 @@ function run_test(isLoopy) {
 			buckets = [], // locales per unique values
 			unique = [], // one line per values hash
 			bucketsizes = [],
-			data = [], //
+			data = [],
 			tzzero = [],
 			matches = []
 
@@ -632,10 +661,8 @@ function run_test(isLoopy) {
 						diff = Math.ceil(diff)
 					}
 					// option 2: always floor
-						// c7ed43efe7da9688bcb6e1c5a3fab3522bb55d88 344/320
 						//diff = Math.floor(diff)
 					// option 2: always ceil
-						// c7ed43efe7da9688bcb6e1c5a3fab3522bb55d88 344/320
 						//diff = Math.ceil(diff)
 				}
 				*/
@@ -713,7 +740,6 @@ function run_test(isLoopy) {
 		if (isLoopy == "false") {
 			// sum of bucketsizes
 			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
-			console.debug(buckethash, bucketsizes.length, uniqueTZs)
 
 			// unique results
 			unique.sort()
@@ -737,7 +763,7 @@ function run_test(isLoopy) {
 
 				// color up valuesHash, track matches
 				if (valuesHash == zeroHash) {
-					valuesHash = sColor3 + valuesHash +" [you match this]"+ sc
+					valuesHash = sg + valuesHash +" [you match this]"+ sc
 					matches.push(groupTZ)
 				} else {
 					valuesHash = sColor2 + valuesHash + sc
@@ -788,18 +814,46 @@ function run_test(isLoopy) {
 						+ singles.join("")
 				)
 			}
-			// output data
+			// build info
+			let info = []
+			info.push("    entropy hash: " + sColor + buckethash + sc)
+			info.push("   unique groups: " + bucketsizes.length)
+			info.push("unique timezones: " + sg + uniqueTZs + sc)
+			if (sumTZ !== list.length) {
+				info.push("mismatched count: " + sb + sumTZ + " total in groups" + sc)
+			}
+			info.push(" resolvedOptions: " + tzResolved)
+			if (matches.length > 0) {
+				// there can only ever be one entry at most
+				// count timezones by commas
+				let strTZ = matches[0],
+					commas = strTZ.match(/,/g)
+				if (commas == null) {
+					if (strTZ == tzResolved) {
+						// not being spoofed
+						info.push("          result: " + sg + strTZ + sc)
+					} else {
+						// spoofed
+						info.push("          result: " + strTZ)
+					}
+				} else {
+					// in a group
+					info.push("         results: " + strTZ)
+				}
+			} else {
+				// no match
+				info.push("         matches: " + sb + "none" + sc)
+			}
+			info.push("<br><hr><br>") // final line
+
+			// output data + info
+			dom.info.innerHTML = info.join("<br>")
 			dom.data.innerHTML = data.join("<br>")
 
 			// color up unique in legend
 			if (singles.length > 0) {
 				legend(singlesclean)
 			}
-			// ToDo: resolvedOptions timezone + matches
-			if (matches.length > 0) {
-				console.debug("matches", matches)
-			}
-			// perf ?
 		}
 	}
 
@@ -821,7 +875,7 @@ function run_test(isLoopy) {
 			test()
 		}
 		// output loopData
-		dom.data.innerHTML = loopData.join("<br>")
+		dom.info.innerHTML = loopData.join("<br>")
 	} else {
 		test()
 	}
@@ -831,20 +885,20 @@ function run_test(isLoopy) {
 function run(isLoopy) {
 	// reset legend
 	legend()
-	dom.data = "calculating..."
+	dom.info = "calculating"
+	dom.data = ""
 	// rebuild dates
 	build_dates()
+	tzResolved = Intl.DateTimeFormat().resolvedOptions().timeZone
 	// pause for repaint
 	function test() {
 		clearInterval(checking)
 		run_test(isLoopy)
 	}
 	let checking = setInterval(test, 10)
-
 }
 
 legend()
-build_dates()
 
 </script>
 </body>
