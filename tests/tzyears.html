@@ -627,7 +627,6 @@ function legend(array) {
 
 function run_test(isLoopy) {
 
-	// loop each timezone
 	function test() {
 		// vars
 		let k = 60000,
@@ -637,11 +636,23 @@ function run_test(isLoopy) {
 			bucketsizes = [],
 			data = [],
 			tzzero = [],
-			matches = []
+			tzresults = [],
+			matchHash = [],
+			matchList = ""
 
+		// get your hash
+		for (let i = 0 ; i < dates.length; i++) {
+			let control = new Date(dates[i])
+			let test = control.toLocaleString()
+			let diff = ((Date.parse(test) - Date.parse(control))/k)
+			tzresults.push(diff)
+		}
+		matchHash = sha1(tzresults.join())
+
+		// loop each timezone	
 		for (let i = 0 ; i < list.length; i++) {
-			let tz = list[i],
-				tzresults = []
+			let tz = list[i]
+			tzresults = []
 			// loop each date
 			for (let i = 0 ; i < dates.length; i++) {
 				let control = new Date(dates[i])
@@ -747,10 +758,6 @@ function run_test(isLoopy) {
 				singles = [],
 				singlesclean = []
 				groupData = ""
-			// get a hash of what all zeros is
-			let zeroArray = []
-			for (i = 0; i < dates.length; i++) {zeroArray.push(0)}
-			let zeroHash = sha1(zeroArray.join())
 
 			for(let i = (unique.length - 1); i > -1; i = i-1) {
 				// four parts
@@ -762,9 +769,9 @@ function run_test(isLoopy) {
 				groupData = line.split(":")[3]
 
 				// color up valuesHash, track matches
-				if (valuesHash == zeroHash) {
-					valuesHash = sg + valuesHash +" [you match this]"+ sc
-					matches.push(groupTZ)
+				if (valuesHash == matchHash) {
+					valuesHash = sColor3 + valuesHash +" [you match this]"+ sc
+					matchList = groupTZ
 				} else {
 					valuesHash = sColor2 + valuesHash + sc
 				}
@@ -822,27 +829,30 @@ function run_test(isLoopy) {
 			if (sumTZ !== list.length) {
 				info.push("mismatched count: " + sb + sumTZ + " total in groups" + sc)
 			}
-			info.push(" resolvedOptions: " + tzResolved)
-			if (matches.length > 0) {
-				// there can only ever be one entry at most
-				// count timezones by commas
-				let strTZ = matches[0],
-					commas = strTZ.match(/,/g)
+			info.push("       your hash: " + sColor3 + matchHash + sc)
+			if (matchList.length > 0) {
+				commas = matchList.match(/,/g)
 				if (commas == null) {
-					if (strTZ == tzResolved) {
-						// not being spoofed
-						info.push("          result: " + sg + strTZ + sc)
+					if (matchList == tzResolved) {
+						// real deal
+						info.push(" resolvedOptions: " + tzResolved + " [matches]")
+						info.push("   unique result: " + sg + matchList + sc)
 					} else {
 						// spoofed
-						info.push("          result: " + strTZ)
+						info.push(" resolvedOptions: " + tzResolved + " [lies]")
+						info.push("   unique result: " + matchList)
 					}
 				} else {
 					// in a group
-					info.push("         results: " + strTZ)
+					// ToDo: check if resolved option is in the list
+						// and if it is then tzResolved = [is in the group]
+				info.push("    group result: " + matchList)
+				info.push(" resolvedOptions: " + tzResolved)
 				}
 			} else {
 				// no match
-				info.push("         matches: " + sb + "none" + sc)
+				info.push("           group: " + sb + "none" + sc)
+				info.push(" resolvedOptions: " + tzResolved)
 			}
 			info.push("<br><hr><br>") // final line
 
