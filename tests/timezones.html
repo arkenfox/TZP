@@ -633,17 +633,34 @@ function run_test(isLoopy) {
 			bucketsizes = [],
 			data = [],
 			tzresults = [],
-			matchHash = [],
-			matchList = ""
+			matchHash = "",
+			matchList = "",
+			tzpHash = ""
 
-		// get your hash
-		for (let i = 0 ; i < dates.length; i++) {
-			let control = new Date(dates[i])
-			let test = control.toLocaleString()
-			let diff = ((Date.parse(test) - Date.parse(control))/k)
-			tzresults.push(diff)
+		if (isLoopy == "false") {
+			// get TZP hash
+			for (let i = 0 ; i < years.length; i++) {
+				for (let j = 0 ; j < days.length; j++) {
+					let datetime = days[j] +", "+ years[i] +" 13:00:00"
+					let control = new Date(datetime + " UTC")
+					let test = new Date(datetime)
+					let diff = ((Date.parse(test) - Date.parse(control))/k)
+					tzresults.push(diff)
+				}
+			}
+			//console.debug("tzp data\n" + tzresults)
+			tzpHash = sha1(tzresults.join())
+
+			// get matching hash
+			tzresults = []
+			for (let i = 0 ; i < dates.length; i++) {
+				let control = new Date(dates[i])
+				let test = control.toLocaleString()
+				let diff = ((Date.parse(test) - Date.parse(control))/k)
+				tzresults.push(diff)
+			}
+			matchHash = sha1(tzresults.join())
 		}
-		matchHash = sha1(tzresults.join())
 
 		// loop each timezone	
 		for (let i = 0 ; i < list.length; i++) {
@@ -791,13 +808,14 @@ function run_test(isLoopy) {
 				parts = parts.join("<br>" + ("").padStart(17))
 				return parts
 			}
-			info.push( title("entropy") + sColor + buckethash + sc)
 			info.push(
-				title("unique") + s4 + bucketsizes.length + sc +" groups, "
-					+ sg + uniqueTZs + sc + " timezones, "
+				title("unique") + bucketsizes.length +" groups, "
+					+ uniqueTZs + " timezones, "
 					+ (sumTZ == list.length ? sumTZ : sb + sumTZ +" mismatched"+ sc) +" total"
 			)
-			info.push( title("your hash") + sColor3 + matchHash + sc )
+			info.push( title("entropy") + sColor + buckethash + sc)
+			info.push( title("[tzp] hash") + tzpHash )
+			info.push( title("[toLocale] hash") + sColor2 + matchHash + sc)
 			info.push( title("resolvedOptions") + tzResolved)
 
 			// any matches
