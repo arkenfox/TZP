@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>timezones & years</title>
+<title>timezones</title>
 <style>
 </style>
 </head>
@@ -30,7 +30,7 @@
 	<table id="tb4">
 		<col width="30%"><col width="70%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">timezones & years
+			<div class="nav-title">timezones
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
@@ -38,13 +38,12 @@
 			<span class="no_color" id="intro"></span>
 		</td></tr>
 		<tr>
-			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>	<span class="btn4 btn" onClick="run(`true`)">[ compare years ]</span></div>
 				<br><span><hr></span>
-				<br><span class="spaces" id="info"></span>
+				<br><span class="spaces" id="info" style="line-height: 1.5em;"></span>
 				<span class="spaces" id="data"></span>
-
 			</td></tr>
 	</table>
 	<br>
@@ -499,7 +498,6 @@ var legendIANA = [],
 	sColor = s12.trim(),
 	sColor2 = s14.trim(),
 	sColor3 = s16.trim(),
-	autoZero = false,
 	tzResolved = ""
 
 sg = sg.trim()
@@ -538,7 +536,6 @@ function build_dates(year) {
 		//for (let i = 1879; i < 2021; i++) {years.push(i)}    // 1879+
 		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
 		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
-		//autoZero = true // this can affect entropy: e.g. UTC + Africa/Accra
 
 		// sort numerically & dedupe
 		years.sort((b,a) => b-a)
@@ -635,7 +632,6 @@ function run_test(isLoopy) {
 			unique = [], // one line per values hash
 			bucketsizes = [],
 			data = [],
-			tzzero = [],
 			tzresults = [],
 			matchHash = [],
 			matchList = ""
@@ -658,44 +654,10 @@ function run_test(isLoopy) {
 				let control = new Date(dates[i])
 				let test = control.toLocaleString('en', { timeZone: tz })
 				let diff = ((Date.parse(test) - Date.parse(control))/k)
-				let prezero = diff
-
-				/*
-				//force integers
-					// we do it for every single value so it doesn't affect entropy
-					// BAD IDEA: we lose stability + some entropy
-				if (Number.isInteger(diff) == false) {
-					// option 1: strip decimals
-					if (diff > 0) {
-						diff = Math.floor(diff)
-					} else {
-						diff = Math.ceil(diff)
-					}
-					// option 2: always floor
-						//diff = Math.floor(diff)
-					// option 2: always ceil
-						//diff = Math.ceil(diff)
-				}
-				*/
-
-				// autoZero close results
-				if (autoZero) {
-					// eg: 1921 Amercia/Chihuahua is 0.3333333333333333
-					// eg: 1919 Amercia/Mexico_City is 0.6
-					// eg: many Amercia/Berlin is -0.4666666666666667, or even -1
-					if (diff < 1.01 && diff > -1.01 && diff !== 0) {
-						diff = 0
-						tzzero.push(tz + ": " + test + ": was " + prezero)
-					}
-				}
 				tzresults.push(diff)
 			}
 			// one result for every timezone
 			results.push(sha1(tzresults.join()) + ":"+ tz +":"+ tzresults.join(", "))
-		}
-		// auto-zero
-		if (tzzero.length > 0) {
-			console.debug("auto-zeroed\n - " + tzzero.join("\n - "))
 		}
 
 		// sort + loop results, get locales per hash
@@ -823,38 +785,46 @@ function run_test(isLoopy) {
 			}
 			// build info
 			let info = []
-			info.push("    entropy hash: " + sColor + buckethash + sc)
-			info.push("   unique groups: " + bucketsizes.length)
-			info.push("unique timezones: " + sg + uniqueTZs + sc)
-			if (sumTZ !== list.length) {
-				info.push("mismatched count: " + sb + sumTZ + " total in groups" + sc)
+			function title(input) {return input.padStart(15) + ": "}
+			function splitgroup() {
+				let parts = matchList.split(", ")
+				parts = parts.join("<br>" + ("").padStart(17))
+				return parts
 			}
-			info.push("       your hash: " + sColor3 + matchHash + sc)
+			info.push( title("entropy") + sColor + buckethash + sc)
+			info.push(
+				title("unique") + s4 + bucketsizes.length + sc +" groups, "
+					+ sg + uniqueTZs + sc + " timezones, "
+					+ (sumTZ == list.length ? sumTZ : sb + sumTZ +" mismatched"+ sc) +" total"
+			)
+			info.push( title("your hash") + sColor3 + matchHash + sc )
+			info.push( title("resolvedOptions") + tzResolved)
+
+			// any matches
 			if (matchList.length > 0) {
 				commas = matchList.match(/,/g)
 				if (commas == null) {
+					// single timezone
+					info.push( title("your group") + matchList)
 					if (matchList == tzResolved) {
-						// real deal
-						info.push(" resolvedOptions: " + tzResolved + " [matches]")
-						info.push("   unique result: " + sg + matchList + sc)
+						info.push( title("veracity") + "100% true")
 					} else {
-						// spoofed
-						info.push(" resolvedOptions: " + tzResolved + " [lies]")
-						info.push("   unique result: " + matchList)
+						info.push( title("veracity") + "spoofing detected")
 					}
 				} else {
-					// in a group
-					// ToDo: check if resolved option is in the list
-						// and if it is then tzResolved = [is in the group]
-				info.push("    group result: " + matchList)
-				info.push(" resolvedOptions: " + tzResolved)
+					// multiple timezones
+					info.push( title("your group") + splitgroup())
+					if (matchList.search(tzResolved) == -1) {
+						info.push( title("veracity") + "spoofing detected")
+					} else {
+						info.push( title("veracity") + "seems legit")
+					}
 				}
 			} else {
 				// no match
-				info.push("           group: " + sb + "none" + sc)
-				info.push(" resolvedOptions: " + tzResolved)
+				info.push( title("your group") + "none")
 			}
-			info.push("<br><hr><br>") // final line
+			info.push("<br><hr>") // final line
 
 			// output data + info
 			dom.info.innerHTML = info.join("<br>")
