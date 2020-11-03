@@ -56,11 +56,41 @@
  https://github.com/vvo/tzdb/
 */
 
-var list = []
-var listMISC = [
-'UTC'
-]
-var listIANA = [
+var list = [
+// MISC: the AA part is bogus
+"AA/UTC",
+
+"AA/GMT",
+"AA/Etc/GMT+12",
+"AA/Etc/GMT+11",
+"AA/Etc/GMT+10",
+"AA/Etc/GMT+9",
+"AA/Etc/GMT+8",
+"AA/Etc/GMT+7",
+"AA/Etc/GMT+6",
+"AA/Etc/GMT+5",
+"AA/Etc/GMT+4",
+"AA/Etc/GMT+3",
+"AA/Etc/GMT+2",
+"AA/Etc/GMT+1",
+"AA/Etc/GMT",
+"AA/Etc/GMT-1",
+"AA/Etc/GMT-2",
+"AA/Etc/GMT-3",
+"AA/Etc/GMT-4",
+"AA/Etc/GMT-5",
+"AA/Etc/GMT-6",
+"AA/Etc/GMT-7",
+"AA/Etc/GMT-8",
+"AA/Etc/GMT-9",
+"AA/Etc/GMT-10",
+"AA/Etc/GMT-11",
+"AA/Etc/GMT-12",
+"AA/Etc/GMT-13",
+"AA/Etc/GMT-14",
+
+
+// IANA 425 current
 "Africa/Abidjan",
 "Africa/Accra",
 "Africa/Addis_Ababa",
@@ -488,8 +518,7 @@ var listIANA = [
 "Pacific/Wallis"
 ]
 
-var legendIANA = [],
-	legendMISC = []
+var legendclean = [],
 	dates = [],
 	days = ["January 1","July 1",],
 	years = [],
@@ -513,29 +542,20 @@ function build_dates(year) {
 		// single year
 		years.push(year)
 	} else {
-		// ALL
+		// ALL: from 425 list
 			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d <- stable
 			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
-		// ACCUMULATIVE
-				// anything prior to 1879 is redundant
-					// tested: every year since and including the year 0
-					// tested: negative years
-			// 1879: 328/305 : 4ff6e0102815efa2c53c9bf30917fecf229299b0
-			// 1884: 329/306 : 162085bf7a6a55f2579b998a1385e0eac289c137
-			// 1894: 330/308 : 064ca8f8939d410eea043df278824543356cebdf
-			// 1900: 331/309 : 2955cacc954c16e2deb41a941308d460f5225a80
-			// 1921: 334/311 : be8b7c883170709b71496856d5682993a320832d
-			// 1952: 339/316 : bea10d244bad3da0e3d922991a72ab17469c5416
-			// 1957: 344/321 : e0826a258ad175e883b305ce7e415b305b2a142d
-			// 1976: 347/324 : c08021ce47b41cf4a81b52b66d0e9199f1e4556c
-			// 2018: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d
+		// anything prior to 1879 is redundant
+			// tested: every year from 0-2100
+			// tested: negative years
 		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
 
 		// test flips
-		//days = ["January 1","April 1","July 1","October 1"]  // do four days
+		//days = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
 		//for (let i = 1879; i < 2021; i++) {years.push(i)}    // 1879+
 		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
 		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
+		//for (let i = 2000; i < 2100; i++) {years.push(i)}    // add the future
 
 		// sort numerically & dedupe
 		years.sort((b,a) => b-a)
@@ -552,26 +572,17 @@ function build_dates(year) {
 function legend(array) {
 	let prev = ""
 	// do once
-	if (list.length == 0) {
-		// merge
-		list = listIANA.concat(listMISC)
+	if (legendclean.length == 0) {
 		list.sort()
-		// build MISC part of legend
-		listMISC.sort()
-		legendMISC.push("<br>"+s4 + "MISC" + sc + "<br>")
-		for (let i = 0 ; i < listMISC.length; i++) {
-			legendMISC.push("  " + listMISC[i])
-		}
-		// build IANA part of legend
-		listIANA.sort()
-		for (let i = 0 ; i < listIANA.length; i++) {
-			let parts = listIANA[i].split("/")
+		for (let i = 0 ; i < list.length; i++) {
+			let parts = list[i].split("/")
 			let area = parts[0]
 			let location = parts.slice(1).join("/")
 			if (area == prev) {
-				legendIANA.push("  " + location)
+				legendclean.push("  " + location)
 			} else {
-				legendIANA.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
+				legendclean.push("<br>"+ newArea + "<br><br>  " + location)
 			}
 			prev = area
 		}
@@ -582,24 +593,15 @@ function legend(array) {
 		+ "<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
 
 	if (array == undefined) {
-		dom.legend.innerHTML = header + legendMISC.join("<br>") + "<br>" + legendIANA.join("<br>")
+		dom.legend.innerHTML = header + legendclean.join("<br>")
 	} else {
-		// ToDo: need a new way to color the list when I add items out of alphabetical order
-			// like Etc/GMT+11 or America/Nuuk
-			// currently UTC works because alphabetically it's last
 		let legendNEW = []
-		// build MISC
-		legendNEW.push("<br>"+s4 + "MISC" + sc + "<br>")
-		for (let i = 0 ; i < listMISC.length; i++) {
-			legendNEW.push("  " + listMISC[i])
-		}
-		// build IANA
 		array.sort()
 		let matchparts = array[0].split("/"),
 			match = matchparts.slice(1).join("/"),
 			counter = 0
-		for (let i = 0 ; i < listIANA.length; i++) {
-			let parts = listIANA[i].split("/")
+		for (let i = 0 ; i < list.length; i++) {
+			let parts = list[i].split("/")
 			let area = parts[0]
 			let location = parts.slice(1).join("/")
 			if (location == match) {
@@ -613,12 +615,12 @@ function legend(array) {
 			if (area == prev) {
 				legendNEW.push("  " + location)
 			} else {
-				legendNEW.push("<br>"+s4 + area.toUpperCase() + sc + "<br><br>  " + location)
+				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
+				legendNEW.push("<br>"+ newArea + "<br><br>  " + location)
 			}
 			prev = area
 		}
 		dom.legend.innerHTML = header + legendNEW.join("<br>")
-
 	}
 }
 
@@ -635,7 +637,8 @@ function run_test(isLoopy) {
 			tzresults = [],
 			matchHash = "",
 			matchList = "",
-			tzpHash = ""
+			tzpHash = "",
+			invalid = []
 
 		if (isLoopy == "false") {
 			// get TZP hash
@@ -665,27 +668,36 @@ function run_test(isLoopy) {
 		// loop each timezone	
 		for (let i = 0 ; i < list.length; i++) {
 			let tz = list[i]
+			let tzclean = tz
+			// strip bogus area
+			if (tz.substring(0,3) == "AA/") { tzclean = tz.substring(3)}
 			tzresults = []
 			// loop each date
 			for (let i = 0 ; i < dates.length; i++) {
-				let control = new Date(dates[i])
-				let test = control.toLocaleString('en', { timeZone: tz })
-				let diff = ((Date.parse(test) - Date.parse(control))/k)
-				tzresults.push(diff)
+				try {
+					let control = new Date(dates[i])
+					let test = control.toLocaleString('en', { timeZone: tzclean })
+					let diff = ((Date.parse(test) - Date.parse(control))/k)
+					tzresults.push(diff)
+				} catch(e) {
+					invalid.push(tzclean)
+				}
 			}
 			// one result for every timezone
-			results.push(sha1(tzresults.join()) + ":"+ tz +":"+ tzresults.join(", "))
+			results.push(sha1(tzresults.join()) + ":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
 		}
 
 		// sort + loop results, get locales per hash
 		results.sort()
-		let nxtH = "", timezones = "", tmpTZ = []
+		let nxtH = "", timezones = "", tmpTZ = [], tmpLegend = []
 		for (let i = 0 ; i < results.length; i++) {
 			// get current item
 			let currentHash = results[i].split(":")[0]
 			let currentTZ = results[i].split(":")[1]
-			let currentValues = results[i].split(":")[2]
+			let currentLegend = results[i].split(":")[2]
+			let currentValues = results[i].split(":")[3]
 			tmpTZ.push(currentTZ)
+			tmpLegend.push(currentLegend)
 			// grab next item
 			if (i < results.length - 1) {
 				nextHash = results[(i+1)].split(":")[0]
@@ -699,11 +711,13 @@ function run_test(isLoopy) {
 					padCount
 					+ ":" + currentHash
 					+ ":" + tmpTZ.join(", ")
+					+ ":" + tmpLegend.join(", ")
 					+ ":" + currentValues
-					)
+				)
 				buckets.push(tmpTZ.join())
 				bucketsizes.push(tmpTZ.length)
 				tmpTZ = [] // reset
+				tmpLegend = []
 			}
 		}
 		// hash of locales in buckets
@@ -730,12 +744,14 @@ function run_test(isLoopy) {
 		if (isLoopy == "false") {
 			// sum of bucketsizes
 			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
+			invalid = invalid.filter(function(item, position) {return invalid.indexOf(item) === position})
+			sumTZ = (sumTZ - invalid.length)
 
 			// unique results
 			unique.sort()
 			let counter = 1,
 				singles = [],
-				singlesclean = []
+				singlesLegend = []
 				groupData = ""
 
 			for(let i = (unique.length - 1); i > -1; i = i-1) {
@@ -744,8 +760,9 @@ function run_test(isLoopy) {
 				let groupCount = line.split(":")[0].trim(),
 					valuesHash = line.split(":")[1],
 					groupTZ = line.split(":")[2],
+					groupLegend = line.split(":")[3],
 					groupNumber = counter.toString()
-				groupData = line.split(":")[3]
+				groupData = line.split(":")[4]
 
 				// color up valuesHash, track matches
 				if (valuesHash == matchHash) {
@@ -788,7 +805,7 @@ function run_test(isLoopy) {
 				} else {
 					// combine unique TZz into one
 					singles.push(groupTZ + "<ul><li>" + valuesHash + "</li><li>"+ groupData + "</li></ul>")
-					singlesclean.push(groupTZ)
+					singlesLegend.push(groupLegend)
 				}
 				counter ++
 			}
@@ -802,18 +819,26 @@ function run_test(isLoopy) {
 			}
 			// build info
 			let info = []
-			function title(input) {return input.padStart(15) + ": "}
+			function title(input, color) {
+				console.debug(color, input)
+				if (color == undefined) {
+					return input.padStart(15) + ": "
+				} else {
+					return color + input.padStart(15) + ": " + sc
+				}
+			}
 			function splitgroup() {
 				let parts = matchList.split(", ")
 				parts = parts.join("<br>" + ("").padStart(17))
 				return parts
 			}
+
 			info.push(
 				title("unique") + bucketsizes.length +" groups, "
 					+ uniqueTZs + " timezones, "
 					+ (sumTZ == list.length ? sumTZ : sb + sumTZ +" mismatched"+ sc) +" total"
 			)
-			info.push( title("entropy") + sColor + buckethash + sc)
+			info.push( title("[groups] hash") + sColor + buckethash + sc)
 			info.push( title("[tzp] hash") + tzpHash )
 			info.push( title("[toLocale] hash") + sColor2 + matchHash + sc)
 			info.push( title("resolvedOptions") + tzResolved)
@@ -842,6 +867,10 @@ function run_test(isLoopy) {
 				// no match
 				info.push( title("your group") + "none")
 			}
+			// invalid timezones
+			if (invalid.length > 0) {
+				info.push( title(invalid.length + " invalid", sb) + invalid.join(", "))
+			}
 			info.push("<br><hr>") // final line
 
 			// output data + info
@@ -850,7 +879,7 @@ function run_test(isLoopy) {
 
 			// color up unique in legend
 			if (singles.length > 0) {
-				legend(singlesclean)
+				legend(singlesLegend)
 			}
 		}
 	}
