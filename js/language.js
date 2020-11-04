@@ -502,7 +502,7 @@ function get_lang_datetime() {
 	if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
 
 	// hash 0-11: language
-	var lHash0 = sha1(res.slice(0,12).join("-"))
+	let lHash0 = sha1(res.slice(0,12).join("-"))
 	//console.debug("language", lHash0, res.slice(0,12))
 	if (isFF) {
 		if (lHash0 == "4a6ed35c7fba3d1bb488859f1bd85fdf015cad04") {
@@ -518,14 +518,14 @@ function get_lang_datetime() {
 	dom.lHash0.innerHTML = lHash0
 
 	// hash 12-16: timezone
-	var lHash1 = sha1(res.slice(12,17).join("-"))
+	let lHash1 = sha1(res.slice(12,17).join("-"))
 	//console.debug("timezone", lHash1, res.slice(12,17))
 	bTZ = (lHash1 == "254494c3d7be4c1fa40f72d399a57a8f94196db1" ? true : false)
 	lHash1 += (bTZ ? rfp_green : rfp_red)
 	dom.lHash1.innerHTML = lHash1
 
 	// hash 17+: datetime
-	var lHash2 = sha1(res.slice(17,res.length).join("-"))
+	let lHash2 = sha1(res.slice(17,res.length).join("-"))
 	dom.lHash2 = lHash2
 	// RFP
 	let ff = ""
@@ -626,15 +626,15 @@ function get_lang_datetime() {
 				// compare hashes
 				if (isFF) {
 					let wHash0 = sha1(e.data.slice(0,12).join("-"))
-					if (wHash0 !== lHash0) {
+					if (wHash0 !== sha1(res.slice(0,12).join("-"))) {
 						dom.lHash0.innerHTML = lHash0 +"<br>"+ sb + wHash0 + sc+" [see details]"
 					}
 					let wHash1 = sha1(e.data.slice(12,17).join("-"))
-					if (wHash1 !== lHash1) {
+					if (wHash1 !== sha1(res.slice(12,17).join("-"))) {
 						dom.lHash1.innerHTML = lHash1 +"<br>"+ sb + wHash1 + sc+" [see details]"
 					}
 					let wHash2 = sha1(e.data.slice(17,e.data.length).join("-"))
-					if (wHash2 !== lHash2) {
+					if (wHash2 !== sha1(res.slice(17,res.length).join("-"))) {
 						dom.lHash2.innerHTML = lHash2 +"<br>"+ sb + wHash2 + sc+" [see details]"
 					}
 				}
