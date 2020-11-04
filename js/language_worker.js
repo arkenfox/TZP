@@ -31,20 +31,21 @@ addEventListener("message", function(msg) {
 			} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
 			} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
 			} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
+			} else if (item == 10) {return "n/a"
+			} else if (item == 11) {return "n/a"
 			// timezone
-			} else if (item == 10) {
-				// just do the one year in service worker for now while I experiment
+			} else if (item == 12) {
 				let k = 60000, yr = Date().split` `[3]
 				// control
-				let c1 = new Date("January 15, "+yr+" 13:00:00 UTC"),
-					c2 = new Date("April 15, "+yr+" 13:00:00 UTC"),
-					c3 = new Date("July 15, "+yr+" 13:00:00 UTC"),
-					c4 = new Date("October 15, "+yr+" 13:00:00 UTC")
+				let c1 = new Date("January 1, "+yr+" 13:00:00 UTC"),
+					c2 = new Date("April 1, "+yr+" 13:00:00 UTC"),
+					c3 = new Date("July 1, "+yr+" 13:00:00 UTC"),
+					c4 = new Date("October 1, "+yr+" 13:00:00 UTC")
 				// real
-				let r1 = new Date("January 15, "+yr+" 13:00:00"),
-					r2 = new Date("April 15, "+yr+" 13:00:00"),
-					r3 = new Date("July 15, "+yr+" 13:00:00"),
-					r4 = new Date("October 15, "+yr+" 13:00:00")
+				let r1 = new Date("January 1, "+yr+" 13:00:00"),
+					r2 = new Date("April 1, "+yr+" 13:00:00"),
+					r3 = new Date("July 1, "+yr+" 13:00:00"),
+					r4 = new Date("October 1, "+yr+" 13:00:00")
 				return r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
 					+", "+ r3.getTimezoneOffset() +", "+ r4.getTimezoneOffset()
 					// getTime
@@ -53,36 +54,53 @@ addEventListener("message", function(msg) {
 					// Date.parse
 					+ " | "+ ((Date.parse(r1) - Date.parse(c1))/k) + ", "+ ((Date.parse(r2) - Date.parse(c2))/k)
 					+ ", "+ ((Date.parse(r3) - Date.parse(c3))/k) + ", "+ ((Date.parse(r4) - Date.parse(c4))/k)
-			} else if (item == 11) {return Intl.DateTimeFormat().resolvedOptions().timeZone
+			} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
+			} else if (item == 14) {
+				let tzresults = [],
+					days = ["January 1","July 1",],
+					years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,],
+					k = 60000
+				for (let i = 0 ; i < years.length; i++) {
+					for (let j = 0 ; j < days.length; j++) {
+						let datetime = days[j] +", "+ years[i] +" 13:00:00"
+						let control = new Date(datetime + " UTC")
+						let test = new Date(datetime)
+						let diff = ((Date.parse(test) - Date.parse(control))/k)
+						tzresults.push(diff)
+					}
+				}
+				return tzresults.join()
+			} else if (item == 15) {return "n/a"
+			} else if (item == 16) {return "n/a"
 			// date/time format
-			} else if (item == 12) {
+			} else if (item == 17) {
 				return (amWorker ? ""+d : d)
-			} else if (item == 13) {return d.toString()
-			} else if (item == 14) {return d.toLocaleString(undefined, o)
-			} else if (item == 15) {return d.toLocaleDateString(undefined, o)
-			} else if (item == 16) {return d.toLocaleTimeString(undefined, o)
-			} else if (item == 17) {return Intl.DateTimeFormat(undefined, o).format(d)
-			} else if (item == 18) {
+			} else if (item == 18) {return d.toString()
+			} else if (item == 19) {return d.toLocaleString(undefined, o)
+			} else if (item == 20) {return d.toLocaleDateString(undefined, o)
+			} else if (item == 21) {return d.toLocaleTimeString(undefined, o)
+			} else if (item == 22) {return Intl.DateTimeFormat(undefined, o).format(d)
+			} else if (item == 23) {
 				let f = Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric",
 					year: "numeric", hour: "numeric", minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long" })
 				let temp = f.formatToParts(d)
 				return temp.map(function(entry){return entry.value}).join("")
-			} else if (item == 19) {return d.toGMTString()
-			} else if (item == 20) {return d.toUTCString()
-			} else if (item == 21) {return d.toLocaleString()
-			} else if (item == 22) {return [d].toLocaleString()
-			} else if (item == 23) {return d.toLocaleDateString()
-			} else if (item == 24) {return Intl.DateTimeFormat().format(d)
-			} else if (item == 25) {return d.toLocaleTimeString()
-			} else if (item == 26) {return d.toTimeString()
-			} else if (item == 27) {
+			} else if (item == 24) {return d.toGMTString()
+			} else if (item == 25) {return d.toUTCString()
+			} else if (item == 26) {return d.toLocaleString()
+			} else if (item == 27) {return [d].toLocaleString()
+			} else if (item == 28) {return d.toLocaleDateString()
+			} else if (item == 29) {return Intl.DateTimeFormat().format(d)
+			} else if (item == 30) {return d.toLocaleTimeString()
+			} else if (item == 31) {return d.toTimeString()
+			} else if (item == 32) {
 				return Intl.DateTimeFormat(undefined, {hour: "numeric"}).resolvedOptions().hourCycle
-			} else if (item == 28) {
+			} else if (item == 33) {
 				// 65+: Intl.RelativeTimeFormat
 				let rtf = new Intl.RelativeTimeFormat(undefined, {style: "long", numeric: "auto"})
 				return rtf.format(-7, "day") +", "+ rtf.format(-1, "day") +", "+
 					rtf.format(1, "day") +", "+ rtf.format(1, "month") +", "+ rtf.format(2, "year")
-			} else if (item == 29) {
+			} else if (item == 34) {
 				// 70+: Intl.RelativeTimeFormat formatToParts
 				let rtf = new Intl.RelativeTimeFormat(undefined, {style: "long", numeric: "auto"})
 				function concat_parts(length, value) {
@@ -101,7 +119,7 @@ addEventListener("message", function(msg) {
 					+ ", " + concat_parts("45", "second")
 					+ ", " + concat_parts("1", "day")
 					+ ", " + concat_parts("1", "quarter")
-			} else if (item == 30) {
+			} else if (item == 35) {
 				// Intl.NumberFormat
 				function err_check(name, error) {
 					if (isFF) {
@@ -150,7 +168,7 @@ addEventListener("message", function(msg) {
 					tmp += " | "+ (55).toLocaleString(undefined, {signDisplay: "always"})
 				} catch(e) {}
 				return tmp
-			} else if (item == 31) {
+			} else if (item == 36) {
 				// [formatToParts] Intl.NumberFormat
 					// ToDo: trap script blocking
 				let tmp = "", str = "", type ="", charcode = ""
@@ -196,13 +214,13 @@ addEventListener("message", function(msg) {
 				str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(4/5 + "%")[0])
 				tmp += " | "+ clean_string(type, str, false)
 				return tmp
-			} else if (item == 32) {
+			} else if (item == 37) {
 				// 70+: [BigInt] Intl.NumberFormat
 				let bint = BigInt(9007199254740991)
 				bint = eval("987654321987654321n")
 				let numFormat = new Intl.NumberFormat(undefined)
 				return numFormat.format(bint)
-			} else if (item == 33) {
+			} else if (item == 38) {
 				// 70+: [BigInt] toLocaleString
 				let bint = BigInt(9007199254740991)
 				bint = eval("123456789123456789n")
@@ -212,13 +230,13 @@ addEventListener("message", function(msg) {
 					tmp = zNS
 				}
 				return tmp
-			} else if (item == 34) {
+			} else if (item == 39) {
 				return Number(1234567.89).toLocaleString(undefined, {style: "currency", currency: "USD", currencyDisplay: "symbol"})
-			} else if (item == 35) {
+			} else if (item == 40) {
 				return Intl.DateTimeFormat().resolvedOptions().calendar
-			} else if (item == 36) {
+			} else if (item == 41) {
 				return Intl.DateTimeFormat().resolvedOptions().numberingSystem
-			} else if (item == 37) {
+			} else if (item == 42) {
 				// 70+
 				let tmp = new Intl.RelativeTimeFormat().resolvedOptions().numberingSystem
 				// 65-69
@@ -226,7 +244,7 @@ addEventListener("message", function(msg) {
 					if (tmp == undefined) {tmp = "not supported [undefined]"}
 				}
 				return tmp
-			} else if (item == 38) {
+			} else if (item == 43) {
 				// relatedYear, yearName
 				let tmp = Intl.DateTimeFormat(undefined, {relatedYear: "long"})
 					tmp = tmp.formatToParts(d)
@@ -235,7 +253,7 @@ addEventListener("message", function(msg) {
 					tmpb = tmpb.formatToParts(d)
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
-			} else if (item == 39) {
+			} else if (item == 44) {
 				// dayPeriod: 1569103: nightly-only FF78+
 				function get_day_period(date) {
 					return new Intl.DateTimeFormat(undefined, {dayPeriod: "long"}).format(date)
@@ -258,7 +276,7 @@ addEventListener("message", function(msg) {
 						+ ", " + get_day_period(new Date("2019-01-30T22:00:00"))
 				}
 				return tmp
-			} else if (item == 40) {
+			} else if (item == 45) {
 				// ListFormat: 1589095: 78+
 				let tmp = "", res40 = []
 				let	styles = ['long','short','narrow'],
@@ -270,7 +288,7 @@ addEventListener("message", function(msg) {
 				})
 				if (res40.length > 0) {tmp = res40.join(" | ")}
 				return tmp
-			} else if (item == 41) {
+			} else if (item == 46) {
 				// 1557718: 79+
 				let list = ["short", "medium","long"],
 					res41 = []
@@ -279,14 +297,14 @@ addEventListener("message", function(msg) {
 					res41.push(style.format(d))
 				})
 				return res41.join(" | ")
-			} else if (item == 42) {
+			} else if (item == 47) {
 				// FF80+: 1496584, 1653024: formatRange
 				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 				let f = Intl.DateTimeFormat(undefined, o)
 				return f.formatRange(date1, date2) +"<br>"+ f.formatRange(date1, date3)
-			} else if (item == 43) {
+			} else if (item == 48) {
 				let prules = [], nos = [0,1,2,3,4,6,7,11,20,21,100]
 				let prev = "", current = ""
 				for (let i=0; i < nos.length; i++) {
@@ -308,17 +326,17 @@ addEventListener("message", function(msg) {
 				if (item == 5) {
 					// ToDo: add DisplayNames version check when it lands in stable
 					if (e.message == "Intl.DisplayNames is not a function") {msg = zNS}
-				} else if (item == 6 || item == 40) {
+				} else if (item == 6 || item == 45) {
 					if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
-				} else if (item == 9|| item == 28 || item == 37) {
+				} else if (item == 9|| item == 33 || item == 42) {
 					if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
-				} else if (item == 29 ) {
+				} else if (item == 34 ) {
 					if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
 					if (e.message == "rtf.formatToParts is not a function" && isVer > 64 && isVer < 70) {msg = zNS}
-				} else if (item == 32 || item == 33) {
+				} else if (item == 37 || item == 38) {
 					if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS + " [BigInt]"}
 					if (e.message == "can't convert BigInt to number" && isVer > 67 && isVer < 70) {msg = zNS}
-				} else if (item == 42) {
+				} else if (item == 47) {
 					// ToDo: formatRange is nighly only: 1653024 add version when it rides the train
 					if (e.message == "f.formatRange is not a function") {msg = zNS}
 				}
@@ -342,7 +360,7 @@ addEventListener("message", function(msg) {
 	}
 
 	// build
-	for (let i=0; i < 43; i++) {
+	for (let i=0; i < 49; i++) {
 		let result = get_item(i)
 		if (result == undefined) {result = zB4}
 		if (result == "undefined") {result = zB5}
