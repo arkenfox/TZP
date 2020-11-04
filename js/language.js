@@ -607,6 +607,10 @@ function get_lang_datetime() {
 							}
 						} else if (i == 17) {
 							// date object
+							console.debug(res[i])
+							console.debug(""+res[i])
+							console.debug(e.data[i])
+
 							if (""+res[i] !== e.data[i]) {
 								document.getElementById("ldt"+i).innerHTML = res[i] + divider + sb + e.data[i] + sc
 							}
