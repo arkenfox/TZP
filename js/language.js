@@ -605,7 +605,7 @@ function get_lang_datetime() {
 									dom.ldt9.innerHTML = combo2 + "<br>" + sb + swcombo2 + sc
 								}								
 							}
-						} else if (i == 12) {
+						} else if (i == 17) {
 							// date object
 							if (""+res[i] !== e.data[i]) {
 								document.getElementById("ldt"+i).innerHTML = res[i] + divider + sb + e.data[i] + sc
