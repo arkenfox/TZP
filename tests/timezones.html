@@ -35,12 +35,21 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color" id="intro"></span>
+			<span class="no_color">A proof that calculates the maximum outcomes in timezone offsets between timezones.
+				Testing with an empty input runs the example.
+				Reducing the number of years loses maximum outcomes. Adding more years gains nothing.
+				You can, however, swap some years for others.
+			</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>	<span class="btn4 btn" onClick="run(`true`)">[ compare years ]</span></div>
+			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>
+					<span class="btn4 btn" onClick="run(`true`)">[ summarize years ]</span>
+					<span class="btn4 btn" onClick="reset()">[ clear input ]</span>
+				</div>
+				<br><span><input type="text" style="width: 99%;" placeholder="comma delimited year(s)" id="inputYears"></span>
+				<br>
 				<br><span><hr></span>
 				<br><span class="spaces" id="info" style="line-height: 1.5em;"></span>
 				<br><span class="spaces" id="data"></span>
@@ -73,6 +82,7 @@ var list = [
 "AA/Etc/GMT+3",
 "AA/Etc/GMT+2",
 "AA/Etc/GMT+1",
+"AA/Etc/GMT+0",
 "AA/Etc/GMT",
 "AA/Etc/GMT-1",
 "AA/Etc/GMT-2",
@@ -88,7 +98,6 @@ var list = [
 "AA/Etc/GMT-12",
 "AA/Etc/GMT-13",
 "AA/Etc/GMT-14",
-
 
 // IANA 425 current
 "Africa/Abidjan",
@@ -535,28 +544,13 @@ s4 = s4.trim()
 
 function build_dates(year) {
 	// reset
-	years = []
 	dates = []
 	let suffix = " 13:00:00 UTC"
 	if (year !== undefined && year !== "") {
 		// single year
-		years.push(year)
+		years = [year]
 	} else {
-		// ALL: from 425 list
-			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d <- stable
-			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
-		// anything prior to 1879 is redundant
-			// tested: every year from 0-2100
-			// tested: negative years
-		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
-
-		// test flips
-		//days = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
-		//for (let i = 1879; i < 2021; i++) {years.push(i)}    // 1879+
-		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
-		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
-		//for (let i = 2000; i < 2100; i++) {years.push(i)}    // add the future
-
+		// years is set in run()
 		// sort numerically & dedupe
 		years.sort((b,a) => b-a)
 		years = years.filter(function(item, position) {return years.indexOf(item) === position})
@@ -567,6 +561,10 @@ function build_dates(year) {
 			dates.push(days[j] + ", " + years[i] + " " + suffix )
 		}
 	}
+}
+
+function reset() {
+	dom.inputYears.value = ""
 }
 
 function legend(array) {
@@ -820,7 +818,6 @@ function run_test(isLoopy) {
 			// build info
 			let info = []
 			function title(input, color) {
-				console.debug(color, input)
 				if (color == undefined) {
 					return input.padStart(15) + ": "
 				} else {
@@ -845,22 +842,27 @@ function run_test(isLoopy) {
 
 			// any matches
 			if (matchList.length > 0) {
+				// we can't say it's spoofed if we don't have it in the list
+				let isListed = list.includes(tzResolved)
+
 				commas = matchList.match(/,/g)
 				if (commas == null) {
 					// single timezone
 					info.push( title("your group") + matchList)
 					if (matchList == tzResolved) {
-						info.push( title("veracity") + "100% true")
+						info.push( title("veracity") + "resolvedOptions is 100% true")
 					} else {
-						info.push( title("veracity") + "spoofing detected")
+						info.push( title("veracity")
+							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
 					}
 				} else {
 					// multiple timezones
 					info.push( title("your group") + splitgroup())
 					if (matchList.search(tzResolved) == -1) {
-						info.push( title("veracity") + "spoofing detected")
+						info.push( title("veracity")
+							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
 					} else {
-						info.push( title("veracity") + "seems legit")
+						info.push( title("veracity") + "resolvedOptions seems legit")
 					}
 				}
 			} else {
@@ -889,9 +891,9 @@ function run_test(isLoopy) {
 		loopData = []
 		loopData.push(
 			sColor + "year" + sc + " "
-			+ "hash-of-locales/groups"
+			+ "hash-of-timezone-groups"
 			+ s4 + " [groups] " + sc
-			+ sg + "[unique]" + sc + "<br>"
+			+ sg + "[unique timezones]" + sc + "<br>"
 		)
 		// loop
 		let loopYears = years
@@ -910,19 +912,69 @@ function run_test(isLoopy) {
 }
 
 function run(isLoopy) {
+	let go = false
 	// reset legend
 	legend()
-	dom.info = "calculating"
+	dom.info = ""
 	dom.data = ""
-	// rebuild dates
-	build_dates()
-	tzResolved = Intl.DateTimeFormat().resolvedOptions().timeZone
-	// pause for repaint
-	function test() {
-		clearInterval(checking)
-		run_test(isLoopy)
+	years = []
+
+	let yearStr = dom.inputYears.value
+	yearStr = yearStr.trim()
+	if (yearStr.length > 0) {
+		// parse for valid years
+		let tmpArr = yearStr.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length > 0) {
+				// only collect numbers
+				trimmed = parseInt(trimmed)
+				if (Number.isInteger(trimmed)) {
+					// put a range limit on it
+					if (trimmed > -2000 && trimmed < 3000) {
+						years.push(trimmed)
+					}
+				}
+			}
+		}
+		// do we have at least one year
+		if (years.length > 0) {
+			go = true
+		} else {
+			dom.info = "please provide at least one year"
+		}
+	} else {
+		// run example
+		// ALL: from 425 list
+			// 1879-2020: 348/326 : bfe1ccc96a72a2df07207ee3b2e7759b8becb16d <- stable
+			// 1900-2020: 340/313 : dd72990677d1aa0134e9bc61a663c4b416871c2c
+		// anything prior to 1879 is redundant
+			// tested: every year from 0-2100
+			// tested: negative years
+		years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
+		dom.inputYears.value = years.join(",")
+
+		// test flips
+		//days = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
+		//for (let i = 1879; i < 2021; i++) {years.push(i)}    // 1879+
+		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
+		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
+		//for (let i = 2000; i < 2100; i++) {years.push(i)}    // add the future
+		go = true
 	}
-	let checking = setInterval(test, 10)
+
+	if (go) {
+		dom.info = "calculating"
+		// rebuild dates
+		build_dates()
+		tzResolved = Intl.DateTimeFormat().resolvedOptions().timeZone
+		// pause for repaint
+		function test() {
+			clearInterval(checking)
+			run_test(isLoopy)
+		}
+		let checking = setInterval(test, 10)
+	}
 }
 
 legend()
