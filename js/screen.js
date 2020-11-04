@@ -1788,12 +1788,16 @@ function get_version() {
 		}
 		// run
 		function v75plus() {
+			// 84: 1673440
+			if (go) {
+				try {eval("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84+"; go=false}}
+			}
 			// 83: 1667094
 			if (go) {
 				try {
 					let obj83 = {exec() {return function(){}}}
 					let test83 = RegExp.prototype.test.call(obj83, "")
-					verNo = "83+"; go = false
+					verNo = "83"; go = false
 				} catch(e) {}
 			}
 			// 82: 1655947
