@@ -300,47 +300,55 @@
 			<input id="collapseL" class="toggle" type="checkbox" checked onchange="toggleitems(this, `L`)"/>
 			<label for="collapseL" class="lbl-toggle" id="labelL">&#9660; show details</label>
 		</td></tr>
+		<!--language-->
 		<tr class="togL"><td></td><td class="s4">language & locale</td></tr>
 			<tr class="togL"><td>languages | language | languages[0]</td><td class="c" id="ldt2"></td></tr>
 			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat
 				<br>PluralRules<br>RelativeTimeFormat</span></div> &nbsp resolvedOptions</td><td class="c" id="ldt9"></td></tr>
+			<tr class="hidden"><td>spare</td><td class="c" id="ldt10"></td></tr>
+			<tr class="hidden"><td>spare</td><td class="c" id="ldt11"></td></tr>
+		<!--timezone-->
 		<tr class="togL"><td></td><td class="s4">timezone</td></tr>
-			<tr class="togL"><td>timezoneOffset | getTime | Date.parse</td><td class="c" id="ldt10"></td></tr>
-			<tr class="togL"><td>[resolvedOptions] timezone</td><td class="c" id="ldt11"></td></tr>
+			<tr class="togL"><td>timezoneOffset | getTime | Date.parse</td><td class="c" id="ldt12"></td></tr>
+			<tr class="togL"><td>[resolvedOptions] timezone</td><td class="c" id="ldt13"></td></tr>
+			<tr class="togL"><td>[timezone offsets] Date.parse</td><td class="c mono" id="ldt14"></td></tr>
+			<tr class="hidden"><td>spare</td><td class="c" id="ldt15"></td></tr>
+			<tr class="hidden"><td>spare</td><td class="c" id="ldt16"></td></tr>
+		<!--datetime-->
 		<tr class="togL"><td></td><td class="s4">date/time & format</td></tr>
-			<tr class="togL"><td>date/time</td><td class="c" id="ldt12"></td></tr>
-			<tr class="togL"><td>toString</td><td class="c" id="ldt13"></td></tr>
-			<tr class="togL"><td>[long] toLocaleString</td><td class="c" id="ldt14"></td></tr>
-			<tr class="togL"><td>[long] toLocaleDateString</td><td class="c" id="ldt15"></td></tr>
-			<tr class="togL"><td>[long] toLocaleTimeString</td><td class="c" id="ldt16"></td></tr>
-			<tr class="togL"><td>[long] Intl.DateTimeFormat</td><td class="c" id="ldt17"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.DateTimeFormat</td><td class="c" id="ldt18"></td></tr>
-			<tr class="togL"><td>toGMTString</td><td class="c" id="ldt19"></td></tr>
-			<tr class="togL"><td>toUTCString</td><td class="c" id="ldt20"></td></tr>
-			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt21"></td></tr>
-			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt22"></td></tr>
-			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt23"></td></tr>
-			<tr class="togL"><td>Intl.DateTimeFormat</td><td class="c" id="ldt24"></td></tr>
-			<tr class="togL"><td>[relatedYear | yearName] Intl.DateTimeFormat</td><td class="c" id="ldt38"></td></tr>
-			<tr class="togL"><td>[dateStyle | timeStyle] Intl.DateTimeFormat</td><td class="c" id="ldt41"></td></tr>
-			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt25"></td></tr>
-			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt26"></td></tr>
-			<tr class="togL"><td>[resolvedOptions] hourCycle</td><td class="c" id="ldt27"></td></tr>
-			<tr class="togL"><td>Intl.ListFormat</td><td class="c spaces" id="ldt40"></td></tr>
-			<tr class="togL"><td>[dayPeriod] Intl.DateTimeFormat</td><td class="c" id="ldt39"></td></tr>
-			<tr class="togL"><td>[formatRange] Intl.DateTimeFormat</td><td class="c" id="ldt42"></td></tr>
-			<tr class="togL"><td>Intl.PluralRules</td><td class="c" id="ldt43"></td></tr>
-			<tr class="togL"><td>Intl.RelativeTimeFormat</td><td class="c" id="ldt28"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.RelativeTimeFormat</td><td class="c" id="ldt29"></td></tr>
-			<tr class="togL"><td>Intl.NumberFormat</td><td class="c" id="ldt30"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.NumberFormat</td><td class="c" id="ldt31"></td></tr>
-			<tr class="togL"><td>[BigInt] Intl.NumberFormat</td><td class="c" id="ldt32"></td></tr>
-			<tr class="togL"><td>[BigInt] toLocaleString</td><td class="c" id="ldt33"></td></tr>
-			<tr class="togL"><td>[currency] toLocaleString</td><td class="c" id="ldt34"></td></tr>
-			<tr class="togL"><td>[Intl.DateTimeFormat] calendar</td><td class="c" id="ldt35"></td></tr>
+			<tr class="togL"><td>date/time</td><td class="c" id="ldt17"></td></tr>
+			<tr class="togL"><td>toString</td><td class="c" id="ldt18"></td></tr>
+			<tr class="togL"><td>[long] toLocaleString</td><td class="c" id="ldt19"></td></tr>
+			<tr class="togL"><td>[long] toLocaleDateString</td><td class="c" id="ldt20"></td></tr>
+			<tr class="togL"><td>[long] toLocaleTimeString</td><td class="c" id="ldt21"></td></tr>
+			<tr class="togL"><td>[long] Intl.DateTimeFormat</td><td class="c" id="ldt22"></td></tr>
+			<tr class="togL"><td>[formatToParts] Intl.DateTimeFormat</td><td class="c" id="ldt23"></td></tr>
+			<tr class="togL"><td>toGMTString</td><td class="c" id="ldt24"></td></tr>
+			<tr class="togL"><td>toUTCString</td><td class="c" id="ldt25"></td></tr>
+			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt26"></td></tr>
+			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt27"></td></tr>
+			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt28"></td></tr>
+			<tr class="togL"><td>Intl.DateTimeFormat</td><td class="c" id="ldt29"></td></tr>
+			<tr class="togL"><td>[relatedYear | yearName] Intl.DateTimeFormat</td><td class="c" id="ldt43"></td></tr>
+			<tr class="togL"><td>[dateStyle | timeStyle] Intl.DateTimeFormat</td><td class="c" id="ldt46"></td></tr>
+			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt30"></td></tr>
+			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt31"></td></tr>
+			<tr class="togL"><td>[resolvedOptions] hourCycle</td><td class="c" id="ldt32"></td></tr>
+			<tr class="togL"><td>Intl.ListFormat</td><td class="c spaces" id="ldt45"></td></tr>
+			<tr class="togL"><td>[dayPeriod] Intl.DateTimeFormat</td><td class="c" id="ldt44"></td></tr>
+			<tr class="togL"><td>[formatRange] Intl.DateTimeFormat</td><td class="c" id="ldt47"></td></tr>
+			<tr class="togL"><td>Intl.PluralRules</td><td class="c" id="ldt48"></td></tr>
+			<tr class="togL"><td>Intl.RelativeTimeFormat</td><td class="c" id="ldt33"></td></tr>
+			<tr class="togL"><td>[formatToParts] Intl.RelativeTimeFormat</td><td class="c" id="ldt34"></td></tr>
+			<tr class="togL"><td>Intl.NumberFormat</td><td class="c" id="ldt35"></td></tr>
+			<tr class="togL"><td>[formatToParts] Intl.NumberFormat</td><td class="c" id="ldt36"></td></tr>
+			<tr class="togL"><td>[BigInt] Intl.NumberFormat</td><td class="c" id="ldt37"></td></tr>
+			<tr class="togL"><td>[BigInt] toLocaleString</td><td class="c" id="ldt38"></td></tr>
+			<tr class="togL"><td>[currency] toLocaleString</td><td class="c" id="ldt39"></td></tr>
+			<tr class="togL"><td>[Intl.DateTimeFormat] calendar</td><td class="c" id="ldt40"></td></tr>
 			<tr class="togL"><td>[DateTime | RelativeTime] numberingSystem</td>
-				<td><span class="c" id="ldt36"></span> | <span class="c" id="ldt37"></span></td></tr>
+				<td><span class="c" id="ldt41"></span> | <span class="c" id="ldt42"></span></td></tr>
 		<tr class="togL"><td></td><td class="s4">geolocation</td></tr>
 			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">geo.enabled</span></div> &nbsp [api | window] geolocation</td><td class="c" id="geo1"></td></tr>
