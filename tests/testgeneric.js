@@ -13,6 +13,11 @@ function getUniqueElements() {
 	})
 }
 
+function count_decimals(value) {
+	if(Math.floor(value) === value) return 0
+	return value.toString().split(".")[1].length || 0
+}
+
 function get_engine() {
 	function cbrt(x) {
 		try {
