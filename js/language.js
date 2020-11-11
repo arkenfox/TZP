@@ -5,27 +5,46 @@ let bTZ = false
 function outputHeaders() {
 	let t0 = performance.now()
 	let section = []
-	// note just record "blocked" for stability
+
+	let r = ""
+	try {r = (navigator.sendBeacon ? zE : zD)} catch(e) {r = zB0}
+	dom.nBeacon = r
+	section.push("beacon: " + r)
+
+	// network.preload
+	let relList = document.createElement('link').relList
+	let r4 = !!(relList && relList.supports && relList.supports('preload'))
+	dom.nPreload.innerHTML = r4
+	section.push("preload: " + r4)
 
 	// online
 	let r2 = ""
 	try {
 		r2 = navigator.onLine
-		if (r2 == undefined) {r2 = zB2}
-	} catch(e) {r2 = zB1}
+		if (r2 == undefined) {r2 = zB0}
+	} catch(e) {r2 = zB0}
 	dom.nOnLine.innerHTML = r2
-	if (r2 == zB1 || r2 == zB2) {r2 = zB0}
-	section.push("nav.online: " + r2)
+	section.push("online: " + r2)
+
+	// DNT
+	let r1 = ""
+	if ("doNotTrack" in navigator) {
+		try {
+			r1 = navigator.doNotTrack
+			if (isFF) {
+				if (r1 == undefined) {r1 = zB0}
+			}
+		} catch(e) {
+			r1 = zB0
+		}
+	} else {
+		r1 = zNA
+	}
+	dom.nDNT.innerHTML = ""+r1
+	section.push("dnt: " + r1)
 
 	// FF
 	if (isFF) {
-		// DNT
-		let r1 = ""
-		try {
-			r1 = navigator.doNotTrack
-			if (r1 == undefined) {r1 = zB2}
-		} catch(e) {r1 = zB1}
-		dom.nDNT.innerHTML = r1
 		// network
 		let r3 = "", test = ""
 		if ("connection" in navigator) {
@@ -58,14 +77,13 @@ function outputHeaders() {
 			dom.nConnection.innerHTML = r3
 		}
 	} else {
-		// non-FF
-		dom.nDNT = navigator.doNotTrack
 		if ("connection" in navigator) {
 			dom.nNetwork = zE; dom.nConnection.innerHTML = navigator.connection.type
 		} else {
 			dom.nNetwork = zD; dom.nConnection = navigator.connection
 		}
 	}
+
 	section_info("headers", t0, gt0, section)
 }
 
