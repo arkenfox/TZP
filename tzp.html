@@ -361,7 +361,7 @@
 	<table id="tb5">
 		<col width="50%"><a name="headers"></a><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#headers">http headers</a>
+			<div class="nav-title"><a href="#headers">http headers / networking</a>
 			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
 			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
 			<div class="nav-right"><a name="headersd"></a></div></div>
@@ -369,12 +369,21 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">beacon.enabled</span></div>
+			&nbsp [navigator] beacon</td><td class="c" id="nBeacon"></td></tr>
 		<tr><td>[navigator] doNotTrack</td><td class="c" id="nDNT"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.netinfo.enabled</span></div>
 			&nbsp [api] network information</td><td class="c" id="nNetwork"></td></tr>
 		<tr><td>[navigator] connection</td><td class="c" id="nConnection"></td></tr>
 		<tr><td>[navigator] onLine</td><td class="c" id="nOnLine"></td></tr>
+
+		<tr><td colspan="2" class="center">------</td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">network.preload</span></div>
+			&nbsp link preload</td><td class="c" id="nPreload"></td></tr>
+
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td>http_accept</td><td class="faint"></td></tr>
 		<tr><td>http_accept_encoding</td><td class="faint"></td></tr>
@@ -850,9 +859,6 @@
 		<tr><td colspan="3" class="secthash">
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
-		<tr><td colspan="2">
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">beacon.enabled</span></div>
-			&nbsp [navigator] beacon</td><td class="c" id="nBeacon"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.events.asyncClipboard</span></div>
 			&nbsp [api] clipboard</td><td class="c" id="nClipboard"></td></tr>
