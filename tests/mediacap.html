@@ -38,51 +38,51 @@
 <script>
 'use strict';
 
-function run() {
+s13 = s13.trim()
 
-	// vars
-	const mediaConfigsV = []
-	let go = false
-	let t0 = performance.now()
+var resV = [" x ","320x240","640x480","800x600","1280x720","1920x1080","2560x1440","3840x2160","7680x4320"]
+var framerateV = [15,24,30,60] // add more framerates? e.g. 25, 50
+var bitrateV = [800,2500,4000] // add more bitrates? e.g. 3000
+var codecV = ""
+var mediaConfigsV = [],
+	friendlyConfigsV = []
 
-	if ("mediaCapabilities" in navigator) {
-		go = true
-		dom.enabled = "supported"
 
-		// video components
-		let codecV = [
-			"video/webm; codecs=vp8", "video/webm; codecs=vp9","video/mp4; codecs=avc1.420034",
-		]
-		let resV = [" x ","800x600","1280x720","1920x1080","2560x1440","3840x2160","7680x4320"] // "320x240","640x480"
-		let framerateV = [15,24,30,60] // add more framerates? e.g. 25, 50
-		let bitrateV = [800,2500,4000] // add more bitrates? e.g. 3000
-
+function buildConfig(configType) {
+	if (configType == "video") {
+		// reset
+		mediaConfigsV = []
+		friendlyConfigsV = []
 		// build the configs
-		codecV.forEach(codec => {
-			resV.forEach(resolution => {
-				let parts = resolution.split("x")
-				let resW = parts[0],
-					resH = parts[1]
-				framerateV.forEach(frameV => {
-					bitrateV.forEach(bitV => {
-						return mediaConfigsV.push({
-							type: "file",
-							video: {
-								contentType: codec,
-								width: resW,
-								height: resH,
-								bitrate: bitV,
-								framerate: frameV
-							}
-						})
+		resV.forEach(resolution => {
+			let parts = resolution.split("x")
+			let resW = parts[0],
+				resH = parts[1]
+			framerateV.forEach(frameV => {
+				bitrateV.forEach(bitV => {
+					friendlyConfigsV.push(
+						resolution +"|"+ frameV +"|"+ bitV
+					)
+					return mediaConfigsV.push({
+						type: "file",
+						video: {
+							contentType: codecV,
+							width: resW,
+							height: resH,
+							bitrate: bitV,
+							framerate: frameV
+						}
 					})
 				})
 			})
 		})
-
-	} else {
-		dom.enabled = "not supported"
 	}
+}
+
+
+function runConfig(configType) {
+	// vars
+	let	t0 = performance.now()
 
 	// get the goods
 	function getMediaCapabilities(configs) {
@@ -95,26 +95,45 @@ function run() {
 		})
 	}
 
+	if ("mediaCapabilities" in navigator) {
+		dom.enabled = "supported"
 
-	if (go) {
 		Promise.all([
 			getMediaCapabilities(mediaConfigsV)
 		]).then(function(response){
 				// temp perf
 				let t1 = performance.now()
-				// video
 				let data = response[0]
-				console.log("perf:", Math.round(t1-t0), "ms,", data.length)
-				console.debug(mediaConfigsV[0])
-				console.debug(data[0])
+				console.log(codecV, "perf:", Math.round(t1-t0), "ms,", data.length)
 
+				// video
+				if (configType == "video") {
+					console.debug(friendlyConfigsV[0])
+					console.debug(data)
+				}
 		})
+
+	} else {
+		dom.enabled = "not supported"
 	}
 
 }
 
-s13 = s13.trim()
-run()
+function run(configType) {
+	// set codec
+	if (configType == "video") {
+		//"video/webm; codecs=vp8", "video/webm; codecs=vp9","video/mp4; codecs=avc1.420034",
+		codecV = "video/webm; codecs=vp8"
+	}
+	// build
+	buildConfig(configType)	
+	runConfig(configType)
+
+}
+
+
+run("video") // example
+
 
 </script>
 </body>
