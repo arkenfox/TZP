@@ -33,6 +33,7 @@ function outputHeaders() {
 			r1 = navigator.doNotTrack
 			if (isFF) {
 				if (r1 == undefined) {r1 = zB0}
+				if (r1 == 1) {r1 = zE}
 			}
 		} catch(e) {
 			r1 = zB0
