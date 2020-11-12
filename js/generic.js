@@ -23,15 +23,17 @@ function rnd_number() {
 
 function get_RFP() {
 	let r = false
-	try {
-		performance.mark("a")
-		r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a", entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		if (r == 0) {r = true}
-	} catch(e) {}
+	if (isFF) {
+		try {
+			performance.mark("a")
+			r = performance.getEntriesByName("a","mark").length
+				+ performance.getEntries().length
+				+ performance.getEntries({name:"a", entryType:"mark"}).length
+				+ performance.getEntriesByName("a","mark").length
+				performance.clearMarks()
+			if (r == 0) {r = true}
+		} catch(e) {}
+	}
 	return r
 }
 
