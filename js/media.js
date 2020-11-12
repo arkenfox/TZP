@@ -118,8 +118,8 @@ function get_media(runtype) {
 	hashcan.push("probably"); hashcan = hashcan.concat(canp)
 	hashtype = ['mediasource']; hashtype = hashtype.concat(src)
 	hashtype.push("mediarecorder"); hashtype = hashtype.concat(rec)
-	hashcan = sha1(hashcan)
-	hashtype = sha1(hashtype)
+	hashcan = sha1(hashcan.join())
+	hashtype = sha1(hashtype.join())
 	// output play
 	let notation = sColor +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
 		blockP = block1 + block2,
@@ -143,9 +143,14 @@ function outputMedia() {
 		section = [], r = ""
 
 	// mediaCapabilities: FF63+
-	if (isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
+	if (isFF && isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
 	dom.nMediaC = r
-	section.push("media capabilities: " + r)
+	section.push("mediaCapabilities: " + r)
+
+	// mediaSession: FF71+
+	if (isFF && isVer < 71) {r = zNS} else (r = ("mediaSession" in navigator ? zE : zD))
+	dom.nMediaS = r
+	section.push("mediaSession: " + r)
 
 	Promise.all([
 		get_media("audio"),
