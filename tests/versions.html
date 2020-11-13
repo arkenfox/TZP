@@ -26,7 +26,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a id="testanchor" class="return" href="../index.html">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb3">
@@ -496,6 +496,21 @@ function rerunVersion() {
 
 if ("undefined" != typeof InstallTrigger) {isFF = true}
 outputVersion()
+
+function temptest() {
+	//const anchorElement = document.createElement('a')
+	const anchorElement = dom.testanchor
+	const propertyNames = Object.getOwnPropertyNames(anchorElement.__proto__)
+	const obj = {}
+	propertyNames.forEach(propName => {
+			const value = anchorElement[propName]
+			return (
+					obj[propName] = value
+			)
+	})
+	console.log(obj)
+}
+temptest()
 
 </script>
 </body>
