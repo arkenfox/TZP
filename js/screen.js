@@ -1161,12 +1161,17 @@ function get_pbmode() {
 		dom.IsPBMode = r
 		if (logPerf) {debug_log("pbmode [screen]",t0)}
 	}
-	try {
-		let db = indexedDB.open("PB")
-		db.onerror = function() {output("true")}
-		db.onsuccess = function() {output("false")}
-	} catch(e) {
-		output("unknown: "+e.name)
+	if (isVer < 83) {
+		// dom.indexedDB.privateBrowsing.enabled
+		try {
+			let db = indexedDB.open("PB")
+			db.onerror = function() {output("true")}
+			db.onsuccess = function() {output("false")}
+		} catch(e) {
+			output("unknown: "+e.name)
+		}
+	} else {
+		output("unknown")
 	}
 }
 
