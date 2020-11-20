@@ -4,7 +4,7 @@ TorZillaPrint (TZP) aims to provide a comprehensive, all-in-one, fingerprinting 
 
 ### 🟪  What we do care about:
 - Current Tor Browser and Firefox ESR or higher
-- Tor Uplift, FuzzyFox, Fusion
+- Tor Uplift, Fusion
 - Comparing Tor Browser with Firefox
 - First party only (for now)
 - Lowering entropy (or poison pills where appropriate)
