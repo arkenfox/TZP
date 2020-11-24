@@ -77,7 +77,10 @@ function section_info(name, time1, time2, data) {
 					fpAllCheck.sort()
 					// remove dupes: we only need one
 					fpAllCheck = fpAllCheck.filter(function(item, position) {return fpAllCheck.indexOf(item) === position})
-					console.error("section hash issues\n", fpAllCheck)
+					// ToDo: remove isFile check once all section hashes are finished
+					if (isFile) {
+						console.error("section hash issues\n", fpAllCheck)
+					}
 				}
 				console.log("fingerprint: " + hash2 + "\n", fpAllData)
 				dom.allhash = hash2 + " [incomplete]"
@@ -88,7 +91,7 @@ function section_info(name, time1, time2, data) {
 		try {
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
-			if (name == "fonts" || name == "headers" || name == "devices") {
+			if (name == "fonts" || name == "devices") {
 				hash += " [incomplete: work in progress]"
 			}
 			document.getElementById(name + "hash").innerHTML = hash
