@@ -88,12 +88,6 @@
 			<div class="btn-left"><span class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</span></div>
 			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>stable</td><td class="faint" id="stablehash"></td></tr>
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
-			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show debugging</label>
-		<tr class="togZ"><td>section perf</td><td class="mono gc spaces" id="debugperf"></td></tr>
-		<tr class="togZ"><td>tor browser detection points</td><td class="mono gc spaces" id="debugtb"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
 	<!--screen.js-->
@@ -112,7 +106,8 @@
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
 			&nbsp [css min-device-] screen resolution <sup>1</sup></td><td id="S"></td></tr>
 		<tr><td>[matchMedia] screen resolution <sup>2</sup></td><td class="c" id="ScrMM"></td></tr>
-		<tr><td>screen resolution <span class="group"> &#9679 </span></td><td><span class="c" id="ScrRes"></span><span class="c" id="match"></span></td></tr>
+		<tr><td>screen resolution <span class="group"> &#9679 </span></td>
+			<td><span class="c" id="ScrRes"></span><span class="c" id="match"></span></td></tr>
 		<tr><td>available resolution <span class="group"> &#9679 </span></td><td class="c" id="ScrAvail"></td></tr>
 		<tr><td>outer window <span class="group"> &#9679 </span></td><td class="c" id="WndOut"></td></tr>
 		<tr><td>inner window <span class="group"> &#9679 </span></td><td class="c" id="WndIn"></td></tr>
@@ -359,7 +354,7 @@
 
 	<!--language.js-->
 	<table id="tb5">
-		<col width="50%"><a name="headers"></a><col width="50%">
+		<col width="37%"><a name="headers"></a><col width="63%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#headers">http headers / networking</a>
 			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
@@ -369,30 +364,38 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+		<!-- hashes -->
+		<tr><td>navigator</td><td class="c mono" id="hHash0"></td></tr>
+		<tr><td>networking & connectivity</td><td class="c mono" id="hHash1"></td></tr>
+		<tr><td>http headers</td><td class="faint mono" id="hHash2"></td></tr>
+		<!--details-->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseH" class="toggle" type="checkbox" checked onchange="toggleitems(this, `H`)"/>
+			<label for="collapseH" class="lbl-toggle" id="labelH">&#9660; show details</label>
+		</td></tr>
+		<tr class="togH"><td></td><td class="s5">navigator</td></tr>
+		<tr class="togH"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">beacon.enabled</span></div>
-			&nbsp [navigator] beacon</td><td class="c" id="nBeacon"></td></tr>
-		<tr><td>[navigator] doNotTrack</td><td class="c" id="nDNT"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			&nbsp beacon</td><td class="c" id="nBeacon"></td></tr>
+		<tr class="togH"><td>doNotTrack</td><td class="c" id="nDNT"></td></tr>
+		<tr class="togH"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.netinfo.enabled</span></div>
 			&nbsp [api] network information</td><td class="c" id="nNetwork"></td></tr>
-		<tr><td>[navigator] connection</td><td class="c" id="nConnection"></td></tr>
-		<tr><td>[navigator] onLine</td><td class="c" id="nOnLine"></td></tr>
-
-		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togH"><td>connection</td><td class="c" id="nConnection"></td></tr>
+		<tr class="togH"><td>onLine</td><td class="c" id="nOnLine"></td></tr>
+		<tr class="togH"><td></td><td class="s5">networking & connectivity</td></tr>
+		<tr class="togH"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">network.preload</span></div>
 			&nbsp link preload</td><td class="c" id="nPreload"></td></tr>
-
-		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td>http_accept</td><td class="faint"></td></tr>
-		<tr><td>http_accept_encoding</td><td class="faint"></td></tr>
-		<tr><td>http_accept_language</td><td class="faint"></td></tr>
-		<tr><td>http_dnt</td><td class="faint"></td></tr>
-		<tr><td>http_upgrade_insecure_requests</td><td class="faint"></td></tr>
-		<tr><td>http_user_agent</td><td class="faint"></td></tr>
-		<tr><td>server_protocol</td><td class="faint"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr class="togH"><td></td><td class="s5">http headers</td></tr>
+		<tr class="togH"><td>http_accept</td><td class="faint"></td></tr>
+		<tr class="togH"><td>http_accept_encoding</td><td class="faint"></td></tr>
+		<tr class="togH"><td>http_accept_language</td><td class="faint"></td></tr>
+		<tr class="togH"><td>http_dnt</td><td class="faint"></td></tr>
+		<tr class="togH"><td>http_upgrade_insecure_requests</td><td class="faint"></td></tr>
+		<tr class="togH"><td>http_user_agent</td><td class="faint"></td></tr>
+		<tr class="togH"><td>server_protocol</td><td class="faint"></td></tr>
+		<tr class="togH"><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
 	<!--storage.js-->
@@ -915,6 +918,16 @@
 		<tr><td colspan="3"><span class="no_color">code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
+	</table>
+
+	<!--perf-->
+	<table id="tb99">
+		<col width="29%"><col width="71%">
+		<thead><tr><th colspan="2" class="showhide">
+			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
+			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show debugging</label></th></tr></thead>
+		<tr class="togZ"><td>section perf</td><td class="mono spaces" id="debugperf"></td></tr>
+		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces" id="debugtb"></td></tr>
 	</table>
 
 	<a name="theend"></a><br>
