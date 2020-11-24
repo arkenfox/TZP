@@ -2,90 +2,123 @@
 
 let bTZ = false
 
-function outputHeaders() {
-	let t0 = performance.now()
-	let section = []
+function get_navigator() {
+	return new Promise(resolve => {
+		let results = []
 
-	let r = ""
-	try {r = (navigator.sendBeacon ? zE : zD)} catch(e) {r = zB0}
-	dom.nBeacon = r
-	section.push("beacon: " + r)
+		// beacon
+		let beacon = ""
+		try {beacon = (navigator.sendBeacon ? zE : zD)} catch(e) {beacon = zB0}
 
-	// network.preload
-	let relList = document.createElement('link').relList
-	let r4 = !!(relList && relList.supports && relList.supports('preload'))
-	dom.nPreload.innerHTML = r4
-	section.push("preload: " + r4)
-
-	// online
-	let r2 = ""
-	try {
-		r2 = navigator.onLine
-		if (r2 == undefined) {r2 = zB0}
-	} catch(e) {r2 = zB0}
-	dom.nOnLine.innerHTML = r2
-	section.push("online: " + r2)
-
-	// DNT
-	let r1 = ""
-	if ("doNotTrack" in navigator) {
-		try {
-			r1 = navigator.doNotTrack
-			if (isFF) {
-				if (r1 == undefined) {r1 = zB0}
-				if (r1 == 1) {r1 = zE}
-			}
-		} catch(e) {
-			r1 = zB0
-		}
-	} else {
-		r1 = zNA
-	}
-	dom.nDNT.innerHTML = ""+r1
-	section.push("dnt: " + r1)
-
-	// FF
-	if (isFF) {
-		// network
-		let r3 = "", test = ""
-		if ("connection" in navigator) {
-			// retest
+		// DNT
+		let dnt = ""
+		if ("doNotTrack" in navigator) {
 			try {
-				test = navigator.connection
-				dom.nNetwork = (test == undefined ? zB2 : zE)
-			} catch(e) {dom.nNetwork = zB1}
-			// type
-			try {
-				r3 = navigator.connection.type
-				if (r3 == undefined) {r3 = zB3}
+				dnt = navigator.doNotTrack
+				if (isFF) {
+					if (dnt == undefined) {dnt = zB0}
+					if (dnt == 1) {dnt = zE}
+				}
 			} catch(e) {
-				r3 = (e.name == "ReferenceError" ? zB1 : zB2)
-			}
-			if (r3 == zB1 || r3 == zB2 || r3 == zB3) {
-				dom.nConnection.innerHTML = r3
-			} else {
-				dom.nConnection.innerHTML = r3 += (r3 == "unknown" ? rfp_green : rfp_red)
+				dnt = zB0
 			}
 		} else {
-			// retest
-			try {
-				test = navigator.connection; dom.nNetwork = zD
-			} catch(e) {dom.nNetwork = zB3}
-			// type
-			try {
-				r3 = navigator.connection
-			} catch(e) {r3 = (e.name == "ReferenceError" ? zB4 : zB5)} // never used
-			dom.nConnection.innerHTML = r3
+			dnt = zNA
 		}
-	} else {
-		if ("connection" in navigator) {
-			dom.nNetwork = zE; dom.nConnection.innerHTML = navigator.connection.type
-		} else {
-			dom.nNetwork = zD; dom.nConnection = navigator.connection
-		}
-	}
 
-	section_info("headers", t0, gt0, section)
+		// online
+		let online = ""
+		try {
+			online = navigator.onLine
+			if (online == undefined) {online = zB0}
+		} catch(e) {online = zB0}
+
+		// FF
+		let network = "", connection = "", test = "", r3 = ""
+
+		if (isFF) {
+			// network
+			if ("connection" in navigator) {
+				// retest network
+				try {
+					test = navigator.connection
+					network = (test == undefined ? zB0 : zE)
+				} catch(e) {network = zB0}
+				// type
+				try {
+					connection = navigator.connection.type
+					if (connection == undefined) {connection = zB0}
+				} catch(e) {connection = zB0}
+			} else {
+				// retest
+				try {
+					test = navigator.connection
+					network = zD
+				} catch(e) {network = zB0}
+				// type
+				try {
+					connection = navigator.connection
+				} catch(e) {connection = zB0} // never used
+			}
+		} else {
+			// non-FF
+			if ("connection" in navigator) {
+				network = zE; connection = navigator.connection.type
+			} else {
+				network = zD; connection = navigator.connection
+			}
+		}
+
+		// push
+		results.push("beacon: " + beacon)
+		results.push("dnt: " + dnt)
+		results.push("online: " + online)
+		results.push("network: " + network)
+		results.push("connection: " + connection)
+		// display
+		dom.nBeacon = beacon
+		dom.nDNT.innerHTML = "" + dnt
+		dom.nOnLine.innerHTML = online
+		dom.nNetwork.innerHTML = network
+		if (network == zE) {
+			dom.nConnection.innerHTML = connection + (connection == "unknown" ? rfp_green : rfp_red)
+		} else {
+			dom.nConnection.innerHTML = connection
+		}
+
+		// subsection hash
+		dom.hHash0.innerHTML = sha1(results.join())
+		// resolve
+		return resolve(results)
+	})
+}
+
+function get_network() {
+	return new Promise(resolve => {
+		let results = []
+		// network.preload
+		let relList = document.createElement('link').relList
+		let r4 = !!(relList && relList.supports && relList.supports('preload'))
+		dom.nPreload.innerHTML = r4
+		results.push("preload: " + r4)
+		// subsection hash
+		dom.hHash1.innerHTML = sha1(results.join())
+		return resolve(results)
+	})
+}
+
+function outputHeaders() {
+	let t0 = performance.now(),
+		section = []
+	Promise.all([
+		get_network(),
+		get_navigator()
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section = section.concat(currentResult)
+		})
+		section_info("headers", t0, gt0, section)
+	})
 }
 
 function get_geo() {
