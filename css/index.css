@@ -84,7 +84,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 /* show/hide */
 input[type='checkbox'] {display: none;}
 .lbl-toggle {display: block; cursor: pointer;}
-.togA, .togD, .togD1, .togC, .togCSS, .togE, .togF1, .togF2, .togF3, .togF4, .togL,
+.togA, .togD, .togD1, .togC, .togCSS, .togE, .togF1, .togF2, .togF3, .togF4, .togH, .togL,
 .togM2, .togM3, .togOS1, .togR, .togUA, .togUG, .togW, .togW2, .togZ {display: none;}
 
 /* not-really-buttons & section color */
