@@ -259,10 +259,6 @@ function outputMisc(type) {
 	let t0 = performance.now()
 	let section = [], r = ""
 
-	try {r = (navigator.sendBeacon ? zE : zD)} catch(e) {r = zB0}
-	dom.nBeacon = r
-	section.push("beacon: " + r)
-
 	try {r = (navigator.share ? zE : zD)} catch(e) {r = zB0}
 	dom.webshare = r
 	section.push("web share: " + r)
