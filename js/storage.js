@@ -293,17 +293,25 @@ function get_service_workers() {
 	}
 }
 
-function get_permissions() {
-	try {
-		navigator.permissions.query({name:"notifications"}).then(e => dom.pNote=e.state)
-	} catch(e) {dom.pNote = e.name}
-	try {
-		dom.pPush=zNA
-		navigator.permissions.query({name:"push"}).then(e => dom.pPush=e.state)
-	} catch(e) {dom.pPush = e.name}
-	try {
-		navigator.permissions.query({name:"persistent-storage"}).then(e => dom.pStore=e.state)
-	} catch(e) {dom.pStore = e.name}
+function get_permissions(item) {
+	let userVis = "userVisibleOnly",
+		str = "permission " + item + ": "
+	let el = document.getElementById("p"+item)
+	return new Promise(resolve => {
+		navigator.permissions.query({name:item}).then(function(result) {
+			el.innerHTML = result.state
+			return resolve(str + result.state)
+		}).catch(error => {
+			if ((error.message).includes(userVis)) {
+				el.innerHTML = userVis
+				str += userVis
+			} else {
+				el.innerHTML = error.type
+				str += error.type
+			}
+			return resolve(str)
+		})
+	})
 }
 
 function get_storage_manager(runtype) {
@@ -351,7 +359,6 @@ function outputStorage() {
 	get_idb()
 	get_workers()
 	get_service_workers()
-	get_permissions()
 	get_storage_manager()
 
 	// section hash
@@ -369,8 +376,17 @@ function outputStorage() {
 	dom.swork1 = sw
 	section.push("service worker: " + sw)
 
-	// perf
-	section_info("storage", t0, gt0, section)
+	Promise.all([
+		get_permissions("notifications"),
+		get_permissions("push"),
+		get_permissions("persistent-storage")
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section.push(currentResult)
+		})
+		section_info("storage", t0, gt0, section)
+	})
+
 }
 
 outputStorage()
