@@ -69,7 +69,7 @@ function section_info(name, time1, time2, data) {
 			// yay!
 			fpAllHash.push(name + ": " + hash)
 			fpAllData.push([name +": " + hash, data])
-			if (fpAllHash.length == 10) {
+			if (fpAllHash.length == 11) {
 				fpAllHash.sort()
 				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
