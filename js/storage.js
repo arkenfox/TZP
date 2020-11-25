@@ -195,10 +195,6 @@ function get_idb() {
 	}
 }
 
-function get_appcache() {
-	dom.appcache = ("applicationCache" in window ? zE : zD)
-}
-
 function get_workers() {
 
 	// worker support
@@ -258,7 +254,6 @@ function get_service_workers() {
 	// support
 	if (isSecure) {
 		if ("serviceWorker" in navigator) {
-			dom.swork1 = zE
 			// register
 			navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
 				dom.swork2 = zS
@@ -286,14 +281,13 @@ function get_service_workers() {
 			})
 		}	else {
 			// no sw
-			dom.swork1 = zD
 			dom.swork2 = zNA; dom.swork3 = zNA; dom.swork4 = zNA
 			dom.notif1 = zNA; dom.notif2 = zNA
 		}
 	}	else {
 		// isFile
 		output = zNA
-		dom.swork1.innerHTML = output; dom.swork2.innerHTML = output
+		dom.swork2.innerHTML = output
 		dom.swork3.innerHTML = output; dom.swork4.innerHTML = output
 		dom.notif1.innerHTML = output; dom.notif2.innerHTML = output
 	}
@@ -349,18 +343,34 @@ function get_storage_manager(runtype) {
 }
 
 function outputStorage() {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		section = []
 	// functions
 	get_cookies()
 	get_storage()
 	get_idb()
-	get_appcache()
 	get_workers()
 	get_service_workers()
 	get_permissions()
 	get_storage_manager()
+
+	// section hash
+	// there's almost nothing stable about this section
+		// appcache
+	let appCache = ("applicationCache" in window ? zE : zD)
+	section.push("appCache: " + appCache)
+	dom.appcache = appCache
+		// storageM
+	let storage = ("storage" in navigator ? zE : zD)
+	section.push("storage manager: " + storage)
+		// sw
+	let sw = zD
+	if ("serviceWorker" in navigator) {sw = zE}
+	dom.swork1 = sw
+	section.push("service worker: " + sw)
+
 	// perf
-	section_info("storage", t0, gt0)
+	section_info("storage", t0, gt0, section)
 }
 
 outputStorage()
