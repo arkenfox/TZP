@@ -68,6 +68,7 @@ function section_info(name, time1, time2, data) {
 		} else {
 			// yay!
 			fpAllHash.push(name + ": " + hash)
+			fpAllCount += data.length
 			fpAllData.push([name +": " + hash, data])
 			if (fpAllHash.length == 11) {
 				fpAllHash.sort()
@@ -83,12 +84,15 @@ function section_info(name, time1, time2, data) {
 					}
 				}
 				console.log("fingerprint: " + hash2 + "\n", fpAllData)
-				dom.allhash = hash2 + " [incomplete]"
+				dom.allhash = hash2
+				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
 		}
 		// append + output
 		try {
+			//add metric count
+			hash += snc +"<b>["+ data.length +" metrics]</b>"+ sc
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
 			if (name == "fonts" || name == "devices") {
@@ -122,6 +126,11 @@ function section_info(name, time1, time2, data) {
 	} else {
 		el.innerHTML = el.innerHTML +"<br>"+ pretty
 	}
+}
+
+function showMetrics() {
+	
+
 }
 
 function debug_page(target, str) {
@@ -314,6 +323,7 @@ function outputSection(id, cls) {
 		fpAllHash = []
 		fpAllData = []
 		fpAllCheck = []
+		fpAllCount = 0
 		gRerun = true
 	} else {
 		// clear table elements, &nbsp stops line height jitter
