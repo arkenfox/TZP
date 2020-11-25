@@ -5,6 +5,7 @@ var dom;
 let fpAllHash = [],
 	fpAllData = [],
 	fpAllCheck = [],
+	fpAllCount = 0,
 	gRerun = false
 
 // android
