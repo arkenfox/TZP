@@ -564,7 +564,7 @@ function outputFonts() {
 	// css font loading
 	r = ("FontFace" in window ? zE : zD)
 	dom.fontCSS = r
-	section.push("font loading: " + r)	
+	section.push("font loading: " + r)
 
 	// doc fonts
 	el = dom.spanLH
@@ -573,10 +573,11 @@ function outputFonts() {
 	dom.fontDoc = r
 	section.push("document fonts: " + r)	
 
+	get_unicode() //ToDo: promisify and add to section hash
+
 	// other
 	Promise.all([
 		get_fpjs2(),
-		get_unicode(), //ToDo
 		get_woff()
 	]).then(function(results){
 		results.forEach(function(currentResult) {
