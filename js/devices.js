@@ -372,15 +372,17 @@ function outputDevices() {
 	let t0 = performance.now(),
 		section = []
 
+	//ToDo: promisify and add to section hash
+	get_gamepads()
+	get_media_devices()
+	get_speech_rec()
+	get_speech_synth()
+	get_pointer_hover()
+
 	Promise.all([
-		get_gamepads(),
 		get_hardware_concurrency(),
-		get_media_devices(),
 		get_mimetypes(),
 		get_plugins(),
-		get_pointer_hover(),
-		get_speech_rec(),
-		get_speech_synth(),
 		get_touch(),
 		get_vr(),
 	]).then(function(results){
