@@ -295,7 +295,7 @@ function get_service_workers() {
 
 function get_permissions(item) {
 	let userVis = "userVisibleOnly",
-		str = "permission " + item + ": "
+		str = item + ":"
 	let el = document.getElementById("p"+item)
 	return new Promise(resolve => {
 		navigator.permissions.query({name:item}).then(function(result) {
@@ -365,16 +365,16 @@ function outputStorage() {
 	// there's almost nothing stable about this section
 		// appcache
 	let appCache = ("applicationCache" in window ? zE : zD)
-	section.push("appCache: " + appCache)
+	section.push("appCache:" + appCache)
 	dom.appcache = appCache
 		// storageM
 	let storage = ("storage" in navigator ? zE : zD)
-	section.push("storage manager: " + storage)
+	section.push("storage_manager:" + storage)
 		// sw
 	let sw = zD
 	if ("serviceWorker" in navigator) {sw = zE}
 	dom.swork1 = sw
-	section.push("service worker: " + sw)
+	section.push("service_worker:" + sw)
 
 	Promise.all([
 		get_permissions("notifications"),
