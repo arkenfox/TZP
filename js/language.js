@@ -70,11 +70,11 @@ function get_navigator() {
 		}
 
 		// push
-		results.push("beacon: " + beacon)
-		results.push("dnt: " + dnt)
-		results.push("online: " + online)
-		results.push("network: " + network)
-		results.push("connection: " + connection)
+		results.push("beacon:" + beacon)
+		results.push("dnt:" + dnt)
+		results.push("online:" + online)
+		results.push("network:" + network)
+		results.push("connection:" + connection)
 		// display
 		dom.nBeacon = beacon
 		dom.nDNT.innerHTML = "" + dnt
@@ -98,9 +98,9 @@ function get_network() {
 		let results = []
 		// network.preload
 		let relList = document.createElement('link').relList
-		let r4 = !!(relList && relList.supports && relList.supports('preload'))
-		dom.nPreload.innerHTML = r4
-		results.push("preload: " + r4)
+		let r = !!(relList && relList.supports && relList.supports('preload'))
+		dom.nPreload.innerHTML = r
+		results.push("preload:" + r)
 		// subsection hash
 		dom.hHash1.innerHTML = sha1(results.join())
 		return resolve(results)
@@ -551,7 +551,7 @@ function get_lang_datetime() {
 		}
 	}
 	// debugging: error tracking
-	if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
+	if (isFile && err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
 
 	// hash 0-11: language
 	let lHash0 = sha1(res.slice(0,12).join("-"))
