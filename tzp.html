@@ -87,7 +87,7 @@
 		<tr><td>
 			<div class="btn-left"><span class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</span></div>
 			&nbsp loose</td><td><span class="c mono" id="allhash"></span>
-			<span class="c btn0 btn" onClick="showMetrics()" id="allmetrics"></span></td></tr>
+			<span class="c btn0 btn" onClick="showMetrics(`loose`)" id="allmetrics"></span></td></tr>
 		<tr><td>stable</td><td class="faint" id="stablehash"></td></tr>
 	</table>
 
@@ -174,18 +174,18 @@
 			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</span></div>
 			<span class="c" id="uahash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="nUAinitial"></td></tr>
-		<tr><td id="UA00">userAgent</td><td class="c spaces" id="nUA00"></td></tr>
-		<tr><td id="UA01">appCodeName</td><td class="c spaces" id="nUA01"></td></tr>
-		<tr><td id="UA02">appName</td><td class="c spaces" id="nUA02"></td></tr>
-		<tr><td id="UA03">product</td><td class="c spaces" id="nUA03"></td></tr>
-		<tr><td id="UA04">appVersion</td><td class="c spaces" id="nUA04"></td></tr>
-		<tr><td id="UA05">oscpu</td><td class="c spaces" id="nUA05"></td></tr>
-		<tr><td id="UA06">platform</td><td class="c spaces" id="nUA06"></td></tr>
-		<tr><td id="UA07">buildID</td><td class="c spaces" id="nUA07"></td></tr>
-		<tr><td id="UA08">productSub</td><td class="c spaces" id="nUA08"></td></tr>
-		<tr class="togUA" id="togUA09"><td id="UA09">vendor</td><td class="c spaces" id="nUA09"></td></tr>
-		<tr class="togUA" id="togUA10"><td id="UA10">vendorSub</td><td class="c spaces" id="nUA10"></td></tr>
-		<tr class="togUA" id="togUA11"><td id="UA11"></td><td class="c" id="UA12"></td></tr>
+		<tr><td id="luserAgent">userAgent</td><td class="c spaces" id="nuserAgent"></td></tr>
+		<tr><td id="lappCodeName">appCodeName</td><td class="c spaces" id="nappCodeName"></td></tr>
+		<tr><td id="lappName">appName</td><td class="c spaces" id="nappName"></td></tr>
+		<tr><td id="lproduct">product</td><td class="c spaces" id="nproduct"></td></tr>
+		<tr><td id="lappVersion">appVersion</td><td class="c spaces" id="nappVersion"></td></tr>
+		<tr><td id="loscpu">oscpu</td><td class="c spaces" id="noscpu"></td></tr>
+		<tr><td id="lplatform">platform</td><td class="c spaces" id="nplatform"></td></tr>
+		<tr><td id="lbuildID">buildID</td><td class="c spaces" id="nbuildID"></td></tr>
+		<tr><td id="lproductSub">productSub</td><td class="c spaces" id="nproductSub"></td></tr>
+		<tr class="togUA" id="togvendor"><td id="lvendor">vendor</td><td class="c spaces" id="nvendor"></td></tr>
+		<tr class="togUA" id="togvendorSub"><td id="lvendorSub">vendorSub</td><td class="c spaces" id="nvendorSub"></td></tr>
+		<tr class="togUA" id="togualies"><td><span class="bad">absolute BS detected &#9654 </span></td><td class="c" id="nualies"></td></tr>
 		<tr><td colspan="2" class="center">--- navigator checks ---</td></tr>
 		<tr><td>web worker</td><td class="c mono" id="sectionUA2"></td></tr>
 		<tr><td>shared worker</td><td class="c mono" id="sectionUA3"></td></tr>
@@ -759,7 +759,7 @@
 			&nbsp mediaCapabilities</td><td class="c" id="nMediaC"></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">dom.media.mediasession.enabled</span></div>
-			&nbsp mediaSession</td><td class="c" id="nMediaS"></td></tr>
+			&nbsp [api] mediaSession</td><td class="c" id="nMediaS"></td></tr>
 		<tr><td colspan="2">[canPlayType] audio</td><td class="c mono" id="audiocan"></td></tr>
 		<tr><td colspan="2">[isTypeSupported] audio</td><td class="c mono" id="audiotype"></td></tr>
 		<tr><td colspan="2">[canPlayType] video</td><td class="c mono" id="videocan"></td></tr>
@@ -868,18 +868,9 @@
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.events.asyncClipboard</span></div>
-			&nbsp [api] clipboard</td><td class="c" id="nClipboard"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.IntersectionObserver.enabled</span></div>
-			&nbsp [api] intersection observer</td><td class="c" id="intObserver"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
 			&nbsp mathml</td><td class="c" id="mathml"></td></tr>
 		<tr><td colspan="2">[test example] mathml</td><td id="mathmltest"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.media.mediasession.enabled</span></div>
-			&nbsp [api] mediaSession</td><td class="c" id="mediaSession"></td></tr>
 		<tr><td colspan="2">[getEntries*] performance.mark</td><td class="c" id="perf1"></td></tr>
 		<tr><td colspan="2">performance.now</td><td class="c" id="perf2"></td></tr>
 		<tr><td colspan="2">[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>
@@ -887,9 +878,6 @@
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.reporting.enabled<br></span></div>
 			&nbsp [api] reporting</td><td class="c" id="reportingAPI"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.requestIdleCallback.enabled</span></div>
-			&nbsp requestIdleCallback</td><td class="c" id="reqIdleCB"></td></tr>
 		<tr><td colspan="2">stack depth</td><td class="c" id="recursion"></td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">svg.disabled</span></div>
@@ -897,12 +885,6 @@
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp webassembly</td><td class="c" id="wasm"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">security.webauth.webauthn<br>security.webauth.u2f</span></div>
-			&nbsp web authentication | u2f</td><td class="c" id="webauth"></td></tr>
-		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.webshare.enabled</span></div>
-			&nbsp [api] web share</td><td class="c" id="webshare"></td></tr>
 		<tr><td colspan="2">window.content</td><td class="c" id="wincon"></td></tr>
 		<tr><td colspan="3" class="center">------</td></tr>
 		<tr><td colspan="2"><div class="ttip"><span class="icon">[ i ]</span>
