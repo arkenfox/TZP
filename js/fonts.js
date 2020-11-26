@@ -263,10 +263,10 @@ function get_fpjs2() {
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
 			if (logPerf) {debug_log("fpjs2 [fonts]",t0,gt0)}
-			return resolve("fonts: " + hash)
+			return resolve("fonts:" + hash)
 		} else {
 			// non-FF
-			return resolve("fonts: " + zNA)
+			return resolve("fonts:" + zNA)
 		}
 	})
 }
@@ -492,7 +492,7 @@ function get_woff() {
 		function output_woff(state) {
 			dom.fontWoff2.innerHTML = state
 			if (logPerf) {debug_log("woff [fonts]",t0)}
-			return resolve("woff: " + state)
+			return resolve("woff:" + state)
 		}
 		// check
 		el = dom.woffyes
@@ -549,29 +549,29 @@ function outputFonts() {
 	// proportional
 	r = window.getComputedStyle(document.body,null).getPropertyValue("font-family")
 	dom.fontFCprop = r
-	section.push("proportional: " + r)
+	section.push("proportional:" + r)
 
 	// sizes
 	dom.df1 = fntStrA
 	dom.df2 = fntStrA
 	let el = dom.df1
-	r = "serif/sans-serif: " + getComputedStyle(el).getPropertyValue("font-size")
+	r = "serif/sans-serif, " + getComputedStyle(el).getPropertyValue("font-size")
 	el = dom.df2
-	r += " | monospace: " + getComputedStyle(el).getPropertyValue("font-size")
+	r += " | monospace, " + getComputedStyle(el).getPropertyValue("font-size")
 	dom.fontFCsize = r
-	section.push("sizes: " + r)	
+	section.push("sizes:" + r)	
 
 	// css font loading
 	r = ("FontFace" in window ? zE : zD)
 	dom.fontCSS = r
-	section.push("font loading: " + r)
+	section.push("font_loading:" + r)
 
 	// doc fonts
 	el = dom.spanLH
 	r = getComputedStyle(el).getPropertyValue("font-family")
 	r = (r.slice(1,16) == "Times New Roman" ? zE : zD)
 	dom.fontDoc = r
-	section.push("document fonts: " + r)	
+	section.push("document_fonts:" + r)	
 
 	get_unicode() //ToDo: promisify and add to section hash
 
