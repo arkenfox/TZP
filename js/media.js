@@ -135,7 +135,7 @@ function get_media(runtype) {
 	etype.innerHTML = hashtype + notation
 	// perf
 	if (logPerf) {debug_log(runtype +" [media]",t0)}
-	return (runtype+": " + hashcan + ", " + hashtype)
+	return (runtype+":" + hashcan + ":" + hashtype)
 }
 
 function outputMedia() {
@@ -145,20 +145,22 @@ function outputMedia() {
 	// mediaCapabilities: FF63+
 	if (isFF && isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
 	dom.nMediaC = r
-	section.push("mediaCapabilities: " + r)
+	section.push("mediaCapabilities:" + r)
 
 	// mediaSession: FF71+
 	if (isFF && isVer < 71) {r = zNS} else (r = ("mediaSession" in navigator ? zE : zD))
 	dom.nMediaS = r
-	section.push("mediaSession: " + r)
+	section.push("mediaSession:" + r)
 
 	Promise.all([
 		get_media("audio"),
 		get_media("video")
 	]).then(function(results){
-		results.forEach(function(currentResult) {
-			section.push(currentResult)
-		})
+		for (let i = 0; i < 2; i++) {
+			let parts = results[i].split(":")
+			section.push("canPlay_" + parts[0]+":"+parts[1])
+			section.push("isTypeSupported_" + parts[0]+":"+parts[2])
+		}
 		section_info("media", t0, gt0, section)
 	})
 }
