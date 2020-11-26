@@ -259,10 +259,10 @@ function get_errors() {
 					dom.errh = hash
 				}
 				if (logPerf) {debug_log("errors [fd]",t0)}
-				return resolve("errors: " + hash)
+				return resolve("errors:" + hash)
 			} else {
 				dom.errh = hash; dom.fdError = hash
-				return resolve("errors: " + hash)
+				return resolve("errors:" + hash)
 			}
 		}
 		// run
@@ -710,7 +710,7 @@ function get_line_scrollbar() {
 
 		run_scrollbar()
 		run_lineheight()
-		return resolve("scrollbar: " + finalresolve)
+		return resolve("scrollbar:" + finalresolve)
 	})
 }
 
@@ -921,7 +921,7 @@ function get_math() {
 			// blockage
 			if (block1 || block6) {mchash = zB0}
 			// return
-			return resolve("math: " + mchash.substring(0,40))
+			return resolve("math:" + mchash.substring(0,40))
 		}
 		get_hashes()
 		if (isFF) {
@@ -933,7 +933,7 @@ function get_math() {
 			dom.math6hash = m6hash
 			dom.mathhash = mchash
 			dom.fdMath = mchash
-			return resolve("math: " + mchash)
+			return resolve("math:" + mchash)
 		}
 	})
 }
@@ -1196,7 +1196,7 @@ function get_resources() {
 			// output
 			dom.fdResource.innerHTML = browser + " " + result
 			if (logPerf) {debug_log("resources [fd]",t0)}
-			return resolve("resources: " + browser+" "+wFF+"x"+hFF+" "+extra)
+			return resolve("resources:" + browser+" "+wFF+"x"+hFF+" "+extra)
 		}
 		// FF
 		function build_FF(wFF, hFF) {
@@ -1397,194 +1397,202 @@ function get_ua_nav() {
 		str = "",
 		go = false,
 		lies = 0,
+		pre = "",
+		spoof = false,
+		match = false,
+		myOS = isOS,
+		isPartial = false,
 		t0 = performance.now()
+
 	// FF78+ only
 	if (isFF && isVer > 77) {go = true}
 
-	// EASY
-	function get_property(id, property, good) {
-		str = ""
-		if (go && runS) {
-			// simulate lies
-			if (id == "01") {str = "MoZilla"} // case
-			if (id == "02") {str = " Netscape"} // leading space
-			if (id == "03") {str = "Gecko "} // trailing space
-			if (id == "07") {str = ""} // empty string: unexpected
-			if (id == "08") {str = undefined} // undefined
-			if (id == "09") {str = " "} // single space
-			if (id == "10") {str = "undefined"} // undefined string
-		} else {
-			try {str = navigator[property]} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-		}
-		if (str == "") {str = "empty string"}
-		if (str == "undefined") {str = "undefined string"}
-		if (str == undefined) {str = "undefined value"}
-		// stash
-		res.push(id+": "+str)
-		document.getElementById("nUA"+id).innerHTML = str
-		// show/hide vendor*
-		if (id == "09" || id == "10") {
-			document.getElementById("togUA"+id).style.display = (str == good ? "none" : "table-row")
-		}
-		// isBS
-		if (go) {
-			if (str !== good) {str = sb+"&#9654"+sc; lies++} else {str = ""}
-		} else {
-			str = ""
-		}
-		document.getElementById("UA"+id).innerHTML = property + str
-	}
-	get_property("01", "appCodeName", "Mozilla")
-	get_property("02", "appName", "Netscape")
-	get_property("03", "product", "Gecko")
-	get_property("07", "buildID", "20181001000000")
-	get_property("08", "productSub", "20100101")
-	get_property("09", "vendor", "empty string")
-	get_property("10", "vendorSub", "empty string")
-
 	// arrows
-	function addArrow(id, state) {
-		let title = ""
-		if (id == "00") {title = "userAgent"}
-		if (id == "04") {title = "appVersion"}
-		if (id == "05") {title = "oscpu"}
-		if (id == "06") {title = "platform"}
+	function addArrow(property, state) {
+		let title = property
 		if (state) {
 			if (isPartial == false && go == true) {lies++}
 			title += (isPartial ? sn : sb) +"&#9654"+sc
 		}
-		document.getElementById("UA"+id).innerHTML = title
+		document.getElementById("l"+property).innerHTML = title
 	}
 
-	// MORE COMPLEX: per OS
-	// https://dxr.mozilla.org/mozilla-central/source/browser/components/resistfingerprinting/test/browser/browser_navigator.js
-	// ToDo: check I have the right 78 info since original code was done for 68
-		// note: I'm not actually checking if RFP is correct, I'm checking for lies
-		// for some lies I can then check if RFP is on and discard: such as the version number
-	let pre = "",
-		spoof = false,
-		match = false,
-		myOS = isOS,
-		isPartial = false
-
-	// ToDo: if isOS =""
-		// currently only set by widgets test. can we fall strengthen it (e.g. also set it during math)
-	if (isOS == "" && go) {
-		// ToDo: if runS = isOS = ""
-			// isPartial => output yellow arrows to indicates we only did a partial check
-			// add yellow arrow info text somewhere?
-			// we can still detect some BS by checking all possibles
-			// i.e if oscpu = "undefined" or script blocked, or contains gibberish
-
-		// toggle these to test partial
-		//isPartial = true
-		myOS = "windows" // use your real OS
+	function output(property, str) {
+		// cleanup string
+		if (str == "") {str = "empty string"}
+		if (str == "undefined") {str = "undefined string"}
+		if (str == undefined) {str = "undefined value"}
+		// stash it, display it
+		res.push(property+":"+str)
+		document.getElementById("n"+property).innerHTML = str
+		return str
 	}
+
+	function get_property(property, good) {
+		// treat blocked as lies since it can we selectively used
+		str = ""
+		try {str = navigator[property]} catch(e) {str = zB0}
+		// simulate lies
+		if (go && runS) {
+			if (property == "appCodeName") {str = "MoZilla"} // case
+			if (property == "appName") {str = " Netscape"} // leading space
+			if (property == "product") {str = "Gecko "} // trailing space
+			if (property == "buildID") {str = ""} // empty string: unexpected
+			if (property == "productSub") {str = undefined} // undefined
+			if (property == "vendor") {str = " "} // single space
+			if (property == "vendorSub") {str = "undefined"} // undefined string
+			// these four are OS dependent
+			if (property == "appVersion") {str = "5.0 (windows)"}
+			if (property == "platform") {str = "win32"}
+			if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
+			if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
+		}
+		str = output(property, str)
+		if (good !== undefined) {
+			// show/hide vendor*
+			if (property == "vendor" || property == "vendorSub") {
+				document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
+			}
+			// isBS
+			let arrow = ""
+			if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
+			document.getElementById("l"+property).innerHTML = property + arrow
+		} else {
+			return str
+		}
+	}
+
+	function check_basics(str) {
+		// for dynamic returns
+		let bs = false
+		if (str == "undefined value") {bs = true}
+		if (str == "undefined string") {bs = true}
+		if (str == "blocked") {bs = true}
+		if (str == "empty string") {bs = true}
+		if (str.substring(0, 1) == " ") {bs = true} // leading space
+		if (str.substring(str.length-1, str.length) == " ") {bs = true} // trailing space
+		if (str.indexOf("  ") !== -1) {bs = true} // double spaces
+		return bs
+	}
+
+	// EASY (static values)
+	get_property("appCodeName", "Mozilla")
+	get_property("appName", "Netscape")
+	get_property("product", "Gecko")
+	get_property("buildID", "20181001000000")
+	get_property("productSub", "20100101")
+	get_property("vendor", "empty string")
+	get_property("vendorSub", "empty string")
+
+	// MORE COMPLEX: dynamic, per OS
+		// ToDo: if isOS ="": currently only set by widgets test: harden it
+	//myOS = "windows" // toggle to test isPartial
 
 	// appVersion
-	try {str = navigator.appVersion} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-	// simulate lies
-	if (go && runS) {str = "5.0 (Windows NT 6.1; Win64; x64) AppleWebKit BLAH BLAH"}
-	if (str == "") {str = "empty string"}
-	if (str == "undefined") {str = "undefined string"}
-	if (str == undefined) {str = "undefined value"}
-	res.push("04: "+str)
-	dom.nUA04.innerHTML = str
-	if (go && str.substring(0,5) !== "script") {
-		spoof = false
-		if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
-		if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
-		if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
-		if (myOS == "android") {
-			// tighten this up to be more specific
-			if (str.substring(0,13) == "5.0 (Android ") {match = true}
-			spoof = !match
+	str = get_property("appVersion")
+	if (go) {
+		if (myOS == "") {isPartial = true} else {isPartial = false}
+		spoof = check_basics(str)
+		if (spoof) {
+			// no need to check further, use a red arrow
+			isPartial = false
+		} else {
+			// dig deeper
+			if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
+			if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
+			if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
+			if (myOS == "android") {
+				// tighten this up to be more specific
+				if (str.substring(0,13) == "5.0 (Android ") {match = true}
+				spoof = !match
+			}
 		}
-		if (spoof || isPartial) {addArrow("04", true)}
+		if (spoof || isPartial) {addArrow("appVersion", true)}
 	} else {
-		addArrow("04", false)
+		addArrow("appVersion", false)
 	}
 
 	// platform
 	// ToDo: specific linux distro strings?
 	// ToDo: android: `Linux ${OSArch}` <-- any others
-	try {str = navigator.platform} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-	// simulate lies
-	if (go && runS) {str = "win32"}
-	if (str == "") {str = "empty string"}
-	if (str == "undefined") {str = "undefined string"}
-	if (str == undefined) {str = "undefined value"}
-	res.push("06: "+str)
-	dom.nUA06.innerHTML = str
-	if (go && str.substring(0,5) !== "script") {
-		spoof = false
-		match = false
-		if (myOS == "windows") {spoof = (str !== "Win32")}
-		if (myOS == "mac") {spoof = (str !== "MacIntel")}
-		if (myOS == "linux") {
-			if (str == "Linux i686") {match = true}
-			else if (str == "Linux i686 on x86_64") {match = true}
-			else if (str == "Linux x86_64") {match = true}
-			spoof = !match
+	str = get_property("platform")
+	if (go) {
+		if (myOS == "") {isPartial = true} else {isPartial = false}
+		spoof = check_basics(str)
+		if (spoof) {
+			// no need to check further, use a red arrow
+			isPartial = false
+		} else {
+			// dig deeper
+			if (myOS == "") {isPartial = true}
+			match = false
+			if (myOS == "windows") {spoof = (str !== "Win32")}
+			if (myOS == "mac") {spoof = (str !== "MacIntel")}
+			if (myOS == "linux") {
+				if (str == "Linux i686") {match = true}
+				else if (str == "Linux i686 on x86_64") {match = true}
+				else if (str == "Linux x86_64") {match = true}
+				spoof = !match
+			}
+			if (myOS == "android") {
+				if (str.substring(0,10) == "Linux armv") {match = true}
+				if (str.substring(0,11) == "Linux aarch") {match = true}
+				spoof = !match
+			}
 		}
-		if (myOS == "android") {
-			if (str.substring(0,10) == "Linux armv") {match = true}
-			if (str.substring(0,11) == "Linux aarch") {match = true}
-			spoof = !match
-		}
-		if (spoof || isPartial) {addArrow("06", true)}
+		if (spoof || isPartial) {addArrow("platform", true)}
 	} else {
-		addArrow("06", false)
+		addArrow("platform", false)
 	}
 
 	// oscpu
-	try {str = navigator.oscpu} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-	// simulate lies
-	if (go && runS) {str = "undefined"}
-	if (str == "") {str = "empty string"}
-	if (str == "undefined") {str = "undefined string"}
-	if (str == undefined) {str = "undefined value"}
-	res.push("05: "+str)
-	dom.nUA05.innerHTML = str
-	if (go && str.substring(0,5) !== "script") {
-		spoof = false
-		if (myOS == "windows") {
-			pre = "Windows NT "
-			// app64 + win64
-			if (str == pre+"10.0; Win64; x64") {match = true}
-			else if (str == pre+"6.3; Win64; x64") {match = true}
-			else if (str == pre+"6.1; Win64; x64") {match = true}
-			// app32 + win64
-			else if (str == pre+"10.0; WOW64") {match = true}
-			else if (str == pre+"6.3; WOW64") {match = true}
-			else if (str == pre+"6.1; WOW64") {match = true}
-			// app32 + win32
-			else if (str == pre+"10.0") {match = true}
-			else if (str == pre+"6.3") {match = true}
-			else if (str == pre+"6.1") {match = true}
-			spoof = !match
+	str = get_property("oscpu")
+	if (go) {
+		if (myOS == "") {isPartial = true} else {isPartial = false}
+		spoof = check_basics(str)
+		if (spoof) {
+			// no need to check further, use a red arrow
+			isPartial = false
+		} else {
+			// dig deeper
+			if (myOS == "windows") {
+				pre = "Windows NT "
+				// app64 + win64
+				if (str == pre+"10.0; Win64; x64") {match = true}
+				else if (str == pre+"6.3; Win64; x64") {match = true}
+				else if (str == pre+"6.1; Win64; x64") {match = true}
+				// app32 + win64
+				else if (str == pre+"10.0; WOW64") {match = true}
+				else if (str == pre+"6.3; WOW64") {match = true}
+				else if (str == pre+"6.1; WOW64") {match = true}
+				// app32 + win32
+				else if (str == pre+"10.0") {match = true}
+				else if (str == pre+"6.3") {match = true}
+				else if (str == pre+"6.1") {match = true}
+				spoof = !match
+			}
+			if (myOS == "linux") {
+				// ToDo: specific linux distro strings?
+				pre = "Linux "
+				if (str == pre+"i686") {match = true}
+				else if (str == pre+"i686 on x86_64") {match = true}
+				else if (str == pre+"x86_64") {match = true}
+				spoof = !match
+			}
+			if (myOS == "mac") {
+				if (str.substring(0,14) == "Intel Mac OS X") {match = true}
+				spoof = !match
+			}
+			if (myOS == "android") {
+				pre = "Linux "
+				if (str.substring(0,10) == pre+"armv") {match = true}
+				if (str.substring(0,11) == pre+"aarch") {match = true}
+				spoof = !match
+			}
 		}
-		if (myOS == "linux") {
-			// ToDo: specific linux distro strings?
-			pre = "Linux "
-			if (str == pre+"i686") {match = true}
-			else if (str == pre+"i686 on x86_64") {match = true}
-			else if (str == pre+"x86_64") {match = true}
-			spoof = !match
-		}
-		if (myOS == "mac") {
-			if (str.substring(0,14) == "Intel Mac OS X") {match = true}
-			spoof = !match
-		}
-		if (myOS == "android") {
-			pre = "Linux "
-			if (str.substring(0,10) == pre+"armv") {match = true}
-			if (str.substring(0,11) == pre+"aarch") {match = true}
-			spoof = !match
-		}
-		if (spoof || isPartial) {addArrow("05", true)}
+		if (spoof || isPartial) {addArrow("oscpu", true)}
 	} else {
-		addArrow("05", false)
+		addArrow("oscpu", false)
 	}
 
 	// userAgent
@@ -1594,12 +1602,7 @@ function get_ua_nav() {
 		// 3: the syntax/formula doesn't match
 		// 4: if version doesn't match isVer (allow for isRFP and 78)
 			// note: allow for + symbol on verNo (make global)
-	try{str = navigator.userAgent} catch(e) {str = (e.name == "ReferenceError" ? zB1 : zB2)}
-	if (str == "") {str = "empty string"}
-	if (str == "undefined") {str = "undefined string"}
-	if (str == undefined) {str = "undefined value"}
-	res.push("00: "+str)
-	dom.nUA00.innerHTML = str
+	str = get_property("userAgent")
 
 	// hash
 	res.sort()
@@ -1609,12 +1612,11 @@ function get_ua_nav() {
 	let isBS = false
 	if (lies > 0) {
 		lies += " pinocchio" + (lies > 1 ? "s": "")
-		dom.UA11.innerHTML = sb+"absolute BS detected "+" &#9654"+sc
-		dom.UA12.innerHTML = sb+ lies + sc + " [based only on feature detection]"
-		dom.togUA11.style.display = "table-row"
+		dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
+		dom.togualies.style.display = "table-row"
 		isBS = true
 	} else {
-		dom.togUA11.style.display = "none"
+		dom.togualies.style.display = "none"
 	}
 
 	// ToDo: section hash to also account for worker results
@@ -1627,7 +1629,7 @@ function get_ua_nav() {
 		// if BS + worker matches = use isBS
 		// if BS + worker doesn't matches = use worker
 	if (isBS) {
-		section_info("ua", t0, gt0, ["ua: lies"])
+		section_info("ua", t0, gt0, ["lies:yes"])
 	} else {
 		section_info("ua", t0, gt0, res)
 	}
@@ -1639,25 +1641,23 @@ function get_ua_nav_checks() {
 		res = [],
 		r = ""
 	for (let i=0; i < list.length; i++) {
-		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
-		if (r == "") {r = "undefined"}
-		if (r == undefined && isFF) {r = zB3}
-		res.push((i).toString().padStart(2,"0")+": "+r)
+		try {r = navigator[list[i]]} catch(e) {r = zB0}
+		if (r == "") {r = "empty string"}
+		if (r == "undefined") {r = "undefined string"}
+		if (r == undefined && isFF) {r = zB0}
+		if (r == undefined) {r = "undefined value"}
+		res.push(list[i]+":"+r) // no spaces
 	}
+	res.sort()
 	let control = sha1(res.join())
 
 	function update(data) {
 		// compare shared worker to control: output diffs
-		let target = "", output = ""
 		for (let i=0; i < res.length; i++) {
 			if (res[i] !== data[i]) {
-				output = data[i].slice(4, data[i].length)
-				target = data[i].substring(0,2)
-				// match to correct element: nUAxx
-				if (target == "05") {target = "06"}
-				target = document.getElementById("nUA"+target)
-				// append
-				target.innerHTML += "<br>" + sb.trim() + output + sc
+				let parts = data[i].split(":")
+				let target = document.getElementById("n"+parts[0])
+				target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
 			}
 		}
 	}
@@ -1772,7 +1772,7 @@ function get_version() {
 			}
 			dom.fdVersion.innerHTML = verNo
 			if (logPerf) {debug_log("version [fd]",t0)}
-			return resolve("version: " + verNo)
+			return resolve("version:" + verNo)
 		}
 		// use isErr
 		if (isErr == "X") { verNo = "59 or lower"
@@ -1991,9 +1991,9 @@ function get_widgets() {
 				size = getComputedStyle(el).getPropertyValue("font-size")
 			} catch(e) {size = "unknown"}
 			if (runS) {
-				//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
+				if (i == 1) {font = "-apple-system"; size="11px"} // font + size
 				//if (i == 4) {font = "-apple-system"} // font
-				if (i == 2) {size="13px"} // size
+				//if (i == 2) {size="13px"} // size
 			}
 			output = font+", "+size
 			// 1-7: compare to 1
@@ -2038,7 +2038,7 @@ function get_widgets() {
 		dom.widgetH = whash + (runS ? zSIM : "")
 		// perf & resolve
 		if (logPerf) {debug_log("widgets [fd]",t0)}
-		return resolve("widgets: " + whash)
+		return resolve("widgets:" + whash)
 	})
 }
 
@@ -2314,43 +2314,71 @@ function goNW() {
 }
 
 function goNW_UA() {
+	// control
 	let list = ['userAgent','appCodeName','appName','product','appVersion',
 		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
 		res = [],
+		control = [],
 		r = ""
-	dom.sectionUA8.innerHTML = "&nbsp"
-	// open, get results, close
-	let newWin = window.open()
-	let navigator = newWin.navigator
-	for(let i=0; i < list.length; i++) {
-		try {r = navigator[list[i]]} catch(e) {r = (e.name == "ReferenceError" ? zB1 : zB2)}
+	for (let i=0; i < list.length; i++) {
+		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"}
 		if (r == "undefined") {r = "undefined string"}
 		if (r == undefined) {r = "undefined value"}
-		res.push((i).toString().padStart(2,"0")+": "+r)
+		control.push(list[i]+":"+r) // no spaces
+	}
+	control.sort()
+
+	dom.sectionUA8.innerHTML = "&nbsp"
+	// open, get results, close
+	let newWin = window.open()
+	let newNavigator = newWin.navigator
+	for(let i=0; i < list.length; i++) {
+		try {r = newNavigator[list[i]]} catch(e) {r = zB0}
+		if (r == "") {r = "empty string"}
+		if (r == "undefined") {r = "undefined string"}
+		if (r == undefined) {r = "undefined value"}
+		res.push(list[i]+":"+r)
 	}
 	newWin.close()
+
+	// simulate
+	if (runS) {
+		res = [
+			"appCodeName:Mozilllllla",
+			"appName:Moonscape",
+			"appVersion:5.0 (toaster)",
+			"buildID:20181001000000000",
+			"oscpu:Windows XP 500.1; Win64; x64",
+			"platform:Windows128",
+			"product:Lizard",
+			"productSub:30100101",
+			"userAgent:Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0",
+			"vendor:empty string", // nochange
+			"vendorSub:empty string:with a colon",
+		]
+	}
+
 	// hash
 	res.sort()
 	let hash = sha1(res.join())
-	let hash2 = (dom.nUAinitial.textContent).substring(0,40)
+	let controlhash = sha1(control.join())
 	// output
-	if (hash == hash2) {
+	if (hash == controlhash) {
 		dom.sectionUA8.innerHTML = hash + match_green
 	} else {
 		dom.sectionUA8.innerHTML = hash + match_red
 		// output diffs if not already exposed (has line break)
-		let target = "", output = "", str = "", n = ""
 		for (let i=0; i < res.length; i++) {
-			target = document.getElementById("nUA" + res[i].substring(0,2))
-			str = target.innerHTML
-			output = res[i].slice(3, res[i].length)
+			let parts = res[i].split(":")
+			let target = document.getElementById("n" + parts[0])
+			let str = target.innerHTML
+			let output = parts.slice(1).join(":")
 			if (str.indexOf("<br>") == -1 && str !== output) {
 				target.innerHTML += "<br>" + sb.trim() + output + sc
-				n = (i).toString().padStart(2,"0")
 				// show vendor*
-				if (n == "09" || n == "10") {
-					document.getElementById("togUA"+n).style.display = "table-row"
+				if (target == "vendor" || target == "vendorSub") {
+					document.getElementById("tog"+target).style.display = "table-row"
 				}
 			}
 		}

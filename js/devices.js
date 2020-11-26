@@ -42,7 +42,7 @@ function get_hardware_concurrency() {
 		dom.nHWC = zD
 		h2 = zD
 	}
-	return "hardware concurrency: " + h2
+	return "hardwareConcurrency:" + h2
 }
 
 function get_media_devices() {
@@ -117,18 +117,18 @@ function get_mimetypes() {
 						// application/x-shockwave-flash: application/x-shockwave-flash: swf
 					res.sort()
 					display(res.join("<br>"))
-					return resolve("mimeTypes: " + sha1(res.join()))
+					return resolve("mimeTypes:" + sha1(res.join()))
 				} else {
 					display("none")
-					return resolve("mimeTypes: none")
+					return resolve("mimeTypes:none")
 				}
 			} catch(e) {
 				display((e.name == "ReferenceError" ? zB1 : zB2))
-				return resolve("mimeTypes: blocked")
+				return resolve("mimeTypes:blocked")
 			}
 		} else {
 			display(zD)
-			return resolve("mimeTypes: disabled")
+			return resolve("mimeTypes:disabled")
 		}
 	})
 }
@@ -138,7 +138,7 @@ function get_mm_hover(type){
 	try {
 		if (window.matchMedia(q+n+")").matches) x=n
 		if (window.matchMedia(q+h+")").matches) x=h
-	} catch(e) {x = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {x = zB0}
 	return x
 }
 
@@ -148,7 +148,7 @@ function get_mm_pointer(type){
 		if (window.matchMedia(q+n+")").matches) x=n
 		if (window.matchMedia(q+c+")").matches) x=c
 		if (window.matchMedia(q+f+")").matches) x=f
-	} catch(e) {x = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {x = zB0}
 	return x
 }
 
@@ -197,23 +197,22 @@ function get_plugins() {
 					}
 					if (isFF || isEngine == "blink") {
 						display((isLies ? "fake" : res.join("<br>")))
-						return resolve("plugins: " + (isLies ? "lies" : sha1(res.join())))
+						return resolve("plugins:" + (isLies ? "lies" : sha1(res.join())))
 					} else {
 						display(res.join("<br>"))
-						return resolve("plugins: " + sha1(res.join()))
+						return resolve("plugins:" + sha1(res.join()))
 					}
 				} else {
 					display("none")
-					return resolve("plugins: none")
+					return resolve("plugins:none")
 				}
 			} catch(e) {
-				console.debug(e.name, e.message)
-				dom.plugins.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-				return resolve("plugins: blocked")
+				dom.plugins.innerHTML = zB0
+				return resolve("plugins:blocked")
 			}
 		} else {
 			display(zD)
-			return resolve("plugins: disabled")
+			return resolve("plugins:disabled")
 		}
 	})
 }
@@ -333,7 +332,7 @@ function get_touch() {
 	let t3 = ("ontouchend" in window)
 	// output
 	dom.touch.innerHTML = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
-	return "touch: "+ p2 +", "+ m2 +", "+ t +", "+ t2 +", "+ t3
+	return "touch:"+ p2 +", "+ m2 +", "+ t +", "+ t2 +", "+ t3
 }
 
 function get_vr() {
@@ -356,11 +355,11 @@ function get_vr() {
 					}
 				}
 			} catch(e) {
-				dom.aVR.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+				dom.aVR.innerHTML = zB0
 			}
-			return "vr: " + zE + ", " + r2
+			return "vr:" + zE +", "+ r2
 		} else {
-			return "vr: " + zE + ", " + zD
+			return "vr:" + zE +", "+ zD
 		}
 	}	else {
 		dom.nVR = zD;	dom.aVR = zNA

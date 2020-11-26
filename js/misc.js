@@ -18,7 +18,7 @@ function get_component_shims() {
 		shim = r + s18 +"["+ shim.split(", ").length +"]"+ sc
 	}
 	dom.shim.innerHTML = r
-	return "shims: " + r
+	return "component_shims:" + r
 }
 
 function get_iframe_props() {
@@ -45,21 +45,7 @@ function get_iframe_props() {
 		dom.iProps.innerHTML = error_iframe
 		r = "error"
 	}
-	return "iframe: " + r
-}
-
-function get_int_observer() {
-	let callback = function(entries, observer) {}
-	let r
-	try {
-		let observer = new IntersectionObserver(callback)
-		dom.intObserver = zE
-		r= zE
-	} catch(e) {
-		dom.intObserver = zD
-		r = zD
-	}
-	return "int observer: " + r
+	return "iframe_properties:" + r
 }
 
 function get_mathml() {
@@ -78,7 +64,7 @@ function get_mathml() {
 	let pre = " | offsetHeight difference: ",
 		post = (diff < 10 ? tb_safer : tb_standard)
 	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + post
-	return "mathml: " + (diff < 10 ?	zD : diff) 
+	return "mathml:" + (diff < 10 ?	zD : diff)
 }
 
 function get_nav_prototype() {
@@ -94,7 +80,7 @@ function get_nav_prototype() {
 		dom.nProto = r
 		dom.nProto2 = ""
 	}
-	return "navigator: " + r
+	return "navigator_properties:" + r
 }
 
 function get_recursion() {
@@ -113,7 +99,7 @@ function get_recursion() {
     recurse()
 	} catch (e) {
 		// 2nd test is more accurate/stable
-		console.log("recursion:", test1, level)
+		//console.log("recursion:", test1, level)
 		dom.recursion = level
 	}
 }
@@ -134,7 +120,7 @@ function get_reporting_api() {
 			dom.reportingAPI = zD+" [or "+zNS+"]"
 		}
 	}
-	return "reporting: " + r
+	return "reporting_observer:" + r
 }
 
 function get_perf1() {
@@ -155,7 +141,7 @@ function get_perf1() {
 	} catch(e) {r1 = zB0}
 	dom.perf1.innerHTML = r1 + (r1 == "0, 0, 0, 0" ? rfp_green: rfp_red)
 	r1 = (r1 == "0, 0, 0, 0" ? "zero" : "not zero")	
-	return "perf.mark: " + r1
+	return "perf_mark:" + r1
 }
 
 function get_perf2() {
@@ -186,7 +172,7 @@ function get_perf3() {
 		r = (r == 0 ? "zero" : "not zero")
 	} catch(e) {r = zB0}
 	dom.perf3.innerHTML = r
-	return "perf.timing: " + r
+	return "perf_timing:" + r
 }
 
 function get_perf4() {
@@ -201,7 +187,7 @@ function get_perf4() {
 	} else {
 		dom.perf4 = r
 	}
-	return "perf navigation: " + r
+	return "perf_navigation:" + r
 }
 
 function get_svg() {
@@ -222,7 +208,7 @@ function get_svg() {
 	dom.svgBasicTest = r
 	// remove
 	dom.svgDiv.removeChild(s)
-	return "svg: " + r
+	return "svg:" + r
 }
 
 function get_wasm() {
@@ -239,7 +225,7 @@ function get_wasm() {
 	// ToDo: dom.wasm.innerHTML = (supported ? zE+tb_standard : zD+tb_safer) // currently alpha
 	let r = (supported ? zE : zD )
 	dom.wasm = r
-	return "wasm: " + r
+	return "wasm:" + r
 }
 
 function get_windowcontent() {
@@ -252,32 +238,12 @@ function get_windowcontent() {
 		r = zD
 	}
 	dom.wincon = r
-	return "window.content: " + r
+	return "window_content:" + r
 }
 
 function outputMisc(type) {
 	let t0 = performance.now()
 	let section = [], r = ""
-
-	try {r = (navigator.share ? zE : zD)} catch(e) {r = zB0}
-	dom.webshare = r
-	section.push("web share: " + r)
-	
-	r = ("clipboard" in navigator ? zE: zD) // FF63+
-	dom.nClipboard = r
-	section.push("clipboard: " + r)
-
-	r = ("requestIdleCallback" in window ? zE: zD)
-	dom.reqIdleCB = r
-	section.push("requestIdleCallback: " + r)
-
-	r = ("mediaSession" in navigator ? zE: zD) // FF71+
-	dom.mediaSession = r
-	section.push("mediaSession: " + r)
-
-	r = ("credentials" in navigator ? zE: zD) +" | "+ ("u2f" in window ? zE: zD)
-	dom.webauth = r
-	section.push("webauth + u2f: " + r)
 
 	// other
 	Promise.all([
@@ -286,7 +252,6 @@ function outputMisc(type) {
 		get_perf4(),
 		get_component_shims(),
 		get_iframe_props(),
-		get_int_observer(),
 		get_windowcontent(),
 		get_nav_prototype(),
 		get_reporting_api(),

@@ -31,7 +31,7 @@ function get_colors(runtype) {
 		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
-	} else if (runtype == "CSS4") {
+	} else if (runtype == "css4") {
 		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
 		list = [m+'activehyperlinktext',m+'appearance',m+'buttondefault',m+'buttonhoverface',
@@ -54,7 +54,7 @@ function get_colors(runtype) {
 		try {
 			let x = window.getComputedStyle(element, null).getPropertyValue("background-color")
 			results.push(item+": "+x)
-			if (runtype == "CSS4") {
+			if (runtype == "css4") {
 				data.push(item.padStart(11) + ": " + x)
 			}
 		} catch(e) {
@@ -66,14 +66,14 @@ function get_colors(runtype) {
 	if (runtype == "system") {
 		let control = "1580959336948bb37120a893e8b1cb99c620129e"
 		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
-	} else if (runtype == "CSS4") {
+	} else if (runtype == "css4") {
 		dom.sColorHashNew.innerHTML = error + (error == "" ? hash + notation : "")
 		dom.sColorHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
 		dom.sColorHashData.style.color = zshow
 	} else {
 		dom.mColorHash.innerHTML = error + (error == "" ? hash + notation : "")
 	}
-	return "colors " + runtype + ": " + hash
+	return "colors_" + runtype + ":" + hash
 }
 
 function get_computed_styles() {
@@ -211,16 +211,15 @@ function get_computed_styles() {
 			}
 			if (logPerf) {debug_log("computed styles [css]",t0)}
 			//console.debug(hashes.join("\n"))
-			return resolve("styles: " + sha1(hashes.join()))
+			return resolve("styles:" + sha1(hashes.join()))
 		}).catch(error => {
 			console.error(error)
-			return resolve("styles: error")
+			return resolve("styles:error")
 		})
 	})
 }
 
 function get_mm_css(runtype) {
-
 	let x = zNS, clean = x, q="(prefers-"+ runtype +": ", n="no-preference"
 
 	// FF63+: reduced-motion
@@ -273,7 +272,7 @@ function get_mm_css(runtype) {
 		} catch(e) {x = get_css_block(e.name); clean = zB0}
 		dom.mmFC.innerHTML = x
 	}
-	return("prefers-" + runtype +": " + clean)
+	return("prefers-" + runtype +":" + clean)
 }
 
 function get_system_fonts() {
@@ -325,7 +324,7 @@ function get_system_fonts() {
 	dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
 	dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
 	dom.sFontsHashData.style.color = zshow
-	return "system fonts: " + hash
+	return "system_fonts:" + hash
 }
 
 function outputCSS() {
@@ -337,8 +336,8 @@ function outputCSS() {
 		get_mm_css("contrast"),
 		get_mm_css("forced-colors"),
 		get_colors("system"),
-		get_colors("CSS4"),
-		get_colors("-moz-"),
+		get_colors("css4"),
+		get_colors("moz"),
 		get_system_fonts(),
 		get_computed_styles(),
 	]).then(function(results){

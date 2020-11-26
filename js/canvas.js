@@ -136,7 +136,7 @@ function outputCanvas() {
 				}
 			}
 			// push + display
-			chash1.push(item+": "+pushvalue)
+			chash1.push(item+":"+pushvalue)
 			element.innerHTML = value1
 		}
 
@@ -345,6 +345,7 @@ function outputCanvas() {
 					// make more stable across FF releases
 					// make zoom resistant
 					// do away with using fonts? what happens if doc fonts is blocked: e.g. other lang packs?
+					// ahh: blocking arial via doc fonts and using e.g default TNR = zoom resistance lost
 				let fpText = "BrowserLeaks,com <canvas> 10"
 				context.textBaseline = "top";
 				context.font = "14px 'Arial'";
