@@ -53,8 +53,9 @@ function section_info(name, time1, time2, data) {
 			if (check == undefined) {
 				fpAllCheck.push(name +": contains undefined")
 			} else {
-				let metric = check.split(":")[0]
-				let value = check.split(":")[1]
+				let parts = data[i].split(":")
+				let metric = parts[0]
+				let value = parts.slice(1).join(":")
 				if (value == "") {
 					fpAllCheck.push(name +" - " + metric + ": not set")
 				} else if (value == undefined) {
@@ -64,12 +65,17 @@ function section_info(name, time1, time2, data) {
 		}
 		// store
 		if (sRerun && gRerun == false) {
-			console.log(name + ": " + hash +"\n", data)
+			console.log(name + ":" + hash +"\n", data)
 		} else {
 			// yay!
-			fpAllHash.push(name + ": " + hash)
+			fpAllHash.push(name + ":" + hash)
 			fpAllCount += data.length
-			fpAllData.push([name +": " + hash, data])
+			// pretty name
+			let pname = name
+			if (pname == "ua") {pname = "user agent"}
+			if (pname == "feature") {pname += " detection"}
+			if (pname == "storage") {pname = "cookies & storage"}
+			fpAllData.push([pname +":" + hash, data])
 			if (fpAllHash.length == 11) {
 				fpAllHash.sort()
 				fpAllData.sort()
@@ -128,8 +134,51 @@ function section_info(name, time1, time2, data) {
 	}
 }
 
-function showMetrics() {
-	
+function showMetrics(type) {
+	let array = [],
+		checks = [],
+		output = [],
+		mlength = 0,
+		mPad = 27 // longest metric is currently 22
+	if (type == "loose") {array = fpAllData}
+
+	for (let i = 0; i < array.length; i++) {
+		let item = array[i]
+		let sparts = item[0].split(":")
+		let section = sparts[0]
+		let shash = sparts.slice(1).join(":")
+		// ToDo: pretty up
+		output.push(section + ": " + shash)
+		let data = item[1]
+		for (let j = 0; j < data.length; j++) {
+			let parts = data[j].split(":")
+			let metric = parts[0]
+			let value = parts.slice(1).join(":")
+			// longest metric name length
+			if (metric.length > mlength) {mlength = metric.length}
+			// checks
+			let ok = true, message = []
+			if (metric.indexOf(" ") !== -1) {ok = false; message.push("metric-has-space")} // space
+			if (value.substring(0, 1) == " ") {ok = false; message.push("lead-space")} // leading space
+			if (value.substring(value.length-1, value.length) == " ") {ok = false; message.push("trail-space")} // trailing space
+			//if (value.indexOf(":") !== -1) {ok = false; message.push("contains-colon")}
+			if (ok == false) {
+				checks.push(message.join() + ":~"+ metric +":"+ value +"~")
+			}
+			// build output: ToDo: pretty up
+			output.push(metric.padStart(mPad) +": " + value)
+		}
+	}
+	// checks
+	if (isFile) {
+		console.debug("longest metric name length", mlength)
+		if (checks.length > 0) {
+			checks.sort()
+			console.debug(checks)
+		}
+		// debug
+		console.debug(output.join("\n"))
+	}
 
 }
 
