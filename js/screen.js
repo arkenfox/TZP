@@ -1736,7 +1736,7 @@ function get_ua_nav_checks() {
 					// listen
 					let channel = new BroadcastChannel("sw-ua")
 					channel.addEventListener("message", event => {
-						console.debug("ua service", e.data.msg)
+						console.debug("ua service", event.data.msg)
 						test5 = sha1((event.data.msg).join())
 						el5.innerHTML = test5 + (test5 == control ? match_green : match_red)
 						// unregister & close
