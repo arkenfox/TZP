@@ -1796,9 +1796,19 @@ function get_version() {
 		}
 		// run
 		function v75plus() {
+			// 85: 1675240
+			if (go) {
+				try {
+					let reg85 = ("/a")
+					let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+					let test85 = descriptor.get.call(reg85)
+				} catch(e) {
+					if ((e.message).substring(0,3) == "Reg") {verNo = "85+"; go=false}
+				}
+			}
 			// 84: 1673440
 			if (go) {
-				try {eval("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84+"; go=false}}
+				try {eval("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84"; go=false}}
 			}
 			// 83: 1667094
 			if (go) {
