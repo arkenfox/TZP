@@ -26,7 +26,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a id="testanchor" class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb3">
@@ -38,6 +38,7 @@
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
+		<tr><td>85</td><td id="n85"></td><td class="c mono" id="v85"></td></tr>
 		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
 		<tr><td>83</td><td id="n83"></td><td class="c mono" id="v83"></td></tr>
 		<tr><td>83</td><td id="n83a"></td><td class="c mono" id="v83a"></td></tr>
@@ -130,6 +131,19 @@ function outputVersion() {
 			t0 = performance.now()
 		}
 	}
+
+	// 85: 1675240
+	let t85 = performance.now(), ver85 = xF
+	try {
+		let reg85 = ("/a")
+		let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+		let test85 = descriptor.get.call(reg85)
+	} catch(e) {
+		// 85+: RegExp.prototype.global getter called on non-RegExp object: string
+		// 60+: get global method called on incompatible string
+		if ((e.message).substring(0,3) == "Reg") {ver85 = xS}
+	}
+	output("85", "1675240", ver85, performance.now()-t85)
 
 	// 84: 1673440
 	let t84 = performance.now(), ver84 = xF
@@ -496,21 +510,6 @@ function rerunVersion() {
 
 if ("undefined" != typeof InstallTrigger) {isFF = true}
 outputVersion()
-
-function temptest() {
-	//const anchorElement = document.createElement('a')
-	const anchorElement = dom.testanchor
-	const propertyNames = Object.getOwnPropertyNames(anchorElement.__proto__)
-	const obj = {}
-	propertyNames.forEach(propName => {
-			const value = anchorElement[propName]
-			return (
-					obj[propName] = value
-			)
-	})
-	console.log(obj)
-}
-temptest()
 
 </script>
 </body>
