@@ -1681,7 +1681,7 @@ function get_ua_nav_checks() {
 			let workernav = new Worker("js/worker_ua.js")
 			el2.innerHTML = zF
 			workernav.addEventListener("message", function(e) {
-				console.debug("ua worker", e.data)
+				//console.debug("ua worker", e.data)
 				test2 = sha1((e.data).join())
 				el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
 				workernav.terminate
@@ -1696,7 +1696,7 @@ function get_ua_nav_checks() {
 			let sharednav = new SharedWorker("js/workershared_ua.js")
 			el3.innerHTML = zF
 			sharednav.port.addEventListener("message", function(e) {
-				console.debug("ua shared", e.data)
+				//console.debug("ua shared", e.data)
 				test3 = sha1((e.data).join())
 				el3.innerHTML = test3 + (test3 == control ? match_green : match_red)
 				sharednav.port.close()
@@ -1736,7 +1736,7 @@ function get_ua_nav_checks() {
 					// listen
 					let channel = new BroadcastChannel("sw-ua")
 					channel.addEventListener("message", event => {
-						console.debug("ua service", event.data.msg)
+						//console.debug("ua service", event.data.msg)
 						test5 = sha1((event.data.msg).join())
 						el5.innerHTML = test5 + (test5 == control ? match_green : match_red)
 						// unregister & close
