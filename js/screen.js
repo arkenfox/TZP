@@ -387,9 +387,9 @@ function get_line_scrollbar() {
 			osM = "[Mac]",
 			osTBL = " [Linux]"+tb_green,
 			os = "",
-			sbZoom = ""
-
-		let finalresolve = ""
+			sbZoom = "",
+			dScrollbar = "",
+			eScrollbar = ""
 
 		// scrollbar
 		function run_scrollbar() {
@@ -401,12 +401,8 @@ function get_line_scrollbar() {
 			let w = (window.innerWidth-vw),
 				wZoom = w
 
-			// what I want to resolve for fd hash
-			if (w > 0) {
-				finalresolve = "not zero"
-			} else {
-				finalresolve = "zero"
-			}
+			// for section hash
+			if (w > 0) {dScrollbar = "not zero"} else {dScrollbar = "zero"}
 
 			// start
 			if (w == 0) {
@@ -516,6 +512,7 @@ function get_line_scrollbar() {
 			dom.fdScrollV = w+"px "+sbZoom+os
 			// element scrollbar
 			let eW = (100-dom.fdScroll.scrollWidth)
+			if (eW > 0) {eScrollbar = "not zero"} else {eScrollbar = "zero"}
 			if (jsZoom == 100) {
 				eW += "px" + (eW == w ? "" : sb+"[!= viewport scrollbar]"+sc)
 			}
@@ -710,7 +707,7 @@ function get_line_scrollbar() {
 
 		run_scrollbar()
 		run_lineheight()
-		return resolve("scrollbar:" + finalresolve)
+		return resolve("scrollbars:" + dScrollbar +", " + eScrollbar)
 	})
 }
 
