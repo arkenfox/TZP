@@ -135,7 +135,11 @@ function get_media(runtype) {
 	etype.innerHTML = hashtype + notation
 	// perf
 	if (logPerf) {debug_log(runtype +" [media]",t0)}
-	return (runtype+":" + hashcan + ":" + hashtype)
+	// return array
+	let res = []
+	res.push("canPlay_"+ runtype +":"+ hashcan)
+	res.push("isTypeSupported_"+ runtype +":"+ hashtype)
+	return (res)
 }
 
 function outputMedia() {
@@ -156,11 +160,15 @@ function outputMedia() {
 		get_media("audio"),
 		get_media("video")
 	]).then(function(results){
-		for (let i = 0; i < 2; i++) {
-			let parts = results[i].split(":")
-			section.push("canPlay_" + parts[0]+":"+parts[1])
-			section.push("isTypeSupported_" + parts[0]+":"+parts[2])
-		}
+		results.forEach(function(currentResult) {
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
+		})
 		section_info("media", t0, gt0, section)
 	})
 }
