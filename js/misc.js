@@ -17,7 +17,7 @@ function get_component_shims() {
 		r = sha1(shim)
 		shim = r + s18 +"["+ shim.split(", ").length +"]"+ sc
 	}
-	dom.shim.innerHTML = r
+	dom.shim.innerHTML = shim
 	return "component_shims:" + r
 }
 
@@ -247,6 +247,9 @@ function outputMisc(type) {
 
 	// other
 	Promise.all([
+		get_svg(),
+		get_wasm(),
+		get_mathml(),
 		get_perf1(),
 		get_perf3(),
 		get_perf4(),
@@ -255,9 +258,6 @@ function outputMisc(type) {
 		get_windowcontent(),
 		get_nav_prototype(),
 		get_reporting_api(),
-		get_wasm(),
-		get_mathml(),
-		get_svg()
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
