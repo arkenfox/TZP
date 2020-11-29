@@ -328,19 +328,6 @@ function outputCanvas() {
 				context.rect(0, 0, 10, 10)
 				context.rect(2, 2, 6, 6)
 
-				/* original kkpanser
-				let fpText = "Cwm fjordbank glyphs vext quiz, \ud83d\ude03"
-				context.textBaseline = "alphabetic"
-				context.fillStyle = "#f60"
-				context.fillRect(125, 1, 62, 20)
-				context.fillStyle = "#069"
-				context.font = "11pt no-real-font-123"
-				context.fillText(fpText, 2, 15)
-				context.fillStyle = "rgba(102, 204, 0, 0.7)"
-				context.font = "18pt Arial"
-				context.fillText(fpText, 4, 45)
-				/* */
-
 				// new kkapsner
 					// make more stable across FF releases
 					// make zoom resistant
