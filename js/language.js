@@ -668,6 +668,7 @@ function get_lang_datetime() {
 							}
 						} else {
 							if (res[i] !== e.data[i]) {
+								console.debug(i + "\n - " + res[i] + "\n - " + e.data[i])
 								if (i == 14) {
 									document.getElementById("ldt"+i).innerHTML = res[i] + divider + sb + sha1(e.data[i].join()) + sc
 								} else {
