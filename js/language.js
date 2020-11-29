@@ -486,7 +486,7 @@ function get_lang_datetime() {
 				if (prError == "") {
 					return prules.join(", ")
 				} else {
-					err.push(item + "[unexpected]: " + prError)
+					err.push(item + " [unexpected]: " + prError)
 					return zB0
 				}
 			}
