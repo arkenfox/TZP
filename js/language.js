@@ -471,19 +471,24 @@ function get_lang_datetime() {
 				return f.formatRange(date1, date2) +"<br>"+ f.formatRange(date1, date3)
 			} else if (item == 48) {
 				let prules = [], nos = [0,1,2,3,4,6,7,11,20,21,100]
-				let prev = "", current = ""
+				let prev = "", current = "", prError = ""
 				for (let i=0; i < nos.length; i++) {
 					try {
 						current = new Intl.PluralRules(undefined).select(nos[i])
 					} catch(e) {
-						console.debug(e.name, e.message)
+						prError = e.name + " : " + e.message
 						current = "error"
 					}
 					// record changes only
 					if (prev !== current) {prules.push(nos[i] + ": "+ current)}
 					prev = current
 				}
-				return prules.join(", ")
+				if (prError == "") {
+					return prules.join(", ")
+				} else {
+					err.push(item + "[unexpected]: " + prError)
+					return zB0
+				}
 			}
 		} catch(e) {
 			if (isFF) {
