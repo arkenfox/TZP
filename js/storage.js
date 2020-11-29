@@ -301,7 +301,6 @@ function get_permissions(item) {
 		try {
 			navigator.permissions.query({name:item}).then(function(result) {
 				el.innerHTML = result.state
-				console.debug("permission state", e.state)
 				return resolve(str + result.state)
 			}).catch(error => {
 				if ((error.message).includes(userVis)) {
@@ -314,7 +313,8 @@ function get_permissions(item) {
 				return resolve(str)
 			})
 		} catch(e) {
-			return resolve(zB0)
+			el.innerHTML = zB0
+			return resolve(str + zB0)
 		}
 	})
 }
