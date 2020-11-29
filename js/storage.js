@@ -314,7 +314,7 @@ function get_permissions(item) {
 				return resolve(str)
 			})
 		} catch(e) {
-			return resolved(zB0)
+			return resolve(zB0)
 		}
 	})
 }
