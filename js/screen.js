@@ -29,9 +29,7 @@ function return_mm_dpi(type) {
 					return i}
 			} return i
 		})()
-	} catch(e) {
-		r = (e.name == "ReferenceError" ? zB1 : zB2)
-	}
+	} catch(e) {r = zB0}
 	return r
 }
 
@@ -116,8 +114,7 @@ function get_collation() {
 	// output
 	function output(hash) {
 		if (runS) {hash = sha1(hash)}
-		let r = "",
-			c = ""
+		let r = "", c = ""
 		if (missing.length > 0) {
 			c = " [missing locale code" + (missing.length > 1 ? "s" : "")
 				+ ":" + missing.join(", ") + "]"
@@ -162,7 +159,7 @@ function get_color() {
 			return i
 		})()
 	} catch(e) {
-		r = (e.name == "ReferenceError" ? zB1 : zB2)
+		r = zB0
 	}
 	dom.mmC.innerHTML = (r == 8 ? r+rfp_green : r+rfp_red)
 }
@@ -298,15 +295,13 @@ function get_errors() {
 							test = num.format(test)
 							test = e.name+": "+ e.message
 						} catch (e) {
-							if (e.name == "ReferenceError") {
-								test = zB4; isBlock = true
-							} else if (e.message.substring(0,5) == "Intl.") {
-								test = zB5; isBlock = true
+							if (e.message.substring(0,5) == "Intl.") {
+								test = zB0
 							} else if (e.name == "TypeError") {
 								// 68-69 expected
 								test = e.name+": "+ e.message
 							} else {
-								test = zB6; isBlock = true
+								test = zB0
 							}
 						}
 					} else if (e.name == "ReferenceError") {
@@ -314,18 +309,15 @@ function get_errors() {
 							// 60-67
 							test = e.name+": "+ e.message
 						} else {
-							test = zB1; isBlock = true
+							test = zB0
 						}
 					} else {
-						if (e.name == "TypeError") {
-							test = zB2; isBlock = true
-						} else {
-							test = zB3; isBlock = true
-						}
+						test = zB0
 					}
 				} else {
 					test = e.name+": "+ e.message
 				}
+				if (test == zB0) {isBlock = true}
 				dom.err3=test; res.push(test)
 			}
 			//4
@@ -340,12 +332,8 @@ function get_errors() {
 				if (isFF) {
 					if (e.name == "RangeError") {
 						test = e.name+": "+e.message
-					} else if (e.name == "ReferenceError") {
-						test = zB1; isBlock = true
-					} else if (e.name == "TypeError") {
-						test = zB2; isBlock = true
 					} else {
-						test = zB3; isBlock = true
+						test = zB0; isBlock = true
 					}
 				} else {
 					test = e.name+": "+e.message
@@ -726,7 +714,6 @@ function get_math() {
 			strNew = zNEW + (runS ? zSIM : ""),
 			block1 = false,
 			block6 = false
-			//strBlock = "script blocking detected"+ sb +"[see math details]"+sc + (runS ? zSIM : "")
 
 		function get_hashes() {
 			let h1 = "", h6 = "", r = ""
@@ -737,7 +724,7 @@ function get_math() {
 				try {
 					r = Math.cos(list[i])
 				} catch(e) {
-					r = (e.name == "ReferenceError" ? zB1 :zB2)
+					r = zB0
 					block1 = true
 				}
 				res.push(r)
@@ -749,7 +736,7 @@ function get_math() {
 			try {
 				r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
 			} catch(e) {
-				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				r = zB0
 				block6 = true
 			}
 			h6 = r
@@ -757,7 +744,7 @@ function get_math() {
 			try {
 				r = Math.exp(x) - 1 // expm1(1)
 			} catch(e) {
-				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				r = zB0
 				block6 = true
 			}
 			h6 += "-"+r
@@ -765,7 +752,7 @@ function get_math() {
 			try {
 				y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
 			} catch(e) {
-				r = (e.name == "ReferenceError" ? zB1 :zB2)
+				r = zB0
 				block6 = true
 			}
 			h6 += "-"+r
@@ -1083,7 +1070,7 @@ function get_mm_metrics(runtype) {
 					return Promise.resolve(searchValue.isBigger)
 				}
 			} catch(e) {
-				let reason = (e.name == "ReferenceError" ? zB1 : zB2)
+				let reason = zB0
 				return Promise.reject(reason)
 			}
 		}, maxValue, precision)
@@ -1100,27 +1087,27 @@ function get_orientation(runtype) {
 			if (window.matchMedia("(-moz-device-orientation:"+l+")").matches) return l
 			if (window.matchMedia("(-moz-device-orientation:"+p+")").matches) return p
 		})()
-	} catch(e) {o1 = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {o1 = zB0}
 	try {
 		o2 = (function() {
 			if (window.matchMedia(q+p+")").matches) return p
 			if (window.matchMedia(q+l+")").matches) return l
 		})()
-	} catch(e) {o3 = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {o3 = zB0}
 	try {
 		o3 = (function() {
 			if (window.matchMedia("("+a+":1/1)").matches) return s
 			if (window.matchMedia("(min-"+a+":10000/9999)").matches) return l
 			if (window.matchMedia("(max-"+a+":9999/10000)").matches) return p
 		})()
-	} catch(e) {o3 = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {o3 = zB0}
 	try {
 		o4 = (function() {
 			if (window.matchMedia("(device-"+a+":1/1)").matches) return s
 			if (window.matchMedia("(min-device-"+a+":10000/9999)").matches) return l
 			if (window.matchMedia("(max-device-"+a+":9999/10000)").matches) return p
 		})()
-	} catch(e) {o4 = (e.name == "ReferenceError" ? zB1 : zB2)}
+	} catch(e) {o4 = zB0}
 	dom.mmO.innerHTML = o1+" | "+o2+" | "+o3+" | "+o4
 	// screen*
 	try {
@@ -1133,7 +1120,7 @@ function get_orientation(runtype) {
 			return r
 		})()
 	} catch(e) {
-		dom.ScrOrient.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+		dom.ScrOrient.innerHTML = zB0
 	}
 	// display-mode
 	try {
@@ -1145,7 +1132,7 @@ function get_orientation(runtype) {
 			if (window.matchMedia(q+p+")").matches) return p
 		})()
 	} catch(e) {
-		dom.mmDM.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+		dom.mmDM.innerHTML = zB0
 	}
 	// perf
 	let str = (runtype == "load" ? "" : "ignore")
@@ -1380,7 +1367,7 @@ function get_screen_metrics(runtype) {
 		}
 	}
 	// the rest
-	try {dom.fsState = window.fullScreen} catch(e) {dom.fsState.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)}
+	try {dom.fsState = window.fullScreen} catch(e) {dom.fsState.innerHTML = zB0}
 	get_orientation(runtype)
 	get_mm_metrics(runtype)
 	if (logExtra) {
@@ -2085,7 +2072,7 @@ function get_zoom(runtype) {
 		bDPI = return_mm_dpi("dppx"),
 		cDPI = return_mm_dpi("dpcm")
 
-	if (aDPI !== zB1 && aDPI !== zB2) {varDPI = aDPI}
+	if (aDPI !== zB0) {varDPI = aDPI}
 	dom.mmDPI.innerHTML = aDPI +" | "+ bDPI +" | "+ cDPI
 	dpi_x = Math.round(dom.divDPI.offsetWidth * dpr)
 	dpi_y = Math.round(dom.divDPI.offsetHeight * dpr)
