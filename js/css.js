@@ -5,18 +5,6 @@ function reset_css() {
 	dom.sFontsHashData.style.color = zhide
 }
 
-function get_css_block(name) {
-	if (isFF) {
-		if (name == undefined) {return zB4
-		} else if (name == "") {return zB5
-		} else if (name == "ReferenceError") {return zB1
-		} else if (name == "TypeError") {return zB2
-		} else {return zB3}
-	} else {
-		return "error"
-	}
-}
-
 function get_colors(runtype) {
 	let results = [],
 		data = [],
@@ -58,7 +46,7 @@ function get_colors(runtype) {
 				data.push(item.padStart(11) + ": " + x)
 			}
 		} catch(e) {
-			error = get_css_block(e.name)
+			error = (isFF ? zB0 : "error")
 		}
 	})
 	let hash = sha1(results.join()),
@@ -219,60 +207,56 @@ function get_computed_styles() {
 	})
 }
 
-function get_mm_css(runtype) {
-	let x = zNS, clean = x, q="(prefers-"+ runtype +": ", n="no-preference"
+function get_mm_css() {
+	let res = [], n="no-preference"
 
 	// FF63+: reduced-motion
-	if (runtype == "reduced-motion") {
-		let r="reduce"
-		try {
-			if (window.matchMedia(q+r+")").matches) {x = r+rfp_red; clean = r}
-			if (window.matchMedia(q+n+")").matches) {x = n+rfp_green; clean = n}
-		} catch(e) {x = get_css_block(e.name); clean = zB0}
-		if (isFF) {
-			if (x == zNS && isVer > 62) {x = zB0; clean = zB0}
-		}
-		dom.mmPRM.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
-	}
+	let x = zNS, q="prefers-reduced-motion: "
+	try {
+		if (window.matchMedia("("+q+"reduce)").matches) {x = "reduce"}
+		if (window.matchMedia("("+q+n+")").matches) {x = n}
+	} catch(e) {x = zB0}
+	if (isFF && x == zNS && isVer > 62) {x = zB0}
+	res.push(q.trim() + x)
+	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
 
 	// FF67+: color-scheme
-	if (runtype == "color-scheme") {
-		let l="light", d="dark"
-		try {
-			if (window.matchMedia(q+l+")").matches) {x = l+rfp_green; clean = l}
-			if (window.matchMedia(q+d+")").matches) {x = d+rfp_red; clean = d}
-			if (window.matchMedia(q+n+")").matches) {x = n+rfp_red; clean = n}
-		} catch(e) {x = get_css_block(e.name); clean = zB0}
-		if (isFF) {
-			if (x == zNS && isVer > 66) {x = zB0; clean = zB0}
-		}
-		dom.mmPCS.innerHTML = x + (x.substring(0,6) == "script" ? rfp_red : "")
-	}
+	x = zNS, q="prefers-color-scheme: "
+	try {
+		if (window.matchMedia("("+q+"light)").matches) {x = "light"}
+		if (window.matchMedia("("+q+"dark)").matches) {x = "dark"}
+		if (window.matchMedia("("+q+n+")").matches) {x = n}
+	} catch(e) {x = zB0}
+	if (isFF && x == zNS && isVer > 66) {x = zB0}
+	res.push(q.trim() + x)
+	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
 
 	// contrast
-		// ToDo: RFP notation & version check: 1506364: layout.css.prefers-contrast.enabled
+		// ToDo: RFP & version check: 1506364: layout.css.prefers-contrast.enabled
 		// browser.display.prefers_low_contrast boolean [hidden]
-	if (runtype == "contrast") {
-		try {
-			if (window.matchMedia(q+n+")").matches) {x = n; clean = n}
-			if (window.matchMedia(q+"forced)").matches) {x = "forced"; clean = "forced"}
-			if (window.matchMedia(q+"high)").matches) {x = "high"; clean = "high"}
-			if (window.matchMedia(q+"low)").matches) {x = "low"; clean = "low"}
-		} catch(e) {x = get_css_block(e.name); clean = zB0}
-		dom.mmPC.innerHTML = x
-	}
+	x = zNS, q="prefers-contrast: "
+	try {
+		if (window.matchMedia("("+q+n+")").matches) {x = n}
+		if (window.matchMedia("("+q+"forced)").matches) {x = "forced"}
+		if (window.matchMedia("("+q+"high)").matches) {x = "high"}
+		if (window.matchMedia("("+q+"low)").matches) {x = "low"}
+	} catch(e) {x = zB0}
+	res.push(q.trim() + x)
+	dom.mmPC.innerHTML = x
 
 	// forced-colors
-		// ToDo: RFP notation & version check: 1659511: layout.css.forced-colors.enabled
-	if (runtype == "forced-colors") {
-		try {
-			if (window.matchMedia(q+n+")").matches) {x = n; clean = n}
-			if (window.matchMedia(q+"active)").matches) {x = "active"; clean = "active"}
-			if (window.matchMedia(q+"none)").matches) {x = "none"; clean = "none"}
-		} catch(e) {x = get_css_block(e.name); clean = zB0}
-		dom.mmFC.innerHTML = x
-	}
-	return("prefers-" + runtype +":" + clean)
+		// ToDo: RFP & version check: 1659511: layout.css.forced-colors.enabled
+	x = zNS, q="prefers-forced-colors: "
+	try {
+		if (window.matchMedia("("+q+n+")").matches) {x = n; clean = n}
+		if (window.matchMedia("("+q+"active)").matches) {x = "active"; clean = "active"}
+		if (window.matchMedia("("+q+"none)").matches) {x = "none"; clean = "none"}
+	} catch(e) {x = zB0}
+	res.push(q.trim() + x)
+	dom.mmFC.innerHTML = x
+
+	// return
+	return(res)
 }
 
 function get_system_fonts() {
@@ -316,7 +300,7 @@ function get_system_fonts() {
 			}
 		})
 	} catch(e) {
-		error = get_css_block(e.name)
+		error = (isFF ? zB0 : "error")
 	}
 	// output
 	let hash = sha1(results.join()),
@@ -331,10 +315,7 @@ function outputCSS() {
 	let t0 = performance.now(),
 		section = []
 	Promise.all([
-		get_mm_css("reduced-motion"),
-		get_mm_css("color-scheme"),
-		get_mm_css("contrast"),
-		get_mm_css("forced-colors"),
+		get_mm_css(),
 		get_colors("system"),
 		get_colors("css4"),
 		get_colors("moz"),
@@ -342,7 +323,13 @@ function outputCSS() {
 		get_computed_styles(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
-			section.push(currentResult)
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
 		})
 		section_info("css", t0, gt0, section)
 	})
