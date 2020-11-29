@@ -636,18 +636,15 @@ function get_lang_datetime() {
 			let workerlang = new Worker("js/language_worker.js")
 			workerlang.addEventListener("message", function(e) {
 				workerlang.terminate
-				console.debug(e.data)
-
 				// compare
 				let swcombo1 = "", swcombo2 = ""
-				for (let i=0; i < 48; i++) {
+				for (let i=0; i < res.length; i++) {
 					let divider = " | "
 					if (i > 13 && i < 24) {divider = "<br>"}
 					else if (i == 12 || i == 31) {divider = "<br>"}
 					else if (i > 32 && i < 37) {divider = "<br>"}
 					else if (i > 43) {divider = "<br>"}
 					try {
-						console.debug("hello")
 						if (i < 3) {
 							swcombo1 +=  (i == 0 ? e.data[i].toString() : " | " + e.data[i])
 							if (i == 2) {
@@ -668,7 +665,6 @@ function get_lang_datetime() {
 								document.getElementById("ldt"+i).innerHTML = res[i] + divider + sb + e.data[i] + sc
 							}
 						} else {
-							console.debug(i + "\n - " + res[i] + "\n - " + e.data[i])
 							if (res[i] !== e.data[i]) {
 								if (i == 14) {
 									document.getElementById("ldt"+i).innerHTML = res[i] + divider + sb + sha1(e.data[i].join()) + sc
