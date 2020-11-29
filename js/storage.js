@@ -298,19 +298,24 @@ function get_permissions(item) {
 		str = item + ":"
 	let el = document.getElementById("p"+item)
 	return new Promise(resolve => {
-		navigator.permissions.query({name:item}).then(function(result) {
-			el.innerHTML = result.state
-			return resolve(str + result.state)
-		}).catch(error => {
-			if ((error.message).includes(userVis)) {
-				el.innerHTML = userVis
-				str += userVis
-			} else {
-				el.innerHTML = error.type
-				str += error.type
-			}
-			return resolve(str)
-		})
+		try {
+			navigator.permissions.query({name:item}).then(function(result) {
+				el.innerHTML = result.state
+				console.debug("permission state", e.state)
+				return resolve(str + result.state)
+			}).catch(error => {
+				if ((error.message).includes(userVis)) {
+					el.innerHTML = userVis
+					str += userVis
+				} else {
+					el.innerHTML = error.type
+					str += error.type
+				}
+				return resolve(str)
+			})
+		} catch(e) {
+			return resolved(zB0)
+		}
 	})
 }
 
