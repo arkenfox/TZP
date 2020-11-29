@@ -8,11 +8,7 @@ addEventListener("message", function(msg) {
 		err = []
 
 	let zNS = "not supported",
-		zB1 = "script blocked [a]",
-		zB2 = "script blocked [b]",
-		zB3 = "script blocked [c]",
-		zB4 = "script blocked [d]",
-		zB5 = "script blocked [e]"
+		zB0 = "blocked"
 
 	let isFF = msg.data[0]
 	let isVer = msg.data[1]
@@ -133,9 +129,7 @@ addEventListener("message", function(msg) {
 							return " | \"unit\" " + zNS
 						} else {
 							err.push(item +" [unexpected]: "+ name + " : " + error)
-							if (name == "ReferenceError") {return " | "+ zB1
-							} else if (name == "TypeError") {return " | "+ zB2
-							} else {return " | "+ zB3}
+							return " | "+ zB0
 						}
 					} else {
 						return " | error"
@@ -265,7 +259,7 @@ addEventListener("message", function(msg) {
 					tmp = zNS
 					// ToDo: dayPeriod: version check when this leaves Nightly
 					//if (isFF && isVer < 81) {
-					//	tmp = zB1
+					//	tmp = zB0
 					//	err.push(item +" [unexpected]: dayPeriod")
 					//}
 				} else {
@@ -346,9 +340,7 @@ addEventListener("message", function(msg) {
 						console.log("language worker error: "+ item +": "+ e.name +": "+ e.message)
 					}
 					err.push(item +" [unexpected]: "+ e.name + " : " + e.message)
-					if (e.name == "ReferenceError") {msg = zB1
-					} else if (e.name == "TypeError") {msg = zB2
-					} else {msg = zB3}
+					msg = zB0
 				} else {
 					err.push(item +" [expected]: "+ e.name + " : " + e.message)
 				}
@@ -362,8 +354,8 @@ addEventListener("message", function(msg) {
 	// build
 	for (let i=0; i < 49; i++) {
 		let result = get_item(i)
-		if (result == undefined) {result = zB4}
-		if (result == "undefined") {result = zB5}
+		if (result == undefined) {result = zB0}
+		if (result == "undefined") {result = zB0}
 		res.push(result)
 	}
 	// post
