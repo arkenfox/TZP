@@ -547,7 +547,7 @@ function get_lang_datetime() {
 		}
 	}
 	// debugging: error tracking
-	if (isFile && err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
+	if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
 
 	// hash 0-11: language
 	let lHash0 = sha1(res.slice(0,12).join("-"))
