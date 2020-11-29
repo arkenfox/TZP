@@ -636,6 +636,8 @@ function get_lang_datetime() {
 			let workerlang = new Worker("js/language_worker.js")
 			workerlang.addEventListener("message", function(e) {
 				workerlang.terminate
+				console.debug(e.data)
+
 				// compare
 				let swcombo1 = "", swcombo2 = ""
 				for (let i=0; i < 48; i++) {
