@@ -171,8 +171,8 @@ function get_geo() {
 	try {
 		navigator.permissions.query({name:"geolocation"}).then(e => geoState(e.state))
 	} catch(e) {
-		dom.geo2 = (e.name == "ReferenceError" ? zB1 : zB2)
-		r += "-"+ (e.name == "ReferenceError" ? zB1 : zB2)
+		dom.geo2 = zB0
+		r += "-"+ zB0
 		geoWrite(r)
 	}
 }
@@ -300,9 +300,7 @@ function get_lang_datetime() {
 							return " | \"unit\" " + zNS
 						} else {
 							err.push(item +" [unexpected]: "+ name + " : " + error)
-							if (name == "ReferenceError") {return " | "+ zB1
-							} else if (name == "TypeError") {return " | "+ zB2
-							} else {return " | "+ zB3}
+							return " | "+ zB0
 						}
 					} else {
 						return " | error"
@@ -432,7 +430,7 @@ function get_lang_datetime() {
 					tmp = zNS
 					// ToDo: dayPeriod: version check when this leaves Nightly
 					//if (isFF && isVer < 81) {
-					//	tmp = zB1
+					//	tmp = zB0
 					//	err.push(item +" [unexpected]: dayPeriod")
 					//}
 				} else {
@@ -513,9 +511,7 @@ function get_lang_datetime() {
 						console.log("language worker error: "+ item +": "+ e.name +": "+ e.message)
 					}
 					err.push(item +" [unexpected]: "+ e.name + " : " + e.message)
-					if (e.name == "ReferenceError") {msg = zB1
-					} else if (e.name == "TypeError") {msg = zB2
-					} else {msg = zB3}
+					msg = zB0
 				} else {
 					err.push(item +" [expected]: "+ e.name + " : " + e.message)
 				}
@@ -530,8 +526,8 @@ function get_lang_datetime() {
 	for (let i=0; i < 49; i++) {
 		let result = get_item(i)
 		if (isFF) {
-			if (result == undefined) {result = zB4; err.push(i +" [unexpected]: undefined")}
-			if (result == "undefined") {result = zB5; err.push(i +" [unexpected]: \"undefined\"")}
+			if (result == undefined) {result = zB0; err.push(i +" [unexpected]: undefined")}
+			if (result == "undefined") {result = zB0; err.push(i +" [unexpected]: \"undefined\"")}
 		}
 		res.push(result)
 		// output
