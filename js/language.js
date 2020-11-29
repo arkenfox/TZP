@@ -476,6 +476,7 @@ function get_lang_datetime() {
 					try {
 						current = new Intl.PluralRules(undefined).select(nos[i])
 					} catch(e) {
+						console.debug(e.name, e.message)
 						current = "error"
 					}
 					// record changes only
