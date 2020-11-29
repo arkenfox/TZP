@@ -25,24 +25,18 @@ function get_gamepads() {
 	}
 }
 
-function get_hardware_concurrency() {
-	let h = "", h2 = ""
+function get_concurrency() {
+	let h = zD
 	if ("hardwareConcurrency" in navigator) {
 		try {
 			h = navigator.hardwareConcurrency
-			h2 = h
-			h = (h == undefined ? zB2 : h + (h == "2" ? rfp_green : rfp_red))
-			h2 = (h2 == undefined ? zB0 : h2)
-			dom.nHWC.innerHTML = h
+			h = (h == undefined ? zB0 : h)
 		} catch(e) {
-			dom.nHWC.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
-			h2 = zB0
+			h = zB0
 		}
-	} else {
-		dom.nHWC = zD
-		h2 = zD
 	}
-	return "hardwareConcurrency:" + h2
+	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
+	return "hardwareConcurrency:" + h
 }
 
 function get_media_devices() {
@@ -79,7 +73,7 @@ function get_media_devices() {
 				dom.eMD.innerHTML = e.name +": "+ e.message
 			})
 		} catch(e) {
-			dom.eMD.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+			dom.eMD.innerHTML = zB0
 		}
 	}	else {
 		dom.nMD = zD; dom.eMD = zNA
@@ -123,7 +117,7 @@ function get_mimetypes() {
 					return resolve("mimeTypes:none")
 				}
 			} catch(e) {
-				display((e.name == "ReferenceError" ? zB1 : zB2))
+				display(zB0)
 				return resolve("mimeTypes:blocked")
 			}
 		} else {
@@ -266,7 +260,7 @@ function get_speech_synth() {
 				//return "speech synth: " + zE + ", " + sha1(res.join()) // cleanup
 
 			} catch(e) {
-				dom.sEngines.innerHTML = (e.name == "ReferenceError" ? zB1 : zB2)
+				dom.sEngines.innerHTML = zB0
 				//return "speech synth: " + zE + ", " + zB0
 			}
 		}
@@ -277,11 +271,11 @@ function get_speech_synth() {
 					speechSynthesis.onvoiceschanged = populateVoiceList
 				}
 			} else if (speechSynthesis.onvoiceschanged == undefined) {
-				dom.sEngines.innerHTML = zB4
+				dom.sEngines.innerHTML = zB0
 				//return "speech synth: " + zE + ", " + zB0
 			}
 		} catch(e) {
-			dom.sEngines.innerHTML = zB3
+			dom.sEngines.innerHTML = zB0
 			//return "speech synth: " + zE + ", " + zB0
 		}
 	} else {
@@ -305,34 +299,27 @@ function get_speech_rec() {
 
 function get_touch() {
 	// vars
-	let m = zNS, m2 = m, p = zNS, p2 = p, t = false,
-		q="(-moz-touch-enabled:"
+	let m = zNS, p = zNS, t = false, q="(-moz-touch-enabled:"
 	// m
 	try {
-		if (window.matchMedia(q+"0)").matches) {m=0; m2=0}
-		if (window.matchMedia(q+"1)").matches) {m=1; m2=1}
-	} catch(e) {
-		m = (e.name == "ReferenceError" ? zB1 : zB2)
-		m2 = zB0
-	}
+		if (window.matchMedia(q+"0)").matches) {m=0}
+		if (window.matchMedia(q+"1)").matches) {m=1}
+	} catch(e) {m = zB0}
 	// t
 	try {document.createEvent("TouchEvent"); t = true} catch (e) {}
+	let t2 = ("ontouchstart" in window)
+	let t3 = ("ontouchend" in window)
 	// p
 	if ("maxTouchPoints" in navigator) {
 		try {
 			p = navigator.maxTouchPoints
-			p2 = p
-			if (p == undefined) {p = zB3; p2 = zB0}
-		} catch(e) {
-			p = (e.name == "ReferenceError" ? zB1 : zB2)
-			p2 = zB0
-		}
+			p = (p == undefined ? zB0 : p)
+		} catch(e) {p = zB0}
 	}
-	let t2 = ("ontouchstart" in window)
-	let t3 = ("ontouchend" in window)
 	// output
-	dom.touch.innerHTML = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
-	return "touch:"+ p2 +", "+ m2 +", "+ t +", "+ t2 +", "+ t3
+	let str = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
+	dom.touch.innerHTML = str
+	return "touch:"+ str
 }
 
 function get_vr() {
@@ -363,7 +350,7 @@ function get_vr() {
 		}
 	}	else {
 		dom.nVR = zD;	dom.aVR = zNA
-		return "vr: " + zD + ", " + zNA
+		return "vr:" + zD + ", " + zNA
 	}
 }
 
@@ -379,7 +366,7 @@ function outputDevices() {
 	get_pointer_hover()
 
 	Promise.all([
-		get_hardware_concurrency(),
+		get_concurrency(),
 		get_mimetypes(),
 		get_plugins(),
 		get_touch(),
