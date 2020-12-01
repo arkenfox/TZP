@@ -329,6 +329,57 @@ async function sha256_str(str) {
 	return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('')
 }
 
+function getDynamicIframeWindow({
+	context,
+	source = "",
+	test = "",
+	nestIframeInContainerDiv = false,
+	violateSameOriginPolicy = true,
+	display = false
+}) {
+	const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
+	const length = context.length
+	const element = document.createElement(elementName)
+	document.body.appendChild(element)
+	if (!display) {
+		element.setAttribute('style', 'display:none')
+	}
+	if (nestIframeInContainerDiv) {
+	const attributes = `
+		${source ? `src=${source}` : ''}
+			${violateSameOriginPolicy ? '' : `sandbox="allow-same-origin"`}
+		`
+		element.innerHTML = `<iframe ${attributes}></iframe>`
+	} else if (!violateSameOriginPolicy) {
+		element.setAttribute('sandbox', 'allow-same-origin')
+		if (source) {
+			element.setAttribute('src', source)
+		}
+	} else if (source) {
+		element.setAttribute('src', source)
+	}
+	const iframeWindow = context[length]
+
+	let res = []
+	let navigator = iframeWindow.navigator
+
+	if (test == "ua") {
+		let list = ['userAgent','appCodeName','appName','product','appVersion',
+			'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+			r = ""
+		for (let i=0; i < list.length; i++) {
+			try {r = navigator[list[i]]} catch(e) {r = zB0}
+			if (r == "") {r = "empty string"}
+			if (r == "undefined") {r = "undefined string"}
+			if (r == undefined) {r = "undefined value"}
+			res.push(list[i]+":"+r)
+		}
+		res.sort()
+	}
+	document.body.removeChild(element)
+	return res
+}
+
 /* BASE64 STUFF */
 /* Base64 / binary data / UTF-8 strings utilities (#3)
 	https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding

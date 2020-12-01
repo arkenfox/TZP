@@ -173,7 +173,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</span></div>
 			<span class="c" id="uahash"></span></td></tr>
-		<tr><td>hash</td><td class="c mono" id="nUAinitial"></td></tr>
+		<tr><td>hash</td><td class="c mono" id="uaDoc"></td></tr>
 		<tr><td id="luserAgent">userAgent</td><td class="c spaces" id="nuserAgent"></td></tr>
 		<tr><td id="lappCodeName">appCodeName</td><td class="c spaces" id="nappCodeName"></td></tr>
 		<tr><td id="lappName">appName</td><td class="c spaces" id="nappName"></td></tr>
@@ -186,16 +186,28 @@
 		<tr class="togUA" id="togvendor"><td id="lvendor">vendor</td><td class="c spaces" id="nvendor"></td></tr>
 		<tr class="togUA" id="togvendorSub"><td id="lvendorSub">vendorSub</td><td class="c spaces" id="nvendorSub"></td></tr>
 		<tr class="togUA" id="togualies"><td><span class="bad">absolute BS detected &#9654 </span></td><td class="c" id="nualies"></td></tr>
-		<tr><td colspan="2" class="center">--- navigator checks ---</td></tr>
-		<tr><td>web worker</td><td class="c mono" id="sectionUA2"></td></tr>
-		<tr><td>shared worker</td><td class="c mono" id="sectionUA3"></td></tr>
-		<tr class="hidden"><td>nested worker</td><td class="c mono" id="sectionUA4"></td></tr>
-		<tr><td>service worker</td><td class="c mono" id="sectionUA5"></td></tr>
-		<tr class="hidden"><td>[iframe] hash</td><td class="c mono" id="sectionUA6"></td></tr>
-		<tr class="hidden"><td>[nested iframe] hash</td><td class="c mono" id="sectionUA7"></td></tr>
+		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
+		<tr><td>iframes</td><td class="c mono" id="uaIframes"></td></tr>
+		<tr><td>workers</td><td class="c mono faint" id="uaWorkers"></td></tr>
 		<tr><td><span class="btn0 btn" onClick="goNW_UA()">[ click here ]</span>
-			window.open</td><td class="c mono" id="sectionUA8"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseU" class="toggle" type="checkbox" checked onchange="toggleitems(this, `U`)">
+			<label for="collapseU" class="lbl-toggle" id="labelU">&#9660; show details</label>
+		</td></tr>
+		<tr class="togU"><td></td><td class="s2">iframes</td></tr>
+			<tr class="togU"><td>document root</td><td class="c mono" id="uaIframe0"></td></tr>
+			<tr class="togU"><td>with URL</td><td class="c mono" id="uaIframe1"></td></tr>
+			<tr class="togU"><td>access 1</td><td class="c mono" id="uaIframe2"></td></tr>
+			<tr class="togU"><td>access 2</td><td class="c mono" id="uaIframe3"></td></tr>
+			<tr class="togU"><td>nested</td><td class="c mono" id="uaIframe4"></td></tr>
+		<tr class="togU"><td></td><td class="s2">workers</td></tr>
+			<tr class="togU"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
+			<tr class="togU"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
+			<tr class="togU"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
+			<tr class="togU"><td>nested worker</td><td class="c mono faint" id="uaWorker3"></td></tr>
+			<tr class="togU"><td>worker from blob</td><td class="c mono faint" id="uaWorker4"></td></tr>
+		<tr class="togU"><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
 	<!--screen.js-->
