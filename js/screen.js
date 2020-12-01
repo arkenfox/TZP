@@ -1631,7 +1631,11 @@ function get_ua_workers() {
 			if (res[i] !== data[i]) {
 				let parts = data[i].split(":")
 				let target = document.getElementById("n"+parts[0])
-				target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
+				// don't output it a second time if iframes got it
+				let targetstr = target.innerHTML
+				if (targetstr.indexOf("<br>") != -1) {
+					target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
+				}
 			}
 		}
 	}
