@@ -1,6 +1,6 @@
 'use strict';
 
-var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume;
+var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
 
 /* FUNCTIONS */
 
@@ -1376,250 +1376,240 @@ function get_screen_metrics(runtype) {
 	}
 }
 
-function get_ua_nav() {
-	let res = [],
-		str = "",
-		go = false,
-		lies = 0,
-		pre = "",
-		spoof = false,
-		match = false,
-		myOS = isOS,
-		isPartial = false,
-		t0 = performance.now()
+function get_ua_doc() {
+	return new Promise(resolve => {
 
-	// FF78+ only
-	if (isFF && isVer > 77) {go = true}
+		let res = [],
+			str = "",
+			go = false,
+			lies = 0,
+			pre = "",
+			spoof = false,
+			match = false,
+			myOS = isOS,
+			isPartial = false
 
-	// arrows
-	function addArrow(property, state) {
-		let title = property
-		if (state) {
-			if (isPartial == false && go == true) {lies++}
-			title += (isPartial ? sn : sb) +"&#9654"+sc
-		}
-		document.getElementById("l"+property).innerHTML = title
-	}
+		// FF78+ only
+		if (isFF && isVer > 77) {go = true}
 
-	function output(property, str) {
-		// cleanup string
-		if (str == "") {str = "empty string"}
-		if (str == "undefined") {str = "undefined string"}
-		if (str == undefined) {str = "undefined value"}
-		// stash it, display it
-		res.push(property+":"+str)
-		document.getElementById("n"+property).innerHTML = str
-		return str
-	}
-
-	function get_property(property, good) {
-		// treat blocked as lies since it can we selectively used
-		str = ""
-		try {str = navigator[property]} catch(e) {str = zB0}
-		// simulate lies
-		if (go && runS) {
-			if (property == "appCodeName") {str = "MoZilla"} // case
-			if (property == "appName") {str = " Netscape"} // leading space
-			if (property == "product") {str = "Gecko "} // trailing space
-			if (property == "buildID") {str = ""} // empty string: unexpected
-			if (property == "productSub") {str = undefined} // undefined
-			if (property == "vendor") {str = " "} // single space
-			if (property == "vendorSub") {str = "undefined"} // undefined string
-			// these four are OS dependent
-			if (property == "appVersion") {str = "5.0 (windows)"}
-			if (property == "platform") {str = "win32"}
-			if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
-			if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
-		}
-		str = output(property, str)
-		if (good !== undefined) {
-			// show/hide vendor*
-			if (property == "vendor" || property == "vendorSub") {
-				document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
+		// arrows
+		function addArrow(property, state) {
+			let title = property
+			if (state) {
+				if (isPartial == false && go == true) {lies++}
+				title += (isPartial ? sn : sb) +"&#9654"+sc
 			}
-			// isBS
-			let arrow = ""
-			if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
-			document.getElementById("l"+property).innerHTML = property + arrow
-		} else {
+			document.getElementById("l"+property).innerHTML = title
+		}
+
+		function output(property, str) {
+			// cleanup string
+			if (str == "") {str = "empty string"}
+			if (str == "undefined") {str = "undefined string"}
+			if (str == undefined) {str = "undefined value"}
+			// stash it, display it
+			res.push(property+":"+str)
+			document.getElementById("n"+property).innerHTML = str
 			return str
 		}
-	}
 
-	function check_basics(str) {
-		// for dynamic returns
-		let bs = false
-		if (str == "undefined value") {bs = true}
-		if (str == "undefined string") {bs = true}
-		if (str == "blocked") {bs = true}
-		if (str == "empty string") {bs = true}
-		if (str.substring(0, 1) == " ") {bs = true} // leading space
-		if (str.substring(str.length-1, str.length) == " ") {bs = true} // trailing space
-		if (str.indexOf("  ") !== -1) {bs = true} // double spaces
-		return bs
-	}
-
-	// EASY (static values)
-	get_property("appCodeName", "Mozilla")
-	get_property("appName", "Netscape")
-	get_property("product", "Gecko")
-	get_property("buildID", "20181001000000")
-	get_property("productSub", "20100101")
-	get_property("vendor", "empty string")
-	get_property("vendorSub", "empty string")
-
-	// MORE COMPLEX: dynamic, per OS
-		// ToDo: if isOS ="": currently only set by widgets test: harden it
-	//myOS = "windows" // toggle to test isPartial
-
-	// appVersion
-	str = get_property("appVersion")
-	if (go) {
-		if (myOS == "") {isPartial = true} else {isPartial = false}
-		spoof = check_basics(str)
-		if (spoof) {
-			// no need to check further, use a red arrow
-			isPartial = false
-		} else {
-			// dig deeper
-			if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
-			if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
-			if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
-			if (myOS == "android") {
-				// tighten this up to be more specific
-				if (str.substring(0,13) == "5.0 (Android ") {match = true}
-				spoof = !match
+		function get_property(property, good) {
+			// treat blocked as lies
+			str = ""
+			try {str = navigator[property]} catch(e) {str = zB0}
+			// simulate lies
+			if (go && runS) {
+				if (property == "appCodeName") {str = "MoZilla"} // case
+				if (property == "appName") {str = " Netscape"} // leading space
+				if (property == "product") {str = "Gecko "} // trailing space
+				if (property == "buildID") {str = ""} // empty string: unexpected
+				if (property == "productSub") {str = undefined} // undefined
+				if (property == "vendor") {str = " "} // single space
+				if (property == "vendorSub") {str = "undefined"} // undefined string
+				// these four are OS dependent
+				if (property == "appVersion") {str = "5.0 (windows)"}
+				if (property == "platform") {str = "win32"}
+				if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
+				if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
+			}
+			str = output(property, str)
+			if (good !== undefined) {
+				// show/hide vendor*
+				if (property == "vendor" || property == "vendorSub") {
+					document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
+				}
+				// BS
+				let arrow = ""
+				if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
+				document.getElementById("l"+property).innerHTML = property + arrow
+			} else {
+				return str
 			}
 		}
-		if (spoof || isPartial) {addArrow("appVersion", true)}
-	} else {
-		addArrow("appVersion", false)
-	}
 
-	// platform
-	// ToDo: specific linux distro strings?
-	// ToDo: android: `Linux ${OSArch}` <-- any others
-	str = get_property("platform")
-	if (go) {
-		if (myOS == "") {isPartial = true} else {isPartial = false}
-		spoof = check_basics(str)
-		if (spoof) {
-			// no need to check further, use a red arrow
-			isPartial = false
-		} else {
-			// dig deeper
-			if (myOS == "") {isPartial = true}
-			match = false
-			if (myOS == "windows") {spoof = (str !== "Win32")}
-			if (myOS == "mac") {spoof = (str !== "MacIntel")}
-			if (myOS == "linux") {
-				if (str == "Linux i686") {match = true}
-				else if (str == "Linux i686 on x86_64") {match = true}
-				else if (str == "Linux x86_64") {match = true}
-				spoof = !match
-			}
-			if (myOS == "android") {
-				if (str.substring(0,10) == "Linux armv") {match = true}
-				if (str.substring(0,11) == "Linux aarch") {match = true}
-				spoof = !match
-			}
+		function check_basics(str) {
+			// for dynamic returns
+			let bs = false
+			if (str == "undefined value") {bs = true}
+			if (str == "undefined string") {bs = true}
+			if (str == "blocked") {bs = true}
+			if (str == "empty string") {bs = true}
+			if (str.substring(0, 1) == " ") {bs = true} // leading space
+			if (str.substring(str.length-1, str.length) == " ") {bs = true} // trailing space
+			if (str.indexOf("  ") !== -1) {bs = true} // double spaces
+			return bs
 		}
-		if (spoof || isPartial) {addArrow("platform", true)}
-	} else {
-		addArrow("platform", false)
-	}
 
-	// oscpu
-	str = get_property("oscpu")
-	if (go) {
-		if (myOS == "") {isPartial = true} else {isPartial = false}
-		spoof = check_basics(str)
-		if (spoof) {
-			// no need to check further, use a red arrow
-			isPartial = false
+		// EASY (static values)
+		get_property("appCodeName", "Mozilla")
+		get_property("appName", "Netscape")
+		get_property("product", "Gecko")
+		get_property("buildID", "20181001000000")
+		get_property("productSub", "20100101")
+		get_property("vendor", "empty string")
+		get_property("vendorSub", "empty string")
+
+		// MORE COMPLEX: dynamic, per OS
+			// ToDo: if isOS ="": currently only set by widgets test: harden it
+		//myOS = "windows" // toggle to test isPartial
+
+		// appVersion
+		str = get_property("appVersion")
+		if (go) {
+			if (myOS == "") {isPartial = true} else {isPartial = false}
+			spoof = check_basics(str)
+			if (spoof) {
+				// no need to check further, use a red arrow
+				isPartial = false
+			} else {
+				// dig deeper
+				if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
+				if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
+				if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
+				if (myOS == "android") {
+					// tighten this up to be more specific
+					if (str.substring(0,13) == "5.0 (Android ") {match = true}
+					spoof = !match
+				}
+			}
+			if (spoof || isPartial) {addArrow("appVersion", true)}
 		} else {
-			// dig deeper
-			if (myOS == "windows") {
-				pre = "Windows NT "
-				// app64 + win64
-				if (str == pre+"10.0; Win64; x64") {match = true}
-				else if (str == pre+"6.3; Win64; x64") {match = true}
-				else if (str == pre+"6.1; Win64; x64") {match = true}
-				// app32 + win64
-				else if (str == pre+"10.0; WOW64") {match = true}
-				else if (str == pre+"6.3; WOW64") {match = true}
-				else if (str == pre+"6.1; WOW64") {match = true}
-				// app32 + win32
-				else if (str == pre+"10.0") {match = true}
-				else if (str == pre+"6.3") {match = true}
-				else if (str == pre+"6.1") {match = true}
-				spoof = !match
-			}
-			if (myOS == "linux") {
-				// ToDo: specific linux distro strings?
-				pre = "Linux "
-				if (str == pre+"i686") {match = true}
-				else if (str == pre+"i686 on x86_64") {match = true}
-				else if (str == pre+"x86_64") {match = true}
-				spoof = !match
-			}
-			if (myOS == "mac") {
-				if (str.substring(0,14) == "Intel Mac OS X") {match = true}
-				spoof = !match
-			}
-			if (myOS == "android") {
-				pre = "Linux "
-				if (str.substring(0,10) == pre+"armv") {match = true}
-				if (str.substring(0,11) == pre+"aarch") {match = true}
-				spoof = !match
-			}
+			addArrow("appVersion", false)
 		}
-		if (spoof || isPartial) {addArrow("oscpu", true)}
-	} else {
-		addArrow("oscpu", false)
-	}
 
-	// userAgent
-		// ToDo: userAgent lies: ways this can be inconsistent
-		// 1: if full ua = not consistent with known os etc
-		// 2: if full ua = not the same as individual parts
-		// 3: the syntax/formula doesn't match
-		// 4: if version doesn't match isVer (allow for isRFP and 78)
-			// note: allow for + symbol on verNo (make global)
-	str = get_property("userAgent")
+		// platform
+		// ToDo: specific linux distro strings?
+		// ToDo: android: `Linux ${OSArch}` <-- any others
+		str = get_property("platform")
+		if (go) {
+			if (myOS == "") {isPartial = true} else {isPartial = false}
+			spoof = check_basics(str)
+			if (spoof) {
+				// no need to check further, use a red arrow
+				isPartial = false
+			} else {
+				// dig deeper
+				if (myOS == "") {isPartial = true}
+				match = false
+				if (myOS == "windows") {spoof = (str !== "Win32")}
+				if (myOS == "mac") {spoof = (str !== "MacIntel")}
+				if (myOS == "linux") {
+					if (str == "Linux i686") {match = true}
+					else if (str == "Linux i686 on x86_64") {match = true}
+					else if (str == "Linux x86_64") {match = true}
+					spoof = !match
+				}
+				if (myOS == "android") {
+					if (str.substring(0,10) == "Linux armv") {match = true}
+					if (str.substring(0,11) == "Linux aarch") {match = true}
+					spoof = !match
+				}
+			}
+			if (spoof || isPartial) {addArrow("platform", true)}
+		} else {
+			addArrow("platform", false)
+		}
 
-	// hash
-	res.sort()
-	dom.nUAinitial = sha1(res.join())
+		// oscpu
+		str = get_property("oscpu")
+		if (go) {
+			if (myOS == "") {isPartial = true} else {isPartial = false}
+			spoof = check_basics(str)
+			if (spoof) {
+				// no need to check further, use a red arrow
+				isPartial = false
+			} else {
+				// dig deeper
+				if (myOS == "windows") {
+					pre = "Windows NT "
+					// app64 + win64
+					if (str == pre+"10.0; Win64; x64") {match = true}
+					else if (str == pre+"6.3; Win64; x64") {match = true}
+					else if (str == pre+"6.1; Win64; x64") {match = true}
+					// app32 + win64
+					else if (str == pre+"10.0; WOW64") {match = true}
+					else if (str == pre+"6.3; WOW64") {match = true}
+					else if (str == pre+"6.1; WOW64") {match = true}
+					// app32 + win32
+					else if (str == pre+"10.0") {match = true}
+					else if (str == pre+"6.3") {match = true}
+					else if (str == pre+"6.1") {match = true}
+					spoof = !match
+				}
+				if (myOS == "linux") {
+					// ToDo: specific linux distro strings?
+					pre = "Linux "
+					if (str == pre+"i686") {match = true}
+					else if (str == pre+"i686 on x86_64") {match = true}
+					else if (str == pre+"x86_64") {match = true}
+					spoof = !match
+				}
+				if (myOS == "mac") {
+					if (str.substring(0,14) == "Intel Mac OS X") {match = true}
+					spoof = !match
+				}
+				if (myOS == "android") {
+					pre = "Linux "
+					if (str.substring(0,10) == pre+"armv") {match = true}
+					if (str.substring(0,11) == pre+"aarch") {match = true}
+					spoof = !match
+				}
+			}
+			if (spoof || isPartial) {addArrow("oscpu", true)}
+		} else {
+			addArrow("oscpu", false)
+		}
 
-	// show
-	let isBS = false
-	if (lies > 0) {
-		lies += " pinocchio" + (lies > 1 ? "s": "")
-		dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
-		dom.togualies.style.display = "table-row"
-		isBS = true
-	} else {
-		dom.togualies.style.display = "none"
-	}
+		// userAgent
+			// ToDo: userAgent lies: ways this can be inconsistent
+			// 1: if full ua = not consistent with known os etc
+			// 2: if full ua = not the same as individual parts
+			// 3: the syntax/formula doesn't match
+			// 4: if version doesn't match isVer (allow for isRFP and 78)
+				// note: allow for + symbol on verNo (make global)
+		str = get_property("userAgent")
 
-	// ToDo: section hash to also account for worker results
-		// note: use a boolean for isBS for stability
-		// logic:
-		// if no BS + no worker = use original
-		// if no BS + worker matches = use original
-		// if no BS + worker doesn't match = use worker
-		// if BS + no worker - use isBS
-		// if BS + worker matches = use isBS
-		// if BS + worker doesn't matches = use worker
-	if (isBS) {
-		section_info("ua", t0, gt0, ["lies:yes"])
-	} else {
-		section_info("ua", t0, gt0, res)
-	}
+		// hash
+		res.sort()
+		dom.uaDoc = sha1(res.join())
+
+		// show
+		uaBS = false
+		if (lies > 0) {
+			lies += " pinocchio" + (lies > 1 ? "s": "")
+			dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
+			dom.togualies.style.display = "table-row"
+			uaBS = true
+		} else {
+			dom.togualies.style.display = "none"
+		}
+
+		// return
+		return resolve(res)
+	})
 }
 
-function get_ua_nav_checks() {
+function get_ua_workers() {
 	// control
 	let list = ['userAgent','appCodeName','appName','product','appVersion','platform'],
 		res = [],
@@ -1647,9 +1637,10 @@ function get_ua_nav_checks() {
 	}
 
 	function exit(s) {
-		dom.sectionUA2.innerHTML = s //web
-		dom.sectionUA3.innerHTML = s //shared
-		dom.sectionUA4.innerHTML = s //nested
+		dom.uaWorker0.innerHTML = s //web
+		dom.uaWorker1.innerHTML = s //shared
+		//dom.uaWorker3.innerHTML = s //nested
+		//dom.uaWorker4.innerHTML = s //blob
 	}
 	// workers
 	if (isFile) {
@@ -1660,51 +1651,49 @@ function get_ua_nav_checks() {
 		exit(zF)
 	} else {
 		// web
-		let el2 = dom.sectionUA2, test2 = ""
+		let el0 = dom.uaWorker0, test0 = ""
 		try {
 			let workernav = new Worker("js/worker_ua.js")
-			el2.innerHTML = zF
+			el0.innerHTML = zF
 			workernav.addEventListener("message", function(e) {
 				//console.debug("ua worker", e.data)
-				test2 = sha1((e.data).join())
-				el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
+				test0 = sha1((e.data).join())
+				el0.innerHTML = test0 + (test0 == control ? match_green : match_red)
 				workernav.terminate
 			}, false)
 			workernav.postMessage(isFF)
 		} catch(e) {
-			el2.innerHTML = zF
+			el0.innerHTML = zF
 		}
 		// shared
-		let el3 = dom.sectionUA3, test3 = ""
+		let el1 = dom.uaWorker1, test1 = ""
 		try {
 			let sharednav = new SharedWorker("js/workershared_ua.js")
-			el3.innerHTML = zF
+			el1.innerHTML = zF
 			sharednav.port.addEventListener("message", function(e) {
 				//console.debug("ua shared", e.data)
-				test3 = sha1((e.data).join())
-				el3.innerHTML = test3 + (test3 == control ? match_green : match_red)
+				test1 = sha1((e.data).join())
+				el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 				sharednav.port.close()
-				if (test3 !== control) {
+				if (test1 !== control) {
 					update(e.data)
 				}
 			}, false)
 			sharednav.port.start()
 			sharednav.port.postMessage(isFF)
 		} catch(e) {
-			el3.innerHTML = zF
+			el1.innerHTML = zF
 		}
-		// nested
-		dom.sectionUA4.innerHTML = note_ttc
 	}
 
 	// service
-	let el5 = dom.sectionUA5, test5 = ""
+	let el2 = dom.uaWorker2, test2 = ""
 	if (isFile) {
-		el5.innerHTML = zNA
+		el2.innerHTML = zNA
 	} else if (isSecure) {
 		if ("serviceWorker" in navigator) {
 			// assume failure
-			el5.innerHTML = zF + " [A: assumed]"
+			el2.innerHTML = zF + " [A: assumed]"
 			// register
 			navigator.serviceWorker.register("js/workerservice_ua.js").then(function(swr) {
 				let sw
@@ -1721,21 +1710,21 @@ function get_ua_nav_checks() {
 					let channel = new BroadcastChannel("sw-ua")
 					channel.addEventListener("message", event => {
 						//console.debug("ua service", event.data.msg)
-						test5 = sha1((event.data.msg).join())
-						el5.innerHTML = test5 + (test5 == control ? match_green : match_red)
+						test2 = sha1((event.data.msg).join())
+						el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
 						// unregister & close
 						swr.unregister().then(function(boolean) {})
 						channel.close()
 					})
 				} else {
-					el5.innerHTML = zF + " [B: not swr.installing]"
+					el2.innerHTML = zF + " [B: not swr.installing]"
 				}
 			},
 			function(e) {
-				el5.innerHTML = zF + " [C: not registering]: "  + e.message
+				el2.innerHTML = zF + " [C: not registering]: "  + e.message
 			})
 		} else {
-			el5.innerHTML = zNA
+			el2.innerHTML = zNA
 		}
 	}
 }
@@ -2326,7 +2315,7 @@ function goNW_UA() {
 	}
 	control.sort()
 
-	dom.sectionUA8.innerHTML = "&nbsp"
+	dom.uaHashOpen.innerHTML = "&nbsp"
 	// open, get results, close
 	let newWin = window.open()
 	let newNavigator = newWin.navigator
@@ -2362,9 +2351,9 @@ function goNW_UA() {
 	let controlhash = sha1(control.join())
 	// output
 	if (hash == controlhash) {
-		dom.sectionUA8.innerHTML = hash + match_green
+		hash += match_green
 	} else {
-		dom.sectionUA8.innerHTML = hash + match_red
+		hash += match_red
 		// output diffs if not already exposed (has line break)
 		for (let i=0; i < res.length; i++) {
 			let parts = res[i].split(":")
@@ -2380,6 +2369,7 @@ function goNW_UA() {
 			}
 		}
 	}
+	dom.uaHashOpen.innerHTML = hash
 }
 
 /* OUTPUT */
@@ -2396,9 +2386,90 @@ function outputScreen(runtype) {
 }
 
 function outputUA() {
-	let t0 = performance.now()
-	get_ua_nav()
-	get_ua_nav_checks()
+
+	dom.uaWorkers = "summary not coded yet: see details"
+
+	let t0 = performance.now(),
+		section = [],
+		control = [],
+		controlA = "",
+		controlB = "",
+		useIframe = false
+
+	function get_iframes() {
+		// iframes
+		Promise.all([
+			getDynamicIframeWindow({
+				context: window, violateSameOriginPolicy: false, test: "ua"
+			}), // DocumentRoot
+			getDynamicIframeWindow({
+				context: window, source: "?", violateSameOriginPolicy: false, test: "ua"
+			}), // with URL
+			getDynamicIframeWindow({
+				context: window, test: "ua"
+			}), // access 1
+			getDynamicIframeWindow({
+				context: frames, test: "ua"
+			}), // access 2
+			getDynamicIframeWindow({
+				context: window, nestIframeInContainerDiv: true, test: "ua"
+			}), // nested
+		]).then(function(results){
+			for(let i=0; i < 5; i++) {
+				// output
+				let testhash = sha1(results[i].join())
+				if (testhash !== controlA) {
+					// assumption: any iframe leaks should be the same: just get one
+					if (useIframe == false) {
+						useIframe = true
+						section = results[i] // change section data
+					}
+				}
+				testhash += (testhash == controlA ? match_green : match_red)
+				document.getElementById("uaIframe"+i).innerHTML = testhash
+			}
+			// iframes summary
+			dom.uaIframes.innerHTML = sha1(section.join()) + (useIframe ? match_red : match_green)
+			// show iframe diffs
+			if (useIframe) {
+				for (let i=0; i < control.length; i++) {
+					if (control[i] !== section[i]) {
+						let parts = section[i].split(":")
+						let target = document.getElementById("n"+parts[0])
+						target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
+					}
+				}
+			}
+			// output section: we would do this after calling workers
+			if (uaBS && useIframe == false) {
+				section_info("ua", t0, gt0, ["lies:yes"])
+			} else {
+				section_info("ua", t0, gt0, section)
+			}
+			// call workers
+			get_ua_workers()
+		})
+	}
+
+	Promise.all([
+		get_ua_doc(), // sets uaBS
+	]).then(function(results){
+		controlA = sha1(results[0].join())
+		control = results[0]
+		section = control
+		get_iframes()
+	})
+
+
+	// ToDo: logic: add workers:
+		// if no BS + no worker = use original
+		// if no BS + worker matches = use original
+		// if no BS + worker doesn't match = use worker
+		// if BS + no worker - use isBS
+		// if BS + worker matches = use isBS
+		// if BS + worker doesn't matches = use worker
+
+
 }
 
 function outputFD(runtype) {
