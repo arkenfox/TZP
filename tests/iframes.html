@@ -26,10 +26,9 @@
 		<tr><td>document</td><td class="mono spaces" id="doc"></td></tr>
 		<tr><td>document root</td><td class="mono spaces" id="iframe0"></td></tr>
 		<tr><td>with URL</td><td class="mono spaces" id="iframe1"></td></tr>
-		<tr><td>violating SOP</td><td class="mono spaces" id="iframe2"></td></tr>
-		<tr><td>access 1</td><td class="mono spaces" id="iframe3"></td></tr>
-		<tr><td>access 2</td><td class="mono spaces" id="iframe4"></td></tr>
-		<tr><td>access 3</td><td class="mono spaces" id="iframe5"></td></tr>
+		<tr><td>access 1</td><td class="mono spaces" id="iframe2"></td></tr>
+		<tr><td>access 2</td><td class="mono spaces" id="iframe3"></td></tr>
+		<tr><td>access 3</td><td class="mono spaces" id="iframe4"></td></tr>
 	</table>
 	<br>
 
@@ -81,11 +80,6 @@ function getUA() {
 		}), // with URL
 		getDynamicIframeWindow({
 			context: window,
-			source: "//example.org",
-			test: "ua"
-		}), // violating SOP
-		getDynamicIframeWindow({
-			context: window,
 			test: "ua"
 		}), // access 1
 		getDynamicIframeWindow({
@@ -99,9 +93,10 @@ function getUA() {
 		}), // access 3
 	]).then(function(results){
 
-		for(let i=0; i < 6; i++) {
+		for(let i=0; i < 5; i++) {
 			let el = document.getElementById("iframe"+i)
-			let testhash = sha1(results[i])
+			console.debug(results[i])
+			let testhash = sha1(results[i].join())
 			let isMatch = (testhash == control)
 			testhash = (testhash == control ? sg.trim() : sb.trim()) + testhash + sc
 			if (isMatch) {
