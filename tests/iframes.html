@@ -21,15 +21,15 @@
 	</table>
 
 	<table id="tb2">
-		<col width="15%"><col width="85%">
+		<col width="12%"><col width="88%">
 		<thead><tr><th colspan="2">iframes ua</th></tr></thead>
-		<tr><td>document</td><td class="mono" id="doc"></td></tr>
-		<tr><td>document root</td><td class="mono" id="iframe0"></td></tr>
-		<tr><td>with URL</td><td class="mono" id="iframe1"></td></tr>
-		<tr><td>violating SOP</td><td class="mono" id="iframe2"></td></tr>
-		<tr><td>access 1</td><td class="mono" id="iframe3"></td></tr>
-		<tr><td>access 2</td><td class="mono" id="iframe4"></td></tr>
-		<tr><td>access 3</td><td class="mono" id="iframe5"></td></tr>
+		<tr><td>document</td><td class="mono spaces" id="doc"></td></tr>
+		<tr><td>document root</td><td class="mono spaces" id="iframe0"></td></tr>
+		<tr><td>with URL</td><td class="mono spaces" id="iframe1"></td></tr>
+		<tr><td>violating SOP</td><td class="mono spaces" id="iframe2"></td></tr>
+		<tr><td>access 1</td><td class="mono spaces" id="iframe3"></td></tr>
+		<tr><td>access 2</td><td class="mono spaces" id="iframe4"></td></tr>
+		<tr><td>access 3</td><td class="mono spaces" id="iframe5"></td></tr>
 	</table>
 	<br>
 
@@ -37,28 +37,93 @@
 'use strict';
 
 var control = ""
+s12 = s12.trim()
 
 function getUA() {
 	let list = ['userAgent','appCodeName','appName','product','appVersion',
-		'oscpu','platform','buildID','productSub','vendor','vendorSub','hardwareConcurrency'],
+		'oscpu','platform','buildID','productSub','vendor','vendorSub',],
 		res = [],
-		r = ''
+		r = ""
 	for(let i=0; i < list.length; i++) {
-		try {r = navigator[list[i]]} catch(e) {r = (e.name == 'ReferenceError' ? zB1 : zB2)}
-		if (r == '') {r = 'empty string'}
-		if (r == 'undefined') {r = 'undefined string'}
-		if (r == undefined) {r = 'undefined value'}
-		res.push((i).toString().padStart(2,'0')+': '+r)
+		try {r = navigator[list[i]]} catch(e) {r = (e.name == zB0)}
+		if (r == "") {r = 'empty string'}
+		if (r == "undefined") {r = "undefined string"}
+		if (r == undefined) {r = "undefined value"}
+		res.push(list[i]+":"+r)
 	}
+	res.sort()
 	control = sha1(res.join())
+	let pretty = []
+	for (let i = 0; i < res.length; i++) {
+		let parts = res[i].split(":")
+		let prop = parts[0].padStart(12)
+		let value = parts.slice(1).join(":")
+		pretty.push(s12 + prop + sc +": "+ value)
+	}
 	dom.doc.innerHTML = sg + control + sc
-	 + "<br> - " + res.join("<br> - ")
+	 + "<br>" + pretty.join("<br>")
 }
+
+	getUA()
+	
+
+	Promise.all([
+		getDynamicIframeWindow({
+			context: window,
+			violateSameOriginPolicy: false,
+			test: "ua"
+		}), // DocumentRoot
+		getDynamicIframeWindow({
+			context: window,
+			source: "?",
+			violateSameOriginPolicy: false,
+			test: "ua"
+		}), // with URL
+		getDynamicIframeWindow({
+			context: window,
+			source: "//example.org",
+			test: "ua"
+		}), // violating SOP
+		getDynamicIframeWindow({
+			context: window,
+			test: "ua"
+		}), // access 1
+		getDynamicIframeWindow({
+			context: frames,
+			test: "ua"
+		}), // access 2
+		getDynamicIframeWindow({
+			context: window,
+			nestIframeInContainerDiv: true,
+			test: "ua"
+		}), // access 3
+	]).then(function(results){
+
+		for(let i=0; i < 6; i++) {
+			let el = document.getElementById("iframe"+i)
+			let testhash = sha1(results[i])
+			let isMatch = (testhash == control)
+			testhash = (testhash == control ? sg.trim() : sb.trim()) + testhash + sc
+			if (isMatch) {
+				el.innerHTML = testhash
+			} else {
+				let pretty = []
+				let res = results[i]
+				for (let i = 0; i < res.length; i++) {
+					let parts = res[i].split(":")
+					let prop = parts[0].padStart(12)
+					let value = parts.slice(1).join(":")
+					pretty.push(s12 + prop + sc +": "+ value)
+				}
+				el.innerHTML = testhash + "<br>" + pretty.join("<br>")
+			}
+		}
+	})
 
 function getDynamicIframeWindow({
 	context,
-	source = '',
-	test = '',
+	source = "",
+	test = "",
 	nestIframeInContainerDiv = false,
 	violateSameOriginPolicy = true,
 	display = false
@@ -85,70 +150,27 @@ function getDynamicIframeWindow({
 		element.setAttribute('src', source)
 	}
 	const iframeWindow = context[length]
+
 	let res = []
+	let navigator = iframeWindow.navigator
 
 	if (test == "ua") {
 		let list = ['userAgent','appCodeName','appName','product','appVersion',
-			'oscpu','platform','buildID','productSub','vendor','vendorSub','hardwareConcurrency'],
-			r = ''
-		let navigator = iframeWindow.navigator
-		for(let i=0; i < list.length; i++) {
-			try {r = navigator[list[i]]} catch(e) {r = (e.name == 'ReferenceError' ? zB1 : zB2)}
-			if (r == '') {r = 'empty string'}
-			if (r == 'undefined') {r = 'undefined string'}
-			if (r == undefined) {r = 'undefined value'}
-			res.push((i).toString().padStart(2,'0')+': '+r)
+			'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+			r = ""
+		for (let i=0; i < list.length; i++) {
+			try {r = navigator[list[i]]} catch(e) {r = zB0}
+			if (r == "") {r = "empty string"}
+			if (r == "undefined") {r = "undefined string"}
+			if (r == undefined) {r = "undefined value"}
+			res.push(list[i]+":"+r)
 		}
+		res.sort()
 	}
 	document.body.removeChild(element)
-	//return iframeWindow
 	return res
 }
 
-	getUA()
-
-	Promise.all([
-		getDynamicIframeWindow({
-			context: window,
-			violateSameOriginPolicy: false,
-			test: "ua"
-		}), // DocumentRoot
-		getDynamicIframeWindow({
-			context: window,
-			source: '?',
-			violateSameOriginPolicy: false,
-			test: "ua"
-		}), // with URL
-		getDynamicIframeWindow({
-			context: window,
-			source: '//example.org',
-			test: "ua"
-		}), // violating SOP
-		getDynamicIframeWindow({
-			context: window,
-			test: "ua"
-		}), // access 1
-		getDynamicIframeWindow({
-			context: frames,
-			test: "ua"
-		}), // access 2
-		getDynamicIframeWindow({
-			context: window,
-			nestIframeInContainerDiv: true,
-			test: "ua"
-		}), // access 3
-	]).then(function(results){
-
-		for(let i=0; i < 6; i++) {
-			let el = document.getElementById("iframe"+i)
-			let testhash = sha1(results[i])
-			testhash = (testhash == control ? sg.trim() : sb.trim()) + testhash + sc
-			el.innerHTML = testhash + "<br> - " + results[i].join("<br> - ")
-		}
-		//results.forEach(function(currentResult) {
-		//	
-		//})
-	})
 
 </script>
 </body>
