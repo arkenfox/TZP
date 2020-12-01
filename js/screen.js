@@ -1447,7 +1447,7 @@ function get_ua_doc() {
 			}
 		}
 
-		function check_basics(str) {
+		function check_basics(str, property) {
 			// for dynamic returns
 			let bs = false
 			if (str == "undefined value") {bs = true}
@@ -1457,6 +1457,14 @@ function get_ua_doc() {
 			if (str.substring(0, 1) == " ") {bs = true} // leading space
 			if (str.substring(str.length-1, str.length) == " ") {bs = true} // trailing space
 			if (str.indexOf("  ") !== -1) {bs = true} // double spaces
+			// for userAgent
+			if (property == "userAgent") {
+				// this should get everything not FF
+				if (str.indexOf(".0) Gecko/20100101 Firefox/") == -1) {bs = true}
+				// for kicks
+				str = str.toLowerCase()
+				if (str.indexOf("webkit") !== -1) {bs = true}
+			}
 			return bs
 		}
 
@@ -1581,13 +1589,28 @@ function get_ua_doc() {
 		}
 
 		// userAgent
-			// ToDo: userAgent lies: ways this can be inconsistent
-			// 1: if full ua = not consistent with known os etc
-			// 2: if full ua = not the same as individual parts
-			// 3: the syntax/formula doesn't match
-			// 4: if version doesn't match isVer (allow for isRFP and 78)
-				// note: allow for + symbol on verNo (make global)
 		str = get_property("userAgent")
+		if (go) {
+			if (myOS == "") {isPartial = true} else {isPartial = false}
+			spoof = check_basics(str, "userAgent")
+			if (spoof) {
+				// no need to check further, use a red arrow
+				isPartial = false
+			} else {
+				// ToDo: dig deeper
+					// 2: if version doesn't match isVer (allow higher if version has + symbol)
+						// exception if version in ua is 78 and FF is actually 78+ and RFP=on
+						// "; rv:78.0) Gecko/20100101 Firefox/78.0"
+
+					// 3a: if full ua = not consistent with known os etc
+					// 3b: if full ua = not the same as individual parts
+					// 4: the syntax/formula doesn't match
+
+			}
+			if (spoof || isPartial) {addArrow("userAgent", true)}
+		} else {
+			addArrow("userAgent", false)
+		}
 
 		// hash
 		res.sort()
@@ -2410,10 +2433,10 @@ function outputUA() {
 			}), // with URL
 			getDynamicIframeWindow({
 				context: window, test: "ua"
-			}), // access 1
+			}), // window access
 			getDynamicIframeWindow({
 				context: frames, test: "ua"
-			}), // access 2
+			}), // iframe access
 			getDynamicIframeWindow({
 				context: window, nestIframeInContainerDiv: true, test: "ua"
 			}), // nested
