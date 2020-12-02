@@ -1450,20 +1450,19 @@ function get_ua_doc() {
 		function check_basics(str, property) {
 			// for dynamic returns
 			let bs = false
-			if (str == "undefined value") {bs = true}
-			if (str == "undefined string") {bs = true}
-			if (str == "blocked") {bs = true}
-			if (str == "empty string") {bs = true}
-			if (str.substring(0, 1) == " ") {bs = true} // leading space
-			if (str.substring(str.length-1, str.length) == " ") {bs = true} // trailing space
-			if (str.indexOf("  ") !== -1) {bs = true} // double spaces
-			// for userAgent
-			if (property == "userAgent") {
+			if (str == "undefined value") {bs = true
+			} else if (str == "undefined string") {bs = true
+			} else if (str == "blocked") {bs = true
+			} else if (str == "empty string") {bs = true
+			} else if (str.substring(0, 1) == " ") {bs = true
+			} else if (str.substring(str.length-1, str.length) == " ") {bs = true
+			} else if (str.indexOf("  ") !== -1) {bs = true
+			} else if (property == "userAgent") {
 				// fails fenix: e.g. ".0) Gecko/83.0 Firefox/83.0"
 					//if (str.indexOf(".0) Gecko/20100101 Firefox/") == -1) {bs = true}
 				// this should get everything not FF
-				if (str.indexOf(".0) Gecko/") == -1) {bs = true}
-				if (str.indexOf(" Firefox/") == -1) {bs = true}
+				if (str.indexOf(".0) Gecko/") == -1) {bs = true
+				} else if (str.indexOf(" Firefox/") == -1) {bs = true}
 				// for kicks
 				str = str.toLowerCase()
 				if (str.indexOf("webkit") !== -1) {bs = true}
@@ -1700,7 +1699,7 @@ function get_ua_workers() {
 			let sharednav = new SharedWorker("js/workershared_ua.js")
 			el1.innerHTML = zF
 			sharednav.port.addEventListener("message", function(e) {
-				console.debug("ua shared", e.data)
+				//console.debug("ua shared", e.data)
 				test1 = sha1((e.data).join())
 				el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 				sharednav.port.close()
