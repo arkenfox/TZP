@@ -1700,7 +1700,7 @@ function get_ua_workers() {
 			let sharednav = new SharedWorker("js/workershared_ua.js")
 			el1.innerHTML = zF
 			sharednav.port.addEventListener("message", function(e) {
-				//console.debug("ua shared", e.data)
+				console.debug("ua shared", e.data)
 				test1 = sha1((e.data).join())
 				el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 				sharednav.port.close()
