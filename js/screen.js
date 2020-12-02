@@ -1459,8 +1459,11 @@ function get_ua_doc() {
 			if (str.indexOf("  ") !== -1) {bs = true} // double spaces
 			// for userAgent
 			if (property == "userAgent") {
+				// fails fenix: e.g. ".0) Gecko/83.0 Firefox/83.0"
+					//if (str.indexOf(".0) Gecko/20100101 Firefox/") == -1) {bs = true}
 				// this should get everything not FF
-				if (str.indexOf(".0) Gecko/20100101 Firefox/") == -1) {bs = true}
+				if (str.indexOf(".0) Gecko/") == -1) {bs = true}
+				if (str.indexOf(" Firefox/") == -1) {bs = true}
 				// for kicks
 				str = str.toLowerCase()
 				if (str.indexOf("webkit") !== -1) {bs = true}
