@@ -2451,6 +2451,7 @@ function outputUA() {
 					if (useIframe == false) {
 						useIframe = true
 						section = results[i] // change section data
+						section.push("_spoofing_attempt:true") // did they try to lie adds entropy
 					}
 				}
 				testhash += (testhash == controlA ? match_green : match_red)
