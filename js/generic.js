@@ -98,7 +98,7 @@ function section_info(name, time1, time2, data) {
 		// append + output
 		try {
 			//add metric count
-			hash += snc +"<b>["+ data.length +" metrics]</b>"+ sc
+			hash += snc +"<b>["+ data.length +" metric" + (data.length > 1 ? "s" : "") +"]</b>"+ sc
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
 			if (name == "fonts" || name == "devices") {
