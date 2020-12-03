@@ -146,22 +146,29 @@ function get_collation() {
 }
 
 function get_color() {
+	let res = [], r1 = "", r2 = "", r3 = ""
 	// depth
-	let r1 = screen.pixelDepth, r2 = screen.colorDepth
-	let r = r1+" | "+r2
-	dom.ScrColor.innerHTML = r += (r == "24 | 24" ? rfp_green : rfp_red)
+	try {r1 = screen.pixelDepth} catch(e) {r1 = zB0}
+	try {r2 = screen.colorDepth} catch(e) {r2 = zB0}
+	res.push("pixelDepth:"+r1)
+	res.push("screenDepth:"+r2)
+	r1 += " | "+r2
+	dom.ScrColor.innerHTML = r1 += (r1 == "24 | 24" ? rfp_green : rfp_red)
 	// color
 	try {
-		r = (function() {
+		r3 = (function() {
 			for (let i=0; i < 1000; i++) {
 				if (matchMedia("(color:"+i+")").matches === true) {return i}
 			}
 			return i
 		})()
 	} catch(e) {
-		r = zB0
+		r3 = zB0
 	}
-	dom.mmC.innerHTML = (r == 8 ? r+rfp_green : r+rfp_red)
+	res.push("mm_color:"+r3)
+	dom.mmC.innerHTML = (r3 == 8 ? r3+rfp_green : r3+rfp_red)
+	// return
+	return(res)
 }
 
 function get_engine() {
@@ -347,7 +354,7 @@ function get_errors() {
 	})
 }
 
-function get_fullscreen() {
+function get_fullscreen(runtype) {
 	let r = ""
 	try {
 		if (document.mozFullScreenEnabled) {
@@ -359,7 +366,7 @@ function get_fullscreen() {
 		r = "no: "+e.name; dom.fsLeak = zNA
 	}
 	dom.fsSupport = r
-	return r
+	return (runtype == "section" ? "full_screen_api:" : "") + r
 }
 
 function get_line_scrollbar() {
@@ -1315,7 +1322,8 @@ function get_resources() {
 }
 
 function get_screen_metrics(runtype) {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		res = []
 	// measure
 	let w1 = screen.width, h1 = screen.height,
 		w2 = screen.availWidth, h2 = screen.availHeight,
@@ -1325,9 +1333,41 @@ function get_screen_metrics(runtype) {
 		p3 = screen.availLeft, p4 = screen.availTop,
 		p5 = window.screenX, p6 = window.screenY,
 		p7 = window.mozInnerScreenX, p8 = window.mozInnerScreenY
-	dom.ScrRes = w1+" x "+h1+" ("+p1+","+p2+")"
-	dom.ScrAvail = w2+" x "+h2+" ("+p3+","+p4+")"
-	dom.WndOut = w3+" x "+h3+" ("+p5+","+p6+")"
+
+	let mInner = w+" x "+h,
+		mOuter = w3+" x "+h3,
+		mScreen = w1+" x "+h1,
+		mScrnA = w2+" x "+h2
+
+	dom.ScrRes =  mScreen +" ("+p1+","+p2+")"
+	dom.ScrAvail = mScrnA +" ("+p3+","+p4+")"
+	dom.WndOut = mOuter +" ("+p5+","+p6+")"
+
+	// x/y
+	let items = [p1,p2,p3,p4,p5,p6,p7,p8],
+		isXY = true
+	for (let i=0; i < items.length; i++) {if (items[i] != 0) {isXY = false}}
+	// fs
+	let isFS = false
+	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
+
+	// section hash
+	if (runtype == "load" || runtype == "screen") {
+		// note: FS would make these true
+			res.push("coordinates_zero:"+isXY)
+		let match = (mScreen == mScrnA)
+			res.push("match_screen+available:"+match)
+		match = (mInner == mOuter)
+			res.push("match_inner+outer:"+match)		
+		match = (mInner == mScreen)
+			res.push("match_inner+screen:"+match)
+		if (isFS || mInner !== mScreen) {
+			res.push("screen:"+mScreen)
+		} else {
+			res.push("screen:spoofed")
+		}
+	}
+
 	// RFP
 	if (isFF) {
 		// size
@@ -1336,10 +1376,8 @@ function get_screen_metrics(runtype) {
 		else if (w2+"x"+h2 !== w3+"x"+h3) {m1 = false}
 		else if (w3+"x"+h3 !== w+"x"+h) {m1 = false}
 		r = (m1 ? sg : sb) + "[sizes match x4]"+sc
-		// pos
-		let items = [p1,p2,p3,p4,p5,p6,p7,p8]
-		for (let i=0; i < items.length; i++) {if (items[i] != 0) {m2 = false}}
-		r += " +" + (m2 ? sg : sb) + "[0,0 x4]"+sc
+		// x/y
+		r += " +" + (isXY ? sg : sb) + "[0,0 x4]"+sc
 		dom.match.innerHTML = r
 		// color
 		if (m1 && m2) {c = "#8cdc8c"}
@@ -1367,13 +1405,18 @@ function get_screen_metrics(runtype) {
 		}
 	}
 	// the rest
-	try {dom.fsState = window.fullScreen} catch(e) {dom.fsState.innerHTML = zB0}
 	get_orientation(runtype)
 	get_mm_metrics(runtype)
 	if (logExtra) {
 		let strD = (runtype.type == undefined ? runtype : runtype.type)
 		console.log("D [must follow zoom]: ", strD, ": mm_metrics, orientation, fullscreen")
 	}
+
+	// return for section hash
+	if (runtype == "load" || runtype == "screen") {
+		return(res)
+	}
+
 }
 
 function get_ua_doc() {
@@ -2403,14 +2446,29 @@ function goNW_UA() {
 /* OUTPUT */
 
 function outputScreen(runtype) {
-	let t0 = performance.now()
-	// do these once
-	get_pbmode()
-	get_fullscreen()
-	get_color()
-	get_screen_metrics(runtype) // calls the rest, also used on resize
-	// perf
-	section_info("screen", t0, gt0)
+	// this function is only called on page load or reruns
+	// so no need to worry about resizing events
+	let t0 = performance.now(),
+		section = []
+
+	get_pbmode() // not FP stable
+
+	Promise.all([
+		get_fullscreen("section"),
+		get_color(),
+		get_screen_metrics(runtype), // calls the rest, also used on resize
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
+		})
+		section_info("screen", t0, gt0, section)
+	})
 }
 
 function outputUA() {

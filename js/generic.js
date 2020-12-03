@@ -76,7 +76,7 @@ function section_info(name, time1, time2, data) {
 			if (pname == "feature") {pname += " detection"}
 			if (pname == "storage") {pname = "cookies & storage"}
 			fpAllData.push([pname +":" + hash, data])
-			if (fpAllHash.length == 11) {
+			if (fpAllHash.length == 12) {
 				fpAllHash.sort()
 				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
