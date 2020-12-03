@@ -101,7 +101,7 @@ function section_info(name, time1, time2, data) {
 			hash += snc +"<b>["+ data.length +" metric" + (data.length > 1 ? "s" : "") +"]</b>"+ sc
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
-			if (name == "fonts" || name == "devices") {
+			if (name == "screen" || name == "devices") {
 				hash += " [incomplete: work in progress]"
 			}
 			document.getElementById(name + "hash").innerHTML = hash
@@ -139,7 +139,7 @@ function showMetrics(type) {
 		checks = [],
 		output = [],
 		mlength = 0,
-		mPad = 27 // longest metric is currently 22
+		mPad = 30 // longest metric is currently 27
 	if (type == "loose") {array = fpAllData}
 
 	for (let i = 0; i < array.length; i++) {
