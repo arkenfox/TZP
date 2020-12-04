@@ -63,6 +63,10 @@ function section_info(name, time1, time2, data) {
 				}
 			}
 		}
+		// check its not empty
+		if (data.length == 0) {
+			fpAllCheck.push(name +": data array is empty")
+		}
 		// store
 		if (sRerun && gRerun == false) {
 			console.log(name + ":" + hash +"\n", data)
@@ -76,7 +80,7 @@ function section_info(name, time1, time2, data) {
 			if (pname == "feature") {pname += " detection"}
 			if (pname == "storage") {pname = "cookies & storage"}
 			fpAllData.push([pname +":" + hash, data])
-			if (fpAllHash.length == 12) {
+			if (fpAllHash.length == 13) {
 				fpAllHash.sort()
 				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
