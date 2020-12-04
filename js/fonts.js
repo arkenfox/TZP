@@ -326,158 +326,166 @@ function get_fallback(list) {
 function get_unicode() {
 	/* code based on work by David Fifield (dcf) and Serge Egelman (2015)
 		https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
-	let offset = [], bounding = [], client = [],
-		diffsb = [], diffsc = [], display = "",
-		t0 = performance.now()
-	let isCanvas = true, isBound = true, isClient = true, isTM = true
+	return new Promise(resolve => {
 
-	// textMetrics
-	function supported(property) {return TextMetrics.prototype.hasOwnProperty(property)}
-	let tmres = {
-		tmres0: [], tmres1: [], tmres2: [], tmres3: [], tmres4: [], tmres5: [],
-		tmres6: [], tmres7: [], tmres8: [], tmres9: [], tmres10: [], tmres11: [],
-	}
-	let tmSupport = []
-	let tmTypes = ["width","actualBoundingBoxAscent","actualBoundingBoxDescent",
-		"actualBoundingBoxLeft","actualBoundingBoxRight","alphabeticBaseline",
-		"emHeightAscent","emHeightDescent","fontBoundingBoxAscent",
-		"fontBoundingBoxDescent","hangingBaseline","ideographicBaseline"]
-	for (let i = 0; i < tmTypes.length; i++) {tmSupport.push(supported(tmTypes[i]))}
+		let offset = [], bounding = [], client = [],
+			diffsb = [], diffsc = [], display = "",
+			t0 = performance.now()
+		let isCanvas = true, isBound = true, isClient = true, isTM = true
 
-	function output() {
-		// textmetrics
-		let tmhash = []
-		for (let i=0; i < tmTypes.length; i++) {
-			let el = document.getElementById("tm"+i),
-				array = tmres["tmres"+i],
-				output = sha1(array.join())
-			if (tmSupport[i]) {
-				if (isCanvas) {
-					array = array.filter(function(item, position) {return array.indexOf(item) === position})
-					let hashchk = sha1(array.join())
-					if (hashchk == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
-						output = "undefined" // different to canvas blocking
-						if (i == 0) {isTM = false}
+		// textMetrics
+		function supported(property) {return TextMetrics.prototype.hasOwnProperty(property)}
+		let tmres = {
+			tmres0: [], tmres1: [], tmres2: [], tmres3: [], tmres4: [], tmres5: [],
+			tmres6: [], tmres7: [], tmres8: [], tmres9: [], tmres10: [], tmres11: [],
+		}
+		let tmSupport = []
+		let tmTypes = ["width","actualBoundingBoxAscent","actualBoundingBoxDescent",
+			"actualBoundingBoxLeft","actualBoundingBoxRight","alphabeticBaseline",
+			"emHeightAscent","emHeightDescent","fontBoundingBoxAscent",
+			"fontBoundingBoxDescent","hangingBaseline","ideographicBaseline"]
+		for (let i = 0; i < tmTypes.length; i++) {tmSupport.push(supported(tmTypes[i]))}
+
+		function output() {
+			// textmetrics
+			let res = []
+			for (let i=0; i < tmTypes.length; i++) {
+				let el = document.getElementById("tm"+i),
+					array = tmres["tmres"+i],
+					output = sha1(array.join())
+				if (tmSupport[i]) {
+					if (isCanvas) {
+						array = array.filter(function(item, position) {return array.indexOf(item) === position})
+						let hashchk = sha1(array.join())
+						if (hashchk == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+							output = "undefined" // different to canvas blocking
+							if (i == 0) {isTM = false}
+						}
+					} else {
+						output = zB0
 					}
 				} else {
-					output = "blocked"
+					output = zNS
 				}
-			} else {
-				output = zNS
+				el.innerHTML = output
+				res.push("tm_"+ tmTypes[i] +":"+ output)
 			}
-			el.innerHTML = output
-			tmhash.push(tmTypes[i] +": " + output)
-		}
-		dom.ug2.innerHTML = sha1(tmhash.join()) + (isCanvas ? "" : sb+"[canvas]"+sc)
-		//console.log("HASH: TM combined: " + sha1(tmhash.join()) + "\n - " + tmhash.join("\n - "))
+			dom.ug2.innerHTML = sha1(res.join()) + (isCanvas ? "" : sb+"[canvas]"+sc)
 
-		// de-dupe
-		let unique = tmres["tmres0"]
-		unique = unique.filter(function(item, position) {return unique.indexOf(item) === position})
-		diffsb = diffsb.filter(function(item, position) {return diffsb.indexOf(item) === position})
-		diffsc = diffsc.filter(function(item, position) {return diffsc.indexOf(item) === position})
-		// show/hide
-		let bhash = sha1(bounding.join()), chash = sha1(client.join())
-		if (bhash == chash) {
-			dom.togUG.style.display = "none"; dom.labelUG = "domrect"
-		} else {
-			dom.togUG.style.display = "table-row"; dom.labelUG = "getBoundingClientRect"
-		}
-		// the rest
-		let total = "|"+ unique.length +" diffs]"+ sc, r = ""
-		dom.ug1 = sha1(offset.join())
-		r = (isBound ? "" : zB)
-		if (isBound && isCanvas && isTM) {r = s12 +"["+ diffsb.length + total}
-		dom.ug3.innerHTML = bhash + r
-		r = (isClient ? "" : zB)
-		if (isClient && isCanvas && isTM) {r = s12 +"["+ diffsc.length + total}
-		dom.ug4.innerHTML = chash + r
-		dom.ug10.innerHTML = fntHead + display
+			// de-dupe
+			let unique = tmres["tmres0"]
+			unique = unique.filter(function(item, position) {return unique.indexOf(item) === position})
+			diffsb = diffsb.filter(function(item, position) {return diffsb.indexOf(item) === position})
+			diffsc = diffsc.filter(function(item, position) {return diffsc.indexOf(item) === position})
+			// show/hide
+			let ohash = sha1(offset.join()), bhash = sha1(bounding.join()), chash = sha1(client.join())
+			res.push("glyphs_offset:"+ohash)
+			res.push("glyphs_getClient:"+chash)
+			res.push("glyphs_getBounding:"+bhash)
 
-		// log
-		if (logExtra && isCanvas && isTM) {
-			r = ""
-			if (isBound) {r = "measuretext vs bounding\n" + diffsb.join("\n")}
-			if (isClient && isClient !== isBound) {r += "measuretext vs clientrects\n" + diffsc.join("\n")}
-			//if (r !== "") {console.log(r)}
-		}
-		// perf
-		if (logPerf) {debug_log("unicode glyphs [fonts]",t0)}
-	}
+			if (bhash == chash) {
+				dom.togUG.style.display = "none"; dom.labelUG = "domrect"
+			} else {
+				dom.togUG.style.display = "table-row"; dom.labelUG = "getBoundingClientRect"
+			}
+			// the rest
+			let total = "|"+ unique.length +" diffs]"+ sc, r = ""
+			dom.ug1 = ohash
+			r = (isBound ? "" : zB)
+			if (isBound && isCanvas && isTM) {r = s12 +"["+ diffsb.length + total}
+			dom.ug3.innerHTML = bhash + r
+			r = (isClient ? "" : zB)
+			if (isClient && isCanvas && isTM) {r = s12 +"["+ diffsc.length + total}
+			dom.ug4.innerHTML = chash + r
+			dom.ug10.innerHTML = fntHead + display
 
-	function run() {
-		let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"],
-			div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
-			canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
-		// each char
-		for (let i=0; i < fntCode.length; i++) {
-			let	c = String.fromCodePoint(fntCode[i]),
-				cp = "u+" + (fntCode[i]).substr(2)
-			display += "<br>" + cp.padStart(7)
-			// each style
-			for (let j=0; j < styles.length; j++) {
-				// set
-				slot.style.fontFamily = styles[j]
-				slot.textContent = c
-				let m = ""
-				// offsets: w=span h=div
-				let w = span.offsetWidth, h = div.offsetHeight
-				offset.push((j==0 ? cp+"-" : "" ) + w+"x"+h)
-				display += (w.toString()).padStart(8) +" x "+ (h.toString()).padStart(4)
-				if (j == 5) {display += "    " + c}
-				// measureText
-				if (isCanvas) {
-					try {
-						ctx.font = "normal normal 22000px " + styles[j]
-						let tm = ctx.measureText(c)
-						m = tm.width
-						// no perf gain by checking tmSupport
-						tmres["tmres0"].push(m)
-						tmres["tmres1"].push(tm.actualBoundingBoxAscent)
-						tmres["tmres2"].push(tm.actualBoundingBoxDescent)
-						tmres["tmres3"].push(tm.actualBoundingBoxLeft)
-						tmres["tmres4"].push(tm.actualBoundingBoxRight)
-						tmres["tmres5"].push(tm.alphabeticBaseline)
-						tmres["tmres6"].push(tm.emHeightAscent)
-						tmres["tmres7"].push(tm.emHeightDescent)
-						tmres["tmres8"].push(tm.fontBoundingBoxAscent)
-						tmres["tmres9"].push(tm.fontBoundingBoxDescent)
-						tmres["tmres10"].push(tm.hangingBaseline)
-						tmres["tmres11"].push(tm.ideographicBaseline)
-					} catch(err) {
-						if (err.message == "ctx is undefined") {
-							isCanvas = false
-						} else {
-							console.debug("measureText", err.name, err.message)
+			// log
+			if (logExtra && isCanvas && isTM) {
+				r = ""
+				if (isBound) {r = "measuretext vs bounding\n" + diffsb.join("\n")}
+				if (isClient && isClient !== isBound) {r += "measuretext vs clientrects\n" + diffsc.join("\n")}
+				//if (r !== "") {console.log(r)}
+			}
+			// perf
+			if (logPerf) {debug_log("unicode glyphs [fonts]",t0)}
+			// resolve
+			return resolve(res)
+		}
+
+		function run() {
+			let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"],
+				div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
+				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
+			// each char
+			for (let i=0; i < fntCode.length; i++) {
+				let	c = String.fromCodePoint(fntCode[i]),
+					cp = "u+" + (fntCode[i]).substr(2)
+				display += "<br>" + cp.padStart(7)
+				// each style
+				for (let j=0; j < styles.length; j++) {
+					// set
+					slot.style.fontFamily = styles[j]
+					slot.textContent = c
+					let m = ""
+					// offsets: w=span h=div
+					let w = span.offsetWidth, h = div.offsetHeight
+					offset.push((j==0 ? cp+"-" : "" ) + w+"x"+h)
+					display += (w.toString()).padStart(8) +" x "+ (h.toString()).padStart(4)
+					if (j == 5) {display += "    " + c}
+					// measureText
+					if (isCanvas) {
+						try {
+							ctx.font = "normal normal 22000px " + styles[j]
+							let tm = ctx.measureText(c)
+							m = tm.width
+							// no perf gain by checking tmSupport
+							tmres["tmres0"].push(m)
+							tmres["tmres1"].push(tm.actualBoundingBoxAscent)
+							tmres["tmres2"].push(tm.actualBoundingBoxDescent)
+							tmres["tmres3"].push(tm.actualBoundingBoxLeft)
+							tmres["tmres4"].push(tm.actualBoundingBoxRight)
+							tmres["tmres5"].push(tm.alphabeticBaseline)
+							tmres["tmres6"].push(tm.emHeightAscent)
+							tmres["tmres7"].push(tm.emHeightDescent)
+							tmres["tmres8"].push(tm.fontBoundingBoxAscent)
+							tmres["tmres9"].push(tm.fontBoundingBoxDescent)
+							tmres["tmres10"].push(tm.hangingBaseline)
+							tmres["tmres11"].push(tm.ideographicBaseline)
+						} catch(err) {
+							if (err.message == "ctx is undefined") {
+								isCanvas = false
+							} else {
+								console.debug("measureText", err.name, err.message)
+							}
 						}
 					}
-				}
-				// bounding: w=div h=span
-				if (isBound) {
-					let bDiv = div.getBoundingClientRect()
-					let bSpan = span.getBoundingClientRect()
-					try {
-						w = bSpan.width; h = bDiv.height
-						bounding.push(w+"x"+h)
-						if (m !== w) {diffsb.push(m+" vs "+w)}
-					} catch(err) {isBound = false}
-				}
-				// client: w=span, h=div
-				if (isClient) {
-					let cDiv = div.getClientRects()
-					let cSpan = span.getClientRects()
-					try {
-						w = cSpan[0].width; h = cDiv[0].height
-						client.push(w+"x"+h )
-						if (m !== w) {diffsc.push(m+" vs "+w)}
-					} catch(err) {isClient = false}
+					// bounding: w=div h=span
+					if (isBound) {
+						let bDiv = div.getBoundingClientRect()
+						let bSpan = span.getBoundingClientRect()
+						try {
+							w = bSpan.width; h = bDiv.height
+							bounding.push(w+"x"+h)
+							if (m !== w) {diffsb.push(m+" vs "+w)}
+						} catch(err) {isBound = false}
+					}
+					// client: w=span, h=div
+					if (isClient) {
+						let cDiv = div.getClientRects()
+						let cSpan = span.getClientRects()
+						try {
+							w = cSpan[0].width; h = cDiv[0].height
+							client.push(w+"x"+h )
+							if (m !== w) {diffsc.push(m+" vs "+w)}
+						} catch(err) {isClient = false}
+					}
 				}
 			}
+			dom.ugSlot = ""
+			output()
 		}
-		dom.ugSlot = ""
-		output()
-	}
-	run()
+		run()
+	})
 }
 
 function get_woff() {
@@ -573,15 +581,20 @@ function outputFonts() {
 	dom.fontDoc = r
 	section.push("document_fonts:" + r)	
 
-	get_unicode() //ToDo: promisify and add to section hash
-
 	// other
 	Promise.all([
 		get_fpjs2(),
-		get_woff()
+		get_woff(),
+		get_unicode(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
-			section.push(currentResult)
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
 		})
 		section_info("fonts", t0, gt0, section)
 	})
