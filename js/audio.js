@@ -205,7 +205,8 @@ function outputAudio2() {
 }
 
 function outputAudio1(runtype) {
-	let t0 = performance.now()
+	let t0 = performance.now(),
+		section = []
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
 		// supported
@@ -235,18 +236,26 @@ function outputAudio1(runtype) {
 			Promise.all([
 				crypto.subtle.digest("SHA-256", getTest),
 				crypto.subtle.digest("SHA-256", copyTest),
-				]).then(function(hashes){
-					dom.audioGet = byteArrayToHex(hashes[0])
-					dom.audioCopy = byteArrayToHex(hashes[1])
-				})
+			]).then(function(hashes){
+				// sum
 				let sum = 0
 				for (let i=4500; i < 5000; i++) {
 					sum += Math.abs(getTest[i])
 				}
+				section.push("sum:"+ sum)
 				dom.audioSum = sum
 				pxi_compressor.disconnect()
-				// perf
-				section_info("audio", t0, gt0)
+				// get
+				let tempstr = byteArrayToHex(hashes[0])
+				section.push("getChannelData:"+ tempstr)
+				dom.audioGet = tempstr
+				// copy
+				tempstr = byteArrayToHex(hashes[1])
+				section.push("copyFromChannel:"+ tempstr)
+				dom.audioCopy = tempstr
+				// section
+				section_info("audio", t0, gt0, section)
+			})
 		}
 	} catch(error) {
 		dom.audioSupport = zD
@@ -255,7 +264,7 @@ function outputAudio1(runtype) {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		}
 		// perf
-		section_info("audio", t0, gt0)
+		section_info("audio", t0, gt0, ["web_audio:disabled"])
 	}
 }
 
