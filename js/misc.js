@@ -272,4 +272,4 @@ function outputMisc(type) {
 
 }
 
-outputMisc()
+setTimeout(function() {outputMisc()}, 1)
