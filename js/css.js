@@ -335,4 +335,4 @@ function outputCSS() {
 	})
 }
 
-outputCSS()
+setTimeout(function() {outputCSS()}, 1)
