@@ -54,6 +54,7 @@ function get_chrome() {
 				if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
 			}
 			dom.fdChrome.innerHTML = r
+			isChrome = r
 			if (logPerf) {debug_log("chrome [fd]",t0)}
 			return resolve("ignoreme")
 		}
@@ -101,7 +102,12 @@ function get_chrome() {
 			}
 			let checking = setInterval(check_linux, 20)
 		}
-		run()
+		// immutable: only run once EVER
+		if (isChrome == "") {
+			run()
+		} else {
+			output(isChrome)
+		}
 	})
 }
 
@@ -1168,7 +1174,6 @@ function get_pbmode() {
 
 function get_resources() {
 	return new Promise(resolve => {
-
 		let t0 = performance.now(),
 			browser = "",
 			branding = "",
@@ -1181,13 +1186,16 @@ function get_resources() {
 			el = dom.branding
 
 		// output
-		function output() {
-			// set isChannel
-			isChannel = channel
-			// output
-			dom.fdResource.innerHTML = browser + " " + result
+		function output(setGlobalVars) {
+			// set global vars
+			if (setGlobalVars) {
+				isChannel = channel
+				isResource = browser + " " + result
+				isResourceMetric = "resources:" + browser+" "+wFF+"x"+hFF+" "+extra
+			}
+			dom.fdResource.innerHTML = isResource
 			if (logPerf) {debug_log("resources [fd]",t0)}
-			return resolve("resources:" + browser+" "+wFF+"x"+hFF+" "+extra)
+			return resolve(isResourceMetric)
 		}
 		// FF
 		function build_FF(wFF, hFF) {
@@ -1308,7 +1316,7 @@ function get_resources() {
 								}
 							}
 							// now we output
-							output()
+							output(true)
 						}
 					}
 					// wait for isTB2
@@ -1317,7 +1325,12 @@ function get_resources() {
 			})
 			document.body.removeChild(imgA)
 		}
-		run()
+		// immutable: only run once EVER
+		if (isResource == "") {
+			run()
+		} else {
+			output(false)
+		}
 	})
 }
 
@@ -2115,7 +2128,8 @@ function get_zoom(runtype) {
 			dpr2 = dpr2.slice(0, -2) // trim "px"
 			if (dpr2 > 0) {
 				dpr2 = (1/dpr2)
-				if (dpr2 != 1 ) {dprStr += " | "+dpr2+rfp_red}
+				// if (dpr2 != 1) {dprStr += " | "+dpr2+rfp_red}
+				dprStr += " | "+dpr2 + (dpr2 == 1 ? rfp_green : rfp_red)
 			}
 		} catch(e) {
 			// ToDo: we can't use dpr2 later on
@@ -2528,6 +2542,9 @@ function outputUA() {
 				}
 			}
 			// output section: we would do this after calling workers
+				// ToDo: promisify workers and add to section logic
+				// i.e if workerleak = true but iframeleak = false, then section becomes worker results
+				// note: don't use web-worker as userAgent can be spoofed by ext APIs
 			if (uaBS && useIframe == false) {
 				section_info("ua", t0, gt0, ["lies:yes"])
 			} else {
@@ -2546,17 +2563,6 @@ function outputUA() {
 		section = control
 		get_iframes()
 	})
-
-
-	// ToDo: logic: add workers:
-		// if no BS + no worker = use original
-		// if no BS + worker matches = use original
-		// if no BS + worker doesn't match = use worker
-		// if BS + no worker - use isBS
-		// if BS + worker matches = use isBS
-		// if BS + worker doesn't matches = use worker
-
-
 }
 
 function outputFD(runtype) {
@@ -2565,20 +2571,18 @@ function outputFD(runtype) {
 
 	// FF only
 	if (isFF) {
+		get_chrome() // isTB*
+
 		Promise.all([
 			get_errors(), // isFF (2nd check), needed for version
 			get_widgets(), // isOS
 			get_version(), // isVer - needed early for resources
-			get_chrome(), // isTB*
 			get_resources(), // isTB
 			get_line_scrollbar(), // calls zoom & viewport
 			get_math(), // must come after widget
 		]).then(function(results){
 			results.forEach(function(currentResult) {
-				// ignore chrome: which we need to run sammiched in there
-				if (currentResult !== "ignoreme") {
-					section.push(currentResult)
-				}
+				section.push(currentResult)
 			})
 			section_info("feature", t0, gt0, section)
 		})
@@ -2639,7 +2643,7 @@ function outputFD(runtype) {
 		})
 	}
 	// perf: only on load to account for missing time
-	if (runtype == "load" & isFF) {
+	if (runtype == "load" & isFF && !gRerun) {
 		section_info("part-feature", t0, gt0)
 	}
 }
@@ -2648,30 +2652,38 @@ function outputStart() {
 	// run once
 	function run_checks() {
 		let t0 = performance.now()
-		if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
-		if ((location.protocol) == "https:") {isSecure = true}
-		if ("undefined" != typeof InstallTrigger) {isFF = true}
-		get_engine()
-		// not-coded
+
+		// IMMUTABLE: don't do on reruns
+		if (!gRerun) {
+			if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
+			if ((location.protocol) == "https:") {isSecure = true}
+			if ("undefined" != typeof InstallTrigger) {isFF = true}
+			get_engine()
+			if (!isFF) {runS = false} // sim = FF only
+		}
+
+		// cosmetics
+			// not-coded
 		let items = document.getElementsByClassName("faint")
 		for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
-		// isFile
+			// isFile
 		items = document.getElementsByClassName("isFile")
 		for (let i=0; i < items.length; i++) {items[i].textContent = note_file}
-		// section hash to come
+			// section hash to come
 		items = document.getElementsByClassName("hashtocome")
 		for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
-		// sim = FF only
-		if (!isFF) {runS = false}
+
+		if (logPerf) {debug_log("setup",t0)}
 		section_info("setup", t0, gt0)
 	}
+
 	// functions
 	gt0 = performance.now()
 	run_checks()
 	outputFD("load") // run FD first: checks isFF; sets isOS, isTB*, isVer
-	outputUA()
-	outputScreen("load")
-	run_os() // per os tweaks
+	setTimeout(function() {outputUA()}, 1)
+	setTimeout(function() {outputScreen("load")}, 1)
+	setTimeout(function() {run_os()}, 1) // per os tweaks
 }
 
 outputStart()
