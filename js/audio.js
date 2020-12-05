@@ -269,4 +269,4 @@ function outputAudio1(runtype) {
 }
 
 dom.audiohash2 = "hash not coded yet"
-outputAudio1("load")
+setTimeout(function() {outputAudio1("load")}, 1)
