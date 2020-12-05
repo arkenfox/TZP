@@ -69,12 +69,19 @@ function get_navigator() {
 			}
 		}
 
+		// GPC: 1670058
+		let gpc = ""
+		try {
+			if ("globalPrivacyControl" in navigator) {gpc = zS} else {gpc = zNS}
+		} catch(e) {gpc = zB0}
+
 		// push
 		results.push("beacon:" + beacon)
 		results.push("dnt:" + dnt)
 		results.push("online:" + online)
 		results.push("network:" + network)
 		results.push("connection:" + connection)
+		results.push("globalPrivacyControl:" + gpc)
 		// display
 		dom.nBeacon = beacon
 		dom.nDNT.innerHTML = "" + dnt
@@ -85,6 +92,7 @@ function get_navigator() {
 		} else {
 			dom.nConnection.innerHTML = connection
 		}
+		dom.nGPC = gpc
 
 		// subsection hash
 		dom.hHash0.innerHTML = sha1(results.join())
@@ -710,5 +718,5 @@ function outputLanguage() {
 	section_info("language", t0, gt0)
 }
 
-outputHeaders()
-outputLanguage()
+setTimeout(function() {outputHeaders()}, 1)
+setTimeout(function() {outputLanguage()}, 1)
