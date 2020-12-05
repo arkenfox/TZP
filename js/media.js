@@ -173,4 +173,4 @@ function outputMedia() {
 	})
 }
 
-outputMedia()
+setTimeout(function() {outputMedia()}, 1)

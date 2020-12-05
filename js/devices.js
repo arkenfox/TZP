@@ -379,4 +379,4 @@ function outputDevices() {
 	})
 }
 
-outputDevices()
+setTimeout(function() {outputDevices()}, 1)

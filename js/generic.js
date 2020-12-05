@@ -93,7 +93,7 @@ function section_info(name, time1, time2, data) {
 						console.error("section hash issues\n", fpAllCheck)
 					}
 				}
-				console.log("fingerprint: " + hash2 + "\n", fpAllData)
+				console.log("fingerprint: "+ hash2 +" ["+ fpAllCount +" metrics]\n", fpAllData)
 				dom.allhash = hash2
 				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
@@ -110,10 +110,6 @@ function section_info(name, time1, time2, data) {
 			}
 			document.getElementById(name + "hash").innerHTML = hash
 		} catch(e) {}
-	} else {
-		if (name !=="setup" && name !== "part-feature") {
-			fpAllCheck.push(name +": data is missing")
-		}
 	}
 	// perf
 	let t0 = performance.now()
@@ -429,6 +425,7 @@ function outputSection(id, cls) {
 		fpAllCheck = []
 		fpAllCount = 0
 		gRerun = true
+		sRerun = false
 	} else {
 		// clear table elements, &nbsp stops line height jitter
 		let tbl = document.getElementById("tb"+id)
@@ -445,29 +442,34 @@ function outputSection(id, cls) {
 	if (id=="14") {reset_css()}
 	if (id=="18") {reset_misc()}
 
-	// wait so users see change
-	function call_output() {
-		clearInterval(checking)
+	function output() {
 		// reset timer
 		gt0 = performance.now()
-		if (id=="all") {outputStart()}
+		// section only
 		if (id=="1") {outputScreen("screen")}
 		if (id=="2") {outputUA()}
 		if (id=="3") {outputFD()}
-		if (id=="all" || id=="4") {outputLanguage()}
-		if (id=="all" || id=="5") {outputHeaders()}
-		if (id=="all" || id=="6") {outputStorage()}
-		if (id=="all" || id=="7") {outputDevices()}
-		if (id=="all" || id=="8") {outputDomRect()}
-		if (id=="all" || id=="9") {outputCanvas()}
-		if (id=="all" || id=="10") {outputWebGL()}
-		if (id=="all") {outputAudio1("load")}
 		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
-		if (id=="all" || id=="12") {outputFonts()}
-		if (id=="all" || id=="13") {outputMedia()}
-		if (id=="all" || id=="14") {outputCSS()}
-		if (id=="all" || id=="18") {outputMisc()}
+
+		// possible gRerun: delay/stagger, use same order as js loads
+		if (id=="all") {outputStart()}
+		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
+		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
+		setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
+
 	}
-	let checking = setInterval(call_output, delay)
+
+	// wait so users see change
+	setTimeout(function() {output()}, delay)
+
 }

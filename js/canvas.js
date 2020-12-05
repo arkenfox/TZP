@@ -589,4 +589,4 @@ function outputCanvas() {
 
 }
 
-outputCanvas()
+setTimeout(function() {outputCanvas()}, 1)
