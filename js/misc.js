@@ -37,8 +37,10 @@ function get_iframe_props() {
 		let props = Object.getOwnPropertyNames(contentWindow)
 		// remove iframe
 		iframe.parentNode.removeChild(iframe)
-		// magic: open consoles affect the order
-		props.push(props.splice(props.indexOf("Event"), 1)[0])
+		// magic: open consoles affect the order such as Event, Location
+		//props.push(props.splice(props.indexOf("Event"), 1)[0])
+		// always sort: too many unknown variables could affect the order
+		props.sort()
 		// output
 		dom.iProps.innerHTML = sha1(props.join()) + s18 +"["+ props.length +"]"+sc
 		//console.debug(props.join("\n"))
