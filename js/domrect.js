@@ -170,4 +170,4 @@ function outputDomRect() {
 
 }
 
-outputDomRect()
+setTimeout(function() {outputDomRect()}, 1)
