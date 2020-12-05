@@ -193,4 +193,4 @@ function outputWebGL() {
 	outputWebGL_render()
 }
 
-outputWebGL()
+setTimeout(function() {outputWebGL()}, 1)
