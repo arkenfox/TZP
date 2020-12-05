@@ -513,7 +513,7 @@ function get_woff() {
 			} else {
 				// timed out: pref removed FF69
 				clearInterval(checking)
-				let str = (isVer < 69 ? zD+" [or blocked]" : "blocked")
+				let str = (isVer < 69 ? zD+" [or blocked]" : zB0)
 				output_woff(str)
 			}
 			count++
@@ -600,4 +600,4 @@ function outputFonts() {
 	})
 }
 
-outputFonts()
+setTimeout(function() {outputFonts()}, 1)
