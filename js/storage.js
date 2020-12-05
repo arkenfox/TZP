@@ -394,4 +394,4 @@ function outputStorage() {
 
 }
 
-outputStorage()
+setTimeout(function() {outputStorage()}, 1)
