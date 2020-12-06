@@ -79,7 +79,7 @@ function outputDomRect() {
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
-		section_info("domrect", t0, gt0, hash)
+		section_info("domrect", t0, hash)
 	}
 
 	function getElements(){
