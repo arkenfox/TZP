@@ -170,7 +170,7 @@ function outputCanvas() {
 			display_value(display, value1, value2, value3)
 		}
 		// section
-		section_info("canvas", t0, gt0, chash1)
+		section_info("canvas", t0, chash1)
 	}
 
 	var canvas = {
@@ -582,7 +582,7 @@ function outputCanvas() {
 		outputs[2].forEach(function(output){
 			main2.push(output.name+","+output.displayValue)
 		})
-		if (logPerf) {debug_log("main [canvas]",t0)}
+		//if (logPerf) {debug_log("main [canvas]",t0)}
 		analyzeCanvas("main", main0, main1, main2)
 	})
 	// ToDo: canvas: iframes: each with two passes

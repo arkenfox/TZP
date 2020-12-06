@@ -5,8 +5,7 @@ var dom;
 let fpAllHash = [],
 	fpAllData = [],
 	fpAllCheck = [],
-	fpAllCount = 0,
-	gRerun = false
+	fpAllCount = 0
 
 // android
 let avh = "",
@@ -122,4 +121,5 @@ let avh = "",
 	logStorage = false,
 	runS = false,
 // rerun
+	gRerun = false,
 	sRerun = false

@@ -125,7 +125,7 @@ function outputHeaders() {
 		results.forEach(function(currentResult) {
 			section = section.concat(currentResult)
 		})
-		section_info("headers", t0, gt0, section)
+		section_info("headers", t0, section)
 	})
 }
 
@@ -135,7 +135,7 @@ function get_geo() {
 	dom.geo1 = r
 	function geoWrite(r) {
 		r= sha1(r)
-		if (isTB2 == "y") {
+		if (isTB) {
 			if (r == "ce3ac8f48088499747d70a031d3f4eaaed61da46" && isVer > 71) {
 				// TB ESR78+: disabled, true, prompt
 				r += default_tb_green + " [ESR78+]"
@@ -145,17 +145,15 @@ function get_geo() {
 			} else {
 				r += default_tb_red
 			}
-		} else {
-			if (isFF) {
-				if (r == "d053193ca561271fb2d1f6c888c9a268d5d02e5b" && isVer > 71) {
-					// FF72+: enabled, true, prompt
-					r += default_ff_green + " [FF72+]"
-				} else if (r == "e672602411121842c18d9fa63c964c5ea288b74c" && isVer < 72) {
-					// FF71-: enabled, false, prompt
-					r += default_ff_green + " [FF60-71]"
-				} else {
-					r += default_ff_red
-				}
+		} else if (isFF) {
+			if (r == "d053193ca561271fb2d1f6c888c9a268d5d02e5b" && isVer > 71) {
+				// FF72+: enabled, true, prompt
+				r += default_ff_green + " [FF72+]"
+			} else if (r == "e672602411121842c18d9fa63c964c5ea288b74c" && isVer < 72) {
+				// FF71-: enabled, false, prompt
+				r += default_ff_green + " [FF60-71]"
+			} else {
+				r += default_ff_red
 			}
 		}
 		dom.lHash3.innerHTML = r
@@ -163,18 +161,7 @@ function get_geo() {
 	function geoState(state) {
 		dom.geo2 = state
 		r += "-"+ state
-		// isTB2
-		if (isFF & isTB2 == "") {
-			function checkTB() {
-				if (isTB2 !== "") {
-					clearInterval(tbCheck)
-					geoWrite(r)
-				}
-			}
-			let tbCheck = setInterval(checkTB, 50)
-		} else {
-			geoWrite(r)
-		}
+		geoWrite(r)
 	}
 	try {
 		navigator.permissions.query({name:"geolocation"}).then(e => geoState(e.state))
@@ -561,7 +548,7 @@ function get_lang_datetime() {
 		}
 	}
 	// debugging: error tracking
-	if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
+	//if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
 
 	// hash 0-11: language
 	let lHash0 = sha1(res.slice(0,12).join("-"))
@@ -715,7 +702,7 @@ function outputLanguage() {
 		// ToDO: logic with worker re section hash
 		// if no worker or worker matches - use original result
 		// if worker doesn't match = use worker
-	section_info("language", t0, gt0)
+	section_info("language", t0)
 }
 
 setTimeout(function() {outputHeaders()}, 1)

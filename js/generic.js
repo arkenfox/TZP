@@ -42,7 +42,15 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function section_info(name, time1, time2, data) {
+function section_click(name, time1) {
+	// adds [click here] perf to debugging table
+	let el = dom.debugperf
+	time1 = Math.round(performance.now() - time1).toString()
+	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
+	el.innerHTML = el.innerHTML +"<br>"+ pretty
+}
+
+function section_info(name, time1, data) {
 	// fp
 	if (data !== undefined && data !== "") {
 		data.sort()
@@ -109,7 +117,9 @@ function section_info(name, time1, time2, data) {
 				hash += " [incomplete: work in progress]"
 			}
 			document.getElementById(name + "hash").innerHTML = hash
-		} catch(e) {}
+		} catch(e) {
+			console.debug(name, e.name, e.message)
+		}
 	}
 	// perf
 	let t0 = performance.now()
@@ -117,15 +127,13 @@ function section_info(name, time1, time2, data) {
 	try {
 		document.getElementById("perf"+name).innerHTML = "  "+ time1 +" ms"
 	} catch(e) {}
+
 	// combined perf
 	let el = dom.debugperf
 	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
-	// time2 is only for first run
 	if (sRerun == false || gRerun == true) {
-		if (time2 !== undefined && time2 !== "") {
-			time2 = Math.round(t0-time2).toString()
-			pretty += " | " + so + time2.padStart(4) + sc + " ms"
-		}
+		let time2 = Math.round(t0-gt0).toString()
+		pretty += " | " + so + time2.padStart(4) + sc + " ms"
 	}
 	if (name == "setup") {
 		el.innerHTML = pretty
@@ -193,22 +201,13 @@ function debug_log(str, time1, time2) {
 	// log dev info
 	let t0 = performance.now()
 	time1 = (t0-time1).toString()
-	if (sRerun) {
-		// manual
-		if (time2 == undefined && time2 !== "" || time2 == "ignore") {
-			time2 = ""
-		} else {
-			time2 = (t0-time2).toString()
-			time2 = " | " + time2.padStart(4) + " ms"
-		}
+	if (time2 == "ignore") {
+		// ignore resize events
+		time2 = ""
 	} else {
-		if (time2 == "ignore") {
-			time2 = ""
-		} else {
-			// page load: use gt0
-			time2 = (t0-gt0).toString()
-			time2 = " | " + time2.padStart(4) + " ms"
-		}
+		// else append acculumative time
+		time2 = (t0-gt0).toString()
+		time2 = " | " + time2.padStart(4) + " ms"
 	}
 	console.log(str.padStart(29) + ": "+ time1.padStart(4) + " ms" + time2)
 }
@@ -466,7 +465,6 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-
 	}
 
 	// wait so users see change

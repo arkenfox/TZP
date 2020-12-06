@@ -66,7 +66,7 @@ function analyzeWebGL(runtype, res1, res2) {
 	// output
 	dom.glreadPixels.innerHTML = res1
 	// section perf here for now
-	section_info("webgl", t0webgl, gt0)
+	section_info("webgl", t0webgl)
 }
 
 function outputWebGL_render() {

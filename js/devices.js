@@ -375,7 +375,7 @@ function outputDevices() {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		section_info("devices", t0, gt0, section)
+		section_info("devices", t0, section)
 	})
 }
 

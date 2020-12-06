@@ -169,7 +169,7 @@ function outputMedia() {
 				section.push(currentResult)
 			}
 		})
-		section_info("media", t0, gt0, section)
+		section_info("media", t0, section)
 	})
 }
 

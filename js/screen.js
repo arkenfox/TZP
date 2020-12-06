@@ -35,17 +35,10 @@ function return_mm_dpi(type) {
 
 function get_chrome() {
 	return new Promise(resolve => {
-		let c = "chrome://browser/content/extension-",
-			p = "-panel.css",
-			list = [c+'win'+p, c+'mac'+p],
-			os = "Linux",
+		let os = "Linux",
 			x = 0,
 			t0 = performance.now()
-		// run isTB2 once: put it at the start so we get it early
-		if (isTB2 == "") {
-			list.push('resource://torbutton-assets/aboutTor.css')
-			list.sort((a,b) => b-a)
-		}
+
 		// output
 		function output(r) {
 			if (isVer < 60) {r = zNA
@@ -56,10 +49,13 @@ function get_chrome() {
 			dom.fdChrome.innerHTML = r
 			isChrome = r
 			if (logPerf) {debug_log("chrome [fd]",t0)}
-			return resolve("ignoreme")
+			return resolve(r)
 		}
 		// run
 		function run() {
+			let c = "chrome://browser/content/extension-",
+				p = "-panel.css",
+				list = ['resource://torbutton-assets/aboutTor.css',c+'win'+p, c+'mac'+p]
 			// win/mac
 			list.forEach(function(item) {
 				let css = document.createElement("link")
@@ -102,12 +98,7 @@ function get_chrome() {
 			}
 			let checking = setInterval(check_linux, 20)
 		}
-		// immutable: only run once EVER
-		if (isChrome == "") {
-			run()
-		} else {
-			output(isChrome)
-		}
+		run()
 	})
 }
 
@@ -594,9 +585,8 @@ function get_line_scrollbar() {
 				if (strFont !== "") {
 					os = strFont
 				} else if (lh == "19.2" || lh == "19.2000") {
-					// TB DESKTOP: 19.2 seems TB unique any-zoom/any-platform
+					// TB DESKTOP: 19.2 **seems** TB unique any-zoom/any-platform
 					os = tb_green
-					isTB = true; debug_page("tb"," css line height = 19.2")
 				} else {
 					// isTNR + not 19.2
 					// WINDOWS / LINUX: some known metrics
@@ -914,7 +904,7 @@ function get_math() {
 			dom.math6hash.innerHTML = m6hash
 			dom.mathhash.innerHTML = mchash
 			// perf
-			if (logPerf) {debug_log("math [fd]", t0, gt0)}
+			if (logPerf) {debug_log("math [fd]", t0)}
 			// blockage
 			if (block1 || block6) {mchash = zB0}
 			// return
@@ -941,8 +931,8 @@ function get_mm_metrics(runtype) {
 	// perf
 	function perf() {
 		if (count == 4) {
-			let str = (runtype == "load" ? "" : "ignore")
-			if (logPerf) {debug_log("mm various [screen]",t0, str)}
+			let str = (runtype == "resize" ? "ignore" : "")
+			if (logPerf) {debug_log("mm various [" + runtype + "]",t0, str)}
 		}
 	}
 	// output
@@ -1148,8 +1138,8 @@ function get_orientation(runtype) {
 		dom.mmDM.innerHTML = zB0
 	}
 	// perf
-	let str = (runtype == "load" ? "" : "ignore")
-	if (logPerf) {debug_log("orientation [screen]",t0, str)}
+	let str = (runtype == "resize" ? "ignore" : "")
+	if (logPerf) {debug_log("orientation [" + runtype + "]",t0, str)}
 }
 
 function get_pbmode() {
@@ -1301,26 +1291,20 @@ function get_resources() {
 					// FF
 					build_FF(wFF, hFF)
 					// TB
+					// isTB is already set
 					if (wTB > 0) {
 						isTB = true; debug_page("tb","     resource:// = tor-watermark.png")
 						extra = "y"
 					}
-					function check_TB2() {
-						if (isTB2 !== "") {
-							clearInterval(checking)
-							extra += isTB2 // "", "n" or "y"
-							if (isTB) {
-								build_TB(wFF, hFF)
-								if (isOS !== "android" && wTB < 1) {
-									result += sb+"[missing tor-watermark.png]"+sc
-								}
-							}
-							// now we output
-							output(true)
+					extra += isTB2 // "", "n" or "y"
+					if (isTB) {
+						build_TB(wFF, hFF)
+						if (isOS !== "android" && wTB < 1) {
+							result += sb+"[missing tor-watermark.png]"+sc
 						}
 					}
-					// wait for isTB2
-					let checking = setInterval(check_TB2, 10)
+					// now we output
+					output(true)
 				}
 			})
 			document.body.removeChild(imgA)
@@ -1337,6 +1321,10 @@ function get_resources() {
 function get_screen_metrics(runtype) {
 	let t0 = performance.now(),
 		res = []
+
+	//trap resize event
+	if (runtype !== "load" && runtype !== "screen") {runtype = "resize"}
+
 	// measure
 	let w1 = screen.width, h1 = screen.height,
 		w2 = screen.availWidth, h2 = screen.availHeight,
@@ -1397,10 +1385,11 @@ function get_screen_metrics(runtype) {
 		items = document.getElementsByClassName("group")
 		for (let i=0; i < items.length; i++) {items[i].style.color = c}
 	}
+
 	// update zoom/viewport except on load
 	if (runtype !== "load") {
-		get_zoom("screen")
-		get_viewport("screen")
+		get_zoom(runtype)
+		get_viewport(runtype)
 	}
 	// inner
 	let strTemp = w+" x "+h+" ("+p7+","+p8+")"
@@ -2198,7 +2187,8 @@ function get_zoom(runtype) {
 	}
 	if (logExtra) {console.log("A [ must come first]: ", runtype, ": zoom, dpi, devicePixelRatio")}
 	dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1+"[assumed]"+sc :"")
-	if (runtype !== "resize" && logPerf) {debug_log("zoom ["+runtype+ "]",t0)}
+	let str = (runtype == "resize" ? "ignore" : "")
+	if (logPerf) {debug_log("zoom ["+runtype+ "]",t0, str)}
 	return jsZoom
 }
 
@@ -2481,7 +2471,7 @@ function outputScreen(runtype) {
 				section.push(currentResult)
 			}
 		})
-		section_info("screen", t0, gt0, section)
+		section_info("screen", t0, section)
 	})
 }
 
@@ -2546,9 +2536,9 @@ function outputUA() {
 				// i.e if workerleak = true but iframeleak = false, then section becomes worker results
 				// note: don't use web-worker as userAgent can be spoofed by ext APIs
 			if (uaBS && useIframe == false) {
-				section_info("ua", t0, gt0, ["lies:yes"])
+				section_info("ua", t0, ["lies:yes"])
 			} else {
-				section_info("ua", t0, gt0, section)
+				section_info("ua", t0, section)
 			}
 			// call workers
 			get_ua_workers()
@@ -2571,20 +2561,21 @@ function outputFD(runtype) {
 
 	// FF only
 	if (isFF) {
-		get_chrome() // isTB*
-
+		if (sRerun || gRerun) {
+			dom.fdChrome.innerHTML = isChrome
+		}
 		Promise.all([
+			get_resources(), // isTB (2nd check)
 			get_errors(), // isFF (2nd check), needed for version
 			get_widgets(), // isOS
 			get_version(), // isVer - needed early for resources
-			get_resources(), // isTB
 			get_line_scrollbar(), // calls zoom & viewport
 			get_math(), // must come after widget
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			section_info("feature", t0, gt0, section)
+			section_info("feature", t0, section)
 		})
 		// not used in hash
 		get_collation()
@@ -2639,12 +2630,8 @@ function outputFD(runtype) {
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
-			section_info("feature", t0, gt0, section)
+			section_info("feature", t0, section)
 		})
-	}
-	// perf: only on load to account for missing time
-	if (runtype == "load" & isFF && !gRerun) {
-		section_info("part-feature", t0, gt0)
 	}
 }
 
@@ -2657,9 +2644,12 @@ function outputStart() {
 		if (!gRerun) {
 			if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 			if ((location.protocol) == "https:") {isSecure = true}
-			if ("undefined" != typeof InstallTrigger) {isFF = true}
-			get_engine()
+			if ("undefined" != typeof InstallTrigger) {
+				isFF = true
+				get_chrome() // isTB*, get as soon as possible
+			}
 			if (!isFF) {runS = false} // sim = FF only
+			get_engine()
 		}
 
 		// cosmetics
@@ -2674,15 +2664,15 @@ function outputStart() {
 		for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
 
 		if (logPerf) {debug_log("setup",t0)}
-		section_info("setup", t0, gt0)
+		section_info("setup", t0)
 	}
 
 	// functions
 	gt0 = performance.now()
 	run_checks()
 	outputFD("load") // run FD first: checks isFF; sets isOS, isTB*, isVer
-	setTimeout(function() {outputUA()}, 1)
 	setTimeout(function() {outputScreen("load")}, 1)
+	setTimeout(function() {outputUA()}, 1)
 	setTimeout(function() {run_os()}, 1) // per os tweaks
 }
 
