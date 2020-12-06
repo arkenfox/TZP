@@ -262,7 +262,7 @@ function get_fpjs2() {
 			// cleanup details
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
-			if (logPerf) {debug_log("fpjs2 [fonts]",t0,gt0)}
+			if (logPerf) {debug_log("fpjs2 [fonts]",t0)}
 			return resolve("fonts:" + hash)
 		} else {
 			// non-FF
@@ -320,6 +320,7 @@ function get_fallback(list) {
 		// cleanup details
 		if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 		// perf
+		section_click("font fallback", t0)
 	}
 }
 
@@ -596,7 +597,7 @@ function outputFonts() {
 				section.push(currentResult)
 			}
 		})
-		section_info("fonts", t0, gt0, section)
+		section_info("fonts", t0, section)
 	})
 }
 
