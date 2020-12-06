@@ -331,7 +331,7 @@ function outputCSS() {
 				section.push(currentResult)
 			}
 		})
-		section_info("css", t0, gt0, section)
+		section_info("css", t0, section)
 	})
 }
 
