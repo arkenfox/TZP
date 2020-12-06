@@ -80,7 +80,7 @@ function get_audio2_context(attempt) {
 			dom.audio1hash.innerHTML = result[0] + sColor + "["+ results.length +" keys]" + sc
 			// perf
 			if (logPerf) {debug_log("context [audio]", t0, t0audio)}
-			if (latencyTries == 2) {section_info("audio2", t0audio)}
+			if (latencyTries == 2) {section_click("audio2", t0audio)}
 		})
 	}
 	// next test
@@ -135,7 +135,7 @@ function get_audio2_hybrid() {
 			dom.audio3hash = result[0]
 			// perf
 			if (logPerf) {debug_log("hybrid [audio]",t0,t0audio)}
-			if (showperf) {section_info("audio2", t0audio)}
+			if (showperf) {section_click("audio2", t0audio)}
 		})
 		// re-test context
 		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
@@ -254,7 +254,7 @@ function outputAudio1(runtype) {
 				section.push("copyFromChannel:"+ tempstr)
 				dom.audioCopy = tempstr
 				// section
-				section_info("audio", t0, gt0, section)
+				section_info("audio", t0, section)
 			})
 		}
 	} catch(error) {
@@ -264,7 +264,7 @@ function outputAudio1(runtype) {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		}
 		// perf
-		section_info("audio", t0, gt0, ["web_audio:disabled"])
+		section_info("audio", t0, ["web_audio:disabled"])
 	}
 }
 
