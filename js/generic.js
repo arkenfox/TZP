@@ -52,7 +52,7 @@ function section_click(name, time1) {
 
 function section_info(name, time1, data) {
 	// fp
-	if (data !== undefined && data !== "") {
+	if (data !== undefined) {
 		data.sort()
 		let hash = sha1(data.join())
 		// checks: everything should be a "metric: value"
