@@ -266,7 +266,7 @@ function outputMisc(type) {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		section_info("misc", t0, gt0, section)
+		section_info("misc", t0, section)
 	})
 
 	// perf2 is not needed in the hash as performance.mark is RFP unique
