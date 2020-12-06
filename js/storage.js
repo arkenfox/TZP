@@ -389,7 +389,7 @@ function outputStorage() {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		section_info("storage", t0, gt0, section)
+		section_info("storage", t0, section)
 	})
 
 }
