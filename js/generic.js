@@ -155,7 +155,6 @@ function showMetrics(type) {
 		let sparts = item[0].split(":")
 		let section = sparts[0]
 		let shash = sparts.slice(1).join(":")
-		// ToDo: pretty up
 		output.push(section + ": " + shash)
 		let data = item[1]
 		for (let j = 0; j < data.length; j++) {
@@ -169,7 +168,6 @@ function showMetrics(type) {
 			if (metric.indexOf(" ") !== -1) {ok = false; message.push("metric-has-space")} // space
 			if (value.substring(0, 1) == " ") {ok = false; message.push("lead-space")} // leading space
 			if (value.substring(value.length-1, value.length) == " ") {ok = false; message.push("trail-space")} // trailing space
-			//if (value.indexOf(":") !== -1) {ok = false; message.push("contains-colon")}
 			if (ok == false) {
 				checks.push(message.join() + ":~"+ metric +":"+ value +"~")
 			}
@@ -332,6 +330,7 @@ function getDynamicIframeWindow({
 	context,
 	source = "",
 	test = "",
+	contentWindow = false,
 	nestIframeInContainerDiv = false,
 	violateSameOriginPolicy = true,
 	display = false
@@ -357,7 +356,7 @@ function getDynamicIframeWindow({
 	} else if (source) {
 		element.setAttribute('src', source)
 	}
-	const iframeWindow = context[length]
+	const iframeWindow = contentWindow ? element.contentWindow : context[length]
 
 	let res = []
 	let navigator = iframeWindow.navigator
