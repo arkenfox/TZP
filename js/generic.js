@@ -330,7 +330,6 @@ function getDynamicIframeWindow({
 	context,
 	source = "",
 	test = "",
-	contentWindow = false,
 	nestIframeInContainerDiv = false,
 	violateSameOriginPolicy = true,
 	display = false
@@ -356,7 +355,7 @@ function getDynamicIframeWindow({
 	} else if (source) {
 		element.setAttribute('src', source)
 	}
-	const iframeWindow = contentWindow ? element.contentWindow : context[length]
+	const iframeWindow = context[length]
 
 	let res = []
 	let navigator = iframeWindow.navigator
