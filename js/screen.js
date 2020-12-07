@@ -56,6 +56,7 @@ function get_chrome() {
 			let c = "chrome://browser/content/extension-",
 				p = "-panel.css",
 				list = ['resource://torbutton-assets/aboutTor.css',c+'win'+p, c+'mac'+p]
+				// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
 			// win/mac
 			list.forEach(function(item) {
 				let css = document.createElement("link")
@@ -2490,10 +2491,10 @@ function outputUA() {
 		// iframes
 		Promise.all([
 			getDynamicIframeWindow({
-				context: window, violateSameOriginPolicy: false, test: "ua"
+				context: window, contentWindow: true, violateSameOriginPolicy: false, test: "ua"
 			}), // DocumentRoot
 			getDynamicIframeWindow({
-				context: window, source: "?", violateSameOriginPolicy: false, test: "ua"
+				context: window, contentWindow: true, source: "?", violateSameOriginPolicy: false, test: "ua"
 			}), // with URL
 			getDynamicIframeWindow({
 				context: window, test: "ua"
@@ -2531,17 +2532,23 @@ function outputUA() {
 					}
 				}
 			}
-			// output section: we would do this after calling workers
+			// output section
 				// ToDo: promisify workers and add to section logic
-				// i.e if workerleak = true but iframeleak = false, then section becomes worker results
-				// note: don't use web-worker as userAgent can be spoofed by ext APIs
-			if (uaBS && useIframe == false) {
-				section_info("ua", t0, ["lies:yes"])
-			} else {
+					// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
+			if (useIframe) {
+				// iframeleak: output + finish workers
 				section_info("ua", t0, section)
+				get_ua_workers()
+			} else {
+				// call workers and then decide
+				get_ua_workers()
+				// temp return until I promisify workers
+				if (uaBS) {
+					section_info("ua", t0, ["lies:yes"])
+				} else {
+					section_info("ua", t0, section)
+				}
 			}
-			// call workers
-			get_ua_workers()
 		})
 	}
 
