@@ -36,6 +36,7 @@ function get_concurrency() {
 		}
 	}
 	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
+	if (isBrave) {h = "unreliable"}
 	return "hardwareConcurrency:" + h
 }
 
