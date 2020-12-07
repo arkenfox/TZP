@@ -2491,10 +2491,10 @@ function outputUA() {
 		// iframes
 		Promise.all([
 			getDynamicIframeWindow({
-				context: window, contentWindow: true, violateSameOriginPolicy: false, test: "ua"
+				context: window, violateSameOriginPolicy: false, test: "ua"
 			}), // DocumentRoot
 			getDynamicIframeWindow({
-				context: window, contentWindow: true, source: "?", violateSameOriginPolicy: false, test: "ua"
+				context: window, source: "?", violateSameOriginPolicy: false, test: "ua"
 			}), // with URL
 			getDynamicIframeWindow({
 				context: window, test: "ua"
