@@ -2487,6 +2487,33 @@ function outputUA() {
 		controlB = "",
 		useIframe = false
 
+	function output() {
+		if (isBrave) {
+			for (let i=0; i < section.length; i++) {
+				section[i] = section[i].replace(/\s+/g," ").trim()
+			}
+		}
+		section_info("ua", t0, section)
+	}
+
+	function get_workers() {
+		// ToDo: promisify workers and add to section logic
+			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
+		if (useIframe) {
+			// iframeleak: output THEN finish workers
+			output()
+			get_ua_workers()
+		} else {
+			// call workers and then decide
+			get_ua_workers()
+			// temp return until I promisify workers
+			if (uaBS) {
+				section = ["lies:yes"]
+			}
+			output()
+		}
+	}
+
 	function get_iframes() {
 		// iframes
 		Promise.all([
@@ -2532,23 +2559,7 @@ function outputUA() {
 					}
 				}
 			}
-			// output section
-				// ToDo: promisify workers and add to section logic
-					// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
-			if (useIframe) {
-				// iframeleak: output + finish workers
-				section_info("ua", t0, section)
-				get_ua_workers()
-			} else {
-				// call workers and then decide
-				get_ua_workers()
-				// temp return until I promisify workers
-				if (uaBS) {
-					section_info("ua", t0, ["lies:yes"])
-				} else {
-					section_info("ua", t0, section)
-				}
-			}
+			get_workers()
 		})
 	}
 
@@ -2655,6 +2666,7 @@ function outputStart() {
 				isFF = true
 				get_chrome() // isTB*, get as soon as possible
 			}
+			if ("brave" in navigator) {isBrave = true}
 			if (!isFF) {runS = false} // sim = FF only
 			get_engine()
 		}
