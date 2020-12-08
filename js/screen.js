@@ -2497,6 +2497,10 @@ function outputUA() {
 	}
 
 	function get_workers() {
+		// temp
+		dom.uaWorker3.innerHTML = "not coded yet" //nested
+		dom.uaWorker4.innerHTML = "not coded yet" //blob
+
 		// ToDo: promisify workers and add to section logic
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
 		if (useIframe) {
