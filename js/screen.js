@@ -2518,6 +2518,12 @@ function outputUA() {
 		// iframes
 		Promise.all([
 			getDynamicIframeWindow({
+				context: window, contentWindow: true, violateSameOriginPolicy: false, test: "ua"
+			}), // DocumentRoot contentWindow
+			getDynamicIframeWindow({
+				context: window, contentWindow: true, source: "?", violateSameOriginPolicy: false, test: "ua"
+			}), // with URL contentWindow
+			getDynamicIframeWindow({
 				context: window, violateSameOriginPolicy: false, test: "ua"
 			}), // DocumentRoot
 			getDynamicIframeWindow({
@@ -2533,7 +2539,7 @@ function outputUA() {
 				context: window, nestIframeInContainerDiv: true, test: "ua"
 			}), // nested
 		]).then(function(results){
-			for(let i=0; i < 5; i++) {
+			for(let i=0; i < 7; i++) {
 				// output
 				let testhash = sha1(results[i].join())
 				if (testhash !== controlA) {
