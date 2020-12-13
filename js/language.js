@@ -220,7 +220,7 @@ function get_lang_datetime() {
 			} else if (item == 14) {
 				let tzresults = [],
 					days = ["January 1","July 1",],
-					years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,],
+					years = [1879,1921,1952,1976,2018],
 					k = 60000
 				for (let i = 0 ; i < years.length; i++) {
 					for (let j = 0 ; j < days.length; j++) {
