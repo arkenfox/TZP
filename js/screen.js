@@ -2505,6 +2505,7 @@ function outputUA() {
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
 		if (useIframe) {
 			// iframeleak: output THEN finish workers
+			section.push("_spoofing_attempt:true") // did they try to lie adds entropy
 			output()
 			get_ua_workers()
 		} else {
@@ -2551,7 +2552,6 @@ function outputUA() {
 					if (useIframe == false) {
 						useIframe = true
 						section = results[i] // change section data
-						section.push("_spoofing_attempt:true") // did they try to lie adds entropy
 					}
 				}
 				testhash += (testhash == controlA ? match_green : match_red)
