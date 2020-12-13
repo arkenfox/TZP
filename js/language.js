@@ -569,7 +569,7 @@ function get_lang_datetime() {
 	// hash 12-16: timezone
 	let lHash1 = sha1(res.slice(12,17).join("-"))
 	//console.debug("timezone", lHash1, res.slice(12,17))
-	bTZ = (lHash1 == "254494c3d7be4c1fa40f72d399a57a8f94196db1" ? true : false)
+	bTZ = (lHash1 == "8aa77801dd2bb3ad49c68f7ff179df3ea276479f" ? true : false)
 	lHash1 += (bTZ ? rfp_green : rfp_red)
 	dom.lHash1.innerHTML = lHash1
 
