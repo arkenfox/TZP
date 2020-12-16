@@ -584,7 +584,7 @@ function get_lang_datetime() {
 	if (isFF) {
 		if (bTZ) {
 			// state1: both green
-			if (lHash2 == "79d7dddb43af8873e5f9271bc03c5e65c022c48e") {
+			if (lHash2 == "0e884d1322d92ba36a736dd4f5655c2b8a562d6f") {
 				// nightly has dayPeriod, formatRange
 				ff = " [Nightly]"
 			} else if (lHash2 == "1850636a34767cc10c2e72de7e9a460bf136bc4d") {
