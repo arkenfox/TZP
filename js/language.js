@@ -491,7 +491,7 @@ function get_lang_datetime() {
 				let msg = ""
 				if (item == 5) {
 					// ToDo: 1654116: DisplayNames: shipped 86+
-					if (e.message == "Intl.DisplayNames is not a function") {msg = zNS}
+					if (e.message == "Intl.DisplayNames is not a constructor") {msg = zNS}
 				} else if (item == 6 || item == 45) {
 					if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
 				} else if (item == 9|| item == 33 || item == 42) {
@@ -554,7 +554,10 @@ function get_lang_datetime() {
 	let lHash0 = sha1(res.slice(0,12).join("-"))
 	//console.debug("language", lHash0, res.slice(0,12))
 	if (isFF) {
-		if (lHash0 == "4a6ed35c7fba3d1bb488859f1bd85fdf015cad04") {
+		if (lHash0 == "f118f627a051196ddc7cb3b005aac3b3f549e1e5") {
+			// DisplayNames supported
+			lHash0 += enUS_green + " [FF86+]"
+		} else if (lHash0 == "4a6ed35c7fba3d1bb488859f1bd85fdf015cad04") {
 			// ListFormat supported
 			lHash0 += enUS_green + " [FF78+]"
 		} else if (lHash0 == "a36834b8d352b5991f677a417c277b32709ec979") {
