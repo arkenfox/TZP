@@ -22,7 +22,7 @@ addEventListener("message", function(msg) {
 			} else if (item == 2) {return navigator.languages[0]
 			} else if (item == 3) {return Intl.Collator().resolvedOptions().locale
 			} else if (item == 4) {return Intl.DateTimeFormat().resolvedOptions().locale
-			} else if (item == 5) {return Intl.DisplayNames().resolvedOptions().locale
+			} else if (item == 5) {return new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
 			} else if (item == 6) {return new Intl.ListFormat(undefined).resolvedOptions().locale
 			} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
 			} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
@@ -297,7 +297,7 @@ addEventListener("message", function(msg) {
 					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 				let f = Intl.DateTimeFormat(undefined, o)
-				return f.formatRange(date1, date2) +"<br>"+ f.formatRange(date1, date3)
+				return f.formatRange(date1, date2) +" | "+ f.formatRange(date1, date3)
 			} else if (item == 48) {
 				let prules = [], nos = [0,1,2,3,4,6,7,11,20,21,100]
 				let prev = "", current = "", prError = ""
@@ -324,7 +324,7 @@ addEventListener("message", function(msg) {
 				// standard FF errors
 				let msg = ""
 				if (item == 5) {
-					// ToDo: add DisplayNames version check when it lands in stable
+					// ToDo: 1654116: DisplayNames: shipped 86+
 					if (e.message == "Intl.DisplayNames is not a function") {msg = zNS}
 				} else if (item == 6 || item == 45) {
 					if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
