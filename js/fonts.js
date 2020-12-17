@@ -264,8 +264,8 @@ function get_fonts() {
 			// cleanup details
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
-			if (logPerf) {debug_log("creepy fpjs2 [fonts]",t0)}
-			debug_log("creepy fpjs2 [fonts]",t0) // temp
+			if (logPerf) {debug_log("creepJS [fonts]",t0)}
+			debug_log("creepyJS [fonts]",t0) // temp
 			// resolve
 			return resolve(fontReturn)
 		}
@@ -289,7 +289,9 @@ function get_fonts() {
 				finish_up()
 			} else {
 				const {lies, fontsScroll, fontsOffset, fontsClient} = res
-				// display
+				let isLies = lies
+
+				// values
 				let hashO = sha1(fontsOffset.join()),
 					countO = fontsOffset.length
 				let hashC = sha1(fontsClient.join()),
@@ -297,25 +299,45 @@ function get_fonts() {
 				let hashS = sha1(fontsScroll.join()),
 					countS = fontsScroll.length,
 					countF = fntList.length
+
+				// simulate
+				//isLies = true
+				//hashO = sha1("offset")
+				//hashC = sha1("client")
+				//hashS = sha1("scroll")
+				//hashO = sha1("one-of-two"); hashC = hashO
+				//hashO = sha1("one-of-two"); hashS = hashO
+				//hashC = sha1("one-of-two"); hashS = hashC
+				//hashC = sha1("a"); hashS = sha1("b"); hashO = sha1("c")
+
+				// output
 				dom.fontOffset.innerHTML = hashO + s12 + "["+countO+"/"+countF+"]" + sc
 				dom.fontClient.innerHTML = hashC + s12 + "["+countC+"/"+countF+"]" + sc
 				dom.fontScroll.innerHTML = hashS + s12 + "["+countS+"/"+countF+"]" + sc
 
-				// determine return vars
-				let fontHash = hashO,
-					fontCount = countO,
-					fontsFound = fontsOffset
-				if (lies) {
-					// decide which one to use for display results + returned values
-						// if two are the same: use one of them
-						// if all three differ, then we can't trust them
+				// determine return vars: default scroll as most likely
+				let fontHash = hashS,
+					fontCount = countS,
+					fontsFound = fontsScroll
 
+				// ToDo: better return logic
+				let useHash = true
+				if (isLies) {
+					if (hashS == hashC || hashS == hashO || hashO == hashC) {
+						// if two are the same: use one of them
+							// change to client if needed
+						if (hashC == hashO) {fontHash = hashC; fontCount = countC; fontsFound = fontsClient}
+					} else {
+						// all three are different
+						useHash = false
+						fontReturn = ["fonts_hash:unknown", "fonts_count:unknown", "fonts_lied:"+isLies]
+					}
 				}
-				// display found
 				dom.fontLabel = fontHash
 				dom.fontFound.innerHTML = (fontCount > 0 ? fontsFound.join(", ") : "no fonts detected")
-				// finalize return
-				fontReturn = ["fonts_hash:"+fontHash, "fonts_count:"+fontCount, "fonts_lied:"+lies]
+				if (useHash) {
+					fontReturn = ["fonts_hash:"+fontHash, "fonts_count:"+fontCount, "fonts_lied:"+isLies]
+				}
 				finish_up()
 			}
 		})
