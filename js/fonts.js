@@ -106,63 +106,223 @@ function reset_fonts() {
 	}
 	dom.ug10.innerHTML = fntHead + r
 	// fpjs2: hide/color: dont shrink elements
-	dom.fontFPJS2label = "...pending..."
-	dom.fontFPJS2Found.style.color = zhide
+	if (isFF) {
+		dom.fontLabel = "...pending..."
+		dom.fontFound.style.color = zhide
+	}
 }
 
-let spawn = (function() {
-	/* arthur's spawn code */
-	let promiseFromGenerator
-	// returns true if aValue is a generator object
-	let isGenerator = aValue => {
-		return Object.prototype.toString.call(aValue) === "[object Generator]"
-	}
-	// converts right-hand argument of yield or return
-	// values to a promise, according to Task.jsm semantics
-	let asPromise = yieldArgument => {
-		if (yieldArgument instanceof Promise) {
-			return yieldArgument
-		} else if (isGenerator(yieldArgument)) {
-			return promiseFromGenerator(yieldArgument)
-		} else if (yieldArgument instanceof Function) {
-			return asPromise(yieldArgument())
-		} else if (yieldArgument instanceof Error) {
-			return Promise.reject(yieldArgument)
-		} else if (yieldArgument instanceof Array) {
-			return Promise.all(yieldArgument.map(asPromise))
-		} else {
-			return Promise.resolve(yieldArgument)
+const createLieDetector = () => {
+	/* https://github.com/abrahamjuliot/creepjs */
+	let invalidDimensions = []
+	return {
+		getInvalidDimensions: () => invalidDimensions,
+			compute: ({
+				scrollWidth,
+				scrollHeight,
+				offsetWidth,
+				offsetHeight,
+				clientWidth,
+				clientHeight
+		}) => {
+			const invalid = (
+				scrollWidth != offsetWidth ||
+				scrollWidth != clientWidth ||
+				scrollHeight != offsetHeight ||
+				scrollHeight != clientHeight
+			)
+			if (invalid) {
+				invalidDimensions.push({
+					width: [scrollWidth, offsetWidth, clientWidth],
+					height: [scrollHeight, offsetHeight, clientHeight]
+				})
+			}
+			return
 		}
 	}
-	// takes a generator object, runs it as an asynchronous task,
-	// returning a promise with the result of that task
-	promiseFromGenerator = generator => {
-		return new Promise((resolve, reject) => {
-			let processPromise
-			let processPromiseResult = (success, result) => {
-				try {
-					let {value, done} = success ? generator.next(result) : generator.throw(result)
-					if (done) {
-						asPromise(value).then(resolve, reject)
-					} else {
-						processPromise(asPromise(value))
-					}
-				} catch (error) {
-					reject(error)
-				}
-			}
-			processPromise = promise => {
-				promise.then(result => processPromiseResult(true, result),
-					error => processPromiseResult(false, error))
-			}
-			processPromise(asPromise(undefined))
-		})
-	}
-	// __spawn(generatorFunction)__
-	return generatorFunction => promiseFromGenerator(generatorFunction())
-})()
+}
 
-function get_fpjs2() {
+const getFonts = () => {
+	/* https://github.com/abrahamjuliot/creepjs */
+	return new Promise(resolve => {
+		if (!isFF) {
+			return resolve("n/a")
+		}
+		try {
+			const detectLies = createLieDetector()
+			const doc = document // or iframe.contentWindow.document
+			const id = `font-fingerprint`
+			const div = doc.createElement('div')
+			div.setAttribute('id', id)
+			doc.body.appendChild(div)
+			doc.getElementById(id).innerHTML = `
+				<style>
+				#${id}-detector {
+					--font: '';
+					position: absolute !important;
+					left: -9999px!important;
+					font-size: 256px !important;
+					font-style: normal !important;
+					font-weight: normal !important;
+					letter-spacing: normal !important;
+					line-break: auto !important;
+					line-height: normal !important;
+					text-transform: none !important;
+					text-align: left !important;
+					text-decoration: none !important;
+					text-shadow: none !important;
+					white-space: normal !important;
+					word-break: normal !important;
+					word-spacing: normal !important;
+					/* in order to test scrollWidth, clientWidth, etc. */
+					padding: 0 !important;
+					margin: 0 !important;
+				}
+				#${id}-detector::after {
+					font-family: var(--font);
+					content: '` + fntStrA + `';
+				}
+				</style>
+				<span id="${id}-detector"></span>`
+
+			const span = doc.getElementById(`${id}-detector`)
+			const detectedViaScroll = new Set()
+			const detectedViaOffset = new Set()
+			const detectedViaClient = new Set()
+			const baseFonts = ['monospace', 'sans-serif', 'serif']
+			const base = baseFonts.reduce((acc, font) => {
+				span.style.setProperty('--font', font)
+				const dimensions = {
+					scrollWidth: span.scrollWidth,
+					scrollHeight: span.scrollHeight,
+					offsetWidth: span.offsetWidth,
+					offsetHeight: span.offsetHeight,
+					clientWidth: span.clientWidth,
+					clientHeight: span.clientHeight
+				}
+			detectLies.compute(dimensions)
+				acc[font] = dimensions
+				return acc
+			}, {})
+
+			const families = fntList.reduce((acc, font) => {
+				baseFonts.forEach(baseFont => acc.push(`'${font}', ${baseFont}`))
+				return acc
+			}, [])
+
+			families.forEach(family => {
+				span.style.setProperty('--font', family)
+				const basefont = /, (.+)/.exec(family)[1]
+				const dimensions = {
+					scrollWidth: span.scrollWidth,
+					scrollHeight: span.scrollHeight,
+					offsetWidth: span.offsetWidth,
+					offsetHeight: span.offsetHeight,
+					clientWidth: span.clientWidth,
+					clientHeight: span.clientHeight
+				}
+				detectLies.compute(dimensions)
+				const font = /\'(.+)\'/.exec(family)[1]
+				if (dimensions.scrollWidth != base[basefont].scrollWidth ||
+					dimensions.scrollHeight != base[basefont].scrollHeight) {
+					detectedViaScroll.add(font)
+				}
+				if (dimensions.offsetWidth != base[basefont].offsetWidth ||
+					dimensions.offsetHeight != base[basefont].offsetHeight) {
+					detectedViaOffset.add(font)
+				}
+				if (dimensions.clientWidth != base[basefont].clientWidth ||
+					dimensions.clientHeight != base[basefont].clientHeight) {
+					detectedViaClient.add(font)
+				}
+				return
+			})
+			const fontsScroll = [...detectedViaScroll]
+			const fontsOffset = [...detectedViaOffset]
+			const fontsClient = [...detectedViaClient]
+			return resolve({
+				lies: !!detectLies.getInvalidDimensions().length,
+				fontsScroll,
+				fontsOffset,
+				fontsClient
+			})
+		} catch (error) {
+			console.error(error)
+			return resolve("error")
+		}
+	})
+}
+
+function get_fonts() {
+	return new Promise(resolve => {
+		let t0 = performance.now(),
+			fontReturn = []
+
+		function finish_up() {
+			// unhide
+			dom.fontFound.style.color = zshow
+			// cleanup details
+			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
+			// perf
+			if (logPerf) {debug_log("creepy fpjs2 [fonts]",t0)}
+			debug_log("creepy fpjs2 [fonts]",t0) // temp
+			// resolve
+			return resolve(fontReturn)
+		}
+
+		// run it
+		getFonts().then(res => {
+			// remove element
+			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+
+			// handled other cases
+			if (res == "n/a") {
+				fontReturn = ["fonts_hash:n/a","fonts_count:n/a","fonts_lied:n/a"]
+				finish_up()
+			} else if (res == "error") {
+				fontReturn = ["fonts_hash:error","fonts_count:error","fonts_lied:error"]
+				dom.fontOffset = res
+				dom.fontClient = res
+				dom.fontScroll = res
+				dom.fontFound = res
+				dom.fontLabel = "fonts"
+				finish_up()
+			} else {
+				const {lies, fontsScroll, fontsOffset, fontsClient} = res
+				// display
+				let hashO = sha1(fontsOffset.join()),
+					countO = fontsOffset.length
+				let hashC = sha1(fontsClient.join()),
+					countC = fontsClient.length
+				let hashS = sha1(fontsScroll.join()),
+					countS = fontsScroll.length,
+					countF = fntList.length
+				dom.fontOffset.innerHTML = hashO + s12 + "["+countO+"/"+countF+"]" + sc
+				dom.fontClient.innerHTML = hashC + s12 + "["+countC+"/"+countF+"]" + sc
+				dom.fontScroll.innerHTML = hashS + s12 + "["+countS+"/"+countF+"]" + sc
+
+				// determine return vars
+				let fontHash = hashO,
+					fontCount = countO,
+					fontsFound = fontsOffset
+				if (lies) {
+					// decide which one to use for display results + returned values
+						// if two are the same: use one of them
+						// if all three differ, then we can't trust them
+
+				}
+				// display found
+				dom.fontLabel = fontHash
+				dom.fontFound.innerHTML = (fontCount > 0 ? fontsFound.join(", ") : "no fonts detected")
+				// finalize return
+				fontReturn = ["fonts_hash:"+fontHash, "fonts_count:"+fontCount, "fonts_lied:"+lies]
+				finish_up()
+			}
+		})
+	})
+}
+
+function get_fonts_old() {
 	/* based on https://github.com/Valve/fingerprintjs2 */
 	return new Promise(resolve => {
 		if (isFF) {
@@ -254,11 +414,11 @@ function get_fpjs2() {
 			h.removeChild(baseFontsDiv)
 			// output
 			let hash = sha1(found.join())
-			dom.fontFPJS2label = hash
-			dom.fontFPJS2Found.innerHTML = (found.length > 0 ? found.join(", ") : "no fonts detected")
-			dom.fontFPJS2.innerHTML = hash + s12 + "["+found.length+"/"+fntList.length+"]" + sc
+			dom.fontLabel = hash
+			dom.fontFound.innerHTML = (found.length > 0 ? found.join(", ") : "no fonts detected")
+			dom.fontOffset.innerHTML = hash + s12 + "["+found.length+"/"+fntList.length+"]" + sc
 			// unhide
-			dom.fontFPJS2Found.style.color = zshow
+			dom.fontFound.style.color = zshow
 			// cleanup details
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
@@ -270,6 +430,58 @@ function get_fpjs2() {
 		}
 	})
 }
+
+const spawn = (function() {
+	/* arthur's spawn code */
+	let promiseFromGenerator
+	// returns true if aValue is a generator object
+	let isGenerator = aValue => {
+		return Object.prototype.toString.call(aValue) === "[object Generator]"
+	}
+	// converts right-hand argument of yield or return
+	// values to a promise, according to Task.jsm semantics
+	let asPromise = yieldArgument => {
+		if (yieldArgument instanceof Promise) {
+			return yieldArgument
+		} else if (isGenerator(yieldArgument)) {
+			return promiseFromGenerator(yieldArgument)
+		} else if (yieldArgument instanceof Function) {
+			return asPromise(yieldArgument())
+		} else if (yieldArgument instanceof Error) {
+			return Promise.reject(yieldArgument)
+		} else if (yieldArgument instanceof Array) {
+			return Promise.all(yieldArgument.map(asPromise))
+		} else {
+			return Promise.resolve(yieldArgument)
+		}
+	}
+	// takes a generator object, runs it as an asynchronous task,
+	// returning a promise with the result of that task
+	promiseFromGenerator = generator => {
+		return new Promise((resolve, reject) => {
+			let processPromise
+			let processPromiseResult = (success, result) => {
+				try {
+					let {value, done} = success ? generator.next(result) : generator.throw(result)
+					if (done) {
+						asPromise(value).then(resolve, reject)
+					} else {
+						processPromise(asPromise(value))
+					}
+				} catch (error) {
+					reject(error)
+				}
+			}
+			processPromise = promise => {
+				promise.then(result => processPromiseResult(true, result),
+					error => processPromiseResult(false, error))
+			}
+			processPromise(asPromise(undefined))
+		})
+	}
+	// __spawn(generatorFunction)__
+	return generatorFunction => promiseFromGenerator(generatorFunction())
+})()
 
 function get_fallback(list) {
 	// list passed as we need to do a priming run
@@ -548,9 +760,12 @@ function outputFonts() {
 		section = [], r = ""
 
 	if (!isFF) {
-		dom.fontFPJS2 = zNA
+		dom.fontOffset = zNA
+		dom.fontClient = zNA
+		dom.fontScroll = zNA
 		dom.fontFB = zNA
-		dom.fontFPJS2 = zNA
+		// hide "show fonts"
+		dom.fontShow.style.display = "none"
 	}
 	set_fallback_string()
 	set_fntList()
@@ -584,7 +799,8 @@ function outputFonts() {
 
 	// other
 	Promise.all([
-		get_fpjs2(),
+		get_fonts(),
+		//get_fonts_old(),
 		get_woff(),
 		get_unicode(),
 	]).then(function(results){
