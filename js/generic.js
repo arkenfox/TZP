@@ -415,7 +415,8 @@ function outputSection(id, cls) {
 		items = document.getElementsByClassName("gc")
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 		// hide font fallback rows
-		items = document.getElementsByClassName("togF1")
+		dom.fontFBlabel = ""
+		items = document.getElementsByClassName("togF2")
 		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 		// reset global FP
 		fpAllHash = []
