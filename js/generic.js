@@ -248,7 +248,7 @@ function showhide(togType, togID, togWord) {
 	}
 	// fonts show/hide if font fallback has been run + it differs
 	if (togID == "F1") {
-		let fontA = dom.fontFPJS2label.textContent
+		let fontA = dom.fontLabel.textContent
 		let fontB = dom.fontFBlabel.textContent
 		if (fontB == "") {fontB = fontA}
 		if (fontA == fontB) {
