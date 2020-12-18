@@ -276,16 +276,41 @@ function toggleitems(chkbxState, chkbxID) {
 }
 
 function copyclip(element) {
-	if (document.selection) {
-		let range = document.body.createTextRange()
-		range.moveToElementText(document.getElementById(element))
-		range.select().createTextRange()
-		document.execCommand("copy")
-	} else if (window.getSelection) {
-		let range = document.createRange()
-		range.selectNode(document.getElementById(element))
-		window.getSelection().addRange(range)
-		document.execCommand("copy")
+	// fallback: e.g FF62-
+	function copyExec() {
+		if (element == "ug10") {element = "ugcopy"}
+		if (document.selection) {
+			let range = document.body.createTextRange()
+			range.moveToElementText(document.getElementById(element))
+			range.select().createTextRange()
+			document.execCommand("copy")
+		} else if (window.getSelection) {
+			let range = document.createRange()
+			range.selectNode(document.getElementById(element))
+			window.getSelection().addRange(range)
+			document.execCommand("copy")
+		}
+	}
+	// clipboard API
+	if ("clipboard" in navigator) {
+		try {
+			let content = document.getElementById(element).innerHTML
+			// remove spans, change linebreaks
+			let regex = /<br\s*[\/]?>/gi
+			content = content.replace(regex, "\r\n")
+			content = content.replace(/<\/?span[^>]*>/g,"")
+			// get it
+			navigator.clipboard.writeText(content).then(function() {
+				// clipboard successfully set
+			}, function() {
+				// clipboard write failed
+				copyExec()
+			})
+		} catch(e) {
+			copyExec()
+		}
+	} else {
+		copyExec()
 	}
 }
 
