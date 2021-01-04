@@ -650,7 +650,7 @@ function run_test(isLoopy) {
 			tzresults = []
 			for (let i = 0 ; i < dates.length; i++) {
 				let control = new Date(dates[i])
-				let test = control.toLocaleString()
+				let test = control.toLocaleString("en")
 				let diff = ((Date.parse(test) - Date.parse(control))/k)
 				tzresults.push(diff)
 			}
