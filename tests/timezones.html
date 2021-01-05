@@ -650,10 +650,13 @@ function run_test(isLoopy) {
 			tzresults = []
 			for (let i = 0 ; i < dates.length; i++) {
 				let control = new Date(dates[i])
+				// noteL we need to make sure control+test are the same format (en)
+					// otherwise the string can mix e.g. 1/7 vs 7/1
 				let test = control.toLocaleString("en")
 				let diff = ((Date.parse(test) - Date.parse(control))/k)
 				tzresults.push(diff)
 			}
+			//console.debug("matchHash (toLocaleString) data\n" + tzresults)
 			matchHash = sha1(tzresults.join())
 		}
 
