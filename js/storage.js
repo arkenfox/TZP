@@ -24,7 +24,7 @@ function get_cookies() {
 	// session
 	let rndA = rnd_string("sc_")
 	let rndB = rnd_string("")
-	document.cookie = rndA + "=" + rndB
+	document.cookie = rndA + "=" + rndB + "; SameSite=Strict"
 	let svalue = lookup_cookie(rndA)
 	if (svalue != "") {
 		if (logStorage) {
@@ -45,7 +45,7 @@ function get_cookies() {
 	let d = new Date()
 	d.setTime(d.getTime() + 86400000) // 1 day
 	let expires = "expires="+ d.toUTCString()
-	document.cookie = rndC + "=" + rndD + ";" + expires
+	document.cookie = rndC + "=" + rndD + "; SameSite=Strict; " + expires
 	let pvalue = lookup_cookie(rndC)
 	if (pvalue != "") {
 		if (logStorage) {
