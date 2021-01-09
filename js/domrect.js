@@ -64,8 +64,8 @@ function outputDomRect() {
 							prev_item = delim[0] +"_"+ delim[1]
 							prev_value = delim[3]
 						})
-						console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
 						if (isLies) {
+							console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
 							push = "tampered"
 							display = value1 + sColor + note_noise
 						}
@@ -103,9 +103,7 @@ function outputDomRect() {
 							if (j !== 2 && j !== 3) {go = true}
 							// blink false positives: rect3 <option> left/right/x
 							if (isEngine == "blink" && i == 3) {
-								if (j == 5 || j == 6 || j == 0) {
-									go = false
-								}
+								if (j == 5 || j == 6 || j == 0) {go = false}
 							}
 							if (go) {
 								let str = properties[j] +":rect"+ i +":run"+ runtype +":"+ rect[property]
