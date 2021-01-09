@@ -118,6 +118,14 @@ const createLieDetector = () => {
 	return {
 		getInvalidDimensions: () => invalidDimensions,
 			compute: ({
+				width,
+				height,
+				transformWidth,
+				transformHeight,
+				perspectiveWidth,
+				perspectiveHeight,
+				sizeWidth,
+				sizeHeight,
 				scrollWidth,
 				scrollHeight,
 				offsetWidth,
@@ -126,15 +134,24 @@ const createLieDetector = () => {
 				clientHeight
 		}) => {
 			const invalid = (
-				scrollWidth != offsetWidth ||
-				scrollWidth != clientWidth ||
-				scrollHeight != offsetHeight ||
-				scrollHeight != clientHeight
+				width != transformWidth ||
+				width != perspectiveWidth ||
+				width != sizeWidth ||
+				width != scrollWidth ||
+				width != offsetWidth ||
+				width != clientWidth ||
+
+				height != transformHeight ||
+				height != perspectiveHeight ||
+				height != sizeHeight ||
+				height != scrollHeight ||
+				height != offsetHeight ||
+				height != clientHeight
 			)
 			if (invalid) {
 				invalidDimensions.push({
-					width: [scrollWidth, offsetWidth, clientWidth],
-					height: [scrollHeight, offsetHeight, clientHeight]
+					width: [width, transformWidth, perspectiveWidth, sizeWidth, scrollWidth, offsetWidth, clientWidth],
+					height: [height, transformHeight, perspectiveHeight, sizeHeight, scrollHeight, offsetHeight, clientHeight]
 				})
 			}
 			return
@@ -177,6 +194,11 @@ const getFonts = () => {
 					/* in order to test scrollWidth, clientWidth, etc. */
 					padding: 0 !important;
 					margin: 0 !important;
+					/* in order to test inlineSize and blockSize */
+					writing-mode: horizontal-tb !important;
+					/* for transform and perspective */
+					transform-origin: unset !important;
+					perspective-origin: unset !important;
 				}
 				#${id}-detector::after {
 					font-family: var(--font);
@@ -186,13 +208,30 @@ const getFonts = () => {
 				<span id="${id}-detector"></span>`
 
 			const span = doc.getElementById(`${id}-detector`)
+			const pixelsToInt = pixels => Math.round(+pixels.replace('px',''))
+			const originPixelsToInt = pixels => Math.round(2*pixels.replace('px', ''))
+			const detectedViaPixel = new Set()
+			const detectedViaPixelSize = new Set()
 			const detectedViaScroll = new Set()
 			const detectedViaOffset = new Set()
 			const detectedViaClient = new Set()
+			const detectedViaTransform = new Set()
+			const detectedViaPerspective = new Set()
 			const baseFonts = ['monospace', 'sans-serif', 'serif']
-			const base = baseFonts.reduce((acc, font) => {
-				span.style.setProperty('--font', font)
+			const style = getComputedStyle(span)
+
+			const getDimensions = (span, style) => {
+				const transform = style.transformOrigin.split(' ')
+				const perspective = style.perspectiveOrigin.split(' ')
 				const dimensions = {
+					width: pixelsToInt(style.width),
+					height: pixelsToInt(style.height),
+					transformWidth: originPixelsToInt(transform[0]),
+					transformHeight: originPixelsToInt(transform[1]),
+					perspectiveWidth: originPixelsToInt(perspective[0]),
+					perspectiveHeight: originPixelsToInt(perspective[1]),
+					sizeWidth: pixelsToInt(style.inlineSize),
+					sizeHeight: pixelsToInt(style.blockSize),
 					scrollWidth: span.scrollWidth,
 					scrollHeight: span.scrollHeight,
 					offsetWidth: span.offsetWidth,
@@ -200,7 +239,12 @@ const getFonts = () => {
 					clientWidth: span.clientWidth,
 					clientHeight: span.clientHeight
 				}
-			detectLies.compute(dimensions)
+				return dimensions
+			}
+			const base = baseFonts.reduce((acc, font) => {
+				span.style.setProperty('--font', font)
+				const dimensions = getDimensions(span, style)
+				detectLies.compute(dimensions)
 				acc[font] = dimensions
 				return acc
 			}, {})
@@ -213,16 +257,30 @@ const getFonts = () => {
 			families.forEach(family => {
 				span.style.setProperty('--font', family)
 				const basefont = /, (.+)/.exec(family)[1]
-				const dimensions = {
+				const style = getComputedStyle(span)
+				/*const dimensions = {
+					width: pixelsToInt(style.width),
+					height: pixelsToInt(style.height),
+					sizeWidth: pixelsToInt(style.inlineSize),
+					sizeHeight: pixelsToInt(style.blockSize),
 					scrollWidth: span.scrollWidth,
 					scrollHeight: span.scrollHeight,
 					offsetWidth: span.offsetWidth,
 					offsetHeight: span.offsetHeight,
 					clientWidth: span.clientWidth,
 					clientHeight: span.clientHeight
-				}
+				}*/
+				const dimensions = getDimensions(span, style)
 				detectLies.compute(dimensions)
 				const font = /\'(.+)\'/.exec(family)[1]
+				if (dimensions.width != base[basefont].width ||
+					dimensions.height != base[basefont].height) {
+					detectedViaPixel.add(font)
+				}
+				if (dimensions.sizeWidth != base[basefont].sizeWidth ||
+					dimensions.sizeHeight != base[basefont].sizeHeight) {
+					detectedViaPixelSize.add(font)
+				}
 				if (dimensions.scrollWidth != base[basefont].scrollWidth ||
 					dimensions.scrollHeight != base[basefont].scrollHeight) {
 					detectedViaScroll.add(font)
@@ -235,16 +293,32 @@ const getFonts = () => {
 					dimensions.clientHeight != base[basefont].clientHeight) {
 					detectedViaClient.add(font)
 				}
+				if (dimensions.transformWidth != base[basefont].transformWidth ||
+					dimensions.transformHeight != base[basefont].transformHeight) {
+					detectedViaTransform.add(font)
+				}
+				if (dimensions.perspectiveWidth != base[basefont].perspectiveWidth ||
+					dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
+					detectedViaPerspective.add(font)
+				}
 				return
 			})
+			const fontsPixel = [...detectedViaPixel]
+			const fontsPixelSize = [...detectedViaPixelSize]
 			const fontsScroll = [...detectedViaScroll]
 			const fontsOffset = [...detectedViaOffset]
 			const fontsClient = [...detectedViaClient]
+			const fontsPerspective = [...detectedViaPerspective]
+			const fontsTransform = [...detectedViaTransform]
 			return resolve({
 				lies: !!detectLies.getInvalidDimensions().length,
 				fontsScroll,
 				fontsOffset,
-				fontsClient
+				fontsClient,
+				fontsPixel,
+				fontsPixelSize,
+				fontsPerspective,
+				fontsTransform
 			})
 		} catch (error) {
 			console.error(error)
@@ -265,7 +339,6 @@ function get_fonts() {
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
 			if (logPerf) {debug_log("creepJS [fonts]",t0)}
-			debug_log("creepyJS [fonts]",t0) // temp
 			// resolve
 			return resolve(fontReturn)
 		}
@@ -278,27 +351,40 @@ function get_fonts() {
 			// handled other cases
 			if (res == "n/a") {
 				fontReturn = ["fonts_hash:n/a","fonts_count:n/a","fonts_lied:n/a"]
+				dom.fontMain = res
 				finish_up()
 			} else if (res == "error") {
 				fontReturn = ["fonts_hash:error","fonts_count:error","fonts_lied:error"]
 				dom.fontOffset = res
 				dom.fontClient = res
 				dom.fontScroll = res
+				dom.fontPixel = res
+				dom.fontPixelSize = res
+				dom.fontPerspective = res
+				dom.fontTransform = res
+				dom.fontMain = res
 				dom.fontFound = res
 				dom.fontLabel = "fonts"
 				finish_up()
 			} else {
-				const {lies, fontsScroll, fontsOffset, fontsClient} = res
+				const {lies, fontsScroll, fontsOffset, fontsClient, fontsPixel, fontsPixelSize, fontsPerspective, fontsTransform} = res
 				let isLies = lies
-
 				// values
 				let hashO = sha1(fontsOffset.join()),
 					countO = fontsOffset.length
 				let hashC = sha1(fontsClient.join()),
 					countC = fontsClient.length
 				let hashS = sha1(fontsScroll.join()),
-					countS = fontsScroll.length,
-					countF = fntList.length
+					countS = fontsScroll.length
+				let hashP = sha1(fontsPixel.join()),
+					countP = fontsPixel.length
+				let hashPS = sha1(fontsPixelSize.join()),
+					countPS = fontsPixelSize.length
+				let hashPR = sha1(fontsPerspective.join()),
+					countPR = fontsPerspective.length
+				let hashT = sha1(fontsTransform.join()),
+					countT = fontsTransform.length
+				let countF = fntList.length
 
 				// simulate
 				//isLies = true
@@ -314,6 +400,10 @@ function get_fonts() {
 				dom.fontOffset.innerHTML = hashO + s12 + "["+countO+"/"+countF+"]" + sc
 				dom.fontClient.innerHTML = hashC + s12 + "["+countC+"/"+countF+"]" + sc
 				dom.fontScroll.innerHTML = hashS + s12 + "["+countS+"/"+countF+"]" + sc
+				dom.fontPixel.innerHTML = hashP + s12 + "["+countP+"/"+countF+"]" + sc
+				dom.fontPixelSize.innerHTML = hashPS + s12 + "["+countPS+"/"+countF+"]" + sc
+				dom.fontPerspective.innerHTML = hashPR + s12 + "["+countPR+"/"+countF+"]" + sc
+				dom.fontTransform.innerHTML = hashT + s12 + "["+countT+"/"+countF+"]" + sc
 
 				// determine return vars: default scroll as most likely
 				let fontHash = hashS,
@@ -336,120 +426,12 @@ function get_fonts() {
 				dom.fontLabel = fontHash
 				dom.fontFound.innerHTML = (fontCount > 0 ? fontsFound.join(", ") : "no fonts detected")
 				if (useHash) {
+					dom.fontMain.innerHTML = fontHash + s12 + "["+fontCount+"/"+countF+"]" + sc
 					fontReturn = ["fonts_hash:"+fontHash, "fonts_count:"+fontCount, "fonts_lied:"+isLies]
 				}
 				finish_up()
 			}
 		})
-	})
-}
-
-function get_fonts_old() {
-	/* based on https://github.com/Valve/fingerprintjs2 */
-	return new Promise(resolve => {
-		if (isFF) {
-			// vars
-			let baseFonts = ['monospace','sans-serif','serif'],
-				t0 = performance.now()
-			// elements
-			let h = document.getElementsByTagName('body')[0]
-			let baseFontsDiv = document.createElement('div')
-			let fontsDiv = document.createElement('div')
-			let defaultWidth = {}
-			let defaultHeight = {}
-			let createSpan = function() {
-				let s = document.createElement('spanFP')
-				s.style.position = "absolute"
-				s.style.left = "-9999px"
-				s.style.fontSize = "256px"
-				s.style.fontStyle = "normal"
-				s.style.fontWeight = "normal"
-				s.style.letterSpacing = "normal"
-				s.style.lineBreak = "auto"
-				s.style.lineHeight = "normal"
-				s.style.textTransform = "none"
-				s.style.textAlign = "left"
-				s.style.textDecoration = "none"
-				s.style.textShadow = "none"
-				s.style.whiteSpace = "normal"
-				s.style.wordBreak = "normal"
-				s.style.wordSpacing = "normal"
-				s.innerHTML = fntStrA
-				return s
-			}
-			// creates a span and load the font to detect and a base font for fallback
-			let createSpanWithFonts = function(fontToDetect, baseFont) {
-				let s = createSpan()
-				s.style.fontFamily = "'" + fontToDetect + "'," + baseFont
-				return s
-			}
-			// creates spans for the base fonts and adds them to baseFontsDiv
-			let initializeBaseFontsSpans = function() {
-				let spans = []
-				for (let index=0, length=baseFonts.length; index<length; index++) {
-					let s = createSpan()
-					s.style.fontFamily = baseFonts[index]
-					baseFontsDiv.appendChild(s)
-					spans.push(s)
-				}
-				return spans
-			}
-			// creates spans for the fonts to detect and adds them to fontsDiv
-			let initializeFontsSpans = function() {
-				let spans = {}
-				for (let i = 0; i < fntList.length; i++) {
-					let fontSpans = []
-					for (let j=0, numDefaultFonts = baseFonts.length; j< numDefaultFonts; j++) {
-						let s = createSpanWithFonts(fntList[i], baseFonts[j])
-						fontsDiv.appendChild(s)
-						fontSpans.push(s)
-					}
-					spans[fntList[i]] = fontSpans // Stores {fontName : [spans for that font]}
-				}
-				return spans
-			}
-			// compare
-			let present = function(fontSpans) {
-				let r = false
-				for (let i=0; i < baseFonts.length; i++) {
-					r = (fontSpans[i].offsetWidth !== defaultWidth[baseFonts[i]] || fontSpans[i].offsetHeight !== defaultHeight[baseFonts[i]])
-					if (r) {return r}
-				}
-				return r
-			}
-			// stuff
-			let baseFontsSpans = initializeBaseFontsSpans()
-			h.appendChild(baseFontsDiv)
-			for (let index=0, length = baseFonts.length; index<length; index++) {
-				defaultWidth[baseFonts[index]] = baseFontsSpans[index].offsetWidth // width for the default font
-				defaultHeight[baseFonts[index]] = baseFontsSpans[index].offsetHeight // height for the default font
-			}
-			let fontsSpans = initializeFontsSpans()
-			h.appendChild(fontsDiv)
-			// detect
-			let found = []
-			for (let i=0; i < fntList.length; i++) {
-				if (present(fontsSpans[fntList[i]])) {found.push(fntList[i])}
-			}
-			// cleanup
-			h.removeChild(fontsDiv)
-			h.removeChild(baseFontsDiv)
-			// output
-			let hash = sha1(found.join())
-			dom.fontLabel = hash
-			dom.fontFound.innerHTML = (found.length > 0 ? found.join(", ") : "no fonts detected")
-			dom.fontOffset.innerHTML = hash + s12 + "["+found.length+"/"+fntList.length+"]" + sc
-			// unhide
-			dom.fontFound.style.color = zshow
-			// cleanup details
-			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
-			// perf
-			if (logPerf) {debug_log("fpjs2 [fonts]",t0)}
-			return resolve("fonts:" + hash)
-		} else {
-			// non-FF
-			return resolve("fonts:" + zNA)
-		}
 	})
 }
 
@@ -821,10 +803,9 @@ function outputFonts() {
 
 	// other
 	Promise.all([
-		get_fonts(),
-		//get_fonts_old(),
 		get_woff(),
 		get_unicode(),
+		get_fonts(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
