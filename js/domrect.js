@@ -99,8 +99,14 @@ function outputDomRect() {
 						if (runtype !== 1) {
 							// what is i (0 to 5) ? the element rect number: rect3 = option/select
 							let go = false
-							if (j > 3) {go = true} // 4=top 5=left 6=right 7=bottom
-							if (isEngine == "blink" && i == 3) {go = false} // rect3 option/select gives false positive in chrome
+							// everything except width/height
+							if (j !== 2 && j !== 3) {go = true}
+							// blink false positives: rect3 <option> left/right/x
+							if (isEngine == "blink" && i == 3) {
+								if (j == 5 || j == 6 || j == 0) {
+									go = false
+								}
+							}
 							if (go) {
 								let str = properties[j] +":rect"+ i +":run"+ runtype +":"+ rect[property]
 								chk[method].push(str)
