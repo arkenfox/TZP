@@ -51,7 +51,7 @@ function outputDomRect() {
 					let compare = chk["dr"+i]
 					if (compare.length > 0) {
 						compare.sort()
-						console.log(compare.join("\n"))
+						//console.log(compare.join("\n"))
 						let diffs = [], prev_item = "", prev_value = ""
 						compare.forEach(function(item) {
 							let delim = item.split(":")
@@ -64,7 +64,7 @@ function outputDomRect() {
 							prev_item = delim[0] +"_"+ delim[1]
 							prev_value = delim[3]
 						})
-						console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + diffs.join("\n - "))
+						console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
 						if (isLies) {
 							push = "tampered"
 							display = value1 + sColor + note_noise
