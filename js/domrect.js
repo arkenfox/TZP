@@ -31,7 +31,7 @@ function outputDomRect() {
 			//if (i == 0 || i == 2) {value1 = "0c4cf7ff544ab66"; value2 = "ec46b57d8a484a"}
 
 			if (value1 == "tzp") {
-				// error
+				// catch all error starts with "tzp:"
 				value1 = run0[i].split(":")[3]
 				if (value1 == "") {value1 = "error"}
 				if (value1 == undefined) {value1 = "undefined"}
@@ -45,27 +45,27 @@ function outputDomRect() {
 					+ sColor + note_random
 			} else {
 				// same value
+				let isLies = false
 				// check for noise
 				if (isFF || isEngine == "blink") {
 					let compare = chk["dr"+i]
 					if (compare.length > 0) {
 						compare.sort()
-						//console.log(compare.join("\n"))
+						console.log(compare.join("\n"))
 						let diffs = [], prev_item = "", prev_value = ""
 						compare.forEach(function(item) {
 							let delim = item.split(":")
-							if (prev_item == delim[0] + delim[1]) {
+							if (prev_item == delim[0] +"_"+ delim[1]) {
 								let diff = (delim[3]-prev_value)
-								if (diff !== 0.25) {
-									let margin = (0.25 - diff)
-									diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value + ", "+ delim[3])
-								}
+								if (diff !== 0.25) {isLies = true}
+								let margin = (0.25 - diff)
+								diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value + ", "+ delim[3])
 							}
-							prev_item = delim[0] + delim[1]
+							prev_item = delim[0] +"_"+ delim[1]
 							prev_value = delim[3]
 						})
-						if (diffs.length > 0) {
-							//console.log("DOMRect diffs [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + diffs.join("\n - "))
+						console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, 2nd measurement]\n - " + diffs.join("\n - "))
+						if (isLies) {
 							push = "tampered"
 							display = value1 + sColor + note_noise
 						}
@@ -95,10 +95,14 @@ function outputDomRect() {
 					properties.forEach(function(property, j){
 						data[i * properties.length + j] = rect[property]
 						// diffs on runs
-						if (runtype !== 1 && i == 3) {
-							if (j == 4 || j == 7) {
-								// we could also use 5+6 in FF
-								let str = method+":"+j +":"+ runtype +":"+ rect[property]
+						// runtype !== 1: only collect 2 runs: 0 (first) + 2 (shifted by css)
+						if (runtype !== 1) {
+							// what is i (0 to 5) ? the element rect number: rect3 = option/select
+							let go = false
+							if (j > 3) {go = true} // 4=top 5=left 6=right 7=bottom
+							if (isEngine == "blink" && i == 3) {go = false} // rect3 option/select gives false positive in chrome
+							if (go) {
+								let str = properties[j] +":rect"+ i +":run"+ runtype +":"+ rect[property]
 								chk[method].push(str)
 							}
 						}
