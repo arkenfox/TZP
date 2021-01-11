@@ -367,7 +367,7 @@ function get_fonts() {
 				dom.fontLabel = "fonts"
 				finish_up()
 			} else {
-				const {lies, fontsScroll, fontsOffset, fontsClient, fontsPixel, fontsPixelSize, fontsPerspective, fontsTransform} = res
+				let {lies, fontsScroll, fontsOffset, fontsClient, fontsPixel, fontsPixelSize, fontsPerspective, fontsTransform} = res
 				let isLies = lies
 				// values
 				let hashO = sha1(fontsOffset.join()),
@@ -388,13 +388,10 @@ function get_fonts() {
 
 				// simulate
 				//isLies = true
-				//hashO = sha1("offset")
-				//hashC = sha1("client")
-				//hashS = sha1("scroll")
-				//hashO = sha1("one-of-two"); hashC = hashO
-				//hashO = sha1("one-of-two"); hashS = hashO
-				//hashC = sha1("one-of-two"); hashS = hashC
-				//hashC = sha1("a"); hashS = sha1("b"); hashO = sha1("c")
+				//hashO = sha1("o"); countO = 0; fontsOffset = []
+				//hashC = sha1("c"); countC = 5; fontsClient = ["client","b","c","d","e"]
+				//hashS = sha1("s"); countS = 3; fontsScroll = ["scroll","b","c"]
+				//hashT = sha1("t"); countT = 4; fontsTransform = ["transform","b","c","d"]
 
 				// output
 				dom.fontOffset.innerHTML = hashO + s12 + "["+countO+"/"+countF+"]" + sc
@@ -405,29 +402,41 @@ function get_fonts() {
 				dom.fontPerspective.innerHTML = hashPR + s12 + "["+countPR+"/"+countF+"]" + sc
 				dom.fontTransform.innerHTML = hashT + s12 + "["+countT+"/"+countF+"]" + sc
 
-				// determine return vars: default scroll as most likely
-				let fontHash = hashS,
-					fontCount = countS,
-					fontsFound = fontsScroll
-
-				// ToDo: better return logic
-				let useHash = true
-				if (isLies) {
-					if (hashS == hashC || hashS == hashO || hashO == hashC) {
-						// if two are the same: use one of them
-							// change to client if needed
-						if (hashC == hashO) {fontHash = hashC; fontCount = countC; fontsFound = fontsClient}
-					} else {
-						// all three are different
-						useHash = false
-						fontReturn = ["fonts_hash:unknown", "fonts_count:unknown", "fonts_lied:"+isLies]
+				// get most common hash/count
+				let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
+					let count = list.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
+					if (count > greatest.count) {
+						return {count, item: currentValue}
 					}
+					return greatest
+				}, { count: 0, item: undefined })
+				let list = [hashO, hashC, hashS, hashP, hashPS, hashPR, hashT]
+				let greatest = getGreatestOccurrence(list)
+
+				// default: use scroll
+				let fontCount = countS,
+					fontsFound = fontsScroll
+				let fontHash = greatest.item
+				// greatest first match
+				if (hashS == fontHash) { // already set
+				} else if (hashC == fontHash) {fontCount = countC; fontsFound = fontsClient
+				} else if (hashP == fontHash) {fontCount = countP; fontsFound = fontsPixel
+				} else if (hashPR == fontHash) {fontCount = countPR; fontsFound = fontsPerspective
+				} else if (hashT == fontHash) {fontCount = countT; fontsFound = fontsTransform
+				} else if (hashPS == fontHash) {fontCount = countPS; fontsFound = fontsPixelSize
+				} else if (hashO == fontHash) {fontCount = countO; fontsFound = fontsOffset // do last: most likely to lie?
 				}
+				// display fontsFound
 				dom.fontLabel = fontHash
 				dom.fontFound.innerHTML = (fontCount > 0 ? fontsFound.join(", ") : "no fonts detected")
-				if (useHash) {
+				// set return
+				if (greatest.count > 3) {
+					// if four or more are the same, we'll go with that
 					dom.fontMain.innerHTML = fontHash + s12 + "["+fontCount+"/"+countF+"]" + sc
 					fontReturn = ["fonts_hash:"+fontHash, "fonts_count:"+fontCount, "fonts_lied:"+isLies]
+				} else {
+					fontReturn = ["fonts_hash:unknown", "fonts_count:unknown", "fonts_lied:"+isLies]
+					fontMain.innerHTML = "can't tell"
 				}
 				finish_up()
 			}
