@@ -102,6 +102,7 @@ let avh = "",
 	stateFNT = false,
 // other
 	isBrave = false,
+	isBraveFP = false,
 	isFF = false,
 	isTB = false,
 	isTB2 = "",
