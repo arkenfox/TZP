@@ -394,4 +394,4 @@ function outputStorage() {
 
 }
 
-setTimeout(function() {outputStorage()}, 1)
+countJS("storage")
