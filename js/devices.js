@@ -305,6 +305,7 @@ function get_plugins() {
 							if (res.length > 1) {
 								pluginBS = true
 							} else if (res.length == 1) {
+								console.debug(res[0].split(":")[0])
 								if (res[0].split(":")[0] !== "Shockwave Flash") {pluginBS = true}
 							}
 						}
