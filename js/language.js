@@ -1,6 +1,7 @@
 'use strict';
 
 let bTZ = false
+let langDoc = []
 
 function get_navigator() {
 	return new Promise(resolve => {
@@ -633,8 +634,8 @@ function get_lang_doc() {
 		dom.lHash2.innerHTML = lHash2 + (isFF ? ff : "")
 
 		// return
+		langDoc = res
 		return resolve(reshash)
-
 	})
 }
 
@@ -643,7 +644,6 @@ function get_lang_worker() {
 		let msgWorker = []
 		msgWorker.push(isFF)
 		if (isVer == "") {msgWorker.push("0")} else {msgWorker.push(isVer)}
-
 		if (isFile) {
 			return resolve("n/a")
 		} else if (typeof(Worker) == "undefined") {
@@ -652,6 +652,7 @@ function get_lang_worker() {
 			try {
 				let workerlang = new Worker("js/language_worker.js")
 				workerlang.addEventListener("message", function(e) {
+					let res = langDoc
 					workerlang.terminate
 					// compare
 					let swcombo1 = "", swcombo2 = ""
