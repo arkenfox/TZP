@@ -87,7 +87,7 @@ function set_pluginBS() {
 	if (pluginLies.length) {
 		if (isBrave) {isBraveFP = true}
 		pluginBS = true
-		console.debug("pluginsBS check", pluginsBS)
+		console.debug("pluginBS check", pluginBS)
 	} else {
 		pluginBS = false
 	}
