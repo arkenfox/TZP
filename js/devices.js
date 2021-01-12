@@ -1,6 +1,7 @@
 'use strict';
 
-var pluginBS
+var pluginBS = false
+var hasFlash = false
 
 function reset_devices() {
 	dom.mimeTypesList.style.color = zhide
@@ -35,7 +36,8 @@ function set_pluginBS() {
 
 		// Expect MimeType Plugins to match Plugins
 		try {
-			// Uncaught TypeError: 'get enabledPlugin' called on an object that does not implement interface MimeType.
+			// Chameleon: spoof media devices causes this error
+				// Uncaught TypeError: 'get enabledPlugin' called on an object that does not implement interface MimeType.
 			const mimeTypePluginNames = '' + [
 				...new Set([...mimeTypes].map(mimeType => mimeType.enabledPlugin.name))
 			].sort()
@@ -87,7 +89,6 @@ function set_pluginBS() {
 	if (pluginLies.length) {
 		if (isBrave) {isBraveFP = true}
 		pluginBS = true
-		console.debug("pluginBS check", pluginBS)
 	} else {
 		pluginBS = false
 	}
@@ -223,22 +224,9 @@ function get_mimetypes() {
 							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 					}
 					res.sort()
-					// FF lies
-					if (isFF) {
-						if (isVer > 84) {
-							// FF85+: EOL Flash
-							if (res.length > 0) {mimeBS = true}
-						} else {
-							// Flash only
-							if (res.length > 2) {
-								mimeBS = true
-							} else if (res > 0) {
-								// windows example
-								// application/futuresplash: application/futuresplash: spl
-								// application/x-shockwave-flash: application/x-shockwave-flash: swf
-							}
-						}
-					}
+					// FF
+						// hasFlash: set in plugins test
+						// can FF52+ have mimetypes other than flash?
 					display(res)
 				} else {
 					display("none")
@@ -297,17 +285,22 @@ function get_plugins() {
 							+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 					}
 					res.sort()
-					// FF lies: in case we missed them
+					// FF
 					if (isFF) {
-						if (isVer > 84) {
+						pluginBS = false
+						hasFlash = false
+						if (isVer > 84 && res.length > 0) {
 							// FF85+: EOL Flash
-							if (res.length > 0) {pluginBS = true}
+							pluginBS = true
+						} else if (res.length > 1) {
+							// FF52+: Flash only
+							pluginBS = true
 						} else {
-							if (res.length > 1) {
+							// one item
+							if (res[0].split(":")[0] == "Shockwave Flash") {
+								hasFlash = true
+							} else {
 								pluginBS = true
-							} else if (res.length == 1) {
-								console.debug(res[0].split(":")[0], pluginBS)
-								if (res[0].split(":")[0] !== "Shockwave Flash") {pluginBS = true}
 							}
 						}
 					}
@@ -476,8 +469,11 @@ function get_vr() {
 function outputDevices() {
 	let t0 = performance.now(),
 		section = []
-	// check for BS & trickery
-	set_pluginBS()
+
+	// FF returns Flash as a false positive
+	if (!isFF) {
+		set_pluginBS()
+	}
 
 	//ToDo: promisify and add to section hash
 	get_speech_rec()
@@ -486,12 +482,12 @@ function outputDevices() {
 	Promise.all([
 		get_pointer_hover(),
 		get_gamepads(),
+		get_plugins(),
 		get_media_devices(),
 		get_touch(),
 		get_vr(),
-		get_plugins(),
-		get_mimetypes(),
 		get_concurrency(),
+		get_mimetypes(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
