@@ -276,4 +276,4 @@ function outputMisc(type) {
 
 }
 
-setTimeout(function() {outputMisc()}, 1)
+countJS("misc")
