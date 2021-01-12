@@ -264,7 +264,7 @@ function outputAudio1(runtype) {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		}
 		// perf
-		section_info("audio", t0, ["web_audio:disabled"])
+		section_info("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
 	}
 }
 
