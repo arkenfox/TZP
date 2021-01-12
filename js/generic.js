@@ -50,6 +50,15 @@ function section_click(name, time1) {
 	el.innerHTML = el.innerHTML +"<br>"+ pretty
 }
 
+function countJS(filename) {
+	// don't start anything until all JS files have arrived
+	jsFiles.push(filename)
+	if (jsFiles.length == 12) {
+		//console.debug(jsFiles)
+		outputSection("load")
+	}
+}
+
 function section_info(name, time1, data) {
 	// fp
 	if (data !== undefined && data !== "") {
@@ -82,13 +91,8 @@ function section_info(name, time1, data) {
 			// yay!
 			fpAllHash.push(name + ":" + hash)
 			fpAllCount += data.length
-			// pretty name
-			let pname = name
-			if (pname == "ua") {pname = "user agent"}
-			if (pname == "feature") {pname += " detection"}
-			if (pname == "storage") {pname = "cookies & storage"}
-			fpAllData.push([pname +":" + hash, data])
-			if (fpAllHash.length == 13) {
+			fpAllData.push([name +":" + hash, data])
+			if (fpAllHash.length == 14) {
 				fpAllHash.sort()
 				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
@@ -429,12 +433,12 @@ function byteArrayToHex(arrayBuffer){
 
 /* BUTTONS: (re)GENERATE SECTIONS */
 function outputSection(id, cls) {
-	sRerun = true
 	let delay = 170
 	if (cls == undefined || cls == "") {cls = "c"}
+	sRerun = false
 	// clear everything
 	if (id == "all") {
-		delay = 10
+		delay = 5
 		let items = document.getElementsByClassName("c")
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 		items = document.getElementsByClassName("gc")
@@ -449,12 +453,16 @@ function outputSection(id, cls) {
 		fpAllCheck = []
 		fpAllCount = 0
 		gRerun = true
+	} else if (id == "load") {
+		gRerun = false
 		sRerun = false
+		id = "all"
 	} else {
 		// clear table elements, &nbsp stops line height jitter
 		let tbl = document.getElementById("tb"+id)
 		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
 		gRerun = false
+		sRerun = true
 	}
 	// clear details
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
@@ -476,8 +484,9 @@ function outputSection(id, cls) {
 		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
 
-		// possible gRerun: delay/stagger, use same order as js loads
+		//	first 3 sections: always run first as it sets global vars
 		if (id=="all") {outputStart()}
+		// possible gRerun: delay/stagger, use same order as js loads
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
