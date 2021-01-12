@@ -335,4 +335,4 @@ function outputCSS() {
 	})
 }
 
-setTimeout(function() {outputCSS()}, 1)
+countJS("css")
