@@ -2,6 +2,7 @@
 
 let bTZ = false
 let langDoc = []
+let combo1 = "", combo2 = ""
 
 function get_navigator() {
 	return new Promise(resolve => {
@@ -530,7 +531,6 @@ function get_lang_doc() {
 			}
 		}
 		// output
-		let combo1 = "", combo2 = ""
 		for (let i=0; i < 49; i++) {
 			let result = get_item(i)
 			if (isFF) {
