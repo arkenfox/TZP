@@ -3,6 +3,7 @@
 let bTZ = false
 let langDoc = []
 let combo1 = "", combo2 = ""
+let lHash0 = '', lHash1 = "", lHash2 = ""
 
 function get_navigator() {
 	return new Promise(resolve => {
@@ -559,7 +560,7 @@ function get_lang_doc() {
 
 		let reshash = []
 		// hash 0-11: language
-		let lHash0 = sha1(res.slice(0,12).join("-"))
+		lHash0 = sha1(res.slice(0,12).join("-"))
 		reshash.push("language:" + lHash0)
 		//console.debug("language", lHash0, res.slice(0,12))
 		if (isFF) {
@@ -579,7 +580,7 @@ function get_lang_doc() {
 		dom.lHash0.innerHTML = lHash0
 
 		// hash 12-16: timezone
-		let lHash1 = sha1(res.slice(12,17).join("-"))
+		lHash1 = sha1(res.slice(12,17).join("-"))
 		reshash.push("timezone:" + lHash1)
 		//console.debug("timezone", lHash1, res.slice(12,17))
 		bTZ = (lHash1 == "8aa77801dd2bb3ad49c68f7ff179df3ea276479f" ? true : false)
@@ -587,7 +588,7 @@ function get_lang_doc() {
 		dom.lHash1.innerHTML = lHash1
 
 		// hash 17+: datetime
-		let lHash2 = sha1(res.slice(17,res.length).join("-"))
+		lHash2 = sha1(res.slice(17,res.length).join("-"))
 		reshash.push("datetime:" + lHash2)
 		dom.lHash2 = lHash2
 		// RFP
