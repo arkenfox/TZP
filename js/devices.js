@@ -1,28 +1,20 @@
 'use strict';
 
 function reset_devices() {
-	dom.mimeTypes.style.color = zhide
-	dom.plugins.style.color = zhide
-	dom.eMD.style.color = zhide
-	let str = dom.eMD.innerHTML
-	str = str.replace(/\[RFP\]/g, "")
-	dom.eMD.innerHTML = str
-	str = dom.plugins.innerHTML
-	str = str.replace(/\[RFP\]/g, "")
-	dom.plugins.innerHTML = str
-	str = dom.mimeTypes.innerHTML
-	str = str.replace(/\[RFP\]/g, "")
-	dom.mimeTypes.innerHTML = str
+	dom.mimeTypesList.style.color = zhide
+	dom.pluginsList.style.color = zhide
+	dom.eMDList.style.color = zhide
+	dom.sEnginesList.style.color = zhide
 }
 
 function get_gamepads() {
-	if ("getGamepads" in navigator) {
-		dom.nGP = zE
-		// ToDo: listen for gamepads
-		dom.eGP.innerHTML = note_ttc
-	} else {
-		dom.nGP = zD; dom.eGP = zNA
-	}
+	return new Promise(resolve => {
+		function display(output) {
+			dom.gamepads.innerHTML = output
+			return resolve("gamepads:" + output)
+		}
+		if ("getGamepads" in navigator) {display(zE)} else {display(zD)}
+	})
 }
 
 function get_concurrency() {
@@ -36,67 +28,104 @@ function get_concurrency() {
 		}
 	}
 	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
-	if (isBrave) {h = "unreliable"}
+	if (isBraveFP) {h = "fake"}
 	return "hardwareConcurrency:" + h
 }
 
 function get_media_devices() {
-	if ("mediaDevices" in navigator) {
-		dom.nMD = zE
-		// enumerate
-		let str="", pad=13, strPad=""
-		try {
-			navigator.mediaDevices.enumerateDevices().then(function(devices) {
-				let aCount=0, vCount=0, oCount=0
-				devices.forEach(function(d) {
-					if (d.kind == "audioinput") {aCount++}
-					else if (d.kind == "videoinput") {vCount++}	else {oCount++}
-					str += (d.kind+": ").padStart(pad)+d.deviceId
-					if (d.groupId.length > 0) {
-						strPad = ("group: ").padStart(pad)
-						str += "<br>"+strPad+d.groupId
-					}
-					if (d.label.length > 0) {
-						strPad = ("label: ").padStart(pad)
-						str += "<br>"+strPad+d.label
-					}
-					str += "<br>"
-				})
-				// rfp
-				if (aCount == 1 && vCount == 1 && oCount == 0) {
-					str = str.replace("<br>", rfp_green+"<br>")
-				} else {
-					str = str.replace("<br>", rfp_red+"<br>")
-				}
-				dom.eMD.innerHTML = str
-			})
-			.catch(function(e) {
-				dom.eMD.innerHTML = e.name +": "+ e.message
-			})
-		} catch(e) {
-			dom.eMD.innerHTML = zB0
+	return new Promise(resolve => {
+
+		function finish(result) {
+			dom.eMDList.style.color = zshow
+			return resolve("media_devices:"+result)
 		}
-	}	else {
-		dom.nMD = zD; dom.eMD = zNA
-	}
-	dom.eMD.style.color = zshow
+		if ("mediaDevices" in navigator) {
+			// enumerate
+			let str="", pad=13, strPad=""
+			try {
+				navigator.mediaDevices.enumerateDevices().then(function(devices) {
+					let arr = []
+					// enumerate
+					devices.forEach(function(d) {
+						arr.push(d.kind)
+						str += (d.kind+": ").padStart(pad)+d.deviceId
+						if (d.groupId.length > 0) {
+							strPad = ("group: ").padStart(pad)
+							str += "<br>"+strPad+d.groupId
+						}
+						if (d.label.length > 0) {
+							strPad = ("label: ").padStart(pad)
+							str += "<br>"+strPad+d.label
+						}
+						str += "<br>"
+					})
+					// output list
+					if (str.length == 0) {str = "none"}
+					dom.eMDList.innerHTML = str
+
+					// count each kind
+					let pretty = [], plain = [], rfphash = ""
+					if (arr.length > 0) {
+						arr.sort()
+						let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+						arr = [...map.entries()]
+						// build pretty/plain
+						for (let i=0; i < arr.length; i++) {
+							let data = arr[i],
+								item = data[0],
+								itemcount = data[1]
+							pretty.push(item + s7 +"["+ itemcount +"]" + sc)
+							plain.push(item +","+ itemcount)
+						}
+						pretty = pretty.join(" ")
+						str = plain.join(";")
+						rfphash = sha1(str)
+					} else {
+						pretty = "none"
+					}
+					// RFP
+					if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
+						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
+					} else {
+						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
+					}
+					finish(str)
+				})
+				.catch(function(e) {
+					dom.eMDList.innerHTML = e.name +": "+ e.message
+					dom.eMD.innerHTML = e.name
+					finish(e.name)
+				})
+			} catch(e) {
+				dom.eMDList.innerHTML = zB0
+				dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
+				finish(zB0)
+			}
+		}	else {
+			dom.eMDList = zD
+			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
+			finish(zD)
+		}
+	})
 }
 
 function get_mimetypes() {
+/* flash examples in FF
+	// application/futuresplash: application/futuresplash: spl
+	// application/x-shockwave-flash: application/x-shockwave-flash: swf
+*/
 	return new Promise(resolve => {
-		let res = []
 		function display(output) {
-			if (output == "none") {
-				output += rfp_green
-			} else {
-				if (res.length == 1) {
-					output += rfp_red
-				} else {
-					output = output.replace("<br>", rfp_red + "<br>")
-				}
+			let detail = output, count = ""
+			if (Array.isArray(output)) {
+				count = s7 +"["+ output.length +"]"+ sc
+				detail = output.join("<br>")
+				output = sha1(output.join())
 			}
-			dom.mimeTypes.innerHTML = output
-			dom.mimeTypes.style.color = zshow
+			dom.mimeTypes.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
+			dom.mimeTypesList.innerHTML = detail
+			dom.mimeTypesList.style.color = zshow
+			return resolve("mimeTypes:" + output)
 		}
 		if ("mimeTypes" in navigator) {
 			try {
@@ -107,23 +136,16 @@ function get_mimetypes() {
 						res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
 							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 					}
-					// flash examples in FF
-						// application/futuresplash: application/futuresplash: spl
-						// application/x-shockwave-flash: application/x-shockwave-flash: swf
 					res.sort()
-					display(res.join("<br>"))
-					return resolve("mimeTypes:" + sha1(res.join()))
+					display(res)
 				} else {
 					display("none")
-					return resolve("mimeTypes:none")
 				}
 			} catch(e) {
 				display(zB0)
-				return resolve("mimeTypes:blocked")
 			}
 		} else {
 			display(zD)
-			return resolve("mimeTypes:disabled")
 		}
 	})
 }
@@ -148,141 +170,147 @@ function get_mm_pointer(type){
 }
 
 function get_plugins() {
+/* ToDo: FF Flash EOL version check 2021
+	isLies = false
+	if (isFF) {
+		if (res.length > 1) {
+			isLies = true
+		} else if (res.length == 1) {
+			if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
+		}
+	}
+*/
 	return new Promise(resolve => {
-		let res = [], isLies = true
 		function display(output) {
-			if (output == "none") {
-				output += rfp_green
-			} else {
-				if (res.length == 1) {
-					output += rfp_red
-				} else {
-					output = output.replace("<br>", rfp_red + "<br>")
-				}
+			let detail = output, count = ""
+			if (Array.isArray(output)) {
+				count = s7 +"["+ output.length +"]"+ sc
+				detail = output.join("<br>")
+				output = sha1(output.join())
 			}
-			dom.plugins.innerHTML = output
-			dom.plugins.style.color = zshow
+			dom.plugins.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
+			dom.pluginsList.innerHTML = detail
+			dom.pluginsList.style.color = zshow
+			return resolve("plugins:" + output)
 		}
 		if ("plugins" in navigator) {
 			try {
 				let p = navigator.plugins
 				if (p.length > 0) {
+					let res = []
 					for (let i=0; i < p.length; i++) {
-						// ToDo: better lie detection: e.g mixed alphanumeric
-							// logic is anyone not messing with plugins would show " PDF "
-							// Chromium PDF Plugin, Chromium PDF Viewer, News feed handler
-						if (isEngine == "blink") {
-							let str = p[i].name
-							if (str.indexOf(" PDF ") > 0) {isLies = false}
-						}
 						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
 							+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 					}
 					res.sort()
-					//console.debug("plugins\n - " + res.join("\n - "))
-					// FF: limited to Flash
-						// ToDo: add flash EOL version check Dec2020/Jan2021
-					if (isFF) {
-						isLies = false
-						if (res.length > 1) {
-							isLies = true
-						} else if (res.length == 1) {
-							if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
-						}
-					}
-					if (isFF || isEngine == "blink") {
-						display((isLies ? "fake" : res.join("<br>")))
-						return resolve("plugins:" + (isLies ? "lies" : sha1(res.join())))
-					} else {
-						display(res.join("<br>"))
-						return resolve("plugins:" + sha1(res.join()))
-					}
+					display(res)
 				} else {
 					display("none")
-					return resolve("plugins:none")
 				}
 			} catch(e) {
-				dom.plugins.innerHTML = zB0
-				return resolve("plugins:blocked")
+				display(zB0, false)
 			}
 		} else {
-			display(zD)
-			return resolve("plugins:disabled")
+			display(zD, false)
 		}
 	})
 }
 
 function get_pointer_hover() {
-	// FF64: pointer/hover
-	dom.pointer = (window.PointerEvent == "undefined" ? zD : zE)
-	let p = get_mm_pointer("any-pointer")+" | "+get_mm_pointer("pointer")
-	let h = get_mm_hover("any-hover")+" | "+get_mm_hover("hover")
-	// 1607316
-	if (isVer > 73 && isOS == "android") {
-		p += (p == "coarse | coarse" ? rfp_green : rfp_red)
-		h += (h == "none | none" ? rfp_green : rfp_red)
-	} else {
-		let rfp = zNS+" | "+zNS
-		if (p !== rfp) {
-			p += (p == "fine | fine" ? rfp_green : rfp_red)
+	return new Promise(resolve => {
+		let res = []
+		// pointer event
+		let r1 = (window.PointerEvent == "undefined" ? zD : zE)
+		dom.pointer = r1
+		res.push("pointer_event:"+r1)
+
+		// FF64: pointer/hover
+		let p = get_mm_pointer("any-pointer")+" | "+get_mm_pointer("pointer")
+		let h = get_mm_hover("any-hover")+" | "+get_mm_hover("hover")
+		res.push("any-pointer_pointer:"+p)
+		res.push("any-hover_hover:"+p)
+
+		// 1607316
+		if (isVer > 73 && isOS == "android") {
+			p += (p == "coarse | coarse" ? rfp_green : rfp_red)
+			h += (h == "none | none" ? rfp_green : rfp_red)
+		} else {
+			let rfp = zNS+" | "+zNS
+			if (p !== rfp) {
+				p += (p == "fine | fine" ? rfp_green : rfp_red)
+			}
+			if (h !== rfp) {
+				h += (h == "hover | hover" ? rfp_green : rfp_red)
+			}
 		}
-		if (h !== rfp) {
-			h += (h == "hover | hover" ? rfp_green : rfp_red)
-		}
-	}
-	dom.mmP.innerHTML = p
-	dom.mmH.innerHTML = h
+		dom.mmP.innerHTML = p
+		dom.mmH.innerHTML = h
+		return resolve(res)
+	})
 }
 
-function get_speech_synth() {
-	if ("speechSynthesis" in window) {
-		dom.sSynth = zE
-		// speech engines
-		function populateVoiceList() {
-			let s="", res = []
-			try {
-				if(typeof speechSynthesis == "undefined") {
-					return
-				}
-				let v = speechSynthesis.getVoices()
-				for (let i=0; i < v.length; i++) {
-					s += v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : "") + "<br>"
-					res.push(v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : ""))
-				}
-				if (s == "") {
-					s = "none" + rfp_green // RFP: 1333641
-				} else {
-					s = s.replace("<br>", rfp_red + "<br>")
-				}
-				dom.sEngines.innerHTML = s
-				// return
-				//res.sort()
-				//console.debug("engines", res.join(", "))
-				//return "speech synth: " + zE + ", " + sha1(res.join()) // cleanup
+function get_speech_engines() {
+	return new Promise(resolve => {
+		// output & resolve
+		function display(output) {
+			let detail = output, count = ""
+			if (Array.isArray(output)) {
+				count = s7 +"["+ output.length +"]"+ sc
+				detail = output.join("<br>")
+				output = sha1(output.join())
+			}
+			dom.sEngines.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
+			dom.sEnginesList.innerHTML = detail
+			dom.sEnginesList.style.color = zshow
+			return resolve("speech_engines:" + output)
+		}
 
-			} catch(e) {
-				dom.sEngines.innerHTML = zB0
-				//return "speech synth: " + zE + ", " + zB0
-			}
-		}
-		try {
-			if (speechSynthesis.onvoiceschanged !== undefined) {
-				populateVoiceList()
-				if (typeof speechSynthesis !== "undefined") {
-					speechSynthesis.onvoiceschanged = populateVoiceList
+		if ("speechSynthesis" in window) {
+			function populateVoiceList() {
+				let res = []
+				try {
+					if(typeof speechSynthesis == "undefined") {
+						return
+					} else {
+						let v = speechSynthesis.getVoices()
+						for (let i=0; i < v.length; i++) {
+							res.push(v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : ""))
+						}
+						// ToDo: why does it run multiple times and first pass is empty
+							//      first page load: nothing, got some, got some
+							// same tab page reload: nothing, got some
+							//    new tab page load: nothing, got some
+							//         global rerun: got some
+							//        section rerun: got some
+						if (res.length == 0) {
+							//console.debug("got nothing")
+							display("none")
+						} else {
+							//console.debug("got some", res)
+							res.sort()
+							display(res)
+						}
+					}
+				} catch(e) {
+					display(zB0)
 				}
-			} else if (speechSynthesis.onvoiceschanged == undefined) {
-				dom.sEngines.innerHTML = zB0
-				//return "speech synth: " + zE + ", " + zB0
 			}
-		} catch(e) {
-			dom.sEngines.innerHTML = zB0
-			//return "speech synth: " + zE + ", " + zB0
+			try {
+				if (speechSynthesis.onvoiceschanged !== undefined) {
+					populateVoiceList()
+					if (typeof speechSynthesis !== "undefined") {
+						speechSynthesis.onvoiceschanged = populateVoiceList
+					}
+				} else {
+					display(zB0)
+				}
+			} catch(e) {
+				display(zB0)
+			}
+		} else {
+			display(zD)
 		}
-	} else {
-		dom.sSynth = zD; dom.sEngines = zNA
-		//return "speech synth: " + zD + ", " + zNA
-	}
+	})
 }
 
 function get_speech_rec() {
@@ -324,35 +352,17 @@ function get_touch() {
 }
 
 function get_vr() {
-	let r1 = "", r2 = ""
-	if ("getVRDisplays" in navigator) {
-		dom.nVR = zE
-		if ("activeVRDisplays" in navigator) {
-			try {
-				let d = navigator.activeVRDisplays
-				if (d.length == 0) {
-					r2 = "none"
-					dom.aVR = "none"
-				} else {
-					// ToDo: VR: enum
-					let items = " item" + (d.length == 1 ? "" : "s") + "]"
-					r2 = note_ttc
-					dom.aVR.innerHTML = note_ttc+" ["+d.length + items
-					for (let i=0; i < d.length; i++) {
-						// console.debug(d[i].displayId)
-					}
-				}
-			} catch(e) {
-				dom.aVR.innerHTML = zB0
-			}
-			return "vr:" + zE +", "+ r2
-		} else {
-			return "vr:" + zE +", "+ zD
+	return new Promise(resolve => {
+		function display(output) {
+			dom.vrdisplays.innerHTML = output
+			return resolve("vr:" + output)
 		}
-	}	else {
-		dom.nVR = zD;	dom.aVR = zNA
-		return "vr:" + zD + ", " + zNA
-	}
+		if ("getVRDisplays" in navigator && "activeVRDisplays" in navigator) {
+			try {display(zE)} catch(e) {display(zB0)}
+		}	else {
+			display(zD)
+		}
+	})
 }
 
 function outputDevices() {
@@ -360,21 +370,27 @@ function outputDevices() {
 		section = []
 
 	//ToDo: promisify and add to section hash
-	get_gamepads()
-	get_media_devices()
 	get_speech_rec()
-	get_speech_synth()
-	get_pointer_hover()
+	get_speech_engines()
 
 	Promise.all([
-		get_concurrency(),
+		get_plugins(), // do first: it calculates isBraveFP
 		get_mimetypes(),
-		get_plugins(),
+		get_pointer_hover(),
+		get_gamepads(),
+		get_concurrency(), // ToDo: return fake for isBraveFP
+		get_media_devices(),
 		get_touch(),
 		get_vr(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
-			section.push(currentResult)
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
 		})
 		section_info("devices", t0, section)
 	})
