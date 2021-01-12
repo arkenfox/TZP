@@ -87,6 +87,7 @@ function set_pluginBS() {
 	if (pluginLies.length) {
 		if (isBrave) {isBraveFP = true}
 		pluginBS = true
+		console.debug("pluginsBS check", pluginsBS)
 	} else {
 		pluginBS = false
 	}
@@ -305,7 +306,7 @@ function get_plugins() {
 							if (res.length > 1) {
 								pluginBS = true
 							} else if (res.length == 1) {
-								console.debug(res[0].split(":")[0])
+								console.debug(res[0].split(":")[0], pluginBS)
 								if (res[0].split(":")[0] !== "Shockwave Flash") {pluginBS = true}
 							}
 						}
