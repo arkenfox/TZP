@@ -132,23 +132,19 @@ function get_media_devices() {
 				navigator.mediaDevices.enumerateDevices().then(function(devices) {
 					let arr = []
 					// enumerate
-					try {
-						devices.forEach(function(d) {
-							arr.push(d.kind)
-							str += (d.kind+": ").padStart(pad)+d.deviceId
-							if (d.groupId.length > 0) {
-								strPad = ("group: ").padStart(pad)
-								str += "<br>"+strPad+d.groupId
-							}
-							if (d.label.length > 0) {
-								strPad = ("label: ").padStart(pad)
-								str += "<br>"+strPad+d.label
-							}
-							str += "<br>"
-						})
-					} catch(e) {
-						console.debug(e.name, e.message)
-					}
+					devices.forEach(function(d) {
+						arr.push(d.kind)
+						str += (d.kind+": ").padStart(pad)+d.deviceId
+						if (d.groupId.length > 0) {
+							strPad = ("group: ").padStart(pad)
+							str += "<br>"+strPad+d.groupId
+						}
+						if (d.label.length > 0) {
+							strPad = ("label: ").padStart(pad)
+							str += "<br>"+strPad+d.label
+						}
+						str += "<br>"
+					})
 					// output list
 					if (str.length == 0) {str = "none"}
 					dom.eMDList.innerHTML = str
@@ -508,4 +504,4 @@ function outputDevices() {
 	})
 }
 
-setTimeout(function() {outputDevices()}, 1)
+countJS("devices")
