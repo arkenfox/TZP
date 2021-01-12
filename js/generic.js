@@ -438,7 +438,6 @@ function outputSection(id, cls) {
 	sRerun = false
 	// clear everything
 	if (id == "all") {
-		delay = 5
 		let items = document.getElementsByClassName("c")
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 		items = document.getElementsByClassName("gc")
@@ -454,8 +453,9 @@ function outputSection(id, cls) {
 		fpAllCount = 0
 		gRerun = true
 	} else if (id == "load") {
-		gRerun = false
-		sRerun = false
+		delay = 1
+		gRerun = false // redundant
+		sRerun = false // redundant
 		id = "all"
 	} else {
 		// clear table elements, &nbsp stops line height jitter
@@ -484,7 +484,7 @@ function outputSection(id, cls) {
 		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
 
-		//	first 3 sections: always run first as it sets global vars
+		// first 3 sections: always run first as it sets global vars
 		if (id=="all") {outputStart()}
 		// possible gRerun: delay/stagger, use same order as js loads
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
