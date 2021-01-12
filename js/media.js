@@ -173,4 +173,4 @@ function outputMedia() {
 	})
 }
 
-setTimeout(function() {outputMedia()}, 1)
+countJS("media")

@@ -1150,7 +1150,7 @@ function get_pbmode() {
 		if (logPerf) {debug_log("pbmode [screen]",t0)}
 	}
 	if (isVer < 83) {
-		// dom.indexedDB.privateBrowsing.enabled
+		// FF83+: 1638396: dom.indexedDB.privateBrowsing.enabled
 		try {
 			let db = indexedDB.open("PB")
 			db.onerror = function() {output("true")}
@@ -2505,7 +2505,7 @@ function outputUA() {
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
 		if (useIframe) {
 			// iframeleak: output THEN finish workers
-			section.push("_spoofing_attempt:true") // did they try to lie adds entropy
+			section.push("_spoofing_attempt_ua:true") // lie entropy
 			output()
 			get_ua_workers()
 		} else {
@@ -2513,7 +2513,9 @@ function outputUA() {
 			get_ua_workers()
 			// temp return until I promisify workers
 			if (uaBS) {
-				section = ["lies:yes"]
+				section = ["_spoofing_attempt_ua:true"]
+			} else {
+				section.push("_spoofing_attempt_ua:false")
 			}
 			output()
 		}
@@ -2705,4 +2707,4 @@ function outputStart() {
 	setTimeout(function() {run_os()}, 1) // per os tweaks
 }
 
-outputStart()
+countJS("screen")

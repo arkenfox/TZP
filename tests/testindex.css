@@ -21,7 +21,7 @@
 }
 
 /* main */
-body {background-color: #1a1a1a; color: #b3b3b3;}
+body {background-color: #161b22; color: #b3b3b3;}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
 code {background: #303030 !important; border: 1px solid rgba(255, 255, 255, .1);
 	padding: 1px; border-radius: 2px;}
@@ -58,7 +58,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 }
 
 /* not-really-buttons & section color */
-.btn {background-color: #1a1a1a;
+.btn {background-color: #161b22;
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";

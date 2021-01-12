@@ -829,4 +829,4 @@ function outputFonts() {
 	})
 }
 
-setTimeout(function() {outputFonts()}, 1)
+countJS("fonts")

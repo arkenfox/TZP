@@ -178,4 +178,4 @@ function outputDomRect() {
 
 }
 
-setTimeout(function() {outputDomRect()}, 1)
+countJS("domrect")

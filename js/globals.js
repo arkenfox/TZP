@@ -7,6 +7,8 @@ let fpAllHash = [],
 	fpAllCheck = [],
 	fpAllCount = 0
 
+let jsFiles = []
+
 // android
 let avh = "",
 	firstH = window.innerHeight,
@@ -39,7 +41,7 @@ let avh = "",
 	s18 = s0+"s18'>",
 	sc = "</span>",
 // show/hide text colors
-	zhide = "#1a1a1a",
+	zhide = "#161b22",
 	zshow = "#b3b3b3",
 // common results
 	zB = sb+"[blocked]"+sc,
