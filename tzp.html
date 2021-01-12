@@ -466,6 +466,7 @@
 	</table>
 
 	<!--devices.js-->
+	<!--devices.js-->
 	<table id="tb7">
 		<col width="29%"><a name="devices"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -477,8 +478,9 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</span></div>
 			<span class="c" id="deviceshash"></span></td></tr>
-		<tr><td>plugins</td><td class="gc" id="plugins"></td></tr>
-		<tr><td>mimeTypes</td><td class="gc" id="mimeTypes"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">dom.gamepad.enabled</span></div>
+			&nbsp gamepads</td><td class="c" id="gamepads"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp hardwareConcurrency</td><td class="c" id="nHWC"></td></tr>
@@ -491,26 +493,30 @@
 			<span class="ttxtb">media.webspeech.recognition.enable</span></div>
 			&nbsp speech recognition</td><td class="c" id="sRec"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
-			&nbsp speech synthesis</td><td class="c" id="sSynth"></td></tr>
-		<tr><td>speech engines</td><td class="c gc" id="sEngines"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">maxTouchPoints<br>-moz-touch-enabled<br>ontouchstart<br>ontouchend<br>TouchEvent</span>
 			</div>&nbsp touch</td><td class="c" id="touch"></td></tr>
-		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.gamepad.enabled</span></div>
-			&nbsp [api] gamepad</td><td class="c" id="nGP"></td></tr>
-		<tr><td>gamepads</td><td class="c gc" id="eGP"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">media.navigator.enabled</span></div>
-			&nbsp mediaDevices</td><td class="c" id="nMD"></td></tr>
-		<tr><td>enumerateDevices</td><td class="mono gc spaces" id="eMD"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.vr.enabled</span></div>
-			&nbsp [api] webvr</td><td class="c" id="nVR"></td></tr>
-		<tr><td>activeVRDisplays</td><td class="c gc" id="aVR"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+			&nbsp virtual reality</td><td class="c" id="vrdisplays"></td></tr>
+		<tr><td colspan="2" class="center">--- enumeration ---</td></tr>
+		<tr><td>plugins</td><td class="c gc mono" id="plugins"></td></tr>
+		<tr><td>mimeTypes</td><td class="c gc mono" id="mimeTypes"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtx">media.navigator.enabled &amp media.peerconnection.enabled<br></span></div>
+			&nbsp media devices</td><td class="c mono" id="eMD"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
+			&nbsp speech engines</td><td class="c mono" id="sEngines"></td></tr>
+		<!-- DETAILS -->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseDv" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Dv`)">
+			<label for="collapseDv" class="lbl-toggle" id="labelDv">&#9660; show details</label>
+		</td></tr>
+		<tr class="togDv"><td>plugins</td><td class="gc" id="pluginsList"></td></tr>
+		<tr class="togDv"><td>mimeTypes</td><td class="gc" id="mimeTypesList"></td></tr>
+		<tr class="togDv"><td>media devices</td><td class="mono gc spaces" id="eMDList"></td></tr>
+		<tr class="togDv"><td>speech engines</td><td class="gc " id="sEnginesList"></td></tr>
+		<tr class="togDv"><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
 	<!--domrect.js-->
