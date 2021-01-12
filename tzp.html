@@ -131,7 +131,10 @@
 			<span class="ttxtb">will attempt to open a new<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c" id="newWinLeak"></td></tr>
 		<tr class="togOS1"><td>[android] new window</td><td id="droidWin"></td></tr>
-		<tr><td>private window</td><td class="c" id="IsPBMode"></td></tr>
+		<tr><td>
+			<div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtx">FF83+<br>dom.indexedDB.privateBrowsing.enabled</span></div>
+			&nbsp private window</td><td class="c" id="IsPBMode"></td></tr>
 		<tr><td>[screen] orientation | mozOrientation | angle</td><td class="c" id="ScrOrient"></td></tr>
 		<tr><td>[css] -moz- | orientation | aspect-ratio | device-aspect-ratio</td>
 			<td><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span></td></tr>
@@ -305,10 +308,19 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="languagehash"></span></td></tr>
+
+		<tr><td>hash</td><td class="c mono" id="lHashDoc"></td></tr>
 		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="lHash2"></td></tr>
 		<tr><td>geolocation</td><td class="c mono" id="lHash3"></td></tr>
+
+		<!--
+		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
+		<tr><td>nested iframe</td><td class="c mono faint" id="langIframe"></td></tr>
+		<tr><td>shared worker</td><td class="c mono" id="langWorker"></td></tr>
+		-->
+
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseL" class="toggle" type="checkbox" checked onchange="toggleitems(this, `L`)"/>
@@ -466,7 +478,6 @@
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
-	<!--devices.js-->
 	<!--devices.js-->
 	<table id="tb7">
 		<col width="29%"><a name="devices"></a><col width="71%">
@@ -953,9 +964,10 @@
 	<a name="theend"></a><br>
 
 	<script src="js/main.js"></script>
-	<!--first 3 sections: load first as it sets global vars-->
+	<!--download order doesn't matter
+		JS chooses the order and runs when all files below are recieved
+	-->
 	<script src="js/screen.js"></script>
-	<!--faster-->
 	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>
 	<script src="js/devices.js"></script>
@@ -964,7 +976,6 @@
 	<script src="js/css.js"></script>
 	<script src="js/misc.js"></script>
 	<script src="js/media.js"></script>
-	<!--slower-->
 	<script src="js/canvas.js"></script>
 	<script src="js/fonts.js"></script>
 	<script src="js/webgl.js"></script>
