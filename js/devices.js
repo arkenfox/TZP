@@ -1,11 +1,94 @@
 'use strict';
 
+var pluginBS
+
 function reset_devices() {
 	dom.mimeTypesList.style.color = zhide
 	dom.pluginsList.style.color = zhide
 	dom.eMDList.style.color = zhide
 	dom.sEnginesList.style.color = zhide
 }
+
+function set_pluginBS() {
+	/* https://github.com/abrahamjuliot/creepjs */
+
+	// set pluginBS
+	const testPlugins = (plugins, mimeTypes) => {
+		const lies = []
+		const ownProperties = Object.getOwnPropertyNames(plugins).filter(name => isNaN(+name))
+		const ownPropertiesSet = new Set(ownProperties)
+		const mimeTypesDescriptions = new Set(
+			[...mimeTypes]
+			.map(mime => mime.description)
+			.filter(description => description != '') // ignore blank descriptions  
+		)
+		const pluginsList = [...plugins]
+			.filter(plugin => plugin.description != '') // ignore blank descriptions
+		const mimeTypesDescriptionsString = `${[...mimeTypesDescriptions].join(', ')}`
+		const validPluginList = pluginsList.filter(plugin => {
+			try {
+				return plugin[0].description
+			} catch (error) {
+				return undefined // sign of tampering
+			}
+		})
+
+		// Expect MimeType Plugins to match Plugins
+		const mimeTypePluginNames = '' + [
+			...new Set([...mimeTypes].map(mimeType => mimeType.enabledPlugin.name))
+		].sort()
+		const rawPluginNames = '' + [
+			...new Set([...plugins].map(plugin => plugin.name))
+		].sort()
+		if (mimeTypePluginNames != rawPluginNames) {lies.push("A")}
+
+		// Expect MimeType object in plugins
+		const invalidPluginList = pluginsList.filter(plugin => {
+			try {
+				return !plugin[0].description
+			} catch (error) {
+				return true // sign of tampering
+			}
+		})
+		if (!!invalidPluginList.length) {lies.push("B")}
+
+		// Expect plugin MimeType description to match plugin description
+		const nonMatchingMimetypePlugins = validPluginList
+			.filter(plugin => plugin[0].description != plugin.description)
+			.map(plugin => [plugin.description, plugin[0].description])
+		if (!!nonMatchingMimetypePlugins.length) {lies.push("C")}
+
+		// Expect plugin MimeType description to match a MimeType description
+		const invalidPrototypeMimeTypePlugins = validPluginList
+			.filter(plugin => !mimeTypesDescriptions.has(plugin[0].description))
+			.map(plugin => [plugin[0].description, mimeTypesDescriptionsString])
+		if (!!invalidPrototypeMimeTypePlugins.length) {lies.push("D")}
+
+		// Expect plugin description to match a MimeType description
+		const invalidMimetypePlugins = validPluginList
+			.filter(plugin => !mimeTypesDescriptions.has(plugin.description))
+			.map(plugin => [plugin.description, mimeTypesDescriptionsString])
+		if (!!invalidMimetypePlugins.length) {lies.push("E")}
+
+		// Expect plugin name to be in plugins own properties
+		pluginsList.forEach(plugin => {
+			const {
+				name
+			} = plugin
+			if (!ownPropertiesSet.has(name)) {lies.push("F")}
+		})
+		return lies
+	}
+	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
+
+	if (pluginLies.length) {
+		if (isBrave) {isBraveFP = true}
+		pluginBS = true
+	} else {
+		pluginBS = false
+	}
+}
+
 
 function get_gamepads() {
 	return new Promise(resolve => {
@@ -27,8 +110,8 @@ function get_concurrency() {
 			h = zB0
 		}
 	}
-	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
 	if (isBraveFP) {h = "fake"}
+	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
 	return "hardwareConcurrency:" + h
 }
 
@@ -110,11 +193,14 @@ function get_media_devices() {
 }
 
 function get_mimetypes() {
-/* flash examples in FF
+/* FF84 and lower: Flash example (both)
 	// application/futuresplash: application/futuresplash: spl
 	// application/x-shockwave-flash: application/x-shockwave-flash: swf
 */
 	return new Promise(resolve => {
+
+		var mimeBS = false
+
 		function display(output) {
 			let detail = output, count = ""
 			if (Array.isArray(output)) {
@@ -122,6 +208,7 @@ function get_mimetypes() {
 				detail = output.join("<br>")
 				output = sha1(output.join())
 			}
+			if (mimeBS) {output = "fake"; count = ""}
 			dom.mimeTypes.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.mimeTypesList.innerHTML = detail
 			dom.mimeTypesList.style.color = zshow
@@ -137,6 +224,13 @@ function get_mimetypes() {
 							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 					}
 					res.sort()
+					// FF lies
+					if (isFF) {
+						if (isVer > 84) {
+							// FF85+: EOL Flash
+							if (res.length > 0) {mimeBS = true}
+						}
+					}
 					display(res)
 				} else {
 					display("none")
@@ -170,16 +264,6 @@ function get_mm_pointer(type){
 }
 
 function get_plugins() {
-/* ToDo: FF Flash EOL version check 2021
-	isLies = false
-	if (isFF) {
-		if (res.length > 1) {
-			isLies = true
-		} else if (res.length == 1) {
-			if (res[0].split(":")[0] !== "Shockwave Flash") {isLies = true}
-		}
-	}
-*/
 	return new Promise(resolve => {
 		function display(output) {
 			let detail = output, count = ""
@@ -188,11 +272,13 @@ function get_plugins() {
 				detail = output.join("<br>")
 				output = sha1(output.join())
 			}
+			if (pluginBS) {output = "fake"; count = ""}
 			dom.plugins.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.pluginsList.innerHTML = detail
 			dom.pluginsList.style.color = zshow
 			return resolve("plugins:" + output)
 		}
+
 		if ("plugins" in navigator) {
 			try {
 				let p = navigator.plugins
@@ -203,6 +289,19 @@ function get_plugins() {
 							+ (p[i].description == "" ? ": *" : ": " + p[i].description))
 					}
 					res.sort()
+					// FF lies: in case we missed them
+					if (isFF) {
+						if (isVer > 84) {
+							// FF85+: EOL Flash
+							if (res.length > 0) {pluginBS = true}
+						} else {
+							if (res.length > 1) {
+								pluginBS = true
+							} else if (res.length == 1) {
+								if (res[0].split(":")[0] !== "Shockwave Flash") {pluginBS = true}
+							}
+						}
+					}
 					display(res)
 				} else {
 					display("none")
@@ -368,20 +467,22 @@ function get_vr() {
 function outputDevices() {
 	let t0 = performance.now(),
 		section = []
+	// check for BS & trickery
+	set_pluginBS()
 
 	//ToDo: promisify and add to section hash
 	get_speech_rec()
 	get_speech_engines()
 
 	Promise.all([
-		get_plugins(), // do first: it calculates isBraveFP
-		get_mimetypes(),
 		get_pointer_hover(),
 		get_gamepads(),
-		get_concurrency(), // ToDo: return fake for isBraveFP
 		get_media_devices(),
 		get_touch(),
 		get_vr(),
+		get_plugins(),
+		get_mimetypes(),
+		get_concurrency(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
