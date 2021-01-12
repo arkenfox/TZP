@@ -35,14 +35,15 @@ function set_pluginBS() {
 
 		// Expect MimeType Plugins to match Plugins
 		try {
+			// Uncaught TypeError: 'get enabledPlugin' called on an object that does not implement interface MimeType.
 			const mimeTypePluginNames = '' + [
 				...new Set([...mimeTypes].map(mimeType => mimeType.enabledPlugin.name))
 			].sort()
+			const rawPluginNames = '' + [
+				...new Set([...plugins].map(plugin => plugin.name))
+			].sort()
+			if (mimeTypePluginNames != rawPluginNames) {lies.push("A")}
 		} catch(e) {}
-		const rawPluginNames = '' + [
-			...new Set([...plugins].map(plugin => plugin.name))
-		].sort()
-		if (mimeTypePluginNames != rawPluginNames) {lies.push("A")}
 
 		// Expect MimeType object in plugins
 		const invalidPluginList = pluginsList.filter(plugin => {
