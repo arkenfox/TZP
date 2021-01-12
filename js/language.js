@@ -726,7 +726,7 @@ function outputLanguage() {
 
 	function get_worker() {
 		section_info("language", t0, section)
-
+		get_lang_worker() // tack this on here for now
 	}
 
 	// run
