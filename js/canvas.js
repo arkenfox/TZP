@@ -589,4 +589,4 @@ function outputCanvas() {
 
 }
 
-setTimeout(function() {outputCanvas()}, 1)
+countJS("canvas")
