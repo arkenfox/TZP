@@ -132,19 +132,23 @@ function get_media_devices() {
 				navigator.mediaDevices.enumerateDevices().then(function(devices) {
 					let arr = []
 					// enumerate
-					devices.forEach(function(d) {
-						arr.push(d.kind)
-						str += (d.kind+": ").padStart(pad)+d.deviceId
-						if (d.groupId.length > 0) {
-							strPad = ("group: ").padStart(pad)
-							str += "<br>"+strPad+d.groupId
-						}
-						if (d.label.length > 0) {
-							strPad = ("label: ").padStart(pad)
-							str += "<br>"+strPad+d.label
-						}
-						str += "<br>"
-					})
+					try {
+						devices.forEach(function(d) {
+							arr.push(d.kind)
+							str += (d.kind+": ").padStart(pad)+d.deviceId
+							if (d.groupId.length > 0) {
+								strPad = ("group: ").padStart(pad)
+								str += "<br>"+strPad+d.groupId
+							}
+							if (d.label.length > 0) {
+								strPad = ("label: ").padStart(pad)
+								str += "<br>"+strPad+d.label
+							}
+							str += "<br>"
+						})
+					} catch(e) {
+						console.debug(e.name, e.message)
+					}
 					// output list
 					if (str.length == 0) {str = "none"}
 					dom.eMDList.innerHTML = str
@@ -196,12 +200,7 @@ function get_media_devices() {
 }
 
 function get_mimetypes() {
-/* FF84 and lower: Flash example (both)
-	// application/futuresplash: application/futuresplash: spl
-	// application/x-shockwave-flash: application/x-shockwave-flash: swf
-*/
 	return new Promise(resolve => {
-
 		var mimeBS = false
 
 		function display(output) {
@@ -232,6 +231,15 @@ function get_mimetypes() {
 						if (isVer > 84) {
 							// FF85+: EOL Flash
 							if (res.length > 0) {mimeBS = true}
+						} else {
+							// Flash only
+							if (res.length > 2) {
+								mimeBS = true
+							} else if (res > 0) {
+								// windows example
+								// application/futuresplash: application/futuresplash: spl
+								// application/x-shockwave-flash: application/x-shockwave-flash: swf
+							}
 						}
 					}
 					display(res)
