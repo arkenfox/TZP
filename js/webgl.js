@@ -193,4 +193,4 @@ function outputWebGL() {
 	outputWebGL_render()
 }
 
-setTimeout(function() {outputWebGL()}, 1)
+countJS("webgl")
