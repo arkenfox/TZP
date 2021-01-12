@@ -34,9 +34,11 @@ function set_pluginBS() {
 		})
 
 		// Expect MimeType Plugins to match Plugins
-		const mimeTypePluginNames = '' + [
-			...new Set([...mimeTypes].map(mimeType => mimeType.enabledPlugin.name))
-		].sort()
+		try {
+			const mimeTypePluginNames = '' + [
+				...new Set([...mimeTypes].map(mimeType => mimeType.enabledPlugin.name))
+			].sort()
+		} catch(e) {}
 		const rawPluginNames = '' + [
 			...new Set([...plugins].map(plugin => plugin.name))
 		].sort()
