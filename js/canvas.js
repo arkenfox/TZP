@@ -319,8 +319,8 @@ function outputCanvas() {
 				// taken from https://panopticlick.eff.org/static/fp2.js
 				var context = getContext()
 				var canvas = context.canvas
-				canvas.width = 2000
-				canvas.height = 200
+				canvas.width = 220
+				canvas.height = 30
 				canvas.style.display = "inline"
 				// detect browser support of canvas winding
 				// http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
