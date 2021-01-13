@@ -121,7 +121,7 @@ let avh = "",
 // dev
 	gt0,
 	logExtra = false,
-	logPerf = false,
+	logPerf = true,
 	logStorage = false,
 	runS = false,
 // rerun

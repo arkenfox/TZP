@@ -2672,15 +2672,7 @@ function outputStart() {
 
 		// IMMUTABLE: don't do on reruns
 		if (!gRerun) {
-			if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
-			if ((location.protocol) == "https:") {isSecure = true}
-			if ("undefined" != typeof InstallTrigger) {
-				isFF = true
-				get_chrome() // isTB*, get as soon as possible
-			}
-			if ("brave" in navigator) {isBrave = true}
-			if (!isFF) {runS = false} // sim = FF only
-			get_engine()
+			if (isFF) {get_chrome()} // sets isTB*, get ASAP
 		}
 
 		// cosmetics
