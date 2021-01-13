@@ -51,11 +51,20 @@ function section_click(name, time1) {
 }
 
 function countJS(filename) {
-	// don't start anything until all JS files have arrived
 	jsFiles.push(filename)
+	// set isEngine while we wait
+	if (filename == "screen") {get_engine()}
+
+	// yay! all js files have arrived
 	if (jsFiles.length == 12) {
-		//console.debug(jsFiles)
 		outputSection("load")
+
+		// or load a single section for perf tests
+		// note: some tests require global vars set
+		//isOS = "windows" // font list sizes: windows 468, linux 449, mac 755, droid 140
+		//outputFonts()
+
+		//outputDevices() // media devices is slow (300+ ms) speech engines runs 3 times
 	}
 }
 
@@ -489,8 +498,8 @@ function outputSection(id, cls) {
 		// possible gRerun: delay/stagger, use same order as js loads
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 		setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
@@ -505,3 +514,24 @@ function outputSection(id, cls) {
 	setTimeout(function() {output()}, delay)
 
 }
+
+function run_once() {
+	// lets get started while we wait for all the JS modules to arrive
+
+	// immutable
+	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
+	if ((location.protocol) == "https:") {isSecure = true}
+	if ("brave" in navigator) {isBrave = true}
+	if (!isFF) {runS = false} // sim = FF only
+	if ("undefined" != typeof InstallTrigger) {isFF = true}
+
+	//prime up some JS functions
+	try {
+		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
+	} catch(e) {}
+	try {
+		let v = speechSynthesis.getVoices()
+	} catch(e) {}
+}
+
+run_once()
