@@ -122,9 +122,11 @@ function get_concurrency() {
 
 function get_media_devices() {
 	return new Promise(resolve => {
+		let t0 = performance.now()
 
 		function finish(result) {
 			dom.eMDList.style.color = zshow
+			if (logPerf) {debug_log("media devices [devices]",t0)}
 			return resolve("media_devices:"+result)
 		}
 		if ("mediaDevices" in navigator) {
@@ -199,6 +201,7 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
+		let t0 = performance.now()
 		var mimeBS = false
 
 		function display(output) {
@@ -212,6 +215,7 @@ function get_mimetypes() {
 			dom.mimeTypes.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.mimeTypesList.innerHTML = detail
 			dom.mimeTypesList.style.color = zshow
+			if (logPerf) {debug_log("mimeTypes [devices]",t0)}
 			return resolve("mimeTypes:" + output)
 		}
 		if ("mimeTypes" in navigator) {
@@ -224,7 +228,7 @@ function get_mimetypes() {
 							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 					}
 					res.sort()
-					// FF
+					// ToDo: FF: mimeBS
 						// hasFlash: set in plugins test
 						// can FF52+ have mimetypes other than flash?
 					display(res)
@@ -261,6 +265,8 @@ function get_mm_pointer(type){
 
 function get_plugins() {
 	return new Promise(resolve => {
+		let t0 = performance.now()
+
 		function display(output) {
 			let detail = output, count = ""
 			if (Array.isArray(output)) {
@@ -272,6 +278,7 @@ function get_plugins() {
 			dom.plugins.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.pluginsList.innerHTML = detail
 			dom.pluginsList.style.color = zshow
+			if (logPerf) {debug_log("plugins [devices]",t0)}
 			return resolve("plugins:" + output)
 		}
 
@@ -352,6 +359,8 @@ function get_pointer_hover() {
 
 function get_speech_engines() {
 	return new Promise(resolve => {
+		let t0 = performance.now()
+
 		// output & resolve
 		function display(output) {
 			let detail = output, count = ""
@@ -363,6 +372,7 @@ function get_speech_engines() {
 			dom.sEngines.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.sEnginesList.innerHTML = detail
 			dom.sEnginesList.style.color = zshow
+			if (logPerf) {debug_log("speech engines [devices]",t0)}
 			return resolve("speech_engines:" + output)
 		}
 
@@ -480,13 +490,13 @@ function outputDevices() {
 	get_speech_engines()
 
 	Promise.all([
+		get_media_devices(),
 		get_pointer_hover(),
 		get_gamepads(),
-		get_plugins(),
-		get_media_devices(),
 		get_touch(),
 		get_vr(),
 		get_concurrency(),
+		get_plugins(),
 		get_mimetypes(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
