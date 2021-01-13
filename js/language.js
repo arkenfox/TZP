@@ -3,7 +3,7 @@
 let bTZ = false
 let langDoc = []
 let combo1 = "", combo2 = ""
-let lHash0 = '', lHash1 = "", lHash2 = ""
+let lHash0 = "", lHash1 = "", lHash2 = ""
 
 function get_navigator() {
 	return new Promise(resolve => {
@@ -98,22 +98,9 @@ function get_navigator() {
 		dom.nGPC = gpc
 
 		// subsection hash
+		results.sort()
 		dom.hHash0.innerHTML = sha1(results.join())
 		// resolve
-		return resolve(results)
-	})
-}
-
-function get_network() {
-	return new Promise(resolve => {
-		let results = []
-		// network.preload
-		let relList = document.createElement('link').relList
-		let r = !!(relList && relList.supports && relList.supports('preload'))
-		dom.nPreload.innerHTML = r
-		results.push("preload:" + r)
-		// subsection hash
-		dom.hHash1.innerHTML = sha1(results.join())
 		return resolve(results)
 	})
 }
@@ -122,7 +109,6 @@ function outputHeaders() {
 	let t0 = performance.now(),
 		section = []
 	Promise.all([
-		get_network(),
 		get_navigator()
 	]).then(function(results){
 		results.forEach(function(currentResult) {
