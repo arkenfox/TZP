@@ -1,7 +1,6 @@
 'use strict';
 
 var pluginBS = false
-var hasFlash = false
 
 function reset_devices() {
 	dom.mimeTypesList.style.color = zhide
@@ -93,7 +92,6 @@ function set_pluginBS() {
 		pluginBS = false
 	}
 }
-
 
 function get_gamepads() {
 	return new Promise(resolve => {
@@ -201,7 +199,6 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
 		var mimeBS = false
 
 		function display(output) {
@@ -215,8 +212,7 @@ function get_mimetypes() {
 			dom.mimeTypes.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.mimeTypesList.innerHTML = detail
 			dom.mimeTypesList.style.color = zshow
-			if (logPerf) {debug_log("mimeTypes [devices]",t0)}
-			return resolve("mimeTypes:" + output)
+			return resolve(output)
 		}
 		if ("mimeTypes" in navigator) {
 			try {
@@ -228,9 +224,26 @@ function get_mimetypes() {
 							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
 					}
 					res.sort()
-					// ToDo: FF: mimeBS
-						// hasFlash: set in plugins test
-						// can FF52+ have mimetypes other than flash?
+					// FF: mimeBS
+					if (isFF) {
+						if (isVer > 84 && res.length > 0) {
+							// FF85+: EOL Flash
+							mimeBS = true
+						} else {
+							if (res.length == 2) {
+									// example
+										// application/futuresplash: application/futuresplash: spl
+										// application/x-shockwave-flash: application/x-shockwave-flash: swf
+									let mime1 = res[0].split(":")[0]
+									let mime2 = res[1].split(":")[0]
+									if (mime1 !== "application/futuresplash" || mime2 !== "application/x-shockwave-flash") {
+										mimeBS = true
+									}
+							} else {
+								mimeBS = true
+							}
+						}
+					}
 					display(res)
 				} else {
 					display("none")
@@ -241,6 +254,38 @@ function get_mimetypes() {
 		} else {
 			display(zD)
 		}
+	})
+}
+
+function get_mimetypes_plugins() {
+	return new Promise(resolve => {
+		let t0 = performance.now()
+		Promise.all([
+			get_plugins(),
+			get_mimetypes(),
+		]).then(function(results){
+			let pValue = results[0]
+			let mValue = results[1]
+			// values returned can be: none, sha1-hash, disabled, blocked, fake
+			if (isFF) {
+				// the only hashes allowed through in FF are flash
+				let pFlash = false
+				let mFlash = false
+				if (pValue.length == 40) {pFlash = true}
+				if (mValue.length == 40) {mFlash = true}
+				// if any flash then BOTH must be true: replace hash with fake
+				if (pFlash == true && mFlash == false) {
+					pValue = "fake"
+					dom.plugins.innerHTML = "fake" + rfp_red
+				}
+				if (pFlash == false && mFlash == true) {
+					mValue = "fake"
+					dom.mimeTypes.innerHTML = "fake" + rfp_red
+				}
+			}
+			if (logPerf) {debug_log("mimetypes/plugins [devices]",t0)}
+			return resolve(["plugins:"+pValue, "mimeTypes:"+mValue])
+		})
 	})
 }
 
@@ -265,7 +310,6 @@ function get_mm_pointer(type){
 
 function get_plugins() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
 
 		function display(output) {
 			let detail = output, count = ""
@@ -278,8 +322,7 @@ function get_plugins() {
 			dom.plugins.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.pluginsList.innerHTML = detail
 			dom.pluginsList.style.color = zshow
-			if (logPerf) {debug_log("plugins [devices]",t0)}
-			return resolve("plugins:" + output)
+			return resolve(output)
 		}
 
 		if ("plugins" in navigator) {
@@ -294,8 +337,8 @@ function get_plugins() {
 					res.sort()
 					// FF
 					if (isFF) {
+						// reset
 						pluginBS = false
-						hasFlash = false
 						if (isVer > 84 && res.length > 0) {
 							// FF85+: EOL Flash
 							pluginBS = true
@@ -304,9 +347,7 @@ function get_plugins() {
 							pluginBS = true
 						} else {
 							// one item
-							if (res[0].split(":")[0] == "Shockwave Flash") {
-								hasFlash = true
-							} else {
+							if (res[0].split(":")[0] !== "Shockwave Flash") {
 								pluginBS = true
 							}
 						}
@@ -496,8 +537,7 @@ function outputDevices() {
 		get_touch(),
 		get_vr(),
 		get_concurrency(),
-		get_plugins(),
-		get_mimetypes(),
+		get_mimetypes_plugins(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
