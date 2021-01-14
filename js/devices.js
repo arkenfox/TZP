@@ -239,6 +239,7 @@ function get_mimetypes() {
 									if (mime1 !== "application/futuresplash" || mime2 !== "application/x-shockwave-flash") {
 										mimeBS = true
 									}
+									console.debug(mime1,mime2, mimeBS)
 							} else {
 								mimeBS = true
 							}
@@ -350,6 +351,7 @@ function get_plugins() {
 							if (res[0].split(":")[0] !== "Shockwave Flash") {
 								pluginBS = true
 							}
+							console.debug(res.length, res[0].split(":")[0], pluginBS)
 						}
 					}
 					display(res)
