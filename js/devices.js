@@ -231,15 +231,14 @@ function get_mimetypes() {
 							mimeBS = true
 						} else {
 							if (res.length == 2) {
-									// example
-										// application/futuresplash: application/futuresplash: spl
+									// example windows 64bit FF both 32/64bit
+										// application/x-futuresplash: application/x-futuresplash: spl
 										// application/x-shockwave-flash: application/x-shockwave-flash: swf
 									let mime1 = res[0].split(":")[0]
 									let mime2 = res[1].split(":")[0]
-									if (mime1 !== "application/futuresplash" || mime2 !== "application/x-shockwave-flash") {
+									if (mime1 !== "application/x-futuresplash" || mime2 !== "application/x-shockwave-flash") {
 										mimeBS = true
 									}
-									console.debug(mime1,mime2, mimeBS)
 							} else {
 								mimeBS = true
 							}
@@ -351,7 +350,6 @@ function get_plugins() {
 							if (res[0].split(":")[0] !== "Shockwave Flash") {
 								pluginBS = true
 							}
-							console.debug(res.length, res[0].split(":")[0], pluginBS)
 						}
 					}
 					display(res)
