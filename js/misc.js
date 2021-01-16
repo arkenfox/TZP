@@ -62,7 +62,7 @@ function get_mathml() {
 	dom.mathmltest.style.color = zshow
 	// measure
 	let test = dom.mathmltest.offsetHeight,
-		control = dom.nOnLine.offsetHeight, // a row with plain text and info icon
+		control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
 		diff = Math.abs(test-control)
 	// compare: use a range as zoom affects diff
 	let pre = " | offsetHeight difference: ",
@@ -251,9 +251,9 @@ function outputMisc(type) {
 
 	// other
 	Promise.all([
+		get_reporting_api(),
 		get_svg(),
 		get_wasm(),
-		get_mathml(),
 		get_perf1(),
 		get_perf3(),
 		get_perf4(),
@@ -261,7 +261,7 @@ function outputMisc(type) {
 		get_iframe_props(),
 		get_windowcontent(),
 		get_nav_prototype(),
-		get_reporting_api(),
+		get_mathml(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
