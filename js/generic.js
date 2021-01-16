@@ -63,7 +63,6 @@ function countJS(filename) {
 		// note: some tests require global vars set
 		//isOS = "windows" // font list sizes: windows 468, linux 449, mac 755, droid 140
 		//outputFonts()
-
 		//outputDevices() // media devices is slow (300+ ms) speech engines runs 3 times
 	}
 }
@@ -522,10 +521,13 @@ function run_once() {
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("brave" in navigator) {isBrave = true}
-	if (!isFF) {runS = false} // sim = FF only
-	if ("undefined" != typeof InstallTrigger) {isFF = true}
+	if ("undefined" != typeof InstallTrigger) {
+		isFF = true
+	} else {
+		runS = false // simulation is FF only
+	}
 
-	//prime up some JS functions
+	//warm up some JS functions
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
 	} catch(e) {}
