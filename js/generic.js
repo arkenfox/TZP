@@ -514,6 +514,22 @@ function outputSection(id, cls) {
 
 }
 
+const promiseRaceFulfilled = async ({
+    promise,
+    responseType, // the promise response type
+    limit = 1000 // default ms to fulfill
+}) => {
+    // set up promise race
+    const slowPromise = new Promise(resolve => setTimeout(resolve, limit))
+    // await promise race status
+    const response = await Promise.race([slowPromise, promise]) // the fastest will win 
+        .then(response => response instanceof responseType ? response : 'pending')
+        .catch(error => 'rejected')
+    return (
+        response == 'rejected' || response == 'pending' ? undefined : response
+    )
+}
+
 function run_once() {
 	// lets get started while we wait for all the JS modules to arrive
 
