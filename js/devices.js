@@ -148,7 +148,7 @@ function get_media_devices() {
 				// handle if devices was rejected or not fulfilled
 				if (!devices) {
 					// custom error
-					let e = { name: 'Promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
+					let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
 					dom.eMDList.innerHTML = e.name +": "+ e.message
 					dom.eMD.innerHTML = e.name
 					finish(e.name)
