@@ -175,9 +175,6 @@ function outputCanvas() {
 
 	var canvas = {
 		createHashes: function(window, runNo){
-
-			let t0canvas = performance.now()
-
 			let outputs = [
 				{
 					name: "getContext",
