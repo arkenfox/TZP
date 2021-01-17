@@ -174,7 +174,10 @@ function outputCanvas() {
 	}
 
 	var canvas = {
-		createHashes: function(window){
+		createHashes: function(window, runNo){
+
+			let t0canvas = performance.now()
+
 			let outputs = [
 				{
 					name: "getContext",
@@ -197,7 +200,9 @@ function outputCanvas() {
 				{
 					name: "toDataURL",
 					value: function(){
-						return hashDataURL(getFilledContext().canvas.toDataURL())
+						let data = hashDataURL(getFilledContext().canvas.toDataURL())
+						if (logPerf) {debug_log("toDataURL [" + runNo + "] [canvas]",t0)}
+						return data
 					}
 				},
 				{
@@ -212,7 +217,9 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									resolve(hashDataURL(reader.result))
+									let data = hashDataURL(reader.result)
+									if (logPerf) {debug_log("toBlob [" + runNo + "] [canvas]",t0)}
+									resolve(data)
 								}
 								reader.onerror = function(){
 									reject("Unable to read blob!")
@@ -245,7 +252,10 @@ function outputCanvas() {
 					value: function(){
 						var context = getFilledContext()
 						var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
-						return window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
+						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
+						if (logPerf) {debug_log("getImageData [" + runNo + "] [canvas]",t0)}
+						return data
+						//return window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
 					}
 				},
 				{
@@ -272,7 +282,9 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInPath(x, y)
 							}
 						}
-						return window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						if (logPerf) {debug_log("isPointInPath [" + runNo + "] [canvas]",t0)}
+						return dataR
 					}
 				},
 				{
@@ -286,7 +298,9 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInStroke(x, y)
 							}
 						}
-						return window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						if (logPerf) {debug_log("isPointInStroke [" + runNo + "] [canvas]",t0)}
+						return dataR
 					}
 				},
 				{
@@ -427,7 +441,9 @@ function outputCanvas() {
 				{
 					name: "toDataURL",
 					value: function(){
-						return (sha1(getKnown().canvas.toDataURL()) == known1 ? true : false)
+						let data = sha1(getKnown().canvas.toDataURL())
+						if (logPerf) {debug_log("toDataURL [k] [canvas]",t0)}
+						return (data == known1 ? true : false)
 					}
 				},
 				{
@@ -442,7 +458,9 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									resolve(sha1(reader.result) == known1 ? true : false)
+									let data = sha1(reader.result)
+									if (logPerf) {debug_log("toBlob [k] [canvas]",t0)}
+									resolve(data == known1 ? true : false)
 								}
 								reader.onerror = function(){
 									reject(false)
@@ -481,7 +499,9 @@ function outputCanvas() {
 								imageData.push(pixel.data)
 							}
 						}
-						return (sha1(imageData.join()) == known2 ? true : false)
+						let data = sha1(imageData.join())
+						if (logPerf) {debug_log("getImageData [k] [canvas]",t0)}
+						return (data == known2 ? true : false)
 					}
 				},
 				{
@@ -495,7 +515,9 @@ function outputCanvas() {
 								pathData.push(context2.isPointInPath(x, y))
 							}
 						}
-						return (sha1(pathData.join()) == known3 ? true : false)
+						let data = sha1(pathData.join())
+						if (logPerf) {debug_log("isPointInPath [k] [canvas]",t0)}
+						return (data == known3 ? true : false)
 					}
 				},
 				{
@@ -509,7 +531,9 @@ function outputCanvas() {
 								pathStroke.push(context2.isPointInStroke(x, y))
 							}
 						}
-						return (sha1(pathStroke.join()) == known4 ? true : false)
+						let data = sha1(pathStroke.join())
+						if (logPerf) {debug_log("isPointInStroke [k] [canvas]",t0)}
+						return (data == known4 ? true : false)
 					}
 				},
 				// add these so arrays match
@@ -569,8 +593,8 @@ function outputCanvas() {
 	}
 
 	Promise.all([
-		canvas.createHashes(window),
-		canvas.createHashes(window),
+		canvas.createHashes(window, 1),
+		canvas.createHashes(window, 2),
 		known.createHashes(window),
 	]).then(function(outputs){
 		outputs[0].forEach(function(output){
