@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>domrect noise</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 580px;}
+		.rotatedOn {width:100px;height:100px;background-color: skyblue; transform: rotate(45deg); color: black;}
+		.rotatedOff {width:100px;height:100px;background-color: pink; color: black;}
+		#invisible {position: fixed;
+			padding: 0px;
+			opacity: 0;
+			z-index: -20;
+		}
+		.divrect1 {
+			top: 0;
+			left: 0;
+		}
+	</style>
+</head>
+<body>
+	<div id="invisible" class="divrect1">
+		<div class="rotatedOn" id="rectTest"></div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb8">
+		<col width="28%"><col width="72%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">domrect spoof detection
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td>getClientRects</td><td class="mono" id="hash0"></td></tr>
+		<tr><td>getBoundingClientRect</td><td class="mono" id="hash1"></td></tr>
+		<tr><td>details</td><td class="mono spaces" id="details"></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+	let t0 = performance.now()
+	let details = []
+
+	let el = (dom.rectTest).getBoundingClientRect()
+	let measure1 = [el.x, el.y, el.top, el.left, el.width, el.height, el.bottom, el.right]
+	details.push("     x: " + measure1[0])
+	details.push("     y: " + measure1[1])
+	details.push("   top: " + measure1[2])
+	details.push("  left: " + measure1[3])
+	details.push(" width: " + measure1[4])
+	details.push("height: " + measure1[5])
+	details.push("bottom: " + measure1[6])
+	details.push(" right: " + measure1[7])
+
+	let hash1 = sha1(measure1.join())
+	// chrome: 6a4af283678fe39fc4e56a72a90acd2a7b6c045d
+	dom.hash1.innerHTML = hash1 + (hash1 == "9de3579c0b324ff29a64db604769bbdef20a2049" ? sg+"[pass]" : sb+"[fail]") + sc
+	dom.details.innerHTML = details.join("<br>")
+
+</script>
+</body>
+</html>
