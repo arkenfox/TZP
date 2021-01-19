@@ -254,6 +254,15 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 	padding: 4.937px;
 	margin: 9.876px;
 }
+#rect6 {
+	top: 0;
+	left: 0;
+	width:100px;
+	height:100px;
+	transform: rotate(45deg);
+	padding: 0px;
+	position: fixed;
+}
 .testRect {outline: 2px dotted lightblue;}
 
 /* line-height */
