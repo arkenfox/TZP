@@ -11,23 +11,22 @@
 	<!-- custom -->
 	<style>
 		table {width: 580px;}
-		.rotatedOn {width:100px;height:100px;background-color: skyblue; transform: rotate(45deg); color: black;}
-		.rotatedOff {width:100px;height:100px;background-color: pink; color: black;}
-		#invisible {position: fixed;
+		#rectTest {
+			top: 0;
+			left: 0;
+			width:100px;
+			height:100px;
+			transform: rotate(45deg);
 			padding: 0px;
 			opacity: 0;
 			z-index: -20;
-		}
-		.divrect1 {
-			top: 0;
-			left: 0;
+			position: fixed;
 		}
 	</style>
 </head>
 <body>
-	<div id="invisible" class="divrect1">
-		<div class="rotatedOn" id="rectTest"></div>
-	</div>
+	<div id="rectTest"></div>
+
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -65,9 +64,20 @@
 	details.push(" right: " + measure1[7])
 
 	let hash1 = sha1(measure1.join())
-	// chrome: 6a4af283678fe39fc4e56a72a90acd2a7b6c045d
+	// chrome: windows: 6a4af283678fe39fc4e56a72a90acd2a7b6c045d
+	// chrome: android: 25383d500b0a647d8ac0e56c1efb66d929b8bfae
+	// FF: windows/android: 9de3579c0b324ff29a64db604769bbdef20a2049
 	dom.hash1.innerHTML = hash1 + (hash1 == "9de3579c0b324ff29a64db604769bbdef20a2049" ? sg+"[pass]" : sb+"[fail]") + sc
 	dom.details.innerHTML = details.join("<br>")
+
+	// perf
+	let t1 = performance.now()
+	dom.perf.innerHTML = Math.round(t1-t0) + " ms"
+
+	//let testhash = [-20.71068000793457,-20.71068000793457,-20.71068000793457,-20.71068000793457,
+	//	141.42137145996094,141.42137145996094,120.71069145202637,120.71069145202637]
+	//console.debug(sha1(testhash.join()))
+
 
 </script>
 </body>
