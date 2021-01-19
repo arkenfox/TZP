@@ -3,9 +3,9 @@
 <head>
 <style>
 #overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
+	position: fixed;
+	top: 0;
+	left: 0;
 	padding: 8px;
 }
 #inside{
@@ -25,7 +25,7 @@
 	-webkit-transform-origin: 0.1111px 0.2222px 0.3333px;
 	transform-origin: 0.1111px 0.2222px 0.3333px;
 }
-#rect3 { transform: rotate(1.23deg); }
+#rect3 {transform: rotate(1.23deg);}
 #rect4 {
 	transform: scale(3.14);
 	position: absolute;
@@ -36,27 +36,36 @@
 	padding: 4.937px;
 	margin: 9.876px;
 }
-.testRect { outline: 2px dotted lightblue; }
+#rect6 {
+	top: 0;
+	left: 0;
+	width:100px;
+	height:100px;
+	transform: rotate(45deg);
+	padding: 0px;
+	position: fixed;
+	background-color: skyblue;
+	z-index: -20;
+}
+.testRect {outline: 2px dotted lightblue;}
 </style>
 </head>
 
 <body>
 <div id="overlay">
-<div id="inside">
-<h1 class="testRect" id="rect0">https://browserleaks.com<i>/rects</i></h1>
-<span class="testRect" id="rect1"><strong>Element.getClientRects (̿▀̿&thinsp;̿Ĺ̯̿̿▀̿ ̿)̄ </strong></span><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<span class="testRect" id="rect2">F i n g e r p r i n t i n g ?</span>
-</div>
-<select class="testRect" id="rect3">
-<option>&minus;&#1726;-</option>
-</select>
-<progress class="testRect" id="rect4">test</progress>
-<button class="testRect" id="rect5"></button>
-<div id="test">test</div>
+	<div id="rect6"></div>
+	<div id="inside">
+		<h1 class="testRect" id="rect0">https://browserleaks.com<i>/rects</i></h1>
+		<span class="testRect" id="rect1"><strong>Element.getClientRects (̿▀̿&thinsp;̿Ĺ̯̿̿▀̿ ̿)̄ </strong></span><br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span class="testRect" id="rect2">F i n g e r p r i n t i n g ?</span>
+	</div>
+	<select class="testRect" id="rect3"><option>&minus;&#1726;-</option></select>
+	<progress class="testRect" id="rect4">test</progress>
+	<button class="testRect" id="rect5"></button>
 </div>
 </body>
 </html>
