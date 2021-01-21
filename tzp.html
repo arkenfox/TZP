@@ -12,18 +12,17 @@
 <body>
 	<!-- domrect -->
 	<div id="divrect" class="divrect1">
+		<div id="rect6"></div>
 		<div class="insideDOMRect">
-		<h1 class="testRect" id="rect0">https://browserleaks.com<i>/rects</i></h1>
-		<span class="testRect" id="rect1"><strong>Element.getClientRects (̿▀̿&thinsp;̿Ĺ̯̿̿▀̿ ̿)̄ </strong></span><br>
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<span class="testRect" id="rect2">F i n g e r p r i n t i n g ?</span>
+			<h1 class="testRect" id="rect0">https://browserleaks.com<i>/rects</i></h1>
+			<span class="testRect" id="rect1"><strong>Element.getClientRects (̿▀̿&thinsp;̿Ĺ̯̿̿▀̿ ̿)̄ </strong></span><br>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<span class="testRect" id="rect2">F i n g e r p r i n t i n g ?</span>
 		</div>
-		<select class="testRect" id="rect3">
-		<option>&minus;&#1726;-</option>
-		</select>
+		<select class="testRect" id="rect3"><option>&minus;&#1726;-</option></select>
 		<progress class="testRect" id="rect4">test</progress>
 		<button class="testRect" id="rect5"></button>
 	</div>
@@ -608,6 +607,9 @@
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">Additonal canvas tests [iframes, workers, offscreen]
+			can be found at <a target="blank" class="blue" href="https://canvasblocker.kkapsner.de/test/test.html">CanvasBlocker</a></span>
+		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</span></div>
 			<span class="c" id="canvashash"></span> <span class="isFile"><span></td></tr>
@@ -703,7 +705,8 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">The font enumeration tests are Firefox only and OS
 			based to get metrics on stable fonts per OS. The <code>font fallback</code> test is a slower method that
-			may produce different results</span>
+			may produce different results. Additional font enumeration tests can be found at <a target="blank" class="blue"
+			href="https://abrahamjuliot.github.io/creepjs/tests/fonts.html">CreepJS</a></span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
@@ -959,9 +962,6 @@
 	<a name="theend"></a><br>
 
 	<script src="js/main.js"></script>
-	<!--download order doesn't matter
-		JS chooses the order and runs when all files below are recieved
-	-->
 	<script src="js/screen.js"></script>
 	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>
