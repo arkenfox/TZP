@@ -38,6 +38,7 @@
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
+		<tr><td>86</td><td id="n86"></td><td class="c mono" id="v86"></td></tr>
 		<tr><td>85</td><td id="n85"></td><td class="c mono" id="v85"></td></tr>
 		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
 		<tr><td>83</td><td id="n83"></td><td class="c mono" id="v83"></td></tr>
@@ -131,6 +132,18 @@ function outputVersion() {
 			t0 = performance.now()
 		}
 	}
+
+	// 86: 1685482
+	let t86 = performance.now(), ver86 = xF
+	try {
+		eval('for (async of [])')
+	} catch(e) {
+		// 86+: SyntaxError an expression X in 'for (X of Y)' must not start with 'async of'
+		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
+		if ((e.message).substring(0,2) == "an") {ver86 = xS}
+		console.debug("86", e.name, e.message)
+	}
+	output("86", "1685482", ver86, performance.now()-t86)
 
 	// 85: 1675240
 	let t85 = performance.now(), ver85 = xF
