@@ -7,7 +7,8 @@ let fpAllHash = [],
 	fpAllCheck = [],
 	fpAllCount = 0
 
-let jsFiles = []
+let jsFiles = [],
+	perfData = []
 
 // android
 let avh = "",
