@@ -929,6 +929,7 @@ function get_math() {
 function get_mm_metrics(runtype) {
 	let t0 = performance.now(),
 		count = 0
+	if (runtype == "load") {runtype = "screen"}
 	// perf
 	function perf() {
 		if (count == 4) {
@@ -1083,6 +1084,7 @@ function get_mm_metrics(runtype) {
 
 function get_orientation(runtype) {
 	let t0 = performance.now()
+	if (runtype == "load") {runtype = "screen"}
 	// mm
 	let l="landscape", p="portrait", q="(orientation: ", s="square",
 		a="aspect-ratio", o1=zNS, o2=zNS, o3=zNS, o4=zNS
@@ -1843,6 +1845,14 @@ function get_version() {
 		}
 		// run
 		function v75plus() {
+			// 86: 
+			if (go) {
+				try {
+					eval('for (async of [])')
+				} catch(e) {
+					if ((e.message).substring(0,2) == "an") {verNo = "86+"; go=false}
+				}
+			}
 			// 85: 1675240
 			if (go) {
 				try {
@@ -1850,7 +1860,7 @@ function get_version() {
 					let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
 					let test85 = descriptor.get.call(reg85)
 				} catch(e) {
-					if ((e.message).substring(0,3) == "Reg") {verNo = "85+"; go=false}
+					if ((e.message).substring(0,3) == "Reg") {verNo = "85"; go=false}
 				}
 			}
 			// 84: 1673440
