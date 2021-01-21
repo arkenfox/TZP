@@ -104,7 +104,7 @@ function section_info(name, time1, data) {
 			if (fpAllHash.length == 14) {
 				// perf
 				if (logPerf) {
-					console.debug("logPerf detail\n" + perfData.join("\n"))
+					console.log("logPerf detail\n" + perfData.join("\n"))
 				}
 				// FP
 				fpAllHash.sort()
