@@ -510,19 +510,19 @@ function outputSection(id, cls) {
 
 		// first 3 sections: always run first as it sets global vars
 		if (id=="all") {outputStart()}
-		// possible gRerun: delay/stagger, use same order as js loads
+		// possible gRerun: delay/stagger
+		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // get toBlob out of the way
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
-		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 		setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
+		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 	}
 
 	// wait so users see change
