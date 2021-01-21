@@ -64,6 +64,7 @@ function countJS(filename) {
 		//isOS = "windows" // font list sizes: windows 468, linux 449, mac 755, droid 140
 		//outputFonts()
 		//outputDevices() // media devices is slow (300+ ms) speech engines runs 3 times
+		//outputCanvas()
 	}
 }
 
@@ -101,6 +102,11 @@ function section_info(name, time1, data) {
 			fpAllCount += data.length
 			fpAllData.push([name +":" + hash, data])
 			if (fpAllHash.length == 14) {
+				// perf
+				if (logPerf) {
+					console.debug("logPerf detail\n" + perfData.join("\n"))
+				}
+				// FP
 				fpAllHash.sort()
 				fpAllData.sort()
 				let hash2 = sha1(fpAllHash.join())
@@ -219,9 +225,17 @@ function debug_log(str, time1, time2) {
 		time2 = (t0-gt0).toString()
 		time2 = " | " + time2.padStart(4) + " ms"
 	}
-	console.log(str.padStart(29) + ": "+ time1.padStart(4) + " ms" + time2)
+	// string
+	let output = str.padStart(29) + ": "+ time1.padStart(4) + " ms" + time2
+	// array or console
+		// false false = load
+		// true false = gRerun
+	if (gRerun || (gRerun + sRerun == 0)) {
+		perfData.push(output)
+	} else {
+		console.log(output)
+	}
 }
-
 
 function showhide(togType, togID, togWord) {
 	var xyz = document.getElementsByClassName("tog"+togID);
@@ -459,6 +473,8 @@ function outputSection(id, cls) {
 		fpAllData = []
 		fpAllCheck = []
 		fpAllCount = 0
+		// reset perf array
+		perfData = []
 		gRerun = true
 	} else if (id == "load") {
 		delay = 1
