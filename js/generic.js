@@ -247,13 +247,13 @@ function debug_page(target, str) {
 function debug_log(str, time1, time2) {
 	// log dev info
 	let t0 = performance.now()
-	time1 = (t0-time1).toString()
+	time1 = Math.round(t0 - time1).toString()
 	if (time2 == "ignore") {
 		// ignore resize events
 		time2 = ""
 	} else {
 		// else append acculumative time
-		time2 = (t0-gt0).toString()
+		time2 = Math.round(t0 - gt0).toString()
 		time2 = " | " + time2.padStart(4) + " ms"
 	}
 	// string
