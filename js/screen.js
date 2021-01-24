@@ -929,12 +929,14 @@ function get_math() {
 function get_mm_metrics(runtype) {
 	let t0 = performance.now(),
 		count = 0
-	if (runtype == "load") {runtype = "screen"}
 	// perf
 	function perf() {
 		if (count == 4) {
-			let str = (runtype == "resize" ? "ignore" : "")
-			if (logPerf) {debug_log("mm various [" + runtype + "]",t0, str)}
+			if (runtype == "resize") {
+				if (logResize) {debug_log("mm various [resize]",t0, "ignore")}
+			} else if (logPerf) {
+				debug_log("mm various [screen]",t0, "")
+			}
 		}
 	}
 	// output
@@ -1084,7 +1086,6 @@ function get_mm_metrics(runtype) {
 
 function get_orientation(runtype) {
 	let t0 = performance.now()
-	if (runtype == "load") {runtype = "screen"}
 	// mm
 	let l="landscape", p="portrait", q="(orientation: ", s="square",
 		a="aspect-ratio", o1=zNS, o2=zNS, o3=zNS, o4=zNS
@@ -1141,8 +1142,11 @@ function get_orientation(runtype) {
 		dom.mmDM.innerHTML = zB0
 	}
 	// perf
-	let str = (runtype == "resize" ? "ignore" : "")
-	if (logPerf) {debug_log("orientation [" + runtype + "]",t0, str)}
+	if (runtype == "resize") {
+		if (logResize) {debug_log("orientation [resize]",t0, "ignore")}
+	} else if (logPerf) {
+		debug_log("orientation [screen]",t0, "")
+	}
 }
 
 function get_pbmode() {
@@ -2151,7 +2155,12 @@ function get_zoom(runtype) {
 	dpi_x = Math.round(dom.divDPI.offsetWidth * dpr)
 	dpi_y = Math.round(dom.divDPI.offsetHeight * dpr)
 	dom.jsDPI = dpi_x
-	if (logPerf) {debug_log("dpi [part of zoom]",t1,"ignore")}
+
+	if (runtype == "resize") {
+		if (logResize) {debug_log("dpi [part of zoom]",t1,"ignore")}
+	} else if (logPerf) {
+		debug_log("dpi [part of zoom]",t1,"ignore")
+	}
 
 	// zoom: choose method
 	if (dpr !== 1 || dpi_y == 0) {
@@ -2198,8 +2207,12 @@ function get_zoom(runtype) {
 	}
 	if (logExtra) {console.log("A [ must come first]: ", runtype, ": zoom, dpi, devicePixelRatio")}
 	dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1+"[assumed]"+sc :"")
-	let str = (runtype == "resize" ? "ignore" : "")
-	if (logPerf) {debug_log("zoom ["+runtype+ "]",t0, str)}
+
+	if (runtype == "resize") {
+		if (logResize) {debug_log("zoom [resize]",t0, "ignore")}
+	} else if (logPerf) {
+		debug_log("zoom ["+ runtype +"]",t0, "")
+	}
 	return jsZoom
 }
 
