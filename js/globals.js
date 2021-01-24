@@ -2,10 +2,30 @@
 
 var dom;
 
+// overall global hash
 let fpAllHash = [],
 	fpAllData = [],
 	fpAllCheck = [],
-	fpAllCount = 0
+	fpAllCount = 0,
+	knownLies = []
+
+// sections can be rerun: keep separate from global
+let fpAllSections = {screen: [],
+	ua: [],
+	feature: [],
+	language: [],
+	headers: [],
+	storage: [],
+	devices: [],
+	domrect: [],
+	canvas: [],
+	webgl: [],
+	audio: [],
+	fonts: [],
+	media: [],
+	css: [],
+	misc: []
+}
 
 let jsFiles = [],
 	perfData = []
