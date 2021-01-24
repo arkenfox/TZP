@@ -8,6 +8,7 @@ let	fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
 	fntList = [],
+	fntStart,
 	fntHead = "  glyph        default     sans-serif          serif"
 		+ "      monospace        cursive        fantasy<br>  -----"
 
@@ -556,7 +557,6 @@ function get_unicode() {
 	/* code based on work by David Fifield (dcf) and Serge Egelman (2015)
 		https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
 	return new Promise(resolve => {
-
 		let offset = [], bounding = [], client = [],
 			diffsb = [], diffsc = [], display = "",
 			t0 = performance.now()
@@ -645,6 +645,14 @@ function get_unicode() {
 			let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"],
 				div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
+
+			// page load: measure primer diff
+			if (gRerun + sRerun == 0) {
+				if (logPerf) {
+					debug_log("time since unicode priming",fntStart,"ignore")
+				}
+			}
+
 			// each char
 			for (let i=0; i < fntCode.length; i++) {
 				let	c = String.fromCodePoint(fntCode[i]),
@@ -844,6 +852,7 @@ function prime_unicode() {
 		str += String.fromCodePoint(fntCode[i])
 	}
 	dom.unicodePrimer.innerHTML = str
+	fntStart = performance.now()
 	// ToDo: unicode priming: does this allow enough time on slow systems
 }
 
