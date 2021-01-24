@@ -143,6 +143,7 @@ let avh = "",
 	gt0,
 	logExtra = false,
 	logPerf = true,
+	logResize = false,
 	logStorage = false,
 	runS = false,
 // rerun
