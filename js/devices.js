@@ -1,6 +1,7 @@
 'use strict';
 
-var pluginBS = false
+var pluginBS = false,
+	mimeBS = false
 
 function reset_devices() {
 	dom.mimeTypesList.style.color = zhide
@@ -214,7 +215,6 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
-		var mimeBS = false
 
 		function display(output) {
 			let detail = output, count = ""
@@ -241,6 +241,7 @@ function get_mimetypes() {
 					res.sort()
 					// FF: mimeBS
 					if (isFF) {
+						mimeBS = false
 						if (isVer > 84 && res.length > 0) {
 							// FF85+: EOL Flash
 							mimeBS = true
@@ -563,6 +564,13 @@ function outputDevices() {
 				section.push(currentResult)
 			}
 		})
+		// global lies
+		if (!sRerun) {
+			if (pluginBS) {knownLies.push("plugins")}
+			if (mimeBS) {knownLies.push("mimeTypes")}
+			if (isBraveFP) {knownLies.push("hardwareConcurrency")}
+		}
+		// section
 		section_info("devices", t0, section)
 	})
 }

@@ -94,17 +94,29 @@ function section_info(name, time1, data) {
 			fpAllCheck.push(name +": data array is empty")
 		}
 		// store
-		if (sRerun && gRerun == false) {
-			console.log(name + ":" + hash +"\n", data)
-		} else {
+		//console.debug("gRerun", gRerun, "sRerun", sRerun)
+		// false, false = page load
+		// false, true  = section
+		// true,  false = global
+
+		if (!sRerun) {
 			// yay!
 			fpAllHash.push(name + ":" + hash)
 			fpAllCount += data.length
 			fpAllData.push([name +":" + hash, data])
+
 			if (fpAllHash.length == 14) {
 				// perf
 				if (logPerf) {
 					console.log("logPerf detail\n" + perfData.join("\n"))
+				}
+				// lies
+				if (knownLies.length > 0) {
+					knownLies.sort()
+					dom.knownhash = sha1(knownLies.join())
+					dom.knownmetrics.innerHTML = "<u>[" + knownLies.length + " lie" + (knownLies.length > 1 ? "s" : "") + "]</u>"
+				} else {
+					dom.knownhash = "none"
 				}
 				// FP
 				fpAllHash.sort()
@@ -119,16 +131,23 @@ function section_info(name, time1, data) {
 						console.error("section hash issues\n", fpAllCheck)
 					}
 				}
-				console.log("fingerprint: "+ hash2 +" ["+ fpAllCount +" metrics]\n", fpAllData)
+				//console.log("fingerprint: "+ hash2 +" ["+ fpAllCount +" metrics]\n", fpAllData)
 				dom.allhash = hash2
 				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
+
 		}
-		// append + output
+
+		// remember each section's results seperately
+			// e.g. a rerun can differ from the global stored result: e.g. zoom
+		fpAllSections[name] = data
+
+		// append + output section
 		try {
 			//add metric count
-			hash += snc +"<b>["+ data.length +" metric" + (data.length > 1 ? "s" : "") +"]</b>"+ sc
+			hash += " <span class='c btn0 btn' onClick='showMetrics(`" + name + "`)'><u><b>["
+				+ data.length + " metric" + (data.length > 1 ? "s" : "") +"]</b></u>" + sc
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
 			if (name == "screen" || name == "devices") {
@@ -166,44 +185,56 @@ function showMetrics(type) {
 		output = [],
 		mlength = 0,
 		mPad = 30 // longest metric is currently 27
-	if (type == "loose") {array = fpAllData}
 
-	for (let i = 0; i < array.length; i++) {
-		let item = array[i]
-		let sparts = item[0].split(":")
-		let section = sparts[0]
-		let shash = sparts.slice(1).join(":")
-		output.push(section + ": " + shash)
-		let data = item[1]
-		for (let j = 0; j < data.length; j++) {
-			let parts = data[j].split(":")
-			let metric = parts[0]
-			let value = parts.slice(1).join(":")
-			// longest metric name length
-			if (metric.length > mlength) {mlength = metric.length}
-			// checks
-			let ok = true, message = []
-			if (metric.indexOf(" ") !== -1) {ok = false; message.push("metric-has-space")} // space
-			if (value.substring(0, 1) == " ") {ok = false; message.push("lead-space")} // leading space
-			if (value.substring(value.length-1, value.length) == " ") {ok = false; message.push("trail-space")} // trailing space
-			if (ok == false) {
-				checks.push(message.join() + ":~"+ metric +":"+ value +"~")
+	if (type == "known") {
+		array = knownLies
+	} else if (type == "loose") {
+		array = fpAllData
+	} else {
+		// section
+		array = fpAllSections[type]
+	}
+	console.log(type + ": " + sha1(array.join()) + "\n", array)
+
+	let go = false
+	if (go) {
+		if (type == "loose") {array = fpAllData}
+		for (let i = 0; i < array.length; i++) {
+			let item = array[i]
+			let sparts = item[0].split(":")
+			let section = sparts[0]
+			let shash = sparts.slice(1).join(":")
+			output.push(section + ": " + shash)
+			let data = item[1]
+			for (let j = 0; j < data.length; j++) {
+				let parts = data[j].split(":")
+				let metric = parts[0]
+				let value = parts.slice(1).join(":")
+				// longest metric name length
+				if (metric.length > mlength) {mlength = metric.length}
+				// checks
+				let ok = true, message = []
+				if (metric.indexOf(" ") !== -1) {ok = false; message.push("metric-has-space")} // space
+				if (value.substring(0, 1) == " ") {ok = false; message.push("lead-space")} // leading space
+				if (value.substring(value.length-1, value.length) == " ") {ok = false; message.push("trail-space")} // trailing space
+				if (ok == false) {
+					checks.push(message.join() + ":~"+ metric +":"+ value +"~")
+				}
+				// build output: ToDo: pretty up
+				output.push(metric.padStart(mPad) +": " + value)
 			}
-			// build output: ToDo: pretty up
-			output.push(metric.padStart(mPad) +": " + value)
+		}
+		// checks
+		if (isFile) {
+			console.debug("longest metric name length", mlength)
+			if (checks.length > 0) {
+				checks.sort()
+				console.debug(checks)
+			}
+			// debug
+			console.debug(output.join("\n"))
 		}
 	}
-	// checks
-	if (isFile) {
-		console.debug("longest metric name length", mlength)
-		if (checks.length > 0) {
-			checks.sort()
-			console.debug(checks)
-		}
-		// debug
-		console.debug(output.join("\n"))
-	}
-
 }
 
 function debug_page(target, str) {
@@ -473,6 +504,8 @@ function outputSection(id, cls) {
 		fpAllData = []
 		fpAllCheck = []
 		fpAllCount = 0
+		// reset lies
+		knownLies = []
 		// reset perf array
 		perfData = []
 		gRerun = true
@@ -511,7 +544,7 @@ function outputSection(id, cls) {
 		// first 3 sections: always run first as it sets global vars
 		if (id=="all") {outputStart()}
 		// possible gRerun: delay/stagger
-		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
+		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next: don't let promise time out
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
@@ -521,13 +554,12 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // get toBlob out of the way
+		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last: toBlob
 		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 	}
 
 	// wait so users see change
 	setTimeout(function() {output()}, delay)
-
 }
 
 const promiseRaceFulfilled = async ({
