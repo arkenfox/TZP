@@ -121,7 +121,7 @@ function section_info(name, time1, data) {
 				// FP
 				fpAllHash.sort()
 				fpAllData.sort()
-				let hash2 = sha1(fpAllHash.join())
+				let hash2 = sha1(fpAllData.join())
 				if (fpAllCheck.length > 0) {
 					fpAllCheck.sort()
 					// remove dupes: we only need one
