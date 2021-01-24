@@ -392,6 +392,9 @@ function get_fonts() {
 				//hashC = sha1("c"); countC = 5; fontsClient = ["client","b","c","d","e"]
 				//hashS = sha1("s"); countS = 3; fontsScroll = ["scroll","b","c"]
 				//hashT = sha1("t"); countT = 4; fontsTransform = ["transform","b","c","d"]
+				//hashPR = sha1("pr"); countPR = 2; fontsPerspective = ["perspective","b"]
+				//hashP = sha1("p"); countP = 1; fontsPixel = ["pixel"]
+				//hashPS = sha1("ps"); countPS = 1; fontsPixelSize = ["pixelsize"]
 
 				// output
 				dom.fontOffset.innerHTML = hashO + s12 + "["+countO+"/"+countF+"]" + sc
@@ -829,4 +832,20 @@ function outputFonts() {
 	})
 }
 
+function prime_unicode() {
+	// FF86+ 1676966: gfx.font_rendering.fallback.async
+		// when characters that trigger the global fallback search (iterating over all available fonts to try and
+		// render the char) FF starts loading the character map data required to support this, but no longer allows
+		// this to block layout & rendering; instead, FF continues to render (perhaps rendering tofu) while the
+		// loading happens in the background, and then re-layout/renders the document once loading is complete
+	// To counter this: we can set a unicode string early in the process (in an offscreen div)
+	let str = ""
+	for (let i=0; i < fntCode.length; i++) {
+		str += String.fromCodePoint(fntCode[i])
+	}
+	dom.unicodePrimer.innerHTML = str
+	// ToDo: unicode priming: does this allow enough time on slow systems
+}
+
+prime_unicode()
 countJS("fonts")
