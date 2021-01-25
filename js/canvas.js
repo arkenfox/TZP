@@ -24,13 +24,9 @@ function outputCanvas() {
 		// vars
 		let chash1 = [],
 			diff78 = false,
-			isRFP78 = false,
 			error_string = "error while testing"
 		// RFP
 		let isRFP = get_RFP()
-		if (isVer > 77) {
-			if (isRFP) {isRFP78 = true}
-		}
 
 		function display_value(item, value1, value2, value3) {
 			// vars
@@ -105,7 +101,7 @@ function outputCanvas() {
 					if (isVer > 77) {
 						// 78+: random
 						if (isRandom) {
-							if (isRFP78) {
+							if (isRFP) {
 								pushvalue = "random rfp"
 								// toDataURL vs toBlob
 								if (sname == "toDa" || sname == "toBl") {
