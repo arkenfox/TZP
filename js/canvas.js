@@ -93,7 +93,8 @@ function outputCanvas() {
 			if (sname == "toDa" || sname == "toBl" || sname == "getI") {
 				// control
 				if (sname == "getI") {
-					control = "ae8d89f4cb47814af5d79e63a1a60b3f3f28d9309189b7518f1ecc23d8bda282"
+					control = "ae8d89f4cb47814af5d79e63a1a60b3f3f28d9309189b7518f1ecc23d8bda282" // 2000x200
+					//control = "03fedeb80c3f8ebf2ed864024e9967256468d64dbe847f202ad06a60f2b3d9b3" // 
 				}
 				if (value1 == error_string) {
 					value1 += (isVer > 77 ? rfp_random_red : rfp_red)
@@ -338,8 +339,8 @@ function outputCanvas() {
 				// taken from https://panopticlick.eff.org/static/fp2.js
 				var context = getContext()
 				var canvas = context.canvas
-				canvas.width = 220
-				canvas.height = 30
+				canvas.width = 2000
+				canvas.height = 200
 				canvas.style.display = "inline"
 				// detect browser support of canvas winding
 				// http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
