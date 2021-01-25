@@ -24,11 +24,12 @@ function outputCanvas() {
 		// vars
 		let chash1 = [],
 			diff78 = false,
-			is78rfp = false,
+			isRFP78 = false,
 			error_string = "error while testing"
 		// RFP
+		let isRFP = get_RFP()
 		if (isVer > 77) {
-			if (get_RFP() == true) {is78rfp = true}
+			if (isRFP) {isRFP78 = true}
 		}
 
 		function display_value(item, value1, value2, value3) {
@@ -74,7 +75,7 @@ function outputCanvas() {
 			if (sname == "isPo") {
 				control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
 				if (isRandom) {value1 = combined
-				} else if (value1 == control) {
+				} else if (value1 == control && isRFP) { // do nothing
 				} else if (value3 == "false") {
 					value1 = noise
 					pushvalue = "tampered"
@@ -83,7 +84,8 @@ function outputCanvas() {
 			}
 			if (sname == "mozG" && isVer < 74) {
 				if (isRandom) {value1 = combined
-				} else if (value3 == "false" && value1 !== control) {
+				} else if (value1 == control && isRFP) { // do nothing
+				} else if (value3 == "false") {
 					value1 = noise
 					pushvalue = "tampered"
 				}
@@ -103,7 +105,7 @@ function outputCanvas() {
 					if (isVer > 77) {
 						// 78+: random
 						if (isRandom) {
-							if (is78rfp) {
+							if (isRFP78) {
 								pushvalue = "random rfp"
 								// toDataURL vs toBlob
 								if (sname == "toDa" || sname == "toBl") {
@@ -126,12 +128,11 @@ function outputCanvas() {
 						}
 					} else {
 						// <78: static
-						if (value1 !== control) {
-							// noise
-							if (isRandom == false && value3 == "false") {
-								pushvalue = "tampered"
-								value1 = noise
-							}
+						if (isRandom) {value1 = combined
+						} else if (value1 == control && isRFP) { // do nothing
+						} else if (value3 == "false") {
+							value1 = noise
+							pushvalue = "tampered"
 						}
 						value1 += (value1 == control ? rfp_green : rfp_red)
 					}
