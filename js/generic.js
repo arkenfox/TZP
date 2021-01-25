@@ -112,6 +112,8 @@ function section_info(name, time1, data) {
 				}
 				// lies
 				if (knownLies.length > 0) {
+					// de-dupe, sort
+					knownLies = knownLies.filter(function(item, position) {return knownLies.indexOf(item) === position})
 					knownLies.sort()
 					dom.knownhash = sha1(knownLies.join())
 					dom.knownmetrics.innerHTML = "<u>[" + knownLies.length + " lie" + (knownLies.length > 1 ? "s" : "") + "]</u>"
@@ -131,7 +133,6 @@ function section_info(name, time1, data) {
 						console.error("section hash issues\n", fpAllCheck)
 					}
 				}
-				//console.log("fingerprint: "+ hash2 +" ["+ fpAllCount +" metrics]\n", fpAllData)
 				dom.allhash = hash2
 				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
