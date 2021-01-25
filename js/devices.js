@@ -144,7 +144,7 @@ function get_media_devices() {
 			promiseRaceFulfilled({
 				promise: navigator.mediaDevices.enumerateDevices(),
 				responseType: Array,
-				limit: 1000 // increase race limit for slow system/networks
+				limit: 2000 // increase race limit for slow system/networks
 			}).then(function(devices) {
 				// handle if devices was rejected or not fulfilled
 				if (!devices) {
