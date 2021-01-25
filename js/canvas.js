@@ -32,6 +32,7 @@ function outputCanvas() {
 		}
 
 		function display_value(item, value1, value2, value3) {
+			console.debug(item,value1)
 			// vars
 			let isRandom = false,
 				pushvalue = value1,
