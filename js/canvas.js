@@ -141,7 +141,7 @@ function outputCanvas() {
 
 			// global lies
 			if (!sRerun) {
-				if (pushvalue.substring(0,6) == "random" || pushvalue == "tampered") {
+				if (pushvalue.substring(0,6) == "random") {
 					knownLies.push("canvas "+item)
 				}
 			}
@@ -447,6 +447,7 @@ function outputCanvas() {
 					value: function(){
 						let data = sha1(getKnown().canvas.toDataURL())
 						if (logPerf) {debug_log("toDataURL [k] [canvas]",t0)}
+						if (!sRerun) {if (data !== known1) {knownLies.push("canvas toDataURL")}}
 						return (data == known1 ? true : false)
 					}
 				},
@@ -464,6 +465,7 @@ function outputCanvas() {
 								reader.onload = function(){
 									let data = sha1(reader.result)
 									if (logPerf) {debug_log("toBlob [k] [canvas]",t0)}
+									if (!sRerun) {if (data !== known1) {knownLies.push("canvas toBlob")}}
 									resolve(data == known1 ? true : false)
 								}
 								reader.onerror = function(){
@@ -485,7 +487,9 @@ function outputCanvas() {
 							var file = getKnown().canvas.mozGetAsFile("known.png")
 							var reader = new FileReader()
 							reader.onload = function(){
-								resolve(sha1(reader.result) == known1 ? true : false)
+								let data = sha1(reader.result)
+								if (!sRerun) {if (data !== known1) {knownLies.push("canvas mozGetAsFile")}}
+								resolve(data == known1 ? true : false)
 							}
 							reader.readAsDataURL(file)
 						})
@@ -505,6 +509,7 @@ function outputCanvas() {
 						}
 						let data = sha1(imageData.join())
 						if (logPerf) {debug_log("getImageData [k] [canvas]",t0)}
+						if (!sRerun) {if (data !== known2) {knownLies.push("canvas getImageData")}}
 						return (data == known2 ? true : false)
 					}
 				},
@@ -521,6 +526,7 @@ function outputCanvas() {
 						}
 						let data = sha1(pathData.join())
 						if (logPerf) {debug_log("isPointInPath [k] [canvas]",t0)}
+						if (!sRerun) {if (data !== known3) {knownLies.push("canvas isPointInPath")}}
 						return (data == known3 ? true : false)
 					}
 				},
@@ -537,6 +543,7 @@ function outputCanvas() {
 						}
 						let data = sha1(pathStroke.join())
 						if (logPerf) {debug_log("isPointInStroke [k] [canvas]",t0)}
+						if (!sRerun) {if (data !== known4) {knownLies.push("canvas isPointInStroke")}}
 						return (data == known4 ? true : false)
 					}
 				},
