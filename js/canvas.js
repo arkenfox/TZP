@@ -138,6 +138,13 @@ function outputCanvas() {
 			// push + display
 			chash1.push(item+":"+pushvalue)
 			element.innerHTML = value1
+
+			// global lies
+			if (!sRerun) {
+				if (pushvalue.substring(0,6) == "random" || pushvalue == "tampered") {
+					knownLies.push("canvas "+item)
+				}
+			}
 		}
 
 		// 78+: track toDataURL vs toBlob randomness
