@@ -409,6 +409,12 @@ function get_line_scrollbar() {
 					if (w==16) {os=osL}
 					if (w==15) {os=osM}
 					if (w==12) {os=osL}
+				} else if (jsZoom == 500) {
+					if (w==3) {os=osW}
+					console.debug("scrollbarwidth", "zoom " + jsZoom, w)					
+				} else if (jsZoom == 400) {
+					if (w==4) {os=osW}
+					console.debug("scrollbarwidth", "zoom " + jsZoom, w)
 				} else if (jsZoom == 300) {
 					if (w==6) {os=osWL}
 					if (w==5) {os=osWM}
@@ -547,6 +553,10 @@ function get_line_scrollbar() {
 					// trim decimals
 					if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
 					lh = lh.toString()
+					// remove trailing zeros
+					try {
+						lh = (lh * 1).toString()
+					} catch(e) {}
 					method = "clientrect"
 				} catch(err) {
 					method = "none"
@@ -585,7 +595,7 @@ function get_line_scrollbar() {
 				// check font
 				if (strFont !== "") {
 					os = strFont
-				} else if (lh == "19.2" || lh == "19.2000") {
+				} else if (lh == "19.2") {
 					// TB DESKTOP: 19.2 **seems** TB unique any-zoom/any-platform
 					os = tb_green
 				} else {
@@ -596,6 +606,12 @@ function get_line_scrollbar() {
 						if (lh=="19") {os=osL}
 						if (lh=="18") {os=osW}
 						if (lh=="17") {os=osL}
+					} else if (jsZoom == 500) {
+						console.debug("lineheight", "zoom " + jsZoom, lh)
+						if (lh=="18.4") {os=osW}						
+					} else if (jsZoom == 400) {
+						console.debug("lineheight", "zoom " + jsZoom, lh)
+						if (lh=="18.5") {os=osW}
 					} else if (jsZoom == 300) {
 						if (lh=="19") {os=osW}
 						if (lh=="18.6667") {os=osW}
