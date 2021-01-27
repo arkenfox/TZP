@@ -2,33 +2,38 @@
 
 var dom;
 
-// overall global hash
-let fpAllHash = [],
+let jsFiles = [],
+	perfData = [],
+	// mathematical/equivalency lies
+	knownLies = [],
+	// prototype lies
+	protoList = [],
+	protoDetail = {},
+	protoCount = 0,
+	protoProps = [],
+	// global FP
+	fpAllHash = [],
 	fpAllData = [],
 	fpAllCheck = [],
 	fpAllCount = 0,
-	knownLies = []
-
-// sections can be rerun: keep separate from global
-let fpAllSections = {screen: [],
-	ua: [],
-	feature: [],
-	language: [],
-	headers: [],
-	storage: [],
-	devices: [],
-	domrect: [],
-	canvas: [],
-	webgl: [],
-	audio: [],
-	fonts: [],
-	media: [],
-	css: [],
-	misc: []
-}
-
-let jsFiles = [],
-	perfData = []
+	// section FP: can be rerun: keep separate from global
+	fpAllSections = {
+		screen: [],
+		ua: [],
+		feature: [],
+		language: [],
+		headers: [],
+		storage: [],
+		devices: [],
+		domrect: [],
+		canvas: [],
+		webgl: [],
+		audio: [],
+		fonts: [],
+		media: [],
+		css: [],
+		misc: []
+	}
 
 // android
 let avh = "",
