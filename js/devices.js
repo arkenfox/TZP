@@ -134,81 +134,81 @@ function get_media_devices() {
 			dom.eMDList = zD
 			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
 			finish(zD)
-		}
+		} else {
+			// else try enumerateDevices
+			let str="", pad=13, strPad=""
+			try {
+				// await devices
+				let limit = 1000
+				promiseRaceFulfilled({
+					promise: navigator.mediaDevices.enumerateDevices(),
+					responseType: Array,
+					limit: 2000 // increase race limit for slow system/networks
+				}).then(function(devices) {
+					// handle if devices was rejected or not fulfilled
+					if (!devices) {
+						// custom error
+						let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
+						dom.eMDList.innerHTML = e.name +": "+ e.message
+						dom.eMD.innerHTML = e.name
+						finish(e.name)
+						return
+					}
+					
+					// compute devices output
+					let arr = []
+					// enumerate
+					devices.forEach(function(d) {
+						arr.push(d.kind)
+						str += (d.kind+": ").padStart(pad)+d.deviceId
+						if (d.groupId.length > 0) {
+							strPad = ("group: ").padStart(pad)
+							str += "<br>"+strPad+d.groupId
+						}
+						if (d.label.length > 0) {
+							strPad = ("label: ").padStart(pad)
+							str += "<br>"+strPad+d.label
+						}
+						str += "<br>"
+					})
+					// output list
+					if (str.length == 0) {str = "none"}
+					dom.eMDList.innerHTML = str
 
-		// else try enumerateDevices
-		let str="", pad=13, strPad=""
-		try {
-			// await devices
-			let limit = 1000
-			promiseRaceFulfilled({
-				promise: navigator.mediaDevices.enumerateDevices(),
-				responseType: Array,
-				limit: 2000 // increase race limit for slow system/networks
-			}).then(function(devices) {
-				// handle if devices was rejected or not fulfilled
-				if (!devices) {
-					// custom error
-					let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
-					dom.eMDList.innerHTML = e.name +": "+ e.message
-					dom.eMD.innerHTML = e.name
-					finish(e.name)
-					return
-				}
-				
-				// compute devices output
-				let arr = []
-				// enumerate
-				devices.forEach(function(d) {
-					arr.push(d.kind)
-					str += (d.kind+": ").padStart(pad)+d.deviceId
-					if (d.groupId.length > 0) {
-						strPad = ("group: ").padStart(pad)
-						str += "<br>"+strPad+d.groupId
+					// count each kind
+					let pretty = [], plain = [], rfphash = ""
+					if (arr.length > 0) {
+						arr.sort()
+						let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+						arr = [...map.entries()]
+						// build pretty/plain
+						for (let i=0; i < arr.length; i++) {
+							let data = arr[i],
+								item = data[0],
+								itemcount = data[1]
+							pretty.push(item + s7 +"["+ itemcount +"]" + sc)
+							plain.push(item +","+ itemcount)
+						}
+						pretty = pretty.join(" ")
+						str = plain.join(";")
+						rfphash = sha1(str)
+					} else {
+						pretty = "none"
 					}
-					if (d.label.length > 0) {
-						strPad = ("label: ").padStart(pad)
-						str += "<br>"+strPad+d.label
+					// RFP
+					if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
+						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
+					} else {
+						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
 					}
-					str += "<br>"
+					finish(str)
+
 				})
-				// output list
-				if (str.length == 0) {str = "none"}
-				dom.eMDList.innerHTML = str
-
-				// count each kind
-				let pretty = [], plain = [], rfphash = ""
-				if (arr.length > 0) {
-					arr.sort()
-					let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-					arr = [...map.entries()]
-					// build pretty/plain
-					for (let i=0; i < arr.length; i++) {
-						let data = arr[i],
-							item = data[0],
-							itemcount = data[1]
-						pretty.push(item + s7 +"["+ itemcount +"]" + sc)
-						plain.push(item +","+ itemcount)
-					}
-					pretty = pretty.join(" ")
-					str = plain.join(";")
-					rfphash = sha1(str)
-				} else {
-					pretty = "none"
-				}
-				// RFP
-				if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
-					dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
-				} else {
-					dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
-				}
-				finish(str)
-
-			})
-		} catch(e) {
-			dom.eMDList.innerHTML = zB0
-			dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
-			finish(zB0)
+			} catch(e) {
+				dom.eMDList.innerHTML = zB0
+				dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
+				finish(zB0)
+			}
 		}
 	})
 }
