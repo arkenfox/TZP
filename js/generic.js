@@ -70,35 +70,36 @@ function countJS(filename) {
 
 function section_info(name, time1, data) {
 	// fp
-	if (data !== undefined && data !== "") {
+	if (Array.isArray(data)) {
 		data.sort()
 		let hash = sha1(data.join())
-		// checks: everything should be a "metric: value"
-		for (let i=0; i < data.length; i++) {
-			let check = data[i]
-			if (check == undefined) {
-				fpAllCheck.push(name +": contains undefined")
-			} else {
-				let parts = data[i].split(":")
-				let metric = parts[0]
-				let value = parts.slice(1).join(":")
-				if (value == "") {
-					fpAllCheck.push(name +" - " + metric + ": not set")
-				} else if (value == undefined) {
-					fpAllCheck.push(name +" - " + metric + ": undefined")
-				}
-			}
-		}
 		// check its not empty
 		if (data.length == 0) {
 			fpAllCheck.push(name +": data array is empty")
+		} else {
+			// checks: everything should be a "metric: value"
+			for (let i=0; i < data.length; i++) {
+				let check = data[i]
+				if (check == undefined) {
+					fpAllCheck.push(name +": contains undefined")
+				} else {
+					let parts = data[i].split(":")
+					let metric = parts[0]
+					let value = parts.slice(1).join(":")
+					if (value == "") {
+						fpAllCheck.push(name +" - " + metric + ": not set")
+					} else if (value == undefined) {
+						fpAllCheck.push(name +" - " + metric + ": undefined")
+					}
+				}
+			}
 		}
-		// store
-		//console.debug("gRerun", gRerun, "sRerun", sRerun)
-		// false, false = page load
-		// false, true  = section
-		// true,  false = global
 
+		// remember each section's results seperately
+			// e.g. a rerun can differ from the global stored result: e.g. zoom
+		fpAllSections[name] = data
+
+		// store in global if not a section rerun
 		if (!sRerun) {
 			// yay!
 			fpAllHash.push(name + ":" + hash)
@@ -137,12 +138,7 @@ function section_info(name, time1, data) {
 				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
-
 		}
-
-		// remember each section's results seperately
-			// e.g. a rerun can differ from the global stored result: e.g. zoom
-		fpAllSections[name] = data
 
 		// append + output section
 		try {
@@ -158,10 +154,14 @@ function section_info(name, time1, data) {
 		} catch(e) {
 			console.debug(name, e.name, e.message)
 		}
+	} else {
+		// not an array: prototypeLies, setup
+		//console.debug(name)
 	}
 	// perf
 	let t0 = performance.now()
 	time1 = Math.round(t0-time1).toString()
+
 	try {
 		document.getElementById("perf"+name).innerHTML = "  "+ time1 +" ms"
 	} catch(e) {}
@@ -173,7 +173,7 @@ function section_info(name, time1, data) {
 		let time2 = Math.round(t0-gt0).toString()
 		pretty += " | " + so + time2.padStart(4) + sc + " ms"
 	}
-	if (name == "setup") {
+	if (name == "prototype") {
 		el.innerHTML = pretty
 	} else {
 		el.innerHTML = el.innerHTML +"<br>"+ pretty
@@ -487,7 +487,7 @@ function byteArrayToHex(arrayBuffer){
 
 /* BUTTONS: (re)GENERATE SECTIONS */
 function outputSection(id, cls) {
-	let delay = 170
+
 	if (cls == undefined || cls == "") {cls = "c"}
 	sRerun = false
 	// clear everything
@@ -507,13 +507,15 @@ function outputSection(id, cls) {
 		fpAllCount = 0
 		// reset lies
 		knownLies = []
+		protoList = []
+		protoDetail = {}
+		protoCount = 0
+		protoProps = []
 		// reset perf array
 		perfData = []
 		gRerun = true
 	} else if (id == "load") {
-		delay = 1
 		gRerun = false // redundant
-		sRerun = false // redundant
 		id = "all"
 	} else {
 		// clear table elements, &nbsp stops line height jitter
@@ -533,8 +535,8 @@ function outputSection(id, cls) {
 	if (id=="18") {reset_misc()}
 
 	function output() {
-		// reset timer
-		gt0 = performance.now()
+		// reset timer for sections only: otherwise it is set by prototypeLies
+		if (sRerun) {gt0 = performance.now()}
 		// section only
 		if (id=="1") {outputScreen("screen")}
 		if (id=="2") {outputUA()}
@@ -559,8 +561,27 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 	}
 
+	//console.debug("gRerun", gRerun, "sRerun", sRerun)
+	// false, false = page load : delay 1
+	// false, true  = section   : delay 170
+	// true,  false = global    : delay 130 (prototype is about 30 or 40 ms)
+
 	// wait so users see change
-	setTimeout(function() {output()}, delay)
+	if (sRerun) {
+		// section
+		setTimeout(function() {output()}, 170)
+	} else {
+		let delay = 130 // global reruns
+		if (gRerun == false) {delay = 1} // page loads
+		setTimeout(function() {
+			// we need to make sure prototypeLies finishes
+			Promise.all([
+				outputPrototypeLies()
+			]).then(function(){
+				output()
+			})
+		}, delay)
+	}
 }
 
 const promiseRaceFulfilled = async ({

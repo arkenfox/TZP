@@ -2724,13 +2724,11 @@ function outputStart() {
 			// section hash to come
 		items = document.getElementsByClassName("hashtocome")
 		for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
-
 		if (logPerf) {debug_log("setup",t0)}
 		section_info("setup", t0)
 	}
 
 	// functions
-	gt0 = performance.now()
 	run_checks()
 	outputFD("load") // run FD first: checks isFF; sets isOS, isTB*, isVer
 	setTimeout(function() {outputScreen("load")}, 1)
