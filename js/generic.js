@@ -56,7 +56,7 @@ function countJS(filename) {
 	if (filename == "screen") {get_engine()}
 
 	// yay! all js files have arrived
-	if (jsFiles.length == 12) {
+	if (jsFiles.length == 13) {
 		outputSection("load")
 
 		// or load a single section for perf tests
