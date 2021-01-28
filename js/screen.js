@@ -1790,35 +1790,39 @@ function get_ua_workers() {
 		if ("serviceWorker" in navigator) {
 			// assume failure
 			el2.innerHTML = zF + " [A: assumed]"
-			// register
-			navigator.serviceWorker.register("js/workerservice_ua.js").then(function(swr) {
-				let sw
-				if (swr.installing) {sw = swr.installing}
-				else if (swr.waiting) {sw = swr.waiting}
-				else if (swr.active) {sw = swr.active}
-				sw.addEventListener("statechange", function(e) {
-					if (e.target.state == "activated") {
-						sw.postMessage(isFF)
-					}
-				})
-				if (sw) {
-					// listen
-					let channel = new BroadcastChannel("sw-ua")
-					channel.addEventListener("message", event => {
-						//console.debug("ua service", event.data.msg)
-						test2 = sha1((event.data.msg).join())
-						el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
-						// unregister & close
-						swr.unregister().then(function(boolean) {})
-						channel.close()
+			try {
+				// register
+				navigator.serviceWorker.register("js/workerservice_ua.js").then(function(swr) {
+					let sw
+					if (swr.installing) {sw = swr.installing}
+					else if (swr.waiting) {sw = swr.waiting}
+					else if (swr.active) {sw = swr.active}
+					sw.addEventListener("statechange", function(e) {
+						if (e.target.state == "activated") {
+							sw.postMessage(isFF)
+						}
 					})
-				} else {
-					el2.innerHTML = zF + " [B: not swr.installing]"
-				}
-			},
-			function(e) {
-				el2.innerHTML = zF + " [C: not registering]: "  + e.message
-			})
+					if (sw) {
+						// listen
+						let channel = new BroadcastChannel("sw-ua")
+						channel.addEventListener("message", event => {
+							//console.debug("ua service", event.data.msg)
+							test2 = sha1((event.data.msg).join())
+							el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
+							// unregister & close
+							swr.unregister().then(function(boolean) {})
+							channel.close()
+						})
+					} else {
+						el2.innerHTML = zF + " [B: not swr.installing]"
+					}
+				},
+				function(e) {
+					el2.innerHTML = zF + " [C: not registering]: "  + e.message
+				})
+			} catch(e) {
+				el2.innerHTML = zB0
+			}
 		} else {
 			el2.innerHTML = zNA
 		}
