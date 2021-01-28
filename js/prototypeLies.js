@@ -636,6 +636,7 @@ function outputPrototypeLies() {
 			el.innerHTML = "none" // none [x properties] (clickable)
 		} else {
 			// ToDo
+			console.log(lieDetail)
 			el.innerHTML = lieCount // hash [x properties] [y lies] (each clickable)
 		}
 
