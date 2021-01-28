@@ -254,31 +254,37 @@ function get_service_workers() {
 	// support
 	if (isSecure) {
 		if ("serviceWorker" in navigator) {
-			// register
-			navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
-				dom.swork2 = zS
-				// cache support
-				dom.swork3.innerHTML = note_ttc
-				// cache test
-				dom.swork4.innerHTML = note_ttc
-				// notifications support
-				dom.notif1.innerHTML = note_ttc
-				// notifications test
-				dom.notif2.innerHTML = note_ttc
-				// unregister
-				registration.unregister().then(function(boolean) {})
-			},
-			function(e) {
-				// sw error
-				if (e.name ==="") {
-					output = zF+": unknown error"
-				} else {
-					output = zF+": "+ e.name
-				}
-				dom.swork2 = output
+			try {
+				// register
+				navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
+					dom.swork2 = zS
+					// cache support
+					dom.swork3.innerHTML = note_ttc
+					// cache test
+					dom.swork4.innerHTML = note_ttc
+					// notifications support
+					dom.notif1.innerHTML = note_ttc
+					// notifications test
+					dom.notif2.innerHTML = note_ttc
+					// unregister
+					registration.unregister().then(function(boolean) {})
+				},
+				function(e) {
+					// sw error
+					if (e.name ==="") {
+						output = zF+": unknown error"
+					} else {
+						output = zF+": "+ e.name
+					}
+					dom.swork2 = output
+					dom.swork3 = zNA; dom.swork4 = zNA
+					dom.notif1 = zNA; dom.notif2 = zNA
+				})
+			} catch(e) {
+				dom.swork2 = zB0
 				dom.swork3 = zNA; dom.swork4 = zNA
 				dom.notif1 = zNA; dom.notif2 = zNA
-			})
+			}
 		}	else {
 			// no sw
 			dom.swork2 = zNA; dom.swork3 = zNA; dom.swork4 = zNA
