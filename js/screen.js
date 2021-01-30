@@ -1869,12 +1869,18 @@ function get_version() {
 		}
 		// run
 		function v75plus() {
-			// 86: 
+			if (go) {
+			// 87: 1688335
+				try {
+					if (console.length == undefined) {verNo = "87+"; go=false}
+				} catch(e) {}
+			}
+			// 86: 1685482
 			if (go) {
 				try {
 					eval('for (async of [])')
 				} catch(e) {
-					if ((e.message).substring(0,2) == "an") {verNo = "86+"; go=false}
+					if ((e.message).substring(0,2) == "an") {verNo = "86"; go=false}
 				}
 			}
 			// 85: 1675240
