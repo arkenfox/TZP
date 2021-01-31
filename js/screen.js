@@ -202,6 +202,7 @@ function get_engine() {
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
 	}
+	console.debug(isEngine)
 }
 
 function get_errors() {
