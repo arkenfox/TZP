@@ -547,7 +547,6 @@ function get_lang_doc() {
 		}
 		// debugging: error tracking
 		if (err.length > 0) {console.log("language/datetime errors\n" + err.join("\n"))}
-		console.debug(res) // temp debug
 
 		let reshash = []
 		// hash 0-11: language
