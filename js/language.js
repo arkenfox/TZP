@@ -521,12 +521,12 @@ function get_lang_doc() {
 		for (let i=0; i < 49; i++) {
 			let result = get_item(i)
 			if (isFF) {
-				if (result == undefined) {result = zB0; err.push(i +" [unexpected]: undefined")
-				} else if (result == "undefined") {result = zB0; err.push(i +" [unexpected]: \"undefined\"")
-				} else if (result == "") {result = zB0; err.push(i +" [unexpected]: zero-length string")
-				} else if (result == " | ") {result = zB0 + " | " + zB0; err.push(i +" [unexpected]: zero-length string")
-				} else if (result == " |  | ") {result = zB0 + " | " + zB0 + " | " + zB0; err.push(i +" [unexpected]: zero-length string")
-				}
+				if (result == undefined) {result = zB0; err.push(i +" [unexpected]: undefined")}
+				if (result == "undefined") {result = zB0; err.push(i +" [unexpected]: \"undefined\"")}
+			}
+			if (result == "") {result = zB0; err.push(i +" [unexpected]: zero-length string")
+			} else if (result == " | ") {result = zB0 + " | " + zB0; err.push(i +" [unexpected]: zero-length strings")
+			} else if (result == " |  | ") {result = zB0 + " | " + zB0 + " | " + zB0; err.push(i +" [unexpected]: zero-length strings")
 			}
 			res.push(result)
 			// output
