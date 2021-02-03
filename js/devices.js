@@ -1,7 +1,8 @@
 'use strict';
 
 var pluginBS = false,
-	mimeBS = false
+	mimeBS = false, // FF only
+	devicesBS = false // FF only
 
 function reset_devices() {
 	dom.mimeTypesList.style.color = zhide
@@ -124,6 +125,10 @@ function get_media_devices() {
 		let t0 = performance.now()
 
 		function finish(result) {
+			// global lie
+			if (!sRerun) {
+				if (devicesBS) {knownLies.push("media devices")}
+			}
 			dom.eMDList.style.color = zshow
 			if (logPerf) {debug_log("media devices [devices]",t0)}
 			return resolve("media_devices:"+result)
@@ -157,6 +162,8 @@ function get_media_devices() {
 					
 					// compute devices output
 					let arr = []
+					// reset known lie
+					devicesBS = false
 					// enumerate
 					devices.forEach(function(d) {
 						arr.push(d.kind)
@@ -164,12 +171,31 @@ function get_media_devices() {
 						if (d.groupId.length > 0) {
 							strPad = ("group: ").padStart(pad)
 							str += "<br>"+strPad+d.groupId
+							
+						} else {
+							// if FF the length cannot be zero
+							console.debug(d.kind, "zero-length groupId")
 						}
 						if (d.label.length > 0) {
 							strPad = ("label: ").padStart(pad)
 							str += "<br>"+strPad+d.label
 						}
 						str += "<br>"
+						// FF sanity check
+						if (isFF) {
+							// deviceId
+							let chk = d.deviceId
+							console.debug("device", chk.length, chk.slice(-1), chk)
+							if (chk.length !== 44) {devicesBS = true}
+							else if (chk.slice(-1) !== "=") {devicesBS = true}
+							// groupId
+							if (isVer > 66) {
+								chk = d.groupId
+								console.debug("group", chk.length, chk.slice(-1), chk)
+								if (chk.length !== 44) {devicesBS = true}
+								else if (chk.slice(-1) !== "=") {devicesBS = true}
+							}
+						}
 					})
 					// output list
 					if (str.length == 0) {str = "none"}
@@ -178,20 +204,24 @@ function get_media_devices() {
 					// count each kind
 					let pretty = [], plain = [], rfphash = ""
 					if (arr.length > 0) {
-						arr.sort()
-						let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-						arr = [...map.entries()]
-						// build pretty/plain
-						for (let i=0; i < arr.length; i++) {
-							let data = arr[i],
-								item = data[0],
-								itemcount = data[1]
-							pretty.push(item + s7 +"["+ itemcount +"]" + sc)
-							plain.push(item +","+ itemcount)
+						if (devicesBS) {
+							pretty = "fake"
+						} else {
+							arr.sort()
+							let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+							arr = [...map.entries()]
+							// build pretty/plain
+							for (let i=0; i < arr.length; i++) {
+								let data = arr[i],
+									item = data[0],
+									itemcount = data[1]
+								pretty.push(item + s7 +"["+ itemcount +"]" + sc)
+								plain.push(item +","+ itemcount)
+							}
+							pretty = pretty.join(" ")
+							str = plain.join(";")
+							rfphash = sha1(str)
 						}
-						pretty = pretty.join(" ")
-						str = plain.join(";")
-						rfphash = sha1(str)
 					} else {
 						pretty = "none"
 					}
