@@ -173,6 +173,8 @@ function get_lang_doc() {
 				minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"},
 			res = [],
 			err = []
+		// reset language + resolved option combos
+		combo1 = ""; combo2 = ""
 
 		function get_item(item) {
 			let amWorker = false
