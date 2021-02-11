@@ -127,7 +127,7 @@ function get_media_devices() {
 		function finish(result) {
 			// global lie
 			if (!sRerun) {
-				if (devicesBS) {knownLies.push("media devices")}
+				if (devicesBS) {knownLies.push("devices:media")}
 			}
 			dom.eMDList.style.color = zshow
 			if (logPerf) {debug_log("media devices [devices]",t0)}
@@ -185,13 +185,13 @@ function get_media_devices() {
 						if (isFF) {
 							// deviceId
 							let chk = d.deviceId
-							console.debug("device", chk.length, chk.slice(-1), chk)
+							//console.debug("device", chk.length, chk.slice(-1), chk)
 							if (chk.length !== 44) {devicesBS = true}
 							else if (chk.slice(-1) !== "=") {devicesBS = true}
 							// groupId
 							if (isVer > 66) {
 								chk = d.groupId
-								console.debug("group", chk.length, chk.slice(-1), chk)
+								//console.debug("group", chk.length, chk.slice(-1), chk)
 								if (chk.length !== 44) {devicesBS = true}
 								else if (chk.slice(-1) !== "=") {devicesBS = true}
 							}
@@ -596,9 +596,9 @@ function outputDevices() {
 		})
 		// global lies
 		if (!sRerun) {
-			if (pluginBS) {knownLies.push("plugins")}
-			if (mimeBS) {knownLies.push("mimeTypes")}
-			if (isBraveFP) {knownLies.push("hardwareConcurrency")}
+			if (pluginBS) {knownLies.push("devices:plugins")}
+			if (mimeBS) {knownLies.push("devices:mimeTypes")}
+			if (isBraveFP) {knownLies.push("devices:hardwareConcurrency")}
 		}
 		// section
 		section_info("devices", t0, section)
