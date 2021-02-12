@@ -39,20 +39,25 @@ function run() {
 	let output = []
 
 	function build(r1,r2) {
-		// compare
-		let notation = " "+ (r1 == r2 ? sg + "\u2713" : sb + "\u274C") + sc
-		// pad
-		r1 = r1.toString().padEnd(20)
-		r2 = r2.toString().padEnd(20)
-		// push
-		output.push(r1 +"   "+ r2 + notation)
+		if (r1 == "separator") {
+			output.push(s3 + "--- " + r2 + sc)
+		} else {
+			// compare
+			let notation = " "+ (r1 == r2 ? sg + "\u2713" : sb + "\u274C") + sc
+			// pad
+			r1 = r1.toString().padEnd(20)
+			r2 = r2.toString().padEnd(20)
+			// push
+			output.push(r1 +"   "+ r2 + notation)
+		}
 	}
 
 	// ToDo: add error handling etc
 		// loop thru a set
 	let x, y
 	
-	// hypot
+	// hypot/sqrt
+	build("separator", "hypot/sqrt")
 	x = 9; y = 3
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
 	x = 5; y = 7
@@ -63,13 +68,31 @@ function run() {
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
 
 	// cos/sin
+	build("separator", "cos/sin")
 	x = 5; y = 2
 	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
 	x = 1; y = 8
-	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
+	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) ) // catches cydec
 	x = 8; y = -1
 	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
 
+	/* https://en.wikipedia.org/wiki/Trigonometric_functions#cos */
+
+	// law of sines
+	// sinA/a = sinB/b = sinC/c
+	build("separator", "law of sines")
+	x = 3, y = 3
+	build( Math.sin(60)/x, Math.sin(60)/y )
+	build( Math.sin(Math.PI/3)/x, Math.sin(Math.PI/3)/y )
+	x = 3, y = 3
+	build( Math.sin(75)/x, Math.sin(75)/y )
+	x = 5, y = 5
+	build( x/Math.sin(45), y/Math.sin(45) )
+
+	// law of cosines
+	// sin2 x + cos2 x = 1  ???
+	//x = 5
+	//build( Math.sin(2*x) + Math.cos(2*x), 1 )
 
 
 	// output
@@ -86,6 +109,7 @@ function outputMath() {
 	}, 170)
 }
 
+s3 = s3.trim()
 run()
 
 </script>
