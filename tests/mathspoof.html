@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=400">
+  <title>math spoof detection</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 380px;}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+	<table id="tb3">
+		<col width="1%"><col width="99%">
+		<thead><tr><th colspan="2">math spoof detection</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">blah blah</span>
+		</td></tr>
+		<tr><td colspan="2"><div class="btn-left"><span class="btn3 btn" onClick="outputMath()">[ re-run ]</span></div></td></tr>
+		<tr><td colspan="2"></td></tr> <!--spacer-->
+		<tr><td></td><td class="c mono spaces" id="output"></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+function run() {
+
+	let output = []
+
+	function build(r1,r2) {
+		// compare
+		let notation = " "+ (r1 == r2 ? sg + "\u2713" : sb + "\u274C") + sc
+		// pad
+		r1 = r1.toString().padEnd(20)
+		r2 = r2.toString().padEnd(20)
+		// push
+		output.push(r1 +"   "+ r2 + notation)
+	}
+
+	// ToDo: add error handling etc
+		// loop thru a set
+	let x, y
+	
+	// hypot
+	x = 9; y = 3
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = 5; y = 7
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = 95; y = -23
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = Math.PI; y = Math.PI
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+
+	// cos/sin
+	x = 5; y = 2
+	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
+	x = 1; y = 8
+	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
+	x = 8; y = -1
+	build( Math.cos(x-y), (Math.cos(x) * Math.cos(y)) + (Math.sin(x) * Math.sin(y)) )
+
+
+
+	// output
+	dom.output.innerHTML = output.join("<br>")
+}
+
+function outputMath() {
+	// clear
+	let items = document.getElementsByClassName("c mono")
+	for (let i=0; i < items.length; i++) {items[i].textContent = ""}
+	// delay so user can see things being reset
+	setTimeout(function(){
+		run()
+	}, 170)
+}
+
+run()
+
+</script>
+</body>
+</html>
