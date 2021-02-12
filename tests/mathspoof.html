@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=400">
+	<meta name="viewport" content="width=450">
   <title>math spoof detection</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
@@ -10,7 +10,7 @@
 	<script src="testmain.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 380px;}
+		table {width: 430px;}
 	</style>
 </head>
 <body>
@@ -45,8 +45,8 @@ function run() {
 			// compare
 			let notation = " "+ (r1 == r2 ? sg + "\u2713" : sb + "\u274C") + sc
 			// pad
-			r1 = r1.toString().padEnd(20)
-			r2 = r2.toString().padEnd(20)
+			r1 = r1.toString().padEnd(24)
+			r2 = r2.toString().padEnd(24)
 			// push
 			output.push(r1 +"   "+ r2 + notation)
 		}
@@ -67,6 +67,19 @@ function run() {
 	x = Math.PI; y = Math.PI
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
 
+	if (isFF) {
+		build(Math.hypot(1e-300, 1e-300), 1.414213562373095e-300)
+	}
+	build(Math.hypot(1e-3, 1e-3, 1e-3), 0.0017320508075688772)
+	build(Math.hypot(1e300, 1e300), 1.4142135623730952e+300)
+	build(Math.hypot(1e100, 1e200, 1e300), 1e300)
+	build(Math.hypot(1e3, 1e-3), 1000.0000000005)
+	build(Math.hypot(1e-300, 1e300), 1e300)
+	build(Math.hypot(1e3, 1e-3, 1e3, 1e-3), 1414.2135623738021555)
+	build(Math.hypot(1e1, 1e2, 1e3), Math.sqrt(1e2 + 1e4 + 1e6))
+	build(Math.hypot(1e1, 1e2, 1e3, 1e4), Math.sqrt(1e2 + 1e4 + 1e6 + 1e8))
+
+
 	// cos/sin
 	build("separator", "cos/sin")
 	x = 5; y = 2
@@ -81,19 +94,21 @@ function run() {
 	// law of sines
 	// sinA/a = sinB/b = sinC/c
 	build("separator", "law of sines")
-	x = 3, y = 3
+	x = 3; y = 3
 	build( Math.sin(60)/x, Math.sin(60)/y )
 	build( Math.sin(Math.PI/3)/x, Math.sin(Math.PI/3)/y )
-	x = 3, y = 3
+	x = 3; y = 3
 	build( Math.sin(75)/x, Math.sin(75)/y )
-	x = 5, y = 5
+	x = 5; y = 5
 	build( x/Math.sin(45), y/Math.sin(45) )
 
 	// law of cosines
-	// sin2 x + cos2 x = 1  ???
-	//x = 5
-	//build( Math.sin(2*x) + Math.cos(2*x), 1 )
-
+	build("separator", "law of cosines")
+	x = 3; y = 2.999999999999999
+	let temp = Math.sqrt((x * x) + (y * y) - ( (2 * x * y) * Math.cos(Math.PI/3) ))
+	// limit to 15 decimal places: values is usually 2.9999999999999996
+	temp = temp.toFixed(15)
+	build( temp, y )
 
 	// output
 	dom.output.innerHTML = output.join("<br>")
@@ -109,6 +124,7 @@ function outputMath() {
 	}, 170)
 }
 
+if ("undefined" != typeof InstallTrigger) {isFF = true}
 s3 = s3.trim()
 run()
 
