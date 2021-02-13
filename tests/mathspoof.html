@@ -36,6 +36,20 @@
 
 function run() {
 
+	/* NOTES: cydec tests show targeting at these values used in Math functions
+Math.SQRT1_2
+Math.PI
+Math.SQRT2
+Math.cosh(1)
+Math.expm1(1)
+Math.E
+Math.LN2
+Math.LOG2E
+Math.LOG10E
+1e-310
+1e0
+	*/
+
 	let output = []
 
 	function build(r1,r2) {
@@ -57,6 +71,58 @@ function run() {
 	let x, y
 	
 	// hypot/sqrt
+	// known targeted values
+	build("separator", "hypot/sqrt: known targeted values")
+	x = Math.PI; y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = Math.cosh(1); y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = Math.expm1(1); y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = Math.LOG2E; y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = Math.LOG10E; y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	x = 1e0; y = x
+	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+
+	if (isFF) {
+		x = Math.SQRT1_2; y = x
+		build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+		x = Math.SQRT2; y = x
+		build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+		x = Math.E; y = x
+		build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+		x = Math.LN2; y = x
+		build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
+	} else {
+		// in chrome we need to fix up the decimals places
+		/*
+			1.0000000000000002         1
+			2.0000000000000004         2
+			3.844231028159117          3.8442310281591165
+			0.9802581434685472         0.9802581434685471
+		*/
+		let tmpx, tmpy
+		x = Math.SQRT1_2; y = x
+		tmpx = Math.hypot(x, y).toFixed(15)
+		tmpy = Math.sqrt((x*x) + (y*y)).toFixed(15)
+		build( tmpx, tmpy )
+		x = Math.SQRT2; y = x
+		tmpx = Math.hypot(x, y).toFixed(15)
+		tmpy = Math.sqrt((x*x) + (y*y)).toFixed(15)
+		build( tmpx, tmpy )
+		x = Math.E; y = x
+		tmpx = Math.hypot(x, y).toFixed(14)
+		tmpy = Math.sqrt((x*x) + (y*y)).toFixed(14)
+		build( tmpx, tmpy )
+		x = Math.LN2; y = x
+		tmpx = Math.hypot(x, y).toFixed(15)
+		tmpy = Math.sqrt((x*x) + (y*y)).toFixed(15)
+		build( tmpx, tmpy )
+	}
+
+	// hypot/sqrt: other
 	build("separator", "hypot/sqrt")
 	x = 9; y = 3
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
@@ -64,9 +130,6 @@ function run() {
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
 	x = 95; y = -23
 	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
-	x = Math.PI; y = Math.PI
-	build( Math.hypot(x, y), Math.sqrt((x*x) + (y*y)) )
-
 	if (isFF) {
 		build(Math.hypot(1e-300, 1e-300), 1.414213562373095e-300)
 	}
