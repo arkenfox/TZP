@@ -52,8 +52,17 @@ function section_click(name, time1) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	// set isEngine while we wait
-	if (filename == "screen") {get_engine()}
+	// set isFF
+		// ToDo: multiple fallbacks: see Cydec
+	if (filename == "css") {
+
+		if ("undefined" != typeof InstallTrigger) {
+			isFF = true
+		} else {
+			let test = get_system_fonts("isFFcheck")
+			if (test !== "0db95b1c2493aaa6d3c01ed0e6139289091dda78") {isFF = true}
+		}
+	}
 
 	// yay! all js files have arrived
 	if (jsFiles.length == 13) {
@@ -607,11 +616,6 @@ function run_once() {
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	if ("brave" in navigator) {isBrave = true}
-	if ("undefined" != typeof InstallTrigger) {
-		isFF = true
-	} else {
-		runS = false // simulation is FF only
-	}
 
 	//warm up some JS functions
 	try {
