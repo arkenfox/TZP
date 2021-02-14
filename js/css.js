@@ -259,13 +259,17 @@ function get_mm_css() {
 	return(res)
 }
 
-function get_system_fonts() {
+function get_system_fonts(runtype) {
 	let results = [],
 		data = [],
 		error = "",
 		m = "-moz-"
 	let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
 		m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
+	if (runtype == "isFFcheck") {
+		fonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
+	}
+
 	let el = document.getElementById("sysFont")
 	try {
 		// script blocking
@@ -303,12 +307,16 @@ function get_system_fonts() {
 		error = (isFF ? zB0 : "error")
 	}
 	// output
-	let hash = sha1(results.join()),
-		notation = s14 + " [" + fonts.length + "]" + sc
-	dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
-	dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
-	dom.sFontsHashData.style.color = zshow
-	return "system_fonts:" + hash
+	let hash = sha1(results.join())
+	if (runtype == "isFFcheck") {
+		return hash
+	} else {
+		let notation = s14 + " [" + fonts.length + "]" + sc
+		dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
+		dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
+		dom.sFontsHashData.style.color = zshow
+		return "system_fonts:" + hash
+	}
 }
 
 function outputCSS() {
