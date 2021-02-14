@@ -204,7 +204,7 @@ function get_engine() {
 	} else if ("undefined" != typeof InstallTrigger) {isEngine = "gecko"
 	} else if ("chrome" in window) {isEngine = "blink"
 	}
-	if (isEngine == "") {console.error("isEngine: not found")}
+	if (isEngine == "") {console.error("isEngine: not found\n", res)}
 }
 
 function get_errors() {
@@ -1364,10 +1364,10 @@ function get_screen_metrics(runtype) {
 	let mInner = w+" x "+h,
 		mOuter = w3+" x "+h3,
 		mScreen = w1+" x "+h1,
-		mScrnA = w2+" x "+h2
+		mAvailable = w2+" x "+h2
 
 	dom.ScrRes =  mScreen +" ("+p1+","+p2+")"
-	dom.ScrAvail = mScrnA +" ("+p3+","+p4+")"
+	dom.ScrAvail = mAvailable +" ("+p3+","+p4+")"
 	dom.WndOut = mOuter +" ("+p5+","+p6+")"
 
 	// x/y
@@ -1379,15 +1379,20 @@ function get_screen_metrics(runtype) {
 	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 
 	// section hash
+		// ToDo: needs better logic + prototype lie checks: e.g.
+			// if in FS all but available should be the same (ignore available)
+			// if not in FS all 4 values should be different?
 	if (runtype == "load" || runtype == "screen") {
 		// note: FS would make these true
 			res.push("coordinates_zero:"+isXY)
-		let match = (mScreen == mScrnA)
+		let match = (mScreen == mAvailable)
 			res.push("match_screen+available:"+match)
 		match = (mInner == mOuter)
 			res.push("match_inner+outer:"+match)		
 		match = (mInner == mScreen)
 			res.push("match_inner+screen:"+match)
+
+		// ToDo: improve (see above) and return screen + available screen
 		if (isFS || mInner !== mScreen) {
 			res.push("screen:"+mScreen)
 		} else {
