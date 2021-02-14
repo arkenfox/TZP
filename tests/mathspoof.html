@@ -21,7 +21,12 @@
 	</table>
 	<table id="tb3">
 		<col width="1%"><col width="8%"><col width="92%">
-		<thead><tr><th colspan="3">math spoof detection</th></tr></thead>
+		<thead><tr><th colspan="3">
+			<div class="nav-title">math spoof fingerprinting
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+
 		<tr><td colspan="3" class="intro">
 			<span class="no_color">blah blah</span>
 		</td></tr>
@@ -145,18 +150,6 @@ function run(runtype) {
 					r2 = "blocked"
 				}
 
-				// test
-				/*
-				if (fn[0] == 6) {
-					r2 = 1.4142135623730958
-				}
-				if (fn[0] == 16) {
-					if (runtype == 1) {
-						r2 = 1e+301
-					}
-				}
-				*/
-
 				// fixed decimal places
 				if (fn[5] !== undefined) {
 					let isFixed = false
@@ -207,10 +200,11 @@ function run(runtype) {
 
 function outputMath(delay) {
 	// clear
-	let items = document.getElementsByClassName("c mono")
+	let items = document.getElementsByClassName("c")
 	for (let i=0; i < items.length; i++) {items[i].textContent = ""}
 	// delay so user can see things being reset
 	setTimeout(function(){
+		let t0 = performance.now()
 		Promise.all([
 			run(1),
 			run(2),
@@ -232,6 +226,11 @@ function outputMath(delay) {
 			// match hashes
 			let hashmatch = (run1hash == run2hash ? sg : sb) + "[match]"+sc
 			dom.run2hash.innerHTML = run2hash + run2count + hashmatch
+
+			// perf
+			let t1 = performance.now()
+			dom.perf.innerHTML = Math.round(t1-t0) + "ms"
+
 		})
 	}, delay)
 }
