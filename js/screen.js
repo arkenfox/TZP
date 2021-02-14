@@ -201,7 +201,7 @@ function get_engine() {
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
-	} else if ("undefined" != typeof InstallTrigger) {isEngine = "gecko"
+	} else if (isFF) {isEngine = "gecko"
 	} else if ("chrome" in window) {isEngine = "blink"
 	}
 	if (isEngine == "") {console.error("isEngine: not found\n", res)}
@@ -2729,9 +2729,14 @@ function outputStart() {
 
 		// IMMUTABLE: don't do on reruns
 		if (!gRerun) {
-			if (isFF) {get_chrome()} // sets isTB*, get ASAP
+			if (isFF) {
+				get_chrome() // sets isTB*, get ASAP
+			} else {
+				runS = false // simulation is FF only
+			}
 		}
 
+		get_engine()
 		// cosmetics
 			// not-coded
 		let items = document.getElementsByClassName("faint")
