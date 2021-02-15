@@ -260,63 +260,69 @@ function get_mm_css() {
 }
 
 function get_system_fonts(runtype) {
-	let results = [],
-		data = [],
-		error = "",
-		m = "-moz-"
-	let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
-		m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
-	if (runtype == "isFFcheck") {
-		fonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
-	}
+	return new Promise(resolve => {
+		let results = [],
+			data = [],
+			error = "",
+			m = "-moz-"
+		let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
+			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
+		if (runtype == "isFFcheck") {fonts = [m+"dialog"]}
 
-	let el = document.getElementById("sysFont")
-	try {
-		// script blocking
-		let test = getComputedStyle(el).getPropertyValue("font-family")
-		// compute
-		fonts.forEach(function(font){
-			el.style.font = "99px sans-serif"		
-			try {el.style.font = font} catch(err) {}
-			let s = ""
-			if (window.getComputedStyle) {
-				try {
-					s = getComputedStyle(el, null)
-				} catch(e) {}
-			} else {
-				s = el.currentStyle
-			}
-			if (s !== "") {
-				let f = undefined
-				if (s.fontSize != "99px") {
-					f = s.fontFamily + " " + s.fontSize;
-					if (s.fontWeight != 400 && s.fontWeight != "normal") {
-						f += ", " +	(s.fontWeight == 700 ? "bold" :
-							typeof s.fontWeight == "number" ? "weight " + s.fontWeight :
-							s.fontWeight)
+		let el = document.getElementById("sysFont")
+		try {
+			// script blocking
+			let test = getComputedStyle(el).getPropertyValue("font-family")
+			// compute
+			fonts.forEach(function(font){
+				el.style.font = "99px sans-serif"
+				try {el.style.font = font} catch(err) {}
+				let s = ""
+				if (window.getComputedStyle) {
+					try {
+						s = getComputedStyle(el, null)
+					} catch(e) {}
+				} else {
+					s = el.currentStyle
+				}
+				if (s !== "") {
+					let f = undefined
+					if (s.fontSize != "99px") {
+						f = s.fontFamily + " " + s.fontSize;
+						if (s.fontWeight != 400 && s.fontWeight != "normal") {
+							f += ", " +	(s.fontWeight == 700 ? "bold" :
+								typeof s.fontWeight == "number" ? "weight " + s.fontWeight :
+								s.fontWeight)
+						}
+						if (s.fontStyle != "normal") {
+							f += ", " + s.fontStyle
+						}
 					}
-					if (s.fontStyle != "normal") {
-						f += ", " + s.fontStyle
+					data.push(font.padStart(20) + ": " + f)
+					if (runtype == "isFFcheck") {
+						return resolve(""+f)
+					} else {
+						results.push(font+":"+f)
 					}
 				}
-				data.push(font.padStart(20) + ": " + f)
-				results.push(font+":"+f)
+			})
+		} catch(e) {
+			if (runtype == "isFFcheck") {
+				return resolve("error")
+			} else {
+				error = (isFF ? zB0 : "error")
 			}
-		})
-	} catch(e) {
-		error = (isFF ? zB0 : "error")
-	}
-	// output
-	let hash = sha1(results.join())
-	if (runtype == "isFFcheck") {
-		return hash
-	} else {
-		let notation = s14 + " [" + fonts.length + "]" + sc
-		dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
-		dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
-		dom.sFontsHashData.style.color = zshow
-		return "system_fonts:" + hash
-	}
+		}
+		// output
+		if (runtype !== "isFFcheck") {
+			let hash = sha1(results.join())
+			let notation = s14 + " [" + fonts.length + "]" + sc
+			dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
+			dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
+			dom.sFontsHashData.style.color = zshow
+			return resolve("system_fonts:" + hash)
+		}
+	})
 }
 
 function outputCSS() {
