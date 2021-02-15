@@ -52,28 +52,43 @@ function section_click(name, time1) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	// set isFF
-		// ToDo: multiple fallbacks: see Cydec
-	if (filename == "css") {
 
-		if ("undefined" != typeof InstallTrigger) {
-			isFF = true
-		} else {
-			let test = get_system_fonts("isFFcheck")
-			if (test !== "0db95b1c2493aaa6d3c01ed0e6139289091dda78") {isFF = true}
-		}
-	}
-
-	// yay! all js files have arrived
+	// all js files have arrived
 	if (jsFiles.length == 13) {
-		outputSection("load")
 
-		// or load a single section for perf tests
-		// note: some tests require global vars set
-		//isOS = "windows" // font list sizes: windows 468, linux 449, mac 755, droid 140
-		//outputFonts()
-		//outputDevices() // media devices is slow (300+ ms) speech engines runs 3 times
-		//outputCanvas()
+		//isFF = false // temp
+		if (!isFF) {
+			// isFF fallback A: -moz-dialog font (10ms)
+			// isFF fallback B: errors: really obscure unique FF ones
+			// isFF fallback C: resource:// (slow AF)
+
+			let t0 = performance.now()
+			Promise.all([
+				get_system_fonts("isFFcheck"),
+			]).then(function(result){
+				let go = true
+				let check = result.join()
+				if (check == "error") {
+					go = false // we need to test more
+					console.info("isFF fallback A: failed")
+				} else {
+					if (check !== "undefined") {
+						isFF = true
+						let t1 = performance.now()
+						console.info("isFF fallback A: caught you lying!", Math.round(t1-t0) + "ms")
+					}
+				}
+				if (go) {
+					outputSection("load")
+				} else {
+					// ToDo: isFF fallback B
+					outputSection("load")
+				}
+			})
+
+		} else {
+			outputSection("load")
+		}
 	}
 }
 
@@ -615,8 +630,8 @@ function run_once() {
 	// immutable
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
+	if ("undefined" != typeof InstallTrigger) {isFF = true} 
 	if ("brave" in navigator) {isBrave = true}
-
 	//warm up some JS functions
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
@@ -624,6 +639,7 @@ function run_once() {
 	try {
 		let v = speechSynthesis.getVoices()
 	} catch(e) {}
+
 }
 
 run_once()
