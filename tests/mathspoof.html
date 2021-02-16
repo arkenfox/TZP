@@ -235,7 +235,12 @@ function outputMath(delay) {
 	}, delay)
 }
 
-if ("undefined" != typeof InstallTrigger) {isFF = true}
+// isFF
+let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+	+ ("InstallTrigger" in window ? true : false)
+	+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
+if (isFFsum > 0) {isFF = true}
+
 s3 = s3.trim()
 s12 = s12.trim()
 outputMath(1)
