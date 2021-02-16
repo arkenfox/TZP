@@ -292,7 +292,11 @@ function run() {
 	}, 170)
 }
 
-if ("undefined" != typeof InstallTrigger) {isFF = true}
+// isFF
+let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+	+ ("InstallTrigger" in window ? true : false)
+	+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
+if (isFFsum > 0) {isFF = true}
 get_engine()
 run()
 
