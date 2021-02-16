@@ -18,7 +18,14 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function get_engine() {
+function get_isFF_engine() {
+	// set isFF
+	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+		+ ("InstallTrigger" in window ? true : false)
+		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
+	if (isFFsum > 0) {isFF = true}
+
+	// engine
 	function cbrt(x) {
 		try {
 			let y = Math.pow(Math.abs(x), 1 / 3)
