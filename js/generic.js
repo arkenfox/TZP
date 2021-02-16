@@ -630,14 +630,13 @@ function run_once() {
 	// immutable
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
-	if ("undefined" != typeof InstallTrigger) {
-		isFF = true
-	} else {
-		if ("InstallTrigger" in window) {
-			isFF = true
-			console.info("isFF fallback A: caught you lying!")
-		}
-	}
+
+	// isFF
+	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+		+ ("InstallTrigger" in window ? true : false)
+		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
+	if (isFFsum > 0) {isFF = true}
+
 	if ("brave" in navigator) {isBrave = true}
 	//warm up some JS functions
 	try {

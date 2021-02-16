@@ -2,31 +2,31 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=600">
-	<title>domrect noise</title>
+	<meta name="viewport" content="width=800">
+	<title>domrect spoof detection</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<script src="testmain.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 580px;}
+		table {width: 780px;}
 		#rectTest {
+			background-color: skyblue;
 			top: 0;
 			left: 0;
 			width:100px;
 			height:100px;
 			transform: rotate(45deg);
 			padding: 0px;
-			opacity: 0;
+			/* opacity: 0; */
 			z-index: -20;
-			position: fixed;
+			position: fixed; /* must be fixed */
 		}
 	</style>
 </head>
 <body>
 	<div id="rectTest"></div>
-
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -49,35 +49,59 @@
 <script>
 'use strict';
 
+var resizeArray = []
+
+function get_rect() {
 	let t0 = performance.now()
 	let details = []
 
 	let el = (dom.rectTest).getBoundingClientRect()
-	let measure1 = [el.x, el.y, el.top, el.left, el.width, el.height, el.bottom, el.right]
+	let measure1 = ["x:"+el.x, "y:"+el.y, "width:"+el.width, "height:"+el.height,
+		"top:"+el.top, "left:"+el.left, "right:"+el.right, "bottom:"+el.bottom]
 	details.push("     x: " + measure1[0])
 	details.push("     y: " + measure1[1])
-	details.push("   top: " + measure1[2])
-	details.push("  left: " + measure1[3])
-	details.push(" width: " + measure1[4])
-	details.push("height: " + measure1[5])
-	details.push("bottom: " + measure1[6])
-	details.push(" right: " + measure1[7])
+	details.push(" width: " + measure1[2])
+	details.push("height: " + measure1[3])
+	details.push("   top: " + measure1[4])
+	details.push("  left: " + measure1[5])
+	details.push(" right: " + measure1[6])
+	details.push("bottom: " + measure1[7])
 
 	let hash1 = sha1(measure1.join())
-	// chrome: windows: 6a4af283678fe39fc4e56a72a90acd2a7b6c045d
-	// chrome: android: 25383d500b0a647d8ac0e56c1efb66d929b8bfae
-	// FF: windows/android: 9de3579c0b324ff29a64db604769bbdef20a2049
-	dom.hash1.innerHTML = hash1 + (hash1 == "9de3579c0b324ff29a64db604769bbdef20a2049" ? sg+"[pass]" : sb+"[fail]") + sc
+	console.debug(measure1)
+
+	if (isFF) {
+		dom.hash1.innerHTML = hash1 + (hash1 == "bebfc291e9d1adc90e240790551d0305b8b91294" ? sg+"[pass]" : sb+"[fail]") + sc
+	} else {
+		dom.hash1.innerHTML = hash1
+	}
 	dom.details.innerHTML = details.join("<br>")
+
+	/*
+	// FF: 1 result
+	// chrome: 9 results on windows
+
+	if (isEngine == "blink") {
+		resizeArray.push(hash1 + ": " + measure1.join())
+		if (resizeArray.length == 30) {
+			resizeArray.sort()
+			resizeArray = resizeArray.filter(function(item, position) {return resizeArray.indexOf(item) === position})
+			console.debug(resizeArray)
+			resizeArray = []
+		}
+	}
+	*/
+
 
 	// perf
 	let t1 = performance.now()
 	dom.perf.innerHTML = Math.round(t1-t0) + " ms"
+}
 
-	//let testhash = [-20.71068000793457,-20.71068000793457,-20.71068000793457,-20.71068000793457,
-	//	141.42137145996094,141.42137145996094,120.71069145202637,120.71069145202637]
-	//console.debug(sha1(testhash.join()))
+window.addEventListener("resize", get_rect)
 
+get_isFF_engine()
+get_rect()
 
 </script>
 </body>

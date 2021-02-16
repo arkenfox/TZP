@@ -248,7 +248,6 @@ function get_errors() {
 					code = "G2"; ff = "[FF78+]"
 				}
 				if (code !== "") {
-					isFF = true
 					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
 					dom.errh.innerHTML = hash + s3+"["+code+"]"+sc + (runS ? zSIM : "")
 				} else if (isFF) {
@@ -1428,7 +1427,7 @@ function get_screen_metrics(runtype) {
 		dom.WndIn = strTemp
 	} else {
 		// LB+NW
-		if (isFF == true) {
+		if (isFF) {
 			if (jsZoom == 100) {strTemp += return_lb_nw(w,h)} else {strTemp += "<br>"+lb_orange}
 		}
 		dom.WndIn.innerHTML = strTemp
@@ -2753,7 +2752,7 @@ function outputStart() {
 
 	// functions
 	run_checks()
-	outputFD("load") // run FD first: checks isFF; sets isOS, isTB*, isVer
+	outputFD("load") // run FD first: sets isOS, isTB*, isVer
 	setTimeout(function() {outputScreen("load")}, 1)
 	setTimeout(function() {outputUA()}, 1)
 	setTimeout(function() {run_os()}, 1) // per os tweaks

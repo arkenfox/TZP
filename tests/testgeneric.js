@@ -18,7 +18,14 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function get_engine() {
+function get_isFF_engine() {
+	// set isFF
+	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+		+ ("InstallTrigger" in window ? true : false)
+		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
+	if (isFFsum > 0) {isFF = true}
+
+	// engine
 	function cbrt(x) {
 		try {
 			let y = Math.pow(Math.abs(x), 1 / 3)
@@ -50,7 +57,10 @@ function get_engine() {
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
+	} else if (isFF) {isEngine = "gecko"
+	} else if ("chrome" in window) {isEngine = "blink"
 	}
+	if (isEngine == "") {console.error("isEngine: not found\n", res)}
 }
 
 function copyclip(element) {
