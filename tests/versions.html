@@ -529,12 +529,7 @@ function rerunVersion() {
 	}, 170)
 }
 
-// isFF
-let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
-	+ ("InstallTrigger" in window ? true : false)
-	+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-if (isFFsum > 0) {isFF = true}
-
+get_isFF_engine()
 outputVersion()
 
 </script>
