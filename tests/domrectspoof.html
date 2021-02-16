@@ -100,14 +100,7 @@ function get_rect() {
 
 window.addEventListener("resize", get_rect)
 
-// isFF
-let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
-	+ ("InstallTrigger" in window ? true : false)
-	+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-if (isFFsum > 0) {isFF = true}
-get_engine()
-
-
+get_isFF_engine()
 get_rect()
 
 </script>
