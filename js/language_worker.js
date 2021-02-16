@@ -324,8 +324,8 @@ addEventListener("message", function(msg) {
 				// standard FF errors
 				let msg = ""
 				if (item == 5) {
-					// ToDo: 1654116: DisplayNames: shipped 86+
-					if (e.message == "Intl.DisplayNames is not a constructor") {msg = zNS}
+					// 1654116: DisplayNames: shipped 86+
+					if (e.message == "Intl.DisplayNames is not a constructor" && isVer < 87) {msg = zNS}
 				} else if (item == 6 || item == 45) {
 					if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
 				} else if (item == 9|| item == 33 || item == 42) {
