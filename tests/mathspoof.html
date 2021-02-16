@@ -235,14 +235,9 @@ function outputMath(delay) {
 	}, delay)
 }
 
-// isFF
-let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
-	+ ("InstallTrigger" in window ? true : false)
-	+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-if (isFFsum > 0) {isFF = true}
-
 s3 = s3.trim()
 s12 = s12.trim()
+get_isFF_engine()
 outputMath(1)
 
 </script>
