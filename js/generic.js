@@ -58,9 +58,9 @@ function countJS(filename) {
 
 		//isFF = false // temp
 		if (!isFF) {
-			// isFF fallback A: -moz-dialog font (10ms)
-			// isFF fallback B: errors: really obscure unique FF ones
-			// isFF fallback C: resource:// (slow AF)
+			// isFF fallback B: -moz-dialog font (10ms)
+			// isFF fallback C: errors: really obscure unique FF ones?
+			// isFF fallback D: resource:// (slow AF)
 
 			let t0 = performance.now()
 			Promise.all([
@@ -70,12 +70,12 @@ function countJS(filename) {
 				let check = result.join()
 				if (check == "error") {
 					go = false // we need to test more
-					console.info("isFF fallback A: failed")
+					console.info("isFF fallback B: failed")
 				} else {
 					if (check !== "undefined") {
 						isFF = true
 						let t1 = performance.now()
-						console.info("isFF fallback A: caught you lying!", Math.round(t1-t0) + "ms")
+						console.info("isFF fallback B: caught you lying!", Math.round(t1-t0) + "ms")
 					}
 				}
 				if (go) {
@@ -630,7 +630,14 @@ function run_once() {
 	// immutable
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
-	if ("undefined" != typeof InstallTrigger) {isFF = true} 
+	if ("undefined" != typeof InstallTrigger) {
+		isFF = true
+	} else {
+		if ("InstallTrigger" in window) {
+			isFF = true
+			console.info("isFF fallback A: caught you lying!")
+		}
+	}
 	if ("brave" in navigator) {isBrave = true}
 	//warm up some JS functions
 	try {
