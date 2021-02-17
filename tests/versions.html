@@ -39,6 +39,7 @@
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
 		<tr><td>87</td><td id="n87"></td><td class="c mono" id="v87"></td></tr>
+		<tr><td>87</td><td id="n87a"></td><td class="c mono" id="v87a"></td></tr>
 		<tr><td>86</td><td id="n86"></td><td class="c mono" id="v86"></td></tr>
 		<tr><td>85</td><td id="n85"></td><td class="c mono" id="v85"></td></tr>
 		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
@@ -141,6 +142,14 @@ function outputVersion() {
 	} catch(e) {}
 	output("87", "1688335", ver87, performance.now()-t87)
 
+	// 87a: 1676708
+	let t87a = performance.now(), ver87a = xF
+	try {
+		let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
+		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
+	} catch(e) {}
+	output("87a", "1676708", ver87a, performance.now()-t87a)
+
 	// 86: 1685482
 	let t86 = performance.now(), ver86 = xF
 	try {
@@ -149,7 +158,6 @@ function outputVersion() {
 		// 86+: SyntaxError an expression X in 'for (X of Y)' must not start with 'async of'
 		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
 		if ((e.message).substring(0,2) == "an") {ver86 = xS}
-		console.debug("86", e.name, e.message)
 	}
 	output("86", "1685482", ver86, performance.now()-t86)
 
