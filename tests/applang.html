@@ -41,7 +41,7 @@
 		<col width="30%"></a><col width="70%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><span class="btn4 btn" onClick="rerunAppLanguage()">[ re-run ]</span></div>
+			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="rerunAppLanguage()">[ run ]</span></div>
 			<div>dtd <sup>1</sup></div></div></td><td class="c" id="appLang2"></td></tr>
 		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c" id="appLang3"></td></tr>
 		<tr><td>dom.properties <sup>3</sup></td><td class="c" id="appLang1"></td></tr>
@@ -57,7 +57,6 @@
 			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>3</sup>
 			</td></tr>
 		</table>
-
 	<br>
 
 <script>
@@ -91,7 +90,7 @@ function test_iframe() {
 	}
 
 	let iframe = dom.iframeTest
-	iframe.src="applangtest.html"
+	iframe.src="applang-iframetest.html"
 	iframe.addEventListener("load", function(){
 		try {
 			let testerror = iframe.contentWindow.document.getElementById("test")
@@ -173,6 +172,8 @@ function get_app_lang_dtd2() {
 	dtd2 = ""
 	function output_dtd2(output) {
 		dom.appLang3.innerHTML = output
+		// as good a time as any to flip the button
+		dom.runbutton.innerHTML = "[ re-run ]"
 	}
 	// load it up
 	let iframe = dom.appLang_3
@@ -230,7 +231,7 @@ function get_app_lang_mediadocument() {
 		let iframe = dom.appLang_4
 		// load the iframe
 		if (iframe.src == "") {
-			iframe.src="applang.png"
+			iframe.src="applang-image.png"
 			iframe.addEventListener("load", function(){
 				run_mediadocument()
 			})
@@ -242,7 +243,7 @@ function get_app_lang_mediadocument() {
 
 	// keep checking if image loaded, but stop after x tries
 	let image = dom.imageTest
-	image.src="applang.png" // 1px high
+	image.src="applang-image.png" // 1px high
 	let counter = 0
 	function check_image() {
 		if (counter < 60) {
@@ -314,8 +315,6 @@ function rerunAppLanguage() {
 		outputAppLanguage()
 	}, 170)
 }
-
-outputAppLanguage()
 
 </script>
 </body>
