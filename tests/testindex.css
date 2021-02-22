@@ -42,6 +42,11 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 .good {color: #8cdca7;} /* test7 */
 .bad {color: #dc8c8c;}
 
+/* show/hide */
+input[type='checkbox'] {display: none;}
+.lbl-toggle {display: block; cursor: pointer;}
+.togA, .togB, .togC, .togD {display: none;}
+
 .normalized {
 	font-family: none;
   font-style: normal;

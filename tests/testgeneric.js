@@ -63,6 +63,24 @@ function get_isFF_engine() {
 	if (isEngine == "") {console.error("isEngine: not found\n", res)}
 }
 
+function showhide(togType, togID, togWord) {
+	var xyz = document.getElementsByClassName("tog"+togID);
+	var abc;
+	for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
+	// change label
+	if (togWord !== "") {
+		document.getElementById("label"+togID).innerHTML = togWord+" details"
+	}
+}
+
+function toggleitems(chkbxState, chkbxID) {
+	if (chkbxState.checked) {
+		showhide("none",chkbxID,"&#9660; show")
+	} else {
+		showhide("table-row",chkbxID,"&#9650; hide")
+	}
+}
+
 function copyclip(element) {
 	// fallback: e.g FF62-
 	function copyExec() {
@@ -132,3 +150,8 @@ function sha1(str1){
 	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
 	return str1
 }
+
+// set some global vars for all test pages
+if ((location.protocol) == "file:") {isFile = true; note_file = sn+"[file:]"+sc}
+if ((location.protocol) == "https:") {isSecure = true}
+get_isFF_engine()
