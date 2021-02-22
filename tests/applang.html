@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=700">
+	<title>app language</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 680px;}
+	</style>
+</head>
+
+<body>
+	<!-- offscreen -->
+	<div class="offscreen">
+		<div><img id="imageTest" src=""></div>
+	</div>
+	<!-- hidden -->
+	<div class="hidden">
+		<div>
+			<iframe id="iframeTest"></iframe>
+			<form><input id="appLang_1" required="" type="text"></form>
+			<iframe id="appLang_2"></iframe>
+			<iframe id="appLang_3"></iframe>
+			<iframe id="appLang_4"></iframe>
+		</div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<!-- app lang -->
+	<table id="tb4">
+		<col width="30%"></a><col width="70%">
+		<thead><tr><th colspan="2">application language</th></tr></thead>
+		<tr><td><div>
+			<div class="btn-left"><span class="btn4 btn" onClick="rerunAppLanguage()">[ re-run ]</span></div>
+			<div>dtd <sup>1</sup></div></div></td><td class="c" id="appLang2"></td></tr>
+		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c" id="appLang3"></td></tr>
+		<tr><td>dom.properties <sup>3</sup></td><td class="c" id="appLang1"></td></tr>
+		<tr><td>MediaDocument.properties <sup>3</sup></td><td class="c" id="appLang4"></td></tr>
+		<tr><td>xmlparser.properties <sup>3</sup></td><td class="c" id="appLang5"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<!--credits-->
+		<tr><td colspan="2"><span class="no_color">app language code based on work by Alex Catarineu </span>
+			<a target="_blank" class="blue" href="https://acatarineu.github.io/fp/locale.html">here</a> <sup>1</sup>
+			<span class="no_color"> and </span>
+			<a target="_blank" class="blue" href="https://acatarineu.github.io/fp/locale_nullprincipal.html">here</a> <sup>2</sup>
+			<span class="no_color"> and </span>
+			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>3</sup>
+			</td></tr>
+		</table>
+
+	<br>
+
+<script>
+'use strict';
+
+var dtd2 = ""
+
+function test_iframe() {
+	let iframeBlocked = true // assume blocked
+
+	// test an iframe: if loaded call other functions
+	function output_iframe() {
+		// clear iframe
+		iframe.src=""
+		// output
+		if (iframeBlocked == true) {
+			if (isFile) {
+				// file: Cross-Origin Request Blocked
+				dom.appLang2.innerHTML = error_file_cors
+				dom.appLang4.innerHTML = error_file_cors
+			} else {
+				// iframe is blocked
+				dom.appLang2.innerHTML = error_iframe
+				dom.appLang4.innerHTML = error_iframe
+			}
+		} else {
+			// iframes are good: call functions
+			get_app_lang_mediadocument()
+			get_app_lang_dtd1()
+		}
+	}
+
+	let iframe = dom.iframeTest
+	iframe.src="applangtest.html"
+	iframe.addEventListener("load", function(){
+		try {
+			let testerror = iframe.contentWindow.document.getElementById("test")
+			iframeBlocked = false
+		} catch(e) {}
+	})
+
+	// keep checking iframe loaded, but stop after x tries
+	let counter = 0
+	function check_iframe() {
+		if (counter < 60) {
+			if (iframeBlocked == false) {
+				clearInterval(checking)
+				output_iframe()
+			}
+		} else {
+			clearInterval(checking)
+			output_iframe()
+		}
+		counter++
+	}
+	let checking = setInterval(check_iframe, 50)
+}
+
+function get_app_lang_dtd1() {
+	// only call if iframes != blocked: no result = bugzilla fix
+	let dtd1 = ""
+	function output_dtd1(output) {
+		dom.appLang2.innerHTML = output
+	}
+	// load it
+	let iframe = dom.appLang_2,
+		dtdtemp = ""
+	iframe.src="applang.xml"
+	iframe.addEventListener('load', () => {
+		try {
+			dtd1 = iframe.contentDocument.getElementById("DTD1").innerText
+		} catch(e) {
+			if (isFile) {
+				// could be CORS or the patch: check MediaDocument result
+				setTimeout(function() {
+					let str = dom.appLang4.textContent
+					if ( str == "[file:] [Cross-Origin Request Blocked]") {
+						dtdtemp = error_file_cors
+					} else if (str == "") {
+						// should never happen, we waited a whole sec
+						dtdtemp = sg+"[bugzilla 467035]</span> or " + error_file_cors
+					} else {
+						dtdtemp = sg+"[bugzilla 467035]"+sc
+					}
+				}, 1000) // get this done before the check_dtd1 runs out
+			}
+		}
+	})
+	// keep checking dtd1 != blank x times
+	let counter = 0
+	function check_dtd1() {
+		if (counter < 30) {
+			if (dtd1 !== "") {
+				clearInterval(checking)
+				// notate
+				if (navigator.language == "en-US") {
+					dtd1 = (sha1(dtd1) == "4496d79dd1843c7c743647b45b4f0d76abf46bfe" ? enUS_green + dtd1 : enUS_red + dtd1)
+				}
+				output_dtd1(dtd1)
+			}
+		} else {
+			clearInterval(checking)
+			if (dtdtemp == "") {dtdtemp = sg+"[bugzilla 467035]"+sc}
+			output_dtd1(dtdtemp)
+		}
+		counter++
+	}
+	let checking = setInterval(check_dtd1, 50)
+}
+
+function get_app_lang_dtd2() {
+	// dtd nullprinciple
+	dtd2 = ""
+	function output_dtd2(output) {
+		dom.appLang3.innerHTML = output
+	}
+	// load it up
+	let iframe = dom.appLang_3
+	iframe.src="data:application/xml;charset=utf-8,%3C%21DOCTYPE%20html%20SYSTEM%20%22chrome%3A%2F%2Fglobal%2Flocale%2FnetError.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%2F%3E%0D%0A%20%20%3C%2Fhead%3E%0D%0A%20%20%3Cbody%3E%3Cspan%20id%3D%22text-container%22%3E%26loadError.label%3B%3C%2Fspan%3E%0D%0A%20%20%3Cscript%3E%0D%0A%20%20window.addEventListener%28%27message%27%2C%20%28e%29%20%3D%3E%20%7B%0D%0A%20%20%20%20e.source.postMessage%28document.getElementById%28%27text-container%27%29.innerText%2C%20%27%2A%27%29%3B%0D%0A%20%20%7D%29%3B%0D%0A%20%20%3C%2Fscript%3E%0D%0A%20%20%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E";
+	iframe.addEventListener('load', () => {
+		window.addEventListener('message', ({ data }) => dtd2 = data)
+		iframe.contentWindow.postMessage('foo', '*')
+	})
+	// keep checking dtd2 not blank, but stop after x tries
+	let counter = 0
+	function check_dtd2() {
+		if (counter < 30) {
+			if (dtd2 !== "") {
+				clearInterval(checking)
+				// notate
+				if (navigator.language == "en-US") {
+					dtd2 = (sha1(dtd2) == "4496d79dd1843c7c743647b45b4f0d76abf46bfe" ? enUS_green + dtd2 : enUS_red + dtd2)
+				}
+				output_dtd2(dtd2)
+			}
+		} else {
+			clearInterval(checking)
+			output_dtd2(sg+"[bugzilla 467035]"+sc)
+		}
+		counter++
+	}
+	let checking = setInterval(check_dtd2, 50)
+}
+
+function get_app_lang_mediadocument() {
+	// MediaDocument.properties
+	let iframe = dom.appLang_4
+	function output_mediadocument(string) {
+		dom.appLang4.innerHTML = string
+	}
+	function run_mediadocument() {
+		try {
+			let output = (iframe.contentWindow.document.title)
+			// notate
+			if (navigator.language == "en-US") {
+				output = (sha1(output) == "12ad5833d780efdd0d7e66432a1abab3afd9901d" ? enUS_green + output : enUS_red + output)
+			}
+			output_mediadocument(output)
+		} catch(e) {
+			if (isFile) {
+				// file: Cross-Origin Request Blocked
+				output_mediadocument(error_file_cors)
+			} else {
+			// iframe blocked
+				output_mediadocument(error_iframe)
+			}
+		}
+	}
+	function check_mediadocument() {
+		let iframe = dom.appLang_4
+		// load the iframe
+		if (iframe.src == "") {
+			iframe.src="applang.png"
+			iframe.addEventListener("load", function(){
+				run_mediadocument()
+			})
+		} else {
+			// already loaded
+			run_mediadocument()
+		}
+	}
+
+	// keep checking if image loaded, but stop after x tries
+	let image = dom.imageTest
+	image.src="applang.png" // 1px high
+	let counter = 0
+	function check_image() {
+		if (counter < 60) {
+			if (image.offsetHeight == 1) {
+				// empty_src=0px, broken_src= approx 24px
+				// extensions blocking images = if placeholders = approx 20px
+				// therefore: if 1px then our image was loaded
+				clearInterval(checking)
+				image.src="" // reset src
+				check_mediadocument()
+			}
+		} else {
+			clearInterval(checking)
+			output_mediadocument(error_image)
+			image.src="" // reset src
+		}
+		counter++
+	}
+	let checking = setInterval(check_image, 50)
+}
+
+function get_app_lang_xmlparser() {
+	let doc = (new DOMParser).parseFromString('getyourlocale', 'application/xhtml+xml')
+	let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+	// strip location
+	let start = str.search("http")
+	if (start == -1) { start = str.search("file")}
+	let end = str.search("html") + 4
+	let output = str.slice(0,start-1) + str.slice(end)
+	// strip anchor
+	start = output.search("#")
+	if (start !== -1) {
+		let strTemp = output.substring(start, output.length)
+		strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
+		end = strTemp.search(" ")
+		output = output.slice(0,start) + output.slice(start+end,output.length)
+	}
+	// output
+	if (navigator.language == "en-US") {
+		output = (sha1(output) === "0e4bcf212e9bcdae045444087659ffc9672c7582" ? enUS_green + output : enUS_red + output)
+	}
+	dom.appLang5.innerHTML = output
+}
+
+function outputAppLanguage() {
+	// FF only
+	if (isFF) {
+		// dom.properties
+		let str = dom.appLang_1.validationMessage
+		if (navigator.language == "en-US") {
+			str = (sha1(str) == "c17ee6480cdfbdc082000efe84ca520283b761ef" ? enUS_green + str : enUS_red + str)
+		}
+		dom.appLang1.innerHTML = str
+		// the others
+		get_app_lang_xmlparser()
+		get_app_lang_dtd2()
+		test_iframe() // fires last two PoCs
+	}
+}
+
+function rerunAppLanguage() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = "&nbsp"
+	}
+	// pause so users see change
+	setTimeout(function() {
+		outputAppLanguage()
+	}, 170)
+}
+
+outputAppLanguage()
+
+</script>
+</body>
+</html>
