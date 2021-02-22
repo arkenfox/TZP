@@ -1,0 +1,11 @@
+<!DOCTYPE html SYSTEM "chrome://global/locale/netError.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta charset="utf-8"/></head>
+<body><span id="DTD1">&loadError.label;</span>
+<script>
+window.addEventListener('message', (e) => {
+	e.source.postMessage(document.getElementById('DTD1').innerText, '*');
+});
+</script>
+</body>
+</html>
