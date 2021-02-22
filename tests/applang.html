@@ -212,10 +212,9 @@ function get_app_lang_mediadocument() {
 	function run_mediadocument() {
 		try {
 			let output = (iframe.contentWindow.document.title)
-			console.debug(output)
 			// notate
 			if (navigator.language == "en-US") {
-				output = (sha1(output) == "12ad5833d780efdd0d7e66432a1abab3afd9901d" ? enUS_green + output : enUS_red + output)
+				output = (output == "applang-image.png (PNG Image, 800 × 1 pixels)" ? enUS_green + output : enUS_red + output)
 			}
 			output_mediadocument(output)
 		} catch(e) {
