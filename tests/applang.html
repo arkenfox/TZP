@@ -212,6 +212,10 @@ function get_app_lang_mediadocument() {
 	function run_mediadocument() {
 		try {
 			let output = (iframe.contentWindow.document.title)
+			// debug
+			console.debug(output)
+			console.debug(sha1(output))
+
 			// notate
 			if (navigator.language == "en-US") {
 				output = (output == "applang-image.png (PNG Image, 800 × 1 pixels)" ? enUS_green + output : enUS_red + output)
