@@ -27,7 +27,7 @@
 			<form><input id="appLang_1" required="" type="text"></form>
 			<iframe id="appLang_2"></iframe>
 			<iframe id="appLang_3"></iframe>
-			<iframe id="appLang_4"></iframe>
+			<iframe id="appLang_4" src="applang-image.png"></iframe>
 		</div>
 	</div>
 
@@ -209,12 +209,13 @@ function get_app_lang_mediadocument() {
 	function output_mediadocument(string) {
 		dom.appLang4.innerHTML = string
 	}
-	function run_mediadocument(output) {
+	function run_mediadocument() {
 		try {
+			let output = (iframe.contentWindow.document.title)
+
 			// debug
 			console.debug("~"+output+"~")
 			console.debug(sha1(output))
-
 			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels)"))
 				// 7bc392a516c338f8dc9b31d2583f0abaeed5dcf7
 			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels) = Scaled 37%"))
@@ -245,9 +246,10 @@ function get_app_lang_mediadocument() {
 			iframe.src="applang-image.png"
 			iframe.addEventListener("load", function(){
 				let title = this.contentWindow.document.title
-				run_mediadocument(title)
+				run_mediadocument()
 			})
 		} else {
+			console.debug("applang4 already loaded")
 			// already loaded
 			run_mediadocument()
 		}
