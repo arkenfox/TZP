@@ -19,6 +19,7 @@
 	<!-- offscreen -->
 	<div class="offscreen">
 		<div><img id="imageTest" src=""></div>
+		<!-- appLang_4 can't be hidden otherwise "Scaled..." is not in the title -->
 		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
 	</div>
 	<!-- hidden -->
@@ -213,21 +214,14 @@ function get_app_lang_mediadocument() {
 		try {
 			let output = (iframe.contentWindow.document.title)
 
-			// debug
-			console.debug("~"+output+"~")
-			console.debug(sha1(output))
 			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels)"))
 				// 7bc392a516c338f8dc9b31d2583f0abaeed5dcf7
 			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels) — Scaled (37%)")
 				// 97a0314b3d87e32c0b29d0f59ff51ff519d14239
 
-			// WTF is 091a998bfb412db572da677286386c3e4a25bd2c coming from
-
-			// WTF did "scaled.." go?
-
 			// notate
 			if (navigator.language == "en-US") {
-				output = (output == "97a0314b3d87e32c0b29d0f59ff51ff519d14239" ? enUS_green : enUS_red) + output
+				output = (sha1(output) == "97a0314b3d87e32c0b29d0f59ff51ff519d14239" ? enUS_green : enUS_red) + output
 			}
 			output_mediadocument(output)
 		} catch(e) {
