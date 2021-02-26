@@ -40,6 +40,7 @@
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
 		<tr><td>87</td><td id="n87"></td><td class="c mono" id="v87"></td></tr>
 		<tr><td>87</td><td id="n87a"></td><td class="c mono" id="v87a"></td></tr>
+		<tr><td>87</td><td id="n87b"></td><td class="c mono" id="v87b"></td></tr>
 		<tr><td>86</td><td id="n86"></td><td class="c mono" id="v86"></td></tr>
 		<tr><td>85</td><td id="n85"></td><td class="c mono" id="v85"></td></tr>
 		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
@@ -149,6 +150,14 @@ function outputVersion() {
 		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
 	} catch(e) {}
 	output("87a", "1676708", ver87a, performance.now()-t87a)
+
+	// 87b: 944846
+	let t87b = performance.now(), ver87b = xF
+	try {
+		let test87b = (12345).toExponential(3)
+		if (test87b == 1.235e+4) {ver87b = xS}
+	} catch(e) {}
+	output("87b", "944846", ver87b, performance.now()-t87b)
 
 	// 86: 1685482
 	let t86 = performance.now(), ver86 = xF
