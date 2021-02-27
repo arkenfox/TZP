@@ -1877,9 +1877,17 @@ function get_version() {
 		// run
 		function v75plus() {
 			if (go) {
+				// 88: 1670124
+				try {
+					eval('function invalid () { "use strict" \n ' + '"\\8"' + '}')
+				} catch(e) {
+					if (e.message.substr(13,5) == "8 and") {verNo = "88+"; go=false}
+				}
+			}
+			if (go) {
 			// 87: 1688335
 				try {
-					if (console.length == undefined) {verNo = "87+"; go=false}
+					if (console.length == undefined) {verNo = "87"; go=false}
 				} catch(e) {}
 			}
 			// 86: 1685482
