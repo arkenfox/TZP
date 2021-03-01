@@ -140,7 +140,7 @@ function outputVersion() {
 	// 88: 1670124
 	let t88 = performance.now(), ver88 = xF
 	try {
-		eval('function invalid () { "use strict" \n ' + '"\\8"' + '}')
+		newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
 	} catch(e) {
 		// FF88+: SyntaxError the escapes \8 and \9 can't be used in untagged template literals or in strict mode code
 		if (e.message.substr(13,5) == "8 and") {ver88 = xS}
@@ -173,7 +173,7 @@ function outputVersion() {
 	// 86: 1685482
 	let t86 = performance.now(), ver86 = xF
 	try {
-		eval('for (async of [])')
+		newFn('for (async of [])')
 	} catch(e) {
 		// 86+: SyntaxError an expression X in 'for (X of Y)' must not start with 'async of'
 		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
@@ -197,7 +197,7 @@ function outputVersion() {
 	// 84: 1673440
 	let t84 = performance.now(), ver84 = xF
 	try {
-		eval("var x = @")
+		newFn("var x = @")
 	} catch(e) {
 		if (e.message == "illegal character U+0040") {ver84 = xS}
 	}
@@ -269,7 +269,7 @@ function outputVersion() {
 	//80a: 1559253
 	let t80a = performance.now(), ver80a = xF
 	try {
-		eval(`
+		newFn(`
 		/aaa(/; 012345678`)
 	} catch (e) {
 		//console.debug(e.lineNumber, e.columnNumber)
@@ -300,7 +300,6 @@ function outputVersion() {
 	output("79a", "1557718", ver79a, performance.now()-t79a)
 
 	//79b: 1639591
-	// possible: will likely be backported to 78
 	let t79b = performance.now(), ver79b = xF
 	try {
 		let x = 3, y = 3
@@ -362,7 +361,7 @@ function outputVersion() {
 	//74: 1605835
 	let t74 = performance.now(), ver74 = xF
 	try {
-		eval("let t = ({ 1n: 1 })")
+		newFn("let t = ({ 1n: 1 })")
 		ver74 = xS
 	} catch(e) {}
 	output("74", "1605835", ver74, performance.now()-t74)
@@ -376,7 +375,7 @@ function outputVersion() {
 	//72: 1589072
 	let t72 = performance.now(), ver72 = xF
 	try {
-		let test72 = eval('let a = 100_00_;')
+		let test72 = newFn('let a = 100_00_;')
 	} catch(e) {
 		if (e.message.substring(0,6) == "unders" ) {
 			ver72 = xS
@@ -400,7 +399,10 @@ function outputVersion() {
 
 	//70: 1435818
 	let t70 = performance.now(), ver70 = xF
-	try {eval("let t = 1_050"); ver70=xS } catch(e) {}
+	try {
+		newFn("let t = 1_050")
+		ver70=xS
+	} catch(e) {}
 	output("70", "1435818", ver70, performance.now()-t70)
 
 	//69: 1558387
