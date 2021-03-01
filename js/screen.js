@@ -234,18 +234,19 @@ function get_errors() {
 				} else if (temp == "7121c507d7") {
 					code = "D"; ff = "[FF71]"
 				// 74+: 1259822: pref alters err2: 2 outcomes
+					// javascript.options.property_error_message_fix
 				} else if (temp == "fa8efa5727") {
-					code = "E1"; ff = "[FF72-74]"
+					code = "E1"; ff = "[FF72-74]" // fix false
 				} else if (temp == "fb19e1bedb") {
-					code = "E2"; ff = "[FF74]"
+					code = "E2"; ff = "[FF74]" // fix true
 				} else if (temp == "214fc55f92") {
-					code = "F1"; ff = "[FF75+]"
+					code = "F1"; ff = "[FF75-77]" // fix false
 				} else if (temp == "5186bfbb76") {
-					code = "F2"; ff = "[FF75+]"
-				} else if (temp == "0dc5e92b7d") {
-					code = "G1"; ff = "[FF78+]"
+					code = "F2"; ff = "[FF75-77]" // fix true
 				} else if (temp == "b75bad7247") {
-					code = "G2"; ff = "[FF78+]"
+					code = "G1"; ff = "[FF78+]" // fix false
+				} else if (temp == "0dc5e92b7d") {
+					code = "G2"; ff = "[FF78+]" // fix true
 				}
 				if (code !== "") {
 					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
