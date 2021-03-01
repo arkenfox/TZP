@@ -105,7 +105,15 @@ function run(runtype) {
 			[c++, 'cos', [5-2], 'none', [(Math.cos(5) * Math.cos(2)) + (Math.sin(5) * Math.sin(2))] ],
 			[c++, 'cos', [1-8], 'none', [(Math.cos(1) * Math.cos(8)) + (Math.sin(1) * Math.sin(8))] ],
 			[c++, 'cos', [8-(-1)], 'none', [(Math.cos(8) * Math.cos(-1)) + (Math.sin(8) * Math.sin(-1))] ],
-			
+
+			// constants
+			["separator", "constants"],
+			["indent", "pythagoras SQRT2"],
+			[c++, 'none', ["2.000000000000000"], 'none', [Math.SQRT2 * Math.SQRT2], "all", 15],
+			["indent", "Theodorus SQRT 3"],
+			[c++, 'none', [3], 'none', [Math.sqrt(3) * Math.sqrt(3)], "all", 15],
+
+
 			// law of cosines
 			//["separator", "law of cosines"],
 			//x = 3; y = 3
@@ -116,6 +124,8 @@ function run(runtype) {
 
 		]
 
+		// expected: 26 item: f50756e5747a502327cebeed8b11d8b7fc6a2aa3
+
 		let output = []
 		let data = []
 		let diffs = []
@@ -125,11 +135,24 @@ function run(runtype) {
 			let fn = fns[i]
 			if (fn[0] == "separator") {
 				// add separator
-				output.push(s3 + "---: " + fn[1] + sc)
+				output.push(s3 + "---: " + fn[1].toLowerCase() + sc)
+			} else if (fn[0] == "indent") {
+				output.push(s12 + "     " + fn[1].toLowerCase() + sc)
 			} else {
 				let r1, r2
 				try {
-					r1 = (Math[fn[1]](...fn[2])) //.toString()
+					if (fn[1] == "none") {
+						// just use the value
+						if (Array.isArray(fn[2])) {
+							// in case I left it in an array on it's own
+							let array = fn[2]
+							r1 = array[0]
+						} else {
+							r1 = fn[2]
+						}
+					} else {
+						r1 = (Math[fn[1]](...fn[2])) //.toString()
+					}
 				} catch(e) {
 					r1 = "blocked"
 				}
@@ -161,6 +184,10 @@ function run(runtype) {
 						try {r1 = r1.toFixed(fix)} catch(e) {}
 						try {r2 = r2.toFixed(fix)} catch(e) {}
 					}
+				}
+				// make results the same type
+				if (typeof r1 === "string") {
+					r2 = r2.toString()
 				}
 				// store pure data
 				data.push([r1,r2])
