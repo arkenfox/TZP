@@ -216,7 +216,6 @@ function get_errors() {
 			code = "",
 			ff = "",
 			isBlock = false,
-			errorBS = false,
 			t0 = performance.now()
 		// output
 		function output() {
@@ -278,12 +277,10 @@ function get_errors() {
 		}
 		// run
 		function run() {
-			const newFn = x => typeof x != 'string' ? x : new Function(x)()
 			isErr = ""
 			//1
 			try {
 				newFn("alert('A)")
-				//eval("alert('A)")
 			} catch(e) {
 				dom.err1=e; res.push(e.name+": "+e.message)
 				if (e.message == "unterminated string literal") {isErr = "X"}
@@ -1861,6 +1858,7 @@ function get_version() {
 			alt2 = alt0 +"2]"+sc,
 			alt3 = alt0 +"3]"+sc,
 			t0 = performance.now()
+
 		function output(){
 			// set isVer
 			if (isVer == "") {
@@ -1894,7 +1892,7 @@ function get_version() {
 			if (go) {
 				// 88: 1670124
 				try {
-					eval('function invalid () { "use strict" \n ' + '"\\8"' + '}')
+					newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
 				} catch(e) {
 					if (e.message.substr(13,5) == "8 and") {verNo = "88+"; go=false}
 				}
@@ -1908,7 +1906,7 @@ function get_version() {
 			// 86: 1685482
 			if (go) {
 				try {
-					eval('for (async of [])')
+					newFn('for (async of [])')
 				} catch(e) {
 					if ((e.message).substring(0,2) == "an") {verNo = "86"; go=false}
 				}
@@ -1925,7 +1923,7 @@ function get_version() {
 			}
 			// 84: 1673440
 			if (go) {
-				try {eval("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84"; go=false}}
+				try {newFn("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84"; go=false}}
 			}
 			// 83: 1667094
 			if (go) {
@@ -1998,13 +1996,13 @@ function get_version() {
 		}
 		function v74minus () {
 			//74: 1605835
-			if (go) {try {eval("let t = ({ 1n: 1 })"); verNo = "74"; go = false;} catch(e) {}}
+			if (go) {try {newFn("let t = ({ 1n: 1 })"); verNo = "74"; go = false;} catch(e) {}}
 			//73: 1605803
 			if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
 			//new
 			if (isNew && go) {
 				//72: 1589072
-				try {let test72 = eval('let a = 100_00_;')} catch(e) {
+				try {let test72 = newFn('let a = 100_00_;')} catch(e) {
 					if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
 				}
 				//71: 1575980
@@ -2017,7 +2015,7 @@ function get_version() {
 				}
 				//70: 1435818
 				if (go) {
-					try {eval("let t = 1_050"); verNo = "70"} catch(e) {v69minus()}
+					try {newFn("let t = 1_050"); verNo = "70"} catch(e) {v69minus()}
 				}
 			} else if (go) {verNo = "72"}
 		}
