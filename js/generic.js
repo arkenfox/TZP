@@ -1,5 +1,7 @@
 'use strict';
 
+const newFn = x => typeof x != 'string' ? x : new Function(x)()
+
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
 	return new Proxy(dom, {
