@@ -292,7 +292,7 @@ function get_errors() {
 					let foo = document.getElementById("bar")
 					foo.value = screen.width
 				}
-				newFn("window.onload = ${foobar}()")
+				newFn(`window.onload = ${foobar}()`)
 			} catch(e) {
 				if (runS) {e += zSIM}
 				dom.err2=e; res.push(e.name+": "+e.message)
