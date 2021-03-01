@@ -220,7 +220,6 @@ function get_errors() {
 		// output
 		function output() {
 			hash = sha1(res.join())
-			console.debug(res) // temp
 			if (isFF) {
 				let temp = hash.substring(0,10)
 				if (isErr == "") {isErr = hash.substring(0,4)}
