@@ -216,6 +216,7 @@ function get_errors() {
 			code = "",
 			ff = "",
 			isBlock = false,
+			errorBS = false,
 			t0 = performance.now()
 		// output
 		function output() {
@@ -223,30 +224,35 @@ function get_errors() {
 			if (isFF) {
 				let temp = hash.substring(0,10)
 				if (isErr == "") {isErr = hash.substring(0,4)}
+				// 74+: 1259822: javascript.options.property_error_message_fix
 				if (isErr == "X") {
 					code = "X"; ff = "[FF59 or lower]"
-				} else if (temp == "e09e23efbf") {	
+				} else if (temp == "211593fcbb") {
 					code = "A"; ff = "[FF60-67]"
-				} else if (temp == "9be311282c") {
+				} else if (temp == "1bce15c1a1") {
 					code = "B"; ff = "[FF68-69]"
-				} else if (temp == "1492f1bd13") {
+				} else if (temp == "e4ce5e9113") {
 					code = "C"; ff = "[FF70]"
-				} else if (temp == "7121c507d7") {
+				} else if (temp == "6883095d80") {
 					code = "D"; ff = "[FF71]"
-				// 74+: 1259822: pref alters err2: 2 outcomes
-					// javascript.options.property_error_message_fix
-				} else if (temp == "fa8efa5727") {
-					code = "E1"; ff = "[FF72-74]" // fix false
-				} else if (temp == "fb19e1bedb") {
-					code = "E2"; ff = "[FF74]" // fix true
-				} else if (temp == "214fc55f92") {
-					code = "F1"; ff = "[FF75-77]" // fix false
-				} else if (temp == "5186bfbb76") {
-					code = "F2"; ff = "[FF75-77]" // fix true
-				} else if (temp == "b75bad7247") {
-					code = "G1"; ff = "[FF78+]" // fix false
-				} else if (temp == "0dc5e92b7d") {
-					code = "G2"; ff = "[FF78+]" // fix true
+				} else if (temp == "84d3f94263") {
+					// fix false
+					code = "E1"; ff = "[FF72-74]"
+				} else if (temp == "1457bd35f2") {
+					// fix true
+					code = "E2"; ff = "[FF74]"
+				} else if (temp == "1cd163debb") {
+					// fix false
+					code = "F1"; ff = "[FF75-77]"
+				} else if (temp == "4c89ee104d") {
+					// fix true
+					code = "F2"; ff = "[FF75-77]"
+				} else if (temp == "ec1a5b060f") {
+					// fix false
+					code = "G1"; ff = "[FF78+]"
+				} else if (temp == "9ac124a3d5") {
+					// fix true
+					code = "G2"; ff = "[FF78+]"
 				}
 				if (code !== "") {
 					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
@@ -272,23 +278,31 @@ function get_errors() {
 		}
 		// run
 		function run() {
+			const newFn = x => typeof x != 'string' ? x : new Function(x)()
 			isErr = ""
 			//1
-			try {eval("alert('A)")} catch(e) {
-				dom.err1=e; res.push(e)
+			try {
+				newFn("alert('A)")
+				//eval("alert('A)")
+			} catch(e) {
+				dom.err1=e; res.push(e.name+": "+e.message)
 				if (e.message == "unterminated string literal") {isErr = "X"}
 			}
 			//2
 			try {
-				function foobar() {let foo = document.getElementById("bar"); foo.value = screen.width}
+				/*** newFn NEEDED here ***/
+				function foobar() {
+					let foo = document.getElementById("bar")
+					foo.value = screen.width
+				}
 				window.onload = foobar()
 			} catch(e) {
 				if (runS) {e += zSIM}
-				dom.err2=e; res.push(e)
+				dom.err2=e; res.push(e.name+": "+e.message)
 			}
 			//3
 			try {
-				test = BigInt(2.5)
+				test = newFn("BigInt(2.5)")
 			} catch(e) {
 				if (isFF) {
 					test = e.message.substring(0,3)
@@ -298,7 +312,7 @@ function get_errors() {
 					} else if (test == "can") {
 						// 68-74: trap NumberFormat
 						try {
-							test = eval("987654321987654321n")
+							test = newFn("987654321987654321n")
 							let num = new Intl.NumberFormat(undefined)
 							test = num.format(test)
 							test = e.name+": "+ e.message
@@ -329,11 +343,12 @@ function get_errors() {
 				dom.err3=test; res.push(test)
 			}
 			//4
-			try {test = eval("let a = 1_00_;")
+			try {
+				test = newFn("let a = 1_00_;")
 			} catch(e) {
 				test = e.name+": "+e.message; dom.err4=test; res.push(test)
 			}
-			//5
+			//5: should be no error if FF78+
 			try {
 				test = new Intl.NumberFormat("en", {style:"unit", unit:"percent"}).format(1/2)
 			} catch(e) {
@@ -351,7 +366,6 @@ function get_errors() {
 			output()
 		}
 		run()
-
 	})
 }
 
