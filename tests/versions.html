@@ -39,6 +39,7 @@
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
 		<tr><td>88</td><td id="n88"></td><td class="c mono" id="v88"></td></tr>
+		<tr><td>88</td><td id="n88a"></td><td class="c mono" id="v88a"></td></tr>
 		<tr><td>87</td><td id="n87"></td><td class="c mono" id="v87"></td></tr>
 		<tr><td>87</td><td id="n87a"></td><td class="c mono" id="v87a"></td></tr>
 		<tr><td>87</td><td id="n87b"></td><td class="c mono" id="v87b"></td></tr>
@@ -146,6 +147,13 @@ function outputVersion() {
 		if (e.message.substr(13,5) == "8 and") {ver88 = xS}
 	}
 	output("88", "1670124", ver88, performance.now()-t88)
+
+	// 88a: 1497557
+	let t88a = performance.now(), ver88a = xF
+	try {
+		if (document.createElement('a').protocol == ":") {ver88a = xS}
+	} catch(e) {}
+	output("88a", "1497557", ver88a, performance.now()-t88a)
 
 	// 87: 1688335
 	let t87 = performance.now(), ver87 = xF
@@ -303,7 +311,7 @@ function outputVersion() {
 	let t79b = performance.now(), ver79b = xF
 	try {
 		let x = 3, y = 3
-		eval('let z = (x ??= x * y)')
+		eval("let z = (x ??= x * y)")
 		ver79b = xS
 	} catch(e) {}
 	output("79b", "1639591", ver79b, performance.now()-t79b)
