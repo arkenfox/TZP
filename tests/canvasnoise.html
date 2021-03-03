@@ -84,10 +84,12 @@
 function run() {
 	// vars
 	let clrSet = [], cellSet = [],
-		clrRead = [], cellRead = [],
+		clrRead = [], cellRead = [], cellRead2 = []
 		hashSet = "",
 		hashGetImage = "",
 		hashGetImage2 = "",
+		cWidth = 20,
+		cHeight = 20,
 		m = 9 // multplier for large visuals
 
 	// clear
@@ -109,8 +111,8 @@ function run() {
 					ctxBig2 = dom.cnvBig2.getContext('2d')
 
 				// output SET visuals
-				for (let x=0; x < 20; x++) {
-					for (let y=0; y < 20; y++) {
+				for (let x=0; x < cWidth; x++) {
+					for (let y=0; y < cHeight; y++) {
 						// get random color
 						let clrR = Math.floor(Math.random()*256),
 							clrG = Math.floor(Math.random()*256),
@@ -155,8 +157,8 @@ function run() {
 				//} catch(err) {}
 
 				// read: getImageData
-				for (let x=0; x < 20; x++) {
-					for (let y=0; y < 20; y++) {
+				for (let x=0; x < cWidth; x++) {
+					for (let y=0; y < cHeight; y++) {
 						let pixel = ctxCtrl.getImageData(x,y,1,1)
 						clrRead.push(pixel.data[0])
 						clrRead.push(pixel.data[1])
@@ -175,13 +177,15 @@ function run() {
 
 				// second read
 				let clrRead2 = []
-				for (let x=0; x < 20; x++) {
-					for (let y=0; y < 20; y++) {
+				for (let x=0; x < cWidth; x++) {
+					for (let y=0; y < cHeight; y++) {
 						let pixel = ctxCtrl.getImageData(x,y,1,1)
 						clrRead2.push(pixel.data[0])
 						clrRead2.push(pixel.data[1])
 						clrRead2.push(pixel.data[2])
 						clrRead2.push(pixel.data[3])
+						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
+						cellRead2.push(pixel)
 					}
 				}
 				hashGetImage2 = sha1(clrRead2.join())
@@ -190,7 +194,6 @@ function run() {
 				} else {
 					dom.readhash2.innerHTML = sb+ hashGetImage2 + sc
 						+ (hashGetImage2 == hashGetImage ? " [cached]" : " [per-execution]")
-					
 				}
 
 				if (hashGetImage == hashSet) {
@@ -199,7 +202,7 @@ function run() {
 					dom.readhash.innerHTML = sb + hashGetImage + sc
 
 					// analyze
-					let changeR = [], changeG = [], changeB = [], changeA = [], changeC = [], channels = []
+					let changeR = [], changeG = [], changeB = [], changeA = [], changeC = [], changeC2 = [], channels = []
 					let absR = [], absG = [], absB = []
 					let negR = 0, negG = 0, negB = 0, z = 0
 					let chan = ""
@@ -222,12 +225,18 @@ function run() {
 							chan = ""
 						}
 					}
+					// what co-ordinates changed
 					for (let i=0; i < cellSet.length; i++) {
-						if (cellSet[i] !== cellRead[i]) {
-							changeC.push(i)
-							// x = i % 10, y = Math.floor(i/10)
-						}
+						if (cellSet[i] !== cellRead[i]) {changeC.push(i)}
+						if (cellSet[i] !== cellRead2[i]) {changeC2.push(i)}
 					}
+					if (changeC.length > 1) {
+						console.debug("read 1: pixels changed: ", sha1(changeC.join()) + "\n", changeC)
+					}
+					if (changeC2.length > 1) {
+						console.debug("read 2: pixels changed: ", sha1(changeC2.join()) + "\n", changeC2)
+					}
+
 
 					// channels
 					let counts = {}
