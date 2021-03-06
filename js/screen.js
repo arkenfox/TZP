@@ -39,33 +39,37 @@ function get_chrome() {
 
 	// output
 	function output(r) {
+		os = r
 		if (r == "") {
-
+			// must be linux or android
+			run2()
 		} else {
-			// os-check (runS already sets isOS ="")
-			if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
-
+			if (r !== "blocked") {
+				// os-check (runS already sets isOS ="")
+				if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+			}
 			dom.fdChrome.innerHTML = r
 			isChrome = r
 			if (logPerf) {debug_log("chrome [fd]",t0)}
-			console.log("chrome [fd]", Math.round(performance.now()-t0) + " ms")
+			console.log("chrome [fd]", Math.round(performance.now()-t0) + " ms") // temp
 		}
 	}
 
 	function run2() {
-		// is it linux or android
-			// android doesn't have this resource
+		os = "Linux"
+		// assume linux
+		// android doesn't have this resource
 		let img = new Image()
 		img.src = "chrome://branding/content/icon64.png"
 		img.style.visibility = "hidden"
 		document.body.appendChild(img)
 		img.onload = function() {
 			console.debug("chrome test: image found", "linux" )
-			os="Linux"
+			output(os)
 		}
 		img.onerror = function() {
 			console.debug("chrome test: no image found", "android" )
-			os="Android"
+			output("Android")
 		}
 		document.body.removeChild(img)
 	}
