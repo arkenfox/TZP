@@ -34,73 +34,100 @@ function return_mm_dpi(type) {
 }
 
 function get_chrome() {
-	return new Promise(resolve => {
-		let os = "Linux",
-			x = 0,
-			t0 = performance.now()
+	let os = "",
+		t0 = performance.now()
 
-		// output
-		function output(r) {
-			if (isVer < 60) {r = zNA
-			} else {
+	// output
+	function output(r) {
+		os = r
+		if (r == "") {
+			// must be linux or android
+			run2()
+		} else {
+			if (r !== "blocked") {
 				// os-check (runS already sets isOS ="")
 				if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
 			}
 			dom.fdChrome.innerHTML = r
 			isChrome = r
 			if (logPerf) {debug_log("chrome [fd]",t0)}
-			return resolve(r)
+			console.log("chrome [fd]", Math.round(performance.now()-t0) + " ms") // temp
 		}
-		// run
-		function run() {
-			let c = "chrome://browser/content/extension-",
-				p = "-panel.css",
-				list = ['resource://torbutton-assets/aboutTor.css',c+'win'+p, c+'mac'+p]
-				// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
-			// win/mac
-			list.forEach(function(item) {
-				let css = document.createElement("link")
-				css.href = item
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				document.head.appendChild(css)
-				css.onload = function() {
-					if (item === c+"win"+p) {os="Windows"; x++; output(os)}
-					if (item === c+"mac"+p) {os="Mac"; x++; output(os)}
-					// isTB2
-					if (item.substring(0,3) === "res") {
-						isTB = true; debug_page("tb","     resource:// = aboutTor.css")
-						isTB2 = "y"
-						if (logPerf) {debug_log("[yes] tb resource [fd]",t0)}
-					}
+	}
+
+	function run2() {
+		os = "Linux"
+		// assume linux
+		// android doesn't have this resource
+		let img = new Image()
+		img.src = "chrome://branding/content/icon64.png"
+		img.style.visibility = "hidden"
+		document.body.appendChild(img)
+		img.onload = function() {
+			console.debug("chrome test: image found", "linux" )
+			output(os)
+		}
+		img.onerror = function() {
+			console.debug("chrome test: no image found", "android" )
+			output("Android")
+		}
+		document.body.removeChild(img)
+	}
+
+	function run1() {
+		// robots block, isTB2, win, mac
+		let c = "chrome://browser/content/extension-",
+			p = "-panel.css",
+			robot = "chrome://browser/content/aboutRobots.css",
+			list = ['resource://torbutton-assets/aboutTor.css',robot,c+'win'+p, c+'mac'+p],
+			x = 0
+
+		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
+		list.forEach(function(item) {
+			let css = document.createElement("link")
+			css.href = item
+			css.type = "text/css"
+			css.rel = "stylesheet"
+			document.head.appendChild(css)
+			css.onload = function() {
+				console.debug("chrome test: found " + item)
+				if (item === c+"win"+p) {os = "Windows"}
+				if (item === c+"mac"+p) {os = "Mac"}
+				// isTB2
+				if (item.substring(0,3) === "res") {
+					isTB = true; debug_page("tb","     resource:// = aboutTor.css")
+					isTB2 = "y"
+					if (logPerf) {debug_log("[yes] tb resource [fd]",t0)}
 				}
-				css.onerror = function() {
-					if (item.substring(0,3) === "res") {
-						isTB2 = "n"
-						if (logPerf) {debug_log("[no] tb resource [fd]",t0)}
-					} else {x++}
-				}
-				document.head.removeChild(css)
-			})
-			// android
-			let img = new Image()
-			img.src = "chrome://branding/content/icon64.png"
-			img.style.visibility = "hidden"
-			document.body.appendChild(img)
-			img.onload = function() {x++}
-			img.onerror = function() {os="Android"; x++; output(os)}
-			document.body.removeChild(img)
-			// linux: default
-			function check_linux() {
-				if (x == 3) {
-					clearInterval(checking)
-					if (os == "Linux") {output(os)}
-				}
+				x++
+				// output on last item
+				if (x == 4) {output(os)}
 			}
-			let checking = setInterval(check_linux, 20)
+			css.onerror = function() {
+				console.debug("chrome test: not found " + item)
+				if (item == robot) {os = "blocked"}
+				if (item.substring(0,3) === "res") {
+					isTB2 = "n"
+					if (logPerf) {debug_log("[no] tb resource [fd]",t0)}
+				}
+				x++
+				// output on last item
+				if (x == 4) {output(os)}
+			}
+			document.head.removeChild(css)
+		})
+	}
+
+	// only run for FF60+
+	try {
+		newFn("alert('A)")
+	} catch(e) {
+		if (e.message == "unterminated string literal") {
+			output(zNA)
+		} else {
+			run1()
 		}
-		run()
-	})
+	}
 }
 
 function get_collation() {
@@ -2217,6 +2244,7 @@ function get_widgets() {
 		} else {
 			dom.fdWidget = whash
 		}
+		dom.wid0.style.color = zshow
 		dom.widgetH = whash + (runS ? zSIM : "")
 		// perf & resolve
 		if (logPerf) {debug_log("widgets [fd]",t0)}
