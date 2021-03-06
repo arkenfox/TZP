@@ -552,6 +552,7 @@ function outputSection(id, cls) {
 	}
 	// clear details
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
+	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
 	if (id=="7") {reset_devices()}
 	if (id=="all" || id=="8") {reset_domrect()}
 	if (id=="11" && cls=="c2") {reset_audio2()}
