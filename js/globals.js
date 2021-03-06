@@ -147,7 +147,7 @@ let avh = "",
 // dev
 	gt0,
 	logExtra = false,
-	logPerf = true,
+	logPerf = false,
 	logResize = false,
 	logStorage = false,
 	runS = false,
