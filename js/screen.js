@@ -35,51 +35,55 @@ function return_mm_dpi(type) {
 
 function get_chrome() {
 	let os = "",
-		t0 = performance.now()
+		t0 = performance.now(),
+		message = []
 
 	// output
 	function output(r) {
-		os = r
-		if (r == "") {
-			// must be linux or android
-			run2()
-		} else {
-			if (r !== "blocked") {
-				// os-check (runS already sets isOS ="")
-				if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
-			}
-			dom.fdChrome.innerHTML = r
-			isChrome = r
-			if (logPerf) {debug_log("chrome [fd]",t0)}
-			console.log("chrome [fd]", Math.round(performance.now()-t0) + " ms") // temp
+		if (r !== "blocked" && r !== zNA) {
+			// os-check (runS already sets isOS ="")
+			if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
 		}
+		dom.fdChrome.innerHTML = r
+		isChrome = r
+		if (logPerf) {debug_log("chrome [fd]",t0)}
+		// temp
+		dom.newWinLeak.innerHTML = "temp chrome test debugging<br>- " + message.join("<br>- ")
 	}
 
 	function run2() {
+		// assume linux: do not return an empty string
 		os = "Linux"
-		// assume linux
 		// android doesn't have this resource
 		let img = new Image()
 		img.src = "chrome://branding/content/icon64.png"
 		img.style.visibility = "hidden"
 		document.body.appendChild(img)
 		img.onload = function() {
-			console.debug("chrome test: image found", "linux" )
+			message.push("image found: linux")
 			output(os)
 		}
 		img.onerror = function() {
-			console.debug("chrome test: no image found", "android" )
+			message.push("no image found: android")
 			output("Android")
 		}
 		document.body.removeChild(img)
 	}
 
+	function output_check(r) {
+		if (r == "") {
+			run2()
+		} else {
+			output(r)
+		}
+	}
+
 	function run1() {
-		// robots block, isTB2, win, mac
+		// block, isTB2, win, mac
 		let c = "chrome://browser/content/extension-",
 			p = "-panel.css",
-			robot = "chrome://browser/content/aboutRobots.css",
-			list = ['resource://torbutton-assets/aboutTor.css',robot,c+'win'+p, c+'mac'+p],
+			block = "chrome://global/content/buildconfig.css",
+			list = ['resource://torbutton-assets/aboutTor.css',block,c+'win'+p, c+'mac'+p],
 			x = 0
 
 		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
@@ -90,7 +94,7 @@ function get_chrome() {
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
 			css.onload = function() {
-				console.debug("chrome test: found " + item)
+				message.push("found: " + item)
 				if (item === c+"win"+p) {os = "Windows"}
 				if (item === c+"mac"+p) {os = "Mac"}
 				// isTB2
@@ -101,18 +105,18 @@ function get_chrome() {
 				}
 				x++
 				// output on last item
-				if (x == 4) {output(os)}
+				if (x == 4) {output_check(os)}
 			}
 			css.onerror = function() {
-				console.debug("chrome test: not found " + item)
-				if (item == robot) {os = "blocked"}
+				message.push("not found " + item)
+				if (item == block) {os = "blocked"}
 				if (item.substring(0,3) === "res") {
 					isTB2 = "n"
 					if (logPerf) {debug_log("[no] tb resource [fd]",t0)}
 				}
 				x++
 				// output on last item
-				if (x == 4) {output(os)}
+				if (x == 4) {output_check(os)}
 			}
 			document.head.removeChild(css)
 		})
