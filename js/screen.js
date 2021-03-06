@@ -37,6 +37,7 @@ function get_chrome() {
 	let os = "",
 		t0 = performance.now(),
 		message = []
+	dom.fdChrome.innerHTML = "blocked"
 
 	// output
 	function output(r) {
@@ -48,7 +49,7 @@ function get_chrome() {
 		isChrome = r
 		if (logPerf) {debug_log("chrome [fd]",t0)}
 		// temp
-		dom.newWinLeak.innerHTML = "temp chrome test debugging<br>- " + message.join("<br>- ")
+		//dom.newWinLeak.innerHTML = "temp chrome test debugging<br>- " + message.join("<br>- ")
 	}
 
 	function run2() {
