@@ -287,12 +287,15 @@ function get_errors() {
 			}
 			//2
 			try {
-				/*** newFn NEEDED here ***/
 				function foobar() {
 					let foo = document.getElementById("bar")
 					foo.value = screen.width
 				}
 				newFn(`window.onload = ${foobar}()`)
+				// type1: FF: TypeError: can't access property "value" of null
+				// type2: FF: TypeError: null has no properties
+				//    Chrome: TypeError: Cannot set property 'value' of null
+				//null.value = 1
 			} catch(e) {
 				if (runS) {e += zSIM}
 				dom.err2=e; res.push(e.name+": "+e.message)
@@ -734,7 +737,7 @@ function get_line_scrollbar() {
 }
 
 function get_math() {
-	return new Promise(resolve => {	
+	return new Promise(resolve => {
 		let t0 = performance.now()
 		// 1= ecma1, 6= ecma6, c= combined
 		let m1hash = "",
@@ -749,59 +752,67 @@ function get_math() {
 			block1 = false,
 			block6 = false
 
-		function get_hashes() {
-			let h1 = "", h6 = "", r = ""
-			// 1st
-			let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
-				res = []
-			for (let i=0; i < list.length; i++) {
+		function get_hashes(runtype) {
+			return new Promise(resolve => {
+				let h1 = "", h6 = "", r = ""
+				// 1st
+				let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
+					res = []
+				for (let i=0; i < list.length; i++) {
+					try {
+						r = Math.cos(list[i])
+					} catch(e) {
+						r = zB0
+						block1 = true
+					}
+					res.push(r)
+				}
+				h1 = res.join("-")
+				// 6th
+				let x, y
+				x = 0.5
 				try {
-					r = Math.cos(list[i])
+					r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
 				} catch(e) {
 					r = zB0
-					block1 = true
+					block6 = true
 				}
-				res.push(r)
-			}
-			h1 = res.join("-")
-			// 6th
-			let x, y
-			x = 0.5
-			try {
-				r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
-			} catch(e) {
-				r = zB0
-				block6 = true
-			}
-			h6 = r
-			x=1
-			try {
-				r = Math.exp(x) - 1 // expm1(1)
-			} catch(e) {
-				r = zB0
-				block6 = true
-			}
-			h6 += "-"+r
-			x = 1
-			try {
-				y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
-			} catch(e) {
-				r = zB0
-				block6 = true
-			}
-			h6 += "-"+r
-			// hashes
-			m1hash = sha1(h1)
-			m6hash = sha1(h6)
-			mchash = sha1(h1+"-"+h6)
-			// sim
-			if (runS) {
-				//m1hash = sha1("a"), mchash = sha1("b") // emca1
-				//m6hash = sha1("c"), mchash = sha1("d") // emca6
-				m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
-				//block1 = true
-				//block6 = true
-			}
+				h6 = r
+				x=1
+				try {
+					r = Math.exp(x) - 1 // expm1(1)
+				} catch(e) {
+					r = zB0
+					block6 = true
+				}
+				h6 += "-"+r
+				x = 1
+				try {
+					y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
+				} catch(e) {
+					r = zB0
+					block6 = true
+				}
+				h6 += "-"+r
+				// hashes
+				m1hash = sha1(h1)
+				m6hash = sha1(h6)
+				mchash = sha1(h1+"-"+h6)
+				// test random per execution
+					//m1hash = sha1(h1 + runtype)
+					//m6hash = sha1(h6 + runtype)
+					//mchash = sha1(h1+"-"+h6 + runtype)
+
+				// sim
+				if (runS) {
+					//m1hash = sha1("a"), mchash = sha1("b") // emca1
+					//m6hash = sha1("c"), mchash = sha1("d") // emca6
+					m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
+					//block1 = true
+					//block6 = true
+				}
+				return resolve(m1hash +":"+ m6hash + ":" + mchash)
+			})
 		}
 		function get_codes() {
 			// known FF hashes (browser)
@@ -818,7 +829,6 @@ function get_math() {
 			else if (m1hash == "19df0b54c852f35f011187087bd3a0dce12b4071") {m1="G"}
 			else if (m1hash == "8ee641f01271d500e5c1d40e831232214c0bbbdc") {m1="H"}
 		}
-
 		function build_output() {
 			if (block1) {m1=""} // for runS
 			if (block6) {m6=""} // for runS
@@ -886,6 +896,9 @@ function get_math() {
 						// blocked
 						m1hash = zB
 						fdMath1 = zB
+					} else if (m1hash.substring(0,6) == "random") {
+						// random per execution
+						fdMath1 = "random"
 					} else {
 						// new
 						m1hash += strNew
@@ -902,6 +915,9 @@ function get_math() {
 						// blocked
 						m6hash = zB
 						fdMath6 = zB
+					} else if (m6hash.substring(0,6) == "random") {
+						// random per execution
+						fdMath6 = "random"
 					} else {
 						m6hash += strNew
 						fdMath6 = m6hash
@@ -921,6 +937,8 @@ function get_math() {
 					if (block1 || block6) {
 					// blocked
 						mchash = zB
+					} else if (mchash.substring(0,6) == "random") {
+						// random per execution
 					} else {
 						// new
 						mchash += strNew
@@ -939,20 +957,56 @@ function get_math() {
 			// blockage
 			if (block1 || block6) {mchash = zB0}
 			// return
+			if (mchash.substring(0,6) == "random") {mchash = "random"}
 			return resolve("math:" + mchash.substring(0,40))
 		}
-		get_hashes()
-		if (isFF) {
-			get_codes()
-			build_output()
-			output()
-		} else {
-			dom.math1hash = m1hash
-			dom.math6hash = m6hash
-			dom.mathhash = mchash
-			dom.fdMath = mchash
-			return resolve("math:" + mchash)
-		}
+
+		Promise.all([
+			get_hashes(0),
+			get_hashes(1),
+		]).then(function(res){
+			// run0
+			let run01 = res[0].split(":")[0],
+				run06 = res[0].split(":")[1],
+				run0c = res[0].split(":")[2]
+				//console.debug(res[0])
+				//console.debug("RUN0\n - "+ run01 +"\n - "+ run06 +"\n - "+ run0c)
+			// run1
+			let run11 = res[1].split(":")[0],
+				run16 = res[1].split(":")[1],
+				run1c = res[1].split(":")[2]
+				//console.debug(res[1])
+				//console.debug("RUN1\n - "+ run11 +"\n - "+ run16 +"\n - "+ run1c)
+			// compare runs
+			if (run0c !== run1c) {
+				let sColor = s3
+				// combined
+				mchash = "random " + sColor +" [1] "+ sc + run0c.substring(0,22) + ".."
+					+ sColor +" [2] "+ sc + run1c.substring(0,22) + ".."
+				// math1
+				if (run01 !== run11) {
+					m1hash = "random " + sColor +" [1] "+ sc + run01.substring(0,22) + ".."
+						+ sColor +" [2] "+ sc + run11.substring(0,22) + ".."
+				}
+				// math6
+				if (run06 !== run16) {
+					m6hash = "random " + sColor +" [1] "+ sc + run06.substring(0,22) + ".."
+						+ sColor +" [2] "+ sc + run16.substring(0,22) + ".."
+				}
+			}
+			if (isFF) {
+				get_codes()
+				build_output()
+				output()
+			} else {
+				dom.math1hash.innerHTML = m1hash
+				dom.math6hash.innerHTML = m6hash
+				dom.mathhash.innerHTML = mchash
+				if (mchash.substring(0,6) == "random") {mchash = "random"}
+				dom.fdMath.innerHTML = mchash
+				return resolve("math:" + mchash)
+			}
+		})
 	})
 }
 
