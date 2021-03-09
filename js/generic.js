@@ -33,7 +33,7 @@ function get_RFP() {
 				+ performance.getEntries({name:"a", entryType:"mark"}).length
 				+ performance.getEntriesByName("a","mark").length
 				performance.clearMarks()
-			if (r == 0) {r = true}
+			if (r == 0) {r = true} else {r = false}
 		} catch(e) {}
 	}
 	return r
