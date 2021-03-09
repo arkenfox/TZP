@@ -86,7 +86,6 @@ function get_chrome() {
 			block = "chrome://global/content/buildconfig.css",
 			list = ['resource://torbutton-assets/aboutTor.css',block,c+'win'+p, c+'mac'+p],
 			x = 0
-
 		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
 		list.forEach(function(item) {
 			let css = document.createElement("link")
@@ -1551,7 +1550,6 @@ function get_screen_metrics(runtype) {
 
 function get_ua_doc() {
 	return new Promise(resolve => {
-
 		let res = [],
 			str = "",
 			go = false,
@@ -1631,11 +1629,46 @@ function get_ua_doc() {
 			} else if (str.substring(str.length-1, str.length) == " ") {bs = true
 			} else if (str.indexOf("  ") !== -1) {bs = true
 			} else if (property == "userAgent") {
-				// fails fenix: e.g. ".0) Gecko/83.0 Firefox/83.0"
-					//if (str.indexOf(".0) Gecko/20100101 Firefox/") == -1) {bs = true}
-				// this should get everything not FF
-				if (str.indexOf(".0) Gecko/") == -1) {bs = true
-				} else if (str.indexOf(" Firefox/") == -1) {bs = true}
+				// STUFF
+				let isRFP = get_RFP(), 
+					v = isVer +".0",
+					control = "",
+					build = "20100101"
+				if (isRFP) {
+					if (isVer > 90) {v = "91.0"}
+					else {v = "78.0"}
+				}
+				// NO OS
+				if (isOS == "") {
+					if (str.indexOf(".0) Gecko/") == -1) {bs = true
+					} else if (str.indexOf(" Firefox/"+v) == -1) {bs = true}
+				} else if (isRFP) {
+				// RFP ON
+					/* resistfingerprinting/test/browser/browser_navigator.js#106 */
+					if (isOS == "windows") {
+						control = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
+					} else if (isOS == "linux") {
+						control = "X11; Linux x86_64; rv:"+ v +") Gecko/20100101"
+					} else if (isOS == "mac") {
+						control = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
+					} else if (isOS == "android") {
+						if (isVer < 88) {
+							control = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
+						} else {
+							control = "Android 9; Mobile; rv:"+ v +") Gecko/"+ v
+						}
+					}
+					control = "Mozilla/5.0 (" + control +" Firefox/"+ v
+					if (str !== control) {bs = true}
+				} else {
+				// RFP OFF
+					// desktop: ends in "; rv:XX.0) Gecko/20100101 Firefox/XX.0"
+					// android: ends in "; rv:XX.0) Gecko/XX.0 Firefox/XX.0"
+					if (isOS == "android") {build = v}
+					control = "; rv:"+ v +") Gecko/"+ build +" Firefox/"+ v
+					let test = str.substring(str.length - control.length)
+					if (test !== control) {bs = true}
+				}
 				// for kicks
 				str = str.toLowerCase()
 				if (str.indexOf("webkit") !== -1) {bs = true}
@@ -1772,15 +1805,11 @@ function get_ua_doc() {
 				// no need to check further, use a red arrow
 				isPartial = false
 			} else {
+				// DONE: RFP check, endstring, version matching
 				// ToDo: dig deeper
-					// 2: if version doesn't match isVer (allow higher if version has + symbol)
-						// exception if version in ua is 78 and FF is actually 78+ and RFP=on
-						// "; rv:78.0) Gecko/20100101 Firefox/78.0"
-
 					// 3a: if full ua = not consistent with known os etc
 					// 3b: if full ua = not the same as individual parts
 					// 4: the syntax/formula doesn't match
-
 			}
 			if (spoof || isPartial) {addArrow("userAgent", true)}
 		} else {
