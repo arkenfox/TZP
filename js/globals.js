@@ -137,6 +137,7 @@ let avh = "",
 	isOS = "",
 	isErr = "",
 	isVer = "",
+	isVerPlus = false,
 	isChannel = "",
 	isChrome = "", // i.e chrome://
 	isResource = "",
