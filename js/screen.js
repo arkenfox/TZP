@@ -1845,9 +1845,9 @@ function get_ua_doc() {
 		// hash
 		res.sort()
 		dom.uaDoc = sha1(res.join())
-
-		// show
+		// reset
 		uaBS = false
+		// show
 		if (lies > 0) {
 			lies += " pinocchio" + (lies > 1 ? "s": "")
 			dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
@@ -1858,9 +1858,9 @@ function get_ua_doc() {
 				knownLies.push("useragent:navigator")
 			}
 		} else {
+			// hide
 			dom.togualies.style.display = "none"
 		}
-
 		// return
 		return resolve(res)
 	})
@@ -2739,6 +2739,7 @@ function outputUA() {
 			get_ua_workers()
 			// temp return until I promisify workers
 			if (uaBS) {
+				// either by feature detection or prototype lies
 				section = ["_spoofing_attempt_ua:true"]
 			} else {
 				section.push("_spoofing_attempt_ua:false")
@@ -2801,12 +2802,34 @@ function outputUA() {
 		})
 	}
 
+	function get_pLies() {
+		// prototype lies: in order of likely fuckery
+		if (protoList.includes("Navigator.userAgent")) {uaBS = true
+		} else if (protoList.includes("Navigator.appVersion")) {uaBS = true
+		} else if (protoList.includes("Navigator.platform")) {uaBS = true
+		} else if (protoList.includes("Navigator.oscpu")) {uaBS = true
+		}
+		if (!isFF) {
+			// FF: these are always caught by feature detection
+				// so ignore in FF because they could be correct
+			if (protoList.includes("Navigator.productSub")) {uaBS = true
+			} else if (protoList.includes("Navigator.buildID")) {uaBS = true
+			} else if (protoList.includes("Navigator.vendor")) {uaBS = true
+			} else if (protoList.includes("Navigator.vendorSub")) {uaBS = true
+			} else if (protoList.includes("Navigator.appCodeName")) {uaBS = true
+			} else if (protoList.includes("Navigator.appName")) {uaBS = true
+			} else if (protoList.includes("Navigator.product")) {uaBS = true
+			}
+		}
+	}
+
 	Promise.all([
 		get_ua_doc(), // sets uaBS
 	]).then(function(results){
 		controlA = sha1(results[0].join())
 		control = results[0]
 		section = control
+		if (uaBS == false) {get_pLies()} // sets uaBS
 		get_iframes()
 	})
 }
