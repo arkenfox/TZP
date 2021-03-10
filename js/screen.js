@@ -1632,46 +1632,72 @@ function get_ua_doc() {
 				// STUFF
 				let isRFP = get_RFP(), 
 					v = isVer +".0",
-					control = "",
-					build = "20100101"
-				if (isRFP) {
-					if (isVer > 90) {v = "91.0"}
-					else {v = "78.0"}
-				}
-				// NO OS
-				if (isOS == "") {
-					if (str.indexOf(".0) Gecko/") == -1) {bs = true
-					} else if (str.indexOf(" Firefox/"+v) == -1) {bs = true}
-				} else if (isRFP) {
-				// RFP ON
-					/* resistfingerprinting/test/browser/browser_navigator.js#106 */
-					if (isOS == "windows") {
-						control = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
-					} else if (isOS == "linux") {
-						control = "X11; Linux x86_64; rv:"+ v +") Gecko/20100101"
-					} else if (isOS == "mac") {
-						control = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
-					} else if (isOS == "android") {
-						if (isVer < 88) {
-							control = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
-						} else {
-							control = "Android 9; Mobile; rv:"+ v +") Gecko/"+ v
-						}
-					}
-					control = "Mozilla/5.0 (" + control +" Firefox/"+ v
-					if (str !== control) {bs = true}
+					v2 = (isVer + 1) +".0",
+					sub = "20100101",
+					sub2 = sub,
+					debug = []
+
+				// SAVE TME
+				if (str.indexOf(".0) Gecko/") == -1) {bs = true
+				} else if (str.indexOf(" Firefox/") == -1) {bs = true
 				} else {
-				// RFP OFF
-					// desktop: ends in "; rv:XX.0) Gecko/20100101 Firefox/XX.0"
-					// android: ends in "; rv:XX.0) Gecko/XX.0 Firefox/XX.0"
-					if (isOS == "android") {build = v}
-					control = "; rv:"+ v +") Gecko/"+ build +" Firefox/"+ v
-					let test = str.substring(str.length - control.length)
-					if (test !== control) {bs = true}
+					let strA = str.toLowerCase()
+					if (strA.indexOf("webkit") !== -1) {bs = true}
 				}
-				// for kicks
-				str = str.toLowerCase()
-				if (str.indexOf("webkit") !== -1) {bs = true}
+
+				if (isOS !== "" && bs == false) {
+					// isVerPlus: allow the next version 
+					let controlA = "", controlB = "", testA = str, testB = str
+
+					if (isRFP) {
+					// RFP ON 
+						v = "78.0"
+						if (isVer > 90) {v = "91.0"}
+						if (isVer > 103) {v = "104.0"}
+						v2 = v
+						// only allow v2 as next RFP number IF...
+						if (isVerPlus) {
+							if (isVer == 90) {v2 = "91.0"}
+							if (isVer == 103) {v2 = "104.0"}
+						}
+						/* resistfingerprinting/test/browser/browser_navigator.js#106 */
+						if (isOS == "windows") {
+							controlA = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
+							controlB = "Windows NT 10.0; Win64; x64; rv:"+ v2 +") Gecko/20100101"
+						} else if (isOS == "linux") {
+							controlA = "X11; Linux x86_64; rv:"+ v +") Gecko/20100101"
+							controlB = "X11; Linux x86_64; rv:"+ v2 +") Gecko/20100101"
+						} else if (isOS == "mac") {
+							controlA = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
+							controlB = "Macintosh; Intel Mac OS X 10.15 rv:"+ v2 +") Gecko/20100101"
+						} else if (isOS == "android") {
+							if (isVer < 88) {
+								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
+								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/20100101"
+							} else {
+								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/"+ v
+								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/"+ v
+							}
+						}
+						controlA = "Mozilla/5.0 (" + controlA +" Firefox/"+ v
+						controlB = "Mozilla/5.0 (" + controlB +" Firefox/"+ v2
+					} else {
+					// RFP OFF
+						// desktop: ends in "; rv:XX.0) Gecko/20100101 Firefox/XX.0"
+						// android: ends in "; rv:XX.0) Gecko/XX.0 Firefox/XX.0"
+						if (isVerPlus == false) {v2 = v}
+						if (isOS == "android") {sub = v; sub2 = v2}
+						controlA = "; rv:"+ v +") Gecko/"+ sub +" Firefox/"+ v
+						controlB = "; rv:"+ v2 +") Gecko/"+ sub2 +" Firefox/"+ v2
+						testA = str.substring(str.length - controlA.length)
+						testB = str.substring(str.length - controlB.length)
+					}
+					// as long as one matches
+					debug.push("A: "+ (testA == controlA) + "\n s/be: " + controlA + "\n  got: " + testA)
+					debug.push("B: "+ (testB == controlB) + "\n s/be: " + controlB + "\n  got: " + testB)
+					console.debug(debug.join("\n"))
+					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
+				}
 			}
 			return bs
 		}
@@ -1974,12 +2000,15 @@ function get_version() {
 			alt3 = alt0 +"3]"+sc,
 			t0 = performance.now()
 
-		function output(){
-			// set isVer
+		function output() {
+			// set isVer, isVerPlus
 			if (isVer == "") {
+				if (verNo.slice(-1) == "+") {isVerPlus = true}
 				isVer = verNo.replace(/\D/g,',')
 				let start = isVer.indexOf(",")
-				if (start !== -1) {isVer = isVer.substring(0,start)}
+				if (start !== -1) {
+					isVer = (isVer.substring(0,start)) * 1
+				}
 			}
 			dom.fdVersion.innerHTML = verNo
 			if (logPerf) {debug_log("version [fd]",t0)}
