@@ -1695,7 +1695,7 @@ function get_ua_doc() {
 					// as long as one matches
 					debug.push("A: "+ (testA == controlA) + "\n s/be: " + controlA + "\n  got: " + testA)
 					debug.push("B: "+ (testB == controlB) + "\n s/be: " + controlB + "\n  got: " + testB)
-					console.debug(debug.join("\n"))
+					//console.debug(debug.join("\n"))
 					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
 				}
 			}
@@ -1831,7 +1831,7 @@ function get_ua_doc() {
 				// no need to check further, use a red arrow
 				isPartial = false
 			} else {
-				// DONE: RFP check, endstring, version matching
+				// DONE: RFP check, endstring, version
 				// ToDo: dig deeper
 					// 3a: if full ua = not consistent with known os etc
 					// 3b: if full ua = not the same as individual parts
@@ -1853,6 +1853,10 @@ function get_ua_doc() {
 			dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
 			dom.togualies.style.display = "table-row"
 			uaBS = true
+			// global lies
+			if (!sRerun) {
+				knownLies.push("useragent:navigator")
+			}
 		} else {
 			dom.togualies.style.display = "none"
 		}
