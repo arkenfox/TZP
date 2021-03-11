@@ -2729,7 +2729,6 @@ function outputUA() {
 
 		// ToDo: promisify workers and add to section logic
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
-		console.debug("useIframe", useIframe)
 		if (useIframe) {
 			// iframeleak: output THEN finish workers
 			section.push("_spoofing_attempt_ua:true") // lie entropy
@@ -2781,9 +2780,9 @@ function outputUA() {
 					// assumption: any iframe leaks should be the same: just get one
 					if (useIframe == false) {
 						useIframe = true
-						section = results[i] // change section data
+						section = results[i] // change section data: not working?
 						// debug
-						console.debug("an iframe has different results: section data is now\n", section)
+						console.debug("an iframe has different results: section data s/be now\n", results[i])
 					}
 				}
 				testhash += (testhash == controlA ? match_green : match_red)
@@ -2823,8 +2822,6 @@ function outputUA() {
 			} else if (protoList.includes("Navigator.product")) {uaBS = true
 			}
 		}
-		// 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0 = my chrome
-
 	}
 
 	Promise.all([
