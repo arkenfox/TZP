@@ -1606,9 +1606,9 @@ function get_ua_doc() {
 			str = output(property, str)
 			if (good !== undefined) {
 				// show/hide vendor*
-				if (property == "vendor" || property == "vendorSub") {
-					document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
-				}
+				//if (property == "vendor" || property == "vendorSub") {
+				//	document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
+				//}
 				// BS
 				let arrow = ""
 				if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
@@ -1844,7 +1844,6 @@ function get_ua_doc() {
 
 		// hash
 		res.sort()
-		dom.uaDoc = sha1(res.join())
 		// reset
 		uaBS = false
 		// show
@@ -2665,9 +2664,9 @@ function goNW_UA() {
 			if (str.indexOf("<br>") == -1 && str !== output) {
 				target.innerHTML += "<br>" + sb.trim() + output + sc
 				// show vendor*
-				if (target == "vendor" || target == "vendorSub") {
-					document.getElementById("tog"+target).style.display = "table-row"
-				}
+				//if (target == "vendor" || target == "vendorSub") {
+				//	document.getElementById("tog"+target).style.display = "table-row"
+				//}
 			}
 		}
 	}
@@ -2707,13 +2706,13 @@ function outputUA() {
 	dom.uaWorkers = "summary not coded yet: see details"
 
 	let t0 = performance.now(),
-		section = [],
-		control = [],
-		controlA = "",
-		controlB = "",
+		docArray = [],
+		docHash = "",
+		iframeArray = [],
 		useIframe = false
 
-	function output() {
+	function output(outputArray) {
+		let section = outputArray
 		if (isBrave) {
 			for (let i=0; i < section.length; i++) {
 				section[i] = section[i].replace(/\s+/g," ").trim()
@@ -2727,25 +2726,23 @@ function outputUA() {
 		dom.uaWorker3.innerHTML = "not coded yet" //nested
 		dom.uaWorker4.innerHTML = "not coded yet" //blob
 
+		if (useIframe) {
+			console.debug("use iframe", iframeArray)
+			output(iframeArray)
+		} else {
+			if (uaBS) {
+				console.debug("use lie")
+				output(["ua:lies"])
+			} else {
+				console.debug("use doc", docArray)
+				output(docArray)
+			}
+		}
+
 		// ToDo: promisify workers and add to section logic
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
-		if (useIframe) {
-			// iframeleak: output THEN finish workers
-			//section.push("_spoofing_attempt_ua:true") // lie entropy
-			output()
-			get_ua_workers()
-		} else {
-			// call workers and then decide
-			get_ua_workers()
-			// temp return until I promisify workers
-			if (uaBS) {
-				// either by feature detection or prototype lies
-				section = ["ua:lies"]
-			} else {
-				//section.push("_spoofing_attempt_ua:false")
-			}
-			output()
-		}
+		get_ua_workers()
+
 	}
 
 	function get_iframes() {
@@ -2775,25 +2772,27 @@ function outputUA() {
 		]).then(function(results){
 			for(let i=0; i < 7; i++) {
 				// output
-				let testhash = sha1(results[i].join())
-				if (testhash !== controlA) {
+				let iframeHash = sha1(results[i].join())
+				iframeArray = results[i]
+				if (iframeHash !== docHash) {
 					// assumption: any iframe leaks should be the same: just get one
 					if (useIframe == false) {
 						useIframe = true
-						section = results[i] // change section data: not working?
+						// red sumary
+						dom.uaIframes.innerHTML = iframeHash + match_red
 						// debug
-						console.debug("an iframe has different results: section data s/be now\n", results[i])
+						console.debug("an iframe has different results: section data s/be now\n", iframeArray)
 					}
 				}
-				testhash += (testhash == controlA ? match_green : match_red)
-				document.getElementById("uaIframe"+i).innerHTML = testhash
+				iframeHash += (iframeHash == docHash ? match_green : match_red)
+				document.getElementById("uaIframe"+i).innerHTML = iframeHash
 			}
-			// iframes summary
-			dom.uaIframes.innerHTML = sha1(section.join()) + (useIframe ? match_red : match_green)
+			// green sumary
+			if (useIframe == false) {dom.uaIframes.innerHTML = docHash + match_green}
 			// show iframe diffs
 			if (useIframe) {
-				for (let i=0; i < control.length; i++) {
-					if (control[i] !== section[i]) {
+				for (let i=0; i < docArray.length; i++) {
+					if (docArray[i] !== iframeArray[i]) {
 						let parts = section[i].split(":")
 						let target = document.getElementById("n"+parts[0])
 						target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
@@ -2826,10 +2825,10 @@ function outputUA() {
 
 	Promise.all([
 		get_ua_doc(), // sets uaBS
-	]).then(function(results){
-		controlA = sha1(results[0].join()) // doc
-		control = results[0]
-		section = control
+	]).then(function(item){
+		docHash = sha1(item[0].join()) // doc: 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0
+		docArray = item[0]
+		dom.uaDoc = docHash
 		if (uaBS == false) {get_pLies()} // sets uaBS
 		get_iframes()
 	})
