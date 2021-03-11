@@ -2826,9 +2826,10 @@ function outputUA() {
 	Promise.all([
 		get_ua_doc(), // sets uaBS
 	]).then(function(item){
-		docHash = sha1(item[0].join()) // doc: 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0
 		docArray = item[0]
+		docHash = sha1(docArray.join()) // doc: 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0
 		dom.uaDoc = docHash
+		console.debug("docArray", docHash + "]n", docArray )
 		if (uaBS == false) {get_pLies()} // sets uaBS
 		get_iframes()
 	})
