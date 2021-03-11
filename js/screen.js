@@ -2793,6 +2793,7 @@ function outputUA() {
 			if (useIframe) {
 				for (let i=0; i < docArray.length; i++) {
 					if (docArray[i] !== iframeArray[i]) {
+						console.debug("iframe lie: ", iframeArray[i])
 						let parts = iframeArray[i].split(":")
 						let target = document.getElementById("n"+parts[0])
 						target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
