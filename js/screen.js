@@ -2726,21 +2726,16 @@ function outputUA() {
 		dom.uaWorker3.innerHTML = "not coded yet" //nested
 		dom.uaWorker4.innerHTML = "not coded yet" //blob
 
-		if (useIframe) {
-			console.debug("use iframe", iframeArray)
-			output(iframeArray)
+		// we cannot rely on iframes
+			// some of the metrics may be covered, but not all
+		if (uaBS || useIframe) {
+			output(["ua:lies"])
 		} else {
-			if (uaBS) {
-				console.debug("use lie")
-				output(["ua:lies"])
-			} else {
-				console.debug("use doc", docArray)
-				output(docArray)
-			}
+			output(docArray)
 		}
 
 		// ToDo: promisify workers and add to section logic
-			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
+			// i.e workerleak (excl. web worker) > uaBS/prototype Lies > document
 		get_ua_workers()
 
 	}
@@ -2780,8 +2775,6 @@ function outputUA() {
 						useIframe = true
 						// red sumary
 						dom.uaIframes.innerHTML = iframeHash + match_red
-						// debug
-						console.debug("an iframe has different results: section data s/be now\n", iframeArray)
 					}
 				}
 				iframeHash += (iframeHash == docHash ? match_green : match_red)
@@ -2793,7 +2786,6 @@ function outputUA() {
 			if (useIframe) {
 				for (let i=0; i < docArray.length; i++) {
 					if (docArray[i] !== iframeArray[i]) {
-						console.debug("iframe lie: ", iframeArray[i])
 						let parts = iframeArray[i].split(":")
 						let target = document.getElementById("n"+parts[0])
 						target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
@@ -2828,9 +2820,8 @@ function outputUA() {
 		get_ua_doc(), // sets uaBS
 	]).then(function(item){
 		docArray = item[0]
-		docHash = sha1(docArray.join()) // doc: 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0
+		docHash = sha1(docArray.join())
 		dom.uaDoc = docHash
-		console.debug("docArray", docHash + "]n", docArray )
 		if (uaBS == false) {get_pLies()} // sets uaBS
 		get_iframes()
 	})
