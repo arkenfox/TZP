@@ -2731,7 +2731,7 @@ function outputUA() {
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
 		if (useIframe) {
 			// iframeleak: output THEN finish workers
-			section.push("_spoofing_attempt_ua:true") // lie entropy
+			//section.push("_spoofing_attempt_ua:true") // lie entropy
 			output()
 			get_ua_workers()
 		} else {
@@ -2740,9 +2740,9 @@ function outputUA() {
 			// temp return until I promisify workers
 			if (uaBS) {
 				// either by feature detection or prototype lies
-				section = ["_spoofing_attempt_ua:true"]
+				section = ["ua:lies"]
 			} else {
-				section.push("_spoofing_attempt_ua:false")
+				//section.push("_spoofing_attempt_ua:false")
 			}
 			output()
 		}
@@ -2827,7 +2827,7 @@ function outputUA() {
 	Promise.all([
 		get_ua_doc(), // sets uaBS
 	]).then(function(results){
-		controlA = sha1(results[0].join())
+		controlA = sha1(results[0].join()) // doc
 		control = results[0]
 		section = control
 		if (uaBS == false) {get_pLies()} // sets uaBS
