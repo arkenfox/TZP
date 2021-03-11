@@ -2729,6 +2729,7 @@ function outputUA() {
 
 		// ToDo: promisify workers and add to section logic
 			// i.e iframeleak > workerleak (excl. web worker) > uaBS > document
+		console.debug("useIframe", useIframe)
 		if (useIframe) {
 			// iframeleak: output THEN finish workers
 			section.push("_spoofing_attempt_ua:true") // lie entropy
@@ -2781,6 +2782,8 @@ function outputUA() {
 					if (useIframe == false) {
 						useIframe = true
 						section = results[i] // change section data
+						// debug
+						console.debug("an iframe has different results: section data is now\n", section)
 					}
 				}
 				testhash += (testhash == controlA ? match_green : match_red)
@@ -2808,8 +2811,7 @@ function outputUA() {
 		} else if (protoList.includes("Navigator.appVersion")) {uaBS = true
 		} else if (protoList.includes("Navigator.platform")) {uaBS = true
 		} else if (protoList.includes("Navigator.oscpu")) {uaBS = true
-		}
-		if (!isFF) {
+		} else if (!isFF) {
 			// FF: these are always caught by feature detection
 				// so ignore in FF because they could be correct
 			if (protoList.includes("Navigator.productSub")) {uaBS = true
@@ -2821,6 +2823,8 @@ function outputUA() {
 			} else if (protoList.includes("Navigator.product")) {uaBS = true
 			}
 		}
+		// 9b72ce3fa8cbdbfd3ad79ceb40398feb79bde4a0 = my chrome
+
 	}
 
 	Promise.all([
