@@ -323,7 +323,7 @@ function outputPrototypeLies() {
 						;[...new Set([
 							...Object.getOwnPropertyNames(interfaceObject),
 							...Object.keys(interfaceObject) // backup
-						])].forEach(name => {
+						])].sort().forEach(name => {
 								const skip = (
 									name == 'constructor' ||
 									(target.length && !new Set(target).has(name)) ||
