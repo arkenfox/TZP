@@ -240,7 +240,6 @@ function get_engine() {
 
 function get_errors() {
 	return new Promise(resolve => {
-
 		let res = [],
 			test = "",
 			hash = "",
@@ -317,19 +316,33 @@ function get_errors() {
 				if (e.message == "unterminated string literal") {isErr = "X"}
 			}
 			//2
+			// type1: FF: foo is null
+			// type2: FF: can't access property "value", foo is null
+			//    Chrome: Cannot set property 'value' of null
 			try {
 				function foobar() {
 					let foo = document.getElementById("bar")
 					foo.value = screen.width
 				}
 				newFn(`window.onload = ${foobar}()`)
-				// type1: FF: TypeError: can't access property "value" of null
-				// type2: FF: TypeError: null has no properties
-				//    Chrome: TypeError: Cannot set property 'value' of null
-				//null.value = 1
+
 			} catch(e) {
-				if (runS) {e += zSIM}
-				dom.err2=e; res.push(e.name+": "+e.message)
+				// cydec total mode causes a syntax error
+				if (e.name !== "TypeError") {
+					// 2 alt
+					// type1: FF: null has no properties
+					// type2: FF: can't access property "value" of null
+					//    Chrome: Cannot set property 'value' of null
+					try {
+						newFn(`null.value = 1`)
+					} catch(e) {
+						if (runS) {e += zSIM}
+						dom.err2=e; res.push(e.name+": "+e.message)
+					}
+				} else {
+					if (runS) {e += zSIM}
+					dom.err2=e; res.push(e.name+": "+e.message)
+				}
 			}
 			//3
 			try {
@@ -1729,7 +1742,7 @@ function get_ua_doc() {
 				if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
 				if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
 				if (myOS == "android") {
-					// tighten this up to be more specific
+					// tighten this up to be more specific?
 					if (str.substring(0,13) == "5.0 (Android ") {match = true}
 					spoof = !match
 				}
