@@ -282,6 +282,12 @@ function get_errors() {
 				} else if (temp == "9ac124a3d5") {
 					// fix true
 					code = "G2"; ff = "[FF78+]"
+				} else if (temp == "ac156397f3") {
+					// tampered: fix false
+					code = "T1"; ff = "[FF78+]"
+				} else if (temp == "6140f2426e") {
+					// tampered: fix true
+					code = "T2"; ff = "[FF78+]"
 				}
 				if (code !== "") {
 					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
