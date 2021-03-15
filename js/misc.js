@@ -77,7 +77,7 @@ function get_mathml() {
 	// compare: use a range as zoom affects diff
 	let pre = " | offsetHeight difference: ",
 		post = (diff < 10 ? tb_safer : tb_standard)
-	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + post
+	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
 	return "mathml:" + (diff < 10 ?	zD : zE)
 }
 
