@@ -206,10 +206,16 @@ function section_info(name, time1, data) {
 	}
 }
 
-function showConsole(name) {
+function buildButton(color, dString, display) {
+	return "<span class='c btn" + color + " btn' onClick='showDetail(`" + dString + "`)'><u>[" + display + "]</u></span>"
+}
+
+function showDetail(name) {
 	// output clickable data links/counts to console log
-	let data = consoleData[name]
-	console.debug(data)
+	let data = detailData[name]
+	name = name.replace("_", ": ")
+	name = name.replace(/\_/g, " ")
+	console.debug(name + "\n", data)
 }
 
 function showMetrics(type) {

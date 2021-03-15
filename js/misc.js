@@ -7,24 +7,29 @@ function reset_misc() {
 }
 
 function get_component_shims() {
-	let r
-	let shim = (typeof Components === "undefined") ? zU : Object.getOwnPropertyNames(Components.interfaces).join(", ")
-	dom.shimdata = shim
-	dom.shimdata.style.color = zshow
-	if (shim == zU) {
-		r = zU
-	} else {
-		r = sha1(shim)
-		shim = r + s18 +"["+ shim.split(", ").length +"]"+ sc
+	let dString = "misc_component_shims"
+	detailData[dString] = []
+	let hash = ""
+	try {
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
+		detailData[dString] = keys
+		dom.shimdata = keys.join(", ")
+		hash = sha1(keys.join())
+		dom.shim.innerHTML = hash + buildButton("18", dString, keys.length)
+
+	} catch(e) {
+		hash = zU
+		dom.shim = zU
+		dom.shimdata = zU
 	}
-	dom.shim.innerHTML = shim
-	return "component_shims:" + r
+	dom.shimdata.style.color = zshow
+	return "component_shims:" + hash
 }
 
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
-	let consoleString = "MiscIframeProps"
-	consoleData[consoleString] = []
+	let dString = "misc_iframe_properties"
+	detailData[dString] = []
 	let r
 	try {
 		// create iframe & append
@@ -44,9 +49,9 @@ function get_iframe_props() {
 		// always sort: too many unknown variables could affect the order
 		props.sort()
 		// output
-		let output = s18 +"["+ props.length +"]"+sc
-		output = sha1(props.join()) + "<span class='c btn0 btn' onClick='showConsole(`" + consoleString + "`)'><u>" + output + "</u></span>"
-		consoleData[consoleString] = props
+		let output = props.length
+		output = sha1(props.join()) + buildButton("18", dString, output)
+		detailData[dString] = props
 		dom.iProps.innerHTML = output
 		//console.debug(props.join("\n"))
 		r= sha1(props.join())
@@ -77,8 +82,12 @@ function get_mathml() {
 }
 
 function get_nav_prototype() {
-	let consoleString = "MiscNavFakeKeys"
-	consoleData[consoleString] = []
+	// reset
+	let dString = "misc navigator fake keys"
+	detailData[dString] = []
+	let dString2 = "misc navigator true keys"
+	detailData[dString2] = []
+
 	let hash, keys, keyWord = "", lastKeyIndex, fakeStr = ""
 	try {
 		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -96,26 +105,29 @@ function get_nav_prototype() {
 			lastKeyIndex = keys.indexOf(keyWord) // the index of the last descriptor key
 		}
 		let fakeKeys = keys.slice(lastKeyIndex+1) // the fake set of keys
+		//fakeKeys = ["imfake"] // test
+		detailData[dString] = fakeKeys
 		let trueKeys = keys.slice(0, lastKeyIndex+1) // the true set of keys
+		detailData[dString2] = trueKeys
 		hash = sha1(trueKeys.join())
 		// append fake
 		if (fakeKeys.length > 0) {
-			fakeStr = s18 + "["+ fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "") +"]"+ sc
-			fakeStr = "<span class='c btn0 btn' onClick='showConsole(`" + consoleString + "`)'><u>" + fakeStr + "</u></span>"
-			consoleData[consoleString] = fakeKeys
+			fakeStr = fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "")
+			fakeStr = buildButton("18", dString, fakeStr)
 			// global lies
 			if (!sRerun) {
 				knownLies.push("misc:navigator")
 			}
 		}
-		dom.nProto.innerHTML = hash + s18 +"["+ trueKeys.length +"]"+ sc + fakeStr
+		let display = hash + buildButton("18", dString2, trueKeys.length)
+		dom.nProto.innerHTML = display + fakeStr
 		dom.nProto2 = trueKeys.join(", ")
-		dom.nProto2.style.color = zshow
 	} catch(e) {
 		hash = zB0
 		dom.nProto = hash
 		dom.nProto2 = ""
 	}
+	dom.nProto2.style.color = zshow
 	return "navigator_properties:" + hash
 }
 
