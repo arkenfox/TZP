@@ -206,6 +206,12 @@ function section_info(name, time1, data) {
 	}
 }
 
+function showConsole(name) {
+	// output clickable data links/counts to console log
+	let data = consoleData[name]
+	console.debug(data)
+}
+
 function showMetrics(type) {
 	let array = [],
 		checks = [],
