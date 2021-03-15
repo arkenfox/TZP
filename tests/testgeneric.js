@@ -20,6 +20,18 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
+function buildButton(color, dString, display) {
+	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
+}
+
+function showDetail(name) {
+	// output clickable data links/counts to console log
+	let data = detailData[name]
+	name = name.replace("_", ": ")
+	name = name.replace(/\_/g, " ")
+	console.debug(name + "\n", data)
+}
+
 function get_isFF_engine() {
 	// set isFF
 	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)

@@ -83,9 +83,9 @@ function get_mathml() {
 
 function get_nav_prototype() {
 	// reset
-	let dString = "misc navigator fake keys"
+	let dString = "misc_navigator_fake_keys"
 	detailData[dString] = []
-	let dString2 = "misc navigator true keys"
+	let dString2 = "misc_navigator_true_keys"
 	detailData[dString2] = []
 
 	let hash, keys, keyWord = "", lastKeyIndex, fakeStr = ""

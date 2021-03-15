@@ -62,13 +62,21 @@ input[type='checkbox'] {display: none;}
   word-spacing: normal;
 }
 
-/* not-really-buttons & section color */
+/* they're-not-really-buttons */
 .btn {background-color: #161b22;
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
+	font-weight: bold;
 	padding-left: 8px;
 	padding-right: 8px;
+	cursor: pointer;
+}
+/* counts */
+.btnc {
+	font-weight: normal;
+	text-decoration: underline;
+	text-decoration-style: dotted;
 	cursor: pointer;
 }
 .btn0 {border-color: #b3b3b3; color: #b3b3b3;}
