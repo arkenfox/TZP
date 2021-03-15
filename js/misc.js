@@ -84,6 +84,44 @@ function get_nav_prototype() {
 		dom.nProto = r
 		dom.nProto2 = ""
 	}
+
+	// test different method to bypass interference
+	let keys, keyWord = "", lastKeyIndex
+	try {
+		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)) // reported descriptor keys
+		if (isFF) {
+			// FF: constructor is always last
+			keyWord = "constructor"
+		} else if (isEngine == "blink") {
+			// chromium: not sure if this is always last
+			keyWord = "webkitGetUserMedia"
+		}
+		if (keyWord == "") {
+			// everything else: who knows
+			lastKeyIndex = keys.length
+		} else {
+			lastKeyIndex = keys.indexOf(keyWord) // the index of the last descriptor key
+		}
+		let fakeKeys = keys.slice(lastKeyIndex+1) // the fake set of keys
+		let trueKeys = keys.slice(0, lastKeyIndex+1) // the true set of keys
+
+		// temp comparison to old method
+		if (isFF) {
+			let trueKeys2 = keys.slice(0, lastKeyIndex) // drop constructor
+			console.debug(
+				"old: ", r + "\nnew: ", sha1(trueKeys2.join(", ")) + " [without constructor]"
+			)
+		}
+
+		console.debug("new:", sha1(trueKeys.join(", ")))
+		console.debug("keys", keys)
+		console.debug("fakeKeys", fakeKeys)
+		console.debug("trueKeys", trueKeys)
+	} catch(e) {
+		console.debug("sheesh louise", e.name, e.message)
+	}
+
+
 	return "navigator_properties:" + r
 }
 
