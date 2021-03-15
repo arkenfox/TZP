@@ -92,7 +92,6 @@ input[type='checkbox'] {display: none;}
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
-	font-weight: bold;
 	padding-left: 8px;
 	padding-right: 8px;
 	cursor: pointer;
