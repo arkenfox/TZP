@@ -19,7 +19,7 @@ let jsFiles = [],
 	// section FP: can be rerun: keep separate from global
 	fpAllSections = {},
 	// clickable counts
-	consoleData = {}
+	detailData = {}
 
 // android
 let avh = "",
