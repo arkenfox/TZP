@@ -2,6 +2,8 @@
 
 var dom;
 
+let detailData = {}
+
 // css
 let s0 = " <span class='",
 	sb = s0+"bad'>",
