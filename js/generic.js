@@ -123,7 +123,7 @@ function section_info(name, time1, data) {
 
 		// remember each section's results seperately
 			// e.g. a rerun can differ from the global stored result: e.g. zoom
-		fpAllSections[name] = data
+		sectionData[name] = data
 
 		// store in global if not a section rerun
 		if (!sRerun) {
@@ -133,6 +133,8 @@ function section_info(name, time1, data) {
 			fpAllData.push([name +":" + hash, data])
 
 			if (fpAllHash.length == 14) {
+				// store detail data
+				fpAllDetail = detailData
 				// perf
 				if (logPerf) {
 					console.log("logPerf detail\n" + perfData.join("\n"))
@@ -207,7 +209,7 @@ function section_info(name, time1, data) {
 }
 
 function buildButton(color, dString, display) {
-	return "<span class='c btn" + color + " btn' onClick='showDetail(`" + dString + "`)'><u>[" + display + "]</u></span>"
+	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
 }
 
 function showDetail(name) {
@@ -231,9 +233,13 @@ function showMetrics(type) {
 		array = fpAllData
 	} else {
 		// section
-		array = fpAllSections[type]
+		array = sectionData[type]
 	}
 	console.log(type + ": " + sha1(array.join()) + "\n", array)
+	//detail data
+	if (type == "loose") {
+		console.log("detail data\n", fpAllDetail)
+	}
 
 	let go = false
 	if (go) {
@@ -543,6 +549,10 @@ function outputSection(id, cls) {
 		fpAllData = []
 		fpAllCheck = []
 		fpAllCount = 0
+		fpAllDetail = {}
+		// reset re-runnable data
+		sectionData = {}
+		detailData = {}
 		// reset lies
 		knownLies = []
 		protoList = []
