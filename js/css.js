@@ -13,6 +13,10 @@ function get_colors(runtype) {
 		m = "-moz-",
 		mm = m+"mac-",
 		element = dom.sColorElement
+
+	let dString = "css_colors_"+runtype
+	detailData[dString] = []
+
 	if (runtype == "system") {
 		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
 		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
@@ -37,6 +41,7 @@ function get_colors(runtype) {
 		m+'win-accentcolor',m+'win-accentcolortext',m+'win-communications-toolbox',
 		m+'win-communicationstext',	m+'win-media-toolbox',m+'win-mediatext']
 	}
+	list.sort()
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
 		try {
@@ -49,8 +54,11 @@ function get_colors(runtype) {
 			error = (isFF ? zB0 : "error")
 		}
 	})
-	let hash = sha1(results.join()),
-		notation = s14 + "["+list.length+"] " + sc 
+	detailData[dString] = results
+
+	let hash = sha1(results.join())
+	let notation = buildButton("14", dString, list.length)
+
 	if (runtype == "system") {
 		let control = "1580959336948bb37120a893e8b1cb99c620129e"
 		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
@@ -237,7 +245,7 @@ function get_mm_css() {
 	x = zNS, q="prefers-contrast: "
 	try {
 		if (window.matchMedia("("+q+n+")").matches) {x = n}
-		if (window.matchMedia("("+q+"forced)").matches) {x = "forced"}
+		if (window.matchMedia("("+q+"forced)").matches) {x = "forced"} // 1694864: removed
 		if (window.matchMedia("("+q+"high)").matches) {x = "high"}
 		if (window.matchMedia("("+q+"low)").matches) {x = "low"}
 	} catch(e) {x = zB0}
