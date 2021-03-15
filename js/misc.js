@@ -23,6 +23,8 @@ function get_component_shims() {
 
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
+	let consoleString = "MiscIframeProps"
+	consoleData[consoleString] = []
 	let r
 	try {
 		// create iframe & append
@@ -42,7 +44,10 @@ function get_iframe_props() {
 		// always sort: too many unknown variables could affect the order
 		props.sort()
 		// output
-		dom.iProps.innerHTML = sha1(props.join()) + s18 +"["+ props.length +"]"+sc
+		let output = s18 +"["+ props.length +"]"+sc
+		output = sha1(props.join()) + "<span class='c btn0 btn' onClick='showConsole(`" + consoleString + "`)'><u>" + output + "</u></span>"
+		consoleData[consoleString] = props
+		dom.iProps.innerHTML = output
 		//console.debug(props.join("\n"))
 		r= sha1(props.join())
 	} catch(e) {
@@ -72,7 +77,9 @@ function get_mathml() {
 }
 
 function get_nav_prototype() {
-	let hash, keys, keyWord = "", lastKeyIndex
+	let consoleString = "MiscNavFakeKeys"
+	consoleData[consoleString] = []
+	let hash, keys, keyWord = "", lastKeyIndex, fakeStr
 	try {
 		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		if (isFF) {
@@ -91,11 +98,19 @@ function get_nav_prototype() {
 		let fakeKeys = keys.slice(lastKeyIndex+1) // the fake set of keys
 		let trueKeys = keys.slice(0, lastKeyIndex+1) // the true set of keys
 		hash = sha1(trueKeys.join())
-		dom.nProto.innerHTML = hash + s18 +"["+ trueKeys.length +"]"+ sc
+		// append fake
+		if (fakeKeys.length > 0) {
+			fakeStr = s18 + "["+ fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "") +"]"+ sc
+			fakeStr = "<span class='c btn0 btn' onClick='showConsole(`" + consoleString + "`)'><u>" + fakeStr + "</u></span>"
+			consoleData[consoleString] = fakeKeys
+			// global lies
+			if (!sRerun) {
+				knownLies.push("misc:navigator")
+			}
+		}
+		dom.nProto.innerHTML = hash + s18 +"["+ trueKeys.length +"]"+ sc + fakeStr
 		dom.nProto2 = trueKeys.join(", ")
 		dom.nProto2.style.color = zshow
-		// temp debug for a while
-		if (fakeKeys.length > 0) {console.log("fakeKeys", fakeKeys)}
 	} catch(e) {
 		hash = zB0
 		dom.nProto = hash
