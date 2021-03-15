@@ -72,23 +72,9 @@ function get_mathml() {
 }
 
 function get_nav_prototype() {
-	let r
+	let hash, keys, keyWord = "", lastKeyIndex
 	try {
-		let nProto = Object.keys(Object.getPrototypeOf(navigator)).join(", ")
-		dom.nProto.innerHTML = sha1(nProto) + s18 +"["+ nProto.split(', ').length +"]"+ sc
-		dom.nProto2 = nProto
-		dom.nProto2.style.color = zshow
-		r = sha1(nProto)
-	} catch(e) {
-		r = zB0
-		dom.nProto = r
-		dom.nProto2 = ""
-	}
-
-	// test different method to bypass interference
-	let keys, keyWord = "", lastKeyIndex
-	try {
-		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)) // reported descriptor keys
+		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		if (isFF) {
 			// FF: constructor is always last
 			keyWord = "constructor"
@@ -104,25 +90,18 @@ function get_nav_prototype() {
 		}
 		let fakeKeys = keys.slice(lastKeyIndex+1) // the fake set of keys
 		let trueKeys = keys.slice(0, lastKeyIndex+1) // the true set of keys
-
-		// temp comparison to old method
-		if (isFF) {
-			let trueKeys2 = keys.slice(0, lastKeyIndex) // drop constructor
-			console.debug(
-				"old: ", r + "\nnew: ", sha1(trueKeys2.join(", ")) + " [without constructor]"
-			)
-		}
-
-		console.debug("new:", sha1(trueKeys.join(", ")))
-		console.debug("keys", keys)
-		console.debug("fakeKeys", fakeKeys)
-		console.debug("trueKeys", trueKeys)
+		hash = sha1(trueKeys.join())
+		dom.nProto.innerHTML = hash + s18 +"["+ trueKeys.length +"]"+ sc
+		dom.nProto2 = trueKeys.join(", ")
+		dom.nProto2.style.color = zshow
+		// temp debug for a while
+		if (fakeKeys.length > 0) {console.log("fakeKeys", fakeKeys)}
 	} catch(e) {
-		console.debug("sheesh louise", e.name, e.message)
+		hash = zB0
+		dom.nProto = hash
+		dom.nProto2 = ""
 	}
-
-
-	return "navigator_properties:" + r
+	return "navigator_properties:" + hash
 }
 
 function get_recursion() {
