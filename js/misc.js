@@ -79,7 +79,7 @@ function get_mathml() {
 function get_nav_prototype() {
 	let consoleString = "MiscNavFakeKeys"
 	consoleData[consoleString] = []
-	let hash, keys, keyWord = "", lastKeyIndex, fakeStr
+	let hash, keys, keyWord = "", lastKeyIndex, fakeStr = ""
 	try {
 		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		if (isFF) {
