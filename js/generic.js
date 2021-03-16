@@ -133,8 +133,11 @@ function section_info(name, time1, data) {
 			fpAllData.push([name +":" + hash, data])
 
 			if (fpAllHash.length == 14) {
-				// store detail data
+				// store detail data, remove empty arrays
 				fpAllDetail = detailData
+				for (let item in fpAllDetail) {
+					if (fpAllDetail[item].length == 0) {delete fpAllDetail[item]}
+				}
 				// perf
 				if (logPerf) {
 					console.log("logPerf detail\n" + perfData.join("\n"))
@@ -210,6 +213,13 @@ function section_info(name, time1, data) {
 
 function buildButton(color, dString, display) {
 	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
+}
+
+function clearDetail(name) {
+	// empty details
+	try {
+		detailData[name] = []
+	} catch(e) {}
 }
 
 function showDetail(name) {
