@@ -8,7 +8,7 @@ function reset_misc() {
 
 function get_component_shims() {
 	let dString = "misc_component_shims"
-	detailData[dString] = []
+	clearDetail(dString)
 	let hash = ""
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
@@ -16,7 +16,6 @@ function get_component_shims() {
 		dom.shimdata = keys.join(", ")
 		hash = sha1(keys.join())
 		dom.shim.innerHTML = hash + buildButton("18", dString, keys.length)
-
 	} catch(e) {
 		hash = zU
 		dom.shim = zU
@@ -29,7 +28,7 @@ function get_component_shims() {
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let dString = "misc_iframe_properties"
-	detailData[dString] = []
+	clearDetail(dString)
 	let r
 	try {
 		// create iframe & append
@@ -83,43 +82,46 @@ function get_mathml() {
 
 function get_nav_prototype() {
 	// reset
-	let dString = "misc_navigator_fake_keys"
-	detailData[dString] = []
-	let dString2 = "misc_navigator_true_keys"
-	detailData[dString2] = []
+	let dTrue = "misc_navigator_true_keys"
+	let dFake = "misc_navigator_fake_keys"
+	clearDetail(dTrue)
+	clearDetail(dFake)
 
-	let hash, keys, keyWord = "", lastKeyIndex, fakeStr = ""
+	let hash
 	try {
-		keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let trueKeys = keys
+		let lastKeyIndex = keys.length
+		let fakeKeys = [], fakeStr = ""
+
 		if (isFF) {
 			// FF: constructor is always last
-			keyWord = "constructor"
+			lastKeyIndex = keys.indexOf("constructor")
+			trueKeys = keys.slice(0, lastKeyIndex+1)
+			fakeKeys = keys.slice(lastKeyIndex+1)
 		} else if (isEngine == "blink") {
-			// chromium: not sure if this is always last
-			keyWord = "webkitGetUserMedia"
+			// chromium last key is inconsistent
+			// split knownPoison from trueKeys into fakeKeys
+			let knownPoison = ["SharedWorker", "Worker", "buildID", "getVRDisplays", "activeVRDisplays", "oscpu"]
+			trueKeys = keys.filter(x => !knownPoison.includes(x))
+			fakeKeys = keys.filter(x => knownPoison.includes(x))
 		}
-		if (keyWord == "") {
-			// everything else: who knows
-			lastKeyIndex = keys.length
-		} else {
-			lastKeyIndex = keys.indexOf(keyWord) // the index of the last descriptor key
-		}
-		let fakeKeys = keys.slice(lastKeyIndex+1) // the fake set of keys
-		//fakeKeys = ["imfake"] // test
-		detailData[dString] = fakeKeys
-		let trueKeys = keys.slice(0, lastKeyIndex+1) // the true set of keys
-		detailData[dString2] = trueKeys
+		// true
+		detailData[dTrue] = trueKeys
 		hash = sha1(trueKeys.join())
-		// append fake
+		// fake
+			//fakeKeys = ["imfake"] // test
 		if (fakeKeys.length > 0) {
+			detailData[dFake] = fakeKeys
 			fakeStr = fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "")
-			fakeStr = buildButton("18", dString, fakeStr)
+			fakeStr = buildButton("18", dFake, fakeStr)
 			// global lies
 			if (!sRerun) {
 				knownLies.push("misc:navigator")
 			}
 		}
-		let display = hash + buildButton("18", dString2, trueKeys.length)
+		// display
+		let display = hash + buildButton("18", dTrue, trueKeys.length)
 		dom.nProto.innerHTML = display + fakeStr
 		dom.nProto2 = trueKeys.join(", ")
 	} catch(e) {
