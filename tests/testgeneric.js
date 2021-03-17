@@ -20,6 +20,15 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
+function check_navObject(property) {
+	try {
+		let a = (`lied:`, `value` in Object.getOwnPropertyDescriptor(Navigator.prototype, property))
+		return true
+	} catch(e) {
+		return false
+	}
+}
+
 function buildButton(color, dString, display) {
 	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
 }
@@ -111,7 +120,7 @@ function copyclip(element) {
 		}
 	}
 	// clipboard API
-	if ("clipboard" in navigator) {
+	if (check_navObject("clipboard")) {
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
