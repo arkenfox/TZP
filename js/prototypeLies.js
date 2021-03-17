@@ -568,7 +568,7 @@ function outputPrototypeLies() {
 					'plugins',
 					'product',
 					'productSub',
-					'sendbeacon',
+					'sendBeacon',
 					'serviceWorker',
 					'userAgent',
 					'vendor',
