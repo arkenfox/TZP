@@ -1,13 +1,7 @@
 'use strict';
 
-function reset_css() {
-	dom.sColorHashData.style.color = zhide
-	dom.sFontsHashData.style.color = zhide
-}
-
 function get_colors(runtype) {
 	let results = [],
-		data = [],
 		list = [],
 		error = "",
 		m = "-moz-",
@@ -15,7 +9,7 @@ function get_colors(runtype) {
 		element = dom.sColorElement
 
 	let dString = "css_colors_"+runtype
-	detailData[dString] = []
+	clearDetail(dString)
 
 	if (runtype == "system") {
 		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
@@ -39,17 +33,19 @@ function get_colors(runtype) {
 		mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',m+'menubarhovertext',m+'menubartext',
 		m+'menuhover',m+'menuhovertext',m+'nativehyperlinktext',m+'oddtreerow',m+'visitedhyperlinktext',
 		m+'win-accentcolor',m+'win-accentcolortext',m+'win-communications-toolbox',
-		m+'win-communicationstext',	m+'win-media-toolbox',m+'win-mediatext']
+		m+'win-communicationstext',	m+'win-media-toolbox',m+'win-mediatext',
+		m+"_i-am-fake", // fake
+		m+"accent-color",m+"accent-color-foreground", // 1698291
+		]
 	}
+	// de-dupe and sort
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
 		try {
 			let x = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			results.push(item+": "+x)
-			if (runtype == "css4") {
-				data.push(item.padStart(11) + ": " + x)
-			}
+			results.push(item+":"+x)
 		} catch(e) {
 			error = (isFF ? zB0 : "error")
 		}
@@ -60,12 +56,10 @@ function get_colors(runtype) {
 	let notation = buildButton("14", dString, list.length)
 
 	if (runtype == "system") {
-		let control = "1580959336948bb37120a893e8b1cb99c620129e"
+		let control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
 		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
 	} else if (runtype == "css4") {
 		dom.sColorHashNew.innerHTML = error + (error == "" ? hash + notation : "")
-		dom.sColorHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
-		dom.sColorHashData.style.color = zshow
 	} else {
 		dom.mColorHash.innerHTML = error + (error == "" ? hash + notation : "")
 	}
@@ -207,7 +201,7 @@ function get_computed_styles() {
 			}
 			if (logPerf) {debug_log("computed styles [css]",t0)}
 			//console.debug(hashes.join("\n"))
-			return resolve("styles:" + sha1(hashes.join()))
+			return resolve("styles:"+ sha1(hashes.join()))
 		}).catch(error => {
 			console.error(error)
 			return resolve("styles:error")
@@ -270,7 +264,6 @@ function get_mm_css() {
 function get_system_fonts(runtype) {
 	return new Promise(resolve => {
 		let results = [],
-			data = [],
 			error = "",
 			m = "-moz-"
 		let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
@@ -306,7 +299,6 @@ function get_system_fonts(runtype) {
 							f += ", " + s.fontStyle
 						}
 					}
-					data.push(font.padStart(20) + ": " + f)
 					if (runtype == "isFFcheck") {
 						return resolve(""+f)
 					} else {
@@ -326,9 +318,7 @@ function get_system_fonts(runtype) {
 			let hash = sha1(results.join())
 			let notation = s14 + " [" + fonts.length + "]" + sc
 			dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
-			dom.sFontsHashData.innerHTML = error + (error == "" ? data.join("<br>") : "")
-			dom.sFontsHashData.style.color = zshow
-			return resolve("system_fonts:" + hash)
+			return resolve("system_fonts:"+ hash)
 		}
 	})
 }
