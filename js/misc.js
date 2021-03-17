@@ -1,11 +1,5 @@
 'use strict';
 
-function reset_misc() {
-	dom.nProto2.style.color = zhide
-	dom.shimdata.style.color = zhide
-	dom.mathmltest.style.color = zhide
-}
-
 function get_component_shims() {
 	let dString = "misc_component_shims"
 	clearDetail(dString)
@@ -13,15 +7,12 @@ function get_component_shims() {
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		detailData[dString] = keys
-		dom.shimdata = keys.join(", ")
 		hash = sha1(keys.join())
 		dom.shim.innerHTML = hash + buildButton("18", dString, keys.length)
 	} catch(e) {
 		hash = zU
 		dom.shim = zU
-		dom.shimdata = zU
 	}
-	dom.shimdata.style.color = zshow
 	return "component_shims:" + hash
 }
 
@@ -43,16 +34,14 @@ function get_iframe_props() {
 		let props = Object.getOwnPropertyNames(contentWindow)
 		// remove iframe
 		iframe.parentNode.removeChild(iframe)
-		// magic: open consoles affect the order such as Event, Location
+		// always sort: too many unknown variables: e.g. various console tabs vs Event, Location
 		//props.push(props.splice(props.indexOf("Event"), 1)[0])
-		// always sort: too many unknown variables could affect the order
 		props.sort()
 		// output
 		let output = props.length
 		output = sha1(props.join()) + buildButton("18", dString, output)
 		detailData[dString] = props
 		dom.iProps.innerHTML = output
-		//console.debug(props.join("\n"))
 		r= sha1(props.join())
 	} catch(e) {
 		dom.iProps.innerHTML = error_iframe
@@ -123,13 +112,10 @@ function get_nav_prototype() {
 		// display
 		let display = hash + buildButton("18", dTrue, trueKeys.length)
 		dom.nProto.innerHTML = display + fakeStr
-		dom.nProto2 = trueKeys.join(", ")
 	} catch(e) {
 		hash = zB0
 		dom.nProto = hash
-		dom.nProto2 = ""
 	}
-	dom.nProto2.style.color = zshow
 	return "navigator_properties:" + hash
 }
 
