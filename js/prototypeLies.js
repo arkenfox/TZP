@@ -4,8 +4,6 @@
 /* https://github.com/abrahamjuliot/creepjs */
 
 function outputPrototypeLies() {
-	// always the first function
-	// only run on page load or global reruns
 	gt0 = performance.now()
 
 	return new Promise(resolve => {
@@ -570,7 +568,7 @@ function outputPrototypeLies() {
 					'plugins',
 					'product',
 					'productSub',
-					'sendBeacon',
+					'sendbeacon',
 					'serviceWorker',
 					'userAgent',
 					'vendor',
@@ -644,7 +642,7 @@ function outputPrototypeLies() {
 			}
 		}
 
-		// start program
+		// start
 		let t0 = performance.now()
 		const {
 			lieList,
@@ -655,35 +653,31 @@ function outputPrototypeLies() {
 		if (iframeContainerDiv) {
 			iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
 		}
-
 		// global data
 		protoList = lieList
 		protoDetail = lieDetail
 		protoCount = lieCount
 		protoProps = propsSearched
-
 		// display
 		let el = dom.prototypehash
 		if (lieCount == 0) {
-			el.innerHTML = "none" // none [x properties] (clickable)
+			el.innerHTML = "none"
 		} else {
-			// ToDo
+			// ToDo: clickable counts etc
 			console.log(lieDetail)
-			el.innerHTML = lieCount // hash [x properties] [y lies] (each clickable)
+			el.innerHTML = lieCount
 		}
-
 		// perf
 		let perf = Math.round(performance.now() - t0)
 		if (logPerf) {debug_log("prototype lies",t0)}
 		section_info("prototype", t0)
-
 		// resolve
 		return resolve("done")
 	})
 }
 
-// check lies later in any function
-//lieList.includes('HTMLCanvasElement.toDataURL') // returns true or false
-//lieDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
+// to check lies
+//protoList.includes('HTMLCanvasElement.toDataURL') // returns true or false
+//protoDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
 
 countJS("prototypeLies")
