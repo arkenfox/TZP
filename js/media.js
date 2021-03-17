@@ -1,16 +1,5 @@
 'use strict';
 
-function reset_media() {
-	dom.audiodata.style.color = zhide
-	dom.videodata.style.color = zhide
-	let str = dom.audiodata.innerHTML
-	str = str.replace(/s13/g, "")
-	dom.audiodata.innerHTML = str
-	str = dom.videodata.innerHTML
-	str = str.replace(/s13/g, "")
-	dom.videodata.innerHTML = str
-}
-
 function get_media(runtype) {
 	let list = [],
 		t0 = performance.now(),
@@ -65,18 +54,9 @@ function get_media(runtype) {
 			ax1+'0"',ax1+'1"',ax1+'2"',ax2+'0"',ax2+'1"',ax2+'2"',
 		]
 	}
-	// sort
-	list.sort()
-
-	// dev: debug + remove dupes
-	let prev = ""
-	for (let i=0; i < list.length; i++) {
-		if (list[i] == prev) {console.debug(runtype+" dupe:", list[i])}
-		prev = list[i]
-	}
+	// de-dupe and sort
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	// full list
-	//console.log(runtype + " list [" + list.length + " items]\n" + list.join("\n"))
+	list.sort()
 
 	// run
 	let canm = [], canp = [], src = [], rec = []
@@ -99,8 +79,7 @@ function get_media(runtype) {
 
 	// elements
 	let ecan = document.getElementById(runtype+"can"),
-		etype = document.getElementById(runtype+"type"),
-		edata = document.getElementById(runtype+"data")
+		etype = document.getElementById(runtype+"type")
 	// blocks
 	let block1 = (canm.length == 0),
 		block2 = (canp.length == 0),
@@ -111,8 +90,7 @@ function get_media(runtype) {
 		+ sColor +" probably: "+sc + (block2 ? "blocked" :canp.join(", "))
 	let hashtype = sColor +"mediasource: "+sc + (block3 ? "blocked" :src.join(", "))
 		+ sColor +" mediarecoder: "+sc + (block4 ? "blocked" : rec.join(", "))
-	edata.innerHTML = hashcan + hashtype
-	edata.style.color = zshow
+
 	// merged hashes
 	hashcan = ['maybe']; hashcan = hashcan.concat(canm)
 	hashcan.push("probably"); hashcan = hashcan.concat(canp)
@@ -147,14 +125,14 @@ function outputMedia() {
 		section = [], r = ""
 
 	// mediaCapabilities: FF63+
-	if (isFF && isVer < 63) {r = zNS} else (r = ("mediaCapabilities" in navigator ? zE : zD))
+	if (isFF && isVer < 63) {r = zNS} else (r = (check_navObject("mediaCapabilities") ? zE : zD))
 	dom.nMediaC = r
-	section.push("mediaCapabilities:" + r)
+	section.push("mediaCapabilities:"+ r)
 
 	// mediaSession: FF71+
-	if (isFF && isVer < 71) {r = zNS} else (r = ("mediaSession" in navigator ? zE : zD))
+	if (isFF && isVer < 71) {r = zNS} else (r = (check_navObject("mediaSession") ? zE : zD))
 	dom.nMediaS = r
-	section.push("mediaSession:" + r)
+	section.push("mediaSession:"+ r)
 
 	Promise.all([
 		get_media("audio"),
