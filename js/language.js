@@ -8,28 +8,21 @@ let lHash0 = "", lHash1 = "", lHash2 = ""
 function get_navigator() {
 	return new Promise(resolve => {
 		let results = []
-
 		// beacon
-		let beacon = ""
-		try {beacon = (navigator.sendBeacon ? zE : zD)} catch(e) {beacon = zB0}
-
+		let beacon = (check_navObject("sendBeacon") ? zE : zD)
+		// GPC: 1670058
+		let gpc = (check_navObject("globalPrivacyControl") ? zS : zNS)
 		// DNT
 		let dnt = ""
-		if ("doNotTrack" in navigator) {
+		if (check_navObject("doNotTrack")) {
 			try {
 				dnt = navigator.doNotTrack
 				if (isFF) {
 					if (dnt == undefined) {dnt = zB0}
 					if (dnt == 1) {dnt = zE}
 				}
-			} catch(e) {
-				dnt = zB0
-			}
-		} else {
-			dnt = zNA
-		}
-
-		// online
+			} catch(e) {dnt = zB0}
+		} else {dnt = zNA}
 		let online = ""
 		try {
 			online = navigator.onLine
@@ -38,10 +31,9 @@ function get_navigator() {
 
 		// FF
 		let network = "", connection = "", test = "", r3 = ""
-
 		if (isFF) {
 			// network
-			if ("connection" in navigator) {
+			if (check_navObject("connection")) {
 				// retest network
 				try {
 					test = navigator.connection
@@ -65,26 +57,21 @@ function get_navigator() {
 			}
 		} else {
 			// non-FF
-			if ("connection" in navigator) {
+			if (check_navObject("connection")) {
 				network = zE; connection = navigator.connection.type
 			} else {
 				network = zD; connection = navigator.connection
 			}
 		}
+		// push: ownProperty checked
+		results.push("beacon:"+ beacon)
+		results.push("globalPrivacyControl:"+ gpc)
+		// push: ToDo: harden/prototype lies
+		results.push("online:"+ online)
+		results.push("dnt:"+ dnt)
+		results.push("network:"+ network)
+		results.push("connection:"+ connection)
 
-		// GPC: 1670058
-		let gpc = ""
-		try {
-			if ("globalPrivacyControl" in navigator) {gpc = zS} else {gpc = zNS}
-		} catch(e) {gpc = zB0}
-
-		// push
-		results.push("beacon:" + beacon)
-		results.push("dnt:" + dnt)
-		results.push("online:" + online)
-		results.push("network:" + network)
-		results.push("connection:" + connection)
-		results.push("globalPrivacyControl:" + gpc)
 		// display
 		dom.nBeacon = beacon
 		dom.nDNT.innerHTML = "" + dnt
@@ -96,7 +83,6 @@ function get_navigator() {
 			dom.nConnection.innerHTML = connection
 		}
 		dom.nGPC = gpc
-
 		// subsection hash
 		results.sort()
 		dom.hHash0.innerHTML = sha1(results.join())
@@ -120,7 +106,7 @@ function outputHeaders() {
 
 function get_geo() {
 	return new Promise(resolve => {
-		let r = ("geolocation" in navigator ? zE : zD)
+		let r = (check_navObject("geolocation") ? zE : zD)
 			+ " | " + ("Geolocation" in window ? "true" : "false")
 		dom.geo1 = r
 		function geoWrite(r) {
@@ -638,9 +624,9 @@ function get_lang_worker() {
 		msgWorker.push(isFF)
 		if (isVer == "") {msgWorker.push("0")} else {msgWorker.push(isVer)}
 		if (isFile) {
-			return resolve("n/a")
+			return resolve(zNA)
 		} else if (typeof(Worker) == "undefined") {
-			return resolve("n/a")
+			return resolve(zNA)
 		} else {
 			try {
 				let workerlang = new Worker("js/language_worker.js")
@@ -699,12 +685,11 @@ function get_lang_worker() {
 							dom.lHash2.innerHTML = lHash2 +"<br>"+ sb + wHash2 + sc+" [see details]"
 						}
 					}
-					
 					return resolve(e.data)
 				}, false)
 				workerlang.postMessage(msgWorker)
 			} catch(e) {
-				return resolve("n/a")
+				return resolve(zNA)
 			}
 		}
 	})
@@ -713,16 +698,13 @@ function get_lang_worker() {
 function outputLanguage() {
 	let t0 = performance.now(),
 		section = []
-
 	// ToDO: logic with worker re section hash
 	// if no worker or worker matches - use original result
 	// if worker doesn't match = use worker
-
 	function get_worker() {
 		section_info("language", t0, section)
 		get_lang_worker() // tack this on here for now
 	}
-
 	// run
 	Promise.all([
 		get_lang_doc(),
@@ -741,7 +723,6 @@ function outputLanguage() {
 		dom.lHashDoc = sha1(section.join())
 		get_worker()
 	})
-
 }
 
 countJS("language")
