@@ -177,7 +177,8 @@ function section_info(name, time1, data) {
 					}
 				}
 				hash2 += buildButton("0", "loose", fpAllCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
-				dom.allhash.innerHTML = hash2 + " [incomplete]"
+				hash2 += buildButton("0", "globaldetail", "details", "showMetrics")
+				dom.allhash.innerHTML = hash2
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
 		}
@@ -244,64 +245,30 @@ function showDetail(name) {
 }
 
 function showMetrics(type) {
-	let array = [],
-		checks = [],
-		output = [],
-		mlength = 0,
-		mPad = 30 // longest metric is currently 27
-
-	if (type == "known") {
-		array = knownLies
-	} else if (type == "loose") {
-		array = fpAllData
+	if (type == "globaldetail") {
+		for (let item in fpAllDetail) {
+			console.log(item, fpAllDetail[item])
+		}
 	} else {
-		// section
-		array = sectionData[type]
-	}
-	console.log(type + ": " + sha1(array.join()) + "\n", array)
-	//detail data
-	if (type == "loose") {
-		console.log("detail data\n", fpAllDetail)
-	}
-
-	let go = false
-	if (go) {
-		if (type == "loose") {array = fpAllData}
-		for (let i = 0; i < array.length; i++) {
-			let item = array[i]
-			let sparts = item[0].split(":")
-			let section = sparts[0]
-			let shash = sparts.slice(1).join(":")
-			output.push(section + ": " + shash)
-			let data = item[1]
-			for (let j = 0; j < data.length; j++) {
-				let parts = data[j].split(":")
-				let metric = parts[0]
-				let value = parts.slice(1).join(":")
-				// longest metric name length
-				if (metric.length > mlength) {mlength = metric.length}
-				// checks
-				let ok = true, message = []
-				if (metric.indexOf(" ") !== -1) {ok = false; message.push("metric-has-space")} // space
-				if (value.substring(0, 1) == " ") {ok = false; message.push("lead-space")} // leading space
-				if (value.substring(value.length-1, value.length) == " ") {ok = false; message.push("trail-space")} // trailing space
-				if (ok == false) {
-					checks.push(message.join() + ":~"+ metric +":"+ value +"~")
-				}
-				// build output: ToDo: pretty up
-				output.push(metric.padStart(mPad) +": " + value)
-			}
+		let array = [],
+			showhash = true
+		if (type == "known") {
+			type += " lies"
+			array = knownLies
+		} else if (type == "loose") {
+			type = "fingerprint: " + type
+			array = fpAllData
+		} else if (type == "prototype lies") {
+			array = protoList
+			showhash = false
+		} else if (type == "prototype lie details") {
+			array = protoDetail
+			showhash = false
+		} else {
+			// section
+			array = sectionData[type]
 		}
-		// checks
-		if (isFile) {
-			console.debug("longest metric name length", mlength)
-			if (checks.length > 0) {
-				checks.sort()
-				console.debug(checks)
-			}
-			// debug
-			console.debug(output.join("\n"))
-		}
+		console.log(type + ": " + (showhash ? sha1(array.join()) : ""), array)
 	}
 }
 
