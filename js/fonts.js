@@ -164,7 +164,7 @@ const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
 		if (!isFF) {
-			return resolve("n/a")
+			return resolve(zNA)
 		}
 		try {
 			const detectLies = createLieDetector()
@@ -737,7 +737,7 @@ function get_woff() {
 		function output_woff(state) {
 			dom.fontWoff2.innerHTML = state
 			if (logPerf) {debug_log("woff [fonts]",t0)}
-			return resolve("woff:" + state)
+			return resolve("woff:"+ state)
 		}
 		// check
 		el = dom.woffyes
