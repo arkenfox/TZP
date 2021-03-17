@@ -19,7 +19,7 @@ function outputCanvas() {
 		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
 	}
 
-	// analysis after promsies
+	// analysis after promises
 	function analyzeCanvas(runtype, res1, res2, res3) {
 		// vars
 		let chash1 = [],
@@ -32,7 +32,6 @@ function outputCanvas() {
 			// vars
 			let isRandom = false,
 				pushvalue = value1,
-				//control = "d87b36e65e37d411ac204db663f0ec05fe94bf7b6df537bab3f11052d1621ecc", // 2000x200 white RFP
 				control = "e5d9fd78536844cc8a4144ddb7a03eb9628f12c7c8b7828f942cadf6efb79ac0", // 220x30 white RFP
 				combined = "",
 				sname = item.substring(0,4)
@@ -91,7 +90,6 @@ function outputCanvas() {
 			if (sname == "toDa" || sname == "toBl" || sname == "getI") {
 				// control
 				if (sname == "getI") {
-					//control = "ae8d89f4cb47814af5d79e63a1a60b3f3f28d9309189b7518f1ecc23d8bda282" // 2000x200
 					control = "03fedeb80c3f8ebf2ed864024e9967256468d64dbe847f202ad06a60f2b3d9b3" // 220x30
 				}
 				if (value1 == error_string) {
@@ -195,7 +193,7 @@ function outputCanvas() {
 								return type + ": supported"
 							}
 							catch (e){
-								return type + ": not supported"
+								return type + ": " + zNS
 							}
 						}).join(", ")
 					}
@@ -420,7 +418,7 @@ function outputCanvas() {
 						if (supported){
 							displayValue = output.value()
 						} else {
-							displayValue = "not supported"
+							displayValue = zNS
 						}
 					} catch (e){
 						displayValue = (e.name == "TypeError" ? "" : e.name + ": ") + e.message
