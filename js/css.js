@@ -30,7 +30,7 @@ function get_colors(runtype) {
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		// skippable
-		ic+b,ic+f,ic+u,ir+b,ir+f,ir+u,is+b,is+f,is+u,ix+b,ix+f,ix+u,'SpellCheckerUnderline','Text'+b,
+		ic+b,ic+f,ic+u,ir+b,ir+f,ir+u,is+b,is+f,is+u,ix+b,ix+f,ix+u,'SpellChecker'+u,'Text'+b,
 		'Text'+f,'TextHighlight'+b,'TextHighlight'+f,ts+b,ts+b+'Attention',ts+b+'Disabled',ts+f,
 		ts+f+'Custom',t,t+'Inactive',tt,tt+'Active',tt+'Hover',tt+'Inactive',w+'3DHighlight',
 		w+'3DShadow',w+b,w+f,w+'Select'+b,w+'Select'+f,'Window'+b,'Window'+f,
@@ -48,10 +48,11 @@ function get_colors(runtype) {
 		mm+'chrome-active',mm+'chrome-inactive',mm+'defaultbuttontext',mm+'disabledtoolbartext',
 		mm+'focusring',mm+'menuitem',mm+'menupopup',mm+'menuselect',mm+'menushadow',mm+'menutextdisable',
 		mm+'menutextselect',mm+'secondaryhighlight',mm+'source-list',mm+'vibrancy-dark',mm+'vibrancy-light',
-		mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',m+'menubarhovertext',m+'menubartext',
-		m+'menuhover',m+'menuhovertext',m+'nativehyperlinktext',m+'oddtreerow',m+'visitedhyperlinktext',
-		m+'win-accentcolor',m+'win-accentcolortext',m+'win-communications-toolbox',
-		m+'win-communicationstext',	m+'win-media-toolbox',m+'win-mediatext',
+		mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',mm+'active-source-list-selection',
+		mm+'source-list-selection',mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',
+		m+'menubarhovertext',m+'menubartext',m+'menuhover',m+'menuhovertext',m+'nativehyperlinktext',
+		m+'oddtreerow',m+'visitedhyperlinktext',m+'win-accentcolor',m+'win-accentcolortext',
+		m+'win-communications-toolbox',m+'win-communicationstext',m+'win-media-toolbox',m+'win-mediatext',
 		m+"_i-am-fake", // fake
 		m+"accent-color",m+"accent-color-foreground", // 1698291
 		]
