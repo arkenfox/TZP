@@ -62,21 +62,29 @@ input[type='checkbox'] {display: none;}
   word-spacing: normal;
 }
 
-/* they're-not-really-buttons */
+/* run/re-run, click here */
 .btn {background-color: #161b22;
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
 	font-weight: bold;
-	padding-left: 8px;
-	padding-right: 8px;
+	padding-left: 6px;
+	padding-right: 6px;
 	cursor: pointer;
 }
-/* counts */
+/* item metrics/counts: dotted, no padding, normal */
 .btnc {
 	font-weight: normal;
 	text-decoration: underline;
 	text-decoration-style: dotted;
+	cursor: pointer;
+}
+/* section metrics/counts: underline, padded, bold */
+.btns {
+	font-weight: bold;
+	text-decoration: underline;
+	padding-left: 8px;
+	padding-right: 8px;
 	cursor: pointer;
 }
 .btn0 {border-color: #b3b3b3; color: #b3b3b3;}
