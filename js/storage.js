@@ -253,7 +253,7 @@ function get_service_workers() {
 	let output = ""
 	// support
 	if (isSecure) {
-		if ("serviceWorker" in navigator) {
+		if (check_navObject("serviceWorker")) {
 			try {
 				// register
 				navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
@@ -327,7 +327,7 @@ function get_permissions(item) {
 
 function get_storage_manager(runtype) {
 	// support
-	if ("storage" in navigator) {
+	if (check_navObject("storage")) {
 		dom.storageMSupport = zE
 		if (isFile) {
 			dom.storageMProp.innerHTML = zNA
@@ -376,14 +376,13 @@ function outputStorage() {
 	// there's almost nothing stable about this section
 		// appcache
 	let appCache = ("applicationCache" in window ? zE : zD)
-	section.push("appCache:" + appCache)
 	dom.appcache = appCache
+	section.push("appCache:"+ appCache)
 		// storageM
-	let storage = ("storage" in navigator ? zE : zD)
-	section.push("storage_manager:" + storage)
+	let sm = (check_navObject("storage") ? zE : zD)
+	section.push("storage_manager:"+ sm)
 		// sw
-	let sw = zD
-	if ("serviceWorker" in navigator) {sw = zE}
+	let sw = (check_navObject("serviceWorker") ? zE : zD)
 	dom.swork1 = sw
 	section.push("service_worker:" + sw)
 
