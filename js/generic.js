@@ -23,6 +23,17 @@ function rnd_number() {
 	return Math.floor((Math.random() * (99999-10000))+10000)
 }
 
+function check_navObject(property) {
+	try {
+		let a = (`lied:`, `value` in Object.getOwnPropertyDescriptor(Navigator.prototype, property))
+		return true
+	} catch(e) {
+		// TypeError right-hand side of 'in' should be an object, got undefined
+		//console.debug("navObject error", e.name, e.message)
+		return false
+	}
+}
+
 function get_RFP() {
 	let r = false
 	if (isFF) {
@@ -147,8 +158,8 @@ function section_info(name, time1, data) {
 					// de-dupe, sort
 					knownLies = knownLies.filter(function(item, position) {return knownLies.indexOf(item) === position})
 					knownLies.sort()
-					dom.knownhash = sha1(knownLies.join())
-					dom.knownmetrics.innerHTML = "<u>[" + knownLies.length + " lie" + (knownLies.length > 1 ? "s" : "") + "]</u>"
+					dom.knownhash.innerHTML = sha1(knownLies.join())
+						+ buildButton("0", "known", knownLies.length + " lie" + (knownLies.length > 1 ? "s" : ""), "showMetrics")
 				} else {
 					dom.knownhash = "none"
 				}
@@ -165,8 +176,8 @@ function section_info(name, time1, data) {
 						console.error("section hash issues\n", fpAllCheck)
 					}
 				}
-				dom.allhash = hash2
-				dom.allmetrics.innerHTML = "<u>["+ fpAllCount +" metrics]</u>" + sc + " [incomplete]"
+				hash2 += buildButton("0", "loose", fpAllCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+				dom.allhash.innerHTML = hash2 + " [incomplete]"
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
 			}
 		}
@@ -174,8 +185,7 @@ function section_info(name, time1, data) {
 		// append + output section
 		try {
 			//add metric count
-			hash += " <span class='c btn0 btn' onClick='showMetrics(`" + name + "`)'><u><b>["
-				+ data.length + " metric" + (data.length > 1 ? "s" : "") +"]</b></u>" + sc
+			hash += buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
 			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
 			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
 			if (name == "screen" || name == "devices") {
@@ -211,8 +221,11 @@ function section_info(name, time1, data) {
 	}
 }
 
-function buildButton(color, dString, display) {
-	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
+function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
+	if (functionName == undefined) {functionName = "showDetail"}
+	if (btnType == undefined) {btnType = "btnc"}
+	return " <span class='btn" + colorCode + " " + btnType
+		+ "' onClick='" + functionName +"(`"+ arrayName +"`)'>" +"["+ displayText +"]</span>"
 }
 
 function clearDetail(name) {
@@ -404,7 +417,7 @@ function copyclip(element) {
 		}
 	}
 	// clipboard API
-	if ("clipboard" in navigator) {
+	if (check_navObject("clipboard")) {
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
@@ -582,16 +595,14 @@ function outputSection(id, cls) {
 		gRerun = false
 		sRerun = true
 	}
-	// clear details
+	// hide/clear stuff
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
 	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
 	if (id=="7") {reset_devices()}
 	if (id=="all" || id=="8") {reset_domrect()}
 	if (id=="11" && cls=="c2") {reset_audio2()}
 	if (id=="all" || id=="12") {reset_fonts()}
-	if (id=="13") {reset_media()}
-	if (id=="14") {reset_css()}
-	if (id=="18") {reset_misc()}
+	if (id=="18") {dom.mathmltest.style.color = zhide}
 
 	function output() {
 		// reset timer for sections only: otherwise it is set by prototypeLies
@@ -672,7 +683,7 @@ function run_once() {
 		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
 	if (isFFsum > 0) {isFF = true}
 
-	if ("brave" in navigator) {isBrave = true}
+	if (check_navObject("brave")) {isBrave = true}
 	//warm up some JS functions
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})

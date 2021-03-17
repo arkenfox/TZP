@@ -97,27 +97,31 @@ function set_pluginBS() {
 
 function get_gamepads() {
 	return new Promise(resolve => {
-		function display(output) {
-			dom.gamepads.innerHTML = output
-			return resolve("gamepads:" + output)
-		}
-		if ("getGamepads" in navigator) {display(zE)} else {display(zD)}
+		let r = (check_navObject("getGamepads") ? "enabled" : "disabled")
+		dom.gamepads.innerHTML = r
+		return resolve("gamepads:"+ r)
 	})
 }
 
 function get_concurrency() {
 	let h = zD
-	if ("hardwareConcurrency" in navigator) {
+	if (check_navObject("hardwareConcurrency")) {
 		try {
 			h = navigator.hardwareConcurrency
 			h = (h == undefined ? zB0 : h)
 		} catch(e) {
 			h = zB0
 		}
+	} else {
+		h = zD
 	}
-	if (isBraveFP) {h = "fake"}
+	if (isBraveFP) {
+		h = "fake"
+	} else {
+		h = (protoList.includes("Navigator.hardwareConcurrency") ? "fake" : h)
+	}
 	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
-	return "hardwareConcurrency:" + h
+	return "hardwareConcurrency:"+ h
 }
 
 function get_media_devices() {
@@ -131,11 +135,11 @@ function get_media_devices() {
 			}
 			dom.eMDList.style.color = zshow
 			if (logPerf) {debug_log("media devices [devices]",t0)}
-			return resolve("media_devices:"+result)
+			return resolve("media_devices:"+ result)
 		}
 
 		// if mediaDevices is not supoprted
-		if (!("mediaDevices" in navigator)) {
+		if (check_navObject("mediaDevices") == false) {
 			dom.eMDList = zD
 			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
 			finish(zD)
@@ -171,7 +175,6 @@ function get_media_devices() {
 						if (d.groupId.length > 0) {
 							strPad = ("group: ").padStart(pad)
 							str += "<br>"+strPad+d.groupId
-							
 						} else {
 							// if FF the length cannot be zero
 							console.debug(d.kind, "zero-length groupId")
@@ -259,7 +262,8 @@ function get_mimetypes() {
 			dom.mimeTypesList.style.color = zshow
 			return resolve(output)
 		}
-		if ("mimeTypes" in navigator) {
+
+		if (check_navObject("mimeTypes")) {
 			try {
 				let m = navigator.mimeTypes
 				if (m.length > 0) {
@@ -371,7 +375,7 @@ function get_plugins() {
 			return resolve(output)
 		}
 
-		if ("plugins" in navigator) {
+		if (check_navObject("plugins")) {
 			try {
 				let p = navigator.plugins
 				if (p.length > 0) {
@@ -460,7 +464,7 @@ function get_speech_engines() {
 			dom.sEnginesList.innerHTML = detail
 			dom.sEnginesList.style.color = zshow
 			if (logPerf) {debug_log("speech engines [devices]",t0)}
-			return resolve("speech_engines:" + output)
+			return resolve("speech_engines:"+ output)
 		}
 
 		if ("speechSynthesis" in window) {
@@ -537,7 +541,7 @@ function get_touch() {
 	let t2 = ("ontouchstart" in window)
 	let t3 = ("ontouchend" in window)
 	// p
-	if ("maxTouchPoints" in navigator) {
+	if (check_navObject("maxTouchPoints")) {
 		try {
 			p = navigator.maxTouchPoints
 			p = (p == undefined ? zB0 : p)
@@ -551,15 +555,10 @@ function get_touch() {
 
 function get_vr() {
 	return new Promise(resolve => {
-		function display(output) {
-			dom.vrdisplays.innerHTML = output
-			return resolve("vr:" + output)
-		}
-		if ("getVRDisplays" in navigator && "activeVRDisplays" in navigator) {
-			try {display(zE)} catch(e) {display(zB0)}
-		}	else {
-			display(zD)
-		}
+		let r = check_navObject("getVRDisplays") + check_navObject("activeVRDisplays")
+		r = (r == 2 ? "enabled" : "disabled")
+		dom.vrdisplays.innerHTML = r
+		return resolve("vr:"+ r)
 	})
 }
 

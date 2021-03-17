@@ -4,20 +4,20 @@ var dom;
 
 let jsFiles = [],
 	perfData = [],
-	// mathematical/equivalency lies
+	// lies: mathematical/equivalency
 	knownLies = [],
-	// prototype lies
+	// lies: prototype
 	protoList = [],
 	protoDetail = {},
 	protoCount = 0,
 	protoProps = [],
-	// global FP
+	// data: global snapshot
 	fpAllHash = [],
 	fpAllData = [],
 	fpAllCheck = [],
 	fpAllCount = 0,
 	fpAllDetail = {},
-	// section clicks: can be rerun: keep separate from global
+	// data: section/detail: can be rerun: not global
 	sectionData = {},
 	detailData = {}
 

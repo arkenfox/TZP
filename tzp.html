@@ -76,7 +76,7 @@
 		<tr><td class="blurb"><a class="return" href="index.html">return to TZP index</a></td></tr>
 	</table>
 
-		<!-- FPs -->
+	<!--FPs-->
 	<table id="tb99">
 		<col width="29%"><a name="finger"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -86,13 +86,9 @@
 		</th></tr></thead>
 		<tr><td>
 			<div class="btn-left"><span class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</span></div>
-			&nbsp loose</td><td><span class="c mono" id="allhash"></span>
-			<span class="c btn0 btn" onClick="showMetrics(`loose`)" id="allmetrics"></span></td></tr>
-		<!--<tr><td>stable</td><td class="faint" id="stablehash"></td></tr>-->
+			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>prototype lies <sup>1</sup></td><td class="c mono" id="prototypehash"></td></tr>
-		<tr><td>known lies</td><td><span class="c mono" id="knownhash"></span>
-			<span class="c btn0 btn" onClick="showMetrics(`known`)" id="knownmetrics"></span></td></tr>
-		<!--<tr class="togU"><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td>known lies</td><td class="c mono" id="knownhash"></td></tr>
 		<tr><td colspan="3"><span class="no_color">prototype lies code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
 	</table>
@@ -314,23 +310,20 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</span></div>
 			<span class="hashtocome" id="languagehash"></span></td></tr>
-
 		<tr><td>hash</td><td class="c mono" id="lHashDoc"></td></tr>
 		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="lHash2"></td></tr>
 		<tr><td>geolocation</td><td class="c mono" id="lHash3"></td></tr>
-
-		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
+		<!--<tr><td colspan="2" class="center">--- other methods ---</td></tr>
 		<tr><td>nested iframe</td><td class="c mono faint" id="langIframe"></td></tr>
-		<tr><td>shared worker</td><td class="c mono" id="langWorker"></td></tr>
-
+		<tr><td>shared worker</td><td class="c mono" id="langWorker"></td></tr>-->
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseL" class="toggle" type="checkbox" checked onchange="toggleitems(this, `L`)"/>
 			<label for="collapseL" class="lbl-toggle" id="labelL">&#9660; show details</label>
 		</td></tr>
-		<!--language-->
+		<!--lang-->
 		<tr class="togL"><td></td><td class="s4">language & locale</td></tr>
 			<tr class="togL"><td>languages | language | languages[0]</td><td class="c" id="ldt2"></td></tr>
 			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -338,7 +331,7 @@
 				<br>PluralRules<br>RelativeTimeFormat</span></div> &nbsp resolvedOptions</td><td class="c" id="ldt9"></td></tr>
 			<tr class="hidden"><td>spare</td><td class="c" id="ldt10"></td></tr>
 			<tr class="hidden"><td>spare</td><td class="c" id="ldt11"></td></tr>
-		<!--timezone-->
+		<!--tz-->
 		<tr class="togL"><td></td><td class="s4">timezone</td></tr>
 			<tr class="togL"><td>timezoneOffset | getTime | Date.parse</td><td class="c" id="ldt12"></td></tr>
 			<tr class="togL"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp
@@ -346,7 +339,7 @@
 			<tr class="togL"><td>[resolvedOptions] timezone</td><td class="c" id="ldt13"></td></tr>
 			<tr class="hidden"><td>spare</td><td class="c" id="ldt15"></td></tr>
 			<tr class="hidden"><td>spare</td><td class="c" id="ldt16"></td></tr>
-		<!--datetime-->
+		<!--d/t-->
 		<tr class="togL"><td></td><td class="s4">date/time & format</td></tr>
 			<tr class="togL"><td>date/time</td><td class="c" id="ldt17"></td></tr>
 			<tr class="togL"><td>toString</td><td class="c" id="ldt18"></td></tr>
@@ -400,7 +393,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span></td></tr>
-		<!-- hashes -->
+		<!--hashes-->
 		<tr><td>navigator</td><td class="c mono" id="hHash0"></td></tr>
 		<tr><td>http headers</td><td class="faint mono" id="hHash1"></td></tr>
 		<!--details-->
@@ -518,7 +511,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
 			&nbsp speech engines</td><td class="c mono" id="sEngines"></td></tr>
-		<!-- DETAILS -->
+		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseDv" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Dv`)">
 			<label for="collapseDv" class="lbl-toggle" id="labelDv">&#9660; show details</label>
@@ -557,7 +550,7 @@
 			<td>[ Fingerprinting? ]</td><td>[ select ]</td><td>[ progress bar ]</td><td>[ empty button ]</td></tr>
 		<tr class="togD"><td></td><td colspan="7" class="s8" id="drFirstHeader">Element.getClientRects
 			<br>[note: the other three methods have the same hash and values]</td></tr>
-			<!-- ^^ Element.getClientRects -->
+			<!--Element.getClientRects -->
 			<tr class="togD"><td>x</td><td id="dr01"></td><td colspan="2" id="dr02"></td><td id="dr03"></td><td id="dr04"></td><td id="dr05"></td><td id="dr06"></td></tr>
 			<tr class="togD"><td>y</td><td id="dr07"></td><td colspan="2" id="dr08"></td><td id="dr09"></td><td id="dr010"></td><td id="dr011"></td><td id="dr012"></td></tr>
 			<tr class="togD"><td>width</td><td id="dr013"></td><td colspan="2" id="dr014"></td><td id="dr015"></td><td id="dr016"></td><td id="dr017"></td><td id="dr018"></td></tr>
@@ -567,7 +560,7 @@
 			<tr class="togD"><td>right</td><td id="dr037"></td><td colspan="2" id="dr038"></td><td id="dr039"></td><td id="dr040"></td><td id="dr041"></td><td id="dr042"></td></tr>
 			<tr class="togD"><td>bottom</td><td id="dr043"></td><td colspan="2" id="dr044"></td><td id="dr045"></td><td id="dr046"></td><td id="dr047"></td><td id="dr048"></td></tr>
 			<tr class="togD"><td colspan="8"></td></tr>
-		<!-- D1 only shown if hashes differ -->
+		<!--D1 only shown if hashes differ-->
 		<tr class="togD1"><td></td><td colspan="7" class="s8">Element.getBoundingClientRect</td></tr>
 			<tr class="togD1"><td>x</td><td id="dr11"></td><td colspan="2" id="dr12"></td><td id="dr13"></td><td id="dr14"></td><td id="dr15"></td><td id="dr16"></td></tr>
 			<tr class="togD1"><td>y</td><td id="dr17"></td><td colspan="2" id="dr18"></td><td id="dr19"></td><td id="dr110"></td><td id="dr111"></td><td id="dr112"></td></tr>
@@ -734,7 +727,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">gfx.downloadable_fonts.woff2.enabled<br>Firefox 68 or lower</span></div>
 			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
-		<!--DETAILS: FONTS -->
+		<!--details: fonts-->
 		<tr id="fontShow"><td colspan="2" class="showhide">
 			<input id="collapseF1" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F1`)">
 			<label for="collapseF1" class="lbl-toggle" id="labelF1">&#9660; show fonts</label></td></tr>
@@ -752,7 +745,12 @@
 		<tr id="fontB1" class="togF2"><td id="fontFBlabel"></td><td>
 			 <span class="btn0 btn" onClick="copyclip(`fontFBFound`)">[ copy to clipboard ]</span></td></tr>
 		<tr id="fontB2" class="togF2"><td colspan="2" class="gc intro" id="fontFBFound"></td></tr>
-		<!-- DETAILS TM -->
+		<!--details: glyphsS-->
+		<tr><td colspan="2" class="showhide">
+			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
+			<label for="collapseF4" class="lbl-toggle" id="labelF4">&#9660; show unicode glyphs</label>
+		</td></tr>
+		<!--details: tm-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseF3" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F3`)">
 			<label for="collapseF3" class="lbl-toggle" id="labelF3">&#9660; show textmetrics</label>
@@ -771,11 +769,6 @@
 			<tr class="togF3 togTM"><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
 			<tr class="togF3 togTM"><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
 			<tr class="togF3 togTM"><td colspan="2"></td></tr>
-		<!-- DETAILS GLYPHS -->
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
-			<label for="collapseF4" class="lbl-toggle" id="labelF4">&#9660; show unicode glyphs</label>
-		</td></tr>
 		<tr class="togF4"><td>[offset] unicode glyphs</td><td>
 			 <span class="btn0 btn" onClick="copyclip(`ug10`)">[ copy to clipboard ]</span></td></tr>
 		<tr class="togF4"><td colspan="2" class="mono spaces intro" id="ugcopy"><span class="no_color" id="ug10"></span></td></tr>
@@ -814,11 +807,7 @@
 		<tr><td colspan="2">[isTypeSupported] audio</td><td class="c mono" id="audiotype"></td></tr>
 		<tr><td colspan="2">[canPlayType] video</td><td class="c mono" id="videocan"></td></tr>
 		<tr><td colspan="2">[isTypeSupported] video</td><td class="c mono" id="videotype"></td></tr>
-		<tr><td colspan="3" class="showhide">
-			<input id="collapseM3" class="toggle" type="checkbox" checked onchange="toggleitems(this, `M3`)">
-			<label for="collapseM3" class="lbl-toggle" id="labelM3">&#9660; show details</label></td></tr>
-		<tr class="togM3"><td>audio</td><td class="gc" colspan="2" id="audiodata"></td></tr>
-		<tr class="togM3"><td>video</td><td class="gc" colspan="2" id="videodata"></td></tr>
+		<tr><td colspan="2"></td></tr>
 	</table>
 
 	<!--css.js-->
@@ -856,14 +845,6 @@
 			<td><span id="cssPRD"></span> | <span class="c" id="mmPRD"></span></td></tr>
 		<tr><td>[css | matchMedia] inverted-colors</td>
 			<td><span id="cssIC"></span> | <span class="c" id="mmIC"></span></td></tr>-->
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseCSS" class="toggle" type="checkbox" checked onchange="toggleitems(this, `CSS`)">
-			<label for="collapseCSS" class="lbl-toggle" id="labelCSS">&#9660; show details</label>
-		</td></tr>
-		<tr class="togCSS"><td>CSS4 system colors</td><td colspan="2" class="gc mono spaces" id="sColorHashData"></td></tr>
-		<tr class="togCSS"><td>system fonts</td><td colspan="2" class="gc mono spaces" id="sFontsHashData"></td></tr>
-		<tr class="togCSS" colspan="2"><td></td></tr>
-		<!--creds-->
 		<tr><td colspan="3"><span class="no_color">code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -880,7 +861,6 @@
 		</th></tr></thead>
 		<tr><td>test</td><td>result</td></tr>
 	</table>
-
 	<!--spare-->
 	<table id="tb16">
 		<col width="50%"><a name="spare"></a><col width="50%">
@@ -892,7 +872,6 @@
 		</th></tr></thead>
 		<tr><td>test</td><td>result</td></tr>
 	</table>
-
 	<!--spare-->
 	<table id="tb17">
 		<col width="50%"><a name="spare2"></a><col width="50%">
@@ -942,13 +921,6 @@
 			&nbsp component interfaces</td><td class="c mono" id="shim"></td></tr>
 		<tr><td colspan="2">iframe.contentWindow properties <sup>1</sup></td><td class="c mono" id="iProps"></td></tr>
 		<tr><td colspan="2">navigator properties</td><td class="c mono" id="nProto"></td></tr>
-		<tr><td colspan="3" class="showhide">
-			<input id="collapseM2" class="toggle" type="checkbox" checked onchange="toggleitems(this, `M2`)">
-			<label for="collapseM2" class="lbl-toggle" id="labelM2">&#9660; show details</label></td></tr>
-		<tr class="togM2"><td>component</td><td class="gc" colspan="2" id="shimdata"></td></tr>
-		<tr class="togM2"><td>navigator</td><td class="gc" colspan="2" id="nProto2"></td></tr>
-		<tr class="togM2" colspan="2"><td></td></tr>
-		<!--creds-->
 		<tr><td colspan="3"><span class="no_color">code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -963,11 +935,10 @@
 		<tr class="togZ"><td>section perf</td><td class="mono spaces" id="debugperf"></td></tr>
 		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces" id="debugtb"></td></tr>
 	</table>
-
 	<a name="theend"></a><br>
 
 	<script src="js/main.js"></script>
-	<script src="js/fonts.js"></script> <!-- so we can trigger the unicode primer early-->
+	<script src="js/fonts.js"></script> <!--to trigger unicode primer asap-->
 	<script src="js/prototypeLies.js"></script>
 	<script src="js/screen.js"></script>
 	<script src="js/language.js"></script>
@@ -980,8 +951,7 @@
 	<script src="js/media.js"></script>
 	<script src="js/canvas.js"></script>
 	<script src="js/webgl.js"></script>
-
-	<!--500kb, load last-->
+	<!--500kb-->
 	<link rel="stylesheet" type="text/css" href="css/media.css">
 	<link rel="stylesheet" type="text/css" href="css/window_size.css">
 	<link rel="stylesheet" type="text/css" href="css/screen_size.css">

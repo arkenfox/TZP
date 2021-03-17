@@ -48,10 +48,7 @@ function get_chrome() {
 		dom.fdChrome.innerHTML = r
 		isChrome = r
 		if (logPerf) {debug_log("chrome [fd]",t0)}
-		// temp
-		//dom.newWinLeak.innerHTML = "temp chrome test debugging<br>- " + message.join("<br>- ")
 	}
-
 	function run2() {
 		// assume linux: do not return an empty string
 		os = "Linux"
@@ -70,7 +67,6 @@ function get_chrome() {
 		}
 		document.body.removeChild(img)
 	}
-
 	function output_check(r) {
 		if (r == "") {
 			run2()
@@ -78,7 +74,6 @@ function get_chrome() {
 			output(r)
 		}
 	}
-
 	function run1() {
 		// block, isTB2, win, mac
 		let c = "chrome://browser/content/extension-",
@@ -121,7 +116,6 @@ function get_chrome() {
 			document.head.removeChild(css)
 		})
 	}
-
 	// only run for FF60+
 	try {
 		newFn("alert('A)")
@@ -305,10 +299,10 @@ function get_errors() {
 					dom.errh = hash
 				}
 				if (logPerf) {debug_log("errors [fd]",t0)}
-				return resolve("errors:" + hash)
+				return resolve("errors:"+ hash)
 			} else {
 				dom.errh = hash; dom.fdError = hash
-				return resolve("errors:" + hash)
+				return resolve("errors:"+ hash)
 			}
 		}
 		// run
@@ -782,7 +776,7 @@ function get_line_scrollbar() {
 
 		run_scrollbar()
 		run_lineheight()
-		return resolve("scrollbars:" + dScrollbar +", " + eScrollbar)
+		return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
 	})
 }
 
@@ -861,7 +855,7 @@ function get_math() {
 					//block1 = true
 					//block6 = true
 				}
-				return resolve(m1hash +":"+ m6hash + ":" + mchash)
+				return resolve(m1hash +":"+ m6hash +":"+ mchash)
 			})
 		}
 		function get_codes() {
@@ -1008,7 +1002,7 @@ function get_math() {
 			if (block1 || block6) {mchash = zB0}
 			// return
 			if (mchash.substring(0,6) == "random") {mchash = "random"}
-			return resolve("math:" + mchash.substring(0,40))
+			return resolve("math:"+ mchash.substring(0,40))
 		}
 
 		Promise.all([
@@ -1054,7 +1048,7 @@ function get_math() {
 				dom.mathhash.innerHTML = mchash
 				if (mchash.substring(0,6) == "random") {mchash = "random"}
 				dom.fdMath.innerHTML = mchash
-				return resolve("math:" + mchash)
+				return resolve("math:"+ mchash)
 			}
 		})
 	})
@@ -1969,7 +1963,7 @@ function get_ua_workers() {
 	if (isFile) {
 		el2.innerHTML = zNA
 	} else if (isSecure) {
-		if ("serviceWorker" in navigator) {
+		if (check_navObject("serviceWorker")) {
 			// assume failure
 			el2.innerHTML = zF + " [A: assumed]"
 			try {
@@ -2034,7 +2028,7 @@ function get_version() {
 			}
 			dom.fdVersion.innerHTML = verNo
 			if (logPerf) {debug_log("version [fd]",t0)}
-			return resolve("version:" + verNo)
+			return resolve("version:"+ verNo)
 		}
 		// use isErr
 		if (isErr == "X") { verNo = "59 or lower"
@@ -2333,7 +2327,7 @@ function get_widgets() {
 		dom.widgetH = whash + (runS ? zSIM : "")
 		// perf & resolve
 		if (logPerf) {debug_log("widgets [fd]",t0)}
-		return resolve("widgets:" + whash)
+		return resolve("widgets:"+ whash)
 	})
 }
 
@@ -2939,8 +2933,8 @@ function outputStart() {
 				runS = false // simulation is FF only
 			}
 		}
-
 		get_engine()
+
 		// cosmetics
 			// not-coded
 		let items = document.getElementsByClassName("faint")
