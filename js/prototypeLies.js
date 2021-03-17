@@ -663,9 +663,11 @@ function outputPrototypeLies() {
 		if (lieCount == 0) {
 			el.innerHTML = "none"
 		} else {
-			// ToDo: clickable counts etc
-			console.log(lieDetail)
-			el.innerHTML = lieCount
+			let hash = sha1(lieList)
+			let lieString = lieList.length + " lie" + (lieList.length > 1 ? "s" : "")
+			hash += buildButton("0", "prototype lies", lieString, "showMetrics")
+			hash += buildButton("0", "prototype lie details", "details", "showMetrics")
+			el.innerHTML = hash
 		}
 		// perf
 		let perf = Math.round(performance.now() - t0)
