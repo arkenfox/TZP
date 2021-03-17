@@ -144,10 +144,14 @@ function section_info(name, time1, data) {
 			fpAllData.push([name +":" + hash, data])
 
 			if (fpAllHash.length == 14) {
-				// store detail data, remove empty arrays
-				fpAllDetail = detailData
-				for (let item in fpAllDetail) {
-					if (fpAllDetail[item].length == 0) {delete fpAllDetail[item]}
+				// reset
+				fpAllDetail = {}
+				// store detail data if not empty, in order
+				let names = Object.keys(detailData).sort()
+				for (let arrayname of names) {
+					if (detailData[arrayname].length > 0) {
+						fpAllDetail[arrayname] = detailData[arrayname]
+					}
 				}
 				// perf
 				if (logPerf) {
