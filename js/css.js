@@ -1,22 +1,40 @@
 'use strict';
 
 function get_colors(runtype) {
+	/* servo/components/style/values/specified/color.rs */
 	let results = [],
 		list = [],
 		error = "",
 		m = "-moz-",
 		mm = m+"mac-",
+		t = "ThemedScrollbar",
+		tt = t+"Thumb",
+		ts = "TextSelect",
+		w = "Widget",
+		b = "Background",
+		f = "Foreground",
+		u = "Underline",
+		ic = "IMEConvertedText",
+		ir = "IMERawInput",
+		is = "IMESelectedConvertedText",
+		ix = "IMESelectedRawText",
 		element = dom.sColorElement
 
 	let dString = "css_colors_"+runtype
 	clearDetail(dString)
 
 	if (runtype == "system") {
-		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
+		list = ['ActiveBorder','ActiveCaption','AppWorkspace',b,'ButtonFace',
 		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
-		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
+		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','Info'+b,
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
-		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
+		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		// skippable
+		ic+b,ic+f,ic+u,ir+b,ir+f,ir+u,is+b,is+f,is+u,ix+b,ix+f,ix+u,'SpellCheckerUnderline','Text'+b,
+		'Text'+f,'TextHighlight'+b,'TextHighlight'+f,ts+b,ts+b+'Attention',ts+b+'Disabled',ts+f,
+		ts+f+'Custom',t,t+'Inactive',tt,tt+'Active',tt+'Hover',tt+'Inactive',w+'3DHighlight',
+		w+'3DShadow',w+b,w+f,w+'Select'+b,w+'Select'+f,'Window'+b,'Window'+f,
+		]
 	} else if (runtype == "css4") {
 		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
@@ -41,6 +59,7 @@ function get_colors(runtype) {
 	// de-dupe and sort
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
+
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
 		try {
@@ -56,7 +75,7 @@ function get_colors(runtype) {
 	let notation = buildButton("14", dString, list.length)
 
 	if (runtype == "system") {
-		let control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
+		let control = "791543b8b70945d9efd6d6d31548180261178c47"
 		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
 	} else if (runtype == "css4") {
 		dom.sColorHashNew.innerHTML = error + (error == "" ? hash + notation : "")
