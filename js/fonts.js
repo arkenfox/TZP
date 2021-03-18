@@ -549,7 +549,7 @@ function get_fallback(list) {
 		// cleanup details
 		if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 		// perf
-		section_click("font fallback", t0)
+		clickhere_perf("font fallback", t0)
 	}
 }
 
