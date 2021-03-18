@@ -26,7 +26,7 @@
 		<col width="1%"></a><col width="99%">
 		<thead><tr><th colspan="2">navigator objects</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
-			trueKeys should be green, fakeKeys should be red<span></span>
+			trueKeys should be found, fakeKeys should be not found<span></span>
 		</td></tr>
 		<tr><td></td><td class="c mono spaces" id="output"></td></tr>
 	</table>
@@ -46,19 +46,17 @@ function check_navObject(property) {
 }
 
 function compare() {
-	let output = [],
-		good = sg +"match" +sc,
-		bad = sb +"no match" +sc
+	let output = []
 
 	if (trueKeys.length > 0) {
 		// remove constructor & sort (easier to read)
 		trueKeys.splice(trueKeys.indexOf("constructor"), 1)[0]
 		trueKeys.sort()
-		output.push(sColor+"trueKeys"+sc)
+		output.push(sColor+"trueKeys"+sc+"<br>")
 		for (let i = 0; i < trueKeys.length; i++) {
 			let property = trueKeys[i]
 			let check = check_navObject(property)
-			let match = (check ? good : bad)
+			let match = (check ? sg +"found" +sc : sb +"not found" +sc)
 			output.push(
 				property.padStart(30) +": "+ match
 			)
@@ -66,11 +64,11 @@ function compare() {
 	}
 	if (fakeKeys.length > 0) {
 		fakeKeys.sort()
-		output.push("<br>"+sColor+"fakeKeys"+sc)
+		output.push("<br>"+sColor+"fakeKeys"+sc+"<br>")
 		for (let i = 0; i < fakeKeys.length; i++) {
-			let property = trueKeys[i]
+			let property = fakeKeys[i]
 			let check = check_navObject(property)
-			let match = (check ? bad : good)
+			let match = (check ? sb+ "found" +sc : sg +"not found" +sc)
 			output.push(
 				property.padStart(30) +": "+ match
 			)
@@ -101,8 +99,8 @@ function get_nav_prototype() {
 				trueKeys = keys.filter(x => !knownPoison.includes(x))
 				fakeKeys = keys.filter(x => knownPoison.includes(x))
 			}
-			// fake
-			fakeKeys = ["imfake"] // test
+			// add a fake key for testing
+			fakeKeys = ["imfake-added-for-this-test"]
 			return resolve("done")
 		} catch(e) {
 			return resolve(e.name + ": " + e.message)
