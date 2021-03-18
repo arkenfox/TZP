@@ -40,11 +40,6 @@ function get_colors(runtype) {
 	// de-dupe and sort
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
-	if (listhash !== controlhash) {
-		console.debug(runtype, "hash doesn't match\n"
-			+ " - expected: " + controlhash + "\n"
-			+ " -      got: " + listhash)
-	}
 	// run
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
