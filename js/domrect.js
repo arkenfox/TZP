@@ -98,7 +98,7 @@ function outputDomRect() {
 			// global lies
 			if (!sRerun) {
 				if (known["dr"+i] == true) {
-					knownLies.push("domrect:" + pretty[i])
+					liesKnown.push("domrect:" + pretty[i])
 				}
 			}
 			// push & display
