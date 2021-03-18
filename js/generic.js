@@ -24,13 +24,8 @@ function rnd_number() {
 }
 
 function check_navObject(property) {
-	try {
-		let a = (`lied:`, `value` in Object.getOwnPropertyDescriptor(Navigator.prototype, property))
-		return true
-	} catch(e) {return false}
-
 	// this fails: sendBeacon + cycec for example
-	//return !!Object.getOwnPropertyDescriptor(Navigator.prototype, property)
+	return !!Object.getOwnPropertyDescriptor(Navigator.prototype, property)
 }
 
 function get_RFP() {
