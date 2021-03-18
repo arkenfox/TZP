@@ -70,7 +70,7 @@ function get_colors(runtype) {
 			error = (isFF ? zB0 : "error")
 		}
 	})
-	detailData[dString] = results
+	sectionDetail[dString] = results
 
 	let hash = sha1(results.join())
 	let notation = buildButton("14", dString, list.length)

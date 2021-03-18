@@ -654,10 +654,8 @@ function outputPrototypeLies() {
 			iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
 		}
 		// global data
-		protoList = lieList
-		protoDetail = lieDetail
-		protoCount = lieCount
-		protoProps = propsSearched
+		liesList = lieList
+		liesDetail = lieDetail
 		// display
 		let el = dom.prototypehash
 		if (lieCount == 0) {
@@ -679,7 +677,7 @@ function outputPrototypeLies() {
 }
 
 // to check lies
-//protoList.includes('HTMLCanvasElement.toDataURL') // returns true or false
-//protoDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
+// liesList.includes('HTMLCanvasElement.toDataURL') // returns true or false
+// liesDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
 
 countJS("prototypeLies")

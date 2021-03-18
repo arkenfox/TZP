@@ -118,7 +118,7 @@ function get_concurrency() {
 	if (isBraveFP) {
 		h = "fake"
 	} else {
-		h = (protoList.includes("Navigator.hardwareConcurrency") ? "fake" : h)
+		h = (liesList.includes("Navigator.hardwareConcurrency") ? "fake" : h)
 	}
 	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
 	return "hardwareConcurrency:"+ h
@@ -131,7 +131,7 @@ function get_media_devices() {
 		function finish(result) {
 			// global lie
 			if (!sRerun) {
-				if (devicesBS) {knownLies.push("devices:media")}
+				if (devicesBS) {liesKnown.push("devices:media")}
 			}
 			dom.eMDList.style.color = zshow
 			if (logPerf) {debug_log("media devices [devices]",t0)}
@@ -595,9 +595,9 @@ function outputDevices() {
 		})
 		// global lies
 		if (!sRerun) {
-			if (pluginBS) {knownLies.push("devices:plugins")}
-			if (mimeBS) {knownLies.push("devices:mimeTypes")}
-			if (isBraveFP) {knownLies.push("devices:hardwareConcurrency")}
+			if (pluginBS) {liesKnown.push("devices:plugins")}
+			if (mimeBS) {liesKnown.push("devices:mimeTypes")}
+			if (isBraveFP) {liesKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
 		section_info("devices", t0, section)

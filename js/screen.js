@@ -1867,7 +1867,7 @@ function get_ua_doc() {
 			uaBS = true
 			// global lies
 			if (!sRerun) {
-				knownLies.push("useragent:navigator")
+				liesKnown.push("useragent:navigator")
 			}
 		} else {
 			// hide
@@ -2811,20 +2811,20 @@ function outputUA() {
 
 	function get_pLies() {
 		// prototype lies: in order of likely fuckery
-		if (protoList.includes("Navigator.userAgent")) {uaBS = true
-		} else if (protoList.includes("Navigator.appVersion")) {uaBS = true
-		} else if (protoList.includes("Navigator.platform")) {uaBS = true
-		} else if (protoList.includes("Navigator.oscpu")) {uaBS = true
+		if (liesList.includes("Navigator.userAgent")) {uaBS = true
+		} else if (liesList.includes("Navigator.appVersion")) {uaBS = true
+		} else if (liesList.includes("Navigator.platform")) {uaBS = true
+		} else if (liesList.includes("Navigator.oscpu")) {uaBS = true
 		} else if (!isFF) {
 			// FF: these are always caught by feature detection
 				// so ignore in FF because they could be correct
-			if (protoList.includes("Navigator.productSub")) {uaBS = true
-			} else if (protoList.includes("Navigator.buildID")) {uaBS = true
-			} else if (protoList.includes("Navigator.vendor")) {uaBS = true
-			} else if (protoList.includes("Navigator.vendorSub")) {uaBS = true
-			} else if (protoList.includes("Navigator.appCodeName")) {uaBS = true
-			} else if (protoList.includes("Navigator.appName")) {uaBS = true
-			} else if (protoList.includes("Navigator.product")) {uaBS = true
+			if (liesList.includes("Navigator.productSub")) {uaBS = true
+			} else if (liesList.includes("Navigator.buildID")) {uaBS = true
+			} else if (liesList.includes("Navigator.vendor")) {uaBS = true
+			} else if (liesList.includes("Navigator.vendorSub")) {uaBS = true
+			} else if (liesList.includes("Navigator.appCodeName")) {uaBS = true
+			} else if (liesList.includes("Navigator.appName")) {uaBS = true
+			} else if (liesList.includes("Navigator.product")) {uaBS = true
 			}
 		}
 	}

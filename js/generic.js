@@ -24,14 +24,7 @@ function rnd_number() {
 }
 
 function check_navObject(property) {
-	try {
-		let a = (`lied:`, `value` in Object.getOwnPropertyDescriptor(Navigator.prototype, property))
-		return true
-	} catch(e) {
-		// TypeError right-hand side of 'in' should be an object, got undefined
-		//console.debug("navObject error", e.name, e.message)
-		return false
-	}
+	return !!Object.getOwnPropertyDescriptor(Navigator.prototype, property)
 }
 
 function get_RFP() {
@@ -55,8 +48,8 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function section_click(name, time1) {
-	// adds [click here] perf to debugging table
+function clickhere_perf(name, time1) {
+	// adds [click here] perf to perf table
 	let el = dom.debugperf
 	time1 = Math.round(performance.now() - time1).toString()
 	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
@@ -98,7 +91,6 @@ function countJS(filename) {
 					outputSection("load")
 				}
 			})
-
 		} else {
 			outputSection("load")
 		}
@@ -112,21 +104,21 @@ function section_info(name, time1, data) {
 		let hash = sha1(data.join())
 		// check its not empty
 		if (data.length == 0) {
-			fpAllCheck.push(name +": data array is empty")
+			globalCheck.push(name +": data array is empty")
 		} else {
 			// checks: everything should be a "metric: value"
 			for (let i=0; i < data.length; i++) {
 				let check = data[i]
 				if (check == undefined) {
-					fpAllCheck.push(name +": contains undefined")
+					globalCheck.push(name +": contains undefined")
 				} else {
 					let parts = data[i].split(":")
 					let metric = parts[0]
 					let value = parts.slice(1).join(":")
 					if (value == "") {
-						fpAllCheck.push(name +" - " + metric + ": not set")
+						globalCheck.push(name +" - " + metric + ": not set")
 					} else if (value == undefined) {
-						fpAllCheck.push(name +" - " + metric + ": undefined")
+						globalCheck.push(name +" - " + metric + ": undefined")
 					}
 				}
 			}
@@ -139,48 +131,44 @@ function section_info(name, time1, data) {
 		// store in global if not a section rerun
 		if (!sRerun) {
 			// yay!
-			fpAllHash.push(name + ":" + hash)
-			fpAllCount += data.length
-			fpAllData.push([name +":" + hash, data])
+			globalHash.push(name + ":" + hash)
+			globalCount += data.length
+			globalData.push([name +":" + hash, data])
 
-			if (fpAllHash.length == 14) {
+			if (globalHash.length == 14) {
 				// reset
-				fpAllDetail = {}
+				globalDetail = {}
 				// store detail data if not empty, in order
-				let names = Object.keys(detailData).sort()
-				for (let arrayname of names) {
-					if (detailData[arrayname].length > 0) {
-						fpAllDetail[arrayname] = detailData[arrayname]
-					}
-				}
+				const names = Object.keys(sectionDetail).sort()
+				for (const k of names) if (sectionDetail[k].length) globalDetail[k] = sectionDetail[k]
 				// perf
 				if (logPerf) {
 					console.log("logPerf detail\n" + perfData.join("\n"))
 				}
 				// lies
-				if (knownLies.length > 0) {
+				if (liesKnown.length > 0) {
 					// de-dupe, sort
-					knownLies = knownLies.filter(function(item, position) {return knownLies.indexOf(item) === position})
-					knownLies.sort()
-					dom.knownhash.innerHTML = sha1(knownLies.join())
-						+ buildButton("0", "known", knownLies.length + " lie" + (knownLies.length > 1 ? "s" : ""), "showMetrics")
+					liesKnown = liesKnown.filter(function(item, position) {return liesKnown.indexOf(item) === position})
+					liesKnown.sort()
+					dom.knownhash.innerHTML = sha1(liesKnown.join())
+						+ buildButton("0", "known", liesKnown.length + " lie" + (liesKnown.length > 1 ? "s" : ""), "showMetrics")
 				} else {
 					dom.knownhash = "none"
 				}
 				// FP
-				fpAllHash.sort()
-				fpAllData.sort()
-				let hash2 = sha1(fpAllData.join())
-				if (fpAllCheck.length > 0) {
-					fpAllCheck.sort()
+				globalHash.sort()
+				globalData.sort()
+				let hash2 = sha1(globalData.join())
+				if (globalCheck.length > 0) {
+					globalCheck.sort()
 					// remove dupes: we only need one
-					fpAllCheck = fpAllCheck.filter(function(item, position) {return fpAllCheck.indexOf(item) === position})
+					globalCheck = globalCheck.filter(function(item, position) {return globalCheck.indexOf(item) === position})
 					// ToDo: remove isFile check once all section hashes are finished
 					if (isFile) {
-						console.error("section hash issues\n", fpAllCheck)
+						console.error("section hash issues\n", globalCheck)
 					}
 				}
-				hash2 += buildButton("0", "loose", fpAllCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+				hash2 += buildButton("0", "loose", globalCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
 				hash2 += buildButton("0", "globaldetail", "details", "showMetrics")
 				dom.allhash.innerHTML = hash2
 				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
@@ -234,15 +222,13 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 }
 
 function clearDetail(name) {
-	// empty details
 	try {
-		detailData[name] = []
+		sectionDetail[name] = []
 	} catch(e) {}
 }
 
 function showDetail(name) {
-	// output clickable data links/counts to console log
-	let data = detailData[name]
+	let data = sectionDetail[name]
 	name = name.replace("_", ": ")
 	name = name.replace(/\_/g, " ")
 	console.debug(name + "\n", data)
@@ -250,23 +236,23 @@ function showDetail(name) {
 
 function showMetrics(type) {
 	if (type == "globaldetail") {
-		for (let item in fpAllDetail) {
-			console.log(item, fpAllDetail[item])
+		for (let item in globalDetail) {
+			console.log(item, globalDetail[item])
 		}
 	} else {
 		let array = [],
 			showhash = true
 		if (type == "known") {
 			type += " lies"
-			array = knownLies
+			array = liesKnown
 		} else if (type == "loose") {
 			type = "fingerprint: " + type
-			array = fpAllData
+			array = globalData
 		} else if (type == "prototype lies") {
-			array = protoList
+			array = liesList
 			showhash = false
 		} else if (type == "prototype lie details") {
-			array = protoDetail
+			array = liesDetail
 			showhash = false
 		} else {
 			// section
@@ -538,21 +524,19 @@ function outputSection(id, cls) {
 		dom.fontFBlabel = ""
 		items = document.getElementsByClassName("togF2")
 		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		// reset global FP
-		fpAllHash = []
-		fpAllData = []
-		fpAllCheck = []
-		fpAllCount = 0
-		fpAllDetail = {}
-		// reset re-runnable data
+		// reset global data
+		globalHash = []
+		globalData = []
+		globalCheck = []
+		globalCount = 0
+		globalDetail = {}
+		// reset section data
 		sectionData = {}
-		detailData = {}
+		sectionDetail = {}
 		// reset lies
-		knownLies = []
-		protoList = []
-		protoDetail = {}
-		protoCount = 0
-		protoProps = []
+		liesKnown = []
+		liesList = []
+		liesDetail = {}
 		// reset perf array
 		perfData = []
 		gRerun = true
@@ -566,7 +550,7 @@ function outputSection(id, cls) {
 		gRerun = false
 		sRerun = true
 	}
-	// hide/clear stuff
+	// hide stuff rather than remove: so it doesn't shrink/grow = jumpy
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
 	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
 	if (id=="7") {reset_devices()}

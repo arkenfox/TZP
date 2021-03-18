@@ -6,7 +6,7 @@ function get_component_shims() {
 	let hash = ""
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
-		detailData[dString] = keys
+		sectionDetail[dString] = keys
 		hash = sha1(keys.join())
 		dom.shim.innerHTML = hash + buildButton("18", dString, keys.length)
 	} catch(e) {
@@ -40,7 +40,7 @@ function get_iframe_props() {
 		// output
 		let output = props.length
 		output = sha1(props.join()) + buildButton("18", dString, output)
-		detailData[dString] = props
+		sectionDetail[dString] = props
 		dom.iProps.innerHTML = output
 		r= sha1(props.join())
 	} catch(e) {
@@ -96,17 +96,17 @@ function get_nav_prototype() {
 			fakeKeys = keys.filter(x => knownPoison.includes(x))
 		}
 		// true
-		detailData[dTrue] = trueKeys
+		sectionDetail[dTrue] = trueKeys
 		hash = sha1(trueKeys.join())
 		// fake
 			//fakeKeys = ["imfake"] // test
 		if (fakeKeys.length > 0) {
-			detailData[dFake] = fakeKeys
+			sectionDetail[dFake] = fakeKeys
 			fakeStr = fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "")
 			fakeStr = buildButton("18", dFake, fakeStr)
 			// global lies
 			if (!sRerun) {
-				knownLies.push("misc:navigator")
+				liesKnown.push("misc:navigator")
 			}
 		}
 		// display
