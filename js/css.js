@@ -7,34 +7,16 @@ function get_colors(runtype) {
 		error = "",
 		m = "-moz-",
 		mm = m+"mac-",
-		t = "ThemedScrollbar",
-		tt = t+"Thumb",
-		ts = "TextSelect",
-		w = "Widget",
-		b = "Background",
-		f = "Foreground",
-		u = "Underline",
-		ic = "IMEConvertedText",
-		ir = "IMERawInput",
-		is = "IMESelectedConvertedText",
-		ix = "IMESelectedRawText",
 		element = dom.sColorElement
-
 	let dString = "css_colors_"+runtype
 	clearDetail(dString)
 
 	if (runtype == "system") {
-		list = ['ActiveBorder','ActiveCaption','AppWorkspace',b,'ButtonFace',
+		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
 		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
-		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','Info'+b,
+		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
-		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
-		// skippable
-		ic+b,ic+f,ic+u,ir+b,ir+f,ir+u,is+b,is+f,is+u,ix+b,ix+f,ix+u,'SpellChecker'+u,'Text'+b,
-		'Text'+f,'TextHighlight'+b,'TextHighlight'+f,ts+b,ts+b+'Attention',ts+b+'Disabled',ts+f,
-		ts+f+'Custom',t,t+'Inactive',tt,tt+'Active',tt+'Hover',tt+'Inactive',w+'3DHighlight',
-		w+'3DShadow',w+b,w+f,w+'Select'+b,w+'Select'+f,'Window'+b,'Window'+f,
-		]
+		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
 	} else if (runtype == "css4") {
 		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
@@ -53,14 +35,17 @@ function get_colors(runtype) {
 		m+'menubarhovertext',m+'menubartext',m+'menuhover',m+'menuhovertext',m+'nativehyperlinktext',
 		m+'oddtreerow',m+'visitedhyperlinktext',m+'win-accentcolor',m+'win-accentcolortext',
 		m+'win-communications-toolbox',m+'win-communicationstext',m+'win-media-toolbox',m+'win-mediatext',
-		m+"_i-am-fake", // fake
-		m+"accent-color",m+"accent-color-foreground", // 1698291
-		]
+		m+"accent-color",m+"accent-color-foreground"]
 	}
 	// de-dupe and sort
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
-
+	if (listhash !== controlhash) {
+		console.debug(runtype, "hash doesn't match\n"
+			+ " - expected: " + controlhash + "\n"
+			+ " -      got: " + listhash)
+	}
+	// run
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
 		try {
@@ -71,12 +56,11 @@ function get_colors(runtype) {
 		}
 	})
 	sectionDetail[dString] = results
-
 	let hash = sha1(results.join())
 	let notation = buildButton("14", dString, list.length)
 
 	if (runtype == "system") {
-		let control = "791543b8b70945d9efd6d6d31548180261178c47"
+		let control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
 		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
 	} else if (runtype == "css4") {
 		dom.sColorHashNew.innerHTML = error + (error == "" ? hash + notation : "")
