@@ -4,22 +4,19 @@ var dom;
 
 let jsFiles = [],
 	perfData = [],
-	// lies: mathematical/equivalency
-	knownLies = [],
-	// lies: prototype
-	protoList = [],
-	protoDetail = {},
-	protoCount = 0,
-	protoProps = [],
+	// lies
+	liesKnown = [],
+	liesList = [],
+	liesDetail = {},
 	// data: global snapshot
-	fpAllHash = [],
-	fpAllData = [],
-	fpAllCheck = [],
-	fpAllCount = 0,
-	fpAllDetail = {},
+	globalHash = [],
+	globalData = [],
+	globalCheck = [],
+	globalCount = 0,
+	globalDetail = {},
 	// data: section/detail: can be rerun: not global
 	sectionData = {},
-	detailData = {}
+	sectionDetail = {}
 
 // android
 let avh = "",
