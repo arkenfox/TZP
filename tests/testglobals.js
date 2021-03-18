@@ -2,7 +2,7 @@
 
 var dom;
 
-let detailData = {}
+let sectionDetail = {}
 
 // css
 let s0 = " <span class='",
