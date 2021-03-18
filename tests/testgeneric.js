@@ -29,13 +29,21 @@ function check_navObject(property) {
 	}
 }
 
-function buildButton(color, dString, display) {
-	return " <span class='btn" + color + " btnc' onClick='showDetail(`"+ dString +"`)'>["+ display +"]</span>"
+function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
+	if (functionName == undefined) {functionName = "showDetail"}
+	if (btnType == undefined) {btnType = "btnc"}
+	return " <span class='btn" + colorCode + " " + btnType
+		+ "' onClick='" + functionName +"(`"+ arrayName +"`)'>" +"["+ displayText +"]</span>"
+}
+
+function clearDetail(name) {
+	try {
+		sectionDetail[name] = []
+	} catch(e) {}
 }
 
 function showDetail(name) {
-	// output clickable data links/counts to console log
-	let data = detailData[name]
+	let data = sectionData[name]
 	name = name.replace("_", ": ")
 	name = name.replace(/\_/g, " ")
 	console.debug(name + "\n", data)
