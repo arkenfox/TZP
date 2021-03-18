@@ -99,8 +99,11 @@ function get_nav_prototype() {
 				trueKeys = keys.filter(x => !knownPoison.includes(x))
 				fakeKeys = keys.filter(x => knownPoison.includes(x))
 			}
-			// add a fake key for testing
-			fakeKeys.push("imfake-added-for-this-test")
+
+			// add test data
+			trueKeys.push("fake-added-for-this-test")
+			fakeKeys.push("alsofake-just-for-this-test")
+
 			return resolve("done")
 		} catch(e) {
 			return resolve(e.name + ": " + e.message)
