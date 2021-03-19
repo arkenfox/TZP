@@ -1,6 +1,5 @@
 'use strict';
 
-/* Prototype lies */
 /* https://github.com/abrahamjuliot/creepjs */
 
 function outputPrototypeLies() {
@@ -667,8 +666,8 @@ function outputPrototypeLies() {
 		}
 		// perf
 		let perf = Math.round(performance.now() - t0)
-		if (logPerf) {debug_log("prototype lies [setup]",t0)}
-		section_info("prototype", t0)
+		if (logPerf) {debug_perf("prototype lies [setup]",t0)}
+		debug_section("prototype", t0)
 		// resolve
 		return resolve("done")
 	})
