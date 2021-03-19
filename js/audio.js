@@ -7,6 +7,16 @@ var t0audio,
 	latencyError = false,
 	latencyTries = 0
 
+function byteArrayToHex(arrayBuffer){
+	var chunks = [];
+	(new Uint32Array(arrayBuffer)).forEach(function(num){
+		chunks.push(num.toString(16));
+	});
+	return chunks.map(function(chunk){
+		return "0".repeat(8 - chunk.length) + chunk;
+	}).join("");
+}
+
 function reset_audio2() {
 	dom.audio1data.style.color = zhide
 	dom.audio2data.style.color = zhide
@@ -77,7 +87,7 @@ function get_audio2_context(attempt) {
 		]).then(function(result){
 			dom.audio1hash.innerHTML = result[0] + sColor + "["+ results.length +" keys]" + sc
 			// perf
-			if (logPerf) {debug_log("context [audio]", t0, t0audio)}
+			if (logPerf) {debug_perf("context [audio]", t0, t0audio)}
 			if (latencyTries == 2) {debug_click("audio2", t0audio)}
 		})
 	}
@@ -132,7 +142,7 @@ function get_audio2_hybrid() {
 		]).then(function(result){
 			dom.audio3hash = result[0]
 			// perf
-			if (logPerf) {debug_log("hybrid [audio]",t0,t0audio)}
+			if (logPerf) {debug_perf("hybrid [audio]",t0,t0audio)}
 			if (showperf) {debug_click("audio2", t0audio)}
 		})
 		// re-test context
@@ -176,7 +186,7 @@ function get_audio2_oscillator() {
 		]).then(function(result){
 			dom.audio2hash = result[0]
 			// perf
-			if (logPerf) {debug_log("oscillator [audio]",t0,t0audio)}
+			if (logPerf) {debug_perf("oscillator [audio]",t0,t0audio)}
 		})
 		// next test
 		get_audio2_context(1)
@@ -252,7 +262,7 @@ function outputAudio1(runtype) {
 				section.push("copyFromChannel:"+ tempstr)
 				dom.audioCopy = tempstr
 				// section
-				section_info("audio", t0, section)
+				debug_section("audio", t0, section)
 			})
 		}
 	} catch(error) {
@@ -262,7 +272,7 @@ function outputAudio1(runtype) {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		}
 		// perf
-		section_info("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
+		debug_section("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
 	}
 }
 
