@@ -620,6 +620,7 @@ function run_once() {
 	if (isFFsum > 0) {
 		isFF = true
 	} else {
+		isTB = false
 		runS = false // simulation is FF only
 	}
 	if (check_navObject("brave")) {isBrave = true}
