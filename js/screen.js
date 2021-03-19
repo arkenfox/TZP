@@ -136,7 +136,6 @@ function get_isOS() {
 			let el = document.getElementById("widget0")
 			try {
 				let font = getComputedStyle(el).getPropertyValue("font-family")
-
 				if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
 				} else if (font == "Roboto") {isOS="android"
 				}	else if (font == "-apple-system") {isOS="mac"
@@ -144,8 +143,8 @@ function get_isOS() {
 				if (logPerf) {debug_perf("isOS [immutables]",t0)}
 				return resolve("done")
 			} catch(e) {
-				console.debug("eeek", e.name, e.message)
-				return resolve("done")
+				console.debug("get_isOS", e.name, e.message)
+				return resolve("error")
 			}
 		} else {
 			return resolve("done")
@@ -156,24 +155,29 @@ function get_isOS() {
 function get_isTB() {
 	return new Promise(resolve => {
 		if (isFF && isTB === "") {
-			let t0 = performance.now()
-			let css = document.createElement("link")
-			css.href = "resource://torbutton-assets/aboutTor.css"
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				isTB = true
-				debug_page("TB","     resource:// = aboutTor.css")
-				if (logPerf) {debug_perf("[yes] isTB [immutables]",t0)}
-				return resolve("done")
+			try {
+				let t0 = performance.now()
+				let css = document.createElement("link")
+				css.href = "resource://torbutton-assets/aboutTor.css"
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				document.head.appendChild(css)
+				css.onload = function() {
+					isTB = true
+					debug_page("TB","     resource:// = aboutTor.css")
+					if (logPerf) {debug_perf("[yes] isTB [immutables]",t0)}
+					return resolve("done")
+				}
+				css.onerror = function() {
+					isTB = false
+					if (logPerf) {debug_perf("[no] isTB [immutables]",t0)}
+					return resolve("done")
+				}
+				document.head.removeChild(css)
+			} catch(e) {
+				console.error("get_isTB", e.name, e.message)
+				return resolve("error")
 			}
-			css.onerror = function() {
-				isTB = false
-				if (logPerf) {debug_perf("[no] isTB [immutables]",t0)}
-				return resolve("done")
-			}
-			document.head.removeChild(css)
 		} else {
 			return resolve("done")
 		}
