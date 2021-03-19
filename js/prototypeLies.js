@@ -4,8 +4,6 @@
 /* https://github.com/abrahamjuliot/creepjs */
 
 function outputPrototypeLies() {
-	gt0 = performance.now()
-
 	return new Promise(resolve => {
 		const getIframe = () => {
 			try {
@@ -669,7 +667,7 @@ function outputPrototypeLies() {
 		}
 		// perf
 		let perf = Math.round(performance.now() - t0)
-		if (logPerf) {debug_log("prototype lies",t0)}
+		if (logPerf) {debug_log("prototype lies [setup]",t0)}
 		section_info("prototype", t0)
 		// resolve
 		return resolve("done")
