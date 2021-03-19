@@ -157,11 +157,15 @@ function get_isTB() {
 		if (isFF && isTB === "") {
 			try {
 				let t0 = performance.now()
+				console.debug("a")
 				let css = document.createElement("link")
+				console.debug("b")
 				css.href = "resource://torbutton-assets/aboutTor.css"
 				css.type = "text/css"
 				css.rel = "stylesheet"
+				console.debug("c")
 				document.head.appendChild(css)
+				console.debug("d")
 				css.onload = function() {
 					isTB = true
 					debug_page("TB","     resource:// = aboutTor.css")
@@ -2604,7 +2608,7 @@ function goNW_UA() {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"
 		} else if (r == "undefined") {r = "undefined string"
-		//} else if (r == undefined && isFF) {r = zB0 // ToDo: why was this not here? isFF is not available I think?
+		//} else if (r == undefined && isFF) {r = zB0 // iSFF not avilable in new window
 		} else if (r == undefined) {r = "undefined value"
 		}
 		control.push(list[i]+":"+r) // no spaces
