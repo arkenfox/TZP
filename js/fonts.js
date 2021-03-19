@@ -821,9 +821,12 @@ function outputFonts() {
 	dom.fontDoc = r
 	section.push("document_fonts:" + r)	
 
-	// other
+	// woff: massive perf killer if downloadable fonts == blocked
+		// seriously, 1 to 1.5secs. Take out of metrics for now
+		// ToDo: speed up woff test? preload? it's already a style
+	get_woff() 
+
 	Promise.all([
-		get_woff(),
 		get_unicode(),
 		get_fonts(),
 	]).then(function(results){
