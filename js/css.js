@@ -198,7 +198,7 @@ function get_computed_styles() {
 				dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>" +
 					"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div>	&nbsp computed styles"
 			}
-			if (logPerf) {debug_log("computed styles [css]",t0)}
+			if (logPerf) {debug_perf("computed styles [css]",t0)}
 			//console.debug(hashes.join("\n"))
 			return resolve("styles:"+ sha1(hashes.join()))
 		}).catch(error => {
@@ -342,7 +342,7 @@ function outputCSS() {
 				section.push(currentResult)
 			}
 		})
-		section_info("css", t0, section)
+		debug_section("css", t0, section)
 	})
 }
 

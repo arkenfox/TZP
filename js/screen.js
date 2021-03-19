@@ -2,6 +2,184 @@
 
 var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
 
+/* set global isVariables once */
+
+function get_isChrome() {
+	// requires isOS
+	let os = "",
+		t0 = performance.now()
+	// output
+	function output(r) {
+		if (isOS == "") {console.error("TZP: isOS not set")}
+		if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+		dom.fdChrome.innerHTML = r
+		isChrome = r
+		if (logPerf) {debug_perf("chrome [fd]",t0)}
+	}
+	if (isChrome == "") {
+		dom.fdChrome.innerHTML = "blocked"
+		function run2() {
+			// android doesn't have this resource
+			let img = new Image()
+			img.src = "chrome://branding/content/icon64.png"
+			img.style.visibility = "hidden"
+			document.body.appendChild(img)
+			img.onload = function() {
+				output("Linux")
+			}
+			img.onerror = function() {
+				output("Android")
+			}
+			document.body.removeChild(img)
+		}
+		function output_check(r) {
+			if (r == "") {
+				run2()
+			} else {
+				output(r)
+			}
+		}
+		function run1() {
+			// win, mac
+			let c = "chrome://browser/content/extension-",
+				p = "-panel.css",
+				list = [c+'win'+p, c+'mac'+p],
+				x = 0
+			// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.href = item
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				document.head.appendChild(css)
+				css.onload = function() {
+					if (item === c+"win"+p) {os = "Windows"}
+					if (item === c+"mac"+p) {os = "Mac"}
+					x++
+					// check after last item
+					if (x == 2) {output_check(os)}
+				}
+				css.onerror = function() {
+					x++
+					// check after last item
+					if (x == 2) {output_check(os)}
+				}
+				document.head.removeChild(css)
+			})
+		}
+		// only run for FF60+
+		try {
+			newFn("alert('A)")
+		} catch(e) {
+			if (e.message == "unterminated string literal") {
+				output(zNA)
+			} else {
+				run1()
+			}
+		}
+	} else {
+		output(isChrome)
+	}
+}
+
+function get_isEngine() {
+	return new Promise(resolve => {
+		if (isEngine == "") {
+			function cbrt(x) {
+				try {
+					let y = Math.pow(Math.abs(x), 1 / 3)
+					return x < 0 ? -y : y
+				} catch(e) {
+					return "error"
+				}
+			}
+			let res = [],
+				t0 = performance.now()
+			for(let i=0; i < 6; i++) {
+				try {
+					let fnResult = "unknown"
+					if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
+					} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
+					} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+					} else if (i == 3) {fnResult = Math.acos(0.123)
+					} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+					} else if (i == 5) {fnResult = Math.atan(2)
+					}
+					res.push(fnResult)
+				} catch(e) {
+					res.push("error")
+				}
+			}
+			let hash = sha1(res.join())
+			if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
+			} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
+			} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
+			} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
+			} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
+			} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
+			} else if (isFF) {isEngine = "gecko"
+			} else if ("chrome" in window) {isEngine = "blink"
+			}
+			if (isEngine == "") {console.error("isEngine: not found\n", res)}
+			if (logPerf) {debug_perf("isEngine [immutables]",t0)}
+			return resolve("done")
+		} else {
+			return resolve("done")
+		}
+	})
+}
+
+function get_isOS() {
+	return new Promise(resolve => {
+		if (isOS == "") {
+			let t0 = performance.now()
+			let el = document.getElementById("widget0")
+			try {
+				let font = getComputedStyle(el).getPropertyValue("font-family")
+
+				if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
+				} else if (font == "Roboto") {isOS="android"
+				}	else if (font == "-apple-system") {isOS="mac"
+				}	else {isOS="linux"}
+				if (logPerf) {debug_perf("isOS [immutables]",t0)}
+				return resolve("done")
+			} catch(e) {
+				console.debug("eeek", e.name, e.message)
+				return resolve("done")
+			}
+		} else {
+			return resolve("done")
+		}
+	})
+}
+
+function get_isTB() {
+	return new Promise(resolve => {
+		if (isFF && isTB === "") {
+			let t0 = performance.now()
+			let css = document.createElement("link")
+			css.href = "resource://torbutton-assets/aboutTor.css"
+			css.type = "text/css"
+			css.rel = "stylesheet"
+			document.head.appendChild(css)
+			css.onload = function() {
+				isTB = true
+				debug_page("TB","     resource:// = aboutTor.css")
+				if (logPerf) {debug_perf("[yes] isTB [immutables]",t0)}
+				return resolve("done")
+			}
+			css.onerror = function() {
+				isTB = false
+				if (logPerf) {debug_perf("[no] isTB [immutables]",t0)}
+				return resolve("done")
+			}
+			document.head.removeChild(css)
+		} else {
+			return resolve("done")
+		}
+	})
+}
+
 /* FUNCTIONS */
 
 function return_lb_nw(w,h) {
@@ -33,101 +211,6 @@ function return_mm_dpi(type) {
 	return r
 }
 
-function get_chrome() {
-	let os = "",
-		t0 = performance.now(),
-		message = []
-	dom.fdChrome.innerHTML = "blocked"
-
-	// output
-	function output(r) {
-		if (r !== "blocked" && r !== zNA) {
-			// os-check (runS already sets isOS ="")
-			if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
-		}
-		dom.fdChrome.innerHTML = r
-		isChrome = r
-		if (logPerf) {debug_log("chrome [fd]",t0)}
-	}
-	function run2() {
-		// assume linux: do not return an empty string
-		os = "Linux"
-		// android doesn't have this resource
-		let img = new Image()
-		img.src = "chrome://branding/content/icon64.png"
-		img.style.visibility = "hidden"
-		document.body.appendChild(img)
-		img.onload = function() {
-			message.push("image found: linux")
-			output(os)
-		}
-		img.onerror = function() {
-			message.push("no image found: android")
-			output("Android")
-		}
-		document.body.removeChild(img)
-	}
-	function output_check(r) {
-		if (r == "") {
-			run2()
-		} else {
-			output(r)
-		}
-	}
-	function run1() {
-		// block, isTB2, win, mac
-		let c = "chrome://browser/content/extension-",
-			p = "-panel.css",
-			block = "chrome://global/content/buildconfig.css",
-			list = ['resource://torbutton-assets/aboutTor.css',block,c+'win'+p, c+'mac'+p],
-			x = 0
-		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
-		list.forEach(function(item) {
-			let css = document.createElement("link")
-			css.href = item
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				message.push("found: " + item)
-				if (item === c+"win"+p) {os = "Windows"}
-				if (item === c+"mac"+p) {os = "Mac"}
-				// isTB2
-				if (item.substring(0,3) === "res") {
-					isTB = true; debug_page("tb","     resource:// = aboutTor.css")
-					isTB2 = "y"
-					if (logPerf) {debug_log("[yes] tb resource [fd]",t0)}
-				}
-				x++
-				// output on last item
-				if (x == 4) {output_check(os)}
-			}
-			css.onerror = function() {
-				message.push("not found " + item)
-				if (item == block) {os = "blocked"}
-				if (item.substring(0,3) === "res") {
-					isTB2 = "n"
-					if (logPerf) {debug_log("[no] tb resource [fd]",t0)}
-				}
-				x++
-				// output on last item
-				if (x == 4) {output_check(os)}
-			}
-			document.head.removeChild(css)
-		})
-	}
-	// only run for FF60+
-	try {
-		newFn("alert('A)")
-	} catch(e) {
-		if (e.message == "unterminated string literal") {
-			output(zNA)
-		} else {
-			run1()
-		}
-	}
-}
-
 function get_collation() {
 	let list = ['ka','ku','lo','no','pa','tk'],
 		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A'],
@@ -153,7 +236,7 @@ function get_collation() {
 			dom.fdCollation.setAttribute("class", "c mono")
 		}
 		dom.fdCollation.innerHTML = r
-		if (logPerf) {debug_log("collation [fd]",t0)}
+		if (logPerf) {debug_perf("collation [fd]",t0)}
 	}
 	// run
 	chars.sort() // set
@@ -194,44 +277,6 @@ function get_color() {
 	return(res)
 }
 
-function get_engine() {
-	function cbrt(x) {
-		try {
-			let y = Math.pow(Math.abs(x), 1 / 3)
-			return x < 0 ? -y : y
-		} catch(e) {
-			return "error"
-		}
-	}
-	let res = []
-	for(let i=0; i < 6; i++) {
-		try {
-			let fnResult = "unknown"
-			if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-			} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-			} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
-			} else if (i == 3) {fnResult = Math.acos(0.123)
-			} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
-			} else if (i == 5) {fnResult = Math.atan(2)
-			}
-			res.push(fnResult)
-		} catch(e) {
-			res.push("error")
-		}
-	}
-	let hash = sha1(res.join())
-	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
-	} else if (isFF) {isEngine = "gecko"
-	} else if ("chrome" in window) {isEngine = "blink"
-	}
-	if (isEngine == "") {console.error("isEngine: not found\n", res)}
-}
-
 function get_errors() {
 	return new Promise(resolve => {
 		let res = [],
@@ -245,43 +290,20 @@ function get_errors() {
 		function output() {
 			hash = sha1(res.join())
 			if (isFF) {
-				let temp = hash.substring(0,10)
+				let tmp = hash.substring(0,8)
 				if (isErr == "") {isErr = hash.substring(0,4)}
-				// 74+: 1259822: javascript.options.property_error_message_fix
-				if (isErr == "X") {
-					code = "X"; ff = "[FF59 or lower]"
-				} else if (temp == "211593fcbb") {
-					code = "A"; ff = "[FF60-67]"
-				} else if (temp == "1bce15c1a1") {
-					code = "B"; ff = "[FF68-69]"
-				} else if (temp == "e4ce5e9113") {
-					code = "C"; ff = "[FF70]"
-				} else if (temp == "6883095d80") {
-					code = "D"; ff = "[FF71]"
-				} else if (temp == "84d3f94263") {
-					// fix false
-					code = "E1"; ff = "[FF72-74]"
-				} else if (temp == "1457bd35f2") {
-					// fix true
-					code = "E2"; ff = "[FF74]"
-				} else if (temp == "1cd163debb") {
-					// fix false
-					code = "F1"; ff = "[FF75-77]"
-				} else if (temp == "4c89ee104d") {
-					// fix true
-					code = "F2"; ff = "[FF75-77]"
-				} else if (temp == "ec1a5b060f") {
-					// fix false
-					code = "G1"; ff = "[FF78+]"
-				} else if (temp == "9ac124a3d5") {
-					// fix true
-					code = "G2"; ff = "[FF78+]"
-				} else if (temp == "ac156397f3") {
-					// tampered: fix false
-					code = "T1"; ff = "[FF78+]"
-				} else if (temp == "6140f2426e") {
-					// tampered: fix true
-					code = "T2"; ff = "[FF78+]"
+				// 74+: 1259822: error_message_fix: codes 1=false 2=true
+				if (isErr == "X") {code = "X"; ff = "[FF59 or lower]"
+				} else if (tmp == "b9a8b17b") {code = "A"; ff = "[FF60-67]"
+				} else if (tmp == "cb379de2") {code = "B"; ff = "[FF68-69]"
+				} else if (tmp == "7453242e") {code = "C"; ff = "[FF70]"
+				} else if (tmp == "30205428") {code = "D"; ff = "[FF71]"
+				} else if (tmp == "79bf9efd") {code = "E1"; ff = "[FF72-74]"
+				} else if (tmp == "18a23d47") {code = "E2"; ff = "[FF74]"
+				} else if (tmp == "057c7db9") {code = "F1"; ff = "[FF75-77]"
+				} else if (tmp == "5bb66724") {code = "F2"; ff = "[FF75-77]"
+				} else if (tmp == "ac156397") {code = "G1"; ff = "[FF78+]"
+				} else if (tmp == "6140f242") {code = "G2"; ff = "[FF78+]"
 				}
 				if (code !== "") {
 					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
@@ -298,7 +320,7 @@ function get_errors() {
 				} else {
 					dom.errh = hash
 				}
-				if (logPerf) {debug_log("errors [fd]",t0)}
+				if (logPerf) {debug_perf("errors [fd]",t0)}
 				return resolve("errors:"+ hash)
 			} else {
 				dom.errh = hash; dom.fdError = hash
@@ -316,33 +338,11 @@ function get_errors() {
 				if (e.message == "unterminated string literal") {isErr = "X"}
 			}
 			//2
-			// type1: FF: foo is null
-			// type2: FF: can't access property "value", foo is null
-			//    Chrome: Cannot set property 'value' of null
 			try {
-				function foobar() {
-					let foo = document.getElementById("bar")
-					foo.value = screen.width
-				}
-				newFn(`window.onload = ${foobar}()`)
-
+				newFn(`null.value = 1`)
 			} catch(e) {
-				// cydec total mode causes a syntax error
-				if (e.name !== "TypeError") {
-					// 2 alt
-					// type1: FF: null has no properties
-					// type2: FF: can't access property "value" of null
-					//    Chrome: Cannot set property 'value' of null
-					try {
-						newFn(`null.value = 1`)
-					} catch(e) {
-						if (runS) {e += zSIM}
-						dom.err2=e; res.push(e.name+": "+e.message)
-					}
-				} else {
-					if (runS) {e += zSIM}
-					dom.err2=e; res.push(e.name+": "+e.message)
-				}
+				if (runS) {e += zSIM}
+				dom.err2=e; res.push(e.name+": "+e.message)
 			}
 			//3
 			try {
@@ -416,11 +416,7 @@ function get_errors() {
 function get_fullscreen(runtype) {
 	let r = ""
 	try {
-		if (document.mozFullScreenEnabled) {
-			r = zE
-		}	else {
-			r = zD; dom.fsLeak = zNA
-		}
+		if (document.mozFullScreenEnabled) {r = zE}	else {r = zD; dom.fsLeak = zNA}
 	} catch(e) {
 		r = "no: "+e.name; dom.fsLeak = zNA
 	}
@@ -578,7 +574,7 @@ function get_line_scrollbar() {
 			}
 			dom.fdScrollE.innerHTML = eW
 			// perf
-			if (logPerf) {debug_log("scrollbar [fd]",t0)}
+			if (logPerf) {debug_perf("scrollbar [fd]",t0)}
 		}
 
 		// css lineheight
@@ -771,7 +767,7 @@ function get_line_scrollbar() {
 			} else {
 				dom.fdLH.innerHTML = lh + "px "+ sbZoom + os // + s3+"["+method+"]"+sc
 			}
-			if (logPerf) {debug_log("css line height [fd]",t0)}
+			if (logPerf) {debug_perf("css line height [fd]",t0)}
 		}
 
 		run_scrollbar()
@@ -842,11 +838,6 @@ function get_math() {
 				m1hash = sha1(h1)
 				m6hash = sha1(h6)
 				mchash = sha1(h1+"-"+h6)
-				// test random per execution
-					//m1hash = sha1(h1 + runtype)
-					//m6hash = sha1(h6 + runtype)
-					//mchash = sha1(h1+"-"+h6 + runtype)
-
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1
@@ -997,7 +988,7 @@ function get_math() {
 			dom.math6hash.innerHTML = m6hash
 			dom.mathhash.innerHTML = mchash
 			// perf
-			if (logPerf) {debug_log("math [fd]", t0)}
+			if (logPerf) {debug_perf("math [fd]", t0)}
 			// blockage
 			if (block1 || block6) {mchash = zB0}
 			// return
@@ -1013,14 +1004,10 @@ function get_math() {
 			let run01 = res[0].split(":")[0],
 				run06 = res[0].split(":")[1],
 				run0c = res[0].split(":")[2]
-				//console.debug(res[0])
-				//console.debug("RUN0\n - "+ run01 +"\n - "+ run06 +"\n - "+ run0c)
 			// run1
 			let run11 = res[1].split(":")[0],
 				run16 = res[1].split(":")[1],
 				run1c = res[1].split(":")[2]
-				//console.debug(res[1])
-				//console.debug("RUN1\n - "+ run11 +"\n - "+ run16 +"\n - "+ run1c)
 			// compare runs
 			if (run0c !== run1c) {
 				let sColor = s3
@@ -1061,9 +1048,9 @@ function get_mm_metrics(runtype) {
 	function perf() {
 		if (count == 4) {
 			if (runtype == "resize") {
-				if (logResize) {debug_log("mm various [resize]",t0, "ignore")}
+				if (logResize) {debug_perf("mm various [resize]",t0, "ignore")}
 			} else if (logPerf) {
-				debug_log("mm various [screen]",t0, "")
+				debug_perf("mm various [screen]",t0, "")
 			}
 		}
 	}
@@ -1120,7 +1107,6 @@ function get_mm_metrics(runtype) {
 			count++; perf()
 		}
 	}
-
 	function searchValue(tester, maxValue, precision){
 		let minValue = 0
 		let ceiling = Math.pow(2, 32)
@@ -1271,9 +1257,9 @@ function get_orientation(runtype) {
 	}
 	// perf
 	if (runtype == "resize") {
-		if (logResize) {debug_log("orientation [resize]",t0, "ignore")}
+		if (logResize) {debug_perf("orientation [resize]",t0, "ignore")}
 	} else if (logPerf) {
-		debug_log("orientation [screen]",t0, "")
+		debug_perf("orientation [screen]",t0, "")
 	}
 }
 
@@ -1281,7 +1267,7 @@ function get_pbmode() {
 	let t0 = performance.now()
 	function output(r) {
 		dom.IsPBMode = r
-		if (logPerf) {debug_log("pbmode [screen]",t0)}
+		if (logPerf) {debug_perf("pbmode [screen]",t0)}
 	}
 	if (isVer < 83) {
 		// FF83+: 1638396: dom.indexedDB.privateBrowsing.enabled
@@ -1306,7 +1292,7 @@ function get_resources() {
 			result = "",
 			wFF = "",
 			hFF = "",
-			extra = "n",
+			extra = "",
 			nob = "[no branding detected]",
 			el = dom.branding
 
@@ -1319,7 +1305,7 @@ function get_resources() {
 				isResourceMetric = "resources:" + browser+" "+wFF+"x"+hFF+" "+extra
 			}
 			dom.fdResource.innerHTML = isResource
-			if (logPerf) {debug_log("resources [fd]",t0)}
+			if (logPerf) {debug_perf("resources [fd]",t0)}
 			return resolve(isResourceMetric)
 		}
 		// FF
@@ -1365,7 +1351,7 @@ function get_resources() {
 				//alpha: 8.5a7+ [60.5.0esr]
 				channel = "alpha"
 				result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
-				debug_page("tb","    css branding = 270 x 48 px = alpha")
+				debug_page("TB","    css branding = 270 x 48 px = alpha")
 			} else if (wFF == 336 && hFF == 48) {
 				if (isVer > 77) {
 					//78+ therefore release
@@ -1425,13 +1411,16 @@ function get_resources() {
 
 					// FF
 					build_FF(wFF, hFF)
-					// TB
-					// isTB is already set
+					// TB: we made sure isTB was set earlier
+					let isTB2 = false
 					if (wTB > 0) {
-						isTB = true; debug_page("tb","     resource:// = tor-watermark.png")
-						extra = "y"
+						isTB2 = true
+						debug_page("TB","     resource:// = tor-watermark.png")
+						if (logPerf) {debug_perf("[yes] tb watermark [fd]",t0)}
+					} else {
+						if (logPerf) {debug_perf("[no] tb watermark [fd]",t0)}
 					}
-					extra += isTB2 // "", "n" or "y"
+					extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
 					if (isTB) {
 						build_TB(wFF, hFF)
 						if (isOS !== "android" && wTB < 1) {
@@ -1558,7 +1547,6 @@ function get_screen_metrics(runtype) {
 	if (runtype == "load" || runtype == "screen") {
 		return(res)
 	}
-
 }
 
 function get_ua_doc() {
@@ -1618,10 +1606,6 @@ function get_ua_doc() {
 			}
 			str = output(property, str)
 			if (good !== undefined) {
-				// show/hide vendor*
-				//if (property == "vendor" || property == "vendorSub") {
-				//	document.getElementById("tog"+property).style.display = (str == good ? "none" : "table-row")
-				//}
 				// BS
 				let arrow = ""
 				if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
@@ -1643,7 +1627,7 @@ function get_ua_doc() {
 			} else if (str.indexOf("  ") !== -1) {bs = true
 			} else if (property == "userAgent") {
 				// STUFF
-				let isRFP = get_RFP(), 
+				let isRFP = check_RFP(), 
 					v = isVer +".0",
 					v2 = (isVer + 1) +".0",
 					sub = "20100101",
@@ -1706,9 +1690,6 @@ function get_ua_doc() {
 						testB = str.substring(str.length - controlB.length)
 					}
 					// as long as one matches
-					debug.push("A: "+ (testA == controlA) + "\n s/be: " + controlA + "\n  got: " + testA)
-					debug.push("B: "+ (testB == controlB) + "\n s/be: " + controlB + "\n  got: " + testB)
-					//console.debug(debug.join("\n"))
 					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
 				}
 			}
@@ -1846,9 +1827,8 @@ function get_ua_doc() {
 			} else {
 				// DONE: RFP check, endstring, version
 				// ToDo: dig deeper
-					// 3a: if full ua = not consistent with known os etc
-					// 3b: if full ua = not the same as individual parts
-					// 4: the syntax/formula doesn't match
+					// - os
+					// - the syntax/formula doesn't match
 			}
 			if (spoof || isPartial) {addArrow("userAgent", true)}
 		} else {
@@ -1885,11 +1865,12 @@ function get_ua_workers() {
 		r = ""
 	for (let i=0; i < list.length; i++) {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
-		if (r == "") {r = "empty string"}
-		if (r == "undefined") {r = "undefined string"}
-		if (r == undefined && isFF) {r = zB0}
-		if (r == undefined) {r = "undefined value"}
-		res.push(list[i]+":"+r) // no spaces
+		if (r == "") {r = "empty string"
+		} else if (r == "undefined") {r = "undefined string"
+		} else if (r == undefined && isFF) {r = zB0
+		} else if (r == undefined) {r = "undefined value"
+		}
+		res.push(list[i]+":"+r)
 	}
 	res.sort()
 	let control = sha1(res.join())
@@ -2027,7 +2008,7 @@ function get_version() {
 				}
 			}
 			dom.fdVersion.innerHTML = verNo
-			if (logPerf) {debug_log("version [fd]",t0)}
+			if (logPerf) {debug_perf("version [fd]",t0)}
 			return resolve("version:"+ verNo)
 		}
 		// use isErr
@@ -2255,7 +2236,6 @@ function get_viewport(runtype) {
 
 function get_widgets() {
 	return new Promise(resolve => {
-
 		let list = ['button','checkbox','color','combobox','datetime-local','radio','text'],
 			font = "",
 			font0 = "",
@@ -2316,7 +2296,6 @@ function get_widgets() {
 					else if (font0 == "-apple-system") {os="Mac"}
 					else if (font0 == "unknown") {os = ""}
 					else {os="Linux"}
-					isOS = os.toLowerCase()
 			}
 			os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
 			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
@@ -2326,7 +2305,7 @@ function get_widgets() {
 		dom.wid0.style.color = zshow
 		dom.widgetH = whash + (runS ? zSIM : "")
 		// perf & resolve
-		if (logPerf) {debug_log("widgets [fd]",t0)}
+		if (logPerf) {debug_perf("widgets [fd]",t0)}
 		return resolve("widgets:"+ whash)
 	})
 }
@@ -2336,7 +2315,7 @@ function get_zoom(runtype) {
 		dpr2 = "",
 		zoomAssume = false
 
-	// devicePixelRatio
+	// dPR
 	let dpr = window.devicePixelRatio || 1;
 	let dprStr = (dpr == 1 ? "1"+rfp_green : dpr+rfp_red)
 	// add extra dpr: 477157
@@ -2372,9 +2351,9 @@ function get_zoom(runtype) {
 	dom.jsDPI = dpi_x
 
 	if (runtype == "resize") {
-		if (logResize) {debug_log("dpi [part of zoom]",t1,"ignore")}
+		if (logResize) {debug_perf("dpi [part of zoom]",t1,"ignore")}
 	} else if (logPerf) {
-		debug_log("dpi [part of zoom]",t1,"ignore")
+		debug_perf("dpi [part of zoom]",t1,"ignore")
 	}
 
 	// zoom: choose method
@@ -2424,9 +2403,9 @@ function get_zoom(runtype) {
 	dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1+"[assumed]"+sc :"")
 
 	if (runtype == "resize") {
-		if (logResize) {debug_log("zoom [resize]",t0, "ignore")}
+		if (logResize) {debug_perf("zoom [resize]",t0, "ignore")}
 	} else if (logPerf) {
-		debug_log("zoom ["+ runtype +"]",t0, "")
+		debug_perf("zoom ["+ runtype +"]",t0, "")
 	}
 	return jsZoom
 }
@@ -2598,7 +2577,6 @@ function goNW() {
 		}
 		let checking = setInterval(build_newwin, 3)
 	}
-
 	// ANDROID
 	if (isOS == "android") {
 		if (ih > firstH) {
@@ -2610,7 +2588,6 @@ function goNW() {
 		}
 		dom.newWinLeak.innerHTML = newWinLeak
 	}
-
 }
 
 function goNW_UA() {
@@ -2622,9 +2599,11 @@ function goNW_UA() {
 		r = ""
 	for (let i=0; i < list.length; i++) {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
-		if (r == "") {r = "empty string"}
-		if (r == "undefined") {r = "undefined string"}
-		if (r == undefined) {r = "undefined value"}
+		if (r == "") {r = "empty string"
+		} else if (r == "undefined") {r = "undefined string"
+		//} else if (r == undefined && isFF) {r = zB0 // why was this not here
+		} else if (r == undefined) {r = "undefined value"
+		}
 		control.push(list[i]+":"+r) // no spaces
 	}
 	control.sort()
@@ -2676,10 +2655,6 @@ function goNW_UA() {
 			let output = parts.slice(1).join(":")
 			if (str.indexOf("<br>") == -1 && str !== output) {
 				target.innerHTML += "<br>" + sb.trim() + output + sc
-				// show vendor*
-				//if (target == "vendor" || target == "vendorSub") {
-				//	document.getElementById("tog"+target).style.display = "table-row"
-				//}
 			}
 		}
 	}
@@ -2710,7 +2685,7 @@ function outputScreen(runtype) {
 				section.push(currentResult)
 			}
 		})
-		section_info("screen", t0, section)
+		debug_section("screen", t0, section)
 	})
 }
 
@@ -2731,7 +2706,7 @@ function outputUA() {
 				section[i] = section[i].replace(/\s+/g," ").trim()
 			}
 		}
-		section_info("ua", t0, section)
+		debug_section("ua", t0, section)
 	}
 
 	function get_workers() {
@@ -2810,7 +2785,6 @@ function outputUA() {
 	}
 
 	function get_pLies() {
-		// prototype lies: in order of likely fuckery
 		if (liesList.includes("Navigator.userAgent")) {uaBS = true
 		} else if (liesList.includes("Navigator.appVersion")) {uaBS = true
 		} else if (liesList.includes("Navigator.platform")) {uaBS = true
@@ -2846,21 +2820,19 @@ function outputFD(runtype) {
 
 	// FF only
 	if (isFF) {
-		if (sRerun || gRerun) {
-			dom.fdChrome.innerHTML = isChrome
-		}
+		get_isChrome()
 		Promise.all([
+			get_errors(), // isErr needed for version
+			get_version(), // isVer needed for resources
 			get_resources(), // isTB (2nd check)
-			get_errors(), // isFF (2nd check), needed for version
-			get_widgets(), // isOS
-			get_version(), // isVer - needed early for resources
+			get_widgets(),
 			get_line_scrollbar(), // calls zoom & viewport
 			get_math(), // must come after widget
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			section_info("feature", t0, section)
+			debug_section("feature", t0, section)
 		})
 		// not used in hash
 		get_collation()
@@ -2915,42 +2887,23 @@ function outputFD(runtype) {
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
-			section_info("feature", t0, section)
+			debug_section("feature", t0, section)
 		})
 	}
 }
 
 function outputStart() {
-	// run once
-	function run_checks() {
-		let t0 = performance.now()
+	// cosmetics
+		// not-coded
+	let items = document.getElementsByClassName("faint")
+	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
+		// isFile
+	items = document.getElementsByClassName("isFile")
+	for (let i=0; i < items.length; i++) {items[i].textContent = note_file}
+		// section hash to come
+	items = document.getElementsByClassName("hashtocome")
+	for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
 
-		// IMMUTABLE: don't do on reruns
-		if (!gRerun) {
-			if (isFF) {
-				get_chrome() // sets isTB*, get ASAP
-			} else {
-				runS = false // simulation is FF only
-			}
-		}
-		get_engine()
-
-		// cosmetics
-			// not-coded
-		let items = document.getElementsByClassName("faint")
-		for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
-			// isFile
-		items = document.getElementsByClassName("isFile")
-		for (let i=0; i < items.length; i++) {items[i].textContent = note_file}
-			// section hash to come
-		items = document.getElementsByClassName("hashtocome")
-		for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
-		if (logPerf) {debug_log("setup",t0)}
-		section_info("setup", t0)
-	}
-
-	// functions
-	run_checks()
 	outputFD("load") // run FD first: sets isOS, isTB*, isVer
 	setTimeout(function() {outputScreen("load")}, 1)
 	setTimeout(function() {outputUA()}, 1)

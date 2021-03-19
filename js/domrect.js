@@ -1,6 +1,6 @@
 "use strict";
 
-/* code based on work by kkapsner and canvasblocker
+/* code based on
 https://canvasblocker.kkapsner.de/test/
 https://github.com/kkapsner/CanvasBlocker
 */
@@ -108,7 +108,7 @@ function outputDomRect() {
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
-		section_info("domrect", t0, hash)
+		debug_section("domrect", t0, hash)
 	}
 
 	function getElements(classname){

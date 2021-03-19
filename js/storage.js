@@ -394,7 +394,7 @@ function outputStorage() {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		section_info("storage", t0, section)
+		debug_section("storage", t0, section)
 	})
 
 }

@@ -26,7 +26,7 @@ function outputCanvas() {
 			diff78 = false,
 			error_string = "error while testing"
 		// RFP
-		let isRFP = get_RFP()
+		let isRFP = check_RFP()
 
 		function display_value(item, value1, value2, value3) {
 			// vars
@@ -174,7 +174,7 @@ function outputCanvas() {
 			display_value(display, value1, value2, value3)
 		}
 		// section
-		section_info("canvas", t0, chash1)
+		debug_section("canvas", t0, chash1)
 	}
 
 	var canvas = {
@@ -202,7 +202,7 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
-						if (logPerf) {debug_log("toDataURL [" + runNo + "] [canvas]",t0)}
+						if (logPerf) {debug_perf("toDataURL [" + runNo + "] [canvas]",t0)}
 						return data
 					}
 				},
@@ -219,7 +219,7 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = hashDataURL(reader.result)
-									if (logPerf) {debug_log("toBlob [" + runNo + "] [canvas]",t0)}
+									if (logPerf) {debug_perf("toBlob [" + runNo + "] [canvas]",t0)}
 									resolve(data)
 								}
 								reader.onerror = function(){
@@ -254,7 +254,7 @@ function outputCanvas() {
 						var context = getFilledContext()
 						var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
 						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
-						if (logPerf) {debug_log("getImageData [" + runNo + "] [canvas]",t0)}
+						if (logPerf) {debug_perf("getImageData [" + runNo + "] [canvas]",t0)}
 						return data
 						//return window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
 					}
@@ -284,7 +284,7 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						if (logPerf) {debug_log("isPointInPath [" + runNo + "] [canvas]",t0)}
+						if (logPerf) {debug_perf("isPointInPath [" + runNo + "] [canvas]",t0)}
 						return dataR
 					}
 				},
@@ -300,7 +300,7 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						if (logPerf) {debug_log("isPointInStroke [" + runNo + "] [canvas]",t0)}
+						if (logPerf) {debug_perf("isPointInStroke [" + runNo + "] [canvas]",t0)}
 						return dataR
 					}
 				},
@@ -443,7 +443,7 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let data = sha1(getKnown().canvas.toDataURL())
-						if (logPerf) {debug_log("toDataURL [k] [canvas]",t0)}
+						if (logPerf) {debug_perf("toDataURL [k] [canvas]",t0)}
 						if (!sRerun) {if (data !== known1) {liesKnown.push("canvas:toDataURL")}}
 						return (data == known1 ? true : false)
 					}
@@ -461,7 +461,7 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = sha1(reader.result)
-									if (logPerf) {debug_log("toBlob [k] [canvas]",t0)}
+									if (logPerf) {debug_perf("toBlob [k] [canvas]",t0)}
 									if (!sRerun) {if (data !== known1) {liesKnown.push("canvas:toBlob")}}
 									resolve(data == known1 ? true : false)
 								}
@@ -505,7 +505,7 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(imageData.join())
-						if (logPerf) {debug_log("getImageData [k] [canvas]",t0)}
+						if (logPerf) {debug_perf("getImageData [k] [canvas]",t0)}
 						if (!sRerun) {if (data !== known2) {liesKnown.push("canvas:getImageData")}}
 						return (data == known2 ? true : false)
 					}
@@ -522,7 +522,7 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathData.join())
-						if (logPerf) {debug_log("isPointInPath [k] [canvas]",t0)}
+						if (logPerf) {debug_perf("isPointInPath [k] [canvas]",t0)}
 						if (!sRerun) {if (data !== known3) {liesKnown.push("canvas:isPointInPath")}}
 						return (data == known3 ? true : false)
 					}
@@ -539,7 +539,7 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathStroke.join())
-						if (logPerf) {debug_log("isPointInStroke [k] [canvas]",t0)}
+						if (logPerf) {debug_perf("isPointInStroke [k] [canvas]",t0)}
 						if (!sRerun) {if (data !== known4) {liesKnown.push("canvas:isPointInStroke")}}
 						return (data == known4 ? true : false)
 					}
@@ -614,7 +614,7 @@ function outputCanvas() {
 		outputs[2].forEach(function(output){
 			main2.push(output.name+","+output.displayValue)
 		})
-		//if (logPerf) {debug_log("main [canvas]",t0)}
+		//if (logPerf) {debug_perf("main [canvas]",t0)}
 		analyzeCanvas("main", main0, main1, main2)
 	})
 	// ToDo: canvas: iframes: each with two passes

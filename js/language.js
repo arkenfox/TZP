@@ -23,6 +23,7 @@ function get_navigator() {
 				}
 			} catch(e) {dnt = zB0}
 		} else {dnt = zNA}
+		// onLine
 		let online = ""
 		try {
 			online = navigator.onLine
@@ -100,7 +101,7 @@ function outputHeaders() {
 		results.forEach(function(currentResult) {
 			section = section.concat(currentResult)
 		})
-		section_info("headers", t0, section)
+		debug_section("headers", t0, section)
 	})
 }
 
@@ -702,7 +703,7 @@ function outputLanguage() {
 	// if no worker or worker matches - use original result
 	// if worker doesn't match = use worker
 	function get_worker() {
-		section_info("language", t0, section)
+		debug_section("language", t0, section)
 		get_lang_worker() // tack this on here for now
 	}
 	// run

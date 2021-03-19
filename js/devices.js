@@ -134,7 +134,7 @@ function get_media_devices() {
 				if (devicesBS) {liesKnown.push("devices:media")}
 			}
 			dom.eMDList.style.color = zshow
-			if (logPerf) {debug_log("media devices [devices]",t0)}
+			if (logPerf) {debug_perf("media devices [devices]",t0)}
 			return resolve("media_devices:"+ result)
 		}
 
@@ -333,7 +333,7 @@ function get_mimetypes_plugins() {
 					dom.mimeTypes.innerHTML = "fake" + rfp_red
 				}
 			}
-			if (logPerf) {debug_log("mimetypes/plugins [devices]",t0)}
+			if (logPerf) {debug_perf("mimetypes/plugins [devices]",t0)}
 			return resolve(["plugins:"+pValue, "mimeTypes:"+mValue])
 		})
 	})
@@ -463,7 +463,7 @@ function get_speech_engines() {
 			dom.sEngines.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.sEnginesList.innerHTML = detail
 			dom.sEnginesList.style.color = zshow
-			if (logPerf) {debug_log("speech engines [devices]",t0)}
+			if (logPerf) {debug_perf("speech engines [devices]",t0)}
 			return resolve("speech_engines:"+ output)
 		}
 
@@ -600,7 +600,7 @@ function outputDevices() {
 			if (isBraveFP) {liesKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
-		section_info("devices", t0, section)
+		debug_section("devices", t0, section)
 	})
 }
 

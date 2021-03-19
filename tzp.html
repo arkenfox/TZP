@@ -925,12 +925,15 @@
 
 	<!--perf-->
 	<table id="tb99">
-		<col width="29%"><col width="71%">
+		<col width="37%"><col width="63%">
 		<thead><tr><th colspan="2" class="showhide">
 			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
-			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show debugging</label></th></tr></thead>
-		<tr class="togZ"><td>section perf</td><td class="mono spaces" id="debugperf"></td></tr>
-		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces" id="debugtb"></td></tr>
+			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show perf & debugging</label></th></tr></thead>
+		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`perfDetail`)">[details]</span>
+			global perf</td><td class="mono spaces" id="perfD"></td></tr>
+		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`perfSection`)">[details]</span>
+			click perf</td><td class="mono spaces" id="perfS"></td></tr>
+		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces" id="debugTB"></td></tr>
 	</table>
 	<a name="theend"></a><br>
 

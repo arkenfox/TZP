@@ -3,7 +3,8 @@
 var dom;
 
 let jsFiles = [],
-	perfData = [],
+	perfDetail = [],
+	perfSection = [], // rerun perf
 	// lies
 	liesKnown = [],
 	liesList = [],
@@ -115,8 +116,7 @@ let avh = "",
 	isBrave = false,
 	isBraveFP = false,
 	isFF = false,
-	isTB = false,
-	isTB2 = "",
+	isTB = "", // "", true, false
 	isOS = "",
 	isErr = "",
 	isVer = "",
@@ -131,7 +131,7 @@ let avh = "",
 // dev
 	gt0,
 	logExtra = false,
-	logPerf = false,
+	logPerf = true,
 	logResize = false,
 	logStorage = false,
 	runS = false,
