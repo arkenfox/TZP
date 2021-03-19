@@ -416,7 +416,7 @@ function get_errors() {
 function get_fullscreen(runtype) {
 	let r = ""
 	try {
-		if (document.mozFullScreenEnabled) {r = zE}	else {r = zD; dom.fsLeak = zNA}
+		if (document.mozFullScreenEnabled) {r = zE} else {r = zD; dom.fsLeak = zNA}
 	} catch(e) {
 		r = "no: "+e.name; dom.fsLeak = zNA
 	}
@@ -2290,7 +2290,6 @@ function get_widgets() {
 				os = whash + zNEW
 				dom.fdWidget.setAttribute("class", "c mono")
 			} else {
-					// set isOS
 					if (font0.slice(0,12) == "MS Shell Dlg") {os="Windows"}
 					else if (font0 == "Roboto") {os="Android"}
 					else if (font0 == "-apple-system") {os="Mac"}
@@ -2601,7 +2600,7 @@ function goNW_UA() {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"
 		} else if (r == "undefined") {r = "undefined string"
-		//} else if (r == undefined && isFF) {r = zB0 // why was this not here
+		//} else if (r == undefined && isFF) {r = zB0 // ToDo: why was this not here? isFF is not available I think?
 		} else if (r == undefined) {r = "undefined value"
 		}
 		control.push(list[i]+":"+r) // no spaces
@@ -2823,9 +2822,9 @@ function outputFD(runtype) {
 		get_isChrome()
 		Promise.all([
 			get_errors(), // isErr needed for version
-			get_version(), // isVer needed for resources
-			get_resources(), // isTB (2nd check)
 			get_widgets(),
+			get_version(), // isVer needed for resources
+			get_resources(),
 			get_line_scrollbar(), // calls zoom & viewport
 			get_math(), // must come after widget
 		]).then(function(results){
