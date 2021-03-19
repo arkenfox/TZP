@@ -339,7 +339,7 @@ function get_fonts() {
 			// cleanup details
 			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
 			// perf
-			if (logPerf) {debug_log("creepJS [fonts]",t0)}
+			if (logPerf) {debug_perf("creepJS [fonts]",t0)}
 			// resolve
 			return resolve(fontReturn)
 		}
@@ -636,7 +636,7 @@ function get_unicode() {
 				//if (r !== "") {console.log(r)}
 			}
 			// perf
-			if (logPerf) {debug_log("unicode glyphs [fonts]",t0)}
+			if (logPerf) {debug_perf("unicode glyphs [fonts]",t0)}
 			// resolve
 			return resolve(res)
 		}
@@ -649,7 +649,7 @@ function get_unicode() {
 			// page load: measure primer diff
 			if (gRerun + sRerun == 0) {
 				if (logPerf) {
-					debug_log("time since unicode priming",fntStart,"ignore")
+					debug_perf("time since unicode priming",fntStart,"ignore")
 				}
 			}
 
@@ -736,7 +736,7 @@ function get_woff() {
 		// output
 		function output_woff(state) {
 			dom.fontWoff2.innerHTML = state
-			if (logPerf) {debug_log("woff [fonts]",t0)}
+			if (logPerf) {debug_perf("woff [fonts]",t0)}
 			return resolve("woff:"+ state)
 		}
 		// check
@@ -836,7 +836,7 @@ function outputFonts() {
 				section.push(currentResult)
 			}
 		})
-		section_info("fonts", t0, section)
+		debug_section("fonts", t0, section)
 	})
 }
 
