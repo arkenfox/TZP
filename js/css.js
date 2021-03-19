@@ -268,6 +268,8 @@ function get_system_fonts(runtype) {
 		let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
 			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
 		if (runtype == "isFFcheck") {fonts = [m+"dialog"]}
+		let dString = "css_system_fonts"
+		if (runtype !== "isFFcheck") {clearDetail(dString)}
 
 		let el = document.getElementById("sysFont")
 		try {
@@ -298,25 +300,19 @@ function get_system_fonts(runtype) {
 							f += ", " + s.fontStyle
 						}
 					}
-					if (runtype == "isFFcheck") {
-						return resolve(""+f)
-					} else {
-						results.push(font+":"+f)
-					}
+					if (runtype == "isFFcheck") {return resolve(""+f)
+					} else {results.push(font+":"+f)}
 				}
 			})
 		} catch(e) {
-			if (runtype == "isFFcheck") {
-				return resolve("error")
-			} else {
-				error = (isFF ? zB0 : "error")
-			}
+			if (runtype == "isFFcheck") {return resolve("error")
+			} else {error = (isFF ? zB0 : "error")}
 		}
 		// output
 		if (runtype !== "isFFcheck") {
+			sectionDetail[dString] = results
 			let hash = sha1(results.join())
-			let notation = s14 + " [" + fonts.length + "]" + sc
-			dom.sFontsHash.innerHTML = error + (error == "" ? hash + notation : "")
+			dom.sFontsHash.innerHTML = error + (error == "" ? hash + buildButton("14", dString, results.length) : "")
 			return resolve("system_fonts:"+ hash)
 		}
 	})
