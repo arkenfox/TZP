@@ -112,7 +112,7 @@ function get_media(runtype) {
 	if (blockT == 1) {notation += partblock}
 	etype.innerHTML = hashtype + notation
 	// perf
-	if (logPerf) {debug_log(runtype +" [media]",t0)}
+	if (logPerf) {debug_perf(runtype +" [media]",t0)}
 	// return array
 	let res = []
 	res.push("canPlay_"+ runtype +":"+ hashcan)
@@ -147,7 +147,7 @@ function outputMedia() {
 				section.push(currentResult)
 			}
 		})
-		section_info("media", t0, section)
+		debug_section("media", t0, section)
 	})
 }
 
