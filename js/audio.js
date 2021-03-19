@@ -1,9 +1,7 @@
 "use strict";
 
-/* code based on work by
-	kkapsner: https://canvasblocker.kkapsner.de/test/, https://github.com/kkapsner/CanvasBlocker
-	openWPM: https://audiofingerprint.openwpm.com/
-*/
+/* kkapsner: https://canvasblocker.kkapsner.de/test/, https://github.com/kkapsner/CanvasBlocker */
+/* openWPM: https://audiofingerprint.openwpm.com/ */
 
 var t0audio,
 	latencyError = false,
@@ -80,7 +78,7 @@ function get_audio2_context(attempt) {
 			dom.audio1hash.innerHTML = result[0] + sColor + "["+ results.length +" keys]" + sc
 			// perf
 			if (logPerf) {debug_log("context [audio]", t0, t0audio)}
-			if (latencyTries == 2) {clickhere_perf("audio2", t0audio)}
+			if (latencyTries == 2) {debug_click("audio2", t0audio)}
 		})
 	}
 	// next test
@@ -135,7 +133,7 @@ function get_audio2_hybrid() {
 			dom.audio3hash = result[0]
 			// perf
 			if (logPerf) {debug_log("hybrid [audio]",t0,t0audio)}
-			if (showperf) {clickhere_perf("audio2", t0audio)}
+			if (showperf) {debug_click("audio2", t0audio)}
 		})
 		// re-test context
 		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
