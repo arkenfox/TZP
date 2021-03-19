@@ -38,7 +38,7 @@ function outputWebGL_param() {
 	// hash
 	dom.glhash0.innerHTML = sha1(glhash.join())
 	// perf
-	if (logPerf) {debug_log("parameters [webgl]",t0)}
+	if (logPerf) {debug_perf("parameters [webgl]",t0)}
 }
 
 function analyzeWebGL(runtype, res1, res2) {
@@ -66,7 +66,7 @@ function analyzeWebGL(runtype, res1, res2) {
 	// output
 	dom.glreadPixels.innerHTML = res1
 	// section perf here for now
-	section_info("webgl", t0webgl)
+	debug_section("webgl", t0webgl)
 }
 
 function outputWebGL_render() {
@@ -182,7 +182,7 @@ function outputWebGL_render() {
 		outputs[1].forEach(function(output){
 			main2 = output.displayValue
 		})
-		if (logPerf) {debug_log("main [webgl]",t0)}
+		if (logPerf) {debug_perf("main [webgl]",t0)}
 		analyzeWebGL("main", main1, main2)
 	})
 }
