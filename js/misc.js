@@ -298,10 +298,10 @@ function outputMisc(type) {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		section_info("misc", t0, section)
+		debug_section("misc", t0, section)
 	})
 
-	// perf2 is not needed in the hash as performance.mark is RFP unique
+	// perf2 not needed in the hash as performance.mark is RFP unique
 	get_perf2()
 	// ToDO: experimental: bucketize?
 	get_recursion()
