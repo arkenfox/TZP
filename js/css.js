@@ -2,24 +2,28 @@
 
 function get_colors(runtype) {
 	/* servo/components/style/values/specified/color.rs */
-	let results = [],
-		list = [],
-		error = "",
+	let list = [],
 		m = "-moz-",
 		mm = m+"mac-",
-		element = dom.sColorElement
+		target = "",
+		control = ""
 	let dString = "css_colors_"+runtype
 	clearDetail(dString)
 
 	if (runtype == "system") {
+		control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
+		target = dom.sColorHash
 		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
 		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
 		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
 	} else if (runtype == "css4") {
+		control = "3900ddea19449a8174058383c32dc40b2e31b9a2"
+		target = dom.cColorHash
 		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
+		target = dom.mColorHash
 		list = [m+'activehyperlinktext',m+'appearance',m+'buttondefault',m+'buttonhoverface',
 		m+'buttonhovertext',m+'cellhighlight',m+'cellhighlighttext',m+'combobox',m+'comboboxtext',
 		m+'default-background-color',m+'default-color',m+'dialog',m+'dialogtext',m+'dragtargetzone',
@@ -41,6 +45,9 @@ function get_colors(runtype) {
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
 	// run
+	let results = [],
+		element = dom.sColorElement,
+		error = ""
 	list.forEach(function(item) {
 		element.style.backgroundColor = item
 		try {
@@ -53,16 +60,9 @@ function get_colors(runtype) {
 	sectionDetail[dString] = results
 	let hash = sha1(results.join())
 	let notation = buildButton("14", dString, list.length)
-
-	if (runtype == "system") {
-		let control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
-		dom.sColorHash.innerHTML = error + (error == "" ? hash + notation + (hash == control ? rfp_green : rfp_red) : "")
-	} else if (runtype == "css4") {
-		dom.sColorHashNew.innerHTML = error + (error == "" ? hash + notation : "")
-	} else {
-		dom.mColorHash.innerHTML = error + (error == "" ? hash + notation : "")
-	}
-	return "colors_" + runtype + ":" + hash
+	if (control.length) {notation += (hash == control ? rfp_green : rfp_red)}
+	target.innerHTML = (error.length ? error : hash + notation)
+	return "colors_" + runtype + ":" + (error.length ? error : hash)
 }
 
 function get_computed_styles() {
