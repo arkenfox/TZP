@@ -19,7 +19,10 @@ function get_colors(runtype) {
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
 	} else if (runtype == "css4") {
-		control = "3900ddea19449a8174058383c32dc40b2e31b9a2"
+		if (isVer > 75) {
+			// FF76+ note: FF72+: field/fieldtext added: RFP no effect
+			control = "3900ddea19449a8174058383c32dc40b2e31b9a2"
+		}
 		target = dom.cColorHash
 		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
