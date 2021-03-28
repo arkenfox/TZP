@@ -55,7 +55,6 @@
 		<tr><td>80</td><td id="n80a"></td><td class="c mono" id="v80a"></td></tr>
 		<tr><td>79</td><td id="n79"></td><td class="c mono" id="v79"></td></tr>
 		<tr><td>79</td><td id="n79a"></td><td class="c mono" id="v79a"></td></tr>
-		<tr><td>79</td><td id="n79b"></td><td class="c mono" id="v79b"></td></tr>
 		<tr><td>78</td><td id="n78"></td><td class="c mono" id="v78"></td></tr>
 		<tr><td>78</td><td id="n78a"></td><td class="c mono" id="v78a"></td></tr>
 		<tr><td>78</td><td id="n78b"></td><td class="c mono" id="v78b"></td></tr>
@@ -118,10 +117,10 @@
 'use strict';
 
 function outputVersion() {
-	let xF = sb+"failure"+sc,
-		xS = sg+"success"+sc,
-		xNC = sb+"no change"+sc,
-		xOMG = sg+"OMG it's fixed"+sc,
+	let xF = sb +"failure"+ sc,
+		xS = sg +"success"+ sc,
+		xNC = sb +"no change"+ sc,
+		xOMG = sg +"OMG it's fixed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
 		strB = "' class='blue' target='blank'>[",
 		strC = "]</a>",
@@ -129,11 +128,11 @@ function outputVersion() {
 
 	function output(id, bug, result, perf){
 		perf = Math.round(perf)
-		document.getElementById("v"+id).innerHTML = result + " (" + perf + " ms)"
+		document.getElementById("v"+id).innerHTML = result +" ("+ perf +" ms)"
 		if (bug !== "") {document.getElementById("n"+id).innerHTML = strA + bug + strB + bug + strC}
 		// perf
 		if (id == "75" || id == "72a" || id == "71" || id == "70" || id == "68" || id == "60") {
-			document.getElementById("perf"+id).innerHTML = "maximum (" + Math.round(performance.now()-t0) + " ms)"
+			document.getElementById("perf"+id).innerHTML = "maximum (" + Math.round(performance.now()-t0) +" ms)"
 			t0 = performance.now()
 		}
 	}
@@ -297,24 +296,16 @@ function outputVersion() {
 	}
 	output("79", "1644878", ver79, performance.now()-t79)
 
-	//79a: 1557718: slow
+	//79a: 1639591
 	let t79a = performance.now(), ver79a = xF
 	try {
-		let date79 = new Date("January 30, 2019 13:00:00"),
-			style79a = Intl.DateTimeFormat(undefined, {timeStyle: "short",	dateStyle: "short"}),
-			style79b = Intl.DateTimeFormat(undefined, {timeStyle: "long",	dateStyle: "long"})
-		if (style79a.format(date79) !== style79b.format(date79)) {ver79a = xS}
-	} catch(e) {}
-	output("79a", "1557718", ver79a, performance.now()-t79a)
-
-	//79b: 1639591
-	let t79b = performance.now(), ver79b = xF
-	try {
-		let x = 3, y = 3
-		eval("let z = (x ??= x * y)")
-		ver79b = xS
-	} catch(e) {}
-	output("79b", "1639591", ver79b, performance.now()-t79b)
+		newFn("let z = (3 ??= 3 * 3)")
+	} catch(e) {
+		// <79: SyntaxError expected expression, got '?'
+		// 79+: SyntaxError invalid assignment left-hand side
+		if (e.message.substring(0,3) == "inv") {ver79a = xS}
+	}
+	output("79a", "1639591", ver79a, performance.now()-t79a)
 
 	//78: 1633836
 	let t78 = performance.now(), ver78 = xF
@@ -421,7 +412,7 @@ function outputVersion() {
 	//68: 1548773
 	let t68 = performance.now(), ver68 = xF
 	let el68 = dom.test68
-	if (el68.typeMustMatch == false) {} else {ver68 = xS}
+	if (el68.typeMustMatch == undefined) {ver68 = xS} else {}
 	output("68", "1548773", ver68, performance.now()-t68)
 
 	//67: 1531830 (1435829)
@@ -500,7 +491,7 @@ function outputVersion() {
 		} catch(e) {}
 		output("55", "1354974", ver55, performance.now()-t55)
 	} else {
-		dom.n55.innerHTML = strA + "1354974" + strB + "1354974" + strC
+		dom.n55.innerHTML = strA +"1354974"+ strB +"1354974"+ strC
 		dom.v55.innerHTML = "firefox only"
 	}
 
@@ -546,7 +537,7 @@ function outputVersion() {
 	let t41 = performance.now(), ver41 = xNC
 	let test41 = new Date("31-Mar-2011").getFullYear()
 	// 63 and lower = NaN, 64+ = -2011
-	if (test41 !== -2011 && !isNaN(test41)) {ver41 = xOMG + (isFF ? " [" + test41 + "]" : "")}
+	if (test41 !== -2011 && !isNaN(test41)) {ver41 = xOMG + (isFF ? " [" + test41 +"]" : "")}
 	output("41", "", ver41, performance.now()-t41)
 
 	let t42 = performance.now(), ver42 = xNC
