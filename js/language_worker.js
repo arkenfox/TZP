@@ -33,23 +33,23 @@ addEventListener("message", function(msg) {
 			} else if (item == 12) {
 				let k = 60000, yr = Date().split` `[3]
 				// control
-				let c1 = new Date("January 1, "+yr+" 13:00:00 UTC"),
-					c2 = new Date("April 1, "+yr+" 13:00:00 UTC"),
-					c3 = new Date("July 1, "+yr+" 13:00:00 UTC"),
-					c4 = new Date("October 1, "+yr+" 13:00:00 UTC")
+				let c1 = new Date("January 1, "+ yr +" 13:00:00 UTC"),
+					c2 = new Date("April 1, "+ yr +" 13:00:00 UTC"),
+					c3 = new Date("July 1, "+ yr +" 13:00:00 UTC"),
+					c4 = new Date("October 1, "+ yr +" 13:00:00 UTC")
 				// real
-				let r1 = new Date("January 1, "+yr+" 13:00:00"),
-					r2 = new Date("April 1, "+yr+" 13:00:00"),
-					r3 = new Date("July 1, "+yr+" 13:00:00"),
-					r4 = new Date("October 1, "+yr+" 13:00:00")
+				let r1 = new Date("January 1, "+ yr +" 13:00:00"),
+					r2 = new Date("April 1, "+ yr +" 13:00:00"),
+					r3 = new Date("July 1, "+ yr +" 13:00:00"),
+					r4 = new Date("October 1, "+ yr +" 13:00:00")
 				return r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
 					+", "+ r3.getTimezoneOffset() +", "+ r4.getTimezoneOffset()
 					// getTime
-					+ " | "+ ((r1.getTime() - c1.getTime())/k) + ", "+ ((r2.getTime() - c2.getTime())/k)
-					+ ", "+ ((r3.getTime() - c3.getTime())/k) + ", "+ ((r4.getTime() - c4.getTime())/k)
+					+" | "+ ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
+					+", "+ ((r3.getTime() - c3.getTime())/k) +", "+ ((r4.getTime() - c4.getTime())/k)
 					// Date.parse
-					+ " | "+ ((Date.parse(r1) - Date.parse(c1))/k) + ", "+ ((Date.parse(r2) - Date.parse(c2))/k)
-					+ ", "+ ((Date.parse(r3) - Date.parse(c3))/k) + ", "+ ((Date.parse(r4) - Date.parse(c4))/k)
+					+" | "+ ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
+					+", "+ ((Date.parse(r3) - Date.parse(c3))/k) +", "+ ((Date.parse(r4) - Date.parse(c4))/k)
 			} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
 			} else if (item == 14) {
 				let tzresults = [],
@@ -59,7 +59,7 @@ addEventListener("message", function(msg) {
 				for (let i = 0 ; i < years.length; i++) {
 					for (let j = 0 ; j < days.length; j++) {
 						let datetime = days[j] +", "+ years[i] +" 13:00:00"
-						let control = new Date(datetime + " UTC")
+						let control = new Date(datetime +" UTC")
 						let test = new Date(datetime)
 						let diff = ((Date.parse(test) - Date.parse(control))/k)
 						tzresults.push(diff)
@@ -70,7 +70,7 @@ addEventListener("message", function(msg) {
 			} else if (item == 16) {return "n/a"
 			// date/time format
 			} else if (item == 17) {
-				return (amWorker ? ""+d : d)
+				return (amWorker ? ""+ d : d)
 			} else if (item == 18) {return d.toString()
 			} else if (item == 19) {return d.toLocaleString(undefined, o)
 			} else if (item == 20) {return d.toLocaleDateString(undefined, o)
@@ -110,25 +110,25 @@ addEventListener("message", function(msg) {
 				}
 				let test = rtf.formatToParts(-1, "year")
 				return concat_parts("-1", "year")
-					+ ", " + concat_parts("-3", "week")
-					+ ", " + concat_parts("-1", "hour")
-					+ ", " + concat_parts("45", "second")
-					+ ", " + concat_parts("1", "day")
-					+ ", " + concat_parts("1", "quarter")
+					+", "+ concat_parts("-3", "week")
+					+", "+ concat_parts("-1", "hour")
+					+", "+ concat_parts("45", "second")
+					+", "+ concat_parts("1", "day")
+					+", "+ concat_parts("1", "quarter")
 			} else if (item == 35) {
 				// Intl.NumberFormat
 				function err_check(name, error) {
 					if (isFF) {
 						if (error == "invalid value unit for option style" && isVer < 71) {
 							// 70-
-							err.push(item +" [expected]: "+ name + " : " + error)
-							return " | unit " + zNS
+							err.push(item +" [expected]: "+ name +" : "+ error)
+							return " | unit "+ zNS
 						} else if (error == "invalid value \"unit\" for option style" && isVer > 70 && isVer < 78) {
 							// 71-77
-							err.push(item +" [expected]: "+ name + " : " + error)
-							return " | \"unit\" " + zNS
+							err.push(item +" [expected]: "+ name +" : "+ error)
+							return " | \"unit\" "+ zNS
 						} else {
-							err.push(item +" [unexpected]: "+ name + " : " + error)
+							err.push(item +" [unexpected]: "+ name +" : "+ error)
 							return " | "+ zB0
 						}
 					} else {
@@ -176,14 +176,14 @@ addEventListener("message", function(msg) {
 						if (extra == true) {
 							// charCode single chars: e.g group/fr
 							charcode = string.charCodeAt(string.length-1)
-							string = string+" <code>"+ charcode +"</code>"
+							string += " <code>"+ charcode +"</code>"
 						}
 						return string
 					} catch(e) {
 						if (e.message == "string is undefined") {
-							return type+" "+zU
+							return type +" "+ zU
 						} else {
-							return type+" error"
+							return type +" error"
 						}
 					}
 				}
@@ -202,10 +202,10 @@ addEventListener("message", function(msg) {
 				// minusSign
 				type = "minusSign"
 				str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(-5)[0])
-				tmp += " | " + clean_string(type, str, true)
+				tmp += " | "+ clean_string(type, str, true)
 				// nan: e.g. zh-TW
 				type = "nan"
-				str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(4/5 + "%")[0])
+				str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(4/5 +"%")[0])
 				tmp += " | "+ clean_string(type, str, false)
 				return tmp
 			} else if (item == 37) {
@@ -264,10 +264,10 @@ addEventListener("message", function(msg) {
 					//}
 				} else {
 					// in the morning, noon, in the afternoon, in the evening, at night
-					tmp = dayA + ", " + dayB
-						+ ", " + get_day_period(new Date("2019-01-30T15:00:00"))
-						+ ", " + get_day_period(new Date("2019-01-30T18:00:00"))
-						+ ", " + get_day_period(new Date("2019-01-30T22:00:00"))
+					tmp = dayA +", "+ dayB
+						+", "+ get_day_period(new Date("2019-01-30T15:00:00"))
+						+", "+ get_day_period(new Date("2019-01-30T18:00:00"))
+						+", "+ get_day_period(new Date("2019-01-30T22:00:00"))
 				}
 				return tmp
 			} else if (item == 45) {
@@ -280,7 +280,7 @@ addEventListener("message", function(msg) {
 						res40.push(new Intl.ListFormat(undefined,{style: s, type: t}).format(["a","b","c"]))
 					})
 				})
-				if (res40.length > 0) {tmp = res40.join(" | ")}
+				if (res40.length) {tmp = res40.join(" | ")}
 				return tmp
 			} else if (item == 46) {
 				// 1557718: 79+
@@ -305,17 +305,17 @@ addEventListener("message", function(msg) {
 					try {
 						current = new Intl.PluralRules(undefined).select(nos[i])
 					} catch(e) {
-						prError = e.name + " : " + e.message
+						prError = e.name +" : "+ e.message
 						current = "error"
 					}
 					// record changes only
-					if (prev !== current) {prules.push(nos[i] + ": "+ current)}
+					if (prev !== current) {prules.push(nos[i] +": "+ current)}
 					prev = current
 				}
 				if (prError == "") {
 					return prules.join(", ")
 				} else {
-					err.push(item + " [unexpected]: " + prError)
+					err.push(item +" [unexpected]: "+ prError)
 					return zB0
 				}
 			}
@@ -334,7 +334,7 @@ addEventListener("message", function(msg) {
 					if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
 					if (e.message == "rtf.formatToParts is not a function" && isVer > 64 && isVer < 70) {msg = zNS}
 				} else if (item == 37 || item == 38) {
-					if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS + " [BigInt]"}
+					if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS +" [BigInt]"}
 					if (e.message == "can't convert BigInt to number" && isVer > 67 && isVer < 70) {msg = zNS}
 				} else if (item == 47) {
 					// ToDo: formatRange is nighly only: 1653024 add version when it rides the train
@@ -345,10 +345,10 @@ addEventListener("message", function(msg) {
 					if (amWorker) {
 						console.log("language worker error: "+ item +": "+ e.name +": "+ e.message)
 					}
-					err.push(item +" [unexpected]: "+ e.name + " : " + e.message)
+					err.push(item +" [unexpected]: "+ e.name +" : "+ e.message)
 					msg = zB0
 				} else {
-					err.push(item +" [expected]: "+ e.name + " : " + e.message)
+					err.push(item +" [expected]: "+ e.name +" : "+ e.message)
 				}
 				return msg
 			} else {
