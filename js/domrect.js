@@ -2,40 +2,39 @@
 
 /* code based on
 https://canvasblocker.kkapsner.de/test/
-https://github.com/kkapsner/CanvasBlocker
-*/
+https://github.com/kkapsner/CanvasBlocker */
 
 function reset_domrect() {
 	for (let i=0; i < 4; i++) {
 		for (let j=1; j < 49; j++) {
-			document.getElementById("dr"+i+j).innerHTML = "&nbsp"
+			document.getElementById("dr"+ i + j).innerHTML = "&nbsp"
 		}
 	}
 }
 
 function outputDomRect() {
+	let t0 = performance.now()
 	let sColor = s8
 
-	// analyze and output
+	// analyze & output
 	function analyze() {
 		// debug
-		//run0.sort(); run1.sort(); console.log("domrect\n - " + run0.join("\n - ") + "\n - " + run1.join("\n - "))
+		//run0.sort(); run1.sort(); console.log("domrect\n - "+ run0.join("\n - ") +"\n - "+ run1.join("\n - "))
 
 		let knownHash = "bebfc291e9d1adc90e240790551d0305b8b91294"
 		let pretty = ["Element.getClientRects","Element.getBoundingClientRect","Range.getClientRects","Range.getBoundingClientRect"]
 		let hash = []
 
 		for (let i=0; i < 4; i++) {
-
 			// repurpose known arrays as lie booleans
 			if (isFF) {
 				// FF: rect6
 				// note: errors/undefined override these when we check value1
-				known["dr"+i] = (sha1( known["dr"+i].join()) == knownHash ? false : true)
-				//if (known["dr"+i] == true) {console.debug("lie: known values: "+ pretty[i])}
+				known["dr"+ i] = (sha1( known["dr"+ i].join()) == knownHash ? false : true)
+				//if (known["dr"+ i] == true) {console.debug("lie: known values: "+ pretty[i])}
 			} else {
 				// non-FF
-				known["dr"+i] = false
+				known["dr"+ i] = false
 			}
 
 			let value1 = run0[i].split(":")[2],
@@ -49,26 +48,26 @@ function outputDomRect() {
 
 			if (value1 == "tzp") {
 				// errors: starts with "tzp:": don't record lie
-				known["dr"+i] = false
+				known["dr"+ i] = false
 				value1 = run0[i].split(":")[3]
 				if (value1 == "") {value1 = "error"}
 				if (value1 == undefined) {value1 = "undefined"}
 				push = value1
 				display = value1
 			} else if (value1 !== value2) {
-				// random on each pass: record lie
-				known["dr"+i] = true
-				//if (known["dr"+i] == true) {console.debug("lie: random each pass: "+ pretty[i])}
+				// random each pass: record lie
+				known["dr"+ i] = true
+				//console.debug("lie: random each pass: "+ pretty[i])
 				push = "random"
-				display = sColor +"[1] "+sc + value1.substring(0,13) + ".. "
-					+ sColor +"[2] "+sc + value2.substring(0,14) + ".."
+				display = sColor +"[1] "+ sc + value1.substring(0,13) +".. "
+					+ sColor +"[2] "+ sc + value2.substring(0,14) +".."
 					+ sColor + note_random
 			} else {
 				// same value on two passes
 				// check for noise
 				if (isFF || isEngine == "blink") {
-					let compare = chk["dr"+i]
-					if (compare.length > 0) {
+					let compare = chk["dr"+ i]
+					if (compare.length) {
 						compare.sort()
 						//console.log(compare.join("\n"))
 						let diffs = [], prev_item = "", prev_value = ""
@@ -78,37 +77,37 @@ function outputDomRect() {
 								let diff = (delim[3]-prev_value)
 								if (diff !== 0.25) {
 									// record lie
-									known["dr"+i] = true
-									//if (known["dr"+i] == true) {console.debug("lie: shift: "+ pretty[i])}
+									known["dr"+ i] = true
+									//if (known["dr"+ i] == true) {console.debug("lie: shift: "+ pretty[i])}
 								}
 								let margin = (0.25 - diff)
-								diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value + ", "+ delim[3])
+								diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value +", "+ delim[3])
 							}
 							prev_item = delim[0] +"_"+ delim[1]
 							prev_value = delim[3]
 						})
-						if (known["dr"+i] == true) {
-							//console.log("DOMRect method dr" + i + " [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
+						if (known["dr"+ i] == true) {
+							//console.log("DOMRect method dr"+ i +" [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
 							push = "tampered"
 							display = value1 + sColor + note_noise
 						}
 					}
 				}
 			}
-			// global lies
-			if (!sRerun) {
-				if (known["dr"+i] == true) {
-					liesKnown.push("domrect:" + pretty[i])
+			// lies
+			if (gRun) {
+				if (known["dr"+ i] == true) {
+					gLiesKnown.push("domrect:"+ pretty[i])
 				}
 			}
 			// push & display
-			hash.push("dr"+i+":"+push)
-			document.getElementById("dr"+i).innerHTML = display
+			hash.push("dr"+ i +":"+ push)
+			document.getElementById("dr"+ i).innerHTML = display
 		}
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
-		debug_section("domrect", t0, hash)
+		log_section("domrect", t0, hash)
 	}
 
 	function getElements(classname){
@@ -156,7 +155,7 @@ function outputDomRect() {
 						return rects.map(function(rect, i){
 							item++
 							try { // don't display rect6
-								document.getElementById(method+item).textContent = rect[property]
+								document.getElementById(method + item).textContent = rect[property]
 							} catch(e) {}
 							return rect[property]
 						}).join("")
@@ -164,10 +163,10 @@ function outputDomRect() {
 				}
 				// store hashes on first two runs
 				if (runtype < 2) {
-					runarray.push(runtype+":"+method+":"+sha1(data.join()))
+					runarray.push(runtype +":"+ method +":"+ sha1(data.join()))
 				}
 			} catch(e) {
-				runarray.push(runtype+":"+method+":tzp:"+e.name)
+				runarray.push(runtype +":"+ method +":tzp:"+ e.name)
 			}
 		}
 		performTest(runtype)
@@ -176,7 +175,7 @@ function outputDomRect() {
 	// run
 	function run(runtype, runarray) {
 		return new Promise(function(resolve, reject) {
-			//div position
+			// div
 			if (runtype == 0) {
 				// reset
 				dom.divrect.classList.add("divrect1");
@@ -203,7 +202,6 @@ function outputDomRect() {
 		})
 	}
 
-	let t0 = performance.now()
 	let run0 = [], run1 = [], run2 = [], run3 = []
 	let chk = {dr0: [], dr1: [], dr2: [], dr3: []}
 	let known = {dr0: [], dr1: [], dr2: [], dr3: []}
@@ -211,12 +209,11 @@ function outputDomRect() {
 	Promise.all([
 		run(0, run0),
 		run(1, run1),
-		run(2, run2),
-		run(3, run3)
+		run(2, run2), // shift
+		run(3, run3) // knownRect
 	]).then(function(){
 		analyze()
 	})
-
 }
 
 countJS("domrect")
