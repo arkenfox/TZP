@@ -1,8 +1,6 @@
 "use strict";
 
-/* outputCanvas() based on
-https://canvasblocker.kkapsner.de/test/
-https://github.com/kkapsner/CanvasBlocker */
+/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
 
 function outputCanvas() {
 	let t0 = performance.now(),
@@ -199,7 +197,7 @@ function outputCanvas() {
 					value: function(){
 						let t1 = performance.now()
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
-						log_perf("toDataURL ["+ runNo +"] [canvas]",t1) //,gt0,data)
+						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 						return data
 					}
 				},
@@ -217,7 +215,7 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = hashDataURL(reader.result)
-									log_perf("toBlob ["+ runNo +"] [canvas]",t1) //,gt0,data)
+									log_perf("toBlob ["+ runNo +"] [canvas]",t1)
 									resolve(data)
 								}
 								reader.onerror = function(){
@@ -253,7 +251,7 @@ function outputCanvas() {
 						var context = getFilledContext()
 						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
 						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
-						log_perf("getImageData ["+ runNo +"] [canvas]",t1) //,gt0,data)
+						log_perf("getImageData ["+ runNo +"] [canvas]",t1)
 						return data
 					}
 				},
