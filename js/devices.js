@@ -22,7 +22,7 @@ function set_pluginBS() {
 		const mimeTypesDescriptions = new Set(
 			[...mimeTypes]
 			.map(mime => mime.description)
-			.filter(description => description != '') // ignore blank descriptions  
+			.filter(description => description != '') // ignore blank descriptions
 		)
 		const pluginsList = [...plugins]
 			.filter(plugin => plugin.description != '') // ignore blank descriptions
@@ -88,7 +88,7 @@ function set_pluginBS() {
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 
 	if (pluginLies.length) {
-		if (isBrave) {isBraveFP = true}
+		isBraveFP = check_navKey("brave")
 		pluginBS = true
 	} else {
 		pluginBS = false
@@ -97,7 +97,7 @@ function set_pluginBS() {
 
 function get_gamepads() {
 	return new Promise(resolve => {
-		let r = (check_navObject("getGamepads") ? "enabled" : "disabled")
+		let r = (check_navKey("getGamepads") ? "enabled" : "disabled")
 		dom.gamepads.innerHTML = r
 		return resolve("gamepads:"+ r)
 	})
@@ -105,7 +105,7 @@ function get_gamepads() {
 
 function get_concurrency() {
 	let h = zD
-	if (check_navObject("hardwareConcurrency")) {
+	if (check_navKey("hardwareConcurrency")) {
 		try {
 			h = navigator.hardwareConcurrency
 			h = (h == undefined ? zB0 : h)
@@ -118,7 +118,7 @@ function get_concurrency() {
 	if (isBraveFP) {
 		h = "fake"
 	} else {
-		h = (liesList.includes("Navigator.hardwareConcurrency") ? "fake" : h)
+		h = (protoLies.includes("Navigator.hardwareConcurrency") ? "fake" : h)
 	}
 	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
 	return "hardwareConcurrency:"+ h
@@ -129,17 +129,17 @@ function get_media_devices() {
 		let t0 = performance.now()
 
 		function finish(result) {
-			// global lie
-			if (!sRerun) {
-				if (devicesBS) {liesKnown.push("devices:media")}
+			// lies
+			if (gRun) {
+				if (devicesBS) {gLiesKnown.push("devices:media")}
 			}
 			dom.eMDList.style.color = zshow
-			if (logPerf) {debug_perf("media devices [devices]",t0)}
+			log_perf("media devices [devices]",t0)
 			return resolve("media_devices:"+ result)
 		}
 
-		// if mediaDevices is not supoprted
-		if (check_navObject("mediaDevices") == false) {
+		// not supoprted
+		if (check_navKey("mediaDevices") == false) {
 			dom.eMDList = zD
 			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
 			finish(zD)
@@ -171,17 +171,17 @@ function get_media_devices() {
 					// enumerate
 					devices.forEach(function(d) {
 						arr.push(d.kind)
-						str += (d.kind+": ").padStart(pad)+d.deviceId
-						if (d.groupId.length > 0) {
+						str += (d.kind +": ").padStart(pad)+ d.deviceId
+						if (d.groupId.length) {
 							strPad = ("group: ").padStart(pad)
-							str += "<br>"+strPad+d.groupId
+							str += "<br>"+ strPad + d.groupId
 						} else {
 							// if FF the length cannot be zero
 							console.debug(d.kind, "zero-length groupId")
 						}
-						if (d.label.length > 0) {
+						if (d.label.length) {
 							strPad = ("label: ").padStart(pad)
-							str += "<br>"+strPad+d.label
+							str += "<br>"+ strPad + d.label
 						}
 						str += "<br>"
 						// FF sanity check
@@ -206,7 +206,7 @@ function get_media_devices() {
 
 					// count each kind
 					let pretty = [], plain = [], rfphash = ""
-					if (arr.length > 0) {
+					if (arr.length) {
 						if (devicesBS) {
 							pretty = "fake"
 						} else {
@@ -218,7 +218,7 @@ function get_media_devices() {
 								let data = arr[i],
 									item = data[0],
 									itemcount = data[1]
-								pretty.push(item + s7 +"["+ itemcount +"]" + sc)
+								pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
 								plain.push(item +","+ itemcount)
 							}
 							pretty = pretty.join(" ")
@@ -263,20 +263,20 @@ function get_mimetypes() {
 			return resolve(output)
 		}
 
-		if (check_navObject("mimeTypes")) {
+		if (check_navKey("mimeTypes")) {
 			try {
 				let m = navigator.mimeTypes
-				if (m.length > 0) {
+				if (m.length) {
 					let res = []
 					for (let i=0; i < m.length; i++) {
-						res.push( m[i].type + (m[i].description == "" ? ": * " : ": " + m[i].type)
-							+ (m[i].suffixes == "" ? ": *" : ": " + m[i].suffixes) )
+						res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
+							+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes) )
 					}
 					res.sort()
 					// FF: mimeBS
 					if (isFF) {
 						mimeBS = false
-						if (isVer > 84 && res.length > 0) {
+						if (isVer > 84 && res.length) {
 							// FF85+: EOL Flash
 							mimeBS = true
 						} else {
@@ -326,34 +326,34 @@ function get_mimetypes_plugins() {
 				// if any flash then BOTH must be true: replace hash with fake
 				if (pFlash == true && mFlash == false) {
 					pValue = "fake"
-					dom.plugins.innerHTML = "fake" + rfp_red
+					dom.plugins.innerHTML = "fake"+ rfp_red
 				}
 				if (pFlash == false && mFlash == true) {
 					mValue = "fake"
-					dom.mimeTypes.innerHTML = "fake" + rfp_red
+					dom.mimeTypes.innerHTML = "fake"+ rfp_red
 				}
 			}
-			if (logPerf) {debug_perf("mimetypes/plugins [devices]",t0)}
-			return resolve(["plugins:"+pValue, "mimeTypes:"+mValue])
+			log_perf("mimetypes/plugins [devices]",t0)
+			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
 		})
 	})
 }
 
 function get_mm_hover(type){
-	let x=zNS, h="hover", n="none", q="("+type+":"
+	let x=zNS, h="hover", n="none", q="("+ type +":"
 	try {
-		if (window.matchMedia(q+n+")").matches) x=n
-		if (window.matchMedia(q+h+")").matches) x=h
+		if (window.matchMedia(q + n +")").matches) x=n
+		if (window.matchMedia(q + h +")").matches) x=h
 	} catch(e) {x = zB0}
 	return x
 }
 
 function get_mm_pointer(type){
-	let x=zNS, f="fine", c="coarse", n="none", q="("+type+": "
+	let x=zNS, f="fine", c="coarse", n="none", q="("+ type +": "
 	try {
-		if (window.matchMedia(q+n+")").matches) x=n
-		if (window.matchMedia(q+c+")").matches) x=c
-		if (window.matchMedia(q+f+")").matches) x=f
+		if (window.matchMedia(q + n +")").matches) x=n
+		if (window.matchMedia(q + c +")").matches) x=c
+		if (window.matchMedia(q + f +")").matches) x=f
 	} catch(e) {x = zB0}
 	return x
 }
@@ -375,21 +375,21 @@ function get_plugins() {
 			return resolve(output)
 		}
 
-		if (check_navObject("plugins")) {
+		if (check_navKey("plugins")) {
 			try {
 				let p = navigator.plugins
-				if (p.length > 0) {
+				if (p.length) {
 					let res = []
 					for (let i=0; i < p.length; i++) {
-						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": " + p[i].filename)
-							+ (p[i].description == "" ? ": *" : ": " + p[i].description))
+						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
+							+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
 					}
 					res.sort()
 					// FF
 					if (isFF) {
 						// reset
 						pluginBS = false
-						if (isVer > 84 && res.length > 0) {
+						if (isVer > 84 && res.length) {
 							// FF85+: EOL Flash
 							pluginBS = true
 						} else if (res.length > 1) {
@@ -421,20 +421,20 @@ function get_pointer_hover() {
 		// pointer event
 		let r1 = (window.PointerEvent == "undefined" ? zD : zE)
 		dom.pointer = r1
-		res.push("pointer_event:"+r1)
+		res.push("pointer_event:"+ r1)
 
 		// FF64: pointer/hover
-		let p = get_mm_pointer("any-pointer")+" | "+get_mm_pointer("pointer")
-		let h = get_mm_hover("any-hover")+" | "+get_mm_hover("hover")
-		res.push("any-pointer_pointer:"+p)
-		res.push("any-hover_hover:"+p)
+		let p = get_mm_pointer("any-pointer")+" | "+ get_mm_pointer("pointer")
+		let h = get_mm_hover("any-hover")+" | "+ get_mm_hover("hover")
+		res.push("any-pointer_pointer:"+ p)
+		res.push("any-hover_hover:"+ p)
 
 		// 1607316
 		if (isVer > 73 && isOS == "android") {
 			p += (p == "coarse | coarse" ? rfp_green : rfp_red)
 			h += (h == "none | none" ? rfp_green : rfp_red)
 		} else {
-			let rfp = zNS+" | "+zNS
+			let rfp = zNS +" | "+ zNS
 			if (p !== rfp) {
 				p += (p == "fine | fine" ? rfp_green : rfp_red)
 			}
@@ -463,7 +463,7 @@ function get_speech_engines() {
 			dom.sEngines.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
 			dom.sEnginesList.innerHTML = detail
 			dom.sEnginesList.style.color = zshow
-			if (logPerf) {debug_perf("speech engines [devices]",t0)}
+			log_perf("speech engines [devices]",t0)
 			return resolve("speech_engines:"+ output)
 		}
 
@@ -476,19 +476,11 @@ function get_speech_engines() {
 					} else {
 						let v = speechSynthesis.getVoices()
 						for (let i=0; i < v.length; i++) {
-							res.push(v[i].name + " (" + v[i].lang + ")" + (v[i].default ? " : default" : ""))
+							res.push(v[i].name +" ("+ v[i].lang +")"+ (v[i].default ? " : default" : ""))
 						}
-						// ToDo: why does it run multiple times and first pass is empty
-							//      first page load: nothing, got some, got some
-							// same tab page reload: nothing, got some
-							//    new tab page load: nothing, got some
-							//         global rerun: got some
-							//        section rerun: got some
 						if (res.length == 0) {
-							//console.debug("got nothing")
 							display("none")
 						} else {
-							//console.debug("got some", res)
 							res.sort()
 							display(res)
 						}
@@ -524,7 +516,7 @@ function get_speech_rec() {
 	} catch(e) {
 		// undefined
 		// ToDo: speechRec: detect disabled vs not-supported?
-		dom.sRec = zD+" [or "+zNS+"]"
+		dom.sRec = zD +" [or "+ zNS +"]"
 	}
 }
 
@@ -533,15 +525,15 @@ function get_touch() {
 	let m = zNS, p = zNS, t = false, q="(-moz-touch-enabled:"
 	// m
 	try {
-		if (window.matchMedia(q+"0)").matches) {m=0}
-		if (window.matchMedia(q+"1)").matches) {m=1}
+		if (window.matchMedia(q +"0)").matches) {m=0}
+		if (window.matchMedia(q +"1)").matches) {m=1}
 	} catch(e) {m = zB0}
 	// t
 	try {document.createEvent("TouchEvent"); t = true} catch (e) {}
 	let t2 = ("ontouchstart" in window)
 	let t3 = ("ontouchend" in window)
 	// p
-	if (check_navObject("maxTouchPoints")) {
+	if (check_navKey("maxTouchPoints")) {
 		try {
 			p = navigator.maxTouchPoints
 			p = (p == undefined ? zB0 : p)
@@ -555,7 +547,7 @@ function get_touch() {
 
 function get_vr() {
 	return new Promise(resolve => {
-		let r = check_navObject("getVRDisplays") + check_navObject("activeVRDisplays")
+		let r = check_navKey("getVRDisplays") + check_navKey("activeVRDisplays")
 		r = (r == 2 ? "enabled" : "disabled")
 		dom.vrdisplays.innerHTML = r
 		return resolve("vr:"+ r)
@@ -593,14 +585,14 @@ function outputDevices() {
 				section.push(currentResult)
 			}
 		})
-		// global lies
-		if (!sRerun) {
-			if (pluginBS) {liesKnown.push("devices:plugins")}
-			if (mimeBS) {liesKnown.push("devices:mimeTypes")}
-			if (isBraveFP) {liesKnown.push("devices:hardwareConcurrency")}
+		// lies
+		if (gRun) {
+			if (pluginBS) {gLiesKnown.push("devices:plugins")}
+			if (mimeBS) {gLiesKnown.push("devices:mimeTypes")}
+			if (isBraveFP) {gLiesKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
-		debug_section("devices", t0, section)
+		log_section("devices", t0, section)
 	})
 }
 
