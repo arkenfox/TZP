@@ -4,6 +4,8 @@
 
 function outputPrototypeLies() {
 	return new Promise(resolve => {
+		let t0 = performance.now()
+
 		const getIframe = () => {
 			try {
 				const numberOfIframes = window.length
@@ -198,7 +200,7 @@ function outputPrototypeLies() {
 			// "prototype" in function should not exist
 			const getPrototypeInFunctionLie = apiFunction => 'prototype' in apiFunction ? true : false
 
-			// "arguments", "caller", "prototype", "toString"  should not exist in descriptor
+			// "arguments", "caller", "prototype", "toString" should not exist in descriptor
 			const getDescriptorLie = apiFunction => {
 				const hasInvalidDescriptor = (
 					!!Object.getOwnPropertyDescriptor(apiFunction, 'arguments') ||
@@ -277,7 +279,7 @@ function outputPrototypeLies() {
 					[`g: setting prototype to null and converting to a string should throw a TypeError`]: getNullConversionTypeErrorLie(apiFunction),
 					[`h: toString() and toString.toString() should return a native string in all frames`]: getToStringLie(apiFunction, name, iframeWindow),
 					[`i: "prototype" in function should not exist`]: getPrototypeInFunctionLie(apiFunction),
-					[`j: "arguments", "caller", "prototype", "toString"  should not exist in descriptor`]: getDescriptorLie(apiFunction),
+					[`j: "arguments", "caller", "prototype", "toString" should not exist in descriptor`]: getDescriptorLie(apiFunction),
 					[`k: "arguments", "caller", "prototype", "toString" should not exist as own property`]: getOwnPropertyLie(apiFunction),
 					[`l: descriptor keys should only contain "name" and "length"`]: getDescriptorKeysLie(apiFunction),
 					[`m: own property names should only contain "name" and "length"`]: getOwnPropertyNamesLie(apiFunction),
@@ -640,7 +642,6 @@ function outputPrototypeLies() {
 		}
 
 		// start
-		let t0 = performance.now()
 		const {
 			lieList,
 			lieDetail,
@@ -650,31 +651,31 @@ function outputPrototypeLies() {
 		if (iframeContainerDiv) {
 			iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
 		}
-		// global data
-		liesList = lieList
-		liesDetail = lieDetail
-		// display
 		let el = dom.prototypehash
-		if (lieCount == 0) {
-			el.innerHTML = "none"
-		} else {
-			let hash = sha1(lieList)
-			let lieString = lieList.length + " lie" + (lieList.length > 1 ? "s" : "")
-			hash += buildButton("0", "prototype lies", lieString, "showMetrics")
-			hash += buildButton("0", "prototype lie details", "details", "showMetrics")
-			el.innerHTML = hash
+		let hash = sha1(lieList)
+		// gRun: snapshot
+		if (gRun) {
+			gLies = lieList
+			gLiesDetail = lieDetail
+			if (lieCount == 0) {
+				el.innerHTML = "none"
+			} else {
+				let lieString = lieList.length +" lie"+ (lieList.length > 1 ? "s" : "")
+				hash += buildButton("0", "prototype lies", lieString, "showMetrics")
+				hash += buildButton("0", "prototype lie details", "details", "showMetrics")
+				el.innerHTML = hash
+			}
+			log_perf("prototype lies [prereq]",t0)
 		}
-		// perf
-		let perf = Math.round(performance.now() - t0)
-		if (logPerf) {debug_perf("prototype lies [setup]",t0)}
-		debug_section("prototype", t0)
-		// resolve
+		// always set on page-load, global rerun, section re-run 
+		protoLies = lieList
+		log_section("prereq", t0)
 		return resolve("done")
 	})
 }
 
-// to check lies
-// liesList.includes('HTMLCanvasElement.toDataURL') // returns true or false
-// liesDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
+// example: to check lies
+// gLies.includes('HTMLCanvasElement.toDataURL') // returns true or false
+// gLiesDetail['HTMLCanvasElement.toDataURL'] // returns the list of lies
 
 countJS("prototypeLies")
