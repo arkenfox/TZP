@@ -1,8 +1,6 @@
 "use strict";
 
-/* code based on
-https://canvasblocker.kkapsner.de/test/
-https://github.com/kkapsner/CanvasBlocker */
+/* code based on https://canvasblocker.kkapsner.de/test/ */
 
 function reset_domrect() {
 	for (let i=0; i < 4; i++) {
@@ -88,7 +86,7 @@ function outputDomRect() {
 						})
 						if (known["dr"+ i] == true) {
 							//console.log("DOMRect method dr"+ i +" [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
-							push = "tampered"
+							push = "noise"
 							display = value1 + sColor + note_noise
 						}
 					}
