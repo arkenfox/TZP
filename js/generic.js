@@ -17,8 +17,8 @@ function getUniqueElements() {
 	})
 }
 
-function rnd_string(prefix) {
-	return (prefix == undefined ? "" : prefix) + Math.random().toString(36).substring(2, 15)
+function rnd_string() {
+	return Math.random().toString(36).substring(2, 15)
 }
 
 function rnd_number() {
@@ -30,7 +30,7 @@ function count_decimals(value) {
 	return value.toString().split(".")[1].length || 0
 }
 
-function sha1(str1){
+function sha1(str1) {
 	for (var blockstart=0,
 		i = 0,
 		W = [],
@@ -62,48 +62,96 @@ function sha1(str1){
 	return str1
 }
 
-async function sha256_str(str) {
+async function sha256(str) {
 	const buf = await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str))
-	return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('')
+	return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+ x.toString(16)).slice(-2))).join('')
 }
 
 const promiseRaceFulfilled = async ({
-    promise,
-    responseType, // the promise response type
-    limit = 1000 // default ms to fulfill
+	promise,
+	responseType, // the promise response type
+	limit = 1000 // default ms to fulfill
 }) => {
-    // set up promise race
-    const slowPromise = new Promise(resolve => setTimeout(resolve, limit))
-    // await promise race status
-    const response = await Promise.race([slowPromise, promise]) // the fastest will win 
-        .then(response => response instanceof responseType ? response : 'pending')
-        .catch(error => 'rejected')
-    return (
-        response == 'rejected' || response == 'pending' ? undefined : response
-    )
+	// set up promise race
+	const slowPromise = new Promise(resolve => setTimeout(resolve, limit))
+	// await promise race status
+	const response = await Promise.race([slowPromise, promise]) // fastest will win 
+		.then(response => response instanceof responseType ? response : 'pending')
+		.catch(error => 'rejected')
+	return (
+		response == 'rejected' || response == 'pending' ? undefined : response
+	)
 }
 
 /*** CHECK FUNCTIONS ***/
 
-function check_navObject(property) {
-	// this fails: sendBeacon + cycec for example
-	return !!Object.getOwnPropertyDescriptor(Navigator.prototype, property)
+function check_navKey(property) {
+	if (navKeys["trueKeys"]) {
+		return navKeys["trueKeys"].includes(property)
+	} else {
+		console.error(property, false, "navKeys not populated")
+		return false
+	}
 }
 
+const get_navKeys = () => new Promise(resolve => {
+	// reset
+	navKeys = {}
+	// build
+	try {
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let trueKeys = keys
+		let lastKeyIndex = keys.length
+		let fakeKeys = []
+		if (isFF) {
+			// FF: constructor is always last
+			lastKeyIndex = keys.indexOf("constructor")
+			trueKeys = keys.slice(0, lastKeyIndex+1)
+			fakeKeys = keys.slice(lastKeyIndex+1)
+		} else if (isEngine == "blink") {
+			// chromium: last key inconsistent
+			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
+			trueKeys = keys.filter(x => !knownPoison.includes(x))
+			fakeKeys = keys.filter(x => knownPoison.includes(x))
+		}
+		// remove constructor
+		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
+		// set
+		navKeys["trueKeys"] = trueKeys
+		navKeys["fakeKeys"] = fakeKeys
+		// set brave
+		if (check_navKey("brave")) {
+			isBrave = true
+			//set_pluginBS() // ToDo: get isBraveFP
+			//console.debug("isBrave", isBrave, "isBraveFP", isBraveFP)
+		}
+		return resolve("")
+	} catch(e) {
+		console.error("get_navKeys", e.name, e.message)
+		return resolve("")
+	}
+})
+
 function check_RFP() {
-	let r = false
-	if (isFF) {
+	if (!isFF) {
+		return false
+	} else {
 		try {
 			performance.mark("a")
-			r = performance.getEntriesByName("a","mark").length
+			let r = performance.getEntriesByName("a","mark").length
 				+ performance.getEntries().length
 				+ performance.getEntries({name:"a",entryType:"mark"}).length
 				+ performance.getEntriesByName("a","mark").length
 				performance.clearMarks()
-			if (r == 0) {r = true} else {r = false}
-		} catch(e) {}
+			if (r == 0) {
+				return true
+			} else {
+				return false
+			}
+		} catch(e) {
+			return false
+		}
 	}
-	return r
 }
 
 function getDynamicIframeWindow({
@@ -150,7 +198,7 @@ function getDynamicIframeWindow({
 			if (r == "") {r = "empty string"}
 			if (r == "undefined") {r = "undefined string"}
 			if (r == undefined) {r = "undefined value"}
-			res.push(list[i]+":"+r)
+			res.push(list[i] +":"+ r)
 		}
 		res.sort()
 	}
@@ -177,7 +225,7 @@ function copyclip(element) {
 		}
 	}
 	// clipboard API
-	if (check_navObject("clipboard")) {
+	if (check_navKey("clipboard")) {
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
@@ -186,7 +234,6 @@ function copyclip(element) {
 			content = content.replace(/<\/?span[^>]*>/g,"")
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
-				// clipboard successfully set
 			}, function() {
 				// clipboard write failed
 				copyExec()
@@ -200,7 +247,7 @@ function copyclip(element) {
 }
 
 function showhide(togType, togID, togWord) {
-	var xyz = document.getElementsByClassName("tog"+togID);
+	var xyz = document.getElementsByClassName("tog"+ togID);
 	var abc;
 	for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
 	// change label
@@ -210,7 +257,7 @@ function showhide(togType, togID, togWord) {
 		if (togID == "F3") {sText = "textmetrics"}
 		if (togID == "F4") {sText = "unicode glyphs"}
 		if (togID == "Z") {sText = "perf & debugging"}
-		document.getElementById("label"+togID).innerHTML = togWord +" "+ sText
+		document.getElementById("label"+ togID).innerHTML = togWord +" "+ sText
 	}
 	// errors
 	if (togID == "E") {
@@ -234,17 +281,17 @@ function showhide(togType, togID, togWord) {
 			for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
 		}
 	}
-	// fonts show/hide if font fallback has been run + it differs
+	// fonts
 	if (togID == "F1") {
 		let fontA = dom.fontLabel.textContent
 		let fontB = dom.fontFBlabel.textContent
 		if (fontB == "") {fontB = fontA}
 		if (fontA == fontB) {
-			// same: hide the second
+			// same: hide 2nd
 			dom.fontB1.style.display = "none"
 			dom.fontB2.style.display = "none"
 		} else {
-			// different: show both
+			// diff: show both
 			dom.fontB1.style.display = togType
 			dom.fontB2.style.display = togType
 		}
@@ -266,43 +313,54 @@ function toggleitems(chkbxState, chkbxID) {
 /** DISPLAY CLICK FUNCTIONS **/
 
 function showDetail(name) {
-	let data = sectionDetail[name]
-	name = name.replace("_", ": ")
+	let data = sDetail[name],
+		hash = sha1(data.join())
+	// split+tidy name
 	name = name.replace(/\_/g, " ")
-	console.debug(name, data)
+	let n = name.indexOf(" "),
+		section = name.substring(0,n).toUpperCase(),
+		metric = name.substring(n,name.length).trim()
+	console.debug(section +": "+ metric +": "+ hash, data)
 }
 
 function showMetrics(type) {
-	if (type == "globaldetail") {
-		for (let item in globalDetail) {
-			console.log(item, globalDetail[item])
+	if (type == "gDetail") {
+		for (let name in gDetail) {
+			let data = sDetail[name],
+				hash = sha1(data.join())
+			// split+tidy name
+			name = name.replace(/\_/g, " ")
+			let n = name.indexOf(" "),
+				section = name.substring(0,n).toUpperCase(),
+				metric = name.substring(n,name.length).trim()
+			console.debug(section +": "+ metric +": "+ hash, data)
 		}
-	} else if (type == "perfDetail") {
-		console.log("perf detail: global\n" + perfDetail.join("\n"))
-	} else if (type == "perfSection") {
-		if (perfSection.length > 0) {
-			console.log("perf detail: re-runs\n" + perfSection.join("\n"))
+	} else if (type == "gPerfDetail") {
+		console.log("perf detail: global\n"+ gPerfDetail.join("\n"))
+	} else if (type == "sPerfDetail") {
+		if (sPerfDetail.length) {
+			console.log("perf detail: re-runs\n"+ sPerfDetail.join("\n"))
 		}
 	} else {
 		let array = [],
 			showhash = true
 		if (type == "known") {
 			type += " lies"
-			array = liesKnown
+			array = gLiesKnown
 		} else if (type == "loose") {
-			type = "fingerprint: " + type
-			array = globalData
+			type = "fingerprint: "+ type
+			array = gData
 		} else if (type == "prototype lies") {
-			array = liesList
+			array = gLies
 			showhash = false
 		} else if (type == "prototype lie details") {
-			array = liesDetail
+			array = gLiesDetail
 			showhash = false
 		} else {
 			// section
-			array = sectionData[type]
+			array = sData[type]
 		}
-		console.log(type + ": " + (showhash ? sha1(array.join()) : ""), array)
+		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
 	}
 }
 
@@ -312,53 +370,74 @@ function showMetrics(type) {
 function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 	if (functionName == undefined) {functionName = "showDetail"}
 	if (btnType == undefined) {btnType = "btnc"}
-	return " <span class='btn" + colorCode + " " + btnType
-		+ "' onClick='" + functionName +"(`"+ arrayName +"`)'>" +"["+ displayText +"]</span>"
+	return " <span class='btn"+ colorCode +" "+ btnType +"' onClick='"
+		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
 
 function clearDetail(name) {
 	try {
-		sectionDetail[name] = []
+		sDetail[name] = []
 	} catch(e) {}
 }
 
-function debug_click(string, time) {
-	sRerun = true // = click here perf
-	gRerun = false // = not use gt0
-	debug_section(string, time)
+function log_click(name, time) {
+	// click here doesn't record via log_section
+	let output = Math.round(performance.now() - time).toString()
+	output = name.padStart(14) +": "+ sn + output.padStart(4) + sc +" ms"
+	log_debug("perfS", output)
 }
 
-function debug_page(target, str) {
-	// perf table:id = debug*
-	let el = document.getElementById("debug"+target)
-	if (sRerun == false) {
-		el.innerHTML = el.innerHTML + str + "<br>"
+function log_debug(target, output) {
+	// add line items to perf/debug table
+	let el = document.getElementById(target)
+	el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + output
+}
+
+function log_line(str) {
+	let output = str
+	if (str == "line") {
+		output = "-".repeat(20)
+		output = output.padStart(31)
+	}
+	if (gRun) {
+		gPerfDetail.push(output)
+	} else {
+		sPerfDetail.push(output)
 	}
 }
 
-function debug_perf(str, time1, time2) {
-	let t0 = performance.now()
-	time1 = Math.round(t0 - time1).toString()
+function log_perf(str, time1, time2, extra) {
+	let t0 = performance.now(),
+		output = ""
+	if (isNaN(time1)){
+		output = str.padStart(30) +": "+ (time1).padStart(7)
+	} else {
+		time1 = Math.round(t0 - time1).toString()
+		output = str.padStart(30) +": "+ time1.padStart(4) +" ms"
+	}
 	if (time2 == "ignore") {
-		// ignore resize events
 		time2 = ""
+	} else if (time2 == "") {
+		output += " | "+ ("n/a").padStart(7)
 	} else {
-		// else append acculumative time
 		time2 = Math.round(t0 - gt0).toString()
-		time2 = " | " + time2.padStart(4) + " ms"
+		time2 = " | "+ time2.padStart(4) +" ms"
+		output += time2
 	}
-	// string
-	let output = str.padStart(30) + ": "+ time1.padStart(4) + " ms" + time2
-	if (gRerun || (gRerun + sRerun == 0)) {
-		// global perf
-		perfDetail.push(output)
+	if (extra !== undefined && extra !== "") {
+		extra = " | "+ extra
+		output += extra
+	}
+	if (gRun) {
+		gPerfDetail.push(output)
 	} else {
-		// click perf
-		perfSection.push(output)
+		sPerfDetail.push(output)
 	}
 }
 
-function debug_section(name, time1, data) {
+function log_section(name, time1, data) {
+	let t0 = performance.now()
+	time1 = Math.round(t0-time1).toString()
 
 	// DATA
 	if (Array.isArray(data)) {
@@ -366,144 +445,138 @@ function debug_section(name, time1, data) {
 		let hash = sha1(data.join())
 		// SANITY
 		if (data.length == 0) {
-			globalCheck.push(name +": data array is empty")
+			gCheck.push(name +": data array is empty")
 		} else {
 			for (let i=0; i < data.length; i++) {
 				let check = data[i]
 				if (check == undefined) {
-					globalCheck.push(name +": contains undefined")
+					gCheck.push(name +": contains undefined")
 				} else {
 					let parts = data[i].split(":")
 					let metric = parts[0]
 					let value = parts.slice(1).join(":")
 					if (value == "") {
-						globalCheck.push(name +" - " + metric + ": not set")
+						gCheck.push(name +" - "+ metric +": not set")
 					} else if (value == undefined) {
-						globalCheck.push(name +" - " + metric + ": undefined")
-					}
-				}
-			}
-		}
-		// store section results
-		sectionData[name] = data
-
-		// store global results if not a section rerun
-		if (!sRerun) {
-			globalHash.push(name + ":" + hash)
-			globalCount += data.length
-			globalData.push([name +":" + hash, data])
-
-			// global run finished
-			if (globalHash.length == 14) {
-				// lies: de-dupe, sort
-				if (liesKnown.length > 0) {
-					liesKnown = liesKnown.filter(function(item, position) {return liesKnown.indexOf(item) === position})
-					liesKnown.sort()
-					dom.knownhash.innerHTML = sha1(liesKnown.join())
-						+ buildButton("0", "known", liesKnown.length + " lie" + (liesKnown.length > 1 ? "s" : ""), "showMetrics")
-				} else {
-					dom.knownhash = "none"
-				}
-				// global details: order, only add non-empty arrays
-				globalDetail = {}
-				const names = Object.keys(sectionDetail).sort()
-				for (const k of names) if (sectionDetail[k].length) globalDetail[k] = sectionDetail[k]
-				// global data
-				globalHash.sort()
-				globalData.sort()
-				let hash2 = sha1(globalData.join())
-				// display
-				hash2 += buildButton("0", "loose", globalCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
-				hash2 += buildButton("0", "globaldetail", "details", "showMetrics")
-				dom.allhash.innerHTML = hash2
-				dom.perfall = "  "+ Math.round(performance.now() - gt0) + " ms"
-				// global check: de-dupe + sort
-				if (globalCheck.length > 0) {
-					globalCheck = globalCheck.filter(function(item, position) {return globalCheck.indexOf(item) === position})
-					globalCheck.sort()
-					if (isFile) {
-						console.error("section hash issues\n", globalCheck)
+						gCheck.push(name +" - "+ metric +": undefined")
 					}
 				}
 			}
 		}
 
 		// SECTION
-		try {
-			//add metric count
-			hash += buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
-			if (name == "ua") {hash += (isFF ? " [spoofable + detectable]" : "")}
-			if (name == "feature") {hash += (isFF ? " [unspoofable?]" : "")}
-			if (name == "screen" || name == "devices") {
-				hash += " [incomplete: work in progress]"
+		sData[name] = data
+		let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
+		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
+		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
+		if (name == "screen" || name == "devices") {sHash += " [incomplete: work in progress]"}
+		document.getElementById(name +"hash").innerHTML = sHash
+		document.getElementById("perf"+ name).innerHTML = " "+ time1 +" ms"
+
+		// GLOBAL
+		if (gRun) {
+			gCount++
+			gData.push([name +":"+ hash, data])
+			// FINISH
+			if (gCount == 14) {
+				// metric count
+				let metricCount = 0
+				for (let i=0; i < gData.length; i++) {
+					metricCount += gData[i][1].length
+				}
+				// lies: de-dupe/sort
+				if (gLiesKnown.length) {
+					gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
+					gLiesKnown.sort()
+					dom.knownhash.innerHTML = sha1(gLiesKnown.join())
+						+ buildButton("0", "known", gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : ""), "showMetrics")
+				} else {
+					dom.knownhash = "none"
+				}
+				// details: reset, add non-empty arrays in order
+				gDetail = {}
+				const names = Object.keys(sDetail).sort()
+				for (const k of names) if (sDetail[k].length) gDetail[k] = sDetail[k]
+				// data
+				gData.sort()
+				let gHash = sha1(gData.join())
+				// display
+				gHash += buildButton("0", "loose", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+				gHash += buildButton("0", "gDetail", "details", "showMetrics")
+				dom.allhash.innerHTML = gHash
+				dom.perfall = " "+ Math.round(performance.now() - gt0) +" ms"
+				// sanity
+				if (gCheck.length) {
+					gCheck = gCheck.filter(function(item, position) {return gCheck.indexOf(item) === position})
+					gCheck.sort()
+					if (isFile) {
+						console.error("section hash issues\n", gCheck)
+					}
+				}
 			}
-			document.getElementById(name + "hash").innerHTML = hash
-		} catch(e) {
-			console.debug(name, e.name, e.message)
 		}
-	} else {}	// not an array
+	} else {}	// !ARRAY
 
 	// PERF
-	let t0 = performance.now()
-	time1 = Math.round(t0-time1).toString()
-	try {
-		document.getElementById("perf"+name).innerHTML = "  "+ time1 +" ms"
-	} catch(e) {}
-	let el = dom.perfD
-	let pretty = name.padStart(14) + ": " + sn + time1.padStart(4) + sc + " ms"
-	if (sRerun == false || gRerun == true) {
-		// use gt0 for running total
+	let el = dom.perfG
+	let pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"
+
+	if (gRun) {
 		let time2 = Math.round(t0-gt0).toString()
-		pretty += " | " + so + time2.padStart(4) + sc + " ms"
+		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
+		gPerf.push(pretty)
+		if (gCount == 14) {
+			el.innerHTML = gPerf.join("<br>")
+		}
+	} else {
+		if (name !== "prereq") {
+			el = dom.perfS
+			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
+		}
 	}
-	if (sRerun) {el = dom.perfS}
-	el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
 }
 
 /*** RUN IT FUNCTIONS ***/
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	// all js files have arrived
+	// all here
 	if (jsFiles.length == 13) {
-		if (!isFF) {
-			// isFF fallback B: -moz-dialog font (10ms)
-			// isFF fallback C: errors: really obscure unique FF ones?
-			// isFF fallback D: resource:// (slow AF)
+		// harden isFF
+		log_line(Math.round(performance.now()) + " : RUN ONCE")
+		Promise.all([
+			get_isError(),
+			get_isSystemFont(),
+		]).then(function(){
+			// uses isFF
 			let t0 = performance.now()
 			Promise.all([
-				get_system_fonts("isFFcheck"),
-			]).then(function(result){
-				let go = true
-				let check = result.join()
-				if (check == "error") {
-					go = false // we need to test more
-					console.info("isFF fallback B: failed")
-				} else {
-					if (check !== "undefined") {
-						isFF = true
-						let t1 = performance.now()
-						console.info("isFF fallback B: caught you lying!", Math.round(t1-t0) + "ms")
-					}
+				get_isEngine(),
+				get_isOS(),
+				get_isVer(),
+				get_isTB(),
+			]).then(function(results){
+				if (results[2] == "timeout") {
+					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
 				}
-				if (go) {
-					outputSection("load")
-				} else {
-					// ToDo: isFF fallback B
-					outputSection("load")
-				}
+				outputSection("load")
 			})
-		} else {
-			outputSection("load")
-		}
+		})
 	}
 }
 
 function outputSection(id, cls) {
 	if (cls == undefined || cls == "") {cls = "c"}
-	sRerun = false
-	// clear everything
-	if (id == "all") {
+	let delay = 100
+
+	if (id == "load") {
+		// skip clear/rest
+		id = "all"
+		gRun = true
+		delay = 1
+	} else if (id == "all") {
+		gRun = true
+		// clear/reset
 		let items = document.getElementsByClassName("c")
 		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 		items = document.getElementsByClassName("gc")
@@ -512,36 +585,30 @@ function outputSection(id, cls) {
 		dom.fontFBlabel = ""
 		items = document.getElementsByClassName("togF2")
 		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		// reset global data
-		globalHash = []
-		globalData = []
-		globalCheck = []
-		globalCount = 0
-		globalDetail = {}
-		// reset section data
-		sectionData = {}
-		sectionDetail = {}
-		// reset lies
-		liesKnown = []
-		liesList = []
-		liesDetail = {}
+		// reset global
+		gLiesKnown = []
+		gCount = 0
+		gData = []
+		gCheck = []
+		gDetail = {}
+		// reset section/current
+		protoLies = []
+		sData = {}
+		sDetail = {}
 		// reset perf
-		perfDetail = []
-		perfSection = []
-		dom.perfD = ""
+		gPerf = []
+		gPerfDetail = []
+		sPerfDetail = []
+		dom.perfG = ""
 		dom.perfS = ""
-		gRerun = true
-	} else if (id == "load") {
-		gRerun = false // redundant
-		id = "all"
 	} else {
-		// clear table elements, &nbsp stops line height jitter
-		let tbl = document.getElementById("tb"+id)
+		// clear: &nbsp stops line height jitter
+		let tbl = document.getElementById("tb"+ id)
 		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
-		gRerun = false
-		sRerun = true
+		gRun = false
 	}
-	// hide stuff rather than remove: so it doesn't shrink/grow = jumpy
+
+	// hide stuff so it doesn't shrink/grow
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
 	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
 	if (id=="7") {reset_devices()}
@@ -551,18 +618,17 @@ function outputSection(id, cls) {
 	if (id=="18") {dom.mathmltest.style.color = zhide}
 
 	function output() {
-		// reset timer for sections only
-		if (sRerun) {gt0 = performance.now()}
+		// section timer
+		if (!gRun) {gt0 = performance.now()}
 		// section only
 		if (id=="1") {outputScreen("screen")}
 		if (id=="2") {outputUA()}
 		if (id=="3") {outputFD()}
 		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
-
-		// first 3 sections: always run first as it sets global vars
+		// first 3 sections: run first: it sets global vars
 		if (id=="all") {outputStart()}
-		// possible gRerun: delay/stagger
+		// stagger
 		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next: don't let promise time out
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
@@ -577,54 +643,47 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 	}
 
-	//console.debug("gRerun", gRerun, "sRerun", sRerun)
-	// false, false = page load : delay 1
-	// false, true  = section   : delay 170
-	// true,  false = global    : delay 130 (prototype is ~40ms)
-
-	// wait so users see change
-	if (sRerun) {
-		// section
-		setTimeout(function() {output()}, 170)
+	if (gRun) {
+		if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
 	} else {
-		let delay = 130 // global reruns
-		if (gRerun == false) {delay = 1} // page loads
-		setTimeout(function() {
-			// ensure isOS, isTB, isEngine, function skips if ""
-			gt0 = performance.now()
-			let t0 = performance.now()
-			Promise.all([
-				get_isOS(),
-				get_isEngine(),
-				get_isTB(),
-			]).then(function(){
-				debug_section("immutable", t0)
-				Promise.all([
-					outputPrototypeLies(),
-					]).then(function(){
-						output()
-				})
-			})
-		}, delay)
+		// section
+		const aNames = ['screen','skip','fd','skip','skip','skip','devices','skip',
+			'canvas','webgl','skip','fonts','media','css','skip','skip','skip','skip']
+		const aNumber = (id * 1) - 1
+		let sectionName = aNames[aNumber]
+		if (sectionName !== "skip" && sPerfDetail.length) {
+			log_line("line")
+		}
 	}
+	setTimeout(function() {
+		gt0 = performance.now()
+		Promise.all([
+			get_navKeys(),
+			outputPrototypeLies(),
+		]).then(function(results){
+			output()
+		})
+	}, delay)
 }
 
 function run_once() {
-	// while we wait... some immutables
+	// while we can
+	log_line(Math.round(performance.now()) + " : GENERIC")
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	// isFF
-	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
+	let t0 = performance.now()
+	const isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
 		+ ("InstallTrigger" in window ? true : false)
 		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-	if (isFFsum > 0) {
+	if (isFFsum) {
 		isFF = true
 	} else {
-		isTB = false
-		runS = false // simulation is FF only
+		runS = false // simulation
 	}
-	if (check_navObject("brave")) {isBrave = true}
-	//warm up some JS functions
+	log_perf("installtrigger [isFF]",t0,"",""+ isFF)
+
+	// warm up
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
 	} catch(e) {}
