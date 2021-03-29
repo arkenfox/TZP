@@ -428,7 +428,7 @@ function log_perf(str, time1, time2, extra) {
 		extra = " | "+ extra
 		output += extra
 	}
-	if (output.indexOf("[canvas]") > 0) {console.info(output)} // temp
+	//if (output.indexOf("[canvas]") > 0) {console.info(output)} // temp
 	if (gRun) {
 		gPerfDetail.push(output)
 	} else {
