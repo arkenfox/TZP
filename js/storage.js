@@ -22,40 +22,40 @@ function get_cookies() {
 	try {ctest0 = navigator.cookieEnabled} catch(e) {}
 	dom.ctest0.innerHTML = (ctest0 == zB ? zB : (ctest0 ? zE : zD))
 	// session
-	let rndA = rnd_string("sc_")
-	let rndB = rnd_string("")
-	document.cookie = rndA + "=" + rndB + "; SameSite=Strict"
+	let rndA = "sc_"+ rnd_string()
+	let rndB = rnd_string()
+	document.cookie = rndA +"="+ rndB +"; SameSite=Strict"
 	let svalue = lookup_cookie(rndA)
 	if (svalue != "") {
 		if (logStorage) {
-			console.log(" set:", rndA.padStart(18) + " -", rndB)
-			console.log("read:", rndA.padStart(18) + " -", svalue)
+			console.log(" set:", rndA.padStart(18) +" -", rndB)
+			console.log("read:", rndA.padStart(18) +" -", svalue)
 		}
 		if (svalue == rndB) {
 			dom.ctest1 = zS
 		} else {
-			dom.ctest1 = zF+": values do not match"
+			dom.ctest1 = zF +": values do not match"
 		}
 	} else {
 		dom.ctest1 = zF
 	}
 	// persistent
-	let rndC = rnd_string("pc_")
-	let rndD = rnd_string("")
+	let rndC = "pc_"+ rnd_string()
+	let rndD = rnd_string()
 	let d = new Date()
 	d.setTime(d.getTime() + 86400000) // 1 day
 	let expires = "expires="+ d.toUTCString()
-	document.cookie = rndC + "=" + rndD + "; SameSite=Strict; " + expires
+	document.cookie = rndC +"="+ rndD +"; SameSite=Strict; "+ expires
 	let pvalue = lookup_cookie(rndC)
 	if (pvalue != "") {
 		if (logStorage) {
-			console.log(" set:", rndC.padStart(18) + " -", rndD)
-			console.log("read:", rndC.padStart(18) + " -", pvalue)
+			console.log(" set:", rndC.padStart(18) +" -", rndD)
+			console.log("read:", rndC.padStart(18) +" -", pvalue)
 		}
 		if (pvalue == rndD) {
 			dom.ctest2 = zS
 		} else {
-			dom.ctest2 = zF+": values do not match"
+			dom.ctest2 = zF +": values do not match"
 		}
 	} else {
 		dom.ctest2 = zF
@@ -66,66 +66,66 @@ function get_storage() {
 	// LS support
 	try {
 		if (typeof(localStorage) == "undefined") {
-			dom.lstest0 = zD+": "+zU			
+			dom.lstest0 = zD +": "+ zU			
 		}	else {
 			dom.lstest0 = zE
 		}
 	} catch(e) {
-		dom.lstest0 = zD+": "+ e.name
+		dom.lstest0 = zD +": "+ e.name
 	}
 	// LS test
 	try {
-		let rndE = rnd_string("pls_")
-		let rndF = rnd_string("")
+		let rndE = "pls_"+ rnd_string()
+		let rndF = rnd_string()
 		localStorage.setItem(rndE, rndF)
 		let lsvalue = localStorage.getItem(rndE)
 		if (lsvalue == null) {
 			dom.lstest1 = zF
 		} else {
 			if (logStorage) {
-				console.log(" set:", rndE.padStart(18) + " -", rndF)
-				console.log("read:", rndE.padStart(18) + " -", lsvalue)
+				console.log(" set:", rndE.padStart(18) +" -", rndF)
+				console.log("read:", rndE.padStart(18) +" -", lsvalue)
 			}			
 			if (lsvalue == rndF) {
 				dom.lstest1 = zS
 			} else {
-				dom.lstest1 = zF+": values do not match"
+				dom.lstest1 = zF +": values do not match"
 			}
 		}
 	} catch(e) {
-		dom.lstest1 = zF+": " + e.name
+		dom.lstest1 = zF +": "+ e.name
 	}
 	// SS support
 	try {
 		if (typeof(sessionStorage) == "undefined") {
-			dom.lstest2 = zD+": "+zU
+			dom.lstest2 = zD +": "+ zU
 		} else {
 			dom.lstest2 = zE
 		}
 	} catch(e) {
-		dom.lstest2 = zD+": "+ e.name
+		dom.lstest2 = zD +": "+ e.name
 	}
 	// SS test
 	try {
-		let rndStrG = rnd_string("sls_")
-		let rndStrH = rnd_string("")
+		let rndStrG = "sls_"+ rnd_string()
+		let rndStrH = rnd_string()
 		sessionStorage.setItem(rndStrG, rndStrH)
 		let ssvalue = sessionStorage.getItem(rndStrG)
 		if (ssvalue == null) {
 			dom.lstest3 = zF
 		} else {
 			if (logStorage) {
-				console.log(" set:", rndStrG.padStart(18) + " -", rndStrH)
-				console.log("read:", rndStrG.padStart(18) + " -", ssvalue)
+				console.log(" set:", rndStrG.padStart(18) +" -", rndStrH)
+				console.log("read:", rndStrG.padStart(18) +" -", ssvalue)
 			}			
 			if (ssvalue == rndStrH) {
 				dom.lstest3 = zS
 			} else {
-				dom.lstest3 = zF+": values do not match"
+				dom.lstest3 = zF +": values do not match"
 			}
 		}
 	} catch(e) {
-		dom.lstest3 = zF+": " + e.name
+		dom.lstest3 = zF +": "+ e.name
 	}
 }
 
@@ -138,17 +138,17 @@ function get_idb() {
 			dom.idb1 = zE
 		}
 	} catch(e) {
-		dom.idb1 = zD+": " + e.name
+		dom.idb1 = zD +": "+ e.name
 	}
 	// test
 	try {
 		let dbIDB = indexedDB.open("_testPBMode")
 		dbIDB.onerror = function() {
 			// pb mode
-			dom.idb2 = zF+": onerror"
+			dom.idb2 = zF +": onerror"
 		}
 		dbIDB.onsuccess = function() {
-			let rndStrI = rnd_string("idb_")
+			let rndStrI = "idb_"+ rnd_string()
 			// normal mode
 			try {
 				let openIDB = indexedDB.open(rndStrI)
@@ -165,33 +165,33 @@ function get_idb() {
 					let dbStore = dbTx.objectStore("testIDB")
 					// add data
 					let rndIndex = rnd_number()
-					let rndValue = rnd_string("")
+					let rndValue = rnd_string()
 					if (logStorage) {
-						console.log(" set:", rndStrI.padStart(18) + " -", rndIndex, rndValue)
+						console.log(" set:", rndStrI.padStart(18) +" -", rndIndex, rndValue)
 					}
 					dbStore.put( {id: rndIndex, value: rndValue} )
 					// query data
 					let getStr = dbStore.get(rndIndex)
 					getStr.onsuccess = function() {
 						if (logStorage) {
-							console.log("read:", rndStrI.padStart(18) + " -", getStr.result.id, getStr.result.value)
+							console.log("read:", rndStrI.padStart(18) +" -", getStr.result.id, getStr.result.value)
 						}
 						if (getStr.result.value == rndValue) {
 							dom.idb2 = zS
 						} else {
-							dom.idb2 = zF+": values do not match"
+							dom.idb2 = zF +": values do not match"
 						}
 					}
 					// close transaction
 					dbTx.oncomplete = function() {dbObject.close()}
 				}
 			} catch(e) {
-				dom.idb2 = zF+": " + e.name
+				dom.idb2 = zF +": "+ e.name
 			}
 		}
 	} catch(e) {
 		// blocking cookies or something
-		dom.idb2 = zF+" .open: " + e.name
+		dom.idb2 = zF +" .open: "+ e.name
 	}
 }
 
@@ -213,15 +213,15 @@ function get_workers() {
 				dom.work2 = zF
 				// add listener
 				wwt.addEventListener("message", function(e) {
-					if (logStorage) {console.log("data <- web worker: "+e.data)}
-					if ("TZP-" + rndStr1 === e.data) {
+					if (logStorage) {console.log("data <- web worker: "+ e.data)}
+					if ("TZP-"+ rndStr1 === e.data) {
 						dom.work2 = zS
 					}
 					wwt.terminate
 				}, false)
 				wwt.postMessage(rndStr1)
 			} catch(e) {
-				dom.work2 = zF+": " + e.name
+				dom.work2 = zF +": "+ e.name
 			}
 			// shared worker
 			try {
@@ -231,8 +231,8 @@ function get_workers() {
 				dom.work3 = zF
 				// add listener
 				swt.port.addEventListener("message", function(e) {
-					if (logStorage) {console.log("data <- shared worker: "+e.data)}
-					if ("TZP-" + rndStr2 === e.data) {
+					if (logStorage) {console.log("data <- shared worker: "+ e.data)}
+					if ("TZP-"+ rndStr2 === e.data) {
 						dom.work3 = zS
 					}
 					swt.port.close()
@@ -240,7 +240,7 @@ function get_workers() {
 				swt.port.start()
 				swt.port.postMessage(rndStr2)
 			} catch(e) {
-				dom.work3 = zF+": " + e.name
+				dom.work3 = zF +": "+ e.name
 			}
 		}
 	} else {
@@ -253,7 +253,7 @@ function get_service_workers() {
 	let output = ""
 	// support
 	if (isSecure) {
-		if (check_navObject("serviceWorker")) {
+		if (check_navKey("serviceWorker")) {
 			try {
 				// register
 				navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
@@ -272,9 +272,9 @@ function get_service_workers() {
 				function(e) {
 					// sw error
 					if (e.name ==="") {
-						output = zF+": unknown error"
+						output = zF +": unknown error"
 					} else {
-						output = zF+": "+ e.name
+						output = zF +": "+ e.name
 					}
 					dom.swork2 = output
 					dom.swork3 = zNA; dom.swork4 = zNA
@@ -301,8 +301,8 @@ function get_service_workers() {
 
 function get_permissions(item) {
 	let userVis = "userVisibleOnly",
-		str = item + ":"
-	let el = document.getElementById("p"+item)
+		str = item +":"
+	let el = document.getElementById("p"+ item)
 	return new Promise(resolve => {
 		try {
 			navigator.permissions.query({name:item}).then(function(result) {
@@ -327,7 +327,7 @@ function get_permissions(item) {
 
 function get_storage_manager(runtype) {
 	// support
-	if (check_navObject("storage")) {
+	if (check_navKey("storage")) {
 		dom.storageMSupport = zE
 		if (isFile) {
 			dom.storageMProp.innerHTML = zNA
@@ -347,7 +347,7 @@ function get_storage_manager(runtype) {
 							})
 						})
 					} catch(e) {
-						dom.storageMProp = zF+": " + e.name
+						dom.storageMProp = zF +": "+ e.name
 					}
 					// ToDo: test
 					dom.storageMTest.innerHTML = note_ttc
@@ -379,12 +379,12 @@ function outputStorage() {
 	dom.appcache = appCache
 	section.push("appCache:"+ appCache)
 		// storageM
-	let sm = (check_navObject("storage") ? zE : zD)
+	let sm = (check_navKey("storage") ? zE : zD)
 	section.push("storage_manager:"+ sm)
 		// sw
-	let sw = (check_navObject("serviceWorker") ? zE : zD)
+	let sw = (check_navKey("serviceWorker") ? zE : zD)
 	dom.swork1 = sw
-	section.push("service_worker:" + sw)
+	section.push("service_worker:"+ sw)
 
 	Promise.all([
 		get_permissions("notifications"),
@@ -394,7 +394,7 @@ function outputStorage() {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		debug_section("storage", t0, section)
+		log_section("storage", t0, section)
 	})
 
 }
