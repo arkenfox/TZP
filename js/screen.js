@@ -64,10 +64,10 @@ function get_isChrome() {
 			})
 		}
 		// FF60+ only
-		if (isVer < 60) {
-			output(zNA)
-		} else {
+		if (isVer > 59) {
 			run1()
+		} else {
+			output(zNA)
 		}
 	} else {
 		output(isChrome)
