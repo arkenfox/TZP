@@ -64,14 +64,10 @@ function get_isChrome() {
 			})
 		}
 		// FF60+ only
-		try {
-			newFn("alert('A)")
-		} catch(e) {
-			if (e.message == "unterminated string literal") {
-				output(zNA)
-			} else {
-				run1()
-			}
+		if (isVer < 60) {
+			output(zNA)
+		} else {
+			run1()
 		}
 	} else {
 		output(isChrome)
@@ -273,8 +269,14 @@ const get_isVer = () => new Promise(resolve => {
 
 	// check
 	try {
-		let verNo = "59 or lower"
-		let go = true
+		let verNo = "59 or lower",
+			go = true
+		// 59 or lower
+		try {
+			newFn("alert('A)")
+		} catch(e) {
+			if (e.message == "unterminated string literal") {go = false}
+		}
 		// 88: 1670124
 		if (go) {
 			try {
