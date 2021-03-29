@@ -4,13 +4,6 @@ var pluginBS = false,
 	mimeBS = false, // FF only
 	devicesBS = false // FF only
 
-function reset_devices() {
-	dom.mimeTypesList.style.color = zhide
-	dom.pluginsList.style.color = zhide
-	dom.eMDList.style.color = zhide
-	dom.sEnginesList.style.color = zhide
-}
-
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
 
@@ -133,14 +126,12 @@ function get_media_devices() {
 			if (gRun) {
 				if (devicesBS) {gLiesKnown.push("devices:media")}
 			}
-			dom.eMDList.style.color = zshow
 			log_perf("media devices [devices]",t0)
 			return resolve("media_devices:"+ result)
 		}
 
 		// not supoprted
 		if (check_navKey("mediaDevices") == false) {
-			dom.eMDList = zD
 			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
 			finish(zD)
 		} else {
@@ -158,7 +149,6 @@ function get_media_devices() {
 					if (!devices) {
 						// custom error
 						let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
-						dom.eMDList.innerHTML = e.name +": "+ e.message
 						dom.eMD.innerHTML = e.name
 						finish(e.name)
 						return
@@ -202,7 +192,7 @@ function get_media_devices() {
 					})
 					// output list
 					if (str.length == 0) {str = "none"}
-					dom.eMDList.innerHTML = str
+					//dom.eMDList.innerHTML = str
 
 					// count each kind
 					let pretty = [], plain = [], rfphash = ""
@@ -238,7 +228,6 @@ function get_media_devices() {
 
 				})
 			} catch(e) {
-				dom.eMDList.innerHTML = zB0
 				dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
 				finish(zB0)
 			}
@@ -248,18 +237,20 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
+		let sName = "devices_mimetypes"
+		clearDetail(sName)
+		clearDetail(sName +"_fake")
 
 		function display(output) {
-			let detail = output, count = ""
+			let btn = ""
 			if (Array.isArray(output)) {
-				count = s7 +"["+ output.length +"]"+ sc
-				detail = output.join("<br>")
+				sDetail[sName] = output
+				let sBtn = output.length +" mimetype"+ (output.length > 1 ? "s" : "")
+				btn = buildButton("7", sName + (mimeBS ? "" : "_fake"), sBtn)
 				output = sha1(output.join())
 			}
-			if (mimeBS) {output = "fake"; count = ""}
-			dom.mimeTypes.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
-			dom.mimeTypesList.innerHTML = detail
-			dom.mimeTypesList.style.color = zshow
+			if (mimeBS) {output = "fake"}
+			dom.mimeTypes.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
 			return resolve(output)
 		}
 
@@ -360,18 +351,20 @@ function get_mm_pointer(type){
 
 function get_plugins() {
 	return new Promise(resolve => {
+		let sName = "devices_plugins"
+		clearDetail(sName)
+		clearDetail(sName +"_fake")
 
 		function display(output) {
-			let detail = output, count = ""
+			let btn = ""
 			if (Array.isArray(output)) {
-				count = s7 +"["+ output.length +"]"+ sc
-				detail = output.join("<br>")
+				sDetail[sName] = output
+				let sBtn = output.length +" plugin"+ (output.length > 1 ? "s" : "")
+				btn = buildButton("7", sName + (pluginBS ? "" : "_fake"), sBtn)
 				output = sha1(output.join())
 			}
-			if (pluginBS) {output = "fake"; count = ""}
-			dom.plugins.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
-			dom.pluginsList.innerHTML = detail
-			dom.pluginsList.style.color = zshow
+			if (pluginBS) {output = "fake"}
+			dom.plugins.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
 			return resolve(output)
 		}
 
@@ -451,18 +444,18 @@ function get_pointer_hover() {
 function get_speech_engines() {
 	return new Promise(resolve => {
 		let t0 = performance.now()
+		let sName = "devices_speech_engines"
+		clearDetail(sName)
 
 		// output & resolve
 		function display(output) {
-			let detail = output, count = ""
+			let btn = ""
 			if (Array.isArray(output)) {
-				count = s7 +"["+ output.length +"]"+ sc
-				detail = output.join("<br>")
+				sDetail[sName] = output
+				btn = buildButton("7", sName, output.length +" engine"+ (output.length > 1 ? "s" : ""))
 				output = sha1(output.join())
 			}
-			dom.sEngines.innerHTML = output + count + (output == "none" ? rfp_green : rfp_red)
-			dom.sEnginesList.innerHTML = detail
-			dom.sEnginesList.style.color = zshow
+			dom.sEngines.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
 			log_perf("speech engines [devices]",t0)
 			return resolve("speech_engines:"+ output)
 		}
@@ -565,10 +558,10 @@ function outputDevices() {
 
 	//ToDo: promisify and add to section hash
 	get_speech_rec()
-	get_speech_engines()
 
 	Promise.all([
 		get_media_devices(),
+		get_speech_engines(),
 		get_pointer_hover(),
 		get_gamepads(),
 		get_touch(),
