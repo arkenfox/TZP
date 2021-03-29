@@ -2,24 +2,22 @@
 
 var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
 
-/* set global isVariables once */
+/* GLOBALS */
 
 function get_isChrome() {
-	// requires isOS
 	let os = "",
 		t0 = performance.now()
 	// output
 	function output(r) {
-		if (isOS == "") {console.error("TZP: isOS not set")}
-		if (r.toLowerCase() !== isOS) {r += sb+"[!= widget]"+sc + (runS ? zSIM : "")}
+		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runS ? zSIM : "")}
 		dom.fdChrome.innerHTML = r
 		isChrome = r
-		if (logPerf) {debug_perf("chrome [fd]",t0)}
+		log_perf("chrome [fd]",t0)
 	}
 	if (isChrome == "") {
 		dom.fdChrome.innerHTML = "blocked"
 		function run2() {
-			// android doesn't have this resource
+			// android lacks this
 			let img = new Image()
 			img.src = "chrome://branding/content/icon64.png"
 			img.style.visibility = "hidden"
@@ -40,10 +38,10 @@ function get_isChrome() {
 			}
 		}
 		function run1() {
-			// win, mac
+			// win/mac
 			let c = "chrome://browser/content/extension-",
 				p = "-panel.css",
-				list = [c+'win'+p, c+'mac'+p],
+				list = [c +'win'+ p, c +'mac'+ p],
 				x = 0
 			// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
 			list.forEach(function(item) {
@@ -53,21 +51,19 @@ function get_isChrome() {
 				css.rel = "stylesheet"
 				document.head.appendChild(css)
 				css.onload = function() {
-					if (item === c+"win"+p) {os = "Windows"}
-					if (item === c+"mac"+p) {os = "Mac"}
+					if (item === c +"win"+ p) {os = "Windows"}
+					if (item === c +"mac"+ p) {os = "Mac"}
 					x++
-					// check after last item
 					if (x == 2) {output_check(os)}
 				}
 				css.onerror = function() {
 					x++
-					// check after last item
 					if (x == 2) {output_check(os)}
 				}
 				document.head.removeChild(css)
 			})
 		}
-		// only run for FF60+
+		// FF60+ only
 		try {
 			newFn("alert('A)")
 		} catch(e) {
@@ -82,111 +78,394 @@ function get_isChrome() {
 	}
 }
 
-function get_isEngine() {
-	return new Promise(resolve => {
+const get_isEngine = () => new Promise(resolve => {
+	let t0 = performance.now(),
+		bFF = false
+	function cbrt(x) {
+		try {
+			let y = Math.pow(Math.abs(x), 1 / 3)
+			return x < 0 ? -y : y
+		} catch(e) {
+			return "error"
+		}
+	}
+	try {
+		let res = []
+		for(let i=0; i < 6; i++) {
+			try {
+				let fnResult = "unknown"
+				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
+				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
+				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+				} else if (i == 3) {fnResult = Math.acos(0.123)
+				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+				} else if (i == 5) {fnResult = Math.atan(2)
+				}
+				res.push(fnResult)
+			} catch(e) {
+				res.push("error")
+			}
+		}
+		let hash = sha1(res.join()).substring(0,8)
+		if (hash == "ede9ca53") {isEngine = "blink"
+		} else if (hash == "05513f36") {isEngine = "webkit"
+		} else if (hash == "38172d94") {isEngine = "edgeHTML"
+		} else if (hash == "36f067c6") {isEngine = "trident"
+		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
+		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
+		}
+		log_perf("math [isFF]",t0,"",""+ (isFF && skipFF ? "skipped": bFF))
+		// harden isEngine
 		if (isEngine == "") {
-			function cbrt(x) {
-				try {
-					let y = Math.pow(Math.abs(x), 1 / 3)
-					return x < 0 ? -y : y
-				} catch(e) {
-					return "error"
-				}
-			}
-			let res = [],
-				t0 = performance.now()
-			for(let i=0; i < 6; i++) {
-				try {
-					let fnResult = "unknown"
-					if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-					} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-					} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
-					} else if (i == 3) {fnResult = Math.acos(0.123)
-					} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
-					} else if (i == 5) {fnResult = Math.atan(2)
-					}
-					res.push(fnResult)
-				} catch(e) {
-					res.push("error")
-				}
-			}
-			let hash = sha1(res.join())
-			if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
-			} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
-			} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
-			} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-			} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
-			} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
-			} else if (isFF) {isEngine = "gecko"
-			} else if ("chrome" in window) {isEngine = "blink"
-			}
-			if (isEngine == "") {console.error("isEngine: not found\n", res)}
-			if (logPerf) {debug_perf("isEngine [immutables]",t0)}
-			return resolve("done")
-		} else {
-			return resolve("done")
+			if (isFF) {
+				// three isFF checks so far
+				isEngine = "gecko"
+			} else if ("chrome" in window) {isEngine = "blink"}
 		}
-	})
-}
+		// harden isFF: the fourth check
+		if (bFF) {isFF = true}
+		// math isFF is the final isFF check
+		log_perf("status [isFF]",""+ isFF,"ignore")
+		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
+		return resolve("")
+	} catch(e) {
+		console.error("get_isEngine", e.name, e.message)
+		log_perf("isEngine [global]",t0,"","error")
+		return resolve("error")
+	}
+})
 
-function get_isOS() {
-	return new Promise(resolve => {
-		if (isOS == "") {
-			let t0 = performance.now()
-			let el = document.getElementById("widget0")
-			try {
-				let font = getComputedStyle(el).getPropertyValue("font-family")
-				if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
-				} else if (font == "Roboto") {isOS="android"
-				}	else if (font == "-apple-system") {isOS="mac"
-				}	else {isOS="linux"}
-				if (logPerf) {debug_perf("isOS [immutables]",t0)}
-				return resolve("done")
-			} catch(e) {
-				console.debug("get_isOS", e.name, e.message)
-				return resolve("error")
-			}
-		} else {
-			return resolve("done")
+const get_isError = () => new Promise(resolve => {
+	let t0 = performance.now()
+	// skip
+	if (isFF && skipFF) {
+		log_perf("errors [isFF]",t0,"","skipped")
+		return resolve("")
+	}
+	try {
+		let res = [],
+			bFF = false
+		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
+		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
+		try {let test = newFn("let a = 1_00_;")} catch(e) {res.push(e.name +": "+ e.message)}
+		let hash = sha1(res.join()).substring(0,8)
+		if (hash == "510b2814") {bFF = true //FF74+ fix on
+		} else if (hash == "422b8490") {bFF = true //FF72-73,FF74+ fix off
+		} else if (hash == "f6c5128f") {bFF = true //FF70-71
+		} else if (hash == "b7463a43") {bFF = true //FF60-69
+		} else if (hash == "7263eca6") {bFF = true //FF59-
 		}
-	})
-}
+		// harden isFF
+		if (bFF) {isFF = true}
+		log_perf("errors [isFF]",t0,"",""+ bFF)
+		return resolve("")
+	} catch(e) {
+		console.error("get_isError", e.name, e.message)
+		log_perf("errors [isFF]",t0,"","error")
+		return resolve("")
+	}
+})
 
-function get_isTB() {
-	return new Promise(resolve => {
-		if (isFF && isTB === "") {
-			try {
-				let t0 = performance.now()
-				console.debug("a")
-				let css = document.createElement("link")
-				console.debug("b")
-				css.href = "resource://torbutton-assets/aboutTor.css"
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				console.debug("c")
-				document.head.appendChild(css)
-				console.debug("d")
-				css.onload = function() {
-					isTB = true
-					debug_page("TB","     resource:// = aboutTor.css")
-					if (logPerf) {debug_perf("[yes] isTB [immutables]",t0)}
-					return resolve("done")
-				}
-				css.onerror = function() {
-					isTB = false
-					if (logPerf) {debug_perf("[no] isTB [immutables]",t0)}
-					return resolve("done")
-				}
-				document.head.removeChild(css)
-			} catch(e) {
-				console.error("get_isTB", e.name, e.message)
-				return resolve("error")
-			}
-		} else {
-			return resolve("done")
+const get_isOS = () => new Promise(resolve => {
+	let t0 = performance.now()
+	// skip
+	if (!isFF || isOS !== "") {
+		log_perf("isOS [global]",t0,"","skipped")
+		return resolve("")
+	}
+	// check
+	let el = dom.widget0
+	try {
+		let font = getComputedStyle(el).getPropertyValue("font-family")
+		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
+		} else if (font == "Roboto") {isOS="android"
+		}	else if (font == "-apple-system") {isOS="mac"
+		}	else {isOS="linux"}
+		log_perf("isOS [global]",t0,"",isOS)
+		return resolve("")
+	} catch(e) {
+		console.error("get_isOS", e.name, e.message)
+		log_perf("isOS [global]",t0,"","error")
+		return resolve("")
+	}
+})
+
+const get_isSystemFont = () => new Promise(resolve => {
+	let t0 = performance.now()
+	// skip
+	if (isFF & skipFF) {
+		log_perf("system font [isFF]",t0,"","skipped")
+		return resolve("")
+	}
+	// check
+	try {
+		let el = dom.sysFont,
+			f = undefined
+		let test = getComputedStyle(el).getPropertyValue("font-family")
+		el.style.font = "99px sans-serif"
+		try {el.style.font = "-moz-dialog"} catch(err) {}
+		let s = getComputedStyle(el, null)
+		if (s.fontSize != "99px") {f = s.fontFamily}
+		let bFF = (""+ f == "undefined" ? false : true)
+		if (bFF) {isFF = true}
+		log_perf("system font [isFF]",t0,"",bFF)
+		return resolve("")
+	} catch(e) {
+		console.error("get_isSystemFont", e.name, e.message)
+		log_perf("system font [isFF]",t0,"","error")
+		return resolve("")
+	}
+})
+
+const get_isTB = () => new Promise(resolve => {
+	// skip
+	let t0 = performance.now()
+	if (!isFF) {
+		log_perf("isTB [global]",t0,"","skipped")
+		return resolve("")
+	}
+	// check
+	try {
+		// extensions can block resources://
+			// FF ~5ms, TB ~20ms
+		setTimeout(() => resolve("timeout"), 100)
+		let css = document.createElement("link")
+		css.href = "resource://torbutton-assets/aboutTor.css"
+		css.type = "text/css"
+		css.rel = "stylesheet"
+		document.head.appendChild(css)
+		css.onload = function() {
+			isTB = true
+			log_debug("debugTB","resource:// = ".padStart(19) + "aboutTor.css")
+			log_perf("isTB [global]",t0,"",isTB)
+			return resolve("")
 		}
-	})
-}
+		css.onerror = function() {
+			log_perf("isTB [global]",t0,"",isTB)
+			return resolve("")
+		}
+		document.head.removeChild(css)
+	} catch(e) {
+		console.error("get_isTB", e.name, e.message)
+		log_perf("isTB [global]",t0,"","error")
+		return resolve("")
+	}
+})
+
+const get_isVer = () => new Promise(resolve => {
+	let t0 = performance.now()
+	// skip
+	if (!isFF || isVer !== "") {
+		log_perf("isVer [global]",t0,"","skipped")
+		return resolve("")
+	}
+	// set isVer, isVerPlus
+	function output(verNo) {
+		if (verNo.slice(-1) == "+") {isVerPlus = true}
+		isVer = verNo.replace(/\D/g,',')
+		let start = isVer.indexOf(",")
+		if (start !== -1) {
+			isVer = (isVer.substring(0,start)) * 1
+		}
+		log_perf("isVer [global]",t0,"",verNo)
+		return resolve("")
+	}
+
+	// check
+	try {
+		let verNo = "59 or lower"
+		let go = true
+		// 88: 1670124
+		if (go) {
+			try {
+				newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
+			} catch(e) {
+				if (e.message.substr(13,5) == "8 and") {verNo = "88+"; go=false}
+			}
+		}
+		// 87: 1688335
+		if (go) {
+			try {
+				if (console.length == undefined) {verNo = "87"; go=false}
+			} catch(e) {}
+		}
+		// 86: 1685482
+		if (go) {
+			try {
+				newFn('for (async of [])')
+			} catch(e) {
+				if ((e.message).substring(0,2) == "an") {verNo = "86"; go=false}
+			}
+		}
+		// 85: 1675240
+		if (go) {
+			try {
+				let reg85 = ("/a")
+				let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+				let test85 = descriptor.get.call(reg85)
+			} catch(e) {
+				if ((e.message).substring(0,3) == "Reg") {verNo = "85"; go=false}
+			}
+		}
+		// 84: 1673440
+		if (go) {
+			try {
+				newFn("var x = @")
+			} catch(e) {
+				if (e.message == "illegal character U+0040") {verNo = "84"; go=false}
+			}
+		}
+		// 83: 1667094
+		if (go) {
+			try {
+				let obj83 = {exec() {return function(){}}}
+				let test83 = RegExp.prototype.test.call(obj83, "")
+				verNo = "83"; go = false
+			} catch(e) {}
+		}
+		// 82: 1655947
+		if (go) {
+			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
+			if (test82 == 1) {verNo = "82"; go = false}
+		}
+		// 81: 1650607
+		if (go) {
+			try {
+				let file81 = new File(["bits"], "a/b.txt")
+				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
+			} catch(e) {}
+		}
+		// 80: 1651732
+		if (go) {
+			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
+			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
+			try {
+				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
+				verNo = "80"; go = false
+			} catch (e) {}
+		}
+		//79: 1644878
+		if (go) {
+			try {
+				Map.prototype.entries.call(true)
+			} catch(e) {
+				if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
+			}
+		}
+		//78: 1589095
+		if (go) {
+			try {
+				let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
+				verNo = "78"; go = false
+			} catch(e) {}
+		}
+		//78: 1633836
+		if (go) {
+			try {
+				let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
+				verNo = "78"; go = false
+			} catch(e) {}
+		}
+		//78: 1634135
+		if (go) {
+			try {
+				let regex78b = new RegExp('b')
+				if (regex78b.dotAll == false) {verNo = "78"; go = false}
+			} catch(e) {}
+		}
+		//77: 1627285
+		if (go) {
+			if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}
+		}
+		//76: 1608010
+		if (go) {
+			if (test76.validity.rangeOverflow) {} else {verNo = "76"; go = false}
+		}
+		//75: 1615600
+		if (go) {
+			try {let test75 = BigInt(2.5)} catch(e) {
+				if (e.message.substring(0,3) == "2.5") {verNo = "75"} else {}
+			}
+		}
+		//74: 1605835
+		if (go) {
+			try {newFn("let t = ({ 1n: 1 })"); verNo = "74"; go = false
+			} catch(e) {}
+		}
+		//73: 1605803
+		if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
+		//72: 1589072
+		if (go) {
+			try {let test72 = newFn('let a = 100_00_;')} catch(e) {
+				if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
+			}
+		}
+		//71: 1575980
+		if (go) {
+			try {
+				let test71 = new StaticRange()
+			} catch(e) {
+				if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {verNo = "71"; go = false}
+			}
+		}
+		//70: 1435818
+		if (go) {
+			try {newFn("let t = 1_050"); verNo = "70"; go = false} catch(e) {}
+		}
+		//69: 1558387
+		if (go) {
+			try {let test69 = new DOMError('a')} catch(e) {verNo = "69"; go = false}
+		}
+		//68: 1548773
+		if (go) {
+			if (dom.test68.typeMustMatch == undefined) {verNo = "68"; go = false} else {}
+		}
+		//67: 1531830
+		if (go) {
+			if (!Symbol.hasOwnProperty('matchAll')) {} else {verNo="67"; go = false}
+		}
+		//66
+		if (go) {
+			try {
+				let txt = new TextEncoder(), utf8 = new Uint8Array(1)
+				let test66 = txt.encodeInto("a", utf8)
+				verNo="66"; go = false
+			} catch(e) {}
+		}
+		//65
+		if (go) {
+			try {
+				let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); verNo="65"; go = false
+			} catch(e) {}
+		}
+		//64
+		if (go) {if (window.screenLeft == undefined){} else {verNo="64"; go = false}}
+		//63
+		if (go) {if (Symbol.for(`a`).description == "a") {verNo="63"; go = false}}
+		//62
+		if (go) {
+			console.time("v62")
+			try {console.timeLog("v62"); verNo="62"; go = false} catch(e) {}
+			console.timeEnd("v62")
+		}
+		//61
+		if (go) {try {let test61 = (" a").trimStart(); verNo="61"; go = false} catch(e) {}}
+		//60
+		if (go) {
+			try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
+				|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
+					"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
+				verNo = "60"
+			} catch(e) {}
+		}
+		output(verNo)
+	} catch(e) {
+		isVer = "error"
+		console.error("get_isVer", e.name, e.message)
+		log_perf("isVer [global]",t0,"","error")
+		return resolve("")
+	}
+})
 
 /* FUNCTIONS */
 
@@ -211,7 +490,7 @@ function return_mm_dpi(type) {
 	try {
 		r = (function() {
 			for (let i=1; i < 2000; i++) {
-				if (matchMedia("(max-resolution:"+i+type+")").matches === true) {
+				if (matchMedia("(max-resolution:"+ i + type +")").matches === true) {
 					return i}
 			} return i
 		})()
@@ -229,22 +508,22 @@ function get_collation() {
 	function output(hash) {
 		if (runS) {hash = sha1(hash)}
 		let r = "", c = ""
-		if (missing.length > 0) {
-			c = " [missing locale code" + (missing.length > 1 ? "s" : "")
-				+ ":" + missing.join(", ") + "]"
+		if (missing.length) {
+			c = " [missing locale code"+ (missing.length > 1 ? "s" : "")
+				+":"+ missing.join(", ") +"]"
 		}
 		if (hash == "d0e83d1d652f95d686870a59def6ddcc7cde5e28") {
-			r = zFF + " [FF70+]" + c
+			r = zFF +" [FF70+]"+ c
 		} else if (hash == "e4a32b021b6743d34573ab91a9a31d1068e5b01e") {
-			r = zFF + " [FF65-69]" + c
+			r = zFF +" [FF65-69]"+ c
 		} else if (hash == "78c0998f75b0da6b11dd55e2f29dc054e14aae9e") {
-			r = zFF + " [FF64 or lower]" + c
+			r = zFF +" [FF64 or lower]"+ c
 		} else if (isFF) {
 			r = hash + c + zNEW + (runS ? zSIM : "")
 			dom.fdCollation.setAttribute("class", "c mono")
 		}
 		dom.fdCollation.innerHTML = r
-		if (logPerf) {debug_perf("collation [fd]",t0)}
+		log_perf("collation [fd]",t0)
 	}
 	// run
 	chars.sort() // set
@@ -254,7 +533,7 @@ function get_collation() {
 		chars.sort(Intl.Collator(i).compare)
 		let test = sha1(chars.join())
 		results.push(test)
-		if (control == test) {missing.push("<code>" + i + "</code>")}
+		if (control == test) {missing.push("<code>"+ i +"</code>")}
 	})
 	output(sha1(results.join()))
 }
@@ -264,23 +543,23 @@ function get_color() {
 	// depth
 	try {r1 = screen.pixelDepth} catch(e) {r1 = zB0}
 	try {r2 = screen.colorDepth} catch(e) {r2 = zB0}
-	res.push("pixelDepth:"+r1)
-	res.push("screenDepth:"+r2)
-	r1 += " | "+r2
+	res.push("pixelDepth:"+ r1)
+	res.push("screenDepth:"+ r2)
+	r1 += " | "+ r2
 	dom.ScrColor.innerHTML = r1 += (r1 == "24 | 24" ? rfp_green : rfp_red)
 	// color
 	try {
 		r3 = (function() {
 			for (let i=0; i < 1000; i++) {
-				if (matchMedia("(color:"+i+")").matches === true) {return i}
+				if (matchMedia("(color:"+ i +")").matches === true) {return i}
 			}
 			return i
 		})()
 	} catch(e) {
 		r3 = zB0
 	}
-	res.push("mm_color:"+r3)
-	dom.mmC.innerHTML = (r3 == 8 ? r3+rfp_green : r3+rfp_red)
+	res.push("mm_color:"+ r3)
+	dom.mmC.innerHTML = r3 + (r3 == 8 ? rfp_green : rfp_red)
 	// return
 	return(res)
 }
@@ -298,11 +577,10 @@ function get_errors() {
 		function output() {
 			hash = sha1(res.join())
 			if (isFF) {
+				// codes
 				let tmp = hash.substring(0,8)
-				if (isErr == "") {isErr = hash.substring(0,4)}
 				// 74+: 1259822: error_message_fix: codes 1=false 2=true
-				if (isErr == "X") {code = "X"; ff = "[FF59 or lower]"
-				} else if (tmp == "b9a8b17b") {code = "A"; ff = "[FF60-67]"
+				if (tmp == "b9a8b17b") {code = "A"; ff = "[FF60-67]"
 				} else if (tmp == "cb379de2") {code = "B"; ff = "[FF68-69]"
 				} else if (tmp == "7453242e") {code = "C"; ff = "[FF70]"
 				} else if (tmp == "30205428") {code = "D"; ff = "[FF71]"
@@ -313,44 +591,42 @@ function get_errors() {
 				} else if (tmp == "ac156397") {code = "G1"; ff = "[FF78+]"
 				} else if (tmp == "6140f242") {code = "G2"; ff = "[FF78+]"
 				}
+				if (runS) {code = ""; ff = ""}
 				if (code !== "") {
-					dom.fdError.innerHTML = zFF +" " + ff + s3+"["+code+"]"+sc
-					dom.errh.innerHTML = hash + s3+"["+code+"]"+sc + (runS ? zSIM : "")
-				} else if (isFF) {
+					code = s3 +"["+ code +"]"+ sc
+					dom.fdError.innerHTML = zFF +" "+ ff + code
+					dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
+				} else {
 					code = zNEW
 					dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
 					if (isBlock) {
-						dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+sc + (runS ? zSIM : "")
+						dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+ sc + (runS ? zSIM : "")
 					} else {
 						dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "")
 						dom.fdError.setAttribute("class", "c mono")
 					}
-				} else {
-					dom.errh = hash
 				}
-				if (logPerf) {debug_perf("errors [fd]",t0)}
-				return resolve("errors:"+ hash)
 			} else {
 				dom.errh = hash; dom.fdError = hash
-				return resolve("errors:"+ hash)
 			}
+			log_perf("errors [fd]",t0)
+			return resolve("errors:"+ hash)
 		}
 		// run
 		function run() {
-			isErr = ""
 			//1
 			try {
 				newFn("alert('A)")
 			} catch(e) {
-				dom.err1=e; res.push(e.name+": "+e.message)
-				if (e.message == "unterminated string literal") {isErr = "X"}
+				dom.err1=e; res.push(e.name +": "+ e.message)
+				if (e.message == "unterminated string literal") {code = "X"; ff = "[FF59 or lower]"}
 			}
 			//2
 			try {
 				newFn(`null.value = 1`)
 			} catch(e) {
 				if (runS) {e += zSIM}
-				dom.err2=e; res.push(e.name+": "+e.message)
+				dom.err2=e; res.push(e.name +": "+ e.message)
 			}
 			//3
 			try {
@@ -360,20 +636,20 @@ function get_errors() {
 					test = e.message.substring(0,3)
 					if (test == "2.5") {
 						// 75+
-						test = e.name+": "+ e.message
+						test = e.name +": "+ e.message
 					} else if (test == "can") {
 						// 68-74: trap NumberFormat
 						try {
 							test = newFn("987654321987654321n")
 							let num = new Intl.NumberFormat(undefined)
 							test = num.format(test)
-							test = e.name+": "+ e.message
+							test = e.name +": "+ e.message
 						} catch (e) {
 							if (e.message.substring(0,5) == "Intl.") {
 								test = zB0
 							} else if (e.name == "TypeError") {
 								// 68-69 expected
-								test = e.name+": "+ e.message
+								test = e.name +": "+ e.message
 							} else {
 								test = zB0
 							}
@@ -381,7 +657,7 @@ function get_errors() {
 					} else if (e.name == "ReferenceError") {
 						if (test == "Big") {
 							// 60-67
-							test = e.name+": "+ e.message
+							test = e.name +": "+ e.message
 						} else {
 							test = zB0
 						}
@@ -389,7 +665,7 @@ function get_errors() {
 						test = zB0
 					}
 				} else {
-					test = e.name+": "+ e.message
+					test = e.name +": "+ e.message
 				}
 				if (test == zB0) {isBlock = true}
 				dom.err3=test; res.push(test)
@@ -398,20 +674,20 @@ function get_errors() {
 			try {
 				test = newFn("let a = 1_00_;")
 			} catch(e) {
-				test = e.name+": "+e.message; dom.err4=test; res.push(test)
+				test = e.name +": "+ e.message; dom.err4=test; res.push(test)
 			}
-			//5: should be no error if FF78+
+			//5: s/be none FF78+
 			try {
 				test = new Intl.NumberFormat("en", {style:"unit", unit:"percent"}).format(1/2)
 			} catch(e) {
 				if (isFF) {
 					if (e.name == "RangeError") {
-						test = e.name+": "+e.message
+						test = e.name +": "+ e.message
 					} else {
 						test = zB0; isBlock = true
 					}
 				} else {
-					test = e.name+": "+e.message
+					test = e.name +": "+ e.message
 				}
 				dom.err5=test; res.push(test)
 			}
@@ -426,40 +702,36 @@ function get_fullscreen(runtype) {
 	try {
 		if (document.mozFullScreenEnabled) {r = zE} else {r = zD; dom.fsLeak = zNA}
 	} catch(e) {
-		r = "no: "+e.name; dom.fsLeak = zNA
+		r = "no: "+ e.name; dom.fsLeak = zNA
 	}
 	dom.fsSupport = r
 	return (runtype == "section" ? "full_screen_api:" : "") + r
 }
 
-function get_line_scrollbar() {
+function get_line_scrollbar(runtype) {
 	return new Promise(resolve => {
-
 		let osW = "[Windows]",
 			osWL = "[Windows or Linux]",
-			osWM = "[Windows or Mac]",
-			osWLM = "[Windows, Linux or Mac]",
 			osL = "[Linux]",
-			osLA = "[Linux or Android]",
 			osLM = "[Linux or Mac]",
 			osM = "[Mac]",
-			osTBL = " [Linux]"+tb_green,
+			osTBL = " [Linux]"+ tb_green,
 			os = "",
+			vw = "",
 			sbZoom = "",
 			dScrollbar = "",
-			eScrollbar = ""
+			eScrollbar = "",
+			sBig = s3 +"...why are you so big?"+ sc,
+			sSmall = s3 +"...why are you so small?"+sc
 
 		// scrollbar
 		function run_scrollbar() {
+			jsZoom = jsZoom * 1
 			let t0 = performance.now()
-			// recalc zoom/viewport
-			get_zoom("fd")
-			let vw = get_viewport("fd")
 			// get width, remember it for later
 			let w = (window.innerWidth-vw),
 				wZoom = w
-
-			// for section hash
+			// section metric
 			if (w > 0) {dScrollbar = "not zero"} else {dScrollbar = "zero"}
 
 			// start
@@ -474,86 +746,54 @@ function get_line_scrollbar() {
 					if (w==16) {os=osL}
 					if (w==15) {os=osM}
 					if (w==12) {os=osL}
-				} else if (jsZoom == 500) {
-					if (w==3) {os=osW}
-					console.debug("scrollbarwidth", "zoom " + jsZoom, w)					
-				} else if (jsZoom == 400) {
-					if (w==4) {os=osW}
-					console.debug("scrollbarwidth", "zoom " + jsZoom, w)
-				} else if (jsZoom == 300) {
-					if (w==6) {os=osWL}
-					if (w==5) {os=osWM}
-					if (w==4) {os=osL}
-				} else if (jsZoom == 240) {
-					if (w==7) {os=osWM}
-					if (w==6) {os=osL}
-					if (w==5) {os=osL}
-				} else if (jsZoom == 200) {
-					if (w==9) {os=osW}
-					if (w==8) {os=osWLM}
-					if (w==7) {os=osM}
-					if (w==6) {os=osL}
-				} else if (jsZoom == 170) {
-					if (w==10) {os=osWL}
-					if (w==8) {os=osM}
-					if (w==7) {os=osL}
-				} else if (jsZoom == 150) {
-					if (w==12) {os=osW}
-					if (w==11) {os=osW}
-					if (w==10) {os=osLM}
-					if (w==8) {os=osL}
-				} else if (jsZoom == 133) {
-					if (w==13) {os=osW}
-					if (w==12) {os=osWL}
-					if (w==11) {os=osM}
-					if (w==9) {os=osL}
-				} else if (jsZoom == 120) {
-					if (w==15) {os=osW}
-					if (w==14) {os=osWL}
-					if (w==12) {os=osM}
-					if (w==10) {os=osL}
 				} else if (jsZoom == 110) {
 					if (w==16) {os=osW}
 					if (w==15) {os=osW}
 					if (w==14) {os=osLM}
 					if (w==11) {os=osL}
+				} else if (jsZoom == 120) {
+					if (w==15) {os=osW}
+					if (w==14) {os=osWL}
+					if (w==12) {os=osM}
+					if (w==10) {os=osL}
+				} else if (jsZoom == 133) {
+					if (w==13) {os=osW}
+					if (w==12) {os=osWL}
+					if (w==11) {os=osM}
+					if (w==9) {os=osL}
 				} else if (jsZoom == 90) {
 					if (w==19) {os=osW}
 					if (w==18) {os=osL}
 					if (w==17) {os=osM}
 					if (w==16) {os=osM}
 					if (w==13) {os=osL}
+				} else if (jsZoom == 150) {
+					if (w==12) {os=osW}
+					if (w==11) {os=osW}
+					if (w==10) {os=osLM}
+					if (w==8) {os=osL}
+				} else if (jsZoom == 170) {
+					if (w==10) {os=osWL}
+					if (w==8) {os=osM}
+					if (w==7) {os=osL}
 				} else if (jsZoom == 80) {
 					if (w==21) {os=osW}
 					if (w==20) {os=osL}
 					if (w==19) {os=osM}
 					if (w==15) {os=osL}
-				} else if (jsZoom == 67) {
-					if (w==26) {os=osW}
-					if (w==25) {os=osW}
-					if (w==24) {os=osL}
-					if (w==23) {os=osM}
-					if (w==22) {os=osM}
-					if (w==18) {os=osL}
-				} else if (jsZoom == 50) {
-					if (w==34) {os=osW}
-					if (w==32) {os=osL}
-					if (w==30) {os=osM}
-					if (w==24) {os=osL}
-				} else if (jsZoom == 30) {
-					if (w==57) {os=osW}
-					if (w==56) {os=osW}
-					if (w==54) {os=osL}
-					if (w==50) {os=osM}
-					if (w==40) {os=osL}
+				} else if (jsZoom > 170) {
+					os=sBig
+				} else if (jsZoom < 80) {
+					os=sSmall
 				}
 				if (os != "") {
-					// known
-					os += " [known metric]"
+					if (os == sBig || os == sSmall) { // do nothing
+					} else {os += " [known metric]"
+					}
 				} else {
-					// still unknown
+					// unknown
 					if (jsZoom !== 100) {
-						// recalc scrollbar at 100% for final guess: not perfect
+						// recalc at 100% for final guess: not perfect
 						if (window.devicePixelRatio !== 1 || dpi_y == 0) {
 							// RFP is off or css is blocked
 							wZoom = w * window.devicePixelRatio
@@ -572,17 +812,17 @@ function get_line_scrollbar() {
 				}
 			}
 			// output
-			if (jsZoom !== 100) {sbZoom=" at "+jsZoom+"% "}
-			dom.fdScrollV = w+"px "+sbZoom+os
+			if (jsZoom !== 100) {sbZoom = " at "+ jsZoom +"% "}
+			dom.fdScrollV.innerHTML = w +"px "+ sbZoom + os
 			// element scrollbar
 			let eW = (100-dom.fdScroll.scrollWidth)
 			if (eW > 0) {eScrollbar = "not zero"} else {eScrollbar = "zero"}
 			if (jsZoom == 100) {
-				eW += "px" + (eW == w ? "" : sb+"[!= viewport scrollbar]"+sc)
+				eW += "px"+ (eW == w ? "" : sb +"[!= viewport scrollbar]"+ sc)
 			}
 			dom.fdScrollE.innerHTML = eW
 			// perf
-			if (logPerf) {debug_perf("scrollbar [fd]",t0)}
+			log_perf("scrollbar [fd]",t0)
 		}
 
 		// css lineheight
@@ -603,10 +843,10 @@ function get_line_scrollbar() {
 				if (font.slice(1,16) == "Times New Roman") {
 					isTNR = true
 				} else {
-					strFont = sb+"[document fonts are disabled]"+sc
+					strFont = sb +"[document fonts are disabled]"+ sc
 				}
 			} catch(e) {
-				strFont = sb+"[font property is blocked]" +sc
+				strFont = sb +"[font property is blocked]"+ sc
 				fontProp = false
 			}
 			// clientrect
@@ -629,34 +869,36 @@ function get_line_scrollbar() {
 			}
 
 			// simulate
-			let simulate = 10
+			let simulate = 0
 			if (simulate == 1) {
 				// no clientrect
 				method = "none"
 			} else if (simulate == 2) {
 				// no font property
-				strFont = sb+"[font property is blocked]"+sc
+				strFont = sb +"[font property is blocked]"+ sc
 				fontProp = false
 			} else if (simulate == 3) {
 				// doc fonts blocked
-				strFont = sb+"[document fonts are disabled]"+sc
+				strFont = sb +"[document fonts are disabled]"+ sc
 				isTNR = false
 			} else if (simulate == 4) {
 				// 1+2
 				method = "none"
-				strFont = sb+"[font property is blocked]"+sc
+				strFont = sb +"[font property is blocked]"+ sc
 				fontProp = false
 			} else if (simulate == 5) {
 				// 1+3
 				method = "none"
-				strFont = sb+"[document fonts are disabled]"+sc
+				strFont = sb +"[document fonts are disabled]"+ sc
 				isTNR = false
 			}
 
 			// build
-			if (method !== "none") {
+			if (isOS == "android") {
+				// ignore android
+			} else if (method !== "none") {
 				// trim
-				if (lh.substr(-2) == "px") {lh = lh.slice(0, -2)}
+				if (lh.substr(-2) == "px") {lh = lh.slice(0, -2) * 1}
 				// check font
 				if (strFont !== "") {
 					os = strFont
@@ -665,122 +907,110 @@ function get_line_scrollbar() {
 					os = tb_green
 				} else {
 					// isTNR + not 19.2
-					// WINDOWS / LINUX: some known metrics
+					// WIN/LINUX: some known metrics
 					if (jsZoom == 100) {
 						if (lh=="20") {os=osW}
 						if (lh=="19") {os=osL}
 						if (lh=="18") {os=osW}
 						if (lh=="17") {os=osL}
-					} else if (jsZoom == 500) {
-						console.debug("lineheight", "zoom " + jsZoom, lh)
-						if (lh=="18.4") {os=osW}						
-					} else if (jsZoom == 400) {
-						console.debug("lineheight", "zoom " + jsZoom, lh)
-						if (lh=="18.5") {os=osW}
-					} else if (jsZoom == 300) {
-						if (lh=="19") {os=osW}
-						if (lh=="18.6667") {os=osW}
-						if (lh=="18") {os=osL}
-						if (lh=="17.6667") {os=osL}
-					} else if (jsZoom == 240) {
-						if (lh=="19.1667") {os=osW}
-						if (lh=="19") {os=osTBL}
-						if (lh=="18.3333") {os=osWL}
-						if (lh=="17.5") {os=osL}
-					} else if (jsZoom == 200) {
-						if (lh=="19") {os=osW}
-						if (lh=="18") {os=osL}
-					} else if (jsZoom == 170) {
+					} else if (jsZoom == 110) {
 						if (lh=="19.25") {os=osW}
-						if (lh=="18.9") {os=osTBL}
-						if (lh=="18.6667") {os=osW}
-						if (lh=="18.0833") {os=osL}
-						if (lh=="17.5") {os=osL}
-					} else if (jsZoom == 150) {
-						if (lh=="20") {os=osW}
-						if (lh=="18.6667") {os=osWL}
-						if (lh=="17.3333") {os=osL}
-					} else if (jsZoom == 133) {
-						if (lh=="19.5") {os=osW}
-						if (lh=="18.9") {os=osTBL}
-						if (lh=="18") {os=osL}
-						if (lh=="18.75") {os=osW}
+						if (lh=="18.7") {os=osTBL}
+						if (lh=="18.3333") {os=osL}
+						if (lh=="17.4167") {os=osL}
 					} else if (jsZoom == 120) {
 						if (lh=="20") {os=osW}
 						if (lh=="19.1667") {os=osL}
 						if (lh=="19") {os=osTBL}
 						if (lh=="18.3333") {os=osW}
 						if (lh=="17.5") {os=osL}
-					} else if (jsZoom == 110) {
-						if (lh=="19.25") {os=osW}
-						if (lh=="18.7") {os=osTBL}
-						if (lh=="18.3333") {os=osL}
-						if (lh=="17.4167") {os=osL}
+					} else if (jsZoom == 133) {
+						if (lh=="19.5") {os=osW}
+						if (lh=="18.9") {os=osTBL}
+						if (lh=="18") {os=osL}
+						if (lh=="18.75") {os=osW}
 					} else if (jsZoom == 90) {
 						if (lh=="20.1") {os=osW}
 						if (lh=="18.9833") {os=osWL}
 						if (lh=="18.7667") {os=osTBL}
 						if (lh=="16.75") {os=osL}
+					} else if (jsZoom == 150) {
+						if (lh=="20") {os=osW}
+						if (lh=="18.6667") {os=osWL}
+						if (lh=="17.3333") {os=osL}
+					} else if (jsZoom == 170) {
+						if (lh=="19.25") {os=osW}
+						if (lh=="18.9") {os=osTBL}
+						if (lh=="18.6667") {os=osW}
+						if (lh=="18.0833") {os=osL}
+						if (lh=="17.5") {os=osL}
 					} else if (jsZoom == 80) {
 						if (lh=="20") {os=osW}
 						if (lh=="19.5") {os=osTBL}
 						if (lh=="18.75") {os=osWL}
-					} else if (jsZoom == 67) {
-						if (lh=="21") {os=osW}
-						if (lh=="19.8") {os=osTBL}
-						if (lh=="19.5") {os=osWL}
-						if (lh=="18") {os=osL}
-					} else if (jsZoom == 50) {
-						if (lh=="22") {os=osW}
-						if (lh=="20") {os=osWL}
-						if (lh=="18") {os=osL}
-					} else if (jsZoom == 30) {
-						if (lh=="20") {os=osWL}
-						if (lh=="26.6667") {os=osW}
+					} else if (jsZoom > 170) {
+						os=sBig
+					} else if (jsZoom < 80) {
+						os=sSmall
 					}
 				}
 				// MAC
 				if (os == "") {
-				/*  unique: .0167 .05 .0833 .1833 .35 .4333 .6833 .8333 .85
+				/*unique: .0167 .05 .0833 .1833 .35 .4333 .6833 .8333 .85
 				not unique: .7667 .6667 (but unique at those zoom values)
 				hackernews: .5167 (can't repro) */
-					// not necessarily unique given various dpr e.g. android
-					// also RFP affects this on android
-					let lhDec = (lh+"").split(".")[1]
+					let lhDec = (lh +"").split(".")[1]
 					if (lhDec=="0167" | lhDec=="05" | lhDec=="0833" | lhDec=="1833" | lhDec=="35" | lhDec=="4333" | lhDec=="6833"
 						| lhDec=="8333" | lhDec=="85" | lhDec=="7667" | lhDec=="6667" | lhDec=="5167") {os=osM}
 				}
-				// ANDROID
-				if (os == "") {
-					// ToDo: css line height: Android affected by devicePixelRatio
-					// line height affected by RFP
-				}
-				if (os == "") {
-					// guess
-					os = osLA+" [logical guess]"
-				} else {
+				if (os == sBig || os == sSmall) { //do nothing
+				} else if (os !== "") {
 					if (isTNR && fontProp) {
-						// known
 						os += " [known metric]"
 					}
+				} else if (os == "") {
+					os = osL +" [logical guess]"
 				}
 			}
 			// output
 			if (method == "none") {
 				if (fontProp) {
-					dom.fdLH.innerHTML = sb+"[clientrect blocked" + (isTNR ? strFont : " | document fonts disabled")  + "]"+sc 
+					dom.fdLH.innerHTML = sb +"[clientrect blocked"+ (isTNR ? strFont : " | document fonts disabled") +"]"+ sc 
 				} else {
-					dom.fdLH.innerHTML = sb+"[clientrect + font properties blocked]"+sc
+					dom.fdLH.innerHTML = sb +"[clientrect + font properties blocked]"+ sc
 				}
 			} else {
-				dom.fdLH.innerHTML = lh + "px "+ sbZoom + os // + s3+"["+method+"]"+sc
+				dom.fdLH.innerHTML = lh +"px"+ (isOS == "android" ? "" : " "+ sbZoom + os)
 			}
-			if (logPerf) {debug_perf("css line height [fd]",t0)}
+			log_perf("css line height [fd]",t0)
 		}
 
-		run_scrollbar()
-		run_lineheight()
-		return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
+		// recalc zoom/viewport
+		if (runtype == "resize") {
+			// we calling this from get_screen_metrics's runtype = resize
+			Promise.all([
+				vw = get_viewport("fd")
+			]).then(function(){
+				if (logExtra) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
+				run_scrollbar()
+				run_lineheight()
+				return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
+			})
+		} else {
+			Promise.all([
+				get_zoom("fd")
+			]).then(function(){
+				if (jsZoom == undefined) {console.error("jsZoom is undefined")}
+				Promise.all([
+					vw = get_viewport("fd")
+				]).then(function(){
+					if (logExtra) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
+					run_scrollbar()
+					run_lineheight()
+					return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
+				})
+			})
+		}
 	})
 }
 
@@ -833,7 +1063,7 @@ function get_math() {
 					r = zB0
 					block6 = true
 				}
-				h6 += "-"+r
+				h6 += "-"+ r
 				x = 1
 				try {
 					y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
@@ -841,11 +1071,11 @@ function get_math() {
 					r = zB0
 					block6 = true
 				}
-				h6 += "-"+r
+				h6 += "-"+ r
 				// hashes
 				m1hash = sha1(h1)
 				m6hash = sha1(h6)
-				mchash = sha1(h1+"-"+h6)
+				mchash = sha1(h1 +"-"+ h6)
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1
@@ -880,7 +1110,7 @@ function get_math() {
 			if (m6 == "1" | m6 == "3") {
 				fdMath6=zFF
 			} else if (m6 == "2") {
-				fdMath6=zFF+" [32-bit]"
+				fdMath6=zFF +" [32-bit]"
 			}
 			// os, refine browser
 			if (m1 == "A" | m1 == "H") {
@@ -897,7 +1127,7 @@ function get_math() {
 				if (m6 == "1") {
 					// 60-67: 1D : always 64bit Linux -> 64bit FF
 					fdMath1="Linux [64-bit]"
-					fdMath6=zFF+" [64-bit]"
+					fdMath6=zFF +" [64-bit]"
 				}	else if (m6 == "3") {
 					// 68+: 3D : can be FF64bit or TB32/64bit
 					// values already set
@@ -911,7 +1141,7 @@ function get_math() {
 			} else if (m1 == "E") {
 				// E: always Mac: and thus 64bit FF
 				fdMath1="Mac"
-				fdMath6=zFF+" [64-bit]"
+				fdMath6=zFF +" [64-bit]"
 			} else if (m1 == "F") {
 				// F: always Android
 				fdMath1="Android"
@@ -950,7 +1180,7 @@ function get_math() {
 					}
 				} else {
 					// known: add code
-					m1hash += s3+" ["+m1+"]"+sc
+					m1hash += s3 +" ["+ m1 +"]"+ sc
 				}
 				// os
 				if (m6 == "") {
@@ -968,12 +1198,12 @@ function get_math() {
 					}
 				} else {
 					// known: add code
-					m6hash += s3+" ["+m6+"]"+sc
+					m6hash += s3 +" ["+ m6 +"]"+ sc
 				}
 				// combined
 				if (m1 !== "" && m6 !== "") {
 					// both known: add codes
-					mc = s3 + "[" + m1+m6 + "]" + sc
+					mc = s3 +"["+ m1 + m6 +"]"+ sc
 					mchash += mc
 					fdMath1 += mc
 				} else {
@@ -996,7 +1226,7 @@ function get_math() {
 			dom.math6hash.innerHTML = m6hash
 			dom.mathhash.innerHTML = mchash
 			// perf
-			if (logPerf) {debug_perf("math [fd]", t0)}
+			log_perf("math [fd]",t0)
 			// blockage
 			if (block1 || block6) {mchash = zB0}
 			// return
@@ -1020,17 +1250,17 @@ function get_math() {
 			if (run0c !== run1c) {
 				let sColor = s3
 				// combined
-				mchash = "random " + sColor +" [1] "+ sc + run0c.substring(0,22) + ".."
-					+ sColor +" [2] "+ sc + run1c.substring(0,22) + ".."
+				mchash = "random "+ sColor +" [1] "+ sc + run0c.substring(0,22) +".."
+					+ sColor +" [2] "+ sc + run1c.substring(0,22) +".."
 				// math1
 				if (run01 !== run11) {
-					m1hash = "random " + sColor +" [1] "+ sc + run01.substring(0,22) + ".."
-						+ sColor +" [2] "+ sc + run11.substring(0,22) + ".."
+					m1hash = "random "+ sColor +" [1] "+ sc + run01.substring(0,22) +".."
+						+ sColor +" [2] "+ sc + run11.substring(0,22) +".."
 				}
 				// math6
 				if (run06 !== run16) {
-					m6hash = "random " + sColor +" [1] "+ sc + run06.substring(0,22) + ".."
-						+ sColor +" [2] "+ sc + run16.substring(0,22) + ".."
+					m6hash = "random "+ sColor +" [1] "+ sc + run06.substring(0,22) +".."
+						+ sColor +" [2] "+ sc + run16.substring(0,22) +".."
 				}
 			}
 			if (isFF) {
@@ -1056,9 +1286,9 @@ function get_mm_metrics(runtype) {
 	function perf() {
 		if (count == 4) {
 			if (runtype == "resize") {
-				if (logResize) {debug_perf("mm various [resize]",t0, "ignore")}
-			} else if (logPerf) {
-				debug_perf("mm various [screen]",t0, "")
+				if (logResize) {log_perf("mm various [resize]",t0,"ignore")}
+			} else {
+				log_perf("mm various [screen]",t0)
 			}
 		}
 	}
@@ -1149,7 +1379,7 @@ function get_mm_metrics(runtype) {
 							}
 							else {
 								return Promise.reject(
-									"between "+minValue+" and "+maxValue
+									"between "+ minValue +" and "+ maxValue
 								)
 							}
 						})
@@ -1189,10 +1419,10 @@ function get_mm_metrics(runtype) {
 	runTest(function(prefix, maxPrefix, suffix, maxValue, precision){
 		return searchValue(function(valueToTest){
 			try {
-				if (window.matchMedia("("+prefix+": "+valueToTest+suffix+")").matches){
+				if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
 					return Promise.resolve(searchValue.isEqual)
 				}
-				else if (window.matchMedia("("+maxPrefix+": "+valueToTest+suffix+")").matches){
+				else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
 					return Promise.resolve(searchValue.isSmaller)
 				}
 				else {
@@ -1213,35 +1443,35 @@ function get_orientation(runtype) {
 		a="aspect-ratio", o1=zNS, o2=zNS, o3=zNS, o4=zNS
 	try {
 		o1 = (function() {
-			if (window.matchMedia("(-moz-device-orientation:"+l+")").matches) return l
-			if (window.matchMedia("(-moz-device-orientation:"+p+")").matches) return p
+			if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) return l
+			if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) return p
 		})()
 	} catch(e) {o1 = zB0}
 	try {
 		o2 = (function() {
-			if (window.matchMedia(q+p+")").matches) return p
-			if (window.matchMedia(q+l+")").matches) return l
+			if (window.matchMedia(q + p +")").matches) return p
+			if (window.matchMedia(q + l +")").matches) return l
 		})()
 	} catch(e) {o3 = zB0}
 	try {
 		o3 = (function() {
-			if (window.matchMedia("("+a+":1/1)").matches) return s
-			if (window.matchMedia("(min-"+a+":10000/9999)").matches) return l
-			if (window.matchMedia("(max-"+a+":9999/10000)").matches) return p
+			if (window.matchMedia("("+ a +":1/1)").matches) return s
+			if (window.matchMedia("(min-"+ a +":10000/9999)").matches) return l
+			if (window.matchMedia("(max-"+ a +":9999/10000)").matches) return p
 		})()
 	} catch(e) {o3 = zB0}
 	try {
 		o4 = (function() {
-			if (window.matchMedia("(device-"+a+":1/1)").matches) return s
-			if (window.matchMedia("(min-device-"+a+":10000/9999)").matches) return l
-			if (window.matchMedia("(max-device-"+a+":9999/10000)").matches) return p
+			if (window.matchMedia("(device-"+ a +":1/1)").matches) return s
+			if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) return l
+			if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) return p
 		})()
 	} catch(e) {o4 = zB0}
-	dom.mmO.innerHTML = o1+" | "+o2+" | "+o3+" | "+o4
+	dom.mmO.innerHTML = o1 +" | "+ o2 +" | "+ o3 +" | "+ o4
 	// screen*
 	try {
 		dom.ScrOrient.innerHTML = (function() {
-			let r = screen.orientation.type+" | "+screen.mozOrientation+" | "+screen.orientation.angle
+			let r = screen.orientation.type +" | "+ screen.mozOrientation +" | "+ screen.orientation.angle
 			r = r.replace(/landscape-secondary/g, "upside down")
 			r = r.replace(/-primary/g, "")
 			r = r.replace(/-secondary/g, "")
@@ -1255,19 +1485,19 @@ function get_orientation(runtype) {
 	try {
 		dom.mmDM = (function() {
 			q="(display-mode:"
-			if (window.matchMedia(q+"fullscreen)").matches) return "fullscreen"
-			if (window.matchMedia(q+"browser)").matches) return "browser"
-			if (window.matchMedia(q+"minimal-ui)").matches) return "minimal-ui"
-			if (window.matchMedia(q+p+")").matches) return p
+			if (window.matchMedia(q +"fullscreen)").matches) return "fullscreen"
+			if (window.matchMedia(q +"browser)").matches) return "browser"
+			if (window.matchMedia(q +"minimal-ui)").matches) return "minimal-ui"
+			if (window.matchMedia(q + p +")").matches) return p
 		})()
 	} catch(e) {
 		dom.mmDM.innerHTML = zB0
 	}
 	// perf
 	if (runtype == "resize") {
-		if (logResize) {debug_perf("orientation [resize]",t0, "ignore")}
-	} else if (logPerf) {
-		debug_perf("orientation [screen]",t0, "")
+		if (logResize) {log_perf("orientation [resize]",t0,"ignore")}
+	} else {
+		log_perf("orientation [screen]",t0)
 	}
 }
 
@@ -1275,7 +1505,7 @@ function get_pbmode() {
 	let t0 = performance.now()
 	function output(r) {
 		dom.IsPBMode = r
-		if (logPerf) {debug_perf("pbmode [screen]",t0)}
+		log_perf("pbmode [screen]",t0)
 	}
 	if (isVer < 83) {
 		// FF83+: 1638396: dom.indexedDB.privateBrowsing.enabled
@@ -1284,7 +1514,7 @@ function get_pbmode() {
 			db.onerror = function() {output("true")}
 			db.onsuccess = function() {output("false")}
 		} catch(e) {
-			output("unknown: "+e.name)
+			output("unknown: "+ e.name)
 		}
 	} else {
 		output("unknown")
@@ -1304,16 +1534,20 @@ function get_resources() {
 			nob = "[no branding detected]",
 			el = dom.branding
 
+		// extensions can block resources://
+			// FF ~5ms, TB ~20ms
+		setTimeout(() => resolve("resources:blocked"), 100)
+
 		// output
 		function output(setGlobalVars) {
 			// set global vars
 			if (setGlobalVars) {
 				isChannel = channel
-				isResource = browser + " " + result
-				isResourceMetric = "resources:" + browser+" "+wFF+"x"+hFF+" "+extra
+				isResource = browser +" "+ result
+				isResourceMetric = "resources:"+ browser +" "+ wFF +"x"+ hFF +" "+ extra
 			}
 			dom.fdResource.innerHTML = isResource
-			if (logPerf) {debug_perf("resources [fd]",t0)}
+			log_perf("resources [fd]",t0)
 			return resolve(isResourceMetric)
 		}
 		// FF
@@ -1339,14 +1573,14 @@ function get_resources() {
 				channel = "Nightly"
 			}
 			if (channel !== "") {
-				result = branding+" - "+channel+" ["+wFF+" x "+hFF+"]"
+				result = branding +" - "+ channel +" ["+ wFF +" x "+ hFF +"]"
 			} else if (hFF > 0) {
 				//new
-				result = "["+wFF+" x "+hFF+"]" + zNEW + (runS ? zSIM : "")
+				result = "["+ wFF +" x "+ hFF +"]"+ zNEW + (runS ? zSIM : "")
 			} else {
 				//none: red=desktop orange=android
 				if (isVer > 59) {
-					result = (isOS == "android" ? s3 : sb) +nob+sc
+					result = (isOS == "android" ? s3 : sb) + nob + sc
 				}
 				dom.fdBrandingCss = "none"
 			}
@@ -1358,33 +1592,33 @@ function get_resources() {
 			if (wFF == 270 && hFF == 48) {
 				//alpha: 8.5a7+ [60.5.0esr]
 				channel = "alpha"
-				result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
-				debug_page("TB","    css branding = 270 x 48 px = alpha")
+				result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
+				log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
 			} else if (wFF == 336 && hFF == 48) {
 				if (isVer > 77) {
 					//78+ therefore release
 					channel = "release"
-					result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+					result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
 				} else {
 					//idk
-					result = " ["+wFF+" x "+hFF+"]"
+					result = " ["+ wFF +" x "+ hFF +"]"
 				}
 			} else if (wFF == 300 && hFF == 38) {
 				if (isVer > 67 && isVer < 78) {
 					//68+ therefore release
 					channel = "release"
-					result = s3+"["+channel+"]"+sc+" ["+wFF+" x "+hFF+"]"
+					result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
 				} else {
 					//idk
-					result = " ["+wFF+" x "+hFF+"]"
+					result = " ["+ wFF +" x "+ hFF +"]"
 				}
 			} else if (hFF > 0) {
 				//new
-				result = "["+wFF+" x "+hFF+"]" + zNEW + (runS ? zSIM : "")
+				result = "["+ wFF +" x "+ hFF +"]"+ zNEW + (runS ? zSIM : "")
 			} else {
 				//none: red=desktop orange=android
 				if (isVer > 59) {
-					result = (isOS == "android" ? s3 : sb) +nob+sc
+					result = (isOS == "android" ? s3 : sb) + nob + sc
 				}
 				dom.fdBrandingCss = "none"
 			}
@@ -1423,25 +1657,25 @@ function get_resources() {
 					let isTB2 = false
 					if (wTB > 0) {
 						isTB2 = true
-						debug_page("TB","     resource:// = tor-watermark.png")
-						if (logPerf) {debug_perf("[yes] tb watermark [fd]",t0)}
+						log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
+						log_perf("[yes] tb watermark [fd]",t0)
 					} else {
-						if (logPerf) {debug_perf("[no] tb watermark [fd]",t0)}
+						log_perf("[no] tb watermark [fd]",t0)
 					}
 					extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
 					if (isTB) {
 						build_TB(wFF, hFF)
 						if (isOS !== "android" && wTB < 1) {
-							result += sb+"[missing tor-watermark.png]"+sc
+							result += sb +"[missing tor-watermark.png]"+ sc
 						}
 					}
-					// now we output
+					// NOW we output
 					output(true)
 				}
 			})
 			document.body.removeChild(imgA)
 		}
-		// immutable: only run once EVER
+		// immutable: only run once
 		if (isResource == "") {
 			run()
 		} else {
@@ -1457,6 +1691,24 @@ function get_screen_metrics(runtype) {
 	//trap resize event
 	if (runtype !== "load" && runtype !== "screen") {runtype = "resize"}
 
+	// this triggers zoom/viewport when not page load
+		// but ignore viewport on resize: which is called by scrollbar
+		// nothing else needs to wait here for any results
+	if (runtype !== "load") {
+		Promise.all([
+			get_zoom(runtype)
+		]).then(function(){
+			if (runtype !== "resize") {
+				get_viewport(runtype)
+			}
+		})
+	}
+
+	// temp so I can see the new viewport/scrollbar
+	if (runtype == "resize") {
+		get_line_scrollbar("resize")
+	}
+
 	// measure
 	let w1 = screen.width, h1 = screen.height,
 		w2 = screen.availWidth, h2 = screen.availHeight,
@@ -1467,14 +1719,14 @@ function get_screen_metrics(runtype) {
 		p5 = window.screenX, p6 = window.screenY,
 		p7 = window.mozInnerScreenX, p8 = window.mozInnerScreenY
 
-	let mInner = w+" x "+h,
-		mOuter = w3+" x "+h3,
-		mScreen = w1+" x "+h1,
-		mAvailable = w2+" x "+h2
+	let mInner = w +" x "+ h,
+		mOuter = w3 +" x "+ h3,
+		mScreen = w1 +" x "+ h1,
+		mAvailable = w2 +" x "+ h2
 
-	dom.ScrRes =  mScreen +" ("+p1+","+p2+")"
-	dom.ScrAvail = mAvailable +" ("+p3+","+p4+")"
-	dom.WndOut = mOuter +" ("+p5+","+p6+")"
+	dom.ScrRes = mScreen +" ("+ p1 +","+ p2 +")"
+	dom.ScrAvail = mAvailable +" ("+ p3 +","+ p4 +")"
+	dom.WndOut = mOuter +" ("+ p5 +","+ p6 +")"
 
 	// x/y
 	let items = [p1,p2,p3,p4,p5,p6,p7,p8],
@@ -1490,17 +1742,17 @@ function get_screen_metrics(runtype) {
 			// if not in FS all 4 values should be different?
 	if (runtype == "load" || runtype == "screen") {
 		// note: FS would make these true
-			res.push("coordinates_zero:"+isXY)
+			res.push("coordinates_zero:"+ isXY)
 		let match = (mScreen == mAvailable)
-			res.push("match_screen+available:"+match)
+			res.push("match_screen+available:"+ match)
 		match = (mInner == mOuter)
-			res.push("match_inner+outer:"+match)		
+			res.push("match_inner+outer:"+ match)		
 		match = (mInner == mScreen)
-			res.push("match_inner+screen:"+match)
+			res.push("match_inner+screen:"+ match)
 
 		// ToDo: improve (see above) and return screen + available screen
 		if (isFS || mInner !== mScreen) {
-			res.push("screen:"+mScreen)
+			res.push("screen:"+ mScreen)
 		} else {
 			res.push("screen:spoofed")
 		}
@@ -1510,12 +1762,12 @@ function get_screen_metrics(runtype) {
 	if (isFF) {
 		// size
 		let m1 = true, m2 = true, r = "", c = "#ff4f4f"
-		if (w1+"x"+h1 !== w2+"x"+h2) {m1 = false}
-		else if (w2+"x"+h2 !== w3+"x"+h3) {m1 = false}
-		else if (w3+"x"+h3 !== w+"x"+h) {m1 = false}
-		r = (m1 ? sg : sb) + "[sizes match x4]"+sc
+		if (w1 +"x"+ h1 !== w2 +"x"+ h2) {m1 = false}
+		else if (w2 +"x"+ h2 !== w3 +"x"+ h3) {m1 = false}
+		else if (w3 +"x"+ h3 !== w +"x"+ h) {m1 = false}
+		r = (m1 ? sg : sb) +"[sizes match x4]"+ sc
 		// x/y
-		r += " +" + (isXY ? sg : sb) + "[0,0 x4]"+sc
+		r += " +"+ (isXY ? sg : sb) +"[0,0 x4]"+ sc
 		dom.match.innerHTML = r
 		// color
 		if (m1 && m2) {c = "#8cdc8c"}
@@ -1523,35 +1775,22 @@ function get_screen_metrics(runtype) {
 		for (let i=0; i < items.length; i++) {items[i].style.color = c}
 	}
 
-	// update zoom/viewport except on load
-	if (runtype !== "load") {
-		get_zoom(runtype)
-		get_viewport(runtype)
-	}
 	// inner
-	let strTemp = w+" x "+h+" ("+p7+","+p8+")"
+	let strTemp = w +" x "+ h +" ("+ p7 +","+ p8 +")"
 	if (isOS == "android") {
 		dom.WndIn = strTemp
 	} else {
-		// LB+NW
+		// LB/NW
 		if (isFF) {
-			if (jsZoom == 100) {strTemp += return_lb_nw(w,h)} else {strTemp += "<br>"+lb_orange}
+			if (jsZoom == 100) {strTemp += return_lb_nw(w,h)}
 		}
 		dom.WndIn.innerHTML = strTemp
-		if (logExtra) {
-			let strC = (runtype.type == undefined ? runtype : runtype.type)
-			console.log("C [must follow zoom]: ", strC, ": screen_metrics")
-		}
 	}
 	// the rest
 	get_orientation(runtype)
 	get_mm_metrics(runtype)
-	if (logExtra) {
-		let strD = (runtype.type == undefined ? runtype : runtype.type)
-		console.log("D [must follow zoom]: ", strD, ": mm_metrics, orientation, fullscreen")
-	}
 
-	// return for section hash
+	// section metrics
 	if (runtype == "load" || runtype == "screen") {
 		return(res)
 	}
@@ -1568,7 +1807,6 @@ function get_ua_doc() {
 			match = false,
 			myOS = isOS,
 			isPartial = false
-
 		// FF78+ only
 		if (isFF && isVer > 77) {go = true}
 
@@ -1577,9 +1815,9 @@ function get_ua_doc() {
 			let title = property
 			if (state) {
 				if (isPartial == false && go == true) {lies++}
-				title += (isPartial ? sn : sb) +"&#9654"+sc
+				title += (isPartial ? sn : sb) +"&#9654"+ sc
 			}
-			document.getElementById("l"+property).innerHTML = title
+			document.getElementById("l"+ property).innerHTML = title
 		}
 
 		function output(property, str) {
@@ -1588,12 +1826,14 @@ function get_ua_doc() {
 			if (str == "undefined") {str = "undefined string"}
 			if (str == undefined) {str = "undefined value"}
 			// stash it, display it
-			res.push(property+":"+str)
-			document.getElementById("n"+property).innerHTML = str
+			res.push(property +":"+ str)
+			document.getElementById("n"+ property).innerHTML = str
 			return str
 		}
 
 		function get_property(property, good) {
+			// clear arrow
+			addArrow(property, false)
 			// treat blocked as lies
 			str = ""
 			try {str = navigator[property]} catch(e) {str = zB0}
@@ -1616,14 +1856,16 @@ function get_ua_doc() {
 			if (good !== undefined) {
 				// BS
 				let arrow = ""
-				if (go == true && str !== good) {arrow = sb+"&#9654"+sc; lies++}
-				document.getElementById("l"+property).innerHTML = property + arrow
+				if (go == true && str !== good) {arrow = sb +"&#9654"+ sc; lies++}
+				document.getElementById("l"+ property).innerHTML = property + arrow
 			} else {
 				return str
 			}
 		}
 
 		function check_basics(str, property) {
+			// clear arrow
+			addArrow(property, false)
 			// for dynamic returns
 			let bs = false
 			if (str == "undefined value") {bs = true
@@ -1641,7 +1883,6 @@ function get_ua_doc() {
 					sub = "20100101",
 					sub2 = sub,
 					debug = []
-
 				// SAVE TME
 				if (str.indexOf(".0) Gecko/") == -1) {bs = true
 				} else if (str.indexOf(" Firefox/") == -1) {bs = true
@@ -1684,13 +1925,13 @@ function get_ua_doc() {
 								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/"+ v
 							}
 						}
-						controlA = "Mozilla/5.0 (" + controlA +" Firefox/"+ v
-						controlB = "Mozilla/5.0 (" + controlB +" Firefox/"+ v2
+						controlA = "Mozilla/5.0 ("+ controlA +" Firefox/"+ v
+						controlB = "Mozilla/5.0 ("+ controlB +" Firefox/"+ v2
 					} else {
 					// RFP OFF
 						// desktop: ends in "; rv:XX.0) Gecko/20100101 Firefox/XX.0"
 						// android: ends in "; rv:XX.0) Gecko/XX.0 Firefox/XX.0"
-						if (isVerPlus == false) {v2 = v}
+						if (!isVerPlus) {v2 = v}
 						if (isOS == "android") {sub = v; sub2 = v2}
 						controlA = "; rv:"+ v +") Gecko/"+ sub +" Firefox/"+ v
 						controlB = "; rv:"+ v2 +") Gecko/"+ sub2 +" Firefox/"+ v2
@@ -1721,7 +1962,7 @@ function get_ua_doc() {
 		str = get_property("appVersion")
 		if (go) {
 			if (myOS == "") {isPartial = true} else {isPartial = false}
-			spoof = check_basics(str)
+			spoof = check_basics(str, "appVersion")
 			if (spoof) {
 				// no need to check further, use a red arrow
 				isPartial = false
@@ -1737,8 +1978,6 @@ function get_ua_doc() {
 				}
 			}
 			if (spoof || isPartial) {addArrow("appVersion", true)}
-		} else {
-			addArrow("appVersion", false)
 		}
 
 		// platform
@@ -1747,7 +1986,7 @@ function get_ua_doc() {
 		str = get_property("platform")
 		if (go) {
 			if (myOS == "") {isPartial = true} else {isPartial = false}
-			spoof = check_basics(str)
+			spoof = check_basics(str, "platform")
 			if (spoof) {
 				// no need to check further, use a red arrow
 				isPartial = false
@@ -1770,15 +2009,13 @@ function get_ua_doc() {
 				}
 			}
 			if (spoof || isPartial) {addArrow("platform", true)}
-		} else {
-			addArrow("platform", false)
 		}
 
 		// oscpu
 		str = get_property("oscpu")
 		if (go) {
 			if (myOS == "") {isPartial = true} else {isPartial = false}
-			spoof = check_basics(str)
+			spoof = check_basics(str, "oscpu")
 			if (spoof) {
 				// no need to check further, use a red arrow
 				isPartial = false
@@ -1787,25 +2024,25 @@ function get_ua_doc() {
 				if (myOS == "windows") {
 					pre = "Windows NT "
 					// app64 + win64
-					if (str == pre+"10.0; Win64; x64") {match = true}
-					else if (str == pre+"6.3; Win64; x64") {match = true}
-					else if (str == pre+"6.1; Win64; x64") {match = true}
+					if (str == pre +"10.0; Win64; x64") {match = true}
+					else if (str == pre +"6.3; Win64; x64") {match = true}
+					else if (str == pre +"6.1; Win64; x64") {match = true}
 					// app32 + win64
-					else if (str == pre+"10.0; WOW64") {match = true}
-					else if (str == pre+"6.3; WOW64") {match = true}
-					else if (str == pre+"6.1; WOW64") {match = true}
+					else if (str == pre +"10.0; WOW64") {match = true}
+					else if (str == pre +"6.3; WOW64") {match = true}
+					else if (str == pre +"6.1; WOW64") {match = true}
 					// app32 + win32
-					else if (str == pre+"10.0") {match = true}
-					else if (str == pre+"6.3") {match = true}
-					else if (str == pre+"6.1") {match = true}
+					else if (str == pre +"10.0") {match = true}
+					else if (str == pre +"6.3") {match = true}
+					else if (str == pre +"6.1") {match = true}
 					spoof = !match
 				}
 				if (myOS == "linux") {
 					// ToDo: specific linux distro strings?
 					pre = "Linux "
-					if (str == pre+"i686") {match = true}
-					else if (str == pre+"i686 on x86_64") {match = true}
-					else if (str == pre+"x86_64") {match = true}
+					if (str == pre +"i686") {match = true}
+					else if (str == pre +"i686 on x86_64") {match = true}
+					else if (str == pre +"x86_64") {match = true}
 					spoof = !match
 				}
 				if (myOS == "mac") {
@@ -1814,14 +2051,12 @@ function get_ua_doc() {
 				}
 				if (myOS == "android") {
 					pre = "Linux "
-					if (str.substring(0,10) == pre+"armv") {match = true}
-					if (str.substring(0,11) == pre+"aarch") {match = true}
+					if (str.substring(0,10) == pre +"armv") {match = true}
+					if (str.substring(0,11) == pre +"aarch") {match = true}
 					spoof = !match
 				}
 			}
 			if (spoof || isPartial) {addArrow("oscpu", true)}
-		} else {
-			addArrow("oscpu", false)
 		}
 
 		// userAgent
@@ -1839,8 +2074,6 @@ function get_ua_doc() {
 					// - the syntax/formula doesn't match
 			}
 			if (spoof || isPartial) {addArrow("userAgent", true)}
-		} else {
-			addArrow("userAgent", false)
 		}
 
 		// hash
@@ -1848,14 +2081,14 @@ function get_ua_doc() {
 		// reset
 		uaBS = false
 		// show
-		if (lies > 0) {
-			lies += " pinocchio" + (lies > 1 ? "s": "")
-			dom.nualies.innerHTML = sb+ lies + sc + " [based on feature detection]"
+		if (lies) {
+			lies += " pinocchio"+ (lies > 1 ? "s": "")
+			dom.nualies.innerHTML = sb + lies + sc +" [based on feature detection]"
 			dom.togualies.style.display = "table-row"
 			uaBS = true
-			// global lies
-			if (!sRerun) {
-				liesKnown.push("useragent:navigator")
+			// lies
+			if (gRun) {
+				gLiesKnown.push("useragent:navigator")
 			}
 		} else {
 			// hide
@@ -1875,10 +2108,9 @@ function get_ua_workers() {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"
 		} else if (r == "undefined") {r = "undefined string"
-		} else if (r == undefined && isFF) {r = zB0
 		} else if (r == undefined) {r = "undefined value"
 		}
-		res.push(list[i]+":"+r)
+		res.push(list[i] +":"+ r)
 	}
 	res.sort()
 	let control = sha1(res.join())
@@ -1888,10 +2120,10 @@ function get_ua_workers() {
 		for (let i=0; i < res.length; i++) {
 			if (res[i] !== data[i]) {
 				let parts = data[i].split(":")
-				let target = document.getElementById("n"+parts[0])
+				let target = document.getElementById("n"+ parts[0])
 				// don't output it a second time if iframes got it
 				if ((target.innerHTML).indexOf("<br>") == -1) {
-					target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
+					target.innerHTML += "<br>"+ sb.trim() + parts.slice(1).join(":") + sc
 				}
 			}
 		}
@@ -1952,9 +2184,9 @@ function get_ua_workers() {
 	if (isFile) {
 		el2.innerHTML = zNA
 	} else if (isSecure) {
-		if (check_navObject("serviceWorker")) {
+		if (check_navKey("serviceWorker")) {
 			// assume failure
-			el2.innerHTML = zF + " [A: assumed]"
+			el2.innerHTML = zF +" [A: assumed]"
 			try {
 				// register
 				navigator.serviceWorker.register("js/workerservice_ua.js").then(function(swr) {
@@ -1979,11 +2211,11 @@ function get_ua_workers() {
 							channel.close()
 						})
 					} else {
-						el2.innerHTML = zF + " [B: not swr.installing]"
+						el2.innerHTML = zF +" [B: not swr.installing]"
 					}
 				},
 				function(e) {
-					el2.innerHTML = zF + " [C: not registering]: "  + e.message
+					el2.innerHTML = zF +" [C: not registering]: " + e.message
 				})
 			} catch(e) {
 				el2.innerHTML = zB0
@@ -1994,246 +2226,19 @@ function get_ua_workers() {
 	}
 }
 
-function get_version() {
-	return new Promise(resolve => {
-		let go = true,
-			verNo = "",
-			isNew = false,
-			alt0 = sb+" [fallback test ",
-			alt1 = alt0 +"1]"+sc,
-			alt2 = alt0 +"2]"+sc,
-			alt3 = alt0 +"3]"+sc,
-			t0 = performance.now()
-
-		function output() {
-			// set isVer, isVerPlus
-			if (isVer == "") {
-				if (verNo.slice(-1) == "+") {isVerPlus = true}
-				isVer = verNo.replace(/\D/g,',')
-				let start = isVer.indexOf(",")
-				if (start !== -1) {
-					isVer = (isVer.substring(0,start)) * 1
-				}
-			}
-			dom.fdVersion.innerHTML = verNo
-			if (logPerf) {debug_perf("version [fd]",t0)}
-			return resolve("version:"+ verNo)
-		}
-		// use isErr
-		if (isErr == "X") { verNo = "59 or lower"
-		} else if (isErr == "e09e") { v67minus()
-		} else if (isErr == "9be3") { v69minus()
-		} else if (isErr == "1492") { verNo = "70"
-		} else if (isErr == "7121") { verNo = "71"
-		// 74+: 1259822: pref alters err2: now 2 outcomes per bucket
-		// javascript.options.property_error_message_fix
-		} else if (isErr == "fa8e" || isErr == "fb19") { v74minus()
-		} else if (isErr == "214f" || isErr == "5186") { v75plus()
-		} else if (isErr == "0dc5" || isErr == "b75b") { v75plus()
-		} else {
-			// new: cascade down all tests: this helps covers the error
-			// hash being meddled with: e.g. aopr script blocking
-			isNew = true
-			v75plus()
-		}
-		// run
-		function v75plus() {
-			if (go) {
-				// 88: 1670124
-				try {
-					newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
-				} catch(e) {
-					if (e.message.substr(13,5) == "8 and") {verNo = "88+"; go=false}
-				}
-			}
-			if (go) {
-			// 87: 1688335
-				try {
-					if (console.length == undefined) {verNo = "87"; go=false}
-				} catch(e) {}
-			}
-			// 86: 1685482
-			if (go) {
-				try {
-					newFn('for (async of [])')
-				} catch(e) {
-					if ((e.message).substring(0,2) == "an") {verNo = "86"; go=false}
-				}
-			}
-			// 85: 1675240
-			if (go) {
-				try {
-					let reg85 = ("/a")
-					let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-					let test85 = descriptor.get.call(reg85)
-				} catch(e) {
-					if ((e.message).substring(0,3) == "Reg") {verNo = "85"; go=false}
-				}
-			}
-			// 84: 1673440
-			if (go) {
-				try {newFn("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {verNo = "84"; go=false}}
-			}
-			// 83: 1667094
-			if (go) {
-				try {
-					let obj83 = {exec() {return function(){}}}
-					let test83 = RegExp.prototype.test.call(obj83, "")
-					verNo = "83"; go = false
-				} catch(e) {}
-			}
-			// 82: 1655947
-			if (go) {
-				let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-				if (test82 == 1) {verNo = "82"; go = false}
-			}
-			// 81: 1650607
-			if (go) {
-				try {
-					let file81 = new File(["bits"], "a/b.txt")
-					if (file81.name == "a/b.txt") {verNo = "81"; go = false}
-				} catch(e) {}
-			}
-			// 80: 1651732
-			if (go) {
-				let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
-				let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-				try {
-					for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
-					verNo = "80"; go = false
-				} catch (e) {}
-			}
-			//79: 1644878
-			if (go) {
-				try {
-					Map.prototype.entries.call(true)
-				} catch(e) {
-					if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
-				}
-			}
-			//78: 1589095
-			if (go) {
-				try {
-					let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
-					verNo = "78"; go = false
-				} catch(e) {}
-			}
-			//78: 1633836
-			if (go) {
-				try {
-					let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
-					verNo = "78" + alt1; go = false
-				} catch(e) {}
-			}
-			//78: 1634135
-			if (go) {
-				try {
-					let regex78b = new RegExp('b')
-					if (regex78b.dotAll == false) {verNo = "78" + alt2; go = false}
-				} catch(e) {}
-			}
-			//77: 1627285
-			if (go) {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}}
-			//76: 1608010
-			if (go) {if (test76.validity.rangeOverflow) {} else {verNo = "76"; go = false}}
-			//75: 1615600
-			if (isNew && go) {
-				try {let test75 = BigInt(2.5)} catch(e) {
-					if (e.message.substring(0,3) == "2.5") {verNo = "75"} else {v74minus()}
-				}
-			} else if (go) {verNo = "75"}
-		}
-		function v74minus () {
-			//74: 1605835
-			if (go) {try {newFn("let t = ({ 1n: 1 })"); verNo = "74"; go = false;} catch(e) {}}
-			//73: 1605803
-			if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
-			//new
-			if (isNew && go) {
-				//72: 1589072
-				try {let test72 = newFn('let a = 100_00_;')} catch(e) {
-					if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
-				}
-				//71: 1575980
-				if (go) {
-					try {
-						let test71 = new StaticRange()
-					} catch(e) {
-						if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {verNo = "71"; go = false}
-					}
-				}
-				//70: 1435818
-				if (go) {
-					try {newFn("let t = 1_050"); verNo = "70"} catch(e) {v69minus()}
-				}
-			} else if (go) {verNo = "72"}
-		}
-		function v69minus() {
-			//69: 1558387
-			if (go) {try {let test69 = new DOMError('a'); verNo = "68"} catch(e) {verNo = "69"; go = false}}
-			if (isNew && go) {
-				//68: 1548773
-				if (dom.test68.typeMustMatch == false) {v67minus()} else {verNo = "68"}
-			} else if (go) {verNo = "68"}
-		}
-		function v67minus() {
-			//67: 1531830
-			if (go) {if (!Symbol.hasOwnProperty('matchAll')) {} else {verNo="67"; go = false}}
-			//66
-			if (go) {
-				try {
-					let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-					let test66 = txt.encodeInto("a", utf8)
-					verNo="66"; go = false
-				} catch(e) {}
-			}
-			//65
-			if (go) {
-				try {
-					let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); verNo="65"; go = false
-				} catch(e) {}
-			}
-			//64
-			if (go) {if (window.screenLeft == undefined){} else {verNo="64"; go = false}}
-			//63
-			if (go) {if (Symbol.for(`a`).description == "a") {verNo="63"; go = false}}
-			//62
-			if (go) {
-				console.time("v62")
-				try {console.timeLog("v62"); verNo="62"; go = false} catch(e) {}
-				console.timeEnd("v62")
-			}
-			//61
-			if (go) {try {let test61 = (" a").trimStart(); verNo="61"; go = false} catch(e) {}}
-			//60
-			if (go) {
-				try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-					|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-						"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-					verNo = "60"
-				} catch(e) {
-					verNo = "59 or lower"
-				}
-			}
-		}
-		output()
-	})
-}
-
 function get_viewport(runtype) {
+	if (logExtra) {console.log(performance.now(), "B START.:", runtype, ": viewport")}
 	let e=document.createElement("div")
 	e.style.cssText="position:fixed;top:0;left:0;bottom:0;right:0;"
 	document.documentElement.insertBefore(e,document.documentElement.firstChild)
 	let vw=e.offsetWidth,
 		vh=e.offsetHeight
 	document.documentElement.removeChild(e)
-	dom.Viewport = vw+" x "+vh
-
-	if (logExtra) {console.log("B [must follow zoom]: ", runtype, ": viewport")}
-
+	dom.Viewport = vw +" x "+ vh
 	// get viewport height once on first load
 	// this s/be with toolbar visible (not FS)
 	if (avh == "") {avh = vh}
+	if (logExtra) {console.log(performance.now(), "B FINISH:", runtype, ": viewport")}
 	// return
 	if (runtype == "fd") {
 		return vw // scrollbar
@@ -2259,7 +2264,7 @@ function get_widgets() {
 
 		// loop elements
 		for (let i=0; i < 9; i++) {
-			let el = document.getElementById("widget"+i)
+			let el = document.getElementById("widget"+ i)
 			try {
 				font = getComputedStyle(el).getPropertyValue("font-family")
 			} catch(e) {font = "unknown"}
@@ -2271,16 +2276,19 @@ function get_widgets() {
 				//if (i == 4) {font = "-apple-system"} // font
 				//if (i == 2) {size="13px"} // size
 			}
-			output = font+", "+size
+			output = font +", "+ size
 			// 1-7: compare to 1
 			if (i < 7) {
-				combined.push(list[i].padStart(14) + ": "+output)
-				if (i == 0) {size0 = size; font0 = font}
-				if (i > 0) {if (size !== size0) {sizediff = true}}
-				if (i > 0) {if (font !== font0) {fontdiff = true}}
+				combined.push(list[i].padStart(14) +": "+ output)
+				if (i == 0) {
+					size0 = size; font0 = font
+				} else {
+					if (size !== size0) {sizediff = true}
+					if (font !== font0) {fontdiff = true}
+				}
 			}
 			// all
-			document.getElementById("wid"+i).innerHTML = output
+			document.getElementById("wid"+ i).innerHTML = output
 			hash.push(output)
 		}
 		// overall hash
@@ -2304,7 +2312,7 @@ function get_widgets() {
 					else if (font0 == "unknown") {os = ""}
 					else {os="Linux"}
 			}
-			os = (os == "" ? zB : os) + " ["+font0+", "+size0+"]"
+			os = (os == "" ? zB : os) +" ["+ font0 +", "+ size0 +"]"
 			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
 		} else {
 			dom.fdWidget = whash
@@ -2312,109 +2320,109 @@ function get_widgets() {
 		dom.wid0.style.color = zshow
 		dom.widgetH = whash + (runS ? zSIM : "")
 		// perf & resolve
-		if (logPerf) {debug_perf("widgets [fd]",t0)}
+		log_perf("widgets [fd]",t0)
 		return resolve("widgets:"+ whash)
 	})
 }
 
 function get_zoom(runtype) {
-	let t0 = performance.now(),
-		dpr2 = "",
-		zoomAssume = false
+	return new Promise(resolve => {
+		let t0 = performance.now(),
+			dpr2 = "",
+			zoomAssume = false
 
-	// dPR
-	let dpr = window.devicePixelRatio || 1;
-	let dprStr = (dpr == 1 ? "1"+rfp_green : dpr+rfp_red)
-	// add extra dpr: 477157
-	if (isFF) {
-		let element = document.getElementById("dprdroid")
-		try {
-			dpr2 = getComputedStyle(element).borderTopWidth
-			dpr2 = dpr2.slice(0, -2) // trim "px"
-			if (dpr2 > 0) {
-				dpr2 = (1/dpr2)
-				// if (dpr2 != 1) {dprStr += " | "+dpr2+rfp_red}
-				dprStr += " | "+dpr2 + (dpr2 == 1 ? rfp_green : rfp_red)
+		// dPR
+		let dpr = window.devicePixelRatio || 1;
+		let dprStr = dpr + (dpr == 1 ? rfp_green : rfp_red)
+		// add dPR2: 477157
+		if (isFF) {
+			let el = dom.dpr2
+			try {
+				dpr2 = getComputedStyle(el).borderTopWidth
+				dpr2 = dpr2.slice(0, -2) // trim "px"
+				if (dpr2 > 0) {
+					dpr2 = (1/dpr2)
+					dprStr += " | "+ dpr2 + (dpr2 == 1 ? rfp_green : rfp_red)
+				}
+			} catch(e) {
+				// ToDo: we can't use dpr2 later on
 			}
-		} catch(e) {
-			// ToDo: we can't use dpr2 later on
 		}
-	}
-	dom.dpr.innerHTML = dprStr
+		dom.dpr.innerHTML = dprStr
 
-	// dpi
-	// ToDo: when zooming, getting divDPI is much slower
-	// divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
-	let t1 = performance.now()
+		// ToDo: when zooming, getting divDPI is much slower
+		// divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
+		let t1 = performance.now()
 
-	let aDPI = return_mm_dpi("dpi"),
-		bDPI = return_mm_dpi("dppx"),
-		cDPI = return_mm_dpi("dpcm")
+		let aDPI = return_mm_dpi("dpi"),
+			bDPI = return_mm_dpi("dppx"),
+			cDPI = return_mm_dpi("dpcm")
 
-	if (aDPI !== zB0) {varDPI = aDPI}
-	dom.mmDPI.innerHTML = aDPI +" | "+ bDPI +" | "+ cDPI
-	dpi_x = Math.round(dom.divDPI.offsetWidth * dpr)
-	dpi_y = Math.round(dom.divDPI.offsetHeight * dpr)
-	dom.jsDPI = dpi_x
+		if (aDPI !== zB0) {varDPI = aDPI}
+		dom.mmDPI.innerHTML = aDPI +" | "+ bDPI +" | "+ cDPI
+		dpi_x = Math.round(dom.divDPI.offsetWidth * dpr)
+		dpi_y = Math.round(dom.divDPI.offsetHeight * dpr)
+		dom.jsDPI = dpi_x
 
-	if (runtype == "resize") {
-		if (logResize) {debug_perf("dpi [part of zoom]",t1,"ignore")}
-	} else if (logPerf) {
-		debug_perf("dpi [part of zoom]",t1,"ignore")
-	}
+		if (runtype == "resize") {
+			if (logResize) {log_perf("dpi [part of zoom]",t1,"ignore")}
+		} else {
+			log_perf("dpi [part of zoom]",t1,"ignore")
+		}
 
-	// zoom: choose method
-	if (dpr !== 1 || dpi_y == 0) {
-		// use devicePixelRatio if we know RFP is off
-		// or if css is blocked (dpi_y = 0, dpi_x = body width)
-		jsZoom = Math.round(dpr*100).toString()
-	} else {
-		if (varDPI == undefined) {
-			// e.g. matchMedia is blocked
-			if (isFF) {
-				if (dpr2 == "") {
-					// e.g. getComputedStyle is blocked
-					jsZoom = 100
-					zoomAssume = true
+		// zoom: choose method
+		if (dpr !== 1 || dpi_y == 0) {
+			// use devicePixelRatio if we know RFP is off
+			// or if css is blocked (dpi_y = 0, dpi_x = body width)
+			jsZoom = Math.round(dpr*100).toString()
+		} else {
+			if (varDPI == undefined) {
+				// e.g. matchMedia is blocked
+				if (isFF) {
+					if (dpr2 == "") {
+						// e.g. getComputedStyle is blocked
+						jsZoom = 100
+						zoomAssume = true
+					} else {
+						// fallback to dpr2
+						jsZoom = Math.round(dpr2*100).toString()
+					}
 				} else {
-					// fallback to dpr2
-					jsZoom = Math.round(dpr2*100).toString()
+					jsZoom = Math.round((dpi_x/dpi_x)*100).toString()
 				}
 			} else {
-				jsZoom = Math.round((dpi_x/dpi_x)*100).toString()
+				// otherwise it could be spoofed
+				jsZoom = Math.round((varDPI/dpi_x)*100).toString()
 			}
-		} else {
-			// otherwise it could be spoofed
-			jsZoom = Math.round((varDPI/dpi_x)*100).toString()
 		}
-	}
 
-	// ToDo: zoom: css=blocked (dpi_y == 0) AND RFP=true: detect this state
-	// Can't guarantee zoom: notate output for zoom, css line height, scollbar width
+		// ToDo: zoom: css=blocked (dpi_y == 0) AND RFP=true: detect this state
+		// Can't guarantee zoom: notate output for zoom, css line height, scollbar width
 
-	// fixup some numbers
-	if (jsZoom !== 100) {
-		if (jsZoom == 79) {jsZoom=80}
-		if (jsZoom == 92) {jsZoom=90}
-		if (jsZoom == 109) {jsZoom=110}
-		if (jsZoom == 111) {jsZoom=110}
-		if (jsZoom == 121) {jsZoom=120}
-		if (jsZoom == 131) {jsZoom=133}
-		if (jsZoom == 167) {jsZoom=170}
-		if (jsZoom == 171) {jsZoom=170}
-		if (jsZoom == 172) {jsZoom=170}
-		if (jsZoom == 241) {jsZoom=240}
-		if (jsZoom == 250) {jsZoom=240}
-	}
-	if (logExtra) {console.log("A [ must come first]: ", runtype, ": zoom, dpi, devicePixelRatio")}
-	dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1+"[assumed]"+sc :"")
+		// fixup some numbers
+		if (jsZoom !== 100) {
+			if (jsZoom == 79) {jsZoom=80}
+			if (jsZoom == 92) {jsZoom=90}
+			if (jsZoom == 109) {jsZoom=110}
+			if (jsZoom == 111) {jsZoom=110}
+			if (jsZoom == 121) {jsZoom=120}
+			if (jsZoom == 131) {jsZoom=133}
+			if (jsZoom == 167) {jsZoom=170}
+			if (jsZoom == 171) {jsZoom=170}
+			if (jsZoom == 172) {jsZoom=170}
+			if (jsZoom == 241) {jsZoom=240}
+			if (jsZoom == 250) {jsZoom=240}
+		}
+		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc :"")
 
-	if (runtype == "resize") {
-		if (logResize) {debug_perf("zoom [resize]",t0, "ignore")}
-	} else if (logPerf) {
-		debug_perf("zoom ["+ runtype +"]",t0, "")
-	}
-	return jsZoom
+		if (runtype == "resize") {
+			if (logResize) {log_perf("zoom [resize]",t0,"ignore")}
+		} else {
+			log_perf("zoom ["+ runtype +"]",t0)
+		}
+		if (logExtra) {console.log(performance.now(), "A FINISH:", runtype, ": zoom, dpi, devicePixelRatio")}
+		return resolve(jsZoom)
+	})
 }
 
 /* OS SPECIFIC */
@@ -2422,10 +2430,10 @@ function get_zoom(runtype) {
 function run_os() {
 	if (isOS == "android") {
 		showhide("table-row","OS1","")
-		dom.droidWin = firstW+" x "+firstH+" [inner] [toolbar visible]"
+		dom.droidWin = firstW +" x "+ firstH +" [inner] [toolbar visible]"
 		// listen for toolbar
 		get_android_tbh()
-		// rerun screen: droid can be a little slow
+		// rerun screen: android can be slow
 		if (window.innerWidth == firstW) {
 			setTimeout(function(){get_screen_metrics()}, 100)
 		}
@@ -2489,15 +2497,15 @@ function goFS() {
 					setTimeout(function() {
 						let iw = document.mozFullScreenElement.clientWidth,
 							ih = document.mozFullScreenElement.clientHeight
-						dom.fsLeak = screen.width+" x "+screen.height+" [screen] "+iw+" x "+ih+" [mozFullScreenElement client]"
+						dom.fsLeak = screen.width +" x "+ screen.height +" [screen] "+ iw +" x "+ ih +" [mozFullScreenElement client]"
 						exitFS()
 						// TB desktop warning panel
-						if (isTB == true && isOS !== "android") {
+						if (isTB && isOS !== "android") {
 							setTimeout(function(){
 							let ih2 = window.innerHeight
 								let panel = ih1-ih2
 								if (panel !== 0) {
-									dom.fsLeak.innerHTML = dom.fsLeak.textContent+"<br>"+panel+"px [warning panel height]"
+									dom.fsLeak.innerHTML = dom.fsLeak.textContent +"<br>"+ panel +"px [warning panel height]"
 								}
 							}, 600)
 						}
@@ -2527,10 +2535,10 @@ function goNW() {
 		ih = newWin.innerHeight,
 		ow = newWin.outerWidth,
 		oh = newWin.outerHeight
-	sizesi.push(iw+" x "+ih)
-	sizeso.push(ow+" x "+oh)
+	sizesi.push(iw +" x "+ ih)
+	sizeso.push(ow +" x "+ oh)
 	// default output
-	newWinLeak = iw+" x "+ih+" [inner] "+ow+" x "+oh+" [outer]"
+	newWinLeak = iw +" x "+ ih +" [inner] "+ ow +" x "+ oh +" [outer]"
 
 	// DESKTOP
 	if (isOS !== "android") {
@@ -2541,24 +2549,24 @@ function goNW() {
 				changeso = 0
 			// detect changes
 			let prev = sizesi[0]
-			let strInner = s1+"inner: "+sc+iw+" x "+ih
+			let strInner = s1 +"inner: "+ sc + iw +" x "+ ih
 			for (let k=0; k < sizesi.length; k++) {
 				if (sizesi[k] !== prev ) {
-					changesi++;	strInner += s1+" &#9654 <b>["+k+"]</b> "+sc+sizesi[k]
+					changesi++;	strInner += s1 +" &#9654 <b>["+ k +"]</b> "+ sc + sizesi[k]
 				}
 				prev = sizesi[k]
 			}
 			prev = sizeso[0]
-			let strOuter = s1+"outer: "+sc+ow+" x "+oh
+			let strOuter = s1 +"outer: "+ sc + ow +" x "+ oh
 			for (let k=0; k < sizeso.length; k++) {
 				if (sizeso[k] !== prev ) {
-					changeso++;	strOuter += s1+" &#9654 <b>["+k+"]</b> "+sc+sizeso[k]
+					changeso++;	strOuter += s1 +" &#9654 <b>["+ k +"]</b> "+ sc + sizeso[k]
 				}
 				prev = sizeso[k]
 			}
 			// one or two lines
 			if (changesi > 0 || changeso > 0) {
-				newWinLeak = strInner+"<br>"+strOuter
+				newWinLeak = strInner +"<br>"+ strOuter
 			}
 			// output
 			dom.newWinLeak.innerHTML = newWinLeak
@@ -2571,8 +2579,8 @@ function goNW() {
 			} else {
 				// grab metrics
 				try {
-					sizesi.push(newWin.innerWidth+" x "+newWin.innerHeight)
-					sizeso.push(newWin.outerWidth+" x "+newWin.outerHeight)
+					sizesi.push(newWin.innerWidth +" x "+ newWin.innerHeight)
+					sizeso.push(newWin.outerWidth +" x "+ newWin.outerHeight)
 				} catch(e) {
 					clearInterval(checking)
 					// if not "permission denied", eventually we always get
@@ -2588,10 +2596,10 @@ function goNW() {
 	if (isOS == "android") {
 		if (ih > firstH) {
 			// firstH s/be with the toolbar
-			newWinLeak = iw+" x "+ih+" [inner] [toolbar hidden] "+ow+" x "+oh+" [outer]"
+			newWinLeak = iw +" x "+ ih +" [inner] [toolbar hidden] "+ ow +" x "+ oh +" [outer]"
 		} else if (ih == firstH) {
 			// should be the same
-			newWinLeak = iw+" x "+ih+" [inner] [toolbar visible] "+ow+" x "+oh+" [outer]"
+			newWinLeak = iw +" x "+ ih +" [inner] [toolbar visible] "+ ow +" x "+ oh +" [outer]"
 		}
 		dom.newWinLeak.innerHTML = newWinLeak
 	}
@@ -2608,10 +2616,9 @@ function goNW_UA() {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"
 		} else if (r == "undefined") {r = "undefined string"
-		//} else if (r == undefined && isFF) {r = zB0 // iSFF not avilable in new window
 		} else if (r == undefined) {r = "undefined value"
 		}
-		control.push(list[i]+":"+r) // no spaces
+		control.push(list[i] +":"+ r) // no spaces
 	}
 	control.sort()
 
@@ -2624,7 +2631,7 @@ function goNW_UA() {
 		if (r == "") {r = "empty string"}
 		if (r == "undefined") {r = "undefined string"}
 		if (r == undefined) {r = "undefined value"}
-		res.push(list[i]+":"+r)
+		res.push(list[i] +":"+ r)
 	}
 	newWin.close()
 
@@ -2657,11 +2664,11 @@ function goNW_UA() {
 		// output diffs if not already exposed (has line break)
 		for (let i=0; i < res.length; i++) {
 			let parts = res[i].split(":")
-			let target = document.getElementById("n" + parts[0])
+			let target = document.getElementById("n"+ parts[0])
 			let str = target.innerHTML
 			let output = parts.slice(1).join(":")
 			if (str.indexOf("<br>") == -1 && str !== output) {
-				target.innerHTML += "<br>" + sb.trim() + output + sc
+				target.innerHTML += "<br>"+ sb.trim() + output + sc
 			}
 		}
 	}
@@ -2692,7 +2699,7 @@ function outputScreen(runtype) {
 				section.push(currentResult)
 			}
 		})
-		debug_section("screen", t0, section)
+		log_section("screen", t0, section)
 	})
 }
 
@@ -2708,12 +2715,12 @@ function outputUA() {
 
 	function output(outputArray) {
 		let section = outputArray
-		if (isBrave) {
+		if (check_navKey("brave")) {
 			for (let i=0; i < section.length; i++) {
 				section[i] = section[i].replace(/\s+/g," ").trim()
 			}
 		}
-		debug_section("ua", t0, section)
+		log_section("ua", t0, section)
 	}
 
 	function get_workers() {
@@ -2773,7 +2780,7 @@ function outputUA() {
 					}
 				}
 				iframeHash += (iframeHash == docHash ? match_green : match_red)
-				document.getElementById("uaIframe"+i).innerHTML = iframeHash
+				document.getElementById("uaIframe"+ i).innerHTML = iframeHash
 			}
 			// green sumary
 			if (useIframe == false) {dom.uaIframes.innerHTML = docHash + match_green}
@@ -2782,8 +2789,8 @@ function outputUA() {
 				for (let i=0; i < docArray.length; i++) {
 					if (docArray[i] !== iframeArray[i]) {
 						let parts = iframeArray[i].split(":")
-						let target = document.getElementById("n"+parts[0])
-						target.innerHTML += "<br>" + sb.trim() + parts.slice(1).join(":") + sc
+						let target = document.getElementById("n"+ parts[0])
+						target.innerHTML += "<br>"+ sb.trim() + parts.slice(1).join(":") + sc
 					}
 				}
 			}
@@ -2792,20 +2799,20 @@ function outputUA() {
 	}
 
 	function get_pLies() {
-		if (liesList.includes("Navigator.userAgent")) {uaBS = true
-		} else if (liesList.includes("Navigator.appVersion")) {uaBS = true
-		} else if (liesList.includes("Navigator.platform")) {uaBS = true
-		} else if (liesList.includes("Navigator.oscpu")) {uaBS = true
+		if (protoLies.includes("Navigator.userAgent")) {uaBS = true
+		} else if (protoLies.includes("Navigator.appVersion")) {uaBS = true
+		} else if (protoLies.includes("Navigator.platform")) {uaBS = true
+		} else if (protoLies.includes("Navigator.oscpu")) {uaBS = true
 		} else if (!isFF) {
 			// FF: these are always caught by feature detection
 				// so ignore in FF because they could be correct
-			if (liesList.includes("Navigator.productSub")) {uaBS = true
-			} else if (liesList.includes("Navigator.buildID")) {uaBS = true
-			} else if (liesList.includes("Navigator.vendor")) {uaBS = true
-			} else if (liesList.includes("Navigator.vendorSub")) {uaBS = true
-			} else if (liesList.includes("Navigator.appCodeName")) {uaBS = true
-			} else if (liesList.includes("Navigator.appName")) {uaBS = true
-			} else if (liesList.includes("Navigator.product")) {uaBS = true
+			if (protoLies.includes("Navigator.productSub")) {uaBS = true
+			} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
+			} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
+			} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
+			} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
+			} else if (protoLies.includes("Navigator.appName")) {uaBS = true
+			} else if (protoLies.includes("Navigator.product")) {uaBS = true
 			}
 		}
 	}
@@ -2824,22 +2831,24 @@ function outputUA() {
 function outputFD(runtype) {
 	let t0 = performance.now(),
 		section = []
-
 	// FF only
 	if (isFF) {
+		let r = isVer + (isVerPlus ? "+" : "")
+		if (isVer == 59) {r = "59 or lower"}
+		dom.fdVersion.innerHTML = r
+		section.push("version:"+ r)
 		get_isChrome()
 		Promise.all([
-			get_errors(), // isErr needed for version
+			get_errors(),
 			get_widgets(),
-			get_version(), // isVer needed for resources
 			get_resources(),
-			get_line_scrollbar(), // calls zoom & viewport
+			get_line_scrollbar("fd"), // promises zoom & viewport first
 			get_math(), // must come after widget
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			debug_section("feature", t0, section)
+			log_section("feature", t0, section)
 		})
 		// not used in hash
 		get_collation()
@@ -2856,7 +2865,6 @@ function outputFD(runtype) {
 		rfp_random_red = ""
 		lb_green = ""
 		lb_red = ""
-		lb_orange = ""
 		nw_green = ""
 		nw_red = ""
 		enUS_green = ""
@@ -2870,11 +2878,6 @@ function outputFD(runtype) {
 		// hide
 		let items = document.getElementsByClassName("group")
 		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		// non-FF needs these
-		if (runtype == "load") {
-			get_zoom("load")
-			get_viewport("load")
-		}
 		// run some for the info factor and so we output a section hash
 		Promise.all([
 			get_errors(),
@@ -2894,7 +2897,15 @@ function outputFD(runtype) {
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
-			debug_section("feature", t0, section)
+			log_section("feature", t0, section)
+			// non-FF needs these: in FF the scrollbar function calls them
+			if (runtype == "load") {
+				Promise.all([
+					get_zoom("load")
+				]).then(function(){
+					get_viewport("load")
+				})
+			}
 		})
 	}
 }
@@ -2911,7 +2922,7 @@ function outputStart() {
 	items = document.getElementsByClassName("hashtocome")
 	for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
 
-	outputFD("load") // run FD first: sets isOS, isTB*, isVer
+	outputFD("load") // run FD first: sets isVer
 	setTimeout(function() {outputScreen("load")}, 1)
 	setTimeout(function() {outputUA()}, 1)
 	setTimeout(function() {run_os()}, 1) // per os tweaks
