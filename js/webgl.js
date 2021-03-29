@@ -24,9 +24,9 @@ function outputWebGL_param() {
 				if (!context) {
 					throw new Error()
 				}
-				glhash.push(type + ": supported")
+				glhash.push(type +": supported")
 			}	catch (e) {
-				glhash.push(type + ": not supported")
+				glhash.push(type +": not supported")
 			}
 		} catch(e) {}
 	}
@@ -38,7 +38,7 @@ function outputWebGL_param() {
 	// hash
 	dom.glhash0.innerHTML = sha1(glhash.join())
 	// perf
-	if (logPerf) {debug_perf("parameters [webgl]",t0)}
+	log_perf("parameters [webgl]",t0)
 }
 
 function analyzeWebGL(runtype, res1, res2) {
@@ -52,8 +52,8 @@ function analyzeWebGL(runtype, res1, res2) {
 		pushvalue = "blocked"
 	} else if (res1 !== res2) {
 		pushvalue = "random"
-		res1 = "random " + sColor +" [1] "+ sc + res1.substring(0,22) + ".."
-			+ sColor +" [2] "+ sc + res2.substring(0,22) + ".."
+		res1 = "random "+ sColor +" [1] "+ sc + res1.substring(0,22) +".."
+			+ sColor +" [2] "+ sc + res2.substring(0,22) +".."
 	} else {
 		if (sha1(res1) == "47bf7060be2764c531da228da96bd771b14917a1") {
 			// NotSupportedError: Operation is not supported
@@ -66,10 +66,12 @@ function analyzeWebGL(runtype, res1, res2) {
 	// output
 	dom.glreadPixels.innerHTML = res1
 	// section perf here for now
-	debug_section("webgl", t0webgl)
+	log_section("webgl", t0webgl)
 }
 
 function outputWebGL_render() {
+	let t0 = performance.now(),
+		main1 = "", main2 = ""
 
 	var webgl = {
 		createHashes: function(window){
@@ -153,7 +155,7 @@ function outputWebGL_render() {
 							displayValue = "not supported"
 						}
 					} catch (e){
-						displayValue = (e.name == "TypeError" ? "" : e.name + ": ") + e.message
+						displayValue = (e.name == "TypeError" ? "" : e.name +": ") + e.message
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
@@ -168,10 +170,6 @@ function outputWebGL_render() {
 		}
 	}
 
-	// vars
-	let t0 = performance.now(),
-		main1 = "", main2 = ""
-
 	Promise.all([
 		webgl.createHashes(window),
 		webgl.createHashes(window)
@@ -182,7 +180,7 @@ function outputWebGL_render() {
 		outputs[1].forEach(function(output){
 			main2 = output.displayValue
 		})
-		if (logPerf) {debug_perf("main [webgl]",t0)}
+		log_perf("main [webgl]",t0)
 		analyzeWebGL("main", main1, main2)
 	})
 }

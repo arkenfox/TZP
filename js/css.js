@@ -2,18 +2,16 @@
 
 function get_colors(runtype) {
 	/* servo/components/style/values/specified/color.rs */
-	let list = [],
-		m = "-moz-",
-		mm = m+"mac-",
-		target = "",
-		control = ""
-	let dString = "css_colors_"+runtype
-	clearDetail(dString)
+	let aList = [],
+		sTarget = "",
+		sControl = ""
+	let sName = "css_colors_"+ runtype
+	clearDetail(sName)
 
 	if (runtype == "system") {
-		control = "5bcd87c4c7753f09a14546911686a62e8625faf8"
-		target = dom.sColorHash
-		list = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
+		sControl = "5bcd87c4c7753f09a14546911686a62e8625faf8"
+		sTarget = dom.sColorHash
+		aList = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
 		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
 		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
 		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
@@ -21,51 +19,51 @@ function get_colors(runtype) {
 	} else if (runtype == "css4") {
 		if (isVer > 75) {
 			// FF76+ note: FF72+: field/fieldtext added: RFP no effect
-			control = "3900ddea19449a8174058383c32dc40b2e31b9a2"
+			sControl = "3900ddea19449a8174058383c32dc40b2e31b9a2"
 		}
-		target = dom.cColorHash
-		list = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
+		sTarget = dom.cColorHash
+		aList = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
 	} else {
-		target = dom.mColorHash
-		list = [m+'activehyperlinktext',m+'appearance',m+'buttondefault',m+'buttonhoverface',
-		m+'buttonhovertext',m+'cellhighlight',m+'cellhighlighttext',m+'combobox',m+'comboboxtext',
-		m+'default-background-color',m+'default-color',m+'dialog',m+'dialogtext',m+'dragtargetzone',
-		m+'eventreerow',m+'field',m+'fieldtext',m+'gtk-buttonactivetext',m+'gtk-info-bar-text',
-		m+'html-cellhighlight',m+'html-cellhighlighttext',m+'hyperlinktext',mm+'accentdarkestshadow',
-		mm+'accentdarkshadow',mm+'accentface',mm+'accentlightesthighlight',mm+'accentlightshadow',
-		mm+'accentregularhighlight',mm+'accentregularshadow',mm+'active-menuitem',mm+'buttonactivetext',
-		mm+'chrome-active',mm+'chrome-inactive',mm+'defaultbuttontext',mm+'disabledtoolbartext',
-		mm+'focusring',mm+'menuitem',mm+'menupopup',mm+'menuselect',mm+'menushadow',mm+'menutextdisable',
-		mm+'menutextselect',mm+'secondaryhighlight',mm+'source-list',mm+'vibrancy-dark',mm+'vibrancy-light',
-		mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',mm+'active-source-list-selection',
-		mm+'source-list-selection',mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',
-		m+'menubarhovertext',m+'menubartext',m+'menuhover',m+'menuhovertext',m+'nativehyperlinktext',
-		m+'oddtreerow',m+'visitedhyperlinktext',m+'win-accentcolor',m+'win-accentcolortext',
-		m+'win-communications-toolbox',m+'win-communicationstext',m+'win-media-toolbox',m+'win-mediatext',
-		m+"accent-color",m+"accent-color-foreground"]
+		sTarget = dom.mColorHash
+		let m = "-moz-", mm = m+"mac-", mw = m+"win-"
+		aList = [m+'activehyperlinktext',m+"accent-color",m+"accent-color-foreground",m+'appearance',
+		m+'buttondefault',m+'buttonhoverface',m+'buttonhovertext',m+'cellhighlight',m+'cellhighlighttext',
+		m+'combobox',m+'comboboxtext',m+'default-background-color',m+'default-color',m+'dialog',
+		m+'dialogtext',m+'dragtargetzone',m+'eventreerow',m+'field',m+'fieldtext',m+'gtk-buttonactivetext',
+		m+'gtk-info-bar-text',m+'html-cellhighlight',m+'html-cellhighlighttext',m+'hyperlinktext',
+		mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',mm+'accentlightesthighlight',
+		mm+'accentlightshadow',mm+'accentregularhighlight',mm+'accentregularshadow',mm+'active-menuitem',
+		mm+'buttonactivetext',mm+'chrome-active',mm+'chrome-inactive',mm+'defaultbuttontext',
+		mm+'disabledtoolbartext',mm+'focusring',mm+'menuitem',mm+'menupopup',mm+'menuselect',mm+'menushadow',
+		mm+'menutextdisable',mm+'menutextselect',mm+'secondaryhighlight',mm+'source-list',mm+'vibrancy-dark',
+		mm+'vibrancy-light',mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',
+		mm+'active-source-list-selection',mm+'source-list-selection',mm+'tooltip',m+'colheaderhovertext',
+		m+'colheadertext',m+'menubarhovertext',m+'menubartext',m+'menuhover',m+'menuhovertext',
+		m+'nativehyperlinktext',m+'oddtreerow',m+'visitedhyperlinktext',mw+'accentcolor',mw+'accentcolortext',
+		mw+'communications-toolbox',mw+'communicationstext',mw+'media-toolbox',mw+'mediatext',]
 	}
-	// de-dupe and sort
-	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	list.sort()
+	// de-dupe/sort
+	aList = aList.filter(function(item, position) {return aList.indexOf(item) === position})
+	aList.sort()
 	// run
-	let results = [],
+	let aResults = [],
 		element = dom.sColorElement,
-		error = ""
-	list.forEach(function(item) {
-		element.style.backgroundColor = item
+		sError = ""
+	aList.forEach(function(style) {
+		element.style.backgroundColor = style
 		try {
-			let x = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			results.push(item+":"+x)
+			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
+			aResults.push(style +":"+ rgb)
 		} catch(e) {
-			error = (isFF ? zB0 : "error")
+			sError = (isFF ? zB0 : "error")
 		}
 	})
-	sectionDetail[dString] = results
-	let hash = sha1(results.join())
-	let notation = buildButton("14", dString, list.length)
-	if (control.length) {notation += (hash == control ? rfp_green : rfp_red)}
-	target.innerHTML = (error.length ? error : hash + notation)
-	return "colors_" + runtype + ":" + (error.length ? error : hash)
+	sDetail[sName] = aResults
+	let sHash = sha1(aResults.join())
+	let sNotation = buildButton("14", sName, aList.length)
+	if (sControl.length) {sNotation += (sHash == sControl ? rfp_green : rfp_red)}
+	sTarget.innerHTML = (sError.length ? sError : sHash + sNotation)
+	return "colors_"+ runtype +":"+ (sError.length ? sError : sHash)
 }
 
 function get_computed_styles() {
@@ -73,7 +71,7 @@ function get_computed_styles() {
 	return new Promise(resolve => {
 		let t0 = performance.now()
 		let styleVersion = type => {
-			return new Promise(resolve =>  {
+			return new Promise(resolve => {
 				// get CSSStyleDeclaration
 				try {
 					let cssStyleDeclaration = (
@@ -174,14 +172,13 @@ function get_computed_styles() {
 			let isSame = true, hashes = [], display = ""
 			// loop
 			for (let i=0; i < 3; i++) {
-				let el = document.getElementById("cStyles"+i)
+				let el = document.getElementById("cStyles"+ i)
 				try {
 					let results = res[i],
 						array = res[i].keys
 					//if (!isFF) {array.sort()}
 					hashes.push(sha1(array.join()))
-
-					display = hashes[i] + s14+"["+ array.length +"|"+ res[i].moz +"|"+ res[i].webkit +"]"+sc
+					display = hashes[i] + s14+"["+ array.length +"|"+ res[i].moz +"|"+ res[i].webkit +"]"+ sc
 				} catch(e) {
 					hashes.push("error")
 					display = "error"
@@ -191,18 +188,17 @@ function get_computed_styles() {
 					if (hashes[i] != hashes[0]) {isSame = false}
 				}
 			}
-			// show/hide rows
-			document.getElementById("togCSSb").style.display = (isSame ? "none" : "table-row")
-			document.getElementById("togCSSc").style.display = (isSame ? "none" : "table-row")
-			// label
+			// show/hide rows | fixup label
+			dom.togCSSb.style.display = (isSame ? "none" : "table-row")
+			dom.togCSSc.style.display = (isSame ? "none" : "table-row")
 			if (!isSame) {
 				dom.togCSSa = "getComputedStyle"
 			} else {
-				dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>" +
-					"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div>	&nbsp computed styles"
+				dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>"
+					+"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>"
+					+"CSSRuleList.style</span></div>	&nbsp computed styles"
 			}
-			if (logPerf) {debug_perf("computed styles [css]",t0)}
-			//console.debug(hashes.join("\n"))
+			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
 			return resolve("styles:"+ sha1(hashes.join()))
 		}).catch(error => {
 			console.error(error)
@@ -213,73 +209,67 @@ function get_computed_styles() {
 
 function get_mm_css() {
 	let res = [], n="no-preference"
-
-	// FF63+: reduced-motion
+	// FF63+
 	let x = zNS, q="prefers-reduced-motion: "
 	try {
-		if (window.matchMedia("("+q+"reduce)").matches) {x = "reduce"}
-		if (window.matchMedia("("+q+n+")").matches) {x = n}
+		if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"}
+		if (window.matchMedia("("+ q + n +")").matches) {x = n}
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 62) {x = zB0}
 	res.push(q.trim() + x)
 	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
-
-	// FF67+: color-scheme
+	// FF67+
 	x = zNS, q="prefers-color-scheme: "
 	try {
-		if (window.matchMedia("("+q+"light)").matches) {x = "light"}
-		if (window.matchMedia("("+q+"dark)").matches) {x = "dark"}
-		if (window.matchMedia("("+q+n+")").matches) {x = n}
+		if (window.matchMedia("("+ q +"light)").matches) {x = "light"}
+		if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"}
+		if (window.matchMedia("("+ q + n +")").matches) {x = n}
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 66) {x = zB0}
 	res.push(q.trim() + x)
 	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
-
 	// contrast
 		// ToDo: RFP & version check: 1506364: layout.css.prefers-contrast.enabled
 		// browser.display.prefers_low_contrast boolean [hidden]
 	x = zNS, q="prefers-contrast: "
 	try {
-		if (window.matchMedia("("+q+n+")").matches) {x = n}
-		if (window.matchMedia("("+q+"forced)").matches) {x = "forced"} // 1694864: removed
-		if (window.matchMedia("("+q+"high)").matches) {x = "high"}
-		if (window.matchMedia("("+q+"low)").matches) {x = "low"}
+		if (window.matchMedia("("+ q + n +")").matches) {x = n}
+		if (window.matchMedia("("+ q +"forced)").matches) {x = "forced"} // 1694864: removed
+		if (window.matchMedia("("+ q +"high)").matches) {x = "high"}
+		if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
 	} catch(e) {x = zB0}
 	res.push(q.trim() + x)
 	dom.mmPC.innerHTML = x
-
 	// forced-colors
 		// ToDo: RFP & version check: 1659511: layout.css.forced-colors.enabled
 	x = zNS, q="prefers-forced-colors: "
 	try {
-		if (window.matchMedia("("+q+n+")").matches) {x = n; clean = n}
-		if (window.matchMedia("("+q+"active)").matches) {x = "active"; clean = "active"}
-		if (window.matchMedia("("+q+"none)").matches) {x = "none"; clean = "none"}
+		if (window.matchMedia("("+ q + n +")").matches) {x = n; clean = n}
+		if (window.matchMedia("("+ q +"active)").matches) {x = "active"; clean = "active"}
+		if (window.matchMedia("("+ q +"none)").matches) {x = "none"; clean = "none"}
 	} catch(e) {x = zB0}
 	res.push(q.trim() + x)
 	dom.mmFC.innerHTML = x
-
 	// return
 	return(res)
 }
 
-function get_system_fonts(runtype) {
+function get_system_fonts() {
 	return new Promise(resolve => {
-		let results = [],
-			error = "",
-			m = "-moz-"
-		let fonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
+		let aResults = [],
+			sError = "",
+			m = "-moz-",
+			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
 			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
-		if (runtype == "isFFcheck") {fonts = [m+"dialog"]}
-		let dString = "css_system_fonts"
-		if (runtype !== "isFFcheck") {clearDetail(dString)}
 
-		let el = document.getElementById("sysFont")
+		let sName = "css_system_fonts"
+		clearDetail(sName)
+
 		try {
-			// script blocking
-			let test = getComputedStyle(el).getPropertyValue("font-family")
-			// compute
-			fonts.forEach(function(font){
+			let el = dom.sysFont
+			aFonts.forEach(function(font){
+				// catch blocked
+				let test = getComputedStyle(el).getPropertyValue("font-family")
 				el.style.font = "99px sans-serif"
 				try {el.style.font = font} catch(err) {}
 				let s = ""
@@ -287,37 +277,23 @@ function get_system_fonts(runtype) {
 					try {
 						s = getComputedStyle(el, null)
 					} catch(e) {}
-				} else {
-					s = el.currentStyle
 				}
 				if (s !== "") {
 					let f = undefined
 					if (s.fontSize != "99px") {
-						f = s.fontFamily + " " + s.fontSize;
-						if (s.fontWeight != 400 && s.fontWeight != "normal") {
-							f += ", " +	(s.fontWeight == 700 ? "bold" :
-								typeof s.fontWeight == "number" ? "weight " + s.fontWeight :
-								s.fontWeight)
-						}
-						if (s.fontStyle != "normal") {
-							f += ", " + s.fontStyle
-						}
+						f = s.fontFamily +" "+ s.fontSize
 					}
-					if (runtype == "isFFcheck") {return resolve(""+f)
-					} else {results.push(font+":"+f)}
+					aResults.push(font +":"+ f)
 				}
 			})
 		} catch(e) {
-			if (runtype == "isFFcheck") {return resolve("error")
-			} else {error = (isFF ? zB0 : "error")}
+			sError = (isFF ? zB0 : "error")
 		}
 		// output
-		if (runtype !== "isFFcheck") {
-			sectionDetail[dString] = results
-			let hash = sha1(results.join())
-			dom.sFontsHash.innerHTML = error + (error == "" ? hash + buildButton("14", dString, results.length) : "")
-			return resolve("system_fonts:"+ hash)
-		}
+		sDetail[sName] = aResults
+		let sHash = sha1(aResults.join())
+		dom.sFontsHash.innerHTML = sError + (sError == "" ? sHash + buildButton("14", sName, aResults.length) : "")
+		return resolve("system_fonts:"+ (sError == "" ? sHash : sError))
 	})
 }
 
@@ -341,7 +317,7 @@ function outputCSS() {
 				section.push(currentResult)
 			}
 		})
-		debug_section("css", t0, section)
+		log_section("css", t0, section)
 	})
 }
 

@@ -9,7 +9,7 @@ function get_media(runtype) {
 		let v = 'video/', v4 = v+'mp4; codecs="', vm = v+'mpeg; codec="',
 			vo = v+'ogg; codecs="', vw = v+'webm; codecs="', vx = v+'x-matroska; codecs="'
 		list = [
-			// test cases
+			// test
 			v+'mp4; codecs=\'\'',v+'mp4; codecs=""',v+'mp4; codecs=',
 			// mimes
 			'application/ogg',v+'3gpp',v+'3gpp2',v+'avi',v+'h263',v+'mp2t',v+'mp4',v+'mpeg',v+'mpeg2',v+'mpeg4',
@@ -62,7 +62,7 @@ function get_media(runtype) {
 	let canm = [], canp = [], src = [], rec = []
 	let obj = document.createElement(runtype)
 	list.forEach(function(item) {
-		let tmp = item.replace(runtype+"\/","")
+		let tmp = item.replace(runtype +"\/","") // remove leading "video/" or "audio/"
 		try {
 			let str = obj.canPlayType(item)
 			if (str == "maybe") {canm.push(tmp)}
@@ -78,18 +78,18 @@ function get_media(runtype) {
 	// ToDo: media: remove audio/video element?
 
 	// elements
-	let ecan = document.getElementById(runtype+"can"),
-		etype = document.getElementById(runtype+"type")
+	let ecan = document.getElementById(runtype +"can"),
+		etype = document.getElementById(runtype +"type")
 	// blocks
 	let block1 = (canm.length == 0),
 		block2 = (canp.length == 0),
 		block3 = (src.length == 0),
 		block4 = (rec.length == 0)
 	// output detail
-	let hashcan = sColor +"maybe: "+sc + (block1 ? "blocked" :canm.join(", "))
-		+ sColor +" probably: "+sc + (block2 ? "blocked" :canp.join(", "))
-	let hashtype = sColor +"mediasource: "+sc + (block3 ? "blocked" :src.join(", "))
-		+ sColor +" mediarecoder: "+sc + (block4 ? "blocked" : rec.join(", "))
+	let hashcan = sColor +"maybe: "+ sc + (block1 ? "blocked" :canm.join(", "))
+		+ sColor +" probably: "+ sc + (block2 ? "blocked" :canp.join(", "))
+	let hashtype = sColor +"mediasource: "+ sc + (block3 ? "blocked" :src.join(", "))
+		+ sColor +" mediarecoder: "+ sc + (block4 ? "blocked" : rec.join(", "))
 
 	// merged hashes
 	hashcan = ['maybe']; hashcan = hashcan.concat(canm)
@@ -101,7 +101,7 @@ function get_media(runtype) {
 	// output play
 	let notation = sColor +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
 		blockP = block1 + block2,
-		partblock = sb+"[partly blocked]"+sc
+		partblock = sb +"[partly blocked]"+ sc
 	if (blockP == 2) {notation = zB}
 	if (blockP == 1) {notation += partblock}
 	ecan.innerHTML = hashcan + notation
@@ -111,9 +111,8 @@ function get_media(runtype) {
 	if (blockT == 2) {notation = zB}
 	if (blockT == 1) {notation += partblock}
 	etype.innerHTML = hashtype + notation
-	// perf
-	if (logPerf) {debug_perf(runtype +" [media]",t0)}
-	// return array
+	// perf/return
+	log_perf(runtype +" [media]",t0)
 	let res = []
 	res.push("canPlay_"+ runtype +":"+ hashcan)
 	res.push("isTypeSupported_"+ runtype +":"+ hashtype)
@@ -122,15 +121,15 @@ function get_media(runtype) {
 
 function outputMedia() {
 	let t0 = performance.now(),
-		section = [], r = ""
+		section = [],
+		r = ""
 
 	// mediaCapabilities: FF63+
-	if (isFF && isVer < 63) {r = zNS} else (r = (check_navObject("mediaCapabilities") ? zE : zD))
+	if (isFF && isVer < 63) {r = zNS} else (r = (check_navKey("mediaCapabilities") ? zE : zD))
 	dom.nMediaC = r
 	section.push("mediaCapabilities:"+ r)
-
 	// mediaSession: FF71+
-	if (isFF && isVer < 71) {r = zNS} else (r = (check_navObject("mediaSession") ? zE : zD))
+	if (isFF && isVer < 71) {r = zNS} else (r = (check_navKey("mediaSession") ? zE : zD))
 	dom.nMediaS = r
 	section.push("mediaSession:"+ r)
 
@@ -147,7 +146,7 @@ function outputMedia() {
 				section.push(currentResult)
 			}
 		})
-		debug_section("media", t0, section)
+		log_section("media", t0, section)
 	})
 }
 
