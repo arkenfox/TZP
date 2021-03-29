@@ -3,21 +3,23 @@
 var dom;
 
 let jsFiles = [],
-	perfDetail = [],
-	perfSection = [], // rerun perf
-	// lies
-	liesKnown = [],
-	liesList = [],
-	liesDetail = {},
-	// data: global snapshot
-	globalHash = [],
-	globalData = [],
-	globalCheck = [],
-	globalCount = 0,
-	globalDetail = {},
-	// data: section/detail: can be rerun: not global
-	sectionData = {},
-	sectionDetail = {}
+	// global snapshot
+	gLies = [],
+	gLiesDetail = {},
+	gLiesKnown = [], // we only ever add if gRun
+	gCheck = [],
+	gCount = 0,
+	gData = [],
+	gDetail = {},
+	gPerf = [],
+	gPerfDetail = [],
+	// section
+	sData = {},
+	sDetail = {},
+	sPerfDetail = [],
+	// current: reset on global/re-runs (and click-here if required)
+	protoLies = [],
+	navKeys = {}
 
 // android
 let avh = "",
@@ -54,7 +56,7 @@ let avh = "",
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
 // common results
-	zB = sb+"[blocked]"+sc,
+	zB = sb+"[blocked]"+ sc,
 	zB0 = "blocked",
 	zD = "disabled",
 	zE = "enabled",
@@ -65,12 +67,12 @@ let avh = "",
 	zU = "undefined",
 	zFF = "Firefox",
 	zTB = "Tor Browser",
-	zMingw64 = "Firefox [64bit]" + s3+"[mingw]"+sc,
-	zMingw32 = "Firefox [32bit]" + s3+"[mingw]"+sc,
-	zMingw = "Firefox" + s3+"[mingw]"+sc,
-	zSDK64 = "Firefox [64bit]" + s3+"[winsdk]"+sc,
-	zSDK32 = "Firefox [32bit]" + s3+"[winsdk]"+sc,
-	zSDK = "Firefox" + s3+"[winsdk]"+sc,
+	zMingw64 = "Firefox [64bit]"+ s3+"[mingw]"+sc,
+	zMingw32 = "Firefox [32bit]"+ s3+"[mingw]"+sc,
+	zMingw = "Firefox"+ s3+"[mingw]"+sc,
+	zSDK64 = "Firefox [64bit]"+ s3+"[winsdk]"+sc,
+	zSDK32 = "Firefox [32bit]"+ s3+"[winsdk]"+sc,
+	zSDK = "Firefox"+ s3+"[winsdk]"+sc,
 	zSIM = " [sim]",
 	zNEW = sb+"[NEW]"+sc,
 // notes
@@ -84,7 +86,6 @@ let avh = "",
 	rfp_random_red = sb+"[RFP random]"+sc,
 	lb_green = sg+"[LB]"+sc,
 	lb_red = sb+"[LB]"+sc,
-	lb_orange = so+"[LB and RFP New Window only work at 100% zoom]"+sc,
 	nw_green = sg+"[RFP New Window]"+sc,
 	nw_red = sb+"[RFP New Window]"+sc,
 	enUS_green = sg+"[en-US]</span> ",
@@ -101,7 +102,7 @@ let avh = "",
 	match_red = sb+"[match]"+sc,
 	note_file = "",
 	note_ttc = sf+"test to come"+sc,
-// error notes
+// errors
 	se = sb+"[test error: ",
 	error_file_404 = se+"file not found]"+sc,
 	error_file_cors = sn+"[file:] [Cross-Origin Request Blocked]"+sc,
@@ -115,26 +116,23 @@ let avh = "",
 // other
 	isBrave = false,
 	isBraveFP = false,
-	isFF = false,
-	isTB = "", // "", true, false
-	isOS = "",
-	isErr = "",
-	isVer = "",
-	isVerPlus = false,
 	isChannel = "",
 	isChrome = "", // i.e chrome://
+	isEngine = "",
+	isFF = false,
+	isFile = false,
+	isOS = "",
 	isResource = "",
 	isResourceMetric = "",
-	isFile = false,
 	isSecure = false,
-	isEngine = "",
+	isTB = false,
+	isVer = "",
+	isVerPlus = false,
 // dev
 	gt0,
+	gRun = true,
 	logExtra = false,
-	logPerf = true,
 	logResize = false,
 	logStorage = false,
-	runS = false,
-// rerun
-	gRerun = false,
-	sRerun = false
+	runS = false, // simulate
+	skipFF = true // skip extra isFF tests
