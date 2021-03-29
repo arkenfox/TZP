@@ -1,53 +1,51 @@
 'use strict';
 
 function get_component_shims() {
-	let dString = "misc_component_shims"
-	clearDetail(dString)
-	let hash = ""
+	let sName = "misc_component_shims"
+	clearDetail(sName)
+	let sHash = ""
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
-		sectionDetail[dString] = keys
-		hash = sha1(keys.join())
-		dom.shim.innerHTML = hash + buildButton("18", dString, keys.length)
+		sDetail[sName] = keys
+		sHash = sha1(keys.join())
+		dom.shim.innerHTML = hash + buildButton("18", sName, keys.length)
 	} catch(e) {
-		hash = zU
+		sHash = zU
 		dom.shim = zU
 	}
-	return "component_shims:" + hash
+	return "component_shims:"+ sHash
 }
 
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
-	let dString = "misc_iframe_properties"
-	clearDetail(dString)
+	let sName = "misc_iframe_properties"
+	clearDetail(sName)
 	let r
 	try {
-		// create iframe & append
+		// create & append
 		let id = "iframe-window-version"
 		let el = document.createElement("iframe")
 		el.setAttribute("id", id)
 		el.setAttribute('style', 'display: none')
 		document.body.appendChild(el)
-		// get properties
+		// get props
 		let iframe = document.getElementById(id)
 		let contentWindow = iframe.contentWindow
 		let props = Object.getOwnPropertyNames(contentWindow)
-		// remove iframe
+		// remove
 		iframe.parentNode.removeChild(iframe)
-		// always sort: too many unknown variables: e.g. various console tabs vs Event, Location
-		//props.push(props.splice(props.indexOf("Event"), 1)[0])
+		// sort: open console can affect order
 		props.sort()
 		// output
-		let output = props.length
-		output = sha1(props.join()) + buildButton("18", dString, output)
-		sectionDetail[dString] = props
+		sDetail[sName] = props
+		let output = sha1(props.join()) + buildButton("18", sName, props.length)
 		dom.iProps.innerHTML = output
 		r= sha1(props.join())
 	} catch(e) {
-		dom.iProps.innerHTML = error_iframe
 		r = "error"
+		dom.iProps = r
 	}
-	return "iframe_properties:" + r
+	return "iframe_properties:"+ r
 }
 
 function get_mathml() {
@@ -62,80 +60,59 @@ function get_mathml() {
 	let test = dom.mathmltest.offsetHeight,
 		control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
 		diff = Math.abs(test-control)
-	// compare: use a range as zoom affects diff
+	// compare: use range as zoom affects diff
 	let pre = " | offsetHeight difference: ",
 		post = (diff < 10 ? tb_safer : tb_standard)
 	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
-	return "mathml:" + (diff < 10 ?	zD : zE)
+	return "mathml:"+ (diff < 10 ?	zD : zE)
 }
 
 function get_nav_prototype() {
-	// reset
-	let dTrue = "misc_navigator_true_keys"
-	let dFake = "misc_navigator_fake_keys"
-	clearDetail(dTrue)
-	clearDetail(dFake)
-
-	let hash
-	try {
-		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		let trueKeys = keys
-		let lastKeyIndex = keys.length
-		let fakeKeys = [], fakeStr = ""
-
-		if (isFF) {
-			// FF: constructor is always last
-			lastKeyIndex = keys.indexOf("constructor")
-			trueKeys = keys.slice(0, lastKeyIndex+1)
-			fakeKeys = keys.slice(lastKeyIndex+1)
-		} else if (isEngine == "blink") {
-			// chromium last key is inconsistent
-			// split knownPoison from trueKeys into fakeKeys
-			let knownPoison = ["SharedWorker", "Worker", "buildID", "getVRDisplays", "activeVRDisplays", "oscpu"]
-			trueKeys = keys.filter(x => !knownPoison.includes(x))
-			fakeKeys = keys.filter(x => knownPoison.includes(x))
-		}
-		// true
-		sectionDetail[dTrue] = trueKeys
-		hash = sha1(trueKeys.join())
+	// use global
+	let sTrue = "misc_navigator_true_keys"
+	let sFake = "misc_navigator_fake_keys"
+	sDetail[sTrue] = navKeys["trueKeys"]
+	sDetail[sFake] = navKeys["fakeKeys"]
+	// output
+	let hash = zB0
+	if (navKeys["trueKeys"]) {
+		hash = sha1(navKeys["trueKeys"].join())
 		// fake
-			//fakeKeys = ["imfake"] // test
-		if (fakeKeys.length > 0) {
-			sectionDetail[dFake] = fakeKeys
-			fakeStr = fakeKeys.length + " lie" + (fakeKeys.length > 1 ? "s" : "")
-			fakeStr = buildButton("18", dFake, fakeStr)
-			// global lies
-			if (!sRerun) {
-				liesKnown.push("misc:navigator")
+		let lieLength = navKeys["fakeKeys"].length,
+			fakeStr = ""
+		if (lieLength) {
+			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
+			fakeStr = buildButton("18", sFake, fakeStr)
+			// lies
+			if (gRun) {
+				gLiesKnown.push("misc:navigator")
 			}
 		}
 		// display
-		let display = hash + buildButton("18", dTrue, trueKeys.length)
+		let display = hash + buildButton("18", sTrue, navKeys["trueKeys"].length)
 		dom.nProto.innerHTML = display + fakeStr
-	} catch(e) {
-		hash = zB0
+	} else {
 		dom.nProto = hash
 	}
-	return "navigator_properties:" + hash
+	return "navigator_keys:"+ hash
 }
 
 function get_recursion() {
 	let level = 0, test1 = 0
 	function recurse() {
-    level++
-    recurse()
+		level++
+		recurse()
 	}
 	try {
-    recurse()
+		recurse()
 	} catch (e) {
 		test1 = level
 	}
 	level = 0
 	try {
-    recurse()
+		recurse()
 	} catch (e) {
 		// 2nd test is more accurate/stable
-		//console.log("recursion:", test1, level)
 		dom.recursion = level
 	}
 }
@@ -152,11 +129,11 @@ function get_reporting_api() {
 			r = (isVer > 64 ? zD : zNS )
 			dom.reportingAPI = r
 		} else {
-			r = zD + " or " +zNS
-			dom.reportingAPI = zD+" [or "+zNS+"]"
+			r = zD +" or "+ zNS
+			dom.reportingAPI = zD +" [or "+ zNS +"]"
 		}
 	}
-	return "reporting_observer:" + r
+	return "reporting_observer:"+ r
 }
 
 function get_perf1() {
@@ -169,15 +146,15 @@ function get_perf1() {
 		} else {
 				performance.mark("a")
 				r1 = performance.getEntriesByName("a","mark").length
-					+ ", " + performance.getEntries().length
-					+ ", " + performance.getEntries({name:"a", entryType:"mark"}).length
-					+ ", " + performance.getEntriesByName("a","mark").length
+					+", "+ performance.getEntries().length
+					+", "+ performance.getEntries({name:"a", entryType:"mark"}).length
+					+", "+ performance.getEntriesByName("a","mark").length
 				performance.clearMarks()
 		}
 	} catch(e) {r1 = zB0}
 	dom.perf1.innerHTML = r1 + (r1 == "0, 0, 0, 0" ? rfp_green: rfp_red)
 	r1 = (r1 == "0, 0, 0, 0" ? "zero" : "not zero")	
-	return "perf_mark:" + r1
+	return "perf_mark:"+ r1
 }
 
 function get_perf2() {
@@ -193,7 +170,7 @@ function get_perf2() {
 			i++
 		} else {
 			clearInterval(check)
-			dom.perf2.innerHTML = (result? "100 ms" + rfp_green : times.join(", ") + rfp_red)
+			dom.perf2.innerHTML = (result? "100 ms"+ rfp_green : times.join(", ") + rfp_red)
 		}
 	}
 	let check = setInterval(run, 13)
@@ -208,7 +185,7 @@ function get_perf3() {
 		r = (r == 0 ? "zero" : "not zero")
 	} catch(e) {r = zB0}
 	dom.perf3.innerHTML = r
-	return "perf_timing:" + r
+	return "perf_timing:"+ r
 }
 
 function get_perf4() {
@@ -223,7 +200,7 @@ function get_perf4() {
 	} else {
 		dom.perf4 = r
 	}
-	return "perf_navigation:" + r
+	return "perf_navigation:"+ r
 }
 
 function get_svg() {
@@ -244,7 +221,7 @@ function get_svg() {
 	dom.svgBasicTest = r
 	// remove
 	dom.svgDiv.removeChild(s)
-	return "svg:" + r
+	return "svg:"+ r
 }
 
 function get_wasm() {
@@ -258,10 +235,10 @@ function get_wasm() {
 		} catch (e) {}
 		return false
 	})()
-	// ToDo: dom.wasm.innerHTML = (supported ? zE+tb_standard : zD+tb_safer) // currently alpha
+	// ToDo: dom.wasm.innerHTML = (supported && isTB ? zE + tb_standard : zD + tb_safer)
 	let r = (supported ? zE : zD )
 	dom.wasm = r
-	return "wasm:" + r
+	return "wasm:"+ r
 }
 
 function get_windowcontent() {
@@ -274,7 +251,7 @@ function get_windowcontent() {
 		r = zD
 	}
 	dom.wincon = r
-	return "window_content:" + r
+	return "window_content:"+ r
 }
 
 function outputMisc(type) {
@@ -298,7 +275,7 @@ function outputMisc(type) {
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
-		debug_section("misc", t0, section)
+		log_section("misc", t0, section)
 	})
 
 	// perf2 not needed in the hash as performance.mark is RFP unique
