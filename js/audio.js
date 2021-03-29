@@ -1,7 +1,8 @@
 "use strict";
 
-/* kkapsner: https://canvasblocker.kkapsner.de/test/, https://github.com/kkapsner/CanvasBlocker */
-/* openWPM: https://audiofingerprint.openwpm.com/ */
+/* code base on
+https://canvasblocker.kkapsner.de/test/
+https://audiofingerprint.openwpm.com/ */
 
 var t0audio,
 	latencyError = false,
@@ -46,9 +47,9 @@ function get_audio2_context(attempt) {
 	obj = a(obj, f.destination, "ac-")
 	obj = a(obj, f.listener, "ac-")
 	obj = a(obj, d, "an-")
-	// build key+value array
+	// build key + value array
 	for (const [key, value] of Object.entries(obj)) {
-		results.push(key + ": " + value)
+		results.push(key +": "+ value)
 		if (key == "ac-sampleRate") {samplerate = value}
 	}
 	// build output
@@ -64,7 +65,7 @@ function get_audio2_context(attempt) {
 			if (v == 0) {
 				latencyError = true
 				//console.log("latency error", attempt)
-				v = v + sb+"["+zF+"]"+sc
+				v += sb +"["+ zF +"]"+ sc
 			} else {
 				// isOS = "mac" // simulate mac
 				latencyError = false
@@ -75,7 +76,7 @@ function get_audio2_context(attempt) {
 				v += (v == rfp ? rfp_green : rfp_red)
 			}
 		}
-		output += k.padStart(25) + ": " + v + "<br>"
+		output += k.padStart(25) +": "+ v +"<br>"
 	}
 	// output
 	if (!latencyError || latencyTries == 2) {
@@ -83,12 +84,12 @@ function get_audio2_context(attempt) {
 		dom.audio1data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256_str(results.join())
+			sha256(results.join())
 		]).then(function(result){
-			dom.audio1hash.innerHTML = result[0] + sColor + "["+ results.length +" keys]" + sc
+			dom.audio1hash.innerHTML = result[0] + sColor +"["+ results.length +" keys]"+ sc
 			// perf
-			if (logPerf) {debug_perf("context [audio]", t0, t0audio)}
-			if (latencyTries == 2) {debug_click("audio2", t0audio)}
+			log_perf("context [audio]",t0)
+			if (latencyTries == 2) {log_click("audio2",t0audio)}
 		})
 	}
 	// next test
@@ -128,7 +129,7 @@ function get_audio2_hybrid() {
 		bins = new Float32Array(analyser.frequencyBinCount)
 		analyser.getFloatFrequencyData(bins)
 		for (let i=0; i < bins.length; i++) {
-			results.push(" " + bins[i])
+			results.push(" "+ bins[i])
 		}
 		analyser.disconnect()
 		scriptProcessor.disconnect()
@@ -138,12 +139,12 @@ function get_audio2_hybrid() {
 		dom.audio3data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256_str(results.slice(0, 30))
+			sha256(results.slice(0, 30))
 		]).then(function(result){
 			dom.audio3hash = result[0]
 			// perf
-			if (logPerf) {debug_perf("hybrid [audio]",t0,t0audio)}
-			if (showperf) {debug_click("audio2", t0audio)}
+			log_perf("hybrid [audio]",t0)
+			if (showperf) {log_click("audio2", t0audio)}
 		})
 		// re-test context
 		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
@@ -172,7 +173,7 @@ function get_audio2_oscillator() {
 		bins = new Float32Array(analyser.frequencyBinCount)
 		analyser.getFloatFrequencyData(bins)
 		for (let i=0; i < bins.length; i++) {
-			cc_output.push(" " + bins[i])
+			cc_output.push(" "+ bins[i])
 		}
 		analyser.disconnect()
 		scriptProcessor.disconnect()
@@ -182,11 +183,11 @@ function get_audio2_oscillator() {
 		dom.audio2data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256_str(cc_output.slice(0, 30))
+			sha256(cc_output.slice(0, 30))
 		]).then(function(result){
 			dom.audio2hash = result[0]
 			// perf
-			if (logPerf) {debug_perf("oscillator [audio]",t0,t0audio)}
+			log_perf("oscillator [audio]",t0)
 		})
 		// next test
 		get_audio2_context(1)
@@ -202,11 +203,12 @@ function outputAudio2() {
 	try {
 		let test = new window.AudioContext
 		// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
-			// if context is run first, outputLatency *always* = 0 = incorrect : hence run it after oscillator
+			// if context is run first, outputLatency *always* = 0 = incorrect : run it after oscillator
 			// if context is not run first, outputLatency *sometimes* = 0 : hence context [try2]
+		log_line("line")
+		// start
 		get_audio2_oscillator()
 	} catch(e) {
-		// no webaudio
 		dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
 	}
@@ -262,7 +264,7 @@ function outputAudio1(runtype) {
 				section.push("copyFromChannel:"+ tempstr)
 				dom.audioCopy = tempstr
 				// section
-				debug_section("audio", t0, section)
+				log_section("audio", t0, section)
 			})
 		}
 	} catch(error) {
@@ -272,7 +274,7 @@ function outputAudio1(runtype) {
 			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 		}
 		// perf
-		debug_section("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
+		log_section("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
 	}
 }
 
