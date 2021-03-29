@@ -8,7 +8,7 @@ function get_component_shims() {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		sDetail[sName] = keys
 		sHash = sha1(keys.join())
-		dom.shim.innerHTML = hash + buildButton("18", sName, keys.length)
+		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
 		sHash = zU
 		dom.shim = zU
