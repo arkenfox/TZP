@@ -470,7 +470,7 @@ function log_section(name, time1, data) {
 		let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
 		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
-		if (name == "screen" || name == "devices") {sHash += " [incomplete: work in progress]"}
+		if (name == "screen") {sHash += " [incomplete: work in progress]"}
 		document.getElementById(name +"hash").innerHTML = sHash
 		document.getElementById("perf"+ name).innerHTML = " "+ time1 +" ms"
 
@@ -612,7 +612,6 @@ function outputSection(id, cls) {
 	// hide stuff so it doesn't shrink/grow
 	if (id=="all" || id=="1") {dom.kbt.value = ""}
 	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
-	if (id=="7") {reset_devices()}
 	if (id=="all" || id=="8") {reset_domrect()}
 	if (id=="11" && cls=="c2") {reset_audio2()}
 	if (id=="all" || id=="12") {reset_fonts()}
