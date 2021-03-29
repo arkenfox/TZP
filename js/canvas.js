@@ -1,31 +1,28 @@
 "use strict";
 
-/* outputCanvas() based on kkapsner and canvasblocker
+/* outputCanvas() based on
 https://canvasblocker.kkapsner.de/test/
 https://github.com/kkapsner/CanvasBlocker */
 
 function outputCanvas() {
-	// vars
 	let t0 = performance.now(),
 		main0 = [], main1 = [], main2 = [],
 		sColor = s9
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL, toBlob, mozGetAsFile [gecko]
-		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0",   // getImageData
-		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",   // isPointInPath
-		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"    // isPointInStroke
+	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob,mozGetAsFile [gecko]
+		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
+		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
+		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50" // isPointInStroke
 	if (isEngine == "blink") {
-		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"    // toDataURL, toBlob [blink]
+		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf" // toDataURL,toBlob
 	} else if (isEngine == "webkit") {
-		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
+		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5" // toDataURL,toBlob
 	}
 
-	// analysis after promises
+	// analyze
 	function analyzeCanvas(runtype, res1, res2, res3) {
-		// vars
 		let chash1 = [],
 			diff78 = false,
 			error_string = "error while testing"
-		// RFP
 		let isRFP = check_RFP()
 
 		function display_value(item, value1, value2, value3) {
@@ -35,7 +32,7 @@ function outputCanvas() {
 				control = "e5d9fd78536844cc8a4144ddb7a03eb9628f12c7c8b7828f942cadf6efb79ac0", // 220x30 white RFP
 				combined = "",
 				sname = item.substring(0,4)
-			let element = dom.tb9.querySelector("." + item)
+			let element = dom.tb9.querySelector("."+ item)
 			// cleanup
 			if (value1 == error_string || value2 == error_string) {
 				// not two valid results
@@ -54,17 +51,16 @@ function outputCanvas() {
 				// randomness
 				isRandom = true
 				pushvalue = "random"
-				combined = "random " + sColor +" [1] "+ sc + value1.substring(0,22) + ".."
-					+ sColor +" [2] "+ sc + value2.substring(0,22) + ".."
+				combined = "random "+ sColor +" [1] "+ sc + value1.substring(0,22) +".."
+					+ sColor +" [2] "+ sc + value2.substring(0,22) +".."
 			}
 
-			// noise: used only if !isRandom
-			let noise = "noise detected " + sColor +" [both] "+ sc + value1.substring(0,40) + ".."
-			// only use noise for FF & blink & webkit
+			// noise: used if !isRandom and value3 = true
+			let noise = "noise detected "+ sColor +" [both] "+ sc + value1.substring(0,40) +".."
+			// reset value3 if not blink/webkit/gecko, not a hash
 			if (isFF || isEngine == "blink" || isEngine == "webkit") {} else {value3 = "true"}
-			// only apply to hashes
-			if (value1.length !== 64) {value3 = "true"}
-			if (value1.indexOf(" ") > 0) {value3 = "true"}
+			if (value1.length !== 64) {value3 = "true"
+			} else if (value1.indexOf(" ") !== -1) {value3 = "true"}
 
 			// hashes: static
 			if (sname == "isPo") {
@@ -73,7 +69,7 @@ function outputCanvas() {
 				} else if (value1 == control && isRFP) { // do nothing
 				} else if (value3 == "false") {
 					value1 = noise
-					pushvalue = "tampered"
+					pushvalue = "noise"
 				}
 				value1 += (value1 == control ? rfp_green : rfp_red)
 			}
@@ -82,7 +78,7 @@ function outputCanvas() {
 				} else if (value1 == control && isRFP) { // do nothing
 				} else if (value3 == "false") {
 					value1 = noise
-					pushvalue = "tampered"
+					pushvalue = "noise"
 				}
 				value1 += (value1 == control ? rfp_green : rfp_red)
 			}
@@ -103,17 +99,17 @@ function outputCanvas() {
 								pushvalue = "random rfp"
 								// toDataURL vs toBlob
 								if (sname == "toDa" || sname == "toBl") {
-									if (!diff78) {pushvalue = "random ext"}
+									if (!diff78) {pushvalue = "random"}
 								}
 							} else {
-								pushvalue = "random ext"
+								pushvalue = "random"
 							}
 							value1 += (pushvalue == "random rfp" ? rfp_random_green : rfp_random_red)
 						} else {
 							// 78+: not random
 							if (value3 == "false") {
 								// noise
-								pushvalue = "tampered"
+								pushvalue = "noise"
 								value1 = noise + rfp_random_red
 							} else {
 								// no-noise
@@ -126,20 +122,20 @@ function outputCanvas() {
 						} else if (value1 == control && isRFP) { // do nothing
 						} else if (value3 == "false") {
 							value1 = noise
-							pushvalue = "tampered"
+							pushvalue = "noise"
 						}
 						value1 += (value1 == control ? rfp_green : rfp_red)
 					}
 				}
 			}
-			// push + display
-			chash1.push(item+":"+pushvalue)
+			// push & display
+			chash1.push(item+":"+ pushvalue)
 			element.innerHTML = value1
 
-			// global lies
-			if (!sRerun) {
+			// lies
+			if (gRun) {
 				if (pushvalue.substring(0,6) == "random") {
-					liesKnown.push("canvas:"+item)
+					gLiesKnown.push("canvas:"+ item)
 				}
 			}
 		}
@@ -174,7 +170,7 @@ function outputCanvas() {
 			display_value(display, value1, value2, value3)
 		}
 		// section
-		debug_section("canvas", t0, chash1)
+		log_section("canvas", t0, chash1)
 	}
 
 	var canvas = {
@@ -190,10 +186,10 @@ function outputCanvas() {
 								if (!context){
 									throw new Error()
 								}
-								return type + ": supported"
+								return type +": supported"
 							}
 							catch (e){
-								return type + ": " + zNS
+								return type +": "+ zNS
 							}
 						}).join(", ")
 					}
@@ -201,8 +197,9 @@ function outputCanvas() {
 				{
 					name: "toDataURL",
 					value: function(){
+						let t1 = performance.now()
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
-						if (logPerf) {debug_perf("toDataURL [" + runNo + "] [canvas]",t0)}
+						log_perf("toDataURL ["+ runNo +"] [canvas]",t1) //,gt0,data)
 						return data
 					}
 				},
@@ -210,6 +207,7 @@ function outputCanvas() {
 					name: "toBlob",
 					value: function(){
 						return new Promise(function(resolve, reject){
+							let t1 = performance.now()
 							try {
 								var timeout = window.setTimeout(function(){
 									reject("timout in toBlob")
@@ -219,7 +217,7 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = hashDataURL(reader.result)
-									if (logPerf) {debug_perf("toBlob [" + runNo + "] [canvas]",t0)}
+									log_perf("toBlob ["+ runNo +"] [canvas]",t1) //,gt0,data)
 									resolve(data)
 								}
 								reader.onerror = function(){
@@ -229,7 +227,7 @@ function outputCanvas() {
 							})
 							}
 							catch (e){
-								resolve((e.name == "TypeError" ? "" : e.name + ":" ) + e.message)
+								resolve((e.name == "TypeError" ? "" : e.name +":") + e.message)
 							}
 						})
 					}
@@ -251,20 +249,19 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "getImageData",
 					value: function(){
+						let t1 = performance.now()
 						var context = getFilledContext()
-						var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
+						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
 						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
-						if (logPerf) {debug_perf("getImageData [" + runNo + "] [canvas]",t0)}
+						log_perf("getImageData ["+ runNo +"] [canvas]",t1) //,gt0,data)
 						return data
-						//return window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
 					}
 				},
 				{
 					supported: function(){
-						// https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
 						var context = getContext()
-						context.rect(0, 0, 10, 10)
-						context.rect(2, 2, 6, 6)
+						context.rect(0,0,10,10)
+						context.rect(2,2,6,6)
 						return context.isPointInPath(5, 5, 'evenodd') === false
 					},
 					name: "winding",
@@ -276,6 +273,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInPath",
 					value: function(){
+						let t1 = performance.now()
 						var context = getPathContext()
 						var data = new Uint8Array(30 * 30)
 						for (var x = 0; x < 30; x += 1){
@@ -284,7 +282,7 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						if (logPerf) {debug_perf("isPointInPath [" + runNo + "] [canvas]",t0)}
+						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1) //,gt0,dataR)
 						return dataR
 					}
 				},
@@ -292,6 +290,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInStroke",
 					value: function(){
+						let t1 = performance.now()
 						var context = getPathContext()
 						var data = new Uint8Array(30 * 30)
 						for (var x = 0; x < 30; x += 1){
@@ -300,7 +299,7 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						if (logPerf) {debug_perf("isPointInStroke [" + runNo + "] [canvas]",t0)}
+						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1) //,gt0,dataR)
 						return dataR
 					}
 				},
@@ -308,7 +307,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "fillText",
 					value: function(){
-						getContext().fillText("test", 0, 0)
+						getContext().fillText("test",0,0)
 						return "supported"
 					}
 				},
@@ -316,7 +315,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "strokeText",
 					value: function(){
-						getContext().strokeText("test", 0, 0)
+						getContext().strokeText("test",0,0)
 						return "supported"
 					}
 				},
@@ -331,59 +330,51 @@ function outputCanvas() {
 				return getCanvas().getContext(type || "2d")
 			}
 			function getFilledContext(){
-				// taken from https://panopticlick.eff.org/static/fp2.js
 				var context = getContext()
 				var canvas = context.canvas
 				canvas.width = 220
 				canvas.height = 30
 				canvas.style.display = "inline"
-				// detect browser support of canvas winding
-				// http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
-				// https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
-				context.rect(0, 0, 10, 10)
-				context.rect(2, 2, 6, 6)
+				context.rect(0,0,10,10)
+				context.rect(2,2,6,6)
 
-				// new kkapsner
-					// make more stable across FF releases
-					// make zoom resistant
-					// do away with using fonts? what happens if doc fonts is blocked: e.g. other lang packs?
-					// ahh: blocking arial via doc fonts and using e.g default TNR = zoom resistance lost
+				// ToDo: canvas
+					// add background complexity: colors/shapes/overlaps
+					// more complex/better text
+					// stability: remove or split text off? e.g. block Arial, TNR fallback = !zoom resistance
+				// NOTE: no unicode/emojis
 				let fpText = "BrowserLeaks,com <canvas> 10"
 				context.textBaseline = "top";
-				context.font = "14px 'Arial'";
+				context.font = "14px 'Arial'"; // arial seems zoom resistent
 				context.textBaseline = "alphabetic";
 				context.fillStyle = "#f60";
-				context.fillRect(125, 1, 62, 20);
+				context.fillRect(125,1,62,20);
 				context.fillStyle = "#069";
-				context.fillText(fpText, 2, 15);
+				context.fillText(fpText,2,15);
 				context.fillStyle = "rgba(102, 204, 0, 0.7)";
-				context.fillText(fpText, 4, 17);
+				context.fillText(fpText,4,17);
 
-				// canvas blending
-				// http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
-				// http://jsfiddle.net/NDYV8/16/
+				// blending
 				context.globalCompositeOperation = "multiply"
 				context.fillStyle = "rgb(255,0,255)"
 				context.beginPath()
-				context.arc(50, 50, 50, 0, Math.PI * 2, true)
+				context.arc(50,50,50,0, Math.PI * 2, true)
 				context.closePath()
 				context.fill()
 				context.fillStyle = "rgb(0,255,255)"
 				context.beginPath()
-				context.arc(100, 50, 50, 0, Math.PI * 2, true)
+				context.arc(100,50,50,0, Math.PI * 2, true)
 				context.closePath()
 				context.fill()
 				context.fillStyle = "rgb(255,255,0)"
 				context.beginPath()
-				context.arc(75, 100, 50, 0, Math.PI * 2, true)
+				context.arc(75,100,50,0, Math.PI * 2, true)
 				context.closePath()
 				context.fill()
 				context.fillStyle = "rgb(255,0,255)"
-				// canvas winding
-				// http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
-				// http://jsfiddle.net/NDYV8/19/
-				context.arc(75, 75, 75, 0, Math.PI * 2, true)
-				context.arc(75, 75, 25, 0, Math.PI * 2, true)
+				// winding
+				context.arc(75,75,75,0, Math.PI * 2, true)
+				context.arc(75,75,25,0, Math.PI * 2, true)
 				context.fill("evenodd")
 				return context
 			}
@@ -421,7 +412,7 @@ function outputCanvas() {
 							displayValue = zNS
 						}
 					} catch (e){
-						displayValue = (e.name == "TypeError" ? "" : e.name + ": ") + e.message
+						displayValue = (e.name == "TypeError" ? "" : e.name +": ") + e.message
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
@@ -442,9 +433,10 @@ function outputCanvas() {
 				{
 					name: "toDataURL",
 					value: function(){
+						let t1 = performance.now()
 						let data = sha1(getKnown().canvas.toDataURL())
-						if (logPerf) {debug_perf("toDataURL [k] [canvas]",t0)}
-						if (!sRerun) {if (data !== known1) {liesKnown.push("canvas:toDataURL")}}
+						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
+						if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:toDataURL")}}
 						return (data == known1 ? true : false)
 					}
 				},
@@ -452,6 +444,7 @@ function outputCanvas() {
 					name: "toBlob",
 					value: function(){
 						return new Promise(function(resolve, reject){
+							let t1 = performance.now()
 							try {
 								var timeout = window.setTimeout(function(){
 									reject(false)
@@ -461,8 +454,8 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = sha1(reader.result)
-									if (logPerf) {debug_perf("toBlob [k] [canvas]",t0)}
-									if (!sRerun) {if (data !== known1) {liesKnown.push("canvas:toBlob")}}
+									log_perf("toBlob [k] [canvas]",t1,gt0,data)
+									if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:toBlob")}}
 									resolve(data == known1 ? true : false)
 								}
 								reader.onerror = function(){
@@ -485,7 +478,7 @@ function outputCanvas() {
 							var reader = new FileReader()
 							reader.onload = function(){
 								let data = sha1(reader.result)
-								if (!sRerun) {if (data !== known1) {liesKnown.push("canvas:mozGetAsFile")}}
+								if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:mozGetAsFile")}}
 								resolve(data == known1 ? true : false)
 							}
 							reader.readAsDataURL(file)
@@ -496,6 +489,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "getImageData",
 					value: function(){
+						let t1 = performance.now()
 						var context = getKnown()
 						let imageData = []
 						for (let x=0; x < 16; x++) {
@@ -505,8 +499,8 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(imageData.join())
-						if (logPerf) {debug_perf("getImageData [k] [canvas]",t0)}
-						if (!sRerun) {if (data !== known2) {liesKnown.push("canvas:getImageData")}}
+						log_perf("getImageData [k] [canvas]",t1,gt0,data)
+						if (gRun) {if (data !== known2) {gLiesKnown.push("canvas:getImageData")}}
 						return (data == known2 ? true : false)
 					}
 				},
@@ -514,6 +508,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInPath",
 					value: function(){
+						let t1 = performance.now()
 						let context2 = getKnownPath()
 						let pathData = []
 						for (let x = 0; x < 16; x++){
@@ -522,8 +517,8 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathData.join())
-						if (logPerf) {debug_perf("isPointInPath [k] [canvas]",t0)}
-						if (!sRerun) {if (data !== known3) {liesKnown.push("canvas:isPointInPath")}}
+						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
+						if (gRun) {if (data !== known3) {gLiesKnown.push("canvas:isPointInPath")}}
 						return (data == known3 ? true : false)
 					}
 				},
@@ -531,6 +526,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInStroke",
 					value: function(){
+						let t1 = performance.now()
 						let context2 = getKnownPath()
 						let pathStroke = []
 						for (let x = 0; x < 16; x++){
@@ -539,8 +535,8 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathStroke.join())
-						if (logPerf) {debug_perf("isPointInStroke [k] [canvas]",t0)}
-						if (!sRerun) {if (data !== known4) {liesKnown.push("canvas:isPointInStroke")}}
+						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
+						if (gRun) {if (data !== known4) {gLiesKnown.push("canvas:isPointInStroke")}}
 						return (data == known4 ? true : false)
 					}
 				},
@@ -554,18 +550,18 @@ function outputCanvas() {
 				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[output.name]
 			}
 			function getKnown(){
-				let canvas = document.getElementById("kcanvas1")
+				let canvas = dom.kcanvas1
 				let ctx = canvas.getContext('2d')
 				for (let x=0; x < 16; x++) {
 					for (let y=0; y < 16; y++) {
-						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) + ","+ (y*16) + ",255)"
+						ctx.fillStyle = "rgba("+ (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 						ctx.fillRect(x, y, 1, 1)
 					}
 				}
 				return ctx
 			}
 			function getKnownPath(){
-				let canvas2 = document.getElementById("kcanvas2")
+				let canvas2 = dom.kcanvas2
 				let ctx2 = canvas2.getContext('2d')
 				ctx2.fillStyle = "rgba(255,255,255,255)"
 				ctx2.beginPath()
@@ -606,19 +602,17 @@ function outputCanvas() {
 		known.createHashes(window),
 	]).then(function(outputs){
 		outputs[0].forEach(function(output){
-			main0.push(output.name+","+output.displayValue)
+			main0.push(output.name +","+ output.displayValue)
 		})
 		outputs[1].forEach(function(output){
-			main1.push(output.name+","+output.displayValue)
+			main1.push(output.name +","+ output.displayValue)
 		})
 		outputs[2].forEach(function(output){
-			main2.push(output.name+","+output.displayValue)
+			main2.push(output.name +","+ output.displayValue)
 		})
-		//if (logPerf) {debug_perf("main [canvas]",t0)}
 		analyzeCanvas("main", main0, main1, main2)
 	})
 	// ToDo: canvas: iframes: each with two passes
-
 }
 
 countJS("canvas")
