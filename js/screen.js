@@ -822,7 +822,9 @@ function get_line_scrollbar(runtype) {
 			}
 			dom.fdScrollE.innerHTML = eW
 			// perf
-			log_perf("scrollbar [fd]",t0)
+			if (runtype == "fd") {
+				log_perf("scrollbar [fd]",t0)
+			}
 		}
 
 		// css lineheight
