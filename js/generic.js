@@ -556,7 +556,7 @@ function countJS(filename) {
 				get_isVer(),
 				get_isTB(),
 			]).then(function(results){
-				if (results[2] == "timeout") {
+				if (results[3] == "timeout") {
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
 				}
 				outputSection("load")
