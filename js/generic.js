@@ -494,10 +494,10 @@ function log_section(name, time1, data) {
 				} else {
 					dom.knownhash = "none"
 				}
-				// details: reset, add non-empty arrays in order
+				// details: reset, add non-empty non-fake-data arrays in order
 				gDetail = {}
 				const names = Object.keys(sDetail).sort()
-				for (const k of names) if (sDetail[k].length) gDetail[k] = sDetail[k]
+				for (const k of names) if (sDetail[k].length && k.indexOf("fake") == -1) gDetail[k] = sDetail[k]
 				// data
 				gData.sort()
 				let gHash = sha1(gData.join())
