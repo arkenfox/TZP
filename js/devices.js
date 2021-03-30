@@ -244,9 +244,9 @@ function get_mimetypes() {
 		function display(output) {
 			let btn = ""
 			if (Array.isArray(output)) {
+				if (mimeBS) {sName += "_fake"}
 				sDetail[sName] = output
-				let sBtn = output.length +" mimetype"+ (output.length > 1 ? "s" : "")
-				btn = buildButton("7", sName + (mimeBS ? "" : "_fake"), sBtn)
+				btn = buildButton("7", sName, output.length +" mimetype"+ (output.length > 1 ? "s" : ""))
 				output = sha1(output.join())
 			}
 			if (mimeBS) {output = "fake"}
@@ -358,9 +358,9 @@ function get_plugins() {
 		function display(output) {
 			let btn = ""
 			if (Array.isArray(output)) {
+				if (pluginBS) {sName += "_fake"}
 				sDetail[sName] = output
-				let sBtn = output.length +" plugin"+ (output.length > 1 ? "s" : "")
-				btn = buildButton("7", sName + (pluginBS ? "" : "_fake"), sBtn)
+				btn = buildButton("7", sName, output.length +" plugin"+ (output.length > 1 ? "s" : ""))
 				output = sha1(output.join())
 			}
 			if (pluginBS) {output = "fake"}
