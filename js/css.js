@@ -178,7 +178,7 @@ function get_computed_styles() {
 				try {
 					let results = res[i],
 						array = res[i].keys
-					//if (!isFF) {array.sort()}
+					if (!isFF) {array.sort()}
 					sDetail[sNames[i]] = array
 					hashes.push(sha1(array.join()))
 					display = hashes[i] + buildButton("14", sNames[i], array.length +"|"+ res[i].moz +"|"+ res[i].webkit)
