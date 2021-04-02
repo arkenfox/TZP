@@ -178,7 +178,16 @@ function get_computed_styles() {
 				try {
 					let results = res[i],
 						array = res[i].keys
-					if (!isFF) {array.sort()}
+					if (isFF) {
+						let lastStyleIndex = array.indexOf("constructor")
+						array = array.slice(0, lastStyleIndex+1)
+						let fakeStyles = array.slice(lastStyleIndex+1)
+						if (gRun) {
+							if (fakeStyles.length) {gLiesKnown.push("css:computed styles")}
+						}
+					} else {
+						array.sort()
+					}
 					sDetail[sNames[i]] = array
 					hashes.push(sha1(array.join()))
 					display = hashes[i] + buildButton("14", sNames[i], array.length +"|"+ res[i].moz +"|"+ res[i].webkit)
