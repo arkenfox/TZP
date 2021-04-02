@@ -164,29 +164,30 @@ function get_computed_styles() {
 				}
 			})
 		}
+		// run
+		let sNames = ["css_getcomputed","css_htmlelement","css_cssrulelist"]
+		sNames.forEach(function(k){clearDetail[k]})
 		Promise.all([
 			styleVersion(0),
 			styleVersion(1),
 			styleVersion(2)
 		]).then(res => {
 			let isSame = true, hashes = [], display = ""
-			// loop
 			for (let i=0; i < 3; i++) {
 				let el = document.getElementById("cStyles"+ i)
 				try {
 					let results = res[i],
 						array = res[i].keys
 					//if (!isFF) {array.sort()}
+					sDetail[sNames[i]] = array
 					hashes.push(sha1(array.join()))
-					display = hashes[i] + s14+"["+ array.length +"|"+ res[i].moz +"|"+ res[i].webkit +"]"+ sc
+					display = hashes[i] + buildButton("14", sNames[i], array.length +"|"+ res[i].moz +"|"+ res[i].webkit)
 				} catch(e) {
 					hashes.push("error")
 					display = "error"
 				}
 				el.innerHTML = display
-				if (i > 0) {
-					if (hashes[i] != hashes[0]) {isSame = false}
-				}
+				if (i > 0) {if (hashes[i] != hashes[0]) {isSame = false}}
 			}
 			// show/hide rows | fixup label
 			dom.togCSSb.style.display = (isSame ? "none" : "table-row")
@@ -196,7 +197,7 @@ function get_computed_styles() {
 			} else {
 				dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>"
 					+"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>"
-					+"CSSRuleList.style</span></div>	&nbsp computed styles"
+					+"CSSRuleList.style</span></div> &nbsp computed styles"
 			}
 			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
 			return resolve("styles:"+ sha1(hashes.join()))
