@@ -326,7 +326,7 @@ function showDetail(name) {
 function showMetrics(type) {
 	if (type == "gDetail") {
 		for (let name in gDetail) {
-			let data = sDetail[name],
+			let data = gDetail[name],
 				hash = sha1(data.join())
 			// split+tidy name
 			name = name.replace(/\_/g, " ")
