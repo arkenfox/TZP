@@ -17,6 +17,18 @@ function getUniqueElements() {
 	})
 }
 
+function getContent(id, pseudo) {
+	try {
+		let item = window.getComputedStyle(document.querySelector(id), pseudo)
+		item = item.getPropertyValue("content")
+		if (item == "none") {console.warn(id, item)}
+		return item.replace(/"/g,"")
+	} catch(e) {
+		console.error(id, e.name, e.message)
+		return "error"
+	}
+}
+
 function rnd_string() {
 	return Math.random().toString(36).substring(2, 15)
 }
@@ -104,12 +116,12 @@ const get_navKeys = () => new Promise(resolve => {
 		let lastKeyIndex = keys.length
 		let fakeKeys = []
 		if (isFF) {
-			// FF: constructor is always last
+			// constructor is always last
 			lastKeyIndex = keys.indexOf("constructor")
 			trueKeys = keys.slice(0, lastKeyIndex+1)
 			fakeKeys = keys.slice(lastKeyIndex+1)
 		} else if (isEngine == "blink") {
-			// chromium: last key inconsistent
+			// last key inconsistent
 			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
 			trueKeys = keys.filter(x => !knownPoison.includes(x))
 			fakeKeys = keys.filter(x => knownPoison.includes(x))
@@ -122,37 +134,14 @@ const get_navKeys = () => new Promise(resolve => {
 		// set brave
 		if (check_navKey("brave")) {
 			isBrave = true
-			//set_pluginBS() // ToDo: get isBraveFP
-			//console.debug("isBrave", isBrave, "isBraveFP", isBraveFP)
+			// ToDo: set isBraveShield
 		}
 		return resolve("")
 	} catch(e) {
 		console.error("get_navKeys", e.name, e.message)
-		return resolve("")
+		return resolve()
 	}
 })
-
-function check_RFP() {
-	if (!isFF) {
-		return false
-	} else {
-		try {
-			performance.mark("a")
-			let r = performance.getEntriesByName("a","mark").length
-				+ performance.getEntries().length
-				+ performance.getEntries({name:"a",entryType:"mark"}).length
-				+ performance.getEntriesByName("a","mark").length
-				performance.clearMarks()
-			if (r == 0) {
-				return true
-			} else {
-				return false
-			}
-		} catch(e) {
-			return false
-		}
-	}
-}
 
 function getDynamicIframeWindow({
 	context,
@@ -316,6 +305,7 @@ function showDetail(name) {
 	let data = sDetail[name],
 		hash = sha1(data.join())
 	// split+tidy name
+	name = name.replace(/\_skip/g, "")
 	name = name.replace(/\_/g, " ")
 	let n = name.indexOf(" "),
 		section = name.substring(0,n).toUpperCase(),
@@ -329,6 +319,7 @@ function showMetrics(type) {
 			let data = gDetail[name],
 				hash = sha1(data.join())
 			// split+tidy name
+			name = name.replace(/\_skip/g, "")
 			name = name.replace(/\_/g, " ")
 			let n = name.indexOf(" "),
 				section = name.substring(0,n).toUpperCase(),
@@ -421,14 +412,11 @@ function log_perf(str, time1, time2, extra) {
 		output += " | "+ ("n/a").padStart(7)
 	} else {
 		time2 = Math.round(t0 - gt0).toString()
-		time2 = " | "+ time2.padStart(4) +" ms"
-		output += time2
+		output += " | "+ time2.padStart(4) +" ms"
 	}
 	if (extra !== undefined && extra !== "") {
-		extra = " | "+ extra
-		output += extra
+		output += " | "+ extra
 	}
-	//if (output.indexOf("[canvas]") > 0) {console.info(output)} // temp
 	if (gRun) {
 		gPerfDetail.push(output)
 	} else {
@@ -470,7 +458,7 @@ function log_section(name, time1, data) {
 		let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
 		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
-		if (name == "screen") {sHash += " [incomplete: work in progress]"}
+		if (name == "screen") {sHash += " [incomplete]"}
 		document.getElementById(name +"hash").innerHTML = sHash
 		document.getElementById("perf"+ name).innerHTML = " "+ time1 +" ms"
 
@@ -494,17 +482,15 @@ function log_section(name, time1, data) {
 				} else {
 					dom.knownhash = "none"
 				}
-				// details: reset, add non-empty non-fake-data arrays in order
+				// details: reset, add ordered non-empty non-skip-data
 				gDetail = {}
 				const names = Object.keys(sDetail).sort()
-				for (const k of names) if (sDetail[k].length && k.indexOf("fake") == -1) gDetail[k] = sDetail[k]
-				// data
-				gData.sort()
-				let gHash = sha1(gData.join())
+				for (const k of names) if (sDetail[k].length && k.indexOf("skip") == -1) gDetail[k] = sDetail[k]
 				// display
-				gHash += buildButton("0", "loose", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
-				gHash += buildButton("0", "gDetail", "details", "showMetrics")
-				dom.allhash.innerHTML = gHash
+				gData.sort()
+				dom.allhash.innerHTML = sha1(gData.join())
+					+ buildButton("0", "loose", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+					+ buildButton("0", "gDetail", "details", "showMetrics")
 				dom.perfall = " "+ Math.round(performance.now() - gt0) +" ms"
 				// sanity
 				if (gCheck.length) {
@@ -541,7 +527,6 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	// all here
 	if (jsFiles.length == 13) {
 		// harden isFF
 		log_line(Math.round(performance.now()) + " : RUN ONCE")
@@ -571,7 +556,7 @@ function outputSection(id, cls) {
 	let delay = 100
 
 	if (id == "load") {
-		// skip clear/rest
+		// skip clear/reset
 		id = "all"
 		gRun = true
 		delay = 1
@@ -626,10 +611,10 @@ function outputSection(id, cls) {
 		if (id=="3") {outputFD()}
 		if (id=="11" && cls=="c") {outputAudio1()}
 		if (id=="11" && cls=="c2") {outputAudio2()}
-		// first 3 sections: run first: it sets global vars
+		// combine 1,2,3
 		if (id=="all") {outputStart()}
 		// stagger
-		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next: don't let promise time out
+		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next
 		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
@@ -639,7 +624,7 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
 		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last: toBlob
+		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last
 		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
 	}
 
@@ -647,17 +632,18 @@ function outputSection(id, cls) {
 		if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
 	} else {
 		// section
-		const aNames = ['screen','skip','fd','skip','skip','skip','devices','skip',
-			'canvas','webgl','skip','fonts','media','css','skip','skip','skip','skip']
+		const aNames = ['screen','x','fd','x','x','x','devices','x',
+			'canvas','webgl','x','fonts','media','css','x','x','x','x']
 		const aNumber = (id * 1) - 1
 		let sectionName = aNames[aNumber]
-		if (sectionName !== "skip" && sPerfDetail.length) {
+		if (sectionName !== "x" && sPerfDetail.length) {
 			log_line("line")
 		}
 	}
 	setTimeout(function() {
 		gt0 = performance.now()
 		Promise.all([
+			get_isRFP(),
 			get_navKeys(),
 			outputPrototypeLies(),
 		]).then(function(results){
@@ -667,7 +653,7 @@ function outputSection(id, cls) {
 }
 
 function run_once() {
-	// while we can
+	// ASAP
 	log_line(Math.round(performance.now()) + " : GENERIC")
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
@@ -682,8 +668,7 @@ function run_once() {
 		runS = false // simulation
 	}
 	log_perf("installtrigger [isFF]",t0,"",""+ isFF)
-
-	// warm up
+	// WARM
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
 	} catch(e) {}
