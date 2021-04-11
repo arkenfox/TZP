@@ -21,7 +21,6 @@ function outputCanvas() {
 		let chash1 = [],
 			diff78 = false,
 			error_string = "error while testing"
-		let isRFP = check_RFP()
 
 		function display_value(item, value1, value2, value3) {
 			// vars
@@ -538,7 +537,7 @@ function outputCanvas() {
 						return (data == known4 ? true : false)
 					}
 				},
-				// add these so arrays match
+				// add so arrays match
 				{ name: "getContext", value: function(){return true}},
 				{ name: "fillText", value: function(){return true}},
 				{ name: "winding", value: function(){return true}},
@@ -610,7 +609,7 @@ function outputCanvas() {
 		})
 		analyzeCanvas("main", main0, main1, main2)
 	})
-	// ToDo: canvas: iframes: each with two passes
+	// ToDo: canvas: iframe, offScreen
 }
 
 countJS("canvas")
