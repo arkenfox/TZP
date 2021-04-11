@@ -60,7 +60,7 @@ function get_mathml() {
 	let test = dom.mathmltest.offsetHeight,
 		control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
 		diff = Math.abs(test-control)
-	// compare: use range as zoom affects diff
+	// compare: use range: zoom affects diff
 	let pre = " | offsetHeight difference: ",
 		post = (diff < 10 ? tb_safer : tb_standard)
 	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
@@ -69,8 +69,8 @@ function get_mathml() {
 
 function get_nav_prototype() {
 	// use global
-	let sTrue = "misc_navigator_true_keys"
-	let sFake = "misc_navigator_fake_keys"
+	let sTrue = "misc_navigator_keys"
+	let sFake = "misc_navigator_keys_fake_skip"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
 	// output
@@ -258,7 +258,6 @@ function outputMisc(type) {
 	let t0 = performance.now()
 	let section = [], r = ""
 
-	// other
 	Promise.all([
 		get_reporting_api(),
 		get_svg(),
@@ -278,7 +277,7 @@ function outputMisc(type) {
 		log_section("misc", t0, section)
 	})
 
-	// perf2 not needed in the hash as performance.mark is RFP unique
+	// perf2 is RFP unique
 	get_perf2()
 	// ToDO: experimental: bucketize?
 	get_recursion()
