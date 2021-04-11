@@ -137,24 +137,31 @@ function get_reporting_api() {
 }
 
 function get_perf1() {
-	// mark (seems only RFP affects this)
-	let r1 = ""
-	try {
-		performance.mark("test")
-		if (performance.mark === undefined) {
-			r1 = zNA
-		} else {
-				performance.mark("a")
-				r1 = performance.getEntriesByName("a","mark").length
-					+", "+ performance.getEntries().length
-					+", "+ performance.getEntries({name:"a", entryType:"mark"}).length
-					+", "+ performance.getEntriesByName("a","mark").length
-				performance.clearMarks()
+	if (isRFP) {
+		dom.perf1.innerHTML = "0, 0, 0, 0" + rfp_green
+		return "perf_mark:zero"
+	} else {
+		let r1 = ""
+		try {
+			performance.mark("test")
+			if (performance.mark === undefined) {
+				r1 = zNA
+			} else {
+					performance.mark("a")
+					r1 = performance.getEntriesByName("a","mark").length
+						+", "+ performance.getEntries().length
+						+", "+ performance.getEntries({name:"a", entryType:"mark"}).length
+						+", "+ performance.getEntriesByName("a","mark").length
+					performance.clearMarks()
+			}
+		} catch(e) {r1 = zB0}
+		dom.perf1.innerHTML = (r1 == "0, 0, 0, 0" ? "fake" : r1) + rfp_red
+		// lies
+		if (gRun) {
+			if (r1 == "0, 0, 0, 0")	{gLiesKnown.push("misc:performance.mark")}
 		}
-	} catch(e) {r1 = zB0}
-	dom.perf1.innerHTML = r1 + (r1 == "0, 0, 0, 0" ? rfp_green: rfp_red)
-	r1 = (r1 == "0, 0, 0, 0" ? "zero" : "not zero")	
-	return "perf_mark:"+ r1
+		return "perf_mark:not zero"
+	}
 }
 
 function get_perf2() {
@@ -170,7 +177,11 @@ function get_perf2() {
 			i++
 		} else {
 			clearInterval(check)
-			dom.perf2.innerHTML = (result? "100 ms"+ rfp_green : times.join(", ") + rfp_red)
+			if (isRFP) {
+				dom.perf2.innerHTML = (result ? "100 ms"+ rfp_green : times.join(", ") + rfp_red)
+			} else {
+				dom.perf2.innerHTML = (result ? "fake" : times.join(", ")) + rfp_red
+			}
 		}
 	}
 	let check = setInterval(run, 13)
@@ -194,7 +205,6 @@ function get_perf4() {
 	try {
 		if (window.PerformanceNavigationTiming) {r = zE}
 	} catch(e) {r = zB0}
-
 	if (isVer > 77) {
 		dom.perf4.innerHTML = r + (r == zD ? rfp_green : rfp_red) //78+: 1511941
 	} else {
