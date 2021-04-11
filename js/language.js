@@ -12,6 +12,14 @@ function get_navigator() {
 		let beacon = (check_navKey("sendBeacon") ? zE : zD)
 		// GPC: 1670058
 		let gpc = (check_navKey("globalPrivacyControl") ? zS : zNS)
+		// onLine
+		let online = ""
+		if (check_navKey("onLine")) {
+			try {
+				// ignore false: served over https and we want stability with reruns
+				online = (navigator.onLine == undefined ? zB0 : true)
+			} catch(e) {online = zB0}
+		} else {online = zNA}
 		// DNT
 		let dnt = ""
 		if (check_navKey("doNotTrack")) {
@@ -23,16 +31,10 @@ function get_navigator() {
 				}
 			} catch(e) {dnt = zB0}
 		} else {dnt = zNA}
-		// onLine
-		let online = ""
-		try {
-			online = navigator.onLine
-			if (online == undefined) {online = zB0}
-		} catch(e) {online = zB0}
 
-		// FF
 		let network = "", connection = "", test = "", r3 = ""
 		if (isFF) {
+			// FF
 			// network
 			if (check_navKey("connection")) {
 				// retest network
@@ -64,11 +66,11 @@ function get_navigator() {
 				network = zD; connection = navigator.connection
 			}
 		}
-		// push: ownProperty checked
+		// push
 		results.push("beacon:"+ beacon)
 		results.push("globalPrivacyControl:"+ gpc)
-		// push: ToDo: harden
 		results.push("online:"+ online)
+		// push: ToDo: harden
 		results.push("dnt:"+ dnt)
 		results.push("network:"+ network)
 		results.push("connection:"+ connection)

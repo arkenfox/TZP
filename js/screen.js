@@ -2,7 +2,7 @@
 
 var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
 
-/* GLOBALS */
+/* GLOBAL isTHINGS */
 
 function get_isChrome() {
 	let os = "",
@@ -163,25 +163,42 @@ const get_isError = () => new Promise(resolve => {
 })
 
 const get_isOS = () => new Promise(resolve => {
-	let t0 = performance.now()
 	// skip
-	if (!isFF || isOS !== "") {
-		log_perf("isOS [global]",t0,"","skipped")
-		return resolve("")
-	}
+	if (!isFF) {return resolve("")}
 	// check
-	let el = dom.widget0
+	let t0 = performance.now(),
+		el = dom.widget0
 	try {
 		let font = getComputedStyle(el).getPropertyValue("font-family")
 		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
 		} else if (font == "Roboto") {isOS="android"
 		}	else if (font == "-apple-system") {isOS="mac"
 		}	else {isOS="linux"}
+		if (runS) {isOS = ""}
 		log_perf("isOS [global]",t0,"",isOS)
 		return resolve("")
 	} catch(e) {
 		console.error("get_isOS", e.name, e.message)
 		log_perf("isOS [global]",t0,"","error")
+		return resolve("")
+	}
+})
+
+const get_isRFP = () => new Promise(resolve => {
+	isRFP = false
+	// skip
+	if (!isFF) {return resolve("")}
+	try {
+		performance.mark("a")
+		let r = performance.getEntriesByName("a","mark").length
+			+ performance.getEntries().length
+			+ performance.getEntries({name:"a",entryType:"mark"}).length
+			+ performance.getEntriesByName("a","mark").length
+			performance.clearMarks()
+		isRFP = (r == 0)
+		return resolve("")
+	} catch(e) {
+		console.error("get_isRFP", e.name, e.message)
 		return resolve("")
 	}
 })
@@ -215,12 +232,9 @@ const get_isSystemFont = () => new Promise(resolve => {
 
 const get_isTB = () => new Promise(resolve => {
 	// skip
-	let t0 = performance.now()
-	if (!isFF) {
-		log_perf("isTB [global]",t0,"","skipped")
-		return resolve("")
-	}
+	if (!isFF) {return resolve("")}
 	// check
+	let t0 = performance.now()
 	try {
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
@@ -249,224 +263,133 @@ const get_isTB = () => new Promise(resolve => {
 })
 
 const get_isVer = () => new Promise(resolve => {
-	let t0 = performance.now()
 	// skip
-	if (!isFF || isVer !== "") {
-		log_perf("isVer [global]",t0,"","skipped")
-		return resolve("")
-	}
+	if (!isFF) {return resolve("")}
 	// set isVer, isVerPlus
+	let t0 = performance.now()
 	function output(verNo) {
-		if (verNo.slice(-1) == "+") {isVerPlus = true}
-		isVer = verNo.replace(/\D/g,',')
-		let start = isVer.indexOf(",")
-		if (start !== -1) {
-			isVer = (isVer.substring(0,start)) * 1
-		}
+		isVer = verNo
+		if (verNo == 59) {verNo += " or lower"
+		} else if (verNo == 88) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve("")
 	}
-
-	// check
-	try {
-		let verNo = "59 or lower",
-			go = true
-		// 59 or lower
+	function start() { //88:1670124
+		try {newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}'); v87()
+		} catch(e) {if (e.message.substr(13,5) == "8 and") {output(88)} else {v87()}}
+	}
+	function v87() { //87:1688335
+		try {if (console.length == undefined) {output(87)} else {v86()}} catch(e) {v86()}
+	}
+	function v86() { //86:1685482
+		try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {output(86)} else {v85()}}
+	}
+	function v85() { //85:1675240
 		try {
-			newFn("alert('A)")
+			let reg85 = ("/a")
+			let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+			let test85 = descriptor.get.call(reg85)
 		} catch(e) {
-			if (e.message == "unterminated string literal") {go = false}
+			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
 		}
-		// 88: 1670124
-		if (go) {
-			try {
-				newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
-			} catch(e) {
-				if (e.message.substr(13,5) == "8 and") {verNo = "88+"; go=false}
-			}
-		}
-		// 87: 1688335
-		if (go) {
-			try {
-				if (console.length == undefined) {verNo = "87"; go=false}
-			} catch(e) {}
-		}
-		// 86: 1685482
-		if (go) {
-			try {
-				newFn('for (async of [])')
-			} catch(e) {
-				if ((e.message).substring(0,2) == "an") {verNo = "86"; go=false}
-			}
-		}
-		// 85: 1675240
-		if (go) {
-			try {
-				let reg85 = ("/a")
-				let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-				let test85 = descriptor.get.call(reg85)
-			} catch(e) {
-				if ((e.message).substring(0,3) == "Reg") {verNo = "85"; go=false}
-			}
-		}
-		// 84: 1673440
-		if (go) {
-			try {
-				newFn("var x = @")
-			} catch(e) {
-				if (e.message == "illegal character U+0040") {verNo = "84"; go=false}
-			}
-		}
-		// 83: 1667094
-		if (go) {
-			try {
-				let obj83 = {exec() {return function(){}}}
-				let test83 = RegExp.prototype.test.call(obj83, "")
-				verNo = "83"; go = false
-			} catch(e) {}
-		}
-		// 82: 1655947
-		if (go) {
+	}
+	function v84() { //84:1673440
+		try {newFn("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {output(84)} else (v83())}
+	}
+	function v83() { //83:1667094
+		try {
+			let obj83 = {exec() {return function(){}}}
+			let test83 = RegExp.prototype.test.call(obj83, "")
+			output(83)
+		} catch(e) {v82()}
+	}
+	function v82() { //82:1655947
+		try {
 			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-			if (test82 == 1) {verNo = "82"; go = false}
-		}
-		// 81: 1650607
-		if (go) {
-			try {
-				let file81 = new File(["bits"], "a/b.txt")
-				if (file81.name == "a/b.txt") {verNo = "81"; go = false}
-			} catch(e) {}
-		}
-		// 80: 1651732
-		if (go) {
+			if (test82 == 1) {output(82)} else {v81()}
+		} catch(e) {v81()}
+	}
+	function v81() { //81:1650607
+		try {let file81 = new File(["bits"], "a/b.txt"); if (file81.name == "a/b.txt") {output(81)} else {v80()}} catch(e) {v80()}
+	}
+	function v80() { //80:1651732
+		try {
 			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
 			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-			try {
-				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
-				verNo = "80"; go = false
-			} catch (e) {}
-		}
-		//79: 1644878
-		if (go) {
-			try {
-				Map.prototype.entries.call(true)
-			} catch(e) {
-				if ((e.message).substring(0,3) == "ent") {verNo = "79"; go = false}
-			}
-		}
-		//78: 1589095
-		if (go) {
-			try {
-				let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
-				verNo = "78"; go = false
-			} catch(e) {}
-		}
-		//78: 1633836
-		if (go) {
-			try {
-				let test78 = new Intl.NumberFormat(undefined, {style: "unit", unit: "percent"}).format(1/2)
-				verNo = "78"; go = false
-			} catch(e) {}
-		}
-		//78: 1634135
-		if (go) {
-			try {
-				let regex78b = new RegExp('b')
-				if (regex78b.dotAll == false) {verNo = "78"; go = false}
-			} catch(e) {}
-		}
-		//77: 1627285
-		if (go) {
-			if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {verNo = "77"; go = false}
-		}
-		//76: 1608010
-		if (go) {
-			if (test76.validity.rangeOverflow) {} else {verNo = "76"; go = false}
-		}
-		//75: 1615600
-		if (go) {
-			try {let test75 = BigInt(2.5)} catch(e) {
-				if (e.message.substring(0,3) == "2.5") {verNo = "75"} else {}
-			}
-		}
-		//74: 1605835
-		if (go) {
-			try {newFn("let t = ({ 1n: 1 })"); verNo = "74"; go = false
-			} catch(e) {}
-		}
-		//73: 1605803
-		if (go) {if (getComputedStyle(dom.test73).content == "normal") {verNo = "73"; go = false} else {}}
-		//72: 1589072
-		if (go) {
-			try {let test72 = newFn('let a = 100_00_;')} catch(e) {
-				if (e.message.substring(0,6) == "unders") {verNo = "72"; go = false}
-			}
-		}
-		//71: 1575980
-		if (go) {
-			try {
-				let test71 = new StaticRange()
-			} catch(e) {
-				if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {verNo = "71"; go = false}
-			}
-		}
-		//70: 1435818
-		if (go) {
-			try {newFn("let t = 1_050"); verNo = "70"; go = false} catch(e) {}
-		}
-		//69: 1558387
-		if (go) {
-			try {let test69 = new DOMError('a')} catch(e) {verNo = "69"; go = false}
-		}
-		//68: 1548773
-		if (go) {
-			if (dom.test68.typeMustMatch == undefined) {verNo = "68"; go = false} else {}
-		}
-		//67: 1531830
-		if (go) {
-			if (!Symbol.hasOwnProperty('matchAll')) {} else {verNo="67"; go = false}
-		}
-		//66
-		if (go) {
-			try {
-				let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-				let test66 = txt.encodeInto("a", utf8)
-				verNo="66"; go = false
-			} catch(e) {}
-		}
-		//65
-		if (go) {
-			try {
-				let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); verNo="65"; go = false
-			} catch(e) {}
-		}
-		//64
-		if (go) {if (window.screenLeft == undefined){} else {verNo="64"; go = false}}
-		//63
-		if (go) {if (Symbol.for(`a`).description == "a") {verNo="63"; go = false}}
-		//62
-		if (go) {
-			console.time("v62")
-			try {console.timeLog("v62"); verNo="62"; go = false} catch(e) {}
-			console.timeEnd("v62")
-		}
-		//61
-		if (go) {try {let test61 = (" a").trimStart(); verNo="61"; go = false} catch(e) {}}
-		//60
-		if (go) {
-			try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-				|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-					"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-				verNo = "60"
-			} catch(e) {}
-		}
-		output(verNo)
-	} catch(e) {
-		isVer = "error"
-		console.error("get_isVer", e.name, e.message)
-		log_perf("isVer [global]",t0,"","error")
-		return resolve("")
+			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}; output(80)
+		} catch (e) {v79()}
 	}
+	function v79() { //79:1644878
+		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {output(79)} else {v78()}}
+	}
+	function v78() { //78:1634135
+		try {let regex78b = new RegExp('b'); if (regex78b.dotAll == false) {output(78)} else {v78a()}} catch(e) {v78a()}
+	}
+	function v78a() { //78:1589095
+		try {let test78a = new Intl.ListFormat(undefined,{style:'long',type:'unit'}).format(['a','b','c']); output(78)} catch(e) {v78b()}
+	}
+	function v78b() { //78:1633836
+		try {let test78 = new Intl.NumberFormat(undefined, {style:"unit",unit:"percent"}).format(1/2); output(78)} catch(e) {v77()}
+	}
+	function v77() { //77:1627285
+		try {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {output(77)} else {v76()}} catch(e) {v76()}
+	}
+	function v76() { //76:1608010
+		try {if (test76.validity.rangeOverflow) {v75()} else {output(76)}} catch(e) {v75()}
+	}
+	function v75() { //75:1615600
+		try {let test75 = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {output(75)} else {v74()}}
+	}
+	function v74() { //74:1605835
+		try {newFn("let t = ({ 1n: 1 })"); output(74)} catch(e) {v73()}
+	}
+	function v73() { //73:1605803
+		try {if (getComputedStyle(dom.test73).content == "normal") {output(73)} else {v72()}} catch(e) {v72()}
+	}
+	function v72() { //72:1589072
+		try {let test72 = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders") {output(72)} else {v71()}}
+	}
+	function v71() { //71:1575980
+		try {let test71 = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {output(71)} else {v70()}}
+	}
+	function v70() { //70:1435818
+		try {newFn("let t = 1_050"); output(70)} catch(e) {v69()}
+	}
+	function v69() { //69:1558387
+		try {let test69 = new DOMError('a'); v68()} catch(e) {output(69)}
+	}
+	function v68() { //68:1548773
+		try {if (dom.test68.typeMustMatch == undefined) {output(68)} else {v67()}} catch(e) {v67()}
+	}
+	function v67() { //67:1531830
+		try {if (!Symbol.hasOwnProperty('matchAll')) {v66()} else {output(67)}} catch(e) {v66()}
+	}
+	function v66() { //66
+		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let test66 = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
+	}
+	function v65() { //65
+		try {let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
+	}
+	function v64() { //64
+		try {if (window.screenLeft == undefined) {v63()} else {output(64)}} catch(e) {v63()}
+	}
+	function v63() { //63
+		try {if (Symbol.for(`a`).description == "a") {output(63)} else {v62()}} catch(e) {v62()}
+	}
+	function v62() { //62
+		try {console.time("v62"); console.timeLog("v62"); console.timeEnd("v62"); output(62)} catch(e) {v61()}
+	}
+	function v61() { //61
+		try {let test61 = (" a").trimStart(); output(61)} catch(e) {v60()}
+	}
+	function v60() { //60
+		try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
+			|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
+				"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
+			output(60)
+		} catch(e) {output(59)}
+	}
+	start()
 })
 
 /* FUNCTIONS */
@@ -503,28 +426,23 @@ function return_mm_dpi(type) {
 function get_collation() {
 	let list = ['ka','ku','lo','no','pa','tk'],
 		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A'],
-		results = [],
-		missing = [],
+		res = [],
 		t0 = performance.now()
 	// output
 	function output(hash) {
 		if (runS) {hash = sha1(hash)}
-		let r = "", c = ""
-		if (missing.length) {
-			c = " [missing locale code"+ (missing.length > 1 ? "s" : "")
-				+":"+ missing.join(", ") +"]"
-		}
+		let r = ""
 		if (hash == "d0e83d1d652f95d686870a59def6ddcc7cde5e28") {
-			r = zFF +" [FF70+]"+ c
+			r = zFF +" [FF70+]"
 		} else if (hash == "e4a32b021b6743d34573ab91a9a31d1068e5b01e") {
-			r = zFF +" [FF65-69]"+ c
+			r = zFF +" [FF65-69]"
 		} else if (hash == "78c0998f75b0da6b11dd55e2f29dc054e14aae9e") {
-			r = zFF +" [FF64 or lower]"+ c
-		} else if (isFF) {
-			r = hash + c + zNEW + (runS ? zSIM : "")
+			r = zFF +" [FF64 or lower]"
+		} else {
+			r = hash + zNEW
 			dom.fdCollation.setAttribute("class", "c mono")
 		}
-		dom.fdCollation.innerHTML = r
+		dom.fdCollation.innerHTML = r + (runS ? zSIM : "")
 		log_perf("collation [fd]",t0)
 	}
 	// run
@@ -534,10 +452,9 @@ function get_collation() {
 		chars.sort() // reset
 		chars.sort(Intl.Collator(i).compare)
 		let test = sha1(chars.join())
-		results.push(test)
-		if (control == test) {missing.push("<code>"+ i +"</code>")}
+		res.push(test)
 	})
-	output(sha1(results.join()))
+	output(sha1(res.join()))
 }
 
 function get_color() {
@@ -637,10 +554,10 @@ function get_errors() {
 				if (isFF) {
 					test = e.message.substring(0,3)
 					if (test == "2.5") {
-						// 75+
+						//75+
 						test = e.name +": "+ e.message
 					} else if (test == "can") {
-						// 68-74: trap NumberFormat
+						//68-74: trap NumberFormat
 						try {
 							test = newFn("987654321987654321n")
 							let num = new Intl.NumberFormat(undefined)
@@ -650,7 +567,7 @@ function get_errors() {
 							if (e.message.substring(0,5) == "Intl.") {
 								test = zB0
 							} else if (e.name == "TypeError") {
-								// 68-69 expected
+								//68-69 expected
 								test = e.name +": "+ e.message
 							} else {
 								test = zB0
@@ -658,7 +575,7 @@ function get_errors() {
 						}
 					} else if (e.name == "ReferenceError") {
 						if (test == "Big") {
-							// 60-67
+							//60-67
 							test = e.name +": "+ e.message
 						} else {
 							test = zB0
@@ -821,6 +738,8 @@ function get_line_scrollbar(runtype) {
 			if (eW > 0) {eScrollbar = "not zero"} else {eScrollbar = "zero"}
 			if (jsZoom == 100) {
 				eW += "px"+ (eW == w ? "" : sb +"[!= viewport scrollbar]"+ sc)
+			} else {
+				eW += "px"
 			}
 			dom.fdScrollE.innerHTML = eW
 			// perf
@@ -1808,9 +1727,7 @@ function get_ua_doc() {
 			lies = 0,
 			pre = "",
 			spoof = false,
-			match = false,
-			myOS = isOS,
-			isPartial = false
+			match = false
 		// FF78+ only
 		if (isFF && isVer > 77) {go = true}
 
@@ -1818,8 +1735,8 @@ function get_ua_doc() {
 		function addArrow(property, state) {
 			let title = property
 			if (state) {
-				if (isPartial == false && go == true) {lies++}
-				title += (isPartial ? sn : sb) +"&#9654"+ sc
+				lies++
+				title += sb +"&#9654"+ sc
 			}
 			document.getElementById("l"+ property).innerHTML = title
 		}
@@ -1829,7 +1746,7 @@ function get_ua_doc() {
 			if (str == "") {str = "empty string"}
 			if (str == "undefined") {str = "undefined string"}
 			if (str == undefined) {str = "undefined value"}
-			// stash it, display it
+			// stash & display
 			res.push(property +":"+ str)
 			document.getElementById("n"+ property).innerHTML = str
 			return str
@@ -1881,8 +1798,7 @@ function get_ua_doc() {
 			} else if (str.indexOf("  ") !== -1) {bs = true
 			} else if (property == "userAgent") {
 				// STUFF
-				let isRFP = check_RFP(), 
-					v = isVer +".0",
+				let v = isVer +".0",
 					v2 = (isVer + 1) +".0",
 					sub = "20100101",
 					sub2 = sub,
@@ -1959,73 +1875,56 @@ function get_ua_doc() {
 		get_property("vendorSub", "empty string")
 
 		// MORE COMPLEX: dynamic, per OS
-			// ToDo: if isOS ="": currently only set by widgets test: harden it
-		//myOS = "windows" // toggle to test isPartial
-
 		// appVersion
 		str = get_property("appVersion")
 		if (go) {
-			if (myOS == "") {isPartial = true} else {isPartial = false}
 			spoof = check_basics(str, "appVersion")
-			if (spoof) {
-				// no need to check further, use a red arrow
-				isPartial = false
-			} else {
+			if (!spoof) {
 				// dig deeper
-				if (myOS == "windows") {spoof = (str !== "5.0 (Windows)")}
-				if (myOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
-				if (myOS == "linux") {spoof = (str !== "5.0 (X11)")}
-				if (myOS == "android") {
+				if (isOS == "windows") {spoof = (str !== "5.0 (Windows)")}
+				if (isOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
+				if (isOS == "linux") {spoof = (str !== "5.0 (X11)")}
+				if (isOS == "android") {
 					// tighten this up to be more specific?
 					if (str.substring(0,13) == "5.0 (Android ") {match = true}
 					spoof = !match
 				}
 			}
-			if (spoof || isPartial) {addArrow("appVersion", true)}
+			if (spoof) {addArrow("appVersion", true)}
 		}
-
 		// platform
 		// ToDo: specific linux distro strings?
 		// ToDo: android: `Linux ${OSArch}` <-- any others
 		str = get_property("platform")
 		if (go) {
-			if (myOS == "") {isPartial = true} else {isPartial = false}
 			spoof = check_basics(str, "platform")
-			if (spoof) {
-				// no need to check further, use a red arrow
-				isPartial = false
-			} else {
+			if (!spoof) {
 				// dig deeper
-				if (myOS == "") {isPartial = true}
 				match = false
-				if (myOS == "windows") {spoof = (str !== "Win32")}
-				if (myOS == "mac") {spoof = (str !== "MacIntel")}
-				if (myOS == "linux") {
+				if (isOS == "windows") {spoof = (str !== "Win32")}
+				if (isOS == "mac") {spoof = (str !== "MacIntel")}
+				if (isOS == "linux") {
 					if (str == "Linux i686") {match = true}
 					else if (str == "Linux i686 on x86_64") {match = true}
 					else if (str == "Linux x86_64") {match = true}
 					spoof = !match
 				}
-				if (myOS == "android") {
+				if (isOS == "android") {
 					if (str.substring(0,10) == "Linux armv") {match = true}
 					if (str.substring(0,11) == "Linux aarch") {match = true}
 					spoof = !match
 				}
 			}
-			if (spoof || isPartial) {addArrow("platform", true)}
+			if (spoof) {addArrow("platform", true)}
 		}
 
 		// oscpu
 		str = get_property("oscpu")
 		if (go) {
-			if (myOS == "") {isPartial = true} else {isPartial = false}
 			spoof = check_basics(str, "oscpu")
-			if (spoof) {
-				// no need to check further, use a red arrow
-				isPartial = false
-			} else {
+			if (!spoof) {
 				// dig deeper
-				if (myOS == "windows") {
+				if (isOS == "windows") {
 					pre = "Windows NT "
 					// app64 + win64
 					if (str == pre +"10.0; Win64; x64") {match = true}
@@ -2041,7 +1940,7 @@ function get_ua_doc() {
 					else if (str == pre +"6.1") {match = true}
 					spoof = !match
 				}
-				if (myOS == "linux") {
+				if (isOS == "linux") {
 					// ToDo: specific linux distro strings?
 					pre = "Linux "
 					if (str == pre +"i686") {match = true}
@@ -2049,35 +1948,31 @@ function get_ua_doc() {
 					else if (str == pre +"x86_64") {match = true}
 					spoof = !match
 				}
-				if (myOS == "mac") {
+				if (isOS == "mac") {
 					if (str.substring(0,14) == "Intel Mac OS X") {match = true}
 					spoof = !match
 				}
-				if (myOS == "android") {
+				if (isOS == "android") {
 					pre = "Linux "
 					if (str.substring(0,10) == pre +"armv") {match = true}
 					if (str.substring(0,11) == pre +"aarch") {match = true}
 					spoof = !match
 				}
 			}
-			if (spoof || isPartial) {addArrow("oscpu", true)}
+			if (spoof) {addArrow("oscpu", true)}
 		}
 
 		// userAgent
 		str = get_property("userAgent")
 		if (go) {
-			if (myOS == "") {isPartial = true} else {isPartial = false}
 			spoof = check_basics(str, "userAgent")
-			if (spoof) {
-				// no need to check further, use a red arrow
-				isPartial = false
-			} else {
+			if (!spoof) {
 				// DONE: RFP check, endstring, version
 				// ToDo: dig deeper
 					// - os
 					// - the syntax/formula doesn't match
 			}
-			if (spoof || isPartial) {addArrow("userAgent", true)}
+			if (spoof) {addArrow("userAgent", true)}
 		}
 
 		// hash
@@ -2087,7 +1982,7 @@ function get_ua_doc() {
 		// show
 		if (lies) {
 			lies += " pinocchio"+ (lies > 1 ? "s": "")
-			dom.nualies.innerHTML = sb + lies + sc +" [based on feature detection]"
+			dom.nualies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runS ? zSIM : "")
 			dom.togualies.style.display = "table-row"
 			uaBS = true
 			// lies

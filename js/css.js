@@ -220,46 +220,57 @@ function get_computed_styles() {
 function get_mm_css() {
 	let res = [], n="no-preference"
 	// FF63+
-	let x = zNS, q="prefers-reduced-motion: "
+	let x = zNS, x2 = "", q="prefers-reduced-motion: "
 	try {
 		if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"}
 		if (window.matchMedia("("+ q + n +")").matches) {x = n}
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 62) {x = zB0}
-	res.push(q.trim() + x)
 	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
-	// FF67+
-	x = zNS, q="prefers-color-scheme: "
+	x2 = getContent('#cssPRM',':after')
+	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	res.push(q.trim() + x)
+
+	// FF67+: 1494034
+	x = zNS, x2 = "", q="prefers-color-scheme: "
 	try {
 		if (window.matchMedia("("+ q +"light)").matches) {x = "light"}
 		if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"}
 		if (window.matchMedia("("+ q + n +")").matches) {x = n}
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 66) {x = zB0}
-	res.push(q.trim() + x)
 	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
+	x2 = getContent('#cssPCS',':after')
+	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	res.push(q.trim() + x)
+
 	// contrast
 		// ToDo: RFP & version check: 1506364: layout.css.prefers-contrast.enabled
 		// browser.display.prefers_low_contrast boolean [hidden]
-	x = zNS, q="prefers-contrast: "
+	x = zNS, x2 = "", q="prefers-contrast: "
 	try {
 		if (window.matchMedia("("+ q + n +")").matches) {x = n}
 		if (window.matchMedia("("+ q +"forced)").matches) {x = "forced"} // 1694864: removed
 		if (window.matchMedia("("+ q +"high)").matches) {x = "high"}
 		if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
 	} catch(e) {x = zB0}
-	res.push(q.trim() + x)
 	dom.mmPC.innerHTML = x
+	x2 = getContent('#cssPC',':after')
+	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	res.push(q.trim() + x)
+
 	// forced-colors
 		// ToDo: RFP & version check: 1659511: layout.css.forced-colors.enabled
-	x = zNS, q="prefers-forced-colors: "
+	x = zNS, x2 = "", q="prefers-forced-colors: "
 	try {
 		if (window.matchMedia("("+ q + n +")").matches) {x = n; clean = n}
 		if (window.matchMedia("("+ q +"active)").matches) {x = "active"; clean = "active"}
 		if (window.matchMedia("("+ q +"none)").matches) {x = "none"; clean = "none"}
 	} catch(e) {x = zB0}
-	res.push(q.trim() + x)
 	dom.mmFC.innerHTML = x
+	x2 = getContent('#cssFC',':after')
+	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	res.push(q.trim() + x)
 	// return
 	return(res)
 }

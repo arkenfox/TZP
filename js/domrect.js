@@ -65,7 +65,7 @@ function outputDomRect() {
 				// check for noise
 				if (isFF || isEngine == "blink") {
 					let compare = chk["dr"+ i]
-					if (compare.length) {
+					if (compare.length > 0) {
 						compare.sort()
 						//console.log(compare.join("\n"))
 						let diffs = [], prev_item = "", prev_value = ""
@@ -127,8 +127,7 @@ function outputDomRect() {
 							let str = properties[j] +":"+ rect[property]
 							known[method].push(str)
 						} else {
-							// diffs on runs
-							// runtype !== 1: only collect 2 runs: 0 (first) + 2 (shifted by css)
+							// diffs on runs: only collect 2 runs: 0 (first) + 2 (shift)
 							if (runtype !== 1) {
 								// what is i (0 to 5) ? the element rect number: rect3 = option/select
 								let go = false
@@ -183,7 +182,7 @@ function outputDomRect() {
 				dom.divrect.classList.add("divrect2");
 				dom.divrect.classList.remove("divrect1");
 			}
-			// tests
+			// test
 			createTest("dr0", runtype, runarray, function(element){return element.getClientRects()[0]})
 			createTest("dr1", runtype, runarray, function(element){return element.getBoundingClientRect()})
 			createTest("dr2", runtype, runarray, function(element){
