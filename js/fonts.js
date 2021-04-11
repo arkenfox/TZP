@@ -105,7 +105,7 @@ function reset_fonts() {
 	}
 	dom.ug10.innerHTML = fntHead + r
 	// fpjs2: hide/color: dont shrink elements
-	if (isFF) {
+	if (isOS !== "") {
 		dom.fontLabel = "...pending..."
 		dom.fontFound.style.color = zhide
 	}
@@ -161,7 +161,7 @@ const createLieDetector = () => {
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
-		if (!isFF) {
+		if (isOS == "") {
 			return resolve(zNA)
 		}
 		try {
@@ -754,7 +754,7 @@ function get_woff() {
 
 function outputFontsFB() {
 	// IDK why, but when blocking document fonts: we need a primer and a delay
-	if (isFF) {
+	if (isOS !== "") {
 		dom.fontFB.innerHTML = "test is running... please wait"
 		dom.fontFBlabel = "...pending..."
 		dom.fontFBFound.style.color = zhide
@@ -776,12 +776,11 @@ function outputFonts() {
 	let t0 = performance.now(),
 		section = [], r = ""
 
-	if (!isFF) {
+	if (isOS == "") {
 		dom.fontOffset = zNA
 		dom.fontClient = zNA
 		dom.fontScroll = zNA
 		dom.fontFB = zNA
-		// hide "show fonts"
 		dom.fontShow.style.display = "none"
 	}
 	set_fallback_string()
@@ -816,9 +815,6 @@ function outputFonts() {
 	dom.fontDoc = r
 	section.push("document_fonts:"+ r)	
 
-	// ToDo: woff massive perf esp if fonts blocked
-	get_woff() 
-
 	Promise.all([
 		get_unicode(),
 		get_fonts(),
@@ -833,6 +829,8 @@ function outputFonts() {
 			}
 		})
 		log_section("fonts", t0, section)
+		// ToDo: woff massive perf esp if fonts blocked
+		get_woff()
 	})
 }
 
