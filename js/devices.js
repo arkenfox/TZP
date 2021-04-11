@@ -6,8 +6,6 @@ var pluginBS = false,
 
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
-
-	// set pluginBS
 	const testPlugins = (plugins, mimeTypes) => {
 		const lies = []
 		const ownProperties = Object.getOwnPropertyNames(plugins).filter(name => isNaN(+name))
@@ -81,7 +79,7 @@ function set_pluginBS() {
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 
 	if (pluginLies.length) {
-		isBraveFP = check_navKey("brave")
+		isBraveShield = check_navKey("brave")
 		pluginBS = true
 	} else {
 		pluginBS = false
@@ -108,7 +106,7 @@ function get_concurrency() {
 	} else {
 		h = zD
 	}
-	if (isBraveFP) {
+	if (isBraveShield) {
 		h = "fake"
 	} else {
 		h = (protoLies.includes("Navigator.hardwareConcurrency") ? "fake" : h)
@@ -239,12 +237,12 @@ function get_mimetypes() {
 	return new Promise(resolve => {
 		let sName = "devices_mimetypes"
 		clearDetail(sName)
-		clearDetail(sName +"_fake")
+		clearDetail(sName +"_fake_skip")
 
 		function display(output) {
 			let btn = ""
 			if (Array.isArray(output)) {
-				if (mimeBS) {sName += "_fake"}
+				if (mimeBS) {sName += "_fake_skip"}
 				sDetail[sName] = output
 				btn = buildButton("7", sName, output.length +" mimetype"+ (output.length > 1 ? "s" : ""))
 				output = sha1(output.join())
@@ -353,12 +351,12 @@ function get_plugins() {
 	return new Promise(resolve => {
 		let sName = "devices_plugins"
 		clearDetail(sName)
-		clearDetail(sName +"_fake")
+		clearDetail(sName +"_fake_skip")
 
 		function display(output) {
 			let btn = ""
 			if (Array.isArray(output)) {
-				if (pluginBS) {sName += "_fake"}
+				if (pluginBS) {sName += "_fake_skip"}
 				sDetail[sName] = output
 				btn = buildButton("7", sName, output.length +" plugin"+ (output.length > 1 ? "s" : ""))
 				output = sha1(output.join())
@@ -582,7 +580,7 @@ function outputDevices() {
 		if (gRun) {
 			if (pluginBS) {gLiesKnown.push("devices:plugins")}
 			if (mimeBS) {gLiesKnown.push("devices:mimeTypes")}
-			if (isBraveFP) {gLiesKnown.push("devices:hardwareConcurrency")}
+			if (isBraveShield) {gLiesKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
 		log_section("devices", t0, section)
