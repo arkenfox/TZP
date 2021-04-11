@@ -196,6 +196,25 @@ const get_isRFP = () => new Promise(resolve => {
 			+ performance.getEntriesByName("a","mark").length
 			performance.clearMarks()
 		isRFP = (r == 0)
+		console.debug("isRFP chk0", isRFP)
+		// extra checks
+		if (isVer > 62) {
+			let chk1 = getContent('#cssPRM',':after')
+			if (chk1 !== "no-preference") {isRFP = false}
+			console.debug("isRFP chk1", isRFP)
+		}
+		if (isVer > 66) {
+			let chk2 = getContent('#cssPCS',':after')
+			if (chk2 !== "light") {isRFP = false}
+			console.debug("isRFP chk2", isRFP)
+		}
+		if (isVer > 77) {
+			let chk3 = zD
+			try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
+			if (chk3 !== zD) {isRFP = false}
+			console.debug("isRFP chk3", isRFP)
+		}
+		console.debug("isRFP return", isRFP)
 		return resolve("")
 	} catch(e) {
 		console.error("get_isRFP", e.name, e.message)
