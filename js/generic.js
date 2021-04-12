@@ -17,15 +17,15 @@ function getUniqueElements() {
 	})
 }
 
-function getContent(id, pseudo) {
+function getElementProp(id, prop, pseudo) {
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
-		item = item.getPropertyValue("content")
-		if (item == "none") {console.warn(id, item)}
+		item = item.getPropertyValue(prop)
+		if (item == "none") {item = "x"; console.warn(id, item)}
 		return item.replace(/"/g,"")
 	} catch(e) {
 		console.error(id, e.name, e.message)
-		return "error"
+		return "x"
 	}
 }
 
