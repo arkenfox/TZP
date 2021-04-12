@@ -227,8 +227,8 @@ function get_mm_css() {
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 62) {x = zB0}
 	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
-	x2 = getContent('#cssPRM',':after')
-	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	x2 = getElementProp("#cssPRM","content",":after")
+	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
 	// FF67+: 1494034
@@ -240,8 +240,8 @@ function get_mm_css() {
 	} catch(e) {x = zB0}
 	if (isFF && x == zNS && isVer > 66) {x = zB0}
 	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
-	x2 = getContent('#cssPCS',':after')
-	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	x2 = getElementProp("#cssPCS","content",":after")
+	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
 	// contrast
@@ -255,8 +255,8 @@ function get_mm_css() {
 		if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
 	} catch(e) {x = zB0}
 	dom.mmPC.innerHTML = x
-	x2 = getContent('#cssPC',':after')
-	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	x2 = getElementProp("#cssPC","content",":after")
+	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
 	// forced-colors
@@ -268,8 +268,8 @@ function get_mm_css() {
 		if (window.matchMedia("("+ q +"none)").matches) {x = "none"; clean = "none"}
 	} catch(e) {x = zB0}
 	dom.mmFC.innerHTML = x
-	x2 = getContent('#cssFC',':after')
-	if (x2 !== "none" && x2 !== "error" ) {x = x2}
+	x2 = getElementProp("#cssPC","content",":after")
+	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 	// return
 	return(res)
