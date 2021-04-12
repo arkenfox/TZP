@@ -155,12 +155,15 @@ function get_perf1() {
 					performance.clearMarks()
 			}
 		} catch(e) {r1 = zB0}
-		dom.perf1.innerHTML = (r1 == "0, 0, 0, 0" ? "fake" : r1) + rfp_red
-		// lies
-		if (gRun) {
-			if (r1 == "0, 0, 0, 0")	{gLiesKnown.push("misc:performance.mark")}
+		let isZero = (r1 == "0, 0, 0, 0")
+		if (isFF) {
+			if (gRun && isZero) {gLiesKnown.push("misc:performance.mark")} // lies
+			dom.perf1.innerHTML = (isZeros ? "fake" : r1) + rfp_red
+			return "perf_mark:not zero"
+		} else {
+			dom.perf1.innerHTML = r1
+			return "perf_mark:"+ (isZero ? "zero" ; "not zero")
 		}
-		return "perf_mark:not zero"
 	}
 }
 
