@@ -177,7 +177,7 @@ function get_perf2() {
 			i++
 		} else {
 			clearInterval(check)
-			if (isRFP) {
+			if (isPerf) {
 				dom.perf2.innerHTML = (result ? "100 ms"+ rfp_green : times.join(", ") + rfp_red)
 			} else {
 				dom.perf2.innerHTML = (result ? "fake" : times.join(", ")) + rfp_red

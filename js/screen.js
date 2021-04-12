@@ -186,6 +186,7 @@ const get_isOS = () => new Promise(resolve => {
 
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
+	isPerf = true
 	// skip
 	if (!isFF) {return resolve("")}
 	try {
@@ -197,12 +198,13 @@ const get_isRFP = () => new Promise(resolve => {
 			performance.clearMarks()
 		isRFP = (r == 0)
 		// extra checks
+		if (Math.trunc(performance.now() - performance.now()) !== 0) {isRFP = false; isPerf = false}
 		if (isVer > 62) {
-			let chk1 = getContent('#cssPRM',':after')
+			let chk1 = getElementProp("#cssPRM","content",":after")
 			if (chk1 !== "no-preference") {isRFP = false}
 		}
 		if (isVer > 66) {
-			let chk2 = getContent('#cssPCS',':after')
+			let chk2 = getElementProp("#cssPCS","content",":after")
 			if (chk2 !== "light") {isRFP = false}
 		}
 		if (isVer > 77) {
