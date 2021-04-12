@@ -162,7 +162,7 @@ function get_perf1() {
 			return "perf_mark:not zero"
 		} else {
 			dom.perf1.innerHTML = r1
-			return "perf_mark:"+ (isZero ? "zero" ; "not zero")
+			return "perf_mark:"+ (isZero ? "zero" : "not zero")
 		}
 	}
 }
