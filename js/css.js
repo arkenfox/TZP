@@ -182,6 +182,8 @@ function get_computed_styles() {
 						let lastStyleIndex = array.indexOf("constructor")
 						let fakeStyles = array.slice(lastStyleIndex+1)
 						array = array.slice(0, lastStyleIndex+1)
+						// lies: false positives FF60-61
+						// -moz-context-properties,-moz-window-opacity,-moz-window-transform,-moz-window-transform-origin
 						if (gRun) {
 							if (fakeStyles.length) {gLiesKnown.push("css:computed styles")}
 						}
@@ -228,6 +230,7 @@ function get_mm_css() {
 	if (isFF && x == zNS && isVer > 62) {x = zB0}
 	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
 	x2 = getElementProp("#cssPRM","content",":after")
+	if (gRun && x2 !== "x") {if (x !== x) {gLiesKnown.push("css:"+ q.trim())}} // lies
 	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
@@ -241,6 +244,7 @@ function get_mm_css() {
 	if (isFF && x == zNS && isVer > 66) {x = zB0}
 	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
 	x2 = getElementProp("#cssPCS","content",":after")
+	if (gRun && x2 !== "x") {if (x !== x) {gLiesKnown.push("css:"+ q.trim())}} // lies
 	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
@@ -256,6 +260,7 @@ function get_mm_css() {
 	} catch(e) {x = zB0}
 	dom.mmPC.innerHTML = x
 	x2 = getElementProp("#cssPC","content",":after")
+	if (gRun && x2 !== "x") {if (x !== x) {gLiesKnown.push("css:"+ q.trim())}} // lies
 	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 
@@ -269,6 +274,7 @@ function get_mm_css() {
 	} catch(e) {x = zB0}
 	dom.mmFC.innerHTML = x
 	x2 = getElementProp("#cssPC","content",":after")
+	if (gRun && x2 !== "x") {if (x !== x) {gLiesKnown.push("css:"+ q.trim())}} // lies
 	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
 	// return
