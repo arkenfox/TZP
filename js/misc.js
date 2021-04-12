@@ -158,7 +158,7 @@ function get_perf1() {
 		let isZero = (r1 == "0, 0, 0, 0")
 		if (isFF) {
 			if (gRun && isZero) {gLiesKnown.push("misc:performance.mark")} // lies
-			dom.perf1.innerHTML = (isZeros ? "fake" : r1) + rfp_red
+			dom.perf1.innerHTML = (isZero ? "fake" : r1) + rfp_red
 			return "perf_mark:not zero"
 		} else {
 			dom.perf1.innerHTML = r1
