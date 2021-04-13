@@ -51,6 +51,7 @@ function get_iframe_props() {
 				suspectStr = buildButton("18", sSuspect, suspectProps.length + " suspect")
 				// fake
 				knownGood = [
+					// acculumative
 					// cydec
 					'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
 					'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
@@ -59,6 +60,10 @@ function get_iframe_props() {
 					// chameleon
 					'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext',
 					'FontFaceSet','Screen',
+					// CB
+					'Location','MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
+					'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
+					'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
 				]
 				fakeProps = suspectProps.filter(x => !knownGood.includes(x))
 				if (fakeProps.length) {
