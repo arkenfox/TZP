@@ -841,14 +841,18 @@ function prime_unicode() {
 		// this to block layout & rendering; instead, FF continues to render (perhaps rendering tofu) while the
 		// loading happens in the background, and then re-layout/renders the document once loading is complete
 	// To counter: we set a unicode string early in the process (in an offscreen div)
-	log_line(Math.round(performance.now()) + " : PRIME UNICODE")
-	let str = ""
-	for (let i=0; i < fntCode.length; i++) {
-		str += String.fromCodePoint(fntCode[i])
+	try {
+		log_line(Math.round(performance.now()) + " : PRIME UNICODE")
+		let str = ""
+		for (let i=0; i < fntCode.length; i++) {
+			str += String.fromCodePoint(fntCode[i])
+		}
+		dom.unicodePrimer.innerHTML = str
+		fntStart = performance.now()
+		// ToDo: unicode priming: enough time on slow systems?
+	} catch(e) {
+		console.error(e.name, e.message)
 	}
-	dom.unicodePrimer.innerHTML = str
-	fntStart = performance.now()
-	// ToDo: unicode priming: enough time on slow systems?
 }
 
 prime_unicode()
