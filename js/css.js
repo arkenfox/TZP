@@ -266,14 +266,14 @@ function get_mm_css() {
 
 	// forced-colors
 		// ToDo: RFP & version check: 1659511: layout.css.forced-colors.enabled
-	x = zNS, x2 = "", q="prefers-forced-colors: "
+	x = zNS, x2 = "", q="forced-colors: "
 	try {
-		if (window.matchMedia("("+ q + n +")").matches) {x = n; clean = n}
-		if (window.matchMedia("("+ q +"active)").matches) {x = "active"; clean = "active"}
-		if (window.matchMedia("("+ q +"none)").matches) {x = "none"; clean = "none"}
+		if (window.matchMedia("("+ q + n +")").matches) {x = n}
+		if (window.matchMedia("("+ q +"active)").matches) {x = "active"}
+		if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
 	} catch(e) {x = zB0}
 	dom.mmFC.innerHTML = x
-	x2 = getElementProp("#cssPC","content",":after")
+	x2 = getElementProp("#cssFC","content",":after")
 	if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
 	x = (x2 == "x" ? x : x2)
 	res.push(q.trim() + x)
