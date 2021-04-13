@@ -25,6 +25,23 @@ function get_iframe_props() {
 	clearDetail(sFake)
 	clearDetail(sSuspect)
 
+	let knownGood = [
+		// acculumative
+		// cydec
+		'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
+		'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
+		'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
+		'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation',
+		// chameleon
+		'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext','FontFaceSet','Screen',
+		// CB
+		'Location','MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
+		'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
+		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
+		// Trace
+		'PluginArray',
+	]
+
 	let r
 	try {
 		// create & append
@@ -44,31 +61,16 @@ function get_iframe_props() {
 		if (isFF) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
-			let knownGood = ['Event','StyleSheetList'] // false positives
-			suspectProps = suspectProps.filter(x => !knownGood.includes(x))
+			let falsePos = ['Event','StyleSheetList'] // false positives
+			suspectProps = suspectProps.filter(x => !falsePos.includes(x))
 			if (suspectProps.length) {
-				sDetail[sSuspect] = suspectProps
+				sDetail[sSuspect] = suspectProps.sort()
 				suspectStr = buildButton("18", sSuspect, suspectProps.length + " suspect")
 				// fake
-				knownGood = [
-					// acculumative
-					// cydec
-					'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
-					'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
-					'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
-					'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation',
-					// chameleon
-					'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext',
-					'FontFaceSet','Screen',
-					// CB
-					'Location','MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
-					'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
-					'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
-				]
 				fakeProps = suspectProps.filter(x => !knownGood.includes(x))
 				if (fakeProps.length) {
 					props = props.filter(x => !fakeProps.includes(x))
-					sDetail[sFake] = fakeProps
+					sDetail[sFake] = fakeProps.sort()
 					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
 					// lies
 					if (gRun) {gLiesKnown.push("misc:window properties")}
