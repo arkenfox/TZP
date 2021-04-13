@@ -18,8 +18,13 @@ function get_component_shims() {
 
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
-	let sName = "misc_iframe_properties"
-	clearDetail(sName)
+	let sTrue = "misc_iframe_properties"
+	let sFake = "misc_iframe_properties_fake_skip"
+	let sSuspect = "misc_iframe_properties_suspect_skip"
+	clearDetail(sTrue)
+	clearDetail(sFake)
+	clearDetail(sSuspect)
+
 	let r
 	try {
 		// create & append
@@ -34,22 +39,35 @@ function get_iframe_props() {
 		let props = Object.getOwnPropertyNames(contentWindow)
 		// remove
 		iframe.parentNode.removeChild(iframe)
-
-		// debug: get last 10 items
-		let lastProps = props.slice(Math.max(props.length - 10, 0))
-		console.debug(lastProps.join("\n"))
+		// lies
+		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
 		if (isFF) {
-			let knownGood = ['Event','StyleSheetList']
-			let lastKeyIndex = props.indexOf("Performance")
-			let suspectKeys = props.slice(props.indexOf("Performance")+1)
-			console.debug(suspectKeys.join("\n"))
+			// suspect
+			suspectProps = props.slice(props.indexOf("Performance")+1)
+			let knownGood = ['Event','StyleSheetList'] // false positives
+			suspectProps = suspectProps.filter(x => !knownGood.includes(x))
+			if (suspectProps.length) {
+				sDetail[sSuspect] = suspectProps
+				suspectStr = buildButton("18", sSuspect, suspectProps.length + " suspect")
+				// fake
+				knownGood = ['CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
+				'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
+				'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
+				'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation']
+				fakeProps = suspectProps.filter(x => !knownGood.includes(x))
+				if (fakeProps.length) {
+					props = props.filter(x => !fakeProps.includes(x))
+					sDetail[sFake] = fakeProps
+					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
+					// lies
+					if (gRun) {gLiesKnown.push("misc:window properties")}
+				}
+			}
 		}
-
-		// sort: open console can affect order
+		// sort (open console can affect order) + output
 		props.sort()
-		// output
-		sDetail[sName] = props
-		let output = sha1(props.join()) + buildButton("18", sName, props.length)
+		sDetail[sTrue] = props
+		let output = sha1(props.join()) + buildButton("18", sTrue, props.length) + suspectStr + fakeStr
 		dom.iProps.innerHTML = output
 		r= sha1(props.join())
 	} catch(e) {
@@ -95,9 +113,7 @@ function get_nav_prototype() {
 			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
-			if (gRun) {
-				gLiesKnown.push("misc:navigator")
-			}
+			if (gRun) {gLiesKnown.push("misc:navigator")}
 		}
 		// display
 		let display = hash + buildButton("18", sTrue, navKeys["trueKeys"].length)
