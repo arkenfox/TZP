@@ -326,25 +326,33 @@ function showMetrics(type) {
 				metric = name.substring(n,name.length).trim()
 			console.debug(section +": "+ metric +": "+ hash, data)
 		}
+	} else if  (type == "gLiesKnownDetail") {
+		for (let name in gLiesKnownDetail) {
+			let data = gLiesKnownDetail[name]
+			// split+tidy name
+			name = name.replace(/\_skip/g, "")
+			name = name.replace(/\_/g, " ")
+			let n = name.indexOf(" "),
+				section = name.substring(0,n).toUpperCase(),
+				metric = name.substring(n,name.length).trim()
+			console.debug(section +": "+ metric, data)
+		}
 	} else if (type == "gPerfDetail") {
 		console.log("perf detail: global\n"+ gPerfDetail.join("\n"))
 	} else if (type == "sPerfDetail") {
 		if (sPerfDetail.length) {
-			console.log("perf detail: re-runs\n"+ sPerfDetail.join("\n"))
+			console.log("perf detail: section re-runs\n"+ sPerfDetail.join("\n"))
 		}
 	} else {
 		let array = [],
 			showhash = true
-		if (type == "known") {
-			type += " lies"
+		if (type == "known lies") {
 			array = gLiesKnown
-		} else if (type == "loose") {
-			type = "fingerprint: "+ type
+		} else if (type == "fingerprint") {
 			array = gData
 		} else if (type == "prototype lies") {
 			array = gLies
-			showhash = false
-		} else if (type == "prototype lie details") {
+		} else if (type == "prototype lies: details") {
 			array = gLiesDetail
 			showhash = false
 		} else {
@@ -473,23 +481,31 @@ function log_section(name, time1, data) {
 				for (let i=0; i < gData.length; i++) {
 					metricCount += gData[i][1].length
 				}
+				// details: reset, add ordered non-empty non-skip-data
+				gDetail = {}
+				gLiesKnownDetail = {}
+				const names = Object.keys(sDetail).sort()
+				for (const k of names) if (sDetail[k].length) {
+					if (k.indexOf("skip") == -1) {gDetail[k] = sDetail[k]} else {gLiesKnownDetail[k] = sDetail[k]}
+				}
 				// lies: de-dupe/sort
+				let lieBtn = ""
+				if (Object.keys(gLiesKnownDetail).length) {
+					lieBtn = buildButton("0", "gLiesKnownDetail", "details", "showMetrics")
+				}
 				if (gLiesKnown.length) {
 					gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
 					gLiesKnown.sort()
 					dom.knownhash.innerHTML = sha1(gLiesKnown.join())
-						+ buildButton("0", "known", gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : ""), "showMetrics")
+						+ buildButton("0", "known lies", gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : ""), "showMetrics")
+						+ lieBtn
 				} else {
-					dom.knownhash = "none"
+					dom.knownhash = "none" + lieBtn
 				}
-				// details: reset, add ordered non-empty non-skip-data
-				gDetail = {}
-				const names = Object.keys(sDetail).sort()
-				for (const k of names) if (sDetail[k].length && k.indexOf("skip") == -1) gDetail[k] = sDetail[k]
 				// display
 				gData.sort()
 				dom.allhash.innerHTML = sha1(gData.join())
-					+ buildButton("0", "loose", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+					+ buildButton("0", "fingerprint", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
 				dom.perfall = " "+ Math.round(performance.now() - gt0) +" ms"
 				// sanity
@@ -572,11 +588,12 @@ function outputSection(id, cls) {
 		items = document.getElementsByClassName("togF2")
 		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 		// reset global
-		gLiesKnown = []
 		gCount = 0
 		gData = []
 		gCheck = []
 		gDetail = {}
+		gLiesKnown = []
+		gLiesKnownDetail = {}
 		// reset section/current
 		protoLies = []
 		sData = {}
