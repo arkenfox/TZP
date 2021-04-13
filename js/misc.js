@@ -34,9 +34,17 @@ function get_iframe_props() {
 		let props = Object.getOwnPropertyNames(contentWindow)
 		// remove
 		iframe.parentNode.removeChild(iframe)
+
 		// debug: get last 10 items
 		let lastProps = props.slice(Math.max(props.length - 10, 0))
 		console.debug(lastProps.join("\n"))
+		if (isFF) {
+			let knownGood = ['Event','StyleSheetList']
+			let lastKeyIndex = props.indexOf("Performance")
+			let suspectKeys = props.slice(props.indexOf("Performance")+1)
+			console.debug(suspectKeys.join("\n"))
+		}
+
 		// sort: open console can affect order
 		props.sort()
 		// output
