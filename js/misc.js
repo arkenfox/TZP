@@ -34,6 +34,9 @@ function get_iframe_props() {
 		let props = Object.getOwnPropertyNames(contentWindow)
 		// remove
 		iframe.parentNode.removeChild(iframe)
+		// debug: get last 10 items
+		let lastProps = props.slice(Math.max(props.length - 10, 0))
+		console.debug(lastProps.join("\n"))
 		// sort: open console can affect order
 		props.sort()
 		// output
