@@ -50,10 +50,16 @@ function get_iframe_props() {
 				sDetail[sSuspect] = suspectProps
 				suspectStr = buildButton("18", sSuspect, suspectProps.length + " suspect")
 				// fake
-				knownGood = ['CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
-				'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
-				'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
-				'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation']
+				knownGood = [
+					// cydec
+					'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
+					'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
+					'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
+					'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation',
+					// chameleon
+					'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext',
+					'FontFaceSet','Screen',
+				]
 				fakeProps = suspectProps.filter(x => !knownGood.includes(x))
 				if (fakeProps.length) {
 					props = props.filter(x => !fakeProps.includes(x))
