@@ -18,9 +18,9 @@ function get_component_shims() {
 
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
-	let sTrue = "misc_iframe_properties"
-	let sFake = "misc_iframe_properties_fake_skip"
-	let sSuspect = "misc_iframe_properties_suspect_skip"
+	let sTrue = "misc_iframe_window_properties"
+	let sFake = sTrue + "_fake_skip"
+	let sSuspect = sTrue + "_suspect_skip"
 	clearDetail(sTrue)
 	clearDetail(sFake)
 	clearDetail(sSuspect)
@@ -73,7 +73,7 @@ function get_iframe_props() {
 					sDetail[sFake] = fakeProps.sort()
 					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
 					// lies
-					if (gRun) {gLiesKnown.push("misc:window properties")}
+					if (gRun) {gLiesKnown.push("misc:iframe window properties")}
 				}
 			}
 		}
@@ -126,7 +126,7 @@ function get_nav_prototype() {
 			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
-			if (gRun) {gLiesKnown.push("misc:navigator")}
+			if (gRun) {gLiesKnown.push("misc:navigator keys")}
 		}
 		// display
 		let display = hash + buildButton("18", sTrue, navKeys["trueKeys"].length)
