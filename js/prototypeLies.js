@@ -662,7 +662,7 @@ function outputPrototypeLies() {
 			} else {
 				let lieString = lieList.length +" lie"+ (lieList.length > 1 ? "s" : "")
 				hash += buildButton("0", "prototype lies", lieString, "showMetrics")
-				hash += buildButton("0", "prototype lie details", "details", "showMetrics")
+				hash += buildButton("0", "prototype lies: details", "details", "showMetrics")
 				el.innerHTML = hash
 			}
 			log_perf("prototype lies [prereq]",t0)
