@@ -40,6 +40,8 @@ function get_iframe_props() {
 		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
 		// Trace
 		'PluginArray',
+		// ScriptSafe
+		'Array','HTMLDivElement',
 	]
 
 	let r
