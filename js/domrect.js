@@ -94,18 +94,17 @@ function outputDomRect() {
 			}
 			// lies
 			if (gRun) {
-				if (known["dr"+ i] == true) {
-					gLiesKnown.push("domrect:"+ pretty[i])
-				}
+				if (known["dr"+ i] == true) {gLiesKnown.push("domrect:"+ pretty[i])}
 			}
-			// push & display
-			hash.push("dr"+ i +":"+ push)
+			// only push real values
+			if (push.length == 40 && hash.length == 0) {hash.push("domrect:"+push)}
 			document.getElementById("dr"+ i).innerHTML = display
 		}
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
-		log_section("domrect", t0, hash)
+		if (hash.length == 0) {hash.push("domrect:fake")}
+		log_section("domrect", t0, hash) // any real values should be the same
 	}
 
 	function getElements(classname){
