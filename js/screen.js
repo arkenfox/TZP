@@ -482,7 +482,8 @@ function get_color() {
 	res.push("pixelDepth:"+ r1)
 	res.push("screenDepth:"+ r2)
 	r1 += " | "+ r2
-	dom.ScrColor.innerHTML = r1 += (r1 == "24 | 24" ? rfp_green : rfp_red)
+	dom.ScrDepth.innerHTML = r1 += (r1 == "24 | 24" ? rfp_green : rfp_red)
+
 	// color
 	try {
 		r3 = (function() {
@@ -491,11 +492,12 @@ function get_color() {
 			}
 			return i
 		})()
-	} catch(e) {
-		r3 = zB0
-	}
-	res.push("mm_color:"+ r3)
+	} catch(e) {r3 = zB0}
 	dom.mmC.innerHTML = r3 + (r3 == 8 ? rfp_green : rfp_red)
+	let r4 = getElementProp("#cssC","content",":after")
+	if (gRun && r4 !== "x") {if (r3 !== r4) {gLiesKnown.push("screen:color")}} // lies
+	r3 = (r4 == "x" ? r3 : r4)
+	res.push("color:"+ r3)
 	// return
 	return(res)
 }
