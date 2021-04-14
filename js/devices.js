@@ -328,25 +328,6 @@ function get_mimetypes_plugins() {
 	})
 }
 
-function get_mm_hover(type){
-	let x=zNS, h="hover", n="none", q="("+ type +":"
-	try {
-		if (window.matchMedia(q + n +")").matches) x=n
-		if (window.matchMedia(q + h +")").matches) x=h
-	} catch(e) {x = zB0}
-	return x
-}
-
-function get_mm_pointer(type){
-	let x=zNS, f="fine", c="coarse", n="none", q="("+ type +": "
-	try {
-		if (window.matchMedia(q + n +")").matches) x=n
-		if (window.matchMedia(q + c +")").matches) x=c
-		if (window.matchMedia(q + f +")").matches) x=f
-	} catch(e) {x = zB0}
-	return x
-}
-
 function get_plugins() {
 	return new Promise(resolve => {
 		let sName = "devices_plugins"
@@ -408,31 +389,46 @@ function get_plugins() {
 
 function get_pointer_hover() {
 	return new Promise(resolve => {
-		let res = []
+		function get_mm(type, id) {
+			let x=zNS, x2="", f="fine", c="coarse", h="hover", n="none", q=type+": "
+			try {
+				if (window.matchMedia("("+ q + n +")").matches) x=n
+				if (window.matchMedia("("+ q + c +")").matches) x=c
+				if (window.matchMedia("("+ q + f +")").matches) x=f
+				if (window.matchMedia("("+ q + h +")").matches) x=h
+			} catch(e) {x = zB0}
+			x2 = getElementProp(id,"content",":after")
+			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("devices:"+ q.trim())}} // lies
+			x = (x2 == "x" ? x : x2)
+			display.push(x)
+			res.push(q.trim() + x)
+		}
+
+		let res = [], display = []
 		// pointer event
 		let r1 = (window.PointerEvent == "undefined" ? zD : zE)
 		dom.pointer = r1
 		res.push("pointer_event:"+ r1)
-
-		// FF64: pointer/hover
-		let p = get_mm_pointer("any-pointer")+" | "+ get_mm_pointer("pointer")
-		let h = get_mm_hover("any-hover")+" | "+ get_mm_hover("hover")
-		res.push("any-pointer_pointer:"+ p)
-		res.push("any-hover_hover:"+ p)
-
-		// 1607316
-		if (isVer > 73 && isOS == "android") {
+		// pointer
+		get_mm("pointer", "#cssP")
+		get_mm("any-pointer", "#cssAP")
+		let p = display.join(" | ")
+		// hover
+		display = []
+		get_mm("hover", "#cssH")
+		get_mm("any-hover", "#cssAH")
+		let h = display.join(" | ")
+		// notate
+		if (isVer > 73 && isOS == "android") { 
+			// FF74+: 1607316
 			p += (p == "coarse | coarse" ? rfp_green : rfp_red)
 			h += (h == "none | none" ? rfp_green : rfp_red)
-		} else {
-			let rfp = zNS +" | "+ zNS
-			if (p !== rfp) {
-				p += (p == "fine | fine" ? rfp_green : rfp_red)
-			}
-			if (h !== rfp) {
-				h += (h == "hover | hover" ? rfp_green : rfp_red)
-			}
+		} else if (isVer > 63) {
+			// FF64+
+			p += (p == "fine | fine" ? rfp_green : rfp_red)
+			h += (h == "hover | hover" ? rfp_green : rfp_red)
 		}
+		// display
 		dom.mmP.innerHTML = p
 		dom.mmH.innerHTML = h
 		return resolve(res)
