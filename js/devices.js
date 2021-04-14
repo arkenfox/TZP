@@ -397,10 +397,10 @@ function get_pointer_hover() {
 				if (window.matchMedia("("+ q + f +")").matches) x=f
 				if (window.matchMedia("("+ q + h +")").matches) x=h
 			} catch(e) {x = zB0}
+			display.push(x)
 			x2 = getElementProp(id,"content",":after")
 			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("devices:"+ q.trim())}} // lies
 			x = (x2 == "x" ? x : x2)
-			display.push(x)
 			res.push(q.trim() + x)
 		}
 
