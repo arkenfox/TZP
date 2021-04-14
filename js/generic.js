@@ -22,7 +22,9 @@ function getElementProp(id, prop, pseudo) {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue(prop)
 		if (item == "none") {item = "x"; console.warn(id, item)}
-		return item.replace(/"/g,"")
+		item = item.replace(/"/g,"")
+		if (!isNaN(item * 1)) {item = item * 1} // return numbers
+		return item
 	} catch(e) {
 		console.error(id, e.name, e.message)
 		return "x"
