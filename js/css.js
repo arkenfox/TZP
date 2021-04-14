@@ -178,12 +178,11 @@ function get_computed_styles() {
 				try {
 					let results = res[i],
 						array = res[i].keys
-					if (isFF) {
+					if (isFF && isVer > 62) {
+						// ignore false positives FF60-62
 						let lastStyleIndex = array.indexOf("constructor")
 						let fakeStyles = array.slice(lastStyleIndex+1)
 						array = array.slice(0, lastStyleIndex+1)
-						// lies: false positives FF60-61
-						// -moz-context-properties,-moz-window-opacity,-moz-window-transform,-moz-window-transform-origin
 						if (gRun) {
 							if (fakeStyles.length) {gLiesKnown.push("css:computed styles")}
 						}
@@ -220,65 +219,45 @@ function get_computed_styles() {
 }
 
 function get_mm_css() {
-	let res = [], n="no-preference"
-	// FF63+
-	let x = zNS, x2 = "", q="prefers-reduced-motion: "
-	try {
-		if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"}
-		if (window.matchMedia("("+ q + n +")").matches) {x = n}
-	} catch(e) {x = zB0}
-	if (isFF && x == zNS && isVer > 62) {x = zB0}
-	dom.mmPRM.innerHTML = x + (x == n ? rfp_green : (x == zNS ? "" : rfp_red))
-	x2 = getElementProp("#cssPRM","content",":after")
-	if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
-	x = (x2 == "x" ? x : x2)
-	res.push(q.trim() + x)
+	return new Promise(resolve => {
+		function get_mm(type, id, version, expected) {
+			let x = zNS, x2 = "", n="no-preference", q=type +": "
+			try {
+				if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"}
+				if (window.matchMedia("("+ q +"light)").matches) {x = "light"}
+				if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"}
+				if (window.matchMedia("("+ q +"forced)").matches) {x = "forced"} // 1694864: removed
+				if (window.matchMedia("("+ q +"high)").matches) {x = "high"}
+				if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
+				if (window.matchMedia("("+ q +"active)").matches) {x = "active"}
+				if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
+				if (window.matchMedia("("+ q + n +")").matches) {x = n}
+			} catch(e) {x = zB0}
+			x2 = getElementProp("#css"+ id,"content",":after")
+			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
+			x = (x2 == "x" ? x : x2)
+			res.push(q.trim() + x)
+			// notate/display
+			if (version !== undefined) {
+				if (isVer >= version) {
+					x += (x == expected ? rfp_green : rfp_red)
+				}
+			}
+			document.getElementById("mm"+id).innerHTML = x
+		}
+		let res = []
+		get_mm("prefers-reduced-motion","PRM",63,"no-preference") // FF63+
+		get_mm("prefers-color-scheme","PCS",67,"light") // FF67+: 1494034
+		get_mm("prefers-contrast","PC")
+		get_mm("forced-colors","FC") // FF89+: 1659511
 
-	// FF67+: 1494034
-	x = zNS, x2 = "", q="prefers-color-scheme: "
-	try {
-		if (window.matchMedia("("+ q +"light)").matches) {x = "light"}
-		if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"}
-		if (window.matchMedia("("+ q + n +")").matches) {x = n}
-	} catch(e) {x = zB0}
-	if (isFF && x == zNS && isVer > 66) {x = zB0}
-	dom.mmPCS.innerHTML = x + (x == "light" ? rfp_green : (x == zNS ? "" : rfp_red))
-	x2 = getElementProp("#cssPCS","content",":after")
-	if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
-	x = (x2 == "x" ? x : x2)
-	res.push(q.trim() + x)
+		// ToDo: forced-colors: RFP & version check FF89+: 1659511: layout.css.forced-colors.enabled
+		// ToDo: contrast: RFP & version check
+			// 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast boolean [hidden]
 
-	// contrast
-		// ToDo: RFP & version check: 1506364: layout.css.prefers-contrast.enabled
-		// browser.display.prefers_low_contrast boolean [hidden]
-	x = zNS, x2 = "", q="prefers-contrast: "
-	try {
-		if (window.matchMedia("("+ q + n +")").matches) {x = n}
-		if (window.matchMedia("("+ q +"forced)").matches) {x = "forced"} // 1694864: removed
-		if (window.matchMedia("("+ q +"high)").matches) {x = "high"}
-		if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
-	} catch(e) {x = zB0}
-	dom.mmPC.innerHTML = x
-	x2 = getElementProp("#cssPC","content",":after")
-	if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
-	x = (x2 == "x" ? x : x2)
-	res.push(q.trim() + x)
-
-	// forced-colors
-		// ToDo: RFP & version check: 1659511: layout.css.forced-colors.enabled
-	x = zNS, x2 = "", q="forced-colors: "
-	try {
-		if (window.matchMedia("("+ q + n +")").matches) {x = n}
-		if (window.matchMedia("("+ q +"active)").matches) {x = "active"}
-		if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
-	} catch(e) {x = zB0}
-	dom.mmFC.innerHTML = x
-	x2 = getElementProp("#cssFC","content",":after")
-	if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
-	x = (x2 == "x" ? x : x2)
-	res.push(q.trim() + x)
-	// return
-	return(res)
+		// return
+		return resolve(res)
+	})
 }
 
 function get_system_fonts() {
