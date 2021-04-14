@@ -97,13 +97,22 @@ function outputDomRect() {
 				if (known["dr"+ i] == true) {gLiesKnown.push("domrect:"+ pretty[i])}
 			}
 			// only push real values
-			if (push.length == 40 && hash.length == 0) {hash.push("domrect:"+push)}
+			if (push.length == 40) {hash.push("domrect:"+push)}
 			document.getElementById("dr"+ i).innerHTML = display
 		}
 		// cleanup details
 		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
-		if (hash.length == 0) {hash.push("domrect:fake")}
+		if (hash.length) {
+			//de-dupe/sanity check
+			hash = hash.filter(function(item, position) {return hash.indexOf(item) === position})
+			if (hash.length > 1) {
+				console.error("domrect: mismatched good hashes")
+				hash = ["domrect:unknown"]
+			}
+		} else {
+			hash = ["domrect:fake"]
+		}
 		log_section("domrect", t0, hash) // any real values should be the same
 	}
 
