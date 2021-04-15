@@ -369,6 +369,10 @@ function showMetrics(type) {
 			array = sData[type]
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
+		if (type == "known lies" && gLiesBypassed.length) {
+			console.log("lies bypassed", gLiesBypassed)
+		}
+
 	}
 }
 
@@ -601,6 +605,7 @@ function outputSection(id, cls) {
 		gData = []
 		gCheck = []
 		gDetail = {}
+		gLiesBypassed = []
 		gLiesKnown = []
 		gLiesKnownDetail = {}
 		// reset section/current
