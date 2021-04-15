@@ -397,8 +397,14 @@ function get_pointer_hover() {
 				if (window.matchMedia("("+ q + h +")").matches) x=h
 			} catch(e) {x = zB0}
 			display.push(x)
+			// lies
 			x2 = getElementProp(id,"content",":after")
-			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("devices:"+ q.trim())}} // lies
+			if (gRun && x2 !== "x") {
+				if (x !== x2) {
+					gLiesKnown.push("devices:"+ type)
+					gLiesBypassed.push("devices:"+ q.trim() + x2)
+				}
+			}
 			x = (x2 == "x" ? x : x2)
 			res.push(q.trim() + x)
 		}
