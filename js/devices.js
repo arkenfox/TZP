@@ -79,7 +79,6 @@ function set_pluginBS() {
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 
 	if (pluginLies.length) {
-		isBraveShield = check_navKey("brave")
 		pluginBS = true
 	} else {
 		pluginBS = false
@@ -106,7 +105,7 @@ function get_concurrency() {
 	} else {
 		h = zD
 	}
-	if (isBraveShield) {
+	if (isBraveMode.substring(0,2) == "st") {
 		h = "fake"
 	} else {
 		h = (protoLies.includes("Navigator.hardwareConcurrency") ? "fake" : h)
@@ -576,7 +575,7 @@ function outputDevices() {
 		if (gRun) {
 			if (pluginBS) {gLiesKnown.push("devices:plugins")}
 			if (mimeBS) {gLiesKnown.push("devices:mimeTypes")}
-			if (isBraveShield) {gLiesKnown.push("devices:hardwareConcurrency")}
+			if (isBraveMode.substring(0,2) == "st") {gLiesKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
 		log_section("devices", t0, section)
