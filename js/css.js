@@ -243,7 +243,12 @@ function get_mm_css() {
 			document.getElementById("mm"+id).innerHTML = display
 			// lies
 			x2 = getElementProp("#css"+ id,"content",":after")
-			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
+			if (gRun && x2 !== "x") {
+				if (x !== x2) {
+					gLiesKnown.push("css:"+ type)
+					gLiesBypassed.push("css:"+ q.trim() + x2)
+				}
+			}
 			x = (x2 == "x" ? x : x2)
 			res.push(q.trim() + x)
 		}
