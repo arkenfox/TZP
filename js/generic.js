@@ -370,9 +370,8 @@ function showMetrics(type) {
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
 		if (type == "known lies" && gLiesBypassed.length) {
-			console.log("lies bypassed", gLiesBypassed)
+			console.log("lies (hopefully) bypassed", gLiesBypassed)
 		}
-
 	}
 }
 
@@ -509,8 +508,10 @@ function log_section(name, time1, data) {
 				if (gLiesKnown.length) {
 					gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
 					gLiesKnown.sort()
+					let lieStr = gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : "")
+						+ (gLiesBypassed.length ? " | "+ gLiesBypassed.length +" bypassed" : "")
 					dom.knownhash.innerHTML = sha1(gLiesKnown.join())
-						+ buildButton("0", "known lies", gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : ""), "showMetrics")
+						+ buildButton("0", "known lies", lieStr, "showMetrics")
 						+ lieBtn
 				} else {
 					dom.knownhash = "none" + lieBtn
