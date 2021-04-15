@@ -113,6 +113,18 @@ function outputDomRect() {
 		} else {
 			hash = ["domrect:fake"]
 		}
+		// lies bypassed
+		if (gRun) {
+			let sumBS = known["dr0"] + known["dr1"] + known["dr2"] + known["dr3"]
+			if (sumBS > 0 && sumBS < 4) {
+				for (let i=0; i < 4; i++) {
+					let trueValue = hash[0].split(":")[1]
+					if (known["dr"+i] == true && trueValue !== "unknown") {
+						gLiesBypassed.push("domrect:"+ pretty[i] +":" + trueValue)
+					}
+				}
+			}
+		}
 		log_section("domrect", t0, hash) // any real values should be the same
 	}
 
