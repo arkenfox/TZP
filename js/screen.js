@@ -1218,6 +1218,8 @@ function get_math() {
 				run1c = res[1].split(":")[2]
 			// compare runs
 			if (run0c !== run1c) {
+				// lies
+				if (gRun) {gLiesKnown.push("fd:math")}
 				let sColor = s3
 				// combined
 				mchash = "random "+ sColor +" [1] "+ sc + run0c.substring(0,22) +".."
@@ -2034,7 +2036,7 @@ function get_ua_doc() {
 			uaBS = true
 			// lies
 			if (gRun) {
-				gLiesKnown.push("useragent:navigator")
+				gLiesKnown.push("useragent:navigator properties")
 			}
 		} else {
 			// hide
