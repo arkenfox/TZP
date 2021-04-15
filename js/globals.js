@@ -116,7 +116,7 @@ let avh = "",
 	stateFNT = false,
 // other
 	isBrave = false,
-	isBraveShield = false,
+	isBraveMode = "unknown",
 	isChannel = "",
 	isChrome = "", // i.e chrome://
 	isEngine = "",
