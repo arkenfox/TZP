@@ -75,7 +75,10 @@ function get_iframe_props() {
 					sDetail[sFake] = fakeProps.sort()
 					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
 					// lies
-					if (gRun) {gLiesKnown.push("misc:iframe window properties")}
+					if (gRun) {
+						gLiesKnown.push("misc:iframe window properties")
+						gLiesBypassed.push("misc:iframe window properties:"+ sha1(props.sort()))
+					}
 				}
 			}
 		}
@@ -128,7 +131,10 @@ function get_nav_prototype() {
 			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
-			if (gRun) {gLiesKnown.push("misc:navigator keys")}
+			if (gRun) {
+				gLiesKnown.push("misc:navigator keys")
+				gLiesBypassed.push("misc:navigator keys:"+hash)
+			}
 		}
 		// display
 		let display = hash + buildButton("18", sTrue, navKeys["trueKeys"].length)
@@ -199,7 +205,11 @@ function get_perf1() {
 		} catch(e) {r1 = zB0}
 		let isZero = (r1 == "0, 0, 0, 0")
 		if (isFF) {
-			if (gRun && isZero) {gLiesKnown.push("misc:performance.mark")} // lies
+			// lies
+			if (gRun && isZero) {
+				gLiesKnown.push("misc:performance.mark")
+				gLiesBypassed.push("misc:performance.mark:not zero")
+			}
 			dom.perf1.innerHTML = (isZero ? "fake" : r1) + rfp_red
 			return "perf_mark:not zero"
 		} else {
