@@ -8,6 +8,7 @@ let jsFiles = [],
 	gLiesDetail = {},
 	gLiesKnown = [], // we only ever add if gRun
 	gLiesKnownDetail = {},
+	gLiesBypassed = [],
 	gCheck = [],
 	gCount = 0,
 	gData = [],
