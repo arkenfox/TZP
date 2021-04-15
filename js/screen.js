@@ -4,6 +4,28 @@ var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
 
 /* GLOBAL isTHINGS */
 
+function get_isBraveMode() {
+	try {
+		// strict mode returns null supported extensions
+		const canvas = document.createElement("canvas")
+		const gl = canvas.getContext("webgl")
+		if (!gl.getSupportedExtensions()) {
+			return "strict"
+		}
+		// standard and strict mode do not have chrome plugins
+		const chromePlugins = /(Chrom(e|ium)|Microsoft Edge) PDF (Plugin|Viewer)/
+		const pluginsList = [...navigator.plugins]
+		const hasChromePlugins = pluginsList
+			.filter(plugin => chromePlugins.test(plugin.name)).length == 2
+		if (!hasChromePlugins) {
+			return "standard"
+		}
+		return "allow"
+	} catch(e) {
+		return "unknown"
+	}
+}
+
 function get_isChrome() {
 	let os = "",
 		t0 = performance.now()
@@ -123,7 +145,7 @@ const get_isEngine = () => new Promise(resolve => {
 		// math isFF is the final isFF check
 		log_perf("status [isFF]",""+ isFF,"ignore")
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
-		return resolve("")
+		return resolve()
 	} catch(e) {
 		console.error("get_isEngine", e.name, e.message)
 		log_perf("isEngine [global]",t0,"","error")
@@ -136,7 +158,7 @@ const get_isError = () => new Promise(resolve => {
 	// skip
 	if (isFF && skipFF) {
 		log_perf("errors [isFF]",t0,"","skipped")
-		return resolve("")
+		return resolve()
 	}
 	try {
 		let res = [],
@@ -154,17 +176,17 @@ const get_isError = () => new Promise(resolve => {
 		// harden isFF
 		if (bFF) {isFF = true}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
-		return resolve("")
+		return resolve()
 	} catch(e) {
 		console.error("get_isError", e.name, e.message)
 		log_perf("errors [isFF]",t0,"","error")
-		return resolve("")
+		return resolve()
 	}
 })
 
 const get_isOS = () => new Promise(resolve => {
 	// skip
-	if (!isFF) {return resolve("")}
+	if (!isFF) {return resolve()}
 	// check
 	let t0 = performance.now(),
 		el = dom.widget0
@@ -176,11 +198,11 @@ const get_isOS = () => new Promise(resolve => {
 		}	else {isOS="linux"}
 		if (runS) {isOS = ""}
 		log_perf("isOS [global]",t0,"",isOS)
-		return resolve("")
+		return resolve()
 	} catch(e) {
 		console.error("get_isOS", e.name, e.message)
 		log_perf("isOS [global]",t0,"","error")
-		return resolve("")
+		return resolve()
 	}
 })
 
@@ -189,7 +211,7 @@ const get_isRFP = () => new Promise(resolve => {
 	isPerf = true
 	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 	// skip
-	if (!isFF) {return resolve("")}
+	if (!isFF) {return resolve()}
 	try {
 		performance.mark("a")
 		let r = performance.getEntriesByName("a","mark").length
@@ -213,10 +235,10 @@ const get_isRFP = () => new Promise(resolve => {
 			try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
 			if (chk3 !== zD) {isRFP = false}
 		}
-		return resolve("")
+		return resolve()
 	} catch(e) {
 		console.error("get_isRFP", e.name, e.message)
-		return resolve("")
+		return resolve()
 	}
 })
 
@@ -225,7 +247,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 	// skip
 	if (isFF & skipFF) {
 		log_perf("system font [isFF]",t0,"","skipped")
-		return resolve("")
+		return resolve()
 	}
 	// check
 	try {
@@ -239,17 +261,17 @@ const get_isSystemFont = () => new Promise(resolve => {
 		let bFF = (""+ f == "undefined" ? false : true)
 		if (bFF) {isFF = true}
 		log_perf("system font [isFF]",t0,"",bFF)
-		return resolve("")
+		return resolve()
 	} catch(e) {
 		console.error("get_isSystemFont", e.name, e.message)
 		log_perf("system font [isFF]",t0,"","error")
-		return resolve("")
+		return resolve()
 	}
 })
 
 const get_isTB = () => new Promise(resolve => {
 	// skip
-	if (!isFF) {return resolve("")}
+	if (!isFF) {return resolve()}
 	// check
 	let t0 = performance.now()
 	try {
@@ -265,23 +287,23 @@ const get_isTB = () => new Promise(resolve => {
 			isTB = true
 			log_debug("debugTB","resource:// = ".padStart(19) + "aboutTor.css")
 			log_perf("isTB [global]",t0,"",isTB)
-			return resolve("")
+			return resolve()
 		}
 		css.onerror = function() {
 			log_perf("isTB [global]",t0,"",isTB)
-			return resolve("")
+			return resolve()
 		}
 		document.head.removeChild(css)
 	} catch(e) {
 		console.error("get_isTB", e.name, e.message)
 		log_perf("isTB [global]",t0,"","error")
-		return resolve("")
+		return resolve()
 	}
 })
 
 const get_isVer = () => new Promise(resolve => {
 	// skip
-	if (!isFF) {return resolve("")}
+	if (!isFF) {return resolve()}
 	// set isVer, isVerPlus
 	let t0 = performance.now()
 	function output(verNo) {
@@ -289,7 +311,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (verNo == 59) {verNo += " or lower"
 		} else if (verNo == 88) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
-		return resolve("")
+		return resolve()
 	}
 	function start() { //88:1670124
 		try {newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}'); v87()
