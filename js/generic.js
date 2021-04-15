@@ -134,11 +134,18 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["trueKeys"] = trueKeys
 		navKeys["fakeKeys"] = fakeKeys
 		// set brave
+		isBraveMode = "unknown"
 		if (check_navKey("brave")) {
 			isBrave = true
-			// ToDo: set isBraveShield
+			Promise.all([
+				get_isBraveMode(),
+			]).then(function(results){
+				isBraveMode = results[0]
+				return resolve()
+			})
+		} else {
+			return resolve()
 		}
-		return resolve("")
 	} catch(e) {
 		console.error("get_navKeys", e.name, e.message)
 		return resolve()
