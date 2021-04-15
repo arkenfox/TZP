@@ -517,7 +517,13 @@ function get_color() {
 	} catch(e) {r3 = zB0}
 	dom.mmC.innerHTML = r3 + (r3 == 8 ? rfp_green : rfp_red)
 	let r4 = getElementProp("#cssC","content",":after")
-	if (gRun && r4 !== "x") {if (r3 !== r4) {gLiesKnown.push("screen:color")}} // lies
+	// lies
+	if (gRun && r4 !== "x") {
+		if (r3 !== r4) {
+			gLiesKnown.push("screen:color")
+			gLiesBypassed.push("screen:color:"+ r4)
+		}
+	}
 	r3 = (r4 == "x" ? r3 : r4)
 	res.push("color:"+ r3)
 	// return
