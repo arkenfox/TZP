@@ -249,9 +249,28 @@ function outputAudio1(runtype) {
 			]).then(function(hashes){
 				// sum
 				let sum = 0
+				let sumDetail = [], sumDecimals = []
 				for (let i=4500; i < 5000; i++) {
+					let value = Math.abs(getTest[i])
+					sumDetail.push(value)
+					sumDecimals.push(count_decimals(value))
 					sum += Math.abs(getTest[i])
 				}
+				// analysis: seems as all values should be unique: i.e it should be 500
+				sumDetail = sumDetail.filter(function(item, position) {return sumDetail.indexOf(item) === position})
+				sumDetail.sort((a,b) => a-b)
+				let maxValue = sumDetail[sumDetail.length - 1]
+				let minValue = sumDetail[0]
+				sumDecimals = sumDecimals.filter(function(item, position) {return sumDecimals.indexOf(item) === position})
+				sumDecimals.sort((a,b) => a-b)
+				let maxDecimals = sumDecimals[sumDecimals.length -1]
+				let minDecimals = sumDecimals[0]
+				console.debug("AUDIO SUM details\n" + " - length: "+ sumDetail.length
+					+ "\n - range: " + minValue +" - " + maxValue + "\n", sumDetail)
+				console.debug("AUDIO SUM decimals\n" + " - length: "+ sumDecimals.length
+					+ "\n - range: " + minDecimals +" - " + maxDecimals + "\n", sumDecimals)
+
+				// cary on
 				section.push("sum:"+ sum)
 				dom.audioSum = sum
 				pxi_compressor.disconnect()
