@@ -233,10 +233,6 @@ function get_mm_css() {
 				if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
 				if (window.matchMedia("("+ q + n +")").matches) {x = n}
 			} catch(e) {x = zB0}
-			x2 = getElementProp("#css"+ id,"content",":after")
-			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
-			x = (x2 == "x" ? x : x2)
-			res.push(q.trim() + x)
 			// notate/display
 			if (version !== undefined) {
 				if (isVer >= version) {
@@ -244,6 +240,11 @@ function get_mm_css() {
 				}
 			}
 			document.getElementById("mm"+id).innerHTML = x
+			// lies
+			x2 = getElementProp("#css"+ id,"content",":after")
+			if (gRun && x2 !== "x") {if (x !== x2) {gLiesKnown.push("css:"+ q.trim())}} // lies
+			x = (x2 == "x" ? x : x2)
+			res.push(q.trim() + x)
 		}
 		let res = []
 		get_mm("prefers-reduced-motion","PRM",63,"no-preference") // FF63+
