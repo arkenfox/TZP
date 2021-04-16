@@ -508,6 +508,7 @@ function log_section(name, time1, data) {
 				if (gLiesKnown.length) {
 					gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
 					gLiesKnown.sort()
+					gLiesBypassed.sort()
 					let lieStr = gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : "")
 						+ (gLiesBypassed.length ? " | "+ gLiesBypassed.length +" bypassed" : "")
 					dom.knownhash.innerHTML = sha1(gLiesKnown.join())
