@@ -322,6 +322,17 @@ function get_mimetypes_plugins() {
 				}
 			}
 			log_perf("mimetypes/plugins [devices]",t0)
+			// bypassed FF lies: Flash died in FF85
+			if (isVer > 84) {
+				if (pValue !== "none") {
+					pValue = "none"
+					if (gRun) {gLiesBypassed.push("devices:plugins:none")}
+				}
+				if (mValue !== "none") {
+					mValue = "none"
+					if (gRun) {gLiesBypassed.push("devices:mimeTypes:none")}
+				}
+			}
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
 		})
 	})
