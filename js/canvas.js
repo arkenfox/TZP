@@ -179,7 +179,9 @@ function outputCanvas() {
 			}
 		}
 		// bypass: propagate valid hash, record bypass
-		if (bpValue !== "") {
+		if (bpValue == "") {
+			chash1 = chash1.concat(bypass)
+		} else {
 			for (let i=0; i < bypass.length; i++) {
 				let bpName = bypass[i].split(":")[0],
 					bpOld = bypass[i].split(":")[1],
@@ -190,8 +192,6 @@ function outputCanvas() {
 				}
 				chash1.push(bpNew)
 			}
-		} else {
-			chash1 = chash1.concat(bypass)
 		}
 		// section
 		log_section("canvas", t0, chash1)
