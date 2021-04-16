@@ -19,6 +19,7 @@ function outputCanvas() {
 	// analyze
 	function analyzeCanvas(runtype, res1, res2, res3) {
 		let chash1 = [],
+			bypass = [],
 			diff78 = false,
 			error_string = "error while testing"
 
@@ -125,10 +126,13 @@ function outputCanvas() {
 					}
 				}
 			}
-			// push & display
-			chash1.push(item+":"+ pushvalue)
+			// bypass, push & display (ignore mozGetAsFile: not worth supporting)
+			if (sname == "toBl" || sname == "toDa") {
+				bypass.push(item +":"+ pushvalue)
+			} else {
+				chash1.push(item +":"+ pushvalue)
+			}
 			element.innerHTML = value1
-
 			// lies
 			if (gRun) {
 				if (pushvalue.substring(0,6) == "random") {
@@ -165,6 +169,27 @@ function outputCanvas() {
 				value2 = str2.substring(delim+1, str2.length),
 				value3 = str3.substring(delim+1, str3.length)
 			display_value(display, value1, value2, value3)
+		}
+		// bypass: get valid hash
+		let bpValue = ""
+		for (let i=0; i < bypass.length; i++) {
+			let	chkValue = bypass[i].split(":")[1]
+			if (chkValue.length == 64 && chkValue.indexOf(" ") == -1) {
+				bpValue = chkValue
+			}
+		}
+		// bypass: propagate valid hash, record bypass
+		if (bpValue !== "") {
+			for (let i=0; i < bypass.length; i++) {
+				let bpName = bypass[i].split(":")[0],
+					bpOld = bypass[i].split(":")[1],
+					bpNew = bypass[i]
+				if (bpValue !== bpOld) {
+					bpNew = bpName +":"+ bpValue
+					if (gRun) {gLiesBypassed.push("canvas:"+ bpNew)}
+				}
+				chash1.push(bpNew)
+			}
 		}
 		// section
 		log_section("canvas", t0, chash1)
