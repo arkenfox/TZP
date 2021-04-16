@@ -172,7 +172,6 @@ function outputCanvas() {
 		}
 		// bypass: get valid hash
 		let bpValue = ""
-		console.debug(bypass)
 		for (let i=0; i < bypass.length; i++) {
 			let	chkValue = bypass[i].split(":")[1]
 			if (chkValue.length == 64 && chkValue.indexOf(" ") == -1) {
