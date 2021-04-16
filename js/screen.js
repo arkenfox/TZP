@@ -1,6 +1,6 @@
 'use strict';
 
-var jsZoom, varDPI, dpi_x, dpi_y, zoomAssume, uaBS
+var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
 /* GLOBAL isTHINGS */
 
@@ -1708,6 +1708,15 @@ function get_screen_metrics(runtype) {
 	let isFS = false
 	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 
+	// test: always return the screen as if at 100% zoom
+	let mScreen2 = ""
+	if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
+		if (jsZoom !== 100) {
+			if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
+				mScreen2 = 2 * Math.round((w1 * dpr2)/2) +" x "+ 2 * Math.round((h1 * dpr2)/2)
+			}
+		}
+	}
 	// section hash
 		// ToDo: needs better logic + prototype lie checks: e.g.
 			// if in FS all but available should be the same (ignore available)
@@ -1724,7 +1733,7 @@ function get_screen_metrics(runtype) {
 
 		// ToDo: improve (see above) and return screen + available screen
 		if (isFS || mInner !== mScreen) {
-			res.push("screen:"+ mScreen)
+			res.push("screen:"+ (mScreen2 == "" ? mScreen : mScreen2))
 		} else {
 			res.push("screen:spoofed")
 		}
@@ -2276,8 +2285,8 @@ function get_widgets() {
 function get_zoom(runtype) {
 	return new Promise(resolve => {
 		let t0 = performance.now(),
-			dpr2 = "",
 			zoomAssume = false
+		dpr2 = ""
 
 		// dPR
 		let dpr = window.devicePixelRatio || 1;
@@ -2343,6 +2352,7 @@ function get_zoom(runtype) {
 				jsZoom = Math.round((varDPI/dpi_x)*100).toString()
 			}
 		}
+		jsZoom = jsZoom * 1
 
 		// ToDo: zoom: css=blocked (dpi_y == 0) AND RFP=true: detect this state
 		// Can't guarantee zoom: notate output for zoom, css line height, scollbar width
