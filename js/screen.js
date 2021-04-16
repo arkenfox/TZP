@@ -695,8 +695,14 @@ function get_line_scrollbar(runtype) {
 			jsZoom = jsZoom * 1
 			let t0 = performance.now()
 			// get width, remember it for later
-			let w = (window.innerWidth-vw),
-				wZoom = w
+			let w = (window.innerWidth-vw)
+			let pseudoW = getElementProp("#D","content",":before")
+			if (pseudoW !== "x") {
+				pseudoW = pseudoW * 1
+				w = pseudoW-vw
+			}
+			let wZoom = w
+
 			// section metric
 			if (w > 0) {dScrollbar = "not zero"} else {dScrollbar = "zero"}
 
@@ -1690,6 +1696,36 @@ function get_screen_metrics(runtype) {
 		p3 = screen.availLeft, p4 = screen.availTop,
 		p5 = window.screenX, p6 = window.screenY,
 		p7 = window.mozInnerScreenX, p8 = window.mozInnerScreenY
+
+	let innerW = getElementProp("#D","content",":before"),
+		innerH = getElementProp("#D","content",":after")
+	if (innerW !== "x" && innerH !== "x") {
+		innerW = innerW * 1
+		innerH = innerH.slice(3) * 1
+		if (innerW !== w || innerH !== h) {
+			w = innerW
+			h = innerH
+			if (gRun) {
+				gLiesKnown.push("screen:inner window")
+				gLiesBypassed.push("screen:inner window:"+ w +" x "+ h)
+			}
+		}
+	}
+
+	let screenW = getElementProp("#S","content",":before"),
+		screenH = getElementProp("#S","content",":after")
+	if (screenW !== "x" && screenH !== "x") {
+		screenW = screenW * 1
+		screenH = screenH.slice(3) * 1
+		if (screenW !== w1 || screenH !== h1) {
+			w1 = screenW
+			h1 = screenH
+			if (gRun) {
+				gLiesKnown.push("screen:screen")
+				gLiesBypassed.push("screen:screen:"+ w1 +" x "+ h1)
+			}
+		}
+	}
 
 	let mInner = w +" x "+ h,
 		mOuter = w3 +" x "+ h3,
