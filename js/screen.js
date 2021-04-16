@@ -1708,20 +1708,20 @@ function get_screen_metrics(runtype) {
 	let isFS = false
 	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 
-	// test: always return the screen as if at 100% zoom
-	let mScreen2 = ""
-	if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
-		if (jsZoom !== 100) {
-			if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
-				mScreen2 = 2 * Math.round((w1 * dpr2)/2) +" x "+ 2 * Math.round((h1 * dpr2)/2)
-			}
-		}
-	}
 	// section hash
 		// ToDo: needs better logic + prototype lie checks: e.g.
 			// if in FS all but available should be the same (ignore available)
 			// if not in FS all 4 values should be different?
 	if (runtype == "load" || runtype == "screen") {
+		// make screen zoom resistant
+		let mScreen2 = ""
+		if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
+			if (jsZoom !== 100) {
+				if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
+					mScreen2 = 2 * Math.round((w1 * dpr2)/2) +" x "+ 2 * Math.round((h1 * dpr2)/2)
+				}
+			}
+		}
 		// note: FS would make these true
 			res.push("coordinates_zero:"+ isXY)
 		let match = (mScreen == mAvailable)
