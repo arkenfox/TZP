@@ -698,8 +698,8 @@ function get_line_scrollbar(runtype) {
 			let w = (window.innerWidth-vw)
 			let pseudoW = getElementProp("#D","content",":before")
 			if (pseudoW !== "x") {
-				if (pseudoW == w-1) {pseudoW = w} // allow for min-
-				w = (pseudoW * 1)-vw
+				if (pseudoW * 1 == w-1) {pseudoW = w} // allow for min-
+				w = pseudoW-vw
 			}
 			let wZoom = w
 			// section metric
@@ -1759,13 +1759,16 @@ function get_screen_metrics(runtype) {
 			screenH = getElementProp("#S","content",":after"),
 			screenBypass = false
 		if (screenW !== "x" && screenH !== "x") {
-			screenBypass = true
 			screenW = screenW * 1
 			screenH = screenH.slice(3) * 1
 			// round up 1px: helps 100%-zoom recalc
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
+			// don't fallback to fake if a match
+			if (screenW == w1 && screenH == h1) {screenBypass == true}
+			// lies
 			if (screenW !== w1 || screenH !== h1) {
+				screenBypass = true
 				w1 = screenW
 				h1 = screenH
 				mScreen = w1 +" x "+ h1
