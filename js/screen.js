@@ -1774,6 +1774,7 @@ function get_screen_metrics(runtype) {
 				console.debug("screenBypass set [A]")
 			}
 			if ((screenW +" x "+ screenH) == mScreen) {
+				screenBypass == true
 				console.debug("screenBypass set [B]")
 			}
 			// lies
@@ -1822,6 +1823,7 @@ function get_screen_metrics(runtype) {
 
 		// metrics: don't let FS affect stability, no comparisons due to bypasses and recalc at 100% zoom
 		res.push("coordinates_zero:"+ isXY) // FF: mozInnerScreenY is not zero at FS
+		console.debug("setting screen metric: ignoring prototype lies", screenBypass)
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
