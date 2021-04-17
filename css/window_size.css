@@ -1,4 +1,4 @@
-@media (min-width:499px){#S:before{content:"";}}
+@media (min-width:499px){#D:before{content:"";}}
 @media (min-width:500px){#D:before{content:"500";}}
 @media (min-width:501px){#D:before{content:"501";}}
 @media (min-width:502px){#D:before{content:"502";}}
@@ -2060,8 +2060,8 @@
 @media (min-width:2558px){#D:before{content:"2558";}}
 @media (min-width:2559px){#D:before{content:"2559";}}
 @media (min-width:2560px){#D:before{content:"2560";}}
-@media (min-width:2561px){#S:before{content:"";}} /* upper */
-@media (min-height:499px){#S:after{content:"";}} /* lower */
+@media (min-width:2561px){#D:before{content:"";}} /* upper */
+@media (min-height:499px){#D:after{content:"";}} /* lower */
 @media (min-height:500px){#D:after{content:" x 500";}}
 @media (min-height:501px){#D:after{content:" x 501";}}
 @media (min-height:502px){#D:after{content:" x 502";}}
@@ -4123,4 +4123,4 @@
 @media (min-height:2558px){#D:after{content:" x 2558";}}
 @media (min-height:2559px){#D:after{content:" x 2559";}}
 @media (min-height:2560px){#D:after{content:" x 2560";}}
-@media (min-height:2561px){#S:after{content:"";}}
+@media (min-height:2561px){#D:after{content:"";}}
