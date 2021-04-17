@@ -199,7 +199,7 @@ function get_computed_styles() {
 				el.innerHTML = display
 				if (i > 0) {if (hashes[i] != hashes[0]) {isSame = false}}
 			}
-			// show/hide rows | fixup label
+			// show/hide rows & fixup label
 			dom.togCSSb.style.display = (isSame ? "none" : "table-row")
 			dom.togCSSc.style.display = (isSame ? "none" : "table-row")
 			if (!isSame) {
@@ -255,10 +255,8 @@ function get_mm_css() {
 		let res = []
 		get_mm("prefers-reduced-motion","PRM",63,"no-preference") // FF63+
 		get_mm("prefers-color-scheme","PCS",67,"light") // FF67+: 1494034
+		get_mm("forced-colors","FC") // FF89+: 1659511: not RFP protected
 		get_mm("prefers-contrast","PC")
-		get_mm("forced-colors","FC") // FF89+: 1659511
-
-		// ToDo: forced-colors: RFP & version check FF89+: 1659511: layout.css.forced-colors.enabled
 		// ToDo: contrast: RFP & version check
 			// 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast boolean [hidden]
 
@@ -274,10 +272,8 @@ function get_system_fonts() {
 			m = "-moz-",
 			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
 			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
-
 		let sName = "css_system_fonts"
 		clearDetail(sName)
-
 		try {
 			let el = dom.sysFont
 			aFonts.forEach(function(font){
