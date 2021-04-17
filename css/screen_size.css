@@ -1,3 +1,4 @@
+@media (min-device-width:500px){#S:before{content:"";}}
 @media (min-device-width:500px){#S:before{content:"500";}}
 @media (min-device-width:501px){#S:before{content:"501";}}
 @media (min-device-width:502px){#S:before{content:"502";}}
@@ -2059,6 +2060,8 @@
 @media (min-device-width:2558px){#S:before{content:"2558";}}
 @media (min-device-width:2559px){#S:before{content:"2559";}}
 @media (min-device-width:2560px){#S:before{content:"2560";}}
+@media (min-device-width:2561px){#S:before{content:"";}} /* upper */
+@media (min-device-height:499px){#S:after{content:"";}} /* lower */
 @media (min-device-height:500px){#S:after{content:" x 500";}}
 @media (min-device-height:501px){#S:after{content:" x 501";}}
 @media (min-device-height:502px){#S:after{content:" x 502";}}
@@ -4120,3 +4123,4 @@
 @media (min-device-height:2558px){#S:after{content:" x 2558";}}
 @media (min-device-height:2559px){#S:after{content:" x 2559";}}
 @media (min-device-height:2560px){#S:after{content:" x 2560";}}
+@media (min-device-height:2561px){#S:after{content:"";}}
