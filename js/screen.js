@@ -1702,7 +1702,7 @@ function get_screen_metrics(runtype) {
 		mOuter = w3 +" x "+ h3,
 		mScreen = w1 +" x "+ h1,
 		mAvailable = w2 +" x "+ h2
-	//console.debug("reported", mInner, mScreen)
+	console.debug("reported screen", mScreen)
 
 	// DISPLAY
 	dom.ScrRes = mScreen +" ("+ p1 +","+ p2 +")"
@@ -1762,9 +1762,13 @@ function get_screen_metrics(runtype) {
 			screenW = screenW * 1
 			screenH = screenH.slice(3) * 1
 			// round up 1px: helps 100%-zoom recalc
+			console.debug("css values", screenW +" x "+ screenH)
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
+			console.debug("css values tweaked", screenW +" x "+ screenH)
 			// don't fallback to fake if a match
+				// ToDo: chameleon reports 1920x1080, which is correct for 2460x1440 at 133%
+				// css shows 1920x1080, but somehow screenBypass is not set true
 			if (screenW == w1 && screenH == h1) {screenBypass == true}
 			// lies
 			if (screenW !== w1 || screenH !== h1) {
@@ -1772,6 +1776,7 @@ function get_screen_metrics(runtype) {
 				w1 = screenW
 				h1 = screenH
 				mScreen = w1 +" x "+ h1
+				console.debug("values before recalc", mScreen)
 				if (gRun) {gLiesKnown.push("screen:screen")}
 			}
 		}
