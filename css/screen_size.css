@@ -1,4 +1,4 @@
-@media (min-device-width:500px){#S:before{content:"";}}
+@media (min-device-width:499px){#S:before{content:"";}}
 @media (min-device-width:500px){#S:before{content:"500";}}
 @media (min-device-width:501px){#S:before{content:"501";}}
 @media (min-device-width:502px){#S:before{content:"502";}}
