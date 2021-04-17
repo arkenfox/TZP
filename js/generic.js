@@ -24,6 +24,7 @@ function getElementProp(id, prop, pseudo) {
 		if (item == "none") {item = "x"; console.warn(id, item)}
 		item = item.replace(/"/g,"")
 		if (!isNaN(item * 1)) {item = item * 1} // return numbers
+		item = (item == "" ? "x" : item) // blanks
 		return item
 	} catch(e) {
 		console.error(id, e.name, e.message)
