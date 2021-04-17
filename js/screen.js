@@ -1761,22 +1761,10 @@ function get_screen_metrics(runtype) {
 			screenW = screenW * 1
 			screenH = screenH.slice(3) * 1
 			// round up 1px: helps 100%-zoom recalc
-			console.debug("  min css values", screenW, "x", screenH)
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
 			// don't fallback to fake if a match
-				// ToDo: chameleon reports 1920x1080, which is correct for 2460x1440 at 133%
-				// css shows 1920x1080, but somehow screenBypass is not set true
-			console.debug(" reported values", w1, "x", h1)
-			console.debug("final css values", screenW, "x", screenH)
-			if (screenW == w1 && screenH == h1) {
-				screenBypass == true
-				console.debug("screenBypass set [A]")
-			}
-			if ((screenW +" x "+ screenH) == mScreen) {
-				screenBypass == true
-				console.debug("screenBypass set [B]")
-			}
+			if (screenW == w1 && screenH == h1) {screenBypass = true}
 			// lies
 			if (screenW !== w1 || screenH !== h1) {
 				screenBypass = true
@@ -1786,16 +1774,12 @@ function get_screen_metrics(runtype) {
 				if (gRun) {gLiesKnown.push("screen:screen")}
 			}
 		}
-		// debug missing ranges
-		//console.debug(jsZoom+ "%", innerW, innerH, screenW, screenH)
+		//console.debug(jsZoom+ "%", innerW, innerH, screenW, screenH) // missing ranges
 
 		// ToDo: HARDEN: due to zoom and limited ranges: often a css pseudo value can be invalid
 		// since this is excluded in resize events, we can afford to spend some perf to
 		// inject bisecting css rules
 
-		// FS
-		let isFS = false
-		try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 		// calc screen at 100%
 		if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
 			if (jsZoom !== 100) {
@@ -1823,7 +1807,6 @@ function get_screen_metrics(runtype) {
 
 		// metrics: don't let FS affect stability, no comparisons due to bypasses and recalc at 100% zoom
 		res.push("coordinates_zero:"+ isXY) // FF: mozInnerScreenY is not zero at FS
-		console.debug("setting screen metric: ignoring prototype lies", screenBypass)
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
@@ -1835,7 +1818,6 @@ function get_screen_metrics(runtype) {
 			if (protoLies.includes("Screen.height")) {scrLies = true}
 			res.push("screen:"+ (scrLies ? "fake" : mScreen))
 		}
-		//console.debug("fullscreen:", jsZoom + " %", isFS, "\n - "+ sha1(res) + "\n - " + res.join("\n - "))
 		return(res)
 	}
 }
