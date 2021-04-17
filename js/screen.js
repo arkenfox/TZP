@@ -1730,6 +1730,9 @@ function get_screen_metrics(runtype) {
 			dom.WndIn.innerHTML = mInner +" ("+ p7 +","+ p8 +")"+ return_lb_nw(w,h)
 		}
 	}
+	// FS
+	let isFS = false
+	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 	// THE REST
 	get_orientation(runtype) // nothing stable
 	get_mm_metrics(runtype) // not reliable due to extension APIs
