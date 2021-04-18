@@ -1765,20 +1765,18 @@ function get_screen_metrics(runtype) {
 		// screen
 		let screenW = getElementProp("#S","content",":before"),
 			screenH = getElementProp("#S","content",":after"),
-			screenBypass = false
+			screenBypass = false,
+			pushBypass = false
 		if (screenW !== "x" && screenH !== "x") {
+			screenBypass = true
 			screenW = screenW * 1
 			screenH = screenH.slice(3) * 1
 			// round up 1px: helps 100%-zoom recalc
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
-			// don't fallback to fake if a match
-			console.debug("reported", w1, h1)
-			console.debug("     css", screenW, screenH)
-			if (screenW == w1 && screenH == h1) {screenBypass = true; console.debug("they match")}
 			// lies
-			if (screenW !== w1 || screenH !== h1) {
-				screenBypass = true
+			if (screenW !== w1 && screenH !== h1) {
+				pushBypass = true
 				w1 = screenW
 				h1 = screenH
 				mScreen = w1 +" x "+ h1
@@ -1821,7 +1819,7 @@ function get_screen_metrics(runtype) {
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
-			if (gRun) {gLiesBypassed.push("screen:screen:"+ mScreen)}
+			if (gRun && pushBypass) {gLiesBypassed.push("screen:screen:"+ mScreen)}
 		} else {
 			// fall back to prototype
 			let scrLies = false
