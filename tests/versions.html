@@ -21,7 +21,11 @@
 	<div class="hidden">
 	  <object id="test68"></object>
 		<div id="test73"></div>
-		<div><input type=time min="14:00:00" max="12:00:00" value="15:00:00" id=test76></div>
+		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+	</div>
+	<div class="offscreen">
+		<div id="test89" style="width:1em">a &#x3000 b</div>
+		<div id="ctrl89" style="width:1em">a b</div>
 	</div>
 
 	<table>
@@ -37,7 +41,7 @@
 		</td></tr>
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
-		<tr><td colspan="3" class="center">-------- nightly to 75 -------</td></tr>
+		<tr><td>89</td><td id="n89"></td><td class="c mono" id="v89"></td></tr>
 		<tr><td>88</td><td id="n88"></td><td class="c mono" id="v88"></td></tr>
 		<tr><td>88</td><td id="n88a"></td><td class="c mono" id="v88a"></td></tr>
 		<tr><td>87</td><td id="n87"></td><td class="c mono" id="v87"></td></tr>
@@ -62,29 +66,14 @@
 		<tr><td>77</td><td id="n77a"></td><td class="c mono" id="v77a"></td></tr>
 		<tr><td>76</td><td id="n76"></td><td class="c mono" id="v76"></td></tr>
 		<tr><td>75</td><td id= "n75"></td><td class="c mono" id="v75"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf75"></td></tr>
-
-		<tr><td colspan="3" class="center">----------- 74 to 72 ----------</td></tr>
 		<tr><td>74</td><td id="n74"></td><td class="c mono" id="v74"></td></tr>
 		<tr><td>73</td><td id="n73"></td><td class="c mono" id="v73"></td></tr>
 		<tr><td>72</td><td id="n72"></td><td class="c mono" id="v72"></td></tr>
 		<tr><td>72</td><td id="n72a"></td><td class="c mono" id="v72a"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf72a"></td></tr>
-
-		<tr><td colspan="3" class="center">--------------  71 ------------</td></tr>
 		<tr><td>71</td><td id= "n71"></td><td class="c mono" id="v71"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf71"></td></tr>
-
-		<tr><td colspan="3" class="center">--------------  70 ------------</td></tr>
 		<tr><td>70</td><td id= "n70"></td><td class="c mono" id="v70"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf70"></td></tr>
-
-		<tr><td colspan="3" class="center">----------- 69 to 68 ----------</td></tr>
 		<tr><td>69</td><td id="n69"></td><td class="c mono" id="v69"></td></tr>
 		<tr><td>68</td><td id="n68"></td><td class="c mono" id="v68"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf68"></td></tr>
-
-		<tr><td colspan="3" class="center">----------- 67 to 60 ----------</td></tr>
 		<tr><td>67</td><td id="n67"></td><td class="c mono" id="v67"></td></tr>
 		<tr><td>66</td><td id="n66"></td><td class="c mono" id="v66"></td></tr>
 		<tr><td>65</td><td id="n65"></td><td class="c mono" id="v65"></td></tr>
@@ -94,7 +83,6 @@
 		<tr><td>62</td><td id="n62"></td><td class="c mono" id="v62"></td></tr>
 		<tr><td>61</td><td id="n61"></td><td class="c mono" id="v61"></td></tr>
 		<tr><td>60</td><td id= "n60"></td><td class="c mono" id="v60"></td></tr>
-		<tr><td></td><td></td><td class="c mono" id="perf60"></td></tr>
 		<tr><td colspan="3">&nbsp</td></tr>
 
 		<tr><td colspan="3" class="center">--------- 59 or lower ---------</td></tr>
@@ -117,8 +105,8 @@
 'use strict';
 
 function outputVersion() {
-	let xF = sb +"failure"+ sc,
-		xS = sg +"success"+ sc,
+	let xF = sb +"fail"+ sc,
+		xS = sg +"pass"+ sc,
 		xNC = sb +"no change"+ sc,
 		xOMG = sg +"OMG it's fixed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
@@ -126,16 +114,21 @@ function outputVersion() {
 		strC = "]</a>",
 		t0 = performance.now()
 
-	function output(id, bug, result, perf){
+	function output(id, bug, result, perf) {
 		perf = Math.round(perf)
 		document.getElementById("v"+id).innerHTML = result +" ("+ perf +" ms)"
 		if (bug !== "") {document.getElementById("n"+id).innerHTML = strA + bug + strB + bug + strC}
-		// perf
-		if (id == "75" || id == "72a" || id == "71" || id == "70" || id == "68" || id == "60") {
-			document.getElementById("perf"+id).innerHTML = "maximum (" + Math.round(performance.now()-t0) +" ms)"
-			t0 = performance.now()
-		}
 	}
+
+	// 89: 1703213
+	let t89 = performance.now(), ver89 = xF
+	try {
+		let x89 = dom.ctrl89.offsetHeight
+		let y89 = dom.test89.offsetHeight
+		//console.debug(x89/y89)
+		if (x89/y89 > 0.85) {ver89 = xS}
+	} catch(e) {}
+	output("89", "1703213", ver89, performance.now()-t89)
 
 	// 88: 1670124
 	let t88 = performance.now(), ver88 = xF
