@@ -506,12 +506,13 @@ function get_color() {
 	let res = [], r1 = "", r2 = "", r3 = ""
 	// depth
 	try {r1 = screen.pixelDepth} catch(e) {r1 = zB0}
+	if (protoLies.includes("Screen.PixelDepth")) {r1 = "fake"}
 	try {r2 = screen.colorDepth} catch(e) {r2 = zB0}
+	if (protoLies.includes("Screen.colorDepth")) {r1 = "fake"}
 	res.push("pixelDepth:"+ r1)
 	res.push("screenDepth:"+ r2)
 	r1 += " | "+ r2
 	dom.ScrDepth.innerHTML = r1 += (r1 == "24 | 24" ? rfp_green : rfp_red)
-
 	// color
 	try {
 		r3 = (function() {
