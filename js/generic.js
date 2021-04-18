@@ -479,7 +479,6 @@ function log_section(name, time1, data) {
 		let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
 		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
-		if (name == "screen") {sHash += " [incomplete]"}
 		document.getElementById(name +"hash").innerHTML = sHash
 		document.getElementById("perf"+ name).innerHTML = " "+ time1 +" ms"
 
