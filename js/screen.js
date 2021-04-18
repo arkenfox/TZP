@@ -508,7 +508,7 @@ function get_color() {
 	try {r1 = screen.pixelDepth} catch(e) {r1 = zB0}
 	if (protoLies.includes("Screen.PixelDepth")) {r1 = "fake"}
 	try {r2 = screen.colorDepth} catch(e) {r2 = zB0}
-	if (protoLies.includes("Screen.colorDepth")) {r1 = "fake"}
+	if (protoLies.includes("Screen.colorDepth")) {r2 = "fake"}
 	res.push("pixelDepth:"+ r1)
 	res.push("screenDepth:"+ r2)
 	r1 += " | "+ r2
