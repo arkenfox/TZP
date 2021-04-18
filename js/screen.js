@@ -1773,7 +1773,9 @@ function get_screen_metrics(runtype) {
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
 			// don't fallback to fake if a match
-			if (screenW == w1 && screenH == h1) {screenBypass = true}
+			console.debug("reported", w1, h1)
+			console.debug("     css", screenW, screenH)
+			if (screenW == w1 && screenH == h1) {screenBypass = true; console.debug("they match")}
 			// lies
 			if (screenW !== w1 || screenH !== h1) {
 				screenBypass = true
