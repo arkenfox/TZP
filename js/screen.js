@@ -1810,6 +1810,12 @@ function get_screen_metrics(runtype) {
 			if (protoLies.includes("Screen.height")) {scrLies = true}
 			res.push("screen:"+ (scrLies ? "fake" : mScreen))
 		}
+		// dpr
+		if (isOS == "android") {
+			if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
+				res.push("devicePixeRatio:"+ dpr2.toFixed(6))
+			}
+		}
 		return(res)
 	}
 }
