@@ -1669,9 +1669,9 @@ function get_resources() {
 
 function get_screen_metrics(runtype) {
 	let res = []
-
 	//trap resize event
 	if (runtype !== "load" && runtype !== "screen") {runtype = "resize"}
+
 	// this triggers zoom/viewport when not page load
 		// but ignore viewport on resize: which is called by scrollbar
 		// nothing else needs to wait here for any results
@@ -1698,17 +1698,10 @@ function get_screen_metrics(runtype) {
 		p3 = screen.availLeft, p4 = screen.availTop,
 		p5 = window.screenX, p6 = window.screenY,
 		p7 = window.mozInnerScreenX, p8 = window.mozInnerScreenY
-	// temp lies
-	//w1 = 1920; h1 = 1080
-	//w2 = 1920, h2 = 1080,
-	//w3 = 1920, h3 = 1080,
-	//w = 1920; h = 1080
-
 	let mInner = w +" x "+ h,
 		mOuter = w3 +" x "+ h3,
 		mScreen = w1 +" x "+ h1,
 		mAvailable = w2 +" x "+ h2
-
 	// DISPLAY
 	dom.ScrRes = mScreen +" ("+ p1 +","+ p2 +")"
 	dom.ScrAvail = mAvailable +" ("+ p3 +","+ p4 +")"
@@ -1740,8 +1733,8 @@ function get_screen_metrics(runtype) {
 	let isFS = false
 	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
 	// THE REST
-	get_orientation(runtype) // nothing stable
-	get_mm_metrics(runtype) // not reliable due to extension APIs
+	get_orientation(runtype) // not stable
+	get_mm_metrics(runtype) // not reliable (extension APIs)
 
 	// METRICS
 	if (runtype !== "resize") {
@@ -1752,7 +1745,6 @@ function get_screen_metrics(runtype) {
 		if (innerW !== "x" && innerH !== "x") {
 			innerW = innerW * 1
 			innerH = innerH.slice(3) * 1
-			// round up 1px
 			if (innerW == w-1) {innerW = w}
 			if (innerH == h-1) {innerH = h}
 			if (innerW !== w || innerH !== h) {
@@ -1771,10 +1763,8 @@ function get_screen_metrics(runtype) {
 			screenBypass = true
 			screenW = screenW * 1
 			screenH = screenH.slice(3) * 1
-			// round up 1px: helps 100%-zoom recalc
 			if (screenW == w1-1) {screenW = w1}
 			if (screenH == h1-1) {screenH = h1}
-			// lies
 			if (screenW !== w1 && screenH !== h1) {
 				pushBypass = true
 				w1 = screenW
@@ -1783,13 +1773,9 @@ function get_screen_metrics(runtype) {
 				if (gRun) {gLiesKnown.push("screen:screen")}
 			}
 		}
-		//console.debug(jsZoom+ "%", innerW, innerH, screenW, screenH) // missing ranges
+		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
 
-		// ToDo: HARDEN: due to zoom and limited ranges: often a css pseudo value can be invalid
-		// since this is excluded in resize events, we can afford to spend some perf to
-		// inject bisecting css rules
-
-		// calc screen at 100%
+		// zoom resistance: recalc screen at 100%
 		if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
 			if (jsZoom !== 100) {
 				if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
@@ -1799,29 +1785,26 @@ function get_screen_metrics(runtype) {
 					let common = [360,600,640,720,768,800,810,834,864,900,1024,1050,1080,1112,1152,1200,1280,1360,1366,1440,1536,1600,1680,1920,2048,2560,]
 					for (let i=0; i < common.length; i++) {
 						let real = common[i]
-						if (w100 >= real-2 && w100 <= real+2) {
-							//if (w100 !== real) {console.debug("changed width", w100, "to", real, jsZoom +"%")} // temp debug
-							w100 = real
-						}
-						if (h100 >= real-2 && h100 <= real+2) {
-							//if (h100 !== real) {console.debug("changed height", h100, "to", real, jsZoom +"%")} // temp debug
-							h100 = real
-						}
+						if (w100 >= real-2 && w100 <= real+2) {w1 = real}
+						if (h100 >= real-2 && h100 <= real+2) {h1 = real}
 					}
-					mScreen = w100 +" x "+ h100
-					//console.debug("recalculated 100% zoom screen", mScreen)
+					mScreen = w1 +" x "+ h1
 				}
 			}
 		}
 
-		// metrics: don't let FS affect stability, no comparisons due to bypasses and recalc at 100% zoom
-		res.push("coordinates_zero:"+ isXY) // FF: mozInnerScreenY is not zero at FS
+		// stable metrics
+			// FF: mozInnerScreenY is not zero at FS
+			// no inner/outer/screen/availble comparisons due to FS affects and screenBypassed/recalc
+			// eliminate orientation: return screen at widest x highest
+		res.push("coordinates_zero:"+ isXY)
+		if (w1 < h1) {mScreen = h1 +" x "+ w1} else {mScreen = w1 +" x "+ h1}
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
 			if (gRun && pushBypass) {gLiesBypassed.push("screen:screen:"+ mScreen)}
 		} else {
-			// fall back to prototype
+			// prototype lies
 			let scrLies = false
 			if (protoLies.includes("Screen.width")) {scrLies = true}
 			if (protoLies.includes("Screen.height")) {scrLies = true}
@@ -1854,11 +1837,9 @@ function get_ua_doc() {
 		}
 
 		function output(property, str) {
-			// cleanup string
 			if (str == "") {str = "empty string"}
 			if (str == "undefined") {str = "undefined string"}
 			if (str == undefined) {str = "undefined value"}
-			// stash & display
 			res.push(property +":"+ str)
 			document.getElementById("n"+ property).innerHTML = str
 			return str
