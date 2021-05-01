@@ -1,8 +1,11 @@
 'use strict';
 
-var pluginBS = false,
-	mimeBS = false, // FF only
-	devicesBS = false // FF only
+var pluginBS = false
+// FF only
+var mimeBS = false,
+	devicesBS = false,
+	pluginFlash = false,
+	mimeFlash = false
 
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
@@ -78,11 +81,8 @@ function set_pluginBS() {
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 
-	if (pluginLies.length) {
-		pluginBS = true
-	} else {
-		pluginBS = false
-	}
+	if (pluginLies.length) {pluginBS = true} else {pluginBS = false}
+	if (runSL) {pluginBS = true}
 }
 
 function get_gamepads() {
@@ -99,19 +99,18 @@ function get_concurrency() {
 		try {
 			h = navigator.hardwareConcurrency
 			h = (h == undefined ? zB0 : h)
-		} catch(e) {
-			h = zB0
-		}
-	} else {
-		h = zD
-	}
+		} catch(e) {h = zB0}
+	} else {h = zD}
+	let isLies = false
 	if (isBraveMode.substring(0,2) == "st") {
-		h = "fake"
+		isLies = true
 	} else {
-		h = (protoLies.includes("Navigator.hardwareConcurrency") ? "fake" : h)
+		isLies = (protoLies.includes("Navigator.hardwareConcurrency") ? true : false)
 	}
-	dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
-	return "hardwareConcurrency:"+ h
+	if (runSL) {isLies = true}
+	if (isLies) {h = soL + h + scC} else {h += (h == "2" ? rfp_green : rfp_red)}
+	dom.nHWC.innerHTML = h
+	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
 }
 
 function get_media_devices() {
@@ -234,36 +233,28 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
-		let sName = "devices_mimetypes"
-		clearDetail(sName)
-		clearDetail(sName +"_fake_skip")
-
-		function display(output) {
-			let btn = ""
-			if (Array.isArray(output)) {
-				if (mimeBS) {sName += "_fake_skip"}
-				sDetail[sName] = output
-				btn = buildButton("7", sName, output.length +" mimetype"+ (output.length > 1 ? "s" : ""))
-				output = sha1(output.join())
-			}
-			if (mimeBS) {output = "fake"}
-			dom.mimeTypes.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
-			return resolve(output)
-		}
-
 		if (check_navKey("mimeTypes")) {
+			let res = []
+			if (runSL) {
+				res = ["application/x-futuresplash: application/x-futuresplash: spl",
+					"application/x-shockwave-flash: application/x-shockwave-flash: swf"]
+				mimeBS = true
+			}
 			try {
 				let m = navigator.mimeTypes
-				if (m.length) {
-					let res = []
-					for (let i=0; i < m.length; i++) {
-						res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
-							+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes) )
+				if (m.length || res.length) {
+					if (!runSL) {
+						for (let i=0; i < m.length; i++) {
+							res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
+								+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes) )
+						}
 					}
 					res.sort()
 					// FF: mimeBS
 					if (isFF) {
+						// reset
 						mimeBS = false
+						mimeFlash = false
 						if (isVer > 84 && res.length) {
 							// FF85+: EOL Flash
 							mimeBS = true
@@ -274,7 +265,9 @@ function get_mimetypes() {
 										// application/x-shockwave-flash: application/x-shockwave-flash: swf
 									let mime1 = res[0].split(":")[0]
 									let mime2 = res[1].split(":")[0]
-									if (mime1 !== "application/x-futuresplash" || mime2 !== "application/x-shockwave-flash") {
+									if (mime1 == "application/x-futuresplash" && mime2 == "application/x-shockwave-flash") {
+										mimeFlash = true
+									} else {
 										mimeBS = true
 									}
 							} else {
@@ -282,15 +275,15 @@ function get_mimetypes() {
 							}
 						}
 					}
-					display(res)
+					return resolve(res)
 				} else {
-					display("none")
+					return resolve("none")
 				}
 			} catch(e) {
-				display(zB0)
+				return resolve(zB0)
 			}
 		} else {
-			display(zD)
+			return resolve(zD)
 		}
 	})
 }
@@ -298,37 +291,66 @@ function get_mimetypes() {
 function get_mimetypes_plugins() {
 	return new Promise(resolve => {
 		let t0 = performance.now()
+		// reset
+		let sName = "devices_mimetypes"
+		clearDetail(sName)
+		clearDetail(sName +"_fake_skip")
+		sName = "devices_plugins"
+		clearDetail(sName)
+		clearDetail(sName +"_fake_skip")
+
+		// promise
 		Promise.all([
 			get_plugins(),
 			get_mimetypes(),
 		]).then(function(results){
-			let pValue = results[0]
-			let mValue = results[1]
-			// values returned can be: none, sha1-hash, disabled, blocked, fake
+			let outputP = results[0]
+			let outputM = results[1]
+			// FF: check Flash in both
 			if (isFF) {
-				// the only hashes allowed through in FF are flash
-				let pFlash = false
-				let mFlash = false
-				if (pValue.length == 40) {pFlash = true}
-				if (mValue.length == 40) {mFlash = true}
-				// if any flash then BOTH must be true: replace hash with fake
-				if (pFlash == true && mFlash == false) {
-					pValue = "fake"
-					dom.plugins.innerHTML = "fake"+ rfp_red
-				}
-				if (pFlash == false && mFlash == true) {
-					mValue = "fake"
-					dom.mimeTypes.innerHTML = "fake"+ rfp_red
-				}
+				if (pluginFlash == true && mimeFlash == false) {pluginBS = true}
+				if (pluginFlash == false && mimeFlash == true) {mimeBS = true}
+			}
+			// plugins
+			let btnP = "", pValue = outputP
+			if (Array.isArray(outputP)) {
+				if (pluginBS) {sName += "_fake_skip"}
+				sDetail[sName] = outputP
+				btnP = buildButton("7", sName, outputP.length +" plugin"+ (outputP.length > 1 ? "s" : ""))
+				outputP = sha1(outputP.join())
+				pValue = outputP
+			}
+			if (pluginBS) {
+				pValue = zLIE
+				outputP = (isVer > 84 ? soB : soL) + outputP + scC
+				dom.plugins.innerHTML = outputP + btnP
+			} else {
+				dom.plugins.innerHTML = outputP + btnP + (outputP == "none" ? rfp_green : rfp_red)
+			}
+			// mimeTypes
+			let btnM = "", mValue = outputP
+			sName = "devices_mimetypes"
+			if (Array.isArray(outputM)) {
+				if (mimeBS) {sName += "_fake_skip"}
+				sDetail[sName] = outputM
+				btnM = buildButton("7", sName, outputM.length +" mimetype"+ (outputM.length > 1 ? "s" : ""))
+				outputM = sha1(outputM.join())
+			}
+			if (mimeBS) {
+				mValue = zLIE
+				outputM = (isVer > 84 ? soB : soL) + outputM + scC
+				dom.mimeTypes.innerHTML = outputM + btnM
+			} else {
+				dom.mimeTypes.innerHTML = outputM + btnM + (outputM == "none" ? rfp_green : rfp_red)
 			}
 			log_perf("mimetypes/plugins [devices]",t0)
 			// bypassed FF lies: Flash died in FF85
 			if (isVer > 84) {
-				if (pValue !== "none") {
+				if (results[0] !== "none") {
 					pValue = "none"
 					if (gRun) {gLiesBypassed.push("devices:plugins:none")}
 				}
-				if (mValue !== "none") {
+				if (results[1] !== "none") {
 					mValue = "none"
 					if (gRun) {gLiesBypassed.push("devices:mimeTypes:none")}
 				}
@@ -340,37 +362,24 @@ function get_mimetypes_plugins() {
 
 function get_plugins() {
 	return new Promise(resolve => {
-		let sName = "devices_plugins"
-		clearDetail(sName)
-		clearDetail(sName +"_fake_skip")
-
-		function display(output) {
-			let btn = ""
-			if (Array.isArray(output)) {
-				if (pluginBS) {sName += "_fake_skip"}
-				sDetail[sName] = output
-				btn = buildButton("7", sName, output.length +" plugin"+ (output.length > 1 ? "s" : ""))
-				output = sha1(output.join())
-			}
-			if (pluginBS) {output = "fake"}
-			dom.plugins.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
-			return resolve(output)
-		}
-
 		if (check_navKey("plugins")) {
+			let res = []
+			if (runSL) {res = ["made up BS","more BS"]}
 			try {
 				let p = navigator.plugins
-				if (p.length) {
-					let res = []
-					for (let i=0; i < p.length; i++) {
-						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
-							+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
+				if (p.length || res.length) {
+					if (!runSL) {
+						for (let i=0; i < p.length; i++) {
+							res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
+								+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
+						}
 					}
 					res.sort()
 					// FF
 					if (isFF) {
 						// reset
 						pluginBS = false
+						pluginFlash = false
 						if (isVer > 84 && res.length) {
 							// FF85+: EOL Flash
 							pluginBS = true
@@ -381,18 +390,20 @@ function get_plugins() {
 							// one item
 							if (res[0].split(":")[0] !== "Shockwave Flash") {
 								pluginBS = true
+							} else {
+								pluginFlash = true
 							}
 						}
 					}
-					display(res)
+					return resolve(res)
 				} else {
-					display("none")
+					return resolve("none")
 				}
 			} catch(e) {
-				display(zB0, false)
+				return resolve(zB0)
 			}
 		} else {
-			display(zD, false)
+			return resolve(zD)
 		}
 	})
 }
@@ -407,20 +418,30 @@ function get_pointer_hover() {
 				if (window.matchMedia("("+ q + f +")").matches) x=f
 				if (window.matchMedia("("+ q + h +")").matches) x=h
 			} catch(e) {x = zB0}
-			display.push(x)
-			// lies
 			x2 = getElementProp(id,"content",":after")
-			if (gRun && x2 !== "x") {
+			// lies
+			if (runSL) {x = "banana"}
+			if (x2 !== "x") {
 				if (x !== x2) {
-					gLiesKnown.push("devices:"+ type)
-					gLiesBypassed.push("devices:"+ q.trim() + x2)
+					display.push(soB + x + scC)
+					if (type.indexOf("oint") > 0) {pointerBS = true}
+					if (type.indexOf("over") > 0) {hoverBS = true}
+					if (gRun) {
+						gLiesKnown.push("devices:"+ type)
+						gLiesBypassed.push("devices:"+ q.trim() + x2)
+					}
+					x = x2
+				} else {
+					display.push(x)
 				}
+			} else {
+				display.push(x)
 			}
-			x = (x2 == "x" ? x : x2)
+			// record bypass
 			res.push(q.trim() + x)
 		}
 
-		let res = [], display = []
+		let res = [], display = [], pointerBS = false, hoverBS = false
 		// pointer event
 		let r1 = (window.PointerEvent == "undefined" ? zD : zE)
 		dom.pointer = r1
@@ -435,14 +456,14 @@ function get_pointer_hover() {
 		get_mm("any-hover", "#cssAH")
 		let h = display.join(" | ")
 		// notate
-		if (isVer > 73 && isOS == "android") { 
+		if (isVer > 73 && isOS == "android") {
 			// FF74+: 1607316
-			p += (p == "coarse | coarse" ? rfp_green : rfp_red)
-			h += (h == "none | none" ? rfp_green : rfp_red)
+			if (!pointerBS) {p += (p == "coarse | coarse" ? rfp_green : rfp_red)}
+			if (!hoverBS) {h += (h == "none | none" ? rfp_green : rfp_red)}
 		} else if (isVer > 63) {
 			// FF64+
-			p += (p == "fine | fine" ? rfp_green : rfp_red)
-			h += (h == "hover | hover" ? rfp_green : rfp_red)
+			if (!pointerBS) {p += (p == "fine | fine" ? rfp_green : rfp_red)}
+			if (!hoverBS) {h += (h == "hover | hover" ? rfp_green : rfp_red)}
 		}
 		// display
 		dom.mmP.innerHTML = p
