@@ -328,7 +328,7 @@ function get_mimetypes_plugins() {
 				dom.plugins.innerHTML = outputP + btnP + (outputP == "none" ? rfp_green : rfp_red)
 			}
 			// mimeTypes
-			let btnM = "", mValue = outputP
+			let btnM = "", mValue = outputM
 			sName = "devices_mimetypes"
 			if (Array.isArray(outputM)) {
 				if (mimeBS) {sName += "_fake_skip"}
