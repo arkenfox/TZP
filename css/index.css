@@ -25,12 +25,32 @@ body {background-color: #161b22; color: #b3b3b3;}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
 code {background: #303030 !important; border: 1px solid rgba(255, 255, 255, .1);
 	padding: 1px; border-radius: 2px;}
+code.lies {
+	background-color: rgba(255, 79, 79, 0.6) !important;
+	padding-left: 3px !important;
+	padding-right: 3px !important;
+	color: white;
+}
+code.bypass {
+	/* background-color: rgba(255, 79, 79, 0.7) !important; /* red */
+	/* background-color: rgba(167, 140, 220, 0.4) !important; /* purple */
+	/* background-color: rgba(140, 220, 140, 0.5) !important; /* green: test7 */
+	background-color: rgba(220, 140, 220, 0.5) !important; /* pink: test16 */
+	padding-left: 3px !important;
+	padding-right: 3px !important;
+	color: white;
+}
+
 a {color: black; text-decoration: none;}
 a.blue {color: #8ca7dc; text-decoration: none;}
 a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 1.2em}
 .no_color {color: #b3b3b3;}
 .hidden {display: none;}
-.offscreen {position: absolute; top: -2000%;}
+.offscreen {
+	position: absolute !important;
+	top: -2000% !important;
+	left: -2000px !important
+}
 .group {font-weight: bold;}
 .mono {font-family: monospace, "Courier New";}
 .strike {text-decoration: line-through;}
@@ -46,17 +66,17 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 
 .normalized {
 	font-family: none;
-  font-style: normal;
+	font-style: normal;
 	font-variant: normal;
-  font-weight: normal;
-  line-height: normal;
-  text-transform: none;
-  text-align: left;
-  text-decoration: none;
-  text-shadow: none;
-  white-space: normal;
-  word-break: normal;
-  word-spacing: normal;
+	font-weight: normal;
+	line-height: normal;
+	text-transform: none;
+	text-align: left;
+	text-decoration: none;
+	text-shadow: none;
+	white-space: normal;
+	word-break: normal;
+	word-spacing: normal;
 }
 #ugSpan {font-size: 10000%;}
 
