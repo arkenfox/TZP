@@ -116,10 +116,10 @@ const get_navKeys = () => new Promise(resolve => {
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// true/fake keys
+		if (runSL) {keys.push("iamfake")}
 		let trueKeys = keys
 		let lastKeyIndex = keys.length
 		let fakeKeys = []
-		if (runSL) {keys.push("iamfake")}
 		// orig minus constructor
 		let allKeys = keys
 		allKeys = allKeys.filter(x => !["constructor"].includes(x))
@@ -504,7 +504,13 @@ function log_section(name, time1, data) {
 				gLiesKnownDetail = {}
 				const names = Object.keys(sDetail).sort()
 				for (const k of names) if (sDetail[k].length) {
-					if (k.indexOf("skip") == -1) {gDetail[k] = sDetail[k]} else {gLiesKnownDetail[k] = sDetail[k]}
+					if (k.indexOf("skip") == -1) {
+						gDetail[k] = sDetail[k]
+					} else {
+						if (k.indexOf("reported") == -1) {
+							gLiesKnownDetail[k] = sDetail[k]
+						}
+					}
 				}
 				// lies: de-dupe/sort
 				let lieBtn = ""
@@ -521,7 +527,7 @@ function log_section(name, time1, data) {
 						+ buildButton("0", "known lies", lieStr, "showMetrics")
 						+ lieBtn
 				} else {
-					dom.knownhash.innerHTML = "none" //+lieBtn // ignore reported_skip
+					dom.knownhash.innerHTML = "none" +lieBtn
 				}
 				// display
 				gData.sort()
