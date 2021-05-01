@@ -249,50 +249,9 @@ function outputAudio1(runtype) {
 			]).then(function(hashes){
 				// sum
 				let sum = 0
-				let sumDetail = [], sumDecimals = []
 				for (let i=4500; i < 5000; i++) {
-					let value = Math.abs(getTest[i])
-					sumDetail.push(value)
-					sumDecimals.push(count_decimals(value))
 					sum += Math.abs(getTest[i])
 				}
-
-				/*
-				// analysis: seems as all values should be unique: i.e it should be 500
-				sumDetail = sumDetail.filter(function(item, position) {return sumDetail.indexOf(item) === position})
-				sumDetail.sort((a,b) => a-b)
-				let maxValue = sumDetail[sumDetail.length - 1]
-				let minValue = sumDetail[0]
-				sumDecimals = sumDecimals.filter(function(item, position) {return sumDecimals.indexOf(item) === position})
-				sumDecimals.sort((a,b) => a-b)
-				let maxDecimals = sumDecimals[sumDecimals.length -1]
-				let minDecimals = sumDecimals[0]
-				console.debug("AUDIO SUM details\n" + " - length: "+ sumDetail.length
-					+ "\n - range: " + minValue +" - " + maxValue + "\n", sumDetail)
-				console.debug("AUDIO SUM decimals\n" + " - length: "+ sumDecimals.length
-					+ "\n - range: " + minDecimals +" - " + maxDecimals + "\n", sumDecimals)
-				*/
-
-				/* windows
-
-				firefox: 35.7383295930922
-				normal   : range: 0.000056900084018707275 - 0.11375368386507034, decimals 15-21 (6: 20 not used)
-				CB       : no real change
-				Chameleon: no real change (decimal upper is 20?)
-				Cydec    : range: 0.8862889409065247 - 3.112492561340332, decimals vary e.g. 13-16 (4) 12-16 (5)
-							   : lower range is always 0.88... and upper is always 3.11...
-							   : sum is always massive!!
-
-				chromium: 124.04347527516074
-				normal     : range: 0.0000786015298217535 - 0.3947939872741699, decimals 14-19
-				BraveShield: range: 0.002402970567345619 - 0.09917338937520981, decimals 14-19
-				           : ^ brave sum is always way too low?
-				Cydec      : range: 0.6086360812187195 - 3.39457106590271
-							     : sum is always massive!! e.g. 950+
-
-				*/
-
-				// cary on
 				section.push("sum:"+ sum)
 				dom.audioSum = sum
 				pxi_compressor.disconnect()

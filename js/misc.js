@@ -21,9 +21,11 @@ function get_iframe_props() {
 	let sTrue = "misc_iframe_window_properties"
 	let sFake = sTrue + "_fake_skip"
 	let sSuspect = sTrue + "_suspect_skip"
+	let sAll = sTrue + "_reported_skip"
 	clearDetail(sTrue)
 	clearDetail(sFake)
 	clearDetail(sSuspect)
+	clearDetail(sAll)
 
 	let knownGood = [
 		// acculumative
@@ -59,6 +61,13 @@ function get_iframe_props() {
 		// remove
 		iframe.parentNode.removeChild(iframe)
 		// lies
+		if (runSL) {
+			props.push("hdcd_canvas_getctx")
+			props.push("serviceWorker")
+		}
+		// original
+		let allProps = props
+		sDetail[sAll] = allProps
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
 		if (isFF) {
 			// suspect
@@ -83,9 +92,14 @@ function get_iframe_props() {
 			}
 		}
 		// sort (open console can affect order) + output
+		// real
 		props.sort()
 		sDetail[sTrue] = props
-		let output = sha1(props.join()) + buildButton("18", sTrue, props.length) + suspectStr + fakeStr
+		// display
+		allProps.sort()
+		let output = sha1(allProps.join())
+		if (fakeProps.length) {output = soB + output + scC}
+		output += buildButton("18", sAll, sDetail[sAll].length) + suspectStr + fakeStr
 		dom.iProps.innerHTML = output
 		r= sha1(props.join())
 	} catch(e) {
@@ -118,31 +132,35 @@ function get_nav_prototype() {
 	// use global
 	let sTrue = "misc_navigator_keys"
 	let sFake = "misc_navigator_keys_fake_skip"
+	let sAll = "misc_navigator_keys_reported_skip"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
+	sDetail[sAll] = navKeys["allKeys"]
+	let lieLength = navKeys["fakeKeys"].length,
+		fakeStr = ""
 	// output
-	let hash = zB0
+	let realhash = zB0
 	if (navKeys["trueKeys"]) {
-		hash = sha1(navKeys["trueKeys"].join())
+		let hash = sha1(navKeys["allKeys"].join())
+		realhash = sha1(navKeys["trueKeys"].join())
 		// fake
-		let lieLength = navKeys["fakeKeys"].length,
-			fakeStr = ""
 		if (lieLength) {
 			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
 			if (gRun) {
 				gLiesKnown.push("misc:navigator keys")
-				gLiesBypassed.push("misc:navigator keys:"+hash)
+				gLiesBypassed.push("misc:navigator keys:"+realhash)
 			}
 		}
 		// display
-		let display = hash + buildButton("18", sTrue, navKeys["trueKeys"].length)
-		dom.nProto.innerHTML = display + fakeStr
+		let display = hash
+		if (lieLength) {display = soB + hash + scC}
+		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr
 	} else {
-		dom.nProto = hash
+		dom.nProto = realhash
 	}
-	return "navigator_keys:"+ hash
+	return "navigator_keys:"+ realhash
 }
 
 function get_recursion() {
@@ -185,38 +203,47 @@ function get_reporting_api() {
 }
 
 function get_perf1() {
-	if (isRFP) {
-		dom.perf1.innerHTML = "0, 0, 0, 0" + rfp_green
-		return "perf_mark:zero"
-	} else {
-		let r1 = ""
-		try {
-			performance.mark("test")
-			if (performance.mark === undefined) {
-				r1 = zNA
-			} else {
-					performance.mark("a")
-					r1 = performance.getEntriesByName("a","mark").length
-						+", "+ performance.getEntries().length
-						+", "+ performance.getEntries({name:"a", entryType:"mark"}).length
-						+", "+ performance.getEntriesByName("a","mark").length
-					performance.clearMarks()
-			}
-		} catch(e) {r1 = zB0}
-		let isZero = (r1 == "0, 0, 0, 0")
-		if (isFF) {
-			// lies
-			if (gRun && isZero) {
-				gLiesKnown.push("misc:performance.mark")
-				gLiesBypassed.push("misc:performance.mark:not zero")
-			}
-			dom.perf1.innerHTML = (isZero ? "fake" : r1) + rfp_red
-			return "perf_mark:not zero"
+	let control = "0, 0, 0, 0",
+		isLies = false,
+		test = ""
+	// get result
+	try {
+		performance.mark("test")
+		if (performance.mark === undefined) {
+			test = zNA
 		} else {
-			dom.perf1.innerHTML = r1
-			return "perf_mark:"+ (isZero ? "zero" : "not zero")
+				performance.mark("a")
+				test = performance.getEntriesByName("a","mark").length
+					+", "+ performance.getEntries().length
+					+", "+ performance.getEntries({name:"a", entryType:"mark"}).length
+					+", "+ performance.getEntriesByName("a","mark").length
+				performance.clearMarks()
 		}
+	} catch(e) {test = zB0}
+	// simulate
+	if (runSL && isFF) {
+		if (isRFP) {test = "1, 4, 4, 1"} else {test = control}
 	}
+	// compare
+	let value = (test == control ? "zero" : "not zero")
+	if (isRFP) {
+		value = "zero"
+		if (control !== test) {isLies = true}
+	} else if (isFF) {
+		value = "not zero"
+		if (control == test) {isLies = true}
+	}
+	// display
+	if (isLies) {
+		if (gRun) {
+			gLiesKnown.push("misc:performance.mark")
+			gLiesBypassed.push("misc:performance.mark:"+value)
+		}
+		dom.perf1.innerHTML = soB + test + scC
+	} else {
+		dom.perf1.innerHTML = test + (test == control ? rfp_green : rfp_red)
+	}
+	return "perf_mark:"+value
 }
 
 function get_perf2() {
@@ -232,10 +259,22 @@ function get_perf2() {
 			i++
 		} else {
 			clearInterval(check)
+			let display = times.join(", ")
+			// simulate
+			if (runSL) {
+				isPerf = false
+				if (isRFP) {
+					display = "21, 35, 49, 62, 76, 88, 1, 15, 28, 41"
+				} else {
+					display = "0, 0, 0, 0, 0, 0, 0, 0, 0, 0"
+				}
+			}
+			// control
 			if (isPerf) {
-				dom.perf2.innerHTML = (result ? "100 ms"+ rfp_green : times.join(", ") + rfp_red)
+				dom.perf2.innerHTML = (result ? "100 ms"+ rfp_green : display + rfp_red)
 			} else {
-				dom.perf2.innerHTML = (result ? "fake" : times.join(", ")) + rfp_red
+				display = (isFF ? soB : soL) + display + scC
+				dom.perf2.innerHTML = display
 			}
 		}
 	}

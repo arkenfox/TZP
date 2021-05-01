@@ -105,7 +105,7 @@ function reset_fonts() {
 	}
 	dom.ug10.innerHTML = fntHead + r
 	// fpjs2: hide/color: dont shrink elements
-	if (isOS !== "") {
+	if (isFF && isOS !== "") {
 		dom.fontLabel = "...pending..."
 		dom.fontFound.style.color = zhide
 	}
@@ -754,7 +754,7 @@ function get_woff() {
 
 function outputFontsFB() {
 	// IDK why, but when blocking document fonts: we need a primer and a delay
-	if (isOS !== "") {
+	if (isFF && isOS !== "") {
 		dom.fontFB.innerHTML = "test is running... please wait"
 		dom.fontFBlabel = "...pending..."
 		dom.fontFBFound.style.color = zhide
@@ -784,9 +784,7 @@ function outputFonts() {
 		dom.fontShow.style.display = "none"
 	}
 	set_fallback_string()
-	if (isFF && fntList.length == 0) {
-	set_fntList()
-	}
+	if (isFF && fntList.length == 0) {set_fntList()}
 
 	// proportional
 	r = window.getComputedStyle(document.body,null).getPropertyValue("font-family")

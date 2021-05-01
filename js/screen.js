@@ -2540,8 +2540,18 @@ function goNW() {
 	// default output
 	newWinLeak = iw +" x "+ ih +" [inner] "+ ow +" x "+ oh +" [outer]"
 
-	// DESKTOP
-	if (isOS !== "android") {
+	if (isOS == "android") {
+		// FF-ANDROID
+		if (ih > firstH) {
+			// firstH s/be with the toolbar
+			newWinLeak = iw +" x "+ ih +" [inner] [toolbar hidden] "+ ow +" x "+ oh +" [outer]"
+		} else if (ih == firstH) {
+			// should be the same
+			newWinLeak = iw +" x "+ ih +" [inner] [toolbar visible] "+ ow +" x "+ oh +" [outer]"
+		}
+		dom.newWinLeak.innerHTML = newWinLeak
+	} else {
+		// FF-DESKTOP (and non-FF)
 		function check_newwin() {
 			let diffsi = [], // 4 inner sizes
 				diffso = [], // 4 outer sizes
@@ -2591,17 +2601,6 @@ function goNW() {
 			n++
 		}
 		let checking = setInterval(build_newwin, 3)
-	}
-	// ANDROID
-	if (isOS == "android") {
-		if (ih > firstH) {
-			// firstH s/be with the toolbar
-			newWinLeak = iw +" x "+ ih +" [inner] [toolbar hidden] "+ ow +" x "+ oh +" [outer]"
-		} else if (ih == firstH) {
-			// should be the same
-			newWinLeak = iw +" x "+ ih +" [inner] [toolbar visible] "+ ow +" x "+ oh +" [outer]"
-		}
-		dom.newWinLeak.innerHTML = newWinLeak
 	}
 }
 

@@ -115,9 +115,16 @@ const get_navKeys = () => new Promise(resolve => {
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		// true/fake keys
 		let trueKeys = keys
 		let lastKeyIndex = keys.length
 		let fakeKeys = []
+		if (runSL) {keys.push("iamfake")}
+		// orig minus constructor
+		let allKeys = keys
+		allKeys = allKeys.filter(x => !["constructor"].includes(x))
+		navKeys["allKeys"] = allKeys
+
 		if (isFF) {
 			// constructor is always last
 			lastKeyIndex = keys.indexOf("constructor")
@@ -125,7 +132,7 @@ const get_navKeys = () => new Promise(resolve => {
 			fakeKeys = keys.slice(lastKeyIndex+1)
 		} else if (isEngine == "blink") {
 			// last key inconsistent
-			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
+			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu","iamfake"]
 			trueKeys = keys.filter(x => !knownPoison.includes(x))
 			fakeKeys = keys.filter(x => knownPoison.includes(x))
 		}
@@ -610,6 +617,7 @@ function outputSection(id, cls) {
 		gLiesBypassed = []
 		gLiesKnown = []
 		gLiesKnownDetail = {}
+		gLiesMethods = []
 		// reset section/current
 		protoLies = []
 		sData = {}

@@ -9,6 +9,7 @@ let jsFiles = [],
 	gLiesKnown = [], // we only ever add if gRun
 	gLiesKnownDetail = {},
 	gLiesBypassed = [],
+	gLiesMethods = [], // blocks, FPing techniques
 	gCheck = [],
 	gCount = 0,
 	gData = [],
@@ -54,6 +55,9 @@ let avh = "",
 	s17 = s0+"s17'>",
 	s18 = s0+"s18'>",
 	sc = "</span>",
+	soL = "<span><code class='lies'>", // span open lies
+	soB = "<span><code class='bypass'>", // span open bypass
+	scC = "</code></span>", // close span+code
 // show/hide text colors
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
@@ -77,6 +81,7 @@ let avh = "",
 	zSDK = "Firefox"+ s3+"[winsdk]"+sc,
 	zSIM = " [sim]",
 	zNEW = sb+"[NEW]"+sc,
+	zLIE = "untrustworthy",
 // notes
 	tb_green = sg+"[TB]"+sc,
 	tb_red = sb+"[TB]"+sc,
@@ -139,4 +144,5 @@ let avh = "",
 	logResize = false,
 	logStorage = false,
 	runS = false, // simulate
+	runSL = false, // simulate lies
 	skipFF = true // skip extra isFF tests
