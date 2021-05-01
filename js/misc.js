@@ -154,7 +154,7 @@ function get_nav_prototype() {
 			}
 		}
 		// display
-		let display = hash,
+		let display = hash
 		let btn = buildButton("18", sTrue, navKeys["trueKeys"].length)
 		if (lieLength) {
 			display = soB + hash + scC
