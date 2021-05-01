@@ -154,9 +154,13 @@ function get_nav_prototype() {
 			}
 		}
 		// display
-		let display = hash
-		if (lieLength) {display = soB + hash + scC}
-		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr
+		let display = hash,
+		let btn = buildButton("18", sTrue, navKeys["trueKeys"].length)
+		if (lieLength) {
+			display = soB + hash + scC
+			btn = buildButton("18", sAll, navKeys["allKeys"].length)
+		}
+		dom.nProto.innerHTML = display + btn + fakeStr
 	} else {
 		dom.nProto = realhash
 	}
