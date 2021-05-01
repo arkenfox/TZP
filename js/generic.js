@@ -522,7 +522,7 @@ function log_section(name, time1, data) {
 						+ buildButton("0", "known lies", lieStr, "showMetrics")
 						+ lieBtn
 				} else {
-					dom.knownhash = "none" + lieBtn
+					dom.knownhash.innerHTML = "none" //+lieBtn // ignore reported_skip
 				}
 				// display
 				gData.sort()
