@@ -234,21 +234,25 @@ function get_mm_css() {
 				if (window.matchMedia("("+ q + n +")").matches) {x = n}
 			} catch(e) {x = zB0}
 			// notate/display
+			if (runSL) {x = "apple"}
 			let display = x
-			if (version !== undefined) {
+			// lies
+			x2 = getElementProp("#css"+ id,"content",":after")
+			if (x2 !== "x") {
+				if (x !== x2) {
+					display = soB + x + scC
+					if (gRun) {
+						gLiesKnown.push("css:"+ type)
+						gLiesBypassed.push("css:"+ q.trim() + x2)
+					}
+				}
+			}
+			if (version !== undefined && x2 == x) {
 				if (isVer >= version) {
 					display += (x == expected ? rfp_green : rfp_red)
 				}
 			}
 			document.getElementById("mm"+id).innerHTML = display
-			// lies
-			x2 = getElementProp("#css"+ id,"content",":after")
-			if (gRun && x2 !== "x") {
-				if (x !== x2) {
-					gLiesKnown.push("css:"+ type)
-					gLiesBypassed.push("css:"+ q.trim() + x2)
-				}
-			}
 			x = (x2 == "x" ? x : x2)
 			res.push(q.trim() + x)
 		}
