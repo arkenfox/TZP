@@ -117,6 +117,7 @@ const get_navKeys = () => new Promise(resolve => {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// true/fake keys
 		let trueKeys = keys
+		console.debug(trueKeys)
 		let lastKeyIndex = keys.length
 		let fakeKeys = []
 		if (runSL) {keys.push("iamfake")}
