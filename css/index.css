@@ -17,13 +17,15 @@
 	--test16: #dc8cdc;
 	--test17: #dc8cc1;
 	--test18: #dc8ca7;
-	--test99: #808080; /* debugging */
+	--test99: #808080;
 }
 
 /* main */
 body {background-color: #161b22; color: #b3b3b3;}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
-code {background: #303030 !important; border: 1px solid rgba(255, 255, 255, .1);
+code {
+	background: #41424d !important; /* was #303030 */
+	border: 1px solid rgba(255, 255, 255, .1);
 	padding: 1px; border-radius: 2px;}
 code.lies {
 	background-color: rgba(255, 79, 79, 0.6) !important;
@@ -32,10 +34,7 @@ code.lies {
 	color: white;
 }
 code.bypass {
-	/* background-color: rgba(255, 79, 79, 0.7) !important; /* red */
-	/* background-color: rgba(167, 140, 220, 0.4) !important; /* purple */
-	/* background-color: rgba(140, 220, 140, 0.5) !important; /* green: test7 */
-	background-color: rgba(220, 140, 220, 0.5) !important; /* pink: test16 */
+	background-color: rgba(167, 140, 220, 0.2) !important; /* purple */
 	padding-left: 3px !important;
 	padding-right: 3px !important;
 	color: white;
