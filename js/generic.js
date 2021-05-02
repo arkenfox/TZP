@@ -115,31 +115,43 @@ const get_navKeys = () => new Promise(resolve => {
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		// true/fake keys
-		if (runSL) {keys.push("iamfake")}
+		// simulate
+		if (runSL) {
+			keys.push("iamfake") // add fake
+			keys = keys.filter(x => !["buildID"].includes(x)) // remove expected
+		}
+		// true/fake/original keys
 		let trueKeys = keys
 		let lastKeyIndex = keys.length
 		let fakeKeys = []
-		// orig minus constructor
 		let allKeys = keys
-		allKeys = allKeys.filter(x => !["constructor"].includes(x))
-		navKeys["allKeys"] = allKeys
 		if (isFF) {
 			// constructor is always last
+			// track added keys
 			lastKeyIndex = keys.indexOf("constructor")
 			trueKeys = keys.slice(0, lastKeyIndex+1)
 			fakeKeys = keys.slice(lastKeyIndex+1)
+			// track missing keys: onLine incl because this is served over HTTPS
+			let expectedKeys = ["appCodeName","appName","buildID","hardwareConcurrency",
+				"language","languages","mimeTypes","onLine","oscpu","platform","plugins",
+				"product","productSub","userAgent","vendor","vendorSub"]
+			let missingKeys = expectedKeys.filter(x => !keys.includes(x))
+			trueKeys = trueKeys.concat(missingKeys)
+			fakeKeys = fakeKeys.concat(missingKeys)
 		} else if (isEngine == "blink") {
 			// last key inconsistent
-			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu","iamfake"]
-			trueKeys = keys.filter(x => !knownPoison.includes(x))
-			fakeKeys = keys.filter(x => knownPoison.includes(x))
+			let poisonKeys = ["activeVRDisplays","buildID","getVRDisplays","iamfake",
+				"oscpu","SharedWorker","Worker"]
+			trueKeys = keys.filter(x => !poisonKeys.includes(x))
+			fakeKeys = keys.filter(x => poisonKeys.includes(x))
 		}
 		// remove constructor
 		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
+		allKeys = allKeys.filter(x => !["constructor"].includes(x))
 		// set
-		navKeys["trueKeys"] = trueKeys
-		navKeys["fakeKeys"] = fakeKeys
+		navKeys["trueKeys"] = trueKeys.sort()
+		navKeys["fakeKeys"] = fakeKeys.sort()
+		navKeys["allKeys"] = allKeys.sort()
 		// set brave
 		isBraveMode = "unknown"
 		if (check_navKey("brave")) {
