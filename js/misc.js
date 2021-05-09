@@ -45,6 +45,9 @@ function get_iframe_props() {
 		// ScriptSafe
 		'Array','HTMLDivElement',
 	]
+	if (isTB) {
+		knownGood.push('HTMLObjectElement', 'MediaSource', 'URL', 'webkitURL')
+	}
 
 	let r
 	try {
@@ -149,6 +152,7 @@ function get_nav_prototype() {
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
 			if (gRun) {
+				// ToDo: only record bypass if it knownGood passes
 				gLiesKnown.push("misc:navigator keys")
 				gLiesBypassed.push("misc:navigator keys:"+realhash)
 			}
