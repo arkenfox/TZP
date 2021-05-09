@@ -41,6 +41,7 @@
 		</td></tr>
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
+		<tr><td>90</td><td id="n90"></td><td class="c mono" id="v90"></td></tr>
 		<tr><td>89</td><td id="n89"></td><td class="c mono" id="v89"></td></tr>
 		<tr><td>88</td><td id="n88"></td><td class="c mono" id="v88"></td></tr>
 		<tr><td>88</td><td id="n88a"></td><td class="c mono" id="v88a"></td></tr>
@@ -119,6 +120,18 @@ function outputVersion() {
 		document.getElementById("v"+id).innerHTML = result +" ("+ perf +" ms)"
 		if (bug !== "") {document.getElementById("n"+id).innerHTML = strA + bug + strB + bug + strC}
 	}
+
+	// 90: 1520434
+	let t90 = performance.now(), ver90 = xF
+	try {
+		var share90 = new ArrayBuffer(4096)
+		let test90 = new Int32Array(share90, 7)
+	} catch(e) {
+		// 90: start offset of Int32Array should be a multiple of 4
+		// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
+		if (e.message.substr(0,1) == "s") {ver90 = xS}
+	}
+	output("90", "1520434", ver90, performance.now()-t90)
 
 	// 89: 1703213
 	let t89 = performance.now(), ver89 = xF
