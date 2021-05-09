@@ -309,11 +309,19 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 89) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 90) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //89:1703213
+	function start() { // 90: 1520434
+		try {
+			var share90 = new ArrayBuffer(4096)
+			let test90 = new Int32Array(share90, 7)
+		} catch(e) {
+			if (e.message.substr(0,1) == "s") {output(90)} else {v89()}
+		}
+	}
+	function v89() { //89:1703213
 		try {
 			let x = dom.ctrl89.offsetHeight, y = dom.test89.offsetHeight
 			if (x/y > 0.85) {output(89)} else {v88()}
