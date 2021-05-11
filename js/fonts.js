@@ -496,55 +496,62 @@ const spawn = (function() {
 })()
 
 function get_fallback(list) {
-	// list passed as we need to do a priming run
+	// list passed for priming run
 	/* https://github.com/arthuredelstein/tordemos */
-	let width0 = null,
-		t = dom.fontFBTest,
-		outputB = dom.fontFB,
-		outputD = dom.fontFBFound,
-		t0 = performance.now()
-	// measure
-	let measure = function(font) {
-		t.style.fontSize = "256px"
-		t.style.fontStyle = "normal"
-		t.style.fontWeight = "normal"
-		t.style.letterSpacing = "normal"
-		t.style.lineBreak = "auto"
-		t.style.lineHeight = "normal"
-		t.style.textTransform = "none"
-		t.style.textAlign = "left"
-		t.style.textShadow = "none"
-		t.style.wordSpacing = "normal"
-		t.style.fontFamily = font
-		return t.offsetWidth
-	}
-	// compare
-	let present = function(font) {
-		width0 = width0 || measure("fontFallback")
-		let width1 = measure("'"+ font +"', fontFallback")
-		return width0 !== width1
-	}
-	// detect
-	let found = []
-	let enumerate = function(possible) {
-		for (let font of possible) {if (present(font)) {found.push(font)}}
-	}
-	// run
-	fontFBTest.innerHTML = fntStrB
-	enumerate(list)
-	dom.fontFBTest = ""
-	// output based on second result
-	if (list.length > 2) {
-		let hash = sha1(found.join())
-		dom.fontFBlabel = hash
-		dom.fontFB.innerHTML = hash + s12 +"["+ found.length +"/"+ fntList.length +"]"+ sc
-		dom.fontFBFound.innerHTML = (found.length ? found.join(", ") : "no fonts detected")
-		// unhide style
-		dom.fontFBFound.style.color = zshow
-		// cleanup details
-		if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
-		// perf
-		log_click("font fallback",t0)
+	try {
+		let width0 = null,
+			t = dom.fontFBTest,
+			outputB = dom.fontFB,
+			outputD = dom.fontFBFound,
+			t0 = performance.now()
+		// measure
+		let measure = function(font) {
+			t.style.fontSize = "256px"
+			t.style.fontStyle = "normal"
+			t.style.fontWeight = "normal"
+			t.style.letterSpacing = "normal"
+			t.style.lineBreak = "auto"
+			t.style.lineHeight = "normal"
+			t.style.textTransform = "none"
+			t.style.textAlign = "left"
+			t.style.textShadow = "none"
+			t.style.wordSpacing = "normal"
+			t.style.fontFamily = font
+			return t.offsetWidth
+		}
+		// compare
+		let present = function(font) {
+			width0 = width0 || measure("fontFallback")
+			let width1 = measure("'"+ font +"', fontFallback")
+			return width0 !== width1
+		}
+		// detect
+		let found = []
+		let enumerate = function(possible) {
+			for (let font of possible) {if (present(font)) {found.push(font)}}
+		}
+		// run
+		fontFBTest.innerHTML = fntStrB
+		enumerate(list)
+		dom.fontFBTest = ""
+		// output based on second result
+		if (list.length > 2) {
+			let hash = sha1(found.join())
+			dom.fontFBlabel = hash
+			dom.fontFB.innerHTML = hash + s12 +"["+ found.length +"/"+ fntList.length +"]"+ sc
+			dom.fontFBFound.innerHTML = (found.length ? found.join(", ") : "no fonts detected")
+			// unhide style
+			dom.fontFBFound.style.color = zshow
+			// cleanup details
+			if (stateFNT == true) {showhide("table-row","F1","&#9650; hide")}
+			// perf
+			log_click("font fallback",t0)
+			gClick = true
+		}
+	} catch(e) {
+		if (list.length > 2) {
+			gClick = true
+		}
 	}
 }
 
@@ -755,20 +762,23 @@ function get_woff() {
 function outputFontsFB() {
 	// IDK why, but when blocking document fonts: we need a primer and a delay
 	if (isFF && isOS !== "") {
-		dom.fontFB.innerHTML = "test is running... please wait"
-		dom.fontFBlabel = "...pending..."
-		dom.fontFBFound.style.color = zhide
-		// set interval allows ^^ to paint
-		function run_primer() {
-			clearInterval(checking)
-			get_fallback(['orange','banana']) // primer
-			function run_real() {
-				get_fallback(fntList)
-				clearInterval(checking2)
+		if (gClick) {
+			gClick = false
+			dom.fontFB.innerHTML = "test is running... please wait"
+			dom.fontFBlabel = "...pending..."
+			dom.fontFBFound.style.color = zhide
+			// set interval allows ^^ to paint
+			function run_primer() {
+				clearInterval(checking)
+				get_fallback(['orange','banana']) // primer
+				function run_real() {
+					get_fallback(fntList)
+					clearInterval(checking2)
+				}
+				let checking2 = setInterval(run_real, 25)
 			}
-			let checking2 = setInterval(run_real, 25)
+			let checking = setInterval(run_primer, 1)
 		}
-		let checking = setInterval(run_primer, 1)
 	}
 }
 
@@ -848,6 +858,8 @@ function prime_unicode() {
 		dom.unicodePrimer.innerHTML = str
 		fntStart = performance.now()
 		// ToDo: unicode priming: enough time on slow systems?
+		// ToDo: does the font fallback string also need priming?
+		// ToDo: set these directly in the HTML
 	} catch(e) {
 		console.error(e.name, e.message)
 	}
