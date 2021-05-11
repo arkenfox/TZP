@@ -94,6 +94,7 @@
 			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>prototype lies <sup>1</sup></td><td class="c mono" id="prototypehash"></td></tr>
 		<tr><td>known lies</td><td class="c mono" id="knownhash"></td></tr>
+		<tr><td>methods</td><td class="c mono" id="knownmethods"></td></tr>
 		<tr><td colspan="3"><span class="no_color">prototype lies code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
 	</table>
@@ -252,6 +253,9 @@
 		<tr><td><a class="blue" target="blank" href="tests/versions.html">[PoC]</a>
 			&nbsp <div class="ttip"><span class="icon">[ i ]</span> <span class="ttxt">Firefox 60+ only</span></div>
 			&nbsp [feature detection] version</td><td class="c" id="fdVersion"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtx">Firefox 89+<br>javascript.options.large_arraybuffers</span>
+			</div> &nbsp [architecture] os</td><td class="c" id="fdArchOS"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
 		<tr><td>[math] os</td><td class="c" id="fdMathOS"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">Linux, Mac or Windows<br>
@@ -668,7 +672,7 @@
 		<tr><td>copyFromChannel <sup>1</sup></td><td class="c mono" id="audioCopy"></td></tr>
 		<tr><td>sum <sup>1</sup></td><td class="c mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn0 btn" onClick="outputSection(`11`, `c2`)">[ click here ]</span>
+		<tr><td><span class="btn0 btn" onClick="outputAudio2()">[ click here ]</span>
 			hash</td><td class="faint c2 mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
@@ -721,7 +725,7 @@
 		<tr id="togUG"><td>[getClientRects] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
 		<tr><td>[textmetrics] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug2"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">gfx.downloadable_fonts.woff2.enabled<br>Firefox 68 or lower</span></div>
+			<span class="ttxtx">Firefox 68 or lower<br>gfx.downloadable_fonts.woff2.enabled</span></div>
 			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
 		<!--details: fonts-->
 		<tr id="fontShow"><td colspan="2" class="showhide">

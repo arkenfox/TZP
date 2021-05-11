@@ -112,6 +112,10 @@ function check_navKey(property) {
 const get_navKeys = () => new Promise(resolve => {
 	// reset
 	navKeys = {}
+	// simulate
+	if (runSL && navigator.brave) {
+		delete Navigator.prototype.brave;
+	}
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -152,14 +156,34 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["trueKeys"] = trueKeys.sort()
 		navKeys["fakeKeys"] = fakeKeys.sort()
 		navKeys["allKeys"] = allKeys.sort()
-		// set brave
+
+		// get isBrave if not already
+		let bYes = [], bNo = []
+		if (!isFF & !isBrave) {
+			let bList = ['binance','bookmarks','braveRewards','braveTheme','cryptoDotCom','gemini','greaselion','topSites']
+			bList.forEach(function(item) {
+				if (item in chrome) {bYes.push("chrome."+ item)} else {bNo.push("chrome."+ item)}
+			})
+			if (check_navKey("brave")) {bYes.push("navigator.brave")} else {bNo.push("navigator.brave")}
+			if (typeof navigator.brave.isBrave == "function") {bYes.push("navigator.brave.isBrave")} else {bNo.push("navigator.brave.isBrave")}
+			console.debug("YES", bYes)
+			console.debug("NO", bNo)
+			if (bYes.length) {
+				isBrave = true
+				if (bNo.length && gRun) {
+					// record attempted lies and bypass
+					//console.debug("you tried to lie about being brave")
+				}
+			}
+		}
+		// get isBraveMode
 		isBraveMode = "unknown"
-		if (check_navKey("brave")) {
+		if (isBrave) {
+			let t0 = performance.now()
 			isBrave = true
 			Promise.all([
 				get_isBraveMode(),
 			]).then(function(results){
-				isBraveMode = results[0]
 				return resolve()
 			})
 		} else {
@@ -376,6 +400,8 @@ function showMetrics(type) {
 			showhash = true
 		if (type == "known lies") {
 			array = gLiesKnown
+		} else if (type == "known methods") {
+			array = gLiesMethods
 		} else if (type == "fingerprint") {
 			array = gData
 		} else if (type == "prototype lies") {
@@ -541,6 +567,15 @@ function log_section(name, time1, data) {
 				} else {
 					dom.knownhash.innerHTML = "none" +lieBtn
 				}
+				// methods
+				if (gLiesMethods.length) {
+					gLiesMethods.sort()
+					let methodStr = gLiesMethods.length +" occurence"+ (gLiesMethods.length > 1 ? "s" : "")
+					let methodBtn = buildButton("0", "known methods", methodStr, "showMetrics")
+					dom.knownmethods.innerHTML = sha1(gLiesMethods.join()) + methodBtn
+				} else {
+					dom.knownmethods = "none"
+				}
 				// display
 				gData.sort()
 				dom.allhash.innerHTML = sha1(gData.join())
@@ -555,6 +590,7 @@ function log_section(name, time1, data) {
 						console.error("section hash issues\n", gCheck)
 					}
 				}
+				gClick = true
 			}
 		}
 	} else {}	// !ARRAY
@@ -574,6 +610,7 @@ function log_section(name, time1, data) {
 		if (name !== "prereq") {
 			el = dom.perfS
 			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
+			gClick = true
 		}
 	}
 }
@@ -607,107 +644,108 @@ function countJS(filename) {
 }
 
 function outputSection(id, cls) {
-	if (cls == undefined || cls == "") {cls = "c"}
-	let delay = 100
-
-	if (id == "load") {
-		// skip clear/reset
-		id = "all"
-		gRun = true
-		delay = 1
-	} else if (id == "all") {
-		gRun = true
-		// clear/reset
-		let items = document.getElementsByClassName("c")
-		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
-		items = document.getElementsByClassName("gc")
-		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
-		// hide font fallback rows
-		dom.fontFBlabel = ""
-		items = document.getElementsByClassName("togF2")
-		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		// reset global
-		gCount = 0
-		gData = []
-		gCheck = []
-		gDetail = {}
-		gLiesBypassed = []
-		gLiesKnown = []
-		gLiesKnownDetail = {}
-		gLiesMethods = []
-		// reset section/current
-		protoLies = []
-		sData = {}
-		sDetail = {}
-		// reset perf
-		gPerf = []
-		gPerfDetail = []
-		sPerfDetail = []
-		dom.perfG = ""
-		dom.perfS = ""
-	} else {
-		// clear: &nbsp stops line height jitter
-		let tbl = document.getElementById("tb"+ id)
-		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
-		gRun = false
-	}
-
-	// hide stuff so it doesn't shrink/grow
-	if (id=="all" || id=="1") {dom.kbt.value = ""}
-	if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
-	if (id=="all" || id=="8") {reset_domrect()}
-	if (id=="11" && cls=="c2") {reset_audio2()}
-	if (id=="all" || id=="12") {reset_fonts()}
-	if (id=="18") {dom.mathmltest.style.color = zhide}
-
-	function output() {
-		// section timer
-		if (!gRun) {gt0 = performance.now()}
-		// section only
-		if (id=="1") {outputScreen("screen")}
-		if (id=="2") {outputUA()}
-		if (id=="3") {outputFD()}
-		if (id=="11" && cls=="c") {outputAudio1()}
-		if (id=="11" && cls=="c2") {outputAudio2()}
-		// combine 1,2,3
-		if (id=="all") {outputStart()}
-		// stagger
-		setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next
-		setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-		setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last
-		setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
-	}
-
-	if (gRun) {
-		if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
-	} else {
-		// section
-		const aNames = ['screen','x','fd','x','x','x','devices','x',
-			'canvas','webgl','x','fonts','media','css','x','x','x','x']
-		const aNumber = (id * 1) - 1
-		let sectionName = aNames[aNumber]
-		if (sectionName !== "x" && sPerfDetail.length) {
-			log_line("line")
+	if (gClick) {
+		gClick = false
+		if (cls == undefined || cls == "") {cls = "c"}
+		let delay = 100
+		if (id == "load") {
+			// skip clear/reset
+			id = "all"
+			gRun = true
+			delay = 1
+		} else if (id == "all") {
+			gRun = true
+			// clear/reset
+			let items = document.getElementsByClassName("c")
+			for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+			items = document.getElementsByClassName("gc")
+			for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+			// hide font fallback rows
+			dom.fontFBlabel = ""
+			items = document.getElementsByClassName("togF2")
+			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+			// reset global
+			gCount = 0
+			gData = []
+			gCheck = []
+			gDetail = {}
+			gLiesBypassed = []
+			gLiesKnown = []
+			gLiesKnownDetail = {}
+			gLiesMethods = []
+			// reset section/current
+			protoLies = []
+			sData = {}
+			sDetail = {}
+			// reset perf
+			gPerf = []
+			gPerfDetail = []
+			sPerfDetail = []
+			dom.perfG = ""
+			dom.perfS = ""
+		} else {
+			// clear: &nbsp stops line height jitter
+			let tbl = document.getElementById("tb"+ id)
+			tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+			gRun = false
 		}
+
+		// hide stuff so it doesn't shrink/grow
+		if (id=="all" || id=="1") {dom.kbt.value = ""}
+		if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
+		if (id=="all" || id=="8") {reset_domrect()}
+		if (id=="all" || id=="12") {reset_fonts()}
+		if (id=="18") {dom.mathmltest.style.color = zhide}
+
+		function output() {
+			// section timer
+			if (!gRun) {gt0 = performance.now()}
+			// section only
+			if (id=="1") {outputScreen("screen")}
+			if (id=="2") {outputUA()}
+			if (id=="3") {outputFD()}
+			if (id=="11" && cls=="c") {outputAudio1()}
+			if (id=="11" && cls=="c2") {outputAudio2()}
+			// combine 1,2,3
+			if (id=="all") {outputStart()}
+			// stagger
+			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next
+			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last
+			setTimeout(function() {if (id=="all") {outputAudio1("load")}}, 1)
+		}
+
+		if (gRun) {
+			if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
+		} else {
+			// section
+			const aNames = ['screen','x','fd','x','x','x','devices','x',
+				'canvas','webgl','x','fonts','media','css','x','x','x','x']
+			const aNumber = (id * 1) - 1
+			let sectionName = aNames[aNumber]
+			if (sectionName !== "x" && sPerfDetail.length) {
+				log_line("line")
+			}
+		}
+		setTimeout(function() {
+			gt0 = performance.now()
+			Promise.all([
+				get_isRFP(),
+				get_navKeys(),
+				outputPrototypeLies(),
+			]).then(function(results){
+				output()
+			})
+		}, delay)
 	}
-	setTimeout(function() {
-		gt0 = performance.now()
-		Promise.all([
-			get_isRFP(),
-			get_navKeys(),
-			outputPrototypeLies(),
-		]).then(function(results){
-			output()
-		})
-	}, delay)
 }
 
 function run_once() {

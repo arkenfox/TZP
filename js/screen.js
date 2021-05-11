@@ -5,12 +5,23 @@ var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 /* GLOBAL isTHINGS */
 
 function get_isBraveMode() {
+	let t0 = performance.now()
+	function set(mode) {
+		isBraveMode = mode
+		if (gRun) {
+			log_perf("isBraveMode [prereq]",t0,"a",isBraveMode)
+			if (mode == "unkown") {
+				console.error("get_isBraveMode", isBraveMode)
+			}
+		}
+	}
 	try {
 		// strict mode returns null supported extensions
 		const canvas = document.createElement("canvas")
 		const gl = canvas.getContext("webgl")
 		if (!gl.getSupportedExtensions()) {
-			return "strict"
+			set("strict")
+			return
 		}
 		// standard and strict mode do not have chrome plugins
 		const chromePlugins = /(Chrom(e|ium)|Microsoft Edge) PDF (Plugin|Viewer)/
@@ -18,11 +29,14 @@ function get_isBraveMode() {
 		const hasChromePlugins = pluginsList
 			.filter(plugin => chromePlugins.test(plugin.name)).length == 2
 		if (!hasChromePlugins) {
-			return "standard"
+			set("standard")
+			return
 		}
-		return "allow"
+		set("allow")
+		return
 	} catch(e) {
-		return "unknown"
+		set("unknown")
+		return
 	}
 }
 
@@ -311,7 +325,20 @@ const get_isVer = () => new Promise(resolve => {
 		if (verNo == 59) {verNo += " or lower"
 		} else if (verNo == 90) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
-		return resolve()
+
+		// OS architecture
+			// FF89+: 1703505: javascript.options.large_arraybuffers
+		t0 = performance.now()
+		try {
+			let test = new ArrayBuffer(Math.pow(2,32))
+			isOS64 = true
+			log_perf("isOS64 [global]",t0,"",isOS64)
+			return resolve()
+		} catch(e) {
+			// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit
+			//log_perf("isOS64 [global]",t0,"",isOS64)
+			return resolve()
+		}
 	}
 	function start() { // 90: 1520434
 		try {
@@ -2840,10 +2867,27 @@ function outputFD(runtype) {
 		section = []
 	// FF only
 	if (isFF) {
+		// version
 		let r = isVer + (isVerPlus ? "+" : "")
 		if (isVer == 59) {r = "59 or lower"}
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
+		// FF89+: OS architecture: javascript.options.large_arraybuffers
+			// ToDo: watch what TB do, watch pref deprecation
+		let bits = zNA
+		if (isVer > 88) {
+			if (isOS64 == true) {
+				bits = "64bit"
+			} else if (isOS64 = false) {
+				bits = "32bit" // ToDo: or other?
+			} else {
+				bits = "can't tell"
+			}
+		}
+		dom.fdArchOS.innerHTML = bits
+		section.push("os_architecture:"+ bits)
+
+		// chrome:// os
 		get_isChrome()
 		Promise.all([
 			get_errors(),
@@ -2901,6 +2945,7 @@ function outputFD(runtype) {
 			dom.fdChrome = zNA
 			dom.fdVersion = zNA
 			dom.fdMathOS = zNA
+			dom.fdArchOS = zNA
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
@@ -2922,6 +2967,7 @@ function outputStart() {
 		// not-coded
 	let items = document.getElementsByClassName("faint")
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
+	dom.audiohash2 = ""
 		// isFile
 	items = document.getElementsByClassName("isFile")
 	for (let i=0; i < items.length; i++) {items[i].textContent = note_file}

@@ -89,7 +89,11 @@ function get_audio2_context(attempt) {
 			dom.audio1hash.innerHTML = result[0] + sColor +"["+ results.length +" keys]"+ sc
 			// perf
 			log_perf("context [audio]",t0)
-			if (latencyTries == 2) {log_click("audio2",t0audio)}
+			if (latencyTries == 2) {
+				dom.audiohash2 = "hash not coded yet"
+				log_click("audio2",t0audio)
+				gClick = true
+			}
 		})
 	}
 	// next test
@@ -144,7 +148,11 @@ function get_audio2_hybrid() {
 			dom.audio3hash = result[0]
 			// perf
 			log_perf("hybrid [audio]",t0)
-			if (showperf) {log_click("audio2", t0audio)}
+			if (showperf) {
+				dom.audiohash2 = "hash not coded yet"
+				log_click("audio2", t0audio)
+				gClick = true
+			}
 		})
 		// re-test context
 		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
@@ -196,21 +204,32 @@ function get_audio2_oscillator() {
 }
 
 function outputAudio2() {
-	t0audio = performance.now()
-	latencyTries = 0
-	// temp
-	dom.audiohash2 = "hash not coded yet"
-	try {
-		let test = new window.AudioContext
-		// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
-			// if context is run first, outputLatency *always* = 0 = incorrect : run it after oscillator
-			// if context is not run first, outputLatency *sometimes* = 0 : hence context [try2]
-		log_line("line")
-		// start
-		get_audio2_oscillator()
-	} catch(e) {
-		dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
-		dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
+	if (gClick) {
+		gClick = false
+		let tbl = document.getElementById("tb11")
+		let cls = "c2"
+		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+		reset_audio2()
+		t0audio = performance.now()
+		latencyTries = 0
+		try {
+			let test = new window.AudioContext
+			// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
+				// if context is run first, outputLatency *always* = 0 = incorrect : run it after oscillator
+				// if context is not run first, outputLatency *sometimes* = 0 : hence context [try2]
+			log_line("line")
+			// update prototypelies
+			Promise.all([
+				outputPrototypeLies(),
+			]).then(function(results){
+				// start
+				get_audio2_oscillator()				
+			})
+		} catch(e) {
+			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
+			dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
+			gClick = true
+		}
 	}
 }
 
@@ -247,22 +266,44 @@ function outputAudio1(runtype) {
 				crypto.subtle.digest("SHA-256", getTest),
 				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
+				// ToDo: add polyfill: prototypeLie checks are not reliable
+				// brave lies
+				let isLies = false, isBraveLies = false
+				if (isBraveMode.substring(0,2) == "st") {isLies = true; isBraveLies = true}
 				// sum
 				let sum = 0
 				for (let i=4500; i < 5000; i++) {
 					sum += Math.abs(getTest[i])
 				}
-				section.push("sum:"+ sum)
-				dom.audioSum = sum
 				pxi_compressor.disconnect()
+				if (isLies) {
+					sum = soL + sum + scC
+					section.push("sum:"+ zLIE)
+					if (gRun && isBraveLies) {gLiesKnown.push("audio:sum")}
+				} else {
+					section.push("sum:"+ sum)
+				}
+				dom.audioSum.innerHTML = sum
 				// get
 				let tempstr = byteArrayToHex(hashes[0])
-				section.push("getChannelData:"+ tempstr)
-				dom.audioGet = tempstr
+				if (isLies) {
+					tempstr = soL + tempstr + scC
+					section.push("getChannelData:"+ zLIE)
+					if (gRun && isBraveLies) {gLiesKnown.push("audio:getChannelData")}
+				} else {
+					section.push("getChannelData:"+ tempstr)
+				}
+				dom.audioGet.innerHTML = tempstr
 				// copy
 				tempstr = byteArrayToHex(hashes[1])
-				section.push("copyFromChannel:"+ tempstr)
-				dom.audioCopy = tempstr
+				if (isLies) {
+					tempstr = soL + tempstr + scC
+					section.push("copyFromChannel:"+ zLIE)
+					if (gRun && isBraveLies) {gLiesKnown.push("audio:copyFromChannel")}
+				} else {
+					section.push("copyFromChannel:"+ tempstr)
+				}
+				dom.audioCopy.innerHTML = tempstr
 				// section
 				log_section("audio", t0, section)
 			})
