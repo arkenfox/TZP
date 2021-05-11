@@ -55,9 +55,9 @@ let avh = "",
 	s17 = s0+"s17'>",
 	s18 = s0+"s18'>",
 	sc = "</span>",
-	soL = "<span><code class='lies'>", // span open lies
-	soB = "<span><code class='bypass'>", // span open bypass
-	scC = "</code></span>", // close span+code
+	soL = "<code class='lies'>",
+	soB = "<code class='bypass'>",
+	scC = "</code>",
 // show/hide text colors
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
@@ -129,6 +129,7 @@ let avh = "",
 	isFF = false,
 	isFile = false,
 	isOS = "",
+	isOS64 = "unknown",
 	isPerf = true,
 	isResource = "",
 	isResourceMetric = "",
@@ -140,6 +141,7 @@ let avh = "",
 // dev
 	gt0,
 	gRun = true,
+	gClick = true,
 	logExtra = false,
 	logResize = false,
 	logStorage = false,
