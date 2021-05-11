@@ -111,7 +111,7 @@ function outputDomRect() {
 				hash = ["domrect:unknown"]
 			}
 		} else {
-			hash = ["domrect:fake"]
+			hash = ["domrect:"+ zLIE]
 		}
 		// lies bypassed
 		if (gRun) {
