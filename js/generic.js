@@ -109,14 +109,22 @@ function check_navKey(property) {
 	}
 }
 
+function get_braveChrome() {
+	if (!('chrome' in window)) return false
+	const braveChromeKeys = ['binance','bookmarks','braveRewards','braveTheme','cryptoDotCom','gemini','greaselion','topSites']
+	const chromeKeys = Object.keys(chrome)
+	console.log(chromeKeys)
+	return !!chromeKeys.filter(key => braveChromeKeys.includes(key)).length
+}
+
 const get_navKeys = () => new Promise(resolve => {
 	// reset
 	navKeys = {}
 	isBraveMode = "unknown"
 	// simulate
-	if (runSL && navigator.brave) {
-		delete Navigator.prototype.brave;
-	}
+	runSL = true
+	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
+	runSL = false
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -159,41 +167,22 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["allKeys"] = allKeys.sort()
 
 		// set isBrave if not already
-		let go = (!isBrave && isEngine == "blink")
-		// can we eliminate opera, vivaldi, chrome?
-
-		if (go) {
-			navigator.storage.estimate().then(estimate => console.debug(estimate.quota))
-				// 1200238045593 chrome
-				// 520541139 chrome incognito
-
-				// 2147483648 brave: normal + private windows
-
-				// 344413186 opera
-				// 493381148 opera private window
-
-			let bYes = [], bNo = []
-			let bList = ['binance','bookmarks','braveRewards','braveTheme','cryptoDotCom','gemini','greaselion','topSites']
-			bList.forEach(function(item) {
-				if (item in chrome) {bYes.push("chrome."+ item)} else {bNo.push("chrome."+ item)}
-			})
-			let str = "navigator.brave"
-			if (check_navKey("brave")) {bYes.push(str)} else {bNo.push(str)}
-			try {
-				str += ".isBrave"
-				if (typeof navigator.brave.isBrave == "function") {bYes.push(str)} else {bNo.push(str)}
-			} catch(e) {bNo.push(str)}
-			console.debug("YES", bYes)
-			console.debug("NO", bNo)
-			if (bYes.length) {
+		if (!isBrave && isEngine == "blink") {
+			if (check_navKey("brave")) {
 				isBrave = true
-				if (bNo.length && gRun) {
-					// record attempted lies and bypass
-					//console.debug("you tried to lie about being brave")
+			} else {
+				const braveChrome = get_braveChrome()
+				if (braveChrome) {
+					isBrave = true
+					if (gRun) {
+						gLiesKnown.push("global:isBrave")
+						gLiesBypassed.push("global:isBrave:true")
+					}
 				}
+			}
+			if (isBrave) {
 				// set isBraveMode
 				let t0 = performance.now()
-				isBrave = true
 				Promise.all([
 					get_isBraveMode(),
 				]).then(function(results){
