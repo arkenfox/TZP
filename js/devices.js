@@ -107,7 +107,7 @@ function get_concurrency() {
 	} else {
 		isLies = (protoLies.includes("Navigator.hardwareConcurrency") ? true : false)
 	}
-	if (runSL) {isLies = true}
+	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
 	if (isLies) {h = soL + h + scC} else {h += (h == "2" ? rfp_green : rfp_red)}
 	dom.nHWC.innerHTML = h
 	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
@@ -221,7 +221,6 @@ function get_media_devices() {
 						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
 					}
 					finish(str)
-
 				})
 			} catch(e) {
 				dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
