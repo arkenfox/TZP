@@ -111,8 +111,20 @@ function get_isChrome() {
 }
 
 const get_isEngine = () => new Promise(resolve => {
-	let t0 = performance.now(),
-		bFF = false
+	let t0 = performance.now(), bFF = false
+	// set isFF for engine lies
+	if (isFFyes.length) {isFF = true}
+	function final_isFF() {
+		if (isFFyes.length) {isFF = true}
+		log_perf("final status [isFF]",""+ isFF,"ignore")
+		if (isFF && isFFno.length) {
+			isFFno.forEach(function(item) {
+				gLiesOnce.push("_global:isFF "+ item)
+				gLiesOnceBypassed.push("_global:isFF "+ item + ":true")
+			})
+		}
+	}
+	// do math
 	function cbrt(x) {
 		try {
 			let y = Math.pow(Math.abs(x), 1 / 3)
@@ -139,6 +151,7 @@ const get_isEngine = () => new Promise(resolve => {
 			}
 		}
 		let hash = sha1(res.join()).substring(0,8)
+		if (runSL) {hash = "x"}
 		if (hash == "ede9ca53") {isEngine = "blink"
 		} else if (hash == "05513f36") {isEngine = "webkit"
 		} else if (hash == "38172d94") {isEngine = "edgeHTML"
@@ -146,37 +159,33 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
 		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
 		}
-		log_perf("math [isFF]",t0,"",""+ (isFF && skipFF ? "skipped": bFF))
+		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
+		log_perf("math [isFF]",t0,"",bFF)
 		// harden isEngine
 		if (isEngine == "") {
-			if (isFF) {
-				// three isFF checks so far
-				isEngine = "gecko"
-			} else if ("chrome" in window) {isEngine = "blink"}
+			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
+			if (isEngine !== "") {
+				gLiesOnce.push("_global:isEngine")
+				gLiesOnceBypassed.push("_global:isEngine:"+ isEngine)
+			}
 		}
-		// harden isFF: the fourth check
-		if (bFF) {isFF = true}
-		// math isFF is the final isFF check
-		log_perf("status [isFF]",""+ isFF,"ignore")
+		final_isFF()
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
 		return resolve()
 	} catch(e) {
+		isFFno.push("math")
+		final_isFF()
 		console.error("get_isEngine", e.name, e.message)
 		log_perf("isEngine [global]",t0,"","error")
-		return resolve("error")
+		return resolve()
 	}
 })
 
 const get_isError = () => new Promise(resolve => {
 	let t0 = performance.now()
-	// skip
-	if (isFF && skipFF) {
-		log_perf("errors [isFF]",t0,"","skipped")
-		return resolve()
-	}
 	try {
-		let res = [],
-			bFF = false
+		// note: we will test for error lie entropy elsewhere without newFn()
+		let res = [], bFF = false
 		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
 		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
 		try {let test = newFn("let a = 1_00_;")} catch(e) {res.push(e.name +": "+ e.message)}
@@ -187,13 +196,13 @@ const get_isError = () => new Promise(resolve => {
 		} else if (hash == "b7463a43") {bFF = true //FF60-69
 		} else if (hash == "7263eca6") {bFF = true //FF59-
 		}
-		// harden isFF
-		if (bFF) {isFF = true}
+		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
 	} catch(e) {
 		console.error("get_isError", e.name, e.message)
 		log_perf("errors [isFF]",t0,"","error")
+		isFFno.push("errors")
 		return resolve()
 	}
 })
@@ -204,20 +213,75 @@ const get_isOS = () => new Promise(resolve => {
 	// check
 	let t0 = performance.now(),
 		el = dom.widget0
+	function tryharder() {
+		// we will record math lies elsewhere
+		log_perf("isOS [global]",t0,"","unknown")
+		return resolve()
+	}
+	function trymath() {
+		// log lie
+		gLiesOnce.push("_global:isOS")
+		// try quick math
+		let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
+			res = []
+		list.forEach(function(item) {
+			try {res.push(Math.cos(item))} catch(e) {}
+		})
+		let m = (sha1(res.join("-"))).substring(0,8)
+		if (m == "46f7c2bb") {m="A"}
+		else if (m == "8464b989") {m="B"}
+		else if (m == "97eee448") {m="C"}
+		else if (m == "96895e00") {m="D"}
+		else if (m == "06a01549") {m="E"}
+		else if (m == "ae434b10") {m="F"}
+		else if (m == "19df0b54") {m="G"}
+		else if (m == "8ee641f0") {m="H"}
+		if (m == "A" | m == "B" | m == "C" | m == "H") {
+			isOS = "windows"
+		} else if (m == "D" | m == "G") {
+			isOS = "linux"
+		} else if (m == "E") {
+			isOS = "mac"
+		} else if (m == "F") {
+			isOS = "android"
+		}
+		if (runSL) (isOS = "")
+		if (isOS == "") {
+			tryharder()
+		} else {
+			gLiesOnceBypassed.push("_global:isOS:"+ isOS)
+			log_perf("isOS [global]",t0,"",isOS)
+			return resolve()
+		}
+	}
+	// system font
 	try {
 		let font = getComputedStyle(el).getPropertyValue("font-family")
 		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
 		} else if (font == "Roboto") {isOS="android"
 		}	else if (font == "-apple-system") {isOS="mac"
 		}	else {isOS="linux"}
-		if (runS) {isOS = ""}
-		log_perf("isOS [global]",t0,"",isOS)
+		if (runSL) {
+			isOS = ""
+			trymath()
+		} else {
+			log_perf("isOS [global]",t0,"",isOS)
+		}
 		return resolve()
 	} catch(e) {
-		console.error("get_isOS", e.name, e.message)
-		log_perf("isOS [global]",t0,"","error")
-		return resolve()
+		trymath()
 	}
+})
+
+const get_isOS2 = () => new Promise(resolve => {
+	// skip
+	if (!isFF || isOS !== "") {return resolve()}
+	
+	// someone bypassed math and system font
+	// check useragent and prototype lies. record bypass if successful
+
+	
+
 })
 
 const get_isRFP = () => new Promise(resolve => {
@@ -258,12 +322,6 @@ const get_isRFP = () => new Promise(resolve => {
 
 const get_isSystemFont = () => new Promise(resolve => {
 	let t0 = performance.now()
-	// skip
-	if (isFF & skipFF) {
-		log_perf("system font [isFF]",t0,"","skipped")
-		return resolve()
-	}
-	// check
 	try {
 		let el = dom.sysFont,
 			f = undefined
@@ -273,12 +331,14 @@ const get_isSystemFont = () => new Promise(resolve => {
 		let s = getComputedStyle(el, null)
 		if (s.fontSize != "99px") {f = s.fontFamily}
 		let bFF = (""+ f == "undefined" ? false : true)
-		if (bFF) {isFF = true}
+		if (runSL) {bFF = false}
+		if (bFF) {isFFyes.push("system font")} else {isFFno.push("system font")}
 		log_perf("system font [isFF]",t0,"",bFF)
 		return resolve()
 	} catch(e) {
 		console.error("get_isSystemFont", e.name, e.message)
 		log_perf("system font [isFF]",t0,"","error")
+		isFFno.push("system font")
 		return resolve()
 	}
 })
@@ -1049,50 +1109,20 @@ function get_math() {
 
 		function get_hashes(runtype) {
 			return new Promise(resolve => {
-				let h1 = "", h6 = "", r = ""
 				// 1st
 				let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
-					res = []
-				for (let i=0; i < list.length; i++) {
-					try {
-						r = Math.cos(list[i])
-					} catch(e) {
-						r = zB0
-						block1 = true
-					}
-					res.push(r)
-				}
-				h1 = res.join("-")
+					res1 = [], res6 = []
+				list.forEach(function(item) {
+					try {res1.push(Math.cos(item))} catch(e) {res1.push("x"); block1 = true}
+				})
 				// 6th
-				let x, y
-				x = 0.5
-				try {
-					r = Math.log((1 + x) / (1 - x)) / 2 // atanh(0.5)
-				} catch(e) {
-					r = zB0
-					block6 = true
-				}
-				h6 = r
-				x=1
-				try {
-					r = Math.exp(x) - 1 // expm1(1)
-				} catch(e) {
-					r = zB0
-					block6 = true
-				}
-				h6 += "-"+ r
-				x = 1
-				try {
-					y = Math.exp(x); r = (y - 1 / y) / 2 // sinh(1)
-				} catch(e) {
-					r = zB0
-					block6 = true
-				}
-				h6 += "-"+ r
+				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
+				try {res6.push(Math.exp(1) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+				try {let y = Math.exp(1); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
 				// hashes
-				m1hash = sha1(h1)
-				m6hash = sha1(h6)
-				mchash = sha1(h1 +"-"+ h6)
+				m1hash = sha1(res1.join("-"))
+				m6hash = sha1(res6.join("-"))
+				mchash = sha1(res1.concat(res6))
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1

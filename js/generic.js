@@ -112,6 +112,7 @@ function check_navKey(property) {
 const get_navKeys = () => new Promise(resolve => {
 	// reset
 	navKeys = {}
+	isBraveMode = "unknown"
 	// simulate
 	if (runSL && navigator.brave) {
 		delete Navigator.prototype.brave;
@@ -157,15 +158,31 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["fakeKeys"] = fakeKeys.sort()
 		navKeys["allKeys"] = allKeys.sort()
 
-		// get isBrave if not already
-		let bYes = [], bNo = []
-		if (!isFF & !isBrave) {
+		// set isBrave if not already
+		let go = (!isBrave && isEngine == "blink")
+		// can we eliminate opera, vivaldi, chrome?
+
+		if (go) {
+			navigator.storage.estimate().then(estimate => console.debug(estimate.quota))
+				// 1200238045593 chrome
+				// 520541139 chrome incognito
+
+				// 2147483648 brave: normal + private windows
+
+				// 344413186 opera
+				// 493381148 opera private window
+
+			let bYes = [], bNo = []
 			let bList = ['binance','bookmarks','braveRewards','braveTheme','cryptoDotCom','gemini','greaselion','topSites']
 			bList.forEach(function(item) {
 				if (item in chrome) {bYes.push("chrome."+ item)} else {bNo.push("chrome."+ item)}
 			})
-			if (check_navKey("brave")) {bYes.push("navigator.brave")} else {bNo.push("navigator.brave")}
-			if (typeof navigator.brave.isBrave == "function") {bYes.push("navigator.brave.isBrave")} else {bNo.push("navigator.brave.isBrave")}
+			let str = "navigator.brave"
+			if (check_navKey("brave")) {bYes.push(str)} else {bNo.push(str)}
+			try {
+				str += ".isBrave"
+				if (typeof navigator.brave.isBrave == "function") {bYes.push(str)} else {bNo.push(str)}
+			} catch(e) {bNo.push(str)}
 			console.debug("YES", bYes)
 			console.debug("NO", bNo)
 			if (bYes.length) {
@@ -174,18 +191,17 @@ const get_navKeys = () => new Promise(resolve => {
 					// record attempted lies and bypass
 					//console.debug("you tried to lie about being brave")
 				}
-			}
-		}
-		// get isBraveMode
-		isBraveMode = "unknown"
-		if (isBrave) {
-			let t0 = performance.now()
-			isBrave = true
-			Promise.all([
-				get_isBraveMode(),
-			]).then(function(results){
+				// set isBraveMode
+				let t0 = performance.now()
+				isBrave = true
+				Promise.all([
+					get_isBraveMode(),
+				]).then(function(results){
+					return resolve()
+				})
+			} else {
 				return resolve()
-			})
+			}
 		} else {
 			return resolve()
 		}
@@ -550,6 +566,9 @@ function log_section(name, time1, data) {
 						}
 					}
 				}
+				// add runonce lie entropy and bypasses
+				gLiesKnown = gLiesKnown.concat(gLiesOnce)
+				gLiesBypassed = gLiesBypassed.concat(gLiesOnceBypassed)
 				// lies: de-dupe/sort
 				let lieBtn = ""
 				if (Object.keys(gLiesKnownDetail).length) {
@@ -755,15 +774,18 @@ function run_once() {
 	if ((location.protocol) == "https:") {isSecure = true}
 	// isFF
 	let t0 = performance.now()
-	const isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
-		+ ("InstallTrigger" in window ? true : false)
-		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-	if (isFFsum) {
-		isFF = true
+	let str = "installtrigger"
+	let str1 = "type of "+str, str2 = "type of "+ str +"Impl", str3 = str+ " in window"
+	let test1 = false, test2 = false, test3 = false
+	if (runSL) {
+		isFFno.push(str1,str2,str3)
 	} else {
-		runS = false // simulation
+		if ("undefined" != typeof InstallTrigger) {isFFyes.push(str1); test1 = true} else {isFFno.push(str1)}
+		if ("undefined" != typeof InstallTriggerImpl) {isFFyes.push(str2); test2 = true} else {isFFno.push(str2)}
+		if ("InstallTrigger" in window) {isFFyes.push(str3); test3 = true} else {isFFno.push(str3)}
 	}
-	log_perf("installtrigger [isFF]",t0,"",""+ isFF)
+	if (isFFno.length) {runS = false}
+	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
 	// WARM
 	try {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {})
