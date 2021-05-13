@@ -861,7 +861,7 @@ function prime_unicode() {
 		// ToDo: does the font fallback string also need priming?
 		// ToDo: set these directly in the HTML
 	} catch(e) {
-		console.error(e.name, e.message)
+		gCheckOnce.push("fonts: unicode primer: " + e.name +" : "+ e.message)
 	}
 }
 
