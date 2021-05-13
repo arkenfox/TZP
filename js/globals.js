@@ -3,26 +3,29 @@
 var dom;
 
 let jsFiles = [],
-	// global snapshot
-	gLies = [],
-	gLiesDetail = {},
-	gLiesKnown = [], // we only ever add if gRun
-	gLiesKnownDetail = {},
-	gLiesBypassed = [],
-	gLiesMethods = [], // blocks, FPing techniques
-	gLiesOnce = [], // only tested on page load
+	// global: only on page load
+	gCheckOnce = [],
+	gLiesOnce = [],
 	gLiesOnceBypassed = [],
+	gLiesOnceMethods = [],
+	// global snapshot
 	gCheck = [],
 	gCount = 0,
 	gData = [],
 	gDetail = {},
+	gLies = [],
+	gLiesBypassed = [],
+	gLiesDetail = {},
+	gLiesKnown = [],
+	gLiesKnownDetail = {},
+	gLiesMethods = [],
 	gPerf = [],
 	gPerfDetail = [],
-	// section
+	// section snapshot
 	sData = {},
 	sDetail = {},
 	sPerfDetail = [],
-	// current: reset on global/re-runs (and click-here if required)
+	// fluid: reset on demand
 	protoLies = [],
 	navKeys = {}
 
