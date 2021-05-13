@@ -184,7 +184,10 @@ function get_computed_styles() {
 						let fakeStyles = array.slice(lastStyleIndex+1)
 						array = array.slice(0, lastStyleIndex+1)
 						if (gRun) {
-							if (fakeStyles.length) {gLiesKnown.push("css:computed styles")}
+							if (fakeStyles.length) {
+								gLiesKnown.push("css:computed styles")
+								if (i == 0) {console.debug(fakeStyles)}
+							}
 						}
 					} else {
 						array.sort()
