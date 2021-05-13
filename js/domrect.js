@@ -107,7 +107,7 @@ function outputDomRect() {
 			//de-dupe/sanity check
 			hash = hash.filter(function(item, position) {return hash.indexOf(item) === position})
 			if (hash.length > 1) {
-				console.error("domrect: mismatched good hashes")
+				if (gRun) {gCheck.push("domrect: mismatched good hashes")}
 				hash = ["domrect:unknown"]
 			}
 		} else {
