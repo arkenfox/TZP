@@ -9,10 +9,8 @@ function get_isBraveMode() {
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
+			if (mode == "unknown") {gCheck.push("_global:isBraveMode: unknown")}
 			log_perf("isBraveMode [prereq]",t0,"a",isBraveMode)
-			if (mode == "unkown") {
-				console.error("get_isBraveMode", isBraveMode)
-			}
 		}
 	}
 	try {
@@ -175,7 +173,7 @@ const get_isEngine = () => new Promise(resolve => {
 	} catch(e) {
 		isFFno.push("math")
 		final_isFF()
-		console.error("get_isEngine", e.name, e.message)
+		gCheckOnce.push("_global:isEngine: " + e.name +" : "+ e.message)
 		log_perf("isEngine [global]",t0,"","error")
 		return resolve()
 	}
@@ -200,7 +198,7 @@ const get_isError = () => new Promise(resolve => {
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
 	} catch(e) {
-		console.error("get_isError", e.name, e.message)
+		gCheckOnce.push("_global:isError: " + e.name +" : "+ e.message)
 		log_perf("errors [isFF]",t0,"","error")
 		isFFno.push("errors")
 		return resolve()
@@ -276,11 +274,8 @@ const get_isOS = () => new Promise(resolve => {
 const get_isOS2 = () => new Promise(resolve => {
 	// skip
 	if (!isFF || isOS !== "") {return resolve()}
-	
 	// someone bypassed math and system font
-	// check useragent and prototype lies. record bypass if successful
-
-	
+	// check useragent and prototype lies. record bypass if possible
 
 })
 
@@ -315,7 +310,7 @@ const get_isRFP = () => new Promise(resolve => {
 		}
 		return resolve()
 	} catch(e) {
-		console.error("get_isRFP", e.name, e.message)
+		if (gRun) {gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)}
 		return resolve()
 	}
 })
@@ -336,9 +331,9 @@ const get_isSystemFont = () => new Promise(resolve => {
 		log_perf("system font [isFF]",t0,"",bFF)
 		return resolve()
 	} catch(e) {
-		console.error("get_isSystemFont", e.name, e.message)
-		log_perf("system font [isFF]",t0,"","error")
 		isFFno.push("system font")
+		gCheckOnce.push("_global:isSystemFont: " + e.name +" : "+ e.message)
+		log_perf("system font [isFF]",t0,"","error")
 		return resolve()
 	}
 })
@@ -369,7 +364,7 @@ const get_isTB = () => new Promise(resolve => {
 		}
 		document.head.removeChild(css)
 	} catch(e) {
-		console.error("get_isTB", e.name, e.message)
+		gCheckOnce.push("_global:isTB: " + e.name +" : "+ e.message)
 		log_perf("isTB [global]",t0,"","error")
 		return resolve()
 	}
@@ -1077,7 +1072,7 @@ function get_line_scrollbar(runtype) {
 			Promise.all([
 				get_zoom("fd")
 			]).then(function(){
-				if (jsZoom == undefined) {console.error("jsZoom is undefined")}
+				if (jsZoom == undefined && gRun) {gCheck.push("fd:zoom is undefined")}
 				Promise.all([
 					vw = get_viewport("fd")
 				]).then(function(){

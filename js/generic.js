@@ -27,7 +27,7 @@ function getElementProp(id, prop, pseudo) {
 		item = (item == "" ? "x" : item) // blanks
 		return item
 	} catch(e) {
-		console.error(id, e.name, e.message)
+		if (gRun) {gCheck.push("_generic:element property "+ id +": " + e.name)}
 		return "x"
 	}
 }
@@ -104,7 +104,6 @@ function check_navKey(property) {
 	if (navKeys["trueKeys"]) {
 		return navKeys["trueKeys"].includes(property)
 	} else {
-		console.error(property, false, "navKeys not populated")
 		return false
 	}
 }
@@ -170,7 +169,7 @@ const get_navKeys = () => new Promise(resolve => {
 			return resolve()
 		}
 	} catch(e) {
-		console.error("get_navKeys", e.name, e.message)
+		if (gRun) {gCheck.push("_global:get_navKeys: " + e.name +" : "+ e.message)}
 		return resolve()
 	}
 })
@@ -389,6 +388,9 @@ function showMetrics(type) {
 		} else if (type == "prototype lies: details") {
 			array = gLiesDetail
 			showhash = false
+		} else if (type == "alerts") {
+			array = gCheck
+			showhash = false
 		} else {
 			// section
 			array = sData[type]
@@ -479,20 +481,20 @@ function log_section(name, time1, data) {
 		let hash = sha1(data.join())
 		// SANITY
 		if (data.length == 0) {
-			gCheck.push(name +": data array is empty")
+			gCheck.push("#section "+ name +": data array is empty")
 		} else {
 			for (let i=0; i < data.length; i++) {
 				let check = data[i]
 				if (check == undefined) {
-					gCheck.push(name +": contains undefined")
+					gCheck.push("#section "+ name +": contains undefined")
 				} else {
 					let parts = data[i].split(":")
 					let metric = parts[0]
 					let value = parts.slice(1).join(":")
 					if (value == "") {
-						gCheck.push(name +" - "+ metric +": not set")
+						gCheck.push("#section "+ name +": "+ metric +" not set")
 					} else if (value == undefined) {
-						gCheck.push(name +" - "+ metric +": undefined")
+						gCheck.push("#section "+ name +": "+ metric +" undefined")
 					}
 				}
 			}
@@ -530,18 +532,30 @@ function log_section(name, time1, data) {
 						}
 					}
 				}
-				// add runonce lie entropy and bypasses
+				// persist runonce data, de-dupe, sort
+				gCheck = gCheck.concat(gCheckOnce)
+				gCheck = gCheck.filter(function(item, position) {return gCheck.indexOf(item) === position})
+				gCheck.sort()
 				gLiesKnown = gLiesKnown.concat(gLiesOnce)
+				gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
+				gLiesKnown.sort()
 				gLiesBypassed = gLiesBypassed.concat(gLiesOnceBypassed)
-				// lies: de-dupe/sort
+				gLiesBypassed = gLiesBypassed.filter(function(item, position) {return gLiesBypassed.indexOf(item) === position})
+				gLiesBypassed.sort()
+				gLiesMethods = gLiesMethods.concat(gLiesOnceMethods)
+				gLiesMethods = gLiesMethods.filter(function(item, position) {return gLiesMethods.indexOf(item) === position})
+				gLiesMethods.sort()
+				// checks
+				if (gCheck.length) {
+					dom.allcheck.innerHTML = buildButton("1","alerts",
+						gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
+				}
+				// lies/bypasses
 				let lieBtn = ""
 				if (Object.keys(gLiesKnownDetail).length) {
 					lieBtn = buildButton("0", "gLiesKnownDetail", "details", "showMetrics")
 				}
 				if (gLiesKnown.length) {
-					gLiesKnown = gLiesKnown.filter(function(item, position) {return gLiesKnown.indexOf(item) === position})
-					gLiesKnown.sort()
-					gLiesBypassed.sort()
 					let lieStr = gLiesKnown.length +" lie"+ (gLiesKnown.length > 1 ? "s" : "")
 						+ (gLiesBypassed.length ? " | "+ gLiesBypassed.length +" bypassed" : "")
 					dom.knownhash.innerHTML = sha1(gLiesKnown.join())
@@ -553,7 +567,7 @@ function log_section(name, time1, data) {
 				// methods
 				if (gLiesMethods.length) {
 					gLiesMethods.sort()
-					let methodStr = gLiesMethods.length +" occurence"+ (gLiesMethods.length > 1 ? "s" : "")
+					let methodStr = gLiesMethods.length +" noted"
 					let methodBtn = buildButton("0", "known methods", methodStr, "showMetrics")
 					dom.knownmethods.innerHTML = sha1(gLiesMethods.join()) + methodBtn
 				} else {
@@ -565,14 +579,6 @@ function log_section(name, time1, data) {
 					+ buildButton("0", "fingerprint", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
 				dom.perfall = " "+ Math.round(performance.now() - gt0) +" ms"
-				// sanity
-				if (gCheck.length) {
-					gCheck = gCheck.filter(function(item, position) {return gCheck.indexOf(item) === position})
-					gCheck.sort()
-					if (isFile) {
-						console.error("section hash issues\n", gCheck)
-					}
-				}
 				gClick = true
 			}
 		}
@@ -618,6 +624,7 @@ function countJS(filename) {
 				get_isTB(),
 			]).then(function(results){
 				if (results[3] == "timeout") {
+					gLiesOnceMethods.push("_global:resource:blocked")
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
 				}
 				outputSection("load")

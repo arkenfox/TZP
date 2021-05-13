@@ -167,42 +167,66 @@ function get_computed_styles() {
 		// run
 		let sNames = ["css_getcomputed","css_htmlelement","css_cssrulelist"]
 		sNames.forEach(function(k){clearDetail[k]})
+		sNames.forEach(function(k){clearDetail[k + "_fake_skip"]})
+		sNames.forEach(function(k){clearDetail[k + "_reported_skip"]})
 		Promise.all([
 			styleVersion(0),
 			styleVersion(1),
 			styleVersion(2)
 		]).then(res => {
-			let isSame = true, hashes = [], display = ""
+			let reportedHashes = [], trueHashes = [], methodError = []
 			for (let i=0; i < 3; i++) {
-				let el = document.getElementById("cStyles"+ i)
+				let el = document.getElementById("cStyles"+ i),
+					display = ""
 				try {
-					let results = res[i],
-						array = res[i].keys
+					let reportedStyles = [], trueStyles = [], fakeStyles = []
+					reportedStyles = res[i].keys
+					// sim
+					if (runSL) {
+						reportedStyles.push("setProperty")
+						if (i==1) {reportedStyles.push("fake")}
+						if (i==2) {reportedStyles.push("hello","world")}
+					}
+					// ignore false positives FF60-62
 					if (isFF && isVer > 62) {
-						// ignore false positives FF60-62
-						let lastStyleIndex = array.indexOf("constructor")
-						let fakeStyles = array.slice(lastStyleIndex+1)
-						array = array.slice(0, lastStyleIndex+1)
-						if (gRun) {
-							if (fakeStyles.length) {
-								gLiesKnown.push("css:computed styles")
-								if (i == 0) {console.debug(fakeStyles)}
-							}
+						let lastStyleIndex = reportedStyles.indexOf("constructor")
+						fakeStyles = reportedStyles.slice(lastStyleIndex+1)
+						trueStyles = reportedStyles.slice(0, lastStyleIndex+1)
+						sDetail[sNames[i]] = trueStyles
+						sDetail[sNames[i]+ "_fake_skip"] = fakeStyles
+						sDetail[sNames[i]+ "_reported_skip"] = reportedStyles
+						if (gRun && fakeStyles.length) {
+							gLiesKnown.push("css:"+sNames[i])
+							gLiesBypassed.push("css::"+ sNames[i] +":"+ sha1(trueStyles.join()))
 						}
 					} else {
-						array.sort()
+						reportedStyles.sort()
+						trueStyles = reportedStyles
+						sDetail[sNames[i]] = trueStyles
+						sDetail[sNames[i]+ "_reported_skip"] = reportedStyles
 					}
-					sDetail[sNames[i]] = array
-					hashes.push(sha1(array.join()))
-					display = hashes[i] + buildButton("14", sNames[i], array.length +"|"+ res[i].moz +"|"+ res[i].webkit)
+					// hashes
+					let reportedHash = sha1(reportedStyles.join())
+					reportedHashes.push(reportedHash)
+					trueHashes.push(sha1(trueStyles.join()))
+					// display
+					display = reportedHash
+					if (fakeStyles.length) {display = soB + reportedHash + scC}
+					display += buildButton("14", sNames[i]+ "_reported_skip", reportedStyles.length +"|"+ res[i].moz +"|"+ res[i].webkit)
+					if (fakeStyles.length) {
+						display += buildButton("14", sNames[i]+ "_fake_skip", fakeStyles.length +" lie"+ (fakeStyles.length > 1 ? "s" : ""))
+					}
 				} catch(e) {
-					hashes.push("error")
+					methodError.push("css:"+ sNames[i]+ ":blocked")
 					display = "error"
+					reportedHashes.push("error")
+					trueHashes.push("error")
 				}
 				el.innerHTML = display
-				if (i > 0) {if (hashes[i] != hashes[0]) {isSame = false}}
 			}
 			// show/hide rows & fixup label
+			let uniqueReported = reportedHashes.filter(function(item, position) {return reportedHashes.indexOf(item) === position})
+			let isSame = (uniqueReported.length < 2)
 			dom.togCSSb.style.display = (isSame ? "none" : "table-row")
 			dom.togCSSc.style.display = (isSame ? "none" : "table-row")
 			if (!isSame) {
@@ -212,10 +236,26 @@ function get_computed_styles() {
 					+"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>"
 					+"CSSRuleList.style</span></div> &nbsp computed styles"
 			}
+			// record blocks
+			if (gRun && methodError.length) {
+				gLiesMethods = gLiesMethods.concat(methodError)
+			}
 			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
-			return resolve("styles:"+ sha1(hashes.join()))
+			// return
+			if (methodError.length == 3) {
+				return resolve("styles:"+ zB0)
+			} else {
+				let uniqueTrue = trueHashes.filter(function(item, position) {return trueHashes.indexOf(item) === position})
+				uniqueTrue = uniqueTrue.filter(x => !["error"].includes(x))
+				if (uniqueTrue.length == 1) {
+					return resolve("styles:"+ uniqueTrue[0])
+				} else {
+					if (gRun) {gCheck.push("css:computed styles: multiple values")}
+					return resolve("styles:"+ trueHashes.join(","))
+				}
+			}
 		}).catch(error => {
-			console.error(error)
+			if (gRun) {gCheck.push("css:computed styles: " + e.name +" : "+ e.message)}
 			return resolve("styles:error")
 		})
 	})
