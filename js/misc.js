@@ -140,14 +140,16 @@ function get_nav_prototype() {
 	sDetail[sFake] = navKeys["fakeKeys"]
 	sDetail[sAll] = navKeys["allKeys"]
 	let lieLength = navKeys["fakeKeys"].length,
-		fakeStr = ""
+		fakeStr = "",
+		realhash = zB0
 	// output
-	let realhash = zB0
 	if (navKeys["trueKeys"]) {
 		let hash = sha1(navKeys["allKeys"].join())
+		let display = hash
 		realhash = sha1(navKeys["trueKeys"].join())
 		// fake
 		if (lieLength) {
+			display = soB + hash + scC
 			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
 			fakeStr = buildButton("18", sFake, fakeStr)
 			// lies
@@ -157,14 +159,7 @@ function get_nav_prototype() {
 				gLiesBypassed.push("misc:navigator keys:"+realhash)
 			}
 		}
-		// display
-		let display = hash
-		let btn = buildButton("18", sTrue, navKeys["trueKeys"].length)
-		if (lieLength) {
-			display = soB + hash + scC
-			btn = buildButton("18", sAll, navKeys["allKeys"].length)
-		}
-		dom.nProto.innerHTML = display + btn + fakeStr
+		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr
 	} else {
 		dom.nProto = realhash
 	}
