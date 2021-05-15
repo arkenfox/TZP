@@ -1,9 +1,10 @@
 'use strict';
 
+let mediaLists = ""
+
 function get_media(runtype) {
 	let list = [],
-		t0 = performance.now(),
-		sColor = s13
+		t0 = performance.now()
 	// list
 	if (runtype == "video") {
 		let v = 'video/', v4 = v+'mp4; codecs="', vm = v+'mpeg; codec="',
@@ -57,6 +58,20 @@ function get_media(runtype) {
 	// de-dupe and sort
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
+	// lists
+	if (runtype == "audio") {
+		sDetail["media_audio_list_skip"] = list
+		mediaLists = buildButton("13","media_audio_list_skip", list.length +" audio")
+	} else {
+		sDetail["media_video_list_skip"] = list
+		mediaLists += buildButton("13","media_video_list_skip", list.length +" video")
+		dom.medialists.innerHTML = mediaLists
+	}
+	// clear
+	let sCan = "media_"+ runtype +"_canplaytype",
+		sType = "media_"+ runtype +"_istypesupported"
+	clearDetail[sCan]
+	clearDetail[sType]
 
 	// run
 	let canm = [], canp = [], src = [], rec = []
@@ -77,46 +92,50 @@ function get_media(runtype) {
 	})
 	// ToDo: media: remove audio/video element?
 
-	// elements
-	let ecan = document.getElementById(runtype +"can"),
-		etype = document.getElementById(runtype +"type")
 	// blocks
 	let block1 = (canm.length == 0),
 		block2 = (canp.length == 0),
-		block3 = (src.length == 0),
-		block4 = (rec.length == 0)
-	// output detail
-	let hashcan = sColor +"maybe: "+ sc + (block1 ? "blocked" :canm.join(", "))
-		+ sColor +" probably: "+ sc + (block2 ? "blocked" :canp.join(", "))
-	let hashtype = sColor +"mediasource: "+ sc + (block3 ? "blocked" :src.join(", "))
-		+ sColor +" mediarecoder: "+ sc + (block4 ? "blocked" : rec.join(", "))
-
-	// merged hashes
-	hashcan = ['maybe']; hashcan = hashcan.concat(canm)
-	hashcan.push("probably"); hashcan = hashcan.concat(canp)
-	hashtype = ['mediasource']; hashtype = hashtype.concat(src)
-	hashtype.push("mediarecorder"); hashtype = hashtype.concat(rec)
-	hashcan = sha1(hashcan.join())
-	hashtype = sha1(hashtype.join())
-	// output play
-	let notation = sColor +" ["+ canm.length +"|"+ canp.length +"/"+ list.length +"]"+ sc,
-		blockP = block1 + block2,
-		partblock = sb +"[partly blocked]"+ sc
-	if (blockP == 2) {notation = zB}
-	if (blockP == 1) {notation += partblock}
-	ecan.innerHTML = hashcan + notation
-	// output type
-	notation = sColor +" ["+ src.length +"|"+ rec.length +"/"+ list.length +"]"+ sc
-	let blockT = block3 + block4
-	if (blockT == 2) {notation = zB}
-	if (blockT == 1) {notation += partblock}
-	etype.innerHTML = hashtype + notation
+		block3 = (rec.length == 0),
+		block4 = (src.length == 0)
+	if (gRun) {
+		if (block1) {gLiesMethods.push("media:"+ runtype + " canPlayType maybe:" + zB0)}
+		if (block2) {gLiesMethods.push("media:"+ runtype + " canPlayType probably:" + zB0)}
+		if (block3) {gLiesMethods.push("media:"+ runtype + " isTypeSupported MediaRecorder:" + zB0)}
+		if (block4) {gLiesMethods.push("media:"+ runtype + " isTypeSupported MediaSource:" + zB0)}
+	}
+	// merge data
+	let hashcan = [], hashtype = []
+	if (!block1) {hashcan = ['==maybe==']; hashcan = hashcan.concat(canm)}
+	if (!block2) {hashcan.push("==probably=="); hashcan = hashcan.concat(canp)}
+	if (!block3) {hashtype = ['==mediarecorder==']; hashtype = hashtype.concat(rec)}
+	if (!block3) {hashtype.push("==mediasource=="); hashtype = hashtype.concat(src)}
+	// store data
+	sDetail[sCan] = hashcan
+	sDetail[sType] = hashtype
+	// elements
+	let ecan = document.getElementById(runtype +"can"),
+		etype = document.getElementById(runtype +"type")
+	// output
+	let notation = ""
+	if (block1 && block2) {
+		hashcan = zB0
+		ecan.innerHTML = zB0
+	} else {
+		hashcan = sha1(hashcan.join())
+		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
+		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
+	}
+	if (block3 && block4) {
+		hashtype = zB0
+		etype.innerHTML = zB0
+	} else {
+		hashtype = sha1(hashtype.join())
+		notation = (block3 ? zB0 : rec.length) +"/"+ (block4 ? zB0 : src.length)
+		etype.innerHTML = hashtype + buildButton("13", sType, notation)
+	}
 	// perf/return
 	log_perf(runtype +" [media]",t0)
-	let res = []
-	res.push("canPlay_"+ runtype +":"+ hashcan)
-	res.push("isTypeSupported_"+ runtype +":"+ hashtype)
-	return (res)
+	return (["canPlay_"+ runtype +":"+ hashcan, "isTypeSupported_"+ runtype +":"+ hashtype])
 }
 
 function outputMedia() {
@@ -134,7 +153,7 @@ function outputMedia() {
 	section.push("mediaSession:"+ r)
 
 	Promise.all([
-		get_media("audio"),
+		get_media("audio"), //run 1st to keep medialists in sync
 		get_media("video")
 	]).then(function(results){
 		results.forEach(function(currentResult) {
