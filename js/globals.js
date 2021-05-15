@@ -124,7 +124,6 @@ let avh = "",
 	error_global_os = se+"global variable not set]"+sc,
 // toggle states
 	stateDR = false,
-	stateFNT = false,
 // other
 	isBrave = false,
 	isBraveMode = "unknown",
