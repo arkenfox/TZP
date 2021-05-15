@@ -709,7 +709,7 @@
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
-			<span class="c" id="fontshash"></span><span></td></tr>
+			<span class="c" id="fontshash"></span><span class="c" id="fontslists"></span></td></tr>
 		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
 		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -722,12 +722,24 @@
 		<tr><td><span class="btn0 btn" onClick="outputFontsFB()">[ click here ]</span>
 				font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<tr><td>[offset] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug1"></td></tr>
-		<tr><td>[<span id="labelUG">domrect</span>] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
-		<tr id="togUG"><td>[getClientRects] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
-		<tr><td>[textmetrics] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug2"></td></tr>
+		<tr><td>[getBoundingClientRect] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
+		<tr><td>[getClientRects] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 68 or lower<br>gfx.downloadable_fonts.woff2.enabled</span></div>
 			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
+		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
+		<tr><td>width</td><td class="c mono" id="tm0"></td></tr>
+		<tr><td>actualBoundingBoxAscent</td><td class="c mono" id="tm1"></td></tr>
+		<tr><td>actualBoundingBoxDescent</td><td class="c mono" id="tm2"></td></tr>
+		<tr><td>actualBoundingBoxLeft</td><td class="c mono" id="tm3"></td></tr>
+		<tr><td>actualBoundingBoxRight</td><td class="c mono" id="tm4"></td></tr>
+		<tr><td>alphabeticBaseline</td><td class="c mono" id="tm5"></td></tr>
+		<tr><td>emHeightAscent</td><td class="c mono" id="tm6"></td></tr>
+		<tr><td>emHeightDescent</td><td class="c mono" id="tm7"></td></tr>
+		<tr><td>fontBoundingBoxAscent</td><td class="c mono" id="tm8"></td></tr>
+		<tr><td>fontBoundingBoxDescent</td><td class="c mono" id="tm9"></td></tr>
+		<tr><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
+		<tr><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
 		<!--details: fonts-->
 		<tr id="fontShow"><td colspan="2" class="showhide">
 			<input id="collapseF1" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F1`)">
@@ -739,30 +751,6 @@
 		<tr class="togF1"><td>size <sup>2</sup></td><td class="c mono" id="fontPixelSize"></td></tr>
 		<tr class="togF1"><td>perspective <sup>2</sup></td><td class="c mono" id="fontPerspective"></td></tr>
 		<tr class="togF1"><td>transform <sup>2</sup></td><td class="c mono" id="fontTransform"></td></tr>
-		<tr class="togF1"><td id="fontLabel">fonts</td><td>
-			 <span class="btn0 btn" onClick="copyclip(`fontFound`)">[ copy to clipboard ]</span></td></tr>
-		<tr class="togF1"><td colspan="2" class="gc intro" id="fontFound"></td></tr>
-		<tr id="fontB1" class="togF2"><td id="fontFBlabel"></td><td>
-			 <span class="btn0 btn" onClick="copyclip(`fontFBFound`)">[ copy to clipboard ]</span></td></tr>
-		<tr id="fontB2" class="togF2"><td colspan="2" class="gc intro" id="fontFBFound"></td></tr>
-		<!--details: tm-->
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseF3" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F3`)">
-			<label for="collapseF3" class="lbl-toggle" id="labelF3">&#9660; show textmetrics</label>
-		</td></tr>
-		<tr class="togF3 togTM"><td></td><td class="s12">textMetrics</td></tr>
-			<tr class="togF3"><td id="labelTM">width</td><td class="c mono" id="tm0"></td></tr>
-			<tr class="togF3 togTM"><td>actualBoundingBoxAscent</td><td class="c mono" id="tm1"></td></tr>
-			<tr class="togF3 togTM"><td>actualBoundingBoxDescent</td><td class="c mono" id="tm2"></td></tr>
-			<tr class="togF3 togTM"><td>actualBoundingBoxLeft</td><td class="c mono" id="tm3"></td></tr>
-			<tr class="togF3 togTM"><td>actualBoundingBoxRight</td><td class="c mono" id="tm4"></td></tr>
-			<tr class="togF3 togTM"><td>alphabeticBaseline</td><td class="c mono" id="tm5"></td></tr>
-			<tr class="togF3 togTM"><td>emHeightAscent</td><td class="c mono" id="tm6"></td></tr>
-			<tr class="togF3 togTM"><td>emHeightDescent</td><td class="c mono" id="tm7"></td></tr>
-			<tr class="togF3 togTM"><td>fontBoundingBoxAscent</td><td class="c mono" id="tm8"></td></tr>
-			<tr class="togF3 togTM"><td>fontBoundingBoxDescent</td><td class="c mono" id="tm9"></td></tr>
-			<tr class="togF3 togTM"><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
-			<tr class="togF3 togTM"><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
 		<!--details: glyphsS-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
