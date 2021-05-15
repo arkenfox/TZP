@@ -301,31 +301,14 @@ function showhide(togType, togID, togWord) {
 			for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
 		}
 	}
-	// fonts
-	if (togID == "F1") {
-		let fontA = dom.fontLabel.textContent
-		let fontB = dom.fontFBlabel.textContent
-		if (fontB == "") {fontB = fontA}
-		if (fontA == fontB) {
-			// same: hide 2nd
-			dom.fontB1.style.display = "none"
-			dom.fontB2.style.display = "none"
-		} else {
-			// diff: show both
-			dom.fontB1.style.display = togType
-			dom.fontB2.style.display = togType
-		}
-	}
 }
 
 function toggleitems(chkbxState, chkbxID) {
 	if (chkbxState.checked) {
 		if (chkbxID=="D") {stateDR = false}
-		if (chkbxID=="F1") {stateFNT = false}
 		showhide("none",chkbxID,"&#9660; show")
 	} else {
 		if (chkbxID=="D") {stateDR = true}
-		if (chkbxID=="F1") {stateFNT = true}
 		showhide("table-row",chkbxID,"&#9650; hide")
 	}
 }
@@ -357,7 +340,7 @@ function showMetrics(type) {
 				metric = name.substring(n,name.length).trim()
 			console.debug(section +": "+ metric +": "+ hash, data)
 		}
-	} else if  (type == "gLiesKnownDetail") {
+	} else if (type == "gLiesKnownDetail") {
 		for (let name in gLiesKnownDetail) {
 			let data = gLiesKnownDetail[name]
 			// split+tidy name
@@ -650,10 +633,6 @@ function outputSection(id, cls) {
 			for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
 			items = document.getElementsByClassName("gc")
 			for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
-			// hide font fallback rows
-			dom.fontFBlabel = ""
-			items = document.getElementsByClassName("togF2")
-			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 			// reset global
 			gCount = 0
 			gData = []
