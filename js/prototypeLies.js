@@ -173,16 +173,6 @@ function outputPrototypeLies() {
 						iframeToStringToString :
 						apiFunction.toString.toString()
 				)
-				
-				/*
-				Accepted strings:
-				'function name() { [native code] }'
-				'function name() {\n    [native code]\n}'
-				'function get name() { [native code] }'
-				'function get name() {\n    [native code]\n}'
-				'function () { [native code] }'
-				`function () {\n    [native code]\n}`
-				*/
 				const trust = name => ({
 					[`function ${name}() { [native code] }`]: true,
 					[`function get ${name}() { [native code] }`]: true,
@@ -619,7 +609,6 @@ function outputPrototypeLies() {
 					'readPixels'
 				]
 			})
-
 			/* potential targets:
 				RTCPeerConnection
 				Plugin
@@ -629,7 +618,6 @@ function outputPrototypeLies() {
 				Worker
 				History
 			*/
-
 			// return lies list and detail 
 			const props = lieDetector.getProps()
 			const propsSearched = lieDetector.getPropsSearched()
