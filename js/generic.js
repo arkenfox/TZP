@@ -524,10 +524,10 @@ function log_section(name, time1, data) {
 				gLiesKnownDetail = {}
 				const names = Object.keys(sDetail).sort()
 				for (const k of names) if (sDetail[k].length) {
-					if (k.indexOf("skip") == -1) {
+					if (k.indexOf("_skip") == -1) {
 						gDetail[k] = sDetail[k]
 					} else {
-						if (k.indexOf("reported") == -1) {
+						if (k.indexOf("_reported") == -1 && k.indexOf("_list") == -1) {
 							gLiesKnownDetail[k] = sDetail[k]
 						}
 					}
