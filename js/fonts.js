@@ -817,13 +817,13 @@ function prime_unicode() {
 		// loading happens in the background, and then re-layout/renders the document once loading is complete
 	// To counter: we set a unicode string early in the process (in an offscreen div)
 	try {
-		log_line(Math.round(performance.now()) + " : PRIME UNICODE")
+		fntStart = performance.now()
+		log_line(Math.round(fntStart) + " : PRIME UNICODE")
 		let str = ""
 		for (let i=0; i < fntCode.length; i++) {
 			str += String.fromCodePoint(fntCode[i])
 		}
 		dom.unicodePrimer.innerHTML = str
-		fntStart = performance.now()
 		// ToDo: unicode priming: enough time on slow systems?
 		// ToDo: does the font fallback string also need priming?
 		// ToDo: set these directly in the HTML
