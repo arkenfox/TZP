@@ -815,7 +815,7 @@ function prime_unicode() {
 		// render the char) FF starts loading the character map data required to support this, but no longer allows
 		// this to block layout & rendering; instead, FF continues to render (perhaps rendering tofu) while the
 		// loading happens in the background, and then re-layout/renders the document once loading is complete
-	// To counter: we set a unicode string early in the process (in an offscreen div)
+	// Solution: set unicode string early in the process (in an offscreen div)
 	try {
 		fntStart = performance.now()
 		log_line(Math.round(fntStart) + " : PRIME UNICODE")
