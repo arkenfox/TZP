@@ -183,47 +183,53 @@ function getDynamicIframeWindow({
 	violateSameOriginPolicy = true,
 	display = false
 }) {
-	const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
-	const length = context.length
-	const element = document.createElement(elementName)
-	document.body.appendChild(element)
-	if (!display) {
-		element.setAttribute('style', 'display:none')
-	}
-	if (nestIframeInContainerDiv) {
-	const attributes = `
-		${source ? `src=${source}` : ''}
-			${violateSameOriginPolicy ? '' : `sandbox="allow-same-origin"`}
-		`
-		element.innerHTML = `<iframe ${attributes}></iframe>`
-	} else if (!violateSameOriginPolicy) {
-		element.setAttribute('sandbox', 'allow-same-origin')
-		if (source) {
+	try {
+		const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
+		const length = context.length
+		const element = document.createElement(elementName)
+		document.body.appendChild(element)
+		if (!display) {
+			element.setAttribute('style', 'display:none')
+		}
+		if (nestIframeInContainerDiv) {
+		const attributes = `
+			${source ? `src=${source}` : ''}
+				${violateSameOriginPolicy ? '' : `sandbox="allow-same-origin"`}
+			`
+			element.innerHTML = `<iframe ${attributes}></iframe>`
+		} else if (!violateSameOriginPolicy) {
+			element.setAttribute('sandbox', 'allow-same-origin')
+			if (source) {
+				element.setAttribute('src', source)
+			}
+		} else if (source) {
 			element.setAttribute('src', source)
 		}
-	} else if (source) {
-		element.setAttribute('src', source)
-	}
-	const iframeWindow = contentWindow ? element.contentWindow : context[length]
+		const iframeWindow = contentWindow ? element.contentWindow : context[length]
 
-	let res = []
-	let navigator = iframeWindow.navigator
+		let res = []
+		let navigator = iframeWindow.navigator
 
-	if (test == "ua") {
-		let list = ['userAgent','appCodeName','appName','product','appVersion',
-			'oscpu','platform','buildID','productSub','vendor','vendorSub'],
-			r = ""
-		for (let i=0; i < list.length; i++) {
-			try {r = navigator[list[i]]} catch(e) {r = zB0}
-			if (r == "") {r = "empty string"}
-			if (r == "undefined") {r = "undefined string"}
-			if (r == undefined) {r = "undefined value"}
-			res.push(list[i] +":"+ r)
+		if (test == "ua") {
+			let list = ['userAgent','appCodeName','appName','product','appVersion',
+				'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+				r = ""
+			for (let i=0; i < list.length; i++) {
+				try {r = navigator[list[i]]} catch(e) {r = zB0}
+				if (r == "") {r = "empty string"}
+				if (r == "undefined") {r = "undefined string"}
+				if (r == undefined) {r = "undefined value"}
+				res.push(list[i] +":"+ r)
+			}
+			res.sort()
 		}
-		res.sort()
+		document.body.removeChild(element)
+		return res
+	} catch(e) {
+		if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
+		if (gRun) {gCheck.push("_generic:dynamic iframe: "+ test +": " + e.name +" : "+ e.message)}
+		return resolve(zB0)
 	}
-	document.body.removeChild(element)
-	return res
 }
 
 /** GENERAL CLICK FUNCTIONS **/
