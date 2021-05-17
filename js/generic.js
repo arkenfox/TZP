@@ -228,7 +228,7 @@ function getDynamicIframeWindow({
 	} catch(e) {
 		if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
 		if (gRun) {gCheck.push("_generic:dynamic iframe: "+ test +": " + e.name +" : "+ e.message)}
-		return resolve(zB0)
+		return zB0
 	}
 }
 
