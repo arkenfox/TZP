@@ -187,7 +187,7 @@ function get_computed_styles() {
 						if (i==1) {reportedStyles.push("fake")}
 						if (i==2) {reportedStyles.push("hello","world")}
 					}
-					// ignore false positives FF60-62
+					// false positives FF60-62: added to alerts
 					if (isFF && isVer > 62) {
 						let lastStyleIndex = reportedStyles.indexOf("constructor")
 						fakeStyles = reportedStyles.slice(lastStyleIndex+1)
