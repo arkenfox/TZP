@@ -430,6 +430,7 @@ function log_line(str) {
 function log_perf(str, time1, time2, extra) {
 	let t0 = performance.now(),
 		output = ""
+	if (time1 == undefined) {time1 = ("error").padStart(7)}
 	if (isNaN(time1)){
 		output = str.padStart(30) +": "+ (time1).padStart(7)
 	} else {
