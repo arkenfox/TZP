@@ -273,19 +273,13 @@ function showhide(togType, togID, togWord) {
 	// change label
 	if (togWord !== "") {
 		let sText = "details"
-		if (togID == "F1") {sText = "fonts"}
-		if (togID == "F3") {sText = "textmetrics"}
 		if (togID == "F4") {sText = "unicode glyphs"}
 		if (togID == "Z") {sText = "perf & debugging"}
 		document.getElementById("label"+ togID).innerHTML = togWord +" "+ sText
 	}
 	// errors
 	if (togID == "E") {
-		if (dom.err5.textContent.length > 1) {
-			dom.togE5.style.display = "table=row"
-		} else {
-			dom.togE5.style.display = "none"
-		}
+		dom.togE5.style.display = (dom.err5.textContent.length > 1 ? "table=row" : "none")
 	}
 	// domrect show/hide extra sections & change drFirstHeader text
 	if (togID == "D") {
@@ -607,6 +601,7 @@ function countJS(filename) {
 				get_isVer(),
 				get_isTB(),
 			]).then(function(results){
+				if (!isFF) {runS = false} // runS is FF only
 				if (results[3] == "timeout") {
 					gLiesOnceMethods.push("_global:resource:blocked")
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
@@ -726,7 +721,7 @@ function run_once() {
 	// isFF
 	let t0 = performance.now()
 	let str = "installtrigger"
-	let str1 = "type of "+str, str2 = "type of "+ str +"Impl", str3 = str+ " in window"
+	let str1 = "type of "+str, str2 = "type of "+ str +"impl", str3 = str+ " in window"
 	let test1 = false, test2 = false, test3 = false
 	if (runSL) {
 		isFFno.push(str1,str2,str3)
@@ -735,7 +730,6 @@ function run_once() {
 		if ("undefined" != typeof InstallTriggerImpl) {isFFyes.push(str2); test2 = true} else {isFFno.push(str2)}
 		if ("InstallTrigger" in window) {isFFyes.push(str3); test3 = true} else {isFFno.push(str3)}
 	}
-	if (isFFno.length) {runS = false}
 	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
 	// WARM
 	try {
