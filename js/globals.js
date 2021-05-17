@@ -151,6 +151,5 @@ let avh = "",
 	logExtra = false,
 	logResize = false,
 	logStorage = false,
-	runS = false, // simulate
+	runS = false, // simulate FF only
 	runSL = false // simulate lies
-
