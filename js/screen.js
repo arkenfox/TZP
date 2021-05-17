@@ -2821,22 +2821,26 @@ function outputUA() {
 			}), // nested
 		]).then(function(results){
 			for(let i=0; i < 7; i++) {
-				// output
-				let iframeHash = sha1(results[i].join())
-				iframeArray = results[i]
-				if (iframeHash !== docHash) {
-					// assumption: any iframe leaks should be the same: just get one
-					if (useIframe == false) {
-						useIframe = true
-						// red sumary
-						dom.uaIframes.innerHTML = iframeHash + match_red
+				let iframeHash = ""
+				if (Array.isArray(results[i])) {
+					// output
+					let iframeHash = sha1(results[i].join())
+					iframeArray = results[i]
+					if (iframeHash !== docHash) {
+						// assumption: any iframe leaks should be the same: just get one
+						if (useIframe == false) {
+							useIframe = true
+							// red sumary
+							dom.uaIframes.innerHTML = iframeHash + match_red
+						}
 					}
+					iframeHash += (iframeHash == docHash ? match_green : match_red)
+					document.getElementById("uaIframe"+ i).innerHTML = iframeHash
+				} else {
+					iframeHash = results[i]
+					document.getElementById("uaIframe"+ i).innerHTML = iframeHash
 				}
-				iframeHash += (iframeHash == docHash ? match_green : match_red)
-				document.getElementById("uaIframe"+ i).innerHTML = iframeHash
 			}
-			// green sumary
-			if (useIframe == false) {dom.uaIframes.innerHTML = docHash + match_green}
 			// show iframe diffs
 			if (useIframe) {
 				for (let i=0; i < docArray.length; i++) {
@@ -2846,6 +2850,10 @@ function outputUA() {
 						target.innerHTML += "<br>"+ sb.trim() + parts.slice(1).join(":") + sc
 					}
 				}
+			} else {
+				// green sumary
+				// ToDo: this doesn't handled errors/blocks
+				dom.uaIframes.innerHTML = docHash + match_green
 			}
 			get_workers()
 		})
