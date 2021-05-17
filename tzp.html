@@ -718,15 +718,25 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
 			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
-		<tr><td>fonts <sup>1, 2</sup></td><td class="c mono" id="fontMain"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="outputFontsFB()">[ click here ]</span>
-				font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<tr><td>[offset] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug1"></td></tr>
 		<tr><td>[getBoundingClientRect] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
 		<tr><td>[getClientRects] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 68 or lower<br>gfx.downloadable_fonts.woff2.enabled</span></div>
 			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
+		<!--fonts-->
+		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
+		<tr><td>fonts <sup>1, 2</sup></td><td class="c mono" id="fontMain"></td></tr>
+		<tr class="togF1"><td>offset <sup>1</sup></td><td class="c mono" id="fontsOffset"></td></tr>
+		<tr class="togF1"><td>client <sup>2</sup></td><td class="c mono" id="fontsClient"></td></tr>
+		<tr class="togF1"><td>scroll <sup>2</sup></td><td class="c mono" id="fontsScroll"></td></tr>
+		<tr class="togF1"><td>pixel <sup>2</sup></td><td class="c mono" id="fontsPixel"></td></tr>
+		<tr class="togF1"><td>size <sup>2</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
+		<tr class="togF1"><td>perspective <sup>2</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
+		<tr class="togF1"><td>transform <sup>2</sup></td><td class="c mono" id="fontsTransform"></td></tr>
+		<tr><td><span class="btn0 btn" onClick="outputFontsFB()">[ click here ]</span>
+				font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
+		<!--tm-->
 		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
 		<tr><td>width</td><td class="c mono" id="tm0"></td></tr>
 		<tr><td>actualBoundingBoxAscent</td><td class="c mono" id="tm1"></td></tr>
@@ -740,17 +750,6 @@
 		<tr><td>fontBoundingBoxDescent</td><td class="c mono" id="tm9"></td></tr>
 		<tr><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
 		<tr><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
-		<!--details: fonts-->
-		<tr id="fontShow"><td colspan="2" class="showhide">
-			<input id="collapseF1" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F1`)">
-			<label for="collapseF1" class="lbl-toggle" id="labelF1">&#9660; show fonts</label></td></tr>
-		<tr class="togF1"><td>offset <sup>1</sup></td><td class="c mono" id="fontOffset"></td></tr>
-		<tr class="togF1"><td>client <sup>2</sup></td><td class="c mono" id="fontClient"></td></tr>
-		<tr class="togF1"><td>scroll <sup>2</sup></td><td class="c mono" id="fontScroll"></td></tr>
-		<tr class="togF1"><td>pixel <sup>2</sup></td><td class="c mono" id="fontPixel"></td></tr>
-		<tr class="togF1"><td>size <sup>2</sup></td><td class="c mono" id="fontPixelSize"></td></tr>
-		<tr class="togF1"><td>perspective <sup>2</sup></td><td class="c mono" id="fontPerspective"></td></tr>
-		<tr class="togF1"><td>transform <sup>2</sup></td><td class="c mono" id="fontTransform"></td></tr>
 		<!--details: glyphsS-->
 		<tr><td colspan="2" class="showhide">
 			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
