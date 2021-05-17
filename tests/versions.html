@@ -22,6 +22,7 @@
 	  <object id="test68"></object>
 		<div id="test73"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+		<output id="test90">a</output>
 	</div>
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000 b</div>
@@ -42,6 +43,7 @@
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
 		<tr><td>90</td><td id="n90"></td><td class="c mono" id="v90"></td></tr>
+		<tr><td>90</td><td id="n90a"></td><td class="c mono" id="v90a"></td></tr>
 		<tr><td>89</td><td id="n89"></td><td class="c mono" id="v89"></td></tr>
 		<tr><td>88</td><td id="n88"></td><td class="c mono" id="v88"></td></tr>
 		<tr><td>88</td><td id="n88a"></td><td class="c mono" id="v88a"></td></tr>
@@ -132,6 +134,13 @@ function outputVersion() {
 		if (e.message.substr(0,1) == "s") {ver90 = xS}
 	}
 	output("90", "1520434", ver90, performance.now()-t90)
+
+	// 90a: 1537689
+	let t90a = performance.now(), ver90a = xF
+	try {
+		if (dom.test90.defaultValue == "a") {ver90a = xS}
+	} catch(e) {}
+	output("90a", "1537689", ver90a, performance.now()-t90a)
 
 	// 89: 1703213
 	let t89 = performance.now(), ver89 = xF
@@ -550,6 +559,27 @@ function outputVersion() {
 	let test42 = new Date("19999-11-11").toString()
 	if (test42 !== "Invalid Date") {ver42 = xOMG}
 	output("42", "", ver42, performance.now()-t42)
+
+	try {
+		const chromeKeysA = Object.keys(chrome)
+		const chromeKeysB = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
+		console.debug(chromeKeysA)
+		// note: runtime missing due to testing on file:/// scheme
+		// chrome/brave: loadTimes, csi, app
+		// opera: loadTimes, csi, search, app
+	} catch(e) {
+		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
+		console.debug("chromeKeysA", e.name, e.message)
+	}
+	try {
+		const chromeKeysB = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
+		console.debug(chromeKeysB)
+		// brave: isInstalled", getDetails, getIsInstalled, installState, runningState, InstallState, RunningState
+
+	} catch(e) {
+		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
+		console.debug("chromeKeysB", e.name, e.message)
+	}
 }
 
 function rerunVersion() {
