@@ -16,6 +16,8 @@ let fntLists = [], fontslists = ""
 let fntHead = "glyph".padStart(7) +"default".padStart(15) +"sans-serif".padStart(15) +"serif".padStart(15)
 	+"monospace".padStart(15) +"cursive".padStart(15) +"fantasy".padStart(15) +"<br>" +"-----".padStart(7)
 
+let fntSim = 0
+
 function set_fntList() {
 	fontslists = ""
 	let fntMaster = [
@@ -38,6 +40,10 @@ function set_fntList() {
 			fontslists += buildButton("12", str, fntKey[i])
 		}
 		sDetail[str] = array
+	}
+	if (fntList.length == 0) {
+		dom.fontMain = zNA
+		dom.fontFB = zNA
 	}
 }
 
@@ -158,7 +164,7 @@ const createLieDetector = () => {
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
-		if (isOS == "") {
+		if (fntList.length == 0) {
 			return resolve(zNA)
 		}
 		try {
@@ -305,8 +311,9 @@ const getFonts = () => {
 				fontsTransform
 			})
 		} catch (error) {
+			// TypeError: document.fonts.values() is not iterable
 			console.error(error)
-			return resolve("error")
+			return resolve(zB0)
 		}
 	})
 }
@@ -315,108 +322,142 @@ function get_fonts() {
 	return new Promise(resolve => {
 		let t0 = performance.now(),
 			fontReturn = []
-		function finish_up() {
-			log_perf("creepJS [fonts]",t0)
-			return resolve(fontReturn)
-		}
+		// clear
+		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		clearDetail["fonts_fonts"]
-		// run it
+		sNames.forEach(function(name) {
+			clearDetail("fonts_"+ name + "_reported_skip")
+		})
+		// toggle
+		function showhide_detail(action) {
+			let items = document.getElementsByClassName("togF1")
+			for (let i=0; i < items.length; i++) {items[i].style.display = action}
+		}
+		// run
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
 
-			// handled other cases
-			if (res == "n/a") {
-				fontReturn = "fonts:n/a"
-				dom.fontMain = res
-				finish_up()
-			} else if (res == "error") {
-				fontReturn = "fonts:error"
-				dom.fontOffset = res
-				dom.fontClient = res
-				dom.fontScroll = res
-				dom.fontPixel = res
-				dom.fontPixelSize = res
-				dom.fontPerspective = res
-				dom.fontTransform = res
-				dom.fontMain = res
-				finish_up()
-			} else {
-				let {lies, fontsScroll, fontsOffset, fontsClient, fontsPixel, fontsPixelSize, fontsPerspective, fontsTransform} = res
-				let isLies = lies
-				// values
-				let hashO = sha1(fontsOffset.join()),
-					countO = fontsOffset.length
-				let hashC = sha1(fontsClient.join()),
-					countC = fontsClient.length
-				let hashS = sha1(fontsScroll.join()),
-					countS = fontsScroll.length
-				let hashP = sha1(fontsPixel.join()),
-					countP = fontsPixel.length
-				let hashPS = sha1(fontsPixelSize.join()),
-					countPS = fontsPixelSize.length
-				let hashPR = sha1(fontsPerspective.join()),
-					countPR = fontsPerspective.length
-				let hashT = sha1(fontsTransform.join()),
-					countT = fontsTransform.length
-				let countF = fntList.length
-
-				// simulate
-				//isLies = true
-				//hashO = sha1("o"); countO = 0; fontsOffset = []
-				//hashC = sha1("c"); countC = 5; fontsClient = ["client","b","c","d","e"]
-				//hashS = sha1("s"); countS = 3; fontsScroll = ["scroll","b","c"]
-				//hashT = sha1("t"); countT = 4; fontsTransform = ["transform","b","c","d"]
-				//hashPR = sha1("pr"); countPR = 2; fontsPerspective = ["perspective","b"]
-				//hashP = sha1("p"); countP = 1; fontsPixel = ["pixel"]
-				//hashPS = sha1("ps"); countPS = 1; fontsPixelSize = ["pixelsize"]
-
-				// output
-				dom.fontOffset.innerHTML = hashO + s12 +"["+ countO +"/"+ countF +"]"+ sc
-				dom.fontClient.innerHTML = hashC + s12 +"["+ countC +"/"+ countF +"]"+ sc
-				dom.fontScroll.innerHTML = hashS + s12 +"["+ countS +"/"+ countF +"]"+ sc
-				dom.fontPixel.innerHTML = hashP + s12 +"["+ countP +"/"+ countF +"]"+ sc
-				dom.fontPixelSize.innerHTML = hashPS + s12 +"["+ countPS +"/"+ countF +"]"+ sc
-				dom.fontPerspective.innerHTML = hashPR + s12 +"["+ countPR +"/"+ countF +"]"+ sc
-				dom.fontTransform.innerHTML = hashT + s12 +"["+ countT +"/"+ countF +"]"+ sc
-
-				// get most common hash/count
-				let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
-					let count = list.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
-					if (count > greatest.count) {
-						return {count, item: currentValue}
-					}
-					return greatest
-				}, { count: 0, item: undefined })
-				let list = [hashO, hashC, hashS, hashP, hashPS, hashPR, hashT]
-				let greatest = getGreatestOccurrence(list)
-
-				// default: use scroll
-				let fontCount = countS,
-					fontsFound = fontsScroll
-				let fontHash = greatest.item
-
-				// greatest first match
-				if (hashS == fontHash) { // already set
-				} else if (hashC == fontHash) {fontCount = countC; fontsFound = fontsClient
-				} else if (hashP == fontHash) {fontCount = countP; fontsFound = fontsPixel
-				} else if (hashPR == fontHash) {fontCount = countPR; fontsFound = fontsPerspective
-				} else if (hashT == fontHash) {fontCount = countT; fontsFound = fontsTransform
-				} else if (hashPS == fontHash) {fontCount = countPS; fontsFound = fontsPixelSize
-				} else if (hashO == fontHash) {fontCount = countO; fontsFound = fontsOffset // do last: most likely to lie?
+			// simulate
+			let fntSimNames = [
+				"mixed results: valid bypass",
+				"mixed results: invalid bypass [greatest > 4 occurences]",
+				"mixed results: invalid bypass [greatest is none]",
+				"same results: all none",
+				"same results: all n/a",
+				"same results: all blocked"
+			]
+			if (runSL) {
+				fntSim = fntSim % 6
+				console.debug("FONT SIM #"+ fntSim + ":", fntSimNames[fntSim])
+				if (fntSim == 0) {
+					res["fontsClient"] = ["client","d","e"]; res["fontsScroll"] = ["scroll","t"]; res["fontsTransform"] = []
+				} else if (fntSim == 1) {
+					res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
+					res["fontsPerspective"] = ["perspective","q"]; res["fontsPixel"] = ["pixel"]
+				} else if (fntSim == 2) {
+					res["fontsOffset"] = []; res["fontsScroll"] = []; res["fontsTransform"] = []; res["fontsPixel"] = []
+				} else if (fntSim == 3) {
+					res["fontsOffset"] = []; res["fontsClient"] = []; res["fontsScroll"] = []; res["fontsTransform"] = []
+					res["fontsPerspective"] = []; res["fontsPixel"] = []; res["fontsPixelSize"] = []
+				} else if (fntSim == 4) {
+					res = zNA
+				} else if (fntSim == 5) {
+					res = zB0
 				}
-				// set return
-				if (greatest.count > 3) {
-					// if four or more are the same, we'll go with that
-					sDetail["fonts_fonts"] = fontsFound
-					dom.fontMain.innerHTML = fontHash + buildButton("12", "fonts_fonts", fontCount)
-					fontReturn = "fonts:"+ fontHash
-				} else {
-					fontReturn = "fonts:"+zLIE
-					fontMain.innerHTML = zLIE
-				}
-				finish_up()
+				fntSim++
 			}
+
+			// single return
+			if (res == zB0 || res == zNA) {
+				dom.fontMain = res
+				showhide_detail("none")
+				if (runSL) {console.debug(" - display "+ res +", return " + res)}
+				return resolve("fonts:"+ res)
+			}
+			// get values
+			let fntData = [], fntHashes = []
+			for (let name in res) {
+				if (name !== "lies") {
+					let data = res[name],
+						hash = sha1(data.join())
+					fntData.push(name+ ":"+ hash + ":"+ data.length)
+					fntHashes.push(hash)
+					sDetail["fonts_"+ name + "_reported_skip"] = data
+				}
+			}
+			// single hash: FF62 and lower: pixelsize is none: nor worth coding around
+			let fntUnique = fntHashes.filter(function(item, position) {return fntHashes.indexOf(item) === position})
+			if (fntUnique.length == 1) {
+				showhide_detail("none")
+				sDetail["fonts_fonts"] = res["fontsClient"]
+				if (res["fontsClient"].length) {
+					dom.fontMain.innerHTML = fntUnique[0] + buildButton("12", "fonts_fonts", res["fontsClient"].length)
+					return resolve("fonts:"+ fntUnique[0])
+				} else {
+					dom.fontMain.innerHTML = soL +"none"+ scC
+					if (gRun) {gLiesKnown.push("fonts:fonts")} // generic lie
+					if (runSL) {console.debug(" - generic font lie, display none, return none")}
+					return resolve("fonts:none")
+				}
+			}
+
+			// mixed results
+			// get most common hash/occurence
+			let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
+				let count = list.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
+				if (count > greatest.count) {
+					return {count, item: currentValue}
+				}
+				return greatest
+			}, { count: 0, item: undefined })
+			let greatest = getGreatestOccurrence(fntHashes)
+			let isBypass = (greatest.count > 3)
+			if (greatest.item == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {isBypass = false} // zero detected
+			// show/populate
+			showhide_detail("table-row")
+			let matchCount = "", matchName = ""
+			fntData.forEach(function(item) {
+				let name = item.split(":")[0],
+					hash = item.split(":")[1],
+					count = item.split(":")[2],
+					detail = "fonts_"+ name + "_reported_skip",
+					el = document.getElementById(name),
+					display = ""
+				if (count == 0) {hash = "none"}
+				if (isBypass) {
+					if (hash == greatest.item) {
+						matchCount = count
+						matchName = name
+						display = hash
+					} else {
+						hash = soB + hash + scC
+						if (runSL) {console.debug(" - specific font lie + bypass", name)}
+						if (gRun) {
+							gLiesKnown.push("fonts:"+ name) // specific lie
+							gLiesBypassed.push("fonts:"+ name +":"+ greatest.item)
+						}
+						display = hash + (count == 0 ? "" : buildButton("12", detail, count))
+					}
+				} else {
+					display = soL + hash + scC + (count == 0 ? "" : buildButton("12", detail, count))
+				}
+				el.innerHTML = display
+			})
+			// display
+			let result = greatest.item, display = ""
+			if (isBypass) {
+				sDetail["fonts_fonts"] = res[matchName]
+				display = result + buildButton("12", "fonts_fonts", matchCount)
+			} else {
+				display = "unknown"
+				if (gRun) {gLiesKnown.push("fonts:fonts")} // generic lie
+				if (runSL) {console.debug(" - generic font lie, display unknown, return " + zLIE)}
+				result = zLIE
+			}
+			dom.fontMain.innerHTML = display
+			log_perf("creepJS [fonts]",t0)
+			return resolve("fonts:"+ result)
 		})
 	})
 }
@@ -728,12 +769,12 @@ function get_woff() {
 }
 
 function outputFontsFB() {
-	// IDK why, when doc fonts blocked: we need a primer and a delay
+	// IDK: when doc fonts blocked: we need a primer and a delay
 	if (isFF && isOS !== "") {
 		if (gClick) {
 			gClick = false
 			dom.fontFB.innerHTML = "test is running... please wait"
-			// set interval allows ^^ to paint
+			// interval allows ^^ to paint
 			function run_primer() {
 				clearInterval(checking)
 				get_fallback(['orange','banana']) // primer
@@ -751,22 +792,12 @@ function outputFontsFB() {
 function outputFonts() {
 	let t0 = performance.now(),
 		section = [], r = ""
-
-	if (isOS == "") {
-		dom.fontOffset = zNA
-		dom.fontClient = zNA
-		dom.fontScroll = zNA
-		dom.fontFB = zNA
-		dom.fontShow.style.display = "none"
-	}
 	set_fallback_string()
 	if (gRun) {set_fntList()}
-
 	// proportional
 	r = window.getComputedStyle(document.body,null).getPropertyValue("font-family")
 	dom.fontFCprop = r
 	section.push("proportional:"+ r)
-
 	// sizes
 	dom.df1 = fntStrA
 	dom.df2 = fntStrA
@@ -776,12 +807,10 @@ function outputFonts() {
 	r += " | monospace, "+ getComputedStyle(el).getPropertyValue("font-size")
 	dom.fontFCsize = r
 	section.push("sizes:"+ r)	
-
 	// css font loading
 	r = ("FontFace" in window ? zE : zD)
 	dom.fontCSS = r
 	section.push("font_loading:"+ r)
-
 	// doc fonts
 	el = dom.spanLH
 	r = getComputedStyle(el).getPropertyValue("font-family")
@@ -815,7 +844,7 @@ function prime_unicode() {
 		// render the char) FF starts loading the character map data required to support this, but no longer allows
 		// this to block layout & rendering; instead, FF continues to render (perhaps rendering tofu) while the
 		// loading happens in the background, and then re-layout/renders the document once loading is complete
-	// Solution: set unicode string early in the process (in an offscreen div)
+	// Solution: set unicode string early in the process in an offscreen div
 	try {
 		fntStart = performance.now()
 		log_line(Math.round(fntStart) + " : PRIME UNICODE")
@@ -824,7 +853,6 @@ function prime_unicode() {
 			str += String.fromCodePoint(fntCode[i])
 		}
 		dom.unicodePrimer.innerHTML = str
-		// ToDo: unicode priming: enough time on slow systems?
 		// ToDo: does the font fallback string also need priming?
 		// ToDo: set these directly in the HTML
 	} catch(e) {

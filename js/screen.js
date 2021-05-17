@@ -115,12 +115,6 @@ const get_isEngine = () => new Promise(resolve => {
 	function final_isFF() {
 		if (isFFyes.length) {isFF = true}
 		log_perf("final status [isFF]",""+ isFF,"ignore")
-		if (isFF && isFFno.length) {
-			isFFno.forEach(function(item) {
-				gLiesOnce.push("_global:isFF "+ item)
-				gLiesOnceBypassed.push("_global:isFF "+ item + ":true")
-			})
-		}
 	}
 	// do math
 	function cbrt(x) {
@@ -243,7 +237,7 @@ const get_isOS = () => new Promise(resolve => {
 		} else if (m == "F") {
 			isOS = "android"
 		}
-		if (runSL) (isOS = "")
+		//if (runSL) (isOS = "") // breaks font sim
 		if (isOS == "") {
 			tryharder()
 		} else {
@@ -275,8 +269,7 @@ const get_isOS2 = () => new Promise(resolve => {
 	// skip
 	if (!isFF || isOS !== "") {return resolve()}
 	// someone bypassed math and system font
-	// check useragent and prototype lies. record bypass if possible
-
+	// check ua vs prototype lies. record bypass if possible
 })
 
 const get_isRFP = () => new Promise(resolve => {
@@ -1972,7 +1965,7 @@ function get_ua_doc() {
 				}
 
 				if (isOS !== "" && bs == false) {
-					// isVerPlus: allow the next version 
+					// isVerPlus: allow the next version
 					let controlA = "", controlB = "", testA = str, testB = str
 
 					if (isRFP) {
@@ -2989,6 +2982,14 @@ function outputFD(runtype) {
 }
 
 function outputStart() {
+	// FF60: false positive: installtriggerimpl
+	if (isVer < 61) {isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))}
+	if (isFF && isFFno.length) {
+		isFFno.forEach(function(item) {
+			gLiesOnce.push("_global:isFF "+ item)
+			gLiesOnceBypassed.push("_global:isFF "+ item + ":true")
+		})
+	}
 	// cosmetics
 		// not-coded
 	let items = document.getElementsByClassName("faint")
