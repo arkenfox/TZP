@@ -567,8 +567,7 @@ function outputVersion() {
 		for (const k of names) {
 			res.push(k +":"+ chromeKeys[k].join())
 		}
-		console.debug(sha1(res.join()), res)
-
+		console.debug(sha1(res.join()) +"\n"+ res.join("\n"))
 	} catch(e) {
 		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
 		console.debug("chromeKeys", e.name, e.message)
