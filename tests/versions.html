@@ -561,24 +561,17 @@ function outputVersion() {
 	output("42", "", ver42, performance.now()-t42)
 
 	try {
-		const chromeKeysA = Object.keys(chrome)
-		const chromeKeysB = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
-		console.debug(chromeKeysA)
-		// note: runtime missing due to testing on file:/// scheme
-		// chrome/brave: loadTimes, csi, app
-		// opera: loadTimes, csi, search, app
-	} catch(e) {
-		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
-		console.debug("chromeKeysA", e.name, e.message)
-	}
-	try {
-		const chromeKeysB = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
-		console.debug(chromeKeysB)
-		// brave: isInstalled", getDetails, getIsInstalled, installState, runningState, InstallState, RunningState
+		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
+		const names = Object.keys(chromeKeys)
+		let res = []
+		for (const k of names) {
+			res.push(k +":"+ chromeKeys[k].join())
+		}
+		console.debug(sha1(res.join()), res)
 
 	} catch(e) {
 		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
-		console.debug("chromeKeysB", e.name, e.message)
+		console.debug("chromeKeys", e.name, e.message)
 	}
 }
 
