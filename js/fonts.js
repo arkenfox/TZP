@@ -310,9 +310,9 @@ const getFonts = () => {
 				fontsPerspective,
 				fontsTransform
 			})
-		} catch (error) {
-			// TypeError: document.fonts.values() is not iterable
-			console.error(error)
+		} catch(e) {
+			if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
+			if (gRun) {gCheck.push("fonts:fonts: "+ e.name +" : "+ e.message)}
 			return resolve(zB0)
 		}
 	})
