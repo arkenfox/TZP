@@ -112,10 +112,23 @@ const get_navKeys = () => new Promise(resolve => {
 	// reset
 	navKeys = {}
 	isBraveMode = "unknown"
-	// simulate
-	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
 	// build
 	try {
+		// compare methods: testing
+		let keysPrototype = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		keysPrototype = keysPrototype.filter(x => !["constructor"].includes(x))
+		let keysLoop = []
+		for (const key in navigator) {keysLoop.push(key)}
+		if (gRun) {
+			// don't record a lie, but populate details
+			if (sha1(keysPrototype.join()) !== sha1(keysLoop.join())) {
+				gCheck.push("_generic:get_navKeys: mismatch")
+				sDetail["misc_navigator_keys_prototype_skip"] = keysPrototype
+				sDetail["misc_navigator_keys_loop_skip"] = keysLoop
+			}
+		}
+
+
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// simulate
 		if (runSL) {
@@ -124,21 +137,6 @@ const get_navKeys = () => new Promise(resolve => {
 			keys = keys.filter(x => !["appName"].includes(x)) // change order
 			keys.push("appName")
 		}
-
-		// compare methods: testing
-		let keysPrototype = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		keysPrototype = keysPrototype.filter(x => !["constructor"].includes(x))
-		let keysLoop = []
-		for (const key in navigator) {keysLoop.push(key)}
-		if (gRun) {
-			// don't record a lie, but populate details
-			if (sha1(keys.join()) !== sha1(keysLoop.join())) {
-				gCheck.push("_generic:get_navKeys: mismatch")
-				sDetail["misc_navigator_keys_prototype_skip"] = keysPrototype
-				sDetail["misc_navigator_keys_loop_skip"] = keysLoop
-			}
-		}
-
 		// true/fake/original keys
 		let trueKeys = keys
 		let lastKeyIndex = keys.length,
