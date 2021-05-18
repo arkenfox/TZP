@@ -117,6 +117,21 @@ const get_navKeys = () => new Promise(resolve => {
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+
+		// compare methods: testing
+		let keysPrototype = keys
+		keysPrototype = keysPrototype.filter(x => !["constructor"].includes(x))
+		let keysLoop = []
+		for (const key in navigator) {keysLoop.push(key)}
+		if (gRun) {
+			// don't record a lie, but populate details
+			if (sha1(keys.join()) !== sha1(keysLoop.join())) {
+				gCheck.push("_generic:get_navKeys: mismatch")
+				sDetail["misc_navigator_keys_prototype_skip"] = keys
+				sDetail["misc_navigator_keys_loop_skip"] = keysLoop
+			}
+		}
+
 		// simulate
 		if (runSL) {
 			keys.push("iamfake") // add fake
