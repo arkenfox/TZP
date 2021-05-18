@@ -4,6 +4,79 @@ var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
 /* GLOBAL isTHINGS */
 
+const get_isBrave = () => new Promise(resolve => {
+	// not
+	if (isFF) {return resolve()} // FF
+	if (!('chrome' in window)) return resolve() // no chrome
+	if (Object.keys(chrome).includes("search")) {return resolve()} // opera
+	// proceed
+	let t0 = performance.now(), res = []
+	// simulate
+	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
+	// primary
+	let navKeys = []
+	for (const key in navigator) {navKeys.push(key)}
+
+	let chkA = false, chkC = false
+	try {chkA = Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave'} catch(e) {}
+	let chkB = chkA ? navKeys.indexOf("brave") < 10 : false
+	try {chkC = navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }'} catch(e) {}
+	let chkD = navKeys.includes("brave")
+	res.push("braveConstructor:"+ chkA)
+	res.push("braveIndex:"+ chkB)
+	res.push("braveIsBrave:"+ chkC)
+	res.push("braveNavigator:"+ chkD)
+	let isPrimary = chkA && chkB && chkC && chkD
+
+	const detectBrave = async () => {
+		/* with help from creepJS */
+		const windowKeys = Object.keys(Object.getOwnPropertyDescriptors(window))
+		const fileSystemKeys = /FileSystem((|Directory|File)Handle|WritableFileStream)|show((Directory|((Open|Save)File))Picker)/
+		// each can be spoofed or blocked
+		return {
+			// moving to flags?: https://github.com/brave/brave-browser/issues/9586#issuecomment-840872720
+			fileSystemAccessDisabled: !windowKeys.filter(key => fileSystemKeys.test(key)).length,
+			webSerialDisabled: !('Serial' in window || 'SerialPort' in window),
+			reportingDisabled: !('ReportingObserver' in window),
+			// not strictly brave
+			gpcInNavigator: 'globalPrivacyControl' in navigator,
+			/*// primary method
+			braveInNavigator: (
+				'brave' in navigator &&
+				Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave' &&
+				navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }' &&
+				'brave' in navigator ? Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)).indexOf("brave") < 10 : false
+			),*/
+			// rule out other brands
+			brandIsNotGoogleMicrosoftOrOpera: (
+				!('userAgentData' in navigator) ? 'unknown' :
+				!navigator.userAgentData.brands
+				.filter(item => /Google Chrome|Microsoft Edge|Opera/.test(item.brand)).length
+			),
+			// blink w/2147483648 is brave (spoofable and blockable)
+			storageQuotaIs2Gb: 2147483648 == (await navigator.storage.estimate()).quota,
+		}
+	}
+	;(async () => {
+		const x = await detectBrave()
+		const names = Object.keys(x).sort()
+		for (const k of names) {res.push(k +":"+ x[k])}
+		res.sort()
+		// definitely Brave (assuming index position is super-unlikely to be matched by a spoof)
+		if (isPrimary) {
+			isBrave = true
+			log_perf("isBrave [global]",t0,"",isBrave)
+			return resolve()
+		}
+		// dig deeper
+
+
+		log_perf("isBrave [global]",t0,"",isBrave)
+		return resolve()
+
+	})()
+})
+
 function get_isBraveMode() {
 	let t0 = performance.now()
 	function set(mode) {
@@ -2976,6 +3049,14 @@ function outputFD(runtype) {
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
+			// add some simple entropy for Brave/Chrome
+			let browser = ""
+			if (isBrave) {browser = "Brave"} else if (Object.keys(chrome).includes("search")) {browser = "Opera"}
+			if (browser.length) {
+				dom.browserlabel = "browser"
+				dom.fdResourceCss = browser
+				section.push("browser:"+ browser)
+			}
 			log_section("feature", t0, section)
 			// non-FF needs these: in FF the scrollbar function calls them
 			if (runtype == "load") {

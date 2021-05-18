@@ -133,33 +133,43 @@ function get_mathml() {
 
 function get_nav_prototype() {
 	// use global
-	let sTrue = "misc_navigator_keys"
-	let sFake = "misc_navigator_keys_fake_skip"
-	let sAll = "misc_navigator_keys_reported_skip"
+	let sTrue = "misc_navigator_keys",
+		sFake = "misc_navigator_keys_fake_skip",
+		sMoved = "misc_navigator_keys_moved_skip",
+		sAll = "misc_navigator_keys_reported_skip"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
+	sDetail[sMoved] = navKeys["movedKeys"]
 	sDetail[sAll] = navKeys["allKeys"]
 	let lieLength = navKeys["fakeKeys"].length,
+		movedLength = navKeys["movedKeys"].length,
 		fakeStr = "",
+		movedStr = "",
 		realhash = zB0
 	// output
 	if (navKeys["trueKeys"]) {
 		let hash = sha1(navKeys["allKeys"].join())
 		let display = hash
 		realhash = sha1(navKeys["trueKeys"].join())
+		// moved
+		if (movedLength) {
+			movedStr = buildButton("18", sMoved, movedLength +" moved")
+			// method
+			if (gRun) {
+				gLiesMethods.push("misc:navigator keys: expected keys moved")
+			}
+		}
 		// fake
 		if (lieLength) {
 			display = soB + hash + scC
-			fakeStr = lieLength +" lie"+ (lieLength > 1 ? "s" : "")
-			fakeStr = buildButton("18", sFake, fakeStr)
+			fakeStr = buildButton("18", sFake, lieLength +" lie"+ (lieLength > 1 ? "s" : ""))
 			// lies
 			if (gRun) {
-				// ToDo: only record bypass if it knownGood passes
 				gLiesKnown.push("misc:navigator keys")
 				gLiesBypassed.push("misc:navigator keys:"+realhash)
 			}
 		}
-		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr
+		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr + movedStr
 	} else {
 		dom.nProto = realhash
 	}

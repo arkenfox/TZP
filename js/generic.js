@@ -117,9 +117,16 @@ const get_navKeys = () => new Promise(resolve => {
 	// build
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		// simulate
+		if (runSL) {
+			keys.push("iamfake") // add fake
+			keys = keys.filter(x => !["buildID"].includes(x)) // remove expected
+			keys = keys.filter(x => !["appName"].includes(x)) // change order
+			keys.push("appName")
+		}
 
 		// compare methods: testing
-		let keysPrototype = keys
+		let keysPrototype = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		keysPrototype = keysPrototype.filter(x => !["constructor"].includes(x))
 		let keysLoop = []
 		for (const key in navigator) {keysLoop.push(key)}
@@ -127,40 +134,54 @@ const get_navKeys = () => new Promise(resolve => {
 			// don't record a lie, but populate details
 			if (sha1(keys.join()) !== sha1(keysLoop.join())) {
 				gCheck.push("_generic:get_navKeys: mismatch")
-				sDetail["misc_navigator_keys_prototype_skip"] = keys
+				sDetail["misc_navigator_keys_prototype_skip"] = keysPrototype
 				sDetail["misc_navigator_keys_loop_skip"] = keysLoop
 			}
 		}
 
-		// simulate
-		if (runSL) {
-			keys.push("iamfake") // add fake
-			keys = keys.filter(x => !["buildID"].includes(x)) // remove expected
-		}
 		// true/fake/original keys
 		let trueKeys = keys
-		let lastKeyIndex = keys.length
-		let fakeKeys = []
-		let allKeys = keys
+		let lastKeyIndex = keys.length,
+			fakeKeys = [],
+			allKeys = keys,
+			missingKeys = [],
+			movedKeys = []
+		// common
+		let expectedKeys = [
+			"appCodeName","appName","appVersion","platform","product","productSub","userAgent","vendor","vendorSub", // ua bits
+			"hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
+		]
 		if (isFF) {
 			// constructor is always last
 			// track added keys
 			lastKeyIndex = keys.indexOf("constructor")
 			trueKeys = keys.slice(0, lastKeyIndex+1)
 			fakeKeys = keys.slice(lastKeyIndex+1)
-			// track missing keys: onLine incl because this is served over HTTPS
-			let expectedKeys = ["appCodeName","appName","buildID","hardwareConcurrency",
-				"language","languages","mimeTypes","onLine","oscpu","platform","plugins",
-				"product","productSub","userAgent","vendor","vendorSub"]
-			let missingKeys = expectedKeys.filter(x => !keys.includes(x))
+			// track missing keys
+			// track moved (expected) keys: use trueKeys
+			expectedKeys.push("buildID","oscpu")
+			missingKeys = expectedKeys.filter(x => !trueKeys.includes(x))
+			movedKeys = fakeKeys.filter(x => expectedKeys.includes(x))
 			trueKeys = trueKeys.concat(missingKeys)
 			fakeKeys = fakeKeys.concat(missingKeys)
+			// remove moved expected from fake
+			fakeKeys = fakeKeys.filter(x => !movedKeys.includes(x))
 		} else if (isEngine == "blink") {
 			// last key inconsistent
 			let poisonKeys = ["activeVRDisplays","buildID","getVRDisplays","iamfake",
 				"oscpu","SharedWorker","Worker"]
+			if (isBrave) {
+				expectedKeys.push("globalPrivacyControl")
+			} else {
+				poisonKeys.push("brave")
+			}
+			// track posion
 			trueKeys = keys.filter(x => !poisonKeys.includes(x))
 			fakeKeys = keys.filter(x => poisonKeys.includes(x))
+			// track missing
+			missingKeys = expectedKeys.filter(x => !keys.includes(x))
+			trueKeys = trueKeys.concat(missingKeys)
+			fakeKeys = fakeKeys.concat(missingKeys)
 		}
 		// remove constructor
 		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
@@ -169,9 +190,8 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["trueKeys"] = trueKeys.sort()
 		navKeys["fakeKeys"] = fakeKeys.sort()
 		navKeys["allKeys"] = allKeys.sort()
+		navKeys["movedKeys"] = movedKeys.sort()
 
-		// ToDo: harden isBrave
-		if (check_navKey("brave") && isEngine == "blink") {isBrave = true}
 		// set isBraveMode
 		if (isBrave) {
 			let t0 = performance.now()
@@ -621,6 +641,7 @@ function countJS(filename) {
 				get_isOS(),
 				get_isVer(),
 				get_isTB(),
+				get_isBrave(),
 			]).then(function(results){
 				if (!isFF) {runS = false} // runS is FF only
 				if (results[3] == "timeout") {
