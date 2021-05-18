@@ -135,7 +135,7 @@ function get_nav_prototype() {
 	// use global
 	let sTrue = "misc_navigator_keys",
 		sFake = "misc_navigator_keys_fake_skip",
-		sMoved = "misc_navigator_keys_moved_skip",
+		sMoved = "misc_navigator_keys_moved_reported_skip",
 		sAll = "misc_navigator_keys_reported_skip"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
@@ -156,7 +156,7 @@ function get_nav_prototype() {
 			movedStr = buildButton("18", sMoved, movedLength +" moved")
 			// method
 			if (gRun) {
-				gLiesMethods.push("misc:navigator keys: expected keys moved")
+				gLiesMethods.push("misc:navigator keys: expected keys moved: " + sDetail[sMoved].join(", "))
 			}
 		}
 		// fake
