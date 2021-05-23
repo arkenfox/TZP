@@ -271,10 +271,15 @@ function outputAudio1(runtype) {
 				let isLies = false, isBraveLies = false
 				if (isBraveMode.substring(0,2) == "st") {isLies = true; isBraveLies = true}
 				// sum
-				let sum = 0
-				for (let i=4500; i < 5000; i++) {
-					sum += Math.abs(getTest[i])
+				let sum = 0, sum2 = 0, sum3 = 0
+				//for (let i=4500; i < 5000; i++) {sum += Math.abs(getTest[i])}
+				for (let i=0; i < getTest.length; i++) {
+					let x = getTest[i]
+					sum2 += x
+					sum3 += Math.abs(x)
+					if (i > 4499 && i < 5000) {sum += Math.abs(x)}
 				}
+				console.log("sum: "+ sum +"\nsum2: "+ sum2 +"\nsum3: "+ sum3)
 				pxi_compressor.disconnect()
 				if (isLies) {
 					sum = soL + sum + scC
