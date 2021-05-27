@@ -47,12 +47,11 @@ function get_audio2_context(attempt) {
 	obj = a(obj, f.destination, "ac-")
 	obj = a(obj, f.listener, "ac-")
 	obj = a(obj, d, "an-")
-	// build key + value array
+	// get keys/value
 	for (const [key, value] of Object.entries(obj)) {
 		results.push(key +": "+ value)
 		if (key == "ac-sampleRate") {samplerate = value}
 	}
-	// build output
 	let k="", v="", n=0, rfp="", output=""
 	for (let i=0; i < results.length; i++) {
 		n = results[i].search(":")
@@ -67,7 +66,7 @@ function get_audio2_context(attempt) {
 				//console.log("latency error", attempt)
 				v += sb +"["+ zF +"]"+ sc
 			} else {
-				// isOS = "mac" // simulate mac
+				// isOS = "mac" // sim mac
 				latencyError = false
 				if (isOS == "windows") {rfp = "0.04"}
 				if (isOS == "android") {rfp = "0.02"}
@@ -112,7 +111,7 @@ function get_audio2_hybrid() {
 		gain = audioCtx.createGain(),
 		scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
 
-	// create & configure compressor
+	// compressor
 	let compressor = audioCtx.createDynamicsCompressor()
 	compressor.threshold && (compressor.threshold.value = -50)
 	compressor.knee && (compressor.knee.value = 40)
@@ -121,13 +120,13 @@ function get_audio2_hybrid() {
 	compressor.attack && (compressor.attack.value = 0)
 	compressor.release && (compressor.release.value = .25)
 
-	gain.gain.value = 0 // disable volume
-	oscillator.type = "triangle" // output triangle wave
-	oscillator.connect(compressor) // connect oscillator output to dynamic compressor
-	compressor.connect(analyser) // connect compressor to analyser
-	analyser.connect(scriptProcessor) // connect analyser output to scriptProcessor input
-	scriptProcessor.connect(gain) // connect scriptProcessor output to gain input
-	gain.connect(audioCtx.destination) // connect gain output to audiocontext destination
+	gain.gain.value = 0 // 0 volume
+	oscillator.type = "triangle" // wave
+	oscillator.connect(compressor)
+	compressor.connect(analyser)
+	analyser.connect(scriptProcessor)
+	scriptProcessor.connect(gain)
+	gain.connect(audioCtx.destination)
 
 	scriptProcessor.onaudioprocess = function(bins) {
 		bins = new Float32Array(analyser.frequencyBinCount)
@@ -161,10 +160,9 @@ function get_audio2_hybrid() {
 }
 
 function get_audio2_oscillator() {
-	let t0 = performance.now()
-
-	let cc_output = []
-	let audioCtx = new window.AudioContext
+	let t0 = performance.now(),
+		cc_output = [],
+		audioCtx = new window.AudioContext
 	let oscillator = audioCtx.createOscillator(),
 		analyser = audioCtx.createAnalyser(),
 		gain = audioCtx.createGain(),
@@ -206,45 +204,44 @@ function get_audio2_oscillator() {
 function outputAudio2() {
 	if (gClick) {
 		gClick = false
+		gRun = false
 		let tbl = document.getElementById("tb11")
 		let cls = "c2"
 		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
-		reset_audio2()
-		t0audio = performance.now()
-		latencyTries = 0
 		try {
 			let test = new window.AudioContext
-			// each test calls the next: oscillator -> context [try1] -> hybrid -> context [try2 if req]
+			// each test calls the next: oscillator -> context[try1] -> hybrid -> context[try2 if req]
 				// if context is run first, outputLatency *always* = 0 = incorrect : run it after oscillator
 				// if context is not run first, outputLatency *sometimes* = 0 : hence context [try2]
-			log_line("line")
-			// update prototypelies
+			reset_audio2()
 			Promise.all([
 				outputPrototypeLies(),
 			]).then(function(results){
-				// start
+				gt0 = performance.now()
+				t0audio = gt0
+				latencyTries = 0
+				log_line("line")
 				get_audio2_oscillator()				
 			})
 		} catch(e) {
-			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
+			dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
 			dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
 			gClick = true
 		}
 	}
 }
 
-function outputAudio1(runtype) {
+function outputAudio1() {
 	let t0 = performance.now(),
 		section = []
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
-		// supported
 		dom.audioSupport = zE
-		// create oscillator
+		// oscillator
 		let pxi_oscillator = context.createOscillator()
 		pxi_oscillator.type = "triangle"
 		pxi_oscillator.frequency.value = 1e4
-		// create & configure compressor
+		// compressor
 		let pxi_compressor = context.createDynamicsCompressor()
 		pxi_compressor.threshold && (pxi_compressor.threshold.value = -50)
 		pxi_compressor.knee && (pxi_compressor.knee.value = 40)
@@ -255,7 +252,7 @@ function outputAudio1(runtype) {
 		// connect nodes
 		pxi_oscillator.connect(pxi_compressor)
 		pxi_compressor.connect(context.destination)
-		// start processing
+		// process
 		pxi_oscillator.start(0)
 		context.startRendering()
 		context.oncomplete = function(event) {
@@ -266,10 +263,8 @@ function outputAudio1(runtype) {
 				crypto.subtle.digest("SHA-256", getTest),
 				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
-				// ToDo: add polyfill: prototypeLie checks are not reliable
-				// brave lies
-				let isLies = false, isBraveLies = false
-				if (isBraveMode.substring(0,2) == "st") {isLies = true; isBraveLies = true}
+				// brave
+				let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
 				for (let i=0; i < getTest.length; i++) {
@@ -280,48 +275,26 @@ function outputAudio1(runtype) {
 				}
 				if (sum2 == sum3) {isLies = true}
 				pxi_compressor.disconnect()
-				if (isLies) {
-					sum = soL + sum + scC
-					section.push("sum:"+ zLIE)
-					if (gRun && isBraveLies) {gLiesKnown.push("audio:sum")}
-				} else {
-					section.push("sum:"+ sum)
-				}
-				dom.audioSum.innerHTML = sum
+				section.push("sum:"+ (isLies ? zLIE : sum))
+				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
 				// get
-				let tempstr = byteArrayToHex(hashes[0])
-				if (isLies) {
-					tempstr = soL + tempstr + scC
-					section.push("getChannelData:"+ zLIE)
-					if (gRun && isBraveLies) {gLiesKnown.push("audio:getChannelData")}
-				} else {
-					section.push("getChannelData:"+ tempstr)
-				}
-				dom.audioGet.innerHTML = tempstr
+				let hash = byteArrayToHex(hashes[0])
+				section.push("getChannelData:"+ (isLies ? zLIE : hash))
+				dom.audioGet.innerHTML = (isLies ? soL + hash + scC : hash)
 				// copy
-				tempstr = byteArrayToHex(hashes[1])
-				if (isLies) {
-					tempstr = soL + tempstr + scC
-					section.push("copyFromChannel:"+ zLIE)
-					if (gRun && isBraveLies) {gLiesKnown.push("audio:copyFromChannel")}
-				} else {
-					section.push("copyFromChannel:"+ tempstr)
-				}
-				dom.audioCopy.innerHTML = tempstr
-				// section
+				hash = byteArrayToHex(hashes[1])
+				section.push("copyFromChannel:"+ (isLies ? zLIE : hash))
+				dom.audioCopy.innerHTML = (isLies ? soL + hash + scC : hash)
+				if (gRun && isLies) {gKnown.push("audio:")}
+				// done
 				log_section("audio", t0, section)
 			})
 		}
 	} catch(error) {
-		dom.audioSupport = zD
-		dom.audioCopy = zNA, dom.audioGet = zNA, dom.audioSum = zNA
-		if (runtype == "load") {
-			dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
-		}
-		// perf
+		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
+		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
 		log_section("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
 	}
 }
 
-dom.audiohash2 = "hash not coded yet"
 countJS("audio")
