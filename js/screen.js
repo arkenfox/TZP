@@ -49,7 +49,7 @@ const get_isBrave = () => new Promise(resolve => {
 			),*/
 			// rule out other brands
 			brandIsNotGoogleMicrosoftOrOpera: (
-				!('userAgentData' in navigator) ? 'unknown' :
+				!navigator.userAgentData ? 'unknown' :
 				!navigator.userAgentData.brands
 				.filter(item => /Google Chrome|Microsoft Edge|Opera/.test(item.brand)).length
 			),
