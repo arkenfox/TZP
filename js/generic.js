@@ -356,9 +356,10 @@ const get_isOS = () => new Promise(resolve => {
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
 	isPerf = true
+	if (runSL) {isPerf = false}
 	if (Math.trunc(performance.now() - performance.now()) !== 0) {
 		isPerf = false
-		if (gRun) {gMethodsOnce.push("_global:performance.now")}
+		if (gRun) {gMethods.push("_global:performance.now:tampered")}
 	}
 	if (!isFF) {return resolve()}
 	try {
@@ -906,7 +907,7 @@ function clearDetail(name) {
 
 function log_click(name, time) {
 	// click here doesn't record via log_section
-	let output = Math.round(performance.now() - time).toString()
+	let output = isPerf ? Math.round(performance.now() - time).toString() : "xx"
 	output = name.padStart(14) +": "+ sn + output.padStart(4) + sc +" ms"
 	log_debug("perfS", output)
 }
@@ -937,7 +938,7 @@ function log_perf(str, time1, time2, extra) {
 	if (isNaN(time1)){
 		output = str.padStart(30) +": "+ (time1).padStart(7)
 	} else {
-		time1 = Math.round(t0 - time1).toString()
+		time1 = isPerf? Math.round(t0 - time1).toString() : "xx"
 		output = str.padStart(30) +": "+ time1.padStart(4) +" ms"
 	}
 	if (time2 == "ignore") {
@@ -945,7 +946,7 @@ function log_perf(str, time1, time2, extra) {
 	} else if (time2 == "") {
 		output += " | "+ ("n/a").padStart(7)
 	} else {
-		time2 = Math.round(t0 - gt0).toString()
+		time2 = isPerf? Math.round(t0 - gt0).toString() : "xxx"
 		output += " | "+ time2.padStart(4) +" ms"
 	}
 	if (extra !== undefined && extra !== "") {
@@ -1071,7 +1072,7 @@ function log_section(name, time1, data) {
 				dom.allhash.innerHTML = sha1(gData.join())
 					+ buildButton("0", "fingerprint", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
-				dom.perfall = " "+ (isPerf? Math.round(performance.now() - gt0) : "xxx") +" ms"
+				dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"
 				gClick = true
 			}
 		}
@@ -1079,10 +1080,12 @@ function log_section(name, time1, data) {
 
 	// PERF
 	let el = dom.perfG
+	if (!isPerf) {time1 = "xx"}
 	let pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"
 
 	if (gRun) {
 		let time2 = Math.round(t0-gt0).toString()
+		if (!isPerf) {time2 = "xxx"}
 		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
 		gPerf.push(pretty)
 		if (gCount == 14) {
@@ -1102,6 +1105,8 @@ function log_section(name, time1, data) {
 function countJS(filename) {
 	jsFiles.push(filename)
 	if (jsFiles.length == 13) {
+		if (runSL) {isPerf = false}
+		if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		// harden isFF
 		log_line(Math.round(performance.now()) + " : RUN ONCE")
 		Promise.all([
