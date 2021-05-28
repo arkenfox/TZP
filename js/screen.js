@@ -1171,7 +1171,8 @@ function get_math() {
 		function get_hashes(runtype) {
 			return new Promise(resolve => {
 				// 1st
-				let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
+				//let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
+				let list = ['1e251','1e140','1e12','1e130','1e272',3-2,'1e284','1e75'],
 					res1 = [], res6 = []
 				list.forEach(function(item) {
 					try {res1.push(Math.cos(item))} catch(e) {res1.push("x"); block1 = true}
