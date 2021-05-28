@@ -48,7 +48,7 @@ function analyzeWebGL(runtype, res1, res2) {
 	let pushvalue = res1
 	if (res1.substring(0,14) == "ReferenceError") {
 		// blocked
-		res1 = zB
+		res1 = zB0
 		pushvalue = "blocked"
 	} else if (res1 !== res2) {
 		pushvalue = "random"
