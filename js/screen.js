@@ -630,13 +630,6 @@ function get_math() {
 			block1 = false,
 			block6 = false
 
-		console.debug(Math.exp(0.9999999999999999999) - 1)
-		console.debug(Math.expm1(1))
-		console.debug(Math.expm1(0.9999999999999999999))
-
-		console.debug(Math.sinh(1))
-		console.debug(Math.sinh(0.9999999999999999999))
-
 		function get_hashes(runtype) {
 			return new Promise(resolve => {
 				// 1st
