@@ -1179,8 +1179,13 @@ function get_math() {
 				// 6th
 				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
 				let x = 0.9999999999999999999
-				try {res6.push(Math.exp(x) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-				try {let y = Math.exp(x); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
+				if (isFF) {
+					try {res6.push(Math.exp(x) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+					try {let y = Math.exp(x); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
+				} else {
+					try {res6.push(Math.expm1(x))} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+					try {res6.push(Math.sinh(x))} catch(e) {res6.push("x"); block6 = true} // sinh(1)
+				}
 				// hashes
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
