@@ -2,598 +2,7 @@
 
 var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
-/* GLOBAL isTHINGS */
-
-const get_isBrave = () => new Promise(resolve => {
-	// not
-	if (isFF) {return resolve()} // FF
-	if (!('chrome' in window)) return resolve() // no chrome
-	if (Object.keys(chrome).includes("search")) {return resolve()} // opera
-	// proceed
-	let t0 = performance.now(), res = []
-	// simulate
-	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
-	// primary
-	let navKeys = []
-	for (const key in navigator) {navKeys.push(key)}
-
-	let chkA = false, chkC = false
-	try {chkA = Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave'} catch(e) {}
-	let chkB = chkA ? navKeys.indexOf("brave") < 10 : false
-	try {chkC = navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }'} catch(e) {}
-	let chkD = navKeys.includes("brave")
-	res.push("braveConstructor:"+ chkA)
-	res.push("braveIndex:"+ chkB)
-	res.push("braveIsBrave:"+ chkC)
-	res.push("braveNavigator:"+ chkD)
-	let isPrimary = chkA && chkB && chkC && chkD
-
-	const detectBrave = async () => {
-		/* with help from creepJS */
-		const windowKeys = Object.keys(Object.getOwnPropertyDescriptors(window))
-		const fileSystemKeys = /FileSystem((|Directory|File)Handle|WritableFileStream)|show((Directory|((Open|Save)File))Picker)/
-		// each can be spoofed or blocked
-		return {
-			// moving to flags?: https://github.com/brave/brave-browser/issues/9586#issuecomment-840872720
-			fileSystemAccessDisabled: !windowKeys.filter(key => fileSystemKeys.test(key)).length,
-			webSerialDisabled: !('Serial' in window || 'SerialPort' in window),
-			reportingDisabled: !('ReportingObserver' in window),
-			// not strictly brave
-			gpcInNavigator: 'globalPrivacyControl' in navigator,
-			/*// primary method
-			braveInNavigator: (
-				'brave' in navigator &&
-				Object.getPrototypeOf(navigator.brave).constructor.name == 'Brave' &&
-				navigator.brave.isBrave.toString() == 'function isBrave() { [native code] }' &&
-				'brave' in navigator ? Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype)).indexOf("brave") < 10 : false
-			),*/
-			// rule out other brands
-			brandIsNotGoogleMicrosoftOrOpera: (
-				!navigator.userAgentData ? 'unknown' :
-				!navigator.userAgentData.brands
-				.filter(item => /Google Chrome|Microsoft Edge|Opera/.test(item.brand)).length
-			),
-			// blink w/2147483648 is brave (spoofable and blockable)
-			storageQuotaIs2Gb: 2147483648 == (await navigator.storage.estimate()).quota,
-		}
-	}
-	;(async () => {
-		const x = await detectBrave()
-		const names = Object.keys(x).sort()
-		for (const k of names) {res.push(k +":"+ x[k])}
-		res.sort()
-		// definitely Brave (assuming index position is super-unlikely to be matched by a spoof)
-		if (isPrimary) {
-			isBrave = true
-			log_perf("isBrave [global]",t0,"",isBrave)
-			return resolve()
-		}
-		// dig deeper
-
-
-		log_perf("isBrave [global]",t0,"",isBrave)
-		return resolve()
-
-	})()
-})
-
-function get_isBraveMode() {
-	let t0 = performance.now()
-	function set(mode) {
-		isBraveMode = mode
-		if (gRun) {
-			if (mode == "unknown") {gCheck.push("_global:isBraveMode: unknown")}
-			log_perf("isBraveMode [prereq]",t0,"a",isBraveMode)
-		}
-	}
-	try {
-		// strict mode returns null supported extensions
-		const canvas = document.createElement("canvas")
-		const gl = canvas.getContext("webgl")
-		if (!gl.getSupportedExtensions()) {
-			set("strict")
-			return
-		}
-		// standard and strict mode do not have chrome plugins
-		const chromePlugins = /(Chrom(e|ium)|Microsoft Edge) PDF (Plugin|Viewer)/
-		const pluginsList = [...navigator.plugins]
-		const hasChromePlugins = pluginsList
-			.filter(plugin => chromePlugins.test(plugin.name)).length == 2
-		if (!hasChromePlugins) {
-			set("standard")
-			return
-		}
-		set("allow")
-		return
-	} catch(e) {
-		set("unknown")
-		return
-	}
-}
-
-function get_isChrome() {
-	let os = "",
-		t0 = performance.now()
-	// output
-	function output(r) {
-		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runS ? zSIM : "")}
-		dom.fdChrome.innerHTML = r
-		isChrome = r
-		log_perf("chrome [fd]",t0)
-	}
-	if (isChrome == "") {
-		dom.fdChrome.innerHTML = "blocked"
-		function run2() {
-			// android lacks this
-			let img = new Image()
-			img.src = "chrome://branding/content/icon64.png"
-			img.style.visibility = "hidden"
-			document.body.appendChild(img)
-			img.onload = function() {
-				output("Linux")
-			}
-			img.onerror = function() {
-				output("Android")
-			}
-			document.body.removeChild(img)
-		}
-		function output_check(r) {
-			if (r == "") {
-				run2()
-			} else {
-				output(r)
-			}
-		}
-		function run1() {
-			// win/mac
-			let c = "chrome://browser/content/extension-",
-				p = "-panel.css",
-				list = [c +'win'+ p, c +'mac'+ p],
-				x = 0
-			// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
-			list.forEach(function(item) {
-				let css = document.createElement("link")
-				css.href = item
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				document.head.appendChild(css)
-				css.onload = function() {
-					if (item === c +"win"+ p) {os = "Windows"}
-					if (item === c +"mac"+ p) {os = "Mac"}
-					x++
-					if (x == 2) {output_check(os)}
-				}
-				css.onerror = function() {
-					x++
-					if (x == 2) {output_check(os)}
-				}
-				document.head.removeChild(css)
-			})
-		}
-		// FF60+ only
-		if (isVer > 59) {
-			run1()
-		} else {
-			output(zNA)
-		}
-	} else {
-		output(isChrome)
-	}
-}
-
-const get_isEngine = () => new Promise(resolve => {
-	let t0 = performance.now(), bFF = false
-	// set isFF for engine lies
-	if (isFFyes.length) {isFF = true}
-	function final_isFF() {
-		if (isFFyes.length) {isFF = true}
-		log_perf("final status [isFF]",""+ isFF,"ignore")
-	}
-	// do math
-	function cbrt(x) {
-		try {
-			let y = Math.pow(Math.abs(x), 1 / 3)
-			return x < 0 ? -y : y
-		} catch(e) {
-			return "error"
-		}
-	}
-	try {
-		let res = []
-		for(let i=0; i < 6; i++) {
-			try {
-				let fnResult = "unknown"
-				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
-				} else if (i == 3) {fnResult = Math.acos(0.123)
-				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
-				} else if (i == 5) {fnResult = Math.atan(2)
-				}
-				res.push(fnResult)
-			} catch(e) {
-				res.push("error")
-			}
-		}
-		let hash = sha1(res.join()).substring(0,8)
-		if (runSL) {hash = "x"}
-		if (hash == "ede9ca53") {isEngine = "blink"
-		} else if (hash == "05513f36") {isEngine = "webkit"
-		} else if (hash == "38172d94") {isEngine = "edgeHTML"
-		} else if (hash == "36f067c6") {isEngine = "trident"
-		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
-		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
-		}
-		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
-		log_perf("math [isFF]",t0,"",bFF)
-		// harden isEngine
-		if (isEngine == "") {
-			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
-			if (isEngine !== "") {
-				gLiesOnce.push("_global:isEngine")
-				gLiesOnceBypassed.push("_global:isEngine:"+ isEngine)
-			}
-		}
-		final_isFF()
-		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
-		return resolve()
-	} catch(e) {
-		isFFno.push("math")
-		final_isFF()
-		gCheckOnce.push("_global:isEngine: " + e.name +" : "+ e.message)
-		log_perf("isEngine [global]",t0,"","error")
-		return resolve()
-	}
-})
-
-const get_isError = () => new Promise(resolve => {
-	let t0 = performance.now()
-	try {
-		// note: we will test for error lie entropy elsewhere without newFn()
-		let res = [], bFF = false
-		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
-		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
-		try {let test = newFn("let a = 1_00_;")} catch(e) {res.push(e.name +": "+ e.message)}
-		let hash = sha1(res.join()).substring(0,8)
-		if (hash == "510b2814") {bFF = true //FF74+ fix on
-		} else if (hash == "422b8490") {bFF = true //FF72-73,FF74+ fix off
-		} else if (hash == "f6c5128f") {bFF = true //FF70-71
-		} else if (hash == "b7463a43") {bFF = true //FF60-69
-		} else if (hash == "7263eca6") {bFF = true //FF59-
-		}
-		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
-		log_perf("errors [isFF]",t0,"",""+ bFF)
-		return resolve()
-	} catch(e) {
-		gCheckOnce.push("_global:isError: " + e.name +" : "+ e.message)
-		log_perf("errors [isFF]",t0,"","error")
-		isFFno.push("errors")
-		return resolve()
-	}
-})
-
-const get_isOS = () => new Promise(resolve => {
-	// skip
-	if (!isFF) {return resolve()}
-	// check
-	let t0 = performance.now(),
-		el = dom.widget0
-	function tryharder() {
-		// we will record math lies elsewhere
-		log_perf("isOS [global]",t0,"","unknown")
-		return resolve()
-	}
-	function trymath() {
-		// log lie
-		gLiesOnce.push("_global:isOS")
-		// try quick math
-		let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
-			res = []
-		list.forEach(function(item) {
-			try {res.push(Math.cos(item))} catch(e) {}
-		})
-		let m = (sha1(res.join("-"))).substring(0,8)
-		if (m == "46f7c2bb") {m="A"}
-		else if (m == "8464b989") {m="B"}
-		else if (m == "97eee448") {m="C"}
-		else if (m == "96895e00") {m="D"}
-		else if (m == "06a01549") {m="E"}
-		else if (m == "ae434b10") {m="F"}
-		else if (m == "19df0b54") {m="G"}
-		else if (m == "8ee641f0") {m="H"}
-		if (m == "A" | m == "B" | m == "C" | m == "H") {
-			isOS = "windows"
-		} else if (m == "D" | m == "G") {
-			isOS = "linux"
-		} else if (m == "E") {
-			isOS = "mac"
-		} else if (m == "F") {
-			isOS = "android"
-		}
-		//if (runSL) (isOS = "") // breaks font sim
-		if (isOS == "") {
-			tryharder()
-		} else {
-			gLiesOnceBypassed.push("_global:isOS:"+ isOS)
-			log_perf("isOS [global]",t0,"",isOS)
-			return resolve()
-		}
-	}
-	// system font
-	try {
-		let font = getComputedStyle(el).getPropertyValue("font-family")
-		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
-		} else if (font == "Roboto") {isOS="android"
-		}	else if (font == "-apple-system") {isOS="mac"
-		}	else {isOS="linux"}
-		if (runSL) {
-			isOS = ""
-			trymath()
-		} else {
-			log_perf("isOS [global]",t0,"",isOS)
-		}
-		return resolve()
-	} catch(e) {
-		trymath()
-	}
-})
-
-const get_isOS2 = () => new Promise(resolve => {
-	// skip
-	if (!isFF || isOS !== "") {return resolve()}
-	// someone bypassed math and system font
-	// check ua vs prototype lies. record bypass if possible
-})
-
-const get_isRFP = () => new Promise(resolve => {
-	isRFP = false
-	isPerf = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
-	// skip
-	if (!isFF) {return resolve()}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP = (r == 0)
-		// extra checks
-		if (!isPerf) {isRFP = false}
-		if (isVer > 62) {
-			let chk1 = getElementProp("#cssPRM","content",":after")
-			if (chk1 !== "no-preference") {isRFP = false}
-		}
-		if (isVer > 66) {
-			let chk2 = getElementProp("#cssPCS","content",":after")
-			if (chk2 !== "light") {isRFP = false}
-		}
-		if (isVer > 77) {
-			let chk3 = zD
-			try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
-			if (chk3 !== zD) {isRFP = false}
-		}
-		return resolve()
-	} catch(e) {
-		if (gRun) {gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)}
-		return resolve()
-	}
-})
-
-const get_isSystemFont = () => new Promise(resolve => {
-	let t0 = performance.now()
-	try {
-		let el = dom.sysFont,
-			f = undefined
-		let test = getComputedStyle(el).getPropertyValue("font-family")
-		el.style.font = "99px sans-serif"
-		try {el.style.font = "-moz-dialog"} catch(err) {}
-		let s = getComputedStyle(el, null)
-		if (s.fontSize != "99px") {f = s.fontFamily}
-		let bFF = (""+ f == "undefined" ? false : true)
-		if (runSL) {bFF = false}
-		if (bFF) {isFFyes.push("system font")} else {isFFno.push("system font")}
-		log_perf("system font [isFF]",t0,"",bFF)
-		return resolve()
-	} catch(e) {
-		isFFno.push("system font")
-		gCheckOnce.push("_global:isSystemFont: " + e.name +" : "+ e.message)
-		log_perf("system font [isFF]",t0,"","error")
-		return resolve()
-	}
-})
-
-const get_isTB = () => new Promise(resolve => {
-	// skip
-	if (!isFF) {return resolve()}
-	// check
-	let t0 = performance.now()
-	try {
-		// extensions can block resources://
-			// FF ~5ms, TB ~20ms
-		setTimeout(() => resolve("timeout"), 100)
-		let css = document.createElement("link")
-		css.href = "resource://torbutton-assets/aboutTor.css"
-		css.type = "text/css"
-		css.rel = "stylesheet"
-		document.head.appendChild(css)
-		css.onload = function() {
-			isTB = true
-			log_debug("debugTB","resource:// = ".padStart(19) + "aboutTor.css")
-			log_perf("isTB [global]",t0,"",isTB)
-			return resolve()
-		}
-		css.onerror = function() {
-			log_perf("isTB [global]",t0,"",isTB)
-			return resolve()
-		}
-		document.head.removeChild(css)
-	} catch(e) {
-		gCheckOnce.push("_global:isTB: " + e.name +" : "+ e.message)
-		log_perf("isTB [global]",t0,"","error")
-		return resolve()
-	}
-})
-
-const get_isVer = () => new Promise(resolve => {
-	// skip
-	if (!isFF) {return resolve()}
-	// set isVer, isVerPlus
-	let t0 = performance.now()
-	function output(verNo) {
-		isVer = verNo
-		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 90) {isVerPlus = true; verNo += "+"}
-		log_perf("isVer [global]",t0,"",verNo)
-
-		// OS architecture
-			// FF89+: 1703505: javascript.options.large_arraybuffers
-		t0 = performance.now()
-		try {
-			let test = new ArrayBuffer(Math.pow(2,32))
-			isOS64 = true
-			log_perf("isOS64 [global]",t0,"",isOS64)
-			return resolve()
-		} catch(e) {
-			// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit
-			//log_perf("isOS64 [global]",t0,"",isOS64)
-			return resolve()
-		}
-	}
-	function start() { // 90: 1520434
-		try {
-			var share90 = new ArrayBuffer(4096)
-			let test90 = new Int32Array(share90, 7)
-		} catch(e) {
-			if (e.message.substr(0,1) == "s") {output(90)} else {v89()}
-		}
-	}
-	function v89() { //89:1703213
-		try {
-			let x = dom.ctrl89.offsetHeight, y = dom.test89.offsetHeight
-			if (x/y > 0.85) {output(89)} else {v88()}
-		} catch(e) {v88()}
-	}
-	function v88() { //88:1670124
-		try {newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}'); v87()
-		} catch(e) {if (e.message.substr(13,5) == "8 and") {output(88)} else {v87()}}
-	}
-	function v87() { //87:1688335
-		try {if (console.length == undefined) {output(87)} else {v86()}} catch(e) {v86()}
-	}
-	function v86() { //86:1685482
-		try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {output(86)} else {v85()}}
-	}
-	function v85() { //85:1675240
-		try {
-			let reg85 = ("/a")
-			let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-			let test85 = descriptor.get.call(reg85)
-		} catch(e) {
-			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
-		}
-	}
-	function v84() { //84:1673440
-		try {newFn("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {output(84)} else (v83())}
-	}
-	function v83() { //83:1667094
-		try {
-			let obj83 = {exec() {return function(){}}}
-			let test83 = RegExp.prototype.test.call(obj83, "")
-			output(83)
-		} catch(e) {v82()}
-	}
-	function v82() { //82:1655947
-		try {
-			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-			if (test82 == 1) {output(82)} else {v81()}
-		} catch(e) {v81()}
-	}
-	function v81() { //81:1650607
-		try {let file81 = new File(["bits"], "a/b.txt"); if (file81.name == "a/b.txt") {output(81)} else {v80()}} catch(e) {v80()}
-	}
-	function v80() { //80:1651732
-		try {
-			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
-			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}; output(80)
-		} catch (e) {v79()}
-	}
-	function v79() { //79:1644878
-		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {output(79)} else {v78()}}
-	}
-	function v78() { //78:1634135
-		try {let regex78b = new RegExp('b'); if (regex78b.dotAll == false) {output(78)} else {v78a()}} catch(e) {v78a()}
-	}
-	function v78a() { //78:1589095
-		try {let test78a = new Intl.ListFormat(undefined,{style:'long',type:'unit'}).format(['a','b','c']); output(78)} catch(e) {v78b()}
-	}
-	function v78b() { //78:1633836
-		try {let test78 = new Intl.NumberFormat(undefined, {style:"unit",unit:"percent"}).format(1/2); output(78)} catch(e) {v77()}
-	}
-	function v77() { //77:1627285
-		try {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {output(77)} else {v76()}} catch(e) {v76()}
-	}
-	function v76() { //76:1608010
-		try {if (test76.validity.rangeOverflow) {v75()} else {output(76)}} catch(e) {v75()}
-	}
-	function v75() { //75:1615600
-		try {let test75 = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {output(75)} else {v74()}}
-	}
-	function v74() { //74:1605835
-		try {newFn("let t = ({ 1n: 1 })"); output(74)} catch(e) {v73()}
-	}
-	function v73() { //73:1605803
-		try {if (getComputedStyle(dom.test73).content == "normal") {output(73)} else {v72()}} catch(e) {v72()}
-	}
-	function v72() { //72:1589072
-		try {let test72 = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders") {output(72)} else {v71()}}
-	}
-	function v71() { //71:1575980
-		try {let test71 = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {output(71)} else {v70()}}
-	}
-	function v70() { //70:1435818
-		try {newFn("let t = 1_050"); output(70)} catch(e) {v69()}
-	}
-	function v69() { //69:1558387
-		try {let test69 = new DOMError('a'); v68()} catch(e) {output(69)}
-	}
-	function v68() { //68:1548773
-		try {if (dom.test68.typeMustMatch == undefined) {output(68)} else {v67()}} catch(e) {v67()}
-	}
-	function v67() { //67:1531830
-		try {if (!Symbol.hasOwnProperty('matchAll')) {v66()} else {output(67)}} catch(e) {v66()}
-	}
-	function v66() { //66
-		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let test66 = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
-	}
-	function v65() { //65
-		try {let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
-	}
-	function v64() { //64
-		try {if (window.screenLeft == undefined) {v63()} else {output(64)}} catch(e) {v63()}
-	}
-	function v63() { //63
-		try {if (Symbol.for(`a`).description == "a") {output(63)} else {v62()}} catch(e) {v62()}
-	}
-	function v62() { //62
-		try {console.time("v62"); console.timeLog("v62"); console.timeEnd("v62"); output(62)} catch(e) {v61()}
-	}
-	function v61() { //61
-		try {let test61 = (" a").trimStart(); output(61)} catch(e) {v60()}
-	}
-	function v60() { //60
-		try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-			|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-				"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-			output(60)
-		} catch(e) {output(59)}
-	}
-	start()
-})
-
-/* FUNCTIONS */
+let iframeSim = 0
 
 function return_lb_nw(w,h) {
 	// LB
@@ -622,6 +31,63 @@ function return_mm_dpi(type) {
 		})()
 	} catch(e) {r = zB0}
 	return r
+}
+
+function get_chrome() {
+	let os = "",
+		t0 = performance.now()
+	// display
+	function output(r) {
+		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runS ? zSIM : "")}
+		dom.fdChrome.innerHTML = r
+		isChrome = r
+		log_perf("chrome [fd]",t0)
+	}
+	// bail
+	if (isChrome !== "") {output(isChrome); return}
+	if (isVer < 60) {output(zNA); return}
+	// run
+	dom.fdChrome.innerHTML = "blocked"
+	function run2() {
+		// android/linux
+		let img = new Image()
+		img.src = "chrome://branding/content/icon64.png"
+		img.style.visibility = "hidden"
+		document.body.appendChild(img)
+		img.onload = function() {output("Linux")}
+		img.onerror = function() {output("Android")}
+		document.body.removeChild(img)
+	}
+	function check(r) {
+		if (r == "") {run2()} else {output(r)}
+	}
+	function run() {
+		// win/mac
+		let c = "chrome://browser/content/extension-",
+			p = "-panel.css",
+			list = [c +'win'+ p, c +'mac'+ p],
+			x = 0
+		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
+		list.forEach(function(item) {
+			let css = document.createElement("link")
+			css.href = item
+			css.type = "text/css"
+			css.rel = "stylesheet"
+			document.head.appendChild(css)
+			css.onload = function() {
+				if (item === c +"win"+ p) {os = "Windows"}
+				if (item === c +"mac"+ p) {os = "Mac"}
+				x++
+				if (x == 2) {check(os)}
+			}
+			css.onerror = function() {
+				x++
+				if (x == 2) {check(os)}
+			}
+			document.head.removeChild(css)
+		})
+	}
+	run()
 }
 
 function get_collation() {
@@ -683,8 +149,8 @@ function get_color() {
 	// lies
 	if (gRun && r4 !== "x") {
 		if (r3 !== r4) {
-			gLiesKnown.push("screen:color")
-			gLiesBypassed.push("screen:color:"+ r4)
+			gKnown.push("screen:color")
+			gBypassed.push("screen:color:"+ r4)
 		}
 	}
 	r3 = (r4 == "x" ? r3 : r4)
@@ -857,7 +323,7 @@ function get_line_scrollbar(runtype) {
 		function run_scrollbar() {
 			jsZoom = jsZoom * 1
 			let t0 = performance.now()
-			// get width, remember it for later
+			// get width, remember for later
 			let w = (window.innerWidth-vw)
 			let pseudoW = getElementProp("#D","content",":before")
 			if (pseudoW !== "x") {
@@ -876,7 +342,7 @@ function get_line_scrollbar(runtype) {
 			}	else {
 				// known metrics
 				if (jsZoom == 100) {
-					if (w==17) {os=osW};
+					if (w==17) {os=osW}
 					if (w==16) {os=osL}
 					if (w==15) {os=osM}
 					if (w==12) {os=osL}
@@ -958,9 +424,7 @@ function get_line_scrollbar(runtype) {
 			}
 			dom.fdScrollE.innerHTML = eW
 			// perf
-			if (runtype == "fd") {
-				log_perf("scrollbar [fd]",t0)
-			}
+			if (runtype == "fd") {log_perf("scrollbar [fd]",t0)}
 		}
 
 		// css lineheight
@@ -997,34 +461,32 @@ function get_line_scrollbar(runtype) {
 					if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
 					lh = lh.toString()
 					// remove trailing zeros
-					try {
-						lh = (lh * 1).toString()
-					} catch(e) {}
+					try {lh = (lh * 1).toString()} catch(e) {}
 					method = "clientrect"
 				} catch(err) {
 					method = "none"
 				}
 			}
 
-			// simulate
-			let simulate = 0
-			if (simulate == 1) {
+			// sim
+			let widSim = 0
+			if (widSim == 1) {
 				// no clientrect
 				method = "none"
-			} else if (simulate == 2) {
+			} else if (widSim == 2) {
 				// no font property
 				strFont = sb +"[font property is blocked]"+ sc
 				fontProp = false
-			} else if (simulate == 3) {
+			} else if (widSim == 3) {
 				// doc fonts blocked
 				strFont = sb +"[document fonts are disabled]"+ sc
 				isTNR = false
-			} else if (simulate == 4) {
+			} else if (widSim == 4) {
 				// 1+2
 				method = "none"
 				strFont = sb +"[font property is blocked]"+ sc
 				fontProp = false
-			} else if (simulate == 5) {
+			} else if (widSim == 5) {
 				// 1+3
 				method = "none"
 				strFont = sb +"[document fonts are disabled]"+ sc
@@ -1033,7 +495,7 @@ function get_line_scrollbar(runtype) {
 
 			// build
 			if (isOS == "android") {
-				// ignore android
+				// ignore
 			} else if (method !== "none") {
 				// trim
 				if (lh.substr(-2) == "px") {lh = lh.slice(0, -2) * 1}
@@ -1125,7 +587,7 @@ function get_line_scrollbar(runtype) {
 
 		// recalc zoom/viewport
 		if (runtype == "resize") {
-			// we calling this from get_screen_metrics's runtype = resize
+			// when calling this from get_screen_metrics's runtype = resize
 			Promise.all([
 				vw = get_viewport("fd")
 			]).then(function(){
@@ -1162,7 +624,7 @@ function get_math() {
 			m1 = "", // short codes
 			m6 = "",
 			mc = "",
-			fdMath1 = "", // strings for browser/os
+			fdMath1 = "", // browser/os strings
 			fdMath6 = "",
 			strNew = zNEW + (runS ? zSIM : ""),
 			block1 = false,
@@ -1178,14 +640,8 @@ function get_math() {
 				})
 				// 6th
 				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
-				let x = 0.9999999999999999999
-				if (isFF) {
-					try {res6.push(Math.exp(x) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-					try {let y = Math.exp(x); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
-				} else {
-					try {res6.push(Math.expm1(x))} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-					try {res6.push(Math.sinh(x))} catch(e) {res6.push("x"); block6 = true} // sinh(1)
-				}
+				try {res6.push(Math.exp(1) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+				try {let y = Math.exp(1); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
 				// hashes
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
@@ -1202,11 +658,11 @@ function get_math() {
 			})
 		}
 		function get_codes() {
-			// known FF hashes (browser)
+			// known (browser)
 			if (m6hash == "7a73daaff1955eef2c88b1e56f8bfbf854d52486") {m6="1"}
 			else if (m6hash == "0eb76fed1c087ebb8f80ce1c571b2f26a8724365") {m6="2"}
 			else if (m6hash == "9251136865b8509cc22f8773503288d106104634") {m6="3"} // 68+ exmp1(1) 1380031
-			// known FF hashes (os)
+			// known (os)
 			if (m1hash == "46f7c2bbe55a2cd28252d059604f8c3bac316c23") {m1="A"}
 			else if (m1hash == "8464b989070dcff22c136e4d0fe21d466b708ece") {m1="B"}
 			else if (m1hash == "97eee44856b0d2339f7add0d22feb01bcc0a430e") {m1="C"}
@@ -1281,8 +737,8 @@ function get_math() {
 				if (m1 == "") {
 					if (block1) {
 						// blocked
-						m1hash = zB
-						fdMath1 = zB
+						m1hash = zB0
+						fdMath1 = zB0
 					} else if (m1hash.substring(0,6) == "random") {
 						// random per execution
 						fdMath1 = "random"
@@ -1300,8 +756,8 @@ function get_math() {
 				if (m6 == "") {
 					if (block6) {
 						// blocked
-						m6hash = zB
-						fdMath6 = zB
+						m6hash = zB0
+						fdMath6 = zB0
 					} else if (m6hash.substring(0,6) == "random") {
 						// random per execution
 						fdMath6 = "random"
@@ -1323,7 +779,7 @@ function get_math() {
 				} else {
 					if (block1 || block6) {
 					// blocked
-						mchash = zB
+						mchash = zB0
 					} else if (mchash.substring(0,6) == "random") {
 						// random per execution
 					} else {
@@ -1363,7 +819,7 @@ function get_math() {
 			// compare runs
 			if (run0c !== run1c) {
 				// lies
-				if (gRun) {gLiesKnown.push("fd:math")}
+				if (gRun) {gKnown.push("fd:math")}
 				let sColor = s3
 				// combined
 				mchash = "random "+ sColor +" [1] "+ sc + run0c.substring(0,22) +".."
@@ -1653,7 +1109,7 @@ function get_resources() {
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
 		setTimeout(() => resolve("resources:blocked"), 100)
-
+		if (isResource !== "") {output(false); return}
 		// output
 		function output(setGlobalVars) {
 			// set global vars
@@ -1764,7 +1220,7 @@ function get_resources() {
 					if (runS) {
 						wFF = 110, hFF = 50 // new to both TB and FF
 						//wFF = 336, hFF = 48 // new TB but not new FF
-						// to simulate missing, change html img src
+						//to sim missing, change html img src
 					}
 
 					// FF
@@ -1791,12 +1247,7 @@ function get_resources() {
 			})
 			document.body.removeChild(imgA)
 		}
-		// immutable: only run once
-		if (isResource == "") {
-			run()
-		} else {
-			output(false)
-		}
+		run()
 	})
 }
 
@@ -1882,8 +1333,8 @@ function get_screen_metrics(runtype) {
 			if (innerH == h-1) {innerH = h}
 			if (innerW !== w || innerH !== h) {
 				if (gRun) {
-					gLiesKnown.push("screen:inner window")
-					gLiesBypassed.push("screen:inner window:"+ innerW +" x "+ innerH)
+					gKnown.push("screen:inner window")
+					gBypassed.push("screen:inner window:"+ innerW +" x "+ innerH)
 				}
 			}
 		}
@@ -1903,7 +1354,7 @@ function get_screen_metrics(runtype) {
 				w1 = screenW
 				h1 = screenH
 				mScreen = w1 +" x "+ h1
-				if (gRun) {gLiesKnown.push("screen:screen")}
+				if (gRun) {gKnown.push("screen:screen")}
 			}
 		}
 		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
@@ -1935,7 +1386,7 @@ function get_screen_metrics(runtype) {
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
-			if (gRun && pushBypass) {gLiesBypassed.push("screen:screen:"+ mScreen)}
+			if (gRun && pushBypass) {gBypassed.push("screen:screen:"+ mScreen)}
 		} else {
 			// prototype lies
 			let scrLies = false
@@ -1964,6 +1415,7 @@ function get_ua_doc() {
 			match = false
 		// FF78+ only
 		if (isFF && isVer > 77) {go = true}
+		uaBS = false // reset
 
 		// arrows
 		function addArrow(property, state) {
@@ -1980,7 +1432,7 @@ function get_ua_doc() {
 			if (str == "undefined") {str = "undefined string"}
 			if (str == undefined) {str = "undefined value"}
 			res.push(property +":"+ str)
-			document.getElementById("n"+ property).innerHTML = str
+			document.getElementById("n"+ property).innerHTML = "~"+str+"~"
 			return str
 		}
 
@@ -1990,7 +1442,7 @@ function get_ua_doc() {
 			// treat blocked as lies
 			str = ""
 			try {str = navigator[property]} catch(e) {str = zB0}
-			// simulate lies
+			// sim
 			if (go && runS) {
 				if (property == "appCodeName") {str = "MoZilla"} // case
 				if (property == "appName") {str = " Netscape"} // leading space
@@ -2048,7 +1500,7 @@ function get_ua_doc() {
 					let controlA = "", controlB = "", testA = str, testB = str
 
 					if (isRFP) {
-					// RFP ON 
+					// RFP ON
 						v = "78.0"
 						if (isVer > 90) {v = "91.0"}
 						if (isVer > 103) {v = "104.0"}
@@ -2201,30 +1653,18 @@ function get_ua_doc() {
 			spoof = check_basics(str, "userAgent")
 			if (!spoof) {
 				// DONE: RFP check, endstring, version
-				// ToDo: dig deeper
-					// - os
-					// - the syntax/formula doesn't match
+				// ToDo: os, architecture, syntax/formula
 			}
 			if (spoof) {addArrow("userAgent", true)}
 		}
 
-		// hash
-		res.sort()
-		// reset
-		uaBS = false
-		// show
+		// lies
+		showhide("UA",(lies ? "table-row": "none"))
 		if (lies) {
 			lies += " pinocchio"+ (lies > 1 ? "s": "")
-			dom.nualies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runS ? zSIM : "")
-			dom.togualies.style.display = "table-row"
+			dom.uaLies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runS ? zSIM : "")
 			uaBS = true
-			// lies
-			if (gRun) {
-				gLiesKnown.push("useragent:navigator properties")
-			}
-		} else {
-			// hide
-			dom.togualies.style.display = "none"
+			if (gRun) {gKnown.push("useragent:navigator properties")}
 		}
 		// return
 		return resolve(res)
@@ -2232,6 +1672,7 @@ function get_ua_doc() {
 }
 
 function get_ua_workers() {
+	dom.uaWorkers = "summary not coded yet"
 	// control
 	let list = ['userAgent','appCodeName','appName','product','appVersion','platform'],
 		res = [],
@@ -2246,20 +1687,6 @@ function get_ua_workers() {
 	}
 	res.sort()
 	let control = sha1(res.join())
-
-	function update(data) {
-		// compare shared worker to control: output diffs
-		for (let i=0; i < res.length; i++) {
-			if (res[i] !== data[i]) {
-				let parts = data[i].split(":")
-				let target = document.getElementById("n"+ parts[0])
-				// don't output it a second time if iframes got it
-				if ((target.innerHTML).indexOf("<br>") == -1) {
-					target.innerHTML += "<br>"+ sb.trim() + parts.slice(1).join(":") + sc
-				}
-			}
-		}
-	}
 
 	function exit(s) {
 		dom.uaWorker0.innerHTML = s //web
@@ -2281,7 +1708,7 @@ function get_ua_workers() {
 			let workernav = new Worker("js/worker_ua.js")
 			el0.innerHTML = zF
 			workernav.addEventListener("message", function(e) {
-				//console.debug("ua worker", e.data)
+				//console.log("ua worker", e.data)
 				test0 = sha1((e.data).join())
 				el0.innerHTML = test0 + (test0 == control ? match_green : match_red)
 				workernav.terminate
@@ -2296,13 +1723,10 @@ function get_ua_workers() {
 			let sharednav = new SharedWorker("js/workershared_ua.js")
 			el1.innerHTML = zF
 			sharednav.port.addEventListener("message", function(e) {
-				//console.debug("ua shared", e.data)
+				//console.log("ua shared", e.data)
 				test1 = sha1((e.data).join())
 				el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 				sharednav.port.close()
-				if (test1 !== control) {
-					update(e.data)
-				}
 			}, false)
 			sharednav.port.start()
 			sharednav.port.postMessage(isFF)
@@ -2335,7 +1759,7 @@ function get_ua_workers() {
 						// listen
 						let channel = new BroadcastChannel("sw-ua")
 						channel.addEventListener("message", event => {
-							//console.debug("ua service", event.data.msg)
+							//console.log("ua service", event.data.msg)
 							test2 = sha1((event.data.msg).join())
 							el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
 							// unregister & close
@@ -2444,7 +1868,7 @@ function get_widgets() {
 					else if (font0 == "unknown") {os = ""}
 					else {os="Linux"}
 			}
-			os = (os == "" ? zB : os) +" ["+ font0 +", "+ size0 +"]"
+			os = (os == "" ? zB0 : os) +" ["+ font0 +", "+ size0 +"]"
 			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
 		} else {
 			dom.fdWidget = whash
@@ -2562,7 +1986,7 @@ function get_zoom(runtype) {
 
 function run_os() {
 	if (isOS == "android") {
-		showhide("table-row","OS1","")
+		showhide("OS1","table-row")
 		dom.droidWin = firstW +" x "+ firstH +" [inner] [toolbar visible]"
 		// listen for toolbar
 		get_android_tbh()
@@ -2743,14 +2167,18 @@ function goNW_UA() {
 		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
 		res = [],
 		control = [],
+		sim = [],
 		r = ""
 	for (let i=0; i < list.length; i++) {
 		try {r = navigator[list[i]]} catch(e) {r = zB0}
 		if (r == "") {r = "empty string"
 		} else if (r == "undefined") {r = "undefined string"
-		} else if (r == undefined) {r = "undefined value"
-		}
-		control.push(list[i] +":"+ r) // no spaces
+		} else if (r == undefined) {r = "undefined value"}
+		control.push(list[i] +":"+ r)
+		if (list[i] == "appCodeName") { r = "moZillla"}
+		if (list[i] == "appVersion") { r = "5.0 (toaster)"}
+		if (list[i] == "userAgent") { r = "moZillla/5.0 (toaster)"}
+		sim.push(list[i] +":"+ r)
 	}
 	control.sort()
 
@@ -2767,24 +2195,8 @@ function goNW_UA() {
 	}
 	newWin.close()
 
-	// simulate
-	if (runS) {
-		res = [
-			"appCodeName:Mozilllllla",
-			"appName:Moonscape",
-			"appVersion:5.0 (toaster)",
-			"buildID:20181001000000000",
-			"oscpu:Windows XP 500.1; Win64; x64",
-			"platform:Windows128",
-			"product:Lizard",
-			"productSub:30100101",
-			"userAgent:Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0",
-			"vendor:empty string", // nochange
-			"vendorSub:empty string:with a colon",
-		]
-	}
-
 	// hash
+	if (runSL) {res = sim}
 	res.sort()
 	let hash = sha1(res.join())
 	let controlhash = sha1(control.join())
@@ -2792,17 +2204,12 @@ function goNW_UA() {
 	if (hash == controlhash) {
 		hash += match_green
 	} else {
-		hash += match_red
-		// output diffs if not already exposed (has line break)
-		for (let i=0; i < res.length; i++) {
-			let parts = res[i].split(":")
-			let target = document.getElementById("n"+ parts[0])
-			let str = target.innerHTML
-			let output = parts.slice(1).join(":")
-			if (str.indexOf("<br>") == -1 && str !== output) {
-				target.innerHTML += "<br>"+ sb.trim() + output + sc
-			}
+		let sStr = "ua_navigator_new_window_reported_diff_skip", diffs = []
+		for (let i = 0; i < res.length; i++) {
+			if (res[i] !== control[i]) {diffs.push(res[i])}
 		}
+		sDetail[sStr] = diffs
+		hash += match_red + buildButton("2", sStr, "diff")
 	}
 	dom.uaHashOpen.innerHTML = hash
 }
@@ -2836,165 +2243,188 @@ function outputScreen(runtype) {
 }
 
 function outputUA() {
-
-	dom.uaWorkers = "summary not coded yet: see details"
-
-	let t0 = performance.now(),
-		docArray = [],
-		docHash = "",
-		iframeArray = [],
-		useIframe = false
-
-	function output(outputArray) {
-		let section = outputArray
-		if (check_navKey("brave")) {
-			for (let i=0; i < section.length; i++) {
-				section[i] = section[i].replace(/\s+/g," ").trim()
-			}
-		}
-		log_section("ua", t0, section)
-	}
-
-	function get_workers() {
-		// temp
-		dom.uaWorker3.innerHTML = "not coded yet" //nested
-		dom.uaWorker4.innerHTML = "not coded yet" //blob
-
-		// we cannot rely on iframes
-			// some of the metrics may be covered, but not all
-		if (uaBS || useIframe) {
-			output(["ua:lies"])
-		} else {
-			output(docArray)
-		}
-
-		// ToDo: promisify workers and add to section logic
-			// i.e workerleak (excl. web worker) > uaBS/prototype Lies > document
-		get_ua_workers()
-
-	}
-
-	function get_iframes() {
-		// iframes
-		Promise.all([
-			getDynamicIframeWindow({
-				context: window, contentWindow: true, violateSameOriginPolicy: false, test: "ua"
-			}), // DocumentRoot contentWindow
-			getDynamicIframeWindow({
-				context: window, contentWindow: true, source: "?", violateSameOriginPolicy: false, test: "ua"
-			}), // with URL contentWindow
-			getDynamicIframeWindow({
-				context: window, violateSameOriginPolicy: false, test: "ua"
-			}), // DocumentRoot
-			getDynamicIframeWindow({
-				context: window, source: "?", violateSameOriginPolicy: false, test: "ua"
-			}), // with URL
-			getDynamicIframeWindow({
-				context: window, test: "ua"
-			}), // window access
-			getDynamicIframeWindow({
-				context: frames, test: "ua"
-			}), // iframe access
-			getDynamicIframeWindow({
-				context: window, nestIframeInContainerDiv: true, test: "ua"
-			}), // nested
-		]).then(function(results){
-			for(let i=0; i < 7; i++) {
-				let iframeHash = ""
-				if (Array.isArray(results[i])) {
-					// output
-					let iframeHash = sha1(results[i].join())
-					iframeArray = results[i]
-					if (iframeHash !== docHash) {
-						// assumption: any iframe leaks should be the same: just get one
-						if (useIframe == false) {
-							useIframe = true
-							// red sumary
-							dom.uaIframes.innerHTML = iframeHash + match_red
-						}
-					}
-					iframeHash += (iframeHash == docHash ? match_green : match_red)
-					document.getElementById("uaIframe"+ i).innerHTML = iframeHash
-				} else {
-					iframeHash = results[i]
-					document.getElementById("uaIframe"+ i).innerHTML = iframeHash
-				}
-			}
-			// show iframe diffs
-			if (useIframe) {
-				for (let i=0; i < docArray.length; i++) {
-					if (docArray[i] !== iframeArray[i]) {
-						let parts = iframeArray[i].split(":")
-						let target = document.getElementById("n"+ parts[0])
-						target.innerHTML += "<br>"+ sb.trim() + parts.slice(1).join(":") + sc
-					}
-				}
-			} else {
-				// green sumary
-				// ToDo: this doesn't handled errors/blocks
-				dom.uaIframes.innerHTML = docHash + match_green
-			}
-			get_workers()
-		})
-	}
-
+	let t0 = performance.now()
+	// lies
 	function get_pLies() {
 		if (protoLies.includes("Navigator.userAgent")) {uaBS = true
 		} else if (protoLies.includes("Navigator.appVersion")) {uaBS = true
 		} else if (protoLies.includes("Navigator.platform")) {uaBS = true
 		} else if (protoLies.includes("Navigator.oscpu")) {uaBS = true
-		} else if (!isFF) {
-			// FF: these are always caught by feature detection
-				// so ignore in FF because they could be correct
-			if (protoLies.includes("Navigator.productSub")) {uaBS = true
-			} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
-			} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
-			} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
-			} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
-			} else if (protoLies.includes("Navigator.appName")) {uaBS = true
-			} else if (protoLies.includes("Navigator.product")) {uaBS = true
-			}
+		} else if (protoLies.includes("Navigator.productSub")) {uaBS = true
+		} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
+		} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
+		} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
+		} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
+		} else if (protoLies.includes("Navigator.appName")) {uaBS = true
+		} else if (protoLies.includes("Navigator.product")) {uaBS = true
 		}
 	}
+	// clear
+	let str1 = "ua_navigator", str2 = str1 +"_iframe_diff_", str3 = "_method_skip"
+	let aNames = [str2 + str3, str2 +"[content] docroot"+ str3, str2 + "[content] with url"+ str3,
+		str2 +"[window] docroot"+ str3,	str2 +"[window] with url"+ str3,
+		str2 + "iframe access"+ str3, str2 + "nested"+ str3, str2 +"window access"+ str3,
+	]
+	aNames.forEach(function(item) {clearDetail(item)})
 
 	Promise.all([
 		get_ua_doc(), // sets uaBS
-	]).then(function(item){
-		docArray = item[0]
-		docHash = sha1(docArray.join())
-		dom.uaDoc = docHash
+		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: "ua"}), // docroot contentWindow
+		getDynamicIframeWindow({context: window, contentWindow: true, source: "?", violateSOP: false, test: "ua"}), // with URL contentWindow
+		getDynamicIframeWindow({context: window, violateSOP: false, test: "ua"}), // docroot
+		getDynamicIframeWindow({context: window, source: "?", violateSOP: false, test: "ua"}), // with URL
+		getDynamicIframeWindow({context: frames, test: "ua"}), // iframe access
+		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: "ua"}), // nested
+		getDynamicIframeWindow({context: window, test: "ua"}), // window access
+	]).then(function(results){
 		if (uaBS == false) {get_pLies()} // sets uaBS
-		get_iframes()
+		const ctrl = results[0].sort()
+		const ctrlhash = sha1(ctrl.join())
+
+		// sim
+		if (runSL) {
+			iframeSim = iframeSim % 6
+			let simA = ["appCodeName:simA","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:Mozilla/5.0","vendor:","vendorSub:"]
+			let simB = ["appCodeName:simB","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:GODZILLA/5.0","vendor:","vendorSub:"]
+			if (iframeSim == 0) {
+				results[1] = [], results[2] = [], results[3] = [], results[4] = [], results[5] = [], results[6] = [], results[7] = []
+			} else if (iframeSim == 2) {
+				results[2] = [], results[4] = []
+			} else if (iframeSim == 3) {
+				results[1] = simA, results[2] = simA, results[3] = simA, results[4] = simA, results[5] = simA, results[6] = simA, results[7] = simA
+			} else if (iframeSim == 4) {
+				results[1] = simB, results[2] = [], results[3] = simB, results[4] = zB0, results[6] = simB
+			} else if (iframeSim == 5) {
+				results[2] = simA, results[5] = simB, results[6] = zB0
+			}
+			iframeSim++
+		}
+
+		// loop iframe results
+		let block = [], distinct = [], mismatch = []
+		for(let i=1; i < 8; i++) {
+			let data = results[i]
+			let name = aNames[i].replace(/\ua_navigator_iframe_diff_/g, "")
+			name = name.replace(/\_method_skip/g, "")
+			if (Array.isArray(data)) {
+				let hash = sha1(data.join())
+				if (data.length == 0) {
+					hash = zB0
+					block.push(name)
+				} else {
+					if (hash !== ctrlhash) {
+						distinct.push(sha1(data.join()))
+						mismatch.push(name)
+						let diffs = []
+						for (let i = 0; i < data.length; i++) {if (data[i] !== ctrl[i]) {diffs.push(data[i])}}
+						sDetail[aNames[0]] = diffs
+					}
+				}
+				document.getElementById("uaIframe"+ i).innerHTML = hash
+			} else {
+				block.push(name)
+				document.getElementById("uaIframe"+ i).innerHTML = data
+			}
+		}
+		let bCount = block.length
+		distinct = distinct.filter(function(item, position) {return distinct.indexOf(item) === position})
+		// methods
+		if (gRun) {
+			if (block.length) {gMethods.push("ua:iframe block:"+ (bCount == 7 ? "all": block.join()))}
+			if (mismatch.length) {gMethods.push("ua:iframe mismatch:"+ (mismatch.length == 7 ? "all": mismatch.join()))}
+		}
+		// iframe summary
+		let summary = sha1(results[1].join())
+		let bNote = ""
+		if (bCount > 0 && bCount < 7) {bNote = s2 + "[" + bCount +" block"+ (bCount > 1 ? "s]" : "]") + sc}
+		// single line
+		if (distinct.length < 2) {
+			let diffBtn = ""
+			if (bCount == 7) {
+				summary = zB0
+			} else {
+				if (distinct.length > 0) {diffBtn = buildButton("2", aNames[0], "diff")}
+				summary += (distinct.length > 0 ? match_red : match_green) + diffBtn + bNote
+			}
+		}	else {
+		// multi-line
+			sDetail[aNames[0]] = []
+			summary = "mixed results" + match_red + bNote
+			for(let i=1; i < 8; i++) {
+				let data = results[i]
+				if (Array.isArray(data)) {
+					let hash = sha1(data.join())
+					if (data.length > 0) {
+						if (hash !== ctrlhash) {
+							let diffs = []
+							for (let i = 0; i < data.length; i++) {if (data[i] !== ctrl[i]) {diffs.push(data[i])}}
+							sDetail[aNames[i]] = diffs
+							hash += buildButton("2", aNames[i], "diff")
+							document.getElementById("uaIframe"+ i).innerHTML = hash
+						}
+					}
+				}
+			}
+		}
+		dom.uaIframes.innerHTML = summary
+
+		// section
+		let section = ctrl, displayhash = ctrlhash
+		if (uaBS || mismatch > 0) {
+			// uaBS or mismatch
+			section = ["ua:"+ zLIE]
+			displayhash = soL + ctrlhash + scC
+		} else {
+			// no lies: check bypasses
+			let sReported = section[8]
+			// RFP: non open-ended version
+			if (isRFP && !isVerPlus) {
+				let n = sReported.lastIndexOf("/"),
+					vReported = sReported.slice(n+1, sReported.length),
+					vReal = isVer.toString() + ".0"
+				let sReal = sReported.replaceAll(vReported, vReal)
+				if (sReported !== sReal) {
+					section[8] = sReal
+					sReal = sReal.slice(10)
+					sReported = sReported.replaceAll(vReported, soB + vReported + scC)
+					dom.nuserAgent.innerHTML = "~"+ sReported.slice(10) +"~"
+					if (gRun) {
+						gKnown.push("ua:userAgent version")
+						gBypassed.push("ua:userAgent version:"+ sReal)
+					}
+				}
+			}
+			// ToDo: isBrave spaces
+			if (isBrave) {
+
+			}
+		}
+		dom.uaDoc.innerHTML = displayhash
+		log_section("ua", t0, section)
+		// ToDo: promisify workers
+		get_ua_workers()
 	})
 }
 
 function outputFD(runtype) {
 	let t0 = performance.now(),
 		section = []
-	// FF only
+	// FF
 	if (isFF) {
-		// version
+		// ver
 		let r = isVer + (isVerPlus ? "+" : "")
 		if (isVer == 59) {r = "59 or lower"}
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
-		// FF89+: OS architecture: javascript.options.large_arraybuffers
-			// ToDo: watch what TB do, watch pref deprecation
+		// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
 		let bits = zNA
 		if (isVer > 88) {
-			if (isOS64 == true) {
-				bits = "64bit"
-			} else if (isOS64 = false) {
-				bits = "32bit" // ToDo: or other?
-			} else {
-				bits = "can't tell"
-			}
+			if (isOS64 == true) {bits = "64bit"} else if (isOS64 = false) {	bits = "32bit"} else {bits = "can't tell"}
 		}
 		dom.fdArchOS.innerHTML = bits
 		section.push("os_architecture:"+ bits)
 
-		// chrome:// os
-		get_isChrome()
+		get_chrome()
 		Promise.all([
 			get_errors(),
 			get_widgets(),
@@ -3007,35 +2437,9 @@ function outputFD(runtype) {
 			})
 			log_section("feature", t0, section)
 		})
-		// not used in hash
 		get_collation()
 
 	} else {
-		// don't notate
-		tb_green = ""
-		tb_red = ""
-		tb_standard = ""
-		tb_safer = ""
-		rfp_green = ""
-		rfp_red = ""
-		rfp_random_green = ""
-		rfp_random_red = ""
-		lb_green = ""
-		lb_red = ""
-		nw_green = ""
-		nw_red = ""
-		enUS_green = ""
-		enUS_red = ""
-		spoof_both_green = ""
-		spoof_both_red = ""
-		default_tb_green = ""
-		default_tb_red = ""
-		default_ff_green = ""
-		default_ff_red = ""
-		// hide
-		let items = document.getElementsByClassName("group")
-		for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		// run some for the info factor and so we output a section hash
 		Promise.all([
 			get_errors(),
 			get_widgets(),
@@ -3055,7 +2459,7 @@ function outputFD(runtype) {
 			dom.fdLH = zNA
 			dom.fdScrollV = zNA
 			dom.fdScrollE = zNA
-			// add some simple entropy for Brave/Chrome
+			// Brave/Opera
 			let browser = ""
 			if (isBrave) {browser = "Brave"} else if (Object.keys(chrome).includes("search")) {browser = "Opera"}
 			if (browser.length) {
@@ -3064,7 +2468,7 @@ function outputFD(runtype) {
 				section.push("browser:"+ browser)
 			}
 			log_section("feature", t0, section)
-			// non-FF needs these: in FF the scrollbar function calls them
+			// non-FF needs these: in FF scrollbar calls them
 			if (runtype == "load") {
 				Promise.all([
 					get_zoom("load")
@@ -3077,29 +2481,21 @@ function outputFD(runtype) {
 }
 
 function outputStart() {
-	// FF60: false positive: installtriggerimpl
+	// FF60: false positive
 	if (isVer < 61) {isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))}
 	if (isFF && isFFno.length) {
 		isFFno.forEach(function(item) {
-			gLiesOnce.push("_global:isFF "+ item)
-			gLiesOnceBypassed.push("_global:isFF "+ item + ":true")
+			gKnownOnce.push("_global:isFF "+ item)
+			gBypassedOnce.push("_global:isFF "+ item + ":true")
 		})
 	}
-	// cosmetics
-		// not-coded
+	// cosmetic
 	let items = document.getElementsByClassName("faint")
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
 	dom.audiohash2 = ""
-		// isFile
-	items = document.getElementsByClassName("isFile")
-	for (let i=0; i < items.length; i++) {items[i].textContent = note_file}
-		// section hash to come
-	items = document.getElementsByClassName("hashtocome")
-	for (let i=0; i < items.length; i++) {items[i].textContent = "section-hash-will-be-coming-just-hold-on"}
-
-	outputFD("load") // run FD first: sets isVer
-	setTimeout(function() {outputScreen("load")}, 1)
+	outputFD("load")
 	setTimeout(function() {outputUA()}, 1)
+	setTimeout(function() {outputScreen("load")}, 1)
 	setTimeout(function() {run_os()}, 1) // per os tweaks
 }
 

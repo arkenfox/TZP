@@ -136,7 +136,7 @@ function outputCanvas() {
 			// lies
 			if (gRun) {
 				if (pushvalue.substring(0,6) == "random") {
-					gLiesKnown.push("canvas:"+ item)
+					gKnown.push("canvas:"+ item)
 				}
 			}
 		}
@@ -188,7 +188,7 @@ function outputCanvas() {
 					bpNew = bypass[i]
 				if (bpValue !== bpOld) {
 					bpNew = bpName +":"+ bpValue
-					if (gRun) {gLiesBypassed.push("canvas:"+ bpNew)}
+					if (gRun) {gBypassed.push("canvas:"+ bpNew)}
 				}
 				chash1.push(bpNew)
 			}
@@ -460,7 +460,7 @@ function outputCanvas() {
 						let t1 = performance.now()
 						let data = sha1(getKnown().canvas.toDataURL())
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:toDataURL")}}
+						if (gRun) {if (data !== known1) {gKnown.push("canvas:toDataURL")}}
 						return (data == known1 ? true : false)
 					}
 				},
@@ -479,7 +479,7 @@ function outputCanvas() {
 								reader.onload = function(){
 									let data = sha1(reader.result)
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
-									if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:toBlob")}}
+									if (gRun) {if (data !== known1) {gKnown.push("canvas:toBlob")}}
 									resolve(data == known1 ? true : false)
 								}
 								reader.onerror = function(){
@@ -502,7 +502,7 @@ function outputCanvas() {
 							var reader = new FileReader()
 							reader.onload = function(){
 								let data = sha1(reader.result)
-								if (gRun) {if (data !== known1) {gLiesKnown.push("canvas:mozGetAsFile")}}
+								if (gRun) {if (data !== known1) {gKnown.push("canvas:mozGetAsFile")}}
 								resolve(data == known1 ? true : false)
 							}
 							reader.readAsDataURL(file)
@@ -524,7 +524,7 @@ function outputCanvas() {
 						}
 						let data = sha1(imageData.join())
 						log_perf("getImageData [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known2) {gLiesKnown.push("canvas:getImageData")}}
+						if (gRun) {if (data !== known2) {gKnown.push("canvas:getImageData")}}
 						return (data == known2 ? true : false)
 					}
 				},
@@ -542,7 +542,7 @@ function outputCanvas() {
 						}
 						let data = sha1(pathData.join())
 						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known3) {gLiesKnown.push("canvas:isPointInPath")}}
+						if (gRun) {if (data !== known3) {gKnown.push("canvas:isPointInPath")}}
 						return (data == known3 ? true : false)
 					}
 				},
@@ -560,7 +560,7 @@ function outputCanvas() {
 						}
 						let data = sha1(pathStroke.join())
 						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known4) {gLiesKnown.push("canvas:isPointInStroke")}}
+						if (gRun) {if (data !== known4) {gKnown.push("canvas:isPointInStroke")}}
 						return (data == known4 ? true : false)
 					}
 				},

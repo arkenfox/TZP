@@ -47,7 +47,10 @@
 		<div id="svgDiv"></div>
 		<div id="fdScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
-		<div id="unicodePrimer"></div>
+		<div>&#x20B9; &#x2581; &#x20BA; &#xA73D; &#xFFFD; &#x20B8; &#x05C6; &#x1E9E; &#x097F; &#xF003; &#x1CDA;
+			&#x17DD; &#x23AE; &#x0D02; &#x0B82; &#x115A; &#x2425; &#x302E; &#xA830; &#x2B06; &#x21E4; &#x20BD;
+			&#x2C7B; &#x20B0; &#xFBEE; &#xF810; &#xFFFF; &#x007F; &#x10A0; &#x1D790; &#x0700; &#x1950; &#x3095;
+			&#x532D; &#x061C; &#x20E3; &#xFFF9; &#x0218; &#x058F; &#x08E4; &#x09B3; &#x1C50; &#x2619;</div>
 		<div id="test89" style="width:1em">a &#x3000 b</div>
 		<div id="ctrl89" style="width:1em">a b</div>
 	</div>
@@ -90,7 +93,7 @@
 			<div class="nav-down"><a href="#screend">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td>
-			<div class="btn-left"><span class="btn0 btn" onClick="outputSection(`all`)">[ re-run ]</span>
+			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span>
 			<span class="c mono" id="allcheck"></span></div>
 			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
 		<tr><td>prototype lies <sup>1</sup></td><td class="c mono" id="prototypehash"></td></tr>
@@ -100,7 +103,7 @@
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
 	</table>
 
-	<!--screen.js-->
+	<!--screen-->
 	<table id="tb1">
 		<col width="50%"><a name="screen"></a><col width="50%">
 		<thead><tr><th colspan="2">
@@ -131,11 +134,11 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">full-screen-api.enabled</span></div>
 			&nbsp [api] full screen</td><td class="c" id="fsSupport"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="goFS()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="goFS()">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span></div>
 			&nbsp [test] full screen <sup>4</sup></td><td class="c" id="fsLeak"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="goNW()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="goNW()">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">will attempt to open a new<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c" id="newWinLeak"></td></tr>
@@ -174,7 +177,7 @@
 		</td></tr>
 	</table>
 
-	<!--screen.js-->
+	<!--ua-->
 	<table id="tb2">
 		<col width="37%"><a name="useragent"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -198,37 +201,32 @@
 		<tr><td id="lproductSub">productSub</td><td class="c spaces" id="nproductSub"></td></tr>
 		<tr><td id="lvendor">vendor</td><td class="c spaces" id="nvendor"></td></tr>
 		<tr><td id="lvendorSub">vendorSub</td><td class="c spaces" id="nvendorSub"></td></tr>
-		<tr class="togUA" id="togualies"><td><span class="bad">absolute BS detected &#9654 </span></td><td class="c" id="nualies"></td></tr>
+		<tr class="togUA"><td><span class="bad">absolute BS detected &#9654 </span></td><td class="c" id="uaLies"></td></tr>
 		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
-		<tr><td>iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
-		<tr><td>workers</td><td class="c mono faint" id="uaWorkers"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="goNW_UA()">[ click here ]</span>
+		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[ show ]</span>
+			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
+			<tr class="togUA1"><td>[contentWindow] document root</td><td class="c mono" id="uaIframe1"></td></tr>
+			<tr class="togUA1"><td>[contentWindow] with URL</td><td class="c mono" id="uaIframe2"></td></tr>
+			<tr class="togUA1"><td>[window] document root</td><td class="c mono" id="uaIframe3"></td></tr>
+			<tr class="togUA1"><td>[window] with URL</td><td class="c mono" id="uaIframe4"></td></tr>
+			<tr class="togUA1"><td>iframe access</td><td class="c mono" id="uaIframe5"></td></tr>
+			<tr class="togUA1"><td>nested</td><td class="c mono" id="uaIframe6"></td></tr>
+			<tr class="togUA1"><td>window access</td><td class="c mono" id="uaIframe7"></td></tr>
+		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[ show ]</span>
+			workers</td><td class="c mono faint" id="uaWorkers"></td></tr>
+			<tr class="togUA2"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
+			<tr class="togUA2"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
+			<tr class="togUA2"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
+			<tr class="togUA2"><td>nested worker</td><td class="c mono faint" id="uaWorker3"></td></tr>
+			<tr class="togUA2"><td>worker from blob</td><td class="c mono faint" id="uaWorker4"></td></tr>
+		<tr><td><span class="btn btn0" onClick="goNW_UA()">[ click here ]</span>
 			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
-		<tr><td colspan="2" class="showhide">
-			<input id="collapseU" class="toggle" type="checkbox" checked onchange="toggleitems(this, `U`)">
-			<label for="collapseU" class="lbl-toggle" id="labelU">&#9660; show details</label>
-		</td></tr>
-		<tr class="togU"><td></td><td class="s2">iframes <sup>1</sup></td></tr>
-			<tr class="togU"><td>[contentWindow] document root</td><td class="c mono" id="uaIframe0"></td></tr>
-			<tr class="togU"><td>[contentWindow] with URL</td><td class="c mono" id="uaIframe1"></td></tr>
-			<tr class="togU"><td>[window] document root</td><td class="c mono" id="uaIframe2"></td></tr>
-			<tr class="togU"><td>[window] with URL</td><td class="c mono" id="uaIframe3"></td></tr>
-			<tr class="togU"><td>window access</td><td class="c mono" id="uaIframe4"></td></tr>
-			<tr class="togU"><td>iframe access</td><td class="c mono" id="uaIframe5"></td></tr>
-			<tr class="togU"><td>nested</td><td class="c mono" id="uaIframe6"></td></tr>
-		<tr class="togU"><td></td><td class="s2">workers</td></tr>
-			<tr class="togU"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
-			<tr class="togU"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
-			<tr class="togU"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
-			<tr class="togU"><td>nested worker</td><td class="c mono faint" id="uaWorker3"></td></tr>
-			<tr class="togU"><td>worker from blob</td><td class="c mono faint" id="uaWorker4"></td></tr>
-			<tr class="togU"><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup></td></tr>
 	</table>
 
-	<!--screen.js-->
+	<!--fd-->
 	<table id="tb3">
 		<col width="37%"><a name="feature"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -270,9 +268,7 @@
 		<tr><td>[element scrollbar width] os</td><td class="c" id="fdScrollE"></td></tr>
 		<tr><td>[widgets] os</td><td class="c" id="fdWidget"></td></tr>
 		<tr><td colspan="2" class="showhide">
-			<input id="collapseE" class="toggle" type="checkbox" checked onchange="toggleitems(this, `E`)">
-			<label for="collapseE" class="lbl-toggle" id="labelE">&#9660; show details</label>
-		</td></tr>
+			<span id="labelE" class="btnb" onClick="togglerows('E')">&#9660; show details</span></td></tr>
 		<tr class="togE"><td></td><td class="s3">error messages</td></tr>
 			<tr class="togE"><td>hash</td><td class="c mono" id="errh"></td></tr>
 			<tr class="togE"><td>error1</td><td class="c" id="err1"></td></tr>
@@ -308,7 +304,7 @@
 			<a target="_blank" class="blue" href="https://github.com/earthlng/testpages">earthlng</a> <sup>3</sup></td></tr>
 	</table>
 
-	<!--language.js-->
+	<!--language-->
 	<table id="tb4">
 		<col width="37%"><a name="language"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -319,7 +315,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</span></div>
-			<span class="hashtocome" id="languagehash"></span></td></tr>
+			<span id="languagehash"></span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="lHashDoc"></td></tr>
 		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
 		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
@@ -330,9 +326,7 @@
 		<tr><td>shared worker</td><td class="c mono" id="langWorker"></td></tr>-->
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
-			<input id="collapseL" class="toggle" type="checkbox" checked onchange="toggleitems(this, `L`)"/>
-			<label for="collapseL" class="lbl-toggle" id="labelL">&#9660; show details</label>
-		</td></tr>
+			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
 		<!--lang-->
 		<tr class="togL"><td></td><td class="s4">language & locale</td></tr>
 			<tr class="togL"><td>languages | language | languages[0]</td><td class="c" id="ldt2"></td></tr>
@@ -391,7 +385,7 @@
 		<tr class="togL" colspan="2"><td></td></tr>
 	</table>
 
-	<!--language.js-->
+	<!--headers-->
 	<table id="tb5">
 		<col width="37%"><a name="headers"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -408,9 +402,7 @@
 		<tr><td>http headers</td><td class="faint mono" id="hHash1"></td></tr>
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
-			<input id="collapseH" class="toggle" type="checkbox" checked onchange="toggleitems(this, `H`)"/>
-			<label for="collapseH" class="lbl-toggle" id="labelH">&#9660; show details</label>
-		</td></tr>
+			<span id="labelH" class="btnb" onClick="togglerows('H')">&#9660; show details</span></td></tr>
 		<tr class="togH"><td></td><td class="s5">navigator</td></tr>
 		<tr class="togH"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">beacon.enabled</span></div>
@@ -433,7 +425,7 @@
 		<tr class="togH"><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
-	<!--storage.js-->
+	<!--storage-->
 	<table id="tb6">
 		<col width="50%"><a name="storage"></a><col width="50%">
 		<thead><tr><th colspan="2">
@@ -448,7 +440,7 @@
 			is it deemed to be available and working.</span></td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn6 btn" onClick="outputSection(`6`)">[ re-run ]</span></div>
-			<span class="hashtocome" id="storagehash"></span> <span class="isFile"><span></td></tr>
+			<span id="storagehash"></span></td></tr>
 		<tr><td>[navigator] cookieEnabled</td><td class="c" id="ctest0"></td></tr>
 		<tr><td>[javascript 1st party cookie] session | persistent</td>
 			<td><span class="c" id="ctest1"></span> | <span class="c" id="ctest2"></span></td></tr>
@@ -474,13 +466,13 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.storageManager.enabled</span></div>
 			&nbsp storage manager</td><td class="c" id="storageMSupport"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="get_storage_manager(`click`)">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="get_storage_manager(`click`)">[ click here ]</span>
 			[properties | test] storage manager</td>
 			<td><span class="c" id="storageMProp"></span> | <span class="c" id="storageMTest"></span></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
-	<!--devices.js-->
+	<!--devices-->
 	<table id="tb7">
 		<col width="29%"><a name="devices"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -524,7 +516,7 @@
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
-	<!--domrect.js-->
+	<!--domrect-->
 	<table id="tb8">
 		<col width="7%"><a name="domrect"></a>
 			<col width="15%"><col width="7%"><col width="8%"><col width="15%"><col width="15%"><col width="15%"><col width="18%">
@@ -543,61 +535,12 @@
 		<tr><td colspan="3">Range.getBoundingClientRect</td><td colspan="5" class="c mono" id="dr3"></td></tr>
 		<tr><td colspan="8"></td></tr>
 		<tr><td colspan="8" class="center"><a target="_blank" class="blue" href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
-		<tr><td colspan="8" class="showhide">
-			<input id="collapseD" class="toggle" type="checkbox" checked onchange="toggleitems(this, `D`)"/>
-			<label for="collapseD" class="lbl-toggle" id="labelD">&#9660; show details</label>
-		</td></tr>
-		<tr class="togD"><td></td><td>[ *browserleaks* ]</td><td colspan="2">[ *getClientRects* ]</td>
-			<td>[ Fingerprinting? ]</td><td>[ select ]</td><td>[ progress bar ]</td><td>[ empty button ]</td></tr>
-		<tr class="togD"><td></td><td colspan="7" class="s8" id="drFirstHeader">Element.getClientRects
-			<br>[note: the other three methods have the same hash and values]</td></tr>
-			<!--Element.getClientRects -->
-			<tr class="togD"><td>x</td><td id="dr01"></td><td colspan="2" id="dr02"></td><td id="dr03"></td><td id="dr04"></td><td id="dr05"></td><td id="dr06"></td></tr>
-			<tr class="togD"><td>y</td><td id="dr07"></td><td colspan="2" id="dr08"></td><td id="dr09"></td><td id="dr010"></td><td id="dr011"></td><td id="dr012"></td></tr>
-			<tr class="togD"><td>width</td><td id="dr013"></td><td colspan="2" id="dr014"></td><td id="dr015"></td><td id="dr016"></td><td id="dr017"></td><td id="dr018"></td></tr>
-			<tr class="togD"><td>height</td><td id="dr019"></td><td colspan="2" id="dr020"></td><td id="dr021"></td><td id="dr022"></td><td id="dr023"></td><td id="dr024"></td></tr>
-			<tr class="togD"><td>top</td><td id="dr025"></td><td colspan="2" id="dr026"></td><td id="dr027"></td><td id="dr028"></td><td id="dr029"></td><td id="dr030"></td></tr>
-			<tr class="togD"><td>left</td><td id="dr031"></td><td colspan="2" id="dr032"></td><td id="dr033"></td><td id="dr034"></td><td id="dr035"></td><td id="dr036"></td></tr>
-			<tr class="togD"><td>right</td><td id="dr037"></td><td colspan="2" id="dr038"></td><td id="dr039"></td><td id="dr040"></td><td id="dr041"></td><td id="dr042"></td></tr>
-			<tr class="togD"><td>bottom</td><td id="dr043"></td><td colspan="2" id="dr044"></td><td id="dr045"></td><td id="dr046"></td><td id="dr047"></td><td id="dr048"></td></tr>
-			<tr class="togD"><td colspan="8"></td></tr>
-		<!--D1 only shown if hashes differ-->
-		<tr class="togD1"><td></td><td colspan="7" class="s8">Element.getBoundingClientRect</td></tr>
-			<tr class="togD1"><td>x</td><td id="dr11"></td><td colspan="2" id="dr12"></td><td id="dr13"></td><td id="dr14"></td><td id="dr15"></td><td id="dr16"></td></tr>
-			<tr class="togD1"><td>y</td><td id="dr17"></td><td colspan="2" id="dr18"></td><td id="dr19"></td><td id="dr110"></td><td id="dr111"></td><td id="dr112"></td></tr>
-			<tr class="togD1"><td>width</td><td id="dr113"></td><td colspan="2" id="dr114"></td><td id="dr115"></td><td id="dr116"></td><td id="dr117"></td><td id="dr118"></td></tr>
-			<tr class="togD1"><td>height</td><td id="dr119"></td><td colspan="2" id="dr120"></td><td id="dr121"></td><td id="dr122"></td><td id="dr123"></td><td id="dr124"></td></tr>
-			<tr class="togD1"><td>top</td><td id="dr125"></td><td colspan="2" id="dr126"></td><td id="dr127"></td><td id="dr128"></td><td id="dr129"></td><td id="dr130"></td></tr>
-			<tr class="togD1"><td>left</td><td id="dr131"></td><td colspan="2" id="dr132"></td><td id="dr133"></td><td id="dr134"></td><td id="dr135"></td><td id="dr136"></td></tr>
-			<tr class="togD1"><td>right</td><td id="dr137"></td><td colspan="2" id="dr138"></td><td id="dr139"></td><td id="dr140"></td><td id="dr141"></td><td id="dr142"></td></tr>
-			<tr class="togD1"><td>bottom</td><td id="dr143"></td><td colspan="2" id="dr144"></td><td id="dr145"></td><td id="dr146"></td><td id="dr147"></td><td id="dr148"></td></tr>
-			<tr class="togD1"><td colspan="8"></td></tr>
-		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getClientRects</td></tr>
-			<tr class="togD1"><td>x</td><td id="dr21"></td><td colspan="2" id="dr22"></td><td id="dr23"></td><td id="dr24"></td><td id="dr25"></td><td id="dr26"></td></tr>
-			<tr class="togD1"><td>y</td><td id="dr27"></td><td colspan="2" id="dr28"></td><td id="dr29"></td><td id="dr210"></td><td id="dr211"></td><td id="dr212"></td></tr>
-			<tr class="togD1"><td>width</td><td id="dr213"></td><td colspan="2" id="dr214"></td><td id="dr215"></td><td id="dr216"></td><td id="dr217"></td><td id="dr218"></td></tr>
-			<tr class="togD1"><td>height</td><td id="dr219"></td><td colspan="2" id="dr220"></td><td id="dr221"><td id="dr222"></td><td id="dr223"></td><td id="dr224"></td></td></tr>
-			<tr class="togD1"><td>top</td><td id="dr225"></td><td colspan="2" id="dr226"></td><td id="dr227"></td><td id="dr228"></td><td id="dr229"></td><td id="dr230"></td></tr>
-			<tr class="togD1"><td>left</td><td id="dr231"></td><td colspan="2" id="dr232"></td><td id="dr233"></td><td id="dr234"></td><td id="dr235"></td><td id="dr236"></td></tr>
-			<tr class="togD1"><td>right</td><td id="dr237"></td><td colspan="2" id="dr238"></td><td id="dr239"></td><td id="dr240"></td><td id="dr241"></td><td id="dr242"></td></tr>
-			<tr class="togD1"><td>bottom</td><td id="dr243"></td><td colspan="2" id="dr244"></td><td id="dr245"></td><td id="dr246"></td><td id="dr247"></td><td id="dr248"></td></tr>
-			<tr class="togD1"><td colspan="8"></td></tr>
-		<tr class="togD1"><td></td><td colspan="7" class="s8">Range.getBoundingClientRect</td></tr>
-			<tr class="togD1"><td>x</td><td id="dr31"></td><td colspan="2" id="dr32"></td><td id="dr33"></td><td id="dr34"></td><td id="dr35"></td><td id="dr36"></td></tr>
-			<tr class="togD1"><td>y</td><td id="dr37"></td><td colspan="2" id="dr38"></td><td id="dr39"></td><td id="dr310"></td><td id="dr311"></td><td id="dr312"></td></tr>
-			<tr class="togD1"><td>width</td><td id="dr313"></td><td colspan="2" id="dr314"></td><td id="dr315"></td><td id="dr316"></td><td id="dr317"></td><td id="dr318"></td></tr>
-			<tr class="togD1"><td>height</td><td id="dr319"></td><td colspan="2" id="dr320"></td><td id="dr321"></td><td id="dr322"></td><td id="dr323"></td><td id="dr324"></td></tr>
-			<tr class="togD1"><td>top</td><td id="dr325"></td><td colspan="2" id="dr326"></td><td id="dr327"></td><td id="dr328"></td><td id="dr329"></td><td id="dr330"></td></tr>
-			<tr class="togD1"><td>left</td><td id="dr331"></td><td colspan="2" id="dr332"></td><td id="dr333"></td><td id="dr334"></td><td id="dr335"></td><td id="dr336"></td></tr>
-			<tr class="togD1"><td>right</td><td id="dr337"></td><td colspan="2" id="dr338"></td><td id="dr339"></td><td id="dr340"></td><td id="dr341"></td><td id="dr342"></td></tr>
-			<tr class="togD1"><td>bottom</td><td id="dr343"></td><td colspan="2" id="dr344"></td><td id="dr345"></td><td id="dr346"></td><td id="dr347"></td><td id="dr348"></td></tr>
-			<tr class="togD"><td colspan="8"></td></tr>
 		<tr><td colspan="8"><span class="no_color">domrect code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
 	</table>
 
-	<!--canvas.js-->
+	<!--canvas-->
 	<table id="tb9">
 		<col width="29%"><a name="canvas"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -611,7 +554,7 @@
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</span></div>
-			<span class="c" id="canvashash"></span> <span class="isFile"><span></td></tr>
+			<span class="c" id="canvashash"></span></td></tr>
 		<tr><td>getContext</td><td class="c mono getContext"></td></tr>
 		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
 		<tr><td>toBlob</td><td class="c mono toBlob"></td></tr>
@@ -627,7 +570,7 @@
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
 	</table>
 
-	<!--webgl.js-->
+	<!--webgl-->
 	<table id="tb10">
 		<col width="29%"><a name="webgl"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -638,7 +581,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn10 btn" onClick="outputSection(`10`)">[ re-run ]</span></div>
-			<span class="hashtocome" id="webglhash"></span></td></tr>
+			<span id="webglhash">section-hash-will-be-coming-just-hold-on</span></td></tr>
 		<tr><td>hash</td><td class="c mono" id="glhash0"></td></tr>
 		<tr><td>getContext</td><td class="c mono" id="glsupport"></td></tr>
 		<tr><td>vendor | unmasked</td><td class="faint mono" id="glvend"></td></tr>
@@ -654,7 +597,7 @@
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
 	</table>
 
-	<!--audio.js-->
+	<!--audio-->
 	<table id="tb11">
 		<col width="29%"><a name="audio"></a><col width="71%">
 		<thead><tr><th colspan="2">
@@ -673,14 +616,13 @@
 		<tr><td>copyFromChannel <sup>1</sup></td><td class="c mono" id="audioCopy"></td></tr>
 		<tr><td>sum <sup>1</sup></td><td class="c mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn0 btn" onClick="outputAudio2()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputAudio2()">[ click here ]</span>
 			hash</td><td class="faint c2 mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
 		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 gc mono" id="audio3hash"></td></tr>
 		<tr><td colspan="2" class="showhide">
-			<input id="collapseA" class="toggle" type="checkbox" checked onchange="toggleitems(this, `A`)">
-			<label for="collapseA" class="lbl-toggle" id="labelA">&#9660; show details</label></td></tr>
+			<span id="labelA" class="btnb" onClick="togglerows('A')">&#9660; show details</span></td></tr>
 		<tr class="togA"><td>audioContext <sup>2</sup></td><td class="gc mono spaces" id="audio1data"></td></tr>
 		<tr class="togA"><td>OscillatorNode <sup>2</sup></td><td class="gc mono" id="audio2data"></td></tr>
 		<tr class="togA"><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="gc mono" id="audio3data"></td></tr>
@@ -693,7 +635,7 @@
 		</td></tr>
 	</table>
 
-	<!--fonts.js-->
+	<!--fonts-->
 	<table id="tb12">
 		<col width="37%"><a name="fonts"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -709,7 +651,7 @@
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
-			<span class="c" id="fontshash"></span><span class="c" id="fontslists"></span></td></tr>
+			<span class="c" id="fontshash"></span><span class="c" id="fontBtns"></span></td></tr>
 		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
 		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -718,18 +660,13 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
 			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
-		<tr><td>[offset] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug1"></td></tr>
-		<tr><td>[getBoundingClientRect] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
-		<tr><td>[getClientRects] unicode glyphs <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 68 or lower<br>gfx.downloadable_fonts.woff2.enabled</span></div>
 			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
 		<!--fonts-->
 		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt"><p><b><u>lengths</u></b><br>offset<br>client<br>scroll<br></p>
-			<p><b><u>pixels</u></b><br>pixel<br>size<br>perspective<br>transform</p></span></div>
-			&nbsp fonts <sup>1, 2</sup></td><td class="c mono" id="fontMain"></td></tr>
+		<tr><td><span id="labelF1" class="btn btn0" onClick="togglerows('F1','btn')">[ show ]</span>
+			fonts <sup>1, 2</sup></td><td class="c mono" id="fontMain"></td></tr>
 		<tr class="togF1"><td>offset <sup>1</sup></td><td class="c mono" id="fontsOffset"></td></tr>
 		<tr class="togF1"><td>client <sup>2</sup></td><td class="c mono" id="fontsClient"></td></tr>
 		<tr class="togF1"><td>scroll <sup>2</sup></td><td class="c mono" id="fontsScroll"></td></tr>
@@ -737,8 +674,13 @@
 		<tr class="togF1"><td>size <sup>2</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
 		<tr class="togF1"><td>perspective <sup>2</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
 		<tr class="togF1"><td>transform <sup>2</sup></td><td class="c mono" id="fontsTransform"></td></tr>
-		<tr><td><span class="btn0 btn" onClick="outputFontsFB()">[ click here ]</span>
-				font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputFontsFB()">[ click here ]</span>
+			font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
+		<!--glyphs-->
+		<tr><td colspan="2" class="center">--- glyphs ---</td></tr>
+		<tr><td>offset <sup>4</sup></td><td class="c mono" id="ug1"></td></tr>
+		<tr><td>getBoundingClientRect <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
+		<tr><td>getClientRects <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
 		<!--tm-->
 		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
 		<tr><td>width</td><td class="c mono" id="tm0"></td></tr>
@@ -753,13 +695,11 @@
 		<tr><td>fontBoundingBoxDescent</td><td class="c mono" id="tm9"></td></tr>
 		<tr><td>hangingBaseline</td><td class="c mono" id="tm10"></td></tr>
 		<tr><td>ideographicBaseline</td><td class="c mono" id="tm11"></td></tr>
-		<!--details: glyphsS-->
+		<!--details: glyphs-->
 		<tr><td colspan="2" class="showhide">
-			<input id="collapseF4" class="toggle" type="checkbox" checked onchange="toggleitems(this, `F4`)">
-			<label for="collapseF4" class="lbl-toggle" id="labelF4">&#9660; show unicode glyphs</label>
-		</td></tr>
+			<span id="labelF4" class="btnb" onClick="togglerows('F4','glyphs')">&#9660; show glyphs</span></td></tr>
 		<tr class="togF4"><td>[offset] unicode glyphs</td><td>
-			 <span class="btn0 btn" onClick="copyclip(`ug10`)">[ copy to clipboard ]</span></td></tr>
+			 <span class="btn btn0" onClick="copyclip(`ug10`)">[ copy to clipboard ]</span></td></tr>
 		<tr class="togF4"><td colspan="2" class="mono spaces intro" id="ugcopy"><span class="no_color" id="ug10"></span></td></tr>
 		<!--creds-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
@@ -773,7 +713,7 @@
 		</td></tr>
 	</table>
 
-	<!--media.js-->
+	<!--media-->
 	<table id="tb13">
 		<col width="10%"><col width="27%"><a name="media"></a><col width="63%">
 		<thead><tr><th colspan="3">
@@ -784,7 +724,7 @@
 		</th></tr></thead>
 		<tr><td colspan="3" class="secthash">
 			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(`13`)">[ re-run ]</span></div>
-			<span class="c" id="mediahash"></span><span class="c" id="medialists"></span></td></tr>
+			<span class="c" id="mediahash"></span><span class="c" id="mediaBtns"></span></td></tr>
 		<tr><td colspan="2">
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">media.media-capabilities.enabled</span></div>
 			&nbsp mediaCapabilities</td><td class="c" id="nMediaC"></td></tr>
@@ -798,7 +738,7 @@
 		<tr><td colspan="2"></td></tr>
 	</table>
 
-	<!--css.js-->
+	<!--css-->
 	<table id="tb14">
 		<col width="37%"><a name="css"></a><col width="63%">
 		<thead><tr><th colspan="2">
@@ -815,8 +755,8 @@
 		<tr><td>[system] colors</td><td class="c mono" id="sColorHash"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="sFontsHash"></td></tr>
 		<tr><td><span id="togCSSa">computed styles</span> <sup>1</sup></td><td class="c mono" id="cStyles0"></td></tr>
-		<tr class="hidden" id="togCSSb"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="cStyles1"></td></tr>
-		<tr class="hidden" id="togCSSc"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="cStyles2"></td></tr>
+		<tr class="togC" id="togCSSb"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="cStyles1"></td></tr>
+		<tr class="togC" id="togCSSc"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="cStyles2"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">ui.prefersReducedMotion</span></div>
 			&nbsp [css | matchMedia] prefers-reduced-motion</td>
 			<td><span id="cssPRM"></span> | <span class="c" id="mmPRM"></span></td></tr>
@@ -838,7 +778,7 @@
 		</td></tr>
 	</table>
 
-	<!--ciphers.js-->
+	<!--ciphers-->
 	<table id="tb15">
 		<col width="50%"><a name="ciphers"></a><col width="50%">
 		<thead><tr><th colspan="2">
@@ -918,19 +858,17 @@
 	<table id="tb99">
 		<col width="37%"><col width="63%">
 		<thead><tr><th colspan="2" class="showhide">
-			<input id="collapseZ" class="toggle" type="checkbox" checked onchange="toggleitems(this, `Z`)">
-			<label for="collapseZ" class="lbl-toggle" id="labelZ">&#9660; show perf & debugging</label></th></tr></thead>
+			<span id="labelZ" class="btnb" onClick="togglerows('Z','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
 		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`gPerfDetail`)">[details]</span>
-			global perf</td><td class="mono spaces" id="perfG"></td></tr>
+			global perf</td><td class="mono spaces gc" id="perfG"></td></tr>
 		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`sPerfDetail`)">[details]</span>
-			click perf</td><td class="mono spaces" id="perfS"></td></tr>
-		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces" id="debugTB"></td></tr>
+			click perf</td><td class="mono spaces gc" id="perfS"></td></tr>
+		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces gc" id="debugTB"></td></tr>
 	</table>
 	<a name="theend"></a><br>
 
-	<script src="js/main.js"></script>
-	<script src="js/fonts.js"></script> <!--to trigger unicode primer asap-->
 	<script src="js/prototypeLies.js"></script>
+	<script src="js/fonts.js"></script>
 	<script src="js/screen.js"></script>
 	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>

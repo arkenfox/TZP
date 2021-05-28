@@ -88,8 +88,8 @@ function get_iframe_props() {
 					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
 					// lies
 					if (gRun) {
-						gLiesKnown.push("misc:iframe window properties")
-						gLiesBypassed.push("misc:iframe window properties:"+ sha1(props.sort()))
+						gKnown.push("misc:iframe window properties")
+						gBypassed.push("misc:iframe window properties:"+ sha1(props.sort()))
 					}
 				}
 			}
@@ -135,7 +135,7 @@ function get_nav_prototype() {
 	// use global
 	let sTrue = "misc_navigator_keys",
 		sFake = "misc_navigator_keys_fake_skip",
-		sMoved = "misc_navigator_keys_moved_reported_skip",
+		sMoved = "misc_navigator_keys_moved_method_skip",
 		sAll = "misc_navigator_keys_reported_skip"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
@@ -156,7 +156,7 @@ function get_nav_prototype() {
 			movedStr = buildButton("18", sMoved, movedLength +" moved")
 			// method
 			if (gRun) {
-				gLiesMethods.push("misc:navigator keys: expected keys moved: " + sDetail[sMoved].join(", "))
+				gMethods.push("misc:navigator keys: expected keys moved")
 			}
 		}
 		// fake
@@ -165,8 +165,8 @@ function get_nav_prototype() {
 			fakeStr = buildButton("18", sFake, lieLength +" lie"+ (lieLength > 1 ? "s" : ""))
 			// lies
 			if (gRun) {
-				gLiesKnown.push("misc:navigator keys")
-				gLiesBypassed.push("misc:navigator keys:"+realhash)
+				gKnown.push("misc:navigator keys")
+				gBypassed.push("misc:navigator keys:"+realhash)
 			}
 		}
 		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr + movedStr
@@ -233,7 +233,7 @@ function get_perf1() {
 				performance.clearMarks()
 		}
 	} catch(e) {test = zB0}
-	// simulate
+	// sim
 	if (runSL && isFF) {
 		if (isRFP) {test = "1, 4, 4, 1"} else {test = control}
 	}
@@ -249,8 +249,8 @@ function get_perf1() {
 	// display
 	if (isLies) {
 		if (gRun) {
-			gLiesKnown.push("misc:performance.mark")
-			gLiesBypassed.push("misc:performance.mark:"+value)
+			gKnown.push("misc:performance.mark")
+			gBypassed.push("misc:performance.mark:"+value)
 		}
 		dom.perf1.innerHTML = soB + test + scC
 	} else {
@@ -273,7 +273,7 @@ function get_perf2() {
 		} else {
 			clearInterval(check)
 			let display = times.join(", ")
-			// simulate
+			// sim
 			if (runSL) {
 				isPerf = false
 				if (isRFP) {

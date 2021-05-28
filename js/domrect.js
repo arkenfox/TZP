@@ -2,14 +2,6 @@
 
 /* code based on https://canvasblocker.kkapsner.de/test/ */
 
-function reset_domrect() {
-	for (let i=0; i < 4; i++) {
-		for (let j=1; j < 49; j++) {
-			document.getElementById("dr"+ i + j).innerHTML = "&nbsp"
-		}
-	}
-}
-
 function outputDomRect() {
 	let t0 = performance.now()
 	let sColor = s8
@@ -29,7 +21,7 @@ function outputDomRect() {
 				// FF: rect6
 				// note: errors/undefined override these when we check value1
 				known["dr"+ i] = (sha1( known["dr"+ i].join()) == knownHash ? false : true)
-				//if (known["dr"+ i] == true) {console.debug("lie: known values: "+ pretty[i])}
+				//if (known["dr"+ i] == true) {console.log("lie: known values: "+ pretty[i])}
 			} else {
 				// non-FF
 				known["dr"+ i] = false
@@ -40,7 +32,7 @@ function outputDomRect() {
 			let push = value1
 			let display = value1
 
-			// simulate random
+			// sim
 			//if (i == 1) {value1 = "0c4cf7ff544ab66"; value2 = "ec46b57d8a484a"}
 			//if (i == 3) {value1 = "0c4cf7ff544ab66"; value2 = "ec46b57d8a484a"}
 
@@ -55,7 +47,7 @@ function outputDomRect() {
 			} else if (value1 !== value2) {
 				// random each pass: record lie
 				known["dr"+ i] = true
-				//console.debug("lie: random each pass: "+ pretty[i])
+				//console.log("lie: random each pass: "+ pretty[i])
 				push = "random"
 				display = sColor +"[1] "+ sc + value1.substring(0,13) +".. "
 					+ sColor +"[2] "+ sc + value2.substring(0,14) +".."
@@ -76,7 +68,7 @@ function outputDomRect() {
 								if (diff !== 0.25) {
 									// record lie
 									known["dr"+ i] = true
-									//if (known["dr"+ i] == true) {console.debug("lie: shift: "+ pretty[i])}
+									//if (known["dr"+ i] == true) {console.log("lie: shift: "+ pretty[i])}
 								}
 								let margin = (0.25 - diff)
 								diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value +", "+ delim[3])
@@ -94,14 +86,12 @@ function outputDomRect() {
 			}
 			// lies
 			if (gRun) {
-				if (known["dr"+ i] == true) {gLiesKnown.push("domrect:"+ pretty[i])}
+				if (known["dr"+ i] == true) {gKnown.push("domrect:"+ pretty[i])}
 			}
 			// only push real values
 			if (push.length == 40) {hash.push("domrect:"+push)}
 			document.getElementById("dr"+ i).innerHTML = display
 		}
-		// cleanup details
-		if (stateDR == true) {showhide("table-row","D","&#9650; hide")}
 		// section
 		if (hash.length) {
 			//de-dupe/sanity check
@@ -120,7 +110,7 @@ function outputDomRect() {
 				for (let i=0; i < 4; i++) {
 					let trueValue = hash[0].split(":")[1]
 					if (known["dr"+i] == true && trueValue !== "unknown") {
-						gLiesBypassed.push("domrect:"+ pretty[i] +":" + trueValue)
+						gBypassed.push("domrect:"+ pretty[i] +":" + trueValue)
 					}
 				}
 			}
@@ -171,9 +161,6 @@ function outputDomRect() {
 					properties.map(function(property){
 						return rects.map(function(rect, i){
 							item++
-							try { // don't display rect6
-								document.getElementById(method + item).textContent = rect[property]
-							} catch(e) {}
 							return rect[property]
 						}).join("")
 					}).join("")
@@ -227,7 +214,7 @@ function outputDomRect() {
 		run(0, run0),
 		run(1, run1),
 		run(2, run2), // shift
-		run(3, run3) // knownRect
+		run(3, run3), // known
 	]).then(function(){
 		analyze()
 	})

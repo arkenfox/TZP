@@ -2,31 +2,39 @@
 
 var dom;
 
+// global snapshot
 let jsFiles = [],
-	// global: only on page load
-	gCheckOnce = [],
-	gLiesOnce = [],
-	gLiesOnceBypassed = [],
-	gLiesOnceMethods = [],
-	// global snapshot
-	gCheck = [],
 	gCount = 0,
+	// alerts
+	gCheck = [],
+	gCheckOnce = [],
+	// FP
 	gData = [],
 	gDetail = {},
+	// prototype lies
 	gLies = [],
-	gLiesBypassed = [],
 	gLiesDetail = {},
-	gLiesKnown = [],
-	gLiesKnownDetail = {},
-	gLiesMethods = [],
+	// known
+	gKnown = [],
+	gKnownDetail = {},
+	gKnownOnce = [],
+	// bypasses
+	gBypassed = [],
+	gBypassedOnce = [],
+	// methods
+	gMethods = [],
+	gMethodsDetail = {},
+	gMethodsOnce = [],
+	// perf
 	gPerf = [],
-	gPerfDetail = [],
-	// section snapshot
-	sData = {},
+	gPerfDetail = []
+
+// section snapshot
+let sData = {},
 	sDetail = {},
-	sPerfDetail = [],
-	// fluid: reset on demand
-	protoLies = [],
+	sPerfDetail = []
+// fluid
+let protoLies = [],
 	navKeys = {}
 
 // android
@@ -63,11 +71,10 @@ let avh = "",
 	soL = "<code class='lies'>",
 	soB = "<code class='bypass'>",
 	scC = "</code>",
-// show/hide text colors
+// show/hide colors
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
 // common results
-	zB = sb+"[blocked]"+ sc,
 	zB0 = "blocked",
 	zD = "disabled",
 	zE = "enabled",
@@ -114,21 +121,12 @@ let avh = "",
 	match_red = sb+"[match]"+sc,
 	note_file = "",
 	note_ttc = sf+"test to come"+sc,
-// errors
-	se = sb+"[test error: ",
-	error_file_404 = se+"file not found]"+sc,
-	error_file_cors = sn+"[file:] [Cross-Origin Request Blocked]"+sc,
-	error_file_xhr = se+"xhr]"+sc,
-	error_iframe = se+"iframe]"+sc,
-	error_image = se+"image]"+sc,
-	error_global_os = se+"global variable not set]"+sc,
-// toggle states
-	stateDR = false,
 // other
+	isBaseFonts = false,
 	isBrave = false,
 	isBraveMode = "unknown",
 	isChannel = "",
-	isChrome = "", // i.e chrome://
+	isChrome = "", // chrome://
 	isEngine = "",
 	isFF = false,
 	isFFno = [],
@@ -146,10 +144,12 @@ let avh = "",
 	isVerPlus = false,
 // dev
 	gt0,
+	gLoad = true,
 	gRun = true,
 	gClick = true,
 	logExtra = false,
-	logResize = false,
+	logResize = true,
 	logStorage = false,
-	runS = false, // simulate FF only
-	runSL = false // simulate lies
+	runS = false,
+	runSL = false,
+	runBF = false

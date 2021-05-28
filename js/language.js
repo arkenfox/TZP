@@ -402,7 +402,7 @@ function get_lang_doc() {
 						tmpb = tmpb.map(function(entry){return entry.value}).join("")
 					return tmp += " | "+ tmpb
 				} else if (item == 44) {
-					// dayPeriod: 1569103: nightly-only FF78+
+					// ToDo: dayPeriod: 1569103: shipped FF90+
 					function get_day_period(date) {
 						return new Intl.DateTimeFormat(undefined, {dayPeriod: "long"}).format(date)
 					}
@@ -411,11 +411,10 @@ function get_lang_doc() {
 						dayB = get_day_period(new Date("2019-01-30T12:00:00"))
 					if (dayA == dayB) {
 						tmp = zNS
-						// ToDo: dayPeriod: version check when this leaves Nightly
-						//if (isFF && isVer < 81) {
-						//	tmp = zB0
-						//	err.push(item +" [unexpected]: dayPeriod")
-						//}
+						if (isFF && isVer > 89) {
+							tmp = zB0
+							err.push(item +" [unexpected]: dayPeriod")
+						}
 					} else {
 						// in the morning, noon, in the afternoon, in the evening, at night
 						tmp = dayA +", "+ dayB
@@ -545,7 +544,7 @@ function get_lang_doc() {
 		// hash 0-11: language
 		lHash0 = sha1(res.slice(0,12).join("-"))
 		reshash.push("language:"+ lHash0)
-		//console.debug("language", lHash0, res.slice(0,12))
+		//console.log("language", lHash0, res.slice(0,12))
 		if (isFF) {
 			if (lHash0 == "f118f627a051196ddc7cb3b005aac3b3f549e1e5") {
 				// DisplayNames supported
@@ -565,7 +564,7 @@ function get_lang_doc() {
 		// hash 12-16: timezone
 		lHash1 = sha1(res.slice(12,17).join("-"))
 		reshash.push("timezone:"+ lHash1)
-		//console.debug("timezone", lHash1, res.slice(12,17))
+		//console.log("timezone", lHash1, res.slice(12,17))
 		bTZ = (lHash1 == "8aa77801dd2bb3ad49c68f7ff179df3ea276479f" ? true : false)
 		lHash1 += (bTZ ? rfp_green : rfp_red)
 		dom.lHash1.innerHTML = lHash1
@@ -672,7 +671,7 @@ function get_lang_worker() {
 								}
 							}
 						} catch(k) {
-							console.debug("compare", i, k.name, k.message)
+							console.log("compare", i, k.name, k.message)
 						}
 					}
 					// compare hashes
