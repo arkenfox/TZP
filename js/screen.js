@@ -1196,12 +1196,19 @@ function get_math() {
 				let resAll = res1.concat(res6)
 				let resA1 = [-0.37419577499634155,-0.7854805190645291,0.7914463018528902,-0.767224894221913,-0.7415825695514536,
 					0.5403023058681397,0.7086865671674246,-0.7482651726250321,0.5493061443340548,1.718281828459045,1.1752011936438014]
+				if (isEngine == "blink") {
+					resA1 = [-0.37419577499634155,-0.7854805190645291,0.7914463018528903,-0.767224894221913,-0.7415825695514535,
+						0.5403023058681398,0.7086865671674247,-0.7482651726250322,0.5493061443340548,1.718281828459045,1.1752011936438014]
+				}
 				let resDiff = [], indexDiff = []
 				for (let i=0; i < resAll.length; i++) {
 					let diff = Math.abs(resAll[i] - resA1[i])
 					if (diff !== 0) {resDiff.push(0.1 + diff); indexDiff.push(i)}
 				}
-				console.log("run number "+ runtype + ": index "+ indexDiff.join() +"\n"+ resDiff.join(", "))
+				if (resDiff.length) {
+					console.debug(resAll)
+					console.log("run number "+ runtype + ": index "+ indexDiff.join() +"\n"+ resDiff.join(", "))
+				}
 				return resolve(m1hash +":"+ m6hash +":"+ mchash)
 			})
 		}
