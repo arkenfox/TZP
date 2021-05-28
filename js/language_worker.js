@@ -248,7 +248,7 @@ addEventListener("message", function(msg) {
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
 			} else if (item == 44) {
-				// dayPeriod: 1569103: nightly-only FF78+
+				// ToDo: dayPeriod: 1569103: shipped FF90+
 				function get_day_period(date) {
 					return new Intl.DateTimeFormat(undefined, {dayPeriod: "long"}).format(date)
 				}
@@ -257,11 +257,10 @@ addEventListener("message", function(msg) {
 					dayB = get_day_period(new Date("2019-01-30T12:00:00"))
 				if (dayA == dayB) {
 					tmp = zNS
-					// ToDo: dayPeriod: version check when this leaves Nightly
-					//if (isFF && isVer < 81) {
-					//	tmp = zB0
-					//	err.push(item +" [unexpected]: dayPeriod")
-					//}
+					if (isFF && isVer > 89) {
+						tmp = zB0
+						err.push(item +" [unexpected]: dayPeriod")
+					}
 				} else {
 					// in the morning, noon, in the afternoon, in the evening, at night
 					tmp = dayA +", "+ dayB
