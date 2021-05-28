@@ -231,7 +231,7 @@ function outputAudio2() {
 	}
 }
 
-function outputAudio1() {
+function outputAudio() {
 	let t0 = performance.now(),
 		section = []
 	try {
@@ -285,7 +285,7 @@ function outputAudio1() {
 				hash = byteArrayToHex(hashes[1])
 				section.push("copyFromChannel:"+ (isLies ? zLIE : hash))
 				dom.audioCopy.innerHTML = (isLies ? soL + hash + scC : hash)
-				if (gRun && isLies) {gLiesKnown.push("audio:")}
+				if (gRun && isLies) {gKnown.push("audio:")}
 				// done
 				log_section("audio", t0, section)
 			})
