@@ -1184,6 +1184,7 @@ function get_math() {
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
 				mchash = sha1(res1.concat(res6))
+				if (runtype == 0) {console.log(res1,res6)}
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1
