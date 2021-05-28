@@ -1171,7 +1171,6 @@ function get_math() {
 		function get_hashes(runtype) {
 			return new Promise(resolve => {
 				// 1st
-				//let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
 				let list = ['1e251','1e140','1e12','1e130','1e272',-1,'1e284','1e75'],
 					res1 = [], res6 = []
 				list.forEach(function(item) {
@@ -1179,8 +1178,9 @@ function get_math() {
 				})
 				// 6th
 				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
-				try {res6.push(Math.exp(1) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-				try {let y = Math.exp(1); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
+				let x = 0.9999999999999999999
+				try {res6.push(Math.exp(x) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+				try {let y = Math.exp(x); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
 				// hashes
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
@@ -1192,23 +1192,6 @@ function get_math() {
 					m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
 					//block1 = true
 					//block6 = true
-				}
-				// temp cydec debugging
-				let resAll = res1.concat(res6)
-				let resA1 = [-0.37419577499634155,-0.7854805190645291,0.7914463018528902,-0.767224894221913,-0.7415825695514536,
-					0.5403023058681397,0.7086865671674246,-0.7482651726250321,0.5493061443340548,1.718281828459045,1.1752011936438014]
-				if (isEngine == "blink") {
-					resA1 = [-0.37419577499634155,-0.7854805190645291,0.7914463018528903,-0.767224894221913,-0.7415825695514535,
-						0.5403023058681398,0.7086865671674247,-0.7482651726250322,0.5493061443340548,1.718281828459045,1.1752011936438014]
-				}
-				let resDiff = [], indexDiff = []
-				for (let i=0; i < resAll.length; i++) {
-					let diff = Math.abs(resAll[i] - resA1[i])
-					if (diff !== 0) {resDiff.push(0.1 + diff); indexDiff.push(i)}
-				}
-				if (resDiff.length) {
-					console.debug(resAll)
-					console.log("run number "+ runtype + ": index "+ indexDiff.join() +"\n"+ resDiff.join(", "))
 				}
 				return resolve(m1hash +":"+ m6hash +":"+ mchash)
 			})
