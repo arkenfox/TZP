@@ -1184,7 +1184,6 @@ function get_math() {
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
 				mchash = sha1(res1.concat(res6))
-				if (runtype == 0) {console.log(res1,res6)}
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1
@@ -1193,6 +1192,16 @@ function get_math() {
 					//block1 = true
 					//block6 = true
 				}
+				// temp cydec debugging
+				let resAll = res1.concat(res6)
+				let resA1 = [-0.37419577499634155,-0.7854805190645291,0.7914463018528902,-0.767224894221913,-0.7415825695514536,
+					0.5403023058681397,0.7086865671674246,-0.7482651726250321,0.5493061443340548,1.718281828459045,1.1752011936438014]
+				let resDiff = []
+				for (let i=0; i < resAll.length; i++) {
+					resDiff.push(resAll[i] - resA1[i])
+				}
+				console.log(resAll)
+				console.log("run "+ runtype +": "+ resDiff.join(", "))
 				return resolve(m1hash +":"+ m6hash +":"+ mchash)
 			})
 		}
