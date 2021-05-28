@@ -277,15 +277,15 @@ function outputAudio() {
 				pxi_compressor.disconnect()
 				section.push("sum:"+ (isLies ? zLIE : sum))
 				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
-				// get
-				let hash = byteArrayToHex(hashes[0])
-				section.push("getChannelData:"+ (isLies ? zLIE : hash))
-				dom.audioGet.innerHTML = (isLies ? soL + hash + scC : hash)
-				// copy
-				hash = byteArrayToHex(hashes[1])
-				section.push("copyFromChannel:"+ (isLies ? zLIE : hash))
-				dom.audioCopy.innerHTML = (isLies ? soL + hash + scC : hash)
-				if (gRun && isLies) {gKnown.push("audio:")}
+				// get/copy
+				let hashG = byteArrayToHex(hashes[0])
+				let hashC = byteArrayToHex(hashes[1])
+				if (hashG !== hashC) {isLies = true}
+				section.push("getChannelData:"+ (isLies ? zLIE : hashG))
+				dom.audioGet.innerHTML = (isLies ? soL + hash + scC : hashG)
+				section.push("copyFromChannel:"+ (isLies ? zLIE : hashC))
+				dom.audioCopy.innerHTML = (isLies ? soL + hash + scC : hashC)
+				if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
 				// done
 				log_section("audio", t0, section)
 			})
