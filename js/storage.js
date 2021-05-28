@@ -18,9 +18,9 @@ function lookup_cookie(name) {
 
 function get_cookies() {
 	// support
-	let ctest0 = zB
+	let ctest0 = zB0
 	try {ctest0 = navigator.cookieEnabled} catch(e) {}
-	dom.ctest0.innerHTML = (ctest0 == zB ? zB : (ctest0 ? zE : zD))
+	dom.ctest0.innerHTML = (ctest0 == zB0 ? zB0 : (ctest0 ? zE : zD))
 	// session
 	let rndA = "sc_"+ rnd_string()
 	let rndB = rnd_string()
@@ -364,24 +364,14 @@ function get_storage_manager(runtype) {
 function outputStorage() {
 	let t0 = performance.now(),
 		section = []
-	// functions
-	get_cookies()
-	get_storage()
-	get_idb()
-	get_workers()
-	get_service_workers()
-	get_storage_manager()
-
-	// section hash
-	// there's almost nothing stable about this section
-		// appcache
+	// appcache
 	let appCache = ("applicationCache" in window ? zE : zD)
 	dom.appcache = appCache
 	section.push("appCache:"+ appCache)
-		// storageM
+	// storageM
 	let sm = (check_navKey("storage") ? zE : zD)
 	section.push("storage_manager:"+ sm)
-		// sw
+	// sw
 	let sw = (check_navKey("serviceWorker") ? zE : zD)
 	dom.swork1 = sw
 	section.push("service_worker:"+ sw)
@@ -397,6 +387,13 @@ function outputStorage() {
 		log_section("storage", t0, section)
 	})
 
+	// not used in FP
+	get_cookies()
+	get_storage()
+	get_idb()
+	get_workers()
+	get_service_workers()
+	get_storage_manager()
 }
 
 countJS("storage")
