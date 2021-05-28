@@ -356,7 +356,10 @@ const get_isOS = () => new Promise(resolve => {
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
 	isPerf = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
+	if (Math.trunc(performance.now() - performance.now()) !== 0) {
+		isPerf = false
+		if (gRun) {gMethodsOnce.push("_global:performance.now")}
+	}
 	if (!isFF) {return resolve()}
 	try {
 		performance.mark("a")
@@ -991,7 +994,7 @@ function log_section(name, time1, data) {
 		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
 		document.getElementById(name +"hash").innerHTML = sHash
-		document.getElementById("perf"+ name).innerHTML = " "+ time1 +" ms"
+		document.getElementById("perf"+ name).innerHTML = " "+ (isPerf ? time1 : "xxx") +" ms"
 
 		// GLOBAL
 		if (gRun) {
