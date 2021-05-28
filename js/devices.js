@@ -120,7 +120,7 @@ function get_media_devices() {
 		function finish(result) {
 			// lies
 			if (gRun) {
-				if (devicesBS) {gLiesKnown.push("devices:media")}
+				if (devicesBS) {gKnown.push("devices:media")}
 			}
 			log_perf("media devices [devices]",t0)
 			return resolve("media_devices:"+ result)
@@ -163,7 +163,7 @@ function get_media_devices() {
 							str += "<br>"+ strPad + d.groupId
 						} else {
 							// if FF the length cannot be zero
-							console.debug(d.kind, "zero-length groupId")
+							console.log(d.kind, "zero-length groupId")
 						}
 						if (d.label.length) {
 							strPad = ("label: ").padStart(pad)
@@ -174,13 +174,13 @@ function get_media_devices() {
 						if (isFF) {
 							// deviceId
 							let chk = d.deviceId
-							//console.debug("device", chk.length, chk.slice(-1), chk)
+							//console.log("device", chk.length, chk.slice(-1), chk)
 							if (chk.length !== 44) {devicesBS = true}
 							else if (chk.slice(-1) !== "=") {devicesBS = true}
 							// groupId
 							if (isVer > 66) {
 								chk = d.groupId
-								//console.debug("group", chk.length, chk.slice(-1), chk)
+								//console.log("group", chk.length, chk.slice(-1), chk)
 								if (chk.length !== 44) {devicesBS = true}
 								else if (chk.slice(-1) !== "=") {devicesBS = true}
 							}
@@ -347,11 +347,11 @@ function get_mimetypes_plugins() {
 			if (isVer > 84) {
 				if (results[0] !== "none") {
 					pValue = "none"
-					if (gRun) {gLiesBypassed.push("devices:plugins:none")}
+					if (gRun) {gBypassed.push("devices:plugins:none")}
 				}
 				if (results[1] !== "none") {
 					mValue = "none"
-					if (gRun) {gLiesBypassed.push("devices:mimeTypes:none")}
+					if (gRun) {gBypassed.push("devices:mimeTypes:none")}
 				}
 			}
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
@@ -426,8 +426,8 @@ function get_pointer_hover() {
 					if (type.indexOf("oint") > 0) {pointerBS = true}
 					if (type.indexOf("over") > 0) {hoverBS = true}
 					if (gRun) {
-						gLiesKnown.push("devices:"+ type)
-						gLiesBypassed.push("devices:"+ q.trim() + x2)
+						gKnown.push("devices:"+ type)
+						gBypassed.push("devices:"+ q.trim() + x2)
 					}
 					x = x2
 				} else {
@@ -610,9 +610,9 @@ function outputDevices() {
 		})
 		// lies
 		if (gRun) {
-			if (pluginBS) {gLiesKnown.push("devices:plugins")}
-			if (mimeBS) {gLiesKnown.push("devices:mimeTypes")}
-			if (isBraveMode.substring(0,2) == "st") {gLiesKnown.push("devices:hardwareConcurrency")}
+			if (pluginBS) {gKnown.push("devices:plugins")}
+			if (mimeBS) {gKnown.push("devices:mimeTypes")}
+			if (isBraveMode.substring(0,2) == "st") {gKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
 		log_section("devices", t0, section)
