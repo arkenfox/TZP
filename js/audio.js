@@ -282,9 +282,9 @@ function outputAudio() {
 				let hashC = byteArrayToHex(hashes[1])
 				if (hashG !== hashC) {isLies = true}
 				section.push("getChannelData:"+ (isLies ? zLIE : hashG))
-				dom.audioGet.innerHTML = (isLies ? soL + hash + scC : hashG)
+				dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
 				section.push("copyFromChannel:"+ (isLies ? zLIE : hashC))
-				dom.audioCopy.innerHTML = (isLies ? soL + hash + scC : hashC)
+				dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
 				if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
 				// done
 				log_section("audio", t0, section)
