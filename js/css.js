@@ -174,7 +174,7 @@ function get_computed_styles() {
 			styleVersion(1),
 			styleVersion(2)
 		]).then(res => {
-			let reportedHashes = [], trueHashes = [], methodError = []
+			let reportedHashes = [], trueHashes = [], blocks = []
 			for (let i=0; i < 3; i++) {
 				let el = document.getElementById("cStyles"+ i),
 					display = ""
@@ -196,8 +196,8 @@ function get_computed_styles() {
 						sDetail[sNames[i]+ "_fake_skip"] = fakeStyles
 						sDetail[sNames[i]+ "_reported_skip"] = reportedStyles
 						if (gRun && fakeStyles.length) {
-							gLiesKnown.push("css:"+sNames[i])
-							gLiesBypassed.push("css::"+ sNames[i] +":"+ sha1(trueStyles.join()))
+							gKnown.push("css:"+sNames[i])
+							gBypassed.push("css::"+ sNames[i] +":"+ sha1(trueStyles.join()))
 						}
 					} else {
 						reportedStyles.sort()
@@ -217,18 +217,17 @@ function get_computed_styles() {
 						display += buildButton("14", sNames[i]+ "_fake_skip", fakeStyles.length +" lie"+ (fakeStyles.length > 1 ? "s" : ""))
 					}
 				} catch(e) {
-					methodError.push("css:"+ sNames[i]+ ":blocked")
+					if (!isFile) {blocks.push(sNames[i])}
 					display = "error"
 					reportedHashes.push("error")
 					trueHashes.push("error")
 				}
 				el.innerHTML = display
 			}
-			// show/hide rows & fixup label
+			// show/hide & fixup label
 			let uniqueReported = reportedHashes.filter(function(item, position) {return reportedHashes.indexOf(item) === position})
 			let isSame = (uniqueReported.length < 2)
-			dom.togCSSb.style.display = (isSame ? "none" : "table-row")
-			dom.togCSSc.style.display = (isSame ? "none" : "table-row")
+			showhide("C",(isSame ? "none" : "table-row"))
 			if (!isSame) {
 				dom.togCSSa = "getComputedStyle"
 			} else {
@@ -236,13 +235,12 @@ function get_computed_styles() {
 					+"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>"
 					+"CSSRuleList.style</span></div> &nbsp computed styles"
 			}
-			// record blocks
-			if (gRun && methodError.length) {
-				gLiesMethods = gLiesMethods.concat(methodError)
-			}
+			// blocks
+			blocks.sort()
+			if (gRun && blocks.length) {gMethods.push("css:computed styles:blocked:"+ blocks.join())}
 			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
 			// return
-			if (methodError.length == 3) {
+			if (blocks.length == 3) {
 				return resolve("styles:"+ zB0)
 			} else {
 				let uniqueTrue = trueHashes.filter(function(item, position) {return trueHashes.indexOf(item) === position})
@@ -285,8 +283,8 @@ function get_mm_css() {
 				if (x !== x2) {
 					display = soB + x + scC
 					if (gRun) {
-						gLiesKnown.push("css:"+ type)
-						gLiesBypassed.push("css:"+ q.trim() + x2)
+						gKnown.push("css:"+ type)
+						gBypassed.push("css:"+ q.trim() + x2)
 					}
 				}
 			}
