@@ -2514,10 +2514,10 @@ function outputStart() {
 	// FF60: false positive
 	if (isVer < 61) {isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))}
 	if (isFF && isFFno.length) {
-		isFFno.forEach(function(item) {
-			gKnownOnce.push("_global:isFF "+ item)
-			gBypassedOnce.push("_global:isFF "+ item + ":true")
-		})
+		let fake = []
+		isFFno.forEach(function(item) {fake.push(item)})
+		gKnownOnce.push("_global:isFF")
+		gBypassedOnce.push("_global:isFF:"+ fake.join() + ":true")
 	}
 	// cosmetic
 	let items = document.getElementsByClassName("faint")
