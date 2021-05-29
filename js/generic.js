@@ -1054,10 +1054,12 @@ function log_section(name, time1, data) {
 					detailBtn = buildButton("0", "gKnownDetail", "details", "showMetrics")
 				}
 				if (gKnown.length) {
-					let knownBtn = buildButton("0","known lies", soL + gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") + scC, "showMetrics")
+					let knownBtn = " <span class='btn0 btnc' onClick='showMetrics(`known lies`)'>"
+						+ soL +"["+ gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") +"]"+ scC + "</span>"
 					let bypassBtn = ""
 					if (gBypassed.length) {
-						bypassBtn = buildButton("0","lies (hopefully) bypassed", soB + gBypassed.length +" bypassed" + scC, "showMetrics")
+						bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`lies (hopefully) bypassed`)'>"
+						+ soB +"["+ gBypassed.length +" bypassed]"+ scC + "</span>"
 					}
 					dom.knownhash.innerHTML = sha1(gKnown.join())	+ knownBtn + bypassBtn + detailBtn
 				} else {
