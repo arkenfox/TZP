@@ -2369,37 +2369,50 @@ function outputUA() {
 		dom.uaIframes.innerHTML = summary
 
 		// section
-		let section = ctrl, displayhash = ctrlhash
+		let section = ctrl, display = ctrlhash
 		if (uaBS || mismatch > 0) {
 			// uaBS or mismatch
 			section = ["ua:"+ zLIE]
-			displayhash = soL + ctrlhash + scC
+			display = soL + ctrlhash + scC
 		} else {
 			// no lies: check bypasses
-			let sReported = section[8]
+			let sRep = section[8], sReal = ""
 			// RFP: non open-ended version
 			if (isRFP && !isVerPlus) {
-				let n = sReported.lastIndexOf("/"),
-					vReported = sReported.slice(n+1, sReported.length),
+				let n = sRep.lastIndexOf("/"),
+					vReported = sRep.slice(n+1, sRep.length),
 					vReal = isVer.toString() + ".0"
-				let sReal = sReported.replaceAll(vReported, vReal)
-				if (sReported !== sReal) {
+				sReal = sRep.replaceAll(vReported, vReal)
+				if (sRep !== sReal) {
 					section[8] = sReal
 					sReal = sReal.slice(10)
-					sReported = sReported.replaceAll(vReported, soB + vReported + scC)
-					dom.nuserAgent.innerHTML = "~"+ sReported.slice(10) +"~"
+					sRep = sRep.replaceAll(vReported, soB + vReported + scC)
+					dom.nuserAgent.innerHTML = "~"+ sRep.slice(10) +"~"
 					if (gRun) {
-						gKnown.push("ua:userAgent version")
-						gBypassed.push("ua:userAgent version:"+ sReal)
+						gKnown.push("ua:userAgent:version")
+						gBypassed.push("ua:userAgent:version:"+ sReal)
 					}
 				}
 			}
-			// ToDo: isBrave spaces
+			// isBrave spaces
 			if (isBrave) {
-
+				for (let i=0; i < section.length; i++) {
+					let item = section[i],
+						name = item.split(":")[0]
+					sRep = item.substring(name.length+1, item.length)
+					sReal = sRep.trim().replace(/\s+/g, " ")
+					if (sRep !== sReal) {
+						section[i] = name +":"+ sReal
+						document.getElementById("n"+ name).innerHTML = "~"+ sRep + "~ " + soB +"spaces"+ scC
+						if (gRun) {
+							gKnown.push("ua:"+ name +":spacing")
+							gBypassed.push("ua:"+ name +":spacing:"+ sReal)
+						}
+					}
+				}
 			}
 		}
-		dom.uaDoc.innerHTML = displayhash
+		dom.uaDoc.innerHTML = display
 		log_section("ua", t0, section)
 		// ToDo: promisify workers
 		get_ua_workers()
