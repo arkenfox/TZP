@@ -2,6 +2,7 @@
 
 var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
+let isOS64math = ""
 let iframeSim = 0
 
 function return_lb_nw(w,h) {
@@ -687,6 +688,7 @@ function get_math() {
 				// A or H: always 64bit WIN on 64bit FF
 				fdMath1="Windows [64-bit]"
 				fdMath6=zSDK64
+				isOS64math = 64
 			} else if (m1 == "C") {
 				// C: always 32bit FF on WIN (32bit or 64bit)
 				fdMath1="Windows"
@@ -698,12 +700,14 @@ function get_math() {
 					// 60-67: 1D : always 64bit Linux -> 64bit FF
 					fdMath1="Linux [64-bit]"
 					fdMath6=zFF +" [64-bit]"
+					isOS64math = 64
 				}	else if (m6 == "3") {
 					// 68+: 3D : can be FF64bit or TB32/64bit
 					// values already set
 				}	else if (m6 == "2") {
 					// D2: always 32bit Linux (32bit FF set earlier)
 					fdMath1="Linux [32-bit]"
+					isOS64math = 32
 				}
 			} else if (m1 == "G") {
 				// G: always Linux (Ubuntu)
@@ -712,6 +716,7 @@ function get_math() {
 				// E: always Mac: and thus 64bit FF
 				fdMath1="Mac"
 				fdMath6=zFF +" [64-bit]"
+				isOS64math = 64
 			} else if (m1 == "F") {
 				// F: always Android
 				fdMath1="Android"
@@ -722,6 +727,7 @@ function get_math() {
 					// ESR60: 1B: always 64bit TB: thus 64bit WIN
 					fdMath6=zMingw64
 					fdMath1="Windows [64-bit]"
+					isOS64math = 64
 				} else if (m6 == "2") {
 					// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
 					fdMath6=zMingw32
@@ -804,6 +810,7 @@ function get_math() {
 			return resolve("math:"+ mchash.substring(0,40))
 		}
 
+		isOS64math = ""
 		Promise.all([
 			get_hashes(0),
 			get_hashes(1),
@@ -2250,13 +2257,14 @@ function outputUA() {
 		} else if (protoLies.includes("Navigator.appVersion")) {uaBS = true
 		} else if (protoLies.includes("Navigator.platform")) {uaBS = true
 		} else if (protoLies.includes("Navigator.oscpu")) {uaBS = true
-		} else if (protoLies.includes("Navigator.productSub")) {uaBS = true
-		} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
-		} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
-		} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
-		} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
-		} else if (protoLies.includes("Navigator.appName")) {uaBS = true
-		} else if (protoLies.includes("Navigator.product")) {uaBS = true
+		} else if (!isFF) {
+			if (protoLies.includes("Navigator.productSub")) {uaBS = true
+			} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
+			} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
+			} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
+			} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
+			} else if (protoLies.includes("Navigator.appName")) {uaBS = true
+			} else if (protoLies.includes("Navigator.product")) {uaBS = true}
 		}
 	}
 	// clear
@@ -2429,13 +2437,6 @@ function outputFD(runtype) {
 		if (isVer == 59) {r = "59 or lower"}
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
-		// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
-		let bits = zNA
-		if (isVer > 88) {
-			if (isOS64 == true) {bits = "64bit"} else if (isOS64 = false) {	bits = "32bit"} else {bits = "can't tell"}
-		}
-		dom.fdArchOS.innerHTML = bits
-		section.push("os_architecture:"+ bits)
 
 		get_chrome()
 		Promise.all([
@@ -2448,6 +2449,22 @@ function outputFD(runtype) {
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
+			// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
+			let bits = zNA, display = bits
+			if (isVer > 88) {
+				if (isOS64 == true) {bits = "64bit"} else if (isOS64 = false) {bits = "32bit"} else {bits = "can't tell"}
+				display = bits
+				if (bits == "can't tell" && isOS64math !== "") {
+					display = soB + bits + scC
+					bits = isOS64math + "bits"
+					if (gRun) {
+						gKnown.push("fd:os_architecture")
+						gBypassed.push("fd:os_architecture:"+ bits)
+					}
+				}
+			}
+			dom.fdArchOS.innerHTML = display
+			section.push("os_architecture:"+ bits)
 			log_section("feature", t0, section)
 		})
 		get_collation()
