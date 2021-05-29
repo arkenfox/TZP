@@ -24,7 +24,7 @@
 body {background-color: #161b22; color: #b3b3b3;}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
 code {
-	background: #41424d !important; /* was #303030 */
+	background: #41424d !important;
 	border: 1px solid rgba(255, 255, 255, .1);
 	padding: 1px; border-radius: 2px;}
 code.lies {
@@ -34,7 +34,7 @@ code.lies {
 	color: white;
 }
 code.bypass {
-	background-color: rgba(167, 140, 220, 0.2) !important; /* purple */
+	background-color: rgba(140, 220, 193, 0.4) !important; /* test9 */
 	padding-left: 3px !important;
 	padding-right: 3px !important;
 	color: white;
