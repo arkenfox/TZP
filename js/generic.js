@@ -353,6 +353,22 @@ const get_isOS = () => new Promise(resolve => {
 	}
 })
 
+const get_isOS64 = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	// OS architecture
+		// FF89+: 1703505: javascript.options.large_arraybuffers
+	try {
+		isOS64 = "unknown"
+		let test = new ArrayBuffer(Math.pow(2,32))
+		isOS64 = true
+		return resolve()
+	} catch(e) {
+		// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit
+		//log_perf("isOS64 [global]",t0,"",isOS64)
+		return resolve()
+	}
+})
+
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
 	isPerf = true
@@ -458,20 +474,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (verNo == 59) {verNo += " or lower"
 		} else if (verNo == 90) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
-
-		// OS architecture
-			// FF89+: 1703505: javascript.options.large_arraybuffers
-		t0 = performance.now()
-		try {
-			let test = new ArrayBuffer(Math.pow(2,32))
-			isOS64 = true
-			log_perf("isOS64 [global]",t0,"",isOS64)
-			return resolve()
-		} catch(e) {
-			// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit
-			//log_perf("isOS64 [global]",t0,"",isOS64)
-			return resolve()
-		}
+		return resolve()
 	}
 	function start() { // 90: 1520434
 		try {
@@ -1217,6 +1220,7 @@ function outputSection(id, cls) {
 				get_isBraveMode(),
 				get_navKeys(),
 				outputPrototypeLies(),
+				get_isOS64(),
 			]).then(function(results){
 				output()
 			})
