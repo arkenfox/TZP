@@ -372,11 +372,14 @@ const get_isOS64 = () => new Promise(resolve => {
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
 	isPerf = true
+	let realPerf = true
 	if (runSL) {isPerf = false}
 	if (Math.trunc(performance.now() - performance.now()) !== 0) {
 		isPerf = false
+		realPerf = false
 		if (gRun) {gMethods.push("_global:performance.now:tampered")}
 	}
+	if (runSL) {isPerf = realPerf}
 	if (!isFF) {return resolve()}
 	try {
 		performance.mark("a")
@@ -872,6 +875,8 @@ function showMetrics(type) {
 			showhash = true
 		if (type == "known lies") {
 			array = gKnown
+		} else if (type == "lies (hopefully) bypassed") {
+			array = gBypassed
 		} else if (type == "known methods") {
 			array = gMethods
 		} else if (type == "fingerprint") {
@@ -889,9 +894,6 @@ function showMetrics(type) {
 			array = sData[type]
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
-		if (type == "known lies" && gBypassed.length) {
-			console.log("lies (hopefully) bypassed", gBypassed)
-		}
 	}
 }
 
@@ -1052,9 +1054,12 @@ function log_section(name, time1, data) {
 					detailBtn = buildButton("0", "gKnownDetail", "details", "showMetrics")
 				}
 				if (gKnown.length) {
-					let knownStr = gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "")
-						+ (gBypassed.length ? " | "+ gBypassed.length +" bypassed" : "")
-					dom.knownhash.innerHTML = sha1(gKnown.join())	+ buildButton("0", "known lies", knownStr, "showMetrics") + detailBtn
+					let knownBtn = buildButton("0","known lies", soL + gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") + scC, "showMetrics")
+					let bypassBtn = ""
+					if (gBypassed.length) {
+						bypassBtn = buildButton("0","lies (hopefully) bypassed", soB + gBypassed.length +" bypassed" + scC, "showMetrics")
+					}
+					dom.knownhash.innerHTML = sha1(gKnown.join())	+ knownBtn + bypassBtn + detailBtn
 				} else {
 					dom.knownhash.innerHTML = "none"+ detailBtn
 				}
