@@ -2288,7 +2288,7 @@ function outputUA() {
 		if (uaBS == false) {get_pLies()} // sets uaBS
 		const ctrl = results[0].sort()
 		const ctrlhash = sha1(ctrl.join())
-
+		console.debug(results) // temp debug
 		// sim
 		if (runSL) {
 			iframeSim = iframeSim % 6
