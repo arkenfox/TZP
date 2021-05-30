@@ -634,11 +634,8 @@ function get_math() {
 		function get_hashes(runtype) {
 			return new Promise(resolve => {
 				// 1st
-				let list = ['1e251','1e140','1e12','1e130','1e272',-1,'1e284','1e75'],
-					res1 = [], res6 = []
-				list.forEach(function(item) {
-					try {res1.push(Math.cos(item))} catch(e) {res1.push("x"); block1 = true}
-				})
+				let res1 = [], res6 = [], list = [1e251,1e140,1e12,1e130,1e272,-1,1e284,1e75]
+				list.forEach(function(item) {try {res1.push(Math.cos(item))} catch(e) {res1.push("x"); block1 = true}})
 				// 6th
 				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
 				try {res6.push(Math.E - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
