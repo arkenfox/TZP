@@ -641,8 +641,8 @@ function get_math() {
 				})
 				// 6th
 				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
-				try {res6.push(Math.exp(1) - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-				try {let y = Math.exp(1); res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
+				try {res6.push(Math.E - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
+				try {let y = Math.E; res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
 				// hashes
 				m1hash = sha1(res1.join("-"))
 				m6hash = sha1(res6.join("-"))
@@ -676,7 +676,6 @@ function get_math() {
 		function build_output() {
 			if (block1) {m1=""} // for runS
 			if (block6) {m6=""} // for runS
-
 			// browser
 			if (m6 == "1" | m6 == "3") {
 				fdMath6=zFF
@@ -815,11 +814,6 @@ function get_math() {
 			get_hashes(0),
 			get_hashes(1),
 		]).then(function(res){
-			// temp test
-			let testE = []
-			testE.push(Math.E)
-			testE.push(Math.exp(1))
-			testE.push(Math.exp(0.99999999999999999))
 			// run0
 			let run01 = res[0].split(":")[0],
 				run06 = res[0].split(":")[1],
@@ -830,7 +824,6 @@ function get_math() {
 				run1c = res[1].split(":")[2]
 			// compare runs
 			if (run0c !== run1c) {
-				console.log(sha1(testE.join()) +"\n", testE) // temp test
 				// lies
 				if (gRun) {gKnown.push("fd:math")}
 				let sColor = s3
@@ -1507,11 +1500,9 @@ function get_ua_doc() {
 					let strA = str.toLowerCase()
 					if (strA.indexOf("webkit") !== -1) {bs = true}
 				}
-
 				if (isOS !== "" && bs == false) {
 					// isVerPlus: allow the next version
 					let controlA = "", controlB = "", testA = str, testB = str
-
 					if (isRFP) {
 					// RFP ON
 						v = "78.0"
@@ -1659,7 +1650,6 @@ function get_ua_doc() {
 			}
 			if (spoof) {addArrow("oscpu", true)}
 		}
-
 		// userAgent
 		str = get_property("userAgent")
 		if (go) {
@@ -1670,7 +1660,6 @@ function get_ua_doc() {
 			}
 			if (spoof) {addArrow("userAgent", true)}
 		}
-
 		// lies
 		showhide("UA",(lies ? "table-row": "none"))
 		if (lies) {
@@ -2312,7 +2301,6 @@ function outputUA() {
 			}
 			iframeSim++
 		}
-
 		// loop iframe results
 		let block = [], distinct = [], mismatch = []
 		for(let i=1; i < 8; i++) {
@@ -2380,7 +2368,6 @@ function outputUA() {
 			}
 		}
 		dom.uaIframes.innerHTML = summary
-
 		// section
 		let section = ctrl, display = ctrlhash
 		if (uaBS || mismatch > 0) {
