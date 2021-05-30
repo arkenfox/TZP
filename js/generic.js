@@ -302,28 +302,22 @@ const get_isOS = () => new Promise(resolve => {
 		// log lie
 		gKnownOnce.push("_global:isOS")
 		// try quick math
-		let list = ['1e251','1e140','1e12','1e130','1e272','1e0','1e284','1e75'],
-			res = []
-		list.forEach(function(item) {
-			try {res.push(Math.cos(item))} catch(e) {}
-		})
+		let res = [], list = [1e251,1e140,1e12,1e130,1e272,-1,1e284,1e75]
+		list.forEach(function(item) {try {res.push(Math.cos(item))} catch(e) {}})
 		let m = (sha1(res.join("-"))).substring(0,8)
-		if (m == "46f7c2bb") {m="A"}
-		else if (m == "8464b989") {m="B"}
-		else if (m == "97eee448") {m="C"}
-		else if (m == "96895e00") {m="D"}
-		else if (m == "06a01549") {m="E"}
-		else if (m == "ae434b10") {m="F"}
-		else if (m == "19df0b54") {m="G"}
-		else if (m == "8ee641f0") {m="H"}
-		if (m == "A" | m == "B" | m == "C" | m == "H") {
-			isOS = "windows"
-		} else if (m == "D" | m == "G") {
-			isOS = "linux"
-		} else if (m == "E") {
-			isOS = "mac"
-		} else if (m == "F") {
-			isOS = "android"
+		if (m == "46f7c2bb") {m="A"
+		} else if (m == "8464b989") {m="B"
+		} else if (m == "97eee448") {m="C"
+		} else if (m == "96895e00") {m="D"
+		} else if (m == "06a01549") {m="E"
+		} else if (m == "ae434b10") {m="F"
+		} else if (m == "19df0b54") {m="G"
+		} else if (m == "8ee641f0") {m="H"
+		}
+		if (m == "A" | m == "B" | m == "C" | m == "H") {isOS = "windows"
+		} else if (m == "D" | m == "G") {isOS = "linux"
+		} else if (m == "E") {isOS = "mac"
+		} else if (m == "F") {isOS = "android"
 		}
 		//if (runSL) (isOS = "") // breaks font sim
 		if (isOS == "") {
