@@ -815,6 +815,11 @@ function get_math() {
 			get_hashes(0),
 			get_hashes(1),
 		]).then(function(res){
+			// temp test
+			let testE = []
+			testE.push(Math.E)
+			testE.push(Math.exp(1))
+			testE.push(Math.exp(0.99999999999999999))
 			// run0
 			let run01 = res[0].split(":")[0],
 				run06 = res[0].split(":")[1],
@@ -825,6 +830,7 @@ function get_math() {
 				run1c = res[1].split(":")[2]
 			// compare runs
 			if (run0c !== run1c) {
+				console.log(sha1(testE.join()) +"\n", testE) // temp test
 				// lies
 				if (gRun) {gKnown.push("fd:math")}
 				let sColor = s3
