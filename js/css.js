@@ -1,5 +1,7 @@
 'use strict';
 
+let cSim = 0
+
 function get_colors(runtype) {
 	/* servo/components/style/values/specified/color.rs */
 	let aList = [],
@@ -160,101 +162,151 @@ function get_computed_styles() {
 						prototypeName
 					})
 				} catch(e) {
-					return resolve(undefined)
+					return resolve("error")
 				}
 			})
 		}
-		// run
+		// clear
+		let names = ["getcomputed","htmlelement","cssrulelist"]
 		let sNames = ["css_getcomputed","css_htmlelement","css_cssrulelist"]
-		sNames.forEach(function(k){clearDetail[k]})
+		sDetail["css_computed_styles"] = []
 		sNames.forEach(function(k){clearDetail[k + "_fake_skip"]})
 		sNames.forEach(function(k){clearDetail[k + "_reported_skip"]})
+
+		// run
 		Promise.all([
 			styleVersion(0),
 			styleVersion(1),
 			styleVersion(2)
 		]).then(res => {
-			let reportedHashes = [], trueHashes = [], blocks = []
+			let blankIndex = [], realIndex = [], fakeIndex = [], distinctRep = [], distinctReal = []
+			let values = [], btns = []
+			//sim
+			if (runSC) {
+				cSim++
+				cSim = cSim % 10
+				if (cSim == 0) {console.log("style sim #0: all blocked")}
+				var bMsg = false
+			}
+			// analyse
 			for (let i=0; i < 3; i++) {
-				let el = document.getElementById("cStyles"+ i),
-					display = ""
+				let aRep = [], aReal = [], aFake = []
 				try {
-					let reportedStyles = [], trueStyles = [], fakeStyles = []
-					reportedStyles = res[i].keys
-					// sim
-					if (runSL) {
-						reportedStyles.push("setProperty")
-						if (i==1) {reportedStyles.push("fake")}
-						if (i==2) {reportedStyles.push("hello","world")}
-					}
-					// false positives FF60-62: added to alerts
-					if (isFF && isVer > 62) {
-						let lastStyleIndex = reportedStyles.indexOf("constructor")
-						fakeStyles = reportedStyles.slice(lastStyleIndex+1)
-						trueStyles = reportedStyles.slice(0, lastStyleIndex+1)
-						sDetail[sNames[i]] = trueStyles
-						sDetail[sNames[i]+ "_fake_skip"] = fakeStyles
-						sDetail[sNames[i]+ "_reported_skip"] = reportedStyles
-						if (gRun && fakeStyles.length) {
-							gKnown.push("css:"+sNames[i])
-							gBypassed.push("css::"+ sNames[i] +":"+ sha1(trueStyles.join()))
+					aRep = res[i].keys
+					if (runSC) {
+						let cMsg = ""
+						// privacy.file_unique_origin = false
+						if (cSim == 0) {bMsg = true; let k=y
+						} else if (cSim == 1) {cMsg = "3 same fake"; aRep.push("setProperty")
+						} else if (cSim == 2) {cMsg = "2 true, 1 block"; if (i == 1) {let k=y}
+						} else if (cSim == 3) {cMsg = "2 same fake, 1 block"; if (i == 1 || i == 2) {aRep.push("banana")} else if (i == 0) {let k=y}
+						} else if (cSim == 4) {cMsg = "2 same fake, 1 true"; if (i == 0 || i == 2) {aRep.push("banana")}
+						} else if (cSim == 5) {cMsg = "1 true, 1 fake, 1 blocked"; if (i == 2) {aRep.push("foo","bar")} else if (i == 1) {let k=y}
+						} else if (cSim == 6) {cMsg = "2 diff fakes, 1 true"; if (i==1) {aRep.push("woo")} else if (i==2) {aRep.push("wha")}
+						} else if (cSim == 7) {cMsg = "2 diff fakes, 1 block"
+							if (i==0) {aRep.push("a","b")} else if (i==1) {let k=y} else if (i==2) {aRep.push("ek")}
+						} else if (cSim == 8) {cMsg = "3 diff fakes"
+							if (i==0) {aRep.push("x")} else if (i==1) {aRep.push("y")} else if (i==2) {aRep.push("z","k")}
+						} else if (cSim == 9) {cMsg = "at least 2 diff real results, 1 block"
+							if (i==1) {aRep = aRep.filter(x => !["constructor"].includes(x)); aRep.push("y"); aRep.push("constructor")} else if (i==2) {let k=y}
 						}
+						if (cSim !== 0 && !bMsg) {console.log("style sim #"+ cSim + ":", cMsg); bMsg = true}
+					}
+					// note false positives FF60-62
+					if (isFF && isVer > 62) {
+						let lastStyleIndex = aRep.indexOf("constructor")
+						aFake = aRep.slice(lastStyleIndex+1)
+						aReal = aRep.slice(0, lastStyleIndex+1)
 					} else {
-						reportedStyles.sort()
-						trueStyles = reportedStyles
-						sDetail[sNames[i]] = trueStyles
-						sDetail[sNames[i]+ "_reported_skip"] = reportedStyles
+						aRep.sort()
+						aReal = aRep
 					}
-					// hashes
-					let reportedHash = sha1(reportedStyles.join())
-					reportedHashes.push(reportedHash)
-					trueHashes.push(sha1(trueStyles.join()))
-					// display
-					display = reportedHash
-					if (fakeStyles.length) {display = soB + reportedHash + scC}
-					display += buildButton("14", sNames[i]+ "_reported_skip", reportedStyles.length +"|"+ res[i].moz +"|"+ res[i].webkit)
-					if (fakeStyles.length) {
-						display += buildButton("14", sNames[i]+ "_fake_skip", fakeStyles.length +" lie"+ (fakeStyles.length > 1 ? "s" : ""))
+					// data
+					let value = sha1(aRep.join())
+					values.push(value)
+					distinctRep.push(value)
+					let btn = buildButton("14", sNames[i] +"_reported_skip", aRep.length +"|"+ res[i].moz +"|"+ res[i].webkit)
+					sDetail["css_computed_styles"] = aReal
+					if (aFake.length) {
+						fakeIndex.push(i)
+						sDetail[sNames[i] +"_reported_skip"] = aRep
+						sDetail[sNames[i] +"_fake_skip"] = aFake
+						btn += buildButton("14", sNames[i] +"_fake_skip", aFake.length +" lie"+ (aFake.length > 1 ? "s" : ""))
+						distinctReal.push(sha1(aReal.join()))
+					} else {
+						sDetail[sNames[i] +"_reported_skip"] = aReal
+						realIndex.push(i)
+						distinctReal.push(value)
 					}
+					btns.push(btn)
 				} catch(e) {
-					if (!isFile) {blocks.push(sNames[i])}
-					display = "error"
-					reportedHashes.push("error")
-					trueHashes.push("error")
+					blankIndex.push(i)
+					values.push("blocked")
+					btns.push("")
 				}
-				el.innerHTML = display
 			}
-			// show/hide & fixup label
-			let uniqueReported = reportedHashes.filter(function(item, position) {return reportedHashes.indexOf(item) === position})
-			let isSame = (uniqueReported.length < 2)
+			distinctRep = distinctRep.filter(function(item, position) {return distinctRep.indexOf(item) === position})
+			distinctReal = distinctReal.filter(function(item, position) {return distinctReal.indexOf(item) === position})
+			let bCount = blankIndex.length
+			// showhide
+			let isSame = false
+			if (distinctRep.length == 1 && bCount == 0 || bCount == 3) {
+				isSame = true
+			}
 			showhide("C",(isSame ? "none" : "table-row"))
-			if (!isSame) {
-				dom.togCSSa = "getComputedStyle"
-			} else {
-				dom.togCSSa.innerHTML = "<div class='ttip'><span class='icon'>[ i ]</span>"
-					+"<span class='ttxt'>getComputedStyle<br>HTMLElement.style<br>"
-					+"CSSRuleList.style</span></div> &nbsp computed styles"
-			}
-			// blocks
-			blocks.sort()
-			if (gRun && blocks.length) {gMethods.push("css:computed styles:blocked:"+ blocks.join())}
-			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
-			// return
-			if (blocks.length == 3) {
-				return resolve("styles:"+ zB0)
-			} else {
-				let uniqueTrue = trueHashes.filter(function(item, position) {return trueHashes.indexOf(item) === position})
-				uniqueTrue = uniqueTrue.filter(x => !["error"].includes(x))
-				if (uniqueTrue.length == 1) {
-					return resolve("styles:"+ uniqueTrue[0])
-				} else {
-					if (gRun) {gCheck.push("css:computed styles: multiple values")}
-					return resolve("styles:"+ trueHashes.join(","))
+			let tooltip = "<div class='ttip'><span class='icon'>[ i ]</span><span class='ttxt'>"
+				+"getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div> &nbsp computed styles"
+			dom.togCSSa.innerHTML = isSame ? tooltip : "getComputedStyle"
+			// blocks/lie
+			if (gRun) {
+				let isLie = false
+				if (bCount) {
+					let blank = []
+					for (let i=0; i < bCount; i++) {blank.push(names[blankIndex[i]])}
+					blank.sort()
+					gMethods.push("css:computed styles:blocked:"+ (blank.length == 3 ? "all": blank.join()))
+					if (bCount !== 3) {isLie = true}
 				}
+				if (fakeIndex.length) (isLie = true)
+				if (isLie) {gKnown.push("css:computed_styles")}
 			}
+			// value
+			let value = zLIE
+			// bypasses
+			let isBypass = false
+			if (distinctReal.length == 1) {
+				isBypass = true
+				value = distinctReal[0]
+				if (gRun) {
+					let bypass = []
+					for (let i=0; i < bCount; i++) {bypass.push(names[blankIndex[i]])}
+					for (let i=0; i < fakeIndex.length; i++) {bypass.push(names[fakeIndex[i]])}
+					bypass.sort()
+					gBypassed.push("css:computed styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
+				}
+			} else {
+				if (bCount == 3) {value = zB0}
+				sDetail["css_computed_styles"] = []
+			}
+			// output
+			for (let i=0; i < values.length; i++) {
+				let hash = values[i]
+				if (isBypass && hash !== value) {hash = soB + hash + scC}
+				if (value == zLIE) {hash = soL + hash + scC}
+				let display = hash + btns[i]
+				document.getElementById("cStyles"+ i).innerHTML = display
+			}
+			// multihash
+			if (gRun) {
+				if (distinctRep.length > 1) {gCheck.push("css:computed styles: multiple hashes")}
+				if (value == zLIE) {gKnown.push("css:computed_styles")}
+			}
+			// return
+			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
+			return resolve("computed_styles:"+ value)
 		}).catch(error => {
-			if (gRun) {gCheck.push("css:computed styles: " + e.name +" : "+ e.message)}
-			return resolve("styles:error")
+			if (gRun) {gCheck.push("css:computed styles: " + error.name +" : "+ error.message)}
+			return resolve("computed_styles:error")
 		})
 	})
 }
