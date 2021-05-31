@@ -197,12 +197,12 @@ function get_computed_styles() {
 						let cMsg = ""
 						// privacy.file_unique_origin = false
 						if (cSim == 0) {bMsg = true; let k=y
-						} else if (cSim == 1) {cMsg = "3 same fake"; aRep.push("setProperty")
+						} else if (cSim == 1) {cMsg = "3 same fake"; aRep.push("fake")
 						} else if (cSim == 2) {cMsg = "2 true, 1 block"; if (i == 1) {let k=y}
-						} else if (cSim == 3) {cMsg = "2 same fake, 1 block"; if (i == 1 || i == 2) {aRep.push("banana")} else if (i == 0) {let k=y}
-						} else if (cSim == 4) {cMsg = "2 same fake, 1 true"; if (i == 0 || i == 2) {aRep.push("banana")}
+						} else if (cSim == 3) {cMsg = "2 same fake, 1 block"; if (i == 1 || i == 2) {aRep.push("eh")} else if (i == 0) {let k=y}
+						} else if (cSim == 4) {cMsg = "2 same fake, 1 true"; if (i == 0 || i == 2) {aRep.push("ugh")}
 						} else if (cSim == 5) {cMsg = "1 true, 1 fake, 1 blocked"; if (i == 2) {aRep.push("foo","bar")} else if (i == 1) {let k=y}
-						} else if (cSim == 6) {cMsg = "2 diff fakes, 1 true"; if (i==1) {aRep.push("woo")} else if (i==2) {aRep.push("wha")}
+						} else if (cSim == 6) {cMsg = "2 diff fakes, 1 true"; if (i==1) {aRep.push("woo")} else if (i==2) {aRep.push("wha","wee")}
 						} else if (cSim == 7) {cMsg = "2 diff fakes, 1 block"
 							if (i==0) {aRep.push("a","b")} else if (i==1) {let k=y} else if (i==2) {aRep.push("ek")}
 						} else if (cSim == 8) {cMsg = "3 diff fakes"
@@ -260,7 +260,7 @@ function get_computed_styles() {
 			// blocks/lie
 			if (gRun) {
 				let isLie = false
-				if (bCount) {
+				if (bCount > 0) {
 					let blank = []
 					for (let i=0; i < bCount; i++) {blank.push(names[blankIndex[i]])}
 					blank.sort()
@@ -268,13 +268,13 @@ function get_computed_styles() {
 					if (bCount !== 3) {isLie = true}
 				}
 				if (fakeIndex.length) (isLie = true)
-				if (isLie) {gKnown.push("css:computed_styles")}
+				if (isLie) {gKnown.push("css:computed_styles");}
 			}
 			// value
 			let value = zLIE
 			// bypasses
 			let isBypass = false
-			if (distinctReal.length == 1) {
+			if (distinctReal.length == 1 && (bCount + fakeIndex.length > 0)) {
 				isBypass = true
 				value = distinctReal[0]
 				if (gRun) {
@@ -285,7 +285,7 @@ function get_computed_styles() {
 					gBypassed.push("css:computed styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
 				}
 			} else {
-				if (bCount == 3) {value = zB0}
+				if (bCount == 3) {value = zB0} else if (isSame) {value = distinctReal[0]}
 				sDetail["css_computed_styles"] = []
 			}
 			// output
