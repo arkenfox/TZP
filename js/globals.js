@@ -152,4 +152,5 @@ let avh = "",
 	logStorage = false,
 	runS = false,
 	runSL = false,
+	runSC = false,
 	runBF = false
