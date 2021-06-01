@@ -42,6 +42,7 @@
 		</td></tr>
 		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
 				<td>BUG NO.</td><td>RESULT</td></tr>
+		<tr><td>91</td><td id="n91"></td><td class="c mono" id="v91"></td></tr>
 		<tr><td>90</td><td id="n90"></td><td class="c mono" id="v90"></td></tr>
 		<tr><td>90</td><td id="n90a"></td><td class="c mono" id="v90a"></td></tr>
 		<tr><td>89</td><td id="n89"></td><td class="c mono" id="v89"></td></tr>
@@ -122,6 +123,15 @@ function outputVersion() {
 		document.getElementById("v"+id).innerHTML = result +" ("+ perf +" ms)"
 		if (bug !== "") {document.getElementById("n"+id).innerHTML = strA + bug + strB + bug + strC}
 	}
+
+	// 91: 1710429
+	let t91 = performance.now(), ver91 = xF
+	try {
+		let d91 = new Date("January 30, 2019 13:00:00")
+		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
+		ver91 = xS
+	} catch(e) {console.debug(e.name, e.message)}
+	output("91", "1710429", ver91, performance.now()-t91)
 
 	// 90: 1520434
 	let t90 = performance.now(), ver90 = xF
@@ -568,6 +578,17 @@ function outputVersion() {
 			res.push(k +":"+ chromeKeys[k].join())
 		}
 		console.debug(sha1(res.join()) +"\n"+ res.join("\n"))
+		// Brave/Chrome: 57fddf2707cb589cd02e5e15ed33cd00a14f743a
+			//loadTimes:
+			//csi:
+			//app:isInstalled,getDetails,getIsInstalled,installState,runningState,InstallState,RunningState
+			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
+		// Opera: cc467b638955186a27c4ec03792867169da121ed
+			//loadTimes:
+			//csi:
+			//search:
+			//app:isInstalled,getDetails,getIsInstalled,installState,runningState,InstallState,RunningState
+			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
 	} catch(e) {
 		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
 		console.debug("chromeKeys", e.name, e.message)
