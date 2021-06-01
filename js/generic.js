@@ -469,14 +469,20 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 90) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 91) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { // 90: 1520434
+	function start() { //91:1710429
 		try {
-			var share90 = new ArrayBuffer(4096)
-			let test90 = new Int32Array(share90, 7)
+			let t = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date())
+			output(91)
+		} catch(e) {v90()}
+	}
+	function v90() { //90:1520434
+		try {
+			var share = new ArrayBuffer(4096)
+			let t = new Int32Array(share, 7)
 		} catch(e) {
 			if (e.message.substr(0,1) == "s") {output(90)} else {v89()}
 		}
@@ -499,9 +505,9 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v85() { //85:1675240
 		try {
-			let reg85 = ("/a")
-			let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-			let test85 = descriptor.get.call(reg85)
+			let reg = ("/a")
+			let des = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+			let t = des.get.call(reg)
 		} catch(e) {
 			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
 		}
@@ -511,38 +517,38 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v83() { //83:1667094
 		try {
-			let obj83 = {exec() {return function(){}}}
-			let test83 = RegExp.prototype.test.call(obj83, "")
+			let obj = {exec() {return function(){}}}
+			let t = RegExp.prototype.test.call(obj, "")
 			output(83)
 		} catch(e) {v82()}
 	}
 	function v82() { //82:1655947
 		try {
-			let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-			if (test82 == 1) {output(82)} else {v81()}
+			let t = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
+			if (t == 1) {output(82)} else {v81()}
 		} catch(e) {v81()}
 	}
 	function v81() { //81:1650607
-		try {let file81 = new File(["bits"], "a/b.txt"); if (file81.name == "a/b.txt") {output(81)} else {v80()}} catch(e) {v80()}
+		try {let t = new File(["bits"], "a/b.txt"); if (t.name == "a/b.txt") {output(81)} else {v80()}} catch(e) {v80()}
 	}
 	function v80() { //80:1651732
 		try {
-			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
-			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}; output(80)
+			let obj = {[Symbol.toPrimitive]: () => Symbol()}
+			let proxy = (new Proxy({},{get: (obj, prop, proxy) => prop}))
+			for (let i = 0; i < 11; i++) {if (typeof proxy[obj] == 'symbol') {}}; output(80)
 		} catch (e) {v79()}
 	}
 	function v79() { //79:1644878
 		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {output(79)} else {v78()}}
 	}
 	function v78() { //78:1634135
-		try {let regex78b = new RegExp('b'); if (regex78b.dotAll == false) {output(78)} else {v78a()}} catch(e) {v78a()}
+		try {let t = new RegExp('b'); if (t.dotAll == false) {output(78)} else {v78a()}} catch(e) {v78a()}
 	}
 	function v78a() { //78:1589095
-		try {let test78a = new Intl.ListFormat(undefined,{style:'long',type:'unit'}).format(['a','b','c']); output(78)} catch(e) {v78b()}
+		try {let t = new Intl.ListFormat(undefined,{style:'long',type:'unit'}).format(['a','b','c']); output(78)} catch(e) {v78b()}
 	}
 	function v78b() { //78:1633836
-		try {let test78 = new Intl.NumberFormat(undefined, {style:"unit",unit:"percent"}).format(1/2); output(78)} catch(e) {v77()}
+		try {let t = new Intl.NumberFormat(undefined, {style:"unit",unit:"percent"}).format(1/2); output(78)} catch(e) {v77()}
 	}
 	function v77() { //77:1627285
 		try {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {output(77)} else {v76()}} catch(e) {v76()}
@@ -551,7 +557,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {if (test76.validity.rangeOverflow) {v75()} else {output(76)}} catch(e) {v75()}
 	}
 	function v75() { //75:1615600
-		try {let test75 = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {output(75)} else {v74()}}
+		try {let t = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {output(75)} else {v74()}}
 	}
 	function v74() { //74:1605835
 		try {newFn("let t = ({ 1n: 1 })"); output(74)} catch(e) {v73()}
@@ -560,16 +566,16 @@ const get_isVer = () => new Promise(resolve => {
 		try {if (getComputedStyle(dom.test73).content == "normal") {output(73)} else {v72()}} catch(e) {v72()}
 	}
 	function v72() { //72:1589072
-		try {let test72 = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders") {output(72)} else {v71()}}
+		try {let t = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders") {output(72)} else {v71()}}
 	}
 	function v71() { //71:1575980
-		try {let test71 = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {output(71)} else {v70()}}
+		try {let t = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {output(71)} else {v70()}}
 	}
 	function v70() { //70:1435818
 		try {newFn("let t = 1_050"); output(70)} catch(e) {v69()}
 	}
 	function v69() { //69:1558387
-		try {let test69 = new DOMError('a'); v68()} catch(e) {output(69)}
+		try {let t = new DOMError('a'); v68()} catch(e) {output(69)}
 	}
 	function v68() { //68:1548773
 		try {if (dom.test68.typeMustMatch == undefined) {output(68)} else {v67()}} catch(e) {v67()}
@@ -578,10 +584,10 @@ const get_isVer = () => new Promise(resolve => {
 		try {if (!Symbol.hasOwnProperty('matchAll')) {v66()} else {output(67)}} catch(e) {v66()}
 	}
 	function v66() { //66
-		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let test66 = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
+		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let t = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
 	}
 	function v65() { //65
-		try {let test65 = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
+		try {let t = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
 	}
 	function v64() { //64
 		try {if (window.screenLeft == undefined) {v63()} else {output(64)}} catch(e) {v63()}
@@ -593,7 +599,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {console.time("v62"); console.timeLog("v62"); console.timeEnd("v62"); output(62)} catch(e) {v61()}
 	}
 	function v61() { //61
-		try {let test61 = (" a").trimStart(); output(61)} catch(e) {v60()}
+		try {let t = (" a").trimStart(); output(61)} catch(e) {v60()}
 	}
 	function v60() { //60
 		try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
