@@ -1522,7 +1522,10 @@ function get_ua_doc() {
 							controlA = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
 							controlB = "Macintosh; Intel Mac OS X 10.15 rv:"+ v2 +") Gecko/20100101"
 						} else if (isOS == "android") {
-							// ToDo: 1711179 bump to 10
+							if (isVer > 90)
+								// FF91+: 1711179
+								controlA = "Android 10; Mobile; rv:"+ v +") Gecko/20100101"
+								controlB = "Android 10; Mobile; rv:"+ v2 +") Gecko/20100101"
 							if (isVer < 88) {
 								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
 								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/20100101"
