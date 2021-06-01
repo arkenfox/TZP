@@ -552,7 +552,7 @@ function build_dates(year) {
 	// build
 	for (let i = 0; i < years.length; i++) {
 		for (let j = 0; j < days.length; j++) {
-			dates.push(days[j] + ", " + years[i] + " " + suffix )
+			dates.push(days[j] +", "+ years[i] +" "+ suffix )
 		}
 	}
 }
@@ -574,15 +574,15 @@ function legend(array) {
 				legendclean.push("  " + location)
 			} else {
 				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				legendclean.push("<br>"+ newArea + "<br><br>  " + location)
+				legendclean.push("<br>"+ newArea +"<br><br>  "+ location)
 			}
 			prev = area
 		}
 	}
 
-	let header = s4.trim() +"TIMEZONES ("+ list.length + ") " + sc + "<a class='blue' target='blank' "
-		+ "href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>source</a><br><br>"
-		+ "<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
+	let header = s4.trim() +"TIMEZONES ("+ list.length +") "+ sc +"<a class='blue' target='blank' "
+		+"href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>source</a><br><br>"
+		+"<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
 
 	if (array == undefined) {
 		dom.legend.innerHTML = header + legendclean.join("<br>")
@@ -608,7 +608,7 @@ function legend(array) {
 				legendNEW.push("  " + location)
 			} else {
 				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				legendNEW.push("<br>"+ newArea + "<br><br>  " + location)
+				legendNEW.push("<br>"+ newArea +"<br><br>  "+ location)
 			}
 			prev = area
 		}
@@ -637,7 +637,7 @@ function run_test(isLoopy) {
 			for (let i = 0 ; i < years.length; i++) {
 				for (let j = 0 ; j < days.length; j++) {
 					let datetime = days[j] +", "+ years[i] +" 13:00:00"
-					let control = new Date(datetime + " UTC")
+					let control = new Date(datetime +" UTC")
 					let test = new Date(datetime)
 					let diff = ((Date.parse(test) - Date.parse(control))/k)
 					tzresults.push(diff)
@@ -679,7 +679,7 @@ function run_test(isLoopy) {
 				}
 			}
 			// one result for every timezone
-			results.push(sha1(tzresults.join()) + ":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
+			results.push(sha1(tzresults.join()) +":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
 		}
 
 		// sort + loop results, get locales per hash
@@ -704,10 +704,10 @@ function run_test(isLoopy) {
 				padCount = padCount.padStart(3)
 				unique.push(
 					padCount
-					+ ":" + currentHash
-					+ ":" + tmpTZ.join(", ")
-					+ ":" + tmpLegend.join(", ")
-					+ ":" + currentValues
+					+":"+ currentHash
+					+":"+ tmpTZ.join(", ")
+					+":"+ tmpLegend.join(", ")
+					+":"+ currentValues
 				)
 				buckets.push(tmpTZ.join())
 				bucketsizes.push(tmpTZ.length)
@@ -729,9 +729,9 @@ function run_test(isLoopy) {
 		// Loopy
 		if (isLoopy == "true") {
 			loopData.push(
-				sColor + loopYear + sc + " "
-				+ buckethash + s4 + " [" + bucketsizes.length + "] " + sc
-				+ sg + "[" + uniqueTZs + "]" + sc
+				sColor + loopYear + sc +" "
+				+ buckethash + s4 +" ["+ bucketsizes.length +"] "+ sc
+				+ sg +"["+ uniqueTZs +"]"+ sc
 			)
 		}
 
@@ -776,7 +776,7 @@ function run_test(isLoopy) {
 				for (let i = 0; i < years.length; i++) {
 					prettyStr = s4 + years[(i)] + sc +":"
 					for (let j = 0; j < days.length; j++) {
-						prettyStr += " "+ parts[partCounter] + ","
+						prettyStr += " "+ parts[partCounter] +","
 						partCounter++
 						//last item per year
 						if ( ((j+1)/days.length) == 1 ) {
@@ -792,33 +792,32 @@ function run_test(isLoopy) {
 					let groupHash = sha1(groupTZ)
 					data.push(
 						sColor + groupNumber +": "+ groupHash + sc +" "
-						+ s4 +"["+ groupCount +"]"+ sc + "<br>"
-						+ "<ul><li>" + groupTZ + "</li>"
-						+ "<li>" + valuesHash + "</li>"
-						+ "<li>" + groupData + "</li></ul>"
+						+ s4 +"["+ groupCount +"]"+ sc +"<br>"
+						+"<ul><li>"+ groupTZ +"</li>"
+						+"<li>"+ valuesHash +"</li>"
+						+"<li>"+ groupData +"</li></ul>"
 					)
 				} else {
 					// combine unique TZz into one
-					singles.push(groupTZ + "<ul><li>" + valuesHash + "</li><li>"+ groupData + "</li></ul>")
+					singles.push(groupTZ +"<ul><li>"+ valuesHash +"</li><li>"+ groupData +"</li></ul>")
 					singlesLegend.push(groupLegend)
 				}
 				counter ++
 			}
-			if (singles.length > 0) {
+			if (singles.length) {
 				singles.sort()
 				data.push(
-					sColor + (unique.length - singles.length + 1) + "-" + unique.length + sc + ": "
-					+ "are all unique" + " " + s4 +"["+ singles.length +"]"+ sc + "<br><br>"
-						+ singles.join("")
+					sColor + (unique.length - singles.length + 1) +"-"+ unique.length + sc
+					+": are all unique "+ s4 +"["+ singles.length +"]"+ sc +"<br><br>"+ singles.join("")
 				)
 			}
 			// build info
 			let info = []
 			function title(input, color) {
 				if (color == undefined) {
-					return input.padStart(15) + ": "
+					return input.padStart(15) +": "
 				} else {
-					return color + input.padStart(15) + ": " + sc
+					return color + input.padStart(15) +": "+ sc
 				}
 			}
 			function splitgroup() {
@@ -829,17 +828,23 @@ function run_test(isLoopy) {
 
 			info.push(
 				// color it up
-				title("unique") + sg + bucketsizes.length + sc +" groups, "
-					+ sg + uniqueTZs + sc +" timezones, "
-					+ (sumTZ == list.length ? s4 + sumTZ + sc : sb + sumTZ +" mismatched"+ sc) +" total"
+				title("unique")	+ sg + (bucketsizes.length - uniqueTZs).toString().padStart(3) + sc + " groups (>1) "
+					+ s4 + (list.length - uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
+					+ title("") + sg + (uniqueTZs).toString().padStart(3) + sc +" groups (=1) "
+					+ s4 + (uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
+					+ title("total") + sg + (bucketsizes.length).toString().padStart(3) + sc +" groups .... "
+					+ s4 + (list.length).toString().padStart(3) + sc + " timezones"
 			)
+			if (sumTZ !== list.length) {
+				info.push( title("alert") + sb +"total timezones !== legend count" + sc)
+			}
 			info.push( title("[groups] hash") + sColor + buckethash + sc)
 			info.push( title("[tzp] hash") + tzpHash )
 			info.push( title("[toLocale] hash") + sColor2 + matchHash + sc)
 			info.push( title("resolvedOptions") + tzResolved)
 
 			// any matches
-			if (matchList.length > 0) {
+			if (matchList.length) {
 				// we can't say it's spoofed if we don't have it in the list
 				let isListed = list.includes(tzResolved)
 
@@ -848,7 +853,7 @@ function run_test(isLoopy) {
 					// single timezone
 					info.push( title("your group") + matchList)
 					if (matchList == tzResolved) {
-						info.push( title("veracity") + "resolvedOptions is 100% true")
+						info.push( title("veracity") +"resolvedOptions is 100% true")
 					} else {
 						info.push( title("veracity")
 							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
@@ -860,25 +865,30 @@ function run_test(isLoopy) {
 						info.push( title("veracity")
 							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
 					} else {
-						info.push( title("veracity") + "resolvedOptions seems legit")
+						info.push( title("veracity") +"resolvedOptions seems legit")
 					}
 				}
 			} else {
 				// no match
-				info.push( title("your group") + "none")
+				info.push( title("your group") +"none")
 			}
 			// invalid timezones
-			if (invalid.length > 0) {
-				info.push( title(invalid.length + " invalid", sb) + invalid.join(", "))
+			if (invalid.length) {
+				info.push( title(invalid.length +" invalid", sb) + invalid.join(", "))
 			}
+			bucketsizes.sort((a,b) => b-a)
+			let uniqueBS = bucketsizes.filter(function(item, position) {return bucketsizes.indexOf(item) === position})
+			let notoneBS = bucketsizes.filter(x => x != 1)
+			info.push("<br><hr>")
+			info.push(s4+ "unique groups sizes" + sc + "<br>" + uniqueBS.join(", ") + "<br>")
+			info.push(s4+ "groups > 1 summary" + sc + "<br>" + notoneBS.join(", "))
 			info.push("<br><hr>") // final line
-
 			// output data + info
 			dom.info.innerHTML = info.join("<br>")
 			dom.data.innerHTML = data.join("<br>")
 
 			// color up unique in legend
-			if (singles.length > 0) {
+			if (singles.length) {
 				legend(singlesLegend)
 			}
 		}
@@ -888,10 +898,9 @@ function run_test(isLoopy) {
 		// reset loopData
 		loopData = []
 		loopData.push(
-			sColor + "year" + sc + " "
-			+ "hash-of-timezone-groups"
-			+ s4 + " [groups] " + sc
-			+ sg + "[unique timezones]" + sc + "<br>"
+			sColor +"year"+ sc +" hash-of-timezone-groups"
+			+ s4 +" [groups] "+ sc
+			+ sg +"[unique timezones]"+ sc +"<br>"
 		)
 		// loop
 		let loopYears = years
@@ -919,12 +928,12 @@ function run(isLoopy) {
 
 	let yearStr = dom.inputYears.value
 	yearStr = yearStr.trim()
-	if (yearStr.length > 0) {
+	if (yearStr.length) {
 		// parse for valid years
 		let tmpArr = yearStr.split(",")
 		for (let i = 0 ; i < tmpArr.length; i++) {
 			let trimmed = tmpArr[i].trim()
-			if (trimmed.length > 0) {
+			if (trimmed.length) {
 				// only collect numbers
 				trimmed = parseInt(trimmed)
 				if (Number.isInteger(trimmed)) {
@@ -936,7 +945,7 @@ function run(isLoopy) {
 			}
 		}
 		// do we have at least one year
-		if (years.length > 0) {
+		if (years.length) {
 			go = true
 		} else {
 			dom.info = "please provide at least one year"
