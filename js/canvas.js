@@ -6,6 +6,8 @@ function outputCanvas() {
 	let t0 = performance.now(),
 		main0 = [], main1 = [], main2 = [],
 		sColor = s9
+	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // blink android
+
 	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob,mozGetAsFile [gecko]
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
@@ -460,8 +462,14 @@ function outputCanvas() {
 						let t1 = performance.now()
 						let data = sha1(getKnown().canvas.toDataURL())
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known1) {gKnown.push("canvas:toDataURL")}}
-						return (data == known1 ? true : false)
+						let isFake = false
+						if (isEngine == "blink") {
+							if (gData !== known1 && gData !== known1b) {isFake = true}
+						} else {
+							if (gData !== known1) {isFake = true}
+						}
+						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
+						return (isFake ? true : false)
 					}
 				},
 				{
@@ -479,8 +487,14 @@ function outputCanvas() {
 								reader.onload = function(){
 									let data = sha1(reader.result)
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
-									if (gRun) {if (data !== known1) {gKnown.push("canvas:toBlob")}}
-									resolve(data == known1 ? true : false)
+									let isFake = false
+									if (isEngine == "blink") {
+										if (gData !== known1 && gData !== known1b) {isFake = true}
+									} else {
+										if (gData !== known1) {isFake = true}
+									}
+									if (gRun && isFake) {gKnown.push("canvas:toBlob")}
+									resolve(isFake ? true : false)
 								}
 								reader.onerror = function(){
 									reject(false)
