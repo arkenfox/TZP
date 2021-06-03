@@ -264,7 +264,9 @@ function outputAudio() {
 				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
 				// brave
-				let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
+				let blinksum = 124.04347527516074,
+					blinkhash = "7a7ab5a59627f5ade54719129d09fb3af847d30e3be705ac915f9230f7c57e44",
+					isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
 				for (let i=0; i < getTest.length; i++) {
@@ -275,17 +277,26 @@ function outputAudio() {
 				}
 				if (sum2 == sum3) {isLies = true}
 				pxi_compressor.disconnect()
-				section.push("sum:"+ (isLies ? zLIE : sum))
-				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
 				// get/copy
 				let hashG = byteArrayToHex(hashes[0])
 				let hashC = byteArrayToHex(hashes[1])
 				if (hashG !== hashC) {isLies = true}
-				section.push("getChannelData:"+ (isLies ? zLIE : hashG))
-				dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
-				section.push("copyFromChannel:"+ (isLies ? zLIE : hashC))
-				dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-				if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
+				// bypass
+				let isBypass = false
+				if (isEngine == "blink") {
+					if (sum !== blinksum || hashG !== blinkhash || hashC !== blinkhash) {isBypass = true}
+				}
+				let prefix = (isLies ? soL : soB)
+				// display/FP
+				dom.audioSum.innerHTML = (isLies ? prefix + sum + scC : sum)
+				section.push("sum:"+ (isLies ? (isBypass ? blinksum : zLIE) : sum))
+				dom.audioGet.innerHTML = (isLies ? prefix + hashG + scC : hashG)
+				dom.audioCopy.innerHTML = (isLies ? prefix + hashC + scC : hashC)
+				section.push("channel:"+ (isLies ? (isBypass ? blinkhash : zLIE) : hashG))
+				if (gRun && isLies) {
+					gKnown.push("audio:OfflineAudioContext")
+					if (isBypass) {gBypassed.push("audio:OfflineAudioContext:"+ blinkhash +":"+ blinksum)}
+				}
 				// done
 				log_section("audio", t0, section)
 			})
@@ -293,7 +304,7 @@ function outputAudio() {
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, ["copyFromChannel:n/a","getChannelData:n/a","sum:n/a"])
+		log_section("audio", t0, ["channel:n/a","sum:n/a"])
 	}
 }
 
