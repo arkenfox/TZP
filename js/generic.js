@@ -1045,8 +1045,8 @@ function log_section(name, time1, data) {
 				gMethods.sort()
 				// alerts
 				if (gCheck.length) {
-					dom.allcheck.innerHTML = buildButton("1","alerts",
-						gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
+					dom.allcheck.innerHTML = buildButton("1","alerts", gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
+					dom.debugA.innerHTML = gCheck.join("<br>")
 				}
 				// known/bypass
 				let detailBtn = ""
