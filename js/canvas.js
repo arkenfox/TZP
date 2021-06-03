@@ -464,12 +464,12 @@ function outputCanvas() {
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						let isFake = false
 						if (isEngine == "blink") {
-							if (gData !== known1 && gData !== known1b) {isFake = true}
+							if (data !== known1 && data !== known1b) {isFake = true}
 						} else {
-							if (gData !== known1) {isFake = true}
+							if (data !== known1) {isFake = true}
 						}
 						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
-						return (isFake ? true : false)
+						return (isFake ? false : true)
 					}
 				},
 				{
@@ -489,12 +489,12 @@ function outputCanvas() {
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
 									let isFake = false
 									if (isEngine == "blink") {
-										if (gData !== known1 && gData !== known1b) {isFake = true}
+										if (data !== known1 && data !== known1b) {isFake = true}
 									} else {
-										if (gData !== known1) {isFake = true}
+										if (data !== known1) {isFake = true}
 									}
 									if (gRun && isFake) {gKnown.push("canvas:toBlob")}
-									resolve(isFake ? true : false)
+									resolve(isFake ? false : true)
 								}
 								reader.onerror = function(){
 									reject(false)
