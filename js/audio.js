@@ -286,7 +286,7 @@ function outputAudio() {
 				if (isEngine == "blink") {
 					if (sum !== blinksum || hashG !== blinkhash || hashC !== blinkhash) {isBypass = true}
 				}
-				let prefix = (isLies ? soL : soB)
+				let prefix = (isBypass ? soB : soL)
 				// display/FP
 				dom.audioSum.innerHTML = (isLies ? prefix + sum + scC : sum)
 				section.push("sum:"+ (isLies ? (isBypass ? blinksum : zLIE) : sum))
