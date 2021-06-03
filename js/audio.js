@@ -263,10 +263,15 @@ function outputAudio() {
 				crypto.subtle.digest("SHA-256", getTest),
 				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
-				// brave
-				let blinksum = 124.04347527516074,
-					blinkhash = "7a7ab5a59627f5ade54719129d09fb3af847d30e3be705ac915f9230f7c57e44",
-					isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
+				// blink: CPU touches FP?
+					// ToDo: get the full hash for an array of knownGood
+					// https://fingerprintjs.com/blog/audio-fingerprinting/
+					// windows: 124.04347527516074
+					// chromeOS: 124.04347721464
+					// macOS 11: 124.0434806260746
+					// android 9: 124.08074500028306
+					// android 11: 124.08075528279005
+				let blinkmin = 124.04347527516074, blinkmax = 124.08075528279005
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
 				for (let i=0; i < getTest.length; i++) {
@@ -275,28 +280,23 @@ function outputAudio() {
 					sum2 += x
 					sum3 += Math.abs(x)
 				}
+				// lies
+				let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
 				if (sum2 == sum3) {isLies = true}
+				if (isEngine == "blink" && !isLies) {
+					if (sum < blinkmin || sum > blinkmax) {isLies = true}
+				}
 				pxi_compressor.disconnect()
 				// get/copy
 				let hashG = byteArrayToHex(hashes[0])
 				let hashC = byteArrayToHex(hashes[1])
 				if (hashG !== hashC) {isLies = true}
-				// bypass
-				let isBypass = false
-				if (isEngine == "blink") {
-					if (sum !== blinksum || hashG !== blinkhash || hashC !== blinkhash) {isBypass = true}
-				}
-				let prefix = (isBypass ? soB : soL)
 				// display/FP
-				dom.audioSum.innerHTML = (isLies ? prefix + sum + scC : sum)
-				section.push("sum:"+ (isLies ? (isBypass ? blinksum : zLIE) : sum))
-				dom.audioGet.innerHTML = (isLies ? prefix + hashG + scC : hashG)
-				dom.audioCopy.innerHTML = (isLies ? prefix + hashC + scC : hashC)
-				section.push("channel:"+ (isLies ? (isBypass ? blinkhash : zLIE) : hashG))
-				if (gRun && isLies) {
-					gKnown.push("audio:OfflineAudioContext")
-					if (isBypass) {gBypassed.push("audio:OfflineAudioContext:"+ blinkhash +":"+ blinksum)}
-				}
+				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
+				dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
+				dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
+				section.push("OfflineAudioContext:"+ (isLies ? zLIE : hashG))
+				if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
 				// done
 				log_section("audio", t0, section)
 			})
