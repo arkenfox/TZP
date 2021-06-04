@@ -266,12 +266,13 @@ function outputAudio() {
 				// blink: CPU touches FP?
 					// ToDo: get the full hash for an array of knownGood
 					// https://fingerprintjs.com/blog/audio-fingerprinting/
-					// windows: 124.04347527516074
+					// chromeOS: 124.04344884395687
+					// windows + android10: 124.04347527516074
 					// chromeOS: 124.04347721464
 					// macOS 11: 124.0434806260746
 					// android 9: 124.08074500028306
-					// android 11: 124.08075528279005
-				let blinkmin = 124.04347527516074, blinkmax = 124.08075528279005
+					// android 10+11: 124.08075528279005
+				let blinkmin = 124.04, blinkmax = 124.081
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
 				for (let i=0; i < getTest.length; i++) {
