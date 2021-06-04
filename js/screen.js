@@ -1446,7 +1446,7 @@ function get_ua_doc() {
 			str = ""
 			try {str = navigator[property]} catch(e) {str = zB0}
 			// sim
-			if (go && runS) {
+			if (go && runSUA) {
 				if (property == "appCodeName") {str = "MoZilla"} // case
 				if (property == "appName") {str = " Netscape"} // leading space
 				if (property == "product") {str = "Gecko "} // trailing space
@@ -1511,7 +1511,7 @@ function get_ua_doc() {
 							if (isVer == 90) {v2 = "91.0"}
 							if (isVer == 103) {v2 = "104.0"}
 						}
-						/* resistfingerprinting/test/browser/browser_navigator.js#106 */
+						/* resistfingerprinting/test/browser/browser_navigator.js */
 						if (isOS == "windows") {
 							controlA = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
 							controlB = "Windows NT 10.0; Win64; x64; rv:"+ v2 +") Gecko/20100101"
@@ -1522,16 +1522,16 @@ function get_ua_doc() {
 							controlA = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
 							controlB = "Macintosh; Intel Mac OS X 10.15 rv:"+ v2 +") Gecko/20100101"
 						} else if (isOS == "android") {
-							if (isVer > 90)
+							if (isVer > 90) {
 								// FF91+: 1711179
-								controlA = "Android 10; Mobile; rv:"+ v +") Gecko/20100101"
-								controlB = "Android 10; Mobile; rv:"+ v2 +") Gecko/20100101"
-							if (isVer < 88) {
+								controlA = "Android 10; Mobile; rv:"+ v +") Gecko/"+ v
+								controlB = "Android 10; Mobile; rv:"+ v2 +") Gecko/"+ v2
+							} else if (isVer < 88) {
 								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
 								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/20100101"
 							} else {
 								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/"+ v
-								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/"+ v
+								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/"+ v2
 							}
 						}
 						controlA = "Mozilla/5.0 ("+ controlA +" Firefox/"+ v
@@ -1664,7 +1664,7 @@ function get_ua_doc() {
 		showhide("UA",(lies ? "table-row": "none"))
 		if (lies) {
 			lies += " pinocchio"+ (lies > 1 ? "s": "")
-			dom.uaLies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runS ? zSIM : "")
+			dom.uaLies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runSUA ? zSIM : "")
 			uaBS = true
 			if (gRun) {gKnown.push("useragent:navigator properties")}
 		}
@@ -2370,7 +2370,8 @@ function outputUA() {
 		dom.uaIframes.innerHTML = summary
 		// section
 		let section = ctrl, display = ctrlhash
-		if (uaBS || mismatch > 0) {
+
+		if (uaBS || mismatch.length > 0) {
 			// uaBS or mismatch
 			section = ["ua:"+ zLIE]
 			display = soL + ctrlhash + scC
