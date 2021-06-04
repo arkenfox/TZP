@@ -108,9 +108,10 @@ function get_concurrency() {
 		isLies = (protoLies.includes("Navigator.hardwareConcurrency") ? true : false)
 	}
 	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
+	let h2 = h
 	if (isLies) {h = soL + h + scC} else {h += (h == "2" ? rfp_green : rfp_red)}
 	dom.nHWC.innerHTML = h
-	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
+	return "hardwareConcurrency:"+ (isLies ? zLIE : h2)
 }
 
 function get_media_devices() {
