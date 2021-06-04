@@ -150,7 +150,9 @@ let avh = "",
 	logExtra = false,
 	logResize = true,
 	logStorage = false,
+// simulations
 	runS = false,
+	runSUA = false,
 	runSL = false,
 	runSC = false,
 	runBF = false
