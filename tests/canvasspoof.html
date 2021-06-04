@@ -71,6 +71,8 @@ function run() {
 		items[i].innerHTML = "&nbsp"
 	}
 	// vars
+	let known2b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL, toBlob [blink] android alt
+
 	let known1 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
 		known2 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed",   // toDataURL, toBlob [gecko]
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",   // isPointInPath
@@ -171,7 +173,7 @@ function run() {
 				let ctx = canvas.getContext('2d')
 				for (let x=0; x < 16; x++) {
 					for (let y=0; y < 16; y++) {
-						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) + ","+ (y*16) + ",255)"
+						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 						ctx.fillRect(x, y, 1, 1)
 					}
 				}
@@ -224,7 +226,7 @@ function run() {
 			let ctxV = dom.visual.getContext('2d')
 			for (let x=0; x < 16; x++) {
 				for (let y=0; y < 16; y++) {
-					ctxV.fillStyle = "rgba(" + (x*y) +","+ (x*16) + ","+ (y*16) + ",255)"
+					ctxV.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 					ctxV.fillRect(x*m, y*m, m, m)
 				}
 			}
@@ -252,11 +254,11 @@ function run() {
 				// only apply to hashes
 				if (display == "d5d4cd07616a542891b7ec2d0257b3a24b69856e") {display = "undefined"; isHash = false} // toDataURL
 				if (display == "35917794d0d204f4549e352f8152f553279e68a9") {display = "blocked"; isHash = false} // isPoint*
-				if (display.length !== 40) {isHash = false}
-				if (display.indexOf(" ") > 0) {isHash = false}
+				if (display.length !== 40) {isHash = false
+				} else if (display.indexOf(" ")) {isHash = false}
 				// PNG differs between engines: limit to known results
 				let checkPNG = false
-				if (isFF == true || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
+				if (isFF || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
 
 				// cleanup output
 				if (name == "getImageData") {
@@ -266,9 +268,13 @@ function run() {
 				} else if (name == "toDataURL" || name == "toBlob") {
 					if (isHash) {
 						if (checkPNG) {
-							if (display !== known2) { display = sb + display + sc}
+							if (isEngine == "blink") { // blink has two known goods
+								if (display !== known2 && display !== known2b) { display = sb + display + sc}
+							} else {
+								if (display !== known2) { display = sb + display + sc}
+							}
 						} else {
-							display += sb + "<sup>1</sup>" + sc
+							display += sb +"<sup>1</sup>" + sc
 							// unhide unkown notation row
 							dom.unknown.style.display = "table-row"
 						}
@@ -287,7 +293,7 @@ function run() {
 			}
 			// perf
 			let t1 = performance.now()
-			dom.perf.innerHTML = Math.round(t1-t0) + " ms"
+			dom.perf.innerHTML = Math.round(t1-t0) +" ms"
 		})
 	}, 170)
 }
