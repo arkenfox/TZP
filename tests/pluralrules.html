@@ -59,8 +59,7 @@ var locales = [],
 
 function start() {
 	// builds locales array and outputs a legend
-	try {
-		let detailed = [
+let detailed = [
 "aa,afar",
 "ab,abkhazian",
 "ach,acholi",
@@ -220,6 +219,7 @@ function start() {
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sc,sardinian",
+"sco,scots", // 1714293
 "sd,sindhi",
 "se,northern sami",
 "sg,sango",
@@ -237,7 +237,7 @@ function start() {
 "su,sundanese",
 "sv,swedish",
 "sw,swahili",
-"szl,silesian", // added 1691695
+"szl,silesian", // 1691695
 "ta,tamil",
 "te,telugu",
 "tg,tajik",
@@ -250,7 +250,7 @@ function start() {
 "tn,tswana",
 "to,tonga",
 "tr,turkish",
-"trs,triqui",
+"trs,triqui", // 1583177
 "ts,tsonga",
 "tt,tatar",
 "tw,twi",
@@ -278,18 +278,19 @@ function start() {
 "zh-sg,chinese singapore",
 "zh-tw,chinese taiwan",
 "zu,zulu",
-		]
-		detailed.sort()
+]
+detailed.sort()
 
+	try {
 		let legend = []
 		for (let i = 0 ; i < detailed.length; i++) {
 			// split: A (code), B (name)
 			let listA = detailed[i].split(",")[0]
 			let listB = detailed[i].split(",")[1]
 			locales.push(listA)
-			legend.push( listA.padStart(7) + ": " + listB  )
+			legend.push(listA.padStart(7) +": "+ listB)
 		}
-		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length + ")"+ sc	+"<br><br>"+ legend.join("<br>")
+		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length +")"+ sc +"<br><br>"+ legend.join("<br>")
 	} catch(e) {}
 }
 
@@ -372,7 +373,7 @@ function run_test(type) {
 				}
 				// record all changes
 				if (prev !== current) {
-					tmp_result.push(n + ": "+ current)
+					tmp_result.push(n +": "+ current)
 					// main test, record all numbers that change
 					if (type == "0") {
 						list_all.push(n)
@@ -383,7 +384,7 @@ function run_test(type) {
 			// array: hash + code + result
 			let tmpR = tmp_result.join(", ")
 			let tmpH = sha1(tmpR)
-			test_all.push(sha1(tmp_result.join()) + "~" + code + "~" + tmpR)
+			test_all.push(sha1(tmp_result.join()) +"~"+ code +"~"+ tmpR)
 		}
 
 		// set things in main test for subsequent tests
@@ -395,15 +396,15 @@ function run_test(type) {
 			list_all = list_all.filter(function(item, position) {return list_all.indexOf(item) === position})
 			list_all.sort((a,b) => a-b)
 		} else if ( type == "1") {
-			dom.numbers1.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() + " ("
-				+ list_one.length + ")" + sc + "<br><br>" + list_one.join(", ")
+			dom.numbers1.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() +" ("
+				+ list_one.length +")"+ sc +"<br><br>"+ list_one.join(", ")
 		} else {
-			dom.numbers2.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() + " ("
-				+ list_all.length + ")" + sc + "<br><br>" + list_all.join(", ")
+			dom.numbers2.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() +" ("
+				+ list_all.length +")"+ sc +"<br><br>"+ list_all.join(", ")
 		}
 		// perf
-		let perf = perfname + " " + s4.trim() + Math.round(performance.now()-t0) + sc +" ms"
-		elperf.innerHTML = (type == "0" ? s4.trim() + "PERF: " + sc : " | ") + perf
+		let perf = perfname +" "+ s4.trim() + Math.round(performance.now()-t0) + sc +" ms"
+		elperf.innerHTML = (type == "0" ? s4.trim() +"PERF: "+ sc : " | ") + perf
 			+ (type == "1" ? "<br>" : "")
 
 		// sort array & loop: get hash + code + result buckets, and code_total
@@ -425,7 +426,7 @@ function run_test(type) {
 			}
 			// next hash is diff: write data
 			if (nextHash !== part1) {
-				bucket_hash.push(part1 + s4 +"("+ tmp_code.length + ")"+sc)
+				bucket_hash.push(part1 + s4 +"("+ tmp_code.length +")"+ sc)
 				bucket_res.push(part3)
 				bucket_code.push(tmp_code.join(", "))
 				code_total += tmp_code.length
@@ -438,9 +439,9 @@ function run_test(type) {
 			// build pretty BEFORE sorting
 			let pretty = []
 			for (let i=0; i < bucket_hash.length; i++) {
-				let part1 = s4 + "hash: " + sc + bucket_hash[i]
-				let part2 = "<ul><li>" + sColor + "result: "  + sc + bucket_res[i] + "</li>"
-				let part3 = "<li>" + sColor + "locale: " + sc + bucket_code[i] + "</li></ul>"
+				let part1 = s4 +"hash: "+ sc + bucket_hash[i]
+				let part2 = "<ul><li>" + sColor +"result: "+ sc + bucket_res[i] +"</li>"
+				let part3 = "<li>" + sColor +"locale: "+ sc + bucket_code[i] +"</li></ul>"
 				pretty.push(part1 + part2 + part3)
 			}
 			// sort and set globals
@@ -450,12 +451,12 @@ function run_test(type) {
 			bucket_code.sort()
 			main_code = sha1(bucket_code.join())
 			// output
-			str = code_total + (code_total == locales.length ? sg : sb) + "[match]" + sc
-			str = "<hr><br>" + s4.trim() + "ALL NUMBERS (" + list.length + ")"  + sc + "<br>"
-				+ "<ul><li>" + sColor + "unique hashes: " + sc + main_count + "</li>"
-				+ "<li>" + sColor + " results hash: " + sc + main_result + "</li>"
-				+ "<li>" + sColor + " locales hash: " + sc + main_code + "</li>"
-				+ "<li>" + sColor + " locale check: " + sc + str + "</li></ul>"
+			str = code_total + (code_total == locales.length ? sg : sb) +"[match]"+ sc
+			str = "<hr><br>"+ s4.trim() +"ALL NUMBERS ("+ list.length +")"+ sc +"<br>"
+				+"<ul><li>"+ sColor +"unique hashes: "+ sc + main_count +"</li>"
+				+"<li>"+ sColor +" results hash: "+ sc + main_result +"</li>"
+				+"<li>"+ sColor +" locales hash: "+ sc + main_code +"</li>"
+				+"<li>"+ sColor +" locale check: "+ sc + str +"</li></ul>"
 			dom.numbers0.innerHTML = str
 			element.innerHTML = pretty.join("")
 
@@ -467,16 +468,16 @@ function run_test(type) {
 			bucket_code.sort()
 			let check_code = sha1(bucket_code.join())
 			// append results
-			let matchbad = sb + "[match]" + sc, matchgood = sg + "[match]" + sc
-			str = "<ul><li>" + sColor + "unique hashes:" + sc
-			str += " " + check_count + (check_count == main_count ? matchgood : matchbad)
+			let matchbad = sb +"[match]"+ sc, matchgood = sg +"[match]"+ sc
+			str = "<ul><li>" + sColor +"unique hashes:"+ sc
+			str += " "+ check_count + (check_count == main_count ? matchgood : matchbad)
 			if (type == "2") {
-				str += "</li><li>" + sColor + " results hash: " + sc + check_result + (check_result == main_result ? matchgood : matchbad)
+				str += "</li><li>"+ sColor +" results hash: "+ sc + check_result + (check_result == main_result ? matchgood : matchbad)
 			} else {
 				// we know the results hash changes: that's not what we testing for
-				str += "</li><li>" + sColor + " results hash: " + sc + check_result
+				str += "</li><li>"+ sColor +" results hash: "+ sc + check_result
 			}
-			str += "</li><li>" + sColor + " locales hash: " + sc + check_code + (check_code == main_code ? matchgood : matchbad)
+			str += "</li><li>"+ sColor +" locales hash: "+ sc + check_code + (check_code == main_code ? matchgood : matchbad)
 			str += "</li></ul>"
 			element.innerHTML = str
 		}
