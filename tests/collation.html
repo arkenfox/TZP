@@ -73,8 +73,8 @@ var legendclean = [],
 	legendheader = ""
 
 /*
-toolkit/components/mozintl/mozIntl.jsm
-toolkit/locales/en-US/toolkit/intl/languageNames.ftl
+https://searchfox.org/mozilla-central/source/toolkit/components/mozintl/mozIntl.jsm
+https://searchfox.org/mozilla-central/source/toolkit/locales/en-US/toolkit/intl/languageNames.ftl
  */
 var list = [
 "aa,afar",
@@ -236,6 +236,7 @@ var list = [
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sc,sardinian",
+"sco,scots", // 1714293
 "sd,sindhi",
 "se,northern sami",
 "sg,sango",
@@ -253,7 +254,7 @@ var list = [
 "su,sundanese",
 "sv,swedish",
 "sw,swahili",
-"szl,silesian", // added 1691695
+"szl,silesian", // 1691695
 "ta,tamil",
 "te,telugu",
 "tg,tajik",
@@ -266,7 +267,7 @@ var list = [
 "tn,tswana",
 "to,tonga",
 "tr,turkish",
-"trs,triqui",
+"trs,triqui", // 1583177
 "ts,tsonga",
 "tt,tatar",
 "tw,twi",
@@ -427,11 +428,11 @@ function legend() {
 		for (let i = 0 ; i < list.length; i++) {
 			let code = list[i].split(",")[0]
 			let name = list[i].split(",")[1]
-			legendclean.push(code.padStart(7) + ": " + name)
+			legendclean.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	legendheader = s4 +"   LEGEND ("+ legendclean.length	+ ")" + sc + "<br><br>"
+	legendheader = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"
 	dom.legend.innerHTML = legendheader + legendclean.join("<br>")
 }
 
@@ -452,7 +453,7 @@ function compare() {
 	// make sure we have two valid values
 	valueA = valueA.trim()
 	valueB = valueB.trim()
-	if (valueA.length > 0 && valueB.length > 0) {
+	if (valueA.length && valueB.length) {
 		if (valueA !== valueB) {
 			dom.valueA.value = valueA
 			dom.valueB.value = valueB
@@ -475,11 +476,11 @@ function compare() {
 			let output = [], str = ""
 			if (isExample) {
 				str = "example " + sColor + (counter == 0 ? compareExamples.length : counter)
-					+ sc + " of " + sColor + compareExamples.length + sc + ": comparing "
-					+ sColor + valueA + sc + " and " + sColor + valueB + sc + "<br>"
+					+ sc +" of "+ sColor + compareExamples.length + sc +": comparing "
+					+ sColor + valueA + sc +" and "+ sColor + valueB + sc +"<br>"
 				output.push(str)
 			} else {
-				str = "comparing " + sColor + valueA + sc + " and " + sColor + valueB + sc + "<br>"
+				str = "comparing " + sColor + valueA + sc +" and "+ sColor + valueB + sc +"<br>"
 				output.push(str)
 			}
 			for (let i = 0 ; i < list.length; i++) {
@@ -488,7 +489,7 @@ function compare() {
 				let name = list[i].split(",")[1]
 				test = valueA.localeCompare(valueB, code)
 				if ( control !== test) {
-					output.push(sColor + code.padStart(7) + sc + ": " + name)
+					output.push(sColor + code.padStart(7) + sc +": "+ name)
 				}
 			}
 			if (output.length == 1) {
@@ -516,12 +517,11 @@ function collator() {
 
 	// make sure we have at least two valid values
 	valueC = valueC.trim()
-	if (valueC.length > 0) {
-
+	if (valueC.length) {
 		let tmpArr = valueC.split(",")
 		for (let i = 0 ; i < tmpArr.length; i++) {
 			let trimmed = tmpArr[i].trim()
-			if (trimmed.length > 0) {
+			if (trimmed.length) {
 				chars.push(trimmed)
 			}
 		}
@@ -546,19 +546,19 @@ function collator() {
 		setTimeout(function() {
 			let output = []
 			chars.sort()
-			let strItem = s4.trim() +"ITEMS: "+sc + chars.length
-				+ (isExample ? sColor + " [example]" + sc: "") + "<br><br>"
-				+ chars.join(", ") + "<br>"
+			let strItem = s4.trim() +"ITEMS: "+ sc + chars.length
+				+ (isExample ? sColor +" [example]"+ sc : "") +"<br><br>"
+				+ chars.join(", ") +"<br>"
 			output.push(strItem)
 
 			// set control
 			chars = chars.sort(Intl.Collator("en").compare)
 			let control = sha1(chars.join())
-			strItem = s4.trim() +"CONTROL "+sc + "<br><br>"
-				+ sColor + "   hash: "+sc + control + sColor +" [en]"+sc+"<br>"
+			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
+				+ sColor +"   hash: "+ sc + control + sColor +" [en]"+ sc +"<br>"
 			output.push(strItem)
 			// results header
-			strItem = s4.trim() + "RESULTS"+ sc +"<br>"
+			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
 			output.push(strItem)
 
 			// loop
@@ -573,15 +573,15 @@ function collator() {
 				chars.sort(Intl.Collator(code).compare)
 				let test = sha1(chars.join())
 				if (test == control) {
-					legendnew.push(code.padStart(7) + ": " + name)
+					legendnew.push(code.padStart(7) +": "+ name)
 				} else {
 					codes.push(code)
-					legendnew.push(sg + code.padStart(7) + ": " + name + sc)
-					diffs.push(test + ":" + code + " (" + name + ")")
+					legendnew.push(sg + code.padStart(7) +": "+ name + sc)
+					diffs.push(test +":"+ code +" ("+ name +")")
 				}
 			}
 			// we have diffs
-			if (diffs.length > 0) {
+			if (diffs.length) {
 				// output colored legend
 				dom.legend.innerHTML = legendheader + legendnew.join("<br>")
 
@@ -594,7 +594,7 @@ function collator() {
 					tmpStr = diffs[i]
 					tmpH = tmpStr.substring(0,40) // first 40 chars = sha1 hash
 					tmpL = tmpStr.substring(41, tmpStr.length) // skip colon and get the locale
-					locales += sg + tmpL.split("(")[0] + sc + "(" + tmpL.split("(")[1] + " "
+					locales += sg + tmpL.split("(")[0] + sc +"("+ tmpL.split("(")[1] +" "
 					// grab next item
 					if (i < diffs.length - 1) {
 						nxtH = diffs[(i+1)].substring(0,40)
@@ -604,7 +604,7 @@ function collator() {
 					// build new item
 					if (nxtH !== tmpH) {
 						locales = locales.slice(0, -1)
-						newArr.push(locales + ":" + tmpH)
+						newArr.push(locales +":"+ tmpH)
 						locales = "" // reset
 					}
 				}
@@ -620,9 +620,9 @@ function collator() {
 					len = tmpStr.length
 					tmpH = tmpStr.substring(len-40,len)
 					tmpL = tmpStr.substring(0,len-41)
-					tmpStr = sColor + (i + 1).toString().padStart(3) + ": " + sc
+					tmpStr = sColor + (i + 1).toString().padStart(3) +": "+ sc
 					// counter then hash then locales
-					lineItems.push (tmpStr + tmpH + "<br><ul><li>" + tmpL + "</li></ul>")
+					lineItems.push (tmpStr + tmpH +"<br><ul><li>"+ tmpL +"</li></ul>")
 					// cleanup tring for localesHash array
 					tmpL = tmpL.replace(/\<span class='good'>/g, "")
 					tmpL = tmpL.replace(/\<\/span>/g, "")
@@ -630,17 +630,17 @@ function collator() {
 				}
 				// results output
 				localesHash = sha1(localesHash.join())
-				strItem = sColor + "  stats: " + sc
-					+ sg + newArr.length + " unique "
+				strItem = sColor +"  stats: "+ sc
+					+ sg + newArr.length +" unique "
 					+ (newArr.length > 1 ? "hashes": "hash")
-					+ sc + " covering "
-					+ sg + codes.length + " locales"+ sc
+					+ sc +" covering "
+					+ sg + codes.length +" locales"+ sc
 				output.push(strItem)
-				strItem = sColor + "locales: "+ sc + localesHash + "<br>"
+				strItem = sColor +"locales: "+ sc + localesHash +"<br>"
 				output.push(strItem)
 
 				// details
-				strItem = s4.trim() + "DETAILS"+ sc +"<br>"
+				strItem = s4.trim() +"DETAILS"+ sc +"<br>"
 				output.push(strItem)
 				output.push(lineItems.join("<br>"))
 			} else {
