@@ -6,7 +6,7 @@ function outputCanvas() {
 	let t0 = performance.now(),
 		main0 = [], main1 = [], main2 = [],
 		sColor = s9
-	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // blink android
+	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL,toBlob [blink android alt]
 
 	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob,mozGetAsFile [gecko]
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
@@ -225,6 +225,7 @@ function outputCanvas() {
 					value: function(){
 						let t1 = performance.now()
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
+						if (runNo == 1) {console.debug(getFilledContext().canvas.toDataURL())}
 						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 						return data
 					}
