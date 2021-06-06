@@ -7,7 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 780px;}
@@ -82,7 +81,7 @@ function get_rect() {
 	// chrome: 9 results on windows
 
 	if (isEngine == "blink") {
-		resizeArray.push(hash1 + ": " + measure1.join())
+		resizeArray.push(hash1 +": "+ measure1.join())
 		if (resizeArray.length == 30) {
 			resizeArray.sort()
 			resizeArray = resizeArray.filter(function(item, position) {return resizeArray.indexOf(item) === position})
@@ -95,7 +94,7 @@ function get_rect() {
 
 	// perf
 	let t1 = performance.now()
-	dom.perf.innerHTML = Math.round(t1-t0) + " ms"
+	dom.perf.innerHTML = Math.round(t1-t0) +" ms"
 }
 
 window.addEventListener("resize", get_rect)
