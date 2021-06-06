@@ -5,13 +5,13 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
 	<title>chrome://</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 580px;}
+		.togA, .togC {display: none;}
 		#tb4 th {background-color: #f0c878;}
 		#tb4 td:first-child {color: var(--test3);}
 	</style>
@@ -35,10 +35,7 @@
 		<tr><td>js</td><td class="c mono" id="jsHashR"></td></tr>
 		<tr><td>css</td><td class="c mono" id="cssHashR"></td></tr>
 		<tr><td>combined</td></td><td class="c mono" id="allHashR"></td></tr>
-		<tr><td colspan="2" class="showhide">
-				<input id="collapseA" class="toggle" type="checkbox" checked onchange="toggleitems(this, `A`)">
-				<label for="collapseA" class="lbl-toggle" id="labelA">&#9660; show details</label>
-		</td></tr>
+		<tr><td colspan="2" class="showhide"><span id="labelA" class="btnb" onClick="togglerows('A')">&#9660; show details</span></td></tr>
 		<tr class="togA">
 		 <td><span class="btn0 btn" onClick="copyclip(`allLoadedR`)">[ copy ]</span>results</td>
 		 <td class="c" id="allLoadedR"></td>
@@ -61,10 +58,7 @@
 		<tr><td>js</td><td class="c mono" id="jsHash"></td></tr>
 		<tr><td>css</td><td class="c mono" id="cssHash"></td></tr>
 		<tr><td>combined</td></td><td class="c mono" id="allHash"></td></tr>
-		<tr><td colspan="2" class="showhide">
-				<input id="collapseC" class="toggle" type="checkbox" checked onchange="toggleitems(this, `C`)">
-				<label for="collapseC" class="lbl-toggle" id="labelC">&#9660; show details</label>
-		</td></tr>
+		<tr><td colspan="2" class="showhide"><span id="labelC" class="btnb" onClick="togglerows('C')">&#9660; show details</span></td></tr>
 		<tr class="togC">
 		 <td><span class="btn0 btn" onClick="copyclip(`allLoaded`)">[ copy ]</span>all</td>
 		 <td class="c" id="allLoaded"></td>
@@ -92,29 +86,29 @@ function outputChrome() {
 
 		let b = "chrome://branding/content/",
 			c = "chrome://browser/content/",
-			ca = c + "abouthome/",
-			cb = c + "browser",
-			cd = c + "devtools/",
-			ce = c + "devltools/debugger",
-			cf = c + "devtools/performance/",
-			cl = c + "loop/shared/",
-			cp = c + "preferences/",
-			cr = c + "parent/",
-			ci = c + "preferences/in-content",
-			cq = c + "pocket/panels/",
-			ct = c + "defaultthemes/",
+			ca = c +"abouthome/",
+			cb = c +"browser",
+			cd = c +"devtools/",
+			ce = c +"devltools/debugger",
+			cf = c +"devtools/performance/",
+			cl = c +"loop/shared/",
+			cp = c +"preferences/",
+			cr = c +"parent/",
+			ci = c +"preferences/in-content",
+			cq = c +"pocket/panels/",
+			ct = c +"defaultthemes/",
 			g = "chrome://global/content/",
 			s = "chrome://browser/skin/",
-			xc = s + "customizableui/",
-			xd = s + "devtools/",
-			xe = s + "controlcenter/",
-			xf = s + "downloads/",
-			xn = s + "notification-icons/",
-			xp = s + "preferences/",
-			xq = s + "places/",
-			xt = s + "tabbrowser/",
-			xy = s + "yosemite/",
-			xx = s + "syncProgress"
+			xc = s +"customizableui/",
+			xd = s +"devtools/",
+			xe = s +"controlcenter/",
+			xf = s +"downloads/",
+			xn = s +"notification-icons/",
+			xp = s +"preferences/",
+			xq = s +"places/",
+			xt = s +"tabbrowser/",
+			xy = s +"yosemite/",
+			xx = s +"syncProgress"
 
 		let jsUris = [c+'ext-android.js',c+'aboutDialog-appUpdater.js',c+'aboutDialog.js',c+'aboutNetError.js',c+'aboutPrivateBrowsing.js',
 		c+'aboutRestartRequired.js',c+'aboutRobots.js',c+'aboutSessionRestore.js',c+'aboutTabCrashed.js',c+'aboutTabGroupsMigration.js',
@@ -633,11 +627,11 @@ function outputChrome() {
 				hashC = sha1(cssHash.sort()),
 				hashA = sha1(allHash.sort())
 			// output
-			dom.imgHash = hashI + " ["+ foundI +"/" + imgUris.length +"]"
-			dom.jsHash = hashJ + " ["+ foundJ +"/" + jsUris.length +"]"
-			dom.cssHash = hashC + " ["+ foundC +"/" + cssUris.length +"]"
+			dom.imgHash = hashI +" ["+ foundI +"/"+ imgUris.length +"]"
+			dom.jsHash = hashJ +" ["+ foundJ +"/"+ jsUris.length +"]"
+			dom.cssHash = hashC +" ["+ foundC +"/"+ cssUris.length +"]"
 			let countTested = imgUris.length + jsUris.length + cssUris.length
-			dom.allHash = sha1(hashA) + " ["+ foundA +"/"+ countTested +"]"
+			dom.allHash = sha1(hashA) +" ["+ foundA +"/"+ countTested +"]"
 			// data
 			let strAll = allHash.sort().toString()
 			let strOut = strAll.replace(/,/gi, '<br>')
@@ -781,28 +775,20 @@ function outputResource() {
 				hashC = sha1(cssHash.sort()),
 				hashA = sha1(allHash.sort())
 			// output
-			dom.imgHashR = hashI + " ["+ foundI +"/" + imgUris.length +"]"
-			dom.jsHashR = hashJ + " ["+ foundJ +"/" + jsUris.length +"]"
-			dom.cssHashR = hashC + " ["+ foundC +"/" + cssUris.length +"]"
+			dom.imgHashR = hashI +" ["+ foundI +"/"+ imgUris.length +"]"
+			dom.jsHashR = hashJ +" ["+ foundJ +"/"+ jsUris.length +"]"
+			dom.cssHashR = hashC +" ["+ foundC +"/"+ cssUris.length +"]"
 			let countTested = imgUris.length + jsUris.length + cssUris.length
-			dom.allHashR = sha1(hashA) + " ["+ foundA +"/"+ countTested +"]"
+			dom.allHashR = sha1(hashA) +" ["+ foundA +"/"+ countTested +"]"
 			// data
 			cssHash.sort()
 			jsHash.sort()
 			imgHash.sort()
 			let strOut = ""
-			if (foundC > 0) {
-				strOut = s2+"--- css ---"+sc + "<br>"+cssHash.join("<br>")
-			}
-			if (foundJ > 0) {
-				strOut += "<br>"+s2+"--- js ---"+sc + "<br>"+jsHash.join("<br>")
-			}
-			if (foundI > 0) {
-				strOut += "<br>"+s2+"--- img ---"+sc + "<br>"+imgHash.join("<br>")
-			}
-			if (foundC + foundJ + foundI == 0) {
-				strOut = "nothing found"
-			}
+			if (foundC) {strOut = s2 +"--- css ---"+ sc +"<br>"+cssHash.join("<br>")}
+			if (foundJ) {strOut += "<br>"+ s2 +"--- js ---"+ sc +"<br>"+ jsHash.join("<br>")}
+			if (foundI) {strOut += "<br>"+ s2 +"--- img ---"+ sc +"<br>"+ imgHash.join("<br>")}
+			if (foundC + foundJ + foundI == 0) {strOut = "nothing found"}
 			if (strOut.substring(0,4) == "<br>") {strOut = strOut.slice(4, strOut.length)}
 			dom.allLoadedR.innerHTML = strOut
 			// label
@@ -812,8 +798,6 @@ function outputResource() {
 		let checking = setInterval(output_chrome, 1200)
 	}
 }
-
-
 </script>
 
 </body>

@@ -7,7 +7,6 @@
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
 	<style>
 		table {width: 580px;}
 		table td.bottom {vertical-align: bottom;}
@@ -117,15 +116,15 @@ function run() {
 						let clrR = Math.floor(Math.random()*256),
 							clrG = Math.floor(Math.random()*256),
 							clrB = Math.floor(Math.random()*256)
-						let clrs = clrR +","+ clrG + ","+ clrB + ",255"
+						let clrs = clrR +","+ clrG +","+ clrB +",255"
 						clrSet.push(clrR)
 						clrSet.push(clrG)
 						clrSet.push(clrB)
 						clrSet.push(255)
 						cellSet.push(clrs)
-						ctxBig.fillStyle = "rgba(" + clrs + ")"
+						ctxBig.fillStyle = "rgba("+ clrs +")"
 						ctxBig.fillRect(x*m, y*m, m, m)
-						ctxCtrl.fillStyle = "rgba(" + clrs + ")"
+						ctxCtrl.fillStyle = "rgba("+ clrs +")"
 						ctxCtrl.fillRect(x, y, 1, 1)
 					}
 				}
@@ -167,9 +166,9 @@ function run() {
 						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
 						cellRead.push(pixel)
 						// output READ visuals
-						ctxBig2.fillStyle = "rgba(" + pixel + ")"
+						ctxBig2.fillStyle = "rgba("+ pixel +")"
 						ctxBig2.fillRect(x*m, y*m, m, m)
-						ctxGet.fillStyle = "rgba(" + pixel + ")"
+						ctxGet.fillStyle = "rgba("+ pixel +")"
 						ctxGet.fillRect(x, y, 1, 1)
 					}
 				}
@@ -190,14 +189,14 @@ function run() {
 				}
 				hashGetImage2 = sha1(clrRead2.join())
 				if (hashGetImage2 == hashSet) {
-					dom.readhash2.innerHTML = hashGetImage2 + s9 + "[matches]" + sc
+					dom.readhash2.innerHTML = hashGetImage2 + s9 +"[matches]"+ sc
 				} else {
 					dom.readhash2.innerHTML = sb+ hashGetImage2 + sc
 						+ (hashGetImage2 == hashGetImage ? " [cached]" : " [per-execution]")
 				}
 
 				if (hashGetImage == hashSet) {
-					dom.readhash.innerHTML = hashGetImage + s9 + "[matches]" + sc
+					dom.readhash.innerHTML = hashGetImage + s9 +"[matches]"+ sc
 				} else {
 					dom.readhash.innerHTML = sb + hashGetImage + sc
 
@@ -231,10 +230,10 @@ function run() {
 						if (cellSet[i] !== cellRead2[i]) {changeC2.push(i)}
 					}
 					if (changeC.length > 1) {
-						console.debug("read 1: pixels changed: ", sha1(changeC.join()) + "\n", changeC)
+						console.debug("read 1: pixels changed: ", sha1(changeC.join()) +"\n", changeC)
 					}
 					if (changeC2.length > 1) {
-						console.debug("read 2: pixels changed: ", sha1(changeC2.join()) + "\n", changeC2)
+						console.debug("read 2: pixels changed: ", sha1(changeC2.join()) +"\n", changeC2)
 					}
 
 
@@ -247,20 +246,20 @@ function run() {
 					tmpchan.sort()
 
 					let chancount = 0, chanstring = ""
-					if (changeR.length > 0) {chancount++; chanstring = "r"}
-					if (changeG.length > 0) {chancount++; chanstring += "g"}
-					if (changeB.length > 0) {chancount++; chanstring += "b"}
-					if (changeA.length > 0) {chancount++; chanstring += "a"}
+					if (changeR.length) {chancount++; chanstring = "r"}
+					if (changeG.length) {chancount++; chanstring += "g"}
+					if (changeB.length) {chancount++; chanstring += "b"}
+					if (changeA.length) {chancount++; chanstring += "a"}
 
 					// stats
-					dom.readstats.innerHTML = "    cells changed: " + changeC.length
-						+ "<br> channels changed: "+ chancount + " [" + chanstring + "]"
-						+ "<br>   channel counts: r: "+ changeR.length
-						+ ", g: "+ changeG.length
-						+ ", b: "+ changeB.length
-						+ ", a: "+ changeA.length
-						+ "<br>   combos altered: " + tmpchan.length + " [" + tmpchan.join(", ") + "]"
-						+ "<br>     combo counts: " + JSON.stringify(counts)
+					dom.readstats.innerHTML = "    cells changed: "+ changeC.length
+						+"<br> channels changed: "+ chancount +" [" + chanstring +"]"
+						+"<br>   channel counts: r: "+ changeR.length
+						+", g: "+ changeG.length
+						+", b: "+ changeB.length
+						+", a: "+ changeA.length
+						+"<br>   combos altered: "+ tmpchan.length +" ["+ tmpchan.join(", ") +"]"
+						+"<br>     combo counts: "+ JSON.stringify(counts)
 
 					// diffs
 					let tmpR = changeR.filter(function(item, position) {return changeR.indexOf(item) === position})
@@ -275,20 +274,20 @@ function run() {
 					// for each we want a count and a spread (max/min)
 					// +/- split (ignore a)
 					let strR = "n/a", strG = "n/a", strB = "n/a", strA = "n/a"
-					if (tmpR.length > 0) {
-						strR = tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] + ", " + (tmpR[tmpR.length-1]-tmpR[0]) +"]"
-						strR += " " + negR + "/" + (changeR.length-negR)
+					if (tmpR.length) {
+						strR = tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] +", "+ (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+						strR += " "+ negR +"/"+ (changeR.length-negR)
 					}
-					if (tmpG.length > 0) {
-						strG = tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] + ", " + (tmpG[tmpG.length-1]-tmpG[0]) +"]"
-						strG += " " + negG + "/" + (changeG.length-negG)
+					if (tmpG.length) {
+						strG = tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] +", "+ (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+						strG += " "+ negG +"/" + (changeG.length-negG)
 					}
-					if (tmpB.length > 0) {
-						strB = tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] + ", " + (tmpB[tmpB.length-1]-tmpB[0]) +"]"
-						strB += " " + negB + "/" + (changeB.length-negB)
+					if (tmpB.length) {
+						strB = tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] +", "+ (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+						strB += " "+ negB +"/"+ (changeB.length-negB)
 					}
-					if (tmpA.length > 0) {
-						strA = tmpA.length +" ["+ tmpA[0] +" to "+ tmpA[tmpA.length-1] + ", " + (tmpA[tmpA.length-1]-tmpA[0]) +"]"
+					if (tmpA.length) {
+						strA = tmpA.length +" ["+ tmpA[0] +" to "+ tmpA[tmpA.length-1] +", "+ (tmpA[tmpA.length-1]-tmpA[0]) +"]"
 					}
 				
 					// absolute stats (ignore a)
@@ -298,24 +297,20 @@ function run() {
 					tmpR.sort(function(a, b){return a-b})
 					tmpG.sort(function(a, b){return a-b})
 					tmpB.sort(function(a, b){return a-b})
-					if (tmpR.length > 0) {
-						strR += " ... " + tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] + ", " + (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+					if (tmpR.length) {
+						strR += " ... " + tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] +", "+ (tmpR[tmpR.length-1]-tmpR[0]) +"]"
 					}
-					if (tmpG.length > 0) {
-						strG += " ... " + tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] + ", " + (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+					if (tmpG.length) {
+						strG += " ... " + tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] +", "+ (tmpG[tmpG.length-1]-tmpG[0]) +"]"
 					}
-					if (tmpB.length > 0) {
-						strB += " ... " + tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] + ", " + (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+					if (tmpB.length) {
+						strB += " ... " + tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] +", "+ (tmpB[tmpB.length-1]-tmpB[0]) +"]"
 					}
-
-					dom.readdiff.innerHTML = "  r: "+ strR
-						+ "<br>  g: "+ strG + "<br>  b: "+ strB + "<br>  a: "+ strA 
-
+					dom.readdiff.innerHTML = "  r: "+ strR +"<br>  g: "+ strG +"<br>  b: "+ strB +"<br>  a: "+ strA 
 				}
-
 				// perf
 				let t1 = performance.now()
-				dom.perf.innerHTML = Math.round(t1-t0) + "ms"
+				dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 			}
 		} catch(e) {
 			// ToDo: output some errors or something

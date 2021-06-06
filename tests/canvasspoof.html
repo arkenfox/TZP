@@ -3,14 +3,14 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
-  <title>canvas spoof detection</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<title>canvas spoof detection</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 580px;}
-		.wordwrap {word-break: break-all;}
+		.togC {display: none;}
+		.wordwrap {word-break: break-all; padding-right: 30px;}
 	</style>
 </head>
 <body>
@@ -62,8 +62,10 @@
 		<tr><td>isPointInStroke</td><td class="c mono" id="isPointInStroke"></td></tr>
 
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td></td><td class="s9">------</td></tr> <!-- spacer -->
-		<tr><td>toBlob</td><td class="c mono wordwrap" id="rawData"></td></tr>
+		<tr><td colspan="2" class="showhide">
+			<span id="labelC" class="btnb" onClick="togglerows('C','base64 details')">&#9660; show base64 details</span></td></tr>
+		<tr class="togC"><td>toDataURL</td><td class="c mono wordwrap" id="rawData"></td></tr>
+		<tr class="togC"><td>toBlob</td><td class="c mono wordwrap" id="rawBlob"></td></tr>
 
 	</table>
 	<br>
@@ -98,6 +100,7 @@ function run() {
 				{
 					name: "toDataURL",
 					value: function(){
+						dom.rawData.innerHTML = getKnown().canvas.toDataURL()
 						return sha1(getKnown().canvas.toDataURL())
 					}
 				},
@@ -113,7 +116,7 @@ function run() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									dom.rawData.innerHTML = reader.result
+									dom.rawBlob.innerHTML = reader.result
 									resolve(sha1(reader.result))
 								}
 								reader.onerror = function(){

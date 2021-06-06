@@ -1,6 +1,10 @@
 'use strict';
+dom = getUniqueElements();
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
+function rnd_string() {return Math.random().toString(36).substring(2, 15)}
+function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
+function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
 
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
@@ -15,38 +19,68 @@ function getUniqueElements() {
 	})
 }
 
-function count_decimals(value) {
-	if(Math.floor(value) === value) return 0
-	return value.toString().split(".")[1].length || 0
+function check_navKey(property) {
+	if (navKeys["trueKeys"]) {return navKeys["trueKeys"].includes(property)} else {return false}
 }
 
-function check_navObject(property) {
+const get_navKeys = () => new Promise(resolve => {
+	// reset
+	navKeys = {}
+	// build
 	try {
-		let a = (`lied:`, `value` in Object.getOwnPropertyDescriptor(Navigator.prototype, property))
-		return true
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let trueKeys = keys
+		let lastKeyIndex = keys.length
+		let fakeKeys = []
+		if (isFF) {
+			// FF: constructor is always last
+			lastKeyIndex = keys.indexOf("constructor")
+			trueKeys = keys.slice(0, lastKeyIndex+1)
+			fakeKeys = keys.slice(lastKeyIndex+1)
+		} else if (isEngine == "blink") {
+			// chromium: last key inconsistent
+			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
+			trueKeys = keys.filter(x => !knownPoison.includes(x))
+			fakeKeys = keys.filter(x => knownPoison.includes(x))
+		}
+		// remove constructor
+		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
+		// set
+		navKeys["trueKeys"] = trueKeys
+		navKeys["fakeKeys"] = fakeKeys
+		// set brave
+		if (check_navKey("brave")) {
+			isBrave = true
+		}
+		return resolve()
 	} catch(e) {
-		return false
+		console.error("get_navKeys failed", e.name, e.message)
+		return resolve()
 	}
-}
+})
 
 function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 	if (functionName == undefined) {functionName = "showDetail"}
 	if (btnType == undefined) {btnType = "btnc"}
-	return " <span class='btn" + colorCode + " " + btnType
-		+ "' onClick='" + functionName +"(`"+ arrayName +"`)'>" +"["+ displayText +"]</span>"
+	return " <span class='btn"+ colorCode +" "+ btnType +"' onClick='"
+		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
 
 function clearDetail(name) {
 	try {
-		sectionDetail[name] = []
+		sDetail[name] = []
 	} catch(e) {}
 }
 
 function showDetail(name) {
-	let data = sectionData[name]
-	name = name.replace("_", ": ")
+	let data = sDetail[name],
+		hash = sha1(data.join())
+	// split+tidy name
 	name = name.replace(/\_/g, " ")
-	console.debug(name + "\n", data)
+	let n = name.indexOf(" "),
+		section = name.substring(0,n).toUpperCase(),
+		metric = name.substring(n,name.length).trim()
+	console.log(section +": "+ metric +": "+ hash, data)
 }
 
 function get_isFF_engine() {
@@ -54,7 +88,7 @@ function get_isFF_engine() {
 	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
 		+ ("InstallTrigger" in window ? true : false)
 		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-	if (isFFsum > 0) {isFF = true}
+	if (isFFsum) {isFF = true}
 
 	// engine
 	function cbrt(x) {
@@ -94,22 +128,21 @@ function get_isFF_engine() {
 	if (isEngine == "") {console.error("isEngine: not found\n", res)}
 }
 
-function showhide(togType, togID, togWord) {
-	var xyz = document.getElementsByClassName("tog"+togID);
-	var abc;
-	for (abc = 0; abc < xyz.length; abc++) { xyz[abc].style.display = togType;}
-	// change label
-	if (togWord !== "") {
-		document.getElementById("label"+togID).innerHTML = togWord+" details"
-	}
+function showhide(id, style) {
+	let items = document.getElementsByClassName("tog"+ id)
+	for (let i=0; i < items.length; i++) {items[i].style.display = style}
 }
 
-function toggleitems(chkbxState, chkbxID) {
-	if (chkbxState.checked) {
-		showhide("none",chkbxID,"&#9660; show")
+function togglerows(id, word) {
+	let items = document.getElementsByClassName("tog"+ id)
+	let	style = items[0].style.display == "table-row" ? "none" : "table-row"
+	for (let i=0; i < items.length; i++) {items[i].style.display = style}
+	if (word == "btn") {
+		word = "[ "+ (style == "none" ? "show" : "hide") +" ]"
 	} else {
-		showhide("table-row",chkbxID,"&#9650; hide")
+		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word == undefined ? "details" : word)
 	}
+	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
 
 function copyclip(element) {
@@ -128,7 +161,7 @@ function copyclip(element) {
 		}
 	}
 	// clipboard API
-	if (check_navObject("clipboard")) {
+	if (check_navKey("clipboard")) {
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
@@ -183,6 +216,7 @@ function sha1(str1){
 }
 
 // set some global vars for all test pages
-if ((location.protocol) == "file:") {isFile = true; note_file = sn+"[file:]"+sc}
+if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ sc}
 if ((location.protocol) == "https:") {isSecure = true}
+get_navKeys()
 get_isFF_engine()
