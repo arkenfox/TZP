@@ -225,7 +225,6 @@ function outputCanvas() {
 					value: function(){
 						let t1 = performance.now()
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
-						if (runNo == 1) {console.debug(getFilledContext().canvas.toDataURL())}
 						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 						return data
 					}
