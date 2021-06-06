@@ -2,7 +2,8 @@
 
 var dom;
 
-let sectionDetail = {}
+let sDetail = {},
+	navKeys = {}
 
 // css
 let s0 = " <span class='",
@@ -63,6 +64,7 @@ let s0 = " <span class='",
 	error_image = se+"image]"+sc,
 	error_global_os = se+"global variable not set]"+sc,
 // other
+	isBrave = false,
 	isFF = false,
 	isFile = false,
 	isSecure = false,
