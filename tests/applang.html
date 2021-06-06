@@ -8,7 +8,6 @@
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 680px;}
@@ -138,9 +137,9 @@ function get_app_lang_dtd1() {
 						dtdtemp = error_file_cors
 					} else if (str == "") {
 						// should never happen, we waited a whole sec
-						dtdtemp = sg+"[bugzilla 467035]</span> or " + error_file_cors
+						dtdtemp = sg +"[bugzilla 467035]</span> or "+ error_file_cors
 					} else {
-						dtdtemp = sg+"[bugzilla 467035]"+sc
+						dtdtemp = sg +"[bugzilla 467035]"+ sc
 					}
 				}, 1000) // get this done before the check_dtd1 runs out
 			}
@@ -160,7 +159,7 @@ function get_app_lang_dtd1() {
 			}
 		} else {
 			clearInterval(checking)
-			if (dtdtemp == "") {dtdtemp = sg+"[bugzilla 467035]"+sc}
+			if (dtdtemp == "") {dtdtemp = sg +"[bugzilla 467035]"+ sc}
 			output_dtd1(dtdtemp)
 		}
 		counter++
@@ -197,7 +196,7 @@ function get_app_lang_dtd2() {
 			}
 		} else {
 			clearInterval(checking)
-			output_dtd2(sg+"[bugzilla 467035]"+sc)
+			output_dtd2(sg +"[bugzilla 467035]"+ sc)
 		}
 		counter++
 	}
