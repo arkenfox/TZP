@@ -226,6 +226,12 @@ function outputCanvas() {
 						let t1 = performance.now()
 						let data = hashDataURL(getFilledContext().canvas.toDataURL())
 						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
+
+						// temp debug
+						if (data == "") {console.debug(runNo, "empty string")}
+						if (data === "") {console.debug(runNo, "null")}
+						if (data === undefined) {console.debug(runNo, "undefined")}
+
 						return data
 					}
 				},
@@ -468,6 +474,11 @@ function outputCanvas() {
 						} else {
 							if (data !== known1) {isFake = true}
 						}
+						// temp debug
+						if (data == "") {console.debug("k, empty string")}
+						if (data === "") {console.debug("k, null")}
+						if (data === undefined) {console.debug("k, undefined")}
+
 						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
 						return (isFake ? false : true)
 					}
