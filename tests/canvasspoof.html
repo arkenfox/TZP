@@ -260,10 +260,15 @@ function run() {
 
 				let isHash = true
 				// only apply to hashes
-				if (display == "d5d4cd07616a542891b7ec2d0257b3a24b69856e") {display = "undefined"; isHash = false} // toDataURL
-				if (display == "35917794d0d204f4549e352f8152f553279e68a9") {display = "blocked"; isHash = false} // isPoint*
-				if (display.length !== 40) {isHash = false
-				} else if (display.indexOf(" ")) {isHash = false}
+				if (display == "d5d4cd07616a542891b7ec2d0257b3a24b69856e") { // toDataURL
+					display = "undefined"; isHash = false
+				} else if (display == "35917794d0d204f4549e352f8152f553279e68a9") { // isPoint*
+					display = "blocked"; isHash = false
+				} else if (display.length !== 40) { // not a sha1 hash length
+					isHash = false
+				} else if (display.indexOf(" ") !== -1) {
+					isHash = false
+				}
 				// PNG differs between engines: limit to known results
 				let checkPNG = false
 				if (isFF || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
