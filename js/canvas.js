@@ -228,9 +228,10 @@ function outputCanvas() {
 						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 
 						// temp debug
-						if (data == "") {console.debug(runNo, "empty string")}
-						if (data === "") {console.debug(runNo, "null")}
-						if (data === undefined) {console.debug(runNo, "undefined")}
+						let testdata = getFilledContext().canvas.toDataURL()
+						if (testdata == "") {console.debug(runNo, "empty string")}
+						if (testdata === null) {console.debug(runNo, "null")}
+						if (testdata === undefined) {console.debug(runNo, "undefined")}
 
 						return data
 					}
@@ -474,10 +475,12 @@ function outputCanvas() {
 						} else {
 							if (data !== known1) {isFake = true}
 						}
+
 						// temp debug
-						if (data == "") {console.debug("k, empty string")}
-						if (data === "") {console.debug("k, null")}
-						if (data === undefined) {console.debug("k, undefined")}
+						let testdata = getKnown().canvas.toDataURL()
+						if (testdata == "") {console.debug("k, empty string")}
+						if (testdata === null) {console.debug("k, null")}
+						if (testdata === undefined) {console.debug("k, undefined")}
 
 						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
 						return (isFake ? false : true)
