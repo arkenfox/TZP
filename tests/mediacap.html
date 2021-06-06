@@ -3,11 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-  <title>mediaCapabilities</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<title>mediaCapabilities</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 480px;}
@@ -95,9 +94,8 @@ function runConfig(configType) {
 		})
 	}
 
-	if ("mediaCapabilities" in navigator) {
+	if (check_navObject("mediaCapabilities")) {
 		dom.enabled = "supported"
-
 		Promise.all([
 			getMediaCapabilities(mediaConfigsV)
 		]).then(function(response){
@@ -112,9 +110,8 @@ function runConfig(configType) {
 					console.debug(data)
 				}
 		})
-
 	} else {
-		dom.enabled = "not supported"
+		dom.enabled = zNS
 	}
 
 }
