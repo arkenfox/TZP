@@ -10,6 +10,7 @@
 	<script src="testmain.js"></script>
 	<style>
 		table {width: 580px;}
+		.wordwrap {word-break: break-all;}
 	</style>
 </head>
 <body>
@@ -59,6 +60,11 @@
 		</tr>
 		<tr><td>isPointInPath</td><td class="c mono" id="isPointInPath"></td></tr>
 		<tr><td>isPointInStroke</td><td class="c mono" id="isPointInStroke"></td></tr>
+
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td></td><td class="s9">------</td></tr> <!-- spacer -->
+		<tr><td>toDataURL</td><td class="c mono wordwrap" id="rawData"></td></tr>
+
 	</table>
 	<br>
 <script>
@@ -107,6 +113,7 @@ function run() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
+									dom.rawData.innerHTML = reader.result
 									resolve(sha1(reader.result))
 								}
 								reader.onerror = function(){
@@ -245,6 +252,7 @@ function run() {
 			// output
 			//console.debug(results.join("\n"))
 			for (let i=0; i < results.length; i++) {
+
 				let data = results[i]
 				let name = data.split(",")[0]
 				let delim = data.search(",") // start of first comma
