@@ -3,11 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-  <title>sorting</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<title>sorting</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 480px;}
@@ -57,7 +56,7 @@ dom.lang = lang
 let control = sha1(chars)
 control = (control == "0afcef6c49a93566e6e7b5d082697c8f4e8227c0" ? sg : sb) + control + sc
 
-dom.control.innerHTML = control + " [control]"
+dom.control.innerHTML = control +" [control]"
 dom.en = sha1(chars.sort(Intl.Collator("en").compare))
 dom.undefined = sha1(chars.sort(Intl.Collator(undefined).compare))
 dom.gibbers = sha1(chars.sort(Intl.Collator("gibbers").compare))
