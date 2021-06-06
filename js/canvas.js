@@ -38,6 +38,10 @@ function outputCanvas() {
 				// not two valid results
 				value1 = error_string
 				pushvalue = value1
+			} else if (value1 == "null" || value2 == "null") {
+				// not two valid results
+				value1 = "null"
+				pushvalue = value1
 			} else if (value1.substring(0,14) == "ReferenceError") {
 				// blocked
 				value1 = zB0
@@ -224,15 +228,9 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let t1 = performance.now()
-						let data = hashDataURL(getFilledContext().canvas.toDataURL())
+						let data = getFilledContext().canvas.toDataURL()
+						if (data === null) {data = "null"} else {data = hashDataURL(data)}
 						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
-
-						// temp debug
-						let testdata = getFilledContext().canvas.toDataURL()
-						if (testdata == "") {console.debug(runNo, "empty string")}
-						if (testdata === null) {console.debug(runNo, "null")}
-						if (testdata === undefined) {console.debug(runNo, "undefined")}
-
 						return data
 					}
 				},
@@ -249,7 +247,8 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									let data = hashDataURL(reader.result)
+									let data = reader.result
+									if (data === null) {data = "null"} else {data = hashDataURL(data)}
 									log_perf("toBlob ["+ runNo +"] [canvas]",t1)
 									resolve(data)
 								}
@@ -467,7 +466,8 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let t1 = performance.now()
-						let data = sha1(getKnown().canvas.toDataURL())
+						let data = getKnown().canvas.toDataURL()
+						if (data === null) {data = "null"} else {data = sha1(data)}
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						let isFake = false
 						if (isEngine == "blink") {
@@ -475,13 +475,6 @@ function outputCanvas() {
 						} else {
 							if (data !== known1) {isFake = true}
 						}
-
-						// temp debug
-						let testdata = getKnown().canvas.toDataURL()
-						if (testdata == "") {console.debug("k, empty string")}
-						if (testdata === null) {console.debug("k, null")}
-						if (testdata === undefined) {console.debug("k, undefined")}
-
 						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
 						return (isFake ? false : true)
 					}
@@ -499,7 +492,8 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									let data = sha1(reader.result)
+									let data = reader.result
+									if (data === null) {data = "null"} else {data = sha1(data)}
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
 									let isFake = false
 									if (isEngine == "blink") {
