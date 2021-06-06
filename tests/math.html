@@ -3,11 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-  <title>math</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<title>math</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 780px;}
@@ -120,10 +119,10 @@ function get_engine() {
 		}
 	}
 	let hash = sha1(res.join())
-	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s3+"blink"+sc
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3+"webkit"+sc
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3+"edgeHTML"+sc
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3+"trident"+sc // also presto if we don't use `let`
+	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s3 +"blink"+ sc
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3 +"webkit"+ sc
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3 +"edgeHTML"+ sc
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3 +"trident"+ sc // also presto if we don't use `let`
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko [a]" // abraham
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko [b]" // me
 	}
@@ -144,17 +143,16 @@ function get_engine() {
 					// note: this would only apply to later v28 releases
 					try {
 						let test61 = (" a").trimStart()
-						engine += "<br><br>" + "but wait.. I did some extra tests"
-							+ "<br>" + s12.trim() + "real engine:" + sc + s3+"goanna [52esr]"+sc
+						engine += "<br><br>but wait.. I did some extra tests<br>"
+							+ s12.trim() +"real engine:" + sc + s3 +"goanna [52esr]"+ sc
 					} catch(e) {}
 				}
 			}
 		} catch(e) {}
 	}
-	dom.perfE.innerHTML = Math.round(performance.now()-et0) + " ms"
-	dom.engine.innerHTML = s12.trim() + hash + sc + "<br> &middot; " + res.join("<br> &middot; ")
-		+ "<br>" + s12.trim() + "engine:" + sc + engine
-
+	dom.perfE.innerHTML = Math.round(performance.now()-et0) +" ms"
+	dom.engine.innerHTML = s12.trim() + hash + sc +"<br> &middot; "+ res.join("<br> &middot; ")
+		+"<br>"+ s12.trim() +"engine:"+ sc + engine
 }
 
 function build_controlset(engine) {
@@ -416,7 +414,7 @@ function get_results() {
 		if (fnResult !== fnControl) {
 			isFnDiff = true
 			fnmatch.push(k+":"+fnName+"("+fn[3]+"):"+fnControl +":"+fnResult)
-			numbers.push(fnName + ":" + k.toString())
+			numbers.push(fnName +":"+ k.toString())
 		}
 		math1.push(fnName+"("+fnValue+"):"+fnResult)
 		generate.push("'"+fnResult+"'")
@@ -448,7 +446,7 @@ function get_results() {
 			if (poly1Result !== poly1Control) {
 				isPolyDiff = true
 				polymatch.push(k+"p1:"+fnName+"("+fn[3]+"):"+poly1Control +":"+poly1Result)
-				numbers.push(fnName + ":" + k.toString() + "p1")
+				numbers.push(fnName +":"+ k.toString() +"p1")
 			}
 			math2.push(fnName+"("+fnValue+")polyfill1:"+poly1Result)
 			generate.push("'"+poly1Result+"'")
@@ -471,7 +469,7 @@ function get_results() {
 			poly1Result = poly1Result.padStart(rPad)
 		}
 		if (isDiff) {
-			poly1Result += s1 + "[match]" +sc
+			poly1Result += s1 +"[match]"+ sc
 		}
 		if (poly1Result !== "") {
 			fnResult += ", " + poly1Result
@@ -482,7 +480,7 @@ function get_results() {
 		if (demarc == true) {
 			display.push(sColor.trim() + strDemarc +"<br>"+ fnName.toUpperCase() + sc)
 		}
-		display.push(kpad+": "+ sColor + fnValue.padEnd(vPad) + sc + ": " +fnResult)
+		display.push(kpad+": "+ sColor + fnValue.padEnd(vPad) + sc +": "+ fnResult)
 		// remember last function
 		prevFn = fn[1]
 	}
@@ -502,7 +500,7 @@ function get_results() {
 		for(let i=0; i < numbers.length; i++) {
 			let part0 = numbers[i].split(":")[0]
 			let part1 = numbers[i].split(":")[1]
-				part1 = part1.replace(/\p1/g, s12.trim() + "p1"+sc)
+				part1 = part1.replace(/\p1/g, s12.trim() +"p1"+ sc)
 			// build number string
 			tmp_nums.push(part1)
 			if (i < numbers.length - 1) {
@@ -512,7 +510,7 @@ function get_results() {
 			}
 			// next math function is diff: write data
 			if (mathNext !== part0) {
-				numdisplay.push(s12.trim() + part0.padStart(5) + sc + ": " + tmp_nums.join(", "))
+				numdisplay.push(s12.trim() + part0.padStart(5) + sc +": "+ tmp_nums.join(", "))
 				tmp_nums = [] // reset
 			}
 			mathPrev = part0
@@ -533,7 +531,7 @@ function get_results() {
 				let part2 = array[i].split(":")[2]
 					part2 = (part2.toString()).padStart(rPad)
 				let part3 = array[i].split(":")[3]
-				output.push(s12.trim() + part1 + sc + " s/be " + s3.trim() + part2 + sc + " got" + s1 + part3 + sc)
+				output.push(s12.trim() + part1 + sc +" s/be "+ s3.trim() + part2 + sc +" got"+ s1 + part3 + sc)
 			}
 			document.getElementById("diff" + type).innerHTML = output.join("<br>")
 		} else {
@@ -549,16 +547,16 @@ function get_results() {
 	//console.debug(math3.join("\n"))
 	let maincode = get_code(hash0)
 	if (numstr == "none") {
-		numstr = s12.trim() + "  nos: "+ sc + numstr
+		numstr = s12.trim() +"  nos: "+ sc + numstr
 	}
 
 	// SHORT REPORT
-	let report = s12.trim() + "control: " + controlname
-		+ "<br>" + strDemarc + sc
-		+ "<br>" + s12.trim() + " hash: "+ sc + hash0 + maincode
-		+ "<br>" + s12.trim() + " func: " + sc + hash1
-		+ "<br>" + s12.trim() + " poly: " + sc + hash2
-		+ "<br>" + numstr
+	let report = s12.trim() +"control: "+ controlname
+		+"<br>"+ strDemarc + sc
+		+"<br>"+ s12.trim() +" hash: "+ sc + hash0 + maincode
+		+"<br>"+ s12.trim() +" func: "+ sc + hash1
+		+"<br>"+ s12.trim() +" poly: "+ sc + hash2
+		+"<br>"+ numstr
 	dom.report.innerHTML = report
 	// LONG REPORT
 	output_diffs(diffs, 0)
@@ -566,10 +564,10 @@ function get_results() {
 	output_diffs(polymatch, 2)
 	// DATA
 	dom.mathdata.innerHTML = report
-		+ "<br><br>" + bigNstr.padStart(52)
-		+ "<br>" + display.join("<br>")
+		+"<br><br>"+ bigNstr.padStart(52)
+		+"<br>"+ display.join("<br>")
 	// PERF
-	dom.perf.innerHTML = Math.round(performance.now()-t0) + " ms"
+	dom.perf.innerHTML = Math.round(performance.now()-t0) +" ms"
 
 }
 
