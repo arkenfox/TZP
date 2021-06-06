@@ -3,11 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-  <title>math data</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-  <script src="testglobals.js"></script>
-  <script src="testgeneric.js"></script>
-	<script src="testmain.js"></script>
+	<title>math data</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
 		table {width: 780px;}
@@ -322,35 +321,35 @@ function outputData() {
 			b.setAttribute("class", "mono spaces")
 			b.innerHTML = str
 		} else if (code == "group") {
-			str = "<u>" + str.toUpperCase() + "</u>"
+			str = "<u>" + str.toUpperCase() +"</u>"
 			let row = table.insertRow(-1)
 			let a = row.insertCell(0)
 			a.setAttribute("class", "mono spaces intro")
 			a.colSpan = "2"
 			a.innerHTML = str
 		} else {
-			let lines = [sColor2 + " hash: "+ sc + data[1]]
+			let lines = [sColor2 +" hash: "+ sc + data[1]]
 			for (let i=2; i < data.length; i++) {
 				let fnc = data[i].split(":")[0]
-				let fncPad = s12.trim() + fnc.padStart(5) + ":" + sc
+				let fncPad = s12.trim() + fnc.padStart(5) +":"+ sc
 				str = data[i].split(":")[1]
 
 				if (fnc == "tests") {
 					// configs tested
 					str = data[i]
 					// color up TB: boring list of replaces & lots of duplication :)
-					str = str.replace(/TB68-78 64bit/g, sColor4 + "TB68-78 64bit"+ sc)
-					str = str.replace(/TB68-78 32bit/g, sColor4 + "TB68-78 32bit"+ sc)
-					str = str.replace(/TB60 64bit/g, sColor4 + "TB60 64bit"+ sc)
-					str = str.replace(/TB60 32bit/g, sColor4 + "TB60 32bit"+ sc)
-					str = str.replace(/TB68-78/g, sColor4 + "TB68-78"+ sc)
-					str = str.replace(/TB78/g, sColor4 + "TB78"+ sc)
-					str = str.replace(/TB68/g, sColor4 + "TB68"+ sc)
-					str = str.replace(/TB60/g, sColor4 + "TB60"+ sc)
+					str = str.replace(/TB68-78 64bit/g, sColor4 +"TB68-78 64bit"+ sc)
+					str = str.replace(/TB68-78 32bit/g, sColor4 +"TB68-78 32bit"+ sc)
+					str = str.replace(/TB60 64bit/g, sColor4 +"TB60 64bit"+ sc)
+					str = str.replace(/TB60 32bit/g, sColor4 +"TB60 32bit"+ sc)
+					str = str.replace(/TB68-78/g, sColor4 +"TB68-78"+ sc)
+					str = str.replace(/TB78/g, sColor4 +"TB78"+ sc)
+					str = str.replace(/TB68/g, sColor4 +"TB68"+ sc)
+					str = str.replace(/TB60/g, sColor4 +"TB60"+ sc)
 					lines.push(sColor3 + str + sc)
 				} else {
 					// results
-					let strpretty = str.replace(/p1/g, sColor2 + "p1"+ sc)
+					let strpretty = str.replace(/p1/g, sColor2 +"p1"+ sc)
 					lines.push(fncPad + strpretty)
 					// numbers: ignore F1 notation line ("nos")
 					if (fnc !== "nos") {
@@ -358,18 +357,18 @@ function outputData() {
 						tmp.forEach(function(num) {
 							num = num.trim()
 							// all
-							numbers.push(fnc + " " + num)
+							numbers.push(fnc +" "+ num)
 							// FF
 							if (code.substring(0,1) == "F") {
 								let second = code.substring(1,2)
 								if (second == "8" || second == "9") {
 									// obsolete FF
-									obsolete.push(fnc + " " + num)
+									obsolete.push(fnc +" "+ num)
 								} else {
 									// FF68+
-									firefox.push(fnc + " " + num)
+									firefox.push(fnc +" "+ num)
 								}
-								firefoxall.push(fnc + " " + num)
+								firefoxall.push(fnc +" "+ num)
 							}
 						})
 					}
@@ -399,12 +398,12 @@ function outputData() {
 	// ToDo: maybe abraham wants all numbers excluding FF67-
 
 	let strpretty = numbers.join(", ")
-	strpretty = strpretty.replace(/p1/g, sColor2 + "p1"+ sc)
+	strpretty = strpretty.replace(/p1/g, sColor2 +"p1"+ sc)
 	dom.numbers.innerHTML = strpretty
 	dom.countAll = numbers.length
 
 	strpretty = firefox.join(", ")
-	strpretty = strpretty.replace(/p1/g, sColor2 + "p1"+ sc)
+	strpretty = strpretty.replace(/p1/g, sColor2 +"p1"+ sc)
 	dom.firefox.innerHTML = strpretty
 	dom.countFF = firefox.length
 
