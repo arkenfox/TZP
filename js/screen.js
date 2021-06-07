@@ -2379,15 +2379,15 @@ function outputUA() {
 			// no lies: check bypasses
 			let sRep = section[8], sReal = ""
 			// RFP: non open-ended version
-			if (isRFP && !isVerPlus) {
+			if (isRFP && !isVerPlus && isVer > 59) {
 				let n = sRep.lastIndexOf("/"),
 					vReported = sRep.slice(n+1, sRep.length),
 					vReal = isVer.toString() + ".0"
-				sReal = sRep.replaceAll(vReported, vReal)
+				sReal = sRep.replace(new RegExp(vReported, 'g'), vReal)
 				if (sRep !== sReal) {
 					section[8] = sReal
 					sReal = sReal.slice(10)
-					sRep = sRep.replaceAll(vReported, soB + vReported + scC)
+					sRep = sRep.replace(new RegExp(vReported, 'g'), soB + vReported + scC)
 					dom.nuserAgent.innerHTML = "~"+ sRep.slice(10) +"~"
 					if (gRun) {
 						gKnown.push("ua:userAgent:version")
