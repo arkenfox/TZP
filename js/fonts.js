@@ -718,7 +718,7 @@ function get_unicode() {
 							if (err.message == "ctx is undefined") {
 								isCanvas = false
 							} else {
-								console.log("measureText", err.name, err.message)
+								//console.log("measureText", err.name, err.message)
 							}
 						}
 					}
