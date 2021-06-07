@@ -46,7 +46,7 @@ function outputCanvas() {
 			aKnown.push(val2 == "true" ? true : false)
 			// valid hashes
 			if (!isBlock) {
-				if (val2 == "true") {
+				if (val2 == "true" && aPass[i] == true) {
 					if (name == "toBlob") {compareBlob = val0}
 					if (name == "toDataURL") {compareDataURL = val0}
 				}
