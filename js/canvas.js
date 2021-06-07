@@ -102,7 +102,7 @@ function outputCanvas() {
 						if (isRFP && aPass[i] == false) {
 							// toBlob !== toDataURL 
 							if (item == "toDataURL" || item == "toBlob") {
-								if (compareBlob !== compareData) {notation = rfp_random_green}
+								if (compareBlob !== compareDataURL) {notation = rfp_random_green}
 							} else if (item == "getImageData") {
 								notation = rfp_random_green
 							}
