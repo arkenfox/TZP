@@ -137,6 +137,7 @@ function outputCanvas() {
 			console.debug("mPass", mPass, "\nmBlock", mBlock, "\nmPersist", mPersist)
 		}
 		console.debug("aIndex", aIndex, "\naPass", aPass, "\naBlock", aBlock, "\naKnown", aKnown, "\naValue\n - " + aValue.join("\n - "))
+		console.debug("compare", compareBlob, compareDataURL)
 
 		// section
 		log_section("canvas", t0, aRecord)
