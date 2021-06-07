@@ -4,11 +4,10 @@
 
 function outputCanvas() {
 	let t0 = performance.now(),
-		main0 = [], main1 = [], main2 = [],
-		sColor = s9
-	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL,toBlob [blink android alt]
+		res0 = [], res1 = [], res2 = []
 
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob,mozGetAsFile [gecko]
+	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL,toBlob [blink android alt]
+	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob [gecko]
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
 		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50" // isPointInStroke
@@ -19,219 +18,171 @@ function outputCanvas() {
 	}
 
 	// analyze
-	function analyzeCanvas(runtype, res1, res2, res3) {
-		let chash1 = [],
-			bypass = [],
-			diff78 = false,
-			error_string = "error while testing"
+	function analyze() {
+		// get data
+		let useKnown = (isFF || isEngine == "blink" || isEngine == "webkit")
+		let aBlock = [], aIndex = [], aValue = [], aKnown = [], aPass = []
+		let compareBlob = "", compareDataURL = ""
+		for (let i=0; i < res1.length; i++) {
+			let str0 = res0[i], str1 = res1[i], str2 = res2[i]
+			let delim = str0.search(",")
+			let name = str0.substring(0,delim),
+				val0 = str0.substring(delim+1, str0.length),
+				val1 = str1.substring(delim+1, str1.length),
+				val2 = str2.substring(delim+1, str2.length)
+			// index
+			aIndex.push(name)
+			// blocks = not a hash
+			let isBlock = (val0.length !== 64 || val1.length !== 64)
+			if (val0.indexOf(" ") !== -1 || val1.indexOf(" ") !== -1) {isBlock = true}
+			aBlock.push(isBlock ? true : false)
+			// per execution = if valid hashes
+			if (isBlock) {aPass.push(true)} else {aPass.push(val0 == val1 ? true : false)}
+			// value = force non-hash if required
+			if (isBlock && val0.length == 64 && val0.indexOf(" ") == -1) {val0 = val1}
+			aValue.push(val0) 
+			// lies = from known: valid hash + engine
+			if (!useKnown || isBlock) {val2 = true}
+			aKnown.push(val2 == "true" ? true : false)
+			// valid bypass hashes
+			if (!isBlock && val2 == "true") {
+				if (name == "toBlob") {compareBlob = val0}
+				if (name == "toDataURL") {compareDataURL = val0}
+			}
+		}
 
-		function display_value(item, value1, value2, value3) {
-			// vars
-			let isRandom = false,
-				pushvalue = value1,
-				control = "e5d9fd78536844cc8a4144ddb7a03eb9628f12c7c8b7828f942cadf6efb79ac0", // 220x30 white RFP
-				combined = "",
-				sname = item.substring(0,4)
+		// bypass
+		let bypassValue = "", bypassTarget = ""
+		if (compareBlob !== compareDataURL) {
+			bypassTarget = compareBlob == "" ? "toBlob" : "toDataURL"
+			bypassValue = compareBlob + compareDataURL
+			if (gRun) {gKnown.push("canvas:"+ bypassTarget)}
+		}
+
+		// record FP + display
+		let aRecord = []
+		for (let i=0; i < aIndex.length; i++) {
+			let item = aIndex[i]
 			let element = dom.tb9.querySelector("."+ item)
-			// cleanup
-			if (value1 == error_string || value2 == error_string) {
-				// not two valid results
-				value1 = error_string
-				pushvalue = value1
-			} else if (value1 == "null" || value2 == "null") {
-				// not two valid results
-				value1 = "null"
-				pushvalue = value1
-			} else if (value1.substring(0,14) == "ReferenceError") {
-				// blocked
-				value1 = zB0
-				pushvalue = zB0
-			} else if (value1== "42c4b0e3141cfc98c8f4fb9a24b96f99e441ae274c939b641b9995a455b85278") {
-				// sha256 of undefined
-				value1 = zU
-				value2 = zU
-				pushvalue = zU
-			} else if (value1 !== value2) {
-				// randomness
-				isRandom = true
-				pushvalue = "random"
-				combined = "random "+ sColor +" [1] "+ sc + value1.substring(0,22) +".."
-					+ sColor +" [2] "+ sc + value2.substring(0,22) +".."
+			let display = aValue[i], record = display
+			// block first
+			if (aBlock[i] == true) {record = zB0}
+			// then bypass can override block
+			if (item == bypassTarget) {
+				display = soB + display + scC; record = bypassValue
+				if (gRun) {gBypassed.push("canvas:"+ bypassTarget +":"+ bypassValue)}
+			} else if (aKnown[i] == false && aBlock[i] == false || aPass[i] == false) {
+				// otherwise color up lies but not blocks
+				display = soL + display + scC; record = zLIE
 			}
-
-			// noise: used if !isRandom and value3 = true
-			let noise = "noise detected "+ sColor +" [both] "+ sc + value1.substring(0,40) +".."
-			// reset value3 if not blink/webkit/gecko, not a hash
-			if (isFF || isEngine == "blink" || isEngine == "webkit") {} else {value3 = "true"}
-			if (value1.length !== 64) {value3 = "true"
-			} else if (value1.indexOf(" ") !== -1) {value3 = "true"}
-
-			// hashes: static
-			if (sname == "isPo") {
-				control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
-				if (isRandom) {value1 = combined
-				} else if (value1 == control && isRFP) { // do nothing
-				} else if (value3 == "false") {
-					value1 = noise
-					pushvalue = "noise"
+			aRecord.push("canvas:"+ item +":"+ record)
+			// notation for non-blocked
+			if (isFF && aBlock[i] == false) {
+				let control = ""
+				let test = aValue[i]
+				if (item.substring(0,4) == "isPo") {
+					control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
+					display += (test == control ? rfp_green : rfp_red)
 				}
-				value1 += (value1 == control ? rfp_green : rfp_red)
-			}
-			if (sname == "mozG" && isVer < 74) {
-				if (isRandom) {value1 = combined
-				} else if (value1 == control && isRFP) { // do nothing
-				} else if (value3 == "false") {
-					value1 = noise
-					pushvalue = "noise"
+				// static
+				if (isVer < 78) {
+					if (item == "toDataURL" || item == "toBlob") {
+						control = "e5d9fd78536844cc8a4144ddb7a03eb9628f12c7c8b7828f942cadf6efb79ac0" // 220x30 white
+						display += (test == control ? rfp_green : rfp_red)
+					} else if (item == "getImageData") {
+						control = "03fedeb80c3f8ebf2ed864024e9967256468d64dbe847f202ad06a60f2b3d9b3"
+						display += (test == control ? rfp_green : rfp_red)
+					}
 				}
-				value1 += (value1 == control ? rfp_green : rfp_red)
-			}
-			// hashes: randomized/static
-			if (sname == "toDa" || sname == "toBl" || sname == "getI") {
-				// control
-				if (sname == "getI") {
-					control = "03fedeb80c3f8ebf2ed864024e9967256468d64dbe847f202ad06a60f2b3d9b3" // 220x30
-				}
-				if (value1 == error_string) {
-					value1 += (isVer > 77 ? rfp_random_red : rfp_red)
-				} else {
-					if (isRandom) {value1 = combined}
-					if (isVer > 77) {
-						// 78+: random
-						if (isRandom) {
-							if (isRFP) {
-								pushvalue = "random rfp"
-								// toDataURL vs toBlob
-								if (sname == "toDa" || sname == "toBl") {
-									if (!diff78) {pushvalue = "random"}
-								}
-							} else {
-								pushvalue = "random"
-							}
-							value1 += (pushvalue == "random rfp" ? rfp_random_green : rfp_random_red)
-						} else {
-							// 78+: not random
-							if (value3 == "false") {
-								// noise
-								pushvalue = "noise"
-								value1 = noise + rfp_random_red
-							} else {
-								// no-noise
-								value1 += rfp_random_red
+				// random
+				if (isVer > 77) {
+					if (item == "toDataURL" || item == "toBlob" || item == "getImageData") {
+						let notation = rfp_random_red
+						// RFP on, two pass is random
+						if (isRFP && aPass[i] == false) {
+							// toBlob !== toDataURL 
+							if (item == "toDataURL" || item == "toBlob") {
+								if (compareBlob !== compareData) {notation = rfp_random_green}
+							} else if (item == "getImageData") {
+								notation = rfp_random_green
 							}
 						}
-					} else {
-						// <78: static
-						if (isRandom) {value1 = combined
-						} else if (value1 == control && isRFP) { // do nothing
-						} else if (value3 == "false") {
-							value1 = noise
-							pushvalue = "noise"
-						}
-						value1 += (value1 == control ? rfp_green : rfp_red)
+						display += notation
 					}
 				}
 			}
-			// bypass, push & display (ignore mozGetAsFile: not worth supporting)
-			if (sname == "toBl" || sname == "toDa") {
-				bypass.push(item +":"+ pushvalue)
-			} else {
-				chash1.push(item +":"+ pushvalue)
-			}
-			element.innerHTML = value1
-			// lies
-			if (gRun) {
-				if (pushvalue.substring(0,6) == "random") {
-					gKnown.push("canvas:"+ item)
-				}
-			}
+			element.innerHTML = display
 		}
 
-		// 78+: track toDataURL vs toBlob randomness
-		let valueB = "", valueD = ""
-		for (let i=0; i < res1.length; i++) {
-			let str1 = res1[i],
-				delim = str1.search(","),
-				display = str1.substring(0,delim)
-			if (display == "toBlob") {
-				valueB = str1.substring(delim+1, str1.length)
-			} else if (display == "toDataURL") {
-				valueD = str1.substring(delim+1, str1.length)
-			}
-		}
-		if (valueB !== valueD) {diff78 = true}
-
-		// sort arrays, output values
-		res1.sort()
-		res2.sort()
-		res3.sort()
-		for (let i=0; i < res1.length; i++) {
-			let str1 = res1[i],
-				str2 = res2[i],
-				str3 = res3[i],
-				delim = str1.search(","),
-				display = str1.substring(0,delim),
-				value1 = str1.substring(delim+1, str1.length),
-				value2 = str2.substring(delim+1, str2.length),
-				value3 = str3.substring(delim+1, str3.length)
-			display_value(display, value1, value2, value3)
-		}
-		// bypass: get valid hash
-		let bpValue = ""
-		for (let i=0; i < bypass.length; i++) {
-			let	chkValue = bypass[i].split(":")[1]
-			if (chkValue.length == 64 && chkValue.indexOf(" ") == -1) {
-				bpValue = chkValue
-			}
-		}
-		// bypass: propagate valid hash, record bypass
-		if (bpValue == "") {
-			chash1 = chash1.concat(bypass)
-		} else {
-			for (let i=0; i < bypass.length; i++) {
-				let bpName = bypass[i].split(":")[0],
-					bpOld = bypass[i].split(":")[1],
-					bpNew = bypass[i]
-				if (bpValue !== bpOld) {
-					bpNew = bpName +":"+ bpValue
-					if (gRun) {gBypassed.push("canvas:"+ bpNew)}
+		// methods & lies
+		if (gRun) {
+			let mPass = [], mPersist = [], mBlock = []
+			for (let i=0; i < aIndex.length; i++) {
+				if (aKnown[i] == false || aPass[i] == false) {gKnown.push("canvas:"+ aIndex[i])}
+				if (aBlock[i] == true) {
+					mBlock.push(aIndex[i])
+					// we should record block method details here: e.g. null
+				} else {
+					if (aPass[i] == false) { // per-execution
+						mPass.push(aIndex[i])
+					} else if (aKnown[i] == false) { // persistent
+						mPersist.push(aIndex[i])
+					}
 				}
-				chash1.push(bpNew)
 			}
+			let max = aIndex.length
+			if (mBlock.length) {gMethods.push("canvas:blocked:"+ (mBlock.length == max ? "all" : mBlock.join()))}
+			if (mPass.length) {gMethods.push("canvas:random per execution:"+ (mPass.length == max ? "all" : mPass.join()))}
+			if (mPersist.length) {gMethods.push("canvas:persistent noise:"+ (mPersist.length == max ? "all" : mPersist.join()))}
+			console.debug("mPass", mPass, "\nmBlock", mBlock, "\nmPersist", mPersist)
 		}
+		console.debug("aIndex", aIndex, "\naPass", aPass, "\naBlock", aBlock, "\naKnown", aKnown, "\naValue\n - " + aValue.join("\n - "))
+
 		// section
-		log_section("canvas", t0, chash1)
+		log_section("canvas", t0, aRecord)
+	}
+
+	function hashToString(hash){
+		var chunks = [];
+		(new Uint32Array(hash)).forEach(function(num){
+			chunks.push(num.toString(16))
+		})
+		return chunks.map(function(chunk){
+			return "0".repeat(8 - chunk.length) + chunk
+		}).join("")
+	}
+
+	function hashDataURL(url){
+		return crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(url)).then(hashToString)
+	}
+
+	function tidy_data(data) {
+		if (data === false || data == "false") {data = "false"
+		} else if (data === true || data == "trie") {data = "true"
+		} else if (data === 0) {data = "0"
+		} else if (data === null) {data = "null"
+		} else if (data === undefined) {data = "undefined"
+		} else if (data === "") {data = "empty string"
+		} else if (data === []) {data = "empty array"
+		} else {data = hashDataURL(data)}
+		return data
 	}
 
 	var canvas = {
 		createHashes: function(window, runNo){
 			let outputs = [
 				{
-					name: "getContext",
-						value: function(){
-						return ["2d"].map(function(type){
-							var canvas = getCanvas()
-							try {
-								var context = canvas.getContext(type)
-								if (!context){
-									throw new Error()
-								}
-								return type +": supported"
-							}
-							catch (e){
-								return type +": "+ zNS
-							}
-						}).join(", ")
-					}
-				},
-				{
 					name: "toDataURL",
 					value: function(){
-						let t1 = performance.now()
-						let data = getFilledContext().canvas.toDataURL()
-						if (data === null) {data = "null"} else {data = hashDataURL(data)}
-						log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
-						return data
+						try {
+							let t1 = performance.now()
+							let data = getFilledContext().canvas.toDataURL()
+							data = tidy_data(data)
+							log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
+							return data
+						} catch (e) {
+							return(e.name === undefined ? "error" : e.name +": " + e.message)
+						}
 					}
 				},
 				{
@@ -241,39 +192,25 @@ function outputCanvas() {
 							let t1 = performance.now()
 							try {
 								var timeout = window.setTimeout(function(){
-									reject("timout in toBlob")
+									reject("timeout")
 								}, 750)
-							getFilledContext().canvas.toBlob(function(blob){
-								window.clearTimeout(timeout)
-								var reader = new FileReader()
-								reader.onload = function(){
-									let data = reader.result
-									if (data === null) {data = "null"} else {data = hashDataURL(data)}
-									log_perf("toBlob ["+ runNo +"] [canvas]",t1)
-									resolve(data)
-								}
-								reader.onerror = function(){
-									reject("Unable to read blob!")
-								}
-								reader.readAsDataURL(blob)
-							})
+								getFilledContext().canvas.toBlob(function(blob){
+									window.clearTimeout(timeout)
+									var reader = new FileReader()
+									reader.onload = function(){
+										let data = reader.result
+										data = tidy_data(data)
+										log_perf("toBlob ["+ runNo +"] [canvas]",t1)
+										resolve(data)
+									}
+									reader.onerror = function(){
+										reject("unable to read blob!")
+									}
+									reader.readAsDataURL(blob)
+								})
+							} catch (e){
+								resolve(e.name === undefined ? "error" : e.name +": " + e.message)
 							}
-							catch (e){
-								resolve((e.name == "TypeError" ? "" : e.name +":") + e.message)
-							}
-						})
-					}
-				},
-				{
-					name: "mozGetAsFile",
-					value: function(){
-						return new Promise(function(resolve, reject){
-							var file = getFilledContext().canvas.mozGetAsFile("canvas.png")
-							var reader = new FileReader()
-							reader.onload = function(){
-								resolve(hashDataURL(reader.result))
-							}
-							reader.readAsDataURL(file)
 						})
 					}
 				},
@@ -290,18 +227,6 @@ function outputCanvas() {
 					}
 				},
 				{
-					supported: function(){
-						var context = getContext()
-						context.rect(0,0,10,10)
-						context.rect(2,2,6,6)
-						return context.isPointInPath(5, 5, 'evenodd') === false
-					},
-					name: "winding",
-					value: function(){
-						return "supported"
-					}
-				},
-				{
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInPath",
 					value: function(){
@@ -314,7 +239,7 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1) //,gt0,dataR)
+						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
 				},
@@ -331,24 +256,8 @@ function outputCanvas() {
 							}
 						}
 						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
-						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1) //,gt0,dataR)
+						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1)
 						return dataR
-					}
-				},
-				{
-					class: window.CanvasRenderingContext2D,
-					name: "fillText",
-					value: function(){
-						getContext().fillText("test",0,0)
-						return "supported"
-					}
-				},
-				{
-					class: window.CanvasRenderingContext2D,
-					name: "strokeText",
-					value: function(){
-						getContext().strokeText("test",0,0)
-						return "supported"
 					}
 				},
 			];
@@ -369,7 +278,6 @@ function outputCanvas() {
 				canvas.style.display = "inline"
 				context.rect(0,0,10,10)
 				context.rect(2,2,6,6)
-
 				// ToDo: canvas
 					// add background complexity: colors/shapes/overlaps
 					// more complex/better text
@@ -385,7 +293,6 @@ function outputCanvas() {
 				context.fillText(fpText,2,15);
 				context.fillStyle = "rgba(102, 204, 0, 0.7)";
 				context.fillText(fpText,4,17);
-
 				// blending
 				context.globalCompositeOperation = "multiply"
 				context.fillStyle = "rgb(255,0,255)"
@@ -421,18 +328,6 @@ function outputCanvas() {
 				context.fill()
 				return context
 			}
-			function hashToString(hash){
-				var chunks = [];
-				(new Uint32Array(hash)).forEach(function(num){
-					chunks.push(num.toString(16))
-				})
-				return chunks.map(function(chunk){
-					return "0".repeat(8 - chunk.length) + chunk
-				}).join("")
-			}
-			function hashDataURL(url){
-				return crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(url)).then(hashToString)
-			}
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){
 					var displayValue
@@ -444,13 +339,13 @@ function outputCanvas() {
 							displayValue = zNS
 						}
 					} catch (e){
-						displayValue = (e.name == "TypeError" ? "" : e.name +": ") + e.message
+						displayValue = (e.name === undefined ? "error" : e.name +": " + e.message)
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
 						resolve(output)
 					}, function(e){
-						output.displayValue = "error while testing"
+						output.displayValue = (e.name === undefined ? "error" : e.name +": " + e.message)
 						resolve(output)
 					})
 				})
@@ -466,8 +361,7 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let t1 = performance.now()
-						let data = getKnown().canvas.toDataURL()
-						if (data === null) {data = "null"} else {data = sha1(data)}
+						let data = sha1(getKnown().canvas.toDataURL())
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						let isFake = false
 						if (isEngine == "blink") {
@@ -475,7 +369,6 @@ function outputCanvas() {
 						} else {
 							if (data !== known1) {isFake = true}
 						}
-						if (gRun && isFake) {gKnown.push("canvas:toDataURL")}
 						return (isFake ? false : true)
 					}
 				},
@@ -492,8 +385,7 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									let data = reader.result
-									if (data === null) {data = "null"} else {data = sha1(data)}
+									let data = sha1(reader.result)
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
 									let isFake = false
 									if (isEngine == "blink") {
@@ -501,7 +393,6 @@ function outputCanvas() {
 									} else {
 										if (data !== known1) {isFake = true}
 									}
-									if (gRun && isFake) {gKnown.push("canvas:toBlob")}
 									resolve(isFake ? false : true)
 								}
 								reader.onerror = function(){
@@ -513,21 +404,6 @@ function outputCanvas() {
 							catch (e){
 								resolve(false)
 							}
-						})
-					}
-				},
-				{
-					name: "mozGetAsFile",
-					value: function(){
-						return new Promise(function(resolve, reject){
-							var file = getKnown().canvas.mozGetAsFile("known.png")
-							var reader = new FileReader()
-							reader.onload = function(){
-								let data = sha1(reader.result)
-								if (gRun) {if (data !== known1) {gKnown.push("canvas:mozGetAsFile")}}
-								resolve(data == known1 ? true : false)
-							}
-							reader.readAsDataURL(file)
 						})
 					}
 				},
@@ -546,7 +422,6 @@ function outputCanvas() {
 						}
 						let data = sha1(imageData.join())
 						log_perf("getImageData [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known2) {gKnown.push("canvas:getImageData")}}
 						return (data == known2 ? true : false)
 					}
 				},
@@ -564,7 +439,6 @@ function outputCanvas() {
 						}
 						let data = sha1(pathData.join())
 						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known3) {gKnown.push("canvas:isPointInPath")}}
 						return (data == known3 ? true : false)
 					}
 				},
@@ -582,15 +456,9 @@ function outputCanvas() {
 						}
 						let data = sha1(pathStroke.join())
 						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
-						if (gRun) {if (data !== known4) {gKnown.push("canvas:isPointInStroke")}}
 						return (data == known4 ? true : false)
 					}
 				},
-				// add so arrays match
-				{ name: "getContext", value: function(){return true}},
-				{ name: "fillText", value: function(){return true}},
-				{ name: "winding", value: function(){return true}},
-				{ name: "strokeText", value: function(){return true}},
 			];
 			function isSupported(output){
 				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[output.name]
@@ -648,17 +516,20 @@ function outputCanvas() {
 		known.createHashes(window),
 	]).then(function(outputs){
 		outputs[0].forEach(function(output){
-			main0.push(output.name +","+ output.displayValue)
+			res0.push(output.name +","+ output.displayValue)
 		})
 		outputs[1].forEach(function(output){
-			main1.push(output.name +","+ output.displayValue)
+			res1.push(output.name +","+ output.displayValue)
 		})
 		outputs[2].forEach(function(output){
-			main2.push(output.name +","+ output.displayValue)
+			res2.push(output.name +","+ output.displayValue)
 		})
-		analyzeCanvas("main", main0, main1, main2)
+		res0.sort()
+		res1.sort()
+		res2.sort()
+		analyze(res0, res1, res2)
 	})
-	// ToDo: canvas: iframe, offScreen
+	// ToDo: canvas: iframe, offScreen, convertToBlob
 }
 
 countJS("canvas")
