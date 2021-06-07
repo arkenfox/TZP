@@ -983,11 +983,21 @@ function log_section(name, time1, data) {
 				} else {
 					let parts = data[i].split(":")
 					let metric = parts[0]
+					if (metric !== metric.trim()) {
+						gCheck.push("#section "+ name +": "+ metric +" needs trimming")
+					}
 					let value = parts.slice(1).join(":")
 					if (value == "") {
 						gCheck.push("#section "+ name +": "+ metric +" not set")
 					} else if (value == undefined) {
 						gCheck.push("#section "+ name +": "+ metric +" undefined")
+					} else {
+						if ((value.indexOf("<sp") + value.indexOf("<code")) > 0) {
+							gCheck.push("#section "+ name +": "+ metric +" contains notation")
+						}
+						if (value !== value.trim()) {
+							gCheck.push("#section "+ name +": "+ metric +" value needs a trim")
+						}
 					}
 				}
 			}
@@ -1114,7 +1124,7 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	if (jsFiles.length == 13) {
+	if (jsFiles.length == 12) {
 		if (runSL) {isPerf = false}
 		if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		// harden isFF
@@ -1209,7 +1219,7 @@ function outputSection(id, cls) {
 			setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
+			//setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last
 			setTimeout(function() {if (id=="all") {outputAudio()}}, 1)
 		}
