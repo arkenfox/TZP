@@ -250,7 +250,7 @@ addEventListener("message", function(msg) {
 			} else if (item == 44) {
 				// ToDo: dayPeriod: 1569103: shipped FF90+
 				function get_day_period(date) {
-					return new Intl.DateTimeFormat(undefined, {dayPeriod: "long"}).format(date)
+					return new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "long"}).format(date)
 				}
 				let tmp ="",
 					dayA = get_day_period(new Date("2019-01-30T08:00:00")),
