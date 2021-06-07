@@ -22,7 +22,7 @@ function outputCanvas() {
 		// get data
 		let useKnown = (isFF || isEngine == "blink" || isEngine == "webkit")
 		let aBlock = [], aIndex = [], aValue = [], aKnown = [], aPass = []
-		let compareBlob = "", compareDataURL = ""
+		let compareBlob = "", compareDataURL = "", ffBlob = "", ffDataURL = ""
 		for (let i=0; i < res1.length; i++) {
 			let str0 = res0[i], str1 = res1[i], str2 = res2[i]
 			let delim = str0.search(",")
@@ -44,10 +44,15 @@ function outputCanvas() {
 			// lies = from known: valid hash + engine
 			if (!useKnown || isBlock) {val2 = true}
 			aKnown.push(val2 == "true" ? true : false)
-			// valid bypass hashes
-			if (!isBlock && val2 == "true") {
-				if (name == "toBlob") {compareBlob = val0}
-				if (name == "toDataURL") {compareDataURL = val0}
+			// valid hashes
+			if (!isBlock) {
+				if (val2 == "true") {
+					if (name == "toBlob") {compareBlob = val0}
+					if (name == "toDataURL") {compareDataURL = val0}
+				}
+				// valid FF compare hashes
+				if (name == "toBlob") {ffBlob = val0}
+				if (name == "toDataURL") {ffDataURL = val0}
 			}
 		}
 
@@ -102,7 +107,7 @@ function outputCanvas() {
 						if (isRFP && aPass[i] == false) {
 							// toBlob !== toDataURL 
 							if (item == "toDataURL" || item == "toBlob") {
-								if (compareBlob !== compareDataURL) {notation = rfp_random_green}
+								if (ffBlob !== ffDataURL) {notation = rfp_random_green}
 							} else if (item == "getImageData") {
 								notation = rfp_random_green
 							}
@@ -138,6 +143,7 @@ function outputCanvas() {
 		}
 		console.debug("aIndex", aIndex, "\naPass", aPass, "\naBlock", aBlock, "\naKnown", aKnown, "\naValue\n - " + aValue.join("\n - "))
 		console.debug("compare", compareBlob, compareDataURL)
+		console.debug("ff compare", ffBlob, ffDataURL)
 
 		// section
 		log_section("canvas", t0, aRecord)
