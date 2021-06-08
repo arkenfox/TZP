@@ -1090,7 +1090,7 @@ function log_section(name, time1, data) {
 				// FP
 				gData.sort()
 				dom.allhash.innerHTML = sha1(gData.join())
-					+ buildButton("0", "fingerprint", metricCount +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics")
+					+ buildButton("0", "fingerprint", metricCount +" metric"+ (metricCount > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
 				dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"
 				gClick = true
