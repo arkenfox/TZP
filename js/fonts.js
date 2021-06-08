@@ -60,6 +60,7 @@ function set_fntList() {
 	}
 	if (isBaseFonts) {
 		fntList = fntBase[isOS]
+		fntList.sort()
 		let strB = "fonts_fonts_"+ isOS +"-base_list_skip"
 		sDetail[strB] = fntList
 		fontBaseBtn = buildButton("12", strB, "base fonts")
