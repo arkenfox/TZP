@@ -139,11 +139,11 @@ function outputCanvas() {
 			if (mBlock.length) {gMethods.push("canvas:blocked:"+ (mBlock.length == max ? "all" : mBlock.join()))}
 			if (mPass.length) {gMethods.push("canvas:random per execution:"+ (mPass.length == max ? "all" : mPass.join()))}
 			if (mPersist.length) {gMethods.push("canvas:persistent noise:"+ (mPersist.length == max ? "all" : mPersist.join()))}
-			console.debug("mPass", mPass, "\nmBlock", mBlock, "\nmPersist", mPersist)
+			//console.debug("mPass", mPass, "\nmBlock", mBlock, "\nmPersist", mPersist)
 		}
-		console.debug("aIndex", aIndex, "\naPass", aPass, "\naBlock", aBlock, "\naKnown", aKnown, "\naValue\n - " + aValue.join("\n - "))
-		console.debug("compare", compareBlob, compareDataURL)
-		console.debug("ff compare", ffBlob, ffDataURL)
+		//console.debug("aIndex", aIndex, "\naPass", aPass, "\naBlock", aBlock, "\naKnown", aKnown, "\naValue\n - " + aValue.join("\n - "))
+		//console.debug("compare", compareBlob, compareDataURL)
+		//console.debug("ff compare", ffBlob, ffDataURL)
 
 		// section
 		log_section("canvas", t0, aRecord)
