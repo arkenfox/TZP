@@ -42,7 +42,7 @@ function outputCanvas() {
 			if (isBlock && val0.length == 64 && val0.indexOf(" ") == -1) {val0 = val1}
 			aValue.push(val0) 
 			// lies = from known: valid hash + engine
-			if (!useKnown || isBlock) {val2 = true}
+			if (!useKnown || isBlock) {val2 = "true"}
 			aKnown.push(val2 == "true" ? true : false)
 			// valid hashes
 			if (!isBlock) {
