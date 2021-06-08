@@ -579,10 +579,12 @@ function get_lang_doc() {
 			if (bTZ) {
 				// state1: both green
 				if (lHash2 == "0e884d1322d92ba36a736dd4f5655c2b8a562d6f") {
-					// nightly has Intl.DateTimeFormat dayPeriod & formatRange
+					// nightly has Intl.DateTimeFormat formatRange
 					ff = " [Nightly]"
+				} else if (lHash2 == "33d32304fd73bb55ef8f561fbca4f3f1df0617ad") {
+					ff = " [FF90+]"
 				} else if (lHash2 == "1850636a34767cc10c2e72de7e9a460bf136bc4d") {
-					ff = " [FF79+]"
+					ff = " [FF79-89]"
 				} else if (lHash2 == "ed964df4e555954fb897a3e868c4f18729335d73") {
 					ff = " [FF78]"
 				} else if (lHash2 == "4009d40e41812b66e6c0f66494bb4a1781ff9a80") {
@@ -637,7 +639,7 @@ function get_lang_worker() {
 				workerlang.addEventListener("message", function(e) {
 					let res = langDoc
 					workerlang.terminate
-					// compare
+					// ToDo: replace with sDetail[diffs] like ua iframes
 					let swcombo1 = "", swcombo2 = ""
 					for (let i=0; i < res.length; i++) {
 						let divider = "<br>"
@@ -674,21 +676,14 @@ function get_lang_worker() {
 							console.log("compare", i, k.name, k.message)
 						}
 					}
-					// compare hashes
-					if (isFF) {
-						let wHash0 = sha1(e.data.slice(0,12).join("-"))
-						if (wHash0 !== sha1(res.slice(0,12).join("-"))) {
-							dom.lHash0.innerHTML = lHash0 +"<br>"+ sb + wHash0 + sc +" [see details]"
-						}
-						let wHash1 = sha1(e.data.slice(12,17).join("-"))
-						if (wHash1 !== sha1(res.slice(12,17).join("-"))) {
-							dom.lHash1.innerHTML = lHash1 +"<br>"+ sb + wHash1 + sc +" [see details]"
-						}
-						let wHash2 = sha1(e.data.slice(17,e.data.length).join("-"))
-						if (wHash2 !== sha1(res.slice(17,res.length).join("-"))) {
-							dom.lHash2.innerHTML = lHash2 +"<br>"+ sb + wHash2 + sc +" [see details]"
-						}
-					}
+					// ToDo: replace with line items and subitems: like ua iframes
+						// sha1(e.data.slice(0,12).join("-")) // control
+						// sha1(res.slice(0,12).join("-"))
+						// sha1(e.data.slice(12,17).join("-"))
+						// sha1(res.slice(12,17).join("-"))
+						// sha1(e.data.slice(17,e.data.length).join("-"))
+						// sha1(res.slice(17,res.length).join("-"))
+
 					return resolve(e.data)
 				}, false)
 				workerlang.postMessage(msgWorker)
