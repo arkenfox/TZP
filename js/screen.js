@@ -2396,7 +2396,7 @@ function outputUA() {
 				}
 			}
 			// isBrave spaces
-			if (isBrave) {
+			if (isBraveMode.substring(0,2) == "st") {
 				for (let i=0; i < section.length; i++) {
 					let item = section[i],
 						name = item.split(":")[0]
