@@ -305,7 +305,7 @@ function outputAudio() {
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, ["channel:n/a","sum:n/a"])
+		log_section("audio", t0, ["OfflineAudioContext:n/a"])
 	}
 }
 
