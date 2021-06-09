@@ -83,7 +83,7 @@ function get_audio2_context(attempt) {
 		dom.audio1data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256(results.join())
+			sha1(results.join())
 		]).then(function(result){
 			dom.audio1hash.innerHTML = result[0] + sColor +"["+ results.length +" keys]"+ sc
 			// perf
@@ -142,7 +142,7 @@ function get_audio2_hybrid() {
 		dom.audio3data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256(results.slice(0, 30))
+			sha1(results.slice(0, 30))
 		]).then(function(result){
 			dom.audio3hash = result[0]
 			// perf
@@ -189,7 +189,7 @@ function get_audio2_oscillator() {
 		dom.audio2data.style.color = zshow
 		// hash
 		Promise.all([
-			sha256(cc_output.slice(0, 30))
+			sha1(cc_output.slice(0, 30))
 		]).then(function(result){
 			dom.audio2hash = result[0]
 			// perf
@@ -260,8 +260,8 @@ function outputAudio() {
 			event.renderedBuffer.copyFromChannel(copyTest, 0)
 			let getTest = event.renderedBuffer.getChannelData(0)
 			Promise.all([
-				crypto.subtle.digest("SHA-256", getTest),
-				crypto.subtle.digest("SHA-256", copyTest),
+				crypto.subtle.digest("SHA-1", getTest),
+				crypto.subtle.digest("SHA-1", copyTest),
 			]).then(function(hashes){
 				// blink: CPU touches FP? https://fingerprintjs.com/blog/audio-fingerprinting/
 				// 124.04344884395687 : chromeOS 84

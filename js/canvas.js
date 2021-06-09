@@ -20,6 +20,7 @@ function outputCanvas() {
 	// analyze
 	function analyze() {
 		// get data
+		let nHash = 40 // SHA-1: 40, SHA-256: 64
 		let useKnown = (isFF || isEngine == "blink" || isEngine == "webkit")
 		let aBlock = [], aIndex = [], aValue = [], aKnown = [], aPass = []
 		let compareBlob = "", compareDataURL = "", ffBlob = "", ffDataURL = ""
@@ -33,13 +34,13 @@ function outputCanvas() {
 			// index
 			aIndex.push(name)
 			// blocks = not a hash
-			let isBlock = (val0.length !== 64 || val1.length !== 64)
+			let isBlock = (val0.length !== nHash || val1.length !== nHash)
 			if (val0.indexOf(" ") !== -1 || val1.indexOf(" ") !== -1) {isBlock = true}
 			aBlock.push(isBlock ? true : false)
 			// per execution = if valid hashes
 			if (isBlock) {aPass.push(true)} else {aPass.push(val0 == val1 ? true : false)}
 			// value = force non-hash if required
-			if (isBlock && val0.length == 64 && val0.indexOf(" ") == -1) {val0 = val1}
+			if (isBlock && val0.length == nHash && val0.indexOf(" ") == -1) {val0 = val1}
 			aValue.push(val0) 
 			// lies = from known: valid hash + engine
 			if (!useKnown || isBlock) {val2 = "true"}
@@ -169,12 +170,12 @@ function outputCanvas() {
 	}
 
 	function hashDataURL(url){
-		return crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(url)).then(hashToString)
+		return crypto.subtle.digest("SHA-1", new TextEncoder("utf-8").encode(url)).then(hashToString)
 	}
 
 	function tidy_data(data) {
 		if (data === false || data == "false") {data = "false"
-		} else if (data === true || data == "trie") {data = "true"
+		} else if (data === true || data == "true") {data = "true"
 		} else if (data === 0) {data = "0"
 		} else if (data === null) {data = "null"
 		} else if (data === undefined) {data = "undefined"
@@ -237,7 +238,7 @@ function outputCanvas() {
 						let t1 = performance.now()
 						var context = getFilledContext()
 						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
-						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
+						let data = window.crypto.subtle.digest("SHA-1", imageData.data).then(hashToString)
 						log_perf("getImageData ["+ runNo +"] [canvas]",t1)
 						return data
 					}
@@ -254,7 +255,7 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInPath(x, y)
 							}
 						}
-						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest("SHA-1", data).then(hashToString)
 						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
@@ -271,7 +272,7 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInStroke(x, y)
 							}
 						}
-						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest("SHA-1", data).then(hashToString)
 						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}

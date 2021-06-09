@@ -169,13 +169,13 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 	border-style: solid; border-color: transparent #b3b3b3 transparent transparent;}
 
 /* table nav */
-div.nav-title {position: relative; width: 900px;}
+div.nav-title {position: relative; width: 865px;}
 div.nav-down {position: absolute; right: 5px; top: 0px; width: 20px;}
 div.nav-up {position: absolute; left: 5px; top: 0px; width: 250px; text-align: left;}
 div.nav-right {position: absolute; right: 5px; top: -2px; width: 0px;}
 
 /* tables */
-table {width: 900px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
+table {width: 865px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
 tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
 td {padding-bottom: 3px; padding-top: 3px; padding-left: 10px;}
 th {color: black; font-weight: bold; font-size: 16px; padding: 3px 0;}
