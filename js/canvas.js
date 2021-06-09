@@ -121,12 +121,14 @@ function outputCanvas() {
 
 		// methods & lies
 		if (gRun) {
+			let sName = "canvas_blocks_method_skip"
+			sDetail[sName] = []
 			let mPass = [], mPersist = [], mBlock = []
 			for (let i=0; i < aIndex.length; i++) {
 				if (aKnown[i] == false || aPass[i] == false) {gKnown.push("canvas:"+ aIndex[i])}
 				if (aBlock[i] == true) {
 					mBlock.push(aIndex[i])
-					// we should record block method details here: e.g. null
+					sDetail[sName].push(aIndex[i] +":"+ aValue[i])
 				} else {
 					if (aPass[i] == false) { // per-execution
 						mPass.push(aIndex[i])
@@ -145,6 +147,13 @@ function outputCanvas() {
 		//console.debug("compare", compareBlob, compareDataURL)
 		//console.debug("ff compare", ffBlob, ffDataURL)
 
+		// 2d keys
+		let keys = []
+		for (const key in CanvasRenderingContext2D.prototype) {keys.push(key)}
+		let keyhash = sha1(keys.join())
+		sDetail["canvas_2d_keys"] = keys
+		aRecord.push("2d_keys:"+ keyhash)
+		dom.canvas2dkeys.innerHTML = keyhash + buildButton("9","canvas_2d_keys", keys.length + " keys")
 		// section
 		log_section("canvas", t0, aRecord)
 	}
@@ -517,6 +526,7 @@ function outputCanvas() {
 		}
 	}
 
+	sDetail["canvas_2d_keys"] = []
 	Promise.all([
 		canvas.createHashes(window, 1),
 		canvas.createHashes(window, 2),
