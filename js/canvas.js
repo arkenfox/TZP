@@ -87,16 +87,16 @@ function outputCanvas() {
 				let control = ""
 				let test = aValue[i]
 				if (item.substring(0,4) == "isPo") {
-					control = "957c80fa4be3af7e53b40c852edf96a090f09958cc7f832aaf9a9fd544fb69a8"
+					control = "ff86099c8eb14523e204d688a35b104a217bd886"
 					display += (test == control ? rfp_green : rfp_red)
 				}
 				// static
 				if (isVer < 78) {
 					if (item == "toDataURL" || item == "toBlob") {
-						control = "e5d9fd78536844cc8a4144ddb7a03eb9628f12c7c8b7828f942cadf6efb79ac0" // 220x30 white
+						control = "0a4b8b3ff3cbd712d1883e1324a8bb3f07e10ca7" // 220x30 white
 						display += (test == control ? rfp_green : rfp_red)
 					} else if (item == "getImageData") {
-						control = "03fedeb80c3f8ebf2ed864024e9967256468d64dbe847f202ad06a60f2b3d9b3"
+						control = "25470ba3fb79778869ad46c7175d5fac9c88ad2b"
 						display += (test == control ? rfp_green : rfp_red)
 					}
 				}
