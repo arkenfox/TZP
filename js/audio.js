@@ -260,18 +260,9 @@ function outputAudio() {
 			event.renderedBuffer.copyFromChannel(copyTest, 0)
 			let getTest = event.renderedBuffer.getChannelData(0)
 			Promise.all([
-				crypto.subtle.digest("SHA-1", getTest),
-				crypto.subtle.digest("SHA-1", copyTest),
+				crypto.subtle.digest("SHA-256", getTest),
+				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
-				// blink: CPU touches FP? https://fingerprintjs.com/blog/audio-fingerprinting/
-				// 124.04344884395687 : chromeOS 84
-				// 124.04347527516074 : windows + android10
-				// 124.04347657808103 : macOS BigSur 11.3 + ungoogled chromium
-				// 124.04347721464    : chromeOS 89
-				// 124.0434806260746  : macOS 11
-				// 124.08074500028306 : android 9
-				// 124.08075528279005 : android 10+11
-
 				let blinkmin = 124.04, blinkmax = 124.081
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
@@ -289,8 +280,8 @@ function outputAudio() {
 				}
 				pxi_compressor.disconnect()
 				// get/copy
-				let hashG = byteArrayToHex(hashes[0])
-				let hashC = byteArrayToHex(hashes[1])
+				let hashG = sha1(byteArrayToHex(hashes[0]))
+				let hashC = sha1(byteArrayToHex(hashes[1]))
 				if (hashG !== hashC) {isLies = true}
 				// display/FP
 				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
