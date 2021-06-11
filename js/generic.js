@@ -167,10 +167,21 @@ const get_isBraveMode = () => new Promise(resolve => {
 		}
 	}
 	try {
-		// strict mode returns null supported extensions
-		const canvas = document.createElement("canvas")
-		const gl = canvas.getContext("webgl")
-		if (!gl.getSupportedExtensions()) {
+		// strict mode
+		const strictMode = () => {
+			const audioContext = (
+				'OfflineAudioContext' in window ? OfflineAudioContext : 
+				'webkitOfflineAudioContext' in window ? webkitOfflineAudioContext :
+				undefined
+			)
+			if (!audioContext) {
+				return false
+			}
+			const context = new audioContext(1, 1, 44100)
+			const analyser = context.createAnalyser()
+			const data = new Float32Array(analyser.frequencyBinCount)
+			analyser.getFloatFrequencyData(data)
+			const strict = new Set(data).size > 1 // native only has -Infinity
 			set("strict")
 			return resolve()
 		}
