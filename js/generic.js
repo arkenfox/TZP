@@ -182,20 +182,24 @@ const get_isBraveMode = () => new Promise(resolve => {
 			const data = new Float32Array(analyser.frequencyBinCount)
 			analyser.getFloatFrequencyData(data)
 			const strict = new Set(data).size > 1 // native only has -Infinity
-			set("strict")
+			return strict
+		}
+		if (strictMode()) {
+			set("strict")			
+			return resolve()
+		} else {
+			// standard and strict mode do not have chrome plugins
+			const chromePlugins = /(Chrom(e|ium)|Microsoft Edge) PDF (Plugin|Viewer)/
+			const pluginsList = [...navigator.plugins]
+			const hasChromePlugins = pluginsList
+				.filter(plugin => chromePlugins.test(plugin.name)).length == 2
+			if (!hasChromePlugins) {
+				set("standard")
+				return resolve()
+			}
+			set("allow")
 			return resolve()
 		}
-		// standard and strict mode do not have chrome plugins
-		const chromePlugins = /(Chrom(e|ium)|Microsoft Edge) PDF (Plugin|Viewer)/
-		const pluginsList = [...navigator.plugins]
-		const hasChromePlugins = pluginsList
-			.filter(plugin => chromePlugins.test(plugin.name)).length == 2
-		if (!hasChromePlugins) {
-			set("standard")
-			return resolve()
-		}
-		set("allow")
-		return resolve()
 	} catch(e) {
 		set("unknown")
 		return resolve()
