@@ -297,12 +297,13 @@ addEventListener("message", function(msg) {
 					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 				let f = Intl.DateTimeFormat(undefined, o)
 				return f.formatRange(date1, date2) +" | "+ f.formatRange(date1, date3)
-			} else if (item == 48) {
-				let prules = [], nos = [0,1,2,3,4,6,7,11,20,21,100]
+			} else if (item == 48 || item == 49) {
+				let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
+				let prtype = item == 48 ? "cardinal" : "ordinal"
 				let prev = "", current = "", prError = ""
 				for (let i=0; i < nos.length; i++) {
 					try {
-						current = new Intl.PluralRules(undefined).select(nos[i])
+						current = new Intl.PluralRules(undefined, {type: prtype}).select(nos[i])
 					} catch(e) {
 						prError = e.name +" : "+ e.message
 						current = "error"
@@ -357,7 +358,7 @@ addEventListener("message", function(msg) {
 	}
 
 	// build
-	for (let i=0; i < 49; i++) {
+	for (let i=0; i < 50; i++) {
 		let result = get_item(i)
 		if (result == undefined) {result = zB0}
 		if (result == "undefined") {result = zB0}
