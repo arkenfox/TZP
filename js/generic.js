@@ -178,7 +178,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 			const pluginsList = [...navigator.plugins]
 			const hasChromePlugins = pluginsList
 				.filter(plugin => chromePlugins.test(plugin.name)).length == 2
-			if (!hasChromePlugins) {
+			if (pluginsList.length && !hasChromePlugins) {
 				set("standard")
 				return resolve()
 			}
