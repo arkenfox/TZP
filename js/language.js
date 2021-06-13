@@ -451,12 +451,13 @@ function get_lang_doc() {
 						date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 					let f = Intl.DateTimeFormat(undefined, o)
 					return f.formatRange(date1, date2) +" | "+ f.formatRange(date1, date3)
-				} else if (item == 48) {
-					let prules = [], nos = [0,1,2,3,4,6,7,11,20,21,100]
+				} else if (item == 48 || item == 49) {
+					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
+					let prtype = item == 48 ? "cardinal" : "ordinal"
 					let prev = "", current = "", prError = ""
 					for (let i=0; i < nos.length; i++) {
 						try {
-							current = new Intl.PluralRules(undefined).select(nos[i])
+							current = new Intl.PluralRules(undefined, {type: prtype}).select(nos[i])
 						} catch(e) {
 							prError = e.name +" : "+ e.message
 							current = "error"
@@ -510,7 +511,7 @@ function get_lang_doc() {
 			}
 		}
 		// output
-		for (let i=0; i < 49; i++) {
+		for (let i=0; i < 50; i++) {
 			let result = get_item(i)
 			if (isFF) {
 				if (result == undefined) {result = zB0; err.push(i +" [unexpected]: undefined")}
@@ -575,30 +576,21 @@ function get_lang_doc() {
 		dom.lHash2 = lHash2
 		// RFP
 		let ff = ""
-		if (isFF) {
+		if (isVer > 59) {
+			// FF85+: also use javascript.use_us_english_locale
 			if (bTZ) {
 				// state1: both green
-				if (lHash2 == "0e884d1322d92ba36a736dd4f5655c2b8a562d6f") {
+				if (lHash2 == "9400890690bc0ee88ceccbec12eec15dcc9f4fec") {ff = " [Nightly]"
 					// nightly has Intl.DateTimeFormat formatRange
-					ff = " [Nightly]"
-				} else if (lHash2 == "33d32304fd73bb55ef8f561fbca4f3f1df0617ad") {
-					ff = " [FF90+]"
-				} else if (lHash2 == "1850636a34767cc10c2e72de7e9a460bf136bc4d") {
-					ff = " [FF79-89]"
-				} else if (lHash2 == "ed964df4e555954fb897a3e868c4f18729335d73") {
-					ff = " [FF78]"
-				} else if (lHash2 == "4009d40e41812b66e6c0f66494bb4a1781ff9a80") {
-					ff = " [FF71-77]"
-				} else if (lHash2 == "657b6ea41edca81376a65c2fa81fa6bc641ec5a1") {
-					ff = " [FF70]"
-				} else if (lHash2 == "e8c8aaecdf81f60e2295c9beaeec6dd86ffa4caa") {
-					ff = " [FF68-69]"
-				} else if (lHash2 == "02f4b55b856e182cc2626a04246aee0c8d5499c6") {
-					ff = " [FF65-67]"
-				} else if (lHash2 == "b9d2ca0773957025f370d4060e666c405c3bf84d") {
-					ff = " [FF63-64]"
-				} else if (lHash2 == "5df6cb0174d57eeda7900ef81ca8aa1fd49587d7") {
-					ff = " [FF60-62]"
+				} else if (lHash2 == "d030c1c2d02b7dbc470f00407fdb664daeb9fa00") {ff = " [FF90+]"
+				} else if (lHash2 == "9f7bb4d28e36f52789e20df8df49804710a8b81f") {ff = " [FF79-89]"
+				} else if (lHash2 == "a7cb9834179a21ebe5e7030a1681ebceeca0b2b3") {ff = " [FF78]"
+				} else if (lHash2 == "65ccc207a507a44828dc5bbe9387e8634be2491a") {ff = " [FF71-77]"
+				} else if (lHash2 == "0e45c2b9e9ccc00fc53e3e502b8c825a3c2bc11f") {ff = " [FF70]"
+				} else if (lHash2 == "dcee6b76fe0108cd37c8f428205e04bd38fa524b") {ff = " [FF68-69]"
+				} else if (lHash2 == "5ac52370f84e4abe8612e68ea6f754f5a2a87e2a") {ff = " [FF65-67]"
+				} else if (lHash2 == "cd238899b1b08729a93f390bc973f632d5d6b36e") {ff = " [FF63-64]"
+				} else if (lHash2 == "2cf4cde43c8c4654cef9e89071be9bfc741b6b5b") {ff = " [FF60-62]"
 				}
 			}
 			if (ff == "") {
