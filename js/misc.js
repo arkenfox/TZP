@@ -44,6 +44,9 @@ function get_iframe_props() {
 		'PluginArray',
 		// ScriptSafe
 		'Array','HTMLDivElement',
+		// AdBlocker Ultimate
+		'CustomEvent','HTMLObjectElement','String','WeakSet','decodeURI','decodeURIComponent',
+		'encodeURI','encodeURIComponent','escape',
 	]
 	if (isTB) {
 		knownGood.push('HTMLObjectElement', 'MediaSource', 'URL', 'webkitURL')
