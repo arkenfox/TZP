@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>pluralrules</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=650">
+	<title>pluralrules</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 630px;}
+		hr {color: #dcdc8c}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="40%"><col width="60%">
+		<thead><tr><th colspan="2">pluralrules: supportedLocalesOf</th></tr></thead>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span class="spaces" id="results0"></span>
+				<hr>
+				<span class="spaces" id="results1"></span>
+
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+var locales = []
+
+var detailed = [
+"aa,afar",
+"ab,abkhazian",
+"ach,acholi",
+"ae,avestan",
+"af,afrikaans",
+"ak,akan",
+"am,amharic",
+"an,aragonese",
+"ar,arabic",
+"as,assamese",
+"ast,asturian",
+"av,avaric",
+"ay,aymara",
+"az,azerbaijani",
+"ba,bashkir",
+"be,belarusian",
+"bg,bulgarian",
+"bh,bihari",
+"bi,bislama",
+"bm,bambara",
+"bn,bengali",
+"bo,tibetan",
+"br,breton",
+"bs,bosnian",
+"ca,catalan",
+"cak,kaqchikel",
+"ce,chechen",
+"ch,chamorro",
+"ckb,central kurdish", // ? dropped
+"co,corsican",
+"cr,cree",
+"crh,crimean tatar",
+"cs,czech",
+"csb,kashubian",
+"cu,church slavic",
+"cv,chuvash",
+"cy,welsh",
+"da,danish",
+"de,german",
+"dsb,lower sorbian",
+"dv,divehi",
+"dz,dzongkha",
+"ee,ewe",
+"el,greek",
+"en,english",
+"eo,esperanto",
+"es,spanish",
+"et,estonian",
+"eu,basque",
+"fa,persian",
+"ff,fulah",
+"fi,finnish",
+"fj,fijian",
+"fo,faroese",
+"fr,french",
+"fur,friulian",
+"fy,frisian",
+"ga,irish",
+"gd,scottish gaelic",
+"gl,galician",
+"gn,guarani",
+"gu,gujarati",
+"gv,manx",
+"ha,hausa",
+"haw,hawaiian",
+"he,hebrew",
+"hi,hindi",
+"hil,hiligaynon",
+"ho,hiri motu",
+"hr,croatian",
+"hsb,upper sorbian",
+"ht,haitian",
+"hu,hungarian",
+"hy,armenian",
+"hye,eastern armenian", // ? dropped
+"hz,herero",
+"ia,interlingua",
+"id,indonesian",
+"ie,interlingue",
+"ig,igbo",
+"ii,sichuan yi",
+"ik,inupiaq",
+"io,ido",
+"is,icelandic",
+"it,italian",
+"iu,inuktitut",
+"ja,japanese",
+"jv,javanese",
+"ka,georgian",
+"kab,kabyle",
+"kg,kongo",
+"ki,kikuyu",
+"kj,kuanyama",
+"kk,kazakh",
+"kl,greenlandic",
+"km,khmer",
+"kn,kannada",
+"ko,korean",
+"kok,konkani",
+"kr,kanuri",
+"ks,kashmiri",
+"ku,kurdish",
+"kv,komi",
+"kw,cornish",
+"ky,kirghiz",
+"la,latin",
+"lb,luxembourgish",
+"lg,ganda",
+"li,limburgan",
+"lij,ligurian",
+"ln,lingala",
+"lo,lao",
+"lt,lithuanian",
+"ltg,latgalian",
+"lu,luba-katanga",
+"lv,latvian",
+"mai,maithili",
+"meh,sw tlaxiaco mixtec",
+"mg,malagasy",
+"mh,marshallese",
+"mi,maori",
+"mix,mixtepec mixtec",
+"mk,macedonian",
+"ml,malayalam",
+"mn,mongolian",
+"mr,marathi",
+"ms,malay",
+"mt,maltese",
+"my,burmese",
+"na,nauru",
+"nb,norwegian bokmål",
+"nd,ndebele north",
+"ne,nepali",
+"ng,ndonga",
+"nl,dutch",
+"nn,norwegian nynorsk",
+"no,norwegian",
+"nr,ndebele south",
+"nso,sotho northern",
+"nv,navajo",
+"ny,chichewa",
+"oc,occitan",
+"oj,ojibwa",
+"om,oromo",
+"or,odia",
+"os,ossetian",
+"pa,punjabi",
+"pi,pali",
+"pl,polish",
+"ps,pashto",
+"pt,portuguese",
+"qu,quechua",
+"rm,rhaeto-romanic",
+"rn,kirundi",
+"ro,romanian",
+"ru,russian",
+"rw,kinyarwanda",
+"sa,sanskrit",
+"sc,sardinian",
+"sco,scots", // 1714293
+"sd,sindhi",
+"se,northern sami",
+"sg,sango",
+"si,singhalese",
+"sk,slovak",
+"sl,slovenian",
+"sm,samoan",
+"sn,shona",
+"so,somali",
+"son,songhay",
+"sq,albanian",
+"sr,serbian",
+"ss,siswati",
+"st,sotho southern",
+"su,sundanese",
+"sv,swedish",
+"sw,swahili",
+"szl,silesian", // 1691695
+"ta,tamil",
+"te,telugu",
+"tg,tajik",
+"th,thai",
+"ti,tigrinya",
+"tig,tigre",
+"tk,turkmen",
+"tl,tagalog",
+"tlh,klingon",
+"tn,tswana",
+"to,tonga",
+"tr,turkish",
+"trs,triqui", // 1583177
+"ts,tsonga",
+"tt,tatar",
+"tw,twi",
+"ty,tahitian",
+"ug,uighur",
+"uk,ukrainian",
+"ur,urdu",
+"uz,uzbek",
+"ve,venda",
+"vi,vietnamese",
+"vo,volapük",
+"wa,walloon",
+"wen,sorbian",
+"wo,wolof",
+"xh,xhosa",
+"yi,yiddish",
+"yo,yoruba",
+"za,zhuang",
+"zam,miahuatlán zapotec",
+"zh,chinese",
+"zh-cn,chinese china",
+"zh-Hans,chinese simple",
+"zh-Hant,chinese traditional",
+"zh-hk,chinese hong kong",
+"zh-sg,chinese singapore",
+"zh-tw,chinese taiwan",
+"zu,zulu",
+]
+
+function start() {
+	// builds locales array and outputs a legend
+	detailed.sort()
+	try {
+		let legend = []
+		for (let i = 0 ; i < detailed.length; i++) {
+			// split: A (code), B (name)
+			let listA = detailed[i].split(",")[0]
+			let listB = detailed[i].split(",")[1]
+			locales.push(listA)
+			legend.push(listA.padStart(7) +": "+ listB)
+		}
+		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+		run()
+	} catch(e) {}
+}
+
+function run() {
+	s4 = s4.trim()
+
+	let supported0 = Intl.PluralRules.supportedLocalesOf(locales, {localeMatcher: 'lookup'})
+	let hash0 = sha1(supported0.join())
+
+	let notation = ""
+	if (hash0 == "d63bcc4d160bf3034613c34a1774666ad5d40750") {notation = " [FF91+]" // added: sa
+	} else if (hash0 == "d2412a09ca429cfae7c49976bc2f1b3a0652a3f3") {notation = " [FF78-90]" // added: mai, su
+	} else if (hash0 == "e35f3a39a4805055a594598056137a5a23bc87f8") {notation = " [FF70-77]" // added: fil (tl)
+	} else if (hash0 == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
+	} else if (hash0 == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF60-64]"
+	}
+	dom.results0.innerHTML = s4 +"LOOKUP"+ sc + "<br><br>" + hash0 + s4 +" ["+ supported0.length +"]"+ sc + notation
+		+ "<br><br>" + supported0.join(", ") + "<br><br>"
+
+	let supported1 = Intl.PluralRules.supportedLocalesOf(locales, {localeMatcher: 'best fit'})
+	let hash1 = sha1(supported1.join())	
+	let str1 = 
+	dom.results1.innerHTML = "<br>"+ s4 +"BEST FIT"+ sc + "<br><br>" + hash1 + s4 +" ["+ supported0.length +"]"+ sc
+		+ "<br><br>" + supported1.join(", ")
+
+}
+
+start()
+
+</script>
+</body>
+</html>
