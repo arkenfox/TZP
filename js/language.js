@@ -219,6 +219,7 @@ function get_lang_doc() {
 							tzresults.push(diff)
 						}
 					}
+					console.debug(tzresults)
 					return tzresults.join()
 				} else if (item == 15) {
 					// FF91+: 1710429
