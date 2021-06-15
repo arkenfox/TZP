@@ -220,7 +220,33 @@ function get_lang_doc() {
 						}
 					}
 					return tzresults.join()
-				} else if (item == 15) {return "n/a"
+				} else if (item == 15) {
+					// FF91+: 1710429
+					let tzRes = []
+					try {
+						let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
+						let tzDays = ["January 1, 2019 13:00:00","July 1, 2019 13:00:00"]
+						tzDays.forEach(function(day) {
+							tzNames.forEach(function(item) {
+								let tz = ""
+								let tzDate = new Date(day)
+								try {
+									let tzO = {hour12: true, timeZoneName: item}
+									tz = JSON.stringify(Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)[6])
+									tz = tz.replace(/"/g, "")
+									tz = tz.replace("{type:timeZoneName,value:", "")
+									tz = tz.replace("{type:unknown,value:", "")
+									tz = tz.replace("}", "")
+								} catch(e) {
+									if (isVer > 90) {tz = zB0} else if (isFF) {tz = zNS} else {tz = e.name == "RangeError" ? zNS : zB0}
+								}
+								if (tz !== zNS) {tzRes.push(tz)}
+							})
+						})
+						return tzRes.join(", ")
+					} catch(e) {
+						return zB0
+					}
 				} else if (item == 16) {return "n/a"
 				// date/time format
 				} else if (item == 17) {
@@ -566,8 +592,18 @@ function get_lang_doc() {
 		lHash1 = sha1(res.slice(12,17).join("-"))
 		reshash.push("timezone:"+ lHash1)
 		//console.log("timezone", lHash1, res.slice(12,17))
-		bTZ = (lHash1 == "8aa77801dd2bb3ad49c68f7ff179df3ea276479f" ? true : false)
-		lHash1 += (bTZ ? rfp_green : rfp_red)
+		
+		let tzControl = "", tzFF = ""
+		if (isVer > 90) {
+			tzControl = "473219af1a5e04791bf34c46a0a13a1091ca0911", tzFF = " [FF91+]"
+		} else if (isVer > 62) {
+			tzControl = "be4761c191aeae12193f3223e0d62aa6adceb481", tzFF = " [FF63-90]"
+		} else if (isVer > 59) {
+			tzControl = "76c361c2e3fdf92e169455251a66bd78def6adeb", tzFF = " [FF60-62]"
+		}
+
+		bTZ = (lHash1 == tzControl ? true : false)
+		lHash1 += (bTZ ? rfp_green : rfp_red) + (isVer > 59 && bTZ ? tzFF : "")
 		dom.lHash1.innerHTML = lHash1
 
 		// hash 17+: datetime
