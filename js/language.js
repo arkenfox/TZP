@@ -220,7 +220,9 @@ function get_lang_doc() {
 						}
 					}
 					return tzresults.join()
-				} else if (item == 15) {
+				} else if (item == 15) {return "n/a"
+				// date/time format
+				} else if (item == 16) {
 					// FF91+: 1710429
 					let tzRes = []
 					try {
@@ -247,8 +249,6 @@ function get_lang_doc() {
 					} catch(e) {
 						return zB0
 					}
-				} else if (item == 16) {return "n/a"
-				// date/time format
 				} else if (item == 17) {
 					return (amWorker ? ""+ d : d)
 				} else if (item == 18) {return d.toString()
@@ -589,26 +589,18 @@ function get_lang_doc() {
 		dom.lHash0.innerHTML = lHash0
 
 		// hash 12-16: timezone
-		lHash1 = sha1(res.slice(12,17).join("-"))
+		lHash1 = sha1(res.slice(12,16).join("-"))
 		reshash.push("timezone:"+ lHash1)
-		//console.log("timezone", lHash1, res.slice(12,17))
+		//console.log("timezone", lHash1, res.slice(12,16))
 		
-		let tzControl = "", tzFF = ""
-		if (isVer > 90) {
-			tzControl = "473219af1a5e04791bf34c46a0a13a1091ca0911", tzFF = " [FF91+]"
-		} else if (isVer > 62) {
-			tzControl = "be4761c191aeae12193f3223e0d62aa6adceb481", tzFF = " [FF63-90]"
-		} else if (isVer > 59) {
-			tzControl = "76c361c2e3fdf92e169455251a66bd78def6adeb", tzFF = " [FF60-62]"
-		}
-
-		bTZ = (lHash1 == tzControl ? true : false)
-		lHash1 += (bTZ ? rfp_green : rfp_red) + (isVer > 59 && bTZ ? tzFF : "")
+		bTZ = (lHash1 == "be32bb73c0061974a3301536469d40d74e325375" ? true : false)
+		lHash1 += (bTZ ? rfp_green : rfp_red)
 		dom.lHash1.innerHTML = lHash1
 
 		// hash 17+: datetime
-		lHash2 = sha1(res.slice(17,res.length).join("-"))
+		lHash2 = sha1(res.slice(16,res.length).join("-"))
 		reshash.push("datetime:"+ lHash2)
+		//console.log("timezone", lHash2, res.slice(16,res.length))
 		dom.lHash2 = lHash2
 		// RFP
 		let ff = ""
@@ -616,17 +608,18 @@ function get_lang_doc() {
 			// FF85+: also use javascript.use_us_english_locale
 			if (bTZ) {
 				// state1: both green
-				if (lHash2 == "9400890690bc0ee88ceccbec12eec15dcc9f4fec") {ff = " [Nightly]"
+				if (lHash2 == "94fb2afc5cf3027349f9d1bf7c693bf4dc49b368") {ff = " [Nightly]"
 					// nightly has Intl.DateTimeFormat formatRange
-				} else if (lHash2 == "d030c1c2d02b7dbc470f00407fdb664daeb9fa00") {ff = " [FF90+]"
-				} else if (lHash2 == "9f7bb4d28e36f52789e20df8df49804710a8b81f") {ff = " [FF79-89]"
-				} else if (lHash2 == "a7cb9834179a21ebe5e7030a1681ebceeca0b2b3") {ff = " [FF78]"
-				} else if (lHash2 == "65ccc207a507a44828dc5bbe9387e8634be2491a") {ff = " [FF71-77]"
-				} else if (lHash2 == "0e45c2b9e9ccc00fc53e3e502b8c825a3c2bc11f") {ff = " [FF70]"
-				} else if (lHash2 == "dcee6b76fe0108cd37c8f428205e04bd38fa524b") {ff = " [FF68-69]"
-				} else if (lHash2 == "5ac52370f84e4abe8612e68ea6f754f5a2a87e2a") {ff = " [FF65-67]"
-				} else if (lHash2 == "cd238899b1b08729a93f390bc973f632d5d6b36e") {ff = " [FF63-64]"
-				} else if (lHash2 == "2cf4cde43c8c4654cef9e89071be9bfc741b6b5b") {ff = " [FF60-62]"
+				} else if (lHash2 == "423185c71ea568138d32e71b60638098733c3190") {ff = " [FF91+]"
+				} else if (lHash2 == "131929d615983ebde1f9b6c0154975aed15a5ca1") {ff = " [FF90]"
+				} else if (lHash2 == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
+				} else if (lHash2 == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
+				} else if (lHash2 == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
+				} else if (lHash2 == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
+				} else if (lHash2 == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
+				} else if (lHash2 == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
+				} else if (lHash2 == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
+				} else if (lHash2 == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
 				}
 			}
 			if (ff == "") {
@@ -707,10 +700,10 @@ function get_lang_worker() {
 					// ToDo: replace with line items and subitems: like ua iframes
 						// sha1(e.data.slice(0,12).join("-")) // control
 						// sha1(res.slice(0,12).join("-"))
-						// sha1(e.data.slice(12,17).join("-"))
-						// sha1(res.slice(12,17).join("-"))
-						// sha1(e.data.slice(17,e.data.length).join("-"))
-						// sha1(res.slice(17,res.length).join("-"))
+						// sha1(e.data.slice(12,16).join("-"))
+						// sha1(res.slice(12,16).join("-"))
+						// sha1(e.data.slice(16,e.data.length).join("-"))
+						// sha1(res.slice(16,res.length).join("-"))
 
 					return resolve(e.data)
 				}, false)
