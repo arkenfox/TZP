@@ -80,11 +80,16 @@ addEventListener("message", function(msg) {
 							let tzDate = new Date(day)
 							try {
 								let tzO = {hour12: true, timeZoneName: item}
-								tz = JSON.stringify(Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)[6])
-								tz = tz.replace(/"/g, "")
-								tz = tz.replace("{type:timeZoneName,value:", "")
-								tz = tz.replace("{type:unknown,value:", "")
-								tz = tz.replace("}", "")
+								let tzA = Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)
+								for (let i = 0 ; i < tzA.length; i++) {
+									let str = JSON.stringify(Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)[i])
+									if (str.indexOf("timeZoneName") !== -1 || str.indexOf("unknown") !== -1) {
+										tz = str.replace(/"/g, "")
+										tz = tz.replace("{type:timeZoneName,value:", "")
+										tz = tz.replace("{type:unknown,value:", "")
+										tz = tz.replace("}", "")			
+									}
+								}
 							} catch(e) {
 								if (isVer > 90) {tz = zB0} else if (isFF) {tz = zNS} else {tz = e.name == "RangeError" ? zNS : zB0}
 							}
