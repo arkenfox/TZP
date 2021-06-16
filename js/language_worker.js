@@ -66,7 +66,9 @@ addEventListener("message", function(msg) {
 					}
 				}
 				return tzresults.join()
-			} else if (item == 15) {
+			} else if (item == 15) {return "n/a"
+			// date/time format
+			} else if (item == 16) {
 				// FF91+: 1710429
 				let tzRes = []
 				try {
@@ -93,8 +95,6 @@ addEventListener("message", function(msg) {
 				} catch(e) {
 					return zB0
 				}
-			} else if (item == 16) {return "n/a"
-			// date/time format
 			} else if (item == 17) {
 				return (amWorker ? ""+ d : d)
 			} else if (item == 18) {return d.toString()
