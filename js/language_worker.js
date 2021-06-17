@@ -377,7 +377,7 @@ addEventListener("message", function(msg) {
 		res.push(result)
 	}
 	// debug
-	if (err.length) {console.log("worker language/datetime errors\n"+ err.join("\n"))}
+	//if (err.length) {console.log("worker language/datetime errors\n"+ err.join("\n"))}
 
 	// post
 	self.postMessage(res)
