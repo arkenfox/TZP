@@ -360,7 +360,7 @@ function get_lang_doc() {
 									tmpS = tmpS.replace("{type:", "")
 									tmpS = tmpS.replace(",value:", " ")
 									str = tmpS.replace("}", "")
-									if (extra == true) {str += " <code>"+ tmpS.charCodeAt(tmpS.length-1) +"</code>"}
+									if (extra == true) {str += " <code>"+ str.charCodeAt(str.length-1) +"</code>"}
 								}
 							}
 							return str
