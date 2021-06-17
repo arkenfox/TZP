@@ -350,48 +350,29 @@ function get_lang_doc() {
 				} else if (item == 36) {
 					// [formatToParts] Intl.NumberFormat
 						// ToDo: trap script blocking
-					let tmp = "", str = "", type ="", charcode = ""
-					function clean_string(type, string, extra) {
-						// prettify
+					function get_value(type, data, extra) {
 						try {
-							string = string.replace(/"/g, "")
-							string = string.replace("{type:", "")
-							string = string.replace(",value:", " ")
-							string = string.replace("}", "")
-							if (extra == true) {
-								// charCode single chars: e.g group/fr
-								charcode = string.charCodeAt(string.length-1)
-								string += " <code>"+ charcode +"</code>"
+							let str = type + " undefined"
+							for (let i = 0 ; i < data.length; i++) {
+								let tmpS = JSON.stringify(data[i])
+								if (tmpS.indexOf(type) !== -1) {
+									tmpS = tmpS.replace(/"/g, "")
+									tmpS = tmpS.replace("{type:", "")
+									tmpS = tmpS.replace(",value:", " ")
+									str = tmpS.replace("}", "")
+									if (extra == true) {str += " <code>"+ tmpS.charCodeAt(tmpS.length-1) +"</code>"}
+								}
 							}
-							return string
+							return str
 						} catch(e) {
-							if (e.message == "string is undefined") {
-								return type +" "+ zU
-							} else {
-								return type +" error"
-							}
+							return type +" error"
 						}
 					}
-					// decimal
-					type = "decimal"
-					str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(1000.2)[3])
-					tmp += clean_string(type, str, true)
-					// group: e.g fr = narrow no-break space
-					type = "group"
-					str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(1000)[1])
-					tmp += " | "+ clean_string(type, str, true)
-					// infinity
-					type = "infinity"
-					str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(Infinity)[0])
-					tmp += " | "+ clean_string(type, str, true)
-					// minusSign
-					type = "minusSign"
-					str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(-5)[0])
-					tmp += " | "+ clean_string(type, str, true)
-					// nan: e.g. zh-TW
-					type = "nan"
-					str = JSON.stringify(new Intl.NumberFormat(undefined).formatToParts(4/5 +"%")[0])
-					tmp += " | "+ clean_string(type, str, false)
+					let tmp = get_value("decimal", new Intl.NumberFormat(undefined).formatToParts(1000.2), true)
+						+" | "+ get_value("group", new Intl.NumberFormat(undefined).formatToParts(1000), true)
+						+" | "+ get_value("infinity", new Intl.NumberFormat(undefined).formatToParts(Infinity), true)
+						+" | "+ get_value("minusSign", new Intl.NumberFormat(undefined).formatToParts(-5), true)
+						+" | "+ get_value("nan", new Intl.NumberFormat(undefined).formatToParts(4/5 +"%"), false)
 					return tmp
 				} else if (item == 37) {
 					// 70+: [BigInt] Intl.NumberFormat
