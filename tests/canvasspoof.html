@@ -101,15 +101,24 @@ function run() {
 					name: "toDataURL",
 					value: function(){
 						let dataU = getKnown().canvas.toDataURL()
+		//dataU = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAOElEQVQ4jWM4sfKu8LkZEaV+z32nHV6/69vmq+6cd/afV9vLsPXLkZAJEoTkGUYNGDVg1IDhYgAA7oZLn5Q3joMAAAAASUVORK5CYII="
 		//dataU = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hKKKAxylEQVQ4jW123K7DLzNffe6ZReXCKrWtlUrbdijb7hVJjH9Z97W9xyaKkDzDqAGjBowaMFwMAABQKbXQsOLfUgAAAABJRU5ErkJggg=="
-						console.debug("toDataURL", dataU.length, dataU)
+		//dataU = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANklEQVQ4jWMo7PCXPyzS8CdoqV/cOhlGxoa2mAw9kZQf2fpnvz1RYfUgJM8wasCoAaMGDBcDAA8iqHAY9EyPAAAAAElFTkSuQmCC"
 						let hashU = sha1(dataU)
-						let lengthU = s9 +"["+ dataU.length +"]"
+						let lengthU = dataU.length
 						let testU = dataU.slice(69,80)
 						if (testU.slice(0,1) == "A" && testU.slice(3,11) == "lEQVQ4jW") {
 							dataU = dataU.slice(0,69) + sb.trim() + testU + sc + dataU.slice(80, dataU.length)
 						}
-						dom.rawData.innerHTML = dataU + lengthU
+						let goU = false
+						testU = dataU.slice(dataU.length - 10,dataU.length)
+						if (lengthU == 174) {
+							if (testU == "5ErkJggg==" || testU == "VORK5CYII=") {goU = true}
+						} else if (lengthU == 170) {
+							if (testU == "lFTkSuQmCC") {goU = true}
+						}
+						if (goU) {dataU = dataU.slice(0, dataU.length-10) + sb.trim() + testU + sc}
+						dom.rawData.innerHTML = dataU + s9 +"["+ lengthU +"]"+ sc
 						return hashU
 					}
 				},
@@ -126,15 +135,24 @@ function run() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let dataB = reader.result
-		//dataB = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA__AN0lEQVQ4jW__NnBhTtG7Gb+623yB4KwHWcF739TUs+8ukXrmyZwVk/qRkDzDqAGjBowaMFwMAACxs8hw63wENgAAAABJRU5ErkJggg=="
-									console.debug("toBlob", dataB.length, dataB)
+		//dataB = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAOElEQVQ4jWM4sfKu8LkZEaV+z32nHV6/69vmq+6cd/afV9vLsPXLkZAJEoTkGUYNGDVg1IDhYgAA7oZLn5Q3joMAAAAASUVORK5CYII="
+		//dataB = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hKKKAxylEQVQ4jW123K7DLzNffe6ZReXCKrWtlUrbdijb7hVJjH9Z97W9xyaKkDzDqAGjBowaMFwMAABQKbXQsOLfUgAAAABJRU5ErkJggg=="
+		//dataB = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANklEQVQ4jWMo7PCXPyzS8CdoqV/cOhlGxoa2mAw9kZQf2fpnvz1RYfUgJM8wasCoAaMGDBcDAA8iqHAY9EyPAAAAAElFTkSuQmCC"
 									let hashB = sha1(dataB)
-									let lengthB = s9 +"["+ dataB.length +"]"
+									let lengthB = dataB.length
 									let testB = dataB.slice(69,80)
 									if (testB.slice(0,1) == "A" && testB.slice(3,11) == "lEQVQ4jW") {
 										dataB = dataB.slice(0,69) + sb.trim() + testB + sc + dataB.slice(80, dataB.length)
 									}
-									dom.rawBlob.innerHTML = dataB + lengthB
+									let goB = false
+									testB = dataB.slice(dataB.length - 10,dataB.length)
+									if (lengthB == 174) {
+										if (testB == "5ErkJggg==" || testB == "VORK5CYII=") {goB = true}
+									} else if (lengthB == 170) {
+										if (testB == "lFTkSuQmCC") {goB = true}
+									}
+									if (goB) {dataB = dataB.slice(0, dataB.length-10) + sb.trim() + testB + sc}
+									dom.rawBlob.innerHTML = dataB + s9 +"["+ lengthB +"]"+ sc
 									resolve(hashB)
 								}
 								reader.onerror = function(){
