@@ -72,7 +72,7 @@
 <script>
 
 function run() {
-
+	s14 = s14.trim()
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
@@ -100,8 +100,10 @@ function run() {
 				{
 					name: "toDataURL",
 					value: function(){
-						dom.rawData.innerHTML = getKnown().canvas.toDataURL()
-						return sha1(getKnown().canvas.toDataURL())
+						let dataU = getKnown().canvas.toDataURL()
+						let displayU = dataU.replace("AN0lEQVQ4jW", sb +"<b>AN0lEQVQ4jW<b>" + sc)
+						dom.rawData.innerHTML = displayU
+						return sha1(dataU)
 					}
 				},
 				{
@@ -116,8 +118,10 @@ function run() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									dom.rawBlob.innerHTML = reader.result
-									resolve(sha1(reader.result))
+									let dataB = reader.result
+									let displayB = dataB.replace("AN0lEQVQ4jW", sb +"<b>AN0lEQVQ4jW<b>" + sc)
+									dom.rawBlob.innerHTML = displayB
+									resolve(sha1(dataB))
 								}
 								reader.onerror = function(){
 									reject("error")
