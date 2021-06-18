@@ -102,7 +102,7 @@ function run() {
 					value: function(){
 						let dataU = getKnown().canvas.toDataURL()
 						let testU = dataU.slice(69,80)
-						if (testU.slice(0,2) == "AN" && testU.slice(3,11) == "lEQVQ4jW") {
+						if (testU.slice(0,1) == "A" && testU.slice(3,11) == "lEQVQ4jW") {
 							dataU = dataU.slice(0,69) + sb.trim() + testU + sc + dataU.slice(80, dataU.length)
 						}
 						dom.rawData.innerHTML = dataU
@@ -123,7 +123,7 @@ function run() {
 								reader.onload = function(){
 									let dataB = reader.result
 									let testB = dataB.slice(69,80)
-									if (testB.slice(0,2) == "AN" && testB.slice(3,11) == "lEQVQ4jW") {
+									if (testB.slice(0,1) == "A" && testB.slice(3,11) == "lEQVQ4jW") {
 										dataB = dataB.slice(0,69) + sb.trim() + testB + sc + dataB.slice(80, dataB.length)
 									}
 									dom.rawBlob.innerHTML = dataB
