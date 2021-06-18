@@ -2,20 +2,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>pluralrules</title>
+<title>supportedlocales</title>
 <style>
 </style>
 </head>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=650">
+	<meta name="viewport" content="width=800">
 	<title>pluralrules</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 630px;}
+		table {width: 780px;}
 		hr {color: #dcdc8c}
 	</style>
 </head>
@@ -27,22 +27,20 @@
 	</table>
 
 	<table id="tb4">
-		<col width="40%"><col width="60%">
-		<thead><tr><th colspan="2">pluralrules: supportedLocalesOf</th></tr></thead>
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">pluralrules: supportedLocalesOf
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
-			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span class="spaces" id="results0"></span>
-				<hr>
-				<span class="spaces" id="results1"></span>
-
+			<td class="mono" style="text-align: left; vertical-align: top;" id ="results">
 			</td></tr>
 	</table>
 	<br>
 
 <script>
-var locales = []
-
 var detailed = [
 "aa,afar",
 "ab,abkhazian",
@@ -264,48 +262,174 @@ var detailed = [
 "zu,zulu",
 ]
 
-function start() {
-	// builds locales array and outputs a legend
-	detailed.sort()
-	try {
-		let legend = []
-		for (let i = 0 ; i < detailed.length; i++) {
-			// split: A (code), B (name)
-			let listA = detailed[i].split(",")[0]
-			let listB = detailed[i].split(",")[1]
-			locales.push(listA)
-			legend.push(listA.padStart(7) +": "+ listB)
-		}
-		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length +")"+ sc +"<br><br>"+ legend.join("<br>")
-		run()
-	} catch(e) {}
-}
-
 function run() {
+	let t0 = performance.now()
+
 	s4 = s4.trim()
+	s12 = s12.trim(),
+	s14 = s14.trim(),
+	s16 = s16.trim(),
+	sg = sg.trim()
+	sb = sb.trim()
+	detailed.sort()
 
-	let supported0 = Intl.PluralRules.supportedLocalesOf(locales, {localeMatcher: 'lookup'})
-	let hash0 = sha1(supported0.join())
+	let legend = [], locales = [], data = [], map = [], nocase = [], nocasemap = [], all = []
+	let spacer = "<br><br>", hashLookup = ""
+	let display = []
 
-	let notation = ""
-	if (hash0 == "d63bcc4d160bf3034613c34a1774666ad5d40750") {notation = " [FF91+]" // added: sa
-	} else if (hash0 == "d2412a09ca429cfae7c49976bc2f1b3a0652a3f3") {notation = " [FF78-90]" // added: mai, su
-	} else if (hash0 == "e35f3a39a4805055a594598056137a5a23bc87f8") {notation = " [FF70-77]" // added: fil (tl)
-	} else if (hash0 == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
-	} else if (hash0 == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF60-64]"
+	try {
+		// hash
+		function getNotation(hash) {
+			let notation = ""
+			if (hash == "6f9a68637c020f4f6733b1dd386a2fdef2539fa0") {notation = " [FF91+]" // 1714933: no, sa
+			} else if (hash == "5abdce3e9207123ab9c3333916c49dfe6d026ba3") {notation = " [FF78-90]" // added: mai, su
+			} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // added: fil (tl)
+			} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
+			} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF64 or lower]"
+			}
+			return notation
+		}
+		// get data
+		function getSupported(type) {
+			data = []
+			map = []
+			all = []
+			for (let i = 0 ; i < detailed.length; i++) {
+				// split: code, name
+				let code = detailed[i].split(",")[0]
+				let name = detailed[i].split(",")[1]
+				// list of locales: do once
+				if (type == "lookup") {locales.push(code.toLowerCase())}
+				// test
+				let test = Intl.PluralRules.supportedLocalesOf([code], {localeMatcher: type})
+				if (test.length) {
+					let found = test[0]
+					all.push(found +":"+ code)
+					if (type == "lookup") {
+						nocase.push(found.toLowerCase())
+						if (code.toLowerCase() !== found.toLowerCase()) {
+							nocasemap.push(code)
+						}
+					}
+					if (code.toLowerCase() !== found.toLowerCase()) {
+						map.push(code +" -> "+ found)
+						data.push(code +" -> "+ found)
+					} else {
+						data.push(found)
+					}
+				}
+			}
+			// don't sort or remove any dupes
+			let hash = sha1(data.join())
+
+			// dupes
+			all.sort()
+			let dupes = [], dupesclean = [], tmpCodes = [], tmpCount = 0
+			let nextItem = ""
+			for (let i = 0 ; i < all.length; i++) {
+				let a = all[i].split(":")[0] // found locale
+				let b = all[i].split(":")[1] // tested code
+				tmpCodes.push(b)
+				if (i < all.length - 1) {
+					nextItem = all[(i+1)].split(":")[0]
+				} else {
+					nextItem = "end"
+				}
+				if (nextItem !== a) {
+					if (tmpCodes.length > 1) {
+						dupes.push(s16 + a + sc + s4 +" ["+ tmpCodes.length +"] "+ sc + tmpCodes.join(", "))
+						dupesclean.push(a)
+					}
+					tmpCodes = []
+					tmpCount = 0
+				}
+			}
+
+			// not in legend
+			let notlist = [], notlistclean = [], map2 = []
+			for (let i = 0 ; i < map.length; i++) {
+				let x = map[i].split(" -> ")[0] // tested
+				let y = map[i].split(" -> ")[1] // found
+				if (!locales.includes(y)) {
+					notlist.push(s12 + y + sc +" ["+ x +"]")
+					notlistclean.push(y)
+				}
+				map2.push(s14 + x + sc + " -> "+ y)
+			}
+
+			// color up results
+			for (let i = 0 ; i < data.length; i++) {
+				let r = data[i]
+				if (map.includes(r)) {
+					let part1 = r.split(" -> ")[0],
+						part2 = r.split(" -> ")[1]
+					if (dupesclean.includes(part2)) {
+						data[i] = s14 + part1 +" -> "+ sc + s16 + part2 + sc
+					} else if (notlistclean.includes(part2)) {
+						data[i] = s14 + part1 +" -> "+ sc + s12 + part2 + sc
+					} else {
+						data[i] = s14 + r + sc
+					}
+				} else {
+					if (dupesclean.includes(r)) {
+						data[i] = s16 + r + sc
+					}
+				}
+			}
+
+			// output
+			let str = s4 + type.toUpperCase() + sc + spacer
+			if (type == "lookup") {
+				hashLookup = hash
+				str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash)
+				// nocase used to color legend items
+				nocase.sort()
+				nocase = nocase.filter(function(item, position) {return nocase.indexOf(item) === position})
+				nocasemap.sort()
+				nocasemap = nocasemap.filter(function(item, position) {return nocasemap.indexOf(item) === position})
+			} else {
+				str = spacer + "<hr>" + "<br>" + str
+				str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
+			}
+			str += spacer + data.join(", ")
+			if (map2.length) {str += spacer + s14 +"MAPPED"+ sc + spacer + map2.join("<br>")}
+			if (dupes.length) {str += spacer + s16 +"DUPES"+ sc + spacer + dupes.join("<br>")}
+			if (notlist.length) {str += spacer + s12 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+
+			display.push(str)
+		}
+
+		getSupported("lookup")
+		getSupported("best fit")
+		dom.results.innerHTML = display.join("<br>")
+
+		// build + color legend
+		for (let i = 0 ; i < detailed.length; i++) {
+			// split: code, name
+			let code = detailed[i].split(",")[0]
+			let name = detailed[i].split(",")[1]
+			if (nocase.includes(code.toLowerCase())) {
+				legend.push(sg + code.padStart(7) +": "+ name + sc)
+			} else {
+				if (nocasemap.includes(code)) {
+					legend.push(s14 + code.padStart(7) +": "+ name + sc)
+				} else {
+					legend.push(code.padStart(7) +": "+ name)
+				}
+			}
+		}
+		// display legend
+		dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+		// perf
+		let t1 = performance.now()
+		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+
+	} catch(e) {
+		console.error(e.name, e.message)
 	}
-	dom.results0.innerHTML = s4 +"LOOKUP"+ sc + "<br><br>" + hash0 + s4 +" ["+ supported0.length +"]"+ sc + notation
-		+ "<br><br>" + supported0.join(", ") + "<br><br>"
-
-	let supported1 = Intl.PluralRules.supportedLocalesOf(locales, {localeMatcher: 'best fit'})
-	let hash1 = sha1(supported1.join())	
-	let str1 = 
-	dom.results1.innerHTML = "<br>"+ s4 +"BEST FIT"+ sc + "<br><br>" + hash1 + s4 +" ["+ supported0.length +"]"+ sc
-		+ "<br><br>" + supported1.join(", ")
-
 }
 
-start()
+run()
 
 </script>
 </body>
