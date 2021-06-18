@@ -101,6 +101,7 @@ function run() {
 					name: "toDataURL",
 					value: function(){
 						let dataU = getKnown().canvas.toDataURL()
+						console.debug(dataU)
 						let testU = dataU.slice(69,80)
 						if (testU.slice(0,1) == "A" && testU.slice(3,11) == "lEQVQ4jW") {
 							dataU = dataU.slice(0,69) + sb.trim() + testU + sc + dataU.slice(80, dataU.length)
