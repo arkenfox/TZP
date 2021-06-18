@@ -101,8 +101,11 @@ function run() {
 					name: "toDataURL",
 					value: function(){
 						let dataU = getKnown().canvas.toDataURL()
-						let displayU = dataU.replace("AN0lEQVQ4jW", sb +"<b>AN0lEQVQ4jW<b>" + sc)
-						dom.rawData.innerHTML = displayU
+						let testU = dataU.slice(69,80)
+						if (testU.slice(0,2) == "AN" && testU.slice(3,11) == "lEQVQ4jW") {
+							dataU = dataU.slice(0,69) + sb.trim() + testU + sc + dataU.slice(80, dataU.length)
+						}
+						dom.rawData.innerHTML = dataU
 						return sha1(dataU)
 					}
 				},
@@ -119,8 +122,11 @@ function run() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let dataB = reader.result
-									let displayB = dataB.replace("AN0lEQVQ4jW", sb +"<b>AN0lEQVQ4jW<b>" + sc)
-									dom.rawBlob.innerHTML = displayB
+									let testB = dataB.slice(69,80)
+									if (testB.slice(0,2) == "AN" && testB.slice(3,11) == "lEQVQ4jW") {
+										dataB = dataB.slice(0,69) + sb.trim() + testB + sc + dataB.slice(80, dataB.length)
+									}
+									dom.rawBlob.innerHTML = dataB
 									resolve(sha1(dataB))
 								}
 								reader.onerror = function(){
