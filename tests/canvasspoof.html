@@ -101,13 +101,16 @@ function run() {
 					name: "toDataURL",
 					value: function(){
 						let dataU = getKnown().canvas.toDataURL()
-						console.debug(dataU)
+		//dataU = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hKKKAxylEQVQ4jW123K7DLzNffe6ZReXCKrWtlUrbdijb7hVJjH9Z97W9xyaKkDzDqAGjBowaMFwMAABQKbXQsOLfUgAAAABJRU5ErkJggg=="
+						console.debug("toDataURL", dataU.length, dataU)
+						let hashU = sha1(dataU)
+						let lengthU = s9 +"["+ dataU.length +"]"
 						let testU = dataU.slice(69,80)
 						if (testU.slice(0,1) == "A" && testU.slice(3,11) == "lEQVQ4jW") {
 							dataU = dataU.slice(0,69) + sb.trim() + testU + sc + dataU.slice(80, dataU.length)
 						}
-						dom.rawData.innerHTML = dataU
-						return sha1(dataU)
+						dom.rawData.innerHTML = dataU + lengthU
+						return hashU
 					}
 				},
 				{
@@ -123,12 +126,16 @@ function run() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let dataB = reader.result
+		//dataB = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA__AN0lEQVQ4jW__NnBhTtG7Gb+623yB4KwHWcF739TUs+8ukXrmyZwVk/qRkDzDqAGjBowaMFwMAACxs8hw63wENgAAAABJRU5ErkJggg=="
+									console.debug("toBlob", dataB.length, dataB)
+									let hashB = sha1(dataB)
+									let lengthB = s9 +"["+ dataB.length +"]"
 									let testB = dataB.slice(69,80)
 									if (testB.slice(0,1) == "A" && testB.slice(3,11) == "lEQVQ4jW") {
 										dataB = dataB.slice(0,69) + sb.trim() + testB + sc + dataB.slice(80, dataB.length)
 									}
-									dom.rawBlob.innerHTML = dataB
-									resolve(sha1(dataB))
+									dom.rawBlob.innerHTML = dataB + lengthB
+									resolve(hashB)
 								}
 								reader.onerror = function(){
 									reject("error")
