@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>supportedlocales</title>
+<title>supported locales</title>
 <style>
 </style>
 </head>
@@ -29,13 +29,28 @@
 	<table id="tb4">
 		<col width="30%"><col width="70%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">pluralrules: supportedLocalesOf
+			<div class="nav-title">supported locales
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Return supported locales, including mappings and duplicates, for each given Intl constructor</span>
+		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
-			<td class="mono" style="text-align: left; vertical-align: top;" id ="results">
+			<td class="mono" style="text-align: left; vertical-align: top;">
+					<div class="btn">
+						<span id="bC" class="btn4 btn" onClick="run('C')">[ C ]</span>
+						<span id="bDTF" class="btn4 btn" onClick="run('DTF')" id="">[ DTF ]</span>
+						<span id="bDN" class="btn4 btn" onClick="run('DN')">[ DN ]</span>
+						<span id="bLF" class="btn4 btn" onClick="run('LF')">[ LF ]</span>
+						<span id="bNF" class="btn4 btn" onClick="run('NF')">[ NF ]</span>
+						<span id="bPR" class="btn4 btn" onClick="run('PR')">[ PR ]</span>
+						<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[ RTF ]</span>
+						<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>
+					</div>
+				<br><br><hr><br>
+				<span id ="results"></span>
 			</td></tr>
 	</table>
 	<br>
@@ -262,35 +277,65 @@ var detailed = [
 "zu,zulu",
 ]
 
-function run() {
+var legendclean = [],
+	locales = []
+
+function legend() {
+	// build once
+	if (legendclean.length == 0) {
+		detailed.sort()
+		for (let i = 0 ; i < detailed.length; i++) {
+			let code = detailed[i].split(",")[0]
+			let name = detailed[i].split(",")[1]
+			legendclean.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	dom.legend.innerHTML = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"+ legendclean.join("<br>")
+}
+
+function run_main(method, isLoopy) {
 	let t0 = performance.now()
 
-	s4 = s4.trim()
-	s12 = s12.trim(),
-	s14 = s14.trim(),
-	s16 = s16.trim(),
-	sg = sg.trim()
-	sb = sb.trim()
-	detailed.sort()
-
-	let legend = [], locales = [], data = [], map = [], nocase = [], nocasemap = [], all = []
+	let legend = [], data = [], map = [], nocase = [], nocasemap = [], all = []
 	let spacer = "<br><br>", hashLookup = ""
 	let display = []
 
 	try {
 		// hash
-		function getNotation(hash) {
+		function getPretty(method) {
+			let pretty = ""
+			if (method == "C") {pretty = "collation"
+			} else if (method == "DTF") {pretty = "datetimeformat"
+			} else if (method == "DN") {pretty = "displaynames"
+			} else if (method == "LF") {pretty = "listformat"
+			} else if (method == "NF") {pretty = "numberformat"
+			} else if (method == "PR") {pretty = "pluralrules"
+			} else if (method == "RTF") {pretty = "relativetimeformat"
+			}
+			return pretty
+		}
+		function getNotation(hash, method) {
 			let notation = ""
-			if (hash == "6f9a68637c020f4f6733b1dd386a2fdef2539fa0") {notation = " [FF91+]" // 1714933: no, sa
-			} else if (hash == "5abdce3e9207123ab9c3333916c49dfe6d026ba3") {notation = " [FF78-90]" // added: mai, su
-			} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // added: fil (tl)
-			} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
-			} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF64 or lower]"
+			if (method == "C") {
+				if (hash == "3b56232ec292c89df7b091695691ec80337db3bf") {notation = " [FF91+]"
+				} else if (hash == "be17178a7587f2dc7217725b5dcc691368f1995b") {notation = " [FF78-90]"
+				} else if (hash == "fe1701c2a7b516e80a2416019a703eadec5aeb87") {notation = " [FF70-77]"
+				} else if (hash == "a1c42e941d133cb48e589afdd12fcdfcb4fff602") {notation = " [FF65-69]"
+				} else if (hash == "5aae08c4b2ec7e5ff4189632ae3fc197c8cd2091") {notation = " [FF64 or lower]"
+				}
+			} else {
+				if (hash == "6f9a68637c020f4f6733b1dd386a2fdef2539fa0") {notation = " [FF91+]" // 1714933: no (instead of no->nb), sa
+				} else if (hash == "5abdce3e9207123ab9c3333916c49dfe6d026ba3") {notation = " [FF78-90]" // added: mai, su
+				} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // added: fil (tl)
+				} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
+				} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF64 or lower]"
+				}
 			}
 			return notation
 		}
 		// get data
-		function getSupported(type) {
+		function getSupported(type, method) {
 			data = []
 			map = []
 			all = []
@@ -298,10 +343,26 @@ function run() {
 				// split: code, name
 				let code = detailed[i].split(",")[0]
 				let name = detailed[i].split(",")[1]
+
 				// list of locales: do once
 				if (type == "lookup") {locales.push(code.toLowerCase())}
 				// test
-				let test = Intl.PluralRules.supportedLocalesOf([code], {localeMatcher: type})
+				let test = ""
+				if (method == "C") {
+					test = Intl.Collator.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "DTF") {
+					test = Intl.DateTimeFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "DN") {
+					test = Intl.DisplayNames.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "LF") {
+					test = Intl.ListFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "NF") {
+					test = Intl.NumberFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "PR") {
+					test = Intl.PluralRules.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "RTF") {
+					test = Intl.RelativeTimeFormat.supportedLocalesOf([code], {localeMatcher: type})
+				}
 				if (test.length) {
 					let found = test[0]
 					all.push(found +":"+ code)
@@ -321,7 +382,6 @@ function run() {
 			}
 			// don't sort or remove any dupes
 			let hash = sha1(data.join())
-
 			// dupes
 			all.sort()
 			let dupes = [], dupesclean = [], tmpCodes = [], tmpCount = 0
@@ -344,7 +404,6 @@ function run() {
 					tmpCount = 0
 				}
 			}
-
 			// not in legend
 			let notlist = [], notlistclean = [], map2 = []
 			for (let i = 0 ; i < map.length; i++) {
@@ -356,7 +415,6 @@ function run() {
 				}
 				map2.push(s14 + x + sc + " -> "+ y)
 			}
-
 			// color up results
 			for (let i = 0 ; i < data.length; i++) {
 				let r = data[i]
@@ -376,12 +434,12 @@ function run() {
 					}
 				}
 			}
-
 			// output
 			let str = s4 + type.toUpperCase() + sc + spacer
 			if (type == "lookup") {
 				hashLookup = hash
-				str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash)
+				str = s4 + getPretty(method).toUpperCase() + sc + spacer + str
+				str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method)
 				// nocase used to color legend items
 				nocase.sort()
 				nocase = nocase.filter(function(item, position) {return nocase.indexOf(item) === position})
@@ -399,37 +457,86 @@ function run() {
 			display.push(str)
 		}
 
-		getSupported("lookup")
-		getSupported("best fit")
+		getSupported("lookup", method)
+		getSupported("best fit", method)
 		dom.results.innerHTML = display.join("<br>")
 
 		// build + color legend
-		for (let i = 0 ; i < detailed.length; i++) {
-			// split: code, name
-			let code = detailed[i].split(",")[0]
-			let name = detailed[i].split(",")[1]
-			if (nocase.includes(code.toLowerCase())) {
-				legend.push(sg + code.padStart(7) +": "+ name + sc)
-			} else {
-				if (nocasemap.includes(code)) {
-					legend.push(s14 + code.padStart(7) +": "+ name + sc)
+		if (!isLoopy) {
+			for (let i = 0 ; i < detailed.length; i++) {
+				// split: code, name
+				let code = detailed[i].split(",")[0]
+				let name = detailed[i].split(",")[1]
+				if (nocase.includes(code.toLowerCase())) {
+					legend.push(sg + code.padStart(7) +": "+ name + sc)
 				} else {
-					legend.push(code.padStart(7) +": "+ name)
+					if (nocasemap.includes(code)) {
+						legend.push(s14 + code.padStart(7) +": "+ name + sc)
+					} else {
+						legend.push(code.padStart(7) +": "+ name)
+					}
 				}
 			}
+			// display legend
+			dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
 		}
-		// display legend
-		dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+
 		// perf
 		let t1 = performance.now()
 		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 
 	} catch(e) {
-		console.error(e.name, e.message)
+		// catch unsupported
+		if (!isLoopy) {
+			dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+		}
 	}
 }
 
-run()
+function run(method) {
+	//reset
+	legend()
+	dom.results = ""
+	dom.perf = ""
+	setBtn(method)
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		if (method == "ALL") {
+			dom.results.innerHTML = "<br>coming soon"
+		} else {
+			run_main(method, false)
+		}
+	}, 250)
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+function start() {
+	s4 = s4.trim()
+	s12 = s12.trim(),
+	s14 = s14.trim(),
+	s16 = s16.trim(),
+	sg = sg.trim()
+	sb = sb.trim()
+	detailed.sort()
+	let autostart = "C"
+	setBtn(autostart)
+	run_main(autostart, false)
+}
+
+start()
+
 
 </script>
 </body>
