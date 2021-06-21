@@ -348,8 +348,8 @@ addEventListener("message", function(msg) {
 				} else if (item == 37 || item == 38) {
 					if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS +" [BigInt]"}
 					if (e.message == "can't convert BigInt to number" && isVer > 67 && isVer < 70) {msg = zNS}
-				} else if (item == 47) {
-					// ToDo: formatRange is nighly only: 1653024 add version when it rides the train
+				} else if (item == 47 && isVer < 91) {
+					// 1653024: formatRange: shipped 91+
 					if (e.message == "f.formatRange is not a function") {msg = zNS}
 				}
 				// script blocking
