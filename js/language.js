@@ -457,7 +457,7 @@ function get_lang_doc() {
 					})
 					return res41.join(" | ")
 				} else if (item == 47) {
-					// FF80+: 1496584, 1653024: formatRange
+					// FF91+: 1653024: formatRange
 					let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 						date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 						date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
@@ -502,8 +502,8 @@ function get_lang_doc() {
 					} else if (item == 37 || item == 38) {
 						if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS +" [BigInt]"}
 						if (e.message == "can't convert BigInt to number" && isVer > 67 && isVer < 70) {msg = zNS}
-					} else if (item == 47) {
-						// ToDo: formatRange is nighly only: 1653024 add version when it rides the train
+					} else if (item == 47 && isVer < 91) {
+						// 1653024: formatRange: shipped 91+
 						if (e.message == "f.formatRange is not a function") {msg = zNS}
 					}
 					// script blocking
@@ -594,9 +594,7 @@ function get_lang_doc() {
 			// FF85+: also use javascript.use_us_english_locale
 			if (bTZ) {
 				// state1: both green
-				if (lHash2 == "94fb2afc5cf3027349f9d1bf7c693bf4dc49b368") {ff = " [Nightly]"
-					// nightly has Intl.DateTimeFormat formatRange
-				} else if (lHash2 == "423185c71ea568138d32e71b60638098733c3190") {ff = " [FF91+]"
+				if (lHash2 == "94fb2afc5cf3027349f9d1bf7c693bf4dc49b368") {ff = " [FF91+]" // 1653024
 				} else if (lHash2 == "131929d615983ebde1f9b6c0154975aed15a5ca1") {ff = " [FF90]"
 				} else if (lHash2 == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
 				} else if (lHash2 == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
