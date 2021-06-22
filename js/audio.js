@@ -263,7 +263,11 @@ function outputAudio() {
 				crypto.subtle.digest("SHA-256", getTest),
 				crypto.subtle.digest("SHA-256", copyTest),
 			]).then(function(hashes){
-				let blinkmin = 124.04, blinkmax = 124.081
+				let min = 124.04344, max = 124.08076
+				if (isFF) {
+					min = 35.738329
+					max = 35.78334
+				}
 				// sum
 				let sum = 0, sum2 = 0, sum3 = 0
 				for (let i=0; i < getTest.length; i++) {
@@ -275,8 +279,8 @@ function outputAudio() {
 				// lies
 				let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
 				if (sum2 == sum3) {isLies = true}
-				if (isEngine == "blink" && !isLies) {
-					if (sum < blinkmin || sum > blinkmax) {isLies = true}
+				if (isFF || isEngine == "blink") {
+					if (sum < min || sum > max) {isLies = true}
 				}
 				pxi_compressor.disconnect()
 				// get/copy
