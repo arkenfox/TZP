@@ -10,6 +10,7 @@
 	<!-- custom -->
 	<style>
 		table {width: 380px;}
+		hr {color: #dcc18c}
 	</style>
 	<style id="test73">
 		.a{border-width: 1px; border-style: solid; border-color: black; border-image: linear-gradient(white,black);}
@@ -26,6 +27,7 @@
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000 b</div>
 		<div id="ctrl89" style="width:1em">a b</div>
+		<span id="test81a"></span><span id="test81b"></span>
 	</div>
 
 	<table>
@@ -34,73 +36,13 @@
 	</table>
 
 	<table id="tb3">
-		<col width="30%"><col width="20%"><col width="50%">
+		<col width="1%"><col width="98%"><col width="1%">
 		<thead><tr><th colspan="3">versions</th></tr></thead>
 		<tr><td colspan="3" class="intro">
 			<span class="no_color">A history of firefox version-specific PoCs tzp uses or considered</span>
 		</td></tr>
-		<tr><td><div class="btn-left"><span class="btn3 btn" onClick="rerunVersion()">[ re-run ]</span></div></td>
-				<td>BUG NO.</td><td>RESULT</td></tr>
-		<tr><td>91</td><td id="n91"></td><td class="c mono" id="v91"></td></tr>
-		<tr><td>90</td><td id="n90"></td><td class="c mono" id="v90"></td></tr>
-		<tr><td>90</td><td id="n90a"></td><td class="c mono" id="v90a"></td></tr>
-		<tr><td>89</td><td id="n89"></td><td class="c mono" id="v89"></td></tr>
-		<tr><td>88</td><td id="n88"></td><td class="c mono" id="v88"></td></tr>
-		<tr><td>88</td><td id="n88a"></td><td class="c mono" id="v88a"></td></tr>
-		<tr><td>87</td><td id="n87"></td><td class="c mono" id="v87"></td></tr>
-		<tr><td>87</td><td id="n87a"></td><td class="c mono" id="v87a"></td></tr>
-		<tr><td>87</td><td id="n87b"></td><td class="c mono" id="v87b"></td></tr>
-		<tr><td>86</td><td id="n86"></td><td class="c mono" id="v86"></td></tr>
-		<tr><td>85</td><td id="n85"></td><td class="c mono" id="v85"></td></tr>
-		<tr><td>84</td><td id="n84"></td><td class="c mono" id="v84"></td></tr>
-		<tr><td>83</td><td id="n83"></td><td class="c mono" id="v83"></td></tr>
-		<tr><td>83</td><td id="n83a"></td><td class="c mono" id="v83a"></td></tr>
-		<tr><td>82</td><td id="n82"></td><td class="c mono" id="v82"></td></tr>
-		<tr><td>81</td><td id="n81"></td><td class="c mono" id="v81"></td></tr>
-		<tr><td>81<span id="test81a"></span><span id="test81b"></span></td><td id="n81a"></td><td class="c mono" id="v81a"></td></tr>
-		<tr><td>80</td><td id="n80"></td><td class="c mono" id="v80"></td></tr>
-		<tr><td>80</td><td id="n80a"></td><td class="c mono" id="v80a"></td></tr>
-		<tr><td>79</td><td id="n79"></td><td class="c mono" id="v79"></td></tr>
-		<tr><td>79</td><td id="n79a"></td><td class="c mono" id="v79a"></td></tr>
-		<tr><td>78</td><td id="n78"></td><td class="c mono" id="v78"></td></tr>
-		<tr><td>78</td><td id="n78a"></td><td class="c mono" id="v78a"></td></tr>
-		<tr><td>78</td><td id="n78b"></td><td class="c mono" id="v78b"></td></tr>
-		<tr><td>77</td><td id="n77"></td><td class="c mono" id="v77"></td></tr>
-		<tr><td>77</td><td id="n77a"></td><td class="c mono" id="v77a"></td></tr>
-		<tr><td>76</td><td id="n76"></td><td class="c mono" id="v76"></td></tr>
-		<tr><td>75</td><td id= "n75"></td><td class="c mono" id="v75"></td></tr>
-		<tr><td>74</td><td id="n74"></td><td class="c mono" id="v74"></td></tr>
-		<tr><td>73</td><td id="n73"></td><td class="c mono" id="v73"></td></tr>
-		<tr><td>72</td><td id="n72"></td><td class="c mono" id="v72"></td></tr>
-		<tr><td>72</td><td id="n72a"></td><td class="c mono" id="v72a"></td></tr>
-		<tr><td>71</td><td id= "n71"></td><td class="c mono" id="v71"></td></tr>
-		<tr><td>70</td><td id= "n70"></td><td class="c mono" id="v70"></td></tr>
-		<tr><td>69</td><td id="n69"></td><td class="c mono" id="v69"></td></tr>
-		<tr><td>68</td><td id="n68"></td><td class="c mono" id="v68"></td></tr>
-		<tr><td>67</td><td id="n67"></td><td class="c mono" id="v67"></td></tr>
-		<tr><td>66</td><td id="n66"></td><td class="c mono" id="v66"></td></tr>
-		<tr><td>65</td><td id="n65"></td><td class="c mono" id="v65"></td></tr>
-		<tr><td>64</td><td id="n64"></td><td class="c mono" id="v64"></td></tr>
-		<tr><td>64</td><td id="n64a"></td><td class="c mono" id="v64a"></td></tr>
-		<tr><td>63</td><td id="n63"></td><td class="c mono" id="v63"></td></tr>
-		<tr><td>62</td><td id="n62"></td><td class="c mono" id="v62"></td></tr>
-		<tr><td>61</td><td id="n61"></td><td class="c mono" id="v61"></td></tr>
-		<tr><td>60</td><td id= "n60"></td><td class="c mono" id="v60"></td></tr>
-		<tr><td colspan="3">&nbsp</td></tr>
-
-		<tr><td colspan="3" class="center">--------- 59 or lower ---------</td></tr>
-		<tr><td>55</td><td id="n55"></td><td class="c mono" id="v55"></td></tr>
-		<tr><td>55</td><td id="n55b"></td><td class="c mono" id="v55b"></td></tr>
-		<tr><td>54</td><td id="n54"></td><td class="c mono" id="v54"></td></tr>
-		<tr><td>53</td><td id="n53"></td><td class="c mono" id="v53"></td></tr>
-		<tr><td>52</td><td id="n52"></td><td class="c mono" id="v52"></td></tr>
-		<tr><td colspan="3">&nbsp</td></tr>
-
-		<tr><td colspan="3" class="center">------- items to watch -------</td></tr>
-		<tr><td><code>NaN</code></td><td id="n40"></td><td class="c mono" id="v40"></td></tr>
-		<tr><td><code>-2011</code></td><td>''</td><td class="c mono" id="v41"></td></tr>
-		<tr><td><code>Invalid Date</code></td><td>''</td><td class="c mono" id="v42"></td></tr>
-		<tr><td colspan="3">&nbsp</td></tr>
+		<tr><td colspan="3"><hr></td></tr>
+		<tr><td></td><td class="c mono spaces" id="results"></td><td></td></tr>
 	</table>
 	<br>
 
@@ -113,24 +55,89 @@ function outputVersion() {
 		xNC = sb +"no change"+ sc,
 		xOMG = sg +"OMG it's fixed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
-		strB = "' class='blue' target='_blank'>[",
-		strC = "]</a>",
+		strB = "' class='blue' target='_blank'>",
+		strC = "</a>",
 		t0 = performance.now()
 
-	function output(id, bug, result, perf) {
-		perf = Math.round(perf)
-		document.getElementById("v"+id).innerHTML = result +" ("+ perf +" ms)"
-		if (bug !== "") {document.getElementById("n"+id).innerHTML = strA + bug + strB + bug + strC}
+	s3 = s3.trim()
+
+	let results = []
+	let data = {}
+
+	function display() {
+		// data -> results in descending order
+		const names = Object.keys(data).sort((a,b) => b-a)
+		for (const k of names) {results.push(data[k])}
+
+		let display = [], prevV = "", prevB = "", prefix = 0
+		for (let i=0; i < results.length; i++) {
+			let id = results[i].split(":")[0].trim(),
+				bug = results[i].split(":")[1],
+				result = results[i].split(":")[2],
+				perf = results[i].split(":")[3]
+			// version
+			let isWatch = false
+			if (id == -2011) {isWatch = true}
+			if (!isWatch && Number.isInteger(id * 1)) {
+				if (id !== prevV) {id = s3 + (id +"").padStart(5) + sc} else {id = "".padStart(5)}
+			} else {
+				isWatch = true
+			}
+			// watchlist: not version specific
+			if (isWatch) {
+				if (id == "NaN") {display.push("<br>"+ s3 + "--- watchlist ---"+ sc + "<br>")}
+				id = id + ""
+				prefix = 15 - id.length
+				id = "".padStart(prefix) + s3 + "<code>"+ id +"</code>" + sc
+			}
+			// bugzilla
+			if (bug !== "") {
+				bug = bug +""
+				prefix = 10 - bug.length
+				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
+					+ "".padEnd(2)
+			} else {
+				bug = "".padStart(12)
+			}
+			// perf
+			perf = (perf + "").padStart(3) + " ms"
+
+			display.push(id + bug + result + perf)
+			prevV = results[i].split(":")[0].trim()
+			prevB = results[i].split(":")[1]
+		}
+		dom.results.innerHTML = display.join("<br>")
 	}
 
-	// 91: 1710429
+	function record(order, version, bug, result, perf) {
+		perf = Math.round(perf)
+		order = (order+"").padStart(3,"0")
+		data[order] = version +" :"+ bug +":"+ result +":"+ perf
+		count ++
+		if (count == expected) {
+			display()
+		}
+	}
+	// update expected when we add more tests
+	let count = 0,
+		expected = 54
+
+	// 91: 1714933
 	let t91 = performance.now(), ver91 = xF
+	try {
+		let test91 = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
+		if (test91.length) {ver91 = xS}
+	} catch(e) {}
+	record(211,91, "1714933", ver91, performance.now()-t91)
+
+	// 91: 1710429
+	let t91a = performance.now(), ver91a = xF
 	try {
 		let d91 = new Date("January 30, 2019 13:00:00")
 		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
-		ver91 = xS
-	} catch(e) {console.debug(e.name, e.message)}
-	output("91", "1710429", ver91, performance.now()-t91)
+		ver91a = xS
+	} catch(e) {}
+	record(210,91, "1710429", ver91a, performance.now()-t91a)
 
 	// 90: 1520434
 	let t90 = performance.now(), ver90 = xF
@@ -142,14 +149,14 @@ function outputVersion() {
 		// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
 		if (e.message.substr(0,1) == "s") {ver90 = xS}
 	}
-	output("90", "1520434", ver90, performance.now()-t90)
+	record(206,90, "1520434", ver90, performance.now()-t90)
 
-	// 90a: 1537689
+	// 90: 1537689
 	let t90a = performance.now(), ver90a = xF
 	try {
 		if (dom.test90.defaultValue == "a") {ver90a = xS}
 	} catch(e) {}
-	output("90a", "1537689", ver90a, performance.now()-t90a)
+	record(205,90, "1537689", ver90a, performance.now()-t90a)
 
 	// 89: 1703213
 	let t89 = performance.now(), ver89 = xF
@@ -159,7 +166,7 @@ function outputVersion() {
 		//console.debug(x89/y89)
 		if (x89/y89 > 0.85) {ver89 = xS}
 	} catch(e) {}
-	output("89", "1703213", ver89, performance.now()-t89)
+	record(200,89, "1703213", ver89, performance.now()-t89)
 
 	// 88: 1670124
 	let t88 = performance.now(), ver88 = xF
@@ -169,21 +176,21 @@ function outputVersion() {
 		// FF88+: SyntaxError the escapes \8 and \9 can't be used in untagged template literals or in strict mode code
 		if (e.message.substr(13,5) == "8 and") {ver88 = xS}
 	}
-	output("88", "1670124", ver88, performance.now()-t88)
+	record(191,88, "1670124", ver88, performance.now()-t88)
 
 	// 88a: 1497557
 	let t88a = performance.now(), ver88a = xF
 	try {
 		if (document.createElement('a').protocol == ":") {ver88a = xS}
 	} catch(e) {}
-	output("88a", "1497557", ver88a, performance.now()-t88a)
+	record(190,88, "1497557", ver88a, performance.now()-t88a)
 
 	// 87: 1688335
 	let t87 = performance.now(), ver87 = xF
 	try {
 		if (console.length == undefined) {ver87 = xS}
 	} catch(e) {}
-	output("87", "1688335", ver87, performance.now()-t87)
+	record(187,87, "1688335", ver87, performance.now()-t87)
 
 	// 87a: 1676708
 	let t87a = performance.now(), ver87a = xF
@@ -191,7 +198,7 @@ function outputVersion() {
 		let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
 		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
 	} catch(e) {}
-	output("87a", "1676708", ver87a, performance.now()-t87a)
+	record(186,87, "1676708", ver87a, performance.now()-t87a)
 
 	// 87b: 944846
 	let t87b = performance.now(), ver87b = xF
@@ -199,7 +206,7 @@ function outputVersion() {
 		let test87b = (12345).toExponential(3)
 		if (test87b == 1.235e+4) {ver87b = xS}
 	} catch(e) {}
-	output("87b", "944846", ver87b, performance.now()-t87b)
+	record(185,87, "944846", ver87b, performance.now()-t87b)
 
 	// 86: 1685482
 	let t86 = performance.now(), ver86 = xF
@@ -210,7 +217,7 @@ function outputVersion() {
 		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
 		if ((e.message).substring(0,2) == "an") {ver86 = xS}
 	}
-	output("86", "1685482", ver86, performance.now()-t86)
+	record(180,86, "1685482", ver86, performance.now()-t86)
 
 	// 85: 1675240
 	let t85 = performance.now(), ver85 = xF
@@ -223,7 +230,7 @@ function outputVersion() {
 		// 60+: get global method called on incompatible string
 		if ((e.message).substring(0,3) == "Reg") {ver85 = xS}
 	}
-	output("85", "1675240", ver85, performance.now()-t85)
+	record(175,85, "1675240", ver85, performance.now()-t85)
 
 	// 84: 1673440
 	let t84 = performance.now(), ver84 = xF
@@ -232,7 +239,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message == "illegal character U+0040") {ver84 = xS}
 	}
-	output("84", "1673440", ver84, performance.now()-t84)
+	record(170,84, "1673440", ver84, performance.now()-t84)
 
 	// 83: 1667094
 	let t83 = performance.now(), ver83 = xF
@@ -241,7 +248,7 @@ function outputVersion() {
 		let test83 = RegExp.prototype.test.call(obj83, "")
 		ver83 = xS
 	} catch(e) {}
-	output("83", "1667094", ver83, performance.now()-t83)
+	record(166,83, "1667094", ver83, performance.now()-t83)
 
 	// 83a: 1665746
 	let t83a = performance.now(), ver83a = xF
@@ -253,13 +260,13 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message == "1 is not iterable") {ver83a = xS}
 	}
-	output("83a", "1665746", ver83a, performance.now()-t83a)
+	record(165,83, "1665746", ver83a, performance.now()-t83a)
 
 	// 82: 1655947
 	let t82 = performance.now(), ver82 = xF
 	let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
 	if (test82 == 1) {ver82 = xS}
-	output("82", "1655947", ver82, performance.now()-t82)
+	record(160,82, "1655947", ver82, performance.now()-t82)
 
 	// 81: 1650607 (53: 1321534)
 	let t81 = performance.now(), ver81 = xF
@@ -267,7 +274,7 @@ function outputVersion() {
 		let file81 = new File(["bits"], "a/b.txt")
 		if (file81.name == "a/b.txt") {ver81 = xS}
 	} catch(e) {}
-	output("81", "1650607", ver81, performance.now()-t81)
+	record(156,81, "1650607", ver81, performance.now()-t81)
 
 	// 81a: 1657437
 	// this is unstable in Tor Browser
@@ -283,7 +290,7 @@ function outputVersion() {
 		//console.debug(w81a, w81b)
 		if (w81a < w81b) {ver81a = xS}
 	} catch(e) {}
-	output("81a", "1657437", ver81a, performance.now()-t81a)
+	record(155,81, "1657437", ver81a, performance.now()-t81a)
 
 	// 80: 1651732
 	let t80 = performance.now(), ver80 = xF
@@ -294,8 +301,10 @@ function outputVersion() {
 			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
 			ver80 = xS
 		} catch (e) {}
-		output("80", "1651732", ver80, performance.now()-t80)
-	} catch(e) {}
+		record(151,80, "1651732", ver80, performance.now()-t80)
+	} catch(e) {
+		record(151,80, "1651732", ver80, performance.now()-t80)
+	}
 
 	//80a: 1559253
 	let t80a = performance.now(), ver80a = xF
@@ -309,7 +318,7 @@ function outputVersion() {
 		//   80+: = 2,6
 		if (e.columnNumber == 6) {ver80a = xS}
 	}
-	output("80a", "1559253", ver80a, performance.now()-t80a)
+	record(150,80, "1559253", ver80a, performance.now()-t80a)
 
 	//79: 1644878
 	let t79 = performance.now(), ver79 = xF
@@ -318,7 +327,7 @@ function outputVersion() {
 	} catch(e) {
 		if ((e.message).substring(0,3) == "ent") {ver79 = xS}
 	}
-	output("79", "1644878", ver79, performance.now()-t79)
+	record(146,79, "1644878", ver79, performance.now()-t79)
 
 	//79a: 1639591
 	let t79a = performance.now(), ver79a = xF
@@ -329,7 +338,7 @@ function outputVersion() {
 		// 79+: SyntaxError invalid assignment left-hand side
 		if (e.message.substring(0,3) == "inv") {ver79a = xS}
 	}
-	output("79a", "1639591", ver79a, performance.now()-t79a)
+	record(145,79, "1639591", ver79a, performance.now()-t79a)
 
 	//78: 1633836
 	let t78 = performance.now(), ver78 = xF
@@ -337,7 +346,7 @@ function outputVersion() {
 		let test78 = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2)
 		ver78 = xS
 	} catch(e) {}
-	output("78", "1633836", ver78, performance.now()-t78)
+	record(142,78, "1633836", ver78, performance.now()-t78)
 
 	//78a: 1589095
 	let t78a = performance.now(), ver78a = xF
@@ -345,7 +354,7 @@ function outputVersion() {
 		let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
 		ver78a = xS
 	} catch(e) {}
-	output("78a", "1589095", ver78a, performance.now()-t78a)
+	record(141,78, "1589095", ver78a, performance.now()-t78a)
 
 	//78b: 1634135
 	let t78b = performance.now(), ver78b = xF
@@ -353,24 +362,24 @@ function outputVersion() {
 		let regex78b = new RegExp('b')
 		if (regex78b.dotAll == false) {ver78b = xS}
 	} catch(e) {}
-	output("78b", "1634135", ver78b, performance.now()-t78b)
+	record(140,78, "1634135", ver78b, performance.now()-t78b)
 
 	//77: 1627285
 	let t77 = performance.now(), ver77 = xF
 	if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {ver77 = xS}
-	output("77", "1627285", ver77, performance.now()-t77)
+	record(136,77, "1627285", ver77, performance.now()-t77)
 
 	//77a: 1608168
 	let t77a = performance.now(), ver77a = xF
 	try {
 		("aa").replaceAll("a","b"); ver77a = xS
 	} catch(e) {}
-	output("77a", "1608168", ver77a, performance.now()-t77a)
+	record(135,77, "1608168", ver77a, performance.now()-t77a)
 
 	//76: 1608010
 	let t76 = performance.now(), ver76 = xF
 	if (test76.validity.rangeOverflow) {} else {ver76 = xS}
-	output("76", "1608010", ver76, performance.now()-t77)
+	record(130,76, "1608010", ver76, performance.now()-t77)
 
 	//75: 1615600
 	let t75 = performance.now(), ver75 = xF
@@ -379,7 +388,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message.substring(0,3) == "2.5") {ver75 = xS}
 	}
-	output("75", "1615600", ver75, performance.now()-t75)
+	record(125,75, "1615600", ver75, performance.now()-t75)
 
 	//74: 1605835
 	let t74 = performance.now(), ver74 = xF
@@ -387,13 +396,13 @@ function outputVersion() {
 		newFn("let t = ({ 1n: 1 })")
 		ver74 = xS
 	} catch(e) {}
-	output("74", "1605835", ver74, performance.now()-t74)
+	record(120,74, "1605835", ver74, performance.now()-t74)
 
 	//73: 1605803
 	let t73 = performance.now(), ver73 = xF
 	let el73 = dom.test73
 	if (getComputedStyle(el73).content == "normal") {ver73 = xS}
-	output("73", "1605803", ver73, performance.now()-t73)
+	record(115,73, "1605803", ver73, performance.now()-t73)
 
 	//72: 1589072
 	let t72 = performance.now(), ver72 = xF
@@ -404,12 +413,12 @@ function outputVersion() {
 			ver72 = xS
 		}
 	}
-	output("72", "1589072", ver72, performance.now()-t72)
+	record(111,72, "1589072", ver72, performance.now()-t72)
 
 	//72a: 1441976
 	let t72a = performance.now(), ver72a = xF
 	try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
-	output("72a", "1441976", ver72a, performance.now()-t72a)
+	record(110,72, "1441976", ver72a, performance.now()-t72a)
 
 	//71: 1575980
 	let t71 = performance.now(), ver71 = xF
@@ -418,7 +427,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71=xS}
 	}
-	output("71", "1575980", ver71, performance.now()-t71)
+	record(105,71, "1575980", ver71, performance.now()-t71)
 
 	//70: 1435818
 	let t70 = performance.now(), ver70 = xF
@@ -426,23 +435,23 @@ function outputVersion() {
 		newFn("let t = 1_050")
 		ver70=xS
 	} catch(e) {}
-	output("70", "1435818", ver70, performance.now()-t70)
+	record(100,70, "1435818", ver70, performance.now()-t70)
 
 	//69: 1558387
 	let t69 = performance.now(), ver69 = xF
 	try {let test69 = new DOMError('a')} catch(e) {ver69 = xS}
-	output("69", "1558387", ver69, performance.now()-t69)
+	record(95,69, "1558387", ver69, performance.now()-t69)
 
 	//68: 1548773
 	let t68 = performance.now(), ver68 = xF
 	let el68 = dom.test68
 	if (el68.typeMustMatch == undefined) {ver68 = xS} else {}
-	output("68", "1548773", ver68, performance.now()-t68)
+	record(90,68, "1548773", ver68, performance.now()-t68)
 
 	//67: 1531830 (1435829)
 	let t67 = performance.now(), ver67 = xF
 	if (!Symbol.hasOwnProperty('matchAll')) {} else {ver67 = xS}
-	output("67", "1531830", ver67, performance.now()-t67)
+	record(85,67, "1531830", ver67, performance.now()-t67)
 
 	//66
 	let t66 = performance.now(), ver66 = xF
@@ -451,7 +460,7 @@ function outputVersion() {
 		let test66 = txt.encodeInto("a", utf8)
 		ver66 = xS
 	} catch(e) {}
-	output("66", "", ver66, performance.now()-t66)
+	record(80,66, "", ver66, performance.now()-t66)
 
 	//65
 	let t65 = performance.now(), ver65 = xF
@@ -459,34 +468,34 @@ function outputVersion() {
 		let test65 = new Intl.RelativeTimeFormat("en",{style: "long"})
 		ver65 = xS
 	} catch(e) {}
-	output("65", "", ver65, performance.now()-t65)
+	record(75,65, "", ver65, performance.now()-t65)
 
 	//64
 	let t64 = performance.now(), ver64 = xF
 	if (window.screenLeft == undefined){} else {ver64 = xS}
-	output("64", "", ver64, performance.now()-t64)
+	record(71,64, "", ver64, performance.now()-t64)
 
 	//64a
 	let t64a = performance.now(), ver64a = xF
 	if (new Date("31-Mar-2011").getFullYear() == -2011) {ver64a = xS}
-	output("64a", "", ver64a, performance.now()-t64a)
+	record(70,64, "", ver64a, performance.now()-t64a)
 
 	//63
 	let t63 = performance.now(), ver63 = xF
 	if (Symbol.for(`foo`).description == "foo") {ver63 = xS}
-	output("63", "", ver63, performance.now()-t63)
+	record(65,63, "", ver63, performance.now()-t63)
 
 	//62
 	let t62 = performance.now(), ver62 = xF
 	console.time("v62")
 	try {console.timeLog("v62"); ver62 = xS} catch(e) {}
 	console.timeEnd("v62")
-	output("62", "", ver62, performance.now()-t62)
+	record(60,62, "", ver62, performance.now()-t62)
 
 	//61
 	let t61 = performance.now(), ver61 = xF
 	try {let test61 = (" a").trimStart(); ver61 = xS} catch(e) {}
-	output("61", "", ver61, performance.now()-t61)
+	record(55,61, "", ver61, performance.now()-t61)
 
 	//60
 	let t60 = performance.now(), ver60 = xF
@@ -495,12 +504,12 @@ function outputVersion() {
 			"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null;
 		ver60 = xS
 	} catch(e) {}
-	output("60", "", ver60, performance.now()-t60)
+	record(50,60, "", ver60, performance.now()-t60)
 
 	// 55: 1354974
 	// this test hangs the page in chromium
+	let t55 = performance.now(), ver55 = xF
 	if (isFF) {
-		let t55 = performance.now(), ver55 = xF
 		try {
 			let maxIndex = Math.pow(2, 31)
 			let list55 = []
@@ -513,10 +522,9 @@ function outputVersion() {
 				ver55 = xS
 			}
 		} catch(e) {}
-		output("55", "1354974", ver55, performance.now()-t55)
+		record(18,55, "1354974", ver55, performance.now()-t55)
 	} else {
-		dom.n55.innerHTML = strA +"1354974"+ strB +"1354974"+ strC
-		dom.v55.innerHTML = "firefox only"
+		record(18,55, "1354974", " n/a ", performance.now()-t55)
 	}
 
 	// 55b: 1351795
@@ -524,7 +532,7 @@ function outputVersion() {
 	try {
 		console.timeline()
 	} catch(e) {ver55b = xS}
-	output("55b", "1351795", ver55b, performance.now()-t55b)
+	record(16,55, "1351795", ver55b, performance.now()-t55b)
 
 	// 54: 1050755
 	let t54 = performance.now(), ver54 = xF
@@ -532,7 +540,7 @@ function outputVersion() {
 		let test54 = [Date.UTC(), Date.UTC(1)]
 		if (isNaN(test54[1]) == false) {ver54 = xS}
 	} catch(e) {}
-	output("54", "1050755", ver54, performance.now()-t54)
+	record(14,54, "1050755", ver54, performance.now()-t54)
 
 	// 53: 1317307
 	let t53 = performance.now(), ver53 = xF
@@ -541,7 +549,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.name == "TypeError") {ver53 = xS}
 	}
-	output("53", "1317307", ver53, performance.now()-t53)
+	record(12,53, "1317307", ver53, performance.now()-t53)
 
 	// 52: 837961
 	let t52 = performance.now(), ver52 = xF
@@ -549,25 +557,25 @@ function outputVersion() {
 		let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
 		ver52 = xS
 	} catch(e) {}
-	output("52", "837961", ver52, performance.now()-t52)
+	record(10,52, "837961", ver52, performance.now()-t52)
 
 	// watch
 	// 1274354
 	let t40 = performance.now(), ver40 = xNC
 	let test40 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
 	if (!isNaN(test40)) {ver40 = xOMG}
-	output("40", "1274354", ver40, performance.now()-t40)
+	record(3,"NaN", "1274354", ver40, performance.now()-t40)
 
 	let t41 = performance.now(), ver41 = xNC
 	let test41 = new Date("31-Mar-2011").getFullYear()
 	// 63 and lower = NaN, 64+ = -2011
 	if (test41 !== -2011 && !isNaN(test41)) {ver41 = xOMG + (isFF ? " [" + test41 +"]" : "")}
-	output("41", "", ver41, performance.now()-t41)
+	record(2,"-2011", "1274354", ver41, performance.now()-t41)
 
 	let t42 = performance.now(), ver42 = xNC
 	let test42 = new Date("19999-11-11").toString()
 	if (test42 !== "Invalid Date") {ver42 = xOMG}
-	output("42", "", ver42, performance.now()-t42)
+	record(1,"Invalid Date", "1274354", ver42, performance.now()-t42)
 
 	try {
 		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
@@ -576,7 +584,7 @@ function outputVersion() {
 		for (const k of names) {
 			res.push(k +":"+ chromeKeys[k].join())
 		}
-		console.debug(sha1(res.join()) +"\n"+ res.join("\n"))
+		console.log(sha1(res.join()) +"\n"+ res.join("\n"))
 		// Brave/Chrome: 57fddf2707cb589cd02e5e15ed33cd00a14f743a
 			//loadTimes:
 			//csi:
@@ -590,20 +598,8 @@ function outputVersion() {
 			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
 	} catch(e) {
 		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
-		console.debug("chromeKeys", e.name, e.message)
+		console.log("chromeKeys", e.name, e.message)
 	}
-}
-
-function rerunVersion() {
-	// clear
-	let items = document.getElementsByClassName("c mono")
-	for(let i=0; i < items.length; i++) {
-		items[i].innerHTML = "&nbsp"
-	}
-	// pause so users see change
-	setTimeout(function() {
-		outputVersion()
-	}, 170)
 }
 
 outputVersion()
