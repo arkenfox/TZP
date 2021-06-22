@@ -370,6 +370,8 @@ var collatorExample = [
 	// f28621c5d958602e2b7a45b26ea7ec368af168cd
 ]
 
+console.debug(collatorExample)
+
 var compareExamples = [
 	'\u0109,\u00E7\a',
 	'a,\u03B1',
@@ -635,7 +637,14 @@ function collator() {
 					+ sc +" covering "
 					+ sg + codes.length +" locales"+ sc
 				output.push(strItem)
-				strItem = sColor +"locales: "+ sc + localesHash +"<br>"
+
+				let ff = ""
+				if (localesHash == "f28621c5d958602e2b7a45b26ea7ec368af168cd") {ff = "70+" // hye, no
+				} else if (localesHash == "a76c437849ec89d41ce1dd948589f4b0da706835") {ff = "68-69" // zh-hk, zh-sg changed
+				} else if (localesHash == "bade21ec76bd415dbdae917273491c5ed774c204") {ff = "65-67" // ku,tk
+				} else if (localesHash == "53f698034e61f1af9fd1743f5ddc1177305e0828") {ff = "64 or lower"
+				}
+				strItem = sColor +"locales: "+ sc + localesHash + (ff == "" ? "" : s14+ "[FF"+ ff + "]"+ sc) +"<br>"
 				output.push(strItem)
 
 				// details
@@ -651,13 +660,12 @@ function collator() {
 	} else {
 		// crash and burn
 		el.innerHTML = "please provide two different values"
-		
 	}
-
 }
 
 legend()
 check_example()
+collator()
 
 </script>
 </body>
