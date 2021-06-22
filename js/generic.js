@@ -137,18 +137,25 @@ const get_isBrave = () => new Promise(resolve => {
 			gBypassedOnce.push("_global:isBrave:navigator:true")
 		}
 		log_perf("isBrave [global]",t0,"",isBrave)
-		return resolve()
+		if (!isBrave) {
+			return resolve()
+		} else {
+			Promise.all([
+				get_isBraveMode(),
+			]).then(function(){
+				return resolve()
+			})
+		}
 	})()
 })
 
 const get_isBraveMode = () => new Promise(resolve => {
-	if (!isBrave) {return resolve()}
 	let t0 = performance.now()
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
 			if (mode == "unknown") {gCheck.push("_global:isBraveMode: unknown")}
-			log_perf("isBraveMode [prereq]",t0,"a",isBraveMode)
+			log_perf("isBraveMode [global]",t0,"",isBraveMode)
 		}
 	}
 	try {
@@ -473,7 +480,13 @@ const get_isVer = () => new Promise(resolve => {
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //91:1710429
+	function start() { //91:1714933
+		try {
+			let t = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
+			if (t.length) {output(91)} else {v91a()}
+		} catch(e) {v91a()}
+	}
+	function v91a() { //91:1710429
 		try {
 			let t = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date())
 			output(91)
@@ -1234,7 +1247,6 @@ function outputSection(id, cls) {
 			gt0 = performance.now()
 			Promise.all([
 				get_isRFP(),
-				get_isBraveMode(),
 				get_navKeys(),
 				outputPrototypeLies(),
 				get_isOS64(),
