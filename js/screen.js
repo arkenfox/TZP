@@ -92,25 +92,20 @@ function get_chrome() {
 }
 
 function get_collation() {
-	let list = ['ka','ku','lo','no','pa','tk'],
-		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A'],
+	let list = ['ka','ku','lo','no','pa','tk','zh-hk'],
+		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
 		res = [],
 		t0 = performance.now()
 	// output
 	function output(hash) {
-		if (runS) {hash = sha1(hash)}
-		let r = ""
-		if (hash == "d0e83d1d652f95d686870a59def6ddcc7cde5e28") {
-			r = zFF +" [FF70+]"
-		} else if (hash == "e4a32b021b6743d34573ab91a9a31d1068e5b01e") {
-			r = zFF +" [FF65-69]"
-		} else if (hash == "78c0998f75b0da6b11dd55e2f29dc054e14aae9e") {
-			r = zFF +" [FF64 or lower]"
-		} else {
-			r = hash + zNEW
-			dom.fdCollation.setAttribute("class", "c mono")
+		let ff = ""
+		if (hash == "8291f32b70e5a2b32d569e4d8b89ec70cab4c6d7") {ff = "70+"
+		} else if (hash == "80b4f22e20a30510f129a5f480c645d1a5de04ea") {ff = "68-69"
+		} else if (hash == "351d6f924ee449b73d05d227f28e77c110555351") {ff = "65-67"
+		} else if (hash == "9edd7f16bf0a3bf34e1ee349291ab5f77aad6ef4") {ff = "64 or lower"
 		}
-		dom.fdCollation.innerHTML = r + (runS ? zSIM : "")
+		dom.fdCollation.setAttribute("class", ff == "" ? "c mono" : "c")
+		dom.fdCollation.innerHTML = ff == "" ? hash + zNEW : "Firefox ["+ ff +"]"
 		log_perf("collation [fd]",t0)
 	}
 	// run
@@ -613,6 +608,19 @@ function get_line_scrollbar(runtype) {
 			})
 		}
 	})
+}
+
+function get_locales() {
+	let supported = Intl.PluralRules.supportedLocalesOf(["kok","ia","tl","mai","sa","no"])
+	let hash = sha1(supported.join()), ff = ""
+	if (hash == "1f97cbf7d207da2ec78612cd872f785e0c8bef34") {ff = "91+"
+	} else if (hash == "34b51e904c1e07e21b110f435e4dc122e18456eb") {ff = "78-90"
+	} else if (hash == "b53a43de7c04eb3b72c94f5590cc3bc0808c98de") {ff = "70-77"
+	} else if (hash == "54a561ce7b6a36800e8d818c762e61ffb4dd32d6") {ff = "65-69"
+	} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {ff = "64 or lower"
+	}
+	dom.fdLocales.setAttribute("class", hash == "" ? "c mono" : "c")
+	dom.fdLocales.innerHTML = ff == "" ? hash + zNEW : "Firefox [FF"+ ff +"]"
 }
 
 function get_math() {
@@ -2461,6 +2469,7 @@ function outputFD(runtype) {
 			log_section("feature", t0, section)
 		})
 		get_collation()
+		get_locales()
 
 	} else {
 		Promise.all([
@@ -2474,6 +2483,7 @@ function outputFD(runtype) {
 			dom.fdBrandingCss = zNA
 			dom.fdResourceCss = zNA
 			dom.fdCollation = zNA
+			dom.fdLocales = zNA
 			dom.fdResource = zNA
 			dom.fdChrome = zNA
 			dom.fdVersion = zNA
