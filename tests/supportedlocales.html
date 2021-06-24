@@ -278,7 +278,8 @@ var detailed = [
 ]
 
 var legendclean = [],
-	locales = []
+	locales = [],
+	summary = []
 
 function legend() {
 	// build once
@@ -287,6 +288,8 @@ function legend() {
 		for (let i = 0 ; i < detailed.length; i++) {
 			let code = detailed[i].split(",")[0]
 			let name = detailed[i].split(",")[1]
+			code = code.trim()
+			locales.push(code.toLowerCase())
 			legendclean.push(code.padStart(7) +": "+ name)
 		}
 	}
@@ -296,16 +299,15 @@ function legend() {
 
 function run_main(method, isLoopy) {
 	let t0 = performance.now()
-
 	let legend = [], data = [], map = [], nocase = [], nocasemap = [], all = []
-	let spacer = "<br><br>", hashLookup = ""
+	let spacer = "<br><br>", hashLookup = "", lookupSummary = ""
 	let display = []
 
 	try {
 		// hash
 		function getPretty(method) {
 			let pretty = ""
-			if (method == "C") {pretty = "collation"
+			if (method == "C") {pretty = "collator"
 			} else if (method == "DTF") {pretty = "datetimeformat"
 			} else if (method == "DN") {pretty = "displaynames"
 			} else if (method == "LF") {pretty = "listformat"
@@ -343,9 +345,6 @@ function run_main(method, isLoopy) {
 				// split: code, name
 				let code = detailed[i].split(",")[0]
 				let name = detailed[i].split(",")[1]
-
-				// list of locales: do once
-				if (type == "lookup") {locales.push(code.toLowerCase())}
 				// test
 				let test = ""
 				if (method == "C") {
@@ -416,53 +415,74 @@ function run_main(method, isLoopy) {
 				map2.push(s14 + x + sc + " -> "+ y)
 			}
 			// color up results
-			for (let i = 0 ; i < data.length; i++) {
-				let r = data[i]
-				if (map.includes(r)) {
-					let part1 = r.split(" -> ")[0],
-						part2 = r.split(" -> ")[1]
-					if (dupesclean.includes(part2)) {
-						data[i] = s14 + part1 +" -> "+ sc + s16 + part2 + sc
-					} else if (notlistclean.includes(part2)) {
-						data[i] = s14 + part1 +" -> "+ sc + s12 + part2 + sc
+			if (!isLoopy) {
+				for (let i = 0 ; i < data.length; i++) {
+					let r = data[i]
+					if (map.includes(r)) {
+						let part1 = r.split(" -> ")[0],
+							part2 = r.split(" -> ")[1]
+						if (dupesclean.includes(part2)) {
+							data[i] = s14 + part1 +" -> "+ sc + s16 + part2 + sc
+						} else if (notlistclean.includes(part2)) {
+							data[i] = s14 + part1 +" -> "+ sc + s12 + part2 + sc
+						} else {
+							data[i] = s14 + r + sc
+						}
 					} else {
-						data[i] = s14 + r + sc
-					}
-				} else {
-					if (dupesclean.includes(r)) {
-						data[i] = s16 + r + sc
+						if (dupesclean.includes(r)) {
+							data[i] = s16 + r + sc
+						}
 					}
 				}
 			}
 			// output
-			let str = s4 + type.toUpperCase() + sc + spacer
-			if (type == "lookup") {
-				hashLookup = hash
-				str = s4 + getPretty(method).toUpperCase() + sc + spacer + str
-				str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method)
-				// nocase used to color legend items
-				nocase.sort()
-				nocase = nocase.filter(function(item, position) {return nocase.indexOf(item) === position})
-				nocasemap.sort()
-				nocasemap = nocasemap.filter(function(item, position) {return nocasemap.indexOf(item) === position})
-			} else {
-				str = spacer + "<hr>" + "<br>" + str
-				str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
-			}
-			str += spacer + data.join(", ")
-			if (map2.length) {str += spacer + s14 +"MAPPED"+ sc + spacer + map2.join("<br>")}
-			if (dupes.length) {str += spacer + s16 +"DUPES"+ sc + spacer + dupes.join("<br>")}
-			if (notlist.length) {str += spacer + s12 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+			let str = ""
+			if (type == "lookup") {hashLookup = hash}
 
-			display.push(str)
+			if (isLoopy) {
+				// build summary
+				if (type == "lookup") {
+					lookupSummary = "<ul><li>" + hashLookup + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method) +"</li>"
+					if (map2.length) {lookupSummary += "<li>"+ s14 +"MAPPED: "+ sc + map2.join(", ") +"</li>"}
+					if (dupes.length) {lookupSummary += "<li>"+ s16 +"DUPES: "+ sc + dupes.join(", ") +"</li>"}
+					if (notlist.length) {lookupSummary += "<li>"+ s12 +"NOT LISTED: "+ sc + notlist.join(", ") +"</li>"}					
+					lookupSummary += "</ul>"
+				} else {
+					str = s4 + getPretty(method).toUpperCase() + sc
+						+ (hash == hashLookup ? "" : sb +" [localeMatcher mismatch]"+ sc)
+					str += "<br>" + lookupSummary
+					summary.push(str)
+				}
+			} else {
+				str = s4 + type.toUpperCase() + sc
+				if (type == "lookup") {
+					str = s4 + getPretty(method).toUpperCase() + sc + spacer + str + spacer
+					str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method)
+					// nocase used to color legend items
+					nocase.sort()
+					nocase = nocase.filter(function(item, position) {return nocase.indexOf(item) === position})
+					nocasemap.sort()
+					nocasemap = nocasemap.filter(function(item, position) {return nocasemap.indexOf(item) === position})
+				} else {
+					str = spacer + "<hr>" + "<br>" + str + spacer
+					str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
+				}
+				str += spacer + data.join(", ")
+				if (map2.length) {str += spacer + s14 +"MAPPED"+ sc + spacer + map2.join("<br>")}
+				if (dupes.length) {str += spacer + s16 +"DUPES"+ sc + spacer + dupes.join("<br>")}
+				if (notlist.length) {str += spacer + s12 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+				display.push(str)
+			}
 		}
 
 		getSupported("lookup", method)
 		getSupported("best fit", method)
-		dom.results.innerHTML = display.join("<br>")
 
-		// build + color legend
 		if (!isLoopy) {
+			getSupported("lookup", method)
+			getSupported("best fit", method)
+			dom.results.innerHTML = display.join("<br>")
+			// build + color legend
 			for (let i = 0 ; i < detailed.length; i++) {
 				// split: code, name
 				let code = detailed[i].split(",")[0]
@@ -479,15 +499,17 @@ function run_main(method, isLoopy) {
 			}
 			// display legend
 			dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+			// perf
+			let t1 = performance.now()
+			dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 		}
-
-		// perf
-		let t1 = performance.now()
-		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
-
 	} catch(e) {
 		// catch unsupported
-		if (!isLoopy) {
+		if (isLoopy) {
+			let x = s4 + getPretty(method).toUpperCase() + sc
+				+ "<ul><li>"+ e.name +": "+ e.message +"</li></ul>"
+			summary.push(x)
+		} else {
 			dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
 		}
 	}
@@ -502,11 +524,26 @@ function run(method) {
 	// delay so users see change and allow paint
 	setTimeout(function() {
 		if (method == "ALL") {
-			dom.results.innerHTML = "<br>coming soon"
+			run_all()
 		} else {
 			run_main(method, false)
 		}
 	}, 250)
+}
+
+function run_all() {
+	let t0 = performance.now()
+	summary = []
+	run_main("C", true)
+	run_main("DTF", true)
+	run_main("DN", true)
+	run_main("LF", true)
+	run_main("NF", true)
+	run_main("PR", true)
+	run_main("RTF", true)
+	dom.results.innerHTML = summary.join("<br>")
+	let t1 = performance.now()
+	dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 }
 
 function setBtn(method) {
@@ -529,10 +566,10 @@ function start() {
 	s16 = s16.trim(),
 	sg = sg.trim()
 	sb = sb.trim()
-	detailed.sort()
-	let autostart = "C"
+	legend()
+	let autostart = "ALL"
 	setBtn(autostart)
-	run_main(autostart, false)
+	run(autostart)
 }
 
 start()
