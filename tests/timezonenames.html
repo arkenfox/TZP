@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>timeZoneName</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>pluralrules</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">timeZoneName
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Testing language entropy in timeZoneName</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+					<div class="btn">
+						<span id="b0" class="btn4 btn" onClick="run('0')">[ S ]</span>
+						<span id="b1" class="btn4 btn" onClick="run('1')">[ L ]</span>
+						<span id="b2" class="btn4 btn" onClick="run('2')">[ SO ]</span>
+						<span id="b3" class="btn4 btn" onClick="run('3')">[ LO ]</span>
+						<span id="b4" class="btn4 btn" onClick="run('4')">[ SG ]</span>
+						<span id="b5" class="btn4 btn" onClick="run('5')">[ LG ]</span>
+						<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>
+					</div>
+				<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+var detailed = [
+"aa,afar",
+"ab,abkhazian",
+"ach,acholi",
+"ae,avestan",
+"af,afrikaans",
+"ak,akan",
+"am,amharic",
+"an,aragonese",
+"ar,arabic",
+"as,assamese",
+"ast,asturian",
+"av,avaric",
+"ay,aymara",
+"az,azerbaijani",
+"ba,bashkir",
+"be,belarusian",
+"bg,bulgarian",
+"bh,bihari",
+"bi,bislama",
+"bm,bambara",
+"bn,bengali",
+"bo,tibetan",
+"br,breton",
+"bs,bosnian",
+"ca,catalan",
+"cak,kaqchikel",
+"ce,chechen",
+"ch,chamorro",
+"ckb,central kurdish", // ? dropped
+"co,corsican",
+"cr,cree",
+"crh,crimean tatar",
+"cs,czech",
+"csb,kashubian",
+"cu,church slavic",
+"cv,chuvash",
+"cy,welsh",
+"da,danish",
+"de,german",
+"dsb,lower sorbian",
+"dv,divehi",
+"dz,dzongkha",
+"ee,ewe",
+"el,greek",
+"en,english",
+"eo,esperanto",
+"es,spanish",
+"et,estonian",
+"eu,basque",
+"fa,persian",
+"ff,fulah",
+"fi,finnish",
+"fj,fijian",
+"fo,faroese",
+"fr,french",
+"fur,friulian",
+"fy,frisian",
+"ga,irish",
+"gd,scottish gaelic",
+"gl,galician",
+"gn,guarani",
+"gu,gujarati",
+"gv,manx",
+"ha,hausa",
+"haw,hawaiian",
+"he,hebrew",
+"hi,hindi",
+"hil,hiligaynon",
+"ho,hiri motu",
+"hr,croatian",
+"hsb,upper sorbian",
+"ht,haitian",
+"hu,hungarian",
+"hy,armenian",
+"hye,eastern armenian", // ? dropped
+"hz,herero",
+"ia,interlingua",
+"id,indonesian",
+"ie,interlingue",
+"ig,igbo",
+"ii,sichuan yi",
+"ik,inupiaq",
+"io,ido",
+"is,icelandic",
+"it,italian",
+"iu,inuktitut",
+"ja,japanese",
+"jv,javanese",
+"ka,georgian",
+"kab,kabyle",
+"kg,kongo",
+"ki,kikuyu",
+"kj,kuanyama",
+"kk,kazakh",
+"kl,greenlandic",
+"km,khmer",
+"kn,kannada",
+"ko,korean",
+"kok,konkani",
+"kr,kanuri",
+"ks,kashmiri",
+"ku,kurdish",
+"kv,komi",
+"kw,cornish",
+"ky,kirghiz",
+"la,latin",
+"lb,luxembourgish",
+"lg,ganda",
+"li,limburgan",
+"lij,ligurian",
+"ln,lingala",
+"lo,lao",
+"lt,lithuanian",
+"ltg,latgalian",
+"lu,luba-katanga",
+"lv,latvian",
+"mai,maithili",
+"meh,sw tlaxiaco mixtec",
+"mg,malagasy",
+"mh,marshallese",
+"mi,maori",
+"mix,mixtepec mixtec",
+"mk,macedonian",
+"ml,malayalam",
+"mn,mongolian",
+"mr,marathi",
+"ms,malay",
+"mt,maltese",
+"my,burmese",
+"na,nauru",
+"nb,norwegian bokmål",
+"nd,ndebele north",
+"ne,nepali",
+"ng,ndonga",
+"nl,dutch",
+"nn,norwegian nynorsk",
+"no,norwegian",
+"nr,ndebele south",
+"nso,sotho northern",
+"nv,navajo",
+"ny,chichewa",
+"oc,occitan",
+"oj,ojibwa",
+"om,oromo",
+"or,odia",
+"os,ossetian",
+"pa,punjabi",
+"pi,pali",
+"pl,polish",
+"ps,pashto",
+"pt,portuguese",
+"qu,quechua",
+"rm,rhaeto-romanic",
+"rn,kirundi",
+"ro,romanian",
+"ru,russian",
+"rw,kinyarwanda",
+"sa,sanskrit",
+"sc,sardinian",
+"sco,scots", // 1714293
+"sd,sindhi",
+"se,northern sami",
+"sg,sango",
+"si,singhalese",
+"sk,slovak",
+"sl,slovenian",
+"sm,samoan",
+"sn,shona",
+"so,somali",
+"son,songhay",
+"sq,albanian",
+"sr,serbian",
+"ss,siswati",
+"st,sotho southern",
+"su,sundanese",
+"sv,swedish",
+"sw,swahili",
+"szl,silesian", // 1691695
+"ta,tamil",
+"te,telugu",
+"tg,tajik",
+"th,thai",
+"ti,tigrinya",
+"tig,tigre",
+"tk,turkmen",
+"tl,tagalog",
+"tlh,klingon",
+"tn,tswana",
+"to,tonga",
+"tr,turkish",
+"trs,triqui", // 1583177
+"ts,tsonga",
+"tt,tatar",
+"tw,twi",
+"ty,tahitian",
+"ug,uighur",
+"uk,ukrainian",
+"ur,urdu",
+"uz,uzbek",
+"ve,venda",
+"vi,vietnamese",
+"vo,volapük",
+"wa,walloon",
+"wen,sorbian",
+"wo,wolof",
+"xh,xhosa",
+"yi,yiddish",
+"yo,yoruba",
+"za,zhuang",
+"zam,miahuatlán zapotec",
+"zh,chinese",
+"zh-cn,chinese china",
+"zh-Hans,chinese simple",
+"zh-Hant,chinese traditional",
+"zh-hk,chinese hong kong",
+"zh-sg,chinese singapore",
+"zh-tw,chinese taiwan",
+"zu,zulu",
+]
+
+var legend = [],
+	locales = []
+
+function do_legend() {
+	// build once
+	if (legend.length == 0) {
+		detailed.sort()
+		for (let i = 0 ; i < detailed.length; i++) {
+			let code = detailed[i].split(",")[0].trim()
+			let name = detailed[i].split(",")[1]
+			locales.push(code.toLowerCase())
+			legend.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+}
+
+function run_main(type) {
+	let t0 = performance.now()
+	let data = []
+	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
+	let tzDays = ["January 1, 2019 13:00:00","July 1, 2019 13:00:00"]
+	let spacer = "<br><br>"
+	
+	if (type !== "ALL") {
+		let tmp = tzNames[type]
+		tzNames = [tmp]
+	}
+
+	function getTZNames(code) {
+		let tzRes = []
+		try {
+			tzDays.forEach(function(day) {
+				tzNames.forEach(function(item) {
+					let tz = ""
+					let tzDate = new Date(day)
+					try {
+						let tzO = {hour12: true, timeZoneName: item}
+						let tzA = Intl.DateTimeFormat(code, tzO).formatToParts(tzDate)
+						for (let i = 0 ; i < tzA.length; i++) {
+							let str = JSON.stringify(Intl.DateTimeFormat(code, tzO).formatToParts(tzDate)[i])
+							if (str.indexOf("timeZoneName") !== -1 || str.indexOf("unknown") !== -1) {
+								tz = str.replace(/"/g, "")
+								tz = tz.replace("{type:timeZoneName,value:", "")
+								tz = tz.replace("{type:unknown,value:", "")
+								tz = tz.replace("}", "")			
+							}
+						}
+					} catch(e) {
+						tz = (e.name == "RangeError" ? zNS : zB0)
+					}
+					if (tz !== zNS) {tzRes.push(tz)}
+				})
+			})
+			return tzRes.join(", ")
+		} catch(e) {
+			return zB0
+		}
+	}
+
+	try {
+		// get data
+		locales.forEach(function(code) {
+			let res = getTZNames(code)
+			if (res.length > 0) {
+				data.push(sha1(res) +":"+ code +":" + res)
+			}
+		})
+
+		if (data.length) {
+			// get one line per hash
+			data.sort()
+			//console.debug(data)
+			let next = "", codes = []
+			let aHash = []
+			for (let i = 0 ; i < data.length; i++) {
+				// get current item
+				let parts = data[i].split(":")
+				let tmpH = parts[0]
+				let tmpL = parts[1]
+				let tmpR = parts.slice(2, parts.length).join(":")
+				codes.push(tmpL)
+				// grab next item
+				if (i < data.length - 1) {
+					next = data[(i+1)].substring(0,40)
+				} else {
+					next = "end"
+				}
+				// build new item
+				if (next !== tmpH) {
+					let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
+						+ "<br><ul><li>" + codes.join(", ") +"</li>"
+						+ "<li>"+ tmpR + "</li></ul>"
+					aHash.push(str)
+					codes = [] // reset
+				}
+			}
+			if (type !== "ALL") {
+				type = tzNames[0]
+				dom.results.innerHTML = s4 + type.toUpperCase() +" ["+ aHash.length +"]"+ sc + spacer + aHash.join("<br>")
+			}
+
+		} else {
+			if (type !== "ALL") {
+				type = tzNames[0]
+				dom.results.innerHTML = s4 + type.toUpperCase() + sc + spacer + "not supported"
+			}
+		}
+		
+		// perf
+		let t1 = performance.now()
+		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+
+	} catch(e) {
+		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(type) {
+	//reset
+	dom.results = ""
+	dom.perf = ""
+	setBtn(type)
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		if (type == "ALL") {
+			dom.results.innerHTML = "<br>not coming soon... it's too slow"
+		} else {
+			run_main(type * 1)
+		}
+	}, 250)
+}
+
+function setBtn(type) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ type)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+function start() {
+	s4 = s4.trim()
+	s12 = s12.trim(),
+	s14 = s14.trim(),
+	s16 = s16.trim(),
+	sg = sg.trim()
+	sb = sb.trim()
+	do_legend()
+}
+
+start()
+
+
+</script>
+</body>
+</html>
