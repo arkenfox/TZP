@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>timeZoneName</title>
+<title>timezonenames</title>
 <style>
 </style>
 </head>
@@ -397,7 +397,7 @@ function run_main(type) {
 
 function run(type) {
 	//reset
-	dom.results = ""
+	dom.results.innerHTML = "<br>running test..."
 	dom.perf = ""
 	setBtn(type)
 	// delay so users see change and allow paint
@@ -407,7 +407,7 @@ function run(type) {
 		} else {
 			run_main(type * 1)
 		}
-	}, 250)
+	}, 1)
 }
 
 function setBtn(type) {
