@@ -479,8 +479,6 @@ function run_main(method, isLoopy) {
 		getSupported("best fit", method)
 
 		if (!isLoopy) {
-			getSupported("lookup", method)
-			getSupported("best fit", method)
 			dom.results.innerHTML = display.join("<br>")
 			// build + color legend
 			for (let i = 0 ; i < detailed.length; i++) {
