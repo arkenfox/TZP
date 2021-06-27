@@ -44,6 +44,7 @@
 						<span id="bshort" class="btn4 btn" onClick="run('short')">[ SHORT ]</span>
 						<span id="blong" class="btn4 btn" onClick="run('long')">[ LONG ]</span>
 						<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
 					</div>
 				<br><br><hr><br>
 				<span id ="results"></span>
@@ -300,34 +301,43 @@ function get_dayperiod(date, code, option) {
 
 function run_main(method) {
 	let t0 = performance.now()
-	let data = []
+	let data = [], aSupported = []
 	let spacer = "<br><br>"
 	let isAll = false
 	if (method == "all") {isAll = true; method = "narrow"}
-	
+	let useSupportedOnly = dom.supported.checked
+
 	try {
 		locales.forEach(function(code) {
-			let str ="", str2 = "", str3 = ""
-			// in the morning, noon, in the afternoon, in the evening, at night
-			str = get_dayperiod(new Date("2019-01-30T08:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, method)
-			if (!isAll) {
-				data.push(sha1(str) +"~~~"+ code +"~~~" + str)
-			} else {
-				str2 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "short")
-				str3 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "long")
-				data.push(sha1(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
+			// only if locale is supported
+			let go = true
+			if (useSupportedOnly) {
+				let test = Intl.PluralRules.supportedLocalesOf([code])
+				if (test.length) {aSupported.push(code)} else {go = false}
+			}
+			if (go) {
+				let str ="", str2 = "", str3 = ""
+				// in the morning, noon, in the afternoon, in the evening, at night
+				str = get_dayperiod(new Date("2019-01-30T08:00:00"), code, method)
+					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, method)
+					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, method)
+					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, method)
+					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, method)
+				if (!isAll) {
+					data.push(sha1(str) +"~~~"+ code +"~~~" + str)
+				} else {
+					str2 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "short")
+						+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "short")
+						+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "short")
+						+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "short")
+						+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "short")
+					str3 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "long")
+						+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "long")
+						+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "long")
+						+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "long")
+						+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "long")
+					data.push(sha1(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
+				}
 			}
 		})
 
@@ -335,7 +345,7 @@ function run_main(method) {
 		data.sort()
 		//console.debug(data)
 		let next = "", codes = []
-		let aHash = []
+		let aHash = [], aBuckets = []
 		for (let i = 0 ; i < data.length; i++) {
 			// get current item
 			let parts = data[i].split("~~~")
@@ -353,6 +363,7 @@ function run_main(method) {
 			}
 			// build new item
 			if (next !== tmpH) {
+				aBuckets.push(codes.join())
 				let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
 				if (isAll) {
 					str += "<ul><li>"+ s12 +"N: "+ sc + tmpN +"</li>"
@@ -366,10 +377,15 @@ function run_main(method) {
 				codes = [] // reset
 			}
 		}
+		// buckets
+		aBuckets.sort()
+		let bHash = sha1(aBuckets.join())
+
 		// display
 		if (isAll) {method = "all"}
-		dom.results.innerHTML = s4 + method.toUpperCase() + " ["+ aHash.length +"]" + sc
-			+ spacer + aHash.join("<br>")
+		dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + bHash
+			+ s4 +" ["+ aBuckets.length + (useSupportedOnly ? "|"+ aSupported.length : "") +"]" + sc
+			+ spacer +"<br>"+ aHash.join("<br>")
 		// perf
 		let t1 = performance.now()
 		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
@@ -424,6 +440,7 @@ function start() {
 	s16 = s16.trim(),
 	sg = sg.trim()
 	sb = sb.trim()
+	dom.supported.checked = true
 	legend()
 	run_test()
 }
