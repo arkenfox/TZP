@@ -260,9 +260,10 @@ addEventListener("message", function(msg) {
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
 			} else if (item == 44) {
-				// ToDo: dayPeriod: 1569103: shipped FF90+
 				function get_day_period(date) {
-					return new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "long"}).format(date)
+					let dpNarrow = new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "narrow"}).format(date)
+					let dpLong = new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "long"}).format(date)
+					return dpNarrow == dpLong ? dpLong : dpNarrow + ", " + dpLong
 				}
 				let tmp ="",
 					dayA = get_day_period(new Date("2019-01-30T08:00:00")),
@@ -275,10 +276,10 @@ addEventListener("message", function(msg) {
 					}
 				} else {
 					// in the morning, noon, in the afternoon, in the evening, at night
-					tmp = dayA +", "+ dayB
-						+", "+ get_day_period(new Date("2019-01-30T15:00:00"))
-						+", "+ get_day_period(new Date("2019-01-30T18:00:00"))
-						+", "+ get_day_period(new Date("2019-01-30T22:00:00"))
+					tmp = dayA +" | "+ dayB
+						+" | "+ get_day_period(new Date("2019-01-30T15:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T18:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T22:00:00"))
 				}
 				return tmp
 			} else if (item == 45) {

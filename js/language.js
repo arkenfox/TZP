@@ -414,9 +414,10 @@ function get_lang_doc() {
 						tmpb = tmpb.map(function(entry){return entry.value}).join("")
 					return tmp += " | "+ tmpb
 				} else if (item == 44) {
-					// ToDo: dayPeriod: 1569103: shipped FF90+
 					function get_day_period(date) {
-						return new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "long"}).format(date)
+						let dpNarrow = new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "narrow"}).format(date)
+						let dpLong = new Intl.DateTimeFormat(undefined, {hourCycle: "h12", dayPeriod: "long"}).format(date)
+						return dpNarrow == dpLong ? dpLong : dpNarrow + ", " + dpLong
 					}
 					let tmp ="",
 						dayA = get_day_period(new Date("2019-01-30T08:00:00")),
@@ -429,10 +430,10 @@ function get_lang_doc() {
 						}
 					} else {
 						// in the morning, noon, in the afternoon, in the evening, at night
-						tmp = dayA +", "+ dayB
-							+", "+ get_day_period(new Date("2019-01-30T15:00:00"))
-							+", "+ get_day_period(new Date("2019-01-30T18:00:00"))
-							+", "+ get_day_period(new Date("2019-01-30T22:00:00"))
+						tmp = dayA +" | "+ dayB
+							+" | "+ get_day_period(new Date("2019-01-30T15:00:00"))
+							+" | "+ get_day_period(new Date("2019-01-30T18:00:00"))
+							+" | "+ get_day_period(new Date("2019-01-30T22:00:00"))
 					}
 					return tmp
 				} else if (item == 45) {
@@ -594,8 +595,8 @@ function get_lang_doc() {
 			// FF85+: also use javascript.use_us_english_locale
 			if (bTZ) {
 				// state1: both green
-				if (lHash2 == "94fb2afc5cf3027349f9d1bf7c693bf4dc49b368") {ff = " [FF91+]" // 1653024
-				} else if (lHash2 == "131929d615983ebde1f9b6c0154975aed15a5ca1") {ff = " [FF90]"
+				if (lHash2 == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
+				} else if (lHash2 == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
 				} else if (lHash2 == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
 				} else if (lHash2 == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
 				} else if (lHash2 == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
