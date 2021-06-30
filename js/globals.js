@@ -36,6 +36,7 @@ let sData = {},
 	sPerfDetail = []
 // fluid
 let protoLies = [],
+	proxyLies = [],
 	navKeys = {}
 
 // android
