@@ -896,6 +896,8 @@ function showMetrics(type) {
 			array = gData
 		} else if (type == "prototype lies") {
 			array = gLies
+		} else if (type == "proxy lies") {
+			array = gLiesProxy
 		} else if (type == "prototype lies: details") {
 			array = gLiesDetail
 			showhash = false

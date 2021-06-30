@@ -13,6 +13,7 @@ let jsFiles = [],
 	gDetail = {},
 	// prototype lies
 	gLies = [],
+	gLiesProxy = [],
 	gLiesDetail = {},
 	// known
 	gKnown = [],
