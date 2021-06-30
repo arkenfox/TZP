@@ -730,6 +730,7 @@ function outputPrototypeLies() {
 		}
 		// always set on page-load, global rerun, section re-run 
 		protoLies = lieList
+		proxyLies = tamperingList
 		log_section("prereq", t0)
 		return resolve("done")
 	})
