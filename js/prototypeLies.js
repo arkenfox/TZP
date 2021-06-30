@@ -706,19 +706,25 @@ function outputPrototypeLies() {
 		if (iframeContainerDiv) {
 			iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
 		}
-		let el = dom.prototypehash
-		let hash = sha1(lieList)
 		// gRun: snapshot
 		if (gRun) {
 			gLies = lieList
+			gLiesProxy = tamperingList
 			gLiesDetail = lieDetail
 			if (lieCount == 0) {
-				el.innerHTML = "none"
+				dom.prototypehash = "none"
 			} else {
 				let lieString = lieList.length +" lie"+ (lieList.length > 1 ? "s" : "")
-				hash += buildButton("0", "prototype lies", lieString, "showMetrics")
-				hash += buildButton("0", "prototype lies: details", "details", "showMetrics")
-				el.innerHTML = hash
+				dom.prototypehash.innerHTML = sha1(lieList.join())
+					+ buildButton("0", "prototype lies", lieString, "showMetrics")
+					+ buildButton("0", "prototype lies: details", "details", "showMetrics")
+			}
+			if (tamperingList.length == 0) {
+				dom.proxyhash = "none"
+			} else {
+				let proxyString = tamperingList.length +" lie"+ (tamperingList.length > 1 ? "s" : "")
+				dom.proxyhash.innerHTML = sha1(lieList)
+					+ buildButton("0", "proxy lies", proxyString, "showMetrics")
 			}
 			log_perf("prototype lies [prereq]",t0)
 		}
