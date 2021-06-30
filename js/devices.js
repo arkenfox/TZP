@@ -105,7 +105,7 @@ function get_concurrency() {
 	if (isBraveMode.substring(0,2) == "st") {
 		isLies = true
 	} else {
-		isLies = (protoLies.includes("Navigator.hardwareConcurrency") ? true : false)
+		isLies = (proxyLies.includes("Navigator.hardwareConcurrency") ? true : false)
 	}
 	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
 	let h2 = h
