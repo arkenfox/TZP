@@ -248,6 +248,55 @@ function outputPrototypeLies() {
 					return error.constructor.name != 'TypeError' ? true : false
 				}
 			}
+			
+			/* Firefox Proxy tests */
+			const getFirefox = () => 3.141592653589793 ** -100 == 1.9275814160560185e-50
+
+			// arguments or caller should not throw 'incompatible Proxy' TypeError
+			const tryIncompatibleProxy = (isFirefox, fn) => {
+				try {
+					fn()
+					return true
+				} catch (error) {
+					return (
+						error.constructor.name != 'TypeError' ||
+						(isFirefox && /incompatible\sProxy/.test(error.message)) ? true : false
+					)
+				}
+			}
+			const getIncompatibleProxyTypeErrorLie = apiFunction => {
+				const isFirefox = getFirefox()
+				return (
+					tryIncompatibleProxy(isFirefox, () => apiFunction.arguments) ||
+					tryIncompatibleProxy(isFirefox, () => apiFunction.arguments)
+				)
+			}
+			const getToStringIncompatibleProxyTypeErrorLie = apiFunction => {
+				const isFirefox = getFirefox()
+				return (
+					tryIncompatibleProxy(isFirefox, () => apiFunction.toString.arguments) ||
+					tryIncompatibleProxy(isFirefox, () => apiFunction.toString.caller)
+				)
+			}
+
+			// setting prototype to itself should not throw 'Uncaught InternalError: too much recursion'
+			const getTooMuchRecursionLie = apiFunction => {
+				const isFirefox = getFirefox()
+				const nativeProto = Object.getPrototypeOf(apiFunction)
+				try {
+					Object.setPrototypeOf(apiFunction, apiFunction) + ''
+					return true
+				} catch (error) {
+					return (
+						error.constructor.name != 'TypeError' ||
+							(isFirefox && /too much recursion/.test(error.message)) ? true : false
+					)
+				} finally {
+					// restore proto
+					Object.setPrototypeOf(apiFunction, nativeProto)
+				}
+			}
+			
 
 			// API Function Test
 			const getLies = (apiFunction, proto, obj = null) => {
@@ -274,7 +323,10 @@ function outputPrototypeLies() {
 					[`l: descriptor keys should only contain "name" and "length"`]: getDescriptorKeysLie(apiFunction),
 					[`m: own property names should only contain "name" and "length"`]: getOwnPropertyNamesLie(apiFunction),
 					[`n: own keys names should only contain "name" and "length"`]: getOwnKeysLie(apiFunction),
-					[`o: calling toString() on an object created from the function should throw a TypeError`]: getNewObjectToStringTypeErrorLie(apiFunction)
+					[`o: calling toString() on an object created from the function should throw a TypeError`]: getNewObjectToStringTypeErrorLie(apiFunction),
+					[`p: arguments or caller should not throw 'incompatible Proxy' TypeError`]: getIncompatibleProxyTypeErrorLie(apiFunction),
+					[`q: arguments or caller on toString should not throw 'incompatible Proxy' TypeError`]: getToStringIncompatibleProxyTypeErrorLie(apiFunction),
+					[`r: setting prototype to itself should throw a TypeError not 'InternalError: too much recursion'`]: getTooMuchRecursionLie(apiFunction)
 				}
 				const lieTypes = Object.keys(lies).filter(key => !!lies[key])
 				return {
@@ -618,6 +670,10 @@ function outputPrototypeLies() {
 				Worker
 				History
 			*/
+
+			// disregard Function.prototype.toString lies to filter direct API tampering
+			const getCountOfNonFunctionToStringLies = x => !x ? x : x.filter(x => !/o:|q:/.test(x)).length
+
 			// return lies list and detail 
 			const props = lieDetector.getProps()
 			const propsSearched = lieDetector.getPropsSearched()
@@ -625,7 +681,17 @@ function outputPrototypeLies() {
 				lieList: Object.keys(props).sort(),
 				lieDetail: props,
 				lieCount: Object.keys(props).reduce((acc, key) => acc + props[key].length, 0),
-				propsSearched
+				propsSearched,
+				// filter out lies on Function.prototype.toString
+				tamperingList: (props => {
+					return Object.keys(props).filter(key => {
+						const totalTamperingLies = getCountOfNonFunctionToStringLies(props[key])
+						if (!totalTamperingLies) {
+							return false
+						}
+						return true
+					})
+				})(props)
 			}
 		}
 
@@ -634,7 +700,8 @@ function outputPrototypeLies() {
 			lieList,
 			lieDetail,
 			lieCount,
-			propsSearched
+			propsSearched,
+			tamperingList
 		} = getPrototypeLies(iframeWindow) // execute and destructure the list and detail
 		if (iframeContainerDiv) {
 			iframeContainerDiv.parentNode.removeChild(iframeContainerDiv)
