@@ -723,7 +723,7 @@ function outputPrototypeLies() {
 				dom.proxyhash = "none"
 			} else {
 				let proxyString = tamperingList.length +" lie"+ (tamperingList.length > 1 ? "s" : "")
-				dom.proxyhash.innerHTML = sha1(lieList)
+				dom.proxyhash.innerHTML = sha1(tamperingList.join())
 					+ buildButton("0", "proxy lies", proxyString, "showMetrics")
 			}
 			log_perf("prototype lies [prereq]",t0)
