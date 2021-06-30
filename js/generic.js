@@ -1194,6 +1194,7 @@ function outputSection(id, cls) {
 			gMethods = []
 			// reset section
 			protoLies = []
+			proxyLies = []
 			sData = {}
 			sDetail = {}
 			// reset perf
