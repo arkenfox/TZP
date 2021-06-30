@@ -124,9 +124,9 @@ function get_color() {
 	let res = [], r1 = "", r2 = "", r3 = ""
 	// depth
 	try {r1 = screen.pixelDepth} catch(e) {r1 = zB0}
-	if (protoLies.includes("Screen.pixelDepth")) {r1 = "fake"}
+	if (proxyLies.includes("Screen.pixelDepth")) {r1 = "fake"}
 	try {r2 = screen.colorDepth} catch(e) {r2 = zB0}
-	if (protoLies.includes("Screen.colorDepth")) {r2 = "fake"}
+	if (proxyLies.includes("Screen.colorDepth")) {r2 = "fake"}
 	res.push("pixelDepth:"+ r1)
 	res.push("colorDepth:"+ r2)
 	r1 += " | "+ r2
@@ -1401,8 +1401,8 @@ function get_screen_metrics(runtype) {
 		} else {
 			// prototype lies
 			let scrLies = false
-			if (protoLies.includes("Screen.width")) {scrLies = true}
-			if (protoLies.includes("Screen.height")) {scrLies = true}
+			if (proxyLies.includes("Screen.width")) {scrLies = true}
+			if (proxyLies.includes("Screen.height")) {scrLies = true}
 			res.push("screen:"+ (scrLies ? "fake" : mScreen))
 		}
 		// dpr
@@ -2256,18 +2256,18 @@ function outputUA() {
 	let t0 = performance.now()
 	// lies
 	function get_pLies() {
-		if (protoLies.includes("Navigator.userAgent")) {uaBS = true
-		} else if (protoLies.includes("Navigator.appVersion")) {uaBS = true
-		} else if (protoLies.includes("Navigator.platform")) {uaBS = true
-		} else if (protoLies.includes("Navigator.oscpu")) {uaBS = true
+		if (proxyLies.includes("Navigator.userAgent")) {uaBS = true
+		} else if (proxyLies.includes("Navigator.appVersion")) {uaBS = true
+		} else if (proxyLies.includes("Navigator.platform")) {uaBS = true
+		} else if (proxyLies.includes("Navigator.oscpu")) {uaBS = true
 		} else if (!isFF) {
-			if (protoLies.includes("Navigator.productSub")) {uaBS = true
-			} else if (protoLies.includes("Navigator.buildID")) {uaBS = true
-			} else if (protoLies.includes("Navigator.vendor")) {uaBS = true
-			} else if (protoLies.includes("Navigator.vendorSub")) {uaBS = true
-			} else if (protoLies.includes("Navigator.appCodeName")) {uaBS = true
-			} else if (protoLies.includes("Navigator.appName")) {uaBS = true
-			} else if (protoLies.includes("Navigator.product")) {uaBS = true}
+			if (proxyLies.includes("Navigator.productSub")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.buildID")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.vendor")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.vendorSub")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.appCodeName")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.appName")) {uaBS = true
+			} else if (proxyLies.includes("Navigator.product")) {uaBS = true}
 		}
 	}
 	// clear
