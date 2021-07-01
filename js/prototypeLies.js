@@ -709,7 +709,7 @@ function outputPrototypeLies() {
 		// gRun: snapshot
 		if (gRun) {
 			gLies = lieList
-			gLiesProxy = tamperingList
+			gLiesProxy = tamperingList.sort()
 			gLiesDetail = lieDetail
 			if (lieCount == 0) {
 				dom.prototypehash = "none"
