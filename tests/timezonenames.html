@@ -8,14 +8,14 @@
 </head>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=850">
 	<title>pluralrules</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 780px;}
+		table {width: 830px;}
 		hr {color: #dcdc8c}
 	</style>
 </head>
@@ -47,6 +47,7 @@
 						<span id="b4" class="btn4 btn" onClick="run('4')">[ SG ]</span>
 						<span id="b5" class="btn4 btn" onClick="run('5')">[ LG ]</span>
 						<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>
+						<span class="btn4 btn"><input type="checkbox" id="supported"> supported</span>
 					</div>
 				<br><br><hr><br>
 				<span id ="results"></span>
@@ -277,16 +278,19 @@ var detailed = [
 ]
 
 var legend = [],
-	locales = []
+	locales = [],
+	supported = []
 
 function do_legend() {
-	// build once
+	// build once: legend, locales, supportedlocales
 	if (legend.length == 0) {
 		detailed.sort()
 		for (let i = 0 ; i < detailed.length; i++) {
 			let code = detailed[i].split(",")[0].trim()
 			let name = detailed[i].split(",")[1]
-			locales.push(code.toLowerCase())
+			locales.push(code)
+			let test = Intl.PluralRules.supportedLocalesOf([code])
+			if (test.length) {supported.push(code)}
 			legend.push(code.padStart(7) +": "+ name)
 		}
 	}
@@ -337,20 +341,27 @@ function run_main(type) {
 		}
 	}
 
+	let useSupportedOnly = dom.supported.checked
+	let loop = useSupportedOnly ? supported : locales
 	try {
 		// get data
-		locales.forEach(function(code) {
+		loop.forEach(function(code) {
 			let res = getTZNames(code)
 			if (res.length > 0) {
 				data.push(sha1(res) +":"+ code +":" + res)
 			}
 		})
+		// if supported only, also add undefined
+		if (useSupportedOnly) {
+			let res = getTZNames(undefined)
+			data.push(sha1(res) +":undefined:" + res)
+		}
 
 		if (data.length) {
 			// get one line per hash
 			data.sort()
 			let next = "", codes = []
-			let aHash = []
+			let aHash = [], aBucketsR = [], aBucketsC = []
 			for (let i = 0 ; i < data.length; i++) {
 				// get current item
 				let parts = data[i].split(":")
@@ -366,6 +377,8 @@ function run_main(type) {
 				}
 				// build new item
 				if (next !== tmpH) {
+					aBucketsR.push(tmpR) // hash of results
+					aBucketsC.push(codes.join()) // hash of locale groups
 					let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
 						+ "<br><ul><li>" + codes.join(", ") +"</li>"
 						+ "<li>"+ tmpR + "</li></ul>"
@@ -373,11 +386,18 @@ function run_main(type) {
 					codes = [] // reset
 				}
 			}
+			// buckets
+			aBucketsR.sort()
+			aBucketsC.sort()
 			if (type !== "ALL") {
 				type = tzNames[0]
-				dom.results.innerHTML = s4 + type.toUpperCase() +" ["+ aHash.length +"]"+ sc + spacer + aHash.join("<br>")
+				dom.results.innerHTML = s4 + type.toUpperCase() +" ["+ aHash.length
+					+ (useSupportedOnly ? sc +" from "+ s4 + loop.length + " supported + undefined" : "")
+					+"]"+ sc	+ spacer
+					+ s16 +"results: "+ sc + sha1(aBucketsR.join()) +"<br>"
+					+ s16 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
+					+ aHash.join("<br>")
 			}
-
 		} else {
 			if (type !== "ALL") {
 				type = tzNames[0]
@@ -429,6 +449,7 @@ function start() {
 	s16 = s16.trim(),
 	sg = sg.trim()
 	sb = sb.trim()
+	dom.supported.checked = true
 	do_legend()
 }
 
