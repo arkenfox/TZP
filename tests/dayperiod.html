@@ -345,7 +345,7 @@ function run_main(method) {
 		data.sort()
 		//console.debug(data)
 		let next = "", codes = []
-		let aHash = [], aBuckets = []
+		let aHash = [], aBucketsC = [], aBucketsM = []
 		for (let i = 0 ; i < data.length; i++) {
 			// get current item
 			let parts = data[i].split("~~~")
@@ -363,7 +363,12 @@ function run_main(method) {
 			}
 			// build new item
 			if (next !== tmpH) {
-				aBuckets.push(codes.join())
+				aBucketsC.push(codes.join())
+				if (isAll) {
+					aBucketsM.push(tmpN +" | "+ tmpS +" | " + tmpL )
+				} else {
+					aBucketsM.push(tmpN)
+				}
 				let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
 				if (isAll) {
 					str += "<ul><li>"+ s12 +"N: "+ sc + tmpN +"</li>"
@@ -378,15 +383,19 @@ function run_main(method) {
 			}
 		}
 		// buckets
-		aBuckets.sort()
-		//console.debug(aBuckets.join("\n"))
-		let bHash = sha1(aBuckets.join())
+		aBucketsC.sort() // locale code groups
+		aBucketsM.sort() // method
+		//console.debug(aBucketsM)
 
 		// display
 		if (isAll) {method = "all"}
-		dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + bHash
-			+ s4 +" ["+ aBuckets.length + (useSupportedOnly ? "|"+ aSupported.length : "") +"]" + sc
-			+ spacer +"<br>"+ aHash.join("<br>")
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ aHash.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
+			+ spacer + s16 +"results: "+ sc + sha1(aBucketsM.join()) +"<br>"
+			+ s16 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
+			+"<br>"+ aHash.join("<br>")
+		dom.results.innerHTML = display
+
 		// perf
 		let t1 = performance.now()
 		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
