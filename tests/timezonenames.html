@@ -351,13 +351,13 @@ function run_main(type) {
 				data.push(sha1(res) +":"+ code +":" + res)
 			}
 		})
-		// if supported only, also add undefined
-		if (useSupportedOnly) {
-			let res = getTZNames(undefined)
-			data.push(sha1(res) +":undefined:" + res)
-		}
 
 		if (data.length) {
+			// if supported only, also add undefined
+			if (useSupportedOnly) {
+				let res = getTZNames(undefined)
+				data.push(sha1(res) +":undefined:" + res)
+			}
 			// get one line per hash
 			data.sort()
 			let next = "", codes = []
