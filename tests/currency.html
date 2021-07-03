@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>currency</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>pluralrules</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">currency
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Testing gecko language results with currency</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+					<div class="btn">
+						<span id="brun" class="btn4 btn" onClick="run('run')">[ RUN ]</span>
+						<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+						<span id="bsum" class="btn4 btn" onClick="run('sum')">[ SUMMARY ]</span>
+						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
+					</div>
+				<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+var detailed = [
+"aa,afar",
+"ab,abkhazian",
+"ach,acholi",
+"ae,avestan",
+"af,afrikaans",
+"ak,akan",
+"am,amharic",
+"an,aragonese",
+"ar,arabic",
+"as,assamese",
+"ast,asturian",
+"av,avaric",
+"ay,aymara",
+"az,azerbaijani",
+"ba,bashkir",
+"be,belarusian",
+"bg,bulgarian",
+"bh,bihari",
+"bi,bislama",
+"bm,bambara",
+"bn,bengali",
+"bo,tibetan",
+"br,breton",
+"bs,bosnian",
+"ca,catalan",
+"cak,kaqchikel",
+"ce,chechen",
+"ch,chamorro",
+"ckb,central kurdish", // ? dropped
+"co,corsican",
+"cr,cree",
+"crh,crimean tatar",
+"cs,czech",
+"csb,kashubian",
+"cu,church slavic",
+"cv,chuvash",
+"cy,welsh",
+"da,danish",
+"de,german",
+"dsb,lower sorbian",
+"dv,divehi",
+"dz,dzongkha",
+"ee,ewe",
+"el,greek",
+"en,english",
+"eo,esperanto",
+"es,spanish",
+"et,estonian",
+"eu,basque",
+"fa,persian",
+"ff,fulah",
+"fi,finnish",
+"fj,fijian",
+"fo,faroese",
+"fr,french",
+"fur,friulian",
+"fy,frisian",
+"ga,irish",
+"gd,scottish gaelic",
+"gl,galician",
+"gn,guarani",
+"gu,gujarati",
+"gv,manx",
+"ha,hausa",
+"haw,hawaiian",
+"he,hebrew",
+"hi,hindi",
+"hil,hiligaynon",
+"ho,hiri motu",
+"hr,croatian",
+"hsb,upper sorbian",
+"ht,haitian",
+"hu,hungarian",
+"hy,armenian",
+"hye,eastern armenian", // ? dropped
+"hz,herero",
+"ia,interlingua",
+"id,indonesian",
+"ie,interlingue",
+"ig,igbo",
+"ii,sichuan yi",
+"ik,inupiaq",
+"io,ido",
+"is,icelandic",
+"it,italian",
+"iu,inuktitut",
+"ja,japanese",
+"jv,javanese",
+"ka,georgian",
+"kab,kabyle",
+"kg,kongo",
+"ki,kikuyu",
+"kj,kuanyama",
+"kk,kazakh",
+"kl,greenlandic",
+"km,khmer",
+"kn,kannada",
+"ko,korean",
+"kok,konkani",
+"kr,kanuri",
+"ks,kashmiri",
+"ku,kurdish",
+"kv,komi",
+"kw,cornish",
+"ky,kirghiz",
+"la,latin",
+"lb,luxembourgish",
+"lg,ganda",
+"li,limburgan",
+"lij,ligurian",
+"ln,lingala",
+"lo,lao",
+"lt,lithuanian",
+"ltg,latgalian",
+"lu,luba-katanga",
+"lv,latvian",
+"mai,maithili",
+"meh,sw tlaxiaco mixtec",
+"mg,malagasy",
+"mh,marshallese",
+"mi,maori",
+"mix,mixtepec mixtec",
+"mk,macedonian",
+"ml,malayalam",
+"mn,mongolian",
+"mr,marathi",
+"ms,malay",
+"mt,maltese",
+"my,burmese",
+"na,nauru",
+"nb,norwegian bokmål",
+"nd,ndebele north",
+"ne,nepali",
+"ng,ndonga",
+"nl,dutch",
+"nn,norwegian nynorsk",
+"no,norwegian",
+"nr,ndebele south",
+"nso,sotho northern",
+"nv,navajo",
+"ny,chichewa",
+"oc,occitan",
+"oj,ojibwa",
+"om,oromo",
+"or,odia",
+"os,ossetian",
+"pa,punjabi",
+"pi,pali",
+"pl,polish",
+"ps,pashto",
+"pt,portuguese",
+"qu,quechua",
+"rm,rhaeto-romanic",
+"rn,kirundi",
+"ro,romanian",
+"ru,russian",
+"rw,kinyarwanda",
+"sa,sanskrit",
+"sc,sardinian",
+"sco,scots", // 1714293
+"sd,sindhi",
+"se,northern sami",
+"sg,sango",
+"si,singhalese",
+"sk,slovak",
+"sl,slovenian",
+"sm,samoan",
+"sn,shona",
+"so,somali",
+"son,songhay",
+"sq,albanian",
+"sr,serbian",
+"ss,siswati",
+"st,sotho southern",
+"su,sundanese",
+"sv,swedish",
+"sw,swahili",
+"szl,silesian", // 1691695
+"ta,tamil",
+"te,telugu",
+"tg,tajik",
+"th,thai",
+"ti,tigrinya",
+"tig,tigre",
+"tk,turkmen",
+"tl,tagalog",
+"tlh,klingon",
+"tn,tswana",
+"to,tonga",
+"tr,turkish",
+"trs,triqui", // 1583177
+"ts,tsonga",
+"tt,tatar",
+"tw,twi",
+"ty,tahitian",
+"ug,uighur",
+"uk,ukrainian",
+"ur,urdu",
+"uz,uzbek",
+"ve,venda",
+"vi,vietnamese",
+"vo,volapük",
+"wa,walloon",
+"wen,sorbian",
+"wo,wolof",
+"xh,xhosa",
+"yi,yiddish",
+"yo,yoruba",
+"za,zhuang",
+"zam,miahuatlán zapotec",
+"zh,chinese",
+"zh-cn,chinese china",
+"zh-Hans,chinese simple",
+"zh-Hant,chinese traditional",
+"zh-hk,chinese hong kong",
+"zh-sg,chinese singapore",
+"zh-tw,chinese taiwan",
+"zu,zulu",
+]
+
+var	currencyExample = [
+	// firefox nightly 91
+	// accumulative: // max? 135 from 150
+'USD', // 5cd66cc51e1aed54e2f04f1ac4fad6e54b33a2d5:  42: +42
+'AUD', // c45ec7a252d472cd3f22ea1e736fd3c5cd24859d:  59: +17
+'PHP', // 7bf52f7702e05a919fa92ea3f3ce567e78e2e40f:  74: +15
+'JPY', // 20d7c843139f243f6a8408ff39a8c522c12ec1ba:  88: +14
+'THB', // ef1cbad25ffdbf8a46f13db1fc86b39a639c27a8:  99: +11
+'XXX', // 7317e5119f65d450764aab3374e0a249f25ee264: 107: +8
+'RUB', // 6e7f2fbaa296831804add7c3d25df928844dc352: 111: +4
+'CNY', // d21de32e991fb55100b339b1659d4426d64a7788: 114: +3
+'XCD', // 24b40b1a51ceb7fa8d72447ad8f6cd0d333b509b: 117: +3
+'BBD', // 42d94363564403a5f22fd11af35fa80ffd0e3ffb: 119: +2
+'CDF', // ae6bef450af9b3a1fc9073fe012beb280b764cee: 121: +2
+'AZN',
+'DKK',
+'ETB',
+'EUR', // 125
+'GHS',
+'IDR',
+'KES',
+'KRW',
+'MGA', // 130
+'MNT',
+'NGN',
+'RWF',
+'UAH',
+'ZAR', // 45385ba50107e0c29c40d3c79e98c955a9b9dedf: 135
+
+// FF90 or lower: at this stage it is 127
+'NZD',
+'RON',
+'XOF',
+'XPF',
+'PKR',
+'UZS', // to 133
+'zzz', // garbage
+
+]
+
+var	currencyMaster = [
+// covered by USD
+'AFN','ANG','AOA','ARS','AWG','BDT','BGN','BND','BOB','BOV','BTN','BWP','CHE','CHF','CHW','CLF','CLP','COP',
+'COU','CRC','CUC','CUP','CVE','DJF','ERN','FKP','GIP','GMD','GNF','GTQ','GYD','HNL','HTG','KHR','KMF','KPW',
+'KYD','LRD','LSL','MDL','MMK','MOP','MUR','MVR','MWK','MXV','MYR','MZN','NAD','NIO','NPR','PAB','PEN','PGK',
+'PYG','SCR','SHP','SLL','SRD','SSP','STN','SVC','SZL','TTD','USN','UYI','UYU','UYW','VES','VUV','WST','XAG',
+'XAU','XBA','XBB','XBC','XBD','XDR','XPD','XPT','XSU','XTS','XUA','ZMW','ZWL',
+// covered by AUD PHP JPY THB XXX
+'AED','ALL','BAM','BHD','BYN','CAD','CZK','DZD','FJD','HKD','HRK','INR','IQD','IRR','JOD','KGS','KWD','LAK',
+'LKR','LBP','LYD','MAD','MKD','MRU','OMR','QAR','RSD','SAR','SBD','SDG','SYP','TMT','TND','TOP','TZS','UGX',
+'VND','YER',
+// covered by RUB CNY XCD BBD CDF
+'AMD','BIF','BMD','BRL','BSD','BZD','DOP','EGP','GEL','ILS','ISK','JMD','KZT','MXN','NOK','PLN','SEK','SGD',
+'SOS','TJS','TRY','XAF',
+// duplicates in the long tail
+'GBP','TWD',
+]
+/* iso codes
+- https://www.iso.org/iso-4217-currency-codes.html
+- https://en.wikipedia.org/wiki/ISO_4217
+*/
+
+var legendclean = [],
+	locales = [],
+	supported = [],
+	currencies = []
+
+var useExample = false
+
+function legend() {
+	// build once
+	if (legendclean.length == 0) {
+		detailed.sort()
+		for (let i = 0 ; i < detailed.length; i++) {
+			let code = detailed[i].split(",")[0]
+			let name = detailed[i].split(",")[1]
+			code = code.trim()
+			locales.push(code)
+			let test = Intl.PluralRules.supportedLocalesOf([code])
+			if (test.length) {supported.push(code)}
+			legendclean.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	dom.legend.innerHTML = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"+ legendclean.join("<br>")
+}
+
+function run_test(isSummary, isExample) {
+	let t0 = performance.now()
+	let data = []
+	let spacer = "<br><br>"
+	currencies.sort()
+	let useSupportedOnly = dom.supported.checked
+	let loop = useSupportedOnly ? supported : locales
+
+	try {
+		if (isSummary) {
+			currencyMaster.forEach(function(cur) {
+				let curData = []
+				loop.forEach(function(code) {
+					let res = undefined
+					res = Number(1234567.89).toLocaleString(code, {style: "currency", currency: cur, currencyDisplay: "symbol"})
+					if (res.length > 0) {
+						curData.push(sha1(res) +"~~~"+ code)
+					}
+				})
+				if (curData.length) {
+					curData.sort()
+					//console.debug(curData)
+					// get locales per hash
+					let next = "", codes = []
+					let aBucketsC = []
+					for (let i = 0 ; i < curData.length; i++) {
+						// get current item
+						let parts = curData[i].split("~~~")
+						let tmpH = parts[0]
+						let tmpC = parts[1]
+						codes.push(tmpC)
+						// grab next item
+						if (i < curData.length - 1) {
+							next = curData[(i+1)].substring(0,40)
+						} else {
+							next = "end"
+						}
+						// build new item
+						if (next !== tmpH) {
+							aBucketsC.push(codes.join()) // locale groups
+							codes = [] // reset
+						}
+					}
+					// buckets
+					aBucketsC.sort()
+					data.push(sha1(aBucketsC.join()) +":"+ aBucketsC.length +":"+ cur)
+				}
+			})
+			// sort data, group
+			data.sort()
+			//console.debug(data)
+			// get locales per hash
+			let nextG = "", codesG = []
+			let display = []
+			for (let i = 0 ; i < data.length; i++) {
+				// get current item
+				let parts = data[i].split(":")
+				let tmpH = parts[0] // hash
+				let tmpC = parts[1] // count
+				let tmpR = parts[2] // currency
+				codesG.push(tmpR)
+				// grab next item
+				if (i < data.length - 1) {
+					next = data[(i+1)].substring(0,40)
+				} else {
+					next = "end"
+				}
+				// build new item
+				if (next !== tmpH) {
+					let str = s12 + tmpH + sc +" "+ s4 +"["+ tmpC +"]"+ sc
+						+ "<br><ul><li>"+ codesG.join(", ") + "</li></ul>"
+					display.push(str)
+					codesG = [] // reset
+				}
+			}
+			dom.results.innerHTML = s4 + display.length + sc
+				+ (useSupportedOnly ? sc +" from "+ s4 + loop.length + " supported" : " testing all " + loop.length) + sc + spacer
+				+ s16 +"currencies: " + currencies.length +"<br>"+ sc + currencies.join(", ") + spacer
+				+ display.join("<br>")
+		}
+
+		//
+		if (!isSummary) {
+			loop.forEach(function(code) {
+				let codeData = []
+				currencies.forEach(function(cur) {
+					let res = undefined
+					res = Number(1234567.89).toLocaleString(code, {style: "currency", currency: cur, currencyDisplay: "symbol"})
+					if (res.length > 0) {
+						codeData.push(cur +":"+ res)
+					}
+				})
+				if (codeData.length) {
+					data.push(sha1(codeData.join()) +"~~~"+ code +"~~~"+ codeData.join("^^^"))
+				}
+			})
+			if (data.length) {
+				// add one undefined record
+				let codeData = []
+				currencies.forEach(function(cur) {
+					let res = undefined
+					res = Number(1234567.89).toLocaleString(undefined, {style: "currency", currency: cur, currencyDisplay: "symbol"})
+					if (res.length > 0) {
+						codeData.push(cur +":"+ res)
+					}
+				})
+				if (codeData.length) {
+					data.push(sha1(codeData.join()) +"~~~undefined~~~"+ codeData.join("^^^"))
+				}
+				// get one line per hash
+				data.sort()
+				let next = "", codes = []
+				let aHash = [], aBucketsR = [], aBucketsC = []
+				for (let i = 0 ; i < data.length; i++) {
+					// get current item
+					let parts = data[i].split("~~~")
+					let tmpH = parts[0]
+					let tmpL = parts[1]
+					let tmpR = parts.slice(2, parts.length).join("~~~")
+					codes.push(tmpL)
+					// grab next item
+					if (i < data.length - 1) {
+						next = data[(i+1)].substring(0,40)
+					} else {
+						next = "end"
+					}
+					// build new item
+					if (next !== tmpH) {
+						aBucketsR.push(tmpR) // hash of results
+						aBucketsC.push(codes.join()) // hash of locale groups
+						let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc +"<br><ul>"
+						// split tmpR into parts
+						let curRes = tmpR.split("^^^")
+						curRes.forEach(function(item) {
+							let part1 = item.split(":")[0]
+							let part2 = item.split(":")[1]
+							str += "<li>"+ s16 + part1 + sc +": "+ part2 +"</li>"
+						})
+						str += "<li>"+ s12 +"locales: "+ sc + codes.join(", ") + "</li></ul>"
+						aHash.push(str)
+						codes = [] // reset
+					}
+				}
+				// buckets
+				aBucketsR.sort()
+				aBucketsC.sort()
+				//console.debug(aBucketsC.join("\n"))
+				dom.results.innerHTML = s4 + aHash.length + sc +" from " + s4 + loop.length
+					+ (useSupportedOnly ? " supported" : "") + sc +" + undefined"+ spacer
+					+ s16 +"currencies: " + currencies.length +"<br>"+ sc + currencies.join(", ") + spacer
+					+ s16 +"results: "+ sc + sha1(aBucketsR.join()) +"<br>"
+					+ s12 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
+					+ aHash.join("<br>")
+			}
+		}
+
+		// perf
+		let t1 = performance.now()
+		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+
+	} catch(e) {
+		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(type) {
+	dom.results.innerHTML = "running test..."
+	dom.perf = ""
+	setTimeout(function() {
+		if (type == "sum") {
+
+			run_test(true)
+		} else if (type == "all") {
+
+			currencies = currencyMaster
+			run_test(false)
+		} else {
+			// use text field, if empty run example
+
+			currencies = currencyExample
+			run_test(false)
+		}
+	}, 1)
+}
+
+function start() {
+	s4 = s4.trim()
+	s12 = s12.trim(),
+	s14 = s14.trim(),
+	s16 = s16.trim(),
+	sg = sg.trim()
+	sb = sb.trim()
+	dom.supported.checked = true
+	legend()
+	currencyMaster = currencyMaster.concat(currencyExample)
+	currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})
+	currencyMaster.sort()
+}
+
+start()
+
+
+</script>
+</body>
+</html>
