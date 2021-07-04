@@ -54,6 +54,7 @@
 					<div class="btn">
 						<span class="btn4 btn" onClick="collator()">[ run ]</span>
 						<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
+						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
 					</div>
 				<br><br>
 				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
@@ -65,11 +66,6 @@
 	<br>
 
 <script>
-
-var legendclean = [],
-	sColor = s12.trim(),
-	counter = 0,
-	legendheader = ""
 
 /*
 https://searchfox.org/mozilla-central/source/toolkit/components/mozintl/mozIntl.jsm
@@ -370,8 +366,6 @@ var collatorExample = [
 	// f28621c5d958602e2b7a45b26ea7ec368af168cd
 ]
 
-console.debug(collatorExample)
-
 var compareExamples = [
 	'\u0109,\u00E7\a',
 	'a,\u03B1',
@@ -398,15 +392,20 @@ var compareExamples = [
 	'\u05EA,\uFB4A',
 ]
 
+var aLegend = [],
+	aLocales = [],
+	aSupported = [],
+	aSupportedDetail = [],
+	useSupportedOnly = true,
+	sColor = s12.trim(),
+	counter = 0
+
 function reset(type) {
 	if (type == "compare") {
 		dom.valueA.value = ""
 		dom.valueB.value = ""
-		//dom.output_compare.innerHTML = "&nbsp"
 	} else {
 		dom.valueC.value = ""
-		//legend()
-		//dom.output_collator.innerHTML = "&nbsp"
 	}
 }
 
@@ -423,18 +422,29 @@ function check_example() {
 
 function legend() {
 	// build once
-	if (legendclean.length == 0) {
+	if (aLegend.length == 0) {
 		sg = sg.trim() // change global var
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
 			let code = list[i].split(",")[0]
 			let name = list[i].split(",")[1]
-			legendclean.push(code.padStart(7) +": "+ name)
+			code = code.trim()
+			aLocales.push(code)
+			let test = Intl.Collator.supportedLocalesOf([code])
+			if (test.length) {
+				aSupported.push(code)
+				aSupportedDetail.push(code.padStart(7) +": "+ name)
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	legendheader = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"
-	dom.legend.innerHTML = legendheader + legendclean.join("<br>")
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aSupportedDetail}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
 function compare() {
@@ -543,6 +553,8 @@ function collator() {
 
 	// good to go
 	if (go) {
+		useSupportedOnly = dom.supported.checked
+
 		// delay so user can see changes
 		setTimeout(function() {
 			let output = []
@@ -571,22 +583,28 @@ function collator() {
 				chars.sort()
 				let code = list[i].split(",")[0]
 				let name = list[i].split(",")[1]
-				chars.sort(Intl.Collator(code).compare)
-				let test = sha1(chars.join())
-				if (test == control) {
-					legendnew.push(code.padStart(7) +": "+ name)
+
+				if (useSupportedOnly && aSupported.indexOf(code) == -1) {
+					// ignore unsupported
 				} else {
-					codes.push(code)
-					legendnew.push(sg + code.padStart(7) +": "+ name + sc)
-					diffs.push(test +":"+ code +" ("+ name +")")
+					chars.sort(Intl.Collator(code).compare)
+					let test = sha1(chars.join())
+					if (test == control) {
+						legendnew.push(code.padStart(7) +": "+ name)
+					} else {
+						codes.push(code)
+						legendnew.push(sg + code.padStart(7) +": "+ name + sc)
+						diffs.push(test +":"+ code +" ("+ name +")")
+					}
 				}
 			}
 			// we have diffs
 			if (diffs.length) {
 				// output colored legend
-				dom.legend.innerHTML = legendheader + legendnew.join("<br>")
+				let header = s4 +"   LEGEND ["+ (useSupportedOnly ? aSupported.length +" supported" : aLocales.length) +"]"+ sc +"<br><br>"
+				dom.legend.innerHTML = header + legendnew.join("<br>")
 
-				// get one line per hash				
+				// get one line per hash
 				diffs.sort()
 				let tmpH = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
 				let newArr = [], newArrPretty = []
@@ -632,10 +650,9 @@ function collator() {
 				// results output
 				localesHash = sha1(localesHash.join())
 				strItem = sColor +"  stats: "+ sc
-					+ sg + newArr.length +" unique "
-					+ (newArr.length > 1 ? "hashes": "hash")
-					+ sc +" covering "
-					+ sg + codes.length +" locales"+ sc
+					+ sg + newArr.length +" unique"
+					+ sc +" covering "+ sg + codes.length
+					+ (useSupportedOnly ? "/"+ aSupported.length + sc +" supported": sc) + " locales"
 				output.push(strItem)
 
 				let ff = ""
@@ -663,6 +680,7 @@ function collator() {
 	}
 }
 
+dom.supported.checked = true
 legend()
 check_example()
 collator()
