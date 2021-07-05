@@ -37,31 +37,26 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-			<div><span class="btn4 btn" onClick="run(`false`)">[ combine years ]</span>
-					<span class="btn4 btn" onClick="run(`true`)">[ summarize years ]</span>
-					<span class="btn4 btn" onClick="reset()">[ clear input ]</span>
-				</div>
-				<br><span><input type="text" style="width: 99%;" placeholder="comma delimited year(s)" id="inputYears"></span>
-				<br>
-				<br><span><hr></span>
-				<br><span class="spaces" id="info" style="line-height: 1.5em;"></span>
-				<br><span class="spaces" id="data"></span>
+				<span class="btn4 btnfirst" onClick="run(`false`)">[ combine years ]</span>
+				<span class="btn4 btn" onClick="run(`true`)">[ summarize years ]</span>
+				<span class="btn4 btn" onClick="reset()">[ clear input ]</span>
+			<br><br>
+				<span><input type="text" style="width: 99%;" placeholder="comma delimited year(s)" id="inputYears"></span>
+			<br><br>
+				<span><hr></span>
+			<br>
+				<span class="spaces" id="info" style="line-height: 1.5em;"></span>
+			<br>
+				<span class="spaces" id="data"></span>
 			</td></tr>
 	</table>
 	<br>
 
 <script>
 
-/*
- IANA time zone database
- https://www.iana.org/time-zones
- https://github.com/vvo/tzdb/
-*/
-
 var list = [
 // MISC: the AA part is bogus
 "AA/UTC",
-
 "AA/GMT",
 "AA/Etc/GMT+12",
 "AA/Etc/GMT+11",
@@ -91,7 +86,6 @@ var list = [
 "AA/Etc/GMT-12",
 "AA/Etc/GMT-13",
 "AA/Etc/GMT-14",
-
 // IANA 425 current
 "Africa/Abidjan",
 "Africa/Accra",
@@ -520,38 +514,38 @@ var list = [
 "Pacific/Wallis"
 ]
 
-var legendclean = [],
-	dates = [],
-	days = ["January 1","July 1",],
-	years = [],
+var aLegend = [],
+	aDates = [],
+	aDays = ["January 1","July 1",],
+	aYears = [],
 	loopYear = "",
 	loopData = [],
-	sColor = s12.trim(),
-	sColor2 = s14.trim(),
-	sColor3 = s16.trim(),
 	tzResolved = ""
 
 sg = sg.trim()
 sb = sb.trim()
 s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
 
 function build_dates(year) {
 	// reset
-	dates = []
+	aDates = []
 	let suffix = " 13:00:00 UTC"
 	if (year !== undefined && year !== "") {
 		// single year
-		years = [year]
+		aYears = [year]
 	} else {
-		// years is set in run()
+		// aYears is set in run()
 		// sort numerically & dedupe
-		years.sort((b,a) => b-a)
-		years = years.filter(function(item, position) {return years.indexOf(item) === position})
+		aYears.sort((b,a) => b-a)
+		aYears = aYears.filter(function(item, position) {return aYears.indexOf(item) === position})
 	}
 	// build
-	for (let i = 0; i < years.length; i++) {
-		for (let j = 0; j < days.length; j++) {
-			dates.push(days[j] +", "+ years[i] +" "+ suffix )
+	for (let i = 0; i < aYears.length; i++) {
+		for (let j = 0; j < aDays.length; j++) {
+			aDates.push(aDays[j] +", "+ aYears[i] +" "+ suffix )
 		}
 	}
 }
@@ -563,28 +557,28 @@ function reset() {
 function legend(array) {
 	let prev = ""
 	// do once
-	if (legendclean.length == 0) {
+	if (aLegend.length == 0) {
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
 			let parts = list[i].split("/")
 			let area = parts[0]
 			let location = parts.slice(1).join("/")
 			if (area == prev) {
-				legendclean.push("  " + location)
+				aLegend.push(" " + location)
 			} else {
 				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				legendclean.push("<br>"+ newArea +"<br><br>  "+ location)
+				aLegend.push("<br>"+ newArea +"<br><br> "+ location)
 			}
 			prev = area
 		}
 	}
 
-	let header = s4.trim() +"TIMEZONES ("+ list.length +") "+ sc +"<a class='blue' target='blank' "
+	let header = s4.trim() +"TIMEZONES ["+ list.length +"] "+ sc +"<a class='blue' target='blank' "
 		+"href='https://github.com/vvo/tzdb/blob/master/time-zones-names.json'>source</a><br><br>"
 		+"<a class='blue' target='blank' href='https://www.iana.org/time-zones'>IANA TimeZone Database</a><br>"
 
 	if (array == undefined) {
-		dom.legend.innerHTML = header + legendclean.join("<br>")
+		dom.legend.innerHTML = header + aLegend.join("<br>")
 	} else {
 		let legendNEW = []
 		array.sort()
@@ -604,10 +598,10 @@ function legend(array) {
 				} catch(e) {}
 			}
 			if (area == prev) {
-				legendNEW.push("  " + location)
+				legendNEW.push(" " + location)
 			} else {
 				let newArea = s4+ (area == "AA" ? "MISC" : area.toUpperCase()) + sc
-				legendNEW.push("<br>"+ newArea +"<br><br>  "+ location)
+				legendNEW.push("<br>"+ newArea +"<br><br> "+ location)
 			}
 			prev = area
 		}
@@ -633,9 +627,9 @@ function run_test(isLoopy) {
 
 		if (isLoopy == "false") {
 			// get TZP hash
-			for (let i = 0 ; i < years.length; i++) {
-				for (let j = 0 ; j < days.length; j++) {
-					let datetime = days[j] +", "+ years[i] +" 13:00:00"
+			for (let i = 0 ; i < aYears.length; i++) {
+				for (let j = 0 ; j < aDays.length; j++) {
+					let datetime = aDays[j] +", "+ aYears[i] +" 13:00:00"
 					let control = new Date(datetime +" UTC")
 					let test = new Date(datetime)
 					let diff = ((Date.parse(test) - Date.parse(control))/k)
@@ -647,8 +641,8 @@ function run_test(isLoopy) {
 
 			// get matching hash
 			tzresults = []
-			for (let i = 0 ; i < dates.length; i++) {
-				let control = new Date(dates[i])
+			for (let i = 0 ; i < aDates.length; i++) {
+				let control = new Date(aDates[i])
 				// note: we need to make sure control+test are the same format (en)
 					// otherwise the string can mix e.g. 1/7 vs 7/1
 				let test = control.toLocaleString("en")
@@ -667,9 +661,9 @@ function run_test(isLoopy) {
 			if (tz.substring(0,3) == "AA/") { tzclean = tz.substring(3)}
 			tzresults = []
 			// loop each date
-			for (let i = 0 ; i < dates.length; i++) {
+			for (let i = 0 ; i < aDates.length; i++) {
 				try {
-					let control = new Date(dates[i])
+					let control = new Date(aDates[i])
 					let test = control.toLocaleString('en', { timeZone: tzclean })
 					let diff = ((Date.parse(test) - Date.parse(control))/k)
 					tzresults.push(diff)
@@ -728,7 +722,7 @@ function run_test(isLoopy) {
 		// Loopy
 		if (isLoopy == "true") {
 			loopData.push(
-				sColor + loopYear + sc +" "
+				s12 + loopYear + sc +" "
 				+ buckethash + s4 +" ["+ bucketsizes.length +"] "+ sc
 				+ sg +"["+ uniqueTZs +"]"+ sc
 			)
@@ -760,10 +754,10 @@ function run_test(isLoopy) {
 
 				// color up valuesHash, track matches
 				if (valuesHash == matchHash) {
-					valuesHash = sColor3 + valuesHash +" [you match this]"+ sc
+					valuesHash = s16 + valuesHash +" [you match this]"+ sc
 					matchList = groupTZ
 				} else {
-					valuesHash = sColor2 + valuesHash + sc
+					valuesHash = s14 + valuesHash + sc
 				}
 
 				// color up the group data, add year
@@ -772,13 +766,13 @@ function run_test(isLoopy) {
 					prettyStr = "",
 					prettyData = [],
 					partCounter = 0
-				for (let i = 0; i < years.length; i++) {
-					prettyStr = s4 + years[(i)] + sc +":"
-					for (let j = 0; j < days.length; j++) {
+				for (let i = 0; i < aYears.length; i++) {
+					prettyStr = s4 + aYears[(i)] + sc +":"
+					for (let j = 0; j < aDays.length; j++) {
 						prettyStr += " "+ parts[partCounter] +","
 						partCounter++
 						//last item per year
-						if ( ((j+1)/days.length) == 1 ) {
+						if ( ((j+1)/aDays.length) == 1 ) {
 							prettyStr = prettyStr.slice(0, -1)
 							prettyData.push(prettyStr)
 						}
@@ -790,14 +784,14 @@ function run_test(isLoopy) {
 				if (groupCount > 1) {
 					let groupHash = sha1(groupTZ)
 					data.push(
-						sColor + groupNumber +": "+ groupHash + sc +" "
+						s12 + groupNumber +": "+ groupHash + sc +" "
 						+ s4 +"["+ groupCount +"]"+ sc +"<br>"
 						+"<ul><li>"+ groupTZ +"</li>"
 						+"<li>"+ valuesHash +"</li>"
 						+"<li>"+ groupData +"</li></ul>"
 					)
 				} else {
-					// combine unique TZz into one
+					// combine unique TZs into one
 					singles.push(groupTZ +"<ul><li>"+ valuesHash +"</li><li>"+ groupData +"</li></ul>")
 					singlesLegend.push(groupLegend)
 				}
@@ -806,7 +800,7 @@ function run_test(isLoopy) {
 			if (singles.length) {
 				singles.sort()
 				data.push(
-					sColor + (unique.length - singles.length + 1) +"-"+ unique.length + sc
+					s12 + (unique.length - singles.length + 1) +"-"+ unique.length + sc
 					+": are all unique "+ s4 +"["+ singles.length +"]"+ sc +"<br><br>"+ singles.join("")
 				)
 			}
@@ -837,9 +831,9 @@ function run_test(isLoopy) {
 			if (sumTZ !== list.length) {
 				info.push( title("alert") + sb +"total timezones !== legend count" + sc)
 			}
-			info.push( title("[groups] hash") + sColor + buckethash + sc)
+			info.push( title("[groups] hash") + s12 + buckethash + sc)
 			info.push( title("[tzp] hash") + tzpHash )
-			info.push( title("[toLocale] hash") + sColor2 + matchHash + sc)
+			info.push( title("[toLocale] hash") + s14 + matchHash + sc)
 			info.push( title("resolvedOptions") + tzResolved)
 
 			// any matches
@@ -879,8 +873,8 @@ function run_test(isLoopy) {
 			let uniqueBS = bucketsizes.filter(function(item, position) {return bucketsizes.indexOf(item) === position})
 			let notoneBS = bucketsizes.filter(x => x != 1)
 			info.push("<br><hr>")
-			info.push(s4+ "unique groups sizes" + sc + "<br>" + uniqueBS.join(", ") + "<br>")
-			info.push(s4+ "groups > 1 summary" + sc + "<br>" + notoneBS.join(", "))
+			info.push(s4 +"unique groups sizes"+ sc +"<br>"+ uniqueBS.join(", ") +"<br>")
+			info.push(s4 +"groups > 1 summary"+ sc +"<br>"+ notoneBS.join(", "))
 			info.push("<br><hr>") // final line
 			// output data + info
 			dom.info.innerHTML = info.join("<br>")
@@ -897,12 +891,12 @@ function run_test(isLoopy) {
 		// reset loopData
 		loopData = []
 		loopData.push(
-			sColor +"year"+ sc +" hash-of-timezone-groups"
+			s12 +"year"+ sc +" hash-of-timezone-groups"
 			+ s4 +" [groups] "+ sc
 			+ sg +"[unique timezones]"+ sc +"<br>"
 		)
 		// loop
-		let loopYears = years
+		let loopYears = aYears
 		for (let i = 0; i < loopYears.length; i++) {
 			results = []
 			loopYear = loopYears[i]
@@ -923,7 +917,7 @@ function run(isLoopy) {
 	legend()
 	dom.info = ""
 	dom.data = ""
-	years = []
+	aYears = []
 
 	let yearStr = dom.inputYears.value
 	yearStr = yearStr.trim()
@@ -938,13 +932,13 @@ function run(isLoopy) {
 				if (Number.isInteger(trimmed)) {
 					// put a range limit on it
 					if (trimmed > -2000 && trimmed < 3000) {
-						years.push(trimmed)
+						aYears.push(trimmed)
 					}
 				}
 			}
 		}
 		// do we have at least one year
-		if (years.length) {
+		if (aYears.length) {
 			go = true
 		} else {
 			dom.info = "please provide at least one year"
@@ -957,22 +951,22 @@ function run(isLoopy) {
 		// anything prior to 1879 is redundant
 			// tested: every year from 0-2100
 			// tested: negative years
-		//years = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
-		years = [1879,1921,1952,1976,2018]
-		dom.inputYears.value = years.join(",")
+		//aYears = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
+		aYears = [1879,1921,1952,1976,2018]
+		dom.inputYears.value = aYears.join(",")
 
 		// test flips
-		//days = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
-		//for (let i = 1879; i < 2025; i++) {years.push(i)}    // 1879+
-		//for (let i = 1800; i < 1900; i++) {years.push(i)}    // add a century
-		//for (let i = -1050; i < -350; i=i+7) {years.push(i)} // add negative years
-		//for (let i = 2000; i < 2100; i++) {years.push(i)}    // add the future
+		//aDays = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
+		//for (let i = 1879; i < 2025; i++) {aYears.push(i)}    // 1879+
+		//for (let i = 1800; i < 1900; i++) {aYears.push(i)}    // add a century
+		//for (let i = -1050; i < -350; i=i+7) {aYears.push(i)} // add negative years
+		//for (let i = 2000; i < 2100; i++) {aYears.push(i)}    // add the future
 		go = true
 	}
 
 	if (go) {
-		dom.info = "calculating"
-		// rebuild dates
+		dom.info = "calculating..."
+		// rebuild aDates
 		build_dates()
 		tzResolved = Intl.DateTimeFormat().resolvedOptions().timeZone
 		// pause for repaint
