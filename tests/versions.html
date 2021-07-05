@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=400">
+	<meta name="viewport" content="width=500">
 	<title>versions</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 380px;}
+		table {width: 480px;}
 		hr {color: #dcc18c}
 	</style>
 	<style id="test73">
@@ -36,13 +36,18 @@
 	</table>
 
 	<table id="tb3">
-		<col width="1%"><col width="98%"><col width="1%">
-		<thead><tr><th colspan="3">versions</th></tr></thead>
-		<tr><td colspan="3" class="intro">
+		<col width="1%"><col width="49%"><col width="49%"><col width="1%">
+		<thead><tr><th colspan="4">versions</th></tr></thead>
+		<tr><td colspan="4" class="intro">
 			<span class="no_color">A history of firefox version-specific PoCs tzp uses or considered</span>
 		</td></tr>
-		<tr><td colspan="3"><hr></td></tr>
-		<tr><td></td><td class="c mono spaces" id="results"></td><td></td></tr>
+		<tr><td colspan="4"><hr></td></tr>
+		<tr><td></td>
+			<td class="c mono spaces" id="results1"></td>
+			<td class="c mono spaces" id="results2" style="vertical-align: top;"></td>
+			<td></td>
+		</tr>
+		<tr><td></td><td colspan="2" class="c mono spaces" id="watchlist"></td><td></td></tr>
 	</table>
 	<br>
 
@@ -57,10 +62,10 @@ function outputVersion() {
 		strA = "<a href='https://bugzilla.mozilla.org/",
 		strB = "' class='blue' target='_blank'>",
 		strC = "</a>",
-		t0 = performance.now()
+		t0 = performance.now(),
+		watchcount = 1
 
 	s3 = s3.trim()
-
 	let results = []
 	let data = {}
 
@@ -79,7 +84,7 @@ function outputVersion() {
 			let isWatch = false
 			if (id == -2011) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
-				if (id !== prevV) {id = s3 + (id +"").padStart(5) + sc} else {id = "".padStart(5)}
+				if (id !== prevV) {id = s3 + (id +"").padStart(3) + sc} else {id = "".padStart(3)}
 			} else {
 				isWatch = true
 			}
@@ -89,6 +94,7 @@ function outputVersion() {
 				id = id + ""
 				prefix = 15 - id.length
 				id = "".padStart(prefix) + s3 + "<code>"+ id +"</code>" + sc
+				watchcount++
 			}
 			// bugzilla
 			if (bug !== "") {
@@ -106,7 +112,22 @@ function outputVersion() {
 			prevV = results[i].split(":")[0].trim()
 			prevB = results[i].split(":")[1]
 		}
-		dom.results.innerHTML = display.join("<br>")
+		// split watchlist off
+		let watchlist = display.slice(display.length - watchcount, display.length)
+		dom.watchlist.innerHTML = watchlist.join("<br>")
+		// split remainder into two columns
+		display = display.slice(0, display.length - watchcount)
+		let midpoint = Math.ceil(display.length/2)
+		// make sure we split with a version number
+		let splitpoint = ""
+		for (let i = midpoint; i < midpoint + 5; i++) {
+			let test = display[i]
+			if (splitpoint == "" & test.slice(0,1) !== " ") {splitpoint = i}
+		}
+		let display1 = display.slice(0, splitpoint)
+		let display2 = display.slice(splitpoint, display.length)
+		dom.results1.innerHTML = display1.join("<br>")
+		dom.results2.innerHTML = display2.join("<br>")
 	}
 
 	function record(order, version, bug, result, perf) {
@@ -120,7 +141,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 54
+		expected = 55
 
 	// 91: 1714933
 	let t91 = performance.now(), ver91 = xF
@@ -128,7 +149,16 @@ function outputVersion() {
 		let test91 = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
 		if (test91.length) {ver91 = xS}
 	} catch(e) {}
-	record(211,91, "1714933", ver91, performance.now()-t91)
+	record(212,91, "1714933", ver91, performance.now()-t91)
+
+	// 91: 1284868
+	let t91b = performance.now(), ver91b = xF
+	try {
+		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
+		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
+		if (seconds == "07") {ver91b = xS}
+	} catch(e) {}
+	record(211,91, "1284868", ver91b, performance.now()-t91b)
 
 	// 91: 1710429
 	let t91a = performance.now(), ver91a = xF
