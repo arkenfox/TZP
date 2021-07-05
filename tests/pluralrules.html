@@ -28,15 +28,20 @@
 
 	<table id="tb4">
 		<col width="30%"><col width="70%">
-		<thead><tr><th colspan="2">pluralrules</th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">pluralrules
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<div id="button" class="btn"><span class="btn4 btn" onClick="run()">[ run ]</span></div>
-				<span class="spaces" id="perf0"></span><span id="perf2"></span><span id="perf1"></span>
+				<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
+				<span class="btn4 btn"><input type="checkbox" id="supported"> supported [pluralrules]</span>
+				<br><br><hr>
 				<br><span class="spaces" id="numbers1"></span>
 				<br><span class="spaces" id="results1"></span>
 				<br><span class="spaces" id="numbers0"></span>
@@ -46,15 +51,7 @@
 	<br>
 
 <script>
-var locales = [],
-	list = [],
-	list_one = [], // first change of each result
-	main_buckets = [],
-	isDebug = false,
-	debug0 = [],
-	debug1 = []
-
-var detailed = [
+var list = [
 "aa,afar",
 "ab,abkhazian",
 "ach,acholi",
@@ -83,7 +80,7 @@ var detailed = [
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
-"ckb,central kurdish", // ? dropped
+"ckb,central kurdish",
 "co,corsican",
 "cr,cree",
 "crh,crimean tatar",
@@ -129,7 +126,7 @@ var detailed = [
 "ht,haitian",
 "hu,hungarian",
 "hy,armenian",
-"hye,eastern armenian", // ? dropped
+"hye,eastern armenian",
 "hz,herero",
 "ia,interlingua",
 "id,indonesian",
@@ -275,20 +272,51 @@ var detailed = [
 "zu,zulu",
 ]
 
-function start() {
+var aLegend = []
+	aLegendSupported = [],
+	aLocales = [],
+	aSupported = [],
+	aListOne = [], // 1st run
+	aListTwo = [], // 2nd run
+	main_buckets = [],
+	useSupportedOnly = true,
+	isDebug = false,
+	debug0 = [],
+	debug1 = [],
+	perf = ""
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+
+function legend() {
 	// builds locales array and outputs a legend
-	detailed.sort()
-	try {
-		let legend = []
-		for (let i = 0 ; i < detailed.length; i++) {
-			// split: A (code), B (name)
-			let listA = detailed[i].split(",")[0]
-			let listB = detailed[i].split(",")[1]
-			locales.push(listA)
-			legend.push(listA.padStart(7) +": "+ listB)
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			let test = Intl.PluralRules.supportedLocalesOf([code])
+			if (test.length) {
+				aSupported.push(code)
+				aLegendSupported.push(code.padStart(7) +": "+ name)
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
 		}
-		dom.legend.innerHTML = s4 +"   LEGEND ("+ locales.length +")"+ sc +"<br><br>"+ legend.join("<br>")
-	} catch(e) {}
+	}
+	// output
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aLegendSupported}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
 function run_test(type) {
@@ -299,8 +327,7 @@ function run_test(type) {
 		test_all = [], // result hash + locale code + result
 		go = true,
 		perfname = "all"
-		str = "",
-		sColor = s12.trim()
+		str = ""
 
 	let	element = document.getElementById("results" + type)
 	let	elperf = document.getElementById("perf" + type)
@@ -308,29 +335,29 @@ function run_test(type) {
 	// main test
 	if (type == "0") {
 		// reset
-		list = []
-		list_one = []
+		aListOne = []
+		aListTwo = []
 		main_buckets = []
 		// build
-		for (let i=0; i < 101; i++) {list.push(i)}
+		for (let i=0; i < 101; i++) {aListOne.push(i)}
 		// temp smaller tests
-		//list = [0,1,2,3,4,6,7,11,20,21,100]
-		//list = [1,2,3,4,5,25,134,910293019,12,1412,15,2931,31231,3123,13231,91,0,231,33,728,2,291,24,479,291,778,919,93]
-		//locales = ['ar','br','bs','cs','cy','en','fr','ga','gd','gv','he','is','kw','lt','lv','mt','pl','ro','ru','sl','zh',]
-		//locales = ['ar','bo','bn','dz','en','fa','fi','gd','he','kw','ku','lv','se','sl','ss',]
-		test_array = list
+		//aListOne = [0,1,2,3,4,6,7,11,20,21,100]
+		//aListOne = [1,2,3,4,5,25,134,910293019,12,1412,15,2931,31231,3123,13231,91,0,231,33,728,2,291,24,479,291,778,919,93]
+		//aLocales = ['ar','br','bs','cs','cy','en','fr','ga','gd','gv','he','is','kw','lt','lv','mt','pl','ro','ru','sl','zh',]
+		//aLocales = ['ar','bo','bn','dz','en','fa','fi','gd','he','kw','ku','lv','se','sl','ss',]
+		test_array = aListOne
 	}
 
 	// subsequent tests
-	if (list.length == 0) {
+	if (aListOne.length == 0) {
 		go = false
-		console.debug("ABORTED: run the main test first")
+		dom.numbers1.innerHTML = sb +"ABORTED: "+ sc + "run the main test first"
 	}
 
 	if (go) {
 		// small test
 		if (type == "1") {
-			test_array = list_one
+			test_array = aListTwo
 			if (isEngine == "blink") {
 				test_array.push(81) // chromium to keep lij unique from it,sc in ordinal (bug?)
 			}
@@ -339,8 +366,11 @@ function run_test(type) {
 		// always sort the array
 		test_array.sort((a,b) => a-b)
 
+		useSupportedOnly = dom.supported.checked
+		let loop = useSupportedOnly ? aSupported : aLocales
+
 		// for each locale
-		for (let j=0; j < locales.length; j++) {
+		for (let j=0; j < loop.length; j++) {
 			// reset cardinal
 			let prevC = "", currentC = "", tmp_resultC = []
 			c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
@@ -348,8 +378,8 @@ function run_test(type) {
 			let prevO = "", currentO = "", tmp_resultO = []
 			o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
 
-			let code = locales[j]
-			// list
+			let code = loop[j]
+			// aListOne
 			for (let k=0; k < test_array.length; k++) {
 				let n = test_array[k]
 				// cardinal
@@ -357,12 +387,12 @@ function run_test(type) {
 					currentC = new Intl.PluralRules(code, {type:"cardinal"}).select(n)
 					if (type == "0") {
 						// catch first
-						if (c0 && currentC == "zero") {c0 = false; list_one.push(n)}
-						if (c1 && currentC == "one") {c1 = false; list_one.push(n)}
-						if (c2 && currentC == "two") {c2 = false; list_one.push(n)}
-						if (c3 && currentC == "few") {c3 = false; list_one.push(n)}
-						if (c4 && currentC == "many") {c4 = false; list_one.push(n)}
-						if (c5 && currentC == "other") {c5 = false; list_one.push(n)}
+						if (c0 && currentC == "zero") {c0 = false; aListTwo.push(n)}
+						if (c1 && currentC == "one") {c1 = false; aListTwo.push(n)}
+						if (c2 && currentC == "two") {c2 = false; aListTwo.push(n)}
+						if (c3 && currentC == "few") {c3 = false; aListTwo.push(n)}
+						if (c4 && currentC == "many") {c4 = false; aListTwo.push(n)}
+						if (c5 && currentC == "other") {c5 = false; aListTwo.push(n)}
 					}
 				} catch(e) {
 					currentC = "error"
@@ -378,12 +408,12 @@ function run_test(type) {
 					currentO = new Intl.PluralRules(code, {type:"ordinal"}).select(n)
 					if (type == "0") {
 						// catch first
-						if (o0 && currentO == "zero") {o0 = false; list_one.push(n)}
-						if (o1 && currentO == "one") {o1 = false; list_one.push(n)}
-						if (o2 && currentO == "two") {o2 = false; list_one.push(n)}
-						if (o3 && currentO == "few") {o3 = false; list_one.push(n)}
-						if (o4 && currentO == "many") {o4 = false; list_one.push(n)}
-						if (o5 && currentO == "other") {o5 = false; list_one.push(n)}
+						if (o0 && currentO == "zero") {o0 = false; aListTwo.push(n)}
+						if (o1 && currentO == "one") {o1 = false; aListTwo.push(n)}
+						if (o2 && currentO == "two") {o2 = false; aListTwo.push(n)}
+						if (o3 && currentO == "few") {o3 = false; aListTwo.push(n)}
+						if (o4 && currentO == "many") {o4 = false; aListTwo.push(n)}
+						if (o5 && currentO == "other") {o5 = false; aListTwo.push(n)}
 					}
 				} catch(e) {
 					currentO = "error"
@@ -403,7 +433,8 @@ function run_test(type) {
 			test_all.push(hashCombined +"~"+ code +"~"+ strC +"~"+ strO)
 
 			if (isDebug) { // example
-				if (code == "lij" || code == "it" || code == "sc") {
+				//if (code == "lij" || code == "it" || code == "sc") {
+				if (code == "en") {
 					if (type == "0") {
 						debug0.push(code)
 						debug0.push(hashC +":"+ strC)
@@ -419,21 +450,23 @@ function run_test(type) {
 		// set things in main test for small test
 		if (type == "0") {
 			// first changes
-			list_one = list_one.filter(function(item, position) {return list_one.indexOf(item) === position})
-			list_one.sort((a,b) => a-b)
+			aListTwo = aListTwo.filter(function(item, position) {return aListTwo.indexOf(item) === position})
+			aListTwo.sort((a,b) => a-b)
 		} else if( type == "1") {
 			let blinkStr = isEngine == "blink" ? " [81 added for blink + lij]" : ""
-			dom.numbers1.innerHTML = "<hr><br>" + s4.trim() + perfname.toUpperCase() +" ("
-				+ list_one.length +")"+ sc + blinkStr +"<br><br>"+ list_one.join(", ")
+			dom.numbers1.innerHTML = s4 + perfname.toUpperCase() +" ["
+				+ aListTwo.length +"]"+ sc + blinkStr +"<br><br>"+ aListTwo.join(", ")
 			if (isDebug) {
 				console.debug("BIG test\n - " + debug0.join("\n - "))
 				console.debug("SMALL test\n - " + debug1.join("\n - "))
 			}
 		}
 		// perf
-		let perf = perfname +" "+ s4.trim() + Math.round(performance.now()-t0) + sc +" ms"
-		elperf.innerHTML = (type == "0" ? s4.trim() +"PERF: "+ sc : " | ") + perf
-			+ (type == "1" ? "<br>" : "")
+		if (type == 0) {
+			perf = "all: "+ Math.round(performance.now()-t0)
+		} else {
+			dom.perf.innerHTML = perf +" | 1st: "+ Math.round(performance.now()-t0) +" ms"
+		}
 
 		// sort array & loop: get hash + code + result buckets, and code_total
 		test_all.sort()
@@ -455,7 +488,7 @@ function run_test(type) {
 			}
 			// next hash is diff: write data
 			if (nextHash !== part1) {
-				bucket_hash.push(part1 + s4 +"("+ tmp_code.length +")"+ sc)
+				bucket_hash.push(part1 + s4 +" ["+ tmp_code.length +"]"+ sc)
 				bucket_resC.push(part3)
 				bucket_resO.push(part4)
 				bucket_code.push(tmp_code.join(", "))
@@ -470,20 +503,20 @@ function run_test(type) {
 			let pretty = []
 			for (let i=0; i < bucket_hash.length; i++) {
 				let part1 = s4 +"hash: "+ sc + bucket_hash[i]
-				let part2 = "<ul><li>" + sColor +"cardinal: "+ sc + bucket_resC[i] +"</li>"
-				let part3 = "<li>" + sColor +"ordinal: "+ sc + bucket_resO[i] +"</li>"
-				let part4 = "<li>" + sColor +"locale: "+ sc + bucket_code[i] +"</li></ul>"
+				let part2 = "<ul><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
+				let part3 = "<li>" + s12 +"ordinal: "+ sc + bucket_resO[i] +"</li>"
+				let part4 = "<li>" + s12 +"locale: "+ sc + bucket_code[i] +"</li></ul>"
 				pretty.push(part1 + part2 + part3 + part4)
 			}
 			// remember main details
 			main_buckets = bucket_code
 			main_buckets.sort()
 			// output
-			str = code_total + (code_total == locales.length ? sg : sb) +"[match]"+ sc
-			str = "<hr><br>"+ s4.trim() +"ALL NUMBERS ("+ list.length +")"+ sc +"<br>"
-				+"<ul><li>"+ sColor +"unique hashes: "+ sc + main_buckets.length +"</li>"
-				+"<li>"+ sColor +" locales hash: "+ sc + sha1(main_buckets.join()) +"</li>"
-				+"<li>"+ sColor +" locale check: "+ sc + str +"</li></ul>"
+			str = code_total + (code_total == loop.length ? sg : sb) +" [match]"+ sc
+			str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aListOne.length +"]"+ sc +"<br>"
+				+"<ul><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
+				+"<li>"+ s12 +" locales hash: "+ sc + sha1(main_buckets.join()) +"</li>"
+				+"<li>"+ s12 +" locale check: "+ sc + str +"</li></ul>"
 			dom.numbers0.innerHTML = str
 			element.innerHTML = pretty.join("")
 		} else {
@@ -493,10 +526,10 @@ function run_test(type) {
 			let check_hash = sha1(bucket_code.join())
 			let main_hash = sha1(main_buckets.join())
 			// append results
-			let matchbad = sb +"[match]"+ sc, matchgood = sg +"[match]"+ sc
-			str = "<ul><li>" + sColor +"unique hashes:"+ sc
+			let matchbad = sb +" [match]"+ sc, matchgood = sg +" [match]"+ sc
+			str = "<ul><li>" + s12 +"unique hashes:"+ sc
 			str += " "+ check_count + (check_count == main_buckets.length ? matchgood : matchbad)
-			str += "</li><li>"+ sColor +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
+			str += "</li><li>"+ s12 +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
 			str += "</li></ul>"
 			element.innerHTML = str
 			if (check_hash !== main_hash) {
@@ -508,12 +541,22 @@ function run_test(type) {
 
 function run() {
 	//isDebug = true
-	dom.button.remove()
-	run_test("0") // main test
-	run_test("1")
+	perf = ""
+	dom.perf = ""
+	dom.numbers1 = "calculating..."
+	dom.numbers0 = ""
+	dom.results1 = ""
+	dom.results0 = ""
+	legend()
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		run_test("0") // main test
+		run_test("1")
+	}, 1)
 }
 
-start()
+dom.supported.checked = true
+legend()
 
 </script>
 </body>
