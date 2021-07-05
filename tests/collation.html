@@ -37,30 +37,25 @@
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<!-- localeCompare -->
-				<hr>
-				<br><span class="s4">LOCALECOMPARE</span> &nbsp
-					<div class="btn">
-						<span class="btn4 btn" onClick="compare()">[ run ]</span>
-						<span class="btn4 btn" onClick="reset(`compare`)">[ clear input ]</span>
-					</div>
+				<hr><br>
+					<span class="s4">LOCALECOMPARE</span>
+					<span class="btn4 btn" onClick="compare()">[ run ]</span>
+					<span class="btn4 btn" onClick="reset(`compare`)">[ clear input ]</span>
 				<br><br>
 				<input type="text" placeholder="a" id="valueA"> &nbsp <input type="text" placeholder="A" id="valueB">
 				<br>
 				<br><span class="spaces" id="output_compare"></span>
 				<!-- Intl.Collator -->
-				<br><br>
-				<hr>
-				<br><span class="s4">INTL.COLLATOR</span> &nbsp
-					<div class="btn">
-						<span class="btn4 btn" onClick="collator()">[ run ]</span>
-						<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
-						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
-					</div>
+				<br><br><hr><br>
+					<span class="s4">INTL.COLLATOR</span>
+					<span class="btn4 btn" onClick="collator()">[ run ]</span>
+					<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
+					<span class="btn4 btn"><input type="checkbox" id="supported"> supported [collator]</span>
 				<br><br>
 				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
 						style="width: 100%; resize: vertical" id="valueC"></textarea>
-				<br>
-				<br><span class="spaces" id="output_collator"></span>
+				<br><br>
+					<span class="spaces" id="output_collator"></span>
 			</td></tr>
 	</table>
 	<br>
@@ -100,7 +95,7 @@ var list = [
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
-"ckb,central kurdish", // ? dropped
+"ckb,central kurdish",
 "co,corsican",
 "cr,cree",
 "crh,crimean tatar",
@@ -146,7 +141,7 @@ var list = [
 "ht,haitian",
 "hu,hungarian",
 "hy,armenian",
-"hye,eastern armenian", // ? dropped
+"hye,eastern armenian",
 "hz,herero",
 "ia,interlingua",
 "id,indonesian",
@@ -362,7 +357,7 @@ var collatorExample = [
 	'\u0B85',  //      TAMIL A
 	'\u0C05',  //     TELUGU A
 	'\u0E24',  //       THAI RU
-	// 80 from 93
+	// 80 covering 93
 	// f28621c5d958602e2b7a45b26ea7ec368af168cd
 ]
 
@@ -378,7 +373,6 @@ var compareExamples = [
 	'\u0627,\u06FD',
 	'a,A',
 	'\u00E7\a,ch',
-	//'a,b', // test for if example returns no results: e.g. non-FF missing locales
 	'\u0144,\u00F1','n,ng',
 	'\u00ED,\u00EE',
 	'r,\u0453',
@@ -393,12 +387,44 @@ var compareExamples = [
 ]
 
 var aLegend = [],
+	aLegendSupported = [],
 	aLocales = [],
 	aSupported = [],
-	aSupportedDetail = [],
 	useSupportedOnly = true,
-	sColor = s12.trim(),
 	counter = 0
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			let test = Intl.Collator.supportedLocalesOf([code])
+			if (test.length) {
+				aSupported.push(code)
+				aLegendSupported.push(code.padStart(7) +": "+ name)
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aLegendSupported}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
+}
 
 function reset(type) {
 	if (type == "compare") {
@@ -418,33 +444,6 @@ function check_example() {
 	if (collatorExample.length !== control) {
 		console.debug("attention thorin: collation example contains dupes.. get your shit together")
 	}
-}
-
-function legend() {
-	// build once
-	if (aLegend.length == 0) {
-		sg = sg.trim() // change global var
-		list.sort()
-		for (let i = 0 ; i < list.length; i++) {
-			let code = list[i].split(",")[0]
-			let name = list[i].split(",")[1]
-			code = code.trim()
-			aLocales.push(code)
-			let test = Intl.Collator.supportedLocalesOf([code])
-			if (test.length) {
-				aSupported.push(code)
-				aSupportedDetail.push(code.padStart(7) +": "+ name)
-			}
-			aLegend.push(code.padStart(7) +": "+ name)
-		}
-	}
-	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aSupportedDetail}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
 function compare() {
@@ -486,12 +485,12 @@ function compare() {
 		setTimeout(function() {
 			let output = [], str = ""
 			if (isExample) {
-				str = "example " + sColor + (counter == 0 ? compareExamples.length : counter)
-					+ sc +" of "+ sColor + compareExamples.length + sc +": comparing "
-					+ sColor + valueA + sc +" and "+ sColor + valueB + sc +"<br>"
+				str = "example " + s12 + (counter == 0 ? compareExamples.length : counter)
+					+ sc +" of "+ s12 + compareExamples.length + sc +": comparing "
+					+ s12 + valueA + sc +" and "+ s12 + valueB + sc +"<br>"
 				output.push(str)
 			} else {
-				str = "comparing " + sColor + valueA + sc +" and "+ sColor + valueB + sc +"<br>"
+				str = "comparing " + s12 + valueA + sc +" and "+ s12 + valueB + sc +"<br>"
 				output.push(str)
 			}
 			for (let i = 0 ; i < list.length; i++) {
@@ -500,7 +499,7 @@ function compare() {
 				let name = list[i].split(",")[1]
 				test = valueA.localeCompare(valueB, code)
 				if ( control !== test) {
-					output.push(sColor + code.padStart(7) + sc +": "+ name)
+					output.push(s12 + code.padStart(7) + sc +": "+ name)
 				}
 			}
 			if (output.length == 1) {
@@ -518,8 +517,7 @@ function collator() {
 	// clear
 	let el = dom.output_collator
 	el.innerHTML = "&nbsp"
-	legend() // this may look jumpy
-
+	legend()
 	// vars
 	let valueC = dom.valueC.value,
 		chars = [],
@@ -546,7 +544,6 @@ function collator() {
 	} else {
 		// run example
 		chars = collatorExample
-		//chars = ['a','A','th','tw'] // temp small test
 		isExample = true
 		go = true
 	}
@@ -560,7 +557,7 @@ function collator() {
 			let output = []
 			chars.sort()
 			let strItem = s4.trim() +"ITEMS: "+ sc + chars.length
-				+ (isExample ? sColor +" [example]"+ sc : "") +"<br><br>"
+				+ (isExample ? s12 +" [example]"+ sc : "") +"<br><br>"
 				+ chars.join(", ") +"<br>"
 			output.push(strItem)
 
@@ -568,7 +565,7 @@ function collator() {
 			chars = chars.sort(Intl.Collator("en").compare)
 			let control = sha1(chars.join())
 			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
-				+ sColor +"   hash: "+ sc + control + sColor +" [en]"+ sc +"<br>"
+				+ s12 +"   hash: "+ sc + control + s12 +" [en]"+ sc +"<br>"
 			output.push(strItem)
 			// results header
 			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
@@ -581,9 +578,9 @@ function collator() {
 			for (let i = 0 ; i < list.length; i++) {
 				// important: reset to original order
 				chars.sort()
-				let code = list[i].split(",")[0]
-				let name = list[i].split(",")[1]
-
+				let str = list[i].toLowerCase()
+				let code = str.split(",")[0].trim()
+				let name = str.split(",")[1].trim()
 				if (useSupportedOnly && aSupported.indexOf(code) == -1) {
 					// ignore unsupported
 				} else {
@@ -639,7 +636,7 @@ function collator() {
 					len = tmpStr.length
 					tmpH = tmpStr.substring(len-40,len)
 					tmpL = tmpStr.substring(0,len-41)
-					tmpStr = sColor + (i + 1).toString().padStart(3) +": "+ sc
+					tmpStr = s12 + (i + 1).toString().padStart(3) +": "+ sc
 					// counter then hash then locales
 					lineItems.push (tmpStr + tmpH +"<br><ul><li>"+ tmpL +"</li></ul>")
 					// cleanup tring for localesHash array
@@ -649,19 +646,19 @@ function collator() {
 				}
 				// results output
 				localesHash = sha1(localesHash.join())
-				strItem = sColor +"  stats: "+ sc
+				strItem = s12 +"  stats: "+ sc
 					+ sg + newArr.length +" unique"
-					+ sc +" covering "+ sg + codes.length
-					+ (useSupportedOnly ? "/"+ aSupported.length + sc +" supported": sc) + " locales"
+					+ sc +" in "+ sg + codes.length
+					+ (useSupportedOnly ? sc+ " of "+ sg + aSupported.length +" supported" + sc: sc)
 				output.push(strItem)
 
 				let ff = ""
-				if (localesHash == "f28621c5d958602e2b7a45b26ea7ec368af168cd") {ff = "70+" // hye, no
-				} else if (localesHash == "a76c437849ec89d41ce1dd948589f4b0da706835") {ff = "68-69" // zh-hk, zh-sg changed
-				} else if (localesHash == "bade21ec76bd415dbdae917273491c5ed774c204") {ff = "65-67" // ku,tk
-				} else if (localesHash == "53f698034e61f1af9fd1743f5ddc1177305e0828") {ff = "64 or lower"
+				if (localesHash == "4a16f12e61d36648b0c8221007e9953b3256ddab") {ff = "70+" // hye, no
+				} else if (localesHash == "c4ab4437ca6416fd573e473015f9f4ff2120481c") {ff = "68-69" // zh-hk, zh-sg changed
+				} else if (localesHash == "dd682eaf62b498563da5e2a42ca8671960e1820a") {ff = "65-67" // ku,tk
+				} else if (localesHash == "8eb7de4db8f980b7a2cf17f2ac554bd4cfcb528c") {ff = "64 or lower"
 				}
-				strItem = sColor +"locales: "+ sc + localesHash + (ff == "" ? "" : s14+ "[FF"+ ff + "]"+ sc) +"<br>"
+				strItem = s12 +"locales: "+ sc + localesHash + (ff == "" ? "" : s14+ "[FF"+ ff + "]"+ sc) +"<br>"
 				output.push(strItem)
 
 				// details
@@ -669,7 +666,6 @@ function collator() {
 				output.push(strItem)
 				output.push(lineItems.join("<br>"))
 			} else {
-
 				output.push("nothing to report")
 			}
 			el.innerHTML = output.join("<br>")
