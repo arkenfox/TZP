@@ -67,6 +67,15 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 	padding-right: 6px;
 	cursor: pointer;
 }
+.btnfirst {background-color: #161b22;
+	display: inline-block;
+	font-size: 12px;
+	font-family: monospace, "Courier New";
+	font-weight: bold;
+	padding-left: 0px;
+	padding-right: 6px;
+	cursor: pointer;
+}
 .btnb {cursor: pointer;}
 /* item metrics/counts: dotted, no padding, normal */
 .btnc {
@@ -83,6 +92,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 	padding-right: 8px;
 	cursor: pointer;
 }
+
 .btn0 {border-color: #b3b3b3; color: #b3b3b3;}
 .btn1, .s1 {border-color: var(--test1); color: var(--test1);}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
@@ -123,7 +133,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 
 /* table nav */
 div.nav-title {position: relative;}
-div.nav-up {position: absolute; left: 20px; top: 0px; width: 50px; text-align: left;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 200px; text-align: left;}
 
 /* tables */
 table {width: 900px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
