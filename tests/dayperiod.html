@@ -39,21 +39,19 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-					<div class="btn">
-						<span id="bnarrow" class="btn4 btn" onClick="run('narrow')">[ NARROW ]</span>
-						<span id="bshort" class="btn4 btn" onClick="run('short')">[ SHORT ]</span>
-						<span id="blong" class="btn4 btn" onClick="run('long')">[ LONG ]</span>
-						<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
-						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
-					</div>
-				<br><br><hr><br>
+				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ NARROW ]</span>
+				<span id="bshort" class="btn4 btn" onClick="run('short')">[ SHORT ]</span>
+				<span id="blong" class="btn4 btn" onClick="run('long')">[ LONG ]</span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span class="btn4 btn"><input type="checkbox" id="supported"> supported [dtf]</span>
+			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
 	</table>
 	<br>
 
 <script>
-var detailed = [
+var list = [
 "aa,afar",
 "ab,abkhazian",
 "ach,acholi",
@@ -82,7 +80,7 @@ var detailed = [
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
-"ckb,central kurdish", // ? dropped
+"ckb,central kurdish",
 "co,corsican",
 "cr,cree",
 "crh,crimean tatar",
@@ -128,7 +126,7 @@ var detailed = [
 "ht,haitian",
 "hu,hungarian",
 "hy,armenian",
-"hye,eastern armenian", // ? dropped
+"hye,eastern armenian",
 "hz,herero",
 "ia,interlingua",
 "id,indonesian",
@@ -274,73 +272,86 @@ var detailed = [
 "zu,zulu",
 ]
 
-var legendclean = [],
-	locales = [],
+var aLegend = [],
+	aLegendSupported = [],
+	aLocales = [],
+	aSupported = [],
 	summary = [],
+	useSupportedOnly = true,
 	isDayPeriodSupported = false
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
 
 function legend() {
 	// build once
-	if (legendclean.length == 0) {
-		detailed.sort()
-		for (let i = 0 ; i < detailed.length; i++) {
-			let code = detailed[i].split(",")[0]
-			let name = detailed[i].split(",")[1]
-			code = code.trim()
-			locales.push(code.toLowerCase())
-			legendclean.push(code.padStart(7) +": "+ name)
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
+			if (test.length) {
+				aSupported.push(code)
+				aLegendSupported.push(code.padStart(7) +": "+ name)
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	dom.legend.innerHTML = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"+ legendclean.join("<br>")
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aLegendSupported}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
 function get_dayperiod(date, code, option) {
+	// always use h12
 	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
 }
 
 function run_main(method) {
 	let t0 = performance.now()
-	let data = [], aSupported = []
+	let data = []
 	let spacer = "<br><br>"
 	let isAll = false
 	if (method == "all") {isAll = true; method = "narrow"}
-	let useSupportedOnly = dom.supported.checked
+	useSupportedOnly = dom.supported.checked
 
 	try {
-		locales.forEach(function(code) {
-			// only if locale is supported
-			let go = true
-			if (useSupportedOnly) {
-				let test = Intl.PluralRules.supportedLocalesOf([code])
-				if (test.length) {aSupported.push(code)} else {go = false}
-			}
-			if (go) {
-				let str ="", str2 = "", str3 = ""
-				// in the morning, noon, in the afternoon, in the evening, at night
-				str = get_dayperiod(new Date("2019-01-30T08:00:00"), code, method)
-					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, method)
-					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, method)
-					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, method)
-					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, method)
-				if (!isAll) {
-					data.push(sha1(str) +"~~~"+ code +"~~~" + str)
-				} else {
-					str2 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "short")
-						+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "short")
-						+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "short")
-						+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "short")
-						+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "short")
-					str3 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "long")
-						+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "long")
-						+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "long")
-						+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "long")
-						+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "long")
-					data.push(sha1(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
-				}
+		let array = useSupportedOnly ? aSupported : aLocales
+		array.forEach(function(code) {
+			let str ="", str2 = "", str3 = ""
+			// in the morning, noon, in the afternoon, in the evening, at night
+			str = get_dayperiod(new Date("2019-01-30T08:00:00"), code, method)
+				+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, method)
+				+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, method)
+				+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, method)
+				+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, method)
+			if (!isAll) {
+				data.push(sha1(str) +"~~~"+ code +"~~~" + str)
+			} else {
+				str2 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "short")
+					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "short")
+					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "short")
+					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "short")
+					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "short")
+				str3 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "long")
+					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "long")
+					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "long")
+					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "long")
+					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "long")
+				data.push(sha1(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
 			}
 		})
-
 		// get one line per hash
 		data.sort()
 		//console.debug(data)
@@ -371,13 +382,13 @@ function run_main(method) {
 				}
 				let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
 				if (isAll) {
-					str += "<ul><li>"+ s12 +"N: "+ sc + tmpN +"</li>"
-						+ "<li>"+ s12 +"S: "+ sc + tmpS +"</li>"
-						+ "<li>"+ s12 +"L: "+ sc + tmpL +"</li>"
+					str += "<ul><li>"+ s16 +"N: "+ sc + tmpN +"</li>"
+						+ "<li>"+ s16 +"S: "+ sc + tmpS +"</li>"
+						+ "<li>"+ s16 +"L: "+ sc + tmpL +"</li>"
 				} else {
-					str += "<ul><li>"+ tmpN +"</li>"
+					str += "<ul><li>"+ s16 + method.slice(0,1).toUpperCase() +": "+ sc + tmpN +"</li>"
 				}
-				str += "<li>"+ codes.join(", ") +"</li></ul>"
+				str += "<li>"+ s12 +"L: "+ sc + codes.join(", ") +"</li></ul>"
 				aHash.push(str)
 				codes = [] // reset
 			}
@@ -392,7 +403,7 @@ function run_main(method) {
 		let display = s4 + method.toUpperCase() +": "
 			+" ["+ aHash.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
 			+ spacer + s16 +"results: "+ sc + sha1(aBucketsM.join()) +"<br>"
-			+ s16 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
+			+ s12 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
 			+"<br>"+ aHash.join("<br>")
 		dom.results.innerHTML = display
 
@@ -448,20 +459,9 @@ function setBtn(method) {
 	el.classList.remove("btn4")
 }
 
-function start() {
-	s4 = s4.trim()
-	s12 = s12.trim(),
-	s14 = s14.trim(),
-	s16 = s16.trim(),
-	sg = sg.trim()
-	sb = sb.trim()
-	dom.supported.checked = true
-	legend()
-	run_test()
-}
-
-start()
-
+dom.supported.checked = true
+legend()
+run_test()
 
 </script>
 </body>
