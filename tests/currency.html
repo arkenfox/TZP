@@ -39,12 +39,10 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-					<div class="btn">
-						<span id="brun" class="btn4 btn" onClick="run('run')">[ RUN ]</span>
-						<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
-						<span id="bsum" class="btn4 btn" onClick="run('sum')">[ SUMMARY ]</span>
-						<span class="btn4 btn"><input type="checkbox" id="supported"> supported locales only</span>
-					</div>
+				<span id="brun" class="btn4 btnfirst" onClick="run('run')">[ RUN ]</span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bsum" class="btn4 btn" onClick="run('sum')">[ SUMMARY ]</span>
+				<span class="btn4 btn"><input type="checkbox" id="supported"> supported [numberformat]</span>
 				<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -52,7 +50,7 @@
 	<br>
 
 <script>
-var detailed = [
+var list = [
 "aa,afar",
 "ab,abkhazian",
 "ach,acholi",
@@ -81,7 +79,7 @@ var detailed = [
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
-"ckb,central kurdish", // ? dropped
+"ckb,central kurdish",
 "co,corsican",
 "cr,cree",
 "crh,crimean tatar",
@@ -127,7 +125,7 @@ var detailed = [
 "ht,haitian",
 "hu,hungarian",
 "hy,armenian",
-"hye,eastern armenian", // ? dropped
+"hye,eastern armenian",
 "hz,herero",
 "ia,interlingua",
 "id,indonesian",
@@ -301,7 +299,6 @@ var	currencyExample = [
 'RWF',
 'UAH',
 'ZAR', // 45385ba50107e0c29c40d3c79e98c955a9b9dedf: 135
-
 // FF90 or lower: at this stage it is 127
 'NZD',
 'RON',
@@ -310,7 +307,6 @@ var	currencyExample = [
 'PKR',
 'UZS', // to 133
 'zzz', // garbage
-
 ]
 
 var	currencyMaster = [
@@ -335,38 +331,57 @@ var	currencyMaster = [
 - https://en.wikipedia.org/wiki/ISO_4217
 */
 
-var legendclean = [],
-	locales = [],
-	supported = [],
-	currencies = []
+var aLegend = [],
+	aLegendCurrency = [],
+	aLegendSupported = [],
+	aLocales = [],
+	aSupported = [],
+	aCurrency = [],
+	useSupportedOnly = true,
+	useExample = false
 
-var useExample = false
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
 
 function legend() {
 	// build once
-	if (legendclean.length == 0) {
-		detailed.sort()
-		for (let i = 0 ; i < detailed.length; i++) {
-			let code = detailed[i].split(",")[0]
-			let name = detailed[i].split(",")[1]
-			code = code.trim()
-			locales.push(code)
-			let test = Intl.PluralRules.supportedLocalesOf([code])
-			if (test.length) {supported.push(code)}
-			legendclean.push(code.padStart(7) +": "+ name)
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			let test = Intl.NumberFormat.supportedLocalesOf([code])
+			if (test.length) {
+				aSupported.push(code)
+				aLegendSupported.push(code.padStart(7) +": "+ name)
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	dom.legend.innerHTML = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"+ legendclean.join("<br>")
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aLegendSupported}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
 }
 
 function run_test(isSummary, isExample) {
 	let t0 = performance.now()
 	let data = []
 	let spacer = "<br><br>"
-	currencies.sort()
-	let useSupportedOnly = dom.supported.checked
-	let loop = useSupportedOnly ? supported : locales
+	aCurrency.sort()
+
+	legend()
+	useSupportedOnly = dom.supported.checked
+	let loop = useSupportedOnly ? aSupported : aLocales
 
 	try {
 		if (isSummary) {
@@ -437,7 +452,7 @@ function run_test(isSummary, isExample) {
 			}
 			dom.results.innerHTML = s4 + display.length + sc
 				+ (useSupportedOnly ? sc +" from "+ s4 + loop.length + " supported" : " testing all " + loop.length) + sc + spacer
-				+ s16 +"currencies: " + currencies.length +"<br>"+ sc + currencies.join(", ") + spacer
+				+ s16 +"currencies [" + aCurrency.length +"]"+ sc +"<br><br>"+ aCurrency.join(", ") + spacer
 				+ display.join("<br>")
 		}
 
@@ -445,7 +460,7 @@ function run_test(isSummary, isExample) {
 		if (!isSummary) {
 			loop.forEach(function(code) {
 				let codeData = []
-				currencies.forEach(function(cur) {
+				aCurrency.forEach(function(cur) {
 					let res = undefined
 					res = Number(1234567.89).toLocaleString(code, {style: "currency", currency: cur, currencyDisplay: "symbol"})
 					if (res.length > 0) {
@@ -459,7 +474,7 @@ function run_test(isSummary, isExample) {
 			if (data.length) {
 				// add one undefined record
 				let codeData = []
-				currencies.forEach(function(cur) {
+				aCurrency.forEach(function(cur) {
 					let res = undefined
 					res = Number(1234567.89).toLocaleString(undefined, {style: "currency", currency: cur, currencyDisplay: "symbol"})
 					if (res.length > 0) {
@@ -509,7 +524,7 @@ function run_test(isSummary, isExample) {
 				//console.debug(aBucketsC.join("\n"))
 				dom.results.innerHTML = s4 + aHash.length + sc +" from " + s4 + loop.length
 					+ (useSupportedOnly ? " supported" : "") + sc +" + undefined"+ spacer
-					+ s16 +"currencies: " + currencies.length +"<br>"+ sc + currencies.join(", ") + spacer
+					+ s16 +"currencies [" + aCurrency.length +"]"+ sc + "<br><br>"+ sc + aCurrency.join(", ") + spacer
 					+ s16 +"results: "+ sc + sha1(aBucketsR.join()) +"<br>"
 					+ s12 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
 					+ aHash.join("<br>")
@@ -530,37 +545,23 @@ function run(type) {
 	dom.perf = ""
 	setTimeout(function() {
 		if (type == "sum") {
-
 			run_test(true)
 		} else if (type == "all") {
-
-			currencies = currencyMaster
+			aCurrency = currencyMaster
 			run_test(false)
 		} else {
 			// use text field, if empty run example
-
-			currencies = currencyExample
+			aCurrency = currencyExample
 			run_test(false)
 		}
 	}, 1)
 }
 
-function start() {
-	s4 = s4.trim()
-	s12 = s12.trim(),
-	s14 = s14.trim(),
-	s16 = s16.trim(),
-	sg = sg.trim()
-	sb = sb.trim()
-	dom.supported.checked = true
-	legend()
-	currencyMaster = currencyMaster.concat(currencyExample)
-	currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})
-	currencyMaster.sort()
-}
-
-start()
-
+dom.supported.checked = true
+legend()
+currencyMaster = currencyMaster.concat(currencyExample)
+currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})
+currencyMaster.sort()
 
 </script>
 </body>

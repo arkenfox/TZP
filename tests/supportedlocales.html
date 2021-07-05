@@ -39,16 +39,14 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-					<div class="btn">
-						<span id="bC" class="btn4 btn" onClick="run('C')">[ C ]</span>
-						<span id="bDTF" class="btn4 btn" onClick="run('DTF')" id="">[ DTF ]</span>
-						<span id="bDN" class="btn4 btn" onClick="run('DN')">[ DN ]</span>
-						<span id="bLF" class="btn4 btn" onClick="run('LF')">[ LF ]</span>
-						<span id="bNF" class="btn4 btn" onClick="run('NF')">[ NF ]</span>
-						<span id="bPR" class="btn4 btn" onClick="run('PR')">[ PR ]</span>
-						<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[ RTF ]</span>
-						<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>
-					</div>
+				<span id="bC" class="btn4 btnfirst" onClick="run('C')">[ C ]</span>
+				<span id="bDTF" class="btn4 btn" onClick="run('DTF')">[ DTF ]</span>
+				<span id="bDN" class="btn4 btn" onClick="run('DN')">[ DN ]</span>
+				<span id="bLF" class="btn4 btn" onClick="run('LF')">[ LF ]</span>
+				<span id="bNF" class="btn4 btn" onClick="run('NF')">[ NF ]</span>
+				<span id="bPR" class="btn4 btn" onClick="run('PR')">[ PR ]</span>
+				<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[ RTF ]</span>
+				<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>
 				<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -56,7 +54,7 @@
 	<br>
 
 <script>
-var detailed = [
+var list = [
 "aa,afar",
 "ab,abkhazian",
 "ach,acholi",
@@ -85,7 +83,7 @@ var detailed = [
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
-"ckb,central kurdish", // ? dropped
+"ckb,central kurdish",
 "co,corsican",
 "cr,cree",
 "crh,crimean tatar",
@@ -131,7 +129,7 @@ var detailed = [
 "ht,haitian",
 "hu,hungarian",
 "hy,armenian",
-"hye,eastern armenian", // ? dropped
+"hye,eastern armenian",
 "hz,herero",
 "ia,interlingua",
 "id,indonesian",
@@ -277,24 +275,31 @@ var detailed = [
 "zu,zulu",
 ]
 
-var legendclean = [],
-	locales = [],
-	summary = []
+var aLegend = [],
+	aLocales = [],
+	aSummary = []
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
 
 function legend() {
 	// build once
-	if (legendclean.length == 0) {
-		detailed.sort()
-		for (let i = 0 ; i < detailed.length; i++) {
-			let code = detailed[i].split(",")[0]
-			let name = detailed[i].split(",")[1]
-			code = code.trim()
-			locales.push(code.toLowerCase())
-			legendclean.push(code.padStart(7) +": "+ name)
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	dom.legend.innerHTML = s4 +"   LEGEND ("+ legendclean.length +")"+ sc +"<br><br>"+ legendclean.join("<br>")
+	dom.legend.innerHTML = s4 +"   LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"+ aLegend.join("<br>")
 }
 
 function run_main(method, isLoopy) {
@@ -341,10 +346,10 @@ function run_main(method, isLoopy) {
 			data = []
 			map = []
 			all = []
-			for (let i = 0 ; i < detailed.length; i++) {
+			for (let i = 0 ; i < list.length; i++) {
 				// split: code, name
-				let code = detailed[i].split(",")[0]
-				let name = detailed[i].split(",")[1]
+				let code = list[i].split(",")[0]
+				let name = list[i].split(",")[1]
 				// test
 				let test = ""
 				if (method == "C") {
@@ -408,7 +413,7 @@ function run_main(method, isLoopy) {
 			for (let i = 0 ; i < map.length; i++) {
 				let x = map[i].split(" -> ")[0] // tested
 				let y = map[i].split(" -> ")[1] // found
-				if (!locales.includes(y)) {
+				if (!aLocales.includes(y)) {
 					notlist.push(s12 + y + sc +" ["+ x +"]")
 					notlistclean.push(y)
 				}
@@ -451,7 +456,7 @@ function run_main(method, isLoopy) {
 					str = s4 + getPretty(method).toUpperCase() + sc
 						+ (hash == hashLookup ? "" : sb +" [localeMatcher mismatch]"+ sc)
 					str += "<br>" + lookupSummary
-					summary.push(str)
+					aSummary.push(str)
 				}
 			} else {
 				str = s4 + type.toUpperCase() + sc
@@ -481,10 +486,11 @@ function run_main(method, isLoopy) {
 		if (!isLoopy) {
 			dom.results.innerHTML = display.join("<br>")
 			// build + color legend
-			for (let i = 0 ; i < detailed.length; i++) {
+			for (let i = 0 ; i < list.length; i++) {
 				// split: code, name
-				let code = detailed[i].split(",")[0]
-				let name = detailed[i].split(",")[1]
+				let str = list[i].toLowerCase()
+				let code = str.split(",")[0].trim()
+				let name = str.split(",")[1].trim()
 				if (nocase.includes(code.toLowerCase())) {
 					legend.push(sg + code.padStart(7) +": "+ name + sc)
 				} else {
@@ -496,7 +502,7 @@ function run_main(method, isLoopy) {
 				}
 			}
 			// display legend
-			dom.legend.innerHTML = s4 +"   LEGEND ("+ legend.length +")"+ sc +"<br><br>"+ legend.join("<br>")
+			dom.legend.innerHTML = s4 +"   LEGEND ["+ legend.length +"]"+ sc +"<br><br>"+ legend.join("<br>")
 			// perf
 			let t1 = performance.now()
 			dom.perf.innerHTML = Math.round(t1-t0) +"ms"
@@ -506,7 +512,7 @@ function run_main(method, isLoopy) {
 		if (isLoopy) {
 			let x = s4 + getPretty(method).toUpperCase() + sc
 				+ "<ul><li>"+ e.name +": "+ e.message +"</li></ul>"
-			summary.push(x)
+			aSummary.push(x)
 		} else {
 			dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
 		}
@@ -531,7 +537,7 @@ function run(method) {
 
 function run_all() {
 	let t0 = performance.now()
-	summary = []
+	aSummary = []
 	run_main("C", true)
 	run_main("DTF", true)
 	run_main("DN", true)
@@ -539,7 +545,7 @@ function run_all() {
 	run_main("NF", true)
 	run_main("PR", true)
 	run_main("RTF", true)
-	dom.results.innerHTML = summary.join("<br>")
+	dom.results.innerHTML = aSummary.join("<br>")
 	let t1 = performance.now()
 	dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 }
@@ -557,21 +563,8 @@ function setBtn(method) {
 	el.classList.remove("btn4")
 }
 
-function start() {
-	s4 = s4.trim()
-	s12 = s12.trim(),
-	s14 = s14.trim(),
-	s16 = s16.trim(),
-	sg = sg.trim()
-	sb = sb.trim()
-	legend()
-	let autostart = "ALL"
-	setBtn(autostart)
-	run(autostart)
-}
-
-start()
-
+legend()
+run("ALL")
 
 </script>
 </body>
