@@ -37,6 +37,7 @@
 			<span class="btn9 btn" onClick="run(500)">[ run 500 ]</span>
 			<span class="btn9 btn" onClick="run(1000)">[ run 1000 ]</span>
 			<span class="btn9 btn" onClick="run(5000)">[ run 5000 ]</span>
+			<span class="btn9 btn" onClick="run(25000)">[ run 25000 ]</span>
 			<br><br><hr>
 			<br><span class="spaces" id="results"></span>
 			</td>
@@ -61,15 +62,18 @@ function analyse(data) {
 		if (slice4 == "5ErkJggg==") {
 			if (len == 174) {return "0"}
 			if (len == 170) {return "1"}
-			if (len == 162) {return "2"}
+			if (len == 166) {return "2"}
+			if (len == 162) {return "3"}
 		} else if (slice4 == "VORK5CYII=") {
-			if (len == 174) {return "3"}
-			if (len == 170) {return "4"}
-			if (len == 162) {return "5"}
+			if (len == 174) {return "4"}
+			if (len == 170) {return "5"}
+			if (len == 166) {return "6"}
+			if (len == 162) {return "7"}
 		} else if (slice4 == "lFTkSuQmCC") {
-			if (len == 174) {return "6"}
-			if (len == 170) {return "7"}
-			if (len == 162) {return "8"}
+			if (len == 174) {return "8"}
+			if (len == 170) {return "9"}
+			if (len == 166) {return "10"}
+			if (len == 162) {return "11"}
 		}
 		return strNew
 	}
@@ -205,12 +209,17 @@ let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4jW"+ sc +" ... "
 let rules = [
 	s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
+	s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
+
 	s14+ "174 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "170 "+ prefix + "VORK5CYII="+ sc,
+	s14+ "166 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "162 "+ prefix + "VORK5CYII="+ sc,
+
 	s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
+	s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
 ]
 let testCount = 100
