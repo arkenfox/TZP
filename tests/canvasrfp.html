@@ -61,10 +61,14 @@ function analyse(data) {
 				return "0"
 			} else if (slice4 == "VORK5CYII=") {
 				return "1"
+			} else if (slice4 == "lFTkSuQmCC") {
+				return "2"
 			}
 		} else if (data.length == 170) {
-			if (slice4 == "lFTkSuQmCC") {
-				return "2"
+			if (slice4 == "VORK5CYII=") {
+				return "3"
+			} else if (slice4 == "lFTkSuQmCC") {
+				return "4"
 			}
 		}
 		return strNew
@@ -201,6 +205,8 @@ let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4jW"+ sc +" ... "
 let rules = [
 	s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+	s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+	s14+ "170 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
 ]
 let testCount = 100
