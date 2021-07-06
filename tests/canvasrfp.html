@@ -49,11 +49,10 @@
 <script>
 
 function analyse(data) {
-	//let slice1 = data.slice(69,80)
 	let slice1 = data.slice(69,70),
 		slice2 = data.slice(70,72),
 		slice3 = data.slice(72,80),
-	slice4 = data.slice(data.length - 10, data.length)
+		slice4 = data.slice(data.length - 10, data.length)
 	let strNew = s14 + data.length +sc +" : "
 		+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
 
@@ -84,42 +83,48 @@ function get_data(type) {
 	let realvalue = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed"
 	let aData = []
 	let canvas = document.getElementById("canvas")
-	let data = canvas.toDataURL()
-	if (sha1(data) == realvalue) {
-		aData.push("remove the RFP site exception and randomize")
+	try {
+		let data = canvas.toDataURL()
+		if (sha1(data) == realvalue) {
+			aData.push("remove the RFP site exception and randomize")
+			return aData
+		}
+		let data2 = canvas.toDataURL()
+		if (data == data2) {
+			aData.push("this is not RFP as it is not random per execution")
+			return aData
+		}
+		if (data.length > 180 || data2.length > 180) {
+			aData.push("look, you're not fooling anyone, this is not RFP")
+			return aData
+		}
+		// looks good
+		aData.push(analyse(data))
+		aData.push(analyse(data2))
+		for (let i=2; i < testCount; i++) {
+			data = canvas.toDataURL()
+			aData.push(analyse(canvas.toDataURL()))
+		}
+		return aData
+	} catch(e) {
+		let error = "error"
+		if (e.name !== undefined) {error = sb + e.name + sc +": "+ e.message}
+		aData.push(error)
 		return aData
 	}
-	let data2 = canvas.toDataURL()
-	if (data == data2) {
-		aData.push("this is not RFP as it is not random per execution")
-		return aData
-	}
-	if (data.length > 180 || data2.length > 180) {
-		aData.push("look, you're not fooling anyone, this is not RFP")
-		return aData
-	}
-	// looks good
-	aData.push(analyse(data))
-	aData.push(analyse(data2))
-	for (let i=0; i < testCount - 2; i++) {
-		data = canvas.toDataURL()
-		aData.push(analyse(canvas.toDataURL()))
-	}
-	return aData
 }
 
 function run(howmany) {
 	dom.perf = ""
 	dom.results = ""
-
 	testCount = howmany
 
-	// not FF
+	// isFF
 	if (!isFF) {
 		dom.results = "this test requires firefox"
 		return
 	}
-	// not FF78+
+	// FF78+
 	try {
 		let t = new RegExp('b')
 		if (t.dotAll == false) {} else {
@@ -127,8 +132,7 @@ function run(howmany) {
 			return
 		}
 	} catch(e) {}
-
-	// check RFP is on
+	// isRFP
 	let isRFP = false
 	let isPerf = true
 	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
@@ -147,7 +151,6 @@ function run(howmany) {
 		return
 	}
 
-	dom.results = "calculating..."
 	// create canvas
 	try {
 		let canvas = document.getElementById("canvas")
@@ -162,13 +165,14 @@ function run(howmany) {
 		dom.results.innerHTML = sb + e.name + sc +": "+ e.message
 		return
 	}
+	dom.results = "calculating..."
 
 	// test
-	let delay = 170
-	if (testCount > 1000) {delay = 20}
+	let delay = 250
+	if (testCount > 1000) {delay = 45}
 
-	let t0 = performance.now()
 	setTimeout(function(){
+		let t0 = performance.now()
 		// get results
 		Promise.all([
 			get_data()
