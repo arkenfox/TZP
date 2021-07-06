@@ -160,6 +160,9 @@ function run(howmany) {
 	}
 
 	// test
+	let delay = 170
+	if (testCount > 1000) {delay = 20}
+
 	let t0 = performance.now()
 	setTimeout(function(){
 		// get results
@@ -197,7 +200,7 @@ function run(howmany) {
 			let t1 = performance.now()
 			dom.perf.innerHTML = Math.round(t1-t0) +"ms | "+ Math.round((t1-t0)/testCount) +" each"
 		})
-	}, 1)
+	}, delay)
 }
 
 sb = sb.trim()
