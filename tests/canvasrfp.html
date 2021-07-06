@@ -178,7 +178,7 @@ function run(howmany) {
 					let total = data.length
 					data = data.filter(x => ![""+i].includes(x))
 					display.push(
-						("RULE"+ i).padStart(6) + " : " + rules[i]
+						("RULE"+ i).padEnd(6) + " : " + rules[i]
 						+" : "+ s9 + (total - data.length) + sc
 					)
 				}
