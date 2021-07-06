@@ -198,7 +198,9 @@ function run(howmany) {
 			dom.results.innerHTML = display.join("<br>")
 			// perf
 			let t1 = performance.now()
-			dom.perf.innerHTML = Math.round(t1-t0) +"ms | "+ Math.round((t1-t0)/testCount) +" each"
+			let perItem = (t1-t0)/testCount
+			if (!Number.isInteger(perItem)) {perItem = perItem.toFixed(2)}
+			dom.perf.innerHTML = Math.round(t1-t0) +"ms | "+ perItem +" each"
 		})
 	}, delay)
 }
