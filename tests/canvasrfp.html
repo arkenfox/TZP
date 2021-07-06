@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>canvas rfp</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 580px;}
+		hr {color: #8cdcc1}
+	</style>
+</head>
+
+<body>
+	<div class="hidden"><canvas id="canvas" width="16" height="16"></canvas></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb9">
+		<col width="1%"><col width="99%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">canvas RFP
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Testing RFP charcteristics in toDataURL [and by extension toBlob]</span>
+		</td></tr>
+		<tr><td></td><td class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn9 btnfirst" onClick="run(100)">[ run 100 ]</span>
+			<span class="btn9 btnfirst" onClick="run(500)">[ run 500 ]</span>
+			<span class="btn9 btnfirst" onClick="run(1000)">[ run 1000 ]</span>
+			<br><br><hr>
+			<br><span class="spaces" id="results"></span>
+			</td>
+		</tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+	</table>
+	<br>
+
+<script>
+
+function analyse(data) {
+	//let slice1 = data.slice(69,80)
+	let slice1 = data.slice(69,70),
+		slice2 = data.slice(70,72),
+		slice3 = data.slice(73,80),
+	slice4 = data.slice(data.length - 10, data.length)
+	let strNew = s14 + data.length +sc +" : "
+		+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
+
+	if (slice1 == "A" && slice3 == "lEQVQ4jW") {
+		if (data.length == 174) {
+			if (slice4 == "5ErkJggg==") {
+				return "0"
+			} else if (slice4 == "VORK5CYII=") {
+				return "1"
+			}
+		} else if (data.length == 170) {
+			if (slice4 == "lFTkSuQmCC") {
+				return "2"
+			}
+		}
+		return strNew
+	}
+	return strNew
+}
+
+function get_data(type) {
+	let realvalue = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed"
+	let aData = []
+	let canvas = document.getElementById("canvas")
+	let data = canvas.toDataURL()
+	if (sha1(data) == realvalue) {
+		aData.push("remove the RFP site exception and randomize")
+		return aData
+	}
+	let data2 = canvas.toDataURL()
+	if (data == data2) {
+		aData.push("this is not RFP as it is not random per execution")
+		return aData
+	}
+	// looks good
+	aData.push(analyse(data))
+	aData.push(analyse(data2))
+	for (let i=0; i < testCount - 2; i++) {
+		data = canvas.toDataURL()
+		aData.push(analyse(canvas.toDataURL()))
+	}
+	return aData
+}
+
+function run(howmany) {
+	dom.perf = ""
+	dom.results = ""
+
+	testCount = howmany
+
+	// not FF
+	if (!isFF) {
+		dom.results = "this test requires firefox"
+		return
+	}
+	// not FF78+
+	try {
+		let t = new RegExp('b')
+		if (t.dotAll == false) {} else {
+			dom.results = "this test requires firefox 78 or higher"
+			return
+		}
+	} catch(e) {}
+
+	// check RFP is on
+	let isRFP = false
+	let isPerf = true
+	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
+	try {
+		performance.mark("a")
+		let r = performance.getEntriesByName("a","mark").length
+			+ performance.getEntries().length
+			+ performance.getEntries({name:"a",entryType:"mark"}).length
+			+ performance.getEntriesByName("a","mark").length
+			performance.clearMarks()
+		isRFP = (r == 0)
+		if (!isPerf) {isRFP = false}
+	} catch(e) {}
+	if (!isRFP) {
+		dom.results = "this test requires RFP to be enabled"
+		return
+	}
+
+	dom.results = "calculating..."
+	// create canvas
+	try {
+		let canvas = document.getElementById("canvas")
+		let ctx = canvas.getContext('2d')
+		for (let x=0; x < 16; x++) {
+			for (let y=0; y < 16; y++) {
+				ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
+				ctx.fillRect(x, y, 1, 1)
+			}
+		}
+	} catch(e) {
+		dom.results.innerHTML = sb + e.name + sc +": "+ e.message
+		return
+	}
+
+	// test
+	let t0 = performance.now()
+	setTimeout(function(){
+		// get results
+		Promise.all([
+			get_data()
+		]).then(function(results){
+			let data = results[0]
+			let display = []
+			if (data.length == 1) {
+				dom.results.innerHTML = data[0]
+				return
+			} else {
+				data.sort()
+				display.push(s9 +"TESTS COMPLETED: " + data.length + sc +"<br>")
+				for (let i=0; i < rules.length; i++) {
+					let total = data.length
+					data = data.filter(x => ![""+i].includes(x))
+					display.push(
+						s14+ "RULE"+ i + sc +" : " + rules[i]
+						+" : "+ s9 + (total - data.length) + sc
+					)
+				}
+			}
+			if (data.length) {
+				let count = data.length
+				data = data.filter(function(item, position) {return data.indexOf(item) === position})
+				let deduped = data.length == count ? "" : " [de-duped]"
+				display.push("<br><br>" + s9 + "THE REST: " + data.length + deduped + sc +"<br>")
+				display.push(data.join("<br>"))
+			} else {
+				display.push("<br><br>"+ s9 + "NAILED IT!"+ sc)
+			}
+			dom.results.innerHTML = display.join("<br>")
+			// perf
+			let t1 = performance.now()
+			dom.perf.innerHTML = Math.round(t1-t0) +"ms | "+ Math.round((t1-t0)/testCount) +" each"
+		})
+	}, 1)
+}
+
+sb = sb.trim()
+sg = sg.trim()
+s9 = s9.trim()
+s14 = s14.trim()
+
+let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4jW"+ sc +" ... "+ s14
+let rules = [
+	s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+	s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
+]
+let testCount = 100
+
+run(100)
+
+</script>
+</body>
+</html>
