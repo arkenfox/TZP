@@ -150,6 +150,12 @@ function run(howmany) {
 		return
 	}
 
+	// heh
+	if (testTotal >= 200000) {
+		dom.results = "that's enough tests for now... go take a break"
+		return
+	}
+
 	// create canvas
 	try {
 		let canvas = document.getElementById("canvas")
@@ -166,7 +172,7 @@ function run(howmany) {
 	}
 	dom.results = "calculating..."
 
-	// test
+	// ok, test away
 	let delay = 250
 	if (testCount > 1000) {delay = 45}
 
@@ -183,11 +189,12 @@ function run(howmany) {
 				return
 			}
 
-			// test
+			// debug
 			//data = ["1","1","2","2","8","11","0","3","3", rules[3]]
 			//data = ["1","1","2","2","8","11","0","3","3"]
 			//testCount = data.length
 
+			testTotal += data.length
 			data.sort()
 			display.push(s9 +"TESTS COMPLETED: " + data.length + sc +"<br>")
 			for (let i=0; i < rules.length; i++) {
@@ -227,7 +234,7 @@ function run(howmany) {
 
 			// running totals
 			if (hasTotal) {
-				display = [s9 +"RUNNING TOTALS"+ sc +"<br>"]
+				display = [s9 +"TOTAL TESTS: "+ testTotal + sc +"<br>"]
 				let displayTotal = []
 				for (let i=0; i < rules.length; i++) {
 					let curTotal = oTotal["rule"+ (i +"").padStart(2,"0")][0]
@@ -287,6 +294,7 @@ for (let i=0; i < rules.length; i++) {
 
 // autorun
 let testCount = 100
+let testTotal = 0
 run(100)
 
 </script>
