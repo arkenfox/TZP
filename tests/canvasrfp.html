@@ -37,8 +37,9 @@
 			<span class="btn9 btn" onClick="run(500)">[ run 500 ]</span>
 			<span class="btn9 btn" onClick="run(1000)">[ run 1000 ]</span>
 			<span class="btn9 btn" onClick="run(5000)">[ run 5000 ]</span>
-			<span class="btn9 btn" onClick="run(25000)">[ run 25000 ]</span>
+			<span class="btn9 btn" onClick="run(20000)">[ run 20000 ]</span>
 			<br><br><hr>
+			<br><span class="spaces" style="color: #b3b3b3;" id="totals"></span>
 			<br><span class="spaces" style="color: #b3b3b3;" id="results"></span>
 			</td>
 		</tr>
@@ -107,9 +108,7 @@ function get_data(type) {
 		}
 		return aData
 	} catch(e) {
-		let error = "error"
-		if (e.name !== undefined) {error = sb + e.name + sc +": "+ e.message}
-		aData.push(error)
+		aData.push(e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message)
 		return aData
 	}
 }
@@ -162,7 +161,7 @@ function run(howmany) {
 			}
 		}
 	} catch(e) {
-		dom.results.innerHTML = sb + e.name + sc +": "+ e.message
+		dom.results.innerHTML = aData.push(e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message)
 		return
 	}
 	dom.results = "calculating..."
@@ -182,28 +181,71 @@ function run(howmany) {
 			if (data.length == 1) {
 				dom.results.innerHTML = data[0]
 				return
-			} else {
-				data.sort()
-				display.push(s9 +"TESTS COMPLETED: " + data.length + sc +"<br>")
-				for (let i=0; i < rules.length; i++) {
-					let total = data.length
-					data = data.filter(x => ![""+i].includes(x))
-					display.push(
-						("RULE"+ i).padEnd(6) + " : " + rules[i]
-						+" : "+ s9 + (total - data.length) + sc
-					)
+			}
+
+			// test
+			//data = ["1","1","2","2","8","11","0","3","3", rules[3]]
+			//data = ["1","1","2","2","8","11","0","3","3"]
+			//testCount = data.length
+
+			data.sort()
+			display.push(s9 +"TESTS COMPLETED: " + data.length + sc +"<br>")
+			for (let i=0; i < rules.length; i++) {
+				let total = data.length
+				data = data.filter(x => ![""+i].includes(x))
+				let rulecount = total - data.length
+				if (rulecount > 0 ) {
+					display.push(("RULE"+ i).padEnd(6) + " : " + rules[i] +" : "+ s9 + (rulecount +"").padStart(5) + sc)
+					// update running totals
+					let curTotal = oTotal["rule"+ (i +"").padStart(2,"0")][0]
+					let newTotal = curTotal + rulecount
+					oTotal["rule"+ (i +"").padStart(2,"0")] = [newTotal]
 				}
 			}
-			if (data.length) {
-				let count = data.length
-				data = data.filter(function(item, position) {return data.indexOf(item) === position})
-				let deduped = data.length == count ? "" : " [de-duped]"
-				display.push("<br><br>" + s9 + "THE REST: " + data.length + deduped + sc +"<br>")
-				display.push(data.join("<br>"))
-			} else {
-				display.push("<br><br>"+ s9 + "NAILED IT!"+ sc)
+			let count = data.length
+			let countRFP = testCount - count
+
+			if (countRFP > 0) {
+				hasTotal = true
+				display.push(s9 +"".padStart(51) + "-----" + sc)
+				display.push(s9 +"TOTAL: ".padStart(51) + (countRFP +"").padStart(5) + sc)
+			}
+			if (count == 0) {
+				display.push(s9 +"<br>\u2713 NAILED IT"+ sc)
+			}
+			if (count > 0) {
+				let strRemainder = countRFP == 0 ? "RESULTS: " : "OTHER RESULTS: " 
+				if (data.length) {
+					data = data.filter(function(item, position) {return data.indexOf(item) === position})
+					let deduped = data.length == count ? "" : " [de-duped]"
+					display.push("<br>" + s9 + strRemainder + data.length + deduped + sc +"<br>")
+					display.push(data.join("<br>"))
+					if (countRFP == 0) {display.push(sb +"<br><br>\u2716 FAILED IT"+ sc)}
+				}
 			}
 			dom.results.innerHTML = display.join("<br>")
+
+			// running totals
+			if (hasTotal) {
+				display = [s9 +"RUNNING TOTALS"+ sc +"<br>"]
+				let displayTotal = []
+				for (let i=0; i < rules.length; i++) {
+					let curTotal = oTotal["rule"+ (i +"").padStart(2,"0")][0]
+					let strTotal = curTotal +""
+					if (strTotal.length > 5) {strTotal = "> 99999"}
+					strTotal = strTotal.padStart(7)
+					let ruleNo = "RULE"+ (i +"").padEnd(2)
+					strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s9 + ruleNo + sc +": "+ strTotal
+					displayTotal.push(strTotal)
+					if ((i % 4) == 3) {
+						display.push(displayTotal.join(" | "))
+						displayTotal = []
+					}
+				}
+				display.push("<br><hr>")
+				dom.totals.innerHTML = display.join("<br>")
+			}
+
 			// perf
 			let t1 = performance.now()
 			let perItem = (t1-t0)/testCount
@@ -235,8 +277,16 @@ let rules = [
 	s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
 ]
-let testCount = 100
 
+// running totals
+let oTotal = {},
+	hasTotal = false
+for (let i=0; i < rules.length; i++) {
+	oTotal["rule"+ (i +"").padStart(2,"0")] = [0]
+}
+
+// autorun
+let testCount = 100
 run(100)
 
 </script>
