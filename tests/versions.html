@@ -591,21 +591,31 @@ function outputVersion() {
 
 	// watch
 	// 1274354
-	let t40 = performance.now(), ver40 = xNC
-	let test40 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
-	if (!isNaN(test40)) {ver40 = xOMG}
-	record(3,"NaN", "1274354", ver40, performance.now()-t40)
+	let t9 = performance.now(), ver9 = xNC
+	let test9 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
+	if (!isNaN(test9)) {ver9 = xOMG}
+	record(9,"NaN", "1274354", ver9, performance.now()-t9)
 
-	let t41 = performance.now(), ver41 = xNC
-	let test41 = new Date("31-Mar-2011").getFullYear()
+	let t8 = performance.now(), ver8 = xNC
+	let test8 = new Date("31-Mar-2011").getFullYear()
 	// 63 and lower = NaN, 64+ = -2011
-	if (test41 !== -2011 && !isNaN(test41)) {ver41 = xOMG + (isFF ? " [" + test41 +"]" : "")}
-	record(2,"-2011", "1274354", ver41, performance.now()-t41)
+	if (test8 !== -2011 && !isNaN(test8)) {ver8 = xOMG + (isFF ? " [" + test8 +"]" : "")}
+	record(8,"-2011", "1274354", ver8, performance.now()-t8)
 
-	let t42 = performance.now(), ver42 = xNC
-	let test42 = new Date("19999-11-11").toString()
-	if (test42 !== "Invalid Date") {ver42 = xOMG}
-	record(1,"Invalid Date", "1274354", ver42, performance.now()-t42)
+	let t7 = performance.now(), ver7 = xNC
+	let test7 = new Date("19999-11-11").toString()
+	if (test7 !== "Invalid Date") {ver7 = xOMG}
+	record(7,"Invalid Date", "1274354", ver7, performance.now()-t7)
+
+	/*
+	// 1370185
+	let t6 = performance.now(), ver6 = xNC
+	let chars6 = ["\u0F45","རྔ"] // TIBETAN CA + ??
+	let control6 = chars6.sort(Intl.Collator("en").compare)
+	let test6 = chars6.sort(Intl.Collator("dz").compare)
+	if (control6 !== test6) {ver6 = xOMG}
+	record(6,control6, "1370185", ver6, performance.now()-t6)
+	*/
 
 	try {
 		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
