@@ -284,19 +284,17 @@ function run() {
 				if (isFF || isEngine == "blink" || isEngine == "webkit") {checkPNG = true}
 
 				// cleanup output
-				let green = "<span style='font-size: 10px;'>" + s9 +" \u2713"+ sc + "</span>",
-					red = "<span style='font-size: 10px;'>" + sb +" \u2716"+ sc + "</span>"
 				if (name == "getImageData") {
 					if (isHash) {
-						display += (display == known1 ? green : red)
+						display += (display == known1 ? green_tick : red_cross)
 					}
 				} else if (name == "toDataURL" || name == "toBlob") {
 					if (isHash) {
 						if (checkPNG) {
 							if (isEngine == "blink") { // blink has two known goods
-								display += (display == known2 || display == known2b ? green : red)
+								display += (display == known2 || display == known2b ? green_tick : red_cross)
 							} else {
-								display += (display == known2 ? green : red)
+								display += (display == known2 ? green_tick : red_cross)
 							}
 						} else {
 							// unhide unkown notation row
@@ -306,11 +304,11 @@ function run() {
 					}
 				} else if (name == "isPointInPath") {
 					if (isHash) {
-						display += (display == known3 ? green : red)
+						display += (display == known3 ? green_tick : red_cross)
 					}
 				} else if (name == "isPointInStroke") {
 					if (isHash) {
-						display += (display == known4 ? green : red)
+						display += (display == known4 ? green_tick : red_cross)
 					}
 				}
 				// output
