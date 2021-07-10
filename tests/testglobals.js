@@ -31,6 +31,8 @@ let s0 = " <span class='",
 	s17 = s0+"s17'>",
 	s18 = s0+"s18'>",
 	sc = "</span>",
+	green_tick = "<span style='font-size: 10px;'>" + s9 +" \u2713"+ sc + "</span>",
+	red_cross = "<span style='font-size: 10px;'>" + sb +" \u2716"+ sc + "</span>",
 // show/hide text colors
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
