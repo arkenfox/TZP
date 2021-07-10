@@ -50,14 +50,13 @@
 <script>
 
 function analyse(data) {
-	let slice1 = data.slice(69,70),
+	let len = data.length,
+		slice1 = data.slice(69,70),
 		slice2 = data.slice(70,72),
 		slice3 = data.slice(72,80),
 		slice4 = data.slice(data.length - 10, data.length)
-	let strNew = s14 + data.length +sc +" : "
+	let strNew = s14 + len +sc +" : "
 		+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
-
-	let len = data.length
 	if (slice1 == "A" && slice3 == "lEQVQ4jW") {
 		if (slice4 == "5ErkJggg==") {
 			if (len == 174) {return "0"}
@@ -80,7 +79,7 @@ function analyse(data) {
 	return strNew
 }
 
-function get_data(type) {
+function get_data() {
 	let realvalue = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed"
 	let aData = []
 	let canvas = document.getElementById("canvas")
@@ -242,7 +241,7 @@ function run(howmany) {
 					if (strTotal.length > 5) {strTotal = "> 99999"}
 					strTotal = strTotal.padStart(7)
 					let ruleNo = "RULE"+ (i +"").padEnd(2)
-					strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s9 + ruleNo + sc +": "+ strTotal
+					strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s14 + ruleNo + sc +": "+ strTotal
 					displayTotal.push(strTotal)
 					if ((i % 4) == 3) {
 						display.push(displayTotal.join(" | "))
