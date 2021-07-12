@@ -281,7 +281,6 @@ function get_fonts(runtype) {
 							display.push(s12 + "MIN FONTS NOT FOUND: ["+ notFoundInMin.length +"]"+ sc +"<br>")
 							display.push(notFoundInMin.join(", "))
 						}
-
 					}
 
 					// STYLES: we want to be zero
@@ -302,6 +301,8 @@ function get_fonts(runtype) {
 					}
 					// output
 					dom.results.innerHTML = display.join("<br>")
+						+"<p><details><summary>"+ s12 +"ALL FOUND FONTS ["+ data.length + sc +"]</summary><p>"
+						+ data.join(", ") + "<br><br></p></details>"
 				}
 			}
 		} else {
@@ -409,9 +410,11 @@ function run(runtype) {
 }
 
 function run_once() {
+	let interstitial = "<br>"+ s12 +"FONT LISTS: "+ sc + zNA
 	// isFF
 	if (!isFF) {
-		dom.results = "these tests requires firefox"
+		dom.statstitle.innerHTML = interstitial
+		dom.results = "these tests require firefox"
 		return
 	}
 	// set strOS, bTB
@@ -422,9 +425,11 @@ function run_once() {
 		strOS = results[0]
 		bTB = results[1]
 		if (strOS == "unknown") {
+			dom.statstitle.innerHTML = interstitial
 			dom.results = "unknown os"
 			return
 		} else if (strOS == "android") {
+			dom.statstitle.innerHTML = interstitial
 			dom.results = "you are not the droid we are looking for"
 		} else {
 			// create master fontlist
