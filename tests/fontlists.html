@@ -50,7 +50,6 @@
 <script>
 
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
-	fntStrB = "",
 	fntList = [],
 	fntListCheck = []
 
@@ -247,6 +246,7 @@ function get_fonts(runtype) {
 			for (let name in res) {
 				let data = res[name]
 				let display = []
+				let bRFP = get_RFP()
 
 				//data.push("Aldhabi","Andalus","Angsana New") // windows base test
 				//data.push("Angsana New Bold") // windows styles test
@@ -267,8 +267,19 @@ function get_fonts(runtype) {
 
 					// BASE: we want to match all
 					if (runtype == "min") {
+						// android
+						if (strOS == "android") {
+							if (bTB) {
+								display.push("<br>test skipped: Tor Browser for android doesn't have a font whitelist")
+							} else {
+								display.push("<br>test skipped: RFP font protection doesn't cover android")
+							}
+						// non-TB & RFP is off
+						} else if (!bRFP && !bTB) {
+								display.push("<br>test skipped: the min font test requires RFP, flip it on and run again")
+
 						// base fonts > 0
-						if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
+						} else if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
 							let notFoundInMin = fntListCheck.filter(x => !data.includes(x)) // base list items not found
 							// display
 							display.push(s12 +"min".padStart(10) + sc +": " + checkHash + s12
@@ -283,8 +294,9 @@ function get_fonts(runtype) {
 								display.push(s12 + "MIN FONTS NOT FOUND: ["+ notFoundInMin.length +"]"+ sc +"<br>")
 								display.push(notFoundInMin.join(", "))
 							}
+
+						// test not configured
 						} else {
-							// test not configured
 							display.push("<br>the "+ (bTB ? "TB " : "firefox ") + strOS
 								+" min test is not configured yet"
 							)
@@ -293,8 +305,17 @@ function get_fonts(runtype) {
 
 					// STYLES: we want to be zero
 					if (runtype == "styles") {
+						// android
+						if (strOS == "android") {
+							display.push("<br>test skipped: there is no android style test, never will be")
+						// TB
+						} else if (bTB) {
+								display.push("<br>test skipped: Tor Browser's whitelist blocks a full test")
+						// RFP is on
+						} else if (bRFP) {
+								display.push("<br>test skipped: RFP blocks a full test, flip it off and run again")
 						// styles > 0
-						if (fntStyles[strOS].length > 0) {
+						} else if (fntStyles[strOS].length > 0) {
 							display.push(s12 +"styles".padStart(10) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (checkData.length ? red_cross : green_tick) + "<br>"
@@ -308,13 +329,6 @@ function get_fonts(runtype) {
 							display.push("<br>the "+ (bTB ? "TB " : "firefox ") + strOS
 								+" style test is not configured yet"
 							)
-						}
-						if (bTB) {
-							display.push("this test is a bit useless on Tor Browser")
-						} else if (get_RFP() == true) {
-							if (strOS !== "android") {
-								display.push("you should run this test with RFP disabled")
-							}
 						}
 					}
 					// output
@@ -397,25 +411,15 @@ function run(runtype) {
 				let proxy = (new Proxy({},{get: (obj, prop, proxy) => prop}))
 				for (let i = 0; i < 11; i++) {if (typeof proxy[obj] == 'symbol') {}}
 			} catch (e) {
-				dom.results = "the min font test requires firefox 80 or higher"
+				dom.results = "test skipped: the min font test requires firefox 80 or higher"
 				return
 			}
 		}
-		Promise.all([
-			get_RFP(),
-		]).then(function(results){
-			let bRFP = results[0]
-			if (!bRFP && !bTB) {
-				dom.results = "the min font test requires RFP, flip it on and run again"
-				return
-			}
-			// set fonts
-			fntListCheck = fntMasterBase[strOS]
-			fntListCheck.sort()
-			setTimeout(function() {
-				get_fonts("min")
-			}, 170)
-		})
+		fntListCheck = fntMasterBase[strOS]
+		fntListCheck.sort()
+		setTimeout(function() {
+			get_fonts("min")
+		}, 170)
 	}
 
 	if (runtype == "styles") {
@@ -425,7 +429,7 @@ function run(runtype) {
 		fntListCheck.sort()
 		setTimeout(function() {
 			get_fonts("styles")
-		})
+		}, 170)
 	}
 }
 
@@ -444,8 +448,7 @@ function run_once() {
 	]).then(function(results){
 		strOS = results[0]
 		// test
-		//strOS = "android"
-
+		//strOS = "linux"
 		bTB = results[1]
 		if (strOS == "unknown") {
 			dom.statstitle.innerHTML = interstitial
