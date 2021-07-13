@@ -53,6 +53,10 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntList = [],
 	fntListCheck = []
 
+// remember some results across the two tests
+let notFoundInMin = [],
+	foundInAll = []
+
 let fntMaster = {android: [], linux: [],mac: [], windows: []}
 let fntMasterBase = {android: [], linux: [],mac: [], windows: []}
 
@@ -83,6 +87,7 @@ let fntBase = {
 }
 let fntAlways = {
 	// note: add mozilla bundled fonts here
+	// note: we can also use this to filter out fonts not in the kBaseFonts
 	android: ["EmojiOne Mozilla","Twemoji Mozilla",],
 	linux: ["EmojiOne Mozilla","Twemoji Mozilla",],
 	mac: ["EmojiOne Mozilla","Twemoji Mozilla",],
@@ -251,6 +256,10 @@ function get_fonts(runtype) {
 				//data.push("Aldhabi","Andalus","Angsana New") // windows base test
 				//data.push("Angsana New Bold") // windows styles test
 				//data.sort()
+				//if (runtype == "styles" && !bTB) {
+				//	data.push("Franklin Gothic Medium") // test basefont not found in min, but found in all = bug
+				//	data.sort() // actually this font is a real bug, no need to simulate: all windows
+				//}
 
 				if (data.length == 0) {
 					dom.results = "nothing found"
@@ -277,15 +286,25 @@ function get_fonts(runtype) {
 						// non-TB & RFP is off
 						} else if (!bRFP && !bTB) {
 								display.push("<br>test skipped: the min font test requires RFP, flip it on and run again")
-
 						// base fonts > 0
 						} else if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
-							let notFoundInMin = fntListCheck.filter(x => !data.includes(x)) // base list items not found
+							notFoundInMin = fntListCheck.filter(x => !data.includes(x)) // base list items not found
 							// display
 							display.push(s12 +"min".padStart(10) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (hash == checkHash ? green_tick : red_cross) + "<br>"
 							)
+							// check kBaseFonts integrity
+							if (notFoundInMin.length) {
+								let fntSuspect = notFoundInMin.filter(x => foundInAll.includes(x))
+								fntSuspect = fntSuspect.filter(x => !fntAlways[strOS].includes(x)) // not in kBaseFonts
+								if (fntSuspect.length) {
+									display.push(sb + (bTB ? "TB" : "BASE")
+										+" FONTS NOT FOUND IN MIN THAT WERE FOUND IN STYLES TEST ["+ fntSuspect.length +"]"+ sc +"<br>"
+									)
+									display.push(fntSuspect.join(", ") + "<br>")
+								}
+							}
 							if (missingInCheck.length) {
 								display.push(s12 + "FOUND FONTS NOT IN MIN: ["+ missingInCheck.length +"]"+ sc +"<br>")
 								display.push(missingInCheck.join(", ") + "<br>")
@@ -316,12 +335,23 @@ function get_fonts(runtype) {
 								display.push("<br>test skipped: RFP blocks a full test, flip it off and run again")
 						// styles > 0
 						} else if (fntStyles[strOS].length > 0) {
+							foundInAll = data
 							display.push(s12 +"styles".padStart(10) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (checkData.length ? red_cross : green_tick) + "<br>"
 							)
+							// check kBaseFonts integrity
+							if (notFoundInMin.length) {
+								let fntSuspect = notFoundInMin.filter(x => foundInAll.includes(x))
+								fntSuspect = fntSuspect.filter(x => !fntAlways[strOS].includes(x)) // not in kBaseFonts
+								if (fntSuspect.length) {
+									display.push(sb + (bTB ? "TB" : "BASE")
+										+" FONTS FOUND IN MAX THAT WEREN'T FOUND IN MIN TEST ["+ fntSuspect.length +"]"+ sc +"<br>")
+									display.push(fntSuspect.join(", ") + "<br>")
+								}
+							}
 							if (checkData.length) {
-								display.push(s12 + "FOUND FONTS IN STYLE: ["+ checkData.length +"]"+ sc +"<br>")
+								display.push(s12 +"FOUND FONTS IN STYLE: ["+ checkData.length +"]"+ sc +"<br>")
 								display.push(checkData.join(", ") + "<br>")
 							}
 						} else {
