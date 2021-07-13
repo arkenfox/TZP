@@ -47,10 +47,9 @@ function get_iframe_props() {
 		// AdBlocker Ultimate
 		'CustomEvent','HTMLObjectElement','String','WeakSet','decodeURI','decodeURIComponent',
 		'encodeURI','encodeURIComponent','escape','unescape',
+		// NoScript
+		'MediaSource', 'URL', 'webkitURL',
 	]
-	if (isTB) {
-		knownGood.push('HTMLObjectElement', 'MediaSource', 'URL', 'webkitURL')
-	}
 
 	let r
 	try {
