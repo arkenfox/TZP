@@ -89,6 +89,7 @@ let fntTB = {
 ],
 	windows: ["Arial","Arial Black","Arial Narrow","Batang","Cambria Math","Courier New","Euphemia","Gautami","Georgia","Gulim","GulimChe","Iskoola Pota","Kalinga","Kartika","Latha","Lucida Console","MS Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Meiryo","Meiryo UI","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","MingLiU","Nyala","PMingLiU","Plantagenet Cherokee","Raavi","Segoe UI","Segoe UI Black","Segoe UI Light", "Segoe UI Semibold","Segoe UI Semilight","Shruti","SimSun","Sylfaen","Tahoma","Times New Roman","Tunga","Verdana","Vrinda","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight","MS Mincho","MS PGothic","MS PMincho",],
 }
+let fntTBOther = {android: [], linux: [],mac: [], windows: []}
 let fntBundled = {
 	android: [],linux: [],
 	mac: [],
@@ -112,13 +113,17 @@ let fntAlways = {
 function log_list(name) {
 	let listArray = []
 	if (name == "base") {
-		listArray = bTB ? fntTB[strOS] : fntBase[strOS]
+		listArray = fntBase[strOS]
+	} else if (name == "whitelist") {
+		listArray = fntTB[strOS]
 	} else if (name == "extra faces") {
 		listArray = fntExtraFaces[strOS]
 	} else if (name == "max") {
 		listArray = fntMaster[strOS]
 	} else if (name == "other") {
 		listArray = fntOther[strOS]
+	} else if (name == "TB other") {
+		listArray = fntTBOther[strOS]
 	} else if (name == "always") {
 		listArray = fntAlways[strOS]
 	} else if (name == "bundled") {
@@ -126,7 +131,11 @@ function log_list(name) {
 	} else if (name == "min") {
 		listArray = fntMasterBase[strOS]
 	} else if (name == "medium") {
-		listArray = fntMasterBase[strOS].concat(fntOther[strOS])
+		if (bTB) {
+			listArray = fntMasterBase[strOS].concat(fntTBOther[strOS])
+		} else {
+			listArray = fntMasterBase[strOS].concat(fntOther[strOS])
+		}
 	}
 	listArray.sort()
 	let logtype = dom.logtype.checked
@@ -155,13 +164,26 @@ function set_fntListMaster() {
 	// create: fntMaster & fntMasterBase
 	let names = Object.keys(fntMaster)
 	for (const k of names) {
+		// tb other
+		let tbMin = fntTB[k].concat(fntAlways[k])
+		tbMin = tbMin.concat(fntBundled[k])
+		let tbAll = tbMin.concat(fntBase[k])
+		tbAll = tbAll.concat(fntOther[k])
+		tbAll = tbAll.filter(function(item, position) {return tbAll.indexOf(item) === position})
+		tbAll = tbAll.sort()
+		let tbOther = tbAll.filter(x => !tbMin.includes(x)) // e.g. win: 81 min, 254 everything-else so 173 other
+		fntTBOther[k] = tbOther
 		// master
-		let array = fntBase[k].concat(fntAlways[k])
-		array = array.concat(fntOther[k])
-		array = array.concat(fntExtraFaces[k])
+		let array = fntAlways[k]
 		if (bTB) {
 			array = array.concat(fntBundled[k])
+			array = array.concat(fntTB[k])
+			array = array.concat(fntTBOther[k])
+		} else {
+			array = array.concat(fntBase[k])
+			array = array.concat(fntOther[k])
 		}
+		array = array.concat(fntExtraFaces[k])
 		array.sort()
 		// spot duplicates
 		let next = "", dupes = []
@@ -180,8 +202,7 @@ function set_fntListMaster() {
 		fntMaster[k] = array
 		// masterbase
 		if (bTB) {
-			array = fntTB[k].concat(fntAlways[k])
-			array = array.concat(fntBundled[k])
+			array = tbMin
 		} else {
 			array = fntBase[k].concat(fntAlways[k])
 		}
@@ -199,29 +220,30 @@ function set_fntListMaster() {
 		let isRed = len == 0 ? true : false
 		if (name !== "bundled") {len = (len+"").padStart(3)}
 		if (isRed) {len = sb + len + sc}
-
 		return "<span class='btnb' onClick='log_list(`"+ name +"`)'>" + s12 + len + sc +"</span>"
 	}
-	let btnO = button("other", fntOther[strOS].length),
+	let btnO = button((bTB ? "TB other" : "other"), (bTB ? fntTBOther[strOS].length : fntOther[strOS].length)),
 		btnS = button("extra faces", fntExtraFaces[strOS].length),
-		btnB = button("base", (bTB ? fntTB[strOS].length : fntBase[strOS].length)),
+		btnB = button((bTB ? "whitelist" : "base"), (bTB ? fntTB[strOS].length : fntBase[strOS].length)),
 		btnBun = button("bundled", fntBundled[strOS].length),
 		btnA = button("always", fntAlways[strOS].length)
 
 	let	btnMin = button("min", fntMasterBase[strOS].length),
-		btnMed = button("medium", fntMasterBase[strOS].length + fntOther[strOS].length)
+		btnMed = button("medium", fntMasterBase[strOS].length + (bTB ? fntTBOther[strOS].length: fntOther[strOS].length))
 		btnMax = button("max", fntMaster[strOS].length)
 
 	let display = []
 	let lines = []
 	display.push(s12 +"   MIN:"+ sc +"always ".padStart(9) + btnA)
-	display.push("base ".padStart(12) + btnB)
+	let strBase = bTB ? "whitelist " : "base "
+	display.push(strBase.padStart(12) + btnB)
 	display.push("min ".padStart(9) + btnMin + (bTB ? " [includes "+ btnBun +" bundled]": ""))
 	lines.push(display.join(" | "))
 	
 	display = []
 	display.push(s12 +"MEDIUM:"+ sc +"min ".padStart(9) + btnMin)
-	display.push("other ".padStart(12) + btnO)
+	let strOther = bTB ? "TB other " : "other "
+	display.push(strOther.padStart(12) + btnO)
 	display.push("medium ".padStart(9) + btnMed)
 	lines.push(display.join(" | "))
 
