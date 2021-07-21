@@ -194,7 +194,8 @@ function get_recursion() {
 		recurse()
 	} catch (e) {
 		// 2nd test is more accurate/stable
-		dom.recursion = level
+		dom.recursion = level +" | "+ e.stack.toString().length
+		return "stack_length:"+ e.stack.toString().length
 	}
 }
 
@@ -376,7 +377,6 @@ function get_windowcontent() {
 function outputMisc(type) {
 	let t0 = performance.now()
 	let section = [], r = ""
-
 	Promise.all([
 		get_reporting_api(),
 		get_svg(),
@@ -389,18 +389,15 @@ function outputMisc(type) {
 		get_windowcontent(),
 		get_nav_prototype(),
 		get_mathml(),
+		get_recursion(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
 		log_section("misc", t0, section)
 	})
-
 	// perf2 is RFP unique
 	get_perf2()
-	// ToDO: experimental: bucketize?
-	get_recursion()
-
 }
 
 countJS("misc")
