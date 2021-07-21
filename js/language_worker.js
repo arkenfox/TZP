@@ -17,16 +17,16 @@ addEventListener("message", function(msg) {
 		let amWorker = true
 		try {
 			// language
-			if (item == 0) {return navigator.languages
-			} else if (item == 1) {return navigator.language
-			} else if (item == 2) {return navigator.languages[0]
-			} else if (item == 3) {return Intl.Collator().resolvedOptions().locale
-			} else if (item == 4) {return Intl.DateTimeFormat().resolvedOptions().locale
-			} else if (item == 5) {return new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
-			} else if (item == 6) {return new Intl.ListFormat(undefined).resolvedOptions().locale
-			} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
-			} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
-			} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
+			if (item == 0) {return eval('navigator.languages')
+			} else if (item == 1) {return eval('navigator.language')
+			} else if (item == 2) {return eval('navigator.languages[0]')
+			} else if (item == 3) {return eval('Intl.Collator().resolvedOptions().locale')
+			} else if (item == 4) {return eval('Intl.DateTimeFormat().resolvedOptions().locale')
+			} else if (item == 5) {return eval('new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale')
+			} else if (item == 6) {return eval('new Intl.ListFormat(undefined).resolvedOptions().locale')
+			} else if (item == 7) {return eval('Intl.NumberFormat().resolvedOptions().locale')
+			} else if (item == 8) {return eval('new Intl.PluralRules().resolvedOptions().locale')
+			} else if (item == 9) {return eval('new Intl.RelativeTimeFormat().resolvedOptions().locale')
 			} else if (item == 10) {return "n/a"
 			} else if (item == 11) {return "n/a"
 			// timezone
@@ -198,7 +198,7 @@ addEventListener("message", function(msg) {
 					// ToDo: trap script blocking
 				function get_value(type, data, extra) {
 					try {
-						let str = type + " undefined"
+						let str = type + " <code>none</code>"
 						for (let i = 0 ; i < data.length; i++) {
 							let tmpS = JSON.stringify(data[i])
 							if (tmpS.indexOf(type) !== -1) {
@@ -209,6 +209,7 @@ addEventListener("message", function(msg) {
 								if (extra == true) {str += " <code>"+ str.charCodeAt(str.length-1) +"</code>"}
 							}
 						}
+						if (str == undefined) {str = " <code>undefined</code>"}
 						return str
 					} catch(e) {
 						return type +" error"
