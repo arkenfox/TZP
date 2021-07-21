@@ -171,7 +171,7 @@ function get_lang_doc() {
 			let amWorker = false
 			try {
 				// language
-				if (item == 0) {return navigator.languages
+				if (item == 0) {return eval('navigator.languages')
 				} else if (item == 1) {return eval('navigator.language')
 				} else if (item == 2) {return eval('navigator.languages[0]')
 				} else if (item == 3) {return eval('Intl.Collator().resolvedOptions().locale')
