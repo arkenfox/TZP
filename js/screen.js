@@ -2386,13 +2386,33 @@ function outputUA() {
 		} else {
 			// no lies: check bypasses
 			let sRep = section[8], sReal = ""
-			// RFP: non open-ended version
-			if (isRFP && !isVerPlus && isVer > 59) {
-				let n = sRep.lastIndexOf("/"),
-					vReported = sRep.slice(n+1, sRep.length),
-					vReal = isVer.toString() + ".0"
+			let n = sRep.lastIndexOf("/"),
+				vReported = sRep.slice(n+1, sRep.length)
+			let go = false
+			// NOTE: non-RFP version lies are already picked up as uaBS
+			// so this only applies to ESR numbering
+			if (isRFP && isVer > 59) {
+				go = true
+				// skip open-ended versions if next version is ESR
+				// assuming isVer keeps up to date: e.g. 103+ can be 103 or 104
+				if (isVerPlus) {
+					if (isVer == 103 && (vReported * 1) == 104) {go = false}
+				}
+			}
+			// RFP: version
+			if (go) {
+				let vReal = isVer.toString() + ".0"
 				sReal = sRep.replace(new RegExp(vReported, 'g'), vReal)
 				if (sRep !== sReal) {
+					// notate open-ended
+					console.debug(sReal)
+					if (isVerPlus) {
+						sReal = sReal.replace("rv:"+ vReal , "rv:"+ vReal + "+")
+						sReal = sReal.replace("Firefox/"+ vReal , "Firefox/"+ vReal + "+")
+						sReal = sReal.replace("Gecko/"+ vReal , "Gecko/"+ vReal + "+") // android
+					}
+					console.debug(sReal)
+
 					section[8] = sReal
 					sReal = sReal.slice(10)
 					sRep = sRep.replace(new RegExp(vReported, 'g'), soB + vReported + scC)
