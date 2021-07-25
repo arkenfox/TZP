@@ -476,11 +476,17 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 91) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 92) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //91:1714933
+	function start() { //92:1721149
+		try {
+			let test = {foo: false}
+			if (Object.hasOwn(test, "foo")) {output(92)}
+		} catch(e) {v91b()}
+	}
+	function v91b() { //91:1714933
 		try {
 			let t = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
 			if (t.length) {output(91)} else {v91a()}
