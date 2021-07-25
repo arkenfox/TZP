@@ -141,7 +141,15 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 55
+		expected = 56
+
+	// 92: 1721149
+	let t92 = performance.now(), ver92 = xF
+	try {
+		let obj92 = {foo: false}
+		if (Object.hasOwn(obj92, "foo")) {ver92 = xS}
+	} catch(e) {}
+	record(215,92, "1721149", ver92, performance.now()-t92)
 
 	// 91: 1714933
 	let t91 = performance.now(), ver91 = xF
