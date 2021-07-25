@@ -2405,14 +2405,11 @@ function outputUA() {
 				sReal = sRep.replace(new RegExp(vReported, 'g'), vReal)
 				if (sRep !== sReal) {
 					// notate open-ended
-					console.debug(sReal)
 					if (isVerPlus) {
-						sReal = sReal.replace("rv:"+ vReal , "rv:"+ vReal + "+")
-						sReal = sReal.replace("Firefox/"+ vReal , "Firefox/"+ vReal + "+")
-						sReal = sReal.replace("Gecko/"+ vReal , "Gecko/"+ vReal + "+") // android
+						sReal = sReal.replace("rv:"+ vReal, "rv:"+ vReal + "+")
+						sReal = sReal.replace("Firefox/"+ vReal, "Firefox/"+ vReal + "+")
+						sReal = sReal.replace("Gecko/"+ vReal, "Gecko/"+ vReal + "+") // android
 					}
-					console.debug(sReal)
-
 					section[8] = sReal
 					sReal = sReal.slice(10)
 					sRep = sRep.replace(new RegExp(vReported, 'g'), soB + vReported + scC)
