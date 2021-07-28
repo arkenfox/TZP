@@ -106,7 +106,7 @@ function outputVersion() {
 				bug = "".padStart(12)
 			}
 			// perf
-			perf = (perf + "").padStart(3) + " ms"
+			perf = (perf + "").padStart(4) + " ms"
 
 			display.push(id + bug + result + perf)
 			prevV = results[i].split(":")[0].trim()
@@ -650,7 +650,9 @@ function outputVersion() {
 	}
 }
 
-outputVersion()
+setTimeout(function() {
+	outputVersion()
+}, 100)
 
 </script>
 </body>
