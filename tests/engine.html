@@ -42,7 +42,7 @@ s3 = s3.trim()
 let results = [],
 	data = {},
 	count = 0,
-	expected = 16
+	expected = 21
 
 function display() {
 	// data -> ordered results
@@ -124,6 +124,51 @@ function compute() {
 		record(100, strNOscpu, e.name, zB0)
 	}
 
+	let strSleft = "screen.left", testSleft = false
+	try {
+		let resSleft = screen.left
+		if (Number.isInteger(resSleft)) {testSleft = true
+		} else if (resSleft == "") {resSleft = "empty string"
+		} else if (resSleft == undefined) {resSleft = "undefined"
+		} else if (resSleft == "undefined") {resSleft = "undefined string"}
+		record (150, strSleft, resSleft, testSleft)
+	} catch (e) {
+		record(150, strSleft, e.name, zB0)
+	}
+	let strStop = "screen.top", testStop = false
+	try {
+		let resStop = screen.top
+		if (Number.isInteger(resStop)) {testStop = true
+		} else if (resStop == "") {resStop = "empty string"
+		} else if (resStop == undefined) {resStop = "undefined"
+		} else if (resStop == "undefined") {resStop = "undefined string"}
+		record (151, strStop, resStop, testStop)
+	} catch (e) {
+		record(151, strStop, e.name, zB0)
+	}
+	let strWmozX = "window.mozInnerScreenX", testWmozX = false
+	try {
+		let resWmozX = window.mozInnerScreenX
+		if (Number.isInteger(resWmozX)) {testWmozX = true
+		} else if (resWmozX == "") {resWmozX = "empty string"
+		} else if (resWmozX == undefined) {resWmozX = "undefined"
+		} else if (resWmozX == "undefined") {resWmozX = "undefined string"}
+		record (250, strWmozX, resWmozX, testWmozX)
+	} catch (e) {
+		record(250, strWmozX, e.name, zB0)
+	}
+	let strWmozY = "window.mozInnerScreenY", testWmozY = false
+	try {
+		let resWmozY = window.mozInnerScreenY
+		if (Number.isInteger(resWmozY)) {testWmozY = true
+		} else if (resWmozY == "") {resWmozY = "empty string"
+		} else if (resWmozY == undefined) {resWmozY = "undefined"
+		} else if (resWmozY == "undefined") {resWmozY = "undefined string"}
+		record (251, strWmozY, resWmozY, testWmozY)
+	} catch (e) {
+		record(251, strWmozY, e.name, zB0)
+	}
+
 	// 300+: NOT EXPECTED
 	let strWChrome = "chrome in window", testWChrome = false
 	try {
@@ -135,6 +180,14 @@ function compute() {
 
 	// 600+: SPECIFIC VALUES
 	// 650: recursion error
+	let strEvalLen = "eval.toString().length", testEvalLen = false
+	try {
+		let resEvalLen = eval.toString().length
+		if (resEvalLen == 37) {testEvalLen = true}
+		record (670, strEvalLen, resEvalLen, testEvalLen)
+	} catch(e) {
+		record (670, strEvalLen, e.name, zB0)
+	}
 	let strNbuild = "navigator.buildID", testNbuild = false
 	try {
 		let resNbuild = navigator.buildID
@@ -175,6 +228,7 @@ function compute() {
 	} catch (e) {
 		record(800, strStackL, e.name, zB0)
 	}
+
 }
 
 function get_stacklength() {
