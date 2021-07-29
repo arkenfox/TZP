@@ -139,13 +139,6 @@ function outputCanvas() {
 			if (mPass.length) {gMethods.push("canvas:random per execution:"+ (mPass.length == max ? "all" : mPass.join()))}
 			if (mPersist.length) {gMethods.push("canvas:persistent noise:"+ (mPersist.length == max ? "all" : mPersist.join()))}
 		}
-		// 2d keys
-		let keys = []
-		for (const key in CanvasRenderingContext2D.prototype) {keys.push(key)}
-		let keyhash = sha1(keys.join())
-		sDetail["canvas_2d_keys"] = keys
-		aRecord.push("2d_keys:"+ keyhash)
-		dom.canvas2dkeys.innerHTML = keyhash + buildButton("9","canvas_2d_keys", keys.length + " keys")
 		// section
 		log_section("canvas", t0, aRecord)
 	}
