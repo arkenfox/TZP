@@ -127,7 +127,7 @@ function compute() {
 	let strSleft = "screen.left", testSleft = false
 	try {
 		let resSleft = screen.left
-		if (Number.isInteger(resSleft)) {testSleft = true
+		if (!isNaN(resSleft)) {testSleft = true
 		} else if (resSleft == "") {resSleft = "empty string"
 		} else if (resSleft == undefined) {resSleft = "undefined"
 		} else if (resSleft == "undefined") {resSleft = "undefined string"}
@@ -138,7 +138,7 @@ function compute() {
 	let strStop = "screen.top", testStop = false
 	try {
 		let resStop = screen.top
-		if (Number.isInteger(resStop)) {testStop = true
+		if (!isNaN(resStop)) {testStop = true
 		} else if (resStop == "") {resStop = "empty string"
 		} else if (resStop == undefined) {resStop = "undefined"
 		} else if (resStop == "undefined") {resStop = "undefined string"}
@@ -149,7 +149,7 @@ function compute() {
 	let strWmozX = "window.mozInnerScreenX", testWmozX = false
 	try {
 		let resWmozX = window.mozInnerScreenX
-		if (Number.isInteger(resWmozX)) {testWmozX = true
+		if (!isNaN(resWmozX)) {testWmozX = true
 		} else if (resWmozX == "") {resWmozX = "empty string"
 		} else if (resWmozX == undefined) {resWmozX = "undefined"
 		} else if (resWmozX == "undefined") {resWmozX = "undefined string"}
@@ -160,7 +160,7 @@ function compute() {
 	let strWmozY = "window.mozInnerScreenY", testWmozY = false
 	try {
 		let resWmozY = window.mozInnerScreenY
-		if (Number.isInteger(resWmozY)) {testWmozY = true
+		if (!isNaN(resWmozY)) {testWmozY = true
 		} else if (resWmozY == "") {resWmozY = "empty string"
 		} else if (resWmozY == undefined) {resWmozY = "undefined"
 		} else if (resWmozY == "undefined") {resWmozY = "undefined string"}
