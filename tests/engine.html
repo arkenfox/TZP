@@ -243,7 +243,7 @@ function compute() {
 	try {
 		let resNbuild = navigator.buildID
 		if (resNbuild == "20181001000000") {testNbuild = true
-		} else if (resNbuild == "") {resbuild = "empty string"
+		} else if (resNbuild == "") {resNbuild = "empty string"
 		} else if (resNbuild == undefined) {resNbuild = "undefined"
 		} else if (resNbuild == "undefined") {resNbuild = "undefined string"}
 		record (700, strNbuild, resNbuild, testNbuild)
