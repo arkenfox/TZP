@@ -39,16 +39,21 @@
 'use strict';
 
 s3 = s3.trim()
+sb = sb.trim()
 let results = [],
 	data = {},
 	count = 0,
-	expected = 21
+	expected = 24
 
 function display() {
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
 	for (const k of names) {results.push(data[k])}
 	let display = []
+	// check no numbers duplicated
+	if (expected !== results.length) {
+		display.push(sb+ "ERROR:"+ sc + " duplicate numbers detected<br>")
+	}
 	// parse for pretty output
 	for (let i=0; i < results.length; i++) {
 		let desc = results[i].split("~~~")[0].trim(),
@@ -59,7 +64,7 @@ function display() {
 		} else {
 			if (match == zB0) {match = red_block} else {match = (match == "true" ? green_tick : red_cross)}
 			match += " "
-			desc = s3 + desc.padStart(30) + sc
+			desc = s3 + desc.padStart(29) + sc
 			let sectionspace = ""
 			if (i+1 < results.length) {
 				let nextitem = results[i+1].split("~~~")[0].trim()
@@ -78,7 +83,6 @@ function record(order, description, result, match) {
 	if (count == expected) {
 		display()
 	}
-	//console.debug(count, order, description)
 }
 
 function compute() {
@@ -89,14 +93,14 @@ function compute() {
 
 	// 0+: EXPECTED
 	// 20, 21, 22 = error columnNumber, fileName, lineNumber
-	let strIT1 = "InstallTrigger in window", testIT1 = false
+	let strIT1 = "[window] InstallTrigger", testIT1 = false
 	try {
 		testIT1 = "InstallTrigger" in window
-		record (50, strIT1, testIT1, testIT1)
+		record (52, strIT1, testIT1, testIT1)
 	} catch (e) {
-		record(50, strIT1, e.name, zB0)
+		record(52, strIT1, e.name, zB0)
 	}
-	let strIT2 = "typeof InstallTrigger", testIT2 = false
+	let strIT2 = "[typeof] InstallTrigger", testIT2 = false
 	try {
 		let resIT2 = typeof InstallTrigger
 		if (resIT2 == "object") {testIT2 = true}
@@ -104,15 +108,60 @@ function compute() {
 	} catch (e) {
 		record(51, strIT2, e.name, zB0)
 	}
-	let strIT3 = "typeof InstallTriggerImpl", testIT3 = false
+	let strIT3 = "[typeof] InstallTriggerImpl", testIT3 = false
 	try {
 		let resIT3 = typeof InstallTriggerImpl
 		if (resIT3 == "function") {testIT3 = true}
-		record (52, strIT3, resIT3, testIT3)
+		record (53, strIT3, resIT3, testIT3)
 	} catch (e) {
-		record(52, strIT3, e.name, zB0)
+		record(53, strIT3, e.name, zB0)
 	}
-	let strNOscpu = "navigator.oscpu", testNOscpu = false
+	// keys
+	let strMCanvas = "[2d canvas] keys", testMCanvas = false
+	try {
+		let aMCanvas = []
+		let aMCanvasGood = ['mozCurrentTransform', 'mozCurrentTransformInverse', 'mozImageSmoothingEnabled', 'mozTextStyle']
+		for (const key in CanvasRenderingContext2D.prototype) {aMCanvas.push(key)}
+		aMCanvas = aMCanvas.filter(x => aMCanvasGood.includes(x))
+		aMCanvas.sort()
+		let resMCanvas = "none"
+		if (aMCanvas.length > 0) {
+			resMCanvas = sha1(aMCanvas.join())
+			if (resMCanvas == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {testMCanvas = true}
+			resMCanvas += s3 +" ["+ aMCanvas.length +"]"+ sc
+		}
+		record(80, strMCanvas, resMCanvas, testMCanvas)
+	} catch(e) {
+		record(80, strMCanvas, e.name, zB0)
+	}
+	let strNavKeysExpected = "[navigator] keys"
+	let strNavKeysNotExpected = "[navigator] keys"
+	try {
+		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		// expected FF only
+		let aNavExpected = ["buildID","oscpu","taintEnabled"]
+		let aNavCheckE = aNavKeys.filter(x => aNavExpected.includes(x))
+		let resNavCheckE = aNavCheckE.length ? aNavCheckE.join(", ") : "none"
+		let testNavCheckE = aNavCheckE.length == 3 ? true : false
+		record(85, strNavKeysExpected, resNavCheckE, testNavCheckE)
+		// not expected: blink items
+		let aNavNotExpected = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
+			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation",
+			"requestMIDIAccess","scheduling","serial","setAppBadge","share","unregisterProtocolHandler",
+			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
+			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
+		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
+		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
+		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
+		record(400, strNavKeysNotExpected, resNavCheckNotE, aNavCheckNotE.length ? false : true)
+	} catch(e) {
+		console.debug(e.message)
+		record(85, strNavKeysExpected, e.name, zB0)
+		record(400, strNavKeysNotExpected, e.name, zB0)
+	}
+
+	// navigator
+	let strNOscpu = "[oscpu] navigator", testNOscpu = false
 	try {
 		let resNOscpu = navigator.oscpu
 		if (resNOscpu == "") {resNOscpu = "empty string"
@@ -124,7 +173,7 @@ function compute() {
 		record(100, strNOscpu, e.name, zB0)
 	}
 
-	let strSleft = "screen.left", testSleft = false
+	let strSleft = "[left] screen", testSleft = false
 	try {
 		let resSleft = screen.left
 		if (!isNaN(resSleft)) {testSleft = true
@@ -135,7 +184,7 @@ function compute() {
 	} catch (e) {
 		record(150, strSleft, e.name, zB0)
 	}
-	let strStop = "screen.top", testStop = false
+	let strStop = "[top] screen", testStop = false
 	try {
 		let resStop = screen.top
 		if (!isNaN(resStop)) {testStop = true
@@ -146,7 +195,7 @@ function compute() {
 	} catch (e) {
 		record(151, strStop, e.name, zB0)
 	}
-	let strWmozX = "window.mozInnerScreenX", testWmozX = false
+	let strWmozX = "[mozInnerScreenX] window", testWmozX = false
 	try {
 		let resWmozX = window.mozInnerScreenX
 		if (!isNaN(resWmozX)) {testWmozX = true
@@ -157,7 +206,7 @@ function compute() {
 	} catch (e) {
 		record(250, strWmozX, e.name, zB0)
 	}
-	let strWmozY = "window.mozInnerScreenY", testWmozY = false
+	let strWmozY = "[mozInnerScreenY] window", testWmozY = false
 	try {
 		let resWmozY = window.mozInnerScreenY
 		if (!isNaN(resWmozY)) {testWmozY = true
@@ -170,13 +219,15 @@ function compute() {
 	}
 
 	// 300+: NOT EXPECTED
-	let strWChrome = "chrome in window", testWChrome = false
+	let strWChrome = "[chrome] window", testWChrome = false
 	try {
 		testWChrome = "chrome" in window
-		record (350, strWChrome, testWChrome, !testWChrome)
+		record (450, strWChrome, testWChrome, !testWChrome)
 	} catch (e) {
-		record(350, strWChrome, e.name, zB0)
+		record(450, strWChrome, e.name, zB0)
 	}
+
+
 
 	// 600+: SPECIFIC VALUES
 	// 650: recursion error
@@ -188,7 +239,7 @@ function compute() {
 	} catch(e) {
 		record (670, strEvalLen, e.name, zB0)
 	}
-	let strNbuild = "navigator.buildID", testNbuild = false
+	let strNbuild = "[buildID] navigator", testNbuild = false
 	try {
 		let resNbuild = navigator.buildID
 		if (resNbuild == "20181001000000") {testNbuild = true
@@ -199,7 +250,7 @@ function compute() {
 	} catch (e) {
 		record(700, strNbuild, e.name, zB0)
 	}
-	let strNsub = "navigator.productSub", testNsub = false
+	let strNsub = "[productSub] navigator", testNsub = false
 	try {
 		let resNsub = navigator.productSub
 		if (resNsub == "20100101") {testNsub = true
@@ -210,7 +261,7 @@ function compute() {
 	} catch (e) {
 		record(701, strNsub, e.name, zB0)
 	}
-	let strNvendor = "navigator.vendor", testNvendor = false
+	let strNvendor = "[vendor] navigator", testNvendor = false
 	try {
 		let resNvendor = navigator.vendor
 		if (resNvendor == "") {resNvendor = "empty string"; testNvendor = true
@@ -248,7 +299,7 @@ function get_stacklength() {
 	} catch (e) {
 		// columnNumber
 		try {
-			let strCN = "error.columnNumber", errCN = false
+			let strCN = "[columnNumber] error", errCN = false
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
 			record(20, strCN, resCN, testCN)
@@ -257,7 +308,7 @@ function get_stacklength() {
 		}
 		// fileName
 		try {
-			let strFN = "error.fileName", errFN = false
+			let strFN = "[fileName] error", errFN = false
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
@@ -267,14 +318,14 @@ function get_stacklength() {
 		}
 		// lineNumber
 		try {
-			let strLN = "error.lineNumber", errLN = false
+			let strLN = "[lineNumber] error", errLN = false
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
 			record(22, strLN, resLN, testLN)
 		} catch(n) {
 			record(22, strLN, resFN, zB0)
 		}
-		let strRE = "recursion error", resRE = e.name +": "+ e.message
+		let strRE = "[recursion] error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
 			record(650, strRE, resRE, true)
 			return e.stack.toString().length
