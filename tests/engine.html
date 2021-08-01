@@ -45,7 +45,7 @@ let results = [],
 	data = {},
 	count = 0,
 	errcount = 0,
-	expected = 30
+	expected = 38
 
 function standardize(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -71,7 +71,7 @@ function display() {
 		if (desc == "header") {
 			let note = ""
 			if (result == "errors") {
-				note = " [there are 100s & 100s of these]"
+				note = " [there are thousands of these]"
 			}
 			result = s14 + result.toUpperCase() + sc + note
 			display.push("<span>"+ result + "</span><br>")
@@ -81,7 +81,7 @@ function display() {
 			if (match == zB0) {match = red_block} else {match = (match == "true" ? green_tick : red_cross)}
 			match += " "
 			if (desc == "error") {
-				pad = 5; errcount++; desc = errcount.toString()
+				pad = 3; errcount++; desc = errcount.toString()
 			}
 			desc = s3 + desc.padStart(pad) + sc
 			let sectionspace = ""
@@ -176,11 +176,11 @@ function compute() {
 		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
 		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
 		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
-		record(400, strNavKeysNotExpected, resNavCheckNotE, aNavCheckNotE.length ? false : true)
+		record(350, strNavKeysNotExpected, resNavCheckNotE, aNavCheckNotE.length ? false : true)
 	} catch(e) {
 		console.debug(e.message)
 		record(85, strNavKeysExpected, e.name, zB0)
-		record(400, strNavKeysNotExpected, e.name, zB0)
+		record(350, strNavKeysNotExpected, e.name, zB0)
 	}
 
 	// navigator
@@ -242,6 +242,16 @@ function compute() {
 	}
 
 	// 300+: NOT EXPECTED
+	let strNvendor = "[vendor] navigator", testNvendor = false
+	try {
+		let resNvendor = navigator.vendor
+		if (resNvendor == "") {resNvendor = "empty string"; testNvendor = true
+		} else if (resNvendor == undefined) {resNvendor = "undefined"
+		} else if (resNvendor == "undefined") {resNvendor = "undefined string"}
+		record (400, strNvendor, resNvendor, testNvendor)
+	} catch (e) {
+		record(400, strNvendor, e.name, zB0)
+	}
 	let strWChrome = "[chrome] window", testWChrome = false
 	try {
 		testWChrome = "chrome" in window
@@ -260,6 +270,7 @@ function compute() {
 	} catch(e) {
 		record (670, strEvalLen, e.name, zB0)
 	}
+	get_math() // 690
 	let strNbuild = "[buildID] navigator", testNbuild = false
 	try {
 		let resNbuild = navigator.buildID
@@ -282,62 +293,95 @@ function compute() {
 	} catch (e) {
 		record(701, strNsub, e.name, zB0)
 	}
-	let strNvendor = "[vendor] navigator", testNvendor = false
-	try {
-		let resNvendor = navigator.vendor
-		if (resNvendor == "") {resNvendor = "empty string"; testNvendor = true
-		} else if (resNvendor == undefined) {resNvendor = "undefined"
-		} else if (resNvendor == "undefined") {resNvendor = "undefined string"}
-		record (702, strNvendor, resNvendor, testNvendor)
-	} catch (e) {
-		record(702, strNvendor, e.name, zB0)
-	}
-	let strStackL = "stack length", testStackL = false
-	try {
-		let resStackL = get_stacklength()
-		if (resStackL == 8064) {testStackL = true}
-		record (800, strStackL, resStackL, testStackL)
-	} catch (e) {
-		record(800, strStackL, e.name, zB0)
-	}
 
+	//
+	get_stacklength()
+	get_errors()
+
+
+}
+
+function get_errors() {
 	// 900+: errors
 	// 901 = recursion
-	try {
-		var a = {};a.b = a; JSON.stringify(a)
-	} catch(e) {
-		let err2 = standardize(e.name +": "+ e.message)
-		let tst2 = false
-		if (err2 == "TypeError: cyclic object value") {tst2 = true}
-		record(902, "error", err2, tst2)
-	}
-	try {
-		eval("alert('A)")
-	} catch(e) {
-		let err3 = standardize(e.name +": "+ e.message)
-		let tst3 = false
-		if (err3 == "SyntaxError: '' literal not terminated before end of script") {tst3 = true}
-		record(903, "error", err3, tst3)
-	}
-	try {
-		eval("null.value = 1")
-	} catch(e) {
-		let err4 = standardize(e.name +": "+ e.message)
-		let tst4 = false
-		if (err4 == "TypeError: can't access property \"value\" of null") {tst4 = true}
-		if (err4 == "TypeError: null has no properties") {tst4 = true}
-		record(904, "error", err4, tst4)
-	}
-	try {
-		eval("let a = 1_00_;")
-	} catch(e) {
-		let err5 = standardize(e.name +": "+ e.message)
-		let tst5 = false
-		if (err5 == "SyntaxError: underscore can appear only between digits, not after t...") {tst5 = true}
-		if (err5 == "SyntaxError: identifier starts immediately after numeric literal") {tst5 = true}
-		record(905, "error", err5, tst5)
-	}
+	let errTests = [
+		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value", ""],
+		["alert('A)","SyntaxError: '' literal not terminated before end of script", ""],
+		["null.value = 1","TypeError: can't access property \"value\" of null", "TypeError: null has no properties"],
+		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...",
+			"SyntaxError: identifier starts immediately after numeric literal"],
+		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+		["null.bar","TypeError: can't access property \"bar\" of null","TypeError: null has no properties"],
+		["(1).toString(1000)","RangeError: radix must be an integer at least 2 and no greater than 36",""],
+		["var x = new Array(-1)","RangeError: invalid array length",""],
+		["[...undefined].length","TypeError: can't access property Symbol.iterator of undefined","TypeError: undefined has no properties"],
+		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp",""],
+		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+	]
+	let errNo = 902
+	errTests.forEach(function(array) {
+		try {
+			eval(array[0])
+		} catch(e) {
+			let errTest = false
+			let errStr = standardize(e.name +": "+ e.message)
+			if (errStr == array[1]) {errTest = true}
+			if (array[2] !== "") {
+				if (errStr == array[2]) {errTest = true}
+			}
+			record(errNo, "error", errStr, errTest)
+			errNo++
+		}
+	})
+}
 
+function get_math() {
+	// polyfill
+	function cbrt(x) {
+		try {
+			let y = Math.pow(Math.abs(x), 1 / 3)
+			return x < 0 ? -y : y
+		} catch(e) {
+			return "error"
+		}
+	}
+	try {
+		let res = []
+		for(let i=0; i < 6; i++) {
+			try {
+				let fnResult = "unknown"
+				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
+				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
+				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+				} else if (i == 3) {fnResult = Math.acos(0.123)
+				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+				} else if (i == 5) {fnResult = Math.atan(2)
+				}
+				res.push(fnResult)
+			} catch(e) {
+				res.push("error")
+			}
+		}
+		let hash = sha1(res.join()).substring(0,20)
+		let engine = ""
+    if (hash == "ede9ca53efbb1902cc21") {engine = "blink"
+		} else if (hash == "05513f36d87dd78af60a") {engine = "webkit"
+		} else if (hash == "38172d9426d77af71baa") {engine = "edgeHTML"
+		} else if (hash == "36f067c652c8cfd90725") {engine = "trident"
+		} else if (hash == "225f4a612fdca4065043") {engine = "gecko"
+		} else if (hash == "cb89002a8d6fabf859f6") {engine = "gecko"
+		}
+		hash += "... "
+		let testEngine = engine == "gecko" ? true : false
+		if (!testEngine) {
+			if (engine == "") {hash += sb +"[that's dodgy]"+sc
+			} else {hash += s3 +"["+ engine +"]"+sc}
+		}
+		record(690, "math", hash, testEngine)
+	} catch(e) {
+		console.debug(e.message)
+		record(690, "math", e.name, zB0)
+	}
 }
 
 function get_stacklength() {
@@ -386,11 +430,13 @@ function get_stacklength() {
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
 			record(901, strRE, resRE, true)
-			return e.stack.toString().length
 		} else {
 			record(901, strRE, resRE, false)
-			return e.stack.toString().length
 		}
+		let strSL = "stack length", testSL = false
+		let resSL = e.stack.toString().length
+		if (resSL == 8064) {testSL = true}
+		record (800, strSL, resSL, testSL)
 	}
 }
 
