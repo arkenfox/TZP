@@ -41,6 +41,7 @@
 s3 = s3.trim()
 s14 = s14.trim()
 sb = sb.trim()
+sg = sg.trim()
 let results = [],
 	data = {},
 	count = 0,
@@ -58,6 +59,7 @@ function display() {
 	const names = Object.keys(data).sort((a,b) => a-b)
 	for (const k of names) {results.push(data[k])}
 	let display = []
+	let countTrue = 0, countFalse = 0, countBlock = 0, countNA = 0
 	// check no numbers duplicated
 	if (expected !== results.length) {
 		display.push(sb+ "ERROR:"+ sc + " duplicate numbers detected<br>")
@@ -78,7 +80,10 @@ function display() {
 		} else if (desc == "hr") {
 			display.push("<br><hr>")
 		} else {
-			if (match == zB0) {match = red_block} else {match = (match == "true" ? green_tick : red_cross)}
+			if (match == zB0) {match = red_block; countBlock++
+			} else if (match == "true") {match = green_tick; countTrue++
+			} else if (match == "false") {match = red_cross; countFalse++
+			} else {match = "-"; countNA++}
 			match += " "
 			if (desc == "error") {
 				pad = 3; errcount++; desc = errcount.toString()
@@ -92,7 +97,18 @@ function display() {
 			display.push(desc + match +" "+ result + sectionspace)
 		}
 	}
-	dom.results.innerHTML = display.join("<br>")
+	// summary
+	let countValid = countTrue + countFalse + countBlock // na tests ignored
+	let countFail = countFalse + countBlock
+	let percentPassed = Math.floor((countTrue/countValid)*100)
+	let isPass = percentPassed == 100 ? true : false
+	let percentFailed = Math.ceil((countFail/countValid)*100)
+	let summary = s14 +"SUMMARY"+ sc
+		+"PASSED: ".padStart(10) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
+		+"FAILED: ".padStart(10) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
+	if (countNA > 0) {summary += "NA: ".padStart(6) + countNA}
+	// output
+	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
 
 function record(order, description, result, match) {
@@ -371,9 +387,14 @@ function get_math() {
 		} else if (hash == "225f4a612fdca4065043") {engine = "gecko"
 		} else if (hash == "cb89002a8d6fabf859f6") {engine = "gecko"
 		}
-		hash += "... "
+
 		let testEngine = engine == "gecko" ? true : false
-		if (!testEngine) {
+		if (testEngine) {
+			// full hash for gecko
+			hash = sha1(res.join())
+		} else {
+			// trimmed hash + notation for non-gecko
+			hash += "... "
 			if (engine == "") {hash += sb +"[that's dodgy]"+sc
 			} else {hash += s3 +"["+ engine +"]"+sc}
 		}
