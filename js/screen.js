@@ -1815,7 +1815,7 @@ function get_viewport(runtype) {
 
 function get_widgets() {
 	return new Promise(resolve => {
-		let list = ['button','checkbox','color','combobox','datetime-local','radio','text'],
+		let list = ['button','checkbox','color','combobox','radio','text'],
 			font = "",
 			font0 = "",
 			fontdiff = false,
@@ -1829,7 +1829,7 @@ function get_widgets() {
 			t0 = performance.now()
 
 		// loop elements
-		for (let i=0; i < 9; i++) {
+		for (let i=0; i < (list.length + 2); i++) {
 			let el = document.getElementById("widget"+ i)
 			try {
 				font = getComputedStyle(el).getPropertyValue("font-family")
@@ -1843,8 +1843,8 @@ function get_widgets() {
 				//if (i == 2) {size="13px"} // size
 			}
 			output = font +", "+ size
-			// 1-7: compare to 1
-			if (i < 7) {
+			// list items: compare to 1
+			if (i < list.length) {
 				combined.push(list[i].padStart(14) +": "+ output)
 				if (i == 0) {
 					size0 = size; font0 = font
