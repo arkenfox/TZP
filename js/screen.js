@@ -1828,8 +1828,6 @@ function get_widgets() {
 			combined = [],
 			t0 = performance.now()
 
-		//list = ['button','checkbox','color','combobox','radio','text']
-
 		// loop elements
 		for (let i=0; i < (list.length + 2); i++) {
 			let el = document.getElementById("widget"+ i)
