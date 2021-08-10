@@ -476,11 +476,16 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 92) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 93) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //92:1721149
+	function start() { //93:1722448
+		try {
+			self.reportError("v93"); output(93)
+		} catch(e) {v92()}
+	}
+	function v92() { //92:1721149
 		try {
 			let test = {foo: false}
 			if (Object.hasOwn(test, "foo")) {output(92)}
@@ -680,7 +685,7 @@ const get_navKeys = () => new Promise(resolve => {
 			fakeKeys = keys.slice(lastKeyIndex+1)
 			// track missing keys
 			// track moved (expected) keys: use trueKeys
-			expectedKeys.push("buildID","oscpu")
+			expectedKeys.push("buildID","oscpu","taintEnabled")
 			missingKeys = expectedKeys.filter(x => !trueKeys.includes(x))
 			movedKeys = fakeKeys.filter(x => expectedKeys.includes(x))
 			trueKeys = trueKeys.concat(missingKeys)
@@ -690,7 +695,7 @@ const get_navKeys = () => new Promise(resolve => {
 		} else if (isEngine == "blink") {
 			// last key inconsistent
 			let poisonKeys = ["activeVRDisplays","buildID","getVRDisplays","iamfake",
-				"oscpu","SharedWorker","Worker"]
+				"oscpu","SharedWorker","Worker","taintEnabled"]
 			if (isBrave) {
 				expectedKeys.push("brave","globalPrivacyControl")
 			} else {
