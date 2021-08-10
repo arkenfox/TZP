@@ -105,7 +105,7 @@ function get_collation() {
 		} else if (hash == "9edd7f16bf0a3bf34e1ee349291ab5f77aad6ef4") {ff = "64 or lower"
 		}
 		dom.fdCollation.setAttribute("class", ff == "" ? "c mono" : "c")
-		dom.fdCollation.innerHTML = ff == "" ? hash + zNEW : "Firefox ["+ ff +"]"
+		dom.fdCollation.innerHTML = ff == "" ? hash + zNEW : "Firefox [FF"+ ff +"]"
 		log_perf("collation [fd]",t0)
 	}
 	// run
