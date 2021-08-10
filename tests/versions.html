@@ -141,7 +141,15 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 56
+		expected = 57
+
+	// 93: 1722448
+	let t93 = performance.now(), ver93 = xF
+	try {
+		self.reportError("93")
+		ver93 = xS
+	} catch(e) {}
+	record(220,93, "1722448", ver93, performance.now()-t93)
 
 	// 92: 1721149
 	let t92 = performance.now(), ver92 = xF
