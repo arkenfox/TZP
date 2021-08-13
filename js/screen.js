@@ -2539,6 +2539,12 @@ function outputStart() {
 		gKnownOnce.push("_global:isFF")
 		gBypassedOnce.push("_global:isFF:"+ fake.join() + ":true")
 	}
+	// cydec
+	let len = eval.toString().length
+	if (isFF && len !== 37) {
+		gKnownOnce.push("_global:eval.toString().length")
+		gBypassedOnce.push("_global:eval.toString().length:37")
+	}
 	// cosmetic
 	let items = document.getElementsByClassName("faint")
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
