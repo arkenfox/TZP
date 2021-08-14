@@ -46,7 +46,7 @@ let results = [],
 	data = {},
 	count = 0,
 	errcount = 0,
-	expected = 38
+	expected = 39
 
 function standardize(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -311,6 +311,7 @@ function compute() {
 	}
 
 	//
+	get_permission("push")
 	get_stacklength()
 	get_errors()
 
@@ -402,6 +403,26 @@ function get_math() {
 	} catch(e) {
 		console.debug(e.message)
 		record(690, "math", e.name, zB0)
+	}
+}
+
+function get_permission(item) {
+	let strPush = "[permissions] push", noPush = 730
+	try {
+		let userVis = "userVisibleOnly"
+		navigator.permissions.query({name:item}).then(function(result) {
+			let res = result.state
+			let testPush = (res == "prompt" || res == "denied" || res == "granted") ? true : false
+			record(noPush, strPush, res, testPush)
+		}).catch(error => {
+			if ((error.message).includes(userVis)) {
+				record(noPush, strPush, userVis, false)
+			} else {
+				record(noPush, strPush, error.name, zB0)
+			}
+		})
+	} catch(e) {
+		record(noPush, strPush, e.name, zB0)
 	}
 }
 
