@@ -93,8 +93,6 @@ function run() {
 		items[i].innerHTML = "&nbsp"
 	}
 	// vars
-	let known2b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL, toBlob [blink] android alt
-
 	let known1 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
 		known2 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed",   // toDataURL, toBlob [gecko]
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f",   // isPointInPath
@@ -105,6 +103,9 @@ function run() {
 		known2 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"    // toDataURL, toBlob [webkit]
 	}
 	// FYI: 2d61dc2efc6f46be7b1ddf1977a308ac3bbc91e5 = edgeHTML toDataURL
+
+	let known2b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // toDataURL, toBlob [blink] android alt
+	let known2c = "c05807c783bd281ee83d13807426023390c7d66a" // toDataURL, toBlob [blink] another alt
 
 	dom.unknown.style.display = "none" // rehide
 
@@ -292,7 +293,7 @@ function run() {
 					if (isHash) {
 						if (checkPNG) {
 							if (isEngine == "blink") { // blink has two known goods
-								display += (display == known2 || display == known2b ? green_tick : red_cross)
+								display += (display == known2 || display == known2b || display == known2c ? green_tick : red_cross)
 							} else {
 								display += (display == known2 ? green_tick : red_cross)
 							}
