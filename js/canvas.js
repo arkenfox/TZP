@@ -16,6 +16,7 @@ function outputCanvas() {
 		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"
 	}
 	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // blink android alt
+	let known1c = "c05807c783bd281ee83d13807426023390c7d66a" // blink another alt
 
 	// analyze
 	function analyze() {
@@ -361,7 +362,7 @@ function outputCanvas() {
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						let isFake = false
 						if (isEngine == "blink") {
-							if (data !== known1 && data !== known1b) {isFake = true}
+							if (data !== known1 && data !== known1b && data !== known1c) {isFake = true}
 						} else {
 							if (data !== known1) {isFake = true}
 						}
@@ -385,7 +386,7 @@ function outputCanvas() {
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
 									let isFake = false
 									if (isEngine == "blink") {
-										if (data !== known1 && data !== known1b) {isFake = true}
+										if (data !== known1 && data !== known1b && data !== known1c) {isFake = true}
 									} else {
 										if (data !== known1) {isFake = true}
 									}
