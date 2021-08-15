@@ -480,7 +480,12 @@ const get_isVer = () => new Promise(resolve => {
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //93:1722448
+	function start() { //93:1328672
+		try {
+			if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {output(93)} else {v93b()}
+		} catch(e) {v93b()}
+	}
+	function v93b() { //93:1722448
 		try {
 			self.reportError("v93"); output(93)
 		} catch(e) {v92()}
