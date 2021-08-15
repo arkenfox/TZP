@@ -141,7 +141,14 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 57
+		expected = 58
+
+	// 93: 1328672
+	let t93a = performance.now(), ver93a = xF
+	try {
+		if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93a = xS}
+	} catch(e) {}
+	record(221,93, "1328672", ver93a, performance.now()-t93a)
 
 	// 93: 1722448
 	let t93 = performance.now(), ver93 = xF
