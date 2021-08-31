@@ -1646,14 +1646,17 @@ function get_ua_doc() {
 					// app64 + win64
 					if (str == pre +"10.0; Win64; x64") {match = true}
 					else if (str == pre +"6.3; Win64; x64") {match = true}
+					else if (str == pre +"6.2; Win64; x64") {match = true}
 					else if (str == pre +"6.1; Win64; x64") {match = true}
 					// app32 + win64
 					else if (str == pre +"10.0; WOW64") {match = true}
 					else if (str == pre +"6.3; WOW64") {match = true}
+					else if (str == pre +"6.2; WOW64") {match = true}
 					else if (str == pre +"6.1; WOW64") {match = true}
 					// app32 + win32
 					else if (str == pre +"10.0") {match = true}
 					else if (str == pre +"6.3") {match = true}
+					else if (str == pre +"6.2") {match = true}
 					else if (str == pre +"6.1") {match = true}
 					spoof = !match
 				}
