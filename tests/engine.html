@@ -43,10 +43,11 @@ s14 = s14.trim()
 sb = sb.trim()
 sg = sg.trim()
 let results = [],
+	itemnumbers = [],
 	data = {},
 	count = 0,
 	errcount = 0,
-	expected = 39
+	expected = 40
 
 function standardize(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -115,10 +116,13 @@ function record(order, description, result, match) {
 	order = (order+"").padStart(3,"0")
 	data[order] = description +"~~~"+ result +"~~~"+ match
 	count ++
+	itemnumbers.push(order +" "+ description)
 	if (count == expected) {
+		itemnumbers.sort()
+		//console.debug(itemnumbers)
 		display()
 	}
-	//console.debug(count, order, description)
+	//console.debug(count, order, description, result)
 	if (count > expected) {console.error(count, "expected count too low")}
 }
 
@@ -311,11 +315,37 @@ function compute() {
 	}
 
 	//
+	get_collation()
 	get_permission("push")
 	get_stacklength()
 	get_errors()
+}
 
-
+function get_collation() {
+	let t0 = performance.now()
+	let list = ['ka','ku','lo','no','pa','tk','zh-hk'],
+		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
+	res = []
+	chars.sort() // set
+	let strC = "collation", testC = false
+	try {
+		let control = sha1(chars.sort(Intl.Collator("en-US").compare))
+		list.forEach(function(i) {
+			chars.sort() // reset
+			chars.sort(Intl.Collator(i).compare)
+			let test = sha1(chars.join())
+			res.push(test)
+		})
+		let hash = sha1(res.join())
+		if (hash == "8291f32b70e5a2b32d569e4d8b89ec70cab4c6d7") {testC = true
+		} else if (hash == "80b4f22e20a30510f129a5f480c645d1a5de04ea") {testC = true
+		} else if (hash == "351d6f924ee449b73d05d227f28e77c110555351") {testC = true
+		} else if (hash == "9edd7f16bf0a3bf34e1ee349291ab5f77aad6ef4") {testC = true
+		}
+		record(630, strC, hash, testC)
+	} catch(e) {
+		record(630, strC, e.name, zB0)
+	}
 }
 
 function get_errors() {
@@ -446,9 +476,9 @@ function get_stacklength() {
 			let strCN = "[columnNumber] error", errCN = false
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
-			record(20, strCN, resCN, testCN)
+			record(30, strCN, resCN, testCN)
 		} catch(n) {
-			record(20, strCN, resCN, zB0)
+			record(30, strCN, resCN, zB0)
 		}
 		// fileName
 		try {
@@ -456,18 +486,18 @@ function get_stacklength() {
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
-			record(21, strFN, resFN, testFN)
+			record(31, strFN, resFN, testFN)
 		} catch(n) {
-			record(21, strFN, resFN, zB0)
+			record(31, strFN, resFN, zB0)
 		}
 		// lineNumber
 		try {
 			let strLN = "[lineNumber] error", errLN = false
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
-			record(22, strLN, resLN, testLN)
+			record(32, strLN, resLN, testLN)
 		} catch(n) {
-			record(22, strLN, resFN, zB0)
+			record(32, strLN, resFN, zB0)
 		}
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
