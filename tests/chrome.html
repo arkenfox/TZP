@@ -89,7 +89,7 @@ function outputChrome() {
 			ca = c +"abouthome/",
 			cb = c +"browser",
 			cd = c +"devtools/",
-			ce = c +"devltools/debugger",
+			ce = c +"devtools/debugger",
 			cf = c +"devtools/performance/",
 			cl = c +"loop/shared/",
 			cp = c +"preferences/",
@@ -677,14 +677,24 @@ function outputResource() {
 			co+'savedKeysDialog.js',
 			co+'netError/onionNetError.js',
 		]
+
 		let imgUris = [
-			c+'securitylevel/securityLevelButton.svg',
-			ct+'torPreferencesIcon.svg', //9+
-			s+'new_circuit.svg', //9+
-			s+'new_identity.svg', //9+
-			s+'onion.svg',
-			s+'onion-disabled.svg',
-			s+'onion-lock.svg',
+"chrome://browser/content/onionservices/netError/browser.svg",
+"chrome://browser/content/onionservices/netError/network.svg",
+"chrome://browser/content/onionservices/netError/onionsite.svg",
+"chrome://browser/content/onionservices/onionlocation.svg",
+"chrome://browser/content/securitylevel/securityLevelButton.svg",
+"chrome://browser/content/torconnect/onion-slash.svg",
+"chrome://browser/content/torconnect/onion.svg",
+"chrome://browser/content/torpreferences/torPreferencesIcon.svg",
+"chrome://browser/skin/new_circuit.svg",
+"chrome://browser/skin/new_identity.svg",
+"chrome://browser/skin/onion.svg",
+"chrome://browser/skin/onion-disabled.svg",
+"chrome://browser/skin/onion-lock.svg",
+"chrome://browser/skin/onion-slash.svg",
+"chrome://browser/skin/onion-warning.svg",
+
 			oif+'circuit-display.png',
 			oif+'expect-differences.png',
 			oif+'network.png',
@@ -696,11 +706,6 @@ function outputResource() {
 			oif+'welcome.png',
 			oi+'icons_no-icon.png',
 			oi+'tor-watermark.png',
-			// TB78+
-			co+'onionlocation.svg',
-			co+'netError/onionsite.svg',
-			co+'netError/browser.svg',
-			co+'netError/network.svg',
 		]
 		let cssUris = [
 			'resource://torbutton-assets/aboutTor.css',
@@ -785,9 +790,9 @@ function outputResource() {
 			jsHash.sort()
 			imgHash.sort()
 			let strOut = ""
-			if (foundC) {strOut = s2 +"--- css ---"+ sc +"<br>"+cssHash.join("<br>")}
-			if (foundJ) {strOut += "<br>"+ s2 +"--- js ---"+ sc +"<br>"+ jsHash.join("<br>")}
-			if (foundI) {strOut += "<br>"+ s2 +"--- img ---"+ sc +"<br>"+ imgHash.join("<br>")}
+			if (foundC) {strOut = s3 +"--- css ---"+ sc +"<br>"+cssHash.join("<br>")}
+			if (foundJ) {strOut += "<br>"+ s3 +"--- js ---"+ sc +"<br>"+ jsHash.join("<br>")}
+			if (foundI) {strOut += "<br>"+ s3 +"--- img ---"+ sc +"<br>"+ imgHash.join("<br>")}
 			if (foundC + foundJ + foundI == 0) {strOut = "nothing found"}
 			if (strOut.substring(0,4) == "<br>") {strOut = strOut.slice(4, strOut.length)}
 			dom.allLoadedR.innerHTML = strOut
