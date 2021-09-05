@@ -92,17 +92,21 @@ function get_chrome() {
 }
 
 function get_collation() {
-	let list = ['ka','ku','lo','no','pa','tk','zh-hk'],
+	let list = ['ka','lo','pa','zh-hk'],
 		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
 		res = [],
 		t0 = performance.now()
+	// don't use unsupported locales: they fall back to system locale,
+	// which could be anything - when we want the hashes to be stable
+	if (isVer > 69) {list.push("no")}
+	if (isVer > 64) {list.push("tk","ku")}
 	// output
 	function output(hash) {
 		let ff = ""
-		if (hash == "8291f32b70e5a2b32d569e4d8b89ec70cab4c6d7") {ff = "70+"
-		} else if (hash == "80b4f22e20a30510f129a5f480c645d1a5de04ea") {ff = "68-69"
-		} else if (hash == "351d6f924ee449b73d05d227f28e77c110555351") {ff = "65-67"
-		} else if (hash == "9edd7f16bf0a3bf34e1ee349291ab5f77aad6ef4") {ff = "64 or lower"
+		if (hash == "2aa31825857e6108274a7ee09bf80070d3000f6a") {ff = "70+"
+		} else if (hash == "290259b839fc8136cd2b171ff7487a099f8563d6") {ff = "68-69"
+		} else if (hash == "c32b1d8c96ace438b2742469af5b6cd0a6b8a2c6") {ff = "65-67"
+		} else if (hash == "0b928aff3d955fc0b4aa720e331a7a80ca5617a3") {ff = "64 or lower"
 		}
 		dom.fdCollation.setAttribute("class", ff == "" ? "c mono" : "c")
 		dom.fdCollation.innerHTML = ff == "" ? hash + zNEW : "Firefox [FF"+ ff +"]"
@@ -110,12 +114,12 @@ function get_collation() {
 	}
 	// run
 	chars.sort() // set
-	let control = sha1(chars.sort(Intl.Collator("en-US").compare))
+	list.sort()
 	list.forEach(function(i) {
 		chars.sort() // reset
 		chars.sort(Intl.Collator(i).compare)
 		let test = sha1(chars.join())
-		res.push(test)
+		res.push(test +" "+ i)
 	})
 	output(sha1(res.join()))
 }
@@ -1487,6 +1491,11 @@ function get_ua_doc() {
 				if (property == "platform") {str = "win32"}
 				if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
 				if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
+				// android desktop mode
+				//if (property == "appVersion") {str = "5.0 (Android 10)"}
+				//if (property == "platform") {str = "Linux aarch64"}
+				//if (property == "oscpu") {str = "Linux aarch64"}
+				//if (property == "userAgent") {str = "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"} // desktop
 			}
 			str = output(property, str)
 			if (good !== undefined) {
@@ -1540,6 +1549,9 @@ function get_ua_doc() {
 							if (isVer == 103) {v2 = "104.0"}
 						}
 						/* resistfingerprinting/test/browser/browser_navigator.js */
+						// NOTE: Android desktop mode uses linux userAgent and the use of
+						// Gecko/20100101 Firefox/XX.0" = bs detected = technically correct
+						// ToDo: we could ignore that in nonRFP and expose RFP bug (if it adds entropy and is a bug)
 						if (isOS == "windows") {
 							controlA = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
 							controlB = "Windows NT 10.0; Win64; x64; rv:"+ v2 +") Gecko/20100101"
