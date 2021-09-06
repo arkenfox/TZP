@@ -281,14 +281,13 @@ function compute() {
 	}
 
 	// 600+: SPECIFIC VALUES
-	// 650: recursion error
 	let strEvalLen = "eval.toString().length", testEvalLen = false
 	try {
 		let resEvalLen = eval.toString().length
 		if (resEvalLen == 37) {testEvalLen = true}
-		record (650, strEvalLen, resEvalLen, testEvalLen)
+		record (630, strEvalLen, resEvalLen, testEvalLen)
 	} catch(e) {
-		record (650, strEvalLen, e.name, zB0)
+		record (630, strEvalLen, e.name, zB0)
 	}
 	get_math() // 690
 	let strNbuild = "[buildID] navigator", testNbuild = false
