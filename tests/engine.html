@@ -286,9 +286,9 @@ function compute() {
 	try {
 		let resEvalLen = eval.toString().length
 		if (resEvalLen == 37) {testEvalLen = true}
-		record (670, strEvalLen, resEvalLen, testEvalLen)
+		record (650, strEvalLen, resEvalLen, testEvalLen)
 	} catch(e) {
-		record (670, strEvalLen, e.name, zB0)
+		record (650, strEvalLen, e.name, zB0)
 	}
 	get_math() // 690
 	let strNbuild = "[buildID] navigator", testNbuild = false
@@ -322,29 +322,40 @@ function compute() {
 }
 
 function get_collation() {
-	let t0 = performance.now()
-	let list = ['ka','ku','lo','no','pa','tk','zh-hk'],
-		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
-	res = []
-	chars.sort() // set
-	let strC = "collation", testC = false
+	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
+	// 24 chars: approx 40ms
+	let list = ['az','cy','dsb','ee','eo','fo','gl','ha','haw','hsb','ig',
+		'ka','kk','ln','lo','mt','om','pa','se','sq','to','wo',]
+	let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
+		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
+		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
+	let res = [], unique = [], same = []
+	list.sort()
+	// debug control
+	chars.sort() // reset
+	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
+
+	let strC = "Intl.Collator", testC = false
 	try {
-		let control = sha1(chars.sort(Intl.Collator("en-US").compare))
 		list.forEach(function(i) {
 			chars.sort() // reset
 			chars.sort(Intl.Collator(i).compare)
 			let test = sha1(chars.join())
-			res.push(test)
+			unique.push(test)
+			if (test == control) {same.push(i)} // all 22 in chrome
+			res.push(test +" "+ i)
 		})
 		let hash = sha1(res.join())
-		if (hash == "8291f32b70e5a2b32d569e4d8b89ec70cab4c6d7") {testC = true
-		} else if (hash == "80b4f22e20a30510f129a5f480c645d1a5de04ea") {testC = true
-		} else if (hash == "351d6f924ee449b73d05d227f28e77c110555351") {testC = true
-		} else if (hash == "9edd7f16bf0a3bf34e1ee349291ab5f77aad6ef4") {testC = true
+		// debug
+		if (same.length > 0) {console.debug("Intl.Collator: same as control\n"+ same.join())}
+		if (isFF) {
+			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
+			if (unique.length !== list.length) {console.debug("we have dupes")}
 		}
-		record(630, strC, hash, testC)
+		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {testC = true}
+		record(650, strC, hash, testC)
 	} catch(e) {
-		record(630, strC, e.name, zB0)
+		record(650, strC, e.name, zB0)
 	}
 }
 
