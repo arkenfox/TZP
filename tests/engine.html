@@ -42,24 +42,26 @@ s3 = s3.trim()
 s14 = s14.trim()
 sb = sb.trim()
 sg = sg.trim()
-let results = [],
-	itemnumbers = [],
-	data = {},
-	count = 0,
-	errcount = 0,
-	expected = 42
 
-function standardize(str) {
+function fnTrim(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
 	if (str.length > 70) {str = str.slice(0,67) +"..."}
 	return str
 }
 
-function display() {
+function fnClean(str) {
+	if (str == "") {str = "empty string"
+	} else if (str == undefined) {str = "undefined"
+	} else if (str == "undefined") {str = "undefined string"}
+	return str
+}
+
+function fnDisplay() {
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
 	for (const k of names) {results.push(data[k])}
-	let display = []
+	let display = [],
+		errcount = 0
 	let countTrue = 0, countFalse = 0, countBlock = 0, countNA = 0
 	// check no numbers duplicated
 	if (expected !== results.length) {
@@ -112,7 +114,7 @@ function display() {
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
 
-function record(order, description, result, match) {
+function fnRecord(order, description, result, match) {
 	order = (order+"").padStart(3,"0")
 	data[order] = description +"~~~"+ result +"~~~"+ match
 	count ++
@@ -120,209 +122,137 @@ function record(order, description, result, match) {
 	if (count == expected) {
 		itemnumbers.sort()
 		//console.debug(itemnumbers)
-		display()
+		fnDisplay()
 	}
 	//console.debug(count, order, description, result)
 	if (count > expected) {console.error(count, "expected count too low")}
 }
 
-function compute() {
-	// HEADERS
-	record(0, "header", "expected")
-	record(300, "header", "not expected")
-	record(600, "header", "specific values")
-	record(899, "hr")
-	record(900, "header", "errors")
-
-	// 0+: EXPECTED
-	// 20, 21, 22 = error columnNumber, fileName, lineNumber
-	let strIT1 = "[window] InstallTrigger", testIT1 = false
-	try {
-		testIT1 = "InstallTrigger" in window
-		record (52, strIT1, testIT1, testIT1)
-	} catch (e) {
-		record(52, strIT1, e.name, zB0)
-	}
-	let strIT2 = "[typeof] InstallTrigger", testIT2 = false
-	try {
-		let resIT2 = typeof InstallTrigger
-		if (resIT2 == "object") {testIT2 = true}
-		record (51, strIT2, resIT2, testIT2)
-	} catch (e) {
-		record(51, strIT2, e.name, zB0)
-	}
-	let strIT3 = "[typeof] InstallTriggerImpl", testIT3 = false
-	try {
-		let resIT3 = typeof InstallTriggerImpl
-		if (resIT3 == "function") {testIT3 = true}
-		record (53, strIT3, resIT3, testIT3)
-	} catch (e) {
-		record(53, strIT3, e.name, zB0)
-	}
-	// keys
-	let strMCanvas = "[2d canvas] keys", testMCanvas = false
+function get_canvaskeys(num) {
+	let strT = "[2d canvas] keys", testT = false
 	try {
 		let aMCanvas = []
 		let aMCanvasGood = ['mozCurrentTransform', 'mozCurrentTransformInverse', 'mozImageSmoothingEnabled', 'mozTextStyle']
 		for (const key in CanvasRenderingContext2D.prototype) {aMCanvas.push(key)}
 		aMCanvas = aMCanvas.filter(x => aMCanvasGood.includes(x))
 		aMCanvas.sort()
-		let resMCanvas = "none"
+		let resT = "none"
 		if (aMCanvas.length > 0) {
-			resMCanvas = sha1(aMCanvas.join())
-			if (resMCanvas == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {testMCanvas = true}
-			resMCanvas += s3 +" ["+ aMCanvas.length +"]"+ sc
+			resT = sha1(aMCanvas.join())
+			if (resT == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {testT = true}
+			resT += s3 +" ["+ aMCanvas.length +"]"+ sc
 		}
-		record(80, strMCanvas, resMCanvas, testMCanvas)
+		fnRecord(num, strT, resT, testT)
 	} catch(e) {
-		record(80, strMCanvas, e.name, zB0)
+		fnRecord(num, strT, e.name, zB0)
 	}
-	let strNavKeysExpected = "[navigator] keys"
-	let strNavKeysNotExpected = "[navigator] keys"
-	try {
-		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		// expected FF only
-		let aNavExpected = ["buildID","oscpu","taintEnabled"]
-		let aNavCheckE = aNavKeys.filter(x => aNavExpected.includes(x))
-		let resNavCheckE = aNavCheckE.length ? aNavCheckE.join(", ") : "none"
-		let testNavCheckE = aNavCheckE.length == 3 ? true : false
-		record(85, strNavKeysExpected, resNavCheckE, testNavCheckE)
-		// not expected: blink items
-		let aNavNotExpected = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
-			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation",
-			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
-			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
-			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
-		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
-		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
-		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
-		record(350, strNavKeysNotExpected, resNavCheckNotE, aNavCheckNotE.length ? false : true)
-	} catch(e) {
-		console.debug(e.message)
-		record(85, strNavKeysExpected, e.name, zB0)
-		record(350, strNavKeysNotExpected, e.name, zB0)
-	}
-
-	// navigator
-	let strNOscpu = "[oscpu] navigator", testNOscpu = false
-	try {
-		let resNOscpu = navigator.oscpu
-		if (resNOscpu == "") {resNOscpu = "empty string"
-		} else if (resNOscpu == undefined) {resNOscpu = "undefined"
-		} else if (resNOscpu == "undefined") {resNOscpu = "undefined string"
-		} else {testNOscpu = true}
-		record (100, strNOscpu, resNOscpu, testNOscpu)
-	} catch (e) {
-		record(100, strNOscpu, e.name, zB0)
-	}
-
-	let strSleft = "[left] screen", testSleft = false
-	try {
-		let resSleft = screen.left
-		if (!isNaN(resSleft)) {testSleft = true
-		} else if (resSleft == "") {resSleft = "empty string"
-		} else if (resSleft == undefined) {resSleft = "undefined"
-		} else if (resSleft == "undefined") {resSleft = "undefined string"}
-		record (150, strSleft, resSleft, testSleft)
-	} catch (e) {
-		record(150, strSleft, e.name, zB0)
-	}
-	let strStop = "[top] screen", testStop = false
-	try {
-		let resStop = screen.top
-		if (!isNaN(resStop)) {testStop = true
-		} else if (resStop == "") {resStop = "empty string"
-		} else if (resStop == undefined) {resStop = "undefined"
-		} else if (resStop == "undefined") {resStop = "undefined string"}
-		record (151, strStop, resStop, testStop)
-	} catch (e) {
-		record(151, strStop, e.name, zB0)
-	}
-	let strWmozX = "[mozInnerScreenX] window", testWmozX = false
-	try {
-		let resWmozX = window.mozInnerScreenX
-		if (!isNaN(resWmozX)) {testWmozX = true
-		} else if (resWmozX == "") {resWmozX = "empty string"
-		} else if (resWmozX == undefined) {resWmozX = "undefined"
-		} else if (resWmozX == "undefined") {resWmozX = "undefined string"}
-		record (250, strWmozX, resWmozX, testWmozX)
-	} catch (e) {
-		record(250, strWmozX, e.name, zB0)
-	}
-	let strWmozY = "[mozInnerScreenY] window", testWmozY = false
-	try {
-		let resWmozY = window.mozInnerScreenY
-		if (!isNaN(resWmozY)) {testWmozY = true
-		} else if (resWmozY == "") {resWmozY = "empty string"
-		} else if (resWmozY == undefined) {resWmozY = "undefined"
-		} else if (resWmozY == "undefined") {resWmozY = "undefined string"}
-		record (251, strWmozY, resWmozY, testWmozY)
-	} catch (e) {
-		record(251, strWmozY, e.name, zB0)
-	}
-
-	// 300+: NOT EXPECTED
-	let strNvendor = "[vendor] navigator", testNvendor = false
-	try {
-		let resNvendor = navigator.vendor
-		if (resNvendor == "") {resNvendor = "empty string"; testNvendor = true
-		} else if (resNvendor == undefined) {resNvendor = "undefined"
-		} else if (resNvendor == "undefined") {resNvendor = "undefined string"}
-		record (400, strNvendor, resNvendor, testNvendor)
-	} catch (e) {
-		record(400, strNvendor, e.name, zB0)
-	}
-	let strWChrome = "[chrome] window", testWChrome = false
-	try {
-		testWChrome = "chrome" in window
-		record (450, strWChrome, testWChrome, !testWChrome)
-	} catch (e) {
-		record(450, strWChrome, e.name, zB0)
-	}
-
-	// 600+: SPECIFIC VALUES
-	let strEvalLen = "eval.toString().length", testEvalLen = false
-	try {
-		let resEvalLen = eval.toString().length
-		if (resEvalLen == 37) {testEvalLen = true}
-		record (630, strEvalLen, resEvalLen, testEvalLen)
-	} catch(e) {
-		record (630, strEvalLen, e.name, zB0)
-	}
-	get_math() // 690
-	let strNbuild = "[buildID] navigator", testNbuild = false
-	try {
-		let resNbuild = navigator.buildID
-		if (resNbuild == "20181001000000") {testNbuild = true
-		} else if (resNbuild == "") {resNbuild = "empty string"
-		} else if (resNbuild == undefined) {resNbuild = "undefined"
-		} else if (resNbuild == "undefined") {resNbuild = "undefined string"}
-		record (700, strNbuild, resNbuild, testNbuild)
-	} catch (e) {
-		record(700, strNbuild, e.name, zB0)
-	}
-	let strNsub = "[productSub] navigator", testNsub = false
-	try {
-		let resNsub = navigator.productSub
-		if (resNsub == "20100101") {testNsub = true
-		} else if (resNsub == "") {resNsub = "empty string"
-		} else if (resNsub == undefined) {resNsub = "undefined"
-		} else if (resNsub == "undefined") {resNsub = "undefined string"}
-		record (701, strNsub, resNsub, testNsub)
-	} catch (e) {
-		record(701, strNsub, e.name, zB0)
-	}
-
-	//
-	get_intl_collator()
-	get_intl_dtf()
-	get_locale_compare()
-	get_permission("push")
-	get_stacklength()
-	get_errors()
 }
 
-function get_intl_dtf() {
+function get_errors(num) {
+	let tests = [
+		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value", ""],
+		["alert('A)","SyntaxError: '' literal not terminated before end of script", ""],
+		["null.value = 1","TypeError: can't access property \"value\" of null", "TypeError: null has no properties"],
+		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...",
+			"SyntaxError: identifier starts immediately after numeric literal"],
+		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+		["null.bar","TypeError: can't access property \"bar\" of null","TypeError: null has no properties"],
+		["(1).toString(1000)","RangeError: radix must be an integer at least 2 and no greater than 36",""],
+		["var x = new Array(-1)","RangeError: invalid array length",""],
+		["[...undefined].length","TypeError: can't access property Symbol.iterator of undefined","TypeError: undefined has no properties"],
+		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp",""],
+		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+	]
+	tests.forEach(function(array) {
+		try {
+			eval(array[0])
+		} catch(e) {
+			let bool = false
+			let str = fnTrim(e.name +": "+ e.message)
+			if (str == array[1]) {bool = true}
+			if (array[2] !== "") {
+				if (str == array[2]) {bool = true}
+			}
+			fnRecord(num, "error", str, bool)
+			num++
+		}
+	})
+}
+
+function get_eval_length(num, title) {
+	let bool = false
+	try {
+		let test = eval.toString().length
+		if (test == 37) {bool = true}
+		fnRecord(num, title, test, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_installtrigger(num) {
+	let strA = "[typeof] InstallTrigger", boolA = false
+	try {
+		let resA = typeof InstallTrigger
+		if (resA == "object") {boolA = true}
+		fnRecord(num, strA, resA, boolA)
+	} catch (e) {
+		fnRecord(num, strA, e.name, zB0)
+	}
+	let strB = "[window] InstallTrigger", boolB = false
+	try {
+		let resB = "InstallTrigger" in window
+		fnRecord(num+1, strB, resB, resB)
+	} catch (e) {
+		fnRecord(num+1, strB, e.name, zB0)
+	}
+	let strC = "[typeof] InstallTriggerImpl", boolC = false
+	try {
+		let resC = typeof InstallTriggerImpl
+		if (resC == "function") {boolC = true}
+		fnRecord(num+2, strC, resC, boolC)
+	} catch (e) {
+		fnRecord(num+2, strC, e.name, zB0)
+	}
+}
+
+function get_intl_collator(num, title) {
+	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
+	// 24 chars: approx 40ms
+	let list = ['az','cy','dsb','ee','eo','fo','gl','ha','haw','hsb','ig',
+		'ka','kk','ln','lo','mt','om','pa','se','sq','to','wo',]
+	let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
+		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
+		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
+	let res = [], unique = [], same = []
+	list.sort()
+	chars.sort() // reset
+	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
+	let bool = false
+	try {
+		list.forEach(function(i) {
+			chars.sort() // reset
+			chars.sort(Intl.Collator(i).compare)
+			let test = sha1(chars.join())
+			unique.push(test)
+			if (test == control) {same.push(i)} // all 22 in chrome
+			res.push(test +" "+ i)
+		})
+		let hash = sha1(res.join())
+		// debug
+		if (isFF) {
+			if (same.length > 0) {console.debug("Intl.Collator: same as control\n"+ same.join())}
+			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
+			if (unique.length !== list.length) {console.debug("we have dupes")}
+		}
+		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {bool = true}
+		fnRecord(num, title, hash, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_intl_dtf(num, title) {
 	// 78 supported in FF60+ not supported in blink: unique results
 	// 100ms to test all 78
 	let list = ['af','ak','as','ast','be','bm','bo','br','ce','ckb',]
@@ -333,7 +263,7 @@ function get_intl_dtf() {
 'si','sn','so','sq','tg','ti','to','tt','ug','ur','wo','yi','yo','zu',
 	]
 	//list = list.concat(listnotused)
-	let strT = "Intl.DateTimeFormat", testT = false
+	let bool = false
 	let date = new Date("January 30, 2019 13:00:00"),
 		options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true}
@@ -348,53 +278,15 @@ function get_intl_dtf() {
 		unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
 		//console.debug(unique.length, unique)
 		let hash = sha1(res.join())
-		if (hash == "4507fc5309b7cc8d30ce875d320951f773df3171") {testT = true}
-		record(655, strT, hash, testT)
+		if (hash == "4507fc5309b7cc8d30ce875d320951f773df3171") {bool = true}
+		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		record(655, strT, e.name, zB0)
+		fnRecord(num, title, e.name, zB0)
 	}
 }
 
-function get_intl_collator() {
-	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
-	// 24 chars: approx 40ms
-	let list = ['az','cy','dsb','ee','eo','fo','gl','ha','haw','hsb','ig',
-		'ka','kk','ln','lo','mt','om','pa','se','sq','to','wo',]
-	let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
-		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
-		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
-	let res = [], unique = [], same = []
-	list.sort()
-	// debug control
-	chars.sort() // reset
-	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
-
-	let strT = "Intl.Collator", testT = false
-	try {
-		list.forEach(function(i) {
-			chars.sort() // reset
-			chars.sort(Intl.Collator(i).compare)
-			let test = sha1(chars.join())
-			unique.push(test)
-			if (test == control) {same.push(i)} // all 22 in chrome
-			res.push(test +" "+ i)
-		})
-		let hash = sha1(res.join())
-		// debug
-		if (same.length > 0) {console.debug("Intl.Collator: same as control\n"+ same.join())}
-		if (isFF) {
-			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			if (unique.length !== list.length) {console.debug("we have dupes")}
-		}
-		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {testT = true}
-		record(650, strT, hash, testT)
-	} catch(e) {
-		record(650, strT, e.name, zB0)
-	}
-}
-
-function get_locale_compare() {
-	let strC = "locale.compare", testC = false
+function get_locale_compare(num, title) {
+	let bool = false
 	let list = [
 		["az","\u00F6","\u1EE3"],
 		["cy","n","ng"],
@@ -428,48 +320,14 @@ function get_locale_compare() {
 		})
 		//console.debug(res)
 		let hash = sha1(res.join())
-		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {testC = true}
-		record(680, strC, hash, testC)
+		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true}
+		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		record(680, strC, e.name, zB0)
+		fnRecord(num, title, e.name, zB0)
 	}
 }
 
-function get_errors() {
-	// 900+: errors
-	// 901 = recursion
-	let errTests = [
-		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value", ""],
-		["alert('A)","SyntaxError: '' literal not terminated before end of script", ""],
-		["null.value = 1","TypeError: can't access property \"value\" of null", "TypeError: null has no properties"],
-		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...",
-			"SyntaxError: identifier starts immediately after numeric literal"],
-		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
-		["null.bar","TypeError: can't access property \"bar\" of null","TypeError: null has no properties"],
-		["(1).toString(1000)","RangeError: radix must be an integer at least 2 and no greater than 36",""],
-		["var x = new Array(-1)","RangeError: invalid array length",""],
-		["[...undefined].length","TypeError: can't access property Symbol.iterator of undefined","TypeError: undefined has no properties"],
-		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp",""],
-		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
-	]
-	let errNo = 902
-	errTests.forEach(function(array) {
-		try {
-			eval(array[0])
-		} catch(e) {
-			let errTest = false
-			let errStr = standardize(e.name +": "+ e.message)
-			if (errStr == array[1]) {errTest = true}
-			if (array[2] !== "") {
-				if (errStr == array[2]) {errTest = true}
-			}
-			record(errNo, "error", errStr, errTest)
-			errNo++
-		}
-	})
-}
-
-function get_math() {
+function get_math(num, title) {
 	// polyfill
 	function cbrt(x) {
 		try {
@@ -506,8 +364,8 @@ function get_math() {
 		} else if (hash == "cb89002a8d6fabf859f6") {engine = "gecko"
 		}
 
-		let testEngine = engine == "gecko" ? true : false
-		if (testEngine) {
+		let bool = engine == "gecko" ? true : false
+		if (bool) {
 			// full hash for gecko
 			hash = sha1(res.join())
 		} else {
@@ -516,34 +374,120 @@ function get_math() {
 			if (engine == "") {hash += sb +"[that's dodgy]"+sc
 			} else {hash += s3 +"["+ engine +"]"+sc}
 		}
-		record(690, "math", hash, testEngine)
+		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		console.debug(e.message)
-		record(690, "math", e.name, zB0)
+		fnRecord(num, title, e.name, zB0)
 	}
 }
 
-function get_permission(item) {
-	let strPush = "[permissions] push", noPush = 730
+function get_nav_keys(num1, num2, title) {
+	try {
+		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		// expected FF only
+		let aNavExpected = ["buildID","oscpu","taintEnabled"]
+		let aNavCheckE = aNavKeys.filter(x => aNavExpected.includes(x))
+		let resNavCheckE = aNavCheckE.length ? aNavCheckE.join(", ") : "none"
+		let testNavCheckE = aNavCheckE.length == 3 ? true : false
+		fnRecord(num1, title, resNavCheckE, testNavCheckE)
+		// not expected: blink items
+		let aNavNotExpected = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
+			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation",
+			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
+			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
+			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
+		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
+		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
+		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
+		fnRecord(num2, title, resNavCheckNotE, aNavCheckNotE.length ? false : true)
+	} catch(e) {
+		fnRecord(num1, title, e.name, zB0)
+		fnRecord(num2, title, e.name, zB0)
+	}
+}
+
+function get_nav_screen(num) {
+	let strA = "[left] screen", boolA = false
+	try {
+		let resA = screen.left
+		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
+		fnRecord(num, strA, resA, boolA)
+	} catch (e) {
+		fnRecord(num, strA, e.name, zB0)
+	}
+	let strB = "[top] screen", boolB = false
+	try {
+		let resB = screen.top
+		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
+		fnRecord(num+1, strB, resB, boolB)
+	} catch (e) {
+		fnRecord(num+1, strB, e.name, zB0)
+	}
+}
+
+function get_nav_values(num1, num2, num3) {
+	// expected
+	let strA = "[oscpu] navigator", boolA = false
+	try {
+		let resA = navigator.oscpu
+		if (resA == "") {resA = "empty string"
+		} else if (resA == undefined) {resA = "undefined"
+		} else if (resA == "undefined") {resA = "undefined string"
+		} else {boolA = true}
+		fnRecord(num1, strA, resA, boolA)
+	} catch (e) {
+		fnRecord(num1, strA, e.name, zB0)
+	}
+	// not expected
+	let strB = "[vendor] navigator", boolB = false
+	try {
+		let resB = navigator.vendor
+		if (resB == "") {boolB = true}
+		resB = fnClean(resB)
+		fnRecord(num2, strB, resB, boolB)
+	} catch (e) {
+		fnRecord(num2, strB, e.name, zB0)
+	}
+	// specific
+	let strC = "[buildID] navigator", boolC = false
+	try {
+		let resC = navigator.buildID
+		if (resC == "20181001000000") {boolC = true}
+		resC = fnClean(resC)
+		fnRecord(num3, strC, resC, boolC)
+	} catch (e) {
+		fnRecord(num3, strC, e.name, zB0)
+	}
+	let strD = "[productSub] navigator", boolD = false
+	try {
+		let resD = navigator.productSub
+		if (resD == "20100101") {boolD = true}
+		resD = fnClean(resD)
+		fnRecord(num3+1, strD, resD, boolD)
+	} catch (e) {
+		fnRecord(num3+1, strD, e.name, zB0)
+	}
+}
+
+function get_permission(num, title) {
 	try {
 		let userVis = "userVisibleOnly"
-		navigator.permissions.query({name:item}).then(function(result) {
+		navigator.permissions.query({name:"push"}).then(function(result) {
 			let res = result.state
-			let testPush = (res == "prompt" || res == "denied" || res == "granted") ? true : false
-			record(noPush, strPush, res, testPush)
+			let bool = (res == "prompt" || res == "denied" || res == "granted") ? true : false
+			fnRecord(num, title, res, bool)
 		}).catch(error => {
 			if ((error.message).includes(userVis)) {
-				record(noPush, strPush, userVis, false)
+				fnRecord(num, title, userVis, false)
 			} else {
-				record(noPush, strPush, error.name, zB0)
+				fnRecord(num, title, error.name, zB0)
 			}
 		})
 	} catch(e) {
-		record(noPush, strPush, e.name, zB0)
+		fnRecord(num, title, e.name, zB0)
 	}
 }
 
-function get_stacklength() {
+function get_stacklength(num1, num2, num3) {
 	let level = 0, test1 = 0
 	function recurse() {
 		level++
@@ -563,9 +507,9 @@ function get_stacklength() {
 			let strCN = "[columnNumber] error", errCN = false
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
-			record(30, strCN, resCN, testCN)
+			fnRecord(num1, strCN, resCN, testCN)
 		} catch(n) {
-			record(30, strCN, resCN, zB0)
+			fnRecord(num1, strCN, resCN, zB0)
 		}
 		// fileName
 		try {
@@ -573,34 +517,90 @@ function get_stacklength() {
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
-			record(31, strFN, resFN, testFN)
+			fnRecord(num1+1, strFN, resFN, testFN)
 		} catch(n) {
-			record(31, strFN, resFN, zB0)
+			fnRecord(num1+1, strFN, resFN, zB0)
 		}
 		// lineNumber
 		try {
 			let strLN = "[lineNumber] error", errLN = false
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
-			record(32, strLN, resLN, testLN)
+			fnRecord(num1+2, strLN, resLN, testLN)
 		} catch(n) {
-			record(32, strLN, resFN, zB0)
+			fnRecord(num1+2, strLN, resFN, zB0)
 		}
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
-			record(901, strRE, resRE, true)
+			fnRecord(num3, strRE, resRE, true)
 		} else {
-			record(901, strRE, resRE, false)
+			fnRecord(num3, strRE, resRE, false)
 		}
 		let strSL = "stack length", testSL = false
 		let resSL = e.stack.toString().length
 		if (resSL == 8064) {testSL = true}
-		record (800, strSL, resSL, testSL)
+		fnRecord(num2, strSL, resSL, testSL)
 	}
 }
 
+function get_window_chrome(num, title) {
+	try {
+		let bool = "chrome" in window
+		fnRecord(num, title, bool, !bool)
+	} catch (e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_window_moz(num) {
+	let strA = "[mozInnerScreenX] window", boolA = false
+	try {
+		let resA = window.mozInnerScreenX
+		if (!isNaN(resA)) {boolA = true}
+		resA = fnClean(resA)
+		fnRecord(num, strA, resA, boolA)
+	} catch (e) {
+		fnRecord(num, strA, e.name, zB0)
+	}
+	let strB = "[mozInnerScreenY] window", boolB = false
+	try {
+		let resB = window.mozInnerScreenY
+		if (!isNaN(resB)) {boolB = true}
+		resB = fnClean(resB)
+		fnRecord(num+1, strB, resB, boolB)
+	} catch (e) {
+		fnRecord(num+1, strB, e.name, zB0)
+	}
+}
+
+let results = [],
+	itemnumbers = [],
+	data = {},
+	count = 0,
+	expected = 42
+
 setTimeout(function() {
-	compute()
+	fnRecord(0, "header", "expected")
+	fnRecord(300, "header", "not expected")
+	fnRecord(600, "header", "specific values")
+	fnRecord(899, "hr")
+	fnRecord(900, "header", "errors")
+	// OK, let's kick some ass
+	get_installtrigger(50) // 50-52
+	get_canvaskeys(80, "[2d canvas] keys")
+	get_nav_screen(150)
+	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
+	get_nav_values(100, 400, 700) // 100 expected, 400 not expected, 700-701 specific
+	get_window_moz(250) // 250-251
+	get_window_chrome(450, "[chrome] window")
+	get_eval_length(630, "eval.toString().length")
+	get_intl_collator(650, "Intl.Collator")
+	get_intl_dtf(655, "Intl.DateTimeFormat")
+	get_locale_compare(685, "locale.conmpare")
+	get_math(710, "math")
+	get_permission(730, "[permissions] push")
+	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
+	get_errors(902)
 }, 100)
 
 </script>
