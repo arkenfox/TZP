@@ -47,7 +47,7 @@ let results = [],
 	data = {},
 	count = 0,
 	errcount = 0,
-	expected = 41
+	expected = 42
 
 function standardize(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -315,10 +315,44 @@ function compute() {
 
 	//
 	get_intl_collator()
+	get_intl_dtf()
 	get_locale_compare()
 	get_permission("push")
 	get_stacklength()
 	get_errors()
+}
+
+function get_intl_dtf() {
+	// 78 supported in FF60+ not supported in blink: unique results
+	// 100ms to test all 78
+	let list = ['af','ak','as','ast','be','bm','bo','br','ce','ckb',]
+	let listnotused = ['cy','dsb','dz','ee','eo','eu',
+'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','ig','ii','is','ka',
+'kab','ki','kk','kl','km','kok','ks','kw','ky','lb','lg','ln','lo','lu','mg','mk',
+'mn','mt','my','nd','ne','nn','om','or','os','ps','qu','rm','rn','rw','se','sg',
+'si','sn','so','sq','tg','ti','to','tt','ug','ur','wo','yi','yo','zu',
+	]
+	//list = list.concat(listnotused)
+	let strT = "Intl.DateTimeFormat", testT = false
+	let date = new Date("January 30, 2019 13:00:00"),
+		options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+			minute: "numeric", second: "numeric", hour12: true}
+	let res = [], unique = []
+	try {
+		list.sort()
+		list.forEach(function(locale) {
+			let test = Intl.DateTimeFormat(locale, options).format(date)
+			unique.push(test)
+			res.push(locale +" "+ test)
+		})
+		unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
+		//console.debug(unique.length, unique)
+		let hash = sha1(res.join())
+		if (hash == "4507fc5309b7cc8d30ce875d320951f773df3171") {testT = true}
+		record(655, strT, hash, testT)
+	} catch(e) {
+		record(655, strT, e.name, zB0)
+	}
 }
 
 function get_intl_collator() {
@@ -335,7 +369,7 @@ function get_intl_collator() {
 	chars.sort() // reset
 	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
 
-	let strC = "Intl.Collator", testC = false
+	let strT = "Intl.Collator", testT = false
 	try {
 		list.forEach(function(i) {
 			chars.sort() // reset
@@ -352,10 +386,10 @@ function get_intl_collator() {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
 			if (unique.length !== list.length) {console.debug("we have dupes")}
 		}
-		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {testC = true}
-		record(650, strC, hash, testC)
+		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {testT = true}
+		record(650, strT, hash, testT)
 	} catch(e) {
-		record(650, strC, e.name, zB0)
+		record(650, strT, e.name, zB0)
 	}
 }
 
@@ -392,7 +426,7 @@ function get_locale_compare() {
 			let strA = item[1]
 			res.push(code +" "+ strA.localeCompare(item[2], code) +" "+ strA +","+ item[2])
 		})
-		console.debug(res)
+		//console.debug(res)
 		let hash = sha1(res.join())
 		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {testC = true}
 		record(680, strC, hash, testC)
