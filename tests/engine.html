@@ -451,8 +451,7 @@ function get_nav_values(num1, num2, num3) {
 	let strC = "[buildID] navigator", boolC = false
 	try {
 		let resC = navigator.buildID
-		if (resC == "20181001000000") {boolC = true}
-		resC = fnClean(resC)
+		if (resC == "20181001000000") {boolC = true} else {resC = fnClean(resC)}
 		fnRecord(num3, strC, resC, boolC)
 	} catch (e) {
 		fnRecord(num3, strC, e.name, zB0)
@@ -460,8 +459,7 @@ function get_nav_values(num1, num2, num3) {
 	let strD = "[productSub] navigator", boolD = false
 	try {
 		let resD = navigator.productSub
-		if (resD == "20100101") {boolD = true}
-		resD = fnClean(resD)
+		if (resD == "20100101") {boolD = true} else {resD = fnClean(resD)}
 		fnRecord(num3+1, strD, resD, boolD)
 	} catch (e) {
 		fnRecord(num3+1, strD, e.name, zB0)
@@ -556,8 +554,7 @@ function get_window_moz(num) {
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
 		let resA = window.mozInnerScreenX
-		if (!isNaN(resA)) {boolA = true}
-		resA = fnClean(resA)
+		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
 	} catch (e) {
 		fnRecord(num, strA, e.name, zB0)
@@ -565,8 +562,7 @@ function get_window_moz(num) {
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
 		let resB = window.mozInnerScreenY
-		if (!isNaN(resB)) {boolB = true}
-		resB = fnClean(resB)
+		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
 	} catch (e) {
 		fnRecord(num+1, strB, e.name, zB0)
