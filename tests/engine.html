@@ -47,7 +47,7 @@ let results = [],
 	data = {},
 	count = 0,
 	errcount = 0,
-	expected = 40
+	expected = 41
 
 function standardize(str) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -314,13 +314,14 @@ function compute() {
 	}
 
 	//
-	get_collation()
+	get_intl_collator()
+	get_locale_compare()
 	get_permission("push")
 	get_stacklength()
 	get_errors()
 }
 
-function get_collation() {
+function get_intl_collator() {
 	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
 	// 24 chars: approx 40ms
 	let list = ['az','cy','dsb','ee','eo','fo','gl','ha','haw','hsb','ig',
@@ -355,6 +356,48 @@ function get_collation() {
 		record(650, strC, hash, testC)
 	} catch(e) {
 		record(650, strC, e.name, zB0)
+	}
+}
+
+function get_locale_compare() {
+	let strC = "locale.compare", testC = false
+	let list = [
+		["az","\u00F6","\u1EE3"],
+		["cy","n","ng"],
+		["dsb","\u0144","\u00F1"],
+		["ee","ts","tt"],
+		["eo","\u0109","\u00E7\a"],
+		["fo","\u00F6","\u1EE3"],
+		["gl","\u00F1","ng"],
+		["ha","ts","tt"],
+		["haw","\u00F0","\u00EB"],
+		["hsb","\u0107","\u0109"],
+		["ig","c","ch"],
+		["ka","\u0107","\u10D0"],
+		["kk","r","\u0453"],
+		["ln","\u1D95","\u025B"],
+		["lo","\u0107","\u0E9A"],
+		["mt","c","C"],
+		["om","ch","\u00ED"],
+		["pa","\u0107","\u0649"],
+		["se","\u00F6","\u1EE3"],
+		["sq","\u00EB","ez"],
+		["to","\u00ED","\u00EE"],
+		["wo","\u00EB","ez"],
+	]
+	let res = []
+	try {
+		list.forEach(function(item) {
+			let code = item[0]
+			let strA = item[1]
+			res.push(code +" "+ strA.localeCompare(item[2], code) +" "+ strA +","+ item[2])
+		})
+		console.debug(res)
+		let hash = sha1(res.join())
+		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {testC = true}
+		record(680, strC, hash, testC)
+	} catch(e) {
+		record(680, strC, e.name, zB0)
 	}
 }
 
