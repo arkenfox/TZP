@@ -26,7 +26,7 @@
 		<thead><tr><th colspan="2">engine</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">An eeny-weeny, teeny-weeny minuscule sample of the thousands of myriad ways engines differ.
-			This test is tweaked for gecko [FF68+]: you want <span class="s9"> &#x2713 </span>'s. Anything different
+			This test is tweaked for gecko [FF60+]: you want <span class="s9"> &#x2713 </span>'s. Anything different
 			<span class="bad"> &#x2716 </span> or blocked <span class="bad"> &#x25cf </span> only makes you stand out.
 			</span>
 		</td></tr>
@@ -86,7 +86,7 @@ function fnDisplay() {
 			if (match == zB0) {match = red_block; countBlock++
 			} else if (match == "true") {match = green_tick; countTrue++
 			} else if (match == "false") {match = red_cross; countFalse++
-			} else {match = "-"; countNA++}
+			} else {match = white_na; countNA++}
 			match += " "
 			if (desc == "error") {
 				pad = 3; errcount++; desc = errcount.toString()
@@ -206,13 +206,22 @@ function get_installtrigger(num) {
 	} catch (e) {
 		fnRecord(num+1, strB, e.name, zB0)
 	}
+	// FF61+
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
-	try {
-		let resC = typeof InstallTriggerImpl
-		if (resC == "function") {boolC = true}
-		fnRecord(num+2, strC, resC, boolC)
-	} catch (e) {
-		fnRecord(num+2, strC, e.name, zB0)
+	let is61 = false
+	if (isFF) {
+		try {let t = (" a").trimStart(); is61 = true} catch(e) {}
+	}
+	if (isFF && !is61) {
+		fnRecord(num+2, strC, zNA + ": requires FF61 or higher", zNA)
+	} else {
+		try {
+			let resC = typeof InstallTriggerImpl
+			if (resC == "function") {boolC = true}
+			fnRecord(num+2, strC, resC, boolC)
+		} catch (e) {
+			fnRecord(num+2, strC, e.name, zB0)
+		}
 	}
 }
 
@@ -225,6 +234,15 @@ function get_intl_collator(num, title) {
 		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
 		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
 	let res = [], unique = [], same = []
+	// webkit has everything FF does for collation that can be detected
+	// except in FF70+, no (same as fo), so swap that out
+	if (isFF) {
+		try {
+			newFn("let t = 1_050")
+			list.push("no")
+			list = list.filter(x => !["fo"].includes(x))
+		} catch(e) {}
+	}
 	list.sort()
 	chars.sort() // reset
 	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
@@ -243,9 +261,17 @@ function get_intl_collator(num, title) {
 		if (isFF) {
 			if (same.length > 0) {console.debug("Intl.Collator: same as control\n"+ same.join())}
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			if (unique.length !== list.length) {console.debug("we have dupes")}
+			unique.sort()
+			if (unique.length !== list.length) {
+				console.debug("we have dupes")
+				//console.debug(control)
+				//res.sort()
+				//console.debug(res)
+				//console.debug(unique)
+			}
 		}
-		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {bool = true}
+		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {bool = true} // FF60-69
+		if (hash == "3ecfbab8c3890f24882115e4cc2d41b2007ff1ab") {bool = true} // FF70+
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -254,13 +280,13 @@ function get_intl_collator(num, title) {
 
 function get_intl_dtf(num, title) {
 	// 78 supported in FF60+ not supported in blink: unique results
-	// 100ms to test all 78
-	let list = ['af','ak','as','ast','be','bm','bo','br','ce','ckb',]
-	let listnotused = ['cy','dsb','dz','ee','eo','eu',
+	// 100ms to test all 78: some are not stable across FF60-93
+	let list = ['ak','ast','be','bm','bo','ce','ckb','eo','fo','to']
+	let listnotused = ['af','as','br','cy','dsb','dz','ee','eo','eu',
 'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','ig','ii','is','ka',
 'kab','ki','kk','kl','km','kok','ks','kw','ky','lb','lg','ln','lo','lu','mg','mk',
 'mn','mt','my','nd','ne','nn','om','or','os','ps','qu','rm','rn','rw','se','sg',
-'si','sn','so','sq','tg','ti','to','tt','ug','ur','wo','yi','yo','zu',
+'si','sn','so','sq','tg','ti','tt','ug','ur','wo','yi','yo','zu',
 	]
 	//list = list.concat(listnotused)
 	let bool = false
@@ -277,8 +303,9 @@ function get_intl_dtf(num, title) {
 		})
 		unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
 		//console.debug(unique.length, unique)
+		//console.debug(res)
 		let hash = sha1(res.join())
-		if (hash == "4507fc5309b7cc8d30ce875d320951f773df3171") {bool = true}
+		if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -312,15 +339,22 @@ function get_locale_compare(num, title) {
 		["wo","\u00EB","ez"],
 	]
 	let res = []
+	// webkit: see intl.collator notes: swap "fo" with "no" FF70+
+	let is70 = false
+	if (isFF) {
+		try {newFn("let t = 1_050"); is70 = true} catch(e) {}
+	}
 	try {
 		list.forEach(function(item) {
 			let code = item[0]
+			if (is70 && code == "fo") {code = "no"}
 			let strA = item[1]
 			res.push(code +" "+ strA.localeCompare(item[2], code) +" "+ strA +","+ item[2])
 		})
 		//console.debug(res)
 		let hash = sha1(res.join())
-		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true}
+		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // FF60-69
+		if (hash == "cfd8243141af8d1666d033234afc96393adee0f5") {bool = true} // FF70+
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -356,7 +390,7 @@ function get_math(num, title) {
 		}
 		let hash = sha1(res.join()).substring(0,20)
 		let engine = ""
-    if (hash == "ede9ca53efbb1902cc21") {engine = "blink"
+		if (hash == "ede9ca53efbb1902cc21") {engine = "blink"
 		} else if (hash == "05513f36d87dd78af60a") {engine = "webkit"
 		} else if (hash == "38172d9426d77af71baa") {engine = "edgeHTML"
 		} else if (hash == "36f067c652c8cfd90725") {engine = "trident"
@@ -448,14 +482,28 @@ function get_nav_values(num1, num2, num3) {
 		fnRecord(num2, strB, e.name, zB0)
 	}
 	// specific
+	let is64 = false
+	if (isFF) {
+		try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
+	}
 	let strC = "[buildID] navigator", boolC = false
 	try {
 		let resC = navigator.buildID
-		if (resC == "20181001000000") {boolC = true} else {resC = fnClean(resC)}
+		if (resC == "20181001000000") {boolC = true} else {
+			resC = fnClean(resC)
+			// FF60-63: 14 digit number
+			if (!is64) {
+				if (resC.length == 14 && resC.slice(0,4) == "2018") {
+					if (!isNaN(resC * 1)) {boolC = true}
+				}
+			}
+		}
 		fnRecord(num3, strC, resC, boolC)
 	} catch (e) {
 		fnRecord(num3, strC, e.name, zB0)
 	}
+
+
 	let strD = "[productSub] navigator", boolD = false
 	try {
 		let resD = navigator.productSub
@@ -592,7 +640,7 @@ setTimeout(function() {
 	get_eval_length(630, "eval.toString().length")
 	get_intl_collator(650, "Intl.Collator")
 	get_intl_dtf(655, "Intl.DateTimeFormat")
-	get_locale_compare(685, "locale.conmpare")
+	get_locale_compare(685, "locale.compare")
 	get_math(710, "math")
 	get_permission(730, "[permissions] push")
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
