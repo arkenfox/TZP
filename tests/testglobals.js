@@ -34,6 +34,7 @@ let s0 = " <span class='",
 	green_tick = "<span style='font-size: 10px;'>" + s9 +" \u2713"+ sc + "</span>",
 	red_cross = "<span style='font-size: 10px;'>" + sb +" \u2716"+ sc + "</span>",
 	red_block = "<span style='font-size: 11px;'>" + sb +" \u25CF"+ sc + "</span>", // was u25A0
+	white_na =  "<span style='font-size: 10px;'>" + snc +" \u2716"+ sc + "</span>",
 // show/hide text colors
 	zhide = "#161b22",
 	zshow = "#b3b3b3",
