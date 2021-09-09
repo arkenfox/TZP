@@ -120,11 +120,12 @@ function fnRecord(order, description, result, match) {
 	count ++
 	itemnumbers.push(order +" "+ description)
 	if (count == expected) {
-		itemnumbers.sort()
-		//console.debug(itemnumbers)
+		if (devLog) {
+			itemnumbers.sort()
+			console.log(itemnumbers)
+		}
 		fnDisplay()
 	}
-	//console.debug(count, order, description, result)
 	if (count > expected) {console.error(count, "expected count too low")}
 }
 
@@ -208,11 +209,7 @@ function get_installtrigger(num) {
 	}
 	// FF61+
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
-	let is61 = false
-	if (isFF) {
-		try {let t = (" a").trimStart(); is61 = true} catch(e) {}
-	}
-	if (isFF && !is61) {
+		if (isFF && !is61) {
 		fnRecord(num+2, strC, zNA + ": requires FF61 or higher", zNA)
 	} else {
 		try {
@@ -228,20 +225,17 @@ function get_installtrigger(num) {
 function get_intl_collator(num, title) {
 	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
 	// 24 chars: approx 40ms
-	let list = ['az','cy','dsb','ee','eo','fo','gl','ha','haw','hsb','ig',
-		'ka','kk','ln','lo','mt','om','pa','se','sq','to','wo',]
+	let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
+		'ka','kk','ln','lo','mt','no','om','pa','se','sq','to','wo',]
 	let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
 		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
 		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
 	let res = [], unique = [], same = []
 	// webkit has everything FF does for collation that can be detected
 	// except in FF70+, no (same as fo), so swap that out
-	if (isFF) {
-		try {
-			newFn("let t = 1_050")
-			list.push("no")
-			list = list.filter(x => !["fo"].includes(x))
-		} catch(e) {}
+	if (!is70 && isFF) {
+		list.push("fo")
+		list = list.filter(x => !["no"].includes(x))
 	}
 	list.sort()
 	chars.sort() // reset
@@ -253,25 +247,18 @@ function get_intl_collator(num, title) {
 			chars.sort(Intl.Collator(i).compare)
 			let test = sha1(chars.join())
 			unique.push(test)
-			if (test == control) {same.push(i)} // all 22 in chrome
-			res.push(test +" "+ i)
+			if (test == control) {same.push(test)}
+			res.push(i +" "+ test)
 		})
 		let hash = sha1(res.join())
-		// debug
-		if (isFF) {
-			if (same.length > 0) {console.debug("Intl.Collator: same as control\n"+ same.join())}
+		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			unique.sort()
-			if (unique.length !== list.length) {
-				console.debug("we have dupes")
-				//console.debug(control)
-				//res.sort()
-				//console.debug(res)
-				//console.debug(unique)
-			}
+			let counts = (unique.length == list.length) ? "100% unique" : "["+ unique.length + "/" + list.length +"]"
+			counts += " ["+ same.length +" match control]"
+			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "2e660424929e2e60b1d3422366ab889b76824fbe") {bool = true} // FF60-69
-		if (hash == "3ecfbab8c3890f24882115e4cc2d41b2007ff1ab") {bool = true} // FF70+
+		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true // FF70+
+		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -281,7 +268,7 @@ function get_intl_collator(num, title) {
 function get_intl_dtf(num, title) {
 	// 78 supported in FF60+ not supported in blink: unique results
 	// 100ms to test all 78: some are not stable across FF60-93
-	let list = ['ak','ast','be','bm','bo','ce','ckb','eo','fo','to']
+	let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
 	let listnotused = ['af','as','br','cy','dsb','dz','ee','eo','eu',
 'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','ig','ii','is','ka',
 'kab','ki','kk','kl','km','kok','ks','kw','ky','lb','lg','ln','lo','lu','mg','mk',
@@ -293,19 +280,29 @@ function get_intl_dtf(num, title) {
 	let date = new Date("January 30, 2019 13:00:00"),
 		options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true}
-	let res = [], unique = []
+	let res = [], unique = [], same = []
+	if (!is70 && isFF) {
+		list.push("fo")
+		list = list.filter(x => !["no"].includes(x))
+	}
+	list.sort()
+	let control = Intl.DateTimeFormat(undefined, options).format(date)
 	try {
-		list.sort()
 		list.forEach(function(locale) {
 			let test = Intl.DateTimeFormat(locale, options).format(date)
 			unique.push(test)
+			if (test == control) {same.push(locale)}
 			res.push(locale +" "+ test)
 		})
-		unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-		//console.debug(unique.length, unique)
-		//console.debug(res)
 		let hash = sha1(res.join())
-		if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true}
+		if (bLog) {
+			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
+			let counts = (unique.length == list.length) ? "100% unique" : "["+ unique.length + "/" + list.length +"]"
+			counts += " ["+ same.length +" match control]"
+			console.log(title +": "+ hash +", "+ counts +"\n", res)
+		}
+		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true // FF70+
+		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -320,7 +317,6 @@ function get_locale_compare(num, title) {
 		["dsb","\u0144","\u00F1"],
 		["ee","ts","tt"],
 		["eo","\u0109","\u00E7\a"],
-		["fo","\u00F6","\u1EE3"],
 		["gl","\u00F1","ng"],
 		["ha","ts","tt"],
 		["haw","\u00F0","\u00EB"],
@@ -331,6 +327,7 @@ function get_locale_compare(num, title) {
 		["ln","\u1D95","\u025B"],
 		["lo","\u0107","\u0E9A"],
 		["mt","c","C"],
+		["no","\u00F6","\u1EE3"],
 		["om","ch","\u00ED"],
 		["pa","\u0107","\u0649"],
 		["se","\u00F6","\u1EE3"],
@@ -338,23 +335,25 @@ function get_locale_compare(num, title) {
 		["to","\u00ED","\u00EE"],
 		["wo","\u00EB","ez"],
 	]
-	let res = []
+	let res = [], same = []
 	// webkit: see intl.collator notes: swap "fo" with "no" FF70+
-	let is70 = false
-	if (isFF) {
-		try {newFn("let t = 1_050"); is70 = true} catch(e) {}
-	}
 	try {
 		list.forEach(function(item) {
 			let code = item[0]
-			if (is70 && code == "fo") {code = "no"}
+			if (!is70 && isFF && code == "no") {code = "fo"} // isFF only
 			let strA = item[1]
-			res.push(code +" "+ strA.localeCompare(item[2], code) +" "+ strA +","+ item[2])
+			let test = strA.localeCompare(item[2], code)
+			if (test !== 1) {same.push(code)}
+			res.push(code +" "+ test +" "+ strA +","+ item[2])
 		})
-		//console.debug(res)
+		res.sort()
 		let hash = sha1(res.join())
-		if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // FF60-69
-		if (hash == "cfd8243141af8d1666d033234afc96393adee0f5") {bool = true} // FF70+
+		if (bLog) {
+			let counts = " ["+ same.length +" match control]"
+			console.log(title +": "+ hash +", "+ counts +"\n", res)
+		}
+		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true // FF70+
+		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
@@ -582,10 +581,14 @@ function get_stacklength(num1, num2, num3) {
 		} else {
 			fnRecord(num3, strRE, resRE, false)
 		}
-		let strSL = "stack length", testSL = false
-		let resSL = e.stack.toString().length
-		if (resSL == 8064) {testSL = true}
-		fnRecord(num2, strSL, resSL, testSL)
+		let strSL = "stack length"
+		if (isFile) {
+			fnRecord(num2, strSL, zNA + ": file://", zNA)
+		} else {
+			let resSL = e.stack.toString().length
+			let testSL = resSL == 8064 ? true : false
+			fnRecord(num2, strSL, resSL, testSL)
+		}
 	}
 }
 
@@ -621,7 +624,16 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 42
+	expected = 42,
+	bLog = true,
+	devLog = false
+
+let is61 = false,
+	is70 = false
+if (isFF) {
+	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
+	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
+}
 
 setTimeout(function() {
 	fnRecord(0, "header", "expected")
