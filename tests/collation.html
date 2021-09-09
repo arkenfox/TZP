@@ -50,7 +50,7 @@
 					<span class="s4">INTL.COLLATOR</span>
 					<span class="btn4 btn" onClick="collator()">[ run ]</span>
 					<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
-					<span class="btn4 btn"><input type="checkbox" id="supported"> supported [collator]</span>
+					<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [collator]</span>
 				<br><br>
 				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
 						style="width: 100%; resize: vertical" id="valueC"></textarea>
@@ -361,6 +361,8 @@ var collatorExample = [
 	// f28621c5d958602e2b7a45b26ea7ec368af168cd
 ]
 
+//console.debug(collatorExample.join())
+
 var compareExamples = [
 	'\u0109,\u00E7\a',
 	'a,\u03B1',
@@ -373,7 +375,8 @@ var compareExamples = [
 	'\u0627,\u06FD',
 	'a,A',
 	'\u00E7\a,ch',
-	'\u0144,\u00F1','n,ng',
+	'\u0144,\u00F1',
+	'n,ng',
 	'\u00ED,\u00EE',
 	'r,\u0453',
 	'\u00F6,\u1EE3',
@@ -381,7 +384,8 @@ var compareExamples = [
 	'\u0107,ch',
 	'ts,tt',
 	'\u1D95,\u025B',
-	'\u040E,\u04F0', 'u,\u04F0',
+	'\u040E,\u04F0',
+	'u,\u04F0',
 	'x,y',
 	'\u05EA,\uFB4A',
 ]
