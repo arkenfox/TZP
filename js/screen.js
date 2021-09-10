@@ -746,9 +746,9 @@ function get_math() {
 			}
 		}
 		function output() {
-			// 531915: RFP + FF93+ = F3
+			// 531915: RFP + FF93+, FF91.1+ = F3
 			let isRFPMath = false
-			if (isVer > 92 && m1 + m6 == "F3") {
+			if (m1 + m6 == "F3") {
 				isRFPMath = true
 				dom.fdMathOS.setAttribute("class", "c mono")
 				dom.fdMath.setAttribute("class", "c mono")
@@ -817,10 +817,9 @@ function get_math() {
 				dom.fdMathOS.innerHTML = mchash + rfp_green
 				dom.fdMath.innerHTML = m6hash + rfp_green
 			} else {
-				dom.fdMathOS.innerHTML = fdMath1 + (isVer > 92 ? rfp_red : "")
-				dom.fdMath.innerHTML = fdMath6 + (isVer > 92 ? rfp_red : "")
+				dom.fdMathOS.innerHTML = fdMath1 + rfp_red
+				dom.fdMath.innerHTML = fdMath6 + rfp_red
 			}
-
 			// output hashes
 			dom.math1hash.innerHTML = m1hash
 			dom.math6hash.innerHTML = m6hash
