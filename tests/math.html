@@ -29,9 +29,9 @@
 
 		<tr><td colspan="2"></td>
 			<td>
-				<button onClick="outputMath(`firefox`)">firefox</button>
-				<button onClick="outputMath(`chrome`)">chrome</button>
-				<button onClick="outputMath(`safari`)">safari</button>
+				<span id="bfirefox" class="btn3 btnfirst" onClick="outputMath(`firefox`)">[ firefox ]</span>
+				<span id="bchrome" class="btn3 btn" onClick="outputMath(`chrome`)">[ chrome ]</span>
+				<span id="bsafari" class="btn3 btn" onClick="outputMath(`safari`)">[ safari ]</span>
 			</td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
@@ -329,7 +329,7 @@ function build_controlset(engine) {
 			absX > Math.pow(2, 28) ? Math.log(absX) + Math.LN2 :
 			absX > 2 ? Math.log(2 * absX + 1 / Math.sqrt(x * x + 1)) :
 			Math.log1p(absX + (x * x) / (1 + Math.sqrt(1 + (x * x))))
-    )
+		)
 		return x > 0 ? w : -w
 	}
 	const atanh = x => Math.log((1 + x) / (1 - x)) / 2
@@ -631,12 +631,12 @@ function outputMath(control) {
 	let items = document.getElementsByClassName("c mono")
 	for (let i=0; i < items.length; i++) {items[i].textContent = ""}
 	// control
-	if (control == "firefox") {controlname = "Firefox 78 64bit on Windows 64bit"
-	} else if (control == "chrome") {controlname = "Chrome 85 64bit on Windows 64bit"
-	} else if (control == "safari") {controlname = "Safari 13.0.5 on macOS Catalina [VM 64bit on Windows 10 64bit]"}
+	setBtn(control)
+	if (control == "firefox") {controlname = s8 +"Firefox"+ sc +" 78 64bit on Windows 64bit"
+	} else if (control == "chrome") {controlname = s8 +"Chrome"+ sc +" 85 64bit on Windows 64bit"
+	} else if (control == "safari") {controlname = s8 +"Safari"+ sc +" 13.0.5 on macOS Catalina [VM 64bit on Windows 10 64bit]"}
 	// build control & run
 	build_controlset(control)
-
 	// delay so user can see things being reset
 	setTimeout(function(){
 		t0 = performance.now()
@@ -644,6 +644,20 @@ function outputMath(control) {
 	}, 170)
 }
 
+function setBtn(control) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn3")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ control)
+	el.classList.add("btn8")
+	el.classList.remove("btn3")
+}
+
+s8 = s8.trim()
 get_engine()
 outputMath("firefox")
 
