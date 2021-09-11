@@ -253,8 +253,8 @@ function get_intl_collator(num, title) {
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100\% unique" : "["+ unique.length + "/" + list.length +"]"
-			counts += " ["+ same.length +" match control]"
+			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
+			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true // FF70+
@@ -297,8 +297,8 @@ function get_intl_dtf(num, title) {
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100\% unique" : "["+ unique.length + "/" + list.length +"]"
-			counts += " ["+ same.length +" match control]"
+			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
+			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true // FF70+
@@ -349,7 +349,7 @@ function get_locale_compare(num, title) {
 		res.sort()
 		let hash = sha1(res.join())
 		if (bLog) {
-			let counts = " ["+ same.length +" match control]"
+			let counts = " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true // FF70+
