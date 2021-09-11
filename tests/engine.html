@@ -253,7 +253,7 @@ function get_intl_collator(num, title) {
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100% unique" : "["+ unique.length + "/" + list.length +"]"
+			let counts = (unique.length == list.length) ? "100\% unique" : "["+ unique.length + "/" + list.length +"]"
 			counts += " ["+ same.length +" match control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
@@ -297,7 +297,7 @@ function get_intl_dtf(num, title) {
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100% unique" : "["+ unique.length + "/" + list.length +"]"
+			let counts = (unique.length == list.length) ? "100\% unique" : "["+ unique.length + "/" + list.length +"]"
 			counts += " ["+ same.length +" match control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
@@ -528,7 +528,12 @@ function get_permission(num, title) {
 			}
 		})
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		// not supported in webkit: https://caniuse.com/?search=push%20permission
+		if ("chrome" in window || isFF) {
+			fnRecord(num, title, e.name, zB0)
+		} else {
+			fnRecord(num, title, "not supported", false)
+		}
 	}
 }
 
