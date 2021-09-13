@@ -43,9 +43,9 @@ s14 = s14.trim()
 sb = sb.trim()
 sg = sg.trim()
 
-function fnTrim(str) {
+function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
-	if (str.length > 70) {str = str.slice(0,67) +"..."}
+	if (str.length > len) {str = str.slice(0,len-3) +"..."}
 	return str
 }
 
@@ -149,6 +149,61 @@ function get_canvaskeys(num) {
 	}
 }
 
+function get_dates(num) {
+	// 1274354: meta
+
+	// 1557650
+	let strA = "[5 digit year] new Date"
+	try {
+		let resA = new Date("19999-11-11")
+		let bolA = resA == "Invalid Date" ? true : false
+		if (!bolA) {resA = fnTrim(resA.toString(), 40)}
+		fnRecord(num, strA, resA, bolA)
+	} catch(e) {
+		fnRecord(num, strA, e.name, zB0)
+	}
+	// 1515318
+	let strB = "[hyphen] new Date"
+	try {
+		let resB = new Date("31-Mar-2011").getFullYear()
+		// FF: 63 and lower = NaN, 64+ = -2011
+		let bolB = false
+		if (resB == -2011) {bolB = true
+		} else if (!is64 && isNaN(resB)) {bolB = true}
+		fnRecord(num+1, strB, resB, bolB)
+	} catch(e) {
+		fnRecord(num+1, strB, e.name, zB0)
+	}
+	// 1439800
+	let strC = "[string] new Data"
+	try {
+		let resC = new Date("11-Nov-11")
+		let bolC = resC.toString() == "Invalid Date" ? true : false
+		if (!bolC) {resC = fnTrim(resC.toString(), 40)}
+		fnRecord(num+2, strC, resC, bolC)
+	} catch(e) {
+		fnRecord(num+2, strC, e.name, zB0)
+	}
+	// 1599375
+	let strD = "[+0000 UTC] Date.parse"
+	try {
+		let resD = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
+		let bolD = isNaN(resD) ? true : false
+		fnRecord(num+3, strD, resD, bolD)
+	} catch(e) {
+		fnRecord(num+3, strD, e.name, zB0)
+	}
+	// 1730155
+	let strE = "[localized] Date.parse"
+	try {
+		let resE = Date.parse("Mercredi 8 Septembre 2021")
+		let bolE = isNaN(resE) ? true : false
+		fnRecord(num+4, strE, resE, bolE)
+	} catch(e) {
+		fnRecord(num+4, strE, e.name, zB0)
+	}
+}
+
 function get_errors(num) {
 	let tests = [
 		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value", ""],
@@ -169,7 +224,7 @@ function get_errors(num) {
 			eval(array[0])
 		} catch(e) {
 			let bool = false
-			let str = fnTrim(e.name +": "+ e.message)
+			let str = fnTrim(e.name +": "+ e.message, 70)
 			if (str == array[1]) {bool = true}
 			if (array[2] !== "") {
 				if (str == array[2]) {bool = true}
@@ -481,10 +536,6 @@ function get_nav_values(num1, num2, num3) {
 		fnRecord(num2, strB, e.name, zB0)
 	}
 	// specific
-	let is64 = false
-	if (isFF) {
-		try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
-	}
 	let strC = "[buildID] navigator", boolC = false
 	try {
 		let resC = navigator.buildID
@@ -501,8 +552,6 @@ function get_nav_values(num1, num2, num3) {
 	} catch (e) {
 		fnRecord(num3, strC, e.name, zB0)
 	}
-
-
 	let strD = "[productSub] navigator", boolD = false
 	try {
 		let resD = navigator.productSub
@@ -629,14 +678,16 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 42,
+	expected = 47,
 	bLog = true,
 	devLog = false
 
 let is61 = false,
+	is64 = false,
 	is70 = false
 if (isFF) {
 	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
+	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
 	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
 }
 
@@ -654,6 +705,7 @@ setTimeout(function() {
 	get_nav_values(100, 400, 700) // 100 expected, 400 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
 	get_window_chrome(450, "[chrome] window")
+	get_dates(620)
 	get_eval_length(630, "eval.toString().length")
 	get_intl_collator(650, "Intl.Collator")
 	get_intl_dtf(655, "Intl.DateTimeFormat")
