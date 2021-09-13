@@ -70,6 +70,8 @@ function outputVersion() {
 	let data = {}
 
 	function display() {
+		let isWatch = false
+		let firstWatch = "1439800"
 		// data -> results in descending order
 		const names = Object.keys(data).sort((a,b) => b-a)
 		for (const k of names) {results.push(data[k])}
@@ -81,8 +83,7 @@ function outputVersion() {
 				result = results[i].split(":")[2],
 				perf = results[i].split(":")[3]
 			// version
-			let isWatch = false
-			if (id == -2011) {isWatch = true}
+			if (bug == firstWatch) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
 				if (id !== prevV) {id = s3 + (id +"").padStart(3) + sc} else {id = "".padStart(3)}
 			} else {
@@ -90,7 +91,7 @@ function outputVersion() {
 			}
 			// watchlist: not version specific
 			if (isWatch) {
-				if (id == "NaN") {display.push("<br>"+ s3 + "--- watchlist ---"+ sc + "<br>")}
+				if (bug == firstWatch) {display.push("<br>"+ s3 + "--- watchlist ---"+ sc + "<br>")}
 				id = id + ""
 				prefix = 15 - id.length
 				id = "".padStart(prefix) + s3 + "<code>"+ id +"</code>" + sc
@@ -141,7 +142,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 58
+		expected = 60
 
 	// 93: 1328672
 	let t93a = performance.now(), ver93a = xF
@@ -613,22 +614,37 @@ function outputVersion() {
 	record(10,52, "837961", ver52, performance.now()-t52)
 
 	// watch
-	// 1274354
+	// 1274354: META
+
+	// 1439800
 	let t9 = performance.now(), ver9 = xNC
-	let test9 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
-	if (!isNaN(test9)) {ver9 = xOMG}
-	record(9,"NaN", "1274354", ver9, performance.now()-t9)
+	let test9 = new Date("11-Nov-11")
+	if (test9.toString() !== "Invalid Date") {ver9 = xOMG; console.debug("banana")}
+	record(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
 
+	// 1557650
 	let t8 = performance.now(), ver8 = xNC
-	let test8 = new Date("31-Mar-2011").getFullYear()
-	// 63 and lower = NaN, 64+ = -2011
-	if (test8 !== -2011 && !isNaN(test8)) {ver8 = xOMG + (isFF ? " [" + test8 +"]" : "")}
-	record(8,"-2011", "1274354", ver8, performance.now()-t8)
+	let test8 = new Date("19999-11-11").toString()
+	if (test8 !== "Invalid Date") {ver8 = xOMG}
+	record(8,"Invalid Date", "1557650", ver8, performance.now()-t8)
 
+	// 1515318: 63 and lower = NaN, 64+ = -2011
 	let t7 = performance.now(), ver7 = xNC
-	let test7 = new Date("19999-11-11").toString()
-	if (test7 !== "Invalid Date") {ver7 = xOMG}
-	record(7,"Invalid Date", "1274354", ver7, performance.now()-t7)
+	let test7 = new Date("31-Mar-2011").getFullYear()
+	if (test7 !== -2011 && !isNaN(test7)) {ver7 = xOMG + (isFF ? " [" + test7 +"]" : "")}
+	record(7,"-2011", "1515318", ver7, performance.now()-t7)
+
+	// 1599375
+	let t6 = performance.now(), ver6 = xNC
+	let test6 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
+	if (!isNaN(test6)) {ver6 = xOMG}
+	record(6,"NaN", "1599375", ver6, performance.now()-t6)
+
+	// 1730155
+	let t5 = performance.now(), ver5 = xNC
+	let test5 = Date.parse("Mercredi 8 Septembre 2021")
+	if (!isNaN(test5)) {ver5 = xOMG}
+	record(5,"NaN", "1730155", ver5, performance.now()-t5)
 
 	/*
 	// 1370185
