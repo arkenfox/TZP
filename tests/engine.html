@@ -206,18 +206,19 @@ function get_dates(num) {
 
 function get_errors(num) {
 	let tests = [
-		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value", ""],
-		["alert('A)","SyntaxError: '' literal not terminated before end of script", ""],
+		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value"],
+		["alert('A)","SyntaxError: '' literal not terminated before end of script"],
 		["null.value = 1","TypeError: can't access property \"value\" of null", "TypeError: null has no properties"],
-		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...",
-			"SyntaxError: identifier starts immediately after numeric literal"],
-		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...", // FF72+
+			"SyntaxError: identifier starts immediately after numeric literal", // FF60-69
+			"SyntaxError: missing digit after '_' numeric separator"], // FF70-71
+		["const foo;foo.bar","SyntaxError: missing = in const declaration"],
 		["null.bar","TypeError: can't access property \"bar\" of null","TypeError: null has no properties"],
-		["(1).toString(1000)","RangeError: radix must be an integer at least 2 and no greater than 36",""],
-		["var x = new Array(-1)","RangeError: invalid array length",""],
+		["(1).toString(1000)","RangeError: radix must be an integer at least 2 and no greater than 36"],
+		["var x = new Array(-1)","RangeError: invalid array length"],
 		["[...undefined].length","TypeError: can't access property Symbol.iterator of undefined","TypeError: undefined has no properties"],
-		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp",""],
-		["const foo;foo.bar","SyntaxError: missing = in const declaration",""],
+		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp"],
+		["const foo;foo.bar","SyntaxError: missing = in const declaration"],
 	]
 	tests.forEach(function(array) {
 		try {
@@ -225,10 +226,7 @@ function get_errors(num) {
 		} catch(e) {
 			let bool = false
 			let str = fnTrim(e.name +": "+ e.message, 70)
-			if (str == array[1]) {bool = true}
-			if (array[2] !== "") {
-				if (str == array[2]) {bool = true}
-			}
+			if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
 			fnRecord(num, "error", str, bool)
 			num++
 		}
@@ -468,6 +466,22 @@ function get_math(num, title) {
 	}
 }
 
+function get_media_constraints(num, title) {
+	// blink: 18c59e90bb3af0ce32be8efaa4457ead01fcacd8 [32]
+	try {
+		let data = navigator.mediaDevices.getSupportedConstraints()
+		let res = Object.keys(data)
+		res.sort()
+		let hash = sha1(res.join())
+		let bool = false
+		if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f") {bool = true // FF70+
+		} else if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc" && !is70) {bool = true} // FF60-69
+		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
 function get_nav_keys(num1, num2, title) {
 	try {
 		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -543,8 +557,11 @@ function get_nav_values(num1, num2, num3) {
 			resC = fnClean(resC)
 			// FF60-63: 14 digit number
 			if (!is64) {
-				if (resC.length == 14 && resC.slice(0,4) == "2018") {
-					if (!isNaN(resC * 1)) {boolC = true}
+				let year = resC.slice(0,4)
+				if (resC.length == 14) {
+					if (year == "2018" || year == "2019") {
+						if (!isNaN(resC * 1)) {boolC = true}
+					}
 				}
 			}
 		}
@@ -678,7 +695,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 47,
+	expected = 48,
 	bLog = true,
 	devLog = false
 
@@ -711,6 +728,7 @@ setTimeout(function() {
 	get_intl_dtf(655, "Intl.DateTimeFormat")
 	get_locale_compare(685, "locale.compare")
 	get_math(710, "math")
+	get_media_constraints(720, "[constraints] mediaDevices")
 	get_permission(730, "[permissions] push")
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
 	get_errors(902)
