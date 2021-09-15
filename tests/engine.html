@@ -262,8 +262,8 @@ function get_installtrigger(num) {
 	}
 	// FF61+
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
-		if (isFF && !is61) {
-		fnRecord(num+2, strC, zNA + ": requires FF61 or higher", zNA)
+	if (isFF && !is61) {
+		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
 		try {
 			let resC = typeof InstallTriggerImpl
@@ -318,17 +318,33 @@ function get_intl_collator(num, title) {
 	}
 }
 
+function get_intl_display_names(num, title) {
+	try {
+		let test = Intl.DisplayNames.supportedLocalesOf("en")
+		fnRecord(num, title, zNA +": coming soon", zNA)
+	} catch(e) {
+		// FF85-: TypeError: Intl.DisplayNames is undefined
+		if (isFF) {
+			if (is86) {
+				fnRecord(num, title, e.name, zB0)
+			} else {
+				let msg = e.message
+				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
+				if (e.name == "TypeError" && msg == "Intl.DisplayNames is undefined") {
+					fnRecord(num, title, zNA +": FF86+ required", zNA)
+				} else {
+					fnRecord(num, title, e.name, zB0)
+				}
+			}
+		} else {
+			fnRecord(num, title, "n/a: not supported", zNA)
+		}
+	}
+}
+
 function get_intl_dtf(num, title) {
-	// 78 supported in FF60+ not supported in blink: unique results
-	// 100ms to test all 78: some are not stable across FF60-93
+	// 78 locales supported in FF60+ not supported in blink: unique results
 	let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
-	let listnotused = ['af','as','br','cy','dsb','dz','ee','eo','eu',
-'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','ig','ii','is','ka',
-'kab','ki','kk','kl','km','kok','ks','kw','ky','lb','lg','ln','lo','lu','mg','mk',
-'mn','mt','my','nd','ne','nn','om','or','os','ps','qu','rm','rn','rw','se','sg',
-'si','sn','so','sq','tg','ti','tt','ug','ur','wo','yi','yo','zu',
-	]
-	//list = list.concat(listnotused)
 	let bool = false
 	let date = new Date("January 30, 2019 13:00:00"),
 		options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
@@ -359,6 +375,101 @@ function get_intl_dtf(num, title) {
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_intl_list_format(num, title) {
+	try {
+		let test = Intl.ListFormat.supportedLocalesOf("en")
+		fnRecord(num, title, zNA +": coming soon", zNA)
+	} catch(e) {
+		// FF77-: TypeError: Intl.ListFormat is undefined
+		if (isFF) {
+			if (is78) {
+				fnRecord(num, title, e.name, zB0)
+			} else {
+				let msg = e.message
+				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
+				if (e.name == "TypeError" && msg == "Intl.ListFormat is undefined") {
+					fnRecord(num, title, zNA +": FF78+ required", zNA)
+				} else {
+					fnRecord(num, title, e.name, zB0)
+				}
+			}
+		} else {
+			fnRecord(num, title, "n/a: not supported", zNA)
+		}
+	}
+}
+
+function get_intl_number_format(num, title) {
+	try {
+		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
+		list.push('af','bo','lb','se','to') // some FF60+ gecko not in blink
+    list.push('co','cv','nso','oc','tig') // some webkit only
+		let res = []
+		list.forEach(function(locale) {
+			let test = Intl.NumberFormat.supportedLocalesOf(locale)
+			if (test.length) {res.push(locale)}
+		})
+		res.sort()
+		let hash = sha1(res.join()),
+			bool = false
+		if (hash == "f727ab8e719e15bbc50cb2a80a4f8a170e257364") {bool = true // FF78+
+		} else if (hash == "10260ae28405581ccf307457ba54fce1314028ff") {bool = true // FF70-77
+		} else if (hash == "ed89e80134f060f82515f6cf8e4658bd0e0405e2") {bool = true // FF60-69
+		}
+		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+	} catch(e) {
+		console.debug(e.message)
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_intl_pluralrules(num, title) {
+	try {
+		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
+		list.push('ki','qu') // some FF60+ gecko not in blink
+		list.push('an','lij','vo') // chrome only
+		list.push('ba','co','cv','gn','oc') // webkit only
+		let res = []
+		list.forEach(function(locale) {
+			let test = Intl.PluralRules.supportedLocalesOf(locale)
+			if (test.length) {res.push(locale)}
+		})
+		res.sort()
+		let hash = sha1(res.join()),
+			bool = false
+		if (hash == "e37e6be93df8ebcb231c0ce502e34d2647e45bf0") {bool = true // FF78+
+		} else if (hash == "f1c25801863b1bc07dbabc13dfea31417ba9d533") {bool = true // FF70-77
+		} else if (hash == "eb8994a2172fbf52b6f0e9461869a48b0bfaa06c") {bool = true // FF60-69
+		}
+		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+	} catch(e) {
+		console.debug(e.message)
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_intl_rtf(num, title) {
+	try {
+		let test = Intl.RelativeTimeFormat.supportedLocalesOf("en")
+		fnRecord(num, title, zNA +": coming soon", zNA)
+	} catch(e) {
+		// FF64-: TypeError: Intl.RelativeTimeFormat is undefined
+		if (isFF) {
+			if (is65) {
+				fnRecord(num, title, e.name, zB0)
+			} else {
+				if (e.name == "TypeError" && e.message == "Intl.RelativeTimeFormat is undefined") {
+					fnRecord(num, title, zNA +": FF65+ required", zNA)
+				} else {
+					fnRecord(num, title, e.name, zB0)
+				}
+			}
+		} else {
+			fnRecord(num, title, "n/a: not supported", zNA)
+		}
 	}
 }
 
@@ -654,7 +765,7 @@ function get_stacklength(num1, num2, num3) {
 		}
 		let strSL = "stack length"
 		if (isFile) {
-			fnRecord(num2, strSL, zNA + ": file://", zNA)
+			fnRecord(num2, strSL, zNA +": file://", zNA)
 		} else {
 			let resSL = e.stack.toString().length
 			let testSL = resSL == 8064 ? true : false
@@ -695,17 +806,35 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 48,
-	bLog = true,
+	expected = 53,
+	bLog = false,
 	devLog = false
 
 let is61 = false,
 	is64 = false,
-	is70 = false
+	is65 = false,
+	is70 = false,
+	is78 = false,
+	is86 = false
 if (isFF) {
-	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
-	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
+	// 86
+	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
+	// 78
+	try {
+		let regex78b = new RegExp('b')
+		if (regex78b.dotAll == false) {is78 = true}
+	} catch(e) {}
+	// 70
 	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
+	// 65
+	try {
+		let test = Intl.DateTimeFormat.supportedLocalesOf("ia")
+		if (test.length) {is65 = true}
+	} catch(e) {}
+	// 64
+	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
+	// 61
+	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
 }
 
 setTimeout(function() {
@@ -725,8 +854,13 @@ setTimeout(function() {
 	get_dates(620)
 	get_eval_length(630, "eval.toString().length")
 	get_intl_collator(650, "Intl.Collator")
-	get_intl_dtf(655, "Intl.DateTimeFormat")
-	get_locale_compare(685, "locale.compare")
+	get_intl_dtf(656, "Intl.DateTimeFormat")
+	get_intl_display_names(660, "Intl.DislayNames")
+	get_intl_list_format(663, "Intl.ListFormat")
+	get_intl_number_format(666, "Intl.NumberFormat")
+	get_intl_pluralrules(670, "Intl.PluralRules")
+	get_intl_rtf(673, "Intl.RelativeTimeFormat")
+	get_locale_compare(690, "locale.compare")
 	get_math(710, "math")
 	get_media_constraints(720, "[constraints] mediaDevices")
 	get_permission(730, "[permissions] push")
