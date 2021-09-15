@@ -142,7 +142,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 60
+		expected = 61
 
 	// 93: 1328672
 	let t93a = performance.now(), ver93a = xF
@@ -522,7 +522,15 @@ function outputVersion() {
 		let test65 = new Intl.RelativeTimeFormat("en",{style: "long"})
 		ver65 = xS
 	} catch(e) {}
-	record(75,65, "", ver65, performance.now()-t65)
+	record(76,65, "", ver65, performance.now()-t65)
+
+	// 65a
+	let t65a = performance.now(), ver65a = xF
+	try {
+		let t65a = Intl.DateTimeFormat.supportedLocalesOf("ia")
+		if (t65a.length) {ver65a = xS}
+	} catch(e) {}
+	record(75,65, "", ver65a, performance.now()-t65a)
 
 	//64
 	let t64 = performance.now(), ver64 = xF
@@ -645,16 +653,6 @@ function outputVersion() {
 	let test5 = Date.parse("Mercredi 8 Septembre 2021")
 	if (!isNaN(test5)) {ver5 = xOMG}
 	record(5,"NaN", "1730155", ver5, performance.now()-t5)
-
-	/*
-	// 1370185
-	let t6 = performance.now(), ver6 = xNC
-	let chars6 = ["\u0F45","རྔ"] // TIBETAN CA + ??
-	let control6 = chars6.sort(Intl.Collator("en").compare)
-	let test6 = chars6.sort(Intl.Collator("dz").compare)
-	if (control6 !== test6) {ver6 = xOMG}
-	record(6,control6, "1370185", ver6, performance.now()-t6)
-	*/
 
 	try {
 		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
