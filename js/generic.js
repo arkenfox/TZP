@@ -616,6 +616,11 @@ const get_isVer = () => new Promise(resolve => {
 		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let t = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
 	}
 	function v65() { //65
+		try {let t = Intl.DateTimeFormat.supportedLocalesOf("ia")
+			if (t.length) {output(65)} else {v65a}
+		} catch(e) {v65a}
+	}
+	function v65a() { //65
 		try {let t = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
 	}
 	function v64() { //64
