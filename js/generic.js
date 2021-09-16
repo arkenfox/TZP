@@ -1294,9 +1294,12 @@ function run_once() {
 	if (runSL) {
 		isFFno.push(str1,str2,str3)
 	} else {
-		if ("undefined" != typeof InstallTrigger) {isFFyes.push(str1); test1 = true} else {isFFno.push(str1)}
-		if ("undefined" != typeof InstallTriggerImpl) {isFFyes.push(str2); test2 = true} else {isFFno.push(str2)}
-		if ("InstallTrigger" in window) {isFFyes.push(str3); test3 = true} else {isFFno.push(str3)}
+		try {if (typeof InstallTrigger == "object") {test1 = true}} catch(e) {}
+		try {if (typeof InstallTriggerImpl == "function") {test2 = true}} catch(e) {}
+		try {if ("InstallTrigger" in window) {test3 = true}} catch(e) {}
+		if (test1) {isFFyes.push(str1)} else {isFFno.push(str1)}
+		if (test2) {isFFyes.push(str2)} else {isFFno.push(str2)}
+		if (test3) {isFFyes.push(str3)} else {isFFno.push(str3)}
 	}
 	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
 	// WARM
