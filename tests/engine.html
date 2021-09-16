@@ -109,7 +109,7 @@ function fnDisplay() {
 	let summary = s14 +"SUMMARY"+ sc
 		+"PASSED: ".padStart(10) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
 		+"FAILED: ".padStart(10) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
-	if (countNA > 0) {summary += "NA: ".padStart(6) + countNA}
+	if (countNA > 0) {summary += "N/A: ".padStart(7) + countNA}
 	// output
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
@@ -337,7 +337,7 @@ function get_intl_display_names(num, title) {
 				}
 			}
 		} else {
-			fnRecord(num, title, "n/a: not supported", zNA)
+			fnRecord(num, title, zNA +": not supported", zNA)
 		}
 	}
 }
@@ -397,7 +397,7 @@ function get_intl_list_format(num, title) {
 				}
 			}
 		} else {
-			fnRecord(num, title, "n/a: not supported", zNA)
+			fnRecord(num, title, zNA +": not supported", zNA)
 		}
 	}
 }
@@ -468,8 +468,57 @@ function get_intl_rtf(num, title) {
 				}
 			}
 		} else {
-			fnRecord(num, title, "n/a: not supported", zNA)
+			fnRecord(num, title, zNA +": not supported", zNA)
 		}
+	}
+}
+
+function get_js_client_hints(num, title) {
+	// testing: https://web.dev/user-agent-client-hints/
+	// https://user-agent-client-hints.glitch.me/javascript.html
+	// TypeError can't access property "X", navigator.X is undefined
+	function output() {
+		if (res.length) {
+			console.debug(res)
+			res.sort()
+			let hash = sha1(res.join())
+			fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, false)
+		} else {
+			fnRecord(num, title, "none", true)
+		}
+	}
+	function cleanup(str) {
+		if (str == "") {str = "empty string"}
+		if (str == "undefined") {str = "undefined string"}
+		if (str == undefined) {str = "undefined value"}
+		return str
+	}
+	let res = []
+	try {
+		let resB = navigator.userAgentData.brands
+		resB.forEach(function(object) {
+			let valueB = cleanup(object.version)
+			res.push(object.brand +": "+ valueB)
+		})
+	} catch(e) {}
+	try {
+		res.push("mobile: " + navigator.userAgentData.mobile)
+	} catch(e) {}
+
+	try {
+		navigator
+			.userAgentData.getHighEntropyValues(
+			["architecture", "bitness", "brands", "mobile",, "platform", "platformVersion", "uaFullVersion"])
+			.then(ua => {
+				const names = Object.keys(ua)
+				for (const k of names) {
+					let valueU = cleanup(ua[k])
+					res.push(k +": "+ valueU)
+				}
+				output()
+			})
+	} catch(e) {
+		output()
 	}
 }
 
@@ -806,7 +855,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 53,
+	expected = 54,
 	bLog = false,
 	devLog = false
 
@@ -847,6 +896,7 @@ setTimeout(function() {
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
 	get_nav_screen(150)
+	get_js_client_hints(320, "[JS] client hints")
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 	get_nav_values(100, 400, 700) // 100 expected, 400 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
