@@ -92,14 +92,18 @@ function get_chrome() {
 }
 
 function get_collation() {
-	let list = ['ka','lo','pa','zh-hk'],
+	let baselist = ['ka','ku','lo','no','pa','tk','zh-hk'],
 		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
+		list = [],
 		res = [],
 		t0 = performance.now()
 	// don't use unsupported locales: they fall back to system locale,
 	// which could be anything - when we want the hashes to be stable
-	if (isVer > 69) {list.push("no")}
-	if (isVer > 64) {list.push("tk","ku")}
+	baselist.forEach(function(locale) {
+		let test = Intl.NumberFormat.supportedLocalesOf(locale)
+		if (test.length) {list.push(locale)}
+	})
+	list.sort()
 	// output
 	function output(hash) {
 		let ff = ""
@@ -114,7 +118,6 @@ function get_collation() {
 	}
 	// run
 	chars.sort() // set
-	list.sort()
 	list.forEach(function(i) {
 		chars.sort() // reset
 		chars.sort(Intl.Collator(i).compare)
