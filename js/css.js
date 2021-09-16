@@ -181,7 +181,7 @@ function get_computed_styles() {
 		]).then(res => {
 			let blankIndex = [], realIndex = [], fakeIndex = [], distinctRep = [], distinctReal = []
 			let values = [], btns = []
-			//sim
+			// sim
 			if (runSC) {
 				cSim++
 				cSim = cSim % 10
@@ -193,6 +193,15 @@ function get_computed_styles() {
 				let aRep = [], aReal = [], aFake = []
 				try {
 					aRep = res[i].keys
+					// don't record untrustworthy: false positives FF60-62: getComputedStyle has extra styles
+					// remove diffs: we don't lose entropy, we already know the version number
+					if (i == 0) {
+						if (isVer < 63) {aRep = aRep.filter(x => !["-moz-context-properties"].includes(x))}
+						if (isVer < 62) {
+							aRep = aRep.filter(x => !["-moz-window-opacity","-moz-window-transform","-moz-window-transform-origin"].includes(x))
+						}
+					}
+					// sim
 					if (runSC) {
 						let cMsg = ""
 						// privacy.file_unique_origin = false
@@ -212,7 +221,6 @@ function get_computed_styles() {
 						}
 						if (cSim !== 0 && !bMsg) {console.log("style sim #"+ cSim + ":", cMsg); bMsg = true}
 					}
-					// note false positives FF60-62
 					if (isFF && isVer > 62) {
 						let lastStyleIndex = aRep.indexOf("constructor")
 						aFake = aRep.slice(lastStyleIndex+1)
