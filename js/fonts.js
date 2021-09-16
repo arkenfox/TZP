@@ -449,6 +449,8 @@ function get_fonts() {
 
 			// mixed
 			blank.sort
+			// don't record method for fontsPixelSize if not supported
+			if (isVer < 63) {blank = blank.filter(x => !["fontsPixelSize"].includes(x))}
 			if (gRun && blank.length > 0) {gMethods.push("fonts:fonts:none:"+ blank.join())}
 			// get most common hash/occurence
 			let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
