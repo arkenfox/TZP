@@ -411,6 +411,8 @@ function get_fonts() {
 							hash = sha1(data.join())
 						if (data.length == 0) {
 							hash = "none"
+							// fontsPixelSize: not supported in FF62 or lower
+							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
 							blank.push(name)
 						} else {
 							fntHashes.push(hash)
@@ -428,7 +430,6 @@ function get_fonts() {
 			if (blank.length == 7) {isSame = true; res = "none"}
 
 			// all n/a, none, blocked or same hash
-			// note: FF62 and lower: pixelsize is none: not worth coding around
 			if (isSame) {
 				sNames.forEach(function(name) {document.getElementById(name).innerHTML = res})
 				summary = (res == "none" ? soL +"none"+ scC : res)
@@ -473,7 +474,8 @@ function get_fonts() {
 					el = document.getElementById(name),
 					display = ""
 				if (isBypass) {
-					if (hash == greatest.item) {
+					// don't bypass if zNS: which we only use for isVer < 63 && fontsPixelSize
+					if (hash == greatest.item || hash == zNS) {
 						matchCount = count
 						matchName = name
 						display = hash
