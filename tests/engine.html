@@ -43,6 +43,21 @@ s14 = s14.trim()
 sb = sb.trim()
 sg = sg.trim()
 
+function fnRFP() {
+	let isPerf2 = true
+	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
+	try {
+		performance.mark("a")
+		let r = performance.getEntriesByName("a","mark").length
+			+ performance.getEntries().length
+			+ performance.getEntries({name:"a",entryType:"mark"}).length
+			+ performance.getEntriesByName("a","mark").length
+			performance.clearMarks()
+		isRFP2 = (r == 0)
+		if (!isPerf2) {isRFP2 = false}
+	} catch(e) {}
+}
+
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
 	if (str.length > len) {str = str.slice(0,len-3) +"..."}
@@ -721,12 +736,15 @@ function get_nav_values(num1, num2, num3) {
 		if (resC == "20181001000000") {boolC = true} else {
 			resC = fnClean(resC)
 			// FF60-63: 14 digit number
+			// RFP60-63 = 20100101
 			if (!is64) {
 				let year = resC.slice(0,4)
 				if (resC.length == 14) {
 					if (year == "2018" || year == "2019") {
 						if (!isNaN(resC * 1)) {boolC = true}
 					}
+				} else if (isRFP2) {
+					if (resC +"" == "20100101") {boolC = true}
 				}
 			}
 		}
@@ -830,8 +848,8 @@ function get_stacklength(num1, num2, num3) {
 
 function get_storage_quota(num, title) {
 	// desktop
-		// FF: 2147483648 (same in PB mode)
-		// brave: 2147483648 (same in incognito)
+		// FF/TB: 2147483648 (same in PB mode) <- tested back to FF60
+		// brave: 2147483648 (same in incognito and Tor window)
 		// opera: 310418104 normal
 		// opera: 521917312 private
 		// chrome: 1200238045593
@@ -889,8 +907,11 @@ let is61 = false,
 	is65 = false,
 	is70 = false,
 	is78 = false,
-	is86 = false
+	is86 = false,
+	isRFP2 = false
+// set some FF variables
 if (isFF) {
+	fnRFP()
 	// 86
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
 	// 78
