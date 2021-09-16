@@ -720,14 +720,23 @@ function get_nav_values(num1, num2, num3) {
 		fnRecord(num1, strA, e.name, zB0)
 	}
 	// not expected
+	let strE = "[gpc] navigator", boolE = false
+	try {
+		let resE = navigator.globalPrivacyControl
+		if (resE == undefined) {boolE = true}
+		resE = fnClean(resE)
+		fnRecord(num2, strE, resE, boolE)
+	} catch (e) {
+		fnRecord(num2, strE, e.name, zB0)
+	}
 	let strB = "[vendor] navigator", boolB = false
 	try {
 		let resB = navigator.vendor
 		if (resB == "") {boolB = true}
 		resB = fnClean(resB)
-		fnRecord(num2, strB, resB, boolB)
+		fnRecord(num2+1, strB, resB, boolB)
 	} catch (e) {
-		fnRecord(num2, strB, e.name, zB0)
+		fnRecord(num2+1, strB, e.name, zB0)
 	}
 	// specific
 	let strC = "[buildID] navigator", boolC = false
@@ -898,7 +907,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 55,
+	expected = 56,
 	bLog = false,
 	devLog = false
 
