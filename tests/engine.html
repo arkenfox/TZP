@@ -720,23 +720,75 @@ function get_nav_values(num1, num2, num3) {
 		fnRecord(num1, strA, e.name, zB0)
 	}
 	// not expected
+	let strF = "[battery] navigator", boolF = false
+	let resF = []
+	try {
+		navigator.getBattery().then(function(battery) {
+			try {
+				resF.push(battery.level * 100 + "%")
+			} catch(e) {resF.push("error")}
+			try {
+				resF.push((battery.charging ? "": "not ") +"charging")
+			} catch(e) {resF.push("error")}
+			try {
+				resF.push(battery.chargingTime)
+			} catch(e) {resF.push("error")}
+			try {
+				resF.push(battery.dischargingTime) // not going to add eventlisteners
+			} catch(e) {resF.push("error")}
+			fnRecord(num2, strF, resF.join(", "), false)
+		})
+	} catch (e) {
+		if (e.name == "TypeError" && e.message == "navigator.getBattery is not a function") {
+			fnRecord(num2, strF, e.name, true)
+		} else {
+			fnRecord(num2, strF, e.name, zB0)
+		}
+	}
 	let strE = "[gpc] navigator", boolE = false
 	try {
 		let resE = navigator.globalPrivacyControl
 		if (resE == undefined) {boolE = true}
 		resE = fnClean(resE)
-		fnRecord(num2, strE, resE, boolE)
+		fnRecord(num2+1, strE, resE, boolE)
 	} catch (e) {
-		fnRecord(num2, strE, e.name, zB0)
+		fnRecord(num2+1, strE, e.name, zB0)
+	}
+	let strK = "[keyboard] navigator"
+	try {
+		let resK = navigator.keyboard
+		if (resK == undefined) {
+			fnRecord(num2+2, strK, "undefined", true)
+		} else {
+			let keys = []
+			let listK = ['Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
+				'Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Equal',
+				'IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG','KeyH',
+				'KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT','KeyU',
+				'KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
+			resK.getLayoutMap().then(keyboardLayoutMap => {
+				listK.forEach(function(key) {
+					try {
+						keys.push(key +": "+ keyboardLayoutMap.get(key))
+					} catch(e) {
+						keys.push(key +": e.name")
+					}
+				})
+				let hash = sha1(keys.join())
+				fnRecord(num2+2, strK, hash, false)
+			})
+		}
+	} catch (e) {
+		fnRecord(num2+2, strK, e.name, zB0)
 	}
 	let strB = "[vendor] navigator", boolB = false
 	try {
 		let resB = navigator.vendor
 		if (resB == "") {boolB = true}
 		resB = fnClean(resB)
-		fnRecord(num2+1, strB, resB, boolB)
+		fnRecord(num2+3, strB, resB, boolB)
 	} catch (e) {
-		fnRecord(num2+1, strB, e.name, zB0)
+		fnRecord(num2+3, strB, e.name, zB0)
 	}
 	// specific
 	let strC = "[buildID] navigator", boolC = false
@@ -907,7 +959,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 56,
+	expected = 58,
 	bLog = false,
 	devLog = false
 
@@ -951,7 +1003,7 @@ setTimeout(function() {
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
 	get_nav_screen(150)
-	get_js_client_hints(320, "[JS] client hints")
+	get_js_client_hints(320, "[js] client hints")
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 	get_nav_values(100, 400, 700) // 100 expected, 400 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
