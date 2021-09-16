@@ -815,6 +815,11 @@ function get_nav_values(num1, num2, num3) {
 		fnRecord(numV, strV, e.name, zB0)
 	}
 
+	// navigator.webkitTemporaryStorage.queryUsageAndQuota
+		// "TypeError: can't access property "queryUsageAndQuota", navigator.webkitTemporaryStorage is undefined"
+	// navigator.webkitPersistentStorage.queryUsageAndQuota
+		// "TypeError: can't access property "queryUsageAndQuota", navigator.webkitPersistentStorage is undefined"
+
 	// specific
 	let strX = "[buildID] navigator", boolX = false
 	try {
@@ -961,6 +966,31 @@ function get_window_chrome(num, title) {
 	}
 }
 
+function get_window_values(num) {
+	//window.offscreenBuffering
+	let strB = "[offscreenBuffering] window", boolB = false
+	try {
+		let resB = window.offscreenBuffering
+		if (resB == undefined) {boolB = true}
+		resB = fnClean(resB)
+		fnRecord(num, strB, resB, boolB)
+	} catch(e) {
+		fnRecord(num, strB, e.name, zB0)
+	}
+	// window.openDatabase
+	let strO = "[openDatabase] window", boolO = false
+	try {
+		window.openDatabase("test", "1.0", "test", 1024)
+		fnRecord(num+2, strO, "success", boolO)
+	} catch(e) {
+		if (e.name == "TypeError" && e.message == "window.openDatabase is not a function") {
+			fnRecord(num+2, strO, e.name, true)
+		} else {
+			fnRecord(num+2, strO, e.name, zB0)
+		}
+	}
+}
+
 function get_window_moz(num) {
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
@@ -984,7 +1014,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 60,
+	expected = 62,
 	bLog = false,
 	devLog = false
 
@@ -1033,6 +1063,7 @@ setTimeout(function() {
 	get_nav_values(100, 400, 700) // 100 expected, 400-410 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
 	get_window_chrome(450, "[chrome] window")
+	get_window_values(460)
 	get_dates(620)
 	get_eval_length(630, "eval.toString().length")
 	get_intl_collator(650, "Intl.Collator")
