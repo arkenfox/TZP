@@ -265,14 +265,14 @@ function get_installtrigger(num) {
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
 		fnRecord(num, strA, resA, boolA)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num, strA, e.name, zB0)
 	}
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
 		let resB = "InstallTrigger" in window
 		fnRecord(num+1, strB, resB, resB)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0)
 	}
 	// FF61+
@@ -284,7 +284,7 @@ function get_installtrigger(num) {
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
 			fnRecord(num+2, strC, resC, boolC)
-		} catch (e) {
+		} catch(e) {
 			fnRecord(num+2, strC, e.name, zB0)
 		}
 	}
@@ -436,7 +436,6 @@ function get_intl_number_format(num, title) {
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		console.debug(e.message)
 		fnRecord(num, title, e.name, zB0)
 	}
 }
@@ -461,7 +460,6 @@ function get_intl_pluralrules(num, title) {
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		console.debug(e.message)
 		fnRecord(num, title, e.name, zB0)
 	}
 }
@@ -494,7 +492,7 @@ function get_js_client_hints(num, title) {
 	// TypeError can't access property "X", navigator.X is undefined
 	function output() {
 		if (res.length) {
-			console.debug(res)
+			console.log(res)
 			res.sort()
 			let hash = sha1(res.join())
 			fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, false)
@@ -693,7 +691,7 @@ function get_nav_screen(num) {
 		let resA = screen.left
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num, strA, e.name, zB0)
 	}
 	let strB = "[top] screen", boolB = false
@@ -701,7 +699,7 @@ function get_nav_screen(num) {
 		let resB = screen.top
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0)
 	}
 }
@@ -716,49 +714,78 @@ function get_nav_values(num1, num2, num3) {
 		} else if (resA == "undefined") {resA = "undefined string"
 		} else {boolA = true}
 		fnRecord(num1, strA, resA, boolA)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num1, strA, e.name, zB0)
 	}
+
 	// not expected
-	let strF = "[battery] navigator", boolF = false
-	let resF = []
+	// bluetooth
+	let strBT = "[bluetooth] navigator", boolBT = false, numBT = num2
 	try {
-		navigator.getBattery().then(function(battery) {
-			try {
-				resF.push(battery.level * 100 + "%")
-			} catch(e) {resF.push("error")}
-			try {
-				resF.push((battery.charging ? "": "not ") +"charging")
-			} catch(e) {resF.push("error")}
-			try {
-				resF.push(battery.chargingTime)
-			} catch(e) {resF.push("error")}
-			try {
-				resF.push(battery.dischargingTime) // not going to add eventlisteners
-			} catch(e) {resF.push("error")}
-			fnRecord(num2, strF, resF.join(", "), false)
-		})
-	} catch (e) {
-		if (e.name == "TypeError" && e.message == "navigator.getBattery is not a function") {
-			fnRecord(num2, strF, e.name, true)
+		let resBT = navigator.bluetooth
+		if (resBT == undefined) {
+			fnRecord(numBT, strBT, "undefined", true)
 		} else {
-			fnRecord(num2, strF, e.name, zB0)
+			try {
+				navigator.bluetooth.getAvailability().then(available => {
+					if (available) {
+						fnRecord(numBT, strBT, "supported", boolBT)
+					} else {
+						fnRecord(numBT, strBT, "not supported", boolBT)
+					}
+				})
+			} catch(e) {
+				fnRecord(numBT, strBT, e.name, zB0)
+			}
+		}
+	} catch(e) {
+		fnRecord(numBT, strBT, e.name, zB0)
+	}
+	// deviceMemory
+	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
+	try {
+		let resDM = navigator.deviceMemory
+		if (resDM == undefined) {boolDM = true}
+		resDM = fnClean(resDM)
+		fnRecord(numDM, strDM, resDM, boolDM)
+	} catch(e) {
+		fnRecord(numDM, strDM, e.name, zB0)
+	}
+	// getbattery
+	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
+	let resB = []
+	try {
+		// not going to add eventlisteners
+		navigator.getBattery().then(function(battery) {
+			try {resB.push(battery.level * 100 + "%")} catch(e) {resB.push("error")}
+			try {resB.push((battery.charging ? "": "not ") +"charging")} catch(e) {resB.push("error")}
+			try {resB.push(battery.chargingTime)} catch(e) {resB.push("error")}
+			try {resB.push(battery.dischargingTime)} catch(e) {resB.push("error")}
+			fnRecord(numB, strB, resB.join(", "), false)
+		})
+	} catch(e) {
+		if (e.name == "TypeError" && e.message == "navigator.getBattery is not a function") {
+			fnRecord(numB, strB, e.name, true)
+		} else {
+			fnRecord(numB, strN, e.name, zB0)
 		}
 	}
-	let strE = "[gpc] navigator", boolE = false
+	// globalprivacycontrol
+	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
-		let resE = navigator.globalPrivacyControl
-		if (resE == undefined) {boolE = true}
-		resE = fnClean(resE)
-		fnRecord(num2+1, strE, resE, boolE)
-	} catch (e) {
-		fnRecord(num2+1, strE, e.name, zB0)
+		let resG = navigator.globalPrivacyControl
+		if (resG == undefined) {boolG = true}
+		resG = fnClean(resG)
+		fnRecord(numG, strG, resG, boolG)
+	} catch(e) {
+		fnRecord(numG, strG, e.name, zB0)
 	}
-	let strK = "[keyboard] navigator"
+	// keyboard
+	let strK = "[keyboard] navigator", numK = num2+8
 	try {
 		let resK = navigator.keyboard
 		if (resK == undefined) {
-			fnRecord(num2+2, strK, "undefined", true)
+			fnRecord(numK, strK, "undefined", true)
 		} else {
 			let keys = []
 			let listK = ['Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
@@ -768,58 +795,56 @@ function get_nav_values(num1, num2, num3) {
 				'KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
 			resK.getLayoutMap().then(keyboardLayoutMap => {
 				listK.forEach(function(key) {
-					try {
-						keys.push(key +": "+ keyboardLayoutMap.get(key))
-					} catch(e) {
-						keys.push(key +": e.name")
-					}
+					try {keys.push(key +": "+ keyboardLayoutMap.get(key))} catch(e) {keys.push(key +": e.name")}
 				})
 				let hash = sha1(keys.join())
-				fnRecord(num2+2, strK, hash, false)
+				fnRecord(numK, strK, hash, false)
 			})
 		}
-	} catch (e) {
-		fnRecord(num2+2, strK, e.name, zB0)
+	} catch(e) {
+		fnRecord(numK, strK, e.name, zB0)
 	}
-	let strB = "[vendor] navigator", boolB = false
+	// vendor
+	let strV = "[vendor] navigator", boolV = false, numV = num2+10
 	try {
-		let resB = navigator.vendor
-		if (resB == "") {boolB = true}
-		resB = fnClean(resB)
-		fnRecord(num2+3, strB, resB, boolB)
-	} catch (e) {
-		fnRecord(num2+3, strB, e.name, zB0)
+		let resV = navigator.vendor
+		if (resV == "") {boolV = true}
+		resV = fnClean(resV)
+		fnRecord(numV, strV, resV, boolV)
+	} catch(e) {
+		fnRecord(numV, strV, e.name, zB0)
 	}
+
 	// specific
-	let strC = "[buildID] navigator", boolC = false
+	let strX = "[buildID] navigator", boolX = false
 	try {
-		let resC = navigator.buildID
-		if (resC == "20181001000000") {boolC = true} else {
-			resC = fnClean(resC)
+		let resX = navigator.buildID
+		if (resX == "20181001000000") {boolX = true} else {
+			resX = fnClean(resX)
 			// FF60-63: 14 digit number
 			// RFP60-63 = 20100101
 			if (!is64) {
-				let year = resC.slice(0,4)
-				if (resC.length == 14) {
+				let year = resX.slice(0,4)
+				if (resX.length == 14) {
 					if (year == "2018" || year == "2019") {
-						if (!isNaN(resC * 1)) {boolC = true}
+						if (!isNaN(resX * 1)) {boolX = true}
 					}
 				} else if (isRFP2) {
-					if (resC +"" == "20100101") {boolC = true}
+					if (resX == "20100101") {boolX = true}
 				}
 			}
 		}
-		fnRecord(num3, strC, resC, boolC)
-	} catch (e) {
-		fnRecord(num3, strC, e.name, zB0)
+		fnRecord(num3, strX, resX, boolX)
+	} catch(e) {
+		fnRecord(num3, strX, e.name, zB0)
 	}
-	let strD = "[productSub] navigator", boolD = false
+	let strY = "[productSub] navigator", boolY = false, numY = num3+2
 	try {
-		let resD = navigator.productSub
-		if (resD == "20100101") {boolD = true} else {resD = fnClean(resD)}
-		fnRecord(num3+1, strD, resD, boolD)
-	} catch (e) {
-		fnRecord(num3+1, strD, e.name, zB0)
+		let resY = navigator.productSub
+		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
+		fnRecord(numY, strY, resY, boolY)
+	} catch(e) {
+		fnRecord(numY, strY, e.name, zB0)
 	}
 }
 
@@ -855,13 +880,13 @@ function get_stacklength(num1, num2, num3) {
 	}
 	try {
 		recurse()
-	} catch (e) {
+	} catch(e) {
 		test1 = level
 	}
 	level = 0
 	try {
 		recurse()
-	} catch (e) {
+	} catch(e) {
 		// columnNumber
 		try {
 			let strCN = "[columnNumber] error", errCN = false
@@ -931,7 +956,7 @@ function get_window_chrome(num, title) {
 	try {
 		let bool = "chrome" in window
 		fnRecord(num, title, bool, !bool)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
 	}
 }
@@ -942,7 +967,7 @@ function get_window_moz(num) {
 		let resA = window.mozInnerScreenX
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num, strA, e.name, zB0)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
@@ -950,7 +975,7 @@ function get_window_moz(num) {
 		let resB = window.mozInnerScreenY
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
-	} catch (e) {
+	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0)
 	}
 }
@@ -959,7 +984,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 58,
+	expected = 60,
 	bLog = false,
 	devLog = false
 
@@ -1005,7 +1030,7 @@ setTimeout(function() {
 	get_nav_screen(150)
 	get_js_client_hints(320, "[js] client hints")
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
-	get_nav_values(100, 400, 700) // 100 expected, 400 not expected, 700-701 specific
+	get_nav_values(100, 400, 700) // 100 expected, 400-410 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
 	get_window_chrome(450, "[chrome] window")
 	get_dates(620)
