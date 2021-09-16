@@ -617,8 +617,8 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v65() { //65
 		try {let t = Intl.DateTimeFormat.supportedLocalesOf("ia")
-			if (t.length) {output(65)} else {v65a}
-		} catch(e) {v65a}
+			if (t.length) {output(65)} else {v65a()}
+		} catch(e) {v65a()}
 	}
 	function v65a() { //65
 		try {let t = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
