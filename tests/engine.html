@@ -638,7 +638,12 @@ function get_media_constraints(num, title) {
 		} else if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		// e.g. TB disables mediaDevices
+		if (e.name == "TypeError" && e.message == "navigator.mediaDevices is undefined") {
+			fnRecord(num, title, zNA +": disabled", zNA)
+		} else {
+			fnRecord(num, title, e.name, zB0)
+		}
 	}
 }
 
