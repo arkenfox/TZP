@@ -26,8 +26,9 @@ function get_navigator() {
 			try {
 				dnt = navigator.doNotTrack
 				if (isFF) {
-					if (dnt == undefined) {dnt = zB0}
-					if (dnt == 1) {dnt = zE}
+					if (dnt == 1) {dnt = zE
+					} else if (dnt == "unspecified") { // do nothing
+					} else {dnt = zB0}
 				}
 			} catch(e) {dnt = zB0}
 		} else {dnt = zNA}
