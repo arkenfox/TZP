@@ -511,22 +511,25 @@ function get_js_client_hints(num, title) {
 		let resB = navigator.userAgentData.brands
 		resB.forEach(function(object) {
 			let valueB = cleanup(object.version)
-			res.push(object.brand +": "+ valueB)
+			res.push("brands: "+ object.brand +": "+ valueB)
 		})
 	} catch(e) {}
 	try {
 		res.push("mobile: " + navigator.userAgentData.mobile)
 	} catch(e) {}
+	try {
+		res.push("platform: " + navigator.userAgentData.platform)
+	} catch(e) {}
 
 	try {
 		navigator
 			.userAgentData.getHighEntropyValues(
-			["architecture", "bitness", "brands", "mobile",, "platform", "platformVersion", "uaFullVersion"])
-			.then(ua => {
+				["architecture","bitness","brands","mobile","model","platform","platformVersion","uaFullVersion"]
+			).then(ua => {
 				const names = Object.keys(ua)
 				for (const k of names) {
 					let valueU = cleanup(ua[k])
-					res.push(k +": "+ valueU)
+					res.push("high entropy: "+ k +": "+ valueU)
 				}
 				output()
 			})
@@ -788,11 +791,13 @@ function get_nav_values(num1, num2, num3) {
 			fnRecord(numK, strK, "undefined", true)
 		} else {
 			let keys = []
-			let listK = ['Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma','Digit0',
-				'Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Equal',
-				'IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG','KeyH',
-				'KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT','KeyU',
-				'KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
+			// https://wicg.github.io/keyboard-map/
+			// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
+			let listK = ['Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma',
+				'Digit0','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9',
+				'Equal','IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG',
+				'KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT',
+				'KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
 			resK.getLayoutMap().then(keyboardLayoutMap => {
 				listK.forEach(function(key) {
 					try {keys.push(key +": "+ keyboardLayoutMap.get(key))} catch(e) {keys.push(key +": e.name")}
@@ -841,9 +846,30 @@ function get_nav_values(num1, num2, num3) {
 		}
 		fnRecord(num3, strX, resX, boolX)
 	} catch(e) {
+		console.debug(e.name, e.message)
 		fnRecord(num3, strX, e.name, zB0)
 	}
-	let strY = "[productSub] navigator", boolY = false, numY = num3+2
+	// DNT: FF: 1, unspecified
+	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
+	try {
+		let testDNT = navigator.doNotTrack
+		if (testDNT == 1 || testDNT == "unspecified") {
+			boolDNT = true
+		} else {
+			if (testDNT == "null") {testDNT = "null string"
+			} else if (testDNT == null) {testDNT = "null"
+			} else {testDNT = fnClean(testDNT)}
+		}
+		if (isFF && !boolDNT) {
+			fnRecord(numDNT, strDNT, testDNT, zB0)
+		} else {
+			fnRecord(numDNT, strDNT, testDNT, boolDNT)
+		}
+	} catch(e) {
+		fnRecord(numDNT, strDNT, e.name, zB0)
+	}
+
+	let strY = "[productSub] navigator", boolY = false, numY = num3+4
 	try {
 		let resY = navigator.productSub
 		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
@@ -938,13 +964,15 @@ function get_stacklength(num1, num2, num3) {
 }
 
 function get_storage_quota(num, title) {
-	// desktop
-		// FF/TB: 2147483648 (same in PB mode) <- tested back to FF60
-		// brave: 2147483648 (same in incognito and Tor window)
-		// opera: 310418104 normal
-		// opera: 521917312 private
-		// chrome: 1200238045593
-		// chrome: 485041940 incognito
+	// desktop unless stated
+		// FF/TB:     2147483648 (same in PB mode) <- tested back to FF60, also on android
+		// brave:     2147483648 (same in incognito and Tor window)
+		// opera:      310418104 normal
+		// opera:      521917312 private
+		// chrome: 1200238045593 normal
+		// chrome:   33076376370 normal android
+		// chrome:     485041940 incognito
+		// chrome:     204974075 incognito android
 	try {
 		navigator.storage.estimate().then(estimate => {
 			let quota = estimate.quota,
@@ -1014,7 +1042,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 62,
+	expected = 64,
 	bLog = false,
 	devLog = false
 
@@ -1054,6 +1082,7 @@ setTimeout(function() {
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
 	fnRecord(900, "header", "errors")
+	fnRecord(425, "the spanish inquisition", "<b><u>no one</u></b> expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
