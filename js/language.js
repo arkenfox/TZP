@@ -173,16 +173,16 @@ function get_lang_doc() {
 			try {
 				// language
 				if (item == 0) {return eval('navigator.languages')
-				} else if (item == 1) {return eval('navigator.language')
-				} else if (item == 2) {return eval('navigator.languages[0]')
-				} else if (item == 3) {return eval('Intl.Collator().resolvedOptions().locale')
-				} else if (item == 4) {return eval('Intl.DateTimeFormat().resolvedOptions().locale')
-				} else if (item == 5) {return eval('new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale')
-				} else if (item == 6) {return eval('new Intl.ListFormat(undefined).resolvedOptions().locale')
-				} else if (item == 7) {return eval('Intl.NumberFormat().resolvedOptions().locale')
-				} else if (item == 8) {return eval('new Intl.PluralRules().resolvedOptions().locale')
-				} else if (item == 9) {return eval('new Intl.RelativeTimeFormat().resolvedOptions().locale')
-				} else if (item == 10) {return "n/a"
+				} else if (item == 1) {return navigator.language
+				} else if (item == 2) {return navigator.languages[0]
+				} else if (item == 3) {return Intl.Collator().resolvedOptions().locale
+				} else if (item == 4) {return Intl.DateTimeFormat().resolvedOptions().locale
+				} else if (item == 5) {return new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
+				} else if (item == 6) {return new Intl.ListFormat(undefined).resolvedOptions().locale
+				} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
+				} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
+				} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
+				} else if (item == 10) {return new Intl.Segmenter().resolvedOptions().locale
 				} else if (item == 11) {return "n/a"
 				// timezone
 				} else if (item == 12) {
@@ -493,12 +493,15 @@ function get_lang_doc() {
 					// standard FF errors
 					let msg = ""
 					if (item == 5) {
-						// 1654116: DisplayNames: shipped 86+
+						// 1654116: shipped 86+
 						if (e.message == "Intl.DisplayNames is not a constructor" && isVer < 87) {msg = zNS}
 					} else if (item == 6 || item == 45) {
 						if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
 					} else if (item == 9|| item == 33 || item == 42) {
 						if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
+					} else if (item == 10) {
+						// 1423593: Segmenter: ToDo: add version check when shipped
+						if (e.message == "Intl.Segmenter is not a constructor") {msg = zNS}
 					} else if (item == 34 ) {
 						if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
 						if (e.message == "rtf.formatToParts is not a function" && isVer > 64 && isVer < 70) {msg = zNS}
@@ -542,10 +545,10 @@ function get_lang_doc() {
 				// combine 0-2
 				combo1 += (i == 0 ? "" : " | ") + result
 				if (i == 2) {dom.ldt2.innerHTML = combo1}
-			} else if (i < 10) {
-				// combine 3-9
+			} else if (i < 12) {
+				// combine 3-11
 				combo2 += (i == 3 ? "" : " | ") + result
-				if (i == 9) {dom.ldt9.innerHTML = combo2}
+				if (i == 10) {dom.ldt9.innerHTML = combo2} // display 3-10
 			} else if (i == 14) {
 				// hash multi-year timezone offsets
 				dom.ldt14.innerHTML = sha1(result)
@@ -562,17 +565,17 @@ function get_lang_doc() {
 		reshash.push("language:"+ lHash0)
 		//console.log("language", lHash0, res.slice(0,12))
 		if (isFF) {
-			if (lHash0 == "f118f627a051196ddc7cb3b005aac3b3f549e1e5") {
+			if (lHash0 == "4329b938f2a1f3f15591eed43e15d303388d7c9a") {
 				// DisplayNames supported
 				lHash0 += enUS_green +" [FF86+]"
-			} else if (lHash0 == "4a6ed35c7fba3d1bb488859f1bd85fdf015cad04") {
+			} else if (lHash0 == "620769481983f4eeafe144b61f3b7bbe5bc7dc1a") {
 				// ListFormat supported
 				lHash0 += enUS_green +" [FF78-85]"
-			} else if (lHash0 == "a36834b8d352b5991f677a417c277b32709ec979") {
+			} else if (lHash0 == "b65bfc8280697e09a57ca60dfbae75d1358a2d28") {
 				// RelativeTimeFormat supported
 				lHash0 += enUS_green +" [FF65-77]"
 			} else {
-				lHash0 += (lHash0 == "94d5c22a78d5d8886527e9dfef7c971bb2d3c31d" ? enUS_green +" [FF60-64]" : enUS_red)
+				lHash0 += (lHash0 == "2525dff5501daca5336cbc2c2d967278143838c2" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
 		}
 		dom.lHash0.innerHTML = lHash0

@@ -17,17 +17,17 @@ addEventListener("message", function(msg) {
 		let amWorker = true
 		try {
 			// language
-			if (item == 0) {return eval('navigator.languages')
-			} else if (item == 1) {return eval('navigator.language')
-			} else if (item == 2) {return eval('navigator.languages[0]')
-			} else if (item == 3) {return eval('Intl.Collator().resolvedOptions().locale')
-			} else if (item == 4) {return eval('Intl.DateTimeFormat().resolvedOptions().locale')
-			} else if (item == 5) {return eval('new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale')
-			} else if (item == 6) {return eval('new Intl.ListFormat(undefined).resolvedOptions().locale')
-			} else if (item == 7) {return eval('Intl.NumberFormat().resolvedOptions().locale')
-			} else if (item == 8) {return eval('new Intl.PluralRules().resolvedOptions().locale')
-			} else if (item == 9) {return eval('new Intl.RelativeTimeFormat().resolvedOptions().locale')
-			} else if (item == 10) {return "n/a"
+			if (item == 0) {return navigator.languages
+			} else if (item == 1) {return navigator.language
+			} else if (item == 2) {return navigator.languages[0]
+			} else if (item == 3) {return Intl.Collator().resolvedOptions().locale
+			} else if (item == 4) {return Intl.DateTimeFormat().resolvedOptions().locale
+			} else if (item == 5) {return new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
+			} else if (item == 6) {return new Intl.ListFormat(undefined).resolvedOptions().locale
+			} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
+			} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
+			} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
+			} else if (item == 10) {return return new Intl.Segmenter().resolvedOptions().locale
 			} else if (item == 11) {return "n/a"
 			// timezone
 			} else if (item == 12) {
@@ -344,6 +344,9 @@ addEventListener("message", function(msg) {
 					if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
 				} else if (item == 9|| item == 33 || item == 42) {
 					if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
+				} else if (item == 10) {
+					// 1423593: Segmenter: ToDo: add version check when shipped
+					if (e.message == "Intl.Segmenter is not a constructor") {msg = zNS}
 				} else if (item == 34 ) {
 					if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
 					if (e.message == "rtf.formatToParts is not a function" && isVer > 64 && isVer < 70) {msg = zNS}
