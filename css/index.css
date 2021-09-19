@@ -244,6 +244,12 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 	background-size: auto 100%;	background-repeat: no-repeat;	background-position: 10px 0px;
 }
 
+/* pointer event */
+#pointertarget {
+	z-index: 50;
+	display: block;
+}
+
 /*domrect*/
 #divrect {
   position: fixed;
