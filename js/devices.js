@@ -409,12 +409,15 @@ function get_plugins() {
 }
 
 function get_pointer_event() {
-	// note: dom.w3c_pointer_events.enabled = false leaves us in limbo
-	// pref removed in FF87
-	if (isTB && isVer < 87) {
-		dom.ptEHash.innerHTML = "n/a" + tb_green
+	// note: FF87 or lower: dom.w3c_pointer_events.enabled = false
+	if (window.PointerEvent == "undefined") {
+		dom.ptEHash.innerHTML = zNS
 		return
+	} else if (isTB && isVer < 87) {
+		dom.ptEHash.innerHTML = "n/a" + tb_green
+		// do not return because prefs can be changed
 	}
+
   let target = window.document.getElementById("pointertarget")
 	target.addEventListener("pointerover", (event) => {
 		// get data
@@ -444,10 +447,11 @@ function get_pointer_event() {
 			} else if (value == null) {value = null}
 			res.push(value)
 		}
-		let hash = sha1(res.join())
-		dom.ptEvent.innerHTML = res.join(" | ")
-
-	}, { once: true });
+		let notation = ""
+		if (isTB && isVer < 87) {notation = tb_red}
+		// ToDo: RFP notation
+		dom.ptEvent.innerHTML = res.join(" | ") + notation
+	})
 }
 
 function get_pointer_hover() {
