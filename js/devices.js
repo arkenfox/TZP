@@ -408,6 +408,48 @@ function get_plugins() {
 	})
 }
 
+function get_pointer_event() {
+	// note: dom.w3c_pointer_events.enabled = false leaves us in limbo
+	// pref removed in FF87
+	if (isTB && isVer < 87) {
+		dom.ptEHash.innerHTML = "n/a" + tb_green
+		return
+	}
+  let target = window.document.getElementById("pointertarget")
+	target.addEventListener("pointerover", (event) => {
+		// get data
+		let list = ['height','isPrimary','mozInputSource','pointerType',
+			'pressure','tangentialPressure','tiltX','tiltY','twist','width',]
+		let res = []
+		for (let i=0; i < list.length; i++) {
+			let value = ""
+			try {
+				if (i == 0) {value = event.height
+				} else if (i == 1) {value = event.isPrimary
+				} else if (i == 2) {value = event.mozInputSource
+				} else if (i == 3) {value = event.pointerType
+				} else if (i == 4) {value = event.pressure
+				} else if (i == 5) {value = event.tangentialPressure
+				} else if (i == 6) {value = event.tiltX
+				} else if (i == 7) {value = event.tiltY
+				} else if (i == 8) {value = event.twist
+				} else if (i == 9) {value = event.width
+				}
+			} catch(e) {
+				value = e.name
+			}
+			if (value == "") {
+			} else if (value == "undefined") {value = "undefined string"
+			} else if (value == undefined) {value = "undefined"
+			} else if (value == null) {value = null}
+			res.push(value)
+		}
+		let hash = sha1(res.join())
+		dom.ptEvent.innerHTML = res.join(" | ")
+
+	}, { once: true });
+}
+
 function get_pointer_hover() {
 	return new Promise(resolve => {
 		function get_mm(type, id) {
