@@ -1154,16 +1154,6 @@ function log_section(name, time1, data) {
 			gClick = true
 		}
 	}
-
-	// pointerevent listener
-	if (name == "devices") {
-		let ptest = (window.PointerEvent == "undefined" ? false : true)
-		if (pTest) {
-			get_pointer_event()
-		} else {
-			dom.ptEvent = zNA
-		}
-	}
 }
 
 /*** RUN ***/
@@ -1193,6 +1183,7 @@ function countJS(filename) {
 					gMethodsOnce.push("_global:resource:blocked")
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
 				}
+				get_pointer_event() // pointer eventlistener
 				outputSection("load")
 			})
 		})
