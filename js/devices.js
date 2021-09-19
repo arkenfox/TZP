@@ -411,14 +411,13 @@ function get_plugins() {
 function get_pointer_event() {
 	// note: FF87 or lower: dom.w3c_pointer_events.enabled = false
 	if (window.PointerEvent == "undefined") {
-		dom.ptEHash.innerHTML = zNS
+		dom.ptEvent.innerHTML = zNS
 		return
 	} else if (isTB && isVer < 87) {
-		dom.ptEHash.innerHTML = "n/a" + tb_green
+		dom.ptEvent.innerHTML = "n/a" + tb_green
 		// do not return because prefs can be changed
 	}
-
-  let target = window.document.getElementById("pointertarget")
+	let target = window.document.getElementById("pointertarget")
 	target.addEventListener("pointerover", (event) => {
 		// get data
 		let list = ['height','isPrimary','mozInputSource','pointerType',
