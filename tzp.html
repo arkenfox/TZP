@@ -166,8 +166,8 @@
 		<tr class="togOS1"><td>keyboard height</td><td class="c" id="kbh"></td></tr>
 		<tr class="togOS1"><td>toolbar height</td><td class="c" id="tbh"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
-		<tr><td colspan="2"><span class="no_color">code based on work by </span>
-			<a target="_blank" class="blue" href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
+			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
 			<span class="no_color">, </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a> <sup>2</sup>
@@ -299,10 +299,10 @@
 			<tr class="togE"><td>datetime</td><td class="c" id="wid6"></td></tr>
 			<tr class="togE"><td>textarea</td><td class="c" id="wid7"></td></tr>
 			<tr class="togE"><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">code based on work by </span>
-			<a target="_blank" class="blue" href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
-			<span class="no_color"> , </span>
-			<a target="_blank" class="blue" href="https://www.hackerfactor.com/blog/index.php?/archives/761-Exploiting-the-TOR-Browser.html">Dr. Neal Krawetz</a> <sup>2</sup>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
+			href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
+			<span class="no_color"> , </span><a target="_blank" class="blue"
+			href="https://www.hackerfactor.com/blog/index.php?/archives/761-Exploiting-the-TOR-Browser.html">Dr. Neal Krawetz</a> <sup>2</sup>
 			<span class="no_color"> and </span>
 			<a target="_blank" class="blue" href="https://github.com/earthlng/testpages">earthlng</a> <sup>3</sup></td></tr>
 	</table>
@@ -497,6 +497,11 @@
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp hardwareConcurrency</td><td class="c" id="nHWC"></td></tr>
 		<tr><td>[api] pointer event</td><td class="c" id="pointer"></td></tr>
+		<tr><td id="pointertarget"><span class="btn btn0" onClick="get_pointer_event()">[ mouse here ]</span>
+			<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxt">height<br>isPrimary<br>mozInputSource<br>pointerType<br>pressure<br>
+				tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
+			</div> &nbsp [data] pointer event <sup>1</sup></td><td class="c" id="ptEvent"></td></tr>
 		<tr><td>[css | matchMedia] any-hover | hover</td>
 			<td><span id="cssAH"></span> | <span id="cssH"></span> | <span class="c" id="mmH"></span></td></tr>
 		<tr><td>[css | matchMedia] any-pointer | pointer</td>
@@ -514,12 +519,13 @@
 		<tr><td>plugins</td><td class="c gc mono" id="plugins"></td></tr>
 		<tr><td>mimeTypes</td><td class="c gc mono" id="mimeTypes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">media.navigator.enabled &amp media.peerconnection.enabled<br></span></div>
+			<span class="ttxtx">media.navigator.enabled<br></span></div>
 			&nbsp media devices</td><td class="c mono" id="eMD"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
 			&nbsp speech engines</td><td class="c mono" id="sEngines"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td colspan="2"><span class="no_color">pointer code based on work by </span>
+			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke <sup>1</sup></a></td></tr>
 	</table>
 
 	<!--domrect-->
@@ -539,7 +545,8 @@
 		<tr><td>Range.getClientRects</td><td class="c mono" id="dr2"></td></tr>
 		<tr><td>Range.getBoundingClientRect</td><td class="c mono" id="dr3"></td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2" class="center"><a target="_blank" class="blue" href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
+		<tr><td colspan="2" class="center"><a target="_blank" class="blue"
+			href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
 		<tr><td colspan="2"><span class="no_color">domrect code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
@@ -701,8 +708,8 @@
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup>
 			<span class="no_color">, </span>
 			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>3</sup>
-			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>4</sup>
+			<span class="no_color"> and </span><a target="_blank" class="blue"
+				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>4</sup>
 		</td></tr>
 	</table>
 
