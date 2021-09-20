@@ -25,7 +25,7 @@
 		<col width="50%"><col width="50%">
 		<thead><tr><th colspan="2">engine</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">An eeny-weeny, teeny-weeny minuscule sample of the thousands of myriad ways engines differ.
+			<span class="no_color">An itsy-bitsy, teeny-weeny, minuscule sample of the thousands of myriad ways engines differ.
 			This test is tweaked for gecko [FF60+]: you want <span class="s9"> &#x2713 </span>'s. Anything different
 			<span class="bad"> &#x2716 </span> or blocked <span class="bad"> &#x25cf </span> only makes you stand out.
 			</span>
@@ -663,6 +663,39 @@ function get_media_constraints(num, title) {
 	}
 }
 
+function get_mimetypes(num, title) {
+	try {
+		if ("mimeTypes" in navigator) {
+			let res = [], bool = false, isFlash = false
+			let m = navigator.mimeTypes
+			if (m.length == 0) {
+				fnRecord(num, title, "none", true)
+			} else {
+				for (let i=0; i < m.length; i++) {
+					res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
+						+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes) )
+				}
+				res.sort()
+				// FF84 or lower allow just Flash
+				if (isFF && !is85 && res.length == 2) {
+					let mime1 = res[0].split(":")[0]
+					let mime2 = res[1].split(":")[0]
+					if (mime1 == "application/x-futuresplash" && mime2 == "application/x-shockwave-flash") {
+						bool = true; isFlash = true
+					}
+				}
+				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
+				if (isFlash) {hash = "flash detected [FF84 or lower]"}
+				fnRecord(num, title, hash, bool)
+			}
+		} else {
+			fnRecord(num, title, e.name, zB0)
+		}
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
 function get_nav_keys(num1, num2, title) {
 	try {
 		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -903,6 +936,35 @@ function get_permission(num, title) {
 	}
 }
 
+function get_plugins(num, title) {
+	try {
+		if ("plugins" in navigator) {
+			let res = [], bool = false, isFlash = false
+			let p = navigator.plugins
+			if (p.length == 0) {
+				fnRecord(num, title, "none", true)
+			} else {
+				for (let i=0; i < p.length; i++) {
+					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
+						+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
+				}
+				res.sort()
+				// FF84 or lower allow just Flash
+				if (isFF && !is85 && res.length == 1) {
+					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true; isFlash = true}
+				}
+				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
+				if (isFlash) {hash = "only flash detected [FF84 or lower]"}
+				fnRecord(num, title, hash, bool)
+			}
+		} else {
+			fnRecord(num, title, e.name, zB0)
+		}
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
+	}
+}
+
 function get_stacklength(num1, num2, num3) {
 	let level = 0, test1 = 0
 	function recurse() {
@@ -1038,19 +1100,12 @@ function get_window_moz(num) {
 	}
 }
 
-let results = [],
-	itemnumbers = [],
-	data = {},
-	count = 0,
-	expected = 64,
-	bLog = false,
-	devLog = false
-
 let is61 = false,
 	is64 = false,
 	is65 = false,
 	is70 = false,
 	is78 = false,
+	is85 = false,
 	is86 = false,
 	isRFP2 = false
 // set some FF variables
@@ -1058,6 +1113,13 @@ if (isFF) {
 	fnRFP()
 	// 86
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
+	// 85
+	try {
+		let des = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
+		let t = des.get.call("/a")
+	} catch(e) {
+		if ((e.message).substring(0,3) == "Reg") {is85 = true}
+	}
 	// 78
 	try {
 		let regex78b = new RegExp('b')
@@ -1076,13 +1138,21 @@ if (isFF) {
 	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
 }
 
+let results = [],
+	itemnumbers = [],
+	data = {},
+	count = 0,
+	expected = 66,
+	bLog = false,
+	devLog = false
+
 setTimeout(function() {
 	fnRecord(0, "header", "expected")
 	fnRecord(300, "header", "not expected")
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
 	fnRecord(900, "header", "errors")
-	fnRecord(425, "the spanish inquisition", "<b><u>no one</u></b> expects the spanish inquisition", true)
+	fnRecord(440, "the spanish inquisition", "<b><u>no one</u></b> expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
@@ -1091,6 +1161,8 @@ setTimeout(function() {
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 	get_nav_values(100, 400, 700) // 100 expected, 400-410 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
+	get_mimetypes(370, "mimetypes")
+	get_plugins(430, "plugins")
 	get_window_chrome(450, "[chrome] window")
 	get_window_values(460)
 	get_dates(620)
