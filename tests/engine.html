@@ -114,7 +114,7 @@ function fnDisplay() {
 				let nextitem = results[i+1].split("~~~")[1].trim()
 				if (nextitem == "header") {sectionspace = "<br>"}
 			}
-			if (bNum) {desc = desc + s16 +" "+ order +""+ sc}
+			if (bNum) {desc = desc + s16 +" "+ order + sc}
 			display.push(desc + match +" "+ result + sectionspace)
 		}
 	}
@@ -273,9 +273,9 @@ function get_eval_length(num, title) {
 
 function get_iframe_props(num1, num2, title) {
 	// just a small sample
-	let expected = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
+	let listE = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
 		'mozInnerScreenY','netscape','onmozfullscreenchange','onmozfullscreenerror']
-	let unexpected = ['BatteryManager','HID','Keyboard','Lock','MIDIAccess','Serial',
+	let listU = ['BatteryManager','HID','Keyboard','Lock','MIDIAccess','Serial',
 		'USB','WakeLock','WebKitMutationObserver','XRAnchor','chrome','webkitCancelAnimationFrame',
 		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
@@ -294,7 +294,7 @@ function get_iframe_props(num1, num2, title) {
 		iframe.parentNode.removeChild(iframe)
 		props.sort()
 		// expected
-		let arrayE = props.filter(x => expected.includes(x))
+		let arrayE = props.filter(x => listE.includes(x))
 		let resE = "", boolE = false
 		if (arrayE.length) {
 			resE = sha1(arrayE.join()) + s3 +" ["+ arrayE.length +"]"+ sc
@@ -304,7 +304,7 @@ function get_iframe_props(num1, num2, title) {
 		}
 		fnRecord(num1, title, resE, boolE)
 		// unexpected
-		let arrayU = props.filter(x => unexpected.includes(x))
+		let arrayU = props.filter(x => listU.includes(x))
 		let resU = "", boolU = false
 		if (arrayU.length) {
 			resU = sha1(arrayU.join()) + s3 +" ["+ arrayU.length +"]"+ sc
