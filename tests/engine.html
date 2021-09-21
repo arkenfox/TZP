@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=600">
+	<meta name="viewport" content="width=620">
 	<title>engine</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 580px;}
+		table {width: 600px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 		hr {color: #dcc18c}
 	</style>
@@ -40,6 +40,7 @@
 
 s3 = s3.trim()
 s14 = s14.trim()
+s16 = s16.trim()
 sb = sb.trim()
 sg = sg.trim()
 
@@ -74,7 +75,7 @@ function fnClean(str) {
 function fnDisplay() {
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
-	for (const k of names) {results.push(data[k])}
+	for (const k of names) {results.push(k +"~~~"+ data[k])}
 	let display = [],
 		errcount = 0
 	let countTrue = 0, countFalse = 0, countBlock = 0, countNA = 0
@@ -85,9 +86,10 @@ function fnDisplay() {
 	// parse for pretty output
 	for (let i=0; i < results.length; i++) {
 		let pad = 29
-		let desc = results[i].split("~~~")[0].trim(),
-			result = results[i].split("~~~")[1],
-			match = results[i].split("~~~")[2]
+		let order = results[i].split("~~~")[0],
+			desc = results[i].split("~~~")[1].trim(),
+			result = results[i].split("~~~")[2],
+			match = results[i].split("~~~")[3]
 		if (desc == "header") {
 			let note = ""
 			if (result == "errors") {
@@ -109,9 +111,10 @@ function fnDisplay() {
 			desc = s3 + desc.padStart(pad) + sc
 			let sectionspace = ""
 			if (i+1 < results.length) {
-				let nextitem = results[i+1].split("~~~")[0].trim()
+				let nextitem = results[i+1].split("~~~")[1].trim()
 				if (nextitem == "header") {sectionspace = "<br>"}
 			}
+			if (bNum) {desc = desc + s16 +" "+ order +""+ sc}
 			display.push(desc + match +" "+ result + sectionspace)
 		}
 	}
@@ -135,10 +138,6 @@ function fnRecord(order, description, result, match) {
 	count ++
 	itemnumbers.push(order +" "+ description)
 	if (count == expected) {
-		if (devLog) {
-			itemnumbers.sort()
-			console.log(itemnumbers)
-		}
 		fnDisplay()
 	}
 	if (count > expected) {console.error(count, "expected count too low")}
@@ -219,6 +218,19 @@ function get_dates(num) {
 	}
 }
 
+function get_doc_values(num, title) {
+	let strFS = "[mozFullScreen] "+ title
+	try {
+		// FF expected true/false
+		let boolFS = false
+		let testFS = document.mozFullScreenEnabled
+		if (testFS == true || testFS == false) {boolFS = true} else {fnClean(testFS)}
+		fnRecord(num, strFS, testFS, boolFS)
+	} catch(e) {
+		fnRecord(num, strFS, e.name, zB0)
+	}
+}
+
 function get_errors(num) {
 	let tests = [
 		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value"],
@@ -256,6 +268,55 @@ function get_eval_length(num, title) {
 		fnRecord(num, title, test, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0)
+	}
+}
+
+function get_iframe_props(num1, num2, title) {
+	// just a small sample
+	let expected = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
+		'mozInnerScreenY','netscape','onmozfullscreenchange','onmozfullscreenerror']
+	let unexpected = ['BatteryManager','HID','Keyboard','Lock','MIDIAccess','Serial',
+		'USB','WakeLock','WebKitMutationObserver','XRAnchor','chrome','webkitCancelAnimationFrame',
+		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
+		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
+	try {
+		// create & append iframe
+		let id = "iframe-window-version"
+		let el = document.createElement("iframe")
+		el.setAttribute("id", id)
+		el.setAttribute('style', 'display: none')
+		document.body.appendChild(el)
+		// get props
+		let iframe = document.getElementById(id)
+		let contentWindow = iframe.contentWindow
+		let props = Object.getOwnPropertyNames(contentWindow)
+		// remove iframe
+		iframe.parentNode.removeChild(iframe)
+		props.sort()
+		// expected
+		let arrayE = props.filter(x => expected.includes(x))
+		let resE = "", boolE = false
+		if (arrayE.length) {
+			resE = sha1(arrayE.join()) + s3 +" ["+ arrayE.length +"]"+ sc
+			if (arrayE.length > 4) {boolE = true}
+		} else {
+			resE = "none"
+		}
+		fnRecord(num1, title, resE, boolE)
+		// unexpected
+		let arrayU = props.filter(x => unexpected.includes(x))
+		let resU = "", boolU = false
+		if (arrayU.length) {
+			resU = sha1(arrayU.join()) + s3 +" ["+ arrayU.length +"]"+ sc
+		} else {
+			resU = "none"
+			boolU = true
+		}
+		fnRecord(num2, title, resU, boolU)
+	} catch(e) {
+		console.debug(e.name, e.message)
+		fnRecord(num1, title, e.type, zB0)
+		fnRecord(num2, title, e.type, zB0)
 	}
 }
 
@@ -1142,9 +1203,9 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 66,
+	expected = 69,
 	bLog = false,
-	devLog = false
+	bNum = false // display numbering
 
 setTimeout(function() {
 	fnRecord(0, "header", "expected")
@@ -1161,6 +1222,8 @@ setTimeout(function() {
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 	get_nav_values(100, 400, 700) // 100 expected, 400-410 not expected, 700-701 specific
 	get_window_moz(250) // 250-251
+	get_doc_values(380, "document")
+	get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected, 
 	get_mimetypes(370, "mimetypes")
 	get_plugins(430, "plugins")
 	get_window_chrome(450, "[chrome] window")
