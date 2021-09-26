@@ -27,7 +27,7 @@ addEventListener("message", function(msg) {
 			} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
 			} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
 			} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
-			} else if (item == 10) {return return new Intl.Segmenter().resolvedOptions().locale
+			} else if (item == 10) {return new Intl.Segmenter().resolvedOptions().locale
 			} else if (item == 11) {return "n/a"
 			// timezone
 			} else if (item == 12) {
