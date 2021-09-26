@@ -225,6 +225,7 @@ var list = [
 "ru,russian",
 "rw,kinyarwanda",
 "sa,sanskrit",
+"sat,santali", // 1731528
 "sc,sardinian",
 "sco,scots", // 1714293
 "sd,sindhi",
@@ -408,6 +409,7 @@ function legend() {
 	// build once
 	if (aLegend.length == 0) {
 		list.sort()
+		let aCanonical = []
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
@@ -419,7 +421,20 @@ function legend() {
 				aLegendSupported.push(code.padStart(7) +": "+ name)
 			}
 			aLegend.push(code.padStart(7) +": "+ name)
+			// testing
+			try {
+				aCanonical.push(code +": "+ Intl.getCanonicalLocales(code))
+			} catch(e) {
+				aCanonical.push(code +": "+ e.name)
+			}
 		}
+		// testing
+		console.log(sha1(aCanonical.join()))
+		console.log(aCanonical.join("\n"))
+		// FF60-69 : f0a110f5d84c34f13bc8a255d5cb8e5efb446a43 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
+		// FF70-90 : 38b9f79f5661b68285bfc552609da913d0969567 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
+		// FF91+   : 45a1ca5e49e32da595ce045e2378da23b8165774 : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
+		// blink   : cfc37d7e331d37aef49539d54187c9fa4566661a : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
 	}
 	// output
 	useSupportedOnly = dom.supported.checked
