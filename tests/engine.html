@@ -305,6 +305,8 @@ function get_iframe_props(num1, num2, title) {
 		fnRecord(num1, title, resE, boolE)
 		// unexpected
 		let arrayU = props.filter(x => listU.includes(x))
+		// ignore BatteryManager if FF < 72
+		if (isFF && !is72) {arrayU = arrayU.filter(x => !["BatteryManager"].includes(x))}
 		let resU = "", boolU = false
 		if (arrayU.length) {
 			resU = sha1(arrayU.join()) + s3 +" ["+ arrayU.length +"]"+ sc
@@ -314,7 +316,6 @@ function get_iframe_props(num1, num2, title) {
 		}
 		fnRecord(num2, title, resU, boolU)
 	} catch(e) {
-		console.debug(e.name, e.message)
 		fnRecord(num1, title, e.type, zB0)
 		fnRecord(num2, title, e.type, zB0)
 	}
@@ -348,6 +349,29 @@ function get_installtrigger(num) {
 		} catch(e) {
 			fnRecord(num+2, strC, e.name, zB0)
 		}
+	}
+}
+
+function get_intl_canonical_locale(num, title) {
+	let list = ["bh","hye","no","tl","tw"], bool = false
+	try {
+		let res = []
+		list.forEach(function(i) {
+			res.push(i +": "+ Intl.getCanonicalLocales(i))
+		})
+		let hash = sha1(res.join())
+		if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {bool = true // FF91+
+		} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {bool = true // FF70-90
+		} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {bool = true // FF60-69
+		}
+		console.log(res.join("\n"))
+		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
+		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
+		// FF91+   : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
+		// blink   : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
+		fnRecord(num, title, hash, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0)
 	}
 }
 
@@ -940,7 +964,6 @@ function get_nav_values(num1, num2, num3) {
 		}
 		fnRecord(num3, strX, resX, boolX)
 	} catch(e) {
-		console.debug(e.name, e.message)
 		fnRecord(num3, strX, e.name, zB0)
 	}
 	// DNT: FF: 1, unspecified
@@ -1165,6 +1188,7 @@ let is61 = false,
 	is64 = false,
 	is65 = false,
 	is70 = false,
+	is72 = false,
 	is78 = false,
 	is85 = false,
 	is86 = false,
@@ -1186,6 +1210,12 @@ if (isFF) {
 		let regex78b = new RegExp('b')
 		if (regex78b.dotAll == false) {is78 = true}
 	} catch(e) {}
+	// 72
+	try {
+		let t = newFn('let a = 100_00_;')
+	} catch(e) {
+		if (e.message.substring(0,6) == "unders") {is72 = true}
+	}
 	// 70
 	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
 	// 65
@@ -1203,7 +1233,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 69,
+	expected = 70,
 	bLog = false,
 	bNum = false // display numbering
 
@@ -1233,6 +1263,7 @@ setTimeout(function() {
 	get_intl_collator(650, "Intl.Collator")
 	get_intl_dtf(656, "Intl.DateTimeFormat")
 	get_intl_display_names(660, "Intl.DislayNames")
+	get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
 	get_intl_list_format(663, "Intl.ListFormat")
 	get_intl_number_format(666, "Intl.NumberFormat")
 	get_intl_pluralrules(670, "Intl.PluralRules")
