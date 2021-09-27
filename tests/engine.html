@@ -132,11 +132,14 @@ function fnDisplay() {
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
 
-function fnRecord(order, description, result, match) {
+function fnRecord(order, description, result, match, error) {
 	order = (order+"").padStart(3,"0")
 	data[order] = description +"~~~"+ result +"~~~"+ match
 	count ++
 	itemnumbers.push(order +" "+ description)
+	if (error !== undefined) {
+		console.error(order, result, error)
+	}
 	if (count == expected) {
 		fnDisplay()
 	}
@@ -159,13 +162,12 @@ function get_canvaskeys(num) {
 		}
 		fnRecord(num, strT, resT, testT)
 	} catch(e) {
-		fnRecord(num, strT, e.name, zB0)
+		fnRecord(num, strT, e.name, zB0, e.message)
 	}
 }
 
 function get_dates(num) {
 	// 1274354: meta
-
 	// 1557650
 	let strA = "[5 digit year] new Date"
 	try {
@@ -174,7 +176,7 @@ function get_dates(num) {
 		if (!bolA) {resA = fnTrim(resA.toString(), 40)}
 		fnRecord(num, strA, resA, bolA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0)
+		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	// 1515318
 	let strB = "[hyphen] new Date"
@@ -186,7 +188,7 @@ function get_dates(num) {
 		} else if (!is64 && isNaN(resB)) {bolB = true}
 		fnRecord(num+1, strB, resB, bolB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0)
+		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 	// 1439800
 	let strC = "[string] new Data"
@@ -196,7 +198,7 @@ function get_dates(num) {
 		if (!bolC) {resC = fnTrim(resC.toString(), 40)}
 		fnRecord(num+2, strC, resC, bolC)
 	} catch(e) {
-		fnRecord(num+2, strC, e.name, zB0)
+		fnRecord(num+2, strC, e.name, zB0, e.message)
 	}
 	// 1599375
 	let strD = "[+0000 UTC] Date.parse"
@@ -205,7 +207,7 @@ function get_dates(num) {
 		let bolD = isNaN(resD) ? true : false
 		fnRecord(num+3, strD, resD, bolD)
 	} catch(e) {
-		fnRecord(num+3, strD, e.name, zB0)
+		fnRecord(num+3, strD, e.name, zB0, e.message)
 	}
 	// 1730155
 	let strE = "[localized] Date.parse"
@@ -214,7 +216,7 @@ function get_dates(num) {
 		let bolE = isNaN(resE) ? true : false
 		fnRecord(num+4, strE, resE, bolE)
 	} catch(e) {
-		fnRecord(num+4, strE, e.name, zB0)
+		fnRecord(num+4, strE, e.name, zB0, e.message)
 	}
 }
 
@@ -227,7 +229,7 @@ function get_doc_values(num, title) {
 		if (testFS == true || testFS == false) {boolFS = true} else {fnClean(testFS)}
 		fnRecord(num, strFS, testFS, boolFS)
 	} catch(e) {
-		fnRecord(num, strFS, e.name, zB0)
+		fnRecord(num, strFS, e.name, zB0, e.message)
 	}
 }
 
@@ -267,7 +269,7 @@ function get_eval_length(num, title) {
 		if (test == 37) {bool = true}
 		fnRecord(num, title, test, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -302,7 +304,6 @@ function get_iframe_props(num1, num2, title) {
 		} else {
 			resE = "none"
 		}
-		fnRecord(num1, title, resE, boolE)
 		// unexpected
 		let arrayU = props.filter(x => listU.includes(x))
 		// ignore BatteryManager if FF < 72
@@ -314,10 +315,12 @@ function get_iframe_props(num1, num2, title) {
 			resU = "none"
 			boolU = true
 		}
+		// record
+		fnRecord(num1, title, resE, boolE)
 		fnRecord(num2, title, resU, boolU)
 	} catch(e) {
-		fnRecord(num1, title, e.type, zB0)
-		fnRecord(num2, title, e.type, zB0)
+		fnRecord(num1, title, e.type, zB0, e.message)
+		fnRecord(num2, title, e.type, zB0, e.message)
 	}
 }
 
@@ -328,14 +331,14 @@ function get_installtrigger(num) {
 		if (resA == "object") {boolA = true}
 		fnRecord(num, strA, resA, boolA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0)
+		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
 		let resB = "InstallTrigger" in window
 		fnRecord(num+1, strB, resB, resB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0)
+		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 	// FF61+
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
@@ -347,14 +350,14 @@ function get_installtrigger(num) {
 			if (resC == "function") {boolC = true}
 			fnRecord(num+2, strC, resC, boolC)
 		} catch(e) {
-			fnRecord(num+2, strC, e.name, zB0)
+			fnRecord(num+2, strC, e.name, zB0, e.message)
 		}
 	}
 }
 
 function get_intl_canonical_locale(num, title) {
-	let list = ["bh","hye","no","tl","tw"], bool = false
 	try {
+		let list = ["bh","hye","no","tl","tw"], bool = false
 		let res = []
 		list.forEach(function(i) {
 			res.push(i +": "+ Intl.getCanonicalLocales(i))
@@ -364,37 +367,37 @@ function get_intl_canonical_locale(num, title) {
 		} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {bool = true // FF70-90
 		} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {bool = true // FF60-69
 		}
-		console.log(res.join("\n"))
 		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
 		// FF91+   : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
 		// blink   : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
+		// webkit  : bh=bh,  hye=hy,  no=no, tl=tl,  tw=tw
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
 function get_intl_collator(num, title) {
-	// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
-	// 24 chars: approx 40ms
-	let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
-		'ka','kk','ln','lo','mt','no','om','pa','se','sq','to','wo',]
-	let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
-		'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
-		'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
-	let res = [], unique = [], same = []
-	// webkit has everything FF does for collation that can be detected
-	// except in FF70+, no (same as fo), so swap that out
-	if (!is70 && isFF) {
-		list.push("fo")
-		list = list.filter(x => !["no"].includes(x))
-	}
-	list.sort()
-	chars.sort() // reset
-	let control = sha1(chars.sort(Intl.Collator(undefined).compare))
-	let bool = false
 	try {
+		// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
+		// 24 chars: approx 40ms
+		let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
+			'ka','kk','ln','lo','mt','no','om','pa','se','sq','to','wo',]
+		let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
+			'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
+			'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
+		let res = [], unique = [], same = []
+		// webkit has everything FF does for collation that can be detected
+		// except in FF70+, no (same as fo), so swap that out
+		if (!is70 && isFF) {
+			list.push("fo")
+			list = list.filter(x => !["no"].includes(x))
+		}
+		list.sort()
+		chars.sort() // reset
+		let control = sha1(chars.sort(Intl.Collator(undefined).compare))
+		let bool = false
 		list.forEach(function(i) {
 			chars.sort() // reset
 			chars.sort(Intl.Collator(i).compare)
@@ -414,7 +417,7 @@ function get_intl_collator(num, title) {
 		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -426,14 +429,14 @@ function get_intl_display_names(num, title) {
 		// FF85-: TypeError: Intl.DisplayNames is undefined
 		if (isFF) {
 			if (is86) {
-				fnRecord(num, title, e.name, zB0)
+				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				let msg = e.message
 				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
 				if (e.name == "TypeError" && msg == "Intl.DisplayNames is undefined") {
 					fnRecord(num, title, zNA +": FF86+ required", zNA)
 				} else {
-					fnRecord(num, title, e.name, zB0)
+					fnRecord(num, title, e.name, zB0, e.message)
 				}
 			}
 		} else {
@@ -443,20 +446,20 @@ function get_intl_display_names(num, title) {
 }
 
 function get_intl_dtf(num, title) {
-	// 78 locales supported in FF60+ not supported in blink: unique results
-	let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
-	let bool = false
-	let date = new Date("January 30, 2019 13:00:00"),
-		options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
-			minute: "numeric", second: "numeric", hour12: true}
-	let res = [], unique = [], same = []
-	if (!is70 && isFF) {
-		list.push("fo")
-		list = list.filter(x => !["no"].includes(x))
-	}
-	list.sort()
-	let control = Intl.DateTimeFormat(undefined, options).format(date)
 	try {
+		// 78 locales supported in FF60+ not supported in blink: unique results
+		let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
+		let bool = false
+		let date = new Date("January 30, 2019 13:00:00"),
+			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+				minute: "numeric", second: "numeric", hour12: true}
+		let res = [], unique = [], same = []
+		if (!is70 && isFF) {
+			list.push("fo")
+			list = list.filter(x => !["no"].includes(x))
+		}
+		list.sort()
+		let control = Intl.DateTimeFormat(undefined, options).format(date)
 		list.forEach(function(locale) {
 			let test = Intl.DateTimeFormat(locale, options).format(date)
 			unique.push(test)
@@ -474,7 +477,7 @@ function get_intl_dtf(num, title) {
 		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -486,14 +489,14 @@ function get_intl_list_format(num, title) {
 		// FF77-: TypeError: Intl.ListFormat is undefined
 		if (isFF) {
 			if (is78) {
-				fnRecord(num, title, e.name, zB0)
+				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				let msg = e.message
 				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
 				if (e.name == "TypeError" && msg == "Intl.ListFormat is undefined") {
 					fnRecord(num, title, zNA +": FF78+ required", zNA)
 				} else {
-					fnRecord(num, title, e.name, zB0)
+					fnRecord(num, title, e.name, zB0, e.message)
 				}
 			}
 		} else {
@@ -521,7 +524,7 @@ function get_intl_number_format(num, title) {
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -545,7 +548,7 @@ function get_intl_pluralrules(num, title) {
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -557,12 +560,12 @@ function get_intl_rtf(num, title) {
 		// FF64-: TypeError: Intl.RelativeTimeFormat is undefined
 		if (isFF) {
 			if (is65) {
-				fnRecord(num, title, e.name, zB0)
+				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				if (e.name == "TypeError" && e.message == "Intl.RelativeTimeFormat is undefined") {
 					fnRecord(num, title, zNA +": FF65+ required", zNA)
 				} else {
-					fnRecord(num, title, e.name, zB0)
+					fnRecord(num, title, e.name, zB0, e.message)
 				}
 			}
 		} else {
@@ -605,7 +608,6 @@ function get_js_client_hints(num, title) {
 	try {
 		res.push("platform: " + navigator.userAgentData.platform)
 	} catch(e) {}
-
 	try {
 		navigator
 			.userAgentData.getHighEntropyValues(
@@ -624,34 +626,34 @@ function get_js_client_hints(num, title) {
 }
 
 function get_locale_compare(num, title) {
-	let bool = false
-	let list = [
-		["az","\u00F6","\u1EE3"],
-		["cy","n","ng"],
-		["dsb","\u0144","\u00F1"],
-		["ee","ts","tt"],
-		["eo","\u0109","\u00E7\a"],
-		["gl","\u00F1","ng"],
-		["ha","ts","tt"],
-		["haw","\u00F0","\u00EB"],
-		["hsb","\u0107","\u0109"],
-		["ig","c","ch"],
-		["ka","\u0107","\u10D0"],
-		["kk","r","\u0453"],
-		["ln","\u1D95","\u025B"],
-		["lo","\u0107","\u0E9A"],
-		["mt","c","C"],
-		["no","\u00F6","\u1EE3"],
-		["om","ch","\u00ED"],
-		["pa","\u0107","\u0649"],
-		["se","\u00F6","\u1EE3"],
-		["sq","\u00EB","ez"],
-		["to","\u00ED","\u00EE"],
-		["wo","\u00EB","ez"],
-	]
-	let res = [], same = []
-	// webkit: see intl.collator notes: swap "fo" with "no" FF70+
 	try {
+		let bool = false
+		let list = [
+			["az","\u00F6","\u1EE3"],
+			["cy","n","ng"],
+			["dsb","\u0144","\u00F1"],
+			["ee","ts","tt"],
+			["eo","\u0109","\u00E7\a"],
+			["gl","\u00F1","ng"],
+			["ha","ts","tt"],
+			["haw","\u00F0","\u00EB"],
+			["hsb","\u0107","\u0109"],
+			["ig","c","ch"],
+			["ka","\u0107","\u10D0"],
+			["kk","r","\u0453"],
+			["ln","\u1D95","\u025B"],
+			["lo","\u0107","\u0E9A"],
+			["mt","c","C"],
+			["no","\u00F6","\u1EE3"],
+			["om","ch","\u00ED"],
+			["pa","\u0107","\u0649"],
+			["se","\u00F6","\u1EE3"],
+			["sq","\u00EB","ez"],
+			["to","\u00ED","\u00EE"],
+			["wo","\u00EB","ez"],
+		]
+		let res = [], same = []
+		// webkit: see intl.collator notes: swap "fo" with "no" FF70+
 		list.forEach(function(item) {
 			let code = item[0]
 			if (!is70 && isFF && code == "no") {code = "fo"} // isFF only
@@ -670,7 +672,7 @@ function get_locale_compare(num, title) {
 		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true} // FF60-69
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -723,7 +725,7 @@ function get_math(num, title) {
 		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -743,7 +745,7 @@ function get_media_constraints(num, title) {
 		if (e.name == "TypeError" && e.message == "navigator.mediaDevices is undefined") {
 			fnRecord(num, title, zNA +": disabled", zNA)
 		} else {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zB0, e.message)
 		}
 	}
 }
@@ -774,10 +776,10 @@ function get_mimetypes(num, title) {
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zB0, e.message)
 		}
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -801,8 +803,8 @@ function get_nav_keys(num1, num2, title) {
 		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
 		fnRecord(num2, title, resNavCheckNotE, aNavCheckNotE.length ? false : true)
 	} catch(e) {
-		fnRecord(num1, title, e.name, zB0)
-		fnRecord(num2, title, e.name, zB0)
+		fnRecord(num1, title, e.name, zB0, e.message)
+		fnRecord(num2, title, e.name, zB0, e.message)
 	}
 }
 
@@ -813,7 +815,7 @@ function get_nav_screen(num) {
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0)
+		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	let strB = "[top] screen", boolB = false
 	try {
@@ -821,7 +823,7 @@ function get_nav_screen(num) {
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0)
+		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 }
 
@@ -836,7 +838,7 @@ function get_nav_values(num1, num2, num3) {
 		} else {boolA = true}
 		fnRecord(num1, strA, resA, boolA)
 	} catch(e) {
-		fnRecord(num1, strA, e.name, zB0)
+		fnRecord(num1, strA, e.name, zB0, e.message)
 	}
 
 	// not expected
@@ -856,11 +858,11 @@ function get_nav_values(num1, num2, num3) {
 					}
 				})
 			} catch(e) {
-				fnRecord(numBT, strBT, e.name, zB0)
+				fnRecord(numBT, strBT, e.name, zB0, e.message)
 			}
 		}
 	} catch(e) {
-		fnRecord(numBT, strBT, e.name, zB0)
+		fnRecord(numBT, strBT, e.name, zB0, e.message)
 	}
 	// deviceMemory
 	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
@@ -870,7 +872,7 @@ function get_nav_values(num1, num2, num3) {
 		resDM = fnClean(resDM)
 		fnRecord(numDM, strDM, resDM, boolDM)
 	} catch(e) {
-		fnRecord(numDM, strDM, e.name, zB0)
+		fnRecord(numDM, strDM, e.name, zB0, e.message)
 	}
 	// getbattery
 	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
@@ -888,7 +890,7 @@ function get_nav_values(num1, num2, num3) {
 		if (e.name == "TypeError" && e.message == "navigator.getBattery is not a function") {
 			fnRecord(numB, strB, e.name, true)
 		} else {
-			fnRecord(numB, strN, e.name, zB0)
+			fnRecord(numB, strB, e.name, zB0, e.message)
 		}
 	}
 	// globalprivacycontrol
@@ -899,7 +901,7 @@ function get_nav_values(num1, num2, num3) {
 		resG = fnClean(resG)
 		fnRecord(numG, strG, resG, boolG)
 	} catch(e) {
-		fnRecord(numG, strG, e.name, zB0)
+		fnRecord(numG, strG, e.name, zB0, e.message)
 	}
 	// keyboard
 	let strK = "[keyboard] navigator", numK = num2+8
@@ -925,7 +927,7 @@ function get_nav_values(num1, num2, num3) {
 			})
 		}
 	} catch(e) {
-		fnRecord(numK, strK, e.name, zB0)
+		fnRecord(numK, strK, e.name, zB0, e.message)
 	}
 	// vendor
 	let strV = "[vendor] navigator", boolV = false, numV = num2+10
@@ -935,7 +937,7 @@ function get_nav_values(num1, num2, num3) {
 		resV = fnClean(resV)
 		fnRecord(numV, strV, resV, boolV)
 	} catch(e) {
-		fnRecord(numV, strV, e.name, zB0)
+		fnRecord(numV, strV, e.name, zB0, e.message)
 	}
 
 	// navigator.webkitTemporaryStorage.queryUsageAndQuota
@@ -964,7 +966,7 @@ function get_nav_values(num1, num2, num3) {
 		}
 		fnRecord(num3, strX, resX, boolX)
 	} catch(e) {
-		fnRecord(num3, strX, e.name, zB0)
+		fnRecord(num3, strX, e.name, zB0, e.message)
 	}
 	// DNT: FF: 1, unspecified
 	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
@@ -978,12 +980,12 @@ function get_nav_values(num1, num2, num3) {
 			} else {testDNT = fnClean(testDNT)}
 		}
 		if (isFF && !boolDNT) {
-			fnRecord(numDNT, strDNT, testDNT, zB0)
+			fnRecord(numDNT, strDNT, testDNT, zB0, e.message)
 		} else {
 			fnRecord(numDNT, strDNT, testDNT, boolDNT)
 		}
 	} catch(e) {
-		fnRecord(numDNT, strDNT, e.name, zB0)
+		fnRecord(numDNT, strDNT, e.name, zB0, e.message)
 	}
 
 	let strY = "[productSub] navigator", boolY = false, numY = num3+4
@@ -992,7 +994,7 @@ function get_nav_values(num1, num2, num3) {
 		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
 		fnRecord(numY, strY, resY, boolY)
 	} catch(e) {
-		fnRecord(numY, strY, e.name, zB0)
+		fnRecord(numY, strY, e.name, zB0, e.message)
 	}
 }
 
@@ -1007,13 +1009,13 @@ function get_permission(num, title) {
 			if ((error.message).includes(userVis)) {
 				fnRecord(num, title, userVis, false)
 			} else {
-				fnRecord(num, title, error.name, zB0)
+				fnRecord(num, title, error.name, zB0, e.message)
 			}
 		})
 	} catch(e) {
 		// not supported in webkit: https://caniuse.com/?search=push%20permission
 		if ("chrome" in window || isFF) {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zB0, e.message)
 		} else {
 			fnRecord(num, title, "not supported", false)
 		}
@@ -1042,10 +1044,10 @@ function get_plugins(num, title) {
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zB0, e.message)
 		}
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -1071,7 +1073,7 @@ function get_stacklength(num1, num2, num3) {
 			let testCN = resCN == undefined? false : true
 			fnRecord(num1, strCN, resCN, testCN)
 		} catch(n) {
-			fnRecord(num1, strCN, resCN, zB0)
+			fnRecord(num1, strCN, resCN, zB0, e.message)
 		}
 		// fileName
 		try {
@@ -1081,7 +1083,7 @@ function get_stacklength(num1, num2, num3) {
 			let testFN = resFN == undefined? false : true
 			fnRecord(num1+1, strFN, resFN, testFN)
 		} catch(n) {
-			fnRecord(num1+1, strFN, resFN, zB0)
+			fnRecord(num1+1, strFN, resFN, zB0, e.message)
 		}
 		// lineNumber
 		try {
@@ -1090,7 +1092,7 @@ function get_stacklength(num1, num2, num3) {
 			let testLN = resLN == undefined? false : true
 			fnRecord(num1+2, strLN, resLN, testLN)
 		} catch(n) {
-			fnRecord(num1+2, strLN, resFN, zB0)
+			fnRecord(num1+2, strLN, resFN, zB0, e.message)
 		}
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
@@ -1127,7 +1129,7 @@ function get_storage_quota(num, title) {
 			fnRecord(num, title, quota, bool)
 		})
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -1136,7 +1138,7 @@ function get_window_chrome(num, title) {
 		let bool = "chrome" in window
 		fnRecord(num, title, bool, !bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
@@ -1149,7 +1151,7 @@ function get_window_values(num) {
 		resB = fnClean(resB)
 		fnRecord(num, strB, resB, boolB)
 	} catch(e) {
-		fnRecord(num, strB, e.name, zB0)
+		fnRecord(num, strB, e.name, zB0, e.message)
 	}
 	// window.openDatabase
 	let strO = "[openDatabase] window", boolO = false
@@ -1160,7 +1162,7 @@ function get_window_values(num) {
 		if (e.name == "TypeError" && e.message == "window.openDatabase is not a function") {
 			fnRecord(num+2, strO, e.name, true)
 		} else {
-			fnRecord(num+2, strO, e.name, zB0)
+			fnRecord(num+2, strO, e.name, zB0, e.message)
 		}
 	}
 }
@@ -1172,7 +1174,7 @@ function get_window_moz(num) {
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0)
+		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
@@ -1180,7 +1182,7 @@ function get_window_moz(num) {
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0)
+		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 }
 
@@ -1243,7 +1245,7 @@ setTimeout(function() {
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
 	fnRecord(900, "header", "errors")
-	fnRecord(440, "the spanish inquisition", "<b><u>no one</u></b> expects the spanish inquisition", true)
+	fnRecord(440, "the spanish inquisition", "no one expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	get_doc_values(10, "document")
 	get_installtrigger(50) // 50-52
