@@ -133,13 +133,18 @@ function fnDisplay() {
 }
 
 function fnRecord(order, description, result, match, error) {
+	if (error !== undefined) {
+		let ehash = sha1(error).substring(0,10)
+		if (ehash !== "ffc0031b7a") {
+			console.error(order, result, error)
+		}
+		result += s3+ " ["+ ehash +"]"+ sc
+	}
 	order = (order+"").padStart(3,"0")
 	data[order] = description +"~~~"+ result +"~~~"+ match
 	count ++
 	itemnumbers.push(order +" "+ description)
-	if (error !== undefined) {
-		console.error(order, result, error)
-	}
+
 	if (count == expected) {
 		fnDisplay()
 	}
@@ -149,6 +154,7 @@ function fnRecord(order, description, result, match, error) {
 function get_canvaskeys(num) {
 	let strT = "[2d canvas] keys", testT = false
 	try {
+		if (bBlock) {bB = 1}
 		let aMCanvas = []
 		let aMCanvasGood = ['mozCurrentTransform', 'mozCurrentTransformInverse', 'mozImageSmoothingEnabled', 'mozTextStyle']
 		for (const key in CanvasRenderingContext2D.prototype) {aMCanvas.push(key)}
@@ -171,6 +177,7 @@ function get_dates(num) {
 	// 1557650
 	let strA = "[5 digit year] new Date"
 	try {
+		if (bBlock) {bB = 1}
 		let resA = new Date("19999-11-11")
 		let bolA = resA == "Invalid Date" ? true : false
 		if (!bolA) {resA = fnTrim(resA.toString(), 40)}
@@ -181,6 +188,7 @@ function get_dates(num) {
 	// 1515318
 	let strB = "[hyphen] new Date"
 	try {
+		if (bBlock) {bB = 1}
 		let resB = new Date("31-Mar-2011").getFullYear()
 		// FF: 63 and lower = NaN, 64+ = -2011
 		let bolB = false
@@ -193,6 +201,7 @@ function get_dates(num) {
 	// 1439800
 	let strC = "[string] new Data"
 	try {
+		if (bBlock) {bB = 1}
 		let resC = new Date("11-Nov-11")
 		let bolC = resC.toString() == "Invalid Date" ? true : false
 		if (!bolC) {resC = fnTrim(resC.toString(), 40)}
@@ -203,6 +212,7 @@ function get_dates(num) {
 	// 1599375
 	let strD = "[+0000 UTC] Date.parse"
 	try {
+		if (bBlock) {bB = 1}
 		let resD = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
 		let bolD = isNaN(resD) ? true : false
 		fnRecord(num+3, strD, resD, bolD)
@@ -212,6 +222,7 @@ function get_dates(num) {
 	// 1730155
 	let strE = "[localized] Date.parse"
 	try {
+		if (bBlock) {bB = 1}
 		let resE = Date.parse("Mercredi 8 Septembre 2021")
 		let bolE = isNaN(resE) ? true : false
 		fnRecord(num+4, strE, resE, bolE)
@@ -223,6 +234,7 @@ function get_dates(num) {
 function get_doc_values(num, title) {
 	let strFS = "[mozFullScreen] "+ title
 	try {
+		if (bBlock) {bB = 1}
 		// FF expected true/false
 		let boolFS = false
 		let testFS = document.mozFullScreenEnabled
@@ -265,6 +277,7 @@ function get_errors(num) {
 function get_eval_length(num, title) {
 	let bool = false
 	try {
+		if (bBlock) {bB = 1}
 		let test = eval.toString().length
 		if (test == 37) {bool = true}
 		fnRecord(num, title, test, bool)
@@ -282,6 +295,7 @@ function get_iframe_props(num1, num2, title) {
 		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
 	try {
+		if (bBlock) {bB = 1}
 		// create & append iframe
 		let id = "iframe-window-version"
 		let el = document.createElement("iframe")
@@ -319,14 +333,15 @@ function get_iframe_props(num1, num2, title) {
 		fnRecord(num1, title, resE, boolE)
 		fnRecord(num2, title, resU, boolU)
 	} catch(e) {
-		fnRecord(num1, title, e.type, zB0, e.message)
-		fnRecord(num2, title, e.type, zB0, e.message)
+		fnRecord(num1, title, e.name, zB0, e.message)
+		fnRecord(num2, title, e.name, zB0, e.message)
 	}
 }
 
 function get_installtrigger(num) {
 	let strA = "[typeof] InstallTrigger", boolA = false
 	try {
+		if (bBlock) {bB = 1}
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
 		fnRecord(num, strA, resA, boolA)
@@ -335,6 +350,7 @@ function get_installtrigger(num) {
 	}
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
+		if (bBlock) {bB = 1}
 		let resB = "InstallTrigger" in window
 		fnRecord(num+1, strB, resB, resB)
 	} catch(e) {
@@ -346,6 +362,7 @@ function get_installtrigger(num) {
 		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
 		try {
+			if (bBlock) {bB = 1}
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
 			fnRecord(num+2, strC, resC, boolC)
@@ -357,6 +374,7 @@ function get_installtrigger(num) {
 
 function get_intl_canonical_locale(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let list = ["bh","hye","no","tl","tw"], bool = false
 		let res = []
 		list.forEach(function(i) {
@@ -380,6 +398,7 @@ function get_intl_canonical_locale(num, title) {
 
 function get_intl_collator(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
 		// 24 chars: approx 40ms
 		let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
@@ -423,6 +442,7 @@ function get_intl_collator(num, title) {
 
 function get_intl_display_names(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let test = Intl.DisplayNames.supportedLocalesOf("en")
 		fnRecord(num, title, zNA +": coming soon", zNA)
 	} catch(e) {
@@ -447,6 +467,7 @@ function get_intl_display_names(num, title) {
 
 function get_intl_dtf(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		// 78 locales supported in FF60+ not supported in blink: unique results
 		let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
 		let bool = false
@@ -483,6 +504,7 @@ function get_intl_dtf(num, title) {
 
 function get_intl_list_format(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let test = Intl.ListFormat.supportedLocalesOf("en")
 		fnRecord(num, title, zNA +": coming soon", zNA)
 	} catch(e) {
@@ -507,6 +529,7 @@ function get_intl_list_format(num, title) {
 
 function get_intl_number_format(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
 		list.push('af','bo','lb','se','to') // some FF60+ gecko not in blink
     list.push('co','cv','nso','oc','tig') // some webkit only
@@ -530,6 +553,7 @@ function get_intl_number_format(num, title) {
 
 function get_intl_pluralrules(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
 		list.push('ki','qu') // some FF60+ gecko not in blink
 		list.push('an','lij','vo') // chrome only
@@ -554,6 +578,7 @@ function get_intl_pluralrules(num, title) {
 
 function get_intl_rtf(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let test = Intl.RelativeTimeFormat.supportedLocalesOf("en")
 		fnRecord(num, title, zNA +": coming soon", zNA)
 	} catch(e) {
@@ -627,6 +652,7 @@ function get_js_client_hints(num, title) {
 
 function get_locale_compare(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let bool = false
 		let list = [
 			["az","\u00F6","\u1EE3"],
@@ -687,6 +713,7 @@ function get_math(num, title) {
 		}
 	}
 	try {
+		if (bBlock) {bB = 1}
 		let res = []
 		for(let i=0; i < 6; i++) {
 			try {
@@ -732,6 +759,7 @@ function get_math(num, title) {
 function get_media_constraints(num, title) {
 	// blink: 18c59e90bb3af0ce32be8efaa4457ead01fcacd8 [32]
 	try {
+		if (bBlock) {bB = 1}
 		let data = navigator.mediaDevices.getSupportedConstraints()
 		let res = Object.keys(data)
 		res.sort()
@@ -752,6 +780,7 @@ function get_media_constraints(num, title) {
 
 function get_mimetypes(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		if ("mimeTypes" in navigator) {
 			let res = [], bool = false, isFlash = false
 			let m = navigator.mimeTypes
@@ -776,7 +805,7 @@ function get_mimetypes(num, title) {
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0, e.message)
+			fnRecord(num, title, e.name, zB0)
 		}
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -785,6 +814,7 @@ function get_mimetypes(num, title) {
 
 function get_nav_keys(num1, num2, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// expected FF only
 		let aNavExpected = ["buildID","oscpu","taintEnabled"]
@@ -811,6 +841,7 @@ function get_nav_keys(num1, num2, title) {
 function get_nav_screen(num) {
 	let strA = "[left] screen", boolA = false
 	try {
+		if (bBlock) {bB = 1}
 		let resA = screen.left
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
@@ -819,6 +850,7 @@ function get_nav_screen(num) {
 	}
 	let strB = "[top] screen", boolB = false
 	try {
+		if (bBlock) {bB = 1}
 		let resB = screen.top
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
@@ -831,6 +863,7 @@ function get_nav_values(num1, num2, num3) {
 	// expected
 	let strA = "[oscpu] navigator", boolA = false
 	try {
+		if (bBlock) {bB = 1}
 		let resA = navigator.oscpu
 		if (resA == "") {resA = "empty string"
 		} else if (resA == undefined) {resA = "undefined"
@@ -845,6 +878,7 @@ function get_nav_values(num1, num2, num3) {
 	// bluetooth
 	let strBT = "[bluetooth] navigator", boolBT = false, numBT = num2
 	try {
+		if (bBlock) {bB = 1}
 		let resBT = navigator.bluetooth
 		if (resBT == undefined) {
 			fnRecord(numBT, strBT, "undefined", true)
@@ -858,7 +892,7 @@ function get_nav_values(num1, num2, num3) {
 					}
 				})
 			} catch(e) {
-				fnRecord(numBT, strBT, e.name, zB0, e.message)
+				fnRecord(numBT, strBT, e.name, zB0)
 			}
 		}
 	} catch(e) {
@@ -867,6 +901,7 @@ function get_nav_values(num1, num2, num3) {
 	// deviceMemory
 	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
 	try {
+		if (bBlock) {bB = 1}
 		let resDM = navigator.deviceMemory
 		if (resDM == undefined) {boolDM = true}
 		resDM = fnClean(resDM)
@@ -878,6 +913,7 @@ function get_nav_values(num1, num2, num3) {
 	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
 	let resB = []
 	try {
+		if (bBlock) {bB = 1}
 		// not going to add eventlisteners
 		navigator.getBattery().then(function(battery) {
 			try {resB.push(battery.level * 100 + "%")} catch(e) {resB.push("error")}
@@ -887,8 +923,9 @@ function get_nav_values(num1, num2, num3) {
 			fnRecord(numB, strB, resB.join(", "), false)
 		})
 	} catch(e) {
-		if (e.name == "TypeError" && e.message == "navigator.getBattery is not a function") {
-			fnRecord(numB, strB, e.name, true)
+		if (e.name == "TypeError" && e.message.substring(0,38) == "navigator.getBattery is not a function") {
+			if (e.message == "navigator.getBattery is not a function") {boolB = true} // webkit wil be false
+			fnRecord(numB, strB, e.name, boolB, e.message)
 		} else {
 			fnRecord(numB, strB, e.name, zB0, e.message)
 		}
@@ -896,6 +933,7 @@ function get_nav_values(num1, num2, num3) {
 	// globalprivacycontrol
 	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
+		if (bBlock) {bB = 1}
 		let resG = navigator.globalPrivacyControl
 		if (resG == undefined) {boolG = true}
 		resG = fnClean(resG)
@@ -906,6 +944,7 @@ function get_nav_values(num1, num2, num3) {
 	// keyboard
 	let strK = "[keyboard] navigator", numK = num2+8
 	try {
+		if (bBlock) {bB = 1}
 		let resK = navigator.keyboard
 		if (resK == undefined) {
 			fnRecord(numK, strK, "undefined", true)
@@ -932,6 +971,7 @@ function get_nav_values(num1, num2, num3) {
 	// vendor
 	let strV = "[vendor] navigator", boolV = false, numV = num2+10
 	try {
+		if (bBlock) {bB = 1}
 		let resV = navigator.vendor
 		if (resV == "") {boolV = true}
 		resV = fnClean(resV)
@@ -948,6 +988,7 @@ function get_nav_values(num1, num2, num3) {
 	// specific
 	let strX = "[buildID] navigator", boolX = false
 	try {
+		if (bBlock) {bB = 1}
 		let resX = navigator.buildID
 		if (resX == "20181001000000") {boolX = true} else {
 			resX = fnClean(resX)
@@ -971,6 +1012,7 @@ function get_nav_values(num1, num2, num3) {
 	// DNT: FF: 1, unspecified
 	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
 	try {
+		if (bBlock) {bB = 1}
 		let testDNT = navigator.doNotTrack
 		if (testDNT == 1 || testDNT == "unspecified") {
 			boolDNT = true
@@ -980,7 +1022,7 @@ function get_nav_values(num1, num2, num3) {
 			} else {testDNT = fnClean(testDNT)}
 		}
 		if (isFF && !boolDNT) {
-			fnRecord(numDNT, strDNT, testDNT, zB0, e.message)
+			fnRecord(numDNT, strDNT, testDNT, zB0)
 		} else {
 			fnRecord(numDNT, strDNT, testDNT, boolDNT)
 		}
@@ -990,6 +1032,7 @@ function get_nav_values(num1, num2, num3) {
 
 	let strY = "[productSub] navigator", boolY = false, numY = num3+4
 	try {
+		if (bBlock) {bB = 1}
 		let resY = navigator.productSub
 		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
 		fnRecord(numY, strY, resY, boolY)
@@ -1000,6 +1043,7 @@ function get_nav_values(num1, num2, num3) {
 
 function get_permission(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let userVis = "userVisibleOnly"
 		navigator.permissions.query({name:"push"}).then(function(result) {
 			let res = result.state
@@ -1009,21 +1053,22 @@ function get_permission(num, title) {
 			if ((error.message).includes(userVis)) {
 				fnRecord(num, title, userVis, false)
 			} else {
-				fnRecord(num, title, error.name, zB0, e.message)
+				fnRecord(num, title, error.name, zB0, error.message)
 			}
 		})
 	} catch(e) {
 		// not supported in webkit: https://caniuse.com/?search=push%20permission
-		if ("chrome" in window || isFF) {
-			fnRecord(num, title, e.name, zB0, e.message)
-		} else {
+		if (isWebkit) {
 			fnRecord(num, title, "not supported", false)
+		} else {
+			fnRecord(num, title, e.name, zB0, e.message)
 		}
 	}
 }
 
 function get_plugins(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		if ("plugins" in navigator) {
 			let res = [], bool = false, isFlash = false
 			let p = navigator.plugins
@@ -1044,7 +1089,7 @@ function get_plugins(num, title) {
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0, e.message)
+			fnRecord(num, title, e.name, zB0)
 		}
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -1067,46 +1112,56 @@ function get_stacklength(num1, num2, num3) {
 		recurse()
 	} catch(e) {
 		// columnNumber
+		let strCN = "[columnNumber] error", errCN = false
 		try {
-			let strCN = "[columnNumber] error", errCN = false
+			if (bBlock) {bB = 1}
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
 			fnRecord(num1, strCN, resCN, testCN)
 		} catch(n) {
-			fnRecord(num1, strCN, resCN, zB0, e.message)
+			fnRecord(num1, strCN, n.name, zB0, n.message)
 		}
 		// fileName
+		let strFN = "[fileName] error", errFN = false
 		try {
-			let strFN = "[fileName] error", errFN = false
+			if (bBlock) {bB = 1}
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
 			fnRecord(num1+1, strFN, resFN, testFN)
 		} catch(n) {
-			fnRecord(num1+1, strFN, resFN, zB0, e.message)
+			fnRecord(num1+1, strFN, n.name, zB0, n.message)
 		}
 		// lineNumber
+		let strLN = "[lineNumber] error", errLN = false
 		try {
-			let strLN = "[lineNumber] error", errLN = false
+			if (bBlock) {bB = 1}
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
 			fnRecord(num1+2, strLN, resLN, testLN)
 		} catch(n) {
-			fnRecord(num1+2, strLN, resFN, zB0, e.message)
+			fnRecord(num1+2, strLN, n.name, zB0, n.message)
 		}
+		// first error
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
 			fnRecord(num3, strRE, resRE, true)
 		} else {
 			fnRecord(num3, strRE, resRE, false)
 		}
+		// stack length
 		let strSL = "stack length"
-		if (isFile) {
-			fnRecord(num2, strSL, zNA +": file://", zNA)
-		} else {
+		try {
+			if (bBlock) {bB = 1}
 			let resSL = e.stack.toString().length
 			let testSL = resSL == 8192 ? true : false
-			fnRecord(num2, strSL, resSL, testSL)
+			if (isFile) {
+				fnRecord(num2, strSL, zNA +": file://", zNA)
+			} else {
+				fnRecord(num2, strSL, resSL, testSL)
+			}
+		} catch(n) {
+			fnRecord(num2, strSL, n.name, zB0, n.message)
 		}
 	}
 }
@@ -1122,6 +1177,7 @@ function get_storage_quota(num, title) {
 		// chrome:     485041940 incognito
 		// chrome:     204974075 incognito android
 	try {
+		if (bBlock) {bB = 1}
 		navigator.storage.estimate().then(estimate => {
 			let quota = estimate.quota,
 				bool = false
@@ -1129,12 +1185,18 @@ function get_storage_quota(num, title) {
 			fnRecord(num, title, quota, bool)
 		})
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		let msg = e.message.substring(0,26)
+		if (isWebkit && e.name == "TypeError" && msg == "undefined is not an object") {
+			fnRecord(num, title, e.name, false, e.message)
+		} else {
+			fnRecord(num, title, e.name, zB0, e.message)
+		}
 	}
 }
 
 function get_window_chrome(num, title) {
 	try {
+		if (bBlock) {bB = 1}
 		let bool = "chrome" in window
 		fnRecord(num, title, bool, !bool)
 	} catch(e) {
@@ -1146,6 +1208,7 @@ function get_window_values(num) {
 	//window.offscreenBuffering
 	let strB = "[offscreenBuffering] window", boolB = false
 	try {
+		if (bBlock) {bB = 1}
 		let resB = window.offscreenBuffering
 		if (resB == undefined) {boolB = true}
 		resB = fnClean(resB)
@@ -1156,11 +1219,14 @@ function get_window_values(num) {
 	// window.openDatabase
 	let strO = "[openDatabase] window", boolO = false
 	try {
+		if (bBlock) {bB = 1}
 		window.openDatabase("test", "1.0", "test", 1024)
 		fnRecord(num+2, strO, "success", boolO)
 	} catch(e) {
 		if (e.name == "TypeError" && e.message == "window.openDatabase is not a function") {
-			fnRecord(num+2, strO, e.name, true)
+			fnRecord(num+2, strO, e.name, true, e.message)
+		} else if (e.name == "UnknownError" && e.message == "Web SQL is deprecated") {
+			fnRecord(num+2, strO, e.name, false, e.message) // webkit
 		} else {
 			fnRecord(num+2, strO, e.name, zB0, e.message)
 		}
@@ -1170,6 +1236,7 @@ function get_window_values(num) {
 function get_window_moz(num) {
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
+		if (bBlock) {bB = 1}
 		let resA = window.mozInnerScreenX
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		fnRecord(num, strA, resA, boolA)
@@ -1178,6 +1245,7 @@ function get_window_moz(num) {
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
+		if (bBlock) {bB = 1}
 		let resB = window.mozInnerScreenY
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		fnRecord(num+1, strB, resB, boolB)
@@ -1194,7 +1262,11 @@ let is61 = false,
 	is78 = false,
 	is85 = false,
 	is86 = false,
-	isRFP2 = false
+	isRFP2 = false,
+	isWebkit = false
+
+// webkit
+if ("chrome" in window || isFF) {} else {isWebkit = true}
 // set some FF variables
 if (isFF) {
 	fnRFP()
@@ -1236,6 +1308,7 @@ let results = [],
 	data = {},
 	count = 0,
 	expected = 70,
+	bBlock = false, // throw a test error
 	bLog = false,
 	bNum = false // display numbering
 
