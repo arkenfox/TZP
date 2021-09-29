@@ -744,7 +744,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#css">css</a>
 			<div class="nav-up"><a href="#media">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
-			<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
+			<div class="nav-down"><a href="#elementsd">&#9660;</a></div>
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
@@ -778,36 +778,46 @@
 		</td></tr>
 	</table>
 
-	<!--ciphers-->
+	<!--elements-->
 	<table id="tb15">
+		<col width="35%"><a name="elements"></a><col width="65%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">
+				<a href="#elements">elements / widgets</a>
+				<div class="nav-up"><a href="#css">&#9650;</a> <span class="c perf" id="perfelements"></span></div>
+				<div class="nav-down"><a href="#ciphersd">&#9660;</a></div>
+				<div class="nav-right"><a name="elementsd"></a></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><span class="btn15 btn" onClick="outputSection(`15`)">[ re-run ]</span></div>
+			<span class="c" id="elementshash"></span></td></tr>
+		<tr><td>
+		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="elementkeys"></td></tr>
+		<tr><td colspan="3"><span class="no_color">code provided by </span>
+			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
+		</td></tr>
+	</table>
+
+	<!--ciphers-->
+	<table id="tb16">
 		<col width="35%"><a name="ciphers"></a><col width="65%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#ciphers">ciphers / tls</a>
-			<div class="nav-up"><a href="#css">&#9650;</a></div>
+			<div class="nav-up"><a href="#elements">&#9650;</a></div>
 			<div class="nav-down"><a href="#spared">&#9660;</a></div>
 			<div class="nav-right"><a name="ciphersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td>test</td><td>result</td></tr>
 	</table>
 	<!--spare-->
-	<table id="tb16">
+	<table id="tb17">
 		<col width="35%"><a name="spare"></a><col width="65%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#spare">oh no, i'm empty</a>
 			<div class="nav-up"><a href="#ciphers">&#9650;</a></div>
-			<div class="nav-down"><a href="#spare2d">&#9660;</a></div>
-			<div class="nav-right"><a name="spared"></a></div></div>
-		</th></tr></thead>
-		<tr><td>test</td><td>result</td></tr>
-	</table>
-	<!--spare-->
-	<table id="tb17">
-		<col width="35%"><a name="spare2"></a><col width="65%">
-		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#spare2">oh no, i'm empty as well</a>
-			<div class="nav-up"><a href="#spare">&#9650;</a></div>
 			<div class="nav-down"><a href="#miscd">&#9660;</a></div>
-			<div class="nav-right"><a name="spare2d"></a></div></div>
+			<div class="nav-right"><a name="spared"></a></div></div>
 		</th></tr></thead>
 		<tr><td>test</td><td>result</td></tr>
 	</table>
@@ -817,7 +827,7 @@
 		<col width="35%"><a name="misc"></a><col width="65%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#misc">miscellaneous</a>
-			<div class="nav-up"><a href="#spare2">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
+			<div class="nav-up"><a href="#spare">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
 			<div class="nav-down"><a href="#theend">&#9660;</a></div>
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
@@ -877,6 +887,7 @@
 	<script src="js/domrect.js"></script>
 	<script src="js/audio.js"></script>
 	<script src="js/css.js"></script>
+	<script src="js/elements.js"></script>
 	<script src="js/misc.js"></script>
 	<script src="js/media.js"></script>
 	<script src="js/canvas.js"></script>

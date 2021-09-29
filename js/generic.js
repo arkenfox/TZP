@@ -1053,7 +1053,7 @@ function log_section(name, time1, data) {
 			gCount++
 			gData.push([name +":"+ hash, data])
 			// FINISH
-			if (gCount == 14) {
+			if (gCount == 15) {
 				gLoad = false
 				// metric count
 				let metricCount = 0
@@ -1160,7 +1160,7 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	if (jsFiles.length == 12) {
+	if (jsFiles.length == 13) {
 		if (runSL) {isPerf = false}
 		if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		// harden isFF
@@ -1252,6 +1252,7 @@ function outputSection(id, cls) {
 			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="15") {outputElements()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
