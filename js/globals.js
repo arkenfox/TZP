@@ -45,6 +45,7 @@ let avh = "",
 	firstW = window.innerWidth,
 // css
 	s0 = " <span class='",
+	smono = s0+"mono'>",
 	sb = s0+"bad'>",
 	sg = s0+"good'>",
 	sf = s0+"faint'>",
@@ -156,5 +157,4 @@ let avh = "",
 	runS = false,
 	runSUA = false,
 	runSL = false,
-	runSC = false,
-	runBF = false
+	runSC = false
