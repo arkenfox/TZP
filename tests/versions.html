@@ -48,6 +48,7 @@
 			<td></td>
 		</tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="watchlist"></td><td></td></tr>
+		<tr><td></td><td colspan="2" class="c mono spaces" id="alert"></td><td></td></tr>
 	</table>
 	<br>
 
@@ -136,13 +137,23 @@ function outputVersion() {
 		order = (order+"").padStart(3,"0")
 		data[order] = version +" :"+ bug +":"+ result +":"+ perf
 		count ++
-		if (count == expected) {
+		if (count > expected) {
+			dom.alert.innerHTML = "<br>"+ sb + "ALERT: expected count too low by "+ (count - expected) + sc
+		} else if (count == expected) {
 			display()
 		}
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 61
+		expected = 62
+
+	// 93: 1670033
+	let t93b = performance.now(), ver93b = xF
+	try {
+		let test93b = Intl.supportedValuesOf("calendar")
+		ver93b = xS
+	} catch(e) {}
+	record(222,93, "1670033", ver93b, performance.now()-t93b)
 
 	// 93: 1328672
 	let t93a = performance.now(), ver93a = xF
@@ -154,7 +165,7 @@ function outputVersion() {
 	// 93: 1722448
 	let t93 = performance.now(), ver93 = xF
 	try {
-		self.reportError("93")
+		newFn("self.reportError('93')")
 		ver93 = xS
 	} catch(e) {}
 	record(220,93, "1722448", ver93, performance.now()-t93)
@@ -196,7 +207,7 @@ function outputVersion() {
 	// 90: 1520434
 	let t90 = performance.now(), ver90 = xF
 	try {
-		var share90 = new ArrayBuffer(4096)
+		let share90 = new ArrayBuffer(4096)
 		let test90 = new Int32Array(share90, 7)
 	} catch(e) {
 		// 90: start offset of Int32Array should be a multiple of 4
@@ -276,9 +287,7 @@ function outputVersion() {
 	// 85: 1675240
 	let t85 = performance.now(), ver85 = xF
 	try {
-		let reg85 = ("/a")
-		let descriptor = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-		let test85 = descriptor.get.call(reg85)
+		newFn("let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)")
 	} catch(e) {
 		// 85+: RegExp.prototype.global getter called on non-RegExp object: string
 		// 60+: get global method called on incompatible string
@@ -298,8 +307,7 @@ function outputVersion() {
 	// 83: 1667094
 	let t83 = performance.now(), ver83 = xF
 	try {
-		let obj83 = {exec() {return function(){}}}
-		let test83 = RegExp.prototype.test.call(obj83, "")
+		newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
 		ver83 = xS
 	} catch(e) {}
 	record(166,83, "1667094", ver83, performance.now()-t83)
@@ -307,9 +315,7 @@ function outputVersion() {
 	// 83a: 1665746
 	let t83a = performance.now(), ver83a = xF
 	try {
-		let a83 = new Set([1,2,3]);
-		let b83 = new Set([2,3,4]);
-		let c83 = new Set(...a83, ...b83);
+		newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
 		ver83a = xS
 	} catch(e) {
 		if (e.message == "1 is not iterable") {ver83a = xS}
@@ -627,7 +633,7 @@ function outputVersion() {
 	// 1439800
 	let t9 = performance.now(), ver9 = xNC
 	let test9 = new Date("11-Nov-11")
-	if (test9.toString() !== "Invalid Date") {ver9 = xOMG; console.debug("banana")}
+	if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
 	record(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
 
 	// 1557650
@@ -675,7 +681,7 @@ function outputVersion() {
 			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
 	} catch(e) {
 		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
-		console.log("chromeKeys", e.name, e.message)
+		//console.log("chromeKeys", e.name, e.message)
 	}
 }
 
