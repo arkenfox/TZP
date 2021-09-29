@@ -487,7 +487,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v93b() { //93:1722448
 		try {
-			self.reportError("v93"); output(93)
+			newFn("self.reportError('93')"); output(93)
 		} catch(e) {v92()}
 	}
 	function v92() { //92:1721149
@@ -534,9 +534,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v85() { //85:1675240
 		try {
-			let reg = ("/a")
-			let des = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-			let t = des.get.call(reg)
+			newFn("let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)")
 		} catch(e) {
 			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
 		}
@@ -546,8 +544,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v83() { //83:1667094
 		try {
-			let obj = {exec() {return function(){}}}
-			let t = RegExp.prototype.test.call(obj, "")
+			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
 			output(83)
 		} catch(e) {v82()}
 	}
@@ -846,8 +843,6 @@ function togglerows(id, word) {
 		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word == undefined ? "details" : word)
 	}
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
-	// errors
-	if (id == "E") {dom.togE5.style.display = (dom.err5.textContent.length > 1 ? "table=row" : "none")}
 }
 
 /** DISPLAY CLICK FUNCTIONS **/
