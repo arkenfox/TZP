@@ -165,133 +165,81 @@ function get_color() {
 function get_errors() {
 	return new Promise(resolve => {
 		let res = [],
-			test = "",
-			hash = "",
-			code = "",
 			ff = "",
-			isBlock = false,
 			t0 = performance.now()
-		// output
-		function output() {
-			hash = sha1(res.join())
-			if (isFF) {
-				// codes
-				let tmp = hash.substring(0,8)
-				// 74+: 1259822: error_message_fix: codes 1=false 2=true
-				if (tmp == "b9a8b17b") {code = "A"; ff = "[FF60-67]"
-				} else if (tmp == "cb379de2") {code = "B"; ff = "[FF68-69]"
-				} else if (tmp == "7453242e") {code = "C"; ff = "[FF70]"
-				} else if (tmp == "30205428") {code = "D"; ff = "[FF71]"
-				} else if (tmp == "79bf9efd") {code = "E1"; ff = "[FF72-74]"
-				} else if (tmp == "18a23d47") {code = "E2"; ff = "[FF74]"
-				} else if (tmp == "057c7db9") {code = "F1"; ff = "[FF75-77]"
-				} else if (tmp == "5bb66724") {code = "F2"; ff = "[FF75-77]"
-				} else if (tmp == "ac156397") {code = "G1"; ff = "[FF78+]"
-				} else if (tmp == "6140f242") {code = "G2"; ff = "[FF78+]"
+		let sName = "feature_errors"
+		clearDetail(sName)
+
+		let tests = [
+			"BigInt(2.5)", // changes FF68 + FF75
+			"alert('A)",
+			"const foo;foo.bar",
+			"null.bar", // changes with error_fix
+			"(1).toString(1000)",
+			"var x = new Array(-1)",
+			"[...undefined].length", // changes with error_fix
+			"self.reportError('93')", // < FF93
+			"let a = new Set([1,2,3]); let b = new Set([2,3,4]); let c = new Set(...a, ...b);", // changes FF83
+			"var x = @", // changes FF84
+			"let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)", // changes FF85
+			"for (async of [])", // changes FF86
+			'function invalid () { "use strict" \n ' + '"\\8"' + '}', // FF88+
+			"let t = ({ 1n: 1 })", // < FF74, changes FF68
+			"let a = 1_00_;", // changes FF70
+		]
+		for (let i = 0; i < tests.length; i++) {
+			try {
+				newFn(tests[i])
+			} catch(e) {
+				let msg = e.message
+				if (tests[i] == "alert('A)") {
+					if (runS) {msg += zSIM} else if (msg == "unterminated string literal") {code = "X"; ff = "[FF59 or lower]"}
 				}
-				if (runS) {code = ""; ff = ""}
-				if (code !== "") {
-					code = s3 +"["+ code +"]"+ sc
-					dom.fdError.innerHTML = zFF +" "+ ff + code
-					dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
-				} else {
-					code = zNEW
-					dom.errh.innerHTML = hash + code + (runS ? zSIM : "")
-					if (isBlock) {
-						dom.fdError.innerHTML = "script blocking detected"+ sb +"[see details]"+ sc + (runS ? zSIM : "")
-					} else {
-						dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "")
-						dom.fdError.setAttribute("class", "c mono")
-					}
-				}
+				res.push(i +": "+ e.name +": "+ msg)
+			}
+		}
+
+		sDetail[sName] = res
+		let hash = sha1(res.join())
+		let errBtn = buildButton("3", sName, res.length +"/"+ tests.length)
+
+		if (isFF) {
+			// codes
+			let tmp = hash.substring(0,8)
+			// 74+: 1259822: error_message_fix: codes 1=false 2=true
+			if (tmp == "3f0a2927") {code = "M1"; ff = "[FF93+] [Type 1]"
+			} else if (tmp == "fcb058e2") {ff = "[FF93+] [Type 2]"
+			} else if (tmp == "93d0c3af") {ff = "[FF88-92] [Type 1]"
+			} else if (tmp == "b6902095") {ff = "[FF88-92] [Type 2]"
+			} else if (tmp == "25d05006") {ff = "[FF86-87] [Type 1]"
+			} else if (tmp == "82d992d7") {ff = "[FF86-87] [Type 2]"
+			} else if (tmp == "5a0ce0c1") {ff = "[FF85] [Type 1]"
+			} else if (tmp == "c7d70afd") {ff = "[FF85] [Type 2]"
+			} else if (tmp == "6c8ac52f") {ff = "[FF84] [Type 1]"
+			} else if (tmp == "1ca49497") {ff = "[FF84] [Type 2]"
+			} else if (tmp == "df9b641d") {ff = "[FF83] [Type 1]"
+			} else if (tmp == "e540e119") {ff = "[FF83] [Type 2]"
+			} else if (tmp == "137d5080") {ff = "[FF75-82] [Type 1]"
+			} else if (tmp == "86ff3101") {ff = "[FF75-82] [Type 2]"
+			} else if (tmp == "54002b6f") {ff = "[FF74] [Type 1]"
+			} else if (tmp == "04e27611") {ff = "[FF74] [Type 2]"
+			} else if (tmp == "f0a867a2") {ff = "[FF71-72]"
+			} else if (tmp == "94b69f86") {ff = "[FF70-71]"
+			} else if (tmp == "117ef2fc") {ff = "[FF68-69]"
+			} else if (tmp == "32d3793c") {ff = "[FF60-67]"
+			}
+			if (ff !== "") {
+				dom.fdError.innerHTML = zFF +" "+ ff + smono + errBtn + sc
 			} else {
-				dom.errh = hash; dom.fdError = hash
+				code = zNEW
+				dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "") + errBtn
+				dom.fdError.setAttribute("class", "c mono")
 			}
-			log_perf("errors [fd]",t0)
-			return resolve("errors:"+ hash)
+		} else {
+			dom.fdError.innerHTML = hash + errBtn
 		}
-		// run
-		function run() {
-			//1
-			try {
-				newFn("alert('A)")
-			} catch(e) {
-				dom.err1=e; res.push(e.name +": "+ e.message)
-				if (e.message == "unterminated string literal") {code = "X"; ff = "[FF59 or lower]"}
-			}
-			//2
-			try {
-				newFn(`null.value = 1`)
-			} catch(e) {
-				if (runS) {e += zSIM}
-				dom.err2=e; res.push(e.name +": "+ e.message)
-			}
-			//3
-			try {
-				test = newFn("BigInt(2.5)")
-			} catch(e) {
-				if (isFF) {
-					test = e.message.substring(0,3)
-					if (test == "2.5") {
-						//75+
-						test = e.name +": "+ e.message
-					} else if (test == "can") {
-						//68-74: trap NumberFormat
-						try {
-							test = newFn("987654321987654321n")
-							let num = new Intl.NumberFormat(undefined)
-							test = num.format(test)
-							test = e.name +": "+ e.message
-						} catch (e) {
-							if (e.message.substring(0,5) == "Intl.") {
-								test = zB0
-							} else if (e.name == "TypeError") {
-								//68-69 expected
-								test = e.name +": "+ e.message
-							} else {
-								test = zB0
-							}
-						}
-					} else if (e.name == "ReferenceError") {
-						if (test == "Big") {
-							//60-67
-							test = e.name +": "+ e.message
-						} else {
-							test = zB0
-						}
-					} else {
-						test = zB0
-					}
-				} else {
-					test = e.name +": "+ e.message
-				}
-				if (test == zB0) {isBlock = true}
-				dom.err3=test; res.push(test)
-			}
-			//4
-			try {
-				test = newFn("let a = 1_00_;")
-			} catch(e) {
-				test = e.name +": "+ e.message; dom.err4=test; res.push(test)
-			}
-			//5: s/be none FF78+
-			try {
-				test = new Intl.NumberFormat("en", {style:"unit", unit:"percent"}).format(1/2)
-			} catch(e) {
-				if (isFF) {
-					if (e.name == "RangeError") {
-						test = e.name +": "+ e.message
-					} else {
-						test = zB0; isBlock = true
-					}
-				} else {
-					test = e.name +": "+ e.message
-				}
-				dom.err5=test; res.push(test)
-			}
-			output()
-		}
-		run()
+		log_perf("errors [fd]",t0)
+		return resolve("errors:"+ hash)
 	})
 }
 
