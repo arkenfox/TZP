@@ -476,11 +476,17 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 93) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 94) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { //93:1328672
+	function start() { // 94: 1722576
+		try {
+			let orig = {name:"TZP"}; orig.itself = orig; let clone = self.structuredClone(orig)
+			output(94)
+		} catch(e) {v93()}
+	}
+	function v93() { //93:1328672
 		try {
 			if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {output(93)} else {v93b()}
 		} catch(e) {v93b()}
