@@ -145,7 +145,15 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 62
+		expected = 63
+
+	// 94: 1722576
+	let t94 = performance.now(), ver94 = xF
+	try {
+		let orig = {name:"TZP"}; original.itself = orig; let clone = self.structuredClone(orig)
+		ver94 = xS
+	} catch(e) {}
+	record(225,94, "1722576", ver94, performance.now()-t94)
 
 	// 93: 1670033
 	let t93b = performance.now(), ver93b = xF
@@ -287,7 +295,7 @@ function outputVersion() {
 	// 85: 1675240
 	let t85 = performance.now(), ver85 = xF
 	try {
-		newFn("let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)")
+		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
 	} catch(e) {
 		// 85+: RegExp.prototype.global getter called on non-RegExp object: string
 		// 60+: get global method called on incompatible string
