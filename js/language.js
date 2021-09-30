@@ -1,9 +1,6 @@
 'use strict';
 
 let bTZ = false
-let langDoc = []
-let combo1 = "", combo2 = ""
-let lHash0 = "", lHash1 = "", lHash2 = ""
 
 function get_navigator() {
 	return new Promise(resolve => {
@@ -165,8 +162,6 @@ function get_lang_doc() {
 				minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"},
 			res = [],
 			err = []
-		// reset language + resolved option combos
-		combo1 = ""; combo2 = ""
 
 		function get_item(item) {
 			let amWorker = false
@@ -528,7 +523,8 @@ function get_lang_doc() {
 				}
 			}
 		}
-		// output
+
+		// build
 		for (let i=0; i < 50; i++) {
 			let result = get_item(i)
 			if (isFF) {
@@ -540,98 +536,87 @@ function get_lang_doc() {
 			} else if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0; err.push(i +" [unexpected]: zero-length strings")
 			}
 			res.push(result)
-			// output
-			if (i < 3) {
-				// combine 0-2
-				combo1 += (i == 0 ? "" : " | ") + result
-				if (i == 2) {dom.ldt2.innerHTML = combo1}
-			} else if (i < 12) {
-				// combine 3-11
-				combo2 += (i == 3 ? "" : " | ") + result
-				if (i == 10) {dom.ldt9.innerHTML = combo2} // display 3-10
-			} else if (i == 14) {
-				// hash multi-year timezone offsets
-				dom.ldt14.innerHTML = sha1(result)
-			} else {
-				document.getElementById("ldt"+ i).innerHTML = result
+
+			// output line items after lang
+			if (i > 11) {
+				if (i == 14) {
+					dom.ldt14.innerHTML = sha1(result) // hash multi-year timezone offsets
+				} else {
+					document.getElementById("ldt"+ i).innerHTML = result
+				}
 			}
 		}
 		// debugging: error tracking
 		//if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
 
-		let reshash = []
-		// hash 0-11: language
-		lHash0 = sha1(res.slice(0,12).join("-"))
-		reshash.push("language:"+ lHash0)
-		//console.log("language", lHash0, res.slice(0,12))
+		// split into three
+		let aLang = res.slice(0,12)
+		let aTime = res.slice(12,16)
+		let aDate = res.slice(16,res.length)
+		// display concatenated fields
+		dom.ldt2.innerHTML = aLang.slice(0,2).join(" | ")
+		dom.ldt9.innerHTML = aLang.slice(2,11).join(" | ") // item 12 is n/a
+		// record three hashes
+		let hashLang = sha1(aLang.join("-"))
+		let hashTime = sha1(aTime.join("-"))
+		let hashDate = sha1(aDate.join("-"))
+		let hashAll = []
+		hashAll.push("language:"+ hashLang)
+		hashAll.push("timezone:"+ hashTime)
+		hashAll.push("datetime:"+ hashDate)
+
+		// notation
 		if (isFF) {
-			if (lHash0 == "4329b938f2a1f3f15591eed43e15d303388d7c9a") {
-				// DisplayNames supported
-				lHash0 += enUS_green +" [FF86+]"
-			} else if (lHash0 == "620769481983f4eeafe144b61f3b7bbe5bc7dc1a") {
-				// ListFormat supported
-				lHash0 += enUS_green +" [FF78-85]"
-			} else if (lHash0 == "b65bfc8280697e09a57ca60dfbae75d1358a2d28") {
-				// RelativeTimeFormat supported
-				lHash0 += enUS_green +" [FF65-77]"
-			} else {
-				lHash0 += (lHash0 == "2525dff5501daca5336cbc2c2d967278143838c2" ? enUS_green +" [FF60-64]" : enUS_red)
+			// language
+			if (hashLang == "4329b938f2a1f3f15591eed43e15d303388d7c9a") {hashLang += enUS_green +" [FF86+]"
+			} else if (hashLang == "620769481983f4eeafe144b61f3b7bbe5bc7dc1a") {hashLang += enUS_green +" [FF78-85]"
+			} else if (hashLang == "b65bfc8280697e09a57ca60dfbae75d1358a2d28") {hashLang += enUS_green +" [FF65-77]"
+			} else {hashLang += (hashLang == "2525dff5501daca5336cbc2c2d967278143838c2" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
-		}
-		dom.lHash0.innerHTML = lHash0
-
-		// hash 12-16: timezone
-		lHash1 = sha1(res.slice(12,16).join("-"))
-		reshash.push("timezone:"+ lHash1)
-		//console.log("timezone", lHash1, res.slice(12,16))
-		
-		bTZ = (lHash1 == "be32bb73c0061974a3301536469d40d74e325375" ? true : false)
-		lHash1 += (bTZ ? rfp_green : rfp_red)
-		dom.lHash1.innerHTML = lHash1
-
-		// hash 17+: datetime
-		lHash2 = sha1(res.slice(16,res.length).join("-"))
-		reshash.push("datetime:"+ lHash2)
-		//console.log("timezone", lHash2, res.slice(16,res.length))
-		dom.lHash2 = lHash2
-		// RFP
-		let ff = ""
-		if (isVer > 59) {
-			// FF85+: also use javascript.use_us_english_locale
-			if (bTZ) {
-				// state1: both green
-				if (lHash2 == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
-				} else if (lHash2 == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
-				} else if (lHash2 == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
-				} else if (lHash2 == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
-				} else if (lHash2 == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
-				} else if (lHash2 == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
-				} else if (lHash2 == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
-				} else if (lHash2 == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
-				} else if (lHash2 == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
-				} else if (lHash2 == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
+			// timezone
+			bTZ = (hashTime == "be32bb73c0061974a3301536469d40d74e325375" ? true : false)
+			hashTime += (bTZ ? rfp_green : rfp_red)
+			// datetime
+			let ff = ""
+			if (isVer > 59) {
+				// FF85+: also use javascript.use_us_english_locale
+				if (bTZ) {
+					// state1: both green
+					if (hashDate == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
+					} else if (hashDate == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
+					} else if (hashDate == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
+					} else if (hashDate == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
+					} else if (hashDate == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
+					} else if (hashDate == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
+					} else if (hashDate == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
+					} else if (hashDate == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
+					} else if (hashDate == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
+					} else if (hashDate == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
+					}
 				}
-			}
-			if (ff == "") {
-				if (bTZ == true) {
-					// state2: lang red, time green
-					lHash2 += enUS_red + rfp_green
+				if (ff == "") {
+					if (bTZ == true) {
+						// state2: lang red, time green
+						hashDate += enUS_red + rfp_green
+					} else {
+						// state3: lang green, time red
+						// hashDate += enUS_green + rfp_red
+
+						// state4: both red: just default to "and/or"
+						hashDate += spoof_both_red
+					}
 				} else {
-					// state3: lang green, time red
-					// lHash2 += enUS_green + rfp_red
-
-					// state4: both red: just default to "and/or"
-					lHash2 += spoof_both_red
+					hashDate += spoof_both_green
 				}
-			} else {
-				lHash2 += spoof_both_green
+				hashDate += ff
 			}
 		}
-		dom.lHash2.innerHTML = lHash2 + (isFF ? ff : "")
-
+		// display
+		dom.lHash0.innerHTML = hashLang
+		dom.lHash1.innerHTML = hashTime
+		dom.lHash2.innerHTML = hashDate
 		// return
-		langDoc = res
-		return resolve(reshash)
+		return resolve(hashAll)
 	})
 }
 
@@ -648,53 +633,8 @@ function get_lang_worker() {
 			try {
 				let workerlang = new Worker("js/language_worker.js")
 				workerlang.addEventListener("message", function(e) {
-					let res = langDoc
 					workerlang.terminate
-					// ToDo: replace with sDetail[diffs] like ua iframes
-					let swcombo1 = "", swcombo2 = ""
-					for (let i=0; i < res.length; i++) {
-						let divider = "<br>"
-						try {
-							if (i < 3) {
-								swcombo1 +=  (i == 0 ? e.data[i].toString() : " | "+ e.data[i])
-								if (i == 2) {
-									if (combo1 !== swcombo1) {
-										dom.ldt2.innerHTML = combo1 +" | "+ sb + swcombo1 + sc
-									}
-								}
-							} else if (i < 10) {
-								swcombo2 += (i == 3 ? "" : " | ") + e.data[i]
-								if (i == 9) {
-									if (combo2 !== swcombo2) {
-										dom.ldt9.innerHTML = combo2 +"<br>"+ sb + swcombo2 + sc
-									}								
-								}
-							} else if (i == 17) {
-								// date object
-								if (""+ res[i] !== e.data[i]) {
-									document.getElementById("ldt"+ i).innerHTML = res[i] + divider + sb + e.data[i] + sc
-								}
-							} else {
-								if (res[i] !== e.data[i]) {
-									if (i == 14) {
-										document.getElementById("ldt"+ i).innerHTML = res[i] + divider + sb + sha1(e.data[i].join()) + sc
-									} else {
-										document.getElementById("ldt"+ i).innerHTML = res[i] + divider + sb + e.data[i] + sc
-									}
-								}
-							}
-						} catch(k) {
-							console.log("compare", i, k.name, k.message)
-						}
-					}
-					// ToDo: replace with line items and subitems: like ua iframes
-						// sha1(e.data.slice(0,12).join("-")) // control
-						// sha1(res.slice(0,12).join("-"))
-						// sha1(e.data.slice(12,16).join("-"))
-						// sha1(res.slice(12,16).join("-"))
-						// sha1(e.data.slice(16,e.data.length).join("-"))
-						// sha1(res.slice(16,res.length).join("-"))
-
+					// do something with e.data
 					return resolve(e.data)
 				}, false)
 				workerlang.postMessage(msgWorker)
@@ -708,11 +648,6 @@ function get_lang_worker() {
 function outputLanguage() {
 	let t0 = performance.now(),
 		section = []
-	// ToDO: logic with worker re section hash
-	function get_worker() {
-		log_section("language", t0, section)
-		get_lang_worker() // tack this on here for now
-	}
 	// run
 	Promise.all([
 		get_lang_doc(),
@@ -729,7 +664,8 @@ function outputLanguage() {
 		})
 		section.sort()
 		dom.lHashDoc = sha1(section.join())
-		get_worker()
+		log_section("language", t0, section)
+		//get_lang_worker() // rework a global worker test
 	})
 }
 
