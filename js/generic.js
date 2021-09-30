@@ -1179,7 +1179,13 @@ function countJS(filename) {
 				get_isTB(),
 				get_isBrave(),
 			]).then(function(results){
-				if (!isFF) {runS = false} // runS is FF only
+				// sims are isFF only
+				if (!isFF) {
+					runS = false
+					runSC = false
+					runSL = false
+					runSUA = false
+				}
 				if (results[3] == "timeout") {
 					gMethodsOnce.push("_global:resource:blocked")
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
