@@ -34,6 +34,33 @@ function return_mm_dpi(type) {
 	return r
 }
 
+function get_canonical() {
+	try {
+		let sName = "feature_canonical_locales_list"
+		clearDetail(sName)
+		let list = ["bh","hye","no","tl","tw"], res = [], ff = ""
+		if (runS) (list.push("en"))
+		list.sort()
+		list.forEach(function(i) {
+			res.push(i +": "+ Intl.getCanonicalLocales(i))
+		})
+		sDetail[sName] = res
+		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ list.length.toString().padStart(2,"0")
+		let canBtn = buildButton("3", sName, btnMsg)
+		let hash = sha1(res.join())
+		if (isFF) {
+			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {ff = " [FF91+]"
+			} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {ff = " [FF70-90]"
+			} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {ff = " [FF69 or lower]"
+			} else {ff = zNEW + (runS ? zSIM : "")
+			}
+		}
+		dom.fdCanonical.innerHTML = hash + canBtn + ff
+	} catch(e) {
+		dom.fdCanonical = e.name
+	}
+}
+
 function get_chrome() {
 	let os = "",
 		t0 = performance.now()
@@ -92,39 +119,49 @@ function get_chrome() {
 }
 
 function get_collation() {
-	let baselist = ['ka','ku','lo','no','pa','tk','zh-hk'],
-		chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D'],
-		list = [],
-		res = [],
-		t0 = performance.now()
-	// don't use unsupported locales: they fall back to system locale,
-	// which could be anything - when we want the hashes to be stable
-	baselist.forEach(function(locale) {
-		let test = Intl.NumberFormat.supportedLocalesOf(locale)
-		if (test.length) {list.push(locale)}
-	})
-	list.sort()
-	// output
-	function output(hash) {
+	try {
+		let baselist = ['ka','ku','lo','no','pa','tk','zh-hk'],
+			chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D']
+		let list = [],
+			res = [],
+			t0 = performance.now()
+		let sName = "feature_collation_list"
+		clearDetail(sName)
+		// don't use unsupported locales: they fall back to system locale,
+		// which could be anything - when we want the hashes to be stable
+		baselist.forEach(function(locale) {
+			let test = Intl.NumberFormat.supportedLocalesOf(locale)
+			if (test.length) {list.push(locale)}
+		})
+		if (runS) (list.push("en"))
+		list.sort()
+		// run
+		chars.sort() // set
+		list.forEach(function(i) {
+			chars.sort() // reset
+			chars.sort(Intl.Collator(i).compare)
+			let test = chars.join()
+			res.push(i +": "+ test)
+		})
+		// notation
 		let ff = ""
-		if (hash == "2aa31825857e6108274a7ee09bf80070d3000f6a") {ff = "70+"
-		} else if (hash == "290259b839fc8136cd2b171ff7487a099f8563d6") {ff = "68-69"
-		} else if (hash == "c32b1d8c96ace438b2742469af5b6cd0a6b8a2c6") {ff = "65-67"
-		} else if (hash == "0b928aff3d955fc0b4aa720e331a7a80ca5617a3") {ff = "64 or lower"
+		sDetail[sName] = res
+		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ baselist.length.toString().padStart(2,"0")
+		let colBtn = buildButton("3", sName, btnMsg)
+		let hash = sha1(res.join())
+		if (isFF) {
+			if (hash == "d9acf7224188d7ac3a3548e0d03e3033ae8c9652") {ff = " [FF70+]"
+			} else if (hash == "8367944425147f7e0f158a877f467278db6e4493") {ff = " [FF68-69]"
+			} else if (hash == "a103107b31916a5bbb05894c5aa2678b27c380cc") {ff = " [FF65-67]"
+			} else if (hash == "512d40975c881fd0cfe4d77816723e524f21774e") {ff = " [FF64 or lower]"
+			} else {ff= zNEW + (runS ? zSIM : "")
+			}
 		}
-		dom.fdCollation.setAttribute("class", ff == "" ? "c mono" : "c")
-		dom.fdCollation.innerHTML = ff == "" ? hash + zNEW : "Firefox [FF"+ ff +"]"
+		dom.fdCollation.innerHTML = hash + colBtn + ff
 		log_perf("collation [fd]",t0)
+	} catch(e) {
+		dom.fdCollation.innerHTML = e.name
 	}
-	// run
-	chars.sort() // set
-	list.forEach(function(i) {
-		chars.sort() // reset
-		chars.sort(Intl.Collator(i).compare)
-		let test = sha1(chars.join())
-		res.push(test +" "+ i)
-	})
-	output(sha1(res.join()))
 }
 
 function get_color() {
@@ -167,7 +204,7 @@ function get_errors() {
 		let res = [],
 			ff = "",
 			t0 = performance.now()
-		let sName = "feature_errors"
+		let sName = "feature_error_messages"
 		clearDetail(sName)
 
 		let tests = [
@@ -202,41 +239,35 @@ function get_errors() {
 		sDetail[sName] = res
 		let hash = sha1(res.join())
 		let errBtn = buildButton("3", sName, res.length +"/"+ tests.length)
-
-		if (isFF) {
-			// codes
-			let tmp = hash.substring(0,8)
+		// notation
 			// 74+: 1259822: error_message_fix: codes 1=false 2=true
-			if (tmp == "3f0a2927") {ff = "[FF93+] [Type 1]"
-			} else if (tmp == "fcb058e2") {ff = "[FF93+] [Type 2]"
-			} else if (tmp == "93d0c3af") {ff = "[FF88-92] [Type 1]"
-			} else if (tmp == "b6902095") {ff = "[FF88-92] [Type 2]"
-			} else if (tmp == "25d05006") {ff = "[FF86-87] [Type 1]"
-			} else if (tmp == "82d992d7") {ff = "[FF86-87] [Type 2]"
-			} else if (tmp == "5a0ce0c1") {ff = "[FF85] [Type 1]"
-			} else if (tmp == "c7d70afd") {ff = "[FF85] [Type 2]"
-			} else if (tmp == "6c8ac52f") {ff = "[FF84] [Type 1]"
-			} else if (tmp == "1ca49497") {ff = "[FF84] [Type 2]"
-			} else if (tmp == "df9b641d") {ff = "[FF83] [Type 1]"
-			} else if (tmp == "e540e119") {ff = "[FF83] [Type 2]"
-			} else if (tmp == "137d5080") {ff = "[FF75-82] [Type 1]"
-			} else if (tmp == "86ff3101") {ff = "[FF75-82] [Type 2]"
-			} else if (tmp == "54002b6f") {ff = "[FF74] [Type 1]"
-			} else if (tmp == "04e27611") {ff = "[FF74] [Type 2]"
-			} else if (tmp == "f0a867a2") {ff = "[FF71-72]"
-			} else if (tmp == "94b69f86") {ff = "[FF70-71]"
-			} else if (tmp == "117ef2fc") {ff = "[FF68-69]"
-			} else if (tmp == "32d3793c") {ff = "[FF60-67]"
+		let tmp = hash.substring(0,8)
+		if (isFF) {
+			let fix = " fixed]", nofix = " no-fix]"
+			if (tmp == "3f0a2927") {ff = " [FF93+"+ nofix
+			} else if (tmp == "fcb058e2") {ff = " [FF93+"+ fix
+			} else if (tmp == "93d0c3af") {ff = " [FF88-92"+ nofix
+			} else if (tmp == "b6902095") {ff = " [FF88-92"+ fix
+			} else if (tmp == "25d05006") {ff = " [FF86-87"+ nofix
+			} else if (tmp == "82d992d7") {ff = " [FF86-87"+ fix
+			} else if (tmp == "5a0ce0c1") {ff = " [FF85"+ nofix
+			} else if (tmp == "c7d70afd") {ff = " [FF85"+ fix
+			} else if (tmp == "6c8ac52f") {ff = " [FF84"+ nofix
+			} else if (tmp == "1ca49497") {ff = " [FF84"+ fix
+			} else if (tmp == "df9b641d") {ff = " [FF83"+ nofix
+			} else if (tmp == "e540e119") {ff = " [FF83"+ fix
+			} else if (tmp == "137d5080") {ff = " [FF75-82"+ nofix
+			} else if (tmp == "86ff3101") {ff = " [FF75-82"+ fix
+			} else if (tmp == "54002b6f") {ff = " [FF74"+ nofix
+			} else if (tmp == "04e27611") {ff = " [FF74"+ fix
+			} else if (tmp == "f0a867a2") {ff = " [FF71-73]"
+			} else if (tmp == "94b69f86") {ff = " [FF70-71]"
+			} else if (tmp == "117ef2fc") {ff = " [FF68-69]"
+			} else if (tmp == "32d3793c") {ff = " [FF60-67]"
+			} else {ff = zNEW + (runS ? zSIM : "")
 			}
-			if (ff !== "") {
-				dom.fdError.innerHTML = zFF +" "+ ff + smono + errBtn + sc
-			} else {
-				dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "") + errBtn
-				dom.fdError.setAttribute("class", "c mono")
-			}
-		} else {
-			dom.fdError.innerHTML = hash + errBtn
 		}
+		dom.fdError.innerHTML = hash + errBtn + ff
 		log_perf("errors [fd]",t0)
 		return resolve("errors:"+ hash)
 	})
@@ -565,16 +596,31 @@ function get_line_scrollbar(runtype) {
 }
 
 function get_locales() {
-	let supported = Intl.PluralRules.supportedLocalesOf(["kok","ia","tl","mai","sa","no"])
-	let hash = sha1(supported.join()), ff = ""
-	if (hash == "1f97cbf7d207da2ec78612cd872f785e0c8bef34") {ff = "91+"
-	} else if (hash == "34b51e904c1e07e21b110f435e4dc122e18456eb") {ff = "78-90"
-	} else if (hash == "b53a43de7c04eb3b72c94f5590cc3bc0808c98de") {ff = "70-77"
-	} else if (hash == "54a561ce7b6a36800e8d818c762e61ffb4dd32d6") {ff = "65-69"
-	} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {ff = "64 or lower"
+	try {
+		let res = [], ff = ""
+		let sName = "feature_supported_locales_list"
+		clearDetail(sName)
+		let list = ["kok","ia","tl","mai","sa","no"]
+		if (runS) {list.push("en")}
+		list.sort()
+		res = Intl.PluralRules.supportedLocalesOf(list)
+		sDetail[sName] = res
+		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ list.length.toString().padStart(2,"0")
+		let supBtn = buildButton("3", sName, btnMsg)
+		let hash = sha1(res.join())
+		if (isFF) {
+			if (hash == "484fbd05b65948839c1804b98b64b1779351d383") {ff = " [FF91+]"
+			} else if (hash == "48bc5f4887de1f772595a8ab482781663723673a") {ff = " [FF78-90]"
+			} else if (hash == "0b08a90192a58d9b3d86f282c97ffc856c483ce9") {ff = " [FF70-77]"
+			} else if (hash == "6106e7a683800853d75fe3f99a428f74253ec6ae") {ff = " [FF65-69]"
+			} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {ff = " [FF64 or lower]"
+			} else {ff = zNEW + (runS ? zSIM : "")
+			}
+		}
+		dom.fdLocales.innerHTML = hash + supBtn + ff
+	} catch(e) {
+		dom.fdLocales = e.name
 	}
-	dom.fdLocales.setAttribute("class", hash == "" ? "c mono" : "c")
-	dom.fdLocales.innerHTML = ff == "" ? hash + zNEW : "Firefox [FF"+ ff +"]"
 }
 
 function get_math() {
@@ -2470,21 +2516,23 @@ function outputFD(runtype) {
 			log_section("feature", t0, section)
 		})
 		get_collation()
+		get_canonical()
 		get_locales()
 
 	} else {
 		Promise.all([
 			get_errors(),
 			get_widgets(),
-			get_math()
+			get_math(),
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
+			get_collation()
+			get_canonical()
+			get_locales()
 			dom.fdBrandingCss = zNA
 			dom.fdResourceCss = zNA
-			dom.fdCollation = zNA
-			dom.fdLocales = zNA
 			dom.fdResource = zNA
 			dom.fdChrome = zNA
 			dom.fdVersion = zNA
