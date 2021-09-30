@@ -181,7 +181,7 @@ function get_errors() {
 			"self.reportError('93')", // < FF93
 			"let a = new Set([1,2,3]); let b = new Set([2,3,4]); let c = new Set(...a, ...b);", // changes FF83
 			"var x = @", // changes FF84
-			"let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)", // changes FF85
+			"let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')", // changes FF85
 			"for (async of [])", // changes FF86
 			'function invalid () { "use strict" \n ' + '"\\8"' + '}', // FF88+
 			"let t = ({ 1n: 1 })", // < FF74, changes FF68
@@ -207,7 +207,7 @@ function get_errors() {
 			// codes
 			let tmp = hash.substring(0,8)
 			// 74+: 1259822: error_message_fix: codes 1=false 2=true
-			if (tmp == "3f0a2927") {code = "M1"; ff = "[FF93+] [Type 1]"
+			if (tmp == "3f0a2927") {ff = "[FF93+] [Type 1]"
 			} else if (tmp == "fcb058e2") {ff = "[FF93+] [Type 2]"
 			} else if (tmp == "93d0c3af") {ff = "[FF88-92] [Type 1]"
 			} else if (tmp == "b6902095") {ff = "[FF88-92] [Type 2]"
@@ -231,7 +231,6 @@ function get_errors() {
 			if (ff !== "") {
 				dom.fdError.innerHTML = zFF +" "+ ff + smono + errBtn + sc
 			} else {
-				code = zNEW
 				dom.fdError.innerHTML = hash + zNEW + (runS ? zSIM : "") + errBtn
 				dom.fdError.setAttribute("class", "c mono")
 			}
