@@ -183,16 +183,20 @@ function get_computed_styles() {
 			let values = [], btns = []
 			// sim
 			if (runSC) {
+				if (isFile && cSim == 0) {console.error("make sure privacy.file_unique_origin = false for file:// scheme testing")}
 				cSim++
 				cSim = cSim % 10
 				if (cSim == 0) {console.log("style sim #0: all blocked")}
 				var bMsg = false
 			}
+			// file:// override for CSSRuleList
+			let fileSchemeOverride = (isFile && !runSC && isVer > 67 ? true : false)
 			// analyse
 			for (let i=0; i < 3; i++) {
 				let aRep = [], aReal = [], aFake = []
 				try {
 					aRep = res[i].keys
+					if (fileSchemeOverride && i==2) {aRep = res[1].keys}
 					// don't record untrustworthy: false positives FF60-62: getComputedStyle has extra styles
 					// remove diffs: we don't lose entropy, we already know the version number
 					if (i == 0) {
@@ -229,11 +233,13 @@ function get_computed_styles() {
 						aRep.sort()
 						aReal = aRep
 					}
+					//if (i==0) {console.debug(aReal.join("\n"))}
 					// data
 					let value = sha1(aRep.join())
 					values.push(value)
 					distinctRep.push(value)
-					let btn = buildButton("14", sNames[i] +"_reported_skip", aRep.length +"|"+ res[i].moz +"|"+ res[i].webkit)
+					let j = (fileSchemeOverride && i==2 ? 1 : i)
+					let btn = buildButton("14", sNames[i] +"_reported_skip", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
 					sDetail["css_computed_styles"] = aReal
 					if (aFake.length) {
 						fakeIndex.push(i)
@@ -293,8 +299,7 @@ function get_computed_styles() {
 					gBypassed.push("css:computed styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
 				}
 			} else {
-				if (bCount == 3) {value = zB0} else if (isSame) {value = distinctReal[0]}
-				sDetail["css_computed_styles"] = []
+				if (bCount == 3) {value = zB0} else if (isSame) {value = distinctReal[0]} else {sDetail["css_computed_styles"] = []}
 			}
 			// output
 			for (let i=0; i < values.length; i++) {
