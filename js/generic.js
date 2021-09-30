@@ -534,7 +534,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v85() { //85:1675240
 		try {
-			newFn("let r=('/a'); let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call(r)")
+			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
 		} catch(e) {
 			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
 		}
