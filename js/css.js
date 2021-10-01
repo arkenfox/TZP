@@ -171,7 +171,7 @@ function get_computed_styles() {
 		let sNames = ["css_getcomputed","css_htmlelement","css_cssrulelist"]
 		sDetail["css_computed_styles"] = []
 		sNames.forEach(function(k){clearDetail[k + "_fake_skip"]})
-		sNames.forEach(function(k){clearDetail[k + "_reported_skip"]})
+		sNames.forEach(function(k){clearDetail[k + "_reported_notglobal"]})
 
 		// run
 		Promise.all([
@@ -239,16 +239,16 @@ function get_computed_styles() {
 					values.push(value)
 					distinctRep.push(value)
 					let j = (fileSchemeOverride && i==2 ? 1 : i)
-					let btn = buildButton("14", sNames[i] +"_reported_skip", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
+					let btn = buildButton("14", sNames[i] +"_reported_notglobal", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
 					sDetail["css_computed_styles"] = aReal
 					if (aFake.length) {
 						fakeIndex.push(i)
-						sDetail[sNames[i] +"_reported_skip"] = aRep
+						sDetail[sNames[i] +"_reported_notglobal"] = aRep
 						sDetail[sNames[i] +"_fake_skip"] = aFake
 						btn += buildButton("14", sNames[i] +"_fake_skip", aFake.length +" lie"+ (aFake.length > 1 ? "s" : ""))
 						distinctReal.push(sha1(aReal.join()))
 					} else {
-						sDetail[sNames[i] +"_reported_skip"] = aReal
+						sDetail[sNames[i] +"_reported_notglobal"] = aReal
 						realIndex.push(i)
 						distinctReal.push(value)
 					}
