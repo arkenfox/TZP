@@ -36,26 +36,26 @@ function return_mm_dpi(type) {
 
 function get_canonical() {
 	try {
-		let sName = "feature_canonical_locales_list"
+		let sName = "feature_canonical_locales_skip"
 		clearDetail(sName)
-		let list = ["bh","hye","no","tl","tw"], res = [], ff = ""
+		let list = ["bh","hye","no","tl","tw"], res = []
 		if (runS) (list.push("en"))
 		list.sort()
 		list.forEach(function(i) {
 			res.push(i +": "+ Intl.getCanonicalLocales(i))
 		})
 		sDetail[sName] = res
-		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ list.length.toString().padStart(2,"0")
-		let canBtn = buildButton("3", sName, btnMsg)
+		let note = "details", color = "3"
 		let hash = sha1(res.join())
 		if (isFF) {
-			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {ff = " [FF91+]"
-			} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {ff = " [FF70-90]"
-			} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {ff = " [FF69 or lower]"
-			} else {ff = zNEW + (runS ? zSIM : "")
+			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {note = "FF91+"
+			} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {note = "FF70-90"
+			} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {note = "FF69 or lower"
+			} else {note = "NEW"; color = "bad"
 			}
 		}
-		dom.fdCanonical.innerHTML = hash + canBtn + ff
+		let btn = buildButton(color, sName, note)
+		dom.fdCanonical.innerHTML = hash + btn + (runS ? zSIM : "")
 	} catch(e) {
 		dom.fdCanonical = e.name
 	}
@@ -125,7 +125,7 @@ function get_collation() {
 		let list = [],
 			res = [],
 			t0 = performance.now()
-		let sName = "feature_collation_list"
+		let sName = "feature_collation_skip"
 		clearDetail(sName)
 		// don't use unsupported locales: they fall back to system locale,
 		// which could be anything - when we want the hashes to be stable
@@ -144,20 +144,19 @@ function get_collation() {
 			res.push(i +": "+ test)
 		})
 		// notation
-		let ff = ""
+		let note = "details", color = "3"
 		sDetail[sName] = res
-		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ baselist.length.toString().padStart(2,"0")
-		let colBtn = buildButton("3", sName, btnMsg)
 		let hash = sha1(res.join())
 		if (isFF) {
-			if (hash == "d9acf7224188d7ac3a3548e0d03e3033ae8c9652") {ff = " [FF70+]"
-			} else if (hash == "8367944425147f7e0f158a877f467278db6e4493") {ff = " [FF68-69]"
-			} else if (hash == "a103107b31916a5bbb05894c5aa2678b27c380cc") {ff = " [FF65-67]"
-			} else if (hash == "512d40975c881fd0cfe4d77816723e524f21774e") {ff = " [FF64 or lower]"
-			} else {ff= zNEW + (runS ? zSIM : "")
+			if (hash == "d9acf7224188d7ac3a3548e0d03e3033ae8c9652") {note = "FF70+"
+			} else if (hash == "8367944425147f7e0f158a877f467278db6e4493") {note = "FF68-69"
+			} else if (hash == "a103107b31916a5bbb05894c5aa2678b27c380cc") {note = "FF65-67"
+			} else if (hash == "512d40975c881fd0cfe4d77816723e524f21774e") {note = "FF64 or lower"
+			} else {note = "NEW"; color = "bad"
 			}
 		}
-		dom.fdCollation.innerHTML = hash + colBtn + ff
+		let btn = buildButton(color, sName, note)
+		dom.fdCollation.innerHTML = hash + btn + (runS ? zSIM : "")
 		log_perf("collation [fd]",t0)
 	} catch(e) {
 		dom.fdCollation.innerHTML = e.name
@@ -202,7 +201,6 @@ function get_color() {
 function get_errors() {
 	return new Promise(resolve => {
 		let res = [],
-			ff = "",
 			t0 = performance.now()
 		let sName = "feature_error_messages"
 		clearDetail(sName)
@@ -235,39 +233,39 @@ function get_errors() {
 				res.push(i +": "+ e.name +": "+ msg)
 			}
 		}
-
 		sDetail[sName] = res
 		let hash = sha1(res.join())
-		let errBtn = buildButton("3", sName, res.length +"/"+ tests.length)
 		// notation
 			// 74+: 1259822: error_message_fix: codes 1=false 2=true
 		let tmp = hash.substring(0,8)
+		let note = "details", color = "3"
 		if (isFF) {
-			let fix = " fixed]", nofix = " no-fix]"
-			if (tmp == "3f0a2927") {ff = " [FF93+"+ nofix
-			} else if (tmp == "fcb058e2") {ff = " [FF93+"+ fix
-			} else if (tmp == "93d0c3af") {ff = " [FF88-92"+ nofix
-			} else if (tmp == "b6902095") {ff = " [FF88-92"+ fix
-			} else if (tmp == "25d05006") {ff = " [FF86-87"+ nofix
-			} else if (tmp == "82d992d7") {ff = " [FF86-87"+ fix
-			} else if (tmp == "5a0ce0c1") {ff = " [FF85"+ nofix
-			} else if (tmp == "c7d70afd") {ff = " [FF85"+ fix
-			} else if (tmp == "6c8ac52f") {ff = " [FF84"+ nofix
-			} else if (tmp == "1ca49497") {ff = " [FF84"+ fix
-			} else if (tmp == "df9b641d") {ff = " [FF83"+ nofix
-			} else if (tmp == "e540e119") {ff = " [FF83"+ fix
-			} else if (tmp == "137d5080") {ff = " [FF75-82"+ nofix
-			} else if (tmp == "86ff3101") {ff = " [FF75-82"+ fix
-			} else if (tmp == "54002b6f") {ff = " [FF74"+ nofix
-			} else if (tmp == "04e27611") {ff = " [FF74"+ fix
-			} else if (tmp == "f0a867a2") {ff = " [FF71-73]"
-			} else if (tmp == "94b69f86") {ff = " [FF70-71]"
-			} else if (tmp == "117ef2fc") {ff = " [FF68-69]"
-			} else if (tmp == "32d3793c") {ff = " [FF60-67]"
-			} else {ff = zNEW + (runS ? zSIM : "")
+			let fix = " fixed", nofix = " no-fix"
+			if (tmp == "3f0a2927") {note = "FF93+"+ nofix
+			} else if (tmp == "fcb058e2") {note = "FF93+"+ fix
+			} else if (tmp == "93d0c3af") {note = "FF88-92"+ nofix
+			} else if (tmp == "b6902095") {note = "FF88-92"+ fix
+			} else if (tmp == "25d05006") {note = "FF86-87"+ nofix
+			} else if (tmp == "82d992d7") {note = "FF86-87"+ fix
+			} else if (tmp == "5a0ce0c1") {note = "FF85"+ nofix
+			} else if (tmp == "c7d70afd") {note = "FF85"+ fix
+			} else if (tmp == "6c8ac52f") {note = "FF84"+ nofix
+			} else if (tmp == "1ca49497") {note = "FF84"+ fix
+			} else if (tmp == "df9b641d") {note = "FF83"+ nofix
+			} else if (tmp == "e540e119") {note = "FF83"+ fix
+			} else if (tmp == "137d5080") {note = "FF75-82"+ nofix
+			} else if (tmp == "86ff3101") {note = "FF75-82"+ fix
+			} else if (tmp == "54002b6f") {note = "FF74"+ nofix
+			} else if (tmp == "04e27611") {note = "FF74"+ fix
+			} else if (tmp == "f0a867a2") {note = "FF71-73"
+			} else if (tmp == "94b69f86") {note = "FF70-71"
+			} else if (tmp == "117ef2fc") {note = "FF68-69"
+			} else if (tmp == "32d3793c") {note = "FF60-67"
+			} else {note = "NEW"; color = "bad"
 			}
 		}
-		dom.fdError.innerHTML = hash + errBtn + ff
+		let btn = buildButton(color, sName, note)
+		dom.fdError.innerHTML = hash + btn + (runS ? zSIM : "")
 		log_perf("errors [fd]",t0)
 		return resolve("errors:"+ hash)
 	})
@@ -597,27 +595,27 @@ function get_line_scrollbar(runtype) {
 
 function get_locales() {
 	try {
-		let res = [], ff = ""
-		let sName = "feature_supported_locales_list"
+		let res = []
+		let sName = "feature_supported_locales_skip"
 		clearDetail(sName)
 		let list = ["kok","ia","tl","mai","sa","no"]
 		if (runS) {list.push("en")}
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
 		sDetail[sName] = res
-		let btnMsg = res.length.toString().padStart(2,"0") +"/"+ list.length.toString().padStart(2,"0")
-		let supBtn = buildButton("3", sName, btnMsg)
 		let hash = sha1(res.join())
+		let note = "details", color = "3"
 		if (isFF) {
-			if (hash == "484fbd05b65948839c1804b98b64b1779351d383") {ff = " [FF91+]"
-			} else if (hash == "48bc5f4887de1f772595a8ab482781663723673a") {ff = " [FF78-90]"
-			} else if (hash == "0b08a90192a58d9b3d86f282c97ffc856c483ce9") {ff = " [FF70-77]"
-			} else if (hash == "6106e7a683800853d75fe3f99a428f74253ec6ae") {ff = " [FF65-69]"
-			} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {ff = " [FF64 or lower]"
-			} else {ff = zNEW + (runS ? zSIM : "")
+			if (hash == "484fbd05b65948839c1804b98b64b1779351d383") {note = "FF91+"
+			} else if (hash == "48bc5f4887de1f772595a8ab482781663723673a") {note = "FF78-90"
+			} else if (hash == "0b08a90192a58d9b3d86f282c97ffc856c483ce9") {note = "FF70-77"
+			} else if (hash == "6106e7a683800853d75fe3f99a428f74253ec6ae") {note = "FF65-69"
+			} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {note = "FF64 or lower"
+			} else {note = "NEW"; color = "bad"
 			}
 		}
-		dom.fdLocales.innerHTML = hash + supBtn + ff
+		let btn = buildButton(color, sName, note)
+		dom.fdLocales.innerHTML = hash + btn + (runS ? zSIM : "")
 	} catch(e) {
 		dom.fdLocales = e.name
 	}
