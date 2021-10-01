@@ -856,6 +856,7 @@ function togglerows(id, word) {
 function tidyName(name) {
 	name = name.replace(/\_method_skip/g, "")
 	name = name.replace(/\_skip/g, "")
+	name = name.replace(/\_notglobal/g, "")
 	name = name.replace(/\_/g, " ")
 	return name
 }
@@ -1061,19 +1062,24 @@ function log_section(name, time1, data) {
 				for (let i=0; i < gData.length; i++) {
 					metricCount += gData[i][1].length
 				}
-				// details: reset, add ordered non-empty non-skip-data
+				// details: reset, add ordered non-empty non-notglobal non-skip-data
 				gDetail = {}
 				gKnownDetail = {}
 				gMethodsDetail = {}
 				const names = Object.keys(sDetail).sort()
 				for (const k of names) if (sDetail[k].length) {
-					if (k.indexOf("_skip") == -1) {
-						gDetail[k] = sDetail[k]
-					} else {
-						if (k.indexOf("_method") !== -1) {
-							gMethodsDetail[k] = sDetail[k]
-						} else if (k.indexOf("_reported") == -1 && k.indexOf("_list") == -1) {
-							gKnownDetail[k] = sDetail[k]
+					if ((k.indexOf("_notglobal") == -1)) {
+						if (k.indexOf("_skip") == -1) {
+							// FP
+							gDetail[k] = sDetail[k]
+						} else {
+							if (k.indexOf("_method") !== -1) {
+								// method
+								gMethodsDetail[k] = sDetail[k]
+							} else {
+								// lies
+								gKnownDetail[k] = sDetail[k]
+							}
 						}
 					}
 				}

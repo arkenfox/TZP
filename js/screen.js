@@ -36,7 +36,7 @@ function return_mm_dpi(type) {
 
 function get_canonical() {
 	try {
-		let sName = "feature_canonical_locales_skip"
+		let sName = "feature_canonical_locales_notglobal"
 		clearDetail(sName)
 		let list = ["bh","hye","no","tl","tw"], res = []
 		if (runS) (list.push("en"))
@@ -125,7 +125,7 @@ function get_collation() {
 		let list = [],
 			res = [],
 			t0 = performance.now()
-		let sName = "feature_collation_skip"
+		let sName = "feature_collation_notglobal"
 		clearDetail(sName)
 		// don't use unsupported locales: they fall back to system locale,
 		// which could be anything - when we want the hashes to be stable
@@ -596,7 +596,7 @@ function get_line_scrollbar(runtype) {
 function get_locales() {
 	try {
 		let res = []
-		let sName = "feature_supported_locales_skip"
+		let sName = "feature_supported_locales_notglobal"
 		clearDetail(sName)
 		let list = ["kok","ia","tl","mai","sa","no"]
 		if (runS) {list.push("en")}
@@ -2242,7 +2242,7 @@ function goNW_UA() {
 	if (hash == controlhash) {
 		hash += match_green
 	} else {
-		let sStr = "ua_navigator_new_window_reported_diff_skip", diffs = []
+		let sStr = "ua_navigator_new_window_reported_diff_notglobal", diffs = []
 		for (let i = 0; i < res.length; i++) {
 			if (res[i] !== control[i]) {diffs.push(res[i])}
 		}

@@ -21,7 +21,7 @@ function get_iframe_props() {
 	let sTrue = "misc_iframe_window_properties"
 	let sFake = sTrue + "_fake_skip"
 	let sSuspect = sTrue + "_suspect_skip"
-	let sAll = sTrue + "_reported_skip"
+	let sAll = sTrue + "_reported_notglobal"
 	clearDetail(sTrue)
 	clearDetail(sFake)
 	clearDetail(sSuspect)
@@ -99,6 +99,8 @@ function get_iframe_props() {
 		// sort (open console can affect order) + output
 		// real
 		props.sort()
+		//console.debug(props.join("\n"))
+		//console.debug(props)
 		sDetail[sTrue] = props
 		// display
 		allProps.sort()
@@ -138,7 +140,7 @@ function get_nav_prototype() {
 	let sTrue = "misc_navigator_keys",
 		sFake = "misc_navigator_keys_fake_skip",
 		sMoved = "misc_navigator_keys_moved_method_skip",
-		sAll = "misc_navigator_keys_reported_skip"
+		sAll = "misc_navigator_keys_reported_notglobal"
 	sDetail[sTrue] = navKeys["trueKeys"]
 	sDetail[sFake] = navKeys["fakeKeys"]
 	sDetail[sMoved] = navKeys["movedKeys"]

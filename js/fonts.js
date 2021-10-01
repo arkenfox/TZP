@@ -35,11 +35,11 @@ let fntAlways = {
 }
 let fntTB = {
 	android: [],linux: [],
-	// mac ToDo: move bundled items to fntBundled
+	// mac ToDo: move bundled items to fntTBBundled
 	mac: ["AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Lucida Grande","Monaco","Noto Sans Armenian","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans Sinhala","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Tibetan","Noto Sans Yi","STHeiti","STIX Math","Tahoma","Thonburi","Times","Times New Roman","Verdana",],
 	windows: ["Arial","Arial Black","Arial Narrow","Batang","Cambria Math","Courier New","Euphemia","Gautami","Georgia","Gulim","GulimChe","Iskoola Pota","Kalinga","Kartika","Latha","Lucida Console","MS Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Meiryo","Meiryo UI","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","MingLiU","Nyala","PMingLiU","Plantagenet Cherokee","Raavi","Segoe UI","Segoe UI Black","Segoe UI Light", "Segoe UI Semibold","Segoe UI Semilight","Shruti","SimSun","Sylfaen","Tahoma","Times New Roman","Tunga","Verdana","Vrinda","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight","MS Mincho","MS PGothic","MS PMincho",],
 }
-let fntBundled = {
+let fntTBBundled = {
 	android: [],linux: [],mac: [],
 	windows: ["Noto Sans Buginese","Noto Sans Khmer","Noto Sans Lao","Noto Sans Myanmar","Noto Sans Yi",],
 }
@@ -69,7 +69,7 @@ function set_fntList() {
 			// masterbase
 			if (isTB) {
 				array = fntTB[k].concat(fntAlways[k])
-				array = array.concat(fntBundled[k])
+				array = array.concat(fntTBBundled[k])
 			} else {
 				array = fntBase[k].concat(fntAlways[k])
 			}
@@ -84,7 +84,7 @@ function set_fntList() {
 		let names = Object.keys(fntMaster)
 		for (const k of names) {
 			let array = fntMaster[k]
-			let str = "fonts_fonts_"+ k + "_list_skip"
+			let str = "fonts_fonts_"+ k + "_list_notglobal"
 			sDetail[str] = array
 			fontBtns += buildButton("12", str, (k == isOS ? array.length +" " : "") + k)
 		}
@@ -93,7 +93,7 @@ function set_fntList() {
 	if (isBaseFonts) {
 		fntList = fntMasterBase[isOS]
 		fntList.sort()
-		let strB = "fonts_fonts_"+ isOS + (isTB ? "_tb_whitelist" : "_base" ) + "_list_skip"
+		let strB = "fonts_fonts_"+ isOS + (isTB ? "_tb_whitelist" : "_base" ) + "_list_notglobal"
 		sDetail[strB] = fntList
 		fontBaseBtn = buildButton("12", strB, (isTB ? "whitelist" : "base fonts"))
 	} else {
@@ -374,7 +374,7 @@ function get_fonts() {
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		clearDetail["fonts_fonts"]
-		sNames.forEach(function(name) {clearDetail("fonts_"+ name + "_reported_skip")})
+		sNames.forEach(function(name) {clearDetail("fonts_"+ name + "_reported_notglobal")})
 		// run
 		getFonts().then(res => {
 			// remove element
@@ -472,7 +472,7 @@ function get_fonts() {
 				let name = item.split(":")[0],
 					hash = item.split(":")[1],
 					count = item.split(":")[2],
-					detail = "fonts_"+ name + "_reported_skip",
+					detail = "fonts_"+ name + "_reported_notglobal",
 					el = document.getElementById(name),
 					display = ""
 				if (isBypass) {
