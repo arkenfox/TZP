@@ -59,7 +59,7 @@ function get_media(runtype) {
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	list.sort()
 	// lists
-	let str = "media_"+ runtype +"_list_skip"
+	let str = "media_"+ runtype +"_list_notglobal"
 	sDetail[str] = list
 	if (gLoad) {mediaBtns += buildButton("13", str, list.length +" "+ runtype)}
 
