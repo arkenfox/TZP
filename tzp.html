@@ -95,7 +95,11 @@
 		<tr><td>
 			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span>
 			<span class="c mono" id="allcheck"></span></div>
-			&nbsp loose</td><td class="c mono" id="allhash"></td></tr>
+			&nbsp top level</td><td class="c mono" id="allhash"></td></tr>
+		<!--
+		<tr><td>iframe</td><td class="c mono faint" id="iframehash"></td></tr>
+		<tr><td>workers</td><td class="c mono faint" id="workershash"></td></tr>
+		-->
 		<tr><td>prototype lies <sup>1</sup></td><td class="c mono" id="prototypehash"></td></tr>
 		<tr><td>proxy lies <sup>1</sup></td><td class="c mono" id="proxyhash"></td></tr>
 		<tr><td>known lies</td><td class="c mono" id="knownhash"></td></tr>
@@ -239,7 +243,7 @@
 		<tr><td colspan="2" class="intro"><span class="no_color">
 			These tests, tailored for <code>Firefox</code>, are to show that you cannot hide your <code>browser</code>,
 			<code>version</code> or <code>OS</code>. Some OS "guesses" don't have to be "correct"; the measurements provide
-			the real entropy, such as math hashes, branding dimensions, and pixel values.	Each test is independent of the others.</span>
+			the real entropy, such as math hashes, branding dimensions, and pixel values.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</span></div>
@@ -261,9 +265,9 @@
 		<tr><td>[canonical locales] browser</td><td class="c mono" id="fdCanonical"></td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/supportedlocales.html">[PoC]</a>
 			&nbsp [supported locales] browser</td><td class="c mono" id="fdLocales"></td></tr>
-		<tr><td>[math] browser</td><td class="c" id="fdMath"></td></tr>
+		<tr><td>[math] browser</td><td class="c mono" id="fdMath"></td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
-			&nbsp [math] os</td><td class="c" id="fdMathOS"></td></tr>
+			&nbsp [math] os</td><td class="c mono" id="fdMathOS"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">Linux, Mac or Windows<br>
 			if <b>none</b> show = Android<br>if <b>all</b> show = fonts are blocked</span>
@@ -274,27 +278,8 @@
 		<tr><td>[css line-height] os</td><td class="c" id="fdLH"></td></tr>
 		<tr><td>[viewport scrollbar width] os <sup>2, 3</sup></td><td class="c" id="fdScrollV"></td></tr>
 		<tr><td>[element scrollbar width] os</td><td class="c" id="fdScrollE"></td></tr>
-		<tr><td>[widgets] os</td><td class="c" id="fdWidget"></td></tr>
-		<tr><td colspan="2" class="showhide">
-			<span id="labelE" class="btnb" onClick="togglerows('E')">&#9660; show details</span></td></tr>
-		<tr class="togE"><td></td><td class="s3">math</td></tr>
-			<tr class="togE"><td>hash</td><td class="c mono" id="mathhash"></td></tr>
-			<tr class="togE"><td>1st edition</td><td class="c mono" id="math1hash"></td></tr>
-			<tr class="togE"><td>polyfills: 6th edition</td><td class="c mono" id="math6hash"></td></tr>
-		<tr class="togE"><td></td><td class="s3">widgets</td></tr>
-			<tr class="togE"><td>hash</td><td class="c mono" id="widgetH"></td></tr>
-			<tr class="togE"><td id="widfirst">
-				<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">
-					button, checkbox<br>color, combobox<br>radio, text</span></div>&nbsp various</td>
-				<td class="mono spaces" id="wid0"></td></tr> <!-- button -->
-			<tr class="hidden"><td>checkbox</td><td id="wid1"></td></tr>
-			<tr class="hidden"><td>color</td><td id="wid2"></td></tr>
-			<tr class="hidden"><td>combobox</td><td id="wid3"></td></tr>
-			<tr class="hidden"><td>radio</td><td id="wid4"></td></tr>
-			<tr class="hidden"><td>text</td><td id="wid5"></td></tr>
-			<tr class="togE"><td>datetime</td><td class="c" id="wid6"></td></tr>
-			<tr class="togE"><td>textarea</td><td class="c" id="wid7"></td></tr>
-			<tr class="togE"><td colspan="2"></td></tr>
+		<tr><td>[widgets] os</td><td class="c mono" id="fdWidget"></td></tr>
+		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
 			<span class="no_color"> , </span><a target="_blank" class="blue"

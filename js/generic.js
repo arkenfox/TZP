@@ -1246,7 +1246,6 @@ function outputSection(id, cls) {
 		if (id=="all" || id=="12") {reset_fonts()}
 		if (id=="all" || id=="1") {dom.kbt.value = ""}
 		// hide: don't shrink/grow
-		if (id=="all" || id=="3") {dom.wid0.style.color = zhide}
 		if (id=="18") {dom.mathmltest.style.color = zhide}
 
 		function output() {
