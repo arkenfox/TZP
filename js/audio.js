@@ -298,8 +298,12 @@ function outputAudio() {
 					log_section("audio", t0, section)
 				})
 			} catch(e) {
-				dom.audioCopy = zB0; dom.audioGet = zB0; dom.audioSum = zB0
-				section.push("OfflineAudioContext:"+ zB0)
+				dom.audioCopy = e.name; dom.audioGet = e.name; dom.audioSum = e.name
+				if (gRun) {
+					gKnown.push("audio:OfflineAudioContext")
+					gMethods.push("audio:OfflineAudioContext:blocked")
+				}
+				section.push("OfflineAudioContext:"+ zLIE)
 				log_section("audio", t0, section)
 			}
 		}
