@@ -351,7 +351,7 @@ function get_svg() {
 }
 
 function get_wasm() {
-	let supported = (() => {
+	let res = (() => {
 		try {
 			if (typeof WebAssembly === "object"	&& typeof WebAssembly.instantiate === "function") {
 				const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00))
@@ -359,14 +359,28 @@ function get_wasm() {
 					return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
 			}
 		} catch (e) {
-			console.debug(e.name, e.message)
+			return [e.name, e.message]
 		}
 		return false
 	})()
-	// ToDo: dom.wasm.innerHTML = (supported && isTB ? zE + tb_standard : zD + tb_safer)
-	let r = (supported ? zE : zD )
-	dom.wasm = r
-	return "wasm:"+ r
+	// ToDo: dom.wasm.innerHTML = (res && isTB ? zE + tb_standard : zD + tb_safer)
+	let display = ""
+	if (res == true) {
+		display = zE
+	} else if (res == false) {
+		display = zD
+	} else {
+		// we only get errors if wasm is enabled
+		display = soB + res.join(": ") + scC
+		res = zE
+		if (gRun) {
+			gKnown.push("misc:wasm")
+			gBypassed.push("misc:wasm:enabled")
+			gMethods.push("misc:wasm:blocked")
+		}
+	}
+	dom.wasm.innerHTML = display
+	return "wasm:"+ res
 }
 
 function get_windowcontent() {
