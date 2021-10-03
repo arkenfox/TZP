@@ -358,7 +358,9 @@ function get_wasm() {
 				if (module instanceof WebAssembly.Module)
 					return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
 			}
-		} catch (e) {}
+		} catch (e) {
+			console.debug(e.name, e.message)
+		}
 		return false
 	})()
 	// ToDo: dom.wasm.innerHTML = (supported && isTB ? zE + tb_standard : zD + tb_safer)
