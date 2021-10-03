@@ -196,20 +196,20 @@ function get_lang_doc() {
 					try {
 						part1 = r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
 						+", "+ r3.getTimezoneOffset() +", "+ r4.getTimezoneOffset()
-					} catch(err) {
-						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					} catch(error) {
+						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
 					}
 					try {
 						part2 = ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
 						+", "+ ((r3.getTime() - c3.getTime())/k) +", "+ ((r4.getTime() - c4.getTime())/k)
-					} catch(err) {
-						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					} catch(error) {
+						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
 					}
 					try {
 						part3 = ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
 						+", "+ ((Date.parse(r3) - Date.parse(c3))/k) +", "+ ((Date.parse(r4) - Date.parse(c4))/k)
-					} catch(err) {
-						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					} catch(error) {
+						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
 					}
 					return part1 +" | "+ part2 +" | "+ part3
 				} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
