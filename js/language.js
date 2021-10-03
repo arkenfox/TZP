@@ -559,7 +559,7 @@ function get_lang_doc() {
 			}
 		}
 		// debugging: error tracking
-		//if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
+		if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
 
 		// split into three
 		let aLang = res.slice(0,12)
