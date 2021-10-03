@@ -683,12 +683,12 @@ function get_math() {
 			if (m6 == "1" | m6 == "3") {
 				fdMath6=zFF
 			} else if (m6 == "2") {
-				fdMath6=zFF +" [32-bit]"
+				fdMath6=zFF +" [32bit]"
 			}
 			// os, refine browser
 			if (m1 == "A" | m1 == "H") {
 				// A or H: always 64bit WIN on 64bit FF
-				fdMath1="Windows [64-bit]"
+				fdMath1="Windows [64bit]"
 				fdMath6=zSDK64
 				isOS64math = 64
 			} else if (m1 == "C") {
@@ -700,15 +700,15 @@ function get_math() {
 				fdMath1="Linux"
 				if (m6 == "1") {
 					// 60-67: 1D : always 64bit Linux -> 64bit FF
-					fdMath1="Linux [64-bit]"
-					fdMath6=zFF +" [64-bit]"
+					fdMath1="Linux [64bit]"
+					fdMath6=zFF +" [64bit]"
 					isOS64math = 64
 				}	else if (m6 == "3") {
 					// 68+: 3D : can be FF64bit or TB32/64bit
 					// values already set
 				}	else if (m6 == "2") {
 					// D2: always 32bit Linux (32bit FF set earlier)
-					fdMath1="Linux [32-bit]"
+					fdMath1="Linux [32bit]"
 					isOS64math = 32
 				}
 			} else if (m1 == "G") {
@@ -717,7 +717,7 @@ function get_math() {
 			} else if (m1 == "E") {
 				// E: always Mac: and thus 64bit FF
 				fdMath1="Mac"
-				fdMath6=zFF +" [64-bit]"
+				fdMath6=zFF +" [64bit]"
 				isOS64math = 64
 			} else if (m1 == "F") {
 				// F: always Android
@@ -728,7 +728,7 @@ function get_math() {
 				if (m6 == "1") {
 					// ESR60: 1B: always 64bit TB: thus 64bit WIN
 					fdMath6=zMingw64
-					fdMath1="Windows [64-bit]"
+					fdMath1="Windows [64bit]"
 					isOS64math = 64
 				} else if (m6 == "2") {
 					// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
@@ -744,11 +744,6 @@ function get_math() {
 			let isRFPMath = false
 			if (m1 + m6 == "F3") {
 				isRFPMath = true
-				dom.fdMathOS.setAttribute("class", "c mono")
-				dom.fdMath.setAttribute("class", "c mono")
-			} else {
-				dom.fdMathOS.setAttribute("class", "c")
-				dom.fdMath.setAttribute("class", "c")
 			}
 			if (isFF) {
 				//browser
@@ -764,7 +759,6 @@ function get_math() {
 						// new
 						m1hash += strNew
 						fdMath1 = m1hash // os
-						dom.fdMathOS.setAttribute("class", "c mono")
 					}
 				} else {
 					// known: add code
@@ -782,7 +776,6 @@ function get_math() {
 					} else {
 						m6hash += strNew
 						fdMath6 = m6hash
-						dom.fdMath.setAttribute("class", "c mono")
 					}
 				} else {
 					// known: add code
@@ -814,10 +807,6 @@ function get_math() {
 				dom.fdMathOS.innerHTML = fdMath1 + rfp_red
 				dom.fdMath.innerHTML = fdMath6 + rfp_red
 			}
-			// output hashes
-			dom.math1hash.innerHTML = m1hash
-			dom.math6hash.innerHTML = m6hash
-			dom.mathhash.innerHTML = mchash
 			// perf
 			log_perf("math [fd]",t0)
 			// blockage
@@ -864,13 +853,6 @@ function get_math() {
 				build_output()
 				output()
 			} else {
-				dom.fdMathOS.setAttribute("class", "c mono")
-				dom.fdMath.setAttribute("class", "c mono")
-				dom.fdWidget.setAttribute("class", "c mono")
-				dom.fdError.setAttribute("class", "c mono")
-				dom.math1hash.innerHTML = m1hash
-				dom.math6hash.innerHTML = m6hash
-				dom.mathhash.innerHTML = mchash
 				if (mchash.substring(0,6) == "random") {mchash = "random"}
 				dom.fdMath.innerHTML = mchash
 				return resolve("math:"+ mchash)
@@ -1843,79 +1825,65 @@ function get_viewport(runtype) {
 
 function get_widgets() {
 	return new Promise(resolve => {
-		let list = ['button','checkbox','color','combobox','radio','text'],
-			font = "",
-			font0 = "",
-			fontdiff = false,
-			size = "",
-			size0 = "",
-			sizediff = false,
-			output = "",
-			os = "",
-			hash = [],
-			combined = [],
+		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea'],
 			t0 = performance.now()
+		let sName = "feature_widgets"
+		sDetail[sName] = []
 
-		// loop elements
-		for (let i=0; i < (list.length + 2); i++) {
-			let el = document.getElementById("widget"+ i)
-			try {
+		try {
+			// loop elements
+			let res = [], sizes = [], fonts = []
+			for (let i=0; i < list.length; i++) {
+				let el = document.getElementById("widget"+ i)
+				let font = "unknown", size = "unknown"
 				font = getComputedStyle(el).getPropertyValue("font-family")
-			} catch(e) {font = "unknown"}
-			try {
 				size = getComputedStyle(el).getPropertyValue("font-size")
-			} catch(e) {size = "unknown"}
-			if (runS) {
-				if (i == 1) {font = "-apple-system"; size="11px"} // font + size
-				//if (i == 4) {font = "-apple-system"} // font
-				//if (i == 2) {size="13px"} // size
+				if (runS) {
+					//if (i == 4) {font = "unknown"} // bypass but new
+					//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
+					if (i == 4) {font = "-apple-system"} // font
+					//if (i == 2) {size="26px"} // size
+				}
+				res.push(list[i] +": "+ font +", "+ size)
+				if (i < 6) {sizes.push(size); fonts.push(font)}
 			}
-			output = font +", "+ size
-			// list items: compare to 1
-			if (i < list.length) {
-				combined.push(list[i].padStart(14) +": "+ output)
-				if (i == 0) {
-					size0 = size; font0 = font
+			let hash = sha1(res.join())
+			sDetail[sName] = res
+			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
+			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
+			// notate
+			let note = "details", color = "3", mixed = ""
+			if (isFF) {
+				// we only need the font for OS: ignore unknown to still get an OS
+				let fntTmp = fonts
+				if (fntTmp.length > 1) {
+					fntTmp = fntTmp.filter(x => !["unknown"].includes(x))
+				}
+				if (fntTmp.length == 1) {
+					let font0 = fntTmp[0]
+					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"}
+						else if (font0 == "Roboto") {note = "android"}
+						else if (font0 == "-apple-system") {note = "mac"}
+						else if (font0 == "unknown") {note = "unknown"; color = "bad"}
+						else {note = "linux"
+					}
 				} else {
-					if (size !== size0) {sizediff = true}
-					if (font !== font0) {fontdiff = true}
+					note = "NEW"; color = "bad"
+				}
+				if (note !== "NEW") {
+					if (fonts.length > 1 || sizes.length > 1) {mixed = zNEW}
 				}
 			}
-			// all
-			document.getElementById("wid"+ i).innerHTML = output
-			hash.push(output)
+			let btn = buildButton(color, sName, note)
+			dom.fdWidget.innerHTML = hash + btn + mixed + (runS ? zSIM : "")
+			// perf & resolve
+			log_perf("widgets [fd]",t0)
+			return resolve("widgets:"+ hash)
+		} catch(e) {
+			dom.fdWidget = zB0
+			log_perf("widgets [fd]",t0)
+			return resolve("widgets:"+ zB0)
 		}
-		// overall hash
-		let whash = sha1(hash.join())
-		// output
-		if (fontdiff + sizediff > 0) {
-			// combined
-			dom.widfirst.innerHTML = "various"
-			dom.wid0.innerHTML = combined.join("<br>")
-		}
-		if (isFF) {
-			if (sizediff) {size0 = "mixed sizes"}
-			if (fontdiff) {
-				font0 = "mixed fonts";
-				os = whash + zNEW
-				dom.fdWidget.setAttribute("class", "c mono")
-			} else {
-					if (font0.slice(0,12) == "MS Shell Dlg") {os="Windows"}
-					else if (font0 == "Roboto") {os="Android"}
-					else if (font0 == "-apple-system") {os="Mac"}
-					else if (font0 == "unknown") {os = ""}
-					else {os="Linux"}
-			}
-			os = (os == "" ? zB0 : os) +" ["+ font0 +", "+ size0 +"]"
-			dom.fdWidget.innerHTML = os + (runS ? zSIM : "")			
-		} else {
-			dom.fdWidget = whash
-		}
-		dom.wid0.style.color = zshow
-		dom.widgetH = whash + (runS ? zSIM : "")
-		// perf & resolve
-		log_perf("widgets [fd]",t0)
-		return resolve("widgets:"+ whash)
 	})
 }
 
