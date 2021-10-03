@@ -48,7 +48,11 @@ function get_iframe_props() {
 		'CustomEvent','HTMLObjectElement','String','WeakSet','decodeURI','decodeURIComponent',
 		'encodeURI','encodeURIComponent','escape','unescape',
 		// NoScript
-		'MediaSource', 'URL', 'webkitURL',
+		'MediaSource','URL','webkitURL',
+		// Javascript Redirector
+		'Gamepad','Math','PerformanceEntry','Promise','Proxy','VRFrameData',
+		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
+		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
 	]
 
 	let r
