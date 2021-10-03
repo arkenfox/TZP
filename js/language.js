@@ -181,7 +181,11 @@ function get_lang_doc() {
 				} else if (item == 11) {return "n/a"
 				// timezone
 				} else if (item == 12) {
-					let k = 60000, yr = Date().split` `[3]
+					let k = 60000
+					let yr = 2021
+					try {yr = Date().split` `[3]} catch(e) {
+						try {yr = new Date().getFullYear()} catch(e) {}
+					}
 					// control
 					let c1 = new Date("January 1, "+ yr +" 13:00:00 UTC"),
 						c2 = new Date("April 1, "+ yr +" 13:00:00 UTC"),
@@ -559,7 +563,7 @@ function get_lang_doc() {
 			}
 		}
 		// debugging: error tracking
-		if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
+		//if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
 
 		// split into three
 		let aLang = res.slice(0,12)
