@@ -256,46 +256,52 @@ function outputAudio() {
 		pxi_oscillator.start(0)
 		context.startRendering()
 		context.oncomplete = function(event) {
-			let copyTest = new Float32Array(44100)
-			event.renderedBuffer.copyFromChannel(copyTest, 0)
-			let getTest = event.renderedBuffer.getChannelData(0)
-			Promise.all([
-				crypto.subtle.digest("SHA-256", getTest),
-				crypto.subtle.digest("SHA-256", copyTest),
-			]).then(function(hashes){
-				let min = 124.04344, max = 124.08076
-				if (isFF) {
-					min = 35.738329
-					max = 35.78334
-				}
-				// sum
-				let sum = 0, sum2 = 0, sum3 = 0
-				for (let i=0; i < getTest.length; i++) {
-					let x = getTest[i]
-					if (i > 4499 && i < 5000) {sum += Math.abs(x)}
-					sum2 += x
-					sum3 += Math.abs(x)
-				}
-				// lies
-				let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
-				if (sum2 == sum3) {isLies = true}
-				if (isFF || isEngine == "blink") {
-					if (sum < min || sum > max) {isLies = true}
-				}
-				pxi_compressor.disconnect()
-				// get/copy
-				let hashG = sha1(byteArrayToHex(hashes[0]))
-				let hashC = sha1(byteArrayToHex(hashes[1]))
-				if (hashG !== hashC) {isLies = true}
-				// display/FP
-				dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
-				dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
-				dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-				section.push("OfflineAudioContext:"+ (isLies ? zLIE : hashG))
-				if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
-				// done
+			try {
+				let copyTest = new Float32Array(44100)
+				event.renderedBuffer.copyFromChannel(copyTest, 0)
+				let getTest = event.renderedBuffer.getChannelData(0)
+				Promise.all([
+					crypto.subtle.digest("SHA-256", getTest),
+					crypto.subtle.digest("SHA-256", copyTest),
+				]).then(function(hashes){
+					let min = 124.04344, max = 124.08076
+					if (isFF) {
+						min = 35.738329
+						max = 35.78334
+					}
+					// sum
+					let sum = 0, sum2 = 0, sum3 = 0
+					for (let i=0; i < getTest.length; i++) {
+						let x = getTest[i]
+						if (i > 4499 && i < 5000) {sum += Math.abs(x)}
+						sum2 += x
+						sum3 += Math.abs(x)
+					}
+					// lies
+					let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
+					if (sum2 == sum3) {isLies = true}
+					if (isFF || isEngine == "blink") {
+						if (sum < min || sum > max) {isLies = true}
+					}
+					pxi_compressor.disconnect()
+					// get/copy
+					let hashG = sha1(byteArrayToHex(hashes[0]))
+					let hashC = sha1(byteArrayToHex(hashes[1]))
+					if (hashG !== hashC) {isLies = true}
+					// display/FP
+					dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
+					dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
+					dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
+					section.push("OfflineAudioContext:"+ (isLies ? zLIE : hashG))
+					if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
+					// done
+					log_section("audio", t0, section)
+				})
+			} catch(e) {
+				dom.audioCopy = zB0; dom.audioGet = zB0; dom.audioSum = zB0
+				section.push("OfflineAudioContext:"+ zB0)
 				log_section("audio", t0, section)
-			})
+			}
 		}
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
