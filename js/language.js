@@ -192,14 +192,26 @@ function get_lang_doc() {
 						r2 = new Date("April 1, "+ yr +" 13:00:00"),
 						r3 = new Date("July 1, "+ yr +" 13:00:00"),
 						r4 = new Date("October 1, "+ yr +" 13:00:00")
-					return r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
+					let part1 = zB0, part2 = zB0, part3 = zB0
+					try {
+						part1 = r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
 						+", "+ r3.getTimezoneOffset() +", "+ r4.getTimezoneOffset()
-						// getTime
-						+" | "+ ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
+					} catch(err) {
+						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					}
+					try {
+						part2 = ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
 						+", "+ ((r3.getTime() - c3.getTime())/k) +", "+ ((r4.getTime() - c4.getTime())/k)
-						// Date.parse
-						+" | "+ ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
+					} catch(err) {
+						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					}
+					try {
+						part3 = ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
 						+", "+ ((Date.parse(r3) - Date.parse(c3))/k) +", "+ ((Date.parse(r4) - Date.parse(c4))/k)
+					} catch(err) {
+						err.push(i +" [unexpected]: "+ err.name +" : "+ err.message)
+					}
+					return part1 +" | "+ part2 +" | "+ part3
 				} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
 				} else if (item == 14) {
 					let tzresults = [],
