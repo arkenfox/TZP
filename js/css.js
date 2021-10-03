@@ -191,6 +191,7 @@ function get_computed_styles() {
 			}
 			// file:// override for CSSRuleList
 			let fileSchemeOverride = (isFile && !runSC && isVer > 67 ? true : false)
+			if (isFile && !isFF) {fileSchemeOverride = true}
 			// analyse
 			for (let i=0; i < 3; i++) {
 				let aRep = [], aReal = [], aFake = []
