@@ -15,6 +15,9 @@ let jsFiles = [],
 	gLies = [],
 	gLiesProxy = [],
 	gLiesDetail = {},
+	// errors
+	gErrors = [],
+	gErrorsOnce = [],
 	// known
 	gKnown = [],
 	gKnownDetail = {},
@@ -154,7 +157,7 @@ let avh = "",
 	logResize = true,
 	logStorage = false,
 // simulations
-	runS = false,
-	runSUA = false,
-	runSL = false,
-	runSC = false
+	runS = false, // different values
+	runSUA = false, // ua lies
+	runSL = false, // lies
+	runSC = false // css styles

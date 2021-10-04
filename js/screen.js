@@ -391,7 +391,9 @@ function get_line_scrollbar(runtype) {
 				}
 			}
 			// output
-			if (jsZoom !== 100) {sbZoom = " at "+ jsZoom +"% "}
+			if (jsZoom !== 100) {
+				sbZoom = " at "+ (isOS == "android" ? jsZoom.toFixed(5)+ " devicePixelRatio ": jsZoom +"% ")
+			}
 			dom.fdScrollV.innerHTML = w +"px "+ sbZoom + os
 			// element scrollbar
 			let eW = (100-dom.fdScroll.scrollWidth)

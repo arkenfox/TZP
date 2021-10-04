@@ -10,6 +10,7 @@ function get_component_shims() {
 		sHash = sha1(keys.join())
 		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
+		log_error("misc: component_shims", e.name, e.message)
 		sHash = zU
 		dom.shim = zU
 	}
@@ -114,29 +115,38 @@ function get_iframe_props() {
 		dom.iProps.innerHTML = output
 		r= sha1(props.join())
 	} catch(e) {
-		r = "error"
-		dom.iProps = r
+		log_error("misc: iframe window properties", e.name, e.message)
+		dom.iProps = zB0
+		r = zLIE
 	}
 	return "iframe_properties:"+ r
 }
 
 function get_mathml() {
 	// build
-	let str = "<math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>"+
-		"<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>"+
-		"<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>"+
-		"<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math>"
-	dom.mathmltest.innerHTML = str
-	dom.mathmltest.style.color = zshow
-	// measure
-	let test = dom.mathmltest.offsetHeight,
-		control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
-		diff = Math.abs(test-control)
-	// compare: use range: zoom affects diff
-	let pre = " | offsetHeight difference: ",
-		post = (diff < 10 ? tb_safer : tb_standard)
-	dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
-	return "mathml:"+ (diff < 10 ?	zD : zE)
+	let r = ""
+	try {
+		let str = "<math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>"+
+			"<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>"+
+			"<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>"+
+			"<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math>"
+		dom.mathmltest.innerHTML = str
+		dom.mathmltest.style.color = zshow
+		// measure
+		let test = dom.mathmltest.offsetHeight,
+			control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
+			diff = Math.abs(test-control)
+		// compare: use range: zoom affects diff
+		let pre = " | offsetHeight difference: ",
+			post = (diff < 10 ? tb_safer : tb_standard)
+		dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
+		r = (diff < 10 ?	zD : zE)
+	} catch(e) {
+		log_error("misc: mathml", e.name, e.message)
+		dom.mathml = zB0
+		r = zLIE
+	}
+	return "mathml:"+ r
 }
 
 function get_nav_prototype() {
@@ -213,8 +223,9 @@ function get_reporting_api() {
 		dom.reportingAPI = zE
 		r = zE
 	} catch(e) {
+		log_error("misc: reporting observer", e.name, e.message)
 		if (isFF) {
-			r = (isVer > 64 ? zD : zNS )
+			r = (isVer > 64 ? zD : zNS)
 			dom.reportingAPI = r
 		} else {
 			r = zD +" or "+ zNS
@@ -310,8 +321,12 @@ function get_perf3() {
 		let timing = performance.timing
 		r = timing.navigationStart - timing.loadEventEnd
 		r = (r == 0 ? "zero" : "not zero")
-	} catch(e) {r = zB0}
-	dom.perf3.innerHTML = r
+		dom.perf3.innerHTML = r
+	} catch(e) {
+		log_error("misc: perf timing", e.name, e.message)
+		dom.perf3 = zB0
+		r = zLIE
+	}
 	return "perf_timing:"+ r
 }
 
@@ -320,34 +335,43 @@ function get_perf4() {
 	let r = zD
 	try {
 		if (window.PerformanceNavigationTiming) {r = zE}
-	} catch(e) {r = zB0}
+	} catch(e) {
+		log_error("misc: perf navigation", e.name, e.message)
+		r = zB0
+	}
 	if (isVer > 77) {
 		dom.perf4.innerHTML = r + (r == zD ? rfp_green : rfp_red) //78+: 1511941
 	} else {
 		dom.perf4 = r
 	}
-	return "perf_navigation:"+ r
+	return "perf_navigation:"+ (r == zB0 ? zLIE : r)
 }
 
 function get_svg() {
-	// svg
-	let s = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-	s.setAttribute("width","100")
-	s.setAttribute("height","100")
-	// circle
-	let c = document.createElementNS("http://www.w3.org/2000/svg", "circle")
-	c.setAttributeNS(null,"cx",50)
-	c.setAttributeNS(null,"cy",50)
-	c.setAttributeNS(null,"r",40)
-	// attach circle->svg->element
-	s.appendChild(c)
-	dom.svgDiv.appendChild(s)
-	// output
-	let r = (dom.svgDiv.offsetHeight > 0 ? zE : zD)
-	dom.svgBasicTest = r
-	// remove
-	dom.svgDiv.removeChild(s)
-	return "svg:"+ r
+	try {
+		// svg
+		let s = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+		s.setAttribute("width","100")
+		s.setAttribute("height","100")
+		// circle
+		let c = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+		c.setAttributeNS(null,"cx",50)
+		c.setAttributeNS(null,"cy",50)
+		c.setAttributeNS(null,"r",40)
+		// attach circle->svg->element
+		s.appendChild(c)
+		dom.svgDiv.appendChild(s)
+		// output
+		let r = (dom.svgDiv.offsetHeight > 0 ? zE : zD)
+		dom.svgBasicTest = r
+		// remove
+		dom.svgDiv.removeChild(s)
+		return "svg:"+ r
+	} catch(e) {
+		log_error("misc: svg", e.name, e.message)
+		dom.svgBasicTest = zB0
+		return "svg:"+ zLIE
+	}
 }
 
 function get_wasm() {
@@ -359,38 +383,26 @@ function get_wasm() {
 					return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
 			}
 		} catch (e) {
-			return [e.name, e.message]
+			// we only get errors if wasm is enabled
+			log_error("misc: wasm", e.name, e.message)
+			return true
 		}
 		return false
 	})()
 	// ToDo: dom.wasm.innerHTML = (res && isTB ? zE + tb_standard : zD + tb_safer)
-	let display = ""
-	if (res == true) {
-		display = zE
-	} else if (res == false) {
-		display = zD
-	} else {
-		// we only get errors if wasm is enabled
-		display = soB + res.join(": ") + scC
-		res = zE
-		if (gRun) {
-			gKnown.push("misc:wasm")
-			gBypassed.push("misc:wasm:enabled")
-			gMethods.push("misc:wasm:blocked")
-		}
-	}
-	dom.wasm.innerHTML = display
-	return "wasm:"+ res
+	let r = (res ? zE : zD)
+	dom.wasm.innerHTML = r
+	return "wasm:"+ r
 }
 
 function get_windowcontent() {
-	let r
+	let r = zD
 	try {
 		let test = window.content
 		let test2 = content.name
 		r = zE
 	} catch(e) {
-		r = zD
+		log_error("misc: window content", e.name, e.message)
 	}
 	dom.wincon = r
 	return "window_content:"+ r
