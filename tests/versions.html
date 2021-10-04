@@ -145,12 +145,20 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 63
+		expected = 64
+
+	// 94: 1729239
+	let t94a = performance.now(), ver94a = xF
+	try {
+		newFn("HTMLScriptElement.supports('classic')")
+		ver94a = xS
+	} catch(e) {}
+	record(226,94, "1729239", ver94a, performance.now()-t94a)
 
 	// 94: 1722576
 	let t94 = performance.now(), ver94 = xF
 	try {
-		let orig = {name:"TZP"}; orig.itself = orig; let clone = self.structuredClone(orig)
+		newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
 		ver94 = xS
 	} catch(e) {}
 	record(225,94, "1722576", ver94, performance.now()-t94)
@@ -158,7 +166,7 @@ function outputVersion() {
 	// 93: 1670033
 	let t93b = performance.now(), ver93b = xF
 	try {
-		let test93b = Intl.supportedValuesOf("calendar")
+		newFn("let test93b = Intl.supportedValuesOf('calendar')")
 		ver93b = xS
 	} catch(e) {}
 	record(222,93, "1670033", ver93b, performance.now()-t93b)
