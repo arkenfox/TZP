@@ -915,6 +915,8 @@ function showMetrics(type) {
 			array = gBypassed
 		} else if (type == "known methods") {
 			array = gMethods
+		} else if (type == "errors") {
+			array = gErrors
 		} else if (type == "fingerprint") {
 			array = gData
 		} else if (type == "prototype lies") {
@@ -959,6 +961,16 @@ function log_debug(target, output) {
 	// add line items to perf/debug table
 	let el = document.getElementById(target)
 	el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + output
+}
+
+function log_error(title, name, msg) {
+	// collect globalrun errors
+	if (gRun) {
+		let isMsg = true
+		if (name == undefined || name == "" || name === null) {name = "Error"}
+		if (msg == undefined || msg == "" || msg === null) {isMsg = false}
+		gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+	}
 }
 
 function log_line(str) {
@@ -1096,6 +1108,15 @@ function log_section(name, time1, data) {
 				gMethods = gMethods.concat(gMethodsOnce)
 				gMethods = gMethods.filter(function(item, position) {return gMethods.indexOf(item) === position})
 				gMethods.sort()
+				// errors
+				gErrors = gErrors.concat(gErrorsOnce)
+				if (gErrors.length) {
+					gErrors.sort()
+					let eBtn = buildButton("0", "errors", gErrors.length +" error"+ (gErrors.length > 1 ? "s": ""),"showMetrics")
+					dom.errorshash.innerHTML = sha1(gErrors.sort()) + eBtn
+				} else {
+					dom.errorshash = "none"
+				}
 				// alerts
 				if (gCheck.length) {
 					dom.allcheck.innerHTML = buildButton("1","alerts", gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
@@ -1227,6 +1248,7 @@ function outputSection(id, cls) {
 			gBypassed = []
 			gKnown = []
 			gMethods = []
+			gErrors = []
 			// reset section
 			protoLies = []
 			proxyLies = []
