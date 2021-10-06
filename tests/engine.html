@@ -135,7 +135,7 @@ function fnDisplay() {
 function fnRecord(order, description, result, match, error) {
 	if (error !== undefined) {
 		let ehash = sha1(error).substring(0,10)
-		if (ehash !== "ffc0031b7a") {
+		if (ehash !== "ffc0031b7a" && ehash !== "2772736bc6") {
 			console.error(order, result, error)
 		}
 		result += s3+ " ["+ ehash +"]"+ sc
@@ -248,8 +248,7 @@ function get_doc_values(num, title) {
 function get_errors(num) {
 	let tests = [
 		["var a = {}; a.b = a; JSON.stringify(a)", "TypeError: cyclic object value"],
-		["alert('A)","SyntaxError: '' literal not terminated before end of script"],
-		["null.value = 1","TypeError: can't access property \"value\" of null", "TypeError: null has no properties"],
+		["alert('A)","SyntaxError: '' string literal contains an unescaped line break"],
 		["let a = 1_00_;","SyntaxError: underscore can appear only between digits, not after t...", // FF72+
 			"SyntaxError: identifier starts immediately after numeric literal", // FF60-69
 			"SyntaxError: missing digit after '_' numeric separator"], // FF70-71
@@ -260,10 +259,11 @@ function get_errors(num) {
 		["[...undefined].length","TypeError: can't access property Symbol.iterator of undefined","TypeError: undefined has no properties"],
 		["const tzp=1; const tzp=2;","SyntaxError: redeclaration of const tzp"],
 		["const foo;foo.bar","SyntaxError: missing = in const declaration"],
+		["var x = @","SyntaxError: illegal character U+0040","SyntaxError: illegal character"],
 	]
 	tests.forEach(function(array) {
 		try {
-			eval(array[0])
+			newFn(array[0])
 		} catch(e) {
 			let bool = false
 			let str = fnTrim(e.name +": "+ e.message, 70)
@@ -770,7 +770,10 @@ function get_media_constraints(num, title) {
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
 		// e.g. TB disables mediaDevices
-		if (e.name == "TypeError" && e.message == "navigator.mediaDevices is undefined") {
+		let error = sha1(e.name +": "+ e.message), isNA = false
+		if (error == "8d6b18a941659cb64de87e474d683a3503d01fce") {isNA = true}
+		if (error == "ad64c7024fe40248168aef7da50f3272efffb221") {isNA = true}
+		if (isNA) {
 			fnRecord(num, title, zNA +": disabled", zNA)
 		} else {
 			fnRecord(num, title, e.name, zB0, e.message)
@@ -828,6 +831,7 @@ function get_nav_keys(num1, num2, title) {
 			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
 			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
 			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
+		// ToDo: 1670058: remove globalPrivacyControl if isFF > 94
 		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
 		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
 		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
@@ -931,6 +935,7 @@ function get_nav_values(num1, num2, num3) {
 		}
 	}
 	// globalprivacycontrol
+		// ToDo: 1670058: return n/a for globalPrivacyControl if isFF > 94
 	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
 		if (bBlock) {bB = 1}
@@ -941,6 +946,7 @@ function get_nav_values(num1, num2, num3) {
 	} catch(e) {
 		fnRecord(numG, strG, e.name, zB0, e.message)
 	}
+
 	// keyboard
 	let strK = "[keyboard] navigator", numK = num2+8
 	try {
@@ -1274,8 +1280,7 @@ if (isFF) {
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
 	// 85
 	try {
-		let des = Object.getOwnPropertyDescriptor(RegExp.prototype, "global")
-		let t = des.get.call("/a")
+		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a/)")
 	} catch(e) {
 		if ((e.message).substring(0,3) == "Reg") {is85 = true}
 	}
