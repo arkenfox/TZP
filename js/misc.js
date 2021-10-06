@@ -50,7 +50,7 @@ function get_iframe_props() {
 		'encodeURI','encodeURIComponent','escape','unescape',
 		// NoScript
 		'MediaSource','URL','webkitURL',
-		// Javascript Redirector
+		// JShelter
 		'Gamepad','Math','PerformanceEntry','Promise','Proxy','VRFrameData',
 		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
 		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
@@ -280,38 +280,49 @@ function get_perf1() {
 }
 
 function get_perf2() {
-	let i = 0,
-		result = true,
-		times = [],
-		p0 = Math.round(performance.now())
-	function run() {
-		if (i < 10) {
-			let p1 = Math.round(performance.now())
-			times.push((p1-p0) % 100)
-			if ((p1-p0) % 100 > 0) {result = false}
-			i++
-		} else {
-			clearInterval(check)
-			let display = times.join(", ")
-			// sim
-			if (runSL) {
-				isPerf = false
-				if (isRFP) {
-					display = "21, 35, 49, 62, 76, 88, 1, 15, 28, 41"
+	try {
+		let i = 0, times = [], p0
+		function run() {
+			try {
+				if (i < 11) {
+					if (i == 0) {
+						p0 = Math.round(performance.now())
+					} else {
+						times.push(Math.round(performance.now())-p0)
+					}
+					i++
 				} else {
-					display = "0, 0, 0, 0, 0, 0, 0, 0, 0, 0"
+					clearInterval(check)
+					let is00 = true, isTamper = false
+					for (let i=0; i < times.length ; i++) {
+						let value = times[i] % 100
+						if (value !== 0) {is00 = false} // ignore hundreds
+						if (i > 0) {
+							let diff = times[i] - times[i-1]
+							if (!isRFP) {
+								if (diff < 11 || diff > 30) {isTamper = true}
+							}
+						}
+					}
+					// tampering
+					if (isRFP && !is00) {isTamper = true}
+					if (!isRFP && is00) {isTamper = true}
+					if (!isPerf) {isTamper = true}
+					let display = times.join(", ")
+					if (isTamper) {
+						dom.perf2.innerHTML = display + sb +"[tampering detected]"+ sc
+					} else {
+						dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
+					}
 				}
-			}
-			// control
-			if (isPerf) {
-				dom.perf2.innerHTML = (result ? "100 ms"+ rfp_green : display + rfp_red)
-			} else {
-				display = (isFF ? soB : soL) + display + scC
-				dom.perf2.innerHTML = display
+			} catch(e) {
+				dom.perf2 = e.name
 			}
 		}
+		let check = setInterval(run, 13)
+	} catch(e) {
+		dom.perf2 = e.name
 	}
-	let check = setInterval(run, 13)
 }
 
 function get_perf3() {
