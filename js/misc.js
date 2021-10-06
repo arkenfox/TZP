@@ -297,11 +297,9 @@ function get_perf2() {
 					for (let i=0; i < times.length ; i++) {
 						let value = times[i] % 100
 						if (value !== 0) {is00 = false} // ignore hundreds
-						if (i > 0) {
+						if (i > 0 && !isRFP) {
 							let diff = times[i] - times[i-1]
-							if (!isRFP) {
-								if (diff < 11 || diff > 30) {isTamper = true}
-							}
+							if (diff < 5 || diff > 30) {isTamper = true}
 						}
 					}
 					// tampering
