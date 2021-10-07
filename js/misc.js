@@ -10,7 +10,7 @@ function get_component_shims() {
 		sHash = sha1(keys.join())
 		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
-		log_error("misc: component_shims", e.name, e.message)
+		log_error("misc: component shims", e.name, e.message)
 		sHash = zU
 		dom.shim = zU
 	}
@@ -162,13 +162,12 @@ function get_nav_prototype() {
 	let lieLength = navKeys["fakeKeys"].length,
 		movedLength = navKeys["movedKeys"].length,
 		fakeStr = "",
-		movedStr = "",
-		realhash = zB0
+		movedStr = ""
 	// output
 	if (navKeys["trueKeys"]) {
 		let hash = sha1(navKeys["allKeys"].join())
 		let display = hash
-		realhash = sha1(navKeys["trueKeys"].join())
+		let realhash = sha1(navKeys["trueKeys"].join())
 		// moved
 		if (movedLength) {
 			movedStr = buildButton("18", sMoved, movedLength +" moved")
@@ -188,10 +187,11 @@ function get_nav_prototype() {
 			}
 		}
 		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr + movedStr
+		return "navigator_keys:"+ realhash
 	} else {
-		dom.nProto = realhash
+		dom.nProto = zB0 // empty array blocked
+		return "navigator_keys:"+ zLie
 	}
-	return "navigator_keys:"+ realhash
 }
 
 function get_recursion() {
@@ -252,7 +252,10 @@ function get_perf1() {
 					+", "+ performance.getEntriesByName("a","mark").length
 				performance.clearMarks()
 		}
-	} catch(e) {test = zB0}
+	} catch(e) {
+		log_error("misc: perf mark", e.name, e.message)
+		test = zB0
+	}
 	// sim
 	if (runSL && isFF) {
 		if (isRFP) {test = "1, 4, 4, 1"} else {test = control}
