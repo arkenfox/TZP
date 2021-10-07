@@ -7,30 +7,83 @@ function get_navigator() {
 		let results = []
 		// beacon
 		let beacon = (check_navKey("sendBeacon") ? zE : zD)
+		dom.nBeacon = beacon
 		// GPC: 1670058
 		let gpc = (check_navKey("globalPrivacyControl") ? zS : zNS)
+		dom.nGPC = gpc
 		// onLine
 		let online = ""
 		if (check_navKey("onLine")) {
+			let onlineLie = true // assume lies
 			try {
-				// ignore false: served over https and we want stability with reruns
-				online = (navigator.onLine == undefined ? zB0 : true)
-			} catch(e) {online = zB0}
-		} else {online = zNA}
+				let online = navigator.onLine
+				if (typeof online == "boolean" && online == true) {
+					onlineLie = false // must be true over HTTPS
+					online = zE
+				} else if (typeof online == "boolean" && online == false) {
+					online = zD
+				} else {
+					if (Number.isInteger(online)) {
+					} else if (online == "undefined") {online = "undefined string"
+					} else if (online == "") {online = "empty string"}
+				}
+				dom.nOnLine.innerHTML = onlineLie ? soB + online + scC : ""+ online
+			} catch(e) {
+				log_error("headers: onLine", e.name, e.message)
+				online = zB0
+				dom.nOnLine.innerHTML = soB + e.name + scC
+			}
+			if (onlineLie && gRun) {
+				gKnown.push("headers:onLine")
+				gBypassed.push("headers:onLine:"+ zE)
+			}
+			online = zE // always return true
+		} else {
+			online = zNA
+			dom.nOnLine = zNA
+		}
+
 		// DNT
-		let dnt = ""
+		let dnt = "", dntLie = false
 		if (check_navKey("doNotTrack")) {
 			try {
 				dnt = navigator.doNotTrack
 				if (isFF) {
-					if (dnt == 1) {dnt = zE
+					if (!Number.isInteger(dnt) && dnt +"" == "1") {dnt = zE
 					} else if (dnt == "unspecified") { // do nothing
-					} else {dnt = zB0}
+					} else {
+						dntLie = true
+						if (Number.isInteger(dnt) || typeof dnt == "boolean") {
+						} else if (dnt == "undefined") {dnt = "undefined string"
+						} else if (dnt == "") {dnt = "empty string"}
+					}
 				}
-			} catch(e) {dnt = zB0}
-		} else {dnt = zNA}
+				dom.nDNT.innerHTML = dntLie ? soL + dnt + scC : ""+ dnt
+				if (dntLie) {
+					dnt = zLIE
+					if (gRun) {gKnown.push("headers:doNotTrack")}
+				}
+			} catch(e) {
+				log_error("headers: doNotTrack", e.name, e.message)
+				dnt = zB0
+				dom.nDNT.innerHTML = ""+ e.name
+			}
+		} else {
+			dnt = zNA
+			dom.nDNT.innerHTML = zNA
+		}
 
+		// NETWORK/CONNECTION
 		let network = "", connection = "", test = "", r3 = ""
+		// non-FF
+		if (!isFF) {
+			if (check_navKey("connection")) {
+				network = zE; connection = navigator.connection.type
+			} else {
+				network = zD; connection = navigator.connection
+			}
+		}
+
 		if (isFF) {
 			// FF
 			// network
@@ -56,37 +109,27 @@ function get_navigator() {
 					connection = navigator.connection
 				} catch(e) {connection = zB0} // never used
 			}
-		} else {
-			// non-FF
-			if (check_navKey("connection")) {
-				network = zE; connection = navigator.connection.type
-			} else {
-				network = zD; connection = navigator.connection
-			}
 		}
 		// push
 		results.push("beacon:"+ beacon)
 		results.push("globalPrivacyControl:"+ gpc)
 		results.push("online:"+ online)
-		// push: ToDo: harden
 		results.push("dnt:"+ dnt)
-		results.push("network:"+ network)
+		// push: ToDo: harden
+		results.push("networkinfo:"+ network)
 		results.push("connection:"+ connection)
 
 		// display
-		dom.nBeacon = beacon
-		dom.nDNT.innerHTML = ""+ dnt
-		dom.nOnLine.innerHTML = online
 		dom.nNetwork.innerHTML = network
 		if (network == zE) {
 			dom.nConnection.innerHTML = connection + (connection == "unknown" ? rfp_green : rfp_red)
 		} else {
 			dom.nConnection.innerHTML = connection
 		}
-		dom.nGPC = gpc
+
 		// subsection hash
 		results.sort()
-		dom.hHash0.innerHTML = sha1(results.join())
+		//dom.hHash0.innerHTML = sha1(results.join())
 		// resolve
 		return resolve(results)
 	})
