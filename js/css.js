@@ -4,45 +4,50 @@ let cSim = 0
 
 function get_colors(runtype) {
 	/* servo/components/style/values/specified/color.rs */
+	/* https://hg.mozilla.org/mozilla-central/diff/5a44200105e26cf5ab8545de0b3ed12f4a34ff4d/dom/canvas/test/test_bug1485266.html */
+	// NOTE: if an alias isn't supported, it gets the previous lookup value
+
 	let aList = [],
 		sTarget = "",
-		sControl = ""
+		m = "-moz-", mm = m+"mac-", mw = m+"win-"
+
 	let sName = "css_colors_"+ runtype
 	clearDetail(sName)
-
 	if (runtype == "system") {
-		sControl = "5bcd87c4c7753f09a14546911686a62e8625faf8"
 		sTarget = dom.sColorHash
-		aList = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace',
-		'ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight',
-		'HighlightText','InactiveBorder','InactiveCaption', 'InactiveCaptionText','InfoBackground',
-		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
-		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
+		aList = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight',
+		'ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder',
+		'InactiveCaption', 'InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar',
+		'ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window',
+		'WindowFrame','WindowText']
+
 	} else if (runtype == "css4") {
-		if (isVer > 75) {
-			// FF76+ note: FF72+: field/fieldtext added: RFP no effect
-			sControl = "3900ddea19449a8174058383c32dc40b2e31b9a2"
-		}
 		sTarget = dom.cColorHash
-		aList = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText']
+		aList = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText','SelectedItem','SelectedItemText']
+
+	} else if (runtype == "moz-stand-in") {
+		sTarget = dom.m2ColorHash
+		aList = [m+'buttondefault',m+'buttonhoverface',m+'buttonhovertext',m+'cellhighlight',
+		m+'cellhighlighttext',m+'combobox',m+'comboboxtext',m+'dialog',m+'dialogtext',m+'dragtargetzone',
+		m+'eventreerow',m+'field',m+'fieldtext',m+'html-cellhighlight',m+'html-cellhighlighttext',
+		m+'menuhover',m+'menuhovertext',m+'menubartext',m+'menubarhovertext',m+'nativehyperlinktext',
+		m+'oddtreerow',mm+'alternateprimaryhighlight',mm+'chrome-active',mm+'chrome-inactive',
+		mm+'disabledtoolbartext',mm+'focusring',mm+'menuselect',mm+'menushadow',mm+'menutextdisable',
+		mm+'menutextselect',mw+'communicationstext',mw+'mediatext',mm+'secondaryhighlight',]
+		// 1693222: "-moz-html-CellHighlight","-moz-html-CellHighlightText" removed from stand-ins
+
+
 	} else {
 		sTarget = dom.mColorHash
-		let m = "-moz-", mm = m+"mac-", mw = m+"win-"
 		aList = [m+'activehyperlinktext',m+"accent-color",m+"accent-color-foreground",m+'appearance',
-		m+'buttondefault',m+'buttonhoverface',m+'buttonhovertext',m+'cellhighlight',m+'cellhighlighttext',
-		m+'combobox',m+'comboboxtext',m+'default-background-color',m+'default-color',m+'dialog',
-		m+'dialogtext',m+'dragtargetzone',m+'eventreerow',m+'field',m+'fieldtext',m+'gtk-buttonactivetext',
-		m+'gtk-info-bar-text',m+'html-cellhighlight',m+'html-cellhighlighttext',m+'hyperlinktext',
-		mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',mm+'accentlightesthighlight',
-		mm+'accentlightshadow',mm+'accentregularhighlight',mm+'accentregularshadow',mm+'active-menuitem',
-		mm+'buttonactivetext',mm+'chrome-active',mm+'chrome-inactive',mm+'defaultbuttontext',
-		mm+'disabledtoolbartext',mm+'focusring',mm+'menuitem',mm+'menupopup',mm+'menuselect',mm+'menushadow',
-		mm+'menutextdisable',mm+'menutextselect',mm+'secondaryhighlight',mm+'source-list',mm+'vibrancy-dark',
-		mm+'vibrancy-light',mm+'vibrant-titlebar-dark',mm+'vibrant-titlebar-light',
-		mm+'active-source-list-selection',mm+'source-list-selection',mm+'tooltip',m+'colheaderhovertext',
-		m+'colheadertext',m+'menubarhovertext',m+'menubartext',m+'menuhover',m+'menuhovertext',
-		m+'nativehyperlinktext',m+'oddtreerow',m+'visitedhyperlinktext',mw+'accentcolor',mw+'accentcolortext',
-		mw+'communications-toolbox',mw+'communicationstext',mw+'media-toolbox',mw+'mediatext',]
+		m+'default-background-color',m+'default-color',m+'gtk-buttonactivetext',m+'gtk-info-bar-text',
+		m+'hyperlinktext',mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',
+		mm+'accentlightesthighlight',mm+'accentlightshadow',mm+'accentregularhighlight',
+		mm+'accentregularshadow',mm+'active-menuitem',mm+'buttonactivetext',mm+'defaultbuttontext',mm+'menuitem',
+		mm+'menupopup',mm+'source-list',mm+'vibrancy-dark',mm+'vibrancy-light',mm+'vibrant-titlebar-dark',
+		mm+'vibrant-titlebar-light',mm+'active-source-list-selection',mm+'source-list-selection',
+		mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',m+'visitedhyperlinktext',mw+'accentcolor',
+		mw+'accentcolortext',mw+'communications-toolbox',mw+'media-toolbox',]
 	}
 	// de-dupe/sort
 	aList = aList.filter(function(item, position) {return aList.indexOf(item) === position})
@@ -61,10 +66,35 @@ function get_colors(runtype) {
 		}
 	})
 	sDetail[sName] = aResults
+
 	let sHash = sha1(aResults.join())
-	let sNotation = buildButton("14", sName, aList.length)
-	if (sControl.length) {sNotation += (sHash == sControl ? rfp_green : rfp_red)}
-	sTarget.innerHTML = (sError.length ? sError : sHash + sNotation)
+	let note = ""
+	if (runtype == "system") {
+		// ToDo: isVer check FF95+ 1734115
+		note = rfp_red
+		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green}
+		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green} // FF95+ : 1734115: ButtonFace
+
+	} else if (runtype == "css4") {
+		// FF72+: Field/FieldText (RFP no effect)
+		// FF76+: Track now we have the first item ActiveText
+		// FF93+: 1693222: SelectedItem/SelectedItemText (uses prev value until supported)
+		if (isVer > 75) {
+			note = rfp_red
+			if (isVer > 92) {
+				if (sHash == "9061b35660aa3bfc28b98bd0f263ff945d3c27c9") {note = rfp_green}
+			} else {
+				if (sHash == "a2352569036cea2e7c3b7a5ff975598893ff1ca2") {note = rfp_green}
+			}
+		}
+	} else if (runtype == "moz-stand-in") {
+		// ToDo: isVer check FF95+ 1734115
+		//note = rfp_red
+		//if (sHash == "ed162e5af511cea8e334dc0aaf8f3d3bf9a0c801") {note = rfp_green}
+		//if (sHash == "27286402856cad42bdd6583b76a9c23dcf45b27b") {note = rfp_green} // FF95+
+	}
+	let btn = buildButton("14", sName, aList.length) + note
+	sTarget.innerHTML = (sError.length ? sError : sHash + btn)
 	return "colors_"+ runtype +":"+ (sError.length ? sError : sHash)
 }
 
@@ -424,6 +454,7 @@ function outputCSS() {
 		get_mm_css(),
 		get_colors("system"),
 		get_colors("css4"),
+		get_colors("moz-stand-in"),
 		get_colors("moz"),
 		get_system_fonts(),
 		get_computed_styles(),
