@@ -482,7 +482,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function start() { // 94: 1722576
 		try {
-			let orig = {name:"TZP"}; orig.itself = orig; let clone = self.structuredClone(orig)
+			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
 			output(94)
 		} catch(e) {v93()}
 	}
