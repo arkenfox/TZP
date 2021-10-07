@@ -296,15 +296,16 @@ function get_perf2() {
 					i++
 				} else {
 					clearInterval(check)
-					let is00 = true, isTamper = false
+					let is00 = true, isTamper = 0
 					for (let i=0; i < times.length ; i++) {
 						let value = times[i] % 100
 						if (value !== 0) {is00 = false} // ignore hundreds
 						if (i > 0 && !isRFP) {
 							let diff = times[i] - times[i-1]
-							if (diff < 5 || diff > 30) {isTamper = true}
+							if (diff < 5 || diff > 30) {isTamper++}
 						}
 					}
+					isTamper = (isTamper > 1 ? true : false) // allow one false positive
 					// tampering
 					if (isRFP && !is00) {isTamper = true}
 					if (!isRFP && is00) {isTamper = true}
