@@ -3,10 +3,7 @@
 let cSim = 0
 
 function get_colors(runtype) {
-	/* servo/components/style/values/specified/color.rs */
-	/* https://hg.mozilla.org/mozilla-central/diff/5a44200105e26cf5ab8545de0b3ed12f4a34ff4d/dom/canvas/test/test_bug1485266.html */
 	// NOTE: if an alias isn't supported, it gets the previous lookup value
-
 	let aList = [],
 		sTarget = "",
 		m = "-moz-", mm = m+"mac-", mw = m+"win-"
@@ -23,7 +20,11 @@ function get_colors(runtype) {
 
 	} else if (runtype == "css4") {
 		sTarget = dom.cColorHash
-		aList = ['Canvas','CanvasText','LinkText','VisitedText','ActiveText','Field','FieldText','SelectedItem','SelectedItemText']
+		aList = [
+		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem',
+		'SelectedItemText','VisitedText',"[ActiveText]_"+m+'activehyperlinktext',
+		"[Canvas]_"+m+'default-background-color',"[CanvasText]_"+m+'default-color',
+		"[LinkText]_"+m+'hyperlinktext',"[VisitedText]_"+m+'visitedhyperlinktext',]
 
 	} else if (runtype == "moz-stand-in") {
 		sTarget = dom.m2ColorHash
@@ -36,18 +37,16 @@ function get_colors(runtype) {
 		mm+'menutextselect',mw+'communicationstext',mw+'mediatext',mm+'secondaryhighlight',]
 		// 1693222: "-moz-html-CellHighlight","-moz-html-CellHighlightText" removed from stand-ins
 
-
 	} else {
 		sTarget = dom.mColorHash
-		aList = [m+'activehyperlinktext',m+"accent-color",m+"accent-color-foreground",m+'appearance',
-		m+'default-background-color',m+'default-color',m+'gtk-buttonactivetext',m+'gtk-info-bar-text',
-		m+'hyperlinktext',mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',
+		aList = [m+"accent-color",m+"accent-color-foreground",m+'appearance',m+'gtk-buttonactivetext',
+		m+'gtk-info-bar-text',mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',
 		mm+'accentlightesthighlight',mm+'accentlightshadow',mm+'accentregularhighlight',
 		mm+'accentregularshadow',mm+'active-menuitem',mm+'buttonactivetext',mm+'defaultbuttontext',mm+'menuitem',
 		mm+'menupopup',mm+'source-list',mm+'vibrancy-dark',mm+'vibrancy-light',mm+'vibrant-titlebar-dark',
 		mm+'vibrant-titlebar-light',mm+'active-source-list-selection',mm+'source-list-selection',
-		mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',m+'visitedhyperlinktext',mw+'accentcolor',
-		mw+'accentcolortext',mw+'communications-toolbox',mw+'media-toolbox',]
+		mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',mw+'accentcolor',	mw+'accentcolortext',
+		mw+'communications-toolbox',mw+'media-toolbox',]
 	}
 	// de-dupe/sort
 	aList = aList.filter(function(item, position) {return aList.indexOf(item) === position})
@@ -57,7 +56,13 @@ function get_colors(runtype) {
 		element = dom.sColorElement,
 		sError = ""
 	aList.forEach(function(style) {
-		element.style.backgroundColor = style
+		let s = style
+		if (runtype == "css4") {
+			if (style.indexOf("[") == 0) {
+				s = s.substring(s.indexOf("]_") + 2, s.length)
+			}
+		}
+		element.style.backgroundColor = s
 		try {
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
 			aResults.push(style +":"+ rgb)
@@ -73,7 +78,7 @@ function get_colors(runtype) {
 		// ToDo: isVer check FF95+ 1734115
 		note = rfp_red
 		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green}
-		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green} // FF95+ : 1734115: ButtonFace
+		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green} // FF95+: 1734115: ButtonFace
 
 	} else if (runtype == "css4") {
 		// FF72+: Field/FieldText (RFP no effect)
@@ -82,9 +87,9 @@ function get_colors(runtype) {
 		if (isVer > 75) {
 			note = rfp_red
 			if (isVer > 92) {
-				if (sHash == "9061b35660aa3bfc28b98bd0f263ff945d3c27c9") {note = rfp_green}
+				if (sHash == "f508caecf80e85a6c8e5fa989529ecad2c094ae6") {note = rfp_green}
 			} else {
-				if (sHash == "a2352569036cea2e7c3b7a5ff975598893ff1ca2") {note = rfp_green}
+				if (sHash == "945a0ced52ea5019e29415b5a019fcc29dc1c02b") {note = rfp_green}
 			}
 		}
 	} else if (runtype == "moz-stand-in") {
@@ -452,10 +457,10 @@ function outputCSS() {
 		section = []
 	Promise.all([
 		get_mm_css(),
-		get_colors("system"),
 		get_colors("css4"),
 		get_colors("moz-stand-in"),
 		get_colors("moz"),
+		get_colors("system"),
 		get_system_fonts(),
 		get_computed_styles(),
 	]).then(function(results){
