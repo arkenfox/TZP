@@ -17,15 +17,12 @@ function get_colors(runtype) {
 		'InactiveCaption', 'InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar',
 		'ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window',
 		'WindowFrame','WindowText']
-
 	} else if (runtype == "css4") {
 		sTarget = dom.cColorHash
-		aList = [
-		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem',
+		aList = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem',
 		'SelectedItemText','VisitedText',"[ActiveText]_"+m+'activehyperlinktext',
 		"[Canvas]_"+m+'default-background-color',"[CanvasText]_"+m+'default-color',
 		"[LinkText]_"+m+'hyperlinktext',"[VisitedText]_"+m+'visitedhyperlinktext',]
-
 	} else if (runtype == "moz-stand-in") {
 		sTarget = dom.m2ColorHash
 		aList = [m+'buttondefault',m+'buttonhoverface',m+'buttonhovertext',m+'cellhighlight',
@@ -35,8 +32,6 @@ function get_colors(runtype) {
 		m+'oddtreerow',mm+'alternateprimaryhighlight',mm+'chrome-active',mm+'chrome-inactive',
 		mm+'disabledtoolbartext',mm+'focusring',mm+'menuselect',mm+'menushadow',mm+'menutextdisable',
 		mm+'menutextselect',mw+'communicationstext',mw+'mediatext',mm+'secondaryhighlight',]
-		// 1693222: "-moz-html-CellHighlight","-moz-html-CellHighlightText" removed from stand-ins
-
 	} else {
 		sTarget = dom.mColorHash
 		aList = [m+"accent-color",m+"accent-color-foreground",m+'appearance',m+'gtk-buttonactivetext',
@@ -57,11 +52,7 @@ function get_colors(runtype) {
 		sError = ""
 	aList.forEach(function(style) {
 		let s = style
-		if (runtype == "css4") {
-			if (style.indexOf("[") == 0) {
-				s = s.substring(s.indexOf("]_") + 2, s.length)
-			}
-		}
+		if (runtype == "css4") {if (style.indexOf("[") == 0) {s = s.substring(s.indexOf("]_") + 2, s.length)}}
 		element.style.backgroundColor = s
 		try {
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
@@ -74,29 +65,32 @@ function get_colors(runtype) {
 
 	let sHash = sha1(aResults.join())
 	let note = ""
+	// ToDo: isVer check FF95+ 1734115 for system + moz stand-ins
 	if (runtype == "system") {
-		// ToDo: isVer check FF95+ 1734115
 		note = rfp_red
-		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green}
-		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green} // FF95+: 1734115: ButtonFace
-
+		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green + " [FF67-94]"}
+		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green + " [FF95+]"} // 1734115: ButtonFace
 	} else if (runtype == "css4") {
-		// FF72+: Field/FieldText (RFP no effect)
-		// FF76+: Track now we have the first item ActiveText
-		// FF93+: 1693222: SelectedItem/SelectedItemText (uses prev value until supported)
+		// FF76+: supported: Field/FieldText FF72+
+		// FF93+: 1693222: SelectedItem* supported
 		if (isVer > 75) {
 			note = rfp_red
 			if (isVer > 92) {
-				if (sHash == "f508caecf80e85a6c8e5fa989529ecad2c094ae6") {note = rfp_green}
+				if (sHash == "f508caecf80e85a6c8e5fa989529ecad2c094ae6") {note = rfp_green + " [FF93+]"}
 			} else {
-				if (sHash == "945a0ced52ea5019e29415b5a019fcc29dc1c02b") {note = rfp_green}
+				if (sHash == "945a0ced52ea5019e29415b5a019fcc29dc1c02b") {note = rfp_green + " [FF76-92]"}
 			}
 		}
 	} else if (runtype == "moz-stand-in") {
-		// ToDo: isVer check FF95+ 1734115
-		//note = rfp_red
-		//if (sHash == "ed162e5af511cea8e334dc0aaf8f3d3bf9a0c801") {note = rfp_green}
-		//if (sHash == "27286402856cad42bdd6583b76a9c23dcf45b27b") {note = rfp_green} // FF95+
+		// FF93+: 1693222: -moz-html* dropped -> same as -moz-* counterpart / -moz-mac-alternate* still reports prev which changed
+		// FF95+: 1734115: -moz-buttonhoverface/-moz-combobox
+		note = rfp_red
+		if (isVer > 92) {
+			if (sHash == "27286402856cad42bdd6583b76a9c23dcf45b27b") {note = rfp_green + " [FF95+]"}
+			if (sHash == "ed162e5af511cea8e334dc0aaf8f3d3bf9a0c801") {note = rfp_green + " [FF93-94]"}
+		} else {
+			if (sHash == "48ca3ce32695e4caf41a834da0c2319e305b6d31") {note = rfp_green + " [FF67-92]"}
+		}
 	}
 	let btn = buildButton("14", sName, aList.length) + note
 	sTarget.innerHTML = (sError.length ? sError : sHash + btn)
