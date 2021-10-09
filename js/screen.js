@@ -118,51 +118,6 @@ function get_chrome() {
 	run()
 }
 
-function get_collation() {
-	try {
-		let baselist = ['ka','ku','lo','no','pa','tk','zh-hk'],
-			chars = ['\u00F1','\u00E4','\u0109','\u0649','\u10D0','\u0E9A','\u311A','\u4E2D']
-		let list = [],
-			res = [],
-			t0 = performance.now()
-		let sName = "feature_collation_notglobal"
-		clearDetail(sName)
-		// don't use unsupported locales: they fall back to system locale,
-		// which could be anything - when we want the hashes to be stable
-		baselist.forEach(function(locale) {
-			let test = Intl.NumberFormat.supportedLocalesOf(locale)
-			if (test.length) {list.push(locale)}
-		})
-		if (runS) (list.push("en"))
-		list.sort()
-		// run
-		chars.sort() // set
-		list.forEach(function(i) {
-			chars.sort() // reset
-			chars.sort(Intl.Collator(i).compare)
-			let test = chars.join()
-			res.push(i +": "+ test)
-		})
-		// notation
-		let note = "details", color = "3"
-		sDetail[sName] = res
-		let hash = sha1(res.join())
-		if (isFF) {
-			if (hash == "d9acf7224188d7ac3a3548e0d03e3033ae8c9652") {note = "FF70+"
-			} else if (hash == "8367944425147f7e0f158a877f467278db6e4493") {note = "FF68-69"
-			} else if (hash == "a103107b31916a5bbb05894c5aa2678b27c380cc") {note = "FF65-67"
-			} else if (hash == "512d40975c881fd0cfe4d77816723e524f21774e") {note = "FF64 or lower"
-			} else {note = "NEW"; color = "bad"
-			}
-		}
-		let btn = buildButton(color, sName, note)
-		dom.fdCollation.innerHTML = hash + btn + (runS ? zSIM : "")
-		log_perf("collation [fd]",t0)
-	} catch(e) {
-		dom.fdCollation.innerHTML = e.name
-	}
-}
-
 function get_color() {
 	let res = [], r1 = "", r2 = "", r3 = ""
 	// depth
@@ -597,10 +552,11 @@ function get_line_scrollbar(runtype) {
 
 function get_locales() {
 	try {
+		let t0 = performance.now()
 		let res = []
 		let sName = "feature_supported_locales_notglobal"
 		clearDetail(sName)
-		let list = ["kok","ia","tl","mai","sa","no"]
+		let list = ["ba","co","cv","ia","ka","ki","ku","kok","lij","lo","mai","no","pa","qu","sa","su","no","tl","tw","vo"]
 		if (runS) {list.push("en")}
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
@@ -608,16 +564,17 @@ function get_locales() {
 		let hash = sha1(res.join())
 		let note = "details", color = "3"
 		if (isFF) {
-			if (hash == "484fbd05b65948839c1804b98b64b1779351d383") {note = "FF91+"
-			} else if (hash == "48bc5f4887de1f772595a8ab482781663723673a") {note = "FF78-90"
-			} else if (hash == "0b08a90192a58d9b3d86f282c97ffc856c483ce9") {note = "FF70-77"
-			} else if (hash == "6106e7a683800853d75fe3f99a428f74253ec6ae") {note = "FF65-69"
-			} else if (hash == "3b4185eac11953b03d8df353f63866d419a7500a") {note = "FF64 or lower"
+			if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91+"
+			} else if (hash == "69a80c449f0a77f1ab419351c04ced065aa49589") {note = "FF78-90"
+			} else if (hash == "88fd1391314005c3fe9b8dced0e2f328b06afbb3") {note = "FF70-77"
+			} else if (hash == "f224735b922be026a0348d98c819239b6a330813") {note = "FF65-69"
+			} else if (hash == "05135c437e798bbee97129b20c8d9676afe78484") {note = "FF64 or lower"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
 		let btn = buildButton(color, sName, note)
 		dom.fdLocales.innerHTML = hash + btn + (runS ? zSIM : "")
+		log_perf("supported locales [fd]",t0)		
 	} catch(e) {
 		dom.fdLocales = e.name
 	}
@@ -2483,7 +2440,6 @@ function outputFD(runtype) {
 			section.push("os_architecture:"+ bits)
 			log_section("feature", t0, section)
 		})
-		get_collation()
 		get_canonical()
 		get_locales()
 
@@ -2496,7 +2452,6 @@ function outputFD(runtype) {
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			get_collation()
 			get_canonical()
 			get_locales()
 			dom.fdBrandingCss = zNA
