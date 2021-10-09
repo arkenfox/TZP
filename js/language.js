@@ -221,7 +221,16 @@ function get_lang_doc() {
 				} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
 				} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
 				} else if (item == 10) {return new Intl.Segmenter().resolvedOptions().locale
-				} else if (item == 11) {return "n/a"
+				} else if (item == 11) {
+					let chars = ['a','A','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u01FB','\u0107',
+					'\u0109','\u00E7\a','\u00EB','\u00ED','\u00EE','\u0137\a','\u0144','\u00F1','\u1ED9','\u00F6','\u1EE3',
+					'\u0627','\u0649','\u06CC','\u06C6','\u06C7','\u06FD','\u0561','\u09A4','\u09CE','\u311A','\u0453',
+					'\uA647','\u0503','\u0439','\u0457','\u040E','\u04F0','\u4E2D','\u0934','\u0935','\u1208','\u10D0',
+					'\u03B1','\u0A85','\u3147','\u05EA','\uFB4A','\u0C85','\u1780','\u0E9A','\u1D95','\u025B','\u0149',
+					'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',]
+					chars.sort()
+					chars.sort(Intl.Collator(undefined).compare)
+					return sha1(chars.join())
 				// timezone
 				} else if (item == 12) {
 					let k = 60000
@@ -596,8 +605,8 @@ function get_lang_doc() {
 			}
 			res.push(result)
 
-			// output line items after lang
-			if (i > 11) {
+			// output line items after combos
+			if (i > 10) {
 				if (i == 14) {
 					dom.ldt14.innerHTML = sha1(result) // hash multi-year timezone offsets
 				} else {
@@ -627,10 +636,10 @@ function get_lang_doc() {
 		// notation
 		if (isFF) {
 			// language
-			if (hashLang == "4329b938f2a1f3f15591eed43e15d303388d7c9a") {hashLang += enUS_green +" [FF86+]"
-			} else if (hashLang == "620769481983f4eeafe144b61f3b7bbe5bc7dc1a") {hashLang += enUS_green +" [FF78-85]"
-			} else if (hashLang == "b65bfc8280697e09a57ca60dfbae75d1358a2d28") {hashLang += enUS_green +" [FF65-77]"
-			} else {hashLang += (hashLang == "2525dff5501daca5336cbc2c2d967278143838c2" ? enUS_green +" [FF60-64]" : enUS_red)
+			if (hashLang == "310fb1221a91e1995165262052d345f9fa5156dc") {hashLang += enUS_green +" [FF86+]"
+			} else if (hashLang == "ceaae0bd27f34c34a10149160e9b5a64dbde2cb2") {hashLang += enUS_green +" [FF78-85]"
+			} else if (hashLang == "ea8a3991e21edaf031240317b35e8e863e3ed5dd") {hashLang += enUS_green +" [FF65-77]"
+			} else {hashLang += (hashLang == "088c29af882518e3d3ab6dfe277b2707a146ac72" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
 			// timezone
 			bTZ = (hashTime == "be32bb73c0061974a3301536469d40d74e325375" ? true : false)
