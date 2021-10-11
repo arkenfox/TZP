@@ -62,6 +62,7 @@ function get_colors(runtype) {
 		}
 	})
 	sDetail[sName] = aResults
+	//console.debug(sHash + "\n" + aResults.join("\n"))
 
 	let sHash = sha1(aResults.join())
 	let note = ""
@@ -70,17 +71,6 @@ function get_colors(runtype) {
 		note = rfp_red
 		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green + " [FF67-94]"}
 		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green + " [FF95+]"} // 1734115: ButtonFace
-	} else if (runtype == "css4") {
-		// FF76+: supported: Field/FieldText FF72+
-		// FF93+: 1693222: SelectedItem* supported
-		if (isVer > 75) {
-			note = rfp_red
-			if (isVer > 92) {
-				if (sHash == "f508caecf80e85a6c8e5fa989529ecad2c094ae6") {note = rfp_green + " [FF93+]"}
-			} else {
-				if (sHash == "945a0ced52ea5019e29415b5a019fcc29dc1c02b") {note = rfp_green + " [FF76-92]"}
-			}
-		}
 	} else if (runtype == "moz-stand-in") {
 		// FF93+: 1693222: -moz-html* dropped -> same as -moz-* counterpart / -moz-mac-alternate* still reports prev which changed
 		// FF95+: 1734115: -moz-buttonhoverface/-moz-combobox
@@ -92,6 +82,10 @@ function get_colors(runtype) {
 			if (sHash == "48ca3ce32695e4caf41a834da0c2319e305b6d31") {note = rfp_green + " [FF67-92]"}
 		}
 	}
+	/*// CSS4: only 4/9 are RFP protected: linux varies even if use system colors is disabled
+		// FF76+: supported: Field/FieldText FF72+
+		// FF93+: 1693222: SelectedItem* supported
+	*/
 	let btn = buildButton("14", sName, aList.length) + note
 	sTarget.innerHTML = (sError.length ? sError : sHash + btn)
 	return "colors_"+ runtype +":"+ (sError.length ? sError : sHash)
