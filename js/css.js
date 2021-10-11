@@ -29,9 +29,9 @@ function get_colors(runtype) {
 		m+'cellhighlighttext',m+'combobox',m+'comboboxtext',m+'dialog',m+'dialogtext',m+'dragtargetzone',
 		m+'eventreerow',m+'field',m+'fieldtext',m+'html-cellhighlight',m+'html-cellhighlighttext',
 		m+'menuhover',m+'menuhovertext',m+'menubartext',m+'menubarhovertext',m+'nativehyperlinktext',
-		m+'oddtreerow',mm+'alternateprimaryhighlight',mm+'chrome-active',mm+'chrome-inactive',
-		mm+'disabledtoolbartext',mm+'focusring',mm+'menuselect',mm+'menushadow',mm+'menutextdisable',
-		mm+'menutextselect',mw+'communicationstext',mw+'mediatext',mm+'secondaryhighlight',]
+		m+'oddtreerow',mm+'chrome-active',mm+'chrome-inactive',mm+'disabledtoolbartext',mm+'focusring',
+		mm+'menuselect',mm+'menushadow',mm+'menutextdisable',mm+'menutextselect',mw+'communicationstext',
+		mw+'mediatext',mm+'secondaryhighlight',]
 	} else {
 		sTarget = dom.mColorHash
 		aList = [m+"accent-color",m+"accent-color-foreground",m+'appearance',m+'gtk-buttonactivetext',
@@ -72,14 +72,14 @@ function get_colors(runtype) {
 		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green + " [FF67-94]"}
 		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green + " [FF95+]"} // 1734115: ButtonFace
 	} else if (runtype == "moz-stand-in") {
-		// FF93+: 1693222: -moz-html* dropped -> same as -moz-* counterpart / -moz-mac-alternate* still reports prev which changed
+		// FF93+: 1693222: -moz-html* dropped -> same as -moz-* counterpart
 		// FF95+: 1734115: -moz-buttonhoverface/-moz-combobox
 		note = rfp_red
 		if (isVer > 92) {
-			if (sHash == "27286402856cad42bdd6583b76a9c23dcf45b27b") {note = rfp_green + " [FF95+]"}
-			if (sHash == "ed162e5af511cea8e334dc0aaf8f3d3bf9a0c801") {note = rfp_green + " [FF93-94]"}
+			if (sHash == "79db5606a0cb8129e8840ff02e93eedfef71dce4") {note = rfp_green + " [FF95+]"}
+			if (sHash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf") {note = rfp_green + " [FF93-94]"}
 		} else {
-			if (sHash == "48ca3ce32695e4caf41a834da0c2319e305b6d31") {note = rfp_green + " [FF67-92]"}
+			if (sHash == "12dfc3bdff6304b4bcf56a66ee087989dda20600") {note = rfp_green + " [FF67-92]"}
 		}
 	}
 	/*// CSS4: only 4/9 are RFP protected: linux varies even if use system colors is disabled
