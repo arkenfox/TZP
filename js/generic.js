@@ -1227,6 +1227,7 @@ function countJS(filename) {
 function outputSection(id, cls) {
 	if (gClick) {
 		gClick = false
+		isLoad = id == "load" ? true : false
 		if (cls == undefined || cls == "") {cls = "c"}
 		let delay = 100
 		if (id == "load") {
