@@ -296,21 +296,25 @@ function get_perf2() {
 					i++
 				} else {
 					clearInterval(check)
-					let is00 = true, isTamper = 0
+					let is00 = true, isYank = false, isTamper = false
+					let maxTamper = 1, countTamper = 0
 					for (let i=0; i < times.length ; i++) {
 						let value = times[i] % 100
 						if (value !== 0) {is00 = false} // ignore hundreds
 						if (i > 0 && !isRFP) {
 							let diff = times[i] - times[i-1]
-							if (diff < 5 || diff > 30) {isTamper++}
+							if (diff < 5 || diff > 30) {countTamper++}
 						}
+						if (i == 0 && value > 75) {isYank = true}
 					}
-					isTamper = (isTamper > 1 ? true : false) // allow one false positive
+					// tweak max
+					if (isLoad) {maxTamper = 2 + (isYank ? 2 : 0)}
+					isTamper = (countTamper > maxTamper ? true : false) // allow one false positive
 					// tampering
 					if (isRFP && !is00) {isTamper = true}
 					if (!isRFP && is00) {isTamper = true}
 					if (!isPerf) {isTamper = true}
-					let display = times.join(", ")
+					let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
 					if (isTamper) {
 						dom.perf2.innerHTML = display + sb +"[tampering detected]"+ sc
 					} else {
@@ -421,7 +425,7 @@ function get_windowcontent() {
 	return "window_content:"+ r
 }
 
-function outputMisc(type) {
+function outputMisc() {
 	let t0 = performance.now()
 	let section = [], r = ""
 	Promise.all([
