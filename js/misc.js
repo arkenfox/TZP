@@ -308,7 +308,7 @@ function get_perf2() {
 						if (i == 0 && value > 75) {isYank = true}
 					}
 					// tweak max
-					if (isLoad) {maxTamper = 2 + (isYank ? 2 : 0)}
+					if (isLoad) {maxTamper = 3 + (isYank ? 1 : 0)}
 					isTamper = (countTamper > maxTamper ? true : false) // allow one false positive
 					// tampering
 					if (isRFP && !is00) {isTamper = true}
