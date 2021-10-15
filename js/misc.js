@@ -122,41 +122,6 @@ function get_iframe_props() {
 	return "iframe_properties:"+ r
 }
 
-function get_mathml() {
-	if (!isFF) {
-		dom.mathml = zNA
-		return "mathml:"+ zNA
-	}
-	let res = []
-	let sName = "misc_mathml"
-	clearDetail(sName)
-	try {
-		let elCtrl = dom.mathmlCtrl,
-			elTest = dom.mathmlTest,
-			target = dom.mathmlDiv,
-			t0 = performance.now()
-		// higher sizes accentuate diffs
-		let sizes = [100,200,300,400,500,600,700,800]
-		sizes.forEach(function(size) {
-			target.style.fontSize = size+"px"
-			res.push(elTest.offsetHeight - elCtrl.offsetHeight)
-		})
-		target.style.fontSize = "8px"
-		sDetail[sName] = res
-		res = sha1(res.join())
-		let btn = buildButton("18", sName, "details")
-		let tbNotation = (res == "7faa6bc4282678a40c9631a411d6b688d16be8ab" ? tb_safer : "")
-		dom.mathml.innerHTML = res + btn + (isTB ? tbNotation : "")
-		log_perf("mathml [misc]",t0, (gRun ? gt0 : "ignore"))		
-	} catch(e) {
-		console.debug(e.name, e.message)
-		log_error("misc: mathml", e.name, e.message)
-		dom.mathml = zB0
-		res = zLIE
-	}
-	return "mathml:"+ res
-}
-
 function get_nav_prototype() {
 	// use global
 	let sTrue = "misc_navigator_keys",
@@ -447,7 +412,6 @@ function outputMisc() {
 		get_iframe_props(),
 		get_windowcontent(),
 		get_nav_prototype(),
-		get_mathml(),
 		get_recursion(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
