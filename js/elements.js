@@ -80,7 +80,7 @@ function get_resized() {
 			log_error("elements: mathml", errM, errMMsg)
 			displayM = zB0
 			resM = [zLIE]
-		} else if (resM.length < 9) {
+		} else if (resM.length < sizes.length) {
 			displayM = zB0
 			resM = [zLIE]
 			if (gRun) {
@@ -105,7 +105,7 @@ function get_resized() {
 			log_error("elements: lineheight", errL, errLMsg)
 			displayL = zB0
 			resL = [zLIE]
-		} else if (resL.length == 0) {
+		} else if (resL.length < sizes.length) {
 			displayL = zB0
 			resL = [zLIE]
 			if (gRun) {
