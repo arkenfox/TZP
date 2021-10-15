@@ -305,4 +305,21 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 .testRect {outline: 2px dotted lightblue;}
 
 /* line-height */
-.cssLH {font-size: 16px; font-family: "Times New Roman", Times, serif;}
+.measure {
+	font-size: 16px;
+	font-family: none;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	line-height: normal;
+	text-transform: none;
+	text-align: left;
+	text-decoration: none;
+	text-shadow: none;
+	white-space: nowrap;
+}
+.cssLH {
+	font-family: "Times New Roman", Times, serif;
+	/* font-family: "Meiryo", Times, serif; */
+}
+
