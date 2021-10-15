@@ -1299,7 +1299,7 @@ function outputSection(id, cls) {
 		if (gRun) {
 			if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
 		} else {
-			const sNames = ['','y','x','y','x','x','x','y','x','y','y','x','y','y','y','x','x','x','y']
+			const sNames = ['','y','x','y','x','x','x','y','x','y','y','x','y','y','y','y','x','x','x']
 			if (sNames[id * 1] !== "x" && sPerfDetail.length) {log_line("line")}
 		}
 		setTimeout(function() {
