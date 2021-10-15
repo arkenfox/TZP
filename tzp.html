@@ -32,18 +32,19 @@
 
 	<!--offscreen-->
 	<div class="offscreen">
-		<div id="mathmlDiv" style="white-space: nowrap">
-			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a</div>
+		<div id="measureDiv" class="measure">
+			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a></div>
 			<div id="mathmlTest"><math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>
 			<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>
 			<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>
 			<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math></div>
+			<div id="lhTest">line height</div>
 		</div>
+		<div id="divLH" class="cssLH"><span id="spanLH">line height</span></div>
 		<img id="imageFS" width=0 height=0></img>
 		<div><span id="woffno" class="woffno">&#xe800;</span></div>
 		<div><span id="woffyes" class="woffyes">&#xe800;</span></div>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
-		<div id="divLH"><span id="spanLH" class="cssLH">line height</span></div>
 		<div id="ugDiv" class="normalized" style='font-size: 22pt;'><span id="ugSpan"><span id="ugSlot"></span></span></div>
 		<div><canvas id="ugCanvas" style='font-size: 22pt;'></canvas></div>
 		<div><span id="fontFBTest" style='white-space: nowrap; font-family: fontFallback;'></span></div>
@@ -779,6 +780,10 @@
 			<span class="c" id="elementshash"></span></td></tr>
 		<tr><td>
 		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="elementkeys"></td></tr>
+		<tr><td>lineheight</td><td class="c mono" id="lineheight"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">mathml.disabled</span></div>
+			&nbsp mathml</td><td class="c mono" id="mathml"></td></tr>
 		<tr><td colspan="3"><span class="no_color">code provided by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -819,9 +824,6 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp mathml</td><td class="c mono" id="mathml"></td></tr>
 		<tr><td>[getEntries*] performance.mark</td><td class="c mono" id="perf1"></td></tr>
 		<tr><td>performance.now</td><td class="c mono" id="perf2"></td></tr>
 		<tr><td>[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>

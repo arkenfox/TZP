@@ -1328,30 +1328,7 @@ function get_screen_metrics(runtype) {
 		}
 		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
 
-		// zoom resistance: recalc screen at 100%
-		if (isFF && Number.isInteger(jsZoom) && isOS !== "android") {
-			if (jsZoom !== 100) {
-				if (Number(dpr2) !== NaN && Number(dpr2) > 0) {
-					let w100 = 2 * Math.round((w1 * dpr2)/2) 
-					let h100 = 2 * Math.round((h1 * dpr2)/2)
-					// rounding fixups
-					let common = [360,600,640,720,768,800,810,834,864,900,1024,1050,1080,1112,1152,1200,1280,1360,1366,1440,1536,1600,1680,1920,2048,2560,]
-					for (let i=0; i < common.length; i++) {
-						let real = common[i]
-						if (w100 >= real-2 && w100 <= real+2) {w1 = real}
-						if (h100 >= real-2 && h100 <= real+2) {h1 = real}
-					}
-					mScreen = w1 +" x "+ h1
-				}
-			}
-		}
-
-		// stable metrics
-			// FF: mozInnerScreenY is not zero at FS
-			// no inner/outer/screen/availble comparisons due to FS affects and screenBypassed/recalc
-			// eliminate orientation: return screen at widest x highest
 		res.push("coordinates_zero:"+ isXY)
-		if (w1 < h1) {mScreen = h1 +" x "+ w1} else {mScreen = w1 +" x "+ h1}
 		if (screenBypass) {
 			// bypass
 			res.push("screen:"+ mScreen)
