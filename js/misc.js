@@ -123,30 +123,34 @@ function get_iframe_props() {
 }
 
 function get_mathml() {
-	// build
-	let r = ""
+	let res = []
+	let sName = "misc_mathml"
+	clearDetail(sName)
 	try {
-		let str = "<math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>"+
-			"<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>"+
-			"<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>"+
-			"<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math>"
-		dom.mathmltest.innerHTML = str
-		dom.mathmltest.style.color = zshow
-		// measure
-		let test = dom.mathmltest.offsetHeight,
-			control = dom.reportingAPI.offsetHeight, // a row with plain text and info icon
-			diff = Math.abs(test-control)
-		// compare: use range: zoom affects diff
-		let pre = " | offsetHeight difference: ",
-			post = (diff < 10 ? tb_safer : tb_standard)
-		dom.mathml.innerHTML = (diff < 10 ?	zD : zE) + pre + diff + (isTB ? post : "")
-		r = (diff < 10 ?	zD : zE)
+		let elCtrl = dom.mathmlCtrl,
+			elTest = dom.mathmlTest,
+			target = dom.mathmlDiv,
+			t0 = performance.now()
+		// higher sizes accentuate diffs
+		let sizes = [100,200,300,400,500,600,700,800]
+		sizes.forEach(function(size) {
+			target.style.fontSize = size+"px"
+			res.push(elTest.offsetHeight - elCtrl.offsetHeight)
+		})
+		target.style.fontSize = "8px"
+		sDetail[sName] = res
+		res = sha1(res.join())
+		let btn = buildButton("18", sName, "details")
+		let tbNotation = (res == "7faa6bc4282678a40c9631a411d6b688d16be8ab" ? tb_safer : "")
+		dom.mathml.innerHTML = res + btn + (isTB ? tbNotation : "")
+		log_perf("mathml [misc]",t0, (gRun ? gt0 : "ignore"))		
 	} catch(e) {
+		console.debug(e.name, e.message)
 		log_error("misc: mathml", e.name, e.message)
 		dom.mathml = zB0
-		r = zLIE
+		res = zLIE
 	}
-	return "mathml:"+ r
+	return "mathml:"+ res
 }
 
 function get_nav_prototype() {
