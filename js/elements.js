@@ -51,7 +51,7 @@ function get_resized() {
 			// mathml
 			try {
 				let diff = elTest.offsetHeight - elCtrl.offsetHeight
-				if (!isNaN(diff)) {resM.push(diff *1)}
+				if (!isNaN(diff)) {resM.push(diff * 1)}
 			} catch(e) {
 				errM = e.name; errMMsg = e.message
 			}
@@ -80,7 +80,7 @@ function get_resized() {
 			log_error("elements: mathml", errM, errMMsg)
 			displayM = zB0
 			resM = [zLIE]
-		} else if (resM.length == 0) {
+		} else if (resM.length < 9) {
 			displayM = zB0
 			resM = [zLIE]
 			if (gRun) {
@@ -91,7 +91,7 @@ function get_resized() {
 			let hashM = sha1(resM.join())
 			if (hashM == "43bd6f03270a43a5488e069a0539c37a30ab402b") {
 				displayM = zD + (isTB ? tb_safer : "")
-				resM = zD
+				resM = [zD]
 			} else {
 				sDetail[sNameM] = resM
 				displayM = hashM + buildButton("15", sNameM, "details")
