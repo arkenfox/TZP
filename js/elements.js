@@ -30,10 +30,6 @@ function get_element_keys() {
 }
 
 function get_resized() {
-	if (!isFF) {
-		dom.mathml = zNA
-		return "mathml:"+ zNA
-	}
 	let resM = [], resL = [], resALL = []
 	let sNameM = "elements_mathml_notglobal",
 		sNameL = "elements_lineheight_notglobal"
@@ -75,10 +71,12 @@ function get_resized() {
 		})
 		try {target.style.fontSize = "16px"} catch(e) {}
 
-
 		// mathml
 		let displayM = ""
-		if (errM !== "") {
+		if (!isFF) {
+			displayM = zNA
+			resM = [zNA]
+		} else if (errM !== "") {
 			log_error("elements: mathml", errM, errMMsg)
 			displayM = zB0
 			resM = [zLIE]
