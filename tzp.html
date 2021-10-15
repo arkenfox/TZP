@@ -32,6 +32,13 @@
 
 	<!--offscreen-->
 	<div class="offscreen">
+		<div id="mathmlDiv" style="white-space: nowrap">
+			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a</div>
+			<div id="mathmlTest"><math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>
+			<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>
+			<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>
+			<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math></div>
+		</div>
 		<img id="imageFS" width=0 height=0></img>
 		<div><span id="woffno" class="woffno">&#xe800;</span></div>
 		<div><span id="woffyes" class="woffyes">&#xe800;</span></div>
@@ -814,8 +821,7 @@
 			<span class="c" id="mischash"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp mathml</td><td class="c" id="mathml"></td></tr>
-		<tr><td>[test example] mathml</td><td id="mathmltest"></td></tr>
+			&nbsp mathml</td><td class="c mono" id="mathml"></td></tr>
 		<tr><td>[getEntries*] performance.mark</td><td class="c mono" id="perf1"></td></tr>
 		<tr><td>performance.now</td><td class="c mono" id="perf2"></td></tr>
 		<tr><td>[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>
