@@ -123,6 +123,10 @@ function get_iframe_props() {
 }
 
 function get_mathml() {
+	if (!isFF) {
+		dom.mathml = zNA
+		return "mathml:"+ zNA
+	}
 	let res = []
 	let sName = "misc_mathml"
 	clearDetail(sName)
