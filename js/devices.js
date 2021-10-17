@@ -116,7 +116,7 @@ function get_concurrency() {
 
 function get_media_devices() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 
 		function finish(result) {
 			// lies
@@ -290,7 +290,7 @@ function get_mimetypes() {
 
 function get_mimetypes_plugins() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 		// reset
 		let sName = "devices_mimetypes"
 		clearDetail(sName)
@@ -316,6 +316,7 @@ function get_mimetypes_plugins() {
 					if (sha1(outputP.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {pluginBS = false}
 				}
 			}
+			
 			// plugins
 			let btnP = "", pValue = outputP
 			if (Array.isArray(outputP)) {
@@ -524,7 +525,7 @@ function get_pointer_hover() {
 
 function get_speech_engines() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 		let sName = "devices_speech_engines"
 		clearDetail(sName)
 
@@ -603,7 +604,7 @@ function get_touch() {
 		if (window.matchMedia(q +"1)").matches) {m=1}
 	} catch(e) {m = zB0}
 	// t
-	try {document.createEvent("TouchEvent"); t = true} catch (e) {}
+	try {document.createEvent("TouchEvent"); t = true} catch(e) {}
 	let t2 = ("ontouchstart" in window)
 	let t3 = ("ontouchend" in window)
 	// p
@@ -629,8 +630,8 @@ function get_vr() {
 }
 
 function outputDevices() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 
 	// FF returns Flash as a false positive
 	if (!isFF) {
