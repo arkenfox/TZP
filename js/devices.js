@@ -3,7 +3,6 @@
 var pluginBS = false
 // FF only
 var mimeBS = false,
-	devicesBS = false,
 	pluginFlash = false,
 	mimeFlash = false
 
@@ -115,6 +114,7 @@ function get_concurrency() {
 }
 
 function get_media_devices() {
+	let devicesBS = false
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 
@@ -124,6 +124,7 @@ function get_media_devices() {
 				if (devicesBS) {gKnown.push("devices:media")}
 			}
 			log_perf("media devices [devices]",t0)
+			if (devicesBS) {result = zLIE}
 			return resolve("media_devices:"+ result)
 		}
 
@@ -133,7 +134,7 @@ function get_media_devices() {
 			finish(zD)
 		} else {
 			// else try enumerateDevices
-			let str="", pad=13, strPad=""
+			let str=""
 			try {
 				// await devices
 				let limit = 1000
@@ -150,32 +151,18 @@ function get_media_devices() {
 						finish(e.name)
 						return
 					}
-					
 					// compute devices output
 					let arr = []
-					// reset known lie
-					devicesBS = false
 					// enumerate
 					devices.forEach(function(d) {
 						arr.push(d.kind)
-						str += (d.kind +": ").padStart(pad)+ d.deviceId
-						if (d.groupId.length) {
-							strPad = ("group: ").padStart(pad)
-							str += "<br>"+ strPad + d.groupId
-						} else {
-							// if FF the length cannot be zero
-							console.log(d.kind, "zero-length groupId")
-						}
-						if (d.label.length) {
-							strPad = ("label: ").padStart(pad)
-							str += "<br>"+ strPad + d.label
-						}
-						str += "<br>"
 						// FF sanity check
 						if (isFF) {
+							// FF67+ groupId
+							if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
+							if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
 							// deviceId
 							let chk = d.deviceId
-							//console.log("device", chk.length, chk.slice(-1), chk)
 							if (chk.length !== 44) {devicesBS = true}
 							else if (chk.slice(-1) !== "=") {devicesBS = true}
 							// groupId
@@ -187,33 +174,29 @@ function get_media_devices() {
 							}
 						}
 					})
-					// output list
-					if (str.length == 0) {str = "none"}
-					//dom.eMDList.innerHTML = str
-
+					// prototypelies
+					if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true}
 					// count each kind
 					let pretty = [], plain = [], rfphash = ""
 					if (arr.length) {
-						if (devicesBS) {
-							pretty = "fake"
-						} else {
-							arr.sort()
-							let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-							arr = [...map.entries()]
-							// build pretty/plain
-							for (let i=0; i < arr.length; i++) {
-								let data = arr[i],
-									item = data[0],
-									itemcount = data[1]
-								pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
-								plain.push(item +","+ itemcount)
-							}
-							pretty = pretty.join(" ")
-							str = plain.join(";")
-							rfphash = sha1(str)
+						arr.sort()
+						let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+						arr = [...map.entries()]
+						// build pretty/plain
+						for (let i=0; i < arr.length; i++) {
+							let data = arr[i],
+								item = data[0],
+								itemcount = data[1]
+							plain.push(item +","+ itemcount)
+							if (devicesBS) {item = soL + item + scC}
+							pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
 						}
+						pretty = pretty.join(" ")
+						str = plain.join(";")
+						rfphash = sha1(str)
 					} else {
 						pretty = "none"
+						if (devicesBS) {pretty = soL +"none"+ scC}
 					}
 					// RFP
 					if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
