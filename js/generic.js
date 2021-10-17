@@ -433,7 +433,7 @@ const get_isRFP = () => new Promise(resolve => {
 	} catch(e) {
 		if (gRun) {
 			gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)
-			log_error("_global: isRFP:", e.name, e.message)
+			log_error("_global: isRFP", e.name, e.message)
 		}
 		return resolve()
 	}
@@ -1005,6 +1005,13 @@ function log_error(title, name, msg) {
 		if (msg == undefined || msg == "" || msg === null) {isMsg = false}
 		gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
 	}
+}
+
+function trim_error(name, msg, len) {
+	if (len == undefined) {len = 70}
+	let str = name +": "+ msg
+	if (str.length > len) {str = str.substring(0,len-3) + "..."}
+	return(str)
 }
 
 function log_line(str) {
