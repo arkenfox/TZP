@@ -297,12 +297,11 @@ function outputAudio() {
 					log_section("audio", t0, section)
 				})
 			} catch(e) {
-				dom.audioCopy = e.name; dom.audioGet = e.name; dom.audioSum = e.name
-				if (gRun) {
-					gKnown.push("audio:OfflineAudioContext")
-					gMethods.push("audio:OfflineAudioContext:blocked")
-				}
-				section.push("OfflineAudioContext:"+ zLIE)
+				log_error("", e.name, e.message)
+				let eMsg = e.name+ ": "+ e.message
+				eMsg = (e.name === undefined ? zErr : eMsg)
+				dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
+				section.push("OfflineAudioContext:"+ (isFF ? zB0 : zErr))
 				log_section("audio", t0, section)
 			}
 		}
