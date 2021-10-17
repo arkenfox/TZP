@@ -327,7 +327,7 @@ function get_perf2() {
 					if (!isPerf) {isTamper = true}
 					let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
 					if (isTamper) {
-						dom.perf2.innerHTML = display + sb +"[tampering detected]"+ sc
+						dom.perf2.innerHTML = display + sb +"[tampered]"+ sc
 					} else {
 						dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
 					}
