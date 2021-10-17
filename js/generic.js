@@ -433,7 +433,7 @@ const get_isRFP = () => new Promise(resolve => {
 	} catch(e) {
 		if (gRun) {
 			gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)
-			log_error("_global: isRFP:", e.name, e,message)
+			log_error("_global: isRFP:", e.name, e.message)
 		}
 		return resolve()
 	}
