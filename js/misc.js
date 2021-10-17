@@ -252,7 +252,7 @@ function get_perf1() {
 		}
 	} catch(e) {
 		log_error("misc: perf mark", e.name, e.message)
-		dom.perf1 = (e.name === undefined ? zErr : e.name +": "+ e.message) +" | "+ zNA
+		dom.perf1 = (e.name === undefined ? zErr : e.name) +" | "+ zNA
 		return "perf_mark:"+ (isFF ? zB0 : zErr)
 	}
 
