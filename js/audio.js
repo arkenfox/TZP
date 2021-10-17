@@ -291,13 +291,13 @@ function outputAudio() {
 					dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
 					dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
 					dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-					section.push("OfflineAudioContext:"+ (isLies ? zLIE : hashG))
-					if (gRun && isLies) {gKnown.push("audio:OfflineAudioContext")}
+					section.push("offlineaudiocontext:"+ (isLies ? zLIE : hashG))
+					if (gRun && isLies) {gKnown.push("audio:offlineaudiocontext")}
 					// done
 					log_section("audio", t0, section)
 				})
 			} catch(e) {
-				log_error("", e.name, e.message)
+				log_error("audio: offlineaudiocontext", e.name, e.message)
 				let eMsg = e.name+ ": "+ e.message
 				eMsg = (e.name === undefined ? zErr : eMsg)
 				dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
@@ -308,7 +308,7 @@ function outputAudio() {
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, ["OfflineAudioContext:n/a"])
+		log_section("audio", t0, ["offlineaudiocontext:n/a"])
 	}
 }
 
