@@ -30,6 +30,7 @@ function get_element_keys() {
 }
 
 function get_resized() {
+	let t0; if (canPerf) {t0 = performance.now()}
 	let resM = [], resL = [], resALL = []
 	let sNameM = "elements_mathml_notglobal",
 		sNameL = "elements_lineheight_notglobal"
@@ -39,8 +40,7 @@ function get_resized() {
 		elTest = dom.mathmlTest,
 		elLine = dom.lhTest,
 		target = dom.measureDiv,
-		sizes = [16,97,203,333,417,513,595,709,867],
-		t0 = performance.now()
+		sizes = [16,97,203,333,417,513,595,709,867]
 
 	// ToDo: apply a font family per OS if isTB
 
@@ -134,7 +134,7 @@ function get_resized() {
 }
 
 function outputElements() {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([
 		get_element_keys(),
