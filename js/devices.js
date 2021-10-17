@@ -310,6 +310,11 @@ function get_mimetypes_plugins() {
 			if (isFF) {
 				if (pluginFlash == true && mimeFlash == false) {pluginBS = true}
 				if (pluginFlash == false && mimeFlash == true) {mimeBS = true}
+			} else {
+				if (isEngine == "blink") {
+					// chrome 94 changes: pluginBS is broken: temp fix
+					if (sha1(outputP.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {pluginBS = false}
+				}
 			}
 			// plugins
 			let btnP = "", pValue = outputP
