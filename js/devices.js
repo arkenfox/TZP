@@ -100,17 +100,16 @@ function get_concurrency() {
 			h = (h == undefined ? zB0 : h)
 		} catch(e) {h = zB0}
 	} else {h = zD}
-	let isLies = false
-	if (isBraveMode.substring(0,2) == "st") {
-		isLies = true
-	} else {
-		isLies = (proxyLies.includes("Navigator.hardwareConcurrency") ? true : false)
-	}
+	let isLies = (isBraveMode.substring(0,2) == "st" ? true: false)
+	if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
 	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
-	let h2 = h
-	if (isLies) {h = soL + h + scC} else {h += (h == "2" ? rfp_green : rfp_red)}
-	dom.nHWC.innerHTML = h
-	return "hardwareConcurrency:"+ (isLies ? zLIE : h2)
+	if (isLies) {
+		dom.nHWC.innerHTML = soL + h + scC
+		if (gRun) {gKnown.push("devices:hardwareConcurrency")}
+	} else {
+		dom.nHWC.innerHTML = (h == "2" ? rfp_green : rfp_red)
+	}
+	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
 }
 
 function get_media_devices() {
