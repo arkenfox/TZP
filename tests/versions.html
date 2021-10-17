@@ -28,6 +28,8 @@
 		<div id="test89" style="width:1em">a &#x3000 b</div>
 		<div id="ctrl89" style="width:1em">a b</div>
 		<span id="test81a"></span><span id="test81b"></span>
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
 	</div>
 
 	<table>
@@ -49,6 +51,7 @@
 		</tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="watchlist"></td><td></td></tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="alert"></td><td></td></tr>
+		<tr><td></td><td colspan="2" class="c mono spaces" id="debug"></td><td></td></tr>
 	</table>
 	<br>
 
@@ -67,7 +70,7 @@ function outputVersion() {
 		watchcount = 1
 
 	s3 = s3.trim()
-	let results = []
+	let results = [], debug = []
 	let data = {}
 
 	function display() {
@@ -130,6 +133,11 @@ function outputVersion() {
 		let display2 = display.slice(splitpoint, display.length)
 		dom.results1.innerHTML = display1.join("<br>")
 		dom.results2.innerHTML = display2.join("<br>")
+		// debug
+		if (debug.length) {
+			dom.debug.innerHTML = s3 + "--- debug ---" + sc + "<br><br>" + debug.join("<br>")
+		}
+
 	}
 
 	function record(order, version, bug, result, perf) {
@@ -145,7 +153,22 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 64
+		expected = 65
+
+	// 95: 1674204
+		// note: en-US, windows
+		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
+		// FF66-94 wraps 2020-1 vs 2020-12   : 45/53 = 0.8490566037735849
+		// FF95+   wraps 2020-1 x twice that : 47/93 = approx 0.5
+	let t95a = performance.now(), ver95a = xF
+	try {
+		let a95 = dom.test95a.offsetWidth
+		let b95 = dom.test95b.offsetWidth
+		let test95 = a95/b95
+		debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
+		if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
+	} catch(e) {}
+	record(230,95, "1674204", ver95a, performance.now()-t95a)
 
 	// 94: 1729239
 	let t94a = performance.now(), ver94a = xF
