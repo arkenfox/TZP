@@ -11,7 +11,7 @@ function get_component_shims() {
 		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
 		log_error("misc: component shims", e.name, e.message)
-		let eMsg = e.name +": "+ e.message
+		let eMsg = trim_error(e.name, e.message)
 		if (eMsg == "ReferenceError: Components is not defined") {
 			sHash = zU; dom.shim = zU
 		} else {
@@ -121,9 +121,8 @@ function get_iframe_props() {
 		r= sha1(props.join())
 	} catch(e) {
 		log_error("misc: iframe window properties", e.name, e.message)
-		let eMsg = e.name +": "+ e.message
 		r = isFF ? zB0 : zErr
-		dom.iProps = (e.name === undefined ? zErr : eMsg)
+		dom.iProps = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 	}
 	return "iframe_properties:"+ r
 }
@@ -203,7 +202,7 @@ function get_reporting_api() {
 		r = zE
 	} catch(e) {
 		log_error("misc: reporting observer", e.name, e.message)
-		let eMsg = e.name +": "+ e.message
+		let eMsg = trim_error(e.name, e.message)
 		if (isFF && eMsg == "ReferenceError: ReportingObserver is not defined") {
 			r = (isVer > 64 ? zD : zNS)
 			dom.reportingAPI = r
@@ -252,7 +251,7 @@ function get_perf1() {
 		}
 	} catch(e) {
 		log_error("misc: perf mark", e.name, e.message)
-		dom.perf1 = (e.name === undefined ? zErr : e.name +": "+ e.message) +" | "+ zNA
+		dom.perf1 = (e.name === undefined ? zErr : trim_error(e.name, e.message)) +" | "+ zNA
 		return "perf_mark:"+ (isFF ? zB0 : zErr)
 	}
 
@@ -297,48 +296,44 @@ function get_perf2() {
 	try {
 		let i = 0, times = [], p0
 		function run() {
-			try {
-				if (i < 11) {
-					if (i == 0) {
-						p0 = Math.round(performance.now())
-					} else {
-						times.push(Math.round(performance.now())-p0)
-					}
-					i++
+			if (i < 11) {
+				if (i == 0) {
+					p0 = Math.round(performance.now())
 				} else {
-					clearInterval(check)
-					let is00 = true, isYank = false, isTamper = false
-					let maxTamper = 1, countTamper = 0
-					for (let i=0; i < times.length ; i++) {
-						let value = times[i] % 100
-						if (value !== 0) {is00 = false} // ignore hundreds
-						if (i > 0 && !isRFP) {
-							let diff = times[i] - times[i-1]
-							if (diff < 5 || diff > 30) {countTamper++}
-						}
-						if (i == 0 && value > 75) {isYank = true}
-					}
-					// tweak max
-					if (isLoad) {maxTamper = 3 + (isYank ? 1 : 0)}
-					isTamper = (countTamper > maxTamper ? true : false) // allow one false positive
-					// tampering
-					if (isRFP && !is00) {isTamper = true}
-					if (!isRFP && is00) {isTamper = true}
-					if (!isPerf) {isTamper = true}
-					let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
-					if (isTamper) {
-						dom.perf2.innerHTML = display + sb +"[tampered]"+ sc
-					} else {
-						dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
-					}
+					times.push(Math.round(performance.now())-p0)
 				}
-			} catch(e) {
-				dom.perf2 = (e.name === undefined ? zErr : e.name +": "+ e.message)
+				i++
+			} else {
+				clearInterval(check)
+				let is00 = true, isYank = false, isTamper = false
+				let maxTamper = 1, countTamper = 0
+				for (let i=0; i < times.length ; i++) {
+					let value = times[i] % 100
+					if (value !== 0) {is00 = false} // ignore hundreds
+					if (i > 0 && !isRFP) {
+						let diff = times[i] - times[i-1]
+						if (diff < 5 || diff > 30) {countTamper++}
+					}
+					if (i == 0 && value > 75) {isYank = true}
+				}
+				// tweak max
+				if (isLoad) {maxTamper = 3 + (isYank ? 1 : 0)}
+				isTamper = (countTamper > maxTamper ? true : false) // allow one false positive
+				// tampering
+				if (isRFP && !is00) {isTamper = true}
+				if (!isRFP && is00) {isTamper = true}
+				if (!isPerf) {isTamper = true}
+				let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
+				if (isTamper) {
+					dom.perf2.innerHTML = display + sb +"[tampered]"+ sc
+				} else {
+					dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
+				}
 			}
 		}
 		let check = setInterval(run, 13)
 	} catch(e) {
-		dom.perf2 = (e.name === undefined ? zErr : e.name +": "+ e.message)
+		dom.perf2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 	}
 }
 
@@ -352,7 +347,7 @@ function get_perf3() {
 		dom.perf3.innerHTML = r
 	} catch(e) {
 		log_error("misc: perf timing", e.name, e.message)
-		dom.perf3 = (e.name === undefined ? zErr : e.name +": "+ e.message)
+		dom.perf3 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		r = isFF ? zB0 : zErr
 	}
 	return "perf_timing:"+ r
@@ -365,7 +360,7 @@ function get_perf4() {
 		if (window.PerformanceNavigationTiming) {r = zE}
 	} catch(e) {
 		log_error("misc: perf navigation", e.name, e.message)
-		dom.perf4 = (e.name === undefined ? zErr : e.name +": "+ e.message)
+		dom.perf4 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		return "perf_navigation:"+ (isFF ? zB0 : zErr)
 	}
 	if (isVer > 77) {
@@ -373,7 +368,7 @@ function get_perf4() {
 	} else {
 		dom.perf4 = r
 	}
-	return "perf_navigation:"+ (r == zB0 ? zLIE : r)
+	return "perf_navigation:"+ r
 }
 
 function get_svg() {
@@ -399,7 +394,7 @@ function get_svg() {
 	} catch(e) {
 		log_error("misc: svg", e.name, e.message)
 		dom.perf3 = 
-		dom.svgBasicTest = (e.name === undefined ? zErr : e.name +": "+ e.message)
+		dom.svgBasicTest = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		return "svg:"+ (isFF ? zB0 : zErr)
 	}
 }
@@ -433,9 +428,9 @@ function get_windowcontent() {
 		r = zE
 	} catch(e) {
 		log_error("misc: window content", e.name, e.message)
-		let eMsg = e.name +": "+ e.message
+		let eMsg = trim_error(e.name, e.message)
 		if (eMsg !== "ReferenceError: content is not defined") {
-			dom.wincon = (e.name === undefined ? zErr : e.name +": "+ e.message)
+			dom.wincon = (e.name === undefined ? zErr : eMsg)
 			return "window_content:"+ (isFF ? zB0 : zErr)
 		}
 	}
