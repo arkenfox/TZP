@@ -117,15 +117,15 @@ function outputCanvas() {
 					}
 				}
 			}
+			if (aBlock[i] == true) {display = trim_error(aValue[i])}
 			element.innerHTML = display
 		}
 		// methods & lies
 		if (gRun) {
-			let mPass = [], mPersist = [], mBlock = []
+			let mPass = [], mPersist = []
 			for (let i=0; i < aIndex.length; i++) {
 				if (aKnown[i] == false || aPass[i] == false) {gKnown.push("canvas:"+ aIndex[i])}
 				if (aBlock[i] == true) {
-					mBlock.push(aIndex[i])
 					log_error("canvas: "+ aIndex[i], aValue[i])
 				} else if (aPass[i] == false) {
 					mPass.push(aIndex[i])
@@ -134,7 +134,6 @@ function outputCanvas() {
 				}
 			}
 			let max = aIndex.length
-			//if (mBlock.length) {gMethods.push("canvas:blocked:"+ (mBlock.length == max ? "all" : mBlock.join()))}
 			if (mPass.length) {gMethods.push("canvas:random per execution:"+ (mPass.length == max ? "all" : mPass.join()))}
 			if (mPersist.length) {gMethods.push("canvas:persistent noise:"+ (mPersist.length == max ? "all" : mPersist.join()))}
 		}
