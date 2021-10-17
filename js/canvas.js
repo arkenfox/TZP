@@ -3,8 +3,8 @@
 /* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
 
 function outputCanvas() {
-	let t0 = performance.now(),
-		res0 = [], res1 = [], res2 = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let res0 = [], res1 = [], res2 = []
 
 	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob [gecko]
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
@@ -121,14 +121,12 @@ function outputCanvas() {
 		}
 		// methods & lies
 		if (gRun) {
-			let sName = "canvas_blocks_method_skip"
-			sDetail[sName] = []
 			let mPass = [], mPersist = [], mBlock = []
 			for (let i=0; i < aIndex.length; i++) {
 				if (aKnown[i] == false || aPass[i] == false) {gKnown.push("canvas:"+ aIndex[i])}
 				if (aBlock[i] == true) {
 					mBlock.push(aIndex[i])
-					sDetail[sName].push(aIndex[i] +":"+ aValue[i])
+					log_error("canvas: "+ aIndex[i], aValue[i])
 				} else if (aPass[i] == false) {
 					mPass.push(aIndex[i])
 				} else if (aKnown[i] == false) {
@@ -136,7 +134,7 @@ function outputCanvas() {
 				}
 			}
 			let max = aIndex.length
-			if (mBlock.length) {gMethods.push("canvas:blocked:"+ (mBlock.length == max ? "all" : mBlock.join()))}
+			//if (mBlock.length) {gMethods.push("canvas:blocked:"+ (mBlock.length == max ? "all" : mBlock.join()))}
 			if (mPass.length) {gMethods.push("canvas:random per execution:"+ (mPass.length == max ? "all" : mPass.join()))}
 			if (mPersist.length) {gMethods.push("canvas:persistent noise:"+ (mPersist.length == max ? "all" : mPersist.join()))}
 		}
@@ -151,12 +149,12 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						try {
-							let t1 = performance.now()
+							let t1; if (canPerf) {t1 = performance.now()}
 							let data = hashData(getFilledContext().canvas.toDataURL())
 							log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 							return data
-						} catch (e) {
-							return(e.name === undefined ? "error" : e.name +": " + e.message)
+						} catch(e) {
+							return(e.name === undefined ? zErr : e.name +": " + e.message)
 						}
 					}
 				},
@@ -164,7 +162,7 @@ function outputCanvas() {
 					name: "toBlob",
 					value: function(){
 						return new Promise(function(resolve, reject){
-							let t1 = performance.now()
+							let t1; if (canPerf) {t1 = performance.now()}
 							try {
 								var timeout = window.setTimeout(function(){
 									reject("timeout")
@@ -182,8 +180,8 @@ function outputCanvas() {
 									}
 									reader.readAsDataURL(blob)
 								})
-							} catch (e){
-								resolve(e.name === undefined ? "error" : e.name +": " + e.message)
+							} catch(e) {
+								resolve(e.name === undefined ? zErr : e.name +": " + e.message)
 							}
 						})
 					}
@@ -192,7 +190,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "getImageData",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getFilledContext()
 						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
 						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
@@ -204,7 +202,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInPath",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(30 * 30)
 						for (var x = 0; x < 30; x += 1){
@@ -221,7 +219,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInStroke",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(30 * 30)
 						for (var x = 0; x < 30; x += 1){
@@ -335,14 +333,14 @@ function outputCanvas() {
 						} else {
 							displayValue = zNS
 						}
-					} catch (e){
-						displayValue = (e.name === undefined ? "error" : e.name +": " + e.message)
+					} catch(e) {
+						displayValue = (e.name === undefined ? zErr : e.name +": " + e.message)
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
 						resolve(output)
 					}, function(e){
-						output.displayValue = (e.name === undefined ? "error" : e.name +": " + e.message)
+						output.displayValue = (e.name === undefined ? zErr : e.name +": " + e.message)
 						resolve(output)
 					})
 				})
@@ -357,7 +355,7 @@ function outputCanvas() {
 				{
 					name: "toDataURL",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						let data = sha1(getKnown().canvas.toDataURL())
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						let isFake = false
@@ -373,7 +371,7 @@ function outputCanvas() {
 					name: "toBlob",
 					value: function(){
 						return new Promise(function(resolve, reject){
-							let t1 = performance.now()
+							let t1; if (canPerf) {t1 = performance.now()}
 							try {
 								var timeout = window.setTimeout(function(){
 									reject(false)
@@ -398,7 +396,7 @@ function outputCanvas() {
 								reader.readAsDataURL(blob)
 							})
 							}
-							catch (e){
+							catch(e) {
 								resolve(false)
 							}
 						})
@@ -408,7 +406,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "getImageData",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getKnown()
 						let imageData = []
 						for (let x=0; x < 16; x++) {
@@ -426,7 +424,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInPath",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						let context2 = getKnownPath()
 						let pathData = []
 						for (let x = 0; x < 16; x++){
@@ -443,7 +441,7 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "isPointInStroke",
 					value: function(){
-						let t1 = performance.now()
+						let t1; if (canPerf) {t1 = performance.now()}
 						let context2 = getKnownPath()
 						let pathStroke = []
 						for (let x = 0; x < 16; x++){
@@ -491,7 +489,7 @@ function outputCanvas() {
 						} else {
 							displayValue = false
 						}
-					} catch (e){
+					} catch(e) {
 						displayValue = false
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
