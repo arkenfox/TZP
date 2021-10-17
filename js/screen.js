@@ -1329,7 +1329,8 @@ function get_screen_metrics(runtype) {
 		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
 
 		res.push("zoom:"+ jsZoomOriginal)
-		res.push("devicePixelRatio:"+ varDPI) // ToDo: dpi2
+		//res.push("dpi:"+ varDPI) // ToDo: matchmedia pseudo
+		res.push("devicePixelRatio:"+ dpr2) // ToDo: dpi
 
 		res.push("coordinates_zero:"+ isXY)
 		if (screenBypass) {
