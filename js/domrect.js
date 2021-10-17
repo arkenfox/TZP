@@ -3,7 +3,7 @@
 /* code based on https://canvasblocker.kkapsner.de/test/ */
 
 function outputDomRect() {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	let sColor = s8
 
 	// analyze & output
