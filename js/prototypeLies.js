@@ -4,7 +4,7 @@
 
 function outputPrototypeLies() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 
 		const getIframe = () => {
 			try {
@@ -158,10 +158,10 @@ function outputPrototypeLies() {
 				let iframeToString, iframeToStringToString
 				try {
 					iframeToString = iframeWindow.Function.prototype.toString.call(apiFunction)
-				} catch (e) { }
+				} catch(e) { }
 				try {
 					iframeToStringToString = iframeWindow.Function.prototype.toString.call(apiFunction.toString)
-				} catch (e) { }
+				} catch(e) { }
 
 				const apiFunctionToString = (
 					iframeToString ?
