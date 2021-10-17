@@ -28,8 +28,8 @@ function reset_audio2() {
 }
 
 function get_audio2_context(attempt) {
-	let t0 = performance.now(),
-		sColor = s11
+	let t0; if (canPerf) {t0 = performance.now()}
+	let sColor = s11
 	latencyTries++
 
 	function a(a, b, c) {
@@ -100,8 +100,8 @@ function get_audio2_context(attempt) {
 }
 
 function get_audio2_hybrid() {
-	let t0 = performance.now(),
-		results = [],
+	let t0; if (canPerf) {t0 = performance.now()}
+	let results = [],
 		showperf = false
 	if (latencyError == false || latencyTries == 2) {showperf = true}
 
@@ -160,8 +160,8 @@ function get_audio2_hybrid() {
 }
 
 function get_audio2_oscillator() {
-	let t0 = performance.now(),
-		cc_output = [],
+	let t0; if (canPerf) {t0 = performance.now()}
+	let cc_output = [],
 		audioCtx = new window.AudioContext
 	let oscillator = audioCtx.createOscillator(),
 		analyser = audioCtx.createAnalyser(),
@@ -217,8 +217,7 @@ function outputAudio2() {
 			Promise.all([
 				outputPrototypeLies(),
 			]).then(function(results){
-				gt0 = performance.now()
-				t0audio = gt0
+				if (canPerf) {gt0 = performance.now(); t0audio = gt0}
 				latencyTries = 0
 				log_line("line")
 				get_audio2_oscillator()				
@@ -232,8 +231,8 @@ function outputAudio2() {
 }
 
 function outputAudio() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
 		dom.audioSupport = zE
