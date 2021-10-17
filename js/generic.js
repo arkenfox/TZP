@@ -1015,15 +1015,17 @@ function trim_error(name, msg, len) {
 }
 
 function log_line(str) {
-	let output = str
-	if (str == "line") {
-		output = "-".repeat(20)
-		output = output.padStart(31)
-	}
-	if (gRun) {
-		gPerfDetail.push(output)
-	} else {
-		sPerfDetail.push(output)
+	if (canPerf) {
+		let output = str
+		if (str == "line") {
+			output = "-".repeat(20)
+			output = output.padStart(31)
+		}
+		if (gRun) {
+			gPerfDetail.push(output)
+		} else {
+			sPerfDetail.push(output)
+		}
 	}
 }
 
