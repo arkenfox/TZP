@@ -3,8 +3,8 @@
 let mediaBtns = ""
 
 function get_media(runtype) {
-	let list = [],
-		t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
+	let list = []
 	// list
 	if (runtype == "video") {
 		let v = 'video/', v4 = v+'mp4; codecs="', vm = v+'mpeg; codec="',
@@ -134,9 +134,8 @@ function get_media(runtype) {
 }
 
 function outputMedia() {
-	let t0 = performance.now(),
-		section = [],
-		r = ""
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = [], r = ""
 	// FF63+
 	if (isFF && isVer < 63) {r = zNS} else (r = (check_navKey("mediaCapabilities") ? zE : zD))
 	dom.nMediaC = r
