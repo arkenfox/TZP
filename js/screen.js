@@ -1,6 +1,6 @@
 'use strict';
 
-var jsZoom, jsZoomOriginal, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
+var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
 let isOS64math = ""
 let iframeSim = 0
@@ -1329,8 +1329,8 @@ function get_screen_metrics(runtype) {
 		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
 
 		res.push("zoom:"+ jsZoomOriginal)
-		//res.push("dpi:"+ varDPI) // ToDo: matchmedia pseudo
-		res.push("devicePixelRatio:"+ dpr2) // ToDo: dpi
+		// ToDo: robust: matchmedia values, dpr1, dpr2: handle non-numbers; trim; bypasses
+		res.push("devicePixelRatio:"+ (isFF ? dpr2 : dpr1))
 
 		res.push("coordinates_zero:"+ isXY)
 		if (screenBypass) {
@@ -1831,10 +1831,12 @@ function get_zoom(runtype) {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let zoomAssume = false
+		dpr1 = ""
 		dpr2 = ""
-
+		
 		// dPR
 		let dpr = window.devicePixelRatio || 1;
+		dpr1 = dpr
 		let dprStr = dpr + (dpr == 1 ? rfp_green : rfp_red)
 		// add dPR2: 477157
 		if (isFF) {
