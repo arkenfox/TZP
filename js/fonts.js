@@ -369,8 +369,8 @@ const getFonts = () => {
 
 function get_fonts() {
 	return new Promise(resolve => {
-		let t0 = performance.now(),
-			fontReturn = []
+		let t0; if (canPerf) {t0 = performance.now()}
+		let fontReturn = []
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		clearDetail["fonts_fonts"]
@@ -574,10 +574,10 @@ function get_fallback(list) {
 	// list passed for priming run
 	/* https://github.com/arthuredelstein/tordemos */
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		clearDetail["fonts_font_fallback"]
 		let width0 = null,
-			t = dom.fontFBTest,
-			t0 = performance.now()
+			t = dom.fontFBTest
 		// measure
 		let measure = function(font) {
 			t.style.fontSize = "256px"
@@ -632,9 +632,9 @@ function get_unicode() {
 		// ToDo: does font fallback string also need priming
 
 	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let offset = [], bounding = [], client = [],
-			diffsb = [], diffsc = [], display = "",
-			t0 = performance.now()
+			diffsb = [], diffsc = [], display = ""
 		let isCanvas = true, isBound = true, isClient = true, isTM = true
 
 		// textMetrics
@@ -790,11 +790,11 @@ function get_unicode() {
 
 function get_woff() {
 	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let el = dom.woffno,
 			control = el.offsetWidth,
 			count = 0,
-			maxcount = 31, // 800ms
-			t0 = performance.now()
+			maxcount = 31 // 800ms
 		if (isOS == "android" | isTB) {maxcount = 59} // 1500ms
 		// output
 		function output_woff(state) {
@@ -847,8 +847,8 @@ function outputFontsFB() {
 }
 
 function outputFonts() {
-	let t0 = performance.now(),
-		section = [], r = ""
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = [], r = ""
 	set_fallback_string()
 	set_fntList()
 	// proportional

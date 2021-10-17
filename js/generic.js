@@ -86,6 +86,20 @@ const promiseRaceFulfilled = async ({
 
 /*** GLOBAL VARS ***/
 
+function get_canPerf(runtype) {
+	// check performance.now
+	try {
+		if (runSP) {a=b}
+		let testPerf = performance.now()
+		canPerf = true
+	} catch(e) {
+		canPerf = false
+		if (runtype == "log") {
+			log_error("_global: performance.now:", e.name, e.message)
+		}
+	}
+}
+
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
 	if (isFF) {return resolve()} // FF
@@ -93,7 +107,8 @@ const get_isBrave = () => new Promise(resolve => {
 	if (Object.keys(chrome).includes("search")) {return resolve()} // opera
 
 	// proceed
-	let t0 = performance.now(), res = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let res = []
 	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
 	const detectBrave = async () => {
 		const windowKeys = Object.keys(Object.getOwnPropertyDescriptors(window))
@@ -150,7 +165,7 @@ const get_isBrave = () => new Promise(resolve => {
 })
 
 const get_isBraveMode = () => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
@@ -199,7 +214,8 @@ const get_isBraveMode = () => new Promise(resolve => {
 })
 
 const get_isEngine = () => new Promise(resolve => {
-	let t0 = performance.now(), bFF = false
+	let t0; if (canPerf) {t0 = performance.now()}
+	let bFF = false
 	// set isFF for engine lies
 	if (isFFyes.length) {isFF = true}
 	function final_isFF() {
@@ -271,7 +287,7 @@ const get_isEngine = () => new Promise(resolve => {
 })
 
 const get_isError = () => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		let res = [], bFF = false
 		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
@@ -298,8 +314,8 @@ const get_isError = () => new Promise(resolve => {
 const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
 	// check
-	let t0 = performance.now(),
-		el = dom.widget0
+	let t0; if (canPerf) {t0 = performance.now()}
+	let el = dom.widget0
 	function tryharder() {
 		// ToDo: harden isOS
 		log_perf("isOS [global]",t0,"","unknown")
@@ -375,10 +391,15 @@ const get_isRFP = () => new Promise(resolve => {
 	isPerf = true
 	let realPerf = true
 	if (runSL) {isPerf = false}
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {
+	try {
+		if (Math.trunc(performance.now() - performance.now()) !== 0) {
+			isPerf = false
+			realPerf = false
+			if (gRun) {gMethods.push("_global:performance.now:tampered")}
+		}
+	} catch(e) {
 		isPerf = false
-		realPerf = false
-		if (gRun) {gMethods.push("_global:performance.now:tampered")}
+		realPerf = false // ??
 	}
 	if (runSL) {isPerf = realPerf}
 	if (!isFF) {return resolve()}
@@ -410,13 +431,16 @@ const get_isRFP = () => new Promise(resolve => {
 		}
 		return resolve()
 	} catch(e) {
-		if (gRun) {gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)}
+		if (gRun) {
+			gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)
+			log_error("_global: isRFP:", e.name, e,message)
+		}
 		return resolve()
 	}
 })
 
 const get_isSystemFont = () => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		let el = dom.sysFont,
 			f = undefined
@@ -440,7 +464,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 
 const get_isTB = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
@@ -472,15 +496,21 @@ const get_isVer = () => new Promise(resolve => {
 	// skip
 	if (!isFF) {return resolve()}
 	// set isVer, isVerPlus
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 94) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 95) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { // 94: 1722576
+	function start() { // 95:1674204 : slow ~20ms and relies on css: replace
+		try {
+			let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+			if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
+		} catch(e) {v94()}
+	}
+	function v94() { // 94:1722576
 		try {
 			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
 			output(94)
@@ -568,7 +598,7 @@ const get_isVer = () => new Promise(resolve => {
 			let obj = {[Symbol.toPrimitive]: () => Symbol()}
 			let proxy = (new Proxy({},{get: (obj, prop, proxy) => prop}))
 			for (let i = 0; i < 11; i++) {if (typeof proxy[obj] == 'symbol') {}}; output(80)
-		} catch (e) {v79()}
+		} catch(e) {v79()}
 	}
 	function v79() { //79:1644878
 		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {output(79)} else {v78()}}
@@ -901,7 +931,9 @@ function showMetrics(type) {
 			console.log(section +": "+ metric, data)
 		}
 	} else if (type == "gPerfDetail") {
-		console.log("perf detail: global\n"+ gPerfDetail.join("\n"))
+		if (gPerfDetail.length) {
+			console.log("perf detail: global\n"+ gPerfDetail.join("\n"))
+		}
 	} else if (type == "sPerfDetail") {
 		if (sPerfDetail.length) {
 			console.log("perf detail: section re-runs\n"+ sPerfDetail.join("\n"))
@@ -952,9 +984,11 @@ function clearDetail(name) {
 
 function log_click(name, time) {
 	// click here doesn't record via log_section
-	let output = isPerf ? Math.round(performance.now() - time).toString() : "xx"
-	output = name.padStart(14) +": "+ sn + output.padStart(4) + sc +" ms"
-	log_debug("perfS", output)
+	if (canPerf) {
+		let output = isPerf ? Math.round(performance.now() - time).toString() : "xx"
+		output = name.padStart(14) +": "+ sn + output.padStart(4) + sc +" ms"
+		log_debug("perfS", output)
+	}
 }
 
 function log_debug(target, output) {
@@ -987,6 +1021,9 @@ function log_line(str) {
 }
 
 function log_perf(str, time1, time2, extra) {
+	if (!canPerf) {
+		return
+	}
 	let t0 = performance.now(),
 		output = ""
 	if (time1 == undefined) {time1 = ("error").padStart(7)}
@@ -1015,8 +1052,7 @@ function log_perf(str, time1, time2, extra) {
 }
 
 function log_section(name, time1, data) {
-	let t0 = performance.now()
-	time1 = Math.round(t0-time1).toString()
+	let t0; if (canPerf) {t0 = performance.now(); time1 = Math.round(t0-time1).toString()}
 
 	// DATA
 	if (Array.isArray(data)) {
@@ -1060,7 +1096,7 @@ function log_section(name, time1, data) {
 		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
 		document.getElementById(name +"hash").innerHTML = sHash
-		document.getElementById("perf"+ name).innerHTML = " "+ (isPerf ? time1 : "xxx") +" ms"
+		if (canPerf) {document.getElementById("perf"+ name).innerHTML = " "+ (isPerf ? time1 : "xxx") +" ms"}
 
 		// GLOBAL
 		if (gRun) {
@@ -1156,22 +1192,22 @@ function log_section(name, time1, data) {
 				dom.allhash.innerHTML = sha1(gData.join())
 					+ buildButton("0", "fingerprint", metricCount +" metric"+ (metricCount > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
-				dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"
+				if (canPerf) {dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"}
 				gClick = true
 			}
 		}
 	} else {}	// !ARRAY
 
 	// PERF
-	let el = dom.perfG
+	let el = dom.perfG, pretty = ""
 	if (!isPerf) {time1 = "xx"}
-	let pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"
+	if (canPerf) {pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"}
 
 	if (gRun) {
 		let time2 = Math.round(t0-gt0).toString()
 		if (!isPerf) {time2 = "xxx"}
 		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
-		gPerf.push(pretty)
+		if (canPerf) {gPerf.push(pretty)}
 		if (gCount == 14) {
 			el.innerHTML = gPerf.join("<br>")
 		}
@@ -1190,15 +1226,18 @@ function countJS(filename) {
 	jsFiles.push(filename)
 	if (jsFiles.length == 13) {
 		if (runSL) {isPerf = false}
-		if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
+		try {
+			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
+		} catch(e) {isPerf = false}
 		// harden isFF
-		log_line(Math.round(performance.now()) + " : RUN ONCE")
+		if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
 		Promise.all([
 			get_isError(),
 			get_isSystemFont(),
 		]).then(function(){
 			// uses isFF
-			let t0 = performance.now()
+			let t0
+			if (canPerf) {t0= performance.now()}
 			Promise.all([
 				get_isEngine(),
 				get_isOS(),
@@ -1212,6 +1251,7 @@ function countJS(filename) {
 					runSC = false
 					runSL = false
 					runSUA = false
+					runSP = false
 				}
 				if (results[3] == "timeout") {
 					gMethodsOnce.push("_global:resource:blocked")
@@ -1271,7 +1311,7 @@ function outputSection(id, cls) {
 
 		function output() {
 			// section timer
-			if (!gRun) {gt0 = performance.now()}
+			if (!gRun && canPerf) {gt0 = performance.now()}
 			// section only
 			if (id=="1") {outputScreen("screen")}
 			if (id=="2") {outputUA()}
@@ -1297,18 +1337,19 @@ function outputSection(id, cls) {
 		}
 
 		if (gRun) {
-			if (delay == 1) {log_line(Math.round(performance.now()) + " : START")}
+			if (delay == 1 && canPerf) {log_line(Math.round(performance.now()) + " : START")}
 		} else {
 			const sNames = ['','y','x','y','x','x','x','y','x','y','y','x','y','y','y','y','x','x','x']
 			if (sNames[id * 1] !== "x" && sPerfDetail.length) {log_line("line")}
 		}
 		setTimeout(function() {
-			gt0 = performance.now()
+			if (canPerf) {gt0 = performance.now()}
 			Promise.all([
 				get_isRFP(),
 				get_navKeys(),
 				outputPrototypeLies(),
 				get_isOS64(),
+				get_canPerf("log"),
 			]).then(function(results){
 				output()
 			})
@@ -1317,12 +1358,13 @@ function outputSection(id, cls) {
 }
 
 function run_once() {
+	get_canPerf()
 	// ASAP
-	log_line(Math.round(performance.now()) + " : GENERIC")
+	if (canPerf) {log_line(Math.round(performance.now()) + " : GENERIC")}
 	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
 	if ((location.protocol) == "https:") {isSecure = true}
 	// isFF
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	let str = "installtrigger"
 	let str1 = "type of "+str, str2 = "type of "+ str +"impl", str3 = str+ " in window"
 	let test1 = false, test2 = false, test3 = false

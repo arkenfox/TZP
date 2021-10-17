@@ -62,6 +62,8 @@
 			&#x532D; &#x061C; &#x20E3; &#xFFF9; &#x0218; &#x058F; &#x08E4; &#x09B3; &#x1C50; &#x2619;</div>
 		<div id="test89" style="width:1em">a &#x3000 b</div>
 		<div id="ctrl89" style="width:1em">a b</div>
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
@@ -824,7 +826,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
-		<tr><td>[getEntries*] performance.mark</td><td class="c mono" id="perf1"></td></tr>
+		<tr><td>[getEntries* | measure] performance.mark</td><td class="c mono" id="perf1"></td></tr>
 		<tr><td>performance.now</td><td class="c mono" id="perf2"></td></tr>
 		<tr><td>[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>
 		<tr><td>PerformanceNavigationTiming</td><td class="c" id="perf4"></td></tr>

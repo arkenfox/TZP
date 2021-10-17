@@ -1,6 +1,6 @@
 'use strict';
 
-var jsZoom, varDPI, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
+var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
 
 let isOS64math = ""
 let iframeSim = 0
@@ -62,8 +62,8 @@ function get_canonical() {
 }
 
 function get_chrome() {
-	let os = "",
-		t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
+	let os = ""
 	// display
 	function output(r) {
 		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runS ? zSIM : "")}
@@ -155,8 +155,8 @@ function get_color() {
 
 function get_errors() {
 	return new Promise(resolve => {
-		let res = [],
-			t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
+		let res = []
 		let sName = "feature_error_messages"
 		clearDetail(sName)
 
@@ -256,7 +256,7 @@ function get_line_scrollbar(runtype) {
 		// scrollbar
 		function run_scrollbar() {
 			jsZoom = jsZoom * 1
-			let t0 = performance.now()
+			let t0; if (canPerf) {t0 = performance.now()}
 			// get width, remember for later
 			let w = (window.innerWidth-vw)
 			let pseudoW = getElementProp("#D","content",":before")
@@ -365,9 +365,9 @@ function get_line_scrollbar(runtype) {
 
 		// css lineheight
 		function run_lineheight() {
+			let t0; if (canPerf) {t0 = performance.now()}
 			let method = "computedstyle",
-				strFont = "",
-				t0 = performance.now()
+				strFont = ""
 			os = ""
 			// computedStyle
 			let element = dom.spanLH,
@@ -527,7 +527,7 @@ function get_line_scrollbar(runtype) {
 			Promise.all([
 				vw = get_viewport("fd")
 			]).then(function(){
-				if (logExtra) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
+				if (logExtra && canPerf) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
 				run_scrollbar()
 				run_lineheight()
 				return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
@@ -540,7 +540,7 @@ function get_line_scrollbar(runtype) {
 				Promise.all([
 					vw = get_viewport("fd")
 				]).then(function(){
-					if (logExtra) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
+					if (logExtra && canPerf) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
 					run_scrollbar()
 					run_lineheight()
 					return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
@@ -552,7 +552,7 @@ function get_line_scrollbar(runtype) {
 
 function get_locales() {
 	try {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 		let res = []
 		let sName = "feature_supported_locales_notglobal"
 		clearDetail(sName)
@@ -582,7 +582,7 @@ function get_locales() {
 
 function get_math() {
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 		// 1= ecma1, 6= ecma6, c= combined
 		let m1hash = "",
 			m6hash = "",
@@ -821,8 +821,8 @@ function get_math() {
 }
 
 function get_mm_metrics(runtype) {
-	let t0 = performance.now(),
-		count = 0
+	let t0; if (canPerf) {t0 = performance.now()}
+	let count = 0
 	// perf
 	function perf() {
 		if (count == 4) {
@@ -978,7 +978,7 @@ function get_mm_metrics(runtype) {
 }
 
 function get_orientation(runtype) {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	// mm
 	let l="landscape", p="portrait", q="(orientation: ", s="square",
 		a="aspect-ratio", o1=zNS, o2=zNS, o3=zNS, o4=zNS
@@ -1043,7 +1043,7 @@ function get_orientation(runtype) {
 }
 
 function get_pbmode() {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	function output(r) {
 		dom.IsPBMode = r
 		log_perf("pbmode [screen]",t0)
@@ -1064,8 +1064,8 @@ function get_pbmode() {
 
 function get_resources() {
 	return new Promise(resolve => {
-		let t0 = performance.now(),
-			browser = "",
+		let t0; if (canPerf) {t0 = performance.now()}
+		let browser = "",
 			branding = "",
 			channel = "",
 			result = "",
@@ -1327,6 +1327,10 @@ function get_screen_metrics(runtype) {
 			}
 		}
 		// ToDo: harden if !screenBypass: due to zoom/system-scaling and limited ranges
+
+		res.push("zoom:"+ jsZoomOriginal)
+		// ToDo: robust: matchmedia values, dpr1, dpr2: handle non-numbers; trim; bypasses
+		res.push("devicePixelRatio:"+ (isFF ? dpr2 : dpr1))
 
 		res.push("coordinates_zero:"+ isXY)
 		if (screenBypass) {
@@ -1739,7 +1743,7 @@ function get_ua_workers() {
 }
 
 function get_viewport(runtype) {
-	if (logExtra) {console.log(performance.now(), "B START.:", runtype, ": viewport")}
+	if (logExtra && canPerf) {console.log(performance.now(), "B START.:", runtype, ": viewport")}
 	let e=document.createElement("div")
 	e.style.cssText="position:fixed;top:0;left:0;bottom:0;right:0;"
 	document.documentElement.insertBefore(e,document.documentElement.firstChild)
@@ -1750,7 +1754,7 @@ function get_viewport(runtype) {
 	// get viewport height once on first load
 	// this s/be with toolbar visible (not FS)
 	if (avh == "") {avh = vh}
-	if (logExtra) {console.log(performance.now(), "B FINISH:", runtype, ": viewport")}
+	if (logExtra && canPerf) {console.log(performance.now(), "B FINISH:", runtype, ": viewport")}
 	// return
 	if (runtype == "fd") {
 		return vw // scrollbar
@@ -1761,8 +1765,8 @@ function get_viewport(runtype) {
 
 function get_widgets() {
 	return new Promise(resolve => {
-		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea'],
-			t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
+		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
 		let sName = "feature_widgets"
 		sDetail[sName] = []
 
@@ -1825,12 +1829,14 @@ function get_widgets() {
 
 function get_zoom(runtype) {
 	return new Promise(resolve => {
-		let t0 = performance.now(),
-			zoomAssume = false
+		let t0; if (canPerf) {t0 = performance.now()}
+		let zoomAssume = false
+		dpr1 = ""
 		dpr2 = ""
-
+		
 		// dPR
 		let dpr = window.devicePixelRatio || 1;
+		dpr1 = dpr
 		let dprStr = dpr + (dpr == 1 ? rfp_green : rfp_red)
 		// add dPR2: 477157
 		if (isFF) {
@@ -1850,7 +1856,7 @@ function get_zoom(runtype) {
 
 		// ToDo: when zooming, getting divDPI is much slower
 		// divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
-		let t1 = performance.now()
+		let t1; if (canPerf) {t1 = performance.now()}
 
 		let aDPI = return_mm_dpi("dpi"),
 			bDPI = return_mm_dpi("dppx"),
@@ -1872,7 +1878,7 @@ function get_zoom(runtype) {
 		if (dpr !== 1 || dpi_y == 0) {
 			// use devicePixelRatio if we know RFP is off
 			// or if css is blocked (dpi_y = 0, dpi_x = body width)
-			jsZoom = Math.round(dpr*100).toString()
+			jsZoom = dpr*100
 		} else {
 			if (varDPI == undefined) {
 				// e.g. matchMedia is blocked
@@ -1883,17 +1889,18 @@ function get_zoom(runtype) {
 						zoomAssume = true
 					} else {
 						// fallback to dpr2
-						jsZoom = Math.round(dpr2*100).toString()
+						jsZoom = dpr2*100
 					}
 				} else {
-					jsZoom = Math.round((dpi_x/dpi_x)*100).toString()
+					jsZoom = (dpi_x/dpi_x)*100
 				}
 			} else {
 				// otherwise it could be spoofed
-				jsZoom = Math.round((varDPI/dpi_x)*100).toString()
+				jsZoom = (varDPI/dpi_x)*100
 			}
 		}
-		jsZoom = jsZoom * 1
+		jsZoomOriginal = jsZoom
+		jsZoom = Math.round(jsZoom)
 
 		// ToDo: zoom: css=blocked (dpi_y == 0) AND RFP=true: detect this state
 		// Can't guarantee zoom: notate output for zoom, css line height, scollbar width
@@ -1919,7 +1926,7 @@ function get_zoom(runtype) {
 		} else {
 			log_perf("zoom ["+ runtype +"]",t0)
 		}
-		if (logExtra) {console.log(performance.now(), "A FINISH:", runtype, ": zoom, dpi, devicePixelRatio")}
+		if (logExtra && canPerf) {console.log(performance.now(), "A FINISH:", runtype, ": zoom, dpi, devicePixelRatio")}
 		return resolve(jsZoom)
 	})
 }
@@ -2161,8 +2168,8 @@ function goNW_UA() {
 function outputScreen(runtype) {
 	// this function is only called on page load or reruns
 	// so no need to worry about resizing events
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 
 	get_pbmode() // not FP stable
 
@@ -2185,7 +2192,7 @@ function outputScreen(runtype) {
 }
 
 function outputUA() {
-	let t0 = performance.now()
+	let t0; if (canPerf) {t0 = performance.now()}
 	// lies
 	function get_pLies() {
 		if (proxyLies.includes("Navigator.userAgent")) {uaBS = true
@@ -2378,8 +2385,8 @@ function outputUA() {
 }
 
 function outputFD(runtype) {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 	// FF
 	if (isFF) {
 		// ver

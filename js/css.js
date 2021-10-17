@@ -3,6 +3,7 @@
 let cSim = 0
 
 function get_colors(runtype) {
+	/* 95+: test_bug232227.html */
 	// NOTE: if an alias isn't supported, it gets the previous lookup value
 	let aList = [],
 		sTarget = "",
@@ -94,7 +95,7 @@ function get_colors(runtype) {
 function get_computed_styles() {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
-		let t0 = performance.now()
+		let t0; if (canPerf) {t0 = performance.now()}
 		let styleVersion = type => {
 			return new Promise(resolve => {
 				// get CSSStyleDeclaration
@@ -441,8 +442,8 @@ function get_system_fonts() {
 }
 
 function outputCSS() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 	Promise.all([
 		get_mm_css(),
 		get_colors("css4"),

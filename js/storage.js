@@ -271,7 +271,7 @@ function get_service_workers() {
 				},
 				function(e) {
 					// sw error
-					if (e.name ==="") {
+					if (e.name === "" || e.name === undefined) {
 						output = zF +": unknown error"
 					} else {
 						output = zF +": "+ e.name
@@ -362,8 +362,8 @@ function get_storage_manager(runtype) {
 }
 
 function outputStorage() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let	section = []
 	// appcache
 	let appCache = ("applicationCache" in window ? zE : zD)
 	dom.appcache = appCache
