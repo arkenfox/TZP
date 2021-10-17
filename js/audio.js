@@ -298,7 +298,7 @@ function outputAudio() {
 				})
 			} catch(e) {
 				log_error("audio: offlineaudiocontext", e.name, e.message)
-				let eMsg = e.name+ ": "+ e.message
+				let eMsg = trim_error(e.name, e.message)
 				eMsg = (e.name === undefined ? zErr : eMsg)
 				dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 				section.push("OfflineAudioContext:"+ (isFF ? zB0 : zErr))
