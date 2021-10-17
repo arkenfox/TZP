@@ -136,8 +136,8 @@ function get_navigator() {
 }
 
 function outputHeaders() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 	Promise.all([
 		get_navigator()
 	]).then(function(results){
@@ -714,8 +714,8 @@ function get_lang_worker() {
 }
 
 function outputLanguage() {
-	let t0 = performance.now(),
-		section = []
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
 	// run
 	Promise.all([
 		get_lang_doc(),
