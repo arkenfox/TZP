@@ -28,6 +28,7 @@ function set_pluginBS() {
 			}
 		})
 
+		/* comment out: blink 94+ changes
 		// Expect MimeType Plugins to match Plugins
 		try {
 			// Chameleon: spoof media devices causes this error
@@ -40,6 +41,7 @@ function set_pluginBS() {
 			].sort()
 			if (mimeTypePluginNames != rawPluginNames) {lies.push("A")}
 		} catch(e) {}
+		*/
 
 		// Expect MimeType object in plugins
 		const invalidPluginList = pluginsList.filter(plugin => {
@@ -69,6 +71,7 @@ function set_pluginBS() {
 			.map(plugin => [plugin.description, mimeTypesDescriptionsString])
 		if (!!invalidMimetypePlugins.length) {lies.push("E")}
 
+		/* comment out: blink 94+ changes
 		// Expect plugin name to be in plugins own properties
 		pluginsList.forEach(plugin => {
 			const {
@@ -76,6 +79,7 @@ function set_pluginBS() {
 			} = plugin
 			if (!ownPropertiesSet.has(name)) {lies.push("F")}
 		})
+		*/
 		return lies
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
@@ -343,11 +347,6 @@ function get_mimetypes_plugins() {
 			if (isFF) {
 				if (pluginFlash == true && mimeFlash == false) {pluginBS = true}
 				if (pluginFlash == false && mimeFlash == true) {mimeBS = true}
-			} else {
-				if (isEngine == "blink") {
-					// chrome 94 changes: pluginBS is broken: temp fix
-					if (sha1(outputP.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {pluginBS = false}
-				}
 			}
 			
 			// plugins
