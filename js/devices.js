@@ -107,9 +107,60 @@ function get_concurrency() {
 		dom.nHWC.innerHTML = soL + h + scC
 		if (gRun) {gKnown.push("devices:hardwareConcurrency")}
 	} else {
-		dom.nHWC.innerHTML = (h == "2" ? rfp_green : rfp_red)
+		dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
 	}
 	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
+}
+
+function get_keyboard() {
+	if (isFF) {
+		dom.nKeyboard = zNA
+		return "keyboard:"+ zNA
+	}
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		try {
+			let sName = "devices_keyboard", resE = []
+			sDetail[sName] = []
+			let resK = navigator.keyboard
+			if (resK == undefined) {
+				r = zU
+			} else {
+				let keys = []
+				// https://wicg.github.io/keyboard-map/
+				// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
+				let listK = ['Backquote','Backslash','Backspace','BracketLeft','BracketRight','Comma',
+					'Digit0','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9',
+					'Equal','IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG',
+					'KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT',
+					'KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
+				resK.getLayoutMap().then(keyboardLayoutMap => {
+					listK.forEach(function(key) {
+						try {
+							keys.push(key +": "+ keyboardLayoutMap.get(key))
+						} catch(e) {
+							if (e.name === undefined) {resE.push(zErr)} else {resE.push(e.name +": "+ e.message)}
+						}
+					})
+					if (resE.length > 0) {
+						log_error("devices: keyboard", resE[0])
+						dom.nKeyboard = trim_error(resE[0])
+						return resolve("keyboard:" + zB0)
+					} else {
+						let hash = sha1(keys.join())
+						sDetail[sName] = keys
+						dom.nKeyboard.innerHTML = hash + buildButton("7", sName, "details")
+						log_perf("keyboard [devices]",t0)
+						return resolve("keyboard:" + hash)
+					}
+				})
+			}
+		} catch(e) {
+			log_error("devices: keyboard", e.name, e.message)
+			dom.nKeyboard = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			return resolve("keyboard:"+ zB0)
+		}
+	})
 }
 
 function get_media_devices() {
@@ -630,6 +681,7 @@ function outputDevices() {
 		get_gamepads(),
 		get_touch(),
 		get_vr(),
+		get_keyboard(),
 		get_concurrency(),
 		get_mimetypes_plugins(),
 	]).then(function(results){
