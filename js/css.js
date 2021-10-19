@@ -2,94 +2,67 @@
 
 let cSim = 0
 
-function get_colors(runtype) {
+function get_colors() {
 	/* 95+: test_bug232227.html */
-	// NOTE: if an alias isn't supported, it gets the previous lookup value
-	let aList = [],
-		sTarget = "",
-		m = "-moz-", mm = m+"mac-", mw = m+"win-"
+	let aList0 = ['-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox']
+	let aList1 = ['-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext']
+	let aList2 = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','[ActiveText]_-moz-activehyperlinktext','[CanvasText]_-moz-default-color','[Canvas]_-moz-default-background-color','[LinkText]_-moz-hyperlinktext','[VisitedText]_-moz-visitedhyperlinktext']
+	let aList3 = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
+	let sNames = ["moz","moz_stand-in","css4","system"]
+	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
+	let aResults = []
 
-	let sName = "css_colors_"+ runtype
-	clearDetail(sName)
-	if (runtype == "system") {
-		sTarget = dom.sColorHash
-		aList = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight',
-		'ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder',
-		'InactiveCaption', 'InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar',
-		'ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window',
-		'WindowFrame','WindowText']
-	} else if (runtype == "css4") {
-		sTarget = dom.cColorHash
-		aList = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem',
-		'SelectedItemText','VisitedText',"[ActiveText]_"+m+'activehyperlinktext',
-		"[Canvas]_"+m+'default-background-color',"[CanvasText]_"+m+'default-color',
-		"[LinkText]_"+m+'hyperlinktext',"[VisitedText]_"+m+'visitedhyperlinktext',]
-	} else if (runtype == "moz-stand-in") {
-		sTarget = dom.m2ColorHash
-		aList = [m+'buttondefault',m+'buttonhoverface',m+'buttonhovertext',m+'cellhighlight',
-		m+'cellhighlighttext',m+'combobox',m+'comboboxtext',m+'dialog',m+'dialogtext',m+'dragtargetzone',
-		m+'eventreerow',m+'field',m+'fieldtext',m+'html-cellhighlight',m+'html-cellhighlighttext',
-		m+'menuhover',m+'menuhovertext',m+'menubartext',m+'menubarhovertext',m+'nativehyperlinktext',
-		m+'oddtreerow',mm+'chrome-active',mm+'chrome-inactive',mm+'disabledtoolbartext',mm+'focusring',
-		mm+'menuselect',mm+'menushadow',mm+'menutextdisable',mm+'menutextselect',mw+'communicationstext',
-		mw+'mediatext',mm+'secondaryhighlight',]
-	} else {
-		sTarget = dom.mColorHash
-		aList = [m+"accent-color",m+"accent-color-foreground",m+'appearance',m+'gtk-buttonactivetext',
-		m+'gtk-info-bar-text',mm+'accentdarkestshadow',mm+'accentdarkshadow',mm+'accentface',
-		mm+'accentlightesthighlight',mm+'accentlightshadow',mm+'accentregularhighlight',
-		mm+'accentregularshadow',mm+'active-menuitem',mm+'buttonactivetext',mm+'defaultbuttontext',mm+'menuitem',
-		mm+'menupopup',mm+'source-list',mm+'vibrancy-dark',mm+'vibrancy-light',mm+'vibrant-titlebar-dark',
-		mm+'vibrant-titlebar-light',mm+'active-source-list-selection',mm+'source-list-selection',
-		mm+'tooltip',m+'colheaderhovertext',m+'colheadertext',mw+'accentcolor',	mw+'accentcolortext',
-		mw+'communications-toolbox',mw+'media-toolbox',]
-	}
-	// de-dupe/sort
-	aList = aList.filter(function(item, position) {return aList.indexOf(item) === position})
-	aList.sort()
-	// run
-	let aResults = [],
-		element = dom.sColorElement,
-		sError = ""
-	aList.forEach(function(style) {
-		let s = style
-		if (runtype == "css4") {if (style.indexOf("[") == 0) {s = s.substring(s.indexOf("]_") + 2, s.length)}}
-		element.style.backgroundColor = s
-		try {
+	try {
+		let splits = [0, aList0.length]
+		let aList = aList0.concat(aList1); splits.push(aList.length)
+		aList = aList.concat(aList2); splits.push(aList.length)
+		aList = aList.concat(aList3); splits.push(aList.length)
+		let aRes = []
+		let element = dom.sColorElement
+		// NOTE: set initial color: non-supported repeats previous lookup value
+		element.style.backgroundColor = "rgba(1,2,3,0.5)"
+		aList.forEach(function(style) {
+			let s = style
+			if (style.indexOf("[") == 0) {s = s.substring(s.indexOf("]_") + 2, s.length)}
+			element.style.backgroundColor = s
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			aResults.push(style +":"+ rgb)
-		} catch(e) {
-			sError = (isFF ? zB0 : "error")
+			aRes.push(style +":"+ rgb)
+		})
+		// split/hash
+		for (let i=0; i < 4; i++) {
+			let aTemp = aRes.slice(splits[i],splits[i+1])
+			let hash = sha1(aTemp.join())
+			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
+			sDetail["css_colors_"+ sNames[i]] = aTemp
+			aResults.push("colors_"+ sNames[i] +":"+ hash)
+			let note = ""
+			if (i == 1) {
+				// moz stand-ins
+				note = rfp_red
+				if (isVer > 92) {
+					if (hash == "79db5606a0cb8129e8840ff02e93eedfef71dce4" && isVer > 94) {note = rfp_green + " [FF95+]" // 1734115
+					} else if (hash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf" && isVer < 95) {note = rfp_green + " [FF93-94]"} // 1693222
+				} else {
+					if (hash == "12dfc3bdff6304b4bcf56a66ee087989dda20600") {note = rfp_green + " [FF67-92]"}
+				}
+			} else if (i == 3) {
+				// system
+				note = rfp_red
+				if (hash == "35de8783ff93479148425072691fc0a6bedc7aba" && isVer > 94) {note = rfp_green + " [FF95+]" // 1734115
+				} else if (hash == "5bcd87c4c7753f09a14546911686a62e8625faf8" && isVer < 95) {note = rfp_green + " [FF67-94]"}
+			}
+			document.getElementById("cssColor"+ i).innerHTML = hash + btn + note
 		}
-	})
-	sDetail[sName] = aResults
-	//console.debug(sHash + "\n" + aResults.join("\n"))
-
-	let sHash = sha1(aResults.join())
-	let note = ""
-	// ToDo: isVer check FF95+ 1734115 for system + moz stand-ins
-	if (runtype == "system") {
-		note = rfp_red
-		if (sHash == "5bcd87c4c7753f09a14546911686a62e8625faf8") {note = rfp_green + " [FF67-94]"}
-		if (sHash == "35de8783ff93479148425072691fc0a6bedc7aba") {note = rfp_green + " [FF95+]"} // 1734115: ButtonFace
-	} else if (runtype == "moz-stand-in") {
-		// FF93+: 1693222: -moz-html* dropped -> same as -moz-* counterpart
-		// FF95+: 1734115: -moz-buttonhoverface/-moz-combobox
-		note = rfp_red
-		if (isVer > 92) {
-			if (sHash == "79db5606a0cb8129e8840ff02e93eedfef71dce4") {note = rfp_green + " [FF95+]"}
-			if (sHash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf") {note = rfp_green + " [FF93-94]"}
-		} else {
-			if (sHash == "12dfc3bdff6304b4bcf56a66ee087989dda20600") {note = rfp_green + " [FF67-92]"}
+ 		return aResults
+	} catch(e) {
+		log_error("css: colors", e.name, e.message)
+		let eMsg = trim_error(e.name, e.message)
+		for (let i=0; i < 4; i++) {
+			document.getElementById("cssColor"+ i).innerHTML = eMsg
+			aResults.push("colors_"+ sNames[i] +":"+ (isFF ? zB0 : zErr))
 		}
+		return aResults
 	}
-	/*// CSS4: only 4/9 are RFP protected: linux varies even if use system colors is disabled
-		// FF76+: supported: Field/FieldText FF72+
-		// FF93+: 1693222: SelectedItem* supported
-	*/
-	let btn = buildButton("14", sName, aList.length) + note
-	sTarget.innerHTML = (sError.length ? sError : sHash + btn)
-	return "colors_"+ runtype +":"+ (sError.length ? sError : sHash)
 }
 
 function get_computed_styles() {
@@ -442,14 +415,12 @@ function get_system_fonts() {
 }
 
 function outputCSS() {
+
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([
 		get_mm_css(),
-		get_colors("css4"),
-		get_colors("moz-stand-in"),
-		get_colors("moz"),
-		get_colors("system"),
+		get_colors(),
 		get_system_fonts(),
 		get_computed_styles(),
 	]).then(function(results){
