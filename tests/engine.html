@@ -16,6 +16,11 @@
 </head>
 
 <body>
+	<div class="offscreen">
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+	</div>
+
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -831,7 +836,10 @@ function get_nav_keys(num1, num2, title) {
 			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
 			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
 			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
-		// ToDo: 1670058: remove globalPrivacyControl if isFF > 94
+		if (is95) {
+			// 1670058: FF95+ globalPrivacyControl
+			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
+		}
 		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
 		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
 		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
@@ -935,13 +943,17 @@ function get_nav_values(num1, num2, num3) {
 		}
 	}
 	// globalprivacycontrol
-		// ToDo: 1670058: return n/a for globalPrivacyControl if isFF > 94
 	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
 		if (bBlock) {bB = 1}
 		let resG = navigator.globalPrivacyControl
 		if (resG == undefined) {boolG = true}
 		resG = fnClean(resG)
+		// 1670058: FF95+ globalPrivacyControl
+		if (is95) {
+			resG = zNA +": FF94 or lower ["+ resG +"]"
+			boolG = zNA
+		}
 		fnRecord(numG, strG, resG, boolG)
 	} catch(e) {
 		fnRecord(numG, strG, e.name, zB0, e.message)
@@ -1268,6 +1280,7 @@ let is61 = false,
 	is78 = false,
 	is85 = false,
 	is86 = false,
+	is95 = false,
 	isRFP2 = false,
 	isWebkit = false
 
@@ -1276,6 +1289,12 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 // set some FF variables
 if (isFF) {
 	fnRFP()
+	// 95: slowish: upgrade if possible
+	try {
+		let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+		if (test > 0.4 && test < 0.6) {is95 = true}
+	} catch(e) {}
+
 	// 86
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
 	// 85
@@ -1355,7 +1374,7 @@ setTimeout(function() {
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
 	get_storage_quota(820, "storage estimate quota")
 	get_errors(902)
-}, 100)
+}, 150)
 
 </script>
 </body>
