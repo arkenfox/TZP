@@ -95,7 +95,7 @@ function set_fntList() {
 		fntList.sort()
 		let strB = "fonts_fonts_"+ isOS + (isTB ? "_tb_whitelist" : "_base" ) + "_list_notglobal"
 		sDetail[strB] = fntList
-		fontBaseBtn = buildButton("12", strB, (isTB ? "whitelist" : "base fonts"))
+		fontBaseBtn = buildButton("12", strB, (isTB ? "whitelist" : fntList.length + " base fonts"))
 	} else {
 		fntList = fntMaster[isOS]
 	}
