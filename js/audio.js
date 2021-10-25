@@ -6,7 +6,8 @@ https://audiofingerprint.openwpm.com/ */
 
 var t0audio,
 	latencyError = false,
-	latencyTries = 0
+	latencyTries = 0,
+	audio2Section = []
 
 function byteArrayToHex(arrayBuffer){
 	var chunks = [];
@@ -18,213 +19,211 @@ function byteArrayToHex(arrayBuffer){
 	}).join("");
 }
 
-function reset_audio2() {
-	dom.audio1data.style.color = zhide
-	dom.audio2data.style.color = zhide
-	dom.audio3data.style.color = zhide
-	let str = dom.audio1data.innerHTML
-	str = str.replace(/\[RFP\]/g, "")
-	dom.audio1data.innerHTML = str
+function exit_audio2() {
+	audio2Section.sort()
+	let sName = "audio_user_gestures_notglobal"
+	sDetail[sName] = audio2Section
+	let hash = sha1(audio2Section.join())
+	dom.audiohash2.innerHTML = hash + buildButton("0", sName, audio2Section.length +" metrics")
+	log_click("audio2",t0audio)
+	gClick = true
 }
 
 function get_audio2_context(attempt) {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let sColor = s11
-	latencyTries++
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		latencyTries++
+		let sName = "audio_audiocontext_keys_notglobal"
+		sDetail[sName] = []
 
-	function a(a, b, c) {
-		for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
-		d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
-		return a
-	}
-	let f = new window.AudioContext
-	let obj
-	let results = [],
-		samplerate = ""
-
-	let	d = f.createAnalyser()
-	obj = a({}, f, "ac-")
-	obj = a(obj, f.destination, "ac-")
-	obj = a(obj, f.listener, "ac-")
-	obj = a(obj, d, "an-")
-	// get keys/value
-	for (const [key, value] of Object.entries(obj)) {
-		results.push(key +": "+ value)
-		if (key == "ac-sampleRate") {samplerate = value}
-	}
-	let k="", v="", n=0, rfp="", output=""
-	for (let i=0; i < results.length; i++) {
-		n = results[i].search(":")
-		k = results[i].substring(0,n) // key
-		v = results[i].substring(n+2) // value
-		if (k == "ac-sampleRate") {v += (v == 44100 ? rfp_green : rfp_red)}
-		if (k == "ac-outputLatency") {
-			// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
-			if (runS) {v = 0}
-			if (v == 0) {
-				latencyError = true
-				//console.log("latency error", attempt)
-				v += sb +"["+ zF +"]"+ sc
-			} else {
-				// isOS = "mac" // sim mac
-				latencyError = false
-				if (isOS == "windows") {rfp = "0.04"}
-				if (isOS == "android") {rfp = "0.02"}
-				if (isOS == "linux") {rfp = "0.025"}
-				if (isOS == "mac") {rfp = 512/samplerate}
-				v += (v == rfp ? rfp_green : rfp_red)
-			}
+		function a(a, b, c) {
+			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
+			d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
+			return a
 		}
-		output += k.padStart(25) +": "+ v +"<br>"
-	}
-	// output
-	if (!latencyError || latencyTries == 2) {
-		dom.audio1data.innerHTML = output
-		dom.audio1data.style.color = zshow
-		// hash
-		Promise.all([
-			sha1(results.join())
-		]).then(function(result){
-			dom.audio1hash.innerHTML = result[0] + sColor +"["+ results.length +" keys]"+ sc
-			// perf
+		let f = new window.AudioContext
+		let obj
+		let results = []
+
+		let	d = f.createAnalyser()
+		obj = a({}, f, "ac-")
+		obj = a(obj, f.destination, "ac-")
+		obj = a(obj, f.listener, "ac-")
+		obj = a(obj, d, "an-")
+		// get keys/value
+		for (const [key, value] of Object.entries(obj)) {
+			let testValue = value
+			if (key == "ac-outputLatency") {
+				// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
+				if (runS) {testValue = 0}
+				latencyError = (testValue == 0 ? true : false)
+			}
+			results.push(key +":"+ testValue)
+		}
+
+		// output
+		if (!latencyError || latencyTries == 2) {
+			sDetail[sName] = results
+			let hash = sha1(results.join())
+			audio2Section.push("keys:"+ hash)
+			let note = rfp_red
+			if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
+			if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
+			if (isOS == "android" && hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e") {note = rfp_green} // 0.025
+			if (isOS == "mac" && hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9") {note = rfp_green} // 512/samplerate = 512/44100 (samplerate is hardcoded with RFP)
+			dom.audio1hash.innerHTML = hash + buildButton("11", sName, results.length +" keys") + note
+				+ (latencyError ? sb +" [0 latency]"+ sc : "")
 			log_perf("context [audio]",t0)
 			if (latencyTries == 2) {
-				dom.audiohash2 = "hash not coded yet"
-				log_click("audio2",t0audio)
-				gClick = true
+				exit_audio2()
 			}
-		})
+		}
+		// next test
+		if (latencyTries == 1) {get_audio2_hybrid()}
+	} catch(e) {
+		dom.audio1hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		audio2Section.push("keys:"+ isFF ? zErr : zB0)
+		// next test
+		if (latencyTries == 1) {get_audio2_hybrid(); latencyTries = 2}
 	}
-	// next test
-	if (latencyTries == 1) {get_audio2_hybrid()}
 }
 
 function get_audio2_hybrid() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let results = [],
-		showperf = false
-	if (latencyError == false || latencyTries == 2) {showperf = true}
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let sName = "audio_audiocontext_hybrid_notglobal"
+		sDetail[sName] = []
 
-	let audioCtx = new window.AudioContext,
-		oscillator = audioCtx.createOscillator(),
-		analyser = audioCtx.createAnalyser(),
-		gain = audioCtx.createGain(),
-		scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
+		let results = [],
+			showperf = false
+		if (latencyError == false || latencyTries == 2) {showperf = true}
 
-	// compressor
-	let compressor = audioCtx.createDynamicsCompressor()
-	compressor.threshold && (compressor.threshold.value = -50)
-	compressor.knee && (compressor.knee.value = 40)
-	compressor.ratio && (compressor.ratio.value = 12)
-	compressor.reduction && (compressor.reduction.value = -20)
-	compressor.attack && (compressor.attack.value = 0)
-	compressor.release && (compressor.release.value = .25)
+		let audioCtx = new window.AudioContext,
+			oscillator = audioCtx.createOscillator(),
+			analyser = audioCtx.createAnalyser(),
+			gain = audioCtx.createGain(),
+			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
 
-	gain.gain.value = 0 // 0 volume
-	oscillator.type = "triangle" // wave
-	oscillator.connect(compressor)
-	compressor.connect(analyser)
-	analyser.connect(scriptProcessor)
-	scriptProcessor.connect(gain)
-	gain.connect(audioCtx.destination)
+		// compressor
+		let compressor = audioCtx.createDynamicsCompressor()
+		compressor.threshold && (compressor.threshold.value = -50)
+		compressor.knee && (compressor.knee.value = 40)
+		compressor.ratio && (compressor.ratio.value = 12)
+		compressor.reduction && (compressor.reduction.value = -20)
+		compressor.attack && (compressor.attack.value = 0)
+		compressor.release && (compressor.release.value = .25)
 
-	scriptProcessor.onaudioprocess = function(bins) {
-		bins = new Float32Array(analyser.frequencyBinCount)
-		analyser.getFloatFrequencyData(bins)
-		for (let i=0; i < bins.length; i++) {
-			results.push(" "+ bins[i])
-		}
-		analyser.disconnect()
-		scriptProcessor.disconnect()
-		gain.disconnect()
-		// output
-		dom.audio3data = results.slice(0, 30)
-		dom.audio3data.style.color = zshow
-		// hash
-		Promise.all([
-			sha1(results.slice(0, 30))
-		]).then(function(result){
-			dom.audio3hash = result[0]
-			// perf
+		gain.gain.value = 0 // 0 volume
+		oscillator.type = "triangle" // wave
+		oscillator.connect(compressor)
+		compressor.connect(analyser)
+		analyser.connect(scriptProcessor)
+		scriptProcessor.connect(gain)
+		gain.connect(audioCtx.destination)
+
+		scriptProcessor.onaudioprocess = function(bins) {
+			bins = new Float32Array(analyser.frequencyBinCount)
+			analyser.getFloatFrequencyData(bins)
+			for (let i=0; i < bins.length; i++) {
+				results.push(" "+ bins[i])
+			}
+			analyser.disconnect()
+			scriptProcessor.disconnect()
+			gain.disconnect()
+			// output
+			sDetail[sName] = results
+			let hash = sha1(results.join())
+			dom.audio3hash.innerHTML = hash + buildButton("11", sName, "details")
+			audio2Section.push("hybrid:"+ hash)
 			log_perf("hybrid [audio]",t0)
 			if (showperf) {
-				dom.audiohash2 = "hash not coded yet"
-				log_click("audio2", t0audio)
-				gClick = true
+				exit_audio2()
 			}
-		})
+			// re-test context
+			if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
+		}
+		oscillator.start(0)
+	} catch(e) {
+		dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		audio2Section.push("hybrid:"+ isFF ? zErr : zB0)
 		// re-test context
-		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
+		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}		
 	}
-	oscillator.start(0)
 }
 
 function get_audio2_oscillator() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let cc_output = [],
-		audioCtx = new window.AudioContext
-	let oscillator = audioCtx.createOscillator(),
-		analyser = audioCtx.createAnalyser(),
-		gain = audioCtx.createGain(),
-		scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let sName = "audio_audiocontext_oscillator_notglobal"
+		sDetail[sName] = []
 
-	gain.gain.value = 0
-	oscillator.type = "triangle"
-	oscillator.connect(analyser)
-	analyser.connect(scriptProcessor)
-	scriptProcessor.connect(gain)
-	gain.connect(audioCtx.destination)
+		let cc_output = [],
+			audioCtx = new window.AudioContext
+		let oscillator = audioCtx.createOscillator(),
+			analyser = audioCtx.createAnalyser(),
+			gain = audioCtx.createGain(),
+			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
 
-	scriptProcessor.onaudioprocess = function(bins) {
-		bins = new Float32Array(analyser.frequencyBinCount)
-		analyser.getFloatFrequencyData(bins)
-		for (let i=0; i < bins.length; i++) {
-			cc_output.push(" "+ bins[i])
-		}
-		analyser.disconnect()
-		scriptProcessor.disconnect()
-		gain.disconnect()
-		// output
-		dom.audio2data = cc_output.slice(0, 30)
-		dom.audio2data.style.color = zshow
-		// hash
-		Promise.all([
-			sha1(cc_output.slice(0, 30))
-		]).then(function(result){
-			dom.audio2hash = result[0]
-			// perf
+		gain.gain.value = 0
+		oscillator.type = "triangle"
+		oscillator.connect(analyser)
+		analyser.connect(scriptProcessor)
+		scriptProcessor.connect(gain)
+		gain.connect(audioCtx.destination)
+
+		scriptProcessor.onaudioprocess = function(bins) {
+			bins = new Float32Array(analyser.frequencyBinCount)
+			analyser.getFloatFrequencyData(bins)
+			for (let i=0; i < bins.length; i++) {
+				cc_output.push(" "+ bins[i])
+			}
+			analyser.disconnect()
+			scriptProcessor.disconnect()
+			gain.disconnect()
+			// output
+			sDetail[sName] = cc_output
+			let hash = sha1(cc_output.join())
+			dom.audio2hash.innerHTML = hash + buildButton("11", sName, "details")
+			audio2Section.push("oscillator:"+ hash)
 			log_perf("oscillator [audio]",t0)
-		})
+			// next test
+			get_audio2_context(1)
+		}
+		oscillator.start(0)
+	} catch(e) {
+		dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		audio2Section.push("oscillator:"+ isFF ? zErr : zB0)
 		// next test
 		get_audio2_context(1)
 	}
-	oscillator.start(0)
 }
 
 function outputAudio2() {
 	if (gClick) {
 		gClick = false
 		gRun = false
-		let tbl = document.getElementById("tb11")
-		let cls = "c2"
-		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+		audio2Section = [] // reset
 		try {
 			let test = new window.AudioContext
+			let tbl = document.getElementById("tb11")
+			let cls = "c2"
+			tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
 			// each test calls the next: oscillator -> context[try1] -> hybrid -> context[try2 if req]
 				// if context is run first, outputLatency *always* = 0 = incorrect : run it after oscillator
 				// if context is not run first, outputLatency *sometimes* = 0 : hence context [try2]
-			reset_audio2()
 			Promise.all([
 				outputPrototypeLies(),
 			]).then(function(results){
 				if (canPerf) {gt0 = performance.now(); t0audio = gt0}
 				latencyTries = 0
 				log_line("line")
-				get_audio2_oscillator()				
+				get_audio2_oscillator() // start
 			})
 		} catch(e) {
-			dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA
-			dom.audio1data = "", dom.audio2data = "", dom.audio3data = ""
+			// output something
+			let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			dom.audio1hash = eMsg, dom.audio2hash = eMsg, dom.audio3hash = eMsg
+			dom.audiohash2 = zNA
 			gClick = true
 		}
 	}
@@ -256,6 +255,13 @@ function outputAudio() {
 		context.startRendering()
 		context.oncomplete = function(event) {
 			try {
+				let knownGood = [
+					124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,124.04345808873768,124.04347503720783,
+					124.04347527516074,124.04347657808103,124.04347721464,124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,
+					124.08072291687131,124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,124.08075528279005,]
+				if (isFF) {
+					knownGood = [35.7383295930922,35.73833039775491,35.73833402246237,35.74996018782258,35.7499681673944,]
+				}
 				let copyTest = new Float32Array(44100)
 				event.renderedBuffer.copyFromChannel(copyTest, 0)
 				let getTest = event.renderedBuffer.getChannelData(0)
@@ -263,11 +269,6 @@ function outputAudio() {
 					crypto.subtle.digest("SHA-256", getTest),
 					crypto.subtle.digest("SHA-256", copyTest),
 				]).then(function(hashes){
-					let min = 124.04344, max = 124.08076
-					if (isFF) {
-						min = 35.738329
-						max = 35.78334
-					}
 					// sum
 					let sum = 0, sum2 = 0, sum3 = 0
 					for (let i=0; i < getTest.length; i++) {
@@ -280,7 +281,7 @@ function outputAudio() {
 					let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
 					if (sum2 == sum3) {isLies = true}
 					if (isFF || isEngine == "blink") {
-						if (sum < min || sum > max) {isLies = true}
+						if (!knownGood.includes(sum)) {isLies = true}
 					}
 					pxi_compressor.disconnect()
 					// get/copy
