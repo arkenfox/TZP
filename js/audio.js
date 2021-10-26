@@ -43,7 +43,7 @@ function get_audio2_context(attempt) {
 		}
 		let f = new window.AudioContext
 		let obj
-		let results = []
+		let results = [], keynames = []
 
 		let	d = f.createAnalyser()
 		obj = a({}, f, "ac-")
@@ -58,19 +58,33 @@ function get_audio2_context(attempt) {
 				if (runS) {testValue = 0}
 				latencyError = (testValue == 0 ? true : false)
 			}
-			results.push(key +":"+ testValue)
+			if (runSL && key == "ac-outputLatency") {
+				// simiulate cydec dropping a key
+			} else {
+				results.push(key +":"+ testValue)
+				keynames.push(key)
+			}
 		}
-
 		// output
 		if (!latencyError || latencyTries == 2) {
+			let isLie = false, note = ""
 			sDetail[sName] = results
 			let hash = sha1(results.join())
-			audio2Section.push("keys:"+ hash)
-			let note = rfp_red
-			if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
-			if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
-			if (isOS == "android" && hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e") {note = rfp_green} // 0.025
-			if (isOS == "mac" && hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9") {note = rfp_green} // 512/samplerate = 512/44100 (samplerate is hardcoded with RFP)
+			// catch key tampering
+			if (isFF) {
+				isLie = true
+				keynames.sort() // stability
+				let lieHash = sha1(keynames.join())
+				if (isVer < 70 && lieHash == "406e1a6ed448d535be7a5c38e923afeb4214502b") {isLie = false}
+				if (isVer > 69 && lieHash == "6be86802849b991e2ce6b966234cbd116c2b84e5") {isLie = false}
+				note = rfp_red
+				if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
+				if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
+				if (isOS == "android" && hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e") {note = rfp_green} // 0.025
+				if (isOS == "mac" && hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
+			}
+			audio2Section.push("keys:"+ (isLie ? zLIE : hash))
+			if (isLie) {hash = soL + hash + scC}
 			dom.audio1hash.innerHTML = hash + buildButton("11", sName, results.length +" keys") + note
 				+ (latencyError ? sb +" [0 latency]"+ sc : "")
 			log_perf("context [audio]",t0)
@@ -131,10 +145,13 @@ function get_audio2_hybrid() {
 			scriptProcessor.disconnect()
 			gain.disconnect()
 			// output
+			if (runSL) {results = []}
 			sDetail[sName] = results
 			let hash = sha1(results.join())
+			let isLie = results.length == 0 ? true : false
+			if (isLie) {hash = soL + hash + scC}
 			dom.audio3hash.innerHTML = hash + buildButton("11", sName, "details")
-			audio2Section.push("hybrid:"+ hash)
+			audio2Section.push("hybrid:"+ (isLie ? zLIE : hash))
 			log_perf("hybrid [audio]",t0)
 			if (showperf) {
 				exit_audio2()
@@ -157,7 +174,7 @@ function get_audio2_oscillator() {
 		let sName = "audio_audiocontext_oscillator_notglobal"
 		sDetail[sName] = []
 
-		let cc_output = [],
+		let results = [],
 			audioCtx = new window.AudioContext
 		let oscillator = audioCtx.createOscillator(),
 			analyser = audioCtx.createAnalyser(),
@@ -175,16 +192,19 @@ function get_audio2_oscillator() {
 			bins = new Float32Array(analyser.frequencyBinCount)
 			analyser.getFloatFrequencyData(bins)
 			for (let i=0; i < bins.length; i++) {
-				cc_output.push(" "+ bins[i])
+				results.push(" "+ bins[i])
 			}
 			analyser.disconnect()
 			scriptProcessor.disconnect()
 			gain.disconnect()
 			// output
-			sDetail[sName] = cc_output
-			let hash = sha1(cc_output.join())
+			if (runSL) {results = []}
+			sDetail[sName] = results
+			let hash = sha1(results.join())
+			let isLie = results.length == 0 ? true : false
+			if (isLie) {hash = soL + hash + scC}
 			dom.audio2hash.innerHTML = hash + buildButton("11", sName, "details")
-			audio2Section.push("oscillator:"+ hash)
+			audio2Section.push("oscillator:"+ (isLie ? zLIE :hash))
 			log_perf("oscillator [audio]",t0)
 			// next test
 			get_audio2_context(1)
@@ -231,7 +251,7 @@ function outputAudio2() {
 
 function outputAudio() {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let section = []
+	let sName = "offlineaudiocontext"
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
 		dom.audioSupport = zE
@@ -292,24 +312,22 @@ function outputAudio() {
 					dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
 					dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
 					dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-					section.push("offlineaudiocontext:"+ (isLies ? zLIE : hashG))
-					if (gRun && isLies) {gKnown.push("audio:offlineaudiocontext")}
+					if (gRun && isLies) {gKnown.push("audio:"+ sName)}
 					// done
-					log_section("audio", t0, section)
+					log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
 				})
 			} catch(e) {
-				log_error("audio: offlineaudiocontext", e.name, e.message)
+				log_error("audio: "+ sName, e.name, e.message)
 				let eMsg = trim_error(e.name, e.message)
 				eMsg = (e.name === undefined ? zErr : eMsg)
 				dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
-				section.push("OfflineAudioContext:"+ (isFF ? zB0 : zErr))
-				log_section("audio", t0, section)
+				log_section("audio", t0, [sName+ ":"+ (isFF ? zB0 : zErr)])
 			}
 		}
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, ["offlineaudiocontext:n/a"])
+		log_section("audio", t0, [sName +":n/a"])
 	}
 }
 
