@@ -43,7 +43,8 @@ function get_audio2_context(attempt) {
 		}
 		let f = new window.AudioContext
 		let obj
-		let results = [], keynames = []
+		let results = [], keynames = [], subset = [], isLie = false, note = ""
+		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
 
 		let	d = f.createAnalyser()
 		obj = a({}, f, "ac-")
@@ -58,25 +59,27 @@ function get_audio2_context(attempt) {
 				if (runS) {testValue = 0}
 				latencyError = (testValue == 0 ? true : false)
 			}
-			if (runSL && key == "ac-outputLatency") {
+			if (runSL && key == "ac-sampleRate") {
 				// simiulate cydec dropping a key
 			} else {
 				results.push(key +":"+ testValue)
 				keynames.push(key)
 			}
+			if (!subsetExclude.includes(key)) {subset.push(key +":"+ testValue)}
 		}
 		// output
 		if (!latencyError || latencyTries == 2) {
-			let isLie = false, note = ""
 			sDetail[sName] = results
 			let hash = sha1(results.join())
-			// catch key tampering
+			// catch tampering
 			if (isFF) {
 				isLie = true
-				keynames.sort() // stability
+				keynames.sort(); subset.sort() // stability
 				let lieHash = sha1(keynames.join())
+				let subHash = sha1(subset.join())
 				if (isVer < 70 && lieHash == "406e1a6ed448d535be7a5c38e923afeb4214502b") {isLie = false}
 				if (isVer > 69 && lieHash == "6be86802849b991e2ce6b966234cbd116c2b84e5") {isLie = false}
+				if (subHash == "b82a976312cf08e6e139b3dcee6c02aa412913c2") {isLie = false}
 				note = rfp_red
 				if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
 				if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
