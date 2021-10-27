@@ -1065,8 +1065,7 @@ function get_pbmode() {
 function get_resources() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		let browser = "",
-			branding = "",
+		let branding = "",
 			channel = "",
 			result = "",
 			wFF = "",
@@ -1084,8 +1083,8 @@ function get_resources() {
 			// set global vars
 			if (setGlobalVars) {
 				isChannel = channel
-				isResource = browser +" "+ result
-				isResourceMetric = "resources:"+ browser +" "+ wFF +"x"+ hFF +" "+ extra
+				isResource = result
+				isResourceMetric = "resources:"+ wFF +"x"+ hFF +" "+ extra
 			}
 			dom.fdResource.innerHTML = isResource
 			log_perf("resources [fd]",t0)
@@ -1093,7 +1092,6 @@ function get_resources() {
 		}
 		// FF
 		function build_FF(wFF, hFF) {
-			browser = zFF
 			if (wFF == 336 && hFF == 48) {
 				//70+
 				branding = "Browser"
@@ -1128,7 +1126,6 @@ function get_resources() {
 		}
 		// TB
 		function build_TB(wFF, hFF) {
-			browser = zTB
 			channel = ""
 			if (wFF == 270 && hFF == 48) {
 				//alpha: 8.5a7+ [60.5.0esr]
@@ -2387,13 +2384,15 @@ function outputUA() {
 function outputFD(runtype) {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
+
 	// FF
 	if (isFF) {
-		// ver
-		let r = isVer + (isVerPlus ? "+" : "")
-		if (isVer == 59) {r = "59 or lower"}
+		// from globals:ver + browser
+		let r
+		if (isVer == 59) {r = "59 or lower"} else {r = isVer + (isVerPlus ? "+" : "")}
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
+		section.push("browser:"+ (isTB ? "Tor Broweser" : "Firefox"))
 
 		get_chrome()
 		Promise.all([
@@ -2436,27 +2435,30 @@ function outputFD(runtype) {
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
+			dom.fdResource = zNA
+			section.push("resources:n/a")
+			dom.fdArchOS = zNA
+			section.push("os_architecture:n/a")
+			dom.fdVersion.innerHTML = zNA
+			section.push("version:n/a")
+			dom.fdScrollV = zNA
+			dom.fdScrollE = zNA
+			section.push("scrollbars:n/a")
+			// Brave/Opera
+			let browser = zNA
+			if (isBrave) {browser = "Brave"} else if (Object.keys(chrome).includes("search")) {browser = "Opera"}
+			dom.browserlabel = "browser"
+			dom.fdResourceCss = browser
+			section.push("browser:"+ browser)
+			log_section("feature", t0, section)
+
 			get_canonical()
 			get_locales()
 			dom.fdBrandingCss = zNA
 			dom.fdResourceCss = zNA
-			dom.fdResource = zNA
 			dom.fdChrome = zNA
-			dom.fdVersion = zNA
 			dom.fdMathOS = zNA
-			dom.fdArchOS = zNA
 			dom.fdLH = zNA
-			dom.fdScrollV = zNA
-			dom.fdScrollE = zNA
-			// Brave/Opera
-			let browser = ""
-			if (isBrave) {browser = "Brave"} else if (Object.keys(chrome).includes("search")) {browser = "Opera"}
-			if (browser.length) {
-				dom.browserlabel = "browser"
-				dom.fdResourceCss = browser
-				section.push("browser:"+ browser)
-			}
-			log_section("feature", t0, section)
 			// non-FF needs these: in FF scrollbar calls them
 			if (runtype == "load") {
 				Promise.all([
