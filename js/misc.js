@@ -2,7 +2,7 @@
 
 function get_component_shims() {
 	let sName = "misc_component_shims"
-	clearDetail(sName)
+	sDetail[sName] = []
 	let sHash = ""
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
@@ -373,27 +373,21 @@ function get_perf4() {
 
 function get_svg() {
 	try {
-		// svg
-		let s = document.createElementNS("http://www.w3.org/2000/svg","svg")
-		s.setAttribute("width","100")
-		s.setAttribute("height","100")
-		// circle
-		let c = document.createElementNS("http://www.w3.org/2000/svg","circle")
-		c.setAttributeNS(null,"cx",50)
-		c.setAttributeNS(null,"cy",50)
-		c.setAttributeNS(null,"r",40)
-		// attach circle->svg->element
-		s.appendChild(c)
-		dom.svgDiv.appendChild(s)
-		// output
-		let r = (dom.svgDiv.offsetHeight > 0 ? zE : zD)
-		dom.svgBasicTest = r
-		// remove
-		dom.svgDiv.removeChild(s)
-		return "svg:"+ r
+		dom.svgDiv.innerHTML = ""
+		//dom.svgDiv.offsetHeight == 0
+		const svgns = "http://www.w3.org/2000/svg"
+		let shape = document.createElementNS(svgns,"svg")
+		let rect = document.createElementNS(svgns,"rect")
+		rect.setAttribute("width",20)
+		rect.setAttribute("height",20)
+		shape.appendChild(rect)
+		dom.svgDiv.appendChild(shape)
+		let res = dom.svgDiv.offsetHeight > 0 ? zE : zD
+		dom.svgDiv.innerHTML = ""
+		dom.svgBasicTest = res
+		return "svg:"+ res
 	} catch(e) {
 		log_error("misc: svg", e.name, e.message)
-		dom.perf3 = 
 		dom.svgBasicTest = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		return "svg:"+ (isFF ? zB0 : zErr)
 	}
