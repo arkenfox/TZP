@@ -77,7 +77,7 @@ function get_navigator() {
 		let network = "", connection = "", test = "", r3 = ""
 		// TEMP TEST
 		try {
-			let test = navigator.connection
+			test = navigator.connection
 			console.log("A", test)
 			console.log("B", typeof test === "object")
 			console.log("C", test +"" == "[object NetworkInformation]")
