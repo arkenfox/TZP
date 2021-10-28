@@ -75,6 +75,26 @@ function get_navigator() {
 
 		// NETWORK/CONNECTION
 		let network = "", connection = "", test = "", r3 = ""
+		// TEMP TEST
+		try {
+			let test = navigator.connection
+			console.log("A", test)
+			console.log("B", typeof test === "object")
+			console.log("C", test +"" == "[object NetworkInformation]")
+			let networkData = {}
+			for (var keyN in navigator.connection) {
+				if (typeof navigator.connection[keyN] !== "function") {networkData[keyN] = navigator.connection[keyN]}
+			}
+			let networkDataNames = []
+			const names = Object.keys(networkData).sort()
+			for (const k of names) {networkDataNames.push(k)}
+			let networkString = networkDataNames.join(",")
+			console.log("D", networkData)
+			console.log("E", networkString)
+		} catch(e) {
+			console.debug(e.name, e.message)
+		}
+
 		// non-FF
 		if (!isFF) {
 			if (check_navKey("connection")) {
