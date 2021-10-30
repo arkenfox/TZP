@@ -1070,6 +1070,7 @@ function get_resources() {
 			result = "",
 			wFF = "",
 			hFF = "",
+			mLogo = "",
 			extra = "",
 			nob = "[no branding detected]",
 			el = dom.branding
@@ -1084,7 +1085,8 @@ function get_resources() {
 			if (setGlobalVars) {
 				isChannel = channel
 				isResource = result
-				isResourceMetric = "resources:"+ wFF +"x"+ hFF +" "+ extra
+				isResourceMetric = "resources:"+ wFF +"x"+ hFF +" "+ mLogo +" "+ extra
+				console.debug(isResourceMetric)
 			}
 			dom.fdResource.innerHTML = isResource
 			log_perf("resources [fd]",t0)
@@ -1168,6 +1170,7 @@ function get_resources() {
 			imgA.style.visibility = "hidden"
 			document.body.appendChild(imgA)
 			imgA.addEventListener("load", function() {
+				mLogo = imgA.width +"x"+ imgA.height
 				if (imgA.width == 300) {
 					// desktop = 300x236: -> icon64
 					dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/icon64.png')"
