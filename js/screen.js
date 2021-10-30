@@ -1086,7 +1086,6 @@ function get_resources() {
 				isChannel = channel
 				isResource = result
 				isResourceMetric = "resources:"+ wFF +"x"+ hFF +" "+ mLogo +" "+ extra
-				console.debug(isResourceMetric)
 			}
 			dom.fdResource.innerHTML = isResource
 			log_perf("resources [fd]",t0)
