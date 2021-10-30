@@ -177,13 +177,14 @@ function get_errors() {
 			"let t = ({ 1n: 1 })", // < FF74, changes FF68
 			"let a = 1_00_;", // changes FF70
 		]
+		let note = "details", color = "3"
 		for (let i = 0; i < tests.length; i++) {
 			try {
 				newFn(tests[i])
 			} catch(e) {
 				let msg = e.message
 				if (tests[i] == "alert('A)") {
-					if (runS) {msg += zSIM} else if (msg == "unterminated string literal") {code = "X"; ff = "[FF59 or lower]"}
+					if (runS) {msg += zSIM} else if (msg == "unterminated string literal") {note = "FF59 or lower"}
 				}
 				res.push(i +": "+ e.name +": "+ msg)
 			}
@@ -193,7 +194,6 @@ function get_errors() {
 		// notation
 			// 74+: 1259822: error_message_fix: codes 1=false 2=true
 		let tmp = hash.substring(0,8)
-		let note = "details", color = "3"
 		if (isFF) {
 			let fix = " fixed", nofix = " no-fix"
 			if (tmp == "3f0a2927") {note = "FF93+"+ nofix
@@ -216,6 +216,7 @@ function get_errors() {
 			} else if (tmp == "94b69f86") {note = "FF70-71"
 			} else if (tmp == "117ef2fc") {note = "FF68-69"
 			} else if (tmp == "32d3793c") {note = "FF60-67"
+			} else if (note == "FF59 or lower") { // do nothing
 			} else {note = "NEW"; color = "bad"
 			}
 		}
@@ -1071,6 +1072,7 @@ function get_resources() {
 			wFF = "",
 			hFF = "",
 			mLogo = "",
+			wMark = "",
 			extra = "",
 			nob = "[no branding detected]",
 			el = dom.branding
@@ -1083,9 +1085,9 @@ function get_resources() {
 		function output(setGlobalVars) {
 			// set global vars
 			if (setGlobalVars) {
-				isChannel = channel
+				isChannel = channel // not used but handy
 				isResource = result
-				isResourceMetric = "resources:"+ wFF +"x"+ hFF +" "+ mLogo +" "+ extra
+				isResourceMetric = "resources:"+ wMark +", "+ mLogo +", "+ extra
 			}
 			dom.fdResource.innerHTML = isResource
 			log_perf("resources [fd]",t0)
@@ -1093,72 +1095,55 @@ function get_resources() {
 		}
 		// FF
 		function build_FF(wFF, hFF) {
-			if (wFF == 336 && hFF == 48) {
-				//70+
-				branding = "Browser"
-				channel = "Release/Beta"
-			} else if (wFF == 336 && hFF == 64) {
-				//70+
-				branding = "Browser"
-				channel = "Developer/Nightly"
-			} else if (wFF == 300 && hFF == 38) {
-				//60-69, ESR60/68
-				branding = "Quantum"
-				channel = "Release/Beta"
-			} else if (wFF == 132 && hFF == 62) {
-				//60-69
-				channel = "Developer Edition"
-			} else if (wFF == 270 && hFF == 48) {
-				//60-69
-				channel = "Nightly"
-			}
+			let is70 = (isVer > 69)
+			//70+
+			if (wMark == "336 x 48" && is70) {
+				branding = "Browser"; channel = "Release/Beta"
+			} else if (wMark == "336 x 64" && is70) {
+				branding = "Browser"; channel = "Developer/Nightly"
+			//60-69, ESR60/68
+			} else if (wMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta"
+			} else if (wMark == "132 x 62" && !is70) {channel = "Developer Edition"
+			} else if (wMark == "270 x 48" && !is70) {channel = "Nightly"
+			// FORKS
+			} else if (wMark == "132 x 48" && mLogo == "128 x 128") {isFork = "Librewolf"}
+
+			let note = s3+ "["+ wMark +"]"+ sc
 			if (channel !== "") {
-				result = branding +" - "+ channel +" ["+ wFF +" x "+ hFF +"]"
+				result = (branding == "" ? "" : branding +" - ") + channel + note
+			} else if (isFork !== "") {
+				result = isFork + note
 			} else if (hFF > 0) {
 				//new
-				result = "["+ wFF +" x "+ hFF +"]"+ zNEW + (runS ? zSIM : "")
+				result = "Firefox "+ note + zNEW + (runS ? zSIM : "")
 			} else {
 				//none: red=desktop orange=android
-				if (isVer > 59) {
-					result = (isOS == "android" ? s3 : sb) + nob + sc
-				}
+				result = (isOS == "android" ? s3 : sb) + nob + sc
 				dom.fdBrandingCss = "none"
 			}
 		}
 		// TB
 		function build_TB(wFF, hFF) {
-			channel = ""
-			if (wFF == 270 && hFF == 48) {
-				//alpha: 8.5a7+ [60.5.0esr]
-				channel = "alpha"
-				result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
+			channel = "Tor Browser"
+			let note = s3 +"["+ wMark +"]"+ sc
+			if (wMark == "270 x 48") {
+				channel += " - Alpha" // alpha: 8.5a7+ [60.5.0esr]
+				result = channel + note
 				log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
-			} else if (wFF == 336 && hFF == 48) {
+			} else if (wMark == "336 x 48") {
 				if (isVer > 77) {
-					//78+ therefore release
-					channel = "release"
-					result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
-				} else {
-					//idk
-					result = " ["+ wFF +" x "+ hFF +"]"
+					channel += " - Release" // 78+ therefore release
 				}
-			} else if (wFF == 300 && hFF == 38) {
+				result = channel + note
+			} else if (wMark == "300 x 38") {
 				if (isVer > 67 && isVer < 78) {
-					//68+ therefore release
-					channel = "release"
-					result = s3 +"["+ channel +"]"+ sc +" ["+ wFF +" x "+ hFF +"]"
-				} else {
-					//idk
-					result = " ["+ wFF +" x "+ hFF +"]"
+					channel += " - Release" // 68+ therefore release
 				}
+				result = channel + note
 			} else if (hFF > 0) {
-				//new
-				result = "["+ wFF +" x "+ hFF +"]"+ zNEW + (runS ? zSIM : "")
+				result = channel + note + zNEW + (runS ? zSIM : "") // new
 			} else {
-				//none: red=desktop orange=android
-				if (isVer > 59) {
-					result = (isOS == "android" ? s3 : sb) + nob + sc
-				}
+				result = (isOS == "android" ? s3 : sb) + nob + sc
 				dom.fdBrandingCss = "none"
 			}
 		}
@@ -1169,27 +1154,30 @@ function get_resources() {
 			imgA.style.visibility = "hidden"
 			document.body.appendChild(imgA)
 			imgA.addEventListener("load", function() {
-				mLogo = imgA.width +"x"+ imgA.height
-				if (imgA.width == 300) {
-					// desktop = 300x236: -> icon64
-					dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/icon64.png')"
+				mLogo = imgA.width +" x "+ imgA.height
+
+				let pngURL = "url('chrome://branding/content/icon64.png')"
+				if (mLogo = "128 x 128") { // Librewolf
+				} else if (imgA.width == 300) { // FF desktop = 300x236
 				} else {
 					// android = 258x99: -> favicon64 (which gives us tor's icon)
-					dom.fdResourceCss.style.backgroundImage="url('chrome://branding/content/favicon64.png')"
+					pngURL = "url('chrome://branding/content/favicon64.png')"
 				}
+				dom.fdResourceCss.style.backgroundImage= pngURL
+
 				if (imgA.width > 0) {
 					// brand: get after logo loaded by js: allows time for
 					// the two branding images (set by html) to be loaded
 					wFF = el.width
 					hFF = el.height
-					el = dom.torbranding
-					let wTB = el.width, hTB = el.height
-
 					if (runS) {
 						wFF = 110, hFF = 50 // new to both TB and FF
 						//wFF = 336, hFF = 48 // new TB but not new FF
 						//to sim missing, change html img src
 					}
+					wMark = wFF +" x "+ hFF
+					el = dom.torbranding
+					let wTB = el.width, hTB = el.height
 
 					// FF
 					build_FF(wFF, hFF)
@@ -1874,6 +1862,7 @@ function get_zoom(runtype) {
 		}
 
 		// zoom: choose method
+		//console.debug(dpr, dpi_x, dpi_y, varDPI)
 		if (dpr !== 1 || dpi_y == 0) {
 			// use devicePixelRatio if we know RFP is off
 			// or if css is blocked (dpi_y = 0, dpi_x = body width)
@@ -1891,7 +1880,7 @@ function get_zoom(runtype) {
 						jsZoom = dpr2*100
 					}
 				} else {
-					jsZoom = (dpi_x/dpi_x)*100
+					jsZoom = (dpi_x/dpi_x)*100 // why do this instead of just using 100? is this a typo?
 				}
 			} else {
 				// otherwise it could be spoofed
@@ -2394,7 +2383,6 @@ function outputFD(runtype) {
 		if (isVer == 59) {r = "59 or lower"} else {r = isVer + (isVerPlus ? "+" : "")}
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
-		section.push("browser:"+ (isTB ? "Tor Broweser" : "Firefox"))
 
 		get_chrome()
 		Promise.all([
@@ -2423,6 +2411,7 @@ function outputFD(runtype) {
 			}
 			dom.fdArchOS.innerHTML = display
 			section.push("os_architecture:"+ bits)
+			section.push("browser:"+ (isTB ? "Tor Broweser" : (isFork !== "" ? isFork : "Firefox")))
 			log_section("feature", t0, section)
 		})
 		get_canonical()
