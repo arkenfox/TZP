@@ -320,7 +320,7 @@ const get_isError = () => new Promise(resolve => {
 		} else if (hash == "422b8490") {bFF = true //FF72-73,FF74+ fix off
 		} else if (hash == "f6c5128f") {bFF = true //FF70-71
 		} else if (hash == "b7463a43") {bFF = true //FF60-69
-		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF59-
+		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
 		} else if (hash == "e64c00a7") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
 		}
 		//console.debug(hash)
