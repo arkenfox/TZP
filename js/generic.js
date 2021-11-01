@@ -20,7 +20,7 @@ function getElementProp(id, prop, pseudo) {
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue(prop)
-		if (item == "none") {item = "x";if (gRun) {gCheck.push("_generic:element property "+ id +": returned none")}}
+		if (item == "none") {item = "x"; if (gRun) {gCheck.push("_generic:element property "+ id +": returned none")}}
 		item = item.replace(/"/g,"")
 		if (!isNaN(item * 1)) {item = item * 1} // numbers
 		if (item == "") {item = "x"} // blanks
@@ -219,9 +219,8 @@ const get_isEngine = () => new Promise(resolve => {
 	// set isFF for engine lies
 	if (isFFyes.length) {isFF = true}
 	function final_isFF() {
-		if (isFFyes.length) {
-			isFF = true
-		} else {
+		if (isFFyes.length) {isFF = true}
+		if (!isFF || isFFLegacy) {
 			rfp_green = ""; rfp_red = ""; rfp_random_green = ""; rfp_random_red = ""; lb_green = ""; lb_red = ""; nw_green = ""; nw_red = ""
 			enUS_green = ""; enUS_red = ""; spoof_both_green = ""; spoof_both_red = ""; default_ff_green = ""; default_ff_red = ""
 			let items = document.getElementsByClassName("group")
@@ -264,6 +263,29 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
 		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
 		}
+
+		if (isEngine == "gecko") {
+			// 52: 837961
+			// only check for PM28+
+			try {
+				let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
+				// 53: 1317307
+				// eliminate FF53+
+				try {
+					newFn("Object.defineProperty([], 'length', {get(){}})")
+				} catch(e) {
+					if (e.name + e.message == "RangeErrorinvalid array length") {
+						// 61
+						// catch something PM did that ESR52 didn't
+						// note: this would only apply to later v28 releases
+						try {
+							let test61 = newFn("(' a').trimStart()")
+							isEngine = "goanna"
+						} catch(e) {}
+					}
+				}
+			} catch(e) {}
+		}
 		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
 		log_perf("math [isFF]",t0,"",bFF)
 		// harden isEngine
@@ -298,8 +320,11 @@ const get_isError = () => new Promise(resolve => {
 		} else if (hash == "422b8490") {bFF = true //FF72-73,FF74+ fix off
 		} else if (hash == "f6c5128f") {bFF = true //FF70-71
 		} else if (hash == "b7463a43") {bFF = true //FF60-69
-		} else if (hash == "7263eca6") {bFF = true //FF59-
+		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF59-
+		} else if (hash == "e64c00a7") {bFF = true; isFFLegacy = true // Palemoon/Waterfox Classic
 		}
+		//console.debug(hash)
+		//console.debug(res.join("\n"))
 		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
@@ -675,7 +700,7 @@ const get_isVer = () => new Promise(resolve => {
 			output(60)
 		} catch(e) {output(59)}
 	}
-	start()
+	if (isFFLegacy) {output(59)} else {start()}
 })
 
 /*** CHECK FUNCTIONS ***/
@@ -1008,7 +1033,7 @@ function log_error(title, name, msg) {
 }
 
 function trim_error(name, msg, len) {
-	if (len == undefined) {len = 70}
+	if (len == undefined) {len = 60}
 	let str = name +": "+ msg
 	if (str.length > len) {str = str.substring(0,len-3) + "..."}
 	return(str)
