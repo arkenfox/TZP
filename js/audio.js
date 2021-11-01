@@ -72,7 +72,7 @@ function get_audio2_context(attempt) {
 			sDetail[sName] = results
 			let hash = sha1(results.join())
 			// catch tampering
-			if (isFF) {
+			if (isFF && !isFFLegacy) {
 				isLie = true
 				keynames.sort(); subset.sort() // stability
 				let lieHash = sha1(keynames.join())
@@ -255,6 +255,16 @@ function outputAudio2() {
 function outputAudio() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let sName = "offlineaudiocontext"
+	let knownGood = [
+		124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,
+		124.04345808873768,124.04347503720783,124.04347527516074,124.04347657808103,124.04347721464,
+		124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,124.08072291687131,
+		124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,
+		124.08075528279005,]
+	if (isFF) {
+		knownGood = [35.7383295930922,35.73833039775491,35.73833402246237,35.74996018782258,35.7499681673944,]
+	}
+
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
 		dom.audioSupport = zE
@@ -278,13 +288,6 @@ function outputAudio() {
 		context.startRendering()
 		context.oncomplete = function(event) {
 			try {
-				let knownGood = [
-					124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,124.04345808873768,124.04347503720783,
-					124.04347527516074,124.04347657808103,124.04347721464,124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,
-					124.08072291687131,124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,124.08075528279005,]
-				if (isFF) {
-					knownGood = [35.7383295930922,35.73833039775491,35.73833402246237,35.74996018782258,35.7499681673944,]
-				}
 				let copyTest = new Float32Array(44100)
 				event.renderedBuffer.copyFromChannel(copyTest, 0)
 				let getTest = event.renderedBuffer.getChannelData(0)
@@ -312,12 +315,18 @@ function outputAudio() {
 					let hashC = sha1(byteArrayToHex(hashes[1]))
 					if (hashG !== hashC) {isLies = true}
 					// display/FP
-					dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
-					dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
-					dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-					if (gRun && isLies) {gKnown.push("audio:"+ sName)}
-					// done
-					log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
+					if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
+						let note = "empty arrayBuffer"
+						if (gRun) {gCheck.push("audio:"+ sName +": "+ note)}
+						dom.audioSum = sum; dom.audioGet = note; dom.audioCopy = note
+						log_section("audio", t0, [sName +":failed"])
+					} else {
+						if (gRun && isLies) {gKnown.push("audio:"+ sName)}
+						dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
+						dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
+						dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
+						log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
+					}
 				})
 			} catch(e) {
 				log_error("audio: "+ sName, e.name, e.message)

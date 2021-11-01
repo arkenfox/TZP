@@ -84,7 +84,7 @@ function get_iframe_props() {
 		let allProps = props
 		sDetail[sAll] = allProps
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
-		if (isFF) {
+		if (isFF && !isFFLegacy) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
 			let falsePos = ['Event','StyleSheetList'] // false positives

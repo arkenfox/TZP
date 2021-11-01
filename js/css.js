@@ -159,6 +159,8 @@ function get_computed_styles() {
 						prototypeName
 					})
 				} catch(e) {
+					// ToDo: catch this and record a single instance per style
+					//console.debug("css style", e.name, e.message)
 					return resolve("error")
 				}
 			})
@@ -180,14 +182,23 @@ function get_computed_styles() {
 			let values = [], btns = []
 			// sim
 			if (runSC) {
-				if (isFile && cSim == 0) {console.error("make sure privacy.file_unique_origin = false for file:// scheme testing")}
-				cSim++
-				cSim = cSim % 10
-				if (cSim == 0) {console.log("style sim #0: all blocked")}
-				var bMsg = false
+				if (isFile) {
+					let devMsg = "set privacy.file_unique_origin = false for file:// scheme testing"
+					if (isVer > 94) {
+						devMsg = "FF95+ : you can't test runSC (styles) using file:// scheme" // 1732052
+						runSC = false
+					} else {
+						cSim++
+						cSim = cSim % 10
+						if (cSim == 0) {console.log("style sim #0: all blocked")}
+						var bMsg = false
+					}
+					console.error(devMsg)
+				}
 			}
 			// file:// override for CSSRuleList
 			let fileSchemeOverride = (isFile && !runSC && isVer > 67 ? true : false)
+			if (isFFLegacy) {fileSchemeOverride = true}
 			if (isFile && !isFF) {fileSchemeOverride = true}
 			// analyse
 			for (let i=0; i < 3; i++) {
@@ -415,7 +426,6 @@ function get_system_fonts() {
 }
 
 function outputCSS() {
-
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([

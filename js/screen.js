@@ -90,6 +90,7 @@ function get_chrome() {
 		if (r == "") {run2()} else {output(r)}
 	}
 	function run() {
+		if (isFFLegacy) {dom.fdChrome = zNA; return}
 		// win/mac
 		let c = "chrome://browser/content/extension-",
 			p = "-panel.css",
@@ -1106,7 +1107,10 @@ function get_resources() {
 			} else if (wMark == "132 x 62" && !is70) {channel = "Developer Edition"
 			} else if (wMark == "270 x 48" && !is70) {channel = "Nightly"
 			// FORKS
-			} else if (wMark == "132 x 48" && mLogo == "128 x 128") {isFork = "Librewolf"}
+			} else if (wMark == "132 x 48" && mLogo == "128 x 128") {isFork = "Librewolf"
+			} else if (isFFLegacy) {
+				if (wMark == "128 x 22" && mLogo == "128 x 128") {isFork = "Waterfox Classic"}
+			}
 
 			let note = s3+ "["+ wMark +"]"+ sc
 			if (channel !== "") {
@@ -1119,6 +1123,7 @@ function get_resources() {
 			} else {
 				//none: red=desktop orange=android
 				result = (isOS == "android" ? s3 : sb) + nob + sc
+				if (isFFLegacy) {result = zNA}
 				dom.fdBrandingCss = "none"
 			}
 		}
@@ -1250,7 +1255,7 @@ function get_screen_metrics(runtype) {
 	// NOTATE
 	let items = [p1,p2,p3,p4,p5,p6,p7,p8], isXY = true
 	for (let i=0; i < items.length; i++) {if (items[i] != 0) {isXY = false}}
-	if (isFF) {
+	if (isFF && !isFFLegacy) {
 		// sizes
 		let m1 = true, m2 = true, r = "", c = "#ff4f4f"
 		if (mScreen !== mAvailable) {m1 = false}
@@ -2411,7 +2416,9 @@ function outputFD(runtype) {
 			}
 			dom.fdArchOS.innerHTML = display
 			section.push("os_architecture:"+ bits)
-			section.push("browser:"+ (isTB ? "Tor Broweser" : (isFork !== "" ? isFork : "Firefox")))
+			let browser = (isTB ? "Tor Browser" : (isFork !== "" ? isFork : "Firefox"))
+			if (isEngine == "goanna") {browser = "Pale Moon"} // ToDo: redundant if we detect PM in resources
+			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 		})
 		get_canonical()
@@ -2437,7 +2444,8 @@ function outputFD(runtype) {
 			section.push("scrollbars:n/a")
 			// Brave/Opera
 			let browser = zNA
-			if (isBrave) {browser = "Brave"} else if (Object.keys(chrome).includes("search")) {browser = "Opera"}
+			if (isBrave) {browser = "Brave"
+			} else if (isEngine == "blink" && Object.keys(chrome).includes("search")) {browser = "Opera"}
 			dom.browserlabel = "browser"
 			dom.fdResourceCss = browser
 			section.push("browser:"+ browser)
