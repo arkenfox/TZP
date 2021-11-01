@@ -136,6 +136,7 @@ let avh = "",
 	isChrome = "", // chrome://
 	isEngine = "",
 	isFF = false,
+	isFFLegacy = false,
 	isFFno = [],
 	isFFyes = [],
 	isFile = false,
