@@ -30,7 +30,10 @@ function return_mm_dpi(type) {
 					return i}
 			} return i
 		})()
-	} catch(e) {r = zB0}
+	} catch(e) {
+		log_error("screen: matchmedia "+ type, e.name, e.message)
+		return zB0
+	}
 	return r
 }
 
@@ -57,7 +60,8 @@ function get_canonical() {
 		let btn = buildButton(color, sName, note)
 		dom.fdCanonical.innerHTML = hash + btn + (runS ? zSIM : "")
 	} catch(e) {
-		dom.fdCanonical = e.name
+		log_error("feature: canonical locales", e.name, e.message)
+		dom.fdCanonical = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 	}
 }
 
@@ -217,6 +221,10 @@ function get_errors() {
 			} else if (tmp == "94b69f86") {note = "FF70-71"
 			} else if (tmp == "117ef2fc") {note = "FF68-69"
 			} else if (tmp == "32d3793c") {note = "FF60-67"
+			} else if (tmp == "b962f3fb") {note = "FF59"
+			} else if (tmp == "422f0723") {note = "FF53-58"
+			} else if (tmp == "d91dcb3c") {note = "FF52" // TZP does not run in FF51 or lower
+			} else if (isFFLegacy) {note = "details"
 			} else if (note == "FF59 or lower") { // do nothing
 			} else {note = "NEW"; color = "bad"
 			}
@@ -578,7 +586,10 @@ function get_locales() {
 		dom.fdLocales.innerHTML = hash + btn + (runS ? zSIM : "")
 		log_perf("supported locales [fd]",t0)		
 	} catch(e) {
-		dom.fdLocales = e.name
+		log_error("feature: supported locales", e.name, e.message)
+		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		if (eMsg == "TypeError: Intl.PluralRules is undefined" && isFFLegacy) {eMsg = zNS} // 57 or lower
+		dom.fdLocales = eMsg
 	}
 }
 
@@ -1103,13 +1114,15 @@ function get_resources() {
 			} else if (wMark == "336 x 64" && is70) {
 				branding = "Browser"; channel = "Developer/Nightly"
 			//60-69, ESR60/68
-			} else if (wMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta"
+			} else if (wMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
 			} else if (wMark == "132 x 62" && !is70) {channel = "Developer Edition"
 			} else if (wMark == "270 x 48" && !is70) {channel = "Nightly"
 			// FORKS
 			} else if (wMark == "132 x 48" && mLogo == "128 x 128") {isFork = "Librewolf"
 			} else if (isFFLegacy) {
-				if (wMark == "128 x 22" && mLogo == "128 x 128") {isFork = "Waterfox Classic"}
+				if (wMark == "128 x 22" && mLogo == "128 x 128") {isFork = "Waterfox Classic"
+				} else if (wMark == "130 x 38" && mLogo == "128 x 128") { isFork = "Firefox" //FF52-56
+				}
 			}
 
 			let note = s3+ "["+ wMark +"]"+ sc
@@ -1793,12 +1806,12 @@ function get_widgets() {
 				}
 				if (fntTmp.length == 1) {
 					let font0 = fntTmp[0]
-					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"}
-						else if (font0 == "Roboto") {note = "android"}
-						else if (font0 == "-apple-system") {note = "mac"}
-						else if (font0 == "unknown") {note = "unknown"; color = "bad"}
-						else {note = "linux"
-					}
+					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
+					} else if (font0.slice(0,12) == "\"MS Shell Dl") {note = "windows" // FF57 has a slice and escape char issue
+					} else if (font0 == "Roboto") {note = "android"
+					} else if (font0 == "-apple-system") {note = "mac"
+					} else if (font0 == "unknown") {note = "unknown"; color = "bad"
+					} else {note = "linux"}
 				} else {
 					note = "NEW"; color = "bad"
 				}
