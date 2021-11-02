@@ -280,7 +280,11 @@ const get_isEngine = () => new Promise(resolve => {
 						// note: this would only apply to later v28 releases
 						try {
 							let test61 = newFn("(' a').trimStart()")
-							isEngine = "goanna"; isLegacy = true
+							isEngine = "goanna"
+							if (!isFFLegacy) {
+								gCheckOnce.push("_global:isEngine: palemoon isFFLegacy failed")
+								isLegacy = true
+							}
 						} catch(e) {}
 					}
 				}
@@ -325,9 +329,8 @@ const get_isError = () => new Promise(resolve => {
 		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
 		} else if (hash == "e64c00a7") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
 		}
-		console.debug(hash)
-		console.debug(res.join("\n"))
-		console.debug(isFFLegacy)
+		//console.debug(hash)
+		//console.debug(res.join("\n"))
 		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
@@ -366,7 +369,7 @@ const get_isFork = () => new Promise(resolve => {
 			}
 			runS = false
 			if (isFFLegacy) {
-				if (isMark == "130 x 38" && isLogo == "300 x 236") {isFork = "Firefox"} //FF52-56
+				if (isMark == "130 x 38" && isLogo == "300 x 236") {isFork = "Firefox"} // FF52-56
 				if (isMark == "128 x 22" && isLogo == "300 x 236") {isFork = "Waterfox Classic"}
 			} else {
 				if (isMark == "132 x 48" && isLogo == "128 x 128") {isFork = "Librewolf"}
