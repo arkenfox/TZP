@@ -1327,15 +1327,16 @@ function get_ua_doc() {
 		let res = [],
 			str = "",
 			go = false,
+			goUA = false, // treat userAgent separatelt
 			lies = 0,
 			pre = "",
 			spoof = false,
 			match = false
 		// FF78+ only
-		// ToDo: think about uaBS except UA string for non legacy isForks
 		if (isFF && isVer > 77) {
-			if (isFork === undefined) {go = true} // we should ignore dealing with any 78+ forks
-			if (isRFP) {go = true} // unless they are using RFP
+			go = true
+			if (isFork === undefined) {goUA = true} // we should ignore dealing with any 78+ forks
+			if (isRFP) {goUA = true} // unless they are using RFP
 		}
 		uaBS = false // reset
 
@@ -1377,13 +1378,16 @@ function get_ua_doc() {
 				if (property == "appVersion") {str = "5.0 (windows)"}
 				if (property == "platform") {str = "win32"}
 				if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
-				if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
 				// android desktop mode
 				//if (property == "appVersion") {str = "5.0 (Android 10)"}
 				//if (property == "platform") {str = "Linux aarch64"}
 				//if (property == "oscpu") {str = "Linux aarch64"}
+			}
+			if (goUA && runSUA) {
+				if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
 				//if (property == "userAgent") {str = "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"} // desktop
 			}
+
 			str = output(property, str)
 			if (good !== undefined) {
 				// BS
@@ -1582,7 +1586,7 @@ function get_ua_doc() {
 		}
 		// userAgent
 		str = get_property("userAgent")
-		if (go) {
+		if (goUA) {
 			spoof = check_basics(str, "userAgent")
 			if (!spoof) {
 				// DONE: RFP check, endstring, version
