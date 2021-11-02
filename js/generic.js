@@ -280,7 +280,7 @@ const get_isEngine = () => new Promise(resolve => {
 						// note: this would only apply to later v28 releases
 						try {
 							let test61 = newFn("(' a').trimStart()")
-							isEngine = "goanna"
+							isEngine = "goanna"; isLegacy = true
 						} catch(e) {}
 					}
 				}
@@ -313,7 +313,6 @@ const get_isEngine = () => new Promise(resolve => {
 const get_isError = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	try {
-abc=def
 		let res = [], bFF = false
 		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
 		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
@@ -326,8 +325,9 @@ abc=def
 		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
 		} else if (hash == "e64c00a7") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
 		}
-		//console.debug(hash)
-		//console.debug(res.join("\n"))
+		console.debug(hash)
+		console.debug(res.join("\n"))
+		console.debug(isFFLegacy)
 		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
