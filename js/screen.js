@@ -1925,7 +1925,7 @@ function get_zoom(runtype) {
 			if (jsZoom == 241) {jsZoom=240}
 			if (jsZoom == 250) {jsZoom=240}
 		}
-		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc :"")
+		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc : (jsZoom == 100 ? rfp_green : rfp_red))
 
 		if (runtype == "resize") {
 			if (logResize) {log_perf("zoom [resize]",t0,"ignore")}
