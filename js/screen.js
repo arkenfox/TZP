@@ -1150,7 +1150,10 @@ function get_resources() {
 			} else if (isFork !== undefined) {
 				result = isFork + note
 			} else if (isMark.substring(0,1) !== "0 ") {
-				result = (isTB ? "Tor Browser" : "Firefox") + note + zNEW + (runS ? zSIM : "")
+				let isNew = true
+				if (isOS == "android" && isMark == "0 x 0") {isNew = false}
+				result = (isTB ? "Tor Browser" : "Firefox") + note
+					+ (isNew ? zNEW + (runS ? zSIM : "") : "")
 			} else {
 				result = (isTB ? "Tor Browser" : "Firefox") + note // e.g. android
 			}
@@ -1903,7 +1906,9 @@ function get_zoom(runtype) {
 			if (jsZoom == 241) {jsZoom=240}
 			if (jsZoom == 250) {jsZoom=240}
 		}
-		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc : (jsZoom == 100 ? rfp_green : rfp_red))
+		let notation = ""
+		if (isOS !== "android") {notation = jsZoom == 100 ? rfp_green : rfp_red}
+		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc : notation)
 
 		if (runtype == "resize") {
 			if (logResize) {log_perf("zoom [resize]",t0,"ignore")}
