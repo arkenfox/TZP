@@ -1117,7 +1117,6 @@ function get_resources() {
 					channel = "Tor Browser"
 				}
 			}
-
 			// FF
 			if (!isTB) {
 				let is70 = (isVer > 69)
@@ -1811,9 +1810,15 @@ function get_zoom(runtype) {
 		dpr2 = ""
 		
 		// dPR
-		let dpr = window.devicePixelRatio || 1;
+		let dpr = ""
+		try {
+			dpr = window.devicePixelRatio || 1;
+		} catch(e) {
+			log_error("screen:dpr", e.name, e.message)
+			dpr = zB0
+		}
 		dpr1 = dpr
-		let dprStr = dpr + (dpr == 1 ? rfp_green : rfp_red)
+
 		// add dPR2: 477157
 		if (isFF) {
 			let el = dom.dpr2
@@ -1822,13 +1827,15 @@ function get_zoom(runtype) {
 				dpr2 = dpr2.slice(0, -2) // trim "px"
 				if (dpr2 > 0) {
 					dpr2 = (1/dpr2)
-					dprStr += " | "+ dpr2 + (dpr2 == 1 ? rfp_green : rfp_red)
 				}
 			} catch(e) {
+				log_error("screen:dpr poc", e.name, e.message)
+				dpr2 = zB0
 				// ToDo: we can't use dpr2 later on
 			}
 		}
-		dom.dpr.innerHTML = dprStr
+		let dprStr = dpr1 + " | " + dpr2
+		dom.dpr.innerHTML = dprStr + (dprStr == "1 | 1" ? rfp_green : rfp_red)
 
 		// ToDo: when zooming, getting divDPI is much slower
 		// divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
