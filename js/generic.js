@@ -298,12 +298,14 @@ const get_isEngine = () => new Promise(resolve => {
 		}
 		final_isFF()
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
+		log_perf("isFFLegacy [global]",t0,"",isFFLegacy)
 		return resolve()
 	} catch(e) {
 		isFFno.push("math")
 		final_isFF()
-		gCheckOnce.push("_global:isEngine: " + e.name +" : "+ e.message)
+		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
 		log_perf("isEngine [global]",t0,"","error")
+		log_perf("isFFLegacy [global]",t0,"","error")
 		return resolve()
 	}
 })
@@ -311,6 +313,7 @@ const get_isEngine = () => new Promise(resolve => {
 const get_isError = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	try {
+abc=def
 		let res = [], bFF = false
 		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
 		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
@@ -329,9 +332,53 @@ const get_isError = () => new Promise(resolve => {
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
 	} catch(e) {
-		gCheckOnce.push("_global:isError: " + e.name +" : "+ e.message)
+		gErrorsOnce.push("_global: isError: " + e.name +" : "+ e.message)
 		log_perf("errors [isFF]",t0,"","error")
 		isFFno.push("errors")
+		return resolve()
+	}
+})
+
+const get_isFork = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	setTimeout(() => resolve("timeout"), 500) // PM sucks
+
+	let t0; if (canPerf) {t0 = performance.now()}
+	let el = dom.branding
+	if (isEngine == "goanna") {isFork = "Pale Moon"} // isMark 0x0 isLogo 300x326
+
+	try {
+		// load about:logo then measure branding so they have time to load
+		//abc=def // throw an error
+		let imgA = new Image()
+		imgA.src = "about:logo"
+		imgA.style.visibility = "hidden"
+		document.body.appendChild(imgA)
+		imgA.addEventListener("load", function() {
+			isLogo = imgA.width +" x "+ imgA.height
+			try {isMark = el.width+ " x " + el.height} catch(e) {}
+			runS = true
+			if (runS) {
+				//isMark = "110 x 50" // new to both TB and FF
+				//isMark = "336 x 48" // new TB but not new FF
+				//isMark = "" // you need to set this one in get_resources as well
+				//isMark = "0 x 0" // same as changing html img src
+			}
+			runS = false
+			if (isFFLegacy) {
+				if (isMark == "130 x 38" && isLogo == "300 x 236") {isFork = "Firefox"} //FF52-56
+				if (isMark == "128 x 22" && isLogo == "300 x 236") {isFork = "Waterfox Classic"}
+			} else {
+				if (isMark == "132 x 48" && isLogo == "128 x 128") {isFork = "Librewolf"}
+				if (isMark == "341 x 32" && isLogo == "300 x 236") {isFork = "Waterfox Browser"}
+			}
+			document.body.removeChild(imgA)
+			log_perf("isFork [global]",t0,"",isFork+"")
+			return resolve()
+		})
+	} catch(e) {
+		gErrorsOnce.push("_global: isFork: " + e.name +" : "+ e.message)
+		log_perf("isFork [global]",t0,"","error")
 		return resolve()
 	}
 })
@@ -511,7 +558,7 @@ const get_isTB = () => new Promise(resolve => {
 		}
 		document.head.removeChild(css)
 	} catch(e) {
-		gCheckOnce.push("_global:isTB: " + e.name +" : "+ e.message)
+		gErrorsOnce.push("_global: isTB: " + e.name +" : "+ e.message)
 		log_perf("isTB [global]",t0,"","error")
 		return resolve()
 	}
@@ -1273,11 +1320,12 @@ function countJS(filename) {
 			let t0
 			if (canPerf) {t0= performance.now()}
 			Promise.all([
-				get_isEngine(),
+				get_isEngine(), // do first to quickly set isFFLegacy
 				get_isOS(),
 				get_isVer(),
 				get_isTB(),
 				get_isBrave(),
+				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
 				// sims are isFF only
 				if (!isFF) {
@@ -1290,6 +1338,10 @@ function countJS(filename) {
 				if (results[3] == "timeout") {
 					gMethodsOnce.push("_global:resource:blocked")
 					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
+				}
+				if (results[5] == "timeout") {
+					gMethodsOnce.push("_global:isFork:blocked")
+					log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
 				}
 				get_pointer_event() // pointer eventlistener
 				outputSection("load")
