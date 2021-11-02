@@ -359,7 +359,7 @@ function get_line_scrollbar(runtype) {
 			if (jsZoom !== 100) {
 				sbZoom = " at "+ (isOS == "android" ? jsZoom.toFixed(5)+ " devicePixelRatio ": jsZoom +"% ")
 			}
-			dom.fdScrollV.innerHTML = w +"px "+ sbZoom + os
+			dom.fdScrollV.innerHTML = w +"px "+ sbZoom + (isFork == "Waterfox Browser" ? "" : os)
 			// element scrollbar
 			let eW = (100-dom.fdScroll.scrollWidth)
 			if (eW > 0) {eScrollbar = "not zero"} else {eScrollbar = "zero"}
@@ -1081,147 +1081,110 @@ function get_resources() {
 		let branding = "",
 			channel = "",
 			result = "",
-			wFF = "",
-			hFF = "",
-			mLogo = "",
-			wMark = "",
 			extra = "",
-			nob = "[no branding detected]",
 			el = dom.branding
 
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
 		setTimeout(() => resolve("resources:blocked"), 100)
 		if (isResource !== "") {output(false); return}
+
 		// output
 		function output(setGlobalVars) {
 			// set global vars
 			if (setGlobalVars) {
 				isChannel = channel // not used but handy
 				isResource = result
-				isResourceMetric = "resources:"+ wMark +", "+ mLogo +", "+ extra
+				isResourceMetric = "resources:"+ isMark +", "+ isLogo +", "+ extra
 			}
 			dom.fdResource.innerHTML = isResource
 			log_perf("resources [fd]",t0)
 			return resolve(isResourceMetric)
 		}
-		// FF
-		function build_FF(wFF, hFF) {
-			let is70 = (isVer > 69)
-			//70+
-			if (wMark == "336 x 48" && is70) {
-				branding = "Browser"; channel = "Release/Beta"
-			} else if (wMark == "336 x 64" && is70) {
-				branding = "Browser"; channel = "Developer/Nightly"
-			//60-69, ESR60/68
-			} else if (wMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
-			} else if (wMark == "132 x 62" && !is70) {channel = "Developer Edition"
-			} else if (wMark == "270 x 48" && !is70) {channel = "Nightly"
-			// FORKS
-			} else if (wMark == "132 x 48" && mLogo == "128 x 128") {isFork = "Librewolf"
-			} else if (isFFLegacy) {
-				if (wMark == "128 x 22" && mLogo == "128 x 128") {isFork = "Waterfox Classic"
-				} else if (wMark == "130 x 38" && mLogo == "128 x 128") { isFork = "Firefox" //FF52-56
+
+		// CLEAN UP
+		function build() {
+			// TB
+			if (isTB) {
+				if (isMark == "270 x 48") {
+					channel = "Tor Browser - Alpha" // alpha: 8.5a7+ [60.5.0esr]
+					log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
+				} else if (isMark == "336 x 48" && isVer > 77) {
+					channel = "Tor Browser - Release" // 78+ therefore release
+				} else if (isMark == "300 x 38" && isVer > 67 && isVer < 78) {
+					channel = "Tor Browser - Release" // 68 therefore release
+				} else if (isMark == "300 x 38" && isVer > 59 && isVer < 68) {
+					channel = "Tor Browser"
 				}
 			}
 
-			let note = s3+ "["+ wMark +"]"+ sc
+			// FF
+			if (!isTB) {
+				let is70 = (isVer > 69)
+				//70+
+				if (isMark == "336 x 48" && is70) {
+					branding = "Browser"; channel = "Release/Beta"
+				} else if (isMark == "336 x 64" && is70) {
+					branding = "Browser"; channel = "Developer/Nightly"
+				//60-69, ESR60/68
+				} else if (isMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
+				} else if (isMark == "132 x 62" && !is70) {channel = "Developer Edition"
+				} else if (isMark == "270 x 48" && !is70) {channel = "Nightly"}
+				// FORKS (less strict)
+				if (isLogo == zB0 && isFork == undefined) {
+					if (isFFLegacy) {
+						if (isMark == "130 x 38") {isFork = "Firefox"} // FF52-56
+						if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
+					} else {
+						if (isMark == "132 x 48") {isFork = "Librewolf"}
+						if (isMark == "341 x 32") {isFork = "Waterfox Browser"}
+					}
+				}
+			}
+
+			if (isMark == "0 x 0") {dom.fdBrandingCss = "none"}
+			if (isMark == "") {isMark = zB0}
+			let note = s3+ "["+ isMark +" | "+ isLogo +"]"+ sc
+
 			if (channel !== "") {
 				result = (branding == "" ? "" : branding +" - ") + channel + note
-			} else if (isFork !== "") {
+			} else if (isFork !== undefined) {
 				result = isFork + note
-			} else if (hFF > 0) {
-				//new
-				result = "Firefox "+ note + zNEW + (runS ? zSIM : "")
+			} else if (isMark.substring(0,1) !== "0 ") {
+				result = (isTB ? "Tor Browser" : "Firefox") + note + zNEW + (runS ? zSIM : "")
 			} else {
-				//none: red=desktop orange=android
-				result = (isOS == "android" ? s3 : sb) + nob + sc
-				if (isFFLegacy) {result = zNA}
-				dom.fdBrandingCss = "none"
+				result = (isTB ? "Tor Browser" : "Firefox") + note // e.g. android
 			}
-		}
-		// TB
-		function build_TB(wFF, hFF) {
-			channel = "Tor Browser"
-			let note = s3 +"["+ wMark +"]"+ sc
-			if (wMark == "270 x 48") {
-				channel += " - Alpha" // alpha: 8.5a7+ [60.5.0esr]
-				result = channel + note
-				log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
-			} else if (wMark == "336 x 48") {
-				if (isVer > 77) {
-					channel += " - Release" // 78+ therefore release
-				}
-				result = channel + note
-			} else if (wMark == "300 x 38") {
-				if (isVer > 67 && isVer < 78) {
-					channel += " - Release" // 68+ therefore release
-				}
-				result = channel + note
-			} else if (hFF > 0) {
-				result = channel + note + zNEW + (runS ? zSIM : "") // new
-			} else {
-				result = (isOS == "android" ? s3 : sb) + nob + sc
-				dom.fdBrandingCss = "none"
-			}
+			output(true)
 		}
 		function run() {
-			// load about:logo
-			let imgA = new Image()
-			imgA.src = "about:logo"
-			imgA.style.visibility = "hidden"
-			document.body.appendChild(imgA)
-			imgA.addEventListener("load", function() {
-				mLogo = imgA.width +" x "+ imgA.height
-
-				let pngURL = "url('chrome://branding/content/icon64.png')"
-				if (mLogo = "128 x 128") { // Librewolf
-				} else if (imgA.width == 300) { // FF desktop = 300x236
-				} else {
-					// android = 258x99: -> favicon64 (which gives us tor's icon)
-					pngURL = "url('chrome://branding/content/favicon64.png')"
-				}
-				dom.fdResourceCss.style.backgroundImage= pngURL
-
-				if (imgA.width > 0) {
-					// brand: get after logo loaded by js: allows time for
-					// the two branding images (set by html) to be loaded
-					wFF = el.width
-					hFF = el.height
-					if (runS) {
-						wFF = 110, hFF = 50 // new to both TB and FF
-						//wFF = 336, hFF = 48 // new TB but not new FF
-						//to sim missing, change html img src
-					}
-					wMark = wFF +" x "+ hFF
-					el = dom.torbranding
-					let wTB = el.width, hTB = el.height
-
-					// FF
-					build_FF(wFF, hFF)
-					// TB: we made sure isTB was set earlier
-					let isTB2 = false
-					if (wTB > 0) {
-						isTB2 = true
-						log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
-						log_perf("[yes] tb watermark [fd]",t0)
-					} else {
-						log_perf("[no] tb watermark [fd]",t0)
-					}
-					extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
-					if (isTB) {
-						build_TB(wFF, hFF)
-						if (isOS !== "android" && wTB < 1) {
-							result += sb +"[missing tor-watermark.png]"+ sc
-						}
-					}
-					// NOW we output
-					output(true)
-				}
-			})
-			document.body.removeChild(imgA)
+			// set icon
+			let pngURL = "url('chrome://branding/content/icon64.png')"
+			if (isOS == "android") {pngURL = "url('chrome://branding/content/favicon64.png')"}
+			dom.fdResourceCss.style.backgroundImage= pngURL
+			// set extra
+			el = dom.torbranding
+			let wTB = el.width, hTB = el.height
+			let isTB2 = wTB > 0
+			if (isTB2) {
+				log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
+			}
+			extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
+			log_perf("[" + extra +"] tb watermark [fd]",t0)
+			// build
+			build()
 		}
-		run()
+
+		if (isLogo !== zB0 && isMark !== "") {
+			// fast path
+			run()
+		} else {
+			// trigger delay to ensure resources loaded, retry isMark
+			setTimeout(function() {
+				try {isMark = el.width+ " x " + el.height} catch(e) {}
+				run()
+			}, 1)
+		}
 	})
 }
 
@@ -1369,7 +1332,11 @@ function get_ua_doc() {
 			spoof = false,
 			match = false
 		// FF78+ only
-		if (isFF && isVer > 77) {go = true}
+		// ToDo: think about uaBS except UA string for non legacy isForks
+		if (isFF && isVer > 77) {
+			if (isFork === undefined) {go = true} // we should ignore dealing with any 78+ forks
+			if (isRFP) {go = true} // unless they are using RFP
+		}
 		uaBS = false // reset
 
 		// arrows
@@ -2334,10 +2301,10 @@ function outputUA() {
 			let n = sRep.lastIndexOf("/"),
 				vReported = sRep.slice(n+1, sRep.length)
 			let go = false
-			// NOTE: non-RFP version lies are already picked up as uaBS
 			// so this only applies to ESR numbering
 			if (isRFP && isVer > 59) {
-				go = true
+				if (isFork === undefined) {go = true}
+				if (isRFP) {go = true}
 				// skip open-ended versions if next version is ESR
 				// assuming isVer keeps up to date: e.g. 103+ can be 103 or 104
 				if (isVerPlus) {
@@ -2429,8 +2396,8 @@ function outputFD(runtype) {
 			}
 			dom.fdArchOS.innerHTML = display
 			section.push("os_architecture:"+ bits)
-			let browser = (isTB ? "Tor Browser" : (isFork !== "" ? isFork : "Firefox"))
-			if (isEngine == "goanna") {browser = "Pale Moon"} // ToDo: redundant if we detect PM in resources
+			let browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
+
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 		})
