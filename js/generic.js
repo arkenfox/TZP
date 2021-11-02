@@ -360,20 +360,21 @@ const get_isFork = () => new Promise(resolve => {
 		imgA.addEventListener("load", function() {
 			isLogo = imgA.width +" x "+ imgA.height
 			try {isMark = el.width+ " x " + el.height} catch(e) {}
-			runS = true
 			if (runS) {
 				//isMark = "110 x 50" // new to both TB and FF
 				//isMark = "336 x 48" // new TB but not new FF
 				//isMark = "" // you need to set this one in get_resources as well
 				//isMark = "0 x 0" // same as changing html img src
 			}
-			runS = false
+			// only use isLogo if we want to harden the check
+				// otherwise it's important to make sure we set isFork
+				// the entropy is still recorded
 			if (isFFLegacy) {
 				if (isMark == "130 x 38" && isLogo == "300 x 236") {isFork = "Firefox"} // FF52-56
-				if (isMark == "128 x 22" && isLogo == "300 x 236") {isFork = "Waterfox Classic"}
+				if (isMark == "128 x 22") {isFork = "Waterfox Classic"} // logo: 300x236
 			} else {
-				if (isMark == "132 x 48" && isLogo == "128 x 128") {isFork = "Librewolf"}
-				if (isMark == "341 x 32" && isLogo == "300 x 236") {isFork = "Waterfox Browser"}
+				if (isMark == "132 x 48") {isFork = "Librewolf"} // logo:128x128
+				if (isMark == "341 x 32") {isFork = "Waterfox Browser"} // logo: G3: 300x236
 			}
 			document.body.removeChild(imgA)
 			log_perf("isFork [global]",t0,"",isFork+"")
