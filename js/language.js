@@ -192,7 +192,7 @@ function get_geo() {
 					r = default_ff_green +" [FF72+]"
 				} else if (r == "e6726024" && isVer < 72) {
 					// FF71-: enabled, false, prompt
-					r = default_ff_green +" [FF60-71]"
+					r = default_ff_green +" [FF52-71]"
 				} else {
 					r = default_ff_red
 				}
@@ -253,8 +253,8 @@ function get_lang_doc() {
 					return sha1(chars.join())
 				// timezone
 				} else if (item == 12) {
-					let k = 60000
-					let yr = 2021
+					let k = 60000, yr = 2021, eMsg = ""
+					item = (item+"").padStart(2,"0")
 					try {yr = Date().split` `[3]} catch(e) {
 						try {yr = new Date().getFullYear()} catch(e) {}
 					}
@@ -273,19 +273,23 @@ function get_lang_doc() {
 						part1 = r1.getTimezoneOffset() +", "+ r2.getTimezoneOffset()
 						+", "+ r3.getTimezoneOffset() +", "+ r4.getTimezoneOffset()
 					} catch(error) {
-						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
+						item = (item+"").padStart(2,"0")
+						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language item: "+ item +" getTimezoneOffset", eMsg)
 					}
 					try {
 						part2 = ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
 						+", "+ ((r3.getTime() - c3.getTime())/k) +", "+ ((r4.getTime() - c4.getTime())/k)
 					} catch(error) {
-						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
+						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language item: "+ item +" getTime", eMsg)
 					}
 					try {
 						part3 = ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
 						+", "+ ((Date.parse(r3) - Date.parse(c3))/k) +", "+ ((Date.parse(r4) - Date.parse(c4))/k)
 					} catch(error) {
-						err.push(i +" [unexpected]: "+ error.name +" : "+ error.message)
+						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language item: "+ item +" Date.parse", eMsg)
 					}
 					return part1 +" | "+ part2 +" | "+ part3
 				} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -359,7 +363,9 @@ function get_lang_doc() {
 				} else if (item == 30) {return d.toLocaleTimeString()
 				} else if (item == 31) {return d.toTimeString()
 				} else if (item == 32) {
-					return Intl.DateTimeFormat(undefined, {hour: "numeric"}).resolvedOptions().hourCycle
+					let test = Intl.DateTimeFormat(undefined, {hour: "numeric"}).resolvedOptions().hourCycle
+					if (isFFLegacy && test === undefined) {test = zNA}
+					return test
 				} else if (item == 33) {
 					// 65+: Intl.RelativeTimeFormat
 					let rtf = new Intl.RelativeTimeFormat(undefined, {style: "long", numeric: "auto"})
@@ -386,18 +392,17 @@ function get_lang_doc() {
 						+", "+ concat_parts("1", "quarter")
 				} else if (item == 35) {
 					// Intl.NumberFormat
-					function err_check(name, error) {
+					function err_check(name, msg) {
 						if (isFF) {
-							if (error == "invalid value unit for option style" && isVer < 71) {
-								// 70-
-								err.push(item +" [expected]: "+ name +" : "+ error)
-								return " | unit "+ zNS
-							} else if (error == "invalid value \"unit\" for option style" && isVer > 70 && isVer < 78) {
-								// 71-77
-								err.push(item +" [expected]: "+ name +" : "+ error)
-								return " | \"unit\" "+ zNS
+							item = (item+"").padStart(2,"0")
+							let eMsg = (name === undefined ? zErr : name +": "+ msg)
+							log_error("language item: "+ item, eMsg)
+							let display = ""
+							if (eMsg == "RangeError: invalid value unit for option style" && isVer < 71) {
+								return " | unit "+ zNS // 70-
+							} else if (eMsg == "RangeError: invalid value \"unit\" for option style" && isVer > 70 && isVer < 78) {
+								return " | \"unit\" "+ zNS // 71-77
 							} else {
-								err.push(item +" [unexpected]: "+ name +" : "+ error)
 								return " | "+ zB0
 							}
 						} else {
@@ -433,7 +438,6 @@ function get_lang_doc() {
 					return tmp
 				} else if (item == 36) {
 					// [formatToParts] Intl.NumberFormat
-						// ToDo: trap script blocking
 					function get_value(type, data, extra) {
 						try {
 							let str = type + " <code>none</code>"
@@ -453,12 +457,23 @@ function get_lang_doc() {
 							return type +" error"
 						}
 					}
-					let tmp = get_value("decimal", new Intl.NumberFormat(undefined).formatToParts(1000.2), true)
-						+" | "+ get_value("group", new Intl.NumberFormat(undefined).formatToParts(1000), true)
-						+" | "+ get_value("infinity", new Intl.NumberFormat(undefined).formatToParts(Infinity), true)
-						+" | "+ get_value("minusSign", new Intl.NumberFormat(undefined).formatToParts(-5), true)
-						+" | "+ get_value("nan", new Intl.NumberFormat(undefined).formatToParts(4/5 +"%"), false)
-					return tmp
+					try {
+						let tmp = get_value("decimal", new Intl.NumberFormat(undefined).formatToParts(1000.2), true)
+							+" | "+ get_value("group", new Intl.NumberFormat(undefined).formatToParts(1000), true)
+							+" | "+ get_value("infinity", new Intl.NumberFormat(undefined).formatToParts(Infinity), true)
+							+" | "+ get_value("minusSign", new Intl.NumberFormat(undefined).formatToParts(-5), true)
+							+" | "+ get_value("nan", new Intl.NumberFormat(undefined).formatToParts(4/5 +"%"), false)
+						return tmp
+					} catch (e) {
+						item = (item+"").padStart(2,"0")
+						let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language item: "+ item, eMsg)
+						if (isFFLegacy && eMsg == "TypeError: (new Intl.NumberFormat(...)).formatToParts is not a function") {
+							return zNS
+						} else {
+							return zB0
+						}
+					}
 				} else if (item == 37) {
 					// 70+: [BigInt] Intl.NumberFormat
 					let bint = BigInt(9007199254740991)
@@ -508,11 +523,7 @@ function get_lang_doc() {
 						dayA = get_day_period(new Date("2019-01-30T08:00:00")),
 						dayB = get_day_period(new Date("2019-01-30T12:00:00"))
 					if (dayA == dayB) {
-						tmp = zNS
-						if (isFF && isVer > 89) {
-							tmp = zB0
-							err.push(item +" [unexpected]: dayPeriod")
-						}
+						tmp = isVer > 89 ? zB0 : zNS
 					} else {
 						// in the morning, noon, in the afternoon, in the evening, at night
 						tmp = dayA +" | "+ dayB
@@ -552,23 +563,28 @@ function get_lang_doc() {
 				} else if (item == 48 || item == 49) {
 					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
 					let prtype = item == 48 ? "cardinal" : "ordinal"
-					let prev = "", current = "", prError = ""
+					let prev = "", current = "", eMsg = ""
 					for (let i=0; i < nos.length; i++) {
 						try {
 							current = new Intl.PluralRules(undefined, {type: prtype}).select(nos[i])
 						} catch(e) {
-							prError = e.name +" : "+ e.message
+							eMsg = (e.name === undefined ? zErr : e.name +" : "+ e.message)
 							current = "error"
 						}
 						// record changes only
 						if (prev !== current) {prules.push(nos[i] +": "+ current)}
 						prev = current
 					}
-					if (prError == "") {
+					if (eMsg == "") {
 						return prules.join(", ")
 					} else {
-						err.push(item +" [unexpected]: "+ prError)
-						return zB0
+						item = (item+"").padStart(2,"0")
+						log_error("language item: "+ item, eMsg)
+						if (isFFLegacy && eMsg == "TypeError: Intl.PluralRules is not a constructor") {
+							return zNS
+						} else {
+							return zB0
+						}
 					}
 				}
 			} catch(e) {
@@ -594,16 +610,22 @@ function get_lang_doc() {
 					} else if (item == 47 && isVer < 91) {
 						// 1653024: formatRange: shipped 91+
 						if (e.message == "f.formatRange is not a function") {msg = zNS}
+					} else if (isVer < 60) {
+						// legacy
+						if (item == 8) {
+							if (e.message == "Intl.PluralRules is not a constructor") {msg = zNS}
+						}
 					}
+					item = (item+"").padStart(2,"0")
+					log_error("language item: "+ item, e.name, e.message)
+
 					// script blocking
 					if (msg == "") {
 						if (amWorker) {
 							console.log("language worker error: "+ item +": "+ e.name +": "+ e.message)
 						}
-						err.push(item +" [unexpected]: "+ e.name +" : "+ e.message)
+						err.push(item +": "+ e.name +" : "+ e.message)
 						msg = zB0
-					} else {
-						err.push(item +" [expected]: "+ e.name +" : "+ e.message)
 					}
 					return msg
 				} else {
@@ -624,7 +646,6 @@ function get_lang_doc() {
 			} else if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0; err.push(i +" [unexpected]: zero-length strings")
 			}
 			res.push(result)
-
 			// output line items after combos
 			if (i > 10) {
 				if (i == 14) {
@@ -635,7 +656,7 @@ function get_lang_doc() {
 			}
 		}
 		// debugging: error tracking
-		//if (err.length) {console.log("language/datetime errors\n"+ err.join("\n"))}
+		if (err.length) {console.log("unexpected language/datetime errors\n"+ err.join("\n"))}
 
 		// split into three
 		let aLang = res.slice(0,12)
@@ -654,7 +675,7 @@ function get_lang_doc() {
 		hashAll.push("datetime:"+ hashDate)
 
 		// notation
-		if (isFF) {
+		if (isVer > 59) { // ignore isFFLegacy
 			// language
 			if (hashLang == "310fb1221a91e1995165262052d345f9fa5156dc") {hashLang += enUS_green +" [FF86+]"
 			} else if (hashLang == "ceaae0bd27f34c34a10149160e9b5a64dbde2cb2") {hashLang += enUS_green +" [FF78-85]"
@@ -666,38 +687,32 @@ function get_lang_doc() {
 			hashTime += (bTZ ? rfp_green : rfp_red)
 			// datetime
 			let ff = ""
-			if (isVer > 59) {
+			if (bTZ) {
+				// state1: both green
 				// FF85+: also use javascript.use_us_english_locale
-				if (bTZ) {
-					// state1: both green
-					if (hashDate == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
-					} else if (hashDate == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
-					} else if (hashDate == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
-					} else if (hashDate == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
-					} else if (hashDate == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
-					} else if (hashDate == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
-					} else if (hashDate == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
-					} else if (hashDate == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
-					} else if (hashDate == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
-					} else if (hashDate == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
-					}
+				if (hashDate == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
+				} else if (hashDate == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
+				} else if (hashDate == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
+				} else if (hashDate == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
+				} else if (hashDate == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
+				} else if (hashDate == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
+				} else if (hashDate == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
+				} else if (hashDate == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
+				} else if (hashDate == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
+				} else if (hashDate == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
 				}
-				if (ff == "") {
-					if (bTZ == true) {
-						// state2: lang red, time green
-						hashDate += enUS_red + rfp_green
-					} else {
-						// state3: lang green, time red
-						// hashDate += enUS_green + rfp_red
-
-						// state4: both red: just default to "and/or"
-						hashDate += spoof_both_red
-					}
-				} else {
-					hashDate += spoof_both_green
-				}
-				hashDate += ff
 			}
+			if (ff == "") {
+				if (bTZ == true) {
+					hashDate += enUS_red + rfp_green // state2: lang red, time green
+				} else {
+						// hashDate += enUS_green + rfp_red // state3: lang green, time red
+						hashDate += spoof_both_red // state4: both red: just default to "and/or"
+					}
+			} else {
+				hashDate += spoof_both_green
+			}
+			hashDate += ff
 		}
 		// display
 		dom.lHash0.innerHTML = hashLang
