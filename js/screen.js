@@ -1129,15 +1129,9 @@ function get_resources() {
 				} else if (isMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
 				} else if (isMark == "132 x 62" && !is70) {channel = "Developer Edition"
 				} else if (isMark == "270 x 48" && !is70) {channel = "Nightly"}
-				// FORKS (less strict)
+				// try setting isFork again
 				if (isLogo == zB0 && isFork == undefined) {
-					if (isFFLegacy) {
-						if (isMark == "130 x 38") {isFork = "Firefox"} // FF52-56
-						if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
-					} else {
-						if (isMark == "132 x 48") {isFork = "Librewolf"}
-						if (isMark == "341 x 32") {isFork = "Waterfox Browser"}
-					}
+					set_isFork()
 				}
 			}
 
