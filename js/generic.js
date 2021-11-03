@@ -1047,7 +1047,7 @@ function showMetrics(type) {
 		} else {
 			// section
 			array = sData[type]
-			type = type
+			type = type.toUpperCase()
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
 	}
