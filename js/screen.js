@@ -1158,13 +1158,10 @@ function get_resources() {
 			let pngURL = "url('chrome://branding/content/icon64.png')"
 			if (isOS == "android") {pngURL = "url('chrome://branding/content/favicon64.png')"}
 			dom.fdResourceCss.style.backgroundImage= pngURL
-			// set extra
+			// set extra: see notes in tzp.html for elementid "torbranding": hidden vs offscreen
 			el = dom.torbranding
-			let wTB = el.width, hTB = el.height
-			let isTB2 = wTB > 0
-			if (isTB2) {
-				log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
-			}
+			let isTB2 = el.width > 0
+			if (isTB2) {log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")}
 			extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
 			log_perf("[" + extra +"] tb watermark [fd]",t0)
 			// build
