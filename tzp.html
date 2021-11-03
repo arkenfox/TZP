@@ -64,6 +64,8 @@
 		<div id="ctrl89" style="width:1em">a b</div>
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
 		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+		<img id="branding" src="chrome://branding/content/about-wordmark.svg"></img>
+		<img id="torbranding" src="resource://onboarding/img/tor-watermark.png"></img>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
@@ -71,8 +73,6 @@
 		<object id="test68"></object>
 		<div id="test73"></div>
 		<span id="sColorElement"></span>
-		<img id="branding" src="chrome://branding/content/about-wordmark.svg"></img>
-		<img id="torbranding" src="resource://onboarding/img/tor-watermark.png"></img>
 		<div id="dpr2" style="border: 0.1px solid;">Foo</div>
 		<div>
 			<input type="reset" value="" id="widget0">
@@ -393,28 +393,14 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span></td></tr>
-		<!--navigator-->
-		<!--<tr><td>hash</td><td class="c mono" id="hHash0"></td></tr>-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">beacon.enabled</span></div>
 			&nbsp beacon</td><td class="c" id="nBeacon"></td></tr>
 		<tr><td>doNotTrack</td><td class="c" id="nDNT"></td></tr>
 		<tr><td>globalPrivacyControl</td><td class="c" id="nGPC"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.netinfo.enabled</span></div>
-			&nbsp [api] network information</td><td class="c" id="nNetwork"></td></tr>
-		<tr><td>connection</td><td class="c" id="nConnection"></td></tr>
+			<span class="ttxt">dom.netinfo.enabled</span></div> connection</td><td class="c mono" id="nConnection"></td></tr>
 		<tr><td>onLine</td><td class="c" id="nOnLine"></td></tr>
-		<!--headers-->
-		<!--<tr><td colspan="2" class="center">--- http headers ---</td></tr>
-		<tr><td>hash</td><td class="faint mono" id="hHash1"></td></tr>
-		<tr><td>http_accept</td><td class="faint"></td></tr>
-		<tr><td>http_accept_encoding</td><td class="faint"></td></tr>
-		<tr><td>http_accept_language</td><td class="faint"></td></tr>
-		<tr><td>http_dnt</td><td class="faint"></td></tr>
-		<tr><td>http_upgrade_insecure_requests</td><td class="faint"></td></tr>
-		<tr><td>http_user_agent</td><td class="faint"></td></tr>
-		<tr><td>server_protocol</td><td class="faint"></td></tr>-->
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 	</table>
 
