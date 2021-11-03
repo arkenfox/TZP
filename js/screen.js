@@ -1083,7 +1083,6 @@ function get_resources() {
 			result = "",
 			extra = "",
 			el = dom.branding
-
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
 		setTimeout(() => resolve("resources:blocked"), 100)
@@ -1101,8 +1100,7 @@ function get_resources() {
 			log_perf("resources [fd]",t0)
 			return resolve(isResourceMetric)
 		}
-
-		// CLEAN UP
+		// set
 		function build() {
 			// TB
 			if (isTB) {
@@ -1134,11 +1132,10 @@ function get_resources() {
 					set_isFork()
 				}
 			}
-
+			// tidy
 			if (isMark == "0 x 0") {dom.fdBrandingCss = "none"}
 			if (isMark == "") {isMark = zB0}
-			let note = s3+ "["+ isMark +" | "+ isLogo +"]"+ sc
-
+			let note = s3+ "["+ isMark +" | "+ isLogo + (isTB ? " | "+ extra : "") +"]"+ sc
 			if (channel !== "") {
 				result = (branding == "" ? "" : branding +" - ") + channel + note
 			} else if (isFork !== undefined) {
@@ -1159,10 +1156,18 @@ function get_resources() {
 			if (isOS == "android") {pngURL = "url('chrome://branding/content/favicon64.png')"}
 			dom.fdResourceCss.style.backgroundImage= pngURL
 			// set extra: see notes in tzp.html for elementid "torbranding": hidden vs offscreen
-			el = dom.torbranding
-			let isTB2 = el.width > 0
-			if (isTB2) {log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")}
-			extra = (isTB ? "y" : "n") + (isTB2 ? "y" : "n")
+			let elTB = dom.torbranding
+			let wTB = elTB.width, hTB = elTB.height
+			let isTB2 = wTB > 0
+			if (isTB2) {
+				log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
+			}
+			// isMark TB: use hidden element
+			if (isTB || isTB2) {
+				elTB = dom.torbranding2
+				isMark = elTB.width + " x " + elTB.height
+			}
+			extra = (isTB ? wTB +" x "+ hTB + " | " : "N | ") + (isTB2 ? "Y" : "N")
 			log_perf("[" + extra +"] tb watermark [fd]",t0)
 			// build
 			build()
