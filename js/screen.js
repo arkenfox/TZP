@@ -1162,13 +1162,13 @@ function get_resources() {
 			if (isTB2) {
 				log_debug("debugTB","resource:// = ".padStart(19) + "tor-watermark.png")
 			}
-			// isMark TB: use hidden element
-			if (isTB || isTB2) {
+			extra = (isTB ? wTB +" x "+ hTB + " | " : "N | ") + (isTB2 ? "Y" : "N")
+			log_perf("[" + extra +"] tb watermark [fd]",t0)
+			// remeasure isMark with hidden element to get 0x0 if missing
+			if (isTB || isTB2 || isOS == "android") {
 				elTB = dom.torbranding2
 				isMark = elTB.width + " x " + elTB.height
 			}
-			extra = (isTB ? wTB +" x "+ hTB + " | " : "N | ") + (isTB2 ? "Y" : "N")
-			log_perf("[" + extra +"] tb watermark [fd]",t0)
 			// build
 			build()
 		}
@@ -1177,9 +1177,12 @@ function get_resources() {
 			// fast path
 			run()
 		} else {
-			// trigger delay to ensure resources loaded, retry isMark
+			// trigger delay to ensure resources loaded, retry original isMark
 			setTimeout(function() {
-				try {isMark = el.width+ " x " + el.height} catch(e) {}
+				try {
+					isMark = el.width+ " x " + el.height
+					set_isFork()
+				} catch(e) {}
 				run()
 			}, 1)
 		}
