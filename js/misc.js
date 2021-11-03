@@ -294,6 +294,7 @@ function get_perf1() {
 
 function get_perf2() {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let i = 0, times = [], p0
 		function run() {
 			if (i < 11) {
@@ -313,6 +314,7 @@ function get_perf2() {
 					if (i > 0 && !isRFP) {
 						let diff = times[i] - times[i-1]
 						if (diff < 5 || diff > 30) {countTamper++}
+						if (isFile) {console.debug(i+1, diff, countTamper)}
 					}
 					if (i == 0 && value > 75) {isYank = true}
 				}
@@ -329,6 +331,7 @@ function get_perf2() {
 				} else {
 					dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
 				}
+				log_perf("perf.now [not in FP]",t0)
 			}
 		}
 		let check = setInterval(run, 13)
@@ -453,8 +456,8 @@ function outputMisc() {
 		})
 		log_section("misc", t0, section)
 	})
-	// perf2 is RFP unique
-	get_perf2()
+	// perf2 not needed: we have isRFP
+	setTimeout(function() {get_perf2()}, 10) // delay to end of queue
 }
 
 countJS("misc")
