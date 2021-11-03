@@ -799,7 +799,7 @@ function get_woff() {
 		// output
 		function output_woff(state) {
 			dom.fontWoff2.innerHTML = state
-			log_perf("woff [fonts]",t0)
+			log_perf("woff [not in FP]",t0)
 			return resolve("woff:"+ state)
 		}
 		// check
@@ -891,7 +891,7 @@ function outputFonts() {
 		})
 		log_section("fonts", t0, section)
 		// ToDo: woff perf esp if fonts blocked
-		get_woff()
+		setTimeout(function() {get_woff()}, 10) // delay to end of queue
 	})
 }
 
