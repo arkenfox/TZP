@@ -342,14 +342,26 @@ const get_isError = () => new Promise(resolve => {
 	}
 })
 
+function set_isFork() {
+	// only use isLogo if we want to harden the check: not needed yet
+	// it's important to make sure we set isFork, the entropy is still recorded
+	// unless specified isLogo is 300 x 236
+	if (isFFLegacy) {
+		if (isMark == "130 x 38") {isFork = "Firefox"} // FF52-56
+		if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
+	} else {
+		if (isMark == "132 x 48") {isFork = "Librewolf"} // 128x128
+		if (isMark == "341 x 32") {isFork = "Waterfox Browser"}
+		if (isMark == "637 x 186") {isFork = "Comodo IceDragon"}
+	}
+}
+
 const get_isFork = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
 	setTimeout(() => resolve("timeout"), 500) // PM sucks
-
 	let t0; if (canPerf) {t0 = performance.now()}
 	let el = dom.branding
 	if (isEngine == "goanna") {isFork = "Pale Moon"} // isMark 0x0 isLogo 300x326
-
 	try {
 		// load about:logo then measure branding so they have time to load
 		//abc=def // throw an error
@@ -366,15 +378,10 @@ const get_isFork = () => new Promise(resolve => {
 				//isMark = "" // you need to set this one in get_resources as well
 				//isMark = "0 x 0" // same as changing html img src
 			}
-			// only use isLogo if we want to harden the check
-				// otherwise it's important to make sure we set isFork
-				// the entropy is still recorded
-			if (isFFLegacy) {
-				if (isMark == "130 x 38" && isLogo == "300 x 236") {isFork = "Firefox"} // FF52-56
-				if (isMark == "128 x 22") {isFork = "Waterfox Classic"} // logo: 300x236
-			} else {
-				if (isMark == "132 x 48") {isFork = "Librewolf"} // logo:128x128
-				if (isMark == "341 x 32") {isFork = "Waterfox Browser"} // logo: G3: 300x236
+			set_isFork(isMark)
+			// special case for goanna (PM is 300x326
+			if (isEngine == "goanna") {
+				if (isMark == "0 x 0" && isLogo == "300 x 240") {isFork = "Basilisk"}
 			}
 			document.body.removeChild(imgA)
 			log_perf("isFork [global]",t0,"",isFork+"")
@@ -1040,6 +1047,7 @@ function showMetrics(type) {
 		} else {
 			// section
 			array = sData[type]
+			type = type
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
 	}
