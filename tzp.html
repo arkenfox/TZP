@@ -29,7 +29,6 @@
 		<progress class="testRect" id="rect4"></progress>
 		<button class="testRect" id="rect5"></button>
 	</div>
-
 	<!--offscreen-->
 	<div class="offscreen">
 		<div id="measureDiv" class="measure">
@@ -64,8 +63,8 @@
 		<div id="ctrl89" style="width:1em">a b</div>
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
 		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
-		<img id="branding" src="chrome://branding/content/about-wordmark.svg"></img>
-		<img id="torbranding" src="resource://onboarding/img/tor-watermark.png"></img>
+		<!-- don't hide generic branding as some forks can't detect it if "hidden" -->
+		<div><img id="branding" src="chrome://branding/content/about-wordmark.svg"></img></div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
@@ -87,6 +86,9 @@
 		<div><canvas id="kcanvas1" width="16" height="16"></canvas>
 			<canvas id="kcanvas2" width="16" height="16"></canvas>
 		</div>
+		<!-- if "hidden" only TB returns the size and FF returns 0x0
+			if "offscreen" FF returns dimensions of a broken image -->
+		<img id="torbranding" src="resource://onboarding/img/tor-watermark.png"></img>
 	</div>
 
 	<table>
