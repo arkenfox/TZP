@@ -6,17 +6,22 @@ function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let res0 = [], res1 = [], res2 = []
 
-	let known1 = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // toDataURL,toBlob [gecko]
+	// ToDo: only add FF96 known good if isVer > 95 or calculate all known compression outputs
+	let known1 = [
+		"8c70ed9a7dbe6d72e3d1a4e448522012661cfbed",	// gecko: toDataURL, toBlob
+		"5d1c72c1fe6b3358a33d03ad93e79ceb80fbb4ec", // FF96+
+	],
 		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
-		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50" // isPointInStroke
+		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"  // isPointInStroke
 	if (isEngine == "blink") {
-		known1 = "bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf"
+		known1 = ["bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf",
+			"05f24fe5cfa497c8bebf1749188ab5fbd2b7c188", // android
+			"c05807c783bd281ee83d13807426023390c7d66a", // android
+		]
 	} else if (isEngine == "webkit") {
-		known1 = "24c8af813fb7001ded7e81e125e9d3237e9400d5"
+		known1 = ["24c8af813fb7001ded7e81e125e9d3237e9400d5"]
 	}
-	let known1b = "05f24fe5cfa497c8bebf1749188ab5fbd2b7c188" // blink android alt
-	let known1c = "c05807c783bd281ee83d13807426023390c7d66a" // blink another alt
 
 	// analyze
 	function analyze() {
@@ -357,13 +362,7 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						let data = sha1(getKnown().canvas.toDataURL())
 						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
-						let isFake = false
-						if (isEngine == "blink") {
-							if (data !== known1 && data !== known1b && data !== known1c) {isFake = true}
-						} else {
-							if (data !== known1) {isFake = true}
-						}
-						return (isFake ? false : true)
+						return (known1.includes(data))
 					}
 				},
 				{
@@ -381,13 +380,7 @@ function outputCanvas() {
 								reader.onload = function(){
 									let data = sha1(reader.result)
 									log_perf("toBlob [k] [canvas]",t1,gt0,data)
-									let isFake = false
-									if (isEngine == "blink") {
-										if (data !== known1 && data !== known1b && data !== known1c) {isFake = true}
-									} else {
-										if (data !== known1) {isFake = true}
-									}
-									resolve(isFake ? false : true)
+									resolve(known1.includes(data))
 								}
 								reader.onerror = function(){
 									reject(false)
