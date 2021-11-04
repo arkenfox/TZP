@@ -9,9 +9,9 @@ function outputCanvas() {
 	// ToDo: only add FF96 known good if isVer > 95 or calculate all known compression outputs
 	let known1 = [
 		"8c70ed9a7dbe6d72e3d1a4e448522012661cfbed",	// gecko: toDataURL, toBlob
-		"5d1c72c1fe6b3358a33d03ad93e79ceb80fbb4ec", // FF96+
+		"5d1c72c1fe6b3358a33d03ad93e79ceb80fbb4ec", // 1737038 FF96+
 	],
-		known2 = "67a2c3bc2f7ccf8c92d57b94586784f19d98a2f0", // getImageData
+		known2 = "22e19372dd33d5f2a6d6f680898dff9d29a539e2", // getImageData
 		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
 		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"  // isPointInStroke
 	if (isEngine == "blink") {
@@ -400,14 +400,8 @@ function outputCanvas() {
 					value: function(){
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getKnown()
-						let imageData = []
-						for (let x=0; x < 16; x++) {
-							for (let y=0; y < 16; y++) {
-								let pixel = context.getImageData(x,y,1,1)
-								imageData.push(pixel.data)
-							}
-						}
-						let data = sha1(imageData.join())
+						let imageData = context.getImageData(0,0,16,16)
+						let data = sha1(imageData)
 						log_perf("getImageData [k] [canvas]",t1,gt0,data)
 						return (data == known2 ? true : false)
 					}
