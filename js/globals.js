@@ -5,6 +5,7 @@ var dom;
 // global snapshot
 let jsFiles = [],
 	gCount = 0,
+	gCountExpected = 15,
 	// alerts
 	gCheck = [],
 	gCheckOnce = [],
