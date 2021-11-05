@@ -1420,6 +1420,8 @@ function outputSection(id, cls) {
 			// combine 1,2,3
 			if (id=="all") {outputStart()}
 			// stagger
+			// must do devices first or it really tanks with RFP
+			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
@@ -1432,7 +1434,6 @@ function outputSection(id, cls) {
 			setTimeout(function() {if (id=="all") {outputAudio()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="15") {outputElements()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
 		}
 
 		if (gRun) {
