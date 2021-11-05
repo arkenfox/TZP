@@ -1148,6 +1148,9 @@ function log_section(name, time1, data) {
 	let t0; if (canPerf) {t0 = performance.now(); time1 = Math.round(t0-time1).toString()}
 
 	// PERF
+	if (gRun && gCount == (gCountExpected - 1)) {
+		if (canPerf) {dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"}
+	}
 	let el = dom.perfG, pretty = ""
 	if (!isPerf) {time1 = "xx"}
 	if (canPerf) {pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"}
@@ -1216,7 +1219,7 @@ function log_section(name, time1, data) {
 			gCount++
 			gData.push([name +":"+ hash, data])
 			// FINISH
-			if (gCount == 15) {
+			if (gCount == gCountExpected) {
 				gLoad = false
 				// metric count
 				let metricCount = 0
@@ -1305,12 +1308,10 @@ function log_section(name, time1, data) {
 				dom.allhash.innerHTML = sha1(gData.join())
 					+ buildButton("0", "fingerprint", metricCount +" metric"+ (metricCount > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
-				if (canPerf) {dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"}
 				gClick = true
 			}
 		}
 	} else {}	// !ARRAY
-
 }
 
 /*** RUN ***/
