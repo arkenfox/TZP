@@ -491,7 +491,6 @@ function outputCanvas() {
 		}
 	}
 
-	sDetail["canvas_2d_keys"] = []
 	Promise.all([
 		canvas.createHashes(window, 1),
 		canvas.createHashes(window, 2),
