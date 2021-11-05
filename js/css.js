@@ -40,16 +40,16 @@ function get_colors() {
 				// moz stand-ins
 				note = rfp_red
 				if (isVer > 92) {
-					if (hash == "79db5606a0cb8129e8840ff02e93eedfef71dce4" && isVer > 94) {note = rfp_green + " [FF95+]" // 1734115
-					} else if (hash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf" && isVer < 95) {note = rfp_green + " [FF93-94]"} // 1693222
+					if (hash == "79db5606a0cb8129e8840ff02e93eedfef71dce4" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
+					} else if (hash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf" && isVer < 95) {note = rfp_green + " [FF93]"} // 1693222
 				} else {
 					if (hash == "12dfc3bdff6304b4bcf56a66ee087989dda20600") {note = rfp_green + " [FF67-92]"}
 				}
 			} else if (i == 3) {
 				// system
 				note = rfp_red
-				if (hash == "35de8783ff93479148425072691fc0a6bedc7aba" && isVer > 94) {note = rfp_green + " [FF95+]" // 1734115
-				} else if (hash == "5bcd87c4c7753f09a14546911686a62e8625faf8" && isVer < 95) {note = rfp_green + " [FF67-94]"}
+				if (hash == "35de8783ff93479148425072691fc0a6bedc7aba" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
+				} else if (hash == "5bcd87c4c7753f09a14546911686a62e8625faf8" && isVer < 95) {note = rfp_green + " [FF67-93]"}
 			}
 			document.getElementById("cssColor"+ i).innerHTML = hash + btn + note
 		}
