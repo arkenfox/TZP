@@ -1147,6 +1147,26 @@ function log_perf(str, time1, time2, extra) {
 function log_section(name, time1, data) {
 	let t0; if (canPerf) {t0 = performance.now(); time1 = Math.round(t0-time1).toString()}
 
+	// PERF
+	let el = dom.perfG, pretty = ""
+	if (!isPerf) {time1 = "xx"}
+	if (canPerf) {pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"}
+	if (gRun) {
+		let time2 = Math.round(t0-gt0).toString()
+		if (!isPerf) {time2 = "xxx"}
+		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
+		if (canPerf) {gPerf.push(pretty)}
+		if (gCount == 14) {
+			el.innerHTML = gPerf.join("<br>")
+		}
+	} else {
+		if (name !== "prereq") {
+			el = dom.perfS
+			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
+			gClick = true
+		}
+	}
+
 	// DATA
 	if (Array.isArray(data)) {
 		data.sort()
@@ -1291,26 +1311,6 @@ function log_section(name, time1, data) {
 		}
 	} else {}	// !ARRAY
 
-	// PERF
-	let el = dom.perfG, pretty = ""
-	if (!isPerf) {time1 = "xx"}
-	if (canPerf) {pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"}
-
-	if (gRun) {
-		let time2 = Math.round(t0-gt0).toString()
-		if (!isPerf) {time2 = "xxx"}
-		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
-		if (canPerf) {gPerf.push(pretty)}
-		if (gCount == 14) {
-			el.innerHTML = gPerf.join("<br>")
-		}
-	} else {
-		if (name !== "prereq") {
-			el = dom.perfS
-			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
-			gClick = true
-		}
-	}
 }
 
 /*** RUN ***/
@@ -1419,19 +1419,19 @@ function outputSection(id, cls) {
 			// combine 1,2,3
 			if (id=="all") {outputStart()}
 			// stagger
-			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1) // do next
-			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="15") {outputElements()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
 			//setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1) // call last
+			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 			setTimeout(function() {if (id=="all") {outputAudio()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
 		}
 
 		if (gRun) {
