@@ -213,6 +213,7 @@ var list = [
 "ru,russian",
 "rw,kinyarwanda",
 "sa,sanskrit",
+"sat,santali", // 1731528
 "sc,sardinian",
 "sco,scots", // 1714293
 "sd,sindhi",
@@ -317,8 +318,11 @@ function legend() {
 function run_main(type) {
 	let t0 = performance.now()
 	let data = []
+	let tzUnknown = []
+	let tzTZN = []
+
 	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
-	let tzDays = ["January 1, 2019 13:00:00","July 1, 2019 13:00:00"]
+	let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
 	let spacer = "<br><br>"
 	
 	if (type !== "ALL") {
@@ -327,24 +331,25 @@ function run_main(type) {
 	}
 
 	function getTZNames(code) {
+		// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 		let tzRes = []
 		try {
 			tzDays.forEach(function(day) {
-				tzNames.forEach(function(item) {
+				tzNames.forEach(function(name) {
 					let tz = ""
 					let tzDate = new Date(day)
 					try {
-						let tzO = {hour12: true, timeZoneName: item}
-						let tzA = Intl.DateTimeFormat(code, tzO).formatToParts(tzDate)
-						for (let i = 0 ; i < tzA.length; i++) {
-							let str = JSON.stringify(Intl.DateTimeFormat(code, tzO).formatToParts(tzDate)[i])
-							if (str.indexOf("timeZoneName") !== -1 || str.indexOf("unknown") !== -1) {
-								tz = str.replace(/"/g, "")
-								tz = tz.replace("{type:timeZoneName,value:", "")
-								tz = tz.replace("{type:unknown,value:", "")
-								tz = tz.replace("}", "")			
+						let tzFormatter = Intl.DateTimeFormat(code, {hour12: true, timeZoneName: name})
+						let tzDateString = tzFormatter.formatToParts(day).map(({type, value}) => {
+							// FF91: extended TZNs are type "unknown"
+							if (type == "timeZoneName" || type == "unknown") {
+								tz = value
 							}
-						}
+							if (type == "timeZoneName") {tzTZN.push(code +": "+ type + " :"+ value)}
+							if (type == "unknown") {tzUnknown.push(code +": "+ type + " :"+ value)}
+							return type +":"+ value
+						})
+						//console.debug(tzDateString, code)
 					} catch(e) {
 						tz = (e.name == "RangeError" ? zNS : zB0)
 					}
@@ -374,6 +379,10 @@ function run_main(type) {
 				let res = getTZNames(undefined)
 				data.push(sha1(res) +":undefined:" + res)
 			}
+			// check types: FF91 extended timezonenames are type unknown
+			//if (tzUnknown.length) {console.debug("type: unknown\n", tzUnknown)}
+			//if (tzTZN.length) {console.debug("type: timeZoneName\n", tzTZN)}
+
 			// get one line per hash
 			data.sort()
 			let next = "", codes = []
