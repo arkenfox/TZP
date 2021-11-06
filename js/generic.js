@@ -1221,9 +1221,6 @@ function log_section(name, time1, data) {
 			gData.push([name +":"+ hash, data])
 			// FINISH
 			if (gCount == gCountExpected) {
-				// trigger nonFP
-				outputPostSection("all")
-				gLoad = false
 				// metric count
 				let metricCount = 0
 				for (let i=0; i < gData.length; i++) {
@@ -1311,7 +1308,10 @@ function log_section(name, time1, data) {
 				dom.allhash.innerHTML = sha1(gData.join())
 					+ buildButton("0", "fingerprint", metricCount +" metric"+ (metricCount > 1 ? "s" : ""), "showMetrics")
 					+ buildButton("0", "gDetail", "details", "showMetrics")
-				gClick = true
+				// trigger nonFP
+				outputPostSection("all")
+				gLoad = false
+				gClick = true // ToDo: should move this to after perf2
 			}
 		}
 	} else {}	// !ARRAY
