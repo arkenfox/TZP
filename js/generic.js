@@ -1222,7 +1222,7 @@ function log_section(name, time1, data) {
 			// FINISH
 			if (gCount == gCountExpected) {
 				// trigger nonFP
-				if (gRun) {outputPostSection("all")}
+				outputPostSection("all")
 				gLoad = false
 				// metric count
 				let metricCount = 0
@@ -1368,6 +1368,14 @@ function countJS(filename) {
 
 function outputPostSection(id) {
 	if (gRun) {log_perf("start [not in FP]", "--")}
+	if (id == "all" || id == "storage") {
+		get_cookies()
+		get_storage()
+		get_idb()
+		get_workers()
+		get_service_workers()
+		get_storage_manager()
+	}
 	if (id == "all" || id == "misc") {
 		get_perf2() // perf2 redundant: we have isRFP
 		get_recursion() // no entropy for isFF, also slows perf
