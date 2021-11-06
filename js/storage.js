@@ -386,14 +386,6 @@ function outputStorage() {
 		})
 		log_section("storage", t0, section)
 	})
-
-	// not used in FP
-	get_cookies()
-	get_storage()
-	get_idb()
-	get_workers()
-	get_service_workers()
-	get_storage_manager()
 }
 
 countJS("storage")
