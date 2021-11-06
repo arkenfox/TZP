@@ -313,8 +313,9 @@ function get_perf2() {
 					if (value !== 0) {is00 = false} // ignore hundreds
 					if (i > 0 && !isRFP) {
 						let diff = times[i] - times[i-1]
-						if (diff < 5 || diff > 30) {countTamper++}
-						if (isFile) {console.debug(i+1, diff, countTamper)}
+						if (diff < 5 || diff > 30) {countTamper++
+							if (isFile) {console.debug(i+1, diff, countTamper)}
+						}
 					}
 					if (i == 0 && value > 75) {isYank = true}
 				}
@@ -449,15 +450,12 @@ function outputMisc() {
 		get_iframe_props(),
 		get_windowcontent(),
 		get_nav_prototype(),
-		get_recursion(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			section.push(currentResult)
 		})
 		log_section("misc", t0, section)
 	})
-	// perf2 not needed: we have isRFP
-	setTimeout(function() {get_perf2()}, 10) // delay to end of queue
 }
 
 countJS("misc")
