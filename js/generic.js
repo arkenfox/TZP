@@ -1213,6 +1213,7 @@ function log_section(name, time1, data) {
 		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
 		document.getElementById(name +"hash").innerHTML = sHash
 		if (canPerf) {document.getElementById("perf"+ name).innerHTML = " "+ (isPerf ? time1 : "xxx") +" ms"}
+		if (!gRun) {outputPostSection(name)} // trigger nonFP
 
 		// GLOBAL
 		if (gRun) {
@@ -1220,6 +1221,8 @@ function log_section(name, time1, data) {
 			gData.push([name +":"+ hash, data])
 			// FINISH
 			if (gCount == gCountExpected) {
+				// trigger nonFP
+				if (gRun) {outputPostSection("all")}
 				gLoad = false
 				// metric count
 				let metricCount = 0
@@ -1360,6 +1363,17 @@ function countJS(filename) {
 				outputSection("load")
 			})
 		})
+	}
+}
+
+function outputPostSection(id) {
+	if (gRun) {log_perf("start [not in FP]", "--")}
+	if (id == "all" || id == "misc") {
+		get_perf2() // perf2 redundant: we have isRFP
+		get_recursion() // no entropy for isFF, also slows perf
+	}
+	if (id == "all" || id == "fonts") {
+		get_woff() // not performant
 	}
 }
 
