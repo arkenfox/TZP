@@ -890,8 +890,6 @@ function outputFonts() {
 			dom.fontBtns.innerHTML = fontBtns
 		})
 		log_section("fonts", t0, section)
-		// ToDo: woff perf esp if fonts blocked
-		setTimeout(function() {get_woff()}, 10) // delay to end of queue
 	})
 }
 
