@@ -312,34 +312,35 @@ function get_lang_doc() {
 				// date/time format
 				} else if (item == 16) {
 					// FF91+: 1710429
+					// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 					let tzRes = []
 					try {
 						let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
-						let tzDays = ["January 1, 2019 13:00:00","July 1, 2019 13:00:00"]
+						let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
 						tzDays.forEach(function(day) {
-							tzNames.forEach(function(item) {
+							tzNames.forEach(function(name) {
 								let tz = ""
 								let tzDate = new Date(day)
 								try {
-									let tzO = {hour12: true, timeZoneName: item}
-									let tzA = Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)
-									for (let i = 0 ; i < tzA.length; i++) {
-										let str = JSON.stringify(Intl.DateTimeFormat(undefined, tzO).formatToParts(tzDate)[i])
-										if (str.indexOf("timeZoneName") !== -1 || str.indexOf("unknown") !== -1) {
-											tz = str.replace(/"/g, "")
-											tz = tz.replace("{type:timeZoneName,value:", "")
-											tz = tz.replace("{type:unknown,value:", "")
-											tz = tz.replace("}", "")			
-										}
-									}
+									let tzFormatter = Intl.DateTimeFormat(undefined, {hour12: true, timeZoneName: name})
+									let tzDateString = tzFormatter.formatToParts(day).map(({type, value}) => {
+										// FF91: extended TZNs are type "unknown"
+										if (type == "timeZoneName" || type == "unknown") {tz = value}
+									})
 								} catch(e) {
+									if (day == tzDays[0]) {
+										eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+										log_error("language: item "+ item +" "+ name, eMsg)
+									}
 									if (isVer > 90) {tz = zB0} else if (isFF) {tz = zNS} else {tz = e.name == "RangeError" ? zNS : zB0}
 								}
-								if (tz !== zNS) {tzRes.push(tz)}
+								if (tz !== zNS && tz !== "") {tzRes.push(tz)}
 							})
 						})
 						return tzRes.join(", ")
 					} catch(e) {
+						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language: item "+ item +" timeZoneName", eMsg)
 						return zB0
 					}
 				} else if (item == 17) {
