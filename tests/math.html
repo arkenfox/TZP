@@ -69,8 +69,7 @@
 <script>
 'use strict';
 
-var t0, // perf
-	fns = [], // what tests to run
+var fns = [], // what tests to run
 	n = 0.123,
 	bigN = 5.860847362277284e+38
 
@@ -377,6 +376,7 @@ function build_controlset(engine) {
 
 
 function get_results() {
+	let t0 = performance.now()
 	// vars
 	let display = [],
 		prevFn = "start",
@@ -639,7 +639,6 @@ function outputMath(control) {
 	build_controlset(control)
 	// delay so user can see things being reset
 	setTimeout(function(){
-		t0 = performance.now()
 		get_results()
 	}, 170)
 }
