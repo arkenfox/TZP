@@ -50,6 +50,8 @@
 	<br>
 
 <script>
+'use strict';
+
 var list = [
 "aa,afar",
 "ab,abkhazian",
@@ -209,6 +211,7 @@ var list = [
 "ru,russian",
 "rw,kinyarwanda",
 "sa,sanskrit",
+"sat,santali", // 1731528
 "sc,sardinian",
 "sco,scots", // 1714293
 "sd,sindhi",
@@ -438,12 +441,12 @@ function run_test(isSummary, isExample) {
 				codesG.push(tmpR)
 				// grab next item
 				if (i < data.length - 1) {
-					next = data[(i+1)].substring(0,40)
+					nextG = data[(i+1)].substring(0,40)
 				} else {
-					next = "end"
+					nextG = "end"
 				}
 				// build new item
-				if (next !== tmpH) {
+				if (nextG !== tmpH) {
 					let str = s12 + tmpH + sc +" "+ s4 +"["+ tmpC +"]"+ sc
 						+ "<br><ul><li>"+ codesG.join(", ") + "</li></ul>"
 					display.push(str)
@@ -545,6 +548,7 @@ function run(type) {
 	dom.perf = ""
 	setTimeout(function() {
 		if (type == "sum") {
+			aCurrency = currencyMaster
 			run_test(true)
 		} else if (type == "all") {
 			aCurrency = currencyMaster
