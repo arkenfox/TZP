@@ -48,6 +48,7 @@
 	<br>
 
 <script>
+'use strict';
 
 function analyse(data) {
 	let len = data.length,
@@ -148,7 +149,11 @@ function run(howmany) {
 		dom.results = "this test requires RFP to be enabled"
 		return
 	}
-
+	// isFile
+	if (isFile) {
+		dom.results = "aw snap! RFP doesn't work on file:/// scheme"
+		return
+	}
 	// heh
 	if (testTotal >= 200000) {
 		dom.results = "that's enough tests for now... go take a break"
