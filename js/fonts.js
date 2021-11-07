@@ -788,37 +788,28 @@ function get_unicode() {
 	})
 }
 
-function get_woff() {
+function get_woff2() {
+	// https://github.com/filamentgroup/woff2-feature-test
 	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let el = dom.woffno,
-			control = el.offsetWidth,
-			count = 0,
-			maxcount = 31 // 800ms
-		if (isOS == "android" | isTB) {maxcount = 59} // 1500ms
-		// output
-		function output_woff(state) {
-			dom.fontWoff2.innerHTML = state
-			if (gRun) {log_perf("woff [not in FP]",t0)}
-			return resolve("woff:"+ state)
+		if (!("FontFace" in window)) {
+			dom.fontWoff2 = zB0
+			return resolve(zB0) // CORS?
 		}
-		// check
-		el = dom.woffyes
-		function check_woff() {
-			if (count < maxcount) {
-				if (control !== el.offsetWidth) {
-					clearInterval(checking)
-					output_woff(zE)
-				}
-			} else {
-				// timed out: pref removed FF69
-				clearInterval(checking)
-				let str = (isVer < 69 ? zD +" [or blocked]" : zB0)
-				output_woff(str)
+		const supportsWoff2 = (function(){
+			try {
+				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
+				font.load()
+				return font.status == "loaded" || font.status == "loading"
+			} catch(e) {
+				log_error("fonts: woff2", e.name, e.message)
+				dom.fontWoff2 = trim_error(e.name, e.message)
+				return resolve("woff:"+ (isFF ? zB0 : zErr))
 			}
-			count++
-		}
-		let checking = setInterval(check_woff, 25)
+		})()
+		let value = (supportsWoff2 ? zE : zB0)
+		if (isFF && value == zB0 && isVer < 69) {value = zD}
+		dom.fontWoff2 = value
+		return resolve("woff:"+ value)
 	})
 }
 
@@ -878,6 +869,7 @@ function outputFonts() {
 	Promise.all([
 		get_unicode(),
 		get_fonts(),
+		get_woff2(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
