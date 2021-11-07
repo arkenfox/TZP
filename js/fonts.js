@@ -799,7 +799,7 @@ function get_woff() {
 		// output
 		function output_woff(state) {
 			dom.fontWoff2.innerHTML = state
-			log_perf("woff [not in FP]",t0)
+			if (gRun) {log_perf("woff [not in FP]",t0)}
 			return resolve("woff:"+ state)
 		}
 		// check
