@@ -332,7 +332,7 @@ function get_perf2() {
 				} else {
 					dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
 				}
-				log_perf("perf.now [not in FP]",t0)
+				if (gRun) {log_perf("perf.now [not in FP]",t0)}
 			}
 		}
 		let check = setInterval(run, 13)
