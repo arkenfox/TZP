@@ -53,6 +53,7 @@
 	<br>
 
 <script>
+'use strict';
 
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntList = [],
@@ -109,9 +110,9 @@ let fntAlways = {
 	// note: add mozilla bundled fonts here: ToDo: make sure they are not bundled with mac/android
 	// note: we can also use this to filter out fonts not in the kBaseFonts
 	android: [],
-	linux: ["EmojiOne Mozilla","Twemoji Mozilla",],
+	linux: ["Twemoji Mozilla",],
 	mac: [],
-	windows: ["Courier","EmojiOne Mozilla","Helvetica","MS Sans Serif","MS Serif","Roman","Small Fonts","Times","Twemoji Mozilla","宋体","微软雅黑","新細明體","細明體","굴림","굴림체","바탕","ＭＳ ゴシック","ＭＳ 明朝","ＭＳ Ｐゴシック","ＭＳ Ｐ明朝",],
+	windows: ["Courier","Helvetica","MS Sans Serif","MS Serif","Roman","Small Fonts","Times","Twemoji Mozilla","宋体","微软雅黑","新細明體","細明體","굴림","굴림체","바탕","ＭＳ ゴシック","ＭＳ 明朝","ＭＳ Ｐゴシック","ＭＳ Ｐ明朝",],
 }
 
 function log_list(name) {
@@ -233,7 +234,7 @@ function set_fntListMaster() {
 		btnA = button("always", fntAlways[strOS].length)
 
 	let	btnMin = button("min", fntMasterBase[strOS].length),
-		btnMed = button("medium", fntMasterBase[strOS].length + (bTB ? fntTBOther[strOS].length: fntOther[strOS].length))
+		btnMed = button("medium", fntMasterBase[strOS].length + (bTB ? fntTBOther[strOS].length: fntOther[strOS].length)),
 		btnMax = button("max", fntMaster[strOS].length)
 
 	let display = []

@@ -51,6 +51,8 @@
 	<br>
 
 <script>
+'use strict';
+
 var list = [
 "aa,afar",
 "ab,abkhazian",
@@ -210,6 +212,7 @@ var list = [
 "ru,russian",
 "rw,kinyarwanda",
 "sa,sanskrit",
+"sat,santali", // 1731528
 "sc,sardinian",
 "sco,scots", // 1714293
 "sd,sindhi",
@@ -272,7 +275,7 @@ var list = [
 "zu,zulu",
 ]
 
-var aLegend = []
+var aLegend = [],
 	aLegendSupported = [],
 	aLocales = [],
 	aSupported = [],
@@ -326,7 +329,7 @@ function run_test(type) {
 	let test_array = [], // numbers used
 		test_all = [], // result hash + locale code + result
 		go = true,
-		perfname = "all"
+		perfname = "all",
 		str = ""
 
 	let	element = document.getElementById("results" + type)
@@ -373,10 +376,10 @@ function run_test(type) {
 		for (let j=0; j < loop.length; j++) {
 			// reset cardinal
 			let prevC = "", currentC = "", tmp_resultC = []
-			c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
+			let c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
 			// reset ordinal
 			let prevO = "", currentO = "", tmp_resultO = []
-			o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
+			let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
 
 			let code = loop[j]
 			// aListOne

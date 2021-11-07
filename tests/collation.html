@@ -61,6 +61,7 @@
 	<br>
 
 <script>
+'use strict';
 
 /*
 https://searchfox.org/mozilla-central/source/toolkit/components/mozintl/mozIntl.jsm
@@ -359,7 +360,7 @@ var collatorExample = [
 	'\u0C05',  //     TELUGU A
 	'\u0E24',  //       THAI RU
 	// 80 covering 93
-	// f28621c5d958602e2b7a45b26ea7ec368af168cd
+	// 4a16f12e61d36648b0c8221007e9953b3256ddab
 ]
 
 //console.debug(collatorExample.join())
@@ -429,8 +430,8 @@ function legend() {
 			}
 		}
 		// testing
-		console.log(sha1(aCanonical.join()))
-		console.log(aCanonical.join("\n"))
+		//console.log(sha1(aCanonical.join()))
+		//console.log(aCanonical.join("\n"))
 		// FF60-69 : f0a110f5d84c34f13bc8a255d5cb8e5efb446a43 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : 38b9f79f5661b68285bfc552609da913d0969567 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
 		// FF91+   : 45a1ca5e49e32da595ce045e2378da23b8165774 : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
@@ -513,11 +514,11 @@ function compare() {
 				output.push(str)
 			}
 			for (let i = 0 ; i < list.length; i++) {
-				control = valueA.localeCompare(valueB, "en-US")
+				let control = valueA.localeCompare(valueB, "en-US")
 				let code = list[i].split(",")[0]
 				let name = list[i].split(",")[1]
-				test = valueA.localeCompare(valueB, code)
-				if ( control !== test) {
+				let test = valueA.localeCompare(valueB, code)
+				if (control !== test) {
 					output.push(s12 + code.padStart(7) + sc +": "+ name)
 				}
 			}
@@ -648,7 +649,8 @@ function collator() {
 				newArrPretty.sort()
 				let localesHash = [],
 					lineItems = []
-				tmpH = "", tmpL = "", tmpStr = "", len = 0
+				tmpH = "", tmpL = "", tmpStr = ""
+				let len = 0
 				// newArr
 				for (let i = 0 ; i < newArr.length; i++) {
 					tmpStr = newArr[i]
