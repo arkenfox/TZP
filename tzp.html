@@ -41,8 +41,6 @@
 		</div>
 		<div id="divLH" class="cssLH"><span id="spanLH">line height</span></div>
 		<img id="imageFS" width=0 height=0></img>
-		<div><span id="woffno" class="woffno">&#xe800;</span></div>
-		<div><span id="woffyes" class="woffyes">&#xe800;</span></div>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
 		<div id="ugDiv" class="normalized" style='font-size: 22pt;'><span id="ugSpan"><span id="ugSlot"></span></span></div>
 		<div><canvas id="ugCanvas" style='font-size: 22pt;'></canvas></div>
@@ -636,26 +634,26 @@
 			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 68 or lower<br>gfx.downloadable_fonts.woff2.enabled</span></div>
-			&nbsp WOFF2</td><td class="c" id="fontWoff2"></td></tr>
+			&nbsp woff2 <sup>1</sup></td><td class="c" id="fontWoff2"></td></tr>
 		<!--fonts-->
 		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/fontlists.html">[PoC]</a>
 			<span id="labelF1" class="btn btn0" onClick="togglerows('F1','btn')">[ show ]</span>
-			fonts <sup>1, 2</sup></td><td class="c mono" id="fontMain"></td></tr>
-		<tr class="togF1"><td>offset <sup>1</sup></td><td class="c mono" id="fontsOffset"></td></tr>
-		<tr class="togF1"><td>client <sup>2</sup></td><td class="c mono" id="fontsClient"></td></tr>
-		<tr class="togF1"><td>scroll <sup>2</sup></td><td class="c mono" id="fontsScroll"></td></tr>
-		<tr class="togF1"><td>pixel <sup>2</sup></td><td class="c mono" id="fontsPixel"></td></tr>
-		<tr class="togF1"><td>size <sup>2</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
-		<tr class="togF1"><td>perspective <sup>2</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
-		<tr class="togF1"><td>transform <sup>2</sup></td><td class="c mono" id="fontsTransform"></td></tr>
+			fonts <sup>2, 3</sup></td><td class="c mono" id="fontMain"></td></tr>
+		<tr class="togF1"><td>offset <sup>2</sup></td><td class="c mono" id="fontsOffset"></td></tr>
+		<tr class="togF1"><td>client <sup>3</sup></td><td class="c mono" id="fontsClient"></td></tr>
+		<tr class="togF1"><td>scroll <sup>3</sup></td><td class="c mono" id="fontsScroll"></td></tr>
+		<tr class="togF1"><td>pixel <sup>3</sup></td><td class="c mono" id="fontsPixel"></td></tr>
+		<tr class="togF1"><td>size <sup>3</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
+		<tr class="togF1"><td>perspective <sup>3</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
+		<tr class="togF1"><td>transform <sup>3</sup></td><td class="c mono" id="fontsTransform"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputFontsFB()">[ click here ]</span>
-			font fallback <sup>3</sup></td><td class="mono gc" id="fontFB"></td></tr>
+			font fallback <sup>4</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<!--glyphs-->
 		<tr><td colspan="2" class="center">--- glyphs ---</td></tr>
-		<tr><td>offset <sup>4</sup></td><td class="c mono" id="ug1"></td></tr>
-		<tr><td>getBoundingClientRect <sup>4</sup></td><td class="c mono" id="ug3"></td></tr>
-		<tr><td>getClientRects <sup>4</sup></td><td class="c mono" id="ug4"></td></tr>
+		<tr><td>offset <sup>5</sup></td><td class="c mono" id="ug1"></td></tr>
+		<tr><td>getBoundingClientRect <sup>5</sup></td><td class="c mono" id="ug3"></td></tr>
+		<tr><td>getClientRects <sup>5</sup></td><td class="c mono" id="ug4"></td></tr>
 		<!--tm-->
 		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
 		<tr><td>width</td><td class="c mono" id="tm0"></td></tr>
@@ -678,13 +676,15 @@
 		<tr class="togF4"><td colspan="2" class="mono spaces intro" id="ugcopy"><span class="no_color" id="ug10"></span></td></tr>
 		<!--creds-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
-			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>1</sup>
+			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>1</sup>
 			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup>
+			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>2</sup>
 			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>3</sup>
+			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>3</sup>
+			<span class="no_color">, </span>
+			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>4</sup>
 			<span class="no_color"> and </span><a target="_blank" class="blue"
-				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>4</sup>
+				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>5</sup>
 		</td></tr>
 	</table>
 
