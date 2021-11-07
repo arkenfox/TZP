@@ -2365,8 +2365,6 @@ function outputUA() {
 		}
 		dom.uaDoc.innerHTML = display
 		log_section("ua", t0, section)
-		// ToDo: promisify workers
-		get_ua_workers()
 	})
 }
 
