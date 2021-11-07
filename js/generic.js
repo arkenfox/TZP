@@ -1383,9 +1383,6 @@ function outputPostSection(id) {
 		get_perf2() // perf2 redundant: we have isRFP
 		get_recursion() // no entropy for isFF, also slows perf
 	}
-	if (id == "all" || id == "fonts") {
-		get_woff() // not performant
-	}
 }
 
 function outputSection(id, cls) {
