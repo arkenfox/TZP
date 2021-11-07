@@ -56,6 +56,8 @@
 	<br>
 
 <script>
+'use strict';
+
 var list = [
 "aa,afar",
 "ab,abkhazian",
@@ -215,6 +217,7 @@ var list = [
 "ru,russian",
 "rw,kinyarwanda",
 "sa,sanskrit",
+"sat,santali", // 1731528
 "sc,sardinian",
 "sco,scots", // 1714293
 "sd,sindhi",
@@ -310,22 +313,23 @@ function run_main(method, isLoopy) {
 	let spacer = "<br><br>", hashLookup = "", lookupSummary = ""
 	let display = []
 
+	function getPretty(method) {
+		let pretty = ""
+		if (method == "C") {pretty = "collator"
+		} else if (method == "DTF") {pretty = "datetimeformat"
+		} else if (method == "DN") {pretty = "displaynames"
+		} else if (method == "LF") {pretty = "listformat"
+		} else if (method == "LI") {pretty = "localeinfo"
+		} else if (method == "NF") {pretty = "numberformat"
+		} else if (method == "PR") {pretty = "pluralrules"
+		} else if (method == "RTF") {pretty = "relativetimeformat"
+		} else if (method == "S") {pretty = "segmenter"
+		}
+		return pretty
+	}
+
 	try {
 		// hash
-		function getPretty(method) {
-			let pretty = ""
-			if (method == "C") {pretty = "collator"
-			} else if (method == "DTF") {pretty = "datetimeformat"
-			} else if (method == "DN") {pretty = "displaynames"
-			} else if (method == "LF") {pretty = "listformat"
-			} else if (method == "LI") {pretty = "localeinfo"
-			} else if (method == "NF") {pretty = "numberformat"
-			} else if (method == "PR") {pretty = "pluralrules"
-			} else if (method == "RTF") {pretty = "relativetimeformat"
-			} else if (method == "S") {pretty = "segmenter"
-			}
-			return pretty
-		}
 		function getNotation(hash, method) {
 			let notation = ""
 			if (method == "C") {
