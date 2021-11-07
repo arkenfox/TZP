@@ -79,11 +79,12 @@
 	<br>
 
 <script>
+'use strict';
 
 function run() {
 	// vars
 	let clrSet = [], cellSet = [],
-		clrRead = [], cellRead = [], cellRead2 = []
+		clrRead = [], cellRead = [], cellRead2 = [],
 		hashSet = "",
 		hashGetImage = "",
 		hashGetImage2 = "",
@@ -145,16 +146,6 @@ function run() {
 					cnvBlob.src = url
 				})
 
-				// mozGetAsFile
-				//try {
-				//	let moz = cnvCtrl.mozGetAsFile("moz.png")
-				//	let reader = new FileReader()
-				//	reader.readAsDataURL(moz)
-				//	reader.onloadend = function() {
-				//	 cnvMoz.src = reader.result;
-				//	}
-				//} catch(err) {}
-
 				// read: getImageData
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
@@ -163,6 +154,7 @@ function run() {
 						clrRead.push(pixel.data[1])
 						clrRead.push(pixel.data[2])
 						clrRead.push(pixel.data[3])
+
 						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
 						cellRead.push(pixel)
 						// output READ visuals
@@ -229,13 +221,14 @@ function run() {
 						if (cellSet[i] !== cellRead[i]) {changeC.push(i)}
 						if (cellSet[i] !== cellRead2[i]) {changeC2.push(i)}
 					}
+					/*
 					if (changeC.length > 1) {
 						console.debug("read 1: pixels changed: ", sha1(changeC.join()) +"\n", changeC)
 					}
 					if (changeC2.length > 1) {
 						console.debug("read 2: pixels changed: ", sha1(changeC2.join()) +"\n", changeC2)
 					}
-
+					*/
 
 					// channels
 					let counts = {}
