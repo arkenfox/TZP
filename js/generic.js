@@ -1447,18 +1447,18 @@ function outputSection(id, cls) {
 			// stagger
 			// must do devices first or it really tanks with RFP
 			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="18") {outputMisc()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1)
-			//setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
-			setTimeout(function() {if (id=="all") {outputAudio()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="15") {outputElements()}}, 1)
+			setTimeout(function() {if (id=="all" || id=="12") {outputFonts()}}, 1) // bottleneck
+			setTimeout(function() {if (id=="all" || id=="9") {outputCanvas()}}, 1)
+			setTimeout(function() {if (id=="all") {outputAudio()}}, 1)
+			//setTimeout(function() {if (id=="all" || id=="10") {outputWebGL()}}, 1)
 		}
 
 		if (gRun) {
