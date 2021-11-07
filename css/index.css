@@ -80,19 +80,6 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 #ugSpan {font-size: 10000%;}
 
 @font-face {
-	font-family: 'fontello';
-	src: url('../fonts/fontello.woff2?65609506') format('woff2');
-}
-.woffno {
-	font-family: "Times New Roman";
-	font-size: 128px;
-}
-.woffyes {
-	font-family: "fontello";
-	font-size: 128px;
-}
-
-@font-face {
 	font-family: "ABR"; src: url("../fonts/AdobeBlankRegular.ttf");
 }
 
