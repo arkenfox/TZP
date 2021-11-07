@@ -1368,6 +1368,9 @@ function countJS(filename) {
 
 function outputPostSection(id) {
 	if (gRun) {log_perf("start [not in FP]", "--")}
+	if (id == "all" || id == "ua") {
+		get_ua_workers()
+	}
 	if (id == "all" || id == "storage") {
 		get_cookies()
 		get_storage()
