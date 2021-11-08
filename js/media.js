@@ -66,8 +66,8 @@ function get_media(runtype) {
 	// clear
 	let sCan = "media_"+ runtype +"_canplaytype",
 		sType = "media_"+ runtype +"_istypesupported"
-	clearDetail[sCan]
-	clearDetail[sType]
+	sDetail[sCan] = []
+	sDetail[sType] = []
 
 	// run
 	let canm = [], canp = [], src = [], rec = []
