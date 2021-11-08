@@ -330,11 +330,11 @@ function get_mimetypes_plugins() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		// reset
 		let sName = "devices_mimetypes"
-		clearDetail(sName)
-		clearDetail(sName +"_fake_skip")
+		sDetail[sName] = []
+		sDetail[sName +"_fake_skip"] = []
 		sName = "devices_plugins"
-		clearDetail(sName)
-		clearDetail(sName +"_fake_skip")
+		sDetail[sName] = []
+		sDetail[sName +"_fake_skip"] = []
 
 		// promise
 		Promise.all([
@@ -559,7 +559,7 @@ function get_speech_engines() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let sName = "devices_speech_engines"
-		clearDetail(sName)
+		sDetail[sName] = []
 
 		// output & resolve
 		function display(output) {
