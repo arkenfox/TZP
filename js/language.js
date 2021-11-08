@@ -228,6 +228,7 @@ function get_lang_doc() {
 
 		function get_item(item) {
 			let amWorker = false
+			let eMsg = ""
 			try {
 				// language
 				if (item == 0) {return eval('navigator.languages')
@@ -253,7 +254,7 @@ function get_lang_doc() {
 					return sha1(chars.join())
 				// timezone
 				} else if (item == 12) {
-					let k = 60000, yr = 2021, eMsg = ""
+					let k = 60000, yr = 2021
 					item = (item+"").padStart(2,"0")
 					try {yr = Date().split` `[3]} catch(e) {
 						try {yr = new Date().getFullYear()} catch(e) {}
@@ -275,21 +276,21 @@ function get_lang_doc() {
 					} catch(error) {
 						item = (item+"").padStart(2,"0")
 						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-						log_error("language item: "+ item +" getTimezoneOffset", eMsg)
+						log_error("language: item "+ item +" getTimezoneOffset", eMsg)
 					}
 					try {
 						part2 = ((r1.getTime() - c1.getTime())/k) +", "+ ((r2.getTime() - c2.getTime())/k)
 						+", "+ ((r3.getTime() - c3.getTime())/k) +", "+ ((r4.getTime() - c4.getTime())/k)
 					} catch(error) {
 						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-						log_error("language item: "+ item +" getTime", eMsg)
+						log_error("language: item "+ item +" getTime", eMsg)
 					}
 					try {
 						part3 = ((Date.parse(r1) - Date.parse(c1))/k) +", "+ ((Date.parse(r2) - Date.parse(c2))/k)
 						+", "+ ((Date.parse(r3) - Date.parse(c3))/k) +", "+ ((Date.parse(r4) - Date.parse(c4))/k)
 					} catch(error) {
 						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-						log_error("language item: "+ item +" Date.parse", eMsg)
+						log_error("language: item "+ item +" Date.parse", eMsg)
 					}
 					return part1 +" | "+ part2 +" | "+ part3
 				} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -396,8 +397,8 @@ function get_lang_doc() {
 					function err_check(name, msg) {
 						if (isFF) {
 							item = (item+"").padStart(2,"0")
-							let eMsg = (name === undefined ? zErr : name +": "+ msg)
-							log_error("language item: "+ item, eMsg)
+							eMsg = (name === undefined ? zErr : name +": "+ msg)
+							log_error("language: item "+ item, eMsg)
 							let display = ""
 							if (eMsg == "RangeError: invalid value unit for option style" && isVer < 71) {
 								return " | unit "+ zNS // 70-
@@ -467,8 +468,8 @@ function get_lang_doc() {
 						return tmp
 					} catch (e) {
 						item = (item+"").padStart(2,"0")
-						let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-						log_error("language item: "+ item, eMsg)
+						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+						log_error("language: item "+ item, eMsg)
 						if (isFFLegacy && eMsg == "TypeError: (new Intl.NumberFormat(...)).formatToParts is not a function") {
 							return zNS
 						} else {
@@ -564,13 +565,14 @@ function get_lang_doc() {
 				} else if (item == 48 || item == 49) {
 					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
 					let prtype = item == 48 ? "cardinal" : "ordinal"
-					let prev = "", current = "", eMsg = ""
+					let prev = "", current = ""
 					for (let i=0; i < nos.length; i++) {
 						try {
 							current = new Intl.PluralRules(undefined, {type: prtype}).select(nos[i])
 						} catch(e) {
 							eMsg = (e.name === undefined ? zErr : e.name +" : "+ e.message)
 							current = "error"
+							break
 						}
 						// record changes only
 						if (prev !== current) {prules.push(nos[i] +": "+ current)}
@@ -580,7 +582,7 @@ function get_lang_doc() {
 						return prules.join(", ")
 					} else {
 						item = (item+"").padStart(2,"0")
-						log_error("language item: "+ item, eMsg)
+						log_error("language: item "+ item, eMsg)
 						if (isFFLegacy && eMsg == "TypeError: Intl.PluralRules is not a constructor") {
 							return zNS
 						} else {
@@ -618,7 +620,7 @@ function get_lang_doc() {
 						}
 					}
 					item = (item+"").padStart(2,"0")
-					log_error("language item: "+ item, e.name, e.message)
+					log_error("language: item "+ item, e.name, e.message)
 
 					// script blocking
 					if (msg == "") {
