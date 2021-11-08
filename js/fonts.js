@@ -374,7 +374,7 @@ function get_fonts() {
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		sDetail["fonts_fonts"] = []
-		sNames.forEach(function(name) sDetail["fonts_"+ name + "_reported_notglobal"] = []})
+		sNames.forEach(function(name) {sDetail["fonts_"+ name + "_reported_notglobal"] = []})
 		// run
 		getFonts().then(res => {
 			// remove element
