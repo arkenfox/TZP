@@ -40,7 +40,7 @@ function return_mm_dpi(type) {
 function get_canonical() {
 	try {
 		let sName = "feature_canonical_locales_notglobal"
-		clearDetail(sName)
+		sDetail[sName] = []
 		let list = ["bh","hye","no","tl","tw"], res = []
 		if (runS) (list.push("en"))
 		list.sort()
@@ -163,7 +163,7 @@ function get_errors() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let res = []
 		let sName = "feature_error_messages"
-		clearDetail(sName)
+		sDetail[sName] = []
 
 		let tests = [
 			"BigInt(2.5)", // changes FF68 + FF75
@@ -565,7 +565,7 @@ function get_locales() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let res = []
 		let sName = "feature_supported_locales_notglobal"
-		clearDetail(sName)
+		sDetail[sName] = []
 		let list = ["ba","co","cv","ia","ka","ki","ku","kok","lij","lo","mai","no","pa","qu","sa","su","no","tl","tw","vo"]
 		if (runS) {list.push("en")}
 		list.sort()
@@ -2201,7 +2201,7 @@ function outputUA() {
 		str2 +"[window] docroot"+ str3,	str2 +"[window] with url"+ str3,
 		str2 + "iframe access"+ str3, str2 + "nested"+ str3, str2 +"window access"+ str3,
 	]
-	aNames.forEach(function(item) {clearDetail(item)})
+	aNames.forEach(function(item) {sDetail[item] = []})
 
 	Promise.all([
 		get_ua_doc(), // sets uaBS

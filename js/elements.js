@@ -2,7 +2,7 @@
 
 function get_element_keys() {
 	let sName = "elements_element_keys"
-	clearDetail(sName)
+	sDetail[sName] = []
 	return new Promise(resolve => {
 		try {
 			// create element
@@ -34,8 +34,8 @@ function get_resized() {
 	let resM = [], resL = [], resALL = []
 	let sNameM = "elements_mathml_notglobal",
 		sNameL = "elements_lineheight_notglobal"
-	clearDetail(sNameM)
-	clearDetail(sNameL)
+	sDetail[sNameM] = []
+	sDetail[sNameL] = []
 	let elCtrl = dom.mathmlCtrl,
 		elTest = dom.mathmlTest,
 		elLine = dom.lhTest,

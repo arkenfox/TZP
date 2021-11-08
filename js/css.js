@@ -169,8 +169,8 @@ function get_computed_styles() {
 		let names = ["getcomputed","htmlelement","cssrulelist"]
 		let sNames = ["css_getcomputed","css_htmlelement","css_cssrulelist"]
 		sDetail["css_computed_styles"] = []
-		sNames.forEach(function(k){clearDetail[k + "_fake_skip"]})
-		sNames.forEach(function(k){clearDetail[k + "_reported_notglobal"]})
+		sNames.forEach(function(k){sDetail[k + "_fake_skip"] = []})
+		sNames.forEach(function(k){sDetail[k + "_reported_notglobal"] = []})
 
 		// run
 		Promise.all([
@@ -392,7 +392,7 @@ function get_system_fonts() {
 			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
 			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
 		let sName = "css_system_fonts"
-		clearDetail(sName)
+		sDetail[sName] = []
 		try {
 			let el = dom.sysFont
 			aFonts.forEach(function(font){

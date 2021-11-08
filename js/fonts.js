@@ -373,8 +373,8 @@ function get_fonts() {
 		let fontReturn = []
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
-		clearDetail["fonts_fonts"]
-		sNames.forEach(function(name) {clearDetail("fonts_"+ name + "_reported_notglobal")})
+		sDetail["fonts_fonts"] = []
+		sNames.forEach(function(name) sDetail["fonts_"+ name + "_reported_notglobal"] = []})
 		// run
 		getFonts().then(res => {
 			// remove element
@@ -575,7 +575,7 @@ function get_fallback(list) {
 	/* https://github.com/arthuredelstein/tordemos */
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
-		clearDetail["fonts_font_fallback"]
+		sDetail["fonts_font_fallback"] = []
 		let width0 = null,
 			t = dom.fontFBTest
 		// measure
