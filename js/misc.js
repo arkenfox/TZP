@@ -28,10 +28,10 @@ function get_iframe_props() {
 	let sFake = sTrue + "_fake_skip"
 	let sSuspect = sTrue + "_suspect_skip"
 	let sAll = sTrue + "_reported_notglobal"
-	clearDetail(sTrue)
-	clearDetail(sFake)
-	clearDetail(sSuspect)
-	clearDetail(sAll)
+	sDetail[sTrue] = []
+	sDetail[sFake] = []
+	sDetail[sSuspect] = []
+	sDetail[sAll] = []
 
 	let knownGood = [
 		// acculumative
