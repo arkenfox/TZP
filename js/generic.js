@@ -1062,10 +1062,6 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
 
-function clearDetail(name) {
-	try {sDetail[name] = []} catch(e) {}
-}
-
 function log_click(name, time) {
 	// click here doesn't record via log_section
 	if (canPerf) {
