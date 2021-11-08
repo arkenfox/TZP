@@ -35,9 +35,10 @@ function outputCanvas() {
 			let str0 = res0[i], str1 = res1[i], str2 = res2[i]
 			let delim = str0.search(",")
 			let name = str0.substring(0,delim),
-				val0 = str0.substring(delim+1, str0.length),
+				val0 = str0.substring(delim+1, str0.length) +"",
 				val1 = str1.substring(delim+1, str1.length),
 				val2 = str2.substring(delim+1, str2.length)
+			if (val0 == "") {val0 = "empty string"}
 			// index
 			aIndex.push(name)
 			// blocks = not a hash
@@ -123,7 +124,10 @@ function outputCanvas() {
 					}
 				}
 			}
-			if (aBlock[i] == true) {display = trim_error(aValue[i])}
+			// if blocked and not bypassed
+			if (aBlock[i] == true && item !== bypassTarget) {
+				display = trim_error(aValue[i])
+			}
 			element.innerHTML = display
 		}
 		// methods & lies
