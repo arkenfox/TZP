@@ -366,7 +366,8 @@ function outputCanvas() {
 					value: function(){
 						let t1; if (canPerf) {t1 = performance.now()}
 						let data = sha1(getKnown().canvas.toDataURL())
-						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
+						let minidata = mini(getKnown().canvas.toDataURL())
+						log_perf("toDataURL [k] [canvas]",t1,gt0,data +" | "+ minidata)
 						return (known1.includes(data))
 					}
 				},
@@ -384,7 +385,8 @@ function outputCanvas() {
 								var reader = new FileReader()
 								reader.onload = function(){
 									let data = sha1(reader.result)
-									log_perf("toBlob [k] [canvas]",t1,gt0,data)
+									let minidata = mini(reader.result)
+									log_perf("toBlob [k] [canvas]",t1,gt0,data +" | "+ minidata)
 									resolve(known1.includes(data))
 								}
 								reader.onerror = function(){
@@ -407,7 +409,8 @@ function outputCanvas() {
 						var context = getKnown()
 						let imageData = context.getImageData(0,0,16,16)
 						let data = sha1(imageData.data)
-						log_perf("getImageData [k] [canvas]",t1,gt0,data)
+						let minidata = mini(imageData.data)
+						log_perf("getImageData [k] [canvas]",t1,gt0,data +" | "+ minidata)
 						return (data == known2 ? true : false)
 					}
 				},
@@ -424,7 +427,8 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathData.join())
-						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
+						let minidata = mini(pathData.join())
+						log_perf("isPointInPath [k] [canvas]",t1,gt0,data +" | "+ minidata)
 						return (data == known3 ? true : false)
 					}
 				},
@@ -441,7 +445,8 @@ function outputCanvas() {
 							}
 						}
 						let data = sha1(pathStroke.join())
-						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
+						let minidata = mini(pathStroke.join())
+						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data +" | "+ minidata)
 						return (data == known4 ? true : false)
 					}
 				},
