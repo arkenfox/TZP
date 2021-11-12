@@ -61,30 +61,39 @@ function analyse(data) {
 	if (slice1 == "A") {
 		if (slice4 == "5ErkJggg==") {
 			if (slice3 == "lEQVQ4T2") {
-				if (len == 186) {return "0"} // FF96+
+				if (len == 190) {return "12"} // FF96+
+				if (len == 186) {return "13"}
+				if (len == 182) {return "14"}
+				if (len == 174) {return "15"}
 			} else if (slice3 == "lEQVQ4jW") {
-				if (len == 174) {return "1"}
-				if (len == 170) {return "2"}
-				if (len == 166) {return "3"}
-				if (len == 162) {return "4"}
+				if (len == 174) {return "0"}
+				if (len == 170) {return "1"}
+				if (len == 166) {return "2"}
+				if (len == 162) {return "3"}
 			}
 		} else if (slice4 == "VORK5CYII=") {
 			if (slice3 == "lEQVQ4T2") {
-				if (len == 186) {return "5"} // FF96+
+				if (len == 190) {return "16"} // FF96+
+				if (len == 186) {return "17"}
+				if (len == 182) {return "18"}
+				if (len == 174) {return "19"}
 			} else if (slice3 == "lEQVQ4jW") {
-				if (len == 174) {return "6"}
-				if (len == 170) {return "7"}
-				if (len == 166) {return "8"}
-				if (len == 162) {return "9"}
+				if (len == 174) {return "4"}
+				if (len == 170) {return "5"}
+				if (len == 166) {return "6"}
+				if (len == 162) {return "7"}
 			}
 		} else if (slice4 == "lFTkSuQmCC") {
 			if (slice3 == "lEQVQ4T2") {
-				if (len == 186) {return "10"} // FF96+
+				if (len == 190) {return "20"} // FF96+
+				if (len == 186) {return "21"}
+				if (len == 182) {return "22"}
+				if (len == 174) {return "23"}
 			} else if (slice3 == "lEQVQ4jW") {
-				if (len == 174) {return "11"}
-				if (len == 170) {return "12"}
-				if (len == 166) {return "13"}
-				if (len == 162) {return "14"}
+				if (len == 174) {return "8"}
+				if (len == 170) {return "9"}
+				if (len == 166) {return "10"}
+				if (len == 162) {return "11"}
 			}
 		}
 		return strNew
@@ -107,8 +116,8 @@ function get_data() {
 			aData.push("this is not RFP as it is not random per execution")
 			return aData
 		}
-		// 1724331 FF96+ (also see 1737038) - 186 is a new length: seems to always be 186
-		if (data.length > 186 || data2.length > 186) { // was 180
+		// 1724331 FF96+ (also see 1737038)
+		if (data.length > 190 || data2.length > 190) { // was 180
 			aData.push("look, you're not fooling anyone, this is not RFP")
 			return aData
 		}
@@ -288,23 +297,37 @@ let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4jW"+ sc +" ... "
 let prefix2 = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4T2"+ sc +" ... "+ s14
 
 let rules = [
-	s14+ "186 "+ prefix2 + "5ErkJggg=="+ sc, // FF96+
+	// FF95 or lower
 	s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
 	s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
 
-	s14+ "186 "+ prefix2 + "VORK5CYII="+ sc, // FF96+
 	s14+ "174 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "170 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "166 "+ prefix + "VORK5CYII="+ sc,
 	s14+ "162 "+ prefix + "VORK5CYII="+ sc,
 
-	s14+ "186 "+ prefix2 + "lFTkSuQmCC"+ sc, // FF96+
 	s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+
+	// FF96+
+	s14+ "190 "+ prefix2 + "5ErkJggg=="+ sc,
+	s14+ "186 "+ prefix2 + "5ErkJggg=="+ sc,
+	s14+ "182 "+ prefix2 + "5ErkJggg=="+ sc, // is there a 176 ?
+	s14+ "174 "+ prefix2 + "5ErkJggg=="+ sc,
+
+	s14+ "190 "+ prefix2 + "VORK5CYII="+ sc,
+	s14+ "186 "+ prefix2 + "VORK5CYII="+ sc,
+	s14+ "182 "+ prefix2 + "VORK5CYII="+ sc,
+	s14+ "174 "+ prefix2 + "VORK5CYII="+ sc,
+
+	s14+ "190 "+ prefix2 + "lFTkSuQmCC"+ sc,
+	s14+ "186 "+ prefix2 + "lFTkSuQmCC"+ sc,
+	s14+ "182 "+ prefix2 + "lFTkSuQmCC"+ sc,
+	s14+ "174 "+ prefix2 + "lFTkSuQmCC"+ sc,
 ]
 
 // running totals
