@@ -76,6 +76,12 @@ function analyse(data) {
 			if (len == 162) {return "11"}
 		}
 		return strNew
+	} else if (slice1 == "A" && slice3 == "lEQVQ4T2") {
+		// FF96+
+		if (slice4 == "VORK5CYII=") {
+			if (len == 186) {return "12"}
+		}
+		return strNew
 	}
 	return strNew
 }
@@ -95,7 +101,7 @@ function get_data() {
 			aData.push("this is not RFP as it is not random per execution")
 			return aData
 		}
-		// 1724331 FF96+ (also see 1737038) - 186 seems to be it
+		// 1724331 FF96+ (also see 1737038) - 186 is a new length: seems to always be 186
 		if (data.length > 186 || data2.length > 186) { // was 180
 			aData.push("look, you're not fooling anyone, this is not RFP")
 			return aData
@@ -288,6 +294,9 @@ let rules = [
 	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
 	s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+
+	// FF96+
+	s14+ "186 "+ prefix + "VORK5CYII="+ sc,
 ]
 
 // running totals
