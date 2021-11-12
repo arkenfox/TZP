@@ -95,6 +95,9 @@ function get_data() {
 			aData.push("this is not RFP as it is not random per execution")
 			return aData
 		}
+		// 1724331 FF96+ (also see 1737038)
+		console.log(data.length)
+
 		if (data.length > 180 || data2.length > 180) {
 			aData.push("look, you're not fooling anyone, this is not RFP")
 			return aData
