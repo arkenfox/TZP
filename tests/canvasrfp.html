@@ -273,7 +273,7 @@ function run(howmany) {
 					let ruleNo = "RULE"+ (i +"").padEnd(2)
 					strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s14 + ruleNo + sc +": "+ strTotal
 					displayTotal.push(strTotal)
-					if ((i % 4) == 3) {
+					if ((i % 4) == 3 || i+1 == rules.length) { // 4 per line plus final line
 						display.push(displayTotal.join(" | "))
 						displayTotal = []
 					}
