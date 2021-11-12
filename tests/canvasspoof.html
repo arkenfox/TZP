@@ -78,9 +78,9 @@ function analyse(data, type) {
 	let element = document.getElementById("raw"+ type)
 	document.getElementById("label"+ type).innerHTML = "to"+ type
 
-	if (slice1 == "A" && slice3 == "lEQVQ4jW") {
-		if (slice4 == "5ErkJggg==" || slice4 == "VORK5CYII=" || slice4 == "lFTkSuQmCC") {
-			if (len == 174 || len == 170 || len == 166 || len == 162) {
+	if (slice1 == "A" && len > 161 && len < 191) {
+		if (slice3 == "lEQVQ4jW" || slice3 == "lEQVQ4T2") {
+			if (slice4 == "5ErkJggg==" || slice4 == "VORK5CYII=" || slice4 == "lFTkSuQmCC") {
 				element.innerHTML = data.slice(0,69) + s14 + slice1 + sc + slice2 + s14 + slice3 + sc
 					+ data.slice(80, len - 10) + s14 + slice4 + sc + s9 +" ["+ len +"]"+ sc
 				return
