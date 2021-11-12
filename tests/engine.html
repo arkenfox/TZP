@@ -299,6 +299,10 @@ function get_iframe_props(num1, num2, title) {
 		'USB','WakeLock','WebKitMutationObserver','XRAnchor','chrome','webkitCancelAnimationFrame',
 		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
+	if (is93) {
+		// 1739233: FF96+ Lock (FF93+ "dom.weblocks.enabled")
+		listU = listU.filter(x => !["Lock"].includes(x))
+	}
 	try {
 		if (bBlock) {bB = 1}
 		// create & append iframe
@@ -840,6 +844,10 @@ function get_nav_keys(num1, num2, title) {
 			// 1670058: FF95+ globalPrivacyControl
 			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
 		}
+		if (is93) {
+			// 1739233: FF96+ locks (FF93+ "dom.weblocks.enabled")
+			aNavNotExpected = aNavNotExpected.filter(x => !["locks"].includes(x))
+		}
 		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
 		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
 		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
@@ -1280,6 +1288,7 @@ let is61 = false,
 	is78 = false,
 	is85 = false,
 	is86 = false,
+	is93 = false,
 	is95 = false,
 	isRFP2 = false,
 	isWebkit = false
@@ -1294,7 +1303,10 @@ if (isFF) {
 		let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
 		if (test > 0.4 && test < 0.6) {is95 = true}
 	} catch(e) {}
-
+	// 93
+	try {
+		if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {is93 = true}
+	} catch(e) {}
 	// 86
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
 	// 85
