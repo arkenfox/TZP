@@ -64,7 +64,8 @@ function analyse(data) {
 				if (len == 190) {return "12"} // FF96+
 				if (len == 186) {return "13"}
 				if (len == 182) {return "14"}
-				if (len == 174) {return "15"}
+				if (len == 178) {return "15"}
+				if (len == 174) {return "16"}
 			} else if (slice3 == "lEQVQ4jW") {
 				if (len == 174) {return "0"}
 				if (len == 170) {return "1"}
@@ -73,10 +74,11 @@ function analyse(data) {
 			}
 		} else if (slice4 == "VORK5CYII=") {
 			if (slice3 == "lEQVQ4T2") {
-				if (len == 190) {return "16"} // FF96+
-				if (len == 186) {return "17"}
-				if (len == 182) {return "18"}
-				if (len == 174) {return "19"}
+				if (len == 190) {return "17"} // FF96+
+				if (len == 186) {return "18"}
+				if (len == 182) {return "19"}
+				if (len == 178) {return "20"}
+				if (len == 174) {return "21"}
 			} else if (slice3 == "lEQVQ4jW") {
 				if (len == 174) {return "4"}
 				if (len == 170) {return "5"}
@@ -85,10 +87,11 @@ function analyse(data) {
 			}
 		} else if (slice4 == "lFTkSuQmCC") {
 			if (slice3 == "lEQVQ4T2") {
-				if (len == 190) {return "20"} // FF96+
-				if (len == 186) {return "21"}
-				if (len == 182) {return "22"}
-				if (len == 174) {return "23"}
+				if (len == 190) {return "22"} // FF96+
+				if (len == 186) {return "23"}
+				if (len == 182) {return "24"}
+				if (len == 178) {return "25"}
+				if (len == 174) {return "26"}
 			} else if (slice3 == "lEQVQ4jW") {
 				if (len == 174) {return "8"}
 				if (len == 170) {return "9"}
@@ -316,17 +319,20 @@ let rules = [
 	// FF96+
 	s14+ "190 "+ prefix2 + "5ErkJggg=="+ sc,
 	s14+ "186 "+ prefix2 + "5ErkJggg=="+ sc,
-	s14+ "182 "+ prefix2 + "5ErkJggg=="+ sc, // is there a 176 ?
+	s14+ "182 "+ prefix2 + "5ErkJggg=="+ sc,
+	s14+ "178 "+ prefix2 + "5ErkJggg=="+ sc,
 	s14+ "174 "+ prefix2 + "5ErkJggg=="+ sc,
 
 	s14+ "190 "+ prefix2 + "VORK5CYII="+ sc,
 	s14+ "186 "+ prefix2 + "VORK5CYII="+ sc,
 	s14+ "182 "+ prefix2 + "VORK5CYII="+ sc,
+	s14+ "178 "+ prefix2 + "VORK5CYII="+ sc,
 	s14+ "174 "+ prefix2 + "VORK5CYII="+ sc,
 
 	s14+ "190 "+ prefix2 + "lFTkSuQmCC"+ sc,
 	s14+ "186 "+ prefix2 + "lFTkSuQmCC"+ sc,
 	s14+ "182 "+ prefix2 + "lFTkSuQmCC"+ sc,
+	s14+ "178 "+ prefix2 + "lFTkSuQmCC"+ sc,
 	s14+ "174 "+ prefix2 + "lFTkSuQmCC"+ sc,
 ]
 
