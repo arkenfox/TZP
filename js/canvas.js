@@ -5,29 +5,35 @@
 function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let res0 = [], res1 = [], res2 = []
+	var isSHA = "SHA-1"
 
 	// ToDo: apply isVer check for FF95+
-	let known1 = [
-		"8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // gecko: toDataURL, toBlob
-		"5d1c72c1fe6b3358a33d03ad93e79ceb80fbb4ec", // 1737038 FF96+ obsolete?
-		"bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf", // 1724331 FF96+
+	let known1 = [ // gecko: toDataURL, toBlob
+		//"749d6141",
+		"b7bf4776", // 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
+		"bdcce913", // 1724331 FF96+ (also see 1737038)
 	],
-		known2 = "feda16213d6e3b49bc7bcec733f0c710aba675f7", // getImageData
-		known3 = "f44c70171a197cc26df382603e76f4ba581e2d8f", // isPointInPath
-		known4 = "1b636fb26edee73d7ca832edd1112e0021566a50"  // isPointInStroke
+		known2 = "749d6141", // getImageData
+		known3 = ["e5b3726b"], // isPointInPath
+		known4 = ["e262d7f1"]  // isPointInStroke
 	if (isEngine == "blink") {
 		known1 = ["bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf",
-			"05f24fe5cfa497c8bebf1749188ab5fbd2b7c188", // android
-			"c05807c783bd281ee83d13807426023390c7d66a", // android
+			"05f24fe5cfa497c8bebf1749188ab5fbd2b7c188", // 
+			"c05807c783bd281ee83d13807426023390c7d66a", // 117efe05
 		]
 	} else if (isEngine == "webkit") {
 		known1 = ["24c8af813fb7001ded7e81e125e9d3237e9400d5"]
+	}
+	if (isBrave && isFile) {
+		// false positives
+		known3.push("dfb223f3")
+		known4.push("dfb223f3")
 	}
 
 	// analyze
 	function analyze() {
 		// get data
-		let nHash = 64
+		let nHash = isSHA == "SHA-256" ? 64 : 40
 		let useKnown = (isFF || isEngine == "blink" || isEngine == "webkit")
 		let aBlock = [], aIndex = [], aValue = [], aKnown = [], aPass = []
 		let compareBlob = "", compareDataURL = "", ffBlob = "", ffDataURL = ""
@@ -49,7 +55,8 @@ function outputCanvas() {
 			if (isBlock) {aPass.push(true)} else {aPass.push(val0 == val1 ? true : false)}
 			// value = force non-hash if required
 			if (isBlock && val0.length == nHash && val0.indexOf(" ") == -1) {val0 = val1}
-			if (!isBlock) {val0 = sha1(val0)}
+			// rehash shorter
+			if (!isBlock && isSHA == "SHA-256") {val0 = sha1(val0, "canvas "+ name)}
 			aValue.push(val0) 
 			// lies = from known: valid hash + engine
 			if (!useKnown || isBlock) {val2 = "true"}
@@ -57,12 +64,12 @@ function outputCanvas() {
 			// valid hashes
 			if (!isBlock) {
 				if (val2 == "true" && aPass[i] == true) {
-					if (name == "toBlob") {compareBlob = val0}
-					if (name == "toDataURL") {compareDataURL = val0}
+					if (name == "toBlob") {compareBlob = val0
+					} else if (name == "toDataURL") {compareDataURL = val0}
 				}
 				// RFP
-				if (name == "toBlob") {ffBlob = val0}
-				if (name == "toDataURL") {ffDataURL = val0}
+				if (name == "toBlob") {ffBlob = val0
+				} else if (name == "toDataURL") {ffDataURL = val0}
 			}
 		}
 		// bypass
@@ -202,7 +209,7 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getFilledContext()
 						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
-						let data = window.crypto.subtle.digest("SHA-256", imageData.data).then(hashToString)
+						let data = window.crypto.subtle.digest(isSHA, imageData.data).then(hashToString)
 						log_perf("getImageData ["+ runNo +"] [canvas]",t1)
 						return data
 					}
@@ -219,7 +226,7 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInPath(x, y)
 							}
 						}
-						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
 						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
@@ -236,7 +243,7 @@ function outputCanvas() {
 								data[y * 30 + x] = context.isPointInStroke(x, y)
 							}
 						}
-						let dataR = window.crypto.subtle.digest("SHA-256", data).then(hashToString)
+						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
 						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
@@ -319,7 +326,7 @@ function outputCanvas() {
 				}).join("")
 			}
 			function hashDataURL(url){
-				return crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(url)).then(hashToString)
+				return crypto.subtle.digest(isSHA, new TextEncoder("utf-8").encode(url)).then(hashToString)
 			}
 			function hashData(data) {
 				if (data === null) {data = "null"
@@ -365,9 +372,10 @@ function outputCanvas() {
 					name: "toDataURL",
 					value: function(){
 						let t1; if (canPerf) {t1 = performance.now()}
-						let data = sha1(getKnown().canvas.toDataURL())
-						let minidata = mini(getKnown().canvas.toDataURL())
-						log_perf("toDataURL [k] [canvas]",t1,gt0,data +" | "+ minidata)
+						let data = getKnown().canvas.toDataURL()
+						let str = "canvas [k] todataurl"
+						data = (isFF ? mini(data, str) : sha1(data, str))
+						log_perf("toDataURL [k] [canvas]",t1,gt0,data)
 						return (known1.includes(data))
 					}
 				},
@@ -384,9 +392,9 @@ function outputCanvas() {
 								window.clearTimeout(timeout)
 								var reader = new FileReader()
 								reader.onload = function(){
-									let data = sha1(reader.result)
-									let minidata = mini(reader.result)
-									log_perf("toBlob [k] [canvas]",t1,gt0,data +" | "+ minidata)
+									let str = "canvas [k] toblob"
+									let data = (isFF ? mini(reader.result, str) : sha1(reader.result, str))
+									log_perf("toBlob [k] [canvas]",t1,gt0,data)
 									resolve(known1.includes(data))
 								}
 								reader.onerror = function(){
@@ -408,9 +416,8 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getKnown()
 						let imageData = context.getImageData(0,0,16,16)
-						let data = sha1(imageData.data)
-						let minidata = mini(imageData.data)
-						log_perf("getImageData [k] [canvas]",t1,gt0,data +" | "+ minidata)
+						let data = mini(imageData.data, "canvas [k] getimagedata")
+						log_perf("getImageData [k] [canvas]",t1,gt0,data)
 						return (data == known2 ? true : false)
 					}
 				},
@@ -426,10 +433,9 @@ function outputCanvas() {
 								pathData.push(context2.isPointInPath(x, y))
 							}
 						}
-						let data = sha1(pathData.join())
-						let minidata = mini(pathData.join())
-						log_perf("isPointInPath [k] [canvas]",t1,gt0,data +" | "+ minidata)
-						return (data == known3 ? true : false)
+						let data = mini(pathData.join(), "canvas [k] ispointinpath")
+						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
+						return (known3.includes(data) ? true : false)
 					}
 				},
 				{
@@ -444,10 +450,9 @@ function outputCanvas() {
 								pathStroke.push(context2.isPointInStroke(x, y))
 							}
 						}
-						let data = sha1(pathStroke.join())
-						let minidata = mini(pathStroke.join())
-						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data +" | "+ minidata)
-						return (data == known4 ? true : false)
+						let data = mini(pathStroke.join(), "canvas [k] ispointinstroke")
+						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
+						return (known4.includes(data) ? true : false)
 					}
 				},
 			];
