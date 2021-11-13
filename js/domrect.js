@@ -167,7 +167,7 @@ function outputDomRect() {
 				}
 				// store hashes on first two runs
 				if (runtype < 2) {
-					runarray.push(runtype +":"+ method +":"+ sha1(data.join()))
+					runarray.push(runtype +":"+ method +":"+ sha1(data.join(), "domrect runtype "+ runtype))
 				}
 			} catch(e) {
 				runarray.push(runtype +":"+ method +":tzp:"+ e.name)
