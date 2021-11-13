@@ -265,7 +265,6 @@ function outputAudio() {
 		knownGood = [35.7383295930922,35.73833039775491,35.73833402246237,35.74996018782258,
 		35.7499681673944,35.74996031448245]
 	}
-
 	try {
 		let context = new window.OfflineAudioContext(1, 44100, 44100)
 		dom.audioSupport = zE
@@ -312,8 +311,8 @@ function outputAudio() {
 					}
 					pxi_compressor.disconnect()
 					// get/copy
-					let hashG = sha1(byteArrayToHex(hashes[0]))
-					let hashC = sha1(byteArrayToHex(hashes[1]))
+					let hashG = sha1(byteArrayToHex(hashes[0]), "audio get")
+					let hashC = sha1(byteArrayToHex(hashes[1]), "audio copy")
 					if (hashG !== hashC) {isLies = true}
 					// display/FP
 					if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
