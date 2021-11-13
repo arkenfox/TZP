@@ -174,7 +174,7 @@ function get_geo() {
 			+" | "+ ("Geolocation" in window ? "true" : "false")
 		dom.geo1 = r
 		function geoWrite(r) {
-			let rhash = sha1(r)
+			let rhash = sha1(r, "language geo")
 			r = rhash.substring(0,8)
 			if (isTB) {
 				if (r == "ce3ac8f4" && isVer > 71) {
@@ -251,7 +251,7 @@ function get_lang_doc() {
 					'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',]
 					chars.sort()
 					chars.sort(Intl.Collator(undefined).compare)
-					return sha1(chars.join())
+					return sha1(chars.join(), "language collation")
 				// timezone
 				} else if (item == 12) {
 					let k = 60000, yr = 2021
@@ -652,7 +652,7 @@ function get_lang_doc() {
 			// output line items after combos
 			if (i > 10) {
 				if (i == 14) {
-					dom.ldt14.innerHTML = sha1(result) // hash multi-year timezone offsets
+					dom.ldt14.innerHTML = sha1(result, "language timezone offsets") // hash multi-year timezone offsets
 				} else {
 					document.getElementById("ldt"+ i).innerHTML = result
 				}
@@ -669,9 +669,9 @@ function get_lang_doc() {
 		dom.ldt2.innerHTML = aLang.slice(0,2).join(" | ")
 		dom.ldt9.innerHTML = aLang.slice(2,11).join(" | ") // item 12 is n/a
 		// record three hashes
-		let hashLang = sha1(aLang.join("-"))
-		let hashTime = sha1(aTime.join("-"))
-		let hashDate = sha1(aDate.join("-"))
+		let hashLang = sha1(aLang.join("-"), "language language & locale")
+		let hashTime = sha1(aTime.join("-"), "language timezone")
+		let hashDate = sha1(aDate.join("-"), "language date/time & format")
 		let hashAll = []
 		hashAll.push("language:"+ hashLang)
 		hashAll.push("timezone:"+ hashTime)
@@ -769,7 +769,7 @@ function outputLanguage() {
 			}
 		})
 		section.sort()
-		dom.lHashDoc = sha1(section.join())
+		dom.lHashDoc = sha1(section.join(),"language overall hash") // do we need this
 		log_section("language", t0, section)
 		//get_lang_worker() // rework a global worker test
 	})
