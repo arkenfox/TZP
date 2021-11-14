@@ -5,7 +5,7 @@ function get_element_keys() {
 	sDetail[sName] = []
 	return new Promise(resolve => {
 		try {
-			// create element
+			// create element //
 			const id = 'html-element-version'
 			const element = document.createElement('div')
 			element.setAttribute('id', id)
