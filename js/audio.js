@@ -2,7 +2,7 @@
 
 /* code base on
 https://canvasblocker.kkapsner.de/test/
-https://audiofingerprint.openwpm.com/ */
+https://audiofingerprint.openwpm.com/ **/
 
 var t0audio,
 	latencyError = false,
