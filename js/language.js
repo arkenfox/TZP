@@ -769,7 +769,7 @@ function outputLanguage() {
 			}
 		})
 		section.sort()
-		dom.lHashDoc = sha1(section.join(),"language overall hash") // do we need this
+		//dom.lHashDoc = sha1(section.join(),"language overall hash") // do we need this
 		log_section("language", t0, section)
 		//get_lang_worker() // rework a global worker test
 	})
