@@ -7,7 +7,7 @@ let	fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	'0x061C','0x20E3','0xFFF9','0x0218','0x058F','0x08E4','0x09B3','0x1C50','0x2619'],
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
-	fntList = [], // what we use //
+	fntList = [], // what we use
 	fntSim = 0,
 	fontBtns = "",
 	fontBaseBtn = ""
@@ -400,82 +400,58 @@ function get_fonts() {
 				}
 				fntSim++
 			}
-
 			// get values
-			let fntHashes = [], blank = [], isSame = false
+			let fntData = [], fntHashes = [], miniHashes = [], blank = [], isSame = false
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
 					if (name !== "lies") { // ignore lies
 						let data = res[name],
 							hash = "none"
 						if (data.length == 0) {
-							// fontsPixelSize: not supported in FF62 or lower
-							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
 							blank.push(name)
 						} else {
-							hash = mini(data.join(), "fonts "+ name)
+							// mini
+							let minihash = mini(data.join(), "fonts "+ name)
+							// sha1
+							let getsha1 = false
+							if (fntHashes.length == 0) {getsha1 = true
+							} else if (miniHashes[miniHashes.length-1] !== minihash) {getsha1 = true}
+							if (getsha1) {
+								hash = sha1(data.join(), "fonts "+ name)
+							} else {
+								hash = fntHashes[fntHashes.length-1] // use last computed
+							}
 							fntHashes.push(hash)
+							miniHashes.push(minihash)
 							sDetail["fonts_fonts"] = data
 						}
+						fntData.push(name+ ":"+ hash + ":"+ data.length)
+						document.getElementById(name).innerHTML = hash // do i need this
 					}
 				}
 			} else {
 				isSame = true
 			}
 			let distinct = fntHashes.filter(function(item, position) {return fntHashes.indexOf(item) === position})
-			if (distinct.length == 1 && blank.length == 0) {isSame = true}
-			if (blank.length == 7) {isSame = true}
+			if (distinct.length == 1 && blank.length == 0) {isSame = true; res = distinct[0]}
+			if (blank.length == 7) {isSame = true; res = "none"}
+
 			// all n/a, none, blocked or same hash
-			let summary = "", singleres = ""
 			if (isSame) {
-				if (res == zB0 || res == zNA) {
-					singleres = res
-				} else if (blank.length == 7) {
-					singleres = "none"
-				} else if (blank.length == 0) {
-					try {
-						singleres = sha1(res["fontsOffset"].join(),"fonts fonts")
-					} catch(e) {
-						singleres = distinct[0]
-						if (singleres == undefined) {singleres = "undefined"
-						} else if (singleres == "") {singleres = "empty string"}
-					}
-				} else {
-					singleres = distinct[0]
-					if (singleres == undefined) {singlesres = "undefined"
-					} else if (singleres == "") {singleres = "empty string"}
-				}
-				sNames.forEach(function(name) {document.getElementById(name).innerHTML = singleres})
-				summary = (singleres == "none" ? soL +"none"+ scC : singleres)
-				if (singleres.length == 40) {
+				sNames.forEach(function(name) {document.getElementById(name).innerHTML = res})
+				let summary = (res == "none" ? soL +"none"+ scC : res)
+				if (res.length == 40) {
 					summary += buildButton("12", "fonts_fonts", sDetail["fonts_fonts"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
 				dom.fontMain.innerHTML = summary
 				if (gRun) {
-					if (singleres == zB0 || singleres == "none") {
-						if (singleres == "none") {gKnown.push("fonts:fonts")}
-						gMethods.push("fonts:fonts:"+ singleres +":all")
+					if (res == zB0 || res == "none") {
+						if (res == "none") {gKnown.push("fonts:fonts")}
+						gMethods.push("fonts:fonts:"+ res +":all")
 					}
 				}
 				log_perf("fonts [fonts]",t0)
-				return resolve("fonts:"+ (singleres == "none"? zLIE : singleres))
-			}
-
-			// mixed: rehash sha1
-			let fntData = []
-			fntHashes = []
-			for (let name in res) {
-				if (name !== "lies") { // ignore lies
-					let data = res[name], hash = "none"
-					if (data.length == 0) {
-						if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
-					} else {
-						hash = sha1(data.join(), "fonts "+ name)
-						fntHashes.push(hash)
-					}
-					fntData.push(name+ ":"+ hash + ":"+ data.length)
-					document.getElementById(name).innerHTML = hash // do i need this
-				}
+				return resolve("fonts:"+ (res == "none"? zLIE : res))
 			}
 
 			blank.sort
