@@ -1,7 +1,7 @@
 'use strict';
 dom = getUniqueElements()
 
-/*** GENERIC ***/
+/*** GENERIC ****/
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
