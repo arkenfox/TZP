@@ -5,7 +5,7 @@ let bTZ = false
 function get_navigator() {
 	return new Promise(resolve => {
 		let results = []
-		// beacon
+		// beacon //
 		let beacon = (check_navKey("sendBeacon") ? zE : zD)
 		dom.nBeacon = beacon
 		// GPC: 1670058

@@ -1,6 +1,6 @@
 "use strict";
 
-/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
+/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ **/
 
 function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}

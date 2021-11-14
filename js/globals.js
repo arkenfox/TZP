@@ -2,7 +2,7 @@
 
 var dom;
 
-// global snapshot
+// global snapshot //
 let jsFiles = [],
 	gCount = 0,
 	gCountExpected = 15,
