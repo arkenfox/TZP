@@ -11,7 +11,7 @@ function outputDomRect() {
 		// debug
 		//run0.sort(); run1.sort(); console.log("domrect\n - "+ run0.join("\n - ") +"\n - "+ run1.join("\n - "))
 
-		let knownHash = "bebfc291e9d1adc90e240790551d0305b8b91294"
+		let knownHash = "cf417ff6"
 		let pretty = ["Element.getClientRects","Element.getBoundingClientRect","Range.getClientRects","Range.getBoundingClientRect"]
 		let hash = []
 
@@ -20,7 +20,7 @@ function outputDomRect() {
 			if (isFF) {
 				// FF: rect6
 				// note: errors/undefined override these when we check value1
-				known["dr"+ i] = (sha1( known["dr"+ i].join()) == knownHash ? false : true)
+				known["dr"+ i] = (mini(known["dr"+ i].join()) == knownHash ? false : true)
 				//if (known["dr"+ i] == true) {console.log("lie: known values: "+ pretty[i])}
 			} else {
 				// non-FF
@@ -167,7 +167,7 @@ function outputDomRect() {
 				}
 				// store hashes on first two runs
 				if (runtype < 2) {
-					runarray.push(runtype +":"+ method +":"+ sha1(data.join()))
+					runarray.push(runtype +":"+ method +":"+ sha1(data.join(), "domrect runtype "+ runtype))
 				}
 			} catch(e) {
 				runarray.push(runtype +":"+ method +":tzp:"+ e.name)

@@ -360,8 +360,8 @@ const getFonts = () => {
 				fontsTransform
 			})
 		} catch(e) {
-			if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
-			if (gRun) {gCheck.push("fonts:fonts: "+ e.name +" : "+ e.message)}
+			//if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
+			if (gRun) {log_error("fonts:fonts", e.name, e.message)}
 			return resolve(zB0)
 		}
 	})
@@ -379,7 +379,6 @@ function get_fonts() {
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
-
 			// sim
 			if (runSL) {
 				fntSim = fntSim % 6
@@ -403,51 +402,82 @@ function get_fonts() {
 			}
 
 			// get values
-			let fntData = [], fntHashes = [], blank = [], isSame = false, summary = ""
+			let fntHashes = [], blank = [], isSame = false
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
 					if (name !== "lies") { // ignore lies
 						let data = res[name],
-							hash = sha1(data.join())
-						if (data.length == 0) {
 							hash = "none"
+						if (data.length == 0) {
 							// fontsPixelSize: not supported in FF62 or lower
 							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
 							blank.push(name)
 						} else {
+							hash = mini(data.join(), "fonts "+ name)
 							fntHashes.push(hash)
 							sDetail["fonts_fonts"] = data
 						}
-						fntData.push(name+ ":"+ hash + ":"+ data.length)
-						document.getElementById(name).innerHTML = hash
 					}
 				}
 			} else {
 				isSame = true
 			}
 			let distinct = fntHashes.filter(function(item, position) {return fntHashes.indexOf(item) === position})
-			if (distinct.length == 1 && blank.length == 0) {isSame = true; res = distinct[0]}
-			if (blank.length == 7) {isSame = true; res = "none"}
-
+			if (distinct.length == 1 && blank.length == 0) {isSame = true}
+			if (blank.length == 7) {isSame = true}
 			// all n/a, none, blocked or same hash
+			let summary = "", singleres = ""
 			if (isSame) {
-				sNames.forEach(function(name) {document.getElementById(name).innerHTML = res})
-				summary = (res == "none" ? soL +"none"+ scC : res)
-				if (res.length == 40) {
+				if (res == zB0 || res == zNA) {
+					singleres = res
+				} else if (blank.length == 7) {
+					singleres = "none"
+				} else if (blank.length == 0) {
+					try {
+						singleres = sha1(res["fontsOffset"].join(),"fonts fonts")
+					} catch(e) {
+						singleres = distinct[0]
+						if (singleres == undefined) {singleres = "undefined"
+						} else if (singleres == "") {singleres = "empty string"}
+					}
+				} else {
+					singleres = distinct[0]
+					if (singleres == undefined) {singlesres = "undefined"
+					} else if (singleres == "") {singleres = "empty string"}
+				}
+				sNames.forEach(function(name) {document.getElementById(name).innerHTML = singleres})
+				summary = (singleres == "none" ? soL +"none"+ scC : singleres)
+				if (singleres.length == 40) {
 					summary += buildButton("12", "fonts_fonts", sDetail["fonts_fonts"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
 				dom.fontMain.innerHTML = summary
 				if (gRun) {
-					if (res == zB0 || res == "none") {
-						if (res == "none") {gKnown.push("fonts:fonts")}
-						gMethods.push("fonts:fonts:"+ res +":all")
+					if (singleres == zB0 || singleres == "none") {
+						if (singleres == "none") {gKnown.push("fonts:fonts")}
+						gMethods.push("fonts:fonts:"+ singleres +":all")
 					}
 				}
 				log_perf("fonts [fonts]",t0)
-				return resolve("fonts:"+ (res == "none"? zLIE : res))
+				return resolve("fonts:"+ (singleres == "none"? zLIE : singleres))
 			}
 
-			// mixed
+			// mixed: rehash sha1
+			let fntData = []
+			fntHashes = []
+			for (let name in res) {
+				if (name !== "lies") { // ignore lies
+					let data = res[name], hash = "none"
+					if (data.length == 0) {
+						if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
+					} else {
+						hash = sha1(data.join(), "fonts "+ name)
+						fntHashes.push(hash)
+					}
+					fntData.push(name+ ":"+ hash + ":"+ data.length)
+					document.getElementById(name).innerHTML = hash // do i need this
+				}
+			}
+
 			blank.sort
 			// don't record method for fontsPixelSize if not supported
 			if (isVer < 63) {blank = blank.filter(x => !["fontsPixelSize"].includes(x))}
@@ -656,14 +686,14 @@ function get_unicode() {
 			for (let i=0; i < tmTypes.length; i++) {
 				let el = document.getElementById("tm"+ i),
 					array = tmres["tmres"+ i],
-					output = sha1(array.join())
+					output = ""
 				if (tmSupport[i]) {
 					if (isCanvas) {
-						array = array.filter(function(item, position) {return array.indexOf(item) === position})
-						let hashchk = sha1(array.join())
-						if (hashchk == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+						if (array[0] === undefined) {
 							output = "undefined" // different to canvas blocking
 							if (i == 0) {isTM = false}
+						} else {
+							output = sha1(array.join(), "fonts textmetrics " + tmTypes[i])
 						}
 					} else {
 						output = zB0
@@ -681,7 +711,9 @@ function get_unicode() {
 			diffsb = diffsb.filter(function(item, position) {return diffsb.indexOf(item) === position})
 			diffsc = diffsc.filter(function(item, position) {return diffsc.indexOf(item) === position})
 			// glyphs
-			let ohash = sha1(offset.join()), bhash = sha1(bounding.join()), chash = sha1(client.join())
+			let ohash = sha1(offset.join(), "fonts gylphs offset"),
+				bhash = sha1(bounding.join(), "fonts gylphs bounding"),
+				chash = sha1(client.join(), "fonts gylphs client")
 			res.push("glyphs_offset:"+ ohash)
 			res.push("glyphs_getClient:"+ chash)
 			res.push("glyphs_getBounding:"+ bhash)
@@ -840,6 +872,7 @@ function outputFontsFB() {
 function outputFonts() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = [], r = ""
+
 	set_fallback_string()
 	set_fntList()
 	// proportional

@@ -116,7 +116,7 @@ function get_media(runtype) {
 		hashcan = zB0
 		ecan.innerHTML = zB0
 	} else {
-		hashcan = sha1(hashcan.join())
+		hashcan = sha1(hashcan.join(), "media canplay")
 		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
 		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
 	}
@@ -124,7 +124,7 @@ function get_media(runtype) {
 		hashtype = zB0
 		etype.innerHTML = zB0
 	} else {
-		hashtype = sha1(hashtype.join())
+		hashtype = sha1(hashtype.join(), "media istype")
 		notation = (block3 ? zB0 : rec.length) +"/"+ (block4 ? zB0 : src.length)
 		etype.innerHTML = hashtype + buildButton("13", sType, notation)
 	}

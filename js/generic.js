@@ -31,17 +31,26 @@ function getElementProp(id, prop, pseudo) {
 	}
 }
 
-function mini(str) {
+/*** HASHING ***/
+
+function mini(str, call) {
 	// https://stackoverflow.com/a/22429679
+	let t0; if (canPerf) {t0 = performance.now()}
 	const json = `${JSON.stringify(str)}`
 	let i, len, hash = 0x811c9dc5
 	for (i = 0, len = json.length; i < len; i++) {
 		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
+	if (logPerfMini) {
+		let ms = (performance.now()-t0)
+		gPerfHash += ms
+		gPerfHashDetail.push(ms +" : mini : "+ call)
+	}
 	return ('0000000' + (hash >>> 0).toString(16)).substr(-8)
 }
 
-function sha1(str) {
+function sha1(str, call) {
+	let t0; if (canPerf) {t0 = performance.now()}
 	for (var blockstart=0,
 		i = 0,
 		W = [],
@@ -70,6 +79,11 @@ function sha1(str) {
 		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
 	}
 	for(str='';i<40;)str += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+	if (logPerfSha1) {
+		let ms = (performance.now()-t0)
+		gPerfHash += ms
+		gPerfHashDetail.push(ms +" : sha1 : "+ call)
+	}
 	return str
 }
 
@@ -264,7 +278,7 @@ const get_isEngine = () => new Promise(resolve => {
 				res.push("error")
 			}
 		}
-		let hash = sha1(res.join()).substring(0,8)
+		let hash = sha1(res.join(), "_global isEngine").substring(0,8)
 		if (runSL) {hash = "x"}
 		if (hash == "ede9ca53") {isEngine = "blink"
 		} else if (hash == "05513f36") {isEngine = "webkit"
@@ -331,13 +345,13 @@ const get_isError = () => new Promise(resolve => {
 		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
 		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
 		try {let test = newFn("let a = 1_00_;")} catch(e) {res.push(e.name +": "+ e.message)}
-		let hash = sha1(res.join()).substring(0,8)
-		if (hash == "510b2814") {bFF = true //FF74+ fix on
-		} else if (hash == "422b8490") {bFF = true //FF72-73,FF74+ fix off
-		} else if (hash == "f6c5128f") {bFF = true //FF70-71
-		} else if (hash == "b7463a43") {bFF = true //FF60-69
-		} else if (hash == "7263eca6") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
-		} else if (hash == "e64c00a7") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
+		let hash = mini(res.join(), "_global isError")
+		if (hash == "a86909c8") {bFF = true //FF74+ fix on
+		} else if (hash == "78be9e0e") {bFF = true //FF72-73,FF74+ fix off
+		} else if (hash == "47bf0bb5") {bFF = true //FF70-71
+		} else if (hash == "27201347") {bFF = true //FF60-69
+		} else if (hash == "453c3df4") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
+		} else if (hash == "bb033aa2") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
 		}
 		//console.debug(hash)
 		//console.debug(res.join("\n"))
@@ -408,7 +422,6 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
 	// check
 	let t0; if (canPerf) {t0 = performance.now()}
-	let el = dom.widget0
 	function tryharder() {
 		// ToDo: harden isOS
 		log_perf("isOS [global]",t0,"","unknown")
@@ -416,6 +429,7 @@ const get_isOS = () => new Promise(resolve => {
 	}
 	function trymath() {
 		// log lie
+		// ToDo: drop this due to RFP math
 		gKnownOnce.push("_global:isOS")
 		// try quick math
 		let res = [], list = [1e251,1e140,1e12,1e130,1e272,-1,1e284,1e75]
@@ -446,19 +460,18 @@ const get_isOS = () => new Promise(resolve => {
 	}
 	// system font
 	try {
+		if (runSL) {abd=def}
+		let el = dom.widget0
 		let font = getComputedStyle(el).getPropertyValue("font-family")
 		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
+		} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
 		} else if (font == "Roboto") {isOS="android"
 		}	else if (font == "-apple-system") {isOS="mac"
 		}	else {isOS="linux"}
-		if (runSL) {
-			isOS = ""
-			trymath()
-		} else {
-			log_perf("isOS [global]",t0,"",isOS)
-		}
+		log_perf("isOS [global]",t0,"",isOS)
 		return resolve()
 	} catch(e) {
+		// no need to gErrorsOnce since we do this in widgets
 		trymath()
 	}
 })
@@ -787,7 +800,7 @@ const get_navKeys = () => new Promise(resolve => {
 		for (const key in navigator) {keysB.push(key)}
 		if (gRun) {
 			if (runSL) {keysA = ["b","c","buildID","iamfake","appName"]; keysB = ["appName","b","e","f"]}
-			if (sha1(keysA.join()) !== sha1(keysB.join())) {
+			if (mini(keysA.join(), "_prereq navA") !== mini(keysB.join(), "_prereq navB")) {
 				gMethods.push("misc:navigator keys: mismatch")
 				sDetail["misc_navigator_keys_mismatch_[prototype]_method_skip"] = keysA
 				sDetail["misc_navigator_keys_mismatch_[for loop]_method_skip"] = keysB
@@ -1120,9 +1133,7 @@ function log_line(str) {
 }
 
 function log_perf(str, time1, time2, extra) {
-	if (!canPerf) {
-		return
-	}
+	if (!canPerf) {return}
 	let t0 = performance.now(),
 		output = ""
 	if (time1 == undefined) {time1 = ("error").padStart(7)}
@@ -1179,7 +1190,7 @@ function log_section(name, time1, data) {
 	// DATA
 	if (Array.isArray(data)) {
 		data.sort()
-		let hash = sha1(data.join())
+		let hash = sha1(data.join(), name +" section result")
 		// SANITY
 		if (data.length == 0) {
 			gCheck.push("#section "+ name +": data array is empty")
@@ -1227,6 +1238,11 @@ function log_section(name, time1, data) {
 			gData.push([name +":"+ hash, data])
 			// FINISH
 			if (gCount == gCountExpected) {
+				// temp
+				if (logPerfHash !== "") {
+					console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "+ gPerfHash +" ms]\n - " + gPerfHashDetail.join("\n - "))
+					//console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "+ gPerfHash +" ms]")
+				}
 				// metric count
 				let metricCount = 0
 				for (let i=0; i < gData.length; i++) {
@@ -1375,8 +1391,13 @@ function countJS(filename) {
 function outputPostSection(id) {
 	if (gRun) {log_perf("start [not in FP]", "--")}
 	if (id == "all" || id == "ua") {
+		get_ua_iframes()
 		get_ua_workers()
 	}
+	if (id == "all" || id == "feature")
+		get_canonical()
+		get_locales()
+		if (isFF) {get_chrome()}
 	if (id == "all" || id == "storage") {
 		get_cookies()
 		get_storage()
@@ -1426,6 +1447,9 @@ function outputSection(id, cls) {
 			gPerf = []
 			gPerfDetail = []
 			sPerfDetail = []
+			// hash perf
+			gPerfHash = 0
+			gPerfHashDetail = []
 		} else {
 			// clear: &nbsp stops line height jitter
 			let tbl = document.getElementById("tb"+ id)
@@ -1435,6 +1459,13 @@ function outputSection(id, cls) {
 		// reset
 		if (id=="all" || id=="12") {reset_fonts()}
 		if (id=="all" || id=="1") {dom.kbt.value = ""}
+		// set hash perf
+		if (gRun && canPerf) {
+			logPerfMini = (logPerfHash == "all" || logPerfHash == "mini")
+			logPerfSha1 = (logPerfHash == "all" || logPerfHash == "sha1")
+		} else {
+			logPerfMini = false; logPerfSha1 = false
+		}
 
 		function output() {
 			// section timer

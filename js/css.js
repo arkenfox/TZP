@@ -31,7 +31,7 @@ function get_colors() {
 		// split/hash
 		for (let i=0; i < 4; i++) {
 			let aTemp = aRes.slice(splits[i],splits[i+1])
-			let hash = sha1(aTemp.join())
+			let hash = sha1(aTemp.join(), "css colors " + sNames[i])
 			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
 			sDetail["css_colors_"+ sNames[i]] = aTemp
 			aResults.push("colors_"+ sNames[i] +":"+ hash)
@@ -179,7 +179,7 @@ function get_computed_styles() {
 			styleVersion(2)
 		]).then(res => {
 			let blankIndex = [], realIndex = [], fakeIndex = [], distinctRep = [], distinctReal = []
-			let values = [], btns = []
+			let values = [], minivalues = [], btns = []
 			// sim
 			if (runSC) {
 				if (isFile) {
@@ -243,9 +243,17 @@ function get_computed_styles() {
 						aReal = aRep
 					}
 					//if (i==0) {console.debug(aReal.join("\n"))}
+
 					// data
-					let value = sha1(aRep.join())
+					let minivalue = mini(aRep.join(), "css computed style "+ i)
+					minivalues.push(minivalue)
+					let getsha1 = true
+					if (i > 0) {
+						if (minivalues[i-1] == minivalues[i]) {getsha1 = false}
+					}
+					let	value = getsha1 ? sha1(aRep.join(), "css computed style "+ i) : values[i-1]
 					values.push(value)
+
 					distinctRep.push(value)
 					let j = (fileSchemeOverride && i==2 ? 1 : i)
 					let btn = buildButton("14", sNames[i] +"_reported_notglobal", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
@@ -255,7 +263,7 @@ function get_computed_styles() {
 						sDetail[sNames[i] +"_reported_notglobal"] = aRep
 						sDetail[sNames[i] +"_fake_skip"] = aFake
 						btn += buildButton("14", sNames[i] +"_fake_skip", aFake.length +" lie"+ (aFake.length > 1 ? "s" : ""))
-						distinctReal.push(sha1(aReal.join()))
+						distinctReal.push(sha1(aReal.join(), "css computed styles "+ i +" real"))
 					} else {
 						sDetail[sNames[i] +"_reported_notglobal"] = aReal
 						realIndex.push(i)
@@ -272,10 +280,7 @@ function get_computed_styles() {
 			distinctReal = distinctReal.filter(function(item, position) {return distinctReal.indexOf(item) === position})
 			let bCount = blankIndex.length
 			// showhide
-			let isSame = false
-			if (distinctRep.length == 1 && bCount == 0 || bCount == 3) {
-				isSame = true
-			}
+			let isSame = (distinctRep.length == 1 && bCount == 0 || bCount == 3)
 			showhide("C",(isSame ? "none" : "table-row"))
 			let tooltip = "<div class='ttip'><span class='icon'>[ i ]</span><span class='ttxt'>"
 				+"getComputedStyle<br>HTMLElement.style<br>CSSRuleList.style</span></div> &nbsp computed styles"
@@ -297,6 +302,7 @@ function get_computed_styles() {
 			let value = zLIE
 			// bypasses
 			let isBypass = false
+
 			if (distinctReal.length == 1 && (bCount + fakeIndex.length > 0)) {
 				isBypass = true
 				value = distinctReal[0]
@@ -419,7 +425,7 @@ function get_system_fonts() {
 		}
 		// output
 		sDetail[sName] = aResults
-		let sHash = sha1(aResults.join())
+		let sHash = sha1(aResults.join(), "css system fonts")
 		dom.sFontsHash.innerHTML = sError + (sError == "" ? sHash + buildButton("14", sName, aResults.length) : "")
 		return resolve("system_fonts:"+ (sError == "" ? sHash : sError))
 	})

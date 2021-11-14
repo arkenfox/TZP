@@ -1,7 +1,7 @@
 'use strict';
 
-var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume, uaBS
-
+var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume
+var uaBS = false
 let isOS64math = ""
 let iframeSim = 0
 
@@ -38,6 +38,7 @@ function return_mm_dpi(type) {
 }
 
 function get_canonical() {
+	// runs post FP
 	try {
 		let sName = "feature_canonical_locales_notglobal"
 		sDetail[sName] = []
@@ -49,7 +50,7 @@ function get_canonical() {
 		})
 		sDetail[sName] = res
 		let note = "details", color = "3"
-		let hash = sha1(res.join())
+		let hash = sha1(res.join(), "feature canonical")
 		if (isFF) {
 			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {note = "FF91+"
 			} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {note = "FF70-90"
@@ -60,12 +61,12 @@ function get_canonical() {
 		let btn = buildButton(color, sName, note)
 		dom.fdCanonical.innerHTML = hash + btn + (runS ? zSIM : "")
 	} catch(e) {
-		log_error("feature: canonical locales", e.name, e.message)
 		dom.fdCanonical = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 	}
 }
 
 function get_chrome() {
+	// runs post FP
 	let t0; if (canPerf) {t0 = performance.now()}
 	let os = ""
 	// display
@@ -73,13 +74,13 @@ function get_chrome() {
 		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runS ? zSIM : "")}
 		dom.fdChrome.innerHTML = r
 		isChrome = r
-		log_perf("chrome [fd]",t0)
+		log_perf("chrome [not in FP]",t0)
 	}
 	// bail
 	if (isChrome !== "") {output(isChrome); return}
 	if (isVer < 60) {output(zNA); return}
 	// run
-	dom.fdChrome.innerHTML = "blocked"
+	dom.fdChrome.innerHTML = zB0
 	function run2() {
 		// android/linux
 		let img = new Image()
@@ -195,7 +196,7 @@ function get_errors() {
 			}
 		}
 		sDetail[sName] = res
-		let hash = sha1(res.join())
+		let hash = sha1(res.join(), "feature errors")
 		// notation
 			// 74+: 1259822: error_message_fix: codes 1=false 2=true
 		let tmp = hash.substring(0,8)
@@ -561,8 +562,8 @@ function get_line_scrollbar(runtype) {
 }
 
 function get_locales() {
+	// runs post FP
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
 		let res = []
 		let sName = "feature_supported_locales_notglobal"
 		sDetail[sName] = []
@@ -571,7 +572,7 @@ function get_locales() {
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
 		sDetail[sName] = res
-		let hash = sha1(res.join())
+		let hash = sha1(res.join(), "feature supported locales")
 		let note = "details", color = "3"
 		if (isFF) {
 			if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91+"
@@ -584,9 +585,7 @@ function get_locales() {
 		}
 		let btn = buildButton(color, sName, note)
 		dom.fdLocales.innerHTML = hash + btn + (runS ? zSIM : "")
-		log_perf("supported locales [fd]",t0)		
 	} catch(e) {
-		log_error("feature: supported locales", e.name, e.message)
 		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		if (eMsg == "TypeError: Intl.PluralRules is undefined" && isFFLegacy) {eMsg = zNS} // 57 or lower
 		dom.fdLocales = eMsg
@@ -619,9 +618,9 @@ function get_math() {
 				try {res6.push(Math.E - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
 				try {let y = Math.E; res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
 				// hashes
-				m1hash = sha1(res1.join("-"))
-				m6hash = sha1(res6.join("-"))
-				mchash = sha1(res1.concat(res6))
+				m1hash = sha1(res1.join("-"), "feature math m1hash")
+				m6hash = sha1(res6.join("-"), "feature math m6hash")
+				mchash = sha1(res1.concat(res6), "feature math mchash")
 				// sim
 				if (runS) {
 					//m1hash = sha1("a"), mchash = sha1("b") // emca1
@@ -1339,8 +1338,6 @@ function get_ua_doc() {
 			if (isFork === undefined) {goUA = true} // we should ignore dealing with any 78+ forks
 			if (isRFP) {goUA = true} // unless they are using RFP
 		}
-		uaBS = false // reset
-
 		// arrows
 		function addArrow(property, state) {
 			let title = property
@@ -1608,6 +1605,129 @@ function get_ua_doc() {
 	})
 }
 
+function get_ua_iframes() {
+	// runs post FP
+	// clear
+	let str1 = "ua_navigator", str2 = str1 +"_iframe_diff_", str3 = "_method_skip"
+	let aNames = [str2 + str3, str2 +"[content] docroot"+ str3, str2 + "[content] with url"+ str3,
+		str2 +"[window] docroot"+ str3,	str2 +"[window] with url"+ str3,
+		str2 + "iframe access"+ str3, str2 + "nested"+ str3, str2 +"window access"+ str3,
+	]
+	aNames.forEach(function(item) {sDetail[item] = []})
+	// control
+	let list = ['userAgent','appCodeName','appName','product','appVersion',
+		'oscpu','platform','buildID','productSub','vendor','vendorSub'],
+		res = [],
+		sim = [],
+		r = ""
+	var ctrl = []
+	for (let i=0; i < list.length; i++) {
+		try {r = navigator[list[i]]} catch(e) {r = zB0}
+		if (r == "") {r = "empty string"
+		} else if (r == "undefined") {r = "undefined string"
+		} else if (r == undefined) {r = "undefined value"}
+		ctrl.push(list[i] +":"+ r)
+		if (list[i] == "appCodeName") { r = "moZillla"}
+		if (list[i] == "appVersion") { r = "5.0 (toaster)"}
+		if (list[i] == "userAgent") { r = "moZillla/5.0 (toaster)"}
+		sim.push(list[i] +":"+ r)
+	}
+	ctrl.sort()
+	// get data
+	Promise.all([
+		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: "ua"}), // docroot contentWindow
+		getDynamicIframeWindow({context: window, contentWindow: true, source: "?", violateSOP: false, test: "ua"}), // with URL contentWindow
+		getDynamicIframeWindow({context: window, violateSOP: false, test: "ua"}), // docroot
+		getDynamicIframeWindow({context: window, source: "?", violateSOP: false, test: "ua"}), // with URL
+		getDynamicIframeWindow({context: frames, test: "ua"}), // iframe access
+		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: "ua"}), // nested
+		getDynamicIframeWindow({context: window, test: "ua"}), // window access
+	]).then(function(results){
+		const ctrlhash = sha1(ctrl.join())
+		// sim
+		if (runSIF) {
+			iframeSim = iframeSim % 6
+			console.debug(iframeSim)
+			let simA = ["appCodeName:simA","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:Mozilla/5.0","vendor:","vendorSub:"]
+			let simB = ["appCodeName:simB","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:GODZILLA/5.0","vendor:","vendorSub:"]
+			if (iframeSim == 0) {
+				results[0] = [], results[1] = [], results[2] = [], results[3] = [], results[4] = [], results[5] = [], results[6] = []
+			} else if (iframeSim == 2) {
+				results[1] = [], results[3] = []
+			} else if (iframeSim == 3) {
+				results[0] = simA, results[1] = simA, results[2] = simA, results[3] = simA, results[4] = simA, results[5] = simA, results[6] = simA
+			} else if (iframeSim == 4) {
+				results[0] = simB, results[1] = [], results[2] = simB, results[3] = zB0, results[5] = simB
+			} else if (iframeSim == 5) {
+				results[0] = simA, results[4] = simB, results[5] = zB0
+			}
+			iframeSim++
+		}
+		// loop iframe results
+		let block = [], distinct = [], mismatch = []
+		for(let i=1; i < 8; i++) {
+			let data = results[i-1]
+			let name = aNames[i].replace(/\ua_navigator_iframe_diff_/g, "")
+			name = name.replace(/\_method_skip/g, "")
+			if (Array.isArray(data)) {
+				let hash = sha1(data.join(), "ua iframe test "+ i)
+				if (data.length == 0) {
+					hash = zB0
+					block.push(name)
+				} else {
+					if (hash !== ctrlhash) {
+						distinct.push(hash)
+						mismatch.push(name)
+						let diffs = []
+						for (let j = 0; j < data.length; j++) {if (data[j] !== ctrl[j]) {diffs.push(data[j])}}
+						sDetail[aNames[0]] = diffs
+					}
+				}
+				document.getElementById("uaIframe"+ i).innerHTML = hash
+			} else {
+				block.push(name)
+				document.getElementById("uaIframe"+ i).innerHTML = data
+			}
+		}
+		let bCount = block.length
+		distinct = distinct.filter(function(item, position) {return distinct.indexOf(item) === position})
+		// iframe summary
+		let summary = sha1(results[0].join(), "ua iframe summary")
+		let bNote = ""
+		if (bCount > 0 && bCount < 7) {bNote = s2 + "[" + bCount +" block"+ (bCount > 1 ? "s]" : "]") + sc}
+		// single line
+		if (distinct.length < 2) {
+			let diffBtn = ""
+			if (bCount == 7) {
+				summary = zB0
+			} else {
+				if (distinct.length > 0) {diffBtn = buildButton("2", aNames[0], "diff")}
+				summary += (distinct.length > 0 ? match_red : match_green) + diffBtn + bNote
+			}
+		}	else {
+			// multi-line
+			sDetail[aNames[0]] = []
+			summary = "mixed results" + match_red + bNote
+			for(let i=1; i < 8; i++) {
+				let data = results[i-1]
+				if (Array.isArray(data)) {
+					let hash = sha1(data.join())
+					if (data.length > 0) {
+						if (hash !== ctrlhash) {
+							let diffs = []
+							for (let j = 0; j < data.length; j++) {if (data[j] !== ctrl[j]) {diffs.push(data[j])}}
+							sDetail[aNames[i]] = diffs
+							hash += buildButton("2", aNames[i], "diff")
+							document.getElementById("uaIframe"+ i).innerHTML = hash
+						}
+					}
+				}
+			}
+		}
+		dom.uaIframes.innerHTML = summary
+	})
+}
+
 function get_ua_workers() {
 	dom.uaWorkers = "summary not coded yet"
 	// control
@@ -1764,7 +1884,7 @@ function get_widgets() {
 				res.push(list[i] +": "+ font +", "+ size)
 				if (i < 6) {sizes.push(size); fonts.push(font)}
 			}
-			let hash = sha1(res.join())
+			let hash = sha1(res.join(), "feature widgets")
 			sDetail[sName] = res
 			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
 			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
@@ -2179,6 +2299,8 @@ function outputScreen(runtype) {
 
 function outputUA() {
 	let t0; if (canPerf) {t0 = performance.now()}
+	// reset
+	uaBS = false
 	// lies
 	function get_pLies() {
 		if (proxyLies.includes("Navigator.userAgent")) {uaBS = true
@@ -2195,117 +2317,16 @@ function outputUA() {
 			} else if (proxyLies.includes("Navigator.product")) {uaBS = true}
 		}
 	}
-	// clear
-	let str1 = "ua_navigator", str2 = str1 +"_iframe_diff_", str3 = "_method_skip"
-	let aNames = [str2 + str3, str2 +"[content] docroot"+ str3, str2 + "[content] with url"+ str3,
-		str2 +"[window] docroot"+ str3,	str2 +"[window] with url"+ str3,
-		str2 + "iframe access"+ str3, str2 + "nested"+ str3, str2 +"window access"+ str3,
-	]
-	aNames.forEach(function(item) {sDetail[item] = []})
-
 	Promise.all([
 		get_ua_doc(), // sets uaBS
-		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: "ua"}), // docroot contentWindow
-		getDynamicIframeWindow({context: window, contentWindow: true, source: "?", violateSOP: false, test: "ua"}), // with URL contentWindow
-		getDynamicIframeWindow({context: window, violateSOP: false, test: "ua"}), // docroot
-		getDynamicIframeWindow({context: window, source: "?", violateSOP: false, test: "ua"}), // with URL
-		getDynamicIframeWindow({context: frames, test: "ua"}), // iframe access
-		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: "ua"}), // nested
-		getDynamicIframeWindow({context: window, test: "ua"}), // window access
 	]).then(function(results){
 		if (uaBS == false) {get_pLies()} // sets uaBS
-		const ctrl = results[0].sort()
-		const ctrlhash = sha1(ctrl.join())
-		// sim
-		if (runSL) {
-			iframeSim = iframeSim % 6
-			let simA = ["appCodeName:simA","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:Mozilla/5.0","vendor:","vendorSub:"]
-			let simB = ["appCodeName:simB","appName:n","appVersion:a","buildID:b","oscpu:c","platform:d","product:g","productSub:k","userAgent:GODZILLA/5.0","vendor:","vendorSub:"]
-			if (iframeSim == 0) {
-				results[1] = [], results[2] = [], results[3] = [], results[4] = [], results[5] = [], results[6] = [], results[7] = []
-			} else if (iframeSim == 2) {
-				results[2] = [], results[4] = []
-			} else if (iframeSim == 3) {
-				results[1] = simA, results[2] = simA, results[3] = simA, results[4] = simA, results[5] = simA, results[6] = simA, results[7] = simA
-			} else if (iframeSim == 4) {
-				results[1] = simB, results[2] = [], results[3] = simB, results[4] = zB0, results[6] = simB
-			} else if (iframeSim == 5) {
-				results[2] = simA, results[5] = simB, results[6] = zB0
-			}
-			iframeSim++
-		}
-		// loop iframe results
-		let block = [], distinct = [], mismatch = []
-		for(let i=1; i < 8; i++) {
-			let data = results[i]
-			let name = aNames[i].replace(/\ua_navigator_iframe_diff_/g, "")
-			name = name.replace(/\_method_skip/g, "")
-			if (Array.isArray(data)) {
-				let hash = sha1(data.join())
-				if (data.length == 0) {
-					hash = zB0
-					block.push(name)
-				} else {
-					if (hash !== ctrlhash) {
-						distinct.push(sha1(data.join()))
-						mismatch.push(name)
-						let diffs = []
-						for (let i = 0; i < data.length; i++) {if (data[i] !== ctrl[i]) {diffs.push(data[i])}}
-						sDetail[aNames[0]] = diffs
-					}
-				}
-				document.getElementById("uaIframe"+ i).innerHTML = hash
-			} else {
-				block.push(name)
-				document.getElementById("uaIframe"+ i).innerHTML = data
-			}
-		}
-		let bCount = block.length
-		distinct = distinct.filter(function(item, position) {return distinct.indexOf(item) === position})
-		// methods
-		if (gRun) {
-			if (block.length) {gMethods.push("ua:iframe block:"+ (bCount == 7 ? "all": block.join()))}
-			if (mismatch.length) {gMethods.push("ua:iframe mismatch:"+ (mismatch.length == 7 ? "all": mismatch.join()))}
-		}
-		// iframe summary
-		let summary = sha1(results[1].join())
-		let bNote = ""
-		if (bCount > 0 && bCount < 7) {bNote = s2 + "[" + bCount +" block"+ (bCount > 1 ? "s]" : "]") + sc}
-		// single line
-		if (distinct.length < 2) {
-			let diffBtn = ""
-			if (bCount == 7) {
-				summary = zB0
-			} else {
-				if (distinct.length > 0) {diffBtn = buildButton("2", aNames[0], "diff")}
-				summary += (distinct.length > 0 ? match_red : match_green) + diffBtn + bNote
-			}
-		}	else {
-		// multi-line
-			sDetail[aNames[0]] = []
-			summary = "mixed results" + match_red + bNote
-			for(let i=1; i < 8; i++) {
-				let data = results[i]
-				if (Array.isArray(data)) {
-					let hash = sha1(data.join())
-					if (data.length > 0) {
-						if (hash !== ctrlhash) {
-							let diffs = []
-							for (let i = 0; i < data.length; i++) {if (data[i] !== ctrl[i]) {diffs.push(data[i])}}
-							sDetail[aNames[i]] = diffs
-							hash += buildButton("2", aNames[i], "diff")
-							document.getElementById("uaIframe"+ i).innerHTML = hash
-						}
-					}
-				}
-			}
-		}
-		dom.uaIframes.innerHTML = summary
 		// section
+		const ctrl = results[0].sort()
+		const ctrlhash = sha1(ctrl.join(), "ua")
 		let section = ctrl, display = ctrlhash
 
-		if (uaBS || mismatch.length > 0) {
-			// uaBS or mismatch
+		if (uaBS) {
 			section = ["ua:"+ zLIE]
 			display = soL + ctrlhash + scC
 		} else {
@@ -2380,7 +2401,6 @@ function outputFD(runtype) {
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
 
-		get_chrome()
 		Promise.all([
 			get_errors(),
 			get_widgets(),
@@ -2412,8 +2432,6 @@ function outputFD(runtype) {
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 		})
-		get_canonical()
-		get_locales()
 
 	} else {
 		Promise.all([
@@ -2442,8 +2460,6 @@ function outputFD(runtype) {
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 
-			get_canonical()
-			get_locales()
 			dom.fdBrandingCss = zNA
 			dom.fdResourceCss = zNA
 			dom.fdChrome = zNA

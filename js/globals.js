@@ -32,7 +32,9 @@ let jsFiles = [],
 	gMethodsOnce = [],
 	// perf
 	gPerf = [],
-	gPerfDetail = []
+	gPerfDetail = [],
+	gPerfHash = 0, // excludes _global checks
+	gPerfHashDetail = []
 
 // section snapshot
 let sData = {},
@@ -148,7 +150,7 @@ let avh = "",
 	isOS = "",
 	isOS64 = "unknown",
 	isPerf = true,
-	canPerf = true,
+	canPerf = false,
 	isResource = "",
 	isResourceMetric = "",
 	isRFP = false,
@@ -156,17 +158,22 @@ let avh = "",
 	isTB = false,
 	isVer = "",
 	isVerPlus = false,
-// dev
+// runtypes
 	gt0,
 	gLoad = true,
 	gRun = true,
 	gClick = true,
+// debug
 	logExtra = false,
+	logPerfHash = "", // "", sha1, mini, "all"
+	logPerfMini = false, // we set these in code
+	logPerfSha1 = false, // ditto
 	logResize = true,
 	logStorage = false,
 // simulations
 	runS = false, // different values
 	runSUA = false, // ua lies
+	runSIF = false, // ua iframe lies
 	runSL = false, // lies
 	runSC = false, // css styles
 	runSP = false // block performance.now()

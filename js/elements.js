@@ -19,7 +19,7 @@ function get_element_keys() {
 				keys.push(key)
 			}
 			sDetail[sName] = keys
-			let hash = sha1(keys.join())
+			let hash = sha1(keys.join(), "elements keys")
 			dom.elementkeys.innerHTML = hash + buildButton("15", sName, keys.length)
 			return resolve("element_keys:"+ hash)
 		} catch (error) {
@@ -49,11 +49,13 @@ function get_resized() {
 		sizes.forEach(function(size) {
 			target.style.fontSize = size+"px"
 			// mathml
-			try {
-				let diff = elTest.offsetHeight - elCtrl.offsetHeight
-				if (!isNaN(diff)) {resM.push(diff * 1)}
-			} catch(e) {
-				errM = e.name; errMMsg = e.message
+			if (isFF) {
+				try {
+					let diff = elTest.offsetHeight - elCtrl.offsetHeight
+					if (!isNaN(diff)) {resM.push(diff * 1)}
+				} catch(e) {
+					errM = e.name; errMMsg = e.message
+				}
 			}
 			// line
 			try {
@@ -73,31 +75,27 @@ function get_resized() {
 
 		// mathml
 		let displayM = ""
-		if (!isFF) {
-			displayM = zNA
-			resM = [zNA]
-		} else if (errM !== "") {
-			log_error("elements: mathml", errM, errMMsg)
-			displayM = zB0
-			resM = [zLIE]
-		} else if (resM.length < sizes.length) {
-			displayM = zB0
-			resM = [zLIE]
-			if (gRun) {
-				gKnown.push("elements:mathml")
-				gMethods.push("elements:mathml:NaN")
-			}
-		} else {
-			let hashM = sha1(resM.join())
-			if (hashM == "43bd6f03270a43a5488e069a0539c37a30ab402b") {
+		if (isFF) {
+			if (errM !== "") {
+				log_error("elements: mathml", errM, errMMsg)
+				displayM = zB0
+				resM = [zLIE]
+			} else if (resM.length < sizes.length) {
+				displayM = zB0
+				resM = [zLIE]
+				if (gRun) {
+					gKnown.push("elements:mathml")
+					gMethods.push("elements:mathml:NaN")
+				}
+			} else if (resM.join() == "0,0,0,0,0,0,0,0,0") {
 				displayM = zD + (isTB ? tb_safer : "")
 				resM = [zD]
 			} else {
 				sDetail[sNameM] = resM
-				displayM = hashM + buildButton("15", sNameM, "details")
+				displayM = sha1(resM.join(), "elements mathml") + buildButton("15", sNameM, "details")
 			}
 		}
-		dom.mathml.innerHTML = displayM
+		dom.mathml.innerHTML = isFF ? displayM : zNA
 
 		// line
 		let displayL = ""
@@ -113,15 +111,14 @@ function get_resized() {
 				gMethods.push("elements:lineheight:NaN")
 			}
 		} else {
-			let hashL = sha1(resL.join())
 			sDetail[sNameL] = resL
-			displayL = hashL + buildButton("15", sNameL, "details")
+			displayL = sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL, "details")
 		}
 		dom.lineheight.innerHTML = displayL
 
 		// return
 		log_perf("resized [elements]",t0, (gRun ? gt0 : "ignore"))
-		resALL.push("mathml:"+ resM.join())
+		resALL.push("mathml:"+ (isFF ? resM.join() : zNA))
 		resALL.push("lineheight:"+ resL.join())
 		return resALL
 

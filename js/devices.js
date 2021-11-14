@@ -151,7 +151,7 @@ function get_keyboard() {
 						dom.nKeyboard = trim_error(resE[0])
 						return resolve("keyboard:" + zB0)
 					} else {
-						let hash = sha1(keys.join())
+						let hash = sha1(keys.join(), "devices keyboard")
 						sDetail[sName] = keys
 						dom.nKeyboard.innerHTML = hash + buildButton("7", sName, "details")
 						log_perf("keyboard [devices]",t0)
@@ -247,7 +247,7 @@ function get_media_devices() {
 						}
 						pretty = pretty.join(" ")
 						str = plain.join(";")
-						rfphash = sha1(str)
+						rfphash = sha1(str, "devices media devices")
 					} else {
 						pretty = "none"
 						if (devicesBS) {pretty = soL +"none"+ scC}
@@ -355,7 +355,7 @@ function get_mimetypes_plugins() {
 				if (pluginBS) {sName += "_fake_skip"}
 				sDetail[sName] = outputP
 				btnP = buildButton("7", sName, outputP.length +" plugin"+ (outputP.length > 1 ? "s" : ""))
-				outputP = sha1(outputP.join())
+				outputP = sha1(outputP.join(), "devices plugins")
 				pValue = outputP
 			}
 			if (pluginBS) {
@@ -372,7 +372,7 @@ function get_mimetypes_plugins() {
 				if (mimeBS) {sName += "_fake_skip"}
 				sDetail[sName] = outputM
 				btnM = buildButton("7", sName, outputM.length +" mimetype"+ (outputM.length > 1 ? "s" : ""))
-				outputM = sha1(outputM.join())
+				outputM = sha1(outputM.join(), "devices mimetypes")
 			}
 			if (mimeBS) {
 				mValue = zLIE
@@ -567,7 +567,7 @@ function get_speech_engines() {
 			if (Array.isArray(output)) {
 				sDetail[sName] = output
 				btn = buildButton("7", sName, output.length +" engine"+ (output.length > 1 ? "s" : ""))
-				output = sha1(output.join())
+				output = sha1(output.join(), "devices speech engines")
 			}
 			dom.sEngines.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
 			log_perf("speech engines [devices]",t0)

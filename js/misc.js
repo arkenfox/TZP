@@ -7,7 +7,7 @@ function get_component_shims() {
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		sDetail[sName] = keys
-		sHash = sha1(keys.join())
+		sHash = sha1(keys.join(), "misc component shims")
 		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
 		log_error("misc: component shims", e.name, e.message)
@@ -61,7 +61,6 @@ function get_iframe_props() {
 		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
 	]
 
-	let r
 	try {
 		// create & append
 		let id = "iframe-window-version"
@@ -98,33 +97,38 @@ function get_iframe_props() {
 					props = props.filter(x => !fakeProps.includes(x))
 					sDetail[sFake] = fakeProps.sort()
 					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
-					// lies
-					if (gRun) {
-						gKnown.push("misc:iframe window properties")
-						gBypassed.push("misc:iframe window properties:"+ sha1(props.sort()))
-					}
 				}
 			}
 		}
 		// sort (open console can affect order) + output
-		// real
-		props.sort()
+		props.sort() // real
+		sDetail[sTrue] = props
+		allProps.sort()
 		//console.debug(props.join("\n"))
 		//console.debug(props)
-		sDetail[sTrue] = props
+
 		// display
-		allProps.sort()
-		let output = sha1(allProps.join())
-		if (fakeProps.length) {output = soB + output + scC}
+		let output = sha1(allProps.join(), "misc iframe props")
+		let result = output
+		if (fakeProps.length) {
+			output = soB + output + scC
+			result = sha1(props.join(), "misc iframe props bypass")
+			// record lie/bypass
+			if (isFF && !isFFLegacy) {
+				if (gRun) {
+					gKnown.push("misc:iframe window properties")
+					gBypassed.push("misc:iframe window properties:"+ result)
+				}
+			}
+		}
 		output += buildButton("18", sAll, sDetail[sAll].length) + suspectStr + fakeStr
 		dom.iProps.innerHTML = output
-		r= sha1(props.join())
+		return "iframe_properties:"+ result
 	} catch(e) {
 		log_error("misc: iframe window properties", e.name, e.message)
-		r = isFF ? zB0 : zErr
 		dom.iProps = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		return "iframe_properties:"+ (isFF ? zB0 : zErr)
 	}
-	return "iframe_properties:"+ r
 }
 
 function get_nav_prototype() {
@@ -143,9 +147,8 @@ function get_nav_prototype() {
 		movedStr = ""
 	// output
 	if (navKeys["trueKeys"]) {
-		let hash = sha1(navKeys["allKeys"].join())
-		let display = hash
-		let realhash = sha1(navKeys["trueKeys"].join())
+		let realhash = sha1(navKeys["trueKeys"].join(), "misc nav keys")
+		let display = realhash
 		// moved
 		if (movedLength) {
 			movedStr = buildButton("18", sMoved, movedLength +" moved")
@@ -156,6 +159,7 @@ function get_nav_prototype() {
 		}
 		// fake
 		if (lieLength) {
+			let hash = sha1(navKeys["allKeys"].join(), "misc nav keys fake")
 			display = soB + hash + scC
 			fakeStr = buildButton("18", sFake, lieLength +" lie"+ (lieLength > 1 ? "s" : ""))
 			// lies
@@ -293,6 +297,7 @@ function get_perf1() {
 }
 
 function get_perf2() {
+	// runs post FP
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let i = 0, times = [], p0
