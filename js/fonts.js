@@ -7,7 +7,7 @@ let	fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	'0x061C','0x20E3','0xFFF9','0x0218','0x058F','0x08E4','0x09B3','0x1C50','0x2619'],
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
-	fntList = [], // what we use
+	fntList = [], // what we use //
 	fntSim = 0,
 	fontBtns = "",
 	fontBaseBtn = ""
