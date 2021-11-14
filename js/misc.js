@@ -23,7 +23,7 @@ function get_component_shims() {
 }
 
 function get_iframe_props() {
-	/* https://github.com/abrahamjuliot/creepjs **/
+	/* https://github.com/abrahamjuliot/creepjs */
 	let sTrue = "misc_iframe_window_properties"
 	let sFake = sTrue + "_fake_skip"
 	let sSuspect = sTrue + "_suspect_skip"
@@ -59,6 +59,7 @@ function get_iframe_props() {
 		'Gamepad','Math','PerformanceEntry','Promise','Proxy','VRFrameData',
 		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
 		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
+		"Error","GeolocationCoordinates","GeolocationPosition","GeolocationPositionError","TypeError","console",
 	]
 
 	try {
