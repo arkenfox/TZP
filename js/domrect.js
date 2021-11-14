@@ -1,6 +1,6 @@
 "use strict";
 
-/* code based on https://canvasblocker.kkapsner.de/test/ */
+/* code based on https://canvasblocker.kkapsner.de/test/ **/
 
 function outputDomRect() {
 	let t0; if (canPerf) {t0 = performance.now()}
