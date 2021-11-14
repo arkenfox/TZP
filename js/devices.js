@@ -7,7 +7,7 @@ var mimeBS = false,
 	mimeFlash = false
 
 function set_pluginBS() {
-	/* https://github.com/abrahamjuliot/creepjs **/
+	/* https://github.com/abrahamjuliot/creepjs */
 	const testPlugins = (plugins, mimeTypes) => {
 		const lies = []
 		const ownProperties = Object.getOwnPropertyNames(plugins).filter(name => isNaN(+name))
@@ -117,19 +117,35 @@ function get_concurrency() {
 }
 
 function get_keyboard() {
-	if (isFF) {
-		dom.nKeyboard = zNA
-		return "keyboard:"+ zNA
-	}
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
+
+		function color(string) {
+			string = (isFF? soB : soL) + string + scC
+			value = (isFF ? zNA : zLIE)
+			if (gRun) {
+				gKnown.push("devices:keyboard")
+				if (isFF) {gBypassed.push("devices:keyboard:"+ value)}
+			}
+			return string
+		}
+
+		let display = "", value = ""
 		try {
-			let sName = "devices_keyboard", resE = []
+			let sName = "devices_keyboard"
 			sDetail[sName] = []
-			let resK = navigator.keyboard
-			if (resK == undefined) {
-				r = zU
-			} else {
+			sDetail[sName +"_fake_skip"] = []
+			let isObjFake = true
+			let test = navigator.keyboard
+			//i need an extension that fakes keyboard keys
+			// cleanup test
+			if (test == "undefined") {test = "undefined string"
+			} else if (test == undefined || test == true || test == false || test == null) {test += ""
+			} else if (Array.isArray(test)) {test = "array"}
+			if (test == "") {test = "empty string"}
+
+			if (typeof test === "object") {
+				if (test+"" == "[object Keyboard]") {isObjFake = false}
 				let keys = []
 				// https://wicg.github.io/keyboard-map/
 				// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
@@ -138,7 +154,8 @@ function get_keyboard() {
 					'Equal','IntlBackslash','IntlRo','IntlYen','KeyA','KeyB','KeyC','KeyD','KeyE','KeyF','KeyG',
 					'KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT',
 					'KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
-				resK.getLayoutMap().then(keyboardLayoutMap => {
+				let resE = []
+				test.getLayoutMap().then(keyboardLayoutMap => {
 					listK.forEach(function(key) {
 						try {
 							keys.push(key +": "+ keyboardLayoutMap.get(key))
@@ -148,21 +165,35 @@ function get_keyboard() {
 					})
 					if (resE.length > 0) {
 						log_error("devices: keyboard", resE[0])
-						dom.nKeyboard = trim_error(resE[0])
-						return resolve("keyboard:" + zB0)
+						display = trim_error(resE[0])
+						if (isFF) {display = color(display)}
+						dom.nKeyboard.innerHTML = display
+						return resolve("keyboard:"+ (isFF ? zNA : zB0))
 					} else {
-						let hash = sha1(keys.join(), "devices keyboard")
+						display = sha1(keys.join(), "devices keyboard")
+						if (isObjFake) {
+							sName += "_fake_skip"
+							display = color(display)
+						}
 						sDetail[sName] = keys
-						dom.nKeyboard.innerHTML = hash + buildButton("7", sName, "details")
+						dom.nKeyboard.innerHTML = display + buildButton("7", sName, "details")
 						log_perf("keyboard [devices]",t0)
-						return resolve("keyboard:" + hash)
+						return resolve("keyboard:" + (isObjFake ? value : display))
 					}
 				})
+			} else {
+				value = test
+				display = test
+				if (test == "undefined" & isFF) {display = zNA; value = zNA} else {display = color(display)}
+				dom.nKeyboard.innerHTML = display
+				return resolve("keyboard:"+ value)
 			}
 		} catch(e) {
 			log_error("devices: keyboard", e.name, e.message)
-			dom.nKeyboard = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("keyboard:"+ zB0)
+			display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			if (isFF) {display = color(display)}
+			dom.nKeyboard.innerHTML = display
+			return resolve("keyboard:"+ (isFF ? zNA : zB0))
 		}
 	})
 }
@@ -261,7 +292,9 @@ function get_media_devices() {
 					finish(str)
 				})
 			} catch(e) {
-				dom.eMD.innerHTML = zB0 + (isTB ? tb_red : rfp_red)
+				log_error("devices: media devices", e.name, e.message)
+				let display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+				dom.eMD.innerHTML = display + (isTB ? tb_red : rfp_red)
 				finish(zB0)
 			}
 		}
@@ -593,6 +626,7 @@ function get_speech_engines() {
 						}
 					}
 				} catch(e) {
+					log_error("devices: speech engines", e.name, e.message)
 					display(zB0)
 				}
 			}
@@ -606,6 +640,7 @@ function get_speech_engines() {
 					display(zB0)
 				}
 			} catch(e) {
+				log_error("devices: speech engines", e.name, e.message)
 				display(zB0)
 			}
 		} else {
@@ -621,6 +656,7 @@ function get_speech_rec() {
 		let recognition = new SpeechRecognition()
 		dom.sRec = zE
 	} catch(e) {
+		log_error("devices: speech recognition", e.name, e.message)
 		// undefined
 		// ToDo: speechRec: detect disabled vs not-supported?
 		dom.sRec = zD +" [or "+ zNS +"]"
@@ -629,22 +665,33 @@ function get_speech_rec() {
 
 function get_touch() {
 	// vars
-	let m = zNS, p = zNS, t = false, q="(-moz-touch-enabled:"
+	let m = zNS, p = zNS, t = false, t2 = zB0, t3 = zB0, q="(-moz-touch-enabled:"
 	// m
 	try {
 		if (window.matchMedia(q +"0)").matches) {m=0}
 		if (window.matchMedia(q +"1)").matches) {m=1}
-	} catch(e) {m = zB0}
+	} catch(e) {
+		log_error("devices: -moz-touch-enabled", e.name, e.message)
+		m = zB0
+	}
 	// t
-	try {document.createEvent("TouchEvent"); t = true} catch(e) {}
-	let t2 = ("ontouchstart" in window)
-	let t3 = ("ontouchend" in window)
+	try {
+		document.createEvent("TouchEvent"); t = true
+	} catch(e) {
+		log_error("devices: touch touchevent", e.name, e.message)
+		if (e.name !== "NotSupportedError") {t = zB0}
+	}
+	try {t2 = ("ontouchstart" in window)} catch(e) {log_error("devices: ontouchstart", e.name, e.message)}
+	try {t3 = ("ontouchend" in window)} catch(e) {log_error("devices: ontouchend ", e.name, e.message)}
 	// p
 	if (check_navKey("maxTouchPoints")) {
 		try {
 			p = navigator.maxTouchPoints
 			p = (p == undefined ? zB0 : p)
-		} catch(e) {p = zB0}
+		} catch(e) {
+			log_error("devices: maxtouchpoints", e.name, e.message)
+			p = zB0
+		}
 	}
 	// output
 	let str = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
@@ -674,7 +721,6 @@ function outputDevices() {
 	get_speech_rec()
 
 	Promise.all([
-		get_media_devices(),
 		get_speech_engines(),
 		get_pointer_hover(),
 		get_gamepads(),
@@ -683,6 +729,7 @@ function outputDevices() {
 		get_keyboard(),
 		get_concurrency(),
 		get_mimetypes_plugins(),
+		get_media_devices(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
