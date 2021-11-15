@@ -43,7 +43,7 @@ function get_iframe_props() {
 		// chameleon
 		'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext','FontFaceSet','Screen',
 		// CB
-		'Location','MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
+		'MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
 		'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
 		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
 		// Trace
@@ -87,7 +87,8 @@ function get_iframe_props() {
 		if (isFF && !isFFLegacy) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
-			let falsePos = ['Event','StyleSheetList'] // false positives
+			let falsePos = ['Event','Location'] // false positives
+			if (isVer < 62) {falsePos.push('StyleSheetList')}
 			suspectProps = suspectProps.filter(x => !falsePos.includes(x))
 			if (suspectProps.length) {
 				sDetail[sSuspect] = suspectProps.sort()
