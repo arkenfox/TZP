@@ -35,9 +35,11 @@ function get_iframe_props() {
 
 	let knownGood = [
 		// acculumative
+		// NoScript (TB)
+		'Element','HTMLElement','HTMLFrameElement','HTMLIFrameElement','HTMLObjectElement','MediaSource','URL','webkitURL',
 		// cydec
 		'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
-		'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer','Element','HTMLElement',
+		'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer',
 		'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
 		'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation',
 		// chameleon
@@ -45,16 +47,13 @@ function get_iframe_props() {
 		// CB
 		'MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
 		'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
-		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics','HTMLIFrameElement','HTMLFrameElement',
+		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics',
 		// Trace
 		'PluginArray',
 		// ScriptSafe
 		'Array','HTMLDivElement',
 		// AdBlocker Ultimate
-		'CustomEvent','HTMLObjectElement','String','WeakSet','decodeURI','decodeURIComponent',
-		'encodeURI','encodeURIComponent','escape','unescape',
-		// NoScript
-		'MediaSource','URL','webkitURL',
+		'CustomEvent','String','WeakSet','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape',
 		// JShelter
 		'Gamepad','Math','PerformanceEntry','Promise','Proxy','VRFrameData',
 		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
@@ -83,14 +82,14 @@ function get_iframe_props() {
 		// original
 		let allProps = []
 		props.forEach(function(item) {allProps.push(item)})
-		//console.log(allProps.slice(allProps.length-4, allProps.length).join()) // last four unsorted
+		//console.log(allProps.slice(allProps.indexOf("Performance"), allProps.length).join()) // last few items
 
 		// gecko BS
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
 		if (isFF && !isFFLegacy) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
-			let falsePos = ['Event','Location'] // false positives
+			let falsePos = ['Event','Location'] // false positives: console open
 			if (isVer < 62) {falsePos.push('StyleSheetList')}
 			suspectProps = suspectProps.filter(x => !falsePos.includes(x))
 			if (suspectProps.length) {
