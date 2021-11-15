@@ -81,8 +81,11 @@ function get_iframe_props() {
 			props.push("serviceWorker")
 		}
 		// original
-		let allProps = props
-		sDetail[sAll] = allProps
+		let allProps = []
+		props.forEach(function(item) {allProps.push(item)})
+		//console.log(allProps.slice(allProps.length-4, allProps.length).join()) // last four unsorted
+
+		// gecko BS
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
 		if (isFF && !isFFLegacy) {
 			// suspect
@@ -102,12 +105,11 @@ function get_iframe_props() {
 				}
 			}
 		}
-		// sort (open console can affect order) + output
-		props.sort() // real
+		// sort (open console can affect order)
+		props.sort() // original or modified gecko
 		sDetail[sTrue] = props
-		allProps.sort()
-		//console.debug(props.join("\n"))
-		//console.debug(props)
+		allProps.sort() // reported
+		sDetail[sAll] = allProps
 
 		// display
 		let output = sha1(allProps.join(), "misc iframe props")
