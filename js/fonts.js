@@ -408,6 +408,8 @@ function get_fonts() {
 						let data = res[name],
 							hash = "none"
 						if (data.length == 0) {
+							// fontsPixelSize: not supported in FF62 or lower
+							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
 							blank.push(name)
 						} else {
 							// mini
