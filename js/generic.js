@@ -1,7 +1,7 @@
 'use strict';
 dom = getUniqueElements()
 
-/*** GENERIC ****/
+/*** GENERIC ***/
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
@@ -118,9 +118,7 @@ function get_canPerf(runtype) {
 		canPerf = true
 	} catch(e) {
 		canPerf = false
-		if (runtype == "log") {
-			log_error("_global: performance.now:", e.name, e.message)
-		}
+		if (runtype == "log") {log_error("_global: performance.now:", e.name, e.message)}
 	}
 }
 
@@ -610,7 +608,15 @@ const get_isVer = () => new Promise(resolve => {
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	function start() { // 95:1674204 : slow ~20ms and relies on css: replace
+	// ESR jumper
+	function jumper() { 
+		try {
+			let test = {foo: false}
+			if (Object.hasOwn(test, "foo")) {start()}
+		} catch(e) {v91b()}
+	}
+	// cascade
+	function start() { // 95:1674204 : ~20ms/relies on css: replace
 		try {
 			let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
 			if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
@@ -781,7 +787,7 @@ const get_isVer = () => new Promise(resolve => {
 			output(60)
 		} catch(e) {output(59)}
 	}
-	if (isFFLegacy) {output(59)} else {start()}
+	if (isFFLegacy) {output(59)} else {jumper()}
 })
 
 /*** CHECK FUNCTIONS ***/
@@ -1348,8 +1354,6 @@ function countJS(filename) {
 		try {
 			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		} catch(e) {isPerf = false}
-		// harden isFF
-		if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
 		Promise.all([
 			get_isError(),
 			get_isSystemFont(),
@@ -1519,11 +1523,22 @@ function outputSection(id, cls) {
 function run_once() {
 	get_canPerf()
 	// ASAP
-	if (canPerf) {log_line(Math.round(performance.now()) + " : GENERIC")}
-	if ((location.protocol) == "file:") {isFile = true; note_file = " [file:/]"}
-	if ((location.protocol) == "https:") {isSecure = true}
-	// isFF
+	if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
+	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
+	} else if (location.protocol == "https:") {isSecure = true}
 	let t0; if (canPerf) {t0 = performance.now()}
+	// WARM
+	try {
+		log_perf("media devices [warmup]",t0,"")
+		navigator.mediaDevices.enumerateDevices().then(function(devices) {
+			log_perf("media devices [warmup]",t0)
+			//console.log("media devices [warmup]", performance.now()-t0 + "ms") // 180ms
+			//console.debug(devices)
+		}
+	)} catch(e) {}
+	try {let v = speechSynthesis.getVoices()} catch(e) {}
+
+	// isFF
 	let str = "installtrigger"
 	let str1 = "type of "+str, str2 = "type of "+ str +"impl", str3 = str+ " in window"
 	let test1 = false, test2 = false, test3 = false
@@ -1538,9 +1553,6 @@ function run_once() {
 		if (test3) {isFFyes.push(str3)} else {isFFno.push(str3)}
 	}
 	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
-	// WARM
-	try {navigator.mediaDevices.enumerateDevices().then(function(devices) {})} catch(e) {}
-	try {let v = speechSynthesis.getVoices()} catch(e) {}
 }
 
 run_once()
