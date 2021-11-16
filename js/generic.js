@@ -1531,7 +1531,7 @@ function run_once() {
 	try {
 		log_perf("media devices [warmup]",t0,"")
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
-			log_perf("media devices [warmup]",t0)
+			log_perf("media devices [warmup]",t0,"")
 			//console.log("media devices [warmup]", performance.now()-t0 + "ms") // 180ms
 			//console.debug(devices)
 		}
