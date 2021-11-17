@@ -7,7 +7,7 @@ var mimeBS = false,
 	mimeFlash = false
 
 function set_pluginBS() {
-	/* https://github.com/abrahamjuliot/creepjs */
+	/* https://github.com/abrahamjuliot/creepjs **/
 	const testPlugins = (plugins, mimeTypes) => {
 		const lies = []
 		const ownProperties = Object.getOwnPropertyNames(plugins).filter(name => isNaN(+name))
