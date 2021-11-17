@@ -1354,6 +1354,7 @@ function countJS(filename) {
 		try {
 			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		} catch(e) {isPerf = false}
+		if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
 		Promise.all([
 			get_isError(),
 			get_isSystemFont(),
@@ -1523,7 +1524,7 @@ function outputSection(id, cls) {
 function run_once() {
 	get_canPerf()
 	// ASAP
-	if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
+	if (canPerf) {log_line(Math.round(performance.now()) + " : IMMEDIATE")}
 	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
 	} else if (location.protocol == "https:") {isSecure = true}
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -1532,8 +1533,6 @@ function run_once() {
 		log_perf("media devices [warmup]",t0,"")
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			log_perf("media devices [warmup]",t0,"")
-			//console.log("media devices [warmup]", performance.now()-t0 + "ms") // 180ms
-			//console.debug(devices)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
