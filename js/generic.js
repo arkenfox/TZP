@@ -1532,7 +1532,9 @@ function run_once() {
 	try {
 		log_perf("media devices [warmup]",t0,"")
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
-			log_perf("media devices [warmup]",t0,"")
+			let info = (canPerf ? Math.round(performance.now()) +" | ": "")
+				+ (gLoad ? "page load" : "global rerun")
+			log_perf("media devices [warmup]",t0,"",info)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
