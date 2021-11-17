@@ -616,7 +616,13 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {v91b()}
 	}
 	// cascade
-	function start() { // 95:1674204 : ~20ms/relies on css: replace
+	function start() { // 95a:1723674
+		// fast path: dom.crypto.randomUUID.enabled default true
+		try {
+			let test = crypto.randomUUID(); output(95)
+		} catch(e) {v95b(); console.log(e.name, e.message) }
+	}
+	function v95b() { // 95b:1674204 : slow path + relies on css
 		try {
 			let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
 			if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
@@ -1534,7 +1540,7 @@ function run_once() {
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			let info = (canPerf ? Math.round(performance.now()) +" | ": "")
 				+ (gLoad ? "page load" : "global rerun")
-			log_perf("media devices [warmup]",t0,"",info)
+			log_perf("media devices [warmup]",t0,gt0,info)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
