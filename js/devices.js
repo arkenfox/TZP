@@ -202,13 +202,18 @@ function get_media_devices() {
 	let devicesBS = false
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
+		let extra = ""
+		if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
+		log_perf("media devices [started]",t0,"",extra)
 
 		function finish(result) {
 			// lies
 			if (gRun) {
 				if (devicesBS) {gKnown.push("devices:media")}
 			}
-			log_perf("media devices [devices]",t0)
+			extra = ""
+			if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
+			log_perf("media devices [devices]",t0,"", extra)
 			if (devicesBS) {result = zLIE}
 			return resolve("media_devices:"+ result)
 		}
@@ -721,6 +726,7 @@ function outputDevices() {
 	get_speech_rec()
 
 	Promise.all([
+		get_media_devices(),
 		get_speech_engines(),
 		get_pointer_hover(),
 		get_gamepads(),
@@ -729,7 +735,6 @@ function outputDevices() {
 		get_keyboard(),
 		get_concurrency(),
 		get_mimetypes_plugins(),
-		get_media_devices(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
