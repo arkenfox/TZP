@@ -619,8 +619,8 @@ const get_isVer = () => new Promise(resolve => {
 	function start() { // 95a:1723674
 		// fast path: dom.crypto.randomUUID.enabled default true
 		try {
-			let test = crypto.randomUUID(); output(95)
-		} catch(e) {v95b(); console.log(e.name, e.message) }
+			let test = self.crypto.randomUUID(); output(95)
+		} catch(e) {v95b()}
 	}
 	function v95b() { // 95b:1674204 : slow path + relies on css
 		try {
