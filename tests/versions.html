@@ -153,17 +153,24 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 67
+		expected = 68
 
-	// 96: 1738422
+	// 96
 	let t96 = performance.now(), ver96 = xF
 	try {
-		let date96 = Date.UTC(2012,12-1,6,12,0,0)
-		let test96 = new Date(date96).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
-		if (test96 == "2012/12/6 中国标准时间 20:00:00") {ver96 = xS}
+		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {ver96 = xS}
+	} catch(e) {}
+	record(236,96, "", ver96, performance.now()-t96)
+
+	// 96b: 1738422
+	let t96b = performance.now(), ver96b = xF
+	try {
+		let date96b = Date.UTC(2012,12-1,6,12,0,0)
+		let test96b = new Date(date96b).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
+		if (test96b == "2012/12/6 中国标准时间 20:00:00") {ver96b = xS}
 		//console.debug(test96)
 	} catch(e) {}
-	record(235,96, "1738422", ver96, performance.now()-t96)
+	record(235,96, "1738422", ver96b, performance.now()-t96b)
 
 	// 95: 1723674: dom.crypto.randomUUID.enabled: fast confirm 95+ only
 	let t95 = performance.now(), ver95 = xF
