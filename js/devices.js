@@ -204,7 +204,7 @@ function get_media_devices() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let extra = ""
 		if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
-		log_perf("media devices [started]",t0,"",extra)
+		log_perf("media devices [started]",t0,gt0,extra)
 
 		function finish(result) {
 			// lies
@@ -213,7 +213,7 @@ function get_media_devices() {
 			}
 			extra = ""
 			if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
-			log_perf("media devices [devices]",t0,"", extra)
+			log_perf("media devices [devices]",t0,gt0,extra)
 			if (devicesBS) {result = zLIE}
 			return resolve("media_devices:"+ result)
 		}
