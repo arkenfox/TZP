@@ -1,6 +1,8 @@
 'use strict';
 dom = getUniqueElements()
 
+let is95b = ""
+
 /*** GENERIC ***/
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
@@ -604,34 +606,42 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 95) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 96) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	// ESR jumper
-	function jumper() { 
+	// jump: speed up ESR, bypass slow 94
+	if (isFFLegacy) {output(59)} else {
 		try {
-			let test = {foo: false}
-			if (Object.hasOwn(test, "foo")) {start()}
-		} catch(e) {v91b()}
+			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
+			start()
+		} catch(e) {v93()}
 	}
 	// cascade
-	function start() { // 95a:1723674
-		// fast path: dom.crypto.randomUUID.enabled default true
+	function start() { // 96:1738422
 		try {
-			let test = self.crypto.randomUUID(); output(95)
-		} catch(e) {v95b()}
+			let d = Date.UTC(2012,12-1,6,12,0,0)
+			let test = new Date(d).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
+			if (test == "2012/12/6 中国标准时间 20:00:00") {output(96)} else {v95()}
+		} catch(e) {v95()}
 	}
-	function v95b() { // 95b:1674204 : slow path + relies on css
-		try {
-			let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-			if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
-		} catch(e) {v94()}
+	function v95() { // 95a:1723674
+		// fast path: dom.crypto.randomUUID.enabled default true
+		try {newFn("let test = self.crypto.randomUUID()"); output(95)} catch(e) {v95b()}
+	}
+	function v95b() { // 95b:1674204: slow
+		if (is95b !== "") {
+			if (is95b > 0.4 && is95b < 0.6) {output(95)} else {v94()} // fast precomputed
+		} else {
+			try {
+				let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+				if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
+			} catch(e) {v94()}
+		}
 	}
 	function v94() { // 94:1722576
 		try {
-			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
-			output(94)
+			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)"); output(94)
 		} catch(e) {v93()}
 	}
 	function v93() { //93:1328672
@@ -640,9 +650,7 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {v93b()}
 	}
 	function v93b() { //93:1722448
-		try {
-			newFn("self.reportError('93')"); output(93)
-		} catch(e) {v92()}
+		try {newFn("self.reportError('93')"); output(93)} catch(e) {v92()}
 	}
 	function v92() { //92:1721149
 		try {
@@ -793,7 +801,6 @@ const get_isVer = () => new Promise(resolve => {
 			output(60)
 		} catch(e) {output(59)}
 	}
-	if (isFFLegacy) {output(59)} else {jumper()}
 })
 
 /*** CHECK FUNCTIONS ***/
@@ -1355,6 +1362,13 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
+	// precompute slow 95b test
+	if (jsFiles.length == 1) {
+		try {
+			is95b = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+		} catch(e) {}
+	}
+	// the whole gangs here
 	if (jsFiles.length == 13) {
 		if (runSL) {isPerf = false}
 		try {
