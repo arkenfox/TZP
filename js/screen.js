@@ -1,7 +1,5 @@
 'use strict';
 
-//force github to update file
-
 var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume
 var uaBS = false
 let isOS64math = ""
@@ -569,7 +567,7 @@ function get_locales() {
 		let res = []
 		let sName = "feature_supported_locales_notglobal"
 		sDetail[sName] = []
-		let list = ["ba","co","cv","ia","ka","ki","ku","kok","lij","lo","mai","no","pa","qu","sa","su","no","tl","tw","vo"]
+		let list = ["ba","co","cv","ia","ka","ki","ku","kok","lij","lo","mai","no","pa","qu","sa","sc","su","no","tl","tw","vo"]
 		if (runS) {list.push("en")}
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
@@ -577,7 +575,8 @@ function get_locales() {
 		let hash = sha1(res.join(), "feature supported locales")
 		let note = "details", color = "3"
 		if (isFF) {
-			if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91+"
+			if (hash == "d64182953a8450518c818dbe9dbf35bab8c9ca26") {note = "FF96+"
+			} else if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91-95"
 			} else if (hash == "69a80c449f0a77f1ab419351c04ced065aa49589") {note = "FF78-90"
 			} else if (hash == "88fd1391314005c3fe9b8dced0e2f328b06afbb3") {note = "FF70-77"
 			} else if (hash == "f224735b922be026a0348d98c819239b6a330813") {note = "FF65-69"
