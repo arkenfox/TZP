@@ -618,11 +618,9 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {v93()}
 	}
 	// cascade
-	function start() { // 96:1738422
+	function start() { // 96
 		try {
-			let d = Date.UTC(2012,12-1,6,12,0,0)
-			let test = new Date(d).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
-			if (test == "2012/12/6 中国标准时间 20:00:00") {output(96)} else {v95()}
+			if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {output(96)} else {v95()}
 		} catch(e) {v95()}
 	}
 	function v95() { // 95a:1723674
