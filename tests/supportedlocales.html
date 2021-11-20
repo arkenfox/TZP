@@ -340,14 +340,14 @@ function run_main(method, isLoopy) {
 				} else if (hash == "5aae08c4b2ec7e5ff4189632ae3fc197c8cd2091") {notation = " [FF64 or lower]"
 				}
 			} else {
-				if (hash == "6f9a68637c020f4f6733b1dd386a2fdef2539fa0") {notation = " [FF91+]" // 1714933: no (instead of no->nb), sa
-				} else if (hash == "5abdce3e9207123ab9c3333916c49dfe6d026ba3") { // added: mai, su
-					if (method == "DN") {notation = " [FF86-90]"} else {notation = " [FF78-90]"}
-				} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // added: fil (tl)
-				} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // added: ia, jv, ku, mi, sd, tk, xh
-				} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF64 or lower]"
+				if (hash == "01680dccae242ab9e4b430250bfab84c9c85125e") {notation = " [FF96+]" // 152: sc
+				} else if (hash == "237ef6664a180247df91e157dc31ce045263ba10") {notation = " [FF91-95]" // 1714933: 151: no (instead of no->nb), sa
+				} else if (hash == "c4b53bd61a62888b78b368b72fc4d021c09409da") { // 150: mai, sat, su
+				 if (method == "DN") {notation = " [FF86-90]"} else {notation = " [FF78-90]"}
+				} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // 147: hye->hy, no->nb, tl->fil, tw->ak
+				} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // 143: ia, jv, ku, mi, sd, tk, xh
+				} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF64 or lower]" // 136
 				}
-
 			}
 			return notation
 		}
@@ -400,6 +400,7 @@ function run_main(method, isLoopy) {
 			}
 			// don't sort or remove any dupes
 			let hash = sha1(data.join())
+
 			// dupes
 			all.sort()
 			let dupes = [], dupesclean = [], tmpCodes = [], tmpCount = 0
