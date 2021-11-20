@@ -1,6 +1,6 @@
 "use strict";
 
-/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ **/
+/* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
 
 function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -100,6 +100,7 @@ function outputCanvas() {
 			if (isFF && aBlock[i] == false) {
 				let control = ""
 				let test = aValue[i]
+console.log(item, test)
 				if (item.substring(0,4) == "isPo") {
 					control = "472a2a3d8f0f23a00a1d25dec73833bdc8a4457e"
 					display += (test == control ? rfp_green : rfp_red)
