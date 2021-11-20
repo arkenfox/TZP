@@ -59,40 +59,40 @@ function analyse(data) {
 	let strNew = s14 + len +sc +" : "
 		+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
 	if (slice1 == "A") {
-		if (slice4 == "5ErkJggg==") {
-			if (slice3 == "lEQVQ4T2") {
-				if (len == 190) {return "12"} // FF96+
-				if (len == 186) {return "13"}
-				if (len == 182) {return "14"}
-				if (len == 178) {return "15"}
-				if (len == 174) {return "16"}
-			} else if (slice3 == "lEQVQ4jW") {
+		// FF96+
+		if (is96 && slice3 == "lEQVQ4T2") {
+			if (slice4 == "5ErkJggg==") {
+				if (len == 190) {return "0"}
+				if (len == 186) {return "1"}
+				if (len == 182) {return "2"}
+				if (len == 178) {return "3"}
+				if (len == 174) {return "4"}
+			} else if (slice4 == "VORK5CYII=") {
+				if (len == 190) {return "5"} // FF96+
+				if (len == 186) {return "6"}
+				if (len == 182) {return "7"}
+				if (len == 178) {return "8"}
+				if (len == 174) {return "9"}
+			} else if (slice4 == "lFTkSuQmCC") {
+				if (len == 190) {return "10"} // FF96+
+				if (len == 186) {return "11"}
+				if (len == 182) {return "12"}
+				if (len == 178) {return "13"}
+				if (len == 174) {return "14"}
+			}
+		// FF78-95
+		} else if (!is96 && slice3 == "lEQVQ4jW") {
+			if (slice4 == "5ErkJggg==") {
 				if (len == 174) {return "0"}
 				if (len == 170) {return "1"}
 				if (len == 166) {return "2"}
 				if (len == 162) {return "3"}
-			}
-		} else if (slice4 == "VORK5CYII=") {
-			if (slice3 == "lEQVQ4T2") {
-				if (len == 190) {return "17"} // FF96+
-				if (len == 186) {return "18"}
-				if (len == 182) {return "19"}
-				if (len == 178) {return "20"}
-				if (len == 174) {return "21"}
-			} else if (slice3 == "lEQVQ4jW") {
+			} else if (slice4 == "VORK5CYII=") {
 				if (len == 174) {return "4"}
 				if (len == 170) {return "5"}
 				if (len == 166) {return "6"}
 				if (len == 162) {return "7"}
-			}
-		} else if (slice4 == "lFTkSuQmCC") {
-			if (slice3 == "lEQVQ4T2") {
-				if (len == 190) {return "22"} // FF96+
-				if (len == 186) {return "23"}
-				if (len == 182) {return "24"}
-				if (len == 178) {return "25"}
-				if (len == 174) {return "26"}
-			} else if (slice3 == "lEQVQ4jW") {
+			} else if (slice4 == "lFTkSuQmCC") {
 				if (len == 174) {return "8"}
 				if (len == 170) {return "9"}
 				if (len == 166) {return "10"}
@@ -296,45 +296,51 @@ sg = sg.trim()
 s9 = s9.trim()
 s14 = s14.trim()
 
-let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4jW"+ sc +" ... "+ s14
-let prefix2 = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14 +"lEQVQ4T2"+ sc +" ... "+ s14
 
-let rules = [
-	// FF95 or lower
-	s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
-	s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
-	s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
-	s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
+// rules
+let is96 = false, rules = []
+if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {is96 = true}
+let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14
+	+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + sc +" ... "+ s14
 
-	s14+ "174 "+ prefix + "VORK5CYII="+ sc,
-	s14+ "170 "+ prefix + "VORK5CYII="+ sc,
-	s14+ "166 "+ prefix + "VORK5CYII="+ sc,
-	s14+ "162 "+ prefix + "VORK5CYII="+ sc,
+if (is96) {
+	rules = [
+		s14+ "190 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "186 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "182 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "178 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
 
-	s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
-	s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
-	s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
-	s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "190 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "186 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "182 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "178 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "174 "+ prefix + "VORK5CYII="+ sc,
 
-	// FF96+
-	s14+ "190 "+ prefix2 + "5ErkJggg=="+ sc,
-	s14+ "186 "+ prefix2 + "5ErkJggg=="+ sc,
-	s14+ "182 "+ prefix2 + "5ErkJggg=="+ sc,
-	s14+ "178 "+ prefix2 + "5ErkJggg=="+ sc,
-	s14+ "174 "+ prefix2 + "5ErkJggg=="+ sc,
+		s14+ "190 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "186 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "182 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "178 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+	]
+} else {
+	rules = [
+		s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
+		s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
 
-	s14+ "190 "+ prefix2 + "VORK5CYII="+ sc,
-	s14+ "186 "+ prefix2 + "VORK5CYII="+ sc,
-	s14+ "182 "+ prefix2 + "VORK5CYII="+ sc,
-	s14+ "178 "+ prefix2 + "VORK5CYII="+ sc,
-	s14+ "174 "+ prefix2 + "VORK5CYII="+ sc,
+		s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "170 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "166 "+ prefix + "VORK5CYII="+ sc,
+		s14+ "162 "+ prefix + "VORK5CYII="+ sc,
 
-	s14+ "190 "+ prefix2 + "lFTkSuQmCC"+ sc,
-	s14+ "186 "+ prefix2 + "lFTkSuQmCC"+ sc,
-	s14+ "182 "+ prefix2 + "lFTkSuQmCC"+ sc,
-	s14+ "178 "+ prefix2 + "lFTkSuQmCC"+ sc,
-	s14+ "174 "+ prefix2 + "lFTkSuQmCC"+ sc,
-]
+		s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
+		s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+	]
+}
 
 // running totals
 let oTotal = {},
