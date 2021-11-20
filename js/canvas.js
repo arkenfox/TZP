@@ -57,7 +57,7 @@ function outputCanvas() {
 			if (isBlock && val0.length == nHash && val0.indexOf(" ") == -1) {val0 = val1}
 			// rehash shorter
 			if (!isBlock && isSHA == "SHA-256") {val0 = sha1(val0, "canvas "+ name)}
-			aValue.push(val0) 
+			aValue.push(val0)
 			// lies = from known: valid hash + engine
 			if (!useKnown || isBlock) {val2 = "true"}
 			aKnown.push(val2 == "true" ? true : false)
@@ -100,18 +100,17 @@ function outputCanvas() {
 			if (isFF && aBlock[i] == false) {
 				let control = ""
 				let test = aValue[i]
-console.log(item, test)
 				if (item.substring(0,4) == "isPo") {
-					control = "472a2a3d8f0f23a00a1d25dec73833bdc8a4457e"
+					control =  isSHA == "SHA-1" ? "ff86099c8eb14523e204d688a35b104a217bd886" : "472a2a3d8f0f23a00a1d25dec73833bdc8a4457e"
 					display += (test == control ? rfp_green : rfp_red)
 				}
 				// static
-				if (isVer < 78) {
+				if (isVer < 78) { // 220x30 white
 					if (item == "toDataURL" || item == "toBlob") {
-						control = "89346bd04959d09543a87649da1321e88c195a04" // 220x30 white
+						control = isSHA == "SHA-1" ? "0a4b8b3ff3cbd712d1883e1324a8bb3f07e10ca7" : "89346bd04959d09543a87649da1321e88c195a04"
 						display += (test == control ? rfp_green : rfp_red)
 					} else if (item == "getImageData") {
-						control = "c4492552ef059c1c7d8042da6f818fc07064e8e5"
+						control = isSHA == "SHA-1" ? "25470ba3fb79778869ad46c7175d5fac9c88ad2b" : "c4492552ef059c1c7d8042da6f818fc07064e8e5"
 						display += (test == control ? rfp_green : rfp_red)
 					}
 				}
