@@ -7,16 +7,14 @@ function outputCanvas() {
 	let res0 = [], res1 = [], res2 = []
 	var isSHA = "SHA-1"
 
-	// ToDo: apply isVer check for FF95+
-	let known1 = [ // gecko: toDataURL, toBlob
-		//"749d6141",
-		"b7bf4776", // 8c70ed9a7dbe6d72e3d1a4e448522012661cfbed
-		"bdcce913", // 1724331 FF96+ (also see 1737038)
-	],
+	// expected known
+	let known1 = ["b7bf4776"], // gecko: toDataURL, toBlob
 		known2 = "749d6141", // getImageData
 		known3 = ["e5b3726b"], // isPointInPath
 		known4 = ["e262d7f1"]  // isPointInStroke
-	if (isEngine == "blink") {
+	if (isVer > 95) {
+		known1 = ["bdcce913"] // 1724331 (also see 1737038)
+	} else if (isEngine == "blink") {
 		known1 = ["bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf",
 			"05f24fe5cfa497c8bebf1749188ab5fbd2b7c188", // 
 			"c05807c783bd281ee83d13807426023390c7d66a", // 117efe05
