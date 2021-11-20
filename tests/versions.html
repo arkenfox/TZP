@@ -155,12 +155,12 @@ function outputVersion() {
 	let count = 0,
 		expected = 68
 
-	// 96
+	// 96: 1738422
 	let t96 = performance.now(), ver96 = xF
 	try {
 		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {ver96 = xS}
 	} catch(e) {}
-	record(236,96, "", ver96, performance.now()-t96)
+	record(236,96, "1738422", ver96, performance.now()-t96)
 
 	// 96b: 1738422
 	let t96b = performance.now(), ver96b = xF
