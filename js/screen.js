@@ -4,6 +4,7 @@ var jsZoom, jsZoomOriginal, varDPI, dpr1, dpr2, dpi_x, dpi_y, zoomAssume
 var uaBS = false
 let isOS64math = ""
 let iframeSim = 0
+let nxtESR = 102
 
 function return_lb_nw(w,h) {
 	// LB
@@ -1431,12 +1432,12 @@ function get_ua_doc() {
 					// RFP ON
 						v = "78.0"
 						if (isVer > 90) {v = "91.0"}
-						if (isVer > 103) {v = "104.0"}
+						if (isVer > nxtESR - 1) {v = nxtESR +".0"}
 						v2 = v
 						// only allow v2 as next RFP number IF...
 						if (isVerPlus) {
 							if (isVer == 90) {v2 = "91.0"}
-							if (isVer == 103) {v2 = "104.0"}
+							if (isVer == nxtESR - 1) {v2 = nxtESR +".0"}
 						}
 						/* resistfingerprinting/test/browser/browser_navigator.js */
 						// NOTE: Android desktop mode uses linux userAgent and the use of
@@ -2341,9 +2342,9 @@ function outputUA() {
 				if (isFork === undefined) {go = true}
 				if (isRFP) {go = true}
 				// skip open-ended versions if next version is ESR
-				// assuming isVer keeps up to date: e.g. 103+ can be 103 or 104
+				// assuming isVer keeps up to date: e.g. 101+ can be 101 or 102
 				if (isVerPlus) {
-					if (isVer == 103 && (vReported * 1) == 104) {go = false}
+					if (isVer == (nxtESR - 1) && (vReported * 1) == nxtESR) {go = false}
 				}
 			}
 			// RFP: version
@@ -2462,7 +2463,6 @@ function outputFD(runtype) {
 			log_section("feature", t0, section)
 
 			dom.fdBrandingCss = zNA
-			dom.fdResourceCss = zNA
 			dom.fdChrome = zNA
 			dom.fdMathOS = zNA
 			dom.fdLH = zNA
