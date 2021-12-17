@@ -415,10 +415,13 @@ function run_main(method) {
 				} else {resultsHash += zNEW
 				}
 				// locales
-				if (localesHash == "a760b65d42061d28bdd0f573d9cf513833bc7945") {localesHash += s4 +" [FF96+]"+ sc
-				} else if (localesHash == "65f9190049b61ec3a2d14a273445a7bf1048e44d") {localesHash += s4 +" [FF91-95]"+ sc
-				} else if (localesHash == "9518690b69c7a74ff1c4b02a4bd36edeb31d3ee9") {localesHash += s4 +" [FF90]"+ sc
-				} else {localesHash += zNEW
+				 // ignore non-supported = same as undefined = could be any supported locale
+				if (useSupportedOnly) {
+					if (localesHash == "a760b65d42061d28bdd0f573d9cf513833bc7945") {localesHash += s4 +" [FF96+]"+ sc
+					} else if (localesHash == "65f9190049b61ec3a2d14a273445a7bf1048e44d") {localesHash += s4 +" [FF91-95]"+ sc
+					} else if (localesHash == "9518690b69c7a74ff1c4b02a4bd36edeb31d3ee9") {localesHash += s4 +" [FF90]"+ sc
+					} else {localesHash += zNEW
+					}
 				}
 			}
 		}
