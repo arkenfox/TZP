@@ -97,6 +97,9 @@ function get_gamepads() {
 }
 
 function get_concurrency() {
+	// gecko stuff
+		// 1630089: FF68+ macOS reports physical cores instead of logical
+		// capped at dom.maxHardwareConcurrency (e.g. 1728741)
 	let h = zD
 	if (check_navKey("hardwareConcurrency")) {
 		try {
@@ -104,11 +107,11 @@ function get_concurrency() {
 			h = (h == undefined ? zB0 : h)
 		} catch(e) {h = zB0}
 	} else {h = zD}
-	let isLies = (isBraveMode.substring(0,2) == "st" ? true: false)
+	let isLies = (isBraveMode > 1 ? true: false)
 	if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
 	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
 	if (isLies) {
-		dom.nHWC.innerHTML = soL + h + scC
+		dom.nHWC.innerHTML = soL + h + scC + rfp_red
 		if (gRun) {gKnown.push("devices:hardwareConcurrency")}
 	} else {
 		dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
@@ -137,7 +140,6 @@ function get_keyboard() {
 			sDetail[sName +"_fake_skip"] = []
 			let isObjFake = true
 			let test = navigator.keyboard
-			//i need an extension that fakes keyboard keys
 			// cleanup test
 			if (test == "undefined") {test = "undefined string"
 			} else if (test == undefined || test == true || test == false || test == null) {test += ""
@@ -204,7 +206,7 @@ function get_media_devices() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let extra = ""
 		if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
-		log_perf("media devices [started]",t0,gt0,extra)
+		log_perf("-- start md section -- ","n/a",gt0,extra)
 
 		function finish(result) {
 			// lies
@@ -213,7 +215,7 @@ function get_media_devices() {
 			}
 			extra = ""
 			if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
-			log_perf("media devices [devices]",t0,gt0,extra)
+			log_perf("media devices [devices]",t0,gt0, extra)
 			if (devicesBS) {result = zLIE}
 			return resolve("media_devices:"+ result)
 		}
@@ -598,7 +600,6 @@ function get_speech_engines() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let sName = "devices_speech_engines"
 		sDetail[sName] = []
-
 		// output & resolve
 		function display(output) {
 			let btn = ""
@@ -611,7 +612,6 @@ function get_speech_engines() {
 			log_perf("speech engines [devices]",t0)
 			return resolve("speech_engines:"+ output)
 		}
-
 		if ("speechSynthesis" in window) {
 			function populateVoiceList() {
 				let res = []
@@ -657,15 +657,19 @@ function get_speech_engines() {
 function get_speech_rec() {
 	// media.webspeech.recognition.enable
 	// NOTE: media.webspeech.test.enable until landed
-	try {
-		let recognition = new SpeechRecognition()
-		dom.sRec = zE
-	} catch(e) {
-		log_error("devices: speech recognition", e.name, e.message)
-		// undefined
-		// ToDo: speechRec: detect disabled vs not-supported?
-		dom.sRec = zD +" [or "+ zNS +"]"
-	}
+	return new Promise(resolve => {
+		try {
+			let recognition = new SpeechRecognition()
+			dom.sRec = zE
+			return resolve("speech_recogniton:" + zE)
+		} catch(e) {
+			log_error("devices: speech recognition", e.name, e.message)
+			// undefined
+			// ToDo: speechRec: detect disabled vs not-supported?
+			dom.sRec = zD +" [or "+ zNS +"]"
+			return resolve("speech_recogniton:" + zD)
+		}
+	})
 }
 
 function get_touch() {
@@ -722,12 +726,10 @@ function outputDevices() {
 		set_pluginBS()
 	}
 
-	//ToDo: promisify and add to section hash
-	get_speech_rec()
-
 	Promise.all([
 		get_media_devices(),
 		get_speech_engines(),
+		get_speech_rec(),
 		get_pointer_hover(),
 		get_gamepads(),
 		get_touch(),
@@ -749,7 +751,7 @@ function outputDevices() {
 		if (gRun) {
 			if (pluginBS) {gKnown.push("devices:plugins")}
 			if (mimeBS) {gKnown.push("devices:mimeTypes")}
-			if (isBraveMode.substring(0,2) == "st") {gKnown.push("devices:hardwareConcurrency")}
+			if (isBraveMode > 1) {gKnown.push("devices:hardwareConcurrency")}
 		}
 		// section
 		log_section("devices", t0, section)

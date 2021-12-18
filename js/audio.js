@@ -2,7 +2,7 @@
 
 /* code base on
 https://canvasblocker.kkapsner.de/test/
-https://audiofingerprint.openwpm.com/ **/
+https://audiofingerprint.openwpm.com/ */
 
 var t0audio,
 	latencyError = false,
@@ -304,7 +304,7 @@ function outputAudio() {
 						sum3 += Math.abs(x)
 					}
 					// lies
-					let isLies = (isBraveMode.substring(0,2) == "st" && !isFile)
+					let isLies = (isBraveMode > 1 && !isFile)
 					if (sum2 == sum3) {isLies = true}
 					if (isFF || isEngine == "blink") {
 						if (!knownGood.includes(sum)) {isLies = true}
