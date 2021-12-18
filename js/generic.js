@@ -193,8 +193,8 @@ const get_isBraveMode = () => new Promise(resolve => {
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
-			if (mode == "unknown") {gCheck.push("_global:isBraveMode: unknown")}
-			log_perf("isBraveMode [global]",t0,"",isBraveMode)
+			if (aBraveMode == 0) {gCheck.push("_global:isBraveMode: unknown")}
+			log_perf("isBraveMode [global]",t0,"",aBraveMode[isBraveMode])
 		}
 	}
 	try {
@@ -216,7 +216,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 			return strict
 		}
 		if (strictMode()) {
-			set("strict")			
+			set(3)			
 			return resolve()
 		} else {
 			// standard and strict mode do not have chrome plugins
@@ -225,14 +225,14 @@ const get_isBraveMode = () => new Promise(resolve => {
 			const hasChromePlugins = pluginsList
 				.filter(plugin => chromePlugins.test(plugin.name)).length == 2
 			if (pluginsList.length && !hasChromePlugins) {
-				set("standard")
+				set(2)
 				return resolve()
 			}
-			set("allow")
+			set(1)
 			return resolve()
 		}
 	} catch(e) {
-		set("unknown")
+		set(0)
 		return resolve()
 	}
 })
@@ -618,7 +618,7 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {v93()}
 	}
 	// cascade
-	function start() { // 96
+	function start() { // 96:1738422
 		try {
 			if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {output(96)} else {v95()}
 		} catch(e) {v95()}
@@ -1542,17 +1542,21 @@ function outputSection(id, cls) {
 function run_once() {
 	get_canPerf()
 	// ASAP
-	if (canPerf) {log_line(Math.round(performance.now()) + " : IMMEDIATE")}
+	let t99 = ""
+	if (canPerf) {
+		t99 = performance.now()
+		log_line(Math.round(performance.now()) + " : IMMEDIATE")
+	}
 	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
 	} else if (location.protocol == "https:") {isSecure = true}
 	let t0; if (canPerf) {t0 = performance.now()}
 	// WARM
 	try {
-		log_perf("media devices [warmup]",t0,"")
+		log_perf("-- start md warmup -- ",t0,"")
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			let info = (canPerf ? Math.round(performance.now()) +" | ": "")
 				+ (gLoad ? "page load" : "global rerun")
-			log_perf("media devices [warmup]",t0,gt0,info)
+			log_perf("-- end md warmup -- ",t0,t99,info)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
