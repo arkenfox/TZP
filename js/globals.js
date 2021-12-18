@@ -2,7 +2,7 @@
 
 var dom;
 
-// global snapshot //
+// global snapshot
 let jsFiles = [],
 	gCount = 0,
 	gCountExpected = 15,
@@ -134,7 +134,8 @@ let avh = "",
 // other
 	isBaseFonts = false,
 	isBrave = false,
-	isBraveMode = "unknown",
+	isBraveMode = 0,
+	aBraveMode = ["unknown", "disabled", "standard", "strict"],
 	isChannel = "",
 	isChrome = "", // chrome://
 	isEngine = "",
