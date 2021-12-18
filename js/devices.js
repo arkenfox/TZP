@@ -99,7 +99,7 @@ function get_gamepads() {
 function get_concurrency() {
 	// gecko stuff
 		// 1630089: FF68+ macOS reports physical cores instead of logical
-		// 1728741: FF96+ dom.maxHardwareConcurrency 16 -> 128
+		// capped at dom.maxHardwareConcurrency (e.g. 1728741)
 	let h = zD
 	if (check_navKey("hardwareConcurrency")) {
 		try {
