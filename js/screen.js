@@ -2460,7 +2460,7 @@ function outputFD(runtype) {
 			// Brave/Opera
 			let browser = zNA, display = zNA
 			if (isBrave) {
-				browser = "Brave" + (isBraveMode > 1 ? +" ["+ aBraveMode[isBraveMode] +"]" : "")
+				browser = "Brave" + (isBraveMode > 1 ? " ["+ aBraveMode[isBraveMode] +"]" : "")
 			} else if (isEngine == "blink" && Object.keys(chrome).includes("search")) {browser = "Opera"}
 			dom.browserlabel = "browser"
 			dom.fdResourceCss = browser
