@@ -1399,6 +1399,10 @@ function get_ua_doc() {
 			}
 		}
 
+		// Notes
+		// 1693295 win capped at 10.0
+		// 1679929 mac capped at 10.15
+
 		function check_basics(str, property) {
 			// clear arrow
 			addArrow(property, false)
@@ -2369,7 +2373,7 @@ function outputUA() {
 				}
 			}
 			// isBrave spaces
-			if (isBraveMode.substring(0,2) == "st") {
+			if (isBraveMode > 1) {
 				for (let i=0; i < section.length; i++) {
 					let item = section[i],
 						name = item.split(":")[0]
@@ -2454,8 +2458,9 @@ function outputFD(runtype) {
 			dom.fdScrollE = zNA
 			section.push("scrollbars:n/a")
 			// Brave/Opera
-			let browser = zNA
-			if (isBrave) {browser = "Brave"
+			let browser = zNA, display = zNA
+			if (isBrave) {
+				browser = "Brave" + (isBraveMode > 1 ? +" ["+ aBraveMode[isBraveMode] +"]" : "")
 			} else if (isEngine == "blink" && Object.keys(chrome).includes("search")) {browser = "Opera"}
 			dom.browserlabel = "browser"
 			dom.fdResourceCss = browser
