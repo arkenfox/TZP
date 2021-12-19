@@ -239,23 +239,23 @@ function set_fntListMaster() {
 
 	let display = []
 	let lines = []
-	display.push(s12 +"   MIN:"+ sc +"always ".padStart(9) + btnA)
+	display.push(s12 +"   MIN:"+ sc +"always ".padStart(10) + btnA)
 	let strBase = bTB ? "whitelist " : "base "
-	display.push(strBase.padStart(9) + btnB)
-	display.push("min ".padStart(9) + btnMin + (bTB ? " [includes "+ btnBun +" bundled]": ""))
+	display.push(strBase.padStart(10) + btnB)
+	display.push("min ".padStart(10) + btnMin + (bTB ? " [includes "+ btnBun +" bundled]": ""))
 	lines.push(display.join(" | "))
 	
 	display = []
-	display.push(s12 +"MEDIUM:"+ sc +"min ".padStart(9) + btnMin)
+	display.push(s12 +"MEDIUM:"+ sc +"min ".padStart(10) + btnMin)
 	let strOther = bTB ? "TB other " : "other "
-	display.push(strOther.padStart(9) + btnO)
-	display.push("medium ".padStart(9) + btnMed)
+	display.push(strOther.padStart(10) + btnO)
+	display.push("medium ".padStart(10) + btnMed)
 	lines.push(display.join(" | "))
 
 	display = []
-	display.push(s12 +"   MAX:"+ sc +"medium ".padStart(9) + btnMed)
-	display.push("faces ".padStart(9) + btnS)
-	display.push("max ".padStart(9) + btnMax)
+	display.push(s12 +"   MAX:"+ sc +"medium ".padStart(10) + btnMed)
+	display.push("faces ".padStart(10) + btnS)
+	display.push("max ".padStart(10) + btnMax)
 	lines.push(display.join(" | "))
 	dom.statstitle.innerHTML = "<br>"+ s12 +"FONT LISTS: "+ sc + strOS
 	dom.stats.innerHTML = "<br><br>"+ lines.join("<br>")
@@ -347,8 +347,8 @@ function get_fonts(runtype) {
 						if (strOS == "android") {
 							display.push("<br>test skipped: there is no android faces test, never will be")
 						// TB
-						} else if (bTB) {
-								display.push("<br>test skipped: Tor Browser's whitelist blocks a full test")
+						//} else if (bTB) {
+						//		display.push("<br>test skipped: Tor Browser's whitelist blocks a full test")
 						// RFP is on
 						} else if (bRFP) {
 								display.push("<br>test skipped: RFP blocks a full test, flip it off and run again")
@@ -359,6 +359,9 @@ function get_fonts(runtype) {
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (checkData.length ? red_cross : green_tick) + "<br>"
 							)
+							if (bTB) {
+								display.push("note: Tor Browser's whitelist blocks a full test")
+							}
 							// check kBaseFonts integrity
 							if (notFoundInMin.length) {
 								let fntSuspect = notFoundInMin.filter(x => foundInAll.includes(x))
