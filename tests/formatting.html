@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>formatting</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>formatting</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">formatting
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Compare expected locale format to actual</span>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr>
+			<td class="mono spaces" id="langS"> </td>
+			<td class="mono spaces" id="hashS"></td>
+		</tr>
+		<tr>
+			<td class="mono spaces">undefined</td>
+			<td class="mono spaces" id="hashU"></td>
+		</tr>
+		<tr><td colspan="2"><br><hr><br></td></tr>
+		<tr>
+			<td class="mono spaces">diffs</td>
+			<td class="mono spaces" id="diffs"></td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+
+// S = simulated, U = undefined
+let arrayS = [], arrayU = [], langS = ""
+
+function detailConsole(name) {
+	name = name == "S" ? langS : "undefined"
+	let data = name == "undefined" ? arrayU : arrayS
+	let hash = sha1(data.join())
+	console.log(name, hash +"\n", data)
+}
+
+function get_data(lang) {
+	return new Promise(resolve => {
+
+		// temp sim
+		if (lang !== undefined) {
+			//lang = "de-DE"
+			//lang = "zh-TW"
+			//dom.langS = lang
+		}
+
+		let d = new Date("January 30, 2019 13:00:00"),
+			o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+				minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"},
+			res = []
+
+		function get_item(item) {
+			try {
+				//ToDo: real resolved options are zh-Hant-TW, simulated are zh-TW
+
+				// language
+				if (item == 0) {return zNA //navigator.languages
+				} else if (item == 1) {return zNA // not relevant //navigator.language
+				} else if (item == 2) {return zNA // not relevant //navigator.languages[0]
+				} else if (item == 3) {return Intl.Collator(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 4) {return Intl.DateTimeFormat(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 5) {return new Intl.DisplayNames(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 6) {return new Intl.ListFormat(lang).resolvedOptions().locale
+				} else if (item == 7) {return Intl.NumberFormat(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 8) {return new Intl.PluralRules(lang).resolvedOptions().locale
+				} else if (item == 9) {return new Intl.RelativeTimeFormat(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 10) {return new Intl.Segmenter(lang, {type: "region"}).resolvedOptions().locale
+				} else if (item == 11) {
+					let chars = ['a','A','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u01FB','\u0107',
+					'\u0109','\u00E7\a','\u00EB','\u00ED','\u00EE','\u0137\a','\u0144','\u00F1','\u1ED9','\u00F6','\u1EE3',
+					'\u0627','\u0649','\u06CC','\u06C6','\u06C7','\u06FD','\u0561','\u09A4','\u09CE','\u311A','\u0453',
+					'\uA647','\u0503','\u0439','\u0457','\u040E','\u04F0','\u4E2D','\u0934','\u0935','\u1208','\u10D0',
+					'\u03B1','\u0A85','\u3147','\u05EA','\uFB4A','\u0C85','\u1780','\u0E9A','\u1D95','\u025B','\u0149',
+					'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',]
+					chars.sort()
+					chars.sort(Intl.Collator(lang).compare)
+					return sha1(chars.join(), "language collation")
+				// timezone
+				} else if (item == 12) {return zNA // time not relevant
+				} else if (item == 13) {return Intl.DateTimeFormat(lang).resolvedOptions().timeZone
+				} else if (item == 14) {return zNA // time not relevant
+				} else if (item == 15) {return zNA // spare
+				// date/time format
+				} else if (item == 16) {
+					// FF91+: 1710429
+					// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
+					let tzRes = []
+					try {
+						let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
+						let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
+						tzDays.forEach(function(day) {
+							tzNames.forEach(function(name) {
+								let tz = ""
+								let tzDate = new Date(day)
+								try {
+									let tzFormatter = Intl.DateTimeFormat(lang, {hour12: true, timeZoneName: name})
+									let tzDateString = tzFormatter.formatToParts(day).map(({type, value}) => {
+										// FF91: extended TZNs are type "unknown"
+										if (type == "timeZoneName" || type == "unknown") {tz = value}
+									})
+								} catch(e) {
+									tz = zErr
+								}
+								tzRes.push(tz)
+							})
+						})
+						return tzRes.join(", ")
+					} catch(e) {
+						return zErr
+					}
+				} else if (item == 17) {return zNA // d
+				} else if (item == 18) {return zNA // d.toString()
+				} else if (item == 19) {return d.toLocaleString(lang, o)
+				} else if (item == 20) {return d.toLocaleDateString(lang, o)
+				} else if (item == 21) {return d.toLocaleTimeString(lang, o)
+				} else if (item == 22) {return Intl.DateTimeFormat(lang, o).format(d)
+				} else if (item == 23) {
+					let f = Intl.DateTimeFormat(lang, { weekday: "long", month: "long", day: "numeric",
+						year: "numeric", hour: "numeric", minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long" })
+					let temp = f.formatToParts(d)
+					return temp.map(function(entry){return entry.value}).join("")
+				} else if (item == 24) {return d.toGMTString()
+				} else if (item == 25) {return d.toUTCString()
+				} else if (item == 26) {return d.toLocaleString(lang)
+				} else if (item == 27) {return [d].toLocaleString(lang)
+				} else if (item == 28) {return d.toLocaleDateString(lang)
+				} else if (item == 29) {return Intl.DateTimeFormat(lang).format(d)
+				} else if (item == 30) {return d.toLocaleTimeString(lang)
+				} else if (item == 31) {return d.toTimeString()
+				} else if (item == 32) {
+					let test = Intl.DateTimeFormat(lang, {hour: "numeric"}).resolvedOptions().hourCycle
+					return test
+				} else if (item == 33) {
+					// 65+: Intl.RelativeTimeFormat
+					let rtf = new Intl.RelativeTimeFormat(lang, {style: "long", numeric: "auto"})
+					return rtf.format(-7, "day") +", "+ rtf.format(-1, "day") +", "+
+						rtf.format(1, "day") +", "+ rtf.format(1, "month") +", "+ rtf.format(2, "year")
+				} else if (item == 34) {
+					// 70+: Intl.RelativeTimeFormat formatToParts
+					let rtf = new Intl.RelativeTimeFormat(lang, {style: "long", numeric: "auto"})
+					function concat_parts(length, value) {
+						let output = ""
+						let rtf2 = new Intl.RelativeTimeFormat(lang, {style: "long", numeric: "auto"})
+						let rtf3 = rtf2.formatToParts(length, value)
+						for (let x=0; x < rtf3.length; x++) {
+							output += rtf3[x].value
+						}
+						return output
+					}
+					let test = rtf.formatToParts(-1, "year")
+					return concat_parts("-1", "year")
+						+", "+ concat_parts("-3", "week")
+						+", "+ concat_parts("-1", "hour")
+						+", "+ concat_parts("45", "second")
+						+", "+ concat_parts("1", "day")
+						+", "+ concat_parts("1", "quarter")
+				} else if (item == 35) {
+					// Intl.NumberFormat
+					function err_check(name, msg) {
+						return " | error"
+					}
+					// decimals & groups
+					let tmp = new Intl.NumberFormat(lang).format(123456.789)
+					// unit long
+					try {
+						tmp += " | "+ new Intl.NumberFormat(lang, {style: "unit", unit: "mile-per-hour", unitDisplay: "long"}).format(5)
+					} catch(e) {
+						tmp += err_check(e.name, e.message)
+					}
+					// notation: scientific
+					try {
+						tmp += " | "+ new Intl.NumberFormat(lang, {notation: "scientific"}).format(987654321)
+					} catch(e) {}
+					// unit percent
+					try {
+						tmp += " | "+ new Intl.NumberFormat(lang, {style: "unit", unit: "percent"}).format(1/2)
+					} catch(e) {
+						tmp += err_check(e.name, e.message)
+					}
+					// notation: long compact
+					try {
+						tmp += " | "+ new Intl.NumberFormat(lang, {notation: "compact", compactDisplay: "long"}).format(654321987)
+					} catch(e) {}
+					// signDisplay
+					try {
+						tmp += " | "+ (55).toLocaleString(lang, {signDisplay: "always"})
+					} catch(e) {}
+					return tmp
+				} else if (item == 36) {
+					// [formatToParts] Intl.NumberFormat
+					function get_value(type, data, extra) {
+						try {
+							let str = type + " <code>none</code>"
+							for (let i = 0 ; i < data.length; i++) {
+								let tmpS = JSON.stringify(data[i])
+								if (tmpS.indexOf(type) !== -1) {
+									tmpS = tmpS.replace(/"/g, "")
+									tmpS = tmpS.replace("{type:", "")
+									tmpS = tmpS.replace(",value:", " ")
+									str = tmpS.replace("}", "")
+									if (extra == true) {str += " <code>"+ str.charCodeAt(str.length-1) +"</code>"}
+								}
+							}
+							if (str == undefined) {str = " <code>undefined</code>"}
+							return str
+						} catch(e) {
+							return type +" error"
+						}
+					}
+					try {
+						let tmp = get_value("decimal", new Intl.NumberFormat(lang).formatToParts(1000.2), true)
+							+" | "+ get_value("group", new Intl.NumberFormat(lang).formatToParts(1000), true)
+							+" | "+ get_value("infinity", new Intl.NumberFormat(lang).formatToParts(Infinity), true)
+							+" | "+ get_value("minusSign", new Intl.NumberFormat(lang).formatToParts(-5), true)
+							+" | "+ get_value("nan", new Intl.NumberFormat(lang).formatToParts(4/5 +"%"), false)
+						return tmp
+					} catch (e) {
+						return zErr
+					}
+				} else if (item == 37) {
+					// 70+: [BigInt] Intl.NumberFormat
+					let bint = BigInt(9007199254740991)
+					bint = eval("987654321987654321n")
+					let numFormat = new Intl.NumberFormat(lang)
+					return numFormat.format(bint)
+				} else if (item == 38) {
+					// 70+: [BigInt] toLocaleString
+					let bint = BigInt(9007199254740991)
+					bint = eval("123456789123456789n")
+					let tmp = bint.toLocaleString()
+					if (tmp == "123456789123456789") {
+						// 68-69
+						tmp = zNS
+					}
+					return tmp
+				} else if (item == 39) {
+					return Number(1234567.89).toLocaleString(lang, {style: "currency", currency: "USD", currencyDisplay: "symbol"})
+				} else if (item == 40) {
+					return Intl.DateTimeFormat(lang).resolvedOptions().calendar
+				} else if (item == 41) {
+					return Intl.DateTimeFormat(lang).resolvedOptions().numberingSystem
+				} else if (item == 42) {
+					let tmp = new Intl.RelativeTimeFormat(lang).resolvedOptions().numberingSystem
+					return tmp
+				} else if (item == 43) {
+					// relatedYear, yearName
+					let tmp = Intl.DateTimeFormat(lang, {relatedYear: "long"})
+						tmp = tmp.formatToParts(d)
+						tmp = tmp.map(function(entry){return entry.value}).join("")
+					let tmpb = Intl.DateTimeFormat(lang, {year: "numeric", yearName: "long"})
+						tmpb = tmpb.formatToParts(d)
+						tmpb = tmpb.map(function(entry){return entry.value}).join("")
+					return tmp += " | "+ tmpb
+				} else if (item == 44) {
+					function get_day_period(date) {
+						let dpNarrow = new Intl.DateTimeFormat(lang, {hourCycle: "h12", dayPeriod: "narrow"}).format(date)
+						let dpLong = new Intl.DateTimeFormat(lang, {hourCycle: "h12", dayPeriod: "long"}).format(date)
+						return dpNarrow == dpLong ? dpLong : dpNarrow + ", " + dpLong
+					}
+					let tmp ="",
+						dayA = get_day_period(new Date("2019-01-30T08:00:00")),
+						dayB = get_day_period(new Date("2019-01-30T12:00:00"))
+					if (dayA == dayB) {
+						tmp = zNS
+					} else {
+						// in the morning, noon, in the afternoon, in the evening, at night
+						tmp = dayA +" | "+ dayB
+							+" | "+ get_day_period(new Date("2019-01-30T15:00:00"))
+							+" | "+ get_day_period(new Date("2019-01-30T18:00:00"))
+							+" | "+ get_day_period(new Date("2019-01-30T22:00:00"))
+					}
+					return tmp
+				} else if (item == 45) {
+					// ListFormat: 1589095: 78+
+					let tmp = "", res45 = []
+					let	styles = ['long','short','narrow'],
+						types = ['conjunction', 'disjunction','unit']
+					styles.forEach(function(s){
+						types.forEach(function(t){
+							res45.push(new Intl.ListFormat(lang,{style: s, type: t}).format(["a","b","c"]))
+						})
+					})
+					if (res45.length) {tmp = res45.join(" | ")}
+					return tmp
+				} else if (item == 46) {
+					// 1557718: 79+
+					let list = ["short", "medium","long"],
+						res46 = []
+					list.forEach(function(s){
+						let style = Intl.DateTimeFormat(lang, {timeStyle: s,	dateStyle: s})
+						res46.push(style.format(d))
+					})
+					return res46.join(" | ")
+				} else if (item == 47) {
+					// FF91+: 1653024: formatRange
+					let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
+						date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
+						date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
+					let f = Intl.DateTimeFormat(lang, o)
+					return f.formatRange(date1, date2) +" | "+ f.formatRange(date1, date3)
+				} else if (item == 48 || item == 49) {
+					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
+					let prtype = item == 48 ? "cardinal" : "ordinal"
+					let prev = "", current = ""
+					for (let i=0; i < nos.length; i++) {
+						try {
+							current = new Intl.PluralRules(lang, {type: prtype}).select(nos[i])
+						} catch(e) {
+							current = zErr
+							break
+						}
+						// record changes only
+						if (prev !== current) {prules.push(nos[i] +": "+ current)}
+						prev = current
+					}
+					if (current !== zErr) {
+						return prules.join(", ")
+					} else {
+						return zErr
+					}
+				} else {
+					return "ignore"
+				}
+			} catch(e) {
+				return e.name +": "+ e.message
+			}
+		}
+
+		// build
+		for (let i=0; i < 50; i++) {
+			let result = get_item(i)
+			if (isFF) {
+				if (result == undefined || result == "undefined" || result == "") {result = zB0}
+			}
+			if (result == " | ") {result = zB0 +" | "+ zB0}
+			if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0}
+			if (result !== "ignore") {
+				res.push(result)
+			}
+		}
+		return resolve(res)
+	})
+}
+
+function get_diffs() {
+	try {
+		let ro = "resolvedOptions ["
+		let aIndex = [
+			// 0-10
+			"","","",ro+"Collator]",ro+"DateTimeFormat]",ro+"DisplayNames]",ro+"ListFormat]",
+			ro+"NumberFormat]",ro+"PluralRules]",ro+"RelativeTimeFormat]",ro+"Segmenter]",
+			// 11
+			"collation", "", "[resolvedOptions] timezone", "", "",
+			// 16+
+			"timeZoneNames",
+			"date/time",
+			"toString",
+			"toLocaleString",
+			"toLocaleDateString", // 20
+			"toLocaleTimeString",
+			"Intl.DateTimeFormat",
+			"[formatToParts] Intl.DateTimeFormat",
+			"toGMTString",
+			"toUTCString", //25
+			"toLocaleString",
+			"[Typed Array] toLocaleString",
+			"toLocaleDateString",
+			"Intl.DateTimeFormat",
+			"toLocaleTimeString", // 30
+			"toTimeString",
+			"[resolvedOptions] hourCycle",
+			"Intl.RelativeTimeFormat",
+			"[formatToParts] Intl.RelativeTimeFormat",
+			"Intl.NumberFormat", // 35
+			"[formatToParts] Intl.NumberFormat",
+			"[BigInt] Intl.NumberFormat",
+			"[BigInt] toLocaleString",
+			"[currency] toLocaleString",
+			"[Intl.DateTimeFormat] calendar", // 40
+			"[DateTime] numberingSystem",
+			"[RelativeTime] numberingSystem",
+			"[relatedYear | yearName] Intl.DateTimeFormat",
+			"[dayPeriod] Intl.DateTimeFormat",
+			"Intl.ListFormat", // 45
+			"Intl.DateTimeFormat",
+			"[formatRange] Intl.DateTimeFormat",
+			"[cardinal] Intl.PluralRules",
+			"[ordinal] Intl.PluralRules",
+		]
+
+		let hashS = sha1(arrayS.join())
+		let hashU = sha1(arrayU.join())
+		dom.hashS.innerHTML = hashS +" <span class='btn4 btnc' onclick='detailConsole(`S`)'>[details]</span>"
+		dom.hashU.innerHTML = hashU +" <span class='btn4 btnc' onclick='detailConsole(`U`)'>[details]</span>"
+		if (hashS == hashU) {
+			dom.diffs = zNA
+		} else {
+			let diffs = []
+			for (let i=0; i < arrayS.length; i++) {
+				let resE = arrayS[i],
+					resG = arrayU[i]
+				if (resE !== resG) {
+					diffs.push(s12 + aIndex[i] + sc)
+					// to do color resG bits that differ
+					let str = "<ul><li>"+ resE +"</li><li>"+ resG +"</li></ul>"
+					diffs.push(str)
+				}
+			}
+			diffs.push("<br>")
+			dom.diffs.innerHTML = diffs.join("<br>")
+		}
+	} catch(e) {
+		dom.diffs = e.name + ": " + e.message
+	}
+}
+
+function run() {
+	langS = ""
+	try {
+		// clear/reset: in case I add a re-run button or allow choosing a language
+		dom.langS.innerHTML = "&nbsp"
+		dom.hashS.innerHTML = "&nbsp"
+		dom.hashU.innerHTML = "&nbsp"
+		dom.diffs.innerHTML = "&nbsp"
+		dom.perf.innerHTML = "&nbsp"
+		arrayS = []
+		arrayU = []
+
+		// ToDo: auto-select nav langauage but allow choosing any
+
+		langS = navigator.language
+		let go = true
+		// cleanup test
+		langS = langS.trim()
+		if (langS == "undefined") {langS = "undefined string"; go = false
+		} else if (langS == undefined || langS == true || langS == false || langS == null) {langS += ""; go = false
+		} else if (Array.isArray(langS)) {langS = "array"; go = false}
+		if (langS == "") {langS = "empty string"; go = false}
+		dom.langS = langS
+		if (!go) {
+			dom.diffs = "\""+ langS + "\" is not a legit language"
+		} else {
+			// do it
+			Promise.all([
+				get_data(langS),
+				get_data(undefined),
+			]).then(function(results){
+				arrayS = results[0]
+				arrayU = results[1]
+				get_diffs()
+			})
+		}
+	} catch (e) {
+		if (langS == "") {langS = "language"}
+		dom.langS.innerHTML = langS
+		dom.diffs = e.name + ": " + e.message
+	}
+}
+
+run()
+
+</script>
+</body>
+</html>
