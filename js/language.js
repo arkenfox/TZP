@@ -231,16 +231,16 @@ function get_lang_doc() {
 			let eMsg = ""
 			try {
 				// language
-				if (item == 0) {return eval('navigator.languages')
+				if (item == 0) {return navigator.languages
 				} else if (item == 1) {return navigator.language
 				} else if (item == 2) {return navigator.languages[0]
-				} else if (item == 3) {return Intl.Collator().resolvedOptions().locale
-				} else if (item == 4) {return Intl.DateTimeFormat().resolvedOptions().locale
+				} else if (item == 3) {return Intl.Collator(undefined).resolvedOptions().locale
+				} else if (item == 4) {return Intl.DateTimeFormat(undefined).resolvedOptions().locale
 				} else if (item == 5) {return new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
 				} else if (item == 6) {return new Intl.ListFormat(undefined).resolvedOptions().locale
-				} else if (item == 7) {return Intl.NumberFormat().resolvedOptions().locale
-				} else if (item == 8) {return new Intl.PluralRules().resolvedOptions().locale
-				} else if (item == 9) {return new Intl.RelativeTimeFormat().resolvedOptions().locale
+				} else if (item == 7) {return Intl.NumberFormat(undefined).resolvedOptions().locale
+				} else if (item == 8) {return new Intl.PluralRules(undefined).resolvedOptions().locale
+				} else if (item == 9) {return new Intl.RelativeTimeFormat(undefined).resolvedOptions().locale
 				} else if (item == 10) {return new Intl.Segmenter().resolvedOptions().locale
 				} else if (item == 11) {
 					let chars = ['a','A','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u01FB','\u0107',
@@ -536,25 +536,25 @@ function get_lang_doc() {
 					return tmp
 				} else if (item == 45) {
 					// ListFormat: 1589095: 78+
-					let tmp = "", res40 = []
+					let tmp = "", res45 = []
 					let	styles = ['long','short','narrow'],
 						types = ['conjunction', 'disjunction','unit']
 					styles.forEach(function(s){
 						types.forEach(function(t){
-							res40.push(new Intl.ListFormat(undefined,{style: s, type: t}).format(["a","b","c"]))
+							res45.push(new Intl.ListFormat(undefined,{style: s, type: t}).format(["a","b","c"]))
 						})
 					})
-					if (res40.length) {tmp = res40.join(" | ")}
+					if (res45.length) {tmp = res45.join(" | ")}
 					return tmp
 				} else if (item == 46) {
 					// 1557718: 79+
 					let list = ["short", "medium","long"],
-						res41 = []
+						res46 = []
 					list.forEach(function(s){
 						let style = Intl.DateTimeFormat(undefined, {timeStyle: s,	dateStyle: s})
-						res41.push(style.format(d))
+						res46.push(style.format(d))
 					})
-					return res41.join(" | ")
+					return res46.join(" | ")
 				} else if (item == 47) {
 					// FF91+: 1653024: formatRange
 					let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
@@ -666,8 +666,8 @@ function get_lang_doc() {
 		let aTime = res.slice(12,16)
 		let aDate = res.slice(16,res.length)
 		// display concatenated fields
-		dom.ldt2.innerHTML = aLang.slice(0,2).join(" | ")
-		dom.ldt9.innerHTML = aLang.slice(2,11).join(" | ") // item 12 is n/a
+		dom.ldt2.innerHTML = aLang.slice(0,3).join(" | ")
+		dom.ldt9.innerHTML = aLang.slice(3,11).join(" | ") // item 12 is n/a
 		// record three hashes
 		let hashLang = sha1(aLang.join("-"), "language language & locale")
 		let hashTime = sha1(aTime.join("-"), "language timezone")
