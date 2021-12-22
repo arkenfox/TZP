@@ -46,9 +46,13 @@
 			<td class="mono spaces" id="hashU"></td>
 		</tr>
 		<tr>
+			<td class="mono spaces">languages</td>
+			<td id="lang"></td>
+		</tr>
+		<tr>
 			<td>
 				<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxtb">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
+				<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
 				<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp <span class="mono spaces">resolvedOptions</span></td>
 			<td id="resO"></td>
 		</tr>
@@ -70,8 +74,8 @@ s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
 
-// S = simulated, U = undefined, RO = resolvedOptions
-let arrayS = [], arrayU = [], arrayRO = [], arrayDiffs = [], langS = ""
+// S = simulated, U = undefined, RO = resolvedOptions, L = languages
+let arrayS = [], arrayU = [], arrayRO = [], arrayL = [], langS = ""
 let ro = "resolvedOptions ["
 let aIndex = [
 	// 11
@@ -138,7 +142,7 @@ function get_data(lang) {
 		function get_item(item) {
 			try {
 				// language
-				if (item == 0) {return zNA //navigator.languages
+				if (item == 0) {return navigator.languages
 				} else if (item == 1) {return zNA // not relevant //navigator.language
 				} else if (item == 2) {return zNA // not relevant //navigator.languages[0]
 				} else if (item == 3) {return Intl.Collator(lang, {type: "region"}).resolvedOptions().locale
@@ -442,6 +446,7 @@ function get_diffs() {
 		let hashU = sha1(arrayU.join())
 		dom.hashS.innerHTML = hashS +" <span class='btn4 btnc' onclick='detailConsole(`S`)'>[details]</span>"
 		dom.hashU.innerHTML = hashU +" <span class='btn4 btnc' onclick='detailConsole(`U`)'>[details]</span>"
+		dom.lang.innerHTML = arrayL.join(" | ")
 		dom.resO.innerHTML = arrayRO.join(" | ")
 		//ToDo: append clickable diffs to undefined
 
@@ -477,11 +482,12 @@ function run() {
 		dom.hashU.innerHTML = "&nbsp"
 		dom.diffs.innerHTML = "&nbsp"
 		dom.resO.innerHTML = "&nbsp"
+		dom.lang.innerHTML = "&nbsp"
 		dom.perf.innerHTML = "&nbsp"
 		arrayS = []
 		arrayU = []
 		arrayRO = []
-		arrayDiffs = []
+		arrayL = []
 
 		// ToDo: auto-select nav langauage but allow choosing any
 
@@ -505,6 +511,7 @@ function run() {
 				arrayS = results[0].slice(11, results[0].length)
 				arrayRO = results[1].slice(3, 11)
 				arrayU = results[1].slice(11, results[1].length)
+				arrayL = results[1].slice(0,1)[0]
 				get_diffs()
 			})
 		}
