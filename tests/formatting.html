@@ -27,7 +27,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="15%"><col width="85%">
+		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">formatting
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -44,6 +44,13 @@
 		<tr>
 			<td class="mono spaces">undefined</td>
 			<td class="mono spaces" id="hashU"></td>
+		</tr>
+		<tr>
+			<td>
+				<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxtb">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
+				<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp <span class="mono spaces">resolvedOptions</span></td>
+			<td id="resO"></td>
 		</tr>
 		<tr><td colspan="2"><br><hr><br></td></tr>
 		<tr>
@@ -63,8 +70,48 @@ s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
 
-// S = simulated, U = undefined
-let arrayS = [], arrayU = [], langS = ""
+// S = simulated, U = undefined, RO = resolvedOptions
+let arrayS = [], arrayU = [], arrayRO = [], arrayDiffs = [], langS = ""
+let ro = "resolvedOptions ["
+let aIndex = [
+	// 11
+	"collation", "", "[resolvedOptions] timezone", "", "",
+	// 16+
+	"timeZoneNames",
+	"date/time",
+	"toString",
+	"toLocaleString",
+	"toLocaleDateString", // 20
+	"toLocaleTimeString",
+	"Intl.DateTimeFormat",
+	"[formatToParts] Intl.DateTimeFormat",
+	"toGMTString",
+	"toUTCString", //25
+	"toLocaleString",
+	"[Typed Array] toLocaleString",
+	"toLocaleDateString",
+	"Intl.DateTimeFormat",
+	"toLocaleTimeString", // 30
+	"toTimeString",
+	"[resolvedOptions] hourCycle",
+	"Intl.RelativeTimeFormat",
+	"[formatToParts] Intl.RelativeTimeFormat",
+	"Intl.NumberFormat", // 35
+	"[formatToParts] Intl.NumberFormat",
+	"[BigInt] Intl.NumberFormat",
+	"[BigInt] toLocaleString",
+	"[currency] toLocaleString",
+	"[Intl.DateTimeFormat] calendar", // 40
+	"[DateTime] numberingSystem",
+	"[RelativeTime] numberingSystem",
+	"[relatedYear | yearName] Intl.DateTimeFormat",
+	"[dayPeriod] Intl.DateTimeFormat",
+	"Intl.ListFormat", // 45
+	"Intl.DateTimeFormat",
+	"[formatRange] Intl.DateTimeFormat",
+	"[cardinal] Intl.PluralRules",
+	"[ordinal] Intl.PluralRules",
+]
 
 function detailConsole(name) {
 	name = name == "S" ? langS : "undefined"
@@ -90,8 +137,6 @@ function get_data(lang) {
 
 		function get_item(item) {
 			try {
-				//ToDo: real resolved options are zh-Hant-TW, simulated are zh-TW
-
 				// language
 				if (item == 0) {return zNA //navigator.languages
 				} else if (item == 1) {return zNA // not relevant //navigator.language
@@ -361,7 +406,11 @@ function get_data(lang) {
 					return "ignore"
 				}
 			} catch(e) {
-				return e.name +": "+ e.message
+				if (item < 11) {
+					return zNA
+				} else {
+					return e.name +": "+ e.message
+				}
 			}
 		}
 
@@ -383,65 +432,31 @@ function get_data(lang) {
 
 function get_diffs() {
 	try {
-		let ro = "resolvedOptions ["
-		let aIndex = [
-			// 0-10
-			"","","",ro+"Collator]",ro+"DateTimeFormat]",ro+"DisplayNames]",ro+"ListFormat]",
-			ro+"NumberFormat]",ro+"PluralRules]",ro+"RelativeTimeFormat]",ro+"Segmenter]",
-			// 11
-			"collation", "", "[resolvedOptions] timezone", "", "",
-			// 16+
-			"timeZoneNames",
-			"date/time",
-			"toString",
-			"toLocaleString",
-			"toLocaleDateString", // 20
-			"toLocaleTimeString",
-			"Intl.DateTimeFormat",
-			"[formatToParts] Intl.DateTimeFormat",
-			"toGMTString",
-			"toUTCString", //25
-			"toLocaleString",
-			"[Typed Array] toLocaleString",
-			"toLocaleDateString",
-			"Intl.DateTimeFormat",
-			"toLocaleTimeString", // 30
-			"toTimeString",
-			"[resolvedOptions] hourCycle",
-			"Intl.RelativeTimeFormat",
-			"[formatToParts] Intl.RelativeTimeFormat",
-			"Intl.NumberFormat", // 35
-			"[formatToParts] Intl.NumberFormat",
-			"[BigInt] Intl.NumberFormat",
-			"[BigInt] toLocaleString",
-			"[currency] toLocaleString",
-			"[Intl.DateTimeFormat] calendar", // 40
-			"[DateTime] numberingSystem",
-			"[RelativeTime] numberingSystem",
-			"[relatedYear | yearName] Intl.DateTimeFormat",
-			"[dayPeriod] Intl.DateTimeFormat",
-			"Intl.ListFormat", // 45
-			"Intl.DateTimeFormat",
-			"[formatRange] Intl.DateTimeFormat",
-			"[cardinal] Intl.PluralRules",
-			"[ordinal] Intl.PluralRules",
-		]
+		//Note: cannot simulate exact resolved options (but we want them in our results): e.g:
+			// vi-VN s/be vi | zh-TW s/be zh-Hant-TW
+			// even varies by browser: e.g. FF returns en-US, opera en for PluralRules
+			// solution
+				// slice resolvedOptions off and display the undefined ones only
 
 		let hashS = sha1(arrayS.join())
 		let hashU = sha1(arrayU.join())
 		dom.hashS.innerHTML = hashS +" <span class='btn4 btnc' onclick='detailConsole(`S`)'>[details]</span>"
 		dom.hashU.innerHTML = hashU +" <span class='btn4 btnc' onclick='detailConsole(`U`)'>[details]</span>"
+		dom.resO.innerHTML = arrayRO.join(" | ")
+		//ToDo: append clickable diffs to undefined
+
 		if (hashS == hashU) {
 			dom.diffs = zNA
 		} else {
 			let diffs = []
 			for (let i=0; i < arrayS.length; i++) {
-				let resE = arrayS[i],
-					resG = arrayU[i]
-				if (resE !== resG) {
+
+				let strE = arrayS[i],
+					strG = arrayU[i]
+				if (strE !== strG) {
 					diffs.push(s12 + aIndex[i] + sc)
-					// to do color resG bits that differ
-					let str = "<ul><li>"+ resE +"</li><li>"+ resG +"</li></ul>"
+					// to do color bits that differ
+					let str = "<ul><li>"+ strE +"</li><li>"+ strG +"</li></ul>"
 					diffs.push(str)
 				}
 			}
@@ -461,9 +476,12 @@ function run() {
 		dom.hashS.innerHTML = "&nbsp"
 		dom.hashU.innerHTML = "&nbsp"
 		dom.diffs.innerHTML = "&nbsp"
+		dom.resO.innerHTML = "&nbsp"
 		dom.perf.innerHTML = "&nbsp"
 		arrayS = []
 		arrayU = []
+		arrayRO = []
+		arrayDiffs = []
 
 		// ToDo: auto-select nav langauage but allow choosing any
 
@@ -484,8 +502,9 @@ function run() {
 				get_data(langS),
 				get_data(undefined),
 			]).then(function(results){
-				arrayS = results[0]
-				arrayU = results[1]
+				arrayS = results[0].slice(11, results[0].length)
+				arrayRO = results[1].slice(3, 11)
+				arrayU = results[1].slice(11, results[1].length)
 				get_diffs()
 			})
 		}
