@@ -192,7 +192,7 @@ function get_data(lang) {
 								tzRes.push(tz)
 							})
 						})
-						return tzRes.join(", ")
+						return tzRes.join(" <br>")
 					} catch(e) {
 						return zErr
 					}
@@ -368,7 +368,7 @@ function get_data(lang) {
 							res45.push(new Intl.ListFormat(lang,{style: s, type: t}).format(["a","b","c"]))
 						})
 					})
-					if (res45.length) {tmp = res45.join(" | ")}
+					if (res45.length) {tmp = res45.join(" <br>")}
 					return tmp
 				} else if (item == 46) {
 					// 1557718: 79+
@@ -378,14 +378,14 @@ function get_data(lang) {
 						let style = Intl.DateTimeFormat(lang, {timeStyle: s,	dateStyle: s})
 						res46.push(style.format(d))
 					})
-					return res46.join(" | ")
+					return res46.join(" <br>")
 				} else if (item == 47) {
 					// FF91+: 1653024: formatRange
 					let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 						date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 						date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 					let f = Intl.DateTimeFormat(lang, o)
-					return f.formatRange(date1, date2) +" <br>"+ f.formatRange(date1, date3)
+					return "<ul><li>"+ f.formatRange(date1, date2) +"</li> <br><li>"+ f.formatRange(date1, date3) +"</li></ul><br>"
 				} else if (item == 48 || item == 49) {
 					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
 					let prtype = item == 48 ? "cardinal" : "ordinal"
@@ -438,12 +438,31 @@ const color_diffs = ({ stringA, stringB, charDiff = false, decorate = diff => `[
 	const splitter = charDiff ? '' : ' '
 	const listA = (''+stringA).split(splitter)
 	const listB = (''+stringB).split(splitter)
-	const listBWithDiffs = listB.map((x, i) => {
+	const diffIndexList = []
+	listB.forEach((x, i) => {
 		const matcher = listA[i]
 		const match = x == matcher
-		return !match ? decorate(x) : x
+		if (!match) {
+			diffIndexList.push(i)
+		}
+		return
 	})
-	return listBWithDiffs.join(splitter)
+	// 
+	const listAReversed = [...listA].reverse()
+	const listBWithDiffs = [...listB].reverse().map((x, i) => {
+		const matcher = listAReversed[i]
+		const match = x == matcher
+		const index = listB.length-(i+1)
+		if (diffIndexList.includes(index)) {
+			if (match) {
+				diffIndexList.splice(diffIndexList.indexOf(index), 1)
+				return x
+			}
+			return decorate(x)
+		}
+		return x
+	})
+	return listBWithDiffs.reverse().join(splitter)
 }
 
 function get_diffs() {
