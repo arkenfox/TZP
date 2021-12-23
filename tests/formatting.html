@@ -385,7 +385,7 @@ function get_data(lang) {
 						date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 						date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 					let f = Intl.DateTimeFormat(lang, o)
-					return f.formatRange(date1, date2) +" | "+ f.formatRange(date1, date3)
+					return f.formatRange(date1, date2) +" <br>"+ f.formatRange(date1, date3)
 				} else if (item == 48 || item == 49) {
 					let prules = [], nos = [0,1,2,3,4,5,6,7,8,9,10,11,20,21,81,100]
 					let prtype = item == 48 ? "cardinal" : "ordinal"
@@ -434,6 +434,18 @@ function get_data(lang) {
 	})
 }
 
+const color_diffs = ({ stringA, stringB, charDiff = false, decorate = diff => `[${diff}]` }) => {
+	const splitter = charDiff ? '' : ' '
+	const listA = (''+stringA).split(splitter)
+	const listB = (''+stringB).split(splitter)
+	const listBWithDiffs = listB.map((x, i) => {
+		const matcher = listA[i]
+		const match = x == matcher
+		return !match ? decorate(x) : x
+	})
+	return listBWithDiffs.join(splitter)
+}
+
 function get_diffs() {
 	try {
 		//Note: cannot simulate exact resolved options (but we want them in our results): e.g:
@@ -448,20 +460,28 @@ function get_diffs() {
 		dom.hashU.innerHTML = hashU +" <span class='btn4 btnc' onclick='detailConsole(`U`)'>[details]</span>"
 		dom.lang.innerHTML = arrayL.join(" | ")
 		dom.resO.innerHTML = arrayRO.join(" | ")
-		//ToDo: append clickable diffs to undefined
 
 		if (hashS == hashU) {
 			dom.diffs = zNA
 		} else {
 			let diffs = []
 			for (let i=0; i < arrayS.length; i++) {
-
-				let strE = arrayS[i],
-					strG = arrayU[i]
+				// expected vs got
+				let strE = arrayS[i], strG = arrayU[i]
 				if (strE !== strG) {
+					let strEColored = color_diffs({
+							stringA: strG,
+							stringB: strE,
+							//charDiff: true // use this option for single words, hashes or number
+							decorate: diff => sb + `${diff}` + sc
+					})
+					let strGColored = color_diffs({
+							stringA: strE,
+							stringB: strG,
+							decorate: diff => sb + `${diff}` + sc
+					})
 					diffs.push(s12 + aIndex[i] + sc)
-					// to do color bits that differ
-					let str = "<ul><li>"+ strE +"</li><li>"+ strG +"</li></ul>"
+					let str = "<ul><li>"+ strEColored +"</li><li>"+ strGColored +"</li></ul>"
 					diffs.push(str)
 				}
 			}
