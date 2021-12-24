@@ -118,7 +118,7 @@ let aIndex = [
 ]
 
 function detailConsole(name) {
-	name = name == "S" ? langS : "undefined"
+	name = name == "S" ? langS +" [simulated] " : "undefined"
 	let data = name == "undefined" ? arrayU : arrayS
 	let hash = sha1(data.join())
 	console.log(name, hash +"\n", data)
@@ -129,9 +129,10 @@ function get_data(lang) {
 
 		// temp sim
 		if (lang !== undefined) {
-			//lang = "de-DE"
+			//lang = "de"
 			//lang = "zh-TW"
-			//dom.langS = lang
+			dom.langS = lang
+			langS = lang
 		}
 
 		let d = new Date("January 30, 2019 13:00:00"),
@@ -214,7 +215,7 @@ function get_data(lang) {
 				} else if (item == 28) {return d.toLocaleDateString(lang)
 				} else if (item == 29) {return Intl.DateTimeFormat(lang).format(d)
 				} else if (item == 30) {return d.toLocaleTimeString(lang)
-				} else if (item == 31) {return d.toTimeString()
+				} else if (item == 31) {return zNA // d.toTimeString()
 				} else if (item == 32) {
 					let test = Intl.DateTimeFormat(lang, {hour: "numeric"}).resolvedOptions().hourCycle
 					return test
@@ -315,7 +316,7 @@ function get_data(lang) {
 					// 70+: [BigInt] toLocaleString
 					let bint = BigInt(9007199254740991)
 					bint = eval("123456789123456789n")
-					let tmp = bint.toLocaleString()
+					let tmp = bint.toLocaleString(lang)
 					if (tmp == "123456789123456789") {
 						// 68-69
 						tmp = zNS
@@ -427,9 +428,14 @@ function get_data(lang) {
 			if (result == " | ") {result = zB0 +" | "+ zB0}
 			if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0}
 			if (result !== "ignore") {
-				res.push(result)
+				if (i < 11) {
+					res.push(result)
+				} else {
+					res.push((isDebug ? i +": " : "") + result)
+				}
 			}
 		}
+		if (isDebug) {console.debug(res)}
 		return resolve(res)
 	})
 }
@@ -499,7 +505,7 @@ function get_diffs() {
 							stringB: strG,
 							decorate: diff => sb + `${diff}` + sc
 					})
-					diffs.push(s12 + aIndex[i] + sc)
+					diffs.push(s12 + "#"+ (i+11) +": " + aIndex[i] + sc)
 					let str = "<ul><li>"+ strEColored +"</li><li>"+ strGColored +"</li></ul>"
 					diffs.push(str)
 				}
@@ -561,6 +567,7 @@ function run() {
 	}
 }
 
+let isDebug = false // flip to output test item numbers
 run()
 
 </script>
