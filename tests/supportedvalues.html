@@ -84,11 +84,13 @@ function run() {
 		})
 		// overall hash
 		let hash = sha1(res.join()), code = ""
-		if (hash == "203b29f75215cd50a3b94d31e44ac0c933011be8") {code = "96+"
-		} else if (hash == "52322e29ea14381cd65f31f568173a785a8e291b") {code = "94-95"
-		} else if (hash == "e4bf3098e5f4ed5f4068076a649e35fffb338cd2") {code = "93"
+		if (isFF) {
+			if (hash == "203b29f75215cd50a3b94d31e44ac0c933011be8") {code = "96+"
+			} else if (hash == "52322e29ea14381cd65f31f568173a785a8e291b") {code = "94-95"
+			} else if (hash == "e4bf3098e5f4ed5f4068076a649e35fffb338cd2") {code = "93"
+			}
 		}
-		dom.hashAll.innerHTML = hash + (code == "" ? zNEW : s14 +" [FF"+ code +"]"+ sc)
+		dom.hashAll.innerHTML = hash + (code == "" ? (isFF ? zNEW : "") : s14 +" [FF"+ code +"]"+ sc)
 	} catch (e) {
 		dom.details = ""
 		dom.detailslabel = ""
