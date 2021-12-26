@@ -543,6 +543,27 @@ var list = [
 "Pacific/Wallis"
 ]
 
+let colorTestList = [
+// contains non-unique (white), unique (green) and invalid (red)
+"AA/CET",
+"AA/CST6CDT",
+"Africa/Khartoum",
+"Africa/Kigali",
+"Africa/Kinshasa",
+"Africa/Lagos",
+"Asia/Yangon",
+"Asia/Yekaterinburg",
+"Europe/Astrakhan",
+"Europe/Berlin",
+"Europe/Bratwurst",
+"Europe/Busingen",
+"Europe/Vaduz",
+"Pacific/Kanton",
+"Pacific/Tarawa",
+"Pacific/Tongatapu",
+"Pacific/Zzzzz",
+]
+
 var aLegend = [],
 	aDates = [],
 	aDays = ["January 1","July 1",],
@@ -583,7 +604,7 @@ function reset() {
 	dom.inputYears.value = ""
 }
 
-function legend(array) {
+function legend(array, invalid) {
 	let prev = ""
 	// do once
 	if (aLegend.length == 0) {
@@ -618,9 +639,11 @@ function legend(array) {
 			let parts = list[i].split("/")
 			let area = parts[0]
 			let location = parts.slice(1).join("/")
-			if (location == match) {
+			if (invalid.includes(list[i])) {
+				location = sb + location + sc
+			} else if (location == match) {
 				location = sg + location + sc
-				counter++
+				counter++ // count matches to keep in sync with array
 				try {
 					matchparts = array[counter].split("/")
 					match = matchparts.slice(1).join("/")
@@ -684,6 +707,7 @@ function run_test(isLoopy) {
 
 		// loop each timezone	
 		for (let i = 0 ; i < list.length; i++) {
+			let isInvalid = false
 			let tz = list[i]
 			let tzclean = tz
 			// strip bogus area
@@ -691,17 +715,22 @@ function run_test(isLoopy) {
 			tzresults = []
 			// loop each date
 			for (let i = 0 ; i < aDates.length; i++) {
+				isInvalid = false
 				try {
 					let control = new Date(aDates[i])
 					let test = control.toLocaleString('en', { timeZone: tzclean })
 					let diff = ((Date.parse(test) - Date.parse(control))/k)
 					tzresults.push(diff)
 				} catch(e) {
-					invalid.push(tzclean)
+					isInvalid = true
 				}
 			}
 			// one result for every timezone
-			results.push(sha1(tzresults.join()) +":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
+			if (isInvalid) {
+				invalid.push(tzclean)
+			} else {
+				results.push(sha1(tzresults.join()) +":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
+			}
 		}
 
 		// sort + loop results, get locales per hash
@@ -762,7 +791,6 @@ function run_test(isLoopy) {
 			// sum of bucketsizes
 			let sumTZ = bucketsizes.reduce(function(a, b){return a + b}, 0)
 			invalid = invalid.filter(function(item, position) {return invalid.indexOf(item) === position})
-			sumTZ = (sumTZ - invalid.length)
 
 			// unique results
 			unique.sort()
@@ -851,15 +879,12 @@ function run_test(isLoopy) {
 			info.push(
 				// color it up
 				title("unique")	+ sg + (bucketsizes.length - uniqueTZs).toString().padStart(3) + sc + " groups (>1) "
-					+ s4 + (list.length - uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
+					+ s4 + (list.length - invalid.length - uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
 					+ title("") + sg + (uniqueTZs).toString().padStart(3) + sc +" groups (=1) "
 					+ s4 + (uniqueTZs).toString().padStart(3) + sc + " timezones<br>"
 					+ title("total") + sg + (bucketsizes.length).toString().padStart(3) + sc +" groups .... "
-					+ s4 + (list.length).toString().padStart(3) + sc + " timezones"
+					+ s4 + (list.length - invalid.length).toString().padStart(3) + sc + " timezones"
 			)
-			if (sumTZ !== list.length) {
-				info.push( title("alert") + sb +"total timezones !== legend count" + sc)
-			}
 			info.push( title("[groups] hash") + s12 + buckethash + sc)
 			info.push( title("[tzp] hash") + tzpHash )
 			info.push( title("[toLocale] hash") + s14 + matchHash + sc)
@@ -894,6 +919,11 @@ function run_test(isLoopy) {
 				info.push( title("your group") +"none")
 			}
 			// invalid timezones
+			if (sumTZ !== list.length) {
+				info.push( title("alert", sb)
+					+"total timezones " + sb +"(" + sumTZ +")"+ sc
+					+" !== legend count " + sb + "(" + list.length +")"+ sc)
+			}
 			if (invalid.length) {
 				info.push( title(invalid.length +" invalid", sb) + invalid.join(", "))
 			}
@@ -910,7 +940,7 @@ function run_test(isLoopy) {
 
 			// color up unique in legend
 			if (singles.length) {
-				legend(singlesLegend)
+				legend(singlesLegend, invalid)
 			}
 		}
 	}
