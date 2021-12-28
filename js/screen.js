@@ -2417,24 +2417,43 @@ function outputFD(runtype) {
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
+			// os bitness: requires get_math()
+				// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
+				// isOS64: true, error string, (or false when pref dropped)
 			let bits = zNA, display = bits
-			if (isVer > 88) {
-				if (isOS64 == true) {bits = "64bit"} else if (isOS64 = false) {bits = "32bit"} else {bits = "can't tell"}
+			// mac
+				// tzp requires FF52+ which requires macOS 10.9+ which use 64bit intel (and ARM for 11+)
+			if (isOS == "mac") {
+				bits = "64bit"
+				if (isOS64 !== true) {
+					if (gRun) {
+						gKnown.push("fd:os_architecture")
+						gBypassed.push("fd:os_architecture:"+ bits)
+					}
+				}
+				display = isOS64 == true ? bits : soB + isOS64 + scC
+			}
+			// non-mac
+			if (isOS !== "mac") {
+				if (isVer < 89) {bits = zNS
+				} else if (isOS64 === true) {bits = "64bit"
+				} else if (isOS64 === false) {bits = "32bit"
+				} else {bits = isOS64}
 				display = bits
-				if (bits == "can't tell" && isOS64math !== "") {
+				// bypassed
+				if (bits !== true && isOS64math !== "") {
 					display = soB + bits + scC
 					bits = isOS64math + "bits"
 					if (gRun) {
-						gKnown.push("fd:os_architecture")
+						if (isVer > 88) {gKnown.push("fd:os_architecture")} // not a lie if not supported
 						gBypassed.push("fd:os_architecture:"+ bits)
 					}
 				}
 			}
 			dom.fdArchOS.innerHTML = display
 			section.push("os_architecture:"+ bits)
-			let browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
 
+			let browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 		})
