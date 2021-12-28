@@ -486,8 +486,10 @@ const get_isOS64 = () => new Promise(resolve => {
 		isOS64 = true
 		return resolve()
 	} catch(e) {
-		// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit
-		//log_perf("isOS64 [global]",t0,"",isOS64)
+		let eMsg = e.name +": "+ e.message
+		log_error("fd: os_architecture", eMsg)
+		isOS64 = trim_error(e.name, e.message)
+		// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit and return false
 		return resolve()
 	}
 })
@@ -1313,23 +1315,23 @@ function log_section(name, time1, data) {
 					dom.allcheck.innerHTML = buildButton("1","alerts", gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
 					dom.debugA.innerHTML = gCheck.join("<br>")
 				}
-				// known/bypass
-				let detailBtn = ""
-				if (Object.keys(gKnownDetail).length) {
-					detailBtn = buildButton("0", "gKnownDetail", "details", "showMetrics")
-				}
+				// known/bypass/details
+				let knownStr = "", detailBtn = "", bypassBtn = ""
 				if (gKnown.length) {
 					let knownBtn = " <span class='btn0 btnc' onClick='showMetrics(`known lies`)'>"
 						+ soL +"["+ gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") +"]"+ scC + "</span>"
-					let bypassBtn = ""
-					if (gBypassed.length) {
-						bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`lies (hopefully) bypassed`)'>"
-						+ soB +"["+ gBypassed.length +" bypassed]"+ scC + "</span>"
-					}
-					dom.knownhash.innerHTML = sha1(gKnown.join())	+ knownBtn + bypassBtn + detailBtn
+					knownStr = sha1(gKnown.join()) + knownBtn
 				} else {
-					dom.knownhash.innerHTML = "none"+ detailBtn
+					knownStr = "none"
 				}
+				if (gBypassed.length) {
+					bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`lies (hopefully) bypassed`)'>"
+					+ soB +"["+ gBypassed.length +" bypassed]"+ scC + "</span>"
+				}
+				if (Object.keys(gKnownDetail).length) {
+					detailBtn = buildButton("0", "gKnownDetail", "details", "showMetrics")
+				}
+				dom.knownhash.innerHTML = knownStr + bypassBtn + detailBtn
 				// method
 				detailBtn = ""
 				if (Object.keys(gMethodsDetail).length) {
