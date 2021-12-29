@@ -2441,7 +2441,7 @@ function outputFD(runtype) {
 				} else {bits = isOS64}
 				display = bits
 				// bypassed
-				if (bits !== true && isOS64math !== "") {
+				if (isOS64 !== true && isOS64math !== "") {
 					display = soB + bits + scC
 					bits = isOS64math + "bits"
 					if (gRun) {
