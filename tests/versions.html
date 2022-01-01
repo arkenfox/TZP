@@ -153,7 +153,21 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 68
+		expected = 70
+
+	//97: 1745372
+	let t97 = performance.now(), ver97 = xF
+	try {
+		let controller97 = new AbortController()
+		let signal97 = controller97.signal
+		signal97.throwIfAborted()
+		ver97 = xS
+		//let reason = new Error("boom")
+		//controller.abort(reason)
+	} catch(e) {
+		// TypeError: signal.throwIfAborted is not a function
+	}
+	record(240,97, "1745372", ver97, performance.now()-t97)
 
 	// 96: 1738422
 	let t96 = performance.now(), ver96 = xF
@@ -722,6 +736,13 @@ function outputVersion() {
 	let test5 = Date.parse("Mercredi 8 Septembre 2021")
 	if (!isNaN(test5)) {ver5 = xOMG}
 	record(5,"NaN", "1730155", ver5, performance.now()-t5)
+
+	// 1742592 related
+	let t4 = performance.now(), ver4 = xNC
+	let lf4 = new Intl.ListFormat("en")
+	let test4 = "~"+ lf4.format(["", "B"]) +"~"
+	if (test4 !== "~ and B~") {ver4 = xOMG}
+	record(5,"~ and B", "1742592", ver4, performance.now()-t4)
 
 	try {
 		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
