@@ -50,7 +50,7 @@ function get_canonical() {
 			res.push(i +": "+ Intl.getCanonicalLocales(i))
 		})
 		sDetail[sName] = res
-		let note = "details", color = "3"
+		let note, color = "3"
 		let hash = sha1(res.join(), "feature canonical")
 		if (isFF) {
 			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {note = "FF91+"
@@ -184,7 +184,6 @@ function get_errors() {
 			"let t = ({ 1n: 1 })", // < FF74, changes FF68
 			"let a = 1_00_;", // changes FF70
 		]
-		let note = "details", color = "3"
 		for (let i = 0; i < tests.length; i++) {
 			try {
 				newFn(tests[i])
@@ -198,9 +197,8 @@ function get_errors() {
 		}
 		sDetail[sName] = res
 		let hash = sha1(res.join(), "feature errors")
-		// notation
-			// 74+: 1259822: error_message_fix: codes 1=false 2=true
-		let tmp = hash.substring(0,8)
+		// notation: 74+: 1259822: error_message_fix: codes 1=false 2=true
+		let tmp = hash.substring(0,8), note, color = "3"
 		if (isFF) {
 			let fix = " fixed", nofix = " no-fix"
 			if (tmp == "3f0a2927") {note = "FF93+"+ nofix
@@ -573,8 +571,7 @@ function get_locales() {
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
 		sDetail[sName] = res
-		let hash = sha1(res.join(), "feature supported locales")
-		let note = "details", color = "3"
+		let hash = sha1(res.join(), "feature supported locales"), note, color = "3"
 		if (isFF) {
 			if (hash == "d64182953a8450518c818dbe9dbf35bab8c9ca26") {note = "FF96+"
 			} else if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91-95"
@@ -1895,7 +1892,7 @@ function get_widgets() {
 			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
 			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
 			// notate
-			let note = "details", color = "3", mixed = ""
+			let note, color = "3", mixed = ""
 			if (isFF) {
 				// we only need the font for OS: ignore unknown to still get an OS
 				let fntTmp = fonts
