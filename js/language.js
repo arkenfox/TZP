@@ -77,6 +77,7 @@ function get_connection() {
 			log_error("headers: connection", e.name, e.message)
 		}
 
+console.debug(isCon, hasNav, hasObj, isObjFake, aNetwork.length)
 		// not supported
 		if (!isCon && !hasNav) {
 			if (test == "undefined") {
@@ -87,11 +88,8 @@ function get_connection() {
 				}
 			} else {
 				if (hasObj) {
-					if (aNetwork.length) {
-						test = soL + hash + scC + btn
-					} else {
-						test = soL + test + scC
-					}
+					if (aNetwork.length) {test = soL + hash + scC + btn
+					} else {test = soL + test + scC}
 				} else {
 					test = soL + test + scC
 				}
@@ -107,7 +105,7 @@ function get_connection() {
 		// supported
 		let fpValue = hash
 		if (isObjFake) {
-			hash = soL + hash + scC + btn
+			hash = soL + hash + scC
 			fpValue = zLIE
 			if (gRun) {gKnown.push("headers:connection")}
 		} else if (isFF) {
