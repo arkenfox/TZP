@@ -21,7 +21,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="25%"><col width="75%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">timezones
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -878,8 +878,8 @@ function run_test(isLoopy) {
 					return color + input.padStart(15) +": "+ sc
 				}
 			}
-			function splitgroup() {
-				let parts = matchList.split(", ")
+			function splitgroup(strToSplit) {
+				let parts = strToSplit.split(", ")
 				parts = parts.join("<br>" + ("").padStart(17))
 				return parts
 			}
@@ -914,7 +914,7 @@ function run_test(isLoopy) {
 					}
 				} else {
 					// multiple timezones
-					info.push( title("your group") + splitgroup())
+					info.push( title("your group") + splitgroup(matchList))
 					if (matchList.search(tzResolved) == -1) {
 						info.push( title("veracity")
 							+ (isListed ? "resolvedOptions spoofing detected" : "no idea, your timezone isn't in the list"))
@@ -933,7 +933,20 @@ function run_test(isLoopy) {
 					+" !== legend count " + sb + "(" + list.length +")"+ sc)
 			}
 			if (invalid.length) {
-				info.push( title(invalid.length +" invalid", sb) + invalid.join(", "))
+				let invHash = sha1(invalid.join()), invNote = ""
+				if (isFF) {
+					if (invHash == "fe9c67315d0381478d9b6edc53e7ad6110887da2") {invNote = "[FF76-93 | ESR68]"
+					} else if (invHash == "8e0649a8de5aec937fb3e347d184ba22f043e3f7") {invNote = "[FF65-75 | ESR68]"
+					} else if (invHash == "fd0d2fa3c61a9eece9e3a93738235869fce8773f") { invNote = "[FF53-64]"
+					} else if (invHash == "8f8855d9658a75e5004283b7f295dc6a7b597c13") { invNote = "[FF52]"
+					}
+				}
+				info.push( title(invalid.length +" invalid", sb) + invHash +" "+ s14 + invNote + sc)
+				if (invalid.length == 1) {
+					info.push(("").padStart(17) + invalid[0])
+				} else {
+					info.push(title("") + splitgroup(invalid.join(", ")))
+				}
 			}
 			bucketsizes.sort((a,b) => b-a)
 			let uniqueBS = bucketsizes.filter(function(item, position) {return bucketsizes.indexOf(item) === position})
