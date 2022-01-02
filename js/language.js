@@ -2,15 +2,143 @@
 
 let bTZ = false
 
+function get_connection() {
+	return new Promise(resolve => {
+		let knownGood = ["cellular","bluetooth","ethernet","wifi","other","none","unknown"]
+		let test = "", value = "", result = "", eMsg = ""
+		let aNetwork = []
+
+		let sName = "headers_connection"
+		sDetail[sName] = []
+		sDetail[sName +"_fake_skip"] = []
+
+		// connection
+		let isCon = check_navKey("connection") // robust isFF
+		let hasNav = ("connection" in navigator) // catch the BS
+		let hasObj = false, isObjFake = true
+		try {
+			test = navigator.connection
+			//test = {NetworkInformation: {}} // type error
+			//test = ""
+			//test = undefined
+			//test = "undefined"
+			//test = "banana"
+			//test = true
+			//test = false
+			//test = null
+			//test = 1
+			//test = 0
+			//test = 9.5
+			//test = "[object Object]"
+			//test = "[object Keyboard]"
+			//test = ["a","b"]
+			//test = [] // <empty string>
+			//abc=def // throw error
+			if (test == "undefined") {test = "undefined string"
+			} else if (test == undefined || test == true || test == false || test == null) {test += ""
+			} else if (Array.isArray(test)) {test = "array"}
+			if (test == "") {test = "empty string"}
+			//console.debug("test value", test)
+			if (typeof test === "object") {hasObj = true}
+			if (hasObj && test +"" == "[object NetworkInformation]") {isObjFake = false}
+		} catch(e) {
+			test = trim_error(e.name, e.message)
+			log_error("headers: connection", e.name, e.message)
+		}
+
+		// networkData
+		let btn = "", hash = ""
+		try {
+			let oNetwork = {}, aKeys = [], aFunc = []
+			for (let key in navigator.connection) {
+				if (typeof navigator.connection[key] !== "function") {aKeys.push(key)} else {aFunc.push(key)}
+			}
+			if (aFunc.length) {aNetwork.push("functions:"+ aFunc.join(","))}
+			if (aKeys.length) {aNetwork.push("keys:"+ aKeys.join(","))
+				aKeys.sort()
+				aKeys.forEach(function(item) {
+					let keyValue = ""
+					try {
+						keyValue = navigator.connection[item]
+					} catch(e) {
+						keyValue = (e.name === undefined ? zErr : e.name)
+					}
+					aNetwork.push(item +":"+ keyValue)
+				})
+			}
+			if (aNetwork.length) {
+				if (isObjFake) {sName += "_fake_skip"}
+				sDetail[sName] = aNetwork
+				hash = sha1(aNetwork.join(), "devices network")
+				btn = buildButton("5", sName, "details")
+			}
+		} catch(e) {
+			console.error(e.name, e.message)
+			log_error("headers: connection", e.name, e.message)
+		}
+
+		// not supported
+		if (!isCon && !hasNav) {
+			if (test == "undefined") {
+				test = zNS
+				if (isFF) {
+					if (isOS == "android") {test += isTB ? default_tb_green : default_ff_red
+					} else {test += default_ff_green}
+				}
+			} else {
+				if (hasObj) {
+					if (aNetwork.length) {
+						test = soL + hash + scC + btn
+					} else {
+						test = soL + test + scC
+					}
+				} else {
+					test = soL + test + scC
+				}
+				if (gRun) {
+					gKnown.push("headers:connection")
+					gBypassed.push("headers:connection:"+ fpValue)
+				}
+			}
+			dom.nConnection.innerHTML = test
+			return resolve("connection:undefined")
+		}
+
+		// supported
+		let fpValue = hash
+		if (isObjFake) {
+			hash = soL + hash + scC + btn
+			fpValue = zLIE
+			if (gRun) {gKnown.push("headers:connection")}
+		} else if (isFF) {
+			if (isTB) {
+				btn += default_tb_red
+			} else if (isOS == "android") {
+				// ToDo: RFP notation
+				btn += hash == "95468d786f5dd56d30c087cedd738b4ee289846f" ? rfp_green : rfp_red
+			} else {
+				btn += default_ff_red
+			}
+		}
+		dom.nConnection.innerHTML = hash + btn
+		return resolve("connection:"+ fpValue)
+
+	})
+}
+
 function get_navigator() {
 	return new Promise(resolve => {
 		let results = []
-		// beacon //
+		// beacon
 		let beacon = (check_navKey("sendBeacon") ? zE : zD)
 		dom.nBeacon = beacon
+		results.push("beacon:"+ beacon)
+
 		// GPC: 1670058
 		let gpc = (check_navKey("globalPrivacyControl") ? zS : zNS)
 		dom.nGPC = gpc
+		results.push("globalPrivacyControl:"+ gpc)
+
 		// onLine
 		let online = ""
 		if (check_navKey("onLine")) {
@@ -42,6 +170,7 @@ function get_navigator() {
 			online = zNA
 			dom.nOnLine = zNA
 		}
+		results.push("online:"+ online)
 
 		// DNT
 		let dnt = "", dntLie = false
@@ -72,85 +201,10 @@ function get_navigator() {
 			dnt = zNA
 			dom.nDNT.innerHTML = zNA
 		}
-
-		// NETWORK/CONNECTION
-		let network = "", connection = "", test = "", r3 = ""
-		// TEMP TEST
-		try {
-			test = navigator.connection
-			console.log("A", test)
-			console.log("B", typeof test === "object")
-			console.log("C", test +"" == "[object NetworkInformation]")
-			let networkData = {}
-			for (var keyN in navigator.connection) {
-				if (typeof navigator.connection[keyN] !== "function") {networkData[keyN] = navigator.connection[keyN]}
-			}
-			let networkDataNames = []
-			const names = Object.keys(networkData).sort()
-			for (const k of names) {networkDataNames.push(k)}
-			let networkString = networkDataNames.join(",")
-			console.log("D", networkData)
-			console.log("E", networkString)
-		} catch(e) {
-			console.debug(e.name, e.message)
-		}
-
-		// non-FF
-		if (!isFF) {
-			if (check_navKey("connection")) {
-				network = zE; connection = navigator.connection.type
-			} else {
-				network = zD; connection = navigator.connection
-			}
-		}
-
-		if (isFF) {
-			// FF
-			// network
-			if (check_navKey("connection")) {
-				// retest network
-				try {
-					test = navigator.connection
-					network = (test == undefined ? zB0 : zE)
-				} catch(e) {network = zB0}
-				// type
-				try {
-					connection = navigator.connection.type
-					if (connection == undefined) {connection = zB0}
-				} catch(e) {connection = zB0}
-			} else {
-				// retest
-				try {
-					test = navigator.connection
-					network = zD
-				} catch(e) {network = zB0}
-				// type
-				try {
-					connection = navigator.connection
-				} catch(e) {connection = zB0} // never used
-			}
-		}
-		// push
-		results.push("beacon:"+ beacon)
-		results.push("globalPrivacyControl:"+ gpc)
-		results.push("online:"+ online)
 		results.push("dnt:"+ dnt)
-		// push: ToDo: harden
-		results.push("networkinfo:"+ network)
-		results.push("connection:"+ connection)
 
-		// display
-		dom.nNetwork.innerHTML = network
-		if (network == zE) {
-			dom.nConnection.innerHTML = connection + (connection == "unknown" ? rfp_green : rfp_red)
-		} else {
-			dom.nConnection.innerHTML = connection
-		}
-
-		// subsection hash
-		results.sort()
-		//dom.hHash0.innerHTML = sha1(results.join())
 		// resolve
+		results.sort()
 		return resolve(results)
 	})
 }
@@ -159,7 +213,8 @@ function outputHeaders() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([
-		get_navigator()
+		get_navigator(),
+		get_connection()
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			section = section.concat(currentResult)
@@ -241,7 +296,7 @@ function get_lang_doc() {
 				} else if (item == 7) {return Intl.NumberFormat(undefined).resolvedOptions().locale
 				} else if (item == 8) {return new Intl.PluralRules(undefined).resolvedOptions().locale
 				} else if (item == 9) {return new Intl.RelativeTimeFormat(undefined).resolvedOptions().locale
-				} else if (item == 10) {return new Intl.Segmenter().resolvedOptions().locale
+				} else if (item == 10) {return new Intl.Segmenter(undefined).resolvedOptions().locale
 				} else if (item == 11) {
 					let chars = ['a','A','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u01FB','\u0107',
 					'\u0109','\u00E7\a','\u00EB','\u00ED','\u00EE','\u0137\a','\u0144','\u00F1','\u1ED9','\u00F6','\u1EE3',
