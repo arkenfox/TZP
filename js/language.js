@@ -90,6 +90,7 @@ function get_connection() {
 			if (gRun) {gKnown.push("headers:connection")}
 			if (isFF && !isCon) {
 				fpValue = "undefined"
+				hash = soB + hash + scC
 				if (gRun) {gBypassed.push("headers:connection:undefined")}
 			} else {
 				hash = soL + hash + scC
