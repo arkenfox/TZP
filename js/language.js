@@ -18,27 +18,10 @@ function get_connection() {
 		let hasObj = false, isObjFake = true
 		try {
 			test = navigator.connection
-			//test = {NetworkInformation: {}} // type error
-			//test = ""
-			//test = undefined
-			//test = "undefined"
-			//test = "banana"
-			//test = true
-			//test = false
-			//test = null
-			//test = 1
-			//test = 0
-			//test = 9.5
-			//test = "[object Object]"
-			//test = "[object Keyboard]"
-			//test = ["a","b"]
-			//test = [] // <empty string>
-			//abc=def // throw error
 			if (test == "undefined") {test = "undefined string"
 			} else if (test == undefined || test == true || test == false || test == null) {test += ""
 			} else if (Array.isArray(test)) {test = "array"}
 			if (test == "") {test = "empty string"}
-			//console.debug("test value", test)
 			if (typeof test === "object") {hasObj = true}
 			if (hasObj && test +"" == "[object NetworkInformation]") {isObjFake = false}
 		} catch(e) {
@@ -73,11 +56,10 @@ function get_connection() {
 				btn = buildButton("5", sName, "details")
 			}
 		} catch(e) {
-			console.error(e.name, e.message)
 			log_error("headers: connection", e.name, e.message)
 		}
 
-console.debug(isCon, hasNav, hasObj, isObjFake, aNetwork.length)
+		// console.debug(isCon, hasNav, hasObj, isObjFake) // cydec false, true, true, true
 		// not supported
 		if (!isCon && !hasNav) {
 			if (test == "undefined") {
@@ -95,7 +77,7 @@ console.debug(isCon, hasNav, hasObj, isObjFake, aNetwork.length)
 				}
 				if (gRun) {
 					gKnown.push("headers:connection")
-					gBypassed.push("headers:connection:"+ fpValue)
+					gBypassed.push("headers:connection:undefined")
 				}
 			}
 			dom.nConnection.innerHTML = test
@@ -105,9 +87,14 @@ console.debug(isCon, hasNav, hasObj, isObjFake, aNetwork.length)
 		// supported
 		let fpValue = hash
 		if (isObjFake) {
-			hash = soL + hash + scC
-			fpValue = zLIE
 			if (gRun) {gKnown.push("headers:connection")}
+			if (isFF && !isCon) {
+				fpValue = "undefined"
+				if (gRun) {gBypassed.push("headers:connection:undefined")}
+			} else {
+				hash = soL + hash + scC
+				fpValue = zLIE
+			}
 		} else if (isFF) {
 			if (isTB) {
 				btn += default_tb_red
