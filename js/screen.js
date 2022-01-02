@@ -1267,6 +1267,7 @@ function get_screen_metrics(runtype) {
 			innerH = innerH.slice(3) * 1
 			if (innerW == w-1) {innerW = w}
 			if (innerH == h-1) {innerH = h}
+console.debug(innerW, w, innerH, h)
 			if (innerW !== w || innerH !== h) {
 				if (gRun) {
 					gKnown.push("screen:inner window")
