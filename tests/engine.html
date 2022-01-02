@@ -267,14 +267,19 @@ function get_errors(num) {
 		["var x = @","SyntaxError: illegal character U+0040","SyntaxError: illegal character"],
 	]
 	tests.forEach(function(array) {
-		try {
-			newFn(array[0])
-		} catch(e) {
-			let bool = false
-			let str = fnTrim(e.name +": "+ e.message, 70)
-			if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
-			fnRecord(num, "error", str, bool)
+		if (!is60 && array[0] == "alert('A)") {
+			fnRecord(num, "error", zNA, zNA)
 			num++
+		} else {
+			try {
+				newFn(array[0])
+			} catch(e) {
+				let bool = false
+				let str = fnTrim(e.name +": "+ e.message, 70)
+				if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
+				fnRecord(num, "error", str, bool)
+				num++
+			}
 		}
 	})
 }
@@ -442,7 +447,9 @@ function get_intl_collator(num, title) {
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true // FF70+
-		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true} // FF60-69
+		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true // FF59-69
+		} else if (hash == "f3dd69682f15cb6b95951a45659546283f71ea8f" && !is59) {bool = true // FF52-58
+		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -504,7 +511,9 @@ function get_intl_dtf(num, title) {
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true // FF70+
-		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true} // FF60-69
+		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
+		} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
+		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -581,7 +590,12 @@ function get_intl_pluralrules(num, title) {
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		// FF57 or lower
+		let type = zB0
+		if (!is59 && e.message == "Intl.PluralRules is undefined") {
+			type = zNA
+		}
+		fnRecord(num, title, e.name, type, e.message)
 	}
 }
 
@@ -704,7 +718,9 @@ function get_locale_compare(num, title) {
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true // FF70+
-		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true} // FF60-69
+		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true // FF59-69
+		} else if (hash == "1cfcca8eaa05f4d004015953c01c312f22c261ab" && !is59) {bool = true // FF52-58
+		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -840,6 +856,14 @@ function get_nav_keys(num1, num2, title) {
 			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
 			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
 			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
+		//for (let i=0; i < aNavNotExpected.length; i++) {
+		//	let hash = sha1(aNavNotExpected[i])
+		//	console.debug(hash, aNavNotExpected[i])
+		//}
+		if (is96) {
+			// 1666203: FF96+ canShare
+			aNavNotExpected = aNavNotExpected.filter(x => !["canShare"].includes(x))
+		}
 		if (is95) {
 			// 1670058: FF95+ globalPrivacyControl
 			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
@@ -1018,12 +1042,12 @@ function get_nav_values(num1, num2, num3) {
 		let resX = navigator.buildID
 		if (resX == "20181001000000") {boolX = true} else {
 			resX = fnClean(resX)
-			// FF60-63: 14 digit number
+			// FF52-63: 14 digit number starting with 2017
 			// RFP60-63 = 20100101
 			if (!is64) {
 				let year = resX.slice(0,4)
 				if (resX.length == 14) {
-					if (year == "2018" || year == "2019") {
+					if (year == "2017" || year == "2018" || year == "2019") {
 						if (!isNaN(resX * 1)) {boolX = true}
 					}
 				} else if (isRFP2) {
@@ -1194,7 +1218,9 @@ function get_stacklength(num1, num2, num3) {
 
 function get_storage_quota(num, title) {
 	// desktop unless stated
-		// FF/TB:     2147483648 (same in PB mode) <- tested back to FF60, also on android
+		// FF/TB:     2147483648 (same in PB mode) <- FF57-97, also on android
+		// FF97  :   10737418240 (same in PB mode) <- FF97 desktop
+		// FF97  :    5512729395 (same in PB mode) <- FF97 android
 		// brave:     2147483648 (same in incognito and Tor window)
 		// opera:      310418104 normal
 		// opera:      521917312 private
@@ -1202,12 +1228,19 @@ function get_storage_quota(num, title) {
 		// chrome:   33076376370 normal android
 		// chrome:     485041940 incognito
 		// chrome:     204974075 incognito android
+
+	// ToDo: check if FF97+ new storage quota is based on disk or free disk space size
 	try {
 		if (bBlock) {bB = 1}
 		navigator.storage.estimate().then(estimate => {
 			let quota = estimate.quota,
 				bool = false
-			if (quota > 2000000000 && quota < 2147483649) {bool = true}
+			if (is97) {
+				if (quota > 10000000000 && quota < 10737418241) {bool = true}
+				if (quota > 5500000000 && quota < 5512729395) {bool = true}
+			} else {
+				if (quota > 2000000000 && quota < 2147483649) {bool = true}
+			}
 			fnRecord(num, title, quota, bool)
 		})
 	} catch(e) {
@@ -1280,7 +1313,9 @@ function get_window_moz(num) {
 	}
 }
 
-let is61 = false,
+let is59 = false,
+	is60 = false,
+	is61 = false,
 	is64 = false,
 	is65 = false,
 	is70 = false,
@@ -1290,6 +1325,8 @@ let is61 = false,
 	is86 = false,
 	is93 = false,
 	is95 = false,
+	is96 = false,
+	is97 = false,
 	isRFP2 = false,
 	isWebkit = false
 
@@ -1298,7 +1335,14 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 // set some FF variables
 if (isFF) {
 	fnRFP()
-	// 95: slowish: upgrade if possible
+	// 97
+	try {
+		let controller = new AbortController(); let signal = controller.signal; signal.throwIfAborted()
+		is97 = true
+	} catch(e) {}
+	try {
+		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {is96 = true} else {}
+	} catch(e) {}
 	try {
 		let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
 		if (test > 0.4 && test < 0.6) {is95 = true}
@@ -1337,6 +1381,16 @@ if (isFF) {
 	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
 	// 61
 	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
+	// 60
+	try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
+		|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
+			"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
+		is60 = true
+	} catch(e) {}
+	// 59
+	try {
+		if (Intl.DateTimeFormat.supportedLocalesOf("tt").join() == "tt") {is59 = true}
+	} catch(e) {}
 }
 
 let results = [],
