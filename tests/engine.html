@@ -50,6 +50,7 @@ sb = sb.trim()
 sg = sg.trim()
 
 function fnRFP() {
+	// detectable in FF56+
 	let isPerf2 = true
 	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
 	try {
@@ -59,8 +60,8 @@ function fnRFP() {
 			+ performance.getEntries({name:"a",entryType:"mark"}).length
 			+ performance.getEntriesByName("a","mark").length
 			performance.clearMarks()
-		isRFP2 = (r == 0)
-		if (!isPerf2) {isRFP2 = false}
+		isRFP56plus = (r == 0)
+		if (!isPerf2) {isRFP56plus = false}
 	} catch(e) {}
 }
 
@@ -267,19 +268,18 @@ function get_errors(num) {
 		["var x = @","SyntaxError: illegal character U+0040","SyntaxError: illegal character"],
 	]
 	tests.forEach(function(array) {
-		if (!is60 && array[0] == "alert('A)") {
-			fnRecord(num, "error", zNA, zNA)
-			num++
-		} else {
-			try {
-				newFn(array[0])
-			} catch(e) {
-				let bool = false
-				let str = fnTrim(e.name +": "+ e.message, 70)
+		try {
+			newFn(array[0])
+		} catch(e) {
+			let bool = false
+			let str = fnTrim(e.name +": "+ e.message, 70)
+			if (!is60 && array[0] == "alert('A)") {
+				if (str == "SyntaxError: unterminated string literal") {bool = true}
+			} else {
 				if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
-				fnRecord(num, "error", str, bool)
-				num++
 			}
+			fnRecord(num, "error", str, bool)
+			num++
 		}
 	})
 }
@@ -446,7 +446,7 @@ function get_intl_collator(num, title) {
 			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true // FF70+
+		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e" && is70) {bool = true // FF70+
 		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true // FF59-69
 		} else if (hash == "f3dd69682f15cb6b95951a45659546283f71ea8f" && !is59) {bool = true // FF52-58
 		}
@@ -503,6 +503,7 @@ function get_intl_dtf(num, title) {
 			if (test == control) {same.push(locale)}
 			res.push(locale +" "+ test)
 		})
+		console.debug(res)
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
@@ -510,8 +511,9 @@ function get_intl_dtf(num, title) {
 			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true // FF70+
+		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6" && is70) {bool = true // FF70+
 		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
+		} else if (hash == "407454b2169899f2c4b3264a716223315d844f0b" && !is59) {bool = true // FF55-57 RFP
 		} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
 		}
 		fnRecord(num, title, hash, bool)
@@ -591,11 +593,15 @@ function get_intl_pluralrules(num, title) {
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
 		// FF57 or lower
+		let result = e.name
 		let type = zB0
+		let error = e.message
 		if (!is59 && e.message == "Intl.PluralRules is undefined") {
+			result = zNA +": FF58+ required"
 			type = zNA
+			error = undefined
 		}
-		fnRecord(num, title, e.name, type, e.message)
+		fnRecord(num, title, result, type, error)
 	}
 }
 
@@ -717,7 +723,7 @@ function get_locale_compare(num, title) {
 			let counts = " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true // FF70+
+		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776" && is70) {bool = true // FF70+
 		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true // FF59-69
 		} else if (hash == "1cfcca8eaa05f4d004015953c01c312f22c261ab" && !is59) {bool = true // FF52-58
 		}
@@ -790,8 +796,11 @@ function get_media_constraints(num, title) {
 		res.sort()
 		let hash = sha1(res.join())
 		let bool = false
-		if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f") {bool = true // FF70+
-		} else if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc" && !is70) {bool = true} // FF60-69
+		if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f" && is70) {bool = true // FF70+
+		} else if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc" && !is70) {bool = true // FF56-69
+		} else if (hash == "827e0cc87e804fc83ec5d67d43f0547f9cf0e624" && !is59) {bool = true // FF55
+		} else if (hash == "f772cf52c7cb9623cc62652f2b0879597e096f37" && !is59) {bool = true // FF52-54
+		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
 		// e.g. TB disables mediaDevices
@@ -1040,19 +1049,21 @@ function get_nav_values(num1, num2, num3) {
 	try {
 		if (bBlock) {bB = 1}
 		let resX = navigator.buildID
-		if (resX == "20181001000000") {boolX = true} else {
+		if (is64) {
+			// all FF64+
+			if (resX == "20181001000000") {boolX = true}
+		} else {
 			resX = fnClean(resX)
 			// FF52-63: 14 digit number starting with 2017
-			// RFP60-63 = 20100101
-			if (!is64) {
-				let year = resX.slice(0,4)
-				if (resX.length == 14) {
-					if (year == "2017" || year == "2018" || year == "2019") {
-						if (!isNaN(resX * 1)) {boolX = true}
-					}
-				} else if (isRFP2) {
-					if (resX == "20100101") {boolX = true}
+			let year = resX.slice(0,4)
+			if (resX.length == 14) {
+				if (year == "2017" || year == "2018" || year == "2019") {
+					if (!isNaN(resX * 1)) {boolX = true}
 				}
+			} else if (isRFP56plus) {
+				// luckily RFP only alters buildID starting FF56
+				// RFP FF56-63 = 20100101
+				if (resX == "20100101") {boolX = true}
 			}
 		}
 		fnRecord(num3, strX, resX, boolX)
@@ -1237,7 +1248,7 @@ function get_storage_quota(num, title) {
 				bool = false
 			if (is97) {
 				if (quota > 10000000000 && quota < 10737418241) {bool = true}
-				if (quota > 5500000000 && quota < 5512729395) {bool = true}
+				if (quota > 5500000000 && quota < 5512729396) {bool = true}
 			} else {
 				if (quota > 2000000000 && quota < 2147483649) {bool = true}
 			}
@@ -1248,7 +1259,16 @@ function get_storage_quota(num, title) {
 		if (isWebkit && e.name == "TypeError" && msg == "undefined is not an object") {
 			fnRecord(num, title, e.name, false, e.message)
 		} else {
-			fnRecord(num, title, e.name, zB0, e.message)
+			// FF56 or lower
+			let result = e.name
+			let type = zB0
+			let error = e.message
+			if (isFF && !is59 && e.message == "navigator.storage is undefined") {
+				result = zNA +": FF57+ required"
+				type = zNA
+				error = undefined
+			}
+			fnRecord(num, title, result, type, error)
 		}
 	}
 }
@@ -1327,13 +1347,15 @@ let is59 = false,
 	is95 = false,
 	is96 = false,
 	is97 = false,
-	isRFP2 = false,
+	isRFP56plus = false,
 	isWebkit = false
 
 // webkit
 if ("chrome" in window || isFF) {} else {isWebkit = true}
 // set some FF variables
 if (isFF) {
+
+	// ToDo: missing some isXX to make things tighter
 	fnRFP()
 	// 97
 	try {
@@ -1403,7 +1425,7 @@ let results = [],
 	bNum = false // display numbering
 
 setTimeout(function() {
-	fnRecord(0, "header", "expected")
+	fnRecord(0, "header", "expected" + (isFile ? " [RFP = "+ isRFP56plus +"]" : ""))
 	fnRecord(300, "header", "not expected")
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
