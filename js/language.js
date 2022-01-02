@@ -53,7 +53,7 @@ function get_connection() {
 				if (isObjFake) {sName += "_fake_skip"}
 				sDetail[sName] = aNetwork
 				hash = sha1(aNetwork.join(), "devices network")
-				btn = buildButton("5", sName, "details")
+				btn = buildButton("5", sName)
 			}
 		} catch(e) {
 			log_error("headers: connection", e.name, e.message)
@@ -292,6 +292,7 @@ function get_lang_doc() {
 					'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',]
 					chars.sort()
 					chars.sort(Intl.Collator(undefined).compare)
+					sDetail[sName11] = chars
 					return sha1(chars.join(), "language collation")
 				// timezone
 				} else if (item == 12) {
@@ -336,20 +337,23 @@ function get_lang_doc() {
 					return part1 +" | "+ part2 +" | "+ part3
 				} else if (item == 13) {return Intl.DateTimeFormat().resolvedOptions().timeZone
 				} else if (item == 14) {
-					let tzresults = [],
+					let tzresults = [], tzyear = [],
 						days = ["January 1","July 1",],
 						years = [1879,1921,1952,1976,2018],
 						k = 60000
 					for (let i = 0 ; i < years.length; i++) {
+						tzyear = []
 						for (let j = 0 ; j < days.length; j++) {
 							let datetime = days[j] +", "+ years[i] +" 13:00:00"
 							let control = new Date(datetime +" UTC")
 							let test = new Date(datetime)
 							let diff = ((Date.parse(test) - Date.parse(control))/k)
-							tzresults.push(diff)
+							tzyear.push(diff)
 						}
+						tzresults.push(years[i] +": "+ tzyear.join(", "))
 					}
-					return tzresults.join()
+					sDetail[sName14] = tzresults
+					return sha1(tzresults.join(), "language timezone offsets date.parse")
 				} else if (item == 15) {return "n/a"
 				// date/time format
 				} else if (item == 16) {
@@ -678,6 +682,12 @@ function get_lang_doc() {
 			}
 		}
 
+		// cleanup details
+		let sName11 = "language_collation",
+			sName14 = "language_timezone_offsets_date.parse"
+		sDetail[sName11] = []
+		sDetail[sName14] = []
+
 		// build
 		for (let i=0; i < 50; i++) {
 			let result = get_item(i)
@@ -692,11 +702,12 @@ function get_lang_doc() {
 			res.push(result)
 			// output line items after combos
 			if (i > 10) {
-				if (i == 14) {
-					dom.ldt14.innerHTML = sha1(result, "language timezone offsets") // hash multi-year timezone offsets
-				} else {
-					document.getElementById("ldt"+ i).innerHTML = result
+				if (i == 11) {
+					result += buildButton("4", sName11)
+				} else if (i == 14) {
+					result += buildButton("4", sName14)
 				}
+				document.getElementById("ldt"+ i).innerHTML = result
 			}
 		}
 		// debugging: error tracking
@@ -727,7 +738,7 @@ function get_lang_doc() {
 			} else {hashLang += (hashLang == "088c29af882518e3d3ab6dfe277b2707a146ac72" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
 			// timezone
-			bTZ = (hashTime == "be32bb73c0061974a3301536469d40d74e325375" ? true : false)
+			bTZ = (hashTime == "c7c562c7bf7c84f05d73c50e7ec23e9052ab3732" ? true : false)
 			hashTime += (bTZ ? rfp_green : rfp_red)
 			// datetime
 			let ff = ""
