@@ -1102,9 +1102,10 @@ function showMetrics(type) {
 
 /*** INCOMING DATA ***/
 
-function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
-	if (functionName == undefined) {functionName = "showDetail"}
-	if (btnType == undefined) {btnType = "btnc"}
+function buildButton(colorCode, arrayName, displayText = "details", functionName = "showDetail", btnType = "btnc") {
+	if (displayText == "") {displayText = "details"}
+	if (functionName == "") {functionName = "showDetail"}
+	if (btnType == "") {btnType = "btnc"}
 	return " <span class='btn"+ colorCode +" "+ btnType +"' onClick='"
 		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
