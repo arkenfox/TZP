@@ -153,7 +153,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 70
+		expected = 71
 
 	//97: 1745372
 	let t97 = performance.now(), ver97 = xF
@@ -651,6 +651,13 @@ function outputVersion() {
 	} catch(e) {}
 	record(50,60, "", ver60, performance.now()-t60)
 
+	//59
+	let t59 = performance.now(), ver59 = xF
+	try {
+		if (Intl.DateTimeFormat.supportedLocalesOf("tt").join() == "tt") {ver59 = xS}
+	} catch(e) {}
+	record(45,59, "", ver59, performance.now()-t59)
+
 	// 55: 1354974
 	// this test hangs the page in chromium
 	let t55 = performance.now(), ver55 = xF
@@ -739,34 +746,14 @@ function outputVersion() {
 
 	// 1742592 related
 	let t4 = performance.now(), ver4 = xNC
-	let lf4 = new Intl.ListFormat("en")
-	let test4 = "~"+ lf4.format(["", "B"]) +"~"
-	if (test4 !== "~ and B~") {ver4 = xOMG}
-	record(5,"~ and B", "1742592", ver4, performance.now()-t4)
-
 	try {
-		const chromeKeys = Object.keys(chrome).reduce((acc, key) => ({ ...acc, [key]: [...Object.keys(chrome[key])] }), {})
-		const names = Object.keys(chromeKeys)
-		let res = []
-		for (const k of names) {
-			res.push(k +":"+ chromeKeys[k].join())
-		}
-		console.log(sha1(res.join()) +"\n"+ res.join("\n"))
-		// Brave/Chrome: 57fddf2707cb589cd02e5e15ed33cd00a14f743a
-			//loadTimes:
-			//csi:
-			//app:isInstalled,getDetails,getIsInstalled,installState,runningState,InstallState,RunningState
-			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
-		// Opera: cc467b638955186a27c4ec03792867169da121ed
-			//loadTimes:
-			//csi:
-			//search:
-			//app:isInstalled,getDetails,getIsInstalled,installState,runningState,InstallState,RunningState
-			//runtime:id,connect,sendMessage,OnInstalledReason,OnRestartRequiredReason,PlatformArch,PlatformNaclArch,PlatformOs,RequestUpdateCheckStatus
+		let lf4 = new Intl.ListFormat("en")
+		let test4 = "~"+ lf4.format(["", "B"]) +"~"
+		if (test4 !== "~ and B~") {ver4 = xOMG}
 	} catch(e) {
-		//FF (and all non-blink I would assume): ReferenceError chrome is not defined
-		//console.log("chromeKeys", e.name, e.message)
+		ver4 = " "+ zNA + " error"
 	}
+	record(5,"~ and B", "1742592", ver4, performance.now()-t4)
 }
 
 setTimeout(function() {
