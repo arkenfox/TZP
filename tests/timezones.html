@@ -672,6 +672,8 @@ function run_test(isLoopy) {
 			bucketsizes = [],
 			data = [],
 			tzresults = [],
+			tzpdata = [],
+			tzyear = [],
 			matchHash = "",
 			matchList = "",
 			tzpHash = "",
@@ -680,16 +682,22 @@ function run_test(isLoopy) {
 		if (isLoopy == "false") {
 			// get TZP hash
 			for (let i = 0 ; i < aYears.length; i++) {
+				tzyear = []
 				for (let j = 0 ; j < aDays.length; j++) {
 					let datetime = aDays[j] +", "+ aYears[i] +" 13:00:00"
 					let control = new Date(datetime +" UTC")
 					let test = new Date(datetime)
 					let diff = ((Date.parse(test) - Date.parse(control))/k)
 					tzresults.push(diff)
+					tzyear.push(diff)
 				}
+				tzpdata.push(aYears[i] +": "+ tzyear.join(", "))
 			}
-			//console.debug("tzp data\n" + tzresults)
-			tzpHash = sha1(tzresults.join())
+			if (aYears.join() == "1879,1921,1952,1976,2018") {
+				tzpHash = sha1(tzpdata.join())
+			} else {
+				tzpHash = zNA
+			}
 
 			// get matching hash
 			tzresults = []
