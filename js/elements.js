@@ -5,7 +5,7 @@ function get_element_keys() {
 	sDetail[sName] = []
 	return new Promise(resolve => {
 		try {
-			// create element //
+			// create element
 			const id = 'html-element-version'
 			const element = document.createElement('div')
 			element.setAttribute('id', id)
@@ -92,7 +92,7 @@ function get_resized() {
 				resM = [zD]
 			} else {
 				sDetail[sNameM] = resM
-				displayM = sha1(resM.join(), "elements mathml") + buildButton("15", sNameM, "details")
+				displayM = sha1(resM.join(), "elements mathml") + buildButton("15", sNameM)
 			}
 		}
 		dom.mathml.innerHTML = isFF ? displayM : zNA
@@ -112,7 +112,7 @@ function get_resized() {
 			}
 		} else {
 			sDetail[sNameL] = resL
-			displayL = sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL, "details")
+			displayL = sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL)
 		}
 		dom.lineheight.innerHTML = displayL
 

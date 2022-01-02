@@ -178,7 +178,7 @@ function get_keyboard() {
 							display = color(display)
 						}
 						sDetail[sName] = keys
-						dom.nKeyboard.innerHTML = display + buildButton("7", sName, "details")
+						dom.nKeyboard.innerHTML = display + buildButton("7", sName)
 						log_perf("keyboard [devices]",t0)
 						return resolve("keyboard:" + (isObjFake ? value : display))
 					}

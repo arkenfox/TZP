@@ -153,7 +153,7 @@ function get_audio2_hybrid() {
 			let hash = sha1(results.join())
 			let isLie = results.length == 0 ? true : false
 			if (isLie) {hash = soL + hash + scC}
-			dom.audio3hash.innerHTML = hash + buildButton("11", sName, "details")
+			dom.audio3hash.innerHTML = hash + buildButton("11", sName)
 			audio2Section.push("hybrid:"+ (isLie ? zLIE : hash))
 			log_perf("hybrid [audio]",t0)
 			if (showperf) {
@@ -206,7 +206,7 @@ function get_audio2_oscillator() {
 			let hash = sha1(results.join())
 			let isLie = results.length == 0 ? true : false
 			if (isLie) {hash = soL + hash + scC}
-			dom.audio2hash.innerHTML = hash + buildButton("11", sName, "details")
+			dom.audio2hash.innerHTML = hash + buildButton("11", sName)
 			audio2Section.push("oscillator:"+ (isLie ? zLIE :hash))
 			log_perf("oscillator [audio]",t0)
 			// next test
