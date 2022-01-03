@@ -661,6 +661,14 @@ function outputPrototypeLies() {
 					'readPixels'
 				]
 			})
+			searchLies(() => Window, {
+				target: [
+					'innerHeight',
+					'innerWidth',
+					'outerHeight',
+					'outerWidth',
+				]
+			})
 			/* potential targets:
 				RTCPeerConnection
 				Plugin
