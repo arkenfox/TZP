@@ -21,8 +21,10 @@ function byteArrayToHex(arrayBuffer){
 
 function exit_audio2() {
 	// why am i getting 4 or 5 metrics on cold load first run android
-	if (isOS == "android" && audio2Section.length > 3) {
+	if (audio2Section.length > 3) {
 		dom.debugB.innerHTML = audio2Section.join("<br>")
+	} else {
+		dom.debugB.innerHTML = ""
 	}
 	audio2Section.sort()
 	let sName = "audio_user_gestures_notglobal"
@@ -46,8 +48,7 @@ function get_audio2_context(attempt) {
 		}
 		let f = new window.AudioContext
 		let obj
-		let results = [], keynames = [], subset = [], isLie = false, note = ""
-		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
+		let results = [], keynames = [], isLie = false, note = ""
 
 		let	d = f.createAnalyser()
 		obj = a({}, f, "ac-")
@@ -71,21 +72,21 @@ function get_audio2_context(attempt) {
 				results.push(key +":"+ testValue)
 				keynames.push(key)
 			}
-			if (!subsetExclude.includes(key)) {subset.push(key +":"+ testValue)}
 		}
 		// output
 		if (!latencyError || latencyTries == 2) {
 			sDetail[sName] = results
 			let hash = sha1(results.join())
-			// catch tampering
 			if (isFF && !isFFLegacy) {
+				// catch tampering: missing keys
 				isLie = true
-				keynames.sort(); subset.sort() // stability
+				keynames.sort()
 				let lieHash = sha1(keynames.join())
-				let subHash = sha1(subset.join())
-				if (isVer < 70 && lieHash == "406e1a6ed448d535be7a5c38e923afeb4214502b") {isLie = false}
-				if (isVer > 69 && lieHash == "6be86802849b991e2ce6b966234cbd116c2b84e5") {isLie = false}
-				if (subHash == "b82a976312cf08e6e139b3dcee6c02aa412913c2") {isLie = false}
+				let knownA = "6be86802849b991e2ce6b966234cbd116c2b84e5" // FF70+ [20]
+				let knownB = "406e1a6ed448d535be7a5c38e923afeb4214502b" // FF69- [18]
+				if (isVer > 69 && lieHash == knownA) {isLie = false
+				} else if (isVer < 70 && lieHash == knownB) {isLie = false}
+				// RFP notation: FF70+ these are all 20 keys
 				note = rfp_red
 				if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
 				if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
@@ -207,7 +208,7 @@ function get_audio2_oscillator() {
 			scriptProcessor.disconnect()
 			gain.disconnect()
 			// output
-			if (runSL) {results = []}
+			if (runSL) {results = []} // sim empty array
 			sDetail[sName] = results
 			let hash = sha1(results.join())
 			let isLie = results.length == 0 ? true : false
