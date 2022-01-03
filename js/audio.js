@@ -20,6 +20,10 @@ function byteArrayToHex(arrayBuffer){
 }
 
 function exit_audio2() {
+	// why am i getting 4 or 5 metrics on cold load first run android
+	if (isOS == "android" && audio2Section.length > 3) {
+		dom.debugB.innerHTML = audio2Section.join("<br>")
+	}
 	audio2Section.sort()
 	let sName = "audio_user_gestures_notglobal"
 	sDetail[sName] = audio2Section
@@ -35,7 +39,6 @@ function get_audio2_context(attempt) {
 		latencyTries++
 		let sName = "audio_audiocontext_keys_notglobal"
 		sDetail[sName] = []
-
 		function a(a, b, c) {
 			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
 			d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
@@ -56,11 +59,14 @@ function get_audio2_context(attempt) {
 			let testValue = value
 			if (key == "ac-outputLatency") {
 				// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
-				if (runS) {testValue = 0}
+				if (runS) {
+					console.log("running context: attempt", attempt, "latencyTry #" + latencyTries)
+					if (attempt == 1) {testValue = 0; console.log("spoofing "+ key)}
+				}
 				latencyError = (testValue == 0 ? true : false)
 			}
 			if (runSL && key == "ac-sampleRate") {
-				// simiulate cydec dropping a key
+				// simulate cydec dropping a key
 			} else {
 				results.push(key +":"+ testValue)
 				keynames.push(key)
