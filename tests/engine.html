@@ -31,7 +31,7 @@
 		<thead><tr><th colspan="2">engine</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">An itsy-bitsy, teeny-weeny, minuscule sample of the thousands of myriad ways engines differ.
-			This test is tweaked for gecko [FF60+]: you want <span class="s9"> &#x2713 </span>'s. Anything different
+			This test is tweaked for gecko [FF52+]: you want <span class="s9"> &#x2713 </span>'s. Anything different
 			<span class="bad"> &#x2716 </span> or blocked <span class="bad"> &#x25cf </span> only makes you stand out.
 			</span>
 		</td></tr>
@@ -130,10 +130,15 @@ function fnDisplay() {
 	let percentPassed = Math.floor((countTrue/countValid)*100)
 	let isPass = percentPassed == 100 ? true : false
 	let percentFailed = Math.ceil((countFail/countValid)*100)
-	let summary = s14 +"SUMMARY"+ sc
-		+"PASSED: ".padStart(10) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
-		+"FAILED: ".padStart(10) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
+	let summary = s14 +"SUMMARY "+ sc
+		+"PASSED: ".padStart(9) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
+		+"FAILED: ".padStart(9) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
 	if (countNA > 0) {summary += "N/A: ".padStart(7) + countNA}
+	if (isFF) {
+		summary += s14+ "DEBUG ".padStart(8) + sc +"RFP:".padStart(6) + (isRFP56plus ? green_tick : red_cross)
+		if (topVer !== "") {summary += "VER: ".padStart(8) + topVer
+		}
+	}
 	// output
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
@@ -1357,20 +1362,21 @@ let is59 = false,
 if ("chrome" in window || isFF) {} else {isWebkit = true}
 // set some FF variables
 if (isFF) {
-
-	// ToDo: missing some isXX to make things tighter
+	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
 	// 97
 	try {
-		let controller = new AbortController(); let signal = controller.signal; signal.throwIfAborted()
+		let controller97 = new AbortController(); let signal97 = controller97.signal; signal97.throwIfAborted()
 		is97 = true
 	} catch(e) {}
+	// 96
 	try {
 		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {is96 = true} else {}
 	} catch(e) {}
+	// 95
 	try {
-		let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-		if (test > 0.4 && test < 0.6) {is95 = true}
+		let test95 = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+		if (test95 > 0.4 && test95 < 0.6) {is95 = true}
 	} catch(e) {}
 	// 93
 	try {
@@ -1380,9 +1386,10 @@ if (isFF) {
 	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
 	// 85
 	try {
-		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a/)")
+		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
 	} catch(e) {
-		if ((e.message).substring(0,3) == "Reg") {is85 = true}
+		let test85 = (e.message).substring(0,3)
+		if (test85 == "Reg") {is85 = true}
 	}
 	// 78
 	try {
@@ -1391,21 +1398,22 @@ if (isFF) {
 	} catch(e) {}
 	// 72
 	try {
-		let t = newFn('let a = 100_00_;')
+		let test72 = newFn('let a = 100_00_;')
 	} catch(e) {
-		if (e.message.substring(0,6) == "unders") {is72 = true}
+		let test72a = (e.message).substring(0,6)
+		if (test72a == "unders") {is72 = true}
 	}
 	// 70
 	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
 	// 65
 	try {
-		let test = Intl.DateTimeFormat.supportedLocalesOf("ia")
-		if (test.length) {is65 = true}
+		let test65 = Intl.DateTimeFormat.supportedLocalesOf("ia")
+		if (test65.length) {is65 = true}
 	} catch(e) {}
 	// 64
 	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
 	// 61
-	try {let t = (" a").trimStart(); is61 = true} catch(e) {}
+	try {let test61 = (" a").trimStart(); is61 = true} catch(e) {}
 	// 60
 	try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
 		|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
@@ -1425,31 +1433,13 @@ let results = [],
 	expected = 70,
 	bBlock = false, // throw a test error
 	bLog = false,
-	bNum = false // display numbering
+	bNum = false, // display numbering
+	topVer = ""
 
 setTimeout(function() {
 	// legacy forks: PM, Basilisk, WF Classic: backported fixes cause isXX false positives
 	// cascade
-	if (isFF) {
-		try {
-			let error59 = newFn("alert('A)")
-		} catch(e) {
-			if (e.name + ": "+ e.message == "SyntaxError: unterminated string literal") {is59 = false}
-		}
-		if (!is59) {is60 = false}
-		if (!is60) {is61 = false}
-		if (!is61) {is64 = false}
-		if (!is64) {is65 = false}
-		if (!is65) {is70 = false}
-		if (!is70) {is72 = false}
-		if (!is72) {is78 = false}
-		if (!is78) {is85 = false}
-		if (!is85) {is86 = false}
-		if (!is86) {is93 = false}
-		if (!is93) {is95 = false}
-		if (!is95) {is96 = false}
-		if (!is96) {is97 = false}
-	}
+	/*
 	if (isFile) {
 		let aVer = []
 		aVer.push("is59: "+ is59) // true: WF Classic
@@ -1468,9 +1458,27 @@ setTimeout(function() {
 		aVer.push("is97: "+ is97)
 		console.debug(aVer.join("\n"))
 	}
+	*/
+	if (isFF) {
+		if (is59 && !is60 && is61 && is70) {is59 = false} // WF Classic
+		if (!is59) {is60 = false; topVer = "> 59"} else {topVer = "59 <sup>60</sup>"}
+		if (!is60) {is61 = false} else {topVer = "60 <sup>61</sup>"}
+		if (!is61) {is64 = false} else {topVer = "61 <sup>64</sup>"}
+		if (!is64) {is65 = false} else {topVer = "64 <sup>65</sup>"}
+		if (!is65) {is70 = false} else {topVer = "65 <sup>70</sup>"}
+		if (!is70) {is72 = false} else {topVer = "70 <sup>72</sup>"}
+		if (!is72) {is78 = false} else {topVer = "72 <sup>78</sup>"}
+		if (!is78) {is85 = false} else {topVer = "78 <sup>85</sup>"}
+		if (!is85) {is86 = false} else {topVer = "85 <sup>86</sup>"}
+		if (!is86) {is93 = false} else {topVer = "86 <sup>93</sup>"}
+		if (!is93) {is95 = false} else {topVer = "93 <sup>95</sup>"}
+		if (!is95) {is96 = false} else {topVer = "95 <sup>96</sup>"}
+		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
+		if (!is97) {} else {topVer = "97"}
+	}
 
 	// now get on with it
-	fnRecord(0, "header", "expected" + (isFile ? " [RFP = "+ isRFP56plus +"]" : ""))
+	fnRecord(0, "header", "expected")
 	fnRecord(300, "header", "not expected")
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
