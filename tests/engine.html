@@ -503,7 +503,6 @@ function get_intl_dtf(num, title) {
 			if (test == control) {same.push(locale)}
 			res.push(locale +" "+ test)
 		})
-		console.debug(res)
 		let hash = sha1(res.join())
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
@@ -515,6 +514,7 @@ function get_intl_dtf(num, title) {
 		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
 		} else if (hash == "407454b2169899f2c4b3264a716223315d844f0b" && !is59) {bool = true // FF55-57 RFP
 		} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
+		} else if (hash == "5e50264aff470447e8c19c899061eada3528ed45" && !is59) {bool = true // WFClassic52 RFP
 		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
@@ -1055,9 +1055,12 @@ function get_nav_values(num1, num2, num3) {
 		} else {
 			resX = fnClean(resX)
 			// FF52-63: 14 digit number starting with 2017
-			let year = resX.slice(0,4)
+			let year = resX.slice(0,4) *1
 			if (resX.length == 14) {
-				if (year == "2017" || year == "2018" || year == "2019") {
+				let isCheck = false
+				if (year > 2016 && year < 2020) {isCheck = true}
+				if (!is59) {if (year > 2016) {isCheck = true}} // FF52 waterfox basilisk palemoon
+				if (isCheck) {
 					if (!isNaN(resX * 1)) {boolX = true}
 				}
 			} else if (isRFP56plus) {
@@ -1425,6 +1428,48 @@ let results = [],
 	bNum = false // display numbering
 
 setTimeout(function() {
+	// legacy forks: PM, Basilisk, WF Classic: backported fixes cause isXX false positives
+	// cascade
+	if (isFF) {
+		try {
+			let error59 = newFn("alert('A)")
+		} catch(e) {
+			if (e.name + ": "+ e.message == "SyntaxError: unterminated string literal") {is59 = false}
+		}
+		if (!is59) {is60 = false}
+		if (!is60) {is61 = false}
+		if (!is61) {is64 = false}
+		if (!is64) {is65 = false}
+		if (!is65) {is70 = false}
+		if (!is70) {is72 = false}
+		if (!is72) {is78 = false}
+		if (!is78) {is85 = false}
+		if (!is85) {is86 = false}
+		if (!is86) {is93 = false}
+		if (!is93) {is95 = false}
+		if (!is95) {is96 = false}
+		if (!is96) {is97 = false}
+	}
+	if (isFile) {
+		let aVer = []
+		aVer.push("is59: "+ is59) // true: WF Classic
+		aVer.push("is60: "+ is60)
+		aVer.push("is61: "+ is61) // true: PM + Basilisk, WF Classic
+		aVer.push("is64: "+ is64)
+		aVer.push("is65: "+ is65)
+		aVer.push("is70: "+ is70) // true: PM + Basilisk, WF Classic
+		aVer.push("is72: "+ is72)
+		aVer.push("is78: "+ is78) // true: WF Classic
+		aVer.push("is85: "+ is85)
+		aVer.push("is86: "+ is86)
+		aVer.push("is93: "+ is93)
+		aVer.push("is95: "+ is95)
+		aVer.push("is96: "+ is96)
+		aVer.push("is97: "+ is97)
+		console.debug(aVer.join("\n"))
+	}
+
+	// now get on with it
 	fnRecord(0, "header", "expected" + (isFile ? " [RFP = "+ isRFP56plus +"]" : ""))
 	fnRecord(300, "header", "not expected")
 	fnRecord(600, "header", "specific values")
