@@ -48,7 +48,8 @@ function get_audio2_context(attempt) {
 		}
 		let f = new window.AudioContext
 		let obj
-		let results = [], keynames = [], isLie = false, note = ""
+		let results = [], keynames = [], subset = [], isLie = false, note = ""
+		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
 
 		let	d = f.createAnalyser()
 		obj = a({}, f, "ac-")
@@ -66,19 +67,17 @@ function get_audio2_context(attempt) {
 				}
 				latencyError = (testValue == 0 ? true : false)
 			}
-			if (runSL && key == "ac-sampleRate") {
-				// simulate cydec dropping a key
-			} else {
-				results.push(key +":"+ testValue)
-				keynames.push(key)
-			}
+			if (runSL && key == "ac-channelCount") {testValue = 4} // sim a fake value in our subset
+			results.push(key +":"+ testValue)
+			keynames.push(key)
+			if (!subsetExclude.includes(key)) {subset.push(key +":"+ testValue)}
 		}
 		// output
 		if (!latencyError || latencyTries == 2) {
 			sDetail[sName] = results
 			let hash = sha1(results.join())
 			if (isFF && !isFFLegacy) {
-				// catch tampering: missing keys
+				// lies: missing keys
 				isLie = true
 				keynames.sort()
 				let lieHash = sha1(keynames.join())
@@ -86,6 +85,15 @@ function get_audio2_context(attempt) {
 				let knownB = "406e1a6ed448d535be7a5c38e923afeb4214502b" // FF69- [18]
 				if (isVer > 69 && lieHash == knownA) {isLie = false
 				} else if (isVer < 70 && lieHash == knownB) {isLie = false}
+
+				// lies: FF70+ known subset of stable keys and values
+					// FF69 and lower as a different set should be stable but who cares
+				if (!isLie && isVer > 69) {
+					subset.sort()
+					let subHash = sha1(subset.join())
+					let knownX = "b82a976312cf08e6e139b3dcee6c02aa412913c2" // FF70+ [16]
+					if (subHash !== knownX) {isLie = true}
+				}
 				// RFP notation: FF70+ these are all 20 keys
 				note = rfp_red
 				if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
