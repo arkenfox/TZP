@@ -738,7 +738,7 @@ function get_lang_doc() {
 			} else {hashLang += (hashLang == "088c29af882518e3d3ab6dfe277b2707a146ac72" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
 			// timezone
-			bTZ = (hashTime == "c7c562c7bf7c84f05d73c50e7ec23e9052ab3732" ? true : false)
+			bTZ = (hashTime == "ebb26d1799f1516321904b1f1a8d717b1cdcdfbf" ? true : false)
 			hashTime += (bTZ ? rfp_green : rfp_red)
 			// datetime
 			let ff = ""
