@@ -361,7 +361,7 @@ const getFonts = () => {
 			})
 		} catch(e) {
 			//if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
-			if (gRun) {log_error("fonts:fonts", e.name, e.message)}
+			if (gRun) {log_error("fonts: fonts", e.name, e.message)}
 			return resolve(zB0)
 		}
 	})
@@ -380,25 +380,27 @@ function get_fonts() {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
 			// sim
-			if (runSL) {
-				fntSim = fntSim % 6
-				console.log("FONT SIM #"+ fntSim)
-				if (fntSim == 0) {
-					res = zB0
-				} else if (fntSim == 1) {
-					res["fontsOffset"] = []; res["fontsClient"] = []; res["fontsScroll"] = []; res["fontsTransform"] = []
-					res["fontsPerspective"] = []; res["fontsPixel"] = []; res["fontsPixelSize"] = []
-				} else if (fntSim == 2) {
-					res["fontsScroll"] = [], res["fontsTransform"] = []
-				} else if (fntSim == 3) {
-					res["fontsClient"] = []; res["fontsPixelSize"] = []; res["fontsTransform"] = []; res["fontsPixel"] = []
-				} else if (fntSim == 4) {
-					res["fontsClient"] = ["client","d","e"]; res["fontsScroll"] = ["scroll","t"]; res["fontsPerspective"] = []
-				} else if (fntSim == 5) {
-					res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
-					res["fontsPerspective"] = []; res["fontsPixel"] = ["pixel"]
+			if (runSF) {
+				if (fntList.length > 0) {
+					fntSim = fntSim % 6
+					console.log("FONT SIM #"+ fntSim)
+					if (fntSim == 0) {
+						res = zB0
+					} else if (fntSim == 1) {
+						res["fontsOffset"] = []; res["fontsClient"] = []; res["fontsScroll"] = []; res["fontsTransform"] = []
+						res["fontsPerspective"] = []; res["fontsPixel"] = []; res["fontsPixelSize"] = []
+					} else if (fntSim == 2) {
+						res["fontsScroll"] = [], res["fontsTransform"] = []
+					} else if (fntSim == 3) {
+						res["fontsClient"] = []; res["fontsPixelSize"] = []; res["fontsTransform"] = []; res["fontsPixel"] = []
+					} else if (fntSim == 4) {
+						res["fontsClient"] = ["client","d","e"]; res["fontsScroll"] = ["scroll","t"]; res["fontsPerspective"] = []
+					} else if (fntSim == 5) {
+						res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
+						res["fontsPerspective"] = []; res["fontsPixel"] = ["pixel"]
+					}
+					fntSim++
 				}
-				fntSim++
 			}
 			// get values
 			let fntData = [], fntHashes = [], miniHashes = [], blank = [], isSame = false
@@ -445,6 +447,7 @@ function get_fonts() {
 				if (res.length == 40) {
 					summary += buildButton("12", "fonts_fonts", sDetail["fonts_fonts"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
+				if (runSF && fntList.length == 0) {summary = sb +"font simulation fail: no font list"+ sc}
 				dom.fontMain.innerHTML = summary
 				if (gRun) {
 					if (res == zB0 || res == "none") {
