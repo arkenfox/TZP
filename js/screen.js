@@ -867,8 +867,7 @@ function get_mm_metrics(runtype) {
 		]).then(function(device){
 			perf("mmScreen", device.join(" x "), "screen")
 		}).catch(function(err){
-			dom.ScrMM.innerHTML = err
-			perf()
+			perf("mmScreen", err, "screen")
 		})
 		// inner
 		Promise.all([
@@ -877,7 +876,7 @@ function get_mm_metrics(runtype) {
 		]).then(function(inner){
 			perf("mmInner", inner.join(" x "), "inner")
 		}).catch(function(err){
-			perf("mmInner", err)
+			perf("mmInner", err, "inner")
 		})
 		// moz
 		if (isFF) {
@@ -885,7 +884,7 @@ function get_mm_metrics(runtype) {
 			).then(function(moz){
 				perf("mmDPRm", moz += (moz == 1 ? rfp_green : rfp_red), "moz-device-pixel-ratio")
 			}).catch(function(err){
-				perf("mmDPRm", err)
+				perf("mmDPRm", err, "moz-device-pixel-ratio")
 			})
 		} else {
 			perf("mmDPRm", zNS)
@@ -896,7 +895,7 @@ function get_mm_metrics(runtype) {
 			).then(function(web){
 				perf("mmDPRw", web, "webkit-device-pixel-ratio")
 			}).catch(function(err){
-				perf("mmDPRw", err)
+				perf("mmDPRw", err, "webkit-device-pixel-ratio")
 			})
 		} else {
 			perf("mmDPRw", zNS)
