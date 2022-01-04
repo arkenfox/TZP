@@ -22,15 +22,21 @@ function return_lb_nw(w,h) {
 	return r
 }
 
-function return_mm_dpi(type) {
+function return_mm_dpi(type, denominator = 1) {
+	// at 33% zoom : results returned at i= dpi=29, dppx=30, dpcm=114
+	// at 500% zoom: results returned at i= dpi=480, dppx=500, dpcm=1890
 	let r = ""
 	try {
 		r = (function() {
 			let i = 1
-			for (1; i < 2001; i++) {
-				if (matchMedia("(max-resolution:"+ i + type +")").matches === true) {
-					return i}
-			} return "> "+ i
+			for (1; i < 3001; i++) {
+				let n = i/denominator
+				if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
+			}
+			if (gRun) {
+				gMethods.push("screen:matchmedia_"+ type +": >"+ (i-1)/denominator)
+			}
+			return zB0 
 		})()
 	} catch(e) {
 		log_error("screen: matchmedia "+ type, e.name, e.message)
@@ -1968,8 +1974,8 @@ function get_zoom(runtype) {
 		let t1; if (canPerf) {t1 = performance.now()}
 
 		let aDPI = return_mm_dpi("dpi"),
-			bDPI = return_mm_dpi("dppx"),
-			cDPI = return_mm_dpi("dpcm")
+			bDPI = return_mm_dpi("dppx",100),
+			cDPI = return_mm_dpi("dpcm",10)
 
 		if (aDPI !== zB0) {varDPI = aDPI}
 		dom.mmDPI.innerHTML = aDPI +" | "+ bDPI +" | "+ cDPI
