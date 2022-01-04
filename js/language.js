@@ -18,6 +18,7 @@ function get_connection() {
 		let hasObj = false, isObjFake = true
 		try {
 			test = navigator.connection
+			if (runSL) {test = {NetworkInformation: {type: "none", ontypechange: null}}}
 			if (test == "undefined") {test = "undefined string"
 			} else if (test == undefined || test == true || test == false || test == null) {test += ""
 			} else if (Array.isArray(test)) {test = "array"}
@@ -48,6 +49,11 @@ function get_connection() {
 					}
 					aNetwork.push(item +":"+ keyValue)
 				})
+			}
+			if (runSL) {
+				aNetwork = ["functions:addEventListener,removeEventListener,dispatchEvent",
+					"keys:type,ontypechange","ontypechange:null","type:none"]
+				hasNav = true
 			}
 			if (aNetwork.length) {
 				if (isObjFake) {sName += "_fake_skip"}

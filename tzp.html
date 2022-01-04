@@ -138,15 +138,23 @@
 			&nbsp [css min-device-] screen resolution <sup>1</sup></td><td id="S"></td></tr>
 		<tr><td>[matchMedia] screen resolution <sup>2</sup></td><td class="c" id="mmScreen"></td></tr>
 		<tr><td>screen resolution <span class="group"> &#9679 </span></td>
-			<td><span class="c" id="ScrRes"></span><span class="c" id="match"></span></td></tr>
-		<tr><td>available resolution <span class="group"> &#9679 </span></td><td class="c" id="ScrAvail"></td></tr>
-		<tr><td>outer window <span class="group"> &#9679 </span></td><td class="c" id="WndOut"></td></tr>
-		<tr><td>inner window <span class="group"> &#9679 </span></td><td class="c" id="WndIn"></td></tr>
+			<td><span class="c" id="mScreen"></span><span class="c" id="match"></span></td></tr>
+		<tr><td>available resolution <span class="group"> &#9679 </span></td><td class="c" id="mAvailable"></td></tr>
+		<tr><td>outer window <span class="group"> &#9679 </span></td><td class="c" id="mOuter"></td></tr>
+		<tr><td>inner window <span class="group"> &#9679 </span></td><td class="c" id="mInner"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">range 500-2560</span></div>
+			<span class="ttxt">range 450-2560</span></div>
 			&nbsp [css min-] inner window <sup>1, 3</sup></td><td id="D"></td></tr>
 		<tr><td>[matchMedia] inner window <sup>2</sup></td><td class="c" id="mmInner"></td></tr>
 		<tr><td>viewport <sup>4</sup></td><td class="c" id="Viewport"></td></tr>
+		<tr><td>
+			<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxt">left<br>top<br>availLeft<br>availTop</span></div>
+			&nbsp [screen] positions</td><td class="c" id="posS"></td></tr>
+		<tr><td>
+			<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxt">screenX<br>screenY<br>mozInnerScreenX<br>mozInnerScreenY</span></div>
+			&nbsp [window] positions</td><td class="c" id="posW"></td></tr>
 		<tr><td>[css | matchMedia] display-mode</td><td><span id="cssDM"></span> | <span class="c" id="mmDM"></span></td></tr>
 		<tr><td>full screen</td><td class="c" id="fsState"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -165,14 +173,16 @@
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">FF83+<br>dom.indexedDB.privateBrowsing.enabled</span></div>
 			&nbsp private window</td><td class="c" id="IsPBMode"></td></tr>
-		<tr><td>[screen] orientation | mozOrientation | angle</td><td class="c" id="ScrOrient"></td></tr>
+		<tr><td>[screen] orientation | mozOrientation | angle</td><td class="c" id="scrOrient"></td></tr>
 		<tr><td>[css] -moz- | orientation | aspect-ratio | device-aspect-ratio</td>
 			<td><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span></td></tr>
 		<tr><td>[matchMedia] -moz- | orientation | aspect-ratio | device-aspect-ratio</td><td class="c" id="mmO"></tr>
-		<tr><td>[screen] pixel depth | color depth</td><td class="c" id="ScrDepth"></td></tr>
+		<tr><td>[screen] pixel depth | color depth</td>
+			<td><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
 		<tr><td>[css | matchMedia] color</td><td><span id="cssC"></span> | <span class="c" id="mmC"></span></td></tr>
 		<tr><td>dpi</td><td class="c" id="jsDPI"></td ></tr>
-		<tr><td>[css min-resolution] dpi</td><td id="P"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
+			&nbsp [css min-resolution] dpi</td><td id="P"></td></tr>
 		<tr><td>[matchMedia max-resolution] dpi | dppx | dpcm</td><td class="c" id="mmDPI"></td></tr>
 		<tr><td>zoom %</td><td class="c" id="jsZoom"></td></tr>
 		<tr><td>devicePixelRatio</td><td class="c" id="dpr"></td></tr>

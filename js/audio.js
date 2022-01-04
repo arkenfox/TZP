@@ -321,6 +321,7 @@ function outputAudio() {
 					// lies
 					let isLies = (isBraveMode > 1 && !isFile)
 					if (sum2 == sum3) {isLies = true}
+					if (runSL) {sum++}
 					if (isFF || isEngine == "blink") {
 						if (!knownGood.includes(sum)) {isLies = true}
 					}

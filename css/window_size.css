@@ -1,4 +1,54 @@
-@media (min-width:499px){#D:before{content:"";}}
+@media (min-width:449px){#D:before{content:"";}} /* lower */
+@media (min-width:450px){#D:before{content:"450";}}
+@media (min-width:451px){#D:before{content:"451";}}
+@media (min-width:452px){#D:before{content:"452";}}
+@media (min-width:453px){#D:before{content:"453";}}
+@media (min-width:454px){#D:before{content:"454";}}
+@media (min-width:455px){#D:before{content:"455";}}
+@media (min-width:456px){#D:before{content:"456";}}
+@media (min-width:457px){#D:before{content:"457";}}
+@media (min-width:458px){#D:before{content:"458";}}
+@media (min-width:459px){#D:before{content:"459";}}
+@media (min-width:460px){#D:before{content:"460";}}
+@media (min-width:461px){#D:before{content:"461";}}
+@media (min-width:462px){#D:before{content:"462";}}
+@media (min-width:463px){#D:before{content:"463";}}
+@media (min-width:464px){#D:before{content:"464";}}
+@media (min-width:465px){#D:before{content:"465";}}
+@media (min-width:466px){#D:before{content:"466";}}
+@media (min-width:467px){#D:before{content:"467";}}
+@media (min-width:468px){#D:before{content:"468";}}
+@media (min-width:469px){#D:before{content:"469";}}
+@media (min-width:470px){#D:before{content:"470";}}
+@media (min-width:471px){#D:before{content:"471";}}
+@media (min-width:472px){#D:before{content:"472";}}
+@media (min-width:473px){#D:before{content:"473";}}
+@media (min-width:474px){#D:before{content:"474";}}
+@media (min-width:475px){#D:before{content:"475";}}
+@media (min-width:476px){#D:before{content:"476";}}
+@media (min-width:477px){#D:before{content:"477";}}
+@media (min-width:478px){#D:before{content:"478";}}
+@media (min-width:479px){#D:before{content:"479";}}
+@media (min-width:480px){#D:before{content:"480";}}
+@media (min-width:481px){#D:before{content:"481";}}
+@media (min-width:482px){#D:before{content:"482";}}
+@media (min-width:483px){#D:before{content:"483";}}
+@media (min-width:484px){#D:before{content:"484";}}
+@media (min-width:485px){#D:before{content:"485";}}
+@media (min-width:486px){#D:before{content:"486";}}
+@media (min-width:487px){#D:before{content:"487";}}
+@media (min-width:488px){#D:before{content:"488";}}
+@media (min-width:489px){#D:before{content:"489";}}
+@media (min-width:490px){#D:before{content:"490";}}
+@media (min-width:491px){#D:before{content:"491";}}
+@media (min-width:492px){#D:before{content:"492";}}
+@media (min-width:493px){#D:before{content:"493";}}
+@media (min-width:494px){#D:before{content:"494";}}
+@media (min-width:495px){#D:before{content:"495";}}
+@media (min-width:496px){#D:before{content:"496";}}
+@media (min-width:497px){#D:before{content:"497";}}
+@media (min-width:498px){#D:before{content:"498";}}
+@media (min-width:499px){#D:before{content:"499";}}
 @media (min-width:500px){#D:before{content:"500";}}
 @media (min-width:501px){#D:before{content:"501";}}
 @media (min-width:502px){#D:before{content:"502";}}
@@ -2061,7 +2111,57 @@
 @media (min-width:2559px){#D:before{content:"2559";}}
 @media (min-width:2560px){#D:before{content:"2560";}}
 @media (min-width:2561px){#D:before{content:"";}} /* upper */
-@media (min-height:499px){#D:after{content:"";}} /* lower */
+@media (min-height:449px){#D:after{content:"";}} /* lower */
+@media (min-height:450px){#D:after{content:" x 450";}}
+@media (min-height:451px){#D:after{content:" x 451";}}
+@media (min-height:452px){#D:after{content:" x 452";}}
+@media (min-height:453px){#D:after{content:" x 453";}}
+@media (min-height:454px){#D:after{content:" x 454";}}
+@media (min-height:455px){#D:after{content:" x 455";}}
+@media (min-height:456px){#D:after{content:" x 456";}}
+@media (min-height:457px){#D:after{content:" x 457";}}
+@media (min-height:458px){#D:after{content:" x 458";}}
+@media (min-height:459px){#D:after{content:" x 459";}}
+@media (min-height:460px){#D:after{content:" x 460";}}
+@media (min-height:461px){#D:after{content:" x 461";}}
+@media (min-height:462px){#D:after{content:" x 462";}}
+@media (min-height:463px){#D:after{content:" x 463";}}
+@media (min-height:464px){#D:after{content:" x 464";}}
+@media (min-height:465px){#D:after{content:" x 465";}}
+@media (min-height:466px){#D:after{content:" x 466";}}
+@media (min-height:467px){#D:after{content:" x 467";}}
+@media (min-height:468px){#D:after{content:" x 468";}}
+@media (min-height:469px){#D:after{content:" x 469";}}
+@media (min-height:470px){#D:after{content:" x 470";}}
+@media (min-height:471px){#D:after{content:" x 471";}}
+@media (min-height:472px){#D:after{content:" x 472";}}
+@media (min-height:473px){#D:after{content:" x 473";}}
+@media (min-height:474px){#D:after{content:" x 474";}}
+@media (min-height:475px){#D:after{content:" x 475";}}
+@media (min-height:476px){#D:after{content:" x 476";}}
+@media (min-height:477px){#D:after{content:" x 477";}}
+@media (min-height:478px){#D:after{content:" x 478";}}
+@media (min-height:479px){#D:after{content:" x 479";}}
+@media (min-height:480px){#D:after{content:" x 480";}}
+@media (min-height:481px){#D:after{content:" x 481";}}
+@media (min-height:482px){#D:after{content:" x 482";}}
+@media (min-height:483px){#D:after{content:" x 483";}}
+@media (min-height:484px){#D:after{content:" x 484";}}
+@media (min-height:485px){#D:after{content:" x 485";}}
+@media (min-height:486px){#D:after{content:" x 486";}}
+@media (min-height:487px){#D:after{content:" x 487";}}
+@media (min-height:488px){#D:after{content:" x 488";}}
+@media (min-height:489px){#D:after{content:" x 489";}}
+@media (min-height:490px){#D:after{content:" x 490";}}
+@media (min-height:491px){#D:after{content:" x 491";}}
+@media (min-height:492px){#D:after{content:" x 492";}}
+@media (min-height:493px){#D:after{content:" x 493";}}
+@media (min-height:494px){#D:after{content:" x 494";}}
+@media (min-height:495px){#D:after{content:" x 495";}}
+@media (min-height:496px){#D:after{content:" x 496";}}
+@media (min-height:497px){#D:after{content:" x 497";}}
+@media (min-height:498px){#D:after{content:" x 498";}}
+@media (min-height:499px){#D:after{content:" x 499";}}
 @media (min-height:500px){#D:after{content:" x 500";}}
 @media (min-height:501px){#D:after{content:" x 501";}}
 @media (min-height:502px){#D:after{content:" x 502";}}
@@ -4123,4 +4223,4 @@
 @media (min-height:2558px){#D:after{content:" x 2558";}}
 @media (min-height:2559px){#D:after{content:" x 2559";}}
 @media (min-height:2560px){#D:after{content:" x 2560";}}
-@media (min-height:2561px){#D:after{content:"";}}
+@media (min-height:2561px){#D:after{content:"";}} /* upper */

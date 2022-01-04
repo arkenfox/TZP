@@ -169,12 +169,14 @@ let avh = "",
 	logPerfHash = "", // "", sha1, mini, "all"
 	logPerfMini = false, // we set these in code
 	logPerfSha1 = false, // ditto
-	logResize = true,
+	logPseudo = false,
+	logResize = false,
 	logStorage = false,
 // simulations
 	runS = false, // different values
-	runSUA = false, // ua lies
-	runSIF = false, // ua iframe lies
+	runSUA = false, // ua
+	runSIF = false, // ua iframe
+	runSF = false, // fonts: requires isOS
 	runSL = false, // lies
 	runSC = false, // css styles
 	runSP = false // block performance.now()
