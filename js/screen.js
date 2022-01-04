@@ -1123,12 +1123,12 @@ function get_orientation(runtype) {
 	try {
 		dom.mmDM.innerHTML = (function() {
 			let real = getElementProp("#cssDM","content",":after")
-			let rep = ""
+			let rep = zB0
 			q="(display-mode:"
 			if (window.matchMedia(q +"fullscreen)").matches) {rep = "fullscreen"}
 			if (window.matchMedia(q +"browser)").matches) {rep = "browser"}
 			if (window.matchMedia(q +"minimal-ui)").matches) {rep = "minimal-ui"}
-			if (runSL) {rep = undefined}
+			if (runSL) {rep = zB0}
 			if (rep !== real && real !== "x") {
 				rep = soB + rep + scC
 				if (gRun) {
@@ -1401,7 +1401,7 @@ function get_screen_metrics(runtype) {
 			// fullscreen = all zeroes I except the last one
 			// maximized = negatives
 		}
-		res.push("positions_window:"+ "TBA")
+		res.push("window_positions:"+ "TBA")
 	} else if (isEngine == "blink") {
 
 	}
