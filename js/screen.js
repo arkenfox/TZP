@@ -841,8 +841,15 @@ function get_math() {
 function get_mm_metrics(runtype) {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let count = 0
+	let unable = "unable to find upper bound"
+
 	// perf
-	function perf() {
+	function perf(id, str, type) {
+		document.getElementById(id).innerHTML = str == unable ? zB0 : str
+		if (gRun & str == unable) {
+			gMethods.push("screen:matchmedia_"+ type +": "+ unable)
+		}
+		count++
 		if (count == 4) {
 			if (runtype == "resize") {
 				if (logResize) {log_perf("mm various [resize]",t0,"ignore")}
@@ -851,57 +858,48 @@ function get_mm_metrics(runtype) {
 			}
 		}
 	}
-	// output
+
 	function runTest(callback){
 		// screen
 		Promise.all([
 			callback("device-width", "max-device-width", "px", 512, 0.01),
 			callback("device-height", "max-device-height", "px", 512, 0.01)
 		]).then(function(device){
-			dom.ScrMM.innerHTML = device.join(" x ")
-			count++; perf()
+			perf("mmScreen", device.join(" x "), "screen")
 		}).catch(function(err){
 			dom.ScrMM.innerHTML = err
-			count++; perf()
+			perf()
 		})
 		// inner
 		Promise.all([
 			callback("width", "max-width", "px", 512, 0.01),
 			callback("height", "max-height", "px", 512, 0.01)
 		]).then(function(inner){
-			dom.WndInMM.innerHTML = inner.join(" x ")
-			count++; perf()
+			perf("mmInner", inner.join(" x "), "inner")
 		}).catch(function(err){
-			dom.WndInMM.innerHTML = err
-			count++; perf()
+			perf("mmInner", err)
 		})
 		// moz
 		if (isFF) {
 			callback("-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 2, 0.0000001
 			).then(function(moz){
-				dom.mmDPRm.innerHTML = moz += (moz == 1 ? rfp_green : rfp_red)
-				count++; perf()
+				perf("mmDPRm", moz += (moz == 1 ? rfp_green : rfp_red), "moz-device-pixel-ratio")
 			}).catch(function(err){
-				dom.mmDPRm.innerHTML = err
-				count++; perf()
+				perf("mmDPRm", err)
 			})
 		} else {
-			dom.mmDPRm = zNS
-			count++; perf()
+			perf("mmDPRm", zNS)
 		}
 		// webkit
 		if (!isFF || isVer > 62) {
 			callback("-webkit-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 2, 0.0000001
 			).then(function(web){
-				dom.mmDPRw.innerHTML = web
-				count++; perf()
+				perf("mmDPRw", web, "webkit-device-pixel-ratio")
 			}).catch(function(err){
-				dom.mmDPRw.innerHTML = err
-				count++; perf()
+				perf("mmDPRw", err)
 			})
 		} else {
-			dom.mmDPRw = zNS
-			count++; perf()
+			perf("mmDPRw", zNS)
 		}
 	}
 	function searchValue(tester, maxValue, precision){
