@@ -846,7 +846,7 @@ function get_mm_metrics(runtype) {
 	// perf
 	function perf(id, str, type) {
 		document.getElementById(id).innerHTML = str == unable ? zB0 : str
-		if (gRun & str == unable) {
+		if (gRun && str == unable) {
 			gMethods.push("screen:matchmedia_"+ type +": "+ unable)
 		}
 		count++
