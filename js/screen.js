@@ -26,10 +26,11 @@ function return_mm_dpi(type) {
 	let r = ""
 	try {
 		r = (function() {
-			for (let i=1; i < 2000; i++) {
+			let i = 1
+			for (1; i < 2001; i++) {
 				if (matchMedia("(max-resolution:"+ i + type +")").matches === true) {
 					return i}
-			} return i
+			} return "> "+ i
 		})()
 	} catch(e) {
 		log_error("screen: matchmedia "+ type, e.name, e.message)
