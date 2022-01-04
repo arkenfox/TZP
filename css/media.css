@@ -1,5 +1,5 @@
 /* @media */
-#cssOm:after{content:"undefined";}
+#cssOm:after{content:"not supported";}
 @media (-moz-device-orientation:portrait){#cssOm:after{content:"portrait";}}
 @media (-moz-device-orientation:landscape){#cssOm:after{content:"landscape";}}
 @media (orientation:portrait){#cssO:after{content:"portrait";}}
@@ -16,7 +16,7 @@
 @media (display-mode:minimal-ui){#cssDM:after{content:"minimal-ui";}}
 @media (display-mode:portrait){#cssDM:after{content:"portrait";}}
 
-@media (color:0){#cssC:after{content:"0";}}
+@media (color:0){#cssC:after{content:"";}}
 @media (color:1){#cssC:after{content:"1";}}
 @media (color:2){#cssC:after{content:"2";}}
 @media (color:3){#cssC:after{content:"3";}}
@@ -33,6 +33,11 @@
 @media (color:14){#cssC:after{content:"14";}}
 @media (color:15){#cssC:after{content:"15";}}
 @media (color:16){#cssC:after{content:"16";}}
+@media (color:17){#cssC:after{content:"17";}}
+@media (color:18){#cssC:after{content:"18";}}
+@media (color:19){#cssC:after{content:"19";}}
+@media (color:20){#cssC:after{content:"20";}}
+@media (color:21){#cssC:after{content:"";}}
 
 #cssP:after{content:"not supported";}
 @media (pointer:none){#cssP:after{content:"none";}}
@@ -82,6 +87,17 @@
 @media (inverted-colors:inverted){#cssIC:after{content:"inverted";}}
 
 /* dpi */
+@media (min-resolution:39dpi){#P:before{content:"";}}
+@media (min-resolution:40dpi){#P:before{content:"40";}}
+@media (min-resolution:41dpi){#P:before{content:"41";}}
+@media (min-resolution:42dpi){#P:before{content:"42";}}
+@media (min-resolution:43dpi){#P:before{content:"43";}}
+@media (min-resolution:44dpi){#P:before{content:"44";}}
+@media (min-resolution:45dpi){#P:before{content:"45";}}
+@media (min-resolution:46dpi){#P:before{content:"46";}}
+@media (min-resolution:47dpi){#P:before{content:"47";}}
+@media (min-resolution:48dpi){#P:before{content:"48";}}
+@media (min-resolution:49dpi){#P:before{content:"49";}}
 @media (min-resolution:50dpi){#P:before{content:"50";}}
 @media (min-resolution:51dpi){#P:before{content:"51";}}
 @media (min-resolution:52dpi){#P:before{content:"52";}}
@@ -383,3 +399,54 @@
 @media (min-resolution:348dpi){#P:before{content:"348";}}
 @media (min-resolution:349dpi){#P:before{content:"349";}}
 @media (min-resolution:350dpi){#P:before{content:"350";}}
+@media (min-resolution:351dpi){#P:before{content:"351";}}
+@media (min-resolution:352dpi){#P:before{content:"352";}}
+@media (min-resolution:353dpi){#P:before{content:"353";}}
+@media (min-resolution:354dpi){#P:before{content:"354";}}
+@media (min-resolution:355dpi){#P:before{content:"355";}}
+@media (min-resolution:356dpi){#P:before{content:"356";}}
+@media (min-resolution:357dpi){#P:before{content:"357";}}
+@media (min-resolution:358dpi){#P:before{content:"358";}}
+@media (min-resolution:359dpi){#P:before{content:"359";}}
+@media (min-resolution:360dpi){#P:before{content:"360";}}
+@media (min-resolution:361dpi){#P:before{content:"361";}}
+@media (min-resolution:362dpi){#P:before{content:"362";}}
+@media (min-resolution:363dpi){#P:before{content:"363";}}
+@media (min-resolution:364dpi){#P:before{content:"364";}}
+@media (min-resolution:365dpi){#P:before{content:"365";}}
+@media (min-resolution:366dpi){#P:before{content:"366";}}
+@media (min-resolution:367dpi){#P:before{content:"367";}}
+@media (min-resolution:368dpi){#P:before{content:"368";}}
+@media (min-resolution:369dpi){#P:before{content:"369";}}
+@media (min-resolution:370dpi){#P:before{content:"370";}}
+@media (min-resolution:371dpi){#P:before{content:"371";}}
+@media (min-resolution:372dpi){#P:before{content:"372";}}
+@media (min-resolution:373dpi){#P:before{content:"373";}}
+@media (min-resolution:374dpi){#P:before{content:"374";}}
+@media (min-resolution:375dpi){#P:before{content:"375";}}
+@media (min-resolution:376dpi){#P:before{content:"376";}}
+@media (min-resolution:377dpi){#P:before{content:"377";}}
+@media (min-resolution:378dpi){#P:before{content:"378";}}
+@media (min-resolution:379dpi){#P:before{content:"379";}}
+@media (min-resolution:380dpi){#P:before{content:"380";}}
+@media (min-resolution:381dpi){#P:before{content:"381";}}
+@media (min-resolution:382dpi){#P:before{content:"382";}}
+@media (min-resolution:383dpi){#P:before{content:"383";}}
+@media (min-resolution:384dpi){#P:before{content:"384";}}
+@media (min-resolution:385dpi){#P:before{content:"385";}}
+@media (min-resolution:386dpi){#P:before{content:"386";}}
+@media (min-resolution:387dpi){#P:before{content:"387";}}
+@media (min-resolution:388dpi){#P:before{content:"388";}}
+@media (min-resolution:389dpi){#P:before{content:"389";}}
+@media (min-resolution:390dpi){#P:before{content:"390";}}
+@media (min-resolution:391dpi){#P:before{content:"391";}}
+@media (min-resolution:392dpi){#P:before{content:"392";}}
+@media (min-resolution:393dpi){#P:before{content:"393";}}
+@media (min-resolution:394dpi){#P:before{content:"394";}}
+@media (min-resolution:395dpi){#P:before{content:"395";}}
+@media (min-resolution:396dpi){#P:before{content:"396";}}
+@media (min-resolution:397dpi){#P:before{content:"397";}}
+@media (min-resolution:398dpi){#P:before{content:"398";}}
+@media (min-resolution:399dpi){#P:before{content:"399";}}
+@media (min-resolution:400dpi){#P:before{content:"400";}}
+@media (min-resolution:401dpi){#P:before{content:"";}}
