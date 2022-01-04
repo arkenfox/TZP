@@ -22,13 +22,15 @@ function getElementProp(id, prop, pseudo) {
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue(prop)
-		if (item == "none") {item = "x"; if (gRun) {gCheck.push("_generic:element property "+ id +": returned none")}}
+		if (item == "none") {item = "x"}
 		item = item.replace(/"/g,"")
 		if (!isNaN(item * 1)) {item = item * 1} // numbers
 		if (item == "") {item = "x"} // blanks
+		if (logPseudo) {console.log("pseudo "+ id +" "+ pseudo +": "+ item)}
 		return item
 	} catch(e) {
-		if (gRun) {gCheck.push("_generic:element property "+ id +": " + e.name)}
+		if (gRun) {gCheck.push("_generic:element property "+ id +": "+ e.name)}
+		if (logPseudo) {console.log("pseudo "+ id +": "+ e.name +": "+ e.message)}
 		return "x"
 	}
 }
@@ -70,7 +72,8 @@ function sha1(str, call) {
 		A = H,i=0;
 		for (; i < 80;
 			A = [[
-				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249)
+					+ ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
 				F = G + (B ^ C ^ D) + 341275144,
 				G + (B & C | B & D | C & D) + 882459459,
 				F + 1535694389
@@ -245,8 +248,20 @@ const get_isEngine = () => new Promise(resolve => {
 	function final_isFF() {
 		if (isFFyes.length) {isFF = true}
 		if (!isFF || isFFLegacy) {
-			rfp_green = ""; rfp_red = ""; rfp_random_green = ""; rfp_random_red = ""; lb_green = ""; lb_red = ""; nw_green = ""; nw_red = ""
-			enUS_green = ""; enUS_red = ""; spoof_both_green = ""; spoof_both_red = ""; default_ff_green = ""; default_ff_red = ""
+			rfp_green = ""
+			rfp_red = ""
+			rfp_random_green = ""
+			rfp_random_red = ""
+			lb_green = ""
+			lb_red = ""
+			nw_green = ""
+			nw_red = ""
+			enUS_green = ""
+			enUS_red = ""
+			spoof_both_green = ""
+			spoof_both_red = ""
+			default_ff_green = ""
+			default_ff_red = ""
 			let items = document.getElementsByClassName("group")
 			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 		}
@@ -427,40 +442,11 @@ const get_isOS = () => new Promise(resolve => {
 		log_perf("isOS [global]",t0,"","unknown")
 		return resolve()
 	}
-	function trymath() {
-		// log lie
-		// ToDo: drop this due to RFP math
-		gKnownOnce.push("_global:isOS")
-		// try quick math
-		let res = [], list = [1e251,1e140,1e12,1e130,1e272,-1,1e284,1e75]
-		list.forEach(function(item) {try {res.push(Math.cos(item))} catch(e) {}})
-		let m = (sha1(res.join("-"))).substring(0,8)
-		if (m == "46f7c2bb") {m="A"
-		} else if (m == "8464b989") {m="B"
-		} else if (m == "97eee448") {m="C"
-		} else if (m == "96895e00") {m="D"
-		} else if (m == "06a01549") {m="E"
-		} else if (m == "ae434b10") {m="F"
-		} else if (m == "19df0b54") {m="G"
-		} else if (m == "8ee641f0") {m="H"
-		}
-		if (m == "A" | m == "B" | m == "C" | m == "H") {isOS = "windows"
-		} else if (m == "D" | m == "G") {isOS = "linux"
-		} else if (m == "E") {isOS = "mac"
-		} else if (m == "F") {isOS = "android"
-		}
-		//if (runSL) (isOS = "") // breaks font sim
-		if (isOS == "") {
-			tryharder()
-		} else {
-			gBypassedOnce.push("_global:isOS:"+ isOS)
-			log_perf("isOS [global]",t0,"",isOS)
-			return resolve()
-		}
-	}
 	// system font
 	try {
-		if (runSL) {abd=def}
+		if (runSL) {
+			//abc = def // ToDo: throw an error once we have tryharder done
+		}
 		let el = dom.widget0
 		let font = getComputedStyle(el).getPropertyValue("font-family")
 		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
@@ -472,7 +458,8 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
-		trymath()
+		// tno good: we haven't got isRFP yet and math is not viable anymore
+		tryharder()
 	}
 })
 
@@ -1358,6 +1345,7 @@ function log_section(name, time1, data) {
 				// trigger nonFP
 				outputPostSection("all")
 				gLoad = false
+				gRun = false // don't let resize events add more stuff
 				gClick = true // ToDo: should move this to after perf2
 			}
 		}
@@ -1396,12 +1384,14 @@ function countJS(filename) {
 				get_isBrave(),
 				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
-				// sims are isFF only
+				// sims: isFF only
 				if (!isFF) {
 					runS = false
-					runSC = false
-					runSL = false
 					runSUA = false
+					runSIF = false
+					runSF = false
+					runSL = false
+					runSC = false
 					runSP = false
 				}
 				if (results[3] == "timeout") {
