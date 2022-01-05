@@ -540,7 +540,10 @@ function get_pointer_hover() {
 				if (window.matchMedia("("+ q + c +")").matches) x=c
 				if (window.matchMedia("("+ q + f +")").matches) x=f
 				if (window.matchMedia("("+ q + h +")").matches) x=h
-			} catch(e) {x = zB0}
+			} catch(e) {
+				log_error("devices: matchmedia_"+ type, e.name, e.message)
+				x = zB0
+			}
 			x2 = getElementProp(id,"content",":after")
 			// lies
 			if (runSL) {x = "banana"}
@@ -680,7 +683,7 @@ function get_touch() {
 		if (window.matchMedia(q +"0)").matches) {m=0}
 		if (window.matchMedia(q +"1)").matches) {m=1}
 	} catch(e) {
-		log_error("devices: -moz-touch-enabled", e.name, e.message)
+		log_error("devices: matchmedia_-moz-touch-enabled", e.name, e.message)
 		m = zB0
 	}
 	// t
