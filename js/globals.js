@@ -47,10 +47,13 @@ let protoLies = [],
 
 // android
 let avh = "",
-	firstH = window.innerHeight,
-	firstW = window.innerWidth,
+	firstH = undefined,
+	firstW = undefined
+try {firstH = window.innerHeight} catch(e) {}
+try {firstW = window.innerWidth} catch(e) {}
+
 // css
-	s0 = " <span class='",
+let s0 = " <span class='",
 	smono = s0+"mono'>",
 	sb = s0+"bad'>",
 	sg = s0+"good'>",
