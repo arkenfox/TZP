@@ -39,7 +39,7 @@ function return_mm_dpi(type, denominator) {
 			return zB0 
 		})()
 	} catch(e) {
-		log_error("screen: matchmedia "+ type, e.name, e.message)
+		log_error("screen: matchmedia_"+ type, e.name, e.message)
 		return zB0
 	}
 	return r
@@ -189,7 +189,7 @@ function get_color() {
 			return i
 		})()
 	} catch(e) {
-		log_error("screen: matchmedia color", e.name, e.message)
+		log_error("screen: matchmedia_color", e.name, e.message)
 		r3 = zB0
 	}
 	// lies
@@ -321,13 +321,15 @@ function get_line_scrollbar(runtype) {
 			jsZoom = jsZoom * 1
 			let t0; if (canPerf) {t0 = performance.now()}
 			// get width, remember for later
-			let w = (window.innerWidth-vw)
+			let w = zB0
+			try {
+				let w = (window.innerWidth-vw)
+			} catch(e) {}
 			let pseudoW = getElementProp("#D","content",":before")
 			if (pseudoW !== "x") {
 				if (pseudoW * 1 == w-1) {pseudoW = w} // allow for min-
 				w = pseudoW-vw
 			}
-			let wZoom = w
 			// section metric
 			if (w > 0) {dScrollbar = "not zero"} else {dScrollbar = "zero"}
 
@@ -1068,7 +1070,7 @@ function get_orientation(runtype) {
 			if (isFF && value == undefined) {value = zB0}
 			mmRes.push(value)
 		} catch(e) {
-			log_error("screen:matchmedia_"+ mmNames[i], e.name, e.message)
+			log_error("screen: matchmedia_"+ mmNames[i], e.name, e.message)
 			mmRes.push(zB0)
 		}
 	}
@@ -1079,7 +1081,7 @@ function get_orientation(runtype) {
 	cssRes.push(getElementProp("#cssAR", "content", ":after"))
 	cssRes.push(getElementProp("#cssDAR", "content", ":after"))
 	// bypasses
-	if (runSL) {mmRes = ["groot","the","space","rabbit"]}
+	if (runSL) {mmRes = ["groot","thor","space","rabbit"]}
 	let aDisplay = []
 	for (let i=0; i < 4; i++) {
 		if (cssRes[i] !== "x" && cssRes[i] !== mmRes[i]) {
@@ -1120,27 +1122,26 @@ function get_orientation(runtype) {
 		dom.scrOrient.innerHTML = zB0
 	}
 	// display-mode
+	let dm = zB0
+	let cssMode = getElementProp("#cssDM","content",":after")
 	try {
-		dom.mmDM.innerHTML = (function() {
-			let real = getElementProp("#cssDM","content",":after")
-			let rep = zB0
-			q="(display-mode:"
-			if (window.matchMedia(q +"fullscreen)").matches) {rep = "fullscreen"}
-			if (window.matchMedia(q +"browser)").matches) {rep = "browser"}
-			if (window.matchMedia(q +"minimal-ui)").matches) {rep = "minimal-ui"}
-			if (runSL) {rep = zB0}
-			if (rep !== real && real !== "x") {
-				rep = soB + rep + scC
-				if (gRun) {
-					gKnown.push("screen:display-mode")
-					gBypassed.push("screen:display-mode:"+ real)
-				}
-			}
-			return rep
-		})()
+		q="(display-mode:"
+		if (window.matchMedia(q +"fullscreen)").matches) {dm = "fullscreen"}
+		if (window.matchMedia(q +"browser)").matches) {dm = "browser"}
+		if (window.matchMedia(q +"minimal-ui)").matches) {dm = "minimal-ui"}
 	} catch(e) {
-		dom.mmDM.innerHTML = zB0
+		log_error("screen: matchmedia_display-mode", e.name, e.message)
 	}
+	if (runSL) {dm = zB0}
+	if (dm !== cssMode && cssMode !== "x") {
+		dm = soB + dm + scC
+		if (gRun) {
+			gKnown.push("screen:display-mode")
+			gBypassed.push("screen:display-mode:"+ cssMode)
+		}
+	}
+	dom.mmDM.innerHTML = dm
+
 	// perf
 	if (runtype == "resize") {
 		if (logResize) {log_perf("orientation [resize]",t0,"ignore")}
@@ -1315,12 +1316,16 @@ function get_screen_metrics(runtype) {
 		"window.screenX","window.screenY","window.mozInnerScreenX","window.mozInnerScreenY"
 	]
 	function clean(item) {
-		if (item == "undefined") {item = "undefined string"
-		} else if (item == undefined || item == true || item == false || item == null) {item += ""
-		} else if (Array.isArray(item)) {item = "array"}
-		if (item == "") {item = "empty string"}
-		item += ""
-		return item.trim()
+		if (!isNaN(item)) {
+			return item
+		} else {
+			if (item == "undefined") {item = "undefined string"
+			} else if (item == undefined || item == true || item == false || item == null) {item += ""
+			} else if (Array.isArray(item)) {item = "array"}
+			if (item == "") {item = "empty string"}
+			item += ""
+			return item.trim()
+		}
 	}
 	for (let i=0; i < 16; i++) {
 		try {
@@ -1407,10 +1412,10 @@ function get_screen_metrics(runtype) {
 	}
 	dom.posW.innerHTML = display + posNote
 
-	let w1 = aMeasures[0] * 1, h1 = aMeasures[1] * 1,
-		w2 = aMeasures[2] * 1, h2 = aMeasures[3] * 1,
-		w3 = aMeasures[4] * 1, h3 = aMeasures[5] * 1,
-		w4 = aMeasures[6] * 1, h4 = aMeasures[7] * 1
+	let w1 = aMeasures[0], h1 = aMeasures[1],
+		w2 = aMeasures[2], h2 = aMeasures[3],
+		w3 = aMeasures[4], h3 = aMeasures[5],
+		w4 = aMeasures[6], h4 = aMeasures[7]
 
 	// sim
 	if (runSL) {
@@ -1418,8 +1423,10 @@ function get_screen_metrics(runtype) {
 		//w = 1920; h = 1000 // lie about one inner value
 	}
 
-	let mScreen = w1 +" x "+ h1, mAvailable = w2 +" x "+ h2,
-		mOuter = w3 +" x "+ h3, mInner = w4 +" x "+ h4
+	let mScreen = w1 +" x "+ h1,
+		mAvailable = w2 +" x "+ h2,
+		mOuter = w3 +" x "+ h3,
+		mInner = w4 +" x "+ h4
 	// default display
 	dom.mScreen = mScreen
 	dom.mAvailable = mAvailable
@@ -1429,31 +1436,60 @@ function get_screen_metrics(runtype) {
 	// NOTATE
 	if (isFF && !isFFLegacy) {
 		// sizes
-		let m1 = true, r = "", c = "#ff4f4f"
-		if (mScreen !== mAvailable) {m1 = false}
-		else if (mAvailable !== mOuter) {m1 = false}
-		else if (mOuter !== mInner) {m1 = false}
-		r = (m1 ? sg : sb) +"[sizes match x4]"+ sc
+		let match = true, r = "", c = "#ff4f4f"
+		if (mScreen !== mAvailable) {match = false
+		}	else if (mAvailable !== mOuter) {match = false
+		}	else if (mOuter !== mInner) {match = false
+		} else {
+			aMeasures.forEach(function(value) {
+				if (isNaN(value)) {match = false}
+			})
+		}
+		r = (match ? sg : sb) +"[sizes match x4]"+ sc
 		dom.match.innerHTML = r
 		// color
-		if (m1) {c = "#8cdc8c"}
+		if (match) {c = "#8cdc8c"}
 		let items = document.getElementsByClassName("group")
 		for (let i=0; i < items.length; i++) {items[i].style.color = c}
+
 		// inner: LB/NW
 		if (isOS !== "android" && jsZoom == 100) {
 			dom.mInner.innerHTML = mInner + return_lb_nw(w4,h4)
 		}
 	}
 	// FS
-	let isFS = false
-	try {isFS = window.fullScreen; dom.fsState = isFS} catch(e) {dom.fsState.innerHTML = zB0}
+	let isFS
+	try {
+		isFS = window.fullScreen
+		if (runSL) {isFS = undefined}
+	} catch(e) {
+		log_error("screen: fullscreen", e.name, e.message)
+		isFS = zB0
+	}
+	let displayFS = isFS
+	if (isFF) {
+		let cssFS = getElementProp("#cssDM","content",":after")
+		if (isFS !== true && isFS !== false) {
+			if (gRun) {gKnown.push("screen:fullscreen")}
+			if (cssFS == "x") {
+				displayFS = soL + displayFS + scC
+			} else {
+				displayFS = soB + displayFS + scC
+				isFS = cssFS == "fullscreen" ? true : false
+				if (gRun) {gBypassed.push("screen:fullscreen:"+ isFS)}
+			}
+		}
+	}
+	dom.fsState.innerHTML = displayFS
+	res.push("fullscreen:"+ isFS)
+
 	// THE REST
 	get_orientation(runtype) // not stable
 	get_mm_metrics(runtype) // not reliable (extension APIs)
 
 	// METRICS
 	//if (runtype !== "resize") {
-		// allow 1px less due to min-
+		// allow 1px less due to min- vs max- and devicePixelRatios
 			// ToDo: harden screen/inner bypass: due to zoom/system-scaling and limited ranges
 			// i.e one or both values return "x": expand css, create binary css on the fly
 		// ToDo: harden measurements with matchMedia if not tampered with
@@ -1538,7 +1574,8 @@ function get_screen_metrics(runtype) {
 			dom.mOuter.innerHTML = soL + mOuter + scC
 			if (gRun) {gKnown.push("screen:window outer")}
 		}
-		res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
+		//res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
+		res.push("window_outer:TBA")
 
 		// other
 		// dpr
@@ -1549,7 +1586,8 @@ function get_screen_metrics(runtype) {
 		}
 		res.push("zoom:"+ jsZoomOriginal)
 		res.push("dpi:"+ varDPI)
-		res.push("devicePixelRatio:"+ (isFF ? dpr2 : dpr1)) // ToDo: robust: matchmedia values, dpr1, dpr2: handle non-numbers; trim; bypasses
+		// ToDo: robust: matchmedia values, dpr1, dpr2: handle non-numbers; trim; bypasses
+		res.push("devicePixelRatio:"+ (isFF ? dpr2 : dpr1))
 
 		return(res)
 	//}
@@ -2227,7 +2265,7 @@ function get_zoom(runtype) {
 
 		// bypass matchmedia lies
 		let diffDPI = 0
-		if (aDPI !== zB0) {diffDPI = Math.abs(aDPI - dpi_x)}
+		if (aDPI !== zB0) {diffDPI = Math.abs(aDPI - dpi_x)} else {diffDPI = 2}
 		if (cssDPI !== "x") {
 			if (aDPI !== cssDPI && diffDPI > 1) {
 				aDPI = soB + aDPI + scC
