@@ -5,9 +5,12 @@ https://canvasblocker.kkapsner.de/test/
 https://audiofingerprint.openwpm.com/ */
 
 var t0audio,
-	latencyError = false,
-	latencyTries = 0,
 	audio2Section = []
+
+let blnAC = true,
+	throwAC = false,
+	throwZero = false,
+	debugAC = []
 
 function byteArrayToHex(arrayBuffer){
 	var chunks = [];
@@ -20,11 +23,12 @@ function byteArrayToHex(arrayBuffer){
 }
 
 function exit_audio2() {
-	// why am i getting 4 or 5 metrics on cold load first run android
-	if (audio2Section.length > 3) {
-		dom.debugB.innerHTML = audio2Section.join("<br>")
-	} else {
-		dom.debugB.innerHTML = ""
+	if (blnAC) {
+		if (isOS == "android") {
+			dom.debugB.innerHTML = debugAC.join("<br>")
+		} else {
+			console.debug(debugAC.join("\n"))
+		}
 	}
 	audio2Section.sort()
 	let sName = "audio_user_gestures_notglobal"
@@ -35,12 +39,15 @@ function exit_audio2() {
 	gClick = true
 }
 
-function get_audio2_context(attempt) {
+function get_audio2_context(run) {
 	try {
+		if (blnAC) {debugAC.push("keys run#" + run + " start")}
 		let t0; if (canPerf) {t0 = performance.now()}
-		latencyTries++
 		let sName = "audio_audiocontext_keys_notglobal"
 		sDetail[sName] = []
+		let latencyError = false
+
+		if (throwAC) {abc = def}
 		function a(a, b, c) {
 			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
 			d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
@@ -61,9 +68,9 @@ function get_audio2_context(attempt) {
 			let testValue = value
 			if (key == "ac-outputLatency") {
 				// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
-				if (runS) {
-					console.log("running context: attempt", attempt, "latencyTry #" + latencyTries)
-					if (attempt == 1) {testValue = 0; console.log("spoofing "+ key)}
+				if (throwZero && run == 1) {
+					if (blnAC) {debugAC.push("keys run#"+ run +" simulating "+ key +" = 0")}
+					testValue = 0
 				}
 				latencyError = (testValue == 0 ? true : false)
 			}
@@ -73,7 +80,7 @@ function get_audio2_context(attempt) {
 			if (!subsetExclude.includes(key)) {subset.push(key +":"+ testValue)}
 		}
 		// output
-		if (!latencyError || latencyTries == 2) {
+		if (!latencyError || run == 2) {
 			sDetail[sName] = results
 			let hash = sha1(results.join())
 			if (isFF && !isFFLegacy) {
@@ -96,39 +103,38 @@ function get_audio2_context(attempt) {
 				}
 				// RFP notation: FF70+ these are all 20 keys
 				note = rfp_red
-				if (isOS == "windows" && hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e") {note = rfp_green} // 0.04
-				if (isOS == "linux" && hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1") {note = rfp_green} // 0.02
-				if (isOS == "android" && hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e") {note = rfp_green} // 0.025
-				if (isOS == "mac" && hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
+				if (hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e" && isOS == "windows") {note = rfp_green // 0.04
+				} else if (hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1" && isOS == "linux") {note = rfp_green // 0.02
+				} else if (hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e" && isOS == "android") {note = rfp_green // 0.025
+				} else if (hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9" && isOS == "mac") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
 			}
 			audio2Section.push("keys:"+ (isLie ? zLIE : hash))
 			if (isLie) {hash = soL + hash + scC}
 			dom.audio1hash.innerHTML = hash + buildButton("11", sName, results.length +" keys") + note
 				+ (latencyError ? sb +" [0 latency]"+ sc : "")
 			log_perf("context [audio]",t0)
-			if (latencyTries == 2) {
-				exit_audio2()
-			}
+			if (blnAC) {debugAC.push("keys run#"+ run +" end | section count "+ audio2Section.length)}
+			if (run == 2) {exit_audio2()}
 		}
 		// next test
-		if (latencyTries == 1) {get_audio2_hybrid()}
+		if (run == 1) {get_audio2_hybrid()}
 	} catch(e) {
 		dom.audio1hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		audio2Section.push("keys:"+ isFF ? zErr : zB0)
+		if (blnAC) {debugAC.push("keys run#"+ run + " end | section count "+ audio2Section.length)}
 		// next test
-		if (latencyTries == 1) {get_audio2_hybrid(); latencyTries = 2}
+		if (run == 1) {get_audio2_hybrid()} else {exit_audio()}
 	}
 }
 
 function get_audio2_hybrid() {
 	try {
+		if (blnAC) {debugAC.push("hybrid start")}
 		let t0; if (canPerf) {t0 = performance.now()}
 		let sName = "audio_audiocontext_hybrid_notglobal"
 		sDetail[sName] = []
-
-		let results = [],
-			showperf = false
-		if (latencyError == false || latencyTries == 2) {showperf = true}
+		let results = []
+		if (throwAC) {abc = def}
 
 		let audioCtx = new window.AudioContext,
 			oscillator = audioCtx.createOscillator(),
@@ -171,27 +177,27 @@ function get_audio2_hybrid() {
 			dom.audio3hash.innerHTML = hash + buildButton("11", sName)
 			audio2Section.push("hybrid:"+ (isLie ? zLIE : hash))
 			log_perf("hybrid [audio]",t0)
-			if (showperf) {
-				exit_audio2()
-			}
-			// re-test context
-			if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}
+			if (blnAC) {debugAC.push("hybrid end | section count "+ audio2Section.length)}
+			if (audio2Section.length == 3) {exit_audio2()} else {get_audio2_context(2)}
 		}
 		oscillator.start(0)
 	} catch(e) {
 		dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		audio2Section.push("hybrid:"+ isFF ? zErr : zB0)
-		// re-test context
-		if (latencyError == true && latencyTries == 1) {get_audio2_context(2)}		
+		if (blnAC) {debugAC.push("hybrid end | section count "+ audio2Section.length)}
+		// exit or retry keys
+		if (audio2Section.length == 3) {exit_audio2()} else {get_audio2_context(2)}
 	}
 }
 
 function get_audio2_oscillator() {
 	try {
+		if (blnAC) {debugAC.push("osc start")}
 		let t0; if (canPerf) {t0 = performance.now()}
 		let sName = "audio_audiocontext_oscillator_notglobal"
 		sDetail[sName] = []
 
+		if (throwAC) {abc = def}
 		let results = [],
 			audioCtx = new window.AudioContext
 		let oscillator = audioCtx.createOscillator(),
@@ -224,6 +230,7 @@ function get_audio2_oscillator() {
 			dom.audio2hash.innerHTML = hash + buildButton("11", sName)
 			audio2Section.push("oscillator:"+ (isLie ? zLIE :hash))
 			log_perf("oscillator [audio]",t0)
+			if (blnAC) {debugAC.push("osc end | section count "+ audio2Section.length)}
 			// next test
 			get_audio2_context(1)
 		}
@@ -231,6 +238,7 @@ function get_audio2_oscillator() {
 	} catch(e) {
 		dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		audio2Section.push("oscillator:"+ isFF ? zErr : zB0)
+		if (blnAC) {debugAC.push("osc end | section "+ audio2Section.length)}
 		// next test
 		get_audio2_context(1)
 	}
@@ -253,7 +261,7 @@ function outputAudio2() {
 				outputPrototypeLies(),
 			]).then(function(results){
 				if (canPerf) {gt0 = performance.now(); t0audio = gt0}
-				latencyTries = 0
+				debugAC = []
 				log_line("line")
 				get_audio2_oscillator() // start
 			})
