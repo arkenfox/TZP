@@ -114,10 +114,11 @@ function get_audio2_context(run) {
 				+ (latencyError ? sb +" [0 latency]"+ sc : "")
 			log_perf("context [audio]",t0)
 			if (blnAC) {debugAC.push("keys run#"+ run +" end | section count "+ audio2Section.length)}
-			if (run == 2) {exit_audio2()}
+			if (run == 1) {get_audio2_hybrid()} else if (run == 2) {exit_audio2()}
+		} else {
+			// next test
+			if (run == 1) {get_audio2_hybrid()}
 		}
-		// next test
-		if (run == 1) {get_audio2_hybrid()}
 	} catch(e) {
 		dom.audio1hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		audio2Section.push("keys:"+ isFF ? zErr : zB0)
@@ -245,6 +246,9 @@ function get_audio2_oscillator() {
 }
 
 function outputAudio2() {
+
+	dom.debugA.innerHTML = dom.debugA.innerHTML +"run: "+ performance.now() + "<br>"
+
 	if (gClick) {
 		gClick = false
 		gRun = false
