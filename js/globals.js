@@ -26,6 +26,7 @@ let jsFiles = [],
 	// bypasses
 	gBypassed = [],
 	gBypassedOnce = [],
+	gBypassedNot = [],
 	// methods
 	gMethods = [],
 	gMethodsDetail = {},
@@ -182,4 +183,5 @@ let s0 = " <span class='",
 	runSF = false, // fonts: requires isOS
 	runSL = false, // lies
 	runSC = false, // css styles
+	runSNC = false, // navigator connection
 	runSP = false // block performance.now()

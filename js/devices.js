@@ -1,10 +1,12 @@
 'use strict';
 
-var pluginBS = false
-// FF only
-var mimeBS = false,
-	pluginFlash = false,
-	mimeFlash = false
+let pluginBS = false,
+	mimeBS = false
+
+let runPM = false,
+	simPM = 0,
+	runPP = false,
+	simPP = 0
 
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
@@ -83,14 +85,13 @@ function set_pluginBS() {
 		return lies
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
-
 	if (pluginLies.length) {pluginBS = true} else {pluginBS = false}
-	if (runSL) {pluginBS = true}
+	console.debug("nonFF: pluginBS", pluginBS)
 }
 
 function get_gamepads() {
 	return new Promise(resolve => {
-		let r = (check_navKey("getGamepads") ? "enabled" : "disabled")
+		let r = (check_navKey("getGamepads") ? zE : zD)
 		dom.gamepads.innerHTML = r
 		return resolve("gamepads:"+ r)
 	})
@@ -100,17 +101,29 @@ function get_concurrency() {
 	// gecko stuff
 		// 1630089: FF68+ macOS reports physical cores instead of logical
 		// capped at dom.maxHardwareConcurrency (e.g. 1728741)
+	function clean(item) {
+		if (!isNaN(item)) {return item
+		} else {if (item == "") {item = "empty string"}; item += ""; return item}
+	}
+
 	let h = zD
 	if (check_navKey("hardwareConcurrency")) {
 		try {
 			h = navigator.hardwareConcurrency
 			h = (h == undefined ? zB0 : h)
-		} catch(e) {h = zB0}
-	} else {h = zD}
+		} catch(e) {
+			log_error("devices: hardwareConcurrency", e.name, e.message)
+			h = zB0
+		}
+	} else {
+		h = zD
+	}
+
 	let isLies = (isBraveMode > 1 ? true: false)
-	if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
+	if (isNaN(h)) {isLies = true
+	} else if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
 	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
-	if (isLies) {
+	if (isLies && h !== zB0) {
 		dom.nHWC.innerHTML = soL + h + scC + rfp_red
 		if (gRun) {gKnown.push("devices:hardwareConcurrency")}
 	} else {
@@ -122,6 +135,10 @@ function get_concurrency() {
 function get_keyboard() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
+		// reset
+		let sName = "devices_keyboard"
+		sDetail[sName] = []
+		sDetail[sName +"_fake_skip"] = []
 
 		function color(string) {
 			string = (isFF? soB : soL) + string + scC
@@ -133,21 +150,19 @@ function get_keyboard() {
 			return string
 		}
 
-		let display = "", value = ""
+		let display = "", value = "", isObj = false, isObjFake = true
 		try {
-			let sName = "devices_keyboard"
-			sDetail[sName] = []
-			sDetail[sName +"_fake_skip"] = []
-			let isObjFake = true
-			let test = navigator.keyboard
+			let k = navigator.keyboard
 			// cleanup test
-			if (test == "undefined") {test = "undefined string"
-			} else if (test == undefined || test == true || test == false || test == null) {test += ""
-			} else if (Array.isArray(test)) {test = "array"}
-			if (test == "") {test = "empty string"}
-
-			if (typeof test === "object") {
-				if (test+"" == "[object Keyboard]") {isObjFake = false}
+			if (k == "undefined") {k = "undefined string"
+			} else if (k == undefined || k == true || k == false || k == null) {k += ""
+			} else if (Array.isArray(k)) {k = "array"}
+			if (k == "") {k = "empty string"}
+			if (typeof k === "object") {
+				isObj = true
+				if (k+"" == "[object Keyboard]") {isObjFake = false}
+			}
+			if (isObj) {
 				let keys = []
 				// https://wicg.github.io/keyboard-map/
 				// https://www.w3.org/TR/uievents-code/#key-alphanumeric-writing-system
@@ -157,7 +172,7 @@ function get_keyboard() {
 					'KeyH','KeyI','KeyJ','KeyK','KeyL','KeyM','KeyN','KeyO','KeyP','KeyQ','KeyR','KeyS','KeyT',
 					'KeyU','KeyV','KeyW','KeyX','KeyY','KeyZ','Minus','Period','Quote','Semicolon','Slash']
 				let resE = []
-				test.getLayoutMap().then(keyboardLayoutMap => {
+				k.getLayoutMap().then(keyboardLayoutMap => {
 					listK.forEach(function(key) {
 						try {
 							keys.push(key +": "+ keyboardLayoutMap.get(key))
@@ -184,9 +199,9 @@ function get_keyboard() {
 					}
 				})
 			} else {
-				value = test
-				display = test
-				if (test == "undefined" & isFF) {display = zNA; value = zNA} else {display = color(display)}
+				value = k
+				display = k
+				if (k == "undefined" & isFF) {display = zNA; value = zNA} else {display = color(display)}
 				dom.nKeyboard.innerHTML = display
 				return resolve("keyboard:"+ value)
 			}
@@ -310,66 +325,109 @@ function get_media_devices() {
 
 function get_mimetypes() {
 	return new Promise(resolve => {
-		if (check_navKey("mimeTypes")) {
-			let res = []
-			if (runSL) {
-				res = ["application/x-futuresplash: application/x-futuresplash: spl",
-					"application/x-shockwave-flash: application/x-shockwave-flash: swf"]
-				mimeBS = true
+		// mimeTypes is an expected key
+		mimeBS = true
+		try {
+			let m = navigator.mimeTypes
+			if (runPM) {
+				console.debug("SIM #" + simPM + " mimeTypes")
+				if (simPM == 0) {m = undefined}
+				if (simPM == 1) {m = {}}
+				if (simPM == 2) {m = null}
+				if (simPM == 3) {m = zB0; mimeBS = false; simPM++; return resolve(m)}
+				if (simPM == 4) {m = "i am groot"}
+				if (simPM == 5) {}
+				simPM++
+				simPM = simPM % 6
 			}
-			try {
-				let m = navigator.mimeTypes
-				if (m.length || res.length) {
-					if (!runSL) {
-						for (let i=0; i < m.length; i++) {
-							res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
-								+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes) )
-						}
+			// cleanup
+			if (m == "undefined") {m = "undefined string"
+			} else if (m == undefined || m == true || m == false || m == null) {m += ""
+			} else if (Array.isArray(m)) {m = "array"}
+			if (m == "") {m = "empty string"}
+			let isObj = false, isObjFake = true
+			if (typeof m === "object") {
+				isObj = true
+				if (m+"" == "[object MimeTypeArray]") {isObjFake = false; mimeBS = false} // !mimeBS only with a legit object
+			}
+			if (isObj) {
+				if (m.length) {
+					let res = []
+					for (let i=0; i < m.length; i++) {
+						res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
+							+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes))
 					}
 					res.sort()
-					// FF: mimeBS
-					if (isFF) {
-						// reset
-						mimeBS = false
-						mimeFlash = false
-						if (isVer > 84 && res.length) {
-							// FF85+: EOL Flash
-							mimeBS = true
-						} else {
-							if (res.length == 2) {
-									// example windows 64bit FF both 32/64bit
-										// application/x-futuresplash: application/x-futuresplash: spl
-										// application/x-shockwave-flash: application/x-shockwave-flash: swf
-									let mime1 = res[0].split(":")[0]
-									let mime2 = res[1].split(":")[0]
-									if (mime1 == "application/x-futuresplash" && mime2 == "application/x-shockwave-flash") {
-										mimeFlash = true
-									} else {
-										mimeBS = true
-									}
-							} else {
-								mimeBS = true
-							}
-						}
-					}
 					return resolve(res)
 				} else {
-					return resolve("none")
+					return resolve(isObjFake ? m : "none")
 				}
-			} catch(e) {
-				return resolve(zB0)
+			} else {
+				return resolve(m)
 			}
-		} else {
-			return resolve(zD)
+		} catch(e) {
+			mimeBS = false // don't color blocks
+			log_error("devices: mimeTypes", e.name, e.message)
+			return resolve(zB0)
 		}
 	})
 }
 
-function get_mimetypes_plugins() {
+function get_plugins() {
+	return new Promise(resolve => {
+		// plugins is an expected key
+		// pluginBS is already set for non-FF
+		if (isFF) {pluginBS = true}
+		try {
+			let p = navigator.plugins
+			if (runPP) {
+				console.debug("SIM #" + simPP + " plugins")
+				if (simPP == 0) {p = zB0; pluginBS = false; simPP++; output(zB0); return}
+				if (simPP == 1) {}
+				if (simPP == 2) {p = null}
+				if (simPP == 3) {p = undefined}
+				if (simPP == 4) {p = {}}
+				simPP++
+				simPP = simPP % 5
+			}
+			// cleanup
+			if (p == "undefined") {p = "undefined string"
+			} else if (p == undefined || p == true || p == false || p == null) {p += ""
+			} else if (Array.isArray(p)) {p = "array"}
+			if (p == "") {p = "empty string"}
+			let isObj = false, isObjFake = true
+			if (typeof p === "object") {
+				isObj = true
+				if (p+"" == "[object PluginArray]") {isObjFake = false; if (isFF) {pluginBS = false}}
+			}
+			if (isObj) {
+				let res = []
+				if (p.length || res.length) {
+					for (let i=0; i < p.length; i++) {
+						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
+							+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
+					}
+					res.sort()
+					return resolve(res)
+				} else {
+					return resolve(isObjFake? p : "none")
+				}
+			} else {
+				return resolve(p)
+			}
+		} catch(e) {
+			if (isFF) {pluginBS = false} // don't color blocks
+			log_error("devices: plugins", e.name, e.message)
+			return resolve(zB0)
+		}
+	})
+}
+
+function get_plugins_mimetypes() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		// reset
-		let sName = "devices_mimetypes"
+		let sName = "devices_mimeTypes"
 		sDetail[sName] = []
 		sDetail[sName +"_fake_skip"] = []
 		sName = "devices_plugins"
@@ -381,108 +439,51 @@ function get_mimetypes_plugins() {
 			get_plugins(),
 			get_mimetypes(),
 		]).then(function(results){
-			let outputP = results[0]
-			let outputM = results[1]
-			// FF: check Flash in both
-			if (isFF) {
-				if (pluginFlash == true && mimeFlash == false) {pluginBS = true}
-				if (pluginFlash == false && mimeFlash == true) {mimeBS = true}
+			function output(type) {
+				let btn = "", fpValue
+				let value = type == "plugins" ? results[0] : results[1]
+				let isLies = type == "plugins" ? pluginBS : mimeBS
+				let el = type == "plugins" ? dom.plugins : dom.mimeTypes
+				sName = "devices_"+ type
+				if (Array.isArray(value)) {
+					if (isLies) {sName += "_fake_skip"}
+					sDetail[sName] = value
+					btn = buildButton("7", sName, value.length +" "+ type + (value.length > 1 ? "s" : ""))
+					value = sha1(value.join(), "devices "+ type)
+				}
+				fpValue = value
+				// isBypass
+				let isBypass = (isVer > 84 && value !== "none" ? true : false) // FF85+ EOL Flash
+				if (isRFP && isLies || isRFP && value == zB0) {isBypass = true}
+				if (isBypass) {isLies = true}
+				if (isFF) {
+					if (isLies || value == zB0) {
+						// FF84- we can also bypass if the other one is "none" which we only get on legit objects
+						// not sure about other engines: chromium should alway have items AFAIK
+						let otherValue = type == "plugins" ? results[1] : results[0]
+						if (otherValue == "none") {isBypass = true; isLies = true}
+					}
+				}
+				// display
+				if (isLies) {
+					value = (isBypass ? soB : soL) + value + scC + rfp_red
+					el.innerHTML = value + btn
+					fpValue = isBypass ? "none" : zLIE
+					if (gRun || runPM || runPP) {
+						gKnown.push("devices:"+ type)
+						if (isBypass) {gBypassed.push("devices:"+ type +":none")}
+						if (runPM || runPP) {console.debug(type+ ": recorded lie" + (isBypass ? " + bypass" : ""), " | value: "+ fpValue)}
+					}
+				} else {
+					el.innerHTML = value + btn + (value == "none" ? rfp_green : rfp_red)
+				}
+				return fpValue
 			}
-			
-			// plugins
-			let btnP = "", pValue = outputP
-			if (Array.isArray(outputP)) {
-				if (pluginBS) {sName += "_fake_skip"}
-				sDetail[sName] = outputP
-				btnP = buildButton("7", sName, outputP.length +" plugin"+ (outputP.length > 1 ? "s" : ""))
-				outputP = sha1(outputP.join(), "devices plugins")
-				pValue = outputP
-			}
-			if (pluginBS) {
-				pValue = zLIE
-				outputP = (isVer > 84 ? soB : soL) + outputP + scC
-				dom.plugins.innerHTML = outputP + btnP
-			} else {
-				dom.plugins.innerHTML = outputP + btnP + (outputP == "none" ? rfp_green : rfp_red)
-			}
-			// mimeTypes
-			let btnM = "", mValue = outputM
-			sName = "devices_mimetypes"
-			if (Array.isArray(outputM)) {
-				if (mimeBS) {sName += "_fake_skip"}
-				sDetail[sName] = outputM
-				btnM = buildButton("7", sName, outputM.length +" mimetype"+ (outputM.length > 1 ? "s" : ""))
-				outputM = sha1(outputM.join(), "devices mimetypes")
-			}
-			if (mimeBS) {
-				mValue = zLIE
-				outputM = (isVer > 84 ? soB : soL) + outputM + scC
-				dom.mimeTypes.innerHTML = outputM + btnM
-			} else {
-				dom.mimeTypes.innerHTML = outputM + btnM + (outputM == "none" ? rfp_green : rfp_red)
-			}
+			let pValue = output("plugins")
+			let mValue = output("mimeTypes")
 			log_perf("mimetypes/plugins [devices]",t0)
-			// bypassed FF lies: Flash died in FF85
-			if (isVer > 84) {
-				if (results[0] !== "none") {
-					pValue = "none"
-					if (gRun) {gBypassed.push("devices:plugins:none")}
-				}
-				if (results[1] !== "none") {
-					mValue = "none"
-					if (gRun) {gBypassed.push("devices:mimeTypes:none")}
-				}
-			}
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
 		})
-	})
-}
-
-function get_plugins() {
-	return new Promise(resolve => {
-		if (check_navKey("plugins")) {
-			let res = []
-			if (runSL) {res = ["made up BS","more BS"]}
-			try {
-				let p = navigator.plugins
-				if (p.length || res.length) {
-					if (!runSL) {
-						for (let i=0; i < p.length; i++) {
-							res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
-								+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
-						}
-					}
-					res.sort()
-					// FF
-					if (isFF) {
-						// reset
-						pluginBS = false
-						pluginFlash = false
-						if (isVer > 84 && res.length) {
-							// FF85+: EOL Flash
-							pluginBS = true
-						} else if (res.length > 1) {
-							// FF52+: Flash only
-							pluginBS = true
-						} else {
-							// one item
-							if (res[0].split(":")[0] !== "Shockwave Flash") {
-								pluginBS = true
-							} else {
-								pluginFlash = true
-							}
-						}
-					}
-					return resolve(res)
-				} else {
-					return resolve("none")
-				}
-			} catch(e) {
-				return resolve(zB0)
-			}
-		} else {
-			return resolve(zD)
-		}
 	})
 }
 
@@ -676,39 +677,80 @@ function get_speech_rec() {
 }
 
 function get_touch() {
-	// vars
-	let m = zNS, p = zNS, t = false, t2 = zB0, t3 = zB0, q="(-moz-touch-enabled:"
-	// m
-	try {
-		if (window.matchMedia(q +"0)").matches) {m=0}
-		if (window.matchMedia(q +"1)").matches) {m=1}
-	} catch(e) {
-		log_error("devices: matchmedia_-moz-touch-enabled", e.name, e.message)
-		m = zB0
+	function clean(item) {
+		if (!isNaN(item)) {return item
+		} else {if (item == "") {item = "empty string"}; item += ""; return item}
 	}
-	// t
+	// maxTouchPoints
+	let MTP, displayMTP, fpMTP, maxBS = false, maxBypass = false
 	try {
-		document.createEvent("TouchEvent"); t = true
+		MTP = clean(navigator.maxTouchPoints)
+	} catch(e) {
+		log_error("devices: maxtouchpoints", e.name, e.message)
+		MTP = zB0
+	}
+	// ontouchstart/ontouchend/TouchEvent
+		// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
+		// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
+		// on touch devices: 0 (all false) 1 or 2 (all true)
+		// on non-touch devices = no change (all false)
+	let touchRes = []
+	try {
+		if ("ontouchstart" in window) {toucRes.push(true)} else {touchRes.push(false)}
+	} catch(e) {
+		log_error("devices: ontouchstart", e.name, e.message)
+		touchRes.push(zB0)
+	}
+	try {
+		if ("ontouchend" in window) {touchRes.push(true)} else {touchRes.push(false)}
+	} catch(e) {
+		log_error("devices: ontouchend", e.name, e.message)
+		touchRes.push(zB0)
+	}
+	try {
+		document.createEvent("TouchEvent")
+		touchRes.push(true)
 	} catch(e) {
 		log_error("devices: touch touchevent", e.name, e.message)
-		if (e.name !== "NotSupportedError") {t = zB0}
+		touchRes.push(e.name == "NotSupportedError" ? false : zB0)
 	}
-	try {t2 = ("ontouchstart" in window)} catch(e) {log_error("devices: ontouchstart", e.name, e.message)}
-	try {t3 = ("ontouchend" in window)} catch(e) {log_error("devices: ontouchend ", e.name, e.message)}
-	// p
-	if (check_navKey("maxTouchPoints")) {
-		try {
-			p = navigator.maxTouchPoints
-			p = (p == undefined ? zB0 : p)
-		} catch(e) {
-			log_error("devices: maxtouchpoints", e.name, e.message)
-			p = zB0
+	// is touch all the same
+	let touchSum = touchRes[0] + touchRes[1] + touchRes[2], touchBS = false
+	if (touchSum !== 0 && touchSum !== 3) {touchBS = true}
+
+	// MTP: BS & Bypasses
+	displayMTP = MTP
+	fpMTP = MTP
+	if (isNaN(MTP) && MTP !== zB0) {maxBS = true // don't color blocks
+	} else if (MTP < 0) {maxBS = true
+	} else if (proxyLies.includes("Navigator.maxTouchPoints")) {maxBS = true}
+	if (maxBS || MTP == zB0) {
+		if (touchSum == 0 && MTP !== 0) {maxBypass = true; fpMTP = 0} // touch is 3xfalse
+		if (maxBypass) {
+			displayMTP = soB + MTP + scC
+		} else {
+			displayMTP = (MTP !== zB0 ? soL + MTP + scC: MTP)
+			if (maxBS) {fpMTP = zLIE}
+		}
+		if (gRun) {
+			gKnown.push("devices:maxtouchpoints")
+			if (maxBypass) {gBypassed.push("devices:maxtouchpoints:0")}
 		}
 	}
+	dom.touchM.innerHTML = displayMTP + (displayMTP == 0 ? rfp_green : rfp_red)
+
+	// ToDo: touch LIE/BYPASS
+	let touchReal = ""
+	if (MTP !== zB0 & !maxBS) {
+		touchReal = MTP == 0 ? false : true
+	} else {
+		// 0=3xfalse, 3=3xtrue
+	}
+
 	// output
-	let str = p +" | "+ m +" | "+ t2 +" | "+ t3 +" | "+ t
-	dom.touch.innerHTML = str
-	return "touch:"+ str
+	let str = touchRes.join(" | ")
+	dom.touchE.innerHTML = str
+	return ["touchevents:"+ str, "maxtouchpoints:"+ fpMTP]
 }
 
 function get_vr() {
@@ -739,7 +781,7 @@ function outputDevices() {
 		get_vr(),
 		get_keyboard(),
 		get_concurrency(),
-		get_mimetypes_plugins(),
+		get_plugins_mimetypes(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
@@ -751,10 +793,8 @@ function outputDevices() {
 			}
 		})
 		// lies
-		if (gRun) {
-			if (pluginBS) {gKnown.push("devices:plugins")}
-			if (mimeBS) {gKnown.push("devices:mimeTypes")}
-			if (isBraveMode > 1) {gKnown.push("devices:hardwareConcurrency")}
+		if (gRun && isBraveMode > 1) {
+			gKnown.push("devices:hardwareConcurrency")
 		}
 		// section
 		log_section("devices", t0, section)

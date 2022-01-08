@@ -145,12 +145,14 @@ function get_color() {
 	if (runSL) {isLies = true; v1 = 11; r1 = 11}
 	if (isLies) {
 		v1 = zLIE
-		if (gRun) {gKnown.push(name1)}
 		if (isRFP) {
 			v1 = 24
 			r1 = soB + r1 + scC
-			if (gRun) {gBypassed.push(name1 +":"+ v1)}
-		} else {
+			if (gRun) {
+				gKnown.push(name1)
+				gBypassed.push(name1 +":"+ v1)
+			}
+		} else if (r1 !== zB0) {
 			r1 = soL + r1 + scC
 		}
 	}
@@ -168,12 +170,14 @@ function get_color() {
 	if (runSL) {isLies = true; v2 = 19; r2 = 19}
 	if (isLies) {
 		v2 = zLIE
-		if (gRun) {gKnown.push(name2)}
 		if (isRFP) {
 			v2 = 24
 			r2 = soB + r2 + scC
-			if (gRun) {gBypassed.push(name2 +":"+ v2)}
-		} else {
+			if (gRun) {
+				gKnown.push(name2)
+				gBypassed.push(name2 +":"+ v2)
+			}
+		} else if (r2 !== zB0) {
 			r2 = soL + r2 + scC
 		}
 	}
@@ -2697,8 +2701,8 @@ function outputUA() {
 						section[i] = name +":"+ sReal
 						document.getElementById("n"+ name).innerHTML = "~"+ sRep + "~ " + soB +"spaces"+ scC
 						if (gRun) {
-							gKnown.push("ua:"+ name +":spacing")
-							gBypassed.push("ua:"+ name +":spacing:"+ sReal)
+							gKnown.push("ua:"+ name)
+							gBypassed.push("ua:"+ name +":"+ sReal)
 						}
 					}
 				}
