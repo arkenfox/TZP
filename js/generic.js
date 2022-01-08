@@ -1056,11 +1056,13 @@ function showMetrics(type) {
 			console.log("perf detail: section re-runs\n"+ sPerfDetail.join("\n"))
 		}
 	} else {
-		let array = [],
-			showhash = true
+		let array = [], array2 = [], type2, showhash = true
 		if (type == "known lies") {
 			array = gKnown
-		} else if (type == "lies (hopefully) bypassed") {
+		} else if (type == "bypassed") {
+			array2 = gBypassedNot
+			type2 = type +" [not]"
+			type += " [hopefully]"
 			array = gBypassed
 		} else if (type == "known methods") {
 			array = gMethods
@@ -1084,6 +1086,9 @@ function showMetrics(type) {
 			type = type.toUpperCase()
 		}
 		console.log(type +": "+ (showhash ? sha1(array.join()) : ""), array)
+		if (array2.length) {
+			console.log(type2 +": "+ (showhash ? sha1(array2.join()) : ""), array2)
+		}
 	}
 }
 
@@ -1294,6 +1299,14 @@ function log_section(name, time1, data) {
 				gMethods = gMethods.concat(gMethodsOnce)
 				gMethods = gMethods.filter(function(item, position) {return gMethods.indexOf(item) === position})
 				gMethods.sort()
+				// populate gBypassedNot: makes it easier to track when so many lies picked up
+				if (gBypassed.length) {
+					let tmpBP = []
+					gBypassed.forEach(function(item) {
+						tmpBP.push(item.split(":")[0] +":"+ item.split(":")[1])
+					})
+					gBypassedNot = gKnown.filter(x => !tmpBP.includes(x))
+				}
 				// errors
 				gErrors = gErrors.concat(gErrorsOnce)
 				if (gErrors.length) {
@@ -1318,7 +1331,7 @@ function log_section(name, time1, data) {
 					knownStr = "none"
 				}
 				if (gBypassed.length) {
-					bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`lies (hopefully) bypassed`)'>"
+					bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`bypassed`)'>"
 					+ soB +"["+ gBypassed.length +" bypassed]"+ scC + "</span>"
 				}
 				if (Object.keys(gKnownDetail).length) {
@@ -1456,6 +1469,7 @@ function outputSection(id, cls) {
 			gData = []
 			gCheck = []
 			gBypassed = []
+			gBypassedNot = []
 			gKnown = []
 			gMethods = []
 			gErrors = []
