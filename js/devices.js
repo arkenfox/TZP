@@ -86,7 +86,6 @@ function set_pluginBS() {
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 	if (pluginLies.length) {pluginBS = true} else {pluginBS = false}
-	console.debug("nonFF: pluginBS", pluginBS)
 }
 
 function get_gamepads() {
