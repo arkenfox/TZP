@@ -1389,10 +1389,11 @@ function get_screen_metrics(runtype) {
 	res.push("screen_positions:"+ value)
 
 	// window positions
-	let posNote = ""
 	let v4 = aPos[4], v5 = aPos[5], v6 = aPos[6], v7 = aPos[7]
 	display = v4 +", "+ v5 +", "+ v6 +", "+ v7
 	value = display
+	let fpValue = display, posNote = ""
+
 	if (isFF && !isFFLegacy) {
 		posNote = value == "0, 0, 0, 0" ? rfp_green : rfp_red
 		if (isRFP) {
@@ -1404,17 +1405,16 @@ function get_screen_metrics(runtype) {
 					gBypassed.push("screen:window positions:"+ value)
 				}
 			}
-			res.push("window_positions:"+ value)
 		} else {
 			// they should all be numbers in FF
 			// fullscreen = all zeroes I except the last one
 			// maximized = negatives
 		}
-		res.push("window_positions:"+ "TBA")
 	} else if (isEngine == "blink") {
 
 	}
 	dom.posW.innerHTML = display + posNote
+	res.push("window_positions:"+ fpValue)
 
 	let w1 = aMeasures[0], h1 = aMeasures[1],
 		w2 = aMeasures[2], h2 = aMeasures[3],
