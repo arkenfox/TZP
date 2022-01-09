@@ -51,7 +51,7 @@ function get_iframe_props() {
 		// Trace
 		'PluginArray',
 		// ScriptSafe
-		'Array','HTMLDivElement',
+		'Array','HTMLDivElement','MediaStreamTrack',
 		// AdBlocker Ultimate
 		'CustomEvent','String','WeakSet','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape',
 		// JShelter
