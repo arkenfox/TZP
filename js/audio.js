@@ -310,47 +310,54 @@ function outputAudio() {
 			pxi_oscillator.start(0)
 			context.startRendering()
 			context.oncomplete = function(event) {
-				let copyTest = new Float32Array(44100)
-				event.renderedBuffer.copyFromChannel(copyTest, 0)
-				let getTest = event.renderedBuffer.getChannelData(0)
-				Promise.all([
-					crypto.subtle.digest("SHA-256", getTest),
-					crypto.subtle.digest("SHA-256", copyTest),
-				]).then(function(hashes){
-					// sum
-					let sum = 0, sum2 = 0, sum3 = 0
-					for (let i=0; i < getTest.length; i++) {
-						let x = getTest[i]
-						if (i > 4499 && i < 5000) {sum += Math.abs(x)}
-						sum2 += x
-						sum3 += Math.abs(x)
-					}
-					// lies
-					let isLies = (isBraveMode > 1 && !isFile)
-					if (sum2 == sum3) {isLies = true}
-					if (runSL) {sum++}
-					if (isFF || isEngine == "blink") {
-						if (!knownGood.includes(sum)) {isLies = true}
-					}
-					pxi_compressor.disconnect()
-					// get/copy
-					let hashG = sha1(byteArrayToHex(hashes[0]), "audio get")
-					let hashC = sha1(byteArrayToHex(hashes[1]), "audio copy")
-					if (hashG !== hashC) {isLies = true}
-					// display/FP
-					if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
-						let note = "empty arrayBuffer"
-						if (gRun) {gCheck.push("audio:"+ sName +": "+ note)}
-						dom.audioSum = sum; dom.audioGet = note; dom.audioCopy = note
-						log_section("audio", t0, [sName +":failed"])
-					} else {
-						if (gRun && isLies) {gKnown.push("audio:"+ sName)}
-						dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
-						dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
-						dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
-						log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
-					}
-				})
+				try {
+					let copyTest = new Float32Array(44100)
+					event.renderedBuffer.copyFromChannel(copyTest, 0)
+					let getTest = event.renderedBuffer.getChannelData(0)
+					Promise.all([
+						crypto.subtle.digest("SHA-256", getTest),
+						crypto.subtle.digest("SHA-256", copyTest),
+					]).then(function(hashes){
+						// sum
+						let sum = 0, sum2 = 0, sum3 = 0
+						for (let i=0; i < getTest.length; i++) {
+							let x = getTest[i]
+							if (i > 4499 && i < 5000) {sum += Math.abs(x)}
+							sum2 += x
+							sum3 += Math.abs(x)
+						}
+						// lies
+						let isLies = (isBraveMode > 1 && !isFile)
+						if (sum2 == sum3) {isLies = true}
+						if (runSL) {sum++}
+						if (isFF || isEngine == "blink") {
+							if (!knownGood.includes(sum)) {isLies = true}
+						}
+						pxi_compressor.disconnect()
+						// get/copy
+						let hashG = sha1(byteArrayToHex(hashes[0]), "audio get")
+						let hashC = sha1(byteArrayToHex(hashes[1]), "audio copy")
+						if (hashG !== hashC) {isLies = true}
+						// display/FP
+						if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
+							let note = "empty arrayBuffer"
+							if (gRun) {gCheck.push("audio:"+ sName +": "+ note)}
+							dom.audioSum = sum; dom.audioGet = note; dom.audioCopy = note
+							log_section("audio", t0, [sName +":failed"])
+						} else {
+							if (gRun && isLies) {gKnown.push("audio:"+ sName)}
+							dom.audioSum.innerHTML = (isLies ? soL + sum + scC : sum)
+							dom.audioGet.innerHTML = (isLies ? soL + hashG + scC : hashG)
+							dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
+							log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
+						}
+					})
+				} catch(e) {
+					log_error("", e.name, e.message)
+					let eMsg = trim_error(e.name, e.message)
+					dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
+					log_section("audio", t0, [sName +":"+ zB0])
+				}
 			}
 		} catch(e) {
 			log_error("audio: "+ sName, e.name, e.message)
