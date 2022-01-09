@@ -134,23 +134,28 @@ function get_audio2_hybrid() {
 			gain.connect(audioCtx.destination)
 
 			scriptProcessor.onaudioprocess = function(bins) {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins)
-				for (let i=0; i < bins.length; i++) {
-					results.push(" "+ bins[i])
+				try {
+					bins = new Float32Array(analyser.frequencyBinCount)
+					analyser.getFloatFrequencyData(bins)
+					for (let i=0; i < bins.length; i++) {
+						results.push(" "+ bins[i])
+					}
+					analyser.disconnect()
+					scriptProcessor.disconnect()
+					gain.disconnect()
+					// output
+					if (runSL) {results = []}
+					sDetail[sName] = results
+					let hash = sha1(results.join())
+					let isLie = results.length == 0 ? true : false
+					let displayHash = isLie ? soL + hash + scC : hash
+					dom.audio3hash.innerHTML = hash + buildButton("11", sName)
+					log_perf("hybrid [audio]",t0)
+					return resolve("hybrid:"+ (isLie ? zLIE : hash))
+				} catch(e) {
+					console.error(e.name, e.message)
+					return resolve("hybrid:"+ zB0)
 				}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// output
-				if (runSL) {results = []}
-				sDetail[sName] = results
-				let hash = sha1(results.join())
-				let isLie = results.length == 0 ? true : false
-				let displayHash = isLie ? soL + hash + scC : hash
-				dom.audio3hash.innerHTML = hash + buildButton("11", sName)
-				log_perf("hybrid [audio]",t0)
-				return resolve("hybrid:"+ (isLie ? zLIE : hash))
 			}
 			oscillator.start(0)
 		} catch(e) {
@@ -183,23 +188,28 @@ function get_audio2_oscillator() {
 			gain.connect(audioCtx.destination)
 
 			scriptProcessor.onaudioprocess = function(bins) {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins)
-				for (let i=0; i < bins.length; i++) {
-					results.push(" "+ bins[i])
+				try {
+					bins = new Float32Array(analyser.frequencyBinCount)
+					analyser.getFloatFrequencyData(bins)
+					for (let i=0; i < bins.length; i++) {
+						results.push(" "+ bins[i])
+					}
+					analyser.disconnect()
+					scriptProcessor.disconnect()
+					gain.disconnect()
+					// output
+					if (runSL) {results = []} // sim empty array
+					sDetail[sName] = results
+					let hash = sha1(results.join())
+					let isLie = results.length == 0 ? true : false
+					if (isLie) {hash = soL + hash + scC}
+					dom.audio2hash.innerHTML = hash + buildButton("11", sName)
+					log_perf("oscillator [audio]",t0)
+					return resolve("oscillator:"+ (isLie ? zLIE : hash))
+				} catch(e) {
+					console.error(e.name, e.message)
+					return resolve("oscillator:"+ zB0)
 				}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// output
-				if (runSL) {results = []} // sim empty array
-				sDetail[sName] = results
-				let hash = sha1(results.join())
-				let isLie = results.length == 0 ? true : false
-				if (isLie) {hash = soL + hash + scC}
-				dom.audio2hash.innerHTML = hash + buildButton("11", sName)
-				log_perf("oscillator [audio]",t0)
-				return resolve("oscillator:"+ (isLie ? zLIE : hash))
 			}
 			oscillator.start(0)
 		} catch(e) {
@@ -354,7 +364,7 @@ function outputAudio() {
 					})
 				} catch(e) {
 					log_error(sName, e.name, e.message)
-					let eMsg = trim_error(e.name, e.message)
+					let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 					dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 					log_section("audio", t0, [sName +":"+ zB0])
 				}
