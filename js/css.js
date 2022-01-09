@@ -292,7 +292,7 @@ function get_computed_styles() {
 					let blank = []
 					for (let i=0; i < bCount; i++) {blank.push(names[blankIndex[i]])}
 					blank.sort()
-					gMethods.push("css:computed styles:blocked:"+ (blank.length == 3 ? "all": blank.join()))
+					gMethods.push("css:computed_styles:blocked:"+ (blank.length == 3 ? "all": blank.join()))
 					if (bCount !== 3) {isLie = true}
 				}
 				if (fakeIndex.length) (isLie = true)
@@ -311,7 +311,7 @@ function get_computed_styles() {
 					for (let i=0; i < bCount; i++) {bypass.push(names[blankIndex[i]])}
 					for (let i=0; i < fakeIndex.length; i++) {bypass.push(names[fakeIndex[i]])}
 					bypass.sort()
-					gBypassed.push("css:computed styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
+					gBypassed.push("css:computed_styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
 				}
 			} else {
 				if (bCount == 3) {value = zB0} else if (isSame) {value = distinctReal[0]} else {sDetail["css_computed_styles"] = []}
@@ -326,14 +326,14 @@ function get_computed_styles() {
 			}
 			// multihash
 			if (gRun) {
-				if (distinctRep.length > 1) {gCheck.push("css:computed styles: multiple hashes")}
+				if (distinctRep.length > 1) {gCheck.push("css:computed_styles: multiple hashes")}
 				if (value == zLIE) {gKnown.push("css:computed_styles")}
 			}
 			// return
 			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
 			return resolve("computed_styles:"+ value)
 		}).catch(error => {
-			if (gRun) {gCheck.push("css:computed styles: " + error.name +" : "+ error.message)}
+			if (gRun) {gCheck.push("css:computed_styles: " + error.name +" : "+ error.message)}
 			return resolve("computed_styles:error")
 		})
 	})
