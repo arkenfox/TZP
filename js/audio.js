@@ -353,7 +353,7 @@ function outputAudio() {
 						}
 					})
 				} catch(e) {
-					log_error("", e.name, e.message)
+					log_error(sName, e.name, e.message)
 					let eMsg = trim_error(e.name, e.message)
 					dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 					log_section("audio", t0, [sName +":"+ zB0])
