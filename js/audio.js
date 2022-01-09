@@ -136,7 +136,7 @@ function get_audio2_hybrid() {
 			scriptProcessor.onaudioprocess = function(bins) {
 				try {
 					bins = new Float32Array(analyser.frequencyBinCount)
-					analyser.getFloatFrequencyData(bins)
+					analyser.getFloatFrequencyData(bins) // JSShelter errors here
 					for (let i=0; i < bins.length; i++) {
 						results.push(" "+ bins[i])
 					}
@@ -153,7 +153,7 @@ function get_audio2_hybrid() {
 					log_perf("hybrid [audio]",t0)
 					return resolve("hybrid:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					console.error(e.name, e.message)
+					//console.error(e.name, e.message)
 					return resolve("hybrid:"+ zB0)
 				}
 			}
@@ -190,7 +190,7 @@ function get_audio2_oscillator() {
 			scriptProcessor.onaudioprocess = function(bins) {
 				try {
 					bins = new Float32Array(analyser.frequencyBinCount)
-					analyser.getFloatFrequencyData(bins)
+					analyser.getFloatFrequencyData(bins) // JSShelter errors here
 					for (let i=0; i < bins.length; i++) {
 						results.push(" "+ bins[i])
 					}
@@ -207,7 +207,7 @@ function get_audio2_oscillator() {
 					log_perf("oscillator [audio]",t0)
 					return resolve("oscillator:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					console.error(e.name, e.message)
+					//console.error(e.name, e.message)
 					return resolve("oscillator:"+ zB0)
 				}
 			}
@@ -322,8 +322,8 @@ function outputAudio() {
 			context.oncomplete = function(event) {
 				try {
 					let copyTest = new Float32Array(44100)
-					event.renderedBuffer.copyFromChannel(copyTest, 0)
-					let getTest = event.renderedBuffer.getChannelData(0)
+					event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
+					let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
 					Promise.all([
 						crypto.subtle.digest("SHA-256", getTest),
 						crypto.subtle.digest("SHA-256", copyTest),
