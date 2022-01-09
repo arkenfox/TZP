@@ -1300,12 +1300,11 @@ function log_section(name, time1, data) {
 				gMethods = gMethods.filter(function(item, position) {return gMethods.indexOf(item) === position})
 				gMethods.sort()
 				// populate gBypassedNot: makes it easier to track when so many lies picked up
+				let tmpKN = [], tmpBP = []
+				if (gKnown.length) {gKnown.forEach(function(item) {tmpKN.push(item.split(":")[0] +":"+ item.split(":")[1])})}
 				if (gBypassed.length) {
-					let tmpBP = []
-					gBypassed.forEach(function(item) {
-						tmpBP.push(item.split(":")[0] +":"+ item.split(":")[1])
-					})
-					gBypassedNot = gKnown.filter(x => !tmpBP.includes(x))
+					gBypassed.forEach(function(item) {tmpBP.push(item.split(":")[0] +":"+ item.split(":")[1])})
+					gBypassedNot = tmpKN.filter(x => !tmpBP.includes(x))
 				}
 				// errors
 				gErrors = gErrors.concat(gErrorsOnce)
