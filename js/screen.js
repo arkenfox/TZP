@@ -205,14 +205,14 @@ function get_color() {
 	if (isBypass) {
 		r3 = soB + r3 + scC
 		if (gRun) {
-			gKnown.push("screen:color")
-			gBypassed.push("screen:color:"+ v3)
+			gKnown.push("screen:matchmedia_color")
+			gBypassed.push("screen:matchmedia_color:"+ v3)
 		}
 	} else {
 		v3 = r3 // if v3 is x
 	}
 	dom.mmC.innerHTML = r3 + (r3 == 8 ? rfp_green : rfp_red)
-	res.push("color:"+ v3)
+	res.push("matchmedia_color:"+ v3)
 	// return
 	return(res)
 }
@@ -1140,8 +1140,8 @@ function get_orientation(runtype) {
 	if (dm !== cssMode && cssMode !== "x") {
 		dm = soB + dm + scC
 		if (gRun) {
-			gKnown.push("screen:display-mode")
-			gBypassed.push("screen:display-mode:"+ cssMode)
+			gKnown.push("screen:matchmedia_display-mode")
+			gBypassed.push("screen:matchmedia_display-mode:"+ cssMode)
 		}
 	}
 	dom.mmDM.innerHTML = dm
@@ -1461,6 +1461,7 @@ function get_screen_metrics(runtype) {
 			dom.mInner.innerHTML = mInner + return_lb_nw(w4,h4)
 		}
 	}
+
 	// FS
 	let isFS
 	try {
@@ -1512,17 +1513,17 @@ function get_screen_metrics(runtype) {
 			if (newH == oldH-1) {newH = oldH}
 			if (newH !== oldH) {isLies++}
 		}
-		if (newW !== "x" && newH !== "x" && isLies > 0) { // valid bypass values
+		if (newW !== "x" && newH !== "x") { // valid bypass values
 			let newInner = newW +" x "+ newH
-			dom.mInner.innerHTML = soB + mInner + scC
-			if (gRun) {
+			if (gRun && isLies > 0) {
 				gKnown.push("screen:window inner")
 				gBypassed.push("screen:window inner:"+ newInner)
 			}
+			dom.mInner.innerHTML = (isLies > 0 ? soB + mInner + scC : mInner)
 			res.push("window_inner:"+ newInner)
 		} else {
 			// ToDo: prototype lies: these do not exist
-			if (proxyLies.includes("window.innerWidth") || proxyLies.includes("window.innerHeight")) {isLies++}
+			//if (proxyLies.includes("window.innerWidth") || proxyLies.includes("window.innerHeight")) {isLies++}
 			if (isLies > 0) {
 				dom.mInner.innerHTML = soL + mInner + scC
 				if (gRun) {gKnown.push("screen:window inner")}
@@ -1544,13 +1545,13 @@ function get_screen_metrics(runtype) {
 			if (newH == oldH-1) {newH = oldH}
 			if (newH !== oldH) {isLies++}
 		}
-		if (newW !== "x" && newH !== "x" && isLies > 0) { // two valid bypass values
+		if (newW !== "x" && newH !== "x") { // two valid bypass values
 			let newScreen = newW +" x "+ newH
-			dom.mScreen.innerHTML = soB + mScreen + scC
-			if (gRun) {
+			if (gRun && isLies > 0) {
 				gKnown.push("screen:screen")
 				gBypassed.push("screen:screen:"+ newScreen)
 			}
+			dom.mScreen.innerHTML = (isLies > 0 ? soB + mScreen + scC : mScreen)
 			res.push("screen:"+ newScreen)
 		} else {
 			if (proxyLies.includes("Screen.width") || proxyLies.includes("Screen.height")) {isLies++}
@@ -1573,7 +1574,7 @@ function get_screen_metrics(runtype) {
 		// outer
 		isLies = 0
 		// ToDo: prototype lies: these do not exist
-		if (proxyLies.includes("window.outerWidth") || proxyLies.includes("window.outerHeight")) {isLies++}
+		//if (proxyLies.includes("window.outerWidth") || proxyLies.includes("window.outerHeight")) {isLies++}
 		if (isLies > 0) {
 			dom.mOuter.innerHTML = soL + mOuter + scC
 			if (gRun) {gKnown.push("screen:window outer")}
