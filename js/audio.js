@@ -153,7 +153,7 @@ function get_audio2_hybrid() {
 					log_perf("hybrid [audio]",t0)
 					return resolve("hybrid:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					//console.error(e.name, e.message)
+					dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 					return resolve("hybrid:"+ zB0)
 				}
 			}
@@ -207,7 +207,7 @@ function get_audio2_oscillator() {
 					log_perf("oscillator [audio]",t0)
 					return resolve("oscillator:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					//console.error(e.name, e.message)
+					dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 					return resolve("oscillator:"+ zB0)
 				}
 			}
