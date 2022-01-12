@@ -4,9 +4,9 @@ TorZillaPrint (TZP) aims to provide a comprehensive, all-in-one, fingerprinting 
 
 ### ❗❗❗ DISCLAIMER ❗❗❗
 
-TZP is **_NOT DESIGNED TO PROVIDE A STABLE FINGERPRINT_** to re-identify users on each visit. A fingerprint is simply a snapshot of data at any given time, and collected metrics can change for a number or reasons: such as zooming, resizing windows, moving windows, per site settings, etc. Snapshots of fingerprints can still be linked after tha fact.
+TZP is **_NOT DESIGNED TO PROVIDE A STABLE FINGERPRINT_** to re-identify users on each visit. A fingerprint is simply a snapshot of data at any given time, and collected metrics can change for a number or reasons: such as zooming, resizing windows, moving windows, per site settings, etc. Snapshots of fingerprints can still be linked after the fact.
 
-TZP aims to make sure Tor Browser and RFP are protecting where known, and to dig into more areas of interest. Non-stable metrics are collected to provide as much information as possible for analysis
+TZP aims to make sure Tor Browser and RFP are protecting metrics where known, and to dig into more areas of interest to determine equivalency or ppossible entropy. Non-stable metrics are collected to provide as much information as possible for analysis
 
 ### 🟪  What we do care about:
 - Current Tor Browser and Firefox ESR or higher
