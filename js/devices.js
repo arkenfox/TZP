@@ -257,73 +257,66 @@ function get_media_devices() {
 						finish(e.name)
 						return
 					}
-
-					let isObj = false, isObjFake = true
-					if (typeof devices !== "object") {
-						devicesBS = true
-					} else {
-						try {
-							console.debug(devices)
-							console.debug(devices+"")
-							console.debug(devices[0]+"")
-						} catch(e) {
-							console.debug(e.name, e.message)
-						}
+					// BS
+					if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true}
+					let isArray = false
+					if (typeof devices == "object") {
+						try {devices.forEach(function(d) {}); isArray = true} catch(e) {}
 					}
-					// compute devices output
-					let arr = []
 					// enumerate
-					devices.forEach(function(d) {
-						arr.push(d.kind)
-						// FF sanity check
-						if (isFF) {
-							// FF67+ groupId
-							if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
-							if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
-							// deviceId
-							let chk = d.deviceId
-							if (chk.length !== 44) {devicesBS = true}
-							else if (chk.slice(-1) !== "=") {devicesBS = true}
-							// groupId
-							if (isVer > 66) {
-								chk = d.groupId
-								//console.log("group", chk.length, chk.slice(-1), chk)
+					if (isArray) {
+						let arr = []
+						devices.forEach(function(d) {
+							arr.push(d.kind)
+							// FF sanity check
+							if (isFF) {
+								// FF67+ groupId
+								if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
+								if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
+								// deviceId
+								let chk = d.deviceId
 								if (chk.length !== 44) {devicesBS = true}
 								else if (chk.slice(-1) !== "=") {devicesBS = true}
+								// groupId
+								if (isVer > 66) {
+									chk = d.groupId
+									//console.log("group", chk.length, chk.slice(-1), chk)
+									if (chk.length !== 44) {devicesBS = true}
+									else if (chk.slice(-1) !== "=") {devicesBS = true}
+								}
 							}
+						})
+						// count each kind
+						let pretty = [], plain = [], rfphash = ""
+						if (arr.length) {
+							arr.sort()
+							let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+							arr = [...map.entries()]
+							// build pretty/plain
+							for (let i=0; i < arr.length; i++) {
+								let data = arr[i],
+									item = data[0],
+									itemcount = data[1]
+								plain.push(item +","+ itemcount)
+								if (devicesBS) {item = soL + item + scC}
+								pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
+							}
+							pretty = pretty.join(" ")
+							str = plain.join(";")
+							rfphash = sha1(str, "devices media devices")
+							// RFP
+							if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
+								dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
+							} else {
+								dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
+							}
+						} else {
+							str = devicesBS ? zLIE : "none"
+							dom.eMD.innerHTML = (devicesBS ? soL +"none"+ scC : "none") + rfp_red
 						}
-					})
-					// prototypelies
-					if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true}
-					// count each kind
-					let pretty = [], plain = [], rfphash = ""
-					if (arr.length) {
-						arr.sort()
-						let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-						arr = [...map.entries()]
-						// build pretty/plain
-						for (let i=0; i < arr.length; i++) {
-							let data = arr[i],
-								item = data[0],
-								itemcount = data[1]
-							plain.push(item +","+ itemcount)
-							if (devicesBS) {item = soL + item + scC}
-							pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
-						}
-						pretty = pretty.join(" ")
-						str = plain.join(";")
-						rfphash = sha1(str, "devices media devices")
 					} else {
-						pretty = "none";
-console.debug("I am groot", "~"+str+"~")
-						str = "none"
-						if (devicesBS) {pretty = soL +"none"+ scC}
-					}
-					// RFP
-					if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
-						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
-					} else {
-						dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
+						dom.eMD.innerHTML = soL + "!typeof" + scC + rfp_red
+						str = zLIE
 					}
 					finish(str)
 				})
