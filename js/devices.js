@@ -257,6 +257,19 @@ function get_media_devices() {
 						finish(e.name)
 						return
 					}
+
+					let isObj = false, isObjFake = true
+					if (typeof devices !== "object") {
+						devicesBS = true
+					} else {
+						try {
+							console.debug(devices)
+							console.debug(devices+"")
+							console.debug(devices[0]+"")
+						} catch(e) {
+							console.debug(e.name, e.message)
+						}
+					}
 					// compute devices output
 					let arr = []
 					// enumerate
@@ -301,7 +314,9 @@ function get_media_devices() {
 						str = plain.join(";")
 						rfphash = sha1(str, "devices media devices")
 					} else {
-						pretty = "none"
+						pretty = "none";
+console.debug("I am groot", "~"+str+"~")
+						str = "none"
 						if (devicesBS) {pretty = soL +"none"+ scC}
 					}
 					// RFP
