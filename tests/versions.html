@@ -61,8 +61,8 @@
 function outputVersion() {
 	let xF = sb +"fail"+ sc,
 		xS = sg +"pass"+ sc,
-		xNC = sb +"no change"+ sc,
-		xOMG = sg +"OMG it's fixed"+ sc,
+		xNC = sb +"no change "+ sc,
+		xOMG = sg +"has landed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
 		strB = "' class='blue' target='_blank'>",
 		strC = "</a>",
@@ -137,7 +137,6 @@ function outputVersion() {
 		if (debug.length) {
 			dom.debug.innerHTML = s3 + "--- debug ---" + sc + "<br><br>" + debug.join("<br>")
 		}
-
 	}
 
 	function record(order, version, bug, result, perf) {
@@ -153,7 +152,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 71
+		expected = 72
 
 	//97: 1745372
 	let t97 = performance.now(), ver97 = xF
@@ -753,7 +752,19 @@ function outputVersion() {
 	} catch(e) {
 		ver4 = " "+ zNA + " error"
 	}
-	record(5,"~ and B", "1742592", ver4, performance.now()-t4)
+	record(4,"~ and B", "1742592", ver4, performance.now()-t4)
+
+	// 1739648: FF98+ nightly: for when it lands in release
+	let t3 = performance.now(), ver3 = xNC
+	try {
+		//function isT(x) {if (x == "t") {return true}; return false}
+		let a3 = [1,2]
+		let a3groupby = a3.groupBy(x => x == 1 ? "1" : "!1")
+		ver3 = xOMG
+	} catch(e) {
+		// TypeError a3.groupBy is not a function
+	}
+	record(3,"array.groupBy", "1739648", ver3, performance.now()-t3)
 }
 
 setTimeout(function() {
