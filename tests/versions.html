@@ -23,6 +23,7 @@
 		<div id="test73"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90">a</output>
+		<div id="test98">a</div>
 	</div>
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000 b</div>
@@ -152,7 +153,14 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 72
+		expected = 73
+
+	//98: 1709790
+	let t98 = performance.now(), ver98 = xF
+	try {
+		if (dom.test98.outerText !== undefined) {ver98 = xS}
+	} catch(e) {}
+	record(245,98, "1709790", ver98, performance.now()-t98)
 
 	//97: 1745372
 	let t97 = performance.now(), ver97 = xF
@@ -750,21 +758,20 @@ function outputVersion() {
 		let test4 = "~"+ lf4.format(["", "B"]) +"~"
 		if (test4 !== "~ and B~") {ver4 = xOMG}
 	} catch(e) {
-		ver4 = " "+ zNA + " error"
+		ver4 = " "+ zNA + " error "
 	}
-	record(4,"~ and B", "1742592", ver4, performance.now()-t4)
+	record(4,"~ and B~", "1742592", ver4, performance.now()-t4)
 
 	// 1739648: FF98+ nightly: for when it lands in release
 	let t3 = performance.now(), ver3 = xNC
 	try {
-		//function isT(x) {if (x == "t") {return true}; return false}
-		let a3 = [1,2]
-		let a3groupby = a3.groupBy(x => x == 1 ? "1" : "!1")
+		let test3 = newFn("[].groupBy(x => 1 == 1 ? 1 : 0)")
 		ver3 = xOMG
 	} catch(e) {
-		// TypeError a3.groupBy is not a function
+		// TypeError [].groupBy is not a function
 	}
 	record(3,"array.groupBy", "1739648", ver3, performance.now()-t3)
+
 }
 
 setTimeout(function() {
