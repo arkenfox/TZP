@@ -595,7 +595,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo == 59) {verNo += " or lower"
-		} else if (verNo == 97) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 98) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -607,7 +607,12 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {v93()}
 	}
 	// cascade
-	function start() { // 97: 1745372
+	function start() { // 98: 1709790
+		try {
+			if (dom.test98.outerText == undefined) {v97()} else {output(98)}
+		} catch(e) {v97()}
+	}
+	function v97() { // 97: 1745372
 		try {
 			let controller = new AbortController(); let signal = controller.signal; signal.throwIfAborted(); output(97)
 		} catch(e) {v96()}
