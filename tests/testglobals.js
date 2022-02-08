@@ -48,6 +48,7 @@ let s0 = " <span class='",
 	zS = "success",
 	zF = "failed",
 	zU = "undefined",
+	zUQ = "\"undefined\"",
 	zNEW = sb+"[NEW]"+sc,
 // notes
 	rfp_green = sg+"[RFP]"+sc,
