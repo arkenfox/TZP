@@ -257,6 +257,15 @@ function get_media_devices() {
 						finish(e.name)
 						return
 					}
+
+try {
+console.debug("A", devices)
+console.debug("B", devices+"")
+console.debug("C", devices[0])
+console.debug("D", devices[0]+"")
+console.debug("E", devices.length)
+} catch(e) {}
+					
 					// BS
 					if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true}
 					let isArray = false
