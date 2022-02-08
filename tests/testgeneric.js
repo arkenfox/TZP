@@ -66,12 +66,6 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
 
-function clearDetail(name) {
-	try {
-		sDetail[name] = []
-	} catch(e) {}
-}
-
 function showDetail(name) {
 	let data = sDetail[name],
 		hash = sha1(data.join())
@@ -85,11 +79,16 @@ function showDetail(name) {
 
 function get_isFF_engine() {
 	// set isFF
-	let isFFsum = ("undefined" != typeof InstallTrigger ? true : false)
-		+ ("InstallTrigger" in window ? true : false)
-		+ (typeof InstallTriggerImpl !== "undefined" ? true : false)
-	if (isFFsum) {isFF = true}
-
+	let test1 = false, test2 = false, test3 = false
+	try {if (typeof InstallTrigger == "object") {test1 = true}} catch(e) {}
+	try {if (typeof InstallTriggerImpl == "function") {test2 = true}} catch(e) {} // FF61+
+	try {if ("InstallTrigger" in window) {test3 = true}} catch(e) {}
+	try {
+		newFn("let t = (' a').trimStart()")
+		if (test1 + test2 + test3 == 3) {isFF = true} // FF61+
+	} catch(e) {
+		if (test1 + test3 == 2) {isFF = true} // FF60 or lower
+	}
 	// engine
 	function cbrt(x) {
 		try {
