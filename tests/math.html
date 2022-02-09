@@ -141,7 +141,7 @@ function get_engine() {
 					// catch something PM did that ESR52 didn't
 					// note: this would only apply to later v28 releases
 					try {
-						let test61 = (" a").trimStart()
+						newFn("let test61 = (' a').trimStart()")
 						engine += "<br><br>but wait.. I did some extra tests<br>"
 							+ s12.trim() +"real engine:" + sc + s3 +"goanna [52esr]"+ sc
 					} catch(e) {}
