@@ -540,7 +540,7 @@ function run() {
 		let go = true
 		// cleanup test
 		langS = langS.trim()
-		if (langS == "undefined") {langS = "undefined string"; go = false
+		if (langS == "undefined") {langS = zUQ; go = false
 		} else if (langS == undefined || langS == true || langS == false || langS == null) {langS += ""; go = false
 		} else if (Array.isArray(langS)) {langS = "array"; go = false}
 		if (langS == "") {langS = "empty string"; go = false}
