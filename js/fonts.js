@@ -362,7 +362,7 @@ const getFonts = () => {
 				fontsTransform
 			})
 		} catch(e) {
-			//if (e.message !== "document.fonts.values() is not iterable") {console.error(e.name, e.message)}
+			// TypeError: document.fonts.values() is not iterable
 			if (gRun) {log_error("fonts: fonts", e.name, e.message)}
 			return resolve(zB0)
 		}
@@ -655,9 +655,9 @@ function get_fallback(list) {
 			gClick = true
 		}
 	} catch(e) {
-		if (list.length > 2) {
-			gClick = true
-		}
+		// TypeError: document.fonts.values() is not iterable
+		gClick = true
+		return zB0
 	}
 }
 
@@ -858,18 +858,24 @@ function outputFontsFB() {
 		if (gClick) {
 			gClick = false
 			gRun = false
-			dom.fontFB.innerHTML = "test is running... please wait"
+			dom.fontFB = "&nbsp"
 			get_isRFP()
 			set_fntList()
 			// interval allows ^^ to paint
 			function run_primer() {
 				clearInterval(checking)
-				get_fallback(['orange','banana']) // primer
-				function run_real() {
-					get_fallback(fntList)
-					clearInterval(checking2)
-				}
-				let checking2 = setInterval(run_real, 25)
+				Promise.all([
+					get_fallback(['orange','banana']) // primer
+				]).then(function(results){
+					if (results[0] = zB0) {
+						// cleanup
+						dom.fontFBTest = ""
+						dom.fontFB = zB0
+					} else {
+						dom.fontFB = "test is running... please wait"
+						get_fallback(fntList)
+					}
+				})
 			}
 			let checking = setInterval(run_primer, 1)
 		}
