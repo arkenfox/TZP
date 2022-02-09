@@ -1660,6 +1660,7 @@ function get_screen_metrics(runtype) {
 		res.push("zoom:"+ jsZoomOriginal)
 		res.push("dpi:"+ varDPI)
 		res.push("devicePixelRatio:"+ varDPR)
+		res.push("window_inner_native_[android]:" + (isOS == "android" ? firstW + " x " + firstH : zNA))
 		return(res)
 	//}
 }
