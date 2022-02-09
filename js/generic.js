@@ -484,8 +484,14 @@ const get_isOS = () => new Promise(resolve => {
 	}
 })
 
-const get_isOS64 = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
+const get_isOS64 = (skip = false) => new Promise(resolve => {
+	if (!isFF && !skip) {return resolve()}
+
+	// on page loads: we run this twice: very early while we're waiting
+		// skip = true: we haven't set isFF yet
+		// then later as a repreq : no point running it twice
+	if (gLoad && !skip) {return resolve()}
+
 	// OS architecture
 		// FF89+: 1703505: javascript.options.large_arraybuffers
 	try {
@@ -493,7 +499,7 @@ const get_isOS64 = () => new Promise(resolve => {
 		isOS64 = "unknown"
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isOS64 = true
-		if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
+		if (gLoad) {log_perf("isOS64",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
 		return resolve()
 	} catch(e) {
 		let eMsg = e.name +": "+ e.message
@@ -1619,6 +1625,8 @@ function run_once() {
 		if (test3) {isFFyes.push(str3)} else {isFFno.push(str3)}
 	}
 	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
+	// get os arch while we wait
+	if (test1+test2+test3 > 1) {get_isOS64(true)} // isFF at least 2/3 is close enough
 }
 
 run_once()
