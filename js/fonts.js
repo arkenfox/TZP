@@ -853,31 +853,31 @@ function get_woff2() {
 }
 
 function outputFontsFB() {
-	// IDK: when doc fonts blocked: we need a primer and a delay
 	if (isFF && isOS !== "") {
 		if (gClick) {
 			gClick = false
 			gRun = false
-			dom.fontFB = "&nbsp"
+			dom.fontFB.innerHTML = "&nbsp"
 			get_isRFP()
 			set_fntList()
-			// interval allows ^^ to paint
-			function run_primer() {
-				clearInterval(checking)
-				Promise.all([
-					get_fallback(['orange','banana']) // primer
-				]).then(function(results){
-					if (results[0] = zB0) {
-						// cleanup
-						dom.fontFBTest = ""
-						dom.fontFB = zB0
-					} else {
-						dom.fontFB = "test is running... please wait"
+			Promise.all([
+				get_fallback(['orange','banana']) // primer
+			]).then(function(results){
+				if (results[0] == zB0) {
+					// cleanup
+					dom.fontFBTest = ""
+					dom.fontFB = zB0
+				} else {
+					dom.fontFB = "test is running... please wait"
+					// we need a delay from the primer run if
+					// browser.display.use_document_fonts = 0 (blocked)
+					function run_main() {
+						clearInterval(checking)
 						get_fallback(fntList)
 					}
-				})
-			}
-			let checking = setInterval(run_primer, 1)
+					let checking = setInterval(run_main, 25)
+				}
+			})
 		}
 	}
 }
