@@ -73,8 +73,8 @@ function fnTrim(str, len) {
 
 function fnClean(str) {
 	if (str == "") {str = "empty string"
-	} else if (str == undefined) {str = "undefined"
-	} else if (str == "undefined") {str = "undefined string"}
+	} else if (str === undefined) {str = zU
+	} else if (str == zU) {str = zUQ}
 	return str
 }
 
@@ -647,17 +647,11 @@ function get_js_client_hints(num, title) {
 			fnRecord(num, title, "none", true)
 		}
 	}
-	function cleanup(str) {
-		if (str == "") {str = "empty string"}
-		if (str == "undefined") {str = "undefined string"}
-		if (str == undefined) {str = "undefined value"}
-		return str
-	}
 	let res = []
 	try {
 		let resB = navigator.userAgentData.brands
 		resB.forEach(function(object) {
-			let valueB = cleanup(object.version)
+			let valueB = fnClean(object.version)
 			res.push("brands: "+ object.brand +": "+ valueB)
 		})
 	} catch(e) {}
@@ -674,7 +668,7 @@ function get_js_client_hints(num, title) {
 			).then(ua => {
 				const names = Object.keys(ua)
 				for (const k of names) {
-					let valueU = cleanup(ua[k])
+					let valueU = fnClean(ua[k])
 					res.push("high entropy: "+ k +": "+ valueU)
 				}
 				output()
@@ -923,10 +917,14 @@ function get_nav_values(num1, num2, num3) {
 	try {
 		if (bBlock) {bB = 1}
 		let resA = navigator.oscpu
-		if (resA == "") {resA = "empty string"
-		} else if (resA == undefined) {resA = "undefined"
-		} else if (resA == "undefined") {resA = "undefined string"
-		} else {boolA = true}
+		if (typeof resA !== "string") {
+			console.debug(typeof resA)
+		} else {
+			if (resA == "") {resA = "empty string"
+			} else if (resA == undefined) {resA = zU
+			} else if (resA == zU) {resA = zUQ
+			} else {boolA = true}
+		}
 		fnRecord(num1, strA, resA, boolA)
 	} catch(e) {
 		fnRecord(num1, strA, e.name, zB0, e.message)
@@ -938,8 +936,8 @@ function get_nav_values(num1, num2, num3) {
 	try {
 		if (bBlock) {bB = 1}
 		let resBT = navigator.bluetooth
-		if (resBT == undefined) {
-			fnRecord(numBT, strBT, "undefined", true)
+		if (resBT === undefined) {
+			fnRecord(numBT, strBT, zU, true)
 		} else {
 			try {
 				navigator.bluetooth.getAvailability().then(available => {
@@ -1411,9 +1409,9 @@ if (isFF) {
 		if (test65.length) {is65 = true}
 	} catch(e) {}
 	// 64
-	try {if (window.screenLeft == undefined) {} else {is64 = true}} catch(e) {}
+	try {if (window.screenLeft === undefined) {} else {is64 = true}} catch(e) {}
 	// 61
-	try {let test61 = (" a").trimStart(); is61 = true} catch(e) {}
+	try {newFn("let test61 = (' a').trimStart()"); is61 = true} catch(e) {}
 	// 60
 	try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
 		|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
