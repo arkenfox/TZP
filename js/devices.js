@@ -275,11 +275,10 @@ function get_media_devices() {
 				}
 				if (typeof devices == "object" && Array.isArray(devices)) {
 					isArray = true
-					try {devices.forEach(function(d) {})} catch(e) {}
 					if (isFF && devices+"" == "[object MediaDeviceInfo]") {devicesBS = false
 					} else if (isEngine == "blink") {
 						if (devices +"" == "[object InputDeviceInfo],[object MediaDeviceInfo]") {devicesBS = false}
-					} else {devicesBS - false} // webkit who cares
+					} else {devicesBS = false} // webkit who cares
 				} else {
 					devices = cleanFn(devices)
 				}
