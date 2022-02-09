@@ -1657,7 +1657,7 @@ function get_screen_metrics(runtype) {
 		}
 		//res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
 		res.push("window_outer:TBA")
-		res.push("zoom:"+ jsZoomOriginal)
+		res.push("zoom_[raw]:"+ jsZoomOriginal) // more entropy with hiDPI/dPR
 		res.push("dpi:"+ varDPI)
 		res.push("devicePixelRatio:"+ varDPR)
 		res.push("window_inner_native_[android]:" + (isOS == "android" ? firstW + " x " + firstH : zNA))
