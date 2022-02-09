@@ -2386,19 +2386,8 @@ function get_zoom(runtype) {
 			}
 			dom.mmDPI.innerHTML = mmDPI +" | "+ mmDPPX +" | "+ mmDPCM
 
-			// allow for diff of one
-			let displayDPI = varDPI
-			if (cssDPI !== "x") {
-				diffDPI = Math.abs(cssDPI - dpi_x)
-				if (diffDPI > 1) {
-					displayDPI = soB + displayDPI + scC
-					if (gRun) {
-						gKnown.push("screen:dpi")
-						gBypassed.push("screen:dpi:"+ cssDPI)
-					}
-				}
-			}
-			dom.jsDPI.innerHTML = displayDPI
+			// varDPI is sancrosanct: don't bypass it with possible lies
+			dom.jsDPI.innerHTML = varDPI
 			if (runtype == "resize") {
 				if (logResize) {log_perf("dpi [part of zoom]",t1,"ignore")}
 			} else {
