@@ -637,7 +637,7 @@ function get_line_scrollbar(runtype) {
 			} else {
 				dom.fdLH.innerHTML = lh +"px"+ (isOS == "android" ? "" : " "+ sbZoom + os)
 			}
-			log_perf("css line height [fd]",t0)
+			if (runtype == "fd") {log_perf("css line height [fd]",t0)}
 		}
 
 		// recalc zoom/viewport
@@ -669,7 +669,7 @@ function get_line_scrollbar(runtype) {
 	})
 }
 
-function get_locales(log = false) {
+function get_locales() {
 	// runs post FP
 	try {
 		let res = []
@@ -944,7 +944,6 @@ function get_mm_metrics(runtype) {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let count = 0
 	let unable = "unable to find upper bound"
-
 	// perf
 	function perf(id, str, type) {
 		document.getElementById(id).innerHTML = str == unable ? zB0 : str
