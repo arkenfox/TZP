@@ -145,11 +145,15 @@ function get_audio2_hybrid() {
 					gain.disconnect()
 					// output
 					if (runSL) {results = []}
-					sDetail[sName] = results
-					let hash = sha1(results.join())
-					let isLie = results.length == 0 ? true : false
-					let displayHash = isLie ? soL + hash + scC : hash
-					dom.audio3hash.innerHTML = hash + buildButton("11", sName)
+					let hash = sha1(results.join()), isLie = false, btn = ""
+					if (hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+						hash = soL + cleanFn(results) + scC // empty array
+						isLie = true
+					} else {
+						sDetail[sName] = results
+						btn = buildButton("11", sName)
+					}
+					dom.audio3hash.innerHTML = hash + btn
 					log_perf("hybrid [audio]",t0)
 					return resolve("hybrid:"+ (isLie ? zLIE : hash))
 				} catch(e) {
@@ -198,12 +202,16 @@ function get_audio2_oscillator() {
 					scriptProcessor.disconnect()
 					gain.disconnect()
 					// output
-					if (runSL) {results = []} // sim empty array
-					sDetail[sName] = results
-					let hash = sha1(results.join())
-					let isLie = results.length == 0 ? true : false
-					if (isLie) {hash = soL + hash + scC}
-					dom.audio2hash.innerHTML = hash + buildButton("11", sName)
+					if (runSL) {results = []}
+					let hash = sha1(results.join()), isLie = false, btn = ""
+					if (hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+						hash = soL + cleanFn(results) + scC // empty array
+						isLie = true
+					} else {
+						sDetail[sName] = results
+						btn = buildButton("11", sName)
+					}
+					dom.audio2hash.innerHTML = hash + btn
 					log_perf("oscillator [audio]",t0)
 					return resolve("oscillator:"+ (isLie ? zLIE : hash))
 				} catch(e) {
