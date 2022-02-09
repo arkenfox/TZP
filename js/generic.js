@@ -10,6 +10,23 @@ function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
 
+function cleanFn(item, skipArray = false) {
+	// catch strings as strings, tidy undefined, empty strings
+	if (typeof item == "number" || typeof item == "bigint") { return item
+	} else if (item == zU) {item = zUQ
+	} else if (item == "true") {item = "\"true\""
+	} else if (item == "false") {item = "\"false\""
+	} else if (item == "null") {item = "\"null\""
+	} else if (!skipArray && Array.isArray(item)) {
+		item = !item.length ? "empty array" : "array"
+	} else if (item === undefined || item === true || item === false || item === null) {item += ""
+	} else if (!skipArray && item == "") {item = "empty string"
+	} else if (typeof item == "string") {
+		if (!isNaN(item*1)) {item = "\"" + item + "\""}
+	}
+	return item
+}
+
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
 	return new Proxy(dom, {
@@ -18,7 +35,11 @@ function getUniqueElements() {
 	})
 }
 
-function getElementProp(id, prop, pseudo) {
+function getElementProp(id, prop, pseudo, noBlock) {
+	if (runPS && noBlock === undefined) {
+		if (logPseudo) {console.log("pseudo "+ id +": runPS ", true, " returned x")}
+		return "x"
+	}
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue(prop)
@@ -35,7 +56,7 @@ function getElementProp(id, prop, pseudo) {
 	}
 }
 
-/*** HASHING ***/
+/*** HASH ***/
 
 function mini(str, call) {
 	// https://stackoverflow.com/a/22429679
@@ -318,7 +339,7 @@ const get_isEngine = () => new Promise(resolve => {
 						// catch something PM did that ESR52 didn't
 						// note: this would only apply to later v28 releases
 						try {
-							let test61 = newFn("(' a').trimStart()")
+							newFn("let test61 = (' a').trimStart()")
 							isEngine = "goanna"
 							if (!isFFLegacy) {
 								gCheckOnce.push("_global:isEngine: palemoon isFFLegacy failed")
@@ -411,8 +432,8 @@ const get_isFork = () => new Promise(resolve => {
 		imgA.addEventListener("load", function() {
 			isLogo = imgA.width +" x "+ imgA.height
 			try {isMark = el.width+ " x " + el.height} catch(e) {}
-			if (runS) {
-				//isMark = "110 x 50" // new to both TB and FF
+			if (runSN) {
+				isMark = "110 x 50" // new to both TB and FF
 				//isMark = "336 x 48" // new TB but not new FF
 				//isMark = "" // you need to set this one in get_resources as well
 				//isMark = "0 x 0" // same as changing html img src
@@ -468,14 +489,16 @@ const get_isOS64 = () => new Promise(resolve => {
 	// OS architecture
 		// FF89+: 1703505: javascript.options.large_arraybuffers
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		isOS64 = "unknown"
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isOS64 = true
+		if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
 		return resolve()
 	} catch(e) {
 		let eMsg = e.name +": "+ e.message
 		log_error("fd: os_architecture", eMsg)
-		isOS64 = trim_error(e.name, e.message)
+		isOS64 = (eMsg == "RangeError: invalid array length" ? zNS : zB0)
 		// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit and return false
 		return resolve()
 	}
@@ -484,8 +507,9 @@ const get_isOS64 = () => new Promise(resolve => {
 const get_isRFP = () => new Promise(resolve => {
 	isRFP = false
 	isPerf = true
+	let t0; if (canPerf) {t0 = performance.now()}
 	let realPerf = true
-	if (runSL) {isPerf = false}
+	if (runRF) {isPerf = false}
 	try {
 		if (Math.trunc(performance.now() - performance.now()) !== 0) {
 			isPerf = false
@@ -496,7 +520,7 @@ const get_isRFP = () => new Promise(resolve => {
 		isPerf = false
 		realPerf = false // ??
 	}
-	if (runSL) {isPerf = realPerf}
+	if (runRF) {isPerf = realPerf}
 	if (!isFF) {return resolve()}
 	try {
 		performance.mark("a")
@@ -509,13 +533,14 @@ const get_isRFP = () => new Promise(resolve => {
 		// extra checks
 		if (!isPerf) {isRFP = false}
 		// extra checks: RFP toggled off-to-on requires page reload
+		// don't block pseudo
 		if (gLoad) {
 			if (isVer > 62) {
-				let chk1 = getElementProp("#cssPRM","content",":after")
+				let chk1 = getElementProp("#cssPRM","content",":after", true)
 				if (chk1 !== "no-preference") {isRFP = false}
 			}
 			if (isVer > 66) {
-				let chk2 = getElementProp("#cssPCS","content",":after")
+				let chk2 = getElementProp("#cssPCS","content",":after", true)
 				if (chk2 !== "light") {isRFP = false}
 			}
 			if (isVer > 77) {
@@ -524,6 +549,7 @@ const get_isRFP = () => new Promise(resolve => {
 				if (chk3 !== zD) {isRFP = false}
 			}
 		}
+		if (gRun) {log_perf("isRFP [prereq]",t0,gt0,isRFP)}
 		return resolve()
 	} catch(e) {
 		if (gRun) {
@@ -609,7 +635,7 @@ const get_isVer = () => new Promise(resolve => {
 	// cascade
 	function start() { // 98: 1709790
 		try {
-			if (dom.test98.outerText == undefined) {v97()} else {output(98)}
+			if (dom.test98.outerText === undefined) {v97()} else {output(98)}
 		} catch(e) {v97()}
 	}
 	function v97() { // 97: 1745372
@@ -686,7 +712,7 @@ const get_isVer = () => new Promise(resolve => {
 		} catch(e) {if (e.message.substr(13,5) == "8 and") {output(88)} else {v87()}}
 	}
 	function v87() { //87:1688335
-		try {if (console.length == undefined) {output(87)} else {v86()}} catch(e) {v86()}
+		try {if (console.length === undefined) {output(87)} else {v86()}} catch(e) {v86()}
 	}
 	function v86() { //86:1685482
 		try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {output(86)} else {v85()}}
@@ -763,7 +789,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {let t = new DOMError('a'); v68()} catch(e) {output(69)}
 	}
 	function v68() { //68:1548773
-		try {if (dom.test68.typeMustMatch == undefined) {output(68)} else {v67()}} catch(e) {v67()}
+		try {if (dom.test68.typeMustMatch === undefined) {output(68)} else {v67()}} catch(e) {v67()}
 	}
 	function v67() { //67:1531830
 		try {if (!Symbol.hasOwnProperty('matchAll')) {v66()} else {output(67)}} catch(e) {v66()}
@@ -780,7 +806,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {let t = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
 	}
 	function v64() { //64
-		try {if (window.screenLeft == undefined) {v63()} else {output(64)}} catch(e) {v63()}
+		try {if (window.screenLeft === undefined) {v63()} else {output(64)}} catch(e) {v63()}
 	}
 	function v63() { //63
 		try {if (Symbol.for(`a`).description == "a") {output(63)} else {v62()}} catch(e) {v62()}
@@ -789,7 +815,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {console.time("v62"); console.timeLog("v62"); console.timeEnd("v62"); output(62)} catch(e) {v61()}
 	}
 	function v61() { //61
-		try {let t = (" a").trimStart(); output(61)} catch(e) {v60()}
+		try {newFn("let t = (' a').trimStart()"); output(61)} catch(e) {v60()}
 	}
 	function v60() { //60
 		try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
@@ -808,6 +834,7 @@ function check_navKey(property) {
 
 const get_navKeys = () => new Promise(resolve => {
 	navKeys = {}
+	let t0; if (canPerf) {t0 = performance.now()}
 	// compare
 	try {
 		let keysA = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -882,6 +909,7 @@ const get_navKeys = () => new Promise(resolve => {
 		navKeys["trueKeys"] = trueKeys.sort()
 		navKeys["fakeKeys"] = fakeKeys.sort()
 		navKeys["movedKeys"] = movedKeys.sort()
+		if (gRun) {log_perf("navKeys [prereq]",t0)}
 		return resolve()
 	} catch(e) {
 		if (gRun) {gCheck.push("_global:get_navKeys: " + e.name +" : "+ e.message)}
@@ -931,9 +959,7 @@ function getDynamicIframeWindow({
 				r = ""
 			for (let i=0; i < list.length; i++) {
 				try {r = navigator[list[i]]} catch(e) {r = zB0}
-				if (r == "") {r = "empty string"}
-				if (r == "undefined") {r = "undefined string"}
-				if (r == undefined) {r = "undefined value"}
+				r = cleanFn(r)
 				res.push(list[i] +":"+ r)
 			}
 			res.sort()
@@ -998,7 +1024,7 @@ function togglerows(id, word) {
 	if (word == "btn") {
 		word = "[ "+ (style == "none" ? "show" : "hide") +" ]"
 	} else {
-		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word == undefined ? "details" : word)
+		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word === undefined ? "details" : word)
 	}
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
@@ -1176,7 +1202,7 @@ function log_perf(str, time1, time2, extra) {
 	if (extra !== undefined && extra !== "") {
 		output += " | "+ extra
 	}
-	if (gRun) {
+	if (gRun || str.includes("not in FP")) {
 		gPerfDetail.push(output)
 	} else {
 		sPerfDetail.push(output)
@@ -1362,7 +1388,6 @@ function log_section(name, time1, data) {
 				// trigger nonFP
 				outputPostSection("all")
 				gLoad = false
-				gRun = false // don't let resize events add more stuff
 				gClick = true // ToDo: should move this to after perf2
 			}
 		}
@@ -1401,15 +1426,14 @@ function countJS(filename) {
 				get_isBrave(),
 				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
-				// sims: isFF only
+				// some sims = isFF only: not fussy; only devs run these
 				if (!isFF) {
-					runS = false
-					runSUA = false
-					runSIF = false
-					runSF = false
-					runSL = false
-					runSC = false
-					runSP = false
+	runSN = false
+	runSU = false
+	runRF = false
+	runCSS = false
+	runFNT = false
+	runWFS = false
 				}
 				if (results[3] == "timeout") {
 					gMethodsOnce.push("_global:resource:blocked")
@@ -1427,15 +1451,18 @@ function countJS(filename) {
 }
 
 function outputPostSection(id) {
-	if (gRun) {log_perf("start [not in FP]", "--")}
+	let isLog = gRun // push to gPerfDetail
+	gRun = false
+
+	if (isLog) {log_perf("start [not in FP]", "--")}
 	if (id == "all" || id == "ua") {
-		get_ua_iframes()
+		get_ua_iframes(isLog)
 		get_ua_workers()
 	}
 	if (id == "all" || id == "feature")
 		get_canonical()
 		get_locales()
-		if (isFF) {get_chrome()}
+		if (isFF) {get_chrome(isLog)}
 	if (id == "all" || id == "storage") {
 		get_cookies()
 		get_storage()
@@ -1445,8 +1472,8 @@ function outputPostSection(id) {
 		get_storage_manager()
 	}
 	if (id == "all" || id == "misc") {
-		get_perf2() // perf2 redundant: we have isRFP
-		get_recursion() // no entropy for isFF, also slows perf
+		get_perf2(isLog) // perf2 redundant: we have isRFP
+		get_recursion(isLog) // no entropy for isFF, also slows perf
 	}
 }
 
@@ -1543,11 +1570,11 @@ function outputSection(id, cls) {
 		setTimeout(function() {
 			if (canPerf) {gt0 = performance.now()}
 			Promise.all([
-				get_isRFP(),
-				get_navKeys(),
-				outputPrototypeLies(),
-				get_isOS64(),
 				get_canPerf("log"),
+				outputPrototypeLies(),
+				get_navKeys(),
+				get_isOS64(),
+				get_isRFP(),
 			]).then(function(results){
 				output()
 			})
@@ -1595,3 +1622,19 @@ function run_once() {
 }
 
 run_once()
+
+
+function cleanFnTest() {
+	let list = [
+		0,1,-1, 50, // numbers
+		"0", "1", "-1", "50",
+		true, false, null,
+		"true", "false", "null",
+		undefined, "undefined",
+		[], [1,2],{},
+	]
+	list.forEach(function(item) {
+		console.log(item, cleanFn(item))
+	})
+}
+//cleanFnTest()
