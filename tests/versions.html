@@ -153,7 +153,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 73
+		expected = 72
 
 	//98: 1709790
 	let t98 = performance.now(), ver98 = xF
@@ -646,7 +646,7 @@ function outputVersion() {
 
 	//61
 	let t61 = performance.now(), ver61 = xF
-	try {let test61 = (" a").trimStart(); ver61 = xS} catch(e) {}
+	try {newFn("let test61 = (' a').trimStart()"); ver61 = xS} catch(e) {}
 	record(55,61, "", ver61, performance.now()-t61)
 
 	//60
@@ -761,16 +761,6 @@ function outputVersion() {
 		ver4 = " "+ zNA + " error "
 	}
 	record(4,"~ and B~", "1742592", ver4, performance.now()-t4)
-
-	// 1739648: FF98+ nightly: for when it lands in release
-	let t3 = performance.now(), ver3 = xNC
-	try {
-		let test3 = newFn("[].groupBy(x => 1 == 1 ? 1 : 0)")
-		ver3 = xOMG
-	} catch(e) {
-		// TypeError [].groupBy is not a function
-	}
-	record(3,"array.groupBy", "1739648", ver3, performance.now()-t3)
 
 }
 
