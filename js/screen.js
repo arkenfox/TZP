@@ -2342,17 +2342,14 @@ function get_zoom(runtype) {
 			// varDPI: fallback checks: allow 1 x diff; use highest value
 			let diffDPI = 0
 			if (dpi_y !== 0) {
+				// this is the one: RFP spoofs cssDPI and mmDPI
 				varDPI = dpi_x
 			} else if (cssDPI !== "x") {
-				if (dpi_y !== 0) {
-					diffDPI = Math.abs(dpi_x - cssDPI)
-					varDPI = (diffDPI == 1 ? dpi_x : cssDPI)
-				} else if (mmDPI !== zB0) {
+				if (mmDPI !== zB0) {
 					diffDPI = Math.abs(mmDPI - cssDPI)
 					varDPI = (diffDPI == 1 ? mmDPI : cssDPI)
 				}
 			} else if (mmDPI !== zB0) {
-				// could be a lie
 				varDPI = mmDPI
 			}
 			if (isOS == "android") {
@@ -2365,24 +2362,25 @@ function get_zoom(runtype) {
 			//console.debug("varDPI", varDPI, "cssDPI", cssDPI, "mmDPI", mmDPI, "dpi_x + y", dpi_x, dpi_y)
 
 			// bypass matchmedia lies
-			//cssDPI = "x"
-			if (cssDPI !== "x") {
-				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
-					if (mmDPI !== cssDPI && diffDPI > 1) {
-						mmDPI = soB + mmDPI + scC
-						if (gRun) {
-							gKnown.push("screen:matchmedia_dpi")
-							gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
-						}
-					}
-			} else { // if (dpr2 !== zB0) ?
-				// if drp2 was blocked then RFP will manifest
+				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
+					// ToDo: but only if drp2 wasn't blocked?
+				// so we want to use varDPI first
+			if (varDPI !== undefined && dpi_y !== 0) {
 				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - dpi_x)} else {diffDPI = 2}
 				if (mmDPI !== dpi_x && diffDPI > 1) {
 					mmDPI = soB + mmDPI + scC
 					if (gRun) {
 						gKnown.push("screen:matchmedia_dpi")
 						gBypassed.push("screen:matchmedia_dpi:"+ dpi_x)
+					}
+				}
+			} else if (cssDPI !== "x") {
+				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
+				if (mmDPI !== cssDPI && diffDPI > 1) {
+					mmDPI = soB + mmDPI + scC
+					if (gRun) {
+						gKnown.push("screen:matchmedia_dpi")
+						gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
 					}
 				}
 			}
