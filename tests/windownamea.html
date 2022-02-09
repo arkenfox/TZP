@@ -72,61 +72,56 @@ table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
 <script>
 'use strict';
 
-	var s0 = " <span class='",
-		sb = s0+"bad'>",
-		sg = s0+"good'>",
-		sc = "</span>"
+var s0 = " <span class='",
+	sb = s0 +"bad'>",
+	sg = s0 +"good'>",
+	sc = "</span>"
 
-	function rnd_string(prefix) {
-		return (prefix == undefined ? "" : prefix) + Math.random().toString(36).substring(2, 15)
+function rnd_string(prefix) {
+	return (prefix == undefined ? "" : prefix) + Math.random().toString(36).substring(2, 15)
+}
+
+function run() {
+	let str = "",
+		current = document.getElementById("current"),
+		setnew = document.getElementById("setnew"),
+		check = document.getElementById("check")
+	// clear
+	current.innerHTML = "&nbsp"
+	setnew.innerHTML = "&nbsp"
+	check.innerHTML = "&nbsp"
+	try {
+		str = window.name
+		if (str == undefined) {str = "undefined"}
+		else if (str == "undefined") {str = "\"undefined\""}
+		else if (str == "") {str = "nothing found"}
+		current.innerHTML = str
+	} catch(e) {
+		current.innerHTML = e.name
 	}
-
-	function run() {
-		let str = ""
-		let current = document.getElementById("current")
-		let setnew = document.getElementById("setnew")
-		let check = document.getElementById("check")
-		// clear
-		current.innerHTML = "&nbsp"
-		setnew.innerHTML = "&nbsp"
-		check.innerHTML = "&nbsp"
-
-		try {
-			str = window.name
-			if (str == undefined) {str = "undefined"}
-			else if (str == "undefined") {str = "undefined string"}
-			else if (str == "") {str = "nothing found"}
-			current.innerHTML = str
-		} catch(e) {
-			current.innerHTML = e.name
-		}
-
-		// create a random string
-		str = rnd_string()
-		var control = str
-		try {
-			window.name = str
-		} catch(e) {
-			str = e.name
-		}
-		setnew.innerHTML = str
-
-		// read it back: set a little timer
-		setTimeout(function() {
-			let chk = ""
-			try {
-				chk = window.name
-				if (chk == undefined) {chk = "undefined"}
-				else if (chk == "undefined") {chk = "undefined string"}
-				else if (chk == "") {chk = "nothing found"}
-
-			} catch(e) {
-				chk = e.name
-			}
-			check.innerHTML = chk + (chk == control ?  sg + "[success]": sb + "[failure]") + sc
-
-		}, 150)	
+	// create a random string
+	str = rnd_string()
+	var control = str
+	try {
+		window.name = str
+	} catch(e) {
+		str = e.name
 	}
+	setnew.innerHTML = str
+	// read it back: set a little timer
+	setTimeout(function() {
+		let chk = ""
+		try {
+			chk = window.name
+			if (chk == undefined) {chk = "undefined"}
+			else if (chk == "undefined") {chk = "\"undefined\""}
+			else if (chk == "") {chk = "nothing found"}
+		} catch(e) {
+			chk = e.name
+		}
+		check.innerHTML = chk + (chk == control ?  sg +"[success]": sb +"[failure]") + sc
+	}, 150)	
+}
 
 run()
 
