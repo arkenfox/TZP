@@ -1,12 +1,14 @@
 'use strict';
 
-let pluginBS = false,
-	mimeBS = false
+let pluginBS = false,	mimeBS = false, devicesBS = false
 
-let runPM = false,
-	simPM = 0,
-	runPP = false,
-	simPP = 0
+// sims
+let intSNC = 0
+let intSNH = 0, lstSNH = ["2", zB0, 2, 11, 0, 7.2, [1,2], {},"null", "undefined", undefined, []]
+let intSNM = 0, lstSNM = [undefined, zU, {}, "null", 5.8, zB0, true, [4], "none", [], null]
+let intSNP = 0, lstSNP = [undefined, {}, 5.8,zB0,zU,"true",true,[4],"none",[],"null", null]
+let intMDV = 0, lstMDV = [[],["a","b"],["[object MediaDeviceInfo]"],[{"kind": "audioinput"}, {"kind": "videoinput"}],{}]
+let intMTP = 0, lstMTP = ["0",0,-1,[],[0],[1],["a"],undefined, zU, zB0,"null", null]
 
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
@@ -100,35 +102,43 @@ function get_concurrency() {
 	// gecko stuff
 		// 1630089: FF68+ macOS reports physical cores instead of logical
 		// capped at dom.maxHardwareConcurrency (e.g. 1728741)
-	function clean(item) {
-		if (!isNaN(item)) {return item
-		} else {if (item == "") {item = "empty string"}; item += ""; return item}
-	}
-
-	let h = zD
-	if (check_navKey("hardwareConcurrency")) {
-		try {
+	// hardwareConcurrency is an expected key
+	let h, isLies = false, name = "devices:hardwareConcurrency"
+	try {
+		if (runSE) {
+			runSNH = false; abc = def
+		} else if (runSL) {
+			h = null; runSNH = false
+		} else if (runSNH) {
+			h = lstSNH[intSNH]; console.log("SIM #"+ intSNH, name, h)
+		} else {
 			h = navigator.hardwareConcurrency
-			h = (h == undefined ? zB0 : h)
-		} catch(e) {
-			log_error("devices: hardwareConcurrency", e.name, e.message)
-			h = zB0
 		}
-	} else {
-		h = zD
+	} catch(e) {
+		log_error("devices: hardwareConcurrency", e.name, e.message)
+		h = zB0
 	}
-
-	let isLies = (isBraveMode > 1 ? true: false)
-	if (isNaN(h)) {isLies = true
-	} else if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
-	if (runSL) {isLies = true; h = Math.floor((Math.random() * 33) + 1)}
-	if (isLies && h !== zB0) {
-		dom.nHWC.innerHTML = soL + h + scC + rfp_red
-		if (gRun) {gKnown.push("devices:hardwareConcurrency")}
-	} else {
-		dom.nHWC.innerHTML = h + (h == "2" ? rfp_green : rfp_red)
+	h = cleanFn(h)
+	// lies
+	if (h !== zB0) {
+		if (typeof h !== "number") {isLies = true
+		} else if (!Number.isInteger(h)) {isLies = true
+		} else if (h < 1) {isLies = true
+		} else if (isBraveMode > 1) {isLies = true
+		} else if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
 	}
-	return "hardwareConcurrency:"+ (isLies ? zLIE : h)
+	let h2 = h
+	// output
+	if (isLies) {
+		h2 = zLIE; h = soL + h + scC
+		if (gRun) {gKnown.push(name)}
+	}
+	dom.nHWC.innerHTML = h + (h === 2 ? rfp_green : rfp_red)
+	if (runSNH) {
+		console.debug(" - returned", h2)
+		intSNH++; intSNH = intSNH % lstSNH.length
+	}
+	return "hardwareConcurrency:"+ h2
 }
 
 function get_keyboard() {
@@ -152,11 +162,7 @@ function get_keyboard() {
 		let display = "", value = "", isObj = false, isObjFake = true
 		try {
 			let k = navigator.keyboard
-			// cleanup test
-			if (k == "undefined") {k = "undefined string"
-			} else if (k == undefined || k == true || k == false || k == null) {k += ""
-			} else if (Array.isArray(k)) {k = "array"}
-			if (k == "") {k = "empty string"}
+			k = cleanFn(k)
 			if (typeof k === "object") {
 				isObj = true
 				if (k+"" == "[object Keyboard]") {isObjFake = false}
@@ -200,7 +206,7 @@ function get_keyboard() {
 			} else {
 				value = k
 				display = k
-				if (k == "undefined" & isFF) {display = zNA; value = zNA} else {display = color(display)}
+				if (k == zU & isFF) {display = zNA; value = zNA} else {display = color(display)}
 				dom.nKeyboard.innerHTML = display
 				return resolve("keyboard:"+ value)
 			}
@@ -215,126 +221,122 @@ function get_keyboard() {
 }
 
 function get_media_devices() {
-	let devicesBS = false
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let extra = ""
 		if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
 		log_perf("-- start md section -- ","n/a",gt0,extra)
+		let hash = ""
 
-		function finish(result) {
-			// lies
-			if (gRun) {
-				if (devicesBS) {gKnown.push("devices:media")}
+		// not supported
+		if (check_navKey("mediaDevices") == false) {
+			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
+			return resolve("media_devices:"+ zD)
+		}
+		// output + resolve
+		function finish(result, display, applyColor = true) {
+			if (devicesBS) {
+				result = zLIE
+				if (applyColor) {display = soL + display + scC}
+				if (gRun) {gKnown.push("devices:media")}
 			}
+			// notation
+			let note = ""
+			if (hash == "3bd41389") {note = (isTB ? tb_red : rfp_green)} else {note = (isTB ? tb_red : rfp_red)}
+			dom.eMD.innerHTML = display + note
 			extra = ""
 			if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
 			log_perf("media devices [devices]",t0,gt0, extra)
-			if (devicesBS) {result = zLIE}
+			if (runMDV) {console.log(" - returned", result)}
 			return resolve("media_devices:"+ result)
 		}
+		// await devices
+		try {
+			let limit = 1000
+			promiseRaceFulfilled({
+				promise: navigator.mediaDevices.enumerateDevices(),
+				responseType: Array,
+				limit: 2000 // increase race limit for slow system/networks
+			}).then(function(devices) {
+				// promise failed
+				if (!devices) {
+					let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
+					dom.eMD.innerHTML = e.name
+					finish(e.name, e.name)
+					return
+				}
+				// reset BS: assume lies
+				devicesBS = true
+				let isArray = false
+				if (runMDV) {
+					devices = lstMDV[intMDV]
+					console.log("SIM #"+ intMDV +" mediaDevices", devices)
+					intMDV++; intMDV = intMDV % lstMDV.length
+				}
+				if (typeof devices == "object" && Array.isArray(devices)) {
+					isArray = true
+					try {devices.forEach(function(d) {})} catch(e) {}
+					if (isFF && devices+"" == "[object MediaDeviceInfo]") {devicesBS = false
+					} else if (isEngine == "blink") {
+						if (devices +"" == "[object InputDeviceInfo],[object MediaDeviceInfo]") {devicesBS = false}
+					} else {devicesBS - false} // webkit who cares
+				} else {
+					devices = cleanFn(devices)
+				}
+				if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true} // fallback
 
-		// not supoprted
-		if (check_navKey("mediaDevices") == false) {
-			dom.eMD.innerHTML = zD + (isTB ? tb_green : rfp_red)
-			finish(zD)
-		} else {
-			// else try enumerateDevices
-			let str=""
-			try {
-				// await devices
-				let limit = 1000
-				promiseRaceFulfilled({
-					promise: navigator.mediaDevices.enumerateDevices(),
-					responseType: Array,
-					limit: 2000 // increase race limit for slow system/networks
-				}).then(function(devices) {
-					// handle if devices was rejected or not fulfilled
-					if (!devices) {
-						// custom error
-						let e = { name: 'promise failed', message: `blocked or failed to fulfill in ${limit}ms` }
-						dom.eMD.innerHTML = e.name
-						finish(e.name)
-						return
-					}
-
-try {
-console.debug("A", devices)
-console.debug("B", devices+"")
-console.debug("C", devices[0])
-console.debug("D", devices[0]+"")
-console.debug("E", devices.length)
-} catch(e) {}
-					
-					// BS
-					if (proxyLies.includes("MediaDevices.enumerateDevices")) {devicesBS = true}
-					let isArray = false
-					if (typeof devices == "object") {
-						try {devices.forEach(function(d) {}); isArray = true} catch(e) {}
-					}
-					// enumerate
-					if (isArray) {
-						let arr = []
-						devices.forEach(function(d) {
-							arr.push(d.kind)
-							// FF sanity check
-							if (isFF) {
-								// FF67+ groupId
-								if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
-								if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
-								// deviceId
-								let chk = d.deviceId
+				// enumerate
+				if (isArray) {
+					let aData = []
+					devices.forEach(function(d) {
+						let dValue = d.kind
+						if (dValue === undefined) {devicesBS = true} else {aData.push(dValue)}
+						// FF sanity check
+						if (isFF && d.groupId !== undefined) {
+							// FF67+ groupId
+							if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
+							if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
+							// deviceId
+							let chk = d.deviceId
+							if (chk.length !== 44) {devicesBS = true}
+							else if (chk.slice(-1) !== "=") {devicesBS = true}
+							// groupId
+							if (isVer > 66) {
+								chk = d.groupId
+								//console.log("group", chk.length, chk.slice(-1), chk)
 								if (chk.length !== 44) {devicesBS = true}
 								else if (chk.slice(-1) !== "=") {devicesBS = true}
-								// groupId
-								if (isVer > 66) {
-									chk = d.groupId
-									//console.log("group", chk.length, chk.slice(-1), chk)
-									if (chk.length !== 44) {devicesBS = true}
-									else if (chk.slice(-1) !== "=") {devicesBS = true}
-								}
 							}
-						})
-						// count each kind
-						let pretty = [], plain = [], rfphash = ""
-						if (arr.length) {
-							arr.sort()
-							let map = arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-							arr = [...map.entries()]
-							// build pretty/plain
-							for (let i=0; i < arr.length; i++) {
-								let data = arr[i],
-									item = data[0],
-									itemcount = data[1]
-								plain.push(item +","+ itemcount)
-								if (devicesBS) {item = soL + item + scC}
-								pretty.push(item + s7 +"["+ itemcount +"]"+ sc)
-							}
-							pretty = pretty.join(" ")
-							str = plain.join(";")
-							rfphash = sha1(str, "devices media devices")
-							// RFP
-							if (rfphash == "6812ba88a8eb69ed8fd02cfaecf7431b9c3d9229") {
-								dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_green)
-							} else {
-								dom.eMD.innerHTML = pretty + (isTB ? tb_red : rfp_red)
-							}
-						} else {
-							str = devicesBS ? zLIE : "none"
-							dom.eMD.innerHTML = (devicesBS ? soL +"none"+ scC : "none") + rfp_red
 						}
+					})
+					// count each kind
+					if (aData.length) {
+						let aDisplay = [], aPlain = []
+						aData.sort()
+						let map = aData.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
+						aData = [...map.entries()]
+						// build pretty/plain
+						for (let i=0; i < aData.length; i++) {
+							let data = aData[i],
+								item = data[0],
+								itemcount = data[1]
+							aPlain.push(item +","+ itemcount)
+							if (devicesBS) {item = soL + item + scC}
+							aDisplay.push(item + s7 +"["+ itemcount +"]"+ sc)
+						}
+						hash = mini(aPlain.join(";"), "devices media devices")
+						finish(aPlain.join(";"), aDisplay.join(" "), false)
 					} else {
-						dom.eMD.innerHTML = soL + "!typeof" + scC + rfp_red
-						str = zLIE
+						finish("none", "none")
 					}
-					finish(str)
-				})
-			} catch(e) {
-				log_error("devices: media devices", e.name, e.message)
-				let display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-				dom.eMD.innerHTML = display + (isTB ? tb_red : rfp_red)
-				finish(zB0)
-			}
+				} else {
+					finish(zLIE, devices)
+				}
+			})
+		} catch(e) {
+			log_error("devices: media devices", e.name, e.message)
+			dom.eMD.innerHTML = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			return resolve("media_devices:"+ zB0)
 		}
 	})
 }
@@ -345,22 +347,18 @@ function get_mimetypes() {
 		mimeBS = true
 		try {
 			let m = navigator.mimeTypes
-			if (runPM) {
-				console.debug("SIM #" + simPM + " mimeTypes")
-				if (simPM == 0) {m = undefined}
-				if (simPM == 1) {m = {}}
-				if (simPM == 2) {m = null}
-				if (simPM == 3) {m = zB0; mimeBS = false; simPM++; return resolve(m)}
-				if (simPM == 4) {m = "i am groot"}
-				if (simPM == 5) {}
-				simPM++
-				simPM = simPM % 6
+			if (runSE) {
+				runSNM = false; abc = def = zB0
+			} else if (runSL) {
+				runSNM = false; m = null
+			} else if (runSNM) {
+				m = lstSNM[intSNM]
+				console.log("SIM #" + intSNM + " mimeTypes", m)
+				intSNM++; intSNM = intSNM % lstSNM.length
+				if (m == zB0) {mimeBS = false; return resolve(m)}
 			}
 			// cleanup
-			if (m == "undefined") {m = "undefined string"
-			} else if (m == undefined || m == true || m == false || m == null) {m += ""
-			} else if (Array.isArray(m)) {m = "array"}
-			if (m == "") {m = "empty string"}
+			m = cleanFn(m)
 			let isObj = false, isObjFake = true
 			if (typeof m === "object") {
 				isObj = true
@@ -376,7 +374,7 @@ function get_mimetypes() {
 					res.sort()
 					return resolve(res)
 				} else {
-					return resolve(isObjFake ? m : "none")
+					return resolve(isObjFake ? m : "none") // we already set mimeBS = false on a legit object
 				}
 			} else {
 				return resolve(m)
@@ -396,21 +394,18 @@ function get_plugins() {
 		if (isFF) {pluginBS = true}
 		try {
 			let p = navigator.plugins
-			if (runPP) {
-				console.debug("SIM #" + simPP + " plugins")
-				if (simPP == 0) {p = zB0; pluginBS = false; simPP++; output(zB0); return}
-				if (simPP == 1) {}
-				if (simPP == 2) {p = null}
-				if (simPP == 3) {p = undefined}
-				if (simPP == 4) {p = {}}
-				simPP++
-				simPP = simPP % 5
+			if (runSE) {
+				runSNP = false; abc = def
+			} else if (runSL) {
+				runSNP = false; p = {}
+			} else if (runSNP) {
+				p = lstSNP[intSNP]
+				console.log("SIM #" + intSNP + " plugins", p)
+				intSNP++; intSNP = intSNP % lstSNP.length
+				if (p == zB0) {pluginBS = false; return resolve(p)}
 			}
 			// cleanup
-			if (p == "undefined") {p = "undefined string"
-			} else if (p == undefined || p == true || p == false || p == null) {p += ""
-			} else if (Array.isArray(p)) {p = "array"}
-			if (p == "") {p = "empty string"}
+			p = cleanFn(p)
 			let isObj = false, isObjFake = true
 			if (typeof p === "object") {
 				isObj = true
@@ -450,7 +445,6 @@ function get_plugins_mimetypes() {
 		sDetail[sName] = []
 		sDetail[sName +"_fake_skip"] = []
 
-		// promise
 		Promise.all([
 			get_plugins(),
 			get_mimetypes(),
@@ -464,34 +458,46 @@ function get_plugins_mimetypes() {
 				if (Array.isArray(value)) {
 					if (isLies) {sName += "_fake_skip"}
 					sDetail[sName] = value
-					btn = buildButton("7", sName, value.length +" "+ type + (value.length > 1 ? "s" : ""))
+					btn = buildButton("7", sName, value.length +" "+ type)
 					value = sha1(value.join(), "devices "+ type)
 				}
 				fpValue = value
 				// isBypass
-				let isBypass = (isVer > 84 && value !== "none" ? true : false) // FF85+ EOL Flash
-				if (isRFP && isLies || isRFP && value == zB0) {isBypass = true}
-				if (isBypass) {isLies = true}
+				let isBypass = false
+				let msgBP = "FF85+"
 				if (isFF) {
-					if (isLies || value == zB0) {
-						// FF84- we can also bypass if the other one is "none" which we only get on legit objects
-						// not sure about other engines: chromium should alway have items AFAIK
-						let otherValue = type == "plugins" ? results[1] : results[0]
-						if (otherValue == "none") {isBypass = true; isLies = true}
+				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
+					let otherValue = type == "plugins" ? results[1] : results[0]
+					let otherBS = type == "plugins" ? mimeBS : pluginBS
+					if (isVer > 84) {
+						// EOL Flash: use isLies
+						if (isLies || value == zB0) {isBypass = true}
+					} else if (isVer < 85 && isLies || value == zB0) {
+						// FF84- we can bypass if the other one is a non-fake "none"
+						if (otherValue == "none" && !otherBS) {
+							isBypass = true
+							if (runSNM || runSNP) {
+								msgBP = "from "+ (type == "plugins" ? "mimeTypes" : "plugins")
+							}
+						}
 					}
+					if (isBypass) {isLies = true}
 				}
 				// display
 				if (isLies) {
 					value = (isBypass ? soB : soL) + value + scC + rfp_red
 					el.innerHTML = value + btn
 					fpValue = isBypass ? "none" : zLIE
-					if (gRun || runPM || runPP) {
+					if (gRun || runSNM || runSNP) {
 						gKnown.push("devices:"+ type)
 						if (isBypass) {gBypassed.push("devices:"+ type +":none")}
-						if (runPM || runPP) {console.debug(type+ ": recorded lie" + (isBypass ? " + bypass" : ""), " | value: "+ fpValue)}
 					}
 				} else {
+					// fake "none" is already wrapped in soB
 					el.innerHTML = value + btn + (value == "none" ? rfp_green : rfp_red)
+				}
+				if (runSNM && type == "mimeTypes" || runSNP && type == "plugins") {
+					console.log(" - returned "+ fpValue + " ["+ type +"]" + (isBypass ? ": bypass "+ msgBP : ""))
 				}
 				return fpValue
 			}
@@ -505,11 +511,11 @@ function get_plugins_mimetypes() {
 
 function get_pointer_event() {
 	// note: FF87 or lower: dom.w3c_pointer_events.enabled = false
-	if (window.PointerEvent == "undefined") {
+	if (window.PointerEvent === undefined) {
 		dom.ptEvent.innerHTML = zNS
 		return
 	} else if (isTB && isVer < 87) {
-		dom.ptEvent.innerHTML = "n/a" + tb_green
+		dom.ptEvent.innerHTML = zNA + tb_green
 		// do not return because prefs can be changed
 	}
 	let target = window.document.getElementById("pointertarget")
@@ -517,6 +523,8 @@ function get_pointer_event() {
 		// get data
 		let list = ['height','isPrimary','mozInputSource','pointerType',
 			'pressure','tangentialPressure','tiltX','tiltY','twist','width',]
+		let listType = ['number','boolean','number','string',
+			'number','number','number','number','number','number',]
 		let res = []
 		for (let i=0; i < list.length; i++) {
 			let value = ""
@@ -536,9 +544,13 @@ function get_pointer_event() {
 				value = e.name
 			}
 			if (value == "") {
-			} else if (value == "undefined") {value = "undefined string"
-			} else if (value == undefined) {value = "undefined"
-			} else if (value == null) {value = null}
+			} else if (value == zU) {value = zUQ
+			} else if (value === undefined) {value = zU}
+			if (typeof value !== listType[i]) {
+				if (i == 2 && isFF || i !== 2) {
+					value = soL + value + scC
+				}
+			}
 			res.push(value)
 		}
 		let notation = ""
@@ -586,9 +598,16 @@ function get_pointer_hover() {
 
 		let res = [], display = [], pointerBS = false, hoverBS = false
 		// pointer event
-		let r1 = (window.PointerEvent == "undefined" ? zD : zE)
-		dom.pointer = r1
-		res.push("pointer_event:"+ r1)
+		let r1 = window.PointerEvent, isLiesPE = false
+		r1 = cleanFn(r1)
+		if (r1 == "undefined") {r1 = zD
+		} else if (typeof r1 == "function") {r1 = zE
+		} else {isLiesPE = true}
+		dom.pointer.innerHTML = isLiesPE ? soL + r1 + scC : r1
+		if (gRun && isLiesPE) {
+			gKnown.push("devices:pointer_event")
+		}
+		res.push("pointer_event:"+ (isLiesPE ? zLIE : r1))
 		// pointer
 		get_mm("pointer", "#cssP")
 		get_mm("any-pointer", "#cssAP")
@@ -693,80 +712,100 @@ function get_speech_rec() {
 }
 
 function get_touch() {
-	function clean(item) {
-		if (!isNaN(item)) {return item
-		} else {if (item == "") {item = "empty string"}; item += ""; return item}
-	}
-	// maxTouchPoints
-	let MTP, displayMTP, fpMTP, maxBS = false, maxBypass = false
-	try {
-		MTP = clean(navigator.maxTouchPoints)
-	} catch(e) {
-		log_error("devices: maxtouchpoints", e.name, e.message)
-		MTP = zB0
-	}
 	// ontouchstart/ontouchend/TouchEvent
 		// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
 		// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
 		// on touch devices: 0 (all false) 1 or 2 (all true)
 		// on non-touch devices = no change (all false)
-	let touchRes = []
-	try {
-		if ("ontouchstart" in window) {toucRes.push(true)} else {touchRes.push(false)}
-	} catch(e) {
-		log_error("devices: ontouchstart", e.name, e.message)
-		touchRes.push(zB0)
-	}
-	try {
-		if ("ontouchend" in window) {touchRes.push(true)} else {touchRes.push(false)}
-	} catch(e) {
-		log_error("devices: ontouchend", e.name, e.message)
-		touchRes.push(zB0)
-	}
-	try {
-		document.createEvent("TouchEvent")
-		touchRes.push(true)
-	} catch(e) {
-		log_error("devices: touch touchevent", e.name, e.message)
-		touchRes.push(e.name == "NotSupportedError" ? false : zB0)
-	}
-	// is touch all the same
-	let touchSum = touchRes[0] + touchRes[1] + touchRes[2], touchBS = false
-	if (touchSum !== 0 && touchSum !== 3) {touchBS = true}
-
-	// MTP: BS & Bypasses
-	displayMTP = MTP
-	fpMTP = MTP
-	if (isNaN(MTP) && MTP !== zB0) {maxBS = true // don't color blocks
-	} else if (MTP < 0) {maxBS = true
-	} else if (proxyLies.includes("Navigator.maxTouchPoints")) {maxBS = true}
-	if (maxBS || MTP == zB0) {
-		if (touchSum == 0 && MTP !== 0) {maxBypass = true; fpMTP = 0} // touch is 3xfalse
-		if (maxBypass) {
-			displayMTP = soB + MTP + scC
-		} else {
-			displayMTP = (MTP !== zB0 ? soL + MTP + scC: MTP)
-			if (maxBS) {fpMTP = zLIE}
+	return new Promise(resolve => {
+		let touchRes = [], touchBS = false
+		function get_ontouch() {
+			let list = ["ontouchstart","ontouchend"]
+			list.forEach(function(name) {
+				try {
+					if (name in window) {toucRes.push(true)} else {touchRes.push(false)}
+				} catch(e) {
+					log_error("devices: "+ name, e.name, e.message)
+					touchRes.push(zB0)
+				}
+			})
+			try {
+				document.createEvent("TouchEvent")
+				touchRes.push(true)
+			} catch(e) {
+				log_error("devices: touch touchevent", e.name, e.message)
+				touchRes.push(e.name == "NotSupportedError" ? false : zB0)
+			}
 		}
-		if (gRun) {
-			gKnown.push("devices:maxtouchpoints")
-			if (maxBypass) {gBypassed.push("devices:maxtouchpoints:0")}
+
+		// maxTouchPoints: 1363508 : FF64+ RFP
+		let MTP, maxBS = false, maxBypass = false
+		function get_mtp() {
+			let name = "maxtouchpoints"
+			try {
+				if (runSE) {
+					runMTP = false; abc = def
+				} else if (runSL) {
+					runMTP = false; runMTP = undefined
+				} else if (runMTP) {
+					MTP = lstMTP[intMTP]; console.log("SIM #"+ intMTP, name, MTP)
+					intMTP++; intMTP = intMTP % lstMTP.length
+				} else {
+					MTP = navigator.maxTouchPoints
+				}
+			} catch(e) {
+				MTP = zB0; log_error("devices: maxtouchpoints", e.name, e.message)
+			}
+			MTP = cleanFn(MTP)
+			// BS
+			if (MTP !== zB0) {
+				if (typeof MTP !== "number") {maxBS = true
+				} else if (!Number.isInteger(MTP)) {maxBS = true
+				} else if (MTP < 0) {maxBS = true
+				} else if (proxyLies.includes("Navigator.maxTouchPoints")) {maxBS = true}
+			}
 		}
-	}
-	dom.touchM.innerHTML = displayMTP + (displayMTP == 0 ? rfp_green : rfp_red)
 
-	// ToDo: touch LIE/BYPASS
-	let touchReal = ""
-	if (MTP !== zB0 & !maxBS) {
-		touchReal = MTP == 0 ? false : true
-	} else {
-		// 0=3xfalse, 3=3xtrue
-	}
+		function analyze() {
+			// is touch all the same
+			let touchSum = touchRes[0] + touchRes[1] + touchRes[2]
+			if (touchSum !== 0 && touchSum !== 3) {touchBS = true}
+			let displayMTP = MTP
+			let fpMTP = MTP
 
-	// output
-	let str = touchRes.join(" | ")
-	dom.touchE.innerHTML = str
-	return ["touchevents:"+ str, "maxtouchpoints:"+ fpMTP]
+			if (touchSum == 0 && MTP !== 0) {maxBypass = true}
+			if (maxBypass) {maxBS = true}
+
+			if (maxBS) {
+				if (maxBypass) {
+					fpMTP = 0
+					displayMTP = soB + MTP + scC
+				} else {
+					displayMTP = (MTP !== zB0 ? soL + MTP + scC: MTP)
+					if (maxBS) {fpMTP = zLIE}
+				}
+				if (gRun) {
+					gKnown.push("devices:maxtouchpoints")
+					if (maxBypass) {gBypassed.push("devices:maxtouchpoints:0")}
+				}
+			}
+			dom.touchM.innerHTML = displayMTP + (displayMTP === 0 ? rfp_green : rfp_red)
+
+			// ToDo: touch LIE/BYPASS
+			//let touchReal = ""
+			// if !isRFP then it must be 3xtrue or 3xfalse
+				// ^ we use MTP but only if that wasn't a lie and isn't blocked
+
+			// output
+			let str = touchRes.join(" | ")
+			dom.touchE.innerHTML = str
+			return resolve(["touchevents:"+ str, "maxtouchpoints:"+ fpMTP])
+		}
+
+		get_mtp()
+		get_ontouch()
+		analyze()
+	})
 }
 
 function get_vr() {

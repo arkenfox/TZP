@@ -1,6 +1,7 @@
 'use strict';
 
-let cSim = 0
+// sims
+let intCSS = 0
 
 function get_colors() {
 	/* 95+: test_bug232227.html */
@@ -180,31 +181,27 @@ function get_computed_styles() {
 		]).then(res => {
 			let blankIndex = [], realIndex = [], fakeIndex = [], distinctRep = [], distinctReal = []
 			let values = [], minivalues = [], btns = []
+			let cMsg = ""
 			// sim
-			if (runSC) {
+			if (runCSS) {
 				if (isFile) {
-					let devMsg = "set privacy.file_unique_origin = false for file:// scheme testing"
+					let devMsg = "#SIM css styles: set privacy.file_unique_origin = false for file:// scheme"
 					if (isVer > 94) {
-						devMsg = "FF95+ : you can't test runSC (styles) using file:// scheme" // 1732052
-						runSC = false
-					} else {
-						cSim++
-						cSim = cSim % 10
-						if (cSim == 0) {console.log("style sim #0: all blocked")}
-						var bMsg = false
+						devMsg = "SIM css styles: FF95+ cannot use file:// scheme" // 1732052
+						runCSS = false
 					}
-					console.error(devMsg)
+					if (intCSS == 0) {console.error(devMsg)}
 				}
 			}
 			// file:// override for CSSRuleList
-			let fileSchemeOverride = (isFile && !runSC && isVer > 67 ? true : false)
+			let fileSchemeOverride = (isFile && !runCSS && isVer > 67 ? true : false)
 			if (isFFLegacy) {fileSchemeOverride = true}
 			if (isFile && !isFF) {fileSchemeOverride = true}
 			// analyse
 			for (let i=0; i < 3; i++) {
 				let aRep = [], aReal = [], aFake = []
 				try {
-					aRep = res[i].keys
+					aRep = res[i].keys // throws an error if blocked
 					if (fileSchemeOverride && i==2) {aRep = res[1].keys}
 					// don't record untrustworthy: false positives FF60-62: getComputedStyle has extra styles
 					// remove diffs: we don't lose entropy, we already know the version number
@@ -215,24 +212,22 @@ function get_computed_styles() {
 						}
 					}
 					// sim
-					if (runSC) {
-						let cMsg = ""
-						// privacy.file_unique_origin = false
-						if (cSim == 0) {bMsg = true; let k=y
-						} else if (cSim == 1) {cMsg = "3 same fake"; aRep.push("fake")
-						} else if (cSim == 2) {cMsg = "2 true, 1 block"; if (i == 1) {let k=y}
-						} else if (cSim == 3) {cMsg = "2 same fake, 1 block"; if (i == 1 || i == 2) {aRep.push("eh")} else if (i == 0) {let k=y}
-						} else if (cSim == 4) {cMsg = "2 same fake, 1 true"; if (i == 0 || i == 2) {aRep.push("ugh")}
-						} else if (cSim == 5) {cMsg = "1 true, 1 fake, 1 blocked"; if (i == 2) {aRep.push("foo","bar")} else if (i == 1) {let k=y}
-						} else if (cSim == 6) {cMsg = "2 diff fakes, 1 true"; if (i==1) {aRep.push("woo")} else if (i==2) {aRep.push("wha","wee")}
-						} else if (cSim == 7) {cMsg = "2 diff fakes, 1 block"
+					if (runCSS) {
+						// let k = y sims thrown error
+						if (intCSS == 0) {cMsg = "all blocked"; let k=y
+						} else if (intCSS == 1) {cMsg = "3 same fake"; aRep.push("fake")
+						} else if (intCSS == 2) {cMsg = "1 block"; if (i == 1) {let k=y}
+						} else if (intCSS == 3) {cMsg = "2 same fake, 1 block"; if (i == 1 || i == 2) {aRep.push("eh")} else if (i == 0) {let k=y}
+						} else if (intCSS == 4) {cMsg = "2 same fake"; if (i == 0 || i == 2) {aRep.push("ugh")}
+						} else if (intCSS == 5) {cMsg = "1 fake, 1 blocked"; if (i == 2) {aRep.push("foo","bar")} else if (i == 1) {let k=y}
+						} else if (intCSS == 6) {cMsg = "2 diff fakes"; if (i==1) {aRep.push("woo")} else if (i==2) {aRep.push("wha","wee")}
+						} else if (intCSS == 7) {cMsg = "2 diff fakes, 1 block"
 							if (i==0) {aRep.push("a","b")} else if (i==1) {let k=y} else if (i==2) {aRep.push("ek")}
-						} else if (cSim == 8) {cMsg = "3 diff fakes"
+						} else if (intCSS == 8) {cMsg = "3 diff fakes"
 							if (i==0) {aRep.push("x")} else if (i==1) {aRep.push("y")} else if (i==2) {aRep.push("z","k")}
-						} else if (cSim == 9) {cMsg = "at least 2 diff real results, 1 block"
+						} else if (intCSS == 9) {cMsg = "at least 2 diff real results, 1 block"
 							if (i==1) {aRep = aRep.filter(x => !["constructor"].includes(x)); aRep.push("y"); aRep.push("constructor")} else if (i==2) {let k=y}
 						}
-						if (cSim !== 0 && !bMsg) {console.log("style sim #"+ cSim + ":", cMsg); bMsg = true}
 					}
 					if (isFF && isVer > 62) {
 						let lastStyleIndex = aRep.indexOf("constructor")
@@ -242,7 +237,7 @@ function get_computed_styles() {
 						aRep.sort()
 						aReal = aRep
 					}
-					//if (i==0) {console.debug(aReal.join("\n"))}
+					//if (i==0) {console.log(aReal.join("\n"))}
 
 					// data
 					let minivalue = mini(aRep.join(), "css computed style "+ i)
@@ -272,7 +267,7 @@ function get_computed_styles() {
 					btns.push(btn)
 				} catch(e) {
 					blankIndex.push(i)
-					values.push("blocked")
+					values.push(zB0)
 					btns.push("")
 				}
 			}
@@ -302,7 +297,6 @@ function get_computed_styles() {
 			let value = zLIE
 			// bypasses
 			let isBypass = false
-
 			if (distinctReal.length == 1 && (bCount + fakeIndex.length > 0)) {
 				isBypass = true
 				value = distinctReal[0]
@@ -331,6 +325,11 @@ function get_computed_styles() {
 			}
 			// return
 			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
+			if (runCSS) {
+				console.log("SIM #"+ intCSS +" css styles:", cMsg)
+				console.log(" - returning", value)
+				intCSS++; intCSS = intCSS % 10
+			}
 			return resolve("computed_styles:"+ value)
 		}).catch(error => {
 			if (gRun) {gCheck.push("css:computed_styles: " + error.name +" : "+ error.message)}

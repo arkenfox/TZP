@@ -4,7 +4,7 @@
 
 function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let res0 = [], res1 = [], res2 = []
+	let res0 = [], res1 = [], res2 = [], aMismatch = [zNA,zNA,zNA,zNA,zNA]
 	var isSHA = "SHA-1"
 
 	// expected known
@@ -55,6 +55,7 @@ function outputCanvas() {
 			if (isBlock && val0.length == nHash && val0.indexOf(" ") == -1) {val0 = val1}
 			// rehash shorter
 			if (!isBlock && isSHA == "SHA-256") {val0 = sha1(val0, "canvas "+ name)}
+			if (aMismatch[i] !== zNA) {val0 = aMismatch[i]}
 			aValue.push(val0)
 			// lies = from known: valid hash + engine
 			if (!useKnown || isBlock) {val2 = "true"}
@@ -84,13 +85,15 @@ function outputCanvas() {
 			let element = dom.tb9.querySelector("."+ item)
 			let display = aValue[i], record = display
 			// block first
-			if (aBlock[i] == true) {record = zB0}
+			if (aBlock[i] == true) {
+				if (aMismatch[i] !== zNA) {record = zLIE} else {record = zB0}
+			}
 			// bypass can override block
 			if (item == bypassTarget) {
 				display = soB + display + scC; record = bypassValue
 				if (gRun) {gBypassed.push("canvas:"+ bypassTarget +":"+ bypassValue)}
-			} else if (aKnown[i] == false && aBlock[i] == false || aPass[i] == false) {
-				// otherwise color up lies but not blocks
+			} else if (aKnown[i] == false && aBlock[i] == false || aPass[i] == false || aMismatch[i] !== zNA) {
+				// otherwise color up lies + mismatched types but not blocks
 				display = soL + display + scC; record = zLIE
 			}
 			aRecord.push(item +":"+ record)
@@ -99,16 +102,16 @@ function outputCanvas() {
 				let control = ""
 				let test = aValue[i]
 				if (item.substring(0,4) == "isPo") {
-					control =  isSHA == "SHA-1" ? "ff86099c8eb14523e204d688a35b104a217bd886" : "472a2a3d8f0f23a00a1d25dec73833bdc8a4457e"
+					control =  isSHA == "SHA-1" ? "5a8876b36c2b45c881ed9cbffd0b08b1919b0d57" : "5c4d5144d5afc2503eede9d3c1af8c25a9181ab0"
 					display += (test == control ? rfp_green : rfp_red)
 				}
 				// static
-				if (isVer < 78) { // 220x30 white
+				if (isVer < 78) { // 270x20 white
 					if (item == "toDataURL" || item == "toBlob") {
-						control = isSHA == "SHA-1" ? "0a4b8b3ff3cbd712d1883e1324a8bb3f07e10ca7" : "89346bd04959d09543a87649da1321e88c195a04"
+						control = isSHA == "SHA-1" ? "3ac477ddf14d503ebf01d7b66985f5426ff03fff" : "4aa37097783babc067ccf9cbc03883f66abd5ee0"
 						display += (test == control ? rfp_green : rfp_red)
 					} else if (item == "getImageData") {
-						control = isSHA == "SHA-1" ? "25470ba3fb79778869ad46c7175d5fac9c88ad2b" : "c4492552ef059c1c7d8042da6f818fc07064e8e5"
+						control = isSHA == "SHA-1" ? "67457668c36241c7da45b355a120119435c7c444" : "bc8be51cf034237e75db150750d22afa1287696e"
 						display += (test == control ? rfp_green : rfp_red)
 					}
 				}
@@ -130,7 +133,7 @@ function outputCanvas() {
 				}
 			}
 			// if blocked and not bypassed
-			if (aBlock[i] == true && item !== bypassTarget) {
+			if (aBlock[i] == true && item !== bypassTarget && aMismatch[i] == zNA) {
 				display = trim_error(aValue[i])
 			}
 			element.innerHTML = display
@@ -139,9 +142,13 @@ function outputCanvas() {
 		if (gRun) {
 			let mPass = [], mPersist = []
 			for (let i=0; i < aIndex.length; i++) {
-				if (aKnown[i] == false || aPass[i] == false) {gKnown.push("canvas:"+ aIndex[i])}
+				if (aKnown[i] == false || aPass[i] == false || aMismatch[i] !== zNA) {
+					gKnown.push("canvas:"+ aIndex[i])
+				}
 				if (aBlock[i] == true) {
-					log_error("canvas: "+ aIndex[i], aValue[i])
+					if (aMismatch[i] == zNA) {
+						log_error("canvas: "+ aIndex[i], aValue[i])
+					}
 				} else if (aPass[i] == false) {
 					mPass.push(aIndex[i])
 				} else if (aKnown[i] == false) {
@@ -164,7 +171,7 @@ function outputCanvas() {
 					value: function(){
 						try {
 							let t1; if (canPerf) {t1 = performance.now()}
-							let data = hashData(getFilledContext().canvas.toDataURL())
+							let data = hashData(getFilledContext().canvas.toDataURL(), 4, runNo)
 							log_perf("toDataURL ["+ runNo +"] [canvas]",t1)
 							return data
 						} catch(e) {
@@ -185,7 +192,7 @@ function outputCanvas() {
 									window.clearTimeout(timeout)
 									var reader = new FileReader()
 									reader.onload = function(){
-										let data = hashData(reader.result)
+										let data = hashData(reader.result, 3, runNo)
 										log_perf("toBlob ["+ runNo +"] [canvas]",t1)
 										resolve(data)
 									}
@@ -204,10 +211,15 @@ function outputCanvas() {
 					class: window.CanvasRenderingContext2D,
 					name: "getImageData",
 					value: function(){
-						let t1; if (canPerf) {t1 = performance.now()}
+						let t1; if (canPerf) {t1 = performance.now()}; let data = ""
 						var context = getFilledContext()
 						var imageData = context.getImageData(0,0, context.canvas.width, context.canvas.height)
-						let data = window.crypto.subtle.digest(isSHA, imageData.data).then(hashToString)
+						if (typeof imageData == "object" && imageData +"" == "[object ImageData]") {
+							data = window.crypto.subtle.digest(isSHA, imageData.data).then(hashToString)
+						} else {
+							data = cleanFn(imageData) +""
+							if (runNo == 1) {aMismatch[0] = data} // not an error
+						}
 						log_perf("getImageData ["+ runNo +"] [canvas]",t1)
 						return data
 					}
@@ -218,10 +230,10 @@ function outputCanvas() {
 					value: function(){
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
-						var data = new Uint8Array(30 * 30)
-						for (var x = 0; x < 30; x += 1){
-							for (var y = 0; y < 30; y += 1){
-								data[y * 30 + x] = context.isPointInPath(x, y)
+						var data = new Uint8Array(16 * 16)
+						for (var x = 0; x < 16; x += 1){
+							for (var y = 0; y < 16; y += 1){
+								data[y * 16 + x] = context.isPointInPath(x, y)
 							}
 						}
 						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
@@ -235,10 +247,10 @@ function outputCanvas() {
 					value: function(){
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
-						var data = new Uint8Array(30 * 30)
-						for (var x = 0; x < 30; x += 1){
-							for (var y = 0; y < 30; y += 1){
-								data[y * 30 + x] = context.isPointInStroke(x, y)
+						var data = new Uint8Array(16 * 16)
+						for (var x = 0; x < 16; x += 1){
+							for (var y = 0; y < 16; y += 1){
+								data[y * 16 + x] = context.isPointInStroke(x, y)
 							}
 						}
 						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
@@ -259,22 +271,18 @@ function outputCanvas() {
 			function getFilledContext(){
 				var context = getContext()
 				var canvas = context.canvas
-				canvas.width = 220
-				canvas.height = 30
+				canvas.width = 170
+				canvas.height = 20
 				canvas.style.display = "inline"
 				context.rect(0,0,10,10)
 				context.rect(2,2,6,6)
-				// ToDo: canvas
-					// add background complexity: colors/shapes/overlaps
-					// more complex/better text
-					// stability: remove or split text off? e.g. block Arial, TNR fallback = !zoom resistance
-				// NOTE: no unicode/emojis
-				let fpText = "BrowserLeaks,com <canvas> 10"
+				// NOTE: the real test is spoofing: keep small/simple/fast: no unicode/emojis
+				let fpText = "BrowseLak,cm <canvs>10"
 				context.textBaseline = "top";
 				context.font = "14px 'Arial'"; // arial seems zoom resistent
 				context.textBaseline = "alphabetic";
 				context.fillStyle = "#f60";
-				context.fillRect(125,1,62,20);
+				context.fillRect(125,1,40, canvas.height-2);
 				context.fillStyle = "#069";
 				context.fillText(fpText,2,15);
 				context.fillStyle = "rgba(102, 204, 0, 0.7)";
@@ -305,11 +313,11 @@ function outputCanvas() {
 			}
 			function getPathContext(){
 				var context = getContext()
-				context.canvas.width = 30
-				context.canvas.height = 30
+				context.canvas.width = 16
+				context.canvas.height = 16
 				context.fillStyle = "#000"
 				context.beginPath()
-				context.arc(15.49, 15.51, 10.314, 0, Math.PI * 2)
+				context.arc(10.49, 14.51, 10.314, 0, Math.PI * 2)
 				context.closePath()
 				context.fill()
 				return context
@@ -326,16 +334,21 @@ function outputCanvas() {
 			function hashDataURL(url){
 				return crypto.subtle.digest(isSHA, new TextEncoder("utf-8").encode(url)).then(hashToString)
 			}
-			function hashData(data) {
-				if (data === null) {data = "null"
-				} else if (data === undefined) {data = "undefined"
-				} else if (data === true || data == "true") {data = "true"
-				} else if (data === false || data == "false") {data = "false"
-				} else if (data === 0) {data = "0"
-				} else if (data === "") {data = "empty string"
-				} else if (data === []) {data = "empty array"
-				} else {data = hashDataURL(data)}
-				return data
+			function hashData(data,type, runNo) {
+				// toDataURL, toBlob: we're expecting 
+				if (typeof data == "string") {
+					if (data.substring(0,21) == "data:image/png;base64") {
+						return hashDataURL(data)
+					} else {
+						data = cleanFn(data) +""
+						if (runNo == 1) {aMismatch[type] = data} // not an error
+					}
+					return data
+				} else {
+					data = cleanFn(data) +""
+					if (runNo == 1) {aMismatch[type] = data} // not an error
+					return data
+				}
 			}
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){

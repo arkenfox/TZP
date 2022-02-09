@@ -97,6 +97,7 @@ let s0 = " <span class='",
 	zS = "success",
 	zF = "failed",
 	zU = "undefined",
+	zUQ = "\"undefined\"",
 	zFF = "Firefox",
 	zTB = "Tor Browser",
 	zMingw64 = "Firefox [64bit]"+ s3+"[mingw]"+sc,
@@ -119,8 +120,8 @@ let s0 = " <span class='",
 	rfp_random_red = sb+"[RFP random]"+sc,
 	lb_green = sg+"[LB]"+sc,
 	lb_red = sb+"[LB]"+sc,
-	nw_green = sg+"[RFP New Window]"+sc,
-	nw_red = sb+"[RFP New Window]"+sc,
+	nw_green = sg+"[RFP NewWin]"+sc,
+	nw_red = sb+"[RFP NewWin]"+sc,
 	enUS_green = sg+"[en-US]</span> ",
 	enUS_red = sb+"[en-US]</span> ",
 	spoof_both_green = sg+"[en-US + RFP]"+sc,
@@ -176,12 +177,26 @@ let s0 = " <span class='",
 	logPseudo = false,
 	logResize = false,
 	logStorage = false,
-// simulations
-	runS = false, // different values
-	runSUA = false, // ua
-	runSIF = false, // ua iframe
-	runSF = false, // fonts: requires isOS
+// sims
+	runSE = false, // errors/blocked
 	runSL = false, // lies
-	runSC = false, // css styles
-	runSNC = false, // navigator connection
-	runSP = false // block performance.now()
+	runSN = false, // new
+	runSU = false, // ua (or use CB)
+// blocks
+	runPS = false, // block css pseudo: return x
+	runRF = false, // block isRFP = true
+	runSP = false, // performance.now()
+
+// cycle sims
+	runCLR = false, // done: color
+	runDEP = false, // done: color/pixel depth
+	runCSS = false, // done: css styles
+	runFNT = false, // done: fonts
+	runMDV = false, // done: mediaDevices
+	runMTP = false, // done: maxTouchPoints
+	runSNC = false, // nav connection
+	runSNH = false, // done: nav hardwareConcurrency
+	runSNM = false, // done: nav mimeTypes
+	runSNP = false, // done: nav plugins
+	runUAI = false, // done: ua iframe
+	runWFS = false  // done: window.fullScreen

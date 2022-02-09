@@ -132,37 +132,23 @@ function get_navigator() {
 		results.push("globalPrivacyControl:"+ gpc)
 
 		// onLine
-		let online = ""
-		if (check_navKey("onLine")) {
-			let onlineLie = true // assume lies
-			try {
-				let online = navigator.onLine
-				if (typeof online == "boolean" && online == true) {
-					onlineLie = false // must be true over HTTPS
-					online = zE
-				} else if (typeof online == "boolean" && online == false) {
-					online = zD
-				} else {
-					if (Number.isInteger(online)) {
-					} else if (online == "undefined") {online = "undefined string"
-					} else if (online == "") {online = "empty string"}
-				}
-				dom.nOnLine.innerHTML = onlineLie ? soB + online + scC : ""+ online
-			} catch(e) {
-				log_error("headers: onLine", e.name, e.message)
-				online = zB0
-				dom.nOnLine.innerHTML = soB + e.name + scC
-			}
-			if (onlineLie && gRun) {
-				gKnown.push("headers:onLine")
-				gBypassed.push("headers:onLine:"+ zE)
-			}
-			online = zE // always return true
-		} else {
-			online = zNA
-			dom.nOnLine = zNA
+		let online = true
+		let onlineLie = true // assume lies
+		try {
+			let online = navigator.onLine
+			online = cleanFn(online)
+			if (online == "true") {onlineLie = false} // must be true over HTTPS
+			dom.nOnLine.innerHTML = onlineLie ? soB + online + scC : ""+ online
+		} catch(e) {
+			log_error("headers: onLine", e.name, e.message)
+			online = zB0
+			dom.nOnLine.innerHTML = soB + e.name + scC
 		}
-		results.push("online:"+ online)
+		if (onlineLie && gRun) {
+			gKnown.push("headers:onLine")
+			gBypassed.push("headers:onLine:"+ zE)
+		}
+		results.push("online:true") // always return true
 
 		// DNT
 		let dnt = "", dntLie = false
@@ -175,7 +161,7 @@ function get_navigator() {
 					} else {
 						dntLie = true
 						if (Number.isInteger(dnt) || typeof dnt == "boolean") {
-						} else if (dnt == "undefined") {dnt = "undefined string"
+						} else if (dnt == zU) {dnt = zUQ
 						} else if (dnt == "") {dnt = "empty string"}
 					}
 				}
@@ -698,12 +684,12 @@ function get_lang_doc() {
 		for (let i=0; i < 50; i++) {
 			let result = get_item(i)
 			if (isFF) {
-				if (result == undefined) {result = zB0; err.push(i +" [unexpected]: undefined")}
-				if (result == "undefined") {result = zB0; err.push(i +" [unexpected]: \"undefined\"")}
+				if (result == zU) {result = zB0; err.push(i +" [unexpected]: " + zUQ)
+				} else if (result === undefined) {result = zB0; err.push(i +" [unexpected]: " + zU)}
 			}
-			if (result == "") {result = zB0; err.push(i +" [unexpected]: zero-length string")
-			} else if (result == " | ") {result = zB0 +" | "+ zB0; err.push(i +" [unexpected]: zero-length strings")
-			} else if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0; err.push(i +" [unexpected]: zero-length strings")
+			if (result == "") {result = zB0; err.push(i +" [unexpected]: empty string")
+			} else if (result == " | ") {result = zB0 +" | "+ zB0; err.push(i +" [unexpected]: empty strings")
+			} else if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0; err.push(i +" [unexpected]: empty strings")
 			}
 			res.push(result)
 			// output line items after combos

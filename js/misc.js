@@ -180,8 +180,9 @@ function get_nav_prototype() {
 	}
 }
 
-function get_recursion() {
+function get_recursion(log = false) {
 	let level = 0, test1 = 0
+	let t0; if (canPerf) {t0 = performance.now()}
 	function recurse() {
 		level++
 		recurse()
@@ -197,6 +198,7 @@ function get_recursion() {
 	} catch(e) {
 		// 2nd test is more accurate/stable
 		dom.recursion = level +" | "+ e.stack.toString().length
+		if (log) {log_perf("recursion [not in FP]",t0)}
 		return "stack_length:"+ e.stack.toString().length
 	}
 }
@@ -300,7 +302,7 @@ function get_perf1() {
 	return "perf_mark:"+ valueE +" | "+ valueM
 }
 
-function get_perf2() {
+function get_perf2(log = false) {
 	// runs post FP
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
@@ -341,7 +343,7 @@ function get_perf2() {
 				} else {
 					dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
 				}
-				if (gRun) {log_perf("perf.now [not in FP]",t0)}
+				if (log) {log_perf("perf.now [not in FP]",t0)}
 			}
 		}
 		let check = setInterval(run, 13)
