@@ -35,29 +35,33 @@ function get_media(runtype) {
 			aw = a+'webm; codecs="', aw1 = a+'wav; codecs="', aw2 = a+'wave; codecs="',
 			ax1 = a+'x-wav; codecs="', ax2 = a+'x-pn-wav; codecs="'
 		list = [
-			// test
+		// test
 			a+'mp4; codecs=\'\'',a+'mp4; codecs=""',a+'mp4; codecs=',
-			// mimes
-			'application/ogg',a+'webm',a+'mpeg',a+'x-mpeg',a+'mp4',a+'wave',a+'wav',a+'x-wav',a+'x-pn-wav',
-			a+'vnd.wave',a+'wma',a+'mp3',a+'3gpp',a+'3gpp2',a+'aac',a+'x-aac',a+'m4a',a+'x-m4a',a+'aiff',
-			a+'x-aiff',a+'ac3',a+'ac-3',a+'x-ac3',a+'ec-3',a+'basic',a+'flac',a+'x-flac',a+'mid',a+'midi',
-			a+'x-midi',a+'mpegurl',a+'x-mpegurl',a+'x-scpls',
-			// codecs
-			a4+'mp4a.40"',a4+'mp4a.40.1"',a4+'mp4a.40.2"',a4+'mp4a.40.3"',a4+'mp4a.40.4"',a4+'mp4a.40.5"',
-			a4+'mp4a.40.6"',a4+'mp4a.40.7"',a4+'mp4a.40.8"',a4+'mp4a.40.9"',a4+'mp4a.40.12"',a4+'mp4a.40.13"',
-			a4+'mp4a.40.14"',a4+'mp4a.40.15"',a4+'mp4a.40.16"',a4+'mp4a.40.17"',a4+'mp4a.40.19"',
-			a4+'mp4a.40.20"',a4+'mp4a.40.21"',a4+'mp4a.40.22"',a4+'mp4a.40.23"',a4+'mp4a.40.24"',
-			a4+'mp4a.40.25"',a4+'mp4a.40.26"',a4+'mp4a.40.27"',a4+'mp4a.40.28"',a4+'mp4a.40.29"',
-			a4+'mp4a.40.32"',a4+'mp4a.40.33"',a4+'mp4a.40.34"',a4+'mp4a.40.35"',a4+'mp4a.40.36"',
-			a4+'mp4a.66"',a4+'mp4a.67"',a4+'mp4a.68"',a4+'mp4a.69"',a4+'mp4a.6B"',a4+'mp3"',a4+'flac"',
-			a4+'bogus"',a4+'aac"',a4+'ac3"',am+'mp3"',ao+'opus"',ao+'flac"',ao+'vorbis"',
-			ao+'speex"',aw1+'0"',aw1+'1"',aw1+'2"',aw2+'0"',aw2+'1"',aw2+'2"',aw+'vorbis"',aw+'opus"',
-			ax1+'0"',ax1+'1"',ax1+'2"',ax2+'0"',ax2+'1"',ax2+'2"',
+		// mimes
+			//ignore: a+'x-scpls',a+'vnd.wave',a+'wma',a+'ec-3',a+'basic',a+'3gpp',a+'3gpp2',a+'mid',a+'aiff',a+'x-aiff',a+'ac-3',
+			'application/ogg',
+			a+'aac',a+'ac3',a+'flac',a+'midi',a+'mp3',a+'m4a',a+'mp4',a+'mpeg',a+'mpegurl',a+'wav',a+'wave',a+'webm',
+			a+'x-aac',a+'x-ac3',a+'x-flac',a+'x-midi',a+'x-m4a',a+'x-mpeg',a+'x-mpegurl',a+'x-wav',a+'x-pn-wav',
+		// codecs
+			//blink: a4+'mp4a.40"',a4+'mp4a.66"',a4+'mp4a.68"',a4+'mp4a.69"',a4+'mp4a.6B"',
+			//ignore: a4+'bogus"',ao+'speex"',
+			a4+'mp4a.40.2"',a4+'mp4a.40.29"',a4+'mp4a.40.5"',a4+'mp4a.67"',
+			a4+'mp3"',a4+'flac"',a4+'aac"',a4+'ac3"',am+'mp3"',ao+'opus"',ao+'flac"',ao+'vorbis"',
+			aw1+'0"',aw1+'1"',aw1+'2"',aw2+'0"',aw2+'1"',aw2+'2"',aw+'vorbis"',aw+'opus"',
+			ax1+'0"',ax1+'1"',ax1+'2"',ax2+'0"',ax2+'1"',ax2+'2"',ax2+'2"',
 		]
 	}
-	// de-dupe and sort
-	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+
 	list.sort()
+	if (logChkList) {
+		let preHash = mini(list.join(), "loglist media")
+		list = list.filter(function(item, position) {return list.indexOf(item) === position})
+		let postHash = mini(list.join(), "media list check")
+		if (preHash !== postHash) {console.error(runtype + " list mismatch", preHash, postHash)
+		} else {console.log(runtype + " list match", preHash, postHash)}
+		//console.log(runtype, list.length +"\n---\n"+ list.join("\n"))
+	}
+
 	// lists
 	let str = "media_"+ runtype +"_list_notglobal"
 	sDetail[str] = list
@@ -108,6 +112,7 @@ function get_media(runtype) {
 	// store
 	sDetail[sCan] = hashcan
 	sDetail[sType] = hashtype
+
 	// output
 	let ecan = document.getElementById(runtype +"can"),
 		etype = document.getElementById(runtype +"type")
@@ -116,9 +121,7 @@ function get_media(runtype) {
 		hashcan = zB0
 		ecan.innerHTML = zB0
 	} else {
-		if (runtype == "audio" && isOS == "android") {
-			dom.debugC.innerHTML = hashcan.join("<br>")
-		}
+		//if (runtype == "audio" && isOS == "android") {dom.debugC.innerHTML = hashcan.join("<br>")}
 		hashcan = sha1(hashcan.join(), "media canplay")
 		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
 		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
