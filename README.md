@@ -2,7 +2,7 @@
 
 TorZillaPrint (TZP) aims to provide a comprehensive, all-in-one, fingerprinting test suite, nicely broken into suitable sections with relevant information together. Long term, the goal is to collect Gecko only fingerprint data (no PII) for analysis to see how many classifications each metric or section provides.
 
-#### 🟥 Fingerpints are ALWAYS loose
+#### 🟥 Fingerprints are ALWAYS loose
 
 A fingerprint is just a snapshot of data at any given time, and collected metrics can change for a number or reasons: such as zooming, resizing windows, moving windows, per site settings, etc. Snapshots of fingerprints can still be linked after the fact. Unless you know what is being collected and it's stability, then don't make assumptions. Always treat fingerprints as loose/fuzzy.
 
