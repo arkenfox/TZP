@@ -168,26 +168,28 @@ let s0 = " <span class='",
 	gt0,
 	gLoad = true,
 	gRun = true,
-	gClick = true,
-// debug
-	logExtra = false,
+	gClick = true
+
+/** DEV **/
+// check
+let logExtra = false,
 	logPerfHash = "", // "", sha1, mini, "all"
 	logPerfMini = false, // we set these in code
 	logPerfSha1 = false, // ditto
 	logPseudo = false,
 	logResize = false,
 	logStorage = false,
-// sims
+	logChkList = false, // check lists for dupes etc
+// simulate
 	runSE = false, // errors/blocked
 	runSL = false, // lies
 	runSN = false, // new
 	runSU = false, // ua (or use CB)
-// blocks
+// block
 	runPS = false, // block css pseudo: return x
 	runRF = false, // block isRFP = true
 	runSP = false, // performance.now()
-
-// cycle sims
+// cycle simulations
 	runCLR = false, // done: color
 	runDEP = false, // done: color/pixel depth
 	runCSS = false, // done: css styles
