@@ -633,10 +633,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	// jump: speed up ESR, bypass slow 94
 	if (isFFLegacy) {output(59)} else {
-		try {
-			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
-			start()
-		} catch(e) {v93()}
+		if ("function" === typeof self.structuredClone) {start()} else {v93()}
 	}
 	// cascade
 	function start() { // 98: 1709790
