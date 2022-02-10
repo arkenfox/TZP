@@ -489,7 +489,7 @@ const get_isOS64 = (skip = false) => new Promise(resolve => {
 
 	// on page loads: we run this twice: very early while we're waiting
 		// skip = true: we haven't set isFF yet
-		// then later as a repreq : no point running it twice
+		// then later as a prereq : no point running it twice
 	if (gLoad && !skip) {return resolve()}
 
 	// OS architecture
@@ -499,7 +499,7 @@ const get_isOS64 = (skip = false) => new Promise(resolve => {
 		isOS64 = "unknown"
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isOS64 = true
-		if (gLoad) {log_perf("isOS64",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
+		if (gLoad) {log_perf("isOS64 [prereq]",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
 		return resolve()
 	} catch(e) {
 		let eMsg = e.name +": "+ e.message
@@ -656,7 +656,7 @@ const get_isVer = () => new Promise(resolve => {
 	}
 	function v95() { // 95a:1723674
 		// fast path: dom.crypto.randomUUID.enabled default true
-		try {newFn("let test = self.crypto.randomUUID()"); output(95)} catch(e) {v95b()}
+		if ("function" === typeof crypto.randomUUID) {output(95)} else {v95b()}
 	}
 	function v95b() { // 95b:1674204: slow
 		if (is95b !== "") {
@@ -669,23 +669,13 @@ const get_isVer = () => new Promise(resolve => {
 		}
 	}
 	function v94() { // 94:1722576
-		try {
-			newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)"); output(94)
-		} catch(e) {v93()}
+		if ("function" === typeof self.structuredClone) {output(94)} else {v93()}
 	}
-	function v93() { //93:1328672
-		try {
-			if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {output(93)} else {v93b()}
-		} catch(e) {v93b()}
-	}
-	function v93b() { //93:1722448
-		try {newFn("self.reportError('93')"); output(93)} catch(e) {v92()}
+	function v93() { //93:1722448
+		if ("function" === typeof self.reportError) {output(93)} else {v92()}
 	}
 	function v92() { //92:1721149
-		try {
-			let test = {foo: false}
-			if (Object.hasOwn(test, "foo")) {output(92)}
-		} catch(e) {v91b()}
+		if ("function" === typeof Object.hasOwn) {output(92)} else {v91b()}
 	}
 	function v91b() { //91:1714933
 		try {
