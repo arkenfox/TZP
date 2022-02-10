@@ -194,10 +194,7 @@ function outputVersion() {
 	record(235,96, "1738422", ver96b, performance.now()-t96b)
 
 	// 95: 1723674: dom.crypto.randomUUID.enabled: fast confirm 95+ only
-	let t95 = performance.now(), ver95 = xF
-	try {
-		newFn("let test = self.crypto.randomUUID()"); ver95 = xS
-	} catch(e) {}
+	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID) ? xS : xF
 	record(231,95, "1723674", ver95, performance.now()-t95)
 
 	// 95a: 1674204 : slow
@@ -224,19 +221,11 @@ function outputVersion() {
 	record(226,94, "1729239", ver94a, performance.now()-t94a)
 
 	// 94: 1722576
-	let t94 = performance.now(), ver94 = xF
-	try {
-		newFn("let orig = {name:'TZP'}; orig.itself = orig; let clone = self.structuredClone(orig)")
-		ver94 = xS
-	} catch(e) {}
+	let t94 = performance.now(), ver94 = "function" === typeof self.structuredClone ? xS : xF
 	record(225,94, "1722576", ver94, performance.now()-t94)
 
 	// 93: 1670033
-	let t93b = performance.now(), ver93b = xF
-	try {
-		newFn("let test93b = Intl.supportedValuesOf('calendar')")
-		ver93b = xS
-	} catch(e) {}
+	let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf) ? xS : xF
 	record(222,93, "1670033", ver93b, performance.now()-t93b)
 
 	// 93: 1328672
@@ -247,19 +236,11 @@ function outputVersion() {
 	record(221,93, "1328672", ver93a, performance.now()-t93a)
 
 	// 93: 1722448
-	let t93 = performance.now(), ver93 = xF
-	try {
-		newFn("self.reportError('93')")
-		ver93 = xS
-	} catch(e) {}
+	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError) ? xS : xF
 	record(220,93, "1722448", ver93, performance.now()-t93)
 
 	// 92: 1721149
-	let t92 = performance.now(), ver92 = xF
-	try {
-		let obj92 = {foo: false}
-		if (Object.hasOwn(obj92, "foo")) {ver92 = xS}
-	} catch(e) {}
+	let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn) ? xS : xF
 	record(215,92, "1721149", ver92, performance.now()-t92)
 
 	// 91: 1714933
