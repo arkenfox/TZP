@@ -757,7 +757,7 @@ function get_touch() {
 			}
 			MTP = cleanFn(MTP)
 			// BS
-			if (MTP !== zB0) {
+			if (MTP !== zB0 && is59) {
 				if (typeof MTP !== "number") {maxBS = true
 				} else if (!Number.isInteger(MTP)) {maxBS = true
 				} else if (MTP < 0) {maxBS = true
@@ -772,7 +772,7 @@ function get_touch() {
 			let displayMTP = MTP
 			let fpMTP = MTP
 
-			if (touchSum == 0 && MTP !== 0) {maxBypass = true}
+			if (touchSum == 0 && MTP !== 0 && is59) {maxBypass = true}
 			if (maxBypass) {maxBS = true}
 
 			if (maxBS) {
@@ -788,7 +788,7 @@ function get_touch() {
 					if (maxBypass) {gBypassed.push("devices:maxtouchpoints:0")}
 				}
 			}
-			dom.touchM.innerHTML = displayMTP + (displayMTP === 0 ? rfp_green : rfp_red)
+			dom.touchM.innerHTML = displayMTP + (is59 ? (displayMTP === 0 ? rfp_green : rfp_red) : "")
 
 			// ToDo: touch LIE/BYPASS
 			//let touchReal = ""
@@ -800,6 +800,10 @@ function get_touch() {
 			dom.touchE.innerHTML = str
 			return resolve(["touchevents:"+ str, "maxtouchpoints:"+ fpMTP])
 		}
+
+		// MTP: FF58 or lower should return undefined
+		let is59 = false
+		try {is59 = (Intl.DateTimeFormat.supportedLocalesOf("tt").length == 1)} catch(e) {}
 
 		get_mtp()
 		get_ontouch()
