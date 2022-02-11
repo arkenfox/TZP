@@ -272,33 +272,18 @@ function get_errors() {
 		let res = [], note = ""
 		let sName = "feature_error_messages"
 		sDetail[sName] = []
-
 		let tests = [
-			"BigInt(2.5)", // changes FF68 + FF75
-			"alert('A)",
 			"const foo;foo.bar",
-			"null.bar", // changes with error_fix
 			"(1).toString(1000)",
 			"var x = new Array(-1)",
+			"var x = @", // changes FF84`
 			"[...undefined].length", // changes with error_fix
-			"self.reportError('93')", // < FF93
-			"let a = new Set([1,2,3]); let b = new Set([2,3,4]); let c = new Set(...a, ...b);", // changes FF83
-			"var x = @", // changes FF84
-			"let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')", // changes FF85
-			"for (async of [])", // changes FF86
-			'function invalid () { "use strict" \n ' + '"\\8"' + '}', // FF88+
-			"let t = ({ 1n: 1 })", // < FF74, changes FF68
-			"let a = 1_00_;", // changes FF70
 		]
 		for (let i = 0; i < tests.length; i++) {
 			try {
 				newFn(tests[i])
 			} catch(e) {
-				let msg = e.message
-				if (tests[i] == "alert('A)") {
-					if (runSN) {msg += zSIM} else if (msg == "unterminated string literal") {note = "FF59 or lower"}
-				}
-				res.push(i +": "+ e.name +": "+ msg)
+				res.push(i +": "+ e.name +": "+ e.message)
 			}
 		}
 		sDetail[sName] = res
@@ -306,32 +291,12 @@ function get_errors() {
 		// notation: 74+: 1259822: error_message_fix: codes 1=false 2=true
 		let tmp = hash.substring(0,8), color = "3"
 		if (isFF) {
-			let fix = " fixed", nofix = " no-fix"
-			if (tmp == "3f0a2927") {note = "FF93+"+ nofix
-			} else if (tmp == "fcb058e2") {note = "FF93+"+ fix
-			} else if (tmp == "93d0c3af") {note = "FF88-92"+ nofix
-			} else if (tmp == "b6902095") {note = "FF88-92"+ fix
-			} else if (tmp == "25d05006") {note = "FF86-87"+ nofix
-			} else if (tmp == "82d992d7") {note = "FF86-87"+ fix
-			} else if (tmp == "5a0ce0c1") {note = "FF85"+ nofix
-			} else if (tmp == "c7d70afd") {note = "FF85"+ fix
-			} else if (tmp == "6c8ac52f") {note = "FF84"+ nofix
-			} else if (tmp == "1ca49497") {note = "FF84"+ fix
-			} else if (tmp == "df9b641d") {note = "FF83"+ nofix
-			} else if (tmp == "e540e119") {note = "FF83"+ fix
-			} else if (tmp == "137d5080") {note = "FF75-82"+ nofix
-			} else if (tmp == "86ff3101") {note = "FF75-82"+ fix
-			} else if (tmp == "54002b6f") {note = "FF74"+ nofix
-			} else if (tmp == "04e27611") {note = "FF74"+ fix
-			} else if (tmp == "f0a867a2") {note = "FF71-73"
-			} else if (tmp == "94b69f86") {note = "FF70-71"
-			} else if (tmp == "117ef2fc") {note = "FF68-69"
-			} else if (tmp == "32d3793c") {note = "FF60-67"
-			} else if (tmp == "b962f3fb") {note = "FF59"
-			} else if (tmp == "422f0723") {note = "FF53-58"
-			} else if (tmp == "d91dcb3c") {note = "FF52" // TZP does not run in FF51 or lower
-			} else if (isFFLegacy) {note = "details"
-			} else if (note == "FF59 or lower") { // do nothing
+			let fix = " fixed" // FF74+
+			if (tmp == "186ecb6f") {note = "FF84+"
+			} else if (tmp == "d95920fd") {note = "FF84+"+ fix
+			} else if (tmp == "6551b4dc") {note = "FF83 or lower" // tested FF52+: TZP does not run in FF51 or lower
+			} else if (tmp == "cce766f4") {note = "FF74-83"+ fix
+			} else if (isFFLegacy) {note = "FF59 or lower" // just in case
 			} else {note = "NEW"; color = "bad"
 			}
 		}
