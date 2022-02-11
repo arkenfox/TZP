@@ -268,7 +268,7 @@ const get_isEngine = () => new Promise(resolve => {
 	if (isFFyes.length) {isFF = true}
 	function final_isFF() {
 		if (isFFyes.length) {isFF = true}
-		if (!isFF || isFFLegacy) {
+		if (!isFF) {
 			rfp_green = ""
 			rfp_red = ""
 			rfp_random_green = ""
@@ -287,6 +287,8 @@ const get_isEngine = () => new Promise(resolve => {
 			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 		}
 		log_perf("final status [isFF]",""+ isFF,"ignore")
+		isFFLegacy = ("function" !== typeof Animation.prototype.updatePlaybackRate)
+		log_perf("isFFLegacy [global]",""+ isFFLegacy,"ignore")
 	}
 	// do math
 	function cbrt(x) {
@@ -341,10 +343,6 @@ const get_isEngine = () => new Promise(resolve => {
 						try {
 							newFn("let test61 = (' a').trimStart()")
 							isEngine = "goanna"
-							if (!isFFLegacy) {
-								gCheckOnce.push("_global:isEngine: palemoon isFFLegacy failed")
-								isLegacy = true
-							}
 						} catch(e) {}
 					}
 				}
@@ -362,14 +360,12 @@ const get_isEngine = () => new Promise(resolve => {
 		}
 		final_isFF()
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
-		log_perf("isFFLegacy [global]",t0,"",isFFLegacy)
 		return resolve()
 	} catch(e) {
 		isFFno.push("math")
 		final_isFF()
 		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
 		log_perf("isEngine [global]",t0,"","error")
-		log_perf("isFFLegacy [global]",t0,"","error")
 		return resolve()
 	}
 })
@@ -386,11 +382,9 @@ const get_isError = () => new Promise(resolve => {
 		} else if (hash == "78be9e0e") {bFF = true //FF72-73,FF74+ fix off
 		} else if (hash == "47bf0bb5") {bFF = true //FF70-71
 		} else if (hash == "27201347") {bFF = true //FF60-69
-		} else if (hash == "453c3df4") {bFF = true; isFFLegacy = true // FF52-59 / Waterfox Classic
-		} else if (hash == "bb033aa2") {bFF = true; isFFLegacy = true // Pale Moon / Waterfox Classic
+		} else if (hash == "453c3df4") {bFF = true // FF52-59 / Waterfox Classic
+		} else if (hash == "bb033aa2") {bFF = true // Pale Moon / Waterfox Classic
 		}
-		//console.debug(hash)
-		//console.debug(res.join("\n"))
 		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
 		log_perf("errors [isFF]",t0,"",""+ bFF)
 		return resolve()
@@ -407,12 +401,12 @@ function set_isFork() {
 	// it's important to make sure we set isFork, the entropy is still recorded
 	// unless specified isLogo is 300 x 236
 	if (isFFLegacy) {
-		if (isMark == "130 x 38") {isFork = "Firefox"} // FF52-56
-		if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
+		if (isMark == "130 x 38") {isFork = "Firefox" // FF52-56
+		} else if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
 	} else {
-		if (isMark == "132 x 48") {isFork = "Librewolf"} // 128x128
-		if (isMark == "341 x 32") {isFork = "Waterfox Browser"}
-		if (isMark == "637 x 186") {isFork = "Comodo IceDragon"}
+		if (isMark == "132 x 48") {isFork = "Librewolf" // 128x128 | note: LW now matches FF sizes FF96+
+		} else if (isMark == "341 x 32") {isFork = "Waterfox Browser"
+		} else if (isMark == "637 x 186") {isFork = "Comodo IceDragon"}
 	}
 }
 
@@ -479,7 +473,7 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
-		// tno good: we haven't got isRFP yet and math is not viable anymore
+		// no good: we haven't got isRFP yet and math is not viable anymore
 		tryharder()
 	}
 })
@@ -1617,7 +1611,6 @@ function run_once() {
 }
 
 run_once()
-
 
 function cleanFnTest() {
 	let list = [
