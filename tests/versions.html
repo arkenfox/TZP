@@ -41,11 +41,12 @@
 		<col width="1%"><col width="49%"><col width="49%"><col width="1%">
 		<thead><tr><th colspan="4">versions</th></tr></thead>
 		<tr><td colspan="4" class="intro">
-			<span class="no_color">Firefox version-specific PoCs:
-				<b><span class='good'> &#x2713 </span></b> pass
-				<b><span class='bad'> &#x2715 </span></b> fail
-				<b><span class='s4'> &#x2715 </span></b> error
-				<b> &#x2715 </b> n/a
+			<span class="no_color">Gecko version-specific PoCs : &nbsp
+				&nbsp <b><span class='good'> &#x2713 </span></b> &nbsp pass &nbsp
+				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail &nbsp
+				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error &nbsp
+				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
+				&nbsp <b><span class='s3'> * </span></b> &nbsp fast path
 			</span>
 		</td></tr>
 		<tr><td colspan="4"><hr></td></tr>
@@ -65,10 +66,12 @@
 'use strict';
 
 function outputVersion() {
+	s3 = s3.trim()
 	let xS = green_tick,
 		xF = red_cross,
 		xB = yellow_block,
 		xNA = white_na,
+		xFP = s3 +" * "+ sc,
 		xNC = sb +"no change "+ sc,
 		xOMG = sg +"has landed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
@@ -77,7 +80,6 @@ function outputVersion() {
 		t0 = performance.now(),
 		watchcount = 1
 
-	s3 = s3.trim()
 	let results = [], debug = []
 	let data = {}
 
@@ -96,12 +98,13 @@ function outputVersion() {
 			let id = results[i].split("~")[0].trim(),
 				bug = results[i].split("~")[1],
 				result = results[i].split("~")[2],
-				perf = results[i].split("~")[3]
+				perf = results[i].split("~")[3],
+				fastpath = results[i].split("~")[4]
 
 			// version
 			if (bug == firstWatch) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
-				if (id !== prevV) {id = s3 + (id +"").padStart(3) + sc} else {id = "".padStart(3)}
+				if (id !== prevV) {id = s3 + id.padStart(4) + sc} else {id = "".padStart(4)}
 			} else {
 				isWatch = true
 			}
@@ -118,9 +121,9 @@ function outputVersion() {
 				bug = bug +""
 				prefix = 9 - bug.length
 				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
-					+ "".padEnd(2)
+					+ (fastpath == "true" ? xFP : "".padEnd(3))
 			} else {
-				bug = "".padStart(11)
+				bug = "".padStart(12)
 			}
 			// perf
 			perf = (perf + "").padStart(5) + " ms"
@@ -150,13 +153,13 @@ function outputVersion() {
 		}
 	}
 
-	function record(order, version, bug, result, perf) {
+	function record(order, version, bug, result, perf, fastpath = false) {
 		// cleanup result
 		if (result === true) {result = xS
 		} else if (result === false || result === undefined) {result = xF}
 		// continue
 		perf = Math.round(perf)
-		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf
+		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ fastpath
 		count ++
 		if (count > expected) {
 			dom.alert.innerHTML = "<br>"+ sb + " RESULT ALERT: expected "+ expected +" got "+ count + sc
@@ -166,7 +169,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 80
+		expected = 81
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -191,9 +194,9 @@ function outputVersion() {
 	} catch(e) {ver96b = xB}
 	record(96,96, "1738422", ver96b, performance.now()-t96b)
 
-	// 95: 1723674: dom.crypto.randomUUID.enabled: fast confirm 95+ only
+	// 95: 1723674: dom.crypto.randomUUID.enabled: fast path: confirm 95+ only
 	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
-	record(95.1, 95, "1723674", ver95, performance.now()-t95)
+	record(95.1, 95, "1723674", ver95, performance.now()-t95, true)
 	// 95a: 1674204 : slow
 		// note: en-US, windows
 		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
@@ -222,10 +225,10 @@ function outputVersion() {
 	// 93: 1722448
 	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
 	record(93.2, 93, "1722448", ver93, performance.now()-t93)
-	// 931: 1670033
-	let t931 = performance.now(), ver931 = ("function" === typeof Intl.supportedValuesOf)
-	record(93.1, 93, "1670033", ver931, performance.now()-t931)
-	// 93a: 1328672
+	// 93a: 1670033
+	let t93a = performance.now(), ver93a = ("function" === typeof Intl.supportedValuesOf)
+	record(93.1, 93, "1670033", ver93a, performance.now()-t93a)
+	// 93b: 1328672
 	let t93b = performance.now(), ver93b
 	try {if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93b = xS}} catch(e) {}
 	record(93, 93, "1328672", ver93b, performance.now()-t93b)
@@ -237,7 +240,7 @@ function outputVersion() {
 	// 91: 1714933
 	let t91 = performance.now(), ver91
 	try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
-	record(91.2, 91, "1714933", ver91, performance.now()-t91)
+	record(91.3, 91, "1714933", ver91, performance.now()-t91)
 	// 91a: 1710429
 	let t91a = performance.now(), ver91a
 	try {
@@ -245,7 +248,7 @@ function outputVersion() {
 		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
 		ver91a = xS
 	} catch(e) {}
-	record(91.1, 91, "1710429", ver91a, performance.now()-t91a)
+	record(91.2, 91, "1710429", ver91a, performance.now()-t91a)
 	// 91b: 1284868
 	let t91b = performance.now(), ver91b
 	try {
@@ -253,7 +256,10 @@ function outputVersion() {
 		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
 		if (seconds == "07") {ver91b = xS}
 	} catch(e) {ver91b = xB}
-	record(91, 91, "1284868", ver91b, performance.now()-t91b)
+	record(91.1, 91, "1284868", ver91b, performance.now()-t91b)
+	// 91c: 1717072 fast path
+	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
+	record(91, 91, "1717072", ver91c, performance.now()-t91c, true)
 
 	// 90: 1520434
 	let t90 = performance.now(), ver90
