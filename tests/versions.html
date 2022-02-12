@@ -159,8 +159,6 @@ function outputVersion() {
 	let count = 0,
 		expected = 75
 
-//HTMLElement.prototype.hasOwnProperty("outerText")
-
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 	record(245,98, "1709790", ver98, performance.now()-t98)
@@ -170,9 +168,9 @@ function outputVersion() {
 	try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
 	record(240,97, "1745372", ver97, performance.now()-t97)
 
-	// 96: 1738422
+	// 96: 1738422 (typeof Intl.PluralRules for FF < 60)
 	let t96 = performance.now(), ver96
-	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" === Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {
+	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {
 		ver96 = xB; console.debug(e.name, e.message)
 	}
 	record(236,96, "1738422", ver96, performance.now()-t96)
@@ -238,14 +236,15 @@ function outputVersion() {
 
 	// 91: 1714933
 	let t91 = performance.now(), ver91
-	try {ver91 = ("sa" === Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
+	try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 	record(212,91, "1714933", ver91, performance.now()-t91)
 
 	// 91b: 1284868
 	let t91b = performance.now(), ver91b
 	try {
 		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
-		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
+		//let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
+		let seconds = test91b.format(new Date('2019-01-01T00:00:07.000Z'))
 		if (seconds == "07") {ver91b = xS}
 	} catch(e) {ver91b = xB}
 	record(211,91, "1284868", ver91b, performance.now()-t91b)
@@ -599,9 +598,7 @@ function outputVersion() {
 
 	// 65a
 	let t65a = performance.now(), ver65a
-	try {
-		ver65a = (Intl.DateTimeFormat.supportedLocalesOf("ia").join() == "ia")
-	} catch(e) {ver65a = xB}
+	try {ver65a = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65a = xB}
 	record(75,65, "", ver65a, performance.now()-t65a)
 
 	// 64
@@ -627,7 +624,7 @@ function outputVersion() {
 	record(50,60, "", ver60, performance.now()-t60)
 	// 59
 	let t59 = performance.now(), ver59
-	try {ver59 = ("tt" === Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
+	try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
 	record(45,59, "", ver59, performance.now()-t59)
 
 	// 55: 1354974
