@@ -23,7 +23,6 @@
 		<div id="test73"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90">a</output>
-		<div id="test98">a</div>
 	</div>
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000 b</div>
@@ -62,6 +61,7 @@
 function outputVersion() {
 	let xF = sb +"fail"+ sc,
 		xS = sg +"pass"+ sc,
+		xB = s3 + " err"+ sc, // blocked: unexpected error
 		xNC = sb +"no change "+ sc,
 		xOMG = sg +"has landed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
@@ -153,34 +153,21 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 72
+		expected = 75
 
-	//98: 1709790
-	let t98 = performance.now(), ver98 = xF
-	try {
-		if (dom.test98.outerText !== undefined) {ver98 = xS}
-	} catch(e) {}
+	// 98: 1709790
+	let t98 = performance.now(), ver98 = ("function" === typeof self.structuredClone) ?  xS : xF
 	record(245,98, "1709790", ver98, performance.now()-t98)
 
-	//97: 1745372
-	let t97 = performance.now(), ver97 = xF
-	try {
-		let controller97 = new AbortController()
-		let signal97 = controller97.signal
-		signal97.throwIfAborted()
-		ver97 = xS
-		//let reason = new Error("boom")
-		//controller.abort(reason)
-	} catch(e) {
-		// TypeError: signal.throwIfAborted is not a function
-	}
+	// 97: 1745372
+	let t97 = performance.now(), ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted) ? xS : xF
 	record(240,97, "1745372", ver97, performance.now()-t97)
 
 	// 96: 1738422
 	let t96 = performance.now(), ver96 = xF
 	try {
 		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {ver96 = xS}
-	} catch(e) {}
+	} catch(e) {ver96 = xB}
 	record(236,96, "1738422", ver96, performance.now()-t96)
 
 	// 96b: 1738422
@@ -212,7 +199,7 @@ function outputVersion() {
 	} catch(e) {}
 	record(230,95, "1674204", ver95a, performance.now()-t95a)
 
-	// 94: 1729239
+	// 94a: 1729239
 	let t94a = performance.now(), ver94a = xF
 	try {
 		newFn("HTMLScriptElement.supports('classic')")
@@ -224,11 +211,11 @@ function outputVersion() {
 	let t94 = performance.now(), ver94 = "function" === typeof self.structuredClone ? xS : xF
 	record(225,94, "1722576", ver94, performance.now()-t94)
 
-	// 93: 1670033
+	// 93b: 1670033
 	let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf) ? xS : xF
 	record(222,93, "1670033", ver93b, performance.now()-t93b)
 
-	// 93: 1328672
+	// 93a: 1328672
 	let t93a = performance.now(), ver93a = xF
 	try {
 		if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93a = xS}
@@ -251,16 +238,16 @@ function outputVersion() {
 	} catch(e) {}
 	record(212,91, "1714933", ver91, performance.now()-t91)
 
-	// 91: 1284868
+	// 91b: 1284868
 	let t91b = performance.now(), ver91b = xF
 	try {
 		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
 		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
 		if (seconds == "07") {ver91b = xS}
-	} catch(e) {}
+	} catch(e) {ver91b = xB}
 	record(211,91, "1284868", ver91b, performance.now()-t91b)
 
-	// 91: 1710429
+	// 91a: 1710429
 	let t91a = performance.now(), ver91a = xF
 	try {
 		let d91 = new Date("January 30, 2019 13:00:00")
@@ -281,7 +268,7 @@ function outputVersion() {
 	}
 	record(206,90, "1520434", ver90, performance.now()-t90)
 
-	// 90: 1537689
+	// 90a: 1537689
 	let t90a = performance.now(), ver90a = xF
 	try {
 		if (dom.test90.defaultValue == "a") {ver90a = xS}
@@ -291,10 +278,7 @@ function outputVersion() {
 	// 89: 1703213
 	let t89 = performance.now(), ver89 = xF
 	try {
-		let x89 = dom.ctrl89.offsetHeight
-		let y89 = dom.test89.offsetHeight
-		//console.debug(x89/y89)
-		if (x89/y89 > 0.85) {ver89 = xS}
+		if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
 	} catch(e) {}
 	record(200,89, "1703213", ver89, performance.now()-t89)
 
@@ -318,7 +302,7 @@ function outputVersion() {
 	// 87: 1688335
 	let t87 = performance.now(), ver87 = xF
 	try {
-		if (console.length == undefined) {ver87 = xS}
+		if (undefined === console.length) {ver87 = xS}
 	} catch(e) {}
 	record(187,87, "1688335", ver87, performance.now()-t87)
 
@@ -389,8 +373,9 @@ function outputVersion() {
 
 	// 82: 1655947
 	let t82 = performance.now(), ver82 = xF
-	let test82 = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-	if (test82 == 1) {ver82 = xS}
+	try {
+		ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
+	} catch(e) {ver82 = xB}
 	record(160,82, "1655947", ver82, performance.now()-t82)
 
 	// 81: 1650607 (53: 1321534)
@@ -398,7 +383,7 @@ function outputVersion() {
 	try {
 		let file81 = new File(["bits"], "a/b.txt")
 		if (file81.name == "a/b.txt") {ver81 = xS}
-	} catch(e) {}
+	} catch(e) {ver81 = xB}
 	record(156,81, "1650607", ver81, performance.now()-t81)
 
 	// 81a: 1657437
@@ -414,7 +399,7 @@ function outputVersion() {
 		dom.test81b.textContent = ""
 		//console.debug(w81a, w81b)
 		if (w81a < w81b) {ver81a = xS}
-	} catch(e) {}
+	} catch(e) {ver81a = xB}
 	record(155,81, "1657437", ver81a, performance.now()-t81a)
 
 	// 80: 1651732
@@ -428,10 +413,10 @@ function outputVersion() {
 		} catch (e) {}
 		record(151,80, "1651732", ver80, performance.now()-t80)
 	} catch(e) {
-		record(151,80, "1651732", ver80, performance.now()-t80)
+		record(151,80, "1651732", xB, performance.now()-t80)
 	}
 
-	//80a: 1559253
+	// 80a: 1559253
 	let t80a = performance.now(), ver80a = xF
 	try {
 		newFn(`
@@ -445,7 +430,7 @@ function outputVersion() {
 	}
 	record(150,80, "1559253", ver80a, performance.now()-t80a)
 
-	//79: 1644878
+	// 79: 1644878
 	let t79 = performance.now(), ver79 = xF
 	try {
 		Map.prototype.entries.call(true)
@@ -454,7 +439,7 @@ function outputVersion() {
 	}
 	record(146,79, "1644878", ver79, performance.now()-t79)
 
-	//79a: 1639591
+	// 79a: 1639591
 	let t79a = performance.now(), ver79a = xF
 	try {
 		newFn("let z = (3 ??= 3 * 3)")
@@ -465,7 +450,12 @@ function outputVersion() {
 	}
 	record(145,79, "1639591", ver79a, performance.now()-t79a)
 
-	//78: 1633836
+	// 78c: 1626015
+	let t78c = performance.now()
+	let ver78c = (Object.getOwnPropertyNames(window.Document.prototype).includes('replaceChildren')) ? xS : xF
+	record(143,78, "1626015", ver78c, performance.now()-t78c)
+
+	// 78: 1633836
 	let t78 = performance.now(), ver78 = xF
 	try {
 		let test78 = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2)
@@ -473,7 +463,7 @@ function outputVersion() {
 	} catch(e) {}
 	record(142,78, "1633836", ver78, performance.now()-t78)
 
-	//78a: 1589095
+	// 78a: 1589095
 	let t78a = performance.now(), ver78a = xF
 	try {
 		let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
@@ -481,32 +471,32 @@ function outputVersion() {
 	} catch(e) {}
 	record(141,78, "1589095", ver78a, performance.now()-t78a)
 
-	//78b: 1634135
+	// 78b: 1634135
 	let t78b = performance.now(), ver78b = xF
 	try {
 		let regex78b = new RegExp('b')
 		if (regex78b.dotAll == false) {ver78b = xS}
-	} catch(e) {}
+	} catch(e) {ver78b = xB}
 	record(140,78, "1634135", ver78b, performance.now()-t78b)
 
-	//77: 1627285
+	// 77: 1627285
 	let t77 = performance.now(), ver77 = xF
 	if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {ver77 = xS}
 	record(136,77, "1627285", ver77, performance.now()-t77)
 
-	//77a: 1608168
+	// 77a: 1608168
 	let t77a = performance.now(), ver77a = xF
 	try {
 		("aa").replaceAll("a","b"); ver77a = xS
 	} catch(e) {}
 	record(135,77, "1608168", ver77a, performance.now()-t77a)
 
-	//76: 1608010
+	// 76: 1608010
 	let t76 = performance.now(), ver76 = xF
 	if (test76.validity.rangeOverflow) {} else {ver76 = xS}
 	record(130,76, "1608010", ver76, performance.now()-t77)
 
-	//75: 1615600
+	// 75: 1615600
 	let t75 = performance.now(), ver75 = xF
 	try {
 		let test75 = BigInt(2.5)
@@ -515,7 +505,7 @@ function outputVersion() {
 	}
 	record(125,75, "1615600", ver75, performance.now()-t75)
 
-	//74: 1605835
+	// 74: 1605835
 	let t74 = performance.now(), ver74 = xF
 	try {
 		newFn("let t = ({ 1n: 1 })")
@@ -523,13 +513,13 @@ function outputVersion() {
 	} catch(e) {}
 	record(120,74, "1605835", ver74, performance.now()-t74)
 
-	//73: 1605803
+	// 73: 1605803
 	let t73 = performance.now(), ver73 = xF
 	let el73 = dom.test73
 	if (getComputedStyle(el73).content == "normal") {ver73 = xS}
 	record(115,73, "1605803", ver73, performance.now()-t73)
 
-	//72: 1589072
+	// 72: 1589072
 	let t72 = performance.now(), ver72 = xF
 	try {
 		let test72 = newFn('let a = 100_00_;')
@@ -540,12 +530,16 @@ function outputVersion() {
 	}
 	record(111,72, "1589072", ver72, performance.now()-t72)
 
-	//72a: 1441976
+	// 72a: 1441976
 	let t72a = performance.now(), ver72a = xF
 	try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
 	record(110,72, "1441976", ver72a, performance.now()-t72a)
 
-	//71: 1575980
+	// 71b: 1549176
+	let t71b = performance.now(), ver71b = ("function" === typeof Promise.allSettled) ? xS : xF
+	record(106,71, "1549176", ver71b, performance.now()-t71b)
+
+	// 71: 1575980
 	let t71 = performance.now(), ver71 = xF
 	try {
 		let test71 = new StaticRange()
@@ -554,31 +548,36 @@ function outputVersion() {
 	}
 	record(105,71, "1575980", ver71, performance.now()-t71)
 
-	//70: 1435818
+	// 70: 1435818
 	let t70 = performance.now(), ver70 = xF
 	try {
-		newFn("let t = 1_050")
+		let t = 1_050
 		ver70=xS
 	} catch(e) {}
 	record(100,70, "1435818", ver70, performance.now()-t70)
 
-	//69: 1558387
+	// 69b: 1557121
+	let t69b = performance.now(), ver69b = ("function" === typeof Blob.prototype.text) ? xS : xF
+	record(96,69, "1557121", ver69b, performance.now()-t69b)
+
+	// 69: 1558387
 	let t69 = performance.now(), ver69 = xF
 	try {let test69 = new DOMError('a')} catch(e) {ver69 = xS}
 	record(95,69, "1558387", ver69, performance.now()-t69)
 
-	//68: 1548773
+	// 68: 1548773
 	let t68 = performance.now(), ver68 = xF
-	let el68 = dom.test68
-	if (el68.typeMustMatch == undefined) {ver68 = xS} else {}
+	try {
+		let el68 = dom.test68
+		if (el68.typeMustMatch === undefined) {ver68 = xS}
+	} catch(e) {ver68 = xB}
 	record(90,68, "1548773", ver68, performance.now()-t68)
 
-	//67: 1531830 (1435829)
-	let t67 = performance.now(), ver67 = xF
-	if (!Symbol.hasOwnProperty('matchAll')) {} else {ver67 = xS}
+	// 67: 1531830 (1435829)
+	let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll) ? xS : xF
 	record(85,67, "1531830", ver67, performance.now()-t67)
 
-	//66
+	// 66
 	let t66 = performance.now(), ver66 = xF
 	try {
 		let txt = new TextEncoder(), utf8 = new Uint8Array(1)
@@ -587,7 +586,7 @@ function outputVersion() {
 	} catch(e) {}
 	record(80,66, "", ver66, performance.now()-t66)
 
-	//65
+	// 65
 	let t65 = performance.now(), ver65 = xF
 	try {
 		let test65 = new Intl.RelativeTimeFormat("en",{style: "long"})
@@ -598,48 +597,33 @@ function outputVersion() {
 	// 65a
 	let t65a = performance.now(), ver65a = xF
 	try {
-		let t65a = Intl.DateTimeFormat.supportedLocalesOf("ia")
-		if (t65a.length) {ver65a = xS}
-	} catch(e) {}
+		ver65a = (Intl.DateTimeFormat.supportedLocalesOf("ia").join() == "ia") ? xS : xF
+	} catch(e) {ver65a = xB}
 	record(75,65, "", ver65a, performance.now()-t65a)
 
-	//64
-	let t64 = performance.now(), ver64 = xF
-	if (window.screenLeft == undefined){} else {ver64 = xS}
-	record(71,64, "", ver64, performance.now()-t64)
+	// 64
+	let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop) ? xS : xF
+	record(71,64, "1498860", ver64, performance.now()-t64)
+	// 63
+	let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description) ? xS : xF
+	record(65,63, "1472170", ver63, performance.now()-t63)
+	// 62
+	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog) ? xS : xF
+	record(60,62, "1458466", ver62, performance.now()-t62)
+	// 61a
+	let t61a = performance.now(), ver61a = ("object" === typeof CSS) ? xS : xF
+	record(55,61, "", ver61a, performance.now()-t61a)
 
-	//64a
-	let t64a = performance.now(), ver64a = xF
-	if (new Date("31-Mar-2011").getFullYear() == -2011) {ver64a = xS}
-	record(70,64, "", ver64a, performance.now()-t64a)
-
-	//63
-	let t63 = performance.now(), ver63 = xF
-	if (Symbol.for(`foo`).description == "foo") {ver63 = xS}
-	record(65,63, "", ver63, performance.now()-t63)
-
-	//62
-	let t62 = performance.now(), ver62 = xF
-	console.time("v62")
-	try {console.timeLog("v62"); ver62 = xS} catch(e) {}
-	console.timeEnd("v62")
-	record(60,62, "", ver62, performance.now()-t62)
-
-	//61
+	// 61
 	let t61 = performance.now(), ver61 = xF
-	try {newFn("let test61 = (' a').trimStart()"); ver61 = xS} catch(e) {}
+	try {let test61 = (' a').trimStart(); ver61 = xS} catch(e) {ver61 = xB}
 	record(55,61, "", ver61, performance.now()-t61)
 
-	//60
-	let t60 = performance.now(), ver60 = xF
-	try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-		|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-			"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null;
-		ver60 = xS
-	} catch(e) {}
+	// 60
+	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate) ? xS : xF
 	record(50,60, "", ver60, performance.now()-t60)
 
-	//59
+	// 59
 	let t59 = performance.now(), ver59 = xF
 	try {
 		if (Intl.DateTimeFormat.supportedLocalesOf("tt").join() == "tt") {ver59 = xS}
