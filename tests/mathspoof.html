@@ -161,7 +161,7 @@ function run(runtype) {
 						}
 					}
 				} catch(e) {
-					r1 = "blocked"
+					r1 = zB0
 				}
 				try {
 					if (fn[3] == "none") {
@@ -181,7 +181,7 @@ function run(runtype) {
 						}
 					}
 				} catch(e) {
-					r2 = "blocked"
+					r2 = zB0
 				}
 
 				// fixed decimal places
@@ -205,8 +205,8 @@ function run(runtype) {
 
 				// compare
 				let notation = ""
-				if (r1 !== "blocked" && r2 !== "blocked") {
-					notation = " "+ (r1 == r2 ? sg +"\u2713" : sb +"\u274C") + sc
+				if (r1 !== zB0 && r2 !== zB0) {
+					notation = " "+ (r1 == r2 ? green_tick : red_cross)
 					if (r1 !== r2) {
 						detail.push([fn[0],r1,r2])
 						diffs.push(fn[0])
