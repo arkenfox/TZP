@@ -41,7 +41,12 @@
 		<col width="1%"><col width="49%"><col width="49%"><col width="1%">
 		<thead><tr><th colspan="4">versions</th></tr></thead>
 		<tr><td colspan="4" class="intro">
-			<span class="no_color">A history of firefox version-specific PoCs tzp uses or considered</span>
+			<span class="no_color">Firefox version-specific PoCs:
+				<b><span class='good'> &#x2713 </span></b> pass
+				<b><span class='bad'> &#x2715 </span></b> fail
+				<b><span class='s4'> &#x2715 </span></b> error
+				<b> &#x2715 </b> n/a
+			</span>
 		</td></tr>
 		<tr><td colspan="4"><hr></td></tr>
 		<tr><td></td>
@@ -51,6 +56,7 @@
 		</tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="watchlist"></td><td></td></tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="alert"></td><td></td></tr>
+		<tr><td></td><td colspan="2" class="c mono spaces" id="alert2"></td><td></td></tr>
 		<tr><td></td><td colspan="2" class="c mono spaces" id="debug"></td><td></td></tr>
 	</table>
 	<br>
@@ -59,9 +65,10 @@
 'use strict';
 
 function outputVersion() {
-	let xF = sb +"fail"+ sc,
-		xS = sg +"pass"+ sc,
-		xB = s3 + " err"+ sc, // blocked: unexpected error
+	let xS = green_tick,
+		xF = red_cross,
+		xB = yellow_block,
+		xNA = white_na,
 		xNC = sb +"no change "+ sc,
 		xOMG = sg +"has landed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
@@ -80,13 +87,17 @@ function outputVersion() {
 		// data -> results in descending order
 		const names = Object.keys(data).sort((a,b) => b-a)
 		for (const k of names) {results.push(data[k])}
+		if (results.length !== expected) {
+			dom.alert2.innerHTML = sb + "DISPLAY ALERT: expected "+ expected +" got "+ results.length + sc + "<br>"
+		}
 
 		let display = [], prevV = "", prevB = "", prefix = 0
 		for (let i=0; i < results.length; i++) {
-			let id = results[i].split(":")[0].trim(),
-				bug = results[i].split(":")[1],
-				result = results[i].split(":")[2],
-				perf = results[i].split(":")[3]
+			let id = results[i].split("~")[0].trim(),
+				bug = results[i].split("~")[1],
+				result = results[i].split("~")[2],
+				perf = results[i].split("~")[3]
+
 			// version
 			if (bug == firstWatch) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
@@ -105,18 +116,17 @@ function outputVersion() {
 			// bugzilla
 			if (bug !== "") {
 				bug = bug +""
-				prefix = 10 - bug.length
+				prefix = 9 - bug.length
 				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
 					+ "".padEnd(2)
 			} else {
-				bug = "".padStart(12)
+				bug = "".padStart(11)
 			}
 			// perf
-			perf = (perf + "").padStart(4) + " ms"
-
+			perf = (perf + "").padStart(5) + " ms"
 			display.push(id + bug + result + perf)
-			prevV = results[i].split(":")[0].trim()
-			prevB = results[i].split(":")[1]
+			prevV = results[i].split("~")[0].trim()
+			prevB = results[i].split("~")[1]
 		}
 		// split watchlist off
 		let watchlist = display.slice(display.length - watchcount, display.length)
@@ -141,40 +151,36 @@ function outputVersion() {
 	}
 
 	function record(order, version, bug, result, perf) {
-		// cleanup result until I transition to boolean
+		// cleanup result
 		if (result === true) {result = xS
 		} else if (result === false || result === undefined) {result = xF}
 		// continue
 		perf = Math.round(perf)
-		order = (order+"").padStart(3,"0")
-		data[order] = version +" :"+ bug +":"+ result +":"+ perf
+		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf
 		count ++
 		if (count > expected) {
-			dom.alert.innerHTML = "<br>"+ sb + "ALERT: expected count too low by "+ (count - expected) + sc
+			dom.alert.innerHTML = "<br>"+ sb + " RESULT ALERT: expected "+ expected +" got "+ count + sc
 		} else if (count == expected) {
 			display()
 		}
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 75
+		expected = 80
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
-	record(245,98, "1709790", ver98, performance.now()-t98)
+	record(98, 98, "1709790", ver98, performance.now()-t98)
 
 	// 97: 1745372 (try/catch for FF < 60)
 	let t97 = performance.now(), ver97
 	try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
-	record(240,97, "1745372", ver97, performance.now()-t97)
+	record(97, 97, "1745372", ver97, performance.now()-t97)
 
 	// 96: 1738422 (typeof Intl.PluralRules for FF < 60)
 	let t96 = performance.now(), ver96
-	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {
-		ver96 = xB; console.debug(e.name, e.message)
-	}
-	record(236,96, "1738422", ver96, performance.now()-t96)
-
+	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
+	record(96.1, 96, "1738422", ver96, performance.now()-t96)
 	// 96b: 1738422
 	let t96b = performance.now(), ver96b
 	try {
@@ -183,12 +189,11 @@ function outputVersion() {
 		if (test96b == "2012/12/6 中国标准时间 20:00:00") {ver96b = xS}
 		//console.debug(test96)
 	} catch(e) {ver96b = xB}
-	record(235,96, "1738422", ver96b, performance.now()-t96b)
+	record(96,96, "1738422", ver96b, performance.now()-t96b)
 
 	// 95: 1723674: dom.crypto.randomUUID.enabled: fast confirm 95+ only
 	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
-	record(231,95, "1723674", ver95, performance.now()-t95)
-
+	record(95.1, 95, "1723674", ver95, performance.now()-t95)
 	// 95a: 1674204 : slow
 		// note: en-US, windows
 		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
@@ -202,53 +207,37 @@ function outputVersion() {
 		debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
 		if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
 	} catch(e) {}
-	record(230,95, "1674204", ver95a, performance.now()-t95a)
+	record(95,95, "1674204", ver95a, performance.now()-t95a)
 
+	// 94: 1722576
+	let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
+	record(94.1, 94, "1722576", ver94, performance.now()-t94)
 	// 94a: 1729239
 	let t94a = performance.now(), ver94a
 	try {
 		ver94a = (HTMLScriptElement.supports("classic"))
 	} catch(e) {}
-	record(226,94, "1729239", ver94a, performance.now()-t94a)
-
-	// 94: 1722576
-	let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
-	record(225,94, "1722576", ver94, performance.now()-t94)
-
-	// 93b: 1670033
-	let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf)
-	record(222,93, "1670033", ver93b, performance.now()-t93b)
-
-	// 93a: 1328672
-	let t93a = performance.now(), ver93a
-	try {
-		if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93a = xS}
-	} catch(e) {}
-	record(221,93, "1328672", ver93a, performance.now()-t93a)
+	record(94, 94, "1729239", ver94a, performance.now()-t94a)
 
 	// 93: 1722448
 	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
-	record(220,93, "1722448", ver93, performance.now()-t93)
+	record(93.2, 93, "1722448", ver93, performance.now()-t93)
+	// 931: 1670033
+	let t931 = performance.now(), ver931 = ("function" === typeof Intl.supportedValuesOf)
+	record(93.1, 93, "1670033", ver931, performance.now()-t931)
+	// 93a: 1328672
+	let t93b = performance.now(), ver93b
+	try {if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93b = xS}} catch(e) {}
+	record(93, 93, "1328672", ver93b, performance.now()-t93b)
 
 	// 92: 1721149
 	let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
-	record(215,92, "1721149", ver92, performance.now()-t92)
+	record(92.3, 92, "1721149", ver92, performance.now()-t92)
 
 	// 91: 1714933
 	let t91 = performance.now(), ver91
 	try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
-	record(212,91, "1714933", ver91, performance.now()-t91)
-
-	// 91b: 1284868
-	let t91b = performance.now(), ver91b
-	try {
-		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
-		//let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
-		let seconds = test91b.format(new Date('2019-01-01T00:00:07.000Z'))
-		if (seconds == "07") {ver91b = xS}
-	} catch(e) {ver91b = xB}
-	record(211,91, "1284868", ver91b, performance.now()-t91b)
-
+	record(91.2, 91, "1714933", ver91, performance.now()-t91)
 	// 91a: 1710429
 	let t91a = performance.now(), ver91a
 	try {
@@ -256,7 +245,15 @@ function outputVersion() {
 		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
 		ver91a = xS
 	} catch(e) {}
-	record(210,91, "1710429", ver91a, performance.now()-t91a)
+	record(91.1, 91, "1710429", ver91a, performance.now()-t91a)
+	// 91b: 1284868
+	let t91b = performance.now(), ver91b
+	try {
+		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
+		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
+		if (seconds == "07") {ver91b = xS}
+	} catch(e) {ver91b = xB}
+	record(91, 91, "1284868", ver91b, performance.now()-t91b)
 
 	// 90: 1520434
 	let t90 = performance.now(), ver90
@@ -268,21 +265,20 @@ function outputVersion() {
 		// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
 		if (e.message.substr(0,1) == "s") {ver90 = xS}
 	}
-	record(206,90, "1520434", ver90, performance.now()-t90)
-
+	record(90.1, 90, "1520434", ver90, performance.now()-t90)
 	// 90a: 1537689
 	let t90a = performance.now(), ver90a
 	try {
 		if (dom.test90.defaultValue == "a") {ver90a = xS}
 	} catch(e) {}
-	record(205,90, "1537689", ver90a, performance.now()-t90a)
+	record(90, 90, "1537689", ver90a, performance.now()-t90a)
 
 	// 89: 1703213
 	let t89 = performance.now(), ver89
 	try {
 		if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
 	} catch(e) {}
-	record(200,89, "1703213", ver89, performance.now()-t89)
+	record(89, 89, "1703213", ver89, performance.now()-t89)
 
 	// 88: 1670124
 	let t88 = performance.now(), ver88
@@ -292,37 +288,34 @@ function outputVersion() {
 		// FF88+: SyntaxError the escapes \8 and \9 can't be used in untagged template literals or in strict mode code
 		if (e.message.substr(13,5) == "8 and") {ver88 = xS}
 	}
-	record(191,88, "1670124", ver88, performance.now()-t88)
-
+	record(88.1, 88, "1670124", ver88, performance.now()-t88)
 	// 88a: 1497557
 	let t88a = performance.now(), ver88a
 	try {
 		if (document.createElement('a').protocol == ":") {ver88a = xS}
 	} catch(e) {}
-	record(190,88, "1497557", ver88a, performance.now()-t88a)
+	record(88,88, "1497557", ver88a, performance.now()-t88a)
 
 	// 87: 1688335
 	let t87 = performance.now(), ver87
 	try {
 		if (undefined === console.length) {ver87 = xS}
 	} catch(e) {}
-	record(187,87, "1688335", ver87, performance.now()-t87)
-
+	record(87.2, 87, "1688335", ver87, performance.now()-t87)
 	// 87a: 1676708
 	let t87a = performance.now(), ver87a
 	try {
 		let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
 		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
 	} catch(e) {}
-	record(186,87, "1676708", ver87a, performance.now()-t87a)
-
+	record(87.1, 87, "1676708", ver87a, performance.now()-t87a)
 	// 87b: 944846
 	let t87b = performance.now(), ver87b
 	try {
 		let test87b = (12345).toExponential(3)
 		if (test87b == 1.235e+4) {ver87b = xS}
 	} catch(e) {}
-	record(185,87, "944846", ver87b, performance.now()-t87b)
+	record(87, 87, "944846", ver87b, performance.now()-t87b)
 
 	// 86: 1685482
 	let t86 = performance.now(), ver86
@@ -333,7 +326,7 @@ function outputVersion() {
 		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
 		if ((e.message).substring(0,2) == "an") {ver86 = xS}
 	}
-	record(180,86, "1685482", ver86, performance.now()-t86)
+	record(86,86, "1685482", ver86, performance.now()-t86)
 
 	// 85: 1675240
 	let t85 = performance.now(), ver85
@@ -344,7 +337,7 @@ function outputVersion() {
 		// 60+: get global method called on incompatible string
 		if ((e.message).substring(0,3) == "Reg") {ver85 = xS}
 	}
-	record(175,85, "1675240", ver85, performance.now()-t85)
+	record(85, 85, "1675240", ver85, performance.now()-t85)
 
 	// 84: 1673440
 	let t84 = performance.now(), ver84
@@ -353,7 +346,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message == "illegal character U+0040") {ver84 = xS}
 	}
-	record(170,84, "1673440", ver84, performance.now()-t84)
+	record(84, 84, "1673440", ver84, performance.now()-t84)
 
 	// 83: 1667094
 	let t83 = performance.now(), ver83
@@ -361,8 +354,7 @@ function outputVersion() {
 		newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
 		ver83 = xS
 	} catch(e) {}
-	record(166,83, "1667094", ver83, performance.now()-t83)
-
+	record(83.1, 83, "1667094", ver83, performance.now()-t83)
 	// 83a: 1665746
 	let t83a = performance.now(), ver83a
 	try {
@@ -371,14 +363,14 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message == "1 is not iterable") {ver83a = xS}
 	}
-	record(165,83, "1665746", ver83a, performance.now()-t83a)
+	record(83, 83, "1665746", ver83a, performance.now()-t83a)
 
 	// 82: 1655947
 	let t82 = performance.now(), ver82
 	try {
 		ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
 	} catch(e) {ver82 = xB}
-	record(160,82, "1655947", ver82, performance.now()-t82)
+	record(82, 82, "1655947", ver82, performance.now()-t82)
 
 	// 81: 1650607 (53: 1321534)
 	let t81 = performance.now(), ver81
@@ -386,11 +378,10 @@ function outputVersion() {
 		let file81 = new File(["bits"], "a/b.txt")
 		if (file81.name == "a/b.txt") {ver81 = xS}
 	} catch(e) {ver81 = xB}
-	record(156,81, "1650607", ver81, performance.now()-t81)
-
+	record(81.1, 81, "1650607", ver81, performance.now()-t81)
 	// 81a: 1657437
 	// this is unstable in Tor Browser
-	// change from offscreen: use exisiting visible spans
+	// change from offscreen: use existing visible spans
 	let t81a = performance.now(), ver81a = xF
 	try {
 		dom.test81a.innerHTML = "AB"
@@ -402,7 +393,7 @@ function outputVersion() {
 		//console.debug(w81a, w81b)
 		if (w81a < w81b) {ver81a = xS}
 	} catch(e) {ver81a = xB}
-	record(155,81, "1657437", ver81a, performance.now()-t81a)
+	record(81, 81, "1657437", ver81a, performance.now()-t81a)
 
 	// 80: 1651732
 	let t80 = performance.now(), ver80
@@ -413,11 +404,10 @@ function outputVersion() {
 			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
 			ver80 = xS
 		} catch (e) {}
-		record(151,80, "1651732", ver80, performance.now()-t80)
+		record(80.1, 80, "1651732", ver80, performance.now()-t80)
 	} catch(e) {
-		record(151,80, "1651732", xB, performance.now()-t80)
+		record(80.1,80, "1651732", xB, performance.now()-t80)
 	}
-
 	// 80a: 1559253
 	let t80a = performance.now(), ver80a
 	try {
@@ -430,17 +420,12 @@ function outputVersion() {
 		//   80+: = 2,6
 		if (e.columnNumber == 6) {ver80a = xS}
 	}
-	record(150,80, "1559253", ver80a, performance.now()-t80a)
+	record(80, 80, "1559253", ver80a, performance.now()-t80a)
 
 	// 79: 1644878
 	let t79 = performance.now(), ver79
-	try {
-		Map.prototype.entries.call(true)
-	} catch(e) {
-		if ((e.message).substring(0,3) == "ent") {ver79 = xS}
-	}
-	record(146,79, "1644878", ver79, performance.now()-t79)
-
+	try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {ver79 = xS}}
+	record(79.1, 79, "1644878", ver79, performance.now()-t79)
 	// 79a: 1639591
 	let t79a = performance.now(), ver79a
 	try {
@@ -450,53 +435,42 @@ function outputVersion() {
 		// 79+: SyntaxError invalid assignment left-hand side
 		if (e.message.substring(0,3) == "inv") {ver79a = xS}
 	}
-	record(145,79, "1639591", ver79a, performance.now()-t79a)
+	record(79,79, "1639591", ver79a, performance.now()-t79a)
 
-	// 78c: 1626015
-	let t78c = performance.now()
-	let ver78c = (window.Document.prototype.hasOwnProperty("replaceChildren"))
-	record(143,78, "1626015", ver78c, performance.now()-t78c)
-
-	// 78: 1633836
-	let t78 = performance.now(), ver78
-	try {
-		let test78 = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2)
-		ver78 = xS
-	} catch(e) {}
-	record(142,78, "1633836", ver78, performance.now()-t78)
-
+	// 78: 1626015
+	let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
+	record(78.3, 78, "1626015", ver78, performance.now()-t78)
 	// 78a: 1589095
 	let t78a = performance.now(), ver78a
 	try {
 		let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
 		ver78a = xS
 	} catch(e) {}
-	record(141,78, "1589095", ver78a, performance.now()-t78a)
-
+	record(78.2, 78, "1589095", ver78a, performance.now()-t78a)
 	// 78b: 1634135
 	let t78b = performance.now(), ver78b
 	try {
 		let regex78b = new RegExp('b')
 		if (regex78b.dotAll == false) {ver78b = xS}
 	} catch(e) {ver78b = xB}
-	record(140,78, "1634135", ver78b, performance.now()-t78b)
+	record(78.1, 78, "1634135", ver78b, performance.now()-t78b)
+	// 78c: 1633836
+	let t78c = performance.now(), ver78c
+	try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = xS} catch(e) {}
+	record(78, 78, "1633836", ver78c, performance.now()-t78c)
 
 	// 77: 1627285
-	let t77 = performance.now(), ver77
-	if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {ver77 = xS}
-	record(136,77, "1627285", ver77, performance.now()-t77)
-
+	let t77 = performance.now(), ver77 = (isNaN(new DOMRect(0, 0, NaN, NaN).top))
+	record(77.1, 77, "1627285", ver77, performance.now()-t77)
 	// 77a: 1608168
 	let t77a = performance.now(), ver77a
-	try {
-		("aa").replaceAll("a","b"); ver77a = xS
-	} catch(e) {}
-	record(135,77, "1608168", ver77a, performance.now()-t77a)
+	try {("aa").replaceAll("a","b"); ver77a = xS} catch(e) {}
+	record(77, 77, "1608168", ver77a, performance.now()-t77a)
 
 	// 76: 1608010
 	let t76 = performance.now(), ver76
 	if (test76.validity.rangeOverflow) {} else {ver76 = xS}
-	record(130,76, "1608010", ver76, performance.now()-t77)
+	record(76, 76, "1608010", ver76, performance.now()-t77)
 
 	// 75: 1615600
 	let t75 = performance.now(), ver75
@@ -505,7 +479,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.message.substring(0,3) == "2.5") {ver75 = xS}
 	}
-	record(125,75, "1615600", ver75, performance.now()-t75)
+	record(75, 75, "1615600", ver75, performance.now()-t75)
 
 	// 74: 1605835
 	let t74 = performance.now(), ver74
@@ -513,119 +487,122 @@ function outputVersion() {
 		newFn("let t = ({ 1n: 1 })")
 		ver74 = xS
 	} catch(e) {}
-	record(120,74, "1605835", ver74, performance.now()-t74)
+	record(74, 74, "1605835", ver74, performance.now()-t74)
 
 	// 73: 1605803
 	let t73 = performance.now(), ver73
 	let el73 = dom.test73
 	if (getComputedStyle(el73).content == "normal") {ver73 = xS}
-	record(115,73, "1605803", ver73, performance.now()-t73)
+	record(73, 73, "1605803", ver73, performance.now()-t73)
 
-	// 72: 1589072
-	let t72 = performance.now(), ver72
-	try {
-		let test72 = newFn('let a = 100_00_;')
-	} catch(e) {
-		if (e.message.substring(0,6) == "unders" ) {
-			ver72 = xS
-		}
-	}
-	record(111,72, "1589072", ver72, performance.now()-t72)
-
+	// 72: 1591892
+	let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
+	record(72.3, 72, "1591892", ver72, performance.now()-t72)
 	// 72a: 1441976
 	let t72a = performance.now(), ver72a
 	try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
-	record(110,72, "1441976", ver72a, performance.now()-t72a)
+	record(72.2, 72, "1441976", ver72a, performance.now()-t72a)
+	// 72b: 1566141
+	let t72b = performance.now(), ver72b
+	try {let test72 = (newFn("null ?? 'foo'")); ver72b = xS} catch(e) {}
+	record(72.1, 72, "1566141", ver72b, performance.now()-t72b)
+	// 72c: 1589072
+	let t72c = performance.now(), ver72c
+	try {	let test72c = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders" ) {ver72c = xS}}
+	record(72, 72, "1589072", ver72c, performance.now()-t72c)
 
-	// 71b: 1549176
-	let t71b = performance.now(), ver71b = ("function" === typeof Promise.allSettled) ? xS : xF
-	record(106,71, "1549176", ver71b, performance.now()-t71b)
-
-	// 71: 1575980
-	let t71 = performance.now(), ver71
-	try {
-		let test71 = new StaticRange()
-	} catch(e) {
-		if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71=xS}
+	// 71: 1549176
+	let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled) ? xS : xF
+	record(71.1, 71, "1549176", ver71, performance.now()-t71)
+	// 71b: 1575980
+	let t71b = performance.now(), ver71b
+	try {let test71b = new StaticRange()} catch(e) {
+		if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71b = xS}
 	}
-	record(105,71, "1575980", ver71, performance.now()-t71)
+	record(71, 71, "1575980", ver71b, performance.now()-t71b)
 
 	// 70: 1435818
 	let t70 = performance.now(), ver70
 	try {
 		newFn("let t = 1_050")
-		ver70=xS
+		ver70 = xS
 	} catch(e) {}
-	record(100,70, "1435818", ver70, performance.now()-t70)
+	record(70, 70, "1435818", ver70, performance.now()-t70)
 
-	// 69b: 1557121
-	let t69b = performance.now(), ver69b = ("function" === typeof Blob.prototype.text)
-	record(96,69, "1557121", ver69b, performance.now()-t69b)
-
-	// 69: 1558387
-	let t69 = performance.now(), ver69 = xF
-	try {let test69 = new DOMError('a')} catch(e) {ver69 = xS}
-	record(95,69, "1558387", ver69, performance.now()-t69)
+	// 69: 1557121
+	let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
+	record(69.1, 69, "1557121", ver69, performance.now()-t69)
+	// 69b: 1558387
+	let t69b = performance.now(), ver69b
+	try {let test69b = new DOMError('a')} catch(e) {ver69b = xS}
+	record(69, 69, "1558387", ver69b, performance.now()-t69b)
 
 	// 68: 1548773
 	let t68 = performance.now(), ver68
-	try {
-		let el68 = dom.test68
-		if (el68.typeMustMatch === undefined) {ver68 = xS}
-	} catch(e) {ver68 = xB}
-	record(90,68, "1548773", ver68, performance.now()-t68)
+	try {if (undefined === dom.test68.typeMustMatch) {ver68 = xS}} catch(e) {ver68 = xB}
+	record(68.1, 68, "1548773", ver68, performance.now()-t68)
+	// 68b: 1550949
+	let t68b = performance.now(), ver68b
+	try {ver68b = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68b = xB}
+	record(68, 68, "1550949", ver68b, performance.now()-t68b)
 
 	// 67: 1531830 (1435829)
 	let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
-	record(85,67, "1531830", ver67, performance.now()-t67)
+	record(67, 67, "1531830", ver67, performance.now()-t67)
 
-	// 66
-	let t66 = performance.now(), ver66
+	// 66: 1425685
+		// ESR60 doesn't have HTMLSlotElement at all so we check for that first
+	let t66 = performance.now()
+	let ver66 = ("function" === typeof HTMLSlotElement && "function" === typeof HTMLSlotElement.prototype.assignedElements)
+	record(66.1, 66, "1425685", ver66, performance.now()-t66)
+	// 66a
+	let t66a = performance.now(), ver66a
 	try {
 		let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-		let test66 = txt.encodeInto("a", utf8)
-		ver66 = xS
+		let test66a = txt.encodeInto("a", utf8)
+		ver66a = xS
 	} catch(e) {}
-	record(80,66, "", ver66, performance.now()-t66)
+	record(66, 66, "", ver66a, performance.now()-t66a)
 
-	// 65
-	let t65 = performance.now(), ver65
-	try {
-		let test65 = new Intl.RelativeTimeFormat("en",{style: "long"})
-		ver65 = xS
-	} catch(e) {}
-	record(76,65, "", ver65, performance.now()-t65)
-
+	// 65: 1334813
+	let t65 = performance.now(), ver65 = (1 === DataView.length)
+	record(65.2, 65, "1334813", ver65, performance.now()-t65)
 	// 65a
 	let t65a = performance.now(), ver65a
-	try {ver65a = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65a = xB}
-	record(75,65, "", ver65a, performance.now()-t65a)
+	try {let test65a = new Intl.RelativeTimeFormat("en",{style: "long"}); ver65a = xS} catch(e) {}
+	record(65.1, 65, "", ver65a, performance.now()-t65a)
+	// 65b
+	let t65b = performance.now(), ver65b
+	try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
+	record(65, 65, "", ver65b, performance.now()-t65b)
 
 	// 64
 	let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
-	record(71,64, "1498860", ver64, performance.now()-t64)
+	record(64, 64, "1498860", ver64, performance.now()-t64)
+
 	// 63
 	let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
-	record(65,63, "1472170", ver63, performance.now()-t63)
+	record(63, 63, "1472170", ver63, performance.now()-t63)
+
 	// 62
 	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
-	record(60,62, "1458466", ver62, performance.now()-t62)
-	// 61a
-	let t61a = performance.now(), ver61a = ("object" === typeof CSS)
-	record(55,61, "", ver61a, performance.now()-t61a)
+	record(62, 62, "1458466", ver62, performance.now()-t62)
 
 	// 61
-	let t61 = performance.now(), ver61
-	try {let test61 = (' a').trimStart(); ver61 = xS} catch(e) {}
-	record(55,61, "", ver61, performance.now()-t61)
+	let t61 = performance.now(), ver61 = ("object" === typeof CSS)
+	record(61.1, 61, "", ver61, performance.now()-t61)
+	// 61a
+	let t61a = performance.now(), ver61a
+	try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
+	record(61, 61, "", ver61a, performance.now()-t61a)
 
 	// 60
 	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
-	record(50,60, "", ver60, performance.now()-t60)
+	record(60, 60, "", ver60, performance.now()-t60)
 	// 59
 	let t59 = performance.now(), ver59
 	try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
-	record(45,59, "", ver59, performance.now()-t59)
+	record(59, 59, "", ver59, performance.now()-t59)
 
 	// 55: 1354974
 	// this test hangs the page in chromium
@@ -643,17 +620,14 @@ function outputVersion() {
 				ver55 = xS
 			}
 		} catch(e) {}
-		record(18,55, "1354974", ver55, performance.now()-t55)
+		record(55.1, 55, "1354974", ver55, performance.now()-t55)
 	} else {
-		record(18,55, "1354974", " n/a ", performance.now()-t55)
+		record(55.1, 55, "1354974", xNA, performance.now()-t55)
 	}
-
 	// 55b: 1351795
 	let t55b = performance.now(), ver55b
-	try {
-		console.timeline()
-	} catch(e) {ver55b = xS}
-	record(16,55, "1351795", ver55b, performance.now()-t55b)
+	try {console.timeline()} catch(e) {ver55b = xS}
+	record(55, 55, "1351795", ver55b, performance.now()-t55b)
 
 	// 54: 1050755
 	let t54 = performance.now(), ver54
@@ -661,7 +635,7 @@ function outputVersion() {
 		let test54 = [Date.UTC(), Date.UTC(1)]
 		if (isNaN(test54[1]) == false) {ver54 = xS}
 	} catch(e) {}
-	record(14,54, "1050755", ver54, performance.now()-t54)
+	record(54, 54, "1050755", ver54, performance.now()-t54)
 
 	// 53: 1317307
 	let t53 = performance.now(), ver53
@@ -670,7 +644,7 @@ function outputVersion() {
 	} catch(e) {
 		if (e.name == "TypeError") {ver53 = xS}
 	}
-	record(12,53, "1317307", ver53, performance.now()-t53)
+	record(53, 53, "1317307", ver53, performance.now()-t53)
 
 	// 52: 837961
 	let t52 = performance.now(), ver52
@@ -678,18 +652,18 @@ function outputVersion() {
 		let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
 		ver52 = xS
 	} catch(e) {}
-	record(10,52, "837961", ver52, performance.now()-t52)
+	record(52, 52, "837961", ver52, performance.now()-t52)
 
 	// watch
 	// 1274354: META
 
-	// 1439800
+	// 1439800: note cydec causes a false positive
 	let t9 = performance.now(), ver9 = xNC
 	let test9 = new Date("11-Nov-11")
 	if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
 	record(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
 
-	// 1557650
+	// 1557650: note cydec causes a false positive
 	let t8 = performance.now(), ver8 = xNC
 	let test8 = new Date("19999-11-11").toString()
 	if (test8 !== "Invalid Date") {ver8 = xOMG}
@@ -722,7 +696,7 @@ function outputVersion() {
 	} catch(e) {
 		ver4 = " "+ zNA + " error "
 	}
-	record(4,"~ and B~", "1742592", ver4, performance.now()-t4)
+	record(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
 
 }
 
