@@ -141,6 +141,10 @@ function outputVersion() {
 	}
 
 	function record(order, version, bug, result, perf) {
+		// cleanup result until I transition to boolean
+		if (result === true) {result = xS
+		} else if (result === false || result === undefined) {result = xF}
+		// continue
 		perf = Math.round(perf)
 		order = (order+"").padStart(3,"0")
 		data[order] = version +" :"+ bug +":"+ result +":"+ perf
@@ -155,23 +159,26 @@ function outputVersion() {
 	let count = 0,
 		expected = 75
 
+//HTMLElement.prototype.hasOwnProperty("outerText")
+
 	// 98: 1709790
-	let t98 = performance.now(), ver98 = ("function" === typeof self.structuredClone) ?  xS : xF
+	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 	record(245,98, "1709790", ver98, performance.now()-t98)
 
-	// 97: 1745372
-	let t97 = performance.now(), ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted) ? xS : xF
+	// 97: 1745372 (try/catch for FF < 60)
+	let t97 = performance.now(), ver97
+	try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
 	record(240,97, "1745372", ver97, performance.now()-t97)
 
 	// 96: 1738422
-	let t96 = performance.now(), ver96 = xF
-	try {
-		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {ver96 = xS}
-	} catch(e) {ver96 = xB}
+	let t96 = performance.now(), ver96
+	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" === Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {
+		ver96 = xB; console.debug(e.name, e.message)
+	}
 	record(236,96, "1738422", ver96, performance.now()-t96)
 
 	// 96b: 1738422
-	let t96b = performance.now(), ver96b = xF
+	let t96b = performance.now(), ver96b
 	try {
 		let date96b = Date.UTC(2012,12-1,6,12,0,0)
 		let test96b = new Date(date96b).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
@@ -181,7 +188,7 @@ function outputVersion() {
 	record(235,96, "1738422", ver96b, performance.now()-t96b)
 
 	// 95: 1723674: dom.crypto.randomUUID.enabled: fast confirm 95+ only
-	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID) ? xS : xF
+	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
 	record(231,95, "1723674", ver95, performance.now()-t95)
 
 	// 95a: 1674204 : slow
@@ -189,7 +196,7 @@ function outputVersion() {
 		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
 		// FF66-94 wraps 2020-1 vs 2020-12   : 45/53 = 0.8490566037735849
 		// FF95+   wraps 2020-1 x twice that : 47/93 = approx 0.5
-	let t95a = performance.now(), ver95a = xF
+	let t95a = performance.now(), ver95a
 	try {
 		let a95 = dom.test95a.offsetWidth
 		let b95 = dom.test95b.offsetWidth
@@ -200,46 +207,42 @@ function outputVersion() {
 	record(230,95, "1674204", ver95a, performance.now()-t95a)
 
 	// 94a: 1729239
-	let t94a = performance.now(), ver94a = xF
+	let t94a = performance.now(), ver94a
 	try {
-		newFn("HTMLScriptElement.supports('classic')")
-		ver94a = xS
+		ver94a = (HTMLScriptElement.supports("classic"))
 	} catch(e) {}
 	record(226,94, "1729239", ver94a, performance.now()-t94a)
 
 	// 94: 1722576
-	let t94 = performance.now(), ver94 = "function" === typeof self.structuredClone ? xS : xF
+	let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
 	record(225,94, "1722576", ver94, performance.now()-t94)
 
 	// 93b: 1670033
-	let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf) ? xS : xF
+	let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf)
 	record(222,93, "1670033", ver93b, performance.now()-t93b)
 
 	// 93a: 1328672
-	let t93a = performance.now(), ver93a = xF
+	let t93a = performance.now(), ver93a
 	try {
 		if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93a = xS}
 	} catch(e) {}
 	record(221,93, "1328672", ver93a, performance.now()-t93a)
 
 	// 93: 1722448
-	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError) ? xS : xF
+	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
 	record(220,93, "1722448", ver93, performance.now()-t93)
 
 	// 92: 1721149
-	let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn) ? xS : xF
+	let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
 	record(215,92, "1721149", ver92, performance.now()-t92)
 
 	// 91: 1714933
-	let t91 = performance.now(), ver91 = xF
-	try {
-		let test91 = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
-		if (test91.length) {ver91 = xS}
-	} catch(e) {}
+	let t91 = performance.now(), ver91
+	try {ver91 = ("sa" === Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 	record(212,91, "1714933", ver91, performance.now()-t91)
 
 	// 91b: 1284868
-	let t91b = performance.now(), ver91b = xF
+	let t91b = performance.now(), ver91b
 	try {
 		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
 		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
@@ -248,7 +251,7 @@ function outputVersion() {
 	record(211,91, "1284868", ver91b, performance.now()-t91b)
 
 	// 91a: 1710429
-	let t91a = performance.now(), ver91a = xF
+	let t91a = performance.now(), ver91a
 	try {
 		let d91 = new Date("January 30, 2019 13:00:00")
 		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
@@ -257,10 +260,10 @@ function outputVersion() {
 	record(210,91, "1710429", ver91a, performance.now()-t91a)
 
 	// 90: 1520434
-	let t90 = performance.now(), ver90 = xF
+	let t90 = performance.now(), ver90
 	try {
 		let share90 = new ArrayBuffer(4096)
-		let test90 = new Int32Array(share90, 7)
+		let tst90 = new Int32Array(share90, 7)
 	} catch(e) {
 		// 90: start offset of Int32Array should be a multiple of 4
 		// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
@@ -269,21 +272,21 @@ function outputVersion() {
 	record(206,90, "1520434", ver90, performance.now()-t90)
 
 	// 90a: 1537689
-	let t90a = performance.now(), ver90a = xF
+	let t90a = performance.now(), ver90a
 	try {
 		if (dom.test90.defaultValue == "a") {ver90a = xS}
 	} catch(e) {}
 	record(205,90, "1537689", ver90a, performance.now()-t90a)
 
 	// 89: 1703213
-	let t89 = performance.now(), ver89 = xF
+	let t89 = performance.now(), ver89
 	try {
 		if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
 	} catch(e) {}
 	record(200,89, "1703213", ver89, performance.now()-t89)
 
 	// 88: 1670124
-	let t88 = performance.now(), ver88 = xF
+	let t88 = performance.now(), ver88
 	try {
 		newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
 	} catch(e) {
@@ -293,21 +296,21 @@ function outputVersion() {
 	record(191,88, "1670124", ver88, performance.now()-t88)
 
 	// 88a: 1497557
-	let t88a = performance.now(), ver88a = xF
+	let t88a = performance.now(), ver88a
 	try {
 		if (document.createElement('a').protocol == ":") {ver88a = xS}
 	} catch(e) {}
 	record(190,88, "1497557", ver88a, performance.now()-t88a)
 
 	// 87: 1688335
-	let t87 = performance.now(), ver87 = xF
+	let t87 = performance.now(), ver87
 	try {
 		if (undefined === console.length) {ver87 = xS}
 	} catch(e) {}
 	record(187,87, "1688335", ver87, performance.now()-t87)
 
 	// 87a: 1676708
-	let t87a = performance.now(), ver87a = xF
+	let t87a = performance.now(), ver87a
 	try {
 		let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
 		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
@@ -315,7 +318,7 @@ function outputVersion() {
 	record(186,87, "1676708", ver87a, performance.now()-t87a)
 
 	// 87b: 944846
-	let t87b = performance.now(), ver87b = xF
+	let t87b = performance.now(), ver87b
 	try {
 		let test87b = (12345).toExponential(3)
 		if (test87b == 1.235e+4) {ver87b = xS}
@@ -323,7 +326,7 @@ function outputVersion() {
 	record(185,87, "944846", ver87b, performance.now()-t87b)
 
 	// 86: 1685482
-	let t86 = performance.now(), ver86 = xF
+	let t86 = performance.now(), ver86
 	try {
 		newFn('for (async of [])')
 	} catch(e) {
@@ -334,7 +337,7 @@ function outputVersion() {
 	record(180,86, "1685482", ver86, performance.now()-t86)
 
 	// 85: 1675240
-	let t85 = performance.now(), ver85 = xF
+	let t85 = performance.now(), ver85
 	try {
 		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
 	} catch(e) {
@@ -345,7 +348,7 @@ function outputVersion() {
 	record(175,85, "1675240", ver85, performance.now()-t85)
 
 	// 84: 1673440
-	let t84 = performance.now(), ver84 = xF
+	let t84 = performance.now(), ver84
 	try {
 		newFn("var x = @")
 	} catch(e) {
@@ -354,7 +357,7 @@ function outputVersion() {
 	record(170,84, "1673440", ver84, performance.now()-t84)
 
 	// 83: 1667094
-	let t83 = performance.now(), ver83 = xF
+	let t83 = performance.now(), ver83
 	try {
 		newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
 		ver83 = xS
@@ -362,7 +365,7 @@ function outputVersion() {
 	record(166,83, "1667094", ver83, performance.now()-t83)
 
 	// 83a: 1665746
-	let t83a = performance.now(), ver83a = xF
+	let t83a = performance.now(), ver83a
 	try {
 		newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
 		ver83a = xS
@@ -372,14 +375,14 @@ function outputVersion() {
 	record(165,83, "1665746", ver83a, performance.now()-t83a)
 
 	// 82: 1655947
-	let t82 = performance.now(), ver82 = xF
+	let t82 = performance.now(), ver82
 	try {
 		ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
 	} catch(e) {ver82 = xB}
 	record(160,82, "1655947", ver82, performance.now()-t82)
 
 	// 81: 1650607 (53: 1321534)
-	let t81 = performance.now(), ver81 = xF
+	let t81 = performance.now(), ver81
 	try {
 		let file81 = new File(["bits"], "a/b.txt")
 		if (file81.name == "a/b.txt") {ver81 = xS}
@@ -403,7 +406,7 @@ function outputVersion() {
 	record(155,81, "1657437", ver81a, performance.now()-t81a)
 
 	// 80: 1651732
-	let t80 = performance.now(), ver80 = xF
+	let t80 = performance.now(), ver80
 	try {
 		let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
 		let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
@@ -417,7 +420,7 @@ function outputVersion() {
 	}
 
 	// 80a: 1559253
-	let t80a = performance.now(), ver80a = xF
+	let t80a = performance.now(), ver80a
 	try {
 		newFn(`
 		/aaa(/; 012345678`)
@@ -431,7 +434,7 @@ function outputVersion() {
 	record(150,80, "1559253", ver80a, performance.now()-t80a)
 
 	// 79: 1644878
-	let t79 = performance.now(), ver79 = xF
+	let t79 = performance.now(), ver79
 	try {
 		Map.prototype.entries.call(true)
 	} catch(e) {
@@ -440,7 +443,7 @@ function outputVersion() {
 	record(146,79, "1644878", ver79, performance.now()-t79)
 
 	// 79a: 1639591
-	let t79a = performance.now(), ver79a = xF
+	let t79a = performance.now(), ver79a
 	try {
 		newFn("let z = (3 ??= 3 * 3)")
 	} catch(e) {
@@ -452,11 +455,11 @@ function outputVersion() {
 
 	// 78c: 1626015
 	let t78c = performance.now()
-	let ver78c = (Object.getOwnPropertyNames(window.Document.prototype).includes('replaceChildren')) ? xS : xF
+	let ver78c = (window.Document.prototype.hasOwnProperty("replaceChildren"))
 	record(143,78, "1626015", ver78c, performance.now()-t78c)
 
 	// 78: 1633836
-	let t78 = performance.now(), ver78 = xF
+	let t78 = performance.now(), ver78
 	try {
 		let test78 = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2)
 		ver78 = xS
@@ -464,7 +467,7 @@ function outputVersion() {
 	record(142,78, "1633836", ver78, performance.now()-t78)
 
 	// 78a: 1589095
-	let t78a = performance.now(), ver78a = xF
+	let t78a = performance.now(), ver78a
 	try {
 		let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
 		ver78a = xS
@@ -472,7 +475,7 @@ function outputVersion() {
 	record(141,78, "1589095", ver78a, performance.now()-t78a)
 
 	// 78b: 1634135
-	let t78b = performance.now(), ver78b = xF
+	let t78b = performance.now(), ver78b
 	try {
 		let regex78b = new RegExp('b')
 		if (regex78b.dotAll == false) {ver78b = xS}
@@ -480,24 +483,24 @@ function outputVersion() {
 	record(140,78, "1634135", ver78b, performance.now()-t78b)
 
 	// 77: 1627285
-	let t77 = performance.now(), ver77 = xF
+	let t77 = performance.now(), ver77
 	if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {ver77 = xS}
 	record(136,77, "1627285", ver77, performance.now()-t77)
 
 	// 77a: 1608168
-	let t77a = performance.now(), ver77a = xF
+	let t77a = performance.now(), ver77a
 	try {
 		("aa").replaceAll("a","b"); ver77a = xS
 	} catch(e) {}
 	record(135,77, "1608168", ver77a, performance.now()-t77a)
 
 	// 76: 1608010
-	let t76 = performance.now(), ver76 = xF
+	let t76 = performance.now(), ver76
 	if (test76.validity.rangeOverflow) {} else {ver76 = xS}
 	record(130,76, "1608010", ver76, performance.now()-t77)
 
 	// 75: 1615600
-	let t75 = performance.now(), ver75 = xF
+	let t75 = performance.now(), ver75
 	try {
 		let test75 = BigInt(2.5)
 	} catch(e) {
@@ -506,7 +509,7 @@ function outputVersion() {
 	record(125,75, "1615600", ver75, performance.now()-t75)
 
 	// 74: 1605835
-	let t74 = performance.now(), ver74 = xF
+	let t74 = performance.now(), ver74
 	try {
 		newFn("let t = ({ 1n: 1 })")
 		ver74 = xS
@@ -514,13 +517,13 @@ function outputVersion() {
 	record(120,74, "1605835", ver74, performance.now()-t74)
 
 	// 73: 1605803
-	let t73 = performance.now(), ver73 = xF
+	let t73 = performance.now(), ver73
 	let el73 = dom.test73
 	if (getComputedStyle(el73).content == "normal") {ver73 = xS}
 	record(115,73, "1605803", ver73, performance.now()-t73)
 
 	// 72: 1589072
-	let t72 = performance.now(), ver72 = xF
+	let t72 = performance.now(), ver72
 	try {
 		let test72 = newFn('let a = 100_00_;')
 	} catch(e) {
@@ -531,7 +534,7 @@ function outputVersion() {
 	record(111,72, "1589072", ver72, performance.now()-t72)
 
 	// 72a: 1441976
-	let t72a = performance.now(), ver72a = xF
+	let t72a = performance.now(), ver72a
 	try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
 	record(110,72, "1441976", ver72a, performance.now()-t72a)
 
@@ -540,7 +543,7 @@ function outputVersion() {
 	record(106,71, "1549176", ver71b, performance.now()-t71b)
 
 	// 71: 1575980
-	let t71 = performance.now(), ver71 = xF
+	let t71 = performance.now(), ver71
 	try {
 		let test71 = new StaticRange()
 	} catch(e) {
@@ -549,15 +552,15 @@ function outputVersion() {
 	record(105,71, "1575980", ver71, performance.now()-t71)
 
 	// 70: 1435818
-	let t70 = performance.now(), ver70 = xF
+	let t70 = performance.now(), ver70
 	try {
-		let t = 1_050
+		newFn("let t = 1_050")
 		ver70=xS
 	} catch(e) {}
 	record(100,70, "1435818", ver70, performance.now()-t70)
 
 	// 69b: 1557121
-	let t69b = performance.now(), ver69b = ("function" === typeof Blob.prototype.text) ? xS : xF
+	let t69b = performance.now(), ver69b = ("function" === typeof Blob.prototype.text)
 	record(96,69, "1557121", ver69b, performance.now()-t69b)
 
 	// 69: 1558387
@@ -566,7 +569,7 @@ function outputVersion() {
 	record(95,69, "1558387", ver69, performance.now()-t69)
 
 	// 68: 1548773
-	let t68 = performance.now(), ver68 = xF
+	let t68 = performance.now(), ver68
 	try {
 		let el68 = dom.test68
 		if (el68.typeMustMatch === undefined) {ver68 = xS}
@@ -574,11 +577,11 @@ function outputVersion() {
 	record(90,68, "1548773", ver68, performance.now()-t68)
 
 	// 67: 1531830 (1435829)
-	let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll) ? xS : xF
+	let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
 	record(85,67, "1531830", ver67, performance.now()-t67)
 
 	// 66
-	let t66 = performance.now(), ver66 = xF
+	let t66 = performance.now(), ver66
 	try {
 		let txt = new TextEncoder(), utf8 = new Uint8Array(1)
 		let test66 = txt.encodeInto("a", utf8)
@@ -587,7 +590,7 @@ function outputVersion() {
 	record(80,66, "", ver66, performance.now()-t66)
 
 	// 65
-	let t65 = performance.now(), ver65 = xF
+	let t65 = performance.now(), ver65
 	try {
 		let test65 = new Intl.RelativeTimeFormat("en",{style: "long"})
 		ver65 = xS
@@ -595,44 +598,41 @@ function outputVersion() {
 	record(76,65, "", ver65, performance.now()-t65)
 
 	// 65a
-	let t65a = performance.now(), ver65a = xF
+	let t65a = performance.now(), ver65a
 	try {
-		ver65a = (Intl.DateTimeFormat.supportedLocalesOf("ia").join() == "ia") ? xS : xF
+		ver65a = (Intl.DateTimeFormat.supportedLocalesOf("ia").join() == "ia")
 	} catch(e) {ver65a = xB}
 	record(75,65, "", ver65a, performance.now()-t65a)
 
 	// 64
-	let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop) ? xS : xF
+	let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
 	record(71,64, "1498860", ver64, performance.now()-t64)
 	// 63
-	let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description) ? xS : xF
+	let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
 	record(65,63, "1472170", ver63, performance.now()-t63)
 	// 62
-	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog) ? xS : xF
+	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
 	record(60,62, "1458466", ver62, performance.now()-t62)
 	// 61a
-	let t61a = performance.now(), ver61a = ("object" === typeof CSS) ? xS : xF
+	let t61a = performance.now(), ver61a = ("object" === typeof CSS)
 	record(55,61, "", ver61a, performance.now()-t61a)
 
 	// 61
-	let t61 = performance.now(), ver61 = xF
-	try {let test61 = (' a').trimStart(); ver61 = xS} catch(e) {ver61 = xB}
+	let t61 = performance.now(), ver61
+	try {let test61 = (' a').trimStart(); ver61 = xS} catch(e) {}
 	record(55,61, "", ver61, performance.now()-t61)
 
 	// 60
-	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate) ? xS : xF
+	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
 	record(50,60, "", ver60, performance.now()-t60)
-
 	// 59
-	let t59 = performance.now(), ver59 = xF
-	try {
-		if (Intl.DateTimeFormat.supportedLocalesOf("tt").join() == "tt") {ver59 = xS}
-	} catch(e) {}
+	let t59 = performance.now(), ver59
+	try {ver59 = ("tt" === Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
 	record(45,59, "", ver59, performance.now()-t59)
 
 	// 55: 1354974
 	// this test hangs the page in chromium
-	let t55 = performance.now(), ver55 = xF
+	let t55 = performance.now(), ver55
 	if (isFF) {
 		try {
 			let maxIndex = Math.pow(2, 31)
@@ -652,14 +652,14 @@ function outputVersion() {
 	}
 
 	// 55b: 1351795
-	let t55b = performance.now(), ver55b = xF
+	let t55b = performance.now(), ver55b
 	try {
 		console.timeline()
 	} catch(e) {ver55b = xS}
 	record(16,55, "1351795", ver55b, performance.now()-t55b)
 
 	// 54: 1050755
-	let t54 = performance.now(), ver54 = xF
+	let t54 = performance.now(), ver54
 	try {
 		let test54 = [Date.UTC(), Date.UTC(1)]
 		if (isNaN(test54[1]) == false) {ver54 = xS}
@@ -667,7 +667,7 @@ function outputVersion() {
 	record(14,54, "1050755", ver54, performance.now()-t54)
 
 	// 53: 1317307
-	let t53 = performance.now(), ver53 = xF
+	let t53 = performance.now(), ver53
 	try {
 		Object.defineProperty([], "length", {get(){}})
 	} catch(e) {
@@ -676,7 +676,7 @@ function outputVersion() {
 	record(12,53, "1317307", ver53, performance.now()-t53)
 
 	// 52: 837961
-	let t52 = performance.now(), ver52 = xF
+	let t52 = performance.now(), ver52
 	try {
 		let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
 		ver52 = xS
