@@ -264,7 +264,7 @@ function run(howmany) {
 					let deduped = data.length == count ? "" : " [de-duped]"
 					display.push("<br>" + s9 + strRemainder + data.length + deduped + sc +"<br>")
 					display.push(data.join("<br>"))
-					if (countRFP == 0) {display.push(sb +"<br><br>\u2716 FAILED IT"+ sc)}
+					if (countRFP == 0) {display.push(sb +"<br><br>\u2715 FAILED IT"+ sc)}
 				}
 			}
 			dom.results.innerHTML = display.join("<br>")
