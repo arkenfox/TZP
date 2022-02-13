@@ -51,7 +51,7 @@
 				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail &nbsp
 				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error &nbsp
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
-				&nbsp <b><span class='s3'> * </span></b> &nbsp fast path
+				&nbsp <b><span class='s3'> * </span></b> &nbsp fast path [pref]
 			</span>
 		</td></tr>
 		<tr><td colspan="5"><hr></td></tr>
@@ -195,7 +195,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 85
+		expected = 83
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -271,15 +271,19 @@ function outputVersion() {
 	let t91 = performance.now(), ver91
 	try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 	record(91.3, 91, "1714933", ver91, performance.now()-t91)
-	// 91a: 1710429
+	// 91c: 1717072
+		// fast path: 91+ only: dom.window.clientinformation.enabled = true (default)
+	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
+	record(91, 91, "1717072", ver91c, performance.now()-t91c, true)
+	/*
+	// 91a: 1710429: very slow cold ~15-20ms slow warm run 4-5ms
 	let t91a = performance.now(), ver91a
 	try {
-		let d91 = new Date("January 30, 2019 13:00:00")
-		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(d91)
+		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
 		ver91a = xS
 	} catch(e) {}
 	record(91.2, 91, "1710429", ver91a, performance.now()-t91a)
-	// 91b: 1284868
+	// 91b: 1284868: slow 2+ms
 	let t91b = performance.now(), ver91b
 	try {
 		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
@@ -287,10 +291,7 @@ function outputVersion() {
 		if (seconds == "07") {ver91b = xS}
 	} catch(e) {ver91b = xB}
 	record(91.1, 91, "1284868", ver91b, performance.now()-t91b)
-	// 91c: 1717072
-		// fast path: 91+ only: dom.window.clientinformation.enabled = true (default)
-	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
-	record(91, 91, "1717072", ver91c, performance.now()-t91c, true)
+	*/
 
 	// 90: 1520434
 	let t90 = performance.now(), ver90
