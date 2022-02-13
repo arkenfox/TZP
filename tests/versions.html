@@ -99,11 +99,15 @@ function outputVersion() {
 				bug = results[i].split("~")[1],
 				result = results[i].split("~")[2],
 				perf = results[i].split("~")[3],
-				fastpath = results[i].split("~")[4]
+				fastpath = results[i].split("~")[4],
+				highlow = false
+			// pigyback fastpath parameter
+			if (fastpath == "<" || fastpath == ">") {highlow = true}
 
 			// version
 			if (bug == firstWatch) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
+				if (highlow) {id = fastpath +" "+ id}
 				if (id !== prevV) {id = s3 + id.padStart(4) + sc} else {id = "".padStart(4)}
 			} else {
 				isWatch = true
@@ -121,7 +125,7 @@ function outputVersion() {
 				bug = bug +""
 				prefix = 9 - bug.length
 				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
-					+ (fastpath == "true" ? xFP : "".padEnd(3))
+					+ (fastpath == "true" && !highlow ? xFP : "".padEnd(3))
 			} else {
 				bug = "".padStart(12)
 			}
@@ -129,6 +133,7 @@ function outputVersion() {
 			perf = (perf + "").padStart(5) + " ms"
 			display.push(id + bug + result + perf)
 			prevV = results[i].split("~")[0].trim()
+			if (highlow) {prevV = fastpath +" "+ prevV}
 			prevB = results[i].split("~")[1]
 		}
 		// split watchlist off
@@ -169,7 +174,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 81
+		expected = 82
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -602,9 +607,14 @@ function outputVersion() {
 	try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
 	record(61, 61, "", ver61a, performance.now()-t61a)
 
+	// < 60
+	let t60not = performance.now(), ver60not = ("function" !== typeof Animation.prototype.updatePlaybackRate)
+	record(60.1, 60, "", ver60not, performance.now()-t60not, "<")
+
 	// 60
 	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
 	record(60, 60, "", ver60, performance.now()-t60)
+
 	// 59
 	let t59 = performance.now(), ver59
 	try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
