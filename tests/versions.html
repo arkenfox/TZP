@@ -19,7 +19,6 @@
 
 <body>
 	<div class="hidden">
-	  <object id="test68"></object>
 		<div id="test73a"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90">a</output>
@@ -584,9 +583,9 @@ function outputVersion() {
 	record(69, 69, "1558387", ver69b, performance.now()-t69b)
 
 	// 68: 1548773
-	let t68 = performance.now(), ver68
-	try {if (undefined === dom.test68.typeMustMatch) {ver68 = xS}} catch(e) {ver68 = xB}
-	record(68.1, 68, "1548773", ver68, performance.now()-t68, "d")
+	let t68 = performance.now(), ver68 = (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch"))
+	record(68.1, 68, "1548773", ver68, performance.now()-t68)
+
 	// 68b: 1550949
 	let t68b = performance.now(), ver68b
 	try {ver68b = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68b = xB}
@@ -650,10 +649,7 @@ function outputVersion() {
 	record(60, 60, "1436659", ver60, performance.now()-t60)
 
 	// 59: 1336400
-		// try catch: legacy FF
-		// 'get mozAutoplayEnabled' called on an object that does not implement interface HTMLMediaElement
-	let t59 = performance.now(), ver59
-	try {ver59 = ("undefined" === typeof HTMLMediaElement.prototype.mozAutoplayEnabled)} catch(e) {}
+	let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
 	record(59.1, 59, "1336400", ver59, performance.now()-t59)
 	// 59a
 	let t59a = performance.now(), ver59a
