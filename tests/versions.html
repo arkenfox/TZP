@@ -51,7 +51,8 @@
 				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail &nbsp
 				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error &nbsp
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
-				&nbsp <b><span class='s3'> * </span></b> &nbsp fast path [pref]
+				&nbsp <b><span class='s3'> f </span></b> &nbsp fast path [pref] &nbsp
+				&nbsp <b><span class='s3'> d </span></b> &nbsp uses dom
 			</span>
 		</td></tr>
 		<tr><td colspan="5"><hr></td></tr>
@@ -77,7 +78,6 @@ function outputVersion() {
 		xF = red_cross,
 		xB = yellow_block,
 		xNA = white_na,
-		xFP = s3 +" * "+ sc,
 		xNC = sb +"no change "+ sc,
 		xOMG = sg +"has landed"+ sc,
 		strA = "<a href='https://bugzilla.mozilla.org/",
@@ -107,15 +107,15 @@ function outputVersion() {
 				bug = results[i].split("~")[1],
 				result = results[i].split("~")[2],
 				perf = results[i].split("~")[3],
-				fastpath = results[i].split("~")[4],
+				note = results[i].split("~")[4],
 				highlow = false
 			// pigyback fastpath parameter
-			if (fastpath == "<" || fastpath == ">") {highlow = true}
+			if (note == "<" || note == ">") {highlow = true}
 
 			// version
 			if (bug == firstWatch) {isWatch = true}
 			if (!isWatch && Number.isInteger(id * 1)) {
-				if (highlow) {id = fastpath +" "+ id}
+				if (highlow) {id = note +" "+ id}
 				if (id !== prevV) {id = s3 + id.padStart(4) + sc} else {id = "".padStart(4)}
 			} else {
 				isWatch = true
@@ -133,7 +133,7 @@ function outputVersion() {
 				bug = bug +""
 				prefix = 9 - bug.length
 				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
-					+ (fastpath == "true" && !highlow ? xFP : "".padEnd(3))
+					+ (note !== "" && !highlow ? s3 +" "+ note +" "+ sc : "".padEnd(3))
 			} else {
 				bug = "".padStart(12)
 			}
@@ -141,7 +141,7 @@ function outputVersion() {
 			perf = (perf + "").padStart(5) + " ms"
 			display.push(id + bug + result + perf)
 			prevV = results[i].split("~")[0].trim()
-			if (highlow) {prevV = fastpath +" "+ prevV}
+			if (highlow) {prevV = note +" "+ prevV}
 			prevB = results[i].split("~")[1]
 		}
 		// split watchlist off
@@ -178,13 +178,13 @@ function outputVersion() {
 		}
 	}
 
-	function record(order, version, bug, result, perf, fastpath = false) {
+	function record(order, version, bug, result, perf, note = "") {
 		// cleanup result
 		if (result === true) {result = xS
 		} else if (result === false || result === undefined) {result = xF}
 		// continue
 		perf = Math.round(perf)
-		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ fastpath
+		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
 		count ++
 		if (count == expected) {
 			dom.perf = Math.round((performance.now() - gtimer)) +" ms | "+ expected +" tests"
@@ -226,7 +226,7 @@ function outputVersion() {
 	// 95: 1723674
 		// fast path: 95+ only: dom.crypto.randomUUID.enabled = true (default)
 	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
-	record(95.1, 95, "1723674", ver95, performance.now()-t95, true)
+	record(95.1, 95, "1723674", ver95, performance.now()-t95, "f")
 	// 95a: 1674204 : slow
 		// note: en-US, windows
 		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
@@ -240,7 +240,7 @@ function outputVersion() {
 		debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
 		if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
 	} catch(e) {}
-	record(95,95, "1674204", ver95a, performance.now()-t95a)
+	record(95,95, "1674204", ver95a, performance.now()-t95a, "d")
 
 	// 94: 1722576
 	let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
@@ -274,16 +274,16 @@ function outputVersion() {
 	// 91c: 1717072
 		// fast path: 91+ only: dom.window.clientinformation.enabled = true (default)
 	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
-	record(91, 91, "1717072", ver91c, performance.now()-t91c, true)
+	record(91, 91, "1717072", ver91c, performance.now()-t91c, "f")
 	/*
-	// 91a: 1710429: very slow cold ~15-20ms slow warm run 4-5ms
+	// 91a: 1710429: very slow cold ~15-20ms, slow 4-5ms
 	let t91a = performance.now(), ver91a
 	try {
 		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
 		ver91a = xS
 	} catch(e) {}
 	record(91.2, 91, "1710429", ver91a, performance.now()-t91a)
-	// 91b: 1284868: slow 2+ms
+	// 91b: 1284868: slow 2-5ms
 	let t91b = performance.now(), ver91b
 	try {
 		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
@@ -309,14 +309,14 @@ function outputVersion() {
 	try {
 		if (dom.test90.defaultValue == "a") {ver90a = xS}
 	} catch(e) {}
-	record(90, 90, "1537689", ver90a, performance.now()-t90a)
+	record(90, 90, "1537689", ver90a, performance.now()-t90a, "d")
 
 	// 89: 1703213
 	let t89 = performance.now(), ver89
 	try {
 		if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
 	} catch(e) {}
-	record(89, 89, "1703213", ver89, performance.now()-t89)
+	record(89, 89, "1703213", ver89, performance.now()-t89, "d")
 
 	// 88: 1670124
 	let t88 = performance.now(), ver88
@@ -431,7 +431,7 @@ function outputVersion() {
 		//console.debug(w81a, w81b)
 		if (w81a < w81b) {ver81a = xS}
 	} catch(e) {ver81a = xB}
-	record(81, 81, "1657437", ver81a, performance.now()-t81a)
+	record(81, 81, "1657437", ver81a, performance.now()-t81a, "d")
 
 	// 80: 1651732
 	let t80 = performance.now(), ver80
@@ -533,7 +533,7 @@ function outputVersion() {
 	// 73a: 1605803
 	let t73a = performance.now(), ver73a
 	try {if (getComputedStyle(dom.test73a).content == "normal") {ver73a = xS}} catch(e) {}
-	record(73, 73, "1605803", ver73a, performance.now()-t73a)
+	record(73, 73, "1605803", ver73a, performance.now()-t73a, "d")
 
 	// 72: 1591892
 	let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
@@ -586,7 +586,7 @@ function outputVersion() {
 	// 68: 1548773
 	let t68 = performance.now(), ver68
 	try {if (undefined === dom.test68.typeMustMatch) {ver68 = xS}} catch(e) {ver68 = xB}
-	record(68.1, 68, "1548773", ver68, performance.now()-t68)
+	record(68.1, 68, "1548773", ver68, performance.now()-t68, "d")
 	// 68b: 1550949
 	let t68b = performance.now(), ver68b
 	try {ver68b = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68b = xB}
