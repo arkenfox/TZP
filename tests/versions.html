@@ -193,14 +193,17 @@ function outputVersion() {
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 	record(98, 98, "1709790", ver98, performance.now()-t98)
 
-	// 97: 1745372 (try/catch for FF < 60)
+	// 97: 1745372
+		// try/catch for FF < 60 (not sure exactly which version)
 	let t97 = performance.now(), ver97
 	try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
 	record(97, 97, "1745372", ver97, performance.now()-t97)
 
-	// 96: 1738422 (typeof Intl.PluralRules for FF < 60)
+	// 96: 1738422
+		// check typeof Intl.PluralRules for FF < 60 (not sure exactly which version)
 	let t96 = performance.now(), ver96
-	try {ver96 = ("function" === typeof Intl.PluralRules && "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
+	try {ver96 = ("function" === typeof Intl.PluralRules
+		&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
 	record(96.1, 96, "1738422", ver96, performance.now()-t96)
 	// 96b: 1738422
 	let t96b = performance.now(), ver96b
@@ -212,7 +215,8 @@ function outputVersion() {
 	} catch(e) {ver96b = xB}
 	record(96,96, "1738422", ver96b, performance.now()-t96b)
 
-	// 95: 1723674: dom.crypto.randomUUID.enabled: fast path: confirm 95+ only
+	// 95: 1723674
+		// fast path: 95+ only: dom.crypto.randomUUID.enabled = true (default)
 	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
 	record(95.1, 95, "1723674", ver95, performance.now()-t95, true)
 	// 95a: 1674204 : slow
@@ -275,7 +279,8 @@ function outputVersion() {
 		if (seconds == "07") {ver91b = xS}
 	} catch(e) {ver91b = xB}
 	record(91.1, 91, "1284868", ver91b, performance.now()-t91b)
-	// 91c: 1717072 fast path
+	// 91c: 1717072
+		// fast path: 91+ only: dom.window.clientinformation.enabled = true (default)
 	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
 	record(91, 91, "1717072", ver91c, performance.now()-t91c, true)
 
@@ -404,8 +409,8 @@ function outputVersion() {
 	} catch(e) {ver81 = xB}
 	record(81.1, 81, "1650607", ver81, performance.now()-t81)
 	// 81a: 1657437
-	// this is unstable in Tor Browser
-	// change from offscreen: use existing visible spans
+		// this is unstable in Tor Browser
+		// change from offscreen: use existing visible spans
 	let t81a = performance.now(), ver81a = xF
 	try {
 		dom.test81a.innerHTML = "AB"
@@ -612,32 +617,31 @@ function outputVersion() {
 	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
 	record(62, 62, "1458466", ver62, performance.now()-t62)
 
-	// 61
+	// 61: 1455805
 	let t61 = performance.now(), ver61 = ("object" === typeof CSS)
-	record(61.1, 61, "", ver61, performance.now()-t61)
-	// 61a
+	record(61.1, 61, "1455805", ver61, performance.now()-t61)
+	// 61a: 1434007
 	let t61a = performance.now(), ver61a
 	try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
-	record(61, 61, "", ver61a, performance.now()-t61a)
+	record(61, 61, "1434007", ver61a, performance.now()-t61a)
 
-	// < 60 : lols, this is the same test as below
+	// < 60: 1436659: same test as below but as a < or >
 	let t60not = performance.now(), ver60not = ("function" !== typeof Animation.prototype.updatePlaybackRate)
-	record(60.1, 60, "", ver60not, performance.now()-t60not, "<")
-
+	record(60.1, 60, "1436659", ver60not, performance.now()-t60not, "<")
 	// 60: 1436659
 	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
-	record(60, 60, "", ver60, performance.now()-t60)
+	record(60, 60, "1436659", ver60, performance.now()-t60)
 
 	// 59: 1336400
 	let t59 = performance.now(), ver59 = ("undefined" === typeof HTMLMediaElement.prototype.mozAutoplayEnabled)
-	record(59.1, 59, "", ver59, performance.now()-t59)
+	record(59.1, 59, "1336400", ver59, performance.now()-t59)
 	// 59a
 	let t59a = performance.now(), ver59a
 	try {ver59a = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59a = xB}
 	record(59, 59, "", ver59a, performance.now()-t59a)
 
 	// 55: 1354974
-	// this test hangs the page in chromium
+		// this test hangs the page in chromium
 	let t55 = performance.now(), ver55
 	if (isFF) {
 		try {
@@ -680,10 +684,7 @@ function outputVersion() {
 
 	// 52: 837961
 	let t52 = performance.now(), ver52
-	try {
-		let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
-		ver52 = xS
-	} catch(e) {}
+	try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = xS} catch(e) {}
 	record(52, 52, "837961", ver52, performance.now()-t52)
 
 	// watch
