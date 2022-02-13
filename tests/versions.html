@@ -12,7 +12,7 @@
 		table {width: 680px;}
 		hr {color: #dcc18c}
 	</style>
-	<style id="test73">
+	<style id="test73a">
 		.a{border-width: 1px; border-style: solid; border-color: black; border-image: linear-gradient(white,black);}
 	</style>
 </head>
@@ -20,7 +20,7 @@
 <body>
 	<div class="hidden">
 	  <object id="test68"></object>
-		<div id="test73"></div>
+		<div id="test73a"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90">a</output>
 	</div>
@@ -39,7 +39,12 @@
 
 	<table id="tb3">
 		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
-		<thead><tr><th colspan="4">versions</th></tr></thead>
+		<thead><tr><th colspan="4">
+			<div class="nav-title">versions
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+
 		<tr><td colspan="5" class="intro">
 			<span class="no_color">Gecko version-specific PoCs : &nbsp
 				&nbsp <b><span class='good'> &#x2713 </span></b> &nbsp pass &nbsp
@@ -83,6 +88,8 @@ function outputVersion() {
 
 	let results = [], debug = []
 	let data = {}
+	let gtimer = performance.now()
+
 
 	function display() {
 		let isWatch = false
@@ -179,15 +186,16 @@ function outputVersion() {
 		perf = Math.round(perf)
 		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ fastpath
 		count ++
-		if (count > expected) {
-			dom.alert.innerHTML = "<br>"+ sb + " RESULT ALERT: expected "+ expected +" got "+ count + sc
-		} else if (count == expected) {
+		if (count == expected) {
+			dom.perf = Math.round((performance.now() - gtimer)) +" ms | "+ expected +" tests"
 			display()
+		} else if (count > expected) {
+			dom.alert.innerHTML = "<br>"+ sb + " RESULT ALERT: expected "+ expected +" got "+ count + sc
 		}
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 83
+		expected = 85
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -518,11 +526,13 @@ function outputVersion() {
 	} catch(e) {}
 	record(74, 74, "1605835", ver74, performance.now()-t74)
 
-	// 73: 1605803
-	let t73 = performance.now(), ver73
-	let el73 = dom.test73
-	if (getComputedStyle(el73).content == "normal") {ver73 = xS}
-	record(73, 73, "1605803", ver73, performance.now()-t73)
+	// 73: 1602163
+	let t73 = performance.now(), ver73 = (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
+	record(73.1, 73, "1602163", ver73, performance.now()-t73)
+	// 73a: 1605803
+	let t73a = performance.now(), ver73a
+	try {if (getComputedStyle(dom.test73a).content == "normal") {ver73a = xS}} catch(e) {}
+	record(73, 73, "1605803", ver73a, performance.now()-t73a)
 
 	// 72: 1591892
 	let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
@@ -550,13 +560,19 @@ function outputVersion() {
 	}
 	record(71, 71, "1575980", ver71b, performance.now()-t71b)
 
-	// 70: 1435818
-	let t70 = performance.now(), ver70
+	// 70: 1473229
+		// ^^ older versions don't have Intl.RelativeTimeFormat so check for that first
+	let t70 = performance.now()
+	let ver70 = ("function" === typeof Intl.RelativeTimeFormat
+		&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+	record(70.1, 70, "1473229", ver70, performance.now()-t70)
+	// 70a: 1435818
+	let t70a = performance.now(), ver70a
 	try {
 		newFn("let t = 1_050")
-		ver70 = xS
+		ver70a = xS
 	} catch(e) {}
-	record(70, 70, "1435818", ver70, performance.now()-t70)
+	record(70, 70, "1435818", ver70a, performance.now()-t70a)
 
 	// 69: 1557121
 	let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
@@ -633,7 +649,10 @@ function outputVersion() {
 	record(60, 60, "1436659", ver60, performance.now()-t60)
 
 	// 59: 1336400
-	let t59 = performance.now(), ver59 = ("undefined" === typeof HTMLMediaElement.prototype.mozAutoplayEnabled)
+		// try catch: legacy FF
+		// 'get mozAutoplayEnabled' called on an object that does not implement interface HTMLMediaElement
+	let t59 = performance.now(), ver59
+	try {ver59 = ("undefined" === typeof HTMLMediaElement.prototype.mozAutoplayEnabled)} catch(e) {}
 	record(59.1, 59, "1336400", ver59, performance.now()-t59)
 	// 59a
 	let t59a = performance.now(), ver59a
