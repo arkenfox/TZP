@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=500">
+	<meta name="viewport" content="width=700">
 	<title>versions</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 480px;}
+		table {width: 680px;}
 		hr {color: #dcc18c}
 	</style>
 	<style id="test73">
@@ -38,9 +38,9 @@
 	</table>
 
 	<table id="tb3">
-		<col width="1%"><col width="49%"><col width="49%"><col width="1%">
+		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
 		<thead><tr><th colspan="4">versions</th></tr></thead>
-		<tr><td colspan="4" class="intro">
+		<tr><td colspan="5" class="intro">
 			<span class="no_color">Gecko version-specific PoCs : &nbsp
 				&nbsp <b><span class='good'> &#x2713 </span></b> &nbsp pass &nbsp
 				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail &nbsp
@@ -49,16 +49,17 @@
 				&nbsp <b><span class='s3'> * </span></b> &nbsp fast path
 			</span>
 		</td></tr>
-		<tr><td colspan="4"><hr></td></tr>
+		<tr><td colspan="5"><hr></td></tr>
 		<tr><td></td>
 			<td class="c mono spaces" id="results1"></td>
 			<td class="c mono spaces" id="results2" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="results3" style="vertical-align: top;"></td>
 			<td></td>
 		</tr>
-		<tr><td></td><td colspan="2" class="c mono spaces" id="watchlist"></td><td></td></tr>
-		<tr><td></td><td colspan="2" class="c mono spaces" id="alert"></td><td></td></tr>
-		<tr><td></td><td colspan="2" class="c mono spaces" id="alert2"></td><td></td></tr>
-		<tr><td></td><td colspan="2" class="c mono spaces" id="debug"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="watchlist"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alert"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alert2"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="debug"></td><td></td></tr>
 	</table>
 	<br>
 
@@ -139,19 +140,31 @@ function outputVersion() {
 		// split watchlist off
 		let watchlist = display.slice(display.length - watchcount, display.length)
 		dom.watchlist.innerHTML = watchlist.join("<br>")
-		// split remainder into two columns
-		display = display.slice(0, display.length - watchcount)
-		let midpoint = Math.ceil(display.length/2)
-		// make sure we split with a version number
+
+		// split remainder into three columns
+			// make sure we split with a version number
+		display = display.slice(0, display.length - watchcount) // watchcount includes the subheader
+		let cutpoint = Math.ceil(display.length/3)
 		let splitpoint = ""
-		for (let i = midpoint; i < midpoint + 5; i++) {
+		for (let i = cutpoint; i < cutpoint + 5; i++) {
 			let test = display[i]
 			if (splitpoint == "" & test.slice(0,1) !== " ") {splitpoint = i}
 		}
 		let display1 = display.slice(0, splitpoint)
-		let display2 = display.slice(splitpoint, display.length)
+		// split the rest in half
+		display = display.slice(splitpoint, display.length)
+		cutpoint = Math.ceil(display.length/2)
+		splitpoint = ""
+		for (let i = cutpoint; i < cutpoint + 5; i++) {
+			let test = display[i]
+			if (splitpoint == "" & test.slice(0,1) !== " ") {splitpoint = i}
+		}
+		let display2 = display.slice(0, splitpoint)
+		let display3 = display.slice(splitpoint, display.length)
+		// output
 		dom.results1.innerHTML = display1.join("<br>")
 		dom.results2.innerHTML = display2.join("<br>")
+		dom.results3.innerHTML = display3.join("<br>")
 		// debug
 		if (debug.length) {
 			dom.debug.innerHTML = s3 + "--- debug ---" + sc + "<br><br>" + debug.join("<br>")
@@ -174,7 +187,7 @@ function outputVersion() {
 	}
 	// update expected when we add more tests
 	let count = 0,
-		expected = 82
+		expected = 83
 
 	// 98: 1709790
 	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -607,18 +620,21 @@ function outputVersion() {
 	try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
 	record(61, 61, "", ver61a, performance.now()-t61a)
 
-	// < 60
+	// < 60 : lols, this is the same test as below
 	let t60not = performance.now(), ver60not = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 	record(60.1, 60, "", ver60not, performance.now()-t60not, "<")
 
-	// 60
+	// 60: 1436659
 	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
 	record(60, 60, "", ver60, performance.now()-t60)
 
-	// 59
-	let t59 = performance.now(), ver59
-	try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
-	record(59, 59, "", ver59, performance.now()-t59)
+	// 59: 1336400
+	let t59 = performance.now(), ver59 = ("undefined" === typeof HTMLMediaElement.prototype.mozAutoplayEnabled)
+	record(59.1, 59, "", ver59, performance.now()-t59)
+	// 59a
+	let t59a = performance.now(), ver59a
+	try {ver59a = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59a = xB}
+	record(59, 59, "", ver59a, performance.now()-t59a)
 
 	// 55: 1354974
 	// this test hangs the page in chromium
