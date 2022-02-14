@@ -45,9 +45,10 @@
 				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail
 				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
-				&nbsp <b><span class='s3'> f </span></b> &nbsp fast [pref]
 				&nbsp <b><span class='s3'> d </span></b> &nbsp dom
-				&nbsp <b><span class='s3'> e </span></b> &nbsp element
+				&nbsp <b><span class='s3'> f </span></b> &nbsp fast [pref]
+				&nbsp <b><span class='s3'> fb </span></b> &nbsp fallback
+				&nbsp <b><span class='s14'> ex </span></b> &nbsp extension
 			</span>
 		</td></tr>
 		<!-- tzp -->
@@ -151,7 +152,7 @@ function outputVersion() {
 			if (note !== "" && !highlow) {
 				// limit to two chars
 				if (note.length > 2) {note = note.substring(0,2)}
-				extra = s3 + note.padStart(3) + sc
+				extra = (note == "ex" ? s14.trim() : s3) + note.padStart(3) + sc
 			} else {
 				extra = "".padStart(3)
 			}
@@ -165,7 +166,8 @@ function outputVersion() {
 			}
 			// perf
 			perf = perf * 1
-			perf = (perf > 1 ? sb + (perf + "").padStart(5) + sc : (perf + "").padStart(5)) + " ms"
+			// color up legit slow
+			perf = (perf > 1 && perf < 50 ? sb + (perf + "").padStart(5) + sc : (perf + "").padStart(5)) + " ms"
 			display.push(id + bug + result + perf)
 			prevV = results[i].split("~")[0].trim()
 			if (highlow) {prevV = note +" "+ prevV}
@@ -197,7 +199,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 33, oTZP = {}
+	let countTZP = 0, expectTZP = 34, oTZP = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -296,7 +298,7 @@ function outputVersion() {
 
 		// 76: 1608010
 		let t76 = performance.now(), ver76 = (!test76.validity.rangeOverflow)
-		rec(76, 76, "1608010", ver76, performance.now()-t76, "e")
+		rec(76, 76, "1608010", ver76, performance.now()-t76, "d")
 
 		// 75: 1613713
 		let t75 = performance.now(), ver75 = ("function" === typeof Intl.Locale)
@@ -319,10 +321,16 @@ function outputVersion() {
 		rec(71, 71, "1549176", ver71, performance.now()-t71)
 
 		// 70: 1473229: legacy check: Intl.RelativeTimeFormat
+			// ext: e.g. chameleon
 		let t70 = performance.now()
 		let ver70 = ("function" === typeof Intl.RelativeTimeFormat
 			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
-		rec(70, 70, "1473229", ver70, performance.now()-t70)
+		rec(70.1, 70, "1473229", ver70, performance.now()-t70, "ex")
+
+		// 70a: 1435818
+		let t70a = performance.now(), ver70a
+		try {newFn("let t = 1_050"); ver70a = xS} catch(e) {}
+		rec(70, 70, "1435818", ver70a, performance.now()-t70a, "fb")
 
 		// 69: 1557121
 		let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
@@ -371,7 +379,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 50, oOther = {}
+	let countOther = 0, expectOther = 49, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -391,6 +399,7 @@ function outputVersion() {
 		}
 
 		// 96b: 1738422
+			// ext fuckery: chameleon/cydec
 		let t96b = performance.now(), ver96b
 		try {
 			let date96b = Date.UTC(2012,12-1,6,12,0,0)
@@ -398,7 +407,7 @@ function outputVersion() {
 			if (test96b == "2012/12/6 中国标准时间 20:00:00") {ver96b = xS}
 			//console.debug(test96)
 		} catch(e) {ver96b = xB}
-		rec(96,96, "1738422", ver96b, performance.now()-t96b)
+		rec(96,96, "1738422", ver96b, performance.now()-t96b, "ex")
 
 		// 94a: 1729239
 		let t94a = performance.now(), ver94a
@@ -422,13 +431,14 @@ function outputVersion() {
 		} catch(e) {}
 		rec(91.2, 91, "1710429", ver91a, performance.now()-t91a)
 		// 91b: 1284868: slow 2-5ms
+			// ext: cydec
 		let t91b = performance.now(), ver91b
 		try {
 			let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
 			let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
 			if (seconds == "07") {ver91b = xS}
 		} catch(e) {ver91b = xB}
-		rec(91.1, 91, "1284868", ver91b, performance.now()-t91b)
+		rec(91.1, 91, "1284868", ver91b, performance.now()-t91b, "ex")
 
 		// 90: 1520434
 		let t90 = performance.now(), ver90
@@ -535,11 +545,12 @@ function outputVersion() {
 		rec(83, 83, "1665746", ver83a, performance.now()-t83a)
 
 		// 82: 1655947
+			// ext: e.g. chameleon
 		let t82 = performance.now(), ver82
 		try {
 			ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
 		} catch(e) {ver82 = xB}
-		rec(82, 82, "1655947", ver82, performance.now()-t82)
+		rec(82, 82, "1655947", ver82, performance.now()-t82, "ex")
 
 		// 81: 1650607 (53: 1321534)
 		let t81 = performance.now(), ver81
@@ -662,11 +673,6 @@ function outputVersion() {
 		let t71b = performance.now(), ver71b
 		try {let test71b = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71b = xS}}
 		rec(71, 71, "1575980", ver71b, performance.now()-t71b)
-
-		// 70a: 1435818
-		let t70a = performance.now(), ver70a
-		try {newFn("let t = 1_050"); ver70a = xS} catch(e) {}
-		rec(70, 70, "1435818", ver70a, performance.now()-t70a)
 
 		// 69b: 1558387
 		let t69b = performance.now(), ver69b
