@@ -282,13 +282,9 @@ function outputVersion() {
 
 		// 80: 1620467: slow 5ms
 			// blink: ReferenceError: CSS2Properties is not defined
-		let t80 = performance.now()
-		if (isFF) {
-			let ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
-			rec(80, 80, "1620467", ver80, performance.now()-t80)
-		} else {
-			rec(80, 80, "1620467", xNA, performance.now()-t80)
-		}
+		let t80 = performance.now(), ver80
+		try {ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))} catch(e) {ver80 = xNA}
+		rec(80, 80, "1620467", ver80, performance.now()-t80)
 
 		// 78: 1626015
 		let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
@@ -805,6 +801,11 @@ function outputVersion() {
 	}
 
 }
+
+// warm stuff up
+try {
+	let warm80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
+} catch(e) {}
 
 setTimeout(function() {
 	outputVersion()
