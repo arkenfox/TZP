@@ -12,14 +12,14 @@
 		table {width: 680px;}
 		hr {color: #dcc18c}
 	</style>
-	<style id="test73a">
+	<style id="test73">
 		.a{border-width: 1px; border-style: solid; border-color: black; border-image: linear-gradient(white,black);}
 	</style>
 </head>
 
 <body>
 	<div class="hidden">
-		<div id="test73a"></div>
+		<div id="test73"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90">a</output>
 	</div>
@@ -38,32 +38,47 @@
 
 	<table id="tb3">
 		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
-		<thead><tr><th colspan="5">
-			<div class="nav-title">versions
-			<div class="nav-up"><span class="c perf" id="perf"></span></div>
-			</div>
-		</th></tr></thead>
-
+		<thead><tr><th colspan="5"><div class="nav-title">versions</div></th></tr></thead>
 		<tr><td colspan="5" class="intro">
 			<span class="no_color">Gecko version-specific PoCs : &nbsp
-				&nbsp <b><span class='good'> &#x2713 </span></b> &nbsp pass &nbsp
-				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail &nbsp
-				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error &nbsp
+				&nbsp <b><span class='good'> &#x2713 </span></b> &nbsp pass
+				&nbsp <b><span class='bad'> &#x2715 </span></b> &nbsp fail
+				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
-				&nbsp <b><span class='s3'> f </span></b> &nbsp fast path [pref] &nbsp
-				&nbsp <b><span class='s3'> d </span></b> &nbsp uses dom
+				&nbsp <b><span class='s3'> f </span></b> &nbsp fast [pref]
+				&nbsp <b><span class='s3'> d </span></b> &nbsp dom
+				&nbsp <b><span class='s3'> e </span></b> &nbsp element
 			</span>
 		</td></tr>
+		<!-- tzp -->
 		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">TZP</span><span id="perftzp" class="c mono spaces"></span></td></tr>
 		<tr><td></td>
-			<td class="c mono spaces" id="results1"></td>
-			<td class="c mono spaces" id="results2" style="vertical-align: top;"></td>
-			<td class="c mono spaces" id="results3" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="tzp1"></td>
+			<td class="c mono spaces" id="tzp2" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="tzp3" style="vertical-align: top;"></td>
 			<td></td>
 		</tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alerttzp1"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alerttzp2"></td><td></td></tr>
+		<!-- other-->
+		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">OTHER</span><span id="perfother" class="c mono spaces"></span></td></tr>
+		<tr><td></td>
+			<td class="c mono spaces" id="other1"></td>
+			<td class="c mono spaces" id="other2" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="other3" style="vertical-align: top;"></td>
+			<td></td>
+		</tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alertother1"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alertother2"></td><td></td></tr>
+		<!-- watch -->
+		<!--<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">WATCH</span></td></tr>
 		<tr><td></td><td colspan="3" class="c mono spaces" id="watchlist"></td><td></td></tr>
-		<tr><td></td><td colspan="3" class="c mono spaces" id="alert"></td><td></td></tr>
-		<tr><td></td><td colspan="3" class="c mono spaces" id="alert2"></td><td></td></tr>
+		<!-- debug-->
+		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">DEBUG</span></td></tr>
 		<tr><td></td><td colspan="3" class="c mono spaces" id="debug"></td><td></td></tr>
 	</table>
 	<br>
@@ -72,7 +87,7 @@
 'use strict';
 
 function outputVersion() {
-	s3 = s3.trim()
+
 	let xS = green_tick,
 		xF = red_cross,
 		xB = yellow_block,
@@ -82,24 +97,40 @@ function outputVersion() {
 		strA = "<a href='https://bugzilla.mozilla.org/",
 		strB = "' class='blue' target='_blank'>",
 		strC = "</a>",
-		t0 = performance.now(),
-		watchcount = 1
+		t0 = performance.now()
 
-	let results = [], debug = []
-	let data = {}
-	let gtimer = performance.now()
+	s3 = s3.trim()
+	sb = sb.trim()
 
+	let debug = []
+	let gTZP, gOther, gWatch // global timers
+	let runtype
 
-	function display() {
-		let isWatch = false
-		let firstWatch = "1439800"
+	function output(type) {
+		// vars
+		let results = [], expected, elAlert
 		// data -> results in descending order
-		const names = Object.keys(data).sort((a,b) => b-a)
-		for (const k of names) {results.push(data[k])}
-		if (results.length !== expected) {
-			dom.alert2.innerHTML = sb + "DISPLAY ALERT: expected "+ expected +" got "+ results.length + sc + "<br>"
+		if (type == "tzp") {
+			const names = Object.keys(oTZP).sort((a,b) => b-a)
+			for (const k of names) {results.push(oTZP[k])}
+			expected = expectTZP
+			elAlert = dom.alerttzp2
+		} else if (type == "other") {
+			const names = Object.keys(oOther).sort((a,b) => b-a)
+			for (const k of names) {results.push(oOther[k])}
+			expected = expectOther
+			elAlert = dom.alertother2
+		} else {
+			const names = Object.keys(oWatch).sort((a,b) => b-a)
+			for (const k of names) {results.push(oWatch[k])}
+			expected = expectWatch
+			elAlert = dom.alertwatch2
 		}
-
+		// we duped on unique object names
+		if (results.length !== expected) {
+			elAlert.innerHTML = sb.trim() + "DISPLAY ALERT: expected "+ expected +" got "+ results.length + sc + "<br>"
+		}
+		// build display data
 		let display = [], prevV = "", prevB = "", prefix = 0
 		for (let i=0; i < results.length; i++) {
 			let id = results[i].split("~")[0].trim(),
@@ -110,46 +141,37 @@ function outputVersion() {
 				highlow = false
 			// pigyback fastpath parameter
 			if (note == "<" || note == ">") {highlow = true}
-
 			// version
-			if (bug == firstWatch) {isWatch = true}
-			if (!isWatch && Number.isInteger(id * 1)) {
+			if (Number.isInteger(id * 1)) {
 				if (highlow) {id = note +" "+ id}
-				if (id !== prevV) {id = s3 + id.padStart(4) + sc} else {id = "".padStart(4)}
-			} else {
-				isWatch = true
+				if (id !== prevV) {id = s3 + id.padStart(3) + sc} else {id = "".padStart(3)}
 			}
-			// watchlist: not version specific
-			if (isWatch) {
-				if (bug == firstWatch) {display.push("<br>"+ s3 + "--- watchlist ---"+ sc + "<br>")}
-				id = id + ""
-				prefix = 15 - id.length
-				id = "".padStart(prefix) + s3 + "<code>"+ id +"</code>" + sc
-				watchcount++
+			// extra
+			let extra = ""
+			if (note !== "" && !highlow) {
+				// limit to two chars
+				if (note.length > 2) {note = note.substring(0,2)}
+				extra = s3 + note.padStart(3) + sc
+			} else {
+				extra = "".padStart(3)
 			}
 			// bugzilla
 			if (bug !== "") {
 				bug = bug +""
 				prefix = 9 - bug.length
-				bug = "".padStart(prefix) + strA + bug + strB + bug + strC
-					+ (note !== "" && !highlow ? s3 +" "+ note +" "+ sc : "".padEnd(3))
+				bug = "".padStart(prefix) + strA + bug + strB + bug + strC + extra
 			} else {
-				bug = "".padStart(12)
+				bug = "".padStart(9) + extra
 			}
 			// perf
-			perf = (perf + "").padStart(5) + " ms"
+			perf = perf * 1
+			perf = (perf > 1 ? sb + (perf + "").padStart(5) + sc : (perf + "").padStart(5)) + " ms"
 			display.push(id + bug + result + perf)
 			prevV = results[i].split("~")[0].trim()
 			if (highlow) {prevV = note +" "+ prevV}
 			prevB = results[i].split("~")[1]
 		}
-		// split watchlist off
-		let watchlist = display.slice(display.length - watchcount, display.length)
-		dom.watchlist.innerHTML = watchlist.join("<br>")
-
-		// split remainder into three columns
-			// make sure we split with a version number
-		display = display.slice(0, display.length - watchcount) // watchcount includes the subheader
+		// split into three columns: make sure we split with a version number
 		let cutpoint = Math.ceil(display.length/3)
 		let splitpoint = ""
 		for (let i = cutpoint; i < cutpoint + 5; i++) {
@@ -168,584 +190,579 @@ function outputVersion() {
 		let display2 = display.slice(0, splitpoint)
 		let display3 = display.slice(splitpoint, display.length)
 		// output
-		dom.results1.innerHTML = display1.join("<br>")
-		dom.results2.innerHTML = display2.join("<br>")
-		dom.results3.innerHTML = display3.join("<br>")
+		document.getElementById(type+"1").innerHTML = display1.join("<br>")
+		document.getElementById(type+"2").innerHTML = display2.join("<br>")
+		document.getElementById(type+"3").innerHTML = display3.join("<br>")
 		// debug
-		if (debug.length) {
-			dom.debug.innerHTML = s3 + "--- debug ---" + sc + "<br><br>" + debug.join("<br>")
-		}
+		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	function record(order, version, bug, result, perf, note = "") {
-		// cleanup result
-		if (result === true) {result = xS
-		} else if (result === false || result === undefined) {result = xF}
-		// continue
-		perf = Math.round(perf)
-		data[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
-		count ++
-		if (count == expected) {
-			dom.perf = Math.round((performance.now() - gtimer)) +" ms | "+ expected +" tests"
-			display()
-		} else if (count > expected) {
-			dom.alert.innerHTML = "<br>"+ sb + " RESULT ALERT: expected "+ expected +" got "+ count + sc
-		}
-	}
-	// update expected when we add more tests
-	let count = 0,
-		expected = 83
-
-	// 98: 1709790
-	let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
-	record(98, 98, "1709790", ver98, performance.now()-t98)
-
-	// 97: 1745372
-		// try/catch for FF < 60 (not sure exactly which version)
-	let t97 = performance.now(), ver97
-	try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
-	record(97, 97, "1745372", ver97, performance.now()-t97)
-
-	// 96: 1738422
-		// check typeof Intl.PluralRules for FF < 60 (not sure exactly which version)
-	let t96 = performance.now(), ver96
-	try {ver96 = ("function" === typeof Intl.PluralRules
-		&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
-	record(96.1, 96, "1738422", ver96, performance.now()-t96)
-	// 96b: 1738422
-	let t96b = performance.now(), ver96b
-	try {
-		let date96b = Date.UTC(2012,12-1,6,12,0,0)
-		let test96b = new Date(date96b).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
-		if (test96b == "2012/12/6 中国标准时间 20:00:00") {ver96b = xS}
-		//console.debug(test96)
-	} catch(e) {ver96b = xB}
-	record(96,96, "1738422", ver96b, performance.now()-t96b)
-
-	// 95: 1723674
-		// fast path: 95+ only: dom.crypto.randomUUID.enabled = true (default)
-	let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
-	record(95.1, 95, "1723674", ver95, performance.now()-t95, "f")
-	// 95a: 1674204 : slow
-		// note: en-US, windows
-		// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
-		// FF66-94 wraps 2020-1 vs 2020-12   : 45/53 = 0.8490566037735849
-		// FF95+   wraps 2020-1 x twice that : 47/93 = approx 0.5
-	let t95a = performance.now(), ver95a
-	try {
-		let a95 = dom.test95a.offsetWidth
-		let b95 = dom.test95b.offsetWidth
-		let test95 = a95/b95
-		debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
-		if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
-	} catch(e) {}
-	record(95,95, "1674204", ver95a, performance.now()-t95a, "d")
-
-	// 94: 1722576
-	let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
-	record(94.1, 94, "1722576", ver94, performance.now()-t94)
-	// 94a: 1729239
-	let t94a = performance.now(), ver94a
-	try {
-		ver94a = (HTMLScriptElement.supports("classic"))
-	} catch(e) {}
-	record(94, 94, "1729239", ver94a, performance.now()-t94a)
-
-	// 93: 1722448
-	let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
-	record(93.2, 93, "1722448", ver93, performance.now()-t93)
-	// 93a: 1670033
-	let t93a = performance.now(), ver93a = ("function" === typeof Intl.supportedValuesOf)
-	record(93.1, 93, "1670033", ver93a, performance.now()-t93a)
-	// 93b: 1328672
-	let t93b = performance.now(), ver93b
-	try {if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93b = xS}} catch(e) {}
-	record(93, 93, "1328672", ver93b, performance.now()-t93b)
-
-	// 92: 1721149
-	let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
-	record(92.3, 92, "1721149", ver92, performance.now()-t92)
-
-	// 91: 1714933
-	let t91 = performance.now(), ver91
-	try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
-	record(91.3, 91, "1714933", ver91, performance.now()-t91)
-	// 91c: 1717072
-		// fast path: 91+ only: dom.window.clientinformation.enabled = true (default)
-	let t91c = performance.now(), ver91c = ("object" === typeof window.clientInformation)
-	record(91, 91, "1717072", ver91c, performance.now()-t91c, "f")
-	/*
-	// 91a: 1710429: very slow cold ~15-20ms, slow 4-5ms
-	let t91a = performance.now(), ver91a
-	try {
-		let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
-		ver91a = xS
-	} catch(e) {}
-	record(91.2, 91, "1710429", ver91a, performance.now()-t91a)
-	// 91b: 1284868: slow 2-5ms
-	let t91b = performance.now(), ver91b
-	try {
-		let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
-		let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
-		if (seconds == "07") {ver91b = xS}
-	} catch(e) {ver91b = xB}
-	record(91.1, 91, "1284868", ver91b, performance.now()-t91b)
-	*/
-
-	// 90: 1520434
-	let t90 = performance.now(), ver90
-	try {
-		let share90 = new ArrayBuffer(4096)
-		let tst90 = new Int32Array(share90, 7)
-	} catch(e) {
-		// 90: start offset of Int32Array should be a multiple of 4
-		// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
-		if (e.message.substr(0,1) == "s") {ver90 = xS}
-	}
-	record(90.1, 90, "1520434", ver90, performance.now()-t90)
-	// 90a: 1537689
-	let t90a = performance.now(), ver90a
-	try {
-		if (dom.test90.defaultValue == "a") {ver90a = xS}
-	} catch(e) {}
-	record(90, 90, "1537689", ver90a, performance.now()-t90a, "d")
-
-	// 89: 1703213
-	let t89 = performance.now(), ver89
-	try {
-		if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
-	} catch(e) {}
-	record(89, 89, "1703213", ver89, performance.now()-t89, "d")
-
-	// 88: 1670124
-	let t88 = performance.now(), ver88
-	try {
-		newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
-	} catch(e) {
-		// FF88+: SyntaxError the escapes \8 and \9 can't be used in untagged template literals or in strict mode code
-		if (e.message.substr(13,5) == "8 and") {ver88 = xS}
-	}
-	record(88.1, 88, "1670124", ver88, performance.now()-t88)
-	// 88a: 1497557
-	let t88a = performance.now(), ver88a
-	try {
-		if (document.createElement('a').protocol == ":") {ver88a = xS}
-	} catch(e) {}
-	record(88,88, "1497557", ver88a, performance.now()-t88a)
-
-	// 87: 1688335
-	let t87 = performance.now(), ver87
-	try {
-		if (undefined === console.length) {ver87 = xS}
-	} catch(e) {}
-	record(87.2, 87, "1688335", ver87, performance.now()-t87)
-	// 87a: 1676708
-	let t87a = performance.now(), ver87a
-	try {
-		let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
-		if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
-	} catch(e) {}
-	record(87.1, 87, "1676708", ver87a, performance.now()-t87a)
-	// 87b: 944846
-	let t87b = performance.now(), ver87b
-	try {
-		let test87b = (12345).toExponential(3)
-		if (test87b == 1.235e+4) {ver87b = xS}
-	} catch(e) {}
-	record(87, 87, "944846", ver87b, performance.now()-t87b)
-
-	// 86: 1685482
-	let t86 = performance.now(), ver86
-	try {
-		newFn('for (async of [])')
-	} catch(e) {
-		// 86+: SyntaxError an expression X in 'for (X of Y)' must not start with 'async of'
-		// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
-		if ((e.message).substring(0,2) == "an") {ver86 = xS}
-	}
-	record(86,86, "1685482", ver86, performance.now()-t86)
-
-	// 85: 1675240
-	let t85 = performance.now(), ver85
-	try {
-		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
-	} catch(e) {
-		// 85+: RegExp.prototype.global getter called on non-RegExp object: string
-		// 60+: get global method called on incompatible string
-		if ((e.message).substring(0,3) == "Reg") {ver85 = xS}
-	}
-	record(85, 85, "1675240", ver85, performance.now()-t85)
-
-	// 84: 1673440
-	let t84 = performance.now(), ver84
-	try {
-		newFn("var x = @")
-	} catch(e) {
-		if (e.message == "illegal character U+0040") {ver84 = xS}
-	}
-	record(84, 84, "1673440", ver84, performance.now()-t84)
-
-	// 83: 1667094
-	let t83 = performance.now(), ver83
-	try {
-		newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
-		ver83 = xS
-	} catch(e) {}
-	record(83.1, 83, "1667094", ver83, performance.now()-t83)
-	// 83a: 1665746
-	let t83a = performance.now(), ver83a
-	try {
-		newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
-		ver83a = xS
-	} catch(e) {
-		if (e.message == "1 is not iterable") {ver83a = xS}
-	}
-	record(83, 83, "1665746", ver83a, performance.now()-t83a)
-
-	// 82: 1655947
-	let t82 = performance.now(), ver82
-	try {
-		ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
-	} catch(e) {ver82 = xB}
-	record(82, 82, "1655947", ver82, performance.now()-t82)
-
-	// 81: 1650607 (53: 1321534)
-	let t81 = performance.now(), ver81
-	try {
-		let file81 = new File(["bits"], "a/b.txt")
-		if (file81.name == "a/b.txt") {ver81 = xS}
-	} catch(e) {ver81 = xB}
-	record(81.1, 81, "1650607", ver81, performance.now()-t81)
-	// 81a: 1657437
-		// this is unstable in Tor Browser
-		// change from offscreen: use existing visible spans
-	let t81a = performance.now(), ver81a = xF
-	try {
-		dom.test81a.innerHTML = "AB"
-		dom.test81b.innerHTML = "A &#013;B"
-		let w81a = dom.test81a.offsetWidth
-		let w81b = dom.test81b.offsetWidth
-		dom.test81a.textContent = ""
-		dom.test81b.textContent = ""
-		//console.debug(w81a, w81b)
-		if (w81a < w81b) {ver81a = xS}
-	} catch(e) {ver81a = xB}
-	record(81, 81, "1657437", ver81a, performance.now()-t81a, "d")
-
-	// 80: 1651732
-	let t80 = performance.now(), ver80
-	try {
-		let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
-		let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
-		try {
-			for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
-			ver80 = xS
-		} catch (e) {}
-		record(80.1, 80, "1651732", ver80, performance.now()-t80)
-	} catch(e) {
-		record(80.1,80, "1651732", xB, performance.now()-t80)
-	}
-	// 80a: 1559253
-	let t80a = performance.now(), ver80a
-	try {
-		newFn(`
-		/aaa(/; 012345678`)
-	} catch (e) {
-		//console.debug(e.lineNumber, e.columnNumber)
-		// 60-65: = 2,2
-		// 66-79: = 1,4
-		//   80+: = 2,6
-		if (e.columnNumber == 6) {ver80a = xS}
-	}
-	record(80, 80, "1559253", ver80a, performance.now()-t80a)
-
-	// 79: 1644878
-	let t79 = performance.now(), ver79
-	try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {ver79 = xS}}
-	record(79.1, 79, "1644878", ver79, performance.now()-t79)
-	// 79a: 1639591
-	let t79a = performance.now(), ver79a
-	try {
-		newFn("let z = (3 ??= 3 * 3)")
-	} catch(e) {
-		// <79: SyntaxError expected expression, got '?'
-		// 79+: SyntaxError invalid assignment left-hand side
-		if (e.message.substring(0,3) == "inv") {ver79a = xS}
-	}
-	record(79,79, "1639591", ver79a, performance.now()-t79a)
-
-	// 78: 1626015
-	let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
-	record(78.3, 78, "1626015", ver78, performance.now()-t78)
-	// 78a: 1589095
-	let t78a = performance.now(), ver78a
-	try {
-		let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
-		ver78a = xS
-	} catch(e) {}
-	record(78.2, 78, "1589095", ver78a, performance.now()-t78a)
-	// 78b: 1634135
-	let t78b = performance.now(), ver78b
-	try {
-		let regex78b = new RegExp('b')
-		if (regex78b.dotAll == false) {ver78b = xS}
-	} catch(e) {ver78b = xB}
-	record(78.1, 78, "1634135", ver78b, performance.now()-t78b)
-	// 78c: 1633836
-	let t78c = performance.now(), ver78c
-	try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = xS} catch(e) {}
-	record(78, 78, "1633836", ver78c, performance.now()-t78c)
-
-	// 77: 1627285
-	let t77 = performance.now(), ver77 = (isNaN(new DOMRect(0, 0, NaN, NaN).top))
-	record(77.1, 77, "1627285", ver77, performance.now()-t77)
-	// 77a: 1608168
-	let t77a = performance.now(), ver77a
-	try {("aa").replaceAll("a","b"); ver77a = xS} catch(e) {}
-	record(77, 77, "1608168", ver77a, performance.now()-t77a)
-
-	// 76: 1608010
-	let t76 = performance.now(), ver76
-	if (test76.validity.rangeOverflow) {} else {ver76 = xS}
-	record(76, 76, "1608010", ver76, performance.now()-t77)
-
-	// 75: 1615600
-	let t75 = performance.now(), ver75
-	try {
-		let test75 = BigInt(2.5)
-	} catch(e) {
-		if (e.message.substring(0,3) == "2.5") {ver75 = xS}
-	}
-	record(75, 75, "1615600", ver75, performance.now()-t75)
-
-	// 74: 1605835
-	let t74 = performance.now(), ver74
-	try {
-		newFn("let t = ({ 1n: 1 })")
-		ver74 = xS
-	} catch(e) {}
-	record(74, 74, "1605835", ver74, performance.now()-t74)
-
-	// 73: 1602163
-	let t73 = performance.now(), ver73 = (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
-	record(73.1, 73, "1602163", ver73, performance.now()-t73)
-	// 73a: 1605803
-	let t73a = performance.now(), ver73a
-	try {if (getComputedStyle(dom.test73a).content == "normal") {ver73a = xS}} catch(e) {}
-	record(73, 73, "1605803", ver73a, performance.now()-t73a, "d")
-
-	// 72: 1591892
-	let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
-	record(72.3, 72, "1591892", ver72, performance.now()-t72)
-	// 72a: 1441976
-	let t72a = performance.now(), ver72a
-	try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
-	record(72.2, 72, "1441976", ver72a, performance.now()-t72a)
-	// 72b: 1566141
-	let t72b = performance.now(), ver72b
-	try {let test72 = (newFn("null ?? 'foo'")); ver72b = xS} catch(e) {}
-	record(72.1, 72, "1566141", ver72b, performance.now()-t72b)
-	// 72c: 1589072
-	let t72c = performance.now(), ver72c
-	try {	let test72c = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders" ) {ver72c = xS}}
-	record(72, 72, "1589072", ver72c, performance.now()-t72c)
-
-	// 71: 1549176
-	let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled) ? xS : xF
-	record(71.1, 71, "1549176", ver71, performance.now()-t71)
-	// 71b: 1575980
-	let t71b = performance.now(), ver71b
-	try {let test71b = new StaticRange()} catch(e) {
-		if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71b = xS}
-	}
-	record(71, 71, "1575980", ver71b, performance.now()-t71b)
-
-	// 70: 1473229
-		// ^^ older versions don't have Intl.RelativeTimeFormat so check for that first
-	let t70 = performance.now()
-	let ver70 = ("function" === typeof Intl.RelativeTimeFormat
-		&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
-	record(70.1, 70, "1473229", ver70, performance.now()-t70)
-	// 70a: 1435818
-	let t70a = performance.now(), ver70a
-	try {
-		newFn("let t = 1_050")
-		ver70a = xS
-	} catch(e) {}
-	record(70, 70, "1435818", ver70a, performance.now()-t70a)
-
-	// 69: 1557121
-	let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
-	record(69.1, 69, "1557121", ver69, performance.now()-t69)
-	// 69b: 1558387
-	let t69b = performance.now(), ver69b
-	try {let test69b = new DOMError('a')} catch(e) {ver69b = xS}
-	record(69, 69, "1558387", ver69b, performance.now()-t69b)
-
-	// 68: 1548773
-	let t68 = performance.now(), ver68 = (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch"))
-	record(68.1, 68, "1548773", ver68, performance.now()-t68)
-
-	// 68b: 1550949
-	let t68b = performance.now(), ver68b
-	try {ver68b = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68b = xB}
-	record(68, 68, "1550949", ver68b, performance.now()-t68b)
-
-	// 67: 1531830 (1435829)
-	let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
-	record(67, 67, "1531830", ver67, performance.now()-t67)
-
-	// 66: 1425685
-		// ESR60 doesn't have HTMLSlotElement at all so we check for that first
-	let t66 = performance.now()
-	let ver66 = ("function" === typeof HTMLSlotElement && "function" === typeof HTMLSlotElement.prototype.assignedElements)
-	record(66.1, 66, "1425685", ver66, performance.now()-t66)
-	// 66a
-	let t66a = performance.now(), ver66a
-	try {
-		let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-		let test66a = txt.encodeInto("a", utf8)
-		ver66a = xS
-	} catch(e) {}
-	record(66, 66, "", ver66a, performance.now()-t66a)
-
-	// 65: 1334813
-	let t65 = performance.now(), ver65 = (1 === DataView.length)
-	record(65.2, 65, "1334813", ver65, performance.now()-t65)
-	// 65a
-	let t65a = performance.now(), ver65a
-	try {let test65a = new Intl.RelativeTimeFormat("en",{style: "long"}); ver65a = xS} catch(e) {}
-	record(65.1, 65, "", ver65a, performance.now()-t65a)
-	// 65b
-	let t65b = performance.now(), ver65b
-	try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
-	record(65, 65, "", ver65b, performance.now()-t65b)
-
-	// 64
-	let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
-	record(64, 64, "1498860", ver64, performance.now()-t64)
-
-	// 63
-	let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
-	record(63, 63, "1472170", ver63, performance.now()-t63)
-
-	// 62
-	let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
-	record(62, 62, "1458466", ver62, performance.now()-t62)
-
-	// 61: 1455805
-	let t61 = performance.now(), ver61 = ("object" === typeof CSS)
-	record(61.1, 61, "1455805", ver61, performance.now()-t61)
-	// 61a: 1434007
-	let t61a = performance.now(), ver61a
-	try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
-	record(61, 61, "1434007", ver61a, performance.now()-t61a)
-
-	// < 60: 1436659: same test as below but as a < or >
-	let t60not = performance.now(), ver60not = ("function" !== typeof Animation.prototype.updatePlaybackRate)
-	record(60.1, 60, "1436659", ver60not, performance.now()-t60not, "<")
-	// 60: 1436659
-	let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
-	record(60, 60, "1436659", ver60, performance.now()-t60)
-
-	// 59: 1336400
-	let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
-	record(59.1, 59, "1336400", ver59, performance.now()-t59)
-	// 59a
-	let t59a = performance.now(), ver59a
-	try {ver59a = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59a = xB}
-	record(59, 59, "", ver59a, performance.now()-t59a)
-
-	// 55: 1354974
-		// this test hangs the page in chromium
-	let t55 = performance.now(), ver55
-	if (isFF) {
-		try {
-			let maxIndex = Math.pow(2, 31)
-			let list55 = []
-			list55[maxIndex - 1] = 'a'
-			list55[maxIndex - 0] = 'b'
-			if (list55[maxIndex] !== 'b') {
-			} else if (list55.slice()[maxIndex] !== 'b') {
-			} else if (list55.slice(maxIndex - 1).length !== 2) {
-			} else {
-				ver55 = xS
+	let countTZP = 0, expectTZP = 33, oTZP = {}
+	function run_tzp() {
+		// start global timer
+		gTZP = performance.now()
+		// record
+		function rec(order, version, bug, result, perf, note = "") {
+			if (result === true) {result = xS
+			} else if (result === false || result === undefined) {result = xF}
+			perf = Math.round(perf)
+			oTZP[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
+			countTZP++
+			if (countTZP == expectTZP) {
+				dom.perftzp = "".padStart(3) + expectTZP +" tests | "+ Math.round((performance.now() - gTZP)) +" ms"
+				output("tzp")
+			} else if (countTZP > expectTZP) {
+				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
+		}
+		// 98: 1709790
+		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
+		rec(98, 98, "1709790", ver98, performance.now()-t98)
+		// 97: 1745372: legacy try/catch
+		let t97 = performance.now(), ver97
+		try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
+		rec(97, 97, "1745372", ver97, performance.now()-t97)
+		// 96: 1738422: legacy check: Intl.PluralRules
+		let t96 = performance.now(), ver96
+		try {ver96 = ("function" === typeof Intl.PluralRules
+			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
+		rec(96, 96, "1738422", ver96, performance.now()-t96)
+		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
+		let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
+		rec(95.1, 95, "1723674", ver95, performance.now()-t95, "f")
+		// 95: 1674204 : slow
+			// note: en-US, windows
+			// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
+			// FF66-94 wraps 2020-1 vs 2020-12   : 45/53 = 0.8490566037735849
+			// FF95+   wraps 2020-1 x twice that : 47/93 = approx 0.5
+		let t95a = performance.now(), ver95a
+		try {
+			let a95 = dom.test95a.offsetWidth, b95 = dom.test95b.offsetWidth
+			let test95 = a95/b95
+			debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
+			if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
 		} catch(e) {}
-		record(55.1, 55, "1354974", ver55, performance.now()-t55)
-	} else {
-		record(55.1, 55, "1354974", xNA, performance.now()-t55)
+		rec(95, 95, "1674204", ver95a, performance.now()-t95a, "d")
+		// 94: 1722576
+		let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
+		rec(94, 94, "1722576", ver94, performance.now()-t94)
+		// 93: 1722448
+		let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
+		rec(93, 93, "1722448", ver93, performance.now()-t93)
+		// 92: 1721149
+		let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
+		rec(92, 92, "1721149", ver92, performance.now()-t92)
+		// 91: 1717072: fast path: dom.window.clientinformation.enabled = true (default)
+		let t91fast = performance.now(), ver91fast = ("object" === typeof window.clientInformation)
+		rec(91.1, 91, "1717072", ver91fast, performance.now()-t91fast, "f")
+		// 91: 1714933
+		let t91 = performance.now(), ver91
+		try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
+		rec(91, 91, "1714933", ver91, performance.now()-t91)
+
+		// 89: 1684316: legacy check CountQueuingStrategy
+		let t89 = performance.now(), ver89 = ("function" === typeof CountQueuingStrategy
+			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark"))
+		rec(89, 89, "1684316", ver91, performance.now()-t89)
+
+		// 87: 1688335
+		let t87 = performance.now(), ver87 = (undefined === console.length)
+		rec(87, 87, "1688335", ver87, performance.now()-t87)
+
+		// 80: 1620467: slow 5ms
+		let t80 = performance.now(), ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
+		rec(80, 80, "1620467", ver80, performance.now()-t80)
+
+		// 78: 1626015
+		let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
+		rec(78, 78, "1626015", ver78, performance.now()-t78)
+		// 77: 1536540
+		let t77 = performance.now(), ver77 = (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request'))
+		rec(77, 77, "1536540", ver77, performance.now()-t77)
+		// 76: 1608010
+		let t76 = performance.now(), ver76 = (!test76.validity.rangeOverflow)
+		rec(76, 76, "1608010", ver76, performance.now()-t76, "e")
+		// 75: 1613713
+		let t75 = performance.now(), ver75 = ("function" === typeof Intl.Locale)
+		rec(75, 75, "1613713", ver75, performance.now()-t75)
+		// 74 1565170
+		let t74 = performance.now(), ver74 = ("undefined" === typeof Object.toSource)
+		rec(74, 74, "1565170", ver74, performance.now()-t74)
+		// 73: 1602163
+		let t73 = performance.now(), ver73 = (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
+		rec(73, 73, "1602163", ver73, performance.now()-t73)
+		// 72: 1591892
+		let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
+		rec(72, 72, "1591892", ver72, performance.now()-t72)
+		// 71: 1549176
+		let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled) ? xS : xF
+		rec(71, 71, "1549176", ver71, performance.now()-t71)
+		// 70: 1473229: legacy check: Intl.RelativeTimeFormat
+		let t70 = performance.now()
+		let ver70 = ("function" === typeof Intl.RelativeTimeFormat
+			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+		rec(70, 70, "1473229", ver70, performance.now()-t70)
+		// 69: 1557121
+		let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
+		rec(69, 69, "1557121", ver69, performance.now()-t69)
+		// 68: 1548773
+		let t68 = performance.now(), ver68 = (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch"))
+		rec(68, 68, "1548773", ver68, performance.now()-t68)
+		// 67: 1531830
+		let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
+		rec(67, 67, "1531830", ver67, performance.now()-t67)
+		// 66: 1425685: legacy check: HTMLSlotElement
+		let t66 = performance.now(), ver66 = ("function" === typeof HTMLSlotElement
+			&& "function" === typeof HTMLSlotElement.prototype.assignedElements)
+		rec(66, 66, "1425685", ver66, performance.now()-t66)
+		// 65: 1334813
+		let t65 = performance.now(), ver65 = (1 === DataView.length)
+		rec(65, 65, "1334813", ver65, performance.now()-t65)
+		// 64: 1498860
+		let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
+		rec(64, 64, "1498860", ver64, performance.now()-t64)
+		// 63: 1472170
+		let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
+		rec(63, 63, "1472170", ver63, performance.now()-t63)
+		// 62: 1458466
+		let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
+		rec(62, 62, "1458466", ver62, performance.now()-t62)
+		// 61: 1455805
+		let t61 = performance.now(), ver61 = ("object" === typeof CSS)
+		rec(61, 61, "1455805", ver61, performance.now()-t61)
+		// 60: 1436659
+		let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
+		rec(60, 60, "1436659", ver60, performance.now()-t60)
+		// 59: 1336400
+		let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
+		rec(59, 59, "1336400", ver59, performance.now()-t59)
 	}
-	// 55b: 1351795
-	let t55b = performance.now(), ver55b
-	try {console.timeline()} catch(e) {ver55b = xS}
-	record(55, 55, "1351795", ver55b, performance.now()-t55b)
+	run_tzp()
 
-	// 54: 1050755
-	let t54 = performance.now(), ver54
-	try {
-		let test54 = [Date.UTC(), Date.UTC(1)]
-		if (isNaN(test54[1]) == false) {ver54 = xS}
-	} catch(e) {}
-	record(54, 54, "1050755", ver54, performance.now()-t54)
+	let countOther = 0, expectOther = 50, oOther = {}
+	function run_other() {
+		// start global timer
+		gOther = performance.now()
+		// record
+		function rec(order, version, bug, result, perf, note = "") {
+			if (result === true) {result = xS
+			} else if (result === false || result === undefined) {result = xF}
+			perf = Math.round(perf)
+			oOther[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
+			countOther++
+			if (countOther == expectOther) {
+				dom.perfother = "".padStart(3) + expectOther +" tests | "+ Math.round((performance.now() - gOther)) +" ms"
+				output("other")
+			} else if (countOther > expectOther) {
+				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
+			}
+		}
 
-	// 53: 1317307
-	let t53 = performance.now(), ver53
-	try {
-		Object.defineProperty([], "length", {get(){}})
-	} catch(e) {
-		if (e.name == "TypeError") {ver53 = xS}
+		// 96b: 1738422
+		let t96b = performance.now(), ver96b
+		try {
+			let date96b = Date.UTC(2012,12-1,6,12,0,0)
+			let test96b = new Date(date96b).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
+			if (test96b == "2012/12/6 中国标准时间 20:00:00") {ver96b = xS}
+			//console.debug(test96)
+		} catch(e) {ver96b = xB}
+		rec(96,96, "1738422", ver96b, performance.now()-t96b)
+
+		// 94a: 1729239
+		let t94a = performance.now(), ver94a
+		try {
+			ver94a = (HTMLScriptElement.supports("classic"))
+		} catch(e) {}
+		rec(94, 94, "1729239", ver94a, performance.now()-t94a)
+		// 93a: 1670033
+		let t93a = performance.now(), ver93a = ("function" === typeof Intl.supportedValuesOf)
+		rec(93.1, 93, "1670033", ver93a, performance.now()-t93a)
+		// 93b: 1328672
+		let t93b = performance.now(), ver93b
+		try {if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93b = xS}} catch(e) {}
+		rec(93, 93, "1328672", ver93b, performance.now()-t93b)
+
+		// 91a: 1710429: very slow cold ~15-20ms, slow 4-5ms
+		let t91a = performance.now(), ver91a
+		try {
+			let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
+			ver91a = xS
+		} catch(e) {}
+		rec(91.2, 91, "1710429", ver91a, performance.now()-t91a)
+		// 91b: 1284868: slow 2-5ms
+		let t91b = performance.now(), ver91b
+		try {
+			let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
+			let seconds = test91b.format(new Date('2016/06/06 15:05:07'))
+			if (seconds == "07") {ver91b = xS}
+		} catch(e) {ver91b = xB}
+		rec(91.1, 91, "1284868", ver91b, performance.now()-t91b)
+
+		// 90: 1520434
+		let t90 = performance.now(), ver90
+		try {
+			let share90 = new ArrayBuffer(4096)
+			let tst90 = new Int32Array(share90, 7)
+		} catch(e) {
+			// 90: start offset of Int32Array should be a multiple of 4
+			// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
+			if (e.message.substr(0,1) == "s") {ver90 = xS}
+		}
+		rec(90.1, 90, "1520434", ver90, performance.now()-t90)
+		// 90a: 1537689
+		let t90a = performance.now(), ver90a
+		try {
+			if (dom.test90.defaultValue == "a") {ver90a = xS}
+		} catch(e) {}
+		rec(90, 90, "1537689", ver90a, performance.now()-t90a, "d")
+
+		// 89: 1703213
+		let t89 = performance.now(), ver89
+		try {
+			if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
+		} catch(e) {}
+		rec(89, 89, "1703213", ver89, performance.now()-t89, "d")
+
+		// 88: 1670124
+		let t88 = performance.now(), ver88
+		try {
+			newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}')
+		} catch(e) {
+			// FF88+: SyntaxError the escapes \8 and \9 can't be used in untagged template literals or in strict mode code
+			if (e.message.substr(13,5) == "8 and") {ver88 = xS}
+		}
+		rec(88.1, 88, "1670124", ver88, performance.now()-t88)
+		// 88a: 1497557
+		let t88a = performance.now(), ver88a
+		try {
+			if (document.createElement('a').protocol == ":") {ver88a = xS}
+		} catch(e) {}
+		rec(88,88, "1497557", ver88a, performance.now()-t88a)
+
+		// 87a: 1676708
+		let t87a = performance.now(), ver87a
+		try {
+			let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
+			if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
+		} catch(e) {}
+		rec(87.1, 87, "1676708", ver87a, performance.now()-t87a)
+		// 87b: 944846
+		let t87b = performance.now(), ver87b
+		try {
+			let test87b = (12345).toExponential(3)
+			if (test87b == 1.235e+4) {ver87b = xS}
+		} catch(e) {}
+		rec(87, 87, "944846", ver87b, performance.now()-t87b)
+
+		// 86: 1685482
+		let t86 = performance.now(), ver86
+		try {
+			newFn('for (async of [])')
+		} catch(e) {
+			// 86+: SyntaxError an expression X in 'for (X of Y)' must not start with 'async of'
+			// 85-: SyntaxError expected '=>' on the same line after an argument list, got '['
+			if ((e.message).substring(0,2) == "an") {ver86 = xS}
+		}
+		rec(86,86, "1685482", ver86, performance.now()-t86)
+
+		// 85: 1675240
+		let t85 = performance.now(), ver85
+		try {
+			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+		} catch(e) {
+			// 85+: RegExp.prototype.global getter called on non-RegExp object: string
+			// 60+: get global method called on incompatible string
+			if ((e.message).substring(0,3) == "Reg") {ver85 = xS}
+		}
+		rec(85, 85, "1675240", ver85, performance.now()-t85)
+
+		// 84: 1673440
+		let t84 = performance.now(), ver84
+		try {
+			newFn("var x = @")
+		} catch(e) {
+			if (e.message == "illegal character U+0040") {ver84 = xS}
+		}
+		rec(84, 84, "1673440", ver84, performance.now()-t84)
+
+		// 83: 1667094
+		let t83 = performance.now(), ver83
+		try {
+			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
+			ver83 = xS
+		} catch(e) {}
+		rec(83.1, 83, "1667094", ver83, performance.now()-t83)
+		// 83a: 1665746
+		let t83a = performance.now(), ver83a
+		try {
+			newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
+			ver83a = xS
+		} catch(e) {
+			if (e.message == "1 is not iterable") {ver83a = xS}
+		}
+		rec(83, 83, "1665746", ver83a, performance.now()-t83a)
+
+		// 82: 1655947
+		let t82 = performance.now(), ver82
+		try {
+			ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
+		} catch(e) {ver82 = xB}
+		rec(82, 82, "1655947", ver82, performance.now()-t82)
+
+		// 81: 1650607 (53: 1321534)
+		let t81 = performance.now(), ver81
+		try {
+			let file81 = new File(["bits"], "a/b.txt")
+			if (file81.name == "a/b.txt") {ver81 = xS}
+		} catch(e) {ver81 = xB}
+		rec(81.1, 81, "1650607", ver81, performance.now()-t81)
+		// 81a: 1657437
+			// this is unstable in Tor Browser
+			// change from offscreen: use existing visible spans
+		let t81a = performance.now(), ver81a = xF
+		try {
+			dom.test81a.innerHTML = "AB"
+			dom.test81b.innerHTML = "A &#013;B"
+			let w81a = dom.test81a.offsetWidth
+			let w81b = dom.test81b.offsetWidth
+			dom.test81a.textContent = ""
+			dom.test81b.textContent = ""
+			//console.debug(w81a, w81b)
+			if (w81a < w81b) {ver81a = xS}
+		} catch(e) {ver81a = xB}
+		rec(81, 81, "1657437", ver81a, performance.now()-t81a, "d")
+
+		// 80: 1651732
+		let t80 = performance.now(), ver80
+		try {
+			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
+			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
+			try {
+				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
+				ver80 = xS
+			} catch (e) {}
+			rec(80.1, 80, "1651732", ver80, performance.now()-t80)
+		} catch(e) {
+			rec(80.1,80, "1651732", xB, performance.now()-t80)
+		}
+		// 80a: 1559253
+		let t80a = performance.now(), ver80a
+		try {
+			newFn(`
+			/aaa(/; 012345678`)
+		} catch (e) {
+			// 60-65: = 4,3
+			// 66-79: = 1,4
+			//   80+: = 2,7
+			if (e.columnNumber == 7) {ver80a = xS}
+		}
+		rec(80, 80, "1559253", ver80a, performance.now()-t80a)
+
+		// 79: 1644878
+		let t79 = performance.now(), ver79
+		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {ver79 = xS}}
+		rec(79.1, 79, "1644878", ver79, performance.now()-t79)
+		// 79a: 1639591
+		let t79a = performance.now(), ver79a
+		try {
+			newFn("let z = (3 ??= 3 * 3)")
+		} catch(e) {
+			// <79: SyntaxError expected expression, got '?'
+			// 79+: SyntaxError invalid assignment left-hand side
+			if (e.message.substring(0,3) == "inv") {ver79a = xS}
+		}
+		rec(79,79, "1639591", ver79a, performance.now()-t79a)
+
+		// 78a: 1589095
+		let t78a = performance.now(), ver78a
+		try {
+			let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
+			ver78a = xS
+		} catch(e) {}
+		rec(78.2, 78, "1589095", ver78a, performance.now()-t78a)
+		// 78b: 1634135
+		let t78b = performance.now(), ver78b
+		try {
+			let regex78b = new RegExp('b')
+			if (regex78b.dotAll == false) {ver78b = xS}
+		} catch(e) {ver78b = xB}
+		rec(78.1, 78, "1634135", ver78b, performance.now()-t78b)
+		// 78c: 1633836
+		let t78c = performance.now(), ver78c
+		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = xS} catch(e) {}
+		rec(78, 78, "1633836", ver78c, performance.now()-t78c)
+
+		// 77: 1627285
+		let t77 = performance.now(), ver77 = (isNaN(new DOMRect(0, 0, NaN, NaN).top))
+		rec(77.1, 77, "1627285", ver77, performance.now()-t77)
+		// 77a: 1608168
+		let t77a = performance.now(), ver77a
+		try {("aa").replaceAll("a","b"); ver77a = xS} catch(e) {}
+		rec(77, 77, "1608168", ver77a, performance.now()-t77a)
+
+		// 75: 1615600
+		let t75 = performance.now(), ver75
+		try {let test75 = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {ver75 = xS}}
+		rec(75, 75, "1615600", ver75, performance.now()-t75)
+		// 74: 1605835
+		let t74 = performance.now(), ver74
+		try {newFn("let t = ({ 1n: 1 })"); ver74 = xS} catch(e) {}
+		rec(74, 74, "1605835", ver74, performance.now()-t74)
+		// 73: 1605803
+		let t73 = performance.now(), ver73
+		try {if (getComputedStyle(dom.test73).content == "normal") {ver73 = xS}} catch(e) {}
+		rec(73, 73, "1605803", ver73, performance.now()-t73, "d")
+
+		// 72a: 1441976
+		let t72a = performance.now(), ver72a
+		try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
+		rec(72.2, 72, "1441976", ver72a, performance.now()-t72a)
+		// 72b: 1566141
+		let t72b = performance.now(), ver72b
+		try {let test72 = (newFn("null ?? 'foo'")); ver72b = xS} catch(e) {}
+		rec(72.1, 72, "1566141", ver72b, performance.now()-t72b)
+		// 72c: 1589072
+		let t72c = performance.now(), ver72c
+		try {	let test72c = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders" ) {ver72c = xS}}
+		rec(72, 72, "1589072", ver72c, performance.now()-t72c)
+
+		// 71b: 1575980
+		let t71b = performance.now(), ver71b
+		try {let test71b = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {ver71b = xS}}
+		rec(71, 71, "1575980", ver71b, performance.now()-t71b)
+
+		// 70a: 1435818
+		let t70a = performance.now(), ver70a
+		try {newFn("let t = 1_050"); ver70a = xS} catch(e) {}
+		rec(70, 70, "1435818", ver70a, performance.now()-t70a)
+
+		// 69b: 1558387
+		let t69b = performance.now(), ver69b
+		try {let test69b = new DOMError('a')} catch(e) {ver69b = xS}
+		rec(69, 69, "1558387", ver69b, performance.now()-t69b)
+
+		// 68b: 1550949
+		let t68b = performance.now(), ver68b
+		try {ver68b = isNaN(Date.parse("T00:00:00Z"))} catch(e) {ver68b = xB}
+		rec(68, 68, "1550949", ver68b, performance.now()-t68b)
+
+		// 66a
+		let t66a = performance.now(), ver66a
+		try {
+			let txt = new TextEncoder(), utf8 = new Uint8Array(1)
+			let test66a = txt.encodeInto("a", utf8)
+			ver66a = xS
+		} catch(e) {}
+		rec(66, 66, "", ver66a, performance.now()-t66a)
+
+		// 65a
+		let t65a = performance.now(), ver65a
+		try {let test65a = new Intl.RelativeTimeFormat("en",{style: "long"}); ver65a = xS} catch(e) {}
+		rec(65.1, 65, "", ver65a, performance.now()-t65a)
+		// 65b
+		let t65b = performance.now(), ver65b
+		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
+		rec(65, 65, "", ver65b, performance.now()-t65b)
+
+		// 61a: 1434007
+		let t61a = performance.now(), ver61a
+		try {let test61a = (' a').trimStart(); ver61a = xS} catch(e) {}
+		rec(61, 61, "1434007", ver61a, performance.now()-t61a)
+
+		// 59a
+		let t59a = performance.now(), ver59a
+		try {ver59a = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59a = xB}
+		rec(59, 59, "", ver59a, performance.now()-t59a)
+
+		// 55: 1354974
+			// this test hangs the page in chromium
+		let t55 = performance.now(), ver55
+		if (isFF) {
+			try {
+				let maxIndex = Math.pow(2, 31)
+				let list55 = []
+				list55[maxIndex - 1] = 'a'
+				list55[maxIndex - 0] = 'b'
+				if (list55[maxIndex] !== 'b') {
+				} else if (list55.slice()[maxIndex] !== 'b') {
+				} else if (list55.slice(maxIndex - 1).length !== 2) {
+				} else {
+					ver55 = xS
+				}
+			} catch(e) {}
+			rec(55.1, 55, "1354974", ver55, performance.now()-t55)
+		} else {
+			rec(55.1, 55, "1354974", xNA, performance.now()-t55)
+		}
+		// 55: 1351795
+		let t55b = performance.now(), ver55b =(undefined == typeof console.timeline)
+		rec(55, 55, "1351795", ver55b, performance.now()-t55b)
+
+		// 54: 1050755
+		let t54 = performance.now(), ver54
+		try {
+			let test54 = [Date.UTC(), Date.UTC(1)]
+			if (isNaN(test54[1]) == false) {ver54 = xS}
+		} catch(e) {}
+		rec(54, 54, "1050755", ver54, performance.now()-t54)
+
+		// 53: 1317307
+		let t53 = performance.now(), ver53
+		try {Object.defineProperty([], "length", {get(){}})} catch(e) {if (e.name == "TypeError") {ver53 = xS}}
+		rec(53, 53, "1317307", ver53, performance.now()-t53)
+
+		// 52: 837961
+		let t52 = performance.now(), ver52
+		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = xS} catch(e) {}
+		rec(52, 52, "837961", ver52, performance.now()-t52)
 	}
-	record(53, 53, "1317307", ver53, performance.now()-t53)
+	run_other()
 
-	// 52: 837961
-	let t52 = performance.now(), ver52
-	try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = xS} catch(e) {}
-	record(52, 52, "837961", ver52, performance.now()-t52)
+	function run_watch() {
+		// watch
+		// 1274354: META
 
-	// watch
-	// 1274354: META
+		// 1439800: note cydec causes a false positive
+		let t9 = performance.now(), ver9 = xNC
+		let test9 = new Date("11-Nov-11")
+		if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
+		rec(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
 
-	// 1439800: note cydec causes a false positive
-	let t9 = performance.now(), ver9 = xNC
-	let test9 = new Date("11-Nov-11")
-	if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
-	record(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
+		// 1557650: note cydec causes a false positive
+		let t8 = performance.now(), ver8 = xNC
+		let test8 = new Date("19999-11-11").toString()
+		if (test8 !== "Invalid Date") {ver8 = xOMG}
+		rec(8,"Invalid Date", "1557650", ver8, performance.now()-t8)
 
-	// 1557650: note cydec causes a false positive
-	let t8 = performance.now(), ver8 = xNC
-	let test8 = new Date("19999-11-11").toString()
-	if (test8 !== "Invalid Date") {ver8 = xOMG}
-	record(8,"Invalid Date", "1557650", ver8, performance.now()-t8)
+		// 1515318: 63 and lower = NaN, 64+ = -2011
+		let t7 = performance.now(), ver7 = xNC
+		let test7 = new Date("31-Mar-2011").getFullYear()
+		if (test7 !== -2011 && !isNaN(test7)) {ver7 = xOMG + (isFF ? " [" + test7 +"]" : "")}
+		rec(7,"-2011", "1515318", ver7, performance.now()-t7)
 
-	// 1515318: 63 and lower = NaN, 64+ = -2011
-	let t7 = performance.now(), ver7 = xNC
-	let test7 = new Date("31-Mar-2011").getFullYear()
-	if (test7 !== -2011 && !isNaN(test7)) {ver7 = xOMG + (isFF ? " [" + test7 +"]" : "")}
-	record(7,"-2011", "1515318", ver7, performance.now()-t7)
+		// 1599375
+		let t6 = performance.now(), ver6 = xNC
+		let test6 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
+		if (!isNaN(test6)) {ver6 = xOMG}
+		rec(6,"NaN", "1599375", ver6, performance.now()-t6)
 
-	// 1599375
-	let t6 = performance.now(), ver6 = xNC
-	let test6 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
-	if (!isNaN(test6)) {ver6 = xOMG}
-	record(6,"NaN", "1599375", ver6, performance.now()-t6)
+		// 1730155
+		let t5 = performance.now(), ver5 = xNC
+		let test5 = Date.parse("Mercredi 8 Septembre 2021")
+		if (!isNaN(test5)) {ver5 = xOMG}
+		rec(5,"NaN", "1730155", ver5, performance.now()-t5)
 
-	// 1730155
-	let t5 = performance.now(), ver5 = xNC
-	let test5 = Date.parse("Mercredi 8 Septembre 2021")
-	if (!isNaN(test5)) {ver5 = xOMG}
-	record(5,"NaN", "1730155", ver5, performance.now()-t5)
-
-	// 1742592 related
-	let t4 = performance.now(), ver4 = xNC
-	try {
-		let lf4 = new Intl.ListFormat("en")
-		let test4 = "~"+ lf4.format(["", "B"]) +"~"
-		if (test4 !== "~ and B~") {ver4 = xOMG}
-	} catch(e) {
-		ver4 = " "+ zNA + " error "
+		// 1742592 related
+		let t4 = performance.now(), ver4 = xNC
+		try {
+			let lf4 = new Intl.ListFormat("en")
+			let test4 = "~"+ lf4.format(["", "B"]) +"~"
+			if (test4 !== "~ and B~") {ver4 = xOMG}
+		} catch(e) {
+			ver4 = " "+ zNA + " error "
+		}
+		rec(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
 	}
-	record(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
 
 }
 
