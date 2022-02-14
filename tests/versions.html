@@ -695,7 +695,7 @@ function outputVersion() {
 			rec(55.1, 55, "1354974", xNA, performance.now()-t55)
 		}
 		// 55: 1351795
-		let t55b = performance.now(), ver55b =(undefined == typeof console.timeline)
+		let t55b = performance.now(), ver55b = ("undefined" === typeof console.timeline)
 		rec(55, 55, "1351795", ver55b, performance.now()-t55b)
 
 		// 54: 1050755
