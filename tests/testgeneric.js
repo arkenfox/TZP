@@ -84,7 +84,7 @@ function get_isFF_engine() {
 	try {if (typeof InstallTriggerImpl == "function") {test2 = true}} catch(e) {} // FF61+
 	try {if ("InstallTrigger" in window) {test3 = true}} catch(e) {}
 	try {
-		newFn("let t = (' a').trimStart()")
+		let t = (' a').trimStart()
 		if (test1 + test2 + test3 == 3) {isFF = true} // FF61+
 	} catch(e) {
 		if (test1 + test3 == 2) {isFF = true} // FF60 or lower
@@ -119,8 +119,8 @@ function get_isFF_engine() {
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
 	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
+	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"; isFF = true
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"; isFF = true
 	} else if (isFF) {isEngine = "gecko"
 	} else if ("chrome" in window) {isEngine = "blink"
 	}
