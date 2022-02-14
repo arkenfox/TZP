@@ -46,9 +46,8 @@
 				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
 				&nbsp <b><span class='s3'> d </span></b> &nbsp dom
-				&nbsp <b><span class='s3'> f </span></b> &nbsp fast [pref]
-				&nbsp <b><span class='s3'> fb </span></b> &nbsp fallback
-				&nbsp <b><span class='s14'> ex </span></b> &nbsp extension
+				&nbsp <b><span class='s3'> p </span></b> &nbsp pref [fast]
+				&nbsp <b><span class='s14'> ex | fb </span></b> &nbsp extension | fallback
 			</span>
 		</td></tr>
 		<!-- tzp -->
@@ -101,6 +100,7 @@ function outputVersion() {
 		t0 = performance.now()
 
 	s3 = s3.trim()
+	s14 = s14.trim()
 	sb = sb.trim()
 
 	let debug = []
@@ -151,8 +151,10 @@ function outputVersion() {
 			let extra = ""
 			if (note !== "" && !highlow) {
 				// limit to two chars
+				let color = s3
 				if (note.length > 2) {note = note.substring(0,2)}
-				extra = (note == "ex" ? s14.trim() : s3) + note.padStart(3) + sc
+				if (note == "ex" || note == "fb") {color = s14}
+				extra = color + note.padStart(3) + sc
 			} else {
 				extra = "".padStart(3)
 			}
@@ -234,7 +236,7 @@ function outputVersion() {
 
 		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
 		let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
-		rec(95.1, 95, "1723674", ver95, performance.now()-t95, "f")
+		rec(95.1, 95, "1723674", ver95, performance.now()-t95, "p")
 		// 95: 1674204 : slow
 			// note: en-US, windows
 			// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
@@ -263,7 +265,7 @@ function outputVersion() {
 
 		// 91: 1717072: fast path: dom.window.clientinformation.enabled = true (default)
 		let t91fast = performance.now(), ver91fast = ("object" === typeof window.clientInformation)
-		rec(91.1, 91, "1717072", ver91fast, performance.now()-t91fast, "f")
+		rec(91.1, 91, "1717072", ver91fast, performance.now()-t91fast, "p")
 		// 91: 1714933
 		let t91 = performance.now(), ver91
 		try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
@@ -327,7 +329,7 @@ function outputVersion() {
 			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
 		rec(70.1, 70, "1473229", ver70, performance.now()-t70, "ex")
 
-		// 70a: 1435818
+		// 70: 1435818 : fallback
 		let t70a = performance.now(), ver70a
 		try {newFn("let t = 1_050"); ver70a = xS} catch(e) {}
 		rec(70, 70, "1435818", ver70a, performance.now()-t70a, "fb")
