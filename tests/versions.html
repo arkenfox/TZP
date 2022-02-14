@@ -201,7 +201,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 34, oTZP = {}
+	let countTZP = 0, expectTZP = 35, oTZP = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -228,9 +228,9 @@ function outputVersion() {
 		try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
 		rec(97, 97, "1745372", ver97, performance.now()-t97)
 
-		// 96: 1738422: legacy check: Intl.PluralRules
+		// 96: 1738422: legacy check: toSource (74+): FF68- very slow: also FF57- Intl.PluralRules not supported
 		let t96 = performance.now(), ver96
-		try {ver96 = ("function" === typeof Intl.PluralRules
+		try {ver96 = ("undefined" === typeof Object.toSource
 			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
 		rec(96, 96, "1738422", ver96, performance.now()-t96)
 
@@ -294,8 +294,8 @@ function outputVersion() {
 		let t77 = performance.now(), ver77 = (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request'))
 		rec(77, 77, "1536540", ver77, performance.now()-t77)
 
-		// 76: 1608010
-		let t76 = performance.now(), ver76 = (!test76.validity.rangeOverflow)
+		// 76: 1608010: legacy check toSource (74+) FF56 or lower false positive
+		let t76 = performance.now(), ver76 = ("undefined" === typeof Object.toSource && !test76.validity.rangeOverflow)
 		rec(76, 76, "1608010", ver76, performance.now()-t76, "d")
 
 		// 75: 1613713
@@ -315,7 +315,7 @@ function outputVersion() {
 		rec(72, 72, "1591892", ver72, performance.now()-t72)
 
 		// 71: 1549176
-		let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled) ? xS : xF
+		let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled)
 		rec(71, 71, "1549176", ver71, performance.now()-t71)
 
 		// 70: 1473229: legacy check: Intl.RelativeTimeFormat
@@ -374,10 +374,14 @@ function outputVersion() {
 		// 59: 1336400
 		let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
 		rec(59, 59, "1336400", ver59, performance.now()-t59)
+
+		// 58: 1403318
+		let t58 = performance.now(), ver58 = ("function" == typeof Intl.PluralRules)
+		rec(58, 58, "1403318", ver58, performance.now()-t58)
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 49, oOther = {}
+	let countOther = 0, expectOther = 50, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -602,7 +606,7 @@ function outputVersion() {
 		// 79: 1644878
 		let t79 = performance.now(), ver79
 		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {ver79 = xS}}
-		rec(79.1, 79, "1644878", ver79, performance.now()-t79)
+		rec(79.2, 79, "1644878", ver79, performance.now()-t79)
 		// 79a: 1639591
 		let t79a = performance.now(), ver79a
 		try {
@@ -612,7 +616,16 @@ function outputVersion() {
 			// 79+: SyntaxError invalid assignment left-hand side
 			if (e.message.substring(0,3) == "inv") {ver79a = xS}
 		}
-		rec(79,79, "1639591", ver79a, performance.now()-t79a)
+		rec(79.1,79, "1639591", ver79a, performance.now()-t79a)
+		// 79b: 1557718
+		let t79b = performance.now(), ver79b
+		try {
+			let test79b = new Intl.DateTimeFormat("en" , { timeStyle: "short" }).format(new Date(Date.UTC(2012, 11, 20, 3, 0, 0)))
+			// 4:00 PM
+			// 12/20/2012 : FF79 or lower
+			ver79b = (test79b.charAt(test79b.length - 1) === "M")
+		} catch(e) {ver79b = xB; console.debug(e.name, e.message)}
+		rec(79,79, "1557718", ver79b, performance.now()-t79b)
 
 		// 78a: 1589095
 		let t78a = performance.now(), ver78a
