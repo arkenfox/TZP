@@ -218,15 +218,18 @@ function outputVersion() {
 		// 98: 1709790
 		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 		rec(98, 98, "1709790", ver98, performance.now()-t98)
+
 		// 97: 1745372: legacy try/catch
 		let t97 = performance.now(), ver97
 		try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
 		rec(97, 97, "1745372", ver97, performance.now()-t97)
+
 		// 96: 1738422: legacy check: Intl.PluralRules
 		let t96 = performance.now(), ver96
 		try {ver96 = ("function" === typeof Intl.PluralRules
 			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
 		rec(96, 96, "1738422", ver96, performance.now()-t96)
+
 		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
 		let t95 = performance.now(), ver95 = ("function" === typeof crypto.randomUUID)
 		rec(95.1, 95, "1723674", ver95, performance.now()-t95, "f")
@@ -243,15 +246,19 @@ function outputVersion() {
 			if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
 		} catch(e) {}
 		rec(95, 95, "1674204", ver95a, performance.now()-t95a, "d")
+
 		// 94: 1722576
 		let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
 		rec(94, 94, "1722576", ver94, performance.now()-t94)
+
 		// 93: 1722448
 		let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
 		rec(93, 93, "1722448", ver93, performance.now()-t93)
+
 		// 92: 1721149
 		let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
 		rec(92, 92, "1721149", ver92, performance.now()-t92)
+
 		// 91: 1717072: fast path: dom.window.clientinformation.enabled = true (default)
 		let t91fast = performance.now(), ver91fast = ("object" === typeof window.clientInformation)
 		rec(91.1, 91, "1717072", ver91fast, performance.now()-t91fast, "f")
@@ -270,69 +277,94 @@ function outputVersion() {
 		rec(87, 87, "1688335", ver87, performance.now()-t87)
 
 		// 80: 1620467: slow 5ms
-		let t80 = performance.now(), ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
-		rec(80, 80, "1620467", ver80, performance.now()-t80)
+			// blink: ReferenceError: CSS2Properties is not defined
+		let t80 = performance.now()
+		if (isFF) {
+			let ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
+			rec(80, 80, "1620467", ver80, performance.now()-t80)
+		} else {
+			rec(80, 80, "1620467", xNA, performance.now()-t80)
+		}
 
 		// 78: 1626015
 		let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
 		rec(78, 78, "1626015", ver78, performance.now()-t78)
+
 		// 77: 1536540
 		let t77 = performance.now(), ver77 = (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request'))
 		rec(77, 77, "1536540", ver77, performance.now()-t77)
+
 		// 76: 1608010
 		let t76 = performance.now(), ver76 = (!test76.validity.rangeOverflow)
 		rec(76, 76, "1608010", ver76, performance.now()-t76, "e")
+
 		// 75: 1613713
 		let t75 = performance.now(), ver75 = ("function" === typeof Intl.Locale)
 		rec(75, 75, "1613713", ver75, performance.now()-t75)
+
 		// 74 1565170
 		let t74 = performance.now(), ver74 = ("undefined" === typeof Object.toSource)
 		rec(74, 74, "1565170", ver74, performance.now()-t74)
+
 		// 73: 1602163
 		let t73 = performance.now(), ver73 = (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
 		rec(73, 73, "1602163", ver73, performance.now()-t73)
+
 		// 72: 1591892
 		let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
 		rec(72, 72, "1591892", ver72, performance.now()-t72)
+
 		// 71: 1549176
 		let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled) ? xS : xF
 		rec(71, 71, "1549176", ver71, performance.now()-t71)
+
 		// 70: 1473229: legacy check: Intl.RelativeTimeFormat
 		let t70 = performance.now()
 		let ver70 = ("function" === typeof Intl.RelativeTimeFormat
 			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
 		rec(70, 70, "1473229", ver70, performance.now()-t70)
+
 		// 69: 1557121
 		let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
 		rec(69, 69, "1557121", ver69, performance.now()-t69)
+
 		// 68: 1548773
 		let t68 = performance.now(), ver68 = (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch"))
 		rec(68, 68, "1548773", ver68, performance.now()-t68)
+
 		// 67: 1531830
 		let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
 		rec(67, 67, "1531830", ver67, performance.now()-t67)
+
 		// 66: 1425685: legacy check: HTMLSlotElement
 		let t66 = performance.now(), ver66 = ("function" === typeof HTMLSlotElement
 			&& "function" === typeof HTMLSlotElement.prototype.assignedElements)
 		rec(66, 66, "1425685", ver66, performance.now()-t66)
+
 		// 65: 1334813
 		let t65 = performance.now(), ver65 = (1 === DataView.length)
 		rec(65, 65, "1334813", ver65, performance.now()-t65)
+
 		// 64: 1498860
 		let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
 		rec(64, 64, "1498860", ver64, performance.now()-t64)
+
 		// 63: 1472170
 		let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
 		rec(63, 63, "1472170", ver63, performance.now()-t63)
+
 		// 62: 1458466
 		let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
 		rec(62, 62, "1458466", ver62, performance.now()-t62)
+
 		// 61: 1455805
 		let t61 = performance.now(), ver61 = ("object" === typeof CSS)
 		rec(61, 61, "1455805", ver61, performance.now()-t61)
+
 		// 60: 1436659
 		let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
 		rec(60, 60, "1436659", ver60, performance.now()-t60)
+
 		// 59: 1336400
 		let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
 		rec(59, 59, "1336400", ver59, performance.now()-t59)
