@@ -572,10 +572,11 @@ function outputPrototypeLies() {
 						}
 
 						const interfaceObject = !!obj.prototype ? obj.prototype : obj
-						;[...new Set([
-							...Object.getOwnPropertyNames(interfaceObject),
-							...Object.keys(interfaceObject) // backup
-						])].sort().forEach(name => {
+						Object.getOwnPropertyNames(interfaceObject)
+							;[...new Set([
+								...Object.getOwnPropertyNames(interfaceObject),
+								...Object.keys(interfaceObject) // backup
+							])].sort().forEach(name => {
 								const skip = (
 									name == 'constructor' ||
 									(target.length && !new Set(target).has(name)) ||
@@ -597,11 +598,15 @@ function outputPrototypeLies() {
 									try {
 										const apiFunction = proto[name] // may trigger TypeError
 										if (typeof apiFunction == 'function') {
-											res = getLies(proto[name], proto)
-												if (res.lied) {
-													return (props[apiName] = res.lieTypes)
-												}
-												return
+											res = getLies({
+												apiFunction: proto[name],
+												proto,
+												lieProps: props
+											})
+											if (res.lied) {
+												return (props[apiName] = res.lieTypes)
+											}
+											return
 										}
 										// since there is no TypeError and the typeof is not a function,
 										// handle invalid values and ingnore name, length, and constants
@@ -609,21 +614,29 @@ function outputPrototypeLies() {
 											name != 'name' &&
 											name != 'length' &&
 											name[0] !== name[0].toUpperCase()) {
+											const lie = [`z: failed descriptor.value undefined`]
 											return (
-												props[apiName] = [`z: descriptor.value should remain undefined`]
+												props[apiName] = lie
 											)
 										}
-									} catch (error) {}
+									} catch (error) { }
 									// else search getter function
 									const getterFunction = Object.getOwnPropertyDescriptor(proto, name).get
-									res = getLies(getterFunction, proto, obj) // send the obj for special tests
+									res = getLies({
+										apiFunction: getterFunction,
+										proto,
+										obj,
+										lieProps: props
+									}) // send the obj for special tests
+									
 									if (res.lied) {
 										return (props[apiName] = res.lieTypes)
 									}
 									return
 								} catch (error) {
+									const lie = `aa: failed prototype test execution`
 									return (
-										props[apiName] = [`aa: prototype tests should not fail execution`]
+										props[apiName] = [lie]
 									)
 								}
 							})
