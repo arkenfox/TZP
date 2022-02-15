@@ -201,14 +201,14 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 35, oTZP = {}
+	let countTZP = 0, expectTZP = 39, oTZP = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
 		// record
 		function rec(order, version, bug, result, perf, note = "") {
 			if (result === true) {result = xS
-			} else if (result === false || result === undefined) {result = xF}
+			} else if (result === false || result === undefined || result == "") {result = xF}
 			perf = Math.round(perf)
 			oTZP[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
 			countTZP++
@@ -223,12 +223,12 @@ function outputVersion() {
 		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 		rec(98, 98, "1709790", ver98, performance.now()-t98)
 
-		// 97: 1745372: legacy try/catch
-		let t97 = performance.now(), ver97
-		try {ver97 = ("function" === typeof AbortSignal.prototype.throwIfAborted)} catch(e) {}
+		// 97: 1745372: legacy check: FF56- ReferenceError AbortSignal
+		let t97 = performance.now(), ver97 = ("function" === typeof AbortSignal
+			&& "function" === typeof AbortSignal.prototype.throwIfAborted)
 		rec(97, 97, "1745372", ver97, performance.now()-t97)
 
-		// 96: 1738422: legacy check: toSource (74+): FF68- very slow: also FF57- Intl.PluralRules not supported
+		// 96: 1738422: legacy check + perf: toSource (74+): FF68- very slow: FF57- Intl.PluralRules not supported
 		let t96 = performance.now(), ver96
 		try {ver96 = ("undefined" === typeof Object.toSource
 			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
@@ -246,7 +246,7 @@ function outputVersion() {
 		try {
 			let a95 = dom.test95a.offsetWidth, b95 = dom.test95b.offsetWidth
 			let test95 = a95/b95
-			debug.push(s3 +" 95 "+ sc + s12 +" 1674204  "+ sc + a95 +"/"+ b95 +" = " +test95)
+			debug.push(" 95 1674204 : "+ a95 +"/"+ b95 +" = " +test95)
 			if (test95 > 0.4 && test95 < 0.6) {ver95a = xS}
 		} catch(e) {}
 		rec(95, 95, "1674204", ver95a, performance.now()-t95a, "d")
@@ -266,12 +266,14 @@ function outputVersion() {
 		// 91: 1717072: fast path: dom.window.clientinformation.enabled = true (default)
 		let t91fast = performance.now(), ver91fast = ("object" === typeof window.clientInformation)
 		rec(91.1, 91, "1717072", ver91fast, performance.now()-t91fast, "p")
-		// 91: 1714933
+
+		// 91: 1714933: legacy perf: toSource (74+): FF70- very slow
 		let t91 = performance.now(), ver91
-		try {ver91 = ("sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
+		try {ver91 = ("undefined" === typeof Object.toSource
+			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 		rec(91, 91, "1714933", ver91, performance.now()-t91)
 
-		// 89: 1684316: legacy check CountQueuingStrategy
+		// 89: 1684316: legacy check: FF64- CountQueuingStrategy
 		let t89 = performance.now(), ver89 = ("function" === typeof CountQueuingStrategy
 			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark"))
 		rec(89, 89, "1684316", ver91, performance.now()-t89)
@@ -280,11 +282,25 @@ function outputVersion() {
 		let t87 = performance.now(), ver87 = (undefined === console.length)
 		rec(87, 87, "1688335", ver87, performance.now()-t87)
 
-		// 80: 1620467: slow 5ms
-			// blink: ReferenceError: CSS2Properties is not defined
+		// 83: 1665252: legacy check: window.HTMLIFrameElement FF55-
+		let t83 = performance.now(), ver83 = ("function" === typeof window.HTMLIFrameElement
+			&& !window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest"))
+		rec(83, 83, "1665252", ver83, performance.now()-t83)
+
+		// 81: 1650607: legacy check: toSource (74+): 52 false positive
+		let t81 = performance.now(), ver81 = ("undefined" === typeof Object.toSource
+			&& new File(["x"], "a/b").name == "a/b")
+		rec(81.1, 81, "1650607", ver81, performance.now()-t81)
+
+		// 80: 1620467
+			// blink try-catch: ReferenceError: CSS2Properties is not defined
 		let t80 = performance.now(), ver80
 		try {ver80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))} catch(e) {ver80 = xNA}
 		rec(80, 80, "1620467", ver80, performance.now()-t80)
+
+		// 79: 1639246 shipped: javascript.options.weakrefs = true (default)
+		let t79 = performance.now(), ver79 = ("function" == typeof WeakRef)
+		rec(79, 79, "1639246", ver79, performance.now()-t79, "p")
 
 		// 78: 1626015
 		let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
@@ -294,7 +310,7 @@ function outputVersion() {
 		let t77 = performance.now(), ver77 = (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request'))
 		rec(77, 77, "1536540", ver77, performance.now()-t77)
 
-		// 76: 1608010: legacy check toSource (74+) FF56 or lower false positive
+		// 76: 1608010: legacy check toSource (74+) FF56- false positive
 		let t76 = performance.now(), ver76 = ("undefined" === typeof Object.toSource && !test76.validity.rangeOverflow)
 		rec(76, 76, "1608010", ver76, performance.now()-t76, "d")
 
@@ -319,7 +335,7 @@ function outputVersion() {
 		rec(71, 71, "1549176", ver71, performance.now()-t71)
 
 		// 70: 1473229: legacy check: Intl.RelativeTimeFormat
-			// ext: e.g. chameleon
+			// ext fuckery: chameleon
 		let t70 = performance.now()
 		let ver70 = ("function" === typeof Intl.RelativeTimeFormat
 			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
@@ -378,6 +394,10 @@ function outputVersion() {
 		// 58: 1403318
 		let t58 = performance.now(), ver58 = ("function" == typeof Intl.PluralRules)
 		rec(58, 58, "1403318", ver58, performance.now()-t58)
+
+		// 57: 1378342
+		let t57 = performance.now(), ver57 = ("function" === typeof AbortSignal)
+		rec(57, 57, "1378342", ver57, performance.now()-t57)
 	}
 	run_tzp()
 
@@ -401,7 +421,7 @@ function outputVersion() {
 		}
 
 		// 96b: 1738422
-			// ext fuckery: chameleon/cydec
+			// ext fuckery: chameleon, cydec
 		let t96b = performance.now(), ver96b
 		try {
 			let date96b = Date.UTC(2012,12-1,6,12,0,0)
@@ -433,7 +453,7 @@ function outputVersion() {
 		} catch(e) {}
 		rec(91.2, 91, "1710429", ver91a, performance.now()-t91a)
 		// 91b: 1284868: slow 2-5ms
-			// ext: cydec
+			// ext fuckery: cydec
 		let t91b = performance.now(), ver91b
 		try {
 			let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
@@ -445,11 +465,11 @@ function outputVersion() {
 		// 90: 1520434
 		let t90 = performance.now(), ver90
 		try {
-			let share90 = new ArrayBuffer(4096)
-			let tst90 = new Int32Array(share90, 7)
+			let tst90 = new Int32Array(new ArrayBuffer(4096), 7)
 		} catch(e) {
 			// 90: start offset of Int32Array should be a multiple of 4
 			// 89: attempting to construct out-of-bounds TypedArray on ArrayBuffer
+			// debug.push(" 90 1520434 "+ e.name +": "+ e.message)
 			if (e.message.substr(0,1) == "s") {ver90 = xS}
 		}
 		rec(90.1, 90, "1520434", ver90, performance.now()-t90)
@@ -535,7 +555,7 @@ function outputVersion() {
 			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
 			ver83 = xS
 		} catch(e) {}
-		rec(83.1, 83, "1667094", ver83, performance.now()-t83)
+		rec(83.2, 83, "1667094", ver83, performance.now()-t83)
 		// 83a: 1665746
 		let t83a = performance.now(), ver83a
 		try {
@@ -544,23 +564,16 @@ function outputVersion() {
 		} catch(e) {
 			if (e.message == "1 is not iterable") {ver83a = xS}
 		}
-		rec(83, 83, "1665746", ver83a, performance.now()-t83a)
+		rec(83.1, 83, "1665746", ver83a, performance.now()-t83a)
 
 		// 82: 1655947
-			// ext: e.g. chameleon
+			// ext fuckery: chameleon
 		let t82 = performance.now(), ver82
 		try {
 			ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
 		} catch(e) {ver82 = xB}
 		rec(82, 82, "1655947", ver82, performance.now()-t82, "ex")
 
-		// 81: 1650607 (53: 1321534)
-		let t81 = performance.now(), ver81
-		try {
-			let file81 = new File(["bits"], "a/b.txt")
-			if (file81.name == "a/b.txt") {ver81 = xS}
-		} catch(e) {ver81 = xB}
-		rec(81.1, 81, "1650607", ver81, performance.now()-t81)
 		// 81a: 1657437
 			// this is unstable in Tor Browser
 			// change from offscreen: use existing visible spans
@@ -606,8 +619,8 @@ function outputVersion() {
 		// 79: 1644878
 		let t79 = performance.now(), ver79
 		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {ver79 = xS}}
-		rec(79.2, 79, "1644878", ver79, performance.now()-t79)
-		// 79a: 1639591
+		rec(79.3, 79, "1644878", ver79, performance.now()-t79)
+		// 79a: 1639591 shipped (FF77 added 1629106)
 		let t79a = performance.now(), ver79a
 		try {
 			newFn("let z = (3 ??= 3 * 3)")
@@ -616,16 +629,24 @@ function outputVersion() {
 			// 79+: SyntaxError invalid assignment left-hand side
 			if (e.message.substring(0,3) == "inv") {ver79a = xS}
 		}
-		rec(79.1,79, "1639591", ver79a, performance.now()-t79a)
+		rec(79.2,79, "1639591", ver79a, performance.now()-t79a)
 		// 79b: 1557718
+			// ext fuckery: cydec
 		let t79b = performance.now(), ver79b
 		try {
-			let test79b = new Intl.DateTimeFormat("en" , { timeStyle: "short" }).format(new Date(Date.UTC(2012, 11, 20, 3, 0, 0)))
+			let test79b = new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date())
+			//debug.push(" 79 1557718 : " + test79b)
 			// 4:00 PM
-			// 12/20/2012 : FF79 or lower
+			// 12/20/2012 : FF78 or lower
 			ver79b = (test79b.charAt(test79b.length - 1) === "M")
 		} catch(e) {ver79b = xB; console.debug(e.name, e.message)}
-		rec(79,79, "1557718", ver79b, performance.now()-t79b)
+		rec(79.1,79, "1557718", ver79b, performance.now()-t79b, "ex")
+		// 79: 1413504
+		let t79c = performance.now(), ver79c
+		try {
+			ver79c = ("1" !== new Intl.NumberFormat("en", {numberingSystem: "gong"}).format(1))
+		} catch(e) {ver79c = xB}
+		rec(79, 79, "1413504", ver79c, performance.now()-t79c)
 
 		// 78a: 1589095
 		let t78a = performance.now(), ver78a
@@ -771,17 +792,19 @@ function outputVersion() {
 		// watch
 		// 1274354: META
 
-		// 1439800: note cydec causes a false positive
+		// 1439800
+			// ext fuckery: cydec
 		let t9 = performance.now(), ver9 = xNC
 		let test9 = new Date("11-Nov-11")
 		if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
-		rec(9,"Invalid Date", "1439800", ver9, performance.now()-t9)
+		rec(9,"Invalid Date", "1439800", ver9, performance.now()-t9, "ex")
 
-		// 1557650: note cydec causes a false positive
+		// 1557650
+			// ext fuckery: cydec
 		let t8 = performance.now(), ver8 = xNC
 		let test8 = new Date("19999-11-11").toString()
 		if (test8 !== "Invalid Date") {ver8 = xOMG}
-		rec(8,"Invalid Date", "1557650", ver8, performance.now()-t8)
+		rec(8,"Invalid Date", "1557650", ver8, performance.now()-t8, "ex")
 
 		// 1515318: 63 and lower = NaN, 64+ = -2011
 		let t7 = performance.now(), ver7 = xNC
