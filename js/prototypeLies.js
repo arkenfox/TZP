@@ -222,7 +222,7 @@ function outputPrototypeLies() {
 			// "prototype" in function should not exist
 			const getPrototypeInFunctionLie = apiFunction => 'prototype' in apiFunction
 		
-			// "arguments", "caller", "prototype", "toString"  should not exist in descriptor
+			// "arguments", "caller", "prototype", "toString" should not exist in descriptor
 			const getDescriptorLie = apiFunction => {
 				const hasInvalidDescriptor = (
 					Object.getOwnPropertyDescriptor(apiFunction, 'arguments') ||
@@ -406,8 +406,7 @@ function outputPrototypeLies() {
 				)
 				return (hasRangeError || hasInternalError) && !(chromeLie || firefoxLie) 
 			}
-		
-		
+
 			const getTooMuchRecursionLie = ({ apiFunction, method = 'setPrototypeOf' }) => {
 				const nativeProto = Object.getPrototypeOf(apiFunction)
 				const proxy = new Proxy(apiFunction, {})
@@ -459,7 +458,7 @@ function outputPrototypeLies() {
 							randomId in apiFunction
 							return false
 						} catch (error) {
-							return true  // failed at Error 
+							return true // failed at Error 
 						}
 					}
 				} catch (error) {
