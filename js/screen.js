@@ -143,15 +143,10 @@ function get_color() {
 	function get_pixeldepth(name) {
 		let isLies = false
 		try {
-			if (runSE) {
-				runDEP = false; abc = def
-			} else if (runSL) {
-				runDEP = false; r1 = "24"
-			} else if (runDEP) {
-				r1 = lstDEP[intDEP]
-				console.log("SIM #"+ intDEP, name, r1)
-			} else {
-				r1 = screen.pixelDepth
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r1 = "24"
+			} else if (runDEP) {r1 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r1)
+			} else {r1 = screen.pixelDepth
 			}
 		} catch(e) {
 			r1 = zB0; log_error("screen: pixelDepth", e.name, e.message)
@@ -179,15 +174,10 @@ function get_color() {
 	function get_colordepth(name) {
 		let isLies = false, r2
 		try {
-			if (runSE) {
-				runDEP = false; abc = def
-			} else if (runSL) {
-				runDEP = false; r2 = "24"
-			} else if (runDEP) {
-				r2 = lstDEP[intDEP]
-				console.log("SIM #"+ intDEP, name, r2)
-			} else {
-				r2 = screen.colorDepth
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r2 = "24"
+			} else if (runDEP) {r2 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r2)
+			} else {r2 = screen.colorDepth
 			}
 		} catch(e) {
 			r2 = zB0; log_error("screen: colorDepth", e.name, e.message)
@@ -215,15 +205,10 @@ function get_color() {
 	function get_mm_color(name) {
 		let isLies = false, r3, isBypass = false
 		let v3 = getElementProp("#cssC","content",":after")
-
 		try {
-			if (runSE) {
-				runCLR = false; abc = def
-			} else if (runSL) {
-				runCLR = false; r3 = "8"
-			} else if (runCLR) {
-				r3 = lstCLR[intCLR]
-				console.log("SIM #"+ intCLR, name, r3)
+			if (runSE) {runCLR = false; abc = def
+			} else if (runSL) {runCLR = false; r3 = "8"
+			} else if (runCLR) {r3 = lstCLR[intCLR]; console.log("SIM #"+ intCLR, name, r3)
 			} else {
 				r3 = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
 					return i
@@ -233,7 +218,6 @@ function get_color() {
 			r3 = zB0; log_error("screen: matchmedia_color", e.name, e.message)
 		}
 		r3 = cleanFn(r3)
-
 		// bypass
 		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
 		// lies
@@ -243,7 +227,6 @@ function get_color() {
 			} else if (r3 < 2) {isLies = true}
 		}
 		if (!isLies) {v3 = r3 == zB0 ? zB0 : r3} // don't record blocked if no lies
-
 		// record
 		if (isLies) {
 			// zBO can't get in here unless we can bypass
@@ -279,24 +262,21 @@ function get_errors() {
 			"var x = @", // changes FF84`
 			"[...undefined].length", // changes with error_fix
 		]
-		for (let i = 0; i < tests.length; i++) {
-			try {
-				newFn(tests[i])
-			} catch(e) {
-				res.push(i +": "+ e.name +": "+ e.message)
-			}
+		for (const t of tests) {
+			// ToDo: don't use newFn
+			try {newFn(t)} catch(e) {res.push(e.name +": "+ e.message)}
 		}
+		if (runSN) {res[0] = res[0] + " [sim new]"}
 		sDetail[sName] = res
 		let hash = sha1(res.join(), "feature errors")
-		// notation: 74+: 1259822: error_message_fix: codes 1=false 2=true
+		// notation: 74+: 1259822: error_message_fix
 		let tmp = hash.substring(0,8), color = "3"
 		if (isFF) {
-			let fix = " fixed" // FF74+
-			if (tmp == "186ecb6f") {note = "FF84+"
-			} else if (tmp == "d95920fd") {note = "FF84+"+ fix
-			} else if (tmp == "6551b4dc") {note = "FF83 or lower" // tested FF52+: TZP does not run in FF51 or lower
-			} else if (tmp == "cce766f4") {note = "FF74-83"+ fix
-			} else if (isFFLegacy) {note = "FF59 or lower" // just in case
+			let fix = " error_fix" // FF74+
+			if (tmp == "42cb98ee") {note = "FF84+"
+			} else if (tmp == "a81d6825") {note = "FF84+"+ fix
+			} else if (tmp == "378e21f1") {note = "FF83 or lower" // tested FF52+: TZP does not run in FF51 or lower
+			} else if (tmp == "0e3cedfc") {note = "FF74-83"+ fix
 			} else {note = "NEW"; color = "bad"
 			}
 		}
@@ -2361,6 +2341,25 @@ function get_zoom(runtype) {
 		}
 		jsZoomOriginal = jsZoom // keep any possible entropy
 		jsZoom = Math.round(jsZoom)
+
+		// visualViewport scale
+		let vvScale
+		try {
+			vvScale = visualViewport.scale
+		} catch(e) {
+			if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
+				vvScale = zNA
+			} else {
+				vvScale = zB0
+				if (gRun) {log_error("screen: visualViewport scale", e.name, e.message)}
+			}
+		}
+		cleanFn(vvScale)
+		// ToDo: lies: if not blocked or n/a
+		//if ("number" !== typeof vvScale) { vvLies = true }
+		dom.vvScale.innerHTML = vvScale
+
+
 		// fixup some numbers
 		//console.debug("zoom", jsZoom)
 		if (jsZoom !== 100) {
