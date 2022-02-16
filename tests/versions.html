@@ -54,7 +54,7 @@
 		<tr><td colspan="4"><hr></td><td></td></tr>
 		<tr><td></td><td colspan="4"><span class="s3">TZP</span><span id="perftzp" class="c mono spaces"></span></td></tr>
 		<tr><td></td>
-			<td class="c mono spaces" id="tzp1"></td>
+			<td class="c mono spaces" id="tzp1" style="vertical-align: top;"></td>
 			<td class="c mono spaces" id="tzp2" style="vertical-align: top;"></td>
 			<td class="c mono spaces" id="tzp3" style="vertical-align: top;"></td>
 			<td></td>
@@ -65,7 +65,7 @@
 		<tr><td colspan="4"><hr></td><td></td></tr>
 		<tr><td></td><td colspan="4"><span class="s3">OTHER</span><span id="perfother" class="c mono spaces"></span></td></tr>
 		<tr><td></td>
-			<td class="c mono spaces" id="other1"></td>
+			<td class="c mono spaces" id="other1" style="vertical-align: top;"></td>
 			<td class="c mono spaces" id="other2" style="vertical-align: top;"></td>
 			<td class="c mono spaces" id="other3" style="vertical-align: top;"></td>
 			<td></td>
@@ -144,7 +144,7 @@ function outputVersion() {
 			if (note == "<" || note == ">") {highlow = true}
 			// version
 			if (Number.isInteger(id * 1)) {
-				if (highlow) {id = note +" "+ id}
+				if (highlow) {id = note + id}
 				if (id !== prevV) {id = s3 + id.padStart(3) + sc} else {id = "".padStart(3)}
 			}
 			// extra
@@ -201,24 +201,38 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 40, oTZP = {}
+	let countTZP = 0, expectTZP = 39, maxVer = 98, oTZP = {}
 	function run_tzp() {
 		// start global timer
+		let myVersion, myPerf
 		gTZP = performance.now()
 		// record
 		function rec(order, version, bug, result, perf, note = "") {
 			if (result === true) {result = xS
 			} else if (result === false || result === undefined || result == "") {result = xF}
+			// get yourVersion
+			if (isFF && myVersion == undefined) {
+				if (result == xS) {
+					myVersion = order == 500 ? "59 or lower" : (version == maxVer ? version + "+" : version)
+					myPerf = Math.round((performance.now() - gTZP)) +" ms"
+				}
+			}
 			perf = Math.round(perf)
 			oTZP[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
 			countTZP++
 			if (countTZP == expectTZP) {
-				dom.perftzp = "".padStart(3) + expectTZP +" tests | "+ Math.round((performance.now() - gTZP)) +" ms"
+				dom.perftzp.innerHTML = "".padStart(3) + expectTZP +" tests | "+ Math.round((performance.now() - gTZP)) +" ms"
+					+ (isFF ? " "+ s14 + " [result: FF"+ myVersion +" | "+ myPerf +"]"+ sc : "")
 				output("tzp")
 			} else if (countTZP > expectTZP) {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// < 60 : 1436659
+		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
+		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
+
 		// 98: 1709790
 		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
 		rec(98, 98, "1709790", ver98, performance.now()-t98)
@@ -289,6 +303,10 @@ function outputVersion() {
 		// 87: 1688335
 		let t87 = performance.now(), ver87 = (undefined === console.length)
 		rec(87, 87, "1688335", ver87, performance.now()-t87)
+
+		// 86: 1654116 shipped
+		let t86 = performance.now(), ver86 = ("function" === typeof Intl.DisplayNames)
+		rec(86, 86, "1654116", ver86, performance.now()-t86)
 
 		// 83: 1665252: legacy check: toSource (74+): FF55- false positive
 		let t83 = performance.now(), ver83 = ("undefined" === typeof Object.toSource
@@ -394,21 +412,10 @@ function outputVersion() {
 		let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
 		rec(60, 60, "1436659", ver60, performance.now()-t60)
 
-		// 59: 1336400
-		let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
-		rec(59, 59, "1336400", ver59, performance.now()-t59)
-
-		// 58: 1403318
-		let t58 = performance.now(), ver58 = ("function" == typeof Intl.PluralRules)
-		rec(58, 58, "1403318", ver58, performance.now()-t58)
-
-		// 57: 1378342
-		let t57 = performance.now(), ver57 = ("function" === typeof AbortSignal)
-		rec(57, 57, "1378342", ver57, performance.now()-t57)
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 50, oOther = {}
+	let countOther = 0, expectOther = 53, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -768,10 +775,22 @@ function outputVersion() {
 		try {let test61a = (' a').trimStart(); ver61 = xS} catch(e) {}
 		rec(61, 61, "1434007", ver61, performance.now()-t61)
 
+		// 59b: 1336400
+		let t59b = performance.now(), ver59b = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
+		rec(59.1, 59, "1336400", ver59b, performance.now()-t59b)
+
 		// 59: 1405993
 		let t59 = performance.now(), ver59
 		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
 		rec(59, 59, "1405993", ver59, performance.now()-t59)
+
+		// 58: 1403318
+		let t58 = performance.now(), ver58 = ("function" == typeof Intl.PluralRules)
+		rec(58, 58, "1403318", ver58, performance.now()-t58)
+
+		// 57: 1378342
+		let t57 = performance.now(), ver57 = ("function" === typeof AbortSignal)
+		rec(57, 57, "1378342", ver57, performance.now()-t57)
 
 		// 55b: 1351795
 		let t55b = performance.now(), ver55b = ("undefined" === typeof console.timeline)
