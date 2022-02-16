@@ -46,7 +46,7 @@
 				&nbsp <b><span class='s4'> &#x2715 </span></b> &nbsp error
 				&nbsp <b> &#x2715 </b> &nbsp n/a &nbsp
 				&nbsp <b><span class='s3'> d </span></b> &nbsp dom
-				&nbsp <b><span class='s3'> p </span></b> &nbsp pref [fast]
+				&nbsp <b><span class='s3'> p </span></b> &nbsp pref
 				&nbsp <b><span class='s14'> ex | fb </span></b> &nbsp extension | fallback
 			</span>
 		</td></tr>
@@ -272,8 +272,9 @@ function outputVersion() {
 		rec(91.1, 91, "1717072", ver91p, performance.now()-t91p, "p")
 
 		// 91: 1714933: legacy perf: toSource (74+): FF70- very slow
-		let t91 = performance.now(), ver91 = ("undefined" === typeof Object.toSource
-			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())
+		let t91 = performance.now(), ver91
+		try {ver91 = ("undefined" === typeof Object.toSource
+			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 		rec(91, 91, "1714933", ver91, performance.now()-t91)
 
 		// 89: 1684316: legacy check: FF64- CountQueuingStrategy
@@ -749,40 +750,29 @@ function outputVersion() {
 		}
 		rec(68, 68, "1550949", ver68, performance.now()-t68)
 
-		// 66
-			// ext fuckery: JSShelter = xB
-		let t66 = performance.now(), ver66
-		try {
-			let txt = new TextEncoder(), utf8 = new Uint8Array(1)
-			let test66 = txt.encodeInto("a", utf8)
-			ver66 = xS
-		} catch(e) {
-			if (e.message !== "txt.encodeInto is not a function") {
-				debug.push(" 66 "+ e.name +" : "+ e.message)
-				ver66 = xB
-			}
-		}
-		rec(66, 66, "", ver66, performance.now()-t66, "ext")
+		// 66: 1514664
+			// ext fuckery: JSShelter
+		let t66 = performance.now(), ver66 = ("function" === typeof TextEncoder.prototype.encodeInto)
+		rec(66, 66, "1514664", ver66, performance.now()-t66, "ext")
 
-		// 65b
+		// 65b: 1499026
 		let t65b = performance.now(), ver65b
 		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
-		rec(65.1, 65, "", ver65b, performance.now()-t65b)
+		rec(65.1, 65, "1499026", ver65b, performance.now()-t65b)
 
-		// 65a
-		let t65a = performance.now(), ver65a
-		try {let test65a = new Intl.RelativeTimeFormat("en",{style: "long"}); ver65a = xS} catch(e) {}
-		rec(65, 65, "", ver65a, performance.now()-t65a)
+		// 65a: 1504334
+		let t65a = performance.now(), ver65a = ("function" === typeof Intl.RelativeTimeFormat)
+		rec(65, 65, "1504334", ver65a, performance.now()-t65a)
 		
 		// 61: 1434007
 		let t61 = performance.now(), ver61
 		try {let test61a = (' a').trimStart(); ver61 = xS} catch(e) {}
 		rec(61, 61, "1434007", ver61, performance.now()-t61)
 
-		// 59a
+		// 59: 1405993
 		let t59 = performance.now(), ver59
 		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
-		rec(59, 59, "", ver59, performance.now()-t59)
+		rec(59, 59, "1405993", ver59, performance.now()-t59)
 
 		// 55b: 1351795
 		let t55b = performance.now(), ver55b = ("undefined" === typeof console.timeline)
