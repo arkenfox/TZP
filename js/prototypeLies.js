@@ -530,6 +530,8 @@ function outputPrototypeLies() {
 				if (detectProxies) {
 					lies = {
 						...lies,
+			// ^ FF52: SyntaxError: invalid property id
+			// ^ FF53-54: SyntaxError: expected property name, got '...'
 						// Advanced Proxy Detection
 						[`s: failed at too much recursion __proto__ error`]: getChainCycleLie({ apiFunction, method: '__proto__' }),
 						[`t: failed at chain cycle error`]: getTooMuchRecursionLie({ apiFunction }),
