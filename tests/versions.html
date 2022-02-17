@@ -140,6 +140,8 @@ function outputVersion() {
 				perf = results[i].split("~")[3],
 				note = results[i].split("~")[4],
 				highlow = false
+			// round perf
+			perf = Math.round(perf*1)
 			// pigyback fastpath parameter
 			if (note == "<" || note == ">") {highlow = true}
 			// version
@@ -201,28 +203,39 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 39, maxVer = 98, oTZP = {}
+	let countTZP = 0, expectTZP = 43, maxVer = 98, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
-		let myVersion, myPerf
 		gTZP = performance.now()
 		// record
 		function rec(order, version, bug, result, perf, note = "") {
-			if (result === true) {result = xS
+			// do as little as possible to not affect perf
+			if (result === true) {
+				result = xS
+				oSuccess[order] = version +"~"+ (performance.now() - gTZP) +" ms"
 			} else if (result === false || result === undefined || result == "") {result = xF}
-			// get yourVersion
-			if (isFF && myVersion == undefined) {
-				if (result == xS) {
-					myVersion = order == 500 ? "59 or lower" : (version == maxVer ? version + "+" : version)
-					myPerf = Math.round((performance.now() - gTZP)) +" ms"
-				}
-			}
-			perf = Math.round(perf)
 			oTZP[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
 			countTZP++
+			// now do stuff after we have finished
 			if (countTZP == expectTZP) {
-				dom.perftzp.innerHTML = "".padStart(3) + expectTZP +" tests | "+ Math.round((performance.now() - gTZP)) +" ms"
-					+ (isFF ? " "+ s14 + " [result: FF"+ myVersion +" | "+ myPerf +"]"+ sc : "")
+				let totalPerf = Math.round((performance.now() - gTZP))
+				let strSuccess = ""
+				if (isFF) {
+					//console.debug(oSuccess)
+					let results = []
+					const names = Object.keys(oSuccess).sort((a,b) => b-a)
+					for (const k of names) {results.push(k +"~"+ oSuccess[k])}
+					if (results.length) {
+						//console.debug(results)
+						let myOrder = results[0].split("~")[0],
+							myVer = results[0].split("~")[1],
+							myPerf = results[0].split("~")[2]
+						if (myOrder == "500") {myVer = "59 or lower"}
+						if (myVer == maxVer) {myVer += "+"}
+						strSuccess = " "+ s14 + " [result: FF"+ myVer +" | "+ myPerf +"]"+ sc
+					}
+				}
+				dom.perftzp.innerHTML = "".padStart(3) + expectTZP +" tests | "+ totalPerf +" ms" + strSuccess
 				output("tzp")
 			} else if (countTZP > expectTZP) {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
@@ -262,7 +275,7 @@ function outputVersion() {
 			let w95 = dom.test95a.offsetWidth, h95 = dom.test95b.offsetWidth
 			let test95 = w95/h95
 			debug.push(" 95 1674204 : "+ w95 +"/"+ h95 +" = " +test95)
-			if (test95 > 0.4 && test95 < 0.6) {ver95 = xS}
+			ver95 = (test95 > 0.4 && test95 < 0.6)
 		} catch(e) {
 			debug.push(" 95 1674204 : "+ e.name +": "+ e.message)
 			ver95 = xB
@@ -291,6 +304,10 @@ function outputVersion() {
 			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
 		rec(91, 91, "1714933", ver91, performance.now()-t91)
 
+		// 90: 1681371 shipped
+		let t90 = performance.now(), ver90 = ("function" == typeof Array.prototype.at)
+		rec(90, 90, "1681371", ver90, performance.now()-t90)
+
 		// 89: 1684316: legacy check: FF64- CountQueuingStrategy
 		let t89 = performance.now(), ver89 = ("function" === typeof CountQueuingStrategy
 			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark"))
@@ -308,10 +325,34 @@ function outputVersion() {
 		let t86 = performance.now(), ver86 = ("function" === typeof Intl.DisplayNames)
 		rec(86, 86, "1654116", ver86, performance.now()-t86)
 
+		// 85: 1675240
+			// 85+: RegExp.prototype.global getter called on non-RegExp object: string
+			// 84-: get global method called on incompatible string
+		let t85 = performance.now(), ver85
+		try {
+			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+		} catch(e) {
+			ver85 = (e.message.length == 66)
+		}
+		rec(85, 85, "1675240", ver85, performance.now()-t85)
+
+		// 84: 1673440
+			// 84+: illegal character U+0040
+			// 83-: illegal character
+		let t84 = performance.now(), ver84
+		try {newFn("var x = @")} catch(e) {ver84 = (e.message.length == 24)}
+		rec(84, 84, "1673440", ver84, performance.now()-t84)
+
 		// 83: 1665252: legacy check: toSource (74+): FF55- false positive
 		let t83 = performance.now(), ver83 = ("undefined" === typeof Object.toSource
 			&& !window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest"))
 		rec(83, 83, "1665252", ver83, performance.now()-t83)
+
+		// 82: 1655947
+			// ext fuckery: chameleon
+		let t82 = performance.now(), ver82
+		try {ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT"))} catch(e) {ver82 = xB}
+		rec(82, 82, "1655947", ver82, performance.now()-t82, "ex")
 
 		// 81: 1650607: legacy check: toSource (74+): 52 false positive
 		let t81 = performance.now(), ver81 = ("undefined" === typeof Object.toSource
@@ -368,7 +409,7 @@ function outputVersion() {
 
 		// 70: 1435818: fallback
 		let t70 = performance.now(), ver70
-		try {newFn("let t = 1_050"); ver70 = xS} catch(e) {}
+		try {newFn("let t = 1_050"); ver70 = true} catch(e) {}
 		rec(70, 70, "1435818", ver70, performance.now()-t70, "fb")
 
 		// 69: 1557121
@@ -415,7 +456,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 53, oOther = {}
+	let countOther = 0, expectOther = 50, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -423,7 +464,6 @@ function outputVersion() {
 		function rec(order, version, bug, result, perf, note = "") {
 			if (result === true) {result = xS
 			} else if (result === false || result === undefined) {result = xF}
-			perf = Math.round(perf)
 			oOther[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
 			countOther++
 			if (countOther == expectOther) {
@@ -440,7 +480,7 @@ function outputVersion() {
 		try {
 			//let date96 = 
 			let test96 = new Date(Date.UTC(2012,12-1,6,12,0,0)).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
-			if (test96 == "2012/12/6 中国标准时间 20:00:00") {ver96 = xS}
+			ver96 = (test96 == "2012/12/6 中国标准时间 20:00:00")
 		} catch(e) {
 			debug.push(" 96 1738422 : "+ e.name +": "+ e.message)
 			ver96 = xB
@@ -458,7 +498,7 @@ function outputVersion() {
 		// 93a: 1328672
 		let t93a = performance.now(), ver93a
 		try {
-			if (!isNaN(new Date("1997-03-08 11:19:10-07").getTime())) {ver93a = xS}
+			ver93a = (!isNaN(new Date("1997-03-08 11:19:10-07").getTime()))
 		} catch(e) {
 			debug.push(" 93 1328672 : "+ e.name +": "+ e.message)
 			ver93a = xB
@@ -481,7 +521,7 @@ function outputVersion() {
 		let t91a = performance.now(), ver91a
 		try {
 			let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
-			ver91a = xS
+			ver91a = true
 		} catch(e) {}
 		rec(91, 91, "1710429", ver91a, performance.now()-t91a)
 
@@ -489,24 +529,18 @@ function outputVersion() {
 			// 90+: start offset of Int32Array should be a multiple of 4
 			// 89-: attempting to construct out-of-bounds TypedArray on ArrayBuffer
 		let t90b = performance.now(), ver90b
-		try {
-			let tst90b = new Int32Array(new ArrayBuffer(4096), 7)
-		} catch(e) {
-			if ((e.message).charAt(0) == "s") {ver90b = xS}
-		}
+		try {let tst90b = new Int32Array(new ArrayBuffer(4096), 7)} catch(e) {ver90b = (e.message.length == 52)}
 		rec(90.1, 90, "1520434", ver90b, performance.now()-t90b)
 
 		// 90a: 1537689
 		let t90a = performance.now(), ver90a
-		try {
-			if (dom.test90a.defaultValue == "a") {ver90a = xS}
-		} catch(e) {}
+		try {ver90a = (dom.test90a.defaultValue == "a")} catch(e) {}
 		rec(90, 90, "1537689", ver90a, performance.now()-t90a, "d")
 
 		// 89: 1703213
 		let t89 = performance.now(), ver89
 		try {
-			if ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85) {ver89 = xS}
+			ver89 = ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85)
 		} catch(e) {
 			debug.push(" 89 1703213 : "+ e.name +": "+ e.message)
 			ver89 = xB
@@ -517,80 +551,49 @@ function outputVersion() {
 			// FF88+: the escapes \8 and \9 can't be used...
 			// FF87-: no error
 		let t88 = performance.now(), ver88
-		try {newFn('"use strict" \n"\\8"')} catch(e) {ver88 = xS}
+		try {newFn('"use strict" \n"\\8"')} catch(e) {ver88 = true}
 		rec(88, 88, "1670124", ver88, performance.now()-t88)
 
 		// 87b: 944846
 		let t87b = performance.now(), ver87b
-		try {
-			ver87b = ((12345).toExponential(3) == 1.235e+4)
-		} catch(e) {}
+		try {ver87b = ((12345).toExponential(3) == 1.235e+4)} catch(e) {}
 		rec(87.1, 87, "944846", ver87b, performance.now()-t87b)
 
 		// 87a: 1676708
 		let t87a = performance.now(), ver87a
 		try {
 			let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
-			if (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT") {ver87a = xS}
+			ver87a = (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT")
 		} catch(e) {}
 		rec(87, 87, "1676708", ver87a, performance.now()-t87a)
 
 		// 86: 1685482
-			// 86+: an expression X in 'for (X of Y)' must not start with 'async of'
-			// 85-: expected '=>' on the same line after an argument list, got '['
+			// 86+: an expression X in 'for (X of Y)' must not start with 'async of' (64)
+			// 85-: expected '=>' on the same line after an argument list, got '[' (62)
 		let t86 = performance.now(), ver86
-		try {
-			newFn('for (async of [])')
-		} catch(e) {
-			if ((e.message).charAt(0) == "a") {ver86 = xS}
-		}
+		try {newFn('for (async of [])')} catch(e) {ver86 = (e.message.length == 64)}
 		rec(86,86, "1685482", ver86, performance.now()-t86)
 
-		// 85: 1675240
-			// 85+: RegExp.prototype.global getter called on non-RegExp object: string
-			// 84-: get global method called on incompatible string
-		let t85 = performance.now(), ver85
-		try {
-			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
-		} catch(e) {
-			// debug.push(" 85 1675240 : " + e.name +": "+ e.message)
-			if ((e.message).charAt(0) == "R") {ver85 = xS}
-		}
-		rec(85, 85, "1675240", ver85, performance.now()-t85)
-
-		// 84: 1673440
-		let t84 = performance.now(), ver84
-		try {
-			newFn("var x = @")
-		} catch(e) {
-			if (e.message == "illegal character U+0040") {ver84 = xS}
-		}
-		rec(84, 84, "1673440", ver84, performance.now()-t84)
+		//85 possibles? : 1445482 1670062 1635561 
+		//84 possibles? : 1645107 shipped
 
 		// 83: 1667094
 		let t83 = performance.now(), ver83
 		try {
 			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
-			ver83 = xS
+			ver83 = true
 		} catch(e) {}
 		rec(83.2, 83, "1667094", ver83, performance.now()-t83)
+
 		// 83a: 1665746: legacy check: toSource (74+): 52 false postive
 		let t83a = performance.now(), ver83a
 		try {
 			newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
 		} catch(e) {
-			if ("undefined" === typeof Object.toSource && e.message == "1 is not iterable") {ver83a = xS}
+			ver83a = ("undefined" === typeof Object.toSource && e.message == "1 is not iterable")
 			//debug.push(" 83 1665746 : " + e.name +": "+ e.message)
 		}
 		rec(83.1, 83, "1665746", ver83a, performance.now()-t83a)
-
-		// 82: 1655947
-			// ext fuckery: chameleon
-		let t82 = performance.now(), ver82
-		try {
-			ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT")) ? xS : xF
-		} catch(e) {ver82 = xB}
-		rec(82, 82, "1655947", ver82, performance.now()-t82, "ex")
 
 		// 81a: 1657437: legacy check: toSource (74+): 52 false positive
 			// this is unstable in Tor Browser: change from offscreen: use existing visible spans
@@ -603,7 +606,7 @@ function outputVersion() {
 			dom.test81a.textContent = ""
 			dom.test81b.textContent = ""
 			//console.debug(w81a, w81b)
-			if ("undefined" === typeof Object.toSource && w81a < w81b) {ver81a = xS}
+			ver81a = ("undefined" === typeof Object.toSource && w81a < w81b)
 		} catch(e) {
 			ver81a = xB
 			debug.push(" 83 1657437 : " + e.name +": "+ e.message)
@@ -617,7 +620,7 @@ function outputVersion() {
 			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
 			try {
 				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
-				if ("undefined" === typeof Object.toSource) {ver80 = xS}
+				ver80 = ("undefined" === typeof Object.toSource)
 			} catch (e) {}
 			rec(80.1, 80, "1651732", ver80, performance.now()-t80)
 		} catch(e) {
@@ -633,46 +636,44 @@ function outputVersion() {
 			// 60-65: = 4,3
 			// 66-79: = 1,4
 			//   80+: = 2,7
-			if (e.columnNumber == 7) {ver80a = xS}
+			ver80a = (e.columnNumber == 7)
 		}
 		rec(80, 80, "1559253", ver80a, performance.now()-t80a)
 
 		// 79p: 1639246 shipped: javascript.options.weakrefs = true (default)
 		let t79p = performance.now(), ver79p = ("function" === typeof WeakRef)
 		rec(79.4, 79, "1639246", ver79p, performance.now()-t79p, "p")
+
 		// 79a: 1639591 shipped (FF77 added 1629106)
-			// <79: SyntaxError expected expression, got '?'
-			// 79+: SyntaxError invalid assignment left-hand side
+			// 79+: SyntaxError invalid assignment left-hand side (33)
+			// 78-: SyntaxError expected expression, got '?' (28)
 		let t79a = performance.now(), ver79a
-		try {
-			newFn("let z = (3 ??= 3 * 3)")
-		} catch(e) {
-			if (e.message.substring(0,3) == "inv") {ver79a = xS}
-		}
+		try {newFn("let z = (3 ??= 3 * 3)")} catch(e) {ver79a = (e.message.length == 33)}
 		rec(79.3, 79, "1639591", ver79a, performance.now()-t79a)
+
 		// 79b: 1557718
 			// ext fuckery: cydec
 		let t79b = performance.now(), ver79b
 		try {
 			let test79b = new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date())
 			//debug.push(" 79 1557718 : " + test79b)
-			// 4:00 PM
-			// 12/20/2012 : FF78 or lower
 			ver79b = (test79b.charAt(test79b.length - 1) === "M")
-		} catch(e) {ver79b = xB; console.debug(e.name, e.message)}
+		} catch(e) {ver79b = xB}
 		rec(79.2, 79, "1557718", ver79b, performance.now()-t79b, "ex")
+
 		// 79: 1413504
 		let t79c = performance.now(), ver79c
 		try {
 			ver79c = ("1" !== new Intl.NumberFormat("en", {numberingSystem: "gong"}).format(1))
 		} catch(e) {ver79c = xB}
 		rec(79.1, 79, "1413504", ver79c, performance.now()-t79c)
+
 		// 79: 1644878: legacy check: toSource (74+): 52 false positive
 			// 79+: entries method called on incompatible boolean
-			// 78-: std_Map_iterator method called on incompatible boolean
+			// 78-: std_Map_iterator method called on incompatible boolean (54)
 		let t79 = performance.now(), ver79
 		try {Map.prototype.entries.call(true)} catch(e) {
-			if ("undefined" === typeof Object.toSource && (e.message).charAt(0) == "e") {ver79 = xS}
+			ver79 = ("undefined" === typeof Object.toSource && e.message.length == 45)
 		}
 		rec(79, 79, "1644878", ver79, performance.now()-t79)
 
@@ -680,67 +681,73 @@ function outputVersion() {
 		let t78a = performance.now(), ver78a
 		try {
 			let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
-			ver78a = xS
+			ver78a = true
 		} catch(e) {}
 		rec(78.2, 78, "1589095", ver78a, performance.now()-t78a)
+
 		// 78b: 1634135
 		let t78b = performance.now(), ver78b
-		try {
-			let regex78b = new RegExp('b')
-			if (regex78b.dotAll == false) {ver78b = xS}
-		} catch(e) {ver78b = xB}
+		try {let regex78b = new RegExp('b'); ver78b = (regex78b.dotAll == false)} catch(e) {ver78b = xB}
 		rec(78.1, 78, "1634135", ver78b, performance.now()-t78b)
+
 		// 78c: 1633836
 		let t78c = performance.now(), ver78c
-		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = xS} catch(e) {}
+		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = true} catch(e) {}
 		rec(78, 78, "1633836", ver78c, performance.now()-t78c)
 
 		// 77: 1627285
 		let t77 = performance.now(), ver77 = (isNaN(new DOMRect(0, 0, NaN, NaN).top))
 		rec(77.1, 77, "1627285", ver77, performance.now()-t77)
+
 		// 77a: 1608168
 		let t77a = performance.now(), ver77a
-		try {("aa").replaceAll("a","b"); ver77a = xS} catch(e) {}
+		try {("aa").replaceAll("a","b"); ver77a = true} catch(e) {}
 		rec(77, 77, "1608168", ver77a, performance.now()-t77a)
 
 		// 75: 1615600
+			// 75+: 2.5 can't be converted to BigInt because it isn't an integer (60)
+			// 74-: BigInt is not defined (21)
 		let t75 = performance.now(), ver75
-		try {let test75 = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {ver75 = xS}}
+		try {let test75 = BigInt(2.5)} catch(e) {ver75 = (e.message.length == 60)}
 		rec(75, 75, "1615600", ver75, performance.now()-t75)
 
 		// 74: 1605835
 		let t74 = performance.now(), ver74
-		try {newFn("let t = ({ 1n: 1 })"); ver74 = xS} catch(e) {}
+		try {newFn("let t = ({ 1n: 1 })"); ver74 = true} catch(e) {}
 		rec(74, 74, "1605835", ver74, performance.now()-t74)
 
 		// 73: 1605803
 		let t73 = performance.now(), ver73
-		try {if (getComputedStyle(dom.test73).content == "normal") {ver73 = xS}} catch(e) {}
+		try {ver73 = (getComputedStyle(dom.test73).content == "normal")} catch(e) {}
 		rec(73, 73, "1605803", ver73, performance.now()-t73, "d")
 
 		// 72a: 1441976
 		let t72a = performance.now(), ver72a
-		try {if (BatteryManager in window) {}} catch(e) {ver72a = xS}
+		try {if (BatteryManager in window) {}} catch(e) {ver72a = true}
 		rec(72.2, 72, "1441976", ver72a, performance.now()-t72a)
+
 		// 72b: 1566141
 		let t72b = performance.now(), ver72b
-		try {let test72 = (newFn("null ?? 'foo'")); ver72b = xS} catch(e) {}
+		try {let test72 = (newFn("null ?? 'foo'")); ver72b = true} catch(e) {}
 		rec(72.1, 72, "1566141", ver72b, performance.now()-t72b)
+
 		// 72c: 1589072
+			// 72+: underscore can appear only between digits, not after the last digit in a number (79)
+			// 71-: identifier starts immediately after numeric literal (51)
 		let t72c = performance.now(), ver72c
-		try {	let test72c = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders" ) {ver72c = xS}}
+		try {let test72c = newFn('let a = 100_00_;')} catch(e) {ver72c = (e.message.length == 79)}
 		rec(72, 72, "1589072", ver72c, performance.now()-t72c)
 
 		// 71: 1575980 [charAt[17]]
 			// FF71+: StaticRange requires at least 1 argument, but only 0 were passed
 			// ^ error_fix: StaticRange constructor: At least 1 argument required, but only 0 passed
 			// FF70-: Illegal constructor
-			// FF68-: StaticRange is notdefined
+			// FF68-: StaticRange is not defined
 		let t71 = performance.now(), ver71
 		try {
 			let test71 = new StaticRange()
 		} catch(e) {
-			if ("function" === typeof StaticRange && (e.message).charAt(0) == "S") {ver71 = xS}
+			ver71 = ("function" === typeof StaticRange && (e.message).charAt(0) == "S")
 			// ^ legacy check: 68- StaticRange
 		}
 		rec(71, 71, "1575980", ver71, performance.now()-t71)
@@ -752,8 +759,8 @@ function outputVersion() {
 		// 68: 1550949
 		let t68 = performance.now(), ver68
 		try {ver68 = isNaN(Date.parse("T00:00:00Z"))} catch(e) {
-			ver68 = xB
 			debug.push(" 68 "+ e.name +" : "+ e.message)
+			ver68 = xB
 		}
 		rec(68, 68, "1550949", ver68, performance.now()-t68)
 
@@ -772,7 +779,7 @@ function outputVersion() {
 		
 		// 61: 1434007
 		let t61 = performance.now(), ver61
-		try {let test61a = (' a').trimStart(); ver61 = xS} catch(e) {}
+		try {let test61a = (' a').trimStart(); ver61 = true} catch(e) {}
 		rec(61, 61, "1434007", ver61, performance.now()-t61)
 
 		// 59b: 1336400
@@ -808,7 +815,7 @@ function outputVersion() {
 				} else if (list55.slice()[maxIndex] !== 'b') {
 				} else if (list55.slice(maxIndex - 1).length !== 2) {
 				} else {
-					ver55 = xS
+					ver55 = true
 				}
 			} catch(e) {}
 			rec(55, 55, "1354974", ver55, performance.now()-t55)
@@ -820,18 +827,18 @@ function outputVersion() {
 		let t54 = performance.now(), ver54
 		try {
 			let test54 = [Date.UTC(), Date.UTC(1)]
-			if (isNaN(test54[1]) == false) {ver54 = xS}
+			ver54 = (isNaN(test54[1]) == false)
 		} catch(e) {}
 		rec(54, 54, "1050755", ver54, performance.now()-t54)
 
 		// 53: 1317307
 		let t53 = performance.now(), ver53
-		try {Object.defineProperty([], "length", {get(){}})} catch(e) {if (e.name == "TypeError") {ver53 = xS}}
+		try {Object.defineProperty([], "length", {get(){}})} catch(e) {if (e.name == "TypeError") {ver53 = true}}
 		rec(53, 53, "1317307", ver53, performance.now()-t53)
 
 		// 52: 837961
 		let t52 = performance.now(), ver52
-		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = xS} catch(e) {}
+		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = true} catch(e) {}
 		rec(52, 52, "837961", ver52, performance.now()-t52)
 	}
 	run_other()
