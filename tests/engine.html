@@ -1339,7 +1339,9 @@ function get_window_moz(num) {
 	}
 }
 
-let is59 = false,
+let isRFP56plus = false,
+	isWebkit = false,
+	is59 = false,
 	is60 = false,
 	is61 = false,
 	is64 = false,
@@ -1352,9 +1354,7 @@ let is59 = false,
 	is93 = false,
 	is95 = false,
 	is96 = false,
-	is97 = false,
-	isRFP56plus = false,
-	isWebkit = false
+	is97 = false
 
 // webkit
 if ("chrome" in window || isFF) {} else {isWebkit = true}
@@ -1362,64 +1362,29 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
-	// 97
-	try {
-		let controller97 = new AbortController(); let signal97 = controller97.signal; signal97.throwIfAborted()
-		is97 = true
-	} catch(e) {}
-	// 96
-	try {
-		if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {is96 = true} else {}
-	} catch(e) {}
-	// 95
+	is97 = ("function" === typeof AbortSignal
+		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
+	try {is96 = ("sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {}
 	try {
 		let test95 = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-		if (test95 > 0.4 && test95 < 0.6) {is95 = true}
+		is95 = (test95 > 0.4 && test95 < 0.6)
 	} catch(e) {}
-	// 93
 	is93 = ("function" === typeof self.reportError)
-	// 86
-	try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {is86 = true}}
-	// 85
+	try {newFn('for (async of [])')} catch(e) {is86 = (e.message.length == 64)}
 	try {
 		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
 	} catch(e) {
-		let test85 = (e.message).substring(0,3)
-		if (test85 == "Reg") {is85 = true}
+		is85 = (e.message.length == 66)
 	}
-	// 78
-	try {
-		let regex78b = new RegExp('b')
-		if (regex78b.dotAll == false) {is78 = true}
-	} catch(e) {}
-	// 72
-	try {
-		let test72 = newFn('let a = 100_00_;')
-	} catch(e) {
-		let test72a = (e.message).substring(0,6)
-		if (test72a == "unders") {is72 = true}
-	}
-	// 70
-	try {newFn("let t = 1_050"); is70 = true} catch(e) {}
-	// 65
-	try {
-		let test65 = Intl.DateTimeFormat.supportedLocalesOf("ia")
-		if (test65.length) {is65 = true}
-	} catch(e) {}
-	// 64
-	try {if (window.screenLeft === undefined) {} else {is64 = true}} catch(e) {}
-	// 61
-	try {newFn("let test61 = (' a').trimStart()"); is61 = true} catch(e) {}
-	// 60
-	try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-		|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-			"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-		is60 = true
-	} catch(e) {}
-	// 59
-	try {
-		if (Intl.DateTimeFormat.supportedLocalesOf("tt").join() == "tt") {is59 = true}
-	} catch(e) {}
+	is78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
+	is72 = ("boolean" === typeof self.crossOriginIsolated)
+	is70 = ("function" === typeof Intl.RelativeTimeFormat
+		&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+	is65 = (1 === DataView.length)
+	is64 = ("number" === typeof window.screenTop)
+	is61 = ("object" === typeof CSS)
+	is60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
+	is59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
 }
 
 let results = [],

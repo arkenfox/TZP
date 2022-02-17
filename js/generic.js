@@ -1,7 +1,7 @@
 'use strict';
 dom = getUniqueElements()
 
-let is95b = ""
+let is95 = false
 
 /*** GENERIC ***/
 
@@ -285,10 +285,11 @@ const get_isEngine = () => new Promise(resolve => {
 			default_ff_red = ""
 			let items = document.getElementsByClassName("group")
 			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+		} else {
+			isFFLegacy = ("function" !== typeof Animation.prototype.updatePlaybackRate)
+			log_perf("isFFLegacy [global]",""+ isFFLegacy,"ignore")
 		}
 		log_perf("final status [isFF]",""+ isFF,"ignore")
-		isFFLegacy = ("function" !== typeof Animation.prototype.updatePlaybackRate)
-		log_perf("isFFLegacy [global]",""+ isFFLegacy,"ignore")
 	}
 	// do math
 	function cbrt(x) {
@@ -341,7 +342,7 @@ const get_isEngine = () => new Promise(resolve => {
 						// catch something PM did that ESR52 didn't
 						// note: this would only apply to later v28 releases
 						try {
-							newFn("let test61 = (' a').trimStart()")
+							let test61 = (' a').trimStart()
 							isEngine = "goanna"
 						} catch(e) {}
 					}
@@ -473,7 +474,7 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
-		// no good: we haven't got isRFP yet and math is not viable anymore
+		// math test is no longer viable due to RFP
 		tryharder()
 	}
 })
@@ -620,196 +621,73 @@ const get_isVer = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	function output(verNo) {
 		isVer = verNo
-		if (verNo == 59) {verNo += " or lower"
+		if (verNo < 60) {verNo += " or lower"
 		} else if (verNo == 98) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
-	// jump: speed up ESR, bypass slow 94
-	if (isFFLegacy) {output(59)} else {
-		if ("function" === typeof self.structuredClone) {start()} else {v93()}
-	}
-	// cascade
-	function start() { // 98: 1709790
-		try {
-			if (dom.test98.outerText === undefined) {v97()} else {output(98)}
-		} catch(e) {v97()}
-	}
-	function v97() { // 97: 1745372
-		try {
-			let controller = new AbortController(); let signal = controller.signal; signal.throwIfAborted(); output(97)
-		} catch(e) {v96()}
-	}
-	function v96() { // 96:1738422
-		try {
-			if (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc") {output(96)} else {v95()}
-		} catch(e) {v95()}
-	}
-	function v95() { // 95a:1723674
-		// fast path: dom.crypto.randomUUID.enabled default true
-		if ("function" === typeof crypto.randomUUID) {output(95)} else {v95b()}
-	}
-	function v95b() { // 95b:1674204: slow
-		if (is95b !== "") {
-			if (is95b > 0.4 && is95b < 0.6) {output(95)} else {v94()} // fast precomputed
-		} else {
-			try {
-				let test = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-				if (test > 0.4 && test < 0.6) {output(95)} else {v94()}
-			} catch(e) {v94()}
-		}
-	}
-	function v94() { // 94:1722576
-		if ("function" === typeof self.structuredClone) {output(94)} else {v93()}
-	}
-	function v93() { //93:1722448
-		if ("function" === typeof self.reportError) {output(93)} else {v92()}
-	}
-	function v92() { //92:1721149
-		if ("function" === typeof Object.hasOwn) {output(92)} else {v91b()}
-	}
-	function v91b() { //91:1714933
-		try {
-			let t = Intl.Collator.supportedLocalesOf(["sa"], {localeMatcher: "lookup"})
-			if (t.length) {output(91)} else {v91a()}
-		} catch(e) {v91a()}
-	}
-	function v91a() { //91:1710429
-		try {
-			let t = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date())
-			output(91)
-		} catch(e) {v90()}
-	}
-	function v90() { //90:1520434
-		try {
-			var share = new ArrayBuffer(4096)
-			let t = new Int32Array(share, 7)
-		} catch(e) {
-			if (e.message.substr(0,1) == "s") {output(90)} else {v89()}
-		}
-	}
-	function v89() { //89:1703213
-		try {
-			let x = dom.ctrl89.offsetHeight, y = dom.test89.offsetHeight
-			if (x/y > 0.85) {output(89)} else {v88()}
-		} catch(e) {v88()}
-	}
-	function v88() { //88:1670124
-		try {newFn('function invalid () { "use strict" \n ' + '"\\8"' + '}'); v87()
-		} catch(e) {if (e.message.substr(13,5) == "8 and") {output(88)} else {v87()}}
-	}
-	function v87() { //87:1688335
-		try {if (console.length === undefined) {output(87)} else {v86()}} catch(e) {v86()}
-	}
-	function v86() { //86:1685482
-		try {newFn('for (async of [])')} catch(e) {if ((e.message).substring(0,2) == "an") {output(86)} else {v85()}}
-	}
-	function v85() { //85:1675240
-		try {
-			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
-		} catch(e) {
-			if ((e.message).substring(0,3) == "Reg") {output(85)} else {v84()}
-		}
-	}
-	function v84() { //84:1673440
-		try {newFn("var x = @")} catch(e) {if (e.message == "illegal character U+0040") {output(84)} else (v83())}
-	}
-	function v83() { //83:1667094
-		try {
-			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
-			output(83)
-		} catch(e) {v82()}
-	}
-	function v82() { //82:1655947
-		try {
-			let t = ((Math.floor((Date.parse("21 Jul 20") - Date.parse("20 Jul 20"))))/86400000)
-			if (t == 1) {output(82)} else {v81()}
-		} catch(e) {v81()}
-	}
-	function v81() { //81:1650607
-		try {let t = new File(["bits"], "a/b.txt"); if (t.name == "a/b.txt") {output(81)} else {v80()}} catch(e) {v80()}
-	}
-	function v80() { //80:1651732
-		try {
-			let obj = {[Symbol.toPrimitive]: () => Symbol()}
-			let proxy = (new Proxy({},{get: (obj, prop, proxy) => prop}))
-			for (let i = 0; i < 11; i++) {if (typeof proxy[obj] == 'symbol') {}}; output(80)
-		} catch(e) {v79()}
-	}
-	function v79() { //79:1644878
-		try {Map.prototype.entries.call(true)} catch(e) {if ((e.message).substring(0,3) == "ent") {output(79)} else {v78()}}
-	}
-	function v78() { //78:1634135
-		try {let t = new RegExp('b'); if (t.dotAll == false) {output(78)} else {v78a()}} catch(e) {v78a()}
-	}
-	function v78a() { //78:1589095
-		try {let t = new Intl.ListFormat(undefined,{style:'long',type:'unit'}).format(['a','b','c']); output(78)} catch(e) {v78b()}
-	}
-	function v78b() { //78:1633836
-		try {let t = new Intl.NumberFormat(undefined, {style:"unit",unit:"percent"}).format(1/2); output(78)} catch(e) {v77()}
-	}
-	function v77() { //77:1627285
-		try {if (isNaN(new DOMRect(0, 0, NaN, NaN).top)) {output(77)} else {v76()}} catch(e) {v76()}
-	}
-	function v76() { //76:1608010
-		try {if (test76.validity.rangeOverflow) {v75()} else {output(76)}} catch(e) {v75()}
-	}
-	function v75() { //75:1615600
-		try {let t = BigInt(2.5)} catch(e) {if (e.message.substring(0,3) == "2.5") {output(75)} else {v74()}}
-	}
-	function v74() { //74:1605835
-		try {newFn("let t = ({ 1n: 1 })"); output(74)} catch(e) {v73()}
-	}
-	function v73() { //73:1605803
-		try {if (getComputedStyle(dom.test73).content == "normal") {output(73)} else {v72()}} catch(e) {v72()}
-	}
-	function v72() { //72:1589072
-		try {let t = newFn('let a = 100_00_;')} catch(e) {if (e.message.substring(0,6) == "unders") {output(72)} else {v71()}}
-	}
-	function v71() { //71:1575980
-		try {let t = new StaticRange()} catch(e) {if (e.name == "TypeError" && e.message.substring(0,4) == "Stat") {output(71)} else {v70()}}
-	}
-	function v70() { //70:1435818
-		try {newFn("let t = 1_050"); output(70)} catch(e) {v69()}
-	}
-	function v69() { //69:1558387
-		try {let t = new DOMError('a'); v68()} catch(e) {output(69)}
-	}
-	function v68() { //68:1548773
-		try {if (dom.test68.typeMustMatch === undefined) {output(68)} else {v67()}} catch(e) {v67()}
-	}
-	function v67() { //67:1531830
-		try {if (!Symbol.hasOwnProperty('matchAll')) {v66()} else {output(67)}} catch(e) {v66()}
-	}
-	function v66() { //66
-		try {let txt = new TextEncoder(), utf8 = new Uint8Array(1); let t = txt.encodeInto("a", utf8); output(66)} catch(e) {v65()}
-	}
-	function v65() { //65
-		try {let t = Intl.DateTimeFormat.supportedLocalesOf("ia")
-			if (t.length) {output(65)} else {v65a()}
-		} catch(e) {v65a()}
-	}
-	function v65a() { //65
-		try {let t = new Intl.RelativeTimeFormat("en",{style:"long"}); output(65)} catch(e) {v64()}
-	}
-	function v64() { //64
-		try {if (window.screenLeft === undefined) {v63()} else {output(64)}} catch(e) {v63()}
-	}
-	function v63() { //63
-		try {if (Symbol.for(`a`).description == "a") {output(63)} else {v62()}} catch(e) {v62()}
-	}
-	function v62() { //62
-		try {console.time("v62"); console.timeLog("v62"); console.timeEnd("v62"); output(62)} catch(e) {v61()}
-	}
-	function v61() { //61
-		try {newFn("let t = (' a').trimStart()"); output(61)} catch(e) {v60()}
-	}
-	function v60() { //60
-		try {(Object.getOwnPropertyDescriptor(Document.prototype, "body")
-			|| Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "body")).get.call((new DOMParser).parseFromString(
-				"<html xmlns='http://www.w3.org/1999/xhtml'><body/></html>","application/xhtml+xml")) !== null
-			output(60)
-		} catch(e) {output(59)}
+	output(cascade())
+
+	function cascade() {
+		if (isFFLegacy) return 59
+			// ^ we can skip < FF60 legacy checks now
+			// note: we can skip non-gecko checks: this only runs if isFF
+		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
+		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
+		if ("undefined" === typeof Object.toSource
+			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
+			// ^ legacy perf: toSource (74+): FF68- very slow
+		if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
+		if (is95) return 95 // 1674204
+			// ^ pre-computed
+		if ("function" === typeof self.structuredClone) return 94 // 1722576
+		if ("function" === typeof self.reportError) return 93 // 1722448
+		if ("function" === typeof Object.hasOwn) return 92 // 1721149
+		if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
+		try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
+		if ("function" === typeof Array.prototype.at) return 90 // 1681371
+		if ("function" === typeof CountQueuingStrategy
+			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
+			// ^ legacy check FF64- CountQueuingStrategy
+		if (":" === document.createElement("a").protocol) return 88 // 1497557
+		if (undefined === console.length) return 87 // 1688335
+		if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
+		try {newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+			} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
+			// ^ replace ?
+		try {newFn("var x = @")} catch(e) {if (e.message.length == 24) {return 84}} // 1673440
+			// ^ replace ?
+		if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
+		try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
+			// ^ ext fuckery: cydec
+		if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
+		if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
+		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
+		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
+		if (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request')) return 77 // 1536540
+		if (!test76.validity.rangeOverflow) return 76 // 1608010
+		if ("function" === typeof Intl.Locale) return 75 // 1613713
+		if ("undefined" === typeof Object.toSource) return 74 // 1565170
+		if (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames")) return 73 // 1602163
+		if ("boolean" === typeof self.crossOriginIsolated) return 72 // 1591892
+		if ("function" === typeof Promise.allSettled) return 71 // 1549176
+		if ("function" === typeof Intl.RelativeTimeFormat
+			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts) return 70 // 1473229
+			// ^ legacy check: FF64- Intl.RelativeTimeFormat
+			// ^ extension fuckery: formatToParts
+		try {newFn("let t = 1_050"); return 70} catch(e) {} // 1435818
+		if ("function" === typeof Blob.prototype.text) return 69 // 1557121
+		if (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch")) return 68 // 1548773
+		if ("function" === typeof String.prototype.matchAll) return 67 // 1531830
+		if ("function" === typeof HTMLSlotElement
+			&& "function" === typeof HTMLSlotElement.prototype.assignedElements) return 66 // 1425685
+			// ^ legacy check: FF60- HTMLSlotElement
+		if (1 === DataView.length) return 65 // 1334813
+		if ("number" === typeof window.screenTop) return 64 // 1498860
+		if ("desc" === Symbol('desc').description) return 63 // 1472170
+		if ("function" === typeof console.timeLog) return 62 // 1458466
+		if ("object" === typeof CSS) return 61 // 1455805
+		return 60 // we already tested <60
 	}
 })
 
@@ -1385,12 +1263,24 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-	// precompute slow 95b test
-	if (jsFiles.length == 1) {
-		try {
-			is95b = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-		} catch(e) {}
+
+	// pre-compute slow 95 test
+	if (jsFiles.length == 1 && isFFyes.length) {
+		// skip if not likely to be Firefox
+		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
+			// ^ do if 94+ but not 95+
+			try {
+				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
+					// but not if 96+
+					let t95; if (canPerf) {t95 = performance.now()}
+					let ratio = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+					is95 = (ratio > 0.4 && ratio < 0.6)
+					log_perf("v95 [pre-compute]",t95,"",is95)
+				}
+			} catch(e) {}
+		}
 	}
+
 	// the whole gangs here
 	if (jsFiles.length == 13) {
 		if (runSL) {isPerf = false}
@@ -1606,8 +1496,15 @@ function run_once() {
 		if (test3) {isFFyes.push(str3)} else {isFFno.push(str3)}
 	}
 	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
+
 	// get os arch while we wait
-	if (test1+test2+test3 > 1) {get_isOS64(true)} // isFF at least 2/3 is close enough
+	get_isOS64(true)
+	// cache/warm things
+	try {
+		let t80; if (canPerf) {t80 = performance.now()}
+		let warm80 = CSS2Properties.prototype.hasOwnProperty("appearance")
+		log_perf("v80 [warm]",t80,"",warm80)
+	} catch(e) {}
 }
 
 run_once()
