@@ -2287,13 +2287,13 @@ function get_zoom(runtype) {
 			} else if (mmDPI !== zB0) {
 				varDPI = mmDPI
 			}
-			if (isOS == "android") {
+			//if (isOS == "android") {
 				dom.debugB.innerHTML = "varDPI : "+ varDPI +"<br>"
 					+"cssDPI : "+ cssDPI +"<br>"
 					+" mmDPI : "+ mmDPI +"<br>"
 					+" dpi_x : "+ dpi_x +"<br>"
 					+" dpi_y : "+ dpi_y +"<br>"
-			}
+			//}
 			//console.debug("varDPI", varDPI, "cssDPI", cssDPI, "mmDPI", mmDPI, "dpi_x + y", dpi_x, dpi_y)
 
 			// bypass matchmedia lies
