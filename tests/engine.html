@@ -106,7 +106,7 @@ function fnDisplay() {
 		} else if (desc == "hr") {
 			display.push("<br><hr>")
 		} else {
-			if (match == zB0) {match = red_block; countBlock++
+			if (match == zB0) {match = yellow_block; countBlock++
 			} else if (match == "true") {match = green_tick; countTrue++
 			} else if (match == "false") {match = red_cross; countFalse++
 			} else {match = white_na; countNA++}
@@ -1372,7 +1372,7 @@ if (isFF) {
 	is93 = ("function" === typeof self.reportError)
 	try {newFn('for (async of [])')} catch(e) {is86 = (e.message.length == 64)}
 	try {
-		newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+		let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
 	} catch(e) {
 		is85 = (e.message.length == 66)
 	}
