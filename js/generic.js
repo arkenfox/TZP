@@ -263,7 +263,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 
 const get_isEngine = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let bFF = false
+	let bFF = false, hash
 	// set isFF for engine lies
 	if (isFFyes.length) {isFF = true}
 	function final_isFF() {
@@ -317,7 +317,7 @@ const get_isEngine = () => new Promise(resolve => {
 				res.push("error")
 			}
 		}
-		let hash = sha1(res.join(), "_global isEngine").substring(0,8)
+		hash = sha1(res.join(), "_global isEngine").substring(0,8)
 		if (runSL) {hash = "x"}
 		if (hash == "ede9ca53") {isEngine = "blink"
 		} else if (hash == "05513f36") {isEngine = "webkit"
@@ -328,26 +328,11 @@ const get_isEngine = () => new Promise(resolve => {
 		}
 
 		if (isEngine == "gecko") {
-			// 52: 837961
-			// only check for PM28+
-			try {
-				let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
-				// 53: 1317307
-				// eliminate FF53+
-				try {
-					newFn("Object.defineProperty([], 'length', {get(){}})")
-				} catch(e) {
-					if (e.name + e.message == "RangeErrorinvalid array length") {
-						// 61
-						// catch something PM did that ESR52 didn't
-						// note: this would only apply to later v28 releases
-						try {
-							let test61 = (' a').trimStart()
-							isEngine = "goanna"
-						} catch(e) {}
-					}
-				}
-			} catch(e) {}
+			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
+				// note: waterfox classic passes both
+			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
+				isEngine = "goanna"
+			}
 		}
 		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
 		log_perf("math [isFF]",t0,"",bFF)
@@ -360,7 +345,7 @@ const get_isEngine = () => new Promise(resolve => {
 			}
 		}
 		final_isFF()
-		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine))
+		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine +" | "+ hash))
 		return resolve()
 	} catch(e) {
 		isFFno.push("math")
@@ -372,22 +357,19 @@ const get_isEngine = () => new Promise(resolve => {
 })
 
 const get_isError = () => new Promise(resolve => {
+	// super mini test to confirm isFF
 	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		let res = [], bFF = false
-		try {newFn("alert('A)")} catch(e) {res.push(e.name +": "+ e.message)}
-		try {newFn(`null.value = 1`)} catch(e) {res.push(e.name +": "+ e.message)}
-		try {let test = newFn("let a = 1_00_;")} catch(e) {res.push(e.name +": "+ e.message)}
+		try {null.bar} catch(e) {res.push(e.message)}
+		try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
+		try {[...undefined].length} catch(e) {res.push(e.message)}
+		try {(1).toString(1000)} catch(e) {res.push(e.message)}
 		let hash = mini(res.join(), "_global isError")
-		if (hash == "a86909c8") {bFF = true //FF74+ fix on
-		} else if (hash == "78be9e0e") {bFF = true //FF72-73,FF74+ fix off
-		} else if (hash == "47bf0bb5") {bFF = true //FF70-71
-		} else if (hash == "27201347") {bFF = true //FF60-69
-		} else if (hash == "453c3df4") {bFF = true // FF52-59 / Waterfox Classic
-		} else if (hash == "bb033aa2") {bFF = true // Pale Moon / Waterfox Classic
-		}
+		if (hash == "009a449c") {bFF = true // FF52+
+		} else if (hash == "4fdb30b3") {bFF = true} //FF74+ error_fix = true
 		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
-		log_perf("errors [isFF]",t0,"",""+ bFF)
+		log_perf("errors [isFF]",t0,"", bFF +" | "+ hash)
 		return resolve()
 	} catch(e) {
 		gErrorsOnce.push("_global: isError: " + e.name +" : "+ e.message)
@@ -652,7 +634,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (":" === document.createElement("a").protocol) return 88 // 1497557
 		if (undefined === console.length) return 87 // 1688335
 		if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
-		try {newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+		try {let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
 			} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
 			// ^ replace ?
 		try {newFn("var x = @")} catch(e) {if (e.message.length == 24) {return 84}} // 1673440
@@ -1472,11 +1454,11 @@ function run_once() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	// WARM
 	try {
-		log_perf("-- start md warmup -- ",t0,"")
+		log_perf("warmup start [md]",t0,"")
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			let info = (canPerf ? Math.round(performance.now()) +" | ": "")
 				+ (gLoad ? "page load" : "global rerun")
-			log_perf("-- end md warmup -- ",t0,t99,info)
+			log_perf("warmup end [md]",t0,t99,info)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
