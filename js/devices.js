@@ -225,7 +225,7 @@ function get_media_devices() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let extra = ""
 		if (gLoad) {extra = (canPerf ? Math.round(performance.now()) : "")}
-		log_perf("-- start md section -- ","n/a",gt0,extra)
+		log_perf("start [md]","n/a",gt0,extra)
 		let hash = ""
 
 		// not supported
@@ -803,7 +803,7 @@ function get_touch() {
 
 		// MTP: FF58 or lower should return undefined
 		let is59 = false
-		try {is59 = (Intl.DateTimeFormat.supportedLocalesOf("tt").length == 1)} catch(e) {}
+		try {is59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {}
 
 		get_mtp()
 		get_ontouch()
