@@ -330,7 +330,7 @@ function outputVersion() {
 			// 84-: get global method called on incompatible string
 		let t85 = performance.now(), ver85
 		try {
-			newFn("let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')")
+			let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
 		} catch(e) {
 			ver85 = (e.message.length == 66)
 		}
@@ -456,7 +456,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 50, oOther = {}
+	let countOther = 0, expectOther = 49, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -580,7 +580,7 @@ function outputVersion() {
 		// 83: 1667094
 		let t83 = performance.now(), ver83
 		try {
-			newFn("let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')")
+			let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')
 			ver83 = true
 		} catch(e) {}
 		rec(83.2, 83, "1667094", ver83, performance.now()-t83)
@@ -588,7 +588,7 @@ function outputVersion() {
 		// 83a: 1665746: legacy check: toSource (74+): 52 false postive
 		let t83a = performance.now(), ver83a
 		try {
-			newFn("let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);")
+			let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);
 		} catch(e) {
 			ver83a = ("undefined" === typeof Object.toSource && e.message == "1 is not iterable")
 			//debug.push(" 83 1665746 : " + e.name +": "+ e.message)
@@ -627,18 +627,6 @@ function outputVersion() {
 			debug.push(" 80 1651732 : " + e.name +": "+ e.message)			
 			rec(80.1,80, "1651732", xB, performance.now()-t80)
 		}
-		// 80a: 1559253
-		let t80a = performance.now(), ver80a
-		try {
-			newFn(`
-			/aaa(/; 012345678`)
-		} catch (e) {
-			// 60-65: = 4,3
-			// 66-79: = 1,4
-			//   80+: = 2,7
-			ver80a = (e.columnNumber == 7)
-		}
-		rec(80, 80, "1559253", ver80a, performance.now()-t80a)
 
 		// 79p: 1639246 shipped: javascript.options.weakrefs = true (default)
 		let t79p = performance.now(), ver79p = ("function" === typeof WeakRef)
@@ -735,7 +723,7 @@ function outputVersion() {
 			// 72+: underscore can appear only between digits, not after the last digit in a number (79)
 			// 71-: identifier starts immediately after numeric literal (51)
 		let t72c = performance.now(), ver72c
-		try {let test72c = newFn('let a = 100_00_;')} catch(e) {ver72c = (e.message.length == 79)}
+		try {newFn('let a = 100_00_;')} catch(e) {ver72c = (e.message.length == 79)}
 		rec(72, 72, "1589072", ver72c, performance.now()-t72c)
 
 		// 71: 1575980 [charAt[17]]
