@@ -255,28 +255,19 @@ function get_errors() {
 		let res = [], note = ""
 		let sName = "feature_error_messages"
 		sDetail[sName] = []
-		let tests = [
-			"const foo;foo.bar",
-			"(1).toString(1000)",
-			"var x = new Array(-1)",
-			"var x = @", // changes FF84`
-			"[...undefined].length", // changes with error_fix
-		]
-		for (const t of tests) {
-			// ToDo: don't use newFn
-			try {newFn(t)} catch(e) {res.push(e.name +": "+ e.message)}
-		}
+		try {null.bar} catch(e) {res.push(e.message)}
+		try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
+		try {[...undefined].length} catch(e) {res.push(e.message)}
+		try {(1).toString(1000)} catch(e) {res.push(e.message)}
+		try {var x = new Array(-1)} catch(e) {res.push(e.message)}
 		if (runSN) {res[0] = res[0] + " [sim new]"}
 		sDetail[sName] = res
 		let hash = sha1(res.join(), "feature errors")
 		// notation: 74+: 1259822: error_message_fix
 		let tmp = hash.substring(0,8), color = "3"
 		if (isFF) {
-			let fix = " error_fix" // FF74+
-			if (tmp == "42cb98ee") {note = "FF84+"
-			} else if (tmp == "a81d6825") {note = "FF84+"+ fix
-			} else if (tmp == "378e21f1") {note = "FF83 or lower" // tested FF52+: TZP does not run in FF51 or lower
-			} else if (tmp == "0e3cedfc") {note = "FF74-83"+ fix
+			if (tmp == "ad67c2c2") {note = "FF52+" // TZP does not run in FF51 or lower
+			} else if (tmp == "96dc9bd1") {note = "FF74+ fix"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
