@@ -1375,7 +1375,7 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
-	is99 = ("boolean" === typeof navigator.pdfViewerEnabled)
+	is99 = ("pdfViewerEnabled" in navigator)
 	is97 = ("function" === typeof AbortSignal
 		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
 	try {is96 = ("sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {}

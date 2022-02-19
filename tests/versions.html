@@ -247,7 +247,7 @@ function outputVersion() {
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
 
 		// 99: 1720353
-		let t99 = performance.now(), ver99 = ("boolean" === typeof navigator.pdfViewerEnabled)
+		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
 		rec(99, 99, "1720353", ver99, performance.now()-t99, "ex")
 
 		// 98: 1709790

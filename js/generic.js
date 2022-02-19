@@ -614,7 +614,8 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
-		if ("boolean" === typeof navigator.pdfViewerEnabled) return 99 // 1720353
+		if ("pdfViewerEnabled" in navigator) return 99 // 1720353
+			// ^ ext fuckable
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
 		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
 		if ("undefined" === typeof Object.toSource
