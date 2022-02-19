@@ -521,23 +521,23 @@ function get_plugins_mimetypes() {
 				if ("boolean" !== typeof pdf && pdf !== undefined) {pdfLies = true}
 			}
 			pdf = cleanFn(pdf)
+			pdfValue = pdf
 			// ToDo: bypass
 				// if pValue = none then it must be false
 				// if pValue != none and no pluginBS then it must be true
 				// note: RFP is not covering this properly yet: so we can have none + true
 			if (pdfBypass) {pdfLies = true}
 			if (pdfLies) {
+				pdfValue = zLIE
 				// ToDo: don't color zBO unless we can bypass
 				pdf = soL + pdf + scC
 				if(gRun) {gKnown.push("devices:pdfViewerEnabled")}
 			}
-			if (isVer > 98) {
-				pdfNote = pdf == "false" ? rfp_green : rfp_red
-			}
+			if (isVer > 98) {pdfNote = pdf == "false" ? rfp_green : rfp_red}
 			dom.pdf.innerHTML = pdf + pdfNote
 
 			log_perf("mimetypes/plugins [devices]",t0)
-			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
+			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue, "pdfViewerEnabled:"+ pdfValue])
 		})
 	})
 }
