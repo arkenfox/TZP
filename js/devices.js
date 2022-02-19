@@ -482,6 +482,10 @@ function get_plugins_mimetypes() {
 					}
 					if (isBypass) {isLies = true}
 				}
+				// we can't bypass with "none" FF99+ 1720353
+					// note: navigator.pdfViewerSupported can be a lie
+					// so we can't even bypass to the hardcoded results
+				if (isVer > 98) {isBypass = false}
 				// display
 				if (isLies) {
 					value = (isBypass ? soB : soL) + value + scC + rfp_red
@@ -502,6 +506,32 @@ function get_plugins_mimetypes() {
 			}
 			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
+
+			// now we do pdfViewerEnabled
+				// FF99+ boolean / FF98- undefined
+			let pdf, pdfValue, pdfLies = false, pdfBypass = false, pdfNote = ""
+			try {
+				pdf = navigator.pdfViewerEnabled
+			} catch(e) {
+				log_error("devices: pdfViewer", e.name, e.message)
+				pdf = zB0
+			}
+			// lies
+				// ToDo: I don't have a v99 test that isn't checking for typeof boolean
+			if ("boolean" !== typeof pdf && pdf !== undefined) {pdfLies = true}
+			pdf = cleanFn(pdf)
+			// bypass
+				// if pValue = none then it must be false
+				// if pValue != none but no pluginBS then it must be true
+			if (pdfLies) {
+				pdf = soL + pdf + scC
+				if(gRun) {gKnown.push("devices:pdfViewerEnabled")}
+			}
+			if (isVer > 98) {
+				pdfNote = pdf == "false" ? rfp_green : rfp_red
+			}
+			dom.pdf.innerHTML = pdf + pdfNote
+
 			log_perf("mimetypes/plugins [devices]",t0)
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue])
 		})
