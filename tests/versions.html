@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 43, maxVer = 98, oTZP = {}, oSuccess = {}
+	let countTZP = 0, expectTZP = 44, maxVer = 99, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -245,6 +245,10 @@ function outputVersion() {
 		// < 60 : 1436659
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
+
+		// 99: 1720353
+		let t99 = performance.now(), ver99 = ("boolean" === typeof navigator.pdfViewerEnabled)
+		rec(99, 99, "1720353", ver99, performance.now()-t99, "ex")
 
 		// 98: 1709790
 		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
