@@ -1384,9 +1384,9 @@ if (isFF) {
 		is95 = (test95 > 0.4 && test95 < 0.6)
 	} catch(e) {}
 	is93 = ("function" === typeof self.reportError)
-	try {newFn('for (async of [])')} catch(e) {is86 = (e.message.length == 64)}
+	is86 = ("function" === typeof Intl.DisplayNames)
 	try {
-		let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
+		Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
 	} catch(e) {
 		is85 = (e.message.length == 66)
 	}
@@ -1438,19 +1438,19 @@ setTimeout(function() {
 		if (is59 && !is60 && is61 && is70) {is59 = false} // WF Classic
 		if (!is59) {is60 = false; topVer = "> 59"} else {topVer = "59 <sup>60</sup>"}
 		if (!is60) {is61 = false} else {topVer = "60 <sup>61</sup>"}
-		if (!is61) {is64 = false} else {topVer = "61 <sup>64</sup>"}
+		if (!is61) {is64 = false} else {topVer = "61+ <sup>64</sup>"}
 		if (!is64) {is65 = false} else {topVer = "64 <sup>65</sup>"}
-		if (!is65) {is70 = false} else {topVer = "65 <sup>70</sup>"}
-		if (!is70) {is72 = false} else {topVer = "70 <sup>72</sup>"}
-		if (!is72) {is78 = false} else {topVer = "72 <sup>78</sup>"}
-		if (!is78) {is85 = false} else {topVer = "78 <sup>85</sup>"}
+		if (!is65) {is70 = false} else {topVer = "65+ <sup>70</sup>"}
+		if (!is70) {is72 = false} else {topVer = "70+ <sup>72</sup>"}
+		if (!is72) {is78 = false} else {topVer = "72+ <sup>78</sup>"}
+		if (!is78) {is85 = false} else {topVer = "78+ <sup>85</sup>"}
 		if (!is85) {is86 = false} else {topVer = "85 <sup>86</sup>"}
-		if (!is86) {is93 = false} else {topVer = "86 <sup>93</sup>"}
-		if (!is93) {is95 = false} else {topVer = "93 <sup>95</sup>"}
+		if (!is86) {is93 = false} else {topVer = "86+ <sup>93</sup>"}
+		if (!is93) {is95 = false} else {topVer = "93+ <sup>95</sup>"}
 		if (!is95) {is96 = false} else {topVer = "95 <sup>96</sup>"}
 		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
-		if (!is97) {is99 = false} else {topVer = "97 <sup>99</sup>"}
-		if (!is99) {} else {topVer = "99"}
+		if (!is97) {is99 = false} else {topVer = "97+ <sup>99</sup>"}
+		if (!is99) {} else {topVer = "99+"}
 	}
 
 	// now get on with it

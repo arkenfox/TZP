@@ -636,11 +636,10 @@ const get_isVer = () => new Promise(resolve => {
 		if (":" === document.createElement("a").protocol) return 88 // 1497557
 		if (undefined === console.length) return 87 // 1688335
 		if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
-		try {let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
+		try {Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
 			} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
 			// ^ replace ?
-		try {newFn("var x = @")} catch(e) {if (e.message.length == 24) {return 84}} // 1673440
-			// ^ replace ?
+		if ("function" === typeof PerformancePaintTiming) return 84 // 1518999
 		if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
 		try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
 			// ^ ext fuckery: cydec
@@ -648,7 +647,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
 		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
 		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
-		if (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request')) return 77 // 1536540
+		if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
 		if (!test76.validity.rangeOverflow) return 76 // 1608010
 		if ("function" === typeof Intl.Locale) return 75 // 1613713
 		if ("undefined" === typeof Object.toSource) return 74 // 1565170
