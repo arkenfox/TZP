@@ -507,23 +507,27 @@ function get_plugins_mimetypes() {
 			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
 
-			// now we do pdfViewerEnabled
-				// FF99+ boolean / FF98- undefined
+			// pdfViewerEnabled: FF99+ boolean, FF98- undefined
 			let pdf, pdfValue, pdfLies = false, pdfBypass = false, pdfNote = ""
 			try {
 				pdf = navigator.pdfViewerEnabled
 			} catch(e) {
-				log_error("devices: pdfViewer", e.name, e.message)
-				pdf = zB0
+				pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
 			}
 			// lies
-				// ToDo: I don't have a v99 test that isn't checking for typeof boolean
-			if ("boolean" !== typeof pdf && pdf !== undefined) {pdfLies = true}
+				// ToDo: current v99 test is this actual test: so I can't use it
+				// I can only test for both results for now
+			if (pdf !== zB0) {
+				if ("boolean" !== typeof pdf && pdf !== undefined) {pdfLies = true}
+			}
 			pdf = cleanFn(pdf)
-			// bypass
+			// ToDo: bypass
 				// if pValue = none then it must be false
-				// if pValue != none but no pluginBS then it must be true
+				// if pValue != none and no pluginBS then it must be true
+				// note: RFP is not covering this properly yet: so we can have none + true
+			if (pdfBypass) {pdfLies = true}
 			if (pdfLies) {
+				// ToDo: don't color zBO unless we can bypass
 				pdf = soL + pdf + scC
 				if(gRun) {gKnown.push("devices:pdfViewerEnabled")}
 			}
