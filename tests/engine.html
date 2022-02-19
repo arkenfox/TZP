@@ -837,7 +837,13 @@ function get_mimetypes(num, title) {
 					}
 				}
 				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
-				if (isFlash) {hash = "flash detected [FF84 or lower]"}
+				if (is99 || !isFF) { // allow non-FF to have the same
+					// FF99+: controlled by pdfjs.disabled
+					// 1720353: hardcoded mimeTypes = 33c916c1a0e2e4e72047e6e142a7b43c6b1eba22
+					if (sha1(res.join()) == "33c916c1a0e2e4e72047e6e142a7b43c6b1eba22") {bool = true}
+				} else if (isFF) {
+					if (isFlash) {hash = "flash detected [FF84 or lower]"}
+				}
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
@@ -1152,7 +1158,13 @@ function get_plugins(num, title) {
 					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true; isFlash = true}
 				}
 				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
-				if (isFlash) {hash = "only flash detected [FF84 or lower]"}
+				if (is99 || !isFF) { // allow non-FF to have the same
+					// FF99+: controlled by pdfjs.disabled
+					// 1720353: hardcoded mimeTypes = a1c55525766a48e19810c6a2accc17f62a748901
+					if (sha1(res.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {bool = true}
+				} else if (isFF) {
+					if (isFlash) {hash = "flash detected [FF84 or lower]"}
+				}
 				fnRecord(num, title, hash, bool)
 			}
 		} else {
@@ -1354,7 +1366,8 @@ let isRFP56plus = false,
 	is93 = false,
 	is95 = false,
 	is96 = false,
-	is97 = false
+	is97 = false,
+	is99 = false
 
 // webkit
 if ("chrome" in window || isFF) {} else {isWebkit = true}
@@ -1362,6 +1375,7 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
+	is99 = ("boolean" === typeof navigator.pdfViewerEnabled)
 	is97 = ("function" === typeof AbortSignal
 		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
 	try {is96 = ("sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {}
@@ -1435,7 +1449,8 @@ setTimeout(function() {
 		if (!is93) {is95 = false} else {topVer = "93 <sup>95</sup>"}
 		if (!is95) {is96 = false} else {topVer = "95 <sup>96</sup>"}
 		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
-		if (!is97) {} else {topVer = "97"}
+		if (!is97) {is99 = false} else {topVer = "97 <sup>99</sup>"}
+		if (!is99) {} else {topVer = "99"}
 	}
 
 	// now get on with it
