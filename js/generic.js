@@ -452,7 +452,7 @@ const get_isOS = () => new Promise(resolve => {
 		} else if (font == "Roboto") {isOS="android"
 		}	else if (font == "-apple-system") {isOS="mac"
 		}	else {isOS="linux"}
-		log_perf("isOS [global]",t0,"",isOS)
+		log_perf("isOS [global]",t0,"",isOS +" | "+ font)
 		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
@@ -604,7 +604,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 98) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 99) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -614,6 +614,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
+		if ("boolean" === typeof navigator.pdfViewerEnabled) return 99 // 1720353
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
 		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
 		if ("undefined" === typeof Object.toSource
