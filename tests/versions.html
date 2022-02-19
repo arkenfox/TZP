@@ -334,18 +334,15 @@ function outputVersion() {
 			// 84-: get global method called on incompatible string
 		let t85 = performance.now(), ver85
 		try {
-			let d=Object.getOwnPropertyDescriptor(RegExp.prototype,'global'); let t=d.get.call('/a')
+			Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
 		} catch(e) {
 			ver85 = (e.message.length == 66)
 		}
 		rec(85, 85, "1675240", ver85, performance.now()-t85)
 
-		// 84: 1673440
-			// 84+: illegal character U+0040
-			// 83-: illegal character
-		let t84 = performance.now(), ver84
-		try {newFn("var x = @")} catch(e) {ver84 = (e.message.length == 24)}
-		rec(84, 84, "1673440", ver84, performance.now()-t84)
+		// 84: 1518999
+		let t84 = performance.now(), ver84 = ("function" === typeof PerformancePaintTiming)
+		rec(84, 84, "1518999", ver84, performance.now()-t84)
 
 		// 83: 1665252: legacy check: toSource (74+): FF55- false positive
 		let t83 = performance.now(), ver83 = ("undefined" === typeof Object.toSource
@@ -378,7 +375,7 @@ function outputVersion() {
 		rec(78, 78, "1626015", ver78, performance.now()-t78)
 
 		// 77: 1536540
-		let t77 = performance.now(), ver77 = (Object.getOwnPropertyNames(window.IDBCursor.prototype).includes('request'))
+		let t77 = performance.now(), ver77 = (window.IDBCursor.prototype.hasOwnProperty("request"))
 		rec(77, 77, "1536540", ver77, performance.now()-t77)
 
 		// 76: 1608010: legacy check toSource (74+) FF56- false positive
@@ -460,7 +457,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 49, oOther = {}
+	let countOther = 0, expectOther = 50, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -579,7 +576,13 @@ function outputVersion() {
 		rec(86,86, "1685482", ver86, performance.now()-t86)
 
 		//85 possibles? : 1445482 1670062 1635561 
-		//84 possibles? : 1645107 shipped
+
+		// 84: 1673440
+			// 84+: illegal character U+0040
+			// 83-: illegal character
+		let t84 = performance.now(), ver84
+		try {newFn("var x = @")} catch(e) {ver84 = (e.message.length == 24)}
+		rec(84, 84, "1673440", ver84, performance.now()-t84)
 
 		// 83: 1667094
 		let t83 = performance.now(), ver83
@@ -647,9 +650,7 @@ function outputVersion() {
 			// ext fuckery: cydec
 		let t79b = performance.now(), ver79b
 		try {
-			let test79b = new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date())
-			//debug.push(" 79 1557718 : " + test79b)
-			ver79b = (test79b.charAt(test79b.length - 1) === "M")
+			ver79b = (new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date()).includes(':'))
 		} catch(e) {ver79b = xB}
 		rec(79.2, 79, "1557718", ver79b, performance.now()-t79b, "ex")
 
