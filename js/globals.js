@@ -172,14 +172,14 @@ let s0 = " <span class='",
 
 /** DEV **/
 // check
-let logExtra = false,
+let logChkList = false,
 	logPerfHash = "", // "", sha1, mini, "all"
-	logPerfMini = false, // we set these in code
+	logPerfMini = false, // we set this in code
 	logPerfSha1 = false, // ditto
 	logPseudo = false,
-	logResize = false,
+	logScreen = false,
 	logStorage = false,
-	logChkList = false, // check lists for dupes etc
+
 // simulate
 	runSE = false, // errors/blocked
 	runSL = false, // lies
