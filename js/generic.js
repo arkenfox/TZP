@@ -412,7 +412,7 @@ const get_isFork = () => new Promise(resolve => {
 			if (runSN) {
 				isMark = "110 x 50" // new to both TB and FF
 				//isMark = "336 x 48" // new TB but not new FF
-				//isMark = "" // you need to set this one in get_resources as well
+				//isMark = "" // you need to set this one in get_fd_resources as well
 				//isMark = "0 x 0" // same as changing html img src
 			}
 			set_isFork(isMark)
@@ -1320,9 +1320,9 @@ function outputPostSection(id) {
 		get_ua_workers()
 	}
 	if (id == "all" || id == "feature")
-		get_canonical()
-		get_locales()
-		if (isFF) {get_chrome(isLog)}
+		get_fd_canonical()
+		get_fd_locales()
+		if (isFF) {get_fd_chrome(isLog)}
 	if (id == "all" || id == "storage") {
 		get_cookies()
 		get_storage()
@@ -1397,7 +1397,7 @@ function outputSection(id, cls) {
 			// section timer
 			if (!gRun && canPerf) {gt0 = performance.now()}
 			// section only
-			if (id=="1") {outputScreen("screen")}
+			if (id=="1") {outputScreen()}
 			if (id=="2") {outputUA()}
 			if (id=="3") {outputFD()}
 			if (id=="11" && cls=="c") {outputAudio()}
