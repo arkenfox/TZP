@@ -488,7 +488,7 @@ function get_plugins_mimetypes() {
 				if (isVer > 98) {isBypass = false}
 				// display
 				if (isLies) {
-					value = (isBypass ? soB : soL) + value + scC + btn + rfp_red
+					el.innerHTML = (isBypass ? soB : soL) + value + scC + btn + rfp_red
 					fpValue = isBypass ? "none" : zLIE
 					if (gRun || runSNM || runSNP) {
 						gKnown.push("devices:"+ type)
