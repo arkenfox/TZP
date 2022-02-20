@@ -51,7 +51,7 @@
 		</div>
 		<div id="iframes"></div>
 		<div id="svgDiv"></div>
-		<div id="fdScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
+		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
 		<div>&#x20B9; &#x2581; &#x20BA; &#xA73D; &#xFFFD; &#x20B8; &#x05C6; &#x1E9E; &#x097F; &#xF003; &#x1CDA;
 			&#x17DD; &#x23AE; &#x0D02; &#x0B82; &#x115A; &#x2425; &#x302E; &#xA830; &#x2B06; &#x21E4; &#x20BD;
@@ -67,9 +67,6 @@
 	<!--hidden-->
 	<div class="hidden">
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
-		<object id="test68"></object>
-		<div id="test73"></div>
-		<div id="test98">a</div>
 		<span id="sColorElement"></span>
 		<div id="dpr2" style="border: 0.1px solid;">Foo</div>
 		<div>
@@ -152,6 +149,7 @@
 			&nbsp [css min-] inner window <sup>1, 3</sup></td><td id="D"></td></tr>
 		<tr><td>[matchMedia] inner window <sup>2</sup></td><td class="c" id="mmInner"></td></tr>
 		<tr><td>viewport <sup>4</sup></td><td class="c" id="Viewport"></td></tr>
+		<tr><td>[viewport | element] scrollbars</td><td class="c" id="mScrollbar"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">left<br>top<br>availLeft<br>availTop</span></div>
@@ -188,10 +186,12 @@
 		<tr><td>dpi</td><td class="c" id="jsDPI"></td ></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
 			&nbsp [css min-resolution] dpi</td><td id="P"></td></tr>
+		<!--<tr><td>[css] dppx</td><td id="PPX"></td></tr>
+		<tr><td>[css] dpcm</td><td id="PCM"></td></tr>-->
 		<tr><td>[matchMedia max-resolution] dpi | dppx | dpcm</td><td class="c" id="mmDPI"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">dom.visualviewport.enabled</span></div>
 			&nbsp [visual viewport] scale</td><td id="vvScale"></td></tr>
-		<tr><td>zoom %</td><td class="c" id="jsZoom"></td></tr>
+		<!--<tr><td>zoom %</td><td class="c" id="jsZoom"></td></tr>-->
 		<tr><td>devicePixelRatio</td><td class="c" id="dpr"></td></tr>
 		<tr><td>[matchMedia -webkit- | -moz-] device-pixel-ratio</td>
 			<td><span class="c" id="mmDPRw"></span> | <span class="c" id="mmDPRm"></span></td></tr>
@@ -303,17 +303,11 @@
 				style="font-family: Segoe UI, ABR;">Windows</span><span
 				style="font-family: Roboto, Droid Sans, ABR;">Android</span>
 		</td></tr>
-		<tr><td>[css line-height] os</td><td class="c" id="fdLH"></td></tr>
-		<tr><td>[viewport scrollbar width] os <sup>2, 3</sup></td><td class="c" id="fdScrollV"></td></tr>
-		<tr><td>[element scrollbar width] os</td><td class="c" id="fdScrollE"></td></tr>
 		<tr><td>[widgets] os</td><td class="c mono" id="fdWidget"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
-			<span class="no_color"> , </span><a target="_blank" class="blue"
-			href="https://www.hackerfactor.com/blog/index.php?/archives/761-Exploiting-the-TOR-Browser.html">Dr. Neal Krawetz</a> <sup>2</sup>
-			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://github.com/earthlng/testpages">earthlng</a> <sup>3</sup></td></tr>
+		</td></tr>
 	</table>
 
 	<!--language-->
