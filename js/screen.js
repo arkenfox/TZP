@@ -1,10 +1,10 @@
 'use strict';
 
-var jsZoom, jsZoomOriginal, zoomAssume
 var varDPR, varDPI, dpi_x, dpi_y
 var uaBS = false
 let isOS64math = ""
 let nxtESR = 102
+let logSData = [], tSD // logScreen
 
 // sims
 let intDEP = 0, lstDEP = ["24",zB0,24, 41,1,7.2,undefined,zU,"null",{}]
@@ -12,44 +12,9 @@ let intCLR = 0, lstCLR = [ "8",zB0, 8, 61,1,7.2,undefined,zU,"null",{}]
 let intWFS = 0, lstWFS = ["true","false",zB0,0,1,-1,true,false]
 let intUAI = 0
 
-function return_lb_nw(w,h) {
-	// LB
-	let wstep = 200, hstep = 200, bw = false, bh = false
-	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = 100}
-	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
-	bw = Number.isInteger(w/wstep)
-	bh = Number.isInteger(h/hstep)
-	let r = (bw && bh) ? lb_green : lb_red
-	// NW
-	wstep = 200, hstep = 100, bw = false, bh = false
-	if (w < 1001) {bw = Number.isInteger(w/wstep)}
-	if (h < 1001) {bh = Number.isInteger(h/hstep)}
-	r += (bw && bh) ? nw_green : nw_red
-	return r
-}
+/* FD */
 
-function return_mm_dpi(type, denominator) {
-	let r = ""
-	try {
-		r = (function() {
-			let i = 1
-			for (1; i < 3001; i++) {
-				let n = i/denominator
-				if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
-			}
-			if (gRun) {
-				gMethods.push("screen:matchmedia_"+ type +": > "+ (i-1)/denominator)
-			}
-			return zB0 
-		})()
-	} catch(e) {
-		log_error("screen: matchmedia_"+ type, e.name, e.message)
-		return zB0
-	}
-	return r
-}
-
-function get_canonical() {
+function get_fd_canonical() {
 	// runs post FP
 	try {
 		let sName = "feature_canonical_locales_notglobal"
@@ -77,7 +42,7 @@ function get_canonical() {
 	}
 }
 
-function get_chrome(log = false) {
+function get_fd_chrome(log = false) {
 	// runs post FP
 	let t0; if (canPerf) {t0 = performance.now()}
 	let os = ""
@@ -136,120 +101,7 @@ function get_chrome(log = false) {
 	run()
 }
 
-function get_color() {
-	let res = [], r1
-
-	// pixelDepth: 418986: FF41+ RFP
-	function get_pixeldepth(name) {
-		let isLies = false
-		try {
-			if (runSE) {runDEP = false; abc = def
-			} else if (runSL) {runDEP = false; r1 = "24"
-			} else if (runDEP) {r1 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r1)
-			} else {r1 = screen.pixelDepth
-			}
-		} catch(e) {
-			r1 = zB0; log_error("screen: pixelDepth", e.name, e.message)
-		}
-		r1 = cleanFn(r1)
-		// lies
-		if (r1 !== zB0) {
-			if (typeof r1 !== "number") {isLies = true
-			} else if (!Number.isInteger(r1)) {isLies = true
-			} else if (r1 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
-		}
-		let v1 = r1
-		// record lies but not blocks
-		if (isLies && r1 !== zB0) {
-			v1 = zLIE; r1 = soL + r1 + scC
-			if (gRun) {gKnown.push(name)}
-		}
-		if (runDEP) {console.log(" - returned", v1)}
-		dom.pixelDepth.innerHTML = r1
-		res.push("pixelDepth:"+ v1)
-	}
-
-	// colorDepth: 418986: FF41+ RFP
-	function get_colordepth(name) {
-		let isLies = false, r2
-		try {
-			if (runSE) {runDEP = false; abc = def
-			} else if (runSL) {runDEP = false; r2 = "24"
-			} else if (runDEP) {r2 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r2)
-			} else {r2 = screen.colorDepth
-			}
-		} catch(e) {
-			r2 = zB0; log_error("screen: colorDepth", e.name, e.message)
-		}
-		r2 = cleanFn(r2)
-		// lies
-		if (r2 !== zB0) {
-			if (typeof r2 !== "number") {isLies = true
-			} else if (!Number.isInteger(r2)) {isLies = true
-			} else if (r2 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
-		}
-		let v2 = r2
-		// record
-		if (isLies && r2 !== zB0) {
-			v2 = zLIE; r2 = soL + r2 + scC
-			if (gRun) {gKnown.push(name)}
-		}
-		if (runDEP) {console.log(" - returned", v2)}
-		dom.colorDepth.innerHTML = r2 + (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
-		res.push("colorDepth:"+ v2)
-	}
-
-	// mm color: 418986: FF41+ RFP
-	function get_mm_color(name) {
-		let isLies = false, r3, isBypass = false
-		let v3 = getElementProp("#cssC","content",":after")
-		try {
-			if (runSE) {runCLR = false; abc = def
-			} else if (runSL) {runCLR = false; r3 = "8"
-			} else if (runCLR) {r3 = lstCLR[intCLR]; console.log("SIM #"+ intCLR, name, r3)
-			} else {
-				r3 = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
-					return i
-				})()
-			}
-		} catch(e) {
-			r3 = zB0; log_error("screen: matchmedia_color", e.name, e.message)
-		}
-		r3 = cleanFn(r3)
-		// bypass
-		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
-		// lies
-		if (r3 !== zB0) {
-			if (typeof r3 !== "number") {isLies = true
-			} else if (!Number.isInteger(r3)) {isLies = true
-			} else if (r3 < 2) {isLies = true}
-		}
-		if (!isLies) {v3 = r3 == zB0 ? zB0 : r3} // don't record blocked if no lies
-		// record
-		if (isLies) {
-			// zBO can't get in here unless we can bypass
-			if (!isBypass) {v3 = zLIE}
-			r3 = (isBypass ? soB : soL) + r3 + scC
-			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
-		}
-		if (runCLR) {console.log(" - returned", v3)}
-		dom.mmC.innerHTML = r3 + (r3 === 8 ? rfp_green : rfp_red)
-		res.push("matchmedia_color:"+ v3)
-	}
-
-	// run
-	get_pixeldepth("screen:pixelDepth")
-	get_colordepth("screen:colorDepth")
-	get_mm_color("screen:matchmedia_color")
-	if (runCLR) {intCLR++; intCLR = intCLR % lstCLR.length}
-	if (runDEP) {intDEP++; intDEP = intDEP % lstDEP.length}
-	// return
-	return(res)
-}
-
-function get_errors() {
+function get_fd_errors() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let res = [], note = ""
@@ -278,334 +130,7 @@ function get_errors() {
 	})
 }
 
-function get_fullscreen(runtype) {
-	let r = ""
-	try {
-		if (document.mozFullScreenEnabled) {r = zE} else {r = zD; dom.fsLeak = zNA}
-	} catch(e) {
-		r = "no: "+ e.name; dom.fsLeak = zNA
-	}
-	dom.fsSupport = r
-	return (runtype == "section" ? "full_screen_api:" : "") + r
-}
-
-function get_line_scrollbar(runtype) {
-	return new Promise(resolve => {
-		let osW = "[Windows]",
-			osWL = "[Windows or Linux]",
-			osL = "[Linux]",
-			osLM = "[Linux or Mac]",
-			osM = "[Mac]",
-			osTBL = " [Linux]"+ tb_green,
-			os = "",
-			vw = "",
-			sbZoom = "",
-			dScrollbar = "",
-			eScrollbar = "",
-			sBig = s3 +"...why are you so big?"+ sc,
-			sSmall = s3 +"...why are you so small?"+sc,
-			wZoom
-
-		// scrollbar
-		function run_scrollbar() {
-			jsZoom = jsZoom * 1
-			let t0; if (canPerf) {t0 = performance.now()}
-			// get width, remember for later
-			let w = zB0
-			try {
-				let w = (window.innerWidth-vw)
-			} catch(e) {}
-			let pseudoW = getElementProp("#D","content",":before")
-			if (pseudoW !== "x") {
-				if (pseudoW * 1 == w-1) {pseudoW = w} // allow for min-
-				w = pseudoW-vw
-			}
-			// section metric
-			if (w > 0) {dScrollbar = "not zero"} else {dScrollbar = "zero"}
-
-			// start
-			if (w == 0) {
-				os= "[Mac OS X, mobile or floating scrollbars]"
-			} else if (w < 0) {
-				os= "[mobile]"
-			}	else {
-				// known metrics
-				if (jsZoom == 100) {
-					if (w==17) {os=osW}
-					if (w==16) {os=osL}
-					if (w==15) {os=osM}
-					if (w==12) {os=osL}
-				} else if (jsZoom == 110) {
-					if (w==16) {os=osW}
-					if (w==15) {os=osW}
-					if (w==14) {os=osLM}
-					if (w==11) {os=osL}
-				} else if (jsZoom == 120) {
-					if (w==15) {os=osW}
-					if (w==14) {os=osWL}
-					if (w==12) {os=osM}
-					if (w==10) {os=osL}
-				} else if (jsZoom == 133) {
-					if (w==13) {os=osW}
-					if (w==12) {os=osWL}
-					if (w==11) {os=osM}
-					if (w==9) {os=osL}
-				} else if (jsZoom == 90) {
-					if (w==19) {os=osW}
-					if (w==18) {os=osL}
-					if (w==17) {os=osM}
-					if (w==16) {os=osM}
-					if (w==13) {os=osL}
-				} else if (jsZoom == 150) {
-					if (w==12) {os=osW}
-					if (w==11) {os=osW}
-					if (w==10) {os=osLM}
-					if (w==8) {os=osL}
-				} else if (jsZoom == 170) {
-					if (w==10) {os=osWL}
-					if (w==8) {os=osM}
-					if (w==7) {os=osL}
-				} else if (jsZoom == 80) {
-					if (w==21) {os=osW}
-					if (w==20) {os=osL}
-					if (w==19) {os=osM}
-					if (w==15) {os=osL}
-				} else if (jsZoom > 170) {
-					os=sBig
-				} else if (jsZoom < 80) {
-					os=sSmall
-				}
-				if (os != "") {
-					if (os == sBig || os == sSmall) { // do nothing
-					} else {os += " [known metric]"
-					}
-				} else {
-					// unknown
-					if (jsZoom !== 100) {
-						// recalc at 100% for final guess: not perfect
-						if (window.devicePixelRatio !== 1 || dpi_y == 0) {
-							// RFP is off or css is blocked
-							wZoom = w * window.devicePixelRatio
-						} else {
-							wZoom = w * (((varDPI/dpi_x)*100)/100)
-						}
-					}
-					// final guess
-					if (wZoom >= 16.5) {
-						os=osW // in testing = windows only
-					} else {
-						os=osL // guess linux (andoid s/be 0, mac s/be covered)
-					}
-					// guess
-					os += " [logical guess]"
-				}
-			}
-			// output
-			if (jsZoom !== 100) {
-				sbZoom = " at "+ (isOS == "android" ? jsZoom.toFixed(5)+ " devicePixelRatio ": jsZoom +"% ")
-			}
-			dom.fdScrollV.innerHTML = w +"px "+ sbZoom + (isFork == "Waterfox Browser" ? "" : os)
-			// element scrollbar
-			let eW = (100-dom.fdScroll.scrollWidth)
-			if (eW > 0) {eScrollbar = "not zero"} else {eScrollbar = "zero"}
-			if (jsZoom == 100) {
-				eW += "px"+ (eW == w ? "" : sb +"[!= viewport scrollbar]"+ sc)
-			} else {
-				eW += "px"
-			}
-			dom.fdScrollE.innerHTML = eW
-			// perf
-			if (runtype == "fd") {log_perf("scrollbar [fd]",t0)}
-		}
-
-		// css lineheight
-		function run_lineheight() {
-			let t0; if (canPerf) {t0 = performance.now()}
-			let method = "computedstyle",
-				strFont = ""
-			os = ""
-			// computedStyle
-			let element = dom.spanLH,
-				lh = "normal"
-			try {lh = getComputedStyle(element).getPropertyValue("line-height")} catch(e) {}
-			// font
-			let font = "", fontProp = false, isTNR = false
-			try {
-				font = getComputedStyle(element).getPropertyValue("font-family")
-				fontProp = true
-				if (font.slice(1,16) == "Times New Roman") {
-					isTNR = true
-				} else {
-					strFont = sb +"[document fonts are disabled]"+ sc
-				}
-			} catch(e) {
-				strFont = sb +"[font property is blocked]"+ sc
-				fontProp = false
-			}
-			// clientrect
-			if (lh == "normal") {
-				element = dom.divLH
-				try {
-					let elDiv = element.getBoundingClientRect()
-					lh = elDiv.height
-					// trim decimals
-					if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
-					lh = lh.toString()
-					// remove trailing zeros
-					try {lh = (lh * 1).toString()} catch(e) {}
-					method = "clientrect"
-				} catch(err) {
-					method = "none"
-				}
-			}
-
-			// sim
-			let widSim = 0
-			if (widSim == 1) {
-				// no clientrect
-				method = "none"
-			} else if (widSim == 2) {
-				// no font property
-				strFont = sb +"[font property is blocked]"+ sc
-				fontProp = false
-			} else if (widSim == 3) {
-				// doc fonts blocked
-				strFont = sb +"[document fonts are disabled]"+ sc
-				isTNR = false
-			} else if (widSim == 4) {
-				// 1+2
-				method = "none"
-				strFont = sb +"[font property is blocked]"+ sc
-				fontProp = false
-			} else if (widSim == 5) {
-				// 1+3
-				method = "none"
-				strFont = sb +"[document fonts are disabled]"+ sc
-				isTNR = false
-			}
-
-			// build
-			if (isOS == "android") {
-				// ignore
-			} else if (method !== "none") {
-				// trim
-				if (lh.substr(-2) == "px") {lh = lh.slice(0, -2) * 1}
-				// check font
-				if (strFont !== "") {
-					os = strFont
-				} else if (lh == "19.2") {
-					// TB DESKTOP: 19.2 **seems** TB unique any-zoom/any-platform
-					os = tb_green
-				} else {
-					// isTNR + not 19.2
-					// WIN/LINUX: some known metrics
-					if (jsZoom == 100) {
-						if (lh=="20") {os=osW}
-						if (lh=="19") {os=osL}
-						if (lh=="18") {os=osW}
-						if (lh=="17") {os=osL}
-					} else if (jsZoom == 110) {
-						if (lh=="19.25") {os=osW}
-						if (lh=="18.7") {os=osTBL}
-						if (lh=="18.3333") {os=osL}
-						if (lh=="17.4167") {os=osL}
-					} else if (jsZoom == 120) {
-						if (lh=="20") {os=osW}
-						if (lh=="19.1667") {os=osL}
-						if (lh=="19") {os=osTBL}
-						if (lh=="18.3333") {os=osW}
-						if (lh=="17.5") {os=osL}
-					} else if (jsZoom == 133) {
-						if (lh=="19.5") {os=osW}
-						if (lh=="18.9") {os=osTBL}
-						if (lh=="18") {os=osL}
-						if (lh=="18.75") {os=osW}
-					} else if (jsZoom == 90) {
-						if (lh=="20.1") {os=osW}
-						if (lh=="18.9833") {os=osWL}
-						if (lh=="18.7667") {os=osTBL}
-						if (lh=="16.75") {os=osL}
-					} else if (jsZoom == 150) {
-						if (lh=="20") {os=osW}
-						if (lh=="18.6667") {os=osWL}
-						if (lh=="17.3333") {os=osL}
-					} else if (jsZoom == 170) {
-						if (lh=="19.25") {os=osW}
-						if (lh=="18.9") {os=osTBL}
-						if (lh=="18.6667") {os=osW}
-						if (lh=="18.0833") {os=osL}
-						if (lh=="17.5") {os=osL}
-					} else if (jsZoom == 80) {
-						if (lh=="20") {os=osW}
-						if (lh=="19.5") {os=osTBL}
-						if (lh=="18.75") {os=osWL}
-					} else if (jsZoom > 170) {
-						os=sBig
-					} else if (jsZoom < 80) {
-						os=sSmall
-					}
-				}
-				// MAC
-				if (os == "") {
-				/*unique: .0167 .05 .0833 .1833 .35 .4333 .6833 .8333 .85
-				not unique: .7667 .6667 (but unique at those zoom values)
-				hackernews: .5167 (can't repro) */
-					let lhDec = (lh +"").split(".")[1]
-					if (lhDec=="0167" | lhDec=="05" | lhDec=="0833" | lhDec=="1833" | lhDec=="35" | lhDec=="4333" | lhDec=="6833"
-						| lhDec=="8333" | lhDec=="85" | lhDec=="7667" | lhDec=="6667" | lhDec=="5167") {os=osM}
-				}
-				if (os == sBig || os == sSmall) { //do nothing
-				} else if (os !== "") {
-					if (isTNR && fontProp) {
-						os += " [known metric]"
-					}
-				} else if (os == "") {
-					os = osL +" [logical guess]"
-				}
-			}
-			// output
-			if (method == "none") {
-				if (fontProp) {
-					dom.fdLH.innerHTML = sb +"[clientrect blocked"+ (isTNR ? strFont : " | document fonts disabled") +"]"+ sc 
-				} else {
-					dom.fdLH.innerHTML = sb +"[clientrect + font properties blocked]"+ sc
-				}
-			} else {
-				dom.fdLH.innerHTML = lh +"px"+ (isOS == "android" ? "" : " "+ sbZoom + os)
-			}
-			if (runtype == "fd") {log_perf("css line height [fd]",t0)}
-		}
-
-		// recalc zoom/viewport
-		if (runtype == "resize") {
-			// when calling this from get_screen_metrics's runtype = resize
-			Promise.all([
-				vw = get_viewport("fd")
-			]).then(function(){
-				if (logExtra && canPerf) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
-				run_scrollbar()
-				run_lineheight()
-				return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
-			})
-		} else {
-			Promise.all([
-				get_zoom("fd")
-			]).then(function(){
-				if (jsZoom == undefined && gRun) {gCheck.push("fd:zoom is undefined")}
-				Promise.all([
-					vw = get_viewport("fd")
-				]).then(function(){
-					if (logExtra && canPerf) {console.log(performance.now(), "C START.:", runtype, ": lineheight, scrollbar")}
-					run_scrollbar()
-					run_lineheight()
-					return resolve("scrollbars:"+ dScrollbar +", "+ eScrollbar)
-				})
-			})
-		}
-	})
-}
-
-function get_locales() {
+function get_fd_locales() {
 	// runs post FP
 	try {
 		let res = []
@@ -636,7 +161,7 @@ function get_locales() {
 	}
 }
 
-function get_math() {
+function get_fd_math() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		// 1= ecma1, 6= ecma6, c= combined
@@ -876,7 +401,1028 @@ function get_math() {
 	})
 }
 
-function get_mm_metrics(runtype) {
+function get_fd_resources() {
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let branding = "",
+			channel = "",
+			result = "",
+			el = dom.branding
+		// extensions can block resources://
+			// FF ~5ms, TB ~20ms
+		setTimeout(() => resolve("resources:blocked"), 100)
+		if (isResource !== "") {output(false); return}
+
+		// output
+		function output(setGlobalVars) {
+			// set global vars
+			if (setGlobalVars) {
+				isChannel = channel // not used but handy
+				isResource = result
+				isResourceMetric = "resources:"+ isMark +", "+ isLogo
+			}
+			dom.fdResource.innerHTML = isResource
+			log_perf("resources [fd]",t0)
+			return resolve(isResourceMetric)
+		}
+		// set
+		function build() {
+			// TB
+			if (isTB) {
+				if (isMark == "270 x 48") {
+					channel = "Tor Browser - Alpha" // alpha: 8.5a7+ [60.5.0esr]
+					log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
+				} else if (isMark == "336 x 48" && isVer > 77) {
+					channel = "Tor Browser - Release" // 78+ therefore release
+				} else if (isMark == "300 x 38" && isVer > 67 && isVer < 78) {
+					channel = "Tor Browser - Release" // 68 therefore release
+				} else if (isMark == "300 x 38" && isVer > 59 && isVer < 68) {
+					channel = "Tor Browser"
+				}
+			}
+			// FF
+			if (!isTB) {
+				let is70 = (isVer > 69)
+				//70+
+				if (isMark == "336 x 48" && is70) {
+					branding = "Browser"; channel = "Release/Beta"
+				} else if (isMark == "336 x 64" && is70) {
+					branding = "Browser"; channel = "Developer/Nightly"
+				//60-69, ESR60/68
+				} else if (isMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
+				} else if (isMark == "132 x 62" && !is70) {channel = "Developer Edition"
+				} else if (isMark == "270 x 48" && !is70) {channel = "Nightly"}
+				// try setting isFork again
+				if (isLogo == zB0 && isFork == undefined) {
+					set_isFork()
+				}
+			}
+			// tidy
+			if (isMark == "0 x 0") {dom.fdBrandingCss = "none"}
+			if (isMark == "") {isMark = zB0}
+			let note = s3+ "["+ isMark +" | "+ isLogo +"]"+ sc
+			if (channel !== "") {
+				result = (branding == "" ? "" : branding +" - ") + channel + note
+			} else if (isFork !== undefined) {
+				result = isFork + note
+			} else if (isMark.substring(0,1) !== "0 ") {
+				let isNew = true
+				if (isOS == "android" && isMark == "0 x 0") {isNew = false}
+				result = (isTB ? "Tor Browser" : "Firefox") + note
+					+ (isNew ? zNEW + (runSN ? zSIM : "") : "")
+			} else {
+				result = (isTB ? "Tor Browser" : "Firefox") + note
+			}
+			output(true)
+		}
+		function run() {
+			// set icon
+			let pngURL = "url('chrome://branding/content/icon64.png')"
+			if (isOS == "android") {pngURL = "url('chrome://branding/content/favicon64.png')"}
+			dom.fdResourceCss.style.backgroundImage= pngURL
+			// remeasure isMark with hidden element to get 0x0 if missing
+			if (isTB || isOS == "android") {
+				let elTB = dom.torbranding2
+				isMark = elTB.width + " x " + elTB.height
+			}
+			// build
+			build()
+		}
+		if (isLogo !== zB0 && isMark !== "") {
+			// fast path
+			run()
+		} else {
+			// trigger delay to ensure resources loaded, retry original isMark
+			setTimeout(function() {
+				try {
+					isMark = el.width+ " x " + el.height
+					set_isFork()
+				} catch(e) {}
+				run()
+			}, 1)
+		}
+	})
+}
+
+function get_fd_widgets() {
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
+		let sName = "feature_widgets"
+		sDetail[sName] = []
+
+		try {
+			// loop elements
+			let res = [], sizes = [], fonts = []
+			for (let i=0; i < list.length; i++) {
+				let el = document.getElementById("widget"+ i)
+				let font = "unknown", size = "unknown"
+				font = getComputedStyle(el).getPropertyValue("font-family")
+				size = getComputedStyle(el).getPropertyValue("font-size")
+				if (runSN) {
+					//if (i == 4) {font = "unknown"} // bypass but new
+					//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
+					if (i == 4) {font = "-apple-system"} // font
+					//if (i == 2) {size="26px"} // size
+				}
+				res.push(list[i] +": "+ font +", "+ size)
+				if (i < 6) {sizes.push(size); fonts.push(font)}
+			}
+			let hash = sha1(res.join(), "feature widgets")
+			sDetail[sName] = res
+			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
+			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
+			// notate
+			let note, color = "3", mixed = ""
+			if (isFF) {
+				// we only need the font for OS: ignore unknown to still get an OS
+				let fntTmp = fonts
+				if (fntTmp.length > 1) {
+					fntTmp = fntTmp.filter(x => !["unknown"].includes(x))
+				}
+				if (fntTmp.length == 1) {
+					let font0 = fntTmp[0]
+					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
+					} else if (font0.slice(0,12) == "\"MS Shell Dl") {note = "windows" // FF57 has a slice and escape char issue
+					} else if (font0 == "Roboto") {note = "android"
+					} else if (font0 == "-apple-system") {note = "mac"
+					} else if (font0 == "unknown") {note = "unknown"; color = "bad"
+					} else {note = "linux"}
+				} else {
+					note = "NEW"; color = "bad"
+				}
+				if (note !== "NEW") {
+					if (fonts.length > 1 || sizes.length > 1) {mixed = zNEW}
+				}
+			}
+			let btn = buildButton(color, sName, note)
+			dom.fdWidget.innerHTML = hash + btn + mixed + (runSN ? zSIM : "")
+			// perf & resolve
+			log_perf("widgets [fd]",t0)
+			return resolve("widgets:"+ hash)
+		} catch(e) {
+			dom.fdWidget = zB0
+			log_perf("widgets [fd]",t0)
+			return resolve("widgets:"+ zB0)
+		}
+	})
+}
+
+/* SCREEN */
+
+function return_lb_nw(w,h) {
+	// LB
+	let wstep = 200, hstep = 200, bw = false, bh = false
+	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = 100}
+	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
+	bw = Number.isInteger(w/wstep)
+	bh = Number.isInteger(h/hstep)
+	let r = (bw && bh) ? lb_green : lb_red
+	// NW
+	wstep = 200, hstep = 100, bw = false, bh = false
+	if (w < 1001) {bw = Number.isInteger(w/wstep)}
+	if (h < 1001) {bh = Number.isInteger(h/hstep)}
+	r += (bw && bh) ? nw_green : nw_red
+	return r
+}
+
+function return_mm_dpi(type, denominator) {
+	let r = ""
+	try {
+		r = (function() {
+			let i = 1
+			for (1; i < 3001; i++) {
+				let n = i/denominator
+				if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
+			}
+			if (gRun) {
+				gMethods.push("screen:matchmedia_"+ type +": > "+ (i-1)/denominator)
+			}
+			return zB0 
+		})()
+	} catch(e) {
+		log_error("screen: matchmedia_"+ type, e.name, e.message)
+		return zB0
+	}
+	return r
+}
+
+function get_scr_color() {
+	let res = [], r1
+
+	// pixelDepth: 418986: FF41+ RFP
+	function get_pixeldepth(name) {
+		let isLies = false
+		try {
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r1 = "24"
+			} else if (runDEP) {r1 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r1)
+			} else {r1 = screen.pixelDepth
+			}
+		} catch(e) {
+			r1 = zB0; log_error("screen: pixelDepth", e.name, e.message)
+		}
+		r1 = cleanFn(r1)
+		// lies
+		if (r1 !== zB0) {
+			if (typeof r1 !== "number") {isLies = true
+			} else if (!Number.isInteger(r1)) {isLies = true
+			} else if (r1 < 2) {isLies = true
+			} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
+		}
+		let v1 = r1
+		// record lies but not blocks
+		if (isLies && r1 !== zB0) {
+			v1 = zLIE; r1 = soL + r1 + scC
+			if (gRun) {gKnown.push(name)}
+		}
+		if (runDEP) {console.log(" - returned", v1)}
+		dom.pixelDepth.innerHTML = r1
+		res.push("pixelDepth:"+ v1)
+	}
+
+	// colorDepth: 418986: FF41+ RFP
+	function get_colordepth(name) {
+		let isLies = false, r2
+		try {
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r2 = "24"
+			} else if (runDEP) {r2 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r2)
+			} else {r2 = screen.colorDepth
+			}
+		} catch(e) {
+			r2 = zB0; log_error("screen: colorDepth", e.name, e.message)
+		}
+		r2 = cleanFn(r2)
+		// lies
+		if (r2 !== zB0) {
+			if (typeof r2 !== "number") {isLies = true
+			} else if (!Number.isInteger(r2)) {isLies = true
+			} else if (r2 < 2) {isLies = true
+			} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
+		}
+		let v2 = r2
+		// record
+		if (isLies && r2 !== zB0) {
+			v2 = zLIE; r2 = soL + r2 + scC
+			if (gRun) {gKnown.push(name)}
+		}
+		if (runDEP) {console.log(" - returned", v2)}
+		dom.colorDepth.innerHTML = r2 + (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
+		res.push("colorDepth:"+ v2)
+	}
+
+	// mm color: 418986: FF41+ RFP
+	function get_mm_color(name) {
+		let isLies = false, r3, isBypass = false
+		let v3 = getElementProp("#cssC","content",":after")
+		try {
+			if (runSE) {runCLR = false; abc = def
+			} else if (runSL) {runCLR = false; r3 = "8"
+			} else if (runCLR) {r3 = lstCLR[intCLR]; console.log("SIM #"+ intCLR, name, r3)
+			} else {
+				r3 = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
+					return i
+				})()
+			}
+		} catch(e) {
+			r3 = zB0; log_error("screen: matchmedia_color", e.name, e.message)
+		}
+		r3 = cleanFn(r3)
+		// bypass
+		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
+		// lies
+		if (r3 !== zB0) {
+			if (typeof r3 !== "number") {isLies = true
+			} else if (!Number.isInteger(r3)) {isLies = true
+			} else if (r3 < 2) {isLies = true}
+		}
+		if (!isLies) {v3 = r3 == zB0 ? zB0 : r3} // don't record blocked if no lies
+		// record
+		if (isLies) {
+			// zBO can't get in here unless we can bypass
+			if (!isBypass) {v3 = zLIE}
+			r3 = (isBypass ? soB : soL) + r3 + scC
+			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
+		}
+		if (runCLR) {console.log(" - returned", v3)}
+		dom.mmC.innerHTML = r3 + (r3 === 8 ? rfp_green : rfp_red)
+		res.push("matchmedia_color:"+ v3)
+	}
+
+	// run
+	get_pixeldepth("screen:pixelDepth")
+	get_colordepth("screen:colorDepth")
+	get_mm_color("screen:matchmedia_color")
+	if (runCLR) {intCLR++; intCLR = intCLR % lstCLR.length}
+	if (runDEP) {intDEP++; intDEP = intDEP % lstDEP.length}
+	// return
+	return(res)
+}
+
+function get_scr_dpi_dpr(runtype) {
+	return new Promise(resolve => {
+		// reset
+		let dpr1 = "", dpr2 = "", dprBypass = false
+		dpi_x = 0
+		dpi_y = 0 // if it stays at 0 = css blocked or offsetWidth blocked
+		varDPI = undefined
+		varDPR = undefined
+
+		// DPR
+		function get_dpr() {
+			let t1; if (canPerf) {t1 = performance.now()}
+			if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start dpr" )}
+			try {
+				dpr1 = window.devicePixelRatio || 1;
+				varDPR = dpr1
+			} catch(e) {
+				log_error("screen: dpr", e.name, e.message)
+				dpr1 = zB0
+			}
+			// 477157: FF always use bypass value
+			if (isFF) {
+				let el = dom.dpr2
+				try {
+					dpr2 = getComputedStyle(el).borderTopWidth
+					dpr2 = dpr2.slice(0, -2) // trim "px"
+					if (dpr2 > 0) {
+						dpr2 = (1/dpr2)
+					}
+					//dpr2 = dpr2.toFixed(6); dpr2 = dpr2.toString("0.######") * 1
+					varDPR = dpr2
+					// record lies + bypass
+					let diffDPR = Math.abs(dpr1 - dpr2)
+					if (isNaN(diffDPR) || diffDPR > 0.0001) {
+						dpr1 = soB + dpr1 + scC
+						if (gRun) {
+							gKnown.push("screen:devicePixelRatio")
+							gBypassed.push("screen:devicePixelRatio:"+ varDPR)
+						}
+					}
+				} catch(e) {
+					log_error("screen: dpr poc", e.name, e.message)
+					dpr2 = zB0
+				}
+			}
+			let dprStr = dpr1 + (isFF ? " | " + dpr2 : "")
+			dom.dpr.innerHTML = dprStr + (dprStr == "1 | 1" ? rfp_green : rfp_red)
+			if (logScreen) {
+				logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh dpr : "+ (performance.now()-t1) +" ms" )
+			}
+			if (runtype !== "resize") {log_perf("dpr [screen]",t1)}
+		}
+
+		// DPI x 3 methods, DPPX, DPCM
+		function get_dpi() {
+			let t2; if (canPerf) {t2 = performance.now()}
+			if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start dpi" )}
+			let mmDPI = return_mm_dpi("dpi",1),
+				mmDPPX = return_mm_dpi("dppx",100),
+				mmDPCM = return_mm_dpi("dpcm",10),
+				cssDPI = getElementProp("#P","content",":before")
+				//console.debug(performance.now() - t1 + "ms") //2-3ms
+				//note: divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
+
+			// measure div
+			try {dpi_x = Math.round(dom.divDPI.offsetWidth * varDPR)} catch(e) {}
+			try {dpi_y = Math.round(dom.divDPI.offsetHeight * varDPR)} catch(e) {}
+			// varDPI: fallback checks: allow 1 x diff; use highest value
+			let diffDPI = 0
+			if (dpi_y !== 0) {
+				// this is the one: RFP spoofs cssDPI and mmDPI
+				varDPI = dpi_x
+			} else if (cssDPI !== "x") {
+				if (mmDPI !== zB0) {
+					diffDPI = Math.abs(mmDPI - cssDPI)
+					varDPI = (diffDPI == 1 ? mmDPI : cssDPI)
+				}
+			} else if (mmDPI !== zB0) {
+				varDPI = mmDPI
+			}
+			// debug
+			dom.debugB.innerHTML = "varDPI : "+ varDPI +"<br>"
+				+"cssDPI : "+ cssDPI +"<br>"
+				+" mmDPI : "+ mmDPI +"<br>"
+				+" dpi_x : "+ dpi_x +"<br>"
+				+" dpi_y : "+ dpi_y +"<br>"
+
+			// bypass matchmedia lies
+				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
+				// ToDo: but only if drp2 wasn't blocked?
+				// so we want to use varDPI first
+			if (varDPI !== undefined && dpi_y !== 0) {
+				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - dpi_x)} else {diffDPI = 2}
+				if (mmDPI !== dpi_x && diffDPI > 1) {
+					mmDPI = soB + mmDPI + scC
+					if (gRun) {
+						gKnown.push("screen:matchmedia_dpi")
+						gBypassed.push("screen:matchmedia_dpi:"+ dpi_x)
+					}
+				}
+			} else if (cssDPI !== "x") {
+				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
+				if (mmDPI !== cssDPI && diffDPI > 1) {
+					mmDPI = soB + mmDPI + scC
+					if (gRun) {
+						gKnown.push("screen:matchmedia_dpi")
+						gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
+					}
+				}
+			}
+			dom.mmDPI.innerHTML = mmDPI +" | "+ mmDPPX +" | "+ mmDPCM
+
+			// varDPI is sancrosanct: don't bypass it with possible lies
+			dom.jsDPI.innerHTML = varDPI
+			if (logScreen) {
+				logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh dpi : "+ (performance.now()-t2) +" ms" )
+			}
+			if (runtype !== "resize") {log_perf("dpi [screen]",t2)}
+		}
+		get_dpr()
+		get_dpi()
+
+		// visualViewport scale
+		let vvScale
+		try {
+			vvScale = visualViewport.scale
+		} catch(e) {
+			if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
+				vvScale = zNA
+			} else {
+				vvScale = zB0
+				if (gRun) {log_error("screen: visualViewport scale", e.name, e.message)}
+			}
+		}
+		cleanFn(vvScale)
+		// ToDo: lies: if not blocked or n/a
+		//if ("number" !== typeof vvScale) { vvLies = true }
+		dom.vvScale.innerHTML = vvScale
+
+		// ToDo: zoom revisit
+
+		return resolve(["dpi:"+ varDPI, "devicePixelRatio:"+ varDPR, "visualViewport_scale:"+ vvScale])
+	})
+}
+
+function get_scr_fs_api(runtype) {
+	let r = ""
+	try {
+		if (document.mozFullScreenEnabled) {r = zE} else {r = zD; dom.fsLeak = zNA}
+	} catch(e) {
+		r = zB0; dom.fsLeak = zNA
+		if (gRun) {log_error("screen: full_screen_api", e.name, e.message)}
+	}
+	dom.fsSupport = r
+	return (runtype == "click" ? r : "full_screen_api:"+ r)
+}
+
+function get_scr_fs_state(runtype) {
+	return new Promise(resolve => {
+		// FS
+		let isFS
+		try {
+			if (runSE) {
+				runWFS = false; abc = def
+			} else if (runSL) {
+				runWFS = false; isFS = undefined
+			} else if (runWFS) {
+				isFS = lstWFS[intWFS]
+				console.log("SIM #" +intWFS, "fullscreen", isFS)
+				intWFS++; intWFS = intWFS % lstWFS.length
+			} else {
+				isFS = window.fullScreen
+			}
+		} catch(e) {
+			log_error("screen: fullscreen", e.name, e.message)
+			isFS = zB0
+		}
+		isFS = cleanFn(isFS)
+		let displayFS = isFS, fsBS = false, fsBypass = false
+		if (isFF) {
+			if (isFS !== zB0) {
+				if (isFS !== "true" && isFS !== "false")
+				fsBS = true
+			}
+			let cssFS = getElementProp("#cssDM","content",":after")
+			if (cssFS !== "x") {
+				cssFS = cssFS == "fullscreen" ? "true" : "false"
+				if (cssFS !== isFS) {fsBS = true}
+			}
+			if (fsBS) {
+				fsBS = true
+				isFS = zLIE
+				if (cssFS !== "x") {fsBypass = true; isFS = cssFS}
+				displayFS = (fsBypass ? soB : soL) + displayFS + scC
+				if (gRun) {
+					gKnown.push("screen:fullscreen")
+					if (fsBypass) {gBypassed.push("screen:fullscreen:"+ isFS)}
+				}
+			}
+		}
+		dom.fsState.innerHTML = displayFS
+		if (runWFS) {console.log(" - returned", isFS)}
+		// resolve
+		return resolve("fullscreen:"+ isFS)
+	})
+}
+
+function get_scr_orientation(runtype) {
+	let t0; if (canPerf) {t0 = performance.now()}
+	// mm
+	let mmNames = ["-moz-device-orientation","orientation","aspect-ratio","device-aspect-ratio"]
+	let mmRes = []
+	let l="landscape", p="portrait", q="(orientation: ", s="square", a="aspect-ratio"
+
+	for (let i=0; i < 4; i++) {
+		try {
+			let value = undefined
+			if (i == 0) {
+				if (isFF) {
+					if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
+					if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
+				} else (value = zNS)
+			} else if (i == 1) {
+				if (window.matchMedia(q + p +")").matches) value = p
+				if (window.matchMedia(q + l +")").matches) value = l
+			} else if (i == 2) {
+				if (window.matchMedia("("+ a +":1/1)").matches) value = s
+				if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
+				if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
+			} else {
+				if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
+				if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
+				if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
+			}
+			if (isFF && value == undefined) {value = zB0}
+			mmRes.push(value)
+		} catch(e) {
+			log_error("screen: matchmedia_"+ mmNames[i], e.name, e.message)
+			mmRes.push(zB0)
+		}
+	}
+	// get css values
+	let cssRes = []
+	cssRes.push(getElementProp("#cssOm", "content", ":after"))
+	cssRes.push(getElementProp("#cssO", "content", ":after"))
+	cssRes.push(getElementProp("#cssAR", "content", ":after"))
+	cssRes.push(getElementProp("#cssDAR", "content", ":after"))
+	// bypasses
+	if (runSL) {mmRes = ["groot","thor","space","rabbit"]}
+	let aDisplay = []
+	for (let i=0; i < 4; i++) {
+		if (cssRes[i] !== "x" && cssRes[i] !== mmRes[i]) {
+			aDisplay.push(soB + mmRes[i] + scC)
+			if (gRun) {
+				gKnown.push("screen:matchmedia_"+ mmNames[i])
+				gBypassed.push("screen:matchmedia_"+ mmNames[i] +":"+ cssRes[i])
+			}
+		} else {
+			aDisplay.push(mmRes[i])
+		}
+	}
+	dom.mmO.innerHTML = aDisplay.join(" | ")
+
+	// screen*
+	try {
+		dom.scrOrient.innerHTML = (function() {
+			let names = ["orientation.type", "mozOrientation", "orientation.angle"]
+			let res = []
+			for (let i=0; i < 3; i++) {
+				try {
+					if (i == 0) {res.push(screen.orientation.type)
+					} else if (i == 1) {if (isFF) {res.push(screen.mozOrientation)} else {res.push(zNS)}
+					} else {res.push(screen.orientation.angle)}
+				} catch(e) {
+					log_error("screen:screen."+ names[i], e.name, e.message)
+					res.push(zB0)
+				}
+			}
+			let r = res.join(" | ")
+			r = r.replace(/landscape-secondary/g, "upside down")
+			r = r.replace(/-primary/g, "")
+			r = r.replace(/-secondary/g, "")
+			r += (r == "landscape | landscape | 0" ? rfp_green : rfp_red)
+			return r
+		})()
+	} catch(e) {
+		dom.scrOrient.innerHTML = zB0
+	}
+	// display-mode
+	let dm = zB0
+	let cssMode = getElementProp("#cssDM","content",":after")
+	try {
+		q="(display-mode:"
+		if (window.matchMedia(q +"fullscreen)").matches) {dm = "fullscreen"}
+		if (window.matchMedia(q +"browser)").matches) {dm = "browser"}
+		if (window.matchMedia(q +"minimal-ui)").matches) {dm = "minimal-ui"}
+	} catch(e) {
+		log_error("screen: matchmedia_display-mode", e.name, e.message)
+	}
+	if (runSL) {
+		dm = (dm == "browser" ? "fullscreen" : "browser")
+	}
+	if (dm !== cssMode && cssMode !== "x") {
+		dm = soB + dm + scC
+		if (gRun) {
+			gKnown.push("screen:matchmedia_display-mode")
+			gBypassed.push("screen:matchmedia_display-mode:"+ cssMode)
+		}
+	}
+	dom.mmDM.innerHTML = dm
+	// perf
+	if (runtype !== "resize") {log_perf("orientation [screen]",t0)}
+}
+
+function get_scr_pbmode() {
+	let t0; if (canPerf) {t0 = performance.now()}
+	function output(r) {
+		dom.IsPBMode = r
+		log_perf("pbmode [screen]",t0)
+	}
+	if (isVer < 83) {
+		// FF83+: 1638396: dom.indexedDB.privateBrowsing.enabled
+		try {
+			let db = indexedDB.open("PB")
+			db.onerror = function() {output("true")}
+			db.onsuccess = function() {output("false")}
+		} catch(e) {
+			output("unknown: "+ e.name)
+		}
+	} else {
+		output("unknown")
+	}
+}
+
+function get_scr_resize(runtype) {
+	// everything for resize event: which is almost everything
+	if (runtype !== "screen") {runtype = "resize"}
+	let t0; if (canPerf) {t0 = performance.now()}
+	if (logScreen) {
+		tSD = performance.now() // reset
+		logSData = ["start"]
+	}
+	return new Promise(resolve => {
+		let res = []
+		Promise.all([
+			get_scr_dpi_dpr(runtype),
+			get_scr_fs_api(),
+			get_scr_fs_state(runtype),
+			get_scr_scrollbar(runtype), // gets viewport
+			get_scr_window(runtype),
+		]).then(function(results){
+			results.forEach(function(currentResult) {
+				if (Array.isArray(currentResult)) {
+					currentResult.forEach(function(item) {
+						res.push(item)
+					})
+				} else {
+					res.push(currentResult)
+				}
+			})
+			res.push("window_inner_native_[android]:" + (isOS == "android" ? firstW + " x " + firstH : zNA))
+			if (logScreen) {
+				logSData.push("finish")
+				console.log(logSData.join("\n"))
+			}
+			// THE REST
+			get_scr_orientation(runtype) // not stable
+			get_scr_window_mm(runtype) // equivalency plus ext fuckery
+			return resolve(res)
+		})
+	})
+}
+
+function get_scr_scrollbar(runtype) {
+	return new Promise(resolve => {
+		// we need to wait for the viewport width
+		Promise.all([
+			get_scr_viewport(runtype)
+		]).then(function(res){
+			let t0; if (canPerf) {t0 = performance.now()}
+			if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start scrollbars" )}
+			// viewport
+			let viewport = res[0]
+			let vWidth, vValue, vLies = false
+			try {
+				vWidth = (window.innerWidth - viewport)
+				vWidth = cleanFn(vWidth)
+				let cssW = getElementProp("#D","content",":before")
+				// leverage css value
+				if (cssW !== "x" && "number" == typeof vWidth) {
+					if (cssW * 1 == vWidth - 1) {cssW = vWidth} // allow for min-
+					vWidth = cssW - viewport
+				}
+				// lies
+				if ("number" !== typeof vWidth) {vLies = true
+				} else if (vWidth < 0) {vLies = true}
+				vValue = vWidth
+				vValue = vLies ? zLIE : vWidth
+				if (vLies) {
+					vWidth = soL + vWidth + scC
+					if (gRun) {gKnown.push("screen:viewport_scrollbar")}
+				}
+			} catch(e) {
+				vWidth = zB0; vValue = zB0
+				log_error("screen: viewport scrollbar", e.name, e.message)
+			}
+			// element
+			let eWidth, eValue, eLies = false
+			try {
+				eWidth = (100 - dom.eScroll.scrollWidth)
+				eWidth = cleanFn(eWidth)
+				// lies
+				if ("number" !== typeof eWidth) {eLies = true
+				} else if (eWidth < 0) {eLies = true}
+				eValue = eLies ? zLIE : eWidth
+				if (eLies) {
+					eWidth = soL + eWidth + scC
+					if (gRun) {gKnown.push("screen:element_scrollbar")}
+				}
+			} catch(e) {
+				eWidth = zB0; eValue = zB0
+				log_error("screen: element scrollbar", e.name, e.message)
+			}
+			// display
+			dom.mScrollbar.innerHTML = vWidth +" | "+ eWidth
+			// perf
+			if (logScreen) {
+				logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh scrollbars : "+ (performance.now()-t0) +" ms" )
+			}
+			if (runtype !== "resize") {log_perf("scrollbars [screen]",t0)}
+			return resolve("scrollbars:"+ vValue +", "+ eValue)
+		})
+	})
+}
+
+function get_scr_viewport(runtype) {
+	let t0; if (canPerf) {t0 = performance.now()}
+	if (runtype !== "screen" && runtype !== "height") {runtype = "resize"}
+	if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start viewport" )}
+
+	let e = document.createElement("div")
+	e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
+	document.documentElement.insertBefore(e,document.documentElement.firstChild)
+	let vw, vh
+	try {vw = e.offsetWidth} catch(e) {}
+	try {vh = e.offsetHeight} catch(e) {}
+	document.documentElement.removeChild(e)
+	dom.Viewport = cleanFn(vw) +" x "+ cleanFn(vh)
+
+	// get viewport height once on first load: this s/be with toolbar visible (not FS)
+	if (avh == "") {avh = vh}
+	if (logScreen) {
+		logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh viewport : "+ (performance.now()-t0) +" ms" )
+	}
+	// perf
+	if (runtype !== "resize") {log_perf("viewport [screen]",t0)}
+	// return
+	if (runtype == "height") {
+		return vh // android tests
+	} else {
+		return vw // scrollbar
+	}
+}
+
+function get_scr_window(runtype) {
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start screen + window" )}
+		let res = []
+		// MEASURE: ToDo: catch errors/undefined etc
+		let aMeasures = []
+		let aPos = []
+		let aList = [
+			"screen.width","screen.height","screen.availWidth","screen.availHeight",
+			"window.outerWidth","window.outerHeight","window.innerWidth","window.innerHeight",
+			"screen.left","screen.top","screen.availLeft","screen.availTop",
+			"window.screenX","window.screenY","window.mozInnerScreenX","window.mozInnerScreenY"
+		]
+		for (let i=0; i < 16; i++) {
+			try {
+				let x
+				if (i == 0) {x = screen.width
+				} else if (i == 1) {x = screen.height
+			} else if (i == 2) {x = screen.availWidth
+				} else if (i == 3) {x = screen.availHeight
+				} else if (i == 4) {x = window.outerWidth
+				} else if (i == 5) {x = window.outerHeight
+				} else if (i == 6) {x = window.innerWidth
+				} else if (i == 7) {x = window.innerHeight
+				} else if (i == 8) {x = screen.left
+				} else if (i == 9) {x = screen.top
+				} else if (i == 10) {x = screen.availLeft
+				} else if (i == 11) {x = screen.availTop
+				} else if (i == 12) {x = window.screenX
+				} else if (i == 13) {x = window.screenY
+				} else if (i == 14) {x = window.mozInnerScreenX
+				} else if (i == 15) {x = window.mozInnerScreenY
+				}
+				x = cleanFn(x)
+				if (i < 8) {aMeasures.push(x)} else {aPos.push(x)}
+			} catch (e) {
+				log_error("screen: "+ aList[i], e.name, e.message)
+				if (i < 8) {aMeasures.push(zB0)} else {aPos.push(zB0)}
+			}
+		}
+		if (runSL) {aPos = ["0",0,zB0,"0",0,"0",100,zB0]}
+		// mark non-numbers excl. blocks as NaNs
+		if (isFF) {
+			for (let i=0; i < aPos.length; i++) {
+				if (aPos[i] !== zB0) {aPos[i] = (typeof aPos[i] == "number" ? aPos[i] : "NaN")}
+			}
+		}
+		for (let i=0; i < aMeasures.length; i++) {
+			if (aMeasures[i] !== zB0) {aMeasures[i] = (typeof aMeasures[i] == "number" ? aMeasures[i] : "NaN")}
+		}
+		// screen positions: FF52 is always zeros
+		let v0 = aPos[0], v1 = aPos[1], v2 = aPos[2], v3 = aPos[3]
+		let display = v0 +", "+ v1 +", "+ v2 +", "+ v3
+		let value = display
+		if (isFF) {
+			value = "0, 0, 0, 0"
+			if (display !== value) {
+				// color each one
+				if (v0 !== 0) {v0 = soB + v0 + scC}
+				if (v1 !== 0) {v1 = soB + v1 + scC}
+				if (v2 !== 0) {v2 = soB + v2 + scC}
+				if (v3 !== 0) {v3 = soB + v3 + scC}
+				display = v0 +", "+ v1 +", "+ v2 +", "+ v3
+				if (gRun) {
+					gKnown.push("screen:screen positions")
+					gBypassed.push("screen:screen positions:"+ value)
+				}
+			}
+		}
+		dom.posS.innerHTML = display
+		res.push("screen_positions:"+ value)
+		// window positions
+		let v4 = aPos[4], v5 = aPos[5], v6 = aPos[6], v7 = aPos[7]
+		display = v4 +", "+ v5 +", "+ v6 +", "+ v7
+		value = display
+		let fpValue = display, posNote = ""
+		if (isFF && !isFFLegacy) {
+			posNote = value == "0, 0, 0, 0" ? rfp_green : rfp_red
+			// RFP bypass but !== resize (does not recheck isRFP)
+			if (isRFP && runtype !== "resize") {
+				value = "0, 0, 0, 0"
+				if (display !== value) {
+				// color each one
+					if (v4 !== 0) {v4 = soB + v4 + scC}
+					if (v5 !== 0) {v5 = soB + v5 + scC}
+					if (v6 !== 0) {v6 = soB + v6 + scC}
+					if (v7 !== 0) {v7 = soB + v7 + scC}
+					display = v4 +", "+ v5 +", "+ v6 +", "+ v7
+					if (gRun) {
+						gKnown.push("screen:window positions")
+						gBypassed.push("screen:window positions:"+ value)
+					}
+				}
+			} else {
+				// fullscreen = all zeroes I except the last one
+				// maximized = negatives
+				// we can't bypass but we can mark NaNs as a lie
+				let isPosLies = false
+				if (v4 == "NaN") {v4 = soL + v4 + scC; isPosLies = true}
+				if (v5 == "NaN") {v5 = soL + v5 + scC; isPosLies = true}
+				if (v6 == "NaN") {v6 = soL + v6 + scC; isPosLies = true}
+				if (v7 == "NaN") {v7 = soL + v7 + scC; isPosLies = true}
+				display = v4 +", "+ v5 +", "+ v6 +", "+ v7
+				if (gRun && isPosLies) {
+					gKnown.push("screen:window positions")
+				}
+				// simplify FP value
+				if (fpValue.includes("NaN")) {fpValue = zLIE
+				} else if (fpValue.includes(zB0)) {fpValue = zB0
+				} else if (fpValue !== "0, 0, 0, 0") {fpValue = "!zeros"
+				}
+			}
+		}
+		dom.posW.innerHTML = display + posNote
+		res.push("window_positions:"+ fpValue)
+		let w1 = aMeasures[0], h1 = aMeasures[1],
+			w2 = aMeasures[2], h2 = aMeasures[3],
+			w3 = aMeasures[4], h3 = aMeasures[5],
+			w4 = aMeasures[6], h4 = aMeasures[7]
+		let mScreen = w1 +" x "+ h1,
+			mAvailable = w2 +" x "+ h2,
+			mOuter = w3 +" x "+ h3,
+			mInner = w4 +" x "+ h4
+		// default display
+		dom.mScreen = mScreen
+		dom.mAvailable = mAvailable
+		dom.mOuter = mOuter
+		dom.mInner.innerHTML = mInner
+		// notate
+		if (isFF && !isFFLegacy) {
+			// sizes
+			let match = true, r = "", c = "#ff4f4f"
+			if (mScreen !== mAvailable) {match = false
+			}	else if (mAvailable !== mOuter) {match = false
+			}	else if (mOuter !== mInner) {match = false
+			} else {
+				aMeasures.forEach(function(value) {
+					if (isNaN(value)) {match = false}
+				})
+			}
+			r = (match ? sg : sb) +"[sizes match]"+ sc
+			dom.match.innerHTML = r
+			// color
+			if (match) {c = "#8cdc8c"}
+			let items = document.getElementsByClassName("group")
+			for (let i=0; i < items.length; i++) {items[i].style.color = c}
+			// inner: LB/NW
+			if (isOS !== "android") {dom.lbnw.innerHTML = return_lb_nw(w4,h4)}
+		}
+		// inner
+		let newW = getElementProp("#D","content",":before"),
+			newH = getElementProp("#D","content",":after"),
+			isLies = 0, oldW = w4, oldH = h4
+		if (newW !== "x") {
+			newW = newW * 1
+			if (newW == oldW-1) {newW = oldW}
+			if (newW !== oldW) {isLies++}
+		}
+		if (newH !== "x") {
+			newH = newH.slice(3) * 1
+			if (newH == oldH-1) {newH = oldH}
+			if (newH !== oldH) {isLies++}
+		}
+		if (newW !== "x" && newH !== "x") { // valid bypass values
+			let newInner = newW +" x "+ newH
+			if (gRun && isLies > 0) {
+				gKnown.push("screen:window inner")
+				gBypassed.push("screen:window inner:"+ newInner)
+			}
+			dom.mInner.innerHTML = (isLies > 0 ? soB + mInner + scC : mInner)
+			res.push("window_inner:"+ newInner)
+		} else {
+			// ToDo: prototype lies: these do not exist
+			//if (proxyLies.includes("window.innerWidth") || proxyLies.includes("window.innerHeight")) {isLies++}
+			if (isLies > 0) {
+				dom.mInner.innerHTML = soL + mInner + scC
+				if (gRun) {gKnown.push("screen:window inner")}
+			}
+			res.push("window_inner:"+ (isLies > 0 ? zLIE : mInner))
+		}
+		// screen
+		newW = getElementProp("#S","content",":before")
+		newH = getElementProp("#S","content",":after")
+		isLies = 0, oldW = w1, oldH = h1
+		if (newW !== "x") {
+			newW = newW * 1
+			if (newW == oldW-1) {newW = oldW}
+			if (newW !== oldW) {isLies++}
+		}
+		if (newH !== "x") {
+			newH = newH.slice(3) * 1
+			if (newH == oldH-1) {newH = oldH}
+			if (newH !== oldH) {isLies++}
+		}
+		if (newW !== "x" && newH !== "x") { // two valid bypass values
+			let newScreen = newW +" x "+ newH
+			if (gRun && isLies > 0) {
+				gKnown.push("screen:screen")
+				gBypassed.push("screen:screen:"+ newScreen)
+			}
+			dom.mScreen.innerHTML = (isLies > 0 ? soB + mScreen + scC : mScreen)
+			res.push("screen:"+ newScreen)
+		} else {
+			if (proxyLies.includes("Screen.width") || proxyLies.includes("Screen.height")) {isLies++}
+			if (isLies > 0) {
+				dom.mScreen.innerHTML = soL + mScreen + scC
+				if (gRun) {gKnown.push("screen:screen")}
+			}
+			res.push("screen:"+ (isLies > 0 ? zLIE : mScreen))
+		}
+		// screen available
+		isLies = 0
+		if (proxyLies.includes("Screen.availWidth") || proxyLies.includes("Screen.availHeight")) {isLies++}
+		if (isLies > 0) {
+			dom.mAvailable.innerHTML = soL + mAvailable + scC
+			if (gRun) {gKnown.push("screen:screen available")}
+		}
+		res.push("screen_available:"+ (isLies > 0 ? zLIE : mAvailable))
+		// outer
+		isLies = 0
+		// ToDo: prototype lies: these do not exist
+		//if (proxyLies.includes("window.outerWidth") || proxyLies.includes("window.outerHeight")) {isLies++}
+		if (isLies > 0) {
+			dom.mOuter.innerHTML = soL + mOuter + scC
+			if (gRun) {gKnown.push("screen:window outer")}
+		}
+		//res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
+		res.push("window_outer:TBA")
+		if (logScreen) {
+			logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh screen + window : "+ (performance.now()-t0) +" ms" )
+		}
+		if (runtype !== "resize") {log_perf("screen + window [screen]",t0)}
+		// resolve
+		return resolve(res)
+	})
+}
+
+function get_scr_window_mm(runtype) {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let count = 0
 	let unable = "unable to find upper bound"
@@ -887,13 +1433,7 @@ function get_mm_metrics(runtype) {
 			gMethods.push("screen:matchmedia_"+ type +": "+ unable)
 		}
 		count++
-		if (count == 4) {
-			if (runtype == "resize") {
-				if (logResize) {log_perf("mm various [resize]",t0,"ignore")}
-			} else {
-				log_perf("mm various [screen]",t0)
-			}
-		}
+		if (count == 4 && runtype !== "resize") {log_perf("mm screen + window [screen]",t0)}
 	}
 
 	function runTest(callback){
@@ -1029,566 +1569,7 @@ function get_mm_metrics(runtype) {
 	})
 }
 
-function get_orientation(runtype) {
-	let t0; if (canPerf) {t0 = performance.now()}
-	// mm
-	let mmNames = ["-moz-device-orientation","orientation","aspect-ratio","device-aspect-ratio"]
-	let mmRes = []
-	let l="landscape", p="portrait", q="(orientation: ", s="square", a="aspect-ratio"
-
-	for (let i=0; i < 4; i++) {
-		try {
-			let value = undefined
-			if (i == 0) {
-				if (isFF) {
-					if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
-					if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
-				} else (value = zNS)
-			} else if (i == 1) {
-				if (window.matchMedia(q + p +")").matches) value = p
-				if (window.matchMedia(q + l +")").matches) value = l
-			} else if (i == 2) {
-				if (window.matchMedia("("+ a +":1/1)").matches) value = s
-				if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
-				if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
-			} else {
-				if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
-				if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
-				if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
-			}
-			if (isFF && value == undefined) {value = zB0}
-			mmRes.push(value)
-		} catch(e) {
-			log_error("screen: matchmedia_"+ mmNames[i], e.name, e.message)
-			mmRes.push(zB0)
-		}
-	}
-	// get css values
-	let cssRes = []
-	cssRes.push(getElementProp("#cssOm", "content", ":after"))
-	cssRes.push(getElementProp("#cssO", "content", ":after"))
-	cssRes.push(getElementProp("#cssAR", "content", ":after"))
-	cssRes.push(getElementProp("#cssDAR", "content", ":after"))
-	// bypasses
-	if (runSL) {mmRes = ["groot","thor","space","rabbit"]}
-	let aDisplay = []
-	for (let i=0; i < 4; i++) {
-		if (cssRes[i] !== "x" && cssRes[i] !== mmRes[i]) {
-			aDisplay.push(soB + mmRes[i] + scC)
-			if (gRun) {
-				gKnown.push("screen:matchmedia_"+ mmNames[i])
-				gBypassed.push("screen:matchmedia_"+ mmNames[i] +":"+ cssRes[i])
-			}
-		} else {
-			aDisplay.push(mmRes[i])
-		}
-	}
-	dom.mmO.innerHTML = aDisplay.join(" | ")
-
-	// screen*
-	try {
-		dom.scrOrient.innerHTML = (function() {
-			let names = ["orientation.type", "mozOrientation", "orientation.angle"]
-			let res = []
-			for (let i=0; i < 3; i++) {
-				try {
-					if (i == 0) {res.push(screen.orientation.type)
-					} else if (i == 1) {if (isFF) {res.push(screen.mozOrientation)} else {res.push(zNS)}
-					} else {res.push(screen.orientation.angle)}
-				} catch(e) {
-					log_error("screen:screen."+ names[i], e.name, e.message)
-					res.push(zB0)
-				}
-			}
-			let r = res.join(" | ")
-			r = r.replace(/landscape-secondary/g, "upside down")
-			r = r.replace(/-primary/g, "")
-			r = r.replace(/-secondary/g, "")
-			r += (r == "landscape | landscape | 0" ? rfp_green : rfp_red)
-			return r
-		})()
-	} catch(e) {
-		dom.scrOrient.innerHTML = zB0
-	}
-	// display-mode
-	let dm = zB0
-	let cssMode = getElementProp("#cssDM","content",":after")
-	try {
-		q="(display-mode:"
-		if (window.matchMedia(q +"fullscreen)").matches) {dm = "fullscreen"}
-		if (window.matchMedia(q +"browser)").matches) {dm = "browser"}
-		if (window.matchMedia(q +"minimal-ui)").matches) {dm = "minimal-ui"}
-	} catch(e) {
-		log_error("screen: matchmedia_display-mode", e.name, e.message)
-	}
-	if (runSL) {
-		dm = (dm == "browser" ? "fullscreen" : "browser")
-	}
-	if (dm !== cssMode && cssMode !== "x") {
-		dm = soB + dm + scC
-		if (gRun) {
-			gKnown.push("screen:matchmedia_display-mode")
-			gBypassed.push("screen:matchmedia_display-mode:"+ cssMode)
-		}
-	}
-	dom.mmDM.innerHTML = dm
-
-	// perf
-	if (runtype == "resize") {
-		if (logResize) {log_perf("orientation [resize]",t0,"ignore")}
-	} else {
-		log_perf("orientation [screen]",t0)
-	}
-}
-
-function get_pbmode() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	function output(r) {
-		dom.IsPBMode = r
-		log_perf("pbmode [screen]",t0)
-	}
-	if (isVer < 83) {
-		// FF83+: 1638396: dom.indexedDB.privateBrowsing.enabled
-		try {
-			let db = indexedDB.open("PB")
-			db.onerror = function() {output("true")}
-			db.onsuccess = function() {output("false")}
-		} catch(e) {
-			output("unknown: "+ e.name)
-		}
-	} else {
-		output("unknown")
-	}
-}
-
-function get_resources() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let branding = "",
-			channel = "",
-			result = "",
-			el = dom.branding
-		// extensions can block resources://
-			// FF ~5ms, TB ~20ms
-		setTimeout(() => resolve("resources:blocked"), 100)
-		if (isResource !== "") {output(false); return}
-
-		// output
-		function output(setGlobalVars) {
-			// set global vars
-			if (setGlobalVars) {
-				isChannel = channel // not used but handy
-				isResource = result
-				isResourceMetric = "resources:"+ isMark +", "+ isLogo
-			}
-			dom.fdResource.innerHTML = isResource
-			log_perf("resources [fd]",t0)
-			return resolve(isResourceMetric)
-		}
-		// set
-		function build() {
-			// TB
-			if (isTB) {
-				if (isMark == "270 x 48") {
-					channel = "Tor Browser - Alpha" // alpha: 8.5a7+ [60.5.0esr]
-					log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
-				} else if (isMark == "336 x 48" && isVer > 77) {
-					channel = "Tor Browser - Release" // 78+ therefore release
-				} else if (isMark == "300 x 38" && isVer > 67 && isVer < 78) {
-					channel = "Tor Browser - Release" // 68 therefore release
-				} else if (isMark == "300 x 38" && isVer > 59 && isVer < 68) {
-					channel = "Tor Browser"
-				}
-			}
-			// FF
-			if (!isTB) {
-				let is70 = (isVer > 69)
-				//70+
-				if (isMark == "336 x 48" && is70) {
-					branding = "Browser"; channel = "Release/Beta"
-				} else if (isMark == "336 x 64" && is70) {
-					branding = "Browser"; channel = "Developer/Nightly"
-				//60-69, ESR60/68
-				} else if (isMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
-				} else if (isMark == "132 x 62" && !is70) {channel = "Developer Edition"
-				} else if (isMark == "270 x 48" && !is70) {channel = "Nightly"}
-				// try setting isFork again
-				if (isLogo == zB0 && isFork == undefined) {
-					set_isFork()
-				}
-			}
-			// tidy
-			if (isMark == "0 x 0") {dom.fdBrandingCss = "none"}
-			if (isMark == "") {isMark = zB0}
-			let note = s3+ "["+ isMark +" | "+ isLogo +"]"+ sc
-			if (channel !== "") {
-				result = (branding == "" ? "" : branding +" - ") + channel + note
-			} else if (isFork !== undefined) {
-				result = isFork + note
-			} else if (isMark.substring(0,1) !== "0 ") {
-				let isNew = true
-				if (isOS == "android" && isMark == "0 x 0") {isNew = false}
-				result = (isTB ? "Tor Browser" : "Firefox") + note
-					+ (isNew ? zNEW + (runSN ? zSIM : "") : "")
-			} else {
-				result = (isTB ? "Tor Browser" : "Firefox") + note
-			}
-			output(true)
-		}
-		function run() {
-			// set icon
-			let pngURL = "url('chrome://branding/content/icon64.png')"
-			if (isOS == "android") {pngURL = "url('chrome://branding/content/favicon64.png')"}
-			dom.fdResourceCss.style.backgroundImage= pngURL
-			// remeasure isMark with hidden element to get 0x0 if missing
-			if (isTB || isOS == "android") {
-				let elTB = dom.torbranding2
-				isMark = elTB.width + " x " + elTB.height
-			}
-			// build
-			build()
-		}
-		if (isLogo !== zB0 && isMark !== "") {
-			// fast path
-			run()
-		} else {
-			// trigger delay to ensure resources loaded, retry original isMark
-			setTimeout(function() {
-				try {
-					isMark = el.width+ " x " + el.height
-					set_isFork()
-				} catch(e) {}
-				run()
-			}, 1)
-		}
-	})
-}
-
-function get_screen_metrics(runtype) {
-	let res = []
-	//trap resize event
-	if (runtype !== "load" && runtype !== "screen") {runtype = "resize"}
-
-	// this triggers zoom/viewport when not page load
-		// but ignore viewport on resize: which is called by scrollbar
-		// nothing else needs to wait here for any results
-	if (runtype !== "load") {
-		Promise.all([
-			get_zoom(runtype)
-		]).then(function(){
-			if (runtype !== "resize") {
-				get_viewport(runtype)
-			}
-		})
-	}
-	// resize to auto-update lineheight/scrollbar
-	if (runtype == "resize") {
-		get_line_scrollbar("resize")
-	}
-
-	// MEASURE: ToDo: catch errors/undefined etc
-	let aMeasures = []
-	let aPos = []
-	let aList = [
-		"screen.width","screen.height","screen.availWidth","screen.availHeight",
-		"window.outerWidth","window.outerHeight","window.innerWidth","window.innerHeight",
-		"screen.left","screen.top","screen.availLeft","screen.availTop",
-		"window.screenX","window.screenY","window.mozInnerScreenX","window.mozInnerScreenY"
-	]
-	for (let i=0; i < 16; i++) {
-		try {
-			let x
-			if (i == 0) {x = screen.width
-			} else if (i == 1) {x = screen.height
-			} else if (i == 2) {x = screen.availWidth
-			} else if (i == 3) {x = screen.availHeight
-			} else if (i == 4) {x = window.outerWidth
-			} else if (i == 5) {x = window.outerHeight
-			} else if (i == 6) {x = window.innerWidth
-			} else if (i == 7) {x = window.innerHeight
-			} else if (i == 8) {x = screen.left
-			} else if (i == 9) {x = screen.top
-			} else if (i == 10) {x = screen.availLeft
-			} else if (i == 11) {x = screen.availTop
-			} else if (i == 12) {x = window.screenX
-			} else if (i == 13) {x = window.screenY
-			} else if (i == 14) {x = window.mozInnerScreenX
-			} else if (i == 15) {x = window.mozInnerScreenY
-			}
-			x = cleanFn(x)
-			if (i < 8) {aMeasures.push(x)} else {aPos.push(x)}
-		} catch (e) {
-			log_error("screen: "+ aList[i], e.name, e.message)
-			if (i < 8) {aMeasures.push(zB0)} else {aPos.push(zB0)}
-		}
-	}
-	if (runSL) {aPos = ["0",0,zB0,"0",0,"0",100,zB0]}
-	// mark non-numbers excl. blocks as NaNs
-	if (isFF) {
-		for (let i=0; i < aPos.length; i++) {
-			if (aPos[i] !== zB0) {aPos[i] = (typeof aPos[i] == "number" ? aPos[i] : "NaN")}
-		}
-	}
-	for (let i=0; i < aMeasures.length; i++) {
-		if (aMeasures[i] !== zB0) {aMeasures[i] = (typeof aMeasures[i] == "number" ? aMeasures[i] : "NaN")}
-	}
-
-	// screen positions: FF52 is always zeros
-	let v0 = aPos[0], v1 = aPos[1], v2 = aPos[2], v3 = aPos[3]
-	let display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-	let value = display
-	if (isFF) {
-		value = "0, 0, 0, 0"
-		if (display !== value) {
-			// color each one
-			if (v0 !== 0) {v0 = soB + v0 + scC}
-			if (v1 !== 0) {v1 = soB + v1 + scC}
-			if (v2 !== 0) {v2 = soB + v2 + scC}
-			if (v3 !== 0) {v3 = soB + v3 + scC}
-			display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-			if (gRun) {
-				gKnown.push("screen:screen positions")
-				gBypassed.push("screen:screen positions:"+ value)
-			}
-		}
-	}
-	dom.posS.innerHTML = display
-	res.push("screen_positions:"+ value)
-
-	// window positions
-	let v4 = aPos[4], v5 = aPos[5], v6 = aPos[6], v7 = aPos[7]
-	display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-	value = display
-	let fpValue = display, posNote = ""
-	if (isFF && !isFFLegacy) {
-		posNote = value == "0, 0, 0, 0" ? rfp_green : rfp_red
-		// RFP bypass but !== resize (does not recheck isRFP)
-		if (isRFP && runtype !== "resize") {
-			value = "0, 0, 0, 0"
-			if (display !== value) {
-			// color each one
-				if (v4 !== 0) {v4 = soB + v4 + scC}
-				if (v5 !== 0) {v5 = soB + v5 + scC}
-				if (v6 !== 0) {v6 = soB + v6 + scC}
-				if (v7 !== 0) {v7 = soB + v7 + scC}
-				display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-				if (gRun) {
-					gKnown.push("screen:window positions")
-					gBypassed.push("screen:window positions:"+ value)
-				}
-			}
-		} else {
-			// fullscreen = all zeroes I except the last one
-			// maximized = negatives
-
-			// we can't bypass but we can mark NaNs as a lie
-			let isPosLies = false
-			if (v4 == "NaN") {v4 = soL + v4 + scC; isPosLies = true}
-			if (v5 == "NaN") {v5 = soL + v5 + scC; isPosLies = true}
-			if (v6 == "NaN") {v6 = soL + v6 + scC; isPosLies = true}
-			if (v7 == "NaN") {v7 = soL + v7 + scC; isPosLies = true}
-			display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-			if (gRun && isPosLies) {
-				gKnown.push("screen:window positions")
-			}
-			// simplify FP value
-			if (fpValue.includes("NaN")) {fpValue = zLIE
-			} else if (fpValue.includes(zB0)) {fpValue = zB0
-			} else if (fpValue !== "0, 0, 0, 0") {fpValue = "!zeros"
-			}
-		}
-	}
-	dom.posW.innerHTML = display + posNote
-	res.push("window_positions:"+ fpValue)
-
-	let w1 = aMeasures[0], h1 = aMeasures[1],
-		w2 = aMeasures[2], h2 = aMeasures[3],
-		w3 = aMeasures[4], h3 = aMeasures[5],
-		w4 = aMeasures[6], h4 = aMeasures[7]
-
-	// sim
-	if (runSL) {
-		w1 = w1-856 ; h1 = h1-183 // lie about screen
-		w4 = w4-73; h4 = h4+18 // lie about inner value
-	}
-
-	let mScreen = w1 +" x "+ h1,
-		mAvailable = w2 +" x "+ h2,
-		mOuter = w3 +" x "+ h3,
-		mInner = w4 +" x "+ h4
-	// default display
-	dom.mScreen = mScreen
-	dom.mAvailable = mAvailable
-	dom.mOuter = mOuter
-	dom.mInner.innerHTML = mInner
-
-	// NOTATE
-	if (isFF && !isFFLegacy) {
-		// sizes
-		let match = true, r = "", c = "#ff4f4f"
-		if (mScreen !== mAvailable) {match = false
-		}	else if (mAvailable !== mOuter) {match = false
-		}	else if (mOuter !== mInner) {match = false
-		} else {
-			aMeasures.forEach(function(value) {
-				if (isNaN(value)) {match = false}
-			})
-		}
-		r = (match ? sg : sb) +"[sizes match]"+ sc
-		dom.match.innerHTML = r
-		// color
-		if (match) {c = "#8cdc8c"}
-		let items = document.getElementsByClassName("group")
-		for (let i=0; i < items.length; i++) {items[i].style.color = c}
-		// inner: LB/NW
-		if (isOS !== "android") {dom.lbnw.innerHTML = return_lb_nw(w4,h4)}
-	}
-
-	// FS
-	let isFS
-	try {
-		if (runSE) {
-			runWFS = false; abc = def
-		} else if (runSL) {
-			runWFS = false; isFS = undefined
-		} else if (runWFS) {
-			isFS = lstWFS[intWFS]
-			console.log("SIM #" +intWFS, "fullscreen", isFS)
-			intWFS++; intWFS = intWFS % lstWFS.length
-		} else {
-			isFS = window.fullScreen
-		}
-	} catch(e) {
-		log_error("screen: fullscreen", e.name, e.message)
-		isFS = zB0
-	}
-	isFS = cleanFn(isFS)
-	let displayFS = isFS, fsBS = false, fsBypass = false
-	if (isFF) {
-		if (isFS !== zB0) {
-			if (isFS !== "true" && isFS !== "false")
-			fsBS = true
-		}
-		let cssFS = getElementProp("#cssDM","content",":after")
-		if (cssFS !== "x") {
-			cssFS = cssFS == "fullscreen" ? "true" : "false"
-			if (cssFS !== isFS) {fsBS = true}
-		}
-		if (fsBS) {
-			fsBS = true
-			isFS = zLIE
-			if (cssFS !== "x") {fsBypass = true; isFS = cssFS}
-			displayFS = (fsBypass ? soB : soL) + displayFS + scC
-			if (gRun) {
-				gKnown.push("screen:fullscreen")
-				if (fsBypass) {gBypassed.push("screen:fullscreen:"+ isFS)}
-			}
-		}
-	}
-	dom.fsState.innerHTML = displayFS
-	res.push("fullscreen:"+ isFS)
-	if (runWFS) {console.log(" - returned", isFS)}
-
-	// THE REST
-	get_orientation(runtype) // not stable
-	get_mm_metrics(runtype) // not reliable (extension APIs)
-
-	// METRICS
-	//if (runtype !== "resize") {
-		// allow 1px less due to min- vs max- and devicePixelRatios
-			// ToDo: harden screen/inner bypass: due to zoom/system-scaling and limited ranges
-			// i.e one or both values return "x": expand css, create binary css on the fly
-		// ToDo: harden measurements with matchMedia if not tampered with?
-
-		// inner
-		let newW = getElementProp("#D","content",":before"),
-			newH = getElementProp("#D","content",":after"),
-			isLies = 0, oldW = w4, oldH = h4
-		if (newW !== "x") {
-			newW = newW * 1
-			if (newW == oldW-1) {newW = oldW}
-			if (newW !== oldW) {isLies++}
-		}
-		if (newH !== "x") {
-			newH = newH.slice(3) * 1
-			if (newH == oldH-1) {newH = oldH}
-			if (newH !== oldH) {isLies++}
-		}
-		if (newW !== "x" && newH !== "x") { // valid bypass values
-			let newInner = newW +" x "+ newH
-			if (gRun && isLies > 0) {
-				gKnown.push("screen:window inner")
-				gBypassed.push("screen:window inner:"+ newInner)
-			}
-			dom.mInner.innerHTML = (isLies > 0 ? soB + mInner + scC : mInner)
-			res.push("window_inner:"+ newInner)
-		} else {
-			// ToDo: prototype lies: these do not exist
-			//if (proxyLies.includes("window.innerWidth") || proxyLies.includes("window.innerHeight")) {isLies++}
-			if (isLies > 0) {
-				dom.mInner.innerHTML = soL + mInner + scC
-				if (gRun) {gKnown.push("screen:window inner")}
-			}
-			res.push("window_inner:"+ (isLies > 0 ? zLIE : mInner))
-		}
-
-		// screen
-		newW = getElementProp("#S","content",":before")
-		newH = getElementProp("#S","content",":after")
-		isLies = 0, oldW = w1, oldH = h1
-		if (newW !== "x") {
-			newW = newW * 1
-			if (newW == oldW-1) {newW = oldW}
-			if (newW !== oldW) {isLies++}
-		}
-		if (newH !== "x") {
-			newH = newH.slice(3) * 1
-			if (newH == oldH-1) {newH = oldH}
-			if (newH !== oldH) {isLies++}
-		}
-		if (newW !== "x" && newH !== "x") { // two valid bypass values
-			let newScreen = newW +" x "+ newH
-			if (gRun && isLies > 0) {
-				gKnown.push("screen:screen")
-				gBypassed.push("screen:screen:"+ newScreen)
-			}
-			dom.mScreen.innerHTML = (isLies > 0 ? soB + mScreen + scC : mScreen)
-			res.push("screen:"+ newScreen)
-		} else {
-			if (proxyLies.includes("Screen.width") || proxyLies.includes("Screen.height")) {isLies++}
-			if (isLies > 0) {
-				dom.mScreen.innerHTML = soL + mScreen + scC
-				if (gRun) {gKnown.push("screen:screen")}
-			}
-			res.push("screen:"+ (isLies > 0 ? zLIE : mScreen))
-		}
-
-		// screen available
-		isLies = 0
-		if (proxyLies.includes("Screen.availWidth") || proxyLies.includes("Screen.availHeight")) {isLies++}
-		if (isLies > 0) {
-			dom.mAvailable.innerHTML = soL + mAvailable + scC
-			if (gRun) {gKnown.push("screen:screen available")}
-		}
-		res.push("screen_available:"+ (isLies > 0 ? zLIE : mAvailable))
-
-		// outer
-		isLies = 0
-		// ToDo: prototype lies: these do not exist
-		//if (proxyLies.includes("window.outerWidth") || proxyLies.includes("window.outerHeight")) {isLies++}
-		if (isLies > 0) {
-			dom.mOuter.innerHTML = soL + mOuter + scC
-			if (gRun) {gKnown.push("screen:window outer")}
-		}
-		//res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
-		res.push("window_outer:TBA")
-		res.push("zoom_[raw]:"+ jsZoomOriginal) // more entropy with hiDPI/dPR
-		res.push("dpi:"+ varDPI)
-		res.push("devicePixelRatio:"+ varDPR)
-		res.push("window_inner_native_[android]:" + (isOS == "android" ? firstW + " x " + firstH : zNA))
-		return(res)
-	//}
-}
+/* UA */
 
 function get_ua_doc() {
 	return new Promise(resolve => {
@@ -2109,284 +2090,6 @@ function get_ua_workers() {
 	}
 }
 
-function get_viewport(runtype) {
-	if (logExtra && canPerf) {console.log(performance.now(), "B START.:", runtype, ": viewport")}
-	let e=document.createElement("div")
-	e.style.cssText="position:fixed;top:0;left:0;bottom:0;right:0;"
-	document.documentElement.insertBefore(e,document.documentElement.firstChild)
-	let vw=e.offsetWidth,
-		vh=e.offsetHeight
-	document.documentElement.removeChild(e)
-	dom.Viewport = vw +" x "+ vh
-	// get viewport height once on first load
-	// this s/be with toolbar visible (not FS)
-	if (avh == "") {avh = vh}
-	if (logExtra && canPerf) {console.log(performance.now(), "B FINISH:", runtype, ": viewport")}
-	// return
-	if (runtype == "fd") {
-		return vw // scrollbar
-	} else {
-		return vh // android tests
-	}
-}
-
-function get_widgets() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
-		let sName = "feature_widgets"
-		sDetail[sName] = []
-
-		try {
-			// loop elements
-			let res = [], sizes = [], fonts = []
-			for (let i=0; i < list.length; i++) {
-				let el = document.getElementById("widget"+ i)
-				let font = "unknown", size = "unknown"
-				font = getComputedStyle(el).getPropertyValue("font-family")
-				size = getComputedStyle(el).getPropertyValue("font-size")
-				if (runSN) {
-					//if (i == 4) {font = "unknown"} // bypass but new
-					//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
-					if (i == 4) {font = "-apple-system"} // font
-					//if (i == 2) {size="26px"} // size
-				}
-				res.push(list[i] +": "+ font +", "+ size)
-				if (i < 6) {sizes.push(size); fonts.push(font)}
-			}
-			let hash = sha1(res.join(), "feature widgets")
-			sDetail[sName] = res
-			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
-			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
-			// notate
-			let note, color = "3", mixed = ""
-			if (isFF) {
-				// we only need the font for OS: ignore unknown to still get an OS
-				let fntTmp = fonts
-				if (fntTmp.length > 1) {
-					fntTmp = fntTmp.filter(x => !["unknown"].includes(x))
-				}
-				if (fntTmp.length == 1) {
-					let font0 = fntTmp[0]
-					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
-					} else if (font0.slice(0,12) == "\"MS Shell Dl") {note = "windows" // FF57 has a slice and escape char issue
-					} else if (font0 == "Roboto") {note = "android"
-					} else if (font0 == "-apple-system") {note = "mac"
-					} else if (font0 == "unknown") {note = "unknown"; color = "bad"
-					} else {note = "linux"}
-				} else {
-					note = "NEW"; color = "bad"
-				}
-				if (note !== "NEW") {
-					if (fonts.length > 1 || sizes.length > 1) {mixed = zNEW}
-				}
-			}
-			let btn = buildButton(color, sName, note)
-			dom.fdWidget.innerHTML = hash + btn + mixed + (runSN ? zSIM : "")
-			// perf & resolve
-			log_perf("widgets [fd]",t0)
-			return resolve("widgets:"+ hash)
-		} catch(e) {
-			dom.fdWidget = zB0
-			log_perf("widgets [fd]",t0)
-			return resolve("widgets:"+ zB0)
-		}
-	})
-}
-
-function get_zoom(runtype) {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		// reset
-		let zoomAssume = false
-		let dpr1 = "", dpr2 = "", dprBypass = false
-		dpi_x = 0
-		dpi_y = 0 // if it stays at 0 = css blocked or offsetWidth blocked
-		varDPI = undefined
-		varDPR = undefined
-		jsZoom = undefined
-
-		// DPR
-		function get_dpr() {
-			try {
-				dpr1 = window.devicePixelRatio || 1;
-				varDPR = dpr1
-			} catch(e) {
-				log_error("screen: dpr", e.name, e.message)
-				dpr1 = zB0
-			}
-			// 477157: FF always use bypass value
-			if (isFF) {
-				let el = dom.dpr2
-				try {
-					dpr2 = getComputedStyle(el).borderTopWidth
-					dpr2 = dpr2.slice(0, -2) // trim "px"
-					if (dpr2 > 0) {
-						dpr2 = (1/dpr2)
-					}
-					//dpr2 = dpr2.toFixed(6); dpr2 = dpr2.toString("0.######") * 1
-					varDPR = dpr2
-					// record lies + bypass
-					let diffDPR = Math.abs(dpr1 - dpr2)
-					if (isNaN(diffDPR) || diffDPR > 0.0001) {
-						dpr1 = soB + dpr1 + scC
-						if (gRun) {
-							gKnown.push("screen:devicePixelRatio")
-							gBypassed.push("screen:devicePixelRatio:"+ varDPR)
-						}
-					}
-				} catch(e) {
-					log_error("screen: dpr poc", e.name, e.message)
-					dpr2 = zB0
-				}
-			}
-			let dprStr = dpr1 + (isFF ? " | " + dpr2 : "")
-			dom.dpr.innerHTML = dprStr + (dprStr == "1 | 1" ? rfp_green : rfp_red)
-		}
-
-		// DPI x 3 methods, DPPX, DPCM
-		function get_dpi_etc() {
-			let t1; if (canPerf) {t1 = performance.now()}
-			let mmDPI = return_mm_dpi("dpi",1),
-				mmDPPX = return_mm_dpi("dppx",100),
-				mmDPCM = return_mm_dpi("dpcm",10),
-				cssDPI = getElementProp("#P","content",":before")
-				//console.debug(performance.now() - t1 + "ms") //2-3ms
-			// note: divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
-
-			// calulated via div
-			try {
-				dpi_x = Math.round(dom.divDPI.offsetWidth * varDPR)
-			} catch(e) {}
-			try {
-				dpi_y = Math.round(dom.divDPI.offsetHeight * varDPR)
-			} catch(e) {}
-
-			if (runSL) {
-				dpi_x = dpi_x + 10; dpi_y = dpi_y + 10; mmDPI = 63
-			}
-			// varDPI: fallback checks: allow 1 x diff; use highest value
-			let diffDPI = 0
-			if (dpi_y !== 0) {
-				// this is the one: RFP spoofs cssDPI and mmDPI
-				varDPI = dpi_x
-			} else if (cssDPI !== "x") {
-				if (mmDPI !== zB0) {
-					diffDPI = Math.abs(mmDPI - cssDPI)
-					varDPI = (diffDPI == 1 ? mmDPI : cssDPI)
-				}
-			} else if (mmDPI !== zB0) {
-				varDPI = mmDPI
-			}
-			//if (isOS == "android") {
-				dom.debugB.innerHTML = "varDPI : "+ varDPI +"<br>"
-					+"cssDPI : "+ cssDPI +"<br>"
-					+" mmDPI : "+ mmDPI +"<br>"
-					+" dpi_x : "+ dpi_x +"<br>"
-					+" dpi_y : "+ dpi_y +"<br>"
-			//}
-			//console.debug("varDPI", varDPI, "cssDPI", cssDPI, "mmDPI", mmDPI, "dpi_x + y", dpi_x, dpi_y)
-
-			// bypass matchmedia lies
-				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
-					// ToDo: but only if drp2 wasn't blocked?
-				// so we want to use varDPI first
-			if (varDPI !== undefined && dpi_y !== 0) {
-				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - dpi_x)} else {diffDPI = 2}
-				if (mmDPI !== dpi_x && diffDPI > 1) {
-					mmDPI = soB + mmDPI + scC
-					if (gRun) {
-						gKnown.push("screen:matchmedia_dpi")
-						gBypassed.push("screen:matchmedia_dpi:"+ dpi_x)
-					}
-				}
-			} else if (cssDPI !== "x") {
-				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
-				if (mmDPI !== cssDPI && diffDPI > 1) {
-					mmDPI = soB + mmDPI + scC
-					if (gRun) {
-						gKnown.push("screen:matchmedia_dpi")
-						gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
-					}
-				}
-			}
-			dom.mmDPI.innerHTML = mmDPI +" | "+ mmDPPX +" | "+ mmDPCM
-
-			// varDPI is sancrosanct: don't bypass it with possible lies
-			dom.jsDPI.innerHTML = varDPI
-			if (runtype == "resize") {
-				if (logResize) {log_perf("dpi [part of zoom]",t1,"ignore")}
-			} else {
-				log_perf("dpi [part of zoom]",t1,"ignore")
-			}
-		}
-		get_dpr()
-		get_dpi_etc()
-
-		// zoom
-		if (varDPI == undefined) {
-			jsZoom = 100
-			zoomAssume = true
-		} else {
-			jsZoom = varDPI
-		}
-		jsZoomOriginal = jsZoom // keep any possible entropy
-		jsZoom = Math.round(jsZoom)
-
-		// visualViewport scale
-		let vvScale
-		try {
-			vvScale = visualViewport.scale
-		} catch(e) {
-			if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
-				vvScale = zNA
-			} else {
-				vvScale = zB0
-				if (gRun) {log_error("screen: visualViewport scale", e.name, e.message)}
-			}
-		}
-		cleanFn(vvScale)
-		// ToDo: lies: if not blocked or n/a
-		//if ("number" !== typeof vvScale) { vvLies = true }
-		dom.vvScale.innerHTML = vvScale
-
-
-		// fixup some numbers
-		//console.debug("zoom", jsZoom)
-		if (jsZoom !== 100) {
-			if (jsZoom > 27 && jsZoom < 34 && isFF) {jsZoom=30
-			} else if (jsZoom > 30 && jsZoom < 36) {jsZoom=33 // chrome
-			} else if (jsZoom > 47 && jsZoom < 52) {jsZoom=50
-			} else if (jsZoom > 63 && jsZoom < 72) {jsZoom=67
-			} else if (jsZoom > 75 && jsZoom < 82) {jsZoom=80
-			} else if (jsZoom > 84 && jsZoom < 95) {jsZoom=90
-			} else if (jsZoom > 95 && jsZoom < 102) {jsZoom=100
-			} else if (jsZoom > 104 && jsZoom < 112) {jsZoom=110
-			} else if (jsZoom > 114 && jsZoom < 122) {jsZoom=120
-			} else if (jsZoom > 127 && jsZoom < 136) {jsZoom=133
-			} else if (jsZoom > 143 && jsZoom < 152) {jsZoom=150
-			} else if (jsZoom > 160 && jsZoom < 180 && isFF) {jsZoom=170
-			} else if (jsZoom > 170 && jsZoom < 180) {jsZoom=175 // chrome
-			} else if (jsZoom > 190 && jsZoom < 210) {jsZoom=200
-			} else if (jsZoom > 225 && jsZoom < 255 && isFF) {jsZoom=240
-			} else if (jsZoom > 240 && jsZoom < 255) {jsZoom=250 // chrome
-			} else if (jsZoom > 280 && jsZoom < 310) {jsZoom=300
-			} else if (jsZoom > 380 && jsZoom < 410) {jsZoom=400
-			} else if (jsZoom > 475 && jsZoom < 510) {jsZoom=500
-			}
-		}
-		dom.jsZoom.innerHTML = jsZoom + (zoomAssume ? s1 +"[assumed]"+ sc : jsZoom == 100 ? rfp_green : rfp_red)
-
-		if (runtype == "resize") {
-			if (logResize) {log_perf("zoom [resize]",t0,"ignore")}
-		} else {
-			log_perf("zoom ["+ runtype +"]",t0)
-		}
-		if (logExtra && canPerf) {console.log(performance.now(), "A FINISH:", runtype, ": zoom, dpi, devicePixelRatio")}
-		return resolve(jsZoom)
-	})
-}
-
 /* OS SPECIFIC */
 
 function run_os() {
@@ -2397,11 +2100,11 @@ function run_os() {
 		get_android_tbh()
 		// rerun screen: android can be slow
 		if (window.innerWidth == firstW) {
-			setTimeout(function(){get_screen_metrics()}, 100)
+			setTimeout(function(){get_scr_resize()}, 100)
 		}
 	} else {
 		// desktop
-		window.addEventListener("resize", get_screen_metrics)
+		window.addEventListener("resize", get_scr_resize)
 	}
 }
 
@@ -2415,7 +2118,7 @@ function get_android_tbh() {
 		if (window.fullScreen == false) {
 			// delay: allow time for toolbar change
 			setTimeout(function() {
-				let vh_new = get_viewport()
+				let vh_new = get_scr_viewport("height")
 				if (vh_new > avh) {
 					dom.tbh = (vh_new - avh)
 				}
@@ -2429,7 +2132,7 @@ function get_android_kbh() {
 		// wait for keyboard
 		setTimeout(function() {
 			// use viewport: doesn't change on zoom
-			let vh_new = get_viewport()
+			let vh_new = get_scr_viewport("height")
 			// Compare to avh (captured on first load: s/be with toolbar visible)
 			// Since the event exits FS, we can rely on avh
 			// use absolute value: event also triggered losing focus
@@ -2445,7 +2148,7 @@ function get_android_kbh() {
 
 function goFS() {
 	if (isFF) {
-		if (get_fullscreen() == zE) {
+		if (get_scr_fs_api("click") == zE) {
 			dom.fsLeak = ""
 			let ih1 = window.innerHeight,
 				delay = 1, n = 1,
@@ -2617,18 +2320,13 @@ function goNW_UA() {
 
 /* OUTPUT */
 
-function outputScreen(runtype) {
+function outputScreen() {
 	// this function is only called on page load or reruns
-	// so no need to worry about resizing events
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
-
-	get_pbmode() // not FP stable
-
 	Promise.all([
-		get_fullscreen("section"),
-		get_color(),
-		get_screen_metrics(runtype), // calls the rest, also used on resize
+		get_scr_color(), // static
+		get_scr_resize("screen"), // basically everything else
 	]).then(function(results){
 		results.forEach(function(currentResult) {
 			if (Array.isArray(currentResult)) {
@@ -2641,6 +2339,7 @@ function outputScreen(runtype) {
 		})
 		log_section("screen", t0, section)
 	})
+	get_scr_pbmode() // not FP stable
 }
 
 function outputUA() {
@@ -2735,7 +2434,7 @@ function outputUA() {
 	})
 }
 
-function outputFD(runtype) {
+function outputFD() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 
@@ -2748,16 +2447,15 @@ function outputFD(runtype) {
 		section.push("version:"+ r)
 
 		Promise.all([
-			get_errors(),
-			get_widgets(),
-			get_resources(),
-			get_line_scrollbar("fd"), // promises zoom & viewport first
-			get_math(), // must come after widget
+			get_fd_errors(),
+			get_fd_widgets(),
+			get_fd_resources(),
+			get_fd_math(), // must come after widget
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
-			// os bitness: requires get_math()
+			// os bitness: requires get_fd_math()
 				// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
 				// isOS64: true, zNS (if correct error), zB0 (incorrect error), or false (future: when pref dropped)
 			let bits, display = bits
@@ -2797,25 +2495,24 @@ function outputFD(runtype) {
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
 		})
+	}
 
-	} else {
+	if (!isFF) {
 		Promise.all([
-			get_errors(),
-			get_widgets(),
-			get_math(),
+			get_fd_errors(),
+			get_fd_widgets(),
+			get_fd_math(),
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				section.push(currentResult)
 			})
 			dom.fdResource = zNA
-			section.push("resources:n/a")
 			dom.fdArchOS = zNA
-			section.push("os_architecture:n/a")
 			dom.fdVersion.innerHTML = zNA
-			section.push("version:n/a")
-			dom.fdScrollV = zNA
-			dom.fdScrollE = zNA
-			section.push("scrollbars:n/a")
+			dom.fdBrandingCss = zNA
+			dom.fdChrome = zNA
+			dom.fdMathOS = zNA
+			section.push("resources:n/a","os_architecture:n/a","version:n/a")
 			// Brave/Opera
 			let browser = zNA, display = zNA
 			if (isBrave) {
@@ -2825,19 +2522,6 @@ function outputFD(runtype) {
 			dom.fdResourceCss = browser
 			section.push("browser:"+ browser)
 			log_section("feature", t0, section)
-
-			dom.fdBrandingCss = zNA
-			dom.fdChrome = zNA
-			dom.fdMathOS = zNA
-			dom.fdLH = zNA
-			// non-FF needs these: in FF scrollbar calls them
-			if (runtype == "load") {
-				Promise.all([
-					get_zoom("load")
-				]).then(function(){
-					get_viewport("load")
-				})
-			}
 		})
 	}
 }
@@ -2861,9 +2545,9 @@ function outputStart() {
 	let items = document.getElementsByClassName("faint")
 	for (let i=0; i < items.length; i++) {items[i].textContent = "not coded yet"}
 	dom.audiohash2 = ""
-	outputFD("load")
+	outputFD()
 	setTimeout(function() {outputUA()}, 1)
-	setTimeout(function() {outputScreen("load")}, 1)
+	setTimeout(function() {outputScreen()}, 1)
 	setTimeout(function() {run_os()}, 1) // per os tweaks
 }
 
