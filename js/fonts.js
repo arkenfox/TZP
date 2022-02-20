@@ -744,13 +744,12 @@ function get_unicode() {
 			dom.ug4.innerHTML = chash + r
 			dom.ug10.innerHTML = fntHead + display
 
-			// log
-			if (logExtra && isCanvas && isTM) {
-				r = ""
-				if (isBound) {r = "measuretext vs bounding\n"+ diffsb.join("\n")}
-				if (isClient && isClient !== isBound) {r += "measuretext vs clientrects\n"+ diffsc.join("\n")}
-				//if (r !== "") {console.debug(r)}
-			}
+			//debug
+			//r = ""
+			//if (isBound) {r = "measuretext vs bounding\n"+ diffsb.join("\n")}
+			//if (isClient && isClient !== isBound) {r += "measuretext vs clientrects\n"+ diffsc.join("\n")}
+			//if (r !== "") {console.debug(r)}
+
 			// perf/resolve
 			log_perf("unicode glyphs [fonts]",t0)
 			return resolve(res)
