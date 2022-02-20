@@ -291,7 +291,7 @@ function get_computed_styles() {
 					if (bCount !== 3) {isLie = true}
 				}
 				if (fakeIndex.length) (isLie = true)
-				if (isLie) {gKnown.push("css:computed_styles");}
+				if (isLie) {gKnown.push("css:computed_styles")}
 			}
 			// value
 			let value = zLIE
