@@ -928,110 +928,118 @@ function get_scr_fs_state(runtype) {
 }
 
 function get_scr_orientation(runtype) {
-	let t0; if (canPerf) {t0 = performance.now()}
-	// mm
-	let mmNames = ["-moz-device-orientation","orientation","aspect-ratio","device-aspect-ratio"]
-	let mmRes = []
-	let l="landscape", p="portrait", q="(orientation: ", s="square", a="aspect-ratio"
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start orientation" )}
+		// mm
+		let mmNames = ["-moz-device-orientation","orientation","aspect-ratio","device-aspect-ratio"]
+		let mmRes = []
+		let l="landscape", p="portrait", q="(orientation: ", s="square", a="aspect-ratio"
 
-	for (let i=0; i < 4; i++) {
-		try {
-			let value = undefined
-			if (i == 0) {
-				if (isFF) {
-					if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
-					if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
-				} else (value = zNS)
-			} else if (i == 1) {
-				if (window.matchMedia(q + p +")").matches) value = p
-				if (window.matchMedia(q + l +")").matches) value = l
-			} else if (i == 2) {
-				if (window.matchMedia("("+ a +":1/1)").matches) value = s
-				if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
-				if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
-			} else {
-				if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
-				if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
-				if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
-			}
-			if (isFF && value == undefined) {value = zB0}
-			mmRes.push(value)
-		} catch(e) {
-			log_error("screen: matchmedia_"+ mmNames[i], e.name, e.message)
-			mmRes.push(zB0)
-		}
-	}
-	// get css values
-	let cssRes = []
-	cssRes.push(getElementProp("#cssOm", "content", ":after"))
-	cssRes.push(getElementProp("#cssO", "content", ":after"))
-	cssRes.push(getElementProp("#cssAR", "content", ":after"))
-	cssRes.push(getElementProp("#cssDAR", "content", ":after"))
-	// bypasses
-	if (runSL) {mmRes = ["groot","thor","space","rabbit"]}
-	let aDisplay = []
-	for (let i=0; i < 4; i++) {
-		if (cssRes[i] !== "x" && cssRes[i] !== mmRes[i]) {
-			aDisplay.push(soB + mmRes[i] + scC)
-			if (gRun) {
-				gKnown.push("screen:matchmedia_"+ mmNames[i])
-				gBypassed.push("screen:matchmedia_"+ mmNames[i] +":"+ cssRes[i])
-			}
-		} else {
-			aDisplay.push(mmRes[i])
-		}
-	}
-	dom.mmO.innerHTML = aDisplay.join(" | ")
-
-	// screen*
-	try {
-		dom.scrOrient.innerHTML = (function() {
-			let names = ["orientation.type", "mozOrientation", "orientation.angle"]
-			let res = []
-			for (let i=0; i < 3; i++) {
-				try {
-					if (i == 0) {res.push(screen.orientation.type)
-					} else if (i == 1) {if (isFF) {res.push(screen.mozOrientation)} else {res.push(zNS)}
-					} else {res.push(screen.orientation.angle)}
-				} catch(e) {
-					log_error("screen:screen."+ names[i], e.name, e.message)
-					res.push(zB0)
+		for (let i=0; i < 4; i++) {
+			try {
+				let value = undefined
+				if (i == 0) {
+					if (isFF) {
+						if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
+						if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
+					} else (value = zNS)
+				} else if (i == 1) {
+					if (window.matchMedia(q + p +")").matches) value = p
+					if (window.matchMedia(q + l +")").matches) value = l
+				} else if (i == 2) {
+					if (window.matchMedia("("+ a +":1/1)").matches) value = s
+					if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
+					if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
+				} else {
+					if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
+					if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
+					if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
 				}
+				if (isFF && value == undefined) {value = zB0}
+				mmRes.push(value)
+			} catch(e) {
+				log_error("screen: matchmedia_"+ mmNames[i], e.name, e.message)
+				mmRes.push(zB0)
 			}
-			let r = res.join(" | ")
-			r = r.replace(/landscape-secondary/g, "upside down")
-			r = r.replace(/-primary/g, "")
-			r = r.replace(/-secondary/g, "")
-			r += (r == "landscape | landscape | 0" ? rfp_green : rfp_red)
-			return r
-		})()
-	} catch(e) {
-		dom.scrOrient.innerHTML = zB0
-	}
-	// display-mode
-	let dm = zB0
-	let cssMode = getElementProp("#cssDM","content",":after")
-	try {
-		q="(display-mode:"
-		if (window.matchMedia(q +"fullscreen)").matches) {dm = "fullscreen"}
-		if (window.matchMedia(q +"browser)").matches) {dm = "browser"}
-		if (window.matchMedia(q +"minimal-ui)").matches) {dm = "minimal-ui"}
-	} catch(e) {
-		log_error("screen: matchmedia_display-mode", e.name, e.message)
-	}
-	if (runSL) {
-		dm = (dm == "browser" ? "fullscreen" : "browser")
-	}
-	if (dm !== cssMode && cssMode !== "x") {
-		dm = soB + dm + scC
-		if (gRun) {
-			gKnown.push("screen:matchmedia_display-mode")
-			gBypassed.push("screen:matchmedia_display-mode:"+ cssMode)
 		}
-	}
-	dom.mmDM.innerHTML = dm
-	// perf
-	if (runtype !== "resize") {log_perf("orientation [screen]",t0)}
+		// get css values
+		let cssRes = []
+		cssRes.push(getElementProp("#cssOm", "content", ":after"))
+		cssRes.push(getElementProp("#cssO", "content", ":after"))
+		cssRes.push(getElementProp("#cssAR", "content", ":after"))
+		cssRes.push(getElementProp("#cssDAR", "content", ":after"))
+		// bypasses
+		if (runSL) {mmRes = ["groot","thor","space","rabbit"]}
+		let aDisplay = []
+		for (let i=0; i < 4; i++) {
+			if (cssRes[i] !== "x" && cssRes[i] !== mmRes[i]) {
+				aDisplay.push(soB + mmRes[i] + scC)
+				if (gRun) {
+					gKnown.push("screen:matchmedia_"+ mmNames[i])
+					gBypassed.push("screen:matchmedia_"+ mmNames[i] +":"+ cssRes[i])
+				}
+			} else {
+				aDisplay.push(mmRes[i])
+			}
+		}
+		dom.mmO.innerHTML = aDisplay.join(" | ")
+
+		// screen*
+		try {
+			dom.scrOrient.innerHTML = (function() {
+				let names = ["orientation.type", "mozOrientation", "orientation.angle"]
+				let res = []
+				for (let i=0; i < 3; i++) {
+					try {
+						if (i == 0) {res.push(screen.orientation.type)
+						} else if (i == 1) {if (isFF) {res.push(screen.mozOrientation)} else {res.push(zNS)}
+						} else {res.push(screen.orientation.angle)}
+					} catch(e) {
+						log_error("screen:screen."+ names[i], e.name, e.message)
+						res.push(zB0)
+					}
+				}
+				let r = res.join(" | ")
+				r = r.replace(/landscape-secondary/g, "upside down")
+				r = r.replace(/-primary/g, "")
+				r = r.replace(/-secondary/g, "")
+				r += (r == "landscape | landscape | 0" ? rfp_green : rfp_red)
+				return r
+			})()
+		} catch(e) {
+			dom.scrOrient.innerHTML = zB0
+		}
+		// display-mode
+		let dm = zB0
+		let cssMode = getElementProp("#cssDM","content",":after")
+		try {
+			q="(display-mode:"
+			if (window.matchMedia(q +"fullscreen)").matches) {dm = "fullscreen"}
+			if (window.matchMedia(q +"browser)").matches) {dm = "browser"}
+			if (window.matchMedia(q +"minimal-ui)").matches) {dm = "minimal-ui"}
+		} catch(e) {
+			log_error("screen: matchmedia_display-mode", e.name, e.message)
+		}
+		if (runSL) {
+			dm = (dm == "browser" ? "fullscreen" : "browser")
+		}
+		if (dm !== cssMode && cssMode !== "x") {
+			dm = soB + dm + scC
+			if (gRun) {
+				gKnown.push("screen:matchmedia_display-mode")
+				gBypassed.push("screen:matchmedia_display-mode:"+ cssMode)
+			}
+		}
+		dom.mmDM.innerHTML = dm
+		// perf
+		if (logScreen) {
+			logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh orientation : "+ (performance.now()-t0) +" ms" )
+		}
+		if (runtype !== "resize") {log_perf("orientation [screen]",t0)}
+		// resolve
+		return resolve("skip")
+	})
 }
 
 function get_scr_pbmode() {
@@ -1065,18 +1073,20 @@ function get_scr_resize(runtype) {
 	return new Promise(resolve => {
 		let res = []
 		Promise.all([
+			get_scr_window(runtype),
 			get_scr_dpi_dpr(runtype),
 			get_scr_fs_api(),
 			get_scr_fs_state(runtype),
 			get_scr_scrollbar(runtype), // gets viewport
-			get_scr_window(runtype),
+			get_scr_window_mm(runtype),
+			get_scr_orientation(runtype),
 		]).then(function(results){
 			results.forEach(function(currentResult) {
 				if (Array.isArray(currentResult)) {
 					currentResult.forEach(function(item) {
 						res.push(item)
 					})
-				} else {
+				} else if (currentResult !== "skip") {
 					res.push(currentResult)
 				}
 			})
@@ -1085,9 +1095,6 @@ function get_scr_resize(runtype) {
 				logSData.push("finish")
 				console.log(logSData.join("\n"))
 			}
-			// THE REST
-			get_scr_orientation(runtype) // not stable
-			get_scr_window_mm(runtype) // equivalency plus ext fuckery
 			return resolve(res)
 		})
 	})
@@ -1187,7 +1194,7 @@ function get_scr_viewport(runtype) {
 function get_scr_window(runtype) {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start screen + window" )}
+		if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start scr/win" )}
 		let res = []
 		// MEASURE: ToDo: catch errors/undefined etc
 		let aMeasures = []
@@ -1403,6 +1410,7 @@ function get_scr_window(runtype) {
 			if (gRun) {gKnown.push("screen:screen available")}
 		}
 		res.push("screen_available:"+ (isLies > 0 ? zLIE : mAvailable))
+
 		// outer
 		isLies = 0
 		// ToDo: prototype lies: these do not exist
@@ -1414,158 +1422,167 @@ function get_scr_window(runtype) {
 		//res.push("window_outer:"+ (isLies > 0 ? zLIE : mAvailable))
 		res.push("window_outer:TBA")
 		if (logScreen) {
-			logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh screen + window : "+ (performance.now()-t0) +" ms" )
+			logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh scr/win : "+ (performance.now()-t0) +" ms" )
 		}
-		if (runtype !== "resize") {log_perf("screen + window [screen]",t0)}
+		if (runtype !== "resize") {log_perf("scr/win [screen]",t0)}
 		// resolve
 		return resolve(res)
 	})
 }
 
 function get_scr_window_mm(runtype) {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let count = 0
-	let unable = "unable to find upper bound"
-	// perf
-	function perf(id, str, type) {
-		document.getElementById(id).innerHTML = str == unable ? zB0 : str
-		if (gRun && str == unable) {
-			gMethods.push("screen:matchmedia_"+ type +": "+ unable)
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start scr/win mm" )}
+		let count = 0, res = []
+		let unable = "unable to find upper bound"
+		// perf
+		function perf(id, str, type) {
+			document.getElementById(id).innerHTML = str == unable ? zB0 : str
+			if (gRun && str == unable) {
+				gMethods.push("screen:matchmedia_"+ type +": "+ unable)
+			}
+			count++
+			if (count == 4) {
+				if (logScreen) {
+					logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh scr/win mm : "+ (performance.now()-t0) +" ms" )
+				}
+				if (runtype !== "resize") {log_perf("scr/win mm [screen]",t0)}
+				return resolve("skip")
+			}
 		}
-		count++
-		if (count == 4 && runtype !== "resize") {log_perf("mm screen + window [screen]",t0)}
-	}
 
-	function runTest(callback){
-		// screen
-		Promise.all([
-			callback("device-width", "max-device-width", "px", 512, 0.01),
-			callback("device-height", "max-device-height", "px", 512, 0.01)
-		]).then(function(device){
-			perf("mmScreen", device.join(" x "), "screen")
-		}).catch(function(err){
-			perf("mmScreen", err, "screen")
-		})
-		// inner
-		Promise.all([
-			callback("width", "max-width", "px", 512, 0.01),
-			callback("height", "max-height", "px", 512, 0.01)
-		]).then(function(inner){
-			perf("mmInner", inner.join(" x "), "inner")
-		}).catch(function(err){
-			perf("mmInner", err, "inner")
-		})
-		// moz
-		if (isFF) {
-			callback("-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 2, 0.0000001
-			).then(function(moz){
-				perf("mmDPRm", moz += (moz == 1 ? rfp_green : rfp_red), "-moz-device-pixel-ratio")
+		function runTest(callback){
+			// screen
+			Promise.all([
+				callback("device-width", "max-device-width", "px", 512, 0.01), // 0.01
+				callback("device-height", "max-device-height", "px", 512, 0.01) // 0.01
+			]).then(function(device){
+				perf("mmScreen", device.join(" x "), "screen")
 			}).catch(function(err){
-				perf("mmDPRm", err, "-moz-device-pixel-ratio")
+				perf("mmScreen", err, "screen")
 			})
-		} else {
-			perf("mmDPRm", zNS)
-		}
-		// webkit
-		if (!isFF || isVer > 62) {
-			callback("-webkit-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 2, 0.0000001
-			).then(function(web){
-				perf("mmDPRw", web, "-webkit-device-pixel-ratio")
+			// inner
+			Promise.all([
+				callback("width", "max-width", "px", 512, 0.01),
+				callback("height", "max-height", "px", 512, 0.01)
+			]).then(function(inner){
+				perf("mmInner", inner.join(" x "), "inner")
 			}).catch(function(err){
-				perf("mmDPRw", err, "-webkit-device-pixel-ratio")
+				perf("mmInner", err, "inner")
 			})
-		} else {
-			perf("mmDPRw", zNS)
-		}
-	}
-	function searchValue(tester, maxValue, precision){
-		let minValue = 0
-		let ceiling = Math.pow(2, 32)
-		function stepUp(){
-			if (maxValue > ceiling){
-				return Promise.reject("unable to find upper bound")
-			}
-			return tester(maxValue).then(function(testResult){
-				if (testResult === searchValue.isEqual){
-					return maxValue
-				}
-				else if (testResult === searchValue.isBigger){
-					minValue = maxValue
-					maxValue *= 2
-					return stepUp()
-				}
-				else {
-					return false
-				}
-			})
-		}
-		function binarySearch(){
-			if (maxValue - minValue < precision){
-				return tester(minValue).then(function(testResult){
-					if (testResult.isEqual){
-						return minValue
-					}
-					else {
-						return tester(maxValue).then(function(testResult){
-							if (testResult.isEqual){
-								return maxValue
-							}
-							else {
-								return Promise.reject(
-									"between "+ minValue +" and "+ maxValue
-								)
-							}
-						})
-					}
+			// moz
+			if (isFF) {
+				callback("-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 2, 0.0000001
+				).then(function(moz){
+					perf("mmDPRm", moz += (moz == 1 ? rfp_green : rfp_red), "-moz-device-pixel-ratio")
+				}).catch(function(err){
+					perf("mmDPRm", err, "-moz-device-pixel-ratio")
 				})
+			} else {
+				perf("mmDPRm", zNS)
 			}
-			else {
-				let pivot = (minValue + maxValue) / 2
-				return tester(pivot).then(function(testResult){
+			// webkit
+			if (!isFF || isVer > 62) {
+				callback("-webkit-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 2, 0.0000001
+				).then(function(web){
+					perf("mmDPRw", web, "-webkit-device-pixel-ratio")
+				}).catch(function(err){
+					perf("mmDPRw", err, "-webkit-device-pixel-ratio")
+				})
+			} else {
+				perf("mmDPRw", zNS)
+			}
+		}
+		function searchValue(tester, maxValue, precision){
+			let minValue = 0
+			let ceiling = Math.pow(2, 32)
+			function stepUp(){
+				if (maxValue > ceiling){
+					return Promise.reject("unable to find upper bound")
+				}
+				return tester(maxValue).then(function(testResult){
 					if (testResult === searchValue.isEqual){
-						return pivot
+						return maxValue
 					}
 					else if (testResult === searchValue.isBigger){
-						minValue = pivot
-						return binarySearch()
+						minValue = maxValue
+						maxValue *= 2
+						return stepUp()
 					}
 					else {
-						maxValue = pivot
-						return binarySearch()
+						return false
 					}
 				})
 			}
-		}
-		return stepUp().then(function(stepUpResult){
-			if (stepUpResult){
-				return stepUpResult
-			}
-			else {
-				return binarySearch()
-			}
-		})
-	}
-	searchValue.isSmaller = -1
-	searchValue.isEqual = 0
-	searchValue.isBigger = 1
-
-	runTest(function(prefix, maxPrefix, suffix, maxValue, precision){
-		return searchValue(function(valueToTest){
-			try {
-				if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
-					return Promise.resolve(searchValue.isEqual)
-				}
-				else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
-					return Promise.resolve(searchValue.isSmaller)
+			function binarySearch(){
+				if (maxValue - minValue < precision){
+					return tester(minValue).then(function(testResult){
+						if (testResult.isEqual){
+							return minValue
+						}
+						else {
+							return tester(maxValue).then(function(testResult){
+								if (testResult.isEqual){
+									return maxValue
+								}
+								else {
+									return Promise.reject(
+										"between "+ minValue +" and "+ maxValue
+									)
+								}
+							})
+						}
+					})
 				}
 				else {
-					return Promise.resolve(searchValue.isBigger)
+					let pivot = (minValue + maxValue) / 2
+					return tester(pivot).then(function(testResult){
+						if (testResult === searchValue.isEqual){
+							return pivot
+						}
+						else if (testResult === searchValue.isBigger){
+							minValue = pivot
+							return binarySearch()
+						}
+						else {
+							maxValue = pivot
+							return binarySearch()
+						}
+					})
 				}
-			} catch(e) {
-				let reason = zB0
-				return Promise.reject(reason)
 			}
-		}, maxValue, precision)
+			return stepUp().then(function(stepUpResult){
+				if (stepUpResult){
+					return stepUpResult
+				}
+				else {
+					return binarySearch()
+				}
+			})
+		}
+		searchValue.isSmaller = -1
+		searchValue.isEqual = 0
+		searchValue.isBigger = 1
+
+		runTest(function(prefix, maxPrefix, suffix, maxValue, precision){
+			return searchValue(function(valueToTest){
+				try {
+					if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
+						return Promise.resolve(searchValue.isEqual)
+					}
+					else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
+						return Promise.resolve(searchValue.isSmaller)
+					}
+					else {
+						return Promise.resolve(searchValue.isBigger)
+					}
+				} catch(e) {
+					let reason = zB0
+					return Promise.reject(reason)
+				}
+			}, maxValue, precision)
+		})
 	})
 }
 
@@ -2320,28 +2337,6 @@ function goNW_UA() {
 
 /* OUTPUT */
 
-function outputScreen() {
-	// this function is only called on page load or reruns
-	let t0; if (canPerf) {t0 = performance.now()}
-	let section = []
-	Promise.all([
-		get_scr_color(), // static
-		get_scr_resize("screen"), // basically everything else
-	]).then(function(results){
-		results.forEach(function(currentResult) {
-			if (Array.isArray(currentResult)) {
-				currentResult.forEach(function(item) {
-					section.push(item)
-				})
-			} else {
-				section.push(currentResult)
-			}
-		})
-		log_section("screen", t0, section)
-	})
-	get_scr_pbmode() // not FP stable
-}
-
 function outputUA() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	// reset
@@ -2524,6 +2519,28 @@ function outputFD() {
 			log_section("feature", t0, section)
 		})
 	}
+}
+
+function outputScreen() {
+	// this function is only called on page load or reruns
+	let t0; if (canPerf) {t0 = performance.now()}
+	let section = []
+	Promise.all([
+		get_scr_color(), // static
+		get_scr_resize("screen"), // basically everything else
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			if (Array.isArray(currentResult)) {
+				currentResult.forEach(function(item) {
+					section.push(item)
+				})
+			} else {
+				section.push(currentResult)
+			}
+		})
+		log_section("screen", t0, section)
+	})
+	get_scr_pbmode() // not FP stable
 }
 
 function outputStart() {
