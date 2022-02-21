@@ -66,12 +66,13 @@ function mini(str, call) {
 	for (i = 0, len = json.length; i < len; i++) {
 		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
+	let result = ('0000000' + (hash >>> 0).toString(16)).slice(-8)
 	if (logPerfMini) {
 		let ms = (performance.now()-t0)
 		gPerfHash += ms
 		gPerfHashDetail.push(ms +" : mini : "+ call)
 	}
-	return ('0000000' + (hash >>> 0).toString(16)).substr(-8)
+	return result
 }
 
 function sha1(str, call) {
