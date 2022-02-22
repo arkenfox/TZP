@@ -528,19 +528,20 @@ function outputPrototypeLies() {
 					name == 'toString' || !!lieProps['Function.toString']
 				)
 				if (detectProxies) {
-					lies = {
-						...lies,
-			// ^ FF52: SyntaxError: invalid property id
-			// ^ FF53-54: SyntaxError: expected property name, got '...'
+					lies = Object.assign(
+						{},
+						lies,
 						// Advanced Proxy Detection
-						[`s: failed at too much recursion __proto__ error`]: getChainCycleLie({ apiFunction, method: '__proto__' }),
-						[`t: failed at chain cycle error`]: getTooMuchRecursionLie({ apiFunction }),
-						[`u: failed at chain cycle __proto__ error`]: getTooMuchRecursionLie({ apiFunction, method: '__proto__' }),
-						[`v: failed at reflect set proto`]: getReflectSetProtoLie({ apiFunction, randomId }),
-						[`w: failed at reflect set proto proxy`]: getReflectSetProtoProxyLie({ apiFunction, randomId }),
-						[`x: failed at instanceof check error`]: getInstanceofCheckLie(apiFunction),
-						[`y: failed at define properties`]: getDefinePropertiesLie(apiFunction)
-					}
+						{
+							[`s: failed at too much recursion __proto__ error`]: getChainCycleLie({ apiFunction, method: '__proto__' }),
+							[`t: failed at chain cycle error`]: getTooMuchRecursionLie({ apiFunction }),
+							[`u: failed at chain cycle __proto__ error`]: getTooMuchRecursionLie({ apiFunction, method: '__proto__' }),
+							[`v: failed at reflect set proto`]: getReflectSetProtoLie({ apiFunction, randomId }),
+							[`w: failed at reflect set proto proxy`]: getReflectSetProtoProxyLie({ apiFunction, randomId }),
+							[`x: failed at instanceof check error`]: getInstanceofCheckLie(apiFunction),
+							[`y: failed at define properties`]: getDefinePropertiesLie(apiFunction)
+						}
+					)
 				}
 				const lieTypes = Object.keys(lies).filter(key => !!lies[key])
 				return {
