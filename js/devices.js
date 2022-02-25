@@ -192,7 +192,7 @@ function get_keyboard() {
 						dom.nKeyboard.innerHTML = display
 						return resolve("keyboard:"+ (isFF ? zNA : zB0))
 					} else {
-						display = sha1(keys.join(), "devices keyboard")
+						display = mini_sha1(keys.join(), "devices keyboard")
 						if (isObjFake) {
 							sName += "_fake_skip"
 							display = color(display)
@@ -458,7 +458,7 @@ function get_plugins_mimetypes() {
 					if (isLies) {sName += "_fake_skip"}
 					sDetail[sName] = value
 					btn = buildButton("7", sName, value.length +" "+ type)
-					value = sha1(value.join(), "devices "+ type)
+					value = mini_sha1(value.join(), "devices "+ type)
 				}
 				fpValue = value
 				// isBypass
@@ -677,7 +677,7 @@ function get_speech_engines() {
 			if (Array.isArray(output)) {
 				sDetail[sName] = output
 				btn = buildButton("7", sName, output.length +" engine"+ (output.length > 1 ? "s" : ""))
-				output = sha1(output.join(), "devices speech engines")
+				output = mini_sha1(output.join(), "devices speech engines")
 			}
 			dom.sEngines.innerHTML = output + btn + (output == "none" ? rfp_green : rfp_red)
 			log_perf("speech engines [devices]",t0)
