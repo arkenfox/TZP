@@ -19,6 +19,7 @@ function get_element_keys() {
 				keys.push(key)
 			}
 			sDetail[sName] = keys
+			//console.debug(keys.join("\n"))
 			let hash = sha1(keys.join(), "elements keys")
 			dom.elementkeys.innerHTML = hash + buildButton("15", sName, keys.length)
 			return resolve("element_keys:"+ hash)
@@ -40,19 +41,16 @@ function get_resized() {
 		elTest = dom.mathmlTest,
 		elLine = dom.lhTest,
 		target = dom.measureDiv,
-		sizes = [16,97,203,333,417,513,595,709,867]
-
-	// ToDo: apply a font family per OS if isTB
+		sizes = [16,97,203,333,417] //,513,595,709,867]
 
 	try {
 		let errM = "", errMMsg = "", errL = "", errLMsg
 		sizes.forEach(function(size) {
-			target.style.fontSize = size+"px"
+			target.style.fontSize = size+"pt" // or px? decisions
 			// mathml
 			if (isFF) {
 				try {
-					let diff = elTest.offsetHeight - elCtrl.offsetHeight
-					if (!isNaN(diff)) {resM.push(diff * 1)}
+					resM.push(cleanFn(elTest.offsetHeight - elCtrl.offsetHeight))
 				} catch(e) {
 					errM = e.name; errMMsg = e.message
 				}
@@ -60,18 +58,12 @@ function get_resized() {
 			// line
 			try {
 				let elDiv = elLine.getBoundingClientRect()
-				let lh = elDiv.height
-				// trim decimals
-				if (count_decimals(lh) > 4) {lh = lh.toFixed(4)}
-				lh = lh.toString()
-				// remove trailing zeros
-				try {lh = (lh * 1).toString(); lh = lh * 1} catch(e) {}
-				if (!isNaN(lh)) {resL.push(lh)}
+				resL.push(cleanFn(elDiv.height))
 			} catch(e) {
 				errL = e.name; errLMsg = e.message
 			}
 		})
-		try {target.style.fontSize = "16px"} catch(e) {}
+		try {target.style.fontSize = "16pt"} catch(e) {} // reset size to remove horizontal scrollbar
 
 		// mathml
 		let displayM = ""
@@ -93,6 +85,7 @@ function get_resized() {
 			} else {
 				sDetail[sNameM] = resM
 				displayM = sha1(resM.join(), "elements mathml") + buildButton("15", sNameM)
+					+ " ["+ mini(resM.join(), "elements lineheight") +"]"
 			}
 		}
 		dom.mathml.innerHTML = isFF ? displayM : zNA
@@ -113,6 +106,7 @@ function get_resized() {
 		} else {
 			sDetail[sNameL] = resL
 			displayL = sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL)
+				+ " ["+ mini(resL.join(), "elements lineheight") +"]"
 		}
 		dom.lineheight.innerHTML = displayL
 
