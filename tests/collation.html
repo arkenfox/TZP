@@ -583,7 +583,7 @@ function collator() {
 
 			// set control
 			chars = chars.sort(Intl.Collator("en").compare)
-			let control = sha1(chars.join())
+			let control = mini_sha1(chars.join())
 			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
 				+ s12 +"   hash: "+ sc + control + s12 +" [en]"+ sc +"<br>"
 			output.push(strItem)
@@ -605,7 +605,7 @@ function collator() {
 					// ignore unsupported
 				} else {
 					chars.sort(Intl.Collator(code).compare)
-					let test = sha1(chars.join())
+					let test = mini_sha1(chars.join())
 					if (test == control) {
 						legendnew.push(code.padStart(7) +": "+ name)
 					} else {
@@ -628,7 +628,7 @@ function collator() {
 				for (let i = 0 ; i < diffs.length; i++) {
 					// get current item
 					tmpStr = diffs[i]
-					tmpH = tmpStr.substring(0,40) // first 40 chars = sha1 hash
+					tmpH = tmpStr.substring(0,40) // first 40 chars = mini_sha1 hash
 					tmpL = tmpStr.substring(41, tmpStr.length) // skip colon and get the locale
 					locales += sg + tmpL.split("(")[0] + sc +"("+ tmpL.split("(")[1] +" "
 					// grab next item
@@ -666,7 +666,7 @@ function collator() {
 					localesHash.push(tmpL)
 				}
 				// results output
-				localesHash = sha1(localesHash.join())
+				localesHash = mini_sha1(localesHash.join())
 				strItem = s12 +"  stats: "+ sc
 					+ sg + newArr.length +" unique"
 					+ sc +" in "+ sg + codes.length
@@ -674,10 +674,10 @@ function collator() {
 				output.push(strItem)
 
 				let ff = ""
-				if (localesHash == "4a16f12e61d36648b0c8221007e9953b3256ddab") {ff = "70+" // hye, no
-				} else if (localesHash == "c4ab4437ca6416fd573e473015f9f4ff2120481c") {ff = "68-69" // zh-hk, zh-sg changed
-				} else if (localesHash == "dd682eaf62b498563da5e2a42ca8671960e1820a") {ff = "65-67" // ku,tk
-				} else if (localesHash == "8eb7de4db8f980b7a2cf17f2ac554bd4cfcb528c") {ff = "64 or lower"
+				if (localesHash == "21cbe4c4e47404815d31e64a619ec08d540cf5cd") {ff = "70+" // hye, no
+				} else if (localesHash == "f9f5d35a8c46ba1b813832e8cb37b9e03ab05a3f") {ff = "68-69" // zh-hk, zh-sg changed
+				} else if (localesHash == "51441ad32be68f5f37a8c15f738a88b480e4e678") {ff = "65-67" // ku,tk
+				} else if (localesHash == "8e779fd9464269b349ced64c90d9e3d3a71e9df6") {ff = "64 or lower"
 				}
 				strItem = s12 +"locales: "+ sc + localesHash + (ff == "" ? "" : s16 +" [FF"+ ff + "]"+ sc) +"<br>"
 				output.push(strItem)
