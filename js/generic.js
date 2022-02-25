@@ -1056,6 +1056,21 @@ function log_perf(str, time1, time2, extra) {
 	}
 }
 
+function log_section_hash(name) {
+	// section hash
+	let data = sData[name]
+	let hash = sha1(data.join(), name +" section result")
+	let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
+	if (name == "canvas" || name == "storage") {if (isFile) {sHash += note_file}
+	} else if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")
+	} else if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
+	document.getElementById(name +"hash").innerHTML = sHash
+	// global run
+	if (gRun) {
+		gData.push([name +":"+ hash, data])
+	}
+}
+
 function log_section(name, time1, data) {
 	let t0; if (canPerf) {t0 = performance.now(); time1 = Math.round(t0-time1).toString()}
 
@@ -1085,7 +1100,6 @@ function log_section(name, time1, data) {
 	// DATA
 	if (Array.isArray(data)) {
 		data.sort()
-		let hash = sha1(data.join(), name +" section result")
 		// SANITY
 		if (data.length == 0) {
 			gCheck.push("#section "+ name +": data array is empty")
@@ -1119,24 +1133,22 @@ function log_section(name, time1, data) {
 
 		// SECTION
 		sData[name] = data
-		let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
-		if (name == "canvas" || name == "storage") {if (isFile) {sHash += note_file}}
-		if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")}
-		if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
-		document.getElementById(name +"hash").innerHTML = sHash
 		if (canPerf) {document.getElementById("perf"+ name).innerHTML = " "+ (isPerf ? time1 : "xxx") +" ms"}
-		if (!gRun) {outputPostSection(name)} // trigger nonFP
-
+		if (!gRun) {
+			log_section_hash(name)
+			outputPostSection(name) // trigger nonFP
+		}
 		// GLOBAL
 		if (gRun) {
 			gCount++
-			gData.push([name +":"+ hash, data])
 			// FINISH
 			if (gCount == gCountExpected) {
+				// build section hashes and propagate gData
+				const sDataNames = Object.keys(sData)
+				sDataNames.forEach(function(name) {log_section_hash(name)})
 				// temp
 				if (logPerfHash !== "") {
 					console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "+ gPerfHash +" ms]\n - " + gPerfHashDetail.join("\n - "))
-					//console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "+ gPerfHash +" ms]")
 				}
 				// metric count
 				let metricCount = 0
