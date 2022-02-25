@@ -1,220 +1,209 @@
 "use strict";
 
-/* code based on https://canvasblocker.kkapsner.de/test/ **/
+/* code based on https://canvasblocker.kkapsner.de/test/ */
 
 function outputDomRect() {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let sColor = s8
+	let pretty = [
+		"Element.getBoundingClientRect","Element.getClientRects",
+		"Range.getBoundingClientRect","Range.getClientRects",]
+	let elements = ["known","h1","text1","text2","select","progress","button"]
 
-	// analyze & output
-	function analyze() {
-		// debug
-		//run0.sort(); run1.sort(); console.log("domrect\n - "+ run0.join("\n - ") +"\n - "+ run1.join("\n - "))
-
-		let knownHash = "cf417ff6"
-		let pretty = ["Element.getClientRects","Element.getBoundingClientRect","Range.getClientRects","Range.getBoundingClientRect"]
-		let hash = []
-
-		for (let i=0; i < 4; i++) {
-			// repurpose known arrays as lie booleans
-			if (isFF) {
-				// FF: rect6
-				// note: errors/undefined override these when we check value1
-				known["dr"+ i] = (mini(known["dr"+ i].join()) == knownHash ? false : true)
-				//if (known["dr"+ i] == true) {console.log("lie: known values: "+ pretty[i])}
+	function output() {
+		let res = [], aLies = [], aValue = [], isBypass = false, bypassHash
+		let prevMini, prevHash
+		for (let i=0; i < pretty.length; i++) {
+			if (aBlock[i] === false) {
+				// replace miniHashes
+				let current = aDisplay[i]
+				if (current !== prevMini) {
+					prevHash = sha1(oData["run0"+i], "domrect [method "+ i +"]"); aDisplay[i] = prevHash
+				} else {
+					aDisplay[i] = prevHash
+				}
+				prevMini = current
+				// lies
+				let isLie = (aType[i] == false)
+				if (aKnown[i] === false) {isLie = true // note: only isFF
+				} else if (aPass[i] === false) {isLie = true
+				} else if (aShift[i] === false) {isLie = true}
+				aLies.push(isLie)
+				// bypass item: isFF only
+				if (isFF) {
+					if (isLie === false && isBypass === false) {isBypass = true; bypassHash = aDisplay[i]}
+				}
 			} else {
-				// non-FF
-				known["dr"+ i] = false
+				aLies.push(false)
 			}
-
-			let value1 = run0[i].split(":")[2],
-				value2 = run1[i].split(":")[2]
-			let push = value1
-			let display = value1
-
-			// sim
-			//if (i == 1) {value1 = "0c4cf7ff544ab66"; value2 = "ec46b57d8a484a"}
-			//if (i == 3) {value1 = "0c4cf7ff544ab66"; value2 = "ec46b57d8a484a"}
-
-			if (value1 == "tzp") {
-				// errors: starts with "tzp:": don't record lie
-				known["dr"+ i] = false
-				value1 = run0[i].split(":")[3]
-				if (value1 == "") {value1 = "error"}
-				if (value1 == undefined) {value1 = "undefined"}
-				push = value1
-				display = value1
-			} else if (value1 !== value2) {
-				// random each pass: record lie
-				known["dr"+ i] = true
-				//console.log("lie: random each pass: "+ pretty[i])
-				push = "random"
-				display = sColor +"[1] "+ sc + value1.substring(0,13) +".. "
-					+ sColor +"[2] "+ sc + value2.substring(0,14) +".."
-					+ sColor + note_random
+		}
+		// display
+		for (let i=0; i < pretty.length; i++) {	
+			if (aBlock[i] === false && aLies[i] === false) {
+				aValue[i] = aDisplay[i]
 			} else {
-				// same value on two passes
-				// check for noise
-				if (isFF || isEngine == "blink") {
-					let compare = chk["dr"+ i]
-					if (compare.length > 0) {
-						compare.sort()
-						//console.log(compare.join("\n"))
-						let diffs = [], prev_item = "", prev_value = ""
-						compare.forEach(function(item) {
-							let delim = item.split(":")
-							if (prev_item == delim[0] +"_"+ delim[1]) {
-								let diff = (delim[3]-prev_value)
-								if (diff !== 0.25) {
-									// record lie
-									known["dr"+ i] = true
-									//if (known["dr"+ i] == true) {console.log("lie: shift: "+ pretty[i])}
-								}
-								let margin = (0.25 - diff)
-								diffs.push(prev_item +", "+ diff +", "+ margin +", "+ prev_value +", "+ delim[3])
-							}
-							prev_item = delim[0] +"_"+ delim[1]
-							prev_value = delim[3]
-						})
-						if (known["dr"+ i] == true) {
-							//console.log("DOMRect method dr"+ i +" [item, diff, diff from 0.25, 1st measurement, shifted measurement]\n", diffs)
-							push = "noise"
-							display = value1 + sColor + note_noise
-						}
-					}
+				aValue[i] = (isBypass ? bypassHash : (aBlock[i] === true ? zB0 : zLIE))
+				aDisplay[i] = (isBypass? soB : soL) + aDisplay[i] + scC
+				if (gRun) {
+					gKnown.push("domrect:"+ pretty[i])
+					if (isBypass) {gBypassed.push("domrect:"+ pretty[i] +":"+ bypassHash)}
 				}
 			}
-			// lies
-			if (gRun) {
-				if (known["dr"+ i] == true) {gKnown.push("domrect:"+ pretty[i])}
-			}
-			// only push real values
-			if (push.length == 40) {hash.push("domrect:"+push)}
-			document.getElementById("dr"+ i).innerHTML = display
+			document.getElementById("dr"+i).innerHTML = aDisplay[i]
+			res.push(pretty[i] +":" + aValue[i])
 		}
-		// section
-		if (hash.length) {
-			//de-dupe/sanity check
-			hash = hash.filter(function(item, position) {return hash.indexOf(item) === position})
-			if (hash.length > 1) {
-				if (gRun) {gCheck.push("domrect: mismatched good hashes")}
-				hash = ["domrect:unknown"]
-			}
-		} else {
-			hash = ["domrect:"+ zLIE]
-		}
-		// lies bypassed
-		if (gRun) {
-			let sumBS = known["dr0"] + known["dr1"] + known["dr2"] + known["dr3"]
-			if (sumBS > 0 && sumBS < 4) {
-				for (let i=0; i < 4; i++) {
-					let trueValue = hash[0].split(":")[1]
-					if (known["dr"+i] == true && trueValue !== "unknown") {
-						gBypassed.push("domrect:"+ pretty[i] +":" + trueValue)
-					}
-				}
-			}
-		}
-		log_section("domrect", t0, hash) // any real values should be the same
+		/*
+		console.debug(
+			"aBlock", aBlock,
+			"\naType", aType,
+			"\naKnown", aKnown,
+			"\naPass", aPass,
+			"\naShift", aShift,
+			"\naNoise", aNoise,
+			"\naLies", aLies,
+			"\naBypass", isBypass, bypassHash,
+			"\naDisplay", aDisplay,
+			"\naValue", aValue,
+		)
+		//console.debug(oData)
+
+		// record methods: per-execution, per-element, isType
+			// note: blocks are recorded in errors
+		*/
+
+		//console.debug(performance.now() - t0 + " ms")
+		log_section("domrect", t0, res)
 	}
 
+	// analyze
+	let aKnown = [], aPass = [], aShift = [], aBlock = [], aDisplay = [], aType = [], aNoise = []
+	function analyze() {
+		for (let i=0; i < pretty.length; i++) {
+			if ("object" === typeof oData["run0"+i]) {
+				aBlock.push(false)
+				// known (isFF)
+				let knownCtrl = oData["run0"+i].slice(0,8)
+				knownCtrl = mini(knownCtrl.join(), "domrect [method "+ i +"] known")
+				aKnown.push(isFF ? (knownCtrl == "2b9f1576" ? true : false) : true) // only isFF can be false
+				// random per execution (known value is static)
+				let runCtrl = oData["run1"+i].slice(0,8)
+				runCtrl = mini(runCtrl.join(), "domrect [method "+ i +"] 2pass")
+				aPass.push(knownCtrl === runCtrl ? true : false)
+				// hash: full data
+				let miniHash = mini(oData["run0"+i].join(), "domrect [method "+ i +"] full")
+				aDisplay.push(miniHash)
+				// shift diffs
+					// ignore width/height = not affected by position (-12 results)
+					// ignore select item = blink + left/right/x properties (-6 results)
+				if (aType[i] === true) {
+					let aOne = oData["run0"+i].slice(8) // 6 x 8 = 48
+					let aTwo = oData["run1"+i].slice(8)
+					let aDiffs = []
+					for (let k=0; k < aOne.length; k++) {
+						let item = aOne[k].split(":")[0],
+							type = aOne[k].split(":")[1]
+						if (type !== "width" && type !== "height" && item !== "select") {
+							let value1 = aOne[k].split(":")[2] * 1
+							let value2 = aTwo[k].split(":")[2] * 1
+							let diff = value2 - value1
+							if (diff !== 0.25) {
+								aDiffs.push(diff)
+								oData["diff"+i].push(item +" : "+ type +" : "+ diff)
+							}
+						}
+					}
+					// diffs random-or-same
+					if (aDiffs.length == 0) {
+						aShift.push(true)
+						aNoise.push(zNA)
+					} else {
+						aShift.push(false)
+						let len = aDiffs.length
+						aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
+						aNoise.push(aDiffs.length +"/"+ len)
+					}
+				} else {
+					aShift.push(zNA)
+					aNoise.push(zNA)
+				}
+			} else {
+				aBlock.push(true)
+				aKnown.push(zNA)
+				aPass.push(zNA)
+				aShift.push(zNA)
+				aNoise.push(zNA)
+				aDisplay.push(oData["run0"+i])
+			}
+		}
+		output()
+	}
 	function getElements(classname){
 		return Array.from(document.querySelectorAll(classname))
 	}
-	function createTest(method, runtype, runarray, callback){
+
+	function createTest(method, runtype, callback){
 		const properties = ["x","y","width","height","top","left","right","bottom"]
 		function performTest(runtype){
 			try {
-				let classname = ".testRect"
-				if (runtype == 3) {classname = ".knownRect"}
-				const rects = getElements(classname).map(callback)
-				const data = new Float64Array(rects.length * properties.length)
+				let aData = [], isType
+				const rects = getElements(".testRect").map(callback)
 				rects.forEach(function(rect, i){
+					isType = true
 					properties.forEach(function(property, j){
-						data[i * properties.length + j] = rect[property]
-						if (runtype == 3) {
-							// known
-							let str = properties[j] +":"+ rect[property]
-							known[method].push(str)
-						} else {
-							// diffs on runs: only collect 2 runs: 0 (first) + 2 (shift)
-							if (runtype !== 1) {
-								// what is i (0 to 5) ? the element rect number: rect3 = option/select
-								let go = false
-								// everything except width/height
-								if (j !== 2 && j !== 3) {go = true}
-								// blink false positives: rect3 <option> left/right/x
-								if (isEngine == "blink" && i == 3) {
-									if (j == 5 || j == 6 || j == 0) {go = false}
-								}
-								if (go) {
-									let str = properties[j] +":rect"+ i +":run"+ runtype +":"+ rect[property]
-									chk[method].push(str)
-								}
-							}
-						}
+						let value = cleanFn(rect[property])
+						if ("number" !== typeof value) {isType = false}
+						oData["run"+ runtype +""+ method].push(elements[i] +":"+ properties[j] +":"+ value)
 					})
 				})
-				// run0 details
-				if (runtype == 0) {
-					let item=0
-					properties.map(function(property){
-						return rects.map(function(rect, i){
-							item++
-							return rect[property]
-						}).join("")
-					}).join("")
-				}
-				// store hashes on first two runs
-				if (runtype < 2) {
-					runarray.push(runtype +":"+ method +":"+ sha1(data.join(), "domrect runtype "+ runtype))
-				}
+				if (runtype == 0) {aType.push(isType)}
 			} catch(e) {
-				runarray.push(runtype +":"+ method +":tzp:"+ e.name)
+				if (runtype == 0) {log_error("domrect: "+ pretty[method], e.name, e.message)}
+				let eMsg = e.name === undefined ? zErr : trim_error(e.name, e.message + e.message + e.message, 40)
+				oData["run"+ runtype +""+ method] = eMsg
+				aType.push(zNA)
 			}
 		}
 		performTest(runtype)
 	}
 
 	// run
-	function run(runtype, runarray) {
+	function run(runtype) {
 		return new Promise(function(resolve, reject) {
 			// div
 			if (runtype == 0) {
-				// reset
 				dom.divrect.classList.add("divrect1");
 				dom.divrect.classList.remove("divrect2");
-			} else if (runtype == 2) {
+			} else {
 				// shift
 				dom.divrect.classList.add("divrect2");
 				dom.divrect.classList.remove("divrect1");
 			}
 			// test
-			createTest("dr0", runtype, runarray, function(element){return element.getClientRects()[0]})
-			createTest("dr1", runtype, runarray, function(element){return element.getBoundingClientRect()})
-			createTest("dr2", runtype, runarray, function(element){
-				let range = document.createRange()
-				range.selectNode(element)
-				return range.getClientRects()[0]
-			})
-			createTest("dr3", runtype, runarray, function(element){
+			createTest("0", runtype, function(element){return element.getBoundingClientRect()})
+			createTest("1", runtype, function(element){return element.getClientRects()[0]})
+			createTest("2", runtype, function(element){
 				let range = document.createRange()
 				range.selectNode(element)
 				return range.getBoundingClientRect()
+			})
+			createTest("3", runtype, function(element){
+				let range = document.createRange()
+				range.selectNode(element)
+				return range.getClientRects()[0]
 			})
 			resolve()
 		})
 	}
 
-	let run0 = [], run1 = [], run2 = [], run3 = []
-	let chk = {dr0: [], dr1: [], dr2: [], dr3: []}
-	let known = {dr0: [], dr1: [], dr2: [], dr3: []}
+	// two runs x 4 methods
+	let oData = {
+		run00 : [], run01: [], run02 : [], run03: [],
+		run10 : [], run11: [], run12 : [], run13: [],
+		diff0 : [], diff1: [], diff2 : [], diff3: [],
+	}
 
 	Promise.all([
-		run(0, run0),
-		run(1, run1),
-		run(2, run2), // shift
-		run(3, run3), // known
+		run(0),
+		run(1), // shift
 	]).then(function(){
 		analyze()
 	})
