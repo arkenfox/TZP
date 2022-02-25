@@ -173,13 +173,13 @@ let s0 = " <span class='",
 /** DEV **/
 // check
 let logChkList = false,
-	logPerfHash = "", // "", sha1, mini, "all"
+	logPerfHash = "", // "", all, sha1, mini, minisha1
 	logPerfMini = false, // we set this in code
 	logPerfSha1 = false, // ditto
+	logPerfMiniSha1 = false, // ditto
 	logPseudo = false,
 	logScreen = false,
 	logStorage = false,
-
 // simulate
 	runSE = false, // errors/blocked
 	runSL = false, // lies
