@@ -2,6 +2,14 @@
 
 /* code based on https://canvasblocker.kkapsner.de/test/ */
 
+// ToDo
+// - record all methods (not blocks which are recorded as errors)
+// - ^ concat them: isType, per-execution, per-element (i.e same diff for all elements or random amounts)
+// - add isFF-only sanity check that we shouldn't get more than one non-Lie hash
+// - add clickable details
+// - ^ one non-Lie, any other lies = "reported" with clickable diffs
+
+
 function outputDomRect() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let pretty = [
@@ -17,7 +25,7 @@ function outputDomRect() {
 				// replace miniHashes
 				let current = aDisplay[i]
 				if (current !== prevMini) {
-					prevHash = sha1(oData["run0"+i], "domrect [method "+ i +"]"); aDisplay[i] = prevHash
+					prevHash = mini_sha1(oData["run0"+i], "domrect [method "+ i +"]"); aDisplay[i] = prevHash
 				} else {
 					aDisplay[i] = prevHash
 				}
