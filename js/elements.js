@@ -20,7 +20,7 @@ function get_element_keys() {
 			}
 			sDetail[sName] = keys
 			//console.debug(keys.join("\n"))
-			let hash = sha1(keys.join(), "elements keys")
+			let hash = mini_sha1(keys.join(), "elements keys")
 			dom.elementkeys.innerHTML = hash + buildButton("15", sName, keys.length)
 			return resolve("element_keys:"+ hash)
 		} catch (error) {
@@ -84,7 +84,7 @@ function get_resized() {
 				resM = [zD]
 			} else {
 				sDetail[sNameM] = resM
-				displayM = sha1(resM.join(), "elements mathml") + buildButton("15", sNameM)
+				displayM = mini_sha1(resM.join(), "elements mathml") + buildButton("15", sNameM)
 					+ " ["+ mini(resM.join(), "elements lineheight") +"]"
 			}
 		}
@@ -105,7 +105,7 @@ function get_resized() {
 			}
 		} else {
 			sDetail[sNameL] = resL
-			displayL = sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL)
+			displayL = mini_sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL)
 				+ " ["+ mini(resL.join(), "elements lineheight") +"]"
 		}
 		dom.lineheight.innerHTML = displayL
