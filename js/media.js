@@ -122,7 +122,7 @@ function get_media(runtype) {
 		ecan.innerHTML = zB0
 	} else {
 		//if (runtype == "audio" && isOS == "android") {dom.debugC.innerHTML = hashcan.join("<br>")}
-		hashcan = sha1(hashcan.join(), "media canplay")
+		hashcan = mini_sha1(hashcan.join(), "media canplay")
 		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
 		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
 	}
@@ -130,7 +130,7 @@ function get_media(runtype) {
 		hashtype = zB0
 		etype.innerHTML = zB0
 	} else {
-		hashtype = sha1(hashtype.join(), "media istype")
+		hashtype = mini_sha1(hashtype.join(), "media istype")
 		notation = (block3 ? zB0 : rec.length) +"/"+ (block4 ? zB0 : src.length)
 		etype.innerHTML = hashtype + buildButton("13", sType, notation)
 	}
