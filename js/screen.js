@@ -27,11 +27,11 @@ function get_fd_canonical() {
 		})
 		sDetail[sName] = res
 		let note, color = "3"
-		let hash = sha1(res.join(), "feature canonical")
+		let hash = mini_sha1(res.join(), "feature canonical")
 		if (isFF) {
-			if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {note = "FF91+"
-			} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {note = "FF70-90"
-			} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {note = "FF69 or lower"
+			if (hash == "3faffb36cf9adef10987c4e6cb5adc7562dac7ab") {note = "FF91+"
+			} else if (hash == "8d98821d21e515bc9bfa6660a744d74fc2df0de1") {note = "FF70-90"
+			} else if (hash == "db0b8b2137d972e0735df959d77dc67c2887404f") {note = "FF69 or lower"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
@@ -114,12 +114,12 @@ function get_fd_errors() {
 		try {var x = new Array(-1)} catch(e) {res.push(e.message)}
 		if (runSN) {res[0] = res[0] + " [sim new]"}
 		sDetail[sName] = res
-		let hash = sha1(res.join(), "feature errors")
+		let hash = mini_sha1(res.join(), "feature errors")
 		// notation: 74+: 1259822: error_message_fix
-		let tmp = hash.substring(0,8), color = "3"
+		let color = "3"
 		if (isFF) {
-			if (tmp == "ad67c2c2") {note = "FF52+" // TZP does not run in FF51 or lower
-			} else if (tmp == "96dc9bd1") {note = "FF74+ fix"
+			if (hash == "be359e88b455009c53525378c512ffadea9ab63c") {note = "FF52+" // TZP does not run in FF51 or lower
+			} else if (hash == "144f6b31dc56ec5e5381631af44d84c5d0a4b1a9") {note = "FF74+ fix"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
@@ -141,14 +141,14 @@ function get_fd_locales() {
 		list.sort()
 		res = Intl.PluralRules.supportedLocalesOf(list)
 		sDetail[sName] = res
-		let hash = sha1(res.join(), "feature supported locales"), note, color = "3"
+		let hash = mini_sha1(res.join(), "feature supported locales"), note, color = "3"
 		if (isFF) {
-			if (hash == "d64182953a8450518c818dbe9dbf35bab8c9ca26") {note = "FF96+"
-			} else if (hash == "c091f78618be5002b68e5937b305e0741ced633a") {note = "FF91-95"
-			} else if (hash == "69a80c449f0a77f1ab419351c04ced065aa49589") {note = "FF78-90"
-			} else if (hash == "88fd1391314005c3fe9b8dced0e2f328b06afbb3") {note = "FF70-77"
-			} else if (hash == "f224735b922be026a0348d98c819239b6a330813") {note = "FF65-69"
-			} else if (hash == "05135c437e798bbee97129b20c8d9676afe78484") {note = "FF64 or lower"
+			if (hash == "f68b48c64e0948be6b9ebe656885bfa89e8f780b") {note = "FF96+"
+			} else if (hash == "336d6fe9581ed30e9dc1df5f9918eef2d4ae5f0d") {note = "FF91-95"
+			} else if (hash == "aaacdb633083e6646e4e1dbb6545aed09e89c15a") {note = "FF78-90"
+			} else if (hash == "8c3b9fb384cf27d7dfc4820cffc21baec58bdc2c") {note = "FF70-77"
+			} else if (hash == "fc10be8144df633ee8dc9c375c293b81c98956e7") {note = "FF65-69"
+			} else if (hash == "efe76a437ab17bc6d60d7dd885617bc1cbe8ae7a") {note = "FF64 or lower"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
@@ -528,7 +528,7 @@ function get_fd_widgets() {
 				res.push(list[i] +": "+ font +", "+ size)
 				if (i < 6) {sizes.push(size); fonts.push(font)}
 			}
-			let hash = sha1(res.join(), "feature widgets")
+			let hash = mini_sha1(res.join(), "feature widgets")
 			sDetail[sName] = res
 			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
 			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})

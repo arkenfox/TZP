@@ -85,6 +85,8 @@ function get_audio2_context(run) {
 					} else if (hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e" && isOS == "android") {note = rfp_green // 0.025
 					} else if (hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9" && isOS == "mac") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
 				}
+				// redo hash as mini_sha1
+				hash = mini_sha1(results.join())
 				let displayHash = isLie ? soL + hash + scC : hash
 				dom.audio1hash.innerHTML = displayHash + buildButton("11", sName, results.length +" keys") + note
 					+ (latencyError ? sb +" [0 latency]"+ sc : "")
@@ -145,8 +147,8 @@ function get_audio2_hybrid() {
 					gain.disconnect()
 					// output
 					if (runSL) {results = []}
-					let hash = sha1(results.join()), isLie = false, btn = ""
-					if (hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+					let hash = mini_sha1(results.join()), isLie = false, btn = ""
+					if (hash == "e38d458c70416a730b2371fff15cfb8debf5b15f") {
 						hash = soL + cleanFn(results) + scC // empty array
 						isLie = true
 					} else {
@@ -203,8 +205,8 @@ function get_audio2_oscillator() {
 					gain.disconnect()
 					// output
 					if (runSL) {results = []}
-					let hash = sha1(results.join()), isLie = false, btn = ""
-					if (hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+					let hash = mini_sha1(results.join()), isLie = false, btn = ""
+					if (hash == "e38d458c70416a730b2371fff15cfb8debf5b15f") {
 						hash = soL + cleanFn(results) + scC // empty array
 						isLie = true
 					} else {
@@ -240,7 +242,7 @@ function outputAudio2() {
 			section.sort()
 			let sName = "audio_user_gestures_notglobal"
 			sDetail[sName] = section
-			let hash = sha1(section.join())
+			let hash = mini_sha1(section.join())
 			dom.audiohash2.innerHTML = hash + buildButton("0", sName, section.length +" metrics")
 			log_click("audio2",t0audio)
 			gClick = true

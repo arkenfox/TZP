@@ -7,7 +7,7 @@ function get_component_shims() {
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		sDetail[sName] = keys
-		sHash = sha1(keys.join(), "misc component shims")
+		sHash = mini_sha1(keys.join(), "misc component shims")
 		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
 	} catch(e) {
 		log_error("misc: component shims", e.name, e.message)
@@ -112,11 +112,11 @@ function get_iframe_props() {
 		sDetail[sAll] = allProps
 
 		// display
-		let output = sha1(allProps.join(), "misc iframe props")
+		let output = mini_sha1(allProps.join(), "misc iframe props")
 		let result = output
 		if (fakeProps.length) {
 			output = soB + output + scC
-			result = sha1(props.join(), "misc iframe props bypass")
+			result = mini_sha1(props.join(), "misc iframe props bypass")
 			// record lie/bypass
 			if (isFF && !isFFLegacy) {
 				if (gRun) {
@@ -151,7 +151,7 @@ function get_nav_prototype() {
 		movedStr = ""
 	// output
 	if (navKeys["trueKeys"]) {
-		let realhash = sha1(navKeys["trueKeys"].join(), "misc nav keys")
+		let realhash = mini_sha1(navKeys["trueKeys"].join(), "misc nav keys")
 		let display = realhash
 		// moved
 		if (movedLength) {
@@ -163,7 +163,7 @@ function get_nav_prototype() {
 		}
 		// fake
 		if (lieLength) {
-			let hash = sha1(navKeys["allKeys"].join(), "misc nav keys fake")
+			let hash = mini_sha1(navKeys["allKeys"].join(), "misc nav keys fake")
 			display = soB + hash + scC
 			fakeStr = buildButton("18", sFake, lieLength +" lie"+ (lieLength > 1 ? "s" : ""))
 			// lies

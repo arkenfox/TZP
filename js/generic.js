@@ -56,7 +56,7 @@ function getElementProp(id, prop, pseudo, noBlock) {
 
 /*** HASH ***/
 
-function mini(str, call) {
+function mini(str, call, log = true) {
 	// https://stackoverflow.com/a/22429679
 	let t0; if (canPerf) {t0 = performance.now()}
 	const json = `${JSON.stringify(str)}`
@@ -65,7 +65,7 @@ function mini(str, call) {
 		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
 	let result = ('0000000' + (hash >>> 0).toString(16)).slice(-8)
-	if (logPerfMini) {
+	if (log && logPerfMini) {
 		let ms = (performance.now()-t0)
 		gPerfHash += ms
 		gPerfHashDetail.push(ms +" : mini : "+ call)
@@ -73,7 +73,20 @@ function mini(str, call) {
 	return result
 }
 
-function sha1(str, call) {
+function mini_sha1(str, call) {
+	let t0; if (canPerf) {t0 = performance.now()}
+	// use mini for speed, then sha1 for length
+	let ministr = mini(str, call, false)
+	str = sha1(ministr, call, false)
+	if (logPerfMiniSha1) {
+		let ms = (performance.now()-t0)
+		gPerfHash += ms
+		gPerfHashDetail.push(ms +" : both : "+ call)
+	}
+	return str
+}
+
+function sha1(str, call, log = true) {
 	let t0; if (canPerf) {t0 = performance.now()}
 	for (var blockstart=0,
 		i = 0,
@@ -104,7 +117,7 @@ function sha1(str, call) {
 		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
 	}
 	for(str='';i<40;)str += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
-	if (logPerfSha1) {
+	if (log && logPerfSha1) {
 		let ms = (performance.now()-t0)
 		gPerfHash += ms
 		gPerfHashDetail.push(ms +" : sha1 : "+ call)
@@ -888,7 +901,7 @@ function tidyName(name) {
 
 function showDetail(name) {
 	let data = sDetail[name],
-		hash = sha1(data.join())
+		hash = mini_sha1(data.join())
 	name = tidyName(name)
 	let n = name.indexOf(" "),
 		section = name.substring(0,n).toUpperCase(),
@@ -900,7 +913,7 @@ function showMetrics(type) {
 	if (type == "gDetail") {
 		for (let name in gDetail) {
 			let data = gDetail[name],
-				hash = sha1(data.join())
+				hash = mini_sha1(data.join())
 			name = tidyName(name)			
 			let n = name.indexOf(" "),
 				section = name.substring(0,n).toUpperCase(),
@@ -1143,13 +1156,15 @@ function log_section(name, time1, data) {
 			gCount++
 			// FINISH
 			if (gCount == gCountExpected) {
+				// temp
+				if (logPerfHash !== "") {
+					console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "
+						+ gPerfHash +" ms]\n - " + gPerfHashDetail.join("\n - ")
+					)
+				}
 				// build section hashes and propagate gData
 				const sDataNames = Object.keys(sData)
 				sDataNames.forEach(function(name) {log_section_hash(name)})
-				// temp
-				if (logPerfHash !== "") {
-					console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "+ gPerfHash +" ms]\n - " + gPerfHashDetail.join("\n - "))
-				}
 				// metric count
 				let metricCount = 0
 				for (let i=0; i < gData.length; i++) {
@@ -1400,6 +1415,7 @@ function outputSection(id, cls) {
 		if (gRun && canPerf) {
 			logPerfMini = (logPerfHash == "all" || logPerfHash == "mini")
 			logPerfSha1 = (logPerfHash == "all" || logPerfHash == "sha1")
+			logPerfMiniSha1 = (logPerfHash == "all" || logPerfHash == "minisha1")
 		} else {
 			logPerfMini = false; logPerfSha1 = false
 		}

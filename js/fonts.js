@@ -443,7 +443,7 @@ function get_fonts() {
 							if (fntHashes.length == 0) {getsha1 = true
 							} else if (miniHashes[miniHashes.length-1] !== minihash) {getsha1 = true}
 							if (getsha1) {
-								hash = sha1(data.join(), "fonts "+ name)
+								hash = mini_sha1(data.join(), "fonts "+ name)
 							} else {
 								hash = fntHashes[fntHashes.length-1] // use last computed
 							}
@@ -653,7 +653,7 @@ function get_fallback(list) {
 		// output based on second result
 		if (list.length > 2) {
 			sDetail["fonts_font_fallback"] = found
-			dom.fontFB.innerHTML = sha1(found.join()) + buildButton("12", "fonts_font_fallback", found.length)
+			dom.fontFB.innerHTML = mini_sha1(found.join()) + buildButton("12", "fonts_font_fallback", found.length)
 				+ (isBaseFonts ? " from"+ fontBaseBtn : "")
 			// perf
 			log_click("font fallback",t0)
@@ -705,7 +705,7 @@ function get_unicode() {
 							output = "undefined" // different to canvas blocking
 							if (i == 0) {isTM = false}
 						} else {
-							output = sha1(array.join(), "fonts textmetrics " + tmTypes[i])
+							output = mini_sha1(array.join(), "fonts textmetrics " + tmTypes[i])
 						}
 					} else {
 						output = zB0
@@ -723,9 +723,9 @@ function get_unicode() {
 			diffsb = diffsb.filter(function(item, position) {return diffsb.indexOf(item) === position})
 			diffsc = diffsc.filter(function(item, position) {return diffsc.indexOf(item) === position})
 			// glyphs
-			let ohash = sha1(offset.join(), "fonts gylphs offset"),
-				bhash = sha1(bounding.join(), "fonts gylphs bounding"),
-				chash = sha1(client.join(), "fonts gylphs client")
+			let ohash = mini_sha1(offset.join(), "fonts gylphs offset"),
+				bhash = mini_sha1(bounding.join(), "fonts gylphs bounding"),
+				chash = mini_sha1(client.join(), "fonts gylphs client")
 			res.push("glyphs_offset:"+ ohash)
 			res.push("glyphs_getClient:"+ chash)
 			res.push("glyphs_getBounding:"+ bhash)

@@ -58,7 +58,7 @@ function get_connection() {
 			if (aNetwork.length) {
 				if (isObjFake) {sName += "_fake_skip"}
 				sDetail[sName] = aNetwork
-				hash = sha1(aNetwork.join(), "devices network")
+				hash = mini_sha1(aNetwork.join(), "devices network")
 				btn = buildButton("5", sName)
 			}
 		} catch(e) {
@@ -107,7 +107,7 @@ function get_connection() {
 				btn += default_tb_red
 			} else if (isOS == "android") {
 				// ToDo: RFP notation
-				btn += hash == "95468d786f5dd56d30c087cedd738b4ee289846f" ? rfp_green : rfp_red
+				btn += hash == "f138e57e317bf6cf3a3e001972764e998238e3f3" ? rfp_green : rfp_red
 			} else {
 				btn += default_ff_red
 			}
@@ -207,25 +207,25 @@ function get_geo() {
 			+" | "+ ("Geolocation" in window ? "true" : "false")
 		dom.geo1 = r
 		function geoWrite(r) {
-			let rhash = sha1(r, "language geo")
+			let rhash = mini_sha1(r, "language geo")
 			r = rhash.substring(0,8)
 			if (isTB) {
-				if (r == "ce3ac8f4" && isVer > 71) {
+				if (r == "6e684da1" && isVer > 71) {
 					// TB ESR78+: disabled, true, prompt
 					r = default_tb_green +" [ESR78+]"
-				} else if (r == "e9870617" && isVer < 72) {
+				} else if (r == "406f0224" && isVer < 72) {
 					// TB ESR68-: disabled, false, prompt
 					r = default_tb_green +" [ESR60-68]"
 				} else {
 					r = default_tb_red
 				}
 			} else if (isFF) {
-				if (r == "d053193c" && isVer > 71) {
+				if (r == "f8a72f92" && isVer > 71) {
 					// FF72+: enabled, true, prompt
 					r = default_ff_green +" [FF72+]"
-				} else if (r == "e6726024" && isVer < 72) {
+				} else if (r == "c64a2946" && isVer < 72) {
 					// FF71-: enabled, false, prompt
-					r = default_ff_green +" [FF52-71]"
+					r = default_ff_green +" [FF71 or lower]"
 				} else {
 					r = default_ff_red
 				}
@@ -285,7 +285,7 @@ function get_lang_doc() {
 					chars.sort()
 					chars.sort(Intl.Collator(undefined).compare)
 					sDetail[sName11] = chars
-					return sha1(chars.join(), "language collation")
+					return mini_sha1(chars.join(), "language collation")
 				// timezone
 				} else if (item == 12) {
 					let k = 60000, yr = 2021
@@ -345,7 +345,7 @@ function get_lang_doc() {
 						tzresults.push(years[i] +": "+ tzyear.join(", "))
 					}
 					sDetail[sName14] = tzresults
-					return sha1(tzresults.join(), "language timezone offsets date.parse")
+					return mini_sha1(tzresults.join(), "language timezone offsets date.parse")
 				} else if (item == 15) {return "n/a"
 				// date/time format
 				} else if (item == 16) {
@@ -713,9 +713,9 @@ function get_lang_doc() {
 		dom.ldt2.innerHTML = aLang.slice(0,3).join(" | ")
 		dom.ldt9.innerHTML = aLang.slice(3,11).join(" | ") // item 12 is n/a
 		// record three hashes
-		let hashLang = sha1(aLang.join("-"), "language language & locale")
-		let hashTime = sha1(aTime.join("-"), "language timezone")
-		let hashDate = sha1(aDate.join("-"), "language date/time & format")
+		let hashLang = mini_sha1(aLang.join("-"), "language language & locale")
+		let hashTime = mini_sha1(aTime.join("-"), "language timezone")
+		let hashDate = mini_sha1(aDate.join("-"), "language date/time & format")
 		let hashAll = []
 		hashAll.push("language:"+ hashLang)
 		hashAll.push("timezone:"+ hashTime)
@@ -724,29 +724,29 @@ function get_lang_doc() {
 		// notation
 		if (isVer > 59) { // ignore isFFLegacy
 			// language
-			if (hashLang == "310fb1221a91e1995165262052d345f9fa5156dc") {hashLang += enUS_green +" [FF86+]"
-			} else if (hashLang == "ceaae0bd27f34c34a10149160e9b5a64dbde2cb2") {hashLang += enUS_green +" [FF78-85]"
-			} else if (hashLang == "ea8a3991e21edaf031240317b35e8e863e3ed5dd") {hashLang += enUS_green +" [FF65-77]"
-			} else {hashLang += (hashLang == "088c29af882518e3d3ab6dfe277b2707a146ac72" ? enUS_green +" [FF60-64]" : enUS_red)
+			if (hashLang == "7bbb3d82cf088ad3acca9977f2f44910945eb7ce") {hashLang += enUS_green +" [FF86+]"
+			} else if (hashLang == "331c8ae488a477424d2cb244dac3499d75004d8d") {hashLang += enUS_green +" [FF78-85]"
+			} else if (hashLang == "f93fb347147bc4c2f8df000987cbd257f929bec3") {hashLang += enUS_green +" [FF65-77]"
+			} else {hashLang += (hashLang == "8d4a717d4072680fdef4112c63b8445991cd1db6" ? enUS_green +" [FF60-64]" : enUS_red)
 			}
 			// timezone
-			bTZ = (hashTime == "ebb26d1799f1516321904b1f1a8d717b1cdcdfbf" ? true : false)
+			bTZ = (hashTime == "e8b260c46d7e3bf71131cc8936a2d5bef1fe5850" ? true : false)
 			hashTime += (bTZ ? rfp_green : rfp_red)
 			// datetime
 			let ff = ""
 			if (bTZ) {
 				// state1: both green
 				// FF85+: also use javascript.use_us_english_locale
-				if (hashDate == "070690b3fa490ce7f78cba7f3e482cdbac389e3e") {ff = " [FF91+]" // 1653024
-				} else if (hashDate == "4c4a1a95f41f4d3f3872d1dbcd7c8081b869781b") {ff = " [FF90]"
-				} else if (hashDate == "819c14f16920703e7a5121edd40b4d49cb5e6379") {ff = " [FF79-89]"
-				} else if (hashDate == "4da6bdf18317347477e5f4b77a0c3a9250f0250c") {ff = " [FF78]"
-				} else if (hashDate == "4dfdca34ff8057e7b32ef5bfa6c5e6d91bf7aa27") {ff = " [FF71-77]"
-				} else if (hashDate == "d98729d2a89db3466d6e6e63921cf8b6643139d8") {ff = " [FF70]"
-				} else if (hashDate == "b102773be99cf93e3205fad3e10ac1f8ab1444b2") {ff = " [FF68-69]"
-				} else if (hashDate == "1f93dc8db2ae73c4a7e739870b2a7cd27d93998d") {ff = " [FF65-67]"
-				} else if (hashDate == "f186c6bcb6cf62c7cf69efa15afc141585a9cf5e") {ff = " [FF63-64]"
-				} else if (hashDate == "af7b6d1e2cac44b43bda6b70204c338c304da04c") {ff = " [FF60-62]"
+				if (hashDate == "561bee350bb336bb1673c345a9d5bbdb340a960e") {ff = " [FF91+]"
+				} else if (hashDate == "3f35d9cfdeeec07da82b12575d89c7bcd786647e") {ff = " [FF90]"
+				} else if (hashDate == "5eb6a41c1535f189aaa1e96c01ee2b0bcd43e76d") {ff = " [FF79-89]"
+				} else if (hashDate == "7142a7276324f9f20c79cb63ce04d0c4bd287d3f") {ff = " [FF78]"
+				} else if (hashDate == "6f4c7722ed4160adbdad5c726293b35fc72d4999") {ff = " [FF71-77]"
+				} else if (hashDate == "7f0e477fd8df913bb3ccf1dc0adb79516fa44dbf") {ff = " [FF70]"
+				} else if (hashDate == "1b0623fb14f16152d9d17ec7ea7e45a3444ae1fa") {ff = " [FF68-69]"
+				} else if (hashDate == "8ce41d7686ad112c618cf5906fc005240d70c34c") {ff = " [FF65-67]"
+				} else if (hashDate == "60a4fc24c0d762ff71ba61c71c9f91281c05df98") {ff = " [FF63-64]"
+				} else if (hashDate == "bd1f40ca6319112d4133f64d82ebb5d947126606") {ff = " [FF60-62]"
 				}
 			}
 			if (ff == "") {
@@ -813,9 +813,7 @@ function outputLanguage() {
 			}
 		})
 		section.sort()
-		//dom.lHashDoc = sha1(section.join(),"language overall hash") // do we need this
 		log_section("language", t0, section)
-		//get_lang_worker() // rework a global worker test
 	})
 }
 

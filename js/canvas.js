@@ -55,6 +55,7 @@ function outputCanvas() {
 			if (isBlock && val0.length == nHash && val0.indexOf(" ") == -1) {val0 = val1}
 			// rehash shorter
 			if (!isBlock && isSHA == "SHA-256") {val0 = sha1(val0, "canvas "+ name)}
+			// mismatches (e.g. null)
 			if (aMismatch[i] !== zNA) {val0 = aMismatch[i]}
 			aValue.push(val0)
 			// lies = from known: valid hash + engine
@@ -231,8 +232,8 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
-						for (var x = 0; x < 16; x += 1){
-							for (var y = 0; y < 16; y += 1){
+						for (var x = 0; x < 16; x++){
+							for (var y = 0; y < 16; y++){
 								data[y * 16 + x] = context.isPointInPath(x, y)
 							}
 						}
@@ -248,8 +249,8 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
-						for (var x = 0; x < 16; x += 1){
-							for (var y = 0; y < 16; y += 1){
+						for (var x = 0; x < 16; x++){
+							for (var y = 0; y < 16; y++){
 								data[y * 16 + x] = context.isPointInStroke(x, y)
 							}
 						}
@@ -446,7 +447,7 @@ function outputCanvas() {
 						}
 						let data = mini(pathData.join(), "canvas [k] ispointinpath")
 						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
-						return (known3.includes(data) ? true : false)
+						return (known3.includes(data))
 					}
 				},
 				{
@@ -463,7 +464,7 @@ function outputCanvas() {
 						}
 						let data = mini(pathStroke.join(), "canvas [k] ispointinstroke")
 						log_perf("isPointInStroke [k] [canvas]",t1,gt0,data)
-						return (known4.includes(data) ? true : false)
+						return (known4.includes(data))
 					}
 				},
 			];
@@ -517,6 +518,7 @@ function outputCanvas() {
 		}
 	}
 
+	// note: the two-pass is "canvas" ("known" doesn't catch input lies)
 	Promise.all([
 		canvas.createHashes(window, 1),
 		canvas.createHashes(window, 2),

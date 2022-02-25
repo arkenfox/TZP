@@ -182,6 +182,22 @@ function copyclip(element) {
 	}
 }
 
+function mini(str) {
+	// https://stackoverflow.com/a/22429679
+	const json = `${JSON.stringify(str)}`
+	let i, len, hash = 0x811c9dc5
+	for (i = 0, len = json.length; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
+}
+
+function mini_sha1(str) {
+	let ministr = mini(str)
+	str = sha1(ministr)
+	return str
+}
+
 function sha1(str1){
 	for (var blockstart=0,
 		i = 0,
