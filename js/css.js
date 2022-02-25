@@ -4,10 +4,11 @@
 let intCSS = 0
 
 function get_colors() {
+	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
 	let aList0 = ['-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox']
 	let aList1 = ['-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext']
-	let aList2 = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','[ActiveText]_-moz-activehyperlinktext','[CanvasText]_-moz-default-color','[Canvas]_-moz-default-background-color','[LinkText]_-moz-hyperlinktext','[VisitedText]_-moz-visitedhyperlinktext']
+	let aList2 = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext']
 	let aList3 = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
 	let sNames = ["moz","moz_stand-in","css4","system"]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
@@ -23,9 +24,7 @@ function get_colors() {
 		// NOTE: set initial color: non-supported repeats previous lookup value
 		element.style.backgroundColor = "rgba(1,2,3,0.5)"
 		aList.forEach(function(style) {
-			let s = style
-			if (style.indexOf("[") == 0) {s = s.substring(s.indexOf("]_") + 2, s.length)}
-			element.style.backgroundColor = s
+			element.style.backgroundColor = style
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
 			aRes.push(style +":"+ rgb)
 		})
@@ -54,6 +53,7 @@ function get_colors() {
 			}
 			document.getElementById("cssColor"+ i).innerHTML = hash + btn + note
 		}
+		log_perf("colors [css]",t0)
  		return aResults
 	} catch(e) {
 		log_error("css: colors", e.name, e.message)
@@ -324,7 +324,7 @@ function get_computed_styles() {
 				if (value == zLIE) {gKnown.push("css:computed_styles")}
 			}
 			// return
-			log_perf("computed styles [css]",t0, (gRun ? gt0 : "ignore"))
+			log_perf("computed styles [css]",t0)
 			if (runCSS) {
 				console.log("SIM #"+ intCSS +" css styles:", cMsg)
 				console.log(" - returning", value)
@@ -394,6 +394,7 @@ function get_mm_css() {
 
 function get_system_fonts() {
 	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let aResults = [],
 			sError = "",
 			m = "-moz-",
@@ -429,6 +430,7 @@ function get_system_fonts() {
 		sDetail[sName] = aResults
 		let sHash = sha1(aResults.join(), "css system fonts")
 		dom.sFontsHash.innerHTML = sError + (sError == "" ? sHash + buildButton("14", sName, aResults.length) : "")
+		log_perf("system fonts [css]",t0)
 		return resolve("system_fonts:"+ (sError == "" ? sHash : sError))
 	})
 }
