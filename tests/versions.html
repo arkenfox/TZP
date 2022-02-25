@@ -884,6 +884,13 @@ function outputVersion() {
 		rec(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
 	}
 
+	// http://the-witness.net/news/2022/02/a-shader-trick/
+	let math = []
+	math.push(Math.cos(9.876*1000*2*Math.PI))
+	math.push(Math.cos(4.573*1000*2*Math.PI))
+	math.push(Math.cos(8.001*1000*2*Math.PI))
+	math.push(Math.cos(3.293*1000*2*Math.PI))
+	console.log(math)
 }
 
 // warm stuff up
