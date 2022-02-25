@@ -59,7 +59,7 @@ function get_iframe_props() {
 		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
 		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
 		"Error","GeolocationCoordinates","GeolocationPosition","GeolocationPositionError","TypeError","console",
-		"MimeTypeArray",
+		"MimeTypeArray","Infinity","MimeType","NaN","Number","Plugin","isFinite","isNaN","parseFloat","parseInt",
 	]
 
 	try {
