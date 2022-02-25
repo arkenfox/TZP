@@ -12,16 +12,14 @@ function count_decimals(value) {if(Math.floor(value) === value) return 0;return 
 
 function cleanFn(item, skipArray = false) {
 	// catch strings as strings, tidy undefined, empty strings
-	if (typeof item == "number" || typeof item == "bigint") { return item
+	if (typeof item === "number" || typeof item === "bigint") { return item
 	} else if (item == zU) {item = zUQ
-	} else if (item == "true") {item = "\"true\""
-	} else if (item == "false") {item = "\"false\""
-	} else if (item == "null") {item = "\"null\""
+	} else if (item == "true" || item == "false" || item == "null") {item = "\"" + item + "\""
 	} else if (!skipArray && Array.isArray(item)) {
 		item = !item.length ? "empty array" : "array"
 	} else if (item === undefined || item === true || item === false || item === null) {item += ""
 	} else if (!skipArray && item == "") {item = "empty string"
-	} else if (typeof item == "string") {
+	} else if (typeof item === "string") {
 		if (!isNaN(item*1)) {item = "\"" + item + "\""}
 	}
 	return item
