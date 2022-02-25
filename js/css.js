@@ -31,7 +31,7 @@ function get_colors() {
 		// split/hash
 		for (let i=0; i < 4; i++) {
 			let aTemp = aRes.slice(splits[i],splits[i+1])
-			let hash = sha1(aTemp.join(), "css colors " + sNames[i])
+			let hash = mini_sha1(aTemp.join(), "css colors " + sNames[i])
 			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
 			sDetail["css_colors_"+ sNames[i]] = aTemp
 			aResults.push("colors_"+ sNames[i] +":"+ hash)
@@ -40,16 +40,16 @@ function get_colors() {
 				// moz stand-ins
 				note = rfp_red
 				if (isVer > 92) {
-					if (hash == "79db5606a0cb8129e8840ff02e93eedfef71dce4" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
-					} else if (hash == "969ffd3fbe040377892f5b0fce68a0e3c53ad5bf" && isVer < 95) {note = rfp_green + " [FF93]"} // 1693222
+					if (hash == "27b4dd7edd7d78b177b1234c9111217560722348" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
+					} else if (hash == "ab375b151b2252ba3d75295dc535678cf0b2d52b" && isVer < 94) {note = rfp_green + " [FF93]"} // 1693222
 				} else {
-					if (hash == "12dfc3bdff6304b4bcf56a66ee087989dda20600") {note = rfp_green + " [FF67-92]"}
+					if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
 				}
 			} else if (i == 3) {
 				// system
 				note = rfp_red
-				if (hash == "35de8783ff93479148425072691fc0a6bedc7aba" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
-				} else if (hash == "5bcd87c4c7753f09a14546911686a62e8625faf8" && isVer < 95) {note = rfp_green + " [FF67-93]"}
+				if (hash == "785865195b65e80b341f3cd595820da9e8c6381b" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
+				} else if (hash == "74a4b25550e715c311645158826c9e4f78554323" && isVer < 94) {note = rfp_green + " [FF67-93]"}
 			}
 			document.getElementById("cssColor"+ i).innerHTML = hash + btn + note
 		}
@@ -246,7 +246,7 @@ function get_computed_styles() {
 					if (i > 0) {
 						if (minivalues[i-1] == minivalues[i]) {getsha1 = false}
 					}
-					let	value = getsha1 ? sha1(aRep.join(), "css computed style "+ i) : values[i-1]
+					let	value = getsha1 ? mini_sha1(aRep.join(), "css computed style "+ i) : values[i-1]
 					values.push(value)
 
 					distinctRep.push(value)
@@ -258,7 +258,7 @@ function get_computed_styles() {
 						sDetail[sNames[i] +"_reported_notglobal"] = aRep
 						sDetail[sNames[i] +"_fake_skip"] = aFake
 						btn += buildButton("14", sNames[i] +"_fake_skip", aFake.length +" lie"+ (aFake.length > 1 ? "s" : ""))
-						distinctReal.push(sha1(aReal.join(), "css computed styles "+ i +" real"))
+						distinctReal.push(mini_sha1(aReal.join(), "css computed styles "+ i +" real"))
 					} else {
 						sDetail[sNames[i] +"_reported_notglobal"] = aReal
 						realIndex.push(i)
@@ -428,7 +428,7 @@ function get_system_fonts() {
 		}
 		// output
 		sDetail[sName] = aResults
-		let sHash = sha1(aResults.join(), "css system fonts")
+		let sHash = mini_sha1(aResults.join(), "css system fonts")
 		dom.sFontsHash.innerHTML = sError + (sError == "" ? sHash + buildButton("14", sName, aResults.length) : "")
 		log_perf("system fonts [css]",t0)
 		return resolve("system_fonts:"+ (sError == "" ? sHash : sError))
