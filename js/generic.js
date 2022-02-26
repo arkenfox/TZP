@@ -319,9 +319,9 @@ const get_isEngine = () => new Promise(resolve => {
 				let fnResult = "unknown"
 				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
 				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+				} else if (i == 2) {fnResult = newFn("Math.log10(2*Math.SQRT1_2)") // cydec BS
 				} else if (i == 3) {fnResult = Math.acos(0.123)
-				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+				} else if (i == 4) {fnResult = newFn("Math.acosh(Math.SQRT2)" // cydec BS
 				} else if (i == 5) {fnResult = Math.atan(2)
 				}
 				res.push(fnResult)
@@ -339,7 +339,6 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
 		}
 		if (isEngine == "") {console.log(res.join())}
-		// cb89002a: 1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030247,0.881373587019543,1.1071487177940904
 
 		if (isEngine == "gecko") {
 			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
