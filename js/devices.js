@@ -566,7 +566,7 @@ console.debug(otherMini, miniCheck)
 					// if mValue and/or pValue = correct hashes (thus no BS) then it must be true
 				if (isVer > 98) {
 					if (mValue == mime99[0] || pValue == plugin99[1]) {
-						if (pdf !== "true") {pdfBypass = true; fpValue = "true"}
+						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
 				}
 				if (pdfBypass) {pdfLies = true}
