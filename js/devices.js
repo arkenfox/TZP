@@ -472,6 +472,7 @@ function get_plugins_mimetypes() {
 					if (isLies) {sName += "_fake_skip"}
 					sDetail[sName] = value
 					btn = buildButton("7", sName, value.length +" "+ type)
+console.debug("B", type, value)
 					value = (type == "plugins" ? pluginValue : mimeValue)
 				}
 				fpValue = value
@@ -479,20 +480,20 @@ function get_plugins_mimetypes() {
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
-console.debug("B", "type", type, "value", value, "isLies", isLies, "isRFP", isRFP)
+console.debug("C", "type", type, "value", value, "isLies", isLies, "isRFP", isRFP)
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
 						// we need to allow isRFP to bypass it
 					if (isLies || value == zB0 || isRFP) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
-console.debug("C", "otherValue", otherValue, "otherBS", otherBS)
+console.debug("D", "otherValue", otherValue, "otherBS", otherBS)
 						if (isVer > 98) {
 						// FF99+: 1720353: static lists vs none (pref)
 							msgBP = "FF99+"
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-console.debug("D", "otherMini", otherMini, "miniCheck", miniCheck)
+console.debug("E", "otherMini", otherMini, "miniCheck", miniCheck)
 							if (pdf !== zB0 && !pdfLies) {
 								// leverage navigator
 								if (pdf === true) {
