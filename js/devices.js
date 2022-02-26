@@ -479,36 +479,29 @@ function get_plugins_mimetypes() {
 				let msgBP = "FF85-98"
 				if (isFF) {
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
+						// we need to allow isRFP to bypass it
 					if (isLies || value == zB0 || isRFP) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
-
 						if (isVer > 98) {
 						// FF99+: 1720353: static lists vs none (pref)
 							msgBP = "FF99+"
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-							// check if we can use pdfViewerEnabled
-							let pdfTest, pdfTestValue
-							if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfTest = false
-							} else {
-								try {pdfTestValue = navigator.pdfViewerEnabled; pdfTest = true} catch(e) {pdfTest = false}
-								if ("boolean" !== typeof pdfTestValue) {pdfTest = false}
-							}
-							if (pdfTest === true) {
-							// leverage navigator
-								if (pdfTestValue) {
+							if (pdf !== zB0 && !pdfLies) {
+								// leverage navigator
+								if (pdf === true) {
 									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
 									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
-								} else {
+								} else if (pdf === false) {
 									if (isLies || value == zB0) { // RFP is already none and is not a lie
 										isBypass = true; fpValue = "none"
 									}
 								}
 								if (runSNM || runSNP) {msgBP += " from navigator"}
 							} else if (!isRFP) {
-							// leverage the other value
+								// leverage the other value
 								if (!otherBS && otherMini == miniCheck) {
 									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
 									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
@@ -520,11 +513,11 @@ function get_plugins_mimetypes() {
 								}
 							}
 						} else if (isVer > 84) {
-						// EOL Flash: use isLies
+							// EOL Flash: use isLies
 							isBypass = true; fpValue = "none"
 							if (runSNM || runSNP) {msgBP += " must be none"}
 						} else {
-						// FF84- we can bypass if the other one is a non-fake "none"
+							// FF84- we can bypass if the other one is a non-fake "none"
 							if (otherValue == "none" && !otherBS) {
 								isBypass = true
 								fpValue = "none"
@@ -556,19 +549,7 @@ function get_plugins_mimetypes() {
 
 			function output_pdf() {
 				// pdfViewerEnabled: FF99+ boolean, FF98- undefined
-				let pdf, fpValue, pdfLies = false, pdfBypass = false, pdfNote = ""
-				try {
-					pdf = navigator.pdfViewerEnabled
-				} catch(e) {
-					pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
-				}
-				// lies: 1720353
-				if (pdf !== zB0) {
-					if (isVer > 98) {
-						pdfLies = ("boolean" !== typeof pdf)
-						pdfLies = (proxyLies.includes("Navigator.pdfViewerEnabled"))
-					} else {pdfLies = (undefined !== pdf)}
-				}
+				let fpValue, pdfBypass = false, pdfNote = ""
 				pdf = cleanFn(pdf)
 				fpValue = pdf
 				// ToDo: FF99+ bypass if !isRFP
@@ -582,7 +563,6 @@ function get_plugins_mimetypes() {
 				if (pdfBypass) {pdfLies = true}
 				if (pdfLies) {
 					if (!pdfBypass) {fpValue = zLIE}
-					// ToDo: don't color zBO unless we can bypass
 					pdf = (pdfBypass ? soB : soL) + pdf + scC
 					if(gRun) {
 						gKnown.push("devices:pdfViewerEnabled")
@@ -594,6 +574,21 @@ function get_plugins_mimetypes() {
 				return fpValue
 			}
 
+			// get pdf/pdfLies first: we use them later
+			let pdf, pdfLies = false
+			try {
+				pdf = navigator.pdfViewerEnabled
+			} catch(e) {
+				pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
+			}
+			// lies: 1720353
+			if (pdf !== zB0) {
+				if (isVer > 98) {
+					if ("boolean" !== typeof pdf) {pdfLies = true
+					} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
+				} else {pdfLies = (undefined !== pdf)}
+			}
+			// now we can cross check them
 			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
 			let pdfValue = output_pdf()
