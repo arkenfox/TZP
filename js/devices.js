@@ -444,6 +444,19 @@ function get_plugins_mimetypes() {
 		sDetail[sName] = []
 		sDetail[sName +"_fake_skip"] = []
 
+		let mime99 = [
+			"5b8b5b83ff5790df763d417ec6e2adbbf0570c47","70c58f33",
+			["application/pdf: application/pdf: pdf","text/pdf: text/pdf: pdf"]
+		]
+		let plugin99 = [
+			"6232b915d6de71c787a36eb42b75d2b8e24aa4d3","ca47ffb2",
+			["Chrome PDF Viewer: internal-pdf-viewer: Portable Document Format",
+			"Chromium PDF Viewer: internal-pdf-viewer: Portable Document Format",
+			"Microsoft Edge PDF Viewer: internal-pdf-viewer: Portable Document Format",
+			"PDF Viewer: internal-pdf-viewer: Portable Document Format",
+			"WebKit built-in PDF: internal-pdf-viewer: Portable Document Format"]
+		]
+
 		Promise.all([
 			get_plugins(),
 			get_mimetypes(),
@@ -463,36 +476,73 @@ function get_plugins_mimetypes() {
 				fpValue = value
 				// isBypass
 				let isBypass = false
-				let msgBP = "FF85+"
+				let msgBP = "FF85-98"
 				if (isFF) {
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
-					let otherValue = type == "plugins" ? results[1] : results[0]
-					let otherBS = type == "plugins" ? mimeBS : pluginBS
-					if (isVer > 84) {
+					if (isLies || value == zB0 || isRFP) {
+						let otherValue = type == "plugins" ? results[1] : results[0]
+						let otherBS = type == "plugins" ? mimeBS : pluginBS
+
+						if (isVer > 98) {
+						// FF99+: 1720353: static lists vs none (pref)
+							msgBP = "FF99+"
+							// check for other nonBS value
+							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
+							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
+							// check if we can use pdfViewerEnabled
+							let pdfTest, pdfTestValue
+							if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfTest = false
+							} else {
+								try {pdfTestValue = navigator.pdfViewerEnabled; pdfTest = true} catch(e) {pdfTest = false}
+								if ("boolean" !== typeof pdfTestValue) {pdfTest = false}
+							}
+							if (pdfTest === true) {
+							// leverage navigator
+								if (pdfTestValue) {
+									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
+									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
+								} else {
+									if (isLies || value == zB0) { // RFP is already none and is not a lie
+										isBypass = true; fpValue = "none"
+									}
+								}
+								if (runSNM || runSNP) {msgBP += " from navigator"}
+							} else if (!isRFP) {
+							// leverage the other value
+								if (!otherBS && otherMini == miniCheck) {
+									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
+									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
+									if (runSNM || runSNP) {msgBP += " from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
+								}
+								if (!otherBS && otherValue == "none") {
+									isBypass = true; fpValue = "none"
+									if (runSNM || runSNP) {msgBP += ": from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
+								}
+							}
+						} else if (isVer > 84) {
 						// EOL Flash: use isLies
-						if (isLies || value == zB0) {isBypass = true}
-					} else if (isVer < 85 && isLies || value == zB0) {
+							isBypass = true; fpValue = "none"
+							if (runSNM || runSNP) {msgBP += " must be none"}
+						} else {
 						// FF84- we can bypass if the other one is a non-fake "none"
-						if (otherValue == "none" && !otherBS) {
-							isBypass = true
-							if (runSNM || runSNP) {
-								msgBP = "from "+ (type == "plugins" ? "mimeTypes" : "plugins")
+							if (otherValue == "none" && !otherBS) {
+								isBypass = true
+								fpValue = "none"
+								if (runSNM || runSNP) {
+									msgBP = "FF84 and lower: from "+ (type == "plugins" ? "mimeTypes" : "plugins")
+								}
 							}
 						}
 					}
 					if (isBypass) {isLies = true}
 				}
-				// we can't bypass with "none" FF99+ 1720353
-					// note: navigator.pdfViewerSupported can be a lie
-					// so we can't even bypass to the hardcoded results
-				if (isVer > 98) {isBypass = false}
 				// display
 				if (isLies) {
 					el.innerHTML = (isBypass ? soB : soL) + value + scC + btn + rfp_red
-					fpValue = isBypass ? "none" : zLIE
+					if (!isBypass) {fpValue = zLIE}
 					if (gRun || runSNM || runSNP) {
 						gKnown.push("devices:"+ type)
-						if (isBypass) {gBypassed.push("devices:"+ type +":none")}
+						if (isBypass) {gBypassed.push("devices:"+ type +":"+ fpValue)}
 					}
 				} else {
 					// fake "none" is already wrapped in soB
@@ -503,37 +553,50 @@ function get_plugins_mimetypes() {
 				}
 				return fpValue
 			}
+
+			function output_pdf() {
+				// pdfViewerEnabled: FF99+ boolean, FF98- undefined
+				let pdf, fpValue, pdfLies = false, pdfBypass = false, pdfNote = ""
+				try {
+					pdf = navigator.pdfViewerEnabled
+				} catch(e) {
+					pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
+				}
+				// lies: 1720353
+				if (pdf !== zB0) {
+					if (isVer > 98) {
+						pdfLies = ("boolean" !== typeof pdf)
+						pdfLies = (proxyLies.includes("Navigator.pdfViewerEnabled"))
+					} else {pdfLies = (undefined !== pdf)}
+				}
+				pdf = cleanFn(pdf)
+				fpValue = pdf
+				// ToDo: FF99+ bypass if !isRFP
+					// note: RFP does not cover this yet: so we can have none + true
+					// if mValue and/or pValue = correct hashes (thus no BS) then it must be true
+				if (isVer > 98) {
+					if (mValue == mime99[0] || pValue == plugin99[1]) {
+						if (pdf !== "true") {pdfBypass = true; fpValue = "true"}
+					}
+				}
+				if (pdfBypass) {pdfLies = true}
+				if (pdfLies) {
+					if (!pdfBypass) {fpValue = zLIE}
+					// ToDo: don't color zBO unless we can bypass
+					pdf = (pdfBypass ? soB : soL) + pdf + scC
+					if(gRun) {
+						gKnown.push("devices:pdfViewerEnabled")
+						if (pdfBypass) {gBypassed.push("devices:pdfViewerEnabled:" + fpValue)}
+					}
+				}
+				if (isVer > 98) {pdfNote = pdf == "false" ? rfp_green : rfp_red}
+				dom.pdf.innerHTML = pdf + pdfNote
+				return fpValue
+			}
+
 			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
-
-			// pdfViewerEnabled: FF99+ boolean, FF98- undefined
-			let pdf, pdfValue, pdfLies = false, pdfBypass = false, pdfNote = ""
-			try {
-				pdf = navigator.pdfViewerEnabled
-			} catch(e) {
-				pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
-			}
-			// lies
-				// ToDo: current v99 test is this actual test: so I can't use it
-				// I can only test for both results for now
-			if (pdf !== zB0) {
-				if ("boolean" !== typeof pdf && pdf !== undefined) {pdfLies = true}
-			}
-			pdf = cleanFn(pdf)
-			pdfValue = pdf
-			// ToDo: bypass
-				// if pValue = none then it must be false
-				// if pValue != none and no pluginBS then it must be true
-				// note: RFP is not covering this properly yet: so we can have none + true
-			if (pdfBypass) {pdfLies = true}
-			if (pdfLies) {
-				pdfValue = zLIE
-				// ToDo: don't color zBO unless we can bypass
-				pdf = soL + pdf + scC
-				if(gRun) {gKnown.push("devices:pdfViewerEnabled")}
-			}
-			if (isVer > 98) {pdfNote = pdf == "false" ? rfp_green : rfp_red}
-			dom.pdf.innerHTML = pdf + pdfNote
+			let pdfValue = output_pdf()
 
 			log_perf("mimetypes/plugins [devices]",t0)
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue, "pdfViewerEnabled:"+ pdfValue])
