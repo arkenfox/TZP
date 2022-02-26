@@ -321,7 +321,7 @@ const get_isEngine = () => new Promise(resolve => {
 				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
 				} else if (i == 2) {fnResult = newFn("Math.log10(2*Math.SQRT1_2)") // cydec BS
 				} else if (i == 3) {fnResult = Math.acos(0.123)
-				} else if (i == 4) {fnResult = newFn("Math.acosh(Math.SQRT2)" // cydec BS
+				} else if (i == 4) {fnResult = newFn("Math.acosh(Math.SQRT2)") // cydec BS
 				} else if (i == 5) {fnResult = Math.atan(2)
 				}
 				res.push(fnResult)
