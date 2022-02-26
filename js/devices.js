@@ -87,7 +87,9 @@ function set_pluginBS() {
 		return lies
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
-	if (pluginLies.length) {pluginBS = true} else {pluginBS = false}
+	if (!isFF) {pluginBS = (pluginLies.length > 1)}
+console.debug("pluginLies", pluginLies)
+
 }
 
 function get_gamepads() {
@@ -408,10 +410,9 @@ function get_plugins() {
 			let isObj = false, isObjFake = true
 			if (typeof p === "object") {
 				isObj = true
-console.debug(p+"")
+				// cydec passes this
 				if (p+"" === "[object PluginArray]") {isObjFake = false; if (isFF) {pluginBS = false}}
 			}
-console.debug("A", p, p+"", isObj, isObjFake, pluginBS)
 			if (isObj) {
 				let res = []
 				if (p.length || res.length) {
@@ -422,11 +423,9 @@ console.debug("A", p, p+"", isObj, isObjFake, pluginBS)
 					res.sort()
 					return resolve(res)
 				} else {
-console.debug("Y", p)
 					return resolve(isObjFake? p : "none")
 				}
 			} else {
-console.debug("Z", p)
 				return resolve(p)
 			}
 		} catch(e) {
@@ -568,6 +567,9 @@ console.debug(otherMini, miniCheck)
 				if (isVer > 98) {
 					if (mValue == mime99[0] || pValue == plugin99[1]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
+					}
+					if (mValue == none || pValue == none) {
+						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "none"}
 					}
 				}
 				if (pdfBypass) {pdfLies = true}
@@ -928,9 +930,7 @@ function outputDevices() {
 	let section = []
 
 	// FF returns Flash as a false positive
-	if (!isFF) {
-		set_pluginBS()
-	}
+	set_pluginBS()
 
 	Promise.all([
 		get_media_devices(),
