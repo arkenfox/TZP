@@ -852,6 +852,7 @@ function outputPrototypeLies() {
 					'maxTouchPoints',
 					'mimeTypes',
 					'oscpu',
+					'pdfViewerEnabled',
 					'platform',
 					'plugins',
 					'product',
