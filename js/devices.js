@@ -408,9 +408,10 @@ function get_plugins() {
 			let isObj = false, isObjFake = true
 			if (typeof p === "object") {
 				isObj = true
-				if (p+"" == "[object PluginArray]") {isObjFake = false; if (isFF) {pluginBS = false}}
+console.debug(p+"")
+				if (p+"" === "[object PluginArray]") {isObjFake = false; if (isFF) {pluginBS = false}}
 			}
-console.debug("A", p, isObj, isObjFake, pluginBS)
+console.debug("A", p, p+"", isObj, isObjFake, pluginBS)
 			if (isObj) {
 				let res = []
 				if (p.length || res.length) {
