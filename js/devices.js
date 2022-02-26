@@ -88,8 +88,6 @@ function set_pluginBS() {
 	}
 	const pluginLies = testPlugins(navigator.plugins, navigator.mimeTypes)
 	if (!isFF) {pluginBS = (pluginLies.length > 1)}
-console.debug("pluginLies", pluginLies)
-
 }
 
 function get_gamepads() {
@@ -474,30 +472,27 @@ function get_plugins_mimetypes() {
 					if (isLies) {sName += "_fake_skip"}
 					sDetail[sName] = value
 					btn = buildButton("7", sName, value.length +" "+ type)
-					value = mini_sha1(value.join(), "devices "+ type)
+					value = (type == "plugins" ? pluginValue : mimeValue)
 				}
 				fpValue = value
 				// isBypass
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
-console.debug(type, value, isLies, isRFP)
+console.debug("B", "type", type, "value", value, "isLies", isLies, "isRFP", isRFP)
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
 						// we need to allow isRFP to bypass it
 					if (isLies || value == zB0 || isRFP) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
-
-console.debug(otherValue, otherBS)
-
+console.debug("C", "otherValue", otherValue, "otherBS", otherBS)
 						if (isVer > 98) {
 						// FF99+: 1720353: static lists vs none (pref)
 							msgBP = "FF99+"
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-console.debug(otherMini, miniCheck)
-
+console.debug("D", "otherMini", otherMini, "miniCheck", miniCheck)
 							if (pdf !== zB0 && !pdfLies) {
 								// leverage navigator
 								if (pdf === true) {
@@ -563,14 +558,18 @@ console.debug(otherMini, miniCheck)
 				fpValue = pdf
 				// ToDo: FF99+ bypass if !isRFP
 					// note: RFP does not cover this yet: so we can have none + true
-					// if mValue and/or pValue = correct hashes (thus no BS) then it must be true
 				if (isVer > 98) {
-					if (mValue == mime99[0] || pValue == plugin99[1]) {
+					// two legit arrays
+					if (mValue == mime99[0] && pValue == plugin99[1]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
-					if (mValue == "none" || pValue == "none") {
-						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "none"}
+					// two legit nones
+					if (mValue == "none" && pValue == "none") {
+						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "false"}
 					}
+				} else {
+					// FF98 or lower
+					if (pdf !== "undefined") {pdfBypass = true; fpValue = "undefined"}
 				}
 				if (pdfBypass) {pdfLies = true}
 				if (pdfLies) {
@@ -600,12 +599,24 @@ console.debug(otherMini, miniCheck)
 					} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
 				} else {pdfLies = (undefined !== pdf)}
 			}
-console.debug(pdf, pdfLies)
+console.debug("A", "pdf", pdf, "pdfLies", pdfLies)
 
+			// harden BS before we compare
+			let pluginValue = (Array.isArray(results[0])) ? mini_sha1(results[0].join(), "devices plugins") : results[0]
+			let mimeValue = (Array.isArray(results[1])) ? mini_sha1(results[1].join(), "devices mimeTypes") : results[1]
+			if (isVer > 98) {
+				if (pluginValue !== plugin99[0] && pluginValue !== "none") {pluginBS = true}
+				if (mimeValue !== mime99[0] && mimeValue !== "none") {mimeBS = true}
+			} else if (isVer > 84) {
+				if (pluginValue !== "none") {pluginBS = true}
+				if (mimeValue !== "none") {mimeBS = true}
+			}
 			// now we can cross check them
-			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
+			let pValue = output("plugins")
 			let pdfValue = output_pdf()
+			// ToDo: sanity check for legit combos of the three results
+			// i.e we should be false, none, none (RFP exception)
 
 			log_perf("mimetypes/plugins [devices]",t0)
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue, "pdfViewerEnabled:"+ pdfValue])
@@ -930,7 +941,9 @@ function outputDevices() {
 	let section = []
 
 	// FF returns Flash as a false positive
-	set_pluginBS()
+	if (!isFF) {
+		set_pluginBS()
+	}
 
 	Promise.all([
 		get_media_devices(),
