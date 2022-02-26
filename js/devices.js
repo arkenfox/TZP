@@ -478,17 +478,23 @@ function get_plugins_mimetypes() {
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
+console.debug(type, value, isLies, isRFP)
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
 						// we need to allow isRFP to bypass it
 					if (isLies || value == zB0 || isRFP) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
+
+console.debug(otherValue, otherBS)
+
 						if (isVer > 98) {
 						// FF99+: 1720353: static lists vs none (pref)
 							msgBP = "FF99+"
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
+console.debug(otherMini, miniCheck)
+
 							if (pdf !== zB0 && !pdfLies) {
 								// leverage navigator
 								if (pdf === true) {
@@ -588,6 +594,8 @@ function get_plugins_mimetypes() {
 					} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
 				} else {pdfLies = (undefined !== pdf)}
 			}
+console.debug(pdf, pdfLies)
+
 			// now we can cross check them
 			let pValue = output("plugins")
 			let mValue = output("mimeTypes")
