@@ -338,6 +338,8 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
 		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
 		}
+		if (isEngine == "") {console.log(res.join())}
+		// cb89002a: 1.4645918875615231,0.48288235131479357,0.15051499783199063,1.4474840516030247,0.881373587019543,1.1071487177940904
 
 		if (isEngine == "gecko") {
 			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
@@ -347,7 +349,7 @@ const get_isEngine = () => new Promise(resolve => {
 			}
 		}
 		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
-		log_perf("math [isFF]",t0,"",bFF)
+		log_perf("math [isFF]",t0,"",bFF +" |"+ hash)
 		// harden isEngine
 		if (isEngine == "") {
 			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
@@ -729,6 +731,7 @@ const get_navKeys = () => new Promise(resolve => {
 			"hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
 		]
 		if (isFF) {
+			if (isVer > 98) {expectedKeys.push("pdfViewerEnabled")}
 			// constructor is always last
 			// track added keys
 			lastKeyIndex = keys.indexOf("constructor")
