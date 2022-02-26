@@ -246,9 +246,20 @@ function outputVersion() {
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
 
-		// 99: 1720353
-		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
-		rec(99, 99, "1720353", ver99, performance.now()-t99, "ex")
+
+		// 99: 1711715 + 1756204
+			// note: FF90+ javascript.options.experimental.private_fields : default true
+		let t99 = performance.now(), ver99
+		try {
+			newFn("class A { #x; h(o) { return !#x in o; }}")
+		} catch(e) {
+			// 99+ : invalid use of private name in unary expression without object reference (72) (pref has no effect)
+			// 98- : private names aren't valid in this context (pref = true)
+			// 98- : private fields are not currently supported (pref = false / no-pref)
+			//debug.push(" 99 1711715 : "+ e.name +" : "+ e.message)
+			ver99 = (e.message.length == 72)
+		}
+		rec(99, 99, "1711715", ver99, performance.now()-t99)
 
 		// 98: 1709790
 		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
@@ -457,7 +468,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 50, oOther = {}
+	let countOther = 0, expectOther = 51, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -474,6 +485,11 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 99: 1720353
+			// ext fuckery possible/likely due to mimeTypes/plugins
+		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
+		rec(99, 99, "1720353", ver99, performance.now()-t99, "ex")
 
 		// 96: 1738422
 			// ext fuckery: chameleon, cydec
@@ -884,13 +900,6 @@ function outputVersion() {
 		rec(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
 	}
 
-	// http://the-witness.net/news/2022/02/a-shader-trick/
-	let math = []
-	math.push(Math.cos(9.876*1000*2*Math.PI))
-	math.push(Math.cos(4.573*1000*2*Math.PI))
-	math.push(Math.cos(8.001*1000*2*Math.PI))
-	math.push(Math.cos(3.293*1000*2*Math.PI))
-	console.log(math)
 }
 
 // warm stuff up
