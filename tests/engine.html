@@ -309,6 +309,10 @@ function get_iframe_props(num1, num2, title) {
 		'USB','WakeLock','WebKitMutationObserver','XRAnchor','chrome','webkitCancelAnimationFrame',
 		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
+	if (is99) {
+		// 1752906: FF99+ MIDIAccess (FF? dom.webmidi.enabled)
+		listU = listU.filter(x => !["MIDIAccess"].includes(x))
+	}
 	if (is93) {
 		// 1739233: FF96+ Lock (FF93+ "dom.weblocks.enabled")
 		listU = listU.filter(x => !["Lock"].includes(x))
@@ -870,10 +874,10 @@ function get_nav_keys(num1, num2, title) {
 			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
 			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
 			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
-		//for (let i=0; i < aNavNotExpected.length; i++) {
-		//	let hash = sha1(aNavNotExpected[i])
-		//	console.debug(hash, aNavNotExpected[i])
-		//}
+		if (is99) {
+			// 1752906: FF99+ MIDIAccess (FF? dom.webmidi.enabled)
+			aNavNotExpected = aNavNotExpected.filter(x => !["requestMIDIAccess"].includes(x))
+		}
 		if (is96) {
 			// 1666203: FF96+ canShare
 			aNavNotExpected = aNavNotExpected.filter(x => !["canShare"].includes(x))
@@ -1375,7 +1379,7 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
-	is99 = ("pdfViewerEnabled" in navigator)
+	try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {is99 = (e.message.length == 72)}
 	is97 = ("function" === typeof AbortSignal
 		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
 	try {is96 = ("sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {}
