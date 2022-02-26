@@ -568,7 +568,7 @@ console.debug(otherMini, miniCheck)
 					if (mValue == mime99[0] || pValue == plugin99[1]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
-					if (mValue == none || pValue == none) {
+					if (mValue == "none" || pValue == "none") {
 						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "none"}
 					}
 				}
