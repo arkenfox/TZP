@@ -508,8 +508,7 @@ oDebug[type+" isLies"] = isLies
 				let msgBP = "FF85-98"
 				if (isFF) {
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
-						// we need to allow isRFP to bypass it
-					if (isLies || value == zB0 || isRFP) {
+					if (isLies || value == zB0) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
 						if (isVer > 98) {
@@ -518,28 +517,15 @@ oDebug[type+" isLies"] = isLies
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-							if (pdf !== zB0 && !pdfLies) {
-								// leverage navigator
-								if (pdf === true) {
-									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
-									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
-								} else if (pdf === false) {
-									if (isLies || value == zB0) { // RFP is already none and is not a lie
-										isBypass = true; fpValue = "none"
-									}
-								}
-								if (runSNM || runSNP) {msgBP += " from navigator"}
-							} else if (!isRFP) {
-								// leverage the other value
-								if (!otherBS && otherMini == miniCheck) {
-									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
-									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
-									if (runSNM || runSNP) {msgBP += " from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
-								}
-								if (!otherBS && otherValue == "none") {
-									isBypass = true; fpValue = "none"
-									if (runSNM || runSNP) {msgBP += ": from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
-								}
+							// leverage the other value
+							if (!otherBS && otherMini == miniCheck) {
+								isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
+								sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
+								if (runSNM || runSNP) {msgBP += " from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
+							}
+							if (!otherBS && otherValue == "none") {
+								isBypass = true; fpValue = "none"
+								if (runSNM || runSNP) {msgBP += ": from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
 							}
 						} else if (isVer > 84) {
 							// EOL Flash: use isLies
@@ -622,8 +608,8 @@ oDebug["isRFP"] = isRFP
 			// lies: 1720353
 			if (pdf !== zB0) {
 				if (isVer > 98) {
-					if ("boolean" !== typeof pdf) {pdfLies = true
-					} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
+					if ("boolean" !== typeof pdf) {pdfLies = true}
+					//} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
 				} else {pdfLies = (undefined !== pdf)}
 			}
 oDebug["pdf"] = pdf
