@@ -499,7 +499,7 @@ function get_plugins_mimetypes() {
 				let btn = "", fpValue
 				let value = type == "plugins" ? results[0] : results[1]
 				let isLies = type == "plugins" ? pluginBS : mimeBS
-oDebug[type+" result"] = value
+//oDebug[type+" result"] = value
 				let el = type == "plugins" ? dom.plugins : dom.mimeTypes
 				sName = "devices_"+ type
 				if (Array.isArray(value)) {
@@ -508,14 +508,14 @@ oDebug[type+" result"] = value
 					btn = buildButton("7", sName, value.length +" "+ type)
 					value = (type == "plugins" ? pluginValue : mimeValue)
 				}
-oDebug[type+" value"] = value
-oDebug[type+" isLies"] = isLies
+//oDebug[type+" value"] = value
+//oDebug[type+" isLies"] = isLies
 				fpValue = value
 				// isBypass
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
-				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
+				  // we can only bypass lies or blocked
 					if (isLies || value == zB0) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
@@ -572,7 +572,19 @@ oDebug[type+" isLies"] = isLies
 
 			function output_pdf() {
 				// pdfViewerEnabled: FF99+ boolean, FF98- undefined
-				let fpValue, pdfBypass = false, pdfNote = ""
+				let pdf, fpValue, pdfLies = false, pdfBypass = false, pdfNote = ""
+				try {
+					pdf = navigator.pdfViewerEnabled
+				} catch(e) {
+					pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
+				}
+				// lies: 1720353
+				if (pdf !== zB0) {
+					if (isVer > 98) {
+						if ("boolean" !== typeof pdf) {pdfLies = true}
+						//} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
+					} else {pdfLies = (undefined !== pdf)}
+				}
 				pdf = cleanFn(pdf)
 				fpValue = pdf
 				if (isVer > 98) {
@@ -598,29 +610,15 @@ oDebug[type+" isLies"] = isLies
 						if (pdfBypass) {gBypassed.push("devices:pdfViewerEnabled:" + fpValue)}
 					}
 				}
+//oDebug["pdf"] = pdf
+//oDebug["pdfLies"] = pdfLies
+//oDebug["isRFP"] = isRFP
 				if (isVer > 98) {pdfNote = pdf == "false" ? rfp_green : rfp_red}
 				dom.pdf.innerHTML = pdf + pdfNote
 				return fpValue
 			}
+//let oDebug = {}
 
-let oDebug = {}
-oDebug["isRFP"] = isRFP
-			// get pdf/pdfLies first: we use them later
-			let pdf, pdfLies = false
-			try {
-				pdf = navigator.pdfViewerEnabled
-			} catch(e) {
-				pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
-			}
-			// lies: 1720353
-			if (pdf !== zB0) {
-				if (isVer > 98) {
-					if ("boolean" !== typeof pdf) {pdfLies = true}
-					//} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
-				} else {pdfLies = (undefined !== pdf)}
-			}
-oDebug["pdf"] = pdf
-oDebug["pdfLies"] = pdfLies
 			// harden BS before we compare
 			let pluginValue = (Array.isArray(results[0])) ? mini_sha1(results[0].join(), "devices plugins") : results[0]
 			let mimeValue = (Array.isArray(results[1])) ? mini_sha1(results[1].join(), "devices mimeTypes") : results[1]
@@ -638,7 +636,7 @@ oDebug["pdfLies"] = pdfLies
 			// ToDo: sanity check for legit combos of the three results
 			// i.e we should be false, none, none (RFP exception)
 
-console.debug(oDebug)
+//console.debug(oDebug)
 			log_perf("mimetypes/plugins [devices]",t0)
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue, "pdfViewerEnabled:"+ pdfValue])
 		})
