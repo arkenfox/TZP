@@ -363,17 +363,16 @@ function get_mimetypes() {
 				isObj = true
 				if (m+"" == "[object MimeTypeArray]") {
 					if (isVer > 84) {
-						let check = ""
-						// chameleon: TypeError: cyclic object value
 						try {
-							check = mini(m, "mimeTypes check")
+							let check = mini(m, "mimeTypes check")
+							if (check == "4f23f546" || check == "ac6c4fe7") {
+								isObjFake = false; mimeBS = false
+							} else {
+								console.debug ("mimeTypes check", check)
+							}
 						} catch(e) {
-							console.debug(e.name, e.message)
-						}
-						if (check == "4f23f546" || check == "ac6c4fe7") {
-							isObjFake = false; mimeBS = false
-						} else {
-							console.debug ("mimeTypes check", check)
+							// chameleon: TypeError: cyclic object value on tampered objects?
+							log_error("devices: mimeTypes", e.name, e.message)
 						}
 					} else {
 						isObjFake = false; if (isFF) {mimeBS = false}
@@ -428,14 +427,17 @@ function get_plugins() {
 				if (p+"" === "[object PluginArray]") {
 					// ^ cydec passes this
 					if (isVer > 84) {
-						let check = mini(p, "plugins check")
-						if (check == "012c6754" || check == "ac6c4fe7") {
-							// FF99: 012c6754
-							// none: ac6c4fe7
-							isObjFake = false; pluginBS = false
-						} else {
-							// none: 5ac1fd17 <- cydec BS
-							console.debug ("plugins check", check)
+						try {
+							let check = mini(p, "plugins check")
+							if (check == "012c6754" || check == "ac6c4fe7") {
+								isObjFake = false; pluginBS = false
+							} else {
+								// none: 5ac1fd17 <- cydec BS
+								console.debug ("plugins check", check)
+							}
+						} catch(e) {
+							// TypeError: cyclic object value on tampered objects?
+							log_error("devices: plugins", e.name, e.message)
 						}
 					} else {
 						isObjFake = false; if (isFF) {pluginBS = false}
@@ -573,15 +575,14 @@ oDebug[type+" isLies"] = isLies
 				let fpValue, pdfBypass = false, pdfNote = ""
 				pdf = cleanFn(pdf)
 				fpValue = pdf
-				// ToDo: FF99+ bypass if !isRFP
-					// note: RFP does not cover this yet: so we can have none + true
 				if (isVer > 98) {
 					// two legit arrays
 					if (mValue == mime99[0] && pValue == plugin99[1]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
 					// two legit nones
-					if (mValue == "none" && pValue == "none") {
+						// note: RFP does not cover this yet: so allow 2 x none + true
+					if (!isRFP && mValue == "none" && pValue == "none") {
 						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "false"}
 					}
 				} else {
