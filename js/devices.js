@@ -1,6 +1,6 @@
 'use strict';
 
-let pluginBS = false,	mimeBS = false, devicesBS = false
+let pluginBS = false, mimeBS = false, devicesBS = false
 
 // sims
 let intSNC = 0
@@ -363,15 +363,15 @@ function get_mimetypes() {
 				isObj = true
 				if (m+"" == "[object MimeTypeArray]") {
 					if (isVer > 84) {
-						let resDebug = []
-						resDebug.push(m)
-						resDebug.push(mini(m), "mimeTypes check")
-							// FF99: 4f23f546
-							// none: ac6c4fe7
-							// none:  <- cydec
-						console.debug(resDebug)
+						let check = mini(m, "mimeTypes check")
+						if (check == "4f23f546" || check == "ac6c4fe7") {
+							isObjFake = false; mimeBS = false
+						} else {
+							console.debug ("mimeTypes check", check)
+						}
+					} else {
+						isObjFake = false; if (isFF) {mimeBS = false}
 					}
-					isObjFake = false; mimeBS = false
 				}
 			}
 			if (isObj) {
@@ -428,6 +428,7 @@ function get_plugins() {
 							// none: ac6c4fe7
 							isObjFake = false; pluginBS = false
 						} else {
+							// none: 5ac1fd17 <- cydec BS
 							console.debug ("plugins check", check)
 						}
 					} else {
