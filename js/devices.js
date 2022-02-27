@@ -408,8 +408,18 @@ function get_plugins() {
 			let isObj = false, isObjFake = true
 			if (typeof p === "object") {
 				isObj = true
-				// cydec passes this
-				if (p+"" === "[object PluginArray]") {isObjFake = false; if (isFF) {pluginBS = false}}
+				if (p+"" === "[object PluginArray]") {
+					// cydec passes this
+					let resDebug = []
+					resDebug.push(p)
+					resDebug.push(mini_sha1(p))
+						// FF99: 29965928eb0d9f8a73f49fae9304d118960494ed
+						// none: 0b53cb22e7783de6e3107bedb2f275db5128bb85
+					let pp = Object.getPrototypeOf(p)
+					resDebug.push(pp)
+					console.debug(resDebug)
+					isObjFake = false; if (isFF) {pluginBS = false}
+				}
 			}
 			if (isObj) {
 				let res = []
@@ -466,34 +476,33 @@ function get_plugins_mimetypes() {
 				let btn = "", fpValue
 				let value = type == "plugins" ? results[0] : results[1]
 				let isLies = type == "plugins" ? pluginBS : mimeBS
+oDebug[type+" result"] = value
 				let el = type == "plugins" ? dom.plugins : dom.mimeTypes
 				sName = "devices_"+ type
 				if (Array.isArray(value)) {
 					if (isLies) {sName += "_fake_skip"}
 					sDetail[sName] = value
 					btn = buildButton("7", sName, value.length +" "+ type)
-console.debug("B", type, value)
 					value = (type == "plugins" ? pluginValue : mimeValue)
 				}
+oDebug[type+" value"] = value
+oDebug[type+" isLies"] = isLies
 				fpValue = value
 				// isBypass
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
-console.debug("C", "type", type, "value", value, "isLies", isLies, "isRFP", isRFP)
 				  // note: isLies (from pluginBS/mimeBS) is only ever false if !isFakeObj or zB0
 						// we need to allow isRFP to bypass it
 					if (isLies || value == zB0 || isRFP) {
 						let otherValue = type == "plugins" ? results[1] : results[0]
 						let otherBS = type == "plugins" ? mimeBS : pluginBS
-console.debug("D", "otherValue", otherValue, "otherBS", otherBS)
 						if (isVer > 98) {
 						// FF99+: 1720353: static lists vs none (pref)
 							msgBP = "FF99+"
 							// check for other nonBS value
 							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
 							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-console.debug("E", "otherMini", otherMini, "miniCheck", miniCheck)
 							if (pdf !== zB0 && !pdfLies) {
 								// leverage navigator
 								if (pdf === true) {
@@ -586,6 +595,8 @@ console.debug("E", "otherMini", otherMini, "miniCheck", miniCheck)
 				return fpValue
 			}
 
+let oDebug = {}
+oDebug["isRFP"] = isRFP
 			// get pdf/pdfLies first: we use them later
 			let pdf, pdfLies = false
 			try {
@@ -600,8 +611,8 @@ console.debug("E", "otherMini", otherMini, "miniCheck", miniCheck)
 					} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
 				} else {pdfLies = (undefined !== pdf)}
 			}
-console.debug("A", "pdf", pdf, "pdfLies", pdfLies)
-
+oDebug["pdf"] = pdf
+oDebug["pdfLies"] = pdfLies
 			// harden BS before we compare
 			let pluginValue = (Array.isArray(results[0])) ? mini_sha1(results[0].join(), "devices plugins") : results[0]
 			let mimeValue = (Array.isArray(results[1])) ? mini_sha1(results[1].join(), "devices mimeTypes") : results[1]
@@ -619,6 +630,7 @@ console.debug("A", "pdf", pdf, "pdfLies", pdfLies)
 			// ToDo: sanity check for legit combos of the three results
 			// i.e we should be false, none, none (RFP exception)
 
+console.debug(oDebug)
 			log_perf("mimetypes/plugins [devices]",t0)
 			return resolve(["plugins:"+ pValue, "mimeTypes:"+ mValue, "pdfViewerEnabled:"+ pdfValue])
 		})
