@@ -363,7 +363,13 @@ function get_mimetypes() {
 				isObj = true
 				if (m+"" == "[object MimeTypeArray]") {
 					if (isVer > 84) {
-						let check = mini(m, "mimeTypes check")
+						let check = ""
+						// chameleon: TypeError: cyclic object value
+						try {
+							check = mini(m, "mimeTypes check")
+						} catch(e) {
+							console.debug(e.name, e.message)
+						}
 						if (check == "4f23f546" || check == "ac6c4fe7") {
 							isObjFake = false; mimeBS = false
 						} else {
