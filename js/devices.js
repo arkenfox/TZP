@@ -361,7 +361,18 @@ function get_mimetypes() {
 			let isObj = false, isObjFake = true
 			if (typeof m === "object") {
 				isObj = true
-				if (m+"" == "[object MimeTypeArray]") {isObjFake = false; mimeBS = false} // !mimeBS only with a legit object
+				if (m+"" == "[object MimeTypeArray]") {
+					if (isVer > 84) {
+						let resDebug = []
+						resDebug.push(m)
+						resDebug.push(mini(m), "mimeTypes check")
+							// FF99: 4f23f546
+							// none: ac6c4fe7
+							// none:  <- cydec
+						console.debug(resDebug)
+					}
+					isObjFake = false; mimeBS = false
+				}
 			}
 			if (isObj) {
 				if (m.length) {
@@ -409,16 +420,19 @@ function get_plugins() {
 			if (typeof p === "object") {
 				isObj = true
 				if (p+"" === "[object PluginArray]") {
-					// cydec passes this
-					let resDebug = []
-					resDebug.push(p)
-					resDebug.push(mini_sha1(p))
-						// FF99: 29965928eb0d9f8a73f49fae9304d118960494ed
-						// none: 0b53cb22e7783de6e3107bedb2f275db5128bb85
-					let pp = Object.getPrototypeOf(p)
-					resDebug.push(pp)
-					console.debug(resDebug)
-					isObjFake = false; if (isFF) {pluginBS = false}
+					// ^ cydec passes this
+					if (isVer > 84) {
+						let check = mini(p, "plugins check")
+						if (check == "012c6754" || check == "ac6c4fe7") {
+							// FF99: 012c6754
+							// none: ac6c4fe7
+							isObjFake = false; pluginBS = false
+						} else {
+							console.debug ("plugins check", check)
+						}
+					} else {
+						isObjFake = false; if (isFF) {pluginBS = false}
+					}
 				}
 			}
 			if (isObj) {
