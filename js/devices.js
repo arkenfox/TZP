@@ -375,7 +375,7 @@ function get_mimetypes() {
 							log_error("devices: mimeTypes", e.name, e.message)
 						}
 					} else {
-						isObjFake = false; if (isFF) {mimeBS = false}
+						isObjFake = false; mimeBS = false
 					}
 				}
 			}
@@ -583,7 +583,7 @@ function get_plugins_mimetypes() {
 					if (isVer > 98) {
 						if ("boolean" !== typeof pdf) {pdfLies = true}
 						//} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
-					} else {pdfLies = (undefined !== pdf)}
+					} else if (isFF) {pdfLies = (undefined !== pdf)}
 				}
 				pdf = cleanFn(pdf)
 				fpValue = pdf
@@ -597,7 +597,7 @@ function get_plugins_mimetypes() {
 					if (!isRFP && mValue == "none" && pValue == "none") {
 						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "false"}
 					}
-				} else {
+				} else if (isFF) {
 					// FF98 or lower
 					if (pdf !== "undefined") {pdfBypass = true; fpValue = "undefined"}
 				}
@@ -618,7 +618,6 @@ function get_plugins_mimetypes() {
 				return fpValue
 			}
 //let oDebug = {}
-
 			// harden BS before we compare
 			let pluginValue = (Array.isArray(results[0])) ? mini_sha1(results[0].join(), "devices plugins") : results[0]
 			let mimeValue = (Array.isArray(results[1])) ? mini_sha1(results[1].join(), "devices mimeTypes") : results[1]
