@@ -1,6 +1,6 @@
 'use strict';
 
-let pluginBS = false, mimeBS = false, devicesBS = false
+let pluginBS = false, pluginMini = "", mimeBS = false, mimeMini = "", devicesBS = false
 
 // sims
 let intSNC = 0
@@ -344,6 +344,7 @@ function get_mimetypes() {
 	return new Promise(resolve => {
 		// mimeTypes is an expected key
 		mimeBS = true
+		mimeMini = ""
 		try {
 			let m = navigator.mimeTypes
 			if (runSE) {
@@ -362,18 +363,16 @@ function get_mimetypes() {
 			if (typeof m === "object") {
 				isObj = true
 				if (m+"" == "[object MimeTypeArray]") {
+					let miniKnown = ["ac6c4fe7"] //none
+					if (isVer > 98) {miniKnown.push("4f23f546")} // hardcoded
+					try {
+						mimeMini = mini(m, "mimeTypes check")
+					} catch(e) {
+						// chameleon: TypeError: cyclic object
+						log_error("devices: mimeTypes", e.name, e.message)
+					}
 					if (isVer > 84) {
-						try {
-							let check = mini(m, "mimeTypes check")
-							if (check == "4f23f546" || check == "ac6c4fe7") {
-								isObjFake = false; mimeBS = false
-							} else {
-								console.debug ("mimeTypes check", check)
-							}
-						} catch(e) {
-							// chameleon: TypeError: cyclic object value on tampered objects?
-							log_error("devices: mimeTypes", e.name, e.message)
-						}
+						if (miniKnown.includes(mimeMini)) {isObjFake = false; mimeBS = false}
 					} else {
 						isObjFake = false; mimeBS = false
 					}
@@ -389,6 +388,7 @@ function get_mimetypes() {
 					res.sort()
 					return resolve(res)
 				} else {
+					if (isFF && mimeMini !== "ac6c4fe7") {isObjFake = true; mimeBS = true}
 					return resolve(isObjFake ? m : "none") // we already set mimeBS = false on a legit object
 				}
 			} else {
@@ -407,6 +407,7 @@ function get_plugins() {
 		// plugins is an expected key
 		// pluginBS is already set for non-FF
 		if (isFF) {pluginBS = true}
+		pluginMini = ""
 		try {
 			let p = navigator.plugins
 			if (runSE) {
@@ -426,19 +427,15 @@ function get_plugins() {
 				isObj = true
 				if (p+"" === "[object PluginArray]") {
 					// ^ cydec passes this
+					let miniKnown = ["ac6c4fe7"] //none
+					if (isVer > 98) {miniKnown.push("012c6754")} // hardcoded
+					try {
+						pluginMini = mini(p, "plugins check")
+					} catch(e) {
+						log_error("devices: plugins", e.name, e.message)
+					}
 					if (isVer > 84) {
-						try {
-							let check = mini(p, "plugins check")
-							if (check == "012c6754" || check == "ac6c4fe7") {
-								isObjFake = false; pluginBS = false
-							} else {
-								// none: 5ac1fd17 <- cydec BS
-								console.debug ("plugins check", check)
-							}
-						} catch(e) {
-							// TypeError: cyclic object value on tampered objects?
-							log_error("devices: plugins", e.name, e.message)
-						}
+						if (miniKnown.includes(pluginMini)) {isObjFake = false; pluginBS = false}
 					} else {
 						isObjFake = false; if (isFF) {pluginBS = false}
 					}
@@ -446,7 +443,7 @@ function get_plugins() {
 			}
 			if (isObj) {
 				let res = []
-				if (p.length || res.length) {
+				if (p.length) {
 					for (let i=0; i < p.length; i++) {
 						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
 							+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
@@ -454,6 +451,7 @@ function get_plugins() {
 					res.sort()
 					return resolve(res)
 				} else {
+					if (isFF && pluginMini !== "ac6c4fe7") {isObjFake = true; pluginBS = true}
 					return resolve(isObjFake? p : "none")
 				}
 			} else {
@@ -479,11 +477,11 @@ function get_plugins_mimetypes() {
 		sDetail[sName +"_fake_skip"] = []
 
 		let mime99 = [
-			"5b8b5b83ff5790df763d417ec6e2adbbf0570c47","70c58f33",
+			"5b8b5b83ff5790df763d417ec6e2adbbf0570c47","4f23f546",
 			["application/pdf: application/pdf: pdf","text/pdf: text/pdf: pdf"]
 		]
 		let plugin99 = [
-			"6232b915d6de71c787a36eb42b75d2b8e24aa4d3","ca47ffb2",
+			"6232b915d6de71c787a36eb42b75d2b8e24aa4d3","012c6754",
 			["Chrome PDF Viewer: internal-pdf-viewer: Portable Document Format",
 			"Chromium PDF Viewer: internal-pdf-viewer: Portable Document Format",
 			"Microsoft Edge PDF Viewer: internal-pdf-viewer: Portable Document Format",
@@ -499,14 +497,12 @@ function get_plugins_mimetypes() {
 				let btn = "", fpValue
 				let value = type == "plugins" ? results[0] : results[1]
 				let isLies = type == "plugins" ? pluginBS : mimeBS
-//oDebug[type+" result"] = value
 				let el = type == "plugins" ? dom.plugins : dom.mimeTypes
+				let elMini = type == "plugins" ? dom.pluginMini : dom.mimeMini
 				sName = "devices_"+ type
+//oDebug[type+" result"] = value
 				if (Array.isArray(value)) {
-					if (isLies) {sName += "_fake_skip"}
-					sDetail[sName] = value
-					btn = buildButton("7", sName, value.length +" "+ type)
-					value = (type == "plugins" ? pluginValue : mimeValue)
+					value = mini_sha1(value.join(), sName)
 				}
 //oDebug[type+" value"] = value
 //oDebug[type+" isLies"] = isLies
@@ -515,30 +511,45 @@ function get_plugins_mimetypes() {
 				let isBypass = false
 				let msgBP = "FF85-98"
 				if (isFF) {
-				  // we can only bypass lies or blocked
-					if (isLies || value == zB0) {
-						let otherValue = type == "plugins" ? results[1] : results[0]
-						let otherBS = type == "plugins" ? mimeBS : pluginBS
-						if (isVer > 98) {
-						// FF99+: 1720353: static lists vs none (pref)
-							msgBP = "FF99+"
-							// check for other nonBS value
-							let otherMini = (Array.isArray(otherValue)) ? mini(otherValue.join()) : undefined
-							let miniCheck = (type == "plugins" ? mime99[1] : plugin99[1])
-							// leverage the other value
-							if (!otherBS && otherMini == miniCheck) {
+					let otherValue = type == "plugins" ? results[1] : results[0]
+					let otherMini = type == "plugins" ? mimeMini : pluginMini
+					let otherBS = type == "plugins" ? mimeBS : pluginBS
+					let expectedMini
+					// FF99+: 1720353: static lists vs none (pref)
+					if (isVer > 98) {
+						msgBP = "FF99+"
+						// leverage pdf
+						if (!pdfLies && pdf !== zB0) {
+							if (pdf == true) {
+								expectedMini = type == "plugins" ? plugin99[1] : mime99[1]
+								let currentMini = type == "plugins" ? pluginMini : mimeMini
+								if (currentMini !== expectedMini) {
+									isBypass = true
+									isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
+									sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
+								}
+							} else if (pdf == false) {
+								if (value !== "none") {isBypass = true; fpValue = "none"}
+							}
+						// lies: leverage the other non-BS value
+						} else if (isLies || value == zB0) {
+							expectedMini = type == "plugins" ? mime99[1] : plugin99[1]
+							if (!otherBS && otherMini == expectedMini) {
 								isBypass = true; fpValue = (type == "plugins" ? plugin99[0] : mime99[0])
 								sDetail["devices_"+ type] = (type == "plugins" ? plugin99[2] : mime99[2])
 								if (runSNM || runSNP) {msgBP += " from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
-							}
-							if (!otherBS && otherValue == "none") {
+							} else if (!otherBS && otherValue == "none") {
 								isBypass = true; fpValue = "none"
 								if (runSNM || runSNP) {msgBP += ": from "+ (type == "plugins" ? "mimeTypes" : "plugins")}
 							}
-						} else if (isVer > 84) {
+						}
+					} else if (isLies || value == zB0) {
+						if (isVer > 84) {
 							// EOL Flash: use isLies
-							isBypass = true; fpValue = "none"
-							if (runSNM || runSNP) {msgBP += " must be none"}
+							if (value !== "none") {
+								isBypass = true; fpValue = "none"
+								if (runSNM || runSNP) {msgBP += " must be none"}
+							}
 						} else {
 							// FF84- we can bypass if the other one is a non-fake "none"
 							if (otherValue == "none" && !otherBS) {
@@ -553,17 +564,23 @@ function get_plugins_mimetypes() {
 					if (isBypass) {isLies = true}
 				}
 				// display
+				let array = type == "plugins" ? results[0] : results[1]
+				if (Array.isArray(array)) {
+					if (isLies) {sName += "_fake_skip"}
+					sDetail[sName] = array
+					btn = buildButton("7", sName, array.length +" "+ type)
+				}
 				if (isLies) {
-					el.innerHTML = (isBypass ? soB : soL) + value + scC + btn + rfp_red
+					value = (isBypass ? soB : soL) + value + scC
 					if (!isBypass) {fpValue = zLIE}
-					if (gRun || runSNM || runSNP) {
+					if (gRun) {
 						gKnown.push("devices:"+ type)
 						if (isBypass) {gBypassed.push("devices:"+ type +":"+ fpValue)}
 					}
-				} else {
-					// fake "none" is already wrapped in soB
-					el.innerHTML = value + btn + (value == "none" ? rfp_green : rfp_red)
 				}
+				el.innerHTML = value + btn + (value == "none" ? rfp_green : rfp_red)
+				let thisMini = (type == "plugins" ? pluginMini : mimeMini)
+				if (thisMini !== "") {elMini.innerHTML = " ["+ thisMini +"] "}
 				if (runSNM && type == "mimeTypes" || runSNP && type == "plugins") {
 					console.log(" - returned "+ fpValue + " ["+ type +"]" + (isBypass ? ": bypass "+ msgBP : ""))
 				}
@@ -572,19 +589,7 @@ function get_plugins_mimetypes() {
 
 			function output_pdf() {
 				// pdfViewerEnabled: FF99+ boolean, FF98- undefined
-				let pdf, fpValue, pdfLies = false, pdfBypass = false, pdfNote = ""
-				try {
-					pdf = navigator.pdfViewerEnabled
-				} catch(e) {
-					pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
-				}
-				// lies: 1720353
-				if (pdf !== zB0) {
-					if (isVer > 98) {
-						if ("boolean" !== typeof pdf) {pdfLies = true}
-						//} else if (proxyLies.includes("Navigator.pdfViewerEnabled")) {pdfLies = true}
-					} else if (isFF) {pdfLies = (undefined !== pdf)}
-				}
+				let fpValue, pdfBypass = false, pdfNote = ""
 				pdf = cleanFn(pdf)
 				fpValue = pdf
 				if (isVer > 98) {
@@ -593,7 +598,8 @@ function get_plugins_mimetypes() {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
 					// two legit nones
-						// note: RFP does not cover this yet: so allow 2 x none + true
+						// note: RFP does not cover this yet: so allow 2 none + true
+						// except we already bypass isRFP nones
 					if (!isRFP && mValue == "none" && pValue == "none") {
 						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "false"}
 					}
@@ -613,20 +619,28 @@ function get_plugins_mimetypes() {
 //oDebug["pdf"] = pdf
 //oDebug["pdfLies"] = pdfLies
 //oDebug["isRFP"] = isRFP
-				if (isVer > 98) {pdfNote = pdf == "false" ? rfp_green : rfp_red}
+				if (isVer > 98) {pdfNote = pdf == "true" ? rfp_green : rfp_red}
 				dom.pdf.innerHTML = pdf + pdfNote
 				return fpValue
 			}
 //let oDebug = {}
-			// harden BS before we compare
-			let pluginValue = (Array.isArray(results[0])) ? mini_sha1(results[0].join(), "devices plugins") : results[0]
-			let mimeValue = (Array.isArray(results[1])) ? mini_sha1(results[1].join(), "devices mimeTypes") : results[1]
-			if (isVer > 98) {
-				if (pluginValue !== plugin99[0] && pluginValue !== "none") {pluginBS = true}
-				if (mimeValue !== mime99[0] && mimeValue !== "none") {mimeBS = true}
-			} else if (isVer > 84) {
-				if (pluginValue !== "none") {pluginBS = true}
-				if (mimeValue !== "none") {mimeBS = true}
+
+			// set some PDF vars first
+			let pdf, pdfLies = false
+			try {
+				pdf = navigator.pdfViewerEnabled
+			} catch(e) {
+				pdf = zB0; log_error("devices: pdfViewer", e.name, e.message)
+			}
+			// lies: 1720353
+			if (pdf !== zB0) {
+				if (proxyLies.includes("Navigator.pdfViewerEnabled")) {
+					pdfLies = true
+				} else if (isVer > 98) {
+					pdfLies = ("boolean" !== typeof pdf)
+				} else if (isFF) {
+					pdfLies = (undefined !== pdf)
+				}
 			}
 			// now we can cross check them
 			let mValue = output("mimeTypes")
