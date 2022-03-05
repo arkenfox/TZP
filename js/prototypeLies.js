@@ -375,9 +375,8 @@ function outputPrototypeLies() {
 					return false // chrome only test
 				}
 				try {
-					const _apiFunction = apiFunction
-					Object.defineProperty(_apiFunction, '', {})+''
-					Object.defineProperties(_apiFunction, {})+''
+					Object.defineProperty(apiFunction, '', { configurable: true })+''
+					Reflect.deleteProperty(apiFunction, '')
 					return false
 				} catch (error) {
 					return true // failed at Error
