@@ -594,7 +594,7 @@ function get_plugins_mimetypes() {
 				fpValue = pdf
 				if (isVer > 98) {
 					// two legit arrays
-					if (mValue == mime99[0] && pValue == plugin99[1]) {
+					if (mValue == mime99[0] && pValue == plugin99[0]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
 					// two legit nones
