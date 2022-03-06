@@ -642,6 +642,9 @@ function get_plugins_mimetypes() {
 					pdfLies = (undefined !== pdf)
 				}
 			}
+			// fuck it: harden
+			if (proxyLies.includes("Navigator.plugins")) {pluginBS = true}
+			if (proxyLies.includes("Navigator.mimeTypes")) {mimeBS = true}
 			// now we can cross check them
 			let mValue = output("mimeTypes")
 			let pValue = output("plugins")
