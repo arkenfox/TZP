@@ -112,26 +112,47 @@ function analyse(data) {
 	return strNew
 }
 
+let aData = []
+let aBypass = []
+
 function get_data() {
-	let realvalue = "8c70ed9a7dbe6d72e3d1a4e448522012661cfbed"
-	let aData = []
+	let realvalues = [
+		"8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // FF78-95
+		"bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf" // FF96+
+	]
+
+	aData = []
 	let canvas = document.getElementById("canvas")
 	try {
 		let data = canvas.toDataURL()
-		if (sha1(data) == realvalue) {
-			aData.push("remove the RFP site exception and randomize")
-			return aData
+		let test = sha1(data)
+		if (isFF && realvalues.includes(test)) {
+			if (bypass) {
+				aBypass.push("canvas is not being spoofed")
+			} else {
+				aData.push("remove the RFP site exception and randomize")
+				return aData
+			}
 		}
 		let data2 = canvas.toDataURL()
 		if (data == data2) {
-			aData.push("this is not RFP as it is not random per execution")
-			return aData
+			if (bypass) {
+				aBypass.push("canvas is not random per execution")
+			} else {
+				aData.push("this is not RFP as it is not random per execution")
+				return aData
+			}
 		}
 		// 1724331 FF96+ (also see 1737038)
 		if (data.length > 190 || data2.length > 190) { // was 180
-			aData.push("look, you're not fooling anyone, this is not RFP")
-			return aData
+			if (bypass) {
+				aBypass.push("toDataURL lengths are too long")
+			} else {
+				aData.push("look, you're not fooling anyone, this is not RFP")
+				return aData
+			}
 		}
+
 		// looks good
 		aData.push(analyse(data))
 		aData.push(analyse(data2))
@@ -150,20 +171,26 @@ function run(howmany) {
 	dom.perf = ""
 	dom.results = ""
 	testCount = howmany
+	aBypass = []
 
 	// isFF
 	if (!isFF) {
-		dom.results = "this test requires firefox"
-		return
+		if (bypass) {
+			aBypass.push("this is not gecko")
+		} else {
+			dom.results = "this test requires firefox"
+			return
+		}
 	}
 	// FF78+
-	try {
-		let t = new RegExp('b')
-		if (t.dotAll == false) {} else {
+	if (isFF && !window.Document.prototype.hasOwnProperty("replaceChildren")) {
+		if (bypass) {
+			aBypass.push("this is not Firefox 78+")
+		} else {
 			dom.results = "this test requires firefox 78 or higher"
 			return
 		}
-	} catch(e) {}
+	}
 	// isRFP
 	let isRFP = false
 	let isPerf = true
@@ -178,14 +205,22 @@ function run(howmany) {
 		isRFP = (r == 0)
 		if (!isPerf) {isRFP = false}
 	} catch(e) {}
-	if (!isRFP) {
-		dom.results = "this test requires RFP to be enabled"
-		return
+	if (isFF && !isRFP) {
+		if (bypass) {
+			aBypass.push("RFP is not enabled")
+		} else {
+			dom.results = "this test requires RFP to be enabled"
+			return
+		}
 	}
 	// isFile
-	if (isFile) {
-		dom.results = "aw snap! RFP doesn't work on file:/// scheme"
-		return
+	if (isFF && isFile) {
+		if (bypass) {
+			aBypass.push("RFP doesn't work on file scheme")
+		} else {
+			dom.results = "aw snap! RFP doesn't work on file:/// scheme"
+			return
+		}
 	}
 	// heh
 	if (testTotal >= 200000) {
@@ -204,7 +239,7 @@ function run(howmany) {
 			}
 		}
 	} catch(e) {
-		dom.results.innerHTML = aData.push(e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message)
+		dom.results.innerHTML = e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message
 		return
 	}
 	dom.results = "calculating..."
@@ -267,7 +302,8 @@ function run(howmany) {
 					if (countRFP == 0) {display.push(sb +"<br><br>\u2715 FAILED IT"+ sc)}
 				}
 			}
-			dom.results.innerHTML = display.join("<br>")
+			dom.results.innerHTML = display.join("<br>") +
+				(aBypass.length ? "<br><br>also... you failed to pass these basics<br><br>" + aBypass.join("<br>") : "")
 
 			// running totals
 			if (hasTotal) {
@@ -356,6 +392,9 @@ let oTotal = {},
 for (let i=0; i < rules.length; i++) {
 	oTotal["rule"+ (i +"").padStart(2,"0")] = [0]
 }
+
+// bypass RFP checks and allow tests to run
+let bypass = true
 
 // autorun
 let testCount = 100
