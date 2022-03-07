@@ -70,9 +70,13 @@ function get_connection() {
 		if (!isCon && !hasNav) {
 			if (test == "undefined") {
 				test = zNS
+				// 1637922: FF99+ android
 				if (isFF) {
-					if (isOS == "android") {test += isTB ? default_tb_green : default_ff_red
-					} else {test += default_ff_green}
+					if (isOS == "android" && isVer < 99) {
+						test += isTB ? default_tb_green : default_ff_red
+					} else {
+						test += default_ff_green
+					}
 				}
 			} else {
 				if (hasObj) {
