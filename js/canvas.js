@@ -254,6 +254,7 @@ function outputCanvas() {
 								data[y * 16 + x] = context.isPointInStroke(x, y)
 							}
 						}
+console.debug(data)
 						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
 						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1)
 						return dataR
