@@ -249,6 +249,8 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
+let dataCheck = context.isPointInStroke(0, 0)
+console.debug(dataCheck)
 						for (var x = 0; x < 16; x++){
 							for (var y = 0; y < 16; y++){
 								data[y * 16 + x] = context.isPointInStroke(x, y)
