@@ -4,7 +4,8 @@
 
 function outputCanvas() {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let res0 = [], res1 = [], res2 = [], aMismatch = [zNA,zNA,zNA,zNA,zNA]
+	let res0 = [], res1 = [], res2 = []
+	let aMismatch = [zNA,zNA,zNA,zNA,zNA] // alphabetical order
 	var isSHA = "SHA-1"
 
 	// expected known
@@ -35,6 +36,7 @@ function outputCanvas() {
 		let useKnown = (isFF || isEngine == "blink" || isEngine == "webkit")
 		let aBlock = [], aIndex = [], aValue = [], aKnown = [], aPass = []
 		let compareBlob = "", compareDataURL = "", ffBlob = "", ffDataURL = ""
+
 		for (let i=0; i < res1.length; i++) {
 			let str0 = res0[i], str1 = res1[i], str2 = res2[i]
 			let delim = str0.search(",")
@@ -146,6 +148,9 @@ function outputCanvas() {
 				if (aKnown[i] == false || aPass[i] == false || aMismatch[i] !== zNA) {
 					gKnown.push("canvas:"+ aIndex[i])
 				}
+				if (aMismatch[i] !== zNA) {
+					gMethods.push("canvas: "+ aIndex[i] +": "+ aValue[i])
+				}
 				if (aBlock[i] == true) {
 					if (aMismatch[i] == zNA) {
 						log_error("canvas: "+ aIndex[i], aValue[i])
@@ -185,9 +190,12 @@ function outputCanvas() {
 					value: function(){
 						return new Promise(function(resolve, reject){
 							let t1; if (canPerf) {t1 = performance.now()}
+							let msg
 							try {
 								var timeout = window.setTimeout(function(){
-									reject("timeout")
+									msg = "undefined [timed out]"
+									aMismatch[3] = msg
+									resolve(msg)
 								}, 750)
 								getFilledContext().canvas.toBlob(function(blob){
 									window.clearTimeout(timeout)
@@ -198,12 +206,19 @@ function outputCanvas() {
 										resolve(data)
 									}
 									reader.onerror = function(){
-										reject("unable to read blob!")
+										msg = "undefined [.onerror]"
+										aMismatch[3] = msg
+										resolve(msg)
 									}
 									reader.readAsDataURL(blob)
 								})
 							} catch(e) {
-								resolve(e.name === undefined ? zErr : e.name +": " + e.message)
+								if (e.name === undefined) {
+									aMismatch[3] = zU
+									resolve(zU)
+								} else {
+									resolve(e.name +": " + e.message)
+								}
 							}
 						})
 					}
@@ -232,12 +247,18 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
-						for (var x = 0; x < 16; x++){
-							for (var y = 0; y < 16; y++){
-								data[y * 16 + x] = context.isPointInPath(x, y)
+						let dataR = context.isPointInStroke(0, 0)
+						if ("boolean" === typeof dataR) {
+							for (var x = 0; x < 16; x++){
+								for (var y = 0; y < 16; y++){
+									data[y * 16 + x] = context.isPointInPath(x, y)
+								}
 							}
+							dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
+						} else {
+							dataR = cleanFn(dataR) +""
+							if (runNo == 1) {aMismatch[1] = dataR} // not an error
 						}
-						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
 						log_perf("isPointInPath ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
@@ -249,15 +270,18 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
-let dataCheck = context.isPointInStroke(0, 0)
-console.debug(dataCheck)
-						for (var x = 0; x < 16; x++){
-							for (var y = 0; y < 16; y++){
-								data[y * 16 + x] = context.isPointInStroke(x, y)
+						let dataR = (context.isPointInStroke(0, 0))
+						if ("boolean" === typeof dataR) {
+							for (var x = 0; x < 16; x++){
+								for (var y = 0; y < 16; y++){
+									data[y * 16 + x] = context.isPointInStroke(x, y)
+								}
 							}
+							dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
+						} else {
+							dataR = cleanFn(dataR) +""
+							if (runNo == 1) {aMismatch[2] = dataR} // not an error
 						}
-console.debug(data)
-						let dataR = window.crypto.subtle.digest(isSHA, data).then(hashToString)
 						log_perf("isPointInStroke ["+ runNo +"] [canvas]",t1)
 						return dataR
 					}
