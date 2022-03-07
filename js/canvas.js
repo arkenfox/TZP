@@ -247,7 +247,7 @@ function outputCanvas() {
 						let t1; if (canPerf) {t1 = performance.now()}
 						var context = getPathContext()
 						var data = new Uint8Array(16 * 16)
-						let dataR = context.isPointInStroke(0, 0)
+						let dataR = context.isPointInPath(0, 0)
 						if ("boolean" === typeof dataR) {
 							for (var x = 0; x < 16; x++){
 								for (var y = 0; y < 16; y++){
