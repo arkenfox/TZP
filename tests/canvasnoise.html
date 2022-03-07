@@ -306,8 +306,7 @@ function run() {
 				dom.perf.innerHTML = Math.round(t1-t0) +"ms"
 			}
 		} catch(e) {
-			// ToDo: output some errors or something
-			console.debug("catchall", e.name, e.message)
+			dom.readhash.innerHTML = sb + e.name +": "+ sc + e.message
 		}
 	}, 170)
 }
