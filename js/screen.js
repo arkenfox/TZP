@@ -2544,8 +2544,15 @@ function outputScreen() {
 }
 
 function outputStart() {
-	// FF60: false positive
-	if (isVer < 61) {isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))}
+	if (isVer > 99) {
+		// FF100+: 1754441: extensions.InstallTrigger*.enabled
+		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
+		isFFno = isFFno.filter(x => !["type of installtrigger"].includes(x))
+		isFFno = isFFno.filter(x => !["installtrigger in window"].includes(x))
+	} else if (isVer < 61) {
+		// FF60: false positive
+		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
+	}
 	if (isFF && isFFno.length) {
 		let fake = []
 		isFFno.forEach(function(item) {fake.push(item)})
