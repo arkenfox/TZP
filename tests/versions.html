@@ -252,7 +252,6 @@ function outputVersion() {
 			try {
 				newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
 			} catch(e) {
-				console.debug(e)
 				ver100 = e === 10
 			}
 		}
