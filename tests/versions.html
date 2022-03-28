@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 44, maxVer = 99, oTZP = {}, oSuccess = {}
+	let countTZP = 0, expectTZP = 45, maxVer = 100, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -246,6 +246,17 @@ function outputVersion() {
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
 
+		// 100: 1757162
+		let t100 = performance.now(), ver100
+		if (HTMLElement.prototype.hasOwnProperty("outerText")) { // speed things up by only checking 98+
+			try {
+				newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
+			} catch(e) {
+				console.debug(e)
+				ver100 = e === 10
+			}
+		}
+		rec(100, 100, "1757162", ver100, performance.now()-t100)
 
 		// 99: 1711715 + 1756204
 			// note: FF90+ javascript.options.experimental.private_fields : default true
