@@ -578,12 +578,22 @@ function get_plugins_mimetypes() {
 						if (isBypass) {gBypassed.push("devices:"+ type +":"+ fpValue)}
 					}
 				}
-				el.innerHTML = value + btn + (value == "none" ? rfp_green : rfp_red)
 				let thisMini = (type == "plugins" ? pluginMini : mimeMini)
 				if (thisMini !== "") {elMini.innerHTML = " ["+ thisMini +"] "}
 				if (runSNM && type == "mimeTypes" || runSNP && type == "plugins") {
 					console.log(" - returned "+ fpValue + " ["+ type +"]" + (isBypass ? ": bypass "+ msgBP : ""))
 				}
+				let notation = ""
+				if (isVer < 100) {
+					notation = (value == "none" ? rfp_green : rfp_red)
+				} else {
+					// 1756280
+					if (type == "plugins") {notation = (thisMini == "012c6754" ? rfp_green : rfp_red)
+					} else if (type == "mimeTypes") {notation = (thisMini == "4f23f546" ? rfp_green : rfp_red)}
+				}
+				el.innerHTML = value + btn + notation
+
+
 				return fpValue
 			}
 
