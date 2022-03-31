@@ -155,7 +155,6 @@ function fnRecord(order, description, result, match, error) {
 	data[order] = description +"~~~"+ result +"~~~"+ match
 	count ++
 	itemnumbers.push(order +" "+ description)
-
 	if (count == expected) {
 		fnDisplay()
 	}
@@ -362,25 +361,36 @@ function get_iframe_props(num1, num2, title) {
 }
 
 function get_installtrigger(num) {
+	// FF100+: 1754441 behind prefs slated for deprecation
 	let strA = "[typeof] InstallTrigger", boolA = false
 	try {
 		if (bBlock) {bB = 1}
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
-		fnRecord(num, strA, resA, boolA)
+		if (is100) {
+			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA)
+		} else {
+			fnRecord(num, strA, resA, boolA)
+		}
 	} catch(e) {
 		fnRecord(num, strA, e.name, zB0, e.message)
 	}
+
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
 		if (bBlock) {bB = 1}
 		let resB = "InstallTrigger" in window
-		fnRecord(num+1, strB, resB, resB)
+		if (is100) {
+			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA)
+		} else {
+			fnRecord(num+1, strB, resB, resB)
+		}
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
-	// FF61+
+
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
+	// FF60 or lower
 	if (isFF && !is61) {
 		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
@@ -388,7 +398,11 @@ function get_installtrigger(num) {
 			if (bBlock) {bB = 1}
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
-			fnRecord(num+2, strC, resC, boolC)
+			if (is100) {
+				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA)
+			} else {
+				fnRecord(num+2, strC, resC, boolC)
+			}
 		} catch(e) {
 			fnRecord(num+2, strC, e.name, zB0, e.message)
 		}
@@ -882,8 +896,9 @@ function get_nav_keys(num1, num2, title) {
 			// 1666203: FF96+ canShare
 			aNavNotExpected = aNavNotExpected.filter(x => !["canShare"].includes(x))
 		}
-		if (is95) {
+		if (is95 || isEngine == "goanna") {
 			// 1670058: FF95+ globalPrivacyControl
+			// PM 30
 			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
 		}
 		if (is93) {
@@ -1001,11 +1016,13 @@ function get_nav_values(num1, num2, num3) {
 	try {
 		if (bBlock) {bB = 1}
 		let resG = navigator.globalPrivacyControl
-		if (resG == undefined) {boolG = true}
 		resG = fnClean(resG)
+		if (resG == "undefined") {boolG = true
+		} else if (isEngine == "goanna" && resG == "empty string") {boolG = true; resG += s3 + " [goanna]"+ sc}
+
 		// 1670058: FF95+ globalPrivacyControl
 		if (is95) {
-			resG = zNA +": FF94 or lower ["+ resG +"]"
+			resG = zNA +": FF94 or lower" + s3 +" ["+ resG +"]" + sc
 			boolG = zNA
 		}
 		fnRecord(numG, strG, resG, boolG)
@@ -1094,12 +1111,15 @@ function get_nav_values(num1, num2, num3) {
 		if (testDNT == 1 || testDNT == "unspecified") {
 			boolDNT = true
 		} else {
-			if (testDNT == "null") {testDNT = "null string"
-			} else if (testDNT == null) {testDNT = "null"
-			} else {testDNT = fnClean(testDNT)}
+			testDNT = fnClean(testDNT)
 		}
 		if (isFF && !boolDNT) {
-			fnRecord(numDNT, strDNT, testDNT, zB0)
+			// PM not supported: returns undefined
+			if (isEngine == "goanna" && testDNT == "undefined") {
+				fnRecord(numDNT, strDNT, testDNT, true)
+			} else {
+				fnRecord(numDNT, strDNT, testDNT, zB0)
+			}
 		} else {
 			fnRecord(numDNT, strDNT, testDNT, boolDNT)
 		}
@@ -1371,7 +1391,8 @@ let isRFP56plus = false,
 	is95 = false,
 	is96 = false,
 	is97 = false,
-	is99 = false
+	is99 = false,
+	is100 = false
 
 // webkit
 if ("chrome" in window || isFF) {} else {isWebkit = true}
@@ -1379,6 +1400,13 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
+	if (HTMLElement.prototype.hasOwnProperty("outerText")) {
+		try {
+			newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
+		} catch(e) {
+			is100 = (e === 10)
+		}
+	}
 	try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {is99 = (e.message.length == 72)}
 	is97 = ("function" === typeof AbortSignal
 		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
@@ -1416,6 +1444,13 @@ let results = [],
 	topVer = ""
 
 setTimeout(function() {
+	if (isEngine == "gecko") {
+		// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
+			// note: waterfox classic passes both
+		if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
+			isEngine = "goanna"
+		}
+	}
 	// legacy forks: PM, Basilisk, WF Classic: backported fixes cause isXX false positives
 	// cascade
 	/*
@@ -1435,6 +1470,8 @@ setTimeout(function() {
 		aVer.push("is95: "+ is95)
 		aVer.push("is96: "+ is96)
 		aVer.push("is97: "+ is97)
+		aVer.push("is99: "+ is99)
+		aVer.push("is100: "+ is100)
 		console.debug(aVer.join("\n"))
 	}
 	*/
@@ -1454,7 +1491,8 @@ setTimeout(function() {
 		if (!is95) {is96 = false} else {topVer = "95 <sup>96</sup>"}
 		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
 		if (!is97) {is99 = false} else {topVer = "97+ <sup>99</sup>"}
-		if (!is99) {} else {topVer = "99+"}
+		if (!is99) {is100 = false} else {topVer = "99+ <sup>100</sup>"}
+		if (!is100) {} else {topVer = "100+"}
 	}
 
 	// now get on with it
