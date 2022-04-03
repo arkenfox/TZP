@@ -472,7 +472,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 52, oOther = {}
+	let countOther = 0, expectOther = 51, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -489,17 +489,6 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
-
-		// 100: 1757162
-		let t100 = performance.now(), ver100
-		if (HTMLElement.prototype.hasOwnProperty("outerText")) { // speed things up by only checking 98+
-			try {
-				newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
-			} catch(e) {
-				ver100 = e === 10
-			}
-		}
-		rec(100, 100, "1757162", ver100, performance.now()-t100)
 
 		// 99: 1720353
 			// ext fuckery possible/likely due to mimeTypes/plugins
