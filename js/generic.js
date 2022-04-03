@@ -627,14 +627,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
-
-		if (HTMLElement.prototype.hasOwnProperty("outerText")) {
-			try {
-				newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
-			} catch(e) {
-				if (e === 10) return 100 // 1757162
-			}
-		}
+		if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
 		try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
 		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
@@ -1501,7 +1494,6 @@ function run_once() {
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
 
 	// isFF
-  // FF100+: 1754441: extensions.InstallTrigger[Impl].enabled
 	let str = "installtrigger"
 	let str1 = "type of "+str, str2 = "type of "+ str +"impl", str3 = str+ " in window"
 	let test1 = false, test2 = false, test3 = false
