@@ -1400,13 +1400,7 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
-	if (HTMLElement.prototype.hasOwnProperty("outerText")) {
-		try {
-			newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
-		} catch(e) {
-			is100 = (e === 10)
-		}
-	}
+	is100 = ("function" === typeof AbortSignal && "function" === typeof AbortSignal.timeout)
 	try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {is99 = (e.message.length == 72)}
 	is97 = ("function" === typeof AbortSignal
 		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
