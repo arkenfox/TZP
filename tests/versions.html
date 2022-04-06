@@ -476,7 +476,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 53, oOther = {}
+	let countOther = 0, expectOther = 52, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -503,6 +503,8 @@ function outputVersion() {
 		} catch(e) {}
 		rec(101, 101, "1752808", ver101, performance.now()-t101)
 
+		/*
+		// comment out: it causes build github page build errors
 		// 100: 1757162
 		let t100 = performance.now(), ver100
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) { // speed things up by only checking 98+
@@ -513,6 +515,7 @@ function outputVersion() {
 			}
 		}
 		rec(100, 100, "1757162", ver100, performance.now()-t100)
+		*/
 
 		// 99: 1720353
 			// ext fuckery possible/likely due to mimeTypes/plugins
