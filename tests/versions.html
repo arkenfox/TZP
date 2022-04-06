@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 45, maxVer = 100, oTZP = {}, oSuccess = {}
+	let countTZP = 0, expectTZP = 46, maxVer = 101, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -245,6 +245,10 @@ function outputVersion() {
 		// < 60 : 1436659
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
+
+		// 101: 1728999
+		let t101 = performance.now(), ver101 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction"))
+		rec(101, 101, "1728999", ver101, performance.now()-t101)
 
 		// 100: 1753309: legacy check: FF56- AbortSignal
 		let t100 = performance.now(), ver100 = ("function" === typeof AbortSignal
@@ -472,7 +476,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 51, oOther = {}
+	let countOther = 0, expectOther = 53, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -489,6 +493,26 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 101: 1752808
+		let t101 = performance.now(), ver101
+		try {
+			let test101 = new Intl.NumberFormat("en", {style:"currency", currency:"USD", maximumFractionDigits:2, notation:"compact"}).format(1773500)
+			ver101 = (test101 == "$1.77M")
+			debug.push("101  1752808: "+ test101)
+		} catch(e) {}
+		rec(101, 101, "1752808", ver101, performance.now()-t101)
+
+		// 100: 1757162
+		let t100 = performance.now(), ver100
+		if (HTMLElement.prototype.hasOwnProperty("outerText")) { // speed things up by only checking 98+
+			try {
+				newFn("function g1() {throw 10}; function g2() {throw 20}; class TZP {#x = 'x' + g1(); constructor(o = g2()) {}}; new TZP")
+			} catch(e) {
+				ver100 = e === 10
+			}
+		}
+		rec(100, 100, "1757162", ver100, performance.now()-t100)
 
 		// 99: 1720353
 			// ext fuckery possible/likely due to mimeTypes/plugins
