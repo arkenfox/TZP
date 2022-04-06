@@ -617,7 +617,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 100) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 101) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -627,6 +627,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) return 101 // 1728999
 		if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
 		try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
