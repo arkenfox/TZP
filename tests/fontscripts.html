@@ -347,6 +347,8 @@ function generate() {
 			}
 		})
 		//console.log("perf: generating blocks", performance.now() - t0, "ms")
+		// always setup if we change our code lists
+		setup()
 		// return
 		return resolve()
 	})
@@ -505,12 +507,8 @@ function test() {
 dom.allassigned.checked = true
 let isRunning = false
 aBlocks.sort() // sort so results are easier to scan
-Promise.all([
-	generate()
-]).then(function(results){
-	// render chars and populate clean legend
-	setup()
-})
+generate()
+
 
 </script>
 </body>
