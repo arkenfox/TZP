@@ -533,12 +533,18 @@ function get_intl_dtf(num, title) {
 			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6" && is70) {bool = true // FF70+
-		} else if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
-		} else if (hash == "407454b2169899f2c4b3264a716223315d844f0b" && !is59) {bool = true // FF55-57 RFP
-		} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
-		} else if (hash == "5e50264aff470447e8c19c899061eada3528ed45" && !is59) {bool = true // WFClassic52 RFP
+		if (is101) {
+			if (hash == "f3292db015c0915ce6099982d84727986140f999") {bool = true} // FF101+
+		} else if (is70) {
+			if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true} // FF70-100
+		} else {
+			if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
+			} else if (hash == "407454b2169899f2c4b3264a716223315d844f0b" && !is59) {bool = true // FF55-57 RFP
+			} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
+			} else if (hash == "5e50264aff470447e8c19c899061eada3528ed45" && !is59) {bool = true // WFClassic52 RFP
+			}
 		}
+
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -1392,7 +1398,8 @@ let isRFP56plus = false,
 	is96 = false,
 	is97 = false,
 	is99 = false,
-	is100 = false
+	is100 = false,
+	is101 = false
 
 // webkit
 if ("chrome" in window || isFF) {} else {isWebkit = true}
@@ -1400,6 +1407,7 @@ if ("chrome" in window || isFF) {} else {isWebkit = true}
 if (isFF) {
 	// ToDo: [possibly add some missing some isXX to make things tighter
 	fnRFP()
+	is101 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction"))
 	is100 = ("function" === typeof AbortSignal && "function" === typeof AbortSignal.timeout)
 	try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {is99 = (e.message.length == 72)}
 	is97 = ("function" === typeof AbortSignal
@@ -1486,7 +1494,8 @@ setTimeout(function() {
 		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
 		if (!is97) {is99 = false} else {topVer = "97+ <sup>99</sup>"}
 		if (!is99) {is100 = false} else {topVer = "99+ <sup>100</sup>"}
-		if (!is100) {} else {topVer = "100+"}
+		if (!is100) {is101 = false} else {topVer = "100+ <sup>101</sup>"}
+		if (!is101) {} else {topVer = "101+"}
 	}
 
 	// now get on with it
