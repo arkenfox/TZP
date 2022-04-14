@@ -85,7 +85,8 @@ function run() {
 		// overall hash
 		let hash = sha1(res.join()), code = ""
 		if (isFF) {
-			if (hash == "203b29f75215cd50a3b94d31e44ac0c933011be8") {code = "96+"
+			if (hash == "0587bf26f1508a6fbc5a26e7dd41fb835790cd31") {code = "101+"
+			} else if (hash == "203b29f75215cd50a3b94d31e44ac0c933011be8") {code = "96-100"
 			} else if (hash == "52322e29ea14381cd65f31f568173a785a8e291b") {code = "94-95"
 			} else if (hash == "e4bf3098e5f4ed5f4068076a649e35fffb338cd2") {code = "93"
 			}
