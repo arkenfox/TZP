@@ -43,7 +43,7 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Testing font visibility vs script support by checking up to <code>x</code>
 			characters of each script for tofu. Allow 1-2 secs before running to ensure <a target="_blank" class="blue"
-			href="https://bugzilla.mozilla.org/1676966">asynchronous font fallback</a> caching.
+			href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">asynchronous font fallback</a> caching.
 			Tofu results are colored coded as <span class="bad">90% or higher</span>, <span class="s2">20-90%</span>,
 			<span class="s4">20% or lower</span>. Non-assigned code points are excluded in <span class="s14">[ranges]</span>,
 			which may or may not be the full ranges. The option to not include <span style="color: #8ca7dc;">all assigned
@@ -53,17 +53,17 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;">
 			</td>
-			<td style="text-align: left; vertical-align: top; font-size: 11px;">
+			<td style="text-align: left; vertical-align: top;">
 				<span class="btn12 btnfirst" onClick="run('test')">[ run ]</span>
-				<span class="btn12 btn" onClick="logObject('codes')">[ codes ]</span>
-				<span class="btn12 btn" onClick="logObject('chars')">[ chars ]</span> | &nbsp
+				<!--<span class="btn12 btn" onClick="logObject('codes')">[ codes ]</span>
+				<span class="btn12 btn" onClick="logObject('chars')">[ chars ]</span> | &nbsp-->
 				<span class="s12 mono"> depth
-					<input type="radio" name="depth" value=20>20
-					<input type="radio" name="depth" value=50 checked>50
-					<input type="radio" name="depth" value=500>ALL
+					<input type="radio" name="depth" value=20> 20
+					<input type="radio" name="depth" value=50 checked> 50
+					<input type="radio" name="depth" value=800> ALL
 				</span> | &nbsp
 				<span class="s12 mono">
-					<input type="checkbox" name="allassigned" style="margin: 0; height: 12px" onClick='generate()'> all assigned code points
+					<input type="checkbox" name="allassigned" style="margin: 0; height: 12px" onClick='reset()'> all assigned code points
 				</span>
 				<br><br><hr>
 				<br><span class="spaces" style="direction:ltr;unicode-bidi:bidi-override; font-size: 12px;" id="visual"></span>
@@ -75,60 +75,48 @@
 'use strict';
 // https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
-let oCodes = {},
-	oChars = {},
-	oRanges = {},
-	aLegend = [],
-	aVisual = [],
-	aSummary = [],
-	aBlocks = [
+let aBlocks = [
 		// name, prefix, [block range], remove last x, [non-assigned], [ignore]
-		["basic latin", "00", [2,3,4,5,6,7], -2,
-			[],
-			["20"]
+
+		// AFRICAN
+		["african"],
+		["adlam", "1E9", [0,1,2,3,4,5], 0, ["4C","4D","4E","4F","5A","5B","5C","5D"]],
+		["bamum", "A6", ["A","B","C","D","E","F"], -8],
+		["bassa vah", "16A", ["D","E","F"], -10, ["EE","EF"]],
+		["medefaidrin ", "16E", [4,5,6,7,8,9], -5],
+		["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], ["FD","FE","FF"]],
+		["vai", "A", [50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62], -4],
+
+		// AMERICAN
+		["american"],
+		["cherokee", 13, ["A","B","C","D","E","F",], -2, ["F6","F7"], ["F5","F8","F9","FA","FB","FC","FD"]],
+		["deseret", "104", [0,1,2,3,4]],
+		["unified canadian aboriginal syllabics", 1,
+			[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",
+			50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",
+			60,61,62,63,64,65,66,67], 0, [],
+			["400","677","678","679","67A","67B","67C","67D","67E","67F"],
 		],
-		["latin-1 supplement", "00", ["A","B","C","D","E","F"], 0,[],["A0"]],
-		["latin extended-a", 0, [10,11,12,13,14,15,17], 0],
-		["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], 0],
-		["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0,
-			[],
-			["9C","9D","9F","FA","FB","FC","FD","FE","FF",] // Medievalist additions
-		],
-		["ipa extensions", "02", [5,6,7,8,9,"A"], 0],
-		["spacing modifier letters", "02", ["B","C","D","E","F"], 0],
-		["combining diacritical marks", "03", [0,1,2,3,4,5,6], 0],
-		["greek and coptic", "03", [7,8,9,"A","B","C","D","E","F"], 0,
-			["78","79","80","81","82","83","8B","8D","A2"],
-			["70","71","72","73","76","77","7F","CF"]
-		],
-		["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0],
-		["cyrillic supplement", 0, [50], 0],
-		["armenian", "05", [3,4,5,6,7,8], 0,
-			["30","57","58","8B","8C"],
-			["60","88","8D","8E","8F",]
-		],
-		["hebrew", "05", [9,"A","B","C","D","E","F"], -11,
-			["90","C8","C9","CA","CB","CC","CD","CE","CF","EB","EC","ED","EE",],
-			["EF"]
-		],
-		["arabic", "06", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0,
-			[],
-			["04","05","1D","20","5F"]
-		],
-		["arabic supplement", "07", [5,6,7], 0,
-			[],
-			["6E","6F","70","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E","7F"]
-		],
-		["syriac", "07", [0,1,2,3,4], 0,["0E","4B","4C"]],
-		["thanaa", "07", [8,9,"A","B"], -14],
-		["devanagari", "09", [0,1,2,3,4,5,6,7], 0,
-			[],
-			["00","3A","3B","4E","4F","55","56","57","73","74","75","76","77","78","79","7A"],
-		],
+
+		// ANCIENT
+		["ancient and historic"],
+		["gothic", 103, [3,4], -5],
+		["ogham", 16, [8,9], -3],
+		["runic", 16, ["A","B","C","D","E","F"], -7, [], ["F1","F2","F3","F4","F5","F6","F7","F8"]],
+
+		// BRAHMIC
+		["brahmic"],
+		["balinese", "1B", [0,1,2,3,4,5,6,7], -1, ["4D","4E","4F","7F"]],
 		["bengali", "09", [8,9,"A","B","C","D","E","F"], -1,
 			["84","8D","8E","91","92","A9","B1","B3","B4","B5","BA","BB","C5","C6","C9","CA","CF",
 			"D0","D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DE","E4","E5"],
 			["80","FB","FC","FD","FE"]
+		],
+		["buginese", "1A", [0,1], 0, ["1C","1D"]],
+		["buhid", 17, [4,5,], -12],
+		["devanagari", "09", [0,1,2,3,4,5,6,7], 0,
+			[],
+			["00","3A","3B","4E","4F","55","56","57","73","74","75","76","77","78","79","7A"],
 		],
 		["gurmukhi", "0A", [0,1,2,3,4,5,6,7], -9,
 			["00","04","0B","0C","0D","0E","11","12","29","31","34","37","3A","3B","3D",
@@ -142,11 +130,40 @@ let oCodes = {},
 			"E4","E5","F2","F3","F4","F5","F6","F7","F8"],
 			["F0","F9","FA","FB","FC","FD","FE","FF"]
 		],
+		["hanunoo", 17, [2,3], -9],
+		["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"]],
+		["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
+			["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
+			"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
+			["80","81","84","DD"]
+		],
+		["khmer", 17, [8,9,"A","B","C","D","E","F"], -6, ["DE","DF","EA","EB","EC","ED","EE","EF","FA","FB","FC","FD","FE","FF"]],
+		["khmer symbols", 19, ["E","F"]],
+		["lao", "0E", [8,9,"A","B","C","D"], 0,
+			["80","83","85","8B","A4","A6","BE","BF","C5","C7","CE","CF","DA","DB"],
+			["86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA","DE","DF"]
+		],
+		["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
+			["0D","11","45","49","50","51","52","53","64","65"],
+			["00","01","04","29","3A","3B","3C","4E","4F",
+			"54","55","56","58","59","5A","5B","5C","5D","5E","5F","76","77","78"]
+		],
+		["myanmar", 10, [0,1,2,3,4,5,6,7,8,9]],
+		["new tai lue", 19, [8,9,"A","B","C","D"], 0, ["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"]],
 		["oriya", "0B", [0,1,2,3,4,5,6,7], -8,
 			["00","04","0D","0E","11","12","29","31","34","3A","3B","45","46","49","4A","4E","4F",
 			"50","51","52","53","54","58","59","5A","5B","5E","64","65"],
 			["55","72","73","74","75","76","77"]
 		],
+		["phags-pa", "A8", [4,5,6,7], -8],
+		["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
+			["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
+			"E0","E1","E2","E3","E4","E5","F0","F1"],
+			["81","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF"]
+		],
+		["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"]],
+		["tagbanwa", 17, [6,7], -12, ["6D","71"]],
+		["tai le", 19, [5,6,7], -11, ["6E","6F"]],
 		["tamil", "0B", [8,9,"A","B","C","D","E","F"], -5,
 			["80","81","84","8B","8C","8D","91","96","97","98","9B","9D",
 			"A0","A1","A2","A5","A6","A7","AB","AC","AD","BA","BB","BC","BD",
@@ -161,75 +178,106 @@ let oCodes = {},
 			"64","65","70","71","72","73","74","75","76"],
 			["00","04","34","3C","5A","5D","77"]
 		],
-		["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
-			["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
-			"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
-			["80","81","84","DD"]
-		],
-		["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
-			["0D","11","45","49","50","51","52","53","64","65"],
-			["00","01","04","29","3A","3B","3C","4E","4F",
-			"54","55","56","58","59","5A","5B","5C","5D","5E","5F","76","77","78"]
-		],
-		["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
-			["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
-			"E0","E1","E2","E3","E4","E5","F0","F1"],
-			["81","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF"]
-		],
-		["thai", "0E", [0,1,2,3,4,5], -4,
-			["00","3B","3C","3D","3E"],
-			[]
-		],
-		["lao", "0E", [8,9,"A","B","C","D"], 0,
-			["80","83","85","8B","A4","A6","BE","BF","C5","C7","CE","CF","DA","DB"],
-			["86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA","DE","DF"]
-		],
+		["thai", "0E", [0,1,2,3,4,5], -4, ["00","3B","3C","3D","3E"]],
 		["tibetan", "0F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -5,
 			["48","6D","6E","6F","70","98","BD","CD"],
 			["6B","6C","8C","8D","8E","8F","CE","D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA"]
 		],
-		["myanmar", 10, [0,1,2,3,4,5,6,7,8,9], 0,],
+
+		// CYRILLIC
+		["cyrillic"],
+		["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0],
+		["cyrillic supplement", 0, [50], 0],
+
+		// EAST ASIAN
+		["east asian"],
+		["bopomofo", 31, [0,1,2], 0, ["00","01","02","03","04"], ["2D","2E","2F"]],
+		["bopomofo extended", 31, ["A","B"], 0, [], ["B8","B9","BA","BB","BC","BD","BE","BF"]],
+		["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0, [],
+			["FA","FB","FC","FD","FE","FF"]
+		],
+
+		// GEORGIAN
+		["georgian"],
 		["georgian", 10, ["A","B","C","D","E","F"], 0,
 			["C6","C8","C9","CA","CB","CC","CE","CF"],
 			["C7","CD","FD","FE","FF"],
 		],
-		["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0,
-			[],
-			["FA","FB","FC","FD","FE","FF"]
+		["georgian extended", "1C", [9,"A","B"], 0, ["BB","BC"]],
+
+		// GREEK
+		["greek"],
+		["greek and coptic", "03", [7,8,9,"A","B","C","D","E","F"], 0,
+			["78","79","80","81","82","83","8B","8D","A2"],
+			["70","71","72","73","76","77","7F","CF"]
 		],
+		["greek extended", "1F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], -1,
+			["16","17","1E","1F","46","47","4E","4F","58","5A","5C","5E","7E","7F","B5","C5","D4","D5","DC","F0","F1","F5"]
+		],
+
+		// LATIN
+		["latin"],
+		["basic latin", "00", [2,3,4,5,6,7], -2,
+			[],
+			["20"]
+		],
+		["latin-1 supplement", "00", ["A","B","C","D","E","F"], 0,[],["A0"]],
+		["latin extended-a", 0, [10,11,12,13,14,15,17], 0],
+		["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], 0],
+		["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0,
+			[],
+			["9C","9D","9F","FA","FB","FC","FD","FE","FF",] // Medievalist additions
+		],
+
+		// NOTATIONAL
+		//["notational"],
+
+		// PHONETIC
+		["phonetic"],
+		["ipa extensions", "02", [5,6,7,8,9,"A"], 0],
+		["phonetic extensions", "1D", [0,1,2,3,4,5,6,7], 0],
+		["phonetic extensions supplement", "1D", [8,9,"A","B"], 0],
+		["spacing modifier letters", "02", ["B","C","D","E","F"], 0],
+
+		// SEMITIC
+		["semitic"],
+		["arabic", "06", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0, [], ["04","05","1D","20","5F"]],
+		["arabic supplement", "07", [5,6,7], 0, [],
+			["6E","6F","70","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E","7F"]
+		],
+		["hebrew", "05", [9,"A","B","C","D","E","F"], -11,
+			["90","C8","C9","CA","CB","CC","CD","CE","CF","EB","EC","ED","EE",], ["EF"]
+		],
+		["mandaic", "08", [4,5], -1, ["5C","5D"]],
+		["samaritan", "08", [0,1,2,3], -1, ["2E","2F"]],
+		["syriac", "07", [0,1,2,3,4], 0,["0E","4B","4C"]],
+
+		// MISC
+		["misc"],
+		["armenian", "05", [3,4,5,6,7,8], 0,
+			["30","57","58","8B","8C"],
+			["60","88","8D","8E","8F",]
+		],
+		["combining diacritical marks", "03", [0,1,2,3,4,5,6], 0],
+		["currency symbols", 20, ["A","B","C"], -15, [], ["B6","B7","BB","BC","BD","BE","BF","C0"]],
 		["ethiopic", 1, [20,21,22,23,24,25,26,27,28,29,"2A","2B","2C","2D","2E","2F",30,31,32,33,34,35,36,37], -3,
 			["249","24E","24F","257","259","25E","25F","289","28E","28F","2B1","2B6","2B7","2BF",
 			"2C1","2C6","2C7","2D7","311","316","317","35B","35C"],
 			["35D","35E"]
 		],
 		["ethiopic supplement", "13", [8,9], -6],
-		["cherokee", 13, ["A","B","C","D","E","F",], -2, ["F6","F7"], ["F5","F8","F9","FA","FB","FC","FD"]],
-		["buhid", 17, [4,5,], -12],
-		["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"]],
-		["hanunoo", 17, [2,3], -9],
-		["tagbanwa", 17, [6,7], -12, ["6D","71"]],
-		["khmer", 17, [8,9,"A","B","C","D","E","F"], -6, ["DE","DF","EA","EB","EC","ED","EE","EF","FA","FB","FC","FD","FE","FF"]],
-		["mongolian", 18, [0,1,2,3,4,5,6,7,8,"A"], -5,["1A","1B","1C","1D","1E","1F","79","7A","7B","7C","7D","7E","7F"], ["78","AA"]],
-		["tai le", 19, [5,6,7], -11, ["6E","6F"]],
-		["new tai lue", 19, [8,9,"A","B","C","D"], 0, ["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"]],
-		["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"]],
+		["letterlike symbols", 21, [0,1,2,3,4], 0, [], ["3C","4C","4F"]],
+		["general punctuation", 20, [1,2,3,4,5,6], 0, ["65"]],
+		["mongolian", 18, [0,1,2,3,4,5,6,7,8,"A"], -5,
+			["1A","1B","1C","1D","1E","1F","79","7A","7B","7C","7D","7E","7F"],
+			["78","AA"]
+		],
+		["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"], ["95","96","97","98","99","9A","9B","9C"]],
+		["thanaa", "07", [8,9,"A","B"], -14],
 
-		["adlam", "1E9", [0,1,2,3,4,5], 0, ["4C","4D","4E","4F","5A","5B","5C","5D"]],
-		["bamum", "A6", ["A","B","C","D","E","F"], -8],
-		["bassa vah", "16A", ["D","E","F"], -10,["EE","EF"]],
-		["medefaidrin ", "16E", [4,5,6,7,8,9], -5],
-		["vai", "A", [50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62], -4],
-		["mandaic", "08", [4,5], -1,["5C","5D"]],
-		["samaritan", "08", [0,1,2,3], -1,["2E","2F"]],
 
 /*
-unified canadian aboriginal syllabics
-ogham
-runic
-greek extended
-currency symbols
 combining diacritical marks for symbols
-
 
 		["name", 0, ["","","",""], 0,
 			["","","",""],
@@ -248,7 +296,16 @@ s14 = s14.trim()
 sg = sg.trim()
 sb = sb.trim()
 
-let tofuSize
+let oCodes = {},
+	oChars = {},
+	oCodesMax = {},
+	oCharsMax = {},
+	oRanges = {},
+	aLegendClean = [],
+	aDisplay = [],
+	aDisplayMax = [],
+	tofuSize,
+	scriptCount
 
 function strip(value) {
 	// strip all spaces
@@ -296,97 +353,134 @@ function logObject(name) {
 }
 
 function generate() {
-	// generate codes and characters
+	// do once
+	// generate two sets of codes and characters and clean displays
+	// generate ranges info
+	// generate a clean legend
 	return new Promise(resolve => {
+		if (oCodes["arabic"] !== undefined) {
+			console.debug("already done")
+			return
+		}
+
+		scriptCount = 0
 		let t0 = performance.now()
 		let aSuffix = [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]
 		aBlocks.forEach(function(data) {
-			let name = data[0].toLowerCase(),
-				prefix = data[1],
-				range = data[2],
-				remove = data[3],
-				nonassigned = data[4],
-				ignore = data[5]
-			oCodes[name] = []
-			oChars[name] = []
-			// what to skip
-			let hasSkip = false
-			let skip = []
-			if (nonassigned !== undefined) {skip = skip.concat(nonassigned)}
-			if (dom.allassigned.checked == false) {
-				if (ignore !== undefined) {skip = skip.concat(ignore)}
-			}
-			if (skip.length > 0) {
-				hasSkip = true
-			}
-			// build
-			let aCodes = []
-			let aChars = []
-			for (let i = 0; i < range.length; i++) {
-				oRanges[name] = []
-				oRanges[name].push(""+ prefix + range[0] +"0-"+ prefix + range[range.length-1] +"F")
-				for (let j = 0; j < aSuffix.length; j++) {
-					let string = "0x"+ prefix + range[i] + aSuffix[j]
-					if (hasSkip) {
-						if (!skip.includes(""+ range[i] + aSuffix[j])) {
-							aCodes.push(string)
-							aChars.push(String.fromCodePoint(string))
+
+			let name = data[0].toLowerCase()
+			let anchor = strip(name)
+			if (data[1] == undefined) {
+				// script groups
+				name = name.toUpperCase()
+				anchor += "group"
+				aLegendClean.push("<br><a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
+				aDisplay.push("<a name='"+ anchor + "'></a><u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u><br>")
+				aDisplayMax.push("<a name='"+ anchor + "'></a><u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u><br>")
+			} else {
+				scriptCount++
+				if (data[1] == undefined) {
+					// sub header
+					name = name.toUpperCase()
+				} else {
+					name = data[0].toLowerCase()
+					let prefix = data[1],
+						range = data[2],
+						remove = data[3],
+						nonassigned = data[4],
+						ignore = data[5]
+					// fixup vars
+					if (nonassigned == undefined) {nonassigned = []}
+					if (ignore == undefined) {ignore = []}
+					if (remove == undefined) {remove = 0}
+					// range info
+					oRanges[name] = []
+					oRanges[name].push(""+ prefix + range[0] +"0-"+ prefix + range[range.length-1] +"F")
+					// legend
+					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
+
+					// vars
+					oCodes[name] = []
+					oCodesMax[name] = []
+					oChars[name] = []
+					oCharsMax[name] = []
+					let aCodes = [],
+						aCodesMax = [],
+						aChars = [],
+						aCharsMax = []
+					// loop
+					for (let i = 0; i < range.length; i++) {
+						for (let j = 0; j < aSuffix.length; j++) {
+							let string = "0x"+ prefix + range[i] + aSuffix[j]
+							let match = ""+ range[i] + aSuffix[j]
+							// always skip nonassigned
+							if (!nonassigned.includes(match)) {
+								// max
+								aCodesMax.push(string)
+								aCharsMax.push(String.fromCodePoint(string))
+								// 
+								if (!ignore.includes(match)) {
+									aCodes.push(string)
+									aChars.push(String.fromCodePoint(string))
+								} else {
+									// ToDo: build ignore object
+								}
+							} else {
+								// ToDo: build reserved object
+							}
 						}
-					} else {
-						aCodes.push(string)
-						aChars.push(String.fromCodePoint(string))
 					}
+					// trim results	
+					if (remove < 0) {
+						aCodes = aCodes.slice(0, remove)
+						aCodesMax = aCodesMax.slice(0, remove)
+						aChars = aChars.slice(0, remove)
+						aCharsMax = aCharsMax.slice(0, remove)
+					}
+					// record
+					oCodes[name] = aCodes
+					oCodesMax[name] = aCodesMax
+					oChars[name] = aChars
+					oCharsMax[name] = aCharsMax
+					// build clean displays
+					aDisplay.push(
+						"<span class='mono'>"+ s12 + "<a name='"+ anchor + "'></a>"+ name
+						+" ["+ aCodes.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + sc
+						+"<br>" + aChars.join(" ") + "<br>"
+					)
+					aDisplayMax.push(
+						"<span class='mono'>"+ s12 + "<a name='"+ anchor + "'></a>"+ name
+						+" ["+ aCodesMax.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + sc
+						+"<br>" + aCharsMax.join(" ") + "<br>"
+					)
 				}
 			}
-			if (remove == 0 || remove == undefined) {
-				oCodes[name] = aCodes
-				oChars[name] = aChars
-			} else {
-				oCodes[name] = aCodes.slice(0, remove)
-				oChars[name] = aChars.slice(0, remove)
-			}
+
 		})
-		//console.log("perf: generating blocks", performance.now() - t0, "ms")
-		// always setup if we change our code lists
-		setup()
+		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms"
 		// return
 		return resolve()
 	})
 }
 
-function setup() {
-	// simple clean function to reset everything
-		// and initially to make sure we display all code points
-	aVisual = []
-	aLegend = []
-	dom.perf.innerHTML = "&nbsp"
-	const names = Object.keys(oCodes)
-	for (const k of names) {
-		let anchor = strip(k)
-		let chars = oChars[k]
-		let display = []
-		for (let i=0; i < chars.length; i++) {
-			display.push(chars[i])
-		}
-		aLegend.push("<a class='no_color' href='#"+ anchor +"'>"+ k +"</a>")
-		aVisual.push("<span class='mono'>"+ s12 + "<a name='"+ anchor + "'></a>"+ k
-			+" ["+ chars.length +"]"+ sc + s14 +" ["+ oRanges[k][0] + "]"+ sc + sc)
-		aVisual.push(display.join(" ") + "<br>")
+function reset(clear = true) {
+	// reset/display everything to make sure all code points have time to hopefully render
+	if (clear) {
+		dom.perf.innerHTML = "&nbsp"
 	}
-		// output
-		dom.legend.innerHTML = s12 +"SCRIPTS [" + aBlocks.length +"]" + sc
-			+ "<br><ul class='nomargin'><li>"+ aLegend.join("</li><li>") + "</ul>"
-		dom.visual.innerHTML = aVisual.join("<br>")
+	dom.legend.innerHTML = s12 +"SCRIPTS [" + scriptCount +"]" + sc
+		+ "<br>"+ aLegendClean.join("")
+	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
+	isRunning = false
 }
-
 
 function run() {
 	if (isRunning) {return}
 	isRunning = true
 	// we need to retest tofu size in case user zoomed
 	Promise.all([
-		get_tofu_size(),
-		setup()
+		reset(),
+		get_tofu_size()
 	]).then(function(results){
 		dom.perf.innerHTML = "running ..."
 		setTimeout(function() {
@@ -396,105 +490,114 @@ function run() {
 }
 
 function test() {
-	// reset vars
-	aVisual = []
-	aLegend = []
-	aSummary = []
 	dom.perf.innerHTML = "&nbsp"
 	// vars
+	let aVisual = [],
+		aLegend = [],
+		aSummary = []
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 	let t0 = performance.now()
 	slot.style.fontFamily = "none"
 	let testDepth = document.querySelector('input[name="depth"]:checked').value
 	let aRed = [], aOrange = [], aYellow = []
 
-	// methods: setup, test
-	const names = Object.keys(oCodes)
-	for (const k of names) {
-		let anchor = strip(k)
-		let chars = oChars[k]
-		let displayA = []
-		let displayB = []
-		let tofuCount = 0
-		let anchorColor = "no_color", nameColor = s12, partial = ""
-		let	maxDepth = (testDepth > chars.length ? chars.length : testDepth)
-		maxDepth = maxDepth * 1
+	aBlocks.forEach(function(data) {
+		let name = data[0].toLowerCase()
+		let anchor = strip(name)
+		if (data[1] == undefined) {
+			// script groups
+			name = name.toUpperCase()
+			anchor += "group"
+			aLegend.push("<br><a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
+			aVisual.push("<a name='"+ anchor + "'></a><u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u><br>")
+		} else {
+			let chars = dom.allassigned.checked ? oCharsMax[name] : oChars[name]
+			let displayA = []
+			let displayB = []
+			let tofuCount = 0
+			let anchorColor = "no_color", nameColor = s12, partial = ""
+			let	maxDepth = (testDepth > chars.length ? chars.length : testDepth)
+			maxDepth = maxDepth * 1
 
-		// split into test and remainder
-		let charsA = chars.slice(0, maxDepth)
-		let charsB = chars.slice(maxDepth, chars.length)
+			// split into test and remainder
+			let charsA = chars.slice(0, maxDepth)
+			let charsB = chars.slice(maxDepth, chars.length)
 
-		// test
-		for (let i=0; i < charsA.length; i++) {
-			let character = charsA[i]
-			slot.textContent = character
-			let w = span.offsetWidth, h = div.offsetHeight
-			if (w +" x "+ h == tofuSize) {
-				tofuCount++
-				displayA.push(sb + character + sc)
-			} else {
-				displayA.push(character)
+			// test
+			for (let i=0; i < charsA.length; i++) {
+				let character = charsA[i]
+				slot.textContent = character
+				let w = span.offsetWidth, h = div.offsetHeight
+				if (w +" x "+ h == tofuSize) {
+					tofuCount++
+					displayA.push(sb + character + sc)
+				} else {
+					displayA.push(character)
+				}
+				//console.log(w +" x "+ h)
 			}
-			//console.log(w +" x "+ h)
+			// remainder
+			if (charsB.length > 0) {
+				//displayA.push(sg + "&#x25C0" + sc) // show test marker
+				displayB = charsB
+			}
+			// colors
+			let percent = (tofuCount/maxDepth) * 100
+			let strA = displayA.join(" ")
+			if (percent >= 90) {
+				anchorColor = "sb"
+				nameColor = sb
+				if (percent !== 100) {partial = " ["+ tofuCount +"/" + maxDepth +"]"}
+				aRed.push("<a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial)
+				if (percent !== 100) {partial = sb + partial + sc}
+			} else if (percent >= 20) {
+				nameColor = s2
+				partial = " ["+ tofuCount +"/" + maxDepth +"]"
+				strA = strA.replace(/bad/g, "s2")
+				aOrange.push("<a class='s2' href='#"+ anchor +"'>"+ name +"</a>" + partial)
+				partial = s2 + partial + sc
+			} else if (percent > 0) {
+				//anchorColor = "s4" // too noisy, just let the count be colored
+				nameColor = s4
+				partial = " ["+ tofuCount +"/" + maxDepth +"]"
+				strA = strA.replace(/bad/g, "s4")
+				aYellow.push("<a class='s4' href='#"+ anchor +"'>"+ name +"</a>" + partial)
+				partial = s4 + partial + sc
+			}
+			// display
+			aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
+			aVisual.push("<span class='mono'>"+ nameColor + "<a name='"+ anchor + "'></a>"+ name + sc
+				+ s12 + " ["+ chars.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + partial + sc)
+			aVisual.push(strA + " " + displayB.join(" ") +"<br>")
+
 		}
-		// remainder
-		if (charsB.length > 0) {
-			//displayA.push(sg + "&#x25C0" + sc) // show test marker
-			displayB = charsB
-		}
-		// colors
-		let percent = (tofuCount/maxDepth) * 100
-		let strA = displayA.join(" ")
-		if (percent >= 90) {
-			anchorColor = "sb"
-			nameColor = sb
-			if (percent !== 100) {partial = " ["+ tofuCount +"/" + maxDepth +"]"}
-			aRed.push(sb + k + sc + partial)
-			if (percent !== 100) {partial = sb + partial +"]"}
-		} else if (percent >= 20) {
-			anchorColor = "s2"
-			nameColor = s2
-			partial = " ["+ tofuCount +"/" + maxDepth +"]"
-			strA = strA.replace(/bad/g, "s2")
-			aOrange.push(s2 + k + sc + partial)
-			partial = s2 + partial + sc
-		} else if (percent > 0) {
-			//anchorColor = "s4" // too noisy, just let the count be colored
-			nameColor = s4
-			partial = " ["+ tofuCount +"/" + maxDepth +"]"
-			strA = strA.replace(/bad/g, "s4")
-			aYellow.push(s4 + k + sc + partial)
-			partial = s4 + partial + sc
-		}
-		// display
-		aLegend.push("<a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ k +"</a>" + partial)
-		aVisual.push("<span class='mono'>"+ nameColor + "<a name='"+ anchor + "'></a>"+ k + sc
-			+ s12 + " ["+ chars.length +"]"+ sc + s14 +" ["+ oRanges[k][0] + "]"+ sc + partial + sc)
-		aVisual.push(strA + " " + displayB.join(" ") +"<br>")
-	}
+	})
 
 	// reset slot so we don't end up with unwanted scrollbars
 	slot.textContent = ""
 
 	// summary
 	if (aRed.length) {
+		aRed.sort()
 		aSummary.push("<br>"+ sb + "unsupported [" + aRed.length +"]"+ sc +"<br>")
 		aSummary.push("<br>"+ aRed.join("<br>") +"<br>")
 	}
 	if (aOrange.length) {
+		aOrange.sort()
 		aSummary.push("<br>"+ s2 + "mixed [" + aOrange.length +"]"+ sc +"<br>")
 		aSummary.push("<br>" + aOrange.join("<br>") +"<br>")
 	}
 	if (aYellow.length) {
+		aYellow.sort()
 		aSummary.push("<br>"+ s4 + "partial [" + aYellow.length +"]"+ sc +"<br>")
 		aSummary.push("<br>"+ aYellow.join("<br>"))
 	}
 
 	// output
 	let summaryBtn = " <span class='btn12 btnfirst' onClick='copyclip(`copy`)'>[ copy ]</span>"
-	dom.legend.innerHTML = s12 +"SCRIPTS ["+ aBlocks.length +"]" + sc
+	dom.legend.innerHTML = s12 +"SCRIPTS ["+ scriptCount +"]" + sc
 		+ " <a class='blue' href='#summary'>#SUMMARY</a>"
-		+ "<br><ul class='nomargin'><li>"+ aLegend.join("</li><li>") + "</ul>"
+		+ "<br>"+ aLegend.join("")
 		+ "<br><span id='summary'></span>"+ s12 +"SUMMARY" + sc + summaryBtn +"<br>"
 		+ "<span id='copy'>"+ aSummary.join(" ") +"</span>"
 	dom.visual.innerHTML = aVisual.join("<br>")
@@ -504,10 +607,13 @@ function test() {
 	isRunning = false
 }
 
-dom.allassigned.checked = true
-let isRunning = false
-aBlocks.sort() // sort so results are easier to scan
-generate()
+//dom.allassigned.checked = true
+let isRunning = true
+Promise.all([
+	generate()
+]).then(function(){
+	reset(false) // false: leave the generate perf value there
+})
 
 
 </script>
