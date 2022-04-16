@@ -476,7 +476,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 52, oOther = {}
+	let countOther = 0, expectOther = 53, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -494,12 +494,19 @@ function outputVersion() {
 			}
 		}
 
+		// 101a: 1764050
+		let t101a = performance.now(), ver101a
+		try {
+			ver101a = Intl.supportedValuesOf("currency").includes("SLE")
+		} catch(e) {}
+		rec(101.1, 101, "1764050", ver101a, performance.now()-t101a)
+
 		// 101: 1752808
 		let t101 = performance.now(), ver101
 		try {
 			let test101 = new Intl.NumberFormat("en", {style:"currency", currency:"USD", maximumFractionDigits:2, notation:"compact"}).format(1773500)
 			ver101 = (test101 == "$1.77M")
-			debug.push("101  1752808: "+ test101)
+			debug.push("101 1752808 : "+ test101)
 		} catch(e) {}
 		rec(101, 101, "1752808", ver101, performance.now()-t101)
 
