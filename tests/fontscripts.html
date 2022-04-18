@@ -540,22 +540,23 @@ function reset(clear = true) {
 	dom.legend.innerHTML = s12 +"SCRIPTS [" + scriptCount +"]" + sc
 		+ "<br>"+ aLegendClean.join("")
 	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
-	isRunning = false
+	if (!clear) {isRunning = false}
 }
 
 function run() {
-	if (isRunning) {return}
-	isRunning = true
-	// we need to retest tofu size in case user zoomed
-	Promise.all([
-		reset(),
-		get_tofu_size()
-	]).then(function(results){
-		dom.perf.innerHTML = "running ..."
-		setTimeout(function() {
-			test()
-		}, 1)
-	})
+	if (!isRunning) {
+		// we need to retest tofu size in case user zoomed
+		Promise.all([
+			reset(),
+			get_tofu_size()
+		]).then(function(results){
+			isRunning = true
+			dom.perf.innerHTML = "running ..."
+			setTimeout(function() {
+				test()
+			}, 1)
+		})
+	}
 }
 
 function test() {
