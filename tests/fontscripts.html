@@ -40,6 +40,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#top">scripts</a>
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="tofuSize"></span></div></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
@@ -371,6 +372,7 @@ function get_tofu_size() {
 		}, { count: 0, item: undefined })
 		let greatest = getGreatestOccurrence(res)
 		tofuSize = greatest.item
+		dom.tofuSize.innerHTML = tofuSize
 		//console.log("tofu test sizes", res)
 		//console.log("tofu size", tofuSize)
 		return resolve()
@@ -533,6 +535,7 @@ function reset(clear = true) {
 	// reset/display everything to make sure all code points have time to hopefully render
 	if (clear) {
 		dom.perf.innerHTML = "&nbsp"
+		dom.tofuSize.innerHTML = "&nbsp"
 	}
 	dom.legend.innerHTML = s12 +"SCRIPTS [" + scriptCount +"]" + sc
 		+ "<br>"+ aLegendClean.join("")
@@ -560,7 +563,8 @@ function test() {
 	// vars
 	let aVisual = [],
 		aLegend = [],
-		aSummary = []
+		aSummary = [],
+		countTested = 0
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 	let t0 = performance.now()
 	slot.style.fontFamily = "none"
@@ -610,6 +614,7 @@ function test() {
 			// split into test and remainder
 			let charsA = chars.slice(0, maxDepth)
 			let charsB = chars.slice(maxDepth, chars.length)
+			countTested += charsA.length
 
 			// test
 			for (let i=0; i < charsA.length; i++) {
@@ -694,7 +699,7 @@ function test() {
 	dom.visual.innerHTML = aVisual.join("<br>")
 
 	// perf
-	dom.perf.innerHTML = Math.round(performance.now() - t0) + " ms"
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | "+ countTested +" chars"
 	isRunning = false
 }
 
