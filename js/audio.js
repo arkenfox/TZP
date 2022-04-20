@@ -308,7 +308,8 @@ function outputAudio() {
 		35.7499681673944,35.74996031448245]
 	}
 	try {
-		let context = new window.OfflineAudioContext(1, 44100, 44100)
+		const bufferLen = 5000
+		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
 		dom.audioSupport = zE
 		try {
 			// oscillator
@@ -331,7 +332,7 @@ function outputAudio() {
 			context.startRendering()
 			context.oncomplete = function(event) {
 				try {
-					let copyTest = new Float32Array(44100)
+					let copyTest = new Float32Array(bufferLen)
 					event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
 					let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
 					Promise.all([
@@ -342,7 +343,7 @@ function outputAudio() {
 						let sum = 0, sum2 = 0, sum3 = 0
 						for (let i=0; i < getTest.length; i++) {
 							let x = getTest[i]
-							if (i > 4499 && i < 5000) {sum += Math.abs(x)}
+							if (i > (bufferLen-501) && i < bufferLen) {sum += Math.abs(x)}
 							sum2 += x
 							sum3 += Math.abs(x)
 						}
