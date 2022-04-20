@@ -308,7 +308,7 @@ function outputAudio() {
 		35.7499681673944,35.74996031448245]
 	}
 	try {
-		const bufferLen = 5000
+		const bufferLen = 5000 // require 5000 to match knownGood
 		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
 		dom.audioSupport = zE
 		try {
