@@ -133,8 +133,8 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 
 /* table nav */
 div.nav-title {position: relative;}
-div.nav-up {position: absolute; left: 20px; top: 0px; width: 200px; text-align: left;}
-div.nav-down {position: absolute; right: 5px; top: 0px; width: 100px;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 400px; text-align: left;}
+div.nav-down {position: absolute; right: 20px; top: 0px; width: 300px; text-align: right;}
 
 /* tables */
 table {width: 900px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
