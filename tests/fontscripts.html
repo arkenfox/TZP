@@ -36,9 +36,9 @@
 	</table>
 
 	<table id="tb12">
-		<col width="20%"><a name="top"></a><col width="80%">
+		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#top">scripts</a>
+			<div class="nav-title">scripts
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			<div class="nav-down"><span class="c perf" id="tofuSize"></span></div></div>
 			</div>
@@ -49,6 +49,7 @@
 			to ensure <a target="_blank" class="blue" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">
 			asynchronous font fallback</a> caching. Tofu results are colored coded as <span class="bad">90% or higher</span>,
 			<span class="s2">20-90%</span>, <span class="s4">20% or lower</span>.
+			Click the script name in the display area to log code points to console.
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;">
@@ -86,183 +87,200 @@ let aPartial =[
 	// script ranges to denote as partial because they are too big
 	"yi syllables" // 1,165 code points
 ]
+
 let aBlocks = [
-		// name, prefix, [block range], remove last x, [non-assigned], [ignore]
+		// name, prefix, [block range], remove last x, [non-assigned], [ignore], wikiURL
+		// note: first item needs to be a group name for the top anchor to work
 
 		// AFRICAN
 		["african"],
-		["adlam", "1E9", [0,1,2,3,4,5], 0, ["4C","4D","4E","4F","5A","5B","5C","5D"]],
-		["bamum", "A6", ["A","B","C","D","E","F"], -8],
-		["bassa vah", "16A", ["D","E","F"], -10, ["EE","EF"]],
+		["adlam", "1E9", [0,1,2,3,4,5], 0, ["4C","4D","4E","4F","5A","5B","5C","5D"], ,"Adlam_(Unicode_block)"],
+		["bamum", "A6", ["A","B","C","D","E","F"], -8, , , "Bamum_(Unicode_block)"],
+		["bassa vah", "16A", ["D","E","F"], -10, ["EE","EF"], , "Bassa_Vah_(Unicode_block)"],
 		["ethiopic", 1, [20,21,22,23,24,25,26,27,28,29,"2A","2B","2C","2D","2E","2F",30,31,32,33,34,35,36,37], -3,
 			["249","24E","24F","257","259","25E","25F","289","28E","28F","2B1","2B6","2B7","2BF",
 			"2C1","2C6","2C7","2D7","311","316","317","35B","35C"],
-			["35D","35E"]
+			["35D","35E"], "Ethiopic_(Unicode_block)",
 		],
-		["ethiopic supplement", "13", [8,9], -6],
-		["medefaidrin", "16E", [4,5,6,7,8,9], -5],
-		["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], ["FD","FE","FF"]],
-		["osmanya", "104", [8,9,"A"], -6, ["9E","9F"]],
+		["ethiopic supplement", "13", [8,9], -6, , , "Ethiopic_Supplement"],
+		["medefaidrin", "16E", [4,5,6,7,8,9], -5, , , "Medefaidrin_(Unicode_block)"],
+		["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], ["FD","FE","FF"], "NKo_(Unicode_block)"],
+		["osmanya", "104", [8,9,"A"], -6, ["9E","9F"], , "Osmanya_(Unicode_block)"],
 		["tifinagh", "2D", [3,4,5,6,7], 0,
 			["68","69","6A","6B","6C","6D","6E","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E"],
-			["66","67","70","7F"]
+			["66","67","70","7F"], "Tifinagh_(Unicode_block)"
 		],
-		["vai", "A", [50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62], -4],
+		["vai", "A", [50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62], -4, , , "Vai_(Unicode_block)"],
 
 		// AMERICAN
 		["american"],
-		["cherokee", 13, ["A","B","C","D","E","F",], -2, ["F6","F7"], ["F5","F8","F9","FA","FB","FC","FD"]],
-		["deseret", "104", [0,1,2,3,4]],
+		["cherokee", 13, ["A","B","C","D","E","F",], -2, ["F6","F7"], ["F5","F8","F9","FA","FB","FC","FD"], "Cherokee_(Unicode_block)"],
+		["deseret", "104", [0,1,2,3,4], , , , "Deseret_(Unicode_block)"],
+		["osage", "104", ["B","C","D","E","F"], -4, ["D4","D5","D6","D7"], , "Osage_(Unicode_block)"],
 		["unified canadian aboriginal syllabics", 1,
 			[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",
 			50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",
 			60,61,62,63,64,65,66,67], 0, [],
 			["400","677","678","679","67A","67B","67C","67D","67E","67F"],
+			"Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)"
 		],
 
 		// ANCIENT
 		["ancient and historic"],
-		["gothic", 103, [3,4], -5],
-		["ogham", 16, [8,9], -3],
-		["old italic", 103, [0,1,2], 0, ["24","25","26","27","28","29","2A","2B","2C"], ["1F","2D","2E","2F"]],
-		["old turkic", "10C", [0,1,2,3,4], -7],
-		["runic", 16, ["A","B","C","D","E","F"], -7, [], ["F1","F2","F3","F4","F5","F6","F7","F8"]],
+		["gothic", 103, [3,4], -5, , , "Gothic_(Unicode_block)"],
+		["ogham", 16, [8,9], -3, , , "Ogham_(Unicode_block)"],
+		["old italic", 103, [0,1,2], 0, ["24","25","26","27","28","29","2A","2B","2C"], ["1F","2D","2E","2F"], "Old_Italic_(Unicode_block)"],
+		["old turkic", "10C", [0,1,2,3,4], -7, , , "Old_Turkic_(Unicode_block)"],
+		["runic", 16, ["A","B","C","D","E","F"], -7, [], ["F1","F2","F3","F4","F5","F6","F7","F8"], "Runic_(Unicode_block)"],
 
 		// BRAHMIC
 		["brahmic"],
-		["balinese", "1B", [0,1,2,3,4,5,6,7], -1, ["4D","4E","4F"]],
+		["balinese", "1B", [0,1,2,3,4,5,6,7], -1, ["4D","4E","4F"], , "Balinese_(Unicode_block)"],
 		["bengali", "09", [8,9,"A","B","C","D","E","F"], -1,
 			["84","8D","8E","91","92","A9","B1","B3","B4","B5","BA","BB","C5","C6","C9","CA","CF",
 			"D0","D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DE","E4","E5"],
-			["80","FB","FC","FD","FE"]
+			["80","FB","FC","FD","FE"],
+			"Bengali_(Unicode_block)"
 		],
-		["buginese", "1A", [0,1], 0, ["1C","1D"]],
-		["buhid", 17, [4,5,], -12],
-		["devanagari", "09", [0,1,2,3,4,5,6,7], 0,
-			[],
+		["buginese", "1A", [0,1], 0, ["1C","1D"], ,"Buginese_(Unicode_block)"],
+		["buhid", 17, [4,5,], -12, , , "Buhid_(Unicode_block)"],
+		["devanagari", "09", [0,1,2,3,4,5,6,7], 0, ,
 			["00","3A","3B","4E","4F","55","56","57","73","74","75","76","77","78","79","7A"],
+			"Devanagari_(Unicode_block)"
 		],
 		["gujarati", "0A", [8,9,"A","B","C","D","E","F"], 0,
 			["80","84","8E","92","A9","B1","B4","BA","BB","C6","CA","CE","CF",
 			"D1","D2","D3","D4","D5","D6","D7","D8","D9","DA","DB","DC","DD","DE","DF",
 			"E4","E5","F2","F3","F4","F5","F6","F7","F8"],
-			["F0","F9","FA","FB","FC","FD","FE","FF"]
+			["F0","F9","FA","FB","FC","FD","FE","FF"], "Gujarati_(Unicode_block)"
 		],
 		["gurmukhi", "0A", [0,1,2,3,4,5,6,7], -9,
 			["00","04","0B","0C","0D","0E","11","12","29","31","34","37","3A","3B","3D",
 			"43","44","45","46","49","4A","4E","4F","50","52","53","54","55","56","57","58",
 			"5D","5F","60","61","62","63","64","65"],
-			["76"]
+			["76"], "Gurmukhi_(Unicode_block)"
 		],
-		["hanunoo", 17, [2,3], -9],
-		["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"]],
+		["hanunoo", 17, [2,3], -9, , , "Hanunoo_(Unicode_block)"],
+		["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"], , "Javanese_(Unicode_block)"],
 		["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
 			["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
 			"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
-			["80","81","84","DD"]
+			["80","81","84","DD"], "Kannada_(Unicode_block)"
 		],
-		["khmer", 17, [8,9,"A","B","C","D","E","F"], -6, ["DE","DF","EA","EB","EC","ED","EE","EF"]],
-		["khmer symbols", 19, ["E","F"]],
+		["khmer", 17, [8,9,"A","B","C","D","E","F"], -6,
+			["DE","DF","EA","EB","EC","ED","EE","EF"], , "Khmer_(Unicode_block)"
+		],
+		["khmer symbols", 19, ["E","F"], , , , "Khmer_Symbols"],
 		["lao", "0E", [8,9,"A","B","C","D","E","F"], -32,
 			["80","83","85","8B","A4","A6","BE","BF","C5","C7","CE","CF","DA","DB"],
-			["86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA","DE","DF"]
+			["86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA","DE","DF"],
+			"Lao_(Unicode_block)"
 		],
 		["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
 			["0D","11","45","49","50","51","52","53","64","65"],
-			["00","01","04","29","3A","3B","3C","4E","4F",
-			"54","55","56","58","59","5A","5B","5C","5D","5E","5F","76","77","78"]
+			["00","01","04","29","3A","3B","3C","4E","4F","54","55","56","58","59","5A","5B","5C","5D","5E","5F","76","77","78"],
+			"Malayalam_(Unicode_block)"
 		],
-		["myanmar", 10, [0,1,2,3,4,5,6,7,8,9]],
-		["new tai lue", 19, [8,9,"A","B","C","D"], 0, ["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"]],
+		["myanmar", 10, [0,1,2,3,4,5,6,7,8,9], 0, , , "Myanmar_(Unicode_block)"],
+		["new tai lue", 19, [8,9,"A","B","C","D"], 0,
+			["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"], , "New_Tai_Lue_(Unicode_block)"
+		],
 		["oriya", "0B", [0,1,2,3,4,5,6,7], -8,
 			["00","04","0D","0E","11","12","29","31","34","3A","3B","45","46","49","4A","4E","4F",
 			"50","51","52","53","54","58","59","5A","5B","5E","64","65"],
-			["55","72","73","74","75","76","77"]
+			["55","72","73","74","75","76","77"], "Oriya_(Unicode_block)"
 		],
-		["phags-pa", "A8", [4,5,6,7], -8],
+		["phags-pa", "A8", [4,5,6,7], -8, , , "Phags-pa_(Unicode_block)"],
 		["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
 			["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
 			"E0","E1","E2","E3","E4","E5","F0","F1"],
-			["81","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF"]
+			["81","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF"], "Sinhala_(Unicode_block)"
 		],
-		["sundanese", "1B", [8,9,"A","B"]],
-		["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"]],
-		["tagbanwa", 17, [6,7], -12, ["6D","71"]],
-		["tai le", 19, [5,6,7], -11, ["6E","6F"]],
+		["sundanese", "1B", [8,9,"A","B"], , , , "Sundanese_(Unicode_block)"],
+		["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"], , "Tagalog_(Unicode_block)"],
+		["tagbanwa", 17, [6,7], -12, ["6D","71"], , "Tagbanwa_(Unicode_block)"],
+		["tai le", 19, [5,6,7], -11, ["6E","6F"], , "Tai_Le_(Unicode_block)"],
 		["tamil", "0B", [8,9,"A","B","C","D","E","F"], -5,
 			["80","81","84","8B","8C","8D","91","96","97","98","9B","9D",
 			"A0","A1","A2","A5","A6","A7","AB","AC","AD","BA","BB","BC","BD",
 			"C3","C4","C5","C9","CE","CF",
 			"D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DC","DD","DE","DF",
 			"E0","E1","E2","E3","E4","E5"],
-			[],
+			[], "Tamil_(Unicode_block)"
 		],
-		["tamil supplement", "11F", ["C","D","E","F"], 0, ["F2","F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"]],
+		["tamil supplement", "11F", ["C","D","E","F"], 0,
+			["F2","F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], , "Tamil_Supplement"
+		],
 		["telugu", "0C", [0,1,2,3,4,5,6,7], 0,
 			["0D","11","29","3A","3B","45","49","4E","4F",
 			"50","51","52","53","54","57","5B","5C","5E","5F",
 			"64","65","70","71","72","73","74","75","76"],
-			["00","04","34","3C","5A","5D","77"]
+			["00","04","34","3C","5A","5D","77"], "Telugu_(Unicode_block)"
 		],
-		["thai", "0E", [0,1,2,3,4,5,6,7], -36, ["00","3B","3C","3D","3E"]],
+		["thai", "0E", [0,1,2,3,4,5,6,7], -36, ["00","3B","3C","3D","3E"], , "Thai_(Unicode_block)"],
 		["tibetan", "0F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], -37,
 			["48","6D","6E","6F","70","98","BD","CD"],
-			["6B","6C","8C","8D","8E","8F","CE","D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA"]
+			["6B","6C","8C","8D","8E","8F","CE","D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA"],
+			"Tibetan_(Unicode_block)"
 		],
 
 		// CYRILLIC
 		["cyrillic"],
-		["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]],
-		["cyrillic extended-a", "2D", ["E","F"]],
-		["cyrillic extended-b", "A6", [4,5,6,7,8,9], 0, [],
-			["98","99","9A","9B","9C","9D","9E"] // v7.0 2014 (4), v8.0 (2)
+		["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , , "Cyrillic_(Unicode_block)"],
+		["cyrillic extended-a", "2D", ["E","F"], , , , "Cyrillic_Extended-A"],
+		["cyrillic extended-b", "A6", [4,5,6,7,8,9], , ,
+			["98","99","9A","9B","9C","9D","9E"], // e.g. v7.0 2014 (4), v8.0 (2)
+			"Cyrillic_Extended-B"
 		],
-		["cyrillic extended-c", "1C", [8], -7],
-		["cyrillic supplement", "05", [0,1,2], 0, [],
-			["14","15","16","17","18","19","1E","1F","20","21","22","23","26","27","28","29","2A","2B","2C","2D","2E","2F"]
+		["cyrillic extended-c", "1C", [8], -7, , , "Cyrillic_Extended-C"],
+		["cyrillic supplement", "05", [0,1,2], , ,
+			["14","15","16","17","18","19","1E","1F","20","21","22","23","26","27","28","29","2A","2B","2C","2D","2E","2F"],
+			"Cyrillic_Supplement"
 		],
-		["glagolitic", "2C", [0,1,2,3,4,5], 0, [], ["2F","5F"]],
+		["glagolitic", "2C", [0,1,2,3,4,5], 0, [], ["2F","5F"], "Glagolitic_(Unicode_block)"],
 
 		// EAST ASIAN
 		["east asian"],
-		["bopomofo", 31, [0,1,2], 0, ["00","01","02","03","04"], ["2D","2E","2F"]],
-		["bopomofo extended", 31, ["A","B"], 0, [], ["B8","B9","BA","BB","BC","BD","BE","BF"]],
+		["bopomofo", 31, [0,1,2], 0, ["00","01","02","03","04"], ["2D","2E","2F"], "Bopomofo_(Unicode_block)"],
+		["bopomofo extended", 31, ["A","B"], 0, [], ["B8","B9","BA","BB","BC","BD","BE","BF"], "Bopomofo_Extended"],
 		["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0, [],
-			["FA","FB","FC","FD","FE","FF"]
+			["FA","FB","FC","FD","FE","FF"], "Hangul_Jamo_(Unicode_block)"
 		],
-		["hiragana", 30, [4,5,6,7,8,9], 0, ["40","97","98"]],
-		["kanbun", 31, [9]],
-		["katakana", 30, ["A","B","C","D","E","F"]],
-		["yi radicals", "A4", [9,"A","B","C"], -9],
-		["yi syllables", "A0", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]],
+		["hiragana", 30, [4,5,6,7,8,9], 0, ["40","97","98"], , "Hiragana_(Unicode_block)"],
+		["kanbun", 31, [9], 0, , , "Kanbun_(Unicode_block)"],
+		["katakana", 30, ["A","B","C","D","E","F"], 0, , , "Katakana_(Unicode_block)"],
+		["yi radicals", "A4", [9,"A","B","C"], -9, , , "Yi_Radicals"],
+		["yi syllables", "A0", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0, , , "Yi_Syllables"],
 
 		// GEORGIAN
 		["georgian"],
-		["georgian", 10, ["A","B","C","D","E","F"], 0,
+		["georgian", 10, ["A","B","C","D","E","F"], ,
 			["C6","C8","C9","CA","CB","CC","CE","CF"],
-			["C7","CD","FD","FE","FF"],
+			["C7","CD","FD","FE","FF"], "Georgian_(Unicode_block)"
 		],
-		["georgian extended", "1C", [9,"A","B"], 0, ["BB","BC"]],
+		["georgian extended", "1C", [9,"A","B"], , ["BB","BC"], , "Georgian_Extended"],
+		["georgian supplement", "2D", [0,1,2], -2, ["26","28","29","2A","2B","2C"], ["27","2D"], "Georgian_Supplement"],
 
 		// GREEK
 		["greek"],
-		["greek and coptic", "03", [7,8,9,"A","B","C","D","E","F"], 0,
+		["greek and coptic", "03", [7,8,9,"A","B","C","D","E","F"], ,
 			["78","79","80","81","82","83","8B","8D","A2"],
-			["70","71","72","73","76","77","7F","CF"]
+			["70","71","72","73","76","77","7F","CF"], "Greek_and_Coptic"
 		],
 		["greek extended", "1F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], -1,
-			["16","17","1E","1F","46","47","4E","4F","58","5A","5C","5E","7E","7F","B5","C5","D4","D5","DC","F0","F1","F5"]
+			["16","17","1E","1F","46","47","4E","4F","58","5A","5C","5E","7E","7F","B5","C5","D4","D5","DC","F0","F1","F5"],
+			[], "Greek_Extended"
 		],
 
 		// LATIN
 		["latin"],
-		["basic latin", "00", [2,3,4,5,6,7], -2],
-		["latin-1 supplement", "00", ["A","B","C","D","E","F"], 0,[],["A0"]],
-		["latin extended-a", 0, [10,11,12,13,14,15,17], 0],
-		["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], 0],
-		["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0,
-			[],
-			["9C","9D","9F","FA","FB","FC","FD","FE","FF",] // Medievalist additions
+		["basic latin", "00", [2,3,4,5,6,7], -2, , , "Basic_Latin_(Unicode_block)"],
+		["latin-1 supplement", "00", ["A","B","C","D","E","F"], , , ["A0"], "Latin-1_Supplement"],
+		["latin extended-a", 0, [10,11,12,13,14,15,17], , , , "Latin_Extended-A"],
+		["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], , , , "Latin_Extended-B"],
+		["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+			["9C","9D","9F","FA","FB","FC","FD","FE","FF"], // Medievalist additions
+			"Latin_Extended_Additional"
 		],
 
 		// NOTATIONAL
@@ -270,40 +288,40 @@ let aBlocks = [
 
 		// PHONETIC
 		["phonetic"],
-		["ipa extensions", "02", [5,6,7,8,9,"A"], 0],
-		["phonetic extensions", "1D", [0,1,2,3,4,5,6,7], 0],
-		["phonetic extensions supplement", "1D", [8,9,"A","B"], 0],
-		["spacing modifier letters", "02", ["B","C","D","E","F"], 0],
+		["ipa extensions", "02", [5,6,7,8,9,"A"], , , , "IPA_Extensions"],
+		["phonetic extensions", "1D", [0,1,2,3,4,5,6,7], , , , "Phonetic_Extensions"],
+		["phonetic extensions supplement", "1D", [8,9,"A","B"], , , , "Phonetic_Extensions_Supplement"],
+		["spacing modifier letters", "02", ["B","C","D","E","F"], , , , "Spacing_Modifier_Letters"],
 
 		// SEMITIC
 		["semitic"],
-		["arabic", "06", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], 0, [], ["04","05","1D","20","5F"]],
-		["arabic supplement", "07", [5,6,7], 0, [],
-			["6E","6F","70","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E","7F"]
+		["arabic", "06", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , ["04","05","1D","20","5F"], "Arabic_(Unicode_block)"],
+		["arabic supplement", "07", [5,6,7], , ,
+			["6E","6F","70","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E","7F"], "Arabic_Supplement"
 		],
 		["hebrew", "05", [9,"A","B","C","D","E","F"], -11,
-			["90","C8","C9","CA","CB","CC","CD","CE","CF","EB","EC","ED","EE",], ["EF"]
+			["90","C8","C9","CA","CB","CC","CD","CE","CF","EB","EC","ED","EE"], ["EF"], "Hebrew_(Unicode_block)"
 		],
-		["mandaic", "08", [4,5], -1, ["5C","5D"]],
-		["samaritan", "08", [0,1,2,3], -1, ["2E","2F"]],
-		["syriac", "07", [0,1,2,3,4], 0,["0E","4B","4C"]],
+		["mandaic", "08", [4,5], -1, ["5C","5D"], , "Mandaic_(Unicode_block)"],
+		["samaritan", "08", [0,1,2,3], -1, ["2E","2F"], , "Samaritan_(Unicode_block)"],
+		["syriac", "07", [0,1,2,3,4], 0, ["0E","4B","4C"], , "Syriac_(Unicode_block)"],
 
 		// MISC
 		["misc"],
 		["armenian", "05", [3,4,5,6,7,8], 0,
-			["30","57","58","8B","8C"],
-			["60","88","8D","8E","8F",]
+			["30","57","58","8B","8C"], ["60","88","8D","8E","8F"], "Armenian_(Unicode_block)"
 		],
-		["combining diacritical marks", "03", [0,1,2,3,4,5,6], 0],
-		["currency symbols", 20, ["A","B","C"], -15, [], ["B6","B7","BB","BC","BD","BE","BF","C0"]],
-		["letterlike symbols", 21, [0,1,2,3,4], 0, [], ["3C","4C","4F"]],
-		["general punctuation", 20, [1,2,3,4,5,6], 0, ["65"]],
+		["combining diacritical marks", "03", [0,1,2,3,4,5,6], , , , "Combining_Diacritical_Marks"],
+		["currency symbols", 20, ["A","B","C"], -15, , ["B6","B7","BB","BC","BD","BE","BF","C0"], "Currency_Symbols_(Unicode_block)"],
+		["letterlike symbols", 21, [0,1,2,3,4], , , ["3C","4C","4F"], "Letterlike_Symbols"],
+		["general punctuation", 20, [1,2,3,4,5,6], , ["65"], , "General_Punctuation"],
 		["mongolian", 18, [0,1,2,3,4,5,6,7,8,"A"], -5,
 			["1A","1B","1C","1D","1E","1F","79","7A","7B","7C","7D","7E","7F"],
-			["78","AA"]
+			["78","AA"], "Mongolian_(Unicode_block)"
 		],
-		["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"], ["95","96","97","98","99","9A","9B","9C"]],
-		["thanaa", "07", [8,9,"A","B"], -14],
+		["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"],
+			["95","96","97","98","99","9A","9B","9C"], "Superscripts_and_Subscripts_(Unicode_block)"],
+		["thanaa", "07", [8,9,"A","B"], -14, , , "Thaana_(Unicode_block)"],
 
 
 /*
@@ -330,17 +348,53 @@ let oCodes = {},
 	oChars = {},
 	oCodesMax = {},
 	oCharsMax = {},
+	oCodesIgnore = {},
+	oCharsIgnore = {},
+	oCodesReserved = {},
+	oCharsReserved = {},
 	oRanges = {},
+	oWiki = {},
 	aLegendClean = [],
 	aNav = [],
 	aDisplay = [],
 	aDisplayMax = [],
+	oTofuSizes = {},
 	tofuSize,
-	scriptCount
+	countScript,
+	countChars,
+	countCharsMax
 
-function strip(value) {
-	// strip all spaces
-	return value.replace(/ /g,"")
+function strip(value) {return value.replace(/ /g,"")} 	// strip all spaces
+
+function hyperlink(string) {return " <a target='blank' class='blue' href='"+ string +"'>wiki</a>"}
+
+function build_title(type, name, anchor, misc, nameColor, grouptitle) {
+	if (type == "script") {
+		let intChars = oChars[name].length,
+			intCharsMax = oCharsMax[name].length,
+			count = intChars
+		if (intChars !== intCharsMax) {count += "|" + intCharsMax}
+		return (grouptitle !== "" ? grouptitle : "") +
+			"<span class='mono'>"
+				// name
+				+ nameColor + "<a name='"+ anchor + "'></a>"
+					+ "<span style='cursor: pointer;' onClick='logCodes(`"+ name + "`)'>" + name + sc + sc
+				// char count
+				+ s12 + " ["+ count +"]"+ sc
+				// range
+				+ s14 +" ["+ oRanges[name][0] + (aPartial.includes(name) ? " &#9664 partial" : "") +"]"+ sc
+				// link
+				+ (oWiki[name].length ? hyperlink(oWiki[name][0]) : "")
+			+ sc
+	} else if (type == "group") {
+		return "<div><a name='"+ anchor + "'></a>"
+			+ "<hr><p class='groupleft'>"
+			+ "<u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u>"
+			+ "</p>"
+			+ misc // navString
+			+ "<div style='clear: both;'></div>"
+			+ "</div>"
+	}
 }
 
 function copysummary() {
@@ -350,49 +404,168 @@ function copysummary() {
 function get_tofu_size() {
 	// measure some known unassigned + reserved unicode glyphs
 	return new Promise(resolve => {
-		// list: assigned codepoints for testing: '0x20B9','0xA840'
-		let list = ['0x20B9','0xA840','0x07BF','0x20CF','0xA87F','0x09D2','0x0A7F']
+		// list: some reserved code points
+		// use multiple scripts to reduce change in greatest occurence over time
+		let list = [
+			'0x0402', // control: cyrillic: capital Dje
+			'0x0386', // control: greek: capital A with acute
+			'0x09E5', // bangali
+			'0x135C', // ethiopic
+			'0x10CF', // georgian
+			'0x0AF8', // gujarati
+			'0x0A65', // gurmukhi
+			'0x03A2', // greek
+			'0x0EDB', // lao
+			'0x0D65', // malayam
+			// log oCharsReserved to console for inspiration
+			/* 
+			'0x187F', // mongolian
+			'0x0DF1', // sinhala
+			'0x0BE5', // tamil
+			'0x2D7E', // tifinagh
+			*/
+		]
+		let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"]
 		let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
-		let res = []
-		for (let i=0; i < list.length; i++) {
-			slot.style.fontFamily = "none"
-			slot.textContent = String.fromCodePoint(list[i])
-			let w = span.offsetWidth, h = div.offsetHeight
-			res.push(w +" x "+ h)
-		}
+		let res = {}
+		styles.forEach(function(style) {res[style] = []})
+		oTofuSizes["test array"] = []
+
+		list.forEach(function(codepoint) {
+			oTofuSizes["test array"].push(codepoint +" "+ String.fromCodePoint(codepoint))
+			styles.forEach(function(style) {
+				slot.style.fontFamily = style
+				slot.textContent = String.fromCodePoint(codepoint)
+				let w = span.offsetWidth, h = div.offsetHeight
+				res[style].push(w +" x "+ h)
+			})
+		})
 		// reset slot so we don't end up with unwanted scrollbars
 		slot.textContent = ""
+
 		// get most common size
-		let getGreatestOccurrence = res => res.reduce((greatest , currentValue, index, res) => {
-			let count = res.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
-			if (count > greatest.count) {
-				return {count, item: currentValue}
-			}
-			return greatest
-		}, { count: 0, item: undefined })
-		let greatest = getGreatestOccurrence(res)
-		tofuSize = greatest.item
-		dom.tofuSize.innerHTML = tofuSize
-		//console.log("tofu test sizes", res)
-		//console.log("tofu size", tofuSize)
+		const names = Object.keys(res)
+		for (const k of names) {
+			let aRes = res[k]
+			let getGreatestOccurrence = aRes => aRes.reduce((greatest, currentValue, index, res) => {
+				let count = res.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
+				if (count > greatest.count) {
+					return {count, item: currentValue}
+				}
+				return greatest
+			}, { count: 0, item: undefined })
+			let greatest = getGreatestOccurrence(aRes)
+			oTofuSizes[k] = [greatest.item, aRes.join(", ")]
+		}
+		tofuSize = oTofuSizes["none"][0]
+		dom.tofuSize.innerHTML = "<span style='cursor: pointer;' onClick='logObject(`tofu`)'>" + tofuSize +"</span>"
 		return resolve()
 	})
 }
 
+function logCodes(name) {
+	let codes = oCodesMax[name],
+		ignore = oCodesIgnore[name],
+		reserved = oCodesReserved[name]
+	if (aPartial.includes(name)) {name += " partial"}
+	let logStr = name + " code points"
+	logStr += "\n'"+ name +" assigned': ['" + codes.join("', '")+ "']"
+	if (ignore.length > 0) {
+		logStr += "\n'"+ name +" ignored': ['" + ignore.join("', '")+ "']"
+	}
+	if (reserved.length > 0) {
+		logStr += "\n'"+ name +" reserved': ['" + reserved.join("', '")+ "']"
+	}
+	console.log(logStr)
+}
+
 function logObject(name) {
-	let notation = (dom.allassigned.checked ? " [all assigned codepoints]" : "")
+	let logStr = ""
+	// tofu info
+	if (name == "tofu") {
+		logStr = "calculated tofu sizes [greatest occurence, results]"
+		logStr += "\n==========="
+		const names = Object.keys(oTofuSizes)
+		for (const k of names) {
+			logStr += "\n"+ k
+			+ (k == "test array" ? "\n - "+ oTofuSizes[k].join(", ") : "\n - "+ oTofuSizes[k][0])
+			+ (k == "test array" ? "" : "\n - "+ oTofuSizes[k][1])
+		}
+		console.log(logStr)
+		return
+	}
+	let partial = "- note: some large ranges may be partial and are denoted as such; e.g. "+ aPartial[0]
+	let aTemp = [] // so we can sort results
+	// range info
+	if (name == "ranges") {
+		logStr = "ranges used [partial ranges denoted]"
+		logStr += "\n==========="
+		const names = Object.keys(oRanges)
+		for (const k of names) {
+			aTemp.push(k + (aPartial.includes(k) ? " [partial]" : "") +": "+ oRanges[k][0])
+		}
+		aTemp.sort()
+		console.log(logStr +"\n"+ aTemp.join("\n"))
+		return
+	}
+	// wiki urls
+	if (name == "wiki") {
+		console.debug("i am groot")
+		logStr = "wikipedia links\n"
+		const names = Object.keys(oWiki)
+		for (const k of names) {
+			let url = oWiki[k][0]
+			if (url !== undefined && url !== "") {
+				aTemp.push(k +": "+ url)
+			}
+		}
+		aTemp.sort()
+		console.log(logStr +"\n"+ aTemp.join("\n"))
+		return
+	}
+
+	let oUsed = {}
+	// code points
 	if (name == "codes") {
-		console.log("CODES"+ notation +"\n", oCodes)
-	} else {
-		console.log("CHARS"+ notation +"\n", oChars)
+		oUsed = oCodesMax
+		logStr = "codepoints [assigned]\n"+ partial
+	} else if (name == "codesignore") {
+		logStr = "code points [ignored]\n- reduces tofu results on older platforms with older font versions\n"+ partial
+		oUsed = oCodesIgnore
+	} else if (name == "codesreserved") {
+		logStr = "code points [reserved]\n"+ partial
+		oUsed = oCodesReserved
+	} else if (name == "chars") {
+		logStr = "characters [asigned]\n"+ partial
+		oUsed = oCharsMax
+	} else if (name == "charsignored") {
+		logStr = "characters [ignored]\n - reduces tofu results on older platforms with older font versions\n"+ partial
+		oUsed = oCharsIgnore
+	} else if (name == "charsreserved") {
+		logStr = "characters [reserved]\n"+ partial
+		oUsed = oCharsReserved
+	}
+	const names = Object.keys(oUsed)
+	for (const k of names) {
+		if (oUsed[k].length) {
+			aTemp.push("'"+ k + (aPartial.includes(k) ? " partial": "") + "': ['"+ oUsed[k].join("', '") +"'],")
+		}
+	}
+	aTemp.sort()
+	if (aTemp.length) {
+		logStr += "\n==========="
+		console.log(logStr +"\n"+ aTemp.join("\n"))
 	}
 }
 
 function generate() {
 	// do once
-	// generate two sets of codes and characters and clean displays
-	// generate ranges info
-	// generate a clean legend
+	// two sets of codes and characters and clean displays
+	// ignored codes/chars
+	// reserved code/chars
+	// range info
+	// clean legend
+	// get char counts
 	return new Promise(resolve => {
 		if (oCodes["arabic"] !== undefined) {
 			console.debug("already done")
@@ -406,13 +579,17 @@ function generate() {
 			}
 		})
 
-		scriptCount = 0
+		countScript = 0
+		countChars = 0
+		countCharsMax = 0
+
 		let t0 = performance.now()
 		let aSuffix = [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]
 		let navIndex = 0,
 			navString ="",
-			navTop = "<a class='blue' href='#top'> &#9650 TOP</a> &nbsp ",
-			navEnd = "<a class='blue' href='#end'> &#9660 END</a></p>"
+			navTop = "<a class='blue' href='#" + aBlocks[0][0].toLowerCase() +"group'> &#9650 TOP</a> &nbsp ",
+			navEnd = "<a class='blue' href='#end'> &#9660 END</a></p>",
+			grouptitle = ""
 
 		aBlocks.forEach(function(data) {
 			let name = data[0].toLowerCase()
@@ -423,8 +600,7 @@ function generate() {
 				anchor += "group"
 				navString = "<p class='groupright'>"
 				if (anchor !== aNav[0]) {
-					navString += navTop
-						+ "<a class='blue' href='#"+ aNav[navIndex - 1] +"'> &#9664 PREV</a> &nbsp "
+					navString += navTop + "<a class='blue' href='#"+ aNav[navIndex - 1] +"'> &#9664 PREV</a> &nbsp "
 				}
 				if (aNav[navIndex + 1] !== undefined) {
 					navString += "<a class='blue' href='#"+ aNav[navIndex + 1] +"'> &#9654 NEXT</a> &nbsp "
@@ -432,17 +608,9 @@ function generate() {
 				navString += navEnd
 				navIndex++
 				aLegendClean.push("<br><a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
-				let title = "<div><a name='"+ anchor + "'></a>"
-					+ "<hr><p class='groupleft'>"
-						+ "<u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u>"
-					+ "</p>"
-					+ navString
-					+ "<div style='clear: both;'></div>"
-					+ "</div>"
-				aDisplay.push(title)
-				aDisplayMax.push(title)
+				grouptitle = build_title("group", name, anchor, navString)
 			} else {
-				scriptCount++
+				countScript++
 				if (data[1] == undefined) {
 					// sub header
 					name = name.toUpperCase()
@@ -452,7 +620,8 @@ function generate() {
 						range = data[2],
 						remove = data[3],
 						nonassigned = data[4],
-						ignore = data[5]
+						ignore = data[5],
+						url = data[6]
 					// fixup vars
 					if (nonassigned == undefined) {nonassigned = []}
 					if (ignore == undefined) {ignore = []}
@@ -460,20 +629,33 @@ function generate() {
 					// range info
 					oRanges[name] = []
 					let rangeString = ""+ prefix + range[0] +"0-"+ prefix + range[range.length-1] +"F"
-					if (aPartial.includes(name)) {rangeString += " &#9664 partial"}
 					oRanges[name].push(rangeString)
+					// wikiurl info
+					oWiki[name] = []
+					if (url !== undefined && url !== "") {
+						oWiki[name] = ["https://en.wikipedia.org/wiki/"+ url]
+					}
 					// legend
 					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
-
 					// vars
 					oCodes[name] = []
 					oCodesMax[name] = []
+					oCodesIgnore[name] = []
+					oCodesReserved[name] = []
 					oChars[name] = []
 					oCharsMax[name] = []
+					oCharsIgnore[name] = []
+					oCharsReserved[name] = []
+
 					let aCodes = [],
 						aCodesMax = [],
+						aCodesIgnore = [],
+						aCodesReserved = [],
 						aChars = [],
-						aCharsMax = []
+						aCharsMax = [],
+						aCharsIgnore = [],
+						aCharsReserved = []
+
 					// loop
 					for (let i = 0; i < range.length; i++) {
 						for (let j = 0; j < aSuffix.length; j++) {
@@ -489,14 +671,16 @@ function generate() {
 									aCodes.push(string)
 									aChars.push(String.fromCodePoint(string))
 								} else {
-									// ToDo: build ignore object
+									aCodesIgnore.push(string)
+									aCharsIgnore.push(String.fromCodePoint(string))
 								}
 							} else {
-								// ToDo: build reserved object
+								aCodesReserved.push(string)
+								aCharsReserved.push(String.fromCodePoint(string))
 							}
 						}
 					}
-					// trim results	
+					// trim results
 					if (remove < 0) {
 						aCodes = aCodes.slice(0, remove)
 						aCodesMax = aCodesMax.slice(0, remove)
@@ -506,26 +690,41 @@ function generate() {
 					// record
 					oCodes[name] = aCodes
 					oCodesMax[name] = aCodesMax
+					oCodesIgnore[name] = aCodesIgnore
+					oCodesReserved[name] = aCodesReserved
 					oChars[name] = aChars
 					oCharsMax[name] = aCharsMax
+					oCharsIgnore[name] = aCharsIgnore
+					oCharsReserved[name] = aCharsReserved
+					// counts
+					countChars += aCodes.length
+					countCharsMax += aCodesMax.length
+
 					// build clean displays
-					aDisplay.push(
-						"<span class='mono'>"+ s12 + "<a name='"+ anchor + "'></a>"+ name
-						+" ["+ aCodes.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + sc
-						+"<br>" + aChars.join(" ") + "<br>"
-					)
-					aDisplayMax.push(
-						"<span class='mono'>"+ s12 + "<a name='"+ anchor + "'></a>"+ name
-						+" ["+ aCodesMax.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + sc
-						+"<br>" + aCharsMax.join(" ") + "<br>"
-					)
+					let nameColor = s12
+					aDisplay.push(build_title("script", name, anchor, "", nameColor, grouptitle))
+					aDisplay.push(aChars.join(" ") + "<br>")
+					aDisplayMax.push(build_title("script", name, anchor, "", nameColor, grouptitle))
+					aDisplayMax.push(aCharsMax.join(" ") + "<br>")
+					// reset grouptitle
+					grouptitle = ""
 				}
 			}
-
 		})
 		aDisplay.push("<a name='end'></a>")
 		aDisplayMax.push("<a name='end'></a>")
-		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms"
+		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | "
+			+ (dom.allassigned.checked ? countCharsMax : countChars) + " chars"
+		/*
+		logObject("codes")
+		logObject("codesignore")
+		logObject("codesreserved")
+		logObject("chars")
+		logObject("charsignore")
+		logObject("charsreserved")
+		logObject("ranges")
+		logObject("wiki")
+		*/
 		// return
 		return resolve()
 	})
@@ -534,12 +733,12 @@ function generate() {
 function reset(clear = true) {
 	// reset/display everything to make sure all code points have time to hopefully render
 	if (clear) {
-		dom.perf.innerHTML = "&nbsp"
-		dom.tofuSize.innerHTML = "&nbsp"
+		dom.perf.innerHTML = (dom.allassigned.checked ? countCharsMax : countChars) + " chars"
 	}
-	dom.legend.innerHTML = s12 +"SCRIPTS [" + scriptCount +"]" + sc
+	dom.legend.innerHTML = s12 +"SCRIPTS [" + countScript +"]" + sc
 		+ "<br>"+ aLegendClean.join("")
 	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
+	// add char counts
 	if (!clear) {isRunning = false}
 }
 
@@ -565,7 +764,8 @@ function test() {
 	let aVisual = [],
 		aLegend = [],
 		aSummary = [],
-		countTested = 0
+		countTested = 0,
+		countTofu = 0
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 	let t0 = performance.now()
 	slot.style.fontFamily = "none"
@@ -574,8 +774,9 @@ function test() {
 
 	let navIndex = 0,
 		navString ="",
-		navTop = "<a class='blue' href='#top'> &#9650 TOP</a> &nbsp ",
-		navEnd = "<a class='blue' href='#end'> &#9660 END</a></p>"
+		navTop = "<a class='blue' href='#" + aBlocks[0][0].toLowerCase() +"group'> &#9650 TOP</a> &nbsp ",
+		navEnd = "<a class='blue' href='#end'> &#9660 END</a></p>",
+		grouptitle = ""
 
 	aBlocks.forEach(function(data) {
 		let name = data[0].toLowerCase()
@@ -595,14 +796,7 @@ function test() {
 				navString += navEnd
 				navIndex++
 				aLegend.push("<br><a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
-				let title = "<div><a name='"+ anchor + "'></a>"
-					+ "<hr><p class='groupleft'>"
-						+ "<u><b><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></b></u>"
-					+ "</p>"
-					+ navString
-					+ "<div style='clear: both;'></div>"
-					+ "</div>"
-				aVisual.push(title)
+				grouptitle = build_title("group", name, anchor, navString)
 		} else {
 			let chars = dom.allassigned.checked ? oCharsMax[name] : oChars[name]
 			let displayA = []
@@ -626,10 +820,13 @@ function test() {
 					tofuCount++
 					displayA.push(sb + character + sc)
 				} else {
+					// ToDo: can we reduce any false positives: check a different style?
 					displayA.push(character)
 				}
 				//console.log(w +" x "+ h)
 			}
+			// track total tofu
+			countTofu += tofuCount
 			// remainder
 			if (charsB.length > 0) {
 				//displayA.push(sg + "&#x25C0" + sc) // show test marker
@@ -660,14 +857,17 @@ function test() {
 			}
 			// display
 			aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
-			aVisual.push("<span class='mono'>"+ nameColor + "<a name='"+ anchor + "'></a>"+ name + sc
-				+ s12 + " ["+ chars.length +"]"+ sc + s14 +" ["+ oRanges[name][0] + "]"+ sc + partial + sc)
-			aVisual.push(strA + " " + displayB.join(" ") +"<br><a name='end'></a>")
+			aVisual.push(build_title("script", name, anchor, "", nameColor, grouptitle))
+			aVisual.push(strA + " " + displayB.join(" ") +"<br>")
+			// reset grouptitle
+			grouptitle = ""
 		}
 	})
-
 	// reset slot so we don't end up with unwanted scrollbars
 	slot.textContent = ""
+	// display visuals
+	aVisual.push("<br><a name='end'></a>")
+	dom.visual.innerHTML = aVisual.join("<br>")
 
 	// summary
 	if (aRed.length) {
@@ -692,22 +892,23 @@ function test() {
 	// and instead directly set content in navigator.clipboard.writeText(content)
 	// also output to console
 
-	dom.legend.innerHTML = s12 +"SCRIPTS ["+ scriptCount +"]" + sc
+	dom.legend.innerHTML = s12 +"SCRIPTS ["+ countScript +"]" + sc
 		//+ " <a class='blue' href='#summary'>#SUMMARY</a>"
 		+ "<br>"+ aLegend.join("")
 		+ "<br><span id='summary'></span>"+ s12 +"SUMMARY" + sc //+ summaryBtn
 		+ "<br><span id='copy'>"+ aSummary.join(" ") +"</span>"
-	dom.visual.innerHTML = aVisual.join("<br>")
 
 	// perf
-	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | "+ countTested +" chars"
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | "
+		+ countTested +" chars" +" | "+ countTofu +" tofu"
 	isRunning = false
 }
 
 //dom.allassigned.checked = true
 let isRunning = true
 Promise.all([
-	generate()
+	get_tofu_size(),
+	generate(),
 ]).then(function(){
 	reset(false) // false: leave the generate perf value there
 })
