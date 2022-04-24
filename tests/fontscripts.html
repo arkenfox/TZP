@@ -52,9 +52,10 @@
 			Click the script name in the display area to log code points to console.
 		</td></tr>
 		<tr>
-			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px;">
+			<td style="text-align: left; vertical-align: bottom;">
+				<span id="toggleScript" class="btn12 btnfirst" onClick="toggleindex()">&#9660 show index</span> <span id="countScript"></span>
 			</td>
-			<td style="text-align: left; vertical-align: top;">
+			<td style="text-align: left; vertical-align: bottom;">
 				<span class="btn12 btnfirst" onClick="run('test')">[ run ]</span>
 				<!--<span class="btn12 btn" onClick="logObject('codes')">[ codes ]</span>
 				<span class="btn12 btn" onClick="logObject('chars')">[ chars ]</span> | &nbsp-->
@@ -73,7 +74,15 @@
 						<br>Reduces tofu noise on platforms<br>with older font versions e.g. if<br>just checking basic script support<br><br></span>
 					</div>
 				</span>
-				<br><br>
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: left; vertical-align: top;">
+				<hr>
+				<span class="mono spaces hidden" id="legend" style="color: #b3b3b3; font-size: 11px;"></span>
+				<span class="mono spaces" id="summary" style="color: #b3b3b3; font-size: 11px;"></span>
+			</td>
+			<td style="text-align: left; vertical-align: top;">
 				<span class="spaces" style="direction:ltr;unicode-bidi:bidi-override; font-size: 12px;" id="visual"></span>
 			</td></tr>
 	</table>
@@ -631,6 +640,18 @@ function strip(value) {return value.replace(/ /g,"")} 	// strip all spaces
 
 function hyperlink(string) {return " <a target='blank' class='blue' href='"+ string +"'>wiki</a>"}
 
+function toggleindex() {
+	let	el = document.getElementById("legend")
+	let style = el.getAttribute("class")
+	if (style.includes("hidden")) {
+		el.classList.remove("hidden")
+		dom.toggleScript.innerHTML = "&#9650 hide index"
+	} else {
+		el.classList.add("hidden")
+		dom.toggleScript.innerHTML = "&#9660 show index"
+	}
+}
+
 function build_title(name, anchor, misc, nameColor, grouptitle) {
 	// builds the html code for each script header, including if we need a script group
 	let intCodes = oCodes[name].length,
@@ -954,6 +975,7 @@ function generate() {
 		aDisplayMax.push("<a name='end'></a>")
 		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | "
 			+ (dom.allassigned.checked ? countCodesMax : countCodes) + " chars"
+		dom.countScript.innerHTML = "["+ countScript +"]"
 		/*
 		logObject("ranges")
 		logObject("codesreserved")
@@ -973,9 +995,9 @@ function reset(clear = true) {
 	if (clear) {
 		dom.perf.innerHTML = (dom.allassigned.checked ? countCodesMax : countCodes) + " chars"
 	}
-	dom.legend.innerHTML = s12 +"SCRIPTS [" + countScript +"]" + sc
-		+ "<br>"+ aLegendClean.join("")
+	dom.legend.innerHTML = aLegendClean.join("") +"<br><hr>"
 	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
+	dom.summary.innerHTML = ""
 	if (!clear) {isRunning = false}
 }
 
@@ -1067,21 +1089,18 @@ function test() {
 				anchorColor = "sb"
 				nameColor = sb
 				if (percent !== 100) {partial = " ["+ aTofu.length +"/" + maxDepth +"]"}
-				aRed.push("<a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial)
-				if (percent !== 100) {partial = sb + partial + sc}
+				aRed.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>" + sb + partial + sc)
 			} else if (percent >= 20) {
 				nameColor = s2
-				partial = " ["+ aTofu.length +"/" + maxDepth +"]"
+				partial = s2 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
 				strA = strA.replace(/bad/g, "s2")
-				aOrange.push("<a class='s2' href='#"+ anchor +"'>"+ name +"</a>" + partial)
-				partial = s2 + partial + sc
+				aOrange.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
 			} else if (percent > 0) {
 				//anchorColor = "s4" // too noisy, just let the count be colored
 				nameColor = s4
-				partial = " ["+ aTofu.length +"/" + maxDepth +"]"
+				partial = s4 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
 				strA = strA.replace(/bad/g, "s4")
-				aYellow.push("<a class='s4' href='#"+ anchor +"'>"+ name +"</a>" + partial)
-				partial = s4 + partial + sc
+				aYellow.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
 			}
 			// display
 			aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
@@ -1099,35 +1118,32 @@ function test() {
 	// display visuals
 	aVisual.push("<a name='end'></a>")
 	dom.visual.innerHTML = aVisual.join("<br>")
+	dom.legend.innerHTML = aLegend.join("") +"<br><hr>"
+
 
 	// summary
 	if (aRed.length) {
 		aRed.sort()
 		aSummary.push("<br>"+ sb + "unsupported [" + aRed.length +"]"+ sc +"<br>")
-		aSummary.push("<br>"+ aRed.join("<br>") +"<br>")
+		aSummary.push("<br><li>"+ aRed.join("</li><li>") +"</li>")
 	}
 	if (aOrange.length) {
 		aOrange.sort()
 		aSummary.push("<br>"+ s2 + "mixed [" + aOrange.length +"]"+ sc +"<br>")
-		aSummary.push("<br>" + aOrange.join("<br>") +"<br>")
+		aSummary.push("<br><li>" + aOrange.join("</li><li>") +"</li>")
 	}
 	if (aYellow.length) {
 		aYellow.sort()
 		aSummary.push("<br>"+ s4 + "partial [" + aYellow.length +"]"+ sc +"<br>")
-		aSummary.push("<br>"+ aYellow.join("<br>"))
+		aSummary.push("<br><li>"+ aYellow.join("</li><li>") +"</li>")
 	}
+	dom.summary.innerHTML = "<br><span class='s12' style='font-size: 12px;'><b><u>"+ "SUMMARY</u></b>"+ sc +"<br>"+ aSummary.join("")
 
 	// output
-	let summaryBtn = " <span class='btn12 btnfirst onClick='copysummary()'>[ copy ]</span>"
+	//let summaryBtn = " <span class='btn12 btnfirst onClick='copysummary()'>[ copy ]</span>"
 	// ToDo: store summary in friendly format
 	// and instead directly set content in navigator.clipboard.writeText(content)
 	// also output to console
-
-	dom.legend.innerHTML = s12 +"SCRIPTS ["+ countScript +"]" + sc
-		//+ " <a class='blue' href='#summary'>#SUMMARY</a>"
-		+ "<br>"+ aLegend.join("")
-		+ "<br><span id='summary'></span>"+ s12 +"SUMMARY" + sc //+ summaryBtn
-		+ "<br><span id='copy'>"+ aSummary.join(" ") +"</span>"
 
 	// perf
 	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | "
