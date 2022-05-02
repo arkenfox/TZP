@@ -45,27 +45,26 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Testing font visibility vs script support by checking up to
-			<code>x</code> characters of each script for tofu. Allow 2-3 secs before running to ensure
+			<code>x</code> characters of each script for matching tofu sizes. Allow 2-3 secs before running to ensure
 			<a target="_blank" class="blue" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">
-			asynchronous font fallback</a> caching. Tofu results are colored coded as <span class="bad">90% or higher</span>,
-			<span class="s2">20-90%</span>, <span class="s4">20% or lower</span>.
-			Click the script name in the display area to log code points to console.
+			asynchronous font fallback</a> caching. Tofu results are colored coded as <span class="bad">80% or higher</span>,
+			<span class="s2">20-80%</span>, <span class="s4">20% or lower</span>.
+			Click script names in the display area to log code points to console.
 		</td></tr>
 		<tr>
 			<td style="text-align: left; vertical-align: bottom;">
-				<span id="toggleScript" class="btn12 btnfirst" onClick="toggleindex()">&#9660 show index</span> <span id="countScript"></span>
+				<span id="toggleScript" class="btn12 btnfirst" onClick="toggleindex()">&#9660 index</span> <span id="countScript"></span>
 			</td>
 			<td style="text-align: left; vertical-align: bottom;">
 				<span class="btn12 btnfirst" onClick="run('test')">[ run ]</span>
-				<!--<span class="btn12 btn" onClick="logObject('codes')">[ codes ]</span>
-				<span class="btn12 btn" onClick="logObject('chars')">[ chars ]</span> | &nbsp-->
+				<span class="btn12 btn" onClick="togglelog()">[ log &#9660 ]</span>
 				<span class="s12 mono"> depth
 					<input type="radio" name="depth" value=20 checked> 20
 					<input type="radio" name="depth" value=50> 50
-					<input type="radio" name="depth" value=800> ALL
+					<input type="radio" name="depth" value="ALL"> ALL
 				</span> | &nbsp
 				<span class="s12 mono">
-					<input type="checkbox" name="allassigned" style="margin: 0; height: 12px" onClick='reset()'> max code points
+					<input type="checkbox" name="allassigned" style="margin: 0; height: 12px" onClick='reset()'> max
 					<div class="ttip"><span class="icon">[ i ]</span>
 						<span class="ttxtb" style="font-style: normal; font-family: serif;">
 						<br>When unchecked, some scripts<br>will use earlier unicode versions<br>
@@ -93,40 +92,61 @@
 // https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
 let aPartial = [
+	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
 	"basic latin", // C0 controls ignored
+	"cjk unified ideographs", // 20,992 code points
+	"cjk unified ideographs extension-a", // 6,592 code points
+	"cjk unified ideographs extension-b", // 42,720 code points
 	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
+	"hangul syllables", // 11,172 code points
 	"latin-1 supplement", // 008x + 009x ignored, control codes
+	"mathematical alphanumeric symbols", // 996 code points
 	"yi syllables",  // 1,165 code points
 ]
 
+let aSpacer = [
+	"combining diacritical marks",
+	"combining diacritical marks for symbols",
+	"combining diacritical marks supplement",
+]
+
 let oEnlarge = {
-	"ethiopic supplement": [18],
-	"ogham": [18],
+	"alphabetic presentation forms": [14],
+	"arabic": [16],
+	"arabic presentation forms-a": [16],
+	"arabic supplement": [16],
+	"arrows": [14],
 	"bengali": [14],
+	"bopomofo extended": [14],
+	"combining diacritical marks": [20],
+	"combining diacritical marks for symbmols": [20],
+	"combining diacritical marks supplement": [20],
+	"control pictures": [16],
 	"devanagari": [14],
+	"ethiopic supplement": [18],
+	"general punctuation": [16],
+	"glagolitic": [14],
+	"hangul jamo": [14],
+	"hebrew": [18],
+	"ipa extensions": [16],
+	"kanbun": [16],
+	"mongolian": [18],
+	"ogham": [18],
+	"optical character recognition": [18],
+	"phonetic extensions": [16],
+	"phonetic extensions supplement": [16],
 	"sinhala": [16],
+	"spacing modifier letters": [18],
+	"superscripts and subscripts": [18],
+	"supplemental arrows-b": [14],
+	"syriac": [16],
 	"tai le": [14],
 	"telugu": [16],
 	"thai": [14],
-	"tibetan": [18],
-	"glagolitic": [14],
-	"bopomofo extended": [14],
-	"hangul jamo": [14],
-	"kanbun": [16],
-	"yi syllables": [16],
-	"ipa extensions": [16],
-	"phonetic extensions": [16],
-	"phonetic extensions supplement": [16],
-	"spacing modifier letters": [18],
-	"arabic": [16],
-	"arabic supplement": [16],
-	"hebrew": [18],
-	"syriac": [16],
-	"mongolian": [18],
-	"combining diacritical marks": [20],
-	"general punctuation": [16],
-	"superscripts and subscripts": [18],
 	"thanaa": [16],
+	"tibetan": [18],
+	"vertical forms": [16],
+	"yi syllables": [16],
 }
 
 let	uv1x0x0 = "1.0.0 (1991)",
@@ -385,6 +405,7 @@ let aBlocks = [
 		], uv3x0,
 		["0C"] // ignore: mark delimiter tsheg bstar
 	],
+
 	// CYRILLIC
 	["cyrillic"],
 	["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
@@ -435,15 +456,61 @@ let aBlocks = [
 			"BB","BC","BD","BE","BF", // 13.0
 		], uv3x0
 	],
+	["cjk compatibility", 33, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+		"CJK_Compatibility",
+		[
+			"77","78","79","7A","DE","DF","FF", // 4.0
+		], uv1x1
+	],
+	["cjk compatibility forms", "FE", [3,4], , , "CJK_Compatibility_Forms"],
+	["cjk compatibility ideographs", "F",
+		[90,91,92,93,94,95,96,97,98,99,"9A","9B","9C","9D","9E","9F",
+		"A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","AA","AB","AC","AD","AE","AF"], -38, ["A6E","A6F"],
+		"CJK_Compatibility_Ideographs",
+		[
+			"A6B","A6C","A6D", // 5.2
+			"A2E","A2F", // 6.1
+		], uv4x1
+	],
+	["cjk compatibility ideographs supplement", "2F",
+		[80,81,82,83,84,85,86,87,88,89,"8A","8B","8C","8D","8E","8F",
+			90,91,92,93,94,95,96,97,98,"9A","9B","9C","9D","9E","9F","A0","A1"
+		], -2, ,
+		"CJK_Compatibility_Ideographs_Supplement"
+	],
+	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
+		["00"] // ignore: ID SP
+	],
+	["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"],
+	["cjk unified ideographs", "4E", [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_(Unicode_block)"],
+	["cjk unified ideographs extension-a", 34, [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_Extension_A"],
+	["cjk unified ideographs extension-b", 200, [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_Extension_B"],
+	["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"],
+		"Enclosed_CJK_Letters_and_Months",
+		[
+			"1D","1E","50","7C","7D","CC","CD","CE","CF", // 4.0
+			"7E", // 4.1
+			"44","45","46","47","48","49","4A","4B","4C","4D","4E","4F", // 5.2
+			"FF", // 12.1
+		], uv3x2
+	],
+	["hangul compatibility jamo", 31, [3,4,5,6,7,8], -1, ["30"], "Hangul_Compatibility_Jamo", , ,
+		["64"] // ignore: HF
+	],
 	["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)",
 		[
 			"5A","5B","5C","5D","5E","A3","A4","A5","A6","A7","FA","FB","FC","FD","FE","FF", // 5.2
 		], uv1x1,
 		["5F","60"] // ignore: HCF hangul choseong filler, HJF hangul jungseong filler
 	],
+	["hangul syllables", "AC", [0,1,2,3,4,5,6,7,8,9], , , "Hangul_Syllables"],
 	["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"],
+	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
+	["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_radical#Kangxi_Radicals_block"],
 	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"],
+	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
+	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
 	["yi radicals", "A4", [9,"A","B","C"], -9, , "Yi_Radicals"],
 	["yi syllables", "A0", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Yi_Syllables"],
 
@@ -494,9 +561,6 @@ let aBlocks = [
 		], uv2x0
 	],
 
-	// NOTATIONAL
-	//["notational"],
-
 	// PHONETIC
 	["phonetic"],
 	["ipa extensions", "02", [5,6,7,8,9,"A"], , , "IPA_Extensions"],
@@ -516,6 +580,7 @@ let aBlocks = [
 		], uv5x1,
 		["1C"] // ALM
 	],
+	["arabic presentation forms-a", "FB", [5,6,7,8,9,"A"], , , "Arabic_Presentation_Forms-A"],
 	["arabic supplement", "07", [5,6,7], , , "Arabic_Supplement",
 		[
 			"6E","6F","70","71","72","73","74","75","76","77","78","79","7A","7B","7C","7D","7E","7F", // 5.1
@@ -532,6 +597,117 @@ let aBlocks = [
 	["samaritan", "08", [0,1,2,3], -1, ["2E","2F"], "Samaritan_(Unicode_block)"],
 	["syriac", "07", [0,1,2,3,4], 0, ["0E","4B","4C"], "Syriac_(Unicode_block)"],
 
+	// symbols
+	["symbols"],
+	["alphabetic presentation forms", "FB", [0,1,2,3,4], ,
+		["07","08","09","0A","0B","0C","0D","0E","0F","10","11","12","18","19","1A","1B","1C","37","3D","3F","42","45"],
+		"Alphabetic_Presentation_Forms"
+	],
+	["arrows", 21, [9,"A","B","C","D","E","F"], , , "Arrows_(Unicode_block)"],
+	["block elements", 25, [8,9], , , "Block_Elements"],
+	["box drawing", 25, [0,1,2,3,4,5,6,7], , , "Box_Drawing"],
+	["braille patterns", 28, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,"Braille_Patterns"],
+	["currency symbols", 20, ["A","B","C"], -15, , "Currency_Symbols_(Unicode_block)",
+		[
+			"B6","B7","B8", // 5.2
+			"B9", // 6.0
+			"BA", // 6.2
+			"BB","BC","BD", // 7.0
+			"BE", // 8.0
+			"BF", // 10.0
+			"C0", // 14.0
+		], uv4x1
+	],
+	["dingbats", 27, [0,1,2,3,4,5,6,7,8,9,"A","B"], , , "Dingbat",
+		[
+			"57", // 5.2
+			"05","0A","0B","28","4C","4E","53","54","55","5F","60","95","96","97","B0","BF", // 6.0
+			"00", // 7.0
+		], uv3x2
+	],
+	["enclosed alphanumerics", 24, [6,7,8,9,"A","B","C","D","E","F"], , , "Enclosed_Alphanumerics"],
+	["general punctuation", 20, [1,2,3,4,5], , , "General_Punctuation", , ,
+		[
+			"11", // NB
+			"28","29", // L SEP, P SEP
+			"2A","2B", // LRE, RLE
+			"2C", // PDF
+			"2D","2E", // LRO, RLO
+			"2F", // NNB SP
+			"5F", // MM SP
+		],
+	],
+	["geometric shapes", 25, ["A","B","C","D","E","F"], , , "Geometric_Shapes_(Unicode_block)"],
+	["letterlike symbols", 21, [0,1,2,3,4], , , "Letterlike_Symbols",
+		[
+			"3C","4C", // 4.1
+			"4D","4E", // 5.0
+			"4F", // 5.1
+		], uv4x0
+	],
+	["mathematical alphanumeric symbols", "1D4", [0,1,2,3,4,5,6,7,8,9], , ["55","9D"],
+		"Mathematical_Alphanumeric_Symbols"
+	],
+	["mathematical operators", 22, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+		"Mathematical_Operators_(Unicode_block)"
+	],
+	["miscellaneous mathematical symbols-a", 27, ["C","D","E"], , ,
+		"Miscellaneous_Mathematical_Symbols-A",
+		[
+			"C0","C1","C2","C3","C4","C5","C6", // 4.1
+			"CA","C7","C8","C9", // 5.0
+			"CC","EC","ED","EE","EF", // 5.1
+			"CE","CF", // 6.0
+			"CB","CD", // 6.1
+		], uv3x2
+	],
+	["miscellaneous mathematical symbols-b", 29, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+		"Miscellaneous_Mathematical_Symbols-B"
+	],
+	["miscellaneous symbols", 26, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+		"Miscellaneous_Symbols",
+		[
+			"B2", // 5.0
+			"9D","B3","B4","B5","B6","B7","B8","B9","BA","BB","BC","C0","C1","C2","C3", // 5.1
+			"9E","9F","BD","BE","BF","C4","C5","C6","C7","C8","C9","CA","CB","CC","CD","CF",
+			"D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA","DB","DC","DD","DE","DF",
+			"E0","E1","E3","E8","E9","EA","EB","EC","ED","EE","EF",
+			"F0","F1","F2","F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE","FF", // 5.2
+			"CE","E2","E4","E5","E6","E7", // 6.0
+		], uv4x1
+	],
+	["miscellaneous technical", 23, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], ,
+		["29","2A"], // 2 deprecated 5.2
+		"Miscellaneous_Technical",
+		[
+			"DC","DD","DE","DF","E0","E1","E2","E3","E4","E5","E6","E7", // 5.0
+			"E8", // 5.2
+			"E9","EA","EB","EC","ED","EE","EF","F0","F1","F2","F3", // 6.0
+			"F4","F5","F6","F7","F8","F9","FA", // 7.0
+			"FB","FC","FD","FE", // 9.0
+			"FF", // 10.0
+		], uv4x1
+	],
+	["number forms", 21, [5,6,7,8], -4, , "Number_Forms",
+		[
+			"85","86","87","88", // 
+			"50","51","52","89", // 5.2
+			"8A","8B", // 8.0
+		], uv5x0
+	],
+	["optical character recognition", 24, [4,5], -21, ,"Optical_Character_Recognition_(Unicode_block)"],
+	["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"],
+		"Superscripts_and_Subscripts_(Unicode_block)",
+		[
+			"95","96","97","98","99","9A","9B","9C", // 6.0
+		], uv4x1
+	],
+	["supplemental arrows-a", 27, ["F"], , ,"Supplemental_Arrows-A"],
+	["supplemental arrows-b", 29, [0,1,2,3,4,5,6,7], , ,"Supplemental_Arrows-B"],
+	["supplemental mathematical operators", "2A", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
+		"Supplemental_Mathematical_Operators"
+	],
+
 	// MISC
 	["misc"],
 	["armenian", "05", [3,4,5,6,7,8], , ["30","57","58","8B","8C"],
@@ -545,34 +721,33 @@ let aBlocks = [
 	["combining diacritical marks", "03", [0,1,2,3,4,5,6], , , "Combining_Diacritical_Marks", , ,
 		["4F"] // ignore: CGJ
 	],
-	["currency symbols", 20, ["A","B","C"], -15, , "Currency_Symbols_(Unicode_block)",
+	["combining diacritical marks for symbols", 20, ["D","E","F"], -15, ,
+		"Combining_Diacritical_Marks_for_Symbols",
 		[
-			"B6","B7","B8", // 5.2
-			"B9", // 6.0
-			"BA", // 6.2
-			"BB","BC","BD", // 7.0
-			"BE", // 8.0
-			"BF", // 10.0
-			"C0", // 14.0
-		], uv4x1
+			"E2","E3", // 3.0
+			"E4","E5","E6","E7","E8","E9","EA", // 3.2
+			"EB", // 4.1
+			"EC","ED","EE","EF", // 5.0
+			"F0", // 5.1
+		], uv1x0x0
 	],
-	["letterlike symbols", 21, [0,1,2,3,4], , , "Letterlike_Symbols",
+	["combining diacritical marks supplement", "1D", ["C","D","E","F"], , ,
+		"Combining_Diacritical_Marks_Supplement",
 		[
-			"3C","4C", // 4.1
-			"4D","4E", // 5.0
-			"4F", // 5.1
-		], uv4x0
+			"", // 5.1
+			"FD", // 5.2
+			"FC", // 6.0
+			"E7","E8","E9","EA","EB","EC","ED","EE","EF","F0","F1","F2","F3","F4","F5", // 7.0
+			"FB", // 9.0
+			"F6","F7","F8","F9", // 10.0
+			"FA", // 14.0
+		], uv5x1
 	],
-	["general punctuation", 20, [1,2,3,4,5], , , "General_Punctuation", , ,
-		[ // ignore
-			"11", // NB
-			"28","29", // L SEP, P SEP
-			"2A","2B", // LRE, RLE
-			"2C", // PDF
-			"2D","2E", // LRO, RLO
-			"2F", // NNB SP
-			"5F", // MM SP
-		],
+	["control pictures", 24, [0,1,2,3], -25, , "Control_Pictures"],
+	["halfwidth and fullwidth forms", "FF", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E"], -1,
+		["00","BF","C0","C1","C8","C9","D0","D1","D8","D9","DD","DE","DF","E7"],
+		"Halfwidth_and_Fullwidth_Forms_(Unicode_block)", , ,
+		["A0"] // ignore: HW HF
 	],
 	["mongolian", 18, [0,1,2,3,4,5,6,7,8,9,"A"], -5,
 		["1A","1B","1C","1D","1E","1F","79","7A","7B","7C","7D","7E","7F"],
@@ -584,26 +759,7 @@ let aBlocks = [
 		], uv3x0,
 		["0B","0C","0D","0E","0F"] // ignore: FVS1, FVS2, FVS3, MVS, FVS4
 	],
-	["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"],
-		"Superscripts_and_Subscripts_(Unicode_block)",
-		[
-			"95","96","97","98","99","9A","9B","9C", // 6.0
-		], uv4x1
-	],
 	["thanaa", "07", [8,9,"A","B"], -14, , "Thaana_(Unicode_block)"],
-
-/*
-combining diacritical marks for symbols
-
-	["name", 0, ["","","",""], -substract,
-		["","","",""], // reserved
-		"link", 
-		[
-			"","","","",
-		], uvVersion
-	],
-*/
-
 ]
 
 s2 = s2.trim()
@@ -615,13 +771,14 @@ s14 = s14.trim()
 sg = sg.trim()
 sb = sb.trim()
 
-let oCodes = {},
-	oCodesVersion = {},
+let oCodesMin = {},
+	oCodesMinVersion = {},
 	oCodesMax = {},
 	oCodesReduce = {},
 	oCodesReserved = {},
 	oCodesIgnore = {}, // bidirectional, non-printing, control codes etc
 	oCodesTofu = {},
+	oCodesMeasure = {},
 	oRanges = {},
 	oWiki = {},
 	oGroupHeader = {},
@@ -633,55 +790,61 @@ let oCodes = {},
 	oTofuSizes = {},
 	tofuSize,
 	countScript,
-	countCodes,
-	countCodesMax
+	countCodesMin,
+	countCodesMax,
+	testParams = ""
+
+let oCodePoints = {}
+let oTempData = {}
 
 function strip(value) {return value.replace(/ /g,"")} 	// strip all spaces
 
 function hyperlink(string) {return " <a target='blank' class='blue' href='"+ string +"'>wiki</a>"}
+
+function togglelog() {
+	// ToDo
+}
 
 function toggleindex() {
 	let	el = document.getElementById("legend")
 	let style = el.getAttribute("class")
 	if (style.includes("hidden")) {
 		el.classList.remove("hidden")
-		dom.toggleScript.innerHTML = "&#9650 hide index"
 	} else {
 		el.classList.add("hidden")
-		dom.toggleScript.innerHTML = "&#9660 show index"
 	}
 }
 
-function build_title(name, anchor, misc, nameColor, grouptitle) {
+function build_title(name, anchor, misc, nameColor, grouptitle, intCodes, intCodesMax) {
 	// builds the html code for each script header, including if we need a script group
-	let intCodes = oCodes[name].length,
-		intCodesMax = oCodesMax[name].length,
-		count = intCodes
-	if (oCodesVersion[name] !== undefined) {
+	let count = intCodes
+	let strVersion = oTempData[name]["min version"]
+	if (strVersion !== undefined) {
 		if (intCodes == intCodesMax) {
 			count += sb + " <sup>counts match</sup></span> | " + intCodesMax
 		} else {
-			count += " <span class='no_color'><sup>"+ oCodesVersion[name][0] +"</sup></span> | " + intCodesMax
+			count += " <span class='no_color'><sup>"+ strVersion +"</sup></span> | " + intCodesMax
 		}
 	} else if (intCodes !== intCodesMax) {
 		count += sb + " <sup>version</sup>"+ sc +" | "+ intCodesMax
 	}
+	let strWiki = oTempData[name]["wiki"]
+	strWiki = strWiki == undefined ? "" : hyperlink(strWiki)
+	let strRange = oTempData[name]["range"]
+	if (strRange == undefined) {
+		strRange = sb +"[range]"+ sc
+	} else {
+		strRange =  s14 +" ["+ strRange + (aPartial.includes(name) ? " &#9664 partial" : "") +"]"+ sc
+	}
+
 	return (grouptitle !== "" ? oGroupHeader[grouptitle][0] : "") +
 		"<span class='mono'>"
 			// name
 			+ nameColor + "<a name='"+ anchor + "'></a>"
-				+ "<span style='cursor: pointer;' onClick='logCodes(`"+ name + "`)'>" + name + sc + sc
+				+ "<span style='cursor: pointer;' onClick='logConsole(`"+ name + "`)'>" + name + sc + sc
 			// char count
-			+ s12 + " ["+ count +"]"+ sc
-			// range
-			+ s14 +" ["+ oRanges[name][0] + (aPartial.includes(name) ? " &#9664 partial" : "") +"]"+ sc
-			// link
-			+ (oWiki[name] !== undefined ? hyperlink(oWiki[name][0]) : "")
+			+ s12 + " ["+ count +"]"+ sc + strRange + strWiki
 		+ sc
-}
-
-function copysummary() {
-
 }
 
 function get_tofu_size() {
@@ -700,7 +863,6 @@ function get_tofu_size() {
 			'0x03A2', // greek
 			'0x0EDB', // lao
 			'0x0D65', // malayam
-			// log oCodesReserved to console for inspiration
 			/* 
 			'0x187F', // mongolian
 			'0x0DF1', // sinhala
@@ -741,45 +903,58 @@ function get_tofu_size() {
 			oTofuSizes[k] = [greatest.item, aRes.join(", ")]
 		}
 		tofuSize = oTofuSizes["none"][0]
-		dom.tofuSize.innerHTML = "<span style='cursor: pointer;' onClick='logObject(`tofusize`)'>" + tofuSize +"</span>"
+		dom.tofuSize.innerHTML = "<span style='cursor: pointer;' onClick='logConsole(`tofusize`)'>" + tofuSize +"</span>"
 		return resolve()
 	})
 }
 
-function logCodes(name) {
-	let codes = oCodesMax[name],
-		reduce = oCodesReduce[name],
-		reserved = oCodesReserved[name],
-		ignore = oCodesIgnore[name],
-		version = oCodesVersion[name],
-		range = oRanges[name]
-	if (aPartial.includes(name)) {name += " partial"}
-	let logStr = name +"\n - 'range': '"+ range +"'"
-	if (reserved !== undefined) {
-		logStr += "\n - 'reserved': ['" + reserved.join("', '")+ "']"
-	}
-	if (ignore !== undefined) {
-		logStr += "\n - 'ignored': ['" + ignore.join("', '")+ "']"
-	}
-	logStr += "\n - 'used': ['" + codes.join("', '")+ "']"
-	if (reduce !== undefined) {
-		logStr += "\n - 'reduce': ['" + reduce.join("', '")+ "']"
-		logStr += "\n - 'reduced version': '"+ version +"'"
-	}
-	console.log(logStr)
+function prettyPrintArray(json) {
+  if (typeof json === 'string') {
+    json = JSON.parse(json);
+  }
+  let output = JSON.stringify(json, function(k,v) {
+    if(v instanceof Array)
+      return JSON.stringify(v);
+    return v;
+  }, 3).replace(/\\/g, '')
+        .replace(/\"\[/g, '[')
+        .replace(/\]\"/g,']')
+        .replace(/\"\{/g, '{')
+        .replace(/\}\"/g,'}')
+        .replace(/,/g,', ');
+  return output;
 }
 
-function logObject(name) {
-	let logStr = ""
-	if (name == "wiki") { console.log("wikipedia links", oWiki)
-	} else if (name == "ranges") { console.log("ranges used", oRanges)
-	} else if (name == "codesignore") { console.log("codes [ignored]", oCodesIgnore)
-	} else if (name == "codesreduce") { console.log("codes [reduce]", oCodesReduce)
-	} else if (name == "codesreserved") { console.log("codes [reserved]", oCodesReserved)
-	} else if (name == "codes") { console.log("codes [used]", oCodesMax)
-	} else if (name == "codesversion") { console.log("codes [reduced version]", oCodesVersion)
-	} else if (name == "tofu") { console.log("codes [tofu]", oCodesTofu)
-	} else if (name == "tofusize") {
+function logConsole(name) {
+	// objects
+	let oUsed = {}, logStr = ""
+	if (name == "everything") {oUsed = oCodePoints; logStr = "everything"
+	} else if (name == "wiki") {oUsed = oWiki; logStr = "wikipedia links"
+	} else if (name == "ranges") {oUsed = oRanges; logStr = "ranges used"
+	} else if (name == "ignore") {oUsed = oCodesIgnore; logStr = "code points [ignored]"
+	} else if (name == "max") {oUsed = oCodesMax; logStr = "code points [max used]"
+	} else if (name == "min") {oUsed = oCodesMin; logStr = "code points [min used]"
+	} else if (name == "reduce") {oUsed = oCodesReduce; logStr = "code points [reduce]"
+	} else if (name == "reserved") {oUsed = oCodesReserved; logStr = "code points [reserved]"
+	} else if (name == "version") {oUsed = oCodesMinVersion; logStr = "code points [min version]"
+	} else if (name == "tofu") {
+		oUsed = oCodesTofu
+		logStr = "fingerprint [tofu] | "+ testParams +" | "+ mini_sha1(oCodesTofu)
+	} else if (name == "fp") {
+		oUsed = oCodesMeasure
+		logStr = "fingerprint [sizes] | "+ testParams +" | "+ mini_sha1(oCodesMeasure)
+	}
+	if (logStr !== "") {
+		console.log(logStr+"\n", prettyPrintArray(oUsed))
+		return
+	}
+	// array
+	if (name == "partial") {
+		aPartial.sort()
+		console.log("partial ranges\n", aPartial.join(", "))
+	}
+	// pretty
+	if (name == "tofusize") {
 		logStr = "calculated tofu sizes [greatest occurence, results]"
 		logStr += "\n==========="
 		const names = Object.keys(oTofuSizes).sort()
@@ -789,6 +964,11 @@ function logObject(name) {
 			+ (k == "test array" ? "" : "\n - "+ oTofuSizes[k][1])
 		}
 		console.log(logStr)
+		return
+	}
+	// script
+	if (oCodePoints[name] !== undefined) {
+		console.log(name, prettyPrintArray(oCodePoints[name]))
 	}
 }
 
@@ -802,7 +982,7 @@ function generate() {
 	// clean legend
 	// get char counts
 	return new Promise(resolve => {
-		if (oCodes["arabic"] !== undefined) {
+		if (oCodesMin["arabic"] !== undefined) {
 			console.debug("already done")
 			return
 		}
@@ -813,9 +993,17 @@ function generate() {
 				aNav.push(anchor)
 			}
 		})
+		// FP lines
+		let strFP = "<hr><br><span class='mono'>"
+			+ s12 + ("tofu size: ").padStart(18) + sc +"<br>"
+			+ s12 + ("parameters: ").padStart(18) + sc +"<br>"
+			+ s12 +"tofu fingerprint: "+ sc +"<br>"
+			+ s12 +"size fingerprint: "+ sc +"</span><br>"
+		aDisplay.push(strFP)
+		aDisplayMax.push(strFP)
 
 		countScript = 0
-		countCodes = 0
+		countCodesMin = 0
 		countCodesMax = 0
 
 		let t0 = performance.now()
@@ -861,6 +1049,7 @@ function generate() {
 					name = name.toUpperCase()
 				} else {
 					name = data[0].toLowerCase()
+					oTempData[name] = {}
 					let prefix = data[1],
 						range = data[2],
 						remove = data[3],
@@ -875,29 +1064,20 @@ function generate() {
 					if (ignore == undefined) {ignore = []}
 					if (remove == undefined) {remove = 0}
 					// range info
-					oRanges[name] = []
 					let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
-					oRanges[name].push(rangeString)
-					// reduced unicode version
-					if (version !== undefined && version !== "") {
-						oCodesVersion[name] = [version]
-					}
-					// wikiurl info
-					if (url !== undefined && url !== "") {
-						oWiki[name] = ["https://en.wikipedia.org/wiki/"+ url]
-					}
+					oTempData[name]["range"] = rangeString
+					// partial
+					let isPartial = aPartial.includes(name)
+					oTempData[name]["partial"] = isPartial
 					// legend
 					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
-					// vars
-					oCodes[name] = []
-					oCodesMax[name] = []
 
-					let aCodes = [],
+					let aCodesMin = [],
 						aCodesMax = [],
 						aCodesReduce = [],
 						aCodesReserved = [],
 						aCodesIgnore = [],
-						aChars = [],
+						aCharsMin = [],
 						aCharsMax = []
 
 					// loop
@@ -912,8 +1092,8 @@ function generate() {
 								aCharsMax.push(String.fromCodePoint(string))
 								// 
 								if (!reduce.includes(match)) {
-									aCodes.push(string)
-									aChars.push(String.fromCodePoint(string))
+									aCodesMin.push(string)
+									aCharsMin.push(String.fromCodePoint(string))
 								} else {
 									aCodesReduce.push(string)
 								}
@@ -925,45 +1105,43 @@ function generate() {
 					// trim results
 					if (remove < 0) {
 						// add trimmed items to reserved
-						let trimReserved = aCodes.slice(aCodes.length + remove, aCodes.length)
+						let trimReserved = aCodesMin.slice(aCodesMin.length + remove, aCodesMin.length)
 						aCodesReserved = aCodesReserved.concat(trimReserved)
 						// slice results
-						aCodes = aCodes.slice(0, remove)
+						aCodesMin = aCodesMin.slice(0, remove)
 						aCodesMax = aCodesMax.slice(0, remove)
-						aChars = aChars.slice(0, remove)
+						aCharsMin = aCharsMin.slice(0, remove)
 						aCharsMax = aCharsMax.slice(0, remove)
 					}
+
 					// record
-					oCodes[name] = aCodes
-					oCodesMax[name] = aCodesMax
+					if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
+					if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
+					oTempData[name]["max used"] = aCodesMax
 					if (aCodesReduce.length) {
-						oCodesReduce[name] = aCodesReduce
+						oTempData[name]["reduce"] = aCodesReduce
+						oTempData[name]["min used"] = aCodesMin
 					}
-					if (aCodesReserved.length) {
-						oCodesReserved[name] = aCodesReserved
-					}
-					if (aCodesIgnore.length) {
-						oCodesIgnore[name] = aCodesIgnore
-					}
+					if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
+					if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
+
 					// counts
-					countCodes += aCodes.length
+					countCodesMin += aCodesMin.length
 					countCodesMax += aCodesMax.length
 
 					// build clean displays
 					let nameColor = s12
-					let scriptheader = build_title(name, anchor, "", nameColor, grouptitle)
+					let scriptheader = build_title(name, anchor, "", nameColor, grouptitle, aCodesMin.length, aCodesMax.length)
 					oScriptHeader[name] = [scriptheader]
 					aDisplay.push(scriptheader)
 					aDisplayMax.push(scriptheader)
-					let strStart = "", strEnd = "", spacer = ""
+					let strStart = "", strEnd = ""
 					if (oEnlarge[name] !== undefined) {
 						strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
 						strEnd = sc
 					}
-					if (name == "combining diacritical marks") {
-						spacer = " "
-					}
-					aDisplay.push(strStart + spacer + aChars.join(" "+ spacer) + strEnd +"<br>")
+					let spacer = aSpacer.includes(name) ? " " : ""
+					aDisplay.push(strStart + spacer + aCharsMin.join(" "+ spacer) + strEnd +"<br>")
 					aDisplayMax.push(strStart + spacer + aCharsMax.join(" " + spacer) + strEnd +"<br>")
 
 					// reset grouptitle
@@ -974,17 +1152,38 @@ function generate() {
 		aDisplay.push("<a name='end'></a>")
 		aDisplayMax.push("<a name='end'></a>")
 		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | "
-			+ (dom.allassigned.checked ? countCodesMax : countCodes) + " chars"
+			+ (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
 		dom.countScript.innerHTML = "["+ countScript +"]"
-		/*
-		logObject("ranges")
-		logObject("codesreserved")
-		logObject("codesignore")
-		logObject("codes")
-		logObject("codesreduce")
-		logObject("codesversion")
-		logObject("wiki")
-		//*/
+
+		// sort oTempData => sorted objects
+		const names = Object.keys(oTempData).sort()
+		for (const k of names) {
+			oCodePoints[k] = oTempData[k]
+			if (oTempData[k]["range"] !== undefined) {
+				oRanges[k] = oTempData[k]["range"]
+			}
+			if (oTempData[k]["max used"] !== undefined) {
+				oCodesMax[k] = oTempData[k]["max used"]
+			}
+			if (oTempData[k]["ignored"] !== undefined) {
+				oCodesIgnore[k] = oTempData[k]["ignored"]
+			}
+			if (oTempData[k]["reserved"] !== undefined) {
+				oCodesReserved[k] = oTempData[k]["reserved"]
+			}
+			if (oTempData[k]["wiki"] !== undefined) {
+				oWiki[k] = oTempData[k]["wiki"]
+			}
+			if (oTempData[k]["reduce"] !== undefined) {
+				oCodesReduce[k] = oTempData[k]["reduce"]
+				if (oTempData[k]["min used"] !== undefined) {
+					oCodesMin[k] = oTempData[k]["min used"]
+				}
+			}
+			if (oTempData[k]["min version"] !== undefined) {
+				oCodesMinVersion[k] = oTempData[k]["min version"]
+			}
+		}
 		// return
 		return resolve()
 	})
@@ -993,7 +1192,7 @@ function generate() {
 function reset(clear = true) {
 	// reset/display everything to make sure all code points have time to hopefully render
 	if (clear) {
-		dom.perf.innerHTML = (dom.allassigned.checked ? countCodesMax : countCodes) + " chars"
+		dom.perf.innerHTML = (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
 	}
 	dom.legend.innerHTML = aLegendClean.join("") +"<br><hr>"
 	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
@@ -1029,9 +1228,16 @@ function test() {
 	let t0 = performance.now()
 	slot.style.fontFamily = "none"
 	let testDepth = document.querySelector('input[name="depth"]:checked').value
+	testParams = (testDepth == "ALL" ? "all" : "up to "+ testDepth)
+		+" | "+ (dom.allassigned.checked ? "max" : "reduced")
+	if (testDepth == "ALL") {testDepth = 800}
+
 	let aRed = [], aOrange = [], aYellow = []
-	// reset
+	// reset FP objects
 	oCodesTofu = {}
+	oCodesMeasure = {}
+	let oTempTofu = {}
+	let oTempMeasure = {}
 
 	aBlocks.forEach(function(data) {
 		let name = data[0].toLowerCase()
@@ -1039,10 +1245,13 @@ function test() {
 		if (data[1] == undefined) {
 			aLegend.push("<br><a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
 		} else {
-			let codes = dom.allassigned.checked ? oCodesMax[name] : oCodes[name]
+			let codes = dom.allassigned.checked ? oCodePoints[name]["max used"] : oCodePoints[name]["min used"]
+			if (oCodePoints[name]["min used"] == undefined) {codes = oCodePoints[name]["max used"]}
+
 			let displayA = []
 			let displayB = []
 			let aTofu = []
+			let aMeasure = []
 			let anchorColor = "no_color", nameColor = s12, partial = ""
 			let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
 			maxDepth = maxDepth * 1
@@ -1057,6 +1266,7 @@ function test() {
 				let character = String.fromCodePoint(codesA[i])
 				slot.textContent = character
 				let w = span.offsetWidth, h = div.offsetHeight
+				aMeasure.push(codesA[i] +": "+ w + " x " + h)
 				if (w +" x "+ h == tofuSize) {
 					aTofu.push(codesA[i])
 					displayA.push(sb + character + sc)
@@ -1069,8 +1279,10 @@ function test() {
 			// track total tofu
 			if (aTofu.length) {
 				countTofu += aTofu.length
-				oCodesTofu[name] = aTofu
+				oTempTofu[name] = aTofu
 			}
+			oTempMeasure[name] = aMeasure
+
 			// remainder
 			if (codesB.length > 0) {
 				for (let i=0; i < codesB.length; i++) {
@@ -1079,13 +1291,10 @@ function test() {
 				}
 			}
 			// colors
-			let spacer = ""
-			if (name == "combining diacritical marks") {
-				spacer = " "
-			}
+			let spacer = aSpacer.includes(name) ? " " : ""
 			let percent = (aTofu.length/maxDepth) * 100
 			let strA = spacer + displayA.join(" "+ spacer)
-			if (percent >= 90) {
+			if (percent >= 80) {
 				anchorColor = "sb"
 				nameColor = sb
 				if (percent !== 100) {partial = " ["+ aTofu.length +"/" + maxDepth +"]"}
@@ -1115,11 +1324,39 @@ function test() {
 	})
 	// reset slot so we don't end up with unwanted scrollbars
 	slot.textContent = ""
+	// sort tofu codes
+	const names = Object.keys(oTempTofu).sort()
+	for (const k of names) {
+		oCodesTofu[k] = oTempTofu[k]
+	}
+	// sort measurements
+	const namesM = Object.keys(oTempMeasure).sort()
+	for (const m of namesM) {
+		oCodesMeasure[m] = oTempMeasure[m]
+	}
+
+	// FP lines
+	let tofuFP = mini_sha1(oCodesTofu)
+		+ " <span class='btn12 btnc' onClick='logConsole(`tofu`)'>["+ countTofu +"]</span> "
+		+ Math.round((countTofu/countTested) * 100) + "%"
+	if (countTofu == 0) {
+		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
+	}
+
+	let sizeFP = mini_sha1(oCodesMeasure)
+		+ " <span class='btn12 btnc' onClick='logConsole(`fp`)'>["+ countTested +"]</span>"
+	let tofuSizeBtn = " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
+
+	let strFP = "<hr><br><span class='mono'>"
+		+ s12 + ("tofu size: ").padStart(18) + sc + tofuSize + tofuSizeBtn + "<br>"
+		+ s12 + ("parameters: ").padStart(18) + sc + testParams +"<br>"
+		+ s12 +"tofu fingerprint: "+ sc + tofuFP +"<br>"
+		+ s12 +"size fingerprint: "+ sc + sizeFP +"</span><br>"
+
 	// display visuals
 	aVisual.push("<a name='end'></a>")
-	dom.visual.innerHTML = aVisual.join("<br>")
+	dom.visual.innerHTML = strFP +"<br>"+ aVisual.join("<br>")
 	dom.legend.innerHTML = aLegend.join("") +"<br><hr>"
-
 
 	// summary
 	if (aRed.length) {
@@ -1137,18 +1374,11 @@ function test() {
 		aSummary.push("<br>"+ s4 + "partial [" + aYellow.length +"]"+ sc +"<br>")
 		aSummary.push("<br><li>"+ aYellow.join("</li><li>") +"</li>")
 	}
-	dom.summary.innerHTML = "<br><span class='s12' style='font-size: 12px;'><b><u>"+ "SUMMARY</u></b>"+ sc +"<br>"+ aSummary.join("")
-
-	// output
-	//let summaryBtn = " <span class='btn12 btnfirst onClick='copysummary()'>[ copy ]</span>"
-	// ToDo: store summary in friendly format
-	// and instead directly set content in navigator.clipboard.writeText(content)
-	// also output to console
+	dom.summary.innerHTML = "<br><span class='s12' style='font-size: 12px;'><b><u>"
+		+ "SUMMARY</u></b>"+ sc +"<br>"+ aSummary.join("")
 
 	// perf
-	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | "
-		+ countTested +" tested" +" | "
-		+ "<span style='cursor: pointer;' onClick='logObject(`tofu`)'>" + countTofu +" tofu</span>"
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	isRunning = false
 }
 
