@@ -9,7 +9,7 @@
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 600px;}
+		table {width: 700px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 		hr {color: #dcc18c}
 	</style>
@@ -19,6 +19,9 @@
 	<div class="offscreen">
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
 		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+	</div>
+	<div class="hidden">
+		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 	</div>
 
 	<table>
@@ -91,7 +94,7 @@ function fnDisplay() {
 	}
 	// parse for pretty output
 	for (let i=0; i < results.length; i++) {
-		let pad = 29
+		let pad = 35
 		let order = results[i].split("~~~")[0],
 			desc = results[i].split("~~~")[1].trim(),
 			result = results[i].split("~~~")[2],
@@ -136,8 +139,10 @@ function fnDisplay() {
 	if (countNA > 0) {summary += "N/A: ".padStart(7) + countNA}
 	if (isFF) {
 		summary += s14+ "DEBUG ".padStart(8) + sc +"RFP:".padStart(6) + (isRFP56plus ? green_tick : red_cross)
-		if (topVer !== "") {summary += "VER: ".padStart(8) + topVer
-		}
+		let strVer = isVer
+		strVer += (isVer == topVer ? "+" : "")
+		strVer += (isVer == minVer ? " or lower" : "")
+		summary += "VER: ".padStart(8) + strVer
 	}
 	// output
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
@@ -182,6 +187,19 @@ function get_canvaskeys(num) {
 	}
 }
 
+function get_colorgamut(num, title) {
+	let q = "(color-gamut: ", res = "undefined", bolC = false
+	try {
+		if (bBlock) {bB = 1}
+		if (window.matchMedia(q +"srgb)").matches) {res = "srgb"}
+		if (window.matchMedia(q +"p3)").matches) {res = "p3"}
+		if (window.matchMedia(q +"rec2020)").matches) {res = "rec2020"}
+		fnRecord(num, title, res, res == "undefined")
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
 function get_dates(num) {
 	// 1274354: meta
 	// 1557650
@@ -203,7 +221,7 @@ function get_dates(num) {
 		// FF: 63 and lower = NaN, 64+ = -2011
 		let bolB = false
 		if (resB == -2011) {bolB = true
-		} else if (!is64 && isNaN(resB)) {bolB = true}
+		} else if (isVer < 64 && isNaN(resB)) {bolB = true}
 		fnRecord(num+1, strB, resB, bolB)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
@@ -277,7 +295,7 @@ function get_errors(num) {
 		} catch(e) {
 			let bool = false
 			let str = fnTrim(e.name +": "+ e.message, 70)
-			if (!is60 && array[0] == "alert('A)") {
+			if (isVer < 60 && array[0] == "alert('A)") {
 				if (str == "SyntaxError: unterminated string literal") {bool = true}
 			} else {
 				if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
@@ -304,16 +322,15 @@ function get_iframe_props(num1, num2, title) {
 	// just a small sample
 	let listE = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
 		'mozInnerScreenY','netscape','onmozfullscreenchange','onmozfullscreenerror']
-	let listU = ['BatteryManager','HID','Keyboard','Lock','MIDIAccess','Serial',
+	let listU = ['BatteryManager','HID','Keyboard','Lock','Serial',
 		'USB','WakeLock','WebKitMutationObserver','XRAnchor','chrome','webkitCancelAnimationFrame',
 		'webkitMediaStream','webkitRTCPeerConnection','webkitRequestAnimationFrame',
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
-	if (is99) {
-		// 1752906: FF99+ MIDIAccess (FF? dom.webmidi.enabled)
-		listU = listU.filter(x => !["MIDIAccess"].includes(x))
-	}
-	if (is93) {
-		// 1739233: FF96+ Lock (FF93+ "dom.weblocks.enabled")
+	// FYI: don't use MIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
+
+	if (isVer > 92) {
+		// FF93+ "dom.weblocks.enabled"
+		// 1739233: FF96+ Lock
 		listU = listU.filter(x => !["Lock"].includes(x))
 	}
 	try {
@@ -342,8 +359,8 @@ function get_iframe_props(num1, num2, title) {
 		}
 		// unexpected
 		let arrayU = props.filter(x => listU.includes(x))
-		// ignore BatteryManager if FF < 72
-		if (isFF && !is72) {arrayU = arrayU.filter(x => !["BatteryManager"].includes(x))}
+		// ignore BatteryManager FF72+
+		if (isFF && isVer < 72) {arrayU = arrayU.filter(x => !["BatteryManager"].includes(x))}
 		let resU = "", boolU = false
 		if (arrayU.length) {
 			resU = sha1(arrayU.join()) + s3 +" ["+ arrayU.length +"]"+ sc
@@ -367,7 +384,7 @@ function get_installtrigger(num) {
 		if (bBlock) {bB = 1}
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
-		if (is100) {
+		if (isVer > 99) {
 			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA)
 		} else {
 			fnRecord(num, strA, resA, boolA)
@@ -380,7 +397,7 @@ function get_installtrigger(num) {
 	try {
 		if (bBlock) {bB = 1}
 		let resB = "InstallTrigger" in window
-		if (is100) {
+		if (isVer > 99) {
 			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA)
 		} else {
 			fnRecord(num+1, strB, resB, resB)
@@ -391,14 +408,14 @@ function get_installtrigger(num) {
 
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
 	// FF60 or lower
-	if (isFF && !is61) {
+	if (isFF && isVer < 61) {
 		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
 		try {
 			if (bBlock) {bB = 1}
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
-			if (is100) {
+			if (isVer > 99) {
 				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA)
 			} else {
 				fnRecord(num+2, strC, resC, boolC)
@@ -446,7 +463,7 @@ function get_intl_collator(num, title) {
 		let res = [], unique = [], same = []
 		// webkit has everything FF does for collation that can be detected
 		// except in FF70+, no (same as fo), so swap that out
-		if (!is70 && isFF) {
+		if (isVer < 70 && isFF) {
 			list.push("fo")
 			list = list.filter(x => !["no"].includes(x))
 		}
@@ -469,9 +486,13 @@ function get_intl_collator(num, title) {
 			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e" && is70) {bool = true // FF70+
-		} else if (hash == "152220e565cdba8e36d483a78128a2a501ac3428" && !is70) {bool = true // FF59-69
-		} else if (hash == "f3dd69682f15cb6b95951a45659546283f71ea8f" && !is59) {bool = true // FF52-58
+		if (isVer > 69) {
+			if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true} // FF70+
+		} else if (isVer > 58) {
+			if (hash == "152220e565cdba8e36d483a78128a2a501ac3428") {bool = true} // FF59-69
+		} else {
+			if (hash == "f3dd69682f15cb6b95951a45659546283f71ea8f") {bool = true} // FF52-58
+			if (hash == "152220e565cdba8e36d483a78128a2a501ac3428") {bool = true} // WFClassic isVer = 58
 		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
@@ -487,7 +508,7 @@ function get_intl_display_names(num, title) {
 	} catch(e) {
 		// FF85-: TypeError: Intl.DisplayNames is undefined
 		if (isFF) {
-			if (is86) {
+			if (isVer > 85) {
 				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				let msg = e.message
@@ -514,7 +535,7 @@ function get_intl_dtf(num, title) {
 			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 				minute: "numeric", second: "numeric", hour12: true}
 		let res = [], unique = [], same = []
-		if (!is70 && isFF) {
+		if (isVer < 70 && isFF) {
 			list.push("fo")
 			list = list.filter(x => !["no"].includes(x))
 		}
@@ -533,18 +554,18 @@ function get_intl_dtf(num, title) {
 			counts += " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (is101) {
+		if (isVer > 100) {
 			if (hash == "f3292db015c0915ce6099982d84727986140f999") {bool = true} // FF101+
-		} else if (is70) {
+		} else if (isVer > 69) {
 			if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true} // FF70-100
+		} else if (isVer > 58) {
+			if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true} // FF59-69
 		} else {
-			if (hash == "661319323bd37daabe3c83a649f024e5929a499d" && !is70) {bool = true // FF59-69
-			} else if (hash == "407454b2169899f2c4b3264a716223315d844f0b" && !is59) {bool = true // FF55-57 RFP
-			} else if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3" && !is59) {bool = true // FF52-58
-			} else if (hash == "5e50264aff470447e8c19c899061eada3528ed45" && !is59) {bool = true // WFClassic52 RFP
-			}
+			if (hash == "407454b2169899f2c4b3264a716223315d844f0b") {bool = true} // FF55-57 RFP
+			if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3") {bool = true} // FF52-58
+			if (hash == "5e50264aff470447e8c19c899061eada3528ed45") {bool = true} // WFClassic52 RFP
+			if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true} // WFClassic isVer = 58
 		}
-
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
@@ -559,7 +580,7 @@ function get_intl_list_format(num, title) {
 	} catch(e) {
 		// FF77-: TypeError: Intl.ListFormat is undefined
 		if (isFF) {
-			if (is78) {
+			if (isVer > 77) {
 				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				let msg = e.message
@@ -625,7 +646,7 @@ function get_intl_pluralrules(num, title) {
 		let result = e.name
 		let type = zB0
 		let error = e.message
-		if (!is59 && e.message == "Intl.PluralRules is undefined") {
+		if (isVer < 59 && e.message == "Intl.PluralRules is undefined") {
 			result = zNA +": FF58+ required"
 			type = zNA
 			error = undefined
@@ -642,7 +663,7 @@ function get_intl_rtf(num, title) {
 	} catch(e) {
 		// FF64-: TypeError: Intl.RelativeTimeFormat is undefined
 		if (isFF) {
-			if (is65) {
+			if (isVer > 64) {
 				fnRecord(num, title, e.name, zB0, e.message)
 			} else {
 				if (e.name == "TypeError" && e.message == "Intl.RelativeTimeFormat is undefined") {
@@ -702,6 +723,37 @@ function get_js_client_hints(num, title) {
 	}
 }
 
+function get_last_prototype_keys(num1, title) {
+	// HTMLAnchorElement
+	let title1 = title +" HTMLAnchorElement"
+	try {
+		if (bBlock) {bB = 1}
+		Object.keys(HTMLAnchorElement.prototype)
+		let props1 = Object.getOwnPropertyNames(HTMLAnchorElement.prototype) // includes the constructor
+		let res1 = props1.slice(-3).join(", ")
+		// search, hash, constructor
+		fnRecord(num1, title1, res1, res1 == "search, hash, constructor")
+	} catch(e) {
+		fnRecord(num1, title1, e.name, zB0, e.message)
+	}
+
+	// HTMLLinkElement
+	let title2 = title +" HTMLLinkElement"
+	let num2 = num1 + 1
+	try {
+		if (bBlock) {bB = 1}
+		Object.keys(HTMLLinkElement.prototype)
+		let props2 = Object.getOwnPropertyNames(HTMLLinkElement.prototype) // includes the constructor
+		let res2 = props2.slice(-3).join(", ")
+		let bol2 = res2 == "as, sheet, constructor"
+		// 52-55: integrity, sheet, constructor
+		if (isVer <= 56 && res2 == "integrity, sheet, constructor") {bol2 = true}
+		fnRecord(num2, title2, res2, bol2)
+	} catch(e) {
+		fnRecord(num2, title2, e.name, zB0, e.message)
+	}
+}
+
 function get_locale_compare(num, title) {
 	try {
 		if (bBlock) {bB = 1}
@@ -734,7 +786,7 @@ function get_locale_compare(num, title) {
 		// webkit: see intl.collator notes: swap "fo" with "no" FF70+
 		list.forEach(function(item) {
 			let code = item[0]
-			if (!is70 && isFF && code == "no") {code = "fo"} // isFF only
+			if (isVer < 70 && isFF && code == "no") {code = "fo"} // isFF only
 			let strA = item[1]
 			let test = strA.localeCompare(item[2], code)
 			if (test !== 1) {same.push(code)}
@@ -746,9 +798,13 @@ function get_locale_compare(num, title) {
 			let counts = " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
-		if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776" && is70) {bool = true // FF70+
-		} else if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf" && !is70) {bool = true // FF59-69
-		} else if (hash == "1cfcca8eaa05f4d004015953c01c312f22c261ab" && !is59) {bool = true // FF52-58
+		if (isVer > 69) {
+			if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true} // FF70+
+		} else if (isVer > 58) {
+			if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // FF59-69
+		} else {
+			if (hash == "1cfcca8eaa05f4d004015953c01c312f22c261ab") {bool = true} // FF52-58
+			if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // WFClassic isVer = 58
 		}
 		fnRecord(num, title, hash, bool)
 	} catch(e) {
@@ -819,10 +875,16 @@ function get_media_constraints(num, title) {
 		res.sort()
 		let hash = sha1(res.join())
 		let bool = false
-		if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f" && is70) {bool = true // FF70+
-		} else if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc" && !is70) {bool = true // FF56-69
-		} else if (hash == "827e0cc87e804fc83ec5d67d43f0547f9cf0e624" && !is59) {bool = true // FF55
-		} else if (hash == "f772cf52c7cb9623cc62652f2b0879597e096f37" && !is59) {bool = true // FF52-54
+		if (isVer > 69) {
+			if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f") {bool = true} // FF70+
+		} else {
+			if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc") {bool = true} // FF56-69
+			if (isVer < 57) {
+				if (hash == "827e0cc87e804fc83ec5d67d43f0547f9cf0e624") {bool = true} // FF55
+			}
+			if (isVer < 55) {
+				if (hash == "f772cf52c7cb9623cc62652f2b0879597e096f37") {bool = true} // FF52-54
+			}
 		}
 		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
 	} catch(e) {
@@ -853,7 +915,7 @@ function get_mimetypes(num, title) {
 				}
 				res.sort()
 				// FF84 or lower allow just Flash
-				if (isFF && !is85 && res.length == 2) {
+				if (isFF && isVer < 85 && res.length == 2) {
 					let mime1 = res[0].split(":")[0]
 					let mime2 = res[1].split(":")[0]
 					if (mime1 == "application/x-futuresplash" && mime2 == "application/x-shockwave-flash") {
@@ -861,10 +923,13 @@ function get_mimetypes(num, title) {
 					}
 				}
 				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
-				if (is99 || !isFF) { // allow non-FF to have the same
+				if (isVer > 98) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
 					// 1720353: hardcoded mimeTypes = 33c916c1a0e2e4e72047e6e142a7b43c6b1eba22
-					if (sha1(res.join()) == "33c916c1a0e2e4e72047e6e142a7b43c6b1eba22") {bool = true}
+					if (sha1(res.join()) == "33c916c1a0e2e4e72047e6e142a7b43c6b1eba22") {
+						bool = true
+						num = 710 // move to specific values
+					}
 				} else if (isFF) {
 					if (isFlash) {hash = "flash detected [FF84 or lower]"}
 				}
@@ -890,25 +955,22 @@ function get_nav_keys(num1, num2, title) {
 		fnRecord(num1, title, resNavCheckE, testNavCheckE)
 		// not expected: blink items
 		let aNavNotExpected = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
-			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation",
-			"requestMIDIAccess","scheduling","serial","setAppBadge","unregisterProtocolHandler",
-			"usb","userActivation","userAgentData","wakeLock","webkitGetUserMedia","webkitPersistentStorage",
-			"webkitTemporaryStorage","xr","SharedWorker","Worker"]
-		if (is99) {
-			// 1752906: FF99+ MIDIAccess (FF? dom.webmidi.enabled)
-			aNavNotExpected = aNavNotExpected.filter(x => !["requestMIDIAccess"].includes(x))
-		}
-		if (is96) {
+			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation","scheduling",
+			"serial","setAppBadge","unregisterProtocolHandler","usb","userActivation","userAgentData","wakeLock",
+			"webkitGetUserMedia","webkitPersistentStorage","webkitTemporaryStorage","xr","SharedWorker","Worker"]
+		// FYI: don't use requestMIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
+		if (isVer > 95) {
 			// 1666203: FF96+ canShare
 			aNavNotExpected = aNavNotExpected.filter(x => !["canShare"].includes(x))
 		}
-		if (is95 || isEngine == "goanna") {
+		if (isVer > 94 || isEngine == "goanna") {
 			// 1670058: FF95+ globalPrivacyControl
 			// PM 30
 			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
 		}
-		if (is93) {
-			// 1739233: FF96+ locks (FF93+ "dom.weblocks.enabled")
+		if (isVer > 92) {
+			// FF93+ "dom.weblocks.enabled"
+			// 1739233: FF96+ locks
 			aNavNotExpected = aNavNotExpected.filter(x => !["locks"].includes(x))
 		}
 		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
@@ -1027,7 +1089,7 @@ function get_nav_values(num1, num2, num3) {
 		} else if (isEngine == "goanna" && resG == "empty string") {boolG = true; resG += s3 + " [goanna]"+ sc}
 
 		// 1670058: FF95+ globalPrivacyControl
-		if (is95) {
+		if (isVer > 94) {
 			resG = zNA +": FF94 or lower" + s3 +" ["+ resG +"]" + sc
 			boolG = zNA
 		}
@@ -1085,7 +1147,7 @@ function get_nav_values(num1, num2, num3) {
 	try {
 		if (bBlock) {bB = 1}
 		let resX = navigator.buildID
-		if (is64) {
+		if (isVer > 63) {
 			// all FF64+
 			if (resX == "20181001000000") {boolX = true}
 		} else {
@@ -1095,7 +1157,7 @@ function get_nav_values(num1, num2, num3) {
 			if (resX.length == 14) {
 				let isCheck = false
 				if (year > 2016 && year < 2020) {isCheck = true}
-				if (!is59) {if (year > 2016) {isCheck = true}} // FF52 waterfox basilisk palemoon
+				if (isVer < 59) {if (year > 2016) {isCheck = true}} // FF52 waterfox basilisk palemoon
 				if (isCheck) {
 					if (!isNaN(resX * 1)) {boolX = true}
 				}
@@ -1184,14 +1246,17 @@ function get_plugins(num, title) {
 				}
 				res.sort()
 				// FF84 or lower allow just Flash
-				if (isFF && !is85 && res.length == 1) {
+				if (isFF && isVer < 85 && res.length == 1) {
 					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true; isFlash = true}
 				}
 				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
-				if (is99 || !isFF) { // allow non-FF to have the same
+				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
 					// 1720353: hardcoded mimeTypes = a1c55525766a48e19810c6a2accc17f62a748901
-					if (sha1(res.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {bool = true}
+					if (sha1(res.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {
+						bool = true
+						num = 740 // move to specific values
+					}
 				} else if (isFF) {
 					if (isFlash) {hash = "flash detected [FF84 or lower]"}
 				}
@@ -1294,7 +1359,7 @@ function get_storage_quota(num, title) {
 		navigator.storage.estimate().then(estimate => {
 			let quota = estimate.quota,
 				bool = false
-			if (is97) {
+			if (isVer > 96) {
 				if (quota > 10000000000 && quota < 10737418241) {bool = true}
 				if (quota > 5500000000 && quota < 5512729396) {bool = true}
 			} else {
@@ -1311,7 +1376,7 @@ function get_storage_quota(num, title) {
 			let result = e.name
 			let type = zB0
 			let error = e.message
-			if (isFF && !is59 && e.message == "navigator.storage is undefined") {
+			if (isFF && isVer < 59 && e.message == "navigator.storage is undefined") {
 				result = zNA +": FF57+ required"
 				type = zNA
 				error = undefined
@@ -1381,123 +1446,155 @@ function get_window_moz(num) {
 	}
 }
 
-let isRFP56plus = false,
-	isWebkit = false,
-	is59 = false,
-	is60 = false,
-	is61 = false,
-	is64 = false,
-	is65 = false,
-	is70 = false,
-	is72 = false,
-	is78 = false,
-	is85 = false,
-	is86 = false,
-	is93 = false,
-	is95 = false,
-	is96 = false,
-	is97 = false,
-	is99 = false,
-	is100 = false,
-	is101 = false
-
-// webkit
-if ("chrome" in window || isFF) {} else {isWebkit = true}
-// set some FF variables
-if (isFF) {
-	// ToDo: [possibly add some missing some isXX to make things tighter
-	fnRFP()
-	is101 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction"))
-	is100 = ("function" === typeof AbortSignal && "function" === typeof AbortSignal.timeout)
-	try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {is99 = (e.message.length == 72)}
-	is97 = ("function" === typeof AbortSignal
-		&& "function" === typeof AbortSignal.prototype.throwIfAborted)
-	try {is96 = ("sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {}
-	try {
-		let test95 = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-		is95 = (test95 > 0.4 && test95 < 0.6)
-	} catch(e) {}
-	is93 = ("function" === typeof self.reportError)
-	is86 = ("function" === typeof Intl.DisplayNames)
-	try {
-		Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
-	} catch(e) {
-		is85 = (e.message.length == 66)
-	}
-	is78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
-	is72 = ("boolean" === typeof self.crossOriginIsolated)
-	is70 = ("function" === typeof Intl.RelativeTimeFormat
-		&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
-	is65 = (1 === DataView.length)
-	is64 = ("number" === typeof window.screenTop)
-	is61 = ("object" === typeof CSS)
-	is60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
-	is59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
-}
-
 let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 70,
+	expected = 73,
 	bBlock = false, // throw a test error
 	bLog = false,
-	bNum = false, // display numbering
-	topVer = ""
+	bNum = false // display numbering
 
-setTimeout(function() {
-	if (isEngine == "gecko") {
-		// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
-			// note: waterfox classic passes both
-		if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
-			isEngine = "goanna"
+let	isVer = "",
+	topVer = "",
+	minVer = "",
+	isRFP56plus = false,
+	isWebkit = false,
+	is95 = false
+
+function get_is95() {
+	return new Promise(resolve => {
+		// pre-compute slow 95 test
+		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
+			// ^ do if 94+ but not 95+ fast path
+			try {
+				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
+					// but not if 96+
+					let ratio = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+					is95 = (ratio > 0.4 && ratio < 0.6)
+				}
+			} catch(e) {
+				console.debug(e.name, e.message)
+			}
 		}
-	}
-	// legacy forks: PM, Basilisk, WF Classic: backported fixes cause isXX false positives
-	// cascade
-	/*
-	if (isFile) {
-		let aVer = []
-		aVer.push("is59: "+ is59) // true: WF Classic
-		aVer.push("is60: "+ is60)
-		aVer.push("is61: "+ is61) // true: PM + Basilisk, WF Classic
-		aVer.push("is64: "+ is64)
-		aVer.push("is65: "+ is65)
-		aVer.push("is70: "+ is70) // true: PM + Basilisk, WF Classic
-		aVer.push("is72: "+ is72)
-		aVer.push("is78: "+ is78) // true: WF Classic
-		aVer.push("is85: "+ is85)
-		aVer.push("is86: "+ is86)
-		aVer.push("is93: "+ is93)
-		aVer.push("is95: "+ is95)
-		aVer.push("is96: "+ is96)
-		aVer.push("is97: "+ is97)
-		aVer.push("is99: "+ is99)
-		aVer.push("is100: "+ is100)
-		console.debug(aVer.join("\n"))
-	}
-	*/
-	if (isFF) {
-		if (is59 && !is60 && is61 && is70) {is59 = false} // WF Classic
-		if (!is59) {is60 = false; topVer = "> 59"} else {topVer = "59 <sup>60</sup>"}
-		if (!is60) {is61 = false} else {topVer = "60 <sup>61</sup>"}
-		if (!is61) {is64 = false} else {topVer = "61+ <sup>64</sup>"}
-		if (!is64) {is65 = false} else {topVer = "64 <sup>65</sup>"}
-		if (!is65) {is70 = false} else {topVer = "65+ <sup>70</sup>"}
-		if (!is70) {is72 = false} else {topVer = "70+ <sup>72</sup>"}
-		if (!is72) {is78 = false} else {topVer = "72+ <sup>78</sup>"}
-		if (!is78) {is85 = false} else {topVer = "78+ <sup>85</sup>"}
-		if (!is85) {is86 = false} else {topVer = "85 <sup>86</sup>"}
-		if (!is86) {is93 = false} else {topVer = "86+ <sup>93</sup>"}
-		if (!is93) {is95 = false} else {topVer = "93+ <sup>95</sup>"}
-		if (!is95) {is96 = false} else {topVer = "95 <sup>96</sup>"}
-		if (!is96) {is97 = false} else {topVer = "96 <sup>97</sup>"}
-		if (!is97) {is99 = false} else {topVer = "97+ <sup>99</sup>"}
-		if (!is99) {is100 = false} else {topVer = "99+ <sup>100</sup>"}
-		if (!is100) {is101 = false} else {topVer = "100+ <sup>101</sup>"}
-		if (!is101) {} else {topVer = "101+"}
-	}
+		return resolve(is95)
+	})
+}
 
+function get_isVer() {
+	return new Promise(resolve => {
+		// set webkit
+		if ("chrome" in window || isFF) {} else {isWebkit = true}
+		// set goanna
+		if (isEngine == "gecko") {
+			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
+				// note: waterfox classic passes both
+			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
+				isEngine = "goanna"
+				// exit and return isVer as 52
+				isVer = 52
+				return resolve()
+			}
+		}
+		// is55
+		let is55 = false
+		try {
+			let maxIndex = Math.pow(2, 31)
+			let list55 = []
+			list55[maxIndex - 1] = 'a'
+			list55[maxIndex - 0] = 'b'
+			if (list55[maxIndex] !== 'b') {
+			} else if (list55.slice()[maxIndex] !== 'b') {
+			} else if (list55.slice(maxIndex - 1).length !== 2) {
+			} else {
+				is55 = true
+			}
+		} catch(e) {}
+		// skip !isFF
+		if (!isFF) {
+			return resolve()
+		}
+		isVer = cascade()
+		return resolve()
+		function cascade() {
+			// FF52-59
+			if ("function" !== typeof Animation.prototype.updatePlaybackRate) {
+				if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) return 59
+				if ("function" == typeof Intl.PluralRules) return 58
+				if ("function" === typeof AbortSignal) return 57
+				if (is55) {
+					minVer = 56
+					return 56
+				} else {
+					minVer = 54
+					return 54
+				}
+			}
+			// FF60+
+			topVer = 101
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) return 101 // 1728999
+			if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
+			try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
+			if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
+			if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
+			if ("undefined" === typeof Object.toSource
+				&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
+				// ^ legacy perf: toSource (74+): FF68- very slow
+			if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
+			if (is95) return 95 // 1674204
+				// ^ pre-computed
+			if ("function" === typeof self.structuredClone) return 94 // 1722576
+			if ("function" === typeof self.reportError) return 93 // 1722448
+			if ("function" === typeof Object.hasOwn) return 92 // 1721149
+			if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
+			try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
+			if ("function" === typeof Array.prototype.at) return 90 // 1681371
+			if ("function" === typeof CountQueuingStrategy
+				&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
+				// ^ legacy check FF64- CountQueuingStrategy
+			if (":" === document.createElement("a").protocol) return 88 // 1497557
+			if (undefined === console.length) return 87 // 1688335
+			if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
+			try {Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
+				} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
+				// ^ replace ?
+			if ("function" === typeof PerformancePaintTiming) return 84 // 1518999
+			if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
+			try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
+				// ^ ext fuckery: cydec
+			if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
+			if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
+			if ("function" === typeof Promise.any) return 79 // 1599769 shipped
+			if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
+			if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
+			if (!test76.validity.rangeOverflow) return 76 // 1608010
+			if ("function" === typeof Intl.Locale) return 75 // 1613713
+			if ("undefined" === typeof Object.toSource) return 74 // 1565170
+			if (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames")) return 73 // 1602163
+			if ("boolean" === typeof self.crossOriginIsolated) return 72 // 1591892
+			if ("function" === typeof Promise.allSettled) return 71 // 1549176
+			if ("function" === typeof Intl.RelativeTimeFormat
+				&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts) return 70 // 1473229
+				// ^ legacy check: FF64- Intl.RelativeTimeFormat
+				// ^ extension fuckery: formatToParts
+			try {newFn("let t = 1_050"); return 70} catch(e) {} // 1435818
+			if ("function" === typeof Blob.prototype.text) return 69 // 1557121
+			if (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch")) return 68 // 1548773
+			if ("function" === typeof String.prototype.matchAll) return 67 // 1531830
+			if ("function" === typeof HTMLSlotElement
+				&& "function" === typeof HTMLSlotElement.prototype.assignedElements) return 66 // 1425685
+				// ^ legacy check: FF60- HTMLSlotElement
+			if (1 === DataView.length) return 65 // 1334813
+			if ("number" === typeof window.screenTop) return 64 // 1498860
+			if ("desc" === Symbol('desc').description) return 63 // 1472170
+			if ("function" === typeof console.timeLog) return 62 // 1458466
+			if ("object" === typeof CSS) return 61 // 1455805
+			return 60 // we already tested <60
+		}
+	})
+}
+
+function run() {
 	// now get on with it
 	fnRecord(0, "header", "expected")
 	fnRecord(300, "header", "not expected")
@@ -1512,15 +1609,17 @@ setTimeout(function() {
 	get_nav_screen(150)
 	get_js_client_hints(320, "[js] client hints")
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
-	get_nav_values(100, 400, 700) // 100 expected, 400-410 not expected, 700-701 specific
+	get_nav_values(100, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
 	get_window_moz(250) // 250-251
 	get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected, 
+	get_colorgamut(310, "[css] color-gamut"),
 	get_mimetypes(370, "mimetypes")
 	get_plugins(430, "plugins")
 	get_window_chrome(450, "[chrome] window")
 	get_window_values(460)
 	get_dates(620)
 	get_eval_length(630, "eval.toString().length")
+	get_last_prototype_keys(640, "[last x keys] "), // 640+641
 	get_intl_collator(650, "Intl.Collator")
 	get_intl_dtf(656, "Intl.DateTimeFormat")
 	get_intl_display_names(660, "Intl.DislayNames")
@@ -1530,13 +1629,29 @@ setTimeout(function() {
 	get_intl_pluralrules(670, "Intl.PluralRules")
 	get_intl_rtf(673, "Intl.RelativeTimeFormat")
 	get_locale_compare(690, "locale.compare")
-	get_math(710, "math")
-	get_media_constraints(720, "[constraints] mediaDevices")
-	get_permission(730, "[permissions] push")
+	get_math(695, "math")
+	get_media_constraints(700, "[constraints] mediaDevices")
+	get_permission(750, "[permissions] push")
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
 	get_storage_quota(820, "storage estimate quota")
 	get_errors(902)
-}, 150)
+}
+
+
+setTimeout(function() {
+	if (isFF) {
+		fnRFP()
+	}
+	Promise.all([
+		get_is95(),
+	]).then(function(){
+		Promise.all([
+			get_isVer(),
+		]).then(function(){
+			run()
+		})
+	})
+}, 10)
 
 </script>
 </body>
