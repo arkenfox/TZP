@@ -22,6 +22,17 @@
 		a.sb {color: #dc8c8c;}
 		.groupleft {float: left;}
 		.groupright {float: right;}
+
+		nav {
+			position: absolute;
+			padding: 15px;
+			background-color: #161b22;
+			<!--min-width: 150px;-->
+		}
+		nav div {
+			white-space: nowrap;
+			margin-bottom: 12px;
+		}
 	</style>
 </head>
 <body>
@@ -53,11 +64,26 @@
 		</td></tr>
 		<tr>
 			<td style="text-align: left; vertical-align: bottom;">
-				<span id="toggleScript" class="btn12 btnfirst" onClick="toggleindex()">&#9660 index</span> <span id="countScript"></span>
+				<span id="toggleScript" class="btn12 btnfirst" onClick="toggleitem(`legend`)">&#9660 index</span> <span id="countScript"></span>
 			</td>
 			<td style="text-align: left; vertical-align: bottom;">
 				<span class="btn12 btnfirst" onClick="run('test')">[ run ]</span>
-				<span class="btn12 btn" onClick="togglelog()">[ log &#9660 ]</span>
+				<span class="btn12 btn" onClick="toggleitem(`navmenu`)" style="position: relative;">
+					[ list &#9660 ]
+					<nav id="navmenu" class="hidden">
+						<span class="no_color">console.log<br><br></span>
+						<div onClick="logConsole('partial')">ranges [partial]</div>
+						<div onClick="logConsole('ranges')">ranges [used]</div>
+						<div onClick="logConsole('reserved')">code points [reserved]</div>
+						<div onClick="logConsole('ignore')">code points [ignored]</div>
+						<div onClick="logConsole('max')">code points [max used]</div>
+						<div onClick="logConsole('reduce')">code points [reduce]</div>
+						<div onClick="logConsole('min')">code points [min used]</div>
+						<div onClick="logConsole('version')">unicode [min versions]</div>
+						<div onClick="logConsole('wiki')">wiki links</div>
+						<div onClick="logConsole('everything')">everything</div>
+					</nav>
+				</span>
 				<span class="s12 mono"> depth
 					<input type="radio" name="depth" value=20 checked> 20
 					<input type="radio" name="depth" value=50> 50
@@ -90,6 +116,7 @@
 <script>
 'use strict';
 // https://en.wikipedia.org/wiki/List_of_Unicode_characters
+// https://www.cogsci.ed.ac.uk/~richard/unicode-sample-3-2.html
 
 let aPartial = [
 	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
@@ -801,12 +828,8 @@ function strip(value) {return value.replace(/ /g,"")} 	// strip all spaces
 
 function hyperlink(string) {return " <a target='blank' class='blue' href='"+ string +"'>wiki</a>"}
 
-function togglelog() {
-	// ToDo
-}
-
-function toggleindex() {
-	let	el = document.getElementById("legend")
+function toggleitem(item) {
+	let	el = document.getElementById(item)
 	let style = el.getAttribute("class")
 	if (style.includes("hidden")) {
 		el.classList.remove("hidden")
@@ -933,10 +956,10 @@ function logConsole(name) {
 	} else if (name == "ranges") {oUsed = oRanges; logStr = "ranges used"
 	} else if (name == "ignore") {oUsed = oCodesIgnore; logStr = "code points [ignored]"
 	} else if (name == "max") {oUsed = oCodesMax; logStr = "code points [max used]"
-	} else if (name == "min") {oUsed = oCodesMin; logStr = "code points [min used]"
+	} else if (name == "min") {oUsed = oCodesMin; logStr = "code points [min used if reduced]"
 	} else if (name == "reduce") {oUsed = oCodesReduce; logStr = "code points [reduce]"
 	} else if (name == "reserved") {oUsed = oCodesReserved; logStr = "code points [reserved]"
-	} else if (name == "version") {oUsed = oCodesMinVersion; logStr = "code points [min version]"
+	} else if (name == "version") {oUsed = oCodesMinVersion; logStr = "unicode [min version if reduced]"
 	} else if (name == "tofu") {
 		oUsed = oCodesTofu
 		logStr = "fingerprint [tofu] | "+ testParams +" | "+ mini_sha1(oCodesTofu)
