@@ -75,9 +75,9 @@
 				</span>
 			</td>
 		</tr>
+		<tr><td colspan="2"><hr></td></tr>
 		<tr>
 			<td style="text-align: left; vertical-align: top;">
-				<hr>
 				<span class="mono spaces hidden" id="legend" style="color: #b3b3b3; font-size: 11px;"></span>
 				<span class="mono spaces" id="summary" style="color: #b3b3b3; font-size: 11px;"></span>
 			</td>
@@ -994,7 +994,7 @@ function generate() {
 			}
 		})
 		// FP lines
-		let strFP = "<hr><br><span class='mono'>"
+		let strFP = "<span class='mono'>"
 			+ s12 + ("tofu size: ").padStart(18) + sc +"<br>"
 			+ s12 + ("parameters: ").padStart(18) + sc +"<br>"
 			+ s12 +"tofu fingerprint: "+ sc +"<br>"
@@ -1029,8 +1029,8 @@ function generate() {
 					navString += "<a class='blue' href='#"+ aNav[navIndex + 1] +"'> &#9654 NEXT</a> &nbsp "
 				}
 				navString += navEnd
+				aLegendClean.push((navIndex == 0 ? "": "<br>") +"<a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
 				navIndex++
-				aLegendClean.push("<br><a class='blue' href='#"+ anchor +"'>"+ name +"</a><br>")
 
 				let groupStr = "<div><a name='"+ anchor + "'></a>"
 					+ "<hr><p class='groupleft'>"
@@ -1194,7 +1194,7 @@ function reset(clear = true) {
 	if (clear) {
 		dom.perf.innerHTML = (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
 	}
-	dom.legend.innerHTML = aLegendClean.join("") +"<br><hr>"
+	dom.legend.innerHTML = aLegendClean.join("")
 	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
 	dom.summary.innerHTML = ""
 	if (!clear) {isRunning = false}
@@ -1243,7 +1243,8 @@ function test() {
 		let name = data[0].toLowerCase()
 		let anchor = strip(name)
 		if (data[1] == undefined) {
-			aLegend.push("<br><a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
+			let firstItem = aBlocks[0].join()
+			aLegend.push((name.toLowerCase() == firstItem.toLowerCase() ? "": "<br>") +"<a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
 		} else {
 			let codes = dom.allassigned.checked ? oCodePoints[name]["max used"] : oCodePoints[name]["min used"]
 			if (oCodePoints[name]["min used"] == undefined) {codes = oCodePoints[name]["max used"]}
@@ -1347,7 +1348,7 @@ function test() {
 		+ " <span class='btn12 btnc' onClick='logConsole(`fp`)'>["+ countTested +"]</span>"
 	let tofuSizeBtn = " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
 
-	let strFP = "<hr><br><span class='mono'>"
+	let strFP = "<span class='mono'>"
 		+ s12 + ("tofu size: ").padStart(18) + sc + tofuSize + tofuSizeBtn + "<br>"
 		+ s12 + ("parameters: ").padStart(18) + sc + testParams +"<br>"
 		+ s12 +"tofu fingerprint: "+ sc + tofuFP +"<br>"
@@ -1356,7 +1357,7 @@ function test() {
 	// display visuals
 	aVisual.push("<a name='end'></a>")
 	dom.visual.innerHTML = strFP +"<br>"+ aVisual.join("<br>")
-	dom.legend.innerHTML = aLegend.join("") +"<br><hr>"
+	dom.legend.innerHTML = aLegend.join("") +"<br><hr><br>"
 
 	// summary
 	if (aRed.length) {
@@ -1374,7 +1375,7 @@ function test() {
 		aSummary.push("<br>"+ s4 + "partial [" + aYellow.length +"]"+ sc +"<br>")
 		aSummary.push("<br><li>"+ aYellow.join("</li><li>") +"</li>")
 	}
-	dom.summary.innerHTML = "<br><span class='s12' style='font-size: 12px;'><b><u>"
+	dom.summary.innerHTML = "<span class='s12' style='font-size: 12px;'><b><u>"
 		+ "SUMMARY</u></b>"+ sc +"<br>"+ aSummary.join("")
 
 	// perf
