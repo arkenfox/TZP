@@ -825,7 +825,6 @@ let oCodesMin = {},
 	aDisplayMax = [],
 	oTofuSizes = {},
 	tofuSize,
-	countScript,
 	countCodesMin,
 	countCodesMax,
 	testParams = ""
@@ -847,7 +846,7 @@ function toggleitem(item) {
 	}
 }
 
-function build_title(name, anchor, misc, nameColor, grouptitle, intCodes, intCodesMax) {
+function build_title(name, anchor, nameColor, grouptitle, intCodes, intCodesMax) {
 	// builds the html code for each script header, including if we need a script group
 	let count = intCodes
 	let strVersion = oTempData[name]["min version"]
@@ -1034,7 +1033,6 @@ function generate() {
 		aDisplay.push(strFP)
 		aDisplayMax.push(strFP)
 
-		countScript = 0
 		countCodesMin = 0
 		countCodesMax = 0
 
@@ -1075,120 +1073,113 @@ function generate() {
 				grouptitle = strip(name).toLowerCase()
 				oGroupHeader[grouptitle] = [groupStr]
 			} else {
-				countScript++
-				if (data[1] == undefined) {
-					// sub header
-					name = name.toUpperCase()
-				} else {
-					name = data[0].toLowerCase()
-					oTempData[name] = {}
-					let prefix = data[1],
-						range = data[2],
-						remove = data[3],
-						nonassigned = data[4],
-						url = data[5],
-						reduce = data[6],
-						version = data[7],
-						ignore = data[8]
-					// fixup vars
-					if (nonassigned == undefined) {nonassigned = []}
-					if (reduce == undefined) {reduce = []}
-					if (ignore == undefined) {ignore = []}
-					if (remove == undefined) {remove = 0}
-					// range info
-					let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
-					oTempData[name]["range"] = rangeString
-					// partial
-					let isPartial = aPartial.includes(name)
-					oTempData[name]["partial"] = isPartial
-					// legend
-					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
+				name = data[0].toLowerCase()
+				oTempData[name] = {}
+				let prefix = data[1],
+					range = data[2],
+					remove = data[3],
+					nonassigned = data[4],
+					url = data[5],
+					reduce = data[6],
+					version = data[7],
+					ignore = data[8]
+				// fixup vars
+				if (nonassigned == undefined) {nonassigned = []}
+				if (reduce == undefined) {reduce = []}
+				if (ignore == undefined) {ignore = []}
+				if (remove == undefined) {remove = 0}
+				// range info
+				let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
+				oTempData[name]["range"] = rangeString
+				// partial
+				let isPartial = aPartial.includes(name)
+				oTempData[name]["partial"] = isPartial
+				// legend
+				aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
 
-					let aCodesMin = [],
-						aCodesMax = [],
-						aCodesReduce = [],
-						aCodesReserved = [],
-						aCodesIgnore = [],
-						aCharsMin = [],
-						aCharsMax = []
+				let aCodesMin = [],
+					aCodesMax = [],
+					aCodesReduce = [],
+					aCodesReserved = [],
+					aCodesIgnore = [],
+					aCharsMin = [],
+					aCharsMax = []
 
-					// loop
-					for (let i = 0; i < range.length; i++) {
-						for (let j = 0; j < aSuffix.length; j++) {
-							let string = "0x"+ prefix + range[i] + aSuffix[j]
-							let match = ""+ range[i] + aSuffix[j]
-							if (ignore.includes(match)) {
-								aCodesIgnore.push(string)
-							} else if (!nonassigned.includes(match)) {
-								aCodesMax.push(string)
-								aCharsMax.push(String.fromCodePoint(string))
-								// 
-								if (!reduce.includes(match)) {
-									aCodesMin.push(string)
-									aCharsMin.push(String.fromCodePoint(string))
-								} else {
-									aCodesReduce.push(string)
-								}
+				// loop
+				for (let i = 0; i < range.length; i++) {
+					for (let j = 0; j < aSuffix.length; j++) {
+						let string = "0x"+ prefix + range[i] + aSuffix[j]
+						let match = ""+ range[i] + aSuffix[j]
+						if (ignore.includes(match)) {
+							aCodesIgnore.push(string)
+						} else if (!nonassigned.includes(match)) {
+							aCodesMax.push(string)
+							aCharsMax.push(String.fromCodePoint(string))
+							// 
+							if (!reduce.includes(match)) {
+								aCodesMin.push(string)
+								aCharsMin.push(String.fromCodePoint(string))
 							} else {
-								aCodesReserved.push(string)
+								aCodesReduce.push(string)
 							}
+						} else {
+							aCodesReserved.push(string)
 						}
 					}
-					// trim results
-					if (remove < 0) {
-						// add trimmed items to reserved
-						let trimReserved = aCodesMin.slice(aCodesMin.length + remove, aCodesMin.length)
-						aCodesReserved = aCodesReserved.concat(trimReserved)
-						// slice results
-						aCodesMin = aCodesMin.slice(0, remove)
-						aCodesMax = aCodesMax.slice(0, remove)
-						aCharsMin = aCharsMin.slice(0, remove)
-						aCharsMax = aCharsMax.slice(0, remove)
-					}
-
-					// record
-					if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
-					if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
-					oTempData[name]["max used"] = aCodesMax
-					if (aCodesReduce.length) {
-						oTempData[name]["reduce"] = aCodesReduce
-						oTempData[name]["min used"] = aCodesMin
-					}
-					if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
-					if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
-
-					// counts
-					countCodesMin += aCodesMin.length
-					countCodesMax += aCodesMax.length
-
-					// build clean displays
-					let nameColor = s12
-					let scriptheader = build_title(name, anchor, "", nameColor, grouptitle, aCodesMin.length, aCodesMax.length)
-					oScriptHeader[name] = [scriptheader]
-					aDisplay.push(scriptheader)
-					aDisplayMax.push(scriptheader)
-					let strStart = "", strEnd = ""
-					if (oEnlarge[name] !== undefined) {
-						strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
-						strEnd = sc
-					}
-					let spacer = aSpacer.includes(name) ? " " : ""
-					aDisplay.push(strStart + spacer + aCharsMin.join(" "+ spacer) + strEnd +"<br>")
-					aDisplayMax.push(strStart + spacer + aCharsMax.join(" " + spacer) + strEnd +"<br>")
-
-					// reset grouptitle
-					grouptitle = ""
 				}
+				// trim results
+				if (remove < 0) {
+					// add trimmed items to reserved
+					let trimReserved = aCodesMin.slice(aCodesMin.length + remove, aCodesMin.length)
+					aCodesReserved = aCodesReserved.concat(trimReserved)
+					// slice results
+					aCodesMin = aCodesMin.slice(0, remove)
+					aCodesMax = aCodesMax.slice(0, remove)
+					aCharsMin = aCharsMin.slice(0, remove)
+					aCharsMax = aCharsMax.slice(0, remove)
+				}
+
+				// record
+				if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
+				if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
+				oTempData[name]["max used"] = aCodesMax
+				if (aCodesReduce.length) {
+					oTempData[name]["reduce"] = aCodesReduce
+					oTempData[name]["min used"] = aCodesMin
+				}
+				if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
+				if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
+
+				// counts
+				countCodesMin += aCodesMin.length
+				countCodesMax += aCodesMax.length
+
+				// build clean displays
+				let nameColor = s12
+				let scriptheader = build_title(name, anchor, nameColor, grouptitle, aCodesMin.length, aCodesMax.length)
+				oScriptHeader[name] = [scriptheader]
+				aDisplay.push(scriptheader)
+				aDisplayMax.push(scriptheader)
+				let strStart = "", strEnd = ""
+				if (oEnlarge[name] !== undefined) {
+					strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
+					strEnd = sc
+				}
+				let spacer = aSpacer.includes(name) ? " " : ""
+				aDisplay.push(strStart + spacer + aCharsMin.join(" "+ spacer) + strEnd +"<br>")
+				aDisplayMax.push(strStart + spacer + aCharsMax.join(" " + spacer) + strEnd +"<br>")
+				// reset grouptitle
+				grouptitle = ""
 			}
 		})
 		aDisplay.push("<a name='end'></a>")
 		aDisplayMax.push("<a name='end'></a>")
 		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | "
 			+ (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
-		dom.countScript.innerHTML = "["+ countScript +"]"
 
 		// sort oTempData => sorted objects
 		const names = Object.keys(oTempData).sort()
+		dom.countScript.innerHTML = "["+ names.length +"]"
 		for (const k of names) {
 			oCodePoints[k] = oTempData[k]
 			if (oTempData[k]["range"] !== undefined) {
