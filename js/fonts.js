@@ -877,25 +877,27 @@ function get_unicode() {
 function get_woff2() {
 	// https://github.com/filamentgroup/woff2-feature-test
 	return new Promise(resolve => {
-		if (!("FontFace" in window)) {
-			dom.fontWoff2 = zB0
-			return resolve(zB0) // CORS?
-		}
-		const supportsWoff2 = (function(){
-			try {
+		try {
+			const supportsWoff2 = (function(){
+				//abc = def
 				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
-				font.load()
+				font.load().catch(err => {
+					log_error("fonts: woff2", err.name, err.message)
+					// NetworkError: A network error occurred. < woff2 disabled
+					let eMsg = (err.name === undefined ? zErr : trim_error(err.name, err.message))
+					dom.fontWoff2 = eMsg
+				})
 				return font.status == "loaded" || font.status == "loading"
-			} catch(e) {
-				log_error("fonts: woff2", e.name, e.message)
-				dom.fontWoff2 = trim_error(e.name, e.message)
-				return resolve("woff:"+ (isFF ? zB0 : zErr))
-			}
-		})()
-		let value = (supportsWoff2 ? zE : zB0)
-		if (isFF && value == zB0 && isVer < 69) {value = zD}
-		dom.fontWoff2 = value
-		return resolve("woff:"+ value)
+			})()
+			let value = (supportsWoff2 ? zE : zB0)
+			if (isFF && value == zB0 && isVer < 69) {value = zD} // assume disabled via pref
+			dom.fontWoff2 = value
+			return resolve("woff:"+ value)
+		} catch(e) {
+			log_error("fonts: woff2", e.name, e.message)
+			dom.fontWoff2 = trim_error(e.name, e.message)
+			return resolve("woff:"+ (isFF ? zB0 : zErr))
+		}
 	})
 }
 
