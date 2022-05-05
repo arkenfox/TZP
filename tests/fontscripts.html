@@ -22,6 +22,7 @@
 		a.sb {color: #dc8c8c;}
 		.groupleft {float: left;}
 		.groupright {float: right;}
+		.script {line-height: 2.4;}
 
 		nav {
 			position: absolute;
@@ -55,12 +56,12 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Testing font visibility vs script support by checking up to
-			<code>x</code> characters of each script for matching tofu sizes. Allow 2-3 secs before running to ensure
+			<span class="no_color">Tests font vis vs script support by checking up to
+			<code>x</code> characters of each script for matching tofu sizes. Allow 2-3 secs to ensure
 			<a target="_blank" class="blue" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">
-			asynchronous font fallback</a> caching. Tofu results are colored coded as <span class="bad">80% or higher</span>,
+			asynchronous font fallback</a>. Tofu results are colored coded as <span class="bad">80% or higher</span>,
 			<span class="s2">20-80%</span>, <span class="s4">20% or lower</span>.
-			Click script names in the display area to log code points to console.
+			Clicking script names in the display area logs code points to console.
 		</td></tr>
 		<tr>
 			<td style="text-align: left; vertical-align: bottom;">
@@ -813,8 +814,6 @@ let oCodesMin = {},
 	oCodesReduce = {},
 	oCodesReserved = {},
 	oCodesIgnore = {}, // bidirectional, non-printing, control codes etc
-	oCodesTofu = {},
-	oCodesMeasure = {},
 	oRanges = {},
 	oWiki = {},
 	oGroupHeader = {},
@@ -829,8 +828,16 @@ let oCodesMin = {},
 	countCodesMax,
 	testParams = ""
 
-let oCodePoints = {}
-let oTempData = {}
+// FP objects
+let fpTofu = {},
+		fpTofuData = {},
+		fpTofuHashes = [],
+		fpSizeData = {},
+		fpSizeHashes = []
+
+// everything
+let oCodePoints = {},
+	oTempData = {}
 
 function strip(value) {return value.replace(/ /g,"")} 	// strip all spaces
 
@@ -869,7 +876,7 @@ function build_title(name, anchor, nameColor, grouptitle, intCodes, intCodesMax)
 	}
 
 	return (grouptitle !== "" ? oGroupHeader[grouptitle][0] : "") +
-		"<span class='mono'>"
+		"<span class='mono script'>"
 			// name
 			+ nameColor + "<a name='"+ anchor + "'></a>"
 				+ "<span style='cursor: pointer;' onClick='logConsole(`"+ name + "`)'>" + name + sc + sc
@@ -939,7 +946,7 @@ function get_tofu_size() {
 	})
 }
 
-function prettyPrintArray(json) {
+function prettyObjectArray(json) {
   if (typeof json === 'string') {
     json = JSON.parse(json);
   }
@@ -956,36 +963,48 @@ function prettyPrintArray(json) {
   return output;
 }
 
-function logConsole(name) {
+function logConsole(type, name) {
 	// objects
 	let oUsed = {}, logStr = ""
-	if (name == "everything") {oUsed = oCodePoints; logStr = "everything"
-	} else if (name == "wiki") {oUsed = oWiki; logStr = "wikipedia links"
-	} else if (name == "ranges") {oUsed = oRanges; logStr = "ranges used"
-	} else if (name == "ignore") {oUsed = oCodesIgnore; logStr = "code points [ignored]"
-	} else if (name == "max") {oUsed = oCodesMax; logStr = "code points [max used]"
-	} else if (name == "min") {oUsed = oCodesMin; logStr = "code points [min used if reduced]"
-	} else if (name == "reduce") {oUsed = oCodesReduce; logStr = "code points [reduce]"
-	} else if (name == "reserved") {oUsed = oCodesReserved; logStr = "code points [reserved]"
-	} else if (name == "version") {oUsed = oCodesMinVersion; logStr = "unicode [min version if reduced]"
-	} else if (name == "tofu") {
-		oUsed = oCodesTofu
-		logStr = "fingerprint [tofu] | "+ testParams +" | "+ mini_sha1(oCodesTofu)
-	} else if (name == "fp") {
-		oUsed = oCodesMeasure
-		logStr = "fingerprint [sizes] | "+ testParams +" | "+ mini_sha1(oCodesMeasure)
+	if (type == "everything") {oUsed = oCodePoints; logStr = "everything"
+	} else if (type == "wiki") {oUsed = oWiki; logStr = "wikipedia links"
+	} else if (type == "ranges") {oUsed = oRanges; logStr = "ranges used"
+	} else if (type == "ignore") {oUsed = oCodesIgnore; logStr = "code points [ignored]"
+	} else if (type == "max") {oUsed = oCodesMax; logStr = "code points [max used]"
+	} else if (type == "min") {oUsed = oCodesMin; logStr = "code points [min used if reduced]"
+	} else if (type == "reduce") {oUsed = oCodesReduce; logStr = "code points [reduce]"
+	} else if (type == "reserved") {oUsed = oCodesReserved; logStr = "code points [reserved]"
+	} else if (type == "version") {oUsed = oCodesMinVersion; logStr = "unicode [min version if reduced]"
+	} else if (type == "fptofudata") {
+		oUsed = fpTofuData; logStr = "tofu fingerprint | "+ testParams
+	} else if (type == "fpsizedata") {
+		oUsed = fpSizeData; logStr = "size fingerprint | "+ testParams
+	} else if (type == "fptofuscript") {
+		oUsed = fpTofuData[name]; logStr="tofu fingerprint ["+ name +"] | "+ testParams
+	} else if (type == "fpsizescript") {
+		oUsed = fpSizeData[name]; logStr="size fingerprint ["+ name +"] | "+ testParams
 	}
 	if (logStr !== "") {
-		console.log(logStr+"\n", prettyPrintArray(oUsed))
+		console.log(logStr+"\n", prettyObjectArray(oUsed))
 		return
 	}
-	// array
-	if (name == "partial") {
+
+	// arrays
+	if (type == "partial") {
 		aPartial.sort()
-		console.log("partial ranges\n", aPartial.join(", "))
+		logStr = "partial ranges\n  " + aPartial.join("\n  ")
+	} else if (type == "fptofu") {
+		logStr = "tofu fingerprint | "+ testParams +" | "+ mini_sha1(fpTofuHashes.join()) +"\n  "+ fpTofuHashes.join("\n  ")
+	} else if (type == "fpsize") {
+		logStr = "size fingerprint | "+ testParams +" | "+ mini_sha1(fpSizeHashes.join()) +"\n  "+ fpSizeHashes.join("\n  ")
 	}
+	if (logStr !== "") {
+		console.log(logStr)
+		return
+	}
+
 	// pretty
-	if (name == "tofusize") {
+	if (type == "tofusize") {
 		logStr = "calculated tofu sizes [greatest occurence, results]"
 		logStr += "\n==========="
 		const names = Object.keys(oTofuSizes).sort()
@@ -998,8 +1017,8 @@ function logConsole(name) {
 		return
 	}
 	// script
-	if (oCodePoints[name] !== undefined) {
-		console.log(name, prettyPrintArray(oCodePoints[name]))
+	if (oCodePoints[type] !== undefined) {
+		console.log(type, prettyObjectArray(oCodePoints[type]))
 	}
 }
 
@@ -1257,10 +1276,13 @@ function test() {
 
 	let aRed = [], aOrange = [], aYellow = []
 	// reset FP objects
-	oCodesTofu = {}
-	oCodesMeasure = {}
-	let oTempTofu = {}
-	let oTempMeasure = {}
+	fpTofuData = {}
+	fpTofuHashes = []
+	fpSizeData = {}
+	fpSizeHashes = []
+	
+	let oTempTofu = {},
+		oTempSize = {}
 
 	aBlocks.forEach(function(data) {
 		let name = data[0].toLowerCase()
@@ -1275,7 +1297,7 @@ function test() {
 			let displayA = []
 			let displayB = []
 			let aTofu = []
-			let aMeasure = []
+			let aSize = []
 			let anchorColor = "no_color", nameColor = s12, partial = ""
 			let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
 			maxDepth = maxDepth * 1
@@ -1290,7 +1312,7 @@ function test() {
 				let character = String.fromCodePoint(codesA[i])
 				slot.textContent = character
 				let w = span.offsetWidth, h = div.offsetHeight
-				aMeasure.push(codesA[i] +": "+ w + " x " + h)
+				aSize.push(codesA[i] +": "+ w + " x " + h)
 				if (w +" x "+ h == tofuSize) {
 					aTofu.push(codesA[i])
 					displayA.push(sb + character + sc)
@@ -1300,12 +1322,14 @@ function test() {
 				}
 				//console.log(w +" x "+ h)
 			}
-			// track total tofu
+			// track tofu
 			if (aTofu.length) {
 				countTofu += aTofu.length
-				oTempTofu[name] = aTofu
+				let tofuHash = mini_sha1(aTofu.join())
+				oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
 			}
-			oTempMeasure[name] = aMeasure
+			let sizeHash = mini_sha1(aSize.join())
+			oTempSize[name] = {"hash": sizeHash, "data": aSize}
 
 			// remainder
 			if (codesB.length > 0) {
@@ -1337,7 +1361,15 @@ function test() {
 			}
 			// display
 			aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
-			aVisual.push(oScriptHeader[name][0])
+
+			// append per script tofu + size clickables
+			let fpBtnTofu = ""
+			if (aTofu.length) {
+				fpBtnTofu = " &nbsp <span class='btn14 btnc mono' onClick='logConsole(`fptofuscript`,`"+ name +"`)'>[tofu]</span>"
+			}
+			let fpBtnSize = " &nbsp <span class='btn12 btnc mono' onClick='logConsole(`fpsizescript`,`"+ name +"`)'>[sizes]</span>"
+
+			aVisual.push(oScriptHeader[name][0] + fpBtnTofu + fpBtnSize)
 			let strStart = "", strEnd = ""
 			if (oEnlarge[name] !== undefined) {
 				strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
@@ -1351,24 +1383,33 @@ function test() {
 	// sort tofu codes
 	const names = Object.keys(oTempTofu).sort()
 	for (const k of names) {
-		oCodesTofu[k] = oTempTofu[k]
+		fpTofuData[k] = oTempTofu[k]
+		fpTofuHashes.push(k +": "+ oTempTofu[k]["hash"])
 	}
 	// sort measurements
-	const namesM = Object.keys(oTempMeasure).sort()
+	const namesM = Object.keys(oTempSize).sort()
 	for (const m of namesM) {
-		oCodesMeasure[m] = oTempMeasure[m]
+		fpSizeData[m] = oTempSize[m]
+		fpSizeHashes.push(m +": "+ oTempSize[m]["hash"])
 	}
+//console.debug(fpTofuData)
+//console.debug(fpTofuHashes)
+//console.debug(mini_sha1(fpTofuHashes.join()))
+//console.debug(fpSizeData)
+//console.debug(fpSizeHashes)
+//console.debug(mini_sha1(fpSizeHashes.join()))
 
 	// FP lines
-	let tofuFP = mini_sha1(oCodesTofu)
-		+ " <span class='btn12 btnc' onClick='logConsole(`tofu`)'>["+ countTofu +"]</span> "
+	let tofuFP = mini_sha1(fpTofuHashes.join())
+		+ " <span class='btn12 btnc' onClick='logConsole(`fptofu`)'>[summary]</span>"
+		+ " <span class='btn12 btnc' onClick='logConsole(`fptofudata`)'>["+ countTofu +"]</span> "
 		+ Math.round((countTofu/countTested) * 100) + "%"
 	if (countTofu == 0) {
 		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
 	}
-
-	let sizeFP = mini_sha1(oCodesMeasure)
-		+ " <span class='btn12 btnc' onClick='logConsole(`fp`)'>["+ countTested +"]</span>"
+	let sizeFP = mini_sha1(fpSizeHashes.join())
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpsize`)'>[summary]</span>"
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpsizedata`)'>["+ countTested +"]</span> "
 	let tofuSizeBtn = " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
 
 	let strFP = "<span class='mono'>"
