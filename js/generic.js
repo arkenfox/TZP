@@ -617,7 +617,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 101) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 102) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -627,7 +627,10 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
-		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) return 101 // 1728999
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
+			if (Array(1).includes()) return 102 // 1767541: regression FF99
+			return 101 // 1728999
+		}
 		if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
 		try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
@@ -1280,7 +1283,7 @@ function countJS(filename) {
 	if (jsFiles.length == 1 && isFFyes.length) {
 		// skip if not likely to be Firefox
 		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
-			// ^ do if 94+ but not 95+
+			// ^ do if 94+ but not 95+ fast path
 			try {
 				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
 					// but not if 96+
