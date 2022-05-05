@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 46, maxVer = 101, oTZP = {}, oSuccess = {}
+	let countTZP = 0, expectTZP = 47, maxVer = 102, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -245,6 +245,11 @@ function outputVersion() {
 		// < 60 : 1436659
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
+
+		// 102: 1767541: regression FF99, hence check for v101
+		let t102 = performance.now()
+		let ver102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+		rec(102, 102, "1767541", ver102, performance.now()-t102)
 
 		// 101: 1728999
 		let t101 = performance.now(), ver101 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction"))
