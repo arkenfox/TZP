@@ -1157,18 +1157,15 @@ function generate() {
 					for (let j = 0; j < aSuffix.length; j++) {
 						let string = "0x"+ prefix + range[i] + aSuffix[j]
 						let match = ""+ range[i] + aSuffix[j]
-						let separator
 						if (ignore.includes(match)) {
 							aCodesIgnore.push(string)
 						} else if (!nonassigned.includes(match)) {
 							aCodesMax.push(string)
-							separator = (aCharsMax.length ? " " : "")
-							aCharsMax.push(separator + String.fromCodePoint(string))
+							aCharsMax.push(String.fromCodePoint(string))
 							// 
 							if (!reduce.includes(match)) {
 								aCodesMin.push(string)
-								separator = (aCharsMin.length ? " " : "")
-								aCharsMin.push(separator + String.fromCodePoint(string))
+								aCharsMin.push(String.fromCodePoint(string))
 							} else {
 								aCodesReduce.push(string)
 							}
@@ -1349,6 +1346,9 @@ function test() {
 			countTested += codesA.length
 
 			// test
+			let aSpanBlock = []
+			let spacer = aSpacer.includes(name) ? " " : ""
+
 			for (let i=0; i < codesA.length; i++) {
 				let character = String.fromCodePoint(codesA[i])
 				slot.textContent = character
@@ -1368,15 +1368,24 @@ function test() {
 				let cSpan = span.getClientRects()
 				let whClient = cSpan[0].width +" x "+ cDiv[0].height
 				aSizeClient.push(codesA[i] +": "+ whClient)
-				let separator = (i == 0 ? "" : " ")
 				if (whClient == tofuSize) {
 					aTofu.push(codesA[i])
-					displayA.push(sb + separator + character + sc)
+					aSpanBlock.push(character)
 				} else {
+					if (aSpanBlock.length) {
+						displayA.push(sb + aSpanBlock.join(" "+ spacer) + sc)
+						aSpanBlock = [] // reset
+					}
 					// ToDo: can we reduce any false positives: check a different style?
-					displayA.push(separator + character)
+					displayA.push(character)
 				}
 			}
+			// add any final aSpanBlock
+			if (aSpanBlock.length) {displayA.push(sb + aSpanBlock.join(" "+ spacer) + sc)}
+			//if (name == "kannada") {
+			//	console.debug(name, displayA)
+			//}
+
 			// track tofu
 			if (aTofu.length) {
 				countTofu += aTofu.length
@@ -1395,7 +1404,6 @@ function test() {
 				}
 			}
 			// colors
-			let spacer = aSpacer.includes(name) ? " " : ""
 			let percent = (aTofu.length/maxDepth) * 100
 			let strA = spacer + displayA.join(" "+ spacer)
 			if (percent >= 80) {
