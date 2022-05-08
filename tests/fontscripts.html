@@ -800,7 +800,7 @@ let aBlocks = [
 ]
 
 let aBlocksTemp = [
-	["testing chromium min vs max"],
+	["testing blink min vs max"],
 	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
 		["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
 		"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
@@ -1413,7 +1413,7 @@ function test() {
 			if (codesB.length > 0) {
 				for (let i=0; i < codesB.length; i++) {
 					let character = String.fromCodePoint(codesB[i])
-					displayB.push(" "+ character)
+					displayB.push(character)
 				}
 			}
 			// colors
