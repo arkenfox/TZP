@@ -23,12 +23,10 @@
 		.groupleft {float: left;}
 		.groupright {float: right;}
 		.script {line-height: 2.4;}
-
 		nav {
 			position: absolute;
 			padding: 15px;
 			background-color: #161b22;
-			<!--min-width: 150px;-->
 		}
 		nav div {
 			white-space: nowrap;
@@ -71,8 +69,9 @@
 				<span class="btn12 btnfirst" onClick="run('test')">[ run ]</span>
 				<span class="btn12 btn" onClick="toggleitem(`navmenu`)" style="position: relative;">
 					[ list &#9660 ]
-					<nav id="navmenu" class="hidden">
-						<span class="no_color">console.log<br><br></span>
+					<nav id="navmenu" class="hidden" style="cursor: auto;">
+						<span class="no_color" style="font-size: 11px;">logs to console<br><br></span>
+						<span style="cursor: pointer;">
 						<div onClick="logConsole('partial')">ranges [partial]</div>
 						<div onClick="logConsole('ranges')">ranges [used]</div>
 						<div onClick="logConsole('reserved')">code points [reserved]</div>
@@ -83,6 +82,7 @@
 						<div onClick="logConsole('version')">unicode [min versions]</div>
 						<div onClick="logConsole('wiki')">wiki links</div>
 						<div onClick="logConsole('everything')">everything</div>
+						</span>
 					</nav>
 				</span>
 				<span class="s12 mono"> depth
@@ -828,12 +828,19 @@ let oCodesMin = {},
 	countCodesMax,
 	testParams = ""
 
-// FP objects
-let fpTofu = {},
-		fpTofuData = {},
+let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"]
+
+// FP
+let fpTofuData = {},
 		fpTofuHashes = [],
-		fpSizeData = {},
-		fpSizeHashes = []
+		// size
+		fpSizeDataOffset = {},
+		fpSizeDataBounding = {},
+		fpSizeDataClient = {},
+		// hashes
+		fpSizeHashesOffset = [],
+		fpSizeHashesBounding = [],
+		fpSizeHashesClient = []
 
 // everything
 let oCodePoints = {},
@@ -908,7 +915,6 @@ function get_tofu_size() {
 			'0x2D7E', // tifinagh
 			*/
 		]
-		let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"]
 		let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 		let res = {}
 		styles.forEach(function(style) {res[style] = []})
@@ -919,8 +925,11 @@ function get_tofu_size() {
 			styles.forEach(function(style) {
 				slot.style.fontFamily = style
 				slot.textContent = String.fromCodePoint(codepoint)
-				let w = span.offsetWidth, h = div.offsetHeight
-				res[style].push(w +" x "+ h)
+				// use clientrects (more precision): w=span, h=div
+				let cDiv = div.getClientRects()
+				let cSpan = span.getClientRects()
+				let whClient = cSpan[0].width +" x "+ cDiv[0].height
+				res[style].push(whClient)
 			})
 		})
 		// reset slot so we don't end up with unwanted scrollbars
@@ -975,17 +984,30 @@ function logConsole(type, name) {
 	} else if (type == "reduce") {oUsed = oCodesReduce; logStr = "code points [reduce]"
 	} else if (type == "reserved") {oUsed = oCodesReserved; logStr = "code points [reserved]"
 	} else if (type == "version") {oUsed = oCodesMinVersion; logStr = "unicode [min version if reduced]"
-	} else if (type == "fptofudata") {
-		oUsed = fpTofuData; logStr = "tofu fingerprint | "+ testParams
-	} else if (type == "fpsizedata") {
-		oUsed = fpSizeData; logStr = "size fingerprint | "+ testParams
+	} else if (type == "fpTofuData") {
+		oUsed = fpTofuData; logStr = "tofu | "+ testParams
+	} else if (type == "fpSizeDataOffset") {
+		oUsed = fpSizeDataOffset; logStr = "offset | "+ testParams
+	} else if (type == "fpSizeDataBounding") {
+		oUsed = fpSizeDataBounding; logStr = "getBounding | "+ testParams
+	} else if (type == "fpSizeDataClient") {
+		oUsed = fpSizeDataClient; logStr = "getClientRects | "+ testParams
 	} else if (type == "fptofuscript") {
-		oUsed = fpTofuData[name]; logStr="tofu fingerprint ["+ name +"] | "+ testParams
-	} else if (type == "fpsizescript") {
-		oUsed = fpSizeData[name]; logStr="size fingerprint ["+ name +"] | "+ testParams
+		oUsed = fpTofuData[name]; logStr="tofu ["+ name +"] | "+ testParams
 	}
 	if (logStr !== "") {
 		console.log(logStr+"\n", prettyObjectArray(oUsed))
+		return
+	}
+	// combine
+	if (type == "fpsizescript") {
+		logStr="sizes ["+ name +"] | "+ testParams
+		console.log(
+			logStr+"\n",
+			"offset\n", prettyObjectArray(fpSizeDataOffset[name]),
+			"\ngetBounding\n", prettyObjectArray(fpSizeDataBounding[name]),
+			"\ngetClientRects\n", prettyObjectArray(fpSizeDataClient[name])
+		)
 		return
 	}
 
@@ -994,9 +1016,13 @@ function logConsole(type, name) {
 		aPartial.sort()
 		logStr = "partial ranges\n  " + aPartial.join("\n  ")
 	} else if (type == "fptofu") {
-		logStr = "tofu fingerprint | "+ testParams +" | "+ mini_sha1(fpTofuHashes.join()) +"\n  "+ fpTofuHashes.join("\n  ")
-	} else if (type == "fpsize") {
-		logStr = "size fingerprint | "+ testParams +" | "+ mini_sha1(fpSizeHashes.join()) +"\n  "+ fpSizeHashes.join("\n  ")
+		logStr = "tofu fingerprint | "+ testParams +" | "+ mini(fpTofuHashes.join()) +"\n  "+ fpTofuHashes.join("\n  ")
+	} else if (type == "fpSizeOffset") {
+		logStr = "offset | "+ testParams +" | "+ mini(fpSizeHashesOffset.join()) +"\n  "+ fpSizeHashesOffset.join("\n  ")
+	} else if (type == "fpSizeBounding") {
+		logStr = "getBounding | "+ testParams +" | "+ mini(fpSizeHashesBounding.join()) +"\n  "+ fpSizeHashesBounding.join("\n  ")
+	} else if (type == "fpSizeClient") {
+		logStr = "getClientRects | "+ testParams +" | "+ mini(fpSizeHashesClient.join()) +"\n  "+ fpSizeHashesClient.join("\n  ")
 	}
 	if (logStr !== "") {
 		console.log(logStr)
@@ -1045,10 +1071,12 @@ function generate() {
 		})
 		// FP lines
 		let strFP = "<span class='mono'>"
-			+ s12 + ("tofu size: ").padStart(18) + sc +"<br>"
-			+ s12 + ("parameters: ").padStart(18) + sc +"<br>"
-			+ s12 +"tofu fingerprint: "+ sc +"<br>"
-			+ s12 +"size fingerprint: "+ sc +"</span><br>"
+			+ s12 + "tofu size: ".padStart(16) + sc +"<br>"
+			+ s12 + "parameters: ".padStart(16) + sc +"<br>"
+			+ s12 +"tofu: ".padStart(16) + sc +"<br>"
+			+ s12 +"offset: ".padStart(16) + sc +"<br>"
+			+ s12 +"getBounding: ".padStart(16) + sc +"<br>"
+			+ s12 +"getClientRects: ".padStart(16) + sc +"</span><br>"
 		aDisplay.push(strFP)
 		aDisplayMax.push(strFP)
 
@@ -1129,15 +1157,18 @@ function generate() {
 					for (let j = 0; j < aSuffix.length; j++) {
 						let string = "0x"+ prefix + range[i] + aSuffix[j]
 						let match = ""+ range[i] + aSuffix[j]
+						let separator
 						if (ignore.includes(match)) {
 							aCodesIgnore.push(string)
 						} else if (!nonassigned.includes(match)) {
 							aCodesMax.push(string)
-							aCharsMax.push(String.fromCodePoint(string))
+							separator = (aCharsMax.length ? " " : "")
+							aCharsMax.push(separator + String.fromCodePoint(string))
 							// 
 							if (!reduce.includes(match)) {
 								aCodesMin.push(string)
-								aCharsMin.push(String.fromCodePoint(string))
+								separator = (aCharsMin.length ? " " : "")
+								aCharsMin.push(separator + String.fromCodePoint(string))
 							} else {
 								aCodesReduce.push(string)
 							}
@@ -1275,21 +1306,31 @@ function test() {
 	if (testDepth == "ALL") {testDepth = 800}
 
 	let aRed = [], aOrange = [], aYellow = []
-	// reset FP objects
+
+	// reset tofu
 	fpTofuData = {}
 	fpTofuHashes = []
-	fpSizeData = {}
-	fpSizeHashes = []
+	// reset size data
+	fpSizeDataOffset = {}
+	fpSizeDataBounding = {}
+	fpSizeDataClient = {}
+	// reset size hashes
+	fpSizeHashesOffset = []
+	fpSizeHashesBounding = []
+	fpSizeHashesClient = []
 	
 	let oTempTofu = {},
-		oTempSize = {}
+		oTempSizeOffset = {},
+		oTempSizeBounding = {},
+		oTempSizeClient = {}
 
 	aBlocks.forEach(function(data) {
 		let name = data[0].toLowerCase()
 		let anchor = strip(name)
 		if (data[1] == undefined) {
 			let firstItem = aBlocks[0].join()
-			aLegend.push((name.toLowerCase() == firstItem.toLowerCase() ? "": "<br>") +"<a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
+			aLegend.push((name.toLowerCase() == firstItem.toLowerCase() ? "": "<br>")
+				+"<a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
 		} else {
 			let codes = dom.allassigned.checked ? oCodePoints[name]["max used"] : oCodePoints[name]["min used"]
 			if (oCodePoints[name]["min used"] == undefined) {codes = oCodePoints[name]["max used"]}
@@ -1297,7 +1338,7 @@ function test() {
 			let displayA = []
 			let displayB = []
 			let aTofu = []
-			let aSize = []
+			let aSizeOffset = [], aSizeBounding = [], aSizeClient = []
 			let anchorColor = "no_color", nameColor = s12, partial = ""
 			let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
 			maxDepth = maxDepth * 1
@@ -1311,31 +1352,46 @@ function test() {
 			for (let i=0; i < codesA.length; i++) {
 				let character = String.fromCodePoint(codesA[i])
 				slot.textContent = character
-				let w = span.offsetWidth, h = div.offsetHeight
-				aSize.push(codesA[i] +": "+ w + " x " + h)
-				if (w +" x "+ h == tofuSize) {
+
+				// offset: w=span h=div
+				let whOffset = span.offsetWidth + " x " + div.offsetHeight
+				aSizeOffset.push(codesA[i] +": "+ whOffset)
+
+				// bounding: w=div h=span
+				let bDiv = div.getBoundingClientRect()
+				let bSpan = span.getBoundingClientRect()
+				let whBounding = bSpan.width +" x "+ bDiv.height
+				aSizeBounding.push(codesA[i] +": "+ whBounding)
+
+				// client: w=span, h=div
+				let cDiv = div.getClientRects()
+				let cSpan = span.getClientRects()
+				let whClient = cSpan[0].width +" x "+ cDiv[0].height
+				aSizeClient.push(codesA[i] +": "+ whClient)
+				let separator = (i == 0 ? "" : " ")
+				if (whClient == tofuSize) {
 					aTofu.push(codesA[i])
-					displayA.push(sb + character + sc)
+					displayA.push(sb + separator + character + sc)
 				} else {
 					// ToDo: can we reduce any false positives: check a different style?
-					displayA.push(character)
+					displayA.push(separator + character)
 				}
-				//console.log(w +" x "+ h)
 			}
 			// track tofu
 			if (aTofu.length) {
 				countTofu += aTofu.length
-				let tofuHash = mini_sha1(aTofu.join())
+				let tofuHash = mini(aTofu.join())
 				oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
 			}
-			let sizeHash = mini_sha1(aSize.join())
-			oTempSize[name] = {"hash": sizeHash, "data": aSize}
+			oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
+			oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
+			oTempSizeClient[name] = {"hash": mini(aSizeClient.join()), "data": aSizeClient}
 
 			// remainder
 			if (codesB.length > 0) {
 				for (let i=0; i < codesB.length; i++) {
 					let character = String.fromCodePoint(codesB[i])
-					displayB.push(character)
+					displayB.push(" "+ character)
 				}
 			}
 			// colors
@@ -1380,43 +1436,55 @@ function test() {
 	})
 	// reset slot so we don't end up with unwanted scrollbars
 	slot.textContent = ""
-	// sort tofu codes
-	const names = Object.keys(oTempTofu).sort()
-	for (const k of names) {
-		fpTofuData[k] = oTempTofu[k]
-		fpTofuHashes.push(k +": "+ oTempTofu[k]["hash"])
+	// sort tofu
+	const namesTofu = Object.keys(oTempTofu).sort()
+	for (const nameT of namesTofu) {
+		fpTofuData[nameT] = oTempTofu[nameT]
+		fpTofuHashes.push(nameT +": "+ oTempTofu[nameT]["hash"])
 	}
-	// sort measurements
-	const namesM = Object.keys(oTempSize).sort()
-	for (const m of namesM) {
-		fpSizeData[m] = oTempSize[m]
-		fpSizeHashes.push(m +": "+ oTempSize[m]["hash"])
+	// sort sizes
+	const namesOffset = Object.keys(oTempSizeOffset).sort()
+	for (const nameO of namesOffset) {
+		fpSizeDataOffset[nameO] = oTempSizeOffset[nameO]
+		fpSizeHashesOffset.push(nameO +": "+ oTempSizeOffset[nameO]["hash"])
 	}
-//console.debug(fpTofuData)
-//console.debug(fpTofuHashes)
-//console.debug(mini_sha1(fpTofuHashes.join()))
-//console.debug(fpSizeData)
-//console.debug(fpSizeHashes)
-//console.debug(mini_sha1(fpSizeHashes.join()))
+	const namesBounding = Object.keys(oTempSizeBounding).sort()
+	for (const nameB of namesBounding) {
+		fpSizeDataBounding[nameB] = oTempSizeBounding[nameB]
+		fpSizeHashesBounding.push(nameB +": "+ oTempSizeBounding[nameB]["hash"])
+	}
+	const namesClient = Object.keys(oTempSizeClient).sort()
+	for (const nameC of namesClient) {
+		fpSizeDataClient[nameC] = oTempSizeClient[nameC]
+		fpSizeHashesClient.push(nameC +": "+ oTempSizeClient[nameC]["hash"])
+	}
 
 	// FP lines
-	let tofuFP = mini_sha1(fpTofuHashes.join())
+	let tofuSizeBtn = " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
+	let tofuFP = mini(fpTofuHashes.join())
 		+ " <span class='btn12 btnc' onClick='logConsole(`fptofu`)'>[summary]</span>"
-		+ " <span class='btn12 btnc' onClick='logConsole(`fptofudata`)'>["+ countTofu +"]</span> "
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpTofuData`)'>["+ countTofu +"]</span> "
 		+ Math.round((countTofu/countTested) * 100) + "%"
 	if (countTofu == 0) {
 		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
 	}
-	let sizeFP = mini_sha1(fpSizeHashes.join())
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpsize`)'>[summary]</span>"
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpsizedata`)'>["+ countTested +"]</span> "
-	let tofuSizeBtn = " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
+	let sizeFPOffset = mini(fpSizeHashesOffset.join())
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeOffset`)'>[summary]</span>"
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataOffset`)'>["+ countTested +"]</span> "
+	let sizeFPBounding = mini(fpSizeHashesBounding.join())
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeBounding`)'>[summary]</span>"
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataBounding`)'>["+ countTested +"]</span> "
+	let sizeFPClient = mini(fpSizeHashesClient.join())
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeClient`)'>[summary]</span>"
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataClient`)'>["+ countTested +"]</span> "
 
 	let strFP = "<span class='mono'>"
-		+ s12 + ("tofu size: ").padStart(18) + sc + tofuSize + tofuSizeBtn + "<br>"
-		+ s12 + ("parameters: ").padStart(18) + sc + testParams +"<br>"
-		+ s12 +"tofu fingerprint: "+ sc + tofuFP +"<br>"
-		+ s12 +"size fingerprint: "+ sc + sizeFP +"</span><br>"
+		+ s12 +"tofu size: ".padStart(16) + sc + tofuSize + tofuSizeBtn + "<br>"
+		+ s12 +"parameters: ".padStart(16) + sc + testParams +"<br>"
+		+ s12 +"tofu: ".padStart(16) + sc + tofuFP +"<br>"
+		+ s12 +"offset: ".padStart(16) + sc + sizeFPOffset +"<br>"
+		+ s12 +"getBounding: ".padStart(16) + sc + sizeFPBounding +"<br>"
+		+ s12 +"getClientRects: ".padStart(16) + sc + sizeFPClient +"</span><br>"
 
 	// display visuals
 	aVisual.push("<a name='end'></a>")
