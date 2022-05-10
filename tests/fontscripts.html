@@ -799,117 +799,17 @@ let aBlocks = [
 	["thanaa", "07", [8,9,"A","B"], -14, , "Thaana_(Unicode_block)"],
 ]
 
-let aBlocksBlink = [
-	["testing blink min vs max"],
-	["unified canadian aboriginal syllabics", 1,
-		[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",
-		50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",
-		60,61,62,63,64,65,66,67], , , "Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)",
-		[
-			"400","677","678","679","67A","67B","67C","67D","67E","67F", // 5.2
-		], uv3x0
-	],
-	["bengali", "09", [8,9,"A","B","C","D","E","F"], -1,
-		["84","8D","8E","91","92","A9","B1","B3","B4","B5","BA","BB","C5","C6","C9","CA","CF",
-		"D0","D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DE","E4","E5"], "Bengali_(Unicode_block)",
-		[
-			"FB", // 5.2
-			"80", // 7.0
-			"FC","FD", // 10.0
-			"FE", // 11.0
-		], uv4x1
-	],
-	["devanagari", "09", [0,1,2,3,4,5,6,7], , , "Devanagari_(Unicode_block)",
-		[
-			"71","72", // 5.1
-			"00","4E","55","79","7A", // 5.2
-			"3A","3B","4F","56","57","73","74","75","76","77", // 6.0
-			"78" // 7.0
-		], uv5x0
-	],
-	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
-		["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
-		"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
-		"Kannada_(Unicode_block)",
-		[
-			"81", // 7.0
-			"80", // 9.0
-			"84", // 11.0
-			"DD", // 14.0
-		], uv5x0
-	],
-	["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
-		["0D","11","45","49","50","51","52","53","64","65"],
-		"Malayalam_(Unicode_block)",
-		[
-			"29","3A","4E", // 6.0
-			"01", // 7.0
-			"5F", // 8.0
-			"4F","54","55","56","58","59","5A","5B","5C","5D","5E","76","77","78", // 9.0
-			"00","3B","3C", // 10.0
-			"04", // 13.0
-		], uv5x1,
-		["4E"] // ignore: letter dot reph
-	],
-	["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
-		["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
-		"E0","E1","E2","E3","E4","E5","F0","F1"],
-		"Sinhala_(Unicode_block)",
-		[
-			"E6","E7","E8","E9","EA","EB","EC","ED","EE","EF", // 7.0
-			"81", // 13.0
-		], uv3x0
-	],
-	["telugu", "0C", [0,1,2,3,4,5,6,7], 0,
-		["0D","11","29","3A","3B","45","49","4E","4F",
-		"50","51","52","53","54","57","5B","5C","5E","5F",
-		"64","65","70","71","72","73","74","75","76"], "Telugu_(Unicode_block)",
-		[
-			"00","34", // 7.0
-			"5A", // 8.0
-			"04", // 11.0
-			"77", // 12.0
-			"3C","5D", // 14.0
-		], uv5x1
-	],
-	["miscellaneous mathematical symbols-a", 27, ["C","D","E"], , ,
-		"Miscellaneous_Mathematical_Symbols-A",
-		[
-			"C0","C1","C2","C3","C4","C5","C6", // 4.1
-			"CA","C7","C8","C9", // 5.0
-			"CC","EC","ED","EE","EF", // 5.1
-			"CE","CF", // 6.0
-			"CB","CD", // 6.1
-		], uv3x2
-	],
-	["superscripts and subscripts", 20, [7,8,9], -3, ["72","73","8F"],
-		"Superscripts_and_Subscripts_(Unicode_block)",
-		[
-			"95","96","97","98","99","9A","9B","9C", // 6.0
-		], uv4x1
-	],
-]
-
-let oBlinkRender = {
+let aTest = [
 	// these are the "reduce" code points in some scripts
 	// known scripts where if the additonal code point is not supported, subsequent code points may not render
 	// lets test each in a div or new line against the first min set
-	"unified canadian aboriginal syllabics": ["0x1400", "0x1677", "0x1678", "0x1679", "0x167A", "0x167B", "0x167C", "0x167D", "0x167E", "0x167F"],
-	"bengali": ["0x0980", "0x09FB", "0x09FC", "0x09FD", "0x09FE"],
-	"devanagari": ["0x0900", "0x093A", "0x093B", "0x094E", "0x094F", "0x0955", "0x0956", "0x0957", "0x0971", "0x0972", "0x0973", "0x0974", "0x0975", "0x0976", "0x0977", "0x0978", "0x0979", "0x097A"],
-	"kannada": ["0x0C80", "0x0C81", "0x0C84", "0x0CDD"],
-	"malayalam": ["0x0D00", "0x0D01", "0x0D04", "0x0D29", "0x0D3A", "0x0D3B", "0x0D3C", "0x0D4F", "0x0D54", "0x0D55", "0x0D56", "0x0D58", "0x0D59", "0x0D5A", "0x0D5B", "0x0D5C", "0x0D5D", "0x0D5E", "0x0D5F", "0x0D76", "0x0D77", "0x0D78"],
-	"sinhala": ["0x0D81", "0x0DE6", "0x0DE7", "0x0DE8", "0x0DE9", "0x0DEA", "0x0DEB", "0x0DEC", "0x0DED", "0x0DEE", "0x0DEF"],
-	"telugu": ["0x0C00", "0x0C04", "0x0C34", "0x0C3C", "0x0C5A", "0x0C5D", "0x0C77"],
-	"miscellaneous mathematical symbols-a": ["0x27C0", "0x27C1", "0x27C2", "0x27C3", "0x27C4", "0x27C5", "0x27C6", "0x27C7", "0x27C8", "0x27C9", "0x27CA", "0x27CB", "0x27CC", "0x27CD", "0x27CE", "0x27CF", "0x27EC", "0x27ED", "0x27EE", "0x27EF"],
-	"superscripts and subscripts": ["0x2095", "0x2096", "0x2097", "0x2098", "0x2099", "0x209A", "0x209B", "0x209C"],
-}
-
-let isBlinkRender = false
-if (isEngine !== "blink") {isBlinkRender = false}
-if (isBlinkRender) {
-	aBlocks = aBlocksBlink
-}
+	"unified canadian aboriginal syllabics",
+	"bengali","devanagari","kannada","malayalam","sinhala","telugu",
+	"miscellaneous mathematical symbols-a","superscripts and subscripts",
+	// or use this for any small set tests
+	// e.g. aTest = aSpacer
+]
+let isTest = false
 
 s2 = s2.trim()
 s3 = s3.trim()
@@ -939,6 +839,8 @@ let oCodesMin = {},
 	countCodesMin,
 	countCodesMax,
 	testParams = ""
+
+let ZWNJ = String.fromCodePoint("0x200C") +" "
 
 let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"]
 
@@ -1234,117 +1136,105 @@ function generate() {
 				oGroupHeader[grouptitle] = [groupStr]
 			} else {
 				name = data[0].toLowerCase()
-				oTempData[name] = {}
-				let prefix = data[1],
-					range = data[2],
-					remove = data[3],
-					nonassigned = data[4],
-					url = data[5],
-					reduce = data[6],
-					version = data[7],
-					ignore = data[8]
-				// fixup vars
-				if (nonassigned == undefined) {nonassigned = []}
-				if (reduce == undefined) {reduce = []}
-				if (ignore == undefined) {ignore = []}
-				if (remove == undefined) {remove = 0}
-				// range info
-				let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
-				oTempData[name]["range"] = rangeString
-				// partial
-				let isPartial = aPartial.includes(name)
-				oTempData[name]["partial"] = isPartial
-				// legend
-				aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
+				let go = !isTest
+				if (isTest && aTest.includes(name)) {go = true}
+				if (go) {
+					oTempData[name] = {}
+					let prefix = data[1],
+						range = data[2],
+						remove = data[3],
+						nonassigned = data[4],
+						url = data[5],
+						reduce = data[6],
+						version = data[7],
+						ignore = data[8]
+					// fixup vars
+					if (nonassigned == undefined) {nonassigned = []}
+					if (reduce == undefined) {reduce = []}
+					if (ignore == undefined) {ignore = []}
+					if (remove == undefined) {remove = 0}
+					// range info
+					let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
+					oTempData[name]["range"] = rangeString
+					// partial
+					let isPartial = aPartial.includes(name)
+					oTempData[name]["partial"] = isPartial
+					// legend
+					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
 
-				let aCodesMin = [],
-					aCodesMax = [],
-					aCodesReduce = [],
-					aCodesReserved = [],
-					aCodesIgnore = [],
-					aCharsMin = [],
-					aCharsMax = []
+					let aCodesMin = [],
+						aCodesMax = [],
+						aCodesReduce = [],
+						aCodesReserved = [],
+						aCodesIgnore = [],
+						aCharsMin = [],
+						aCharsMax = []
 
-				// loop
-				for (let i = 0; i < range.length; i++) {
-					for (let j = 0; j < aSuffix.length; j++) {
-						let string = "0x"+ prefix + range[i] + aSuffix[j]
-						let match = ""+ range[i] + aSuffix[j]
-						if (ignore.includes(match)) {
-							aCodesIgnore.push(string)
-						} else if (!nonassigned.includes(match)) {
-							aCodesMax.push(string)
-							aCharsMax.push(String.fromCodePoint(string))
-							if (!reduce.includes(match)) {
-								aCodesMin.push(string)
-								aCharsMin.push(String.fromCodePoint(string))
+					// loop
+					for (let i = 0; i < range.length; i++) {
+						for (let j = 0; j < aSuffix.length; j++) {
+							let string = "0x"+ prefix + range[i] + aSuffix[j]
+							let match = ""+ range[i] + aSuffix[j]
+							if (ignore.includes(match)) {
+								aCodesIgnore.push(string)
+							} else if (!nonassigned.includes(match)) {
+								aCodesMax.push(string)
+								aCharsMax.push(String.fromCodePoint(string))
+								if (!reduce.includes(match)) {
+									aCodesMin.push(string)
+									aCharsMin.push(String.fromCodePoint(string))
+								} else {
+									aCodesReduce.push(string)
+								}
 							} else {
-								aCodesReduce.push(string)
+								aCodesReserved.push(string)
 							}
-						} else {
-							aCodesReserved.push(string)
 						}
 					}
-				}
-				// trim results
-				if (remove < 0) {
-					// add trimmed items to reserved
-					let trimReserved = aCodesMin.slice(aCodesMin.length + remove, aCodesMin.length)
-					aCodesReserved = aCodesReserved.concat(trimReserved)
-					// slice results
-					aCodesMin = aCodesMin.slice(0, remove)
-					aCodesMax = aCodesMax.slice(0, remove)
-					aCharsMin = aCharsMin.slice(0, remove)
-					aCharsMax = aCharsMax.slice(0, remove)
-				}
+					// trim results
+					if (remove < 0) {
+						// add trimmed items to reserved
+						let trimReserved = aCodesMin.slice(aCodesMin.length + remove, aCodesMin.length)
+						aCodesReserved = aCodesReserved.concat(trimReserved)
+						// slice results
+						aCodesMin = aCodesMin.slice(0, remove)
+						aCodesMax = aCodesMax.slice(0, remove)
+						aCharsMin = aCharsMin.slice(0, remove)
+						aCharsMax = aCharsMax.slice(0, remove)
+					}
 
-				// record
-				if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
-				if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
-				oTempData[name]["max used"] = aCodesMax
-				if (aCodesReduce.length) {
-					oTempData[name]["reduce"] = aCodesReduce
-					oTempData[name]["min used"] = aCodesMin
-				}
-				if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
-				if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
+					// record
+					if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
+					if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
+					oTempData[name]["max used"] = aCodesMax
+					if (aCodesReduce.length) {
+						oTempData[name]["reduce"] = aCodesReduce
+						oTempData[name]["min used"] = aCodesMin
+					}
+					if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
+					if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
 
-				// counts
-				countCodesMin += aCodesMin.length
-				countCodesMax += aCodesMax.length
+					// counts
+					countCodesMin += aCodesMin.length
+					countCodesMax += aCodesMax.length
 
-				// build clean displays
-				let nameColor = s12
-				let scriptheader = build_title(name, anchor, nameColor, grouptitle, aCodesMin.length, aCodesMax.length)
-				oScriptHeader[name] = [scriptheader]
-				aDisplay.push(scriptheader)
-				aDisplayMax.push(scriptheader)
-				let strStart = "", strEnd = ""
-				if (oEnlarge[name] !== undefined) {
-					strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
-					strEnd = sc
+					// build clean displays
+					let nameColor = s12
+					let scriptheader = build_title(name, anchor, nameColor, grouptitle, aCodesMin.length, aCodesMax.length)
+					oScriptHeader[name] = [scriptheader]
+					aDisplay.push(scriptheader)
+					aDisplayMax.push(scriptheader)
+					let strStart = "", strEnd = ""
+					if (oEnlarge[name] !== undefined) {
+						strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
+						strEnd = sc
+					}
+					let spacer = aSpacer.includes(name) ? " " : ""
+					aDisplay.push(strStart + spacer + aCharsMin.join(ZWNJ + spacer) + strEnd +"<br>")
+					aDisplayMax.push(strStart + spacer + aCharsMax.join(ZWNJ + spacer) + strEnd +"<br>")
+					// reset grouptitle
+					grouptitle = ""
 				}
-				let spacer = aSpacer.includes(name) ? " " : ""
-				aDisplay.push(strStart + spacer + aCharsMin.join(" "+ spacer) + strEnd +"<br>")
-				aDisplayMax.push(strStart + spacer + aCharsMax.join(" " + spacer) + strEnd +"<br>")
-				// test blink
-				if (isBlinkRender && oBlinkRender[name] !== undefined) {
-					let aTestCodes = oBlinkRender[name]
-					let aDisplayTest = []
-					let minCode = aCodesMin[0]
-					aTestCodes.forEach(function(code) {
-						aDisplayTest.push(
-							code +": &nbsp "+ String.fromCodePoint(code) +" &nbsp "
-							+ String.fromCodePoint(minCode)
-							+"<br><ul><li> &nbsp " + String.fromCodePoint(code) +" &nbsp </li>"
-							+"<li> &nbsp " + String.fromCodePoint(minCode) +" &nbsp </li></ul>"
-						)
-					})
-					aDisplay.push(aDisplayTest.join("<br>") +"<br>")
-					aDisplayMax.push(aDisplayTest.join("<br>") +"<br>")
-				}
-				// reset grouptitle
-				grouptitle = ""
 			}
 		})
 		aDisplay.push("<a name='end'></a>")
@@ -1457,114 +1347,127 @@ function test() {
 			aLegend.push((name.toLowerCase() == firstItem.toLowerCase() ? "": "<br>")
 				+"<a class='blue' href='#"+ anchor +"group'>"+ name.toUpperCase() +"</a><br>")
 		} else {
-			let codes = dom.allassigned.checked ? oCodePoints[name]["max used"] : oCodePoints[name]["min used"]
-			if (oCodePoints[name]["min used"] == undefined) {codes = oCodePoints[name]["max used"]}
+			let go = !isTest
+			if (isTest && aTest.includes(name)) {go = true}
+			if (go) {
+				let codes = dom.allassigned.checked ? oCodePoints[name]["max used"] : oCodePoints[name]["min used"]
+				if (oCodePoints[name]["min used"] == undefined) {codes = oCodePoints[name]["max used"]}
 
-			let displayA = []
-			let displayB = []
-			let aTofu = []
-			let aSizeOffset = [], aSizeBounding = [], aSizeClient = []
-			let anchorColor = "no_color", nameColor = s12, partial = ""
-			let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
-			maxDepth = maxDepth * 1
+				let displayA = []
+				let aTofu = []
+				let aSizeOffset = [], aSizeBounding = [], aSizeClient = []
+				let anchorColor = "no_color", nameColor = s12, partial = ""
+				let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
+				maxDepth = maxDepth * 1
 
-			// split into test and remainder
-			let codesA = codes.slice(0, maxDepth)
-			let codesB = codes.slice(maxDepth, codes.length)
-			countTested += codesA.length
+				// split into test and remainder
+				let codesA = codes.slice(0, maxDepth)
+				let codesB = codes.slice(maxDepth, codes.length)
+				countTested += codesA.length
 
-			// test
-			let aSpanBlock = []
-			let spacer = aSpacer.includes(name) ? " " : ""
+				// test
+				let aSpanBlock = [], aNonSpanBlock = []
+				let spacer = aSpacer.includes(name) ? " " : ""
+				for (let i=0; i < codesA.length; i++) {
+					let character = String.fromCodePoint(codesA[i])
+					slot.textContent = character
 
-			for (let i=0; i < codesA.length; i++) {
-				let character = String.fromCodePoint(codesA[i])
-				slot.textContent = character
+					// offset: w=span h=div
+					let whOffset = span.offsetWidth + " x " + div.offsetHeight
+					aSizeOffset.push(codesA[i] +": "+ whOffset)
 
-				// offset: w=span h=div
-				let whOffset = span.offsetWidth + " x " + div.offsetHeight
-				aSizeOffset.push(codesA[i] +": "+ whOffset)
+					// bounding: w=div h=span
+					let bDiv = div.getBoundingClientRect()
+					let bSpan = span.getBoundingClientRect()
+					let whBounding = bSpan.width +" x "+ bDiv.height
+					aSizeBounding.push(codesA[i] +": "+ whBounding)
 
-				// bounding: w=div h=span
-				let bDiv = div.getBoundingClientRect()
-				let bSpan = span.getBoundingClientRect()
-				let whBounding = bSpan.width +" x "+ bDiv.height
-				aSizeBounding.push(codesA[i] +": "+ whBounding)
-
-				// client: w=span, h=div
-				let cDiv = div.getClientRects()
-				let cSpan = span.getClientRects()
-				let whClient = cSpan[0].width +" x "+ cDiv[0].height
-				aSizeClient.push(codesA[i] +": "+ whClient)
-				if (whClient == tofuSize) {
-					aTofu.push(codesA[i])
-					aSpanBlock.push(character)
-				} else {
-					if (aSpanBlock.length) {
-						displayA.push(sb + aSpanBlock.join(" "+ spacer) + sc)
-						aSpanBlock = [] // reset
+					// client: w=span, h=div
+					let cDiv = div.getClientRects()
+					let cSpan = span.getClientRects()
+					let whClient = cSpan[0].width +" x "+ cDiv[0].height
+					aSizeClient.push(codesA[i] +": "+ whClient)
+					if (whClient == tofuSize) {
+						aTofu.push(codesA[i])
+						aSpanBlock.push(character)
+						if (aNonSpanBlock.length) {
+							displayA.push(spacer + aNonSpanBlock.join(ZWNJ + spacer) + ZWNJ)
+							aNonSpanBlock = [] // reset
+						}
+					} else {
+						if (aSpanBlock.length) {
+							displayA.push(sb + spacer + aSpanBlock.join(ZWNJ + spacer) + sc + ZWNJ)
+							aSpanBlock = [] // reset
+						}
+						aNonSpanBlock.push(character)
 					}
-					// ToDo: can we reduce any false positives: check a different style?
-					displayA.push(character)
 				}
-			}
-			// add any final aSpanBlock
-			if (aSpanBlock.length) {displayA.push(sb + aSpanBlock.join(" "+ spacer) + sc)}
-
-			// track tofu
-			if (aTofu.length) {
-				countTofu += aTofu.length
-				let tofuHash = mini(aTofu.join())
-				oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
-			}
-			oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
-			oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
-			oTempSizeClient[name] = {"hash": mini(aSizeClient.join()), "data": aSizeClient}
-
-			// remainder
-			if (codesB.length > 0) {
-				for (let i=0; i < codesB.length; i++) {
-					let character = String.fromCodePoint(codesB[i])
-					displayB.push(character)
+				// add final bit
+				if (aSpanBlock.length) {
+					displayA.push(sb + spacer + aSpanBlock.join(ZWNJ + spacer) + sc + ZWNJ)
 				}
-			}
-			// colors
-			let percent = (aTofu.length/maxDepth) * 100
-			let strA = spacer + displayA.join(" "+ spacer)
-			if (percent >= 80) {
-				anchorColor = "sb"
-				nameColor = sb
-				if (percent !== 100) {partial = " ["+ aTofu.length +"/" + maxDepth +"]"}
-				aRed.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>" + sb + partial + sc)
-			} else if (percent >= 20) {
-				nameColor = s2
-				partial = s2 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
-				strA = strA.replace(/bad/g, "s2")
-				aOrange.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
-			} else if (percent > 0) {
-				//anchorColor = "s4" // too noisy, just let the count be colored
-				nameColor = s4
-				partial = s4 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
-				strA = strA.replace(/bad/g, "s4")
-				aYellow.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
-			}
-			// display
-			aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
+				if (aNonSpanBlock.length) {
+					displayA.push(spacer + aNonSpanBlock.join(ZWNJ + spacer) + ZWNJ)
+				}
 
-			// append per script tofu + size clickables
-			let fpBtnTofu = ""
-			if (aTofu.length) {
-				fpBtnTofu = " &nbsp <span class='btn14 btnc mono' onClick='logConsole(`fptofuscript`,`"+ name +"`)'>[tofu]</span>"
-			}
-			let fpBtnSize = " &nbsp <span class='btn12 btnc mono' onClick='logConsole(`fpsizescript`,`"+ name +"`)'>[sizes]</span>"
+				// track tofu
+				if (aTofu.length) {
+					countTofu += aTofu.length
+					let tofuHash = mini(aTofu.join())
+					oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
+				}
+				oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
+				oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
+				oTempSizeClient[name] = {"hash": mini(aSizeClient.join()), "data": aSizeClient}
 
-			aVisual.push(oScriptHeader[name][0] + fpBtnTofu + fpBtnSize)
-			let strStart = "", strEnd = ""
-			if (oEnlarge[name] !== undefined) {
-				strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
-				strEnd = sc
+				// remainder
+				if (codesB.length > 0) {
+					let aRemainderBlock = []
+					for (let i=0; i < codesB.length; i++) {
+						let character = String.fromCodePoint(codesB[i])
+						aRemainderBlock.push(character)
+					}
+					displayA.push(spacer + aRemainderBlock.join(ZWNJ + spacer) + ZWNJ)
+				}
+
+				// colors
+				let percent = (aTofu.length/maxDepth) * 100
+				let strA = displayA.join("")
+				if (percent >= 80) {
+					anchorColor = "sb"
+					nameColor = sb
+					if (percent !== 100) {partial = " ["+ aTofu.length +"/" + maxDepth +"]"}
+					aRed.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>" + sb + partial + sc)
+				} else if (percent >= 20) {
+					nameColor = s2
+					partial = s2 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
+					strA = strA.replace(/bad/g, "s2")
+					aOrange.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
+				} else if (percent > 0) {
+					//anchorColor = "s4" // too noisy, just let the count be colored
+					nameColor = s4
+					partial = s4 +" ["+ aTofu.length +"/" + maxDepth +"]"+ sc
+					strA = strA.replace(/bad/g, "s4")
+					aYellow.push("<a class='no_color' href='#"+ anchor +"'>"+ name +"</a>"+ partial)
+				}
+				// display
+				aLegend.push("<li><a class='"+ anchorColor +"' href='#"+ anchor +"'>"+ name +"</a>" + partial +"</li>")
+
+				// append per script tofu + size clickables
+				let fpBtnTofu = ""
+				if (aTofu.length) {
+					fpBtnTofu = " &nbsp <span class='btn14 btnc mono' onClick='logConsole(`fptofuscript`,`"+ name +"`)'>[tofu]</span>"
+				}
+				let fpBtnSize = " &nbsp <span class='btn12 btnc mono' onClick='logConsole(`fpsizescript`,`"+ name +"`)'>[sizes]</span>"
+
+				aVisual.push(oScriptHeader[name][0] + fpBtnTofu + fpBtnSize)
+				let strStart = "", strEnd = ""
+				if (oEnlarge[name] !== undefined) {
+					strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
+					strEnd = sc
+				}
+				aVisual.push(strStart + strA + strEnd +"<br>")
 			}
-			aVisual.push(strStart + strA + " "+ spacer + displayB.join(" "+ spacer) + strEnd +"<br>")
 		}
 	})
 	// reset slot so we don't end up with unwanted scrollbars
