@@ -1139,8 +1139,9 @@ function get_scr_scrollbar(runtype) {
 				eWidth = (100 - dom.eScroll.scrollWidth)
 				eWidth = cleanFn(eWidth)
 				// lies
+				let eMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
 				if ("number" !== typeof eWidth) {eLies = true
-				} else if (eWidth < 0) {eLies = true}
+				} else if (eWidth < eMin) {eLies = true}
 				eValue = eLies ? zLIE : eWidth
 				if (eLies) {
 					eWidth = soL + eWidth + scC
