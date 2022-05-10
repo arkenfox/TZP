@@ -2136,7 +2136,6 @@ function run_os() {
 			}
 		}
 		if (bolEvent) {
-			console.debug("resize event")
 			window.addEventListener("resize", get_scr_resize)
 		}
 	}
