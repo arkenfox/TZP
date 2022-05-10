@@ -923,7 +923,7 @@ function get_mimetypes(num, title) {
 					}
 				}
 				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
-				if (isVer > 98) { // allow non-FF to have the same
+				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
 					// 1720353: hardcoded mimeTypes = 33c916c1a0e2e4e72047e6e142a7b43c6b1eba22
 					if (sha1(res.join()) == "33c916c1a0e2e4e72047e6e142a7b43c6b1eba22") {
