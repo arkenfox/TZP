@@ -19,6 +19,7 @@ function outputCanvas() {
 		known1 = ["bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf",
 			"05f24fe5cfa497c8bebf1749188ab5fbd2b7c188", // 
 			"c05807c783bd281ee83d13807426023390c7d66a", // 117efe05
+			"11c56ff211c9b45716522c3b67c327c634e00f0b", // android
 		]
 	} else if (isEngine == "webkit") {
 		known1 = ["24c8af813fb7001ded7e81e125e9d3237e9400d5"]
