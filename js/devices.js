@@ -266,6 +266,7 @@ function get_media_devices() {
 					return
 				}
 				// reset BS: assume lies
+dom.debugC.innerHTML = devices +"<br>" + typeof devices
 				devicesBS = true
 				let isArray = false
 				if (runMDV) {
