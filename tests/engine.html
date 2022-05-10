@@ -1464,6 +1464,9 @@ let	isVer = "",
 
 function get_is95() {
 	return new Promise(resolve => {
+		if (!isFF) {
+			return resolve()
+		}
 		// pre-compute slow 95 test
 		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
 			// ^ do if 94+ but not 95+ fast path
@@ -1485,6 +1488,9 @@ function get_isVer() {
 	return new Promise(resolve => {
 		// set webkit
 		if ("chrome" in window || isFF) {} else {isWebkit = true}
+		if (!isFF) {
+			return resolve()
+		}
 		// set goanna
 		if (isEngine == "gecko") {
 			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
@@ -1510,10 +1516,7 @@ function get_isVer() {
 				is55 = true
 			}
 		} catch(e) {}
-		// skip !isFF
-		if (!isFF) {
-			return resolve()
-		}
+
 		isVer = cascade()
 		return resolve()
 		function cascade() {
