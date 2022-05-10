@@ -265,9 +265,8 @@ function get_media_devices() {
 					finish(e.name, e.name)
 					return
 				}
-				// reset BS: assume lies
-dom.debugC.innerHTML = devices +"<br>" + typeof devices
-				devicesBS = true
+				// reset BS
+				devicesBS = false
 				let isArray = false
 				if (runMDV) {
 					devices = lstMDV[intMDV]
@@ -278,8 +277,18 @@ dom.debugC.innerHTML = devices +"<br>" + typeof devices
 					isArray = true
 					if (isFF && devices+"" == "[object MediaDeviceInfo]") {devicesBS = false
 					} else if (isEngine == "blink") {
-						if (devices +"" == "[object InputDeviceInfo],[object MediaDeviceInfo]") {devicesBS = false}
-					} else {devicesBS = false} // webkit who cares
+						let strDevices = devices +""
+						let aSplit = strDevices.split(",")
+						for (let i=0; i < aSplit.length; i++) {
+							if (i == aSplit.length - 1) {
+								console.debug(aSplit[i], "final")
+								if (aSplit[i] !== "[object MediaDeviceInfo]") {devicesBS = false}
+							} else {
+								console.debug(aSplit[i], i, aSplit.length)
+								if (aSplit[i] !== "[object InputDeviceInfo]") {devicesBS = false}
+							}
+						}
+					}
 				} else {
 					devices = cleanFn(devices)
 				}
