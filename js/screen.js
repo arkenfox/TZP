@@ -2121,8 +2121,24 @@ function run_os() {
 			setTimeout(function(){get_scr_resize()}, 100)
 		}
 	} else {
-		// desktop
-		window.addEventListener("resize", get_scr_resize)
+		// FF desktop
+		let bolEvent = true
+		// weed out non-FF mobile for now
+		if (!isFF) {
+			let ua
+			try {
+				ua = navigator["userAgent"]
+			} catch(e) {}
+			ua = cleanFn(ua).toLowerCase()
+			if (ua.includes("android")) {bolEvent = false
+			} else if (ua.includes("mobile")) {bolEvent = false
+			} else if (ua.includes("iphone")) {bolEvent = false
+			}
+		}
+		if (bolEvent) {
+			console.debug("resize event")
+			window.addEventListener("resize", get_scr_resize)
+		}
 	}
 }
 
