@@ -60,6 +60,7 @@ function get_iframe_props() {
 		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
 		"Error","GeolocationCoordinates","GeolocationPosition","GeolocationPositionError","TypeError","console",
 		"MimeTypeArray","Infinity","MimeType","NaN","Number","Plugin","isFinite","isNaN","parseFloat","parseInt",
+		"HTMLMediaElement","IdleDeadline","MediaCapabilities","Set",
 	]
 
 	try {
