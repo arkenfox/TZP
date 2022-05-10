@@ -281,10 +281,8 @@ function get_media_devices() {
 						let aSplit = strDevices.split(",")
 						for (let i=0; i < aSplit.length; i++) {
 							if (i == aSplit.length - 1) {
-								console.debug(aSplit[i], "final")
 								if (aSplit[i] !== "[object MediaDeviceInfo]") {devicesBS = false}
 							} else {
-								console.debug(aSplit[i], i, aSplit.length)
 								if (aSplit[i] !== "[object InputDeviceInfo]") {devicesBS = false}
 							}
 						}
