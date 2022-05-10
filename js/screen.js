@@ -1140,6 +1140,7 @@ function get_scr_scrollbar(runtype) {
 				eWidth = cleanFn(eWidth)
 				// lies
 				let eMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
+dom.debugC.innerHTML = eWidth +" "+ eMin + " "+ (eWidth < eMin)
 				if ("number" !== typeof eWidth) {eLies = true
 				} else if (eWidth < eMin) {eLies = true}
 				eValue = eLies ? zLIE : eWidth
