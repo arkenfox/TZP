@@ -7,8 +7,6 @@ let nxtESR = 102
 let logSData = [], tSD // logScreen
 
 // sims
-let intDEP = 0, lstDEP = ["24",zB0,24, 41,1,7.2,undefined,zU,"null",{}]
-let intCLR = 0, lstCLR = [ "8",zB0, 8, 61,1,7.2,undefined,zU,"null",{}]
 let intWFS = 0, lstWFS = ["true","false",zB0,0,1,-1,true,false]
 let intUAI = 0
 
@@ -607,119 +605,6 @@ function return_mm_dpi(type, denominator) {
 	return r
 }
 
-function get_scr_color() {
-	let res = [], r1
-
-	// pixelDepth: 418986: FF41+ RFP
-	function get_pixeldepth(name) {
-		let isLies = false
-		try {
-			if (runSE) {runDEP = false; abc = def
-			} else if (runSL) {runDEP = false; r1 = "24"
-			} else if (runDEP) {r1 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r1)
-			} else {r1 = screen.pixelDepth
-			}
-		} catch(e) {
-			r1 = zB0; log_error("screen: pixelDepth", e.name, e.message)
-		}
-		r1 = cleanFn(r1)
-		// lies
-		if (r1 !== zB0) {
-			if (typeof r1 !== "number") {isLies = true
-			} else if (!Number.isInteger(r1)) {isLies = true
-			} else if (r1 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
-		}
-		let v1 = r1
-		// record lies but not blocks
-		if (isLies && r1 !== zB0) {
-			v1 = zLIE; r1 = soL + r1 + scC
-			if (gRun) {gKnown.push(name)}
-		}
-		if (runDEP) {console.log(" - returned", v1)}
-		dom.pixelDepth.innerHTML = r1
-		res.push("pixelDepth:"+ v1)
-	}
-
-	// colorDepth: 418986: FF41+ RFP
-	function get_colordepth(name) {
-		let isLies = false, r2
-		try {
-			if (runSE) {runDEP = false; abc = def
-			} else if (runSL) {runDEP = false; r2 = "24"
-			} else if (runDEP) {r2 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r2)
-			} else {r2 = screen.colorDepth
-			}
-		} catch(e) {
-			r2 = zB0; log_error("screen: colorDepth", e.name, e.message)
-		}
-		r2 = cleanFn(r2)
-		// lies
-		if (r2 !== zB0) {
-			if (typeof r2 !== "number") {isLies = true
-			} else if (!Number.isInteger(r2)) {isLies = true
-			} else if (r2 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
-		}
-		let v2 = r2
-		// record
-		if (isLies && r2 !== zB0) {
-			v2 = zLIE; r2 = soL + r2 + scC
-			if (gRun) {gKnown.push(name)}
-		}
-		if (runDEP) {console.log(" - returned", v2)}
-		dom.colorDepth.innerHTML = r2 + (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
-		res.push("colorDepth:"+ v2)
-	}
-
-	// mm color: 418986: FF41+ RFP
-	function get_mm_color(name) {
-		let isLies = false, r3, isBypass = false
-		let v3 = getElementProp("#cssC","content",":after")
-		try {
-			if (runSE) {runCLR = false; abc = def
-			} else if (runSL) {runCLR = false; r3 = "8"
-			} else if (runCLR) {r3 = lstCLR[intCLR]; console.log("SIM #"+ intCLR, name, r3)
-			} else {
-				r3 = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
-					return i
-				})()
-			}
-		} catch(e) {
-			r3 = zB0; log_error("screen: matchmedia_color", e.name, e.message)
-		}
-		r3 = cleanFn(r3)
-		// bypass
-		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
-		// lies
-		if (r3 !== zB0) {
-			if (typeof r3 !== "number") {isLies = true
-			} else if (!Number.isInteger(r3)) {isLies = true
-			} else if (r3 < 2) {isLies = true}
-		}
-		if (!isLies) {v3 = r3 == zB0 ? zB0 : r3} // don't record blocked if no lies
-		// record
-		if (isLies) {
-			// zBO can't get in here unless we can bypass
-			if (!isBypass) {v3 = zLIE}
-			r3 = (isBypass ? soB : soL) + r3 + scC
-			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
-		}
-		if (runCLR) {console.log(" - returned", v3)}
-		dom.mmC.innerHTML = r3 + (r3 === 8 ? rfp_green : rfp_red)
-		res.push("matchmedia_color:"+ v3)
-	}
-
-	// run
-	get_pixeldepth("screen:pixelDepth")
-	get_colordepth("screen:colorDepth")
-	get_mm_color("screen:matchmedia_color")
-	if (runCLR) {intCLR++; intCLR = intCLR % lstCLR.length}
-	if (runDEP) {intDEP++; intDEP = intDEP % lstDEP.length}
-	// return
-	return(res)
-}
-
 function get_scr_dpi_dpr(runtype) {
 	return new Promise(resolve => {
 		// reset
@@ -996,7 +881,7 @@ function get_scr_orientation(runtype) {
 						} else if (i == 1) {if (isFF) {res.push(screen.mozOrientation)} else {res.push(zNS)}
 						} else {res.push(screen.orientation.angle)}
 					} catch(e) {
-						log_error("screen:screen."+ names[i], e.name, e.message)
+						log_error("screen: screen."+ names[i], e.name, e.message)
 						res.push(zB0)
 					}
 				}
@@ -2542,7 +2427,6 @@ function outputScreen() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([
-		get_scr_color(), // static
 		get_scr_resize("screen"), // basically everything else
 	]).then(function(results){
 		results.forEach(function(currentResult) {
