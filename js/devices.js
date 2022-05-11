@@ -9,6 +9,8 @@ let intSNM = 0, lstSNM = [undefined, zU, {}, "null", 5.8, zB0, true, [4], "none"
 let intSNP = 0, lstSNP = [undefined, {}, 5.8,zB0,zU,"true",true,[4],"none",[],"null", null]
 let intMDV = 0, lstMDV = [[],["a","b"],["[object MediaDeviceInfo]"],[{"kind": "audioinput"}, {"kind": "videoinput"}],{}]
 let intMTP = 0, lstMTP = ["0",0,-1,[],[0],[1],["a"],undefined, zU, zB0,"null", null]
+let intDEP = 0, lstDEP = ["24",zB0,24, 41,1,7.2,undefined,zU,"null",{}]
+let intCLR = 0, lstCLR = [ "8",zB0, 8, 61,1,7.2,undefined,zU,"null",{}]
 
 function set_pluginBS() {
 	/* https://github.com/abrahamjuliot/creepjs */
@@ -90,12 +92,149 @@ function set_pluginBS() {
 	if (!isFF) {pluginBS = (pluginLies.length > 1)}
 }
 
-function get_gamepads() {
-	return new Promise(resolve => {
-		let r = (check_navKey("getGamepads") ? zE : zD)
-		dom.gamepads.innerHTML = r
-		return resolve("gamepads:"+ r)
-	})
+function get_device_color() {
+	let res = [], r1
+
+	// pixelDepth: 418986: FF41+ RFP
+	function get_pixeldepth(name) {
+		let isLies = false
+		try {
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r1 = "24"
+			} else if (runDEP) {r1 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r1)
+			} else {r1 = screen.pixelDepth
+			}
+		} catch(e) {
+			r1 = zB0; log_error("devices: pixelDepth", e.name, e.message)
+		}
+		r1 = cleanFn(r1)
+		// lies
+		if (r1 !== zB0) {
+			if (typeof r1 !== "number") {isLies = true
+			} else if (!Number.isInteger(r1)) {isLies = true
+			} else if (r1 < 2) {isLies = true
+			} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
+		}
+		let v1 = r1
+		// record lies but not blocks
+		if (isLies && r1 !== zB0) {
+			v1 = zLIE; r1 = soL + r1 + scC
+			if (gRun) {gKnown.push(name)}
+		}
+		if (runDEP) {console.log(" - returned", v1)}
+		dom.pixelDepth.innerHTML = r1
+		res.push("pixelDepth:"+ v1)
+	}
+
+	// colorDepth: 418986: FF41+ RFP
+	function get_colordepth(name) {
+		let isLies = false, r2
+		try {
+			if (runSE) {runDEP = false; abc = def
+			} else if (runSL) {runDEP = false; r2 = "24"
+			} else if (runDEP) {r2 = lstDEP[intDEP]; console.log("SIM #"+ intDEP, name, r2)
+			} else {r2 = screen.colorDepth
+			}
+		} catch(e) {
+			r2 = zB0; log_error("devices: colorDepth", e.name, e.message)
+		}
+		r2 = cleanFn(r2)
+		// lies
+		if (r2 !== zB0) {
+			if (typeof r2 !== "number") {isLies = true
+			} else if (!Number.isInteger(r2)) {isLies = true
+			} else if (r2 < 2) {isLies = true
+			} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
+		}
+		let v2 = r2
+		// record
+		if (isLies && r2 !== zB0) {
+			v2 = zLIE; r2 = soL + r2 + scC
+			if (gRun) {gKnown.push(name)}
+		}
+		if (runDEP) {console.log(" - returned", v2)}
+		dom.colorDepth.innerHTML = r2 + (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
+		res.push("colorDepth:"+ v2)
+	}
+
+	// mm color: 418986: FF41+ RFP
+	function get_mm_color(name) {
+		let isLies = false, r3, isBypass = false
+		let v3 = getElementProp("#cssC","content",":after")
+		try {
+			if (runSE) {runCLR = false; abc = def
+			} else if (runSL) {runCLR = false; r3 = "8"
+			} else if (runCLR) {r3 = lstCLR[intCLR]; console.log("SIM #"+ intCLR, name, r3)
+			} else {
+				r3 = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
+					return i
+				})()
+			}
+		} catch(e) {
+			r3 = zB0; log_error("devices: matchmedia_color", e.name, e.message)
+		}
+		r3 = cleanFn(r3)
+		// bypass
+		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
+		// lies
+		if (r3 !== zB0) {
+			if (typeof r3 !== "number") {isLies = true
+			} else if (!Number.isInteger(r3)) {isLies = true
+			} else if (r3 < 2) {isLies = true}
+		}
+		if (!isLies) {v3 = r3} // don't record blocked if no lies
+		// record
+		if (isLies) {
+			// zBO can't get in here unless we can bypass
+			if (!isBypass) {v3 = zLIE}
+			r3 = (isBypass ? soB : soL) + r3 + scC
+			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
+		}
+		if (runCLR) {console.log(" - returned", v3)}
+		dom.mmC.innerHTML = r3 + (r3 === 8 ? rfp_green : rfp_red)
+		res.push("matchmedia_color:"+ v3)
+	}
+
+	// color gamut
+	function get_mm_colorgamut(name) {
+		let q = "(color-gamut: "
+		let isLies = false, r4 = zNS, isBypass = false
+		let v4 = getElementProp("#cssCG","content",":after")
+		try {
+			if (runSE) {abc = def
+			} else {
+				if (window.matchMedia(q +"srgb)").matches) {r4 = "srgb"}
+				if (window.matchMedia(q +"p3)").matches) {r4 = "p3"}
+				if (window.matchMedia(q +"rec2020)").matches) {r4 = "rec2020"}
+			}
+		} catch(e) {
+			log_error("devices: matchmedia_color-gamut", e.name, e.message)
+			r4 = zB0
+		}
+		r4 = cleanFn(r4)
+		// bypass
+		if (r4 !== v4 && v4 !== "x") {isBypass = true; isLies = true}
+		if (!isLies) {v4 = r4} // don't record blocked if no lies
+		// record
+		if (isLies) {
+			// zBO can't get in here unless we can bypass
+			if (!isBypass) {v4 = zLIE}
+			r4 = (isBypass ? soB : soL) + r4 + scC
+			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v4)}}
+		}
+		dom.mmCG.innerHTML = r4
+		res.push("matchmedia_color-gamut:"+ v4)
+	}
+
+	// run
+	get_pixeldepth("devices:pixelDepth")
+	get_colordepth("devices:colorDepth")
+	get_mm_color("devices:matchmedia_color")
+	get_mm_colorgamut("devices:matchmedia_color-gamut")
+	if (runCLR) {intCLR++; intCLR = intCLR % lstCLR.length}
+	if (runDEP) {intDEP++; intDEP = intDEP % lstDEP.length}
+	// return
+	return(res)
 }
 
 function get_concurrency() {
@@ -139,6 +278,14 @@ function get_concurrency() {
 		intSNH++; intSNH = intSNH % lstSNH.length
 	}
 	return "hardwareConcurrency:"+ h2
+}
+
+function get_gamepads() {
+	return new Promise(resolve => {
+		let r = (check_navKey("getGamepads") ? zE : zD)
+		dom.gamepads.innerHTML = r
+		return resolve("gamepads:"+ r)
+	})
 }
 
 function get_keyboard() {
@@ -606,8 +753,6 @@ function get_plugins_mimetypes() {
 					} else if (type == "mimeTypes") {notation = (thisMini == "4f23f546" ? rfp_green : rfp_red)}
 				}
 				el.innerHTML = value + btn + notation
-
-
 				return fpValue
 			}
 
@@ -998,16 +1143,15 @@ function get_vr() {
 function outputDevices() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
-
 	// FF returns Flash as a false positive
 	if (!isFF) {
 		set_pluginBS()
 	}
-
 	Promise.all([
 		get_media_devices(),
 		get_speech_engines(),
 		get_speech_rec(),
+		get_device_color(),
 		get_pointer_hover(),
 		get_gamepads(),
 		get_touch(),
