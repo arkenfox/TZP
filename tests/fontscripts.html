@@ -49,7 +49,7 @@
 		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">scripts
-			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-up"><span class="c perf" id="perf">loading ...</span></div>
 			<div class="nav-down"><span class="c perf" id="tofuSize"></span></div></div>
 			</div>
 		</th></tr></thead>
@@ -85,7 +85,7 @@
 						</span>
 					</nav>
 				</span>
-				<span class="s12 mono"> depth
+				<span class="s12 mono" onClick='reset(true, false)'> depth
 					<input type="radio" name="depth" value=20 checked> 20
 					<input type="radio" name="depth" value=50> 50
 					<input type="radio" name="depth" value="ALL"> ALL
@@ -122,13 +122,19 @@
 let aPartial = [
 	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
 	"basic latin", // C0 controls ignored
+	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
+	"latin-1 supplement", // 008x + 009x ignored, control codes
+	"mathematical alphanumeric symbols", // 996 code points
+
+	// partial to also improve perf
+		// all chars in each block seem to be the same size
+	"cjk radicals supplement",
 	"cjk unified ideographs", // 20,992 code points
 	"cjk unified ideographs extension-a", // 6,592 code points
 	"cjk unified ideographs extension-b", // 42,720 code points
-	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
 	"hangul syllables", // 11,172 code points
-	"latin-1 supplement", // 008x + 009x ignored, control codes
-	"mathematical alphanumeric symbols", // 996 code points
+	"kangxi radicals",
+	"katakana",
 	"yi syllables",  // 1,165 code points
 ]
 
@@ -222,7 +228,7 @@ let aBlocks = [
 		], uv4x1
 	],
 	["ethiopic supplement", "13", [8,9], -6, , "Ethiopic_Supplement"],
-	["medefaidrin", "16E", [4,5,6,7,8,9], -5, , "Medefaidrin_(Unicode_block)"],
+	//["medefaidrin", "16E", [4,5,6,7,8,9], -5, , "Medefaidrin_(Unicode_block)"], // noone supports this, reduce overhead/perf
 	["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], "NKo_(Unicode_block)",
 		[
 			"FD","FE","FF", // 11.0
@@ -518,10 +524,10 @@ let aBlocks = [
 	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
 		["00"] // ignore: ID SP
 	],
-	["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"],
-	["cjk unified ideographs", "4E", [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_(Unicode_block)"],
-	["cjk unified ideographs extension-a", 34, [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_Extension_A"],
-	["cjk unified ideographs extension-b", 200, [0,1,2,3,4,5,6,7,8,9], , , "CJK_Unified_Ideographs_Extension_B"],
+	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"], // small partial
+	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"], // small partial
+	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"], // small partial
+	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"], // small partial
 	["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"],
 		"Enclosed_CJK_Letters_and_Months",
 		[
@@ -540,16 +546,16 @@ let aBlocks = [
 		], uv1x1,
 		["5F","60"] // ignore: HCF hangul choseong filler, HJF hangul jungseong filler
 	],
-	["hangul syllables", "AC", [0,1,2,3,4,5,6,7,8,9], , , "Hangul_Syllables"],
+	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"], // small partial
 	["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"],
 	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
-	["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_radical#Kangxi_Radicals_block"],
-	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"],
+	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_radical#Kangxi_Radicals_block"], // small partial
+	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"], // small partial
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
 	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
 	["yi radicals", "A4", [9,"A","B","C"], -9, , "Yi_Radicals"],
-	["yi syllables", "A0", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Yi_Syllables"],
+	["yi syllables", "A0", [0,1,2,3], , , "Yi_Syllables"], // small partial
 
 	// GEORGIAN
 	["georgian"],
@@ -826,6 +832,7 @@ let oCodesMin = {},
 	oCodesReduce = {},
 	oCodesReserved = {},
 	oCodesIgnore = {}, // bidirectional, non-printing, control codes etc
+	oCodesCounts = {},
 	oRanges = {},
 	oWiki = {},
 	oGroupHeader = {},
@@ -836,8 +843,6 @@ let oCodesMin = {},
 	aDisplayMax = [],
 	oTofuSizes = {},
 	tofuSize,
-	countCodesMin,
-	countCodesMax,
 	testParams = ""
 
 let ZWNJ = String.fromCodePoint("0x200C") +" "
@@ -854,7 +859,9 @@ let fpTofuData = {},
 		// hashes
 		fpSizeHashesOffset = [],
 		fpSizeHashesBounding = [],
-		fpSizeHashesClient = []
+		fpSizeHashesClient = [],
+		// unique sizes
+		fpSizeClientUnique = []
 
 // everything
 let oCodePoints = {},
@@ -872,6 +879,15 @@ function toggleitem(item) {
 	} else {
 		el.classList.add("hidden")
 	}
+}
+
+function get_count(prefix) {
+	let name = (dom.allassigned.checked ? "max" : "min")
+		+ document.querySelector('input[name="depth"]:checked').value
+	let value = oCodesCounts[name]
+	let maxValue = oCodesCounts["maxALL"]
+	return prefix + (name == "maxALL" ? "all " : "")
+		+ value + (name == "maxALL" ? "" : " of "+ maxValue) //+" max chars"
 }
 
 function build_title(name, anchor, nameColor, grouptitle, intCodes, intCodesMax) {
@@ -1018,9 +1034,9 @@ function logConsole(type, name) {
 	if (type == "fpsizescript") {
 		logStr="sizes ["+ name +"] | "+ testParams
 		console.log(
-			logStr+"\n",
-			"offset\n", prettyObjectArray(fpSizeDataOffset[name]),
-			"\ngetBounding\n", prettyObjectArray(fpSizeDataBounding[name]),
+			logStr+"\n"+
+			"offset\n", (isOffset ? prettyObjectArray(fpSizeDataOffset[name]) : "n/a"),
+			"\ngetBounding\n", (isBounding ? prettyObjectArray(fpSizeDataBounding[name]) : "n/a"),
 			"\ngetClientRects\n", prettyObjectArray(fpSizeDataClient[name])
 		)
 		return
@@ -1073,10 +1089,7 @@ function generate() {
 	// clean legend
 	// get char counts
 	return new Promise(resolve => {
-		if (oCodesMin["arabic"] !== undefined) {
-			console.debug("already done")
-			return
-		}
+		let t0 = performance.now()
 		aBlocks.forEach(function(data) {
 			let name = data[0].toLowerCase()
 			let anchor = strip(name) +"group"
@@ -1086,25 +1099,24 @@ function generate() {
 		})
 		// FP lines
 		let strFP = "<span class='mono'>"
-			+ s12 + "tofu size: ".padStart(16) + sc +"<br>"
-			+ s12 + "parameters: ".padStart(16) + sc +"<br>"
+			+ s12 + "tofu size: ".padStart(16) + sc +"<span id='runningTofuSize'></span><br>"
+			+ s12 + "parameters: ".padStart(16) + sc +"<span id='runningParameters'></span><br>"
 			+ s12 +"tofu: ".padStart(16) + sc +"<br>"
-			+ s12 +"offset: ".padStart(16) + sc +"<br>"
+			+ s12 +"offset: ".padStart(16) + sc +"<span id='runningStatus'></span><br>"
 			+ s12 +"getBounding: ".padStart(16) + sc +"<br>"
 			+ s12 +"getClientRects: ".padStart(16) + sc +"</span><br>"
 		aDisplay.push(strFP)
 		aDisplayMax.push(strFP)
 
-		countCodesMin = 0
-		countCodesMax = 0
-
-		let t0 = performance.now()
 		let aSuffix = [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]
 		let navIndex = 0,
 			navString ="",
 			navTop = "<a class='blue' href='#" + aBlocks[0][0].toLowerCase() +"group'> &#9650 TOP</a> &nbsp ",
 			navEnd = "<a class='blue' href='#end'> &#9660 END</a></p>",
 			grouptitle = ""
+
+		let aCountsMin = []
+		let aCountsMax = []
 
 		aBlocks.forEach(function(data) {
 			let name = data[0].toLowerCase()
@@ -1206,17 +1218,19 @@ function generate() {
 					// record
 					if (aCodesReserved.length) {oTempData[name]["reserved"] = aCodesReserved}
 					if (aCodesIgnore.length) {oTempData[name]["ignored"] = aCodesIgnore}
+					oTempData[name]["max count"] = aCodesMax.length
 					oTempData[name]["max used"] = aCodesMax
 					if (aCodesReduce.length) {
 						oTempData[name]["reduce"] = aCodesReduce
+						oTempData[name]["min count"] = aCodesMin.length
 						oTempData[name]["min used"] = aCodesMin
 					}
 					if (version !== undefined && version !== "") {oTempData[name]["min version"] = version}
 					if (url !== undefined && url !== "") {oTempData[name]["wiki"] = "https://en.wikipedia.org/wiki/"+ url}
 
 					// counts
-					countCodesMin += aCodesMin.length
-					countCodesMax += aCodesMax.length
+					aCountsMin.push(aCodesMin.length)
+					aCountsMax.push(aCodesMax.length)
 
 					// build clean displays
 					let nameColor = s12
@@ -1239,8 +1253,27 @@ function generate() {
 		})
 		aDisplay.push("<a name='end'></a>")
 		aDisplayMax.push("<a name='end'></a>")
-		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | "
-			+ (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
+
+		// counts
+		let min20 =0, min50=0, minAll=0, max20=0, max50=0, maxAll=0
+		for (let i=0; i < aCountsMin.length; i++) {
+			let minValue = aCountsMin[i],
+				maxValue = aCountsMax[i]
+			min20 += (minValue > 19 ? 20 : minValue)
+			min50 += (minValue > 49 ? 50 : minValue)
+			minAll += minValue
+			max20 += (maxValue > 19 ? 20 : maxValue)
+			max50 += (maxValue > 49 ? 50 : maxValue)
+			maxAll += maxValue
+		}
+		oCodesCounts["min20"] = min20
+		oCodesCounts["min50"] = min50
+		oCodesCounts["minALL"] = minAll
+		oCodesCounts["max20"] = max20
+		oCodesCounts["max50"] = max50
+		oCodesCounts["maxALL"] = maxAll
+		// perf
+		dom.perf.innerHTML = "setup: "+ Math.round(performance.now() - t0) +" ms | " + get_count("test ")
 
 		// sort oTempData => sorted objects
 		const names = Object.keys(oTempData).sort()
@@ -1277,34 +1310,42 @@ function generate() {
 	})
 }
 
-function reset(clear = true) {
+function reset(resetperf = true, resetdisplay = true) {
 	// reset/display everything to make sure all code points have time to hopefully render
-	if (clear) {
-		dom.perf.innerHTML = (dom.allassigned.checked ? countCodesMax : countCodesMin) + " chars"
+	if (resetperf) {
+		dom.perf.innerHTML = get_count("test ")
 	}
-	dom.legend.innerHTML = aLegendClean.join("")
-	dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
-	dom.summary.innerHTML = ""
-	if (!clear) {isRunning = false}
+	if (resetdisplay) {
+		dom.legend.innerHTML = aLegendClean.join("")
+		dom.visual.innerHTML = dom.allassigned.checked ? aDisplayMax.join("<br>") : aDisplay.join("<br>")
+		dom.summary.innerHTML = ""
+	}
+	if (!resetperf) {isRunning = false}
 }
 
 function run() {
 	if (!isRunning) {
 		// we need to retest tofu size in case user zoomed
 		Promise.all([
+			get_tofu_size(),
 			reset(),
-			get_tofu_size()
 		]).then(function(results){
 			isRunning = true
 			dom.perf.innerHTML = "running ..."
+			dom.runningStatus = "running ... "+ get_count("testing ")
+			dom.runningTofuSize.innerHTML = tofuSize + " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
+			let testDepth = document.querySelector('input[name="depth"]:checked').value
+			testParams = (testDepth == "ALL" ? "all" : "up to "+ testDepth)
+				+" | "+ (dom.allassigned.checked ? "max" : "reduced")
+			dom.runningParameters = testParams
 			setTimeout(function() {
-				test()
+				test(testDepth)
 			}, 1)
 		})
 	}
 }
 
-function test() {
+function test(testDepth) {
 	dom.perf.innerHTML = "&nbsp"
 	// vars
 	let aVisual = [],
@@ -1315,11 +1356,7 @@ function test() {
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 	let t0 = performance.now()
 	slot.style.fontFamily = "none"
-	let testDepth = document.querySelector('input[name="depth"]:checked').value
-	testParams = (testDepth == "ALL" ? "all" : "up to "+ testDepth)
-		+" | "+ (dom.allassigned.checked ? "max" : "reduced")
 	if (testDepth == "ALL") {testDepth = 800}
-
 	let aRed = [], aOrange = [], aYellow = []
 
 	// reset tofu
@@ -1333,11 +1370,14 @@ function test() {
 	fpSizeHashesOffset = []
 	fpSizeHashesBounding = []
 	fpSizeHashesClient = []
+	// reset unique sizes
+	fpSizeClientUnique = []
 	
 	let oTempTofu = {},
 		oTempSizeOffset = {},
 		oTempSizeBounding = {},
-		oTempSizeClient = {}
+		oTempSizeClient = {},
+		oTempSizeClientUnique = {}
 
 	aBlocks.forEach(function(data) {
 		let name = data[0].toLowerCase()
@@ -1368,24 +1408,31 @@ function test() {
 				// test
 				let aSpanBlock = [], aNonSpanBlock = []
 				let spacer = aSpacer.includes(name) ? " " : ""
+
 				for (let i=0; i < codesA.length; i++) {
 					let character = String.fromCodePoint(codesA[i])
 					slot.textContent = character
 
 					// offset: w=span h=div
-					let whOffset = span.offsetWidth + " x " + div.offsetHeight
-					aSizeOffset.push(codesA[i] +": "+ whOffset)
+					if (isOffset) {
+						let whOffset = span.offsetWidth + " x " + div.offsetHeight
+						aSizeOffset.push(codesA[i] +": "+ whOffset)
+					}
 
 					// bounding: w=div h=span
-					let bDiv = div.getBoundingClientRect()
-					let bSpan = span.getBoundingClientRect()
-					let whBounding = bSpan.width +" x "+ bDiv.height
-					aSizeBounding.push(codesA[i] +": "+ whBounding)
+					if (isBounding) {
+						let bDiv = div.getBoundingClientRect()
+						let bSpan = span.getBoundingClientRect()
+						let whBounding = bSpan.width +" x "+ bDiv.height
+						aSizeBounding.push(codesA[i] +": "+ whBounding)
+					}
 
 					// client: w=span, h=div
 					let cDiv = div.getClientRects()
 					let cSpan = span.getClientRects()
-					let whClient = cSpan[0].width +" x "+ cDiv[0].height
+					let wClient = cSpan[0].width,
+						hClient = cDiv[0].height
+					let whClient = wClient +" x "+ hClient
 					aSizeClient.push(codesA[i] +": "+ whClient)
 					if (whClient == tofuSize) {
 						aTofu.push(codesA[i])
@@ -1401,6 +1448,14 @@ function test() {
 						}
 						aNonSpanBlock.push(character)
 					}
+					// global unique sizes
+					if (oTempSizeClientUnique[wClient] == undefined) {
+						oTempSizeClientUnique[wClient] = [hClient]
+					} else {
+						oTempSizeClientUnique[wClient].push(hClient)
+					}
+					// ToDo: sizes + count per script
+
 				}
 				// add final bit
 				if (aSpanBlock.length) {
@@ -1416,8 +1471,13 @@ function test() {
 					let tofuHash = mini(aTofu.join())
 					oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
 				}
-				oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
-				oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
+
+				if (isOffset) {
+					oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
+				}
+				if (isBounding) {
+					oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
+				}
 				oTempSizeClient[name] = {"hash": mini(aSizeClient.join()), "data": aSizeClient}
 
 				// remainder
@@ -1479,20 +1539,34 @@ function test() {
 		fpTofuHashes.push(nameT +": "+ oTempTofu[nameT]["hash"])
 	}
 	// sort sizes
-	const namesOffset = Object.keys(oTempSizeOffset).sort()
-	for (const nameO of namesOffset) {
-		fpSizeDataOffset[nameO] = oTempSizeOffset[nameO]
-		fpSizeHashesOffset.push(nameO +": "+ oTempSizeOffset[nameO]["hash"])
+	if (isOffset) {
+		const namesOffset = Object.keys(oTempSizeOffset).sort()
+		for (const nameO of namesOffset) {
+			fpSizeDataOffset[nameO] = oTempSizeOffset[nameO]
+			fpSizeHashesOffset.push(nameO +": "+ oTempSizeOffset[nameO]["hash"])
+		}
 	}
-	const namesBounding = Object.keys(oTempSizeBounding).sort()
-	for (const nameB of namesBounding) {
-		fpSizeDataBounding[nameB] = oTempSizeBounding[nameB]
-		fpSizeHashesBounding.push(nameB +": "+ oTempSizeBounding[nameB]["hash"])
+	if (isBounding) {
+		const namesBounding = Object.keys(oTempSizeBounding).sort()
+		for (const nameB of namesBounding) {
+			fpSizeDataBounding[nameB] = oTempSizeBounding[nameB]
+			fpSizeHashesBounding.push(nameB +": "+ oTempSizeBounding[nameB]["hash"])
+		}
 	}
 	const namesClient = Object.keys(oTempSizeClient).sort()
 	for (const nameC of namesClient) {
 		fpSizeDataClient[nameC] = oTempSizeClient[nameC]
 		fpSizeHashesClient.push(nameC +": "+ oTempSizeClient[nameC]["hash"])
+	}
+	// unique sizes
+	const namesUniqueSizes = Object.keys(oTempSizeClientUnique).sort((a,b) => a-b)
+	for (const nameU of namesUniqueSizes) {
+		let aHeight = oTempSizeClientUnique[nameU]
+		aHeight = aHeight.filter(function(item, position) {return aHeight.indexOf(item) === position})
+		aHeight.sort((a,b) => a-b)
+		aHeight.forEach(function(h) {
+			fpSizeClientUnique.push(nameU +" x " + h)
+		})
 	}
 
 	// FP lines
@@ -1504,15 +1578,23 @@ function test() {
 	if (countTofu == 0) {
 		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
 	}
-	let sizeFPOffset = mini(fpSizeHashesOffset.join())
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeOffset`)'>[summary]</span>"
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataOffset`)'>["+ countTested +"]</span> "
-	let sizeFPBounding = mini(fpSizeHashesBounding.join())
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeBounding`)'>[summary]</span>"
-		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataBounding`)'>["+ countTested +"]</span> "
+
+	let sizeFPOffset = zNA
+	if (isOffset) {
+		sizeFPOffset = mini(fpSizeHashesOffset.join())
+			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeOffset`)'>[summary]</span>"
+			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataOffset`)'>["+ countTested +"]</span> "
+	}
+	let sizeFPBounding = zNA
+	if (isBounding) {
+		sizeFPBounding = mini(fpSizeHashesBounding.join())
+			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeBounding`)'>[summary]</span>"
+			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataBounding`)'>["+ countTested +"]</span> "
+	}
 	let sizeFPClient = mini(fpSizeHashesClient.join())
 		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeClient`)'>[summary]</span>"
 		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataClient`)'>["+ countTested +"]</span> "
+		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataClientUnique`)'>["+ fpSizeClientUnique.length +" sizes]</span> "
 
 	let strFP = "<span class='mono'>"
 		+ s12 +"tofu size: ".padStart(16) + sc + tofuSize + tofuSizeBtn + "<br>"
@@ -1547,19 +1629,28 @@ function test() {
 		+ "SUMMARY</u></b>"+ sc +"<br>"+ aSummary.join("")
 
 	// perf
-	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms | " + get_count("")
 	isRunning = false
 }
 
 //dom.allassigned.checked = true
 let isRunning = true
-Promise.all([
-	get_tofu_size(),
-	generate(),
-]).then(function(){
-	reset(false) // false: leave the generate perf value there
-})
+let isBounding = false
+let isOffset = false
 
+if (isFF) {
+	isBounding = true
+	isOffset = true
+}
+
+setTimeout(function() {
+	Promise.all([
+		get_tofu_size(),
+		generate(),
+	]).then(function(){
+		reset(false) // false: leave the generate perf value there
+	})
+}, 1)
 
 </script>
 </body>
