@@ -181,9 +181,6 @@
 		<tr><td>[css] -moz- | orientation | aspect-ratio | device-aspect-ratio</td>
 			<td><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span></td></tr>
 		<tr><td>[matchMedia] -moz- | orientation | aspect-ratio | device-aspect-ratio</td><td class="c" id="mmO"></tr>
-		<tr><td>[screen] pixel depth | color depth</td>
-			<td><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
-		<tr><td>[css | matchMedia] color</td><td><span id="cssC"></span> | <span class="c" id="mmC"></span></td></tr>
 		<tr><td>dpi</td><td class="c" id="jsDPI"></td ></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
 			&nbsp [css min-resolution] dpi</td><td id="P"></td></tr>
@@ -477,6 +474,10 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</span></div>
 			<span class="c" id="deviceshash"></span></td></tr>
+		<tr><td>[screen] pixel depth | color depth</td>
+			<td><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
+		<tr><td>[css | matchMedia] color</td><td><span id="cssC"></span> | <span class="c" id="mmC"></span></td></tr>
+		<tr><td>[css | matchMedia] color gamut</td><td><span id="cssCG"></span> | <span class="c" id="mmCG"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">dom.gamepad.enabled</span></div>
 			&nbsp gamepads</td><td class="c" id="gamepads"></td></tr>
@@ -841,7 +842,9 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp webassembly</td><td class="c" id="wasm"></td></tr>
-		<tr><td>window.content</td><td class="c" id="wincon"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">dom.window.content.untrusted</span></div>
+			&nbsp window.content</td><td class="c" id="wincon"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.use_components_shim</span></div>
