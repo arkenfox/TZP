@@ -49,7 +49,7 @@
 		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">scripts
-			<div class="nav-up"><span class="c perf" id="perf">loading ...</span></div>
+			<div class="nav-up"><span class="c perf" id="perf">waiting on reflow ...</span></div>
 			<div class="nav-down"><span class="c perf" id="tofuSize"></span></div></div>
 			</div>
 		</th></tr></thead>
@@ -126,15 +126,22 @@ let aPartial = [
 	"latin-1 supplement", // 008x + 009x ignored, control codes
 	"mathematical alphanumeric symbols", // 996 code points
 
-	// partial to also improve perf
-		// all chars in each block seem to be the same size
+	// partial: reduce entropy duplicity
+		// i.e alot of chars are the same measurements: east asian languages
 	"cjk radicals supplement",
+	"enclosed cjk letters and months",
+	"hangul compatibility jamo",
+	"hangul jamo",
+	"kangxi radicals",
+	"hiragana",
+	"katakana",
+
+	// partial! doh! way too big
+		// also east asian and measurments seem to all be the same per script
 	"cjk unified ideographs", // 20,992 code points
 	"cjk unified ideographs extension-a", // 6,592 code points
 	"cjk unified ideographs extension-b", // 42,720 code points
 	"hangul syllables", // 11,172 code points
-	"kangxi radicals",
-	"katakana",
 	"yi syllables",  // 1,165 code points
 ]
 
@@ -524,11 +531,15 @@ let aBlocks = [
 	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
 		["00"] // ignore: ID SP
 	],
-	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"], // small partial
-	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"], // small partial
-	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"], // small partial
-	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"], // small partial
-	["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"],
+	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"], // partial: reduce entropy duplicity
+		// ["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"], // full
+
+	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"],
+	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"],
+	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"],
+
+	["enclosed cjk letters and months", "32", [1,2,4,5,7,"A","C","F"], , ["1F"], // partial: reduce entropy duplicity
+		//["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
 		"Enclosed_CJK_Letters_and_Months",
 		[
 			"1D","1E","50","7C","7D","CC","CD","CE","CF", // 4.0
@@ -537,25 +548,33 @@ let aBlocks = [
 			"FF", // 12.1
 		], uv3x2
 	],
-	["hangul compatibility jamo", 31, [3,4,5,6,7,8], -1, ["30"], "Hangul_Compatibility_Jamo", , ,
+	["hangul compatibility jamo", 31, [3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , , // partial: reduce entropy duplicity
+		// ["hangul compatibility jamo", 31, [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
 		["64"] // ignore: HF
 	],
-	["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)",
+	["hangul jamo", 11, [4,5,"A","B"], , , "Hangul_Jamo_(Unicode_block)", // partial: reduce entropy duplicity
+		// ["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)", // full
 		[
 			"5A","5B","5C","5D","5E","A3","A4","A5","A6","A7","FA","FB","FC","FD","FE","FF", // 5.2
 		], uv1x1,
 		["5F","60"] // ignore: HCF hangul choseong filler, HJF hangul jungseong filler
 	],
-	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"], // small partial
-	["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"],
+	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"],
+
+	["hiragana", 30, [6,7,8,9], , ["97","98"], "Hiragana_(Unicode_block)"], // partial: reduce entropy duplicity
+	// ["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"], // full
+
 	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
-	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_radical#Kangxi_Radicals_block"], // small partial
-	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"], // small partial
+	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_Radicals_(Unicode_block)"],
+
+	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"], // partial: reduce entropy duplicity
+	// ["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
+
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
 	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
 	["yi radicals", "A4", [9,"A","B","C"], -9, , "Yi_Radicals"],
-	["yi syllables", "A0", [0,1,2,3], , , "Yi_Syllables"], // small partial
+	["yi syllables", "A0", [0,1,2,3], , , "Yi_Syllables"],
 
 	// GEORGIAN
 	["georgian"],
