@@ -16,6 +16,11 @@
 @media (display-mode:minimal-ui){#cssDM:after{content:"minimal-ui";}}
 @media (display-mode:portrait){#cssDM:after{content:"portrait";}}
 
+#cssCG:after{content:"not supported";}
+@media (color-gamut:srgb){#cssCG:after{content:"srgb";}}
+@media (color-gamut:p3){#cssCG:after{content:"p3";}}
+@media (color-gamut:rec2020){#cssCG:after{content:"rec2020";}}
+
 @media (color:0){#cssC:after{content:"";}}
 @media (color:1){#cssC:after{content:"1";}}
 @media (color:2){#cssC:after{content:"2";}}
