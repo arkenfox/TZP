@@ -3,7 +3,7 @@
 var varDPR, varDPI, dpi_x, dpi_y
 var uaBS = false
 let isOS64math = ""
-let nxtESR = 102
+let nxtESR = 114
 let logSData = [], tSD // logScreen
 
 // sims
@@ -1584,11 +1584,13 @@ function get_ua_doc() {
 					// RFP ON
 						v = "78.0"
 						if (isVer > 90) {v = "91.0"}
+						if (isVer > 101) {v = 102 +".0"}
 						if (isVer > nxtESR - 1) {v = nxtESR +".0"}
 						v2 = v
 						// only allow v2 as next RFP number IF...
 						if (isVerPlus) {
 							if (isVer == 90) {v2 = "91.0"}
+							if (isVer == 101) {v2 = 102 +".0"}
 							if (isVer == nxtESR - 1) {v2 = nxtESR +".0"}
 						}
 						/* resistfingerprinting/test/browser/browser_navigator.js */
@@ -1632,6 +1634,11 @@ function get_ua_doc() {
 					}
 					// as long as one matches
 					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
+					// trap when RFP fails to get the nextESR
+					if (bs && isRFP && !proxyLies.includes("Navigator.userAgent")) {
+						bs = false
+						dom.luserAgent.innerHTML = sb +"[NEXT RFP ESR VER FAIL] "+ sc + "userAgent"
+					}
 				}
 			}
 			return bs
