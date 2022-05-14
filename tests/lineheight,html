@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>line-height</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 580px;}
+	</style>
+</head>
+<body>
+
+	<div class="offscreen">
+		<div id="measureDiv" class="measure">
+			<div id="lhTest">line height</div>
+		</div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="15%"><col width="70%">
+		<thead><tr><th colspan="2"><div class="nav-title">line-height</div></th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">basic line-height test with different variables
+		</td></tr>
+		<tr>
+			<td><div class="btn-left"><span class="btn15 btn" onClick="run()">[ re-run ]</span></div></td>
+			<td class="c mono" id="results"></td>
+		</tr>
+
+	</table>
+	<br>
+<script>
+'use strict';
+
+sb = sb.trim()
+sg = sg.trim()
+s15 = s15.trim()
+
+function get_lh() {
+
+	let sizetypes = ["pt", "px"]
+	let fontfamilies = [
+		"none",
+		"monospace, 'Courier New'",
+		"'Times New Roman', Times, serif;",
+		"'Arial'",
+	]
+	let sizes = [16,97,203,333,417] //,513,595,709,867]
+	let elLine = dom.lhTest
+	let target = dom.measureDiv
+
+	let display = []
+	let resConsole = []
+
+	sizetypes.forEach(function(sizetype) {
+		display.push(s15 +"<u>"+ sizetype.toUpperCase() +"</u>"+ sc + "<br>")
+		fontfamilies.forEach(function(fontfamily) {
+			dom.lhTest.setAttribute('style', 'font-family:' + fontfamily)
+			let res = [], hasErr = false
+			sizes.forEach(function(size) {
+				target.style.fontSize = size + sizetype
+				try {
+					let elDiv = elLine.getBoundingClientRect()
+					res.push(elDiv.height)
+				} catch(e) {
+					hasErr = true
+					res.push(e.name +": "+ e.message)
+				}
+			})
+			display.push(s15 + fontfamily + sc)
+			// add to display array
+			if (hasErr) {
+				display.push("<ul><li>"+ res[0] +"</li></ul>")
+				resConsole.push(sizetype +": "+ fontfamily +": "+ res[0])
+			} else {
+				let hash = mini(res.join()), values = res.join(", ")
+
+				display.push(
+					"<ul><li>"+ hash +"</li><li>"+ values +"</li></ul>"
+				)
+				resConsole.push(sizetype +": "+ hash +": "+ fontfamily + "\n - "+ values)
+			}
+		})
+	})
+	// reset size to remove horizontal scrollbar
+	try {target.style.fontSize = "16pt"} catch(e) {}
+	// display
+	dom.results.innerHTML = display.join("<br>")
+	console.log(resConsole.join("\n"))
+
+}
+
+
+function run() {
+	dom.results = ""
+	setTimeout(function() {
+		get_lh()
+	}, 170)
+}
+
+get_lh()
+
+
+</script>
+</body>
+</html>
