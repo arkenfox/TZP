@@ -187,3 +187,22 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #tb17 td:first-child {color: var(--test17);}
 #tb18 td:first-child {color: var(--test18);}
 #tb99 td:first-child {color: var(--test99);}
+
+/* line-height */
+.measure {
+	font-size: 16px;
+	font-family: none;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	line-height: normal;
+	text-transform: none;
+	text-align: left;
+	text-decoration: none;
+	text-shadow: none;
+	white-space: nowrap;
+}
+.cssLH {
+	font-family: "Times New Roman", Times, serif;
+	/* font-family: "Meiryo", Times, serif; */
+}
