@@ -32,7 +32,7 @@
 		</td></tr>
 		<tr>
 			<td><div class="btn-left"><span class="btn15 btn" onClick="run()">[ re-run ]</span></div></td>
-			<td class="c mono" id="results"></td>
+			<td class="c mono spaces" id="results"></td>
 		</tr>
 
 	</table>
@@ -42,20 +42,21 @@
 
 sb = sb.trim()
 sg = sg.trim()
+s6 = s6.trim()
 s15 = s15.trim()
 
 function get_lh() {
 
 	let sizetypes = ["pt", "px"]
 	let fontfamilies = [
-		"none",
 		"monospace",
 		"serif",
 		"sans-serif",
 		"cursive",
 		"fantasy",
+		"none",
 		"'Times New Roman'",
-		"Arial",
+		"'Arial'",
 	]
 	let sizes = [13,16,97,203,333,417,513,595,709,811,867,993]
 	let elLine = dom.lhTest
@@ -65,8 +66,11 @@ function get_lh() {
 	let resConsole = []
 
 	sizetypes.forEach(function(sizetype) {
+		let styleHashes = []
+		if (sizetype == "px") {display.push("<br><hr>")}
 		display.push("<b><u>"+ sizetype.toUpperCase() +"</u></b><br>")
-		fontfamilies.forEach(function(fontfamily) {
+		for (let i=0; i < fontfamilies.length; i++) {
+			let fontfamily = fontfamilies[i]
 			dom.lhTest.setAttribute('style', 'font-family:' + fontfamily)
 			let res = [], hasErr = false
 			sizes.forEach(function(size) {
@@ -82,16 +86,20 @@ function get_lh() {
 			display.push(s15 + fontfamily + sc)
 			// add to display array
 			if (hasErr) {
-				display.push(res[0]) +"<br>"
+				display.push(res[0]) //+"<br>"
 				resConsole.push(sizetype +": "+ fontfamily +": "+ res[0])
 			} else {
 				let hash = mini(res.join()), values = res.join(", ")
+				if (i < 5) {styleHashes.push(fontfamily +": " + hash)}
 				display.push(
-					s6 + hash + sc +": " + values +"<br>"
+					"   " + s6 + hash + sc +": " + values // +"<br>"
 				)
 				resConsole.push(sizetype +": "+ hash +": "+ fontfamily + "\n - "+ values)
 			}
-		})
+			if (i == 4) {
+				display.push("<br>    ------- 5 x styles hash: " + s6 + mini(styleHashes.join()) + sc +"<br>")
+			}
+		}
 	})
 	// reset size to remove horizontal scrollbar
 	try {target.style.fontSize = "16pt"} catch(e) {}
