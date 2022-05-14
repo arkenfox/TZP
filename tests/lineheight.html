@@ -61,7 +61,7 @@ function get_lh() {
 	let resConsole = []
 
 	sizetypes.forEach(function(sizetype) {
-		display.push(s15 +"<u>"+ sizetype.toUpperCase() +"</u>"+ sc + "<br>")
+		display.push("<b><u>"+ sizetype.toUpperCase() +"</u></b><br>")
 		fontfamilies.forEach(function(fontfamily) {
 			dom.lhTest.setAttribute('style', 'font-family:' + fontfamily)
 			let res = [], hasErr = false
@@ -78,13 +78,12 @@ function get_lh() {
 			display.push(s15 + fontfamily + sc)
 			// add to display array
 			if (hasErr) {
-				display.push("<ul><li>"+ res[0] +"</li></ul>")
+				display.push(res[0]) +"<br>"
 				resConsole.push(sizetype +": "+ fontfamily +": "+ res[0])
 			} else {
 				let hash = mini(res.join()), values = res.join(", ")
-
 				display.push(
-					"<ul><li>"+ hash +"</li><li>"+ values +"</li></ul>"
+					s6 + hash + sc +": " + values +"<br>"
 				)
 				resConsole.push(sizetype +": "+ hash +": "+ fontfamily + "\n - "+ values)
 			}
