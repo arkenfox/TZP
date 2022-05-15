@@ -174,12 +174,17 @@ function set_fallback_string() {
 		'0x1F100','0x1F200','0x1F300','0x1F600','0x1F650','0x1F680','0x1F700','0x1F780','0x1F800','0x1F900','0x20000',
 		'0x2A700','0x2B740','0x2B820','0x2F800','0xE0000','0xE0100','0xF0000','0x100000']
 
+		let ZWNJ = String.fromCodePoint("0x200C") +" "
+		// why are joining spans with line beaks?
+			// arthur did it to display a list
+
 		// [43] dcf
+		let aCharsA = []
 		for (let i=0; i < fntCode.length; i++) {
-			strA += "</span>\n<span>"+ String.fromCodePoint(fntCode[i])
+			aCharsA.push("<span>"+ String.fromCodePoint(fntCode[i]) + ZWNJ +"</span>")
 		}
-		// [1] fpjs2
-		strA += "</span>\n<span>"+ fntStrA
+		// [1] fpjs2 // do we need this?
+		aCharsA.push("<span>"+ fntStrA +"</span>")
 
 		// [262] arthur : takes a while
 		let getCodePoints = function* () {
@@ -191,13 +196,14 @@ function set_fallback_string() {
 			codePoints[0] = 77
 			return codePoints
 		}
-		// combine
 		if (fntStrB.length == 0) {
 			spawn(function* () {
 				let codePoints = yield getCodePoints()
-				fntStrB = codePoints.map(x => String.fromCodePoint(x)).join("</span>\n<span>")
-				fntStrB += strA
-				return resolve(fntStrB)
+				fntStrB = "<span>"+ codePoints.map(x => String.fromCodePoint(x)).join(ZWNJ +"</span>\n<span>") + ZWNJ +"</span>"
+				// combine
+				fntStrB += "\n"+ aCharsA.join("\n")
+				//console.debug(fntStrB)
+				return resolve()
 			})
 		}
 	})
@@ -883,7 +889,9 @@ function get_woff2() {
 				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
 				font.load().catch(err => {
 					log_error("fonts: woff2", err.name, err.message)
-					// NetworkError: A network error occurred. < woff2 disabled
+					// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
+					// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
+					// ToDo: FontFace API is blocked
 					let eMsg = (err.name === undefined ? zErr : trim_error(err.name, err.message))
 					dom.fontWoff2 = eMsg
 				})
@@ -972,7 +980,7 @@ function outputFonts() {
 	dom.fontCSS = r
 	section.push("font_loading:"+ r)
 	// doc fonts
-	el = dom.spanLH
+	el = dom.divDocFont
 	r = getComputedStyle(el).getPropertyValue("font-family")
 	r = (r.slice(1,16) == "Times New Roman" ? zE : zD)
 	dom.fontDoc = r
