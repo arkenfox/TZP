@@ -382,8 +382,7 @@ function outputAudio() {
 			}
 		} catch(e) {
 			log_error("audio: "+ sName, e.name, e.message)
-			let eMsg = trim_error(e.name, e.message)
-			eMsg = (e.name === undefined ? zErr : eMsg)
+			let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 			dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 			log_section("audio", t0, [sName+ ":"+ (isFF ? zB0 : zErr)])
 		}

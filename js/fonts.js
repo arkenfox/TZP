@@ -903,7 +903,7 @@ function get_woff2() {
 			return resolve("woff:"+ value)
 		} catch(e) {
 			log_error("fonts: woff2", e.name, e.message)
-			dom.fontWoff2 = trim_error(e.name, e.message)
+			dom.fontWoff2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 			return resolve("woff:"+ (isFF ? zB0 : zErr))
 		}
 	})

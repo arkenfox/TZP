@@ -1097,7 +1097,7 @@ function log_section(name, time1, data) {
 	if (gRun && gCount == (gCountExpected - 1)) {
 		if (canPerf) {dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"}
 	}
-	let el = dom.perfG, pretty = ""
+	let pretty = ""
 	if (!isPerf) {time1 = "xx"}
 	if (canPerf) {pretty = name.padStart(14) +": "+ sn + time1.padStart(4) + sc +" ms"}
 	if (gRun) {
@@ -1105,12 +1105,9 @@ function log_section(name, time1, data) {
 		if (!isPerf) {time2 = "xxx"}
 		pretty += " | "+ so + time2.padStart(4) + sc +" ms"
 		if (canPerf) {gPerf.push(pretty)}
-		if (gCount == 14) {
-			el.innerHTML = gPerf.join("<br>")
-		}
 	} else {
 		if (name !== "prereq") {
-			el = dom.perfS
+			let el = dom.perfS
 			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
 			gClick = true
 		}
@@ -1162,6 +1159,7 @@ function log_section(name, time1, data) {
 			gCount++
 			// FINISH
 			if (gCount == gCountExpected) {
+				dom.perfG.innerHTML = gPerf.join("<br>")
 				// temp
 				if (logPerfHash !== "") {
 					console.log("HASH STATS: ["+ gPerfHashDetail.length +" times | "
@@ -1297,7 +1295,7 @@ function countJS(filename) {
 	}
 
 	// the whole gangs here
-	if (jsFiles.length == 13) {
+	if (jsFiles.length == jsFilesExpected) {
 		if (runSL) {isPerf = false}
 		try {
 			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
@@ -1442,7 +1440,6 @@ function outputSection(id, cls) {
 			setTimeout(function() {if (id=="all" || id=="7") {outputDevices()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="5") {outputHeaders()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="6") {outputStorage()}}, 1)
-			setTimeout(function() {if (id=="all" || id=="8") {outputDomRect()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="13") {outputMedia()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="4") {outputLanguage()}}, 1)
 			setTimeout(function() {if (id=="all" || id=="14") {outputCSS()}}, 1)
@@ -1457,7 +1454,12 @@ function outputSection(id, cls) {
 		if (gRun) {
 			if (delay == 1 && canPerf) {log_line(Math.round(performance.now()) + " : START")}
 		} else {
-			const sNames = ['','y','x','y','x','x','x','y','x','y','y','x','y','y','y','y','x','x','x']
+			const sNames = ['',
+				'y','x','y','x','x',
+				'x','y','x','y','y',
+				'x','y','y','y','y',
+				'x','x','x'
+			]
 			if (sNames[id * 1] !== "x" && sPerfDetail.length) {log_line("line")}
 		}
 		setTimeout(function() {

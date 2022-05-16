@@ -6,19 +6,18 @@ let intCSS = 0
 function get_colors() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
-	let aList0 = ['-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox']
-	let aList1 = ['-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext']
-	let aList2 = ['ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext']
-	let aList3 = ['ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText']
+	let aList = [
+		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
+		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText'
+	]
 	let sNames = ["moz","moz_stand-in","css4","system"]
+	let splits = [0, 31, 63, 77 ,105]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
 	let aResults = []
 
 	try {
-		let splits = [0, aList0.length]
-		let aList = aList0.concat(aList1); splits.push(aList.length)
-		aList = aList.concat(aList2); splits.push(aList.length)
-		aList = aList.concat(aList3); splits.push(aList.length)
 		let aRes = []
 		let element = dom.sColorElement
 		// NOTE: set initial color: non-supported repeats previous lookup value
@@ -30,7 +29,7 @@ function get_colors() {
 		})
 		// split/hash
 		for (let i=0; i < 4; i++) {
-			let aTemp = aRes.slice(splits[i],splits[i+1])
+			let aTemp = aRes.slice(splits[i], splits[i+1])
 			let hash = mini_sha1(aTemp.join(), "css colors " + sNames[i])
 			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
 			sDetail["css_colors_"+ sNames[i]] = aTemp
@@ -57,7 +56,7 @@ function get_colors() {
  		return aResults
 	} catch(e) {
 		log_error("css: colors", e.name, e.message)
-		let eMsg = trim_error(e.name, e.message)
+		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		for (let i=0; i < 4; i++) {
 			document.getElementById("cssColor"+ i).innerHTML = eMsg
 			aResults.push("colors_"+ sNames[i] +":"+ (isFF ? zB0 : zErr))
@@ -353,7 +352,7 @@ function get_mm_css() {
 				if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
 				if (window.matchMedia("("+ q + n +")").matches) {x = n}
 			} catch(e) {
-				log_error("css:matchmedia_"+ type, e.name, e.message)
+				log_error("css: matchmedia_"+ type, e.name, e.message)
 				x = zB0
 			}
 			// notate/display
