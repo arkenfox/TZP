@@ -15,8 +15,8 @@
 <body>
 
 	<div class="offscreen">
-		<div id="measureDiv" class="measure">
-			<div id="lhTest">line height</div>
+		<div id="measureDivLH" class="measure">
+			<div id="divLH">lineheight</div>
 		</div>
 	</div>
 
@@ -119,16 +119,17 @@ function get_lh() {
 		//"'Arial'",
 	]
 	let sizes = [13,16,97,203,333,417,513,595,709,811,867,993]
-	let elLine = dom.lhTest
-	let target = dom.measureDiv
+	//sizes = [16,97,203,333,417] // to match current TZP to check we get identical hash for "none"
+	let elLine = dom.divLH
+	let targetL = dom.measureDivLH
 	// reset
 	oEverything = {}
 	
 	let display = []
 	if (dom.scale.checked) {
-		dom.measureDiv.setAttribute("style", "transform: scale(1.318567);")
+		targetL.setAttribute("style", "transform: scale(1.318567);")
 	} else {
-		dom.measureDiv.setAttribute("style", "transform: none")
+		targetL.setAttribute("style", "transform: none")
 	}
 
 	sizetypes.forEach(function(sizetype) {
@@ -138,13 +139,13 @@ function get_lh() {
 
 		for (let i=0; i < fontfamilies.length; i++) {
 			let fontfamily = fontfamilies[i]
-			dom.lhTest.setAttribute('style', 'font-family:' + fontfamily)
+			targetL.setAttribute('style', 'font-family:' + fontfamily)
 
 			oEverything[sizetype] = {}
 
 			let res = [], hasErr = false
 			sizes.forEach(function(size) {
-				target.style.fontSize = size + sizetype
+				targetL.style.fontSize = size + sizetype
 				try {
 					let elDiv = elLine.getBoundingClientRect()
 					res.push(elDiv.height)
@@ -208,7 +209,7 @@ function get_lh() {
 	//console.debug("oEverything", oEverything)
 
 	// reset size to remove horizontal scrollbar
-	try {target.style.fontSize = "16pt"} catch(e) {}
+	try {targetL.style.fontSize = "16pt"} catch(e) {}
 	// display
 	dom.results.innerHTML = display.join("<br>")
 
@@ -228,7 +229,6 @@ function run() {
 
 dom.scale.checked = true
 get_lh()
-
 
 </script>
 </body>
