@@ -8,7 +8,8 @@
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 680px;}
+		table {width: 90%; min-width: 600px; max-width: 980px}
+		hr {color: #c18cdc}
 	</style>
 </head>
 <body>
@@ -26,13 +27,29 @@
 
 	<table id="tb15">
 		<col width="15%"><col width="85%">
-		<thead><tr><th colspan="2"><div class="nav-title">line-height</div></th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">line-height
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">basic line-height test with different variables
+			<span class="no_color">basic line-height test, using clientrect, with different variables</span>
+			<span class="btn15 btn" onClick="run()">[ re-run ]</span>
+			<span class="s12 mono">
+				<input type="checkbox" name="scale" style="margin: 0; height: 12px" onClick='run()'> <span class="no_color">scale</span>
+				<div class="ttip"><span class="icon">[ i ]</span>
+					<span class="ttxtb" style="font-style: normal; font-family: serif;">
+					<br>Toggling re-runs the test<br>
+					<br>when checked: a style of
+					<br><b>transform: scale(1.318567)</b>
+					<br>is applied<br><br></span>
+				</div>
+			</span>
 		</td></tr>
 		<tr>
-			<td><div class="btn-left"><span class="btn15 btn" onClick="run()">[ re-run ]</span></div></td>
-			<td class="c mono spaces" id="results"></td>
+			<td colspan="2" style="text-align: left;">
+			<hr><br>
+			<span class="no_color c mono spaces" id="results"></span></td>
 		</tr>
 
 	</table>
@@ -40,38 +57,91 @@
 <script>
 'use strict';
 
+let oEverything = {}
+
 sb = sb.trim()
 sg = sg.trim()
 s6 = s6.trim()
 s15 = s15.trim()
 
-function get_lh() {
+function prettyObjectArray(json) {
+  if (typeof json === 'string') {
+    json = JSON.parse(json);
+  }
+  let output = JSON.stringify(json, function(k,v) {
+    if(v instanceof Array)
+      return JSON.stringify(v);
+    return v;
+  }, 3).replace(/\\/g, '')
+        .replace(/\"\[/g, '[')
+        .replace(/\]\"/g,']')
+        .replace(/\"\{/g, '{')
+        .replace(/\}\"/g,'}')
+        .replace(/,/g,', ');
+  return output;
+}
 
+function logConsole(group, name) {
+	if (name == "all") {
+		console.log(
+			group.toUpperCase() +" EVERYTHING\n", prettyObjectArray(oEverything[group]["group"]) +"\n",
+			prettyObjectArray(oEverything[group]["hash"]) +"\n",
+			prettyObjectArray(oEverything[group]["data"]),
+		)
+		return
+	}
+
+	let logStr = group.toUpperCase() +": "+ name
+	let oUsed = oEverything[group][name]
+	console.log(logStr+"\n", prettyObjectArray(oUsed))
+}
+
+function get_lh() {
+	let t0 = performance.now()
 	let sizetypes = ["pt", "px"]
 	let fontfamilies = [
-		"monospace",
-		"serif",
-		"sans-serif",
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#values
 		"cursive",
+		"emoji",
+		"fangsong",
 		"fantasy",
+		"math",
+		"monospace",
 		"none",
-		"'Times New Roman'",
-		"'Arial'",
+		"sans-serif",
+		"serif",
+		"system-ui",
+		"ui-serif",
+		"ui-monospace",
+		"ui-rounded",
+		// ^ subhash those
+		//"'Times New Roman'",
+		//"'Arial'",
 	]
 	let sizes = [13,16,97,203,333,417,513,595,709,811,867,993]
 	let elLine = dom.lhTest
 	let target = dom.measureDiv
-
+	// reset
+	oEverything = {}
+	
 	let display = []
-	let resConsole = []
+	if (dom.scale.checked) {
+		dom.measureDiv.setAttribute("style", "transform: scale(1.318567);")
+	} else {
+		dom.measureDiv.setAttribute("style", "transform: none")
+	}
 
 	sizetypes.forEach(function(sizetype) {
-		let styleHashes = []
-		if (sizetype == "px") {display.push("<br><hr>")}
-		display.push("<b><u>"+ sizetype.toUpperCase() +"</u></b><br>")
+		let oTempValues = {},
+			oTempStyles = {},
+			oTempData = {}
+
 		for (let i=0; i < fontfamilies.length; i++) {
 			let fontfamily = fontfamilies[i]
 			dom.lhTest.setAttribute('style', 'font-family:' + fontfamily)
+
+			oEverything[sizetype] = {}
+
 			let res = [], hasErr = false
 			sizes.forEach(function(size) {
 				target.style.fontSize = size + sizetype
@@ -83,40 +153,80 @@ function get_lh() {
 					res.push(e.name +": "+ e.message)
 				}
 			})
-			display.push(s15 + fontfamily + sc)
-			// add to display array
-			if (hasErr) {
-				display.push(res[0]) //+"<br>"
-				resConsole.push(sizetype +": "+ fontfamily +": "+ res[0])
-			} else {
-				let hash = mini(res.join()), values = res.join(", ")
-				if (i < 5) {styleHashes.push(fontfamily +": " + hash)}
-				display.push(
-					"   " + s6 + hash + sc +": " + values // +"<br>"
-				)
-				resConsole.push(sizetype +": "+ hash +": "+ fontfamily + "\n - "+ values)
-			}
-			if (i == 4) {
-				display.push("<br>    ------- 5 x styles hash: " + s6 + mini(styleHashes.join()) + sc +"<br>")
+			let hash = hasErr ? mini(e.name+": "+ e.message) : mini(res.join())
+			let value = hasErr ? e.name+": "+ e.message : res.join()
+			oTempValues[hash] = res
+			try {
+				oTempStyles[hash].push(fontfamily)
+			} catch(e) {
+				oTempStyles[hash] = [fontfamily]
 			}
 		}
+		//console.debug(oTempValues)
+		//console.debug(oTempStyles)
+
+		let aHashes = []
+		let aGroups = []
+
+		const namesH = Object.keys(oTempStyles).sort()
+		for (const nameH of namesH) {
+			aHashes.push(nameH +":"+ oTempStyles[nameH].join(", "))
+			aGroups.push(oTempStyles[nameH].join(", "))
+			oTempData[nameH] = oTempValues[nameH]
+		}
+		aGroups.sort()
+
+		let groupHeader = "<b><u>"+ sizetype.toUpperCase() +"</u></b>"
+		if (sizetype !== sizetypes[0]) {groupHeader = "<br><hr><br>"+ groupHeader}
+		let groupGroupHash = mini(aGroups.join())
+		let groupDataHash = mini(aHashes.join())
+		let groupGroupBtn = " group: "
+			+ s15 + "<span class='btn15 btnc' onClick='logConsole(`"+ sizetype + "`,`group`)'>" + groupGroupHash + sc + sc
+		let groupHashBtn = " hash: "
+			+ s15 + "<span class='btn15 btnc' onClick='logConsole(`"+ sizetype + "`,`hash`)'>" + groupDataHash + sc + sc
+		let groupDataBtn = " data: "
+			+ s15 + "<span class='btn15 btnc' onClick='logConsole(`"+ sizetype + "`,`data`)'>details"+ sc + sc
+		let groupAllBtn = " all: "
+			+ s15 + "<span class='btn15 btnc' onClick='logConsole(`"+ sizetype + "`,`all`)'>details"+ sc + sc
+
+		display.push(groupHeader +" "+ groupGroupBtn +" "+ groupHashBtn +" "+ groupDataBtn +" "+ groupAllBtn +"<br>")
+
+		oEverything[sizetype]["group"] = {"hash": groupGroupHash, "data": aGroups}
+		oEverything[sizetype]["hash"] = {"hash": groupDataHash, "data": aHashes}
+		oEverything[sizetype]["data"] = oTempData
+
+		aHashes.forEach(function(h) {
+			let hashStr = h.split(":")[0],
+				stylesStr = h.split(":")[1]
+			let dataStr = oTempData[hashStr].join(", ")
+			display.push(s6 + hashStr + sc + ": <b>" + stylesStr
+				+"</b><p style='margin: 5px 0px 0px 20px; color: grey;'>"+ dataStr +"</p>"
+			)
+		})
 	})
+
+	//console.debug("oEverything", oEverything)
+
 	// reset size to remove horizontal scrollbar
 	try {target.style.fontSize = "16pt"} catch(e) {}
 	// display
 	dom.results.innerHTML = display.join("<br>")
-	console.log(resConsole.join("\n"))
+
+
+	// perf
+	dom.perf.innerHTML = Math.round(performance.now() -t0) +" ms"
 
 }
 
-
 function run() {
 	dom.results = ""
+	dom.perf = ""
 	setTimeout(function() {
 		get_lh()
 	}, 170)
 }
 
+dom.scale.checked = true
 get_lh()
 
 
