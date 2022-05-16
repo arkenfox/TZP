@@ -49,6 +49,8 @@
 		<tr>
 			<td colspan="2" style="text-align: left;">
 			<hr><br>
+			<span class="no_color c mono spaces" id="summary"><b><u>SUMMARY</u></b></span>
+			<br><br><hr><br>
 			<span class="no_color c mono spaces" id="results"></span></td>
 		</tr>
 
@@ -82,16 +84,18 @@ function prettyObjectArray(json) {
 }
 
 function logConsole(group, name) {
+	let testParam = " [scale: "+ (dom.scale.checked ? "on" : "off") +"]"
+
 	if (name == "all") {
 		console.log(
-			group.toUpperCase() +" EVERYTHING\n", prettyObjectArray(oEverything[group]["group"]) +"\n",
+			group.toUpperCase() +" EVERYTHING"+ testParam +"\n", prettyObjectArray(oEverything[group]["group"]) +"\n",
 			prettyObjectArray(oEverything[group]["hash"]) +"\n",
 			prettyObjectArray(oEverything[group]["data"]),
 		)
 		return
 	}
 
-	let logStr = group.toUpperCase() +": "+ name
+	let logStr = group.toUpperCase() +": "+ name + testParam
 	let oUsed = oEverything[group][name]
 	console.log(logStr+"\n", prettyObjectArray(oUsed))
 }
@@ -101,19 +105,20 @@ function get_lh() {
 	let sizetypes = ["pt", "px"]
 	let fontfamilies = [
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#values
+		"ui-serif",
+		"ui-monospace",
+		"ui-rounded",
 		"cursive",
 		"emoji",
 		"fangsong",
 		"fantasy",
 		"math",
 		"monospace",
-		"none",
 		"sans-serif",
 		"serif",
 		"system-ui",
-		"ui-serif",
-		"ui-monospace",
-		"ui-rounded",
+		"none",
+
 		// ^ subhash those
 		//"'Times New Roman'",
 		//"'Arial'",
@@ -173,7 +178,9 @@ function get_lh() {
 
 		const namesH = Object.keys(oTempStyles).sort()
 		for (const nameH of namesH) {
-			aHashes.push(nameH +":"+ oTempStyles[nameH].join(", "))
+			let aStyles = oTempStyles[nameH]
+			aStyles.sort() // always sort styles per hash
+			aHashes.push(nameH +":"+ aStyles.join(", "))
 			aGroups.push(oTempStyles[nameH].join(", "))
 			oTempData[nameH] = oTempValues[nameH]
 		}
@@ -224,6 +231,7 @@ function get_lh() {
 function run() {
 	dom.results = ""
 	dom.perf = ""
+	dom.summary.innerHTML = "<b><u>SUMMARY</u></b>"
 	setTimeout(function() {
 		get_lh()
 	}, 170)
