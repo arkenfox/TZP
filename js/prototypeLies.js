@@ -345,7 +345,10 @@ function outputPrototypeLies() {
 					const validName = name == 'TypeError'
 					const validMessage = message == `Function has non-object prototype 'undefined' in instanceof check`
 					const targetStackLine = ((stack || '').split('\n') || [])[1]
-					const validStackLine = targetStackLine.startsWith(`    at ${type}.[Symbol.hasInstance]`)
+					const validStackLine = (
+						targetStackLine.startsWith(`    at ${type}.[Symbol.hasInstance]`) ||
+						targetStackLine.startsWith('    at [Symbol.hasInstance]') // Chrome 102
+					)
 					return validName && validMessage && validStackLine
 				}
 				try {
