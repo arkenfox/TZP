@@ -386,7 +386,7 @@ function get_resized() {
 function outputElements() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
-	aClientRectBS = [] // we set this in clientrect test to determine what if any method we can trust
+	aClientRectBS = [] // we set this in clientrect test
 
 	Promise.all([
 		get_clientrect()
