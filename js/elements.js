@@ -260,7 +260,9 @@ function get_resized() {
 	sDetail[sNameL] = []
 	let elCtrl = dom.mathmlCtrl,
 		elTest = dom.mathmlTest,
-		target = dom.measureDiv,
+		elLine = dom.divLH,
+		targetM = dom.measureDivMath,
+		targetL = dom.measureDivLH,
 		sizes = [16,97,203,333,417], //,513,595,709,867]
 		styles = ["none","monospace","serif","sans-serif","cursive","fantasy","system-ui"]
 
@@ -268,12 +270,16 @@ function get_resized() {
 	let method = aClientRectBS.indexOf(false)
 	// and away we go
 	try {
-		let errM = "", errMMsg = "", errL = "", errLMsg = ""
+		let errM = "", errMMsg = ""
+		let errL = "", errLMsg = "", mismatchL = ""
+
 		let range = document.createRange()
-		range.selectNode(elCtrl)
+		range.selectNode(elLine)
 
 		sizes.forEach(function(size) {
-			target.style.fontSize = size + "pt" // or px? decisions
+			targetM.style.fontSize = size + "pt"
+			targetL.style.fontSize = size + "pt"
+
 			// mathml
 			if (isFF) {
 				try {
@@ -286,21 +292,28 @@ function get_resized() {
 			try {
 				let elDiv
 				if (method < 1) { // get a result regardless
-					elDiv = elCtrl.getBoundingClientRect()
+					elDiv = elLine.getBoundingClientRect()
 				} else if (method == 1) {
-					elDiv = elCtrl.getClientRects()
+					elDiv = elLine.getClientRects()
 				} else if (method == 2) {
 					elDiv = range.getBoundingClientRect()
 				} else if (method == 3) {
 					elDiv = range.getClientRects()[0]
 				}
-				resL.push(cleanFn(elDiv.height))
+				let height = cleanFn(elDiv.height)
+				// ToDo: trap undefined, not a number etc
+				if ("number" !== typeof height) {
+					mismatchL = true
+				} else {
+					resL.push(height)
+				}
 			} catch(e) {
 				errL = e.name; errLMsg = e.message
 			}
 		})
 		// reset size to remove horizontal scrollbar
-		try {target.style.fontSize = "16pt"} catch(e) {}
+		try {targetM.style.fontSize = "16pt"} catch(e) {}
+		try {targetL.style.fontSize = "16pt"} catch(e) {}
 
 		// mathml
 		let displayM = ""
