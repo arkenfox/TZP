@@ -304,10 +304,9 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 	text-decoration: none;
 	text-shadow: none;
 	white-space: nowrap;
-	transform: scale(1.318567) /* cause decimals */
+	transform: scale(1.318567); /* cause decimals */
 }
 .cssDocFont {
 	font-family: "Times New Roman", Times, serif;
 	/* font-family: "Meiryo", Times, serif; */
 }
-
