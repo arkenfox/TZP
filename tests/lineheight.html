@@ -122,15 +122,17 @@ function get_lh() {
 	//sizes = [16,97,203,333,417] // to match current TZP to check we get identical hash for "none"
 	let elLine = dom.divLH
 	let targetL = dom.measureDivLH
+
+	if (dom.scale.checked) {
+		targetL.classList.add("measureScale")
+	} else {
+		targetL.classList.remove("measureScale")
+	}
+
 	// reset
 	oEverything = {}
-	
+
 	let display = []
-	if (dom.scale.checked) {
-		targetL.setAttribute("style", "transform: scale(1.318567);")
-	} else {
-		targetL.setAttribute("style", "transform: none")
-	}
 
 	sizetypes.forEach(function(sizetype) {
 		let oTempValues = {},
