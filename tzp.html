@@ -33,12 +33,11 @@
 	<!--offscreen-->
 	<div class="offscreen">
 		<div id="measureDiv" class="measure">
-			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a></div>
+			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a></div> <!-- doubles as lineheight test -->
 			<div id="mathmlTest"><math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>
 			<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>
 			<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>
 			<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math></div>
-			<div id="lhTest">line height</div>
 		</div>
 		<div class="cssDocFont" id="divDocFont">line height</div>
 		<img id="imageFS" width=0 height=0></img>
@@ -118,8 +117,8 @@
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">fingerprints should always be considered 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
-			<sup>1</sup>, prototype/proxy lies code provided by </span>
-			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup>
+			<sup>1</sup>, prototype/proxy lies code provided by <a target="_blank" class="blue"
+			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup></span>
 		</td></tr>
 	</table>
 
@@ -468,7 +467,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#devices">devices & hardware</a>
 			<div class="nav-up"><a href="#storage">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
-			<div class="nav-down"><a href="#domrectd">&#9660;</a></div>
+			<div class="nav-down"><a href="#svgd">&#9660;</a></div>
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
@@ -520,28 +519,19 @@
 			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke <sup>1</sup></a></td></tr>
 	</table>
 
-	<!--domrect-->
+	<!--svg-->
 	<table id="tb8">
-		<col width="35%"><a name="domrect"></a><col width="65%">
+		<col width="35%"><a name="svg"></a><col width="65%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#domrect">domrect / svg</a>
-			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfdomrect"></span></div>
+			<div class="nav-title"><a href="#svg">svg</a>
+			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfsvg"></span></div>
 			<div class="nav-down"><a href="#canvasd">&#9660;</a></div>
-			<div class="nav-right"><a name="domrectd"></a></div></div>
+			<div class="nav-right"><a name="domsvgd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="secthash">
+		<!--<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn8 btn" onClick="outputSection(`8`)">[ re-run ]</span></div>
-			<span class="c" id="domrecthash"></span></td></tr>
-		<tr><td>Element.getBoundingClientRect</td><td class="c mono" id="dr0"></td></tr>
-		<tr><td>Element.getClientRects</td><td class="c mono" id="dr1"></td></tr>
-		<tr><td>Range.getBoundingClientRect</td><td class="c mono" id="dr2"></td></tr>
-		<tr><td>Range.getClientRects</td><td class="c mono" id="dr3"></td></tr>
-		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2" class="center"><a target="_blank" class="blue"
-			href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
-		<tr><td colspan="2"><span class="no_color">domrect code based on work by </span>
-			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
+			<span class="c" id="svghash"></span></td></tr>-->
+		<tr><td>test</td><td>result</td></tr>
 	</table>
 
 	<!--canvas-->
@@ -549,7 +539,7 @@
 		<col width="35%"><a name="canvas"></a><col width="65%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#canvas">canvas</a>
-			<div class="nav-up"><a href="#domrect">&#9650;</a> <span class="c perf" id="perfcanvas"></span></div>
+			<div class="nav-up"><a href="#svgrect">&#9650;</a> <span class="c perf" id="perfcanvas"></span></div>
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
@@ -784,12 +774,26 @@
 			<span class="c" id="elementshash"></span></td></tr>
 		<tr><td>
 		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="elementkeys"></td></tr>
-		<tr><td>lineheight</td><td class="c mono" id="lineheight"></td></tr>
+		<tr><td>[clientrect] lineheight</td><td class="c mono" id="lineheight"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp mathml</td><td class="c mono" id="mathml"></td></tr>
-		<tr><td colspan="3"><span class="no_color">code provided by </span>
-			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
+			&nbsp [offset] mathml</td><td class="c mono" id="mathml"></td></tr>
+
+		<tr><td colspan="2" class="center">--- clientrect ---</td></tr>
+		<tr><td>Element.getBoundingClientRect</td><td class="c mono" id="dr0"></td></tr>
+		<tr><td>Element.getClientRects</td><td class="c mono" id="dr1"></td></tr>
+		<tr><td>Range.getBoundingClientRect</td><td class="c mono" id="dr2"></td></tr>
+		<tr><td>Range.getClientRects</td><td class="c mono" id="dr3"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2" class="center"><a target="_blank" class="blue"
+			href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><span class="no_color"></td></tr>
+		<tr><td colspan="3"><span class="no_color">code provided by <a target="_blank" class="blue"
+			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>, clientrect code based on work by
+			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
+			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a>
+			</span>
 		</td></tr>
 	</table>
 
@@ -878,7 +882,6 @@
 	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>
 	<script src="js/devices.js"></script>
-	<script src="js/domrect.js"></script>
 	<script src="js/audio.js"></script>
 	<script src="js/css.js"></script>
 	<script src="js/elements.js"></script>
@@ -889,3 +892,4 @@
 
 </body>
 </html>
+
