@@ -893,7 +893,7 @@ function get_woff2() {
 					// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
 					// ToDo: FontFace API is blocked
 					let eMsg = (err.name === undefined ? zErr : trim_error(err.name, err.message))
-					dom.fontWoff2 = eMsg
+					dom.fontWoff2 = (isVer < 69 && eMsg == "NetworkError: A network error occurred." ? zD : eMsg)
 				})
 				return font.status == "loaded" || font.status == "loading"
 			})()
