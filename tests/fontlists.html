@@ -25,9 +25,7 @@
 	<table id="tb12">
 		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">font lists
-			<div class="nav-up"><span class="c perf" id="perf"></span></div>
-			</div>
+			<div class="nav-title">font lists</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><!-- &#9745; &#9744; -->
 			<span class="no_color">Checking full OS font lists against smaller ones.
@@ -654,11 +652,30 @@ const getFonts = () => {
 				return acc
 			}, {})
 
+			/* NEW */
+			fntList.forEach(font => {
+				let isDetected = false // reset each font
+				baseFonts.forEach(basefont => {
+					const family = "'"+ font +"', "+ basefont
+					if (!isDetected) {
+						span.style.setProperty('--font', family)
+						const style = getComputedStyle(span)
+						const dimensions = getDimensions(span, style)
+						if (dimensions.offsetWidth != base[basefont].offsetWidth ||
+							dimensions.offsetHeight != base[basefont].offsetHeight) {
+							detectedViaOffset.add(font)
+							isDetected = true
+						}
+						return
+					}
+				})
+			})
+
+			/* ORGINAL
 			const families = fntList.reduce((acc, font) => {
 				baseFonts.forEach(baseFont => acc.push(`'${font}', ${baseFont}`))
 				return acc
 			}, [])
-
 			families.forEach(family => {
 				span.style.setProperty('--font', family)
 				const basefont = /, (.+)/.exec(family)[1]
@@ -670,12 +687,13 @@ const getFonts = () => {
 					detectedViaOffset.add(font)
 				}
 				return
-			})
+			})*/
 			const fontsOffset = [...detectedViaOffset]
 			return resolve({
 				fontsOffset
 			})
 		} catch(e) {
+			console.error(e.name, e.message)
 			return resolve("error")
 		}
 	})
