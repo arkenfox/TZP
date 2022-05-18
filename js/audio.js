@@ -362,7 +362,7 @@ function outputAudio() {
 						// display/FP
 						if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
 							let note = "empty arrayBuffer"
-							if (gRun) {gCheck.push("audio:"+ sName +": "+ note)}
+							log_alert("audio:"+ sName +": "+ note)
 							dom.audioSum = sum; dom.audioGet = note; dom.audioCopy = note
 							log_section("audio", t0, [sName +":failed"])
 						} else {
