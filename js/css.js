@@ -318,8 +318,8 @@ function get_computed_styles() {
 				document.getElementById("cStyles"+ i).innerHTML = display
 			}
 			// multihash
+			if (distinctRep.length > 1) {log_alert("css:computed_styles: multiple hashes")}
 			if (gRun) {
-				if (distinctRep.length > 1) {gCheck.push("css:computed_styles: multiple hashes")}
 				if (value == zLIE) {gKnown.push("css:computed_styles")}
 			}
 			// return
@@ -331,7 +331,7 @@ function get_computed_styles() {
 			}
 			return resolve("computed_styles:"+ value)
 		}).catch(error => {
-			if (gRun) {gCheck.push("css:computed_styles: " + error.name +" : "+ error.message)}
+			log_alert("css:computed_styles: " + error.name +" : "+ error.message)
 			return resolve("computed_styles:error")
 		})
 	})
