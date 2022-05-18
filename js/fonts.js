@@ -129,7 +129,7 @@ function set_fntList() {
 		let names = Object.keys(fntMaster)
 		for (const k of names) {
 			let array = fntMaster[k]
-			let str = "fonts_fonts_"+ k + "_list_notglobal"
+			let str = "fonts_main_"+ k + "_list_notglobal"
 			sDetail[str] = array
 			fontBtns += buildButton("12", str, (k == isOS ? array.length +" " : "") + k)
 		}
@@ -138,7 +138,7 @@ function set_fntList() {
 	if (isBaseFonts) {
 		fntList = fntMasterBase[isOS]
 		fntList.sort()
-		let strB = "fonts_fonts_"+ isOS + (isTB ? "_tb_whitelist" : "_base" ) + "_list_notglobal"
+		let strB = "fonts_"+ (isTB ? "tb_whitelist_" : "base_" ) + isOS +"_list_notglobal"
 		sDetail[strB] = fntList
 		fontBaseBtn = buildButton("12", strB, fntList.length + (isTB ? " whitelisted" : " base fonts"))
 	} else {
@@ -357,6 +357,14 @@ const getFonts = () => {
 			}, {})
 
 			/* NEW */
+			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
+			let oTempBaseFonts = {} // fonts per baseFonts
+			baseFonts.forEach(function(name) {
+				baseFontTests[name] = 0
+				baseFontDetected[name] = 0
+				if (name !== basefontFirst) {oTempBaseFonts[name] = []} // ignore the first baseFont
+			})
+
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
@@ -400,6 +408,14 @@ const getFonts = () => {
 							dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
 							detectedViaPerspective.add(font +":"+ dimensions.perspectiveWidth +" x "+ dimensions.perspectiveHeight)
 							isDetected = true
+						}
+						// stats
+						baseFontTests[basefont]++
+						if (isDetected) {
+							baseFontDetected[basefont]++
+							if (basefont !== basefontFirst) {
+								oTempBaseFonts[basefont].push(font)
+							}
 						}
 						return
 					}
@@ -456,6 +472,37 @@ const getFonts = () => {
 			const fontsClient = [...detectedViaClient]
 			const fontsPerspective = [...detectedViaPerspective]
 			const fontsTransform = [...detectedViaTransform]
+
+			// stats
+			let aStats = [], totalTest = 0, totalDetect = 0
+			for (let i = 0; i < baseFonts.length; i++) {
+				let name = baseFonts[i],
+					intTest = baseFontTests[name],
+					intDetect = baseFontDetected[name]
+				totalTest = totalTest + intTest
+				totalDetect = totalDetect + intDetect
+				let statString = intDetect +"/"+ intTest
+				// highlight detected if after first two baseFonts
+				if (i > 1 && intDetect !== 0) {
+					statString = sb.trim() + statString + sc 
+				}
+				aStats.push(statString)
+			}
+			// build button
+			//oTempBaseFonts["serif"] = ["test"]
+			let btnE = "", sNameE = "fonts_extra_generic-names_data_notglobal"
+			sDetail[sNameE] = []
+			const namesE = Object.keys(oTempBaseFonts).sort()
+			for (const k of namesE) if (oTempBaseFonts[k].length) {
+				sDetail[sNameE].push (k +":" + oTempBaseFonts[k].join())
+			}
+			if (sDetail[sNameE].length) {
+				btnE = buildButton("12", sNameE, mini(sDetail[sNameE].join(), "fonts stats"))
+			}
+			// display
+			dom.fontStats.innerHTML = aStats.join(" | ") + " | "
+				+ s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnE
+
 			return resolve({
 				lies: !!detectLies.getInvalidDimensions().length,
 				fontsScroll,
@@ -468,7 +515,7 @@ const getFonts = () => {
 			})
 		} catch(e) {
 			// TypeError: document.fonts.values() is not iterable
-			if (gRun) {log_error("fonts: fonts", e.name, e.message)}
+			if (gRun) {log_error("fonts: fontsizes", e.name, e.message)}
 			return resolve(zB0)
 		}
 	})
@@ -480,8 +527,8 @@ function get_fonts() {
 		let fontReturn = []
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
-		sDetail["fonts_fonts"] = []
-		sNames.forEach(function(name) {sDetail["fonts_"+ name + "_reported_notglobal"] = []})
+		sDetail["fonts_fontsizes"] = []
+		sNames.forEach(function(name) {sDetail["fonts_fontsizes_"+ name + "_reported_notglobal"] = []})
 		// run
 		getFonts().then(res => {
 			// remove element
@@ -493,7 +540,7 @@ function get_fonts() {
 						"1 empty, 2 fake", "1 empty, 1 blocked, 1 fake", "1 empty, 3 fake", "1 blocked, 3 fake"
 					]
 					intFNT = intFNT % 10
-					console.log("SIM #"+ intFNT + " fonts:", nmeFNT[intFNT])
+					console.log("SIM #"+ intFNT + " fontsizes:", nmeFNT[intFNT])
 					if (intFNT == 0) {
 						res = zB0
 					} else if (intFNT == 1) {
@@ -516,7 +563,7 @@ function get_fonts() {
 						res["fontsPerspective"] = []; res["fontsPixel"] = ["pixel"]
 					} else if (intFNT == 9) {
 						res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
-						res["fontsPerspective"] = zB0; res["fontsPixel"] = ["pixel"]
+						res["fontsPerspective"] = ["perspective"]; res["fontsPixel"] = zB0
 					}
 					intFNT++
 				}
@@ -528,7 +575,7 @@ function get_fonts() {
 					if (name !== "lies") { // ignore lies
 						let data = res[name],
 							hash = "none"
-						data.sort()
+						if ("object" == typeof data) {data.sort()}
 						if (data.length == 0) {
 							// fontsPixelSize: not supported in FF62 or lower
 							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
@@ -538,19 +585,19 @@ function get_fonts() {
 							hash = zB0
 						} else {
 							// mini
-							let minihash = mini(data.join(), "fonts "+ name)
+							let minihash = mini(data.join(), "fontsizes "+ name)
 							// sha1
 							let getsha1 = false
 							if (fntHashes.length == 0) {getsha1 = true
 							} else if (miniHashes[miniHashes.length-1] !== minihash) {getsha1 = true}
 							if (getsha1) {
-								hash = mini_sha1(data.join(), "fonts "+ name)
+								hash = mini_sha1(data.join(), "fontsizes "+ name)
 							} else {
 								hash = fntHashes[fntHashes.length-1] // use last computed
 							}
 							fntHashes.push(hash)
 							miniHashes.push(minihash)
-							sDetail["fonts_fonts"] = data
+							sDetail["fonts_fontsizes"] = data
 						}
 						fntData.push(name+ ":"+ hash + ":"+ data.length)
 						document.getElementById(name).innerHTML = hash // do i need this
@@ -571,27 +618,27 @@ function get_fonts() {
 				sNames.forEach(function(name) {document.getElementById(name).innerHTML = res})
 				let summary = (res == "none" ? soL +"none"+ scC : res)
 				if (res.length == 40) {
-					summary += buildButton("12", "fonts_fonts", sDetail["fonts_fonts"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
+					summary += buildButton("12", "fonts_fontsizes", sDetail["fonts_fontsizes"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
 				if (runFNT && fntList.length == 0) {summary = sb +"font simulation fail: no font list"+ sc}
 				dom.fontMain.innerHTML = summary
 				if (gRun) {
 					if (res == zB0 || res == "none") {
-						if (res == "none") {gKnown.push("fonts:fonts")}
-						gMethods.push("fonts:fonts:"+ res +":all")
+						if (res == "none") {gKnown.push("fonts:fontsizes")}
+						gMethods.push("fonts:fontsizes:"+ res +":all")
 					}
 				}
-				log_perf("fonts [fonts]",t0)
+				log_perf("fontsizes [fonts]",t0)
 				if (runFNT) {console.log(" - returning", res == "none"? zLIE : res)}
-				return resolve("fonts:"+ (res == "none"? zLIE : res))
+				return resolve("fontsizes:"+ (res == "none"? zLIE : res))
 			}
 
 			blank.sort
 			block.sort
 			// don't record method for fontsPixelSize if not supported
 			if (isVer < 63) {blank = blank.filter(x => !["fontsPixelSize"].includes(x))}
-			if (gRun && blank.length > 0) {gMethods.push("fonts:fonts:none:"+ blank.join())}
-			if (gRun && block.length > 0) {gMethods.push("fonts:fonts:blocked:"+ block.join())}
+			if (gRun && blank.length > 0) {gMethods.push("fonts:fontsizes:none:"+ blank.join())}
+			if (gRun && block.length > 0) {gMethods.push("fonts:fontsizes:blocked:"+ block.join())}
 			// get most common hash/occurence
 			let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
 				let count = list.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
@@ -603,7 +650,7 @@ function get_fonts() {
 			let greatest = getGreatestOccurrence(fntHashes)
 			let isBypass = (greatest.count > 3)
 			if (greatest.count == 3 && fntHashes.length == 3) {isBypass = true} // greatest uses fntHashes which excludes empty arrays/zB0
-			if (!isBypass) {sDetail["fonts_fonts"] = []}
+			if (!isBypass) {sDetail["fonts_fontsizes"] = []}
 
 			// show/populate
 			let matchCount = "", matchName = "", bypass = []
@@ -612,7 +659,7 @@ function get_fonts() {
 				let name = item.split(":")[0],
 					hash = item.split(":")[1],
 					count = item.split(":")[2],
-					detail = "fonts_"+ name + "_reported_notglobal",
+					detail = "fonts_fontsizes_"+ name + "_reported_notglobal",
 					el = document.getElementById(name),
 					display = ""
 				let btnFnt = ""
@@ -638,25 +685,25 @@ function get_fonts() {
 			if (gRun) {
 				if (bypass.length) {
 					bypass.sort()
-					gKnown.push("fonts:fonts")
-					gBypassed.push("fonts:fonts:"+ bypass.join() +":"+ greatest.item)
+					gKnown.push("fonts:fontsizes")
+					gBypassed.push("fonts:fontsizes:"+ bypass.join() +":"+ greatest.item)
 				}
 			}
 
 			// display
 			let result = greatest.item, display = ""
 			if (isBypass) {
-				sDetail["fonts_fonts"] = res[matchName]
-				display = result + buildButton("12", "fonts_fonts", matchCount) + (isBaseFonts ? " from"+ fontBaseBtn : "")
+				sDetail["fonts_fontsizes"] = res[matchName]
+				display = result + buildButton("12", "fonts_fontsizes", matchCount) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 			} else {
 				display = soL + "unknown" + scC
-				if (gRun) {gKnown.push("fonts:fonts")} // generic lie
+				if (gRun) {gKnown.push("fonts:fontsizes")} // generic lie
 				result = zLIE
 			}
 			dom.fontMain.innerHTML = display
-			log_perf("fonts [fonts]",t0)
+			log_perf("fontsizes [fonts]",t0)
 			if (runFNT) {console.log(" - returning", result)}
-			return resolve("fonts:"+ result)
+			return resolve("fontsizes:"+ result)
 		})
 	})
 }
