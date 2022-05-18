@@ -105,18 +105,19 @@
 			<div class="nav-down"><a href="#screend">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td>
-			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span>
-			<span class="c mono" id="allcheck"></span></div>
+			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span></div>
 			&nbsp top level</td><td class="c mono" id="allhash"></td></tr>
 		<!--
 		<tr><td>iframe</td><td class="c mono faint" id="iframehash"></td></tr>
 		<tr><td>workers</td><td class="c mono faint" id="workershash"></td></tr>
+		<tr><td>user-gestures</td><td class="c mono faint" id="gesturehash"></td></tr>
 		-->
 		<tr><td>prototype lies <sup>2</sup></td><td class="c mono" id="prototypehash"></td></tr>
 		<tr><td>proxy lies <sup>2</sup></td><td class="c mono" id="proxyhash"></td></tr>
 		<tr><td>untrustworthy | known lies</td><td class="c mono" id="knownhash"></td></tr>
 		<tr><td>methods</td><td class="c mono" id="knownmethods"></td></tr>
-		<tr><td>errors</td><td class="c mono" id="errorshash"></td></tr>
+		<tr><td><div class="btn-left"><span class="btn btn1 c" id="allcheck" onClick="showMetrics(`alerts`)"></span></div>
+			&nbsp errors</td><td class="c mono" id="errorshash"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">fingerprints should always be considered 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
@@ -868,17 +869,17 @@
 
 	<!--perf-->
 	<table id="tb99">
-		<col width="35%"><col width="65%">
-		<thead><tr><th colspan="2" class="showhide">
+		<col width="1%"><col width="34%"><col width="65%">
+		<thead><tr><th colspan="3" class="showhide">
 			<span id="labelZ" class="btnb" onClick="togglerows('Z','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
-		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`gPerfDetail`)">[details]</span>
+		<tr class="togZ"><td colspan="2"><span class="btn btn0 btnc" onClick="showMetrics(`gPerfDetail`)">[details]</span>
 			global perf</td><td class="mono spaces gc" id="perfG"></td></tr>
-		<tr class="togZ"><td><span class="btn btn0 btnc" onClick="showMetrics(`sPerfDetail`)">[details]</span>
-			click perf</td><td class="mono spaces gc" id="perfS"></td></tr>
-		<tr class="togZ"><td>tor browser detection points</td><td class="mono spaces gc" id="debugTB"></td></tr>
-		<tr class="togZ"><td>alerts</td><td class="mono spaces gc" id="debugA"></td></tr>
-		<tr class="togZ"><td>debug</td><td class="mono spaces gc" id="debugB"></td></tr>
-		<tr class="togZ"><td>debug</td><td class="mono spaces gc" id="debugC"></td></tr>
+		<tr class="togZ"><td colspan="2"><span class="btn btn0 btnc" onClick="showMetrics(`sPerfDetail`)">[details]</span>
+			click perf</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
+		<tr class="togZ"><td colspan="3"></td></tr> <!-- spacer -->
+		<tr class="togZ"><td colspan="3" class="center">--- debug ---</td></tr>
+		<tr class="togZ"><td colspan="3"></td></tr>
+		<tr class="togZ"><td></td><td colspan="2" class="mono spaces gc" id="debugAll"></td></tr>
 	</table>
 	<a name="theend"></a><br>
 
