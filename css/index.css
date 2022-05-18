@@ -135,6 +135,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 .btn16, .s16 {border-color: var(--test16); color: var(--test16);}
 .btn17, .s17 {border-color: var(--test17); color: var(--test17);}
 .btn18, .s18 {border-color: var(--test18); color: var(--test18);}
+.s99 {color: var(--test99);}
 .btnbad, .sbad {border-color: #ff4f4f; color: #ff4f4f;}
 .btn-left {float: left; position: relative; left: -10px; top: 0px;}
 
