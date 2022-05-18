@@ -368,102 +368,60 @@ const getFonts = () => {
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
-					const family = "'"+ font +"', "+ basefont
-					if (!isDetected) {
-						span.style.setProperty('--font', family)
-						const style = getComputedStyle(span)
-						const dimensions = getDimensions(span, style)
-						detectLies.compute(dimensions)
-						if (dimensions.width != base[basefont].width ||
-							dimensions.height != base[basefont].height) {
-							detectedViaPixel.add(font +":"+ dimensions.width +" x "+ dimensions.height)
-							isDetected = true
-						}
-						if (dimensions.sizeWidth != base[basefont].sizeWidth ||
-							dimensions.sizeHeight != base[basefont].sizeHeight) {
-							detectedViaPixelSize.add(font +":"+ dimensions.sizeWidth +" x "+ dimensions.sizeHeight)
-							isDetected = true
-						}
-						if (dimensions.scrollWidth != base[basefont].scrollWidth ||
-							dimensions.scrollHeight != base[basefont].scrollHeight) {
-							detectedViaScroll.add(font +":"+ dimensions.scrollWidth +" x "+ dimensions.scrollHeight)
-							isDetected = true
-						}
-						if (dimensions.offsetWidth != base[basefont].offsetWidth ||
-							dimensions.offsetHeight != base[basefont].offsetHeight) {
-							detectedViaOffset.add(font +":"+ dimensions.offsetWidth +" x "+ dimensions.offsetHeight)
-							isDetected = true
-						}
-						if (dimensions.clientWidth != base[basefont].clientWidth ||
-							dimensions.clientHeight != base[basefont].clientHeight) {
-							detectedViaClient.add(font +":"+ dimensions.clientWidth +" x "+ dimensions.clientHeight)
-							isDetected = true
-						}
-						if (dimensions.transformWidth != base[basefont].transformWidth ||
-							dimensions.transformHeight != base[basefont].transformHeight) {
-							detectedViaTransform.add(font +":"+ dimensions.transformWidth +" x "+ dimensions.transformHeight)
-							isDetected = true
-						}
-						if (dimensions.perspectiveWidth != base[basefont].perspectiveWidth ||
-							dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
-							detectedViaPerspective.add(font +":"+ dimensions.perspectiveWidth +" x "+ dimensions.perspectiveHeight)
-							isDetected = true
-						}
-						// stats
-						baseFontTests[basefont]++
-						if (isDetected) {
-							baseFontDetected[basefont]++
-							if (basefont !== basefontFirst) {
-								oTempBaseFonts[basefont].push(font)
-							}
-						}
+					if (isDetected) {
 						return
 					}
+					const family = "'"+ font +"', "+ basefont
+					span.style.setProperty('--font', family)
+					const style = getComputedStyle(span)
+					const dimensions = getDimensions(span, style)
+					detectLies.compute(dimensions)
+					if (dimensions.width != base[basefont].width ||
+						dimensions.height != base[basefont].height) {
+						detectedViaPixel.add(font +":"+ dimensions.width +" x "+ dimensions.height)
+						isDetected = true
+					}
+					if (dimensions.sizeWidth != base[basefont].sizeWidth ||
+						dimensions.sizeHeight != base[basefont].sizeHeight) {
+						detectedViaPixelSize.add(font +":"+ dimensions.sizeWidth +" x "+ dimensions.sizeHeight)
+						isDetected = true
+					}
+					if (dimensions.scrollWidth != base[basefont].scrollWidth ||
+						dimensions.scrollHeight != base[basefont].scrollHeight) {
+						detectedViaScroll.add(font +":"+ dimensions.scrollWidth +" x "+ dimensions.scrollHeight)
+						isDetected = true
+					}
+					if (dimensions.offsetWidth != base[basefont].offsetWidth ||
+						dimensions.offsetHeight != base[basefont].offsetHeight) {
+						detectedViaOffset.add(font +":"+ dimensions.offsetWidth +" x "+ dimensions.offsetHeight)
+						isDetected = true
+					}
+					if (dimensions.clientWidth != base[basefont].clientWidth ||
+						dimensions.clientHeight != base[basefont].clientHeight) {
+						detectedViaClient.add(font +":"+ dimensions.clientWidth +" x "+ dimensions.clientHeight)
+						isDetected = true
+					}
+					if (dimensions.transformWidth != base[basefont].transformWidth ||
+						dimensions.transformHeight != base[basefont].transformHeight) {
+						detectedViaTransform.add(font +":"+ dimensions.transformWidth +" x "+ dimensions.transformHeight)
+						isDetected = true
+					}
+					if (dimensions.perspectiveWidth != base[basefont].perspectiveWidth ||
+						dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
+						detectedViaPerspective.add(font +":"+ dimensions.perspectiveWidth +" x "+ dimensions.perspectiveHeight)
+						isDetected = true
+					}
+					// stats
+					baseFontTests[basefont]++
+					if (isDetected) {
+						baseFontDetected[basefont]++
+						if (basefont !== basefontFirst) {
+							oTempBaseFonts[basefont].push(font)
+						}
+					}
+					return
 				})
 			})
-
-			/* ORIGINAL
-			const families = fntList.reduce((acc, font) => {
-				baseFonts.forEach(baseFont => acc.push(`'${font}', ${baseFont}`))
-				return acc
-			}, [])
-			families.forEach(family => {
-				span.style.setProperty('--font', family)
-				const basefont = /, (.+)/.exec(family)[1]
-				const style = getComputedStyle(span)
-				const dimensions = getDimensions(span, style)
-				detectLies.compute(dimensions)
-				const font = /\'(.+)\'/.exec(family)[1]
-				if (dimensions.width != base[basefont].width ||
-					dimensions.height != base[basefont].height) {
-					detectedViaPixel.add(font)
-				}
-				if (dimensions.sizeWidth != base[basefont].sizeWidth ||
-					dimensions.sizeHeight != base[basefont].sizeHeight) {
-					detectedViaPixelSize.add(font)
-				}
-				if (dimensions.scrollWidth != base[basefont].scrollWidth ||
-					dimensions.scrollHeight != base[basefont].scrollHeight) {
-					detectedViaScroll.add(font)
-				}
-				if (dimensions.offsetWidth != base[basefont].offsetWidth ||
-					dimensions.offsetHeight != base[basefont].offsetHeight) {
-					detectedViaOffset.add(font)
-				}
-				if (dimensions.clientWidth != base[basefont].clientWidth ||
-					dimensions.clientHeight != base[basefont].clientHeight) {
-					detectedViaClient.add(font)
-				}
-				if (dimensions.transformWidth != base[basefont].transformWidth ||
-					dimensions.transformHeight != base[basefont].transformHeight) {
-					detectedViaTransform.add(font)
-				}
-				if (dimensions.perspectiveWidth != base[basefont].perspectiveWidth ||
-					dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
-					detectedViaPerspective.add(font)
-				}
-				return
-			})*/
 
 			const fontsPixel = [...detectedViaPixel]
 			const fontsPixelSize = [...detectedViaPixelSize]
@@ -489,7 +447,6 @@ const getFonts = () => {
 				aStats.push(statString)
 			}
 			// build button
-			//oTempBaseFonts["serif"] = ["test"]
 			let btnE = "", sNameE = "fonts_extra_generic-names_data_notglobal"
 			sDetail[sNameE] = []
 			const namesE = Object.keys(oTempBaseFonts).sort()
