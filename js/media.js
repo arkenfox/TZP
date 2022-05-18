@@ -121,7 +121,6 @@ function get_media(runtype) {
 		hashcan = zB0
 		ecan.innerHTML = zB0
 	} else {
-		//if (runtype == "audio" && isOS == "android") {dom.debugC.innerHTML = hashcan.join("<br>")}
 		hashcan = mini_sha1(hashcan.join(), "media canplay")
 		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
 		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
