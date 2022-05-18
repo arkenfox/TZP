@@ -48,7 +48,7 @@ function getElementProp(id, prop, pseudo, noBlock) {
 		if (logPseudo) {console.log("pseudo "+ id +" "+ pseudo +": "+ item)}
 		return item
 	} catch(e) {
-		if (gRun) {gCheck.push("_generic:element property "+ id +": "+ e.name)}
+		log_alert("_generic:element property "+ id +": "+ e.name)
 		if (logPseudo) {console.log("pseudo "+ id +": "+ e.name +": "+ e.message)}
 		return "x"
 	}
@@ -229,7 +229,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
-			if (aBraveMode == 0) {gCheck.push("_global:isBraveMode: unknown")}
+			if (aBraveMode == 0) {log_alert("_global:isBraveMode: unknown")}
 			log_perf("isBraveMode [global]",t0,"",aBraveMode[isBraveMode])
 		}
 	}
@@ -548,8 +548,8 @@ const get_isRFP = () => new Promise(resolve => {
 		if (gRun) {log_perf("isRFP [prereq]",t0,gt0,isRFP)}
 		return resolve()
 	} catch(e) {
+		log_alert("_global:isRFP: " + e.name +" : "+ e.message)
 		if (gRun) {
-			gCheck.push("_global:isRFP: " + e.name +" : "+ e.message)
 			log_error("_global: isRFP", e.name, e.message)
 		}
 		return resolve()
@@ -573,7 +573,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 		return resolve()
 	} catch(e) {
 		isFFno.push("system font")
-		gCheckOnce.push("_global:isSystemFont: " + e.name +" : "+ e.message)
+		log_alert("_global:isSystemFont: " + e.name +" : "+ e.message, true)
 		log_perf("system font [isFF]",t0,"","error")
 		return resolve()
 	}
@@ -593,7 +593,7 @@ const get_isTB = () => new Promise(resolve => {
 		document.head.appendChild(css)
 		css.onload = function() {
 			isTB = true
-			log_debug("debugTB","resource:// = ".padStart(19) + "aboutTor.css")
+			log_debug("TB", "resource:// = aboutTor.css", true)
 			log_perf("isTB [global]",t0,"",isTB)
 			return resolve()
 		}
@@ -778,7 +778,7 @@ const get_navKeys = () => new Promise(resolve => {
 		if (gRun) {log_perf("navKeys [prereq]",t0)}
 		return resolve()
 	} catch(e) {
-		if (gRun) {gCheck.push("_global:get_navKeys: " + e.name +" : "+ e.message)}
+		log_alert("_global:get_navKeys: " + e.name +" : "+ e.message)
 		return resolve()
 	}
 })
@@ -1004,14 +1004,27 @@ function log_click(name, time) {
 	if (canPerf) {
 		let output = isPerf ? Math.round(performance.now() - time).toString() : "xx"
 		output = name.padStart(14) +": "+ sn + output.padStart(4) + sc +" ms"
-		log_debug("perfS", output)
+		let el = dom.perfS
+		el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + output
 	}
 }
 
-function log_debug(target, output) {
-	// add line items to perf/debug table
-	let el = document.getElementById(target)
-	el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + output
+function log_alert(output, isOnce = false) {
+	let str = s1 +"alert".padStart(11) +": "+ sc + output + (isOnce ? s1 +"[cached]"+ sc : "")
+	if (isOnce) {
+		if (gRun) {gCheckOnce.push(output)} // global snapshot
+		console.error(output) // always console
+		gDebugOnce.push(str) // always update page display
+	} else {
+		if (gRun) {gCheck.push(output)}
+		console.error(output)
+		gDebug.push(str)
+	}
+}
+
+function log_debug(title, output, isOnce = false) {
+	output = s99 + title.padStart(11) +": "+ sc + output + (isOnce ? s99 +"[cached]"+ sc : "")
+	if (isOnce) { gDebugOnce.push(output) } else { gDebug.push(output) }
 }
 
 function log_error(title, name, msg) {
@@ -1109,6 +1122,10 @@ function log_section(name, time1, data) {
 		if (name !== "prereq") {
 			let el = dom.perfS
 			el.innerHTML = el.innerHTML + (el.innerText.length > 2 ? "<br>" : "") + pretty
+			// not a gRun, always update debugAll
+			if (gDebug.length) {
+				dom.debugAll.innerHTML = gDebug.join("<br>")
+			}
 			gClick = true
 		}
 	}
@@ -1118,29 +1135,29 @@ function log_section(name, time1, data) {
 		data.sort()
 		// SANITY
 		if (data.length == 0) {
-			gCheck.push("#section "+ name +": data array is empty")
+			log_alert("#section "+ name +": data array is empty")
 		} else {
 			for (let i=0; i < data.length; i++) {
 				let check = data[i]
 				if (check == undefined) {
-					gCheck.push("#section "+ name +": contains undefined")
+					log_alert("#section "+ name +": contains undefined")
 				} else {
 					let parts = data[i].split(":")
 					let metric = parts[0]
 					if (metric !== metric.trim()) {
-						gCheck.push("#section "+ name +": "+ metric +" needs trimming")
+						log_alert("#section "+ name +": "+ metric +" needs trimming")
 					}
 					let value = parts.slice(1).join(":")
 					if (value == "") {
-						gCheck.push("#section "+ name +": "+ metric +" not set")
+						log_alert("#section "+ name +": "+ metric +" not set")
 					} else if (value == undefined) {
-						gCheck.push("#section "+ name +": "+ metric +" undefined")
+						log_alert("#section "+ name +": "+ metric +" undefined")
 					} else {
 						if ((value.indexOf("<sp") + value.indexOf("<code")) > 0) {
-							gCheck.push("#section "+ name +": "+ metric +" contains notation")
+							log_alert("#section "+ name +": "+ metric +" contains notation")
 						}
 						if (value !== value.trim()) {
-							gCheck.push("#section "+ name +": "+ metric +" value needs a trim")
+							log_alert("#section "+ name +": "+ metric +" value needs a trim")
 						}
 					}
 				}
@@ -1194,6 +1211,9 @@ function log_section(name, time1, data) {
 							}
 						}
 					}
+				} else {
+					// clean empty crap out
+					delete sDetail[k]
 				}
 				// persist runonce data, de-dupe, sort
 				gCheck = gCheck.concat(gCheckOnce)
@@ -1208,6 +1228,12 @@ function log_section(name, time1, data) {
 				gMethods = gMethods.concat(gMethodsOnce)
 				gMethods = gMethods.filter(function(item, position) {return gMethods.indexOf(item) === position})
 				gMethods.sort()
+				// debug: don't sort
+				gDebug = gDebugOnce.concat(gDebug)
+				if (gDebug.length) {
+					dom.debugAll.innerHTML = gDebug.join("<br>")
+				}
+
 				// populate gBypassedNot: makes it easier to track when so many lies picked up
 				let tmpKN = [], tmpBP = []
 				if (gKnown.length) {gKnown.forEach(function(item) {tmpKN.push(item.split(":")[0] +":"+ item.split(":")[1])})}
@@ -1225,10 +1251,8 @@ function log_section(name, time1, data) {
 					dom.errorshash = "none"
 				}
 				// alerts
-				if (gCheck.length) {
-					dom.allcheck.innerHTML = buildButton("1","alerts", gCheck.length +" alert"+ (gCheck.length > 1 ? "s": ""),"showMetrics")
-					dom.debugA.innerHTML = gCheck.join("<br>")
-				}
+				dom.allcheck = (gCheck.length ? "[ alerts ]" : "")
+
 				// known/bypass/details
 				let knownStr = "", detailBtn = "", bypassBtn = ""
 				if (gKnown.length) {
@@ -1399,6 +1423,8 @@ function outputSection(id, cls) {
 			proxyLies = []
 			sData = {}
 			sDetail = {}
+			// reset debug
+			gDebug = []
 			// reset perf
 			gPerf = []
 			gPerfDetail = []

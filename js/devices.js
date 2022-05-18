@@ -425,7 +425,7 @@ function get_media_devices() {
 					let strDevices = devices +""
 					let aSplit = strDevices.split(",")
 					let splitBS = false // assume good
-					dom.debugC.innerHTML = strDevices // tmp
+					log_debug("devices", strDevices)
 					if (isFF || isEngine == "blink") {
 						for (let i=0; i < aSplit.length; i++) {
 							if (isFF) {

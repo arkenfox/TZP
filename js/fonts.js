@@ -437,8 +437,8 @@ const getFonts = () => {
 				let name = baseFonts[i],
 					intTest = baseFontTests[name],
 					intDetect = baseFontDetected[name]
-				totalTest = totalTest + intTest
-				totalDetect = totalDetect + intDetect
+				totalTest += intTest
+				totalDetect += intDetect
 				let statString = intDetect +"/"+ intTest
 				// highlight detected if after first two baseFonts
 				if (i > 1 && intDetect !== 0) {
@@ -451,7 +451,9 @@ const getFonts = () => {
 			sDetail[sNameE] = []
 			const namesE = Object.keys(oTempBaseFonts).sort()
 			for (const k of namesE) if (oTempBaseFonts[k].length) {
-				sDetail[sNameE].push (k +":" + oTempBaseFonts[k].join())
+				let value = k +": " + oTempBaseFonts[k].join(", ")
+				sDetail[sNameE].push (value)
+				log_debug("baseFont", value)
 			}
 			if (sDetail[sNameE].length) {
 				btnE = buildButton("12", sNameE, mini(sDetail[sNameE].join(), "fonts stats"))
@@ -532,7 +534,7 @@ function get_fonts() {
 					if (name !== "lies") { // ignore lies
 						let data = res[name],
 							hash = "none"
-						if ("object" == typeof data) {data.sort()}
+						try {data.sort()} catch(e) {}
 						if (data.length == 0) {
 							// fontsPixelSize: not supported in FF62 or lower
 							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}

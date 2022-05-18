@@ -429,7 +429,7 @@ function get_fd_resources() {
 			if (isTB) {
 				if (isMark == "270 x 48") {
 					channel = "Tor Browser - Alpha" // alpha: 8.5a7+ [60.5.0esr]
-					log_debug("debugTB","css branding = ".padStart(19) +"270 x 48 px = alpha")
+					log_debug("TB", "css branding = 270 x 48 px = alpha", true)
 				} else if (isMark == "336 x 48" && isVer > 77) {
 					channel = "Tor Browser - Release" // 78+ therefore release
 				} else if (isMark == "300 x 38" && isVer > 67 && isVer < 78) {
@@ -666,7 +666,7 @@ function get_scr_dpi_dpr(runtype) {
 				mmDPPX = return_mm_dpi("dppx",100),
 				mmDPCM = return_mm_dpi("dpcm",10),
 				cssDPI = getElementProp("#P","content",":before")
-				//console.debug(performance.now() - t1 + "ms") //2-3ms
+				//console.debug(performance.now() - t1 + " ms") //2-3ms
 				//note: divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
 
 			// measure div
@@ -686,11 +686,11 @@ function get_scr_dpi_dpr(runtype) {
 				varDPI = mmDPI
 			}
 			// debug
-			dom.debugB.innerHTML = "varDPI : "+ varDPI +"<br>"
-				+"cssDPI : "+ cssDPI +"<br>"
-				+" mmDPI : "+ mmDPI +"<br>"
-				+" dpi_x : "+ dpi_x +"<br>"
-				+" dpi_y : "+ dpi_y +"<br>"
+			if (runtype !== "resize") {
+				log_debug("dpi", "varDPI : "+ varDPI +" | cssDPI : "+ cssDPI
+					+" | mmDPI : "+ mmDPI +" | dpi_x : "+ dpi_x +" | dpi_y : "+ dpi_y
+				)
+			}
 
 			// bypass matchmedia lies
 				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
@@ -1888,6 +1888,10 @@ function get_ua_iframes(log = false) {
 			intUAI++; intUAI = intUAI % nmeUAI.length
 		}
 		dom.uaIframes.innerHTML = summary
+		// clean up empties
+		aNames.forEach(function(item) {
+			if (!sDetail[item].length) {delete sDetail[item]}
+		})
 		if (log) {log_perf("ua iframes [not in FP]",t0)}
 	})
 }
