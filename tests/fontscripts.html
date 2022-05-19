@@ -32,6 +32,13 @@
 			white-space: nowrap;
 			margin-bottom: 12px;
 		}
+		code.purple {
+			background-color: rgba(150, 100, 240, 0.4) !important;
+			padding-left: 2px !important;
+			padding-right: 2px !important;
+			color: #dcdcdc;
+			font-size: 11px;
+		}
 	</style>
 </head>
 <body>
@@ -55,11 +62,13 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Tests font vis vs script support by checking up to
-			<code>x</code> characters of each script for matching tofu sizes. Allow 2-3 secs before testing to ensure
+			<code>x</code> characters per script for matching tofu sizes. Allow 2-3 secs before testing to ensure
 			<a target="_blank" class="blue" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">
-			asynchronous font fallback</a>. Tofu results are colored coded as <span class="bad">80% or higher</span>,
+			asynchronous font fallback</a>. Tofu results are colored coded as <span class="bad">80+%</span>,
 			<span class="s2">20-80%</span>, <span class="s4">20% or lower</span>.
-			Clicking script names in the display area logs code points to console.
+			NOTE: <span class="s14">[RANGES...]</span> used can be <code class="purple">P</code> partial
+			and/or <code class="purple">S</code> selective [uses some blocks in that range].
+			TIP: Click script names in the display to logs code points to console.
 		</td></tr>
 		<tr>
 			<td style="text-align: left; vertical-align: bottom;">
@@ -72,7 +81,7 @@
 					<nav id="navmenu" class="hidden" style="cursor: auto;">
 						<span class="no_color" style="font-size: 11px;">logs to console<br><br></span>
 						<span style="cursor: pointer;">
-						<div onClick="logConsole('partial')">ranges [partial]</div>
+						<div onClick="logConsole('rangesreduced')">ranges [reduced]</div>
 						<div onClick="logConsole('ranges')">ranges [used]</div>
 						<div onClick="logConsole('reserved')">code points [reserved]</div>
 						<div onClick="logConsole('ignore')">code points [ignored]</div>
@@ -109,7 +118,9 @@
 				<span class="mono spaces" id="summary" style="color: #b3b3b3; font-size: 11px;"></span>
 			</td>
 			<td style="text-align: left; vertical-align: top;">
-				<span class="spaces" style="direction:ltr;unicode-bidi:bidi-override; font-size: 12px;" id="visual"></span>
+				<span class="spaces" style="direction:ltr;unicode-bidi:bidi-override; font-size: 12px;" id="visual">
+					<br>waiting on reflow ...
+				</span>
 			</td></tr>
 	</table>
 	<br>
@@ -120,6 +131,8 @@
 // https://www.cogsci.ed.ac.uk/~richard/unicode-sample-3-2.html
 
 let aPartial = [
+	// partial range: i.e start..end is not the full assigned range
+
 	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
 	"basic latin", // C0 controls ignored
 	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
@@ -127,7 +140,7 @@ let aPartial = [
 	"mathematical alphanumeric symbols", // 996 code points
 
 	// partial: reduce entropy duplicity
-		// i.e alot of chars are the same measurements: east asian languages
+		// i.e a lot of chars are the same measurements: east asian languages
 	"cjk radicals supplement",
 	"enclosed cjk letters and months",
 	"hangul compatibility jamo",
@@ -137,12 +150,20 @@ let aPartial = [
 	"katakana",
 
 	// partial! doh! way too big
-		// also east asian and measurments seem to all be the same per script
+		// also east asian measurments seem to all be the same per script
 	"cjk unified ideographs", // 20,992 code points
 	"cjk unified ideographs extension-a", // 6,592 code points
 	"cjk unified ideographs extension-b", // 42,720 code points
 	"hangul syllables", // 11,172 code points
 	"yi syllables",  // 1,165 code points
+]
+
+let aSelective = [
+	// not all blocks in the range is used: i.e not "contiguous"
+		// be careful to not exclude later assigned code points
+		// or reduce size entropy per script
+	"enclosed cjk letters and months",
+	"hangul jamo",
 ]
 
 let aSpacer = [
@@ -531,14 +552,14 @@ let aBlocks = [
 	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
 		["00"] // ignore: ID SP
 	],
-	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"], // partial: reduce entropy duplicity
+	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"],
 		// ["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"], // full
 
 	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"],
 	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"],
 	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"],
 
-	["enclosed cjk letters and months", "32", [1,2,4,5,7,"A","C","F"], , ["1F"], // partial: reduce entropy duplicity
+	["enclosed cjk letters and months", "32", [1,2,4,5,7,"A","C","F"], , ["1F"], // 2,A adds size entropy for this script
 		//["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
 		"Enclosed_CJK_Letters_and_Months",
 		[
@@ -548,11 +569,11 @@ let aBlocks = [
 			"FF", // 12.1
 		], uv3x2
 	],
-	["hangul compatibility jamo", 31, [3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , , // partial: reduce entropy duplicity
+	["hangul compatibility jamo", 31, [3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , ,
 		// ["hangul compatibility jamo", 31, [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
 		["64"] // ignore: HF
 	],
-	["hangul jamo", 11, [4,5,"A","B"], , , "Hangul_Jamo_(Unicode_block)", // partial: reduce entropy duplicity
+	["hangul jamo", 11, [5,"A","B","F"], , , "Hangul_Jamo_(Unicode_block)",
 		// ["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)", // full
 		[
 			"5A","5B","5C","5D","5E","A3","A4","A5","A6","A7","FA","FB","FC","FD","FE","FF", // 5.2
@@ -561,14 +582,15 @@ let aBlocks = [
 	],
 	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"],
 
-	["hiragana", 30, [6,7,8,9], , ["97","98"], "Hiragana_(Unicode_block)"], // partial: reduce entropy duplicity
+	["hiragana", 30, [6,7,8,9], , ["97","98"], "Hiragana_(Unicode_block)"],
 	// ["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"], // full
 
 	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
 	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_Radicals_(Unicode_block)"],
+		// ["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"], // full
 
-	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"], // partial: reduce entropy duplicity
+	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"],
 	// ["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
 
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
@@ -853,6 +875,7 @@ let oCodesMin = {},
 	oCodesIgnore = {}, // bidirectional, non-printing, control codes etc
 	oCodesCounts = {},
 	oRanges = {},
+	oRangesReduced = {},
 	oWiki = {},
 	oGroupHeader = {},
 	oScriptHeader = {},
@@ -928,7 +951,9 @@ function build_title(name, anchor, nameColor, grouptitle, intCodes, intCodesMax)
 	if (strRange == undefined) {
 		strRange = sb +"[range]"+ sc
 	} else {
-		strRange =  s14 +" ["+ strRange + (aPartial.includes(name) ? " &#9664 partial" : "") +"]"+ sc
+		strRange =  s14 +" ["+ strRange +"]"+ sc
+			+ (aPartial.includes(name) ? " <code class='purple'>P</code>" : "")
+			+ (aSelective.includes(name) ? " <code class='purple'>S</code>" : "")
 	}
 
 	return (grouptitle !== "" ? oGroupHeader[grouptitle][0] : "") +
@@ -1027,7 +1052,10 @@ function logConsole(type, name) {
 	let oUsed = {}, logStr = ""
 	if (type == "everything") {oUsed = oCodePoints; logStr = "everything"
 	} else if (type == "wiki") {oUsed = oWiki; logStr = "wikipedia links"
-	} else if (type == "ranges") {oUsed = oRanges; logStr = "ranges used"
+	} else if (type == "ranges") {oUsed = oRanges; logStr = "ranges used [not all blocks may be used]"
+	} else if (type == "rangesreduced") {
+		oUsed = oRangesReduced
+		logStr = "ranges [reduced] [P: partial | S: selective blocks used from the range]"
 	} else if (type == "ignore") {oUsed = oCodesIgnore; logStr = "code points [ignored]"
 	} else if (type == "max") {oUsed = oCodesMax; logStr = "code points [max used]"
 	} else if (type == "min") {oUsed = oCodesMin; logStr = "code points [min used if reduced]"
@@ -1062,10 +1090,7 @@ function logConsole(type, name) {
 	}
 
 	// arrays
-	if (type == "partial") {
-		aPartial.sort()
-		logStr = "partial ranges\n  " + aPartial.join("\n  ")
-	} else if (type == "fptofu") {
+	if (type == "fptofu") {
 		logStr = "tofu fingerprint | "+ testParams +" | "+ mini(fpTofuHashes.join()) +"\n  "+ fpTofuHashes.join("\n  ")
 	} else if (type == "fpSizeOffset") {
 		logStr = "offset | "+ testParams +" | "+ mini(fpSizeHashesOffset.join()) +"\n  "+ fpSizeHashesOffset.join("\n  ")
@@ -1188,8 +1213,10 @@ function generate() {
 					let rangeString = ""+ prefix + range[0] +"0.."+ prefix + range[range.length-1] +"F"
 					oTempData[name]["range"] = rangeString
 					// partial
-					let isPartial = aPartial.includes(name)
-					oTempData[name]["partial"] = isPartial
+					let isPartial = []
+					if (aPartial.includes(name)) {isPartial.push("P")}
+					if (aSelective.includes(name)) {isPartial.push("S")}
+					oTempData[name]["partial"] = isPartial.length ? isPartial.join(", ") : false
 					// legend
 					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
 
@@ -1301,6 +1328,12 @@ function generate() {
 			oCodePoints[k] = oTempData[k]
 			if (oTempData[k]["range"] !== undefined) {
 				oRanges[k] = oTempData[k]["range"]
+			}
+			if (oTempData[k]["partial"] !== undefined) {
+				let rangeChk = oTempData[k]["partial"]
+				if (false !== rangeChk) { // ignore false
+					oRangesReduced[k] = oTempData[k]["partial"]
+				}
 			}
 			if (oTempData[k]["max used"] !== undefined) {
 				oCodesMax[k] = oTempData[k]["max used"]
