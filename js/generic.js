@@ -906,8 +906,8 @@ function tidyName(name) {
 }
 
 function showDetail(name) {
-	let data = sDetail[name],
-		hash = mini_sha1(data.join())
+	let data = sDetail[name]
+	let hash = (Array.isArray(sDetail[name])) ? mini_sha1(data.join()) : mini_sha1(data)
 	name = tidyName(name)
 	let n = name.indexOf(" "),
 		section = name.substring(0,n).toUpperCase(),
@@ -1023,6 +1023,7 @@ function log_alert(output, isOnce = false) {
 }
 
 function log_debug(title, output, isOnce = false) {
+	title +=""; 
 	output = s99 + title.padStart(11) +": "+ sc + output + (isOnce ? s99 +"[cached]"+ sc : "")
 	if (isOnce) { gDebugOnce.push(output) } else { gDebug.push(output) }
 }
@@ -1211,9 +1212,14 @@ function log_section(name, time1, data) {
 							}
 						}
 					}
-				} else {
-					// clean empty crap out
+				} else if (Array.isArray(sDetail[k])) {
+					// remove empty arrays
 					delete sDetail[k]
+				} else if ("object" === typeof sDetail[k]) {
+					// remove empty objects
+					if (Object.keys(sDetail[k]).length == 0) {
+						delete sDetail[k]
+					}
 				}
 				// persist runonce data, de-dupe, sort
 				gCheck = gCheck.concat(gCheckOnce)
