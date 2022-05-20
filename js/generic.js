@@ -918,8 +918,8 @@ function showDetail(name) {
 function showMetrics(type) {
 	if (type == "gDetail") {
 		for (let name in gDetail) {
-			let data = gDetail[name],
-				hash = mini_sha1(data.join())
+			let data = gDetail[name]
+			let hash = (Array.isArray(sDetail[name])) ? mini_sha1(data.join()) : mini_sha1(data)
 			name = tidyName(name)			
 			let n = name.indexOf(" "),
 				section = name.substring(0,n).toUpperCase(),
@@ -1213,12 +1213,13 @@ function log_section(name, time1, data) {
 						}
 					}
 				} else if (Array.isArray(sDetail[k])) {
-					// remove empty arrays
-					delete sDetail[k]
+					delete sDetail[k] // remove empty arrays
 				} else if ("object" === typeof sDetail[k]) {
-					// remove empty objects
-					if (Object.keys(sDetail[k]).length == 0) {
-						delete sDetail[k]
+					if (Object.keys(sDetail[k]).length) {
+						// FP
+						gDetail[k] = sDetail[k]
+					} else {
+						delete sDetail[k] // remove empty objects
 					}
 				}
 				// persist runonce data, de-dupe, sort
