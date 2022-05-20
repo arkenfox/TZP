@@ -243,8 +243,12 @@ function get_element_keys() {
 			//console.debug(keys.join("\n"))
 			let hash = mini_sha1(keys.join(), "elements keys")
 			dom.elementkeys.innerHTML = hash + buildButton("15", sName, keys.length)
+			// remove element
+			try {document.getElementById("html-element-version").remove()} catch(e) {}
 			return resolve("element_keys:"+ hash)
 		} catch (error) {
+			// remove element
+			try {document.getElementById("html-element-version").remove()} catch(e) {}
 			dom.elementkeys.innerHTML = zB0
 			return resolve("element_keys:"+ zB0)
 		}
