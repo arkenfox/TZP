@@ -1197,29 +1197,25 @@ function log_section(name, time1, data) {
 				gKnownDetail = {}
 				gMethodsDetail = {}
 				const names = Object.keys(sDetail).sort()
-				for (const k of names) if (sDetail[k].length) {
-					if ((k.indexOf("_notglobal") == -1)) {
-						if (k.indexOf("_skip") == -1) {
-							// FP
-							gDetail[k] = sDetail[k]
-						} else {
-							if (k.indexOf("_method") !== -1) {
-								// method
-								gMethodsDetail[k] = sDetail[k]
+				for (const k of names) {
+					let objectLength = Array.isArray(sDetail[k]) ? sDetail[k].length : Object.keys(sDetail[k]).length
+					if (objectLength > 0) {
+						if ((k.indexOf("_notglobal") == -1)) {
+							if (k.indexOf("_skip") == -1) {
+								// FP
+								gDetail[k] = sDetail[k]
 							} else {
-								// lies
-								gKnownDetail[k] = sDetail[k]
+							if (k.indexOf("_method") !== -1) {
+									// method
+									gMethodsDetail[k] = sDetail[k]
+								} else {
+									// lies
+									gKnownDetail[k] = sDetail[k]
+								}
 							}
 						}
-					}
-				} else if (Array.isArray(sDetail[k])) {
-					delete sDetail[k] // remove empty arrays
-				} else if ("object" === typeof sDetail[k]) {
-					if (Object.keys(sDetail[k]).length) {
-						// FP
-						gDetail[k] = sDetail[k]
 					} else {
-						delete sDetail[k] // remove empty objects
+						delete sDetail[k] // remove empties
 					}
 				}
 				// persist runonce data, de-dupe, sort
