@@ -94,7 +94,10 @@ let fntHead = "glyph".padStart(7) +"default".padStart(15) +"sans-serif".padStart
 
 function set_fntList() {
 	// bail
-	if (isOS == "") {dom.fontMain = zNA; dom.fontFB = zNA; return}
+	if (isOS == "") {
+		dom.fontSizes = zNA; dom.fontFB = zNA; dom.fontStats = zNA; fontNames = zNA; dom.fontBase = zNA
+		return
+	}
 	// isBaseFonts
 	if (isRFP && isVer > 79 && !isTB) {
 		if (isOS == "windows" || isOS == "mac") {isBaseFonts = true}
@@ -325,6 +328,10 @@ const getFonts = () => {
 			const detectedViaTransform = new Set()
 			const detectedViaPerspective = new Set()
 			const baseFonts = ['monospace','sans-serif','serif'] // do monospace first
+			const baseFontsFull = [
+				'none','monospace','sans-serif','serif','cursive','fantasy','fangsong',
+				'system-ui','ui-monospace','ui-rounded','ui-serif','math','emoji'
+			]
 			const style = getComputedStyle(span)
 
 			const getDimensions = (span, style) => {
@@ -348,15 +355,31 @@ const getFonts = () => {
 				}
 				return dimensions
 			}
-			const base = baseFonts.reduce((acc, font) => {
+			// base: all your base are belong to us
+				// ToDo: should we trap type mismatches for each baseFont
+			const base = baseFontsFull.reduce((acc, font) => {
 				span.style.setProperty('--font', font)
 				const dimensions = getDimensions(span, style)
 				detectLies.compute(dimensions)
 				acc[font] = dimensions
 				return acc
 			}, {})
-
-			/* NEW */
+			sDetail["fonts_fontsizes_base"] = []
+			const baseNames = Object.keys(base).sort()
+			sDetail["fonts_fontsizes_base"] = {}
+			for (const k of baseNames) {
+				let aBase = []
+				aBase.push("client "+ base[k]["clientWidth"] + " x " + base[k]["clientHeight"])
+				aBase.push("pixel "+ base[k]["width"] + " x " + base[k]["height"])
+				aBase.push("size " + base[k]["sizeWidth"] + " x " + base[k]["sizeHeight"])
+				aBase.push("scroll "+ base[k]["scrollWidth"] + " x " + base[k]["scrollHeight"])
+				aBase.push("offset "+ base[k]["offsetWidth"] + " x " + base[k]["offsetHeight"])
+				aBase.push("perspective "+ base[k]["perspectiveWidth"] + " x " + base[k]["perspectiveHeight"])
+				aBase.push("transform "+ base[k]["transformWidth"] + " x " + base[k]["transformHeight"])
+				aBase.sort()
+				sDetail["fonts_fontsizes_base"][k] = aBase
+			}
+			// baseFont stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
 			let oTempBaseFonts = {} // fonts per baseFonts
 			baseFonts.forEach(function(name) {
@@ -364,7 +387,7 @@ const getFonts = () => {
 				baseFontDetected[name] = 0
 				if (name !== basefontFirst) {oTempBaseFonts[name] = []} // ignore the first baseFont
 			})
-
+			// loop
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
@@ -492,6 +515,17 @@ function get_fonts() {
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+			// baseHash
+			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
+			if (sDetail[bName] !== undefined) {
+				if (Object.keys(sDetail[bName]).length) {
+					baseHash = mini_sha1(sDetail[bName], "fontsizes base")
+					baseBtn = buildButton("12", bName)
+				}
+			}
+			let baseReturn = "fontsizes_base:"+ baseHash
+			dom.fontBase.innerHTML = baseHash + baseBtn
+
 			// sim
 			if (runFNT) {
 				if (fntList.length > 0) {
@@ -580,7 +614,7 @@ function get_fonts() {
 					summary += buildButton("12", "fonts_fontsizes", sDetail["fonts_fontsizes"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
 				if (runFNT && fntList.length == 0) {summary = sb +"font simulation fail: no font list"+ sc}
-				dom.fontMain.innerHTML = summary
+				dom.fontSizes.innerHTML = summary
 				if (gRun) {
 					if (res == zB0 || res == "none") {
 						if (res == "none") {gKnown.push("fonts:fontsizes")}
@@ -589,7 +623,7 @@ function get_fonts() {
 				}
 				log_perf("fontsizes [fonts]",t0)
 				if (runFNT) {console.log(" - returning", res == "none"? zLIE : res)}
-				return resolve("fontsizes:"+ (res == "none"? zLIE : res))
+				return resolve(["fontsizes:"+ (res == "none"? zLIE : res), baseReturn])
 			}
 
 			blank.sort
@@ -659,10 +693,10 @@ function get_fonts() {
 				if (gRun) {gKnown.push("fonts:fontsizes")} // generic lie
 				result = zLIE
 			}
-			dom.fontMain.innerHTML = display
+			dom.fontSizes.innerHTML = display
 			log_perf("fontsizes [fonts]",t0)
 			if (runFNT) {console.log(" - returning", result)}
-			return resolve("fontsizes:"+ result)
+			return resolve(["fontsizes:"+ result, baseReturn])
 		})
 	})
 }
