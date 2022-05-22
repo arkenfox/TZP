@@ -95,7 +95,8 @@ let fntHead = "glyph".padStart(7) +"default".padStart(15) +"sans-serif".padStart
 function set_fntList() {
 	// bail
 	if (isOS == "") {
-		dom.fontSizes = zNA; dom.fontFB = zNA; dom.fontStats = zNA; fontNames = zNA; dom.fontBase = zNA
+		dom.fontNames = zNA; dom.fontSizes = zNA; dom.fontSizesPS = zNA; dom.fontSizesPT = zNA;
+		dom.fontFB = zNA; dom.fontStats = zNA; dom.fontBase = zNA
 		return
 	}
 	// isBaseFonts
@@ -222,53 +223,6 @@ function reset_fonts() {
 	dom.ug10.innerHTML = fntHead + r
 }
 
-const createLieDetector = () => {
-	/* https://github.com/abrahamjuliot/creepjs */
-	let invalidDimensions = []
-	return {
-		getInvalidDimensions: () => invalidDimensions,
-			compute: ({
-				width,
-				height,
-				transformWidth,
-				transformHeight,
-				perspectiveWidth,
-				perspectiveHeight,
-				sizeWidth,
-				sizeHeight,
-				scrollWidth,
-				scrollHeight,
-				offsetWidth,
-				offsetHeight,
-				clientWidth,
-				clientHeight
-		}) => {
-			const invalid = (
-				width != transformWidth ||
-				width != perspectiveWidth ||
-				width != sizeWidth ||
-				width != scrollWidth ||
-				width != offsetWidth ||
-				width != clientWidth ||
-
-				height != transformHeight ||
-				height != perspectiveHeight ||
-				height != sizeHeight ||
-				height != scrollHeight ||
-				height != offsetHeight ||
-				height != clientHeight
-			)
-			if (invalid) {
-				invalidDimensions.push({
-					width: [width, transformWidth, perspectiveWidth, sizeWidth, scrollWidth, offsetWidth, clientWidth],
-					height: [height, transformHeight, perspectiveHeight, sizeHeight, scrollHeight, offsetHeight, clientHeight]
-				})
-			}
-			return
-		}
-	}
-}
-
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
@@ -276,7 +230,6 @@ const getFonts = () => {
 			return resolve(zNA)
 		}
 		try {
-			const detectLies = createLieDetector()
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
 			const div = doc.createElement('div')
@@ -319,14 +272,20 @@ const getFonts = () => {
 
 			const span = doc.getElementById(`${id}-detector`)
 			const pixelsToInt = pixels => Math.round(+pixels.replace('px',''))
+			const pixelsToNumber = pixels => +pixels.replace('px','')
 			const originPixelsToInt = pixels => Math.round(2*pixels.replace('px', ''))
+			const originPixelsToNumber = pixels => 2*pixels.replace('px', '')
 			const detectedViaPixel = new Set()
+			const detectedViaPixelNumber = new Set()
 			const detectedViaPixelSize = new Set()
+			const detectedViaPixelSizeNumber = new Set()
 			const detectedViaScroll = new Set()
 			const detectedViaOffset = new Set()
 			const detectedViaClient = new Set()
 			const detectedViaTransform = new Set()
+			const detectedViaTransformNumber = new Set()
 			const detectedViaPerspective = new Set()
+			const detectedViaPerspectiveNumber = new Set()
 			const baseFonts = ['monospace','sans-serif','serif'] // do monospace first
 			const baseFontsFull = [
 				'none','monospace','sans-serif','serif','cursive','fantasy','fangsong',
@@ -338,55 +297,88 @@ const getFonts = () => {
 				const transform = style.transformOrigin.split(' ')
 				const perspective = style.perspectiveOrigin.split(' ')
 				const dimensions = {
-					width: pixelsToInt(style.width),
-					height: pixelsToInt(style.height),
-					transformWidth: originPixelsToInt(transform[0]),
-					transformHeight: originPixelsToInt(transform[1]),
-					perspectiveWidth: originPixelsToInt(perspective[0]),
-					perspectiveHeight: originPixelsToInt(perspective[1]),
-					sizeWidth: pixelsToInt(style.inlineSize),
-					sizeHeight: pixelsToInt(style.blockSize),
-					scrollWidth: span.scrollWidth,
-					scrollHeight: span.scrollHeight,
+					clientWidth: span.clientWidth,
+					clientHeight: span.clientHeight,
 					offsetWidth: span.offsetWidth,
 					offsetHeight: span.offsetHeight,
-					clientWidth: span.clientWidth,
-					clientHeight: span.clientHeight
+					pixelWidth: pixelsToInt(style.width),
+					pixelHeight: pixelsToInt(style.height),
+					pixelsizeWidth: pixelsToInt(style.inlineSize),
+					pixelsizeHeight: pixelsToInt(style.blockSize),
+					perspectiveWidth: originPixelsToInt(perspective[0]),
+					perspectiveHeight: originPixelsToInt(perspective[1]),
+					scrollWidth: span.scrollWidth,
+					scrollHeight: span.scrollHeight,
+					transformWidth: originPixelsToInt(transform[0]),
+					transformHeight: originPixelsToInt(transform[1]),
+					// ToNumber
+					npixelWidth: pixelsToNumber(style.width),
+					npixelHeight: pixelsToNumber(style.height),
+					npixelsizeWidth: pixelsToNumber(style.inlineSize),
+					npixelsizeHeight: pixelsToNumber(style.blockSize),
+					ntransformWidth: originPixelsToNumber(transform[0]),
+					ntransformHeight: originPixelsToNumber(transform[1]),
+					nperspectiveWidth: originPixelsToNumber(perspective[0]),
+					nperspectiveHeight: originPixelsToNumber(perspective[1]),
 				}
 				return dimensions
 			}
-			// base: all your base are belong to us
-				// ToDo: should we trap type mismatches for each baseFont
+
 			const base = baseFontsFull.reduce((acc, font) => {
 				span.style.setProperty('--font', font)
 				const dimensions = getDimensions(span, style)
-				detectLies.compute(dimensions)
 				acc[font] = dimensions
 				return acc
 			}, {})
-			sDetail["fonts_fontsizes_base"] = []
+
+			// base [default] sizes
 			const baseNames = Object.keys(base).sort()
-			sDetail["fonts_fontsizes_base"] = {}
+			sDetail["fonts_fontsizes_base"] = [] // array: hash: baseFonts
+			sDetail["fonts_fontsizes_base_data"] = {} // object: hash: {data}
+			let oTempHashBase = {}, oTempHashData = {}
 			for (const k of baseNames) {
-				let aBase = []
-				aBase.push("client "+ base[k]["clientWidth"] + " x " + base[k]["clientHeight"])
-				aBase.push("pixel "+ base[k]["width"] + " x " + base[k]["height"])
-				aBase.push("size " + base[k]["sizeWidth"] + " x " + base[k]["sizeHeight"])
-				aBase.push("scroll "+ base[k]["scrollWidth"] + " x " + base[k]["scrollHeight"])
-				aBase.push("offset "+ base[k]["offsetWidth"] + " x " + base[k]["offsetHeight"])
-				aBase.push("perspective "+ base[k]["perspectiveWidth"] + " x " + base[k]["perspectiveHeight"])
-				aBase.push("transform "+ base[k]["transformWidth"] + " x " + base[k]["transformHeight"])
-				aBase.sort()
-				sDetail["fonts_fontsizes_base"][k] = aBase
+				let tmpDimensionData = {}
+				const dimensionNames = Object.keys(base[k]).sort()
+				for (const j of dimensionNames) {tmpDimensionData[j] = base[k][j]}
+				let tmpHash = mini(tmpDimensionData, "fontsizes base "+ k)
+				oTempHashData[tmpHash] = tmpDimensionData
+				if (oTempHashBase[tmpHash] == undefined) {
+					oTempHashBase[tmpHash] = [k]
+				} else {
+					oTempHashBase[tmpHash].push(k)
+				}
 			}
+			let hashNames = Object.keys(oTempHashBase).sort()
+			for (const h of hashNames) {
+				sDetail["fonts_fontsizes_base"].push(h +":"+ oTempHashBase[h].join(", "))
+				sDetail["fonts_fontsizes_base_data"][h] = oTempHashData[h]
+			}
+
 			// baseFont stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
 			let oTempBaseFonts = {} // fonts per baseFonts
 			baseFonts.forEach(function(name) {
 				baseFontTests[name] = 0
 				baseFontDetected[name] = 0
-				if (name !== basefontFirst) {oTempBaseFonts[name] = []} // ignore the first baseFont
+				// ignore the first baseFont: we only want to track the others
+				if (name !== basefontFirst) {oTempBaseFonts[name] = []}
 			})
+
+			// prefix, Set
+			let aTests = [
+				["client", detectedViaClient],
+				["offset", detectedViaOffset],
+				["npixel", detectedViaPixelNumber],
+				["npixelsize", detectedViaPixelSizeNumber],
+				["nperspective", detectedViaPerspectiveNumber],
+				["ntransform", detectedViaTransformNumber],
+				["pixel", detectedViaPixel],
+				["pixelsize", detectedViaPixelSize],
+				["perspective", detectedViaPerspective],
+				["scroll", detectedViaScroll],
+				["transform", detectedViaTransform],
+			]
+
 			// loop
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
@@ -398,61 +390,34 @@ const getFonts = () => {
 					span.style.setProperty('--font', family)
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
-					detectLies.compute(dimensions)
-					if (dimensions.width != base[basefont].width ||
-						dimensions.height != base[basefont].height) {
-						detectedViaPixel.add(font +":"+ dimensions.width +" x "+ dimensions.height)
-						isDetected = true
-					}
-					if (dimensions.sizeWidth != base[basefont].sizeWidth ||
-						dimensions.sizeHeight != base[basefont].sizeHeight) {
-						detectedViaPixelSize.add(font +":"+ dimensions.sizeWidth +" x "+ dimensions.sizeHeight)
-						isDetected = true
-					}
-					if (dimensions.scrollWidth != base[basefont].scrollWidth ||
-						dimensions.scrollHeight != base[basefont].scrollHeight) {
-						detectedViaScroll.add(font +":"+ dimensions.scrollWidth +" x "+ dimensions.scrollHeight)
-						isDetected = true
-					}
-					if (dimensions.offsetWidth != base[basefont].offsetWidth ||
-						dimensions.offsetHeight != base[basefont].offsetHeight) {
-						detectedViaOffset.add(font +":"+ dimensions.offsetWidth +" x "+ dimensions.offsetHeight)
-						isDetected = true
-					}
-					if (dimensions.clientWidth != base[basefont].clientWidth ||
-						dimensions.clientHeight != base[basefont].clientHeight) {
-						detectedViaClient.add(font +":"+ dimensions.clientWidth +" x "+ dimensions.clientHeight)
-						isDetected = true
-					}
-					if (dimensions.transformWidth != base[basefont].transformWidth ||
-						dimensions.transformHeight != base[basefont].transformHeight) {
-						detectedViaTransform.add(font +":"+ dimensions.transformWidth +" x "+ dimensions.transformHeight)
-						isDetected = true
-					}
-					if (dimensions.perspectiveWidth != base[basefont].perspectiveWidth ||
-						dimensions.perspectiveHeight != base[basefont].perspectiveHeight) {
-						detectedViaPerspective.add(font +":"+ dimensions.perspectiveWidth +" x "+ dimensions.perspectiveHeight)
-						isDetected = true
-					}
+					aTests.forEach(function(pair) {
+						let wName = pair[0] +"Width", hName = pair[0] +"Height"
+						if (dimensions[wName] != base[basefont][wName] || dimensions[hName] != base[basefont][hName]) {
+							pair[1].add(font +":"+ dimensions[wName] +" x "+ dimensions[hName])
+							isDetected = true
+						}
+					})
 					// stats
 					baseFontTests[basefont]++
 					if (isDetected) {
 						baseFontDetected[basefont]++
-						if (basefont !== basefontFirst) {
-							oTempBaseFonts[basefont].push(font)
-						}
+						if (basefont !== basefontFirst) {oTempBaseFonts[basefont].push(font)}
 					}
 					return
 				})
 			})
 
-			const fontsPixel = [...detectedViaPixel]
-			const fontsPixelSize = [...detectedViaPixelSize]
 			const fontsScroll = [...detectedViaScroll]
 			const fontsOffset = [...detectedViaOffset]
 			const fontsClient = [...detectedViaClient]
+			const fontsPixel = [...detectedViaPixel]
+			const fontsPixelSize = [...detectedViaPixelSize]
 			const fontsPerspective = [...detectedViaPerspective]
 			const fontsTransform = [...detectedViaTransform]
+			const fontsPixelNumber = [...detectedViaPixelNumber]
+			const fontsPixelSizeNumber = [...detectedViaPixelSizeNumber]
+			const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
+			const fontsTransformNumber = [...detectedViaTransformNumber]
 
 			// stats
 			let aStats = [], totalTest = 0, totalDetect = 0
@@ -486,14 +451,17 @@ const getFonts = () => {
 				+ s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnE
 
 			return resolve({
-				lies: !!detectLies.getInvalidDimensions().length,
 				fontsScroll,
 				fontsOffset,
 				fontsClient,
 				fontsPixel,
 				fontsPixelSize,
 				fontsPerspective,
-				fontsTransform
+				fontsTransform,
+				fontsPixelNumber,
+				fontsPixelSizeNumber,
+				fontsPerspectiveNumber,
+				fontsTransformNumber,
 			})
 		} catch(e) {
 			// TypeError: document.fonts.values() is not iterable
@@ -505,27 +473,40 @@ const getFonts = () => {
 
 function get_fonts() {
 	return new Promise(resolve => {
+		if (!fntList.length) {
+			// ToDo: add ToNumber returns
+			return resolve(["fontsizes:"+ zNA, "fontsizes_base:"+ zNA, "fontnames:"+ zNA])
+		}
+
 		let t0; if (canPerf) {t0 = performance.now()}
-		let fontReturn = []
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		sDetail["fonts_fontsizes"] = []
+		sDetail["fonts_fontnames"] = []
 		sNames.forEach(function(name) {sDetail["fonts_fontsizes_"+ name + "_reported_notglobal"] = []})
 		// run
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+
 			// baseHash
+				// ToDo: leverage sDetail data for typeof mismatches
 			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
-			if (sDetail[bName] !== undefined) {
-				if (Object.keys(sDetail[bName]).length) {
-					baseHash = mini_sha1(sDetail[bName], "fontsizes base")
-					baseBtn = buildButton("12", bName)
-				}
+			if (sDetail[bName].length) {
+				baseHash = mini_sha1(sDetail[bName].join(), "fontsizes base")
+				baseBtn = buildButton("12", bName) + buildButton("12", bName+"_data", "data")
 			}
 			let baseReturn = "fontsizes_base:"+ baseHash
 			dom.fontBase.innerHTML = baseHash + baseBtn
 
+			// fontnames only
+			function get_fonts_only(aFontSize) {
+				let tmpFontNames = []
+				aFontSize.forEach(function(item) {
+					tmpFontNames.push(item.split(":")[0])
+				})
+				return tmpFontNames
+			}
 			// sim
 			if (runFNT) {
 				if (fntList.length > 0) {
@@ -565,10 +546,11 @@ function get_fonts() {
 			let fntData = [], fntHashes = [], miniHashes = [], blank = [], block = [], isSame = false
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
-					if (name !== "lies") { // ignore lies
+					// ignore Number: we only use seven x Integer for lies
+					if (name.slice(-6) !== "Number") {
 						let data = res[name],
 							hash = "none"
-						try {data.sort()} catch(e) {}
+						// note: do not sort: these are "fontnames:size" and fntList was already sorted
 						if (data.length == 0) {
 							// fontsPixelSize: not supported in FF62 or lower
 							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
@@ -599,31 +581,44 @@ function get_fonts() {
 			} else {
 				isSame = true
 			}
+
+			let resStr = "" // leave res object alone
 			let distinct = fntHashes.filter(function(item, position) {return fntHashes.indexOf(item) === position})
 			if (distinct.length == 1 && blank.length == 0 && block.length == 0) {
-				isSame = true; res = distinct[0]
+				isSame = true; resStr = distinct[0]
 			}
-			if (blank.length == 7) {isSame = true; res = "none"}
-			if (block.length == 7) {isSame = true; res = zB0}
+			if (blank.length == 7) {isSame = true; resStr = "none"}
+			if (block.length == 7) {isSame = true; resStr = zB0}
 
 			// all n/a, none, blocked or same hash
 			if (isSame) {
-				sNames.forEach(function(name) {document.getElementById(name).innerHTML = res})
-				let summary = (res == "none" ? soL +"none"+ scC : res)
-				if (res.length == 40) {
+				sNames.forEach(function(name) {document.getElementById(name).innerHTML = resStr})
+				let summary = (resStr == "none" ? soL +"none"+ scC : resStr)
+				if (resStr.length == 40) {
 					summary += buildButton("12", "fonts_fontsizes", sDetail["fonts_fontsizes"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
 				}
 				if (runFNT && fntList.length == 0) {summary = sb +"font simulation fail: no font list"+ sc}
 				dom.fontSizes.innerHTML = summary
 				if (gRun) {
-					if (res == zB0 || res == "none") {
-						if (res == "none") {gKnown.push("fonts:fontsizes")}
-						gMethods.push("fonts:fontsizes:"+ res +":all")
+					if (resStr == zB0 || resStr == "none") {
+						if (resStr == "none") {gKnown.push("fonts:fontsizes")}
+						gMethods.push("fonts:fontsizes:"+ resStr +":all")
 					}
 				}
+				// fontNames
+				let fontNameReturn = "fontnames:"+ resStr
+				if (resStr.length == 40 && !resStr.includes(" ")) { // hacky check for a valid hash
+					sDetail["fonts_fontnames"] = get_fonts_only(res["fontsOffset"])
+					let fontNameHash = mini_sha1(sDetail["fonts_fontnames"].join(), "fontnames")
+					let fontNameBtn = buildButton("12", "fonts_fontnames", sDetail["fonts_fontnames"].length)
+					fontNameReturn = "fontnames:"+ fontNameHash
+					dom.fontNames.innerHTML = fontNameHash + fontNameBtn
+				} else {
+					dom.fontNames.innerHTML = resStr
+				}
 				log_perf("fontsizes [fonts]",t0)
-				if (runFNT) {console.log(" - returning", res == "none"? zLIE : res)}
-				return resolve(["fontsizes:"+ (res == "none"? zLIE : res), baseReturn])
+				if (runFNT) {console.log(" - returning", resStr == "none"? zLIE : resStr)}
+				return resolve(["fontsizes:"+ (resStr == "none"? zLIE : resStr), baseReturn, fontNameReturn])
 			}
 
 			blank.sort
