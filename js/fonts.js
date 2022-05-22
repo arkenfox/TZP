@@ -229,6 +229,7 @@ const getFonts = () => {
 		if (fntList.length == 0) {
 			return resolve(zNA)
 		}
+		let t0; if (canPerf) {t0 = performance.now()}
 		try {
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
@@ -380,6 +381,7 @@ const getFonts = () => {
 			]
 
 			// loop
+			let t0size; if (canPerf) {t0size = performance.now()}
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
@@ -406,6 +408,7 @@ const getFonts = () => {
 					return
 				})
 			})
+			let t1size; if (canPerf) {t1size = (performance.now()-t0size)}
 
 			const fontsScroll = [...detectedViaScroll]
 			const fontsOffset = [...detectedViaOffset]
@@ -435,13 +438,15 @@ const getFonts = () => {
 				aStats.push(statString)
 			}
 			// build button
-			let btnE = "", sNameE = "fonts_extra_generic-names_data_notglobal"
+			let btnE = "", sNameE = "fonts_fontsizes_generic-names_data_notglobal"
 			sDetail[sNameE] = []
 			const namesE = Object.keys(oTempBaseFonts).sort()
 			for (const k of namesE) if (oTempBaseFonts[k].length) {
 				let value = k +": " + oTempBaseFonts[k].join(", ")
 				sDetail[sNameE].push (value)
-				log_debug("baseFont", value)
+				if (isOS == "android" || !isFF) {
+					log_debug("baseFont", value)
+				}
 			}
 			if (sDetail[sNameE].length) {
 				btnE = buildButton("12", sNameE, mini(sDetail[sNameE].join(), "fonts stats"))
@@ -449,6 +454,9 @@ const getFonts = () => {
 			// display
 			dom.fontStats.innerHTML = aStats.join(" | ") + " | "
 				+ s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnE
+			if (canPerf) {
+				log_debug("fonts", "sizes: "+ t1size +" ms | size function: "+ (performance.now()-t0) +" ms")
+			}
 
 			return resolve({
 				fontsScroll,
@@ -477,7 +485,6 @@ function get_fonts() {
 			// ToDo: add ToNumber returns
 			return resolve(["fontsizes:"+ zNA, "fontsizes_base:"+ zNA, "fontnames:"+ zNA])
 		}
-
 		let t0; if (canPerf) {t0 = performance.now()}
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
@@ -753,7 +760,7 @@ function get_fallback(list) {
 	/* https://github.com/arthuredelstein/tordemos */
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
-		sDetail["fonts_font_fallback"] = []
+		sDetail["fonts_fontnames_fallback"] = []
 		let width0 = null,
 			t = dom.fontFBTest
 		// measure
@@ -788,8 +795,8 @@ function get_fallback(list) {
 		dom.fontFBTest = ""
 		// output based on second result
 		if (list.length > 2) {
-			sDetail["fonts_font_fallback"] = found
-			dom.fontFB.innerHTML = mini_sha1(found.join()) + buildButton("12", "fonts_font_fallback", found.length)
+			sDetail["fonts_fontnames_fallback"] = found
+			dom.fontFB.innerHTML = mini_sha1(found.join()) + buildButton("12", "fonts_fontnames_fallback", found.length)
 				+ (isBaseFonts ? " from"+ fontBaseBtn : "")
 			// perf
 			log_click("font fallback",t0)
