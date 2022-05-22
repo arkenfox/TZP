@@ -71,6 +71,7 @@ function get_computed_styles() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let styleVersion = type => {
 			return new Promise(resolve => {
+				
 				// get CSSStyleDeclaration
 				try {
 					let cssStyleDeclaration = (
@@ -159,8 +160,7 @@ function get_computed_styles() {
 						prototypeName
 					})
 				} catch(e) {
-					// ToDo: catch this and record a single instance per style
-					//console.debug("css style", e.name, e.message)
+					log_error("css: "+ names[type], e.name, e.message)
 					return resolve("error")
 				}
 			})
