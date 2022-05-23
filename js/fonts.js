@@ -326,7 +326,7 @@ const getFonts = () => {
 				}
 				return dimensions
 			}
-			if (canPerf) {aTime.push("element"+ s4 + (performance.now() - t0) + sc); time0 = performance.now()}
+			if (canPerf) {aTime.push("div"+ s4 + (performance.now() - t0) + sc); time0 = performance.now()}
 
 			// base [default] sizes
 			const base = baseFontsFull.reduce((acc, font) => {
@@ -335,29 +335,7 @@ const getFonts = () => {
 				acc[font] = dimensions
 				return acc
 			}, {})
-			if (canPerf) {aTime.push("base"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
-			const baseNames = Object.keys(base).sort()
-			sDetail["fonts_fontsizes_base"] = [] // array: hash: baseFonts
-			sDetail["fonts_fontsizes_base_data"] = {} // object: hash: {data}
-			let oTempHashBase = {}, oTempHashData = {}
-			for (const k of baseNames) {
-				let tmpDimensionData = {}
-				const dimensionNames = Object.keys(base[k]).sort()
-				for (const j of dimensionNames) {tmpDimensionData[j] = base[k][j]}
-				let tmpHash = mini(tmpDimensionData, "fontsizes base "+ k)
-				oTempHashData[tmpHash] = tmpDimensionData
-				if (oTempHashBase[tmpHash] == undefined) {
-					oTempHashBase[tmpHash] = [k]
-				} else {
-					oTempHashBase[tmpHash].push(k)
-				}
-			}
-			let hashNames = Object.keys(oTempHashBase).sort()
-			for (const h of hashNames) {
-				sDetail["fonts_fontsizes_base"].push(h +":"+ oTempHashBase[h].join(", "))
-				sDetail["fonts_fontsizes_base_data"][h] = oTempHashData[h]
-			}
-			// baseFont stats
+			// stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
 			let oTempBaseFonts = {} // fonts per baseFonts
 			baseFonts.forEach(function(name) {
@@ -366,6 +344,7 @@ const getFonts = () => {
 				// ignore the first baseFont: we only want to track the others
 				if (name !== basefontFirst) {oTempBaseFonts[name] = []}
 			})
+			if (canPerf) {aTime.push("base"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 
 			// prefix, Set
 			let aTests = [
@@ -383,7 +362,6 @@ const getFonts = () => {
 			]
 
 			// loop
-			if (canPerf) {aTime.push("tidy"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
@@ -424,44 +402,56 @@ const getFonts = () => {
 			const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
 			const fontsTransformNumber = [...detectedViaTransformNumber]
 
-			// stats
-			let aStats = [], totalTest = 0, totalDetect = 0
-			for (let i = 0; i < baseFonts.length; i++) {
-				let name = baseFonts[i],
-					intTest = baseFontTests[name],
-					intDetect = baseFontDetected[name]
-				totalTest += intTest
-				totalDetect += intDetect
-				let statString = intDetect +"/"+ intTest
-				// highlight detected if after first two baseFonts
-				if (i > 1 && intDetect !== 0) {
-					statString = sb.trim() + statString + sc 
+			// tidy base
+			const baseNames = Object.keys(base).sort()
+			sDetail["fonts_fontsizes_base"] = [] // array: hash: baseFonts
+			sDetail["fonts_fontsizes_base_data"] = {} // object: hash: {data}
+			let oTempHashBase = {}, oTempHashData = {}
+			for (const k of baseNames) {
+				let tmpDimensionData = {}
+				const dimensionNames = Object.keys(base[k]).sort()
+				for (const j of dimensionNames) {tmpDimensionData[j] = base[k][j]}
+				let tmpHash = mini(tmpDimensionData, "fontsizes base "+ k)
+				oTempHashData[tmpHash] = tmpDimensionData
+				if (oTempHashBase[tmpHash] == undefined) {
+					oTempHashBase[tmpHash] = [k]
+				} else {
+					oTempHashBase[tmpHash].push(k)
 				}
-				aStats.push(statString)
 			}
-			// build button
-			let btnE = "", sNameE = "fonts_fontsizes_generic-names_data_notglobal"
-			sDetail[sNameE] = []
+			let hashNames = Object.keys(oTempHashBase).sort()
+			for (const h of hashNames) {
+				sDetail["fonts_fontsizes_base"].push(h +":"+ oTempHashBase[h].join(", "))
+				sDetail["fonts_fontsizes_base_data"][h] = oTempHashData[h]
+			}
+
+			// tidy stats
+			let aStats = [], totalTest = 0, totalDetect = 0, btnStats = ""
+			for (let i = 0; i < baseFonts.length; i++) {
+				let name = baseFonts[i]
+				let intTest = baseFontTests[name], intDetect = baseFontDetected[name]
+				totalTest += intTest; totalDetect += intDetect
+				aStats.push(intDetect +"/"+ intTest)
+			}
+			let sNameStats = "fonts_fontsizes_stat_data_notglobal"
+			sDetail[sNameStats] = []
 			const namesE = Object.keys(oTempBaseFonts).sort()
 			for (const k of namesE) if (oTempBaseFonts[k].length) {
 				let value = k +": " + oTempBaseFonts[k].join(", ")
-				sDetail[sNameE].push (value)
-				if (isOS == "android" || !isFF) {
-					log_debug("baseFont", value)
-				}
+				sDetail[sNameStats].push (value)
+				if (isOS == "android" || !isFF) {log_debug("baseFont", value)}
 			}
-			if (sDetail[sNameE].length) {
-				btnE = buildButton("12", sNameE, mini(sDetail[sNameE].join(), "fonts stats"))
+			if (sDetail[sNameStats].length) {
+				btnStats = buildButton("12", sNameStats, mini(sDetail[sNameStats].join(), "fonts stats"))
 			}
-			// display
-			dom.fontStats.innerHTML = aStats.join(" | ") + " | "
-				+ s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnE
-			if (canPerf) {
-				aTime.push("finish"+ s4 + (performance.now() - time0) + sc);
-				aTime.push("function"+ so + (performance.now() - t0) + sc);
-				log_debug("fontsizes", aTime.join(" ms | ") +" ms")
-			}
+			dom.fontStats.innerHTML = aStats.join(" | ") + " | " + s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnStats
 
+			// finish
+			if (canPerf) {
+				aTime.push("tidy"+ s4 + (performance.now() - time0) + sc);
+				aTime.push("total"+ so + (performance.now() - t0) + sc);
+				log_debug("fontsizes", aTime.join(" | "))
+			}
 			return resolve({
 				fontsScroll,
 				fontsOffset,
@@ -503,10 +493,12 @@ function get_fonts() {
 			// baseHash
 				// ToDo: leverage sDetail data for typeof mismatches
 			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
-			if (sDetail[bName].length) {
-				baseHash = mini_sha1(sDetail[bName].join(), "fontsizes base")
-				baseBtn = buildButton("12", bName) + buildButton("12", bName+"_data", "data")
-			}
+			try {
+				if (sDetail[bName].length) {
+					baseHash = mini_sha1(sDetail[bName].join(), "fontsizes base")
+					baseBtn = buildButton("12", bName) + buildButton("12", bName+"_data", "data")
+				}
+			} catch(e) {}
 			let baseReturn = "fontsizes_base:"+ baseHash
 			dom.fontBase.innerHTML = baseHash + baseBtn
 
