@@ -229,8 +229,10 @@ const getFonts = () => {
 		if (fntList.length == 0) {
 			return resolve(zNA)
 		}
-		let t0; if (canPerf) {t0 = performance.now()}
 		try {
+			let t0, time0; if (canPerf) {t0 = performance.now()}
+			let aTime = []
+
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
 			const div = doc.createElement('div')
@@ -289,8 +291,8 @@ const getFonts = () => {
 			const detectedViaPerspectiveNumber = new Set()
 			const baseFonts = ['monospace','sans-serif','serif'] // do monospace first
 			const baseFontsFull = [
-				'none','monospace','sans-serif','serif','cursive','fantasy','fangsong',
-				'system-ui','ui-monospace','ui-rounded','ui-serif','math','emoji'
+				'none','monospace','sans-serif','serif','cursive','fantasy','fangsong','system-ui',
+				//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
 			]
 			const style = getComputedStyle(span)
 
@@ -324,15 +326,16 @@ const getFonts = () => {
 				}
 				return dimensions
 			}
+			if (canPerf) {aTime.push("element"+ s4 + (performance.now() - t0) + sc); time0 = performance.now()}
 
+			// base [default] sizes
 			const base = baseFontsFull.reduce((acc, font) => {
 				span.style.setProperty('--font', font)
 				const dimensions = getDimensions(span, style)
 				acc[font] = dimensions
 				return acc
 			}, {})
-
-			// base [default] sizes
+			if (canPerf) {aTime.push("base"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 			const baseNames = Object.keys(base).sort()
 			sDetail["fonts_fontsizes_base"] = [] // array: hash: baseFonts
 			sDetail["fonts_fontsizes_base_data"] = {} // object: hash: {data}
@@ -354,7 +357,6 @@ const getFonts = () => {
 				sDetail["fonts_fontsizes_base"].push(h +":"+ oTempHashBase[h].join(", "))
 				sDetail["fonts_fontsizes_base_data"][h] = oTempHashData[h]
 			}
-
 			// baseFont stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
 			let oTempBaseFonts = {} // fonts per baseFonts
@@ -381,7 +383,7 @@ const getFonts = () => {
 			]
 
 			// loop
-			let t0size; if (canPerf) {t0size = performance.now()}
+			if (canPerf) {aTime.push("tidy"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 			fntList.forEach(font => {
 				let isDetected = false // reset each font
 				baseFonts.forEach(basefont => {
@@ -408,7 +410,7 @@ const getFonts = () => {
 					return
 				})
 			})
-			let t1size; if (canPerf) {t1size = (performance.now()-t0size)}
+			if (canPerf) {aTime.push("measure"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 
 			const fontsScroll = [...detectedViaScroll]
 			const fontsOffset = [...detectedViaOffset]
@@ -455,7 +457,9 @@ const getFonts = () => {
 			dom.fontStats.innerHTML = aStats.join(" | ") + " | "
 				+ s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnE
 			if (canPerf) {
-				log_debug("fonts", "sizes: "+ t1size +" ms | size function: "+ (performance.now()-t0) +" ms")
+				aTime.push("finish"+ s4 + (performance.now() - time0) + sc);
+				aTime.push("function"+ so + (performance.now() - t0) + sc);
+				log_debug("fontsizes", aTime.join(" ms | ") +" ms")
 			}
 
 			return resolve({
