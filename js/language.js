@@ -741,7 +741,8 @@ function get_lang_doc() {
 			if (bTZ) {
 				// state1: both green
 				// FF85+: also use javascript.use_us_english_locale
-				if (hashDate == "561bee350bb336bb1673c345a9d5bbdb340a960e") {ff = " [FF91+]"
+				if (hashDate == "5ab7e9a4c127cbe7516d2442400b13626e39df1f") {ff = " [FF101+]"
+				} else if (hashDate == "561bee350bb336bb1673c345a9d5bbdb340a960e") {ff = " [FF91+]"
 				} else if (hashDate == "3f35d9cfdeeec07da82b12575d89c7bcd786647e") {ff = " [FF90]"
 				} else if (hashDate == "5eb6a41c1535f189aaa1e96c01ee2b0bcd43e76d") {ff = " [FF79-89]"
 				} else if (hashDate == "7142a7276324f9f20c79cb63ce04d0c4bd287d3f") {ff = " [FF78]"
