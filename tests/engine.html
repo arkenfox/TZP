@@ -178,7 +178,12 @@ function get_canvaskeys(num) {
 		let resT = "none"
 		if (aMCanvas.length > 0) {
 			resT = sha1(aMCanvas.join())
-			if (resT == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {testT = true}
+			if (resT == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {
+				testT = true
+			} else if (isVer > 101) {
+			// 1765063: FF102+: Disable mozCurrentTransform on early beta and earlier
+				if (resT == "3edbfe7a636b1109796885e6b6dd221f9267b0b3") {testT = true}
+			}
 			resT += s3 +" ["+ aMCanvas.length +"]"+ sc
 		}
 		fnRecord(num, strT, resT, testT)
