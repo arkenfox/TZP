@@ -405,7 +405,9 @@ function get_fonts(runtype) {
 							}
 							if (notFoundInMin.length) {
 								display.push(s12 + "MIN FONTS NOT FOUND: ["+ notFoundInMin.length +"]"+ sc +"<br>")
-								display.push(notFoundInMin.join(", "))
+								let minString = notFoundInMin.join(", ")
+								minString = minString.replace(fntFake, sg + fntFake + sc)
+								display.push(minString)
 							}
 						// test not configured
 						} else {
