@@ -691,7 +691,6 @@ function get_scr_dpi_dpr(runtype) {
 					+" | mmDPI : "+ mmDPI +" | dpi_x : "+ dpi_x +" | dpi_y : "+ dpi_y
 				)
 			}
-
 			// bypass matchmedia lies
 				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
 				// ToDo: but only if drp2 wasn't blocked?
@@ -1580,7 +1579,7 @@ function get_ua_doc() {
 				if (isOS !== "" && bs == false) {
 					// isVerPlus: allow the next version
 					let controlA = "", controlB = "", testA = str, testB = str
-					if (isRFP) {
+					if (isRFP && isOS == "android" || isRFP && isVer < 102) {
 					// RFP ON
 						v = "78.0"
 						if (isVer > 90) {v = "91.0"}
@@ -1635,9 +1634,11 @@ function get_ua_doc() {
 					// as long as one matches
 					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
 					// trap when RFP fails to get the nextESR
-					if (bs && isRFP && !proxyLies.includes("Navigator.userAgent")) {
-						bs = false
-						dom.luserAgent.innerHTML = sb +"[NEXT RFP ESR VER FAIL] "+ sc + "userAgent"
+					if (isOS == "android") {
+						if (bs && isRFP && !proxyLies.includes("Navigator.userAgent")) {
+							bs = false
+							dom.luserAgent.innerHTML = sb +"[NEXT RFP ESR VER FAIL] "+ sc + "userAgent"
+						}
 					}
 				}
 			}
@@ -2290,7 +2291,11 @@ function outputUA() {
 			// so this only applies to ESR numbering
 			if (isRFP && isVer > 59) {
 				if (isFork === undefined) {go = true}
-				if (isRFP) {go = true}
+				if (isRFP && isOS == "android" || isRFP && isVer < 102) {
+					go = true
+				} else {
+					go = false
+				}
 				// skip open-ended versions if next version is ESR
 				// assuming isVer keeps up to date: e.g. 101+ can be 101 or 102
 				if (isVerPlus) {
