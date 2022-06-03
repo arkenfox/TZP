@@ -56,12 +56,24 @@
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntList = [],
 	fntListCheck = [],
+	oBaseFonts = {},
 	fntFake = "",
-	oBaseFonts = {}
+	strOS = "",
+	fntBaseStats = "",
+	fntBaseDimensions = "",
+	bTB = false
 
-// remember some results across the two tests
+// remember results across the two tests
 let notFoundInMin = [],
 	foundInAll = []
+
+sb = sb.trim()
+sg = sg.trim()
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+dom.logtype.checked = true
+
 
 let fntMaster = {android: [], linux: [],mac: [], windows: []}
 let fntMasterBase = {android: [], linux: [],mac: [], windows: []}
@@ -346,7 +358,8 @@ function get_fonts(runtype) {
 					dom.results = "nothing found"
 					return
 				} else {
-					display.push(s12 +"stats".padStart(9) + sc +": " + fntStats +"<br>")
+					display.push(s12 +"stats".padStart(9) + sc +": " + fntBaseStats)
+					display.push(s12 +"base".padStart(9) + sc +": " + fntBaseDimensions +"<br>")
 
 					// all
 					let hash = sha1(data.join())
@@ -627,17 +640,7 @@ function setBtn(method) {
 	el.classList.remove("btn12")
 }
 
-sb = sb.trim()
-sg = sg.trim()
-s4 = s4.trim()
-s12 = s12.trim()
-s14 = s14.trim()
-let strOS = ""
-let bTB = false
-let fntStats = ""
-dom.logtype.checked = true
 run_once()
-
 
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
@@ -647,8 +650,10 @@ const getFonts = () => {
 			return
 		}
 		try {
-			// reset basefont stats
-			fntStats = ""
+			// reset
+			fntBaseStats = ""
+			fntBaseDimensions = ""
+			oBaseFonts = {}
 
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
@@ -711,7 +716,6 @@ const getFonts = () => {
 
 			// stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
-			oBaseFonts = {} // fonts per baseFonts
 			baseFonts.forEach(function(name) {
 				baseFontTests[name] = 0
 				baseFontDetected[name] = 0
@@ -721,16 +725,12 @@ const getFonts = () => {
 			fntList.forEach(font => {
 				baseFonts.forEach(basefont => {
 					const family = "'"+ font +"', "+ basefont
-					let isDetected = false // reset per basefont
 					span.style.setProperty('--font', family)
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
 					if (dimensions.offsetWidth != base[basefont].offsetWidth ||
 						dimensions.offsetHeight != base[basefont].offsetHeight) {
 						detectedViaOffset.add(font)
-						isDetected = true
-					}
-					if (isDetected) {
 						baseFontDetected[basefont]++
 						oBaseFonts[basefont].push(font)
 					}
@@ -739,13 +739,24 @@ const getFonts = () => {
 
 			// BASEFONT STATS
 			// tidy count stats
-			let aStats = []
+			let aTemp = []
 			for (let i = 0; i < baseFonts.length; i++) {
 				let name = baseFonts[i]
 				let intTest = baseFontTests[name], intDetect = baseFontDetected[name]
-				aStats.push(name + ": "+ button(name, intDetect)) 
+				aTemp.push(name + ": "+ button(name, intDetect)) 
 			}
-			if (aStats.length) {fntStats = aStats.join(" | ")}
+			if (aTemp.length) {fntBaseStats = aTemp.join(" | ")}
+
+			// BASEFONT DIMENSIONS
+			aTemp = []
+			try {
+				for (const k of Object.keys(base)) {
+					aTemp.push(k + ": "+ s12 + base[k]["offsetWidth"] +" x "+ base[k]["offsetHeight"] + sc)
+				}
+			} catch(e) {
+				aTemp.push(e.name +": "+ e.message)
+			}
+			if (aTemp.length) {fntBaseDimensions = aTemp.join(" | ")}
 
 			const fontsOffset = [...detectedViaOffset]
 			return resolve({
