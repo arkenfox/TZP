@@ -1042,7 +1042,7 @@ function get_touch() {
 			let list = ["ontouchstart","ontouchend"]
 			list.forEach(function(name) {
 				try {
-					if (name in window) {toucRes.push(true)} else {touchRes.push(false)}
+					if (name in window) {touchRes.push(true)} else {touchRes.push(false)}
 				} catch(e) {
 					log_error("devices: "+ name, e.name, e.message)
 					touchRes.push(zB0)
