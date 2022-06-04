@@ -61,6 +61,7 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	strOS = "",
 	fntBaseStats = "",
 	fntBaseDimensions = "",
+	baseFonts = ['monospace', 'sans-serif', 'serif'],
 	bTB = false
 
 // remember results across the two tests
@@ -358,12 +359,22 @@ function get_fonts(runtype) {
 					dom.results = "nothing found"
 					return
 				} else {
-					display.push(s12 +"stats".padStart(9) + sc +": " + fntBaseStats)
-					display.push(s12 +"base".padStart(9) + sc +": " + fntBaseDimensions +"<br>")
+					display.push(s12 +"base".padStart(12) + sc +": " + fntBaseDimensions)
+					display.push(s12 +"stats".padStart(12) + sc +": " + fntBaseStats)
+
+					// calculate default fonts per basefont
+					if (!data.includes(fntFake)) {
+						// what is in each basefont but not in found
+						baseFonts.forEach(function(basefont) {
+							let unique = data.filter(x => !oBaseFonts[basefont].includes(x))
+							display.push(s12+ basefont.padStart(12) +sc +": " + (unique.length ? unique.join(", ") : "n/a")
+							)
+						})
+					}
 
 					// all
 					let hash = sha1(data.join())
-					display.push(s12+ "max".padStart(9) + sc +": " + hash + s12 +" ["+ data.length +"/"+ fntList.length +"]"+ sc)
+					display.push("<br>"+ s12+ "max".padStart(12) + sc +": " + hash + s12 +" ["+ data.length +"/"+ fntList.length +"]"+ sc)
 					// found in all but not in checklist
 					let missingInCheck = data.filter(x => !fntListCheck.includes(x))
 					// found in both
@@ -391,7 +402,7 @@ function get_fonts(runtype) {
 						} else if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
 							notFoundInMin = fntListCheck.filter(x => !data.includes(x)) // base list items not found
 							// display
-							display.push(s12 +"min".padStart(9) + sc +": " + checkHash + s12
+							display.push(s12 +"min".padStart(12) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (hash == checkHash ? green_tick : red_cross) +"<br>"
 							)
@@ -444,7 +455,7 @@ function get_fonts(runtype) {
 						// faces > 0
 						} else if (fntFaces[strOS].length > 0) {
 							foundInAll = data
-							display.push(s12 +"faces".padStart(9) + sc +": " + checkHash + s12
+							display.push(s12 +"faces".padStart(12) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (checkData.length ? red_cross : green_tick) +"<br>"
 							)
@@ -697,7 +708,6 @@ const getFonts = () => {
 
 			const span = doc.getElementById(`${id}-detector`)
 			const detectedViaOffset = new Set()
-			const baseFonts = ['monospace', 'sans-serif', 'serif']
 			const style = getComputedStyle(span)
 
 			const getDimensions = (span, style) => {
