@@ -61,12 +61,8 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	strOS = "",
 	fntBaseStats = "",
 	fntBaseDimensions = "",
-	baseFonts = [
-		// force alternative fonts in case generic is broken
-		'monospace, Courier, \"Courier New\", Menlo, Consolas',
-		'sans-serif',
-		'serif'
-	],
+	baseFonts = ['monospace','sans-serif','serif'],
+	baseGeneric = baseFonts,
 	bTB = false
 
 // remember results across the two tests
@@ -214,8 +210,8 @@ function log_list(name) {
 		} else {
 			listArray = fntMasterBase[strOS].concat(fntOther[strOS])
 		}
-	} else if (baseFonts.includes(name)) {
-		listArray = oBaseFonts[name]
+	} else if (baseGeneric.includes(name)) {
+			listArray = oBaseFonts[name]
 	}
 	listArray.sort()
 	let logtype = dom.logtype.checked
@@ -371,10 +367,9 @@ function get_fonts(runtype) {
 					// calculate default fonts per basefont
 					if (!data.includes(fntFake)) {
 						// what is in each basefont but not in found
-						baseFonts.forEach(function(basefont) {
+						baseGeneric.forEach(function(basefont) {
 							let unique = data.filter(x => !oBaseFonts[basefont].includes(x))
-							let baseGeneric = basefont.split(",")[0]
-							display.push(s12 + baseGeneric.padStart(12) +sc +": " + (unique.length ? unique.join(", ") : "n/a")
+							display.push(s12 + basefont.padStart(12) +sc +": " + (unique.length ? unique.join(", ") : "n/a")
 							)
 						})
 					}
@@ -641,6 +636,24 @@ function run_once() {
 		} else {
 			// create master fontlist
 			set_fntListMaster()
+
+			// set baseFonts
+				// force alternative fonts in case generic is broken
+				// see https://hg.mozilla.org/mozilla-central/rev/931336f048ab#l1.12
+				// you can simulate using the fallback by changing font.name-list.[basefont].x-western to a made-up font
+				// can't seem to simulate the TB mac issue where everything is found - on windows with no fallback the
+				// default fonts simply drop off the found fonts list - with fallback they are found
+				if (strOS == "mac") {
+					baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
+						'sans-serif',
+						'serif'
+					]
+			} else if (strOS == "windows") {
+					baseFonts = ['monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
+						'sans-serif, Arial',
+						'serif, \"Times New Roman\", Times, Roman'
+					]
+			}
 		}
 	})
 }
@@ -727,13 +740,14 @@ const getFonts = () => {
 			const base = baseFonts.reduce((acc, font) => {
 				span.style.setProperty('--font', font)
 				const dimensions = getDimensions(span, style)
-				acc[font] = dimensions
+				acc[font.split(",")[0]] = dimensions
 				return acc
 			}, {})
 
 			// stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
 			baseFonts.forEach(function(name) {
+				name = name.split(",")[0]
 				baseFontTests[name] = 0
 				baseFontDetected[name] = 0
 				oBaseFonts[name] = []
@@ -745,6 +759,7 @@ const getFonts = () => {
 					span.style.setProperty('--font', family)
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
+					basefont = basefont.split(",")[0]
 					if (dimensions.offsetWidth != base[basefont].offsetWidth ||
 						dimensions.offsetHeight != base[basefont].offsetHeight) {
 						detectedViaOffset.add(font)
@@ -757,11 +772,10 @@ const getFonts = () => {
 			// BASEFONT STATS
 			// tidy count stats
 			let aTemp = []
-			for (let i = 0; i < baseFonts.length; i++) {
-				let name = baseFonts[i]
+			for (let i = 0; i < baseGeneric.length; i++) {
+				let name = baseGeneric[i]
 				let intTest = baseFontTests[name], intDetect = baseFontDetected[name]
-				let baseGeneric = name.split(",")[0]
-				aTemp.push(baseGeneric + ": "+ button(name, intDetect)) 
+				aTemp.push(name + ": "+ button(name, intDetect)) 
 			}
 			if (aTemp.length) {fntBaseStats = aTemp.join(" | ")}
 
@@ -769,8 +783,7 @@ const getFonts = () => {
 			aTemp = []
 			try {
 				for (const k of Object.keys(base)) {
-					let baseGeneric = k.split(",")[0]
-					aTemp.push(baseGeneric + ": "+ s12 + base[k]["offsetWidth"] +" x "+ base[k]["offsetHeight"] + sc)
+					aTemp.push(k + ": "+ s12 + base[k]["offsetWidth"] +" x "+ base[k]["offsetHeight"] + sc)
 				}
 			} catch(e) {
 				aTemp.push(e.name +": "+ e.message)
