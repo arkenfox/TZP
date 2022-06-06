@@ -61,6 +61,7 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	strOS = "",
 	fntBaseStats = "",
 	fntBaseDimensions = "",
+	fntPoison = "",
 	baseFonts = ['monospace','sans-serif','serif'],
 	baseGeneric = baseFonts,
 	bTB = false
@@ -363,6 +364,7 @@ function get_fonts(runtype) {
 				} else {
 					display.push(s12 +"base".padStart(12) + sc +": " + fntBaseDimensions)
 					display.push(s12 +"stats".padStart(12) + sc +": " + fntBaseStats)
+					display.push(s12 +"poison".padStart(12) + sc +": " + fntPoison)
 
 					// calculate default fonts per basefont
 					if (!data.includes(fntFake)) {
@@ -643,16 +645,16 @@ function run_once() {
 				// you can simulate using the fallback by changing font.name-list.[basefont].x-western to a made-up font
 				// can't seem to simulate the TB mac issue where everything is found - on windows with no fallback the
 				// default fonts simply drop off the found fonts list - with fallback they are found
-				if (strOS == "mac") {
-					baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
-						'sans-serif',
-						'serif'
-					]
+			if (strOS == "mac") {
+				baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
+					'sans-serif',
+					'serif'
+				]
 			} else if (strOS == "windows") {
-					baseFonts = ['monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
-						'sans-serif, Arial',
-						'serif, \"Times New Roman\", Times, Roman'
-					]
+				baseFonts = ['monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
+					'sans-serif, Arial',
+					'serif, \"Times New Roman\", Times, Roman'
+				]
 			}
 		}
 	})
@@ -684,6 +686,7 @@ const getFonts = () => {
 			// reset
 			fntBaseStats = ""
 			fntBaseDimensions = ""
+			fntPoison = ""
 			oBaseFonts = {}
 
 			const doc = document // or iframe.contentWindow.document
@@ -746,12 +749,29 @@ const getFonts = () => {
 
 			// stats
 			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
-			baseFonts.forEach(function(name) {
-				name = name.split(",")[0]
+			baseGeneric.forEach(function(name) {
 				baseFontTests[name] = 0
 				baseFontDetected[name] = 0
 				oBaseFonts[name] = []
 			})
+
+			// poison + generic
+			let aPoison = []
+			baseGeneric.forEach(function(basefont) {
+				const family = "'"+ fntFake +"', "+ basefont
+				span.style.setProperty('--font', family)
+				const style = getComputedStyle(span)
+				const dimensions = getDimensions(span, style)
+				if (dimensions.offsetWidth != base[basefont].offsetWidth ||
+					dimensions.offsetHeight != base[basefont].offsetHeight) {
+					aPoison.push(basefont +": "+ sb + "fail" + sc)
+				} else {
+					aPoison.push(basefont +": "+ sg + "pass" + sc)
+				}
+			})
+			if (aPoison.length) {
+				fntPoison = aPoison.join(" | ")
+			}
 
 			fntList.forEach(font => {
 				baseFonts.forEach(basefont => {
