@@ -792,8 +792,22 @@ function get_fallback(list) {
 		// output based on second result
 		if (list.length > 2) {
 			sDetail["fonts_fontnames_fallback"] = found
+			// diffs
+			let fontDiffBtn = ""
+			if (sDetail["fonts_fontnames"].length && found.length) {
+				let fntNames = sDetail["fonts_fontnames"]
+				let fntNew = found.filter(x => !fntNames.includes(x))
+				let fntMissing = fntNames.filter(x => !found.includes(x))
+				let fntDiff = []
+				if (fntNew.length) {fntDiff.push("new:" + fntNew.join(", "))}
+				if (fntMissing.length) {fntDiff.push("missing:" + fntMissing.join(", "))}
+				if (fntDiff.length) {
+					sDetail["fonts_fontnames_diff_notglobal"] = fntDiff
+					fontDiffBtn = buildButton("12", "fonts_fontnames_diff_notglobal", "diff")
+				}
+			}
 			dom.fontFB.innerHTML = mini_sha1(found.join()) + buildButton("12", "fonts_fontnames_fallback", found.length)
-				+ (isBaseFonts ? " from"+ fontBaseBtn : "")
+				+ (isBaseFonts ? " from"+ fontBaseBtn : "") + fontDiffBtn
 			// perf
 			log_click("font fallback",t0)
 			gClick = true
