@@ -142,7 +142,8 @@ let s0 = " <span class='",
 	note_file = "",
 	note_ttc = sf+"test to come"+sc,
 // other
-	isBaseFonts = false,
+	isBaseFonts = false, // use whitelist/kBaseFonts
+	isPlatformFont = undefined, // from widget for baseFonts
 	isBrave = false,
 	isBraveMode = 0,
 	aBraveMode = ["unknown", "disabled", "standard", "strict"],
