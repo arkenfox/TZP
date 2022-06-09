@@ -460,11 +460,16 @@ const get_isOS = () => new Promise(resolve => {
 		}
 		let el = dom.widget0
 		let font = getComputedStyle(el).getPropertyValue("font-family")
-		if (font.slice(0,12) == "MS Shell Dlg") {isOS="windows"
+		if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
 		} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
-		} else if (font == "Roboto") {isOS="android"
-		}	else if (font == "-apple-system") {isOS="mac"
-		}	else {isOS="linux"}
+		} else if (font == "Roboto") {isOS = "android"
+		} else if (font == "-apple-system") {isOS = "mac"
+		} else {isOS = "linux"}
+		// set isPlatformFont
+		// limit to windows + mac for now
+		if (isOS == "windows" || isOS == "mac") {
+			isPlatformFont = font
+		}
 		log_perf("isOS [global]",t0,"",isOS +" | "+ font)
 		return resolve()
 	} catch(e) {
@@ -1337,7 +1342,7 @@ function countJS(filename) {
 			if (canPerf) {t0= performance.now()}
 			Promise.all([
 				get_isEngine(), // do first to quickly set isFFLegacy
-				get_isOS(),
+				get_isOS(), // this also sets isPlatformFont for font tests
 				get_isVer(),
 				get_isTB(),
 				get_isBrave(),
