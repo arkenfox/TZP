@@ -466,8 +466,8 @@ const get_isOS = () => new Promise(resolve => {
 		} else if (font == "-apple-system") {isOS = "mac"
 		} else {isOS = "linux"}
 		// set isPlatformFont
-		// limit to windows + mac for now
-		if (isOS == "windows" || isOS == "mac") {
+		// limit to windows for now
+		if (isOS == "windows") {
 			isPlatformFont = font
 		}
 		log_perf("isOS [global]",t0,"",isOS +" | "+ font)
