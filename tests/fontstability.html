@@ -286,8 +286,11 @@ function run_once() {
 				'serif, \"Times New Roman\", Times, Roman'
 			]
 		}
-		// don't wait, run
-		get_fonts()
+		// don't wait, run: replicate setTimeout in TZP: 1ms seems to do something, start with that
+		let delay = 1
+		setTimeout(function() {
+			get_fonts()
+		}, delay)
 	})
 }
 
