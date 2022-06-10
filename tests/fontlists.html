@@ -246,7 +246,7 @@ function check_fntLists() {
 function set_fntListMaster() {
 	// note: we only call this function once
 	// create: fntMaster & fntMasterBase
-	fntFake = "00"+ rnd_string() + " poison pill"
+	fntFake = ".00"+ rnd_string() + " poison pill"
 	let names = Object.keys(fntMaster)
 	for (const k of names) {
 		// always add a poison pill
@@ -794,8 +794,7 @@ const getFonts = () => {
 			let aTemp = []
 			for (let i = 0; i < baseGeneric.length; i++) {
 				let name = baseGeneric[i]
-				let intTest = baseFontTests[name], intDetect = baseFontDetected[name]
-				aTemp.push(name + ": "+ button(name, intDetect)) 
+				aTemp.push(name + ": "+ button(name, baseFontDetected[name].toString().padStart(4))) 
 			}
 			if (aTemp.length) {fntBaseStats = aTemp.join(" | ")}
 
