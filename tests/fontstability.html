@@ -28,7 +28,7 @@
 			<div class="nav-title">font stability</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><!-- &#9745; &#9744; -->
-			<span class="no_color">Checking font stability on cold app loads, first runs etc</span>
+			<span class="no_color">Checking font stability on cold app loads, first runs etc. See <code>gfx.font_loader.delay</code></span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span id="bmin" class="btn12 btnfirst" onClick="run()">[ re-run ]</span>
@@ -154,7 +154,6 @@ function log_list(name, type) {
 }
 
 function button(name, type, len) {
-	if (name !== "bundled") {len = (len+"").padStart(3)}
 	return " <span class='btnb' onClick='log_list(`"+ name +"`,`" + type +"`)'>" + s12 +"["+ len +"]"+ sc +"</span>"
 }
 
