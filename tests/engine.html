@@ -1539,7 +1539,8 @@ function get_isVer() {
 				}
 			}
 			// FF60+
-			topVer = 102
+			topVer = 103
+			if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
 				if (Array(1).includes()) return 102 // 1767541: regression FF99
 				return 101 // 1728999

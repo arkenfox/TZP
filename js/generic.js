@@ -622,7 +622,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 102) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 103) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -632,6 +632,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
+		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
 			if (Array(1).includes()) return 102 // 1767541: regression FF99
 			return 101 // 1728999
