@@ -39,6 +39,10 @@
 			color: #dcdcdc;
 			font-size: 11px;
 		}
+		div.chars {
+			direction:ltr;
+			unicode-bidi:bidi-override;
+		}
 	</style>
 </head>
 <body>
@@ -1290,8 +1294,8 @@ function generate() {
 						strEnd = sc
 					}
 					let spacer = aSpacer.includes(name) ? " " : ""
-					aDisplay.push(strStart + spacer + aCharsMin.join(ZWNJ + spacer) + strEnd +"<br>")
-					aDisplayMax.push(strStart + spacer + aCharsMax.join(ZWNJ + spacer) + strEnd +"<br>")
+					aDisplay.push("<div class='chars'>"+ strStart + spacer + aCharsMin.join(ZWNJ + spacer) + strEnd +"</div>")
+					aDisplayMax.push("<div class='chars'>"+ strStart + spacer + aCharsMax.join(ZWNJ + spacer) + strEnd +"</div>")
 					// reset grouptitle
 					grouptitle = ""
 				}
@@ -1578,7 +1582,7 @@ function test(testDepth) {
 					strStart = "<span style='font-size: "+ oEnlarge[name][0] +"px'>"
 					strEnd = sc
 				}
-				aVisual.push(strStart + strA + strEnd +"<br>")
+				aVisual.push("<div class='chars'>" + strStart + strA + strEnd +"</div>")
 			}
 		}
 	})
