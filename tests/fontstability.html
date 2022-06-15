@@ -269,11 +269,7 @@ function run_once() {
 		// create master fontlist
 		set_fntListMaster()
 		// set baseFonts
-			// force alternative fonts in case generic is broken
-			// see https://hg.mozilla.org/mozilla-central/rev/931336f048ab#l1.12
-			// you can simulate using the fallback by changing font.name-list.[basefont].x-western to a made-up font
-			// can't seem to simulate the TB mac issue where everything is found - on windows with no fallback the
-			// default fonts simply drop off the found fonts list - with fallback they are found
+			// force falback fonts in case generic is broken
 		if (strOS == "mac") {
 			baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
 				'sans-serif',
@@ -285,11 +281,8 @@ function run_once() {
 				'serif, \"Times New Roman\", Times, Roman'
 			]
 		}
-		// don't wait, run: replicate setTimeout in TZP: 1ms seems to do something, start with that
-		let delay = 1
-		setTimeout(function() {
-			get_fonts()
-		}, delay)
+		// don't wait, run ASAP
+		get_fonts()
 	})
 }
 
