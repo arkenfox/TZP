@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=700">
+	<title>font check</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 680px;}
+		hr {color: #8ca7dc}
+		nav {
+			position: absolute;
+			padding: 15px;
+			background-color: #161b22;
+		}
+		nav div {
+			white-space: nowrap;
+			margin-bottom: 12px;
+		}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<col width="20%"><col width="80%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">font check</div>
+		</th></tr></thead>
+		<!--<tr><td colspan="2" class="intro">
+			<span class="no_color">test whatever you like or use a preset</span>
+		</td></tr>-->
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn12 btnfirst" onClick="run()">[ run ]</span>
+			<span class="btn12 btn" onClick="reset()">[ clear ]</span>
+			<span class="btn12 btn" onClick="toggleitem(`navmenu`)" style="position: relative;">
+				[ presets &#9660 ]
+				<nav id="navmenu" class="hidden" style="cursor: auto;">
+					<span style="cursor: pointer;">
+						<div onClick="preset('android')">Android</div>
+						<div onClick="preset('bundled')">Bundled [Tor Browser]</div>
+						<div onClick="preset('linux')">Linux</div>
+						<div onClick="preset('mac')">Mac</div>
+						<div onClick="preset('windows')">Windows</div>
+					</span>
+				</nav>
+			</span>
+
+			<br><br>
+			<textarea rows="2" placeholder="comma delimited values, with or without quote marks: e.g: 'Arial',Times New Roman"
+					style="width: 98%; resize: vertical" id="valueF"></textarea>
+			<br><br>
+			<hr>
+			<br>
+			<span class="spaces" style="color: #b3b3b3;" id="results"></span>
+			</td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
+	fntList = [],
+	baseFonts = [
+		'monospace, Menlo, Courier, \"Courier New\", Consolas, Monaco',
+		'sans-serif','serif'
+	]
+
+sb = sb.trim()
+sg = sg.trim()
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+
+let fntMaster = {
+	android: ['Droid Sans','Droid Sans Mono','Droid Serif','Noto Color Emoji','Noto Emoji','Noto Kufi Arabic','Noto Mono','Noto Naskh Arabic','Noto Nastaliq Urdu','Noto Sans','Noto Sans Adlam','Noto Sans Adlam Unjoined','Noto Sans Anatolian Hieroglyphs','Noto Sans Arabic','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Balinese','Noto Sans Bamum','Noto Sans Batak','Noto Sans Bengali','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid','Noto Sans CJK JP','Noto Sans CJK KR','Noto Sans CJK SC','Noto Sans CJK SC Regular','Noto Sans CJK TC','Noto Sans Canadian Aboriginal','Noto Sans Carian','Noto Sans Chakma','Noto Sans Cham','Noto Sans Cherokee','Noto Sans Coptic','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Deseret','Noto Sans Devanagari','Noto Sans Display','Noto Sans Egyptian Hieroglyphs','Noto Sans Ethiopic','Noto Sans Georgian','Noto Sans Glagolitic','Noto Sans Gothic','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Hanunoo','Noto Sans Hebrew','Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian','Noto Sans JP Regular','Noto Sans Javanese','Noto Sans KR Regular','Noto Sans Kaithi','Noto Sans Kannada','Noto Sans Kayah Li','Noto Sans Kharoshthi','Noto Sans Khmer','Noto Sans Lao','Noto Sans Lepcha','Noto Sans Limbu','Noto Sans Linear B','Noto Sans Lisu','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Malayalam','Noto Sans Mandaic','Noto Sans Meetei Mayek','Noto Sans Mongolian','Noto Sans Mono','Noto Sans Myanmar','Noto Sans NKo','Noto Sans New Tai Lue','Noto Sans Ogham','Noto Sans Ol Chiki','Noto Sans Old Italic','Noto Sans Old Persian','Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Oriya','Noto Sans Osage','Noto Sans Osmanya','Noto Sans Phags Pa','Noto Sans Phoenician','Noto Sans Rejang','Noto Sans Runic','Noto Sans SC Regular','Noto Sans Samaritan','Noto Sans Saurashtra','Noto Sans Shavian','Noto Sans Sinhala','Noto Sans Sundanese','Noto Sans Syloti Nagri','Noto Sans Symbols','Noto Sans Symbols2','Noto Sans Syriac Eastern','Noto Sans Syriac Estrangela','Noto Sans Syriac Western','Noto Sans TC Regular','Noto Sans Tagalog','Noto Sans Tagbanwa','Noto Sans Tai Le','Noto Sans Tai Tham','Noto Sans Tai Viet','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Thaana','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Tifinagh','Noto Sans Ugaritic','Noto Sans Vai','Noto Sans Yi','Noto Serif','Noto Serif Armenian','Noto Serif Bengali','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC','Noto Serif Devanagari','Noto Serif Display','Noto Serif Ethiopic','Noto Serif Georgian','Noto Serif Gujarati','Noto Serif Hebrew','Noto Serif Kannada','Noto Serif Khmer','Noto Serif Lao','Noto Serif Malayalam','Noto Serif Myanmar','Noto Serif Sinhala','Noto Serif Tamil','Noto Serif Telugu','Noto Serif Thai','Roboto','Roboto Condensed',],
+	linux: ["AR PL UKai CN","AR PL UKai HK","AR PL UKai TW","AR PL UKai TW MBE","AR PL UMing CN","AR PL UMing HK","AR PL UMing TW","AR PL UMing TW MBE","Abyssinica SIL","Aharoni CLM","AlArabiya","AlBattar","AlHor","AlManzomah","AlYarmook","Amiri","Amiri Quran","Amiri Quran Colored","Ani","AnjaliOldLipi","Arab","Arial","Arimo","Bitstream Charter","C059","Caladea","Caladings CLM","Cantarell","Cantarell Extra Bold","Cantarell Light","Cantarell Thin","Carlito","Century Schoolbook L","Chandas","Chilanka","Comfortaa","Comfortaa Light","Cortoba","Courier","Courier 10 Pitch","Courier New","Cousine","D050000L","David CLM","DejaVu Math TeX Gyre","DejaVu Sans","DejaVu Sans Condensed","DejaVu Sans Light","DejaVu Sans Mono","DejaVu Serif","DejaVu Serif Condensed","Dimnah","Dingbats","Droid Arabic Kufi","Droid Sans","Droid Sans Armenian","Droid Sans Devanagari","Droid Sans Ethiopic","Droid Sans Fallback","Droid Sans Georgian","Droid Sans Hebrew","Droid Sans Japanese","Droid Sans Tamil","Droid Sans Thai","Drugulin CLM","Dyuthi","Electron","Ellinia CLM","Ezra SIL","Ezra SIL SR","Frank Ruehl CLM","FreeMono","FreeSans","FreeSerif","Furat","Gargi","Garuda","Gayathri","Gayathri Thin","Georgia","Granada","Graph","Gubbi","Hadasim CLM","Hani","Haramain","Homa","Hor","Jamrul","Japan","Jet","Jomolhari","KacstArt","KacstBook","KacstDecorative","KacstDigital","KacstFarsi","KacstLetter","KacstNaskh","KacstOffice","KacstOne","KacstPen","KacstPoster","KacstQurn","KacstScreen","KacstTitle","KacstTitleL","Kalapi","Kalimati","Karumbi","Kayrawan","Keraleeyam","Keter YG","Khalid","Khmer OS","Khmer OS Battambang","Khmer OS Bokor","Khmer OS Content","Khmer OS Fasthand","Khmer OS Freehand","Khmer OS Metal Chrieng","Khmer OS Muol","Khmer OS Muol Light","Khmer OS Muol Pali","Khmer OS Siemreap","Khmer OS System","Kinnari","LKLUG","Laksaman","Liberation Mono","Liberation Sans","Liberation Sans Narrow","Liberation Serif","Likhan","Lohit Assamese","Lohit Bengali","Lohit Devanagari","Lohit Gujarati","Lohit Gurmukhi","Lohit Kannada","Lohit Malayalam","Lohit Odia","Lohit Tamil","Lohit Tamil Classical","Lohit Telugu","Loma","Manjari","Manjari Thin","Mashq","Mashq-Bold","Meera","Metal","Mingzat","Miriam CLM","Miriam Mono CLM","Mitra Mono","Montserrat","Montserrat Black","Montserrat ExtraBold","Montserrat ExtraLight","Montserrat Light","Montserrat Medium","Montserrat SemiBold","Montserrat Thin","Mukti Narrow","Mukti Narrow Bold","Nachlieli CLM","Nada","Nagham","Nakula","Navilu","Nazli","Nice","Nimbus Mono L","Nimbus Mono PS","Nimbus Roman","Nimbus Roman No9 L","Nimbus Sans","Nimbus Sans L","Nimbus Sans Narrow","Norasi","Noto Color Emoji","Noto Emoji","Noto Mono","Noto Naskh Arabic","Noto Sans Armenian","Noto Sans Bengali","Noto Sans Buginese","Noto Sans CJK HK","Noto Sans CJK HK Black","Noto Sans CJK HK DemiLight","Noto Sans CJK HK Light","Noto Sans CJK HK Medium","Noto Sans CJK HK Thin","Noto Sans CJK JP","Noto Sans CJK JP Black","Noto Sans CJK JP DemiLight","Noto Sans CJK JP Light","Noto Sans CJK JP Medium","Noto Sans CJK JP Thin","Noto Sans CJK KR","Noto Sans CJK KR Black","Noto Sans CJK KR DemiLight","Noto Sans CJK KR Light","Noto Sans CJK KR Medium","Noto Sans CJK KR Thin","Noto Sans CJK SC","Noto Sans CJK SC Black","Noto Sans CJK SC DemiLight","Noto Sans CJK SC Light","Noto Sans CJK SC Medium","Noto Sans CJK SC Thin","Noto Sans CJK TC","Noto Sans CJK TC Black","Noto Sans CJK TC DemiLight","Noto Sans CJK TC Light","Noto Sans CJK TC Medium","Noto Sans CJK TC Thin","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Hebrew","Noto Sans JP Regular","Noto Sans KR Regular","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Mongolian","Noto Sans Mono CJK HK","Noto Sans Mono CJK JP","Noto Sans Mono CJK KR","Noto Sans Mono CJK SC","Noto Sans Mono CJK TC","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans SC Regular","Noto Sans Sinhala","Noto Sans TC Regular","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Thai","Noto Sans Tibetan","Noto Sans Yi","Noto Serif Armenian","Noto Serif CJK JP","Noto Serif CJK JP Black","Noto Serif CJK JP ExtraLight","Noto Serif CJK JP Light","Noto Serif CJK JP Medium","Noto Serif CJK JP SemiBold","Noto Serif CJK KR","Noto Serif CJK KR Black","Noto Serif CJK KR ExtraLight","Noto Serif CJK KR Light","Noto Serif CJK KR Medium","Noto Serif CJK KR SemiBold","Noto Serif CJK SC","Noto Serif CJK SC Black","Noto Serif CJK SC ExtraLight","Noto Serif CJK SC Light","Noto Serif CJK SC Medium","Noto Serif CJK SC SemiBold","Noto Serif CJK TC","Noto Serif CJK TC Black","Noto Serif CJK TC ExtraLight","Noto Serif CJK TC Light","Noto Serif CJK TC Medium","Noto Serif CJK TC SemiBold","Noto Serif Khmer","Noto Serif Lao","Noto Serif Thai","Nuosu SIL","OpenSymbol","Ostorah","Ouhod","Ouhod-Bold","P052","PT Sans","PT Sans Narrow","Padauk","Padauk Book","Pagul","PakType Naskh Basic","Petra","Phetsarath OT","Pothana2000","Purisa","Rachana","RaghuMalayalamSans","Rasa","Rasa Light","Rasa Medium","Rasa SemiBold","Rasheeq","Rasheeq-Bold","Rehan","Rekha","STIX","STIX Math","STIX Two Math","STIX Two Text","Saab","Sahadeva","Salem","Samanata","Samyak Devanagari","Samyak Gujarati","Samyak Malayalam","Samyak Tamil","Sarai","Sawasdee","Scheherazade","Shado","Sharjah","Shofar","Simple CLM","Sindbad","Source Code Pro","Source Code Pro Black","Source Code Pro ExtraLight","Source Code Pro Light","Source Code Pro Medium","Source Code Pro Semibold","Stam Ashkenaz CLM","Stam Sefarad CLM","Standard Symbols L","Standard Symbols PS","Suruma","Symbola","Tarablus","Tholoth","Tibetan Machine Uni","Tinos","Titr","Tlwg Mono","Tlwg Typewriter","Tlwg Typist","Tlwg Typo","UKIJ 3D","UKIJ Basma","UKIJ Bom","UKIJ CJK","UKIJ Chechek","UKIJ Chiwer Kesme","UKIJ Diwani","UKIJ Diwani Kawak","UKIJ Diwani Tom","UKIJ Diwani Yantu","UKIJ Ekran","UKIJ Elipbe","UKIJ Elipbe_Chekitlik","UKIJ Esliye","UKIJ Esliye Chiwer","UKIJ Esliye Neqish","UKIJ Esliye Qara","UKIJ Esliye Tom","UKIJ Imaret","UKIJ Inchike","UKIJ Jelliy","UKIJ Junun","UKIJ Kawak","UKIJ Kawak 3D","UKIJ Kesme","UKIJ Kesme Tuz","UKIJ Kufi","UKIJ Kufi 3D","UKIJ Kufi Chiwer","UKIJ Kufi Gul","UKIJ Kufi Kawak","UKIJ Kufi Tar","UKIJ Kufi Uz","UKIJ Kufi Yay","UKIJ Kufi Yolluq","UKIJ Mejnun","UKIJ Mejnuntal","UKIJ Merdane","UKIJ Moy Qelem","UKIJ Nasq","UKIJ Nasq Zilwa","UKIJ Orqun Basma","UKIJ Orqun Yazma","UKIJ Orxun-Yensey","UKIJ Qara","UKIJ Qolyazma","UKIJ Qolyazma Tez","UKIJ Qolyazma Tuz","UKIJ Qolyazma Yantu","UKIJ Ruqi","UKIJ Saet","UKIJ Sulus","UKIJ Sulus Tom","UKIJ Teng","UKIJ Tiken","UKIJ Title","UKIJ Tor","UKIJ Tughra","UKIJ Tuz","UKIJ Tuz Basma","UKIJ Tuz Gezit","UKIJ Tuz Kitab","UKIJ Tuz Neqish","UKIJ Tuz Qara","UKIJ Tuz Tom","UKIJ Tuz Tor","UKIJ Zilwa","UKIJ_Mac Basma","UKIJ_Mac Ekran","URW Bookman","URW Bookman L","URW Chancery L","URW Gothic","URW Gothic L","URW Palladio L","Ubuntu","Ubuntu Condensed","Ubuntu Light","Ubuntu Mono","Ubuntu Thin","Umpush","Uroob","Vemana2000","Verdana","Waree","Yehuda CLM","Yrsa","Yrsa Light","Yrsa Medium","Yrsa SemiBold","Z003","aakar","mry_KacstQurn","ori1Uni","padmaa","padmaa-Bold.1.1","padmmaa","utkal","מרים","गार्गी","नालिमाटी","অনি Dvf","মিত্র","মুক্তি","মুক্তি পাতনা",],
+	mac: ["Al Bayan","Al Nile","Al Tarikh","American Typewriter","American Typewriter Condensed","American Typewriter Condensed Light","American Typewriter Light","American Typewriter Semibold","Andale Mono","Apple Braille","Apple Braille Outline 6 Dot","Apple Braille Outline 8 Dot","Apple Braille Pinpoint 6 Dot","Apple Braille Pinpoint 8 Dot","Apple Chancery","Apple Color Emoji","Apple LiGothic Medium","Apple LiSung Light","Apple SD Gothic Neo","Apple SD Gothic Neo Heavy","Apple SD Gothic Neo Light","Apple SD Gothic Neo Medium","Apple SD Gothic Neo SemiBold","Apple SD Gothic Neo UltraLight","Apple SD GothicNeo ExtraBold","Apple Symbols","AppleGothic","AppleMyungjo","Arial","Arial Black","Arial Hebrew","Arial Hebrew Scholar","Arial Narrow","Arial Rounded MT Bold","Arial Unicode MS","Arimo","Athelas","Avenir","Avenir Black","Avenir Black Oblique","Avenir Book","Avenir Book Oblique","Avenir Heavy","Avenir Heavy Oblique","Avenir Light","Avenir Light Oblique","Avenir Medium","Avenir Medium Oblique","Avenir Next","Avenir Next Condensed Bold","Avenir Next Condensed Demi Bold","Avenir Next Condensed Heavy","Avenir Next Condensed Medium","Avenir Next Condensed Ultra Light","Avenir Next Demi Bold","Avenir Next Heavy","Avenir Next Medium","Avenir Next Ultra Light","Avenir Oblique","Avenir Roman","Ayuthaya","Baghdad","Bangla MN","Bangla Sangam MN","Baoli SC","Baoli TC","Baskerville","Baskerville SemiBold","Beirut","BiauKai","Big Caslon Medium","Bodoni 72","Bodoni 72 Book","Bodoni 72 Oldstyle","Bodoni 72 Oldstyle Book","Bodoni 72 Smallcaps","Bodoni 72 Smallcaps Book","Bodoni Ornaments","Bradley Hand","Brush Script MT","Chalkboard","Chalkboard SE","Chalkduster","Charcoal CY","Charter","Charter Black","Charter Roman","Cochin","Comic Sans MS","Copperplate","Copperplate Light","Corsiva Hebrew","Courier","Courier New","DIN Alternate","DIN Condensed","Damascus","Damascus Light","Damascus Medium","Damascus Semi Bold","DecoType Naskh","Devanagari MT","Devanagari Sangam MN","Didot","Diwan Kufi","Diwan Thuluth","Euphemia UCAS","Farah","Farisi","Futura","Futura Condensed ExtraBold","Futura Condensed Medium","Futura Medium","GB18030 Bitmap","Galvji","Geeza Pro","Geneva","Geneva CY","Georgia","Gill Sans","Gill Sans Light","Gill Sans SemiBold","Gill Sans UltraBold","Gujarati MT","Gujarati Sangam MN","GungSeo","Gurmukhi MN","Gurmukhi MT","Gurmukhi Sangam MN","Hannotate SC","Hannotate TC","HanziPen SC","HanziPen TC","HeadLineA","Hei","Heiti SC","Heiti SC Light","Heiti SC Medium","Heiti TC","Heiti TC Light","Heiti TC Medium","Helvetica","Helvetica CY Bold","Helvetica Light","Helvetica Neue","Helvetica Neue Condensed Black","Helvetica Neue Condensed Bold","Helvetica Neue Light","Helvetica Neue Medium","Helvetica Neue UltraLight","Herculanum","Hiragino Kaku Gothic Pro W3","Hiragino Kaku Gothic Pro W6","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Hiragino Kaku Gothic Std W8","Hiragino Kaku Gothic StdN W8","Hiragino Maru Gothic Pro W4","Hiragino Maru Gothic ProN","Hiragino Maru Gothic ProN W4","Hiragino Mincho Pro W3","Hiragino Mincho Pro W6","Hiragino Mincho ProN","Hiragino Mincho ProN W3","Hiragino Mincho ProN W6","Hiragino Sans","Hiragino Sans CNS W3","Hiragino Sans CNS W6","Hiragino Sans GB","Hiragino Sans GB W3","Hiragino Sans GB W6","Hiragino Sans W0","Hiragino Sans W1","Hiragino Sans W2","Hiragino Sans W3","Hiragino Sans W4","Hiragino Sans W5","Hiragino Sans W6","Hiragino Sans W7","Hiragino Sans W8","Hiragino Sans W9","Hoefler Text","Hoefler Text Black","Hoefler Text Ornaments","ITF Devanagari","ITF Devanagari Book","ITF Devanagari Demi","ITF Devanagari Light","ITF Devanagari Marathi","ITF Devanagari Marathi Book","ITF Devanagari Marathi Demi","ITF Devanagari Marathi Light","ITF Devanagari Marathi Medium","ITF Devanagari Medium","Impact","InaiMathi","Iowan Old Style Black","Iowan Old Style Bold","Iowan Old Style Italic","Iowan Old Style Roman","Iowan Old Style Titling","Kai","Kailasa","Kaiti SC","Kaiti SC Black","Kaiti TC","Kaiti TC Black","Kannada MN","Kannada Sangam MN","Kefa","Khmer MN","Khmer Sangam MN","Klee Demibold","Klee Medium","Kohinoor Bangla","Kohinoor Bangla Light","Kohinoor Bangla Medium","Kohinoor Bangla Semibold","Kohinoor Devanagari","Kohinoor Devanagari Light","Kohinoor Devanagari Medium","Kohinoor Devanagari Semibold","Kohinoor Gujarati","Kohinoor Gujarati Light","Kohinoor Gujarati Medium","Kohinoor Gujarati Semibold","Kohinoor Telugu","Kohinoor Telugu Light","Kohinoor Telugu Medium","Kohinoor Telugu Semibold","Kokonor","Krungthep","KufiStandardGK","Lantinghei SC Demibold","Lantinghei SC Extralight","Lantinghei SC Heavy","Lantinghei TC Demibold","Lantinghei TC Extralight","Lantinghei TC Heavy","Lao MN","Lao Sangam MN","LiHei Pro","LiSong Pro","Libian SC","Libian TC","LingWai SC Medium","LingWai TC Medium","Lucida Grande","Luminari","Malayalam MN","Malayalam Sangam MN","Marion","Marker Felt","Menlo","Microsoft Sans Serif","Mishafi","Mishafi Gold","Monaco","Mshtakan","Mukta Mahee","Muna","Muna Black","Myanmar MN","Myanmar Sangam MN","Myriad Arabic","Myriad Arabic Black","Myriad Arabic Light","Myriad Arabic Semibold","Nadeem","Nanum Brush Script","Nanum Pen Script","NanumGothic","NanumGothic ExtraBold","NanumMyeongjo","NanumMyeongjo ExtraBold","New Peninim MT","New Peninim MT Bold Inclined","New Peninim MT Inclined","Noteworthy","Noto Nastaliq Urdu","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Myanmar","Noto Sans Oriya","Noto Serif Myanmar","Optima","Optima ExtraBlack","Oriya MN","Oriya Sangam MN","Osaka","Osaka-Mono","PCMyungjo","PT Mono","PT Sans","PT Sans Caption","PT Sans Narrow","PT Serif","PT Serif Caption","Palatino","Papyrus","Papyrus Condensed","Phosphate","Phosphate Inline","Phosphate Solid","PilGi","PingFang HK","PingFang HK Light","PingFang HK Medium","PingFang HK Semibold","PingFang HK Ultralight","PingFang SC","PingFang SC Light","PingFang SC Medium","PingFang SC Semibold","PingFang SC Ultralight","PingFang TC","PingFang TC Light","PingFang TC Medium","PingFang TC Semibold","PingFang TC Ultralight","Plantagenet Cherokee","Raanana","Rockwell","STFangsong","STHeiti","STIX Two Math","STIX Two Text","STIXGeneral","STIXIntegralsD","STIXIntegralsSm","STIXIntegralsUp","STIXIntegralsUpD","STIXIntegralsUpSm","STIXNonUnicode","STIXSizeFiveSym","STIXSizeFourSym","STIXSizeOneSym","STIXSizeThreeSym","STIXSizeTwoSym","STIXVariants","STKaiti","STSong","STXihei","Sana","Sathu","Savoye LET","Seravek","Seravek ExtraLight","Seravek Light","Seravek Medium","Shree Devanagari 714","SignPainter","SignPainter-HouseScript","SignPainter-HouseScript Semibold","Silom","Sinhala MN","Sinhala Sangam MN","Skia","Skia Black","Skia Condensed","Skia Extended","Skia Light","Snell Roundhand","Snell Roundhand Black","Songti SC","Songti SC Black","Songti SC Light","Songti TC","Songti TC Light","Sukhumvit Set","Sukhumvit Set Light","Sukhumvit Set Medium","Sukhumvit Set Semi Bold","Sukhumvit Set Text","Superclarendon","Superclarendon Black","Superclarendon Light","Symbol","Tahoma","Tamil MN","Tamil Sangam MN","Telugu MN","Telugu Sangam MN","Thonburi","Thonburi Light","Times","Times New Roman","Times Roman","Toppan Bunkyu Gothic","Toppan Bunkyu Gothic Demibold","Toppan Bunkyu Gothic Regular","Toppan Bunkyu Midashi Gothic Extrabold","Toppan Bunkyu Midashi Mincho Extrabold","Toppan Bunkyu Mincho","Toppan Bunkyu Mincho Regular","Trattatello","Trebuchet MS","Tsukushi A Round Gothic","Tsukushi A Round Gothic Bold","Tsukushi A Round Gothic Regular","Tsukushi B Round Gothic","Tsukushi B Round Gothic Bold","Tsukushi B Round Gothic Regular","Twemoji Mozilla","Verdana","Waseem","Waseem Light","Wawati SC","Wawati TC","Webdings","Weibei SC Bold","Weibei TC Bold","Wingdings","Wingdings 2","Wingdings 3","Xingkai SC Bold","Xingkai SC Light","Xingkai TC Bold","Xingkai TC Light","YuGothic Bold","YuGothic Medium","YuKyokasho Bold","YuKyokasho Medium","YuKyokasho Yoko Bold","YuKyokasho Yoko Medium","YuMincho +36p Kana Demibold","YuMincho +36p Kana Extrabold","YuMincho +36p Kana Medium","YuMincho Demibold","YuMincho Extrabold","YuMincho Medium","Yuanti SC","Yuanti SC Light","Yuanti TC","Yuanti TC Light","Yuppy SC","Yuppy TC","Zapf Dingbats","Zapfino",],
+	windows: ["Aharoni Bold","Aldhabi","AlternateGothic2 BT","Andalus","Angsana New","AngsanaUPC","Aparajita","Arabic Typesetting","Arial","Arial Black","Arial Narrow","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Batang","BatangChe","Browallia New","BrowalliaUPC","Calibri","Calibri Light","Calibri Light Italic","Cambria","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Cordia New","CordiaUPC","Courier","Courier New","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Ebrima","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","Franklin Gothic Medium","FreesiaUPC","Gabriola","Gadugi","Gautami","Georgia","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Helvetica","HoloLens MDL2 Assets","Impact","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","Javanese Text","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Leelawadee UI","Leelawadee UI Semilight","Levenim MT","LilyUPC","Lucida Console","Lucida Sans Unicode","MS Gothic","MS Mincho","MS PGothic","MS PMincho","MS Sans Serif","MS Serif","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Marlett","Meiryo","Meiryo UI","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft Uighur","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU","MingLiU-ExtB","MingLiU_HKSCS","MingLiU_HKSCS-ExtB","Miriam","Miriam Fixed","Mongolian Baiti","MoolBoran","Myanmar Text","NSimSun","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nirmala UI","Nirmala UI Semilight","Nyala","PMingLiU","PMingLiU-ExtB","Palatino Linotype","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Roman","Sakkal Majalla","Sanskrit Text","Segoe MDL2 Assets","Segoe Print","Segoe Pseudo","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","Shonar Bangla","Shruti","SimHei","SimSun","SimSun-ExtB","Simplified Arabic","Simplified Arabic Fixed","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Small Fonts","Sylfaen","Symbol","Tahoma","Times","Times New Roman","Traditional Arabic","Trebuchet MS","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light","宋体","微软雅黑","新細明體","細明體","굴림","굴림체","바탕","ＭＳ ゴシック","ＭＳ 明朝","ＭＳ Ｐゴシック","ＭＳ Ｐ明朝",],
+	bundled: ["Arimo","Cousine","Noto Emoji","Noto Naskh Arabic","Noto Sans Armenian","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Hebrew","Noto Sans JP Regular","Noto Sans KR Regular","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans SC Regular","Noto Sans Sinhala","Noto Sans TC Regular","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Thai","Noto Sans Tibetan","Noto Sans Yi","Noto Serif Armenian","Noto Serif Khmer","Noto Serif Lao","Noto Serif Thai","STIX Math","Tinos","Twemoji Mozilla",],
+}
+
+function reset() {
+	dom.valueF.value = ""
+}
+
+function toggleitem(item) {
+	let	el = document.getElementById(item)
+	let style = el.getAttribute("class")
+	if (style.includes("hidden")) {
+		el.classList.remove("hidden")
+	} else {
+		el.classList.add("hidden")
+	}
+}
+
+function preset(name) {
+	dom.valueF.value = fntMaster[name].join(", ")
+}
+
+function get_fonts() {
+	getFonts().then(res => {
+		// remove element
+		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+		let display = ""
+		// get values
+		if (typeof res === "object" && res !== null) {
+				let data = res["fontsOffset"]
+				if (data.length == 0) {
+					display += "nothing found"
+				} else {
+					// found
+					display = s12 +"FOUND ["+ data.length + "]"+ sc +"<br><br>" + data.join(", ")
+					// not found
+					let notFound = fntList.filter(x => !data.includes(x))
+					if (notFound.length) {
+						display += "<br><br>"+ s12 +"NOT FOUND ["+ notFound.length +"]"+ sc + "<br><br>" + notFound.join(", ")
+					}
+				}
+		} else {
+			display += "aw snap! something went wrong"
+		}
+		dom.results.innerHTML = display
+	})
+}
+
+function run() {
+	// reset
+	dom.results = ""
+	fntList = []
+
+	// clean up the list
+	let valueF = (dom.valueF.value).trim()
+	valueF = valueF.replace(/['"]+/g, "")
+
+	if (valueF.length) {
+		let tmpArr = valueF.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				fntList.push(trimmed)
+			}
+		}
+		// make sure we have at least one item
+		fntList = fntList.filter(function (item, position) {
+			return fntList.indexOf(item) === position
+		})
+		if (!fntList.length) {
+			dom.results = "aww, snap! try adding at least one font"
+			return
+		}
+	} else {
+		dom.results = "aww, snap! try adding at least one font"
+		return
+	}
+
+	fntList.sort()
+	dom.valueF.value = fntList.join(", ")
+	setTimeout(function() {
+		get_fonts()
+	}, 170)
+}
+
+const getFonts = () => {
+	/* https://github.com/abrahamjuliot/creepjs */
+	return new Promise(resolve => {
+		if (fntList.length == 0) {
+			dom.results.innerHTML = "yikes, the font list is empty"
+			return
+		}
+		try {
+			const doc = document // or iframe.contentWindow.document
+			const id = `font-fingerprint`
+			const div = doc.createElement('div')
+			div.setAttribute('id', id)
+			doc.body.appendChild(div)
+			doc.getElementById(id).innerHTML = `
+				<style>
+				#${id}-detector {
+					--font: '';
+					position: absolute !important;
+					left: -9999px!important;
+					font-size: 256px !important;
+					font-style: normal !important;
+					font-weight: normal !important;
+					letter-spacing: normal !important;
+					line-break: auto !important;
+					line-height: normal !important;
+					text-transform: none !important;
+					text-align: left !important;
+					text-decoration: none !important;
+					text-shadow: none !important;
+					white-space: normal !important;
+					word-break: normal !important;
+					word-spacing: normal !important;
+					/* in order to test scrollWidth, clientWidth, etc. */
+					padding: 0 !important;
+					margin: 0 !important;
+					/* in order to test inlineSize and blockSize */
+					writing-mode: horizontal-tb !important;
+					/* for transform and perspective */
+					transform-origin: unset !important;
+					perspective-origin: unset !important;
+				}
+				#${id}-detector::after {
+					font-family: var(--font);
+					content: '` + fntStrA + `';
+				}
+				</style>
+				<span id="${id}-detector"></span>`
+
+			const span = doc.getElementById(`${id}-detector`)
+			const detectedViaOffset = new Set()
+			const style = getComputedStyle(span)
+
+			const getDimensions = (span, style) => {
+				const dimensions = {
+					offsetWidth: span.offsetWidth,
+					offsetHeight: span.offsetHeight
+				}
+				return dimensions
+			}
+			const base = baseFonts.reduce((acc, font) => {
+				span.style.setProperty('--font', font)
+				const dimensions = getDimensions(span, style)
+				acc[font.split(",")[0]] = dimensions
+				return acc
+			}, {})
+
+			fntList.forEach(font => {
+				baseFonts.forEach(basefont => {
+					const family = "'"+ font +"', "+ basefont
+					span.style.setProperty('--font', family)
+					const style = getComputedStyle(span)
+					const dimensions = getDimensions(span, style)
+					basefont = basefont.split(",")[0]
+					if (dimensions.offsetWidth != base[basefont].offsetWidth ||
+						dimensions.offsetHeight != base[basefont].offsetHeight) {
+						detectedViaOffset.add(font)
+					}
+				})
+			})
+
+			const fontsOffset = [...detectedViaOffset]
+			return resolve({
+				fontsOffset
+			})
+		} catch(e) {
+			//console.error(e.name, e.message)
+			return resolve("error")
+		}
+	})
+}
+
+</script>
+</body>
+</html>
