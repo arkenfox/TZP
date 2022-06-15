@@ -53,7 +53,7 @@
 					<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [collator]</span>
 				<br><br>
 				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
-						style="width: 100%; resize: vertical" id="valueC"></textarea>
+						style="width: 98%; resize: vertical" id="valueC"></textarea>
 				<br><br>
 					<span class="spaces" id="output_collator"></span>
 			</td></tr>
@@ -560,6 +560,7 @@ function collator() {
 		})
 		if (chars.length > 1) {
 			go = true
+			dom.valueC.value = chars.join(", ")
 		}
 	} else {
 		// run example
