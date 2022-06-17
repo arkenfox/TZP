@@ -37,7 +37,11 @@
 				<span class="btn12 btnfirst">
 					<form>
 						<label for="scripts">Choose a script:</label>
-						<select name="scripts" id="scripts" onChange="run()"><option></option></select>
+						<select name="scripts" id="scripts" onChange="run(`scripts`)" onClick="run(`scripts`)"><option></option></select>
+					</form><br>
+					<form>
+						<label for="scripts">..or a language:</label>
+						<select name="languages" id="languages" onChange="run(`languages`)" onClick="run(`languages`)"><option></option></select>
 					</form>
 				</span>
 			</td>
@@ -46,13 +50,14 @@
 		<tr>
 			<td>
 				<div class="no_color" align="left">
+					<div class="s14" id="divInfo"></div><br>
 					<div class="s12">MONOSPACE</div><br>
 					<div class="spaces mono chars" id="divMono">hello world</div><br>
 					<div class="s12">SANS-SERIF</div><br>
 					<div class="spaces sans chars" id="divSans">hello world</div><br>
 					<div class="s12">SERIF</div><br>
 					<div class="spaces serif chars" id="divSerif">hello world</div><br>
-				</dov>
+				</div>
 			</td></tr>
 	</table>
 	<br>
@@ -61,6 +66,46 @@
 'use strict';
 // https://en.wikipedia.org/wiki/List_of_Unicode_characters
 // https://www.cogsci.ed.ac.uk/~richard/unicode-sample-3-2.html
+
+let oSentence = {
+	// using: https://github.com/mozilla-l10n/focusios-l10n
+
+	"arabic": "امسح تأريخ جلسة التصفح كله و كلمات السر و الكعكات في أي وقت بنقرة واحدة.",
+	"burmese": "ရှာဖွေမှုမှတ်တမ်း၊ စကားဝှက်များနှင့် အခြား စသည်တို့ကို တစ်ခါတို့ထိရုံဖြင့် ဖျက်နိုင်သည်။",
+	"catalan": "Esborreu l'historial de navegació, les contrasenyes i les galetes quan vulgueu amb un sol toc.",
+	"chinese (china)": "随时一键清除您的所有浏览记录、密码及 Cookie。",
+	"chinese (taiwan)": "只要輕鬆一點，就能清除這次上網的所有瀏覽紀錄、儲存密碼、Cookie 等資料。",
+	"danish": "Du kan når som helst slette hele din browserhistorik, dine gemte adgangskoder og dine cookies med et enkelt tryk.",
+	"dutch": "Wis uw volledige surfgeschiedenis, wachtwoorden en cookies wanneer u wilt met één tik.",
+	"english": "Clear your entire browsing session history, passwords, cookies anytime with a single tap.",
+	"farsi": "تمام تاریخچه،‌کلمه عبور،‌و کوکی های جلسه مرورگر خود را در هر زمانی تنها با یک لمس پاک کنید.",
+	"french": "Supprimez votre historique de navigation, vos mots de passe, vos cookies et plus encore, d’une simple pression.",
+	"georgian": "გაასუფთავეთ მონახულებული გვერდები, პაროლები და ა.შ. ნებისმიერ დროს, მხოლოდ ერთი შეხებით.",
+	"german": "Löschen Sie mit einer einzigen Berührung die gesamte Chronik, Passwörter und Cookies Ihrer Sitzung.",
+	"greek": "Απαλοιφή ιστορικού περιήγησης, κωδικών πρόσβασης, cookies ανά πάσα στιγμή, με ένα πάτημα.",
+	"hebrew": "ניתן בכל עת לנקות את כל היסטורית הגלישה שלך, הסיסמאות והעוגיות בהקשה אחת.",
+	"hungarian": "Törölje az összes böngészési előzményét, jelszavát, és sütijét bármikor, egyetlen koppintással.",
+	"icelandic": "Hreinsa feril, lykilorð, vefkökur hvenær sem er með einni snertingu.",
+	"indonesian": "Bersihkan semua riwayat sesi penjelajahan, sandi, dan kuki Anda kapan pun dalam sekali ketuk saja.",
+	"irish": "Scrios fianáin chomh maith le do stair chuardaigh agus stair bhrabhsála.", // different sentence
+	"italian": "Cancella l’intera cronologia di navigazione, le password e i cookie con un semplice tocco, in qualunque momento.",
+	"japanese": "ブラウジングセッション履歴やパスワード、Cookie を、いつでもワンタップですべて消去できます。",
+	"korean": "브라우징 세션 기록이나 비밀번호, 쿠키를 언제나 탭 한번으로 삭제합니다.",
+	"lithuanian": "Bet kuriuo metu išvalykite visą savo naršymo žurnalą, slaptažodžius ir slapukus vienu bakstelėjimu.",
+	"macedonian ": "Сакам да разменам пари/натнички чекови.", // I want to exchange some money/travellers cheques.
+	"malay": "Buang seluruh sejarah pelayaran, kata laluan dan kuki dengan sekali tekan sahaja.",
+	"norwegian": "Slett hele nettleserhistorikken din, passord, infokapsler når som helst med ett trykk.",
+	"polish": "Usuwaj całą historię przeglądania, hasła i ciasteczka jednym stuknięciem.",
+	"portuguese (brazil)": "Limpe todo o histórico, senhas e cookies da sessão de navegação quando quiser, com um simples toque.",
+	"romanian": "Șterge întregul istoric al sesiunii, parolele și cookie-urile oricând, cu o singură atingere.",
+	"russian": "В любой момент стирайте одним нажатием всю историю просмотров, пароли и куки.",
+	"spanish (argentina)": "Limpiá todo tu historial de navegación, contraseñas y cookies para esta sesión en cualquier momento con tan solo un toque.",
+	"spanish (spain)": "Limpia todo el historial de navegación de tu sesión, contraseñas y cookies en cualquier momento con tan solo un clic.",
+	"swedish": "Rensa hela din webbhistorik, lösenord, kakor när som helst med ett enda tryck.",
+	"thai": "ล้างประวัติ, รหัสผ่าน และคุกกี้ในวาระการท่องเว็บทั้งหมดของคุณได้ทุกเวลาด้วยการแตะครั้งเดียว",
+	"turkish": "İstediğiniz zaman tek bir dokunuşla gezinti geçmişinizi, parolaları ve çerezleri temizleyebilirsiniz.",
+	"vietnamese": "Xóa toàn bộ lịch sử duyệt web, mật khẩu, cookie bất kỳ lúc nào chỉ với một cú chạm.",
+}
 
 let aPartial = [
 	// partial range: i.e start..end is not the full assigned range
@@ -848,21 +893,33 @@ function generate() {
 		})
 		// populate options
 		dom.scripts.innerHTML = aOptions.join("")
-		run()
+		run("scripts")
+		// populate languages
+		let aLang = []
+		for (const k of Object.keys(oSentence).sort()) {
+			aLang.push("<option value = '"+ k +"'> "+ k +"</option>")
+		}
+		dom.languages.innerHTML = aLang.join("")
 		// return
 		return resolve()
 	})
 }
 
-function run() {
-	let name = document.getElementById("scripts").value
-	if (oDisplay[name] !== undefined) {
-		let spacer = aSpacer.includes(name) ? " " : ""		
-		let display = "<span class='chars'>"+ spacer + oDisplay[name].join(ZWNJ + spacer) + "</span>"
-		dom.divMono.innerHTML = display
-		dom.divSans.innerHTML = display
-		dom.divSerif.innerHTML = display
+function run(type) {
+	let name = document.getElementById(type).value
+	let display = ""
+	if (type == "scripts") {
+		if (oDisplay[name] !== undefined) {
+			let spacer = aSpacer.includes(name) ? " " : ""		
+			display = "<span class='chars'>"+ spacer + oDisplay[name].join(ZWNJ + spacer) + "</span>"
+		}
+	} else if (type == "languages") {
+		display = oSentence[name]
 	}
+	dom.divInfo.innerHTML = name.toUpperCase()
+	dom.divMono.innerHTML = display
+	dom.divSans.innerHTML = display
+	dom.divSerif.innerHTML = display
 }
 
 generate()
