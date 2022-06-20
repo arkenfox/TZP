@@ -457,8 +457,9 @@ function get_fonts(runtype) {
 					// check ALL and fntFont
 					let allStr = (data.length == fntList.length ? sb +" [all detected]"+ sc: "")
 
+					hash = mini(data)
 					dom.results.innerHTML = display.join("<br>")
-						+"<p><details><summary>"+ s12 +"ALL FOUND FONTS ["+ data.length +"]"+ sc + allStr + poisonString + "</summary><p>"
+						+"<p><details><summary>"+ s12 +"ALL FOUND FONTS ["+ data.length +"] "+ sc + hash + allStr + poisonString + "</summary><p>"
 						+ dataString + "<br><br></p></details>"
 				}
 			}
