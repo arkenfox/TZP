@@ -123,7 +123,8 @@ function get_fonts() {
 					display += "nothing found ["+ fntList.length +"]"
 				} else {
 					// found
-					display = s12 +"FOUND ["+ data.length +"/"+ fntList.length +"]"+ sc +"<br><br>" + data.join(", ")
+					let hash = mini(data)
+					display = s12 +"FOUND ["+ data.length +"/"+ fntList.length +"] "+ sc + hash +"<br><br>" + data.join(", ")
 					// not found
 					let notFound = fntList.filter(x => !data.includes(x))
 					if (notFound.length) {
