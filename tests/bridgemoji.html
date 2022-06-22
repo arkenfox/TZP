@@ -58,7 +58,6 @@
 <script>
 'use strict';
 
-let emojiList = []
 sb = sb.trim()
 sg = sg.trim()
 s4 = s4.trim()
@@ -118,22 +117,18 @@ function run_random(array) {
 		return [[a,b,c,d]].concat(groupByFour(rest))
 	}
 	let newData = groupByFour(data)
-	//console.debug(newData)
-
 	// display
 	let display = []
 	newData.forEach(function(array){
-		display.push("  "+ array.join("     "))
+		display.push("  "+ array.join("    "))
 	})
 	dom.results.innerHTML = display.join("<br>")
-
-
 }
 
 function run() {
 	// reset
 	dom.results = ""
-	emojiList = []
+	let emojiList = []
 
 	// clean up the list
 	let valueE = (dom.valueE.value).trim()
@@ -147,12 +142,12 @@ function run() {
 				emojiList.push(trimmed)
 			}
 		}
-		// make sure we have at least one item
+		// make sure we have at least four unique items
 		emojiList = emojiList.filter(function (item, position) {
 			return emojiList.indexOf(item) === position
 		})
-		if (!emojiList.length) {
-			dom.results = "aww, snap! try adding some emojis"
+		if (emojiList.length < 4) {
+			dom.results = "aww, snap! try adding some "+ (emojiList.length > 0 ? "more " : "") +"emojis"
 			return
 		}
 	} else {
@@ -161,9 +156,7 @@ function run() {
 	}
 	//console.debug(emojiList)
 	run_random(emojiList)
-
 }
-
 
 </script>
 </body>
