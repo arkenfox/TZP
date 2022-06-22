@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=720">
+	<title>bridge-moji</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 700px;}
+		hr {color: #8ca7dc}
+		.dark {
+			color: white;
+			background-color: #1c1b22
+		}
+		.light {
+			color: black;
+			background-color: #ffffff
+		}
+		.twenty {
+			font-size: 20px;
+		}
+		.pad {line-height: 2}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<col width="20%"><col width="80%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">bridge-moji</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn12 btnfirst" onClick="run()">[ run ]</span>
+			<span class="btn12 btn" onClick="reset()">[ clear ]</span>
+			<span class="btn12 btn" onClick="preset()">[ load preset ]</span>
+			<span class="btn12 btn">
+				light <input id="rlight" type="radio" name="radio" value="light" onchange="handleTheme(this)">
+				dark <input id="rdark" type="radio" name="radio" value="dark" onchange="handleTheme(this)" checked>
+			</span>
+			<br><br>
+			<textarea rows="16" class="dark twenty"
+				placeholder="comma delimited values: e.g: 🔥, ☎️, 🌽"
+				style="width: 98%;" id="valueE"></textarea>
+			<br><br>
+			<div class="spaces twenty pad" class="dark" id="results"></div>
+			</td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let emojiList = []
+sb = sb.trim()
+sg = sg.trim()
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+
+let emojiPreset = [
+ 	"👽", "🤖", "🧚", "🧜", "🏄", "🐵", "🦍", "🐶", "🐺", "🦊", "🐈", "🦁", "🐯", "🐴", "🦄", "🦓",
+ 	"🦌", "🐮", "🐷", "🐗", "🐑", "🦙", "🦒", "🐘", "🐭", "🐹", "🐇", "🐿", "🦔", "🐨", "🐼", "🦥",
+ 	"🦨", "🦘", "🐓", "🐥", "🐦", "🐧", "🕊", "🦆", "🦢", "🦉", "🦤", "🦩", "🦚", "🦜", "🐊", "🐢", 
+ 	"🦎", "🐍", "🐉", "🦕", "🦖", "🐋", "🐬", "🐟", "🐠", "🐡", "🦈", "🐙", "🐚", "🐌", "🦋", "🐛", 
+ 	"🐝", "🐞", "💐", "🌸", "🌹", "🌺", "🌻", "🌼", "🌷", "🌱", "🌲", "🌳", "🌴", "🌵", "🌿", "🍁", 
+ 	"🍇", "🍉", "🍊", "🍋", "🍌", "🍍", "🥭", "🍏", "🍐", "🍑", "🍒", "🍓", "🥝", "🍅", "🥥", "🥑", 
+ 	"🍆", "🥕", "🌽", "🌶", "🥬", "🥦", "🧅", "🍄", "🥜", "🥐", "🥖", "🥨", "🥞", "🧇", "🍔", "🍕", 
+ 	"🌭", "🌮", "🌯", "🥚", "🍿", "🍙", "🥟", "🦀", "🦞", "🦑", "🍦", "🍩", "🧁", "🍬", "🍭", "🧃", 
+ 	"🧉", "🧭", "⛰", "🌋", "🏝", "🏡", "⛲", "⛺", "🎠", "🎡", "💈", "🚂", "🚃", "🚌", "🚗", "🚚", 
+ 	"🚜", "🛵", "🛺", "🚲", "🛴", "🛹", "⚓️", "⛵", "🛶", "🚤", "🚢", "✈️", "🪂", "🚁", "🚠", "🛰", 
+ 	"🚀", "🛸", "⏳", "🌙", "🌡", "☀️", "🪐", "⭐", "☁️", "🌧", "🌩", "🌀", "🌈", "☂️", "❄️", "☄️",
+ 	"🔥", "💧", "🌊", "🎃", "✨", "🎈", "🎉", "🎊", "🎏", "🎟", "🏆", "⚽", "🏀", "🏈", "🎾", "🥏", 
+ 	"🏓", "⛸", "🪀", "🪁", "🎱", "🔮", "🪄", "🕹", "🎲", "🧩", "🧸", "🎨", "🧵", "🧶", "🕶", "🧦", 
+ 	"🎒", "👟", "👠", "👑", "🎓", "🧢", "💍", "💎", "📢", "🎵", "🎙", "🎤", "🎧", "📻", "🎷", "🪗", 
+ 	"🎸", "🎺", "🎻", "🪕", "🥁", "☎️", "💿", "🎥", "🎬", "📺", "📷", "🔍", "💡", "🔦", "📖", "📚", 
+ 	"🏷", "✏️", "🖌", "🖍", "📎", "📌", "🔑", "🪃", "🏹", "⚙️", "🧲", "🧪", "🧬", "🔭", "📡", "🗿",
+]
+
+function reset() {
+	dom.valueE.value = ""
+}
+function preset() {
+	dom.valueE.value = emojiPreset.join(", ")
+}
+preset()
+function handleTheme(src) {
+	let remove = (src.value == "dark" ? "light" : "dark")
+	dom.valueE.classList.add(src.value)
+	dom.valueE.classList.remove(remove)
+
+	dom.results.classList.add(src.value)
+	dom.results.classList.remove(remove)
+}
+dom.rdark.checked = true
+
+function run_random(array) {
+	//
+	let data = []
+	for (let i=0; i < 500; i++) {
+		let arr = [], line = []
+		while(arr.length < 4){
+			let r = Math.floor(Math.random() * array.length)
+			if(arr.indexOf(r) === -1) {arr.push(r); line.push(array[r]) }
+		}
+		data.push(line.join(" "))
+	}
+	// group into fours
+	function groupByFour([a,b,c,d,...rest]){
+		if (rest.length === 0) return [[a,b,c,d].filter(x => x!==undefined)]
+		return [[a,b,c,d]].concat(groupByFour(rest))
+	}
+	let newData = groupByFour(data)
+	//console.debug(newData)
+
+	// display
+	let display = []
+	newData.forEach(function(array){
+		display.push("  "+ array.join("     "))
+	})
+	dom.results.innerHTML = display.join("<br>")
+
+
+}
+
+function run() {
+	// reset
+	dom.results = ""
+	emojiList = []
+
+	// clean up the list
+	let valueE = (dom.valueE.value).trim()
+	valueE = valueE.replace(/['"]+/g, "")
+	valueE = valueE.trim()
+	if (valueE.length) {
+		let tmpArr = valueE.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				emojiList.push(trimmed)
+			}
+		}
+		// make sure we have at least one item
+		emojiList = emojiList.filter(function (item, position) {
+			return emojiList.indexOf(item) === position
+		})
+		if (!emojiList.length) {
+			dom.results = "aww, snap! try adding some emojis"
+			return
+		}
+	} else {
+		dom.results = "aww, snap! try adding some emojis"
+		return
+	}
+	//console.debug(emojiList)
+	run_random(emojiList)
+
+}
+
+
+</script>
+</body>
+</html>
