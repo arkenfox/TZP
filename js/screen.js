@@ -726,23 +726,26 @@ function get_scr_dpi_dpr(runtype) {
 		get_dpr()
 		get_dpi()
 
-		// visualViewport scale
+		// visualViewport scale: note FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
 		let vvScale
-		try {
-			vvScale = visualViewport.scale
-		} catch(e) {
-			if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
-				vvScale = zNA
-			} else {
-				vvScale = zB0
-				if (gRun) {log_error("screen: visualViewport scale", e.name, e.message)}
+		if (isVer < 63) {
+			vvScale = zNS
+		} else {
+			try {
+				vvScale = visualViewport.scale
+			} catch(e) {
+				log_error("screen: visualViewport scale", e.name, e.message)
+				if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
+					vvScale = zD
+				} else {
+					vvScale = zB0
+				}
 			}
+			cleanFn(vvScale)
+			// ToDo: lies: if not blocked or zNS/zNA
+			//if ("number" !== typeof vvScale) { vvLies = true }
+			dom.vvScale.innerHTML = vvScale
 		}
-		cleanFn(vvScale)
-		// ToDo: lies: if not blocked or n/a
-		//if ("number" !== typeof vvScale) { vvLies = true }
-		dom.vvScale.innerHTML = vvScale
-
 		// ToDo: zoom revisit
 
 		return resolve(["dpi:"+ varDPI, "devicePixelRatio:"+ varDPR, "visualViewport_scale:"+ vvScale])
@@ -992,57 +995,102 @@ function get_scr_scrollbar(runtype) {
 		]).then(function(res){
 			let t0; if (canPerf) {t0 = performance.now()}
 			if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start scrollbars" )}
-			// viewport
-			let viewport = res[0]
-			let vWidth, vValue, vLies = false
-			try {
-				vWidth = (window.innerWidth - viewport)
-				vWidth = cleanFn(vWidth)
-				let cssW = getElementProp("#D","content",":before")
-				// leverage css value
-				if (cssW !== "x" && "number" == typeof vWidth) {
-					if (cssW * 1 == vWidth - 1) {cssW = vWidth} // allow for min-
-					vWidth = cssW - viewport
-				}
-				// lies
-				let vMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
-				if ("number" !== typeof vWidth) {vLies = true
-				} else if (vWidth < vMin) {vLies = true}
-				vValue = vWidth
-				vValue = vLies ? zLIE : vWidth
-				if (vLies) {
-					vWidth = soL + vWidth + scC
-					if (gRun) {gKnown.push("screen:viewport_scrollbar")}
-				}
-			} catch(e) {
-				vWidth = zB0; vValue = zB0
-				log_error("screen: viewport scrollbar", e.name, e.message)
-			}
-			// element
+
+			// css value
+			let cssW = getElementProp("#D","content",":before")
+
+			// viewport element
+			let eViewport = res[0][0] // calculated from element
+			let vViewport = res[0][1] // visualViewport
 			let eWidth, eValue, eLies = false
-			try {
-				eWidth = (100 - dom.eScroll.scrollWidth)
-				eWidth = cleanFn(eWidth)
-				// lies
-				if ("number" !== typeof eWidth) {eLies = true
-				} else if (eWidth < 0) {eLies = true}
-				eValue = eLies ? zLIE : eWidth
-				if (eLies) {
-					eWidth = soL + eWidth + scC
-					if (gRun) {gKnown.push("screen:element_scrollbar")}
+			if ("number" !== typeof eViewport) {
+				eWidth = "NaN"; eLies = true; eValue = zLIE
+			} else {
+				try {
+					eWidth = (window.innerWidth - eViewport)
+					eWidth = cleanFn(eWidth)
+					// leverage css value
+					let cssE = cssW
+					if (cssE !== "x" && "number" == typeof eWidth) {
+						if (cssE * 1 == eWidth - 1) {cssE = eWidth} // allow for min-
+						eWidth = cssE - eViewport
+					}
+					// lies
+					let eMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
+					if ("number" !== typeof eWidth) {eLies = true
+					} else if (eWidth < eMin) {eLies = true}
+					eValue = eLies ? zLIE : eWidth
+				} catch(e) {
+					eWidth = zB0; eValue = zB0
+					log_error("screen: viewport scrollbar", e.name, e.message)
 				}
+			}
+
+			// visualViewport
+			let vValue, vWidth, vLies = false
+			if (vViewport == eViewport) {
+				vValue = eValue
+				vWidth = eWidth
+				vLies = eLies
+			} else if (vViewport == zB0 || vViewport == zNS || vViewport == zD) {
+				vValue = vViewport
+				vWidth = vViewport
+			} else if ("number" !== typeof vViewport) {
+				vWidth = "NaN"; vLies = true; vValue = zLIE
+			} else {
+				try {
+					vWidth = (window.innerWidth - vViewport)
+					vWidth = cleanFn(vWidth)
+					// leverage css value
+					if (cssW !== "x" && "number" == typeof vWidth) {
+						if (cssW * 1 == vWidth - 1) {cssW = vWidth} // allow for min-
+						vWidth = cssW - vViewport
+					}
+					// lies
+					let vMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
+					if ("number" !== typeof vWidth) {vLies = true
+					} else if (vWidth < vMin) {vLies = true}
+					vValue = vLies ? zLIE : vWidth
+				} catch(e) {
+					vWidth = zB0; vValue = zB0
+					log_error("screen: visualViewport scrollbar", e.name, e.message)
+				}
+			}
+
+			// element
+			let elWidth, elValue, elLies = false
+			try {
+				elWidth = (100 - dom.eScroll.scrollWidth)
+				elWidth = cleanFn(elWidth)
+				// lies
+				if ("number" !== typeof elWidth) {elLies = true
+				} else if (elWidth < 0) {elLies = true}
+				elValue = elLies ? zLIE : elWidth
 			} catch(e) {
-				eWidth = zB0; eValue = zB0
+				elWidth = zB0; elValue = zB0
 				log_error("screen: element scrollbar", e.name, e.message)
 			}
+
+			// ToDo: leverage the others for lies/bypasses?
+			if (eLies) {
+				eWidth = soL + eWidth + scC; if (gRun) {gKnown.push("screen:viewport_scrollbar")}
+			}
+			if (vLies) {
+				vWidth = soL + vWidth + scC; if (gRun) {gKnown.push("screen:visualViewport_scrollbar")}
+			}
+			if (elLies) {
+				elWidth = soL + elWidth + scC; if (gRun) {gKnown.push("screen:element_scrollbar")}
+			}
+
 			// display
-			dom.mScrollbar.innerHTML = vWidth +" | "+ eWidth
+			dom.mScrollbar.innerHTML = vWidth +" | "+ eWidth +" | "+ elWidth
+
 			// perf
 			if (logScreen) {
 				logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh scrollbars : "+ (performance.now()-t0) +" ms" )
 			}
 			if (runtype !== "resize") {log_perf("scrollbars [screen]",t0)}
-			return resolve("scrollbars:"+ vValue +", "+ eValue)
+			return resolve("scrollbars:"+ vValue +", "+ eValue +", "+ elValue)
 		})
 	})
 }
@@ -1052,17 +1100,62 @@ function get_scr_viewport(runtype) {
 	if (runtype !== "screen" && runtype !== "height") {runtype = "resize"}
 	if (logScreen) {logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : start viewport" )}
 
-	let e = document.createElement("div")
-	e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
-	document.documentElement.insertBefore(e,document.documentElement.firstChild)
-	let vw, vh
-	try {vw = e.offsetWidth} catch(e) {}
-	try {vh = e.offsetHeight} catch(e) {}
-	document.documentElement.removeChild(e)
-	dom.Viewport = cleanFn(vw) +" x "+ cleanFn(vh)
+	// element
+	let eViewport, evh, evw, eValue, eValid = false
+	try {
+		let e = document.createElement("div")
+		e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
+		document.documentElement.insertBefore(e,document.documentElement.firstChild)
+		evw = e.offsetWidth
+		evh = e.offsetHeight
+		document.documentElement.removeChild(e)
+		if ("number" !== typeof evw || "number" !== typeof evh) {
+			eViewport = soL + cleanFn(evw) +" x "+ cleanFn(evh) + scC
+			eValue = "NaN"
+			if (gRun) {gKnown.push("screen:viewport")}
+		} else {
+			eValid = true; eValue = evw
+			if (avh == "") {avh = evh} // get android height once: s/be with toolbar visible (not FS)
+			eViewport = cleanFn(evw) +" x "+ cleanFn(evh)
+		}
+	} catch(e) {
+		log_error("screen: viewport", e.name, e.message)
+		eViewport = zB0; eValue = zB0
+	}
+	dom.eViewport = eViewport
+
+	// visualViewport
+	// note: FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
+	let vViewport, vvw, vvh, vValue, vValid = false
+	if (isVer < 63) {
+		vViewport = zNS; vValue = zNS
+	} else {
+		try {
+			vvw = window.visualViewport.width
+			vvh = window.visualViewport.height
+			if ("number" !== typeof vvw || "number" !== typeof vvh) {
+				vViewport = soL + cleanFn(vvw) +" x "+ cleanFn(vvh) + scC
+				vValue = "NaN"
+				if (gRun) {gKnown.push("screen:visualViewport size")}
+			} else {
+				vValid = true; vValue = vvw
+				if (avh == "") {avh = vvh} // get android height once: s/be with toolbar visible (not FS)
+				vViewport = cleanFn(vvw) +" x "+ cleanFn(vvh)
+			}
+		} catch(e) {
+			log_error("screen: visualViewport size", e.name, e.message)
+			if (e.name == "TypeError" && e.message == "window.visualViewport is undefined") {
+				vViewport = zD; vValue = zD
+			} else {
+				vViewport = zB0; vValue = zB0
+			}
+		}
+	}
+	dom.vViewport.innerHTML = vViewport
+	// ToDo: compare eViewport to vViewport? bypass?
 
 	// get viewport height once on first load: this s/be with toolbar visible (not FS)
-	if (avh == "") {avh = vh}
+	if (avh == "") {avh = "undefined"}
 	if (logScreen) {
 		logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh viewport : "+ (performance.now()-t0) +" ms" )
 	}
@@ -1070,9 +1163,9 @@ function get_scr_viewport(runtype) {
 	if (runtype !== "resize") {log_perf("viewport [screen]",t0)}
 	// return
 	if (runtype == "height") {
-		return vh // android tests
+		return vValid ? vvh : evh // android tests
 	} else {
-		return vw // scrollbar
+		return [eValue, vValue] // scrollbar
 	}
 }
 
