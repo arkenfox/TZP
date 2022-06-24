@@ -1156,6 +1156,7 @@ function get_scr_viewport(runtype) {
 
 	// get viewport height once on first load: this s/be with toolbar visible (not FS)
 	if (avh == "") {avh = "undefined"}
+	if (gRun) {log_debug("height", "E: "+ evh +" V: "+ vvh +" A: "+ avh)}
 	if (logScreen) {
 		logSData.push((performance.now()-tSD) +" ms : "+ runtype +" : finsh viewport : "+ (performance.now()-t0) +" ms" )
 	}
@@ -1285,6 +1286,7 @@ function get_scr_window(runtype) {
 		}
 		dom.posW.innerHTML = display + posNote
 		res.push("window_positions:"+ fpValue)
+
 		let w1 = aMeasures[0], h1 = aMeasures[1],
 			w2 = aMeasures[2], h2 = aMeasures[3],
 			w3 = aMeasures[4], h3 = aMeasures[5],
@@ -2553,6 +2555,9 @@ function outputScreen() {
 }
 
 function outputStart() {
+	if (!isFile && mini(location.toString().slice(0,39)) !== "c517501a") {
+		dom.index.innerHTML = "<a class='return' href='https://arkenfox.github.io/TZP/tzp.html'>"+ dom.index.textContent +"</a>"
+	}
 	if (isVer > 99) {
 		// FF100+: 1754441: extensions.InstallTrigger*.enabled
 		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
