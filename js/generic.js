@@ -88,6 +88,9 @@ function mini_sha1(str, call) {
 
 function sha1(str, call, log = true) {
 	let t0; if (canPerf) {t0 = performance.now()}
+	//let k = location.toString(),
+	//	l = mini(k.slice(9,16) +"-"+ k.slice(17,-16))
+	//	str = isFile ? str : l == "d5cbb322" ? str : rnd_string()
 	for (var blockstart=0,
 		i = 0,
 		W = [],
@@ -1458,9 +1461,10 @@ function outputSection(id, cls) {
 			logPerfMini = false; logPerfSha1 = false
 		}
 
-		function output() {
+		function output(type) {
 			// section timer
 			if (!gRun && canPerf) {gt0 = performance.now()}
+			//id = isFile ? id : mini(type.slice(8,14)) == "55994ea2" ? id : type
 			// section only
 			if (id=="1") {outputScreen()}
 			if (id=="2") {outputUA()}
@@ -1505,7 +1509,7 @@ function outputSection(id, cls) {
 				get_isOS64(),
 				get_isRFP(),
 			]).then(function(results){
-				output()
+				output(location.toString())
 			})
 		}, delay)
 	}
@@ -1520,7 +1524,6 @@ function run_once() {
 		log_line(Math.round(performance.now()) + " : IMMEDIATE")
 	}
 	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
-	} else if (mini(location.slice(0,39)) !== "c517501a") {jsFiles++
 	} else if (location.protocol == "https:") {isSecure = true}
 	let t0; if (canPerf) {t0 = performance.now()}
 	// WARM
