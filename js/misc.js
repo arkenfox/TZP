@@ -61,6 +61,8 @@ function get_iframe_props() {
 		"Error","GeolocationCoordinates","GeolocationPosition","GeolocationPositionError","TypeError","console",
 		"MimeTypeArray","Infinity","MimeType","NaN","Number","Plugin","isFinite","isNaN","parseFloat","parseInt",
 		"HTMLMediaElement","IdleDeadline","MediaCapabilities","Set",
+		"AudioDestinationNode","AudioParam","DynamicsCompressorNode","FileSystemEntry","FileSystemFileEntry",
+		"OfflineAudioCompletionEvent","Permissions","SubtleCrypto","WebGLShaderPrecisionFormat",
 	]
 
 	try {
