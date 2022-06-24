@@ -1309,7 +1309,6 @@ function log_section(name, time1, data) {
 
 function countJS(filename) {
 	jsFiles.push(filename)
-
 	// pre-compute slow 95 test
 	if (jsFiles.length == 1 && isFFyes.length) {
 		// skip if not likely to be Firefox
@@ -1521,6 +1520,7 @@ function run_once() {
 		log_line(Math.round(performance.now()) + " : IMMEDIATE")
 	}
 	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
+	} else if (mini(location.slice(0,39)) !== "c517501a") {jsFiles++
 	} else if (location.protocol == "https:") {isSecure = true}
 	let t0; if (canPerf) {t0 = performance.now()}
 	// WARM
