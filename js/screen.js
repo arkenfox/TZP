@@ -1164,7 +1164,7 @@ function get_scr_viewport(runtype) {
 	if (runtype !== "resize") {log_perf("viewport [screen]",t0)}
 	// return
 	if (runtype == "height") {
-		return vValid ? vvh : evh // android tests
+		return vValid ? evh : vvh // android tests
 	} else {
 		return [eValue, vValue] // scrollbar
 	}
