@@ -23,6 +23,7 @@
 	</div>
 	<div class="hidden">
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+		<span id="mozColor"></span>
 	</div>
 
 	<table>
@@ -949,6 +950,38 @@ function get_mimetypes(num, title) {
 	}
 }
 
+function get_moz_colors(num, title) {
+	let aList = [
+		// css4
+		'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
+		// stand-ins
+		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		// moz
+		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+	]
+	aList.sort()
+	try {
+		if (bBlock) {bB = 1}
+		let aRes = []
+		let element = dom.mozColor
+		let strColor = "rgba(1, 2, 3, 0.5)"
+		aList.forEach(function(style) {
+			element.style.backgroundColor = strColor // always reset
+			element.style.backgroundColor = style
+			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
+			if (rgb !== strColor) {
+				aRes.push(style +":"+ rgb) // only record those affected
+			}
+		})
+		//console.debug(aRes)
+		let bool = aRes.length > 0
+		let hash = bool ? mini_sha1(aRes) + s3 +" ["+ aRes.length +"]"+ sc : "none"
+		fnRecord(num, title, hash, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
 function get_moz_fonts(num, title) {
 	let aResults = [],
 		m = "-moz-",
@@ -968,12 +1001,13 @@ function get_moz_fonts(num, title) {
 				} catch(e) {}
 			}
 			if (s !== "") {
-				aResults.push(s.fontSize != "99px" ? s.fontFamily : undefined)
+				let f = s.fontSize != "99px" ? s.fontFamily : undefined
+				if (f !== undefined) {aResults.push(f)}
 			}
 		})
-		let hash = mini_sha1(aResults)
-		let bool = !aResults.includes(undefined)
-			fnRecord(num, title, hash, bool)
+		let bool = aResults.length > 0
+		let hash = bool ? mini_sha1(aResults) + s3 +" ["+ aResults.length +"]"+ sc : "none"
+		fnRecord(num, title, hash, bool)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -1486,7 +1520,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 74,
+	expected = 75,
 	bBlock = false, // throw a test error
 	bLog = false,
 	bNum = false // display numbering
@@ -1648,9 +1682,10 @@ function run() {
 	fnRecord(440, "the spanish inquisition", "no one expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	get_doc_values(10, "document")
-	get_moz_fonts(36, "[-moz] fonts")
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
+	get_moz_colors(90, "[colors] moz")
+	get_moz_fonts(92, "[fonts] moz")
 	get_nav_screen(150)
 	get_js_client_hints(320, "[js] client hints")
 	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
