@@ -7,32 +7,45 @@ function get_colors() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
 	let aList = [
-		// stand-ins
-		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		// css4
 		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
 		// system
 		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+	]
+	let aMozStand = [
+		// stand-ins
+		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 	]
 	let aMoz = [
 		// moz: append last so we can remove obsolete values
 		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
 	]
 	/*
-	// ToDo: check what other OSes have in FF102+
-	if (isVer > 101 && isOS == "windows") {
+	// ToDo: check Linux FF102+
+	if (isVer > 101 && isOS !== "linux") {
 		aMoz = [
-			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup',
-			'-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light'
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem',
+			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
 		]
+		// note: inFF102+ -moz-mac-buttonactivetext is ESR only
+		if (isVer == 102) {aMoz.push('-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-mac-buttonactivetext')}
 	}
 	*/
-	aList = aList.concat(aMoz)
 
-	let sNames = ["moz_stand-in","css4","system","moz"]
-	let splits = [0, 32, 46, 74, aList.length]
+	let aResults = [], maxRes = 4
+	let sNames = ["css4","system","moz_stand-in","moz"]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
-	let aResults = []
+	if (isFF) {
+		aList = aList.concat(aMozStand)
+		aList = aList.concat(aMoz)
+	} else {
+		maxRes = 2
+		aResults.push("colors_"+ sNames[2] +":"+ zNA)
+		aResults.push("colors_"+ sNames[3] +":"+ zNA)
+		document.getElementById("cssColor"+ sNames[2]).innerHTML = zNA
+		document.getElementById("cssColor"+ sNames[3]).innerHTML = zNA
+	}
+	let splits = [0, 14, 42, 74, aList.length]
 
 	try {
 		let aRes = []
@@ -45,7 +58,7 @@ function get_colors() {
 			element.style.backgroundColor = strColor // temp: force color to see what is obsolete
 			element.style.backgroundColor = style
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			if (style == aMoz[0]) {isMoz = true}
+			if (style == aMoz[0]) {isMoz = true} // temp
 			if (isMoz) {
 				if (rgb !== strColor) {
 					aRes.push(style +":"+ rgb)
@@ -56,7 +69,7 @@ function get_colors() {
 		})
 
 		// split/hash
-		for (let i=0; i < 4; i++) {
+		for (let i=0; i < maxRes; i++) {
 			let aTemp = aRes.slice(splits[i], splits[i+1])
 			aTemp.sort() // sort for readibility
 			let hash = mini_sha1(aTemp.join(), "css colors " + sNames[i])
@@ -79,7 +92,7 @@ function get_colors() {
 				if (hash == "785865195b65e80b341f3cd595820da9e8c6381b" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
 				} else if (hash == "74a4b25550e715c311645158826c9e4f78554323" && isVer < 94) {note = rfp_green + " [FF67-93]"}
 			} else if (sNames[i] == "moz") {
-				log_debug("moz colors", "<br>    "+ aTemp.join("<br>    "))
+				log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))
 			}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
