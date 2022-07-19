@@ -7,13 +7,30 @@ function get_colors() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
 	let aList = [
-		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+		// stand-ins
 		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		// css4
 		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
-		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText'
+		// system
+		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 	]
-	let sNames = ["moz","moz_stand-in","css4","system"]
-	let splits = [0, 31, 63, 77 ,105]
+	let aMoz = [
+		// moz: append last so we can remove obsolete values
+		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+	]
+	/*
+	// ToDo: check what other OSes have in FF102+
+	if (isVer > 101 && isOS == "windows") {
+		aMoz = [
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup',
+			'-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light'
+		]
+	}
+	*/
+	aList = aList.concat(aMoz)
+
+	let sNames = ["moz_stand-in","css4","system","moz"]
+	let splits = [0, 32, 46, 74, aList.length]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
 	let aResults = []
 
@@ -21,21 +38,33 @@ function get_colors() {
 		let aRes = []
 		let element = dom.sColorElement
 		// NOTE: set initial color: non-supported repeats previous lookup value
-		element.style.backgroundColor = "rgba(1,2,3,0.5)"
+		let strColor = "rgba(1, 2, 3, 0.5)"
+		element.style.backgroundColor = strColor
+		let isMoz = false
 		aList.forEach(function(style) {
+			element.style.backgroundColor = strColor // temp: force color to see what is obsolete
 			element.style.backgroundColor = style
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			aRes.push(style +":"+ rgb)
+			if (style == aMoz[0]) {isMoz = true}
+			if (isMoz) {
+				if (rgb !== strColor) {
+					aRes.push(style +":"+ rgb)
+				}
+			} else { // don't alter the number of results prior to moz
+				aRes.push(style +":"+ rgb)
+			}
 		})
+
 		// split/hash
 		for (let i=0; i < 4; i++) {
 			let aTemp = aRes.slice(splits[i], splits[i+1])
+			aTemp.sort() // sort for readibility
 			let hash = mini_sha1(aTemp.join(), "css colors " + sNames[i])
 			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
 			sDetail["css_colors_"+ sNames[i]] = aTemp
 			aResults.push("colors_"+ sNames[i] +":"+ hash)
 			let note = ""
-			if (i == 1) {
+			if (sNames[i] == "moz_stand-in") {
 				// moz stand-ins
 				note = rfp_red
 				if (isVer > 92) {
@@ -44,13 +73,15 @@ function get_colors() {
 				} else {
 					if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
 				}
-			} else if (i == 3) {
+			} else if (sNames[i] == "system") {
 				// system
 				note = rfp_red
 				if (hash == "785865195b65e80b341f3cd595820da9e8c6381b" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
 				} else if (hash == "74a4b25550e715c311645158826c9e4f78554323" && isVer < 94) {note = rfp_green + " [FF67-93]"}
+			} else if (sNames[i] == "moz") {
+				log_debug("moz colors", "<br>    "+ aTemp.join("<br>    "))
 			}
-			document.getElementById("cssColor"+ i).innerHTML = hash + btn + note
+			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
 		log_perf("colors [css]",t0)
  		return aResults
@@ -58,7 +89,7 @@ function get_colors() {
 		log_error("css: colors", e.name, e.message)
 		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		for (let i=0; i < 4; i++) {
-			document.getElementById("cssColor"+ i).innerHTML = eMsg
+			document.getElementById("cssColor"+ sNames[i]).innerHTML = eMsg
 			aResults.push("colors_"+ sNames[i] +":"+ (isFF ? zB0 : zErr))
 		}
 		return aResults
@@ -420,7 +451,7 @@ function get_system_fonts() {
 				}
 			})
 			// temp
-			log_debug("sys fonts", "<br>      - "+ aResults.join("<br>      - "))
+			if (gRun) {log_debug("sys fonts", "<br>    "+ aResults.join("<br>    "))}
 		} catch(e) {
 			sError = (isFF ? zB0 : "error")
 		}
