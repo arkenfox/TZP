@@ -7,10 +7,10 @@ function get_colors() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
 	let aList = [
-		// css4
-		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
 		// system
 		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		// css4
+		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText',
 	]
 	let aMozStand = [
 		// stand-ins
@@ -33,9 +33,10 @@ function get_colors() {
 	*/
 
 	let aResults = [], maxRes = 4
-	let sNames = ["css4","system","moz_stand-in","moz"]
+	let sNames = ["system","css4","moz_stand-in","moz"]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
 	if (isFF) {
+		aList.push('-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext')
 		aList = aList.concat(aMozStand)
 		aList = aList.concat(aMoz)
 	} else {
@@ -45,7 +46,7 @@ function get_colors() {
 		document.getElementById("cssColor"+ sNames[2]).innerHTML = zNA
 		document.getElementById("cssColor"+ sNames[3]).innerHTML = zNA
 	}
-	let splits = [0, 14, 42, 74, aList.length]
+	let splits = [0, 28, 42, 74, aList.length]
 
 	try {
 		let aRes = []
