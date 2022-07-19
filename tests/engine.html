@@ -17,6 +17,7 @@
 
 <body>
 	<div class="offscreen">
+		<div id="mozFont"></div>
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
 		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
 	</div>
@@ -689,7 +690,7 @@ function get_js_client_hints(num, title) {
 	// TypeError can't access property "X", navigator.X is undefined
 	function output() {
 		if (res.length) {
-			console.log(res)
+			//console.log(res)
 			res.sort()
 			let hash = sha1(res.join())
 			fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, false)
@@ -948,6 +949,36 @@ function get_mimetypes(num, title) {
 	}
 }
 
+function get_moz_fonts(num, title) {
+	let aResults = [],
+		m = "-moz-",
+		aFonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
+	try {
+		let el = dom.mozFont
+		if (bBlock) {bB = 1}
+		aFonts.forEach(function(font){
+			// catch blocked
+			let test = getComputedStyle(el).getPropertyValue("font-family")
+			el.style.font = "99px sans-serif"
+			try {el.style.font = font} catch(err) {}
+			let s = ""
+			if (window.getComputedStyle) {
+				try {
+					s = getComputedStyle(el, null)
+				} catch(e) {}
+			}
+			if (s !== "") {
+				aResults.push(s.fontSize != "99px" ? s.fontFamily : undefined)
+			}
+		})
+		let hash = mini_sha1(aResults)
+		let bool = !aResults.includes(undefined)
+			fnRecord(num, title, hash, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
 function get_nav_keys(num1, num2, title) {
 	try {
 		if (bBlock) {bB = 1}
@@ -1016,7 +1047,7 @@ function get_nav_values(num1, num2, num3) {
 		if (bBlock) {bB = 1}
 		let resA = navigator.oscpu
 		if (typeof resA !== "string") {
-			console.debug(typeof resA)
+			//console.debug(typeof resA)
 		} else {
 			if (resA == "") {resA = "empty string"
 			} else if (resA == undefined) {resA = zU
@@ -1455,7 +1486,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 73,
+	expected = 74,
 	bBlock = false, // throw a test error
 	bLog = false,
 	bNum = false // display numbering
@@ -1617,6 +1648,7 @@ function run() {
 	fnRecord(440, "the spanish inquisition", "no one expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	get_doc_values(10, "document")
+	get_moz_fonts(36, "[-moz] fonts")
 	get_installtrigger(50) // 50-52
 	get_canvaskeys(80, "[2d canvas] keys")
 	get_nav_screen(150)
