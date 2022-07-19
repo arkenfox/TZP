@@ -397,10 +397,11 @@ function get_system_fonts() {
 		let aResults = [],
 			sError = "",
 			m = "-moz-",
-			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",m+"window",m+"desktop",
-			m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
+			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar"],
+			mFonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
 		let sName = "css_system_fonts"
 		sDetail[sName] = []
+		if (isFF) {aFonts = aFonts.concat(mFonts)}
 		try {
 			let el = dom.sysFont
 			aFonts.forEach(function(font){
@@ -415,13 +416,11 @@ function get_system_fonts() {
 					} catch(e) {}
 				}
 				if (s !== "") {
-					let f = undefined
-					if (s.fontSize != "99px") {
-						f = s.fontFamily +" "+ s.fontSize
-					}
-					aResults.push(font +":"+ f)
+					aResults.push(font +":"+ (s.fontSize != "99px" ? s.fontFamily +" "+ s.fontSize : undefined))
 				}
 			})
+			// temp
+			log_debug("sys fonts", "<br>      - "+ aResults.join("<br>      - "))
 		} catch(e) {
 			sError = (isFF ? zB0 : "error")
 		}
