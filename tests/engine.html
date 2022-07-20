@@ -1536,9 +1536,17 @@ function get_storage_estimate(num, title) {
 
 	// Notes: Win10 VM is  52gb / 33gb spare | FF is always the same in PB mode
 		//   2147483648 : FF57-96 Windows / Android / Win 10 VM FF60-96
-		//  10737418240 : FF97+ Windows
-		//   5512729395 : FF97+ Android
-		//   5256596684 : FF97+ Win 10 VM
+	/*
+	FF97+ is not stable enough: see https://bugzilla.mozilla.org/show_bug.cgi?id=1735713
+   10737418240 : Windows, vannTenn's + bashonly's Linux, Android Fabrizio 100gb spare from 128gb
+    5641604300 : Android Fabrizio 49gb spare from 64gb
+    5512729395 : Android Thorin 44gb spare from 64gb
+    5301081292 : Android bashonly 40gb spare from 64gb
+    5256596684 : Win 10 VM 33gb spare from 52gb
+    2934867968 : Debian XCFE 2glops 650gb spare from 1TB
+    1521166745 : Ubuntu VM Fabrizio with 15GB of storage
+    1177328025 : Android aleyvo 1.5gb spare from 16gb
+	*/
 
 	// other: who cares if they match
 		// brave:     2147483648 (same in incognito and Tor window)
@@ -1556,11 +1564,10 @@ function get_storage_estimate(num, title) {
 			let quota = estimate.quota,
 				bool = false
 			if (isVer > 96) {
-				if (quota > 10000000000 && quota < 11000000000) {bool = true}
-				if (quota > 5500000000 && quota < 5550000000) {bool = true}
-				if (quota > 5220000000 && quota < 5300000000) {bool = true}
+				bool = zNA
+				quota = zNA +": variable in FF97+ "+ s3 +"["+ quota +"]"+ sc
 			} else {
-				if (quota > 2100000000 && quota < 2200000000) {bool = true}
+				if (quota > 2147000000 && quota < 2148000000) {bool = true}
 			}
 			fnRecord(num, title, quota, bool)
 		})
