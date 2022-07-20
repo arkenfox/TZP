@@ -1412,9 +1412,14 @@ function get_stacklength(num1, num2, num3) {
 
 function get_storage_quota(num, title) {
 	// desktop unless stated
-		// FF/TB:     2147483648 (same in PB mode) <- FF57-97, also on android
+		// FF/TB:     2147483648 (same in PB mode) <- FF57-96, also on android
 		// FF97  :   10737418240 (same in PB mode) <- FF97 desktop
 		// FF97  :    5512729395 (same in PB mode) <- FF97 android
+
+	//windows 10 (VM) 52gb / 33gb spare
+		// FF96- :    2147483648
+		// FF97+ :    5256596684 (same in PB mode)
+
 		// brave:     2147483648 (same in incognito and Tor window)
 		// opera:      310418104 normal
 		// opera:      521917312 private
@@ -1430,10 +1435,11 @@ function get_storage_quota(num, title) {
 			let quota = estimate.quota,
 				bool = false
 			if (isVer > 96) {
-				if (quota > 10000000000 && quota < 10737418241) {bool = true}
-				if (quota > 5500000000 && quota < 5512729396) {bool = true}
+				if (quota > 10000000000 && quota < 11000000000) {bool = true}
+				if (quota >  5500000000 && quota <  5600000000) {bool = true}
 			} else {
-				if (quota > 2000000000 && quota < 2147483649) {bool = true}
+				if (quota > 5200000000 && quota < 5300000000) {bool = true}
+				if (quota > 2000000000 && quota < 2200000000) {bool = true}
 			}
 			fnRecord(num, title, quota, bool)
 		})
