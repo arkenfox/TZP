@@ -744,8 +744,8 @@ function get_scr_dpi_dpr(runtype) {
 			cleanFn(vvScale)
 			// ToDo: lies: if not blocked or zNS/zNA
 			//if ("number" !== typeof vvScale) { vvLies = true }
-			dom.vvScale.innerHTML = vvScale
 		}
+		dom.vvScale.innerHTML = vvScale
 		// ToDo: zoom revisit
 
 		return resolve(["dpi:"+ varDPI, "devicePixelRatio:"+ varDPR, "visualViewport_scale:"+ vvScale])
