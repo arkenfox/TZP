@@ -11,35 +11,24 @@ function get_colors() {
 		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		// css4
 		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText',
-	]
-	let aMozStand = [
+		'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
 		// stand-ins
 		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		// moz: FF102+ items: note append last due to variable length
+		'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+		'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // the last two were dropped in FF103
 	]
-	let aMoz = [
-		// moz: append last so we can remove obsolete values
-		'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-buttonactivetext','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
-	]
-	/*
-	// ToDo: check Linux FF102+
-	if (isVer > 101 && isOS !== "linux") {
-		aMoz = [
-			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem',
-			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+	if (isVer < 102) {
+		let aMozExtra = [
+			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-buttonactivetext','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		]
-		// note: inFF102+ -moz-mac-buttonactivetext is ESR only
-		if (isVer == 102) {aMoz.push('-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light','-moz-mac-buttonactivetext')}
+		aList = aList.concat(aMozExtra)
 	}
-	*/
-
 	let aResults = [], maxRes = 4
 	let sNames = ["system","css4","moz_stand-in","moz"]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
-	if (isFF) {
-		aList.push('-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext')
-		aList = aList.concat(aMozStand)
-		aList = aList.concat(aMoz)
-	} else {
+	if (!isFF) {
+		aList = aList.slice(0,37) // drop everything -moz
 		maxRes = 2
 		aResults.push("colors_"+ sNames[2] +":"+ zNA)
 		aResults.push("colors_"+ sNames[3] +":"+ zNA)
@@ -51,28 +40,19 @@ function get_colors() {
 	try {
 		let aRes = []
 		let element = dom.sColorElement
-		// NOTE: set initial color: non-supported repeats previous lookup value
 		let strColor = "rgba(1, 2, 3, 0.5)"
-		element.style.backgroundColor = strColor
-		let isMoz = false
 		aList.forEach(function(style) {
-			element.style.backgroundColor = strColor // temp: force color to see what is obsolete
+			element.style.backgroundColor = strColor // reset color to see what is obsolete
 			element.style.backgroundColor = style
 			let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
-			if (style == aMoz[0]) {isMoz = true} // temp
-			if (isMoz) {
-				if (rgb !== strColor) {
-					aRes.push(style +":"+ rgb)
-				}
-			} else { // don't alter the number of results prior to moz
-				aRes.push(style +":"+ rgb)
-			}
+			aRes.push(rgb == strColor ? "x" : style +":"+ rgb)
 		})
 
 		// split/hash
 		for (let i=0; i < maxRes; i++) {
 			let aTemp = aRes.slice(splits[i], splits[i+1])
-			aTemp.sort() // sort for readibility
+			aTemp = aTemp.filter(x => !["x"].includes(x)) // remove unaffected
+			aTemp.sort() // sort for readability
 			let hash = mini_sha1(aTemp.join(), "css colors " + sNames[i])
 			let btn = buildButton("14", "css_colors_"+ sNames[i], aTemp.length)
 			sDetail["css_colors_"+ sNames[i]] = aTemp
@@ -93,7 +73,7 @@ function get_colors() {
 				if (hash == "785865195b65e80b341f3cd595820da9e8c6381b" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
 				} else if (hash == "74a4b25550e715c311645158826c9e4f78554323" && isVer < 94) {note = rfp_green + " [FF67-93]"}
 			} else if (sNames[i] == "moz") {
-				log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))
+				if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
 			}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
