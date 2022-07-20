@@ -1532,7 +1532,7 @@ function get_stacklength(num1, num2, num3) {
 	}
 }
 
-function get_storage_quota(num, title) {
+function get_storage_estimate(num, title) {
 
 	// Notes: Win10 VM is  52gb / 33gb spare | FF is always the same in PB mode
 		//   2147483648 : FF57-96 Windows / Android / Win 10 VM FF60-96
@@ -1827,7 +1827,7 @@ function run() {
 	get_window_values(460)
 	get_dates(620)
 	get_eval_length(630, "eval.toString().length")
-	get_last_prototype_keys(640, "[last x keys] "), // 640+641
+	get_last_prototype_keys(640, "[last x keys]"), // 640+641
 	get_intl_collator(650, "Intl.Collator")
 	get_intl_dtf(656, "Intl.DateTimeFormat")
 	get_intl_display_names(660, "Intl.DislayNames")
@@ -1841,7 +1841,7 @@ function run() {
 	get_media_constraints(700, "[constraints] mediaDevices")
 	get_permission(750, "[permissions] push")
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
-	get_storage_quota(820, "storage estimate quota")
+	get_storage_estimate(820, "storage estimate")
 	get_errors(902)
 }
 
