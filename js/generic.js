@@ -1429,7 +1429,7 @@ function outputSection(id, cls) {
 		if (gLoad) {
 			let msgItems = document.getElementsByClassName("secthash")
 			let msgUpdate = "<br><span style='font-size: 64px;'><b>UPDATE GECKO<b></span> "
-					+"... to at least v"+ isUpdateMinimum
+					+"... TZP requires v"+ isUpdateMinimum +"+"
 			if (isFFLegacy && isFork !== undefined) {
 				let fntSize = isFork.length > 10 ? 32 : 48
 				msgUpdate = "<br><span style='font-size: "+ fntSize + "px;'><b>REPLACE "+ isFork.toUpperCase() +"<b></span> "
