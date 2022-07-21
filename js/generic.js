@@ -623,6 +623,8 @@ const get_isVer = () => new Promise(resolve => {
 	// set isVer, isVerPlus
 	let t0; if (canPerf) {t0 = performance.now()}
 	function output(verNo) {
+		// don't run on old versions
+		if (verNo < isUpdateMinimum) {isUpdateGecko = true}
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
 		} else if (verNo == 104) {isVerPlus = true; verNo += "+"}
@@ -1347,7 +1349,7 @@ function countJS(filename) {
 			Promise.all([
 				get_isEngine(), // do first to quickly set isFFLegacy
 				get_isOS(), // this also sets isPlatformFont for font tests
-				get_isVer(),
+				get_isVer(), // also sets isUpdateGecko
 				get_isTB(),
 				get_isBrave(),
 				get_isFork(), // uses isFFLegacy, isEngine
@@ -1369,7 +1371,9 @@ function countJS(filename) {
 					gMethodsOnce.push("_global:isFork:blocked")
 					log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
 				}
-				get_pointer_event() // pointer eventlistener
+				if (!isUpdateGecko) {
+					get_pointer_event() // pointer eventlistener
+				}
 				outputSection("load")
 			})
 		})
@@ -1403,7 +1407,41 @@ function outputPostSection(id) {
 	}
 }
 
+function outputUser(name) {
+	// user initiated tests
+	if (isUpdateGecko) {
+		return
+	}
+	if (name == "goFS") { goFS()
+	} else if (name == "goNW") { goNW()
+	} else if (name == "goNW_UA") { goNW_UA()
+	} else if (name == "outputAudio2") { outputAudio2()
+	} else if (name == "outputFontsFB") { outputFontsFB()
+	} else if (name == "get_storage_manager") { get_storage_manager("click")
+	} else if (name == "get_pointer_event") { get_pointer_event()
+	}
+}
+
 function outputSection(id, cls) {
+	// return if old gecko
+	if (isUpdateGecko) {
+		// on first load output message
+		if (gLoad) {
+			let msgItems = document.getElementsByClassName("secthash")
+			let msgUpdate = "<br><span style='font-size: 64px;'><b>UPDATE GECKO<b></span> "
+					+"... to at least v"+ isUpdateMinimum
+			if (isFFLegacy && isFork !== undefined) {
+				let fntSize = isFork.length > 10 ? 32 : 48
+				msgUpdate = "<br><span style='font-size: "+ fntSize + "px;'><b>REPLACE "+ isFork.toUpperCase() +"<b></span> "
+					+"... with Firefox [TZP requires v"+ isUpdateMinimum +"+]"
+			}
+			for (let i=0; i < msgItems.length; i++) {
+				msgItems[i].innerHTML = msgUpdate
+			}
+		}
+		return
+	}
+
 	if (gClick) {
 		gClick = false
 		isLoad = id == "load" ? true : false
