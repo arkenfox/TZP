@@ -168,6 +168,8 @@ let s0 = " <span class='",
 	isRFP = false,
 	isSecure = false,
 	isTB = false,
+	isUpdateGecko = false, // stop testing and so many old versions
+	isUpdateMinimum = 68,
 	isVer = "",
 	isVerPlus = false,
 // runtypes
