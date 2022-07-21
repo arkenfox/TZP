@@ -1221,38 +1221,59 @@ function get_scr_window(runtype) {
 		for (let i=0; i < aMeasures.length; i++) {
 			if (aMeasures[i] !== zB0) {aMeasures[i] = (typeof aMeasures[i] == "number" ? aMeasures[i] : "NaN")}
 		}
-		// screen positions: FF52 is always zeros
+		// screen positions
+		let rfpValue = "0, 0, 0, 0"
 		let v0 = aPos[0], v1 = aPos[1], v2 = aPos[2], v3 = aPos[3]
 		let display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-		let value = display
-		if (isFF) {
-			value = "0, 0, 0, 0"
-			if (display !== value) {
+		let fpValue = display, posNote = "", isPosLies = false
+		if (isFF && !isFFLegacy) {
+			posNote = display == rfpValue ? rfp_green : rfp_red
+			// RFP bypass but !== resize (does not recheck isRFP)
+			if (isRFP && runtype !== "resize") {
+				if (display !== rfpValue) {
 				// color each one
-				if (v0 !== 0) {v0 = soB + v0 + scC}
-				if (v1 !== 0) {v1 = soB + v1 + scC}
-				if (v2 !== 0) {v2 = soB + v2 + scC}
-				if (v3 !== 0) {v3 = soB + v3 + scC}
+					if (v0 !== 0) {v0 = soB + v0 + scC}
+					if (v1 !== 0) {v1 = soB + v1 + scC}
+					if (v2 !== 0) {v2 = soB + v2+ scC}
+					if (v3 !== 0) {v3 = soB + v3 + scC}
+					display = v0 +", "+ v1 +", "+ v2 +", "+ v3
+					if (gRun) {
+						gKnown.push("screen:screen positions")
+						gBypassed.push("screen:screen positions:"+ rfpValue)
+					}
+					fpValue = rfpValue
+				}
+			} else {
+				// left + top are always zero, availLeft + availTop depends on docker/taskbar pos
+				// note: not worth bypassing the first two if !== 0
+				if (v0 !== 0) {v0 = soL + v0 + scC; isPosLies = true}
+				if (v1 !== 0) {v1 = soL + v1 + scC; isPosLies = true}
+				if (v2 == "NaN") {v2 = soL + v2 + scC; isPosLies = true}
+				if (v3 == "NaN") {v3 = soL + v3 + scC; isPosLies = true}
 				display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-				if (gRun) {
+				if (gRun && isPosLies) {
 					gKnown.push("screen:screen positions")
-					gBypassed.push("screen:screen positions:"+ value)
+				}
+				// simplify FP value
+					// but record all four values as it is (more) stable (than window) and adds entropy
+				if (isPosLies) {fpValue = zLIE
+				} else if (fpValue.includes(zB0)) {fpValue = zB0
 				}
 			}
 		}
-		dom.posS.innerHTML = display
-		res.push("screen_positions:"+ value)
+		dom.posS.innerHTML = display + posNote
+		res.push("screen_positions:"+ fpValue)
+
 		// window positions
 		let v4 = aPos[4], v5 = aPos[5], v6 = aPos[6], v7 = aPos[7]
 		display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-		value = display
-		let fpValue = display, posNote = ""
+		fpValue = display
+		posNote = ""
 		if (isFF && !isFFLegacy) {
-			posNote = value == "0, 0, 0, 0" ? rfp_green : rfp_red
+			posNote = display == rfpValue ? rfp_green : rfp_red
 			// RFP bypass but !== resize (does not recheck isRFP)
 			if (isRFP && runtype !== "resize") {
-				value = "0, 0, 0, 0"
-				if (display !== value) {
+				if (display !== rfpValue) {
 				// color each one
 					if (v4 !== 0) {v4 = soB + v4 + scC}
 					if (v5 !== 0) {v5 = soB + v5 + scC}
@@ -1261,14 +1282,15 @@ function get_scr_window(runtype) {
 					display = v4 +", "+ v5 +", "+ v6 +", "+ v7
 					if (gRun) {
 						gKnown.push("screen:window positions")
-						gBypassed.push("screen:window positions:"+ value)
+						gBypassed.push("screen:window positions:"+ rfpValue)
 					}
+					fpValue = rfpValue
 				}
 			} else {
-				// fullscreen = all zeroes I except the last one
+				// fullscreen = all zeroes except the last one
 				// maximized = negatives
 				// we can't bypass but we can mark NaNs as a lie
-				let isPosLies = false
+				isPosLies = false
 				if (v4 == "NaN") {v4 = soL + v4 + scC; isPosLies = true}
 				if (v5 == "NaN") {v5 = soL + v5 + scC; isPosLies = true}
 				if (v6 == "NaN") {v6 = soL + v6 + scC; isPosLies = true}
@@ -1278,9 +1300,9 @@ function get_scr_window(runtype) {
 					gKnown.push("screen:window positions")
 				}
 				// simplify FP value
-				if (fpValue.includes("NaN")) {fpValue = zLIE
+				if (isPosLies) {fpValue = zLIE
 				} else if (fpValue.includes(zB0)) {fpValue = zB0
-				} else if (fpValue !== "0, 0, 0, 0") {fpValue = "!zeros"
+				} else if (fpValue !== "0, 0, 0, 0") {fpValue = "!zeros" // not super stable
 				}
 			}
 		}
