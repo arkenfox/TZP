@@ -2175,6 +2175,9 @@ function get_android_tbh() {
 }
 
 function get_android_kbh() {
+	if (isUpdateGecko) {
+		return
+	}
 	if (isOS == "android") {
 		// wait for keyboard
 		setTimeout(function() {
