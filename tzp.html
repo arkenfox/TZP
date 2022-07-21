@@ -168,11 +168,11 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">full-screen-api.enabled</span></div>
 			&nbsp [api] full screen</td><td class="c" id="fsSupport"></td></tr>
-		<tr><td><span class="btn btn0" onClick="goFS()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span></div>
 			&nbsp [test] full screen <sup>4</sup></td><td class="c" id="fsLeak"></td></tr>
-		<tr><td><span class="btn btn0" onClick="goNW()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">will attempt to open a new<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c" id="newWinLeak"></td></tr>
@@ -256,7 +256,7 @@
 			<tr class="togUA2"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
 			<tr class="togUA2"><td>nested worker</td><td class="c mono faint" id="uaWorker3"></td></tr>
 			<tr class="togUA2"><td>worker from blob</td><td class="c mono faint" id="uaWorker4"></td></tr>
-		<tr><td><span class="btn btn0" onClick="goNW_UA()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('goNW_UA')">[ click here ]</span>
 			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -460,7 +460,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.storageManager.enabled</span></div>
 			&nbsp storage manager</td><td class="c" id="storageMSupport"></td></tr>
-		<tr><td><span class="btn btn0" onClick="get_storage_manager(`click`)">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click here ]</span>
 			[properties | test] storage manager</td>
 			<td><span class="c" id="storageMProp"></span> | <span class="c" id="storageMTest"></span></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
@@ -490,7 +490,7 @@
 			&nbsp hardwareConcurrency</td><td class="c" id="nHWC"></td></tr>
 		<tr><td>keyboard</td><td class="c mono" id="nKeyboard"></td></tr>
 		<tr><td>[api] pointer event</td><td class="c" id="pointer"></td></tr>
-		<tr><td id="pointertarget"><span class="btn btn0" onClick="get_pointer_event()">[ mouse/tap here ]</span>
+		<tr><td id="pointertarget"><span class="btn btn0" onClick="outputUser('get_pointer_event')">[ mouse/tap here ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">height<br>isPrimary<br>mozInputSource<br>pointerType<br>pressure<br>
 				tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
@@ -602,7 +602,7 @@
 		<tr><td>copyFromChannel <sup>1</sup></td><td class="c mono" id="audioCopy"></td></tr>
 		<tr><td>sum <sup>1</sup></td><td class="c mono" id="audioSum"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn btn0" onClick="outputAudio2()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('outputAudio2')">[ click here ]</span>
 			hash</td><td class="c2 mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
@@ -662,7 +662,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">detected fonts and styles applied<br>per font-family generic-name</div>
 			&nbsp [stats] fonts <sup>2, 3</sup></td><td class="c mono" id="fontStats"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputFontsFB()">[ click here ]</span>
+		<tr><td><span class="btn btn0" onClick="outputUser('outputFontsFB')">[ click here ]</span>
 			font fallback <sup>4</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<!--glyphs-->
 		<tr><td colspan="2" class="center">--- glyphs ---</td></tr>
