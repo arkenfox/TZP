@@ -90,7 +90,7 @@ function get_iframe_props() {
 
 		// gecko BS
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
-		if (isFF && !isFFLegacy) {
+		if (isFF) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
 			let falsePos = ['Event','Location'] // false positives: console open
@@ -121,7 +121,7 @@ function get_iframe_props() {
 			output = soB + output + scC
 			result = mini_sha1(props.join(), "misc iframe props bypass")
 			// record lie/bypass
-			if (isFF && !isFFLegacy) {
+			if (isFF) {
 				if (gRun) {
 					gKnown.push("misc:iframe window properties")
 					gBypassed.push("misc:iframe window properties:"+ result)
