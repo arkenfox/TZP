@@ -156,6 +156,8 @@ let s0 = " <span class='",
 	isFFyes = [],
 	isGeckoBlock = false, // stop testing/handling so many old versions
 	isGeckoBlockMin = [78, 10], // [FF, TB]
+	isGeckoSmart = false, // simplify code
+	isGeckoSmartMin = [91, 11], // [FF, TB]
 	isFile = false,
 	isFork = undefined,
 	isLoad = true,
