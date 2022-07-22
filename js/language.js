@@ -407,7 +407,6 @@ function get_lang_doc() {
 				} else if (item == 31) {return d.toTimeString()
 				} else if (item == 32) {
 					let test = Intl.DateTimeFormat(undefined, {hour: "numeric"}).resolvedOptions().hourCycle
-					if (isFFLegacy && test === undefined) {test = zNA}
 					return test
 				} else if (item == 33) {
 					// 65+: Intl.RelativeTimeFormat
@@ -511,11 +510,7 @@ function get_lang_doc() {
 						item = (item+"").padStart(2,"0")
 						eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
 						log_error("language: item "+ item, eMsg)
-						if (isFFLegacy && eMsg == "TypeError: (new Intl.NumberFormat(...)).formatToParts is not a function") {
-							return zNS
-						} else {
-							return zB0
-						}
+						return zB0
 					}
 				} else if (item == 37) {
 					// 70+: [BigInt] Intl.NumberFormat
@@ -624,11 +619,7 @@ function get_lang_doc() {
 					} else {
 						item = (item+"").padStart(2,"0")
 						log_error("language: item "+ item, eMsg)
-						if (isFFLegacy && eMsg == "TypeError: Intl.PluralRules is not a constructor") {
-							return zNS
-						} else {
-							return zB0
-						}
+						return zB0
 					}
 				}
 			} catch(e) {
@@ -726,7 +717,7 @@ function get_lang_doc() {
 		hashAll.push("datetime:"+ hashDate)
 
 		// notation
-		if (isVer > 59) { // ignore isFFLegacy
+		if (isFF) {
 			// language
 			if (hashLang == "7bbb3d82cf088ad3acca9977f2f44910945eb7ce") {hashLang += enUS_green +" [FF86+]"
 			} else if (hashLang == "331c8ae488a477424d2cb244dac3499d75004d8d") {hashLang += enUS_green +" [FF78-85]"
