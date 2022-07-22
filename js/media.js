@@ -142,11 +142,11 @@ function outputMedia() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = [], r = ""
 	// FF63+
-	if (isFF && isVer < 63) {r = zNS} else (r = (check_navKey("mediaCapabilities") ? zE : zD))
+	r = check_navKey("mediaCapabilities") ? zE : zD
 	dom.nMediaC = r
 	section.push("mediaCapabilities:"+ r)
 	// FF71+
-	if (isFF && isVer < 71) {r = zNS} else (r = (check_navKey("mediaSession") ? zE : zD))
+	r = check_navKey("mediaSession") ? zE : zD
 	dom.nMediaS = r
 	section.push("mediaSession:"+ r)
 
