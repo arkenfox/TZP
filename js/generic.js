@@ -283,24 +283,7 @@ const get_isEngine = () => new Promise(resolve => {
 	if (isFFyes.length) {isFF = true}
 	function final_isFF() {
 		if (isFFyes.length) {isFF = true}
-		if (!isFF) {
-			rfp_green = ""
-			rfp_red = ""
-			rfp_random_green = ""
-			rfp_random_red = ""
-			lb_green = ""
-			lb_red = ""
-			nw_green = ""
-			nw_red = ""
-			enUS_green = ""
-			enUS_red = ""
-			spoof_both_green = ""
-			spoof_both_red = ""
-			default_ff_green = ""
-			default_ff_red = ""
-			let items = document.getElementsByClassName("group")
-			for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-		} else {
+		if (isFF) {
 			isFFLegacy = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 			log_perf("isFFLegacy [global]",""+ isFFLegacy,"ignore")
 		}
@@ -539,19 +522,13 @@ const get_isRFP = () => new Promise(resolve => {
 		// extra checks: RFP toggled off-to-on requires page reload
 		// don't block pseudo
 		if (gLoad) {
-			if (isVer > 62) {
-				let chk1 = getElementProp("#cssPRM","content",":after", true)
-				if (chk1 !== "no-preference") {isRFP = false}
-			}
-			if (isVer > 66) {
-				let chk2 = getElementProp("#cssPCS","content",":after", true)
-				if (chk2 !== "light") {isRFP = false}
-			}
-			if (isVer > 77) {
-				let chk3 = zD
-				try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
-				if (chk3 !== zD) {isRFP = false}
-			}
+			let chk1 = getElementProp("#cssPRM","content",":after", true)
+			if (chk1 !== "no-preference") {isRFP = false}
+			let chk2 = getElementProp("#cssPCS","content",":after", true)
+			if (chk2 !== "light") {isRFP = false}
+			let chk3 = zD
+			try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
+			if (chk3 !== zD) {isRFP = false}
 		}
 		if (gRun) {log_perf("isRFP [prereq]",t0,gt0,isRFP)}
 		return resolve()
@@ -1353,15 +1330,38 @@ function countJS(filename) {
 				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
 				// don't run on old versions
-				if (isFF && isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
+				if (isFF & isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
+				// treat older FF as dumb
+				if (isFF && isVer >= isGeckoSmartMin[0]) {
+					isGeckoSmart = true
+				}
+				// wipe notations: hook up isGeckoSmart later
+				if (!isFF) {
+					rfp_green = ""
+					rfp_red = ""
+					rfp_random_green = ""
+					rfp_random_red = ""
+					lb_green = ""
+					lb_red = ""
+					nw_green = ""
+					nw_red = ""
+					enUS_green = ""
+					enUS_red = ""
+					spoof_both_green = ""
+					spoof_both_red = ""
+					default_ff_green = ""
+					default_ff_red = ""
+					let items = document.getElementsByClassName("group")
+					for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+				}
 				// some sims = isFF only: not fussy; only devs run these
 				if (!isFF) {
-	runSN = false
-	runSU = false
-	runRF = false
-	runCSS = false
-	runFNT = false
-	runWFS = false
+					runSN = false
+					runSU = false
+					runRF = false
+					runCSS = false
+					runFNT = false
+					runWFS = false
 				}
 				if (results[3] == "timeout") {
 					gMethodsOnce.push("_global:resource:blocked")
