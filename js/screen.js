@@ -2175,7 +2175,7 @@ function get_android_tbh() {
 }
 
 function get_android_kbh() {
-	if (isUpdateGecko) {
+	if (isGeckoBlock) {
 		return
 	}
 	if (isOS == "android") {
