@@ -53,7 +53,6 @@ function get_fd_chrome(log = false) {
 	}
 	// bail
 	if (isChrome !== "") {output(isChrome); return}
-	if (isVer < 60) {output(zNA); return}
 	// run
 	dom.fdChrome.innerHTML = zB0
 	function run2() {
@@ -423,31 +422,21 @@ function get_fd_resources() {
 		}
 		// set
 		function build() {
-			// TB
 			if (isTB) {
+				// TB
 				if (isMark == "270 x 48") {
-					channel = "Tor Browser - Alpha" // alpha: 8.5a7+ [60.5.0esr]
+					channel = "Tor Browser - Alpha"
 					log_debug("TB", "css branding = 270 x 48 px = alpha", true)
-				} else if (isMark == "336 x 48" && isVer > 77) {
-					channel = "Tor Browser - Release" // 78+ therefore release
-				} else if (isMark == "300 x 38" && isVer > 67 && isVer < 78) {
-					channel = "Tor Browser - Release" // 68 therefore release
-				} else if (isMark == "300 x 38" && isVer > 59 && isVer < 68) {
-					channel = "Tor Browser"
+				} else if (isMark == "336 x 48") {
+					channel = "Tor Browser - Release"
 				}
-			}
-			// FF
-			if (!isTB) {
-				let is70 = (isVer > 69)
-				//70+
-				if (isMark == "336 x 48" && is70) {
+			} else if (isFF) {
+				// FF
+				if (isMark == "336 x 48") {
 					branding = "Browser"; channel = "Release/Beta"
-				} else if (isMark == "336 x 64" && is70) {
+				} else if (isMark == "336 x 64") {
 					branding = "Browser"; channel = "Developer/Nightly"
-				//60-69, ESR60/68
-				} else if (isMark == "300 x 38" && !is70) {branding = "Quantum"; channel = "Release/Beta" // FF57-69
-				} else if (isMark == "132 x 62" && !is70) {channel = "Developer Edition"
-				} else if (isMark == "270 x 48" && !is70) {channel = "Nightly"}
+				}
 				// try setting isFork again
 				if (isLogo == zB0 && isFork == undefined) {
 					set_isFork()
@@ -726,26 +715,21 @@ function get_scr_dpi_dpr(runtype) {
 
 		// visualViewport scale: note FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
 		let vvScale
-		if (isVer < 63) {
-			vvScale = zNS
-		} else {
-			try {
-				vvScale = visualViewport.scale
-			} catch(e) {
-				log_error("screen: visualViewport scale", e.name, e.message)
-				if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
-					vvScale = zD
-				} else {
-					vvScale = zB0
-				}
+		try {
+			vvScale = visualViewport.scale
+		} catch(e) {
+			log_error("screen: visualViewport scale", e.name, e.message)
+			if (e.name == "ReferenceError" && e.message == "visualViewport is not defined") {
+				vvScale = zD
+			} else {
+				vvScale = zB0
 			}
-			cleanFn(vvScale)
-			// ToDo: lies: if not blocked or zNS/zNA
-			//if ("number" !== typeof vvScale) { vvLies = true }
 		}
+		cleanFn(vvScale)
+		// ToDo: lies: if not blocked or zNS/zNA
+		//if ("number" !== typeof vvScale) { vvLies = true }
 		dom.vvScale.innerHTML = vvScale
 		// ToDo: zoom revisit
-
 		return resolve(["dpi:"+ varDPI, "devicePixelRatio:"+ varDPR, "visualViewport_scale:"+ vvScale])
 	})
 }
@@ -1125,28 +1109,24 @@ function get_scr_viewport(runtype) {
 	// visualViewport
 	// note: FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
 	let vViewport, vvw, vvh, vValue, vValid = false
-	if (isVer < 63) {
-		vViewport = zNS; vValue = zNS
-	} else {
-		try {
-			vvw = window.visualViewport.width
-			vvh = window.visualViewport.height
-			if ("number" !== typeof vvw || "number" !== typeof vvh) {
-				vViewport = soL + cleanFn(vvw) +" x "+ cleanFn(vvh) + scC
-				vValue = "NaN"
-				if (gRun) {gKnown.push("screen:visualViewport size")}
-			} else {
-				vValid = true; vValue = vvw
-				if (avh == "") {avh = vvh} // get android height once: s/be with toolbar visible (not FS)
-				vViewport = cleanFn(vvw) +" x "+ cleanFn(vvh)
-			}
-		} catch(e) {
-			log_error("screen: visualViewport size", e.name, e.message)
-			if (e.name == "TypeError" && e.message == "window.visualViewport is undefined") {
-				vViewport = zD; vValue = zD
-			} else {
-				vViewport = zB0; vValue = zB0
-			}
+	try {
+		vvw = window.visualViewport.width
+		vvh = window.visualViewport.height
+		if ("number" !== typeof vvw || "number" !== typeof vvh) {
+			vViewport = soL + cleanFn(vvw) +" x "+ cleanFn(vvh) + scC
+			vValue = "NaN"
+			if (gRun) {gKnown.push("screen:visualViewport size")}
+		} else {
+			vValid = true; vValue = vvw
+			if (avh == "") {avh = vvh} // get android height once: s/be with toolbar visible (not FS)
+			vViewport = cleanFn(vvw) +" x "+ cleanFn(vvh)
+		}
+	} catch(e) {
+		log_error("screen: visualViewport size", e.name, e.message)
+		if (e.name == "TypeError" && e.message == "window.visualViewport is undefined") {
+			vViewport = zD; vValue = zD
+		} else {
+			vViewport = zB0; vValue = zB0
 		}
 	}
 	dom.vViewport.innerHTML = vViewport
@@ -1483,7 +1463,7 @@ function get_scr_window_mm(runtype) {
 				perf("mmDPRm", zNS)
 			}
 			// webkit
-			if (!isFF || isVer > 62) {
+			if (!isFF) {
 				callback("-webkit-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 2, 0.0000001
 				).then(function(web){
 					perf("mmDPRw", web, "-webkit-device-pixel-ratio")
@@ -1598,8 +1578,7 @@ function get_ua_doc() {
 			pre = "",
 			spoof = false,
 			match = false
-		// FF78+ only
-		if (isFF && isVer > 77) {
+		if (isFF) {
 			go = true
 			if (isFork === undefined) {goUA = true} // we should ignore dealing with any 78+ forks
 			if (isRFP) {goUA = true} // unless they are using RFP
@@ -2202,7 +2181,7 @@ function goFS() {
 				delay = 1, n = 1,
 				sizeS = [], sizeE = []
 			function exitFS() {
-				if (isVer > 63) {document.exitFullscreen()} else {document.mozCancelFullScreen()}
+				document.exitFullscreen()
 				document.removeEventListener("mozfullscreenchange", getFS)
 			}
 			function getFS() {
@@ -2407,7 +2386,7 @@ function outputUA() {
 				vReported = sRep.slice(n+1, sRep.length)
 			let go = false
 			// so this only applies to ESR numbering
-			if (isRFP && isVer > 59) {
+			if (isRFP) {
 				if (isFork === undefined) {go = true}
 				if (isRFP && isOS == "android" || isRFP && isVer < 102) {
 					go = true
@@ -2586,9 +2565,6 @@ function outputStart() {
 		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
 		isFFno = isFFno.filter(x => !["type of installtrigger"].includes(x))
 		isFFno = isFFno.filter(x => !["installtrigger in window"].includes(x))
-	} else if (isVer < 61) {
-		// FF60: false positive
-		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
 	}
 	if (isFF && isFFno.length) {
 		let fake = []
