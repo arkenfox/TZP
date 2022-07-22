@@ -681,7 +681,7 @@ function get_lang_doc() {
 			// language
 			if (hashLang == "7bbb3d82cf088ad3acca9977f2f44910945eb7ce") {hashLang += enUS_green +" [FF86+]"
 			} else if (hashLang == "331c8ae488a477424d2cb244dac3499d75004d8d") {hashLang += enUS_green +" [FF78-85]"
-			} else {hashLang += enUS_red)
+			} else {hashLang += enUS_red
 			}
 			// timezone
 			bTZ = (hashTime == "e8b260c46d7e3bf71131cc8936a2d5bef1fe5850" ? true : false)
