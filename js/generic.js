@@ -1353,7 +1353,7 @@ function countJS(filename) {
 				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
 				// don't run on old versions
-				if (isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
+				if (isFF && isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
 				// some sims = isFF only: not fussy; only devs run these
 				if (!isFF) {
 	runSN = false
