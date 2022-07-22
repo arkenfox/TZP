@@ -109,31 +109,19 @@ function outputCanvas() {
 					control =  isSHA == "SHA-1" ? "5a8876b36c2b45c881ed9cbffd0b08b1919b0d57" : "5c4d5144d5afc2503eede9d3c1af8c25a9181ab0"
 					display += (test == control ? rfp_green : rfp_red)
 				}
-				// static
-				if (isVer < 78) { // 270x20 white
-					if (item == "toDataURL" || item == "toBlob") {
-						control = isSHA == "SHA-1" ? "3ac477ddf14d503ebf01d7b66985f5426ff03fff" : "4aa37097783babc067ccf9cbc03883f66abd5ee0"
-						display += (test == control ? rfp_green : rfp_red)
-					} else if (item == "getImageData") {
-						control = isSHA == "SHA-1" ? "67457668c36241c7da45b355a120119435c7c444" : "bc8be51cf034237e75db150750d22afa1287696e"
-						display += (test == control ? rfp_green : rfp_red)
-					}
-				}
 				// random
-				if (isVer > 77) {
-					if (item == "toDataURL" || item == "toBlob" || item == "getImageData") {
-						let notation = rfp_random_red
-						// RFP on, two pass is random
-						if (isRFP && aPass[i] == false) {
-							// toBlob !== toDataURL 
-							if (item == "toDataURL" || item == "toBlob") {
-								if (ffBlob !== ffDataURL) {notation = rfp_random_green}
-							} else if (item == "getImageData") {
-								notation = rfp_random_green
-							}
+				if (item == "toDataURL" || item == "toBlob" || item == "getImageData") {
+					let notation = rfp_random_red
+					// RFP on, two pass is random
+					if (isRFP && aPass[i] == false) {
+						// toBlob !== toDataURL 
+						if (item == "toDataURL" || item == "toBlob") {
+							if (ffBlob !== ffDataURL) {notation = rfp_random_green}
+						} else if (item == "getImageData") {
+							notation = rfp_random_green
 						}
-						display += notation
 					}
+					display += notation
 				}
 			}
 			// if blocked and not bypassed
