@@ -154,6 +154,8 @@ let s0 = " <span class='",
 	isFFLegacy = false,
 	isFFno = [],
 	isFFyes = [],
+	isGeckoBlock = false, // stop testing/handling so many old versions
+	isGeckoBlockMin = [78, 10], // [FF, TB]
 	isFile = false,
 	isFork = undefined,
 	isLoad = true,
@@ -168,8 +170,6 @@ let s0 = " <span class='",
 	isRFP = false,
 	isSecure = false,
 	isTB = false,
-	isUpdateGecko = false, // stop testing and so many old versions
-	isUpdateMinimum = 68,
 	isVer = "",
 	isVerPlus = false,
 // runtypes

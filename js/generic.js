@@ -623,8 +623,6 @@ const get_isVer = () => new Promise(resolve => {
 	// set isVer, isVerPlus
 	let t0; if (canPerf) {t0 = performance.now()}
 	function output(verNo) {
-		// don't run on old versions
-		if (verNo < isUpdateMinimum) {isUpdateGecko = true}
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
 		} else if (verNo == 104) {isVerPlus = true; verNo += "+"}
@@ -1349,11 +1347,13 @@ function countJS(filename) {
 			Promise.all([
 				get_isEngine(), // do first to quickly set isFFLegacy
 				get_isOS(), // this also sets isPlatformFont for font tests
-				get_isVer(), // also sets isUpdateGecko
+				get_isVer(),
 				get_isTB(),
 				get_isBrave(),
 				get_isFork(), // uses isFFLegacy, isEngine
 			]).then(function(results){
+				// don't run on old versions
+				if (isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
 				// some sims = isFF only: not fussy; only devs run these
 				if (!isFF) {
 	runSN = false
@@ -1371,7 +1371,7 @@ function countJS(filename) {
 					gMethodsOnce.push("_global:isFork:blocked")
 					log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
 				}
-				if (!isUpdateGecko) {
+				if (!isGeckoBlock) {
 					get_pointer_event() // pointer eventlistener
 				}
 				outputSection("load")
@@ -1409,7 +1409,7 @@ function outputPostSection(id) {
 
 function outputUser(name) {
 	// user initiated tests
-	if (isUpdateGecko) {
+	if (isGeckoBlock) {
 		return
 	}
 	if (name == "goFS") { goFS()
@@ -1424,19 +1424,25 @@ function outputUser(name) {
 
 function outputSection(id, cls) {
 	// return if old gecko
-	if (isUpdateGecko) {
+	if (isGeckoBlock) {
 		// on first load output message
 		if (gLoad) {
+			let msgAction = isFork == undefined ? "UPDATE " : "REPLACE "
+			let msgActionSuffix = isFork == undefined ? "... " : "... with Firefox | "
+			let msgName = isTB ? "TOR BROWSER" : (isFork !== undefined ? isFork.toUpperCase() : "FIREFOX")
+			let msgVerPrefix = isTB ? "TB v" : (isFork !== undefined ? "FF v" : " v")
+			let msgVer = isTB ? isGeckoBlockMin[1] : isGeckoBlockMin[0]
+			let msgReq = "TZP requires "+ msgVerPrefix + msgVer +"+"
+			let msgLen = msgAction.length + msgName.length + 1
+			let msgSize = 56
+			if (msgLen > 15) {msgSize = 48}
+			if (msgLen > 19) {msgSize = 32}
+			let msg = "<br><span style='font-size:"+ msgSize + "px;'><b>"+ msgAction + msgName +"<b></span> "
+				+ msgActionSuffix + msgReq
+			// populate
 			let msgItems = document.getElementsByClassName("secthash")
-			let msgUpdate = "<br><span style='font-size: 64px;'><b>UPDATE GECKO<b></span> "
-					+"... TZP requires v"+ isUpdateMinimum +"+"
-			if (isFFLegacy && isFork !== undefined) {
-				let fntSize = isFork.length > 10 ? 32 : 48
-				msgUpdate = "<br><span style='font-size: "+ fntSize + "px;'><b>REPLACE "+ isFork.toUpperCase() +"<b></span> "
-					+"... with Firefox [TZP requires v"+ isUpdateMinimum +"+]"
-			}
 			for (let i=0; i < msgItems.length; i++) {
-				msgItems[i].innerHTML = msgUpdate
+				msgItems[i].innerHTML = msg
 			}
 		}
 		return
