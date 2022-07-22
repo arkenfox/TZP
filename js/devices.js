@@ -453,20 +453,15 @@ function get_media_devices() {
 						if (dValue === undefined) {devicesBS = true} else {aData.push(dValue)}
 						// FF sanity check
 						if (isFF && d.groupId !== undefined) {
-							// FF67+ groupId
-							if (isVer > 66 && d.groupId.length == 0) {devicesBS = true}
-							if (isVer < 67 && d.groupId.length > 0) {devicesBS = true}
 							// deviceId
 							let chk = d.deviceId
 							if (chk.length !== 44) {devicesBS = true}
 							else if (chk.slice(-1) !== "=") {devicesBS = true}
 							// groupId
-							if (isVer > 66) {
-								chk = d.groupId
-								//console.log("group", chk.length, chk.slice(-1), chk)
-								if (chk.length !== 44) {devicesBS = true}
-								else if (chk.slice(-1) !== "=") {devicesBS = true}
-							}
+							chk = d.groupId
+							//console.log("group", chk.length, chk.slice(-1), chk)
+							if (chk.length !== 44) {devicesBS = true}
+							else if (chk.slice(-1) !== "=") {devicesBS = true}
 						}
 					})
 					// count each kind
@@ -937,14 +932,10 @@ function get_pointer_hover() {
 		get_mm("any-hover", "#cssAH")
 		let h = display.join(" | ")
 		// notate
-		if (isVer > 73 && isOS == "android") {
+		if (isOS == "android") {
 			// FF74+: 1607316
 			if (!pointerBS) {p += (p == "coarse | coarse" ? rfp_green : rfp_red)}
 			if (!hoverBS) {h += (h == "none | none" ? rfp_green : rfp_red)}
-		} else if (isVer > 63) {
-			// FF64+
-			if (!pointerBS) {p += (p == "fine | fine" ? rfp_green : rfp_red)}
-			if (!hoverBS) {h += (h == "hover | hover" ? rfp_green : rfp_red)}
 		}
 		// display
 		dom.mmP.innerHTML = p
