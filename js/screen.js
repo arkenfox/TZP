@@ -70,7 +70,6 @@ function get_fd_chrome(log = false) {
 		if (r == "") {run2()} else {output(r)}
 	}
 	function run() {
-		if (isFFLegacy) {dom.fdChrome = zNA; return}
 		// win/mac
 		let c = "chrome://browser/content/extension-",
 			p = "-panel.css",
@@ -154,7 +153,6 @@ function get_fd_locales() {
 		dom.fdLocales.innerHTML = hash + btn + (runSN ? zSIM : "")
 	} catch(e) {
 		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		if (eMsg == "TypeError: Intl.PluralRules is undefined" && isFFLegacy) {eMsg = zNS} // 57 or lower
 		dom.fdLocales = eMsg
 	}
 }
@@ -1226,7 +1224,7 @@ function get_scr_window(runtype) {
 		let v0 = aPos[0], v1 = aPos[1], v2 = aPos[2], v3 = aPos[3]
 		let display = v0 +", "+ v1 +", "+ v2 +", "+ v3
 		let fpValue = display, posNote = "", isPosLies = false
-		if (isFF && !isFFLegacy) {
+		if (isFF) {
 			posNote = display == rfpValue ? rfp_green : rfp_red
 			// RFP bypass but !== resize (does not recheck isRFP)
 			if (isRFP && runtype !== "resize") {
@@ -1269,7 +1267,7 @@ function get_scr_window(runtype) {
 		display = v4 +", "+ v5 +", "+ v6 +", "+ v7
 		fpValue = display
 		posNote = ""
-		if (isFF && !isFFLegacy) {
+		if (isFF) {
 			posNote = display == rfpValue ? rfp_green : rfp_red
 			// RFP bypass but !== resize (does not recheck isRFP)
 			if (isRFP && runtype !== "resize") {
@@ -1323,7 +1321,7 @@ function get_scr_window(runtype) {
 		dom.mOuter = mOuter
 		dom.mInner.innerHTML = mInner
 		// notate
-		if (isFF && !isFFLegacy) {
+		if (isFF) {
 			// sizes
 			let match = true, r = "", c = "#ff4f4f"
 			if (mScreen !== mAvailable) {match = false

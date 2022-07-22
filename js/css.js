@@ -219,7 +219,6 @@ function get_computed_styles() {
 			}
 			// file:// override for CSSRuleList
 			let fileSchemeOverride = (isFile && !runCSS && isVer > 67 ? true : false)
-			if (isFFLegacy) {fileSchemeOverride = true}
 			if (isFile && !isFF) {fileSchemeOverride = true}
 			// analyse
 			for (let i=0; i < 3; i++) {
@@ -410,8 +409,6 @@ function get_mm_css() {
 		get_mm("prefers-contrast","PC")
 		// ToDo: contrast: RFP & version check
 			// 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast boolean [hidden]
-
-		// return
 		return resolve(res)
 	})
 }
