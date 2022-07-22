@@ -214,25 +214,11 @@ function get_geo() {
 			let rhash = mini_sha1(r, "language geo")
 			r = rhash.substring(0,8)
 			if (isTB) {
-				if (r == "6e684da1" && isVer > 71) {
-					// TB ESR78+: disabled, true, prompt
-					r = default_tb_green +" [ESR78+]"
-				} else if (r == "406f0224" && isVer < 72) {
-					// TB ESR68-: disabled, false, prompt
-					r = default_tb_green +" [ESR60-68]"
-				} else {
-					r = default_tb_red
-				}
+				// TB ESR78+: disabled, true, prompt
+				r = r == "6e684da1" ? default_tb_green : default_tb_red
 			} else if (isFF) {
-				if (r == "f8a72f92" && isVer > 71) {
-					// FF72+: enabled, true, prompt
-					r = default_ff_green +" [FF72+]"
-				} else if (r == "c64a2946" && isVer < 72) {
-					// FF71-: enabled, false, prompt
-					r = default_ff_green +" [FF71 or lower]"
-				} else {
-					r = default_ff_red
-				}
+				// FF72+: enabled, true, prompt
+				r = r == "f8a72f92" ? default_ff_green : default_ff_red
 			} else {
 				r = ""
 			}
@@ -440,13 +426,7 @@ function get_lang_doc() {
 							eMsg = (name === undefined ? zErr : name +": "+ msg)
 							log_error("language: item "+ item, eMsg)
 							let display = ""
-							if (eMsg == "RangeError: invalid value unit for option style" && isVer < 71) {
-								return " | unit "+ zNS // 70-
-							} else if (eMsg == "RangeError: invalid value \"unit\" for option style" && isVer > 70 && isVer < 78) {
-								return " | \"unit\" "+ zNS // 71-77
-							} else {
-								return " | "+ zB0
-							}
+							return " | "+ zB0
 						} else {
 							return " | error"
 						}
@@ -535,12 +515,7 @@ function get_lang_doc() {
 				} else if (item == 41) {
 					return Intl.DateTimeFormat().resolvedOptions().numberingSystem
 				} else if (item == 42) {
-					// 70+
 					let tmp = new Intl.RelativeTimeFormat().resolvedOptions().numberingSystem
-					// 65-69
-					if (isVer > 64 && isVer < 70) {
-						if (tmp == undefined) {tmp = "not supported [undefined]"}
-					}
 					return tmp
 				} else if (item == 43) {
 					// relatedYear, yearName
@@ -629,27 +604,12 @@ function get_lang_doc() {
 					if (item == 5) {
 						// 1654116: shipped 86+
 						if (e.message == "Intl.DisplayNames is not a constructor" && isVer < 87) {msg = zNS}
-					} else if (item == 6 || item == 45) {
-						if (e.message == "Intl.ListFormat is not a constructor" && isVer < 78) {msg = zNS}
-					} else if (item == 9|| item == 33 || item == 42) {
-						if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
 					} else if (item == 10) {
 						// 1423593: Segmenter: ToDo: add version check when shipped
 						if (e.message == "Intl.Segmenter is not a constructor") {msg = zNS}
-					} else if (item == 34 ) {
-						if (e.message == "Intl.RelativeTimeFormat is not a constructor" && isVer < 65) {msg = zNS}
-						if (e.message == "rtf.formatToParts is not a function" && isVer > 64 && isVer < 70) {msg = zNS}
-					} else if (item == 37 || item == 38) {
-						if (e.message == "BigInt is not defined" && isVer < 68) {msg = zNS +" [BigInt]"}
-						if (e.message == "can't convert BigInt to number" && isVer > 67 && isVer < 70) {msg = zNS}
 					} else if (item == 47 && isVer < 91) {
 						// 1653024: formatRange: shipped 91+
 						if (e.message == "f.formatRange is not a function") {msg = zNS}
-					} else if (isVer < 60) {
-						// legacy
-						if (item == 8) {
-							if (e.message == "Intl.PluralRules is not a constructor") {msg = zNS}
-						}
 					}
 					item = (item+"").padStart(2,"0")
 					log_error("language: item "+ item, e.name, e.message)
@@ -721,8 +681,7 @@ function get_lang_doc() {
 			// language
 			if (hashLang == "7bbb3d82cf088ad3acca9977f2f44910945eb7ce") {hashLang += enUS_green +" [FF86+]"
 			} else if (hashLang == "331c8ae488a477424d2cb244dac3499d75004d8d") {hashLang += enUS_green +" [FF78-85]"
-			} else if (hashLang == "f93fb347147bc4c2f8df000987cbd257f929bec3") {hashLang += enUS_green +" [FF65-77]"
-			} else {hashLang += (hashLang == "8d4a717d4072680fdef4112c63b8445991cd1db6" ? enUS_green +" [FF60-64]" : enUS_red)
+			} else {hashLang += enUS_red)
 			}
 			// timezone
 			bTZ = (hashTime == "e8b260c46d7e3bf71131cc8936a2d5bef1fe5850" ? true : false)
@@ -737,12 +696,6 @@ function get_lang_doc() {
 				} else if (hashDate == "3f35d9cfdeeec07da82b12575d89c7bcd786647e") {ff = " [FF90]"
 				} else if (hashDate == "5eb6a41c1535f189aaa1e96c01ee2b0bcd43e76d") {ff = " [FF79-89]"
 				} else if (hashDate == "7142a7276324f9f20c79cb63ce04d0c4bd287d3f") {ff = " [FF78]"
-				} else if (hashDate == "6f4c7722ed4160adbdad5c726293b35fc72d4999") {ff = " [FF71-77]"
-				} else if (hashDate == "7f0e477fd8df913bb3ccf1dc0adb79516fa44dbf") {ff = " [FF70]"
-				} else if (hashDate == "1b0623fb14f16152d9d17ec7ea7e45a3444ae1fa") {ff = " [FF68-69]"
-				} else if (hashDate == "8ce41d7686ad112c618cf5906fc005240d70c34c") {ff = " [FF65-67]"
-				} else if (hashDate == "60a4fc24c0d762ff71ba61c71c9f91281c05df98") {ff = " [FF63-64]"
-				} else if (hashDate == "bd1f40ca6319112d4133f64d82ebb5d947126606") {ff = " [FF60-62]"
 				}
 			}
 			if (ff == "") {
