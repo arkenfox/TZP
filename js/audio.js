@@ -60,7 +60,7 @@ function get_audio2_context(run) {
 			if (!latencyError || run == 2) {
 				sDetail[sName] = results
 				let hash = sha1(results.join())
-				if (isFF && !isFFLegacy) {
+				if (isFF) {
 					// lies: missing keys
 					isLie = true
 					keynames.sort()
