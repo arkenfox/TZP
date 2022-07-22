@@ -218,7 +218,7 @@ function get_computed_styles() {
 				}
 			}
 			// file:// override for CSSRuleList
-			let fileSchemeOverride = (isFile && !runCSS && isVer > 67 ? true : false)
+			let fileSchemeOverride = (isFile && !runCSS ? true : false)
 			if (isFile && !isFF) {fileSchemeOverride = true}
 			// analyse
 			for (let i=0; i < 3; i++) {
@@ -226,14 +226,6 @@ function get_computed_styles() {
 				try {
 					aRep = res[i].keys // throws an error if blocked
 					if (fileSchemeOverride && i==2) {aRep = res[1].keys}
-					// don't record untrustworthy: false positives FF60-62: getComputedStyle has extra styles
-					// remove diffs: we don't lose entropy, we already know the version number
-					if (i == 0) {
-						if (isVer < 63) {aRep = aRep.filter(x => !["-moz-context-properties"].includes(x))}
-						if (isVer < 62) {
-							aRep = aRep.filter(x => !["-moz-window-opacity","-moz-window-transform","-moz-window-transform-origin"].includes(x))
-						}
-					}
 					// sim
 					if (runCSS) {
 						// let k = y sims thrown error
@@ -252,7 +244,7 @@ function get_computed_styles() {
 							if (i==1) {aRep = aRep.filter(x => !["constructor"].includes(x)); aRep.push("y"); aRep.push("constructor")} else if (i==2) {let k=y}
 						}
 					}
-					if (isFF && isVer > 62) {
+					if (isFF) {
 						let lastStyleIndex = aRep.indexOf("constructor")
 						aFake = aRep.slice(lastStyleIndex+1)
 						aReal = aRep.slice(0, lastStyleIndex+1)
