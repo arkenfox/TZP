@@ -18,6 +18,26 @@
 	--test17: #dc8cc1;
 	--test18: #dc8ca7;
 	--test99: #808080;
+
+	--bg1: #f07878;
+	--bg2: #f0a078;
+	--bg3: #f0c878;
+	--bg4: #f0f078;
+	--bg5: #c8f078;
+	--bg6: #a0f078;
+	--bg7: #78f078;
+	--bg8: #78f0a0;
+	--bg9: #78f0c8;
+	--bg10: #78f0f0;
+	--bg11: #78c8f0;
+	--bg12: #78a0f0;
+	--bg13: #7878f0;
+	--bg14: #a078f0;
+	--bg15: #c878f0;
+	--bg16: #f078f0;
+	--bg17: #f078c8;
+	--bg18: #f078a0;
+	--bg99: #808080;
 }
 
 /* main */
@@ -182,25 +202,25 @@ table td.secthash {
 }
 table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 
-#tb1 th {background-color: #f07878;}
-#tb2 th {background-color: #f0a078;}
-#tb3 th {background-color: #f0c878;}
-#tb4 th {background-color: #f0f078;}
-#tb5 th {background-color: #c8f078;}
-#tb6 th {background-color: #a0f078;}
-#tb7 th {background-color: #78f078;}
-#tb8 th {background-color: #78f0a0;}
-#tb9 th {background-color: #78f0c8;}
-#tb10 th {background-color: #78f0f0;}
-#tb11 th {background-color: #78c8f0;}
-#tb12 th {background-color: #78a0f0;}
-#tb13 th {background-color: #7878f0;}
-#tb14 th {background-color: #a078f0;}
-#tb15 th {background-color: #c878f0;}
-#tb16 th {background-color: #f078f0;}
-#tb17 th {background-color: #f078c8;}
-#tb18 th {background-color: #f078a0;}
-#tb99 th {background-color: #808080;}
+#tb1 th {background-color: var(--bg1);}
+#tb2 th {background-color: var(--bg2);}
+#tb3 th {background-color: var(--bg3);}
+#tb4 th {background-color: var(--bg4);}
+#tb5 th {background-color: var(--bg5);}
+#tb6 th {background-color: var(--bg6);}
+#tb7 th {background-color: var(--bg7);}
+#tb8 th {background-color: var(--bg8);}
+#tb9 th {background-color: var(--bg9);}
+#tb10 th {background-color: var(--bg10);}
+#tb11 th {background-color: var(--bg11);}
+#tb12 th {background-color: var(--bg12);}
+#tb13 th {background-color: var(--bg13);}
+#tb14 th {background-color: var(--bg14);}
+#tb15 th {background-color: var(--bg15);}
+#tb16 th {background-color: var(--bg16);}
+#tb17 th {background-color: var(--bg17);}
+#tb18 th {background-color: var(--bg18);}
+#tb99 th {background-color: var(--bg99);}
 
 #tb1 td:first-child {color: var(--test1);}
 #tb2 td:first-child {color: var(--test2);}
