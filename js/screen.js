@@ -2557,9 +2557,6 @@ function outputScreen() {
 }
 
 function outputStart() {
-	if (!isFile && mini(location.toString().slice(0,39)) !== "c517501a") {
-		dom.index.innerHTML = "<a class='return' href='https://arkenfox.github.io/TZP/tzp.html'>"+ dom.index.textContent +"</a>"
-	}
 	if (isVer > 99) {
 		// FF100+: 1754441: extensions.InstallTrigger*.enabled
 		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
