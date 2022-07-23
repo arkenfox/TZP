@@ -1309,6 +1309,11 @@ function countJS(filename) {
 
 	// the whole gangs here
 	if (jsFiles.length == jsFilesExpected) {
+		let isTZP = (mini(location.toString().slice(0,31)) == "1b6751a9")
+		if (!isTZP && !isFile) {
+			// please do not alter: respect my source/work which is always ongoing and up-to-date
+			dom.original.style.display = "block"
+		}
 		if (runSL) {isPerf = false}
 		try {
 			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
