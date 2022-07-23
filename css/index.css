@@ -76,6 +76,20 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 .spaces {white-space: pre-wrap;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
 
+.original {
+	position: fixed;
+	top: 5;
+	right: 5;
+	border: 1px;
+	border-color: #b3b3b3;
+	border-style: solid;
+	text-align: center;
+	background-color: #41424d;
+	padding: 8px;
+	z-index: 50;
+	font-size: 11px;
+}
+
 /* notation colors */
 .faint {color: #606060;} /* #888888 darker off white */
 .good {color: #8cdc8c;} /* test7 */
