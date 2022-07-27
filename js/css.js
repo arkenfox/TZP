@@ -7,20 +7,31 @@ function get_colors() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	/* 95+: test_bug232227.html */
 	let aList = [
-		// system
-		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonFace','ButtonHighlight','ButtonShadow','ButtonText','CaptionText','GrayText','Highlight','HighlightText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
-		// css4
-		'ActiveText','Canvas','CanvasText','Field','FieldText','LinkText','SelectedItem','SelectedItemText','VisitedText',
+		// 23 deprecated
+		// https://www.w3.org/TR/css-color-4/#deprecated-system-colors
+		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow','CaptionText',
+		'InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar',
+		'ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		// css4 19+5
+		// https://www.w3.org/TR/css-color-4/#typedef-system-color
+		'AccentColor','AccentColorText','ActiveText','ButtonBorder','ButtonFace','ButtonText',
+		'Canvas','CanvasText','Field','FieldText','GrayText','Highlight','HighlightText','LinkText',
+		'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText',
 		'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
 		// stand-ins
 		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		// moz: FF102+ items: note append last due to variable length
-		'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-		'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // the last two were dropped in FF103
+		'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
+		'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+		'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // these two dropped FF103
 	]
 	if (isVer < 102) {
 		let aMozExtra = [
-			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-gtk-info-bar-text','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-mac-buttonactivetext','-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+			'-moz-mac-buttonactivetext', // dropped FF93
+			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext', // dropped FF88
+			'-moz-gtk-info-bar-text', // dropped FF90
+			// ddropped FF78+
+			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		]
 		aList = aList.concat(aMozExtra)
 	}
@@ -28,14 +39,14 @@ function get_colors() {
 	let sNames = ["system","css4","moz_stand-in","moz"]
 	sNames.forEach(function(name) {sDetail["css_colors_"+ name] = []})
 	if (!isFF) {
-		aList = aList.slice(0,37) // drop everything -moz
+		aList = aList.slice(0,42) // drop everything -moz
 		maxRes = 2
 		aResults.push("colors_"+ sNames[2] +":"+ zNA)
 		aResults.push("colors_"+ sNames[3] +":"+ zNA)
 		document.getElementById("cssColor"+ sNames[2]).innerHTML = zNA
 		document.getElementById("cssColor"+ sNames[3]).innerHTML = zNA
 	}
-	let splits = [0, 28, 42, 74, aList.length]
+	let splits = [0, 23, 47, 79, aList.length]
 
 	try {
 		let aRes = []
@@ -58,23 +69,20 @@ function get_colors() {
 			sDetail["css_colors_"+ sNames[i]] = aTemp
 			aResults.push("colors_"+ sNames[i] +":"+ hash)
 			let note = ""
-			if (sNames[i] == "moz_stand-in") {
-				// moz stand-ins
-				note = rfp_red
-				if (isVer > 92) {
-					if (hash == "27b4dd7edd7d78b177b1234c9111217560722348" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
-					} else if (hash == "ab375b151b2252ba3d75295dc535678cf0b2d52b" && isVer < 94) {note = rfp_green + " [FF93]"} // 1693222
-				} else {
-					if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
+			//if (isGeckoSmart) {
+				if (sNames[i] == "moz_stand-in") {
+					// moz stand-ins
+					note = rfp_red
+					if (isVer > 92) {
+						if (hash == "27b4dd7edd7d78b177b1234c9111217560722348" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
+						} else if (hash == "ab375b151b2252ba3d75295dc535678cf0b2d52b" && isVer < 94) {note = rfp_green + " [FF93]"} // 1693222
+					} else {
+						if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
+					}
+				} else if (sNames[i] == "moz") {
+					if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
 				}
-			} else if (sNames[i] == "system") {
-				// system
-				note = rfp_red
-				if (hash == "785865195b65e80b341f3cd595820da9e8c6381b" && isVer > 93) {note = rfp_green + " [FF94+]" // 1734115
-				} else if (hash == "74a4b25550e715c311645158826c9e4f78554323" && isVer < 94) {note = rfp_green + " [FF67-93]"}
-			} else if (sNames[i] == "moz") {
-				if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
-			}
+			//}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
 		log_perf("colors [css]",t0)
@@ -84,7 +92,7 @@ function get_colors() {
 		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 		for (let i=0; i < 4; i++) {
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = eMsg
-			aResults.push("colors_"+ sNames[i] +":"+ (isFF ? zB0 : zErr))
+			aResults.push("colors_"+ sNames[i] +":"+ zErr)
 		}
 		return aResults
 	}
