@@ -81,6 +81,8 @@ function get_colors() {
 					}
 				} else if (sNames[i] == "moz") {
 					if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
+				} else if (sNames[i] == "css4") {
+					if (gRun & isOS == "android") {log_debug("css4 colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
 				}
 			//}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
