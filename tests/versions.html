@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 49, maxVer = 104, oTZP = {}, oSuccess = {}
+	let countTZP = 0, expectTZP = 50, maxVer = 105, oTZP = {}, oSuccess = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -245,6 +245,11 @@ function outputVersion() {
 		// < 60: 1436659
 		let t500 = performance.now(), ver500 = ("function" !== typeof Animation.prototype.updatePlaybackRate)
 		rec(500, 60, "1436659", ver500, performance.now()-t500, "<")
+
+		// 105: 1780545
+		let t105 = performance.now() // legacy check FF57- Intl.PluralRules
+		let ver105 = ("function" == typeof Intl.PluralRules && Intl.PluralRules.prototype.hasOwnProperty("selectRange")) // 0.12ms
+		rec(105, 105, "1780545", ver105, performance.now()-t105)
 
 		// 104: 1712623
 		let t104 = performance.now()
