@@ -602,7 +602,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 104) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == 105) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -612,6 +612,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (isFFLegacy) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
+		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
