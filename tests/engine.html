@@ -1398,6 +1398,26 @@ function get_nav_values(num1, num2, num3) {
 	}
 }
 
+function get_obj_enumeration(num, title) {
+	// 1762188
+	try {
+		let t = ['a','b'], result = []
+		for (let i in t) {
+			for (let j in t) {
+				result.push([i, j, t[i], t[j]])
+				let v = t[i]
+				delete t[i]
+				t[i] = v
+			}
+		}
+		let res = result.join(",") // nonFF = 0,0,a,a,0,1,a,b,1,0,b,a,1,1,b,b
+		let bool = res == "0,0,a,a,0,1,a,b,1,0,b,a" ? true : false
+		fnRecord(num, title, res, bool)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
 function get_permission(num, title) {
 	try {
 		if (bBlock) {bB = 1}
@@ -1654,7 +1674,7 @@ let results = [],
 	itemnumbers = [],
 	data = {},
 	count = 0,
-	expected = 76,
+	expected = 77,
 	bBlock = false, // throw a test error
 	bLog = false,
 	bNum = false // display numbering
@@ -1738,7 +1758,10 @@ function get_isVer() {
 				}
 			}
 			// FF60+
-			topVer = 104
+			topVer = 105
+			if ("function" == typeof Intl.PluralRules
+				&& Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
+				// ^ legacy check: FF57- Intl.PluralRules
 			if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 			if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
@@ -1846,12 +1869,12 @@ function run() {
 	get_locale_compare(690, "locale.compare")
 	get_math(695, "math")
 	get_media_constraints(700, "[constraints] mediaDevices")
+	get_obj_enumeration(734, "object enumeration")
 	get_permission(750, "[permissions] push")
 	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
 	get_storage_estimate(820, "storage estimate")
 	get_errors(902)
 }
-
 
 setTimeout(function() {
 	if (isFF) {
