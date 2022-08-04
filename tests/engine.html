@@ -33,7 +33,11 @@
 
 	<table id="tb3">
 		<col width="50%"><col width="50%">
-		<thead><tr><th colspan="2">engine</th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">engine
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">An itsy-bitsy, teeny-weeny, minuscule sample of the thousands of myriad ways engines differ.
 			This test is tweaked for gecko [FF52+]: you want <span class="s9"><b> &#x2713 </b></span>'s. Anything different
@@ -50,25 +54,24 @@
 
 s3 = s3.trim()
 s14 = s14.trim()
-s16 = s16.trim()
+s99 = s99.trim()
 sb = sb.trim()
 sg = sg.trim()
 
-function fnRFP() {
-	// detectable in FF56+
-	let isPerf2 = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP56plus = (r == 0)
-		if (!isPerf2) {isRFP56plus = false}
-	} catch(e) {}
-}
+let results = [],
+	itemnumbers = [],
+	data = {},
+	aPerf = [],
+	count = 0,
+	expected = 77,
+	gt0, // global timer
+	bBlock = false, // throw a test error
+	bLog = false,
+	bNum = false // display numbering instead of perf
+
+let	topVer = 105,
+	minVer = "",
+	isWebkit = false
 
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -83,7 +86,23 @@ function fnClean(str) {
 	return str
 }
 
+function logPerf() {
+	if (aPerf.length) {
+		console.log("PERF LOG\n", aPerf)
+	}
+}
+
 function fnDisplay() {
+	// perf
+	if (canPerf) {
+		let perf = Math.round(performance.now() - gt0) +" ms"
+		// remove the first 6 items
+		if (aPerf.length) {
+			perf = "<span style='cursor: pointer;' onClick='logPerf()'>" + perf +"</span>"
+			aPerf.splice(0, 6)
+		}
+		dom.perf.innerHTML = perf
+	}
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
 	for (const k of names) {results.push(k +"~~~"+ data[k])}
@@ -100,7 +119,15 @@ function fnDisplay() {
 		let order = results[i].split("~~~")[0],
 			desc = results[i].split("~~~")[1].trim(),
 			result = results[i].split("~~~")[2],
-			match = results[i].split("~~~")[3]
+			match = results[i].split("~~~")[3],
+			perf = results[i].split("~~~")[4]
+		if (perf == undefined || perf == "" || perf == "undefined") {perf = " - "
+		} else if (perf !== "NaN") {
+			perf = Math.round(perf)
+			perf = perf.toString()
+			perf = perf.padStart(2) +" "
+		}
+
 		if (desc == "header") {
 			let note = ""
 			if (result == "errors") {
@@ -125,7 +152,7 @@ function fnDisplay() {
 				let nextitem = results[i+1].split("~~~")[1].trim()
 				if (nextitem == "header") {sectionspace = "<br>"}
 			}
-			if (bNum) {desc = desc + s16 +" "+ order + sc}
+			desc += s99 +" "+ (bNum ? order : perf) + sc
 			display.push(desc + match +" "+ result + sectionspace)
 		}
 	}
@@ -138,28 +165,28 @@ function fnDisplay() {
 	let summary = s14 +"SUMMARY "+ sc
 		+"PASSED: ".padStart(9) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
 		+"FAILED: ".padStart(9) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
-	if (countNA > 0) {summary += "N/A: ".padStart(7) + countNA}
+	if (countNA > 0) {summary += "N/A: ".padStart(6) + countNA}
 	if (isFF) {
-		summary += s14+ "DEBUG ".padStart(8) + sc +"RFP:".padStart(6) + (isRFP56plus ? green_tick : red_cross)
+		summary += s14+ "DEBUG".padStart(7) + sc +"RFP:".padStart(6) + (isRFP ? green_tick : red_cross)
 		let strVer = isVer
 		strVer += (isVer == topVer ? "+" : "")
 		strVer += (isVer == minVer ? " or lower" : "")
-		summary += "VER: ".padStart(8) + strVer
+		summary += "VER: ".padStart(6) + strVer
 	}
+	summary += " " + buildButton(3, "all", "all details")
 	// output
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
 
-function fnRecord(order, description, result, match, error) {
-	if (error !== undefined) {
-		let ehash = sha1(error).substring(0,10)
-		if (ehash !== "ffc0031b7a" && ehash !== "2772736bc6") {
-			console.error(order, result, error)
-		}
-		result += s3+ " ["+ ehash +"]"+ sc
+
+function fnRecord(order, description, result, match, error, perf) {
+	if (error !== undefined && error !== "skip") {
+		//console.error(order, result, error)
+		result += s3+ " ["+ mini(error) +"]"+ sc
 	}
+	aPerf.push([perf, order, description])
 	order = (order+"").padStart(3,"0")
-	data[order] = description +"~~~"+ result +"~~~"+ match
+	data[order] = description +"~~~"+ result +"~~~"+ match + "~~~" + perf
 	count ++
 	itemnumbers.push(order +" "+ description)
 	if (count == expected) {
@@ -168,40 +195,44 @@ function fnRecord(order, description, result, match, error) {
 	if (count > expected) {console.error(count, "expected count too low")}
 }
 
-function get_canvaskeys(num) {
-	let strT = "[2d canvas] keys", testT = false
+function get_canvaskeys(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let aMCanvas = []
-		let aMCanvasGood = ['mozCurrentTransform', 'mozCurrentTransformInverse', 'mozImageSmoothingEnabled', 'mozTextStyle']
-		for (const key in CanvasRenderingContext2D.prototype) {aMCanvas.push(key)}
-		aMCanvas = aMCanvas.filter(x => aMCanvasGood.includes(x))
-		aMCanvas.sort()
-		let resT = "none"
-		if (aMCanvas.length > 0) {
-			resT = sha1(aMCanvas.join())
-			if (resT == "f2821c307f0190b324b9eb1dd36da9e40aadc852") {
-				testT = true
-			} else if (isVer > 101) {
+		let res = []
+		let list = [
 			// 1765063: FF102+: Disable mozCurrentTransform on early beta and earlier
-				if (resT == "3edbfe7a636b1109796885e6b6dd221f9267b0b3") {testT = true}
-			}
-			resT += s3 +" ["+ aMCanvas.length +"]"+ sc
+			// 'mozCurrentTransform', 'mozCurrentTransformInverse',
+			'mozImageSmoothingEnabled', 'mozTextStyle',
+		]
+		for (const key in CanvasRenderingContext2D.prototype) {res.push(key)}
+		res = res.filter(x => list.includes(x))
+		res.sort()
+		let bool = false
+
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		if (res.length > 0) {
+			sDetail["expected_"+ title] = res
+			if (hash == "0fd2871814ac9179d6f5a5b4a0ffea0e0e20152c") {bool = true}
+			hash += buildButton(3, "expected_"+ title, res.length)
 		}
-		fnRecord(num, strT, resT, testT)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, strT, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
 function get_colorgamut(num, title) {
 	let q = "(color-gamut: ", res = "undefined", bolC = false
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		if (window.matchMedia(q +"srgb)").matches) {res = "srgb"}
 		if (window.matchMedia(q +"p3)").matches) {res = "p3"}
 		if (window.matchMedia(q +"rec2020)").matches) {res = "rec2020"}
-		fnRecord(num, title, res, res == "undefined")
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, res, res == "undefined", "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -212,55 +243,65 @@ function get_dates(num) {
 	// 1557650
 	let strA = "[5 digit year] new Date"
 	try {
+		let t0A; if (canPerf) {t0A = performance.now()}
 		if (bBlock) {bB = 1}
 		let resA = new Date("19999-11-11")
 		let bolA = resA == "Invalid Date" ? true : false
 		if (!bolA) {resA = fnTrim(resA.toString(), 40)}
-		fnRecord(num, strA, resA, bolA)
+		let perfA = canPerf ? performance.now() - t0A : ""
+		fnRecord(num, strA, resA, bolA, "skip", perfA)
 	} catch(e) {
 		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	// 1515318
 	let strB = "[hyphen] new Date"
 	try {
+		let t0B; if (canPerf) {t0B = performance.now()}
 		if (bBlock) {bB = 1}
 		let resB = new Date("31-Mar-2011").getFullYear()
 		// FF: 63 and lower = NaN, 64+ = -2011
 		let bolB = false
 		if (resB == -2011) {bolB = true
 		} else if (isVer < 64 && isNaN(resB)) {bolB = true}
-		fnRecord(num+1, strB, resB, bolB)
+		let perfB = canPerf ? performance.now() - t0B : ""
+		fnRecord(num+1, strB, resB, bolB, "skip", perfB)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 	// 1439800
 	let strC = "[string] new Data"
 	try {
+		let t0C; if (canPerf) {t0C = performance.now()}
 		if (bBlock) {bB = 1}
 		let resC = new Date("11-Nov-11")
 		let bolC = resC.toString() == "Invalid Date" ? true : false
 		if (!bolC) {resC = fnTrim(resC.toString(), 40)}
-		fnRecord(num+2, strC, resC, bolC)
+		let perfC = canPerf ? performance.now() - t0C : ""
+		fnRecord(num+2, strC, resC, bolC, "skip", perfC)
 	} catch(e) {
 		fnRecord(num+2, strC, e.name, zB0, e.message)
 	}
 	// 1599375
 	let strD = "[+0000 UTC] Date.parse"
 	try {
+		let t0D; if (canPerf) {t0D = performance.now()}
 		if (bBlock) {bB = 1}
 		let resD = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
 		let bolD = isNaN(resD) ? true : false
-		fnRecord(num+3, strD, resD, bolD)
+		let perfD = canPerf ? performance.now() - t0D : ""
+		fnRecord(num+3, strD, resD, bolD, "skip", perfD)
 	} catch(e) {
 		fnRecord(num+3, strD, e.name, zB0, e.message)
 	}
 	// 1730155
 	let strE = "[localized] Date.parse"
 	try {
+		let t0E; if (canPerf) {t0E = performance.now()}
 		if (bBlock) {bB = 1}
 		let resE = Date.parse("Mercredi 8 Septembre 2021")
 		let bolE = isNaN(resE) ? true : false
-		fnRecord(num+4, strE, resE, bolE)
+		let perfE = canPerf ? performance.now() - t0E : ""
+		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
 	} catch(e) {
 		fnRecord(num+4, strE, e.name, zB0, e.message)
 	}
@@ -269,12 +310,14 @@ function get_dates(num) {
 function get_doc_values(num, title) {
 	let strFS = "[mozFullScreen] "+ title
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		// FF expected true/false
 		let boolFS = false
 		let testFS = document.mozFullScreenEnabled
 		if (testFS == true || testFS == false) {boolFS = true} else {fnClean(testFS)}
-		fnRecord(num, strFS, testFS, boolFS)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, strFS, testFS, boolFS, "skip", perf)
 	} catch(e) {
 		fnRecord(num, strFS, e.name, zB0, e.message)
 	}
@@ -297,6 +340,7 @@ function get_errors(num) {
 		["var x = @","SyntaxError: illegal character U+0040","SyntaxError: illegal character"],
 	]
 	tests.forEach(function(array) {
+		let t0; if (canPerf) {t0 = performance.now()}
 		try {
 			newFn(array[0])
 		} catch(e) {
@@ -307,7 +351,8 @@ function get_errors(num) {
 			} else {
 				if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
 			}
-			fnRecord(num, "error", str, bool)
+			let perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num, "error", str, bool, "skip", perf)
 			num++
 		}
 	})
@@ -316,16 +361,19 @@ function get_errors(num) {
 function get_eval_length(num, title) {
 	let bool = false
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let test = eval.toString().length
 		if (test == 37) {bool = true}
-		fnRecord(num, title, test, bool)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, test, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
 }
 
 function get_iframe_props(num1, num2, title) {
+	let t0; if (canPerf) {t0 = performance.now()}
 	// just a small sample
 	let listE = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
 		'mozInnerScreenY','netscape','onmozfullscreenchange','onmozfullscreenerror']
@@ -359,7 +407,8 @@ function get_iframe_props(num1, num2, title) {
 		let arrayE = props.filter(x => listE.includes(x))
 		let resE = "", boolE = false
 		if (arrayE.length) {
-			resE = sha1(arrayE.join()) + s3 +" ["+ arrayE.length +"]"+ sc
+			sDetail["expected_"+ title] = arrayE
+			resE = mini_sha1(arrayE.join()) + buildButton(3, "expected_"+ title, arrayE.length)
 			if (arrayE.length > 4) {boolE = true}
 		} else {
 			resE = "none"
@@ -370,14 +419,16 @@ function get_iframe_props(num1, num2, title) {
 		if (isFF && isVer < 72) {arrayU = arrayU.filter(x => !["BatteryManager"].includes(x))}
 		let resU = "", boolU = false
 		if (arrayU.length) {
-			resU = sha1(arrayU.join()) + s3 +" ["+ arrayU.length +"]"+ sc
+			sDetail["unexpected_"+ title] = arrayU
+			resU = mini_sha1(arrayU.join()) + buildButton(3, "unexpected_"+ title, arrayU.length)
 		} else {
 			resU = "none"
 			boolU = true
 		}
+		let perf = canPerf ? performance.now() - t0 : ""
 		// record
-		fnRecord(num1, title, resE, boolE)
-		fnRecord(num2, title, resU, boolU)
+		fnRecord(num1, title, resE, boolE, "skip", perf)
+		fnRecord(num2, title, resU, boolU, "skip", perf)
 	} catch(e) {
 		fnRecord(num1, title, e.name, zB0, e.message)
 		fnRecord(num2, title, e.name, zB0, e.message)
@@ -388,13 +439,15 @@ function get_installtrigger(num) {
 	// FF100+: 1754441 behind prefs slated for deprecation
 	let strA = "[typeof] InstallTrigger", boolA = false
 	try {
+		let t0A; if (canPerf) {t0A = performance.now()}
 		if (bBlock) {bB = 1}
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
-		if (isVer > 99) {
-			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA)
+		let perfA = canPerf ? performance.now() - t0A : ""
+		if (isVer > 99 && !boolA) {
+			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA, "skip", perfA)
 		} else {
-			fnRecord(num, strA, resA, boolA)
+			fnRecord(num, strA, resA, boolA, "skip", perfA)
 		}
 	} catch(e) {
 		fnRecord(num, strA, e.name, zB0, e.message)
@@ -402,12 +455,14 @@ function get_installtrigger(num) {
 
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
+		let t0B; if (canPerf) {t0B = performance.now()}
 		if (bBlock) {bB = 1}
 		let resB = "InstallTrigger" in window
-		if (isVer > 99) {
-			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA)
+		let perfB = canPerf ? performance.now() - t0B : ""
+		if (isVer > 99 && !resB) {
+			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA, "skip", perfB)
 		} else {
-			fnRecord(num+1, strB, resB, resB)
+			fnRecord(num+1, strB, resB, resB, "skip", perfB)
 		}
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
@@ -419,13 +474,15 @@ function get_installtrigger(num) {
 		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
 		try {
+			let t0C; if (canPerf) {t0C = performance.now()}
 			if (bBlock) {bB = 1}
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
-			if (isVer > 99) {
-				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA)
+			let perfC = canPerf ? performance.now() - t0C : ""
+			if (isVer > 99 && !boolC) {
+				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA, "skip", perfC)
 			} else {
-				fnRecord(num+2, strC, resC, boolC)
+				fnRecord(num+2, strC, resC, boolC, "skip", perfC)
 			}
 		} catch(e) {
 			fnRecord(num+2, strC, e.name, zB0, e.message)
@@ -435,23 +492,29 @@ function get_installtrigger(num) {
 
 function get_intl_canonical_locale(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let list = ["bh","hye","no","tl","tw"], bool = false
 		let res = []
 		list.forEach(function(i) {
 			res.push(i +": "+ Intl.getCanonicalLocales(i))
 		})
-		let hash = sha1(res.join())
-		if (hash == "f52b504f78de0569f1dd6ae8830fac589a7a83e2") {bool = true // FF91+
-		} else if (hash == "620140a916991fed2fc5b3f3b69731745793bbd3") {bool = true // FF70-90
-		} else if (hash == "992692585f2bb1b00689181a905eb237a71c7823") {bool = true // FF60-69
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		if (hash == "3faffb36cf9adef10987c4e6cb5adc7562dac7ab") {bool = true // FF91+
+		} else if (hash == "8d98821d21e515bc9bfa6660a744d74fc2df0de1") {bool = true // FF70-90
+		} else if (hash == "db0b8b2137d972e0735df959d77dc67c2887404f") {bool = true // FF52-69
 		}
 		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
 		// FF91+   : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
 		// blink   : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
 		// webkit  : bh=bh,  hye=hy,  no=no, tl=tl,  tw=tw
-		fnRecord(num, title, hash, bool)
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, "details")
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -459,8 +522,9 @@ function get_intl_canonical_locale(num, title) {
 
 function get_intl_collator(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		// 22 FF60+ locales with unique collations not in chrome (lost my list vs safari)
+		// 22 FF60+ locales with unique collations not in chrome (lost my list vs webkit)
 		// 24 chars: approx 40ms
 		let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
 			'ka','kk','ln','lo','mt','no','om','pa','se','sq','to','wo',]
@@ -476,17 +540,18 @@ function get_intl_collator(num, title) {
 		}
 		list.sort()
 		chars.sort() // reset
-		let control = sha1(chars.sort(Intl.Collator(undefined).compare))
+		let control = chars.sort(Intl.Collator(undefined).compare)
+		control = mini(control.join(", "))
 		let bool = false
 		list.forEach(function(i) {
 			chars.sort() // reset
 			chars.sort(Intl.Collator(i).compare)
-			let test = sha1(chars.join())
+			let test = mini(chars.join(", "))
 			unique.push(test)
 			if (test == control) {same.push(test)}
-			res.push(i +" "+ test)
+			res.push(i +": "+ test + ": "+ chars.join(", "))
 		})
-		let hash = sha1(res.join())
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
 			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
@@ -494,14 +559,19 @@ function get_intl_collator(num, title) {
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (isVer > 69) {
-			if (hash == "6d7bb7fc6054900b3e0e322a843ba96bc2e0c11e") {bool = true} // FF70+
+			if (hash == "d0f5826ab1779b1f489a3157d536240548fb7a82") {bool = true} // FF70+
 		} else if (isVer > 58) {
-			if (hash == "152220e565cdba8e36d483a78128a2a501ac3428") {bool = true} // FF59-69
+			if (hash == "233b2298218fbe5661ca2381f1c1a0f100192a5a") {bool = true} // FF59-69
 		} else {
-			if (hash == "f3dd69682f15cb6b95951a45659546283f71ea8f") {bool = true} // FF52-58
-			if (hash == "152220e565cdba8e36d483a78128a2a501ac3428") {bool = true} // WFClassic isVer = 58
+			if (hash == "68b7a6e04692425631210ae21422edde04bbf094") {bool = true} // FF52-58
+			if (hash == "233b2298218fbe5661ca2381f1c1a0f100192a5a") {bool = true} // WFClassic isVer = 58
 		}
-		fnRecord(num, title, hash, bool)
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, "details")
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -509,9 +579,46 @@ function get_intl_collator(num, title) {
 
 function get_intl_display_names(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let test = Intl.DisplayNames.supportedLocalesOf("en")
-		fnRecord(num, title, zNA +": coming soon", zNA)
+		// FF items not in chromium
+			// remove: ig, om [same as en]
+			// remove: sc (96), sa (91) [FF additions]
+			// remove: ti, yo [CLDR data changes]
+		let initialList = [
+			'ak','as','ast','be','bm','bo','br','ce','ckb','cy','dsb','dz','ee','eo','eu',
+			'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','hye','ia',
+			'ii','is','jv','ka','kab','ki','kk','kl','km','kok','ks','ku','kw','ky','lb',
+			'lg','ln','lo','lu','mai','mg','mi','mk','mn','mt','my','nd','ne','nn','or',
+			'os','ps','qu','rm','rn','rw','sat','sd','se','sg','si','sn','so','sq',
+			'su','tg','tk','to','tt','ug','wo','xh','yi','zu',
+		]
+		// shrink size for perf: pending webkit results
+		let list = [
+			'bo','fo','gl','haw','hye','kl','mai','os','su','tt','ug','xh'
+		]
+		let options = {type: 'region'},
+			testValue = "US",
+			res = []
+		let englishVersion = new Intl.DisplayNames('en', options).of(testValue)
+		list.forEach(function(locale) {
+			try {
+				let value = new Intl.DisplayNames(locale, options).of(testValue)
+				if (value !== englishVersion) {
+					res.push(locale + ":"+ value)
+				}
+			} catch(e) {}
+		})
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		// 86+ (85 not supprted)
+		let bool = hash == "d02cec4400b8157766ef7913ecfde210ebcd0c72"
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, res.length)
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		// FF85-: TypeError: Intl.DisplayNames is undefined
 		if (isFF) {
@@ -534,9 +641,11 @@ function get_intl_display_names(num, title) {
 
 function get_intl_dtf(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		// 78 locales supported in FF60+ not supported in blink: unique results
-		let list = ['ak','ast','be','bm','bo','ce','ckb','eo','no','to']
+		let list = [
+			'ak','ast','be','bm','bo','ce','ckb','eo','no','to', // gecko not in blink
+		]
 		let bool = false
 		let date = new Date("January 30, 2019 13:00:00"),
 			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
@@ -552,9 +661,9 @@ function get_intl_dtf(num, title) {
 			let test = Intl.DateTimeFormat(locale, options).format(date)
 			unique.push(test)
 			if (test == control) {same.push(locale)}
-			res.push(locale +" "+ test)
+			res.push(locale +": "+ test)
 		})
-		let hash = sha1(res.join())
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		if (bLog) {
 			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
 			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
@@ -562,18 +671,23 @@ function get_intl_dtf(num, title) {
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (isVer > 100) {
-			if (hash == "f3292db015c0915ce6099982d84727986140f999") {bool = true} // FF101+
+			if (hash == "b1a2b0aeee7676bcc5af6288a6a87a6e38297f9d") {bool = true} // FF101+
 		} else if (isVer > 69) {
-			if (hash == "1a3f0c7c622a644a1f2a355790faf6ff834012b6") {bool = true} // FF70-100
+			if (hash == "585f6274d0c9ac34dc38fe6d8f3a097a4adb56eb") {bool = true} // FF70-100
 		} else if (isVer > 58) {
-			if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true} // FF59-69
+			if (hash == "1ad9a85853870481a0474f468d987275eff41b58") {bool = true} // FF59-69
 		} else {
-			if (hash == "407454b2169899f2c4b3264a716223315d844f0b") {bool = true} // FF55-57 RFP
-			if (hash == "f5089491bdc7f062e689571ade2a94a0aa67c7e3") {bool = true} // FF52-58
-			if (hash == "5e50264aff470447e8c19c899061eada3528ed45") {bool = true} // WFClassic52 RFP
-			if (hash == "661319323bd37daabe3c83a649f024e5929a499d") {bool = true} // WFClassic isVer = 58
+			if (hash == "1d713eb38d8a7404e3706417452f86c1f1d54ad5") {bool = true} // FF55-57 RFP
+			if (hash == "aad03d05ff68316a337321f88f88bae4d4577374") {bool = true} // FF52-58
+			//if (hash == "5e50264aff470447e8c19c899061eada3528ed45") {bool = true} // WFClassic52 RFP // IDK + IDC what the new mini is
+			if (hash == "1ad9a85853870481a0474f468d987275eff41b58") {bool = true} // WFClassic isVer = 58
 		}
-		fnRecord(num, title, hash, bool)
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, "details")
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -581,9 +695,46 @@ function get_intl_dtf(num, title) {
 
 function get_intl_list_format(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let test = Intl.ListFormat.supportedLocalesOf("en")
-		fnRecord(num, title, zNA +": coming soon", zNA)
+		// FF items not in chromium
+			// remove: ug [same as en]
+			// remove: sc (96), sa (91), [FF additions]
+			// remove: ga, ha, ks, my, rm, ti [CLDR data changes]
+		let initialList = [
+			'ak','as','ast','be','bm','bo','br','ce','ckb','cy','dsb','dz','ee','eo','eu',
+			'ff','fo','fur','fy','gd','gl','gv','haw','hsb','hy','hye','ia','ig',
+			'ii','is','jv','ka','kab','ki','kk','kl','km','kok','ku','kw','ky','lb',
+			'lg','ln','lo','lu','mai','mg','mi','mk','mn','mt','nd','ne','nn','om','or',
+			'os','ps','qu','rn','rw','sat','sd','se','sg','si','sn','so','sq',
+			'su','tg','tk','to','tt','wo','xh','yi','yo','zu',
+		]
+		// shrink size for perf: pending webkit results
+		let list = [
+			'cy','dsb','dz','fur','jv','kab','kok','lu','mg','mk','qu','tk','wo','zu',
+		]
+		let options = {style: 'long', type: 'conjunction'},
+			testValue = ['a','b','c'],
+			res = []
+		let englishValue = new Intl.ListFormat('en', options).format(testValue)
+		list.forEach(function(locale) {
+			try {
+				let value = new Intl.ListFormat(locale, options).format(testValue)
+				if (value !== englishValue) {
+					res.push(locale + ":"+ value)
+				}
+			} catch(e) {}
+		})
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		// 78+ (77 not supported)
+		let bool = hash == "37904e6ef31c1ebad32315c45e444bdd8b50408b"
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, res.length)
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		// FF77-: TypeError: Intl.ListFormat is undefined
 		if (isFF) {
@@ -606,23 +757,30 @@ function get_intl_list_format(num, title) {
 
 function get_intl_number_format(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
-		list.push('af','bo','lb','se','to') // some FF60+ gecko not in blink
-    list.push('co','cv','nso','oc','tig') // some webkit only
+		let list = [
+			'tl','tw', // gecko not in webkit: also 'no', and also FF70+ 'mai','su'
+			'bo','lb', // gecko not in blink: also 'se','to',
+			'co','cv', // webkit only: also 'nso','oc','tig',
+		]
 		let res = []
 		list.forEach(function(locale) {
 			let test = Intl.NumberFormat.supportedLocalesOf(locale)
 			if (test.length) {res.push(locale)}
 		})
 		res.sort()
-		let hash = sha1(res.join()),
-			bool = false
-		if (hash == "f727ab8e719e15bbc50cb2a80a4f8a170e257364") {bool = true // FF78+
-		} else if (hash == "10260ae28405581ccf307457ba54fce1314028ff") {bool = true // FF70-77
-		} else if (hash == "ed89e80134f060f82515f6cf8e4658bd0e0405e2") {bool = true // FF60-69
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		let bool = false
+		if (hash == "fe8eedb41e7748cc7126c8e8daca835eca1d00ec") {bool = true // FF70+
+		} else if (hash == "73aa043db2c050c1d4ba06efe61678c1a1bb3ddc") {bool = true // FF52-69
 		}
-		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, res.length)
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -630,24 +788,32 @@ function get_intl_number_format(num, title) {
 
 function get_intl_pluralrules(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let list = ['mai','no','su','tl','tw'] // gecko not in webkit: FF70/78
-		list.push('ki','qu') // some FF60+ gecko not in blink
-		list.push('an','lij','vo') // chrome only
-		list.push('ba','co','cv','gn','oc') // webkit only
+		let list = [
+			'mai','no','su','tl','tw', // gecko not in webkit: FF70/78
+			'ki','qu', // some FF60+ gecko not in blink
+			'an','lij','vo', // chrome only
+			'ba','co','cv','gn','oc', // webkit only
+		]
 		let res = []
 		list.forEach(function(locale) {
 			let test = Intl.PluralRules.supportedLocalesOf(locale)
 			if (test.length) {res.push(locale)}
 		})
 		res.sort()
-		let hash = sha1(res.join()),
-			bool = false
-		if (hash == "e37e6be93df8ebcb231c0ce502e34d2647e45bf0") {bool = true // FF78+
-		} else if (hash == "f1c25801863b1bc07dbabc13dfea31417ba9d533") {bool = true // FF70-77
-		} else if (hash == "eb8994a2172fbf52b6f0e9461869a48b0bfaa06c") {bool = true // FF60-69
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		let bool = false
+		if (hash == "29e30922fde2245232cc2c4ab2cbb4f511fdf694") {bool = true // FF78+
+		} else if (hash == "b80aaf574257b7b13b5f06ffdeb5f8612a3faf1d") {bool = true // FF70-77
+		} else if (hash == "b9b71087a7b043ee6c0c0e383b0baf99aa92b83b") {bool = true // FF58-69
 		}
-		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash += buildButton(3, "specific_"+ title, res.length)
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		// FF57 or lower
 		let result = e.name
@@ -664,9 +830,47 @@ function get_intl_pluralrules(num, title) {
 
 function get_intl_rtf(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let test = Intl.RelativeTimeFormat.supportedLocalesOf("en")
-		fnRecord(num, title, zNA +": coming soon", zNA)
+		// FF items not in chromium
+			// remove: ckb, eo, gv, haw, kl, kw, om, rw, xh [same as en]
+			// remove: hye, mai, ps, sa, sat, sc, su, tw [FF additions]
+			// remove: ha, ig [CLDR data changes]
+		let initialList = [
+			'ak','as','ast','be','bm','bo','br','ce','cy','dsb','dz','ee','eu',
+			'ff','fo','fur','fy','ga','gd','gl','hsb','hy','ia','ii','is','jv',
+			'ka','kab','ki','kk','km','kok','ks','ku','ky','lb','lg','ln','lo','lu',
+			'mg','mi','mk','mn','mt','my','nd','ne','nn','or','os','qu','rm','rn',
+			'sd','se','sg','si','sn','so','sq','tg','ti','tk','to','tt',
+			'ug','wo','yi','yo','zu',
+		]
+		// shrink size for perf: pending webkit results
+		let list = [
+			'cy','dsb','dz','fur','jv','kab','kok','lu','mg','mk','qu','tk','wo','zu',
+		]
+		let options = {style: 'long', numeric: 'auto'},
+			testValue = ['a','b','c'],
+			res = []
+		let englishVersion = new Intl.RelativeTimeFormat('en', options).format(-1, "day")
+		list.forEach(function(locale) {
+			try {
+				let value = new Intl.RelativeTimeFormat(locale, options).format(-1, "day")
+				if (value !== englishVersion) {
+					res.push(locale + ":"+ value)
+				}
+			} catch(e) {}
+		})
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+		// 65+ (64 not supported)
+		let bool = hash == "5fa5d59b752a4e58127159c8b9d51ada8d84e238"
+		if (res.length > 0) {
+			sDetail["specific_"+ title] = res
+			hash = hash+= buildButton(3, "specific_"+ title, res.length)
+			//hash += s3 +" ["+ res.length +"]"+sc
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		// FF64-: TypeError: Intl.RelativeTimeFormat is undefined
 		if (isFF) {
@@ -690,16 +894,19 @@ function get_js_client_hints(num, title) {
 	// https://user-agent-client-hints.glitch.me/javascript.html
 	// TypeError can't access property "X", navigator.X is undefined
 	function output() {
-		if (res.length) {
-			//console.log(res)
+		let perf = canPerf ? performance.now() - t0 : ""
+		if (res.length > 0) {
 			res.sort()
-			let hash = sha1(res.join())
-			fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, false)
+			sDetail["unexpected_"+ title] = res
+			let hash = mini_sha1(res.join()) + buildButton(3, "unexpected_"+ title , res.length)
+			fnRecord(num, title, hash, false, "skip", perf)
 		} else {
-			fnRecord(num, title, "none", true)
+			fnRecord(num, title, "none", true, "skip", perf)
 		}
 	}
 	let res = []
+	let t0; if (canPerf) {t0 = performance.now()}
+
 	try {
 		let resB = navigator.userAgentData.brands
 		resB.forEach(function(object) {
@@ -734,12 +941,14 @@ function get_last_prototype_keys(num1, title) {
 	// HTMLAnchorElement
 	let title1 = title +" HTMLAnchorElement"
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		Object.keys(HTMLAnchorElement.prototype)
 		let props1 = Object.getOwnPropertyNames(HTMLAnchorElement.prototype) // includes the constructor
 		let res1 = props1.slice(-3).join(", ")
 		// search, hash, constructor
-		fnRecord(num1, title1, res1, res1 == "search, hash, constructor")
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num1, title1, res1, res1 == "search, hash, constructor", "skip", perf)
 	} catch(e) {
 		fnRecord(num1, title1, e.name, zB0, e.message)
 	}
@@ -748,14 +957,16 @@ function get_last_prototype_keys(num1, title) {
 	let title2 = title +" HTMLLinkElement"
 	let num2 = num1 + 1
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		Object.keys(HTMLLinkElement.prototype)
 		let props2 = Object.getOwnPropertyNames(HTMLLinkElement.prototype) // includes the constructor
 		let res2 = props2.slice(-3).join(", ")
-		let bol2 = res2 == "as, sheet, constructor"
+		let bool2 = res2 == "as, sheet, constructor"
 		// 52-55: integrity, sheet, constructor
-		if (isVer <= 56 && res2 == "integrity, sheet, constructor") {bol2 = true}
-		fnRecord(num2, title2, res2, bol2)
+		if (isVer <= 56 && res2 == "integrity, sheet, constructor") {bool2 = true}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num2, title2, res2, bool2, "skip", perf)
 	} catch(e) {
 		fnRecord(num2, title2, e.name, zB0, e.message)
 	}
@@ -763,6 +974,7 @@ function get_last_prototype_keys(num1, title) {
 
 function get_locale_compare(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let bool = false
 		let list = [
@@ -797,23 +1009,28 @@ function get_locale_compare(num, title) {
 			let strA = item[1]
 			let test = strA.localeCompare(item[2], code)
 			if (test !== 1) {same.push(code)}
-			res.push(code +" "+ test +" "+ strA +","+ item[2])
+			res.push(code +": "+ test +": "+ strA +", "+ item[2])
 		})
 		res.sort()
-		let hash = sha1(res.join())
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		if (bLog) {
 			let counts = " ["+ same.length +" = control]"
 			console.log(title +": "+ hash +", "+ counts +"\n", res)
 		}
 		if (isVer > 69) {
-			if (hash == "7619f44ddbccfdbcde0caf9417cef76196f32776") {bool = true} // FF70+
+			if (hash == "393aaf6098964d36ba5226124e7d984ca9b8175c") {bool = true} // FF70+
 		} else if (isVer > 58) {
-			if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // FF59-69
+			if (hash == "73c32218f24756075e3b0c79901a192a1d313f9c") {bool = true} // FF59-69
 		} else {
-			if (hash == "1cfcca8eaa05f4d004015953c01c312f22c261ab") {bool = true} // FF52-58
-			if (hash == "d47a4f0e61d5d6d1583419a177c39f284611c9cf") {bool = true} // WFClassic isVer = 58
+			if (hash == "aa2310c50d847d996ca9b5cc3a58808c34c6af6a") {bool = true} // FF52-58
+			if (hash == "73c32218f24756075e3b0c79901a192a1d313f9c") {bool = true} // WFClassic isVer = 58
 		}
-		fnRecord(num, title, hash, bool)
+		if (res.length > 0) {
+			sDetail["expected_"+ title] = res
+			hash += buildButton(3, "expected_"+ title, "details")
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -830,6 +1047,7 @@ function get_math(num, title) {
 		}
 	}
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let res = []
 		for(let i=0; i < 6; i++) {
@@ -847,8 +1065,9 @@ function get_math(num, title) {
 				res.push("error")
 			}
 		}
+		// I have to use sha1 due to legacy data
 		let hash = sha1(res.join()).substring(0,20)
-		let engine = ""
+		let engine = "unkown"
 		if (hash == "ede9ca53efbb1902cc21") {engine = "blink"
 		} else if (hash == "05513f36d87dd78af60a") {engine = "webkit"
 		} else if (hash == "38172d9426d77af71baa") {engine = "edgeHTML"
@@ -856,18 +1075,12 @@ function get_math(num, title) {
 		} else if (hash == "225f4a612fdca4065043") {engine = "gecko"
 		} else if (hash == "cb89002a8d6fabf859f6") {engine = "gecko"
 		}
-
 		let bool = engine == "gecko" ? true : false
-		if (bool) {
-			// full hash for gecko
-			hash = sha1(res.join())
-		} else {
-			// trimmed hash + notation for non-gecko
-			hash += "... "
-			if (engine == "") {hash += sb +"[that's dodgy]"+sc
-			} else {hash += s3 +"["+ engine +"]"+sc}
-		}
-		fnRecord(num, title, hash, bool)
+		// now redo as mini_sha1
+		sDetail["expected_"+ title] = res
+		hash = mini_sha1(res.join()) + buildButton(3, "expected_"+ title, engine)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -876,29 +1089,40 @@ function get_math(num, title) {
 function get_media_constraints(num, title) {
 	// blink: 18c59e90bb3af0ce32be8efaa4457ead01fcacd8 [32]
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let data = navigator.mediaDevices.getSupportedConstraints()
 		let res = Object.keys(data)
 		res.sort()
-		let hash = sha1(res.join())
+		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		let bool = false
 		if (isVer > 69) {
-			if (hash == "2e72961b2b902ea8d3f652e86eb7c0b56da5901f") {bool = true} // FF70+
+			if (hash == "869109a73d3128c2eb4a8277aff0fec0cf8d0e47") {bool = true} // FF70+
 		} else {
-			if (hash == "4b24a64fb54b15868d13ee77cbcbd87e2272c7dc") {bool = true} // FF56-69
+			if (hash == "499818d3e86b70bd61300a52f1429bb359365890") {bool = true} // FF56-69
 			if (isVer < 57) {
-				if (hash == "827e0cc87e804fc83ec5d67d43f0547f9cf0e624") {bool = true} // FF55
+				if (hash == "c536cceca9d2a679656c7d785e6ada5e5a9016cb") {bool = true} // FF55
 			}
 			if (isVer < 55) {
-				if (hash == "f772cf52c7cb9623cc62652f2b0879597e096f37") {bool = true} // FF52-54
+				if (hash == "846c4bd6379d808ac2d2890954e7f909ba2b9458") {bool = true} // FF52-54
 			}
 		}
-		fnRecord(num, title, hash + s3 +" ["+ res.length +"]"+ sc, bool)
+		if (res.length > 0) {
+			sDetail["expected_"+ title] = res
+			hash += buildButton(3, "expected_"+ title, res.length)
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		// e.g. TB disables mediaDevices
-		let error = sha1(e.name +": "+ e.message), isNA = false
-		if (error == "8d6b18a941659cb64de87e474d683a3503d01fce") {isNA = true}
-		if (error == "ad64c7024fe40248168aef7da50f3272efffb221") {isNA = true}
+		let error = mini(e.name +": "+ e.message), isNA = false
+		if (error == "f2244861") {
+			// TypeError: can't access property "getSupportedConstraints", navigator.mediaDevices is undefined
+			isNA = true
+		} else if (error == "9fc627cf") {
+			// TypeError: navigator.mediaDevices is undefined
+			isNA = true
+		}
 		if (isNA) {
 			fnRecord(num, title, zNA +": disabled", zNA)
 		} else {
@@ -909,9 +1133,10 @@ function get_media_constraints(num, title) {
 
 function get_mimetypes(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		if ("mimeTypes" in navigator) {
-			let res = [], bool = false, isFlash = false
+			let res = [], bool = false
 			let m = navigator.mimeTypes
 			if (m.length == 0) {
 				fnRecord(num, title, "none", true)
@@ -926,21 +1151,21 @@ function get_mimetypes(num, title) {
 					let mime1 = res[0].split(":")[0]
 					let mime2 = res[1].split(":")[0]
 					if (mime1 == "application/x-futuresplash" && mime2 == "application/x-shockwave-flash") {
-						bool = true; isFlash = true
+						bool = true
 					}
 				}
-				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
+				let hash = mini_sha1(res.join())
 				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
-					// 1720353: hardcoded mimeTypes = 33c916c1a0e2e4e72047e6e142a7b43c6b1eba22
-					if (sha1(res.join()) == "33c916c1a0e2e4e72047e6e142a7b43c6b1eba22") {
+					// 1720353: hardcoded mimeTypes
+					if (hash == "5b8b5b83ff5790df763d417ec6e2adbbf0570c47") {
 						bool = true
-						num = 710 // move to specific values
 					}
-				} else if (isFF) {
-					if (isFlash) {hash = "flash detected [FF84 or lower]"}
 				}
-				fnRecord(num, title, hash, bool)
+				sDetail["expected_"+ title] = res
+				hash += buildButton(3, "expected_"+ title, res.length)
+				let perf = canPerf ? performance.now() - t0 : ""
+				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
 			fnRecord(num, title, e.name, zB0)
@@ -961,6 +1186,7 @@ function get_moz_colors(num, title) {
 	]
 	aList.sort()
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let aRes = []
 		let element = dom.mozColor
@@ -973,10 +1199,13 @@ function get_moz_colors(num, title) {
 				aRes.push(style +":"+ rgb) // only record those affected
 			}
 		})
-		//console.debug(aRes)
 		let bool = aRes.length > 0
-		let hash = bool ? mini_sha1(aRes) + s3 +" ["+ aRes.length +"]"+ sc : "none"
-		fnRecord(num, title, hash, bool)
+		if (bool) {
+			sDetail["expected_"+ title] = aRes
+		}
+		let hash = bool ? mini_sha1(aRes.join()) + buildButton(3, "expected_"+ title, aRes.length) : "none"
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -984,9 +1213,10 @@ function get_moz_colors(num, title) {
 
 function get_moz_computed_styles(num, title) {
 	/* https://github.com/abrahamjuliot/creepjs */
-		let styleVersion = type => {
-			return new Promise(resolve => {
+	let t0; if (canPerf) {t0 = performance.now()}
 
+	let styleVersion = type => {
+		return new Promise(resolve => {
 			// get CSSStyleDeclaration
 			try {
 				if (bBlock) {bB = 1}
@@ -1093,9 +1323,13 @@ function get_moz_computed_styles(num, title) {
 			let aRes = res[0]["moz"]
 			aRes.sort()
 			let bool = aRes.length > 0
-			let hash = bool ? mini_sha1(aRes) + s3 +" ["+ aRes.length +"]"+ sc : "none"
+			if (bool) {
+				sDetail["expected_"+ title] = aRes
+			}
+			let hash = bool ? mini_sha1(aRes.join()) + buildButton(3, "expected_"+ title, aRes.length) : "none"
 			bool = aRes.length > 50 // just in case someone spoofs a couple, or older/other browsers have some
-			fnRecord(num, title, hash, bool)
+			let perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num, title, hash, bool, "skip", perf)
 		} catch(err) {
 			fnRecord(num, title, err.name, zB0, err.message)
 		}
@@ -1109,6 +1343,7 @@ function get_moz_fonts(num, title) {
 		m = "-moz-",
 		aFonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let el = dom.mozFont
 		if (bBlock) {bB = 1}
 		aFonts.forEach(function(font){
@@ -1128,8 +1363,12 @@ function get_moz_fonts(num, title) {
 			}
 		})
 		let bool = aResults.length > 0
-		let hash = bool ? mini_sha1(aResults) + s3 +" ["+ aResults.length +"]"+ sc : "none"
-		fnRecord(num, title, hash, bool)
+		if (bool) {
+			sDetail["expected_"+ title] = aResults
+		}
+		let hash = bool ? mini_sha1(aResults.join()) + buildButton(3, "expected_"+ title, aResults.length) : "none"
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -1137,38 +1376,47 @@ function get_moz_fonts(num, title) {
 
 function get_nav_keys(num1, num2, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// expected FF only
-		let aNavExpected = ["buildID","oscpu","taintEnabled"]
-		let aNavCheckE = aNavKeys.filter(x => aNavExpected.includes(x))
-		let resNavCheckE = aNavCheckE.length ? aNavCheckE.join(", ") : "none"
-		let testNavCheckE = aNavCheckE.length == 3 ? true : false
-		fnRecord(num1, title, resNavCheckE, testNavCheckE)
+		let aExpected = ["buildID","oscpu","taintEnabled"]
+		let resE = aNavKeys.filter(x => aExpected.includes(x))
+		let boolE = resE.length == 3 ? true : false
+		resE = resE.length > 0 ? resE.join(", ") : "none"
+		let perfE = canPerf ? performance.now() - t0 : ""
+		fnRecord(num1, title, resE, boolE, "skip", perfE)
+
 		// not expected: blink items
-		let aNavNotExpected = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
+		let aNot = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
 			"getUserMedia","globalPrivacyControl","hid","keyboard","locks","managed","presentation","scheduling",
 			"serial","setAppBadge","unregisterProtocolHandler","usb","userActivation","userAgentData","wakeLock",
 			"webkitGetUserMedia","webkitPersistentStorage","webkitTemporaryStorage","xr","SharedWorker","Worker"]
 		// FYI: don't use requestMIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
 		if (isVer > 95) {
 			// 1666203: FF96+ canShare
-			aNavNotExpected = aNavNotExpected.filter(x => !["canShare"].includes(x))
+			aNot = aNot.filter(x => !["canShare"].includes(x))
 		}
 		if (isVer > 94 || isEngine == "goanna") {
 			// 1670058: FF95+ globalPrivacyControl
 			// PM 30
-			aNavNotExpected = aNavNotExpected.filter(x => !["globalPrivacyControl"].includes(x))
+			aNot = aNot.filter(x => !["globalPrivacyControl"].includes(x))
 		}
 		if (isVer > 92) {
 			// FF93+ "dom.weblocks.enabled"
 			// 1739233: FF96+ locks
-			aNavNotExpected = aNavNotExpected.filter(x => !["locks"].includes(x))
+			aNot = aNot.filter(x => !["locks"].includes(x))
 		}
-		let aNavCheckNotE = aNavKeys.filter(x => aNavNotExpected.includes(x))
-		let resNavCheckNotE = sha1(aNavCheckNotE.join()) + s3 + " ["+ aNavCheckNotE.length +"]"+ sc
-		if (aNavCheckNotE.length == 0) {resNavCheckNotE = "none"}
-		fnRecord(num2, title, resNavCheckNotE, aNavCheckNotE.length ? false : true)
+		let resN = aNavKeys.filter(x => aNot.includes(x))
+		let boolN = resN.length == 0
+		if (resN.length > 0) {
+			sDetail["unexpected_"+ title] = resN
+			resN = mini_sha1(resN.join()) + buildButton(3, "unexpected_"+ title, resN.length)
+		} else {
+			resN = "none"
+		}
+		let perfN = canPerf ? performance.now() - t0 : ""
+		fnRecord(num2, title, resN, boolN, "skip", perfN)
 	} catch(e) {
 		fnRecord(num1, title, e.name, zB0, e.message)
 		fnRecord(num2, title, e.name, zB0, e.message)
@@ -1178,19 +1426,23 @@ function get_nav_keys(num1, num2, title) {
 function get_nav_screen(num) {
 	let strA = "[left] screen", boolA = false
 	try {
+		let t0A; if (canPerf) {t0A = performance.now()}
 		if (bBlock) {bB = 1}
 		let resA = screen.left
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
-		fnRecord(num, strA, resA, boolA)
+		let perfA = canPerf ? performance.now() - t0A : ""
+		fnRecord(num, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
 		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	let strB = "[top] screen", boolB = false
 	try {
+		let t0B; if (canPerf) {t0B = performance.now()}
 		if (bBlock) {bB = 1}
 		let resB = screen.top
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
-		fnRecord(num+1, strB, resB, boolB)
+		let perfB = canPerf ? performance.now() - t0B : ""
+		fnRecord(num+1, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
@@ -1200,6 +1452,7 @@ function get_nav_values(num1, num2, num3) {
 	// expected
 	let strA = "[oscpu] navigator", boolA = false
 	try {
+		let t0A; if (canPerf) {t0A = performance.now()}
 		if (bBlock) {bB = 1}
 		let resA = navigator.oscpu
 		if (typeof resA !== "string") {
@@ -1210,7 +1463,8 @@ function get_nav_values(num1, num2, num3) {
 			} else if (resA == zU) {resA = zUQ
 			} else {boolA = true}
 		}
-		fnRecord(num1, strA, resA, boolA)
+		let perfA = canPerf ? performance.now() - t0A : ""
+		fnRecord(num1, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
 		fnRecord(num1, strA, e.name, zB0, e.message)
 	}
@@ -1219,10 +1473,12 @@ function get_nav_values(num1, num2, num3) {
 	// bluetooth
 	let strBT = "[bluetooth] navigator", boolBT = false, numBT = num2
 	try {
+		let t0BT; if (canPerf) {t0BT = performance.now()}
 		if (bBlock) {bB = 1}
 		let resBT = navigator.bluetooth
 		if (resBT === undefined) {
-			fnRecord(numBT, strBT, zU, true)
+			let perfBT = canPerf ? performance.now() - t0BT : ""
+			fnRecord(numBT, strBT, zU, true, "skip", perfBT)
 		} else {
 			try {
 				navigator.bluetooth.getAvailability().then(available => {
@@ -1242,38 +1498,21 @@ function get_nav_values(num1, num2, num3) {
 	// deviceMemory
 	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
 	try {
+		let t0DM; if (canPerf) {t0DM = performance.now()}
 		if (bBlock) {bB = 1}
 		let resDM = navigator.deviceMemory
 		if (resDM == undefined) {boolDM = true}
 		resDM = fnClean(resDM)
-		fnRecord(numDM, strDM, resDM, boolDM)
+		let perfDM = canPerf ? performance.now() - t0DM : ""
+		fnRecord(numDM, strDM, resDM, boolDM, "skip", perfDM)
 	} catch(e) {
 		fnRecord(numDM, strDM, e.name, zB0, e.message)
 	}
-	// getbattery
-	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
-	let resB = []
-	try {
-		if (bBlock) {bB = 1}
-		// not going to add eventlisteners
-		navigator.getBattery().then(function(battery) {
-			try {resB.push(battery.level * 100 + "%")} catch(e) {resB.push("error")}
-			try {resB.push((battery.charging ? "": "not ") +"charging")} catch(e) {resB.push("error")}
-			try {resB.push(battery.chargingTime)} catch(e) {resB.push("error")}
-			try {resB.push(battery.dischargingTime)} catch(e) {resB.push("error")}
-			fnRecord(numB, strB, resB.join(", "), false)
-		})
-	} catch(e) {
-		if (e.name == "TypeError" && e.message.substring(0,38) == "navigator.getBattery is not a function") {
-			if (e.message == "navigator.getBattery is not a function") {boolB = true} // webkit wil be false
-			fnRecord(numB, strB, e.name, boolB, e.message)
-		} else {
-			fnRecord(numB, strB, e.name, zB0, e.message)
-		}
-	}
+
 	// globalprivacycontrol
 	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
+		let t0G; if (canPerf) {t0G = performance.now()}
 		if (bBlock) {bB = 1}
 		let resG = navigator.globalPrivacyControl
 		resG = fnClean(resG)
@@ -1285,18 +1524,21 @@ function get_nav_values(num1, num2, num3) {
 			resG = zNA +": FF94 or lower" + s3 +" ["+ resG +"]" + sc
 			boolG = zNA
 		}
-		fnRecord(numG, strG, resG, boolG)
+		let perfG = canPerf ? performance.now() - t0G : ""
+		fnRecord(numG, strG, resG, boolG, "skip", perfG)
 	} catch(e) {
 		fnRecord(numG, strG, e.name, zB0, e.message)
 	}
 
 	// keyboard
 	let strK = "[keyboard] navigator", numK = num2+8
+	let t0K, perfK; if (canPerf) {t0K = performance.now()}
 	try {
 		if (bBlock) {bB = 1}
 		let resK = navigator.keyboard
 		if (resK == undefined) {
-			fnRecord(numK, strK, "undefined", true)
+			perfK = canPerf ? performance.now() - t0K : ""
+			fnRecord(numK, strK, "undefined", true, "skip", perfK)
 		} else {
 			let keys = []
 			// https://wicg.github.io/keyboard-map/
@@ -1310,21 +1552,26 @@ function get_nav_values(num1, num2, num3) {
 				listK.forEach(function(key) {
 					try {keys.push(key +": "+ keyboardLayoutMap.get(key))} catch(e) {keys.push(key +": e.name")}
 				})
-				let hash = sha1(keys.join())
-				fnRecord(numK, strK, hash, false)
+				sDetail["unexpected_"+ strK] = keys
+				let hash = mini_sha1(keys.join()) + buildButton(3, "unexpected_"+ strK , keys.length)
+				perfK = canPerf ? performance.now() - t0K : ""
+				fnRecord(numK, strK, hash, false, "skip", perfK)
 			})
 		}
 	} catch(e) {
 		fnRecord(numK, strK, e.name, zB0, e.message)
 	}
+
 	// vendor
 	let strV = "[vendor] navigator", boolV = false, numV = num2+10
 	try {
+		let t0V; if (canPerf) {t0V = performance.now()}
 		if (bBlock) {bB = 1}
 		let resV = navigator.vendor
 		if (resV == "") {boolV = true}
 		resV = fnClean(resV)
-		fnRecord(numV, strV, resV, boolV)
+		let perfV = canPerf ? performance.now() - t0V : ""
+		fnRecord(numV, strV, resV, boolV, "skip", perfV)
 	} catch(e) {
 		fnRecord(numV, strV, e.name, zB0, e.message)
 	}
@@ -1337,6 +1584,7 @@ function get_nav_values(num1, num2, num3) {
 	// specific
 	let strX = "[buildID] navigator", boolX = false
 	try {
+		let t0X; if (canPerf) {t0X = performance.now()}
 		if (bBlock) {bB = 1}
 		let resX = navigator.buildID
 		if (isVer > 63) {
@@ -1353,18 +1601,20 @@ function get_nav_values(num1, num2, num3) {
 				if (isCheck) {
 					if (!isNaN(resX * 1)) {boolX = true}
 				}
-			} else if (isRFP56plus) {
+			} else if (isRFP) {
 				// luckily RFP only alters buildID starting FF56
 				// RFP FF56-63 = 20100101
 				if (resX == "20100101") {boolX = true}
 			}
 		}
-		fnRecord(num3, strX, resX, boolX)
+		let perfX = canPerf ? performance.now() - t0X : ""
+		fnRecord(num3, strX, resX, boolX, "skip", perfX)
 	} catch(e) {
 		fnRecord(num3, strX, e.name, zB0, e.message)
 	}
 	// DNT: FF: 1, unspecified
 	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
+	let t0DNT; if (canPerf) {t0DNT = performance.now()}
 	try {
 		if (bBlock) {bB = 1}
 		let testDNT = navigator.doNotTrack
@@ -1373,15 +1623,16 @@ function get_nav_values(num1, num2, num3) {
 		} else {
 			testDNT = fnClean(testDNT)
 		}
+		let perfDNT = canPerf ? performance.now() - t0DNT : ""
 		if (isFF && !boolDNT) {
 			// PM not supported: returns undefined
 			if (isEngine == "goanna" && testDNT == "undefined") {
-				fnRecord(numDNT, strDNT, testDNT, true)
+				fnRecord(numDNT, strDNT, testDNT, true, "skip", perfDNT)
 			} else {
-				fnRecord(numDNT, strDNT, testDNT, zB0)
+				fnRecord(numDNT, strDNT, testDNT, zB0, "skip", perfDNT)
 			}
 		} else {
-			fnRecord(numDNT, strDNT, testDNT, boolDNT)
+			fnRecord(numDNT, strDNT, testDNT, boolDNT, "skip", perfDNT)
 		}
 	} catch(e) {
 		fnRecord(numDNT, strDNT, e.name, zB0, e.message)
@@ -1389,18 +1640,48 @@ function get_nav_values(num1, num2, num3) {
 
 	let strY = "[productSub] navigator", boolY = false, numY = num3+4
 	try {
+		let t0Y; if (canPerf) {t0Y = performance.now()}
 		if (bBlock) {bB = 1}
 		let resY = navigator.productSub
 		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
-		fnRecord(numY, strY, resY, boolY)
+		let perfY = canPerf ? performance.now() - t0Y : ""
+		fnRecord(numY, strY, resY, boolY, "skip", perfY)
 	} catch(e) {
 		fnRecord(numY, strY, e.name, zB0, e.message)
 	}
+
+	// not expected
+	// getbattery
+	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
+	let resB = []
+	let t0B, perfB; if (canPerf) {t0B = performance.now()}
+	try {
+		if (bBlock) {bB = 1}
+		// not going to add eventlisteners
+		navigator.getBattery().then(function(battery) {
+			try {resB.push(battery.level * 100 + "%")} catch(e) {resB.push("error")}
+			try {resB.push((battery.charging ? "": "not ") +"charging")} catch(e) {resB.push("error")}
+			try {resB.push(battery.chargingTime)} catch(e) {resB.push("error")}
+			try {resB.push(battery.dischargingTime)} catch(e) {resB.push("error")}
+			perfB = canPerf ? performance.now() - t0B : ""
+			fnRecord(numB, strB, resB.join(", "), false, "skip", perfB)
+		})
+	} catch(e) {
+		if (e.name == "TypeError" && e.message.substring(0,38) == "navigator.getBattery is not a function") {
+			if (e.message == "navigator.getBattery is not a function") {boolB = true} // webkit wil be false
+			perfB = canPerf ? performance.now() - t0B : ""
+			fnRecord(numB, strB, e.name, boolB, e.message, perfB)
+		} else {
+			fnRecord(numB, strB, e.name, zB0, e.message)
+		}
+	}
+
 }
 
 function get_obj_enumeration(num, title) {
 	// 1762188
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		let t = ['a','b'], result = []
 		for (let i in t) {
 			for (let j in t) {
@@ -1412,7 +1693,8 @@ function get_obj_enumeration(num, title) {
 		}
 		let res = result.join(",") // nonFF = 0,0,a,a,0,1,a,b,1,0,b,a,1,1,b,b
 		let bool = res == "0,0,a,a,0,1,a,b,1,0,b,a" ? true : false
-		fnRecord(num, title, res, bool)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, res, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -1420,15 +1702,18 @@ function get_obj_enumeration(num, title) {
 
 function get_permission(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let userVis = "userVisibleOnly"
 		navigator.permissions.query({name:"push"}).then(function(result) {
 			let res = result.state
 			let bool = (res == "prompt" || res == "denied" || res == "granted") ? true : false
-			fnRecord(num, title, res, bool)
+			let perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num, title, res, bool, "skip", perf)
 		}).catch(error => {
+			let perfErr = canPerf ? performance.now() - t0 : ""
 			if ((error.message).includes(userVis)) {
-				fnRecord(num, title, userVis, false)
+				fnRecord(num, title, userVis, false, "skip", perfErr)
 			} else {
 				fnRecord(num, title, error.name, zB0, error.message)
 			}
@@ -1445,9 +1730,10 @@ function get_permission(num, title) {
 
 function get_plugins(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		if ("plugins" in navigator) {
-			let res = [], bool = false, isFlash = false
+			let res = [], bool = false
 			let p = navigator.plugins
 			if (p.length == 0) {
 				fnRecord(num, title, "none", true)
@@ -1459,20 +1745,20 @@ function get_plugins(num, title) {
 				res.sort()
 				// FF84 or lower allow just Flash
 				if (isFF && isVer < 85 && res.length == 1) {
-					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true; isFlash = true}
+					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true}
 				}
-				let hash = sha1(res.join()) + s3 +" ["+ res.length +"]"+ sc
+				let hash = mini_sha1(res.join())
 				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
-					// 1720353: hardcoded mimeTypes = a1c55525766a48e19810c6a2accc17f62a748901
-					if (sha1(res.join()) == "a1c55525766a48e19810c6a2accc17f62a748901") {
+					// 1720353: hardcoded mimeTypes
+					if (hash == "6232b915d6de71c787a36eb42b75d2b8e24aa4d3") {
 						bool = true
-						num = 740 // move to specific values
 					}
-				} else if (isFF) {
-					if (isFlash) {hash = "flash detected [FF84 or lower]"}
 				}
-				fnRecord(num, title, hash, bool)
+				sDetail["expected_"+ title] = res
+				hash += buildButton(3, "expected_"+ title, res.length)
+				let perf = canPerf ? performance.now() - t0 : ""
+				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
 			fnRecord(num, title, e.name, zB0)
@@ -1483,6 +1769,7 @@ function get_plugins(num, title) {
 }
 
 function get_stacklength(num1, num2, num3) {
+	let t0; if (canPerf) {t0 = performance.now()}
 	let level = 0, test1 = 0
 	function recurse() {
 		level++
@@ -1497,13 +1784,16 @@ function get_stacklength(num1, num2, num3) {
 	try {
 		recurse()
 	} catch(e) {
+		// timing an error property lookup is not the same as generating a alow recurse one
+		let t0E; if (canPerf) {t0E = performance.now()}
 		// columnNumber
 		let strCN = "[columnNumber] error", errCN = false
 		try {
 			if (bBlock) {bB = 1}
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
-			fnRecord(num1, strCN, resCN, testCN)
+			let perfCN = canPerf ? performance.now() - t0E : ""
+			fnRecord(num1, strCN, resCN, testCN, "skip", perfCN)
 		} catch(n) {
 			fnRecord(num1, strCN, n.name, zB0, n.message)
 		}
@@ -1514,7 +1804,8 @@ function get_stacklength(num1, num2, num3) {
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
-			fnRecord(num1+1, strFN, resFN, testFN)
+			let perfFN = canPerf ? performance.now() - t0E : ""
+			fnRecord(num1+1, strFN, resFN, testFN, "skip", perfFN)
 		} catch(n) {
 			fnRecord(num1+1, strFN, n.name, zB0, n.message)
 		}
@@ -1524,16 +1815,19 @@ function get_stacklength(num1, num2, num3) {
 			if (bBlock) {bB = 1}
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
-			fnRecord(num1+2, strLN, resLN, testLN)
+			let perfLN = canPerf ? performance.now() - t0E : ""
+			fnRecord(num1+2, strLN, resLN, testLN, "skip", perfLN)
 		} catch(n) {
 			fnRecord(num1+2, strLN, n.name, zB0, n.message)
 		}
+
 		// first error
+		let perf = canPerf ? performance.now() - t0 : ""
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
-			fnRecord(num3, strRE, resRE, true)
+			fnRecord(num3, strRE, resRE, true, "skip", perf)
 		} else {
-			fnRecord(num3, strRE, resRE, false)
+			fnRecord(num3, strRE, resRE, false, "skip", perf)
 		}
 		// stack length
 		let strSL = "stack length"
@@ -1542,12 +1836,12 @@ function get_stacklength(num1, num2, num3) {
 			let resSL = e.stack.toString().length
 			let testSL = resSL == 8192 ? true : false
 			if (isFile) {
-				fnRecord(num2, strSL, zNA +": file://", zNA)
-			} else {
-				fnRecord(num2, strSL, resSL, testSL)
+				testSL = zNA
+				resSL = zNA +": file://"
 			}
+			fnRecord(num2, strSL, resSL, testSL, "skip", perf)
 		} catch(n) {
-			fnRecord(num2, strSL, n.name, zB0, n.message)
+			fnRecord(num2, strSL, n.name, zB0, n.message, perf)
 		}
 	}
 }
@@ -1578,6 +1872,7 @@ function get_storage_estimate(num, title) {
 		// chrome:     204974075 incognito android
 
 	// ToDo: check if FF97+ new storage quota is based on disk or free disk space size
+	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		if (bBlock) {bB = 1}
 		navigator.storage.estimate().then(estimate => {
@@ -1589,7 +1884,8 @@ function get_storage_estimate(num, title) {
 			} else {
 				if (quota > 2147000000 && quota < 2148000000) {bool = true}
 			}
-			fnRecord(num, title, quota, bool)
+			let perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num, title, quota, bool, "skip", perf)
 		})
 	} catch(e) {
 		let msg = e.message.substring(0,26)
@@ -1612,9 +1908,11 @@ function get_storage_estimate(num, title) {
 
 function get_window_chrome(num, title) {
 	try {
+		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		let bool = "chrome" in window
-		fnRecord(num, title, bool, !bool)
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, bool, !bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -1624,23 +1922,28 @@ function get_window_values(num) {
 	//window.offscreenBuffering
 	let strB = "[offscreenBuffering] window", boolB = false
 	try {
+		let t0B; if (canPerf) {t0B = performance.now()}
 		if (bBlock) {bB = 1}
 		let resB = window.offscreenBuffering
 		if (resB == undefined) {boolB = true}
 		resB = fnClean(resB)
-		fnRecord(num, strB, resB, boolB)
+		let perfB = canPerf ? performance.now() - t0B : ""
+		fnRecord(num, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
 		fnRecord(num, strB, e.name, zB0, e.message)
 	}
 	// window.openDatabase
 	let strO = "[openDatabase] window", boolO = false
+	let t0, perf = ""; if (canPerf) {t0 = performance.now()}
 	try {
 		if (bBlock) {bB = 1}
 		window.openDatabase("test", "1.0", "test", 1024)
-		fnRecord(num+2, strO, "success", boolO)
+		perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num+2, strO, "success", boolO, "skip", perf)
 	} catch(e) {
 		if (e.name == "TypeError" && e.message == "window.openDatabase is not a function") {
-			fnRecord(num+2, strO, e.name, true, e.message)
+			perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num+2, strO, e.name, true, e.message, perf)
 		} else if (e.name == "UnknownError" && e.message == "Web SQL is deprecated") {
 			fnRecord(num+2, strO, e.name, false, e.message) // webkit
 		} else {
@@ -1652,63 +1955,29 @@ function get_window_values(num) {
 function get_window_moz(num) {
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
+		let t0A; if (canPerf) {t0A = performance.now()}
 		if (bBlock) {bB = 1}
 		let resA = window.mozInnerScreenX
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
-		fnRecord(num, strA, resA, boolA)
+		let perfA = canPerf ? performance.now() - t0A : ""
+		fnRecord(num, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
 		fnRecord(num, strA, e.name, zB0, e.message)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
+		let t0B; if (canPerf) {t0B = performance.now()}
 		if (bBlock) {bB = 1}
 		let resB = window.mozInnerScreenY
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
-		fnRecord(num+1, strB, resB, boolB)
+		let perfB = canPerf ? performance.now() - t0B : ""
+		fnRecord(num+1, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zB0, e.message)
 	}
 }
 
-let results = [],
-	itemnumbers = [],
-	data = {},
-	count = 0,
-	expected = 77,
-	bBlock = false, // throw a test error
-	bLog = false,
-	bNum = false // display numbering
-
-let	isVer = "",
-	topVer = "",
-	minVer = "",
-	isRFP56plus = false,
-	isWebkit = false,
-	is95 = false
-
-function get_is95() {
-	return new Promise(resolve => {
-		if (!isFF) {
-			return resolve()
-		}
-		// pre-compute slow 95 test
-		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
-			// ^ do if 94+ but not 95+ fast path
-			try {
-				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
-					// but not if 96+
-					let ratio = dom.test95a.offsetWidth/dom.test95b.offsetWidth
-					is95 = (ratio > 0.4 && ratio < 0.6)
-				}
-			} catch(e) {
-				console.debug(e.name, e.message)
-			}
-		}
-		return resolve(is95)
-	})
-}
-
-function get_isVer() {
+function get_legacyVer() {
 	return new Promise(resolve => {
 		// set webkit
 		if ("chrome" in window || isFF) {} else {isWebkit = true}
@@ -1741,92 +2010,37 @@ function get_isVer() {
 			}
 		} catch(e) {}
 
-		isVer = cascade()
-		return resolve()
-		function cascade() {
-			// FF52-59
-			if ("function" !== typeof Animation.prototype.updatePlaybackRate) {
-				if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) return 59
-				if ("function" == typeof Intl.PluralRules) return 58
-				if ("function" === typeof AbortSignal) return 57
-				if (is55) {
-					minVer = 56
-					return 56
-				} else {
-					minVer = 54
-					return 54
-				}
+		// FF52-59
+		if ("function" !== typeof Animation.prototype.updatePlaybackRate) {
+			if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) {
+				isVer = 59
+			} else if ("function" == typeof Intl.PluralRules) {isVer = 58
+			} else if ("function" === typeof AbortSignal) {isVer = 57
+			} else if (is55) {
+				minVer = 56
+				isVer = 56
+			} else {
+				minVer = 54
+				isVer = 54
 			}
-			// FF60+
-			topVer = 105
-			if ("function" == typeof Intl.PluralRules
-				&& Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
-				// ^ legacy check: FF57- Intl.PluralRules
-			if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
-			if (undefined === new ErrorEvent("error").error) return 103 // 1772494
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
-				if (Array(1).includes()) return 102 // 1767541: regression FF99
-				return 101 // 1728999
-			}
-			if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
-			try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
-			if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
-			if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
-			if ("undefined" === typeof Object.toSource
-				&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
-				// ^ legacy perf: toSource (74+): FF68- very slow
-			if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
-			if (is95) return 95 // 1674204
-				// ^ pre-computed
-			if ("function" === typeof self.structuredClone) return 94 // 1722576
-			if ("function" === typeof self.reportError) return 93 // 1722448
-			if ("function" === typeof Object.hasOwn) return 92 // 1721149
-			if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
-			try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
-			if ("function" === typeof Array.prototype.at) return 90 // 1681371
-			if ("function" === typeof CountQueuingStrategy
-				&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
-				// ^ legacy check FF64- CountQueuingStrategy
-			if (":" === document.createElement("a").protocol) return 88 // 1497557
-			if (undefined === console.length) return 87 // 1688335
-			if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
-			try {Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
-				} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
-				// ^ replace ?
-			if ("function" === typeof PerformancePaintTiming) return 84 // 1518999
-			if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
-			try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
-				// ^ ext fuckery: cydec
-			if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
-			if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
-			if ("function" === typeof Promise.any) return 79 // 1599769 shipped
-			if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
-			if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
-			if (!test76.validity.rangeOverflow) return 76 // 1608010
-			if ("function" === typeof Intl.Locale) return 75 // 1613713
-			if ("undefined" === typeof Object.toSource) return 74 // 1565170
-			if (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames")) return 73 // 1602163
-			if ("boolean" === typeof self.crossOriginIsolated) return 72 // 1591892
-			if ("function" === typeof Promise.allSettled) return 71 // 1549176
-			if ("function" === typeof Intl.RelativeTimeFormat
-				&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts) return 70 // 1473229
-				// ^ legacy check: FF64- Intl.RelativeTimeFormat
-				// ^ extension fuckery: formatToParts
-			try {newFn("let t = 1_050"); return 70} catch(e) {} // 1435818
-			if ("function" === typeof Blob.prototype.text) return 69 // 1557121
-			if (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch")) return 68 // 1548773
-			if ("function" === typeof String.prototype.matchAll) return 67 // 1531830
-			if ("function" === typeof HTMLSlotElement
-				&& "function" === typeof HTMLSlotElement.prototype.assignedElements) return 66 // 1425685
-				// ^ legacy check: FF60- HTMLSlotElement
-			if (1 === DataView.length) return 65 // 1334813
-			if ("number" === typeof window.screenTop) return 64 // 1498860
-			if ("desc" === Symbol('desc').description) return 63 // 1472170
-			if ("function" === typeof console.timeLog) return 62 // 1458466
-			if ("object" === typeof CSS) return 61 // 1455805
-			return 60 // we already tested <60
 		}
+		return resolve()
 	})
+}
+
+function rerun() {
+	// reset
+	results = []
+	itemnumbers = [],
+	data = {},
+	aPerf = [],
+	count = 0,
+	dom.perf = ""
+	dom.results = ""
+	// do it: delay for user to see visual change
+	setTimeout(function() {
+		run()
+	}, 120)
 }
 
 function run() {
@@ -1838,58 +2052,85 @@ function run() {
 	fnRecord(900, "header", "errors")
 	fnRecord(440, "the spanish inquisition", "no one expects the spanish inquisition", true)
 	// OK, let's kick some ass
-	get_doc_values(10, "document")
-	get_installtrigger(50) // 50-52
-	get_canvaskeys(80, "[2d canvas] keys")
-	get_moz_colors(90, "[colors] moz")
-	get_moz_computed_styles(92, "[computed styles] moz")
-	get_moz_fonts(95, "[fonts] moz")
-	get_nav_screen(150)
-	get_js_client_hints(320, "[js] client hints")
-	get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
-	get_nav_values(100, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
-	get_window_moz(250) // 250-251
-	get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected, 
-	get_colorgamut(310, "[css] color-gamut"),
-	get_mimetypes(370, "mimetypes")
-	get_plugins(430, "plugins")
-	get_window_chrome(450, "[chrome] window")
-	get_window_values(460)
-	get_dates(620)
-	get_eval_length(630, "eval.toString().length")
-	get_last_prototype_keys(640, "[last x keys]"), // 640+641
-	get_intl_collator(650, "Intl.Collator")
-	get_intl_dtf(656, "Intl.DateTimeFormat")
-	get_intl_display_names(660, "Intl.DislayNames")
-	get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
-	get_intl_list_format(663, "Intl.ListFormat")
-	get_intl_number_format(666, "Intl.NumberFormat")
-	get_intl_pluralrules(670, "Intl.PluralRules")
-	get_intl_rtf(673, "Intl.RelativeTimeFormat")
-	get_locale_compare(690, "locale.compare")
-	get_math(695, "math")
-	get_media_constraints(700, "[constraints] mediaDevices")
-	get_obj_enumeration(734, "object enumeration")
-	get_permission(750, "[permissions] push")
-	get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
-	get_storage_estimate(820, "storage estimate")
-	get_errors(902)
+	// stagger to get more accurate perf
+
+	setTimeout(function() {
+		if (canPerf) {gt0 = performance.now()}
+		aPerf.push(["START 1", gt0])
+		get_installtrigger(50) // 50-52
+		get_eval_length(630, "eval.toString().length")
+		get_colorgamut(310, "[css] color-gamut"),
+		get_nav_screen(150)
+		get_window_chrome(450, "[chrome] window"),
+		get_obj_enumeration(734, "object enumeration")
+		get_last_prototype_keys(640, "[last x keys]") // 640+641
+		get_doc_values(10, "document")
+		get_math(695, "math")
+		get_nav_values(100, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
+		get_window_values(460)
+		get_dates(620)
+		get_js_client_hints(320, "[js] client hints")
+		get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
+		get_mimetypes(710, "mimetypes")
+		get_plugins(740, "plugins")
+		get_canvaskeys(80, "[2d canvas] keys")
+		get_intl_number_format(666, "Intl.NumberFormat")
+		get_media_constraints(700, "[constraints] mediaDevices")
+	}, 1)
+
+	setTimeout(function() {
+		aPerf.push(["START 2", performance.now(), performance.now() - gt0])
+		get_window_moz(250) // 250-251
+		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
+		get_intl_pluralrules(670, "Intl.PluralRules")
+		get_locale_compare(690, "locale.compare")
+		get_intl_display_names(660, "Intl.DislayNames")
+	}, 1)
+
+	setTimeout(function() {
+		aPerf.push(["START 3", performance.now(), performance.now() - gt0])
+		get_errors(902)
+		get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
+		get_intl_list_format(663, "Intl.ListFormat")
+		get_intl_rtf(673, "Intl.RelativeTimeFormat")
+	}, 1)
+
+	setTimeout(function() {
+		aPerf.push(["START THE END", performance.now(), performance.now() - gt0])
+		get_intl_collator(650, "Intl.Collator")
+	}, 1)
+
+	setTimeout(function() { get_moz_fonts(95, "[fonts] moz") }, 1)
+	setTimeout(function() { get_iframe_props(40, 330, "[properties] iframe") }, 1) // 40 expected, 330 not expected,
+	setTimeout(function() { get_moz_colors(90, "[colors] moz") }, 1)
+	setTimeout(function() { get_moz_computed_styles(92, "[computed styles] moz") }, 1)
+	setTimeout(function() {	get_intl_dtf(656, "Intl.DateTimeFormat") }, 1)
+	setTimeout(function() {
+		get_permission(750, "[permissions] push")
+		get_storage_estimate(820, "storage estimate")
+	}, 1)
+
 }
 
 setTimeout(function() {
-	if (isFF) {
-		fnRFP()
-	}
 	Promise.all([
+		get_isRFP(),
 		get_is95(),
+		get_legacyVer(),
 	]).then(function(){
-		Promise.all([
-			get_isVer(),
-		]).then(function(){
+		if (isFF && isVer !== "") {
 			run()
-		})
+		} else {
+			console.debug("isVer is emmpty")
+			Promise.all([
+				get_isVer(),
+			]).then(function(){
+				console.debug(isVer)
+				run()
+			})			
+		}
 	})
-}, 10)
+}, 50)
 
 </script>
 </body>
