@@ -86,6 +86,8 @@
 <script>
 'use strict';
 
+let debug = []
+
 function outputVersion() {
 
 	let xS = green_tick,
@@ -103,7 +105,6 @@ function outputVersion() {
 	s14 = s14.trim()
 	sb = sb.trim()
 
-	let debug = []
 	let gTZP, gOther, gWatch // global timers
 	let runtype
 
@@ -960,14 +961,48 @@ function outputVersion() {
 
 }
 
-// warm stuff up
-try {
-	let warm80 = (CSS2Properties.prototype.hasOwnProperty("appearance"))
-} catch(e) {}
+function quickFF() {
+	// testing super fast isFF
+		// ideally FF52+
+		// hopefully non-extension-fuckable
+	try {
+		let quickstart = performance.now()
+		// hasOwnProperty
+		let ff1 = Element.prototype.hasOwnProperty("mozMatchesSelector") // 0.014ms
+		let ff2 = CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle") // 0.133ms
+		// typeof
+		let ff3 = ("boolean" === typeof document.mozFullScreenEnabled) // 0.015ms
+		let ff4 = ("object" === typeof Object.getOwnPropertyDescriptor(SVGElement.prototype, "onmozfullscreenchange")) // 0.024ms
+		let ff5 = ("object" === typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, "onmozfullscreenerror")) // 0.029ms
+		let ff6 = ("function" === typeof CSSMozDocumentRule) // 0.080ms
+			// ^ false FF52
+		let ff7 = ("function" === typeof document.mozSetImageElement) // 0.080ms
+		let ff8 = ("object" === typeof screen.onmozorientationchange) // 0.075ms
+		// display
+		let quickend = performance.now()
+		let res = [ff1, ff2, ff3, ff4, ff5, ff6, ff7, ff8]
+		let pretty = []
+		for (let i=0; i < res.length; i++) {
+			pretty.push(i+1 + (res[i] ? green_tick : red_cross))
+		}
+		debug.push("FF: " + pretty.join(" | ") +" | "+ (quickend-quickstart) +" ms")
 
-setTimeout(function() {
-	outputVersion()
-}, 100)
+		// window>defaults lists lots of potential objects/functions etc
+		//console.debug(window)
+	} catch(e) {
+		debug.push("FF:"+ sb + e.name +": "+ e.message)
+		console.debug(e.name, e.message)
+	}
+}
+
+function run() {
+	quickFF()
+	setTimeout(function() {
+		outputVersion()
+	}, 100)	
+}
+
+run()
 
 </script>
 </body>
