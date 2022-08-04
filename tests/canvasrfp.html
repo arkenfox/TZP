@@ -192,19 +192,6 @@ function run(howmany) {
 		}
 	}
 	// isRFP
-	let isRFP = false
-	let isPerf = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP = (r == 0)
-		if (!isPerf) {isRFP = false}
-	} catch(e) {}
 	if (isFF && !isRFP) {
 		if (bypass) {
 			aBypass.push("RFP is not enabled")
@@ -330,7 +317,7 @@ function run(howmany) {
 			let t1 = performance.now()
 			let perItem = (t1-t0)/testCount
 			if (!Number.isInteger(perItem)) {perItem = perItem.toFixed(2)}
-			dom.perf.innerHTML = Math.round(t1-t0) +"ms | "+ perItem +" each"
+			dom.perf.innerHTML = Math.round(t1-t0) +" ms | "+ perItem +" each"
 		})
 	}, delay)
 }
@@ -399,7 +386,14 @@ let bypass = true
 // autorun
 let testCount = 100
 let testTotal = 0
-run(100)
+
+setTimeout(function() {
+	Promise.all([
+		get_isRFP(),
+	]).then(function(){
+		run(100)
+	})
+}, 50)
 
 </script>
 </body>

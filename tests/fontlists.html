@@ -300,7 +300,7 @@ function get_fonts(runtype) {
 			for (let name in res) {
 				let data = res[name]
 				let display = []
-				let bRFP = get_RFP()
+				get_isRFP()
 
 				//data.push("Aldhabi","Andalus","Angsana New") // windows base test
 				//data.push("Angsana New Bold") // windows full test
@@ -352,7 +352,7 @@ function get_fonts(runtype) {
 								display.push("<br>test skipped: RFP font protection doesn't cover android")
 							}
 						// non-TB & RFP is off
-						} else if (!bRFP && !bTB) {
+						} else if (!isRFP && !bTB) {
 								display.push("<br>test skipped: the min font test requires RFP, flip it on and run again")
 						// base fonts > 0
 						} else if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
@@ -406,7 +406,7 @@ function get_fonts(runtype) {
 						//} else if (bTB) {
 						//		display.push("<br>test skipped: Tor Browser's whitelist blocks a full test")
 						// RFP is on
-						} else if (bRFP) {
+						} else if (isRFP) {
 								display.push("<br>test skipped: RFP blocks a full test, flip it off and run again")
 						// faces > 0
 						} else if (fntFaces[strOS].length > 0) {
@@ -487,24 +487,6 @@ const get_OS = () => new Promise(resolve => {
 		return resolve("unknown")
 	}
 })
-
-function get_RFP() {
-	// isRFP
-	let bRFP = false
-	let bPerf = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {bPerf = false}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		bRFP = (r == 0)
-		if (!bPerf) {bRFP = false}
-	} catch(e) {}
-	return bRFP
-}
 
 const get_TB = () => new Promise(resolve => {
 	try {
