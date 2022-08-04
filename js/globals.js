@@ -151,9 +151,6 @@ let s0 = " <span class='",
 	isChrome = "", // chrome://
 	isEngine = "",
 	isFF = false,
-	isFFLegacy = false,
-	isFFno = [],
-	isFFyes = [],
 	isGeckoBlock = false, // stop testing/handling so many old versions
 	isGeckoBlockMin = [78, 10], // [FF, TB]
 	isGeckoSmart = false, // simplify code
