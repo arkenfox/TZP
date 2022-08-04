@@ -2557,18 +2557,6 @@ function outputScreen() {
 }
 
 function outputStart() {
-	if (isVer > 99) {
-		// FF100+: 1754441: extensions.InstallTrigger*.enabled
-		isFFno = isFFno.filter(x => !["type of installtriggerimpl"].includes(x))
-		isFFno = isFFno.filter(x => !["type of installtrigger"].includes(x))
-		isFFno = isFFno.filter(x => !["installtrigger in window"].includes(x))
-	}
-	if (isFF && isFFno.length) {
-		let fake = []
-		isFFno.forEach(function(item) {fake.push(item)})
-		gKnownOnce.push("_global:isFF")
-		gBypassedOnce.push("_global:isFF:"+ fake.join() + ":true")
-	}
 	// cydec
 	let len = eval.toString().length
 	if (isFF && len !== 37) {

@@ -278,17 +278,6 @@ const get_isBraveMode = () => new Promise(resolve => {
 
 const get_isEngine = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
-	let bFF = false, hash
-	// set isFF for engine lies
-	if (isFFyes.length) {isFF = true}
-	function final_isFF() {
-		if (isFFyes.length) {isFF = true}
-		if (isFF) {
-			isFFLegacy = ("function" !== typeof Animation.prototype.updatePlaybackRate)
-			log_perf("isFFLegacy [global]",""+ isFFLegacy,"ignore")
-		}
-		log_perf("final status [isFF]",""+ isFF,"ignore")
-	}
 	// do math
 	function cbrt(x) {
 		try {
@@ -315,17 +304,24 @@ const get_isEngine = () => new Promise(resolve => {
 				res.push("error")
 			}
 		}
-		hash = sha1(res.join(), "_global isEngine").substring(0,8)
+		let hash = sha1(res.join(), "_global isEngine").substring(0,8)
 		if (runSL) {hash = "x"}
 		if (hash == "ede9ca53") {isEngine = "blink"
 		} else if (hash == "05513f36") {isEngine = "webkit"
 		} else if (hash == "38172d94") {isEngine = "edgeHTML"
 		} else if (hash == "36f067c6") {isEngine = "trident"
-		} else if (hash == "225f4a61") {isEngine = "gecko"; bFF = true
-		} else if (hash == "cb89002a") {isEngine = "gecko"; bFF = true
+		} else if (hash == "225f4a61") {isEngine = "gecko"
+		} else if (hash == "cb89002a") {isEngine = "gecko"
 		}
-		if (isEngine == "") {console.log(res.join())}
-
+		// harden isEngine
+		if (isEngine == "") {
+			console.log(res.join())
+			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
+			if (isEngine !== "") {
+				gKnownOnce.push("_global:isEngine")
+				gBypassedOnce.push("_global:isEngine:"+ isEngine)
+			}
+		}
 		if (isEngine == "gecko") {
 			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
 				// note: waterfox classic passes both
@@ -333,47 +329,11 @@ const get_isEngine = () => new Promise(resolve => {
 				isEngine = "goanna"
 			}
 		}
-		if (bFF) {isFFyes.push("math")} else {isFFno.push("math")}
-		log_perf("math [isFF]",t0,"",bFF +" | "+ hash)
-		// harden isEngine
-		if (isEngine == "") {
-			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
-			if (isEngine !== "") {
-				gKnownOnce.push("_global:isEngine")
-				gBypassedOnce.push("_global:isEngine:"+ isEngine)
-			}
-		}
-		final_isFF()
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine +" | "+ hash))
 		return resolve()
 	} catch(e) {
-		isFFno.push("math")
-		final_isFF()
 		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
 		log_perf("isEngine [global]",t0,"","error")
-		return resolve()
-	}
-})
-
-const get_isError = () => new Promise(resolve => {
-	// super mini test to confirm isFF
-	let t0; if (canPerf) {t0 = performance.now()}
-	try {
-		let res = [], bFF = false
-		try {null.bar} catch(e) {res.push(e.message)}
-		try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
-		try {[...undefined].length} catch(e) {res.push(e.message)}
-		try {(1).toString(1000)} catch(e) {res.push(e.message)}
-		let hash = mini(res.join(), "_global isError")
-		if (hash == "009a449c") {bFF = true // FF52+
-		} else if (hash == "4fdb30b3") {bFF = true} //FF74+ error_fix = true
-		if (bFF) {isFFyes.push("errors")} else {isFFno.push("errors")}
-		log_perf("errors [isFF]",t0,"", bFF +" | "+ hash)
-		return resolve()
-	} catch(e) {
-		gErrorsOnce.push("_global: isError: " + e.name +" : "+ e.message)
-		log_perf("errors [isFF]",t0,"","error")
-		isFFno.push("errors")
 		return resolve()
 	}
 })
@@ -382,7 +342,8 @@ function set_isFork() {
 	// only use isLogo if we want to harden the check: not needed yet
 	// it's important to make sure we set isFork, the entropy is still recorded
 	// unless specified isLogo is 300 x 236
-	if (isFFLegacy) {
+	if ("function" !== typeof Animation.prototype.updatePlaybackRate) {
+		// FF59 or lower
 		if (isMark == "130 x 38") {isFork = "Firefox" // FF52-56
 		} else if (isMark == "128 x 22") {isFork = "Waterfox Classic"}
 	} else {
@@ -480,7 +441,7 @@ const get_isOS64 = (skip = false) => new Promise(resolve => {
 		isOS64 = "unknown"
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isOS64 = true
-		if (gLoad) {log_perf("isOS64 [prereq]",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [prereq]",t0,gt0,isOS64)}
+		if (gLoad) {log_perf("isOS64 [global]",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [global]",t0,gt0,isOS64)}
 		return resolve()
 	} catch(e) {
 		let eMsg = e.name +": "+ e.message
@@ -541,29 +502,6 @@ const get_isRFP = () => new Promise(resolve => {
 	}
 })
 
-const get_isSystemFont = () => new Promise(resolve => {
-	let t0; if (canPerf) {t0 = performance.now()}
-	try {
-		let el = dom.sysFont,
-			f = undefined
-		let test = getComputedStyle(el).getPropertyValue("font-family")
-		el.style.font = "99px sans-serif"
-		try {el.style.font = "-moz-dialog"} catch(err) {}
-		let s = getComputedStyle(el, null)
-		if (s.fontSize != "99px") {f = s.fontFamily}
-		let bFF = (""+ f == "undefined" ? false : true)
-		if (runSL) {bFF = false}
-		if (bFF) {isFFyes.push("system font")} else {isFFno.push("system font")}
-		log_perf("system font [isFF]",t0,"",bFF)
-		return resolve()
-	} catch(e) {
-		isFFno.push("system font")
-		log_alert("_global:isSystemFont: " + e.name +" : "+ e.message, true)
-		log_perf("system font [isFF]",t0,"","error")
-		return resolve()
-	}
-})
-
 const get_isTB = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -609,7 +547,7 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		if (isFFLegacy) return 59
+		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
 		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
@@ -1028,7 +966,10 @@ function log_error(title, name, msg) {
 
 function trim_error(name, msg, len) {
 	if (len == undefined) {len = 60}
-	let str = name +": "+ msg
+	let isMsg = true
+	if (name == undefined || name == "" || name === null) {name = "Error"}
+	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
+	let str = name + (isMsg ? ": "+ msg : "")
 	if (str.length > len) {str = str.substring(0,len-3) + "..."}
 	return(str)
 }
@@ -1292,7 +1233,7 @@ function log_section(name, time1, data) {
 function countJS(filename) {
 	jsFiles.push(filename)
 	// pre-compute slow 95 test
-	if (jsFiles.length == 1 && isFFyes.length) {
+	if (jsFiles.length == 1 && isFF) {
 		// skip if not likely to be Firefox
 		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
 			// ^ do if 94+ but not 95+ fast path
@@ -1320,68 +1261,61 @@ function countJS(filename) {
 			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
 		} catch(e) {isPerf = false}
 		if (canPerf) {log_line(Math.round(performance.now()) + " : RUN ONCE")}
+		let t0; if (canPerf) {t0= performance.now()}
+		// DOC/DOM LOADED
 		Promise.all([
-			get_isError(),
-			get_isSystemFont(),
-		]).then(function(){
-			// uses isFF
-			let t0
-			if (canPerf) {t0= performance.now()}
-			Promise.all([
-				get_isEngine(), // do first to quickly set isFFLegacy
-				get_isOS(), // this also sets isPlatformFont for font tests
-				get_isVer(),
-				get_isTB(),
-				get_isBrave(),
-				get_isFork(), // uses isFFLegacy, isEngine
-			]).then(function(results){
-				// don't run on old versions
-				if (isFF & isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
-				// treat older FF as dumb
-				if (isFF && isVer >= isGeckoSmartMin[0]) {
-					isGeckoSmart = true
-				}
-				// wipe notations: hook up isGeckoSmart later
-				if (!isFF) {
-					rfp_green = ""
-					rfp_red = ""
-					rfp_random_green = ""
-					rfp_random_red = ""
-					lb_green = ""
-					lb_red = ""
-					nw_green = ""
-					nw_red = ""
-					enUS_green = ""
-					enUS_red = ""
-					spoof_both_green = ""
-					spoof_both_red = ""
-					default_ff_green = ""
-					default_ff_red = ""
-					let items = document.getElementsByClassName("group")
-					for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-				}
-				// some sims = isFF only: not fussy; only devs run these
-				if (!isFF) {
-					runSN = false
-					runSU = false
-					runRF = false
-					runCSS = false
-					runFNT = false
-					runWFS = false
-				}
-				if (results[3] == "timeout") {
-					gMethodsOnce.push("_global:resource:blocked")
-					log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
-				}
-				if (results[5] == "timeout") {
-					gMethodsOnce.push("_global:isFork:blocked")
-					log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
-				}
-				if (!isGeckoBlock) {
-					get_pointer_event() // pointer eventlistener
-				}
-				outputSection("load")
-			})
+			get_isVer(),
+			get_isTB(),
+			get_isOS(), // this also sets isPlatformFont for font tests
+			get_isBrave(),
+			get_isFork(),
+		]).then(function(results){
+			// don't run on old versions
+			if (isFF & isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
+			// treat older FF as dumb
+			if (isFF && isVer >= isGeckoSmartMin[0]) {
+				isGeckoSmart = true
+			}
+			// wipe notations: hook up isGeckoSmart later
+			if (!isFF) {
+				rfp_green = ""
+				rfp_red = ""
+				rfp_random_green = ""
+				rfp_random_red = ""
+				lb_green = ""
+				lb_red = ""
+				nw_green = ""
+				nw_red = ""
+				enUS_green = ""
+				enUS_red = ""
+				spoof_both_green = ""
+				spoof_both_red = ""
+				default_ff_green = ""
+				default_ff_red = ""
+				let items = document.getElementsByClassName("group")
+				for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+			}
+			// some sims = isFF only: not fussy; only devs run these
+			if (!isFF) {
+				runSN = false
+				runSU = false
+				runRF = false
+				runCSS = false
+				runFNT = false
+				runWFS = false
+			}
+			if (results[3] == "timeout") {
+				gMethodsOnce.push("_global:resource:blocked")
+				log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
+			}
+			if (results[5] == "timeout") {
+				gMethodsOnce.push("_global:isFork:blocked")
+				log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
+			}
+			if (!isGeckoBlock) {
+				get_pointer_event() // pointer eventlistener
+			}
+			outputSection("load")
 		})
 	}
 }
@@ -1589,29 +1523,32 @@ function run_once() {
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
 
 	// isFF
-	let str = "installtrigger"
-	let str1 = "type of "+str, str2 = "type of "+ str +"impl", str3 = str+ " in window"
-	let test1 = false, test2 = false, test3 = false
-	if (runSL) {
-		isFFno.push(str1,str2,str3)
-	} else {
-		try {if (typeof InstallTrigger == "object") {test1 = true}} catch(e) {}
-		try {if (typeof InstallTriggerImpl == "function") {test2 = true}} catch(e) {}
-		try {if ("InstallTrigger" in window) {test3 = true}} catch(e) {}
-		if (test1) {isFFyes.push(str1)} else {isFFno.push(str1)}
-		if (test2) {isFFyes.push(str2)} else {isFFno.push(str2)}
-		if (test3) {isFFyes.push(str3)} else {isFFno.push(str3)}
-	}
-	log_perf("installtrigger [isFF]",t0,"",test1 +", "+ test2 +", "+ test3)
-
-	// get os arch while we wait
-	get_isOS64(true)
-	// cache/warm things
 	try {
-		let t80; if (canPerf) {t80 = performance.now()}
-		let warm80 = CSS2Properties.prototype.hasOwnProperty("appearance")
-		log_perf("v80 [warm]",t80,"",warm80)
-	} catch(e) {}
+		let ff1 = Element.prototype.hasOwnProperty("mozMatchesSelector") // 0.014ms
+		let ff2 = CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle") // 0.133ms
+		let ff3 = ("boolean" === typeof document.mozFullScreenEnabled) // 0.015ms
+		let ff4 = ("object" === typeof Object.getOwnPropertyDescriptor(SVGElement.prototype, "onmozfullscreenchange")) // 0.024ms
+		let ff5 = ("object" === typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, "onmozfullscreenerror")) // 0.029ms
+		let ff6 = ("function" === typeof CSSMozDocumentRule) // 0.080ms // false FF52
+		let ff7 = ("function" === typeof document.mozSetImageElement) // 0.080ms
+		let ff8 = ("object" === typeof screen.onmozorientationchange) // 0.075ms
+		let res = [ff1, ff2, ff3, ff4, ff5, ff6, ff7, ff8]
+		let sum = ff1 + ff2 + ff3 + ff4 + ff5 + ff6 + ff7 + ff8
+		if (sum < res.length) {
+			let fail = []
+			for (let i=0; i < res.length; i++) {
+				if (!res[i]) {fail.push(i+1)}
+			}
+			log_alert("isFF "+ fail.join() +" are false", true)
+		}
+		if (sum > 5) {isFF = true}
+		log_perf("isFF [global]",t0,"", isFF +" | "+ sum +"/"+ res.length)
+	} catch(e) {
+		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
+		log_perf("isFF [global]",t0,"","error")
+	}
+	get_isEngine()
+	get_isOS64(true)
 }
 
 run_once()
