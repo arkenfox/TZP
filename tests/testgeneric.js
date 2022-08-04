@@ -67,28 +67,45 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 }
 
 function showDetail(name) {
-	let data = sDetail[name],
-		hash = sha1(data.join())
-	// split+tidy name
-	name = name.replace(/\_/g, " ")
-	let n = name.indexOf(" "),
-		section = name.substring(0,n).toUpperCase(),
-		metric = name.substring(n,name.length).trim()
-	console.log(section +": "+ metric +": "+ hash, data)
+	if (name == "all") {
+		console.log("ALL", sDetail)
+	} else {
+		let data = sDetail[name],
+			hash = mini_sha1(data.join())
+		// split+tidy name
+		name = name.replace(/\_/g, " ")
+		let n = name.indexOf(" "),
+			section = name.substring(0,n).toUpperCase(),
+			metric = name.substring(n,name.length).trim()
+		console.log(section +": "+ metric +": "+ hash, data)
+	}
+}
+
+function get_canPerf() {
+	// check performance.now
+	try {
+		let testPerf = performance.now()
+		canPerf = true
+	} catch(e) {
+		canPerf = false
+	}
 }
 
 function get_isFF_engine() {
-	// set isFF
-	let test1 = false, test2 = false, test3 = false
-	try {if (typeof InstallTrigger == "object") {test1 = true}} catch(e) {}
-	try {if (typeof InstallTriggerImpl == "function") {test2 = true}} catch(e) {} // FF61+
-	try {if ("InstallTrigger" in window) {test3 = true}} catch(e) {}
+	// isFF
 	try {
-		let t = (' a').trimStart()
-		if (test1 + test2 + test3 == 3) {isFF = true} // FF61+
-	} catch(e) {
-		if (test1 + test3 == 2) {isFF = true} // FF60 or lower
-	}
+		let ff1 = Element.prototype.hasOwnProperty("mozMatchesSelector") // 0.014ms
+		let ff2 = CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle") // 0.133ms
+		let ff3 = ("boolean" === typeof document.mozFullScreenEnabled) // 0.015ms
+		let ff4 = ("object" === typeof Object.getOwnPropertyDescriptor(SVGElement.prototype, "onmozfullscreenchange")) // 0.024ms
+		let ff5 = ("object" === typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, "onmozfullscreenerror")) // 0.029ms
+		let ff6 = ("function" === typeof CSSMozDocumentRule) // 0.080ms // false FF52
+		let ff7 = ("function" === typeof document.mozSetImageElement) // 0.080ms
+		let ff8 = ("object" === typeof screen.onmozorientationchange) // 0.075ms
+		let sum = ff1 + ff2 + ff3 + ff4 + ff5 + ff6 + ff7 + ff8
+		if (sum > 5) {isFF = true}
+	} catch(e) {}
+
 	// engine
 	function cbrt(x) {
 		try {
@@ -126,6 +143,131 @@ function get_isFF_engine() {
 	}
 	if (isEngine == "") {console.error("isEngine: not found\n", res)}
 }
+
+const get_isRFP = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	// detectable in FF56+
+	let isPerf2 = true
+	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
+	try {
+		performance.mark("a")
+		let r = performance.getEntriesByName("a","mark").length
+			+ performance.getEntries().length
+			+ performance.getEntries({name:"a",entryType:"mark"}).length
+			+ performance.getEntriesByName("a","mark").length
+			performance.clearMarks()
+		isRFP = (r == 0)
+		if (!isPerf2) {isRFP = false}
+		return resolve()
+	} catch(e) {
+		return resolve()
+	}
+})
+
+function get_is95() {
+	return new Promise(resolve => {
+		if (!isFF) {
+			return resolve()
+		}
+		// pre-compute slow 95 test
+		if ("function" === typeof self.structuredClone && "function" !== typeof crypto.randomUUID) {
+			// ^ do if 94+ but not 95+ fast path
+			try {
+				if ("sc" !== Intl.PluralRules.supportedLocalesOf("sc").join()) {
+					// but not if 96+
+					let ratio = dom.test95a.offsetWidth/dom.test95b.offsetWidth
+					is95 = (ratio > 0.4 && ratio < 0.6)
+				}
+			} catch(e) {
+				console.debug(e.name, e.message)
+			}
+		}
+		return resolve()
+	})
+}
+
+const get_isVer = () => new Promise(resolve => {
+	// NOTE: requires dom for 95 and 76, and a promised is95
+
+	// skip
+	if (!isFF) {return resolve()}
+
+	function output(verNo) {
+		isVer = verNo
+		return resolve()
+	}
+	output(cascade())
+
+	function cascade() {
+		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 59
+			// ^ we can skip < FF60 legacy checks now
+			// note: we can skip non-gecko checks: this only runs if isFF
+		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
+		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
+		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
+			if (Array(1).includes()) return 102 // 1767541: regression FF99
+			return 101 // 1728999
+		}
+		if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
+		try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
+		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
+		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
+		if ("undefined" === typeof Object.toSource
+			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
+			// ^ legacy perf: toSource (74+): FF68- very slow
+		if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
+		if (is95) return 95 // 1674204
+			// ^ pre-computed
+		if ("function" === typeof self.structuredClone) return 94 // 1722576
+		if ("function" === typeof self.reportError) return 93 // 1722448
+		if ("function" === typeof Object.hasOwn) return 92 // 1721149
+		if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
+		try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
+		if ("function" === typeof Array.prototype.at) return 90 // 1681371
+		if ("function" === typeof CountQueuingStrategy
+			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
+			// ^ legacy check FF64- CountQueuingStrategy
+		if (":" === document.createElement("a").protocol) return 88 // 1497557
+		if (undefined === console.length) return 87 // 1688335
+		if ("function" === typeof Intl.DisplayNames) return 86 // 1654116
+		try {Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
+			} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
+			// ^ replace ?
+		if ("function" === typeof PerformancePaintTiming) return 84 // 1518999
+		if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
+		try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
+			// ^ ext fuckery: cydec
+		if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
+		if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
+		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
+		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
+		if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
+		if (!test76.validity.rangeOverflow) return 76 // 1608010
+		if ("function" === typeof Intl.Locale) return 75 // 1613713
+		if ("undefined" === typeof Object.toSource) return 74 // 1565170
+		if (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames")) return 73 // 1602163
+		if ("boolean" === typeof self.crossOriginIsolated) return 72 // 1591892
+		if ("function" === typeof Promise.allSettled) return 71 // 1549176
+		if ("function" === typeof Intl.RelativeTimeFormat
+			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts) return 70 // 1473229
+			// ^ legacy check: FF64- Intl.RelativeTimeFormat
+			// ^ extension fuckery: formatToParts
+		try {newFn("let t = 1_050"); return 70} catch(e) {} // 1435818
+		if ("function" === typeof Blob.prototype.text) return 69 // 1557121
+		if (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch")) return 68 // 1548773
+		if ("function" === typeof String.prototype.matchAll) return 67 // 1531830
+		if ("function" === typeof HTMLSlotElement
+			&& "function" === typeof HTMLSlotElement.prototype.assignedElements) return 66 // 1425685
+			// ^ legacy check: FF60- HTMLSlotElement
+		if (1 === DataView.length) return 65 // 1334813
+		if ("number" === typeof window.screenTop) return 64 // 1498860
+		if ("desc" === Symbol('desc').description) return 63 // 1472170
+		if ("function" === typeof console.timeLog) return 62 // 1458466
+		if ("object" === typeof CSS) return 61 // 1455805
+		return 60 // we already tested <60
+	}
+})
 
 function showhide(id, style) {
 	let items = document.getElementsByClassName("tog"+ id)
@@ -235,3 +377,5 @@ if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ s
 if ((location.protocol) == "https:") {isSecure = true}
 get_navKeys()
 get_isFF_engine()
+get_canPerf()
+
