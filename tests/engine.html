@@ -1294,7 +1294,7 @@ function get_moz_objects(num, name) {
 			useHas = true
 			oList[name] = [Element.prototype,["mozMatchesSelector","​mozRequestFullScreen"]]
 		}
-   	if (name === "CSS2Properties" && "function" === typeof CSS2Properties) {
+		if (name === "CSS2Properties" && "function" === typeof CSS2Properties) {
 			oList[name] = [CSS2Properties.prototype,
 				['MozAnimation','MozAnimationDelay','MozAnimationDirection','MozAnimationDuration','MozAnimationFillMode',
 				'MozAnimationIterationCount','MozAnimationName','MozAnimationPlayState','MozAnimationTimingFunction',
@@ -2111,15 +2111,12 @@ function run() {
 		get_moz_objects(120, "MathMLElement")
 		get_moz_objects(122, "MouseEvent")
 		get_moz_objects(124, "Navigator")
-		get_moz_objects(126, "Screen")
-		get_moz_objects(128, "ShadowRoot")
-		get_moz_objects(130, "SVGElement")
-		get_moz_objects(132, "window")
-		get_moz_objects(134, "XMLHttpRequest")
-
-		get_moz_objects(136, "OfflineResourceList")
-
-
+		get_moz_objects(126, "OfflineResourceList")
+		get_moz_objects(128, "Screen")
+		get_moz_objects(130, "ShadowRoot")
+		get_moz_objects(132, "SVGElement")
+		get_moz_objects(134, "window")
+		get_moz_objects(136, "XMLHttpRequest")
 	}, 1)
 	setTimeout(function() {	get_intl_dtf(656, "Intl.DateTimeFormat") }, 1)
 	setTimeout(function() {
