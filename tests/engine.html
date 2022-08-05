@@ -63,7 +63,7 @@ let results = [],
 	data = {},
 	aPerf = [],
 	count = 0,
-	expected = 77,
+	expected = 95,
 	gt0, // global timer
 	bBlock = false, // throw a test error
 	bLog = false,
@@ -178,11 +178,16 @@ function fnDisplay() {
 	dom.results.innerHTML = summary + "<br><br>" + display.join("<br>")
 }
 
-
 function fnRecord(order, description, result, match, error, perf) {
 	if (error !== undefined && error !== "skip") {
-		//console.error(order, result, error)
-		result += s3+ " ["+ mini(error) +"]"+ sc
+		let hash = mini(error)
+		if (hash !== "d8281b3c") { // assignment to undeclared variable bB
+			console.error(order, result, error)
+			hash = s3+ " ["+ hash +"]"+ sc
+		} else {
+			result = "test error thrown"; hash = ""
+		}
+		result += hash
 	}
 	aPerf.push([perf, order, description])
 	order = (order+"").padStart(3,"0")
@@ -193,34 +198,6 @@ function fnRecord(order, description, result, match, error, perf) {
 		fnDisplay()
 	}
 	if (count > expected) {console.error(count, "expected count too low")}
-}
-
-function get_canvaskeys(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		let res = []
-		let list = [
-			// 1765063: FF102+: Disable mozCurrentTransform on early beta and earlier
-			// 'mozCurrentTransform', 'mozCurrentTransformInverse',
-			'mozImageSmoothingEnabled', 'mozTextStyle',
-		]
-		for (const key in CanvasRenderingContext2D.prototype) {res.push(key)}
-		res = res.filter(x => list.includes(x))
-		res.sort()
-		let bool = false
-
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (res.length > 0) {
-			sDetail["expected_"+ title] = res
-			if (hash == "0fd2871814ac9179d6f5a5b4a0ffea0e0e20152c") {bool = true}
-			hash += buildButton(3, "expected_"+ title, res.length)
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
 }
 
 function get_colorgamut(num, title) {
@@ -304,22 +281,6 @@ function get_dates(num) {
 		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
 	} catch(e) {
 		fnRecord(num+4, strE, e.name, zB0, e.message)
-	}
-}
-
-function get_doc_values(num, title) {
-	let strFS = "[mozFullScreen] "+ title
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		// FF expected true/false
-		let boolFS = false
-		let testFS = document.mozFullScreenEnabled
-		if (testFS == true || testFS == false) {boolFS = true} else {fnClean(testFS)}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, strFS, testFS, boolFS, "skip", perf)
-	} catch(e) {
-		fnRecord(num, strFS, e.name, zB0, e.message)
 	}
 }
 
@@ -1211,133 +1172,6 @@ function get_moz_colors(num, title) {
 	}
 }
 
-function get_moz_computed_styles(num, title) {
-	/* https://github.com/abrahamjuliot/creepjs */
-	let t0; if (canPerf) {t0 = performance.now()}
-
-	let styleVersion = type => {
-		return new Promise(resolve => {
-			// get CSSStyleDeclaration
-			try {
-				if (bBlock) {bB = 1}
-				let cssStyleDeclaration = (
-					type == 0 ? getComputedStyle(document.body) :
-					type == 1 ? document.body.style :
-					type == 2 ? document.styleSheets[0].cssRules[0].style :
-					undefined
-				)
-				if (!cssStyleDeclaration) {
-					throw new TypeError("invalid argument string")
-				}
-				// get properties
-				let prototype = Object.getPrototypeOf(cssStyleDeclaration),
-					prototypeProperties = Object.getOwnPropertyNames(prototype),
-					ownEnumerablePropertyNames = [],
-					cssVar = /^--.*$/
-				Object.keys(cssStyleDeclaration).forEach(key => {
-					let numericKey = !isNaN(key),
-						value = cssStyleDeclaration[key],
-						customPropKey = cssVar.test(key),
-						customPropValue = cssVar.test(value)
-					if (numericKey && !customPropValue) {
-						return ownEnumerablePropertyNames.push(value)
-					} else if (!numericKey && !customPropKey) {
-						return ownEnumerablePropertyNames.push(key)
-					}
-					return
-				})
-				// get properties in prototype chain (required only in chrome)
-				let propertiesInPrototypeChain = {}
-				let capitalize = str => str.charAt(0).toUpperCase() + str.slice(1),
-					uncapitalize = str => str.charAt(0).toLowerCase() + str.slice(1),
-					removeFirstChar = str => str.slice(1),
-					caps = /[A-Z]/g
-				ownEnumerablePropertyNames.forEach(key => {
-					if (propertiesInPrototypeChain[key]) {
-						return
-					}
-					// determine attribute type
-					let isNamedAttribute = key.indexOf('-') > -1,
-						isAliasAttribute = caps.test(key)
-					// reduce key for computation
-					let firstChar = key.charAt(0),
-						isPrefixedName = isNamedAttribute && firstChar == '-',
-						isCapitalizedAlias = isAliasAttribute && firstChar == firstChar.toUpperCase()
-					key = (
-						isPrefixedName ? removeFirstChar(key) :
-						isCapitalizedAlias ? uncapitalize(key) :
-						key
-					)
-					// find counterpart in CSSStyleDeclaration object or its prototype chain
-					if (isNamedAttribute) {
-						let aliasAttribute = key.split('-').map((word, index) => index == 0 ? word : capitalize(word)).join('')
-						if (aliasAttribute in cssStyleDeclaration) {
-							propertiesInPrototypeChain[aliasAttribute] = true
-						} else if (capitalize(aliasAttribute) in cssStyleDeclaration) {
-							propertiesInPrototypeChain[capitalize(aliasAttribute)] = true
-						}
-					} else if (isAliasAttribute) {
-						let namedAttribute = key.replace(caps, char => '-' + char.toLowerCase())
-						if (namedAttribute in cssStyleDeclaration) {
-							propertiesInPrototypeChain[namedAttribute] = true
-						} else if (`-${namedAttribute}` in cssStyleDeclaration) {
-							propertiesInPrototypeChain[`-${namedAttribute}`] = true
-						}
-					}
-					return
-				})
-				// compile keys
-				let keys = [
-					...new Set([
-						...prototypeProperties,
-						...ownEnumerablePropertyNames,
-						...Object.keys(propertiesInPrototypeChain)
-					])
-				]
-				// checks
-				let moz = keys.filter(key => (/moz/i).test(key)) //.length,
-					//webkit = keys.filter(key => (/webkit/i).test(key)).length,
-					//prototypeName = ('' + prototype).match(/\[object (.+)\]/)[1]
-				// output
-				return resolve({
-					//keys,
-					moz
-					//webkit,
-					//prototypeName
-				})
-			} catch(e) {
-				fnRecord(num, title, e.name, zB0, e.message)
-				return resolve("error")
-			}
-		})
-	}
-
-	// run
-	Promise.all([
-		styleVersion(0), // we only need one result
-	]).then(res => {
-		if (res == "error") {
-			return
-		}
-		try {
-			let aRes = res[0]["moz"]
-			aRes.sort()
-			let bool = aRes.length > 0
-			if (bool) {
-				sDetail["expected_"+ title] = aRes
-			}
-			let hash = bool ? mini_sha1(aRes.join()) + buildButton(3, "expected_"+ title, aRes.length) : "none"
-			bool = aRes.length > 50 // just in case someone spoofs a couple, or older/other browsers have some
-			let perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num, title, hash, bool, "skip", perf)
-		} catch(err) {
-			fnRecord(num, title, err.name, zB0, err.message)
-		}
-	}).catch(error => {
-		fnRecord(num, title, error.name, zB0, error.message)
-	})
-}
-
 function get_moz_fonts(num, title) {
 	let aResults = [],
 		m = "-moz-",
@@ -1367,6 +1201,166 @@ function get_moz_fonts(num, title) {
 			sDetail["expected_"+ title] = aResults
 		}
 		let hash = bool ? mini_sha1(aResults.join()) + buildButton(3, "expected_"+ title, aResults.length) : "none"
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
+function get_moz_objects(num, name) {
+	let title = "["+ name +"] moz"
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		if (bBlock) {bB = 1}
+		let res = []
+		let oList = {}
+		let isObj = false
+		let useHas = false // use hasOwnProperty or default getOwnPropertyDescriptor
+
+		if (name === "Document" && "function" === typeof Document) {
+			oList[name] = [Document.prototype,
+				["mozSetImageElement","mozCancelFullScreen","mozFullScreen","mozFullScreenEnabled",
+					"mozFullScreenElement","onmozfullscreenchange","onmozfullscreenerror"]
+				]
+		}
+		if (name === "HTMLElement" && "function" === typeof HTMLElement) {
+			oList[name] = [HTMLElement.prototype, ["onmozfullscreenchange","onmozfullscreenerror"]]
+		}
+		if (name === "HTMLMediaElement" && "function" === typeof HTMLMediaElement) {
+			oList[name] = [HTMLMediaElement.prototype, ["mozCaptureStream","mozCaptureStreamUntilEnded",
+				"mozGetMetadata","mozPreservesPitch","mozAudioCaptured","mozFragmentEnd"]
+			]
+		}
+		if (name === "HTMLVideoElement" && "function" === typeof HTMLVideoElement) {
+			oList[name] = [HTMLVideoElement.prototype, ["mozParsedFrames","mozDecodedFrames",
+				"mozPresentedFrames","mozPaintedFrames","mozFrameDelay","mozHasAudio"]
+			]
+		}
+		if (name === "MouseEvent" && "function" === typeof MouseEvent) {
+			oList[name] = [MouseEvent.prototype,
+				["MOZ_SOURCE_UNKNOWN","MOZ_SOURCE_MOUSE","MOZ_SOURCE_PEN","MOZ_SOURCE_ERASER",
+				"MOZ_SOURCE_CURSOR","MOZ_SOURCE_TOUCH","MOZ_SOURCE_KEYBOARD","mozPressure",
+				"mozInputSource","MOZ_SOURCE_UNKNOWN","MOZ_SOURCE_MOUSE","MOZ_SOURCE_PEN",
+				"MOZ_SOURCE_ERASER","MOZ_SOURCE_CURSOR","MOZ_SOURCE_TOUCH","MOZ_SOURCE_KEYBOARD"]
+			]
+		}
+		if (name === "Screen" && "function" === typeof Screen) {
+			oList[name] = [Screen.prototype,
+				["mozLockOrientation","mozUnlockOrientation","mozOrientation","onmozorientationchange"]
+			]
+		}
+		if (name === "SVGElement" && "function" === typeof SVGElement) {
+			oList[name] = [SVGElement.prototype,["onmozfullscreenchange","onmozfullscreenerror"]]
+		}
+		if (name === "HTMLInputElement" && "function" === typeof HTMLInputElement) {
+			oList[name] = [HTMLInputElement.prototype,["mozIsTextField"]]
+		}
+		if (name === "Navigator" && "function" === typeof Navigator) {
+			oList[name] = [Navigator.prototype,["mozGetUserMedia"]]
+		}
+		if (name === "HTMLCanvasElement" && "function" === typeof HTMLCanvasElement) {
+			oList[name] = [HTMLCanvasElement.prototype,["mozOpaque","mozPrintCallback"]]
+		}
+		if (name === "CanvasRenderingContext2D" && "function" === typeof CanvasRenderingContext2D) {
+			oList[name] = [CanvasRenderingContext2D.prototype,
+				["mozCurrentTransform","mozCurrentTransformInverse","mozTextStyle","mozImageSmoothingEnabled"]
+			]
+		}
+		if (name === "MathMLElement" && "function" === typeof MathMLElement) {
+			oList[name] = [MathMLElement.prototype,["onmozfullscreenchange","onmozfullscreenerror"]]
+		}
+		if (name === "DataTransfer" && "function" === typeof DataTransfer) {
+			oList[name] = [DataTransfer.prototype,["mozCursor","mozUserCancelled","mozSourceNode"]]
+		}
+		if (name === "ShadowRoot" && "function" === typeof ShadowRoot) {
+			oList[name] = [ShadowRoot.prototype,["mozFullScreenElement"]]
+		}
+		if (name === "XMLHttpRequest" && "function" === typeof XMLHttpRequest) {
+			oList[name] = [XMLHttpRequest.prototype,["mozAnon","mozSystem"]]
+		}
+		if (name === "IDBObjectStore" && "function" === typeof IDBObjectStore) {
+			oList[name] = [IDBObjectStore.prototype,["mozGetAll"]]
+		}
+		if (name === "IDBIndex" && "function" === typeof IDBIndex) {
+			oList[name] = [IDBIndex.prototype,["mozGetAll","mozGetAllKeys"]]
+		}
+		if (name === "OfflineResourceList" && "function" === typeof OfflineResourceList) {
+			oList[name] = [OfflineResourceList.prototype,
+				["mozHasItem","mozItem","mozAdd","mozRemove","mozItems","mozLength"]
+			]
+		}
+		if (name === "Element" && "function" === typeof Element) {
+			useHas = true
+			oList[name] = [Element.prototype,["mozMatchesSelector","​mozRequestFullScreen"]]
+		}
+   	if (name === "CSS2Properties" && "function" === typeof CSS2Properties) {
+			oList[name] = [CSS2Properties.prototype,
+				['MozAnimation','MozAnimationDelay','MozAnimationDirection','MozAnimationDuration','MozAnimationFillMode',
+				'MozAnimationIterationCount','MozAnimationName','MozAnimationPlayState','MozAnimationTimingFunction',
+				'MozAppearance','MozBackfaceVisibility','MozBorderEnd','MozBorderEndColor','MozBorderEndStyle',
+				'MozBorderEndWidth','MozBorderImage','MozBorderStart','MozBorderStartColor','MozBorderStartStyle',
+				'MozBorderStartWidth','MozBoxAlign','MozBoxDirection','MozBoxFlex','MozBoxOrdinalGroup','MozBoxOrient',
+				'MozBoxPack','MozBoxSizing','MozFloatEdge','MozFontFeatureSettings','MozFontLanguageOverride',
+				'MozForceBrokenImageIcon','MozHyphens','MozImageRegion','MozMarginEnd','MozMarginStart','MozOrient',
+				'MozPaddingEnd','MozPaddingStart','MozPerspective','MozPerspectiveOrigin','MozTabSize','MozTextSizeAdjust',
+				'MozTransform','MozTransformOrigin','MozTransformStyle','MozTransition','MozTransitionDelay',
+				'MozTransitionDuration','MozTransitionProperty','MozTransitionTimingFunction','MozUserFocus','MozUserInput',
+				'MozUserModify','MozUserSelect','MozWindowDragging',
+				// aliases
+				'-moz-animation','-moz-animation-delay','-moz-animation-direction','-moz-animation-duration',
+				'-moz-animation-fill-mode','-moz-animation-iteration-count','-moz-animation-name','-moz-animation-play-state',
+				'-moz-animation-timing-function','-moz-appearance','-moz-backface-visibility','-moz-border-end',
+				'-moz-border-end-color','-moz-border-end-style','-moz-border-end-width','-moz-border-image','-moz-border-start',
+				'-moz-border-start-color','-moz-border-start-style','-moz-border-start-width','-moz-box-align',
+				'-moz-box-direction','-moz-box-flex','-moz-box-ordinal-group','-moz-box-orient','-moz-box-pack',
+				'-moz-box-sizing','-moz-float-edge','-moz-font-feature-settings','-moz-font-language-override',
+				'-moz-force-broken-image-icon','-moz-hyphens','-moz-image-region','-moz-margin-end','-moz-margin-start',
+				'-moz-orient','-moz-padding-end','-moz-padding-start','-moz-perspective','-moz-perspective-origin',
+				'-moz-tab-size','-moz-text-size-adjust','-moz-transform','-moz-transform-origin','-moz-transform-style',
+				'-moz-transition','-moz-transition-delay','-moz-transition-duration','-moz-transition-property',
+				'-moz-transition-timing-function','-moz-user-focus','-moz-user-input','-moz-user-modify','-moz-user-select',
+				'-moz-window-dragging',
+				]
+			]
+		}
+		// object
+		if (name === "window" && "object" == typeof window) {
+			isObj = true
+			oList[name] = [window,["mozRTCPeerConnection","CSSMozDocumentRule"]]
+		}
+
+		// do it!
+		if (oList[name] !== undefined) {
+			let obj = oList[name][0]
+			let props = oList[name][1]
+			if (isObj) {
+				props.forEach(function(element) {
+					if (element in obj) {res.push(element)}
+				})
+			} else if (useHas) {
+				props.forEach(function(element) {
+					if (obj.hasOwnProperty(element)) {res.push(element)}
+				})
+			} else {
+				props.forEach(function(element) {
+					if ("object" == typeof Object.getOwnPropertyDescriptor(obj, element)) {
+						res.push(element)
+					}
+				})
+			}
+			res.sort()
+		}
+		let hash = "none", bool = false
+		if (res.length > 0) {
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["expected_"+ title] = res
+				hash = mini_sha1(res.join()) + buildButton(3, "expected_"+ title, res.length)
+			}
+			bool = true
+		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
@@ -1682,6 +1676,7 @@ function get_obj_enumeration(num, title) {
 	// 1762188
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
+		if (bBlock) {bB = 1}
 		let t = ['a','b'], result = []
 		for (let i in t) {
 			for (let j in t) {
@@ -2064,16 +2059,14 @@ function run() {
 		get_window_chrome(450, "[chrome] window"),
 		get_obj_enumeration(734, "object enumeration")
 		get_last_prototype_keys(640, "[last x keys]") // 640+641
-		get_doc_values(10, "document")
 		get_math(695, "math")
-		get_nav_values(100, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
+		get_nav_values(140, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
 		get_window_values(460)
 		get_dates(620)
 		get_js_client_hints(320, "[js] client hints")
 		get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
 		get_mimetypes(710, "mimetypes")
 		get_plugins(740, "plugins")
-		get_canvaskeys(80, "[2d canvas] keys")
 		get_intl_number_format(666, "Intl.NumberFormat")
 		get_media_constraints(700, "[constraints] mediaDevices")
 	}, 1)
@@ -2098,12 +2091,36 @@ function run() {
 	setTimeout(function() {
 		aPerf.push(["START THE END", performance.now(), performance.now() - gt0])
 		get_intl_collator(650, "Intl.Collator")
+		get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected,
 	}, 1)
+	setTimeout(function() {
+		get_moz_objects(88, "CanvasRenderingContext2D")
+		get_moz_colors(90, "[colors] moz")
+		get_moz_objects(94, "CSS2Properties")
+		get_moz_objects(96, "DataTransfer")
+		get_moz_objects(98, "Document")
+		get_moz_objects(100, "Element")
+		get_moz_fonts(102, "[fonts] moz")
+		get_moz_objects(106, "HTMLElement")
+		get_moz_objects(108, "HTMLCanvasElement")
+		get_moz_objects(110, "HTMLInputElement")
+		get_moz_objects(112, "HTMLMediaElement")
+		get_moz_objects(114, "HTMLVideoElement")
+		get_moz_objects(116, "IDBIndex")
+		get_moz_objects(118, "IDBObjectStore")
+		get_moz_objects(120, "MathMLElement")
+		get_moz_objects(122, "MouseEvent")
+		get_moz_objects(124, "Navigator")
+		get_moz_objects(126, "Screen")
+		get_moz_objects(128, "ShadowRoot")
+		get_moz_objects(130, "SVGElement")
+		get_moz_objects(132, "window")
+		get_moz_objects(134, "XMLHttpRequest")
 
-	setTimeout(function() { get_moz_fonts(95, "[fonts] moz") }, 1)
-	setTimeout(function() { get_iframe_props(40, 330, "[properties] iframe") }, 1) // 40 expected, 330 not expected,
-	setTimeout(function() { get_moz_colors(90, "[colors] moz") }, 1)
-	setTimeout(function() { get_moz_computed_styles(92, "[computed styles] moz") }, 1)
+		get_moz_objects(136, "OfflineResourceList")
+
+
+	}, 1)
 	setTimeout(function() {	get_intl_dtf(656, "Intl.DateTimeFormat") }, 1)
 	setTimeout(function() {
 		get_permission(750, "[permissions] push")
@@ -2121,11 +2138,9 @@ setTimeout(function() {
 		if (isFF && isVer !== "") {
 			run()
 		} else {
-			console.debug("isVer is emmpty")
 			Promise.all([
 				get_isVer(),
 			]).then(function(){
-				console.debug(isVer)
 				run()
 			})			
 		}
