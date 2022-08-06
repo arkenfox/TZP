@@ -94,6 +94,7 @@ function get_canPerf() {
 function get_isFF_engine() {
 	// isFF
 	try {
+		let tstart; if (canPerf) {tstart = performance.now()}
 		let list = [
 			[DataTransfer, "DataTransfer", "mozSourceNode"],
 			[Document, "Document", "mozFullScreen"],
@@ -118,9 +119,21 @@ function get_isFF_engine() {
 				aNo.push(array[1])
 			}
 		})
+		let tend; if (canPerf) {tend = performance.now()}
 		let found = (list.length - aNo.length)
 		if (found > 8) {isFF = true}
-	} catch(e) {}
+		// build a pretty display
+		let display = []
+		list.forEach(function(array) {
+			let check = aNo.includes(array[1]) ? red_cross : green_tick
+			display.push(check)
+		})
+		isFFvalid = true
+		isFFpretty = display.join(" | ") + (canPerf ? " | "+ (tend-tstart) +" ms" : "")
+	} catch(e) {
+		isFFvalid = false
+		isFFpretty = sb.trim() + e.name +": "+ sc + e.message
+	}
 
 	// engine
 	function cbrt(x) {
@@ -391,7 +404,6 @@ function sha1(str1){
 // set some global vars for all test pages
 if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ sc}
 if ((location.protocol) == "https:") {isSecure = true}
+get_canPerf()
 get_navKeys()
 get_isFF_engine()
-get_canPerf()
-
