@@ -962,33 +962,42 @@ function outputVersion() {
 }
 
 function quickFF() {
-	// testing super fast isFF
-		// ideally FF52+
-		// hopefully non-extension-fuckable
+	// testing super fast isFF: hopefully non-extension + non-perf fuckable in every release
 	try {
 		let quickstart = performance.now()
-		// hasOwnProperty
-		let ff1 = Element.prototype.hasOwnProperty("mozMatchesSelector") // 0.014ms
-		let ff2 = CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle") // 0.133ms
-		// typeof
-		let ff3 = ("boolean" === typeof document.mozFullScreenEnabled) // 0.015ms
-		let ff4 = ("object" === typeof Object.getOwnPropertyDescriptor(SVGElement.prototype, "onmozfullscreenchange")) // 0.024ms
-		let ff5 = ("object" === typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, "onmozfullscreenerror")) // 0.029ms
-		let ff6 = ("function" === typeof CSSMozDocumentRule) // 0.080ms
-			// ^ false FF52
-		let ff7 = ("function" === typeof document.mozSetImageElement) // 0.080ms
-		let ff8 = ("object" === typeof screen.onmozorientationchange) // 0.075ms
-		// display
+		let list = [
+			[DataTransfer, "DataTransfer", "mozSourceNode"],
+			[Document, "Document", "mozFullScreen"],
+			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
+			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
+			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
+			[HTMLMediaElement, "HTMLMediaElement", "mozGetMetadata"],
+			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
+			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
+			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
+			[Navigator, "Navigator", "mozGetUserMedia"],
+			[Screen, "Screen", "mozOrientation"],
+			[SVGElement, "SVGElement", "onmozfullscreenchange"] 
+		]
+		let obj, prop, aNo = []
+		list.forEach(function(array) {
+			obj = array[0]
+			prop = array[2]
+			if ("function" === typeof obj
+				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))
+			) {
+			} else {
+				aNo.push(array[1])
+			}
+		})
 		let quickend = performance.now()
-		let res = [ff1, ff2, ff3, ff4, ff5, ff6, ff7, ff8]
-		let pretty = []
-		for (let i=0; i < res.length; i++) {
-			pretty.push(i+1 + (res[i] ? green_tick : red_cross))
-		}
-		debug.push("FF: " + pretty.join(" | ") +" | "+ (quickend-quickstart) +" ms")
-
-		// window>defaults lists lots of potential objects/functions etc
-		//console.debug(window)
+		// build a pretty display
+		let display = []
+		list.forEach(function(array) {
+			let check = aNo.includes(array[2]) ? red_cross : green_tick
+			display.push(check)
+		})
+		debug.push("FF: " + display.join(" | ") +" | "+ (quickend-quickstart) +" ms")
 	} catch(e) {
 		debug.push("FF:"+ sb + e.name +": "+ e.message)
 		console.debug(e.name, e.message)
