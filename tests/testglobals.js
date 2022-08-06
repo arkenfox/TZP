@@ -71,6 +71,8 @@ let s0 = " <span class='",
 	is95 = false,
 	isBrave = false,
 	isFF = false,
+	isFFpretty = "", // results string with perf
+	isFFvalid = false, // no errors
 	isFile = false,
 	isRFP = false,
 	isSecure = false,
