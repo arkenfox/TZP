@@ -479,8 +479,12 @@ function get_intl_canonical_locale(num, title) {
 		// blink   : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
 		// webkit  : bh=bh,  hye=hy,  no=no, tl=tl,  tw=tw
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, "details")
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, "details")
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -550,7 +554,6 @@ function get_intl_display_names(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let test = Intl.DisplayNames.supportedLocalesOf("en")
 		// FF items not in chromium
 			// remove: ig, om [same as en]
 			// remove: sc (96), sa (91) [FF additions]
@@ -565,11 +568,12 @@ function get_intl_display_names(num, title) {
 		]
 		// shrink size for perf: pending webkit results
 		let list = [
-			'bo','fo','gl','haw','hye','kl','mai','os','su','tt','ug','xh'
+			'ak','ce','kl','rm','os','ps','tt','wo','yi'
 		]
+		let res = []
+		/*
 		let options = {type: 'region'},
 			testValue = "US",
-			res = []
 		let englishVersion = new Intl.DisplayNames('en', options).of(testValue)
 		list.forEach(function(locale) {
 			try {
@@ -579,12 +583,18 @@ function get_intl_display_names(num, title) {
 				}
 			} catch(e) {}
 		})
+		*/
+		res = Intl.DisplayNames.supportedLocalesOf(list)
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		// 86+ (85 not supprted)
-		let bool = hash == "d02cec4400b8157766ef7913ecfde210ebcd0c72"
+		let bool = hash == "2484e3ef24674f7b0e76519734786e1dc265a8a4"
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, res.length)
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, res.length)
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -615,16 +625,16 @@ function get_intl_dtf(num, title) {
 		let list = [
 			'ak','ast','be','bm','bo','ce','ckb','eo','no','to', // gecko not in blink
 		]
-		let bool = false
-		let date = new Date("January 30, 2019 13:00:00"),
-			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
-				minute: "numeric", second: "numeric", hour12: true}
-		let res = [], unique = [], same = []
 		if (isVer < 70 && isFF) {
 			list.push("fo")
 			list = list.filter(x => !["no"].includes(x))
 		}
 		list.sort()
+		let res = [], bool = false
+		/*
+		let date = new Date("January 30, 2019 13:00:00"),
+			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+				minute: "numeric", second: "numeric", hour12: true}
 		let control = Intl.DateTimeFormat(undefined, options).format(date)
 		list.forEach(function(locale) {
 			let test = Intl.DateTimeFormat(locale, options).format(date)
@@ -632,28 +642,23 @@ function get_intl_dtf(num, title) {
 			if (test == control) {same.push(locale)}
 			res.push(locale +": "+ test)
 		})
+		*/
+		res = Intl.DateTimeFormat.supportedLocalesOf(list)
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (bLog) {
-			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
-			counts += " ["+ same.length +" = control]"
-			console.log(title +": "+ hash +", "+ counts +"\n", res)
-		}
 		if (isVer > 100) {
-			if (hash == "b1a2b0aeee7676bcc5af6288a6a87a6e38297f9d") {bool = true} // FF101+
+			if (hash == "9ce44d336a9754554d4a1d47b8218962b802994e") {bool = true} // FF101+
 		} else if (isVer > 69) {
-			if (hash == "585f6274d0c9ac34dc38fe6d8f3a097a4adb56eb") {bool = true} // FF70-100
-		} else if (isVer > 58) {
-			if (hash == "1ad9a85853870481a0474f468d987275eff41b58") {bool = true} // FF59-69
+			if (hash == "19af84e779e970070c9d6db4564bf6ce7b8307cf") {bool = true} // FF70-100
 		} else {
-			if (hash == "1d713eb38d8a7404e3706417452f86c1f1d54ad5") {bool = true} // FF55-57 RFP
-			if (hash == "aad03d05ff68316a337321f88f88bae4d4577374") {bool = true} // FF52-58
-			//if (hash == "5e50264aff470447e8c19c899061eada3528ed45") {bool = true} // WFClassic52 RFP // IDK + IDC what the new mini is
-			if (hash == "1ad9a85853870481a0474f468d987275eff41b58") {bool = true} // WFClassic isVer = 58
+			if (hash == "cee90394c5f693fd540de05b6dc7e737e4bed44f") {bool = true} // FF52-69
 		}
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, "details")
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, "details")
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -666,7 +671,6 @@ function get_intl_list_format(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let test = Intl.ListFormat.supportedLocalesOf("en")
 		// FF items not in chromium
 			// remove: ug [same as en]
 			// remove: sc (96), sa (91), [FF additions]
@@ -681,11 +685,12 @@ function get_intl_list_format(num, title) {
 		]
 		// shrink size for perf: pending webkit results
 		let list = [
-			'cy','dsb','dz','fur','jv','kab','kok','lu','mg','mk','qu','tk','wo','zu',
+			'cy','dsb','jv','kab','kok','lu','mk','qu','tk','zu',
 		]
+		let res = []
+		/*
 		let options = {style: 'long', type: 'conjunction'},
 			testValue = ['a','b','c'],
-			res = []
 		let englishValue = new Intl.ListFormat('en', options).format(testValue)
 		list.forEach(function(locale) {
 			try {
@@ -695,12 +700,18 @@ function get_intl_list_format(num, title) {
 				}
 			} catch(e) {}
 		})
+		*/
+		res = Intl.ListFormat.supportedLocalesOf(list)
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		// 78+ (77 not supported)
-		let bool = hash == "37904e6ef31c1ebad32315c45e444bdd8b50408b"
+		let bool = hash == "5d721b1c4274ed170bfaba1aadd83a2e50fb7c40"
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, res.length)
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, res.length)
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -809,7 +820,6 @@ function get_intl_rtf(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let test = Intl.RelativeTimeFormat.supportedLocalesOf("en")
 		// FF items not in chromium
 			// remove: ckb, eo, gv, haw, kl, kw, om, rw, xh [same as en]
 			// remove: hye, mai, ps, sa, sat, sc, su, tw [FF additions]
@@ -824,11 +834,12 @@ function get_intl_rtf(num, title) {
 		]
 		// shrink size for perf: pending webkit results
 		let list = [
-			'cy','dsb','dz','fur','jv','kab','kok','lu','mg','mk','qu','tk','wo','zu',
+			'bm','cy','dz','fur','lu','mg','or','qu','tg','zu',
 		]
+		let res = []
+		/*
 		let options = {style: 'long', numeric: 'auto'},
 			testValue = ['a','b','c'],
-			res = []
 		let englishVersion = new Intl.RelativeTimeFormat('en', options).format(-1, "day")
 		list.forEach(function(locale) {
 			try {
@@ -838,13 +849,18 @@ function get_intl_rtf(num, title) {
 				}
 			} catch(e) {}
 		})
+		*/
+		res = Intl.RelativeTimeFormat.supportedLocalesOf(list)
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
 		// 65+ (64 not supported)
-		let bool = hash == "5fa5d59b752a4e58127159c8b9d51ada8d84e238"
+		let bool = hash == "a905b33e1390e8eb982ecd93054bc5a2bf7e04bc"
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash = hash+= buildButton(3, "specific_"+ title, res.length)
-			//hash += s3 +" ["+ res.length +"]"+sc
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash = hash+= buildButton(3, "specific_"+ title, res.length)
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -1110,13 +1126,14 @@ function get_media_constraints(num, title) {
 
 function get_mimetypes(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0, perf; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		if ("mimeTypes" in navigator) {
 			let res = [], bool = false
 			let m = navigator.mimeTypes
 			if (m.length == 0) {
-				fnRecord(num, title, "none", true)
+				perf = canPerf ? performance.now() - t0 : ""
+				fnRecord(num, title, "none", true, "skip", perf)
 			} else {
 				for (let i=0; i < m.length; i++) {
 					res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
@@ -1141,7 +1158,7 @@ function get_mimetypes(num, title) {
 				}
 				sDetail["expected_"+ title] = res
 				hash += buildButton(3, "expected_"+ title, res.length)
-				let perf = canPerf ? performance.now() - t0 : ""
+				perf = canPerf ? performance.now() - t0 : ""
 				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
@@ -1183,18 +1200,6 @@ function get_moz_colors(num, title) {
 		let hash = bool ? mini_sha1(aRes.join()) + buildButton(3, "expected_"+ title, aRes.length) : "none"
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
-}
-
-function get_moz_docrule(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let res = typeof CSSMozDocumentRule
-		let bool = "function" === typeof CSSMozDocumentRule
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, res, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zB0, e.message)
 	}
@@ -1759,13 +1764,14 @@ function get_permission(num, title) {
 
 function get_plugins(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0, perf; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
 		if ("plugins" in navigator) {
 			let res = [], bool = false
 			let p = navigator.plugins
 			if (p.length == 0) {
-				fnRecord(num, title, "none", true)
+				perf = canPerf ? performance.now() - t0 : ""
+				fnRecord(num, title, "none", true, "skip", perf)
 			} else {
 				for (let i=0; i < p.length; i++) {
 					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
@@ -1786,7 +1792,7 @@ function get_plugins(num, title) {
 				}
 				sDetail["expected_"+ title] = res
 				hash += buildButton(3, "expected_"+ title, res.length)
-				let perf = canPerf ? performance.now() - t0 : ""
+				perf = canPerf ? performance.now() - t0 : ""
 				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
@@ -1982,6 +1988,35 @@ function get_window_values(num) {
 }
 
 function get_window_moz(num) {
+
+	let strC = "[CSSMozDocumentRule] window"
+	try {
+		let t0C; if (canPerf) {t0C = performance.now()}
+		if (bBlock) {bB = 1}
+		let resC = typeof CSSMozDocumentRule
+		let boolC = "function" === typeof CSSMozDocumentRule // FF53+
+		if (!boolC && isFF) {
+			// FF52 exception
+			if (isVer == 54) {boolC = "object" === resC} // lowest ver test I have is 54
+		}
+		let perfC = canPerf ? performance.now() - t0C : ""
+		fnRecord(num, strC, resC, boolC, "skip", perfC)
+	} catch(e) {
+		fnRecord(num, strC, e.name, zB0, e.message)
+	}
+
+	let strM = "[mozRTCPeerConnection] window"
+	try {
+		let t0M; if (canPerf) {t0M = performance.now()}
+		if (bBlock) {bB = 1}
+		let resM = typeof mozRTCPeerConnection
+		let boolM = "function" === typeof mozRTCPeerConnection
+		let perfM = canPerf ? performance.now() - t0M : ""
+		fnRecord(num+1, strM, resM, boolM, "skip", perfM)
+	} catch(e) {
+		fnRecord(num+1, strM, e.name, zB0, e.message)
+	}
+
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
 		let t0A; if (canPerf) {t0A = performance.now()}
@@ -1989,9 +2024,9 @@ function get_window_moz(num) {
 		let resA = window.mozInnerScreenX
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
 		let perfA = canPerf ? performance.now() - t0A : ""
-		fnRecord(num, strA, resA, boolA, "skip", perfA)
+		fnRecord(num+2, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0, e.message)
+		fnRecord(num+2, strA, e.name, zB0, e.message)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
@@ -2000,9 +2035,9 @@ function get_window_moz(num) {
 		let resB = window.mozInnerScreenY
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
 		let perfB = canPerf ? performance.now() - t0B : ""
-		fnRecord(num+1, strB, resB, boolB, "skip", perfB)
+		fnRecord(num+3, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0, e.message)
+		fnRecord(num+3, strB, e.name, zB0, e.message)
 	}
 }
 
@@ -2098,33 +2133,34 @@ function run() {
 		get_window_values(460)
 		get_dates(620)
 		get_js_client_hints(320, "[js] client hints")
-		get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
 		get_mimetypes(710, "mimetypes")
 		get_plugins(740, "plugins")
-		get_intl_number_format(666, "Intl.NumberFormat")
 		get_media_constraints(700, "[constraints] mediaDevices")
 	}, 1)
 
 	setTimeout(function() {
 		aPerf.push(["START 2", performance.now(), performance.now() - gt0])
-		get_window_moz(250) // 250-251
+		get_window_moz(250) // 250-254
 		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
+		get_intl_dtf(656, "Intl.DateTimeFormat")
+		get_intl_list_format(663, "Intl.ListFormat")
+		get_intl_rtf(673, "Intl.RelativeTimeFormat")
 		get_intl_pluralrules(670, "Intl.PluralRules")
-		get_locale_compare(690, "locale.compare")
+		get_intl_number_format(666, "Intl.NumberFormat")
 		get_intl_display_names(660, "Intl.DislayNames")
+		get_locale_compare(690, "locale.compare")
+		get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
+		get_intl_collator(650, "Intl.Collator")
 	}, 1)
 
 	setTimeout(function() {
 		aPerf.push(["START 3", performance.now(), performance.now() - gt0])
 		get_errors(902)
 		get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
-		get_intl_list_format(663, "Intl.ListFormat")
-		get_intl_rtf(673, "Intl.RelativeTimeFormat")
 	}, 1)
 
 	setTimeout(function() {
 		aPerf.push(["START THE END", performance.now(), performance.now() - gt0])
-		get_intl_collator(650, "Intl.Collator")
 		get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected,
 	}, 1)
 	setTimeout(function() {
@@ -2144,7 +2180,6 @@ function run() {
 		get_moz_objects(118, "IDBObjectStore")
 		get_moz_objects(120, "MathMLElement") // added in FF71
 		get_moz_objects(122, "MouseEvent")
-		get_moz_docrule(124, "[CSSMozDocumentRule] moz")
 		get_moz_objects(126, "Navigator")
 			// ^media.peerconnection.enabled + media.navigator.enabled = false negative
 		get_moz_objects(128, "OfflineResourceList")
@@ -2153,10 +2188,9 @@ function run() {
 		get_moz_objects(130, "Screen")
 		get_moz_objects(132, "ShadowRoot") // added in FF63
 		get_moz_objects(134, "SVGElement")
-		get_moz_objects(136, "window")
-		get_moz_objects(138, "XMLHttpRequest")
+		get_moz_objects(136, "XMLHttpRequest")
 	}, 1)
-	setTimeout(function() {	get_intl_dtf(656, "Intl.DateTimeFormat") }, 1)
+
 	setTimeout(function() {
 		get_permission(750, "[permissions] push")
 		get_storage_estimate(820, "storage estimate")
