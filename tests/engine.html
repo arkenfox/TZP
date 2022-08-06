@@ -1364,6 +1364,7 @@ function get_moz_objects(num, name) {
 			// FF none exceptions
 			if (isVer < 63 && name === "ShadowRoot") {bool = zNA, hash = zNA +": FF63+ required"}
 			if (isVer < 71 && name === "MathMLElement") {bool = zNA, hash = zNA +": FF71+ required"}
+			if (name === "OfflineResourceList") {bool = zNA, hash = zNA +": assuming Beta/Dev/Nightly pref"}
 			if (isEngine === "goanna" && name === "Navigator") {bool = zNA, hash = zNA +": Palemoon"}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
