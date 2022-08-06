@@ -1524,25 +1524,36 @@ function run_once() {
 
 	// isFF
 	try {
-		let ff1 = Element.prototype.hasOwnProperty("mozMatchesSelector") // 0.014ms
-		let ff2 = CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle") // 0.133ms
-		let ff3 = ("boolean" === typeof document.mozFullScreenEnabled) // 0.015ms
-		let ff4 = ("object" === typeof Object.getOwnPropertyDescriptor(SVGElement.prototype, "onmozfullscreenchange")) // 0.024ms
-		let ff5 = ("object" === typeof Object.getOwnPropertyDescriptor(HTMLElement.prototype, "onmozfullscreenerror")) // 0.029ms
-		let ff6 = ("function" === typeof CSSMozDocumentRule) // 0.080ms // false FF52
-		let ff7 = ("function" === typeof document.mozSetImageElement) // 0.080ms
-		let ff8 = ("object" === typeof screen.onmozorientationchange) // 0.075ms
-		let res = [ff1, ff2, ff3, ff4, ff5, ff6, ff7, ff8]
-		let sum = ff1 + ff2 + ff3 + ff4 + ff5 + ff6 + ff7 + ff8
-		if (sum < res.length) {
-			let fail = []
-			for (let i=0; i < res.length; i++) {
-				if (!res[i]) {fail.push(i+1)}
+		let list = [
+			[DataTransfer, "DataTransfer", "mozSourceNode"],
+			[Document, "Document", "mozFullScreen"],
+			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
+			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
+			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
+			[HTMLMediaElement, "HTMLMediaElement", "mozGetMetadata"],
+			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
+			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
+			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
+			[Screen, "Screen", "mozOrientation"],
+			[SVGElement, "SVGElement", "onmozfullscreenchange"] 
+		]
+		let obj, prop, aNo = []
+		list.forEach(function(array) {
+			obj = array[0]
+			prop = array[2]
+			if ("function" === typeof obj
+				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))
+			) {
+			} else {
+				aNo.push(array[1])
 			}
-			log_alert("isFF "+ fail.join() +" are false", true)
+		})
+		if (isFF && aNo.length) {
+			log_alert("isFF: not found: "+ aNo.join(", "), true)
 		}
-		if (sum > 5) {isFF = true}
-		log_perf("isFF [global]",t0,"", isFF +" | "+ sum +"/"+ res.length)
+		let found = (list.length - aNo.length)
+		if (found > 8) {isFF = true}
+		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length)
 	} catch(e) {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
 		log_perf("isFF [global]",t0,"","error")
