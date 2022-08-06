@@ -737,8 +737,12 @@ function get_intl_number_format(num, title) {
 		} else if (hash == "73aa043db2c050c1d4ba06efe61678c1a1bb3ddc") {bool = true // FF52-69
 		}
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, res.length)
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, res.length)
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -770,8 +774,12 @@ function get_intl_pluralrules(num, title) {
 		} else if (hash == "b9b71087a7b043ee6c0c0e383b0baf99aa92b83b") {bool = true // FF58-69
 		}
 		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, res.length)
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, res.length)
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
