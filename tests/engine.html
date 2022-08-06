@@ -63,7 +63,7 @@ let results = [],
 	data = {},
 	aPerf = [],
 	count = 0,
-	expected = 95,
+	expected = 96,
 	gt0, // global timer
 	bBlock = false, // throw a test error
 	bLog = false,
@@ -1172,6 +1172,18 @@ function get_moz_colors(num, title) {
 	}
 }
 
+function get_moz_docrule(num, title) {
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let res = typeof CSSMozDocumentRule
+		let bool = "function" === typeof CSSMozDocumentRule
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, res, bool, "skip", perf)
+	} catch(e) {
+		fnRecord(num, title, e.name, zB0, e.message)
+	}
+}
+
 function get_moz_fonts(num, title) {
 	let aResults = [],
 		m = "-moz-",
@@ -1344,7 +1356,7 @@ function get_moz_objects(num, name) {
 				})
 			} else {
 				props.forEach(function(element) {
-					if ("object" == typeof Object.getOwnPropertyDescriptor(obj, element)) {
+					if ("object" === typeof Object.getOwnPropertyDescriptor(obj, element)) {
 						res.push(element)
 					}
 				})
@@ -2061,12 +2073,12 @@ function run() {
 		get_installtrigger(50) // 50-52
 		get_eval_length(630, "eval.toString().length")
 		get_colorgamut(310, "[css] color-gamut"),
-		get_nav_screen(150)
+		get_nav_screen(170)
 		get_window_chrome(450, "[chrome] window"),
 		get_obj_enumeration(734, "object enumeration")
 		get_last_prototype_keys(640, "[last x keys]") // 640+641
 		get_math(695, "math")
-		get_nav_values(140, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
+		get_nav_values(150, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
 		get_window_values(460)
 		get_dates(620)
 		get_js_client_hints(320, "[js] client hints")
@@ -2116,15 +2128,17 @@ function run() {
 		get_moz_objects(118, "IDBObjectStore")
 		get_moz_objects(120, "MathMLElement") // added in FF71
 		get_moz_objects(122, "MouseEvent")
-		get_moz_objects(124, "Navigator")
-		get_moz_objects(126, "OfflineResourceList")
+		get_moz_docrule(124, "[CSSMozDocumentRule] moz")
+		get_moz_objects(126, "Navigator")
+			// ^media.peerconnection.enabled + media.navigator.enabled = false negative
+		get_moz_objects(128, "OfflineResourceList")
 			// ^pref: browser.cache.offline.enable [pref exists since Jesus]
 			// nightly/beta/dev default off - since when? FF71+ 1237782 ?
-		get_moz_objects(128, "Screen")
-		get_moz_objects(130, "ShadowRoot") // added in FF63
-		get_moz_objects(132, "SVGElement")
-		get_moz_objects(134, "window")
-		get_moz_objects(136, "XMLHttpRequest")
+		get_moz_objects(130, "Screen")
+		get_moz_objects(132, "ShadowRoot") // added in FF63
+		get_moz_objects(134, "SVGElement")
+		get_moz_objects(136, "window")
+		get_moz_objects(138, "XMLHttpRequest")
 	}, 1)
 	setTimeout(function() {	get_intl_dtf(656, "Intl.DateTimeFormat") }, 1)
 	setTimeout(function() {
