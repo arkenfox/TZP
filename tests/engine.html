@@ -94,14 +94,16 @@ function logPerf() {
 
 function fnDisplay() {
 	// perf
+	let perfValue = ""
 	if (canPerf) {
-		let perf = Math.round(performance.now() - gt0) +" ms"
+		perfValue = Math.round(performance.now() - gt0) +" ms"
+		let perfTop = perfValue
 		// remove the first 6 items
 		if (aPerf.length) {
-			perf = "<span style='cursor: pointer;' onClick='logPerf()'>" + perf +"</span>"
+			perfTop = "<span style='cursor: pointer;' onClick='logPerf()'>" + perfTop +"</span>"
 			aPerf.splice(0, 6)
 		}
-		dom.perf.innerHTML = perf
+		dom.perf.innerHTML = perfTop
 	}
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
@@ -162,7 +164,13 @@ function fnDisplay() {
 	let percentPassed = Math.floor((countTrue/countValid)*100)
 	let isPass = percentPassed == 100 ? true : false
 	let percentFailed = Math.ceil((countFail/countValid)*100)
-	let summary = s14 +"SUMMARY "+ sc
+	let summary = ""
+	if (isFFvalid) {
+		summary += s14 +"SUPER SPEEDY MINI TEST "+ sc + (canPerf ? " ... we don't need "+ perfValue : "")
+			+"<br><br>"+ isFFpretty + " ... are you gecko? "+ (isFF ? sg +"YES" : sb +"NO") + sc
+			+"<br><br><hr><br>"
+	}
+	summary += s14 +"SUMMARY "+ sc
 		+"PASSED: ".padStart(9) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
 		+"FAILED: ".padStart(9) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
 	if (countNA > 0) {summary += "N/A: ".padStart(6) + countNA}
