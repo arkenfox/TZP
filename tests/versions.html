@@ -105,6 +105,8 @@ function outputVersion() {
 	s14 = s14.trim()
 	sb = sb.trim()
 
+	debug.push("FF:"+ isFFpretty.trim())
+
 	let gTZP, gOther, gWatch // global timers
 	let runtype
 
@@ -961,50 +963,7 @@ function outputVersion() {
 
 }
 
-function quickFF() {
-	// testing super fast isFF: hopefully non-extension + non-perf fuckable in every release
-	try {
-		let quickstart = performance.now()
-		let list = [
-			[DataTransfer, "DataTransfer", "mozSourceNode"],
-			[Document, "Document", "mozFullScreen"],
-			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
-			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
-			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
-			[HTMLMediaElement, "HTMLMediaElement", "mozGetMetadata"],
-			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
-			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
-			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
-			[Screen, "Screen", "mozOrientation"],
-			[SVGElement, "SVGElement", "onmozfullscreenchange"]
-		]
-		let obj, prop, aNo = []
-		list.forEach(function(array) {
-			obj = array[0]
-			prop = array[2]
-			if ("function" === typeof obj
-				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))
-			) {
-			} else {
-				aNo.push(array[1])
-			}
-		})
-		let quickend = performance.now()
-		// build a pretty display
-		let display = []
-		list.forEach(function(array) {
-			let check = aNo.includes(array[1]) ? red_cross : green_tick
-			display.push(check)
-		})
-		debug.push("FF: " + display.join(" | ") +" | "+ (quickend-quickstart) +" ms")
-	} catch(e) {
-		debug.push("FF:"+ sb + e.name +": "+ e.message)
-		console.debug(e.name, e.message)
-	}
-}
-
 function run() {
-	quickFF()
 	setTimeout(function() {
 		outputVersion()
 	}, 100)	
