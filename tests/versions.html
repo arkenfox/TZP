@@ -994,7 +994,7 @@ function quickFF() {
 		// build a pretty display
 		let display = []
 		list.forEach(function(array) {
-			let check = aNo.includes(array[2]) ? red_cross : green_tick
+			let check = aNo.includes(array[1]) ? red_cross : green_tick
 			display.push(check)
 		})
 		debug.push("FF: " + display.join(" | ") +" | "+ (quickend-quickstart) +" ms")
