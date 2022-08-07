@@ -2200,19 +2200,23 @@ function run() {
 
 setTimeout(function() {
 	Promise.all([
-		get_isRFP(),
-		get_is95(),
-		get_legacyVer(),
+		get_globals()
 	]).then(function(){
-		if (isFF && isVer !== "") {
-			run()
-		} else {
-			Promise.all([
-				get_isVer(),
-			]).then(function(){
+		Promise.all([
+			get_isRFP(),
+			get_is95(),
+			get_legacyVer(),
+		]).then(function(){
+			if (isFF && isVer !== "") {
 				run()
-			})			
-		}
+			} else {
+				Promise.all([
+					get_isVer(),
+				]).then(function(){
+					run()
+				})			
+			}
+		})
 	})
 }, 50)
 
