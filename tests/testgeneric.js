@@ -1,6 +1,8 @@
 'use strict';
 dom = getUniqueElements();
 
+/*** GENERIC ***/
+
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
@@ -9,55 +11,10 @@ function count_decimals(value) {if(Math.floor(value) === value) return 0;return 
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
 	return new Proxy(dom, {
-		get: function(obj, prop) {
-			return obj[prop]
-		},
-		set: function(obj, prop, val) {
-			obj[prop].textContent = `${val}`
-			return true
-		}
+		get: function(obj, prop) {return obj[prop]},
+		set: function(obj, prop, val) {obj[prop].textContent = `${val}`; return true}
 	})
 }
-
-function check_navKey(property) {
-	if (navKeys["trueKeys"]) {return navKeys["trueKeys"].includes(property)} else {return false}
-}
-
-const get_navKeys = () => new Promise(resolve => {
-	// reset
-	navKeys = {}
-	// build
-	try {
-		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		let trueKeys = keys
-		let lastKeyIndex = keys.length
-		let fakeKeys = []
-		if (isFF) {
-			// FF: constructor is always last
-			lastKeyIndex = keys.indexOf("constructor")
-			trueKeys = keys.slice(0, lastKeyIndex+1)
-			fakeKeys = keys.slice(lastKeyIndex+1)
-		} else if (isEngine == "blink") {
-			// chromium: last key inconsistent
-			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
-			trueKeys = keys.filter(x => !knownPoison.includes(x))
-			fakeKeys = keys.filter(x => knownPoison.includes(x))
-		}
-		// remove constructor
-		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
-		// set
-		navKeys["trueKeys"] = trueKeys
-		navKeys["fakeKeys"] = fakeKeys
-		// set brave
-		if (check_navKey("brave")) {
-			isBrave = true
-		}
-		return resolve()
-	} catch(e) {
-		console.error("get_navKeys failed", e.name, e.message)
-		return resolve()
-	}
-})
 
 function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 	if (functionName == undefined) {functionName = "showDetail"}
@@ -66,20 +23,55 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
 }
 
-function showDetail(name) {
-	if (name == "all") {
-		console.log("ALL", sDetail)
-	} else {
-		let data = sDetail[name],
-			hash = mini_sha1(data.join())
-		// split+tidy name
-		name = name.replace(/\_/g, " ")
-		let n = name.indexOf(" "),
-			section = name.substring(0,n).toUpperCase(),
-			metric = name.substring(n,name.length).trim()
-		console.log(section +": "+ metric +": "+ hash, data)
+/*** HASH ***/
+
+function mini(str) {
+	// https://stackoverflow.com/a/22429679
+	const json = `${JSON.stringify(str)}`
+	let i, len, hash = 0x811c9dc5
+	for (i = 0, len = json.length; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
 }
+
+function mini_sha1(str) {
+	return sha1(mini(str))
+}
+
+function sha1(str1){
+	for (var blockstart=0,
+		i = 0,
+		W = [],
+		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+		A, B, C, D, F, G,
+		word_array = [],
+		temp2,
+		s = unescape(encodeURI(str1)),
+		str_len = s.length;
+		i<=str_len;){
+		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+	}
+	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
+	for (; blockstart <= temp2; blockstart += 16) {
+		A = H,i=0;
+		for (; i < 80;
+			A = [[
+				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+				F = G + (B ^ C ^ D) + 341275144,
+				G + (B & C | B & D | C & D) + 882459459,
+				F + 1535694389
+			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
+		) {
+			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+		}
+		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
+	}
+	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+	return str1
+}
+
+/*** GLOBAL VARS ***/
 
 function get_canPerf() {
 	// check performance.now
@@ -91,7 +83,13 @@ function get_canPerf() {
 	}
 }
 
-function get_isFF_engine() {
+const get_globals = () => new Promise(resolve => {
+	// immutables: do once but promise from each test page if used
+	// might as well
+	if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ sc}
+	if ((location.protocol) == "https:") {isSecure = true}
+	// always check canPerf
+	get_canPerf()
 	// isFF
 	try {
 		let tstart; if (canPerf) {tstart = performance.now()}
@@ -108,12 +106,11 @@ function get_isFF_engine() {
 			[Screen, "Screen", "mozOrientation"],
 			[SVGElement, "SVGElement", "onmozfullscreenchange"] 
 		]
-		let obj, prop, aNo = []
+		let obj, aNo = []
 		list.forEach(function(array) {
 			obj = array[0]
-			prop = array[2]
 			if ("function" === typeof obj
-				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))
+				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, array[2]))
 			) {
 			} else {
 				aNo.push(array[1])
@@ -165,35 +162,19 @@ function get_isFF_engine() {
 	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
 	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
 	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"; isFF = true
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"; isFF = true
+	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
+	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
 	} else if (isFF) {isEngine = "gecko"
 	} else if ("chrome" in window) {isEngine = "blink"
 	}
 	if (isEngine == "") {console.error("isEngine: not found\n", res)}
-}
 
-const get_isRFP = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
-	// detectable in FF56+
-	let isPerf2 = true
-	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP = (r == 0)
-		if (!isPerf2) {isRFP = false}
-		return resolve()
-	} catch(e) {
-		return resolve()
-	}
+	return resolve()
+
 })
 
 function get_is95() {
+	// requires a dom element
 	return new Promise(resolve => {
 		if (!isFF) {
 			return resolve()
@@ -215,12 +196,71 @@ function get_is95() {
 	})
 }
 
+const get_isOS = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	try {
+		let el = dom.widget0
+		let font = getComputedStyle(el).getPropertyValue("font-family")
+		if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
+		} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
+		} else if (font == "Roboto") {isOS = "android"
+		} else if (font == "-apple-system") {isOS = "mac"
+		} else {isOS = "linux"}
+		return resolve()
+	} catch(e) {
+		console.error(e.name, e.emssage)
+		return resolve()
+	}
+})
+
+const get_isRFP = () => new Promise(resolve => {
+	// FF65+: not worth promising isVer to check FF64 or lower
+	isRFP = false
+	if (!isFF) {return resolve()}
+	let isPerf2 = true
+	if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf2 = false}
+	try {
+		performance.mark("a")
+		let r = performance.getEntriesByName("a","mark").length
+			+ performance.getEntries().length
+			+ performance.getEntries({name:"a",entryType:"mark"}).length
+			+ performance.getEntriesByName("a","mark").length
+			performance.clearMarks()
+		isRFP = (r == 0)
+		if (!isPerf2) {isRFP = false}
+		return resolve()
+	} catch(e) {
+		return resolve()
+	}
+})
+
+const get_isTB = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	try {
+		// extensions can block resources://
+			// FF ~5ms, TB ~20ms
+		setTimeout(() => resolve(false), 100)
+		let css = document.createElement("link")
+		css.href = "resource://torbutton-assets/aboutTor.css"
+		css.type = "text/css"
+		css.rel = "stylesheet"
+		document.head.appendChild(css)
+		css.onload = function() {
+			isTB = true
+			return resolve()
+		}
+		css.onerror = function() {
+			return resolve()
+		}
+		document.head.removeChild(css)
+	} catch(e) {
+		return resolve()
+	}
+})
+
 const get_isVer = () => new Promise(resolve => {
 	// NOTE: requires dom for 95 and 76, and a promised is95
-
-	// skip
 	if (!isFF) {return resolve()}
-
 	function output(verNo) {
 		isVer = verNo
 		return resolve()
@@ -298,22 +338,47 @@ const get_isVer = () => new Promise(resolve => {
 	}
 })
 
-function showhide(id, style) {
-	let items = document.getElementsByClassName("tog"+ id)
-	for (let i=0; i < items.length; i++) {items[i].style.display = style}
+function check_navKey(property) {
+	if (navKeys["trueKeys"]) {return navKeys["trueKeys"].includes(property)} else {return false}
 }
 
-function togglerows(id, word) {
-	let items = document.getElementsByClassName("tog"+ id)
-	let	style = items[0].style.display == "table-row" ? "none" : "table-row"
-	for (let i=0; i < items.length; i++) {items[i].style.display = style}
-	if (word == "btn") {
-		word = "[ "+ (style == "none" ? "show" : "hide") +" ]"
-	} else {
-		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word == undefined ? "details" : word)
+const get_navKeys = () => new Promise(resolve => {
+	// reset
+	navKeys = {}
+	// build
+	try {
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		let trueKeys = keys
+		let lastKeyIndex = keys.length
+		let fakeKeys = []
+		if (isFF) {
+			// FF: constructor is always last
+			lastKeyIndex = keys.indexOf("constructor")
+			trueKeys = keys.slice(0, lastKeyIndex+1)
+			fakeKeys = keys.slice(lastKeyIndex+1)
+		} else if (isEngine == "blink") {
+			// chromium: last key inconsistent
+			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
+			trueKeys = keys.filter(x => !knownPoison.includes(x))
+			fakeKeys = keys.filter(x => knownPoison.includes(x))
+		}
+		// remove constructor
+		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
+		// set
+		navKeys["trueKeys"] = trueKeys
+		navKeys["fakeKeys"] = fakeKeys
+		// set brave
+		if (check_navKey("brave")) {
+			isBrave = true
+		}
+		return resolve()
+	} catch(e) {
+		console.error("get_navKeys failed", e.name, e.message)
+		return resolve()
 	}
-	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
-}
+})
+
+/** GENERAL CLICK FUNCTIONS **/
 
 function copyclip(element) {
 	// fallback: e.g FF62-
@@ -353,57 +418,37 @@ function copyclip(element) {
 	}
 }
 
-function mini(str) {
-	// https://stackoverflow.com/a/22429679
-	const json = `${JSON.stringify(str)}`
-	let i, len, hash = 0x811c9dc5
-	for (i = 0, len = json.length; i < len; i++) {
-		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+function showDetail(name) {
+	if (name == "all") {
+		console.log("ALL", sDetail)
+	} else {
+		let data = sDetail[name],
+			hash = mini_sha1(data.join())
+		// split+tidy name
+		name = name.replace(/\_/g, " ")
+		let n = name.indexOf(" "),
+			section = name.substring(0,n).toUpperCase(),
+			metric = name.substring(n,name.length).trim()
+		console.log(section +": "+ metric +": "+ hash, data)
 	}
-	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
 }
 
-function mini_sha1(str) {
-	let ministr = mini(str)
-	str = sha1(ministr)
-	return str
+function showhide(id, style) {
+	let items = document.getElementsByClassName("tog"+ id)
+	for (let i=0; i < items.length; i++) {items[i].style.display = style}
 }
 
-function sha1(str1){
-	for (var blockstart=0,
-		i = 0,
-		W = [],
-		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
-		A, B, C, D, F, G,
-		word_array = [],
-		temp2,
-		s = unescape(encodeURI(str1)),
-		str_len = s.length;
-		i<=str_len;){
-		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+function togglerows(id, word) {
+	let items = document.getElementsByClassName("tog"+ id)
+	let	style = items[0].style.display == "table-row" ? "none" : "table-row"
+	for (let i=0; i < items.length; i++) {items[i].style.display = style}
+	if (word == "btn") {
+		word = "[ "+ (style == "none" ? "show" : "hide") +" ]"
+	} else {
+		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word == undefined ? "details" : word)
 	}
-	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
-	for (; blockstart <= temp2; blockstart += 16) {
-		A = H,i=0;
-		for (; i < 80;
-			A = [[
-				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
-				F = G + (B ^ C ^ D) + 341275144,
-				G + (B & C | B & D | C & D) + 882459459,
-				F + 1535694389
-			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
-		) {
-			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
-		}
-		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
-	}
-	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
-	return str1
+	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
 
-// set some global vars for all test pages
-if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ sc}
-if ((location.protocol) == "https:") {isSecure = true}
-get_canPerf()
-get_navKeys()
-get_isFF_engine()
+// auto run
+get_navKeys() // used in clipboard
