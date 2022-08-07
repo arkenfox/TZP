@@ -58,13 +58,11 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntListCheck = [],
 	oBaseFonts = {},
 	fntFake = "",
-	strOS = "",
 	fntBaseStats = "",
 	fntBaseDimensions = "",
 	fntPoison = "",
 	baseFonts = ['monospace','sans-serif','serif'],
-	baseGeneric = baseFonts,
-	bTB = false
+	baseGeneric = baseFonts
 
 // remember results across the two tests
 let notFoundInMin = [],
@@ -140,28 +138,28 @@ let fntTBBundled = {
 function log_list(name) {
 	let listArray = []
 	if (name == "base") {
-		listArray = fntBase[strOS]
+		listArray = fntBase[isOS]
 	} else if (name == "whitelist") {
-		listArray = fntTB[strOS]
+		listArray = fntTB[isOS]
 	} else if (name == "faces") {
-		listArray = fntFaces[strOS]
+		listArray = fntFaces[isOS]
 	} else if (name == "max") {
-		listArray = fntMaster[strOS]
+		listArray = fntMaster[isOS]
 	} else if (name == "other") {
-		listArray = fntOther[strOS]
+		listArray = fntOther[isOS]
 	} else if (name == "TB other") {
-		listArray = fntTBOther[strOS]
+		listArray = fntTBOther[isOS]
 	} else if (name == "always") {
-		listArray = fntAlways[strOS]
+		listArray = fntAlways[isOS]
 	} else if (name == "bundled") {
-		listArray = fntTBBundled[strOS]
+		listArray = fntTBBundled[isOS]
 	} else if (name == "min") {
-		listArray = fntMasterBase[strOS]
+		listArray = fntMasterBase[isOS]
 	} else if (name == "medium") {
-		if (bTB) {
-			listArray = fntMasterBase[strOS].concat(fntTBOther[strOS])
+		if (isTB) {
+			listArray = fntMasterBase[isOS].concat(fntTBOther[isOS])
 		} else {
-			listArray = fntMasterBase[strOS].concat(fntOther[strOS])
+			listArray = fntMasterBase[isOS].concat(fntOther[isOS])
 		}
 	} else if (baseGeneric.includes(name)) {
 			listArray = oBaseFonts[name]
@@ -214,7 +212,7 @@ function set_fntListMaster() {
 		fntTBOther[k] = tbOther
 		// master
 		let array = fntAlways[k]
-		if (bTB) {
+		if (isTB) {
 			array = array.concat(fntTBBundled[k])
 			array = array.concat(fntTB[k])
 			array = array.concat(fntTBOther[k])
@@ -240,7 +238,7 @@ function set_fntListMaster() {
 		array = array.filter(function(item, position) {return array.indexOf(item) === position})
 		fntMaster[k] = array
 		// masterbase
-		if (bTB) {
+		if (isTB) {
 			array = tbMin
 		} else {
 			array = fntBase[k].concat(fntAlways[k])
@@ -253,31 +251,31 @@ function set_fntListMaster() {
 	//console.debug(fntMasterBase)
 
 	// set test lists to match OS
-	fntList = fntMaster[strOS]
+	fntList = fntMaster[isOS]
 	fntList.sort()
 
 	// stats
-	let btnO = button((bTB ? "TB other" : "other"), (bTB ? fntTBOther[strOS].length : fntOther[strOS].length)),
-		btnS = button("faces", fntFaces[strOS].length),
-		btnB = button((bTB ? "whitelist" : "base"), (bTB ? fntTB[strOS].length : fntBase[strOS].length)),
-		btnBun = button("bundled", fntTBBundled[strOS].length),
-		btnA = button("always", fntAlways[strOS].length)
+	let btnO = button((isTB ? "TB other" : "other"), (isTB ? fntTBOther[isOS].length : fntOther[isOS].length)),
+		btnS = button("faces", fntFaces[isOS].length),
+		btnB = button((isTB ? "whitelist" : "base"), (isTB ? fntTB[isOS].length : fntBase[isOS].length)),
+		btnBun = button("bundled", fntTBBundled[isOS].length),
+		btnA = button("always", fntAlways[isOS].length)
 
-	let	btnMin = button("min", fntMasterBase[strOS].length),
-		btnMed = button("medium", fntMasterBase[strOS].length + (bTB ? fntTBOther[strOS].length: fntOther[strOS].length)),
-		btnMax = button("max", fntMaster[strOS].length)
+	let	btnMin = button("min", fntMasterBase[isOS].length),
+		btnMed = button("medium", fntMasterBase[isOS].length + (isTB ? fntTBOther[isOS].length: fntOther[isOS].length)),
+		btnMax = button("max", fntMaster[isOS].length)
 
 	let display = []
 	let lines = []
 	display.push(s12 +"   MIN:"+ sc +"always ".padStart(10) + btnA)
-	let strBase = bTB ? "whitelist " : "base "
+	let strBase = isTB ? "whitelist " : "base "
 	display.push(strBase.padStart(10) + btnB)
-	display.push("min ".padStart(10) + btnMin + (bTB ? " [includes "+ btnBun +" bundled]": ""))
+	display.push("min ".padStart(10) + btnMin + (isTB ? " [includes "+ btnBun +" bundled]": ""))
 	lines.push(display.join(" | "))
 	
 	display = []
 	display.push(s12 +"MEDIUM:"+ sc +"min ".padStart(10) + btnMin)
-	let strOther = bTB ? "TB other " : "other "
+	let strOther = isTB ? "TB other " : "other "
 	display.push(strOther.padStart(10) + btnO)
 	display.push("medium ".padStart(10) + btnMed)
 	lines.push(display.join(" | "))
@@ -287,7 +285,7 @@ function set_fntListMaster() {
 	display.push("faces ".padStart(10) + btnS)
 	display.push("max ".padStart(10) + btnMax)
 	lines.push(display.join(" | "))
-	dom.statstitle.innerHTML = "<br>"+ s12 +"FONT LISTS: "+ sc + strOS + (bTB ? sg +" TB"+ sc : "")
+	dom.statstitle.innerHTML = "<br>"+ s12 +"FONT LISTS: "+ sc + isOS + (isTB ? sg +" TB"+ sc : "")
 	dom.stats.innerHTML = "<br><br>"+ lines.join("<br>")
 }
 
@@ -298,14 +296,14 @@ function get_fonts(runtype) {
 		// get values
 		if (typeof res === "object" && res !== null) {
 			for (let name in res) {
+				let test = get_isRFP()
 				let data = res[name]
 				let display = []
-				get_isRFP()
 
 				//data.push("Aldhabi","Andalus","Angsana New") // windows base test
 				//data.push("Angsana New Bold") // windows full test
 				//data.sort()
-				//if (runtype == "full" && !bTB) {
+				//if (runtype == "full" && !isTB) {
 				//	data.push("Franklin Gothic Medium") // test basefont not found in min, but found in all = bug
 				//	data.sort() // actually this font is a real bug, no need to simulate: all windows
 				//}
@@ -345,17 +343,17 @@ function get_fonts(runtype) {
 					// BASE: we want to match all
 					if (runtype == "min") {
 						// android
-						if (strOS == "android") {
-							if (bTB) {
+						if (isOS == "android") {
+							if (isTB) {
 								display.push("<br>test skipped: Tor Browser for android doesn't have a font whitelist")
 							} else {
 								display.push("<br>test skipped: RFP font protection doesn't cover android")
 							}
 						// non-TB & RFP is off
-						} else if (!isRFP && !bTB) {
+						} else if (!isRFP && !isTB) {
 								display.push("<br>test skipped: the min font test requires RFP, flip it on and run again")
 						// base fonts > 0
-						} else if ((bTB ? fntTB[strOS].length : fntBase[strOS].length) > 0) {
+						} else if ((isTB ? fntTB[isOS].length : fntBase[isOS].length) > 0) {
 							notFoundInMin = fntListCheck.filter(x => !data.includes(x)) // base list items not found
 							// display
 							display.push(s12 +"min".padStart(12) + sc +": " + checkHash + s12
@@ -365,16 +363,16 @@ function get_fonts(runtype) {
 							// check kBaseFonts integrity
 							if (notFoundInMin.length) {
 								let fntSuspect = notFoundInMin.filter(x => foundInAll.includes(x))
-								fntSuspect = fntSuspect.filter(x => !fntAlways[strOS].includes(x)) // not in kBaseFonts
+								fntSuspect = fntSuspect.filter(x => !fntAlways[isOS].includes(x)) // not in kBaseFonts
 								if (fntSuspect.length) {
-									display.push(s4 + (bTB ? "TB" : "BASE")
+									display.push(s4 + (isTB ? "TB" : "BASE")
 										+" FONTS NOT FOUND HERE THAT WERE FOUND IN THE FULL TEST ["+ fntSuspect.length +"]"+ sc +"<br>"
 									)
 									display.push(fntSuspect.join(", ") + "<br>")
 								}
 							}
 							if (missingInCheck.length) {
-								if (missingInCheck.length == fntMaster[strOS].length - fntMasterBase[strOS].length) {
+								if (missingInCheck.length == fntMaster[isOS].length - fntMasterBase[isOS].length) {
 									display.push("<p><details><summary>"+ s12 + "FOUND FONTS NOT IN MIN: ["
 										+ missingInCheck.length +"] "+ sc + sb +"[all detected]"+ sc +"</summary><p>")
 									display.push(missingInCheck.join(", ") + "<br></p></details>")
@@ -391,7 +389,7 @@ function get_fonts(runtype) {
 							}
 						// test not configured
 						} else {
-							display.push("<br>the "+ (bTB ? "TB " : "firefox ") + strOS
+							display.push("<br>the "+ (isTB ? "TB " : "firefox ") + isOS
 								+" min test is not configured yet"
 							)
 						}
@@ -400,36 +398,36 @@ function get_fonts(runtype) {
 					// FULL: we want zero faces found
 					if (runtype == "full") {
 						// android
-						if (strOS == "android") {
+						if (isOS == "android") {
 							display.push("<br>test skipped: there is no android faces test, never will be")
 						// TB
-						//} else if (bTB) {
+						//} else if (isTB) {
 						//		display.push("<br>test skipped: Tor Browser's whitelist blocks a full test")
 						// RFP is on
 						} else if (isRFP) {
 								display.push("<br>test skipped: RFP blocks a full test, flip it off and run again")
 						// faces > 0
-						} else if (fntFaces[strOS].length > 0) {
+						} else if (fntFaces[isOS].length > 0) {
 							foundInAll = data
 							display.push(s12 +"faces".padStart(12) + sc +": " + checkHash + s12
 							+" ["+ checkData.length +"/"+ fntListCheck.length +"]"+ sc
 								+" "+ (checkData.length ? red_cross : green_tick) +"<br>"
 							)
-							if (bTB) {
+							if (isTB) {
 								display.push("note: Tor Browser's whitelist blocks a full test")
 							}
 							// check kBaseFonts integrity
 							if (notFoundInMin.length) {
 								let fntSuspect = notFoundInMin.filter(x => foundInAll.includes(x))
-								fntSuspect = fntSuspect.filter(x => !fntAlways[strOS].includes(x)) // not in kBaseFonts
+								fntSuspect = fntSuspect.filter(x => !fntAlways[isOS].includes(x)) // not in kBaseFonts
 								if (fntSuspect.length) {
-									display.push(s4 + (bTB ? "TB" : "BASE")
+									display.push(s4 + (isTB ? "TB" : "BASE")
 										+" FONTS FOUND HERE THAT WEREN'T FOUND IN THE MIN TEST ["+ fntSuspect.length +"]"+ sc +"<br>")
 									display.push(fntSuspect.join(", ") + "<br>")
 								}
 							}
 							if (checkData.length) {
-								if (checkData.length == fntFaces[strOS].length) {
+								if (checkData.length == fntFaces[isOS].length) {
 									display.push("<p><details><summary>"+ s12 + "FOUND FONTS IN FACES: ["
 										+ checkData.length +"] "+ sc + sb +"[all detected]"+ sc +"</summary><p>")
 									display.push(checkData.join(", ") + "<br></p></details>")
@@ -440,14 +438,14 @@ function get_fonts(runtype) {
 							}
 						} else {
 							//test not configured
-							display.push("<br>the "+ (bTB ? "TB " : "firefox ") + strOS
+							display.push("<br>the "+ (isTB ? "TB " : "firefox ") + isOS
 								+" faces test is not configured yet"
 							)
 						}
 					}
 					// missing bundled fonts
-					if (bTB) {
-						let missingBundled = fntTBBundled[strOS].filter(x => !data.includes(x))
+					if (isTB) {
+						let missingBundled = fntTBBundled[isOS].filter(x => !data.includes(x))
 						if (missingBundled.length) {
 							display.push("<br>"+ sb + "BUNDLED FONTS"+ sc + " <sup>[CURRENT RELEASE]</sup> "+ sb
 								+"NOT FOUND: ["+ missingBundled.length +"]"+ sc +"<br>")
@@ -473,52 +471,15 @@ function get_fonts(runtype) {
 	})
 }
 
-const get_OS = () => new Promise(resolve => {
-	let el = dom.widget0
-	try {
-		let font = getComputedStyle(el).getPropertyValue("font-family")
-		if (font.slice(0,12) == "MS Shell Dlg") {strOS="windows"
-		} else if (font == "Roboto") {strOS="android"
-		}	else if (font == "-apple-system") {strOS="mac"
-		}	else {strOS="linux"}
-		return resolve(strOS)
-	} catch(e) {
-		strOS = "unknown"
-		return resolve("unknown")
-	}
-})
-
-const get_TB = () => new Promise(resolve => {
-	try {
-		// extensions can block resources://
-			// FF ~5ms, TB ~20ms
-		setTimeout(() => resolve(false), 100)
-		let css = document.createElement("link")
-		css.href = "resource://torbutton-assets/aboutTor.css"
-		css.type = "text/css"
-		css.rel = "stylesheet"
-		document.head.appendChild(css)
-		css.onload = function() {
-			return resolve(true)
-		}
-		css.onerror = function() {
-			return resolve(false)
-		}
-		document.head.removeChild(css)
-	} catch(e) {
-		return resolve(false)
-	}
-})
-
 function run(runtype) {
 	// check
 	if (!isFF) {return}
-	if (strOS == "unknown") {return}
+	if (isOS == "") {return}
 	setBtn(runtype)
 
 	if (runtype == "min") {
 		dom.results = ""
-		if (!bTB && strOS !== "android") {
+		if (!isTB && isOS !== "android") {
 			// FF80+
 			try {
 				let obj = {[Symbol.toPrimitive]: () => Symbol()}
@@ -529,7 +490,7 @@ function run(runtype) {
 				return
 			}
 		}
-		fntListCheck = fntMasterBase[strOS]
+		fntListCheck = fntMasterBase[isOS]
 		fntListCheck.sort()
 		setTimeout(function() {
 			get_fonts("min")
@@ -539,7 +500,7 @@ function run(runtype) {
 	if (runtype == "full") {
 		dom.results = ""
 		// set fonts
-		fntListCheck = fntFaces[strOS]
+		fntListCheck = fntFaces[isOS]
 		fntListCheck.sort()
 		setTimeout(function() {
 			get_fonts("full")
@@ -549,28 +510,29 @@ function run(runtype) {
 
 function run_once() {
 	let interstitial = "<br>"+ s12 +"FONT LISTS: "+ sc + zNA
-	// isFF
-	if (!isFF) {
-		dom.statstitle.innerHTML = interstitial
-		dom.results = "these tests require firefox"
-		return
-	}
-	// set strOS, bTB
 	Promise.all([
-		get_OS(),
-		get_TB(),
-	]).then(function(results){
-		strOS = results[0]
-		// test
-		//strOS = "mac"
-		//strOS = "linux"
-		//strOS = "android"
-		bTB = results[1]
-		if (strOS == "unknown") {
+		get_globals()
+	]).then(function(){
+		// not FF
+		if (!isFF) {
 			dom.statstitle.innerHTML = interstitial
-			dom.results = "unknown os"
+			dom.results = "these tests require firefox"
 			return
-		} else {
+		}
+		// isFF
+		Promise.all([
+			get_isOS(),
+			get_isTB(),
+		]).then(function(){
+			// test
+			//isOS = "mac"
+			//isOS = "linux"
+			//isOS = "android"
+			if (isOS == "") {
+				dom.statstitle.innerHTML = interstitial
+				dom.results = "unknown os"
+				return
+			}
 			// create master fontlist
 			set_fntListMaster()
 
@@ -580,18 +542,18 @@ function run_once() {
 				// you can simulate using the fallback by changing font.name-list.[basefont].x-western to a made-up font
 				// can't seem to simulate the TB mac issue where everything is found - on windows with no fallback the
 				// default fonts simply drop off the found fonts list - with fallback they are found
-			if (strOS == "mac") {
+			if (isOS == "mac") {
 				baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
 					'sans-serif',
 					'serif'
 				]
-			} else if (strOS == "windows") {
+			} else if (isOS == "windows") {
 				baseFonts = ['monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
 					'sans-serif, Arial',
 					'serif, \"Times New Roman\", Times, Roman'
 				]
 			}
-		}
+		})
 	})
 }
 
