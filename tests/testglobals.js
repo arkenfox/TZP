@@ -70,11 +70,13 @@ let s0 = " <span class='",
 	canPerf = false,
 	is95 = false,
 	isBrave = false,
+	isEngine = "",
 	isFF = false,
 	isFFpretty = "", // results string with perf
 	isFFvalid = false, // no errors
 	isFile = false,
+	isOS = "",
 	isRFP = false,
 	isSecure = false,
-	isEngine = "",
+	isTB = false,
 	isVer = ""
