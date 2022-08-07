@@ -965,10 +965,13 @@ function outputVersion() {
 
 function run() {
 	setTimeout(function() {
-		outputVersion()
-	}, 100)	
+		Promise.all([
+			get_globals()
+		]).then(function(){
+			outputVersion()
+		})
+	}, 50)	
 }
-
 run()
 
 </script>
