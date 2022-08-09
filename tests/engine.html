@@ -733,32 +733,12 @@ function get_locale_compare(num, title) {
 			["om","ch","\u00ED"],
 			["sq","\u00EB","ez"],
 			["to","\u00ED","\u00EE"],
-			// removed: we don't need all of these
-			/*["az","\u00F6","\u1EE3"],
-			["dsb","\u0144","\u00F1"],
-			["ee","ts","tt"],
-			["eo","\u0109","\u00E7\a"],
-			["haw","\u00F0","\u00EB"],
-			["kk","r","\u0453"],
-			["ln","\u1D95","\u025B"],
-			["lo","\u0107","\u0E9A"],
-			["pa","\u0107","\u0649"],
-			["se","\u00F6","\u1EE3"],*/
-			// removed for FF52+ stability
-				//["no","\u00F6","\u1EE3"],
-				//["wo","\u00EB","ez"],
 		]
-		let res = [], same = []
+		let res = []
 		list.forEach(function(item) {
-			let code = item[0]
-			let strA = item[1]
-			let test = strA.localeCompare(item[2], code)
-			if (test !== 1) {same.push(code)}
-			//res.push(code +": "+ test +": "+ strA +", "+ item[2])
-			res.push(test)
+			res.push(item[1].localeCompare(item[2], item[0]))
 		})
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		//console.log(hash)
 		let bool = hash == "d4ed607dd4781454263f3c3fc6d92b55b2980ad2"
 		if (res.length > 0) {
 			hash = res.join(", ")
@@ -1349,11 +1329,6 @@ function get_nav_values(num1, num2, num3) {
 	} catch(e) {
 		fnRecord(numV, strV, e.name, zB0, e.message)
 	}
-
-	// navigator.webkitTemporaryStorage.queryUsageAndQuota
-		// "TypeError: can't access property "queryUsageAndQuota", navigator.webkitTemporaryStorage is undefined"
-	// navigator.webkitPersistentStorage.queryUsageAndQuota
-		// "TypeError: can't access property "queryUsageAndQuota", navigator.webkitPersistentStorage is undefined"
 
 	// specific
 	let strX = "[buildID] navigator", boolX = false
