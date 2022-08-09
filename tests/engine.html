@@ -39,9 +39,10 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">An itsy-bitsy, teeny-weeny, minuscule sample of the thousands of myriad ways engines differ.
-			This test is tweaked for gecko [FF52+]: you want <span class="s9"><b> &#x2713 </b></span>'s. Anything different
-			<span class="bad"><b> &#x2716 </b></span> or blocked <span class="s4"><b> &#x2715 </b></span> only makes you stand out.
+			<span class="no_color">A tiny sample of the myriad ways engines differ. This test is tweaked
+			for gecko [FF52+]: you want <span class="s9"><b> &#x2713 </b></span>'s. Anything different
+			<span class="bad"><b> &#x2716 </b></span> or blocked <span class="s4"><b> &#x2715 </b></span>
+			only makes you stand out. A single unspoofable property check can take as little as <span class="s3">0.01 ms</span>.
 			</span>
 		</td></tr>
 		<tr><td colspan="2"><hr></td></tr>
@@ -66,7 +67,6 @@ let results = [],
 	expected = 96,
 	gt0, // global timer
 	bBlock = false, // throw a test error
-	bLog = false,
 	bNum = false // display numbering instead of perf
 
 let	topVer = 105,
@@ -98,10 +98,10 @@ function fnDisplay() {
 	if (canPerf) {
 		perfValue = Math.round(performance.now() - gt0) +" ms"
 		let perfTop = perfValue
-		// remove the first 6 items
+		// remove the first 5 items: section headers + hr
 		if (aPerf.length) {
 			perfTop = "<span style='cursor: pointer;' onClick='logPerf()'>" + perfTop +"</span>"
-			aPerf.splice(0, 6)
+			aPerf.splice(0, 5)
 		}
 		dom.perf.innerHTML = perfTop
 	}
@@ -166,13 +166,16 @@ function fnDisplay() {
 	let percentFailed = Math.ceil((countFail/countValid)*100)
 	let summary = ""
 	if (isFFvalid) {
-		summary += s14 +"SUPER SPEEDY MINI TEST "+ sc + (canPerf ? " ... we don't need "+ perfValue : "")
-			+"<br><br>"+ isFFpretty + " ... are you gecko? "+ (isFF ? sg +"YES" : sb +"NO") + sc
+		let needStr = "... who needs "+ s3+ (expected - 5) + " tests" + sc
+			+ (canPerf ? " in "+ s3 + perfValue + sc : "")
+			+ "? Here's a single test + nine more to make sure"
+		summary += s14 +"MINI TEST "+ sc + needStr
+			+"<br><br>"+ isFFpretty +" ... are you gecko? "+ (isFF ? sg +"YES" : sb +"NO") + sc
 			+"<br><br><hr><br>"
 	}
 	summary += s14 +"SUMMARY "+ sc
-		+"PASSED: ".padStart(9) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
-		+"FAILED: ".padStart(9) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
+		+"PASS: ".padStart(7) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
+		+"FAIL: ".padStart(7) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
 	if (countNA > 0) {summary += "N/A: ".padStart(6) + countNA}
 	if (isFF) {
 		summary += s14+ "DEBUG".padStart(7) + sc +"RFP:".padStart(6) + (isRFP ? green_tick : red_cross)
@@ -289,6 +292,18 @@ function get_dates(num) {
 		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
 	} catch(e) {
 		fnRecord(num+4, strE, e.name, zB0, e.message)
+	}
+	// 1783731
+	let strF = "[substraction] Date.parse"
+	try {
+		let t0F; if (canPerf) {t0F = performance.now()}
+		if (bBlock) {bB = 1}
+		let resF = Date.parse('2022-08-08') - Date.parse('2022-08-8')
+		let bolF = resF == 0
+		let perfF = canPerf ? performance.now() - t0F : ""
+		fnRecord(num+6, strF, resF, bolF, "skip", perfF)
+	} catch(e) {
+		fnRecord(num+6, strF, e.name, zB0, e.message)
 	}
 }
 
@@ -463,15 +478,15 @@ function get_intl_canonical_locale(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let list = ["bh","hye","no","tl","tw"], bool = false
+		let list = ['bh','hye','no','tl','tw'], bool = false
 		let res = []
 		list.forEach(function(i) {
-			res.push(i +": "+ Intl.getCanonicalLocales(i))
+			res.push(Intl.getCanonicalLocales(i))
 		})
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (hash == "3faffb36cf9adef10987c4e6cb5adc7562dac7ab") {bool = true // FF91+
-		} else if (hash == "8d98821d21e515bc9bfa6660a744d74fc2df0de1") {bool = true // FF70-90
-		} else if (hash == "db0b8b2137d972e0735df959d77dc67c2887404f") {bool = true // FF52-69
+		if (hash == "49ce6431a6b656b0cdce7fc8bff36cbf60f90558") {bool = true // FF91+
+		} else if (hash == "ca3fd91866c1a46b8d08c4c1b406e3201fd7fcd7") {bool = true // FF70-90
+		} else if (hash == "68cbf0ea5d3d3a6bc14f0d574341397d818ba886") {bool = true // FF52-69
 		}
 		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
@@ -493,393 +508,131 @@ function get_intl_canonical_locale(num, title) {
 	}
 }
 
-function get_intl_collator(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		// 22 FF60+ locales with unique collations not in chrome (lost my list vs webkit)
-		// 24 chars: approx 40ms
-		let list = ['az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
-			'ka','kk','ln','lo','mt','no','om','pa','se','sq','to','wo',]
-		let	chars = ['c','C','ch','ez','n','ng','r','ts','tt','\u00E4','\u0107',
-			'\u00E7\a','\u0109','\u00EB','\u00ED','\u00EE','\u0144','\u00F1','\u0649',
-			'\u0453','\u10D0','\u0E9A','\u1D95','\u025B',]
-		let res = [], unique = [], same = []
-		// webkit has everything FF does for collation that can be detected
-		// except in FF70+, no (same as fo), so swap that out
-		if (isVer < 70 && isFF) {
-			list.push("fo")
-			list = list.filter(x => !["no"].includes(x))
-		}
-		list.sort()
-		chars.sort() // reset
-		let control = chars.sort(Intl.Collator(undefined).compare)
-		control = mini(control.join(", "))
-		let bool = false
-		list.forEach(function(i) {
-			chars.sort() // reset
-			chars.sort(Intl.Collator(i).compare)
-			let test = mini(chars.join(", "))
-			unique.push(test)
-			if (test == control) {same.push(test)}
-			res.push(i +": "+ test + ": "+ chars.join(", "))
-		})
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (bLog) {
-			unique = unique.filter(function (item, position) {return unique.indexOf(item) === position})
-			let counts = (unique.length == list.length) ? "100\u0025 unique" : "["+ unique.length + "/" + list.length +"]"
-			counts += " ["+ same.length +" = control]"
-			console.log(title +": "+ hash +", "+ counts +"\n", res)
-		}
-		if (isVer > 69) {
-			if (hash == "d0f5826ab1779b1f489a3157d536240548fb7a82") {bool = true} // FF70+
-		} else if (isVer > 58) {
-			if (hash == "233b2298218fbe5661ca2381f1c1a0f100192a5a") {bool = true} // FF59-69
-		} else {
-			if (hash == "68b7a6e04692425631210ae21422edde04bbf094") {bool = true} // FF52-58
-			if (hash == "233b2298218fbe5661ca2381f1c1a0f100192a5a") {bool = true} // WFClassic isVer = 58
-		}
-		if (res.length > 0) {
-			sDetail["specific_"+ title] = res
-			hash += buildButton(3, "specific_"+ title, "details")
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
-}
+function get_intl_supportedlocales(num) {
+	// DTF, NF, RTF, LF, DN
+	/* NOTES
+	// FF52+ common items (130) not in blink103 common (59) = 71 items
+		// FF52: DTF + NF / FF65: RTF / FF78: LF / FF86: DN
+		// remove if present: bh bho, hye hy, no nb, tl fil, tw ak [aliases/maps]
+	geckoNotBlink = [
+		// mix it up per test
+		'eo','gl','ka','mt','om', // used in C
+			// from collator list below that is in common with this list
+			// ^ note mt only added if .compare works
 
-function get_intl_display_names(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		// FF items not in chromium
-			// remove: ig, om [same as en]
-			// remove: sc (96), sa (91) [FF additions]
-			// remove: ti, yo [CLDR data changes]
-		let initialList = [
-			'ak','as','ast','be','bm','bo','br','ce','ckb','cy','dsb','dz','ee','eo','eu',
-			'ff','fo','fur','fy','ga','gd','gl','gv','ha','haw','hsb','hy','hye','ia',
-			'ii','is','jv','ka','kab','ki','kk','kl','km','kok','ks','ku','kw','ky','lb',
-			'lg','ln','lo','lu','mai','mg','mi','mk','mn','mt','my','nd','ne','nn','or',
-			'os','ps','qu','rm','rn','rw','sat','sd','se','sg','si','sn','so','sq',
-			'su','tg','tk','to','tt','ug','wo','xh','yi','zu',
-		]
-		// shrink size for perf: pending webkit results
+		'ki','lu','qu','rn','rw', // used in PR (limited choices)
+		'as','fo','ln','ne','to', // used in DTF
+		'br','eu','ii','ks','ps', // used in DN
+		'ee','gd','kk','lo','yi', // used in LF
+		'bo','ha','lb','my','sq', // used in NF
+		'cy','km','mg','os','sn', // used in RTF
+		// 35 spare
+		'ast','be','bm','ce','ckb','dsb','dz','ff','fur','fy',
+		'ga','gv','haw','hsb','ig','is','kab','kl','kok','kw',
+		'ky','lg','mk','mn','nd','nn','or','rm','se','sg','si',
+		'so','ti','ug','yo','zu'
+	]
+	// webkit items not in FF105
+		// note: older webkit only: make sure one in each: 'co','cv','oc','nso','tig'
+	WKnotGecko = [
+		'ba','co','cv','dv','gn','io','iu','nr','nso','nv','ny','oc','ss','st','tig','tn','ts','ve','wa'
+	]
+	*/
+	// COLLATOR
+	/*
+	geckoNotBlink = [
+		'as','az','be','bo','bs','cy','dsb','dz','ee','eo','fo','ga','gl',
+		'ha','haw','hsb','ig','is','ka','kk','kl','km','kok','ky','lb',
+		'ln','lo','mk','mn','mt','my','ne','nn','om','or','pa','ps','se',
+		'si','sq','to','ug','uz','yi','yo','zu'
+	]
+	webkit = same as gecko 91+
+	old_list = [
+		'az','cy','dsb','ee','eo','gl','ha','haw','hsb','ig',
+		'ka','kk','ln','lo','mt','om','pa','se','sq','to',
+	]
+	*/
+	// PR
+	/*
+		 FF52+  geckoNotBlink = ['ki','kok','lu','qu','rn','rw']
+		FF105-  blinkNotGecko = ['an','dv','io','iu','lij','nr','nso','ny','ss','st','tig','tn','ts','ve','vo','wa']
+		FF105- webkitNotGecko = ['ba','co','cv','dv','gn','io','iu','nr','nso','nv','ny','oc','ss','st','tig','tn','ts','ve','wa']
+		therefore
+		blinkOnly = ['an','lij','vo']
+		webkitOnly = ['ba',co','cv',''gn','ny','oc']
 		let list = [
-			'ak','ce','kl','rm','os','ps','tt','wo','yi'
+			'ki','lu','qu','rn','rw', // gecko: pick 5
+			'ba','co','cv','gn','oc', // webkit only: pick 4
+			'an','lij','vo', // chrome only: not needed
 		]
-		let res = []
-		/*
-		let options = {type: 'region'},
-			testValue = "US",
-		let englishVersion = new Intl.DisplayNames('en', options).of(testValue)
-		list.forEach(function(locale) {
-			try {
-				let value = new Intl.DisplayNames(locale, options).of(testValue)
-				if (value !== englishVersion) {
-					res.push(locale + ":"+ value)
-				}
-			} catch(e) {}
-		})
-		*/
-		res = Intl.DisplayNames.supportedLocalesOf(list)
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		// 86+ (85 not supprted)
-		let bool = hash == "2484e3ef24674f7b0e76519734786e1dc265a8a4"
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
-			} else {
-				sDetail["specific_"+ title] = res
-				hash += buildButton(3, "specific_"+ title, res.length)
+	*/
+	// MAC supportedlocales == FF91+
+		// but .compare for mt is not hooked up (the other locales seem to be working)
+	let aCollator = []
+	let control = (["c","C"]).sort(Intl.Collator("mt").compare)
+	if (control.join("") == "Cc") {aCollator = ['mt']} // so while Mac !== Cc then only FF will test and report mt
+
+	let aList = [
+		["0bea6b5efcc437aeea70b7f35af0711e6cec9814", 50, ['eo','gl','ka','om'], aCollator, "Collator"],
+		["790e3b04199bd0b1b1132eccd6775d8fd22d8ea6", 50, ['as','fo','ln','ne','to'], ['co','nr','st','tig'], "DateTimeFormat"],
+		["aef0c6da2478d759e406af5ede5c19b31384b02c", 86, ['br','eu','ii','ks','ps'], ['cv','iu','nv','tn' ], "DisplayNames"],
+		["bb051f059f75b8d78c7c0554f7bee9a1bdf04c9f", 78, ['ee','gd','kk','lo','yi'], ['ba','io','oc','ve' ], "ListFormat"],
+		["44b2aba18a3f36f76240cb73ad38c8bc3a66c062", 50, ['bo','ha','lb','my','sq'], ['dv','ny','oc','ts' ], "NumberFormat"],
+		["8ef0a7f2554f893f131b36f05de01cdf5bb17620", 58, ['ki','lu','qu','rn','rw'], ['ba','co','gn','oc' ], "PluralRules"],
+		["d0b4844a8b0561638d4f355bc68aaaf5c1e04149", 65, ['cy','km','mg','os','sn'], ['gn','nso','ss','wa'], "RelativeTimeFormat"],
+	]
+
+	num = (num - 5)
+	aList.forEach(function(array) {
+		num += 5
+		let t0; if (canPerf) {t0 = performance.now()}
+		let expected = array[0],
+			minVer = array[1],
+			list = array[2].concat(array[3]).sort(),
+			type = array[4],
+			res = []
+		let title = "Intl."+ type
+		if (bBlock) {bB = 1}
+		try {
+			if (type == "Collator") { res = Intl.Collator.supportedLocalesOf(list)
+			} else if (type == "DateTimeFormat") { res = Intl.DateTimeFormat.supportedLocalesOf(list)
+			} else if (type == "DisplayNames") { res = Intl.DisplayNames.supportedLocalesOf(list)
+			} else if (type == "ListFormat") { res = Intl.ListFormat.supportedLocalesOf(list)
+			} else if (type == "NumberFormat") { res = Intl.NumberFormat.supportedLocalesOf(list)
+			} else if (type == "PluralRules") { res = Intl.PluralRules.supportedLocalesOf(list)
+			} else if (type == "RelativeTimeFormat") { res = Intl.RelativeTimeFormat.supportedLocalesOf(list)
 			}
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		// FF85-: TypeError: Intl.DisplayNames is undefined
-		if (isFF) {
-			if (isVer > 85) {
-				fnRecord(num, title, e.name, zB0, e.message)
-			} else {
-				let msg = e.message
-				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
-				if (e.name == "TypeError" && msg == "Intl.DisplayNames is undefined") {
-					fnRecord(num, title, zNA +": FF86+ required", zNA)
+			let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+			//console.log(title, hash)
+			let bool = hash == expected
+			if (res.length > 0) {
+				if (res.join(", ").length < 48) {
+					hash = res.join(", ")
 				} else {
+					sDetail["specific_"+ title] = res
+					hash += buildButton(3, "specific_"+ title, res.length)
+				}
+			}
+			let perf = canPerf ? performance.now() - t0 : ""
+			fnRecord(num, title, hash, bool, "skip", perf)
+		} catch(e) {
+			if (isFF) {
+				if (isVer >= minVer) {
 					fnRecord(num, title, e.name, zB0, e.message)
-				}
-			}
-		} else {
-			fnRecord(num, title, zNA +": not supported", zNA)
-		}
-	}
-}
-
-function get_intl_dtf(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		let list = [
-			'ak','ast','be','bm','bo','ce','ckb','eo','no','to', // gecko not in blink
-		]
-		if (isVer < 70 && isFF) {
-			list.push("fo")
-			list = list.filter(x => !["no"].includes(x))
-		}
-		list.sort()
-		let res = [], bool = false
-		/*
-		let date = new Date("January 30, 2019 13:00:00"),
-			options = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
-				minute: "numeric", second: "numeric", hour12: true}
-		let control = Intl.DateTimeFormat(undefined, options).format(date)
-		list.forEach(function(locale) {
-			let test = Intl.DateTimeFormat(locale, options).format(date)
-			unique.push(test)
-			if (test == control) {same.push(locale)}
-			res.push(locale +": "+ test)
-		})
-		*/
-		res = Intl.DateTimeFormat.supportedLocalesOf(list)
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (isVer > 100) {
-			if (hash == "9ce44d336a9754554d4a1d47b8218962b802994e") {bool = true} // FF101+
-		} else if (isVer > 69) {
-			if (hash == "19af84e779e970070c9d6db4564bf6ce7b8307cf") {bool = true} // FF70-100
-		} else {
-			if (hash == "cee90394c5f693fd540de05b6dc7e737e4bed44f") {bool = true} // FF52-69
-		}
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
-			} else {
-				sDetail["specific_"+ title] = res
-				hash += buildButton(3, "specific_"+ title, "details")
-			}
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
-}
-
-function get_intl_list_format(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		// FF items not in chromium
-			// remove: ug [same as en]
-			// remove: sc (96), sa (91), [FF additions]
-			// remove: ga, ha, ks, my, rm, ti [CLDR data changes]
-		let initialList = [
-			'ak','as','ast','be','bm','bo','br','ce','ckb','cy','dsb','dz','ee','eo','eu',
-			'ff','fo','fur','fy','gd','gl','gv','haw','hsb','hy','hye','ia','ig',
-			'ii','is','jv','ka','kab','ki','kk','kl','km','kok','ku','kw','ky','lb',
-			'lg','ln','lo','lu','mai','mg','mi','mk','mn','mt','nd','ne','nn','om','or',
-			'os','ps','qu','rn','rw','sat','sd','se','sg','si','sn','so','sq',
-			'su','tg','tk','to','tt','wo','xh','yi','yo','zu',
-		]
-		// shrink size for perf: pending webkit results
-		let list = [
-			'cy','dsb','jv','kab','kok','lu','mk','qu','tk','zu',
-		]
-		let res = []
-		/*
-		let options = {style: 'long', type: 'conjunction'},
-			testValue = ['a','b','c'],
-		let englishValue = new Intl.ListFormat('en', options).format(testValue)
-		list.forEach(function(locale) {
-			try {
-				let value = new Intl.ListFormat(locale, options).format(testValue)
-				if (value !== englishValue) {
-					res.push(locale + ":"+ value)
-				}
-			} catch(e) {}
-		})
-		*/
-		res = Intl.ListFormat.supportedLocalesOf(list)
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		// 78+ (77 not supported)
-		let bool = hash == "5d721b1c4274ed170bfaba1aadd83a2e50fb7c40"
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
-			} else {
-				sDetail["specific_"+ title] = res
-				hash += buildButton(3, "specific_"+ title, res.length)
-			}
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		// FF77-: TypeError: Intl.ListFormat is undefined
-		if (isFF) {
-			if (isVer > 77) {
-				fnRecord(num, title, e.name, zB0, e.message)
-			} else {
-				let msg = e.message
-				msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
-				if (e.name == "TypeError" && msg == "Intl.ListFormat is undefined") {
-					fnRecord(num, title, zNA +": FF78+ required", zNA)
 				} else {
-					fnRecord(num, title, e.name, zB0, e.message)
+					let msg = e.message
+					msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
+					if (e.name == "TypeError" && msg == "Intl." + type +" is undefined") {
+						fnRecord(num, title, zNA +": FF" + minVer +"+ required", zNA)
+					} else {
+						fnRecord(num, title, e.name, zB0, e.message)
+					}
 				}
-			}
-		} else {
-			fnRecord(num, title, zNA +": not supported", zNA)
-		}
-	}
-}
-
-function get_intl_number_format(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		let list = [
-			'tl','tw', // gecko not in webkit: also 'no', and also FF70+ 'mai','su'
-			'bo','lb', // gecko not in blink: also 'se','to',
-			'co','cv', // webkit only: also 'nso','oc','tig',
-		]
-		let res = []
-		list.forEach(function(locale) {
-			let test = Intl.NumberFormat.supportedLocalesOf(locale)
-			if (test.length) {res.push(locale)}
-		})
-		res.sort()
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		let bool = false
-		if (hash == "fe8eedb41e7748cc7126c8e8daca835eca1d00ec") {bool = true // FF70+
-		} else if (hash == "73aa043db2c050c1d4ba06efe61678c1a1bb3ddc") {bool = true // FF52-69
-		}
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
 			} else {
-				sDetail["specific_"+ title] = res
-				hash += buildButton(3, "specific_"+ title, res.length)
+				fnRecord(num, title, zNA +": not supported", zNA)
 			}
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
-}
-
-function get_intl_pluralrules(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		let list = [
-			'mai','no','su','tl','tw', // gecko not in webkit: FF70/78
-			'ki','qu', // some FF60+ gecko not in blink
-			'an','lij','vo', // chrome only
-			'ba','co','cv','gn','oc', // webkit only
-		]
-		let res = []
-		list.forEach(function(locale) {
-			let test = Intl.PluralRules.supportedLocalesOf(locale)
-			if (test.length) {res.push(locale)}
-		})
-		res.sort()
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		let bool = false
-		if (hash == "29e30922fde2245232cc2c4ab2cbb4f511fdf694") {bool = true // FF78+
-		} else if (hash == "b80aaf574257b7b13b5f06ffdeb5f8612a3faf1d") {bool = true // FF70-77
-		} else if (hash == "b9b71087a7b043ee6c0c0e383b0baf99aa92b83b") {bool = true // FF58-69
-		}
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
-			} else {
-				sDetail["specific_"+ title] = res
-				hash += buildButton(3, "specific_"+ title, res.length)
-			}
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		// FF57 or lower
-		let result = e.name
-		let type = zB0
-		let error = e.message
-		if (isVer < 59 && e.message == "Intl.PluralRules is undefined") {
-			result = zNA +": FF58+ required"
-			type = zNA
-			error = undefined
-		}
-		fnRecord(num, title, result, type, error)
-	}
-}
-
-function get_intl_rtf(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		// FF items not in chromium
-			// remove: ckb, eo, gv, haw, kl, kw, om, rw, xh [same as en]
-			// remove: hye, mai, ps, sa, sat, sc, su, tw [FF additions]
-			// remove: ha, ig [CLDR data changes]
-		let initialList = [
-			'ak','as','ast','be','bm','bo','br','ce','cy','dsb','dz','ee','eu',
-			'ff','fo','fur','fy','ga','gd','gl','hsb','hy','ia','ii','is','jv',
-			'ka','kab','ki','kk','km','kok','ks','ku','ky','lb','lg','ln','lo','lu',
-			'mg','mi','mk','mn','mt','my','nd','ne','nn','or','os','qu','rm','rn',
-			'sd','se','sg','si','sn','so','sq','tg','ti','tk','to','tt',
-			'ug','wo','yi','yo','zu',
-		]
-		// shrink size for perf: pending webkit results
-		let list = [
-			'bm','cy','dz','fur','lu','mg','or','qu','tg','zu',
-		]
-		let res = []
-		/*
-		let options = {style: 'long', numeric: 'auto'},
-			testValue = ['a','b','c'],
-		let englishVersion = new Intl.RelativeTimeFormat('en', options).format(-1, "day")
-		list.forEach(function(locale) {
-			try {
-				let value = new Intl.RelativeTimeFormat(locale, options).format(-1, "day")
-				if (value !== englishVersion) {
-					res.push(locale + ":"+ value)
-				}
-			} catch(e) {}
-		})
-		*/
-		res = Intl.RelativeTimeFormat.supportedLocalesOf(list)
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		// 65+ (64 not supported)
-		let bool = hash == "a905b33e1390e8eb982ecd93054bc5a2bf7e04bc"
-		if (res.length > 0) {
-			if (res.join(", ").length < 48) {
-				hash = res.join(", ")
-			} else {
-				sDetail["specific_"+ title] = res
-				hash = hash+= buildButton(3, "specific_"+ title, res.length)
-			}
-		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
-	} catch(e) {
-		// FF64-: TypeError: Intl.RelativeTimeFormat is undefined
-		if (isFF) {
-			if (isVer > 64) {
-				fnRecord(num, title, e.name, zB0, e.message)
-			} else {
-				if (e.name == "TypeError" && e.message == "Intl.RelativeTimeFormat is undefined") {
-					fnRecord(num, title, zNA +": FF65+ required", zNA)
-				} else {
-					fnRecord(num, title, e.name, zB0, e.message)
-				}
-			}
-		} else {
-			fnRecord(num, title, zNA +": not supported", zNA)
-		}
-	}
+	})
 }
 
 function get_js_client_hints(num, title) {
@@ -969,58 +722,46 @@ function get_locale_compare(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let bool = false
 		let list = [
-			["az","\u00F6","\u1EE3"],
 			["cy","n","ng"],
-			["dsb","\u0144","\u00F1"],
-			["ee","ts","tt"],
-			["eo","\u0109","\u00E7\a"],
 			["gl","\u00F1","ng"],
 			["ha","ts","tt"],
-			["haw","\u00F0","\u00EB"],
 			["hsb","\u0107","\u0109"],
 			["ig","c","ch"],
 			["ka","\u0107","\u10D0"],
+			["mt","c","C"], // MAC: Intl.Collator supportedlocale but does not collate it
+			["om","ch","\u00ED"],
+			["sq","\u00EB","ez"],
+			["to","\u00ED","\u00EE"],
+			// removed: we don't need all of these
+			/*["az","\u00F6","\u1EE3"],
+			["dsb","\u0144","\u00F1"],
+			["ee","ts","tt"],
+			["eo","\u0109","\u00E7\a"],
+			["haw","\u00F0","\u00EB"],
 			["kk","r","\u0453"],
 			["ln","\u1D95","\u025B"],
 			["lo","\u0107","\u0E9A"],
-			["mt","c","C"],
-			["no","\u00F6","\u1EE3"],
-			["om","ch","\u00ED"],
 			["pa","\u0107","\u0649"],
-			["se","\u00F6","\u1EE3"],
-			["sq","\u00EB","ez"],
-			["to","\u00ED","\u00EE"],
-			["wo","\u00EB","ez"],
+			["se","\u00F6","\u1EE3"],*/
+			// removed for FF52+ stability
+				//["no","\u00F6","\u1EE3"],
+				//["wo","\u00EB","ez"],
 		]
 		let res = [], same = []
-		// webkit: see intl.collator notes: swap "fo" with "no" FF70+
 		list.forEach(function(item) {
 			let code = item[0]
-			if (isVer < 70 && isFF && code == "no") {code = "fo"} // isFF only
 			let strA = item[1]
 			let test = strA.localeCompare(item[2], code)
 			if (test !== 1) {same.push(code)}
-			res.push(code +": "+ test +": "+ strA +", "+ item[2])
+			//res.push(code +": "+ test +": "+ strA +", "+ item[2])
+			res.push(test)
 		})
-		res.sort()
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (bLog) {
-			let counts = " ["+ same.length +" = control]"
-			console.log(title +": "+ hash +", "+ counts +"\n", res)
-		}
-		if (isVer > 69) {
-			if (hash == "393aaf6098964d36ba5226124e7d984ca9b8175c") {bool = true} // FF70+
-		} else if (isVer > 58) {
-			if (hash == "73c32218f24756075e3b0c79901a192a1d313f9c") {bool = true} // FF59-69
-		} else {
-			if (hash == "aa2310c50d847d996ca9b5cc3a58808c34c6af6a") {bool = true} // FF52-58
-			if (hash == "73c32218f24756075e3b0c79901a192a1d313f9c") {bool = true} // WFClassic isVer = 58
-		}
+		//console.log(hash)
+		let bool = hash == "d4ed607dd4781454263f3c3fc6d92b55b2980ad2"
 		if (res.length > 0) {
-			sDetail["expected_"+ title] = res
-			hash += buildButton(3, "expected_"+ title, "details")
+			hash = res.join(", ")
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -1997,7 +1738,7 @@ function get_window_moz(num) {
 		let boolC = "function" === typeof CSSMozDocumentRule // FF53+
 		if (!boolC && isFF) {
 			// FF52 exception
-			if (isVer == 54) {boolC = "object" === resC} // lowest ver test I have is 54
+			if (isVer < 55) {boolC = "object" === resC} // lowest ver test I have is 54
 		}
 		let perfC = canPerf ? performance.now() - t0C : ""
 		fnRecord(num, strC, resC, boolC, "skip", perfC)
@@ -2011,6 +1752,12 @@ function get_window_moz(num) {
 		if (bBlock) {bB = 1}
 		let resM = typeof mozRTCPeerConnection
 		let boolM = "function" === typeof mozRTCPeerConnection
+		if (!boolM && isEngine == "goanna" & isVer == 52) {
+			if ("undefined" === resM) {
+				boolM = zNA
+				resM = zNA +": Palemoon "+ s3 +"["+ resM +"]"+ sc
+			}
+		}
 		let perfM = canPerf ? performance.now() - t0M : ""
 		fnRecord(num+1, strM, resM, boolM, "skip", perfM)
 	} catch(e) {
@@ -2114,7 +1861,6 @@ function run() {
 	fnRecord(600, "header", "specific values")
 	fnRecord(899, "hr")
 	fnRecord(900, "header", "errors")
-	fnRecord(440, "the spanish inquisition", "no one expects the spanish inquisition", true)
 	// OK, let's kick some ass
 	// stagger to get more accurate perf
 
@@ -2140,37 +1886,11 @@ function run() {
 
 	setTimeout(function() {
 		aPerf.push(["START 2", performance.now(), performance.now() - gt0])
-		get_window_moz(250) // 250-254
-		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
-		get_intl_dtf(656, "Intl.DateTimeFormat")
-		get_intl_list_format(663, "Intl.ListFormat")
-		get_intl_rtf(673, "Intl.RelativeTimeFormat")
-		get_intl_pluralrules(670, "Intl.PluralRules")
-		get_intl_number_format(666, "Intl.NumberFormat")
-		get_intl_display_names(660, "Intl.DislayNames")
-		get_locale_compare(690, "locale.compare")
-		get_intl_canonical_locale(662, "Intl.getCanonicalLocales")
-		get_intl_collator(650, "Intl.Collator")
-	}, 1)
-
-	setTimeout(function() {
-		aPerf.push(["START 3", performance.now(), performance.now() - gt0])
-		get_errors(902)
-		get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
-	}, 1)
-
-	setTimeout(function() {
-		aPerf.push(["START THE END", performance.now(), performance.now() - gt0])
-		get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected,
-	}, 1)
-	setTimeout(function() {
 		get_moz_objects(88, "CanvasRenderingContext2D")
-		get_moz_colors(90, "[colors] moz")
 		get_moz_objects(94, "CSS2Properties")
 		get_moz_objects(96, "DataTransfer")
 		get_moz_objects(98, "Document")
 		get_moz_objects(100, "Element")
-		get_moz_fonts(102, "[fonts] moz")
 		get_moz_objects(106, "HTMLElement")
 		get_moz_objects(108, "HTMLCanvasElement")
 		get_moz_objects(110, "HTMLInputElement")
@@ -2191,6 +1911,27 @@ function run() {
 		get_moz_objects(136, "XMLHttpRequest")
 	}, 1)
 
+	setTimeout(function() {
+		aPerf.push(["START 3", performance.now(), performance.now() - gt0])
+		get_window_moz(250) // 250-255
+		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
+		get_intl_supportedlocales(655) // +5's: C, DTF, DN, LF, NF, PR, RTF
+		get_intl_canonical_locale(667, "Intl.getCanonicalLocales")
+		get_locale_compare(692, "locale.compare")
+	}, 1)
+
+	setTimeout(function() {
+		aPerf.push(["START 4", performance.now(), performance.now() - gt0])
+		get_moz_colors(90, "[colors] moz")
+		get_moz_fonts(102, "[fonts] moz")
+		get_errors(902)
+		get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
+	}, 1)
+
+	setTimeout(function() {
+		aPerf.push(["START THE END", performance.now(), performance.now() - gt0])
+		get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected,
+	}, 1)
 	setTimeout(function() {
 		get_permission(750, "[permissions] push")
 		get_storage_estimate(820, "storage estimate")
