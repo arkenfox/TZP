@@ -99,7 +99,6 @@ const get_globals = () => new Promise(resolve => {
 			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
 			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
 			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
-			[HTMLMediaElement, "HTMLMediaElement", "mozGetMetadata"],
 			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
 			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
 			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
@@ -118,7 +117,7 @@ const get_globals = () => new Promise(resolve => {
 		})
 		let tend; if (canPerf) {tend = performance.now()}
 		let found = (list.length - aNo.length)
-		if (found > 8) {isFF = true}
+		if (found > 5) {isFF = true}
 		// build a pretty display
 		let display = []
 		list.forEach(function(array) {
