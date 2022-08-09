@@ -1530,7 +1530,6 @@ function run_once() {
 			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
 			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
 			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
-			[HTMLMediaElement, "HTMLMediaElement", "mozGetMetadata"],
 			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
 			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
 			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
@@ -1552,7 +1551,7 @@ function run_once() {
 			log_alert("isFF: not found: "+ aNo.join(", "), true)
 		}
 		let found = (list.length - aNo.length)
-		if (found > 8) {isFF = true}
+		if (found > 5) {isFF = true}
 		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length)
 	} catch(e) {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
