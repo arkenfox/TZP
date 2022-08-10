@@ -449,6 +449,7 @@ const get_isOS64 = (skip = false) => new Promise(resolve => {
 })
 
 const get_isRFP = () => new Promise(resolve => {
+	// FF56+: TZP main test no need to check this: see isGeckoBlockMin
 	isRFP = false
 	isPerf = true
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -558,7 +559,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
 		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
 		if ("undefined" === typeof Object.toSource
-			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
+			&& "sc" === Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
 			// ^ legacy perf: toSource (74+): FF68- very slow
 		if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
 		if (is95) return 95 // 1674204
@@ -567,7 +568,7 @@ const get_isVer = () => new Promise(resolve => {
 		if ("function" === typeof self.reportError) return 93 // 1722448
 		if ("function" === typeof Object.hasOwn) return 92 // 1721149
 		if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
-		try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
+		try {if ("sa" === Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
 		if ("function" === typeof Array.prototype.at) return 90 // 1681371
 		if ("function" === typeof CountQueuingStrategy
 			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
@@ -1551,9 +1552,8 @@ function run_once() {
 		if (found > 5) {
 			isFF = true
 			isEngine = "gecko"
-			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
-				// note: waterfox classic passes both
-			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
+			// palemoon/basilisk: fails 53, passes 54
+			if ("function" !== typeof CSSMozDocumentRule && URL.prototype.hasOwnProperty("toJSON")) {
 				isEngine = "goanna"
 			}
 		}
