@@ -277,6 +277,9 @@ const get_isBraveMode = () => new Promise(resolve => {
 })
 
 const get_isEngine = () => new Promise(resolve => {
+	if (isFF) {
+		return resolve()
+	}
 	let t0; if (canPerf) {t0 = performance.now()}
 	// do math
 	function cbrt(x) {
@@ -313,20 +316,13 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "225f4a61") {isEngine = "gecko"
 		} else if (hash == "cb89002a") {isEngine = "gecko"
 		}
-		// harden isEngine
+		// fallback isEngine
 		if (isEngine == "") {
 			console.log(res.join())
-			if (isFF) {isEngine = "gecko"} else if ("chrome" in window) {isEngine = "blink"}
+			if ("chrome" in window) {isEngine = "blink"}
 			if (isEngine !== "") {
 				gKnownOnce.push("_global:isEngine")
 				gBypassedOnce.push("_global:isEngine:"+ isEngine)
-			}
-		}
-		if (isEngine == "gecko") {
-			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
-				// note: waterfox classic passes both
-			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
-				isEngine = "goanna"
 			}
 		}
 		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine +" | "+ hash))
@@ -991,21 +987,21 @@ function log_line(str) {
 
 function log_perf(str, time1, time2, extra) {
 	if (!canPerf) {return}
-	let t0 = performance.now(),
+	let tEnd = performance.now(),
 		output = ""
 	if (time1 == undefined) {time1 = ("error").padStart(7)}
 	if (isNaN(time1)){
 		output = str.padStart(30) +": "+ (time1).padStart(7)
 	} else {
-		time1 = isPerf? Math.round(t0 - time1).toString() : "xx"
+		time1 = isPerf? Math.round(tEnd - time1).toString() : "xx"
 		output = str.padStart(30) +": "+ time1.padStart(4) +" ms"
 	}
 	if (time2 == "ignore") {
 		time2 = ""
-	} else if (time2 == "") {
+	} else if (time2 == "" || gt0 == undefined) {
 		output += " | "+ ("n/a").padStart(7)
 	} else {
-		time2 = isPerf? Math.round(t0 - gt0).toString() : "xxx"
+		time2 = isPerf? Math.round(tEnd - gt0).toString() : "xxx"
 		output += " | "+ time2.padStart(4) +" ms"
 	}
 	if (extra !== undefined && extra !== "") {
@@ -1503,26 +1499,27 @@ function outputSection(id, cls) {
 function run_once() {
 	get_canPerf()
 	// ASAP
-	let t99 = ""
+	let t00
 	if (canPerf) {
-		t99 = performance.now()
+		t00 = performance.now()
 		log_line(Math.round(performance.now()) + " : IMMEDIATE")
 	}
 	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
 	} else if (location.protocol == "https:") {isSecure = true}
-	let t0; if (canPerf) {t0 = performance.now()}
 	// WARM
 	try {
-		log_perf("warmup start [md]",t0,"")
+		log_perf("warmup start [md]",t00,"", t00 +" | "+ (gLoad ? "page load" : "global rerun"))
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
-			let info = (canPerf ? Math.round(performance.now()) +" | ": "")
+			let t99; if (canPerf) {t99 = performance.now()}
+			let info = (canPerf ? t99 +" | ": "")
 				+ (gLoad ? "page load" : "global rerun")
-			log_perf("warmup end [md]",t0,t99,info)
+			log_perf("warmup end [md]", t00, t99, info)
 		}
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
 
 	// isFF
+	let t0; if (canPerf) {t0 = performance.now()}
 	try {
 		let list = [
 			[DataTransfer, "DataTransfer", "mozSourceNode"],
@@ -1551,8 +1548,16 @@ function run_once() {
 			log_alert("isFF: not found: "+ aNo.join(", "), true)
 		}
 		let found = (list.length - aNo.length)
-		if (found > 5) {isFF = true}
-		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length)
+		if (found > 5) {
+			isFF = true
+			isEngine = "gecko"
+			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
+				// note: waterfox classic passes both
+			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
+				isEngine = "goanna"
+			}
+		}
+		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length +" | "+ isEngine)
 	} catch(e) {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
 		log_perf("isFF [global]",t0,"","error")
