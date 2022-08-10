@@ -117,7 +117,14 @@ const get_globals = () => new Promise(resolve => {
 		})
 		let tend; if (canPerf) {tend = performance.now()}
 		let found = (list.length - aNo.length)
-		if (found > 5) {isFF = true}
+		if (found > 5) {
+			isFF = true
+			isEngine = "gecko"
+			// check for PM28+ : fails 53
+			if ("function" !== typeof CSSMozDocumentRule) {
+				isEngine = "goanna"
+			}
+		}
 		// build a pretty display
 		let display = []
 		list.forEach(function(array) {
@@ -140,34 +147,34 @@ const get_globals = () => new Promise(resolve => {
 			return "error"
 		}
 	}
-	let res = []
-	for(let i=0; i < 6; i++) {
-		try {
-			let fnResult = "unknown"
-			if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-			} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-			} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
-			} else if (i == 3) {fnResult = Math.acos(0.123)
-			} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
-			} else if (i == 5) {fnResult = Math.atan(2)
+	if (!isFF) {
+		let res = []
+		for(let i=0; i < 6; i++) {
+			try {
+				let fnResult = "unknown"
+				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
+				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
+				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
+				} else if (i == 3) {fnResult = Math.acos(0.123)
+				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
+				} else if (i == 5) {fnResult = Math.atan(2)
+				}
+				res.push(fnResult)
+			} catch(e) {
+				res.push("error")
 			}
-			res.push(fnResult)
-		} catch(e) {
-			res.push("error")
 		}
+		let hash = sha1(res.join())
+		if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
+		} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
+		} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
+		} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
+		//} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
+		//} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
+		} else if ("chrome" in window) {isEngine = "blink"
+		}
+		if (isEngine == "") {console.error("isEngine: not found\n", res)}
 	}
-	let hash = sha1(res.join())
-	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
-	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
-	} else if (isFF) {isEngine = "gecko"
-	} else if ("chrome" in window) {isEngine = "blink"
-	}
-	if (isEngine == "") {console.error("isEngine: not found\n", res)}
-
 	return resolve()
 
 })
@@ -264,12 +271,23 @@ const get_isVer = () => new Promise(resolve => {
 		isVer = verNo
 		return resolve()
 	}
+	// avoid false returns with forks
+	if ("function" !== typeof CSSMozDocumentRule) {
+		// palemoon/basilisk: fails 53
+		output(52)
+		return
+	} else if ("function" === typeof AbortSignal && "undefined" !== typeof HTMLAppletElement) {
+		// waterfox classic: 57 pass, 56 fail
+		// but waterfox (v78) also fails 56, so test that as well
+		if (!window.Document.prototype.hasOwnProperty("replaceChildren")) {
+			output(52)
+			return
+		}
+	}
+
 	output(cascade())
 
 	function cascade() {
-		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 59
-			// ^ we can skip < FF60 legacy checks now
-			// note: we can skip non-gecko checks: this only runs if isFF
 		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
@@ -282,7 +300,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
 		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
 		if ("undefined" === typeof Object.toSource
-			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
+			&& "sc" === Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
 			// ^ legacy perf: toSource (74+): FF68- very slow
 		if ("function" === typeof crypto.randomUUID) return 95 // 1723674: fast path pref
 		if (is95) return 95 // 1674204
@@ -291,7 +309,7 @@ const get_isVer = () => new Promise(resolve => {
 		if ("function" === typeof self.reportError) return 93 // 1722448
 		if ("function" === typeof Object.hasOwn) return 92 // 1721149
 		if ("object" === typeof window.clientInformation) return 91 // 1717072 fast path pref
-		try {if ("sa" == Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
+		try {if ("sa" === Intl.Collator.supportedLocalesOf("sa").join()) return 91} catch(e) {} // 1714933
 		if ("function" === typeof Array.prototype.at) return 90 // 1681371
 		if ("function" === typeof CountQueuingStrategy
 			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark")) return 89 // 1684316
@@ -333,7 +351,15 @@ const get_isVer = () => new Promise(resolve => {
 		if ("desc" === Symbol('desc').description) return 63 // 1472170
 		if ("function" === typeof console.timeLog) return 62 // 1458466
 		if ("object" === typeof CSS) return 61 // 1455805
-		return 60 // we already tested <60
+		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 60 // 1436659
+		if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) return 59 // 1336400
+		if ("function" === typeof Intl.PluralRules) return 58 // 1403318
+		if ("function" === typeof AbortSignal) return 57 // 1378342
+		if ("undefined" === typeof HTMLAppletElement) return 56 // 1279218
+		if ("undefined" === typeof console.timeline) return 55 // 1351795
+		if (URL.prototype.hasOwnProperty("toJSON")) return 54 // 1337702
+		if ("function" === typeof CSSMozDocumentRule) return 53
+		return 52
 	}
 })
 

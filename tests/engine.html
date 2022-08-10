@@ -70,7 +70,6 @@ let results = [],
 	bNum = false // display numbering instead of perf
 
 let	topVer = 105,
-	minVer = "",
 	isWebkit = false
 
 function fnTrim(str, len) {
@@ -181,7 +180,7 @@ function fnDisplay() {
 		summary += s14+ "DEBUG".padStart(7) + sc +"RFP:".padStart(6) + (isRFP ? green_tick : red_cross)
 		let strVer = isVer
 		strVer += (isVer == topVer ? "+" : "")
-		strVer += (isVer == minVer ? " or lower" : "")
+		strVer += (isVer == 52 ? " or lower" : "")
 		summary += "VER: ".padStart(6) + strVer
 	}
 	summary += " " + buildButton(3, "all", "all details")
@@ -490,7 +489,7 @@ function get_intl_canonical_locale(num, title) {
 		}
 		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
-		// FF91+   : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
+		// FF91+   : bh=bho, hye=hy,  no=no, tl=fil, tw=ak // webkit now matches
 		// blink   : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
 		// webkit  : bh=bh,  hye=hy,  no=no, tl=tl,  tw=tw
 		if (res.length > 0) {
@@ -587,7 +586,7 @@ function get_intl_supportedlocales(num) {
 		num += 5
 		let t0; if (canPerf) {t0 = performance.now()}
 		let expected = array[0],
-			minVer = array[1],
+			errVer = array[1],
 			list = array[2].concat(array[3]).sort(),
 			type = array[4],
 			res = []
@@ -617,13 +616,13 @@ function get_intl_supportedlocales(num) {
 			fnRecord(num, title, hash, bool, "skip", perf)
 		} catch(e) {
 			if (isFF) {
-				if (isVer >= minVer) {
+				if (isVer >= errVer) {
 					fnRecord(num, title, e.name, zB0, e.message)
 				} else {
 					let msg = e.message
 					msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
 					if (e.name == "TypeError" && msg == "Intl." + type +" is undefined") {
-						fnRecord(num, title, zNA +": FF" + minVer +"+ required", zNA)
+						fnRecord(num, title, zNA +": FF" + errVer +"+ required", zNA)
 					} else {
 						fnRecord(num, title, e.name, zB0, e.message)
 					}
@@ -801,26 +800,21 @@ function get_math(num, title) {
 }
 
 function get_media_constraints(num, title) {
-	// blink: 18c59e90bb3af0ce32be8efaa4457ead01fcacd8 [32]
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
+		let noiseFF = [
+			'groupId', // FF70+
+			'channelCount', // FF56+
+			'autoGainControl','noiseSuppression', // FF55+
+			'mozAutoGainControl','mozNoiseSuppression', // FF54-
+		]
 		let data = navigator.mediaDevices.getSupportedConstraints()
 		let res = Object.keys(data)
+		res = res.filter(x => !noiseFF.includes(x))
 		res.sort()
 		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		let bool = false
-		if (isVer > 69) {
-			if (hash == "869109a73d3128c2eb4a8277aff0fec0cf8d0e47") {bool = true} // FF70+
-		} else {
-			if (hash == "499818d3e86b70bd61300a52f1429bb359365890") {bool = true} // FF56-69
-			if (isVer < 57) {
-				if (hash == "c536cceca9d2a679656c7d785e6ada5e5a9016cb") {bool = true} // FF55
-			}
-			if (isVer < 55) {
-				if (hash == "846c4bd6379d808ac2d2890954e7f909ba2b9458") {bool = true} // FF52-54
-			}
-		}
+		let bool = hash == "a4dfaab7d54b96d9a4ed91d06a20b77fa0df2a45" // FF52+
 		if (res.length > 0) {
 			sDetail["expected_"+ title] = res
 			hash += buildButton(3, "expected_"+ title, res.length)
@@ -1346,7 +1340,7 @@ function get_nav_values(num1, num2, num3) {
 			if (resX.length == 14) {
 				let isCheck = false
 				if (year > 2016 && year < 2020) {isCheck = true}
-				if (isVer < 59) {if (year > 2016) {isCheck = true}} // FF52 waterfox basilisk palemoon
+				if (isVer == 52) {if (year > 2016) {isCheck = true}} // FF52 waterfox basilisk palemoon
 				if (isCheck) {
 					if (!isNaN(resX * 1)) {boolX = true}
 				}
@@ -1639,15 +1633,14 @@ function get_storage_estimate(num, title) {
 			fnRecord(num, title, quota, bool, "skip", perf)
 		})
 	} catch(e) {
-		let msg = e.message.substring(0,26)
-		if (isWebkit && e.name == "TypeError" && msg == "undefined is not an object") {
-			fnRecord(num, title, e.name, false, e.message)
+		if (isWebkit) {
+			fnRecord(num, title, e.name, false, e.message) // not supported in webkit
 		} else {
 			// FF56 or lower
 			let result = e.name
 			let type = zB0
 			let error = e.message
-			if (isFF && isVer < 59 && e.message == "navigator.storage is undefined") {
+			if (isFF && isVer < 57 && e.message == "navigator.storage is undefined") {
 				result = zNA +": FF57+ required"
 				type = zNA
 				error = undefined
@@ -1711,9 +1704,8 @@ function get_window_moz(num) {
 		if (bBlock) {bB = 1}
 		let resC = typeof CSSMozDocumentRule
 		let boolC = "function" === typeof CSSMozDocumentRule // FF53+
-		if (!boolC && isFF) {
-			// FF52 exception
-			if (isVer < 55) {boolC = "object" === resC} // lowest ver test I have is 54
+		if (!boolC && isVer == 52) {
+			boolC = "object" === resC
 		}
 		let perfC = canPerf ? performance.now() - t0C : ""
 		fnRecord(num, strC, resC, boolC, "skip", perfC)
@@ -1761,57 +1753,6 @@ function get_window_moz(num) {
 	} catch(e) {
 		fnRecord(num+3, strB, e.name, zB0, e.message)
 	}
-}
-
-function get_legacyVer() {
-	return new Promise(resolve => {
-		// set webkit
-		if ("chrome" in window || isFF) {} else {isWebkit = true}
-		if (!isFF) {
-			return resolve()
-		}
-		// set goanna
-		if (isEngine == "gecko") {
-			// check for PM28+ : fails 55 (1351795) but passes 57 (1378342)
-				// note: waterfox classic passes both
-			if ("undefined" !== typeof console.timeline && "function" === typeof AbortSignal) {
-				isEngine = "goanna"
-				// exit and return isVer as 52
-				isVer = 52
-				return resolve()
-			}
-		}
-		// is55
-		let is55 = false
-		try {
-			let maxIndex = Math.pow(2, 31)
-			let list55 = []
-			list55[maxIndex - 1] = 'a'
-			list55[maxIndex - 0] = 'b'
-			if (list55[maxIndex] !== 'b') {
-			} else if (list55.slice()[maxIndex] !== 'b') {
-			} else if (list55.slice(maxIndex - 1).length !== 2) {
-			} else {
-				is55 = true
-			}
-		} catch(e) {}
-
-		// FF52-59
-		if ("function" !== typeof Animation.prototype.updatePlaybackRate) {
-			if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) {
-				isVer = 59
-			} else if ("function" == typeof Intl.PluralRules) {isVer = 58
-			} else if ("function" === typeof AbortSignal) {isVer = 57
-			} else if (is55) {
-				minVer = 56
-				isVer = 56
-			} else {
-				minVer = 54
-				isVer = 54
-			}
-		}
-		return resolve()
-	})
 }
 
 function rerun() {
@@ -1921,17 +1862,11 @@ setTimeout(function() {
 		Promise.all([
 			get_isRFP(),
 			get_is95(),
-			get_legacyVer(),
+			get_isVer(),
 		]).then(function(){
-			if (isFF && isVer !== "") {
-				run()
-			} else {
-				Promise.all([
-					get_isVer(),
-				]).then(function(){
-					run()
-				})			
-			}
+			// set webkit
+			if ("chrome" in window || isFF) {} else {isWebkit = true}
+			run()
 		})
 	})
 }, 50)
