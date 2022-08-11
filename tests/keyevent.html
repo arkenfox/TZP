@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>keyevent</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 580px;}
+		.togDataK, .togDataV {display: none;}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb7">
+		<col width="28%"><col width="72%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">keyevent
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td>keys</td><td class="mono" id="keysHash"></td></tr>
+		<tr>
+			<td><span id="labelDataV" class="btn btn0" onClick="togglerows('DataV','btn')">[ show ]</span> values</td>
+			<td class="mono spaces" id="valuesHash"></td>
+		</tr>
+		<tr class="togDataV">
+			<td><span class="btn0 btn" onClick="copyclip(`valuesData`)">[ copy ]</span> data</td>
+			<td class="mono spaces" id="valuesData"></td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+/* TEST: https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values */
+
+/*
+- is there a diff between OSes
+- is there a diff between keyboard layouts
+   - or app builds/languages
+- is there a diff between virtual keyboards vs mechanical/real
+- do we need sorting for stability (FF102+ / OSes)
+   - and/or can just check for specific key values
+*/
+
+sb = sb.trim()
+s8 = s8.trim()
+
+function run() {
+	// ? should probably limit this to isFF
+
+	let t0 = performance.now()
+	let keysA = []
+	// get keys
+	try {
+		let keysA = Object.keys(Object.getOwnPropertyDescriptors(KeyEvent))
+		keysA = keysA.filter(x => !['length','name'].includes(x))
+		let keysHash = mini_sha1(keysA.join())
+		dom.keysHash.innerHTML = keysHash + s8 +" [" + keysA.length +"]"+ sc
+
+		// get values
+		if (keysA.length) {
+			try {
+				let res = []
+				keysA.forEach(function(value) {
+					res.push(value +", " + KeyEvent[value])
+				})
+				let valuesHash = res.length > 0 ? mini_sha1(res.join()) : "none"
+				dom.valuesHash.innerHTML = valuesHash
+				dom.valuesData.innerHTML = res.join("<br>")
+				// perf
+				dom.perf = Math.round(performance.now() - t0) + " ms"
+			
+			} catch(e) {
+				dom.valuesHash.innerHTML = sb+ e.name + sc + ": "+ e.message
+				dom.valuesData.innerHTML = zNA
+			}
+		}
+	} catch(e) {
+		dom.keysHash.innerHTML = sb+ e.name + sc + ": "+ e.message
+		dom.valuesHash.innerHTML = zNA
+		dom.valuesData.innerHTML = zNA
+	}
+
+}
+
+run()
+
+</script>
+</body>
+</html>
