@@ -44,13 +44,24 @@
 /* TEST: https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values */
 
 /*
-- is there a diff between OSes
-- is there a diff between keyboard layouts
-   - or app builds/languages
-- is there a diff between virtual keyboards vs mechanical/real
-- do we need sorting for stability (FF102+ / OSes)
-   - and/or can just check for specific key values
+- no: is there a diff between virtual keyboards vs mechanical/real
+- no: is there a diff between OSes
+- no: is there a diff between keyboard layouts
+- no: is there a diff between app builds/languages
+- no: do we need sorting for stability (FF102+ / OSes)
 */
+
+/* RESULTS
+FF61+
+  keys    bf647a5984b13f07b4f797f541f9466e12369bf3 [186]
+  values  dfccd8e827989b20037cadeba96f3db38a064107
+    diff  DOM_VK_PROCESSKEY, 229
+
+FF52-60
+  keys    8f528900922b9579cede24033140f21dff776dfd [185]
+  values  294ad4deae94feaaa67a12574efd0d5f4be33ef8
+*/
+
 
 sb = sb.trim()
 s8 = s8.trim()
