@@ -1072,7 +1072,7 @@ function get_moz_objects(num, name) {
 				]
 			]
 		}
-		// object
+		// object: don't use, we can do this elsewhere
 		if (name === "window" && "object" == typeof window) {
 			isObj = true
 			oList[name] = [window,["mozRTCPeerConnection","CSSMozDocumentRule"]]
@@ -1118,6 +1118,10 @@ function get_moz_objects(num, name) {
 				if (isEngine == "goanna" || isTB) {
 					bool = zNA
 					hash = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon")
+				} else if (isFF) {
+					// behind prefs: both media.peerconnection.enabled + media.navigator.enabled
+					bool = zNA
+					hash = zNA + s3 +" ["+ hash +"]"+ sc + sb +" [not firefox default]"+ sc
 				}
 			}
 		}
@@ -1725,13 +1729,15 @@ function get_window_moz(num) {
 		if (bBlock) {bB = 1}
 		let resM = typeof mozRTCPeerConnection
 		let boolM = "function" === typeof mozRTCPeerConnection
-		if (!boolM && isFF) {
+		if (!boolM && isFF && "undefined" === resM) {
 			// TB/PM build without WebRTC
 			if (isEngine == "goanna" || isTB) {
-				if ("undefined" === resM) {
-					boolM = zNA
-					resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
-				}
+				boolM = zNA
+				resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
+			} else {
+				// behind a pref: media.peerconnection.enabled
+				boolM = zNA
+				resM = zNA + s3 +" ["+ resM +"]"+ sc + sb +" [not firefox default]"+ sc
 			}
 		}
 		let perfM = canPerf ? performance.now() - t0M : ""
