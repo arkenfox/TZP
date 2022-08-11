@@ -1113,7 +1113,13 @@ function get_moz_objects(num, name) {
 			if (isVer < 63 && name === "ShadowRoot") {bool = zNA, hash = zNA +": FF63+ required"}
 			if (isVer < 71 && name === "MathMLElement") {bool = zNA, hash = zNA +": FF71+ required"}
 			if (name === "OfflineResourceList") {bool = zNA, hash = zNA +": assuming Beta/Dev/Nightly pref"}
-			if (isEngine === "goanna" && name === "Navigator") {bool = zNA, hash = zNA +": Palemoon"}
+			if (name === "Navigator") {
+				// TB/PM build without WebRTC
+				if (isEngine == "goanna" || isTB) {
+					bool = zNA
+					hash = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon")
+				}
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -1719,10 +1725,13 @@ function get_window_moz(num) {
 		if (bBlock) {bB = 1}
 		let resM = typeof mozRTCPeerConnection
 		let boolM = "function" === typeof mozRTCPeerConnection
-		if (!boolM && isEngine == "goanna" & isVer == 52) {
-			if ("undefined" === resM) {
-				boolM = zNA
-				resM = zNA +": Palemoon "+ s3 +"["+ resM +"]"+ sc
+		if (!boolM && isFF) {
+			// TB/PM build without WebRTC
+			if (isEngine == "goanna" || isTB) {
+				if ("undefined" === resM) {
+					boolM = zNA
+					resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
+				}
 			}
 		}
 		let perfM = canPerf ? performance.now() - t0M : ""
@@ -1862,6 +1871,7 @@ setTimeout(function() {
 		Promise.all([
 			get_isRFP(),
 			get_is95(),
+			get_isTB(),
 			get_isVer(),
 		]).then(function(){
 			// set webkit
