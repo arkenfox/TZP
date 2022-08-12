@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=900">
 	<title>engine objects</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 780px;}
+		table {width: 880px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 	</style>
 </head>
@@ -94,7 +94,37 @@ function rerun() {
 function run() {
 	try {
 		tstart = performance.now()
+// gecko functions have line endings: e.g.
+// gecko: value": "function atob() {\n    [native code]\n}"
+// blink: value": "function atob() { [native code] }",
 
+// blink not gecko
+rec(typeof PERSISTENT, "PERSISTENT")
+rec(typeof TEMPORARY, "TEMPORARY")
+rec(typeof defaultStatus, "defaultStatus")
+rec(typeof defaultstatus, "defaultstatus")
+rec(typeof getScreenDetails, "getScreenDetails")
+rec(typeof launchQueue, "launchQueue")
+rec(typeof onbeforexrselect, "onbeforexrselect")
+rec(typeof oncancel, "oncancel")
+rec(typeof oncontextlost, "oncontextlost")
+rec(typeof oncontextrestored, "oncontextrestored")
+rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute")
+rec(typeof onmousewheel, "onmousewheel")
+rec(typeof onpointerrawupdate, "onpointerrawupdate")
+rec(typeof onsearch, "onsearch")
+rec(typeof openDatabase, "openDatabase")
+rec(typeof originAgentCluster, "originAgentCluster")
+rec(typeof queryLocalFonts, "queryLocalFonts")
+rec(typeof showDirectoryPicker, "showDirectoryPicker")
+rec(typeof showOpenFilePicker, "showOpenFilePicker")
+rec(typeof showSaveFilePicker, "showSaveFilePicker")
+rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame")
+rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame")
+rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem")
+rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL")
+
+//
 rec(typeof addEventListener, "addEventListener")
 rec(typeof alert, "alert")
 rec(typeof atob, "atob")
@@ -319,11 +349,11 @@ rec(typeof updateCommands, "updateCommands")
 
 rec(typeof window, "window")
 
-// these all have properties + sometimes nested properties
-
-//InstallTrigger : being deprecated
+//  these all have properties + sometimes nested
 rec(typeof caches, "caches")
 rec(typeof clientInformation, "clientInformation")
+rec(typeof chrome, "chrome")
+rec(typeof cookieStore, "cookieStore")
 rec(typeof crypto, "crypto")
 rec(typeof customElements, "customElements")
 rec(typeof external, "external")
@@ -333,15 +363,21 @@ rec(typeof localStorage, "localStorage")
 rec(typeof location, "location")
 rec(typeof locationbar, "locationbar")
 rec(typeof menubar, "menubar")
+rec(typeof navigation, "navigation")
 rec(typeof navigator, "navigator")
+rec(typeof opr, "opr")
 rec(typeof performance, "performance")
 rec(typeof personalbar, "personalbar")
 rec(typeof screen, "screen")
 rec(typeof scrollbars, "scrollbars")
 rec(typeof sessionStorage, "sessionStorage")
 rec(typeof speechSynthesis, "speechSynthesis")
+rec(typeof styleMedia, "styleMedia")
+rec(typeof trustedTypes, "trustedTypes")
 rec(typeof u2f, "u2f")
 rec(typeof visualViewport, "visualViewport")
+rec(typeof webkitStorageInfo, "webkitStorageInfo")
+//InstallTrigger : being deprecated
 
 		output()
 	} catch(e) {
