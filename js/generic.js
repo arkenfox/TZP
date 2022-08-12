@@ -313,8 +313,6 @@ const get_isEngine = () => new Promise(resolve => {
 		} else if (hash == "05513f36") {isEngine = "webkit"
 		} else if (hash == "38172d94") {isEngine = "edgeHTML"
 		} else if (hash == "36f067c6") {isEngine = "trident"
-		} else if (hash == "225f4a61") {isEngine = "gecko"
-		} else if (hash == "cb89002a") {isEngine = "gecko"
 		}
 		// fallback isEngine
 		if (isEngine == "") {
