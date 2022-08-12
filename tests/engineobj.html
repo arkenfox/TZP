@@ -25,6 +25,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title">engine objects
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="perf" style="cursor: pointer;" onClick="rerun()">re-run</span></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2"><span class="no_color c mono spaces" id="results"></span></td></tr>
@@ -35,27 +36,24 @@
 'use strict';
 
 s3 = s3.trim()
-let oTypes = {}
+
+let oTypes = {},
+	aList = [],
+	tstart
+
+function logList() {
+	console.log(aList.join(", "))
+}
 
 function rec(type, name) {
+	aList.push(name)
 	oTypes[type].push(name)
 }
 
-function reset() {
-	oTypes = {
-		"undefined" : [],
-		"boolean": [],
-		"number": [],
-		"bigint": [],
-		"string": [],
-		"symbol": [],
-		"function": [],
-		"object": [],
-	}
-}
-
 function output() {
-	//console.log(oTypes)
+	aList.sort()
+	dom.perf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
+		+ "<span style='cursor: pointer;' onClick='logList()'>" + aList.length +" items" +"</span>"
 	let display = []
 	for (const k of Object.keys(oTypes).sort()) {
 		let res = oTypes[k]
@@ -69,11 +67,32 @@ function output() {
 	}
 }
 
+function reset() {
+	oTypes = {
+		"undefined" : [],
+		"boolean": [],
+		"number": [],
+		"bigint": [],
+		"string": [],
+		"symbol": [],
+		"function": [],
+		"object": [],
+	}
+	aList = []
+	dom.results.innerHTML = ""
+}
+
+function rerun() {
+	reset()
+	// delay so user sees changes
+	setTimeout(function() {
+		run()
+	}, 170)
+}
+
 function run() {
 	try {
-		reset()
-		dom.results.innerHTML = ""
-
+		tstart = performance.now()
 		// K
 		rec(typeof keys, "keys")
 		rec(typeof Keyboard, "Keyboard")
@@ -83,12 +102,12 @@ function run() {
 		rec(typeof KeyframeEffect, "KeyframeEffect")
 
 		output()
-
 	} catch(e) {
 		console.error(e.name, e.message)
 	}
 }
 
+reset()
 run()
 
 </script>
