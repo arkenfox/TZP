@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>engine objects</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 580px;}
+		#tb3 td:first-child { text-align: left; vertical-align: top;}
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb3">
+		<col width="50%"><col width="50%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">engine objects
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2"><span class="no_color c mono spaces" id="results"></span></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+s3 = s3.trim()
+let oTypes = {}
+
+function rec(type, name) {
+	oTypes[type].push(name)
+}
+
+function reset() {
+	oTypes = {
+		"undefined" : [],
+		"boolean": [],
+		"number": [],
+		"bigint": [],
+		"string": [],
+		"symbol": [],
+		"function": [],
+		"object": [],
+	}
+}
+
+function output() {
+	//console.log(oTypes)
+	let display = []
+	for (const k of Object.keys(oTypes).sort()) {
+		let res = oTypes[k]
+		if (res.length) {
+			let type = k.toUpperCase().padEnd(9)
+			let hash = mini_sha1(res.join())
+			display.push(s3 + type + sc +": "+ hash + s3 +" ["+ res.length +"]"+ sc +"<br>")
+			display.push(res.join(", ") + "<br>")
+		}
+		dom.results.innerHTML = display.join("<br>")
+	}
+}
+
+function run() {
+	try {
+		reset()
+		dom.results.innerHTML = ""
+
+		// K
+		rec(typeof keys, "keys")
+		rec(typeof Keyboard, "Keyboard")
+		rec(typeof KeyboardEvent, "KeyboardEvent")
+		rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap")
+		rec(typeof KeyEvent, "KeyEvent")
+		rec(typeof KeyframeEffect, "KeyframeEffect")
+
+		output()
+
+	} catch(e) {
+		console.error(e.name, e.message)
+	}
+}
+
+run()
+
+</script>
+</body>
+</html>
