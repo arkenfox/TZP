@@ -5,12 +5,13 @@
 	<meta name="viewport" content="width=900">
 	<title>engine objects</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
-	<script src="testglobals.js"></script>
-	<script src="testgeneric.js"></script>
+	<!--<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>-->
 	<!-- custom -->
 	<style>
 		table {width: 880px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
+		hr {color: #dcc18c}
 	</style>
 </head>
 <body>
@@ -28,31 +29,172 @@
 				<div class="nav-down"><span class="perf" style="cursor: pointer;" onClick="rerun()">re-run</span></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td colspan="2"><span class="no_color c mono spaces" id="results"></span></td></tr>
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn3 btnfirst" onClick="rerun()">[ run ]</span>
+			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span>
+			<span class="btn3 btn" onClick="copyclip(`results`)">[ copy ]</span>
+			<br><br>
+			<hr>
+			<br>
+			<span class="spaces" style="color: #b3b3b3;" id="results"></span>
+			</td>
+		</tr>
 	</table>
 	<br>
 
 <script>
 'use strict';
 
-s3 = s3.trim()
-
 let oTypes = {},
 	aList = [],
-	tstart
+	tstart,
+	domresult = document.getElementById("results"),
+	domperf = document.getElementById("perf"),
+	s3 = "<span class='s3'>",
+	sc = "</span>"
+
+/** functions from generic **/
+// we don't want to include globals or generic which will pollute scraping
+
+function mini(str) {
+	// https://stackoverflow.com/a/22429679
+	const json = `${JSON.stringify(str)}`
+	let i, len, hash = 0x811c9dc5
+	for (i = 0, len = json.length; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
+}
+
+function mini_sha1(str) {
+	return sha1(mini(str))
+}
+
+function sha1(str1){
+	for (var blockstart=0,
+		i = 0,
+		W = [],
+		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+		A, B, C, D, F, G,
+		word_array = [],
+		temp2,
+		s = unescape(encodeURI(str1)),
+		str_len = s.length;
+		i<=str_len;){
+		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
+	}
+	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
+	for (; blockstart <= temp2; blockstart += 16) {
+		A = H,i=0;
+		for (; i < 80;
+			A = [[
+				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
+				F = G + (B ^ C ^ D) + 341275144,
+				G + (B & C | B & D | C & D) + 882459459,
+				F + 1535694389
+			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
+		) {
+			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+		}
+		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
+	}
+	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
+	return str1
+}
+
+function copyclip(element) {
+	// fallback: e.g FF62-
+	function copyExec() {
+		if (document.selection) {
+			let range = document.body.createTextRange()
+			range.moveToElementText(document.getElementById(element))
+			range.select().createTextRange()
+			document.execCommand("copy")
+		} else if (window.getSelection) {
+			let range = document.createRange()
+			range.selectNode(document.getElementById(element))
+			window.getSelection().addRange(range)
+			document.execCommand("copy")
+		}
+	}
+	// clipboard API
+	if ("clipboard" in navigator) {
+		try {
+			let content = document.getElementById(element).innerHTML
+			// remove spans, change linebreaks
+			let regex = /<br\s*[\/]?>/gi
+			content = content.replace(regex, "\r\n")
+			content = content.replace(/<\/?span[^>]*>/g,"")
+			// get it
+			navigator.clipboard.writeText(content).then(function() {
+				// clipboard successfully set
+			}, function() {
+				// clipboard write failed
+				copyExec()
+			})
+		} catch(e) {
+			copyExec()
+		}
+	} else {
+		copyExec()
+	}
+}
+
+/** function for this test **/
+
+function collectProps () {
+    const objCache = new Set();
+    // skip these
+    objCache.add(window.self);
+    // prevent us decending into the DOM
+    objCache.add(document);
+    objCache.add(document.activeElement);
+    objCache.add(event?.currentTarget);
+    const recursionAllowed = new Set();
+    recursionAllowed.add('navigator');
+
+    function extractObjectProps (obj, breadcrumbs = [], depth = 0) {
+        if (depth >= 5) {
+            return {};
+        }
+        const props = {};
+        const proplist = [];
+        for (const prop in obj) {
+            proplist.push(prop);
+        }
+        proplist.sort().forEach((prop) => {
+            try {
+                const desc = Object.getOwnPropertyDescriptor(obj, prop) || {};
+                desc.type = typeof obj[prop];
+                if (desc.type === 'function') {
+                    desc.value = obj[prop].toString();
+                } else if (desc.type === 'object') {
+                    if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
+                        objCache.add(obj[prop]);
+                        desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1);
+                    }
+                    delete desc.value;
+                }
+                props[prop] = desc;
+            } catch (e) {
+                console.warn(`Error for ${breadcrumbs.join('.')}.${prop}`, e);
+            }
+        });
+        return props;
+    }
+
+    return {
+        window: extractObjectProps(window)
+    }
+}
 
 function logList() {
 	console.log(aList.join(", "))
 }
 
-function rec(type, name) {
-	aList.push(name)
-	oTypes[type].push(name)
-}
-
 function output() {
 	aList.sort()
-	dom.perf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
+	domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
 		+ "<span style='cursor: pointer;' onClick='logList()'>" + aList.length +" items" +"</span>"
 	let display = []
 	for (const k of Object.keys(oTypes).sort()) {
@@ -64,8 +206,13 @@ function output() {
 			display.push(s3 + type + sc +": "+ hash + s3 +" ["+ res.length +"]"+ sc +"<br>")
 			display.push("'"+ res.join("', '") + "'<br>")
 		}
-		dom.results.innerHTML = display.join("<br>")
+		domresult.innerHTML = display.join("<br>")
 	}
+}
+
+function rec(type, name) {
+	aList.push(name)
+	oTypes[type].push(name)
 }
 
 function reset() {
@@ -80,7 +227,7 @@ function reset() {
 		"object": [],
 	}
 	aList = []
-	dom.results.innerHTML = ""
+	domresult.innerHTML = ""
 }
 
 function rerun() {
@@ -385,18 +532,36 @@ rec(typeof webkitStorageInfo, "webkitStorageInfo")
 	}
 }
 
+function scrape() {
+	domresult.innerHTML = "<br>... running"
+	// delay so user sees changes
+	setTimeout(function() {
+		tstart = performance.now()
+		let result = collectProps().window
+
+		// cleanup
+		delete result.dom // just in case
+		delete result.collectProps
+		delete result.copyclip
+		delete result.logList
+		delete result.mini
+		delete result.mini_sha1
+		delete result.output
+		delete result.rec
+		delete result.rerun
+		delete result.reset
+		delete result.run
+		delete result.scrape
+		delete result.sha1
+		//console.log(result)
+
+		domresult.innerHTML = JSON.stringify(result, null, 2)
+		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
+	}, 100)
+}
+
 reset()
 run()
-
-function create() {
-	let list = ["caches","clientInformation"]
-	let res = []
-	list.forEach(function(item) {
-		res.push("rec(typeof "+ item +", \""+ item +"\")")
-	})
-	console.log(res.join("\n"))
-}
-//create()
 
 </script>
 </body>
