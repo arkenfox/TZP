@@ -62,13 +62,10 @@ FF52-60
   values  294ad4deae94feaaa67a12574efd0d5f4be33ef8
 */
 
-
 sb = sb.trim()
 s8 = s8.trim()
 
 function run() {
-	// ? should probably limit this to isFF
-
 	let t0 = performance.now()
 	let keysA = []
 	// get keys
@@ -77,7 +74,6 @@ function run() {
 		keysA = keysA.filter(x => !['length','name'].includes(x))
 		let keysHash = mini_sha1(keysA.join())
 		dom.keysHash.innerHTML = keysHash + s8 +" [" + keysA.length +"]"+ sc
-
 		// get values
 		if (keysA.length) {
 			try {
@@ -101,7 +97,6 @@ function run() {
 		dom.valuesHash.innerHTML = zNA
 		dom.valuesData.innerHTML = zNA
 	}
-
 }
 
 run()
