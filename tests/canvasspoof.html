@@ -261,9 +261,6 @@ function run() {
 				results.push(output.name+","+output.displayValue)
 			})
 
-			// test unknown PNGs
-			//isFF = false; engine = ""
-
 			// output
 			//console.debug(results.join("\n"))
 			for (let i=0; i < results.length; i++) {
@@ -316,8 +313,7 @@ function run() {
 				document.getElementById(name).innerHTML = display
 			}
 			// perf
-			let t1 = performance.now()
-			dom.perf.innerHTML = Math.round(t1-t0) +" ms"
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		})
 	}, 250)
 }
@@ -326,7 +322,12 @@ sb = sb.trim()
 sg = sg.trim()
 s9 = s9.trim()
 s14 = s14.trim()
-run()
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	run()
+})
 
 </script>
 </body>
