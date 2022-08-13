@@ -40,14 +40,19 @@ function outputPrototypeLies() {
 
 		const getPrototypeLies = scope => {
 			const getEngine = () => {
-				const mathPI = 3.141592653589793
-				const compute = n => mathPI ** -100 == +`1.9275814160560${n}e-50`
-				return {
-					isChrome: compute(204),
-					isFirefox: compute(185),
-					isSafari: compute(206)
+				const x = [].constructor
+				try {
+					(-1).toFixed(-1)
+				} catch (err) {
+					return err.message.length + (x + '').split(x.name).join('').length
 				}
 			}
+
+			const ENGINE_IDENTIFIER = getEngine()
+			const IS_BLINK = ENGINE_IDENTIFIER == 80
+			const IS_GECKO = ENGINE_IDENTIFIER == 58
+			const IS_WEBKIT = ENGINE_IDENTIFIER == 77
+
 			const getRandomValues = () => (
 				String.fromCharCode(Math.random() * 26 + 97) +
 				Math.random().toString(36).slice(-7)
@@ -111,9 +116,8 @@ function outputPrototypeLies() {
 			// extending the function on a fake class should throw a TypeError and message "not a constructor"
 			const getClassExtendsTypeErrorLie = apiFunction => {
 				try {
-					const { isSafari } = getEngine()
 					const shouldExitInSafari13 = (
-						/version\/13/i.test((navigator || {}).userAgent) && isSafari
+						/version\/13/i.test((navigator || {}).userAgent) && IS_WEBKIT
 					)
 					if (shouldExitInSafari13) {
 						return false
@@ -260,8 +264,7 @@ function outputPrototypeLies() {
 						error.constructor.name == 'TypeError' && stackLines.length >= 5
 					)
 					// Chromium must throw error 'at Function.toString'... and not 'at Object.apply'
-					const { isChrome } = getEngine()
-					if (validStackSize && isChrome && (
+					if (validStackSize && IS_BLINK && (
 						!validScope ||
 						!/at Function\.toString/.test(stackLines[1]) ||
 						!/at you/.test(stackLines[2]) ||
@@ -277,14 +280,13 @@ function outputPrototypeLies() {
 			/* Proxy Detection */
 			// arguments or caller should not throw 'incompatible Proxy' TypeError
 			const tryIncompatibleProxy = fn => {
-				const { isFirefox } = getEngine()
 				try {
 					fn()
 					return true // failed to throw
 				} catch (error) {
 					return (
 						error.constructor.name != 'TypeError' ||
-						(isFirefox && /incompatible\sProxy/.test(error.message))
+						(IS_GECKO && /incompatible\sProxy/.test(error.message))
 					)
 				}
 			}
@@ -304,8 +306,7 @@ function outputPrototypeLies() {
 			// checking proxy instanceof proxy should throw a valid TypeError
 			const getInstanceofCheckLie = apiFunction => {
 				const proxy = new Proxy(apiFunction, {})
-				const { isChrome } = getEngine()
-				if (!isChrome) {
+				if (!IS_BLINK) {
 					return false
 				}
 				const hasValidStack = (error, type = 'Function') => {
@@ -341,8 +342,7 @@ function outputPrototypeLies() {
 
 			// defining properties should not throw an error
 			const getDefinePropertiesLie = (apiFunction) => {
-				const { isChrome } = getEngine()
-				if (!isChrome) {
+				if (!IS_BLINK) {
 					return false // chrome only test
 				}
 				try {
@@ -364,14 +364,13 @@ function outputPrototypeLies() {
 				}
 			}
 			const hasValidError = error => {
-				const { isChrome, isFirefox } = getEngine()
 				const { name, message } = error
 				const hasRangeError = name == 'RangeError'
 				const hasInternalError = name == 'InternalError'
-				const chromeLie = isChrome && (
+				const chromeLie = IS_BLINK && (
 					message != `Maximum call stack size exceeded` || !hasRangeError
 				)
-				const firefoxLie = isFirefox && (
+				const firefoxLie = IS_GECKO && (
 					message != `too much recursion` || !hasInternalError
 				)
 				return (hasRangeError || hasInternalError) && !(chromeLie || firefoxLie)
@@ -396,11 +395,10 @@ function outputPrototypeLies() {
 					spawnError(apiFunction, method)
 					return true // failed to throw
 				} catch (error) {
-					const { isChrome, isFirefox } = getEngine()
 					const { name, message, stack } = error
 					const targetStackLine = ((stack || '').split('\n') || [])[1]
 					const hasTypeError = name == 'TypeError'
-					const chromeLie = isChrome && (
+					const chromeLie = IS_BLINK && (
 						message != `Cyclic __proto__ value` || (
 							method == '__proto__' && (
 								!targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`) &&
@@ -408,7 +406,7 @@ function outputPrototypeLies() {
 							)
 						)
 					)
-					const firefoxLie = isFirefox && (
+					const firefoxLie = IS_GECKO && (
 						message != `can't set prototype: it would cause a prototype chain cycle`
 					)
 					if (!hasTypeError || chromeLie || firefoxLie) {
