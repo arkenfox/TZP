@@ -363,46 +363,6 @@ const get_isVer = () => new Promise(resolve => {
 	}
 })
 
-function check_navKey(property) {
-	if (navKeys["trueKeys"]) {return navKeys["trueKeys"].includes(property)} else {return false}
-}
-
-const get_navKeys = () => new Promise(resolve => {
-	// reset
-	navKeys = {}
-	// build
-	try {
-		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		let trueKeys = keys
-		let lastKeyIndex = keys.length
-		let fakeKeys = []
-		if (isFF) {
-			// FF: constructor is always last
-			lastKeyIndex = keys.indexOf("constructor")
-			trueKeys = keys.slice(0, lastKeyIndex+1)
-			fakeKeys = keys.slice(lastKeyIndex+1)
-		} else if (isEngine == "blink") {
-			// chromium: last key inconsistent
-			let knownPoison = ["SharedWorker","Worker","buildID","getVRDisplays","activeVRDisplays","oscpu"]
-			trueKeys = keys.filter(x => !knownPoison.includes(x))
-			fakeKeys = keys.filter(x => knownPoison.includes(x))
-		}
-		// remove constructor
-		trueKeys = trueKeys.filter(x => !["constructor"].includes(x))
-		// set
-		navKeys["trueKeys"] = trueKeys
-		navKeys["fakeKeys"] = fakeKeys
-		// set brave
-		if (check_navKey("brave")) {
-			isBrave = true
-		}
-		return resolve()
-	} catch(e) {
-		console.error("get_navKeys failed", e.name, e.message)
-		return resolve()
-	}
-})
-
 /** GENERAL CLICK FUNCTIONS **/
 
 function copyclip(element) {
@@ -421,7 +381,8 @@ function copyclip(element) {
 		}
 	}
 	// clipboard API
-	if (check_navKey("clipboard")) {
+	if ("clipboard" in navigator) {
+console.log("banana")
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
@@ -474,6 +435,3 @@ function togglerows(id, word) {
 	}
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
-
-// auto run
-get_navKeys() // used in clipboard
