@@ -40,14 +40,19 @@ function outputPrototypeLies() {
 
 		const getPrototypeLies = scope => {
 			const getEngine = () => {
-				const mathPI = 3.141592653589793
-				const compute = n => mathPI ** -100 == +`1.9275814160560${n}e-50`
-				return {
-					isChrome: compute(204),
-					isFirefox: compute(185),
-					isSafari: compute(206)
+				const x = [].constructor
+				try {
+					(-1).toFixed(-1)
+				} catch (err) {
+					return err.message.length + (x + '').split(x.name).join('').length
 				}
 			}
+
+			const ENGINE_IDENTIFIER = getEngine()
+			const IS_BLINK = ENGINE_IDENTIFIER == 80
+			const IS_GECKO = ENGINE_IDENTIFIER == 58
+			const IS_WEBKIT = ENGINE_IDENTIFIER == 77
+
 			const getRandomValues = () => (
 				String.fromCharCode(Math.random() * 26 + 97) +
 				Math.random().toString(36).slice(-7)
@@ -74,38 +79,6 @@ function outputPrototypeLies() {
 				} catch (error) {
 					return error.constructor.name != 'TypeError' ? true : false
 				}
-				const illegal = [
-					'',
-					'is',
-					'call',
-					'seal',
-					'keys',
-					'bind',
-					'apply',
-					'assign',
-					'freeze',
-					'values',
-					'entries',
-					'toString',
-					'isFrozen',
-					'isSealed',
-					'constructor',
-					'isExtensible',
-					'getPrototypeOf',
-					'preventExtensions',
-					'propertyIsEnumerable',
-					'getOwnPropertySymbols',
-					'getOwnPropertyDescriptors'
-				]
-				const hasInvalidError = !!illegal.find(prop => {
-					try {
-						prop == '' ? Object(proto[name]) : Object[prop](proto[name])
-						return true // failed to throw
-					} catch (error) {
-						return error.constructor.name != 'TypeError'
-					}
-				})
-				return hasInvalidError
 			}
 
 			// calling the interface prototype on the function should throw a TypeError
@@ -143,9 +116,8 @@ function outputPrototypeLies() {
 			// extending the function on a fake class should throw a TypeError and message "not a constructor"
 			const getClassExtendsTypeErrorLie = apiFunction => {
 				try {
-					const { isSafari } = getEngine()
 					const shouldExitInSafari13 = (
-						/version\/13/i.test((navigator || {}).userAgent) && isSafari
+						/version\/13/i.test((navigator || {}).userAgent) && IS_WEBKIT
 					)
 					if (shouldExitInSafari13) {
 						return false
@@ -292,8 +264,7 @@ function outputPrototypeLies() {
 						error.constructor.name == 'TypeError' && stackLines.length >= 5
 					)
 					// Chromium must throw error 'at Function.toString'... and not 'at Object.apply'
-					const { isChrome } = getEngine()
-					if (validStackSize && isChrome && (
+					if (validStackSize && IS_BLINK && (
 						!validScope ||
 						!/at Function\.toString/.test(stackLines[1]) ||
 						!/at you/.test(stackLines[2]) ||
@@ -309,14 +280,13 @@ function outputPrototypeLies() {
 			/* Proxy Detection */
 			// arguments or caller should not throw 'incompatible Proxy' TypeError
 			const tryIncompatibleProxy = fn => {
-				const { isFirefox } = getEngine()
 				try {
 					fn()
 					return true // failed to throw
 				} catch (error) {
 					return (
 						error.constructor.name != 'TypeError' ||
-						(isFirefox && /incompatible\sProxy/.test(error.message))
+						(IS_GECKO && /incompatible\sProxy/.test(error.message))
 					)
 				}
 			}
@@ -336,8 +306,7 @@ function outputPrototypeLies() {
 			// checking proxy instanceof proxy should throw a valid TypeError
 			const getInstanceofCheckLie = apiFunction => {
 				const proxy = new Proxy(apiFunction, {})
-				const { isChrome } = getEngine()
-				if (!isChrome) {
+				if (!IS_BLINK) {
 					return false
 				}
 				const hasValidStack = (error, type = 'Function') => {
@@ -373,8 +342,7 @@ function outputPrototypeLies() {
 
 			// defining properties should not throw an error
 			const getDefinePropertiesLie = (apiFunction) => {
-				const { isChrome } = getEngine()
-				if (!isChrome) {
+				if (!IS_BLINK) {
 					return false // chrome only test
 				}
 				try {
@@ -396,14 +364,13 @@ function outputPrototypeLies() {
 				}
 			}
 			const hasValidError = error => {
-				const { isChrome, isFirefox } = getEngine()
 				const { name, message } = error
 				const hasRangeError = name == 'RangeError'
 				const hasInternalError = name == 'InternalError'
-				const chromeLie = isChrome && (
+				const chromeLie = IS_BLINK && (
 					message != `Maximum call stack size exceeded` || !hasRangeError
 				)
-				const firefoxLie = isFirefox && (
+				const firefoxLie = IS_GECKO && (
 					message != `too much recursion` || !hasInternalError
 				)
 				return (hasRangeError || hasInternalError) && !(chromeLie || firefoxLie)
@@ -428,11 +395,10 @@ function outputPrototypeLies() {
 					spawnError(apiFunction, method)
 					return true // failed to throw
 				} catch (error) {
-					const { isChrome, isFirefox } = getEngine()
 					const { name, message, stack } = error
 					const targetStackLine = ((stack || '').split('\n') || [])[1]
 					const hasTypeError = name == 'TypeError'
-					const chromeLie = isChrome && (
+					const chromeLie = IS_BLINK && (
 						message != `Cyclic __proto__ value` || (
 							method == '__proto__' && (
 								!targetStackLine.startsWith(`    at Function.set __proto__ [as __proto__]`) &&
@@ -440,7 +406,7 @@ function outputPrototypeLies() {
 							)
 						)
 					)
-					const firefoxLie = isFirefox && (
+					const firefoxLie = IS_GECKO && (
 						message != `can't set prototype: it would cause a prototype chain cycle`
 					)
 					if (!hasTypeError || chromeLie || firefoxLie) {
@@ -580,74 +546,73 @@ function outputPrototypeLies() {
 						}
 
 						const interfaceObject = !!obj.prototype ? obj.prototype : obj
-						Object.getOwnPropertyNames(interfaceObject)
-							;[...new Set([
-								...Object.getOwnPropertyNames(interfaceObject),
-								...Object.keys(interfaceObject) // backup
-							])].sort().forEach(name => {
-								const skip = (
-									name == 'constructor' ||
-									(target.length && !new Set(target).has(name)) ||
-									(ignore.length && new Set(ignore).has(name))
-								)
-								if (skip) {
-									return
-								}
-								const objectNameString = /\s(.+)\]/
-								const apiName = `${
-									obj.name ? obj.name : objectNameString.test(obj) ? objectNameString.exec(obj)[1] : undefined
-									}.${name}`
-								propsSearched.push(apiName)
+						;[...new Set([
+							...Object.getOwnPropertyNames(interfaceObject),
+							...Object.keys(interfaceObject) // backup
+						])].sort().forEach(name => {
+							const skip = (
+								name == 'constructor' ||
+								(target.length && !new Set(target).has(name)) ||
+								(ignore.length && new Set(ignore).has(name))
+							)
+							if (skip) {
+								return
+							}
+							const objectNameString = /\s(.+)\]/
+							const apiName = `${
+								obj.name ? obj.name : objectNameString.test(obj) ? objectNameString.exec(obj)[1] : undefined
+								}.${name}`
+							propsSearched.push(apiName)
+							try {
+								const proto = obj.prototype ? obj.prototype : obj
+								let res // response from getLies
+
+								// search if function
 								try {
-									const proto = obj.prototype ? obj.prototype : obj
-									let res // response from getLies
-
-									// search if function
-									try {
-										const apiFunction = proto[name] // may trigger TypeError
-										if (typeof apiFunction == 'function') {
-											res = getLies({
-												apiFunction: proto[name],
-												proto,
-												lieProps: props
-											})
-											if (res.lied) {
-												return (props[apiName] = res.lieTypes)
-											}
-											return
+									const apiFunction = proto[name] // may trigger TypeError
+									if (typeof apiFunction == 'function') {
+										res = getLies({
+											apiFunction: proto[name],
+											proto,
+											lieProps: props
+										})
+										if (res.lied) {
+											return (props[apiName] = res.lieTypes)
 										}
-										// since there is no TypeError and the typeof is not a function,
-										// handle invalid values and ingnore name, length, and constants
-										if (
-											name != 'name' &&
-											name != 'length' &&
-											name[0] !== name[0].toUpperCase()) {
-											const lie = [`z: failed descriptor.value undefined`]
-											return (
-												props[apiName] = lie
-											)
-										}
-									} catch (error) { }
-									// else search getter function
-									const getterFunction = Object.getOwnPropertyDescriptor(proto, name).get
-									res = getLies({
-										apiFunction: getterFunction,
-										proto,
-										obj,
-										lieProps: props
-									}) // send the obj for special tests
-
-									if (res.lied) {
-										return (props[apiName] = res.lieTypes)
+										return
 									}
-									return
-								} catch (error) {
-									const lie = `aa: failed prototype test execution`
-									return (
-										props[apiName] = [lie]
-									)
+									// since there is no TypeError and the typeof is not a function,
+									// handle invalid values and ingnore name, length, and constants
+									if (
+										name != 'name' &&
+										name != 'length' &&
+										name[0] !== name[0].toUpperCase()) {
+										const lie = [`z: failed descriptor.value undefined`]
+										return (
+											props[apiName] = lie
+										)
+									}
+								} catch (error) { }
+								// else search getter function
+								const getterFunction = Object.getOwnPropertyDescriptor(proto, name).get
+								res = getLies({
+									apiFunction: getterFunction,
+									proto,
+									obj,
+									lieProps: props
+								}) // send the obj for special tests
+
+								if (res.lied) {
+									return (props[apiName] = res.lieTypes)
 								}
-							})
+								return
+							} catch (error) {
+								const lie = `aa: failed prototype test execution`
+								return (
+									props[apiName] = [lie]
+								)
+							}
+						})
 					}
 				}
 			}
