@@ -74,38 +74,6 @@ function outputPrototypeLies() {
 				} catch (error) {
 					return error.constructor.name != 'TypeError' ? true : false
 				}
-				const illegal = [
-					'',
-					'is',
-					'call',
-					'seal',
-					'keys',
-					'bind',
-					'apply',
-					'assign',
-					'freeze',
-					'values',
-					'entries',
-					'toString',
-					'isFrozen',
-					'isSealed',
-					'constructor',
-					'isExtensible',
-					'getPrototypeOf',
-					'preventExtensions',
-					'propertyIsEnumerable',
-					'getOwnPropertySymbols',
-					'getOwnPropertyDescriptors'
-				]
-				const hasInvalidError = !!illegal.find(prop => {
-					try {
-						prop == '' ? Object(proto[name]) : Object[prop](proto[name])
-						return true // failed to throw
-					} catch (error) {
-						return error.constructor.name != 'TypeError'
-					}
-				})
-				return hasInvalidError
 			}
 
 			// calling the interface prototype on the function should throw a TypeError
