@@ -663,6 +663,8 @@ function legend(array, invalid) {
 
 function run_test(isLoopy) {
 
+	let t0 = performance.now()
+
 	function test() {
 		// vars
 		let k = 60000,
@@ -963,6 +965,7 @@ function run_test(isLoopy) {
 			if (singles.length) {
 				legend(singlesLegend, invalid)
 			}
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		}
 	}
 
@@ -983,6 +986,7 @@ function run_test(isLoopy) {
 		}
 		// output loopData
 		dom.info.innerHTML = loopData.join("<br>")
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	} else {
 		test()
 	}
@@ -995,6 +999,7 @@ function run(isLoopy) {
 	legend()
 	dom.info = ""
 	dom.data = ""
+	dom.perf = ""
 	aYears = []
 
 	let yearStr = dom.inputYears.value
@@ -1031,7 +1036,6 @@ function run(isLoopy) {
 			// tested: negative years
 		//aYears = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
 		aYears = [1879,1921,1952,1976,2018]
-		dom.inputYears.value = aYears.join(",")
 
 		// test flips
 		//aDays = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
@@ -1039,6 +1043,11 @@ function run(isLoopy) {
 		//for (let i = 1800; i < 1900; i++) {aYears.push(i)}    // add a century
 		//for (let i = -1050; i < -350; i=i+7) {aYears.push(i)} // add negative years
 		//for (let i = 2000; i < 2100; i++) {aYears.push(i)}    // add the future
+
+		//aYears = [2022]
+		//aDays = ["August 8"]
+
+		dom.inputYears.value = aYears.join(",")
 		go = true
 	}
 
@@ -1056,6 +1065,7 @@ function run(isLoopy) {
 	}
 }
 
+get_globals()
 legend()
 
 </script>
