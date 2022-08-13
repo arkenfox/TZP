@@ -48,12 +48,18 @@
 let oTypes = {},
 	aList = [],
 	aNew = [], // level 1 items found in scrape not in the test
+	aErr = [], // invalid group codes
 	tstart,
 	domresult = document.getElementById("results"),
 	domperf = document.getElementById("perf"),
 	s3 = "<span class='s3'>",
+	s9 = "<span class='s9'>",
+	s14 = "<span class='s14'>",
 	sb = "<span class='bad'>",
-	sc = "</span>"
+	sg = "<span class='good'>",
+	sc = "</span>",
+	green_tick = "<span style='font-size: 10px;'><b>" + s9 +" \u2713"+ sc + "</b></span>",
+	red_cross = "<span style='font-size: 10px;'><b>" + sb +" \u2715"+ sc + "</b></span>"
 
 /** functions from generic **/
 // we don't want to include globals or generic which will pollute scraping
@@ -127,6 +133,7 @@ function copyclip(element) {
 			let regex = /<br\s*[\/]?>/gi
 			content = content.replace(regex, "\r\n")
 			content = content.replace(/<\/?span[^>]*>/g,"")
+			content = content.replace(/<\/?hr[^>]*>/g,"")
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 				// clipboard successfully set
@@ -151,7 +158,9 @@ function collectProps () {
     // prevent us decending into the DOM
     objCache.add(document);
     objCache.add(document.activeElement);
-    objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
+    //objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
+		if (self.event && event.currentTarget) objCache.add(event.currentTarget)
+
     const recursionAllowed = new Set();
     recursionAllowed.add('navigator');
 
@@ -198,40 +207,106 @@ function logConsole(name) {
 }
 
 function output() {
+
 	aList.sort()
 	domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "+ aList.length +" items"
+	// rename objects for sorting
+		// leave spaces for edgeHTML and other groups
+	oTypes[0] = oTypes["B"]; delete oTypes["B"]
+	oTypes[2] = oTypes["G"]; delete oTypes["G"]
+	oTypes[4] = oTypes["W"]; delete oTypes["W"]
+	oTypes[6] = oTypes["N"]; delete oTypes["N"]
+	oTypes[9] = oTypes["U"]; delete oTypes["U"]
+
 	let display = []
 	for (const k of Object.keys(oTypes).sort()) {
-		let res = oTypes[k]
-		res.sort()
-		if (res.length) {
-			let type = k.toUpperCase().padEnd(9)
-			let hash = mini_sha1(res.join())
-			display.push(s3 + type + sc +": "+ hash + s3 +" ["+ res.length +"]"+ sc +"<br>")
-			display.push("'"+ res.join("', '") + "'<br>")
+		let group = oTypes[k]
+		let gHash = []
+		let gDisplay = []
+		let gCount = 0
+		// get group details
+		for (const n of Object.keys(group).sort()) {
+			let data = group[n]
+			data.sort()
+			gCount += data.length
+			if (data.length) {
+				let tHash = mini_sha1(data.join())
+				gHash.push(n +": "+ tHash)
+				gDisplay.push(s3 + n + sc +": "+ tHash + s3 +" ["+ data.length +"]"+ sc +"<br>")
+				gDisplay.push("'"+ data.join("', '") + "'<br>")
+			}
 		}
-		domresult.innerHTML = display.join("<br>")
+
+		// get group hash
+		let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
+		// add group header
+		let strG = ""
+		if (k == 0) {strG = "BLINK ONLY"
+		} else if (k == 2) { strG = "GECKO ONLY"
+		} else if (k == 4) { strG = "WEBKIT ONLY"
+		} else if (k == 6) { strG = "NOT UNIQUE"
+		} else if (k == 9) { strG = "UNDETERMINED"
+		}
+		strG = strG.padEnd(12)
+		let header = strG + (gHash.length ? ": "+ hashG : "")
+		display.push(s14 + header + sc +"<br>")
+
+		// add group detail
+		if (gHash.length) {
+			display.push(gDisplay.join("<br>"))
+		}
+		// hr
+		if (k < 9) {
+			display.push("<br><hr>")
+		}
+
 	}
+	// invalid group codes
+	let strErr = ""
+	if (aErr.length) {
+		strErr = sb + "INVALID GROUP CODES" + sc
+			+ "<br><br>" + aErr.join(", ") + "<br><br><hr><br>"
+	}
+	// function hash
+	let strF = ""
+	try {
+		let testF = atob.toString()
+		testF = testF.replace(/\n/g,'\\n');
+		let hashF = mini(testF)
+		strF = s14 + "FUNCTION: "+ sc + hashF + " : " + testF + "<br><br><hr><br>"
+
+	} catch(e) {
+		console.error(e.name, e.message)
+	}
+
+	domresult.innerHTML = strF + strErr + display.join("<br>")
 }
 
-function rec(type, name) {
-	aList.push(name)
-	oTypes[type].push(name)
+function rec(type, name, group = "U") {
+		aList.push(name)
+		group = group.toUpperCase() // in case of a typo
+		try {
+			oTypes[group][type].push(name)
+		} catch(e) {
+			aErr.push(name)
+			oTypes["U"][type].push(name)
+		}
 }
 
 function reset() {
-	oTypes = {
-		"undefined" : [],
-		"boolean": [],
-		"number": [],
-		"bigint": [],
-		"string": [],
-		"symbol": [],
-		"function": [],
-		"object": [],
-	}
 	aList = []
+	aErr = []
 	domresult.innerHTML = ""
+	oTypes = {}
+	// B only_blink, G only gecko, W only webkit, M multiple engines U undetermined
+	let groups = ["B","G","W","N","U"]
+	let types = ["bigint","boolean","function","number","object","string","symbol","undefined",]
+	groups.forEach(function(group) {
+		oTypes[group] = {}
+		types.forEach(function(type) {
+			oTypes[group][type] = []
+		})
+	})
 }
 
 function rerun() {
@@ -245,9 +320,6 @@ function rerun() {
 function run() {
 	try {
 		tstart = performance.now()
-// gecko functions have line endings: e.g.
-// gecko: value": "function atob() {\n    [native code]\n}"
-// blink: value": "function atob() { [native code] }",
 
 // LEVEL ONE
 rec(typeof addEventListener, "addEventListener")
@@ -255,25 +327,27 @@ rec(typeof alert, "alert")
 rec(typeof applicationCache, "applicationCache")
 rec(typeof atob, "atob")
 rec(typeof blur, "blur")
+rec(typeof browser, "browser", "W")
 rec(typeof btoa, "btoa")
 rec(typeof caches, "caches")
 rec(typeof cancelAnimationFrame, "cancelAnimationFrame")
 rec(typeof cancelIdleCallback, "cancelIdleCallback")
 rec(typeof captureEvents, "captureEvents")
-rec(typeof chrome, "chrome")
+rec(typeof chrome, "chrome", "B")
 rec(typeof clearInterval, "clearInterval")
 rec(typeof clearTimeout, "clearTimeout")
 rec(typeof clientInformation, "clientInformation")
 rec(typeof close, "close")
 rec(typeof closed, "closed")
 rec(typeof confirm, "confirm")
+rec(typeof content, "content", "G")
 rec(typeof cookieStore, "cookieStore")
 rec(typeof createImageBitmap, "createImageBitmap")
 rec(typeof crossOriginIsolated, "crossOriginIsolated")
 rec(typeof crypto, "crypto")
 rec(typeof customElements, "customElements")
-rec(typeof defaultStatus, "defaultStatus")
 rec(typeof defaultstatus, "defaultstatus")
+rec(typeof defaultStatus, "defaultStatus")
 rec(typeof devicePixelRatio, "devicePixelRatio")
 rec(typeof dispatchEvent, "dispatchEvent")
 rec(typeof document, "document")
@@ -289,18 +363,19 @@ rec(typeof fullScreen, "fullScreen")
 rec(typeof getComputedStyle, "getComputedStyle")
 rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle")
 rec(typeof getDigitalGoodsService, "getDigitalGoodsService") // chrome-android
+rec(typeof getMatchedCSSRules, "getMatchedCSSRules", "W")
 rec(typeof getScreenDetails, "getScreenDetails")
 rec(typeof getSelection, "getSelection")
 rec(typeof history, "history")
 rec(typeof indexedDB, "indexedDB")
 rec(typeof innerHeight, "innerHeight")
 rec(typeof innerWidth, "innerWidth")
-rec(typeof InstallTrigger, "InstallTrigger") // being deprecated
+rec(typeof InstallTrigger, "InstallTrigger", "G")
 rec(typeof isSecureContext, "isSecureContext")
 rec(typeof Keyboard, "Keyboard")
 rec(typeof KeyboardEvent, "KeyboardEvent")
 rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap")
-rec(typeof KeyEvent, "KeyEvent")
+rec(typeof KeyEvent, "KeyEvent", "G")
 rec(typeof KeyframeEffect, "KeyframeEffect")
 rec(typeof keys, "keys")
 rec(typeof launchQueue, "launchQueue")
@@ -312,11 +387,13 @@ rec(typeof matchMedia, "matchMedia")
 rec(typeof menubar, "menubar")
 rec(typeof moveBy, "moveBy")
 rec(typeof moveTo, "moveTo")
-rec(typeof mozInnerScreenX, "mozInnerScreenX")
-rec(typeof mozInnerScreenY, "mozInnerScreenY")
+rec(typeof mozInnerScreenX, "mozInnerScreenX", "G")
+rec(typeof mozInnerScreenY, "mozInnerScreenY", "G")
+rec(typeof mozPaintCount, "mozPaintCount", "G")
 rec(typeof name, "name")
 rec(typeof navigation, "navigation")
 rec(typeof navigator, "navigator")
+rec(typeof offscreenBuffering, "offscreenBuffering", "W")
 rec(typeof onabort, "onabort")
 rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation")
 rec(typeof onafterprint, "onafterprint")
@@ -389,8 +466,8 @@ rec(typeof onmouseout, "onmouseout")
 rec(typeof onmouseover, "onmouseover")
 rec(typeof onmouseup, "onmouseup")
 rec(typeof onmousewheel, "onmousewheel")
-rec(typeof onmozfullscreenchange, "onmozfullscreenchange")
-rec(typeof onmozfullscreenerror, "onmozfullscreenerror")
+rec(typeof onmozfullscreenchange, "onmozfullscreenchange", "G")
+rec(typeof onmozfullscreenerror, "onmozfullscreenerror", "G")
 rec(typeof onoffline, "onoffline")
 rec(typeof ononline, "ononline")
 rec(typeof onorientationchange, "onorientationchange")
@@ -466,7 +543,7 @@ rec(typeof pageXOffset, "pageXOffset")
 rec(typeof pageYOffset, "pageYOffset")
 rec(typeof parent, "parent")
 rec(typeof performance, "performance")
-rec(typeof PERSISTENT, "PERSISTENT")
+rec(typeof PERSISTENT, "PERSISTENT", "B")
 rec(typeof personalbar, "personalbar")
 rec(typeof postMessage, "postMessage")
 rec(typeof print, "print")
@@ -480,6 +557,7 @@ rec(typeof requestAnimationFrame, "requestAnimationFrame")
 rec(typeof requestIdleCallback, "requestIdleCallback")
 rec(typeof resizeBy, "resizeBy")
 rec(typeof resizeTo, "resizeTo")
+rec(typeof safari, "safari", "W")
 rec(typeof scheduler, "scheduler")
 rec(typeof screen, "screen")
 rec(typeof screenLeft, "screenLeft")
@@ -487,6 +565,7 @@ rec(typeof screenTop, "screenTop")
 rec(typeof screenX, "screenX")
 rec(typeof screenY, "screenY")
 rec(typeof scroll, "scroll")
+rec(typeof scrollbars, "scrollbars")
 rec(typeof scrollBy, "scrollBy")
 rec(typeof scrollByLines, "scrollByLines")
 rec(typeof scrollByPages, "scrollByPages")
@@ -495,13 +574,13 @@ rec(typeof scrollMaxY, "scrollMaxY")
 rec(typeof scrollTo, "scrollTo")
 rec(typeof scrollX, "scrollX")
 rec(typeof scrollY, "scrollY")
-rec(typeof scrollbars, "scrollbars")
 rec(typeof self, "self")
 rec(typeof sessionStorage, "sessionStorage")
 rec(typeof setInterval, "setInterval")
 rec(typeof setResizable, "setResizable")
 rec(typeof setTimeout, "setTimeout")
 rec(typeof showDirectoryPicker, "showDirectoryPicker")
+rec(typeof showModalDialog, "showModalDialog", "W")
 rec(typeof showOpenFilePicker, "showOpenFilePicker")
 rec(typeof showSaveFilePicker, "showSaveFilePicker")
 rec(typeof sidebar, "sidebar") // FF deprecated?
@@ -512,7 +591,7 @@ rec(typeof statusbar, "statusbar")
 rec(typeof stop, "stop")
 rec(typeof structuredClone, "structuredClone")
 rec(typeof styleMedia, "styleMedia")
-rec(typeof TEMPORARY, "TEMPORARY")
+rec(typeof TEMPORARY, "TEMPORARY", "B")
 rec(typeof toolbar, "toolbar")
 rec(typeof top, "top")
 rec(typeof trustedTypes, "trustedTypes")
@@ -520,6 +599,10 @@ rec(typeof u2f, "u2f")
 rec(typeof updateCommands, "updateCommands")
 rec(typeof visualViewport, "visualViewport")
 rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame")
+rec(typeof webkitCancelRequestAnimationFrame, "webkitCancelRequestAnimationFrame", "W")
+rec(typeof webkitConvertPointFromNodeToPage, "webkitConvertPointFromNodeToPage", "W")
+rec(typeof webkitConvertPointFromPageToNode, "webkitConvertPointFromPageToNode", "W")
+rec(typeof webkitIndexedDB, "webkitIndexedDB", "W")
 rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame")
 rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem")
 rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL")
@@ -528,10 +611,9 @@ rec(typeof window, "window")
 
 // LEVEL 2
 let obj2 = "", str2 = ""
-
 if ("undefined" !== typeof applicationCache) { // maybe drop this: it's being deprecated
 	obj2 = applicationCache
-	str2 = "applicationCache"
+	str2 = "applicationCache."
 	rec(typeof obj2.CHECKING, str2+"CHECKING")
 	rec(typeof obj2.DOWNLOADING, str2+"DOWNLOADING")
 	rec(typeof obj2.IDLE, str2+"IDLE")
@@ -541,10 +623,10 @@ if ("undefined" !== typeof applicationCache) { // maybe drop this: it's being de
 	rec(typeof obj2.addEventListener, str2+"addEventListener")
 	rec(typeof obj2.dispatchEvent, str2+"dispatchEvent")
 	rec(typeof obj2.length, str2+"length")
-	rec(typeof obj2.mozAdd, str2+"mozAdd")
-	rec(typeof obj2.mozHasItem, str2+"mozHasItem")
-	rec(typeof obj2.mozItem, str2+"mozItem")
-	rec(typeof obj2.mozRemove, str2+"mozRemove")
+	rec(typeof obj2.mozAdd, str2+"mozAdd", "G")
+	rec(typeof obj2.mozHasItem, str2+"mozHasItem", "G")
+	rec(typeof obj2.mozItem, str2+"mozItem", "G")
+	rec(typeof obj2.mozRemove, str2+"mozRemove", "G")
 	rec(typeof obj2.oncached, str2+"oncached")
 	rec(typeof obj2.onchecking, str2+"onchecking")
 	rec(typeof obj2.ondownloading, str2+"ondownloading")
@@ -558,7 +640,6 @@ if ("undefined" !== typeof applicationCache) { // maybe drop this: it's being de
 	rec(typeof obj2.swapCache, str2+"swapCache")
 	rec(typeof obj2.update, str2+"update")
 }
-
 if ("undefined" !== typeof caches) {
 	rec(typeof caches.delete, "caches.delete")
 	rec(typeof caches.has, "caches.has")
@@ -566,8 +647,6 @@ if ("undefined" !== typeof caches) {
 	rec(typeof caches.match, "caches.match")
 	rec(typeof caches.open, "caches.open")
 }
-
-
 		output()
 	} catch(e) {
 		console.error(e.name, e.message)
