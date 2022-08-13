@@ -12,7 +12,6 @@
 		table {width: 880px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 		hr {color: #dcc18c}
-		.btnbad {border-color: #dc8c8c; color: #dc8c8c;}
 	</style>
 </head>
 <body>
@@ -32,9 +31,8 @@
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn3 btnfirst" onClick="rerun()">[ run ]</span>
 			<span class="btn3 btn" onClick="logConsole(`list`)">[ log list ]</span>
-			<span class="btn3 btn" onClick="copyclip(`results`)">[ copy ]</span>
 			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span>
-			<span class="btnbad btn" onClick="logConsole(`new`)" id="new"></span>
+			<span class="btn3 btn" onClick="copyclip(`results`)">[ copy ]</span>
 			<br><br>
 			<hr>
 			<br>
@@ -53,8 +51,8 @@ let oTypes = {},
 	tstart,
 	domresult = document.getElementById("results"),
 	domperf = document.getElementById("perf"),
-	domnew = document.getElementById("new"),
 	s3 = "<span class='s3'>",
+	sb = "<span class='bad'>",
 	sc = "</span>"
 
 /** functions from generic **/
@@ -195,7 +193,6 @@ function collectProps () {
 function logConsole(name) {
 	let array = [], str = ""
 	if (name == "list") { array = aList; str = "TEST LIST"
-	} else if (name == "new") { array = aNew; str = "NEW SCRAPE ITEMS NOT IN TEST LIST"
 	}
 	console.log(str +" [" + array.length +"]\n", array.join(", "))
 }
@@ -393,6 +390,7 @@ rec(typeof onmozfullscreenchange, "onmozfullscreenchange")
 rec(typeof onmozfullscreenerror, "onmozfullscreenerror")
 rec(typeof onoffline, "onoffline")
 rec(typeof ononline, "ononline")
+rec(typeof onorientationchange, "onorientationchange")
 rec(typeof onpagehide, "onpagehide")
 rec(typeof onpageshow, "onpageshow")
 rec(typeof onpause, "onpause")
@@ -428,6 +426,10 @@ rec(typeof onsubmit, "onsubmit")
 rec(typeof onsuspend, "onsuspend")
 rec(typeof ontimeupdate, "ontimeupdate")
 rec(typeof ontoggle, "ontoggle")
+rec(typeof ontouchcancel, "ontouchcancel")
+rec(typeof ontouchend, "ontouchend")
+rec(typeof ontouchmove, "ontouchmove")
+rec(typeof ontouchstart, "ontouchstart")
 rec(typeof ontransitioncancel, "ontransitioncancel")
 rec(typeof ontransitionend, "ontransitionend")
 rec(typeof ontransitionrun, "ontransitionrun")
@@ -479,7 +481,6 @@ rec(typeof screenTop, "screenTop")
 rec(typeof screenX, "screenX")
 rec(typeof screenY, "screenY")
 rec(typeof scroll, "scroll")
-rec(typeof scrollbars, "scrollbars")
 rec(typeof scrollBy, "scrollBy")
 rec(typeof scrollByLines, "scrollByLines")
 rec(typeof scrollByPages, "scrollByPages")
@@ -488,6 +489,7 @@ rec(typeof scrollMaxY, "scrollMaxY")
 rec(typeof scrollTo, "scrollTo")
 rec(typeof scrollX, "scrollX")
 rec(typeof scrollY, "scrollY")
+rec(typeof scrollbars, "scrollbars")
 rec(typeof self, "self")
 rec(typeof sessionStorage, "sessionStorage")
 rec(typeof setInterval, "setInterval")
@@ -567,7 +569,6 @@ if ("undefined" !== typeof caches) {
 
 function scrape() {
 	domresult.innerHTML = "<br>... running"
-	domnew.innerHTML = ""
 
 	aNew = []
 	// delay so user sees changes
@@ -593,19 +594,21 @@ function scrape() {
 
 		// hash it for easier compare
 		let hash = mini_sha1(result)
-
 		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
-		domresult.innerHTML = s3 + "HASH: "+ sc + hash +"<br><br>"
-			+ JSON.stringify(result, null, 2)
 
 		// check if any first level items are not in aList
+		let strNew = ""
 		if (aList.length) {
 			aNew = Object.keys(result)
 			aNew = aNew.filter(x => !aList.includes(x))
 			if (aNew.length) {
-				domnew.innerHTML = "[ log new ]"
+				strNew = sb +"NEW:"+ sc + "<br><br>'" + aNew.join("', '") +"'"+ sc +"<br><br>"
 			}
 		}
+		domresult.innerHTML = strNew + s3 + "HASH: "+ sc + hash +"<br><br>"
+			+ JSON.stringify(result, null, 2)
+
+
 	}, 100)
 }
 
