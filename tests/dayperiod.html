@@ -407,21 +407,19 @@ function run_main(method) {
 		if (isAll) {
 			method = "all"
 			// track FF version changes
-			if (isFF) {
-				// results
-				if (resultsHash == "51b9a0bf92c278297716aaba0c42d8ab99d8196d") {resultsHash += s4 +" [FF96+]"+ sc
-				} else if (resultsHash == "ac6185ab11f9f50f38457f56794e554699249a9b") {resultsHash += s4 +" [FF91-95]"+ sc
-				} else if (resultsHash == "d7cf5cafbaa4d2891099d3cf6c3f1f1fb39ef79e") {resultsHash += s4 +" [FF90]"+ sc
-				} else {resultsHash += zNEW
-				}
-				// locales
-				 // ignore non-supported = same as undefined = could be any supported locale
-				if (useSupportedOnly) {
-					if (localesHash == "a760b65d42061d28bdd0f573d9cf513833bc7945") {localesHash += s4 +" [FF96+]"+ sc
-					} else if (localesHash == "65f9190049b61ec3a2d14a273445a7bf1048e44d") {localesHash += s4 +" [FF91-95]"+ sc
-					} else if (localesHash == "9518690b69c7a74ff1c4b02a4bd36edeb31d3ee9") {localesHash += s4 +" [FF90]"+ sc
-					} else {localesHash += zNEW
-					}
+			// results
+			if (resultsHash == "51b9a0bf92c278297716aaba0c42d8ab99d8196d") {resultsHash += s4 +" [FF96+]"+ sc
+			} else if (resultsHash == "ac6185ab11f9f50f38457f56794e554699249a9b") {resultsHash += s4 +" [FF91-95]"+ sc
+			} else if (resultsHash == "d7cf5cafbaa4d2891099d3cf6c3f1f1fb39ef79e") {resultsHash += s4 +" [FF90]"+ sc
+			} else {resultsHash += zNEW
+			}
+			// locales
+			 // ignore non-supported = same as undefined = could be any supported locale
+			if (useSupportedOnly) {
+				if (localesHash == "a760b65d42061d28bdd0f573d9cf513833bc7945") {localesHash += s4 +" [FF96+]"+ sc
+				} else if (localesHash == "65f9190049b61ec3a2d14a273445a7bf1048e44d") {localesHash += s4 +" [FF91-95]"+ sc
+				} else if (localesHash == "9518690b69c7a74ff1c4b02a4bd36edeb31d3ee9") {localesHash += s4 +" [FF90]"+ sc
+				} else if (isFF) {localesHash += zNEW
 				}
 			}
 		}
@@ -434,8 +432,7 @@ function run_main(method) {
 		dom.results.innerHTML = display
 
 		// perf
-		let t1 = performance.now()
-		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
@@ -487,7 +484,11 @@ function setBtn(method) {
 
 dom.supported.checked = true
 legend()
-run_test()
+Promise.all([
+	get_globals()
+]).then(function(){
+	run_test()
+})
 
 </script>
 </body>
