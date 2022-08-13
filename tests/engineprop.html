@@ -3,7 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=900">
-	<title>engine objects</title>
+	<title>engine properties</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<!--<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>-->
@@ -24,7 +24,7 @@
 	<table id="tb3">
 		<col width="50%"><col width="50%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">engine objects
+			<div class="nav-title">engine properties
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
@@ -554,8 +554,13 @@ function scrape() {
 		delete result.sha1
 		//console.log(result)
 
-		domresult.innerHTML = JSON.stringify(result, null, 2)
+		// hash it for easier compare
+		let hash = mini_sha1(result)
+
 		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
+		domresult.innerHTML = s3 + "HASH: "+ sc + hash +"<br><br>"
+			+ JSON.stringify(result, null, 2)
+
 	}, 100)
 }
 
