@@ -262,7 +262,11 @@ function run_once() {
 	})
 }
 
-run_once()
+Promise.all([
+	get_globals()
+]).then(function(){
+	run_once()
+})
 
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */

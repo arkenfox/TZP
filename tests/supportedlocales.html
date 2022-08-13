@@ -339,6 +339,7 @@ function run_main(method, isLoopy) {
 				} else if (hash == "a1c42e941d133cb48e589afdd12fcdfcb4fff602") {notation = " [FF65-69]"
 				} else if (hash == "5aae08c4b2ec7e5ff4189632ae3fc197c8cd2091") {notation = " [FF59-64]"
 				} else if (hash == "83a4e7f35f712debc3d29a18e9ba5f9d6dc81f85") {notation = " [FF52-58]"
+				} else if (isFF) { notation = zNEW
 				}
 			} else {
 				if (hash == "01680dccae242ab9e4b430250bfab84c9c85125e") {notation = " [FF96+]" // 1738422: 152: sc
@@ -349,6 +350,7 @@ function run_main(method, isLoopy) {
 				} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // 143: ia, jv, ku, mi, sd, tk, xh
 				} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF59-64]" // 136: tg, tt, wo
 				} else if (hash == "d5fbd4f53dac40f6af9d0c9efa2ad339db5e3e63") {notation = " [FF52-58]" // 133
+				} else if (isFF) { notation = zNEW
 				}
 			}
 			return notation
@@ -521,8 +523,7 @@ function run_main(method, isLoopy) {
 			// display legend
 			dom.legend.innerHTML = s4 +"   LEGEND ["+ legend.length +"]"+ sc +"<br><br>"+ legend.join("<br>")
 			// perf
-			let t1 = performance.now()
-			dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		}
 	} catch(e) {
 		// catch unsupported
@@ -585,7 +586,11 @@ function setBtn(method) {
 }
 
 legend()
-run("ALL")
+Promise.all([
+	get_globals()
+]).then(function(){
+	run("ALL")
+})
 
 </script>
 </body>

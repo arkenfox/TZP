@@ -105,7 +105,11 @@ function run() {
 	}
 }
 
-run()
+Promise.all([
+	get_globals()
+]).then(function(){
+	run()
+})
 
 </script>
 </body>
