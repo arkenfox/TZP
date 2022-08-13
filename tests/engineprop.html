@@ -12,6 +12,7 @@
 		table {width: 880px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 		hr {color: #dcc18c}
+		.btnbad {border-color: #dc8c8c; color: #dc8c8c;}
 	</style>
 </head>
 <body>
@@ -30,8 +31,10 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn3 btnfirst" onClick="rerun()">[ run ]</span>
-			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span>
+			<span class="btn3 btn" onClick="logConsole(`list`)">[ log list ]</span>
 			<span class="btn3 btn" onClick="copyclip(`results`)">[ copy ]</span>
+			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span>
+			<span class="btnbad btn" onClick="logConsole(`new`)" id="new"></span>
 			<br><br>
 			<hr>
 			<br>
@@ -46,9 +49,11 @@
 
 let oTypes = {},
 	aList = [],
+	aNew = [], // level 1 items found in scrape not in the test
 	tstart,
 	domresult = document.getElementById("results"),
 	domperf = document.getElementById("perf"),
+	domnew = document.getElementById("new"),
 	s3 = "<span class='s3'>",
 	sc = "</span>"
 
@@ -148,7 +153,7 @@ function collectProps () {
     // prevent us decending into the DOM
     objCache.add(document);
     objCache.add(document.activeElement);
-    objCache.add(event?.currentTarget);
+    objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
     const recursionAllowed = new Set();
     recursionAllowed.add('navigator');
 
@@ -187,14 +192,17 @@ function collectProps () {
     }
 }
 
-function logList() {
-	console.log(aList.join(", "))
+function logConsole(name) {
+	let array = [], str = ""
+	if (name == "list") { array = aList; str = "TEST LIST"
+	} else if (name == "new") { array = aNew; str = "NEW SCRAPE ITEMS NOT IN TEST LIST"
+	}
+	console.log(str +" [" + array.length +"]\n", array.join(", "))
 }
 
 function output() {
 	aList.sort()
-	domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
-		+ "<span style='cursor: pointer;' onClick='logList()'>" + aList.length +" items" +"</span>"
+	domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "+ aList.length +" items"
 	let display = []
 	for (const k of Object.keys(oTypes).sort()) {
 		let res = oTypes[k]
@@ -559,6 +567,9 @@ if ("undefined" !== typeof caches) {
 
 function scrape() {
 	domresult.innerHTML = "<br>... running"
+	domnew.innerHTML = ""
+
+	aNew = []
 	// delay so user sees changes
 	setTimeout(function() {
 		tstart = performance.now()
@@ -568,7 +579,7 @@ function scrape() {
 		delete result.dom // just in case
 		delete result.collectProps
 		delete result.copyclip
-		delete result.logList
+		delete result.logConsole
 		delete result.mini
 		delete result.mini_sha1
 		delete result.output
@@ -589,13 +600,12 @@ function scrape() {
 
 		// check if any first level items are not in aList
 		if (aList.length) {
-			let aFound = Object.keys(result)
-			let aMissing = aFound.filter(x => !aList.includes(x))
-			if (aMissing.length) {
-				console.log("MISSING\n", aMissing)
+			aNew = Object.keys(result)
+			aNew = aNew.filter(x => !aList.includes(x))
+			if (aNew.length) {
+				domnew.innerHTML = "[ log new ]"
 			}
 		}
-
 	}, 100)
 }
 
