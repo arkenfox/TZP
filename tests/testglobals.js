@@ -2,8 +2,7 @@
 
 var dom;
 
-let sDetail = {},
-	navKeys = {}
+let sDetail = {}
 
 // css
 let s0 = " <span class='",
