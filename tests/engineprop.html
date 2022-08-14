@@ -155,51 +155,49 @@ function copyclip(element) {
 /** function for this test **/
 
 function collectProps () {
-    const objCache = new Set();
-    // skip these
-    objCache.add(window.self);
-    // prevent us decending into the DOM
-    objCache.add(document);
-    objCache.add(document.activeElement);
-    //objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
-		if (self.event && event.currentTarget) objCache.add(event.currentTarget)
+	const objCache = new Set();
+	// skip these
+	objCache.add(window.self);
+	// prevent us decending into the DOM
+	objCache.add(document);
+	objCache.add(document.activeElement);
+	//objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
+	if (self.event && event.currentTarget) objCache.add(event.currentTarget)
 
-    const recursionAllowed = new Set();
-    recursionAllowed.add('navigator');
-
-    function extractObjectProps (obj, breadcrumbs = [], depth = 0) {
-        if (depth >= 5) {
-            return {};
-        }
-        const props = {};
-        const proplist = [];
-        for (const prop in obj) {
-            proplist.push(prop);
-        }
-        proplist.sort().forEach((prop) => {
-            try {
-                const desc = Object.getOwnPropertyDescriptor(obj, prop) || {};
-                desc.type = typeof obj[prop];
-                if (desc.type === 'function') {
-                    desc.value = obj[prop].toString();
-                } else if (desc.type === 'object') {
-                    if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
-                        objCache.add(obj[prop]);
-                        desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1);
-                    }
-                    delete desc.value;
-                }
-                props[prop] = desc;
-            } catch (e) {
-                console.warn(`Error for ${breadcrumbs.join('.')}.${prop}`, e);
-            }
-        });
-        return props;
-    }
-
-    return {
-        window: extractObjectProps(window)
-    }
+	const recursionAllowed = new Set();
+	recursionAllowed.add('navigator');
+	function extractObjectProps (obj, breadcrumbs = [], depth = 0) {
+		if (depth >= 5) {
+			return {};
+		}
+		const props = {};
+		const proplist = [];
+		for (const prop in obj) {
+			proplist.push(prop);
+		}
+		proplist.sort().forEach((prop) => {
+			try {
+				const desc = Object.getOwnPropertyDescriptor(obj, prop) || {};
+				desc.type = typeof obj[prop];
+				if (desc.type === 'function') {
+					desc.value = obj[prop].toString();
+				} else if (desc.type === 'object') {
+					if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
+						objCache.add(obj[prop]);
+						desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1);
+					}
+						delete desc.value;
+					}
+					props[prop] = desc;
+			} catch (e) {
+				console.warn(`Error for ${breadcrumbs.join('.')}.${prop}`, e);
+			}
+		});
+		return props;
+	}
+	return {
+		window: extractObjectProps(window)
+	}
 }
 
 function logConsole(name) {
@@ -245,10 +243,8 @@ function output() {
 				}
 			}
 		}
-
 		// get group hash
 		let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
-
 		// add group header
 		let strG = "", strExtra = "", strColor = s12
 			//only
@@ -265,7 +261,6 @@ function output() {
 		}
 		strG = strG.padStart(padNum)
 		let header = strG + (gHash.length ? ": "+ hashG : "")
-
 		// add a green "all undefined" - we should get at least three per engine
 		let strU = ""
 		if (gHash.length && k < 90) {
@@ -274,9 +269,6 @@ function output() {
 			}
 		}
 		display.push(strColor + header + strExtra + sc + strU +"<br>")
-
-
-
 		// add group detail
 		if (gHash.length) {
 			display.push(gDisplay.join("<br>"))
@@ -285,7 +277,6 @@ function output() {
 		if (k < 99) {
 			display.push("<br><hr>")
 		}
-
 	}
 	// invalid group codes
 	let strErr = ""
@@ -304,18 +295,18 @@ function output() {
 	} catch(e) {
 		console.error(e.name, e.message)
 	}
-
+	// output
 	domresult.innerHTML = strErr + strDupe + strF + display.join("<br>")
 }
 
 function rec(type, name, group = 98) {
-		aList.push(name)
-		try {
-			oTypes[group][type].push(name)
-		} catch(e) {
-			aErr.push(name)
-			oTypes[98][type].push(name)
-		}
+	aList.push(name)
+	try {
+		oTypes[group][type].push(name)
+	} catch(e) {
+		aErr.push(name)
+		oTypes[98][type].push(name)
+	}
 }
 
 function reset() {
@@ -344,34 +335,87 @@ function rerun() {
 function run() {
 	try {
 		tstart = performance.now()
+		let code
 
 /** LEVEL ONE ***/
 
+// undetermined: status confirmed in EOL comments (A = android)
+	// where the F did I get these two from?
+code = 98
+rec(typeof event, "event", code)
+rec(typeof keys, "keys", code)
+
 // blink only
-let code = 10
+code = 10
+rec(typeof Keyboard, "Keyboard", code)
+rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap", code)
 rec(typeof PERSISTENT, "PERSISTENT", code)
 rec(typeof TEMPORARY, "TEMPORARY", code)
 rec(typeof chrome, "chrome", code)
-rec(typeof opr, "opr", code) // opera desktop at least
-rec(typeof showDirectoryPicker, "showDirectoryPicker", code) // blink desktop only
-rec(typeof showOpenFilePicker, "showOpenFilePicker", code) // blink desktop only
-rec(typeof showSaveFilePicker, "showSaveFilePicker", code) // blink desktop only
+rec(typeof cookieStore, "cookieStore", code)
+rec(typeof getDigitalGoodsService, "getDigitalGoodsService", code) // android
+rec(typeof getScreenDetails, "getScreenDetails", code)
+rec(typeof launchQueue, "launchQueue", code)
+rec(typeof navigation, "navigation", code)
+rec(typeof offscreenBuffering, "offscreenBuffering", code)
+rec(typeof onappinstalled, "onappinstalled", code)
+rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code)
+rec(typeof onbeforematch, "onbeforematch", code)
+rec(typeof onbeforexrselect, "onbeforexrselect", code)
+rec(typeof oncontextlost, "oncontextlost", code)
+rec(typeof oncontextrestored, "oncontextrestored", code)
+rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code)
+rec(typeof onpointerrawupdate, "onpointerrawupdate", code)
+rec(typeof onsearch, "onsearch", code)
+rec(typeof openDatabase, "openDatabase", code)
+rec(typeof opr, "opr", code) // OPERA desktop at least
+rec(typeof originAgentCluster, "originAgentCluster", code)
+rec(typeof queryLocalFonts, "queryLocalFonts", code)
+rec(typeof showDirectoryPicker, "showDirectoryPicker", code)
+rec(typeof showOpenFilePicker, "showOpenFilePicker", code)
+rec(typeof showSaveFilePicker, "showSaveFilePicker", code)
+rec(typeof trustedTypes, "trustedTypes", code)
+rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code)
+rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code)
+rec(typeof webkitStorageInfo, "webkitStorageInfo", code)
 
 // gecko only
 code = 12
-rec(typeof InstallTrigger, "InstallTrigger", code) // in process of deprecation
+rec(typeof InstallTrigger, "InstallTrigger", code) // prefs-to-be-deprecated
 rec(typeof KeyEvent, "KeyEvent", code)
+rec(typeof applicationCache, "applicationCache", code) // pref-to-be-deprecated
+rec(typeof content, "content", code) // deprecated
 rec(typeof dump, "dump", code)
+rec(typeof fullScreen, "fullScreen", code)
 rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle", code)
 rec(typeof mozInnerScreenX, "mozInnerScreenX", code)
 rec(typeof mozInnerScreenY, "mozInnerScreenY", code)
 rec(typeof mozPaintCount, "mozPaintCount", code) // deprecated
+rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code)
+rec(typeof onbeforeinput, "onbeforeinput", code)
+rec(typeof ondevicelight, "ondevicelight", code) // deprecated
+rec(typeof ondeviceproximity, "ondeviceproximity", code) // deprecated
+rec(typeof ongamepadconnected, "ongamepadconnected", code)
+rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code)
+rec(typeof onloadend, "onloadend", code)
 rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code)
 rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code)
+rec(typeof onshow, "onshow", code) // deprecated
+rec(typeof onuserproximity, "onuserproximity") // deprecated
+rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code) // pref (dom.vr.enabled)
+rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code) // pref
+rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code) // pref
+rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code) // pref
+rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code) // pref
 rec(typeof scrollByLines, "scrollByLines", code)
 rec(typeof scrollByPages, "scrollByPages", code)
 rec(typeof scrollMaxX, "scrollMaxX", code)
 rec(typeof scrollMaxY, "scrollMaxY", code)
+rec(typeof setResizable, "setResizable", code)
+rec(typeof sidebar, "sidebar", code) // deprecated
+rec(typeof sizeToContent, "sizeToContent", code)
+rec(typeof u2f, "u2f", code)
+rec(typeof updateCommands, "updateCommands", code)
 
 // webkit only
 code = 14
@@ -386,12 +430,21 @@ rec(typeof webkitIndexedDB, "webkitIndexedDB", code)
 
 // blink + gecko (not seen in webkit)
 code = 50
+rec(typeof KeyboardEvent, "KeyboardEvent", code)
+rec(typeof KeyframeEffect, "KeyframeEffect", code)
 rec(typeof cancelIdleCallback, "cancelIdleCallback", code)
 rec(typeof external, "external", code)
 rec(typeof onauxclick, "onauxclick", code)
 rec(typeof ondevicemotion, "ondevicemotion", code)
 rec(typeof ondeviceorientation, "ondeviceorientation", code)
+rec(typeof ondragexit, "ondragexit", code) // touch
 rec(typeof onmessageerror, "onmessageerror", code)
+rec(typeof onorientationchange, "onorientationchange") // mobile/tablet
+rec(typeof ontouchcancel, "ontouchcancel", code)
+rec(typeof ontouchend, "ontouchend", code)
+rec(typeof ontouchmove, "ontouchmove", code)
+rec(typeof ontouchstart, "ontouchstart", code)
+rec(typeof orientation, "orientation", code)
 rec(typeof requestIdleCallback, "requestIdleCallback", code)
 rec(typeof scheduler, "scheduler", code)
 
@@ -408,66 +461,6 @@ rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code)
 // gecko + webkit (not seen in blink)
 code = 54
 rec(typeof onanimationcancel, "onanimationcancel", code)
-
-// undetermined
-code = undefined
-rec(typeof applicationCache, "applicationCache")
-rec(typeof content, "content")
-rec(typeof cookieStore, "cookieStore")
-rec(typeof event, "event")
-rec(typeof fullScreen, "fullScreen")
-rec(typeof getDigitalGoodsService, "getDigitalGoodsService") // chrome-android
-rec(typeof getScreenDetails, "getScreenDetails")
-rec(typeof Keyboard, "Keyboard")
-rec(typeof KeyboardEvent, "KeyboardEvent")
-rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap")
-rec(typeof KeyframeEffect, "KeyframeEffect")
-rec(typeof keys, "keys")
-rec(typeof launchQueue, "launchQueue")
-rec(typeof navigation, "navigation")
-rec(typeof offscreenBuffering, "offscreenBuffering")
-rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation")
-rec(typeof onappinstalled, "onappinstalled")
-rec(typeof onbeforeinput, "onbeforeinput")
-rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt")
-rec(typeof onbeforematch, "onbeforematch")
-rec(typeof onbeforexrselect, "onbeforexrselect")
-rec(typeof oncontextlost, "oncontextlost")
-rec(typeof oncontextrestored, "oncontextrestored")
-rec(typeof ondevicelight, "ondevicelight")
-rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute")
-rec(typeof ondeviceproximity, "ondeviceproximity")
-rec(typeof ondragexit, "ondragexit")
-rec(typeof ongamepadconnected, "ongamepadconnected")
-rec(typeof ongamepaddisconnected, "ongamepaddisconnected")
-rec(typeof onloadend, "onloadend")
-rec(typeof onorientationchange, "onorientationchange")
-rec(typeof onpointerrawupdate, "onpointerrawupdate")
-rec(typeof onsearch, "onsearch")
-rec(typeof onshow, "onshow")
-rec(typeof ontouchcancel, "ontouchcancel")
-rec(typeof ontouchend, "ontouchend")
-rec(typeof ontouchmove, "ontouchmove")
-rec(typeof ontouchstart, "ontouchstart")
-rec(typeof onuserproximity, "onuserproximity")
-rec(typeof onvrdisplayactivate, "onvrdisplayactivate")
-rec(typeof onvrdisplayconnect, "onvrdisplayconnect")
-rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate")
-rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect")
-rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange")
-rec(typeof openDatabase, "openDatabase")
-rec(typeof orientation, "orientation")
-rec(typeof originAgentCluster, "originAgentCluster")
-rec(typeof queryLocalFonts, "queryLocalFonts")
-rec(typeof setResizable, "setResizable")
-rec(typeof sidebar, "sidebar") // FF? deprecated
-rec(typeof sizeToContent, "sizeToContent")
-rec(typeof trustedTypes, "trustedTypes")
-rec(typeof u2f, "u2f")
-rec(typeof updateCommands, "updateCommands")
-rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem")
-rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL")
-rec(typeof webkitStorageInfo, "webkitStorageInfo")
 
 // I: IGNORE: confirmed common in blink, gecko, webkit
 code = 99
@@ -657,7 +650,6 @@ rec(typeof top, "top", code)
 rec(typeof visualViewport, "visualViewport", code)
 rec(typeof window, "window", code)
 
-
 // LEVEL 2
 // I don't think we need bother with level 2 for a mini isEngine
 /*
@@ -669,7 +661,6 @@ if ("undefined" !== typeof caches) {
 	rec(typeof caches.open, "caches.open")
 }
 */
-
 		output()
 	} catch(e) {
 		console.error(e.name, e.message)
