@@ -229,6 +229,7 @@ function output() {
 		let gHash = []
 		let gDisplay = []
 		let gCount = 0
+		let gCountUndefined = 0
 		// get group details
 		for (const n of Object.keys(group).sort()) {
 			let data = group[n]
@@ -239,11 +240,15 @@ function output() {
 				gHash.push(n +": "+ tHash)
 				gDisplay.push(s3 + n.padStart(padNum) + sc +": "+ tHash + s3 +" ["+ data.length +"]"+ sc +"<br>")
 				gDisplay.push("'"+ data.join("', '") + "'<br>")
+				if (n == "undefined") {
+					gCountUndefined += data.length
+				}
 			}
 		}
 
 		// get group hash
 		let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
+
 		// add group header
 		let strG = "", strExtra = "", strColor = s12
 			//only
@@ -260,7 +265,17 @@ function output() {
 		}
 		strG = strG.padStart(padNum)
 		let header = strG + (gHash.length ? ": "+ hashG : "")
-		display.push(strColor + header + strExtra + sc +"<br>")
+
+		// add a green "all undefined" - we should get at least three per engine
+		let strU = ""
+		if (gHash.length && k < 90) {
+			if (gCount == gCountUndefined) {
+				strU = " "+ green_tick + sg +" all "+ gCountUndefined +" undefined"+ sc
+			}
+		}
+		display.push(strColor + header + strExtra + sc + strU +"<br>")
+
+
 
 		// add group detail
 		if (gHash.length) {
@@ -353,6 +368,8 @@ rec(typeof mozInnerScreenY, "mozInnerScreenY", code)
 rec(typeof mozPaintCount, "mozPaintCount", code) // deprecated
 rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code)
 rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code)
+rec(typeof scrollByLines, "scrollByLines", code)
+rec(typeof scrollByPages, "scrollByPages", code)
 rec(typeof scrollMaxX, "scrollMaxX", code)
 rec(typeof scrollMaxY, "scrollMaxY", code)
 
@@ -442,8 +459,6 @@ rec(typeof openDatabase, "openDatabase")
 rec(typeof orientation, "orientation")
 rec(typeof originAgentCluster, "originAgentCluster")
 rec(typeof queryLocalFonts, "queryLocalFonts")
-rec(typeof scrollByLines, "scrollByLines")
-rec(typeof scrollByPages, "scrollByPages")
 rec(typeof setResizable, "setResizable")
 rec(typeof sidebar, "sidebar") // FF? deprecated
 rec(typeof sizeToContent, "sizeToContent")
