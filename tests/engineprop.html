@@ -243,39 +243,41 @@ function output() {
 				}
 			}
 		}
-		// get group hash
-		let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
-		// add group header
-		let strG = "", strExtra = "", strColor = s12
-			//only
-		if (k == 10) {strG = "BLINK ONLY"
-		} else if (k == 12) { strG = "GECKO ONLY"
-		} else if (k == 14) { strG = "WEBKIT ONLY"
-			// in two but not the other
-		} else if (k == 50) { strG = "BLINK + GECKO"; strColor = s14; strExtra = " [not webkit... yet]"
-		} else if (k == 52) { strG = "BLINK + WEBKIT"; strColor = s14; strExtra = " [not gecko... yet]"
-		} else if (k == 54) { strG = "GECKO + WEBKIT"; strColor = s14; strExtra = " [not blink... yet]"
-			// the rest
-		} else if (k == 98) { strG = "UNDETERMINED"; strColor = s17; strExtra = " to be assessed"
-		} else if (k == 99) { strG = "IGNORE"; strColor = s17; strExtra = " confirmed in all three engines"
-		}
-		strG = strG.padStart(padNum)
-		let header = strG + (gHash.length ? ": "+ hashG : "")
-		// add a green "all undefined" - we should get at least three per engine
-		let strU = ""
-		if (gHash.length && k < 90) {
-			if (gCount == gCountUndefined) {
-				strU = " "+ green_tick + sg +" all "+ gCountUndefined +" undefined"+ sc
+		if (gDisplay.length) {
+			// get group hash
+			let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
+			// add group header
+			let strG = "", strExtra = "", strColor = s12
+				//only
+			if (k == 10) {strG = "BLINK ONLY"
+			} else if (k == 12) { strG = "GECKO ONLY"
+			} else if (k == 14) { strG = "WEBKIT ONLY"
+				// in two but not the other
+			} else if (k == 50) { strG = "BLINK + GECKO"; strColor = s14; strExtra = " [not webkit... yet]"
+			} else if (k == 52) { strG = "BLINK + WEBKIT"; strColor = s14; strExtra = " [not gecko... yet]"
+			} else if (k == 54) { strG = "GECKO + WEBKIT"; strColor = s14; strExtra = " [not blink... yet]"
+				// the rest
+			} else if (k == 98) { strG = "UNDETERMINED"; strColor = s17; strExtra = " to be assessed"
+			} else if (k == 99) { strG = "IGNORE"; strColor = s17; strExtra = " confirmed in all three engines"
 			}
-		}
-		display.push(strColor + header + strExtra + sc + strU +"<br>")
-		// add group detail
-		if (gHash.length) {
-			display.push(gDisplay.join("<br>"))
-		}
-		// hr
-		if (k < 99) {
-			display.push("<br><hr>")
+			strG = strG.padStart(padNum)
+			let header = strG + (gHash.length ? ": "+ hashG : "")
+			// add a green "all undefined" - we should get at least three per engine
+			let strU = ""
+			if (gHash.length && k < 90) {
+				if (gCount == gCountUndefined) {
+					strU = " "+ green_tick + sg +" all "+ gCountUndefined +" undefined"+ sc
+				}
+			}
+			display.push(strColor + header + strExtra + sc + strU +"<br>")
+			// add group detail
+			if (gHash.length) {
+				display.push(gDisplay.join("<br>"))
+			}
+			// hr
+			if (k < 99) {
+				display.push("<br><hr>")
+			}
 		}
 	}
 	// invalid group codes
@@ -339,11 +341,10 @@ function run() {
 
 /** LEVEL ONE ***/
 
-// undetermined: status confirmed in EOL comments (A = android)
+// undetermined: status confirmed in EOL comments
 	// where the F did I get these two from?
 code = 98
-rec(typeof event, "event", code)
-rec(typeof keys, "keys", code)
+//rec(typeof keys, "keys", code)
 
 // blink only
 code = 10
@@ -679,6 +680,7 @@ function scrape() {
 		let result = collectProps().window
 
 		// cleanup
+		delete result.event // caused by calling event in the scrape function
 		delete result.dom // just in case
 		delete result.collectProps
 		delete result.compare
