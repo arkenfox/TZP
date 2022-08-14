@@ -383,7 +383,6 @@ rec(typeof webkitStorageInfo, "webkitStorageInfo", code)
 code = 12
 rec(typeof InstallTrigger, "InstallTrigger", code) // prefs-to-be-deprecated
 rec(typeof KeyEvent, "KeyEvent", code)
-rec(typeof applicationCache, "applicationCache", code) // pref-to-be-deprecated
 rec(typeof content, "content", code) // deprecated
 rec(typeof dump, "dump", code)
 rec(typeof fullScreen, "fullScreen", code)
@@ -466,6 +465,9 @@ rec(typeof onanimationcancel, "onanimationcancel", code)
 code = 99
 rec(typeof addEventListener, "addEventListener", code)
 rec(typeof alert, "alert", code)
+rec(typeof applicationCache, "applicationCache", code)
+	// ^ gecko confirmed: pref-to-be-deprecated (appCache itself is deprecated: the API does nothing)
+	// ^ ignore: appCache would have been in other older engine(s) releases
 rec(typeof atob, "atob", code)
 rec(typeof blur, "blur", code)
 rec(typeof btoa, "btoa", code)
