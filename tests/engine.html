@@ -64,7 +64,7 @@ let results = [],
 	data = {},
 	aPerf = [],
 	count = 0,
-	expected = 96,
+	expected = 95,
 	gt0, // global timer
 	bBlock = false, // throw a test error
 	bNum = false // display numbering instead of perf
@@ -166,8 +166,8 @@ function fnDisplay() {
 	let summary = ""
 	if (isFFvalid) {
 		let needStr = "... who needs "+ s3+ (expected - 5) + " tests" + sc
-			+ (canPerf ? " in "+ s3 + perfValue + sc : "")
-			+ "? Here's a single test + nine more to make sure"
+			+ " and "+ s3 + "several hundred metrics" + sc
+			+ (canPerf ? " in "+ s3 + perfValue + sc : "") + "?"
 		summary += s14 +"MINI TEST "+ sc + needStr
 			+"<br><br>"+ isFFpretty +" ... are you gecko? "+ (isFF ? sg +"YES" : sb +"NO") + sc
 			+"<br><br><hr><br>"
@@ -591,8 +591,8 @@ function get_intl_supportedlocales(num) {
 			type = array[4],
 			res = []
 		let title = "Intl."+ type
-		if (bBlock) {bB = 1}
 		try {
+			if (bBlock) {bB = 1}
 			if (type == "Collator") { res = Intl.Collator.supportedLocalesOf(list)
 			} else if (type == "DateTimeFormat") { res = Intl.DateTimeFormat.supportedLocalesOf(list)
 			} else if (type == "DisplayNames") { res = Intl.DisplayNames.supportedLocalesOf(list)
@@ -1660,52 +1660,6 @@ function get_storage_estimate(num, title) {
 	}
 }
 
-function get_window_chrome(num, title) {
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		if (bBlock) {bB = 1}
-		let bool = "chrome" in window
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, bool, !bool, "skip", perf)
-	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
-	}
-}
-
-function get_window_values(num) {
-	//window.offscreenBuffering
-	let strB = "[offscreenBuffering] window", boolB = false
-	try {
-		let t0B; if (canPerf) {t0B = performance.now()}
-		if (bBlock) {bB = 1}
-		let resB = window.offscreenBuffering
-		if (resB == undefined) {boolB = true}
-		resB = fnClean(resB)
-		let perfB = canPerf ? performance.now() - t0B : ""
-		fnRecord(num, strB, resB, boolB, "skip", perfB)
-	} catch(e) {
-		fnRecord(num, strB, e.name, zB0, e.message)
-	}
-	// window.openDatabase
-	let strO = "[openDatabase] window", boolO = false
-	let t0, perf = ""; if (canPerf) {t0 = performance.now()}
-	try {
-		if (bBlock) {bB = 1}
-		window.openDatabase("test", "1.0", "test", 1024)
-		perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num+2, strO, "success", boolO, "skip", perf)
-	} catch(e) {
-		if (e.name == "TypeError" && e.message == "window.openDatabase is not a function") {
-			perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num+2, strO, e.name, true, e.message, perf)
-		} else if (e.name == "UnknownError" && e.message == "Web SQL is deprecated") {
-			fnRecord(num+2, strO, e.name, false, e.message) // webkit
-		} else {
-			fnRecord(num+2, strO, e.name, zB0, e.message)
-		}
-	}
-}
-
 function get_window_moz(num) {
 
 	let strC = "[CSSMozDocumentRule] window"
@@ -1770,6 +1724,123 @@ function get_window_moz(num) {
 	}
 }
 
+function get_window_props(num1, num2, title) {
+	// conservative small subset of items from engineprops PoC
+	function rec(type, value, name) {
+		if (value !== "undefined") {
+			if (type == num1) {resE.push(name)} else {resU.push(name)}
+		}
+	}
+
+	// expected
+	let t0E; if (canPerf) {t0E = performance.now()}
+	let resE = []
+	try {
+		if (bBlock) {bB = 1}
+		// enuemrate
+		rec(num1, typeof KeyEvent, "KeyEvent")
+		rec(num1, typeof dump, "dump")
+		rec(num1, typeof fullScreen, "fullScreen")
+		rec(num1, typeof getDefaultComputedStyle, "getDefaultComputedStyle")
+		rec(num1, typeof mozInnerScreenX, "mozInnerScreenX")
+		rec(num1, typeof mozInnerScreenY, "mozInnerScreenY")
+		rec(num1, typeof onabsolutedeviceorientation, "onabsolutedeviceorientation")
+		rec(num1, typeof onbeforeinput, "onbeforeinput")
+		//rec(num1, typeof ongamepadconnected, "ongamepadconnected") // risky? IDHave any gamepads
+		//rec(num1, typeof ongamepaddisconnected, "ongamepaddisconnected")
+		//rec(num1, typeof onloadend, "onloadend") // risky?
+		rec(num1, typeof onmozfullscreenchange, "onmozfullscreenchange")
+		rec(num1, typeof onmozfullscreenerror, "onmozfullscreenerror")
+		rec(num1, typeof scrollByLines, "scrollByLines")
+		rec(num1, typeof scrollByPages, "scrollByPages")
+		rec(num1, typeof scrollMaxX, "scrollMaxX")
+		rec(num1, typeof scrollMaxY, "scrollMaxY")
+		rec(num1, typeof setResizable, "setResizable")
+		rec(num1, typeof sizeToContent, "sizeToContent")
+		rec(num1, typeof u2f, "u2f")
+		rec(num1, typeof updateCommands, "updateCommands")
+		// finish
+		let boolE = resE.length > 0
+		let hashE = boolE ? mini_sha1(resE.join()) : "none"
+		if (boolE) {
+			if (resE.join(", ").length < 48) {
+				hashE = resE.join(", ")
+			} else {
+				sDetail["expected_"+ title] = resE
+				hashE += buildButton(3, "expected_"+ title, resE.length)
+			}
+		}
+		let perfE = canPerf ? performance.now() - t0E : ""
+		fnRecord(num1, title, hashE, boolE, "skip", perfE)
+	} catch(e) {
+		fnRecord(num1, title, e.name, zB0, e.message)
+	}
+
+	// unexpected
+	let t0U; if (canPerf) {t0U = performance.now()}
+	let resU = []
+	try {
+		if (bBlock) {bB = 1}
+		// enumerate
+			// webkit only
+		rec(num2, typeof browser, "browser")
+		rec(num2, typeof getMatchedCSSRules, "getMatchedCSSRules")
+		rec(num2, typeof safari, "safari")
+		rec(num2, typeof showModalDialog, "showModalDialog")
+		rec(num2, typeof webkitCancelRequestAnimationFrame, "webkitCancelRequestAnimationFrame")
+		rec(num2, typeof webkitConvertPointFromNodeToPage, "webkitConvertPointFromNodeToPage")
+		rec(num2, typeof webkitConvertPointFromPageToNode, "webkitConvertPointFromPageToNode")
+		rec(num2, typeof webkitIndexedDB, "webkitIndexedDB")
+			// gecko only
+		rec(num2, typeof Keyboard, "Keyboard")
+		rec(num2, typeof KeyboardLayoutMap, "KeyboardLayoutMap")
+		rec(num2, typeof PERSISTENT, "PERSISTENT")
+		rec(num2, typeof TEMPORARY, "TEMPORARY")
+		rec(num2, typeof chrome, "chrome")
+		rec(num2, typeof cookieStore, "cookieStore")
+		rec(num2, typeof getScreenDetails, "getScreenDetails")
+		rec(num2, typeof launchQueue, "launchQueue")
+		rec(num2, typeof navigation, "navigation")
+		rec(num2, typeof offscreenBuffering, "offscreenBuffering")
+		rec(num2, typeof onappinstalled, "onappinstalled")
+		rec(num2, typeof onbeforeinstallprompt, "onbeforeinstallprompt")
+		rec(num2, typeof onbeforematch, "onbeforematch")
+		rec(num2, typeof onbeforexrselect, "onbeforexrselect")
+		rec(num2, typeof oncontextlost, "oncontextlost")
+		rec(num2, typeof oncontextrestored, "oncontextrestored")
+		rec(num2, typeof ondeviceorientationabsolute, "ondeviceorientationabsolute")
+		rec(num2, typeof onsearch, "onsearch")
+		rec(num2, typeof openDatabase, "openDatabase")
+		rec(num2, typeof opr, "opr") // OPERA desktop at least
+		rec(num2, typeof originAgentCluster, "originAgentCluster")
+		rec(num2, typeof queryLocalFonts, "queryLocalFonts")
+		rec(num2, typeof showDirectoryPicker, "showDirectoryPicker")
+		rec(num2, typeof showOpenFilePicker, "showOpenFilePicker")
+		rec(num2, typeof showSaveFilePicker, "showSaveFilePicker")
+		rec(num2, typeof trustedTypes, "trustedTypes")
+		rec(num2, typeof webkitRequestFileSystem, "webkitRequestFileSystem")
+		rec(num2, typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL")
+		rec(num2, typeof webkitStorageInfo, "webkitStorageInfo")
+
+		// finish
+		let boolU = resU.length == 0
+		let hashU = !boolU ? mini_sha1(resU.join()) : "none"
+		if (!boolU) {
+			if (resU.join(", ").length < 48) {
+				hashU = resU.join(", ")
+			} else {
+				sDetail["unexpected_"+ title] = resU
+				hashU += buildButton(3, "unexpected_"+ title, resU.length)
+			}
+		}
+		let perfU = canPerf ? performance.now() - t0U : ""
+		fnRecord(num2, title, hashU, boolU, "skip", perfU)
+	} catch(e) {
+		fnRecord(num2, title, e.name, zB0, e.message)
+	}
+
+}
+
 function rerun() {
 	// reset
 	results = []
@@ -1800,14 +1871,13 @@ function run() {
 		aPerf.push(["START 1", gt0])
 		get_installtrigger(50) // 50-52
 		get_eval_length(630, "eval.toString().length")
-		get_colorgamut(310, "[css] color-gamut"),
+		get_colorgamut(310, "[css] color-gamut")
 		get_nav_screen(170)
-		get_window_chrome(450, "[chrome] window"),
+		get_window_props(260, 450, "[properties] window")
 		get_obj_enumeration(734, "object enumeration")
 		get_last_prototype_keys(640, "[last x keys]") // 640+641
 		get_math(695, "math")
 		get_nav_values(150, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
-		get_window_values(460)
 		get_dates(620)
 		get_js_client_hints(320, "[js] client hints")
 		get_mimetypes(710, "mimetypes")
@@ -1844,7 +1914,7 @@ function run() {
 
 	setTimeout(function() {
 		aPerf.push(["START 3", performance.now(), performance.now() - gt0])
-		get_window_moz(250) // 250-255
+		get_window_moz(250) // 250-253
 		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 		get_intl_supportedlocales(655) // +5's: C, DTF, DN, LF, NF, PR, RTF
 		get_intl_canonical_locale(667, "Intl.getCanonicalLocales")
