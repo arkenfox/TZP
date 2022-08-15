@@ -237,7 +237,7 @@ function output() {
 				let tHash = mini_sha1(data.join())
 				gHash.push(n +": "+ tHash)
 				gDisplay.push(s3 + n.padStart(padNum) + sc +": "+ tHash + s3 +" ["+ data.length +"]"+ sc +"<br>")
-				gDisplay.push("'"+ data.join("', '") + "'<br>")
+				gDisplay.push(data.join(", ") + "<br>")
 				if (n == "undefined") {
 					gCountUndefined += data.length
 				}
@@ -378,7 +378,7 @@ rec(typeof showSaveFilePicker, "showSaveFilePicker", code)
 rec(typeof trustedTypes, "trustedTypes", code)
 rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code)
 rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code)
-rec(typeof webkitStorageInfo, "webkitStorageInfo", code)
+rec(typeof webkitStorageInfo, "webkitStorageInfo", code) // to-be-deprecated see console
 
 // gecko only
 code = 12
@@ -697,6 +697,36 @@ function scrape() {
 		delete result.sha1
 		//console.log(result)
 
+		// sanitize localStorage
+		let aDelLS = []
+		let sessionGood = ["clear","getItem","key","length","removeItem","setItem"]
+		try {
+			for (const ls of Object.keys(result["localStorage"]["properties"])) {
+				if (!sessionGood.includes(ls)) {
+					delete result["localStorage"]["properties"][ls]
+					aDelSL.push(ls)
+				}
+			}
+		} catch(e) {}
+		// sanitize sessionStorage
+		let aDelSS = []
+		try {
+			for (const ss of Object.keys(result["sessionStorage"]["properties"])) {
+				if (!sessionGood.includes(ss)) {
+					delete result["sessionStorage"]["properties"][ss]
+					aDelSS.push(ss)
+				}
+			}
+		} catch(e) {}
+		// record sanitized
+		let strDel = ""
+		if (aDelSS.length || aDelLS.length) {
+			strDel = sb +"REMOVED:"+ sc + "<br><br>"
+				+ (aDelLS.length ? "localStorage  : " + aDelLS.join(", ") +"<br>" : "")
+				+ (aDelSS.length ? "sessionStorage: " + aDelSS.join(", ") +"<br>" : "")
+				+"<br>"
+		}
+
 		// hash it for easier compare
 		let hash = mini_sha1(result)
 		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
@@ -707,10 +737,10 @@ function scrape() {
 			aNew = Object.keys(result)
 			aNew = aNew.filter(x => !aList.includes(x))
 			if (aNew.length) {
-				strNew = sb +"NEW:"+ sc + "<br><br>'" + aNew.join("', '") +"'"+ sc +"<br><br>"
+				strNew = sb +"NEW:"+ sc + "<br><br>" + aNew.join(", ") + sc +"<br><br>"
 			}
 		}
-		domresult.innerHTML = strNew + s3 + "HASH: "+ sc + hash +"<br><br>"
+		domresult.innerHTML = strNew + strDel + s3 + "HASH: "+ sc + hash +"<br><br>"
 			+ JSON.stringify(result, null, 2)
 
 	}, 100)
