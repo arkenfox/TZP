@@ -250,6 +250,7 @@ function output() {
 			let strG = "", strExtra = "", strColor = s12
 				//only
 			if (k == 10) {strG = "BLINK ONLY"
+			} else if (k == 11) { strG = "EDGEHTML ONLY"
 			} else if (k == 12) { strG = "GECKO ONLY"
 			} else if (k == 14) { strG = "WEBKIT ONLY"
 				// in two but not the other
@@ -316,7 +317,7 @@ function reset() {
 	aErr = []
 	domresult.innerHTML = ""
 	oTypes = {}
-	let groups = [10,12,14,50,52,54,98,99]
+	let groups = [10,11,12,14,50,52,54,98,99]
 	let types = ["bigint","boolean","function","number","object","string","symbol","undefined",]
 	groups.forEach(function(group) {
 		oTypes[group] = {}
@@ -354,31 +355,60 @@ rec(typeof PERSISTENT, "PERSISTENT", code)
 rec(typeof TEMPORARY, "TEMPORARY", code)
 rec(typeof chrome, "chrome", code)
 rec(typeof cookieStore, "cookieStore", code)
-rec(typeof getDigitalGoodsService, "getDigitalGoodsService", code) // android
-rec(typeof getScreenDetails, "getScreenDetails", code)
-rec(typeof launchQueue, "launchQueue", code)
-rec(typeof navigation, "navigation", code)
 rec(typeof offscreenBuffering, "offscreenBuffering", code)
 rec(typeof onappinstalled, "onappinstalled", code)
 rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code)
-rec(typeof onbeforematch, "onbeforematch", code)
-rec(typeof onbeforexrselect, "onbeforexrselect", code)
-rec(typeof oncontextlost, "oncontextlost", code)
-rec(typeof oncontextrestored, "oncontextrestored", code)
 rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code)
 rec(typeof onpointerrawupdate, "onpointerrawupdate", code)
 rec(typeof onsearch, "onsearch", code)
 rec(typeof openDatabase, "openDatabase", code)
-rec(typeof opr, "opr", code) // OPERA desktop at least
 rec(typeof originAgentCluster, "originAgentCluster", code)
-rec(typeof queryLocalFonts, "queryLocalFonts", code)
-rec(typeof showDirectoryPicker, "showDirectoryPicker", code)
-rec(typeof showOpenFilePicker, "showOpenFilePicker", code)
-rec(typeof showSaveFilePicker, "showSaveFilePicker", code)
 rec(typeof trustedTypes, "trustedTypes", code)
 rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code)
 rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code)
+	// android
+rec(typeof getDigitalGoodsService, "getDigitalGoodsService", code)
+	// not in Brave
+rec(typeof showDirectoryPicker, "showDirectoryPicker", code)
+rec(typeof showOpenFilePicker, "showOpenFilePicker", code)
+rec(typeof showSaveFilePicker, "showSaveFilePicker", code)
+	// newish: not in v90
+rec(typeof getScreenDetails, "getScreenDetails", code)
+rec(typeof launchQueue, "launchQueue", code) // + not in Brave
+rec(typeof navigation, "navigation", code)
+rec(typeof onbeforematch, "onbeforematch", code)
+rec(typeof onbeforexrselect, "onbeforexrselect", code)
+rec(typeof oncontextlost, "oncontextlost", code)
+rec(typeof oncontextrestored, "oncontextrestored", code)
+rec(typeof queryLocalFonts, "queryLocalFonts", code)
+	// other
+rec(typeof opr, "opr", code) // OPERA (desktop at least)
 rec(typeof webkitStorageInfo, "webkitStorageInfo", code) // to-be-deprecated see console
+
+// edgeHTML only
+code = 11
+	/* notes: has
+		blink only: chrome, offscreenBuffering
+		gecko only: ondevicelight, onvrdisplayactivate, onvrdisplayconnect, onvrdisplaydeactivate, onvrdisplaydisconnect, onvrdisplaypresentchange
+		webkit only: browser, getMatchedCSSRules, webkitConvertPointFromNodeToPage, webkitConvertPointFromPageToNode
+		also pairs are a mess
+	*/
+rec(typeof clearImmediate, "clearImmediate", code)
+rec(typeof msWriteProfilerMark, "msWriteProfilerMark", code)
+rec(typeof oncompassneedscalibration, "oncompassneedscalibration", code)
+rec(typeof onmsgesturechange, "onmsgesturechange", code)
+rec(typeof onmsgesturedoubletap, "onmsgesturedoubletap", code)
+rec(typeof onmsgestureend, "onmsgestureend", code)
+rec(typeof onmsgesturehold, "onmsgesturehold", code)
+rec(typeof onmsgesturestart, "onmsgesturestart", code)
+rec(typeof onmsgesturetap, "onmsgesturetap", code)
+rec(typeof onmsinertiastart, "onmsinertiastart", code)
+rec(typeof onreadystatechange, "onreadystatechange", code)
+rec(typeof onvrdisplayblur, "onvrdisplayblur", code)
+rec(typeof onvrdisplayfocus, "onvrdisplayfocus", code)
+rec(typeof onvrdisplaypointerrestricted, "onvrdisplaypointerrestricted", code)
+rec(typeof onvrdisplaypointerunrestricted, "onvrdisplaypointerunrestricted", code)
+rec(typeof setImmediate, "setImmediate", code)
 
 // gecko only
 code = 12
