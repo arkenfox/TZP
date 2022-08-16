@@ -288,11 +288,13 @@ function output() {
 			+ "<br><br>" + aErr.join(", ") + "<br><br><hr><br>"
 	}
 	// function hash
+		// gecko: 39: 334c4512 : function atob() {\n    [native code]\n}
+		// blink: 33: 1dd1c7f6 : function atob() { [native code] }
 	let strF = ""
 	try {
 		let testF = atob.toString()
 		testF = testF.replace(/\n/g,'\\n');
-		let hashF = mini(testF)
+		let hashF = testF.length + ": " + mini(testF)
 		strF = s14 + ("FUNCTION").padStart(padNum) + sc +": "+ hashF + " : " + testF + "<br><br><hr><br>"
 
 	} catch(e) {
@@ -343,9 +345,8 @@ function run() {
 /** LEVEL ONE ***/
 
 // undetermined: status confirmed in EOL comments
-	// where the F did I get these two from?
 code = 98
-//rec(typeof keys, "keys", code)
+//rec(typeof keys, "keys", code) // NFI where I got this from
 
 // blink only
 code = 10
@@ -412,40 +413,44 @@ rec(typeof setImmediate, "setImmediate", code)
 
 // gecko only
 code = 12
-rec(typeof InstallTrigger, "InstallTrigger", code) // prefs-to-be-deprecated
+	// stable FF52+
 rec(typeof KeyEvent, "KeyEvent", code)
-rec(typeof content, "content", code) // deprecated
 rec(typeof dump, "dump", code)
 rec(typeof fullScreen, "fullScreen", code)
 rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle", code)
 rec(typeof mozInnerScreenX, "mozInnerScreenX", code)
 rec(typeof mozInnerScreenY, "mozInnerScreenY", code)
-rec(typeof mozPaintCount, "mozPaintCount", code) // deprecated
 rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code)
-rec(typeof onbeforeinput, "onbeforeinput", code)
-rec(typeof ondevicelight, "ondevicelight", code) // deprecated
-rec(typeof ondeviceproximity, "ondeviceproximity", code) // deprecated
-rec(typeof ongamepadconnected, "ongamepadconnected", code)
-rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code)
 rec(typeof onloadend, "onloadend", code)
 rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code)
 rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code)
-rec(typeof onshow, "onshow", code) // deprecated
-rec(typeof onuserproximity, "onuserproximity", code) // deprecated
-rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code) // pref (dom.vr.enabled)
-rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code) // pref
-rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code) // pref
-rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code) // pref
-rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code) // pref
 rec(typeof scrollByLines, "scrollByLines", code)
 rec(typeof scrollByPages, "scrollByPages", code)
 rec(typeof scrollMaxX, "scrollMaxX", code)
 rec(typeof scrollMaxY, "scrollMaxY", code)
 rec(typeof setResizable, "setResizable", code)
-rec(typeof sidebar, "sidebar", code) // deprecated
 rec(typeof sizeToContent, "sizeToContent", code)
-rec(typeof u2f, "u2f", code)
 rec(typeof updateCommands, "updateCommands", code)
+	// new
+rec(typeof onbeforeinput, "onbeforeinput", code) // FF87+
+rec(typeof ongamepadconnected, "ongamepadconnected", code) // FF89+
+rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code) // FF89+
+	// deprecated
+rec(typeof mozPaintCount, "mozPaintCount", code) // removed FF72
+rec(typeof onshow, "onshow", code) // removed FF85 (+ not goanna or Waterfox Classic)
+rec(typeof ondevicelight, "ondevicelight", code) // removed FF89
+rec(typeof ondeviceproximity, "ondeviceproximity", code) // removed FF89
+rec(typeof onuserproximity, "onuserproximity", code) // removed FF89
+rec(typeof content, "content", code) // removed FF101
+rec(typeof sidebar, "sidebar", code) // removed FF102
+rec(typeof InstallTrigger, "InstallTrigger", code) // to-be-deprecated (+prefs)
+	// prefs
+rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code) // dom.vr.enabled (+ not in FF52)
+rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code)
+rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code) // (+ not in FF52)
+rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code)
+rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code)
+rec(typeof u2f, "u2f", code) // security.webauth.u2f
 
 // webkit only
 code = 14
