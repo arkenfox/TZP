@@ -166,7 +166,8 @@ function get_canPerf(runtype) {
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
 	if (isFF) {return resolve()} // FF
-	if (!('chrome' in window)) return resolve() // no chrome
+	if (isEngine == "edgeHTML") return resolve()
+	if (!('chrome' in window)) return resolve() // no chrome: not robust: edgeHTML has this)
 	if (Object.keys(chrome).includes("search")) {return resolve()} // opera
 
 	// proceed
@@ -1310,6 +1311,7 @@ function countJS(filename) {
 			if (!isGeckoBlock) {
 				get_pointer_event() // pointer eventlistener
 			}
+			if (isEngine == "edgeHTML") {console.log("i am here")}
 			outputSection("load")
 		})
 	}
