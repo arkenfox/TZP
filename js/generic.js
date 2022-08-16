@@ -1311,7 +1311,6 @@ function countJS(filename) {
 			if (!isGeckoBlock) {
 				get_pointer_event() // pointer eventlistener
 			}
-			if (isEngine == "edgeHTML") {console.log("i am here")}
 			outputSection("load")
 		})
 	}
@@ -1545,9 +1544,6 @@ function run_once() {
 				aNo.push(array[1])
 			}
 		})
-		if (isFF && aNo.length) {
-			log_alert("isFF: not found: "+ aNo.join(", "), true)
-		}
 		let found = (list.length - aNo.length)
 		if (found > 5) {
 			isFF = true
@@ -1555,6 +1551,10 @@ function run_once() {
 			// palemoon/basilisk: fails 53, passes 54
 			if ("function" !== typeof CSSMozDocumentRule && URL.prototype.hasOwnProperty("toJSON")) {
 				isEngine = "goanna"
+			}
+			// alert if any isFF checks fail
+			if (aNo.length) {
+				log_alert("isFF: not found: "+ aNo.join(", "), true)
 			}
 		}
 		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length +" | "+ isEngine)
