@@ -4,8 +4,16 @@
 
 function outputPrototypeLies() {
 	return new Promise(resolve => {
+		// temp fix: edgeHTML returns 148 lies and perf is like 20 seconds
+		if (isEngine == "edgeHTML") {
+			if (gRun) {
+				dom.prototypehash.innerHTML = zNA
+				dom.proxyhash.innerHTML = zNA
+			}
+			return resolve("done")
+		}
 		let t0; if (canPerf) {t0 = performance.now()}
-
+		
 		const getIframe = () => {
 			try {
 				const numberOfIframes = window.length
