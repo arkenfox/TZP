@@ -146,39 +146,61 @@ const get_globals = () => new Promise(resolve => {
 	// we already got gecko/goanna, but for generic tests lets do the full package
 	isEngine = ""
 	if (canPerf) {tstart = performance.now()}
+	// we use > not >= which means 50% or more to break an engine check
+		// e.g always use odd
+			// 9 all same: to get under/over 4.5 you would need to lie about 5/9 = 56%
+		// e.g. even
+			// 8 true: to get 4-or-lower you would need to lie about 4/8
+			// 8 false: to get over 4 you would need to lie about 5/8
 	let oEngines = {
 		"blink": [
-			"object" === typeof onappinstalled,
+			"number" === typeof TEMPORARY,
+			//"object" === typeof onappinstalled,
+			"object" === typeof onbeforeinstallprompt,
 			"object" === typeof ondeviceorientationabsolute,
 			"object" === typeof onpointerrawupdate,
+			//"object" === typeof onsearch,
 			"boolean" === typeof originAgentCluster,
-			"function" === typeof webkitResolveLocalFileSystemURL
+			"object" === typeof trustedTypes,
+			"function" === typeof webkitResolveLocalFileSystemURL,
 		],
 		"webkit": [
 			"object" === typeof browser,
 			"function" === typeof getMatchedCSSRules,
+			"object" === typeof safari,
 			"function" === typeof showModalDialog,
 			"function" === typeof webkitConvertPointFromNodeToPage,
-			"object" === typeof webkitIndexedDB
+			"function" === typeof webkitCancelRequestAnimationFrame,
+			"object" === typeof webkitIndexedDB,
 		],
 		"gecko": [
 			"function" === typeof dump,
+			//"boolean" === typeof fullScreen,
 			"object" === typeof onloadend,
 			"object" === typeof onabsolutedeviceorientation,
-			"function" === typeof scrollByLines,
-			"number" === typeof scrollMaxY
+			//"function" === typeof scrollByLines,
+			"number" === typeof scrollMaxY,
+			"function" === typeof setResizable,
+			"function" === typeof sizeToContent,
+			"function" === typeof updateCommands,
 		],
 		"edgeHTML": [
 			"function" === typeof clearImmediate,
 			"function" === typeof msWriteProfilerMark,
 			"object" === typeof oncompassneedscalibration,
 			"object" === typeof onmsgesturechange,
-			"function" === typeof setImmediate
+			"object" === typeof onmsinertiastart,
+			"object" === typeof onreadystatechange,
+			//"object" === typeof onvrdisplayfocus,
+			"function" === typeof setImmediate,
 		]
 	}
+	// ToDo: each subsequent list can override the previous if true
+		// arrays with least items are a weak point
+		// e.g. if webkit (last) only had 5 checks, it would only take 3 to override isEngine
 	for (const engine of Object.keys(oEngines).sort()) {
 		let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
-		if (sumE > 3) {isEngine = engine}
+		if (sumE > (oEngines[engine].length/2)) {isEngine = engine}
 	}
 	// perf
 	let tend; if (canPerf) {tend = performance.now()}
@@ -192,8 +214,8 @@ const get_globals = () => new Promise(resolve => {
 		})
 		displayAll.push(displayE.join(""))
 	}
-	isEnginePretty = (canPerf ? (Math.round(tend-tstart)) +" ms | " : "") + displayAll.join(" | ")
-			+ " | you are " + (isEngine == "" ? "unknown" : isEngine)
+	isEnginePretty = (canPerf ? (Math.round(tend-tstart)) +" ms |" : "") + displayAll.join(" |")
+			+ " | " + (isEngine == "" ? "UNKNOWN" : isEngine.toUpperCase())
 
 	// re-tidy vars
 	if (isEngine == "gecko") {
