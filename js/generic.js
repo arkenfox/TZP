@@ -165,10 +165,11 @@ function get_canPerf(runtype) {
 
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
-	if (isFF) {return resolve()} // FF
+	if (isFF) return resolve() // FF
 	if (isEngine == "edgeHTML") return resolve()
-	if (!('chrome' in window)) return resolve() // no chrome: not robust: edgeHTML has this)
-	if (Object.keys(chrome).includes("search")) {return resolve()} // opera
+	if ("undefined" !== typeof opr) return resolve() // opera
+	if (Object.keys(chrome).includes("search")) return resolve() // opera fallback
+	if (!('chrome' in window)) return resolve() // not blink (note: already checked edgeHTML)
 
 	// proceed
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -278,7 +279,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 })
 
 const get_isEngine = () => new Promise(resolve => {
-	if (isFF) {
+	if (isFF) { // we already resolved this as gecko or goanna
 		return resolve()
 	}
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -318,7 +319,7 @@ const get_isEngine = () => new Promise(resolve => {
 		// fallback isEngine
 		if (isEngine == "") {
 			console.log(res.join())
-			if ("chrome" in window) {isEngine = "blink"}
+			if ("chrome" in window) {isEngine = "blink"} // this is also in edgeHTML
 			if (isEngine !== "") {
 				gKnownOnce.push("_global:isEngine")
 				gBypassedOnce.push("_global:isEngine:"+ isEngine)
@@ -1268,6 +1269,9 @@ function countJS(filename) {
 		]).then(function(results){
 			// don't run on old versions
 			if (isFF & isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
+			// don't run on unsupported engines: ToDo: switch edgeHTML into dumb mode
+			//isEngine = "edgeHTML"; isFF = false // test
+			if (isEngine == "edgeHTML") {isGeckoBlock = true}
 			// treat older FF as dumb
 			if (isFF && isVer >= isGeckoSmartMin[0]) {
 				isGeckoSmart = true
@@ -1359,16 +1363,23 @@ function outputUser(name) {
 }
 
 function outputSection(id, cls) {
-	// return if old gecko
+	// return if old gecko or unsupported engine
 	if (isGeckoBlock) {
 		// on first load output message
 		if (gLoad) {
+			let isUnsupported = (!isFF && isEngine !== "") // e.g. edgeHTML
 			let msgAction = isFork == undefined ? "UPDATE " : "REPLACE "
 			let msgActionSuffix = isFork == undefined ? "... " : "... with Firefox | "
 			let msgName = isTB ? "TOR BROWSER" : (isFork !== undefined ? isFork.toUpperCase() : "FIREFOX")
 			let msgVerPrefix = isTB ? "TB v" : (isFork !== undefined ? "FF v" : " v")
 			let msgVer = isTB ? isGeckoBlockMin[1] : isGeckoBlockMin[0]
 			let msgReq = "TZP requires "+ msgVerPrefix + msgVer +"+"
+			if (isUnsupported) {
+				msgAction = "REPLACE "
+				msgActionSuffix = "... with Firefox | "
+				msgName = isEngine.toUpperCase()
+				msgReq = "this engine is not supported"
+			}
 			let msgLen = msgAction.length + msgName.length + 1
 			let msgSize = 56
 			if (msgLen > 15) {msgSize = 48}
