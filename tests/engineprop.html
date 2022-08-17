@@ -841,44 +841,53 @@ function compare() {
 
 
 function get_miniEngine() {
-
-	// engine
-	// we already got gecko/goanna, but for generic tests lets do the full package
-	let isEngine = ""
 	let tstart = performance.now()
 	let oEngines = {
 		"blink": [
-			"object" === typeof onappinstalled,
+			"number" === typeof TEMPORARY,
+			//"object" === typeof onappinstalled,
+			"object" === typeof onbeforeinstallprompt,
 			"object" === typeof ondeviceorientationabsolute,
 			"object" === typeof onpointerrawupdate,
+			//"object" === typeof onsearch,
 			"boolean" === typeof originAgentCluster,
-			"function" === typeof webkitResolveLocalFileSystemURL
+			"object" === typeof trustedTypes,
+			"function" === typeof webkitResolveLocalFileSystemURL,
 		],
 		"webkit": [
 			"object" === typeof browser,
 			"function" === typeof getMatchedCSSRules,
+			"object" === typeof safari,
 			"function" === typeof showModalDialog,
 			"function" === typeof webkitConvertPointFromNodeToPage,
-			"object" === typeof webkitIndexedDB
+			"function" === typeof webkitCancelRequestAnimationFrame,
+			"object" === typeof webkitIndexedDB,
 		],
 		"gecko": [
 			"function" === typeof dump,
+			//"boolean" === typeof fullScreen,
 			"object" === typeof onloadend,
 			"object" === typeof onabsolutedeviceorientation,
-			"function" === typeof scrollByLines,
-			"number" === typeof scrollMaxY
+			//"function" === typeof scrollByLines,
+			"number" === typeof scrollMaxY,
+			"function" === typeof setResizable,
+			"function" === typeof sizeToContent,
+			"function" === typeof updateCommands,
 		],
 		"edgeHTML": [
 			"function" === typeof clearImmediate,
 			"function" === typeof msWriteProfilerMark,
 			"object" === typeof oncompassneedscalibration,
 			"object" === typeof onmsgesturechange,
-			"function" === typeof setImmediate
+			"object" === typeof onmsinertiastart,
+			"object" === typeof onreadystatechange,
+			//"object" === typeof onvrdisplayfocus,
+			"function" === typeof setImmediate,
 		]
 	}
 	for (const engine of Object.keys(oEngines).sort()) {
 		let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
-		if (sumE > 3) {isEngine = engine}
+		if (sumE > (oEngines[engine].length/2)) {isEngine = engine}
 	}
 	// perf
 	let tend = performance.now()
@@ -904,6 +913,7 @@ function get_miniEngine() {
 }
 
 let isEnginePretty = ""
+let isEngine = ""
 Promise.all([
 	get_miniEngine()
 ]).then(function(){
