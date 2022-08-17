@@ -91,8 +91,8 @@ const get_globals = () => new Promise(resolve => {
 	// always check canPerf
 	get_canPerf()
 	// isFF
+	let tstart; if (canPerf) {tstart = performance.now()}
 	try {
-		let tstart; if (canPerf) {tstart = performance.now()}
 		let list = [
 			[DataTransfer, "DataTransfer", "mozSourceNode"],
 			[Document, "Document", "mozFullScreen"],
@@ -132,48 +132,76 @@ const get_globals = () => new Promise(resolve => {
 			display.push(check)
 		})
 		isFFvalid = true
-		isFFpretty = display.join(" | ") + (canPerf ? " | "+ (tend-tstart) +" ms" : "")
+		let strYou = " | are you " + (isEngine !== "" ? isEngine : "gecko") + "? "
+			+ (isFF ? sg + "YES" : sb + "NO") + sc
+
+		isFFpretty = (canPerf ? (Math.round(tend-tstart)) +" ms | " : "")
+			+ display.join(" | ") + strYou
 	} catch(e) {
 		isFFvalid = false
 		isFFpretty = sb.trim() + e.name +": "+ sc + e.message
 	}
 
 	// engine
-	function cbrt(x) {
-		try {
-			let y = Math.pow(Math.abs(x), 1 / 3)
-			return x < 0 ? -y : y
-		} catch(e) {
-			return "error"
-		}
+	// we already got gecko/goanna, but for generic tests lets do the full package
+	isEngine = ""
+	if (canPerf) {tstart = performance.now()}
+	let oEngines = {
+		"blink": [
+			"object" === typeof onappinstalled,
+			"object" === typeof ondeviceorientationabsolute,
+			"object" === typeof onpointerrawupdate,
+			"boolean" === typeof originAgentCluster,
+			"function" === typeof webkitResolveLocalFileSystemURL
+		],
+		"webkit": [
+			"object" === typeof browser,
+			"function" === typeof getMatchedCSSRules,
+			"function" === typeof showModalDialog,
+			"function" === typeof webkitConvertPointFromNodeToPage,
+			"object" === typeof webkitIndexedDB
+		],
+		"gecko": [
+			"function" === typeof dump,
+			"object" === typeof onloadend,
+			"object" === typeof onabsolutedeviceorientation,
+			"function" === typeof scrollByLines,
+			"number" === typeof scrollMaxY
+		],
+		"edgeHTML": [
+			"function" === typeof clearImmediate,
+			"function" === typeof msWriteProfilerMark,
+			"object" === typeof oncompassneedscalibration,
+			"object" === typeof onmsgesturechange,
+			"function" === typeof setImmediate
+		]
 	}
-	if (!isFF) {
-		let res = []
-		for(let i=0; i < 6; i++) {
-			try {
-				let fnResult = "unknown"
-				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2)
-				} else if (i == 3) {fnResult = Math.acos(0.123)
-				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2)
-				} else if (i == 5) {fnResult = Math.atan(2)
-				}
-				res.push(fnResult)
-			} catch(e) {
-				res.push("error")
-			}
+	for (const engine of Object.keys(oEngines).sort()) {
+		let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
+		if (sumE > 3) {isEngine = engine}
+	}
+	// perf
+	let tend; if (canPerf) {tend = performance.now()}
+
+	// build a pretty display
+	let displayAll = []
+	for (const engine of Object.keys(oEngines).sort()) {
+		let displayE = []
+		oEngines[engine].forEach(function(check) {
+			displayE.push(check ? green_tick : red_cross)
+		})
+		displayAll.push(displayE.join(""))
+	}
+	isEnginePretty = (canPerf ? (Math.round(tend-tstart)) +" ms | " : "") + displayAll.join(" | ")
+			+ " | you are " + (isEngine == "" ? "unknown" : isEngine)
+
+	// re-tidy vars
+	if (isEngine == "gecko") {
+		isFF = true
+		// check for PM28+ : fails 53
+		if ("function" !== typeof CSSMozDocumentRule) {
+			isEngine = "goanna"
 		}
-		let hash = sha1(res.join())
-		if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {isEngine = "blink"
-		} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {isEngine = "webkit"
-		} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {isEngine = "edgeHTML"
-		} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {isEngine = "trident"
-		//} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {isEngine = "gecko"
-		//} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {isEngine = "gecko"
-		} else if ("chrome" in window) {isEngine = "blink"
-		}
-		if (isEngine == "") {console.error("isEngine: not found\n", res)}
 	}
 	return resolve()
 

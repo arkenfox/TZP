@@ -105,7 +105,8 @@ function outputVersion() {
 	s14 = s14.trim()
 	sb = sb.trim()
 
-	debug.push("FF:"+ isFFpretty.trim())
+	debug.push("engine: "+ isEnginePretty.trim())
+	debug.push(" gecko: "+ isFFpretty.trim() +"<br>")
 
 	let gTZP, gOther, gWatch // global timers
 	let runtype

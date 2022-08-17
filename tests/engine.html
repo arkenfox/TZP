@@ -168,9 +168,9 @@ function fnDisplay() {
 		let needStr = "... who needs "+ s3+ (expected - 5) + " tests" + sc
 			+ " and "+ s3 + "several hundred metrics" + sc
 			+ (canPerf ? " in "+ s3 + perfValue + sc : "") + "?"
-		summary += s14 +"MINI TEST "+ sc + needStr
-			+"<br><br>"+ isFFpretty +" ... are you gecko? "+ (isFF ? sg +"YES" : sb +"NO") + sc
-			+"<br><br><hr><br>"
+		summary += s14 +"MINI TESTS "+ sc + needStr +"<br><br>"
+			+ "engine: "+ isEnginePretty.trim() +"<br>"
+			+ " gecko: "+ isFFpretty.trim() +"<br><br><hr><br>"
 	}
 	summary += s14 +"SUMMARY "+ sc
 		+"PASS: ".padStart(7) + countTrue + (isPass? sg : sb) +" ["+ percentPassed +"%]"+ sc
