@@ -303,14 +303,14 @@ function output() {
 	try {
 		let testF = atob.toString()
 		testF = testF.replace(/\n/g,'\\n');
-		let hashF = testF.length + ": " + mini(testF)
+		let hashF = "length "+ testF.length + ": " + mini(testF)
 		strF = s14 + ("FUNCTION").padStart(padNum) + sc +": "+ hashF + " : " + testF + "<br><br><hr><br>"
-
 	} catch(e) {
 		console.error(e.name, e.message)
 	}
 	// output
-	domresult.innerHTML = strAlert + strF + display.join("<br>")
+	let strM = s14 + ("MINI TEST").padStart(padNum) + sc + ": "+ isEnginePretty + "<br><br>"
+	domresult.innerHTML = strAlert + strM + strF + display.join("<br>")
 }
 
 function rec(type, name, group = 98, expected) {
@@ -738,6 +738,7 @@ function scrape() {
 		delete result.collectProps
 		delete result.compare
 		delete result.copyclip
+		delete result.get_miniEngine
 		delete result.logConsole
 		delete result.mini
 		delete result.mini_sha1
@@ -799,9 +800,6 @@ function scrape() {
 	}, 100)
 }
 
-reset()
-run()
-
 function compare() {
 	// examples: just paste in scrape results
 	let sBlink = {"all3": [], "blink": [], "blink-gecko": [], "blink-webkit": []}
@@ -840,6 +838,78 @@ function compare() {
 	console.log("COMMON IN GECKO + WEBKIT ONLY: "+ GWonly.length +"\n" + GWonly.join("\n"))
 }
 //compare()
+
+
+function get_miniEngine() {
+
+	// engine
+	// we already got gecko/goanna, but for generic tests lets do the full package
+	let isEngine = ""
+	let tstart = performance.now()
+	let oEngines = {
+		"blink": [
+			"object" === typeof onappinstalled,
+			"object" === typeof ondeviceorientationabsolute,
+			"object" === typeof onpointerrawupdate,
+			"boolean" === typeof originAgentCluster,
+			"function" === typeof webkitResolveLocalFileSystemURL
+		],
+		"webkit": [
+			"object" === typeof browser,
+			"function" === typeof getMatchedCSSRules,
+			"function" === typeof showModalDialog,
+			"function" === typeof webkitConvertPointFromNodeToPage,
+			"object" === typeof webkitIndexedDB
+		],
+		"gecko": [
+			"function" === typeof dump,
+			"object" === typeof onloadend,
+			"object" === typeof onabsolutedeviceorientation,
+			"function" === typeof scrollByLines,
+			"number" === typeof scrollMaxY
+		],
+		"edgeHTML": [
+			"function" === typeof clearImmediate,
+			"function" === typeof msWriteProfilerMark,
+			"object" === typeof oncompassneedscalibration,
+			"object" === typeof onmsgesturechange,
+			"function" === typeof setImmediate
+		]
+	}
+	for (const engine of Object.keys(oEngines).sort()) {
+		let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
+		if (sumE > 3) {isEngine = engine}
+	}
+	// perf
+	let tend = performance.now()
+
+	// build a pretty display
+	let displayAll = []
+	for (const engine of Object.keys(oEngines).sort()) {
+		let displayE = []
+		oEngines[engine].forEach(function(check) {
+			displayE.push(check ? green_tick : red_cross)
+		})
+		displayAll.push(displayE.join(""))
+	}
+	isEnginePretty = Math.round(tend-tstart) +" ms | "+ displayAll.join(" | ")
+			+ " | you are " + (isEngine == "" ? "unknown" : isEngine)
+	// re-tidy vars
+	if (isEngine == "gecko") {
+		// check for PM28+ : fails 53
+		if ("function" !== typeof CSSMozDocumentRule) {
+			isEngine = "goanna"
+		}
+	}
+}
+
+let isEnginePretty = ""
+Promise.all([
+	get_miniEngine()
+]).then(function(){
+	reset()
+	run()
+})
 
 </script>
 </body>
