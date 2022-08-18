@@ -845,11 +845,11 @@ function get_miniEngine() {
 	let oEngines = {
 		"blink": [
 			"number" === typeof TEMPORARY,
-			//"object" === typeof onappinstalled,
+			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
 			"object" === typeof ondeviceorientationabsolute,
 			"object" === typeof onpointerrawupdate,
-			//"object" === typeof onsearch,
+			"object" === typeof onsearch,
 			"boolean" === typeof originAgentCluster,
 			"object" === typeof trustedTypes,
 			"function" === typeof webkitResolveLocalFileSystemURL,
@@ -865,10 +865,10 @@ function get_miniEngine() {
 		],
 		"gecko": [
 			"function" === typeof dump,
-			//"boolean" === typeof fullScreen,
+			"boolean" === typeof fullScreen,
 			"object" === typeof onloadend,
 			"object" === typeof onabsolutedeviceorientation,
-			//"function" === typeof scrollByLines,
+			"function" === typeof scrollByLines,
 			"number" === typeof scrollMaxY,
 			"function" === typeof setResizable,
 			"function" === typeof sizeToContent,
@@ -885,10 +885,13 @@ function get_miniEngine() {
 			"function" === typeof setImmediate,
 		]
 	}
+	// array engine matches, so subsequent results doesn't override prev
+	let aEngine = []
 	for (const engine of Object.keys(oEngines).sort()) {
 		let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
-		if (sumE > (oEngines[engine].length/2)) {isEngine = engine}
+		if (sumE > (oEngines[engine].length/2)) {aEngine.push(engine)}
 	}
+	if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
 	// perf
 	let tend = performance.now()
 	// re-tidy vars
