@@ -891,7 +891,13 @@ function get_miniEngine() {
 	}
 	// perf
 	let tend = performance.now()
-
+	// re-tidy vars
+	if (isEngine == "gecko") {
+		// check for PM28+ : fails 53
+		if ("function" !== typeof CSSMozDocumentRule) {
+			isEngine = "goanna"
+		}
+	}
 	// build a pretty display
 	let displayAll = []
 	for (const engine of Object.keys(oEngines).sort()) {
@@ -901,15 +907,8 @@ function get_miniEngine() {
 		})
 		displayAll.push(displayE.join(""))
 	}
-	isEnginePretty = Math.round(tend-tstart) +" ms | "+ displayAll.join(" | ")
-			+ " | you are " + (isEngine == "" ? "unknown" : isEngine)
-	// re-tidy vars
-	if (isEngine == "gecko") {
-		// check for PM28+ : fails 53
-		if ("function" !== typeof CSSMozDocumentRule) {
-			isEngine = "goanna"
-		}
-	}
+	isEnginePretty = Math.round(tend-tstart) +" ms |"+ displayAll.join(" |")
+		+ " | " + (isEngine == "" ? "UNKNOWN" : isEngine.toUpperCase())
 }
 
 let isEnginePretty = ""
