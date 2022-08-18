@@ -132,11 +132,11 @@ const get_globals = () => new Promise(resolve => {
 			display.push(check)
 		})
 		isFFvalid = true
-		let strYou = " | are you " + (isEngine !== "" ? isEngine : "gecko") + "? "
-			+ (isFF ? sg + "YES" : sb + "NO") + sc
+		let strYou = " | are you " + (isEngine == "goanna" ? "goanna" : "gecko") + "? "
+			+ (isFF ? sg.trim() + "YES" : sb.trim() + "NO") + sc
 
-		isFFpretty = (canPerf ? (Math.round(tend-tstart)) +" ms | " : "")
-			+ display.join(" | ") + strYou
+		isFFpretty = (canPerf ? (Math.round(tend-tstart)) +" ms |" : "")
+			+ display.join("") + strYou
 	} catch(e) {
 		isFFvalid = false
 		isFFpretty = sb.trim() + e.name +": "+ sc + e.message
@@ -204,7 +204,14 @@ const get_globals = () => new Promise(resolve => {
 	}
 	// perf
 	let tend; if (canPerf) {tend = performance.now()}
-
+	// re-tidy vars
+	if (isEngine == "gecko") {
+		isFF = true
+		// check for PM28+ : fails 53
+		if ("function" !== typeof CSSMozDocumentRule) {
+			isEngine = "goanna"
+		}
+	}
 	// build a pretty display
 	let displayAll = []
 	for (const engine of Object.keys(oEngines).sort()) {
@@ -216,15 +223,6 @@ const get_globals = () => new Promise(resolve => {
 	}
 	isEnginePretty = (canPerf ? (Math.round(tend-tstart)) +" ms |" : "") + displayAll.join(" |")
 			+ " | " + (isEngine == "" ? "UNKNOWN" : isEngine.toUpperCase())
-
-	// re-tidy vars
-	if (isEngine == "gecko") {
-		isFF = true
-		// check for PM28+ : fails 53
-		if ("function" !== typeof CSSMozDocumentRule) {
-			isEngine = "goanna"
-		}
-	}
 	return resolve()
 
 })
