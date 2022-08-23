@@ -217,7 +217,7 @@ var list = [
 "sd,sindhi",
 "se,northern sami",
 "sg,sango",
-"si,singhalese",
+"si,sinhala",
 "sk,slovak",
 "sl,slovenian",
 "sm,samoan",
@@ -329,9 +329,14 @@ var	currencyMaster = [
 // duplicates in the long tail
 'GBP','TWD',
 ]
+
+var	currencyMaster = Intl.supportedValuesOf("currency")
+currencyMaster.push("zzz")
+
 /* iso codes
 - https://www.iso.org/iso-4217-currency-codes.html
 - https://en.wikipedia.org/wiki/ISO_4217
+- supportedValuesOf currency
 */
 
 var aLegend = [],
@@ -533,10 +538,8 @@ function run_test(isSummary, isExample) {
 					+ aHash.join("<br>")
 			}
 		}
-
 		// perf
-		let t1 = performance.now()
-		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
