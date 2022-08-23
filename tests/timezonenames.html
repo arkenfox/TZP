@@ -221,7 +221,7 @@ var list = [
 "sd,sindhi",
 "se,northern sami",
 "sg,sango",
-"si,singhalese",
+"si,sinhala",
 "sk,slovak",
 "sl,slovenian",
 "sm,samoan",
@@ -433,8 +433,7 @@ function run_main(type) {
 		}
 		
 		// perf
-		let t1 = performance.now()
-		dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message

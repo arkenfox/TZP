@@ -69,8 +69,7 @@ let results = [],
 	bBlock = false, // throw a test error
 	bNum = false // display numbering instead of perf
 
-let	topVer = 105,
-	isWebkit = false
+let	topVer = 106
 
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -1474,7 +1473,7 @@ function get_permission(num, title) {
 		})
 	} catch(e) {
 		// not supported in webkit: https://caniuse.com/?search=push%20permission
-		if (isWebkit) {
+		if (isEngine == "webkit") {
 			fnRecord(num, title, "not supported", false)
 		} else {
 			fnRecord(num, title, e.name, zB0, e.message)
@@ -1643,7 +1642,7 @@ function get_storage_estimate(num, title) {
 			fnRecord(num, title, quota, bool, "skip", perf)
 		})
 	} catch(e) {
-		if (isWebkit) {
+		if (isEngine == "webkit") {
 			fnRecord(num, title, e.name, false, e.message) // not supported in webkit
 		} else {
 			// FF56 or lower
@@ -1950,8 +1949,6 @@ setTimeout(function() {
 			get_isTB(),
 			get_isVer(),
 		]).then(function(){
-			// set webkit
-			if ("chrome" in window || isFF) {} else {isWebkit = true}
 			run()
 		})
 	})

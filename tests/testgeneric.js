@@ -336,6 +336,7 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
+		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
