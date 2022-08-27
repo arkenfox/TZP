@@ -151,10 +151,6 @@ let s0 = " <span class='",
 	isChrome = "", // chrome://
 	isEngine = "",
 	isFF = false,
-	isGeckoBlock = false, // stop testing/handling so many old versions
-	isGeckoBlockMin = [78, 10], // [FF, TB]
-	isGeckoSmart = false, // simplify code
-	isGeckoSmartMin = [91, 11], // [FF, TB]
 	isFile = false,
 	isFork = undefined,
 	isLoad = true,
@@ -169,8 +165,12 @@ let s0 = " <span class='",
 	isRFP = false,
 	isSecure = false,
 	isTB = false,
+	isTZPBlock = false,
+	isTZPBlockMinVer = [78, 10], // [FF, TB version]
+	isTZPSmart = false,
+	isTZPSmartMinVer = [78, 78, 10], // [FF, TB, TB version]
 	isVer = "",
-    	isVerMax = "",
+	isVerMax = "",
 	isVerPlus = false,
 // runtypes
 	gt0,
@@ -205,7 +205,6 @@ let logChkList = false,
 	runMDV = false, // done: mediaDevices
 	runMTP = false, // done: maxTouchPoints
 	runSNC = false, // nav connection
-	runSNH = false, // done: nav hardwareConcurrency
 	runSNM = false, // done: nav mimeTypes
 	runSNP = false, // done: nav plugins
 	runUAI = false, // done: ua iframe
