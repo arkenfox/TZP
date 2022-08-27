@@ -3,7 +3,7 @@
 var varDPR, varDPI, dpi_x, dpi_y
 var uaBS = false
 let isOS64math = ""
-let nxtESR = 114
+let nxtESR = 114 // assume 114 at this point, more likely 115
 let logSData = [], tSD // logScreen
 
 // sims
@@ -1301,7 +1301,7 @@ function get_scr_window(runtype) {
 		dom.mOuter = mOuter
 		dom.mInner.innerHTML = mInner
 		// notate
-		if (isFF) {
+		if (isFF && isTZPSmart) {
 			// sizes
 			let match = true, r = "", c = "#ff4f4f"
 			if (mScreen !== mAvailable) {match = false
@@ -2152,7 +2152,7 @@ function get_android_tbh() {
 }
 
 function get_android_kbh() {
-	if (isGeckoBlock) {
+	if (isTZPBlock) {
 		return
 	}
 	if (isOS == "android") {
@@ -2451,7 +2451,7 @@ function outputFD() {
 	if (isFF) {
 		// from globals:ver + browser
 		let r
-		if (isVer == 59) {r = "59 or lower"} else {r = isVer + (isVerPlus ? "+" : "")}
+		r = isVer + (isVerPlus ? "+" : "")
 		dom.fdVersion.innerHTML = r
 		section.push("version:"+ r)
 
@@ -2526,7 +2526,11 @@ function outputFD() {
 			let browser = zNA, display = zNA
 			if (isBrave) {
 				browser = "Brave" + (isBraveMode > 1 ? " ["+ aBraveMode[isBraveMode] +"]" : "")
-			} else if (isEngine == "blink" && Object.keys(chrome).includes("search")) {browser = "Opera"}
+			} else if (isEngine == "blink") {
+				if ("undefined" !== typeof opr) {browser = "Opera"
+				} else if (Object.keys(chrome).includes("search")) {browser = "Opera"
+				}
+			}
 			dom.browserlabel = "browser"
 			dom.fdResourceCss = browser
 			section.push("browser:"+ browser)
