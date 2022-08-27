@@ -1,3 +1,19 @@
+/* @supports: https://drafts.csswg.org/css-conditional-5/#at-supports-ext */
+
+/* if font-tech is not supported, we end up with "not font-tech" */
+#cssCOLRv0:after{content:"n/a";}
+@supports font-tech(color-COLRv0){#cssCOLRv0:after{content:"supported";}}
+#cssCOLRv1:after{content:"n/a";}
+@supports font-tech(color-COLRv1){#cssCOLRv1:after{content:"supported";}}
+#cssOpenType:after{content:"n/a";}
+@supports font-tech(feature-opentype){#cssOpenType:after{content:"supported";}}
+#cssTrueType:after{content:"n/a";}
+@supports font-format(TrueType){#cssTrueType:after{content:"supported";}}
+
+/* font-format */
+#cssWoff2:after{content:"n/a";}
+@supports font-format(woff2){#cssWoff2:after{content:"supported";}}
+
 /* @media */
 #cssOm:after{content:"not supported";}
 @media (-moz-device-orientation:portrait){#cssOm:after{content:"portrait";}}
