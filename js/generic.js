@@ -1281,6 +1281,11 @@ function countJS(filename) {
 			// note: everything else is dumb: we can add blink/webkit or brave later
 			// lets just focus on gecko lies/bypasses
 
+			// temp until I hook up all the lies/bypasses to isTZPSmart
+				// looks weird with partial lies/missing methods/no prototype lies etc
+				// note: isTZPBlock overrides isTZPSmart, so nah nah nah edgeHTML
+			if (!isFF) {isTZPSMart = true}
+
 			// clear notations
 			if (!isFF) {
 				// change to if (!isFF || !isTZPSmart)
