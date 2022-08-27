@@ -79,4 +79,5 @@ let s0 = " <span class='",
 	isRFP = false,
 	isSecure = false,
 	isTB = false,
-	isVer = ""
+	isVer = "",
+	isVerMax = ""
