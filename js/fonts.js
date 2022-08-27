@@ -1018,11 +1018,11 @@ function get_woff2() {
 			})()
 			let value = (supportsWoff2 ? zS : zF)
 			dom.fontWoff2 = value
-			return resolve("woff:"+ value)
+			return resolve("woff2:"+ value)
 		} catch(e) {
 			log_error("fonts: woff2", e.name, e.message)
 			dom.fontWoff2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("woff:"+ zErr)
+			return resolve("woff2:"+ zErr)
 		}
 	})
 }
