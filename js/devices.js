@@ -4,7 +4,6 @@ let pluginBS = false, pluginMini = "", mimeBS = false, mimeMini = "", devicesBS 
 
 // sims
 let intSNC = 0
-let intSNH = 0, lstSNH = ["2", zB0, 2, 11, 0, 7.2, [1,2], {},"null", "undefined", undefined, []]
 let intSNM = 0, lstSNM = [undefined, zU, {}, "null", 5.8, zB0, true, [4], "none", [], null]
 let intSNP = 0, lstSNP = [undefined, {}, 5.8,zB0,zU,"true",true,[4],"none",[],"null", null]
 let intMDV = 0, lstMDV = [[],["a","b"],["[object MediaDeviceInfo]"],[{"kind": "audioinput"}, {"kind": "videoinput"}],{}]
@@ -242,42 +241,33 @@ function get_concurrency() {
 		// 1630089: FF68+ macOS reports physical cores instead of logical
 		// capped at dom.maxHardwareConcurrency (e.g. 1728741)
 	// hardwareConcurrency is an expected key
-	let h, isLies = false, name = "devices:hardwareConcurrency"
+	let display, value, isLies = false, notation = ""
 	try {
-		if (runSE) {
-			runSNH = false; abc = def
-		} else if (runSL) {
-			h = null; runSNH = false
-		} else if (runSNH) {
-			h = lstSNH[intSNH]; console.log("SIM #"+ intSNH, name, h)
-		} else {
-			h = navigator.hardwareConcurrency
-		}
+		value = navigator.hardwareConcurrency
+		value = cleanFn(value)
+		display = value
 	} catch(e) {
 		log_error("devices: hardwareConcurrency", e.name, e.message)
-		h = zB0
+		display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		value = zErr
 	}
-	h = cleanFn(h)
 	// lies
-	if (h !== zB0) {
-		if (typeof h !== "number") {isLies = true
-		} else if (!Number.isInteger(h)) {isLies = true
-		} else if (h < 1) {isLies = true
-		} else if (isBraveMode > 1) {isLies = true
-		} else if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
+	if (isTZPSmart) {
+		if (value !== zErr) {
+			if (typeof value !== "number") {isLies = true
+			} else if (!Number.isInteger(value)) {isLies = true
+			} else if (value < 1) {isLies = true
+			} else if (isBraveMode > 1) {isLies = true
+			} else if (proxyLies.includes("Navigator.hardwareConcurrency")) {isLies = true}
+		}		
+		if (isLies) {
+			value = zLIE; display = soL + display + scC
+			if (gRun) {gKnown.push("devices:hardwareConcurrency")}
+		}
+		notation = (value === 2 ? rfp_green : rfp_red)
 	}
-	let h2 = h
-	// output
-	if (isLies) {
-		h2 = zLIE; h = soL + h + scC
-		if (gRun) {gKnown.push(name)}
-	}
-	dom.nHWC.innerHTML = h + (h === 2 ? rfp_green : rfp_red)
-	if (runSNH) {
-		console.debug(" - returned", h2)
-		intSNH++; intSNH = intSNH % lstSNH.length
-	}
-	return "hardwareConcurrency:"+ h2
+	dom.nHWC.innerHTML = display + notation
+	return "hardwareConcurrency:"+ value
 }
 
 function get_gamepads() {
@@ -1022,6 +1012,9 @@ function get_speech_rec() {
 }
 
 function get_touch() {
+
+	//gecko/blink: ontouchcancel, ontouchend, ontouchmove, ontouchstart: engine properties
+
 	// ontouchstart/ontouchend/TouchEvent
 		// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
 		// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)

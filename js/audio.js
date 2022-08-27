@@ -60,25 +60,19 @@ function get_audio2_context(run) {
 			if (!latencyError || run == 2) {
 				sDetail[sName] = results
 				let hash = sha1(results.join())
-				if (isFF) {
+				if (isFF && isTZPSmart) {
 					// lies: missing keys
 					isLie = true
 					keynames.sort()
 					let lieHash = sha1(keynames.join())
-					let knownA = "6be86802849b991e2ce6b966234cbd116c2b84e5" // FF70+ [20]
-					let knownB = "406e1a6ed448d535be7a5c38e923afeb4214502b" // FF69- [18]
-					if (isVer > 69 && lieHash == knownA) {isLie = false
-					} else if (isVer < 70 && lieHash == knownB) {isLie = false}
-
-					// lies: FF70+ known subset of stable keys and values
-						// FF69 and lower as a different set should be stable but who cares
-					if (!isLie && isVer > 69) {
+					if (lieHash == "6be86802849b991e2ce6b966234cbd116c2b84e5") {isLie = false} // FF70+ [20]
+					// lies: missing hardcoded keys + values
+					if (!isLie) {
 						subset.sort()
 						let subHash = sha1(subset.join())
-						let knownX = "b82a976312cf08e6e139b3dcee6c02aa412913c2" // FF70+ [16]
-						if (subHash !== knownX) {isLie = true}
+						if (subHash !== "b82a976312cf08e6e139b3dcee6c02aa412913c2") {isLie = true} // FF70+ [16]
 					}
-					// RFP notation: FF70+ these are all 20 keys
+					// RFP notation
 					note = rfp_red
 					if (hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e" && isOS == "windows") {note = rfp_green // 0.04
 					} else if (hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1" && isOS == "linux") {note = rfp_green // 0.02
@@ -97,8 +91,9 @@ function get_audio2_context(run) {
 				return resolve("redo")
 			}
 		} catch(e) {
-			dom.audio1hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("keys:"+ (isFF ? zErr : zB0))
+			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+			dom.audio1hash = trim_error(eMsg)
+			return resolve("keys:"+ eMsg) // user test: reflect error entropy
 		}
 	})
 }
@@ -111,7 +106,6 @@ function get_audio2_hybrid() {
 			sDetail[sName] = []
 			let results = []
 			if (throwAC) {abc = def}
-
 			let audioCtx = new window.AudioContext,
 				oscillator = audioCtx.createOscillator(),
 				analyser = audioCtx.createAnalyser(),
@@ -160,13 +154,14 @@ function get_audio2_hybrid() {
 					return resolve("hybrid:"+ (isLie ? zLIE : hash))
 				} catch(e) {
 					dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-					return resolve("hybrid:"+ zB0)
+					return resolve("hybrid:"+ zErr)
 				}
 			}
 			oscillator.start(0)
 		} catch(e) {
-			dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("hybrid:"+ (isFF ? zErr : zB0))
+			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+			dom.audio3hash = trim_error(eMsg)
+			return resolve("hybrid:"+ eMsg) // user test: reflect error entropy
 		}
 	})
 }
@@ -218,13 +213,14 @@ function get_audio2_oscillator() {
 					return resolve("oscillator:"+ (isLie ? zLIE : hash))
 				} catch(e) {
 					dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-					return resolve("oscillator:"+ zB0)
+					return resolve("oscillator:"+ zErr)
 				}
 			}
 			oscillator.start(0)
 		} catch(e) {
-			dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("oscillator:"+ (isFF ? zErr : zB0))
+			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
+			dom.audio2hash = trim_error(eMsg)
+			return resolve("oscillator:"+ eMsg) // user test: reflect error entropy
 		}
 	})
 }
@@ -347,18 +343,21 @@ function outputAudio() {
 							sum2 += x
 							sum3 += Math.abs(x)
 						}
-						// lies
-						let isLies = (isBraveMode > 1 && !isFile)
-						if (sum2 == sum3) {isLies = true}
-						if (runSL) {sum++}
-						if (isFF || isEngine == "blink") {
-							if (!knownGood.includes(sum)) {isLies = true}
-						}
 						pxi_compressor.disconnect()
 						// get/copy
 						let hashG = sha1(byteArrayToHex(hashes[0]), "audio get")
 						let hashC = sha1(byteArrayToHex(hashes[1]), "audio copy")
-						if (hashG !== hashC) {isLies = true}
+						// lies
+						let isLies = false
+						if (isTZPSmart) {
+							if (isBraveMode > 1 && !isFile) {isLies = true}
+							if (sum2 == sum3) {isLies = true}
+							if (runSL) {sum++}
+							if (isFF || isEngine == "blink") {
+								if (!knownGood.includes(sum)) {isLies = true}
+							}
+							if (hashG !== hashC) {isLies = true}
+						}
 						// display/FP
 						if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
 							let note = "empty arrayBuffer"
@@ -377,19 +376,19 @@ function outputAudio() {
 					log_error(sName, e.name, e.message)
 					let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 					dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
-					log_section("audio", t0, [sName +":"+ zB0])
+					log_section("audio", t0, [sName +":"+ zErr])
 				}
 			}
 		} catch(e) {
 			log_error("audio: "+ sName, e.name, e.message)
 			let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
 			dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
-			log_section("audio", t0, [sName+ ":"+ (isFF ? zB0 : zErr)])
+			log_section("audio", t0, [sName +":"+ zErr])
 		}
 	} catch(error) {
 		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, [sName +":n/a"])
+		log_section("audio", t0, [sName +":"+ zNA])
 	}
 }
 

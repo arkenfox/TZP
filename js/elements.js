@@ -7,7 +7,7 @@ function get_clientrect() {
 	// ToDo
 	// - record all methods (not blocks which are recorded as errors)
 	// - ^ concat them: isType, per-execution, per-element (i.e same diff for all elements or random amounts)
-	// - add isFF-only sanity check that we shouldn't get more than one non-Lie hash
+	// - add FF-only sanity check that we shouldn't get more than one non-Lie hash
 	// - add clickable details
 	// - ^ one non-Lie, any other lies = "reported" with clickable diffs
 
@@ -46,7 +46,7 @@ function get_clientrect() {
 					aLies.push(false)
 				}
 			}
-			// set our trustyworthy clientrect mthods array for other functions
+			// set our trustyworthy clientrect methods array for other functions
 			aClientRectBS = aLies
 
 			// display
@@ -339,7 +339,7 @@ function get_resized() {
 			} else {
 				sDetail[sNameM] = resM
 				displayM = mini_sha1(resM.join(), "elements mathml") + buildButton("15", sNameM)
-					+ " ["+ mini(resM.join(), "elements lineheight") +"]"
+					+ " ["+ mini(resM.join(), "elements mathml") +"]"
 			}
 		}
 		dom.mathml.innerHTML = isFF ? displayM : zNA
@@ -369,7 +369,6 @@ function get_resized() {
 				displayL = mini_sha1(resL.join(), "elements lineheight") + buildButton("15", sNameL)
 					+ " ["+ mini(resL.join(), "elements lineheight") +"]"
 			}
-
 		}
 		dom.lineheight.innerHTML = displayL
 

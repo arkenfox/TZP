@@ -15,7 +15,7 @@ function get_component_shims() {
 		if (eMsg == "ReferenceError: Components is not defined") {
 			sHash = zU; dom.shim = zU
 		} else {
-			sHash = isFF ? zB0 : zErr
+			sHash = zErr
 			dom.shim = (e.name === undefined ? zErr : eMsg)
 		}
 	}
@@ -90,11 +90,10 @@ function get_iframe_props() {
 
 		// gecko BS
 		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
-		if (isFF) {
+		if (isFF && isTZPSmart) {
 			// suspect
 			suspectProps = props.slice(props.indexOf("Performance")+1)
 			let falsePos = ['Event','Location'] // false positives: console open
-			if (isVer < 62) {falsePos.push('StyleSheetList')}
 			suspectProps = suspectProps.filter(x => !falsePos.includes(x))
 			if (suspectProps.length) {
 				sDetail[sSuspect] = suspectProps.sort()
@@ -117,15 +116,13 @@ function get_iframe_props() {
 		// display
 		let output = mini_sha1(allProps.join(), "misc iframe props")
 		let result = output
-		if (fakeProps.length) {
+		if (fakeProps.length) { // gecko smart only
 			output = soB + output + scC
 			result = mini_sha1(props.join(), "misc iframe props bypass")
 			// record lie/bypass
-			if (isFF) {
-				if (gRun) {
-					gKnown.push("misc:iframe window properties")
-					gBypassed.push("misc:iframe window properties:"+ result)
-				}
+			if (gRun) {
+				gKnown.push("misc:iframe window properties")
+				gBypassed.push("misc:iframe window properties:"+ result)
 			}
 		}
 		output += buildButton("18", sAll, sDetail[sAll].length) + suspectStr + fakeStr
@@ -134,7 +131,7 @@ function get_iframe_props() {
 	} catch(e) {
 		log_error("misc: iframe window properties", e.name, e.message)
 		dom.iProps = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		return "iframe_properties:"+ (isFF ? zB0 : zErr)
+		return "iframe_properties:"+ zErr
 	}
 }
 
@@ -179,7 +176,7 @@ function get_nav_prototype() {
 		return "navigator_keys:"+ realhash
 	} else {
 		dom.nProto = zB0 // empty array blocked
-		return "navigator_keys:"+ zLie
+		return "navigator_keys:"+ zLIE
 	}
 }
 
@@ -217,10 +214,10 @@ function get_reporting_api() {
 		log_error("misc: reporting observer", e.name, e.message)
 		let eMsg = trim_error(e.name, e.message)
 		if (isFF && eMsg == "ReferenceError: ReportingObserver is not defined") {
-			r = (isVer > 64 ? zD : zNS)
+			r = zD
 			dom.reportingAPI = r
 		} else {
-			r = isFF ? zB0 : zErr
+			r = zErr
 			dom.reportingAPI = (e.name === undefined ? zErr : eMsg)
 		}
 	}
@@ -228,7 +225,7 @@ function get_reporting_api() {
 }
 
 function get_perf1() {
-	let testE = "", testM = "", display = "", valueE = "", valueM = ""
+	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
 	// get result
 	try {
 		performance.mark("a")
@@ -239,10 +236,10 @@ function get_perf1() {
 		} else {
 				performance.mark("b")
 				try {
-				testE = performance.getEntriesByName("b","mark").length
-					+", "+ performance.getEntries().length
-					+", "+ performance.getEntries({name:"b", entryType:"mark"}).length
-					+", "+ performance.getEntriesByName("b","mark").length
+					testE = performance.getEntriesByName("b","mark").length
+						+", "+ performance.getEntries().length
+						+", "+ performance.getEntries({name:"b", entryType:"mark"}).length
+						+", "+ performance.getEntriesByName("b","mark").length
 				} catch(e) {
 					log_error("misc: perf getEntries", e.name, e.message)
 					testE = e.name === undefined? zErr : e.name
@@ -264,44 +261,50 @@ function get_perf1() {
 		}
 	} catch(e) {
 		log_error("misc: perf mark", e.name, e.message)
-		dom.perf1 = (e.name === undefined ? zErr : trim_error(e.name, e.message)) +" | "+ zNA
-		return "perf_mark:"+ (isFF ? zB0 : zErr)
+		// bypass isFF non-RFP
+		display = (e.name === undefined ? zErr : trim_error(e.name, e.message)) +" | "+ zNA
+		let fpValue = zErr
+		if (isFF && isTZPSmart && !isRFP) {
+			fpValue = "not zero | not zero"
+			display = soB + display + scC + rfp_red
+			if (gRun) {
+				gKnown.push("misc:performance.mark")
+				gBypassed.push("misc:performance.mark:"+ fpValue)
+			}
+		}
+		dom.perf1.innerHTML = display
+		return "perf_mark:"+ fpValue
 	}
-
-	let ctrlE = "0, 0, 0, 0", ctrlM = 0, isLies = false
-	display = testE +" | "+ testM
-
 	// sim
 	if (runSL) {
 		if (isRFP) {testE = "1, 4, 4, 1"} else {testE = ctrlE}
 	}
-
-	let notation = testE == ctrlE && testM == ctrlM ? rfp_green : rfp_red
+	let ctrlE = "0, 0, 0, 0", ctrlM = 0
+	display = testE +" | "+ testM
 	if (valueE !== zErr) {valueE = testE == ctrlE ? "zero" : "not zero"}
 	if (valueM !== zErr) {valueM = testM == ctrlM ? "zero" : "not zero"}
 
-	// bypass
-	if (isRFP) {
-		valueE = "zero"
-		valueM = "zero"
-		if (ctrlE !== testE) {isLies = true}
-		if (ctrlM !== testM) {isLies = true}
-	} else if (isFF) {
-		if (valueE !== zErr) {valueE = "not zero"}
-		if (valueM !== zErr) {valueM = "not zero"}
-		if (ctrlE == testE) {isLies = true}
-		if (ctrlM == testM) {isLies = true}
+	if (isFF && isTZPSmart) {
+		notation = testE == ctrlE && testM == ctrlM ? rfp_green : rfp_red
+		// non-RFP = not zero: lies/bypass incl. errors
+		if (!isRFP) {
+			let isLies = false
+			if (valueE == zErr || valueM == zErr) {isLies = true} // errors
+			if (ctrlE == testE || ctrlM == testM) {isLies = true} // zeros
+			if (isLies) {
+				notation = rfp_red
+				valueE = "not zero"
+				valueM = "not zero"
+				if (gRun) {
+					gKnown.push("misc:performance.mark")
+					gBypassed.push("misc:performance.mark:"+valueE+" | "+valueM)
+				}
+				display = soB + display + scC
+			}
+		}
 	}
 	// display
-	if (isLies) {
-		if (gRun) {
-			gKnown.push("misc:performance.mark")
-			gBypassed.push("misc:performance.mark:"+valueE+" | "+valueM)
-		}
-		dom.perf1.innerHTML = soB + display + scC
-	} else {
-		dom.perf1.innerHTML = display + notation
-	}
+	dom.perf1.innerHTML = display + notation
 	return "perf_mark:"+ valueE +" | "+ valueM
 }
 
@@ -344,7 +347,8 @@ function get_perf2(log = false) {
 				if (isTamper) {
 					dom.perf2.innerHTML = display + sb +"[tampered]"+ sc
 				} else {
-					dom.perf2.innerHTML = display + (is00 ? rfp_green : rfp_red)
+					let notation = (isTZPSmart ? (is00 ? rfp_green : rfp_red) : "")
+					dom.perf2.innerHTML = display + notation
 				}
 				if (log) {log_perf("perf.now [not in FP]",t0)}
 			}
@@ -366,26 +370,23 @@ function get_perf3() {
 	} catch(e) {
 		log_error("misc: perf timing", e.name, e.message)
 		dom.perf3 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		r = isFF ? zB0 : zErr
+		r = zErr
 	}
 	return "perf_timing:"+ r
 }
 
 function get_perf4() {
 	// also: dom.enable_performance_navigation_timing
-	let r = zD
+	let r = zD, notation = ""
 	try {
 		if (window.PerformanceNavigationTiming) {r = zE}
 	} catch(e) {
 		log_error("misc: perf navigation", e.name, e.message)
 		dom.perf4 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		return "perf_navigation:"+ (isFF ? zB0 : zErr)
+		return "perf_navigation:"+ zErr
 	}
-	if (isVer > 77) {
-		dom.perf4.innerHTML = r + (r == zD ? rfp_green : rfp_red) //78+: 1511941
-	} else {
-		dom.perf4 = r
-	}
+	if (isTZPSmart) {notation = (r == zD ? rfp_green : rfp_red)} //78+: 1511941
+	dom.perf4.innerHTML = r + notation
 	return "perf_navigation:"+ r
 }
 
@@ -407,7 +408,7 @@ function get_svg() {
 	} catch(e) {
 		log_error("misc: svg", e.name, e.message)
 		dom.svgBasicTest = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		return "svg:"+ (isFF ? zB0 : zErr)
+		return "svg:"+ zErr
 	}
 }
 
@@ -443,7 +444,7 @@ function get_windowcontent() {
 		let eMsg = trim_error(e.name, e.message)
 		if (eMsg !== "ReferenceError: content is not defined") {
 			dom.wincon = (e.name === undefined ? zErr : eMsg)
-			return "window_content:"+ (isFF ? zB0 : zErr)
+			return "window_content:"+ zErr
 		}
 	}
 	dom.wincon = r
