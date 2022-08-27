@@ -1284,7 +1284,7 @@ function countJS(filename) {
 			// temp until I hook up all the lies/bypasses to isTZPSmart
 				// looks weird with partial lies/missing methods/no prototype lies etc
 				// note: isTZPBlock overrides isTZPSmart, so nah nah nah edgeHTML
-			if (!isFF) {isTZPSMart = true}
+			if (!isFF) {isTZPSmart = true}
 
 			// clear notations
 			if (!isFF) {
