@@ -70,6 +70,7 @@ let fntList = []
 let baseFonts = ['monospace','sans-serif','serif',]
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii"
 let fntStrB = "ImLwWil"
+let isEverDetected = false // track across all four basefonts compares
 
 function get_OS() {
 	// append widget font to baseFonts
@@ -91,6 +92,7 @@ function run() {
 	dom.base = ""
 	dom.visual = ""
 	dom.detail = ""
+	isEverDetected = false
 	// make sure we have a font
 	let valueF = dom.valueF.value
 	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
@@ -118,8 +120,9 @@ function run() {
 				dom.visual.style.fontFamily = font
 				dom.valueF.value = font
 				fntList = [font]
-				dom.font.innerHTML = "<br><hr><br>" + s12 + "FONT: " + sc + font +"<br><br>"
-				getFonts()				
+				getFonts()
+				let strDetected = (isEverDetected ? sg +" [" : sb +" [NOT ") + "DETECTED]" + sc
+				dom.font.innerHTML = "<br><hr><br>" + s12 + "FONT: " + sc + font + strDetected +"<br><br>"
 			}, 150)
 		}
 	} else {
@@ -241,6 +244,7 @@ function getFonts() {
 						)
 						//oResults[font][basefont].push("result: " + (isDetected ? sg +"detected" : sb+ "not detected") + sc)
 					})
+					if (isDetected) {isEverDetected = true}
 					return
 				})
 			})
