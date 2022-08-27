@@ -1016,13 +1016,13 @@ function get_woff2() {
 				})
 				return font.status == "loaded" || font.status == "loading"
 			})()
-			let value = (supportsWoff2 ? zE : zB0)
+			let value = (supportsWoff2 ? zS : zF)
 			dom.fontWoff2 = value
 			return resolve("woff:"+ value)
 		} catch(e) {
 			log_error("fonts: woff2", e.name, e.message)
 			dom.fontWoff2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("woff:"+ (isFF ? zB0 : zErr))
+			return resolve("woff:"+ zErr)
 		}
 	})
 }
