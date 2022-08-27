@@ -332,12 +332,12 @@ const get_isVer = () => new Promise(resolve => {
 			return
 		}
 	}
-
 	output(cascade())
 
 	function cascade() {
+		isVerMax = 106
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
-		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
+		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {

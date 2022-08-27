@@ -275,10 +275,13 @@ function outputVersion() {
 		let ver106 = (Element.prototype.hasOwnProperty("checkVisibility")) // 0.009 ms
 		rec(106, 106, "1777293", ver106, performance.now()-t106)
 
-		// 105: 1780545
-		let t105 = performance.now() // legacy check FF57- Intl.PluralRules
-		let ver105 = ("function" === typeof Intl.PluralRules && Intl.PluralRules.prototype.hasOwnProperty("selectRange")) // 0.12ms
-		rec(105, 105, "1780545", ver105, performance.now()-t105)
+		// 105: 830716
+			// 105: Function object could not be cloned. 36
+			// 94-104: The object could not be cloned. 31
+			// 93-: structuredClone is not defined. 30
+		let t105 = performance.now(), ver105
+		try {structuredClone((() => {}))} catch(e) {ver105 = (e.message.length == 36); console.log(e.message, e.message.length)}
+		rec(105, 105, "830716", ver105, performance.now()-t105)
 
 		// 104: 1712623
 		let t104 = performance.now()

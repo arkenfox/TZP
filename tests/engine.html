@@ -69,8 +69,6 @@ let results = [],
 	bBlock = false, // throw a test error
 	bNum = false // display numbering instead of perf
 
-let	topVer = 106
-
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
 	if (str.length > len) {str = str.slice(0,len-3) +"..."}
@@ -178,7 +176,7 @@ function fnDisplay() {
 	if (isFF) {
 		summary += s14+ "DEBUG".padStart(7) + sc +"RFP:".padStart(6) + (isRFP ? green_tick : red_cross)
 		let strVer = isVer
-		strVer += (isVer == topVer ? "+" : "")
+		strVer += (isVer == isVerMax ? "+" : "")
 		strVer += (isVer == 52 ? " or lower" : "")
 		summary += "VER: ".padStart(6) + strVer
 	}

@@ -170,6 +170,7 @@ let s0 = " <span class='",
 	isSecure = false,
 	isTB = false,
 	isVer = "",
+    	isVerMax = "",
 	isVerPlus = false,
 // runtypes
 	gt0,
