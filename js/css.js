@@ -30,7 +30,7 @@ function get_colors() {
 			'-moz-mac-buttonactivetext', // dropped FF93
 			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext', // dropped FF88
 			'-moz-gtk-info-bar-text', // dropped FF90
-			// ddropped FF78+
+			// dropped FF78 or lower
 			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		]
 		aList = aList.concat(aMozExtra)
@@ -69,7 +69,7 @@ function get_colors() {
 			sDetail["css_colors_"+ sNames[i]] = aTemp
 			aResults.push("colors_"+ sNames[i] +":"+ hash)
 			let note = ""
-			//if (isGeckoSmart) {
+			if (isFF & isTZPSmart) {
 				if (sNames[i] == "moz_stand-in") {
 					// moz stand-ins
 					note = rfp_red
@@ -79,12 +79,12 @@ function get_colors() {
 					} else {
 						if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
 					}
-				} else if (sNames[i] == "moz") {
-					if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
-				} else if (sNames[i] == "css4") {
-					if (gRun & isOS == "android") {log_debug("css4 colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
-				}
-			//}
+				}// else if (sNames[i] == "moz") {
+				//	if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
+				//} else if (sNames[i] == "css4") {
+				//	if (gRun & isOS == "android") {log_debug("css4 colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
+				//}
+			}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
 		log_perf("colors [css]",t0)
@@ -365,48 +365,49 @@ function get_computed_styles() {
 
 function get_mm_css() {
 	return new Promise(resolve => {
-		function get_mm(type, id, version, expected) {
+		function get_mm(type, id, expected) {
 			let x = zNS, x2 = "", n="no-preference", q=type +": "
 			try {
-				if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"}
-				if (window.matchMedia("("+ q +"light)").matches) {x = "light"}
-				if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"}
-				if (window.matchMedia("("+ q +"forced)").matches) {x = "forced"} // 1694864: removed
-				if (window.matchMedia("("+ q +"high)").matches) {x = "high"}
-				if (window.matchMedia("("+ q +"low)").matches) {x = "low"}
-				if (window.matchMedia("("+ q +"active)").matches) {x = "active"}
-				if (window.matchMedia("("+ q +"none)").matches) {x = "none"}
-				if (window.matchMedia("("+ q + n +")").matches) {x = n}
+				if (window.matchMedia("("+ q + n +")").matches) {x = n
+				} else if (window.matchMedia("("+ q +"light)").matches) {x = "light"
+				} else if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"
+				} else if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"
+				} else if (window.matchMedia("("+ q +"none)").matches) {x = "none"
+				} else if (window.matchMedia("("+ q +"high)").matches) {x = "high"
+				} else if (window.matchMedia("("+ q +"low)").matches) {x = "low"
+				} else if (window.matchMedia("("+ q +"active)").matches) {x = "active"
+				} else if (window.matchMedia("("+ q +"forced)").matches) {x = "forced" // 1694864: removed FF88
+				}
 			} catch(e) {
 				log_error("css: matchmedia_"+ type, e.name, e.message)
-				x = zB0
+				x = zErr
 			}
 			// notate/display
 			if (runSL) {x = "apple"}
 			let display = x
 			// lies
-			x2 = getElementProp("#css"+ id,"content",":after")
-			if (x2 !== "x") {
-				if (x !== x2) {
-					display = soB + x + scC
-					if (gRun) {
-						gKnown.push("css:"+ type)
-						gBypassed.push("css:"+ q.trim() + x2)
+			if (isTZPSmart) {
+				x2 = getElementProp("#css"+ id,"content",":after")
+				if (x2 !== "x") {
+					if (x !== x2) {
+						display = soB + x + scC
+						if (gRun) {
+							gKnown.push("css:"+ type)
+							gBypassed.push("css:"+ q.trim() + x2)
+						}
 					}
 				}
-			}
-			if (version !== undefined && x2 == x) {
-				if (isVer >= version) {
+				if (expected !== undefined && x2 == x) {
 					display += (x == expected ? rfp_green : rfp_red)
 				}
+				x = (x2 == "x" ? x : x2)
 			}
 			document.getElementById("mm"+id).innerHTML = display
-			x = (x2 == "x" ? x : x2)
 			res.push(q.trim() + x)
 		}
 		let res = []
-		get_mm("prefers-reduced-motion","PRM",63,"no-preference") // FF63+
-		get_mm("prefers-color-scheme","PCS",67,"light") // FF67+: 1494034
+		get_mm("prefers-reduced-motion","PRM","no-preference") // FF63+
+		get_mm("prefers-color-scheme","PCS","light") // FF67+: 1494034
 		get_mm("forced-colors","FC") // FF89+: 1659511: not RFP protected
 		get_mm("prefers-contrast","PC")
 		// ToDo: contrast: RFP & version check
@@ -419,13 +420,16 @@ function get_system_fonts() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let aResults = [],
-			sError = "",
-			m = "-moz-",
+			sName = "css_system_fonts",
 			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar"],
-			mFonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
-		let sName = "css_system_fonts"
+			mFonts = [
+				"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+				"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
+			]
 		sDetail[sName] = []
-		if (isFF) {aFonts = aFonts.concat(mFonts)}
+		if (isFF) {
+			aFonts = aFonts.concat(mFonts)
+		}
 		try {
 			let el = dom.sysFont
 			aFonts.forEach(function(font){
@@ -444,16 +448,23 @@ function get_system_fonts() {
 				}
 			})
 			// temp
-			if (gRun) {log_debug("sys fonts", "<br>    "+ aResults.join("<br>    "))}
+			//if (gRun) {log_debug("sys fonts", "<br>    "+ aResults.join("<br>    "))}
 		} catch(e) {
-			sError = (isFF ? zB0 : "error")
+			log_error("css: system_fonts:", e.name, e.message)
+			let eMsg = trim_error(e.name, e.message)
+			dom.sFontsHash.innerHTML = (e.name === undefined ? zErr : eMsg)
+			return resolve("system_fonts:"+ zErr)
 		}
 		// output
-		sDetail[sName] = aResults
-		let sHash = mini_sha1(aResults.join(), "css system fonts")
-		dom.sFontsHash.innerHTML = sError + (sError == "" ? sHash + buildButton("14", sName, aResults.length) : "")
+		let display = "none", value = "none"
+		if (aResults.length) {
+			sDetail[sName] = aResults
+			value = mini_sha1(aResults.join(), "css system fonts")
+			display = value + buildButton("14", sName, aResults.length)
+		}
+		dom.sFontsHash.innerHTML = display
 		log_perf("system fonts [css]",t0)
-		return resolve("system_fonts:"+ (sError == "" ? sHash : sError))
+		return resolve("system_fonts:"+ value)
 	})
 }
 
