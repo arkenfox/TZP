@@ -165,11 +165,9 @@ function get_canPerf(runtype) {
 
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
-	if (isFF) return resolve() // FF
-	if (isEngine == "edgeHTML") return resolve()
+	if (isEngine !== "blink") return resolve()
 	if ("undefined" !== typeof opr) return resolve() // opera
 	if (Object.keys(chrome).includes("search")) return resolve() // opera fallback
-	if (!('chrome' in window)) return resolve() // not blink (note: already checked edgeHTML)
 
 	// proceed
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -449,7 +447,7 @@ const get_isOS64 = (skip = false) => new Promise(resolve => {
 })
 
 const get_isRFP = () => new Promise(resolve => {
-	// FF56+: TZP main test no need to check this: see isGeckoBlockMin
+	// FF56+: TZP main test no need to check this: see isTZPBlockMinVer
 	isRFP = false
 	isPerf = true
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -532,7 +530,7 @@ const get_isTB = () => new Promise(resolve => {
 const get_isVer = () => new Promise(resolve => {
 	// skip
 	if (!isFF) {return resolve()}
-	// set isVer, isVerPlus
+	// set isVer
 	let t0; if (canPerf) {t0 = performance.now()}
 	function output(verNo) {
 		isVer = verNo
@@ -627,20 +625,22 @@ const get_navKeys = () => new Promise(resolve => {
 	navKeys = {}
 	let t0; if (canPerf) {t0 = performance.now()}
 	// compare
-	try {
-		let keysA = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		keysA = keysA.filter(x => !["constructor"].includes(x))
-		let keysB = []
-		for (const key in navigator) {keysB.push(key)}
-		if (gRun) {
-			if (runSL) {keysA = ["b","c","buildID","iamfake","appName"]; keysB = ["appName","b","e","f"]}
-			if (mini(keysA.join(), "_prereq navA") !== mini(keysB.join(), "_prereq navB")) {
-				gMethods.push("misc:navigator keys: mismatch")
-				sDetail["misc_navigator_keys_mismatch_[prototype]_method_skip"] = keysA
-				sDetail["misc_navigator_keys_mismatch_[for loop]_method_skip"] = keysB
+	if (isTZPSmart) {
+		try {
+			let keysA = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+			keysA = keysA.filter(x => !["constructor"].includes(x))
+			let keysB = []
+			for (const key in navigator) {keysB.push(key)}
+			if (gRun) {
+				if (runSL) {keysA = ["b","c","buildID","iamfake","appName"]; keysB = ["appName","b","e","f"]}
+				if (mini(keysA.join(), "_prereq navA") !== mini(keysB.join(), "_prereq navB")) {
+					gMethods.push("misc:navigator keys: mismatch")
+					sDetail["misc_navigator_keys_mismatch_[prototype]_method_skip"] = keysA
+					sDetail["misc_navigator_keys_mismatch_[for loop]_method_skip"] = keysB
+				}
 			}
-		}
-	} catch(e) {}
+		} catch(e) {}
+	}
 
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -655,43 +655,45 @@ const get_navKeys = () => new Promise(resolve => {
 			fakeKeys = [],
 			missingKeys = [],
 			movedKeys = []
-		// common
-		let expectedKeys = [
-			"appCodeName","appName","appVersion","platform","product","productSub","userAgent","vendor","vendorSub", // ua bits
-			"hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
-		]
-		if (isFF) {
-			if (isVer > 98) {expectedKeys.push("pdfViewerEnabled")}
-			// constructor is always last
-			// track added keys
-			lastKeyIndex = keys.indexOf("constructor")
-			trueKeys = keys.slice(0, lastKeyIndex+1)
-			fakeKeys = keys.slice(lastKeyIndex+1)
-			// track missing keys
-			// track moved (expected) keys: use trueKeys
-			expectedKeys.push("buildID","oscpu","taintEnabled")
-			missingKeys = expectedKeys.filter(x => !trueKeys.includes(x))
-			movedKeys = fakeKeys.filter(x => expectedKeys.includes(x))
-			trueKeys = trueKeys.concat(missingKeys)
-			fakeKeys = fakeKeys.concat(missingKeys)
-			// remove moved expected from fake
-			fakeKeys = fakeKeys.filter(x => !movedKeys.includes(x))
-		} else if (isEngine == "blink") {
-			// last key inconsistent
-			let poisonKeys = ["activeVRDisplays","buildID","getVRDisplays","iamfake",
-				"oscpu","SharedWorker","Worker","taintEnabled"]
-			if (isBrave) {
-				expectedKeys.push("brave","globalPrivacyControl")
-			} else {
-				poisonKeys.push("brave")
+		if (isTZPSmart) {
+			// common
+			let expectedKeys = [
+				"appCodeName","appName","appVersion","platform","product","productSub","userAgent","vendor","vendorSub", // ua bits
+				"hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
+			]
+			if (isFF) {
+				if (isVer > 98) {expectedKeys.push("pdfViewerEnabled")}
+				// constructor is always last
+				// track added keys
+				lastKeyIndex = keys.indexOf("constructor")
+				trueKeys = keys.slice(0, lastKeyIndex+1)
+				fakeKeys = keys.slice(lastKeyIndex+1)
+				// track missing keys
+				// track moved (expected) keys: use trueKeys
+				expectedKeys.push("buildID","oscpu","taintEnabled")
+				missingKeys = expectedKeys.filter(x => !trueKeys.includes(x))
+				movedKeys = fakeKeys.filter(x => expectedKeys.includes(x))
+				trueKeys = trueKeys.concat(missingKeys)
+				fakeKeys = fakeKeys.concat(missingKeys)
+				// remove moved expected from fake
+				fakeKeys = fakeKeys.filter(x => !movedKeys.includes(x))
+			} else if (isEngine == "blink") {
+				// last key inconsistent
+				let poisonKeys = ["activeVRDisplays","buildID","getVRDisplays","iamfake",
+					"oscpu","SharedWorker","Worker","taintEnabled"]
+				if (isBrave) {
+					expectedKeys.push("brave","globalPrivacyControl")
+				} else {
+					poisonKeys.push("brave")
+				}
+				// track posion
+				trueKeys = keys.filter(x => !poisonKeys.includes(x))
+				fakeKeys = keys.filter(x => poisonKeys.includes(x))
+				// track missing
+				missingKeys = expectedKeys.filter(x => !keys.includes(x))
+				trueKeys = trueKeys.concat(missingKeys)
+				fakeKeys = fakeKeys.concat(missingKeys)
 			}
-			// track posion
-			trueKeys = keys.filter(x => !poisonKeys.includes(x))
-			fakeKeys = keys.filter(x => poisonKeys.includes(x))
-			// track missing
-			missingKeys = expectedKeys.filter(x => !keys.includes(x))
-			trueKeys = trueKeys.concat(missingKeys)
-			fakeKeys = fakeKeys.concat(missingKeys)
 		}
 		// remove constructor
 		allKeys = allKeys.filter(x => !["constructor"].includes(x))
@@ -1192,7 +1194,7 @@ function log_section(name, time1, data) {
 						+ soL +"["+ gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") +"]"+ scC + "</span>"
 					knownStr = sha1(gKnown.join()) + knownBtn
 				} else {
-					knownStr = "none"
+					knownStr = isFF && isTZPSmart ? "none" : zNA
 				}
 				if (gBypassed.length) {
 					bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`bypassed`)'>"
@@ -1212,7 +1214,7 @@ function log_section(name, time1, data) {
 					let methodBtn = buildButton("0", "known methods", methodStr, "showMetrics")
 					dom.knownmethods.innerHTML = sha1(gMethods.join()) + methodBtn + detailBtn
 				} else {
-					dom.knownmethods = "none"+ detailBtn
+					dom.knownmethods = isFF && isTZPSmart ? "none"+ detailBtn : zNA
 				}
 				// FP
 				gData.sort()
@@ -1270,17 +1272,19 @@ function countJS(filename) {
 			get_isBrave(),
 			get_isFork(),
 		]).then(function(results){
-			// don't run on old versions
-			if (isFF & isVer < isGeckoBlockMin[0]) {isGeckoBlock = true}
-			// don't run on unsupported engines: ToDo: switch edgeHTML into dumb mode
-			//isEngine = "edgeHTML"; isFF = false // test
-			if (isEngine == "edgeHTML") {isGeckoBlock = true}
-			// treat older FF as dumb
-			if (isFF && isVer >= isGeckoSmartMin[0]) {
-				isGeckoSmart = true
+			// block/smart
+			if (isFF & isVer < isTZPBlockMinVer[0]) {isTZPBlock = true // block old gecko
+			} else if (isEngine == "edgeHTML") {isTZPBlock = true // block edgeHTML
+			} else if (isTB && isVer >= isTZPSmartMinVer[1]) {isTZPSmart = true // minTB
+			} else if (isFF && isVer >= isTZPSmartMinVer[0]) {isTZPSmart = true // minFF
 			}
-			// wipe notations: hook up isGeckoSmart later
+			// note: everything else is dumb: we can add blink/webkit or brave later
+			// lets just focus on gecko lies/bypasses
+
+			// clear notations
 			if (!isFF) {
+				// change to if (!isFF || !isTZPSmart)
+				// until then this acts as a visual guide to what needs to be actioned
 				rfp_green = ""
 				rfp_red = ""
 				rfp_random_green = ""
@@ -1298,6 +1302,7 @@ function countJS(filename) {
 				let items = document.getElementsByClassName("group")
 				for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 			}
+
 			// some sims = isFF only: not fussy; only devs run these
 			if (!isFF) {
 				runSN = false
@@ -1315,7 +1320,7 @@ function countJS(filename) {
 				gMethodsOnce.push("_global:isFork:blocked")
 				log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
 			}
-			if (!isGeckoBlock) {
+			if (!isTZPBlock) {
 				get_pointer_event() // pointer eventlistener
 			}
 			outputSection("load")
@@ -1352,7 +1357,7 @@ function outputPostSection(id) {
 
 function outputUser(name) {
 	// user initiated tests
-	if (isGeckoBlock) {
+	if (isTZPBlock) {
 		return
 	}
 	if (name == "goFS") { goFS()
@@ -1367,7 +1372,7 @@ function outputUser(name) {
 
 function outputSection(id, cls) {
 	// return if old gecko or unsupported engine
-	if (isGeckoBlock) {
+	if (isTZPBlock) {
 		// on first load output message
 		if (gLoad) {
 			let isUnsupported = (!isFF && isEngine !== "") // e.g. edgeHTML
@@ -1375,7 +1380,7 @@ function outputSection(id, cls) {
 			let msgActionSuffix = isFork == undefined ? "... " : "... with Firefox | "
 			let msgName = isTB ? "TOR BROWSER" : (isFork !== undefined ? isFork.toUpperCase() : "FIREFOX")
 			let msgVerPrefix = isTB ? "TB v" : (isFork !== undefined ? "FF v" : " v")
-			let msgVer = isTB ? isGeckoBlockMin[1] : isGeckoBlockMin[0]
+			let msgVer = isTB ? isTZPBlockMinVer[1] : isTZPBlockMinVer[0]
 			let msgReq = "TZP requires "+ msgVerPrefix + msgVer +"+"
 			if (isUnsupported) {
 				msgAction = "REPLACE "
@@ -1396,6 +1401,13 @@ function outputSection(id, cls) {
 			}
 		}
 		return
+	} else if (!isTZPSmart) {
+		if (gLoad) {
+			for (let i = 1; i < 19; i++) {
+				document.body.style.setProperty("--test"+i, "#d4c1b3")
+				document.body.style.setProperty("--bg"+i, "#808080")
+			}
+		}
 	}
 
 	if (gClick) {
@@ -1532,8 +1544,82 @@ function run_once() {
 	)} catch(e) {}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
 
-	// isFF
+	// isEngine
 	let t0; if (canPerf) {t0 = performance.now()}
+	try {
+		let oEngines = {
+			"blink": [
+				"number" === typeof TEMPORARY,
+				"object" === typeof onappinstalled,
+				"object" === typeof onbeforeinstallprompt,
+				"object" === typeof ondeviceorientationabsolute,
+				"object" === typeof onpointerrawupdate,
+				"object" === typeof onsearch,
+				"boolean" === typeof originAgentCluster,
+				"object" === typeof trustedTypes,
+				"function" === typeof webkitResolveLocalFileSystemURL,
+			],
+			"webkit": [
+				"object" === typeof browser,
+				"function" === typeof getMatchedCSSRules,
+				"object" === typeof safari,
+				"function" === typeof showModalDialog,
+				"function" === typeof webkitConvertPointFromNodeToPage,
+				"function" === typeof webkitCancelRequestAnimationFrame,
+				"object" === typeof webkitIndexedDB,
+			],
+			"gecko": [
+				"function" === typeof dump,
+				"boolean" === typeof fullScreen,
+				"object" === typeof onloadend,
+				"object" === typeof onabsolutedeviceorientation,
+				"function" === typeof scrollByLines,
+				"number" === typeof scrollMaxY,
+				"function" === typeof setResizable,
+				"function" === typeof sizeToContent,
+				"function" === typeof updateCommands,
+			],
+			"edgeHTML": [
+				"function" === typeof clearImmediate,
+				"function" === typeof msWriteProfilerMark,
+				"object" === typeof oncompassneedscalibration,
+				"object" === typeof onmsgesturechange,
+				"object" === typeof onmsinertiastart,
+				"object" === typeof onreadystatechange,
+				//"object" === typeof onvrdisplayfocus,
+				"function" === typeof setImmediate,
+			]
+		}
+		// array engine matches, so subsequent results doesn't override prev
+		let aEngine = [], aCounts = [], aAlert = []
+		for (const engine of Object.keys(oEngines).sort()) {
+			let len = oEngines[engine].length
+			let sumE = oEngines[engine].reduce((prev, current) => prev + current, 0)
+			if (sumE > (len/2)) {aEngine.push(engine)}
+			// counts
+			aCounts.push(sumE +"/"+ len)
+			// alerts: engine !== all the same
+			if (sumE !== 0 && sumE !== len) {
+				let displayE = []
+				oEngines[engine].forEach(function(check) {
+					displayE.push(check ? "\u2713" : "\u2715")
+				})
+				aAlert.push(engine +": " + displayE.join(" "))
+			}
+		}
+		if (aEngine.length == 1) {isEngine = aEngine[0]} // valid one result
+		// alert
+		if (aAlert.length) {
+			log_alert("isEngine: "+ aAlert.join(" | "), true)
+		}
+		log_perf("isEngine [global]",t0,"", aCounts.join(" | ") +" | "+ (isEngine == "" ? "unknown" : ""+ isEngine))
+	} catch(e) {
+		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
+		log_perf("isEngine [global]",t0,"","error")
+	}
+
+	// isFF: might as well: also set goanna
+	if (canPerf) {t0 = performance.now()}
 	try {
 		let list = [
 			[DataTransfer, "DataTransfer", "mozSourceNode"],
@@ -1576,7 +1662,6 @@ function run_once() {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
 		log_perf("isFF [global]",t0,"","error")
 	}
-	get_isEngine()
 	get_isOS64(true)
 }
 
