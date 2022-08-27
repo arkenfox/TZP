@@ -537,7 +537,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 60) {verNo += " or lower"
-		} else if (verNo == 106) {isVerPlus = true; verNo += "+"}
+		} else if (verNo == isVerMax) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
 		return resolve()
 	}
@@ -547,8 +547,10 @@ const get_isVer = () => new Promise(resolve => {
 		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 59
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
+
+		isVerMax = 106
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
-		if (Intl.PluralRules.prototype.hasOwnProperty("selectRange")) return 105 // 1780545
+		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
