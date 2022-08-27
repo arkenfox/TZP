@@ -794,6 +794,46 @@ function get_fallback(list) {
 	}
 }
 
+function get_formats() {
+	return new Promise(resolve => {
+		let res = []
+		let oList = {
+		"font-format": ["collection", "opentype", "truetype", "embeddedopentype", "svg", "woff", "woff2"],
+		"font-tech": ["color-cbdt","color-colrv0","color-colrv1","color-svg","color-sbix",
+			"feature-aat","feature-graphite","feature-opentype","incremental","palettes","variations"]
+		}
+		for (const k of Object.keys(oList)) {
+			sDetail["fonts_"+ k] = []
+			let array = oList[k]
+			let tmpRes = []
+			try {
+				array.forEach(function(item) {
+					if (CSS.supports(k + "("+ item + ")")) {
+						tmpRes.push(item)
+					}
+				})
+				if (tmpRes.length) {
+					sDetail["fonts_"+ k] = tmpRes
+					let hash = mini_sha1(tmpRes, k)
+					let btn = buildButton("12", "fonts_"+ k, tmpRes.length)
+					document.getElementById(k).innerHTML = hash + btn
+					res.push(k +":"+ hash)
+				} else {
+					// not supported
+					document.getElementById(k).innerHTML = zNS
+					res.push(k +":"+ zNS)
+				}
+			} catch(e) {
+				log_error("fonts: "+ k, e.name, e.message)
+				let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+				document.getElementById(k).innerHTML = eMsg
+				res.push(k +":"+ zErr)
+			}
+		}
+		return resolve(res)
+	})
+}
+
 function get_unicode() {
 	/* code based on work by David Fifield (dcf) and Serge Egelman (2015)
 		https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
@@ -1065,6 +1105,7 @@ function outputFonts() {
 	section.push("document_fonts:"+ r)
 
 	Promise.all([
+		get_formats(),
 		get_unicode(),
 		get_fonts(),
 		get_woff2(),
