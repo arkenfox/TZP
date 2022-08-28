@@ -280,7 +280,7 @@
 		<tr><td colspan="2" class="intro"><span class="no_color">
 			These tests, tailored for <code>Firefox</code>, are to show that you cannot hide your <code>browser</code>,
 			<code>version</code> or <code>OS</code>. Some OS "guesses" don't have to be "correct"; the measurements provide
-			the real entropy, such as math hashes, branding dimensions, and pixel values.</span>
+			the real entropy, such as branding dimensions, and pixel values.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</span></div>
@@ -291,7 +291,6 @@
 			<span class="ttxtx">Firefox 89+<br>javascript.options.large_arraybuffers</span>
 			</div> &nbsp [platform] architecture</td><td class="c" id="fdArchOS"></td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/versions.html">[PoC]</a>
-			&nbsp <div class="ttip"><span class="icon">[ i ]</span> <span class="ttxt">Firefox 60+ only</span></div>
 			&nbsp [feature detection] version</td><td class="c" id="fdVersion"></td></tr>
 		<tr><td>[resource://] browser</td><td class="c" id="fdResource"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -300,9 +299,6 @@
 		<tr><td>[canonical locales] browser</td><td class="c mono" id="fdCanonical"></td></tr>
 		<tr><td><a class="blue" target="blank" href="tests/supportedlocales.html">[PoC]</a>
 			&nbsp [supported locales] browser</td><td class="c mono" id="fdLocales"></td></tr>
-		<tr><td>[math] browser</td><td class="c mono" id="fdMath"></td></tr>
-		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
-			&nbsp [math] os</td><td class="c mono" id="fdMathOS"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
 		<tr><td>[css] os <sup>1</sup></td>
 			<td><span style="font-family: Arimo, DejaVu Serif, ABR;">Linux</span><span
@@ -651,7 +647,7 @@
 		<tr><td>font-format</td><td class="c mono" id="font-format"></td></tr>
 		<tr><td>font-tech</td><td class="c mono" id="font-tech"></td></tr>
 		<tr><td>[css | test] woff2 <sup>1</sup></td>
-			<td class="mono"><span id="cssWoff2"> </span> | <span class="c" id="fontWoff2"></span></td>
+			<td class="mono"><span id="cssWoff2"> </span> | <span class="c" id="fontWoff2"></span></td></tr>
 		<!--fonts-->
 		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
 		<tr><td>[names] fonts <sup>2, 3</sup></td><td class="c mono" id="fontNames"></td></tr>
@@ -851,6 +847,9 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span></td></tr>
+		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
+			&nbsp [other] math</td><td class="c mono" id="mathOther"></td></tr>
+		<tr><td>[trigonometric] math</td><td class="c mono" id="mathTrig"></td></tr>
 		<tr><td>[getEntries* | measure] performance.mark</td><td class="c mono" id="perf1"></td></tr>
 		<tr><td>performance.now</td><td class="c mono" id="perf2"></td></tr>
 		<tr><td>[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>
