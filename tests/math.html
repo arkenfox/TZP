@@ -19,7 +19,7 @@
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
 	</table>
 
-	<table id="tb3">
+	<table id="tb18">
 		<col width="1%"><col width="9%"><col width="90%">
 		<thead><tr><th colspan="3">math: version 2.5</th></tr></thead>
 		<tr><td colspan="3" class="intro">
@@ -29,9 +29,9 @@
 
 		<tr><td colspan="2"></td>
 			<td>
-				<span id="bfirefox" class="btn3 btnfirst" onClick="outputMath(`firefox`)">[ firefox ]</span>
-				<span id="bchrome" class="btn3 btn" onClick="outputMath(`chrome`)">[ chrome ]</span>
-				<span id="bsafari" class="btn3 btn" onClick="outputMath(`safari`)">[ safari ]</span>
+				<span id="bfirefox" class="btn18 btnfirst" onClick="outputMath(`firefox`)">[ firefox ]</span>
+				<span id="bchrome" class="btn18 btn" onClick="outputMath(`chrome`)">[ chrome ]</span>
+				<span id="bsafari" class="btn18 btn" onClick="outputMath(`safari`)">[ safari ]</span>
 			</td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
@@ -48,14 +48,14 @@
 
 		<tr><td colspan="3"><hr></td></tr>
 		<tr><td colspan="3">DIFFS ANALYSIS</td></tr>
-		<tr><td colspan="2"></td><td class="s3">vs control</td></tr>
+		<tr><td colspan="2"></td><td class="s18">vs control</td></tr>
 		<tr><td colspan="2"></td><td class="mono">denoted in <span class="s1">pale red</span></td></tr>
 		<tr><td colspan="2">function</td><td class="c mono spaces" id="diff1"></td></tr>
 		<tr><td colspan="2">polyfill</td><td class="c mono spaces" id="diff2"></td></tr>
 		<tr><td colspan="2">test no's</td><td class="c mono spaces" id="numbers"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="2"></td><td class="s3">polyfill vs function</td></tr>
+		<tr><td colspan="2"></td><td class="s18">polyfill vs function</td></tr>
 		<tr><td colspan="2"></td><td class="mono">denoted with <span class = "s1">[match]</span></td></tr>
 		<tr><td colspan="2">diffs</td><td class="c mono spaces" id="diff0"></td></tr>
 		<tr><td colspan="3"></td></tr>
@@ -118,38 +118,22 @@ function get_engine() {
 		}
 	}
 	let hash = sha1(res.join())
-	if        (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s3 +"blink"+ sc
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s3 +"webkit"+ sc
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s3 +"edgeHTML"+ sc
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s3 +"trident"+ sc // also presto if we don't use `let`
+	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s18 +"blink"+ sc
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s18 +"webkit"+ sc
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s18 +"edgeHTML"+ sc
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s18 +"trident"+ sc // also presto if we don't use `let`
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko [a]" // abraham
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko [b]" // me
 	}
 	if (engine.substring(0,5) == "gecko") {
-		engine = s3 + engine + sc
-		// 52: 837961
-		// only check for PM28+
-		try {
-			let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"})
-			// 53: 1317307
-			// eliminate FF53+
-			try {
-				Object.defineProperty([], "length", {get(){}})
-			} catch(e) {
-				if (e.name == "RangeError") {
-					// 61
-					// catch something PM did that ESR52 didn't
-					// note: this would only apply to later v28 releases
-					try {
-						newFn("let test61 = (' a').trimStart()")
-						engine += "<br><br>but wait.. I did some extra tests<br>"
-							+ s12.trim() +"real engine:" + sc + s3 +"goanna [52esr]"+ sc
-					} catch(e) {}
-				}
-			}
-		} catch(e) {}
+		engine = s18 + engine + sc
+		// palemoon/basilisk: fails 53, passes 54
+		if ("function" !== typeof CSSMozDocumentRule && URL.prototype.hasOwnProperty("toJSON")) {
+			engine += "<br><br>but wait.. I did some extra tests<br>"
+				+ s12.trim() +"real engine:" + sc + s18 +"goanna"+ sc
+		}
 	}
-	dom.perfE.innerHTML = Math.round(performance.now()-et0) +" ms"
+	dom.perfE.innerHTML = Math.round(performance.now() - et0) +" ms"
 	dom.engine.innerHTML = s12.trim() + hash + sc +"<br> &middot; "+ res.join("<br> &middot; ")
 		+"<br>"+ s12.trim() +"engine:"+ sc + engine
 }
@@ -382,7 +366,7 @@ function get_results() {
 		prevFn = "start",
 		demarc = false,
 		strDemarc = "----------------------------------------------------",
-		sColor = s3,
+		sColor = s18,
 		vPad = 19, // value tested
 		fPad = vPad + 7, // function + value
 		rPad = 23, // result
@@ -408,7 +392,6 @@ function get_results() {
 		let fnControl = fn[4].toString()
 		let fnName = fn[1].toString()
 		numberchk.push(fnName+"-"+k.toString())
-
 		// fn result
 		let isFnDiff = false
 		if (fnResult !== fnControl) {
@@ -567,7 +550,7 @@ function get_results() {
 		+"<br><br>"+ bigNstr.padStart(52)
 		+"<br>"+ display.join("<br>")
 	// PERF
-	dom.perf.innerHTML = Math.round(performance.now()-t0) +" ms"
+	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 
 }
 
@@ -647,13 +630,13 @@ function setBtn(control) {
 	// reset btns
 	let items = document.getElementsByClassName("btn8")
 	for (let i=0; i < items.length; i++) {
-		items[i].classList.add("btn3")
+		items[i].classList.add("btn18")
 		items[i].classList.remove("btn8")
 	}
 	// set btn
 	let el = document.getElementById("b"+ control)
 	el.classList.add("btn8")
-	el.classList.remove("btn3")
+	el.classList.remove("btn18")
 }
 
 s8 = s8.trim()
