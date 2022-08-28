@@ -142,6 +142,7 @@ let s0 = " <span class='",
 	note_file = "",
 	note_ttc = sf+"test to come"+sc,
 // other
+	isArch = "unknown", // OS architecture
 	isBaseFonts = false, // use whitelist/kBaseFonts
 	isPlatformFont = undefined, // from widget for baseFonts
 	isBrave = false,
@@ -157,7 +158,6 @@ let s0 = " <span class='",
 	isLogo = zB0, // logo dimensions: assume blocked
 	isMark = "", // watermark dimensions
 	isOS = "",
-	isOS64 = "unknown",
 	isPerf = true,
 	canPerf = false,
 	isResource = "",
@@ -189,7 +189,7 @@ let logChkList = false,
 	logScreen = false,
 	logStorage = false,
 // simulate
-	runSE = false, // errors/blocked
+	runSE = false, // errors
 	runSL = false, // lies
 	runSN = false, // new
 	runSU = false, // ua (or use CB)
