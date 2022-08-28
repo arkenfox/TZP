@@ -163,6 +163,29 @@ function get_canPerf(runtype) {
 	}
 }
 
+const get_isArch = (skip = false) => new Promise(resolve => {
+	if (!isFF && !skip) {return resolve()}
+
+	// on page loads: we run this twice: very early while we're waiting
+		// skip = true: we haven't set isFF yet
+		// then later as a prereq : no point running it twice
+	if (gLoad && !skip) {return resolve()}
+
+	// OS architecture
+		// FF89+: 1703505: javascript.options.large_arraybuffers
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		isArch = "unknown"
+		let test = new ArrayBuffer(Math.pow(2,32))
+		isArch = true
+		if (gLoad) {log_perf("isArch [global]",t0,"",isArch)} else if (gRun) {log_perf("isArch [global]",t0,gt0,isArch)}
+		return resolve()
+	} catch(e) {
+		isArch = log_error("fd: os_architecture", e.name, e.message)
+		return resolve()
+	}
+})
+
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
 	if (isEngine !== "blink") return resolve()
@@ -417,32 +440,6 @@ const get_isOS = () => new Promise(resolve => {
 		// no need to gErrorsOnce since we do this in widgets
 		// math test is no longer viable due to RFP
 		tryharder()
-	}
-})
-
-const get_isOS64 = (skip = false) => new Promise(resolve => {
-	if (!isFF && !skip) {return resolve()}
-
-	// on page loads: we run this twice: very early while we're waiting
-		// skip = true: we haven't set isFF yet
-		// then later as a prereq : no point running it twice
-	if (gLoad && !skip) {return resolve()}
-
-	// OS architecture
-		// FF89+: 1703505: javascript.options.large_arraybuffers
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		isOS64 = "unknown"
-		let test = new ArrayBuffer(Math.pow(2,32))
-		isOS64 = true
-		if (gLoad) {log_perf("isOS64 [global]",t0,"",isOS64)} else if (gRun) {log_perf("isOS64 [global]",t0,gt0,isOS64)}
-		return resolve()
-	} catch(e) {
-		let eMsg = e.name +": "+ e.message
-		log_error("fd: os_architecture", eMsg)
-		isOS64 = (eMsg == "RangeError: invalid array length" ? zNS : zB0)
-		// ToDo: when pref deprecated: update tooltip + use isVer to confirm 32bit and return false
-		return resolve()
 	}
 })
 
@@ -956,20 +953,29 @@ function log_debug(title, output, isOnce = false) {
 	if (isOnce) { gDebugOnce.push(output) } else { gDebug.push(output) }
 }
 
-function log_error(title, name, msg) {
+function log_error(title, name, msg, len = 60) {
+	// tidy values
+	let isMsg = true
+	if (name == undefined || name == "" || name === null) {name = zErr}
+	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
 	// collect globalrun errors
 	if (gRun) {
-		let isMsg = true
-		if (name == undefined || name == "" || name === null) {name = "Error"}
-		if (msg == undefined || msg == "" || msg === null) {isMsg = false}
-		gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+		if (name == "ReferenceError" && msg == "def is not defined") {
+			gErrors.push("simulated: " + title)
+		} else {
+			gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+		}
 	}
+	// return a trimmed str for displays
+	let str = name + (isMsg ? ": "+ msg : "")
+	if (str.length > len) {str = str.substring(0,len-3) + "..."}
+	return(str)
 }
 
 function trim_error(name, msg, len) {
 	if (len == undefined) {len = 60}
 	let isMsg = true
-	if (name == undefined || name == "" || name === null) {name = "Error"}
+	if (name == undefined || name == "" || name === null) {name = zErr}
 	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
 	let str = name + (isMsg ? ": "+ msg : "")
 	if (str.length > len) {str = str.substring(0,len-3) + "..."}
@@ -1335,7 +1341,7 @@ function countJS(filename) {
 
 function outputPostSection(id) {
 	let isLog = gRun // push to gPerfDetail
-	gRun = false
+	gRun = false // stop collecting things
 
 	if (isLog) {log_perf("start [not in FP]", "--")}
 	if (id == "all" || id == "ua") {
@@ -1518,7 +1524,7 @@ function outputSection(id, cls) {
 				get_canPerf("log"),
 				outputPrototypeLies(),
 				get_navKeys(),
-				get_isOS64(),
+				get_isArch(),
 				get_isRFP(),
 			]).then(function(results){
 				output(location.toString())
@@ -1667,7 +1673,7 @@ function run_once() {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
 		log_perf("isFF [global]",t0,"","error")
 	}
-	get_isOS64(true)
+	get_isArch(true)
 }
 
 run_once()

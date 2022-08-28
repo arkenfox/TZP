@@ -2,7 +2,6 @@
 
 var varDPR, varDPI, dpi_x, dpi_y
 var uaBS = false
-let isOS64math = ""
 let nxtESR = 114 // assume 114 at this point, more likely 115
 let logSData = [], tSD // logScreen
 
@@ -11,6 +10,35 @@ let intWFS = 0, lstWFS = ["true","false",zB0,0,1,-1,true,false]
 let intUAI = 0
 
 /* FD */
+
+function get_fd_architecture() {
+	if (!isFF) {
+		dom.fdArchOS = zNA
+		return "os_architecture:n/a"
+	}
+	// os bitness: prereq isArch
+	let bits, display
+	// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
+	// isArch: true or eMsg
+	if (isOS !== "mac") {
+		if (isArch === true) {bits = "64bit"
+		} else if (isArch === false) {bits = "32bit"
+		} else {bits = isArch}
+		display = bits
+	} else if (isTZPSmart) {
+		// macs are always 64bit
+		bits = "64bit"
+		if (isArch !== true) {
+			if (gRun) {
+				gKnown.push("fd:os_architecture")
+				gBypassed.push("fd:os_architecture:"+ bits)
+			}
+		}
+		display = isArch == true ? bits : soB + isArch + scC
+	}
+	dom.fdArchOS.innerHTML = display
+	return "os_architecture:"+ bits
+}
 
 function get_fd_canonical() {
 	// runs post FP
@@ -26,17 +54,16 @@ function get_fd_canonical() {
 		sDetail[sName] = res
 		let note, color = "3"
 		let hash = mini_sha1(res.join(), "feature canonical")
-		if (isFF) {
+		if (isFF && isTZPSmart) {
 			if (hash == "3faffb36cf9adef10987c4e6cb5adc7562dac7ab") {note = "FF91+"
 			} else if (hash == "8d98821d21e515bc9bfa6660a744d74fc2df0de1") {note = "FF70-90"
-			} else if (hash == "db0b8b2137d972e0735df959d77dc67c2887404f") {note = "FF69 or lower"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
 		let btn = buildButton(color, sName, note)
 		dom.fdCanonical.innerHTML = hash + btn + (runSN ? zSIM : "")
 	} catch(e) {
-		dom.fdCanonical = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.fdCanonical = log_error("fd: canonical locales:", e.name, e.message)
 	}
 }
 
@@ -113,7 +140,7 @@ function get_fd_errors() {
 		let hash = mini_sha1(res.join(), "feature errors")
 		// notation: 74+: 1259822: error_message_fix
 		let color = "3"
-		if (isFF) {
+		if (isFF && isTZPSmart) {
 			if (hash == "be359e88b455009c53525378c512ffadea9ab63c") {note = "FF52+" // TZP does not run in FF51 or lower
 			} else if (hash == "144f6b31dc56ec5e5381631af44d84c5d0a4b1a9") {note = "FF74+ fix"
 			} else {note = "NEW"; color = "bad"
@@ -138,265 +165,29 @@ function get_fd_locales() {
 		res = Intl.PluralRules.supportedLocalesOf(list)
 		sDetail[sName] = res
 		let hash = mini_sha1(res.join(), "feature supported locales"), note, color = "3"
-		if (isFF) {
+		if (isFF && isTZPSmart) {
 			if (hash == "f68b48c64e0948be6b9ebe656885bfa89e8f780b") {note = "FF96+"
 			} else if (hash == "336d6fe9581ed30e9dc1df5f9918eef2d4ae5f0d") {note = "FF91-95"
 			} else if (hash == "aaacdb633083e6646e4e1dbb6545aed09e89c15a") {note = "FF78-90"
-			} else if (hash == "8c3b9fb384cf27d7dfc4820cffc21baec58bdc2c") {note = "FF70-77"
-			} else if (hash == "fc10be8144df633ee8dc9c375c293b81c98956e7") {note = "FF65-69"
-			} else if (hash == "efe76a437ab17bc6d60d7dd885617bc1cbe8ae7a") {note = "FF64 or lower"
 			} else {note = "NEW"; color = "bad"
 			}
 		}
 		let btn = buildButton(color, sName, note)
 		dom.fdLocales.innerHTML = hash + btn + (runSN ? zSIM : "")
 	} catch(e) {
-		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-		dom.fdLocales = eMsg
+		dom.fdLocales = log_error("fd: supported locales:", e.name, e.message)
 	}
 }
 
-function get_fd_math() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		// 1= ecma1, 6= ecma6, c= combined
-		let m1hash = "",
-			m6hash = "",
-			mchash = "",
-			m1 = "", // short codes
-			m6 = "",
-			mc = "",
-			fdMath1 = "", // browser/os strings
-			fdMath6 = "",
-			strNew = zNEW + (runSN ? zSIM : ""),
-			block1 = false,
-			block6 = false
-
-		function get_hashes(runtype) {
-			return new Promise(resolve => {
-				// 1st
-				let res1 = [], res6 = [], list = [1e251,1e140,1e12,1e130,1e272,-1,1e284,1e75]
-				list.forEach(function(item) {try {res1.push(Math.cos(item))} catch(e) {res1.push("x"); block1 = true}})
-				// 6th
-				try {res6.push(Math.log((1.5) / (0.5)) / 2)} catch(e) {res6.push("x"); block6 = true} // atanh(0.5)
-				try {res6.push(Math.E - 1)} catch(e) {res6.push("x"); block6 = true} // expm1(1)
-				try {let y = Math.E; res6.push((y - 1 / y) / 2)} catch(e) {res6.push("x"); block6 = true} // sinh(1)
-				// hashes
-				m1hash = sha1(res1.join("-"), "feature math m1hash")
-				m6hash = sha1(res6.join("-"), "feature math m6hash")
-				mchash = sha1(res1.concat(res6), "feature math mchash")
-				// sim
-				if (runSN) {
-					//m1hash = sha1("a"), mchash = sha1("b") // emca1
-					//m6hash = sha1("c"), mchash = sha1("d") // emca6
-					m1hash = sha1("e"), m6hash = sha1("f"), mchash = sha1("g") // both
-					//block1 = true
-					//block6 = true
-				}
-				return resolve(m1hash +":"+ m6hash +":"+ mchash)
-			})
-		}
-		function get_codes() {
-			// known (browser)
-			if (m6hash == "7a73daaff1955eef2c88b1e56f8bfbf854d52486") {m6="1"}
-			else if (m6hash == "0eb76fed1c087ebb8f80ce1c571b2f26a8724365") {m6="2"}
-			else if (m6hash == "9251136865b8509cc22f8773503288d106104634") {m6="3"} // 68+ exmp1(1) 1380031
-			// known (os)
-			if (m1hash == "46f7c2bbe55a2cd28252d059604f8c3bac316c23") {m1="A"}
-			else if (m1hash == "8464b989070dcff22c136e4d0fe21d466b708ece") {m1="B"}
-			else if (m1hash == "97eee44856b0d2339f7add0d22feb01bcc0a430e") {m1="C"}
-			else if (m1hash == "96895e004b623552b9543dcdc030640d1b108816") {m1="D"}
-			else if (m1hash == "06a01549b5841e0ac26c875b456a33f95b5c5c11") {m1="E"}
-			else if (m1hash == "ae434b101452888b756da5916d81f68adeb2b6ae") {m1="F"}
-			else if (m1hash == "19df0b54c852f35f011187087bd3a0dce12b4071") {m1="G"}
-			else if (m1hash == "8ee641f01271d500e5c1d40e831232214c0bbbdc") {m1="H"}
-		}
-		function build_output() {
-			if (block1) {m1=""} // for runSN
-			if (block6) {m6=""} // for runSN
-			// browser
-			if (m6 == "1" | m6 == "3") {
-				fdMath6=zFF
-			} else if (m6 == "2") {
-				fdMath6=zFF +" [32bit]"
-			}
-			// os, refine browser
-			if (m1 == "A" | m1 == "H") {
-				// A or H: always 64bit WIN on 64bit FF
-				fdMath1="Windows [64bit]"
-				fdMath6=zSDK64
-				isOS64math = 64
-			} else if (m1 == "C") {
-				// C: always 32bit FF on WIN (32bit or 64bit)
-				fdMath1="Windows"
-				fdMath6=zSDK32
-			} else if (m1 == "D") {
-				// D: always Linux (Mint, Debian, OpenSUSE)
-				fdMath1="Linux"
-				if (m6 == "1") {
-					// 60-67: 1D : always 64bit Linux -> 64bit FF
-					fdMath1="Linux [64bit]"
-					fdMath6=zFF +" [64bit]"
-					isOS64math = 64
-				}	else if (m6 == "3") {
-					// 68+: 3D : can be FF64bit or TB32/64bit
-					// values already set
-				}	else if (m6 == "2") {
-					// D2: always 32bit Linux (32bit FF set earlier)
-					fdMath1="Linux [32bit]"
-					isOS64math = 32
-				}
-			} else if (m1 == "G") {
-				// G: always Linux (Ubuntu)
-				fdMath1="Linux"
-			} else if (m1 == "E") {
-				// E: always Mac: and thus 64bit FF
-				fdMath1="Mac"
-				fdMath6=zFF +" [64bit]"
-				isOS64math = 64
-			} else if (m1 == "F") {
-				// F: always Android
-				fdMath1="Android"
-			} else if (m1 == "B") {
-				// B: always WIN, always mingw
-				fdMath1="Windows"
-				if (m6 == "1") {
-					// ESR60: 1B: always 64bit TB: thus 64bit WIN
-					fdMath6=zMingw64
-					fdMath1="Windows [64bit]"
-					isOS64math = 64
-				} else if (m6 == "2") {
-					// ESR60: 2B: always 32bit TB (but WIN can be 32bit or 64bit)
-					fdMath6=zMingw32
-				} else if (m6 == "3") {
-					// ESR68: 3B: 32bit TB on 32/64 WIN and 64bit TB on WIN64: now all the same
-					fdMath6=zMingw
-				}
-			}
-		}
-		function output() {
-			// 531915: RFP + FF93+, FF91.1+ = F3
-			let isRFPMath = false
-			if (m1 + m6 == "F3") {
-				isRFPMath = true
-			}
-			if (isFF) {
-				//browser
-				if (m1 == "") {
-					if (block1) {
-						// blocked
-						m1hash = zB0
-						fdMath1 = zB0
-					} else if (m1hash.substring(0,6) == "random") {
-						// random per execution
-						fdMath1 = "random"
-					} else {
-						// new
-						m1hash += strNew
-						fdMath1 = m1hash // os
-					}
-				} else {
-					// known: add code
-					m1hash += s3 +" ["+ m1 +"]"+ sc
-				}
-				// os
-				if (m6 == "") {
-					if (block6) {
-						// blocked
-						m6hash = zB0
-						fdMath6 = zB0
-					} else if (m6hash.substring(0,6) == "random") {
-						// random per execution
-						fdMath6 = "random"
-					} else {
-						m6hash += strNew
-						fdMath6 = m6hash
-					}
-				} else {
-					// known: add code
-					m6hash += s3 +" ["+ m6 +"]"+ sc
-				}
-				// combined
-				if (m1 !== "" && m6 !== "") {
-					// both known: add codes
-					mc = s3 +"["+ m1 + m6 +"]"+ sc
-					mchash += mc
-					fdMath1 += mc
-				} else {
-					if (block1 || block6) {
-					// blocked
-						mchash = zB0
-					} else if (mchash.substring(0,6) == "random") {
-						// random per execution
-					} else {
-						// new
-						mchash += strNew
-					}
-				}
-			}
-			// output
-			if (isRFPMath) {
-				dom.fdMathOS.innerHTML = mchash + rfp_green
-				dom.fdMath.innerHTML = m6hash + rfp_green
-			} else {
-				dom.fdMathOS.innerHTML = fdMath1 + rfp_red
-				dom.fdMath.innerHTML = fdMath6 + rfp_red
-			}
-			// perf
-			log_perf("math [fd]",t0)
-			// blockage
-			if (block1 || block6) {mchash = zB0}
-			// return
-			if (mchash.substring(0,6) == "random") {mchash = "random"}
-			return resolve("math:"+ mchash.substring(0,40))
-		}
-
-		isOS64math = ""
-		Promise.all([
-			get_hashes(0),
-			get_hashes(1),
-		]).then(function(res){
-			// run0
-			let run01 = res[0].split(":")[0],
-				run06 = res[0].split(":")[1],
-				run0c = res[0].split(":")[2]
-			// run1
-			let run11 = res[1].split(":")[0],
-				run16 = res[1].split(":")[1],
-				run1c = res[1].split(":")[2]
-			// compare runs
-			if (run0c !== run1c) {
-				// lies
-				if (gRun) {gKnown.push("fd:math")}
-				let sColor = s3
-				// combined
-				mchash = "random "+ sColor +" [1] "+ sc + run0c.substring(0,22) +".."
-					+ sColor +" [2] "+ sc + run1c.substring(0,22) +".."
-				// math1
-				if (run01 !== run11) {
-					m1hash = "random "+ sColor +" [1] "+ sc + run01.substring(0,22) +".."
-						+ sColor +" [2] "+ sc + run11.substring(0,22) +".."
-				}
-				// math6
-				if (run06 !== run16) {
-					m6hash = "random "+ sColor +" [1] "+ sc + run06.substring(0,22) +".."
-						+ sColor +" [2] "+ sc + run16.substring(0,22) +".."
-				}
-			}
-			if (isFF) {
-				get_codes()
-				build_output()
-				output()
-			} else {
-				if (mchash.substring(0,6) == "random") {mchash = "random"}
-				dom.fdMath.innerHTML = mchash
-				return resolve("math:"+ mchash)
-			}
-		})
-	})
-}
-
 function get_fd_resources() {
+	if (!isFF) {
+		dom.fdResource = zNA
+		// and tidy the other nonFF items
+		dom.fdBrandingCss = zNA
+		dom.fdChrome = zNA
+		return "resources:n/a"
+	}
+
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let branding = "",
@@ -519,7 +310,7 @@ function get_fd_widgets() {
 			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
 			// notate
 			let note, color = "3", mixed = ""
-			if (isFF) {
+			if (isFF && isTZPSmart) {
 				// we only need the font for OS: ignore unknown to still get an OS
 				let fntTmp = fonts
 				if (fntTmp.length > 1) {
@@ -542,13 +333,12 @@ function get_fd_widgets() {
 			}
 			let btn = buildButton(color, sName, note)
 			dom.fdWidget.innerHTML = hash + btn + mixed + (runSN ? zSIM : "")
-			// perf & resolve
 			log_perf("widgets [fd]",t0)
 			return resolve("widgets:"+ hash)
 		} catch(e) {
-			dom.fdWidget = zB0
+			dom.fdWidget = log_error("fd: widgets:", e.name, e.message)
 			log_perf("widgets [fd]",t0)
-			return resolve("widgets:"+ zB0)
+			return resolve("widgets:"+ zErr)
 		}
 	})
 }
@@ -2446,84 +2236,26 @@ function outputUA() {
 function outputFD() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
+	// version
+	let r = (isFF ? isVer + (isVerPlus ? "+" : "") : zNA)
+	dom.fdVersion = r
+	section.push("version:"+ r)
 
-	// FF
-	if (isFF) {
-		// from globals:ver + browser
-		let r
-		r = isVer + (isVerPlus ? "+" : "")
-		dom.fdVersion.innerHTML = r
-		section.push("version:"+ r)
-
-		Promise.all([
-			get_fd_errors(),
-			get_fd_widgets(),
-			get_fd_resources(),
-			get_fd_math(), // must come after widget
-		]).then(function(results){
-			results.forEach(function(currentResult) {
-				section.push(currentResult)
-			})
-			// os bitness: requires get_fd_math()
-				// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
-				// isOS64: true, zNS (if correct error), zB0 (incorrect error), or false (future: when pref dropped)
-			let bits, display = bits
-			// mac
-				// tzp requires FF52+ which requires macOS 10.9+ which use 64bit intel (and ARM for 11+)
-			if (isOS == "mac") {
-				bits = "64bit"
-				if (isOS64 !== true) {
-					if (gRun) {
-						gKnown.push("fd:os_architecture")
-						gBypassed.push("fd:os_architecture:"+ bits)
-					}
-				}
-				display = isOS64 == true ? bits : soB + isOS64 + scC
-			}
-			// non-mac
-			if (isOS !== "mac") {
-				if (isVer < 89) {bits = zNS
-				} else if (isOS64 === true) {bits = "64bit"
-				} else if (isOS64 === false) {bits = "32bit"
-				} else {bits = isOS64}
-				display = bits
-				// bypassed
-				if (isOS64 !== true && isOS64math !== "") {
-					display = soB + bits + scC
-					bits = isOS64math + "bits"
-					if (gRun) {
-						if (isVer > 88) {gKnown.push("fd:os_architecture")} // not a lie if not supported
-						gBypassed.push("fd:os_architecture:"+ bits)
-					}
-				}
-			}
-			dom.fdArchOS.innerHTML = display
-			section.push("os_architecture:"+ bits)
-
-			let browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
-			section.push("browser:"+ browser)
-			log_section("feature", t0, section)
+	Promise.all([
+		get_fd_errors(),
+		get_fd_architecture(),
+		get_fd_widgets(),
+		get_fd_resources(),
+	]).then(function(results){
+		results.forEach(function(currentResult) {
+			section.push(currentResult)
 		})
-	}
-
-	if (!isFF) {
-		Promise.all([
-			get_fd_errors(),
-			get_fd_widgets(),
-			get_fd_math(),
-		]).then(function(results){
-			results.forEach(function(currentResult) {
-				section.push(currentResult)
-			})
-			dom.fdResource = zNA
-			dom.fdArchOS = zNA
-			dom.fdVersion.innerHTML = zNA
-			dom.fdBrandingCss = zNA
-			dom.fdChrome = zNA
-			dom.fdMathOS = zNA
-			section.push("resources:n/a","os_architecture:n/a","version:n/a")
+		// browser
+		let browser = zNA, display = zNA
+		if (isFF) {
+			browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
+		} else {
 			// Brave/Opera
-			let browser = zNA, display = zNA
 			if (isBrave) {
 				browser = "Brave" + (isBraveMode > 1 ? " ["+ aBraveMode[isBraveMode] +"]" : "")
 			} else if (isEngine == "blink") {
@@ -2533,10 +2265,10 @@ function outputFD() {
 			}
 			dom.browserlabel = "browser"
 			dom.fdResourceCss = browser
-			section.push("browser:"+ browser)
-			log_section("feature", t0, section)
-		})
-	}
+		}
+		section.push("browser:"+ browser)
+		log_section("feature", t0, section)
+	})
 }
 
 function outputScreen() {

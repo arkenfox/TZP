@@ -444,7 +444,7 @@ const getFonts = () => {
 			})
 		} catch(e) {
 			// TypeError: document.fonts.values() is not iterable
-			if (gRun) {log_error("fonts: fontsizes", e.name, e.message)}
+			log_error("fonts: fontsizes", e.name, e.message)
 			return resolve(zB0)
 		}
 	})
@@ -732,6 +732,7 @@ function get_fallback(list) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		sDetail["fonts_fontnames_fallback"] = []
+		sDetail["fonts_fontnames_diff_notglobal"] = []
 		let width0 = null,
 			t = dom.fontFBTest
 		// measure
@@ -807,6 +808,7 @@ function get_formats() {
 			let array = oList[k]
 			let tmpRes = []
 			try {
+				if (runSE) {abc = def}
 				array.forEach(function(item) {
 					if (CSS.supports(k + "("+ item + ")")) {
 						tmpRes.push(item)
@@ -824,9 +826,7 @@ function get_formats() {
 					res.push(k +":"+ zNS)
 				}
 			} catch(e) {
-				log_error("fonts: "+ k, e.name, e.message)
-				let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-				document.getElementById(k).innerHTML = eMsg
+				document.getElementById(k).innerHTML = log_error("fonts: "+ k, e.name, e.message)
 				res.push(k +":"+ zErr)
 			}
 		}
@@ -1007,12 +1007,10 @@ function get_woff2() {
 				//abc = def
 				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
 				font.load().catch(err => {
-					log_error("fonts: woff2", err.name, err.message)
 					// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
 					// ReferenceError: FontFace is not defined < layout.css.font-loading-api.enabled
 					// ToDo: FontFace API is blocked
-					let eMsg = (err.name === undefined ? zErr : trim_error(err.name, err.message))
-					dom.fontWoff2 = eMsg
+					dom.fontWoff2 = log_error("fonts: woff2", err.name, err.message)
 				})
 				return font.status == "loaded" || font.status == "loading"
 			})()
@@ -1020,8 +1018,7 @@ function get_woff2() {
 			dom.fontWoff2 = value
 			return resolve("woff2:"+ value)
 		} catch(e) {
-			log_error("fonts: woff2", e.name, e.message)
-			dom.fontWoff2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			dom.fontWoff2 = log_error("fonts: woff2", e.name, e.message)
 			return resolve("woff2:"+ zErr)
 		}
 	})

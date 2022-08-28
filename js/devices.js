@@ -247,8 +247,7 @@ function get_concurrency() {
 		value = cleanFn(value)
 		display = value
 	} catch(e) {
-		log_error("devices: hardwareConcurrency", e.name, e.message)
-		display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		display = log_error("devices: hardwareConcurrency", e.name, e.message)
 		value = zErr
 	}
 	// lies
@@ -323,8 +322,7 @@ function get_keyboard() {
 						}
 					})
 					if (resE.length > 0) {
-						log_error("devices: keyboard", resE[0])
-						display = trim_error(resE[0])
+						display = log_error("devices: keyboard", resE[0])
 						if (isFF) {display = color(display)}
 						dom.nKeyboard.innerHTML = display
 						return resolve("keyboard:"+ (isFF ? zNA : zB0))
@@ -348,11 +346,10 @@ function get_keyboard() {
 				return resolve("keyboard:"+ value)
 			}
 		} catch(e) {
-			log_error("devices: keyboard", e.name, e.message)
-			display = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			display = log_error("devices: keyboard", e.name, e.message)
 			if (isFF) {display = color(display)}
 			dom.nKeyboard.innerHTML = display
-			return resolve("keyboard:"+ (isFF ? zNA : zB0))
+			return resolve("keyboard:"+ (isFF ? zNA : zErr))
 		}
 	})
 }
@@ -479,9 +476,8 @@ function get_media_devices() {
 				}
 			})
 		} catch(e) {
-			log_error("devices: media devices", e.name, e.message)
-			dom.eMD.innerHTML = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-			return resolve("media_devices:"+ zB0)
+			dom.eMD = log_error("devices: media devices", e.name, e.message)
+			return resolve("media_devices:"+ zErr)
 		}
 	})
 }
@@ -494,7 +490,7 @@ function get_mimetypes() {
 		try {
 			let m = navigator.mimeTypes
 			if (runSE) {
-				runSNM = false; abc = def = zB0
+				runSNM = false; abc = def
 			} else if (runSL) {
 				runSNM = false; m = null
 			} else if (runSNM) {
@@ -998,15 +994,13 @@ function get_speech_rec() {
 	// NOTE: media.webspeech.test.enable until landed
 	return new Promise(resolve => {
 		try {
+			if (runSE) {abc = def}
 			let recognition = new SpeechRecognition()
 			dom.sRec = zE
 			return resolve("speech_recogniton:" + zE)
 		} catch(e) {
-			log_error("devices: speech recognition", e.name, e.message)
-			// undefined
-			// ToDo: speechRec: detect disabled vs not-supported?
-			dom.sRec = zD +" [or "+ zNS +"]"
-			return resolve("speech_recogniton:" + zD)
+			dom.sRec = log_error("devices: speech recognition", e.name, e.message)
+			return resolve("speech_recogniton:" + zErr)
 		}
 	})
 }

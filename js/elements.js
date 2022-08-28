@@ -168,7 +168,7 @@ function get_clientrect() {
 					if (runtype == 0) {aType.push(isType)}
 				} catch(e) {
 					if (runtype == 0) {log_error("domrect: "+ pretty[method], e.name, e.message)}
-					let eMsg = e.name === undefined ? zErr : trim_error(e.name, e.message + e.message + e.message, 40)
+					let eMsg = e.name === undefined ? zErr : trim_error(e.name, e.message, 40)
 					oData["run"+ runtype +""+ method] = eMsg
 					aType.push(zNA)
 				}
@@ -323,8 +323,8 @@ function get_resized() {
 		let displayM = ""
 		if (isFF) {
 			if (errM !== "") {
-				log_error("elements: mathml", errM, errMMsg)
-				displayM = trim_error(errM, errMMsg)
+				let eMsg = log_error("elements: mathml", errM, errMMsg)
+				displayM = eMsg
 				resM = [zLIE]
 			} else if (resM.length < sizes.length) {
 				displayM = zB0
@@ -347,8 +347,8 @@ function get_resized() {
 		// lineheight
 		let displayL = ""
 		if (errL !== "") {
-			log_error("elements: lineheight", errL, errLMsg)
-			displayL = trim_error(errL, errLMsg)
+			let eLMsg = log_error("elements: lineheight", errL, errLMsg)
+			displayL = eLMsg
 			resL = [zLIE]
 		} else if (resL.length < sizes.length) {
 			displayL = zB0

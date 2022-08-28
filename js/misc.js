@@ -3,23 +3,19 @@
 function get_component_shims() {
 	let sName = "misc_component_shims"
 	sDetail[sName] = []
-	let sHash = ""
+	let res, notation = ""
 	try {
+		if (runSE) {abc = def}
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
 		sDetail[sName] = keys
-		sHash = mini_sha1(keys.join(), "misc component shims")
-		dom.shim.innerHTML = sHash + buildButton("18", sName, keys.length)
+		res = mini_sha1(keys.join(), "misc component shims")
+		dom.shim.innerHTML = res + buildButton("18", sName, keys.length) + (isTB ? tb_red : "")
 	} catch(e) {
-		log_error("misc: component shims", e.name, e.message)
-		let eMsg = trim_error(e.name, e.message)
-		if (eMsg == "ReferenceError: Components is not defined") {
-			sHash = zU; dom.shim = zU
-		} else {
-			sHash = zErr
-			dom.shim = (e.name === undefined ? zErr : eMsg)
-		}
+		if (isTB) {notation = (e.message == "Components is not defined" ? tb_green : tb_red)}
+		dom.shim.innerHTML = log_error("misc: component shims", e.name, e.message) + notation
+		res = zErr
 	}
-	return "component_shims:"+ sHash
+	return "component_shims:"+ res
 }
 
 function get_iframe_props() {
@@ -66,6 +62,7 @@ function get_iframe_props() {
 	]
 
 	try {
+		if (runSE) {abc = def}
 		// create & append
 		let id = "iframe-window-version"
 		let el = document.createElement("iframe")
@@ -129,9 +126,98 @@ function get_iframe_props() {
 		dom.iProps.innerHTML = output
 		return "iframe_properties:"+ result
 	} catch(e) {
-		log_error("misc: iframe window properties", e.name, e.message)
-		dom.iProps = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.iProps = log_error("misc: iframe window properties", e.name, e.message)
 		return "iframe_properties:"+ zErr
+	}
+}
+
+function get_math_other(isMathLies) {
+	// polyfills + non-trig
+	if (!isFF) {
+		dom.mathOther = zNA
+		return "math_other::n/a"
+	}
+	function cbrt(x) {
+		let y = Math.pow(Math.abs(x), 1 / 3)
+		return x < 0 ? -y : y
+	}
+	let res = [], sName = "misc_math_other"
+	sDetail[sName] = []
+	sDetail[sName +"_reported_notglobal"] = []
+	try {
+		if (runSE) {abc = def}
+		// nothing else added to desktop so just look at android diffs to desktop
+		res.push(Math.log((1.5) / (0.5)) / 2) // original atanh(0.5)
+		res.push(cbrt(Math.PI)) // research
+		res.push(Math.cosh(1)) // research non-polyfill
+		res.push((Math.exp(1) + Math.exp(-1)) / 2) // research cosh(1)
+		res.push(Math.E - 1) // original expm1(1)
+		res.push(Math.exp(1) - 1) // research expm1(1)
+		let y = Math.E; res.push((y - 1 / y) / 2) // original sinh(1)
+		res.push((Math.exp(1) - Math.exp(-1)) / 2) // reseach sinh(1)
+		let hash = mini_sha1(res.join())
+		let value = hash
+		if (isTZPSmart && isMathLies) {
+			sName += "_reported_notglobal"
+			hash = soL + hash + scC
+			value = zLIE
+			if (gRun) {gKnown.push("misc:math_other")}
+		}
+		sDetail[sName] = res
+		let btn = buildButton("18", sName)
+		dom.mathOther.innerHTML = hash + btn
+		return "math_other:"+ value
+	} catch(e) {
+		dom.mathOther = log_error("misc: math other", e.name, e.message)
+		return "math_polyfill_other:"+ zErr
+	}
+}
+
+function get_math_trig(isMathLies) {
+	// sin/cos/tan: we didn't get any extra entropy except in android
+		// this is really just checking RFP fixes this
+	let oMath = {
+		// 8x original cos
+		// add: 7x cos + 2x sin + 6x tan diffs in android vs desktop FF68+
+		"cos": [ 1e251, 1e140, 1e12, 1e130, 1e272, -1, 1e284, 1e75, 57*Math.E, 21*Math.LN2,
+			51*Math.LN2, 21*Math.LOG2E, 25*Math.SQRT2, 50*Math.SQRT1_2, 17*Math.LOG10E,
+		],
+		"sin": [ 7*Math.LOG10E, 35*Math.SQRT1_2],
+		"tan": [ 6*Math.E, 6*Math.LN2, 10*Math.LOG2E, 17*Math.SQRT2, 34*Math.SQRT1_2, 10*Math.LOG10E ],
+	}
+	let res = [], sName = "misc_math_trigonometric"
+	sDetail[sName] = []
+	sDetail[sName +"_reported_notglobal"] = []
+	try {
+		if (runSE) {abc = def}
+		for (const k of Object.keys(oMath)) {
+			let list = oMath[k]
+			list.forEach(function(value) {
+				res.push(Math[k](value))
+			})
+		}
+		let hash = mini_sha1(res.join())
+		let value = hash, notation = ""
+		if (isTZPSmart) {
+			if (isFF) {notation = rfp_red}
+			if (isMathLies) {
+				sName += "_reported_notglobal"
+				hash = soL + hash + scC
+				value = zLIE
+				if (gRun) {gKnown.push("misc:math_trigonometric")}
+			} else {
+				if (hash == "6f7196420acb040d37bb6ef3765a4c3bf9bcd5dd") {notation = rfp_green}
+			}
+		}
+		sDetail[sName] = res
+		let btn = buildButton("18", sName)
+		// add RFP notation
+
+		dom.mathTrig.innerHTML = hash + btn + notation
+		return "math_trigonometric:" + value
+	} catch(e) {
+		dom.mathTrig = log_error("misc: math trigonometric", e.name, e.message)
+		return "math_trigonometric:"+ zErr
 	}
 }
 
@@ -203,31 +289,11 @@ function get_recursion(log = false) {
 	}
 }
 
-function get_reporting_api() {
-	// FF65+
-	let r
-	try {
-		let observer = new ReportingObserver(function() {})
-		dom.reportingAPI = zE
-		r = zE
-	} catch(e) {
-		log_error("misc: reporting observer", e.name, e.message)
-		let eMsg = trim_error(e.name, e.message)
-		if (isFF && eMsg == "ReferenceError: ReportingObserver is not defined") {
-			r = zD
-			dom.reportingAPI = r
-		} else {
-			r = zErr
-			dom.reportingAPI = (e.name === undefined ? zErr : eMsg)
-		}
-	}
-	return "reporting_observer:"+ r
-}
-
 function get_perf1() {
 	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
 	// get result
 	try {
+		if (runSE) {abc = def}
 		performance.mark("a")
 		if (performance.mark === undefined) {
 			display = zU + " | "+ zNA
@@ -311,6 +377,7 @@ function get_perf1() {
 function get_perf2(log = false) {
 	// runs post FP
 	try {
+		if (runSE) {abc = def}
 		let t0; if (canPerf) {t0 = performance.now()}
 		let i = 0, times = [], p0
 		function run() {
@@ -344,18 +411,21 @@ function get_perf2(log = false) {
 				if (!isRFP && is00) {isTamper = true}
 				if (!isPerf) {isTamper = true}
 				let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
-				if (isTamper) {
-					dom.perf2.innerHTML = display + sb +"[tampered]"+ sc
-				} else {
-					let notation = (isTZPSmart ? (is00 ? rfp_green : rfp_red) : "")
-					dom.perf2.innerHTML = display + notation
+				let notation = ""
+				if (isTZPSmart) {
+					if (isTamper) {
+						notation = sb +"[tampered]"+ sc
+					} else {
+						notation = (isTZPSmart ? (is00 ? rfp_green : rfp_red) : "")
+					}
 				}
+				dom.perf2.innerHTML = display + notation
 				if (log) {log_perf("perf.now [not in FP]",t0)}
 			}
 		}
 		let check = setInterval(run, 13)
 	} catch(e) {
-		dom.perf2 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.perf2 = log_error("misc: perf.now:", e.name, e.message)
 	}
 }
 
@@ -363,13 +433,13 @@ function get_perf3() {
 	// loadEventEnd (also dom.enable_performance)
 	let r = ""
 	try {
+		if (runSE) {abc = def}
 		let timing = performance.timing
 		r = timing.navigationStart - timing.loadEventEnd
 		r = (r == 0 ? "zero" : "not zero")
 		dom.perf3.innerHTML = r
 	} catch(e) {
-		log_error("misc: perf timing", e.name, e.message)
-		dom.perf3 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.perf3 = log_error("misc: perf timing", e.name, e.message)
 		r = zErr
 	}
 	return "perf_timing:"+ r
@@ -379,10 +449,10 @@ function get_perf4() {
 	// also: dom.enable_performance_navigation_timing
 	let r = zD, notation = ""
 	try {
+		if (runSE) {abc = def}
 		if (window.PerformanceNavigationTiming) {r = zE}
 	} catch(e) {
-		log_error("misc: perf navigation", e.name, e.message)
-		dom.perf4 = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.perf4 = log_error("misc: perf navigation", e.name, e.message)
 		return "perf_navigation:"+ zErr
 	}
 	if (isTZPSmart) {notation = (r == zD ? rfp_green : rfp_red)} //78+: 1511941
@@ -390,8 +460,22 @@ function get_perf4() {
 	return "perf_navigation:"+ r
 }
 
+function get_reporting_api() {
+	// FF65+
+	try {
+		if (runSE) {abc = def}
+		let observer = new ReportingObserver(function() {})
+		dom.reportingAPI = zE
+		return "reporting_observer:"+ zE
+	} catch(e) {
+		dom.reportingAPI = log_error("misc: reporting observer", e.name, e.message)
+		return "reporting_observer:"+ zErr
+	}
+}
+
 function get_svg() {
 	try {
+		if (runSE) (abc = def)
 		dom.svgDiv.innerHTML = ""
 		//dom.svgDiv.offsetHeight == 0
 		const svgns = "http://www.w3.org/2000/svg"
@@ -406,8 +490,7 @@ function get_svg() {
 		dom.svgBasicTest = res
 		return "svg:"+ res
 	} catch(e) {
-		log_error("misc: svg", e.name, e.message)
-		dom.svgBasicTest = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		dom.svgBasicTest = log_error("misc: svg", e.name, e.message)
 		return "svg:"+ zErr
 	}
 }
@@ -416,6 +499,7 @@ function get_wasm() {
 	let res = (() => {
 		try {
 			if (typeof WebAssembly === "object"	&& typeof WebAssembly.instantiate === "function") {
+				if (runSE) {abc = def}
 				const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00))
 				if (module instanceof WebAssembly.Module)
 					return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
@@ -427,33 +511,37 @@ function get_wasm() {
 		}
 		return false
 	})()
-	// ToDo: dom.wasm.innerHTML = (res && isTB ? zE + tb_standard : zD + tb_safer)
 	let r = (res ? zE : zD)
 	dom.wasm.innerHTML = r
 	return "wasm:"+ r
 }
 
 function get_windowcontent() {
-	let r = zD
 	try {
+		if (runSE) {abc = def}
 		let test = window.content
 		let test2 = content.name
-		r = zE
+		dom.wincon = zE
+		return "window_content:"+ zE
 	} catch(e) {
-		log_error("misc: window content", e.name, e.message)
-		let eMsg = trim_error(e.name, e.message)
-		if (eMsg !== "ReferenceError: content is not defined") {
-			dom.wincon = (e.name === undefined ? zErr : eMsg)
-			return "window_content:"+ zErr
-		}
+		dom.wincon = log_error("misc: window content", e.name, e.message)
+		return "window_content:"+ zErr
 	}
-	dom.wincon = r
-	return "window_content:"+ r
 }
 
 function outputMisc() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = [], r = ""
+
+	let lieList = [
+		"Math.acos","Math.acosh","Math.asinh","Math.atan","Math.atan2","Math.atanh",
+		"Math.cbrt","Math.cos","Math.cosh","Math.exp","Math.expm1","Math.log","Math.log10",
+		"Math.log1p","Math.sin","Math.sinh","Math.sqrt","Math.tan","Math.tanh"
+	]
+	if (runSL) {gLies.push("Math.sin")}
+	let foundLies = lieList.filter(x => gLies.includes(x))
+	let isMathLies = (foundLies.length > 0)
+
 	Promise.all([
 		get_reporting_api(),
 		get_svg(),
@@ -461,6 +549,8 @@ function outputMisc() {
 		get_perf1(),
 		get_perf3(),
 		get_perf4(),
+		get_math_trig(isMathLies),
+		get_math_other(isMathLies),
 		get_component_shims(),
 		get_iframe_props(),
 		get_windowcontent(),
