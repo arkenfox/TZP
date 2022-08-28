@@ -90,8 +90,7 @@ function get_colors() {
 		log_perf("colors [css]",t0)
  		return aResults
 	} catch(e) {
-		log_error("css: colors", e.name, e.message)
-		let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+		let eMsg = log_error("css: colors", undefined, e.message)
 		for (let i=0; i < 4; i++) {
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = eMsg
 			aResults.push("colors_"+ sNames[i] +":"+ zErr)
@@ -450,9 +449,7 @@ function get_system_fonts() {
 			// temp
 			//if (gRun) {log_debug("sys fonts", "<br>    "+ aResults.join("<br>    "))}
 		} catch(e) {
-			log_error("css: system_fonts:", e.name, e.message)
-			let eMsg = trim_error(e.name, e.message)
-			dom.sFontsHash.innerHTML = (e.name === undefined ? zErr : eMsg)
+			dom.sFontsHash = log_error("css: system_fonts:", e.name, e.message)
 			return resolve("system_fonts:"+ zErr)
 		}
 		// output
