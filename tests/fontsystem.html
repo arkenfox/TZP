@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>font system</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 580px;}
+		hr {color: #8ca7dc}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">font system</div>
+		</th></tr></thead>
+		<tr><td colspan="2"><br></td></tr>
+		<tr><td><div id="item0" style="font:caption">caption</div></td><td><div id="test0"></div></td></tr>
+		<tr><td><div id="item1" style="font:icon">icon</div></td><td><div id="test1"></div></td></tr>
+		<tr><td><div id="item2" style="font:menu">menu</div></td><td><div id="test2"></div></td></tr>
+		<tr><td><div id="item3" style="font:message-box">message-box</div></td><td><div id="test3"></div></td></tr>
+		<tr><td><div id="item4" style="font:small-caption">small-caption</div></td><td><div id="test4"></div></td></tr>
+		<tr><td><div id="item5" style="font:status-bar">status-bar</div></td><td><div id="test5"></div></td></tr>
+
+		<tr><td colspan="2" class="center"><br>--- moz ---</td></tr>
+		<tr><td><div id="item7" style="font:-moz-desktop">-moz-desktop</div></td><td><div id="test7"></div></td></tr>
+		<tr><td><div id="item9" style="font:-moz-document">-moz-document</div></td><td><div id="test9"></div></td></tr>
+		<tr><td><div id="item11" style="font:-moz-info">-moz-info</div></td><td><div id="test11"></div></td></tr>
+		<tr><td><div id="item13" style="font:-moz-pull-down-menu">-moz-pull-down-menu</div></td><td><div id="test13"></div></td></tr>
+		<tr><td><div id="item14" style="font:-moz-window">-moz-window</div></td><td><div id="test14"></div></td></tr>
+		<tr><td><div id="item15" style="font:-moz-workspace">-moz-workspace</div></td><td><div id="test15"></div></td></tr>
+		<!-- split these off -->
+		<tr><td><div id="item8" style="font:-moz-dialog">-moz-dialog</div></td><td><div id="test8"></div></td></tr>
+		<tr><td><div id="item6" style="font:-moz-button">-moz-button</div></td><td><div id="test6"></div></td></tr>
+		<tr><td><div id="item10" style="font:-moz-field">-moz-field</div></td><td><div id="test10"></div></td></tr>
+		<tr><td><div id="item12" style="font:-moz-list"">-moz-list"</div></td><td><div id="test12"></div></td></tr>
+		<tr><td colspan="2" class="center"><br>--- system-ui ---</td></tr>
+
+		<tr><td>sample text</td><td>
+			<div style="font-family:system-ui">Vestibulum ante ipsum primis in faucibus
+				orci tor browsera ultrima sposuere onionii curae; Nam maximus thorin erat
+				et ante digitus printus, ac pier justo tincidunt.</div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+for (let i=0; i < 16; i++) {
+	let elItem = document.getElementById("item"+i),
+		elTest = document.getElementById("test"+i)
+	try {
+		let font = getComputedStyle(elItem).getPropertyValue("font-family")
+		let size = window.getComputedStyle(elItem, null).getPropertyValue('font-size');
+		elTest.innerHTML = elItem.textContent +" &nbsp | &nbsp "+ font +", "+ size
+		elTest.setAttribute('style', 'font-family:'+ font +'; font-size:' + size +';')
+	} catch(e) {
+		console.log(e.name, e.message)
+	}
+}
+
+</script>
+</body>
+</html>
