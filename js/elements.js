@@ -294,7 +294,7 @@ function get_resized() {
 			}
 			// lineheight: re-uses mathmlCtrl
 			try {
-				let elDiv
+				let elDiv, height
 				if (method < 1) { // get a result regardless
 					elDiv = elLine.getBoundingClientRect()
 				} else if (method == 1) {
@@ -304,7 +304,13 @@ function get_resized() {
 				} else if (method == 3) {
 					elDiv = range.getClientRects()[0]
 				}
-				let height = cleanFn(elDiv.height)
+				if (method == 1) {
+					// getClientRects is a DOMRectList object
+					height = cleanFn(elDiv[0].height)
+				} else {
+					// the others are a DOMRect array
+					height = cleanFn(elDiv.height)
+				}
 				// ToDo: trap undefined, not a number etc
 				if ("number" !== typeof height) {
 					mismatchL = true
@@ -321,10 +327,11 @@ function get_resized() {
 
 		// mathml
 		let displayM = ""
+		let zeroString = "0,".repeat(sizes.length).slice(0,-1) // always match sizes array length
+
 		if (isFF) {
 			if (errM !== "") {
-				let eMsg = log_error("elements: mathml", errM, errMMsg)
-				displayM = eMsg
+				displayM = log_error("elements: mathml", errM, errMMsg)
 				resM = [zLIE]
 			} else if (resM.length < sizes.length) {
 				displayM = zB0
@@ -333,7 +340,7 @@ function get_resized() {
 					gKnown.push("elements:mathml")
 					gMethods.push("elements:mathml:NaN")
 				}
-			} else if (resM.join() == "0,0,0,0,0,0,0,0,0") {
+			} else if (resM.join() == zeroString) {
 				displayM = zD + (isTB ? tb_safer : "")
 				resM = [zD]
 			} else {
@@ -344,11 +351,9 @@ function get_resized() {
 		}
 		dom.mathml.innerHTML = isFF ? displayM : zNA
 
-		// lineheight
 		let displayL = ""
 		if (errL !== "") {
-			let eLMsg = log_error("elements: lineheight", errL, errLMsg)
-			displayL = eLMsg
+			displayL = log_error("elements: lineheight", errL, errLMsg)
 			resL = [zLIE]
 		} else if (resL.length < sizes.length) {
 			displayL = zB0
@@ -379,10 +384,10 @@ function get_resized() {
 		return resALL
 
 	} catch(e) {
-		log_error("elements: measure", e.name, e.message)
-		dom.mathml = zB0
-		dom.lineheight = zB0
-		return ["mathml:"+ zLIE, "lineheight:"+ zLIE]
+		let eMsg = log_error("elements: measure", e.name, e.message)
+		dom.mathml = eMsg
+		dom.lineheight = eMsg
+		return ["mathml:"+ zErr, "lineheight:"+ zErr]
 	}
 }
 
