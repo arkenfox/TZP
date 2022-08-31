@@ -6,7 +6,7 @@
 #cssCOLRv1:after{content:"n/a";}
 @supports font-tech(color-COLRv1){#cssCOLRv1:after{content:"supported";}}
 #cssOpenType:after{content:"n/a";}
-@supports font-tech(feature-opentype){#cssOpenType:after{content:"supported";}}
+@supports font-tech(features-opentype){#cssOpenType:after{content:"supported";}}
 #cssTrueType:after{content:"n/a";}
 @supports font-format(TrueType){#cssTrueType:after{content:"supported";}}
 
