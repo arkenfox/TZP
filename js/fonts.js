@@ -801,7 +801,7 @@ function get_formats() {
 		let oList = {
 		"font-format": ["collection", "opentype", "truetype", "embeddedopentype", "svg", "woff", "woff2"],
 		"font-tech": ["color-cbdt","color-colrv0","color-colrv1","color-svg","color-sbix",
-			"feature-aat","feature-graphite","feature-opentype","incremental","palettes","variations"]
+			"features-aat","features-graphite","features-opentype","incremental","palettes","variations"]
 		}
 		for (const k of Object.keys(oList)) {
 			sDetail["fonts_"+ k] = []
