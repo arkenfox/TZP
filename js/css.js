@@ -426,28 +426,18 @@ function get_system_fonts() {
 				"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
 			]
 		sDetail[sName] = []
-		if (isFF) {
-			aFonts = aFonts.concat(mFonts)
-		}
+		if (isFF) {aFonts = aFonts.concat(mFonts)}
+		let propList = ['font-family', 'font-size', 'font-style', 'font-weight']
 		try {
 			let el = dom.sysFont
 			aFonts.forEach(function(font){
-				// catch blocked
-				let test = getComputedStyle(el).getPropertyValue("font-family")
-				el.style.font = "99px sans-serif"
-				try {el.style.font = font} catch(err) {}
-				let s = ""
-				if (window.getComputedStyle) {
-					try {
-						s = getComputedStyle(el, null)
-					} catch(e) {}
+				let aData = []
+				el.style.font = font
+				for (const prop of propList) {
+					aData.push(getComputedStyle(el)[prop])
 				}
-				if (s !== "") {
-					aResults.push(font +":"+ (s.fontSize != "99px" ? s.fontFamily +" "+ s.fontSize : undefined))
-				}
+				aResults.push(font +":" + aData.join(", "))
 			})
-			// temp
-			//if (gRun) {log_debug("sys fonts", "<br>    "+ aResults.join("<br>    "))}
 		} catch(e) {
 			dom.sFontsHash = log_error("css: system_fonts:", e.name, e.message)
 			return resolve("system_fonts:"+ zErr)
