@@ -539,7 +539,7 @@ function outputMisc() {
 		"Math.log1p","Math.sin","Math.sinh","Math.sqrt","Math.tan","Math.tanh"
 	]
 	if (runSL) {gLies.push("Math.sin")}
-	let foundLies = lieList.filter(x => gLies.includes(x))
+	let foundLies = lieList.filter(x => proxyLies.includes(x))
 	let isMathLies = (foundLies.length > 0)
 
 	Promise.all([
