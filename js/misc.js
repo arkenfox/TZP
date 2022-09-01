@@ -43,7 +43,7 @@ function get_iframe_props() {
 		// CB
 		'MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
 		'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
-		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics',
+		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics',"OffscreenCanvas",
 		// Trace
 		'PluginArray',
 		// ScriptSafe
@@ -211,8 +211,6 @@ function get_math_trig(isMathLies) {
 		}
 		sDetail[sName] = res
 		let btn = buildButton("18", sName)
-		// add RFP notation
-
 		dom.mathTrig.innerHTML = hash + btn + notation
 		return "math_trigonometric:" + value
 	} catch(e) {
