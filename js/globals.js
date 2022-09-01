@@ -139,6 +139,7 @@ let s0 = " <span class='",
 	isArch = "unknown", // OS architecture
 	isBaseFonts = false, // use whitelist/kBaseFonts
 	isPlatformFont = undefined, // from widget for baseFonts
+	aSystemFont = [], // system generics to add to fontList
 	isBrave = false,
 	isBraveMode = 0,
 	aBraveMode = ["unknown", "disabled", "standard", "strict"],
