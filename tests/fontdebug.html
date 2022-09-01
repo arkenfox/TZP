@@ -41,8 +41,12 @@
 			<div class="nav-title">font debug</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">fully test a single font: </span>
+			<span class="no_color">test a font or font-family </span>
 			&nbsp <input id="valueF" type="text" value="Arial">
+			&nbsp <span class="no_color">
+				e.g. <code>caption</code>, <code>-moz-info</code>, <code>arial</code>
+				, <code>MS Shell Dlg \32</code>
+			</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn12 btnfirst" onClick="run()">[ run ]</span>
@@ -70,6 +74,18 @@ let baseFonts = ['monospace','sans-serif','serif','system-ui']
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii"
 let fntStrB = "ImLwWil"
 let isEverDetected = false // track across all four basefonts compares
+
+let fntSystem = ["caption","icon","menu","message-box","small-caption","status-bar",
+	"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+	"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
+]
+
+let element = dom.valueF
+element.addEventListener("keypress", function(event) {
+	if (event.key === "Enter") {
+		run()
+	}
+})
 
 function get_OS() {
 	// append widget font to baseFonts
@@ -116,7 +132,13 @@ function run() {
 			setTimeout(function() {
 				let font = fntList[0]
 				dom.visual = fntStrB
-				dom.visual.style.fontFamily = font
+				if (fntSystem.includes(font)) {
+					dom.visual.style.setProperty('--font', "")
+					dom.visual.style.font = font
+				} else {
+					dom.visual.style.font = ""
+					dom.visual.style.fontFamily = font
+				}
 				dom.valueF.value = font
 				fntList = [font]
 				getFonts()
@@ -225,8 +247,14 @@ function getFonts() {
 				baseFonts.forEach(basefont => {
 					oResults[font][basefont] = []
 					isDetected = false // reset
-					const family = "'"+ font +"', "+ basefont
-					span.style.setProperty('--font', family)
+					if (fntSystem.includes(font)) {
+						span.style.setProperty('--font', basefont)
+						span.style.font = font
+					} else {
+						const family = "'"+ font +"', "+ basefont	
+						span.style.font = ""
+						span.style.setProperty('--font', family)
+					}
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
 					basefont = basefont.split(",")[0] // switch to short generic name
