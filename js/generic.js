@@ -299,6 +299,64 @@ const get_isBraveMode = () => new Promise(resolve => {
 	}
 })
 
+const get_isClientRect = () => new Promise(resolve => {
+	// determine valid domrect methods
+	if (!isTZPSmart) {
+		isClientRect = 1
+		aClientRect = []
+		return resolve()
+	}
+
+	let t0; if (canPerf) {t0 = performance.now()}
+	isClientRect = -1
+	aClientRect = []
+	let aNames = ["Element.getBoundingClientRect", "Element.getClientRects",
+		"Range.getBoundingClientRect", "Range.getClientRects"]
+
+	// FF we only need to measure once: rect6
+	if (isFF) {
+		let valid = "ee1ba407"
+		let el = dom.rect6
+
+		for (let i=0; i < 4; i++) {
+			try {
+				if (runSE) {abc = def}
+				let obj = ""
+				if (i == 0) {
+					obj = el.getBoundingClientRect()
+				} else if (i == 1) {
+					obj = el.getClientRects()[0]
+				} else {
+					let range = document.createRange()
+					range.selectNode(el)
+					if (i == 2) {
+						obj = range.getBoundingClientRect()
+					} else {
+						obj = range.getClientRects()[0]
+					}
+				}
+				// 3 unique values, but cover all
+				let array = [obj.x, obj.y, obj.width, obj.height, obj.top, obj.left, obj.right, obj.bottom]
+				aClientRect.push(mini(array.join()) == valid ? true : false)
+				// don't log lies: do this when we output in element section
+			} catch(e) {
+				log_error("elements: "+ aNames[i], e.name, e.message)
+				aClientRect.push(zErr)
+			}
+		}
+		//console.log(aClientRect)
+		isClientRect = aClientRect.indexOf(true)
+		if (gRun) {log_perf("isClientRect [prereq]", t0, gt0, aClientRect.join(", ") +" | "+ isClientRect)}
+		return resolve()
+	}
+
+	if (!isFF) {
+		// non-FF we need to do a shift
+		return resolve()
+	}
+
+})
+
 const get_isEngine = () => new Promise(resolve => {
 	if (isFF) { // we already resolved this as gecko or goanna
 		return resolve()
@@ -1383,9 +1441,9 @@ function outputUser(name) {
 
 function outputSection(id, cls) {
 	// return if old gecko or unsupported engine
-	if (isTZPBlock) {
-		// on first load output message
-		if (gLoad) {
+	if (gLoad) {
+		if (isTZPBlock) {
+			// on first load output message
 			let isUnsupported = (!isFF && isEngine !== "") // e.g. edgeHTML
 			let msgAction = isFork == undefined ? "UPDATE " : "REPLACE "
 			let msgActionSuffix = isFork == undefined ? "... " : "... with Firefox | "
@@ -1410,13 +1468,17 @@ function outputSection(id, cls) {
 			for (let i=0; i < msgItems.length; i++) {
 				msgItems[i].innerHTML = msg
 			}
-		}
 		return
-	} else if (!isTZPSmart) {
-		if (gLoad) {
+		} else if (!isTZPSmart) {
+			// decolor
 			for (let i = 1; i < 19; i++) {
 				document.body.style.setProperty("--test"+i, "#d4c1b3")
 				document.body.style.setProperty("--bg"+i, "#808080")
+			}
+			// nav-down
+			let items = document.getElementsByClassName("nav-down")
+			for (let i=0; i < items.length; i++) {
+				items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>basic mode</span> <")
 			}
 		}
 	}
@@ -1526,6 +1588,7 @@ function outputSection(id, cls) {
 				get_navKeys(),
 				get_isArch(),
 				get_isRFP(),
+				get_isClientRect(),
 			]).then(function(results){
 				output(location.toString())
 			})
