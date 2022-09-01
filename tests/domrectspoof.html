@@ -2,14 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=600">
 	<title>domrect spoof detection</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<!-- custom -->
 	<style>
-		table {width: 780px;}
+		table {width: 580px;}
+		hr {color: #c18cdc}
 		#rectTest {
 			background-color: skyblue;
 			top: 0;
@@ -32,60 +33,108 @@
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
 	</table>
 
-	<table id="tb8">
-		<col width="28%"><col width="72%">
-		<thead><tr><th colspan="2">
+	<table id="tb15">
+		<col width="15%"><col width="25%"><col width="60%">
+		<thead><tr><th colspan="3">
 			<div class="nav-title">domrect spoof detection
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td>getClientRects</td><td class="mono" id="hash0"></td></tr>
-		<tr><td>getBoundingClientRect</td><td class="mono" id="hash1"></td></tr>
-		<tr><td>details</td><td class="mono spaces" id="details"></td></tr>
+		<tr><td colspan="3" class="intro">
+			<span class="no_color">Gecko only. Measures a fixed element, rotated to forced decimal precision,
+			for an expected known result at any zoom level (try it: it auto-runs on resize) and on any platform.
+			</span>
+		</td></tr>
+
+		<tr><td colspan="3"><hr></td></tr>
+		<tr><td colspan="2">expected</td><td class="mono spaces" id="expected"></td></tr>
+		<tr><td colspan="3"></td></tr>
+
+		<tr><td colspan="3"><hr></td></tr>
+		<tr><td colspan="2">Element.getBoundingClientRect</td><td class="mono" id="res0"></td></tr>
+		<tr><td colspan="2">Element.getClientRects</td><td class="mono" id="res1"></td></tr>
+		<tr><td colspan="2">range.getBoundingClientRect</td><td class="mono" id="res2"></td></tr>
+		<tr><td colspan="2">range.getClientRects</td><td class="mono" id="res3"></td></tr>
+		<tr><td colspan="3"></td></tr>
+
+		<tr><td colspan="3"><hr></td></tr>
+		<tr><td>history</td><td colspan="2" class="mono spaces" id="history"></td></tr>
+
 	</table>
 	<br>
 
 <script>
 'use strict';
 
-var resizeArray = []
+let aHistory = []
+let expected = [
+	"ee1ba407",
+	"     x: -20.716659545898438",
+	"     y: -20.716659545898438",
+	" width: 141.41665649414062",
+	"height: 141.41665649414062",
+	"   top: -20.716659545898438",
+	"  left: -20.716659545898438",
+	" right: 120.69999694824219",
+	"bottom: 120.69999694824219",
+]
+let count = 0
+dom.expected.innerHTML = expected.join("<br>")
+
+let sNames = ["Element.getBoundingClientRect", "Element.getClientRects",
+	"Range.getBoundingClientRect", "Range.getClientRects"]
+
 
 function get_rect() {
-	let t0 = performance.now()
-	let details = []
+	if (aHistory.length > 19) {aHistory = aHistory.slice(-19)}
+	// clear details
+	sNames.forEach(function(name) {sDetail[name] = []})
 
-	let el = (dom.rectTest).getBoundingClientRect()
-	let measure1 = ["x:"+el.x, "y:"+el.y, "width:"+el.width, "height:"+el.height,
-		"top:"+el.top, "left:"+el.left, "right:"+el.right, "bottom:"+el.bottom]
-	details.push("     x: " + measure1[0])
-	details.push("     y: " + measure1[1])
-	details.push(" width: " + measure1[2])
-	details.push("height: " + measure1[3])
-	details.push("   top: " + measure1[4])
-	details.push("  left: " + measure1[5])
-	details.push(" right: " + measure1[6])
-	details.push("bottom: " + measure1[7])
-
-	let hash1 = sha1(measure1.join())
-	console.debug(measure1)
-
-	if (isFF) {
-		dom.hash1.innerHTML = hash1 + (hash1 == "bebfc291e9d1adc90e240790551d0305b8b91294" ? sg+"[pass]" : sb+"[fail]") + sc
-	} else {
-		dom.hash1.innerHTML = hash1
+	let valid = "ee1ba407"
+	let el = dom.rectTest
+	let res = []
+	for (let i=0; i < 4; i++) {
+		try {
+			let obj = ""
+			let output = document.getElementById("res"+i)
+			if (i == 0) {
+				obj = el.getBoundingClientRect()
+			} else if (i == 1) {
+				obj = el.getClientRects()[0]
+			} else {
+				let range = document.createRange()
+				range.selectNode(el)
+				if (i == 2) {
+					obj = range.getBoundingClientRect()
+				} else {
+					obj = range.getClientRects()[0]
+				}
+			}
+			// 3 unique values, but cover all names
+			let array = [obj.x, obj.y, obj.width, obj.height, obj.top, obj.left, obj.right, obj.bottom]
+			sDetail[sNames[i]] = array
+			let hash = mini(array.join())
+			let display = hash + (hash == valid ? green_tick : red_cross)
+			if (hash !== valid) {
+				display += buildButton("15", sNames[i], "details")
+			}
+			output.innerHTML = display
+			res.push(hash + (mini(array.join()) == valid ? green_tick : red_cross))
+		} catch(e) {
+			output.innerHTML = e.name
+			res.push(zErr)
+		}
 	}
-	dom.details.innerHTML = details.join("<br>")
+	// add to history
+	count++
+	aHistory.push((count.toString()).padStart(3)+ ": " + res.join(" | "))
+	dom.history.innerHTML = aHistory.join("<br>")
 
-	// perf
-	dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
 }
 
-Promise.all([
-	get_globals()
-]).then(function(){
-	window.addEventListener("resize", get_rect)
-	get_rect()
-})
+window.addEventListener("resize", get_rect)
+get_rect()
 
 </script>
 </body>
