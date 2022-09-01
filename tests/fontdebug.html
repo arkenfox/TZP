@@ -248,7 +248,7 @@ function getFonts() {
 					oResults[font][basefont] = []
 					isDetected = false // reset
 					if (fntSystem.includes(font)) {
-						span.style.setProperty('--font', basefont)
+						span.style.setProperty('--font', "")
 						span.style.font = font
 					} else {
 						const family = "'"+ font +"', "+ basefont	
