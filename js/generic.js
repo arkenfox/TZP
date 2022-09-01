@@ -151,6 +151,40 @@ const promiseRaceFulfilled = async ({
 
 /*** GLOBAL VARS ***/
 
+const get_aSystemFont = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	// build unique fonts in system fonts, exclude generic
+	let t0; if (canPerf) {t0 = performance.now()}
+	let aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",
+		"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+		"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
+	]
+	let generic = ['monospace','sans-serif','serif','cursive','fantasy','fangsong',
+		'system-ui','ui-monospace','ui-rounded','ui-serif','math','emoji'
+	]
+	aSystemFont = []
+	try {
+		aFonts.sort()
+		let el = dom.sysFont
+		let data = []
+		aFonts.forEach(function(font){
+			el.style.font = font
+			let family = getComputedStyle(el)["font-family"]
+			if (!data.includes(family)) {
+				data.push(family)
+				aSystemFont.push(font)
+			}
+		})
+		aSystemFont = aSystemFont.filter(x => !generic.includes(x))
+		log_perf("aSystemFont [global]", t0, "", aSystemFont.join(","))
+		return resolve()
+	} catch(e) {
+		log_perf("aSystemFont [global]", t0, "", e.name)
+		// do nothing: we do this test later with more properties
+		return resolve()
+	}
+})
+
 function get_canPerf(runtype) {
 	// check performance.now
 	try {
@@ -1334,6 +1368,7 @@ function countJS(filename) {
 			get_isTB(),
 			get_isOS(), // this also sets isPlatformFont for font tests
 			get_isBrave(),
+			get_aSystemFont(),
 			get_isFork(),
 		]).then(function(results){
 			// block/smart
