@@ -130,7 +130,7 @@ function run() {
 		} else {
 			// only use the first one
 			setTimeout(function() {
-				let font = fntList[0]
+				let font = fntList[0].toLowerCase()
 				dom.visual = fntStrB
 				if (fntSystem.includes(font)) {
 					dom.visual.style.setProperty('--font', "")
