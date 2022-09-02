@@ -122,7 +122,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 }
 
 /* show/hide */
-.togC, .togF1, .togF4, .togL, .togOS1, .togUA, .togUA1, .togUA2, .togUG, .togZ {display: none;}
+.togC, .togF1, .togL, .togOS1, .togUA, .togUA1, .togUA2, .togUG, .togZ {display: none;}
 
 /* run/re-run, click here */
 .btn {background-color: #161b22;
