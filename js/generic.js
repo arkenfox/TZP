@@ -1565,7 +1565,6 @@ function outputSection(id, cls) {
 			gRun = false
 		}
 		// reset
-		if (id=="all" || id=="12") {reset_fonts()}
 		if (id=="all" || id=="1") {dom.kbt.value = ""}
 		// set hash perf
 		if (gRun && canPerf) {
