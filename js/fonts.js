@@ -770,18 +770,20 @@ function get_fallback(list) {
 			sDetail["fonts_fontnames_fallback"] = found
 			// diffs
 			let fontDiffBtn = ""
-			if (sDetail["fonts_fontnames"].length && found.length) {
-				let fntNames = sDetail["fonts_fontnames"]
-				let fntNew = found.filter(x => !fntNames.includes(x))
-				let fntMissing = fntNames.filter(x => !found.includes(x))
-				let fntDiff = []
-				if (fntNew.length) {fntDiff.push("new:" + fntNew.join(", "))}
-				if (fntMissing.length) {fntDiff.push("missing:" + fntMissing.join(", "))}
-				if (fntDiff.length) {
-					sDetail["fonts_fontnames_diff_notglobal"] = fntDiff
-					fontDiffBtn = buildButton("12", "fonts_fontnames_diff_notglobal", "diff")
+			try {
+				if (sDetail["fonts_fontnames"].length && found.length) {
+					let fntNames = sDetail["fonts_fontnames"]
+					let fntNew = found.filter(x => !fntNames.includes(x))
+					let fntMissing = fntNames.filter(x => !found.includes(x))
+					let fntDiff = []
+					if (fntNew.length) {fntDiff.push("new:" + fntNew.join(", "))}
+					if (fntMissing.length) {fntDiff.push("missing:" + fntMissing.join(", "))}
+					if (fntDiff.length) {
+						sDetail["fonts_fontnames_diff_notglobal"] = fntDiff
+						fontDiffBtn = buildButton("12", "fonts_fontnames_diff_notglobal", "diff")
+					}
 				}
-			}
+			} catch(e) {}
 			dom.fontFB.innerHTML = mini_sha1(found.join()) + buildButton("12", "fonts_fontnames_fallback", found.length)
 				+ (isBaseFonts ? " from"+ fontBaseBtn : "") + fontDiffBtn
 			// perf
@@ -843,9 +845,8 @@ function get_unicode() {
 
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		let offset = [], bounding = [], client = [],
-			diffsb = [], diffsc = [], display = ""
-		let isCanvas = true, isBound = true, isClient = true, isTM = true
+		let offset = [], client = []
+		let isCanvas = true, isClient = true, isTM = true
 
 		// textMetrics
 		function supported(property) {return TextMetrics.prototype.hasOwnProperty(property)}
@@ -884,54 +885,28 @@ function get_unicode() {
 				el.innerHTML = output
 				res.push("tm_"+ tmTypes[i] +":"+ output)
 			}
-
-			// de-dupe
-			let unique = tmres["tmres0"]
-			unique = unique.filter(function(item, position) {return unique.indexOf(item) === position})
-			diffsb = diffsb.filter(function(item, position) {return diffsb.indexOf(item) === position})
-			diffsc = diffsc.filter(function(item, position) {return diffsc.indexOf(item) === position})
 			// glyphs
-			let ohash = mini_sha1(offset.join(), "fonts gylphs offset"),
-				bhash = mini_sha1(bounding.join(), "fonts gylphs bounding"),
-				chash = mini_sha1(client.join(), "fonts gylphs client")
-			res.push("glyphs_offset:"+ ohash)
-			res.push("glyphs_getClient:"+ chash)
-			res.push("glyphs_getBounding:"+ bhash)
-
-			if (bhash !== chash) {
-				// ToDo: at least one is a lie
-			}
+			let offsetHash = mini_sha1(offset.join(), "fonts gylphs offset"),
+				clientHash = mini_sha1(client.join(), "fonts gylphs clientrect")
+			res.push("glyphs_offset:"+ offsetHash)
+			res.push("glyphs_clientrect:"+ clientHash)
 			// the rest
-			let total = "|"+ unique.length +" diffs]"+ sc, r = ""
-			dom.ug1 = ohash
-			r = (isBound ? "" : sb+"[blocked]"+ sc)
-			if (isBound && isCanvas && isTM) {r = s12 +"["+ diffsb.length + total}
-			dom.ug3.innerHTML = bhash + r
-			r = (isClient ? "" : sb+"[blocked]"+ sc)
-			if (isClient && isCanvas && isTM) {r = s12 +"["+ diffsc.length + total}
-			dom.ug4.innerHTML = chash + r
-			dom.ug10.innerHTML = fntHead + display
-
-			//debug
-			//r = ""
-			//if (isBound) {r = "measuretext vs bounding\n"+ diffsb.join("\n")}
-			//if (isClient && isClient !== isBound) {r += "measuretext vs clientrects\n"+ diffsc.join("\n")}
-			//if (r !== "") {console.debug(r)}
-
+			dom.ug1 = offsetHash
+			dom.ug3.innerHTML = clientHash
 			// perf/resolve
 			log_perf("unicode glyphs [fonts]",t0)
 			return resolve(res)
 		}
 
 		function run() {
-			let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"],
+			// we do not need style 'none' as it is default proportional font
+			let styles = ["sans-serif","serif","monospace","cursive","fantasy"],
 				div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
 			// each char
 			for (let i=0; i < fntCode.length; i++) {
 				let	c = String.fromCodePoint(fntCode[i]),
 					cp = "u+"+ (fntCode[i]).slice(2)
-				display += "<br>"+ cp.padStart(7)
 				// each style
 				for (let j=0; j < styles.length; j++) {
 					// set
@@ -941,8 +916,7 @@ function get_unicode() {
 					// offsets: w=span h=div
 					let w = span.offsetWidth, h = div.offsetHeight
 					offset.push((j==0 ? cp +"-" : "" ) + w +"x"+ h)
-					display += (w.toString()).padStart(8) +" x "+ (h.toString()).padStart(4)
-					if (j == 5) {display += c.padStart(6)}
+
 					// measureText
 					if (isCanvas) {
 						try {
@@ -963,32 +937,21 @@ function get_unicode() {
 							tmres["tmres10"].push(tm.hangingBaseline)
 							tmres["tmres11"].push(tm.ideographicBaseline)
 						} catch(err) {
-							if (err.message == "ctx is undefined") {
-								isCanvas = false
-							} else {
-								//console.debug("measureText", err.name, err.message)
-							}
+							// ToDo: log_error and display it and return zErr
+							isCanvas = false
 						}
 					}
-					// bounding: w=div h=span
-					if (isBound) {
+					// clientrect
+					// ToDo: isClientRect: we only need one valid method
+					if (isClient) {
 						let bDiv = div.getBoundingClientRect()
 						let bSpan = span.getBoundingClientRect()
 						try {
-							w = bSpan.width; h = bDiv.height
-							bounding.push(w +"x"+ h)
-							if (m !== w) {diffsb.push(m +" vs "+ w)}
-						} catch(err) {isBound = false}
-					}
-					// client: w=span, h=div
-					if (isClient) {
-						let cDiv = div.getClientRects()
-						let cSpan = span.getClientRects()
-						try {
-							w = cSpan[0].width; h = cDiv[0].height
-							client.push(w +"x"+ h )
-							if (m !== w) {diffsc.push(m +" vs "+ w)}
-						} catch(err) {isClient = false}
+							client.push(bSpan.width +"x"+ bDiv.height)
+						} catch(err) {
+							// ToDo: log_error and display it and return zErr
+							isClient = false
+						}
 					}
 				}
 			}
@@ -1061,7 +1024,8 @@ function outputFontsFB() {
 						// browser.display.use_document_fonts = 0 (blocked)
 						function run_main() {
 							clearInterval(checking)
-							get_fallback(fntList)
+							let sanitizedList = fntList.filter(x => !aSystemFont.includes(x))
+							get_fallback(sanitizedList)
 						}
 						let checking = setInterval(run_main, 25)
 					}
