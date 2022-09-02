@@ -66,9 +66,6 @@ let fntTBBundled = {
 	],
 }
 
-let fntHead = "glyph".padStart(7) +"default".padStart(15) +"sans-serif".padStart(15) +"serif".padStart(15)
-	+"monospace".padStart(15) +"cursive".padStart(15) +"fantasy".padStart(15) +"<br>" +"-----".padStart(7)
-
 function set_fntList() {
 	// bail
 	if (isOS == "") {
@@ -188,16 +185,6 @@ function set_fallback_string() {
 			})
 		}
 	})
-}
-
-function reset_fonts() {
-	// glyphs
-	let r = ""
-	for (let i=0; i < fntCode.length; i++) {
-		let c = "u+"+ fntCode[i].slice(2)
-		r += "\n"+ c.padStart(7)
-	}
-	dom.ug10.innerHTML = fntHead + r
 }
 
 const getFonts = () => {
