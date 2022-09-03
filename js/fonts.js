@@ -828,61 +828,91 @@ function get_unicode() {
 		https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
 	// FF86+ 1676966: gfx.font_rendering.fallback.async
 		// prime code chars directly in HTML to force fallback ASAP
-		// ToDo: does font fallback string also need priming
 
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		let offset = [], client = []
-		let isCanvas = true, isClient = true, isTM = true
-
-		// textMetrics
-		function supported(property) {return TextMetrics.prototype.hasOwnProperty(property)}
-		let tmres = {
-			tmres0: [], tmres1: [], tmres2: [], tmres3: [], tmres4: [], tmres5: [],
-			tmres6: [], tmres7: [], tmres8: [], tmres9: [], tmres10: [], tmres11: [],
-		}
-		let tmSupport = []
-		let tmTypes = ["width","actualBoundingBoxAscent","actualBoundingBoxDescent",
-			"actualBoundingBoxLeft","actualBoundingBoxRight","alphabeticBaseline",
-			"emHeightAscent","emHeightDescent","fontBoundingBoxAscent",
-			"fontBoundingBoxDescent","hangingBaseline","ideographicBaseline"]
-		for (let i = 0; i < tmTypes.length; i++) {tmSupport.push(supported(tmTypes[i]))}
 
 		function output() {
-			// textmetrics
 			let res = []
-			for (let i=0; i < tmTypes.length; i++) {
-				let el = document.getElementById("tm"+ i),
-					array = tmres["tmres"+ i],
-					output = ""
-				if (tmSupport[i]) {
-					if (isCanvas) {
-						if (array[0] === undefined) {
-							output = "undefined" // different to canvas blocking
-							if (i == 0) {isTM = false}
-						} else {
-							output = mini_sha1(array.join(), "fonts textmetrics " + tmTypes[i])
-						}
-					} else {
-						output = zB0
+			let aList = [["offset", oOffset], ["clientrect", oClient]]
+			for (const n of Object.keys(oTM)) {	aList.push([n])}
+
+			let errCanvas = oCatch["canvas"]
+			aList.forEach(function(array) {
+				let name = array[0]
+				let obj = array[1] == undefined ? oTM[name]["data"] : array[1]
+				let sName = "", btn = "", display = "", value = ""
+				let errCheck = oCatch[name], typeofCheck = oTypeOf[name]
+				if (name !== "offset" && name !== "clientrect" && errCanvas !== undefined) {
+					// textmetrics
+					display = errCanvas
+					value = zErr
+					if (!TextMetrics.prototype.hasOwnProperty(name)) {
+						display = zNS
+						value = zNS
 					}
+				} else if (errCheck !== undefined) {
+					display = errCheck
+					value = zErr
+				} else if (typeofCheck !== undefined) {
+					display = "typeof mismatch: "+ typeofCheck
+					value = zLIE
+					if (isTZPSmart) {
+						display = soL + display + scC
+						if (gRun) {
+							gKnown.push("fonts: glyphs "+ name)
+							gMethods.push("fonts: glyphs "+ name +": typeof :"+ typeofCheck)
+						}
+					}
+				} else if (Object.keys(obj).length) {
+					sName = "fonts gylphs "+ name
+					btn = buildButton("12", sName)
+					display = mini_sha1(obj, sName)
+					value = display
+					sDetail[sName] = obj
 				} else {
-					output = zNS
+					// empty object
+					if (name !== "offset" && name !== "clientrect") {
+						if (!TextMetrics.prototype.hasOwnProperty(name)) {
+							display = zNS
+							value = zNS
+						}
+					}
 				}
-				el.innerHTML = output
-				res.push("tm_"+ tmTypes[i] +":"+ output)
-			}
-			// glyphs
-			let offsetHash = mini_sha1(offset.join(), "fonts gylphs offset"),
-				clientHash = mini_sha1(client.join(), "fonts gylphs clientrect")
-			res.push("glyphs_offset:"+ offsetHash)
-			res.push("glyphs_clientrect:"+ clientHash)
-			// the rest
-			dom.ug1 = offsetHash
-			dom.ug3.innerHTML = clientHash
-			// perf/resolve
+				// ToDo: compare measuretext width to clientrect width + show red/green [match]
+				res.push("glyphs_"+ name +":"+ value)
+				document.getElementById("ug"+ name).innerHTML = display + btn
+			})
+			// perf
 			log_perf("unicode glyphs [fonts]",t0)
 			return resolve(res)
+		}
+		// reset
+		sDetail["fonts gylphs offset"] = []
+		sDetail["fonts gylphs clientrect"] = []
+		// vars
+		let oCatch = {}, oTypeOf = {}
+		let oOffset = {}, oClient = {}
+		let isClient = true, isOffset = true, isCanvas = true
+		let oTM = {
+			"width": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"actualBoundingBoxAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"actualBoundingBoxDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"actualBoundingBoxLeft": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"actualBoundingBoxRight": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"alphabeticBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"emHeightAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"emHeightDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"fontBoundingBoxAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"fontBoundingBoxDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"hangingBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true },
+			"ideographicBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true }
+		}
+		for (const k of Object.keys(oTM)) {
+			let supported = TextMetrics.prototype.hasOwnProperty(k)
+			oTM[k]["supported"] = supported
+			oTM[k]["proceed"] = supported
+			sDetail["fonts gylphs " + k] = []
 		}
 
 		function run() {
@@ -890,58 +920,103 @@ function get_unicode() {
 			let styles = ["sans-serif","serif","monospace","cursive","fantasy"],
 				div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
-			// each char
-			for (let i=0; i < fntCode.length; i++) {
-				let	c = String.fromCodePoint(fntCode[i]),
-					cp = "u+"+ (fntCode[i]).slice(2)
-				// each style
-				for (let j=0; j < styles.length; j++) {
-					// set
-					slot.style.fontFamily = styles[j]
-					slot.textContent = c
-					let m = ""
-					// offsets: w=span h=div
-					let w = span.offsetWidth, h = div.offsetHeight
-					offset.push((j==0 ? cp +"-" : "" ) + w +"x"+ h)
+			// sort for object
+			styles.sort()
+			fntCode.sort()
 
-					// measureText
-					if (isCanvas) {
+			// each char
+			fntCode.forEach(function(code) {
+				let	codeString = String.fromCodePoint(code)
+				// reset
+				let tmpClient = []
+				let tmpOffset = []
+				for (const j of Object.keys(oTM)) { oTM[j]["temp"] = [] }
+
+				// each style
+				styles.forEach(function(stylename) {
+					// set
+					slot.style.fontFamily = stylename
+					slot.textContent = codeString
+					// offset: span width + div height
+					if (isOffset) {
 						try {
-							ctx.font = "normal normal 22000px "+ styles[j]
-							let tm = ctx.measureText(c)
-							m = tm.width
-							// no perf gain by checking tmSupport
-							tmres["tmres0"].push(m)
-							tmres["tmres1"].push(tm.actualBoundingBoxAscent)
-							tmres["tmres2"].push(tm.actualBoundingBoxDescent)
-							tmres["tmres3"].push(tm.actualBoundingBoxLeft)
-							tmres["tmres4"].push(tm.actualBoundingBoxRight)
-							tmres["tmres5"].push(tm.alphabeticBaseline)
-							tmres["tmres6"].push(tm.emHeightAscent)
-							tmres["tmres7"].push(tm.emHeightDescent)
-							tmres["tmres8"].push(tm.fontBoundingBoxAscent)
-							tmres["tmres9"].push(tm.fontBoundingBoxDescent)
-							tmres["tmres10"].push(tm.hangingBaseline)
-							tmres["tmres11"].push(tm.ideographicBaseline)
-						} catch(err) {
-							// ToDo: log_error and display it and return zErr
-							isCanvas = false
+							if (runSE) {abc = def}
+							let oWidth = span.offsetWidth,
+								oHeight = div.offsetHeight
+							if ("number" === typeof oWidth && "number" === typeof oHeight) {
+								tmpOffset.push([stylename, oWidth, oHeight])
+							} else {
+								isOffset = false // stop checking
+								oTypeOf["offset"] = typeof oWidth +" x "+ typeof oHeight
+							}
+						} catch(e) {
+							let eOffset = log_error("fonts: glyphs offset", e.name, e.message)
+							oCatch["offset"] = eOffset
+							isOffset = false
 						}
 					}
 					// clientrect
 					// ToDo: isClientRect: we only need one valid method
 					if (isClient) {
-						let bDiv = div.getBoundingClientRect()
-						let bSpan = span.getBoundingClientRect()
 						try {
-							client.push(bSpan.width +"x"+ bDiv.height)
-						} catch(err) {
-							// ToDo: log_error and display it and return zErr
+							if (runSE) {abc = def}
+							let cDiv = div.getBoundingClientRect()
+							let cSpan = span.getBoundingClientRect()
+							let cWidth = cSpan.width,
+								cHeight = cDiv.height
+							if ("number" === typeof cWidth && "number" === typeof cHeight) {
+								tmpClient.push([stylename, cWidth, cHeight])
+							} else {
+								isClient = false // stop checking
+								oTypeOf["clientrect"] = typeof cWidth +" x "+ typeof cHeight
+							}
+						} catch(e) {
+							let eClient = log_error("fonts: glyphs clientrect", e.name, e.message)
+							oCatch["clientrect"] = eClient
 							isClient = false
 						}
 					}
+					// canvas
+					if (isCanvas) {
+						try {
+							ctx.font = "normal normal 22000px "+ stylename
+							let tm = ctx.measureText(codeString)
+							// textmetrics
+							for (const k of Object.keys(oTM)) {
+								let proceed = oTM[k]["proceed"]
+								let supported = oTM[k]["supported"]
+								if (proceed || supported) {
+									try {
+										let measure = tm[k]
+										if ("number" === typeof measure) {
+											oTM[k]["temp"].push([stylename, measure])
+										} else {
+											oTM[k]["proceed"] = false // stop checking
+											oTypeOf[k] = typeof measure
+										}
+									} catch(e) {
+										let eMsg = log_error("fonts: glyphs "+ k, e.name, e.message)
+										oCatch[k] = eMsg
+										oTM[k]["proceed"] = false
+									}
+								}
+							}
+
+						} catch(e) {
+							let eCanvas = log_error("fonts: glyphs canvas", e.name, e.message)
+							oCatch["canvas"] = eCanvas
+							isCanvas = false
+						}
+					}
+				})
+				// record per style
+				if (tmpOffset.length) {oOffset[code] = tmpOffset}
+				if (tmpClient.length) {oClient[code] = tmpClient}
+				for (const p of Object.keys(oTM)) {
+					let tmpData = oTM[p]["temp"]
+					if (tmpData.length) {oTM[p]["data"][code] = tmpData}
 				}
-			}
+			})
 			dom.ugSlot = ""
 			output()
 		}
