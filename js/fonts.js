@@ -895,23 +895,21 @@ function get_unicode() {
 		let oOffset = {}, oClient = {}
 		let isClient = true, isOffset = true, isCanvas = true
 		let oTM = {
-			"width": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"actualBoundingBoxAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"actualBoundingBoxDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"actualBoundingBoxLeft": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"actualBoundingBoxRight": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"alphabeticBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"emHeightAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"emHeightDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"fontBoundingBoxAscent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"fontBoundingBoxDescent": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"hangingBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true },
-			"ideographicBaseline": { "data": {}, "temp": [], "supported": true, "proceed" : true }
+			"width": { "data": {}, "temp": [], "proceed" : true },
+			"actualBoundingBoxAscent": { "data": {}, "temp": [], "proceed" : true },
+			"actualBoundingBoxDescent": { "data": {}, "temp": [], "proceed" : true },
+			"actualBoundingBoxLeft": { "data": {}, "temp": [], "proceed" : true },
+			"actualBoundingBoxRight": { "data": {}, "temp": [], "proceed" : true },
+			"alphabeticBaseline": { "data": {}, "temp": [], "proceed" : true },
+			"emHeightAscent": { "data": {}, "temp": [], "proceed" : true },
+			"emHeightDescent": { "data": {}, "temp": [], "proceed" : true },
+			"fontBoundingBoxAscent": { "data": {}, "temp": [], "proceed" : true },
+			"fontBoundingBoxDescent": { "data": {}, "temp": [], "proceed" : true },
+			"hangingBaseline": { "data": {}, "temp": [], "proceed" : true },
+			"ideographicBaseline": { "data": {}, "temp": [], "proceed" : true }
 		}
 		for (const k of Object.keys(oTM)) {
-			let supported = TextMetrics.prototype.hasOwnProperty(k)
-			oTM[k]["supported"] = supported
-			oTM[k]["proceed"] = supported
+			oTM[k]["proceed"] = TextMetrics.prototype.hasOwnProperty(k)
 			sDetail["fonts gylphs " + k] = []
 		}
 
@@ -926,17 +924,16 @@ function get_unicode() {
 
 			// each char
 			fntCode.forEach(function(code) {
+				// set char once
 				let	codeString = String.fromCodePoint(code)
+				slot.textContent = codeString
 				// reset
 				let tmpClient = []
 				let tmpOffset = []
 				for (const j of Object.keys(oTM)) { oTM[j]["temp"] = [] }
-
 				// each style
 				styles.forEach(function(stylename) {
-					// set
 					slot.style.fontFamily = stylename
-					slot.textContent = codeString
 					// offset: span width + div height
 					if (isOffset) {
 						try {
@@ -950,8 +947,7 @@ function get_unicode() {
 								oTypeOf["offset"] = typeof oWidth +" x "+ typeof oHeight
 							}
 						} catch(e) {
-							let eOffset = log_error("fonts: glyphs offset", e.name, e.message)
-							oCatch["offset"] = eOffset
+							oCatch["offset"] = log_error("fonts: glyphs offset", e.name, e.message)
 							isOffset = false
 						}
 					}
@@ -971,8 +967,7 @@ function get_unicode() {
 								oTypeOf["clientrect"] = typeof cWidth +" x "+ typeof cHeight
 							}
 						} catch(e) {
-							let eClient = log_error("fonts: glyphs clientrect", e.name, e.message)
-							oCatch["clientrect"] = eClient
+							oCatch["clientrect"] = log_error("fonts: glyphs clientrect", e.name, e.message)
 							isClient = false
 						}
 					}
@@ -983,9 +978,7 @@ function get_unicode() {
 							let tm = ctx.measureText(codeString)
 							// textmetrics
 							for (const k of Object.keys(oTM)) {
-								let proceed = oTM[k]["proceed"]
-								let supported = oTM[k]["supported"]
-								if (proceed || supported) {
+								if (oTM[k]["proceed"]) {
 									try {
 										let measure = tm[k]
 										if ("number" === typeof measure) {
@@ -995,16 +988,13 @@ function get_unicode() {
 											oTypeOf[k] = typeof measure
 										}
 									} catch(e) {
-										let eMsg = log_error("fonts: glyphs "+ k, e.name, e.message)
-										oCatch[k] = eMsg
+										oCatch[k] = log_error("fonts: glyphs "+ k, e.name, e.message)
 										oTM[k]["proceed"] = false
 									}
 								}
 							}
-
 						} catch(e) {
-							let eCanvas = log_error("fonts: glyphs canvas", e.name, e.message)
-							oCatch["canvas"] = eCanvas
+							oCatch["canvas"] = log_error("fonts: glyphs canvas", e.name, e.message)
 							isCanvas = false
 						}
 					}
