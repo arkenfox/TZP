@@ -19,8 +19,11 @@ function getUniqueElements() {
 function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 	if (functionName == undefined) {functionName = "showDetail"}
 	if (btnType == undefined) {btnType = "btnc"}
+	let part1 = arrayName.split(",")[0]
+	let part2 = arrayName.split(",")[1].trim()
+	if (part2 == "true" || part2 == "false") {part2 = ", "+ part2} else {part2 = ""}
 	return " <span class='btn"+ colorCode +" "+ btnType +"' onClick='"
-		+ functionName +"(`"+ arrayName +"`)'>["+ displayText +"]</span>"
+		+ functionName +"(`"+ part1 +"`"+ part2 + ")'>["+ displayText +"]</span>"
 }
 
 /*** HASH ***/
@@ -431,7 +434,6 @@ function copyclip(element) {
 	}
 	// clipboard API
 	if ("clipboard" in navigator) {
-console.log("banana")
 		try {
 			let content = document.getElementById(element).innerHTML
 			// remove spans, change linebreaks
@@ -453,12 +455,12 @@ console.log("banana")
 	}
 }
 
-function showDetail(name) {
+function showDetail(name, useMini = false) {
 	if (name == "all") {
 		console.log("ALL", sDetail)
 	} else {
-		let data = sDetail[name],
-			hash = mini_sha1(data.join())
+		let data = sDetail[name]
+		let hash = useMini ? mini(data.join()) : mini_sha1(data.join())
 		// split+tidy name
 		name = name.replace(/\_/g, " ")
 		let n = name.indexOf(" "),
