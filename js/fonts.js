@@ -831,16 +831,49 @@ function get_unicode() {
 
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
+		let styles = ["cursive","fantasy","sans-serif","serif","monospace","system-ui"]
+		// some styles match: we should detect those and remove redundant
+			// e.g. if fantasy matches sans-serif
+			// e.g. if system-ui meatches serif
+		styles.sort()
+		fntCode.sort()
+
+		function group(name, data) {
+			// group by style then char
+				// when measuring, looping style then char was a 25% perf hit
+			let newobj = {}
+			styles.forEach(function(style) {
+				newobj[style] = []
+			})
+			if (name == "offset" || name == "clientrect") {
+				// width + height
+				data.forEach(function(item) {
+					newobj[item[0]].push([item[1], item[2], item[3]]) // width + height
+				})
+			} else {
+				// width only
+				data.forEach(function(item) {
+					newobj[item[0]].push([item[1], item[2]])
+				})
+			}
+			// concat style hash
+			for (const style of Object.keys(newobj)) {
+				let hash = mini(newobj[style][0])
+				newobj[style +"-"+ hash] = newobj[style]
+				delete newobj[style]
+			}
+			return newobj
+		}
 
 		function output() {
 			let res = []
-			let aList = [["offset", oOffset], ["clientrect", oClient]]
+			let aList = [["offset", aOffset], ["clientrect", aClient]]
 			for (const n of Object.keys(oTM)) {	aList.push([n])}
 
 			let errCanvas = oCatch["canvas"]
 			aList.forEach(function(array) {
 				let name = array[0]
-				let obj = array[1] == undefined ? oTM[name]["data"] : array[1]
+				let data = array[1] == undefined ? oTM[name]["data"] : array[1]
 				let sName = "", btn = "", display = "", value = ""
 				let errCheck = oCatch[name], typeofCheck = oTypeOf[name]
 				if (name !== "offset" && name !== "clientrect" && errCanvas !== undefined) {
@@ -864,12 +897,14 @@ function get_unicode() {
 							gMethods.push("fonts: glyphs "+ name +": typeof :"+ typeofCheck)
 						}
 					}
-				} else if (Object.keys(obj).length) {
+				} else if (data.length) {
+					data.sort()
+					let newobj = group(name, data)
 					sName = "fonts gylphs "+ name
 					btn = buildButton("12", sName)
-					display = mini_sha1(obj, sName)
+					display = mini_sha1(newobj, sName)
 					value = display
-					sDetail[sName] = obj
+					sDetail[sName] = newobj
 				} else {
 					// empty object
 					if (name !== "offset" && name !== "clientrect") {
@@ -884,6 +919,7 @@ function get_unicode() {
 				document.getElementById("ug"+ name).innerHTML = display + btn
 			})
 			// perf
+			console.log((performance.now() - t0) +" ms")
 			log_perf("unicode glyphs [fonts]",t0)
 			return resolve(res)
 		}
@@ -892,35 +928,32 @@ function get_unicode() {
 		sDetail["fonts gylphs clientrect"] = []
 		// vars
 		let oCatch = {}, oTypeOf = {}
-		let oOffset = {}, oClient = {}
+		let aOffset = [], aClient = []
 		let isClient = true, isOffset = true, isCanvas = true
 		let oTM = {
-			"width": { "data": {}, "temp": [], "proceed" : true },
-			"actualBoundingBoxAscent": { "data": {}, "temp": [], "proceed" : true },
-			"actualBoundingBoxDescent": { "data": {}, "temp": [], "proceed" : true },
-			"actualBoundingBoxLeft": { "data": {}, "temp": [], "proceed" : true },
-			"actualBoundingBoxRight": { "data": {}, "temp": [], "proceed" : true },
-			"alphabeticBaseline": { "data": {}, "temp": [], "proceed" : true },
-			"emHeightAscent": { "data": {}, "temp": [], "proceed" : true },
-			"emHeightDescent": { "data": {}, "temp": [], "proceed" : true },
-			"fontBoundingBoxAscent": { "data": {}, "temp": [], "proceed" : true },
-			"fontBoundingBoxDescent": { "data": {}, "temp": [], "proceed" : true },
-			"hangingBaseline": { "data": {}, "temp": [], "proceed" : true },
-			"ideographicBaseline": { "data": {}, "temp": [], "proceed" : true }
+			"width": {},
+			"actualBoundingBoxAscent": {},
+			"actualBoundingBoxDescent": {},
+			"actualBoundingBoxLeft": {},
+			"actualBoundingBoxRight": {},
+			"alphabeticBaseline": {},
+			"emHeightAscent": {},
+			"emHeightDescent": {},
+			"fontBoundingBoxAscent": {},
+			"fontBoundingBoxDescent": {},
+			"hangingBaseline": {},
+			"ideographicBaseline": {},
 		}
 		for (const k of Object.keys(oTM)) {
+			oTM[k]["data"] = []
 			oTM[k]["proceed"] = TextMetrics.prototype.hasOwnProperty(k)
 			sDetail["fonts gylphs " + k] = []
 		}
 
 		function run() {
 			// we do not need style 'none' as it is default proportional font
-			let styles = ["sans-serif","serif","monospace","cursive","fantasy"],
-				div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
+			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
-			// sort for object
-			styles.sort()
-			fntCode.sort()
 
 			// each char
 			fntCode.forEach(function(code) {
@@ -928,8 +961,6 @@ function get_unicode() {
 				let	codeString = String.fromCodePoint(code)
 				slot.textContent = codeString
 				// reset
-				let tmpClient = []
-				let tmpOffset = []
 				for (const j of Object.keys(oTM)) { oTM[j]["temp"] = [] }
 				// each style
 				styles.forEach(function(stylename) {
@@ -941,7 +972,7 @@ function get_unicode() {
 							let oWidth = span.offsetWidth,
 								oHeight = div.offsetHeight
 							if ("number" === typeof oWidth && "number" === typeof oHeight) {
-								tmpOffset.push([stylename, oWidth, oHeight])
+								aOffset.push([stylename, code, oWidth, oHeight])
 							} else {
 								isOffset = false // stop checking
 								oTypeOf["offset"] = typeof oWidth +" x "+ typeof oHeight
@@ -961,7 +992,7 @@ function get_unicode() {
 							let cWidth = cSpan.width,
 								cHeight = cDiv.height
 							if ("number" === typeof cWidth && "number" === typeof cHeight) {
-								tmpClient.push([stylename, cWidth, cHeight])
+								aClient.push([stylename, code, cWidth, cHeight])
 							} else {
 								isClient = false // stop checking
 								oTypeOf["clientrect"] = typeof cWidth +" x "+ typeof cHeight
@@ -975,14 +1006,17 @@ function get_unicode() {
 					if (isCanvas) {
 						try {
 							ctx.font = "normal normal 22000px "+ stylename
+							ctx.fillText(codeString, 0, 0)
 							let tm = ctx.measureText(codeString)
+							// why not just collect tm props
+
 							// textmetrics
 							for (const k of Object.keys(oTM)) {
 								if (oTM[k]["proceed"]) {
 									try {
 										let measure = tm[k]
 										if ("number" === typeof measure) {
-											oTM[k]["temp"].push([stylename, measure])
+											oTM[k]["data"].push([stylename, code, measure])
 										} else {
 											oTM[k]["proceed"] = false // stop checking
 											oTypeOf[k] = typeof measure
@@ -999,13 +1033,6 @@ function get_unicode() {
 						}
 					}
 				})
-				// record per style
-				if (tmpOffset.length) {oOffset[code] = tmpOffset}
-				if (tmpClient.length) {oClient[code] = tmpClient}
-				for (const p of Object.keys(oTM)) {
-					let tmpData = oTM[p]["temp"]
-					if (tmpData.length) {oTM[p]["data"][code] = tmpData}
-				}
 			})
 			dom.ugSlot = ""
 			output()
