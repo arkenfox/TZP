@@ -831,10 +831,12 @@ function get_unicode() {
 
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		let styles = ["cursive","fantasy","sans-serif","serif","monospace","system-ui"]
+		let styles = ["cursive","fantasy","monospace","sans-serif","serif","system-ui"]
 		// some styles match: we should detect those and remove redundant
-			// e.g. if fantasy matches sans-serif
-			// e.g. if system-ui meatches serif
+			// at least I think it's default proportional that it's falling back to
+			// we do not need style 'none' as it == default proportional (serif me with en)
+			// e.g. if fantasy matches sans-serif (for me using en)
+			// e.g. if system-ui is not enabled it matches default proportional (serif me with en)
 		styles.sort()
 		fntCode.sort()
 
@@ -858,7 +860,7 @@ function get_unicode() {
 			}
 			// concat style hash
 			for (const style of Object.keys(newobj)) {
-				let hash = mini(newobj[style][0])
+				let hash = mini(newobj[style])
 				newobj[style +"-"+ hash] = newobj[style]
 				delete newobj[style]
 			}
@@ -919,7 +921,7 @@ function get_unicode() {
 				document.getElementById("ug"+ name).innerHTML = display + btn
 			})
 			// perf
-			console.log((performance.now() - t0) +" ms")
+			//console.log((performance.now() - t0) +" ms")
 			log_perf("unicode glyphs [fonts]",t0)
 			return resolve(res)
 		}
@@ -951,7 +953,6 @@ function get_unicode() {
 		}
 
 		function run() {
-			// we do not need style 'none' as it is default proportional font
 			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
 
@@ -1006,10 +1007,9 @@ function get_unicode() {
 					if (isCanvas) {
 						try {
 							ctx.font = "normal normal 22000px "+ stylename
-							ctx.fillText(codeString, 0, 0)
+							//ctx.fillText(codeString, 0, 0)
 							let tm = ctx.measureText(codeString)
-							// why not just collect tm props
-
+							// ToDo: why not just loop tm props
 							// textmetrics
 							for (const k of Object.keys(oTM)) {
 								if (oTM[k]["proceed"]) {
