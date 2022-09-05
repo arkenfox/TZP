@@ -41,13 +41,12 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="3" class="intro">
-			<span class="no_color">Gecko only. Measures a fixed element, rotated to forced decimal precision,
-			for an expected known result at any zoom level (try it: it auto-runs on resize) and on any platform.
+			<span class="no_color">Measures a fixed element, rotated to forced decimal precision. On gecko
+			this is an expected known result at any zoom level (try it: it auto-runs on resize) and on any platform.
 			</span>
 		</td></tr>
-
 		<tr><td colspan="3"><hr></td></tr>
-		<tr><td colspan="2">expected</td><td class="mono spaces" id="expected"></td></tr>
+		<tr><td colspan="2">expected gecko</td><td class="mono spaces" id="expected"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
 		<tr><td colspan="3"><hr></td></tr>
@@ -66,17 +65,19 @@
 <script>
 'use strict';
 
+s12 = s12.trim()
+
 let aHistory = []
+let valid = "4447a487",
+	valid1 = "f39a5bc7",
+	valid2 = "dd03a1b3"
 let expected = [
-	"ee1ba407",
-	"     x: -20.716659545898438",
-	"     y: -20.716659545898438",
-	" width: 141.41665649414062",
-	"height: 141.41665649414062",
-	"   top: -20.716659545898438",
-	"  left: -20.716659545898438",
-	" right: 120.69999694824219",
-	"bottom: 120.69999694824219",
+	s12 +" one: "+ sc + valid1,
+	"  x, left, y, top: -20.716659545898438",
+	s12 +" two: "+ sc + valid2,
+	"    width, height: 141.41665649414062",
+	"    right, bottom: 120.69999694824219",
+	s12 +"full: "+ sc + valid,
 ]
 let count = 0
 dom.expected.innerHTML = expected.join("<br>")
@@ -90,13 +91,14 @@ function get_rect() {
 	// clear details
 	sNames.forEach(function(name) {sDetail[name] = []})
 
-	let valid = "ee1ba407"
+
 	let el = dom.rectTest
 	let res = []
 	for (let i=0; i < 4; i++) {
+		let output = document.getElementById("res"+i)
 		try {
 			let obj = ""
-			let output = document.getElementById("res"+i)
+
 			if (i == 0) {
 				obj = el.getBoundingClientRect()
 			} else if (i == 1) {
@@ -111,15 +113,32 @@ function get_rect() {
 				}
 			}
 			// 3 unique values, but cover all names
-			let array = [obj.x, obj.y, obj.width, obj.height, obj.top, obj.left, obj.right, obj.bottom]
-			sDetail[sNames[i]] = array
+			let array1 = [obj.x, obj.left, obj.y, obj.top]
+			let array2 = [obj.width, obj.height, obj.right, obj.bottom]
+			let array = array1.concat(array2)
+
 			let hash = mini(array.join())
-			let display = hash + (hash == valid ? green_tick : red_cross)
+			let hash1 = mini(array1.join())
+			let hash2 = mini(array2.join())
+
+			// part 1
+			let display = hash1
+			if (isFF) {display += (hash1 == valid1 ? green_tick : red_cross)}
+			// part 2
+			display += " | " + hash2
+			if (isFF) {display += (hash2 == valid2 ? green_tick : red_cross)}
+
+			// always display details clickable unless known full gecko
 			if (hash !== valid) {
-				display += buildButton("15", sNames[i], "details")
+				sDetail[sNames[i]] = array
+				display += buildButton("15", sNames[i] +", true", "details")
 			}
 			output.innerHTML = display
-			res.push(hash + (mini(array.join()) == valid ? green_tick : red_cross))
+			if (isFF) {
+				res.push(hash + (mini(array.join()) == valid ? green_tick : red_cross))
+			} else {
+				res.push(hash)
+			}
 		} catch(e) {
 			output.innerHTML = e.name
 			res.push(zErr)
@@ -127,14 +146,18 @@ function get_rect() {
 	}
 	// add to history
 	count++
-	aHistory.push((count.toString()).padStart(3)+ ": " + res.join(" | "))
+	if (res.length) {
+		aHistory.push((count.toString()).padStart(3)+ ": " + res.join(" | "))
+	}
 	dom.history.innerHTML = aHistory.join("<br>")
-
-
 }
 
-window.addEventListener("resize", get_rect)
-get_rect()
+Promise.all([
+	get_globals()
+]).then(function(){
+	window.addEventListener("resize", get_rect)
+	get_rect()
+})
 
 </script>
 </body>
