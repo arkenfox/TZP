@@ -20,8 +20,11 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 	if (functionName == undefined) {functionName = "showDetail"}
 	if (btnType == undefined) {btnType = "btnc"}
 	let part1 = arrayName.split(",")[0]
-	let part2 = arrayName.split(",")[1].trim()
-	if (part2 == "true" || part2 == "false") {part2 = ", "+ part2} else {part2 = ""}
+	let part2 = arrayName.split(",")[1]
+	if (part2 !== undefined) {
+		part2 = part2.trim()
+		if (part2 == "true" || part2 == "false") {part2 = ", "+ part2} else {part2 = ""}
+	}
 	return " <span class='btn"+ colorCode +" "+ btnType +"' onClick='"
 		+ functionName +"(`"+ part1 +"`"+ part2 + ")'>["+ displayText +"]</span>"
 }
