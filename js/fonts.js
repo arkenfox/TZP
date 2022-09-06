@@ -832,13 +832,18 @@ function get_unicode() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let styles = ["cursive","fantasy","monospace","sans-serif","serif","system-ui"]
-		// some styles match: we should detect those and remove redundant
-			// at least I think it's default proportional that it's falling back to
-			// we do not need style 'none' as it == default proportional (serif me with en)
-			// e.g. if fantasy matches sans-serif (for me using en)
-			// e.g. if system-ui is not enabled it matches default proportional (serif me with en)
-		styles.sort()
-		fntCode.sort()
+		// we do not need "none": this is default style + font per style for each language
+			// and is already present in covering monospace/sans-serif/serif
+		if (isFF) {
+			// some styles may match: we should detect those and remove redundant
+				// e.g. if system-ui (FF92+) is not enabled = same as none = redundant
+			if (isVer < 92) {styles = styles.filter(x => !["system-ui"].includes(x))}
+				// fantasy adds very little in gecko (at least on windows 7)
+				// 0x097F, 0x0D02, 0x532D in offset/clientrect and only 0x532D in textmetrics
+			styles = styles.filter(x => !["fantasy"].includes(x))
+		}
+		//styles.sort()
+
 
 		function group(name, data) {
 			// group by style then char
@@ -858,12 +863,32 @@ function get_unicode() {
 					newobj[item[0]].push([item[1], item[2]])
 				})
 			}
-			// concat style hash
-			for (const style of Object.keys(newobj)) {
-				let hash = mini(newobj[style])
-				newobj[style +"-"+ hash] = newobj[style]
-				delete newobj[style]
+			/*
+			// get unique sizes per char
+			let charobj = {}
+			fntCode.forEach(function(code) {
+				charobj[code] = {}
+			})
+			data.forEach(function(item) {
+				let measure = (name == "offset" || name == "clientrect") ? item[2] +"x"+ item[3] : item[2] +""
+				let code = item[1]
+				if (charobj[code][measure] == undefined) {charobj[code][measure] = []}
+				charobj[code][measure].push(item[0])
+			})
+			// now check how unique a style is
+			let stylecheck = "fantasy", unique = []
+			fntCode.forEach(function(code) {
+				for (const size of Object.keys(charobj[code])) {
+					let stylestring = charobj[code][size].join()
+					if (stylestring == stylecheck) {
+						unique.push(code)
+					}
+				}
+			})
+			if (unique.length) {
+				console.log(name + "\n  " + unique.join(", "))
 			}
+			//*/
 			return newobj
 		}
 
