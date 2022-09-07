@@ -1,6 +1,6 @@
 'use strict';
 
-let	fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
+let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	'0x1E9E','0x097F','0xF003','0x1CDA','0x17DD','0x23AE','0x0D02','0x0B82','0x115A',
 	'0x2425','0x302E','0xA830','0x2B06','0x21E4','0x20BD','0x2C7B','0x20B0','0xFBEE',
 	'0xF810','0xFFFF','0x007F','0x10A0','0x1D790','0x0700','0x1950','0x3095','0x532D',
@@ -10,6 +10,8 @@ let	fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	fntList = [], // what we use
 	fontBtns = "",
 	fontBaseBtn = ""
+
+fntCode.sort()
 
 // sims
 let intFNT = 0
@@ -838,12 +840,11 @@ function get_unicode() {
 			// some styles may match: we should detect those and remove redundant
 				// e.g. if system-ui (FF92+) is not enabled = same as none = redundant
 			if (isVer < 92) {styles = styles.filter(x => !["system-ui"].includes(x))}
-				// fantasy adds very little in gecko (at least on windows 7)
-				// 0x097F, 0x0D02, 0x532D in offset/clientrect and only 0x532D in textmetrics
+				// fantasy vs sans-serif adds very little in gecko (at least on windows 7)
 			styles = styles.filter(x => !["fantasy"].includes(x))
 		}
-		//styles.sort()
-
+		styles.sort()
+		let oUnique = {} // unique size per char: i.e does a style bring anything to the table
 
 		function group(name, data) {
 			// group by style then char
@@ -866,7 +867,7 @@ function get_unicode() {
 			/*
 			// get unique sizes per char
 			let charobj = {}
-			fntCode.forEach(function(code) {
+			fntCodeUsed.forEach(function(code) {
 				charobj[code] = {}
 			})
 			data.forEach(function(item) {
@@ -876,18 +877,21 @@ function get_unicode() {
 				charobj[code][measure].push(item[0])
 			})
 			// now check how unique a style is
-			let stylecheck = "fantasy", unique = []
-			fntCode.forEach(function(code) {
-				for (const size of Object.keys(charobj[code])) {
-					let stylestring = charobj[code][size].join()
-					if (stylestring == stylecheck) {
-						unique.push(code)
+			styles.forEach(function(style) {
+				let tmpUnique = []
+				fntCodeUsed.forEach(function(code) {
+					for (const size of Object.keys(charobj[code])) {
+						let stylestring = charobj[code][size].join()
+						if (stylestring == style) {
+							tmpUnique.push(code)
+						}
 					}
+				})
+				if (tmpUnique.length) {
+					oUnique[style] = {}
+					oUnique[style][name] = tmpUnique
 				}
 			})
-			if (unique.length) {
-				console.log(name + "\n  " + unique.join(", "))
-			}
 			//*/
 			return newobj
 		}
@@ -945,6 +949,8 @@ function get_unicode() {
 				res.push("glyphs_"+ name +":"+ value)
 				document.getElementById("ug"+ name).innerHTML = display + btn
 			})
+			// style uniqueness
+			if (Object.keys(oUnique).length) { console.log(oUnique) }
 			// perf
 			//console.log((performance.now() - t0) +" ms")
 			log_perf("unicode glyphs [fonts]",t0)
@@ -978,11 +984,10 @@ function get_unicode() {
 		}
 
 		function run() {
-			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot, m = "",
+			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot,
 				canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
-
 			// each char
-			fntCode.forEach(function(code) {
+			fntCodeUsed.forEach(function(code) {
 				// set char once
 				let	codeString = String.fromCodePoint(code)
 				slot.textContent = codeString
@@ -1032,9 +1037,7 @@ function get_unicode() {
 					if (isCanvas) {
 						try {
 							ctx.font = "normal normal 22000px "+ stylename
-							//ctx.fillText(codeString, 0, 0)
 							let tm = ctx.measureText(codeString)
-							// ToDo: why not just loop tm props
 							// textmetrics
 							for (const k of Object.keys(oTM)) {
 								if (oTM[k]["proceed"]) {
@@ -1062,6 +1065,29 @@ function get_unicode() {
 			dom.ugSlot = ""
 			output()
 		}
+
+		let fntCodeUsed = fntCode
+		function filter_tofu() {
+			try {
+				let fntTofu = []
+				let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
+				slot.style.fontFamily = "none"
+				slot.textContent = String.fromCodePoint('0xFFFF')
+				let tofuWidth = span.offsetWidth,
+					tofuHeight = div.offsetHeight
+				fntCode.forEach(function(code) {
+					slot.textContent = String.fromCodePoint(code)
+					if (span.offsetWidth == tofuWidth && div.offsetHeight == tofuHeight) {
+						fntTofu.push(code)
+					}
+				})
+				fntCodeUsed = fntCode.filter(x => !fntTofu.includes(x))
+				fntCodeUsed.push('0xFFFF') // ensure one tofu, which is in our original list
+				fntCodeUsed.sort()
+				if (gRun) {log_debug("tofu", fntTofu.join(", "))}
+			} catch(e) {}
+		}
+		filter_tofu()
 		run()
 	})
 }
