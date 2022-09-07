@@ -3,8 +3,10 @@
 let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	'0x1E9E','0x097F','0xF003','0x1CDA','0x17DD','0x23AE','0x0D02','0x0B82','0x115A',
 	'0x2425','0x302E','0xA830','0x2B06','0x21E4','0x20BD','0x2C7B','0x20B0','0xFBEE',
-	'0xF810','0xFFFF','0x007F','0x10A0','0x1D790','0x0700','0x1950','0x3095','0x532D',
-	'0x061C','0x20E3','0xFFF9','0x0218','0x058F','0x08E4','0x09B3','0x1C50','0x2619'],
+	'0xF810','0x007F','0x10A0','0x1D790','0x0700','0x1950','0x3095','0x532D',
+	'0x061C','0x20E3','0xFFF9','0x0218','0x058F','0x08E4','0x09B3','0x1C50','0x2619',
+	// '0xFFFF', // we add this tofu later
+	],
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
 	fntList = [], // what we use
@@ -1085,7 +1087,8 @@ function get_unicode() {
 
 		let fntCodeUsed = fntCode
 		function filter_tofu() {
-			if (isFF && isOS == "android") {
+			// skip FF android and TB: very little tofu
+			if (isFF && isOS == "android" || isTB) {
 				return // not worth it
 			}
 			try {
@@ -1103,15 +1106,14 @@ function get_unicode() {
 					}
 				})
 				fntCodeUsed = fntCode.filter(x => !fntTofu.includes(x))
-				fntCodeUsed.push('0xFFFF') // ensure one tofu, which is in our original list
-				fntCodeUsed.sort()
 				if (gRun) {
-					log_debug("tofu", fntTofu.join(", "))
-					log_debug("tofu", fntTofuChars.join(" , "))
+					log_debug("tofu", fntTofu.join(" "))
+					log_debug("tofu", fntTofuChars.join(" "))
 				}
 			} catch(e) {}
 		}
 		filter_tofu()
+		fntCodeUsed.push('0xFFFF') // ensure one tofu
 		run()
 	})
 }
