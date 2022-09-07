@@ -861,37 +861,43 @@ function get_unicode() {
 			} else {
 				// width only
 				data.forEach(function(item) {
-					newobj[item[0]].push([item[1], item[2]])
+					if (oTM[name]["all"]) {
+						newobj[item[0]].push([item[1], item[2]])
+					} else {
+						newobj[item[0]] = item[1]
+					}
 				})
 			}
 			/*
 			// get unique sizes per char
-			let charobj = {}
-			fntCodeUsed.forEach(function(code) {
-				charobj[code] = {}
-			})
-			data.forEach(function(item) {
-				let measure = (name == "offset" || name == "clientrect") ? item[2] +"x"+ item[3] : item[2] +""
-				let code = item[1]
-				if (charobj[code][measure] == undefined) {charobj[code][measure] = []}
-				charobj[code][measure].push(item[0])
-			})
-			// now check how unique a style is
-			styles.forEach(function(style) {
-				let tmpUnique = []
+			if (name == "offset" || name == "clientrect" || oTM[name]["all"] == true) {
+				let charobj = {}
 				fntCodeUsed.forEach(function(code) {
-					for (const size of Object.keys(charobj[code])) {
-						let stylestring = charobj[code][size].join()
-						if (stylestring == style) {
-							tmpUnique.push(code)
+					charobj[code] = {}
+				})
+				data.forEach(function(item) {
+					let measure = (name == "offset" || name == "clientrect") ? item[2] +"x"+ item[3] : item[2] +""
+					let code = item[1]
+					if (charobj[code][measure] == undefined) {charobj[code][measure] = []}
+					charobj[code][measure].push(item[0])
+				})
+				// now check how unique a style is
+				styles.forEach(function(style) {
+					let tmpUnique = []
+					fntCodeUsed.forEach(function(code) {
+						for (const size of Object.keys(charobj[code])) {
+							let stylestring = charobj[code][size].join()
+							if (stylestring == style) {
+								tmpUnique.push(code)
+							}
 						}
+					})
+					if (tmpUnique.length) {
+						if (oUnique[style] == undefined) {oUnique[style] = {}}
+						oUnique[style][name] = tmpUnique
 					}
 				})
-				if (tmpUnique.length) {
-					oUnique[style] = {}
-					oUnique[style][name] = tmpUnique
-				}
-			})
+			}
 			//*/
 			return newobj
 		}
@@ -977,10 +983,15 @@ function get_unicode() {
 			"hangingBaseline": {},
 			"ideographicBaseline": {},
 		}
+		let aAll = [
+			"width", "actualBoundingBoxAscent", "actualBoundingBoxDescent",
+			"actualBoundingBoxLeft", "actualBoundingBoxRight"
+		]
 		for (const k of Object.keys(oTM)) {
 			oTM[k]["data"] = []
 			oTM[k]["proceed"] = TextMetrics.prototype.hasOwnProperty(k)
 			sDetail["fonts gylphs " + k] = []
+			oTM[k]["all"] = aAll.includes(k)
 		}
 
 		function run() {
@@ -991,8 +1002,7 @@ function get_unicode() {
 				// set char once
 				let	codeString = String.fromCodePoint(code)
 				slot.textContent = codeString
-				// reset
-				for (const j of Object.keys(oTM)) { oTM[j]["temp"] = [] }
+				let isFirst = code == fntCodeUsed[0]
 				// each style
 				styles.forEach(function(stylename) {
 					slot.style.fontFamily = stylename
@@ -1042,12 +1052,19 @@ function get_unicode() {
 							for (const k of Object.keys(oTM)) {
 								if (oTM[k]["proceed"]) {
 									try {
-										let measure = tm[k]
-										if ("number" === typeof measure) {
-											oTM[k]["data"].push([stylename, code, measure])
-										} else {
-											oTM[k]["proceed"] = false // stop checking
-											oTypeOf[k] = typeof measure
+										let isOnce = oTM[k]["all"] == false && isFirst
+										if (oTM[k]["all"] || isOnce) {
+											let measure = tm[k]
+											if ("number" === typeof measure) {
+												if (isOnce) {
+													oTM[k]["data"].push([stylename, measure])
+												} else {
+													oTM[k]["data"].push([stylename, code, measure])
+												}
+											} else {
+												oTM[k]["proceed"] = false // stop checking
+												oTypeOf[k] = typeof measure
+											}
 										}
 									} catch(e) {
 										oCatch[k] = log_error("fonts: glyphs "+ k, e.name, e.message)
@@ -1068,8 +1085,11 @@ function get_unicode() {
 
 		let fntCodeUsed = fntCode
 		function filter_tofu() {
+			if (isFF && isOS == "android") {
+				return // not worth it
+			}
 			try {
-				let fntTofu = []
+				let fntTofu = [], fntTofuChars = []
 				let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 				slot.style.fontFamily = "none"
 				slot.textContent = String.fromCodePoint('0xFFFF')
@@ -1079,12 +1099,16 @@ function get_unicode() {
 					slot.textContent = String.fromCodePoint(code)
 					if (span.offsetWidth == tofuWidth && div.offsetHeight == tofuHeight) {
 						fntTofu.push(code)
+						fntTofuChars.push(String.fromCodePoint(code))
 					}
 				})
 				fntCodeUsed = fntCode.filter(x => !fntTofu.includes(x))
 				fntCodeUsed.push('0xFFFF') // ensure one tofu, which is in our original list
 				fntCodeUsed.sort()
-				if (gRun) {log_debug("tofu", fntTofu.join(", "))}
+				if (gRun) {
+					log_debug("tofu", fntTofu.join(", "))
+					log_debug("tofu", fntTofuChars.join(" , "))
+				}
 			} catch(e) {}
 		}
 		filter_tofu()
