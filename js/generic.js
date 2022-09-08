@@ -153,14 +153,11 @@ const promiseRaceFulfilled = async ({
 
 const get_aSystemFont = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
-	// build unique fonts in system fonts, exclude generic
+	// unique first system fonts from computed family
 	let t0; if (canPerf) {t0 = performance.now()}
 	let aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",
 		"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
 		"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
-	]
-	let generic = ['monospace','sans-serif','serif','cursive','fantasy','fangsong',
-		'system-ui','ui-monospace','ui-rounded','ui-serif','math','emoji'
 	]
 	aSystemFont = []
 	try {
@@ -175,7 +172,6 @@ const get_aSystemFont = () => new Promise(resolve => {
 				aSystemFont.push(font)
 			}
 		})
-		aSystemFont = aSystemFont.filter(x => !generic.includes(x))
 		log_perf("aSystemFont [global]", t0, "", aSystemFont.join(","))
 		return resolve()
 	} catch(e) {
@@ -342,16 +338,17 @@ const get_isClientRect = () => new Promise(resolve => {
 	}
 
 	let t0; if (canPerf) {t0 = performance.now()}
-	isClientRect = -1
-	aClientRect = []
 	let aNames = ["Element.getBoundingClientRect", "Element.getClientRects",
 		"Range.getBoundingClientRect", "Range.getClientRects"]
 
 	// FF we only need to measure once: rect6
 	if (isFF) {
-		let valid = "ee1ba407"
-		let el = dom.rect6
+		isClientRect = -1
+		aClientRect = []
+		aClientRectMethod = []
 
+		let valid = "4447a487"
+		let el = dom.rect6
 		for (let i=0; i < 4; i++) {
 			try {
 				if (runSE) {abc = def}
@@ -369,16 +366,33 @@ const get_isClientRect = () => new Promise(resolve => {
 						obj = range.getClientRects()[0]
 					}
 				}
-				// 3 unique values, but cover all
-				let array = [obj.x, obj.y, obj.width, obj.height, obj.top, obj.left, obj.right, obj.bottom]
-				aClientRect.push(mini(array.join()) == valid ? true : false)
-				// don't log lies: do this when we output in element section
+				// 3 unique values in gecko, but cover all
+				let eX = -20.716659545898438,
+					eW = 141.41665649414062,
+					eR = 120.69999694824219
+				let expected = [eX, eX, eX, eX, eW, eW, eR, eR]
+				let array = [obj.x, obj.left, obj.y, obj.top, obj.width, obj.height, obj.right, obj.bottom]
+				aClientRect.push(mini(array.join(), "_prereq clientrect") == valid ? true : false)
+				// if we know the 3 values, we can check the noise
+				let aDiffs = []
+				for (let i=0; i < array.length; i++) {
+					let diff = expected[i] - array[i]
+					if (diff !== 0) {aDiffs.push(diff)}
+				}
+				if (aDiffs.length) {
+					//aDiffs.filter
+					aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
+					aClientRectMethod.push(aDiffs.sort())
+				} else {
+					aClientRectMethod.push(zNA)
+				}
+				// don't log lies or methods: do this when we output in element section
 			} catch(e) {
 				log_error("elements: "+ aNames[i], e.name, e.message)
 				aClientRect.push(zErr)
+				aClientRectMethod.push(zNA)
 			}
 		}
-		//console.log(aClientRect)
 		isClientRect = aClientRect.indexOf(true)
 		if (gRun) {log_perf("isClientRect [prereq]", t0, gt0, aClientRect.join(", ") +" | "+ isClientRect)}
 		return resolve()
@@ -1292,7 +1306,7 @@ function log_section(name, time1, data) {
 						+ soL +"["+ gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "") +"]"+ scC + "</span>"
 					knownStr = sha1(gKnown.join()) + knownBtn
 				} else {
-					knownStr = isFF && isTZPSmart ? "none" : zNA
+					knownStr = isTZPSmart ? "none" : zNA
 				}
 				if (gBypassed.length) {
 					bypassBtn = " <span class='btn0 btnc' onClick='showMetrics(`bypassed`)'>"
@@ -1312,7 +1326,7 @@ function log_section(name, time1, data) {
 					let methodBtn = buildButton("0", "known methods", methodStr, "showMetrics")
 					dom.knownmethods.innerHTML = sha1(gMethods.join()) + methodBtn + detailBtn
 				} else {
-					dom.knownmethods = isFF && isTZPSmart ? "none"+ detailBtn : zNA
+					dom.knownmethods = isTZPSmart ? "none"+ detailBtn : zNA
 				}
 				// FP
 				gData.sort()
