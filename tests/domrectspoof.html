@@ -236,19 +236,19 @@ function testBlink() {
 		let right = array[6], bottom = array[7]
 		let aLies = []
 		if (x !== left) {
-			aLies.push("x !== left")
+			aLies.push(["x !== left", x, left].join(", "))
 		}
 		if (y !== top) {
-			aLies.push("y !== top")
+			aLies.push(["y !== top", y, top].join(", "))
 		}
 		if (right - x !== width) {
-			aLies.push("right - x !== width")
+			aLies.push(["right - x !== width", right, x, "expected "+ width, "got "+ (right - x), "diff "+ ((right - x) - width)].join(", "))
 		}
 		if (bottom - y !== height) {
-			aLies.push("bottom - y !== height")
+			aLies.push(["bottom - y !== height", bottom, y, "expected "+ height, "got "+ (bottom - y), "diff "+ ((bottom - y) - height)].join(", "))
 		}
 		if (aLies.length) {
-			console.log(hash, aLies)
+			console.log(hash +"\n - "+ aLies.join("\n - "))
 		}		
 	}
 }
