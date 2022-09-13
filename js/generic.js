@@ -332,8 +332,6 @@ const get_isBraveMode = () => new Promise(resolve => {
 const get_isClientRect = () => new Promise(resolve => {
 	// determine valid domrect methods
 	if (!isTZPSmart) {
-		isClientRect = 1
-		aClientRect = []
 		return resolve()
 	}
 
@@ -345,12 +343,13 @@ const get_isClientRect = () => new Promise(resolve => {
 	if (isFF) {
 		isClientRect = -1
 		aClientRect = []
-		aClientRectMethod = []
+		aClientRectNoise = {}
 
 		let valid = "4447a487"
 		let el = dom.rect6
 		for (let i=0; i < 4; i++) {
 			try {
+				aClientRectNoise[i] = []
 				if (runSE) {abc = def}
 				let obj = ""
 				if (i == 0) {
@@ -373,19 +372,12 @@ const get_isClientRect = () => new Promise(resolve => {
 				let expected = [eX, eX, eX, eX, eW, eW, eR, eR]
 				let array = [obj.x, obj.left, obj.y, obj.top, obj.width, obj.height, obj.right, obj.bottom]
 				aClientRect.push(mini(array.join(), "_prereq clientrect") == valid ? true : false)
-				// if we know the 3 values, we can check the noise
+				// record noise FP raw data
 				let aDiffs = []
 				for (let i=0; i < array.length; i++) {
-					let diff = expected[i] - array[i]
-					if (diff !== 0) {aDiffs.push(diff)}
+					aDiffs.push(expected[i] - array[i])
 				}
-				if (aDiffs.length) {
-					//aDiffs.filter
-					aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
-					aClientRectMethod.push(aDiffs.sort())
-				} else {
-					aClientRectMethod.push(zNA)
-				}
+				aClientRectNoise[i] = aDiffs
 				// don't log lies or methods: do this when we output in element section
 			} catch(e) {
 				log_error("elements: "+ aNames[i], e.name, e.message)
