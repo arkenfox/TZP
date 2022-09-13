@@ -147,7 +147,7 @@ let s0 = " <span class='",
 	isChrome = "", // chrome://
 	isClientRect = 1, // first true method
 	aClientRect = [], // per method result
-	aClientRectMethod = [], // per method noise
+	aClientRectNoise = {}, // per method noise
 	isEngine = "",
 	isFF = false,
 	isFile = false,
