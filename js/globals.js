@@ -163,6 +163,7 @@ let s0 = " <span class='",
 	isRFP = false,
 	isSecure = false,
 	isTB = false,
+	isTBChannel = "",
 	isTZPBlock = false,
 	isTZPBlockMinVer = [78, 10], // [FF, TB version]
 	isTZPSmart = false,
