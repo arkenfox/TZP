@@ -218,9 +218,13 @@ function get_fd_resources() {
 				if (isMark == "270 x 48") {
 					channel = "Tor Browser - Alpha"
 					log_debug("TB", "css branding = 270 x 48 px = alpha", true)
+				} else if (isMark == "336 x 64") {
+					channel = "Tor Browser - Nightly"
+					log_debug("TB", "css branding = 336 x 64 px = nightly", true)
 				} else if (isMark == "336 x 48") {
 					channel = "Tor Browser - Release"
 				}
+				isTBChannel = channel
 			} else if (isFF) {
 				// FF
 				if (isMark == "336 x 48") {
@@ -2253,7 +2257,7 @@ function outputFD() {
 		// browser
 		let browser = zNA, display = zNA
 		if (isFF) {
-			browser = (isTB ? "Tor Browser" : (isFork !== undefined ? isFork : "Firefox"))
+			browser = (isTB ? isTBChannel : (isFork !== undefined ? isFork : "Firefox"))
 		} else {
 			// Brave/Opera
 			if (isBrave) {
