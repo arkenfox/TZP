@@ -152,7 +152,7 @@ const promiseRaceFulfilled = async ({
 /*** GLOBAL VARS ***/
 
 const get_aSystemFont = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
+	if (!isFF) {return resolve("not FF")}
 	// unique first system fonts from computed family
 	let t0; if (canPerf) {t0 = performance.now()}
 	let aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",
@@ -172,12 +172,12 @@ const get_aSystemFont = () => new Promise(resolve => {
 				aSystemFont.push(font)
 			}
 		})
-		log_perf("aSystemFont [global]", t0, "", aSystemFont.join(","))
-		return resolve()
+		log_perf("aSystemFont [global]", t0, "", aSystemFont.join(", "))
+		return resolve(aSystemFont.join(", "))
 	} catch(e) {
 		log_perf("aSystemFont [global]", t0, "", e.name)
 		// do nothing: we do this test later with more properties
-		return resolve()
+		return resolve("error")
 	}
 })
 
@@ -218,9 +218,9 @@ const get_isArch = (skip = false) => new Promise(resolve => {
 
 const get_isBrave = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs/ */
-	if (isEngine !== "blink") return resolve()
-	if ("undefined" !== typeof opr) return resolve() // opera
-	if (Object.keys(chrome).includes("search")) return resolve() // opera fallback
+	if (isEngine !== "blink") return resolve("not brave")
+	if ("undefined" !== typeof opr) return resolve("not brave") // opera
+	if (Object.keys(chrome).includes("search")) return resolve("not brave") // opera fallback
 
 	// proceed
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -469,7 +469,7 @@ function set_isFork() {
 }
 
 const get_isFork = () => new Promise(resolve => {
-	if (!isFF) {return resolve()}
+	if (!isFF) {return resolve("not FF")}
 	setTimeout(() => resolve("timeout"), 500) // PM sucks
 	let t0; if (canPerf) {t0 = performance.now()}
 	let el = dom.branding
@@ -497,12 +497,12 @@ const get_isFork = () => new Promise(resolve => {
 			}
 			document.body.removeChild(imgA)
 			log_perf("isFork [global]",t0,"",isFork+"")
-			return resolve()
+			return resolve(isFork+"")
 		})
 	} catch(e) {
 		gErrorsOnce.push("_global: isFork: " + e.name +" : "+ e.message)
 		log_perf("isFork [global]",t0,"","error")
-		return resolve()
+		return resolve("fork error")
 	}
 })
 
@@ -512,18 +512,20 @@ const get_isOS = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	function tryharder() {
 		// ToDo: harden isOS
+		// options
+			// can I detect MS Shell Dlg \\32 or -apple-system (doc fonts may be blocked)
+			// look at userAgent, esp if TB: we don't have proxyLies or isRFP yet
+			// font check for common fonts
+
 		log_perf("isOS [global]",t0,"","unknown")
 		return resolve()
 	}
 	// system font
+		// broken by https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41116
+		// and eventually 1787790
 	try {
-		if (runSL) {
-			//abc = def // ToDo: throw an error once we have tryharder done
-		}
-		let el = dom.widget0
-		let font = getComputedStyle(el).getPropertyValue("font-family")
+		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
 		if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-		} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
 		} else if (font == "Roboto") {isOS = "android"
 		} else if (font == "-apple-system") {isOS = "mac"
 		} else {isOS = "linux"}
@@ -532,11 +534,14 @@ const get_isOS = () => new Promise(resolve => {
 		if (isOS == "windows") {
 			isPlatformFont = font
 		}
+		// hide row
+		if (isPlatformFont !== undefined) {
+			showhide("FontStats","none") //groot
+		}
 		log_perf("isOS [global]",t0,"",isOS +" | "+ font)
 		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
-		// math test is no longer viable due to RFP
 		tryharder()
 	}
 })
@@ -608,17 +613,17 @@ const get_isTB = () => new Promise(resolve => {
 			isTB = true
 			log_debug("TB", "resource:// = aboutTor.css", true)
 			log_perf("isTB [global]",t0,"",isTB)
-			return resolve()
+			return resolve("tb yes")
 		}
 		css.onerror = function() {
 			log_perf("isTB [global]",t0,"",isTB)
-			return resolve()
+			return resolve("tb no")
 		}
 		document.head.removeChild(css)
 	} catch(e) {
 		gErrorsOnce.push("_global: isTB: " + e.name +" : "+ e.message)
 		log_perf("isTB [global]",t0,"","error")
-		return resolve()
+		return resolve("tb error")
 	}
 })
 
@@ -632,7 +637,7 @@ const get_isVer = () => new Promise(resolve => {
 		if (verNo < 60) {verNo += " or lower"
 		} else if (verNo == isVerMax) {isVerPlus = true; verNo += "+"}
 		log_perf("isVer [global]",t0,"",verNo)
-		return resolve()
+		return resolve(verNo)
 	}
 	output(cascade())
 
@@ -1372,68 +1377,71 @@ function countJS(filename) {
 		Promise.all([
 			get_isVer(),
 			get_isTB(),
-			get_isOS(), // this also sets isPlatformFont for font tests
 			get_isBrave(),
 			get_aSystemFont(),
 			get_isFork(),
 		]).then(function(results){
-			// block/smart
-			if (isFF & isVer < isTZPBlockMinVer[0]) {isTZPBlock = true // block old gecko
-			} else if (isEngine == "edgeHTML") {isTZPBlock = true // block edgeHTML
-			} else if (isTB && isVer >= isTZPSmartMinVer[1]) {isTZPSmart = true // minTB
-			} else if (isFF && isVer >= isTZPSmartMinVer[0]) {isTZPSmart = true // minFF
-			}
-			// note: everything else is dumb: we can add blink/webkit or brave later
-			// lets just focus on gecko lies/bypasses
-
-			// temp until I hook up all the lies/bypasses to isTZPSmart
-				// looks weird with partial lies/missing methods/no prototype lies etc
-				// note: isTZPBlock overrides isTZPSmart, so nah nah nah edgeHTML
-			if (!isFF) {isTZPSmart = true}
-
-			// clear notations
-			if (!isFF) {
-				// change to if (!isFF || !isTZPSmart)
-				// until then this acts as a visual guide to what needs to be actioned
-				rfp_green = ""
-				rfp_red = ""
-				rfp_random_green = ""
-				rfp_random_red = ""
-				lb_green = ""
-				lb_red = ""
-				nw_green = ""
-				nw_red = ""
-				enUS_green = ""
-				enUS_red = ""
-				spoof_both_green = ""
-				spoof_both_red = ""
-				default_ff_green = ""
-				default_ff_red = ""
-				let items = document.getElementsByClassName("group")
-				for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
-			}
-
-			// some sims = isFF only: not fussy; only devs run these
-			if (!isFF) {
-				runSN = false
-				runSU = false
-				runRF = false
-				runCSS = false
-				runFNT = false
-				runWFS = false
-			}
-			if (results[3] == "timeout") {
+			if (results[1] == "timeout") {
 				gMethodsOnce.push("_global:resource:blocked")
 				log_perf("isTB [global]",t0,"",isTB+ " [timeout]")
 			}
-			if (results[5] == "timeout") {
+			if (results[4] == "timeout") {
 				gMethodsOnce.push("_global:isFork:blocked")
 				log_perf("isFork [global]",t0,"",isTB+ " [timeout]")
 			}
-			if (!isTZPBlock) {
-				get_pointer_event() // pointer eventlistener
-			}
-			outputSection("load")
+			Promise.all([
+				get_isOS(), // this also sets isPlatformFont for font tests
+			]).then(function(){
+				// block/smart
+				if (isFF & isVer < isTZPBlockMinVer[0]) {isTZPBlock = true // block old gecko
+				} else if (isEngine == "edgeHTML") {isTZPBlock = true // block edgeHTML
+				} else if (isTB && isVer >= isTZPSmartMinVer[1]) {isTZPSmart = true // minTB
+				} else if (isFF && isVer >= isTZPSmartMinVer[0]) {isTZPSmart = true // minFF
+				}
+				// note: everything else is dumb: we can add blink/webkit or brave later
+				// lets just focus on gecko lies/bypasses
+
+				// temp until I hook up all the lies/bypasses to isTZPSmart
+					// looks weird with partial lies/missing methods/no prototype lies etc
+					// note: isTZPBlock overrides isTZPSmart, so nah nah nah edgeHTML
+				if (!isFF) {isTZPSmart = true}
+
+				// clear notations
+				if (!isFF) {
+					// change to if (!isFF || !isTZPSmart)
+					// until then this acts as a visual guide to what needs to be actioned
+					rfp_green = ""
+					rfp_red = ""
+					rfp_random_green = ""
+					rfp_random_red = ""
+					lb_green = ""
+					lb_red = ""
+					nw_green = ""
+					nw_red = ""
+					enUS_green = ""
+					enUS_red = ""
+					spoof_both_green = ""
+					spoof_both_red = ""
+					default_ff_green = ""
+					default_ff_red = ""
+					let items = document.getElementsByClassName("group")
+					for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
+				}
+
+				// some sims = isFF only: not fussy; only devs run these
+				if (!isFF) {
+					runSN = false
+					runSU = false
+					runRF = false
+					runCSS = false
+					runFNT = false
+					runWFS = false
+				}
+				if (!isTZPBlock) {
+					get_pointer_event() // pointer eventlistener
+				}
+				outputSection("load")
+			})
 		})
 	}
 }
