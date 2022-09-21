@@ -288,6 +288,10 @@ function get_fd_widgets() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
+		let aIgnore = [
+			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
+			'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
+		]
 		let sName = "feature_widgets"
 		sDetail[sName] = []
 
@@ -322,8 +326,8 @@ function get_fd_widgets() {
 				}
 				if (fntTmp.length == 1) {
 					let font0 = fntTmp[0]
-					if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
-					} else if (font0.slice(0,12) == "\"MS Shell Dl") {note = "windows" // FF57 has a slice and escape char issue
+					if (aIgnore.includes(font0)) {note = undefined
+					} else if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
 					} else if (font0 == "Roboto") {note = "android"
 					} else if (font0 == "-apple-system") {note = "mac"
 					} else if (font0 == "unknown") {note = "unknown"; color = "bad"
