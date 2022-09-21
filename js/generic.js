@@ -397,62 +397,6 @@ const get_isClientRect = () => new Promise(resolve => {
 
 })
 
-const get_isEngine = () => new Promise(resolve => {
-	if (isFF) { // we already resolved this as gecko or goanna
-		return resolve()
-	}
-	let t0; if (canPerf) {t0 = performance.now()}
-	// do math
-	function cbrt(x) {
-		try {
-			let y = Math.pow(Math.abs(x), 1 / 3)
-			return x < 0 ? -y : y
-		} catch(e) {
-			return "error"
-		}
-	}
-	try {
-		let res = []
-		for(let i=0; i < 6; i++) {
-			try {
-				let fnResult = "unknown"
-				if (i == 0) {fnResult = cbrt(Math.PI) // polyfill
-				} else if (i == 1) {fnResult = Math.log10(7*Math.LOG10E)
-				} else if (i == 2) {fnResult = Math.log10(2*Math.SQRT1_2) // cydec BS
-				} else if (i == 3) {fnResult = Math.acos(0.123)
-				} else if (i == 4) {fnResult = Math.acosh(Math.SQRT2) // cydec BS
-				} else if (i == 5) {fnResult = Math.atan(2)
-				}
-				res.push(fnResult)
-			} catch(e) {
-				res.push("error")
-			}
-		}
-		let hash = sha1(res.join(), "_global isEngine").substring(0,8)
-		if (runSL) {hash = "x"}
-		if (hash == "ede9ca53") {isEngine = "blink"
-		} else if (hash == "05513f36") {isEngine = "webkit"
-		} else if (hash == "38172d94") {isEngine = "edgeHTML"
-		} else if (hash == "36f067c6") {isEngine = "trident"
-		}
-		// fallback isEngine
-		if (isEngine == "") {
-			console.log(res.join())
-			if ("chrome" in window) {isEngine = "blink"} // this is also in edgeHTML
-			if (isEngine !== "") {
-				gKnownOnce.push("_global:isEngine")
-				gBypassedOnce.push("_global:isEngine:"+ isEngine)
-			}
-		}
-		log_perf("isEngine [global]",t0,"",(isEngine == "" ? "unknown" : ""+ isEngine +" | "+ hash))
-		return resolve()
-	} catch(e) {
-		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
-		log_perf("isEngine [global]",t0,"","error")
-		return resolve()
-	}
-})
-
 function set_isFork() {
 	// only use isLogo if we want to harden the check: not needed yet
 	// it's important to make sure we set isFork, the entropy is still recorded
@@ -524,22 +468,30 @@ const get_isOS = () => new Promise(resolve => {
 		// broken by https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41116
 		// and eventually 1787790
 	try {
+		let aIgnore = [
+			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
+			'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
+		]
 		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
-		if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-		} else if (font == "Roboto") {isOS = "android"
-		} else if (font == "-apple-system") {isOS = "mac"
-		} else {isOS = "linux"}
-		// set isPlatformFont
-		// limit to windows for now
-		if (isOS == "windows") {
-			isPlatformFont = font
+		if (aIgnore.includes(font)) {
+			tryharder()
+		} else {
+			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
+			} else if (font == "Roboto") {isOS = "android"
+			} else if (font == "-apple-system") {isOS = "mac"
+			} else {isOS = "linux"}
+			// set isPlatformFont
+			// limit to windows for now
+			if (isOS == "windows") {
+				isPlatformFont = font
+			}
+			// hide row
+			if (isPlatformFont !== undefined) {
+				showhide("FontStats","none") //groot
+			}
+			log_perf("isOS [global]",t0,"",isOS +" | "+ font)
+			return resolve()
 		}
-		// hide row
-		if (isPlatformFont !== undefined) {
-			showhide("FontStats","none") //groot
-		}
-		log_perf("isOS [global]",t0,"",isOS +" | "+ font)
-		return resolve()
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
 		tryharder()
