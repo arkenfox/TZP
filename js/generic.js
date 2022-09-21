@@ -461,12 +461,17 @@ const get_isOS = () => new Promise(resolve => {
 			// look at userAgent, esp if TB: we don't have proxyLies or isRFP yet
 			// font check for common fonts
 
-		log_perf("isOS [global]",t0,"","unknown")
+		// isMark: only android is missing this (maybe some obscure forks)
+		if (isMark == "0 x 0") {isOS = "android"}
+
+		if (isOS === undefined) {
+			log_alert("global:isOS: unknown", true)
+		}
+		log_perf("isOS [global]",t0,"",isOS)
 		return resolve()
 	}
 	// system font
-		// broken by https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41116
-		// and eventually 1787790
+		// returns generic font-family if #41116 or eventually 1787790
 	try {
 		let aIgnore = [
 			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
@@ -477,8 +482,8 @@ const get_isOS = () => new Promise(resolve => {
 			tryharder()
 		} else {
 			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-			} else if (font == "Roboto") {isOS = "android"
 			} else if (font == "-apple-system") {isOS = "mac"
+			} else if (font == "Roboto" && isMark == "0 x 0") {isOS = "android"
 			} else {isOS = "linux"}
 			// set isPlatformFont
 			// limit to windows for now
