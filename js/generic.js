@@ -463,11 +463,10 @@ const get_isOS = () => new Promise(resolve => {
 
 		// isMark: only android is missing this (maybe some obscure forks)
 		if (isMark == "0 x 0") {isOS = "android"}
-
-		if (isOS === undefined) {
+		if (isOS === "") {
 			log_alert("global:isOS: unknown", true)
 		}
-		log_perf("isOS [global]",t0,"",isOS)
+		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS))
 		return resolve()
 	}
 	// system font
