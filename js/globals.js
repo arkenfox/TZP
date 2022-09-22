@@ -136,7 +136,8 @@ let s0 = " <span class='",
 	note_file = "",
 	note_ttc = sf+"test to come"+sc,
 // other
-	isArch = "unknown", // OS architecture
+	isArch = false, // OS architecture
+	isArchErr = false,
 	isBaseFonts = false, // use whitelist/kBaseFonts
 	isPlatformFont = undefined, // from widget for baseFonts
 	aSystemFont = [], // for baseFontsFull
