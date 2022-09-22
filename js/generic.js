@@ -454,47 +454,46 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
 	// check
 	let t0; if (canPerf) {t0 = performance.now()}
+	function finish(font) {
+		// set isPlatformFont
+			// expand later: e.g. if linux TB pick one bundled font that has no size collisions
+			// e.g. if android we can use roboto
+		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32 "
+		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
+		// hide stats row
+		if (isPlatformFont !== undefined) {showhide("FontStats","none")}
+		if (isOS === "") {log_alert("global:isOS: unknown", true)}
+		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS + font))
+		return resolve()
+	}
 	function tryharder() {
 		// ToDo: harden isOS
-		// options
+		// isMark: only android is missing this (maybe some obscure forks)
+		//if (isMark == "0 x 0") {isOS = "android"}
+		// next: promise get_fd_chrome and return isChrome: bit slow (30ms+)
+
+		// other options
 			// can I detect MS Shell Dlg \\32 or -apple-system (doc fonts may be blocked)
 			// look at userAgent, esp if TB: we don't have proxyLies or isRFP yet
 			// font check for common fonts
-
-		// isMark: only android is missing this (maybe some obscure forks)
-		if (isMark == "0 x 0") {isOS = "android"}
-		if (isOS === "") {
-			log_alert("global:isOS: unknown", true)
-		}
-		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS))
-		return resolve()
+		finish("")
 	}
-	// system font
-		// returns generic font-family if #41116 or eventually 1787790
 	try {
+		// widget font: returns generic font-family if #41116 or eventually 1787790
 		let aIgnore = [
 			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
 			'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
 		]
+		log_debug("os", isMark + " | " + isLogo)
 		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
 		if (aIgnore.includes(font)) {
 			tryharder()
 		} else {
 			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
 			} else if (font == "-apple-system") {isOS = "mac"
-			} else if (font == "Roboto" && isMark == "0 x 0") {isOS = "android"
+			} else if (font == "Roboto") {isOS = "android"
 			} else {isOS = "linux"}
-			// set isPlatformFont
-			// limit to windows for now
-			if (isOS == "windows") {
-				isPlatformFont = font
-			}
-			// hide row
-			if (isPlatformFont !== undefined) {
-				showhide("FontStats","none") //groot
-			}
-			log_perf("isOS [global]",t0,"",isOS +" | "+ font)
-			return resolve()
+			finish(" | "+ font)
 		}
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
