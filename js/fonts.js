@@ -10,8 +10,12 @@ let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
 	fntList = [], // what we use
+	fntFake = "",
 	fontBtns = "",
-	fontBaseBtn = ""
+	fontBaseBtn = "",
+	baseFonts = [], // what we test each font with
+	baseFontsNames = [], // baseFonts w/out any fallback fonts (used to create arrays etc)
+	baseFontsFull = [] // merged baseFonts + baseMaster
 
 fntCode.sort()
 
@@ -22,94 +26,173 @@ let fntMaster = {android: [], linux: [],mac: [], windows: []}
 let fntMasterBase = {android: [], linux: [],mac: [], windows: []}
 
 let fntOther = {
-	android: ['Droid Sans','Droid Sans Mono','Droid Serif','Noto Color Emoji','Noto Emoji','Noto Kufi Arabic','Noto Mono','Noto Naskh Arabic','Noto Nastaliq Urdu','Noto Sans','Noto Sans Adlam','Noto Sans Adlam Unjoined','Noto Sans Anatolian Hieroglyphs','Noto Sans Arabic','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Balinese','Noto Sans Bamum','Noto Sans Batak','Noto Sans Bengali','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid','Noto Sans CJK JP','Noto Sans CJK KR','Noto Sans CJK SC','Noto Sans CJK SC Regular','Noto Sans CJK TC','Noto Sans Canadian Aboriginal','Noto Sans Carian','Noto Sans Chakma','Noto Sans Cham','Noto Sans Cherokee','Noto Sans Coptic','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Deseret','Noto Sans Devanagari','Noto Sans Display','Noto Sans Egyptian Hieroglyphs','Noto Sans Ethiopic','Noto Sans Georgian','Noto Sans Glagolitic','Noto Sans Gothic','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Hanunoo','Noto Sans Hebrew','Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian','Noto Sans JP Regular','Noto Sans Javanese','Noto Sans KR Regular','Noto Sans Kaithi','Noto Sans Kannada','Noto Sans Kayah Li','Noto Sans Kharoshthi','Noto Sans Khmer','Noto Sans Lao','Noto Sans Lepcha','Noto Sans Limbu','Noto Sans Linear B','Noto Sans Lisu','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Malayalam','Noto Sans Mandaic','Noto Sans Meetei Mayek','Noto Sans Mongolian','Noto Sans Mono','Noto Sans Myanmar','Noto Sans NKo','Noto Sans New Tai Lue','Noto Sans Ogham','Noto Sans Ol Chiki','Noto Sans Old Italic','Noto Sans Old Persian','Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Oriya','Noto Sans Osage','Noto Sans Osmanya','Noto Sans Phags Pa','Noto Sans Phoenician','Noto Sans Rejang','Noto Sans Runic','Noto Sans SC Regular','Noto Sans Samaritan','Noto Sans Saurashtra','Noto Sans Shavian','Noto Sans Sinhala','Noto Sans Sundanese','Noto Sans Syloti Nagri','Noto Sans Symbols','Noto Sans Symbols2','Noto Sans Syriac Eastern','Noto Sans Syriac Estrangela','Noto Sans Syriac Western','Noto Sans TC Regular','Noto Sans Tagalog','Noto Sans Tagbanwa','Noto Sans Tai Le','Noto Sans Tai Tham','Noto Sans Tai Viet','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Thaana','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Tifinagh','Noto Sans Ugaritic','Noto Sans Vai','Noto Sans Yi','Noto Serif','Noto Serif Armenian','Noto Serif Balinese','Noto Serif Bengali','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC','Noto Serif Devanagari','Noto Serif Display','Noto Serif Ethiopic','Noto Serif Georgian','Noto Serif Gujarati','Noto Serif Gurmukhi','Noto Serif Hebrew','Noto Serif Kannada','Noto Serif Khmer','Noto Serif Lao','Noto Serif Malayalam','Noto Serif Myanmar','Noto Serif Sinhala','Noto Serif Tamil','Noto Serif Telugu','Noto Serif Thai','Noto Serif Tibetan','Roboto','Roboto Condensed',],
-	linux: ['AR PL UKai CN','AR PL UKai HK','AR PL UKai TW','AR PL UKai TW MBE','AR PL UMing CN','AR PL UMing HK','AR PL UMing TW','AR PL UMing TW MBE','Abyssinica SIL','Aharoni CLM','AlArabiya','AlBattar','AlHor','AlManzomah','AlYarmook','Amiri','Amiri Quran','Amiri Quran Colored','Ani','AnjaliOldLipi','Arab','Arial','Arimo','Bitstream Charter','C059','Caladea','Caladings CLM','Cantarell','Cantarell Extra Bold','Cantarell Light','Cantarell Thin','Carlito','Century Schoolbook L','Chandas','Chilanka','Comfortaa','Comfortaa Light','Cortoba','Courier','Courier 10 Pitch','Courier New','Cousine','D050000L','David CLM','DejaVu Math TeX Gyre','DejaVu Sans','DejaVu Sans Condensed','DejaVu Sans Light','DejaVu Sans Mono','DejaVu Serif','DejaVu Serif Condensed','Dimnah','Dingbats','Droid Arabic Kufi','Droid Sans','Droid Sans Armenian','Droid Sans Devanagari','Droid Sans Ethiopic','Droid Sans Fallback','Droid Sans Georgian','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Tamil','Droid Sans Thai','Drugulin CLM','Dyuthi','Electron','Ellinia CLM','Ezra SIL','Ezra SIL SR','Frank Ruehl CLM','FreeMono','FreeSans','FreeSerif','Furat','Gargi','Garuda','Gayathri','Gayathri Thin','Georgia','Granada','Graph','Gubbi','Hadasim CLM','Hani','Haramain','Homa','Hor','Jamrul','Japan','Jet','Jomolhari','KacstArt','KacstBook','KacstDecorative','KacstDigital','KacstFarsi','KacstLetter','KacstNaskh','KacstOffice','KacstOne','KacstPen','KacstPoster','KacstQurn','KacstScreen','KacstTitle','KacstTitleL','Kalapi','Kalimati','Karumbi','Kayrawan','Keraleeyam','Keter YG','Khalid','Khmer OS','Khmer OS Battambang','Khmer OS Bokor','Khmer OS Content','Khmer OS Fasthand','Khmer OS Freehand','Khmer OS Metal Chrieng','Khmer OS Muol','Khmer OS Muol Light','Khmer OS Muol Pali','Khmer OS Siemreap','Khmer OS System','Kinnari','LKLUG','Laksaman','Liberation Mono','Liberation Sans','Liberation Sans Narrow','Liberation Serif','Likhan','Lohit Assamese','Lohit Bengali','Lohit Devanagari','Lohit Gujarati','Lohit Gurmukhi','Lohit Kannada','Lohit Malayalam','Lohit Odia','Lohit Tamil','Lohit Tamil Classical','Lohit Telugu','Loma','Manjari','Manjari Thin','Mashq','Mashq-Bold','Meera','Metal','Mingzat','Miriam CLM','Miriam Mono CLM','Mitra Mono','Montserrat','Montserrat Black','Montserrat ExtraBold','Montserrat ExtraLight','Montserrat Light','Montserrat Medium','Montserrat SemiBold','Montserrat Thin','Mukti Narrow','Mukti Narrow Bold','Nachlieli CLM','Nada','Nagham','Nakula','Navilu','Nazli','Nice','Nimbus Mono L','Nimbus Mono PS','Nimbus Roman','Nimbus Roman No9 L','Nimbus Sans','Nimbus Sans L','Nimbus Sans Narrow','Norasi','Noto Color Emoji','Noto Emoji','Noto Mono','Noto Naskh Arabic','Noto Sans','Noto Sans Armenian','Noto Sans Balinese','Noto Sans Bengali','Noto Sans Buginese','Noto Sans CJK HK','Noto Sans CJK HK Black','Noto Sans CJK HK DemiLight','Noto Sans CJK HK Light','Noto Sans CJK HK Medium','Noto Sans CJK HK Thin','Noto Sans CJK JP','Noto Sans CJK JP Black','Noto Sans CJK JP DemiLight','Noto Sans CJK JP Light','Noto Sans CJK JP Medium','Noto Sans CJK JP Thin','Noto Sans CJK KR','Noto Sans CJK KR Black','Noto Sans CJK KR DemiLight','Noto Sans CJK KR Light','Noto Sans CJK KR Medium','Noto Sans CJK KR Thin','Noto Sans CJK SC','Noto Sans CJK SC Black','Noto Sans CJK SC DemiLight','Noto Sans CJK SC Light','Noto Sans CJK SC Medium','Noto Sans CJK SC Thin','Noto Sans CJK TC','Noto Sans CJK TC Black','Noto Sans CJK TC DemiLight','Noto Sans CJK TC Light','Noto Sans CJK TC Medium','Noto Sans CJK TC Thin','Noto Sans Canadian Aboriginal','Noto Sans Cherokee','Noto Sans Devanagari','Noto Sans Ethiopic','Noto Sans Georgian','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Hebrew','Noto Sans JP Regular','Noto Sans KR Regular','Noto Sans Kannada','Noto Sans Khmer','Noto Sans Lao','Noto Sans Malayalam','Noto Sans Mongolian','Noto Sans Mono CJK HK','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR','Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','Noto Sans Myanmar','Noto Sans Oriya','Noto Sans SC Regular','Noto Sans Sinhala','Noto Sans TC Regular','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Thaana','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Yi','Noto Serif','Noto Serif Armenian','Noto Serif Balinese','Noto Serif Bengali','Noto Serif CJK JP','Noto Serif CJK JP Black','Noto Serif CJK JP ExtraLight','Noto Serif CJK JP Light','Noto Serif CJK JP Medium','Noto Serif CJK JP SemiBold','Noto Serif CJK KR','Noto Serif CJK KR Black','Noto Serif CJK KR ExtraLight','Noto Serif CJK KR Light','Noto Serif CJK KR Medium','Noto Serif CJK KR SemiBold','Noto Serif CJK SC','Noto Serif CJK SC Black','Noto Serif CJK SC ExtraLight','Noto Serif CJK SC Light','Noto Serif CJK SC Medium','Noto Serif CJK SC SemiBold','Noto Serif CJK TC','Noto Serif CJK TC Black','Noto Serif CJK TC ExtraLight','Noto Serif CJK TC Light','Noto Serif CJK TC Medium','Noto Serif CJK TC SemiBold','Noto Serif Devanagari','Noto Serif Ethiopic','Noto Serif Georgian','Noto Serif Gujarati','Noto Serif Gurmukhi','Noto Serif Hebrew','Noto Serif Kannada','Noto Serif Khmer','Noto Serif Lao','Noto Serif Malayalam','Noto Serif Myanmar','Noto Serif Sinhala','Noto Serif Tamil','Noto Serif Telugu','Noto Serif Thai','Noto Serif Tibetan','Nuosu SIL','OpenSymbol','Ostorah','Ouhod','Ouhod-Bold','P052','PT Sans','PT Sans Narrow','Padauk','Padauk Book','Pagul','PakType Naskh Basic','Petra','Phetsarath OT','Pothana2000','Purisa','Rachana','RaghuMalayalamSans','Rasa','Rasa Light','Rasa Medium','Rasa SemiBold','Rasheeq','Rasheeq-Bold','Rehan','Rekha','STIX','STIX Math','STIX Two Math','STIX Two Text','Saab','Sahadeva','Salem','Samanata','Samyak Devanagari','Samyak Gujarati','Samyak Malayalam','Samyak Tamil','Sarai','Sawasdee','Scheherazade','Shado','Sharjah','Shofar','Simple CLM','Sindbad','Source Code Pro','Source Code Pro Black','Source Code Pro ExtraLight','Source Code Pro Light','Source Code Pro Medium','Source Code Pro Semibold','Stam Ashkenaz CLM','Stam Sefarad CLM','Standard Symbols L','Standard Symbols PS','Suruma','Symbola','Tarablus','Tholoth','Tibetan Machine Uni','Tinos','Titr','Tlwg Mono','Tlwg Typewriter','Tlwg Typist','Tlwg Typo','UKIJ 3D','UKIJ Basma','UKIJ Bom','UKIJ CJK','UKIJ Chechek','UKIJ Chiwer Kesme','UKIJ Diwani','UKIJ Diwani Kawak','UKIJ Diwani Tom','UKIJ Diwani Yantu','UKIJ Ekran','UKIJ Elipbe','UKIJ Elipbe_Chekitlik','UKIJ Esliye','UKIJ Esliye Chiwer','UKIJ Esliye Neqish','UKIJ Esliye Qara','UKIJ Esliye Tom','UKIJ Imaret','UKIJ Inchike','UKIJ Jelliy','UKIJ Junun','UKIJ Kawak','UKIJ Kawak 3D','UKIJ Kesme','UKIJ Kesme Tuz','UKIJ Kufi','UKIJ Kufi 3D','UKIJ Kufi Chiwer','UKIJ Kufi Gul','UKIJ Kufi Kawak','UKIJ Kufi Tar','UKIJ Kufi Uz','UKIJ Kufi Yay','UKIJ Kufi Yolluq','UKIJ Mejnun','UKIJ Mejnuntal','UKIJ Merdane','UKIJ Moy Qelem','UKIJ Nasq','UKIJ Nasq Zilwa','UKIJ Orqun Basma','UKIJ Orqun Yazma','UKIJ Orxun-Yensey','UKIJ Qara','UKIJ Qolyazma','UKIJ Qolyazma Tez','UKIJ Qolyazma Tuz','UKIJ Qolyazma Yantu','UKIJ Ruqi','UKIJ Saet','UKIJ Sulus','UKIJ Sulus Tom','UKIJ Teng','UKIJ Tiken','UKIJ Title','UKIJ Tor','UKIJ Tughra','UKIJ Tuz','UKIJ Tuz Basma','UKIJ Tuz Gezit','UKIJ Tuz Kitab','UKIJ Tuz Neqish','UKIJ Tuz Qara','UKIJ Tuz Tom','UKIJ Tuz Tor','UKIJ Zilwa','UKIJ_Mac Basma','UKIJ_Mac Ekran','URW Bookman','URW Bookman L','URW Chancery L','URW Gothic','URW Gothic L','URW Palladio L','Ubuntu','Ubuntu Condensed','Ubuntu Light','Ubuntu Mono','Ubuntu Thin','Umpush','Uroob','Vemana2000','Verdana','Waree','Yehuda CLM','Yrsa','Yrsa Light','Yrsa Medium','Yrsa SemiBold','Z003','aakar','mry_KacstQurn','ori1Uni','padmaa','padmaa-Bold.1.1','padmmaa','utkal','מרים','गार्गी','नालिमाटी','অনি Dvf','মিত্র','মুক্তি','মুক্তি পাতনা',],
+	android: ['Droid Sans','Droid Sans Mono','Droid Serif','Noto Color Emoji','Noto Emoji','Noto Kufi Arabic','Noto Mono','Noto Naskh Arabic','Noto Nastaliq Urdu','Noto Sans','Noto Sans Adlam','Noto Sans Adlam Unjoined','Noto Sans Anatolian Hieroglyphs','Noto Sans Arabic','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Balinese','Noto Sans Bamum','Noto Sans Batak','Noto Sans Bengali','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid','Noto Sans CJK JP','Noto Sans CJK KR','Noto Sans CJK SC','Noto Sans CJK TC','Noto Sans Canadian Aboriginal','Noto Sans Carian','Noto Sans Chakma','Noto Sans Cham','Noto Sans Cherokee','Noto Sans Coptic','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Deseret','Noto Sans Devanagari','Noto Sans Display','Noto Sans Egyptian Hieroglyphs','Noto Sans Ethiopic','Noto Sans Georgian','Noto Sans Glagolitic','Noto Sans Gothic','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Hanunoo','Noto Sans Hebrew','Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian','Noto Sans JP','Noto Sans Javanese','Noto Sans KR','Noto Sans Kaithi','Noto Sans Kannada','Noto Sans Kayah Li','Noto Sans Kharoshthi','Noto Sans Khmer','Noto Sans Lao','Noto Sans Lepcha','Noto Sans Limbu','Noto Sans Linear B','Noto Sans Lisu','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Malayalam','Noto Sans Mandaic','Noto Sans Meetei Mayek','Noto Sans Mongolian','Noto Sans Mono','Noto Sans Myanmar','Noto Sans NKo','Noto Sans New Tai Lue','Noto Sans Ogham','Noto Sans Ol Chiki','Noto Sans Old Italic','Noto Sans Old Persian','Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Oriya','Noto Sans Osage','Noto Sans Osmanya','Noto Sans Phags Pa','Noto Sans Phoenician','Noto Sans Rejang','Noto Sans Runic','Noto Sans SC','Noto Sans Samaritan','Noto Sans Saurashtra','Noto Sans Shavian','Noto Sans Sinhala','Noto Sans Sundanese','Noto Sans Syloti Nagri','Noto Sans Symbols','Noto Sans Symbols2','Noto Sans Syriac Eastern','Noto Sans Syriac Estrangela','Noto Sans Syriac Western','Noto Sans TC','Noto Sans Tagalog','Noto Sans Tagbanwa','Noto Sans Tai Le','Noto Sans Tai Tham','Noto Sans Tai Viet','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Thaana','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Tifinagh','Noto Sans Ugaritic','Noto Sans Vai','Noto Sans Yi','Noto Serif','Noto Serif Armenian','Noto Serif Balinese','Noto Serif Bengali','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC','Noto Serif Devanagari','Noto Serif Display','Noto Serif Ethiopic','Noto Serif Georgian','Noto Serif Gujarati','Noto Serif Gurmukhi','Noto Serif Hebrew','Noto Serif Kannada','Noto Serif Khmer','Noto Serif Lao','Noto Serif Malayalam','Noto Serif Myanmar','Noto Serif Sinhala','Noto Serif Tamil','Noto Serif Telugu','Noto Serif Thai','Noto Serif Tibetan','Roboto','Roboto Condensed',],
+	linux: ['AR PL UKai CN','AR PL UKai HK','AR PL UKai TW','AR PL UKai TW MBE','AR PL UMing CN','AR PL UMing HK','AR PL UMing TW','AR PL UMing TW MBE','Abyssinica SIL','Aharoni CLM','AlArabiya','AlBattar','AlHor','AlManzomah','AlYarmook','Amiri','Amiri Quran','Amiri Quran Colored','Ani','AnjaliOldLipi','Arab','Arial','Arimo','Bitstream Charter','C059','Caladea','Caladings CLM','Cantarell','Cantarell Extra Bold','Cantarell Light','Cantarell Thin','Carlito','Century Schoolbook L','Chandas','Chilanka','Comfortaa','Comfortaa Light','Cortoba','Courier','Courier 10 Pitch','Courier New','Cousine','D050000L','David CLM','DejaVu Math TeX Gyre','DejaVu Sans','DejaVu Sans Condensed','DejaVu Sans Light','DejaVu Sans Mono','DejaVu Serif','DejaVu Serif Condensed','Dimnah','Dingbats','Droid Arabic Kufi','Droid Sans','Droid Sans Armenian','Droid Sans Devanagari','Droid Sans Ethiopic','Droid Sans Fallback','Droid Sans Georgian','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Tamil','Droid Sans Thai','Drugulin CLM','Dyuthi','Electron','Ellinia CLM','Ezra SIL','Ezra SIL SR','Frank Ruehl CLM','FreeMono','FreeSans','FreeSerif','Furat','Gargi','Garuda','Gayathri','Gayathri Thin','Georgia','Granada','Graph','Gubbi','Hadasim CLM','Hani','Haramain','Homa','Hor','Jamrul','Japan','Jet','Jomolhari','KacstArt','KacstBook','KacstDecorative','KacstDigital','KacstFarsi','KacstLetter','KacstNaskh','KacstOffice','KacstOne','KacstPen','KacstPoster','KacstQurn','KacstScreen','KacstTitle','KacstTitleL','Kalapi','Kalimati','Karumbi','Kayrawan','Keraleeyam','Keter YG','Khalid','Khmer OS','Khmer OS Battambang','Khmer OS Bokor','Khmer OS Content','Khmer OS Fasthand','Khmer OS Freehand','Khmer OS Metal Chrieng','Khmer OS Muol','Khmer OS Muol Light','Khmer OS Muol Pali','Khmer OS Siemreap','Khmer OS System','Kinnari','LKLUG','Laksaman','Liberation Mono','Liberation Sans','Liberation Sans Narrow','Liberation Serif','Likhan','Lohit Assamese','Lohit Bengali','Lohit Devanagari','Lohit Gujarati','Lohit Gurmukhi','Lohit Kannada','Lohit Malayalam','Lohit Odia','Lohit Tamil','Lohit Tamil Classical','Lohit Telugu','Loma','Manjari','Manjari Thin','Mashq','Mashq-Bold','Meera','Metal','Mingzat','Miriam CLM','Miriam Mono CLM','Mitra Mono','Montserrat','Montserrat Black','Montserrat ExtraBold','Montserrat ExtraLight','Montserrat Light','Montserrat Medium','Montserrat SemiBold','Montserrat Thin','Mukti Narrow','Mukti Narrow Bold','Nachlieli CLM','Nada','Nagham','Nakula','Navilu','Nazli','Nice','Nimbus Mono L','Nimbus Mono PS','Nimbus Roman','Nimbus Roman No9 L','Nimbus Sans','Nimbus Sans L','Nimbus Sans Narrow','Norasi','Noto Color Emoji','Noto Emoji','Noto Mono','Noto Naskh Arabic','Noto Sans','Noto Sans Armenian','Noto Sans Balinese','Noto Sans Bengali','Noto Sans Buginese','Noto Sans CJK HK','Noto Sans CJK HK Black','Noto Sans CJK HK DemiLight','Noto Sans CJK HK Light','Noto Sans CJK HK Medium','Noto Sans CJK HK Thin','Noto Sans CJK JP','Noto Sans CJK JP Black','Noto Sans CJK JP DemiLight','Noto Sans CJK JP Light','Noto Sans CJK JP Medium','Noto Sans CJK JP Thin','Noto Sans CJK KR','Noto Sans CJK KR Black','Noto Sans CJK KR DemiLight','Noto Sans CJK KR Light','Noto Sans CJK KR Medium','Noto Sans CJK KR Thin','Noto Sans CJK SC','Noto Sans CJK SC Black','Noto Sans CJK SC DemiLight','Noto Sans CJK SC Light','Noto Sans CJK SC Medium','Noto Sans CJK SC Thin','Noto Sans CJK TC','Noto Sans CJK TC Black','Noto Sans CJK TC DemiLight','Noto Sans CJK TC Light','Noto Sans CJK TC Medium','Noto Sans CJK TC Thin','Noto Sans Canadian Aboriginal','Noto Sans Cherokee','Noto Sans Devanagari','Noto Sans Ethiopic','Noto Sans Georgian','Noto Sans Gujarati','Noto Sans Gurmukhi','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR','Noto Sans Kannada','Noto Sans Khmer','Noto Sans Lao','Noto Sans Malayalam','Noto Sans Mongolian','Noto Sans Mono CJK HK','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR','Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','Noto Sans Myanmar','Noto Sans Oriya','Noto Sans SC','Noto Sans Sinhala','Noto Sans TC','Noto Sans Tamil','Noto Sans Telugu','Noto Sans Thaana','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Yi','Noto Serif','Noto Serif Armenian','Noto Serif Balinese','Noto Serif Bengali','Noto Serif CJK JP','Noto Serif CJK JP Black','Noto Serif CJK JP ExtraLight','Noto Serif CJK JP Light','Noto Serif CJK JP Medium','Noto Serif CJK JP SemiBold','Noto Serif CJK KR','Noto Serif CJK KR Black','Noto Serif CJK KR ExtraLight','Noto Serif CJK KR Light','Noto Serif CJK KR Medium','Noto Serif CJK KR SemiBold','Noto Serif CJK SC','Noto Serif CJK SC Black','Noto Serif CJK SC ExtraLight','Noto Serif CJK SC Light','Noto Serif CJK SC Medium','Noto Serif CJK SC SemiBold','Noto Serif CJK TC','Noto Serif CJK TC Black','Noto Serif CJK TC ExtraLight','Noto Serif CJK TC Light','Noto Serif CJK TC Medium','Noto Serif CJK TC SemiBold','Noto Serif Devanagari','Noto Serif Ethiopic','Noto Serif Georgian','Noto Serif Gujarati','Noto Serif Gurmukhi','Noto Serif Hebrew','Noto Serif Kannada','Noto Serif Khmer','Noto Serif Lao','Noto Serif Malayalam','Noto Serif Myanmar','Noto Serif Sinhala','Noto Serif Tamil','Noto Serif Telugu','Noto Serif Thai','Noto Serif Tibetan','Nuosu SIL','OpenSymbol','Ostorah','Ouhod','Ouhod-Bold','P052','PT Sans','PT Sans Narrow','Padauk','Padauk Book','Pagul','PakType Naskh Basic','Petra','Phetsarath OT','Pothana2000','Purisa','Rachana','RaghuMalayalamSans','Rasa','Rasa Light','Rasa Medium','Rasa SemiBold','Rasheeq','Rasheeq-Bold','Rehan','Rekha','STIX','STIX Math','STIX Two Math','STIX Two Text','Saab','Sahadeva','Salem','Samanata','Samyak Devanagari','Samyak Gujarati','Samyak Malayalam','Samyak Tamil','Sarai','Sawasdee','Scheherazade','Shado','Sharjah','Shofar','Simple CLM','Sindbad','Source Code Pro','Source Code Pro Black','Source Code Pro ExtraLight','Source Code Pro Light','Source Code Pro Medium','Source Code Pro Semibold','Stam Ashkenaz CLM','Stam Sefarad CLM','Standard Symbols L','Standard Symbols PS','Suruma','Symbola','Tarablus','Tholoth','Tibetan Machine Uni','Tinos','Titr','Tlwg Mono','Tlwg Typewriter','Tlwg Typist','Tlwg Typo','UKIJ 3D','UKIJ Basma','UKIJ Bom','UKIJ CJK','UKIJ Chechek','UKIJ Chiwer Kesme','UKIJ Diwani','UKIJ Diwani Kawak','UKIJ Diwani Tom','UKIJ Diwani Yantu','UKIJ Ekran','UKIJ Elipbe','UKIJ Elipbe_Chekitlik','UKIJ Esliye','UKIJ Esliye Chiwer','UKIJ Esliye Neqish','UKIJ Esliye Qara','UKIJ Esliye Tom','UKIJ Imaret','UKIJ Inchike','UKIJ Jelliy','UKIJ Junun','UKIJ Kawak','UKIJ Kawak 3D','UKIJ Kesme','UKIJ Kesme Tuz','UKIJ Kufi','UKIJ Kufi 3D','UKIJ Kufi Chiwer','UKIJ Kufi Gul','UKIJ Kufi Kawak','UKIJ Kufi Tar','UKIJ Kufi Uz','UKIJ Kufi Yay','UKIJ Kufi Yolluq','UKIJ Mejnun','UKIJ Mejnuntal','UKIJ Merdane','UKIJ Moy Qelem','UKIJ Nasq','UKIJ Nasq Zilwa','UKIJ Orqun Basma','UKIJ Orqun Yazma','UKIJ Orxun-Yensey','UKIJ Qara','UKIJ Qolyazma','UKIJ Qolyazma Tez','UKIJ Qolyazma Tuz','UKIJ Qolyazma Yantu','UKIJ Ruqi','UKIJ Saet','UKIJ Sulus','UKIJ Sulus Tom','UKIJ Teng','UKIJ Tiken','UKIJ Title','UKIJ Tor','UKIJ Tughra','UKIJ Tuz','UKIJ Tuz Basma','UKIJ Tuz Gezit','UKIJ Tuz Kitab','UKIJ Tuz Neqish','UKIJ Tuz Qara','UKIJ Tuz Tom','UKIJ Tuz Tor','UKIJ Zilwa','UKIJ_Mac Basma','UKIJ_Mac Ekran','URW Bookman','URW Bookman L','URW Chancery L','URW Gothic','URW Gothic L','URW Palladio L','Ubuntu','Ubuntu Condensed','Ubuntu Light','Ubuntu Mono','Ubuntu Thin','Umpush','Uroob','Vemana2000','Verdana','Waree','Yehuda CLM','Yrsa','Yrsa Light','Yrsa Medium','Yrsa SemiBold','Z003','aakar','mry_KacstQurn','ori1Uni','padmaa','padmaa-Bold.1.1','padmmaa','utkal','מרים','गार्गी','नालिमाटी','অনি Dvf','মিত্র','মুক্তি','মুক্তি পাতনা',],
 	mac: ["American Typewriter Condensed","American Typewriter Condensed Light","American Typewriter Light","American Typewriter Semibold","Apple Braille Outline 6 Dot","Apple Braille Outline 8 Dot","Apple Braille Pinpoint 6 Dot","Apple Braille Pinpoint 8 Dot","Apple LiGothic Medium","Apple LiSung Light","Apple SD Gothic Neo Heavy","Apple SD Gothic Neo Light","Apple SD Gothic Neo Medium","Apple SD Gothic Neo SemiBold","Apple SD Gothic Neo UltraLight","Apple SD GothicNeo ExtraBold","Athelas","Avenir Book Oblique","Avenir Heavy Oblique","Avenir Light Oblique","Avenir Medium Oblique","Avenir Next Condensed Bold","Avenir Next Condensed Demi Bold","Avenir Next Condensed Heavy","Avenir Next Condensed Medium","Avenir Next Condensed Ultra Light","Avenir Roman","Baoli SC","Baoli TC","Baskerville SemiBold","BiauKai","Bodoni 72 Book","Bodoni 72 Oldstyle Book","Bodoni 72 Smallcaps Book","Charcoal CY","Charter Roman","Copperplate Light","Damascus Light","Damascus Medium","Damascus Semi Bold","Futura Condensed ExtraBold","Futura Condensed Medium","Futura Medium","Geneva CY","Gill Sans Light","Gill Sans SemiBold","Gill Sans UltraBold","GungSeo","Hannotate SC","Hannotate TC","HanziPen SC","HanziPen TC","HeadLineA","Hei","Heiti SC Light","Heiti SC Medium","Heiti TC Light","Heiti TC Medium","Helvetica CY Bold","Helvetica Light","Helvetica Neue Condensed Black","Helvetica Neue Condensed Bold","Helvetica Neue Light","Helvetica Neue Medium","Helvetica Neue UltraLight","Herculanum","Hiragino Kaku Gothic Pro W3","Hiragino Kaku Gothic Pro W6","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Hiragino Kaku Gothic Std W8","Hiragino Kaku Gothic StdN W8","Hiragino Maru Gothic Pro W4","Hiragino Mincho Pro W3","Hiragino Mincho Pro W6","Hiragino Sans CNS W3","Hiragino Sans CNS W6","Hoefler Text Black","ITF Devanagari Book","ITF Devanagari Demi","ITF Devanagari Light","ITF Devanagari Marathi Book","ITF Devanagari Marathi Demi","ITF Devanagari Marathi Light","ITF Devanagari Marathi Medium","ITF Devanagari Medium","Iowan Old Style Black","Iowan Old Style Bold","Iowan Old Style Italic","Iowan Old Style Roman","Iowan Old Style Titling","Kai","Kaiti SC","Kaiti SC Black","Kaiti TC","Kaiti TC Black","Klee Demibold","Klee Medium","Kohinoor Bangla Light","Kohinoor Bangla Medium","Kohinoor Bangla Semibold","Kohinoor Devanagari Light","Kohinoor Devanagari Medium","Kohinoor Devanagari Semibold","Kohinoor Gujarati Light","Kohinoor Gujarati Medium","Kohinoor Gujarati Semibold","Kohinoor Telugu Light","Kohinoor Telugu Medium","Kohinoor Telugu Semibold","Lantinghei SC Demibold","Lantinghei SC Extralight","Lantinghei SC Heavy","Lantinghei TC Demibold","Lantinghei TC Extralight","Lantinghei TC Heavy","LiHei Pro","LiSong Pro","Libian SC","Libian TC","LingWai SC Medium","LingWai TC Medium","Marion","Muna Black","Myriad Arabic","Myriad Arabic Black","Myriad Arabic Light","Myriad Arabic Semibold","Nanum Brush Script","Nanum Pen Script","NanumGothic","NanumGothic ExtraBold","NanumMyeongjo","NanumMyeongjo ExtraBold","New Peninim MT Bold Inclined","New Peninim MT Inclined","Noto Sans Javanese","Optima ExtraBlack","Osaka","Osaka-Mono","PCMyungjo","Papyrus Condensed","Phosphate Inline","Phosphate Solid","PilGi","PingFang HK Light","PingFang HK Medium","PingFang HK Semibold","PingFang HK Ultralight","PingFang SC Light","PingFang SC Medium","PingFang SC Semibold","PingFang SC Ultralight","PingFang TC Light","PingFang TC Medium","PingFang TC Semibold","PingFang TC Ultralight","STFangsong","STHeiti","STIX Two Math","STIX Two Text","STKaiti","STXihei","Seravek","Seravek ExtraLight","Seravek Light","Seravek Medium","SignPainter-HouseScript Semibold","Skia Black","Skia Condensed","Skia Extended","Skia Light","Snell Roundhand Black","Songti SC Black","Songti SC Light","Songti TC Light","Sukhumvit Set Light","Sukhumvit Set Medium","Sukhumvit Set Semi Bold","Sukhumvit Set Text","Superclarendon","Superclarendon Black","Superclarendon Light","Thonburi Light","Times Roman","Toppan Bunkyu Gothic","Toppan Bunkyu Gothic Demibold","Toppan Bunkyu Gothic Regular","Toppan Bunkyu Midashi Gothic Extrabold","Toppan Bunkyu Midashi Mincho Extrabold","Toppan Bunkyu Mincho","Toppan Bunkyu Mincho Regular","Tsukushi A Round Gothic","Tsukushi A Round Gothic Bold","Tsukushi A Round Gothic Regular","Tsukushi B Round Gothic","Tsukushi B Round Gothic Bold","Tsukushi B Round Gothic Regular","Waseem Light","Wawati SC","Wawati TC","Weibei SC Bold","Weibei TC Bold","Xingkai SC Bold","Xingkai SC Light","Xingkai TC Bold","Xingkai TC Light","YuGothic Bold","YuGothic Medium","YuKyokasho Bold","YuKyokasho Medium","YuKyokasho Yoko Bold","YuKyokasho Yoko Medium","YuMincho +36p Kana Demibold","YuMincho +36p Kana Extrabold","YuMincho +36p Kana Medium","YuMincho Demibold","YuMincho Extrabold","YuMincho Medium","Yuanti SC","Yuanti SC Light","Yuanti TC","Yuanti TC Light","Yuppy SC","Yuppy TC",],
-	windows: ["Aharoni Bold","Aldhabi","Andalus","Angsana New","AngsanaUPC","Aparajita","Arabic Typesetting","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Batang","BatangChe","Browallia New","BrowalliaUPC","Cordia New","CordiaUPC","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","FreesiaUPC","Gautami","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Levenim MT","LilyUPC","MS Mincho","MS PMincho","Mangal","Meiryo","Meiryo UI","Microsoft Uighur","MingLiU","MingLiU_HKSCS","Miriam","Miriam Fixed","MoolBoran","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nyala","PMingLiU","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Sakkal Majalla","Sanskrit Text","Segoe Pseudo","Shonar Bangla","Shruti","SimHei","Simplified Arabic","Simplified Arabic Fixed","Traditional Arabic","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light",],
+	windows: [
+		"Aharoni Bold","Aldhabi","Andalus","Angsana New","AngsanaUPC","Aparajita","Arabic Typesetting","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Batang","BatangChe","Browallia New","BrowalliaUPC","Cordia New","CordiaUPC","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","FreesiaUPC","Gautami","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Levenim MT","LilyUPC","MS Mincho","MS PMincho","Mangal","Meiryo","Meiryo UI","Microsoft Uighur","MingLiU","MingLiU_HKSCS","Miriam","Miriam Fixed","MoolBoran","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nyala","PMingLiU","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Sakkal Majalla","Sanskrit Text","Segoe Pseudo","Shonar Bangla","Shruti","SimHei","Simplified Arabic","Simplified Arabic Fixed","Traditional Arabic","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light",
+		// aliases
+		"宋体", // SimSun ?NSimSun
+		"微软雅黑", // Microsoft YaHei
+		"細明體", // MingLiU
+		"新細明體", // PMingLiU
+		"굴림",
+		"굴림체",
+		"바탕",
+		"ＭＳ ゴシック", // MS Gothic
+		"ＭＳ 明朝", // MS Mincho
+		"ＭＳ Ｐゴシック", // MS PGothic
+		"ＭＳ Ｐ明朝", // MS PMincho
+	],
 }
 let fntBase = {
 	// https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
 	android: [],linux: [],
 	mac: ["Al Bayan","Al Nile","Al Tarikh","American Typewriter","Andale Mono","Apple Braille","Apple Chancery","Apple Color Emoji","Apple SD Gothic Neo","Apple Symbols","AppleGothic","AppleMyungjo","Arial","Arial Black","Arial Hebrew","Arial Hebrew Scholar","Arial Narrow","Arial Rounded MT Bold","Arial Unicode MS","Avenir","Avenir Black","Avenir Black Oblique","Avenir Book","Avenir Heavy","Avenir Light","Avenir Medium","Avenir Next","Avenir Next Demi Bold","Avenir Next Heavy","Avenir Next Medium","Avenir Next Ultra Light","Avenir Oblique","Ayuthaya","Baghdad","Bangla MN","Bangla Sangam MN","Baskerville","Beirut","Big Caslon Medium","Bodoni 72","Bodoni 72 Oldstyle","Bodoni 72 Smallcaps","Bodoni Ornaments","Bradley Hand","Brush Script MT","Chalkboard","Chalkboard SE","Chalkduster","Charter","Charter Black","Cochin","Comic Sans MS","Copperplate","Corsiva Hebrew","Courier","Courier New","DIN Alternate","DIN Condensed","Damascus","DecoType Naskh","Devanagari MT","Devanagari Sangam MN","Didot","Diwan Kufi","Diwan Thuluth","Euphemia UCAS","Farah","Farisi","Futura","GB18030 Bitmap","Galvji","Geeza Pro","Geneva","Georgia","Gill Sans","Gujarati MT","Gujarati Sangam MN","Gurmukhi MN","Gurmukhi MT","Gurmukhi Sangam MN","Heiti SC","Heiti TC","Helvetica","Helvetica Neue","Hiragino Maru Gothic ProN","Hiragino Maru Gothic ProN W4","Hiragino Mincho ProN","Hiragino Mincho ProN W3","Hiragino Mincho ProN W6","Hiragino Sans","Hiragino Sans GB","Hiragino Sans GB W3","Hiragino Sans GB W6","Hiragino Sans W0","Hiragino Sans W1","Hiragino Sans W2","Hiragino Sans W3","Hiragino Sans W4","Hiragino Sans W5","Hiragino Sans W6","Hiragino Sans W7","Hiragino Sans W8","Hiragino Sans W9","Hoefler Text","Hoefler Text Ornaments","ITF Devanagari","ITF Devanagari Marathi","Impact","InaiMathi","Kailasa","Kannada MN","Kannada Sangam MN","Kefa","Khmer MN","Khmer Sangam MN","Kohinoor Bangla","Kohinoor Devanagari","Kohinoor Gujarati","Kohinoor Telugu","Kokonor","Krungthep","KufiStandardGK","Lao MN","Lao Sangam MN","Lucida Grande","Luminari","Malayalam MN","Malayalam Sangam MN","Marker Felt","Menlo","Microsoft Sans Serif","Mishafi","Mishafi Gold","Monaco","Mshtakan","Mukta Mahee","Muna","Myanmar MN","Myanmar Sangam MN","Nadeem","New Peninim MT","Noteworthy","Noto Nastaliq Urdu","Noto Sans Kannada","Noto Sans Myanmar","Noto Sans Oriya","Noto Serif Myanmar","Optima","Oriya MN","Oriya Sangam MN","PT Mono","PT Sans","PT Sans Caption","PT Sans Narrow","PT Serif","PT Serif Caption","Palatino","Papyrus","Phosphate","PingFang HK","PingFang SC","PingFang TC","Plantagenet Cherokee","Raanana","Rockwell","STIXGeneral","STIXIntegralsD","STIXIntegralsSm","STIXIntegralsUp","STIXIntegralsUpD","STIXIntegralsUpSm","STIXNonUnicode","STIXSizeFiveSym","STIXSizeFourSym","STIXSizeOneSym","STIXSizeThreeSym","STIXSizeTwoSym","STIXVariants","STSong","Sana","Sathu","Savoye LET","Shree Devanagari 714","SignPainter","SignPainter-HouseScript","Silom","Sinhala MN","Sinhala Sangam MN","Skia","Snell Roundhand","Songti SC","Songti TC","Sukhumvit Set","Symbol","Tahoma","Tamil MN","Tamil Sangam MN","Telugu MN","Telugu Sangam MN","Thonburi","Times","Times New Roman","Trattatello","Trebuchet MS","Verdana","Waseem","Webdings","Wingdings","Wingdings 2","Wingdings 3","Zapf Dingbats","Zapfino",],
-	windows: ["AlternateGothic2 BT","Arial","Arial Black","Arial Narrow","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Calibri","Calibri Light","Calibri Light Italic","Cambria","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Courier New","Ebrima","Franklin Gothic Medium","Gabriola","Gadugi","Georgia","HoloLens MDL2 Assets","Impact","Javanese Text","Leelawadee UI","Leelawadee UI Semilight","Lucida Console","Lucida Sans Unicode","MS Gothic","MS PGothic","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Marlett","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU-ExtB","MingLiU_HKSCS-ExtB","Mongolian Baiti","Myanmar Text","NSimSun","Nirmala UI","Nirmala UI Semilight","PMingLiU-ExtB","Palatino Linotype","Segoe MDL2 Assets","Segoe Print","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","SimSun","SimSun-ExtB","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Sylfaen","Symbol","Tahoma","Times New Roman","Trebuchet MS","Verdana","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight",],
-}
-let fntAlways = {
-	android: [],linux: [],mac: [],
-	windows: ["Courier","Helvetica","MS Sans Serif","MS Serif","Roman","Small Fonts","Times","宋体","微软雅黑","新細明體","細明體","굴림","굴림체","바탕","ＭＳ ゴシック","ＭＳ 明朝","ＭＳ Ｐゴシック","ＭＳ Ｐ明朝",],
+	windows: [
+		"AlternateGothic2 BT","Arial","Arial Black","Arial Narrow","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Calibri","Calibri Light","Calibri Light Italic","Cambria","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Courier New","Ebrima","Gabriola","Gadugi","Georgia","HoloLens MDL2 Assets","Impact","Javanese Text","Leelawadee UI","Leelawadee UI Semilight","Lucida Console","Lucida Sans Unicode","MS Gothic","MS PGothic","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Marlett","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU-ExtB","MingLiU_HKSCS-ExtB","Mongolian Baiti","Myanmar Text","NSimSun","Nirmala UI","Nirmala UI Semilight","PMingLiU-ExtB","Palatino Linotype","Segoe MDL2 Assets","Segoe Print","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","SimSun","SimSun-ExtB","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Sylfaen","Symbol","Tahoma","Times New Roman","Trebuchet MS","Verdana","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight",
+		//"Franklin Gothic Medium", // 1720408
+		// always
+		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
+		// ignore: expected + dupe sizes
+			// "Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
+			// "Courier", //  = courier new
+			// "MS Serif","Roman","Times", // = TNR
+			// "MS Sans Serif", // = Microsoft Sans Serif
+	],
 }
 let fntTB = {
-	android: [],linux: [],
-	mac: ["AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Lucida Grande","Menlo","Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",],
-	windows: ["Arial","Arial Black","Arial Narrow","Batang","Cambria Math","Consolas","Courier New","Euphemia","Gautami","Georgia","Gulim","GulimChe","Iskoola Pota","Kalinga","Kartika","Latha","Lucida Console","MS Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Meiryo","Meiryo UI","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","MingLiU","Nyala","PMingLiU","Plantagenet Cherokee","Raavi","Segoe UI","Segoe UI Black","Segoe UI Light", "Segoe UI Semibold","Segoe UI Semilight","Shruti","SimSun","Sylfaen","Tahoma","Times New Roman","Tunga","Verdana","Vrinda","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight","MS Mincho","MS PGothic","MS PMincho",],
-}
-let fntTBBundled = {
-	// https://gitlab.torproject.org/tpo/applications/tor-browser-build/-/issues/40529
 	android: [],
 	linux: [
+		// TB linux only uses 134 bundled (140 files incl Twemoji Mozilla): set by FontConfig
+			// but we can't have an empty test. plus we want to grab some size entropy
+			// ToDo: check we include any valid widget/system-ui font names: e.g. Ubuntu, Noto Sans, Inter, etc
+			// ToDo: reduce entropy in size buckets
 		"Arimo","Cousine","STIX Math","Tinos","Twemoji Mozilla",
 		"Noto Naskh Arabic",
-		"Noto Sans Armenian","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Hebrew","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans Sinhala","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Thai","Noto Sans Yi",
-		"Noto Serif Armenian","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Ethiopic","Noto Serif Georgian","Noto Serif Gujarati","Noto Serif Gurmukhi","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Khmer","Noto Serif Lao","Noto Serif Malayalam","Noto Serif Myanmar","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Telugu","Noto Serif Thai","Noto Serif Tibetan",
-		// linux only: CJK
-		"Noto Sans JP Regular","Noto Sans KR Regular","Noto Sans SC Regular", "Noto Sans TC Regular",
-		// legacy
-		"Noto Emoji", // twemoji
-		"Noto Sans Tibetan", // serif
+		"Noto Sans Adlam","Noto Sans Armenian","Noto Sans Balinese","Noto Sans Bamum","Noto Sans Bassa Vah","Noto Sans Batak","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Buhid","Noto Sans Canadian Aboriginal","Noto Sans Chakma","Noto Sans Cham","Noto Sans Cherokee","Noto Sans Coptic","Noto Sans Deseret","Noto Sans Devanagari","Noto Sans Elbasan","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Grantha","Noto Sans Gujarati","Noto Sans Gunjala Gondi","Noto Sans Gurmukhi","Noto Sans Hanifi Rohingya","Noto Sans Hanunoo","Noto Sans Hebrew","Noto Sans Javanese","Noto Sans JP","Noto Sans Kannada","Noto Sans Kayah Li","Noto Sans Khmer","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans KR","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Limbu","Noto Sans Lisu","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Medefaidrin","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Mro","Noto Sans Multani","Noto Sans Myanmar","Noto Sans Newa","Noto Sans New Tai Lue","Noto Sans NKo","Noto Sans Ol Chiki","Noto Sans Oriya","Noto Sans Osage","Noto Sans Osmanya","Noto Sans Pahawh Hmong","Noto Sans Pau Cin Hau","Noto Sans Rejang","Noto Sans Runic","Noto Sans Samaritan","Noto Sans Saurashtra","Noto Sans SC","Noto Sans Sharada","Noto Sans Shavian","Noto Sans Sinhala","Noto Sans Sora Sompeng","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Syloti Nagri","Noto Sans Symbols2","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tagalog","Noto Sans Tagbanwa","Noto Sans Tai Le","Noto Sans Tai Tham","Noto Sans Tai Viet","Noto Sans Takri","Noto Sans Tamil","Noto Sans TC","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Thai","Noto Sans Tifinagh Adrar","Noto Sans Tifinagh Agraw Imazighen","Noto Sans Tifinagh Ahaggar","Noto Sans Tifinagh Air","Noto Sans Tifinagh APT","Noto Sans Tifinagh Azawagh","Noto Sans Tifinagh Ghat","Noto Sans Tifinagh Hawad","Noto Sans Tifinagh","Noto Sans Tifinagh Rhissa Ixa","Noto Sans Tifinagh SIL","Noto Sans Tifinagh Tawellemmet","Noto Sans Tirhuta","Noto Sans Vai","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Yi","Noto Sans Zanabazar Square",
+		"Noto Serif Armenian","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra","Noto Serif Ethiopic","Noto Serif Georgian","Noto Serif Grantha","Noto Serif Gujarati","Noto Serif Gurmukhi","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Khmer","Noto Serif Khojki","Noto Serif Lao","Noto Serif Malayalam","Noto Serif Myanmar","Noto Serif Hmong Nyiakeng","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Telugu","Noto Serif Thai","Noto Serif Tibetan","Noto Serif Yezidi",
 	],
 	mac: [
-		"Noto Sans Armenian","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans Sinhala","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Yi",
-		"Noto Serif Tibetan",
-		"STIX Math","Twemoji Mozilla",
-		// legacy
-		"Noto Sans Tibetan", // serif
+		// ESR102 current whitelist minus 123 bundled
+		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo","Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",
 	],
 	windows: [
-		"Noto Sans","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Canadian Aboriginal","Noto Sans Cherokee","Noto Sans Devanagari","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Gujarati","Noto Sans Gurmukhi","Noto Sans Kannada","Noto Sans Khmer","Noto Sans Lao","Noto Sans Malayalam","Noto Sans Myanmar","Noto Sans Oriya","Noto Sans Sinhala","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Yi",
-		"Noto Serif","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Ethiopic","Noto Serif Georgian","Noto Serif Gujarati","Noto Serif Gurmukhi","Noto Serif Kannada","Noto Serif Khmer","Noto Serif Lao","Noto Serif Malayalam","Noto Serif Myanmar","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Telugu","Noto Serif Tibetan",
-		"Twemoji Mozilla",
+		// ESR102 current whitelist minus 122 bundled (incl Twemoji Mozilla)
+		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","MingLiU","PMingLiU","Segoe UI","Segoe UI Black","Segoe UI Light", "Segoe UI Semibold","Segoe UI Semilight","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
+		// aliases: some sizes can differ from their alias
+			"微软雅黑", // Microsoft YaHei
+			"細明體", // MingLiU
+			"新細明體", // PMingLiU
+			"ＭＳ ゴシック", // MS Gothic
+			"ＭＳ Ｐゴシック", // MS PGothic
+			"宋体", // SimSun ?NSimSun
+		// always
+		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
+		"MS Sans Serif",
+		// ignore: expected + dupe sizes
+			// "Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
+			// "Courier", //  = courier new
+			// "MS Serif","Roman","Times", // = TNR
 	],
 }
 
 function set_fntList() {
 	// bail
 	if (isOS == "") {
-		dom.fontNames = zNA; dom.fontSizes = zNA; dom.fontSizesPS = zNA; dom.fontSizesPT = zNA;
-		dom.fontFB = zNA; dom.fontStats = zNA; dom.fontBase = zNA
+		dom.fontFB = zNA
 		return
 	}
 	// isBaseFonts
 	if (isRFP && isVer > 79 && !isTB) {
 		if (isOS == "windows" || isOS == "mac") {isBaseFonts = true}
 	} else if (isTB) {
-		if (isOS == "windows" || isOS == "mac") {isBaseFonts = true}
+		if (isOS !== "android") {isBaseFonts = true}
 	}
+
 	// page load: fntMaster & fntMasterBase once
 	if (gLoad) {
-		let names = Object.keys(fntMaster)
-		for (const k of names) {
+		fntFake = "--00"+ rnd_string() + " poison pill"
+		for (const k of Object.keys(fntMaster)) {
 			// master
-			let array = fntBase[k].concat(fntAlways[k])
-			array = array.concat(fntOther[k])
+			let array = fntBase[k].concat(fntOther[k])
+			if (isOS == k) {
+				array.push(fntFake) // + fake
+				if (isPlatformFont !== undefined) { // - self
+					array = array.filter(x => ![isPlatformFont].includes(x))
+				}
+			}
 			array.sort()
 			array = array.filter(function(item, position) {return array.indexOf(item) === position})
 			fntMaster[k] = array
 			// masterbase
 			if (isTB) {
-				array = fntTB[k].concat(fntAlways[k])
-				array = array.concat(fntTBBundled[k])
+				array = fntTB[k]
 			} else {
-				array = fntBase[k].concat(fntAlways[k])
+				array = fntBase[k]
+			}
+			if (isOS == k) {
+				array.push(fntFake)
+				if (isPlatformFont !== undefined) {
+					array = array.filter(x => ![isPlatformFont].includes(x))
+				}
 			}
 			array.sort()
 			array = array.filter(function(item, position) {return array.indexOf(item) === position})
 			fntMasterBase[k] = array
 		}
+
+		// set baseFonts: either single system font or generic font-family with or without fallback fonts
+		//isPlatformFont = undefined
+		if (isPlatformFont !== undefined) {
+			// use a system font that cannot be blocked that almost every font differs from
+				// notes:
+				// windows: drops some expected fonts
+					// Tahoma (all), Webdings (FF61 or lower), Wingdings (FF98 or lower)
+			baseFonts = [isPlatformFont]
+		} else {
+			baseFonts = ['monospace','sans-serif','serif']
+			if (isOS == "mac") {
+				baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
+					'sans-serif',
+					'serif'
+				]
+			} else if (isOS == "windows") {
+				baseFonts = [
+					'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
+					'sans-serif, Arial',
+					'serif, Times, Roman'
+				]
+			}
+		}
+		// set baseFontsNames
+			// baseFonts w/o potential fallback fonts e.g. "sans-serif, Arial" -> "sans-serif"
+			// used to create arrays in objects etc
+		baseFontsNames = [], 
+		baseFonts.forEach(function(name) {
+			baseFontsNames.push(name.split(",")[0])
+		})
+		// baseMaster
+			//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
+			//'none' // redundant: it will always equal default proportional font
+		let baseMaster = ['monospace','sans-serif','serif','cursive','fantasy','fangsong','system-ui']
+		// add systemfonts to baseMaster + dedupe
+		baseMaster = baseMaster.concat(aSystemFont)
+		// set baseFontsFull
+			// baseFonts + topped up baseMaster
+		baseFontsFull = baseFonts // exact match to font tests
+		let baseOther = baseMaster.filter(x => !baseFontsNames.includes(x)) // don't double up on generic families
+		baseFontsFull = baseFontsFull.concat(baseOther)
+		/*
+		console.debug("names", baseFontsNames)
+		console.debug(" base", baseFonts)
+		console.debug(" full", baseFontsFull)
+		//*/
 	}
 	// global: re-populate sDetail[]
 	if (gRun) {
 		fontBtns = ""
-		let names = Object.keys(fntMaster)
-		for (const k of names) {
+		for (const k of Object.keys(fntMaster)) {
 			let array = fntMaster[k]
 			let str = "fonts_main_"+ k + "_list_notglobal"
 			sDetail[str] = array
@@ -122,7 +205,7 @@ function set_fntList() {
 		fntList.sort()
 		let strB = "fonts_"+ (isTB ? "tb_whitelist_" : "base_" ) + isOS +"_list_notglobal"
 		sDetail[strB] = fntList
-		fontBaseBtn = buildButton("12", strB, fntList.length + (isTB ? " whitelisted" : " base fonts"))
+		fontBaseBtn = buildButton("12", strB, fntList.length + (isTB ? " mini-list" : " base fonts"))
 	} else {
 		fntList = fntMaster[isOS]
 	}
@@ -157,8 +240,7 @@ function set_fallback_string() {
 		'0x2A700','0x2B740','0x2B820','0x2F800','0xE0000','0xE0100','0xF0000','0x100000']
 
 		let ZWNJ = String.fromCodePoint("0x200C") +" "
-		// why are joining spans with line beaks?
-			// arthur did it to display a list
+		// why are we joining spans with line beaks? arthur did it to display a list
 
 		// [43] dcf
 		let aCharsA = []
@@ -236,7 +318,7 @@ const getFonts = () => {
 				}
 				#${id}-detector::after {
 					font-family: var(--font);
-					content: '` + fntStrA + `';
+					content: '`+ fntStrA +`';
 				}
 				</style>
 				<span id="${id}-detector"></span>`
@@ -257,64 +339,56 @@ const getFonts = () => {
 			const detectedViaTransformNumber = new Set()
 			const detectedViaPerspective = new Set()
 			const detectedViaPerspectiveNumber = new Set()
-			const baseFonts = ['monospace','sans-serif','serif'] // do monospace first
-			const baseFontsFull = [
-				'none','monospace','sans-serif','serif','cursive','fantasy','fangsong','system-ui',
-				//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
-			]
 			const style = getComputedStyle(span)
 
 			const getDimensions = (span, style) => {
 				const transform = style.transformOrigin.split(' ')
 				const perspective = style.perspectiveOrigin.split(' ')
 				const dimensions = {
-					clientWidth: span.clientWidth,
+					// keep in sorted order for base objects
+					// + Math.floor(Math.random() * 10), //
 					clientHeight: span.clientHeight,
-					offsetWidth: span.offsetWidth,
-					offsetHeight: span.offsetHeight,
-					pixelWidth: pixelsToInt(style.width),
-					pixelHeight: pixelsToInt(style.height),
-					pixelsizeWidth: pixelsToInt(style.inlineSize),
-					pixelsizeHeight: pixelsToInt(style.blockSize),
-					perspectiveWidth: originPixelsToInt(perspective[0]),
-					perspectiveHeight: originPixelsToInt(perspective[1]),
-					scrollWidth: span.scrollWidth,
-					scrollHeight: span.scrollHeight,
-					transformWidth: originPixelsToInt(transform[0]),
-					transformHeight: originPixelsToInt(transform[1]),
-					// ToNumber
-					npixelWidth: pixelsToNumber(style.width),
-					npixelHeight: pixelsToNumber(style.height),
-					npixelsizeWidth: pixelsToNumber(style.inlineSize),
-					npixelsizeHeight: pixelsToNumber(style.blockSize),
-					ntransformWidth: originPixelsToNumber(transform[0]),
-					ntransformHeight: originPixelsToNumber(transform[1]),
-					nperspectiveWidth: originPixelsToNumber(perspective[0]),
+					clientWidth: span.clientWidth,
 					nperspectiveHeight: originPixelsToNumber(perspective[1]),
+					nperspectiveWidth: originPixelsToNumber(perspective[0]),
+					npixelHeight: pixelsToNumber(style.height),
+					npixelWidth: pixelsToNumber(style.width),
+					npixelsizeHeight: pixelsToNumber(style.blockSize),
+					npixelsizeWidth: pixelsToNumber(style.inlineSize),
+					ntransformHeight: originPixelsToNumber(transform[1]),
+					ntransformWidth: originPixelsToNumber(transform[0]),
+					offsetHeight: span.offsetHeight,
+					offsetWidth: span.offsetWidth,
+					perspectiveHeight: originPixelsToInt(perspective[1]),
+					perspectiveWidth: originPixelsToInt(perspective[0]),
+					pixelHeight: pixelsToInt(style.height),
+					pixelWidth: pixelsToInt(style.width),
+					pixelsizeHeight: pixelsToInt(style.blockSize),
+					pixelsizeWidth: pixelsToInt(style.inlineSize),
+					scrollHeight: span.scrollHeight,
+					scrollWidth: span.scrollWidth,
+					transformHeight: originPixelsToInt(transform[1]),
+					transformWidth: originPixelsToInt(transform[0]),
 				}
 				return dimensions
 			}
-			if (canPerf) {aTime.push("div"+ s4 + (performance.now() - t0) + sc); time0 = performance.now()}
+			if (canPerf) {aTime.push("div"+ s4 + Math.round(performance.now() - t0) + sc); time0 = performance.now()}
 
 			// base [default] sizes
 			const base = baseFontsFull.reduce((acc, font) => {
-				span.style.setProperty('--font', font)
+				if (aSystemFont.includes(font)) { // not a family
+					span.style.setProperty('--font', "")
+					span.style.font = font
+				} else {
+					span.style.font = ""
+					span.style.setProperty('--font', font)
+				}
 				const dimensions = getDimensions(span, style)
-				acc[font] = dimensions
+				acc[font.split(",")[0]] = dimensions // use only generic name: w/o fallback fonts i.e not "sans-serif, Arial"
 				return acc
 			}, {})
-			// stats
-			let baseFontTests = {}, baseFontDetected = {}, basefontFirst = baseFonts[0]
-			let oTempBaseFonts = {} // fonts per baseFonts
-			baseFonts.forEach(function(name) {
-				baseFontTests[name] = 0
-				baseFontDetected[name] = 0
-				// ignore the first baseFont: we only want to track the others
-				if (name !== basefontFirst) {oTempBaseFonts[name] = []}
-			})
-			if (canPerf) {aTime.push("base"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
 
-			// prefix, Set
+			// typeof: don't let each !typeof affect other methods
 			let aTests = [
 				["client", detectedViaClient],
 				["offset", detectedViaOffset],
@@ -328,35 +402,100 @@ const getFonts = () => {
 				["scroll", detectedViaScroll],
 				["transform", detectedViaTransform],
 			]
-
-			// loop
-			fntList.forEach(font => {
-				let isDetected = false // reset each font
-				baseFonts.forEach(basefont => {
-					if (isDetected) {
-						return
+			let aTestsValid = []
+			aTests.forEach(function(pair) {
+				let wName = pair[0] +"Width", hName = pair[0] +"Height"
+				// we need a base object: we'll always have monospace
+				let baseObj = "monospace"
+				let wType = typeof base[baseObj][wName], hType = typeof base[baseObj][hName]
+				// only test valid typeof
+				if ("number" == wType && "number" == hType) {
+					if (base[baseObj][wName] < 1 || base[baseObj][hName] < 1) {
+						pair[1].clear()
+						pair[1].add("zero dimensions")
+					} else {
+						aTestsValid.push(pair)
 					}
-					const family = "'"+ font +"', "+ basefont
-					span.style.setProperty('--font', family)
-					const style = getComputedStyle(span)
-					const dimensions = getDimensions(span, style)
-					aTests.forEach(function(pair) {
-						let wName = pair[0] +"Width", hName = pair[0] +"Height"
-						if (dimensions[wName] != base[basefont][wName] || dimensions[hName] != base[basefont][hName]) {
-							pair[1].add(font +":"+ dimensions[wName] +" x "+ dimensions[hName])
-							isDetected = true
-						}
-					})
-					// stats
-					baseFontTests[basefont]++
-					if (isDetected) {
-						baseFontDetected[basefont]++
-						if (basefont !== basefontFirst) {oTempBaseFonts[basefont].push(font)}
+				} else {
+					// otherwise, change the Set to a typeof mismatch
+					let xName = ("number" !== wType ? wName : hName)
+					let xValue = base[baseObj][xName]
+					let xType = typeof base[baseObj][xName]
+					let xReturn
+					if (xValue === "") { xReturn = "empty string"
+					} else if (undefined === xValue) {xReturn = "undefined"
+					} else if (null === xValue) {xReturn = "null"
+					} else if ("object" === xType) {xReturn = "object"
+					} else if ("boolean" === xType) {xReturn = "boolean"
+					} else if ("string" === xType) {
+						if (!Number.isNaN(xValue * 1)) {xReturn = "NaN"} else {xReturn = "string"}
+					} else {xReturn = cleanFn(xValue) +""
 					}
-					return
-				})
+					pair[1].clear()
+					pair[1].add("mismatch:"+ xReturn)
+				}
 			})
-			if (canPerf) {aTime.push("measure"+ s4 + (performance.now() - time0) + sc); time0 = performance.now()}
+			if (canPerf) {aTime.push("base"+ s4 + Math.round(performance.now() - time0) + sc); time0 = performance.now()}
+			span.style.font = "" // reset from system fonts
+			// measure
+			if (aTestsValid.length) {
+				let isDetected = false, intDetected = 0, intDetectedMax = aTestsValid.length
+				
+				fntList.forEach(font => {
+					isDetected = false // have we found it
+					intDetected = 0 // in all valid methods
+					baseFonts.forEach(basefont => {
+						if (isDetected) {
+							return
+						}
+						intDetected = 0 // reset per basefont tested
+						const family = "'"+ font +"', "+ basefont	
+						span.style.setProperty('--font', family)
+						const style = getComputedStyle(span)
+						const dimensions = getDimensions(span, style)
+						basefont = basefont.split(",")[0] // switch to short generic name
+						aTestsValid.forEach(function(pair) {
+							let wName = pair[0] +"Width", hName = pair[0] +"Height"
+							if (dimensions[wName] != base[basefont][wName] || dimensions[hName] != base[basefont][hName]) {
+								pair[1].add(font +":"+ basefont +":"+ dimensions[wName] +" x "+ dimensions[hName])
+								intDetected++
+							}
+						})
+						if (intDetected == intDetectedMax) {isDetected = true}
+						return
+					})
+				})
+			}
+			if (canPerf) {aTime.push("measure"+ s4 + Math.round(performance.now() - time0) + sc); time0 = performance.now()}
+
+			// tidy base
+			sDetail["fonts_fontsizes_base"] = {}
+			let oTempBase = {}
+			for (const k of Object.keys(base)) {
+				let tmpHash = mini(base[k], "fontsizes base "+ k)
+				if (oTempBase[tmpHash] == undefined) {
+					oTempBase[tmpHash] = {"bases" : [k], "data" : base[k]}
+				} else {
+					oTempBase[tmpHash]["bases"].push(k)
+				}
+			}
+			for (const h of Object.keys(oTempBase).sort()) {
+				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
+			}
+
+			// tidy lies: none/all/fntFake
+			aTests.forEach(function(pair) {
+				if (pair[1].length == 0) {
+					pair[1].clear()
+					pair[1].add("none")
+				} else if (pair[1].length == fntList.length) {
+					pair[1].clear()
+					pair[1].add("all")
+				} else if (fntFake == [...pair[1]][0].split(":")[0]) { //fntFake must be first
+					pair[1].clear()
+					pair[1].add("poison pill")
+				}
+			})
 
 			const fontsScroll = [...detectedViaScroll]
 			const fontsOffset = [...detectedViaOffset]
@@ -370,54 +509,10 @@ const getFonts = () => {
 			const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
 			const fontsTransformNumber = [...detectedViaTransformNumber]
 
-			// tidy base
-			const baseNames = Object.keys(base).sort()
-			sDetail["fonts_fontsizes_base"] = [] // array: hash: baseFonts
-			sDetail["fonts_fontsizes_base_data"] = {} // object: hash: {data}
-			let oTempHashBase = {}, oTempHashData = {}
-			for (const k of baseNames) {
-				let tmpDimensionData = {}
-				const dimensionNames = Object.keys(base[k]).sort()
-				for (const j of dimensionNames) {tmpDimensionData[j] = base[k][j]}
-				let tmpHash = mini(tmpDimensionData, "fontsizes base "+ k)
-				oTempHashData[tmpHash] = tmpDimensionData
-				if (oTempHashBase[tmpHash] == undefined) {
-					oTempHashBase[tmpHash] = [k]
-				} else {
-					oTempHashBase[tmpHash].push(k)
-				}
-			}
-			let hashNames = Object.keys(oTempHashBase).sort()
-			for (const h of hashNames) {
-				sDetail["fonts_fontsizes_base"].push(h +":"+ oTempHashBase[h].join(", "))
-				sDetail["fonts_fontsizes_base_data"][h] = oTempHashData[h]
-			}
-
-			// tidy stats
-			let aStats = [], totalTest = 0, totalDetect = 0, btnStats = ""
-			for (let i = 0; i < baseFonts.length; i++) {
-				let name = baseFonts[i]
-				let intTest = baseFontTests[name], intDetect = baseFontDetected[name]
-				totalTest += intTest; totalDetect += intDetect
-				aStats.push(intDetect +"/"+ intTest)
-			}
-			let sNameStats = "fonts_fontsizes_stat_data_notglobal"
-			sDetail[sNameStats] = []
-			const namesE = Object.keys(oTempBaseFonts).sort()
-			for (const k of namesE) if (oTempBaseFonts[k].length) {
-				let value = k +": " + oTempBaseFonts[k].join(", ")
-				sDetail[sNameStats].push (value)
-				if (isOS == "android" || !isFF) {log_debug("baseFont", value)}
-			}
-			if (sDetail[sNameStats].length) {
-				btnStats = buildButton("12", sNameStats, mini(sDetail[sNameStats].join(), "fonts stats"))
-			}
-			dom.fontStats.innerHTML = aStats.join(" | ") + " | " + s12 + "total: " + sc + totalDetect +"/"+ totalTest + btnStats
-
 			// finish
 			if (canPerf) {
-				aTime.push("tidy"+ s4 + (performance.now() - time0) + sc);
-				aTime.push("total"+ so + (performance.now() - t0) + sc);
+				aTime.push("tidy"+ s4 + Math.round(performance.now() - time0) + sc);
+				aTime.push("total"+ so + Math.round(performance.now() - t0) + sc);
 				log_debug("fontsizes", aTime.join(" | "))
 			}
 			return resolve({
@@ -443,224 +538,139 @@ const getFonts = () => {
 
 function get_fonts() {
 	return new Promise(resolve => {
-		if (!fntList.length) {
-			// ToDo: add ToNumber returns
-			return resolve(["fontsizes:"+ zNA, "fontsizes_base:"+ zNA, "fontnames:"+ zNA])
-		}
 		let t0; if (canPerf) {t0 = performance.now()}
+
+		// functions
+		function get_font_names(aFontSize) {
+			let array = []
+			aFontSize.forEach(function(item) {array.push(item.split(":")[0])})
+			array = array.filter(function(item, position) {return array.indexOf(item) === position})
+			return array
+		}
+		function get_baseHash(isMismatch) {
+			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
+			try {
+				if (Object.keys(sDetail[bName]).length) {
+					baseHash = mini_sha1(sDetail[bName], "fontsizes base")
+					if (isMismatch) {
+						sDetail[bName +"_fake_skip"] = sDetail[bName]; delete sDetail[bName]
+						bName += isMismatch ? "_fake_skip" : ""
+					}
+					baseBtn = buildButton("12", bName)
+				}
+			} catch(e) {}
+			if (isMismatch) {baseHash = soL + baseHash + scC}
+			dom.fontBase.innerHTML = baseHash + baseBtn
+			return isMismatch ? zLIE : baseHash
+		}
+		function exit(value) {
+			dom.fontNames = value; dom.fontSizes = value; dom.fontBase = value
+			return resolve(
+				["fontsizes:"+ value, "fontsizes_base:"+ value]
+			)
+		}
 		// clear
 		let sNames = ['fontsScroll','fontsOffset','fontsClient','fontsPixel','fontsPixelSize','fontsPerspective','fontsTransform']
 		sDetail["fonts_fontsizes"] = []
-		sDetail["fonts_fontnames"] = []
+		sDetail["fonts_fontnames_notglobal"] = []
 		sNames.forEach(function(name) {sDetail["fonts_fontsizes_"+ name + "_reported_notglobal"] = []})
+		// exit n/a
+		if (!fntList.length) {exit(zNA); return}
+
 		// run
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+			// exit zBO
+			if (res === zB0) {exit(zB0); return}
 
-			// baseHash
-				// ToDo: leverage sDetail data for typeof mismatches
-			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
-			try {
-				if (sDetail[bName].length) {
-					baseHash = mini_sha1(sDetail[bName].join(), "fontsizes base")
-					baseBtn = buildButton("12", bName) + buildButton("12", bName+"_data", "data")
-				}
-			} catch(e) {}
-			let baseReturn = "fontsizes_base:"+ baseHash
-			dom.fontBase.innerHTML = baseHash + baseBtn
-
-			// fontnames only
-			function get_fonts_only(aFontSize) {
-				let tmpFontNames = []
-				aFontSize.forEach(function(item) {
-					tmpFontNames.push(item.split(":")[0])
-				})
-				return tmpFontNames
-			}
-			// sim
-			if (runFNT) {
-				if (fntList.length > 0) {
-					let nmeFNT = ["all blocked","all empty","2 blocked","2 empty","4 empty","1 blocked, 3 empty",
-						"1 empty, 2 fake", "1 empty, 1 blocked, 1 fake", "1 empty, 3 fake", "1 blocked, 3 fake"
-					]
-					intFNT = intFNT % 10
-					console.log("SIM #"+ intFNT + " fontsizes:", nmeFNT[intFNT])
-					if (intFNT == 0) {
-						res = zB0
-					} else if (intFNT == 1) {
-						res["fontsOffset"] = []; res["fontsClient"] = []; res["fontsScroll"] = []; res["fontsTransform"] = []
-						res["fontsPerspective"] = []; res["fontsPixel"] = []; res["fontsPixelSize"] = []
-					} else if (intFNT == 2) {
-						res["fontsPixelSize"] = zB0; res["fontsTransform"] = zB0;
-					} else if (intFNT == 3) {
-						res["fontsScroll"] = [], res["fontsTransform"] = []
-					} else if (intFNT == 4) {
-						res["fontsClient"] = []; res["fontsPixelSize"] = []; res["fontsTransform"] = []; res["fontsPixel"] = []
-					} else if (intFNT == 5) {
-						res["fontsClient"] = []; res["fontsPixelSize"] = zB0; res["fontsTransform"] = []; res["fontsPixel"] = []
-					} else if (intFNT == 6) {
-						res["fontsClient"] = ["client","d","e"]; res["fontsScroll"] = ["scroll","t"]; res["fontsPerspective"] = []
-					} else if (intFNT == 7) {
-						res["fontsClient"] = ["client","d","e"]; res["fontsScroll"] = zB0; res["fontsPerspective"] = []
-					} else if (intFNT == 8) {
-						res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
-						res["fontsPerspective"] = []; res["fontsPixel"] = ["pixel"]
-					} else if (intFNT == 9) {
-						res["fontsOffset"] = ["offset","p"]; res["fontsScroll"] = ["scroll","t","u"]
-						res["fontsPerspective"] = ["perspective"]; res["fontsPixel"] = zB0
-					}
-					intFNT++
-				}
-			}
-			// get values
-			let fntData = [], fntHashes = [], miniHashes = [], blank = [], block = [], isSame = false
+			let oHashesRaw = {}, aIgnore = [], isMismatch = false
+			let ignoreList = [zNS, "none", "all", "poison pill", "zero dimensions"]
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
-					// ignore Number: we only use seven x Integer for lies
-					if (name.slice(-6) !== "Number") {
-						let data = res[name],
-							hash = "none"
-						// note: do not sort: these are "fontnames:size" and fntList was already sorted
-						if (data.length == 0) {
-							// fontsPixelSize: not supported in FF62 or lower
-							if (isVer < 63 && name == "fontsPixelSize") {hash = zNS}
-							blank.push(name)
-						} else if (data == zB0) {
-							block.push(name)
-							hash = zB0
-						} else {
-							// mini
-							let minihash = mini(data.join(), "fontsizes "+ name)
-							// sha1
-							let getsha1 = false
-							if (fntHashes.length == 0) {getsha1 = true
-							} else if (miniHashes[miniHashes.length-1] !== minihash) {getsha1 = true}
-							if (getsha1) {
-								hash = mini_sha1(data.join(), "fontsizes "+ name)
-							} else {
-								hash = fntHashes[fntHashes.length-1] // use last computed
-							}
-							fntHashes.push(hash)
-							miniHashes.push(minihash)
-							sDetail["fonts_fontsizes"] = data
-						}
-						fntData.push(name+ ":"+ hash + ":"+ data.length)
-						document.getElementById(name).innerHTML = hash // do i need this
-					}
-				}
-			} else {
-				isSame = true
-			}
-
-			let resStr = "" // leave res object alone
-			let distinct = fntHashes.filter(function(item, position) {return fntHashes.indexOf(item) === position})
-			if (distinct.length == 1 && blank.length == 0 && block.length == 0) {
-				isSame = true; resStr = distinct[0]
-			}
-			if (blank.length == 7) {isSame = true; resStr = "none"}
-			if (block.length == 7) {isSame = true; resStr = zB0}
-
-			// all n/a, none, blocked or same hash
-			if (isSame) {
-				sNames.forEach(function(name) {document.getElementById(name).innerHTML = resStr})
-				let summary = (resStr == "none" ? soL +"none"+ scC : resStr)
-				if (resStr.length == 40) {
-					summary += buildButton("12", "fonts_fontsizes", sDetail["fonts_fontsizes"].length) + (isBaseFonts ? " from"+ fontBaseBtn : "")
-				}
-				if (runFNT && fntList.length == 0) {summary = sb +"font simulation fail: no font list"+ sc}
-				dom.fontSizes.innerHTML = summary
-				if (gRun) {
-					if (resStr == zB0 || resStr == "none") {
-						if (resStr == "none") {gKnown.push("fonts:fontsizes")}
-						gMethods.push("fonts:fontsizes:"+ resStr +":all")
-					}
-				}
-				// fontNames
-				let fontNameReturn = "fontnames:"+ resStr
-				if (resStr.length == 40 && !resStr.includes(" ")) { // hacky check for a valid hash
-					sDetail["fonts_fontnames"] = get_fonts_only(res["fontsOffset"])
-					let fontNameHash = mini_sha1(sDetail["fonts_fontnames"].join(), "fontnames")
-					let fontNameBtn = buildButton("12", "fonts_fontnames", sDetail["fonts_fontnames"].length)
-					fontNameReturn = "fontnames:"+ fontNameHash
-					dom.fontNames.innerHTML = fontNameHash + fontNameBtn
-				} else {
-					dom.fontNames.innerHTML = resStr
-				}
-				log_perf("fontsizes [fonts]",t0)
-				if (runFNT) {console.log(" - returning", resStr == "none"? zLIE : resStr)}
-				return resolve(["fontsizes:"+ (resStr == "none"? zLIE : resStr), baseReturn, fontNameReturn])
-			}
-
-			blank.sort
-			block.sort
-			if (gRun && blank.length > 0) {gMethods.push("fonts:fontsizes:none:"+ blank.join())}
-			if (gRun && block.length > 0) {gMethods.push("fonts:fontsizes:blocked:"+ block.join())}
-			// get most common hash/occurence
-			let getGreatestOccurrence = list => list.reduce((greatest , currentValue, index, list) => {
-				let count = list.filter(item => JSON.stringify(item) == JSON.stringify(currentValue)).length
-				if (count > greatest.count) {
-					return {count, item: currentValue}
-				}
-				return greatest
-			}, { count: 0, item: undefined })
-			let greatest = getGreatestOccurrence(fntHashes)
-			let isBypass = (greatest.count > 3)
-			if (greatest.count == 3 && fntHashes.length == 3) {isBypass = true} // greatest uses fntHashes which excludes empty arrays/zB0
-			if (!isBypass) {sDetail["fonts_fontsizes"] = []}
-
-			// show/populate
-			let matchCount = "", matchName = "", bypass = []
-			fntData.sort()
-			fntData.forEach(function(item) {
-				let name = item.split(":")[0],
-					hash = item.split(":")[1],
-					count = item.split(":")[2],
-					detail = "fonts_fontsizes_"+ name + "_reported_notglobal",
-					el = document.getElementById(name),
-					display = ""
-				let btnFnt = ""
-				if (hash !== zB0 && hash !== "none" && count !== 0) {btnFnt = buildButton("12", detail, count)}
-				if (isBypass) {
-					// don't bypass if zNS: which we only use for isVer < 63 && fontsPixelSize
-					if (hash == greatest.item || hash == zNS) {
-						matchCount = count
-						matchName = name
-						display = hash
+					let data = res[name], hash = "unknown"
+					// note: do not sort: these are "fontnames:size" and fntList was already sorted
+					if (data.length == 0) {
+						aIgnore.push(name +":"+ hash)
+					} else if (ignoreList.includes(data[0])) {
+						hash = data[0]
+						aIgnore.push(name +":"+ hash)
+					} else if (data.length == 1 && data[0].split(":")[0] == "mismatch") {
+						hash = data[0].split(":")[1]
+						aIgnore.push(name +":"+ hash)
+						isMismatch = true
 					} else {
-						hash = soB + hash + scC
-						bypass.push(name)
-						if (btnFnt !== "") {sDetail[detail] = res[name]}
-						display = hash + btnFnt
+						hash = mini(data.join(), "fontsizes "+ name)
+						if (oHashesRaw[hash] == undefined) {
+							oHashesRaw[hash] = [name]
+						} else {
+							oHashesRaw[hash].push(name)
+						}
 					}
-				} else {
-					if (btnFnt !== "") {sDetail[detail] = res[name]}
-					display = hash + btnFnt
-				}
-				el.innerHTML = display
-			})
-			if (gRun) {
-				if (bypass.length) {
-					bypass.sort()
-					gKnown.push("fonts:fontsizes")
-					gBypassed.push("fonts:fontsizes:"+ bypass.join() +":"+ greatest.item)
 				}
 			}
+			// baseReturn
+			let baseReturn = "fontsizes_base:"+ get_baseHash(isMismatch)
 
-			// display
-			let result = greatest.item, display = ""
-			if (isBypass) {
-				sDetail["fonts_fontsizes"] = res[matchName]
-				display = result + buildButton("12", "fonts_fontsizes", matchCount) + (isBaseFonts ? " from"+ fontBaseBtn : "")
-			} else {
-				display = soL + "unknown" + scC
-				if (gRun) {gKnown.push("fonts:fontsizes")} // generic lie
-				result = zLIE
+			// compact each res, get new mini hashes
+			let aHashesSeven = [], oHashes = {}, aLineData = []
+			for (const k of Object.keys(oHashesRaw)) {
+				let aOriginal = res[oHashesRaw[k][0]]
+				let oTempFont = {}
+				aOriginal.forEach(function(item) {
+					let font = item.split(":")[0],
+						basefont = item.split(":")[1],
+						size = item.split(":")[2]
+					if (oTempFont[font] == undefined) {oTempFont[font] = {}}
+					if (oTempFont[font][size] == undefined) {oTempFont[font][size] = []}
+					oTempFont[font][size].push(basefont)
+				})
+				let aNew = [], firstBaseFont = baseFontsNames[0]
+				for (const f of Object.keys(oTempFont)) {
+					let oSize = Object.keys(oTempFont[f]).length
+					let aCombine = []
+					for (const s of Object.keys(oTempFont[f])) {
+						let aBase = oTempFont[f][s]
+						if (oSize == 1) {
+							if (aBase.length == 3 || aBase == firstBaseFont) {
+								aNew.push(f +":"+ s)
+							} else {
+								aNew.push(f+ ":"+ s +" "+ aBase.join(", "))
+							}
+						} else {
+							aCombine.push(s +" "+ aBase.join(", "))
+						}
+					}
+					if (aCombine.length) {aNew.push(f +":" + aCombine.join(":"))}
+				}
+				let aReplace = oHashesRaw[k]
+				let newHash = mini_sha1(aNew.join(), "fontsizes [compact "+ k +"]")
+				oHashes[newHash] = aReplace
+				aReplace.forEach(function(resName) {
+					if (resName.slice(-6) !== "Number") {aHashesSeven.push(newHash)}
+					res[resName] = aNew
+					aLineData.push(resName +":"+ newHash +":" + aNew.length)
+				})
 			}
-			dom.fontSizes.innerHTML = display
-			log_perf("fontsizes [fonts]",t0)
-			if (runFNT) {console.log(" - returning", result)}
-			return resolve(["fontsizes:"+ result, baseReturn])
+			// merge ignore into aLineData
+			aLineData = aLineData.concat(aIgnore)
+			// temp visual check
+			aLineData.forEach(function(item) {
+				let name = item.split(":")[0], hash = item.split(":")[1]
+				try {document.getElementById(name).innerHTML = hash} catch(e) {}
+			})
+			aLineData.sort()
+			aIgnore.sort()
+
+// temp: output font names
+let tmpName = "fonts_fontnames_notglobal"
+sDetail[tmpName] = get_font_names(res["fontsOffset"])
+let fontNameHash = mini_sha1(sDetail[tmpName].join(), "fontnames")
+let fontNameBtn = buildButton("12", tmpName, sDetail[tmpName].length)
+dom.fontNames.innerHTML = fontNameHash + fontNameBtn + (isBaseFonts ? " from"+ fontBaseBtn : "")
+
+return resolve(["fontsizes:TBA", baseReturn])
+
 		})
 	})
 }
@@ -762,8 +772,8 @@ function get_fallback(list) {
 			// diffs
 			let fontDiffBtn = ""
 			try {
-				if (sDetail["fonts_fontnames"].length && found.length) {
-					let fntNames = sDetail["fonts_fontnames"]
+				if (sDetail["fonts_fontnames_notglobal"].length && found.length) {
+					let fntNames = sDetail["fonts_fontnames_notglobal"]
 					let fntNew = found.filter(x => !fntNames.includes(x))
 					let fntMissing = fntNames.filter(x => !found.includes(x))
 					let fntDiff = []
@@ -789,6 +799,7 @@ function get_fallback(list) {
 }
 
 function get_formats() {
+	// FF105+: layout.css.font-tech.enabled
 	return new Promise(resolve => {
 		let res = []
 		let oList = {
@@ -903,7 +914,7 @@ function get_unicode() {
 
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
-		let styles = ["cursive","fantasy","monospace","sans-serif","serif","system-ui"]
+		let styles = ["cursive","fangsong","fantasy","monospace","sans-serif","serif","system-ui"]
 		// we do not need "none": this is default style + font per style for each language
 			// and is already present in covering monospace/sans-serif/serif
 		if (isFF) {
@@ -911,7 +922,8 @@ function get_unicode() {
 				// e.g. if system-ui (FF92+) is not enabled = same as none = redundant
 			if (isVer < 92) {styles = styles.filter(x => !["system-ui"].includes(x))}
 				// fantasy vs sans-serif adds very little in gecko (at least on windows 7)
-			styles = styles.filter(x => !["fantasy"].includes(x))
+				// fangsong vs serif adds very little in gecko (at least on windows 7)
+			styles = styles.filter(x => !["fangsong","fantasy"].includes(x))
 		}
 		styles.sort()
 		let oUnique = {} // unique size per char: i.e does a style bring anything to the table
@@ -1248,8 +1260,7 @@ function outputFontsFB() {
 						// browser.display.use_document_fonts = 0 (blocked)
 						function run_main() {
 							clearInterval(checking)
-							let sanitizedList = fntList.filter(x => !aSystemFont.includes(x))
-							get_fallback(sanitizedList)
+							get_fallback(fntList)
 						}
 						let checking = setInterval(run_main, 25)
 					}
