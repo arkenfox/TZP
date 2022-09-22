@@ -459,10 +459,8 @@ const get_isOS = () => new Promise(resolve => {
 		// set isPlatformFont
 			// expand later: e.g. if linux TB pick one bundled font that has no size collisions
 			// e.g. if android we can use roboto
-		//if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32 "
-		//} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
-		// hide stats row
-		if (isPlatformFont !== undefined) {showhide("FontStats","none")}
+		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32 "
+		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
 		if (isOS === "") {log_alert("global:isOS: unknown", true)}
 		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS + font))
 		return resolve()
