@@ -79,7 +79,8 @@
 			<input type="radio" id="widget4">
 			<input type="text" id="widget5">
 			<input type="date" id="widget6">
-			<textarea id="widget7"></textarea>
+			<input type="datetime-local" id="widget7">
+			<textarea id="widget8"></textarea>
 		</div>
 		<div><canvas id="kcanvas1" width="16" height="16"></canvas>
 			<canvas id="kcanvas2" width="16" height="16"></canvas>
@@ -306,7 +307,6 @@
 				style="font-family: Segoe UI, ABR;">Windows</span><span
 				style="font-family: Roboto, Droid Sans, ABR;">Android</span>
 		</td></tr>
-		<tr><td>[widgets] os</td><td class="c mono" id="fdWidget"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/os-detection-font-css.html">Arthur Edelstein</a> <sup>1</sup>
@@ -618,6 +618,7 @@
 	</table>
 
 	<!--fonts-->
+	<!--fonts-->
 	<table id="tb12">
 		<col width="35%"><a name="fonts"></a><col width="65%">
 		<thead><tr><th colspan="2">
@@ -651,8 +652,6 @@
 		<!--fonts-->
 		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
 		<tr><td>[names] fonts <sup>2, 3</sup></td><td class="c mono" id="fontNames"></td></tr>
-		<tr><td>[pixel + pixelsize] fonts <sup>2, 3</sup></td><td class="c mono" id="fontSizesPS"></td></tr>
-		<tr><td>[perspective + transform] fonts <sup>2, 3</sup></td><td class="c mono" id="fontSizesPT"></td></tr>
 		<tr><td><span id="labelF1" class="btn btn0" onClick="togglerows('F1','btn')">[ show ]</span>
 			[sizes] fonts <sup>2, 3</sup></td><td class="c mono" id="fontSizes"></td></tr>
 		<tr class="togF1"><td>offset <sup>2</sup></td><td class="c mono" id="fontsOffset"></td></tr>
@@ -662,10 +661,16 @@
 		<tr class="togF1"><td>pixelsize <sup>3</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
 		<tr class="togF1"><td>perspective <sup>3</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
 		<tr class="togF1"><td>transform <sup>3</sup></td><td class="c mono" id="fontsTransform"></td></tr>
+		<tr class="togF1"><td>[number] pixel <sup>3</sup></td><td class="c mono" id="fontsPixelNumber"></td></tr>
+		<tr class="togF1"><td>[number] pixelsize <sup>3</sup></td><td class="c mono" id="fontsPixelSizeNumber"></td></tr>
+		<tr class="togF1"><td>[number] perspective <sup>3</sup></td><td class="c mono" id="fontsPerspectiveNumber"></td></tr>
+		<tr class="togF1"><td>[number] transform <sup>3</sup></td><td class="c mono" id="fontsTransformNumber"></td></tr>
 		<tr><td>[base sizes] fonts <sup>2, 3</sup></td><td class="c mono" id="fontBase"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togFontStats"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">detected fonts and styles applied<br>per font-family generic-name</div>
 			&nbsp [stats] fonts <sup>2, 3</sup></td><td class="c mono" id="fontStats"></td></tr>
+		<tr><td>[system] fonts</td><td class="c mono" id="fontsSystem"></td></tr>
+		<tr><td>[widget] fonts</td><td class="c mono" id="fontsWidget"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('outputFontsFB')">[ click here ]</span>
 			font fallback <sup>4</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<!--glyphs-->
@@ -687,6 +692,7 @@
 		<tr><td>hangingBaseline</td><td class="c mono" id="ughangingBaseline"></td></tr>
 		<tr><td>ideographicBaseline</td><td class="c mono" id="ugideographicBaseline"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<!--creds-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
 			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>1</sup>
 			<span class="no_color">, </span>
@@ -741,7 +747,6 @@
 		<tr><td>[stand-in] [-moz-] colors</td><td class="c mono" id="cssColormoz_stand-in"></td></tr>
 		<tr><td>[css4] system colors</td><td class="c mono" id="cssColorcss4"></td></tr>
 		<tr><td>[deprecated] system colors</td><td class="c mono" id="cssColorsystem"></td></tr>
-		<tr><td>[system] fonts</td><td class="c mono" id="sFontsHash"></td></tr>
 		<tr><td><span id="togCSSa">computed styles</span> <sup>1</sup></td><td class="c mono" id="cStyles0"></td></tr>
 		<tr class="togC" id="togCSSb"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="cStyles1"></td></tr>
 		<tr class="togC" id="togCSSc"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="cStyles2"></td></tr>

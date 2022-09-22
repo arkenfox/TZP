@@ -827,6 +827,74 @@ function get_formats() {
 	})
 }
 
+function get_system_fonts() {
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let aResults = [],
+			sName = "fonts_system_fonts",
+			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar"],
+			mFonts = [
+				"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+				"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
+			]
+		sDetail[sName] = []
+		if (isFF) {aFonts = aFonts.concat(mFonts)}
+		let propList = ['font-family', 'font-size', 'font-style', 'font-weight']
+		try {
+			let el = dom.sysFont
+			aFonts.forEach(function(font){
+				let aData = []
+				el.style.font = font
+				for (const prop of propList) {
+					aData.push(getComputedStyle(el)[prop])
+				}
+				aResults.push(font +":" + aData.join(", "))
+			})
+		} catch(e) {
+			dom.fontsSystem = log_error("fonts: system_fonts:", e.name, e.message)
+			return resolve("system_fonts:"+ zErr)
+		}
+		// output
+		let display = "none", value = "none"
+		if (aResults.length) {
+			sDetail[sName] = aResults
+			value = mini_sha1(aResults.join(), "fonts system")
+			display = value + buildButton("12", sName)
+		}
+		dom.fontsSystem.innerHTML = display
+		log_perf("system [fonts]",t0)
+		return resolve("system_fonts:"+ value)
+	})
+}
+
+function get_widget_fonts() {
+	return new Promise(resolve => {
+		let t0; if (canPerf) {t0 = performance.now()}
+		let list = ['button','checkbox','color','combobox','radio','text','datetime','datetime-local','textarea',]
+		let sName = "fonts_widget_fonts"
+		sDetail[sName] = []
+		try {
+			let res = []
+			for (let i=0; i < list.length; i++) {
+				let el = document.getElementById("widget"+ i)
+				let font = getComputedStyle(el).getPropertyValue("font-family")
+				let size = getComputedStyle(el).getPropertyValue("font-size")
+				res.push(list[i] +": "+ font +", "+ size)
+			}
+			let hash = mini_sha1(res.join(), "fonts widget")
+			sDetail[sName] = res
+			let btn = buildButton("12", sName)
+			dom.fontsWidget.innerHTML = hash + btn
+			log_perf("widget [fonts]",t0)
+			return resolve("widget_fonts:"+ hash)
+		} catch(e) {
+			dom.fontsWidget = log_error("fd: widgets:", e.name, e.message)
+			log_perf("widget [fonts]",t0)
+			return resolve("widget_fonts:"+ zErr)
+		}
+	})
+}
+
 function get_unicode() {
 	/* code based on work by David Fifield (dcf) and Serge Egelman (2015)
 		https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
@@ -1223,8 +1291,10 @@ function outputFonts() {
 
 	Promise.all([
 		get_formats(),
-		get_unicode(),
+		get_system_fonts(),
+		get_widget_fonts(),
 		get_fonts(),
+		get_unicode(),
 		get_woff2(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
