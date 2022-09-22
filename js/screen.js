@@ -16,28 +16,28 @@ function get_fd_architecture() {
 		dom.fdArchOS = zNA
 		return "os_architecture:n/a"
 	}
-	// os bitness: prereq isArch
-	let bits, display
-	// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
-	// isArch: true or eMsg
-	if (isOS !== "mac") {
-		if (isArch === true) {bits = "64bit"
-		} else if (isArch === false) {bits = "32bit"
-		} else {bits = isArch}
-		display = bits
-	} else if (isTZPSmart) {
+	// os bitness: prereq isArch, isArchErr
+		// FF89+: javascript.options.large_arraybuffers: ToDo: watch TB + pref deprecation
+		// isArch: true or eMsg
+		// isArchErr: boolean
+	if (isTZPSmart && isOS == "mac" && isVer > 88) {
 		// macs are always 64bit
-		bits = "64bit"
 		if (isArch !== true) {
 			if (gRun) {
 				gKnown.push("fd:os_architecture")
-				gBypassed.push("fd:os_architecture:"+ bits)
+				gBypassed.push("fd:os_architecture:64bit")
 			}
 		}
-		display = isArch == true ? bits : soB + isArch + scC
+		dom.fdArchOS.innerHTML = isArch == true ? "64bit" : soB + isArch + scC
+		return "os_architecture:64bit"
+	} else {
+		let bits
+		if (isArch === true) {bits = "64bit"
+		} else if (isArch === false) {bits = "32bit" // not used yet while pref exists
+		} else {bits = isArch}
+		dom.fdArchOS.innerHTML = bits
+		return "os_architecture:"+ (isArchErr ? zErr : bits)
 	}
-	dom.fdArchOS.innerHTML = display
-	return "os_architecture:"+ bits
 }
 
 function get_fd_canonical() {
