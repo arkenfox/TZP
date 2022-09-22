@@ -9,21 +9,29 @@ function get_colors() {
 	let aList = [
 		// 23 deprecated
 		// https://www.w3.org/TR/css-color-4/#deprecated-system-colors
-		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow','CaptionText',
-		'InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground','InfoText','Menu','MenuText','Scrollbar',
-		'ThreeDDarkShadow','ThreeDFace','ThreeDHighlight','ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow',
+		'CaptionText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground',
+		'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
+		'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		// css4 19+5
 		// https://www.w3.org/TR/css-color-4/#typedef-system-color
 		'AccentColor','AccentColorText','ActiveText','ButtonBorder','ButtonFace','ButtonText',
 		'Canvas','CanvasText','Field','FieldText','GrayText','Highlight','HighlightText','LinkText',
-		'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText',
-		'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
+		'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText','-moz-activehyperlinktext',
+		'-moz-default-color','-moz-default-background-color','-moz-hyperlinktext','-moz-visitedhyperlinktext',
 		// stand-ins
-		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight','-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
+		'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
+		'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
+		'-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
+		'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow',
+		'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
+		'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
+		'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		// moz: FF102+ items: note append last due to variable length
 		'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
-		'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-		'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // these two dropped FF103
+		'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection',
+		'-moz-mac-tooltip','-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // last two dropped FF103
 	]
 	if (isVer < 102) {
 		let aMozExtra = [
@@ -31,7 +39,11 @@ function get_colors() {
 			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext', // dropped FF88
 			'-moz-gtk-info-bar-text', // dropped FF90
 			// dropped FF78 or lower
-			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext','-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow','-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight','-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow','-moz-win-communications-toolbox','-moz-win-media-toolbox',
+			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
+			'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
+			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
+			'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
+			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		]
 		aList = aList.concat(aMozExtra)
 	}
@@ -90,7 +102,7 @@ function get_colors() {
 		log_perf("colors [css]",t0)
  		return aResults
 	} catch(e) {
-		let eMsg = log_error("css: colors", undefined, e.message)
+		let eMsg = log_error("css: colors", e.name, e.message)
 		for (let i=0; i < 4; i++) {
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = eMsg
 			aResults.push("colors_"+ sNames[i] +":"+ zErr)
@@ -415,53 +427,12 @@ function get_mm_css() {
 	})
 }
 
-function get_system_fonts() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let aResults = [],
-			sName = "css_system_fonts",
-			aFonts = ["caption","icon","menu","message-box","small-caption","status-bar"],
-			mFonts = [
-				"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
-				"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
-			]
-		sDetail[sName] = []
-		if (isFF) {aFonts = aFonts.concat(mFonts)}
-		let propList = ['font-family', 'font-size', 'font-style', 'font-weight']
-		try {
-			let el = dom.sysFont
-			aFonts.forEach(function(font){
-				let aData = []
-				el.style.font = font
-				for (const prop of propList) {
-					aData.push(getComputedStyle(el)[prop])
-				}
-				aResults.push(font +":" + aData.join(", "))
-			})
-		} catch(e) {
-			dom.sFontsHash = log_error("css: system_fonts:", e.name, e.message)
-			return resolve("system_fonts:"+ zErr)
-		}
-		// output
-		let display = "none", value = "none"
-		if (aResults.length) {
-			sDetail[sName] = aResults
-			value = mini_sha1(aResults.join(), "css system fonts")
-			display = value + buildButton("14", sName, aResults.length)
-		}
-		dom.sFontsHash.innerHTML = display
-		log_perf("system fonts [css]",t0)
-		return resolve("system_fonts:"+ value)
-	})
-}
-
 function outputCSS() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let section = []
 	Promise.all([
 		get_mm_css(),
 		get_colors(),
-		get_system_fonts(),
 		get_computed_styles(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
