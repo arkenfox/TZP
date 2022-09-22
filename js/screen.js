@@ -284,73 +284,6 @@ function get_fd_resources() {
 	})
 }
 
-function get_fd_widgets() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
-		let sName = "feature_widgets"
-		sDetail[sName] = []
-
-		try {
-			// loop elements
-			let res = [], sizes = [], fonts = []
-			for (let i=0; i < list.length; i++) {
-				let el = document.getElementById("widget"+ i)
-				let font = "unknown", size = "unknown"
-				font = getComputedStyle(el).getPropertyValue("font-family")
-				size = getComputedStyle(el).getPropertyValue("font-size")
-				if (runSN) {
-					//if (i == 4) {font = "unknown"} // bypass but new
-					//if (i == 1) {font = "-apple-system"; size="11px"} // font + size
-					if (i == 4) {font = "-apple-system"} // font
-					//if (i == 2) {size="26px"} // size
-				}
-				res.push(list[i] +": "+ font +", "+ size)
-				if (i < 6) {sizes.push(size); fonts.push(font)}
-			}
-			let hash = mini_sha1(res.join(), "feature widgets")
-			sDetail[sName] = res
-			fonts = fonts.filter(function(item, position) {return fonts.indexOf(item) === position})
-			sizes = sizes.filter(function(item, position) {return sizes.indexOf(item) === position})
-			// notate
-			let note, color = "3", mixed = ""
-			if (isFF && isTZPSmart) {
-				// we only need the font for OS: ignore unknown to still get an OS
-				let aIgnore = [
-					'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
-					'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
-				]
-				let fntTmp = fonts
-				if (fntTmp.length > 1) {
-					fntTmp = fntTmp.filter(x => !["unknown"].includes(x))
-				}
-				if (fntTmp.length == 1) {
-					let font0 = fntTmp[0]
-					if (aIgnore.includes(font0)) {note = undefined
-					} else if (font0.slice(0,12) == "MS Shell Dlg") {note = "windows"
-					} else if (font0 == "Roboto") {note = "android"
-					} else if (font0 == "-apple-system") {note = "mac"
-					} else if (font0 == "unknown") {note = "unknown"; color = "bad"
-					} else {note = "linux"}
-				} else {
-					note = "NEW"; color = "bad"
-				}
-				if (note !== "NEW") {
-					if (fonts.length > 1 || sizes.length > 1) {mixed = zNEW}
-				}
-			}
-			let btn = buildButton(color, sName, note)
-			dom.fdWidget.innerHTML = hash + btn + mixed + (runSN ? zSIM : "")
-			log_perf("widgets [fd]",t0)
-			return resolve("widgets:"+ hash)
-		} catch(e) {
-			dom.fdWidget = log_error("fd: widgets:", e.name, e.message)
-			log_perf("widgets [fd]",t0)
-			return resolve("widgets:"+ zErr)
-		}
-	})
-}
-
 /* SCREEN */
 
 function return_lb_nw(w,h) {
@@ -2252,7 +2185,6 @@ function outputFD() {
 	Promise.all([
 		get_fd_errors(),
 		get_fd_architecture(),
-		get_fd_widgets(),
 		get_fd_resources(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
