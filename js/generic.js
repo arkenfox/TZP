@@ -205,13 +205,14 @@ const get_isArch = (skip = false) => new Promise(resolve => {
 		// FF89+: 1703505: javascript.options.large_arraybuffers
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
-		isArch = "unknown"
+		isArchErr = false
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isArch = true
 		if (gLoad) {log_perf("isArch [global]",t0,"",isArch)} else if (gRun) {log_perf("isArch [global]",t0,gt0,isArch)}
 		return resolve()
 	} catch(e) {
 		isArch = log_error("fd: os_architecture", e.name, e.message)
+		isArchErr = true
 		return resolve()
 	}
 })
@@ -467,10 +468,8 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	}
 	function tryharder() {
-		// ToDo: harden isOS
-		// isMark: only android is missing this (maybe some obscure forks)
-		//if (isMark == "0 x 0") {isOS = "android"}
-		// next: promise get_fd_chrome and return isChrome: bit slow (30ms+)
+		// ToDo: harden isOS desktop
+		// promise get_fd_chrome and return isChrome: bit slow (30ms+)
 
 		// other options
 			// can I detect MS Shell Dlg \\32 or -apple-system (doc fonts may be blocked)
@@ -479,21 +478,28 @@ const get_isOS = () => new Promise(resolve => {
 		finish("")
 	}
 	try {
-		// widget font: returns generic font-family if #41116 or eventually 1787790
-		let aIgnore = [
-			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
-			'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
-		]
-		log_debug("os", isMark + " | " + isLogo)
-		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
-		if (aIgnore.includes(font)) {
-			tryharder()
+		// fastpath android (FF + nightly, Mull, TBA + alpha)
+		if (isMark == "24 x 24") {
+			isOS = "android"
+			finish("")
 		} else {
-			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-			} else if (font == "-apple-system") {isOS = "mac"
-			} else if (font == "Roboto") {isOS = "android"
-			} else {isOS = "linux"}
-			finish(" | "+ font)
+			// widget font
+			let aIgnore = [
+				'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
+				'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
+			]
+			log_debug("os", isMark + " | " + isLogo)
+			let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
+			if (aIgnore.includes(font)) {
+				// returns generic font-family if #41116 or eventually 1787790
+				tryharder()
+			} else {
+				if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
+				} else if (font == "-apple-system") {isOS = "mac"
+				} else if (font == "Roboto") {isOS = "android" // fallback or do some linux use Roboto?
+				} else {isOS = "linux"}
+				finish(" | "+ font)
+			}
 		}
 	} catch(e) {
 		// no need to gErrorsOnce since we do this in widgets
@@ -1739,7 +1745,7 @@ function run_once() {
 		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
 		log_perf("isFF [global]",t0,"","error")
 	}
-	get_isArch(true)
+	get_isArch(true) // saves 30ms+ later in prereq
 }
 
 run_once()
