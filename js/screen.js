@@ -73,7 +73,6 @@ function get_fd_chrome(log = false) {
 	let os = ""
 	// display
 	function output(r) {
-		if (r.toLowerCase() !== isOS && r !== zNA) {r += sb +"[!= widget]"+ sc + (runSN ? zSIM : "")}
 		dom.fdChrome.innerHTML = r
 		isChrome = r
 		if (log) {log_perf("chrome [not in FP]",t0)}
@@ -214,15 +213,16 @@ function get_fd_resources() {
 		// set
 		function build() {
 			if (isTB) {
+				channel = "Tor Browser"
 				// TB
 				if (isMark == "270 x 48") {
-					channel = "Tor Browser - Alpha"
+					channel += " - Alpha"
 					log_debug("TB", "css branding = 270 x 48 px = alpha", true)
 				} else if (isMark == "336 x 64") {
-					channel = "Tor Browser - Nightly"
+					channel += " - Nightly"
 					log_debug("TB", "css branding = 336 x 64 px = nightly", true)
 				} else if (isMark == "336 x 48") {
-					channel = "Tor Browser - Release"
+					channel += " - Release"
 				}
 				isTBChannel = channel
 			} else if (isFF) {
@@ -288,10 +288,6 @@ function get_fd_widgets() {
 	return new Promise(resolve => {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let list = ['button','checkbox','color','combobox','radio','text','datetime','textarea']
-		let aIgnore = [
-			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
-			'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
-		]
 		let sName = "feature_widgets"
 		sDetail[sName] = []
 
@@ -320,6 +316,10 @@ function get_fd_widgets() {
 			let note, color = "3", mixed = ""
 			if (isFF && isTZPSmart) {
 				// we only need the font for OS: ignore unknown to still get an OS
+				let aIgnore = [
+					'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
+					'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
+				]
 				let fntTmp = fonts
 				if (fntTmp.length > 1) {
 					fntTmp = fntTmp.filter(x => !["unknown"].includes(x))
