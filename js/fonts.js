@@ -635,6 +635,11 @@ function get_fonts() {
 
 			// TEMP OUTPUT
 			let sizeReturn = "TBA"
+			aIgnore.forEach(function(item) {
+				let el = item.split(":")[0],
+					value = item.split(":")[1]
+				document.getElementById(el).innerHTML = value
+			})
 			for (const k of Object.keys(oData)) {
 				// TEMP output
 				let aList = oData[k]["names"]
@@ -657,7 +662,8 @@ function get_fonts() {
 						tmpName = "fonts_fontsizes"
 						sDetail[tmpName] = oData[k]["newdata"]
 						sizeReturn = oData[k]["hash"]
-						dom.fontSizes.innerHTML = sizeReturn + buildButton("12", tmpName)
+						let lenReturn = Object.keys(oData[k]["newdata"]).length
+						dom.fontSizes.innerHTML = sizeReturn + buildButton("12", tmpName, lenReturn)
 					}
 				}
 			}
