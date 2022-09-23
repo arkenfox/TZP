@@ -280,7 +280,6 @@ const getFonts = () => {
 			return resolve(zNA)
 		}
 		try {
-			let t0, time0; if (canPerf) {t0 = performance.now()}
 			let aTime = []
 
 			const doc = document // or iframe.contentWindow.document
@@ -372,7 +371,6 @@ const getFonts = () => {
 				}
 				return dimensions
 			}
-			if (canPerf) {aTime.push("div"+ s4 + Math.round(performance.now() - t0) + sc); time0 = performance.now()}
 
 			// base [default] sizes
 			const base = baseFontsFull.reduce((acc, font) => {
@@ -435,7 +433,7 @@ const getFonts = () => {
 					pair[1].add("mismatch:"+ xReturn)
 				}
 			})
-			if (canPerf) {aTime.push("base"+ s4 + Math.round(performance.now() - time0) + sc); time0 = performance.now()}
+
 			span.style.font = "" // reset from system fonts
 			// measure
 			if (aTestsValid.length) {
@@ -462,11 +460,11 @@ const getFonts = () => {
 							}
 						})
 						if (intDetected == intDetectedMax) {isDetected = true}
+						//isDetected = false // force 3 full checks if no platformfont
 						return
 					})
 				})
 			}
-			if (canPerf) {aTime.push("measure"+ s4 + Math.round(performance.now() - time0) + sc); time0 = performance.now()}
 
 			// tidy base
 			sDetail["fonts_fontsizes_base"] = {}
@@ -483,17 +481,14 @@ const getFonts = () => {
 				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
 			}
 
-			// tidy lies: none/all/fntFake
+			// tidy lies: none/all
 			aTests.forEach(function(pair) {
 				if (pair[1].length == 0) {
 					pair[1].clear()
 					pair[1].add("none")
 				} else if (pair[1].length == fntList.length) {
 					pair[1].clear()
-					pair[1].add("all")
-				} else if (fntFake == [...pair[1]][0].split(":")[0]) { //fntFake must be first
-					pair[1].clear()
-					pair[1].add("poison pill")
+					pair[1].add("all") // includes poison pill
 				}
 			})
 
@@ -509,16 +504,11 @@ const getFonts = () => {
 			const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
 			const fontsTransformNumber = [...detectedViaTransformNumber]
 
-			// finish
-			if (canPerf) {
-				aTime.push("tidy"+ s4 + Math.round(performance.now() - time0) + sc);
-				aTime.push("total"+ so + Math.round(performance.now() - t0) + sc);
-				log_debug("fontsizes", aTime.join(" | "))
-			}
 			return resolve({
-				fontsScroll,
+				// match display order
 				fontsOffset,
 				fontsClient,
+				fontsScroll,
 				fontsPixel,
 				fontsPixelSize,
 				fontsPerspective,
@@ -541,12 +531,6 @@ function get_fonts() {
 		let t0; if (canPerf) {t0 = performance.now()}
 
 		// functions
-		function get_font_names(aFontSize) {
-			let array = []
-			aFontSize.forEach(function(item) {array.push(item.split(":")[0])})
-			array = array.filter(function(item, position) {return array.indexOf(item) === position})
-			return array
-		}
 		function get_baseHash(isMismatch) {
 			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
 			try {
@@ -584,8 +568,8 @@ function get_fonts() {
 			// exit zBO
 			if (res === zB0) {exit(zB0); return}
 
-			let oHashesRaw = {}, aIgnore = [], isMismatch = false
-			let ignoreList = [zNS, "none", "all", "poison pill", "zero dimensions"]
+			let oData = {}, aIgnore = [], isMismatch = false
+			let ignoreList = [zNS, "none", "all", "zero dimensions"]
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
 					let data = res[name], hash = "unknown"
@@ -600,11 +584,15 @@ function get_fonts() {
 						aIgnore.push(name +":"+ hash)
 						isMismatch = true
 					} else {
+						// group by hash
 						hash = mini(data.join(), "fontsizes "+ name)
-						if (oHashesRaw[hash] == undefined) {
-							oHashesRaw[hash] = [name]
-						} else {
-							oHashesRaw[hash].push(name)
+						if (oData[hash] == undefined) {
+							oData[hash] = {}
+							oData[hash]["names"] = []
+						}
+						oData[hash]["names"].push(name)
+						if (oData[hash]["rawdata"] == undefined) {
+							oData[hash]["rawdata"] = data
 						}
 					}
 				}
@@ -612,65 +600,69 @@ function get_fonts() {
 			// baseReturn
 			let baseReturn = "fontsizes_base:"+ get_baseHash(isMismatch)
 
-			// compact each res, get new mini hashes
-			let aHashesSeven = [], oHashes = {}, aLineData = []
-			for (const k of Object.keys(oHashesRaw)) {
-				let aOriginal = res[oHashesRaw[k][0]]
-				let oTempFont = {}
+			// collect size buckets, font names
+				// handle mutiple sizes per font: e.g. monospace, serif
+			let firstBaseFont = baseFontsNames[0]
+			for (const k of Object.keys(oData)) {
+				let aOriginal = oData[k]["rawdata"]
+				let aFontNames = []
+				let oSizes = {}
 				aOriginal.forEach(function(item) {
 					let font = item.split(":")[0],
 						basefont = item.split(":")[1],
 						size = item.split(":")[2]
-					if (oTempFont[font] == undefined) {oTempFont[font] = {}}
-					if (oTempFont[font][size] == undefined) {oTempFont[font][size] = []}
-					oTempFont[font][size].push(basefont)
-				})
-				let aNew = [], firstBaseFont = baseFontsNames[0]
-				for (const f of Object.keys(oTempFont)) {
-					let oSize = Object.keys(oTempFont[f]).length
-					let aCombine = []
-					for (const s of Object.keys(oTempFont[f])) {
-						let aBase = oTempFont[f][s]
-						if (oSize == 1) {
-							if (aBase.length == 3 || aBase == firstBaseFont) {
-								aNew.push(f +":"+ s)
-							} else {
-								aNew.push(f+ ":"+ s +" "+ aBase.join(", "))
-							}
-						} else {
-							aCombine.push(s +" "+ aBase.join(", "))
-						}
+					aFontNames.push(font)
+					let fontitem = (basefont == firstBaseFont ? font : font +" "+ basefont) // remove noise
+					if (oSizes[size] == undefined) {oSizes[size] = []}
+					// don't add baseFont variants if already added
+					// e.g. "2426 x 330": [ "LilyUPC", "LilyUPC sans-serif", "LilyUPC serif" ]
+					if (!oSizes[size].includes(font)) {
+						oSizes[size].push(fontitem)
 					}
-					if (aCombine.length) {aNew.push(f +":" + aCombine.join(":"))}
-				}
-				let aReplace = oHashesRaw[k]
-				let newHash = mini_sha1(aNew.join(), "fontsizes [compact "+ k +"]")
-				oHashes[newHash] = aReplace
-				aReplace.forEach(function(resName) {
-					if (resName.slice(-6) !== "Number") {aHashesSeven.push(newHash)}
-					res[resName] = aNew
-					aLineData.push(resName +":"+ newHash +":" + aNew.length)
 				})
+				// sort
+				let aNew = {}
+				for (const j of Object.keys(oSizes).sort()) {aNew[j] = oSizes[j]}
+				// replace
+				oData[k]["newdata"] = aNew
+				oData[k]["hash"] = mini_sha1(aNew, "fontsizes "+ k)
+				// add fontnames
+				aFontNames = aFontNames.filter(function(item, position) {return aFontNames.indexOf(item) === position})
+				oData[k]["fontnames"] = aFontNames
 			}
-			// merge ignore into aLineData
-			aLineData = aLineData.concat(aIgnore)
-			// temp visual check
-			aLineData.forEach(function(item) {
-				let name = item.split(":")[0], hash = item.split(":")[1]
-				try {document.getElementById(name).innerHTML = hash} catch(e) {}
-			})
-			aLineData.sort()
-			aIgnore.sort()
+			//console.log(oData)
+			//console.log(aIgnore)
 
-// temp: output font names
-let tmpName = "fonts_fontnames_notglobal"
-sDetail[tmpName] = get_font_names(res["fontsOffset"])
-let fontNameHash = mini_sha1(sDetail[tmpName].join(), "fontnames")
-let fontNameBtn = buildButton("12", tmpName, sDetail[tmpName].length)
-dom.fontNames.innerHTML = fontNameHash + fontNameBtn + (isBaseFonts ? " from"+ fontBaseBtn : "")
-
-return resolve(["fontsizes:TBA", baseReturn])
-
+			// TEMP OUTPUT
+			let sizeReturn = "TBA"
+			for (const k of Object.keys(oData)) {
+				// TEMP output
+				let aList = oData[k]["names"]
+				for (let i=0; i < aList.length; i++) {
+					let btn = ""
+					if (i == 0) {
+						let tmpName = "fonts_fontsizes_"+ aList[i] +"_reported_notglobal"
+						sDetail[tmpName] = oData[k]["newdata"]
+						btn = buildButton("12", tmpName)
+					}
+					document.getElementById(aList[i]).innerHTML = oData[k]["hash"] + btn
+					if (aList[i] == "fontsTransformNumber") {
+						// names
+						let tmpName = "fonts_fontnames_notglobal"
+						sDetail[tmpName] = oData[k]["fontnames"]
+						let fontNameHash = mini_sha1(sDetail[tmpName].join(), "fontnames")
+						let fontNameBtn = buildButton("12", tmpName, sDetail[tmpName].length)
+						dom.fontNames.innerHTML = fontNameHash + fontNameBtn + (isBaseFonts ? " from"+ fontBaseBtn : "")
+						// sizes
+						tmpName = "fonts_fontsizes"
+						sDetail[tmpName] = oData[k]["newdata"]
+						sizeReturn = oData[k]["hash"]
+						dom.fontSizes.innerHTML = sizeReturn + buildButton("12", tmpName)
+					}
+				}
+			}
+			log_perf("fontsizes [fonts]",t0)
+			return resolve(["fontsizes:"+ sizeReturn, baseReturn])
 		})
 	})
 }
@@ -1301,11 +1293,11 @@ function outputFonts() {
 	section.push("document_fonts:"+ r)
 
 	Promise.all([
+		get_unicode(),
 		get_formats(),
 		get_system_fonts(),
 		get_widget_fonts(),
 		get_fonts(),
-		get_unicode(),
 		get_woff2(),
 	]).then(function(results){
 		results.forEach(function(currentResult) {
