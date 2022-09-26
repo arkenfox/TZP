@@ -155,7 +155,7 @@ function get_math_other(isMathLies) {
 		res.push(Math.exp(1) - 1) // research expm1(1)
 		let y = Math.E; res.push((y - 1 / y) / 2) // original sinh(1)
 		res.push((Math.exp(1) - Math.exp(-1)) / 2) // reseach sinh(1)
-		let hash = mini_sha1(res.join())
+		let hash = mini_sha1(res.join(), "math other")
 		let value = hash
 		if (isTZPSmart && isMathLies) {
 			sName += "_reported_notglobal"
@@ -196,7 +196,7 @@ function get_math_trig(isMathLies) {
 				res.push(Math[k](value))
 			})
 		}
-		let hash = mini_sha1(res.join())
+		let hash = mini_sha1(res.join(), "math trigonometric")
 		let value = hash, notation = ""
 		if (isTZPSmart) {
 			if (isFF) {notation = rfp_red}
@@ -259,7 +259,8 @@ function get_nav_prototype() {
 		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr + movedStr
 		return "navigator_keys:"+ realhash
 	} else {
-		dom.nProto = zB0 // empty array blocked
+		dom.nProto = soL + "none" + scC // empty array
+		if (gRun) {gKnown.push("misc:navigator keys")}
 		return "navigator_keys:"+ zLIE
 	}
 }
@@ -324,9 +325,8 @@ function get_perf1() {
 				performance.clearMeasures()
 		}
 	} catch(e) {
-		log_error("misc: perf mark", e.name, e.message)
 		// bypass isFF non-RFP
-		display = (e.name === undefined ? zErr : trim_error(e.name, e.message)) +" | "+ zNA
+		display = log_error("misc: perf mark", e.name, e.message) +" | "+ zNA
 		let fpValue = zErr
 		if (isFF && isTZPSmart && !isRFP) {
 			fpValue = "not zero | not zero"
