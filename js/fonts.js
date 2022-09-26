@@ -99,50 +99,9 @@ let fntTB = {
 }
 
 function set_fntList() {
-	// bail
-	if (isOS == "") {
-		dom.fontFB = zNA
-		return
-	}
-	// isBaseFonts
-	if (isRFP && isVer > 79 && !isTB) {
-		if (isOS == "windows" || isOS == "mac") {isBaseFonts = true}
-	} else if (isTB) {
-		if (isOS !== "android") {isBaseFonts = true}
-	}
 
 	// page load: fntMaster & fntMasterBase once
 	if (gLoad) {
-		fntFake = "--00"+ rnd_string() + " poison pill"
-		for (const k of Object.keys(fntMaster)) {
-			// master
-			let array = fntBase[k].concat(fntOther[k])
-			if (isOS == k) {
-				array.push(fntFake) // + fake
-				if (isPlatformFont !== undefined) { // - self
-					array = array.filter(x => ![isPlatformFont].includes(x))
-				}
-			}
-			array.sort()
-			array = array.filter(function(item, position) {return array.indexOf(item) === position})
-			fntMaster[k] = array
-			// masterbase
-			if (isTB) {
-				array = fntTB[k]
-			} else {
-				array = fntBase[k]
-			}
-			if (isOS == k) {
-				array.push(fntFake)
-				if (isPlatformFont !== undefined) {
-					array = array.filter(x => ![isPlatformFont].includes(x))
-				}
-			}
-			array.sort()
-			array = array.filter(function(item, position) {return array.indexOf(item) === position})
-			fntMasterBase[k] = array
-		}
-
 		// set baseMaster first three items
 		let baseMaster = ['monospace','sans-serif','serif']
 		if (isOS == "mac") {
@@ -166,7 +125,7 @@ function set_fntList() {
 			baseFonts = baseMaster
 		}
 		// expand baseMaster
-			//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
+			//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF/blink // perf
 			//'none' // redundant: it will always equal default proportional font
 		baseMaster = baseMaster.concat(['cursive','fantasy','fangsong','system-ui'])
 		// set baseFontsNames
@@ -183,12 +142,59 @@ function set_fntList() {
 		baseFontsFull = baseFonts // exact match to font tests
 		let baseOther = baseMaster.filter(x => !baseFontsNames.includes(x)) // don't double up on generic families
 		baseFontsFull = baseFontsFull.concat(baseOther)
+		baseFontsFull.sort()
 		/*
 		console.debug("names", baseFontsNames)
 		console.debug(" base", baseFonts)
 		console.debug(" full", baseFontsFull)
 		//*/
+
+		if (isOS !== "") {
+			fntFake = "--00"+ rnd_string() + " poison pill"
+			for (const k of Object.keys(fntMaster)) {
+				// master
+				let array = fntBase[k].concat(fntOther[k])
+				if (isOS == k) {
+					array.push(fntFake) // + fake
+					if (isPlatformFont !== undefined) { // - self
+						array = array.filter(x => ![isPlatformFont].includes(x))
+					}
+				}
+				array.sort()
+				array = array.filter(function(item, position) {return array.indexOf(item) === position})
+				fntMaster[k] = array
+				// masterbase
+				if (isTB) {
+					array = fntTB[k]
+				} else {
+					array = fntBase[k]
+				}
+				if (isOS == k) {
+					array.push(fntFake)
+					if (isPlatformFont !== undefined) {
+						array = array.filter(x => ![isPlatformFont].includes(x))
+					}
+				}
+				array.sort()
+				array = array.filter(function(item, position) {return array.indexOf(item) === position})
+				fntMasterBase[k] = array
+			}
+		}
 	}
+
+	// bail
+	if (isOS == "") {
+		dom.fontFB = zNA
+		return
+	}
+
+	// isBaseFonts
+	if (isRFP && isVer > 79 && !isTB) {
+		if (isOS == "windows" || isOS == "mac") {isBaseFonts = true}
+	} else if (isTB) {
+		if (isOS !== "android") {isBaseFonts = true}
+	}
+
 	// global: re-populate sDetail[]
 	if (gRun) {
 		fontBtns = ""
@@ -276,9 +282,6 @@ function set_fallback_string() {
 const getFonts = () => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	return new Promise(resolve => {
-		if (fntList.length == 0) {
-			return resolve(zNA)
-		}
 		try {
 			if (runSE) {abc = def}
 			const doc = document // or iframe.contentWindow.document
@@ -384,6 +387,23 @@ const getFonts = () => {
 				acc[font.split(",")[0]] = dimensions // use only generic name: w/o fallback fonts i.e not "sans-serif, Arial"
 				return acc
 			}, {})
+			// tidy base
+			sDetail["fonts_fontsizes_base"] = {}
+			let oTempBase = {}
+			for (const k of Object.keys(base)) {
+				let tmpHash = mini(base[k], "fontsizes base "+ k)
+				if (oTempBase[tmpHash] == undefined) {
+					oTempBase[tmpHash] = {"bases" : [k], "data" : base[k]}
+				} else {
+					oTempBase[tmpHash]["bases"].push(k)
+				}
+			}
+			for (const h of Object.keys(oTempBase).sort()) {
+				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
+			}
+			if (fntList.length == 0) {
+				return resolve("baseonly")
+			}
 
 			// typeof: don't let each !typeof affect other methods
 			let aTests = [
@@ -465,21 +485,6 @@ const getFonts = () => {
 				})
 			}
 
-			// tidy base
-			sDetail["fonts_fontsizes_base"] = {}
-			let oTempBase = {}
-			for (const k of Object.keys(base)) {
-				let tmpHash = mini(base[k], "fontsizes base "+ k)
-				if (oTempBase[tmpHash] == undefined) {
-					oTempBase[tmpHash] = {"bases" : [k], "data" : base[k]}
-				} else {
-					oTempBase[tmpHash]["bases"].push(k)
-				}
-			}
-			for (const h of Object.keys(oTempBase).sort()) {
-				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
-			}
-
 			// tidy lies: none/all
 			aTests.forEach(function(pair) {
 				if (pair[1].length == 0) {
@@ -548,8 +553,10 @@ function get_fonts() {
 		}
 		function exit(value) {
 			dom.fontNames = value; dom.fontSizes = value; dom.fontBase = value
+			let baseReturn = (value == zNA ? "fontsizes_base:"+ get_baseHash(false) : value )
+			log_perf("fontsizes [fonts]",t0)
 			return resolve(
-				["fontsizes:"+ value, "fontsizes_base:"+ value]
+				["fontsizes:"+ value, "fontsizes_base:"+ baseReturn]
 			)
 		}
 		// clear
@@ -557,15 +564,14 @@ function get_fonts() {
 		sDetail["fonts_fontsizes"] = []
 		sDetail["fonts_fontnames_notglobal"] = []
 		sNames.forEach(function(name) {sDetail["fonts_fontsizes_"+ name + "_reported_notglobal"] = []})
-		// exit n/a
-		if (!fntList.length) {exit(zNA); return}
 
 		// run
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
-			// exit error
-			if ("string" === typeof res) {exit(zErr); return}
+			// quick exits
+			if (res == "baseonly") {exit(zNA); return
+			} else if ("string" === typeof res) {exit(zErr); return}
 
 			let oData = {}, aIgnore = [], isMismatch = false
 			let ignoreList = [zNS, "none", "all", "zero dimensions"]
