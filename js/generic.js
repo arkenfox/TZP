@@ -383,7 +383,7 @@ const get_isClientRect = () => new Promise(resolve => {
 			} catch(e) {
 				log_error("elements: "+ aNames[i], e.name, e.message)
 				aClientRect.push(zErr)
-				aClientRectMethod.push(zNA)
+				aClientRectNoise[i] = zNA
 			}
 		}
 		isClientRect = aClientRect.indexOf(true)
@@ -1022,11 +1022,7 @@ function log_error(title, name, msg, len = 60) {
 	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
 	// collect globalrun errors
 	if (gRun) {
-		if (name == "ReferenceError" && msg == "def is not defined") {
-			gErrors.push("simulated: " + title)
-		} else {
-			gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
-		}
+		gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
 	}
 	// return a trimmed str for displays
 	let str = name + (isMsg ? ": "+ msg : "")
@@ -1034,8 +1030,7 @@ function log_error(title, name, msg, len = 60) {
 	return(str)
 }
 
-function trim_error(name, msg, len) {
-	if (len == undefined) {len = 60}
+function trim_error(name, msg, len = 60) {
 	let isMsg = true
 	if (name == undefined || name == "" || name === null) {name = zErr}
 	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
@@ -1246,6 +1241,7 @@ function log_section(name, time1, data) {
 				// errors
 				gErrors = gErrors.concat(gErrorsOnce)
 				if (gErrors.length) {
+					gErrors = gErrors.filter(function(item, position) {return gErrors.indexOf(item) === position})
 					gErrors.sort()
 					let eBtn = buildButton("0", "errors", gErrors.length +" error"+ (gErrors.length > 1 ? "s": ""),"showMetrics")
 					dom.errorshash.innerHTML = sha1(gErrors.sort()) + eBtn
