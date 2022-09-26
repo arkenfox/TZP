@@ -46,7 +46,6 @@ function get_audio2_context(run) {
 				if (key == "ac-outputLatency") {
 					// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
 					if (throwZero && run == 1) {testValue = 0}
-					testValue = 0
 					latencyError = (testValue == 0 ? true : false)
 				}
 				if (runSL && key == "ac-channelCount") {testValue = 4} // sim a fake value in our subset
