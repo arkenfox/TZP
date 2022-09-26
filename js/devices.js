@@ -104,21 +104,23 @@ function get_device_color() {
 			} else {r1 = screen.pixelDepth
 			}
 		} catch(e) {
-			r1 = zB0; log_error("devices: pixelDepth", e.name, e.message)
+			r1 = zErr; log_error("devices: pixelDepth", e.name, e.message)
 		}
 		r1 = cleanFn(r1)
-		// lies
-		if (r1 !== zB0) {
-			if (typeof r1 !== "number") {isLies = true
-			} else if (!Number.isInteger(r1)) {isLies = true
-			} else if (r1 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
-		}
 		let v1 = r1
-		// record lies but not blocks
-		if (isLies && r1 !== zB0) {
-			v1 = zLIE; r1 = soL + r1 + scC
-			if (gRun) {gKnown.push(name)}
+		if (isTZPSmart) {
+			// lies
+			if (r1 !== zErr) {
+				if (typeof r1 !== "number") {isLies = true
+				} else if (!Number.isInteger(r1)) {isLies = true
+				} else if (r1 < 2) {isLies = true
+				} else if (proxyLies.includes("Screen.pixelDepth")) {isLies = true}
+			}
+			// record lies but not blocks
+			if (isLies && r1 !== zErr) {
+				v1 = zLIE; r1 = soL + r1 + scC
+				if (gRun) {gKnown.push(name)}
+			}
 		}
 		if (runDEP) {console.log(" - returned", v1)}
 		dom.pixelDepth.innerHTML = r1
@@ -127,7 +129,7 @@ function get_device_color() {
 
 	// colorDepth: 418986: FF41+ RFP
 	function get_colordepth(name) {
-		let isLies = false, r2
+		let isLies = false, r2, r2notation = ""
 		try {
 			if (runSE) {runDEP = false; abc = def
 			} else if (runSL) {runDEP = false; r2 = "24"
@@ -135,30 +137,33 @@ function get_device_color() {
 			} else {r2 = screen.colorDepth
 			}
 		} catch(e) {
-			r2 = zB0; log_error("devices: colorDepth", e.name, e.message)
+			r2 = zErr; log_error("devices: colorDepth", e.name, e.message)
 		}
 		r2 = cleanFn(r2)
-		// lies
-		if (r2 !== zB0) {
-			if (typeof r2 !== "number") {isLies = true
-			} else if (!Number.isInteger(r2)) {isLies = true
-			} else if (r2 < 2) {isLies = true
-			} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
-		}
 		let v2 = r2
-		// record
-		if (isLies && r2 !== zB0) {
-			v2 = zLIE; r2 = soL + r2 + scC
-			if (gRun) {gKnown.push(name)}
+		if (isTZPSmart) {
+			// lies
+			if (r2 !== zErr) {
+				if (typeof r2 !== "number") {isLies = true
+				} else if (!Number.isInteger(r2)) {isLies = true
+				} else if (r2 < 2) {isLies = true
+				} else if (proxyLies.includes("Screen.colorDepth")) {isLies = true}
+			}
+			// record
+			if (isLies && r2 !== zErr) {
+				v2 = zLIE; r2 = soL + r2 + scC
+				if (gRun) {gKnown.push(name)}
+			}
+			r2notation = (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
 		}
 		if (runDEP) {console.log(" - returned", v2)}
-		dom.colorDepth.innerHTML = r2 + (r1 == 24 && r2 == 24 ? rfp_green : rfp_red)
+		dom.colorDepth.innerHTML = r2 + r2notation
 		res.push("colorDepth:"+ v2)
 	}
 
 	// mm color: 418986: FF41+ RFP
 	function get_mm_color(name) {
-		let isLies = false, r3, isBypass = false
+		let isLies = false, r3, isBypass = false, r3notation = ""
 		let v3 = getElementProp("#cssC","content",":after")
 		try {
 			if (runSE) {runCLR = false; abc = def
@@ -170,27 +175,32 @@ function get_device_color() {
 				})()
 			}
 		} catch(e) {
-			r3 = zB0; log_error("devices: matchmedia_color", e.name, e.message)
+			r3 = zErr; log_error("devices: matchmedia_color", e.name, e.message)
 		}
 		r3 = cleanFn(r3)
-		// bypass
-		if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
-		// lies
-		if (r3 !== zB0) {
-			if (typeof r3 !== "number") {isLies = true
-			} else if (!Number.isInteger(r3)) {isLies = true
-			} else if (r3 < 2) {isLies = true}
+
+		if (isTZPSmart) {
+			// bypass
+			if (r3 !== v3 && v3 !== "x") {isBypass = true; isLies = true}
+			// lies
+			if (r3 !== zErr) {
+				if (typeof r3 !== "number") {isLies = true
+				} else if (!Number.isInteger(r3)) {isLies = true
+				} else if (r3 < 2) {isLies = true}
+			}
+			// record
+			if (isLies) {
+				// zErr can't get in here unless we can bypass
+				if (!isBypass) {v3 = zLIE}
+				r3 = (isBypass ? soB : soL) + r3 + scC
+				if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
+			}
+			r3notation = r3 === 8 ? rfp_green : rfp_red
 		}
+
 		if (!isLies) {v3 = r3} // don't record blocked if no lies
-		// record
-		if (isLies) {
-			// zBO can't get in here unless we can bypass
-			if (!isBypass) {v3 = zLIE}
-			r3 = (isBypass ? soB : soL) + r3 + scC
-			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v3)}}
-		}
 		if (runCLR) {console.log(" - returned", v3)}
-		dom.mmC.innerHTML = r3 + (r3 === 8 ? rfp_green : rfp_red)
+		dom.mmC.innerHTML = r3 + r3notation
 		res.push("matchmedia_color:"+ v3)
 	}
 
@@ -208,19 +218,21 @@ function get_device_color() {
 			}
 		} catch(e) {
 			log_error("devices: matchmedia_color-gamut", e.name, e.message)
-			r4 = zB0
+			r4 = zErr
 		}
 		r4 = cleanFn(r4)
-		// bypass
-		if (r4 !== v4 && v4 !== "x") {isBypass = true; isLies = true}
-		if (!isLies) {v4 = r4} // don't record blocked if no lies
-		// record
-		if (isLies) {
-			// zBO can't get in here unless we can bypass
-			if (!isBypass) {v4 = zLIE}
-			r4 = (isBypass ? soB : soL) + r4 + scC
-			if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v4)}}
+		if (isTZPSmart) {
+			// bypass
+			if (r4 !== v4 && v4 !== "x") {isBypass = true; isLies = true}
+			// record
+			if (isLies) {
+				// zErr can't get in here unless we can bypass
+				if (!isBypass) {v4 = zLIE}
+				r4 = (isBypass ? soB : soL) + r4 + scC
+				if (gRun) {gKnown.push(name); if (isBypass) {gBypassed.push(name +":"+ v4)}}
+			}
 		}
+		if (!isLies) {v4 = r4} // don't record blocked if no lies
 		dom.mmCG.innerHTML = r4
 		res.push("matchmedia_color-gamut:"+ v4)
 	}
@@ -865,18 +877,22 @@ function get_pointer_hover() {
 		function get_mm(type, id) {
 			let x=zNS, x2="", f="fine", c="coarse", h="hover", n="none", q=type+": "
 			try {
-				if (window.matchMedia("("+ q + n +")").matches) x=n
-				if (window.matchMedia("("+ q + c +")").matches) x=c
-				if (window.matchMedia("("+ q + f +")").matches) x=f
-				if (window.matchMedia("("+ q + h +")").matches) x=h
+				if (runSE) {abc = def
+				} else if (runSL) {x = "banana"
+				} else {
+					if (window.matchMedia("("+ q + n +")").matches) x=n
+					if (window.matchMedia("("+ q + c +")").matches) x=c
+					if (window.matchMedia("("+ q + f +")").matches) x=f
+					if (window.matchMedia("("+ q + h +")").matches) x=h
+				}
 			} catch(e) {
 				log_error("devices: matchmedia_"+ type, e.name, e.message)
-				x = zB0
+				x = zErr
 			}
 			x2 = getElementProp(id,"content",":after")
+
 			// lies
-			if (runSL) {x = "banana"}
-			if (x2 !== "x") {
+			if (isTZPSmart && x2 !== "x") {
 				if (x !== x2) {
 					display.push(soB + x + scC)
 					if (type.indexOf("oint") > 0) {pointerBS = true}
@@ -902,12 +918,15 @@ function get_pointer_hover() {
 		r1 = cleanFn(r1)
 		if (r1 == "undefined") {r1 = zD
 		} else if (typeof r1 == "function") {r1 = zE
-		} else {isLiesPE = true}
+		} else {
+			if (isTZPSmart) {isLiesPE = true}
+		}
 		dom.pointer.innerHTML = isLiesPE ? soL + r1 + scC : r1
 		if (gRun && isLiesPE) {
 			gKnown.push("devices:pointer_event")
 		}
 		res.push("pointer_event:"+ (isLiesPE ? zLIE : r1))
+
 		// pointer
 		get_mm("pointer", "#cssP")
 		get_mm("any-pointer", "#cssAP")
@@ -918,7 +937,7 @@ function get_pointer_hover() {
 		get_mm("any-hover", "#cssAH")
 		let h = display.join(" | ")
 		// notate
-		if (isOS == "android") {
+		if (isTZPSmart && isOS == "android") {
 			// FF74+: 1607316
 			if (!pointerBS) {p += (p == "coarse | coarse" ? rfp_green : rfp_red)}
 			if (!hoverBS) {h += (h == "none | none" ? rfp_green : rfp_red)}
