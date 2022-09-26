@@ -152,13 +152,13 @@ const promiseRaceFulfilled = async ({
 /*** GLOBAL VARS ***/
 
 const get_aSystemFont = () => new Promise(resolve => {
-	if (!isFF) {return resolve("not FF")}
 	// unique first system fonts from computed family
 	let t0; if (canPerf) {t0 = performance.now()}
-	let aFonts = ["caption","icon","menu","message-box","small-caption","status-bar",
-		"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
-		"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
-	]
+	let aFonts = ["caption","icon","menu","message-box","small-caption","status-bar"]
+	if (isFF) {
+		aFonts.push("-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+		"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field")
+	}
 	aSystemFont = []
 	try {
 		aFonts.sort()
