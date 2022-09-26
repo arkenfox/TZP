@@ -50,11 +50,12 @@ let fntBase = {
 	android: [],linux: [],
 	mac: ["Al Bayan","Al Nile","Al Tarikh","American Typewriter","Andale Mono","Apple Braille","Apple Chancery","Apple Color Emoji","Apple SD Gothic Neo","Apple Symbols","AppleGothic","AppleMyungjo","Arial","Arial Black","Arial Hebrew","Arial Hebrew Scholar","Arial Narrow","Arial Rounded MT Bold","Arial Unicode MS","Avenir","Avenir Black","Avenir Black Oblique","Avenir Book","Avenir Heavy","Avenir Light","Avenir Medium","Avenir Next","Avenir Next Demi Bold","Avenir Next Heavy","Avenir Next Medium","Avenir Next Ultra Light","Avenir Oblique","Ayuthaya","Baghdad","Bangla MN","Bangla Sangam MN","Baskerville","Beirut","Big Caslon Medium","Bodoni 72","Bodoni 72 Oldstyle","Bodoni 72 Smallcaps","Bodoni Ornaments","Bradley Hand","Brush Script MT","Chalkboard","Chalkboard SE","Chalkduster","Charter","Charter Black","Cochin","Comic Sans MS","Copperplate","Corsiva Hebrew","Courier","Courier New","DIN Alternate","DIN Condensed","Damascus","DecoType Naskh","Devanagari MT","Devanagari Sangam MN","Didot","Diwan Kufi","Diwan Thuluth","Euphemia UCAS","Farah","Farisi","Futura","GB18030 Bitmap","Galvji","Geeza Pro","Geneva","Georgia","Gill Sans","Gujarati MT","Gujarati Sangam MN","Gurmukhi MN","Gurmukhi MT","Gurmukhi Sangam MN","Heiti SC","Heiti TC","Helvetica","Helvetica Neue","Hiragino Maru Gothic ProN","Hiragino Maru Gothic ProN W4","Hiragino Mincho ProN","Hiragino Mincho ProN W3","Hiragino Mincho ProN W6","Hiragino Sans","Hiragino Sans GB","Hiragino Sans GB W3","Hiragino Sans GB W6","Hiragino Sans W0","Hiragino Sans W1","Hiragino Sans W2","Hiragino Sans W3","Hiragino Sans W4","Hiragino Sans W5","Hiragino Sans W6","Hiragino Sans W7","Hiragino Sans W8","Hiragino Sans W9","Hoefler Text","Hoefler Text Ornaments","ITF Devanagari","ITF Devanagari Marathi","Impact","InaiMathi","Kailasa","Kannada MN","Kannada Sangam MN","Kefa","Khmer MN","Khmer Sangam MN","Kohinoor Bangla","Kohinoor Devanagari","Kohinoor Gujarati","Kohinoor Telugu","Kokonor","Krungthep","KufiStandardGK","Lao MN","Lao Sangam MN","Lucida Grande","Luminari","Malayalam MN","Malayalam Sangam MN","Marker Felt","Menlo","Microsoft Sans Serif","Mishafi","Mishafi Gold","Monaco","Mshtakan","Mukta Mahee","Muna","Myanmar MN","Myanmar Sangam MN","Nadeem","New Peninim MT","Noteworthy","Noto Nastaliq Urdu","Noto Sans Kannada","Noto Sans Myanmar","Noto Sans Oriya","Noto Serif Myanmar","Optima","Oriya MN","Oriya Sangam MN","PT Mono","PT Sans","PT Sans Caption","PT Sans Narrow","PT Serif","PT Serif Caption","Palatino","Papyrus","Phosphate","PingFang HK","PingFang SC","PingFang TC","Plantagenet Cherokee","Raanana","Rockwell","STIXGeneral","STIXIntegralsD","STIXIntegralsSm","STIXIntegralsUp","STIXIntegralsUpD","STIXIntegralsUpSm","STIXNonUnicode","STIXSizeFiveSym","STIXSizeFourSym","STIXSizeOneSym","STIXSizeThreeSym","STIXSizeTwoSym","STIXVariants","STSong","Sana","Sathu","Savoye LET","Shree Devanagari 714","SignPainter","SignPainter-HouseScript","Silom","Sinhala MN","Sinhala Sangam MN","Skia","Snell Roundhand","Songti SC","Songti TC","Sukhumvit Set","Symbol","Tahoma","Tamil MN","Tamil Sangam MN","Telugu MN","Telugu Sangam MN","Thonburi","Times","Times New Roman","Trattatello","Trebuchet MS","Verdana","Waseem","Webdings","Wingdings","Wingdings 2","Wingdings 3","Zapf Dingbats","Zapfino",],
 	windows: [
-		"AlternateGothic2 BT","Arial","Arial Black","Arial Narrow","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Calibri","Calibri Light","Calibri Light Italic","Cambria","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Courier New","Ebrima","Gabriola","Gadugi","Georgia","HoloLens MDL2 Assets","Impact","Javanese Text","Leelawadee UI","Leelawadee UI Semilight","Lucida Console","Lucida Sans Unicode","MS Gothic","MS PGothic","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Marlett","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU-ExtB","MingLiU_HKSCS-ExtB","Mongolian Baiti","Myanmar Text","NSimSun","Nirmala UI","Nirmala UI Semilight","PMingLiU-ExtB","Palatino Linotype","Segoe MDL2 Assets","Segoe Print","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","SimSun","SimSun-ExtB","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Sylfaen","Symbol","Tahoma","Times New Roman","Trebuchet MS","Verdana","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight",
+		"AlternateGothic2 BT","Arial","Arial Black","Arial Narrow","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Calibri","Calibri Light","Calibri Light Italic","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Courier New","Ebrima","Gabriola","Gadugi","Georgia","HoloLens MDL2 Assets","Impact","Javanese Text","Leelawadee UI","Leelawadee UI Semilight","Lucida Console","Lucida Sans Unicode","MS Gothic","MS PGothic","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Marlett","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU-ExtB","MingLiU_HKSCS-ExtB","Mongolian Baiti","Myanmar Text","NSimSun","Nirmala UI","Nirmala UI Semilight","PMingLiU-ExtB","Palatino Linotype","Segoe MDL2 Assets","Segoe Print","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","SimSun","SimSun-ExtB","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Sylfaen","Symbol","Tahoma","Times New Roman","Trebuchet MS","Verdana","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight",
 		//"Franklin Gothic Medium", // 1720408
 		// always
 		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
 		// ignore: expected + dupe sizes
+			// "Cambria", // = cambria math
 			// "Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
 			// "Courier", //  = courier new
 			// "MS Serif","Roman","Times", // = TNR
@@ -142,29 +143,32 @@ function set_fntList() {
 			fntMasterBase[k] = array
 		}
 
-		// set baseFonts: either single system font or generic font-family with or without fallback fonts
-		//isPlatformFont = undefined
+		// set baseMaster first three items
+		let baseMaster = ['monospace','sans-serif','serif']
+		if (isOS == "mac") {
+			baseMaster = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
+				'sans-serif',
+				'serif'
+			]
+		} else if (isOS == "windows") {
+			baseMaster = [
+				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
+				'sans-serif, Arial',
+				'serif, Times, Roman'
+			]
+		}
+		// set baseFonts: either single system font or baseMaster first three with or without fallback fonts
 		if (isPlatformFont !== undefined) {
 			// use a system font that cannot be blocked that almost every font differs from
-				// notes:
-				// windows: drops some expected fonts
-					// Tahoma (all), Webdings (FF61 or lower), Wingdings (FF98 or lower)
+				// notes: e.g.windows: drops some expected fonts: Tahoma (all), Webdings (FF61 or lower), Wingdings (FF98 or lower)
 			baseFonts = [isPlatformFont]
 		} else {
-			baseFonts = ['monospace','sans-serif','serif']
-			if (isOS == "mac") {
-				baseFonts = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
-					'sans-serif',
-					'serif'
-				]
-			} else if (isOS == "windows") {
-				baseFonts = [
-					'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
-					'sans-serif, Arial',
-					'serif, Times, Roman'
-				]
-			}
+			baseFonts = baseMaster
 		}
+		// expand baseMaster
+			//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
+			//'none' // redundant: it will always equal default proportional font
+		baseMaster = baseMaster.concat(['cursive','fantasy','fangsong','system-ui'])
 		// set baseFontsNames
 			// baseFonts w/o potential fallback fonts e.g. "sans-serif, Arial" -> "sans-serif"
 			// used to create arrays in objects etc
@@ -172,10 +176,6 @@ function set_fntList() {
 		baseFonts.forEach(function(name) {
 			baseFontsNames.push(name.split(",")[0])
 		})
-		// baseMaster
-			//'ui-monospace','ui-rounded','ui-serif','math','emoji' // redundant in FF // perf
-			//'none' // redundant: it will always equal default proportional font
-		let baseMaster = ['monospace','sans-serif','serif','cursive','fantasy','fangsong','system-ui']
 		// add systemfonts to baseMaster + dedupe
 		baseMaster = baseMaster.concat(aSystemFont)
 		// set baseFontsFull
@@ -280,8 +280,7 @@ const getFonts = () => {
 			return resolve(zNA)
 		}
 		try {
-			let aTime = []
-
+			if (runSE) {abc = def}
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
 			const div = doc.createElement('div')
@@ -520,8 +519,8 @@ const getFonts = () => {
 			})
 		} catch(e) {
 			// TypeError: document.fonts.values() is not iterable
-			log_error("fonts: fontsizes", e.name, e.message)
-			return resolve(zB0)
+			let eMsg = log_error("fonts: fontsizes", e.name, e.message)
+			return resolve(eMsg)
 		}
 	})
 }
@@ -565,8 +564,8 @@ function get_fonts() {
 		getFonts().then(res => {
 			// remove element
 			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
-			// exit zBO
-			if (res === zB0) {exit(zB0); return}
+			// exit error
+			if ("string" === typeof res) {exit(zErr); return}
 
 			let oData = {}, aIgnore = [], isMismatch = false
 			let ignoreList = [zNS, "none", "all", "zero dimensions"]
@@ -850,6 +849,7 @@ function get_system_fonts() {
 		if (isFF) {aFonts = aFonts.concat(mFonts)}
 		let propList = ['font-family', 'font-size', 'font-style', 'font-weight']
 		try {
+			if (runSE) {abc = def}
 			let el = dom.sysFont
 			aFonts.forEach(function(font){
 				let aData = []
@@ -883,6 +883,7 @@ function get_widget_fonts() {
 		let sName = "fonts_widget_fonts"
 		sDetail[sName] = []
 		try {
+			if (runSE) {abc = def}
 			let res = []
 			for (let i=0; i < list.length; i++) {
 				let el = document.getElementById("widget"+ i)
@@ -897,7 +898,7 @@ function get_widget_fonts() {
 			log_perf("widget [fonts]",t0)
 			return resolve("widget_fonts:"+ hash)
 		} catch(e) {
-			dom.fontsWidget = log_error("fd: widgets:", e.name, e.message)
+			dom.fontsWidget = log_error("fonts: widgets:", e.name, e.message)
 			log_perf("widget [fonts]",t0)
 			return resolve("widget_fonts:"+ zErr)
 		}
@@ -1127,6 +1128,7 @@ function get_unicode() {
 					if (isCanvas) {
 						try {
 							ctx.font = "normal normal 22000px "+ stylename
+							if (runSE) {abc = def}
 							let tm = ctx.measureText(codeString)
 							// textmetrics
 							for (const k of Object.keys(oTM)) {
