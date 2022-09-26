@@ -340,10 +340,10 @@ function get_perf1() {
 		return "perf_mark:"+ fpValue
 	}
 	// sim
+	let ctrlE = "0, 0, 0, 0", ctrlM = 0
 	if (runSL) {
 		if (isRFP) {testE = "1, 4, 4, 1"} else {testE = ctrlE}
 	}
-	let ctrlE = "0, 0, 0, 0", ctrlM = 0
 	display = testE +" | "+ testM
 	if (valueE !== zErr) {valueE = testE == ctrlE ? "zero" : "not zero"}
 	if (valueM !== zErr) {valueM = testM == ctrlM ? "zero" : "not zero"}
