@@ -61,6 +61,7 @@ function get_colors() {
 	let splits = [0, 23, 47, 79, aList.length]
 
 	try {
+		if (runSE) {abc = def}
 		let aRes = []
 		let element = dom.sColorElement
 		let strColor = "rgba(1, 2, 3, 0.5)"
@@ -91,11 +92,7 @@ function get_colors() {
 					} else {
 						if (hash == "4e28ed980bab05100cd20972c87c8c5cb3e8075f") {note = rfp_green + " [FF67-92]"}
 					}
-				}// else if (sNames[i] == "moz") {
-				//	if (gRun) {log_debug("moz colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
-				//} else if (sNames[i] == "css4") {
-				//	if (gRun & isOS == "android") {log_debug("css4 colors", hash+ "<br>    "+ aTemp.join("<br>    "))}
-				//}
+				}
 			}
 			document.getElementById("cssColor"+ sNames[i]).innerHTML = hash + btn + note
 		}
@@ -117,9 +114,9 @@ function get_computed_styles() {
 		let t0; if (canPerf) {t0 = performance.now()}
 		let styleVersion = type => {
 			return new Promise(resolve => {
-				
 				// get CSSStyleDeclaration
 				try {
+					if (runSE) {abc = def}
 					let cssStyleDeclaration = (
 						type == 0 ? getComputedStyle(document.body) :
 						type == 1 ? document.body.style :
@@ -206,8 +203,8 @@ function get_computed_styles() {
 						prototypeName
 					})
 				} catch(e) {
-					log_error("css: "+ names[type], e.name, e.message)
-					return resolve("error")
+					let eMsg = log_error("css: "+ names[type], e.name, e.message)
+					return resolve(eMsg)
 				}
 			})
 		}
@@ -245,7 +242,7 @@ function get_computed_styles() {
 			for (let i=0; i < 3; i++) {
 				let aRep = [], aReal = [], aFake = []
 				try {
-					aRep = res[i].keys // throws an error if blocked
+					aRep = res[i].keys // throws an error if an error string
 					if (fileSchemeOverride && i==2) {aRep = res[1].keys}
 					// sim
 					if (runCSS) {
@@ -303,7 +300,7 @@ function get_computed_styles() {
 					btns.push(btn)
 				} catch(e) {
 					blankIndex.push(i)
-					values.push(zB0)
+					values.push(res[i])
 					btns.push("")
 				}
 			}
@@ -319,13 +316,7 @@ function get_computed_styles() {
 			// blocks/lie
 			if (gRun) {
 				let isLie = false
-				if (bCount > 0) {
-					let blank = []
-					for (let i=0; i < bCount; i++) {blank.push(names[blankIndex[i]])}
-					blank.sort()
-					gMethods.push("css:computed_styles:blocked:"+ (blank.length == 3 ? "all": blank.join()))
-					if (bCount !== 3) {isLie = true}
-				}
+				if (bCount > 0 && bCount !== 3) {isLie = true}
 				if (fakeIndex.length) (isLie = true)
 				if (isLie) {gKnown.push("css:computed_styles")}
 			}
@@ -344,7 +335,7 @@ function get_computed_styles() {
 					gBypassed.push("css:computed_styles:"+ (bypass.length == 3 ? "all" : bypass.join()) +":"+ value)
 				}
 			} else {
-				if (bCount == 3) {value = zB0} else if (isSame) {value = distinctReal[0]} else {sDetail["css_computed_styles"] = []}
+				if (bCount == 3) {value = zErr} else if (isSame) {value = distinctReal[0]} else {sDetail["css_computed_styles"] = []}
 			}
 			// output
 			for (let i=0; i < values.length; i++) {
@@ -377,31 +368,33 @@ function get_computed_styles() {
 function get_mm_css() {
 	return new Promise(resolve => {
 		function get_mm(type, id, expected) {
-			let x = zNS, x2 = "", n="no-preference", q=type +": "
+			let x = zNS, x2 = "", n="no-preference", q=type +": ", display = x
 			try {
-				if (window.matchMedia("("+ q + n +")").matches) {x = n
-				} else if (window.matchMedia("("+ q +"light)").matches) {x = "light"
-				} else if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"
-				} else if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"
-				} else if (window.matchMedia("("+ q +"none)").matches) {x = "none"
-				} else if (window.matchMedia("("+ q +"high)").matches) {x = "high"
-				} else if (window.matchMedia("("+ q +"low)").matches) {x = "low"
-				} else if (window.matchMedia("("+ q +"active)").matches) {x = "active"
-				} else if (window.matchMedia("("+ q +"forced)").matches) {x = "forced" // 1694864: removed FF88
+				if (runSE) {abc = def
+				} else if (runSL) { x = "groot"
+				} else {
+					if (window.matchMedia("("+ q + n +")").matches) {x = n
+					} else if (window.matchMedia("("+ q +"light)").matches) {x = "light"
+					} else if (window.matchMedia("("+ q +"dark)").matches) {x = "dark"
+					} else if (window.matchMedia("("+ q +"reduce)").matches) {x = "reduce"
+					} else if (window.matchMedia("("+ q +"none)").matches) {x = "none"
+					} else if (window.matchMedia("("+ q +"high)").matches) {x = "high"
+					} else if (window.matchMedia("("+ q +"low)").matches) {x = "low"
+					} else if (window.matchMedia("("+ q +"active)").matches) {x = "active"
+					} else if (window.matchMedia("("+ q +"forced)").matches) {x = "forced" // 1694864: removed FF88
+					}
 				}
+				display = x
 			} catch(e) {
-				log_error("css: matchmedia_"+ type, e.name, e.message)
+				display = log_error("css: matchmedia_"+ type, e.name, e.message)
 				x = zErr
 			}
-			// notate/display
-			if (runSL) {x = "apple"}
-			let display = x
 			// lies
 			if (isTZPSmart) {
 				x2 = getElementProp("#css"+ id,"content",":after")
 				if (x2 !== "x") {
 					if (x !== x2) {
-						display = soB + x + scC
+						display = soB + display + scC
 						if (gRun) {
 							gKnown.push("css:"+ type)
 							gBypassed.push("css:"+ q.trim() + x2)
