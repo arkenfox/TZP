@@ -553,7 +553,7 @@ function get_fonts() {
 		}
 		function exit(value) {
 			dom.fontNames = value; dom.fontSizes = value; dom.fontBase = value
-			let baseReturn = (value == zNA ? "fontsizes_base:"+ get_baseHash(false) : value )
+			let baseReturn = (value == zNA ? get_baseHash(false) : value )
 			log_perf("fontsizes [fonts]",t0)
 			return resolve(
 				["fontsizes:"+ value, "fontsizes_base:"+ baseReturn]
@@ -603,7 +603,7 @@ function get_fonts() {
 				}
 			}
 			// baseReturn
-			let baseReturn = "fontsizes_base:"+ get_baseHash(isMismatch)
+			let baseReturn = get_baseHash(isMismatch)
 
 			// collect size buckets, font names
 				// handle mutiple sizes per font: e.g. monospace, serif
@@ -673,7 +673,7 @@ function get_fonts() {
 				}
 			}
 			log_perf("fontsizes [fonts]",t0)
-			return resolve(["fontsizes:"+ sizeReturn, baseReturn])
+			return resolve(["fontsizes:"+ sizeReturn, "fontsizes_base:"+ baseReturn])
 		})
 	})
 }
