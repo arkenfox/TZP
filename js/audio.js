@@ -5,7 +5,6 @@ https://canvasblocker.kkapsner.de/test/
 https://audiofingerprint.openwpm.com/ */
 
 let t0audio,
-	throwAC = false,
 	throwZero = false
 
 function byteArrayToHex(arrayBuffer){
@@ -21,12 +20,11 @@ function byteArrayToHex(arrayBuffer){
 function get_audio2_context(run) {
 	return new Promise(resolve => {
 		try {
+			if (runSE) {abc = def}
 			let t0; if (canPerf) {t0 = performance.now()}
 			let sName = "audio_audiocontext_keys_notglobal"
 			sDetail[sName] = []
 			let latencyError = false
-
-			if (throwAC) {abc = def}
 			function a(a, b, c) {
 				for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
 				d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
@@ -48,6 +46,7 @@ function get_audio2_context(run) {
 				if (key == "ac-outputLatency") {
 					// FF70+ nonRFP: return 0.0 if running on a normal thread or 0 unless we detect a user gesture
 					if (throwZero && run == 1) {testValue = 0}
+					testValue = 0
 					latencyError = (testValue == 0 ? true : false)
 				}
 				if (runSL && key == "ac-channelCount") {testValue = 4} // sim a fake value in our subset
@@ -78,12 +77,13 @@ function get_audio2_context(run) {
 					} else if (hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1" && isOS == "linux") {note = rfp_green // 0.02
 					} else if (hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e" && isOS == "android") {note = rfp_green // 0.025
 					} else if (hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9" && isOS == "mac") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
+					// 0 latency
+					if (latencyError) {note += sb +" [0 latency]"+ sc}
 				}
 				// redo hash as mini_sha1
 				hash = mini_sha1(results.join())
 				let displayHash = isLie ? soL + hash + scC : hash
 				dom.audio1hash.innerHTML = displayHash + buildButton("11", sName, results.length +" keys") + note
-					+ (latencyError ? sb +" [0 latency]"+ sc : "")
 				log_perf("context run #"+ run +" [audio]",t0)
 				return resolve("keys:"+ (isLie ? zLIE : hash))
 			} else {
@@ -91,8 +91,8 @@ function get_audio2_context(run) {
 				return resolve("redo")
 			}
 		} catch(e) {
-			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-			dom.audio1hash = trim_error(eMsg)
+			let eMsg = log_error("audio: keys:", e.name, e.message)
+			dom.audio1hash = eMsg
 			return resolve("keys:"+ eMsg) // user test: reflect error entropy
 		}
 	})
@@ -101,11 +101,11 @@ function get_audio2_context(run) {
 function get_audio2_hybrid() {
 	return new Promise(resolve => {
 		try {
+			if (runSE) {abc = def}
 			let t0; if (canPerf) {t0 = performance.now()}
 			let sName = "audio_audiocontext_hybrid_notglobal"
 			sDetail[sName] = []
 			let results = []
-			if (throwAC) {abc = def}
 			let audioCtx = new window.AudioContext,
 				oscillator = audioCtx.createOscillator(),
 				analyser = audioCtx.createAnalyser(),
@@ -153,14 +153,15 @@ function get_audio2_hybrid() {
 					log_perf("hybrid [audio]",t0)
 					return resolve("hybrid:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					dom.audio3hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-					return resolve("hybrid:"+ zErr)
+					let eMsg = log_error("audio: hybrid:", e.name, e.message)
+					dom.audio3hash = eMsg
+					return resolve("hybrid:"+ eMsg)
 				}
 			}
 			oscillator.start(0)
 		} catch(e) {
-			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-			dom.audio3hash = trim_error(eMsg)
+			let eMsg = log_error("audio: hybrid:", e.name, e.message)
+			dom.audio3hash = eMsg
 			return resolve("hybrid:"+ eMsg) // user test: reflect error entropy
 		}
 	})
@@ -169,11 +170,10 @@ function get_audio2_hybrid() {
 function get_audio2_oscillator() {
 	return new Promise(resolve => {
 		try {
+			if (runSE) {abc = def}
 			let t0; if (canPerf) {t0 = performance.now()}
 			let sName = "audio_audiocontext_oscillator_notglobal"
 			sDetail[sName] = []
-
-			if (throwAC) {abc = def}
 			let results = [],
 				audioCtx = new window.AudioContext
 			let oscillator = audioCtx.createOscillator(),
@@ -212,14 +212,15 @@ function get_audio2_oscillator() {
 					log_perf("oscillator [audio]",t0)
 					return resolve("oscillator:"+ (isLie ? zLIE : hash))
 				} catch(e) {
-					dom.audio2hash = (e.name === undefined ? zErr : trim_error(e.name, e.message))
-					return resolve("oscillator:"+ zErr)
+					let eMsg = log_error("audio: oscillator:", e.name, e.message)
+					dom.audio2hash = eMsg
+					return resolve("oscillator:"+ eMsg)
 				}
 			}
 			oscillator.start(0)
 		} catch(e) {
-			let eMsg = (e.name === undefined ? zErr : e.name +": "+ e.message)
-			dom.audio2hash = trim_error(eMsg)
+			let eMsg = log_error("audio: oscillator:", e.name, e.message)
+			dom.audio2hash = eMsg
 			return resolve("oscillator:"+ eMsg) // user test: reflect error entropy
 		}
 	})
@@ -275,7 +276,7 @@ function outputAudio2() {
 				})
 			} catch(e) {
 				// output something
-				let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+				let eMsg = log_error("audio2:", e.name, e.message)
 				dom.audio1hash = eMsg, dom.audio2hash = eMsg, dom.audio3hash = eMsg
 				dom.audiohash2 = zNA
 				gClick = true
@@ -373,22 +374,21 @@ function outputAudio() {
 						}
 					})
 				} catch(e) {
-					log_error(sName, e.name, e.message)
-					let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+					let eMsg = log_error("audio: "+ sName, e.name, e.message)
 					dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 					log_section("audio", t0, [sName +":"+ zErr])
 				}
 			}
 		} catch(e) {
-			log_error("audio: "+ sName, e.name, e.message)
-			let eMsg = (e.name === undefined ? zErr : trim_error(e.name, e.message))
+			let eMsg = log_error("audio: "+ sName, e.name, e.message)
 			dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 			log_section("audio", t0, [sName +":"+ zErr])
 		}
-	} catch(error) {
-		dom.audioSupport = zD; dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
+	} catch(e) {
+		dom.audioSupport = log_error("audio: "+ sName, e.name, e.message)
+		dom.audioCopy = zNA; dom.audioGet = zNA; dom.audioSum = zNA
 		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
-		log_section("audio", t0, [sName +":"+ zNA])
+		log_section("audio", t0, [sName +":"+ zErr])
 	}
 }
 
