@@ -42,11 +42,7 @@ function get_cookies() {
 				console.log(" set:", rndA.padStart(18) +" -", rndB)
 				console.log("read:", rndA.padStart(18) +" -", svalue)
 			}
-			if (svalue == rndB) {
-				dom.ctest1 = zS
-			} else {
-				dom.ctest1 = zF +": values do not match"
-			}
+			dom.ctest1 = svalue == rndB ? zS : zF +": values do not match"
 		} else {
 			dom.ctest1 = zF
 		}
@@ -68,11 +64,7 @@ function get_cookies() {
 				console.log(" set:", rndC.padStart(18) +" -", rndD)
 				console.log("read:", rndC.padStart(18) +" -", pvalue)
 			}
-			if (pvalue == rndD) {
-				dom.ctest2 = zS
-			} else {
-				dom.ctest2 = zF +": values do not match"
-			}
+			dom.ctest2 = pvalue == rndD ? zS : zF +": values do not match"
 		} else {
 			dom.ctest2 = zF
 		}
@@ -193,17 +185,13 @@ function get_idb() {
 						if (logStorage) {
 							console.log("read:", rndStrI.padStart(18) +" -", getStr.result.id, getStr.result.value)
 						}
-						if (getStr.result.value == rndValue) {
-							dom.idb2 = zS
-						} else {
-							dom.idb2 = zF +": values do not match"
-						}
+						dom.idb2 = getStr.result.value == rndValue ? zS : zF +": values do not match"
 					}
 					// close transaction
 					dbTx.oncomplete = function() {dbObject.close()}
 				}
 			} catch(e) {
-				dom.idb2 = zF +": "+ e.name
+				dom.idb2 = log_error("storage: IDB test", e.name)
 			}
 		}
 	} catch(e) {
@@ -285,13 +273,7 @@ function get_service_workers() {
 					registration.unregister().then(function(boolean) {})
 				},
 				function(e) {
-					// sw error
-					if (e.name === "" || e.name === undefined) {
-						output = zF +": unknown error"
-					} else {
-						output = zF +": "+ e.name
-					}
-					dom.swork2 = output
+					dom.swork2 = log_error("storage: service worker test", e.name)
 					dom.swork3 = zNA; dom.swork4 = zNA
 					dom.notif1 = zNA; dom.notif2 = zNA
 				})
