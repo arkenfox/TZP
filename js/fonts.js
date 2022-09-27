@@ -13,6 +13,7 @@ let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	fntFake = "",
 	fontBtns = "",
 	fontBaseBtn = "",
+	fontDocEnabled = false,
 	baseFonts = [], // what we test each font with
 	baseFontsNames = [], // baseFonts w/out any fallback fonts (used to create arrays etc)
 	baseFontsFull = [] // merged baseFonts + baseMaster
@@ -401,7 +402,8 @@ const getFonts = () => {
 			for (const h of Object.keys(oTempBase).sort()) {
 				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
 			}
-			if (fntList.length == 0) {
+			// return if not doing font sizes
+			if (fntList.length == 0 || fontDocEnabled == false) {
 				return resolve("baseonly")
 			}
 
@@ -1299,12 +1301,20 @@ function outputFonts() {
 	r = ("FontFace" in window ? zE : zD)
 	dom.fontCSS = r
 	section.push("font_loading:"+ r)
+
 	// doc fonts
-	el = dom.divDocFont
-	r = getComputedStyle(el).getPropertyValue("font-family")
-	r = (r.slice(1,16) == "Times New Roman" ? zE : zD)
-	dom.fontDoc = r
-	section.push("document_fonts:"+ r)
+	try {
+		el = dom.divDocFont
+		let font = getComputedStyle(el).getPropertyValue("font-family").slice(1,16)
+		fontDocEnabled = (font == "Times New Roman" ? true : false)
+		r = (fontDocEnabled ? zE : zD)
+		dom.fontDoc = r
+		section.push("document_fonts:"+ r)
+	} catch(e) {
+		fontDocEnabled = false
+		dom.fontDoc = log_error("fonts: doc fonts", e.name, e.message)
+		section.push("document_fonts:"+ zErr)
+	}
 
 	Promise.all([
 		get_unicode(),
