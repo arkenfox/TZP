@@ -467,13 +467,22 @@ const get_isOS = () => new Promise(resolve => {
 	}
 	function tryharder() {
 		// ToDo: harden isOS desktop
-		// promise get_fd_chrome and return isChrome: bit slow (30ms+)
-
-		// other options
-			// can I detect MS Shell Dlg \\32 or -apple-system (doc fonts may be blocked)
-			// look at userAgent, esp if TB: we don't have proxyLies or isRFP yet
-			// font check for common fonts
-		finish("")
+		// windows or linux
+			// check for chrome://browser/content/extension-win-panel.css
+		let css = document.createElement("link")
+		css.href = "chrome://browser/content/extension-win-panel.css"
+		css.type = "text/css"
+		css.rel = "stylesheet"
+		document.head.appendChild(css)
+		css.onload = function() {
+			isOS = "windows"
+			finish("")
+		}
+		css.onerror = function() {
+			isOS = "linux"
+			finish("")
+		}
+		document.head.removeChild(css)
 	}
 	try {
 		// fastpath android (FF + nightly, Mull, TBA + alpha)
@@ -490,6 +499,8 @@ const get_isOS = () => new Promise(resolve => {
 			let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
 			if (aIgnore.includes(font)) {
 				// returns generic font-family if #41116 or eventually 1787790
+					// mac should still return -apple-system
+					// https://gitlab.torproject.org/tpo/applications/tor-browser/-/merge_requests/358
 				tryharder()
 			} else {
 				if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
