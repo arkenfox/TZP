@@ -98,7 +98,7 @@ let fntTB = {
 		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo","Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",
 	],
 	windows: [
-		// ESR102 current whitelist minus 122 bundled (incl Twemoji Mozilla)
+		// ESR102 current whitelist minus byundled
 		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","MingLiU","PMingLiU","Segoe UI","Segoe UI Black","Segoe UI Light", "Segoe UI Semibold","Segoe UI Semilight","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
 		// aliases: different size
 			"細明體", // MingLiU
@@ -114,6 +114,8 @@ let fntTB = {
 			// "Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
 			// "Courier", //  = courier new
 			// "MS Serif","Roman","Times", // = TNR
+		// of 121 bundled: 53 unique sizes
+		"Noto Sans Masaram Gondi","Noto Sans Gunjala Gondi","Noto Sans Mende Kikakui","Noto Sans Sinhala","Noto Sans Takri","Noto Sans Elbasan","Noto Sans Warang Citi","Noto Sans Mahajani","Noto Sans Georgian","Noto Sans Wancho","Noto Sans Adlam","Noto Sans Khudawadi","Noto Sans Malayalam","Noto Sans Meetei Mayek","Noto Sans Bengali","Noto Sans Newa","Noto Sans Sundanese","Noto Serif Gujarati","Noto Sans Mandaic","Noto Sans Sharada","Noto Sans Chakma","Noto Sans Modi","Noto Sans Cham","Noto Sans Syriac","Noto Sans Miao","Noto Sans Thaana","Noto Sans Lepcha","Noto Sans Kannada","Noto Sans Tirhuta","Noto Serif Tamil","Noto Sans Tai Tham","Noto Sans Soyombo","Noto Serif Bengali","Noto Serif Devanagari","Noto Sans Lao","Noto Serif Lao","Noto Sans Symbols2","Noto Naskh Arabic","Noto Serif Kannada","Noto Sans Mongolian","Noto Serif Balinese","Noto Sans Grantha","Noto Sans Khojki","Noto Sans Javanese","Noto Sans Myanmar","Noto Sans Balinese","Noto Sans Zanabazar Square","Noto Serif Myanmar","Noto Serif Tibetan","Noto Sans","Noto Sans Symbols","Noto Serif",
 	],
 }
 
