@@ -113,21 +113,22 @@ let fntOther = {
 		"Aharoni Bold","Aldhabi","Andalus","Angsana New","Aparajita","Arabic Typesetting","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Batang","BatangChe","Browallia New","Cordia New","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","FreesiaUPC","Gautami","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Levenim MT","LilyUPC","MS Mincho","MS PMincho","Mangal","Meiryo","Meiryo UI","Microsoft Uighur","MingLiU","MingLiU_HKSCS","Miriam","Miriam Fixed","MoolBoran","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nyala","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Sakkal Majalla","Sanskrit Text","Segoe Pseudo","Shonar Bangla","Shruti","SimHei","Simplified Arabic","Simplified Arabic Fixed","Traditional Arabic","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light",
 		// from fntBase but it's broken there: see 1720408
 		"Franklin Gothic Medium",
-		// aliases
+		// aliases: different size
 		"宋体", // SimSun
 		"細明體", // MingLiU
 		"新細明體", // PMingLiU
 		"굴림",
 		"굴림체", // GulimChe?
-		// ignore: expected + dupe sizes
-			//"PMingLiU", // = PMingLiU-ExtB (fntBase)
-			//"AngsanaUPC","BrowalliaUPC","CordiaUPC", // = Angsana|Browallia|Cordia New
-			//"바탕", // = Batang
-			//"微软雅黑", // = Microsoft YaHei
-			//"ＭＳ ゴシック", // = MS Gothic
-			//"ＭＳ 明朝", // = MS Mincho
-			//"ＭＳ Ｐゴシック", // = MS PGothic
-			//"ＭＳ Ｐ明朝", // = MS PMincho
+		/* ignore: expected + dupe sizes
+			"PMingLiU", // = PMingLiU-ExtB (fntBase)
+			"AngsanaUPC","BrowalliaUPC","CordiaUPC", // = Angsana|Browallia|Cordia New
+			"바탕", // = Batang
+			"微软雅黑", // = Microsoft YaHei
+			"ＭＳ ゴシック", // = MS Gothic
+			"ＭＳ 明朝", // = MS Mincho
+			"ＭＳ Ｐゴシック", // = MS PGothic
+			"ＭＳ Ｐ明朝", // = MS PMincho
+		*/
 	],
 }
 let fntBase = {
@@ -154,31 +155,32 @@ let fntBase = {
 		"Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight",
 		"HoloLens MDL2 Assets","Yu Gothic Medium",
 		// always
-		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
-		// ignore: expected + dupe sizes
-			//"Gadugi","Nirmala UI", // 8 = Segoe UI
-			//"Leelawadee UI","Leelawadee UI Semilight","Nirmala UI Semilight","Segoe UI Black","Segoe UI Emoji", // 8.1 = Segoe UI
-			//"Microsoft JhengHei Light", // 8.1 = Microsoft JhengHei
-			//"Microsoft JhengHei UI Light", // 8.1 = Microsoft JhengHei UI
-			//"Microsoft YaHei Light", // 8.1 = Microsoft YaHei
-			//"Microsoft YaHei UI Light", // 8.1 = Microsoft YaHei UI
-			//"Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text", // = sitka banner (all 8.1)
-			//"Candara Light", // 10 = Candara
-			//"Corbel Light", // 10 = Corbel
-			//"Malgun Gothic Semilight", // 10 = Malgun Gothic
-			//"Segoe UI Historic","Yu Gothic UI" // 10 = Segoe UI
-			//"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
-			//"Yu Gothic UI Light", // = Yu Gothic UI (both 10)
-			//"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight
-			//"Yu Gothic UI Semibold", // 10 = Segoe UI Semibold
-			//"SimSun-ExtB", // = MS Gothic
-			//"MS UI Gothic", // = MS PGothic
-			//"Segoe UI Symbol", // = Segoe UI
-			//"Cambria", // = cambria math
-			//"Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
-			//"Courier", //  = courier new
-			//"MS Serif","Roman","Times", // = TNR
-			//"MS Sans Serif", // = Microsoft Sans Serif
+		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
+		/* ignore: expected + dupe sizes
+			"Gadugi","Nirmala UI", // 8 = Segoe UI
+			"Leelawadee UI","Leelawadee UI Semilight","Nirmala UI Semilight","Segoe UI Black","Segoe UI Emoji", // 8.1 = Segoe UI
+			"Microsoft JhengHei Light", // 8.1 = Microsoft JhengHei
+			"Microsoft JhengHei UI Light", // 8.1 = Microsoft JhengHei UI
+			"Microsoft YaHei Light", // 8.1 = Microsoft YaHei
+			"Microsoft YaHei UI Light", // 8.1 = Microsoft YaHei UI
+			"Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text", // = sitka banner (all 8.1)
+			"Candara Light", // 10 = Candara
+			"Corbel Light", // 10 = Corbel
+			"Malgun Gothic Semilight", // 10 = Malgun Gothic
+			"Segoe UI Historic","Yu Gothic UI" // 10 = Segoe UI
+			"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
+			"Yu Gothic UI Light", // = Yu Gothic UI (both 10)
+			"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight
+			"Yu Gothic UI Semibold", // 10 = Segoe UI Semibold
+			"SimSun-ExtB", // = MS Gothic
+			"MS UI Gothic", // = MS PGothic
+			"Segoe UI Symbol", // = Segoe UI
+			"Cambria", // = cambria math
+			"Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
+			"Courier", //  = courier new
+			"MS Serif","Roman","Times", // = TNR
+			"MS Sans Serif", // = Microsoft Sans Serif
+		*/
 	],
 }
 let fntTB = {
@@ -200,41 +202,33 @@ let fntTB = {
 		"Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Tibetan","STIX Math","Tinos","Twemoji Mozilla"
 	],
 	mac: [
-		// ESR102 current whitelist minus 123 bundled
+		// ESR102 whitelist minus 123 bundled
 		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia",
 		"Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN",
 		"Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo",
 		"Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",
 	],
 	windows: [
-		// ESR102 current whitelist
+		// ESR102 whitelist
 		// 7
 		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
 		"MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei",
-		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","Segoe UI Light","Segoe UI Semibold","SimSun","Sylfaen",
-		"Tahoma","Times New Roman","Verdana",
-		// 8
-		"Microsoft JhengHei UI","Microsoft YaHei UI","Segoe UI Semilight",
-		// 8.1
-		"Segoe UI Black", // = Segoe UI: but keep an 8.1 font
-		// 10
-		"Malgun Gothic Semilight", // = Malgun Gothic: but keep a win10 font
+		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
 		// aliases: different size
 			"細明體", // MingLiU
 			"新細明體", // PMingLiU
 			"宋体", // SimSun
 		// always
-		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
-		// ignore: expected + dupe sizes
-			//"Microsoft JhengHei UI Light", // 8.1 = Microsoft JhengHei UI
-			//"Microsoft YaHei Light", // 8.1 = Microsoft Yahei
-			//"Microsoft YaHei UI Light", // 8.1 = Microsoft YaHei UI
-			//"微软雅黑", // Microsoft YaHei
-			//"ＭＳ ゴシック", // MS Gothic
-			//"ＭＳ Ｐゴシック", // MS PGothic
-			//"Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
-			//"Courier", //  = courier new
-			//"MS Serif","Roman","Times", // = TNR
+		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
+		/* ignore: expected + dupe sizes
+			"ＭＳ ゴシック", // MS Gothic
+			"ＭＳ Ｐゴシック", // MS PGothic
+			"微软雅黑", // Microsoft YaHei
+			"Helvetica","Small Fonts", // = Arial (which we catch if not in fonts, in bases)
+			"Courier", //  = courier new
+			"MS Serif","Roman","Times", // = TNR
+			"Twemoji Mozilla", // = MS Shell Dlg \\32
+		*/
 		// of 121 bundled: 53 unique sizes
 		"Noto Naskh Arabic","Noto Sans","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Georgian","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Symbols2","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Thaana","Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square","Noto Serif","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Gujarati","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Tamil","Noto Serif Tibetan"
 	],
