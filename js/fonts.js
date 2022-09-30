@@ -140,11 +140,10 @@ let fntBase = {
 		"Calibri Light", // = Calibri but optional on win7
 		"Calibri Light Italic","Microsoft JhengHei UI","Microsoft YaHei UI","Myanmar Text","Segoe UI Semilight",
 		// 8.1
-		"Javanese Text","Sitka Banner",
-		"Yu Gothic","Yu Gothic Light",
+		"Javanese Text","Sitka Banner","Yu Gothic","Yu Gothic Light",
 		// 10
-		"Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","HoloLens MDL2 Assets",
-		"Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Semibold","Yu Gothic UI Semilight",
+		"Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight",
+		"HoloLens MDL2 Assets","Yu Gothic Medium",
 		// always
 		"MS Shell Dlg","MS Shell Dlg \\32 ", // these can vary between window versions
 		// ignore: expected + dupe sizes
@@ -158,9 +157,11 @@ let fntBase = {
 			//"Candara Light", // 10 = Candara
 			//"Corbel Light", // 10 = Corbel
 			//"Malgun Gothic Semilight", // 10 = Malgun Gothic
-			//"Segoe UI Historic", // 10 = Segoe UI
-			//"Segoe MDL2 Assets", // HoloLens MDL2 Assets (both 10)
+			//"Segoe UI Historic","Yu Gothic UI" // 10 = Segoe UI
+			//"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
 			//"Yu Gothic UI Light", // = Yu Gothic UI (both 10)
+			//"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight
+			//"Yu Gothic UI Semibold", // 10 = Segoe UI Semibold
 			//"SimSun-ExtB", // = MS Gothic
 			//"MS UI Gothic", // = MS PGothic
 			//"Segoe UI Symbol", // = Segoe UI
