@@ -33,7 +33,6 @@ function listfontsizes() {
 		console.log(sizelog.join("\n"))
 	}
 }
-
 function listfontfirst() {
 	let sizelog = []
 	for (const k of Object.keys(sDetail["fonts_fontsizes"])) {
@@ -45,27 +44,26 @@ function listfontfirst() {
 		console.log("\""+ sizelog.join("\",\"") +"\"")
 	}
 }
-
 let injectedwin11 = false
-	let fontswin11 = [
-		// should be fonts
-		"Cascadia Code","Cascadia Code ExtraLight","Cascadia Code Light","Cascadia Code SemiLight","Cascadia Code SemiBold","Cascadia Mono",
-		"Cascadia Mono ExtraLight","Cascadia Mono Light","Cascadia Mono SemiLight","Cascadia Mono SemiBold","Segoe Fluent Icons",
-		"Segoe UI Variable Display","Segoe UI Variable Display Light","Segoe UI Variable Display Semilight","Segoe UI Variable Display Semibold",
-		"Segoe UI Variable Small","Segoe UI Variable Small Light","Segoe UI Variable Small Semilight","Segoe UI Variable Small Semibold",
-		"Segoe UI Variable Text","Segoe UI Variable Text Light","Segoe UI Variable Text Semilight","Segoe UI Variable Text Semibold",
-		"Sitka Banner Semibold","Sitka Display Semibold","Sitka Small Semibold","Sitka Heading Semibold","Sitka Subheading Semibold",
-		"Sitka Text Semibold",
-	]
-	let faceswin11 = [
-		// should be faces
-		"Cascadia Code ExtraLight Italic","Cascadia Code Light Italic","Cascadia Code SemiLight Italic","Cascadia Code Italic",
-		"Cascadia Code SemiBold Italic","Cascadia Code Bold","Cascadia Code Bold Italic","Cascadia Mono ExtraLight Italic",
-		"Cascadia Mono Light Italic","Cascadia Mono SemiLight Italic","Cascadia Mono Italic","Cascadia Mono SemiBold Italic",
-		"Cascadia Mono Bold","Cascadia Mono Bold Italic","Segoe UI Variable Display Bold","Segoe UI Variable Small Bold",
-		"Segoe UI Variable Text Bold","Sitka Banner Semibold Italic","Sitka Display Semibold Italic","Sitka Small Semibold Italic",
-		"Sitka Heading Semibold Italic","Sitka Subheading Semibold Italic","Sitka Text Semibold Italic",
-	]
+let fontswin11 = [
+	// should be fonts
+	"Cascadia Code","Cascadia Code ExtraLight","Cascadia Code Light","Cascadia Code SemiLight","Cascadia Code SemiBold","Cascadia Mono",
+	"Cascadia Mono ExtraLight","Cascadia Mono Light","Cascadia Mono SemiLight","Cascadia Mono SemiBold","Segoe Fluent Icons",
+	"Segoe UI Variable Display","Segoe UI Variable Display Light","Segoe UI Variable Display Semilight","Segoe UI Variable Display Semibold",
+	"Segoe UI Variable Small","Segoe UI Variable Small Light","Segoe UI Variable Small Semilight","Segoe UI Variable Small Semibold",
+	"Segoe UI Variable Text","Segoe UI Variable Text Light","Segoe UI Variable Text Semilight","Segoe UI Variable Text Semibold",
+	"Sitka Banner Semibold","Sitka Display Semibold","Sitka Small Semibold","Sitka Heading Semibold","Sitka Subheading Semibold",
+	"Sitka Text Semibold",
+]
+let faceswin11 = [
+	// should be faces
+	"Cascadia Code ExtraLight Italic","Cascadia Code Light Italic","Cascadia Code SemiLight Italic","Cascadia Code Italic",
+	"Cascadia Code SemiBold Italic","Cascadia Code Bold","Cascadia Code Bold Italic","Cascadia Mono ExtraLight Italic",
+	"Cascadia Mono Light Italic","Cascadia Mono SemiLight Italic","Cascadia Mono Italic","Cascadia Mono SemiBold Italic",
+	"Cascadia Mono Bold","Cascadia Mono Bold Italic","Segoe UI Variable Display Bold","Segoe UI Variable Small Bold",
+	"Segoe UI Variable Text Bold","Sitka Banner Semibold Italic","Sitka Display Semibold Italic","Sitka Small Semibold Italic",
+	"Sitka Heading Semibold Italic","Sitka Subheading Semibold Italic","Sitka Text Semibold Italic",
+]
 function injectwin11() {
 	if (injectedwin11) {
 		console.log("already injected")
@@ -99,7 +97,6 @@ function checkwin11() {
 	if (faceFound.length == 0) {res.push("FACES NOT FOUND - all")} else {res.push("FACES NOT FOUND\n" + faceNotFound.join(", "))}
 	console.log(res.join("\n"))
 }
-
 /*** END TEMP FUNCTIONS ***/
 
 // sims
@@ -188,13 +185,8 @@ let fntTB = {
 	android: [],
 	linux: [
 		// TB linux only uses 134 bundled (140 files incl Twemoji Mozilla): set by FontConfig
-			// but we can't have an empty test. plus we want to grab some size entropy
-			// ToDo: check we include any valid widget/system-ui font names: e.g. Ubuntu, Noto Sans, Inter, etc
-			// ToDo: reduce entropy in size buckets
-		"Arimo","Cousine","STIX Math","Tinos","Twemoji Mozilla",
-		"Noto Naskh Arabic",
-		"Noto Sans Adlam","Noto Sans Armenian","Noto Sans Balinese","Noto Sans Bamum","Noto Sans Bassa Vah","Noto Sans Batak","Noto Sans Bengali","Noto Sans Buginese","Noto Sans Buhid","Noto Sans Canadian Aboriginal","Noto Sans Chakma","Noto Sans Cham","Noto Sans Cherokee","Noto Sans Coptic","Noto Sans Deseret","Noto Sans Devanagari","Noto Sans Elbasan","Noto Sans Ethiopic","Noto Sans Georgian","Noto Sans Grantha","Noto Sans Gujarati","Noto Sans Gunjala Gondi","Noto Sans Gurmukhi","Noto Sans Hanifi Rohingya","Noto Sans Hanunoo","Noto Sans Hebrew","Noto Sans Javanese","Noto Sans JP","Noto Sans Kannada","Noto Sans Kayah Li","Noto Sans Khmer","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans KR","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Limbu","Noto Sans Lisu","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Medefaidrin","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Mro","Noto Sans Multani","Noto Sans Myanmar","Noto Sans Newa","Noto Sans New Tai Lue","Noto Sans NKo","Noto Sans Ol Chiki","Noto Sans Oriya","Noto Sans Osage","Noto Sans Osmanya","Noto Sans Pahawh Hmong","Noto Sans Pau Cin Hau","Noto Sans Rejang","Noto Sans Runic","Noto Sans Samaritan","Noto Sans Saurashtra","Noto Sans SC","Noto Sans Sharada","Noto Sans Shavian","Noto Sans Sinhala","Noto Sans Sora Sompeng","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Syloti Nagri","Noto Sans Symbols2","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tagalog","Noto Sans Tagbanwa","Noto Sans Tai Le","Noto Sans Tai Tham","Noto Sans Tai Viet","Noto Sans Takri","Noto Sans Tamil","Noto Sans TC","Noto Sans Telugu","Noto Sans Thaana","Noto Sans Thai","Noto Sans Tifinagh Adrar","Noto Sans Tifinagh Agraw Imazighen","Noto Sans Tifinagh Ahaggar","Noto Sans Tifinagh Air","Noto Sans Tifinagh APT","Noto Sans Tifinagh Azawagh","Noto Sans Tifinagh Ghat","Noto Sans Tifinagh Hawad","Noto Sans Tifinagh","Noto Sans Tifinagh Rhissa Ixa","Noto Sans Tifinagh SIL","Noto Sans Tifinagh Tawellemmet","Noto Sans Tirhuta","Noto Sans Vai","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Yi","Noto Sans Zanabazar Square",
-		"Noto Serif Armenian","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra","Noto Serif Ethiopic","Noto Serif Georgian","Noto Serif Grantha","Noto Serif Gujarati","Noto Serif Gurmukhi","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Khmer","Noto Serif Khojki","Noto Serif Lao","Noto Serif Malayalam","Noto Serif Myanmar","Noto Serif Hmong Nyiakeng","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Telugu","Noto Serif Thai","Noto Serif Tibetan","Noto Serif Yezidi",
+		// of 134 bundled: 59 unique sizes, and Arimo (unique on its own) = isPlatformFont (auto removed)
+		"Arimo","Cousine sans-serif","Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans JP","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thai","Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra","Noto Serif Gujarati","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Tibetan","STIX Math","Tinos","Twemoji Mozilla"
 	],
 	mac: [
 		// ESR102 current whitelist minus 123 bundled
