@@ -185,8 +185,19 @@ let fntTB = {
 	android: [],
 	linux: [
 		// TB linux only uses 134 bundled (140 files incl Twemoji Mozilla): set by FontConfig
-		// of 134 bundled: 59 unique sizes, and Arimo (unique on its own) = isPlatformFont (auto removed)
-		"Arimo","Cousine sans-serif","Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans JP","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thai","Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra","Noto Serif Gujarati","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Tibetan","STIX Math","Tinos","Twemoji Mozilla"
+		// of 134 bundled: 59 unique sizes: all but cousine found vs monospace (first pass)
+		"Arimo","Cousine","Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali",
+		"Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi",
+		"Noto Sans JP","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi",
+		"Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic",
+		"Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao",
+		"Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada",
+		"Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac",
+		"Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thai",
+		"Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square",
+		"Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra",
+		"Noto Serif Gujarati","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar",
+		"Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Tibetan","STIX Math","Tinos","Twemoji Mozilla"
 	],
 	mac: [
 		// ESR102 current whitelist minus 123 bundled
