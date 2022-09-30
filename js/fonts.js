@@ -34,6 +34,18 @@ function listfontsizes() {
 	}
 }
 
+function listfontfirst() {
+	let sizelog = []
+	for (const k of Object.keys(sDetail["fonts_fontsizes"])) {
+		let font = sDetail["fonts_fontsizes"][k][0]
+		sizelog.push(font)
+	}
+	if (sizelog.length) {
+		sizelog.sort()
+		console.log("\""+ sizelog.join("\",\"") +"\"")
+	}
+}
+
 let injectedwin11 = false
 	let fontswin11 = [
 		// should be fonts
@@ -186,14 +198,18 @@ let fntTB = {
 	],
 	mac: [
 		// ESR102 current whitelist minus 123 bundled
-		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo","Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",
+		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia",
+		"Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN",
+		"Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo",
+		"Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",
 	],
 	windows: [
-		// ESR102 current whitelist minus bundled
+		// ESR102 current whitelist
 		// 7
-		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic",
-		"MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei","Microsoft YaHei","MingLiU",
-		"PMingLiU","Segoe UI","Segoe UI Light","Segoe UI Semibold","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
+		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
+		"MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei",
+		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","Segoe UI Light","Segoe UI Semibold","SimSun","Sylfaen",
+		"Tahoma","Times New Roman","Verdana",
 		// 8
 		"Microsoft JhengHei UI","Microsoft YaHei UI","Segoe UI Semilight",
 		// 8.1
@@ -217,7 +233,7 @@ let fntTB = {
 			//"Courier", //  = courier new
 			//"MS Serif","Roman","Times", // = TNR
 		// of 121 bundled: 53 unique sizes
-		"Noto Sans Masaram Gondi","Noto Sans Gunjala Gondi","Noto Sans Mende Kikakui","Noto Sans Sinhala","Noto Sans Takri","Noto Sans Elbasan","Noto Sans Warang Citi","Noto Sans Mahajani","Noto Sans Georgian","Noto Sans Wancho","Noto Sans Adlam","Noto Sans Khudawadi","Noto Sans Malayalam","Noto Sans Meetei Mayek","Noto Sans Bengali","Noto Sans Newa","Noto Sans Sundanese","Noto Serif Gujarati","Noto Sans Mandaic","Noto Sans Sharada","Noto Sans Chakma","Noto Sans Modi","Noto Sans Cham","Noto Sans Syriac","Noto Sans Miao","Noto Sans Thaana","Noto Sans Lepcha","Noto Sans Kannada","Noto Sans Tirhuta","Noto Serif Tamil","Noto Sans Tai Tham","Noto Sans Soyombo","Noto Serif Bengali","Noto Serif Devanagari","Noto Sans Lao","Noto Serif Lao","Noto Sans Symbols2","Noto Naskh Arabic","Noto Serif Kannada","Noto Sans Mongolian","Noto Serif Balinese","Noto Sans Grantha","Noto Sans Khojki","Noto Sans Javanese","Noto Sans Myanmar","Noto Sans Balinese","Noto Sans Zanabazar Square","Noto Serif Myanmar","Noto Serif Tibetan","Noto Sans","Noto Sans Symbols","Noto Serif",
+		"Noto Naskh Arabic","Noto Sans","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Georgian","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Symbols2","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Thaana","Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square","Noto Serif","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Gujarati","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Tamil","Noto Serif Tibetan"
 	],
 }
 
