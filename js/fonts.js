@@ -20,11 +20,11 @@ let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 
 fntCode.sort()
 
+/*** TEMP FUNCTIONS ***/
 function listfontsizes() {
-	// tmp list font sizes function
 	let sizelog = []
-	for (const k of Object.keys(gDetail["fonts_fontsizes"])) {
-		let array = gDetail["fonts_fontsizes"][k]
+	for (const k of Object.keys(sDetail["fonts_fontsizes"])) {
+		let array = sDetail["fonts_fontsizes"][k]
 		if (array.length > 1) {
 			sizelog.push(k +" : " + array.join(", "))
 		}
@@ -33,6 +33,62 @@ function listfontsizes() {
 		console.log(sizelog.join("\n"))
 	}
 }
+
+let injectedwin11 = false
+	let fontswin11 = [
+		// should be fonts
+		"Cascadia Code","Cascadia Code ExtraLight","Cascadia Code Light","Cascadia Code SemiLight","Cascadia Code SemiBold","Cascadia Mono",
+		"Cascadia Mono ExtraLight","Cascadia Mono Light","Cascadia Mono SemiLight","Cascadia Mono SemiBold","Segoe Fluent Icons",
+		"Segoe UI Variable Display","Segoe UI Variable Display Light","Segoe UI Variable Display Semilight","Segoe UI Variable Display Semibold",
+		"Segoe UI Variable Small","Segoe UI Variable Small Light","Segoe UI Variable Small Semilight","Segoe UI Variable Small Semibold",
+		"Segoe UI Variable Text","Segoe UI Variable Text Light","Segoe UI Variable Text Semilight","Segoe UI Variable Text Semibold",
+		"Sitka Banner Semibold","Sitka Display Semibold","Sitka Small Semibold","Sitka Heading Semibold","Sitka Subheading Semibold",
+		"Sitka Text Semibold",
+	]
+	let faceswin11 = [
+		// should be faces
+		"Cascadia Code ExtraLight Italic","Cascadia Code Light Italic","Cascadia Code SemiLight Italic","Cascadia Code Italic",
+		"Cascadia Code SemiBold Italic","Cascadia Code Bold","Cascadia Code Bold Italic","Cascadia Mono ExtraLight Italic",
+		"Cascadia Mono Light Italic","Cascadia Mono SemiLight Italic","Cascadia Mono Italic","Cascadia Mono SemiBold Italic",
+		"Cascadia Mono Bold","Cascadia Mono Bold Italic","Segoe UI Variable Display Bold","Segoe UI Variable Small Bold",
+		"Segoe UI Variable Text Bold","Sitka Banner Semibold Italic","Sitka Display Semibold Italic","Sitka Small Semibold Italic",
+		"Sitka Heading Semibold Italic","Sitka Subheading Semibold Italic","Sitka Text Semibold Italic",
+	]
+function injectwin11() {
+	if (injectedwin11) {
+		console.log("already injected")
+		return
+	} else if (isOS !== "windows") {
+		console.log("this is not windows")
+		return
+	}
+	fntList = fntList.concat(fontswin11)
+	fntList = fntList.concat(faceswin11)
+	fntList.sort()
+	console.log("injection, done! now rerun the font section")
+	injectedwin11 = true
+}
+function checkwin11() {
+	if (!injectedwin11) {
+		console.log("you need to inject the fonts first")
+		return
+	}
+	let aFound = sDetail["fonts_fontnames_notglobal"]
+	// testing
+	//aFound.push("Cascadia Code","Cascadia Code ExtraLight","Sitka Text Semibold Italic") // 2 fonts, 1 face
+	let res = []
+	let fontFound = fontswin11.filter(x => aFound.includes(x))
+	if (fontFound.length) {res.push("FONTS FOUND\n" + fontFound.join(", "))} else {res.push("FONTS FOUND - none")}
+	let fontNotFound = fontswin11.filter(x => !aFound.includes(x))
+	if (fontFound.length == 0) {res.push("FONTS NOT FOUND - all")} else {res.push("FONTS NOT FOUND\n" + fontNotFound.join(", "))}
+	let faceFound = faceswin11.filter(x => aFound.includes(x))
+	if (faceFound.length) {res.push("FACES FOUND\n" + faceFound.join(", "))} else {res.push("FACES FOUND - none")}
+	let faceNotFound = faceswin11.filter(x => !aFound.includes(x))
+	if (faceFound.length == 0) {res.push("FACES NOT FOUND - all")} else {res.push("FACES NOT FOUND\n" + faceNotFound.join(", "))}
+	console.log(res.join("\n"))
+}
+
+/*** END TEMP FUNCTIONS ***/
 
 // sims
 let intFNT = 0
