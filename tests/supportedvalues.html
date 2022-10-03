@@ -96,12 +96,7 @@ function run() {
 	} catch (e) {
 		dom.details = ""
 		dom.detailslabel = ""
-		let eMsg = e.name +": "+ e.message
-		if (eMsg == "TypeError: Intl.supportedValuesOf is not a function") {
-			dom.hashAll = zNS
-		} else {
-			dom.hashAll = eMsg
-		}
+		dom.hashAll = e.name +": "+ e.message
 	}
 }
 
