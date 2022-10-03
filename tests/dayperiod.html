@@ -458,7 +458,7 @@ function run_test() {
 	let B = get_dayperiod(new Date("2019-01-30T12:00:00"), "en", "long")
 	if (A == B) {
 		isDayPeriodSupported = false
-		dom.results.innerHTML = s4 + "dayPeriod: " + sc + zNS
+		dom.results.innerHTML = s4 + "dayPeriod: not supported" + sc
 	} else {
 		isDayPeriodSupported = true
 		setBtn("all")
