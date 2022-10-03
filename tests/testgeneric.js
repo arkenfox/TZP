@@ -90,7 +90,6 @@ function get_canPerf() {
 const get_globals = () => new Promise(resolve => {
 	// immutables: do once but promise from each test page if used
 	// might as well
-	if ((location.protocol) == "file:") {isFile = true; note_file = sn +"[file:]"+ sc}
 	if ((location.protocol) == "https:") {isSecure = true}
 	// always check canPerf
 	get_canPerf()
