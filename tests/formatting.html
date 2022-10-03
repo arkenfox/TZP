@@ -35,6 +35,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Compare expected locale format to actual</span>
+			<span class="btn4 btn" onClick="rerun()">[ re-run ]</span>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
 		<tr>
@@ -126,14 +127,6 @@ function detailConsole(name) {
 
 function get_data(lang) {
 	return new Promise(resolve => {
-
-		// temp sim
-		if (lang !== undefined) {
-			//lang = "de"
-			//lang = "zh-TW"
-			dom.langS = lang
-			langS = lang
-		}
 
 		let d = new Date("January 30, 2019 13:00:00"),
 			o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
@@ -246,7 +239,7 @@ function get_data(lang) {
 				} else if (item == 35) {
 					// Intl.NumberFormat
 					function err_check(name, msg) {
-						return " | error"
+						return " | "+ zErr
 					}
 					// decimals & groups
 					let tmp = new Intl.NumberFormat(lang).format(123456.789)
@@ -259,7 +252,9 @@ function get_data(lang) {
 					// notation: scientific
 					try {
 						tmp += " | "+ new Intl.NumberFormat(lang, {notation: "scientific"}).format(987654321)
-					} catch(e) {}
+					} catch(e) {
+						tmp += err_check(e.name, e.message)
+					}
 					// unit percent
 					try {
 						tmp += " | "+ new Intl.NumberFormat(lang, {style: "unit", unit: "percent"}).format(1/2)
@@ -269,11 +264,15 @@ function get_data(lang) {
 					// notation: long compact
 					try {
 						tmp += " | "+ new Intl.NumberFormat(lang, {notation: "compact", compactDisplay: "long"}).format(654321987)
-					} catch(e) {}
+					} catch(e) {
+						tmp += err_check(e.name, e.message)
+					}
 					// signDisplay
 					try {
 						tmp += " | "+ (55).toLocaleString(lang, {signDisplay: "always"})
-					} catch(e) {}
+					} catch(e) {
+						tmp += err_check(e.name, e.message)
+					}
 					return tmp
 				} else if (item == 36) {
 					// [formatToParts] Intl.NumberFormat
@@ -296,16 +295,11 @@ function get_data(lang) {
 							return type +" error"
 						}
 					}
-					try {
-						let tmp = get_value("decimal", new Intl.NumberFormat(lang).formatToParts(1000.2), true)
-							+" | "+ get_value("group", new Intl.NumberFormat(lang).formatToParts(1000), true)
-							+" | "+ get_value("infinity", new Intl.NumberFormat(lang).formatToParts(Infinity), true)
-							+" | "+ get_value("minusSign", new Intl.NumberFormat(lang).formatToParts(-5), true)
-							+" | "+ get_value("nan", new Intl.NumberFormat(lang).formatToParts(4/5 +"%"), false)
-						return tmp
-					} catch (e) {
-						return zErr
-					}
+					return get_value("decimal", new Intl.NumberFormat(lang).formatToParts(1000.2), true)
+						+" | "+ get_value("group", new Intl.NumberFormat(lang).formatToParts(1000), true)
+						+" | "+ get_value("infinity", new Intl.NumberFormat(lang).formatToParts(Infinity), true)
+						+" | "+ get_value("minusSign", new Intl.NumberFormat(lang).formatToParts(-5), true)
+						+" | "+ get_value("nan", new Intl.NumberFormat(lang).formatToParts(4/5 +"%"), false)
 				} else if (item == 37) {
 					// 70+: [BigInt] Intl.NumberFormat
 					let bint = BigInt(9007199254740991)
@@ -316,12 +310,7 @@ function get_data(lang) {
 					// 70+: [BigInt] toLocaleString
 					let bint = BigInt(9007199254740991)
 					bint = eval("123456789123456789n")
-					let tmp = bint.toLocaleString(lang)
-					if (tmp == "123456789123456789") {
-						// 68-69
-						tmp = zNS
-					}
-					return tmp
+					return bint.toLocaleString(lang)
 				} else if (item == 39) {
 					return Number(1234567.89).toLocaleString(lang, {style: "currency", currency: "USD", currencyDisplay: "symbol"})
 				} else if (item == 40) {
@@ -329,8 +318,7 @@ function get_data(lang) {
 				} else if (item == 41) {
 					return Intl.DateTimeFormat(lang).resolvedOptions().numberingSystem
 				} else if (item == 42) {
-					let tmp = new Intl.RelativeTimeFormat(lang).resolvedOptions().numberingSystem
-					return tmp
+					return new Intl.RelativeTimeFormat(lang).resolvedOptions().numberingSystem
 				} else if (item == 43) {
 					// relatedYear, yearName
 					let tmp = Intl.DateTimeFormat(lang, {relatedYear: "long"})
@@ -346,23 +334,15 @@ function get_data(lang) {
 						let dpLong = new Intl.DateTimeFormat(lang, {hourCycle: "h12", dayPeriod: "long"}).format(date)
 						return dpNarrow == dpLong ? dpLong : dpNarrow + ", " + dpLong
 					}
-					let tmp ="",
-						dayA = get_day_period(new Date("2019-01-30T08:00:00")),
-						dayB = get_day_period(new Date("2019-01-30T12:00:00"))
-					if (dayA == dayB) {
-						tmp = zNS
-					} else {
-						// in the morning, noon, in the afternoon, in the evening, at night
-						tmp = dayA +" | "+ dayB
-							+" | "+ get_day_period(new Date("2019-01-30T15:00:00"))
-							+" | "+ get_day_period(new Date("2019-01-30T18:00:00"))
-							+" | "+ get_day_period(new Date("2019-01-30T22:00:00"))
-					}
-					return tmp
+					return get_day_period(new Date("2019-01-30T08:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T12:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T15:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T18:00:00"))
+						+" | "+ get_day_period(new Date("2019-01-30T22:00:00"))
 				} else if (item == 45) {
 					// ListFormat: 1589095: 78+
-					let tmp = "", res45 = []
-					let	styles = ['long','short','narrow'],
+					let tmp, res45 = []
+					let styles = ['long','short','narrow'],
 						types = ['conjunction', 'disjunction','unit']
 					styles.forEach(function(s){
 						types.forEach(function(t){
@@ -392,22 +372,13 @@ function get_data(lang) {
 					let prtype = item == 48 ? "cardinal" : "ordinal"
 					let prev = "", current = ""
 					for (let i=0; i < nos.length; i++) {
-						try {
-							current = new Intl.PluralRules(lang, {type: prtype}).select(nos[i])
-						} catch(e) {
-							current = zErr
-							break
-						}
-						// record changes only
+						current = new Intl.PluralRules(lang, {type: prtype}).select(nos[i])
 						if (prev !== current) {prules.push(nos[i] +": "+ current)}
 						prev = current
 					}
-					if (current !== zErr) {
-						return prules.join(", ")
-					} else {
-						return zErr
-					}
+					return prules.join(", ")
 				} else {
+					// missing item numbers
 					return "ignore"
 				}
 			} catch(e) {
@@ -422,11 +393,10 @@ function get_data(lang) {
 		// build
 		for (let i=0; i < 50; i++) {
 			let result = get_item(i)
-			if (isFF) {
-				if (result == undefined || result == "undefined" || result == "") {result = zB0}
+			if (result == undefined) {result = zU
+			} else if (result == "undefined") {result = zUQ
+			} else if (result === "") {result = "empty string"
 			}
-			if (result == " | ") {result = zB0 +" | "+ zB0}
-			if (result == " |  | ") {result = zB0 +" | "+ zB0 +" | "+ zB0}
 			if (result !== "ignore") {
 				if (i < 11) {
 					res.push(result)
@@ -519,28 +489,15 @@ function get_diffs() {
 }
 
 function run() {
-	langS = ""
+	let t0 = performance.now()
+
 	try {
-		// clear/reset: in case I add a re-run button or allow choosing a language
-		dom.langS.innerHTML = "&nbsp"
-		dom.hashS.innerHTML = "&nbsp"
-		dom.hashU.innerHTML = "&nbsp"
-		dom.diffs.innerHTML = "&nbsp"
-		dom.resO.innerHTML = "&nbsp"
-		dom.lang.innerHTML = "&nbsp"
-		dom.perf.innerHTML = "&nbsp"
-		arrayS = []
-		arrayU = []
-		arrayRO = []
-		arrayL = []
-
 		// ToDo: auto-select nav langauage but allow choosing any
-
 		langS = navigator.language
 		let go = true
 		// cleanup test
 		langS = langS.trim()
-		if (langS == "undefined") {langS = zUQ; go = false
+		if (langS == zU) {langS = zUQ; go = false
 		} else if (langS == undefined || langS == true || langS == false || langS == null) {langS += ""; go = false
 		} else if (Array.isArray(langS)) {langS = "array"; go = false}
 		if (langS == "") {langS = "empty string"; go = false}
@@ -560,11 +517,33 @@ function run() {
 				get_diffs()
 			})
 		}
+		dom.perf = Math.round(performance.now() - t0) +" ms"
+
 	} catch (e) {
 		if (langS == "") {langS = "language"}
 		dom.langS.innerHTML = langS
 		dom.diffs = e.name + ": " + e.message
 	}
+}
+
+function rerun() {
+	// clear/reset
+	langS = ""
+	dom.langS.innerHTML = "&nbsp"
+	dom.hashS.innerHTML = "&nbsp"
+	dom.hashU.innerHTML = "&nbsp"
+	dom.diffs.innerHTML = "&nbsp"
+	dom.resO.innerHTML = "&nbsp"
+	dom.lang.innerHTML = "&nbsp"
+	dom.perf.innerHTML = "&nbsp"
+	arrayS = []
+	arrayU = []
+	arrayRO = []
+	arrayL = []
+	// delay so user sees changes
+	setTimeout(function() {
+		run()
+	}, 120)
 }
 
 let isDebug = false // flip to output test item numbers

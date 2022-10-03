@@ -161,7 +161,7 @@ function run(runtype) {
 						}
 					}
 				} catch(e) {
-					r1 = zB0
+					r1 = zErr
 				}
 				try {
 					if (fn[3] == "none") {
@@ -181,7 +181,7 @@ function run(runtype) {
 						}
 					}
 				} catch(e) {
-					r2 = zB0
+					r2 = zErr
 				}
 
 				// fixed decimal places
@@ -205,7 +205,7 @@ function run(runtype) {
 
 				// compare
 				let notation = ""
-				if (r1 !== zB0 && r2 !== zB0) {
+				if (r1 !== zErr && r2 !== zErr) {
 					notation = " "+ (r1 == r2 ? green_tick : red_cross)
 					if (r1 !== r2) {
 						detail.push([fn[0],r1,r2])
