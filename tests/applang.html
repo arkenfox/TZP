@@ -64,6 +64,14 @@
 
 var dtd2 = ""
 
+// error notes
+let se = sb+"[test error: ",
+	error_file_cors = sn+"[file:] [Cross-Origin Request Blocked]"+sc,
+	error_iframe = se+"iframe]"+sc,
+	error_image = se+"image]"+sc,
+	enUS_green = sg+"[en-US]</span> ",
+	enUS_red = sb+"[en-US]</span> "
+
 function test_iframe() {
 	let iframeBlocked = true // assume blocked
 
