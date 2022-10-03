@@ -136,7 +136,7 @@ function fnDisplay() {
 		} else if (desc == "hr") {
 			display.push("<br><hr>")
 		} else {
-			if (match == zB0) {match = yellow_block; countBlock++
+			if (match == zErr) {match = yellow_block; countBlock++
 			} else if (match == "true") {match = green_tick; countTrue++
 			} else if (match == "false") {match = red_cross; countFalse++
 			} else {match = white_na; countNA++}
@@ -218,7 +218,7 @@ function get_colorgamut(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, res, res == "undefined", "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -235,7 +235,7 @@ function get_dates(num) {
 		let perfA = canPerf ? performance.now() - t0A : ""
 		fnRecord(num, strA, resA, bolA, "skip", perfA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0, e.message)
+		fnRecord(num, strA, e.name, zErr, e.message)
 	}
 	// 1515318
 	let strB = "[hyphen] new Date"
@@ -250,7 +250,7 @@ function get_dates(num) {
 		let perfB = canPerf ? performance.now() - t0B : ""
 		fnRecord(num+1, strB, resB, bolB, "skip", perfB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0, e.message)
+		fnRecord(num+1, strB, e.name, zErr, e.message)
 	}
 	// 1439800
 	let strC = "[string] new Data"
@@ -263,7 +263,7 @@ function get_dates(num) {
 		let perfC = canPerf ? performance.now() - t0C : ""
 		fnRecord(num+2, strC, resC, bolC, "skip", perfC)
 	} catch(e) {
-		fnRecord(num+2, strC, e.name, zB0, e.message)
+		fnRecord(num+2, strC, e.name, zErr, e.message)
 	}
 	// 1599375
 	let strD = "[+0000 UTC] Date.parse"
@@ -275,7 +275,7 @@ function get_dates(num) {
 		let perfD = canPerf ? performance.now() - t0D : ""
 		fnRecord(num+3, strD, resD, bolD, "skip", perfD)
 	} catch(e) {
-		fnRecord(num+3, strD, e.name, zB0, e.message)
+		fnRecord(num+3, strD, e.name, zErr, e.message)
 	}
 	// 1730155
 	let strE = "[localized] Date.parse"
@@ -287,7 +287,7 @@ function get_dates(num) {
 		let perfE = canPerf ? performance.now() - t0E : ""
 		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
 	} catch(e) {
-		fnRecord(num+4, strE, e.name, zB0, e.message)
+		fnRecord(num+4, strE, e.name, zErr, e.message)
 	}
 	// 1783731
 	let strF = "[subtraction] Date.parse"
@@ -299,7 +299,7 @@ function get_dates(num) {
 		let perfF = canPerf ? performance.now() - t0F : ""
 		fnRecord(num+6, strF, resF, bolF, "skip", perfF)
 	} catch(e) {
-		fnRecord(num+6, strF, e.name, zB0, e.message)
+		fnRecord(num+6, strF, e.name, zErr, e.message)
 	}
 }
 
@@ -348,7 +348,7 @@ function get_eval_length(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, test, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -410,8 +410,8 @@ function get_iframe_props(num1, num2, title) {
 		fnRecord(num1, title, resE, boolE, "skip", perf)
 		fnRecord(num2, title, resU, boolU, "skip", perf)
 	} catch(e) {
-		fnRecord(num1, title, e.name, zB0, e.message)
-		fnRecord(num2, title, e.name, zB0, e.message)
+		fnRecord(num1, title, e.name, zErr, e.message)
+		fnRecord(num2, title, e.name, zErr, e.message)
 	}
 }
 
@@ -430,7 +430,7 @@ function get_installtrigger(num) {
 			fnRecord(num, strA, resA, boolA, "skip", perfA)
 		}
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0, e.message)
+		fnRecord(num, strA, e.name, zErr, e.message)
 	}
 
 	let strB = "[window] InstallTrigger", boolB = false
@@ -445,7 +445,7 @@ function get_installtrigger(num) {
 			fnRecord(num+1, strB, resB, resB, "skip", perfB)
 		}
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0, e.message)
+		fnRecord(num+1, strB, e.name, zErr, e.message)
 	}
 
 	let strC = "[typeof] InstallTriggerImpl", boolC = false
@@ -465,7 +465,7 @@ function get_installtrigger(num) {
 				fnRecord(num+2, strC, resC, boolC, "skip", perfC)
 			}
 		} catch(e) {
-			fnRecord(num+2, strC, e.name, zB0, e.message)
+			fnRecord(num+2, strC, e.name, zErr, e.message)
 		}
 	}
 }
@@ -500,7 +500,7 @@ function get_intl_canonical_locale(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -614,14 +614,14 @@ function get_intl_supportedlocales(num) {
 		} catch(e) {
 			if (isFF) {
 				if (isVer >= errVer) {
-					fnRecord(num, title, e.name, zB0, e.message)
+					fnRecord(num, title, e.name, zErr, e.message)
 				} else {
 					let msg = e.message
 					msg = msg.replace("can't access property \"supportedLocalesOf\", ", "") // trim *error_fix
 					if (e.name == "TypeError" && msg == "Intl." + type +" is undefined") {
 						fnRecord(num, title, zNA +": FF" + errVer +"+ required", zNA)
 					} else {
-						fnRecord(num, title, e.name, zB0, e.message)
+						fnRecord(num, title, e.name, zErr, e.message)
 					}
 				}
 			} else {
@@ -692,7 +692,7 @@ function get_last_prototype_keys(num1, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num1, title1, res1, res1 == "search, hash, constructor", "skip", perf)
 	} catch(e) {
-		fnRecord(num1, title1, e.name, zB0, e.message)
+		fnRecord(num1, title1, e.name, zErr, e.message)
 	}
 
 	// HTMLLinkElement
@@ -710,7 +710,7 @@ function get_last_prototype_keys(num1, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num2, title2, res2, bool2, "skip", perf)
 	} catch(e) {
-		fnRecord(num2, title2, e.name, zB0, e.message)
+		fnRecord(num2, title2, e.name, zErr, e.message)
 	}
 }
 
@@ -742,7 +742,7 @@ function get_locale_compare(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -792,7 +792,7 @@ function get_math(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -831,7 +831,7 @@ function get_media_constraints(num, title) {
 		if (isNA) {
 			fnRecord(num, title, zNA +": disabled", zNA)
 		} else {
-			fnRecord(num, title, e.name, zB0, e.message)
+			fnRecord(num, title, e.name, zErr, e.message)
 		}
 	}
 }
@@ -874,10 +874,10 @@ function get_mimetypes(num, title) {
 				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zErr)
 		}
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -913,7 +913,7 @@ function get_moz_colors(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -949,7 +949,7 @@ function get_moz_fonts(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -1125,7 +1125,7 @@ function get_moz_objects(num, name) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -1173,8 +1173,8 @@ function get_nav_keys(num1, num2, title) {
 		let perfN = canPerf ? performance.now() - t0 : ""
 		fnRecord(num2, title, resN, boolN, "skip", perfN)
 	} catch(e) {
-		fnRecord(num1, title, e.name, zB0, e.message)
-		fnRecord(num2, title, e.name, zB0, e.message)
+		fnRecord(num1, title, e.name, zErr, e.message)
+		fnRecord(num2, title, e.name, zErr, e.message)
 	}
 }
 
@@ -1188,7 +1188,7 @@ function get_nav_screen(num) {
 		let perfA = canPerf ? performance.now() - t0A : ""
 		fnRecord(num, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
-		fnRecord(num, strA, e.name, zB0, e.message)
+		fnRecord(num, strA, e.name, zErr, e.message)
 	}
 	let strB = "[top] screen", boolB = false
 	try {
@@ -1199,7 +1199,7 @@ function get_nav_screen(num) {
 		let perfB = canPerf ? performance.now() - t0B : ""
 		fnRecord(num+1, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
-		fnRecord(num+1, strB, e.name, zB0, e.message)
+		fnRecord(num+1, strB, e.name, zErr, e.message)
 	}
 }
 
@@ -1221,7 +1221,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfA = canPerf ? performance.now() - t0A : ""
 		fnRecord(num1, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
-		fnRecord(num1, strA, e.name, zB0, e.message)
+		fnRecord(num1, strA, e.name, zErr, e.message)
 	}
 
 	// not expected
@@ -1244,11 +1244,11 @@ function get_nav_values(num1, num2, num3) {
 					}
 				})
 			} catch(e) {
-				fnRecord(numBT, strBT, e.name, zB0)
+				fnRecord(numBT, strBT, e.name, zErr)
 			}
 		}
 	} catch(e) {
-		fnRecord(numBT, strBT, e.name, zB0, e.message)
+		fnRecord(numBT, strBT, e.name, zErr, e.message)
 	}
 	// deviceMemory
 	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
@@ -1261,7 +1261,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfDM = canPerf ? performance.now() - t0DM : ""
 		fnRecord(numDM, strDM, resDM, boolDM, "skip", perfDM)
 	} catch(e) {
-		fnRecord(numDM, strDM, e.name, zB0, e.message)
+		fnRecord(numDM, strDM, e.name, zErr, e.message)
 	}
 
 	// globalprivacycontrol
@@ -1282,7 +1282,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfG = canPerf ? performance.now() - t0G : ""
 		fnRecord(numG, strG, resG, boolG, "skip", perfG)
 	} catch(e) {
-		fnRecord(numG, strG, e.name, zB0, e.message)
+		fnRecord(numG, strG, e.name, zErr, e.message)
 	}
 
 	// keyboard
@@ -1314,7 +1314,7 @@ function get_nav_values(num1, num2, num3) {
 			})
 		}
 	} catch(e) {
-		fnRecord(numK, strK, e.name, zB0, e.message)
+		fnRecord(numK, strK, e.name, zErr, e.message)
 	}
 
 	// vendor
@@ -1328,7 +1328,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfV = canPerf ? performance.now() - t0V : ""
 		fnRecord(numV, strV, resV, boolV, "skip", perfV)
 	} catch(e) {
-		fnRecord(numV, strV, e.name, zB0, e.message)
+		fnRecord(numV, strV, e.name, zErr, e.message)
 	}
 
 	// specific
@@ -1360,7 +1360,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfX = canPerf ? performance.now() - t0X : ""
 		fnRecord(num3, strX, resX, boolX, "skip", perfX)
 	} catch(e) {
-		fnRecord(num3, strX, e.name, zB0, e.message)
+		fnRecord(num3, strX, e.name, zErr, e.message)
 	}
 	// DNT: FF: 1, unspecified
 	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
@@ -1379,13 +1379,13 @@ function get_nav_values(num1, num2, num3) {
 			if (isEngine == "goanna" && testDNT == "undefined") {
 				fnRecord(numDNT, strDNT, testDNT, true, "skip", perfDNT)
 			} else {
-				fnRecord(numDNT, strDNT, testDNT, zB0, "skip", perfDNT)
+				fnRecord(numDNT, strDNT, testDNT, zErr, "skip", perfDNT)
 			}
 		} else {
 			fnRecord(numDNT, strDNT, testDNT, boolDNT, "skip", perfDNT)
 		}
 	} catch(e) {
-		fnRecord(numDNT, strDNT, e.name, zB0, e.message)
+		fnRecord(numDNT, strDNT, e.name, zErr, e.message)
 	}
 
 	let strY = "[productSub] navigator", boolY = false, numY = num3+4
@@ -1397,7 +1397,7 @@ function get_nav_values(num1, num2, num3) {
 		let perfY = canPerf ? performance.now() - t0Y : ""
 		fnRecord(numY, strY, resY, boolY, "skip", perfY)
 	} catch(e) {
-		fnRecord(numY, strY, e.name, zB0, e.message)
+		fnRecord(numY, strY, e.name, zErr, e.message)
 	}
 
 	// not expected
@@ -1422,7 +1422,7 @@ function get_nav_values(num1, num2, num3) {
 			perfB = canPerf ? performance.now() - t0B : ""
 			fnRecord(numB, strB, e.name, boolB, e.message, perfB)
 		} else {
-			fnRecord(numB, strB, e.name, zB0, e.message)
+			fnRecord(numB, strB, e.name, zErr, e.message)
 		}
 	}
 
@@ -1447,7 +1447,7 @@ function get_obj_enumeration(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, res, bool, "skip", perf)
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -1466,7 +1466,7 @@ function get_permission(num, title) {
 			if ((error.message).includes(userVis)) {
 				fnRecord(num, title, userVis, false, "skip", perfErr)
 			} else {
-				fnRecord(num, title, error.name, zB0, error.message)
+				fnRecord(num, title, error.name, zErr, error.message)
 			}
 		})
 	} catch(e) {
@@ -1474,7 +1474,7 @@ function get_permission(num, title) {
 		if (isEngine == "webkit") {
 			fnRecord(num, title, "not supported", false)
 		} else {
-			fnRecord(num, title, e.name, zB0, e.message)
+			fnRecord(num, title, e.name, zErr, e.message)
 		}
 	}
 }
@@ -1513,10 +1513,10 @@ function get_plugins(num, title) {
 				fnRecord(num, title, hash, bool, "skip", perf)
 			}
 		} else {
-			fnRecord(num, title, e.name, zB0)
+			fnRecord(num, title, e.name, zErr)
 		}
 	} catch(e) {
-		fnRecord(num, title, e.name, zB0, e.message)
+		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
@@ -1547,7 +1547,7 @@ function get_stacklength(num1, num2, num3) {
 			let perfCN = canPerf ? performance.now() - t0E : ""
 			fnRecord(num1, strCN, resCN, testCN, "skip", perfCN)
 		} catch(n) {
-			fnRecord(num1, strCN, n.name, zB0, n.message)
+			fnRecord(num1, strCN, n.name, zErr, n.message)
 		}
 		// fileName
 		let strFN = "[fileName] error", errFN = false
@@ -1559,7 +1559,7 @@ function get_stacklength(num1, num2, num3) {
 			let perfFN = canPerf ? performance.now() - t0E : ""
 			fnRecord(num1+1, strFN, resFN, testFN, "skip", perfFN)
 		} catch(n) {
-			fnRecord(num1+1, strFN, n.name, zB0, n.message)
+			fnRecord(num1+1, strFN, n.name, zErr, n.message)
 		}
 		// lineNumber
 		let strLN = "[lineNumber] error", errLN = false
@@ -1570,7 +1570,7 @@ function get_stacklength(num1, num2, num3) {
 			let perfLN = canPerf ? performance.now() - t0E : ""
 			fnRecord(num1+2, strLN, resLN, testLN, "skip", perfLN)
 		} catch(n) {
-			fnRecord(num1+2, strLN, n.name, zB0, n.message)
+			fnRecord(num1+2, strLN, n.name, zErr, n.message)
 		}
 
 		// first error
@@ -1593,7 +1593,7 @@ function get_stacklength(num1, num2, num3) {
 			}
 			fnRecord(num2, strSL, resSL, testSL, "skip", perf)
 		} catch(n) {
-			fnRecord(num2, strSL, n.name, zB0, n.message, perf)
+			fnRecord(num2, strSL, n.name, zErr, n.message, perf)
 		}
 	}
 }
@@ -1645,7 +1645,7 @@ function get_storage_estimate(num, title) {
 		} else {
 			// FF56 or lower
 			let result = e.name
-			let type = zB0
+			let type = zErr
 			let error = e.message
 			if (isFF && isVer < 57 && e.message == "navigator.storage is undefined") {
 				result = zNA +": FF57+ required"
@@ -1671,7 +1671,7 @@ function get_window_moz(num) {
 		let perfC = canPerf ? performance.now() - t0C : ""
 		fnRecord(num, strC, resC, boolC, "skip", perfC)
 	} catch(e) {
-		fnRecord(num, strC, e.name, zB0, e.message)
+		fnRecord(num, strC, e.name, zErr, e.message)
 	}
 
 	let strM = "[mozRTCPeerConnection] window"
@@ -1694,7 +1694,7 @@ function get_window_moz(num) {
 		let perfM = canPerf ? performance.now() - t0M : ""
 		fnRecord(num+1, strM, resM, boolM, "skip", perfM)
 	} catch(e) {
-		fnRecord(num+1, strM, e.name, zB0, e.message)
+		fnRecord(num+1, strM, e.name, zErr, e.message)
 	}
 
 	let strA = "[mozInnerScreenX] window", boolA = false
@@ -1706,7 +1706,7 @@ function get_window_moz(num) {
 		let perfA = canPerf ? performance.now() - t0A : ""
 		fnRecord(num+2, strA, resA, boolA, "skip", perfA)
 	} catch(e) {
-		fnRecord(num+2, strA, e.name, zB0, e.message)
+		fnRecord(num+2, strA, e.name, zErr, e.message)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
@@ -1717,7 +1717,7 @@ function get_window_moz(num) {
 		let perfB = canPerf ? performance.now() - t0B : ""
 		fnRecord(num+3, strB, resB, boolB, "skip", perfB)
 	} catch(e) {
-		fnRecord(num+3, strB, e.name, zB0, e.message)
+		fnRecord(num+3, strB, e.name, zErr, e.message)
 	}
 }
 
@@ -1770,7 +1770,7 @@ function get_window_props(num1, num2, title) {
 		let perfE = canPerf ? performance.now() - t0E : ""
 		fnRecord(num1, title, hashE, boolE, "skip", perfE)
 	} catch(e) {
-		fnRecord(num1, title, e.name, zB0, e.message)
+		fnRecord(num1, title, e.name, zErr, e.message)
 	}
 
 	// unexpected
@@ -1833,7 +1833,7 @@ function get_window_props(num1, num2, title) {
 		let perfU = canPerf ? performance.now() - t0U : ""
 		fnRecord(num2, title, hashU, boolU, "skip", perfU)
 	} catch(e) {
-		fnRecord(num2, title, e.name, zB0, e.message)
+		fnRecord(num2, title, e.name, zErr, e.message)
 	}
 
 }
