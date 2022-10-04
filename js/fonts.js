@@ -44,59 +44,6 @@ function listfontfirst() {
 		console.log("\""+ sizelog.join("\",\"") +"\"")
 	}
 }
-let injectedwin11 = false
-let fontswin11 = [
-	// should be fonts
-	"Cascadia Code","Cascadia Code ExtraLight","Cascadia Code Light","Cascadia Code SemiLight","Cascadia Code SemiBold","Cascadia Mono",
-	"Cascadia Mono ExtraLight","Cascadia Mono Light","Cascadia Mono SemiLight","Cascadia Mono SemiBold","Segoe Fluent Icons",
-	"Segoe UI Variable Display","Segoe UI Variable Display Light","Segoe UI Variable Display Semilight","Segoe UI Variable Display Semibold",
-	"Segoe UI Variable Small","Segoe UI Variable Small Light","Segoe UI Variable Small Semilight","Segoe UI Variable Small Semibold",
-	"Segoe UI Variable Text","Segoe UI Variable Text Light","Segoe UI Variable Text Semilight","Segoe UI Variable Text Semibold",
-	"Sitka Banner Semibold","Sitka Display Semibold","Sitka Small Semibold","Sitka Heading Semibold","Sitka Subheading Semibold",
-	"Sitka Text Semibold",
-]
-let faceswin11 = [
-	// should be faces
-	"Cascadia Code ExtraLight Italic","Cascadia Code Light Italic","Cascadia Code SemiLight Italic","Cascadia Code Italic",
-	"Cascadia Code SemiBold Italic","Cascadia Code Bold","Cascadia Code Bold Italic","Cascadia Mono ExtraLight Italic",
-	"Cascadia Mono Light Italic","Cascadia Mono SemiLight Italic","Cascadia Mono Italic","Cascadia Mono SemiBold Italic",
-	"Cascadia Mono Bold","Cascadia Mono Bold Italic","Segoe UI Variable Display Bold","Segoe UI Variable Small Bold",
-	"Segoe UI Variable Text Bold","Sitka Banner Semibold Italic","Sitka Display Semibold Italic","Sitka Small Semibold Italic",
-	"Sitka Heading Semibold Italic","Sitka Subheading Semibold Italic","Sitka Text Semibold Italic",
-]
-function injectwin11() {
-	if (injectedwin11) {
-		console.log("already injected")
-		return
-	} else if (isOS !== "windows") {
-		console.log("this is not windows")
-		return
-	}
-	fntList = fntList.concat(fontswin11)
-	fntList = fntList.concat(faceswin11)
-	fntList.sort()
-	console.log("injection, done! now rerun the font section")
-	injectedwin11 = true
-}
-function checkwin11() {
-	if (!injectedwin11) {
-		console.log("you need to inject the fonts first")
-		return
-	}
-	let aFound = sDetail["fonts_fontnames_notglobal"]
-	// testing
-	//aFound.push("Cascadia Code","Cascadia Code ExtraLight","Sitka Text Semibold Italic") // 2 fonts, 1 face
-	let res = []
-	let fontFound = fontswin11.filter(x => aFound.includes(x))
-	if (fontFound.length) {res.push("FONTS FOUND\n" + fontFound.join(", "))} else {res.push("FONTS FOUND - none")}
-	let fontNotFound = fontswin11.filter(x => !aFound.includes(x))
-	if (fontFound.length == 0) {res.push("FONTS NOT FOUND - all")} else {res.push("FONTS NOT FOUND\n" + fontNotFound.join(", "))}
-	let faceFound = faceswin11.filter(x => aFound.includes(x))
-	if (faceFound.length) {res.push("FACES FOUND\n" + faceFound.join(", "))} else {res.push("FACES FOUND - none")}
-	let faceNotFound = faceswin11.filter(x => !aFound.includes(x))
-	if (faceFound.length == 0) {res.push("FACES NOT FOUND - all")} else {res.push("FACES NOT FOUND\n" + faceNotFound.join(", "))}
-	console.log(res.join("\n"))
-}
 /*** END TEMP FUNCTIONS ***/
 
 // sims
@@ -120,6 +67,7 @@ let fntOther = {
 		"굴림",
 		"굴림체", // GulimChe?
 		/* ignore: expected + dupe sizes
+			"MS Outlook", // = MS She11 Dlg \\32 (or rather = tahoma) // we can pick this up via a mini font face test
 			"PMingLiU", // = PMingLiU-ExtB (fntBase)
 			"AngsanaUPC","BrowalliaUPC","CordiaUPC", // = Angsana|Browallia|Cordia New
 			"바탕", // = Batang
@@ -167,7 +115,7 @@ let fntBase = {
 			"Candara Light", // 10 = Candara
 			"Corbel Light", // 10 = Corbel
 			"Malgun Gothic Semilight", // 10 = Malgun Gothic
-			"Segoe UI Historic","Yu Gothic UI" // 10 = Segoe UI
+			"Segoe UI Historic","Yu Gothic UI", // 10 = Segoe UI
 			"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
 			"Yu Gothic UI Light", // = Yu Gothic UI (both 10)
 			"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight
@@ -176,7 +124,7 @@ let fntBase = {
 			"MS UI Gothic", // = MS PGothic
 			"Segoe UI Symbol", // = Segoe UI
 			"Cambria", // = cambria math
-			"Helvetica","Small Fonts" // = Arial (which we catch if not in fonts, in bases)
+			"Helvetica","Small Fonts", // = Arial (which we catch if not in fonts, in bases)
 			"Courier", //  = courier new
 			"MS Serif","Roman","Times", // = TNR
 			"MS Sans Serif", // = Microsoft Sans Serif
@@ -188,18 +136,19 @@ let fntTB = {
 	linux: [
 		// TB linux only uses 134 bundled (140 files incl Twemoji Mozilla): set by FontConfig
 		// of 134 bundled: 59 unique sizes: all but cousine found vs monospace (first pass)
-		"Arimo","Cousine","Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali",
-		"Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi",
-		"Noto Sans JP","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi",
-		"Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic",
-		"Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao",
-		"Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada",
-		"Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac",
-		"Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thai",
+		"Arimo","Cousine","Noto Sans JP","Noto Sans Tamil","Noto Sans Telugu","Noto Sans Thai",
+		"Noto Serif Dogra","Noto Serif Hebrew","Noto Serif Sinhala","STIX Math","Tinos","Twemoji Mozilla",
+
+		"Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma",
+		"Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans Javanese",
+		"Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha",
+		"Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi",
+		"Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian",
+		"Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo",
+		"Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri",
 		"Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square",
-		"Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Dogra",
-		"Noto Serif Gujarati","Noto Serif Hebrew","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar",
-		"Noto Serif Sinhala","Noto Serif Tamil","Noto Serif Tibetan","STIX Math","Tinos","Twemoji Mozilla"
+		"Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Gujarati",
+		"Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Tamil","Noto Serif Tibetan",
 	],
 	mac: [
 		// ESR102 whitelist minus 123 bundled
@@ -230,7 +179,18 @@ let fntTB = {
 			"Twemoji Mozilla", // = MS Shell Dlg \\32
 		*/
 		// of 121 bundled: 53 unique sizes
-		"Noto Naskh Arabic","Noto Sans","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma","Noto Sans Cham","Noto Sans Elbasan","Noto Sans Georgian","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans Javanese","Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha","Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi","Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian","Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo","Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Symbols2","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri","Noto Sans Thaana","Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square","Noto Serif","Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Gujarati","Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Tamil","Noto Serif Tibetan"
+		"Noto Sans","Noto Sans Georgian","Noto Sans Symbols2","Noto Sans Thaana","Noto Serif",
+
+		"Noto Naskh Arabic","Noto Sans Adlam","Noto Sans Balinese","Noto Sans Bengali","Noto Sans Chakma",
+		"Noto Sans Cham","Noto Sans Elbasan","Noto Sans Grantha","Noto Sans Gunjala Gondi","Noto Sans Javanese",
+		"Noto Sans Kannada","Noto Sans Khojki","Noto Sans Khudawadi","Noto Sans Lao","Noto Sans Lepcha",
+		"Noto Sans Mahajani","Noto Sans Malayalam","Noto Sans Mandaic","Noto Sans Masaram Gondi",
+		"Noto Sans Meetei Mayek","Noto Sans Mende Kikakui","Noto Sans Miao","Noto Sans Modi","Noto Sans Mongolian",
+		"Noto Sans Myanmar","Noto Sans Newa","Noto Sans Sharada","Noto Sans Sinhala","Noto Sans Soyombo",
+		"Noto Sans Sundanese","Noto Sans Symbols","Noto Sans Syriac","Noto Sans Tai Tham","Noto Sans Takri",
+		"Noto Sans Tirhuta","Noto Sans Wancho","Noto Sans Warang Citi","Noto Sans Zanabazar Square",
+		"Noto Serif Balinese","Noto Serif Bengali","Noto Serif Devanagari","Noto Serif Gujarati",
+		"Noto Serif Kannada","Noto Serif Lao","Noto Serif Myanmar","Noto Serif Tamil","Noto Serif Tibetan",
 	],
 }
 
@@ -538,7 +498,7 @@ const getFonts = () => {
 				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
 			}
 			// return if not doing font sizes
-			if (fntList.length == 0 || fontDocEnabled == false) {
+			if (fntList.length == 0) { //|| fontDocEnabled == false) {
 				return resolve("baseonly")
 			}
 
@@ -594,7 +554,6 @@ const getFonts = () => {
 			// measure
 			if (aTestsValid.length) {
 				let isDetected = false, intDetected = 0, intDetectedMax = aTestsValid.length
-				
 				fntList.forEach(font => {
 					isDetected = false // have we found it
 					intDetected = 0 // in all valid methods
@@ -672,21 +631,16 @@ function get_fonts() {
 		let t0; if (canPerf) {t0 = performance.now()}
 
 		// functions
-		function get_baseHash(isMismatch) {
-			let baseHash = zB0, baseBtn = "", bName = "fonts_fontsizes_base"
+		function get_baseHash() {
+			let baseHash = zErr, baseBtn = "", bName = "fonts_fontsizes_base"
 			try {
 				if (Object.keys(sDetail[bName]).length) {
 					baseHash = mini_sha1(sDetail[bName], "fontsizes base")
-					if (isMismatch) {
-						sDetail[bName +"_fake_skip"] = sDetail[bName]; delete sDetail[bName]
-						bName += isMismatch ? "_fake_skip" : ""
-					}
 					baseBtn = buildButton("12", bName)
 				}
 			} catch(e) {}
-			if (isMismatch) {baseHash = soL + baseHash + scC}
 			dom.fontBase.innerHTML = baseHash + baseBtn
-			return isMismatch ? zLIE : baseHash
+			return baseHash
 		}
 		function exit(value) {
 			dom.fontNames = value; dom.fontSizes = value; dom.fontBase = value
@@ -710,8 +664,8 @@ function get_fonts() {
 			if (res == "baseonly") {exit(zNA); return
 			} else if ("string" === typeof res) {exit(zErr); return}
 
-			let oData = {}, aIgnore = [], isMismatch = false
-			let ignoreList = [zNS, "none", "all", "zero dimensions"]
+			let oData = {}, aIgnore = []
+			let ignoreList = ["none", "all", "zero dimensions"]
 			if (typeof res === "object" && res !== null) {
 				for (let name in res) {
 					let data = res[name], hash = "unknown"
@@ -724,7 +678,6 @@ function get_fonts() {
 					} else if (data.length == 1 && data[0].split(":")[0] == "mismatch") {
 						hash = data[0].split(":")[1]
 						aIgnore.push(name +":"+ hash)
-						isMismatch = true
 					} else {
 						// group by hash
 						hash = mini(data.join(), "fontsizes "+ name)
@@ -740,7 +693,7 @@ function get_fonts() {
 				}
 			}
 			// baseReturn
-			let baseReturn = get_baseHash(isMismatch)
+			let baseReturn = get_baseHash()
 
 			// collect size buckets, font names
 				// handle mutiple sizes per font: e.g. monospace, serif
@@ -871,6 +824,7 @@ function get_fallback(list) {
 	// list passed for priming run
 	/* https://github.com/arthuredelstein/tordemos */
 	try {
+		if (runSE) {abc = def}
 		let t0; if (canPerf) {t0 = performance.now()}
 		sDetail["fonts_fontnames_fallback"] = []
 		sDetail["fonts_fontnames_diff_notglobal"] = []
@@ -932,9 +886,12 @@ function get_fallback(list) {
 			gClick = true
 		}
 	} catch(e) {
-		// TypeError: document.fonts.values() is not iterable
-		gClick = true
-		return zB0
+		dom.fontFBTest = "" // cleanup
+		if (list.length = 2) {
+			gClick = true
+			dom.fontFB = log_error("font fallback", e.name, e.message)
+		}
+		return zErr
 	}
 }
 
@@ -966,8 +923,8 @@ function get_formats() {
 					res.push(k +":"+ hash)
 				} else {
 					// not supported
-					document.getElementById(k).innerHTML = zNS
-					res.push(k +":"+ zNS)
+					document.getElementById(k).innerHTML = zNA
+					res.push(k +":"+ zNA)
 				}
 			} catch(e) {
 				document.getElementById(k).innerHTML = log_error("fonts: "+ k, e.name, e.message)
@@ -1142,8 +1099,8 @@ function get_unicode() {
 					display = errCanvas
 					value = zErr
 					if (!TextMetrics.prototype.hasOwnProperty(name)) {
-						display = zNS
-						value = zNS
+						display = zNA
+						value = zNA
 					}
 				} else if (errCheck !== undefined) {
 					display = errCheck
@@ -1170,8 +1127,8 @@ function get_unicode() {
 					// empty object
 					if (name !== "offset" && name !== "clientrect") {
 						if (!TextMetrics.prototype.hasOwnProperty(name)) {
-							display = zNS
-							value = zNS
+							display = zNA
+							value = zNA
 						}
 					}
 				}
@@ -1346,7 +1303,7 @@ function get_woff2() {
 	return new Promise(resolve => {
 		try {
 			const supportsWoff2 = (function(){
-				//abc = def
+				if (runSE) {abc = def}
 				const font = new FontFace('t', 'url("data:font/woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA") format("woff2")', {});
 				font.load().catch(err => {
 					// NetworkError: A network error occurred. < woff2 disabled/downloadable | fonts blocked e.g. uBO
@@ -1393,11 +1350,7 @@ function outputFontsFB() {
 				Promise.all([
 					get_fallback(['orange','banana']) // primer
 				]).then(function(results){
-					if (results[0] == zB0) {
-						// cleanup
-						dom.fontFBTest = ""
-						dom.fontFB = zB0
-					} else {
+					if (results[0] !== zErr) {
 						dom.fontFB = "test is running... please wait"
 						// we need a delay from the primer run if
 						// browser.display.use_document_fonts = 0 (blocked)
