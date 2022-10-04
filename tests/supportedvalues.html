@@ -85,7 +85,9 @@ function run() {
 		})
 		// overall hash
 		let hash = sha1(res.join()), code = ""
-		if (hash == "ff4a0a84dd97eddd7199e7655e3ca561274b0f8e") {code = "105+" // Europe/Kirov -> Europe/Kyiv
+		if (hash == "ff4a0a84dd97eddd7199e7655e3ca561274b0f8e") {
+			// 1786025: backported to ESR102: Europe/Kirov -> Europe/Kyiv
+			code = "105+ | ESR102"
 		} else if (hash == "0587bf26f1508a6fbc5a26e7dd41fb835790cd31") {code = "101-104"
 		} else if (hash == "203b29f75215cd50a3b94d31e44ac0c933011be8") {code = "96-100"
 		} else if (hash == "52322e29ea14381cd65f31f568173a785a8e291b") {code = "94-95"
