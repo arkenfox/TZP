@@ -498,7 +498,7 @@ const getFonts = () => {
 				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
 			}
 			// return if not doing font sizes
-			if (fntList.length == 0) || fontDocEnabled == false) {
+			if (fntList.length == 0 || fontDocEnabled == false) {
 				return resolve("baseonly")
 			}
 
