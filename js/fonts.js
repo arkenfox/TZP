@@ -498,7 +498,7 @@ const getFonts = () => {
 				sDetail["fonts_fontsizes_base"][h] = oTempBase[h]
 			}
 			// return if not doing font sizes
-			if (fntList.length == 0) { //|| fontDocEnabled == false) {
+			if (fntList.length == 0) || fontDocEnabled == false) {
 				return resolve("baseonly")
 			}
 
@@ -1391,15 +1391,16 @@ function outputFonts() {
 	section.push("font_loading:"+ r)
 
 	// doc fonts
-		// this returns disabled with e.g. chameleon
-		// we should do it after font sizes and if font detected > e.g. 10 then it's enabled
-		// checking this works on android etc where the font doesn't exist: it should put serif first
+		// check this works on android etc where the font doesn't exist: it should put serif first
 	try {
 		el = dom.divDocFont
 		let font = getComputedStyle(el).getPropertyValue("font-family")
-		log_debug("doc font", font)
 		fontDocEnabled = (font.slice(1,16) == "Times New Roman" ? true : false)
-		r = (fontDocEnabled ? zE : zD)
+		if (!fontDocEnabled) {
+			// chameleon strips quotes marks
+			if (font.slice(0,15) == "Times New Roman") {fntDocEnabled = true}
+		}
+		r = (fontDocEnabled ? zE : zD) + " | " + font
 		dom.fontDoc = r
 		section.push("document_fonts:"+ r)
 	} catch(e) {
