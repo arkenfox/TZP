@@ -1391,10 +1391,14 @@ function outputFonts() {
 	section.push("font_loading:"+ r)
 
 	// doc fonts
+		// this returns disabled with e.g. chameleon
+		// we should do it after font sizes and if font detected > e.g. 10 then it's enabled
+		// checking this works on android etc where the font doesn't exist: it should put serif first
 	try {
 		el = dom.divDocFont
-		let font = getComputedStyle(el).getPropertyValue("font-family").slice(1,16)
-		fontDocEnabled = (font == "Times New Roman" ? true : false)
+		let font = getComputedStyle(el).getPropertyValue("font-family")
+		log_debug("doc font", font)
+		fontDocEnabled = (font.slice(1,16) == "Times New Roman" ? true : false)
 		r = (fontDocEnabled ? zE : zD)
 		dom.fontDoc = r
 		section.push("document_fonts:"+ r)
