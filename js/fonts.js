@@ -1398,7 +1398,7 @@ function outputFonts() {
 		fontDocEnabled = (font.slice(1,16) == "Times New Roman" ? true : false)
 		if (!fontDocEnabled) {
 			// chameleon strips quotes marks
-			if (font.slice(0,15) == "Times New Roman") {fntDocEnabled = true}
+			if (font.slice(0,15) == "Times New Roman") {fontDocEnabled = true}
 		}
 		r = (fontDocEnabled ? zE : zD) + " | " + font
 		dom.fontDoc = r
