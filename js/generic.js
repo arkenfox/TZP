@@ -421,7 +421,6 @@ const get_isFork = () => new Promise(resolve => {
 	if (isEngine == "goanna") {isFork = "Pale Moon"} // isMark 0x0 isLogo 300x326
 	try {
 		// load about:logo then measure branding so they have time to load
-		//abc=def // throw an error
 		let imgA = new Image()
 		imgA.src = "about:logo"
 		imgA.style.visibility = "hidden"
@@ -429,12 +428,11 @@ const get_isFork = () => new Promise(resolve => {
 		imgA.addEventListener("load", function() {
 			isLogo = imgA.width +" x "+ imgA.height
 			try {isMark = el.width+ " x " + el.height} catch(e) {}
-			if (runSN) {
-				isMark = "110 x 50" // new to both TB and FF
-				//isMark = "336 x 48" // new TB but not new FF
+			// simulate
+				//isMark = "110 x 50" // new TB/FF
+				//isMark = "336 x 48" // new TB but not FF
 				//isMark = "" // you need to set this one in get_fd_resources as well
 				//isMark = "0 x 0" // same as changing html img src
-			}
 			set_isFork(isMark)
 			// special case for goanna (PM is 300x326
 			if (isEngine == "goanna") {
@@ -457,8 +455,6 @@ const get_isOS = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	function finish(font) {
 		// set isPlatformFont
-			// expand later: e.g. if linux TB pick one bundled font that has no size collisions
-			// e.g. if android we can use roboto
 		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32 "
 		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
 		if (isOS === "") {log_alert("global:isOS: unknown", true)}
@@ -616,7 +612,8 @@ const get_isVer = () => new Promise(resolve => {
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
 
-		isVerMax = 106
+		isVerMax = 107
+		try {dom.test107.options.length = -1; return 107} catch(e) {} // 344060
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
