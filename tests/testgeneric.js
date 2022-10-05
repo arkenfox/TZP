@@ -317,6 +317,7 @@ const get_isTB = () => new Promise(resolve => {
 
 const get_isVer = () => new Promise(resolve => {
 	// NOTE: requires dom for 95 and 76, and a promised is95
+	// NOTE: requires dom for 107
 	if (!isFF) {return resolve()}
 	function output(verNo) {
 		isVer = verNo
@@ -338,8 +339,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 106
-		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
+		isVerMax = 107
+		if (Element.prototype.hasOwnProperty("checkVisibility")) {
+			try {dom.test107.options.length = -1; return 107 // 344060: false positives FF52-57
+			} catch(e) {return 106} // 1777293
+		}
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
 		if (undefined === new ErrorEvent("error").error) return 103 // 1772494
