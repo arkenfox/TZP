@@ -22,6 +22,7 @@
 		<div id="test73"></div>
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<output id="test90a">a</output>
+		<select id="test107"></select>
 	</div>
 	<div class="offscreen">
 		<div id="test89" style="width:1em">a &#x3000 b</div>
@@ -208,7 +209,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 57, maxVer = 106, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 58, maxVer = 107, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -270,6 +271,17 @@ function outputVersion() {
 			}
 		}
 
+		// 107: 344060
+		let t107 = performance.now(), ver107
+		// false positives FF52-57
+		if (Element.prototype.hasOwnProperty("checkVisibility")) {
+			try {
+				dom.test107.options.length = -1
+				ver107 = true
+			} catch(e) {} // NotSupportedError Operation is not supported
+		}
+		rec(107, 107, "344060", ver107, performance.now()-t107, "d")
+
 		// 106: 1777293
 		let t106 = performance.now()
 		let ver106 = (Element.prototype.hasOwnProperty("checkVisibility")) // 0.009 ms
@@ -280,8 +292,8 @@ function outputVersion() {
 			// 94-104: The object could not be cloned. 31
 			// 93-: structuredClone is not defined. 30
 		let t105 = performance.now(), ver105
-		try {structuredClone((() => {}))} catch(e) {ver105 = (e.message.length == 36); console.log(e.message, e.message.length)}
-		rec(105, 105, "830716", ver105, performance.now()-t105)
+		try {structuredClone((() => {}))} catch(e) {ver105 = (e.message.length == 36)}
+		rec(105, 105, "830716", ver105, performance.now()-t105) // 0.15ms
 
 		// 104: 1712623
 		let t104 = performance.now()
