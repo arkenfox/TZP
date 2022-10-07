@@ -18,6 +18,32 @@ function get_component_shims() {
 	return "component_shims:"+ res
 }
 
+function get_errors() {
+	return new Promise(resolve => {
+		let res = [], btn = "", note = "", hash
+		let sName = "misc_error_messages"
+		sDetail[sName] = []
+		try {null.bar} catch(e) {hash = e.message; res.push(hash)} // 0.06ms
+		if (!isFF) {
+			try {[...undefined].length} catch(e) {res.push(e.message)}
+			try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
+			try {(1).toString(1000)} catch(e) {res.push(e.message)}
+			try {var x = new Array(-1)} catch(e) {res.push(e.message)}
+			hash = mini_sha1(res.join(), "misc errors")
+			sDetail[sName] = res
+			btn = buildButton("18", sName)
+		}
+		// notation: 74+: 1259822: error_message_fix
+		if (isFF && isTZPSmart) {
+			if (hash !== "null has no properties" && hash !== "can't access property \"bar\" of null") {
+				note = zNEW
+			}
+		}
+		dom.miscError.innerHTML = hash + btn + note
+		return resolve("errors:"+ hash)
+	})
+}
+
 function get_iframe_props() {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let sTrue = "misc_iframe_window_properties"
@@ -547,6 +573,7 @@ function outputMisc() {
 		get_perf1(),
 		get_perf3(),
 		get_perf4(),
+		get_errors(),
 		get_math_trig(isMathLies),
 		get_math_other(isMathLies),
 		get_component_shims(),
