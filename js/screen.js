@@ -96,36 +96,6 @@ function get_fd_chrome(log = false) {
 	run()
 }
 
-function get_fd_errors() {
-	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let res = [], note = ""
-		let sName = "feature_error_messages"
-		sDetail[sName] = []
-		try {null.bar} catch(e) {res.push(e.message)}
-		try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
-		try {[...undefined].length} catch(e) {res.push(e.message)}
-		try {(1).toString(1000)} catch(e) {res.push(e.message)}
-		try {var x = new Array(-1)} catch(e) {res.push(e.message)}
-		if (runSN) {res[0] = res[0] + " [sim new]"}
-		sDetail[sName] = res
-		let hash = mini_sha1(res.join(), "feature errors")
-		// notation: 74+: 1259822: error_message_fix
-		let color = "3"
-		if (isFF && isTZPSmart) {
-			if (hash == "be359e88b455009c53525378c512ffadea9ab63c") {note = "FF52+" // TZP does not run in FF51 or lower
-			} else if (hash == "144f6b31dc56ec5e5381631af44d84c5d0a4b1a9") {note = "FF74+ fix"
-			} else {note = "NEW"; color = "bad"
-			}
-		}
-		let btn = buildButton(color, sName, note)
-		dom.fdError.innerHTML = hash + btn + (runSN ? zSIM : "")
-		log_perf("errors [fd]",t0)
-		return resolve("errors:"+ hash)
-	})
-}
-
-
 function get_fd_resources() {
 	if (!isFF) {
 		dom.fdResource = zNA
@@ -136,7 +106,6 @@ function get_fd_resources() {
 	}
 
 	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
 		let branding = "",
 			channel = "",
 			result = "",
@@ -155,7 +124,6 @@ function get_fd_resources() {
 				isResourceMetric = "resources:"+ isMark +", "+ isLogo
 			}
 			dom.fdResource.innerHTML = isResource
-			log_perf("resources [fd]",t0)
 			return resolve(isResourceMetric)
 		}
 		// set
@@ -2131,7 +2099,6 @@ function outputFD() {
 	section.push("version:"+ r)
 
 	Promise.all([
-		get_fd_errors(),
 		get_fd_architecture(),
 		get_fd_resources(),
 	]).then(function(results){
