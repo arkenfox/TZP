@@ -280,9 +280,10 @@
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
-			These tests, tailored for <code>Firefox</code>, are to show that you cannot hide your <code>browser</code>,
-			<code>version</code> or <code>OS</code>. Some OS "guesses" don't have to be "correct"; the measurements provide
-			the real entropy, such as branding dimensions, and pixel values.</span>
+			These tests, tailored for <code>Gecko</code>, are to show that you cannot hide your
+			<code>engine</code> <a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
+			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, <code>version</code>
+			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a>, or <code>OS</code>.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</span></div>
@@ -292,15 +293,11 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 89+<br>javascript.options.large_arraybuffers</span>
 			</div> &nbsp [platform] architecture</td><td class="c" id="fdArchOS"></td></tr>
-		<tr><td><a class="blue" target="blank" href="tests/versions.html">[PoC]</a>
-			&nbsp [feature detection] version</td><td class="c" id="fdVersion"></td></tr>
+		<tr><td>version</td><td class="c" id="fdVersion"></td></tr>
 		<tr><td>[resource://] browser</td><td class="c" id="fdResource"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">Firefox 74+ : javascript.options.<br>property_error_message_fix</span>
 			</div> &nbsp [error messages] browser</td><td class="c mono" id="fdError"></td></tr>
-		<tr><td>[canonical locales] browser</td><td class="c mono" id="fdCanonical"></td></tr>
-		<tr><td><a class="blue" target="blank" href="tests/supportedlocales.html">[PoC]</a>
-			&nbsp [supported locales] browser</td><td class="c mono" id="fdLocales"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
 		<tr><td>[css] os <sup>1</sup></td>
 			<td><span style="font-family: Arimo, DejaVu Serif, ABR;">Linux</span><span
@@ -795,9 +792,6 @@
 		<tr><td>Element.getClientRects</td><td class="c mono" id="dr1"></td></tr>
 		<tr><td>Range.getBoundingClientRect</td><td class="c mono" id="dr2"></td></tr>
 		<tr><td>Range.getClientRects</td><td class="c mono" id="dr3"></td></tr>
-		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2" class="center"><a target="_blank" class="blue"
-			href="iframes/domrect.html">click here to view what is being rendered</a></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color"></td></tr>
 		<tr><td colspan="3"><span class="no_color">code provided by <a target="_blank" class="blue"
