@@ -106,7 +106,6 @@ function get_fd_resources() {
 	}
 
 	return new Promise(resolve => {
-		let t0; if (canPerf) {t0 = performance.now()}
 		let branding = "",
 			channel = "",
 			result = "",
@@ -125,7 +124,6 @@ function get_fd_resources() {
 				isResourceMetric = "resources:"+ isMark +", "+ isLogo
 			}
 			dom.fdResource.innerHTML = isResource
-			log_perf("resources [fd]",t0)
 			return resolve(isResourceMetric)
 		}
 		// set
