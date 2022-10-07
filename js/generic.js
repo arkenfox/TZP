@@ -1419,8 +1419,6 @@ function outputPostSection(id) {
 		get_ua_workers()
 	}
 	if (id == "all" || id == "feature")
-		get_fd_canonical()
-		get_fd_locales()
 		if (isFF) {get_fd_chrome(isLog)}
 	if (id == "all" || id == "storage") {
 		get_cookies()
