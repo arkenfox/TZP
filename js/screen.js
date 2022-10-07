@@ -40,33 +40,6 @@ function get_fd_architecture() {
 	}
 }
 
-function get_fd_canonical() {
-	// runs post FP
-	try {
-		let sName = "feature_canonical_locales_notglobal"
-		sDetail[sName] = []
-		let list = ["bh","hye","no","tl","tw"], res = []
-		if (runSN) (list.push("en"))
-		list.sort()
-		list.forEach(function(i) {
-			res.push(i +": "+ Intl.getCanonicalLocales(i))
-		})
-		sDetail[sName] = res
-		let note, color = "3"
-		let hash = mini_sha1(res.join(), "feature canonical")
-		if (isFF && isTZPSmart) {
-			if (hash == "3faffb36cf9adef10987c4e6cb5adc7562dac7ab") {note = "FF91+"
-			} else if (hash == "8d98821d21e515bc9bfa6660a744d74fc2df0de1") {note = "FF70-90"
-			} else {note = "NEW"; color = "bad"
-			}
-		}
-		let btn = buildButton(color, sName, note)
-		dom.fdCanonical.innerHTML = hash + btn + (runSN ? zSIM : "")
-	} catch(e) {
-		dom.fdCanonical = log_error("fd: canonical locales:", e.name, e.message)
-	}
-}
-
 function get_fd_chrome(log = false) {
 	// runs post FP
 	let t0; if (canPerf) {t0 = performance.now()}
@@ -152,31 +125,6 @@ function get_fd_errors() {
 	})
 }
 
-function get_fd_locales() {
-	// runs post FP
-	try {
-		let res = []
-		let sName = "feature_supported_locales_notglobal"
-		sDetail[sName] = []
-		let list = ["ba","co","cv","ia","ka","ki","ku","kok","lij","lo","mai","no","pa","qu","sa","sc","su","no","tl","tw","vo"]
-		if (runSN) {list.push("en")}
-		list.sort()
-		res = Intl.PluralRules.supportedLocalesOf(list)
-		sDetail[sName] = res
-		let hash = mini_sha1(res.join(), "feature supported locales"), note, color = "3"
-		if (isFF && isTZPSmart) {
-			if (hash == "f68b48c64e0948be6b9ebe656885bfa89e8f780b") {note = "FF96+"
-			} else if (hash == "336d6fe9581ed30e9dc1df5f9918eef2d4ae5f0d") {note = "FF91-95"
-			} else if (hash == "aaacdb633083e6646e4e1dbb6545aed09e89c15a") {note = "FF78-90"
-			} else {note = "NEW"; color = "bad"
-			}
-		}
-		let btn = buildButton(color, sName, note)
-		dom.fdLocales.innerHTML = hash + btn + (runSN ? zSIM : "")
-	} catch(e) {
-		dom.fdLocales = log_error("fd: supported locales:", e.name, e.message)
-	}
-}
 
 function get_fd_resources() {
 	if (!isFF) {
