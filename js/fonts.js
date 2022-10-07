@@ -1271,6 +1271,12 @@ function get_unicode() {
 			if (isFF && isOS == "android" || isTB) {
 				return // not worth it
 			}
+			let tofuStart; if (canPerf) {tofuStart = performance.now()}
+			// Why check all 42 when 20+ should always fallback
+			let fntTofuPossible = [
+				'0x007F','0x058F','0x0700','0x08E4','0x097F','0x09B3','0x0B82','0x0D02','0x10A0','0x115A','0x17DD',
+				'0x1C50','0x1CDA','0x20BD','0x2C7B','0xA73D','0xA830','0xF003','0xF810','0xFBEE','0xFFF9',
+			]
 			try {
 				let fntTofu = [], fntTofuChars = []
 				let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
@@ -1278,7 +1284,7 @@ function get_unicode() {
 				slot.textContent = String.fromCodePoint('0xFFFF')
 				let tofuWidth = span.offsetWidth,
 					tofuHeight = div.offsetHeight
-				fntCode.forEach(function(code) {
+				fntTofuPossible.forEach(function(code) {
 					slot.textContent = String.fromCodePoint(code)
 					if (span.offsetWidth == tofuWidth && div.offsetHeight == tofuHeight) {
 						fntTofu.push(code)
@@ -1287,7 +1293,8 @@ function get_unicode() {
 				})
 				fntCodeUsed = fntCode.filter(x => !fntTofu.includes(x))
 				if (gRun) {
-					log_debug("tofu", fntTofu.join(" "))
+					let tofuPerf = ""; if (canPerf) {tofuPerf = " | "+ (performance.now() - tofuStart) +" ms"}
+					log_debug("tofu", fntTofu.join(" ") + tofuPerf)
 					log_debug("tofu", fntTofuChars.join(" "))
 				}
 			} catch(e) {}
