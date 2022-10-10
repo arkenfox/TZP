@@ -60,6 +60,8 @@ let fntOther = {
 		"Aharoni Bold","Aldhabi","Andalus","Angsana New","Aparajita","Arabic Typesetting","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Batang","BatangChe","Browallia New","Cordia New","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","FreesiaUPC","Gautami","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Levenim MT","LilyUPC","MS Mincho","MS PMincho","Mangal","Meiryo","Meiryo UI","Microsoft Uighur","MingLiU","MingLiU_HKSCS","Miriam","Miriam Fixed","MoolBoran","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nyala","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Sakkal Majalla","Sanskrit Text","Segoe Pseudo","Shonar Bangla","Shruti","SimHei","Simplified Arabic","Simplified Arabic Fixed","Traditional Arabic","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light",
 		// from fntBase but it's broken there: see 1720408
 		"Franklin Gothic Medium",
+		// why not
+		'MS Reference Specialty',
 		// aliases: different size
 		"宋体", // SimSun
 		"細明體", // MingLiU
@@ -160,9 +162,19 @@ let fntTB = {
 	windows: [
 		// ESR102 whitelist
 		// 7
-		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
+		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
 		"MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei",
 		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
+		// variants: not whitelisted but are allowed due to e.g. "Arial"
+		"Arial Black","Arial Narrow","Segoe UI Light","Segoe UI Semibold",
+			/* I think these leak as well
+			// 8
+			"Microsoft JhengHei UI","Microsoft YaHei UI","Segoe UI Semilight",
+			// 8.1
+			"Microsoft JhengHei UI Light","Microsoft YaHei Light","Microsoft YaHei UI Light","Segoe UI Black",
+			// 10
+			"Malgun Gothic Semilight",
+			*/
 		// aliases: different size
 			"細明體", // MingLiU
 			"新細明體", // PMingLiU
