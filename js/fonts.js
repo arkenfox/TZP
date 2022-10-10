@@ -162,17 +162,15 @@ let fntTB = {
 	windows: [
 		// ESR102 whitelist
 		// 7
-		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic","MS PGothic",
-		"MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei","Microsoft YaHei",
-		"MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
+		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic",
+		"MS PGothic","MV Boli","Malgun Gothic","Microsoft Himalaya","Microsoft JhengHei",
+		"Microsoft YaHei","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
 		// variants: not whitelisted but are allowed due to e.g. "Arial"
 		"Arial Black","Arial Narrow","Segoe UI Light","Segoe UI Semibold", // 7
 		"Segoe UI Semilight", // 8
 		"Microsoft JhengHei Light","Microsoft YaHei Light","Segoe UI Black", // 8.1
 		"Malgun Gothic Semilight", // 10
 		// aliases: different size
-			"細明體", // MingLiU
-			"新細明體", // PMingLiU
 			"宋体", // SimSun
 		// always
 		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
