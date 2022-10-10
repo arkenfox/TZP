@@ -162,19 +162,14 @@ let fntTB = {
 	windows: [
 		// ESR102 whitelist
 		// 7
-		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
-		"MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei",
-		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
+		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic","MS PGothic",
+		"MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei","Microsoft YaHei",
+		"MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
 		// variants: not whitelisted but are allowed due to e.g. "Arial"
-		"Arial Black","Arial Narrow","Segoe UI Light","Segoe UI Semibold",
-			/* I think these leak as well
-			// 8
-			"Microsoft JhengHei UI","Microsoft YaHei UI","Segoe UI Semilight",
-			// 8.1
-			"Microsoft JhengHei UI Light","Microsoft YaHei Light","Microsoft YaHei UI Light","Segoe UI Black",
-			// 10
-			"Malgun Gothic Semilight",
-			*/
+		"Arial Black","Arial Narrow","Segoe UI Light","Segoe UI Semibold", // 7
+		"Segoe UI Semilight", // 8
+		"Microsoft JhengHei Light","Microsoft YaHei Light","Segoe UI Black", // 8.1
+		"Malgun Gothic Semilight", // 10
 		// aliases: different size
 			"細明體", // MingLiU
 			"新細明體", // PMingLiU
