@@ -100,6 +100,8 @@ let fntMaster = {
 	windows: [
 		// 252: make sure we escape: "MS Shell Dlg \\32 " is not "MS Shell Dlg \32 "
 		"Aharoni Bold","Aldhabi","AlternateGothic2 BT","Andalus","Angsana New","AngsanaUPC","Aparajita","Arabic Typesetting","Arial","Arial Black","Arial Narrow","Arial Nova","Arial Nova Cond","Arial Nova Cond Light","Arial Nova Light","Arial Unicode MS","BIZ UDGothic","BIZ UDMincho","BIZ UDMincho Medium","BIZ UDPGothic","BIZ UDPMincho","BIZ UDPMincho Medium","Bahnschrift","Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight","Batang","BatangChe","Browallia New","BrowalliaUPC","Calibri","Calibri Light","Calibri Light Italic","Cambria","Cambria Math","Candara","Candara Light","Comic Sans MS","Consolas","Constantia","Corbel","Corbel Light","Cordia New","CordiaUPC","Courier","Courier New","DFKai-SB","DaunPenh","David","DengXian","DengXian Light","DilleniaUPC","DilleniaUPC Bold","DokChampa","Dotum","DotumChe","Ebrima","Estrangelo Edessa","EucrosiaUPC","Euphemia","FangSong","FrankRuehl","Franklin Gothic Medium","FreesiaUPC","Gabriola","Gadugi","Gautami","Georgia","Georgia Pro","Georgia Pro Black","Georgia Pro Cond","Georgia Pro Cond Black","Georgia Pro Cond Light","Georgia Pro Cond Semibold","Georgia Pro Light","Georgia Pro Semibold","Gill Sans Nova","Gill Sans Nova Cond","Gill Sans Nova Cond Lt","Gill Sans Nova Cond Ultra Bold","Gill Sans Nova Cond XBd","Gill Sans Nova Light","Gill Sans Nova Ultra Bold","Gisha","Gulim","GulimChe","Gungsuh","GungsuhChe","Helvetica","HoloLens MDL2 Assets","Impact","Ink Free","IrisUPC","Iskoola Pota","JasmineUPC","Javanese Text","KaiTi","Kalinga","Kartika","Khmer UI","KodchiangUPC","Kokila","Lao UI","Latha","Leelawadee","Leelawadee UI","Leelawadee UI Semilight","Levenim MT","LilyUPC","Lucida Console","Lucida Sans Unicode","MS Gothic","MS Mincho","MS Outlook","MS PGothic","MS PMincho","MS Sans Serif","MS Serif","MS Shell Dlg","MS Shell Dlg \\32 ","MS UI Gothic","MV Boli","Malgun Gothic","Malgun Gothic Semilight","Mangal","Marlett","Meiryo","Meiryo UI","Microsoft Himalaya","Microsoft JhengHei","Microsoft JhengHei Light","Microsoft JhengHei UI","Microsoft JhengHei UI Light","Microsoft New Tai Lue","Microsoft PhagsPa","Microsoft Sans Serif","Microsoft Tai Le","Microsoft Uighur","Microsoft YaHei","Microsoft YaHei Light","Microsoft YaHei UI","Microsoft YaHei UI Light","Microsoft Yi Baiti","MingLiU","MingLiU-ExtB","MingLiU_HKSCS","MingLiU_HKSCS-ExtB","Miriam","Miriam Fixed","Mongolian Baiti","MoolBoran","Myanmar Text","NSimSun","Narkisim","Neue Haas Grotesk Text Pro","Neue Haas Grotesk Text Pro Medium","Nirmala UI","Nirmala UI Semilight","Nyala","PMingLiU","PMingLiU-ExtB","Palatino Linotype","Plantagenet Cherokee","Raavi","Rockwell Nova","Rockwell Nova Cond","Rockwell Nova Cond Light","Rockwell Nova Extra Bold","Rockwell Nova Light Italic","Rockwell Nova Rockwell","Rod","Roman","Sakkal Majalla","Sanskrit Text","Segoe MDL2 Assets","Segoe Print","Segoe Pseudo","Segoe Script","Segoe UI","Segoe UI Black","Segoe UI Emoji","Segoe UI Historic","Segoe UI Light","Segoe UI Semibold","Segoe UI Semilight","Segoe UI Symbol","Shonar Bangla","Shruti","SimHei","SimSun","SimSun-ExtB","Simplified Arabic","Simplified Arabic Fixed","Sitka Banner","Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text","Small Fonts","Sylfaen","Symbol","Tahoma","Times","Times New Roman","Traditional Arabic","Trebuchet MS","Tunga","UD Digi Kyokasho","UD Digi Kyokasho N-B","UD Digi Kyokasho N-R","UD Digi Kyokasho NK-B","UD Digi Kyokasho NK-R","UD Digi Kyokasho NP-B","UD Digi Kyokasho NP-R","Urdu Typesetting","Utsaah","Vani","Verdana","Verdana Pro","Verdana Pro Black","Verdana Pro Cond","Verdana Pro Cond Black","Verdana Pro Cond Light","Verdana Pro Cond SemiBold","Verdana Pro Light","Verdana Pro SemiBold","Vijaya","Vrinda","Webdings","Wingdings","Yu Gothic","Yu Gothic Light","Yu Gothic Medium","Yu Gothic UI","Yu Gothic UI Light","Yu Gothic UI Semibold","Yu Gothic UI Semilight","Yu Mincho","Yu Mincho Demibold","Yu Mincho Light","宋体","微软雅黑","新細明體","細明體","굴림","굴림체","바탕","ＭＳ ゴシック","ＭＳ 明朝","ＭＳ Ｐゴシック","ＭＳ Ｐ明朝",
+		// plus these
+		"MS Reference Specialty","MS Outlook","Twemoji Mozilla"
 	],
 
 	// RFP
@@ -127,10 +129,12 @@ let fntMaster = {
 	],
 	tbwindows: [
 		// ESR102 whitelist minus bundled
-		"Arial","Arial Black","Arial Narrow","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
+		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console",
 		"MS Gothic","MS PGothic","MV Boli","Malgun Gothic","Mangal","Microsoft Himalaya","Microsoft JhengHei",
 		"Microsoft YaHei","MingLiU","PMingLiU","Segoe UI","SimSun","Sylfaen","Tahoma","Times New Roman","Verdana",
 		"細明體","新細明體","宋体","ＭＳ ゴシック","ＭＳ Ｐゴシック","微软雅黑",
+		// variants: not whitelisted but are allowed due to e.g. "Arial"
+		"Arial Black","Arial Narrow","Segoe UI Light","Segoe UI Semibold",
 		// always
 		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
 		"Helvetica","Small Fonts", // = Arial (which we catch if not in fonts, in bases)
@@ -165,6 +169,7 @@ function preset(name) {
 	array.sort()
 	dom.valueF.value = array.join(", ")
 	//console.log("\"" + array.join("\",\"") + "\"")
+	//console.log(array.join("\n"))
 }
 
 function get_fonts() {
