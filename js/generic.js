@@ -455,7 +455,7 @@ const get_isOS = () => new Promise(resolve => {
 	let t0; if (canPerf) {t0 = performance.now()}
 	function finish(font) {
 		// set isPlatformFont
-		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32 "
+		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32"
 		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
 		if (isOS === "") {log_alert("global:isOS: unknown", true)}
 		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS + font))
