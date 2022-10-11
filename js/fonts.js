@@ -96,38 +96,30 @@ let fntBase = {
 		"Segoe UI","Segoe UI Light","Segoe UI Semibold","SimSun","Sylfaen","Symbol","Tahoma","Times New Roman","Trebuchet MS",
 		"Verdana","Webdings","Wingdings",
 		// 8
-		"Calibri Light","Calibri Light Italic", // = Calibri but optional on win7
-		"Microsoft JhengHei UI","Microsoft YaHei UI","Myanmar Text","Segoe UI Semilight",
+		"Calibri Light", // = Calibri but optional on win7
+		"Calibri Light Italic","Nirmala UI","Microsoft JhengHei UI","Microsoft YaHei UI","Myanmar Text","Segoe UI Semilight",
 		// 8.1
-		"Javanese Text","Sitka Banner","Yu Gothic","Yu Gothic Light",
+		"Javanese Text","Microsoft JhengHei Light","Microsoft JhengHei UI Light","Microsoft YaHei Light",
+		"Microsoft YaHei UI Light","Segoe UI Black","Segoe UI Emoji","Sitka Banner","Sitka Display","Sitka Heading",
+		"Sitka Small","Sitka Subheading","Sitka Text","Yu Gothic","Yu Gothic Light",
 		// 10
-		"Bahnschrift","HoloLens MDL2 Assets","Yu Gothic Medium",
+		"Bahnschrift","Candara Light","Corbel Light","HoloLens MDL2 Assets","Malgun Gothic Semilight",
+		"Segoe UI Historic","Yu Gothic Medium",
 		// always
-		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
-		//* ignore: expected + dupe sizes
-//3072 x 316.5 : MingLiU, MingLiU-ExtB, MingLiU_HKSCS
-//3878.4 x 340 : Leelawadee UI Semilight, Nirmala UI Semilight, Segoe UI, Segoe UI Semilight, Yu Gothic UI Semilight
-//3990.4 x 340 : Gadugi, Lao UI, Leelawadee UI, Nirmala UI, Segoe UI Emoji, Segoe UI Historic, Segoe UI Symbol, Yu Gothic UI
-
-			"Gadugi","Nirmala UI", // 8 = Segoe UI
-			"Leelawadee UI","Leelawadee UI Semilight","Nirmala UI Semilight","Segoe UI Black","Segoe UI Emoji", // 8.1 = Segoe UI
-			"Microsoft JhengHei Light", // 8.1 = Microsoft JhengHei
-			"Microsoft JhengHei UI Light", // 8.1 = Microsoft JhengHei UI
-			"Microsoft YaHei Light", // 8.1 = Microsoft YaHei
-			"Microsoft YaHei UI Light", // 8.1 = Microsoft YaHei UI
-			"Sitka Display","Sitka Heading","Sitka Small","Sitka Subheading","Sitka Text", // = sitka banner (all 8.1)
-			"Candara Light", // 10 = Candara
-			"Corbel Light", // 10 = Corbel
-			"Malgun Gothic Semilight", // 10 = Malgun Gothic
-			"Segoe UI Historic","Yu Gothic UI", // 10 = Segoe UI
-			"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
-			"Yu Gothic UI Light", // = Yu Gothic UI (both 10)
-			"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight
-			"Yu Gothic UI Semibold", // 10 = Segoe UI Semibold
-			//"Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight", // 10 not detected: faces?
+		"MS Shell Dlg","MS Shell Dlg \\32", // can map differently between window versions
+		//* ignore: expected + dupe sizes: multiple confirms
+			//"Gadugi", // = Nirmala UI (both 8)
+			//"Leelawadee UI", // 8.1 = Nirmala UI (8)
+			//"Leelawadee UI Semilight","Nirmala UI Semilight", // 8.1 = Segoe UI Semilight
+			//"Yu Gothic UI", // 10 = Segoe UI (7)
+			//"Yu Gothic UI Light", // 10 = Segoe UI Light (7)
+			//"Yu Gothic UI Semilight", // 10 = Segoe UI Semilight (7)
+			//"Yu Gothic UI Semibold", // 10 = Segoe UI Semibold (7)
+			//"Segoe MDL2 Assets", // = HoloLens MDL2 Assets (both 10)
+			//"Bahnschrift Light","Bahnschrift SemiBold","Bahnschrift SemiLight", // (all 10) not detected: faces?
 			//"SimSun-ExtB", // = MS Gothic
 			//"MS UI Gothic", // = MS PGothic
-			"Segoe UI Symbol", // = Segoe UI
+			//"Segoe UI Symbol", // = Segoe UI
 			//"Cambria", // = cambria math
 			//"Helvetica","Small Fonts", // = Arial (which we catch if not in fonts, in bases)
 			//"Courier", //  = courier new
@@ -176,7 +168,7 @@ let fntTB = {
 		// aliases: different size
 			"宋体", // SimSun
 		// always
-		"MS Shell Dlg","MS Shell Dlg \\32 ", // can map differently between window versions
+		"MS Shell Dlg","MS Shell Dlg \\32", // can map differently between window versions
 		/* ignore: expected + dupe sizes
 			"ＭＳ ゴシック", // MS Gothic
 			"ＭＳ Ｐゴシック", // MS PGothic
