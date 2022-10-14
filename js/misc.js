@@ -399,55 +399,59 @@ function get_perf1() {
 }
 
 function get_perf2(log = false) {
+	if (!isFF || isVer < 102) {
+		dom.perf2 = zNA
+		return
+	}
 	// runs post FP
 	try {
-		if (runSE) {abc = def}
 		let t0; if (canPerf) {t0 = performance.now()}
-		let i = 0, times = [], p0
+		let i = 0, aData = [], aTimes = [], aDiffs = [], oCounts = {}, p0
+		// collect
 		function run() {
-			if (i < 11) {
-				if (i == 0) {
-					p0 = Math.round(performance.now())
-				} else {
-					times.push(Math.round(performance.now())-p0)
-				}
+			if (i < 13) {
+				if (i == 0) {p0 = performance.now()} else {aData.push(performance.now())}
 				i++
 			} else {
 				clearInterval(check)
-				let is00 = true, isYank = false, isTamper = false
-				let maxTamper = 1, countTamper = 0
-				for (let i=0; i < times.length ; i++) {
-					let value = times[i] % 100
-					if (value !== 0) {is00 = false} // ignore hundreds
-					if (i > 0 && !isRFP) {
-						let diff = times[i] - times[i-1]
-						if (diff < 5 || diff > 30) {countTamper++
-							if (isFile) {console.debug(i+1, diff, countTamper)}
-						}
-					}
-					if (i == 0 && value > 75) {isYank = true}
+				output()
+			}
+			// analyse
+			function output() {
+				let isMatch = true,
+					goodRFP = [0, 16.7, 16.6, 33.3, 33.4]
+				// tidy times
+				for (let i=0; i < aData.length ; i++) {
+					let time = aData[i] - p0
+					aTimes.push(time.toFixed(1) * 1)
 				}
-				// tweak max
-				if (isLoad) {maxTamper = 3 + (isYank ? 1 : 0)}
-				isTamper = (countTamper > maxTamper ? true : false) // allow one false positive
-				// tampering
-				if (isRFP && !is00) {isTamper = true}
-				if (!isRFP && is00) {isTamper = true}
-				if (!isPerf) {isTamper = true}
-				let display = times.join(", ") + (countTamper > 1 ? s18 +" ["+ countTamper +"/"+ maxTamper +"]"+ sc : "")
+				// collect diffs
+				for (let i=0; i < aTimes.length ; i++) {
+					let prev = (i == 0 ? 0 : aTimes[i-1])
+					let diff = (aTimes[i] - prev).toFixed(1) * 1
+					aDiffs.push(diff)
+					if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
+					if (!goodRFP.includes(diff)) {isMatch = false}
+				}
+				// RFP: at least five 0's, and some 16.7, 16.6 (only RFP for now has decimals)
+				if (oCounts["16.6"] == 0) {isMatch = false
+				} else if (oCounts["16.7"] == 0) {isMatch = false
+				} else if (oCounts["0"] < 6) {isMatch = false}
+				/*
+					console.log(aData)
+					console.log(aTimes)
+					console.log(aDiffs)
+					console.log(oCounts)
+				//*/
 				let notation = ""
 				if (isTZPSmart) {
-					if (isTamper) {
-						notation = sb +"[tampered]"+ sc
-					} else {
-						notation = (isTZPSmart ? (is00 ? rfp_green : rfp_red) : "")
-					}
+					notation = isMatch ? rfp_green : rfp_red
 				}
-				dom.perf2.innerHTML = display + notation
+				dom.perf2.innerHTML = aDiffs.join(", ") + notation
 				if (log) {log_perf("perf.now [not in FP]",t0)}
 			}
 		}
-		let check = setInterval(run, 13)
+		let check = setInterval(run, 7)
 	} catch(e) {
 		dom.perf2 = log_error("misc: perf.now:", e.name, e.message)
 	}
