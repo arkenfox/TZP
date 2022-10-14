@@ -11,7 +11,7 @@ function get_component_shims() {
 		res = mini_sha1(keys.join(), "misc component shims")
 		dom.shim.innerHTML = res + buildButton("18", sName, keys.length) + (isTB ? tb_red : "")
 	} catch(e) {
-		if (isTB) {notation = (e.message == "Components is not defined" ? tb_green : tb_red)}
+		if (isTB && isTZPSmart) {notation = (e.message == "Components is not defined" ? tb_green : tb_red)}
 		dom.shim.innerHTML = log_error("misc: component shims", e.name, e.message) + notation
 		res = zErr
 	}
@@ -433,10 +433,10 @@ function get_perf2(log = false) {
 					if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
 					if (!goodRFP.includes(diff)) {isMatch = false}
 				}
-				// RFP: at least five 0's, and some 16.7, 16.6 (only RFP for now has decimals)
+				// RFP: at least four 0's, and some 16.7, 16.6 (only RFP for now has decimals)
 				if (oCounts["16.6"] == 0) {isMatch = false
 				} else if (oCounts["16.7"] == 0) {isMatch = false
-				} else if (oCounts["0"] < 6) {isMatch = false}
+				} else if (oCounts["0"] < 5) {isMatch = false}
 				/*
 					console.log(aData)
 					console.log(aTimes)
