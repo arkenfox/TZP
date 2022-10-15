@@ -613,7 +613,7 @@ const get_isVer = () => new Promise(resolve => {
 			// note: we can skip non-gecko checks: this only runs if isFF
 
 		isVerMax = 107
-		try {dom.test107.options.length = -1; return 107} catch(e) {} // 344060
+		if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
 		if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
