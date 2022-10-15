@@ -271,16 +271,10 @@ function outputVersion() {
 			}
 		}
 
-		// 107: 344060
-		let t107 = performance.now(), ver107
-		// false positives FF52-57
-		if (Element.prototype.hasOwnProperty("checkVisibility")) {
-			try {
-				dom.test107.options.length = -1
-				ver107 = true
-			} catch(e) {} // NotSupportedError Operation is not supported
-		}
-		rec(107, 107, "344060", ver107, performance.now()-t107, "d")
+		// 107: 1174097
+		let t107 = performance.now()
+		let ver107 = (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) // 0.07ms
+		rec(107, 107, "1174097", ver107, performance.now()-t107)
 
 		// 106: 1777293
 		let t106 = performance.now()
@@ -568,7 +562,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 49, oOther = {}
+	let countOther = 0, expectOther = 50, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -585,6 +579,17 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 107: 344060
+		let t107 = performance.now(), ver107
+		// false positives FF52-57
+		if (Element.prototype.hasOwnProperty("checkVisibility")) {
+			try {
+				dom.test107.options.length = -1
+				ver107 = true
+			} catch(e) {} // NotSupportedError Operation is not supported
+		}
+		rec(107, 107, "344060", ver107, performance.now()-t107, "d")
 
 		// 101a: 1764050
 		let t101a = performance.now(), ver101a
