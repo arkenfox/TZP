@@ -31,10 +31,12 @@
 			<span class="no_color">Enumeration of web accessible resources. 
 				<span class="s3">Firefox</span> list compiled from 91ESR + FF101-105, and Android FF101-106.
 				<span class="s3">Tor Browser</span> list compiled from 11.5-11.5.4 (91ESR) + 12.0a3 (102ESR), and Android 11.5.4.
+				Click counts to display details.
 			</span>
 		</td></tr>
-		<tr><td colspan="2"><span class="no_color">code based on work by </span>
-			<a target="_blank" class="blue" href="https://privacycheck.sec.lrz.de/active/fp_cd/fp_chrome_detect.html">privacycheck.sec.lrz.de</a>
+		<tr><td colspan="2"><span class="no_color">code based on work by
+			<a target="_blank" class="blue" href="https://privacycheck.sec.lrz.de/active/fp_cd/fp_chrome_detect.html">privacycheck.sec.lrz.de</a>,
+			updated lists thanks to <a target="_blank" class="blue" href="https://github.com/cypherpunks11">cypherpunks11</a></span>
 		</td></tr>
 
 		<tr><td colspan="2"><hr><br>TOR BROWSER</td></tr>
@@ -48,8 +50,9 @@
 		<tr><td>combined</td></td><td class="c mono" id="allHashTor"></td></tr>
 		<tr><td colspan="2" class="showhide"><span id="labelA" class="btnb" onClick="togglerows('A')">&#9660; show details</span></td></tr>
 		<tr class="togA">
-		 <td><span class="btn0 btn" onClick="copyclip(`allLoadedTor`)">[ copy ]</span> results</td>
-		 <td class="c" id="allLoadedTor"></td>
+		 <td><span class="btn0 btn" onClick="copyclip(`detailTor`)">[ copy ]</span> results</td>
+		 <td class="c" id="detailTor"></td>
+		<tr><td colspan="2"></td></tr>
 		</tr>
 
 		<tr><td colspan="2"><hr><br>FIREFOX</td></tr>
@@ -63,8 +66,8 @@
 		<tr><td>combined</td></td><td class="c mono" id="allHash"></td></tr>
 		<tr><td colspan="2" class="showhide"><span id="labelC" class="btnb" onClick="togglerows('C')">&#9660; show details</span></td></tr>
 		<tr class="togC">
-		 <td><span class="btn0 btn" onClick="copyclip(`allLoaded`)">[ copy ]</span> results</td>
-		 <td class="c" id="allLoaded"></td>
+		 <td><span class="btn0 btn" onClick="copyclip(`detailFF`)">[ copy ]</span> results</td>
+		 <td class="c" id="detailFF"></td>
 		</tr>
 	</table>
 	<br>
@@ -72,17 +75,26 @@
 <script>
 'use strict';
 
+function display(type, target) {
+	let element = document.getElementById("detail"+ target)
+	let array = sDetail[type + target]
+	element.innerHTML = array.join("<br>")
+}
+
 function outputFirefox() {
 	// FF only
 	if (isFF) {
 		// clear
 		dom.imgHash.innerHTML = "&nbsp"
 		dom.allHash.innerHTML = "&nbsp"
-		dom.allLoaded.innerHTML = "&nbsp"
 		dom.otherHash.innerHTML = "&nbsp"
+		dom.detailFF.innerHTML = "&nbsp"
 		// wait msg
 		dom.jsHash = "tests are running"
 		dom.cssHash = "please wait"
+
+		// removed: chrome://global/content/aboutServiceWorkers.js
+			// this causes errors that prevents onClick function
 
 		let list = `
 
@@ -908,7 +920,6 @@ function outputFirefox() {
 		chrome://global/content/aboutProfiles.xhtml
 		chrome://global/content/aboutRights.js
 		chrome://global/content/aboutRights.xhtml
-		chrome://global/content/aboutServiceWorkers.js
 		chrome://global/content/aboutServiceWorkers.xhtml
 		chrome://global/content/aboutSupport.js
 		chrome://global/content/aboutSupport.xhtml
@@ -2472,6 +2483,12 @@ function outputFirefox() {
 
 		function output_chrome() {
 			clearInterval(checking)
+			// sort
+			imgHash.sort()
+			jsHash.sort()
+			cssHash.sort()
+			otherHash.sort()
+			allHash.sort()
 			// counts
 			let foundI = imgHash.length,
 				foundJ = jsHash.length,
@@ -2479,27 +2496,46 @@ function outputFirefox() {
 				foundO = otherHash.length,
 				foundA = allHash.length
 			// hashes
-			let hashI = sha1(imgHash.sort()),
-				hashJ = sha1(jsHash.sort()),
-				hashC = sha1(cssHash.sort()),
-				hashO = sha1(otherHash.sort()),
-				hashA = sha1(allHash.sort())
-			// output
-			dom.imgHash = hashI +" ["+ foundI +"/"+ imgUris.length +"]"
-			dom.jsHash = hashJ +" ["+ foundJ +"/"+ jsUris.length +"]"
-			dom.cssHash = hashC +" ["+ foundC +"/"+ cssUris.length +"]"
-			dom.otherHash = hashO +" ["+ foundO +"/"+ otherUris.length +"]"
+			let hashI = mini_sha1(imgHash),
+				hashJ = mini_sha1(jsHash),
+				hashC = mini_sha1(cssHash),
+				hashO = mini_sha1(otherHash),
+				hashA = mini_sha1(allHash)
+			// remember data
+			sDetail["imgFF"] = imgHash
+			sDetail["jsFF"] = jsHash
+			sDetail["cssFF"] = cssHash
+			sDetail["otherFF"] = otherHash
+			// remember ordered all data
+			let tmpArray = []
+			if (foundI) {tmpArray.push(s3 +"--- img ---"+ sc); tmpArray = tmpArray.concat(imgHash)}
+			if (foundJ) {tmpArray.push(s3 +"--- js ---"+ sc); tmpArray = tmpArray.concat(jsHash)}
+			if (foundC) {tmpArray.push(s3 +"--- css ---"+ sc); tmpArray = tmpArray.concat(cssHash)}
+			if (foundO) {tmpArray.push(s3 +"--- other ---"+ sc); tmpArray = tmpArray.concat(otherHash)}
+			sDetail["allFF"] = tmpArray
+
+			// item output
+			let stats = " ["+ foundI +"/"+ imgUris.length +"]"
+			if (foundI) {stats = " <span class='btn3 btnc' onclick='display(`" + "img`,`FF" + "`)'>" + stats +"</span>"}
+			dom.imgHash.innerHTML = hashI + stats
+
+			stats = " ["+ foundJ +"/"+ jsUris.length +"]"
+			if (foundJ) {stats = " <span class='btn3 btnc' onclick='display(`" + "js`,`FF" + "`)'>" + stats +"</span>"}
+			dom.jsHash.innerHTML = hashJ + stats
+
+			stats = " ["+ foundC +"/"+ cssUris.length +"]"
+			if (foundC) {stats = " <span class='btn3 btnc' onclick='display(`" + "css`,`FF" + "`)'>" + stats +"</span>"}
+			dom.cssHash.innerHTML = hashC + stats
+
+			stats = " ["+ foundO +"/"+ otherUris.length +"]"
+			if (foundO) {stats = " <span class='btn3 btnc' onclick='display(`" + "other`,`FF" + "`)'>" + stats +"</span>"}
+			dom.otherHash.innerHTML = hashO + stats
+
 			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
-			dom.allHash = sha1(hashA) +" ["+ foundA +"/"+ countTested +"]"
-			// data
-			let strOut = ""
-			if (foundI) {strOut = s3 +"--- img ---"+ sc +"<br>"+ imgHash.join("<br>")}
-			if (foundJ) {strOut += "<br>"+ s3 +"--- js ---"+ sc +"<br>"+ jsHash.join("<br>")}
-			if (foundC) {strOut += "<br>"+ s3 +"--- css ---"+ sc +"<br>"+cssHash.join("<br>")}
-			if (foundO) {strOut += "<br>"+ s3 +"--- other ---"+ sc +"<br>"+ otherHash.join("<br>")}
-			if (foundI + foundJ + foundC + foundO == 0) {strOut = "nothing found"}
-			if (strOut.substring(0,4) == "<br>") {strOut = strOut.slice(4, strOut.length)}
-			dom.allLoaded.innerHTML = strOut
+			stats = " ["+ foundA +"/"+ countTested +"]"
+			if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`" + "all`,`FF" + "`)'>" + stats +"</span>"}
+			dom.allHash.innerHTML = mini_sha1(hashA) + stats
+
 			// label
 			dom.firefoxRun = "[ re-run ]"
 		}
@@ -2514,8 +2550,8 @@ function outputTor() {
 		// clear
 		dom.imgHashTor.innerHTML = "&nbsp"
 		dom.allHashTor.innerHTML = "&nbsp"
-		dom.allLoadedTor.innerHTML = "&nbsp"
 		dom.otherHashTor.innerHTML = "&nbsp"
+		dom.detailTor.innerHTML = "&nbsp"
 		// wait msg
 		dom.jsHashTor = "tests are running"
 		dom.cssHashTor = "please wait"
@@ -3731,6 +3767,12 @@ function outputTor() {
 
 		function output_chrome() {
 			clearInterval(checking)
+			// sort
+			imgHash.sort()
+			jsHash.sort()
+			cssHash.sort()
+			otherHash.sort()
+			allHash.sort()
 			// counts
 			let foundI = imgHash.length,
 				foundJ = jsHash.length,
@@ -3738,27 +3780,46 @@ function outputTor() {
 				foundO = otherHash.length,
 				foundA = allHash.length
 			// hashes
-			let hashI = sha1(imgHash.sort()),
-				hashJ = sha1(jsHash.sort()),
-				hashC = sha1(cssHash.sort()),
-				hashO = sha1(otherHash.sort()),
-				hashA = sha1(allHash.sort())
-			// output
-			dom.imgHashTor = hashI +" ["+ foundI +"/"+ imgUris.length +"]"
-			dom.jsHashTor = hashJ +" ["+ foundJ +"/"+ jsUris.length +"]"
-			dom.cssHashTor = hashC +" ["+ foundC +"/"+ cssUris.length +"]"
-			dom.otherHashTor = hashO +" ["+ foundO +"/"+ otherUris.length +"]"
+			let hashI = mini_sha1(imgHash),
+				hashJ = mini_sha1(jsHash),
+				hashC = mini_sha1(cssHash),
+				hashO = mini_sha1(otherHash),
+				hashA = mini_sha1(allHash)
+			// remember data
+			sDetail["imgTor"] = imgHash
+			sDetail["jsTor"] = jsHash
+			sDetail["cssTor"] = cssHash
+			sDetail["otherTor"] = otherHash
+			// remember ordered all data
+			let tmpArray = []
+			if (foundI) {tmpArray.push(s3 +"--- img ---"+ sc); tmpArray = tmpArray.concat(imgHash)}
+			if (foundJ) {tmpArray.push(s3 +"--- js ---"+ sc); tmpArray = tmpArray.concat(jsHash)}
+			if (foundC) {tmpArray.push(s3 +"--- css ---"+ sc); tmpArray = tmpArray.concat(cssHash)}
+			if (foundO) {tmpArray.push(s3 +"--- other ---"+ sc); tmpArray = tmpArray.concat(otherHash)}
+			sDetail["allTor"] = tmpArray
+
+			// item output
+			let stats = " ["+ foundI +"/"+ imgUris.length +"]"
+			if (foundI) {stats = " <span class='btn3 btnc' onclick='display(`" + "img`,`Tor" + "`)'>" + stats +"</span>"}
+			dom.imgHashTor.innerHTML = hashI + stats
+
+			stats = " ["+ foundJ +"/"+ jsUris.length +"]"
+			if (foundJ) {stats = " <span class='btn3 btnc' onclick='display(`" + "js`,`Tor" + "`)'>" + stats +"</span>"}
+			dom.jsHashTor.innerHTML = hashJ + stats
+
+			stats = " ["+ foundC +"/"+ cssUris.length +"]"
+			if (foundC) {stats = " <span class='btn3 btnc' onclick='display(`" + "css`,`Tor" + "`)'>" + stats +"</span>"}
+			dom.cssHashTor.innerHTML = hashC + stats
+
+			stats = " ["+ foundO +"/"+ otherUris.length +"]"
+			if (foundO) {stats = " <span class='btn3 btnc' onclick='display(`" + "other`,`Tor" + "`)'>" + stats +"</span>"}
+			dom.otherHashTor.innerHTML = hashO + stats
+
 			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
-			dom.allHashTor = sha1(hashA) +" ["+ foundA +"/"+ countTested +"]"
-			// data
-			let strOut = ""
-			if (foundI) {strOut = s3 +"--- img ---"+ sc +"<br>"+ imgHash.join("<br>")}
-			if (foundJ) {strOut += "<br>"+ s3 +"--- js ---"+ sc +"<br>"+ jsHash.join("<br>")}
-			if (foundC) {strOut += "<br>"+ s3 +"--- css ---"+ sc +"<br>"+cssHash.join("<br>")}
-			if (foundO) {strOut += "<br>"+ s3 +"--- other ---"+ sc +"<br>"+ otherHash.join("<br>")}
-			if (foundI + foundJ + foundC + foundO == 0) {strOut = "nothing found"}
-			if (strOut.substring(0,4) == "<br>") {strOut = strOut.slice(4, strOut.length)}
-			dom.allLoadedTor.innerHTML = strOut
+			stats = " ["+ foundA +"/"+ countTested +"]"
+			if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`" + "all`,`Tor" + "`)'>" + stats +"</span>"}
+			dom.allHashTor.innerHTML = mini_sha1(hashA) + stats
+
 			// label
 			dom.torRun = "[ re-run ]"
 		}
