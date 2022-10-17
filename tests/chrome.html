@@ -41,7 +41,7 @@
 
 		<tr><td colspan="2"><hr><br>TOR BROWSER</td></tr>
 		<tr><td><div>
-				<div class="btn-left"><span class="btn3 btn" id="torRun" onClick="outputTor()">[ run ]</span></div>
+				<div class="btn-left"><span class="btn3 btn" id="labelTor" onClick="run(`Tor`)">[ run ]</span></div>
 				<div>images</div></div></td>
 			<td class="c mono" id="imgHashTor"></td></tr>
 		<tr><td>js</td><td class="c mono" id="jsHashTor"></td></tr>
@@ -57,13 +57,13 @@
 
 		<tr><td colspan="2"><hr><br>FIREFOX</td></tr>
 		<tr><td><div>
-				<div class="btn-left"><span class="btn3 btn" id="firefoxRun" onClick="outputFirefox()">[ run ]</span></div>
+				<div class="btn-left"><span class="btn3 btn" id="labelFF" onClick="run(`FF`)">[ run ]</span></div>
 				<div>images</div></div></td>
-			<td class="c mono" id="imgHash"></td></tr>
-		<tr><td>js</td><td class="c mono" id="jsHash"></td></tr>
-		<tr><td>css</td><td class="c mono" id="cssHash"></td></tr>
-		<tr><td>other</td><td class="c mono" id="otherHash"></td></tr>
-		<tr><td>combined</td></td><td class="c mono" id="allHash"></td></tr>
+			<td class="c mono" id="imgHashFF"></td></tr>
+		<tr><td>js</td><td class="c mono" id="jsHashFF"></td></tr>
+		<tr><td>css</td><td class="c mono" id="cssHashFF"></td></tr>
+		<tr><td>other</td><td class="c mono" id="otherHashFF"></td></tr>
+		<tr><td>combined</td></td><td class="c mono" id="allHashFF"></td></tr>
 		<tr><td colspan="2" class="showhide"><span id="labelC" class="btnb" onClick="togglerows('C')">&#9660; show details</span></td></tr>
 		<tr class="togC">
 		 <td><span class="btn0 btn" onClick="copyclip(`detailFF`)">[ copy ]</span> results</td>
@@ -81,22 +81,195 @@ function display(type, target) {
 	element.innerHTML = array.join("<br>")
 }
 
-function outputFirefox() {
+function run(runtype) {
 	// FF only
-	if (isFF) {
-		// clear
-		dom.imgHash.innerHTML = "&nbsp"
-		dom.allHash.innerHTML = "&nbsp"
-		dom.otherHash.innerHTML = "&nbsp"
-		dom.detailFF.innerHTML = "&nbsp"
-		// wait msg
-		dom.jsHash = "tests are running"
-		dom.cssHash = "please wait"
+	if (!isFF) {
+		return
+	}
 
-		// removed: chrome://global/content/aboutServiceWorkers.js
-			// this causes errors that prevents onClick function
+	// cosmetics
+	document.getElementById("imgHash"+ runtype).innerHTML = "&nbsp"
+	document.getElementById("allHash"+ runtype).innerHTML = "&nbsp"
+	document.getElementById("otherHash"+ runtype).innerHTML = "&nbsp"
+	document.getElementById("detail"+ runtype).innerHTML = "&nbsp"
+	document.getElementById("jsHash"+ runtype).innerHTML = "tests are running"
+	document.getElementById("cssHash"+ runtype).innerHTML = "plesase wait"
 
-		let list = `
+	// set list to use
+	let list = runtype == "FF" ? listFF : listTor
+
+	// build Uris
+	let jsUris = list.match(/(chrome|resource):.+\.(js|jsm|mjs)$/gm).sort()
+	let imgUris = list.match(/(chrome|resource):.+\.(svg|png|jpg|gif|ico|webp|avif)$/gm).sort()
+	let cssUris = list.match(/(chrome|resource):.+\.css$/gm).sort()
+	let otherUris = list.match(/(chrome|resource):.+\.(dtd|map|scss|eot|otf|ttf|woff|woff2|template|handlebars)$/gm).sort()
+
+	// VARS
+	let allHash = [],	jsHash = [], imgHash = [], cssHash = [], otherHash = [] 
+
+	// JS
+	const get_js = () => new Promise(resolve => {
+		let expected = jsUris.length, count = 0
+		jsUris.forEach(function(src) {
+			let script = document.createElement('script')
+			script.src = src
+			document.head.appendChild(script)
+			script.onload = function() {
+				jsHash.push(src)
+				allHash.push(src)
+				count++
+				if (count == expected) {return resolve()}
+			};
+			script.onerror = function() {
+				count++
+				if (count == expected) {return resolve()}
+			};
+			document.head.removeChild(script)
+		})
+	})
+	// IMAGES
+	const get_img = () => new Promise(resolve => {
+		let expected = imgUris.length, count = 0
+		imgUris.forEach(function(imgUri) {
+			let img = document.createElement("img");
+			img.src = imgUri
+			img.style.height = "20px"
+			img.style.width = "20px"
+			img.onload = function() {
+				imgHash.push(imgUri)
+				allHash.push(imgUri)
+				count++
+				if (count == expected) {return resolve()}
+			}
+			img.onerror = function() {
+				count++
+				if (count == expected) {return resolve()}
+			};
+		})
+	})
+	// CSS
+	const get_css = () => new Promise(resolve => {
+		let expected = cssUris.length, count = 0
+		cssUris.forEach(function(cssUri) {
+			let css = document.createElement("link")
+			css.href = cssUri
+			css.type = "text/css"
+			css.rel = "stylesheet"
+			document.head.appendChild(css)
+			css.onload = function() {
+				cssHash.push(cssUri)
+				allHash.push(cssUri)
+				count++
+				if (count == expected) {return resolve()}
+			};
+			css.onerror = function() {
+				count++
+				if (count == expected) {return resolve()}
+			};
+			document.head.removeChild(css)
+		})
+	})
+	// OTHER
+	const get_other = () => new Promise(resolve => {
+		let expected = otherUris.length, count = 0
+		otherUris.forEach(function(otherUri) {
+			let other = document.createElement("link")
+			other.href = otherUri
+			other.rel = "stylesheet"
+			document.head.appendChild(other)
+			other.onload = function() {
+				otherHash.push(otherUri)
+				allHash.push(otherUri)
+				count++
+				if (count == expected) {return resolve()}
+			};
+			other.onerror = function() {
+				count++
+				if (count == expected) {return resolve()}
+			};
+			document.head.removeChild(other)
+		})
+	})
+
+	function output() {
+		// CONSOLE
+		let note = (runtype == "FF" ? "Firefox" : "Tor Browser")
+
+		console.debug(note + " items",
+			"\nIMG", imgUris,
+			"\nJS", jsUris,
+			"\nCSS", cssUris,
+			"\nOTHER", otherUris,
+		)
+		// sort
+		imgHash.sort()
+		jsHash.sort()
+		cssHash.sort()
+		otherHash.sort()
+		allHash.sort()
+		// counts
+		let foundI = imgHash.length,
+			foundJ = jsHash.length,
+			foundC = cssHash.length,
+			foundO = otherHash.length,
+			foundA = allHash.length
+		// hashes
+		let hashI = mini_sha1(imgHash),
+			hashJ = mini_sha1(jsHash),
+			hashC = mini_sha1(cssHash),
+			hashO = mini_sha1(otherHash),
+			hashA = mini_sha1(allHash)
+		// remember data
+		sDetail["img"+ runtype] = imgHash
+		sDetail["js"+ runtype] = jsHash
+		sDetail["css"+ runtype] = cssHash
+		sDetail["other"+ runtype] = otherHash
+		// remember ordered all data
+		let tmpArray = []
+		if (foundI) {tmpArray.push(s3 +"--- img ---"+ sc); tmpArray = tmpArray.concat(imgHash)}
+		if (foundJ) {tmpArray.push(s3 +"--- js ---"+ sc); tmpArray = tmpArray.concat(jsHash)}
+		if (foundC) {tmpArray.push(s3 +"--- css ---"+ sc); tmpArray = tmpArray.concat(cssHash)}
+		if (foundO) {tmpArray.push(s3 +"--- other ---"+ sc); tmpArray = tmpArray.concat(otherHash)}
+		sDetail["all"+ runtype] = tmpArray
+
+		// item output
+		let stats = " ["+ foundI +"/"+ imgUris.length +"]"
+		if (foundI) {stats = " <span class='btn3 btnc' onclick='display(`img`,`"+ runtype +"`)'>" + stats +"</span>"}
+		document.getElementById("imgHash"+ runtype).innerHTML = hashI + stats
+			stats = " ["+ foundJ +"/"+ jsUris.length +"]"
+		if (foundJ) {stats = " <span class='btn3 btnc' onclick='display(`js`,`"+ runtype +"`)'>" + stats +"</span>"}
+		document.getElementById("jsHash"+ runtype).innerHTML = hashJ + stats
+			stats = " ["+ foundC +"/"+ cssUris.length +"]"
+		if (foundC) {stats = " <span class='btn3 btnc' onclick='display(`css`,`"+ runtype +"`)'>" + stats +"</span>"}
+		document.getElementById("cssHash"+ runtype).innerHTML = hashC + stats
+			stats = " ["+ foundO +"/"+ otherUris.length +"]"
+		if (foundO) {stats = " <span class='btn3 btnc' onclick='display(`other`,`"+ runtype +"`)'>" + stats +"</span>"}
+		document.getElementById("otherHash"+ runtype).innerHTML = hashO + stats
+			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
+		stats = " ["+ foundA +"/"+ countTested +"]"
+		if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`all`,`"+ runtype +"`)'>" + stats +"</span>"}
+		document.getElementById("allHash"+ runtype).innerHTML = mini_sha1(hashA) + stats
+
+		// label
+		document.getElementById("label" + runtype).innerHTML = "[ re-run ]"
+	}
+
+	Promise.all([
+		get_js(),
+		get_img(),
+		get_css(),
+		get_other(),
+	]).then(function(results){
+		output()
+	})		
+}
+
+get_globals()
+
+	// listFF: removed: chrome://global/content/aboutServiceWorkers.js
+		// this causes errors that prevents onClick function
+
+	let listFF = `
 
 		chrome://activity-stream/content/aboutwelcome/aboutwelcome.css
 		chrome://activity-stream/content/css/activity-stream.css
@@ -2410,153 +2583,9 @@ function outputFirefox() {
 		chrome://global/skin/media/picture-in-picture-seekForward-button.svg
 		resource://content-accessible/details.css
 
-		`
+	`
 
-		let jsUris = list.match(/(chrome|resource):.+\.(js|jsm|mjs)$/gm).sort()
-
-		let imgUris = list.match(/(chrome|resource):.+\.(svg|png|jpg|gif|ico|webp|avif)$/gm).sort()
-
-		let cssUris = list.match(/(chrome|resource):.+\.css$/gm).sort()
-
-		let otherUris = list.match(/(chrome|resource):.+\.(dtd|map|scss|eot|otf|ttf|woff|woff2|template|handlebars)$/gm).sort()
-
-		// CONSOLE
-		console.debug("Firefox items",
-			"\nIMG", imgUris,
-			"\nJS", jsUris,
-			"\nCSS", cssUris,
-			"\nOTHER", otherUris,
-		)
-
-		// JS
-		let allHash = [],
-			jsHash = []
-		jsUris.forEach(function(src) {
-			let script = document.createElement('script')
-			script.src = src
-			document.head.appendChild(script)
-			script.onload = function() {
-				jsHash.push(src)
-				allHash.push(src)
-			};
-			document.head.removeChild(script)
-		})
-		// IMAGES
-		let imgHash = []
-		imgUris.forEach(function(imgUri) {
-			let img = document.createElement("img");
-			img.src = imgUri
-			img.style.height = "20px"
-			img.style.width = "20px"
-			img.onload = function() {
-				imgHash.push(imgUri)
-				allHash.push(imgUri)
-			}
-		})
-		// CSS
-		let cssHash = []
-		cssUris.forEach(function(cssUri) {
-			let css = document.createElement("link")
-			css.href = cssUri
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				cssHash.push(cssUri)
-				allHash.push(cssUri)
-			};
-			document.head.removeChild(css)
-		})
-		// OTHER
-		let otherHash = []
-		otherUris.forEach(function(otherUri) {
-			let other = document.createElement("link")
-			other.href = otherUri
-			other.rel = "stylesheet"
-			document.head.appendChild(other)
-			other.onload = function() {
-				otherHash.push(otherUri)
-				allHash.push(otherUri)
-			};
-			document.head.removeChild(other)
-		})
-
-		function output_chrome() {
-			clearInterval(checking)
-			// sort
-			imgHash.sort()
-			jsHash.sort()
-			cssHash.sort()
-			otherHash.sort()
-			allHash.sort()
-			// counts
-			let foundI = imgHash.length,
-				foundJ = jsHash.length,
-				foundC = cssHash.length,
-				foundO = otherHash.length,
-				foundA = allHash.length
-			// hashes
-			let hashI = mini_sha1(imgHash),
-				hashJ = mini_sha1(jsHash),
-				hashC = mini_sha1(cssHash),
-				hashO = mini_sha1(otherHash),
-				hashA = mini_sha1(allHash)
-			// remember data
-			sDetail["imgFF"] = imgHash
-			sDetail["jsFF"] = jsHash
-			sDetail["cssFF"] = cssHash
-			sDetail["otherFF"] = otherHash
-			// remember ordered all data
-			let tmpArray = []
-			if (foundI) {tmpArray.push(s3 +"--- img ---"+ sc); tmpArray = tmpArray.concat(imgHash)}
-			if (foundJ) {tmpArray.push(s3 +"--- js ---"+ sc); tmpArray = tmpArray.concat(jsHash)}
-			if (foundC) {tmpArray.push(s3 +"--- css ---"+ sc); tmpArray = tmpArray.concat(cssHash)}
-			if (foundO) {tmpArray.push(s3 +"--- other ---"+ sc); tmpArray = tmpArray.concat(otherHash)}
-			sDetail["allFF"] = tmpArray
-
-			// item output
-			let stats = " ["+ foundI +"/"+ imgUris.length +"]"
-			if (foundI) {stats = " <span class='btn3 btnc' onclick='display(`" + "img`,`FF" + "`)'>" + stats +"</span>"}
-			dom.imgHash.innerHTML = hashI + stats
-
-			stats = " ["+ foundJ +"/"+ jsUris.length +"]"
-			if (foundJ) {stats = " <span class='btn3 btnc' onclick='display(`" + "js`,`FF" + "`)'>" + stats +"</span>"}
-			dom.jsHash.innerHTML = hashJ + stats
-
-			stats = " ["+ foundC +"/"+ cssUris.length +"]"
-			if (foundC) {stats = " <span class='btn3 btnc' onclick='display(`" + "css`,`FF" + "`)'>" + stats +"</span>"}
-			dom.cssHash.innerHTML = hashC + stats
-
-			stats = " ["+ foundO +"/"+ otherUris.length +"]"
-			if (foundO) {stats = " <span class='btn3 btnc' onclick='display(`" + "other`,`FF" + "`)'>" + stats +"</span>"}
-			dom.otherHash.innerHTML = hashO + stats
-
-			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
-			stats = " ["+ foundA +"/"+ countTested +"]"
-			if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`" + "all`,`FF" + "`)'>" + stats +"</span>"}
-			dom.allHash.innerHTML = mini_sha1(hashA) + stats
-
-			// label
-			dom.firefoxRun = "[ re-run ]"
-		}
-		// wait 12 seconds
-		let checking = setInterval(output_chrome, 12000)
-	}
-}
-
-function outputTor() {
-	// FF only
-	if (isFF) {
-		// clear
-		dom.imgHashTor.innerHTML = "&nbsp"
-		dom.allHashTor.innerHTML = "&nbsp"
-		dom.otherHashTor.innerHTML = "&nbsp"
-		dom.detailTor.innerHTML = "&nbsp"
-		// wait msg
-		dom.jsHashTor = "tests are running"
-		dom.cssHashTor = "please wait"
-
-		let list = `
+	let listTor = `
 
 		chrome://branding/content/icon256.png
 		chrome://branding/content/icon512.png
@@ -3694,141 +3723,7 @@ function outputTor() {
 		resource://torbutton-assets/forwardArrow.png
 		resource://torbutton-assets/searchLogo.png
 
-		`
-
-		let jsUris = list.match(/(chrome|resource):.+\.(js|jsm|mjs)$/gm).sort()
-
-		let imgUris = list.match(/(chrome|resource):.+\.(svg|png|jpg|gif|ico|webp|avif)$/gm).sort()
-
-		let cssUris = list.match(/(chrome|resource):.+\.css$/gm).sort()
-
-		let otherUris = list.match(/(chrome|resource):.+\.(dtd|map|scss|eot|otf|ttf|woff|woff2|template|handlebars)$/gm).sort()
-
-		// CONSOLE
-		console.debug("Tor Browser items",
-			"\nIMG", imgUris,
-			"\nJS", jsUris,
-			"\nCSS", cssUris,
-			"\nOTHER", otherUris,
-		)
-
-		// JS
-		let allHash = [],
-			jsHash = []
-		jsUris.forEach(function(src) {
-			let script = document.createElement('script')
-			script.src = src
-			document.head.appendChild(script)
-			script.onload = function() {
-				jsHash.push(src)
-				allHash.push(src)
-			};
-			document.head.removeChild(script)
-		})
-		// IMAGES
-		let imgHash = []
-		imgUris.forEach(function(imgUri) {
-			let img = document.createElement("img");
-			img.src = imgUri
-			img.style.height = "20px"
-			img.style.width = "20px"
-			img.onload = function() {
-				imgHash.push(imgUri)
-				allHash.push(imgUri)
-			}
-		})
-		// CSS
-		let cssHash = []
-		cssUris.forEach(function(cssUri) {
-			let css = document.createElement("link")
-			css.href = cssUri
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				cssHash.push(cssUri)
-				allHash.push(cssUri)
-			};
-			document.head.removeChild(css)
-		})
-		// OTHER
-		let otherHash = []
-		otherUris.forEach(function(otherUri) {
-			let other = document.createElement("link")
-			other.href = otherUri
-			other.rel = "stylesheet"
-			document.head.appendChild(other)
-			other.onload = function() {
-				otherHash.push(otherUri)
-				allHash.push(otherUri)
-			};
-			document.head.removeChild(other)
-		})
-
-		function output_chrome() {
-			clearInterval(checking)
-			// sort
-			imgHash.sort()
-			jsHash.sort()
-			cssHash.sort()
-			otherHash.sort()
-			allHash.sort()
-			// counts
-			let foundI = imgHash.length,
-				foundJ = jsHash.length,
-				foundC = cssHash.length,
-				foundO = otherHash.length,
-				foundA = allHash.length
-			// hashes
-			let hashI = mini_sha1(imgHash),
-				hashJ = mini_sha1(jsHash),
-				hashC = mini_sha1(cssHash),
-				hashO = mini_sha1(otherHash),
-				hashA = mini_sha1(allHash)
-			// remember data
-			sDetail["imgTor"] = imgHash
-			sDetail["jsTor"] = jsHash
-			sDetail["cssTor"] = cssHash
-			sDetail["otherTor"] = otherHash
-			// remember ordered all data
-			let tmpArray = []
-			if (foundI) {tmpArray.push(s3 +"--- img ---"+ sc); tmpArray = tmpArray.concat(imgHash)}
-			if (foundJ) {tmpArray.push(s3 +"--- js ---"+ sc); tmpArray = tmpArray.concat(jsHash)}
-			if (foundC) {tmpArray.push(s3 +"--- css ---"+ sc); tmpArray = tmpArray.concat(cssHash)}
-			if (foundO) {tmpArray.push(s3 +"--- other ---"+ sc); tmpArray = tmpArray.concat(otherHash)}
-			sDetail["allTor"] = tmpArray
-
-			// item output
-			let stats = " ["+ foundI +"/"+ imgUris.length +"]"
-			if (foundI) {stats = " <span class='btn3 btnc' onclick='display(`" + "img`,`Tor" + "`)'>" + stats +"</span>"}
-			dom.imgHashTor.innerHTML = hashI + stats
-
-			stats = " ["+ foundJ +"/"+ jsUris.length +"]"
-			if (foundJ) {stats = " <span class='btn3 btnc' onclick='display(`" + "js`,`Tor" + "`)'>" + stats +"</span>"}
-			dom.jsHashTor.innerHTML = hashJ + stats
-
-			stats = " ["+ foundC +"/"+ cssUris.length +"]"
-			if (foundC) {stats = " <span class='btn3 btnc' onclick='display(`" + "css`,`Tor" + "`)'>" + stats +"</span>"}
-			dom.cssHashTor.innerHTML = hashC + stats
-
-			stats = " ["+ foundO +"/"+ otherUris.length +"]"
-			if (foundO) {stats = " <span class='btn3 btnc' onclick='display(`" + "other`,`Tor" + "`)'>" + stats +"</span>"}
-			dom.otherHashTor.innerHTML = hashO + stats
-
-			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
-			stats = " ["+ foundA +"/"+ countTested +"]"
-			if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`" + "all`,`Tor" + "`)'>" + stats +"</span>"}
-			dom.allHashTor.innerHTML = mini_sha1(hashA) + stats
-
-			// label
-			dom.torRun = "[ re-run ]"
-		}
-		// wait 12 seconds
-		let checking = setInterval(output_chrome, 12000)
-	}
-}
-
-get_globals()
+	`
 
 </script>
 
