@@ -11,9 +11,8 @@
 	<!-- custom -->
 	<style>
 		table {width: 780px;}
+		hr {color: #dcc18c}
 		.togA, .togC {display: none;}
-		#tb4 th {background-color: #f0c878;}
-		#tb4 td:first-child {color: var(--test3);}
 	</style>
 </head>
 
@@ -27,7 +26,18 @@
 	<!-- Tor Browser -->
 	<table id="tb3">
 		<col width="20%"></a><col width="80%">
-		<thead><tr><th colspan="2">[tor browser] chrome:// & resource://</th></tr></thead>
+		<thead><tr><th colspan="2">chrome:// & resource://</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Enumeration of web accessible resources. 
+				<span class="s3">Firefox</span> list compiled from 91ESR + FF101-105, and Android FF101-106.
+				<span class="s3">Tor Browser</span> list compiled from 11.5-11.5.4 (91ESR) + 12.0a3 (102ESR), and Android 11.5.4.
+			</span>
+		</td></tr>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span>
+			<a target="_blank" class="blue" href="https://privacycheck.sec.lrz.de/active/fp_cd/fp_chrome_detect.html">privacycheck.sec.lrz.de</a>
+		</td></tr>
+
+		<tr><td colspan="2"><hr><br>TOR BROWSER</td></tr>
 		<tr><td><div>
 				<div class="btn-left"><span class="btn3 btn" id="torRun" onClick="outputTor()">[ run ]</span></div>
 				<div>images</div></div></td>
@@ -41,12 +51,8 @@
 		 <td><span class="btn0 btn" onClick="copyclip(`allLoadedTor`)">[ copy ]</span> results</td>
 		 <td class="c" id="allLoadedTor"></td>
 		</tr>
-	</table>
 
-	<!-- Firefox -->
-	<table id="tb4">
-		<col width="20%"></a><col width="80%">
-		<thead><tr><th colspan="2">[firefox] chrome:// & resource://</th></tr></thead>
+		<tr><td colspan="2"><hr><br>FIREFOX</td></tr>
 		<tr><td><div>
 				<div class="btn-left"><span class="btn3 btn" id="firefoxRun" onClick="outputFirefox()">[ run ]</span></div>
 				<div>images</div></div></td>
@@ -60,11 +66,7 @@
 		 <td><span class="btn0 btn" onClick="copyclip(`allLoaded`)">[ copy ]</span> results</td>
 		 <td class="c" id="allLoaded"></td>
 		</tr>
-		<tr class="togC"><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">chrome:// code based on work by </span>
-			<a target="_blank" class="blue" href="https://privacycheck.sec.lrz.de/active/fp_cd/fp_chrome_detect.html">privacycheck.sec.lrz.de</a></td></tr>
 	</table>
-
 	<br>
 
 <script>
