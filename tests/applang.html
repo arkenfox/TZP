@@ -195,6 +195,7 @@ function get_app_lang_dtd2() {
 	function check_dtd2() {
 		if (counter < 30) {
 			if (dtd2 !== "") {
+				console.log(dtd2)
 				clearInterval(checking)
 				// notate
 				if (navigator.language == "en-US") {
