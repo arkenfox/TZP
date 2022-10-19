@@ -455,7 +455,7 @@ const get_isOS = () => new Promise(resolve => {
 	function finish() {
 		if (isOS == "") {
 			isOS = "android"
-			if (isVer < 88) {
+			if (isVer < 89) {
 				// linux-panel not added until FF89: leverage isMark: tested android (FF + nightly, Mull, TBA + alpha)
 				isOS = (isMark == "24 x 24" ? "android" : "linux")
 			}
