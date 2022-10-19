@@ -443,7 +443,7 @@ const get_isFork = () => new Promise(resolve => {
 			return resolve(isFork+"")
 		})
 	} catch(e) {
-		gErrorsOnce.push("_global: isFork: " + e.name +" : "+ e.message)
+		log_error("_global: isFork", e.name, e.message, 60, true)
 		log_perf("isFork [global]",t0,"","error")
 		return resolve("fork error")
 	}
@@ -451,64 +451,45 @@ const get_isFork = () => new Promise(resolve => {
 
 const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
-	// check
 	let t0; if (canPerf) {t0 = performance.now()}
-	function finish(font) {
-		// set isPlatformFont
-		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32"
-		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
-		if (isOS === "") {log_alert("global:isOS: unknown", true)}
-		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS + font))
-		return resolve()
-	}
-	function tryharder() {
-		// ToDo: harden isOS desktop
-		// windows or linux
-			// check for chrome://browser/content/extension-win-panel.css
-		let css = document.createElement("link")
-		css.href = "chrome://browser/content/extension-win-panel.css"
-		css.type = "text/css"
-		css.rel = "stylesheet"
-		document.head.appendChild(css)
-		css.onload = function() {
-			isOS = "windows"
-			finish("")
-		}
-		css.onerror = function() {
-			isOS = "linux"
-			finish("")
-		}
-		document.head.removeChild(css)
-	}
-	try {
-		// fastpath android (FF + nightly, Mull, TBA + alpha)
-		if (isMark == "24 x 24") {
+	function finish() {
+		if (isOS == "") {
 			isOS = "android"
-			finish("")
-		} else {
-			// widget font
-			let aIgnore = [
-				'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
-				'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
-			]
-			log_debug("os", isMark + " | " + isLogo)
-			let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
-			if (aIgnore.includes(font)) {
-				// returns generic font-family if #41116 or eventually 1787790
-					// mac should still return -apple-system
-					// https://gitlab.torproject.org/tpo/applications/tor-browser/-/merge_requests/358
-				tryharder()
-			} else {
-				if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-				} else if (font == "-apple-system") {isOS = "mac"
-				} else if (font == "Roboto") {isOS = "android" // fallback or do some linux use Roboto?
-				} else {isOS = "linux"}
-				finish(" | "+ font)
+			if (isVer < 88) {
+				// linux-panel not added until FF89: leverage isMark: tested android (FF + nightly, Mull, TBA + alpha)
+				isOS = (isMark == "24 x 24" ? "android" : "linux")
 			}
 		}
+		if (isOS == "win") {isOS = "windows"}
+		log_perf("isOS [global]",t0,"", (isOS === "" ? "unknown" : isOS))
+		return resolve()
+	}
+	try {
+		let path = "chrome://browser/content/extension-", suffix = "-panel.css", count = 0
+		// 1280128: FF51+ win/mac
+		// 1701257: FF89+ linux
+		let list = ["win","mac","linux"]
+		list.forEach(function(item) {
+			let css = document.createElement("link")
+			css.href = path + item + suffix
+			css.type = "text/css"
+			css.rel = "stylesheet"
+			document.head.appendChild(css)
+			css.onload = function() {
+				isOS = item
+				count++
+				if (count == 3) {finish()}
+			}
+			css.onerror = function() {
+				count++
+				if (count == 3) {finish()}
+			}
+			document.head.removeChild(css)
+		})
 	} catch(e) {
-		// no need to gErrorsOnce since we do this in widgets
-		tryharder()
+		isOSError = log_error("_global: isOS", e.name, e.message, 60, true)
+		log_alert("global:isOS: unknown", true)
+		return resolve()
 	}
 })
 
@@ -587,7 +568,7 @@ const get_isTB = () => new Promise(resolve => {
 		}
 		document.head.removeChild(css)
 	} catch(e) {
-		gErrorsOnce.push("_global: isTB: " + e.name +" : "+ e.message)
+		log_error("_global: isTB", e.name, e.message, 60, true)
 		log_perf("isTB [global]",t0,"","error")
 		return resolve("tb error")
 	}
@@ -1023,14 +1004,19 @@ function log_debug(title, output, isOnce = false) {
 	if (isOnce) { gDebugOnce.push(output) } else { gDebug.push(output) }
 }
 
-function log_error(title, name, msg, len = 60) {
+function log_error(title, name, msg, len = 60, isOnce = false) {
 	// tidy values
 	let isMsg = true
+	if (len == undefined || len == "") {len = 60}
 	if (name == undefined || name == "" || name === null) {name = zErr}
 	if (msg == undefined || msg == "" || msg === null) {isMsg = false}
 	// collect globalrun errors
 	if (gRun) {
-		gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+		if (isOnce) {
+			gErrorsOnce.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+		} else {
+			gErrors.push(title +": " + name + (isMsg ? ": "+ msg : ""))
+		}
 	}
 	// return a trimmed str for displays
 	let str = name + (isMsg ? ": "+ msg : "")
@@ -1096,9 +1082,10 @@ function log_section_hash(name) {
 	let data = sData[name]
 	let hash = sha1(data.join(), name +" section result")
 	let sHash = hash + buildButton("0", name, data.length +" metric"+ (data.length > 1 ? "s" : ""), "showMetrics", "btns")
-	if (name == "canvas" || name == "storage") {if (isFile) {sHash += note_file}
-	} else if (name == "ua") {sHash += (isFF ? " [spoofable + detectable]" : "")
-	} else if (name == "feature") {sHash += (isFF ? " [unspoofable?]" : "")}
+	if (isFF) {
+		if (name == "ua") {sHash += " [spoofable + detectable]"
+		} else if (name == "feature") {sHash += " [unspoofable?]"}
+	}
 	document.getElementById(name +"hash").innerHTML = sHash
 	// global run
 	if (gRun) {
@@ -1359,7 +1346,7 @@ function countJS(filename) {
 				if (isFF & isVer < isTZPBlockMinVer[0]) {isTZPBlock = true // block old gecko
 				} else if (isEngine == "edgeHTML") {isTZPBlock = true // block edgeHTML
 				} else if (isTB && isVer >= isTZPSmartMinVer[1]) {isTZPSmart = true // minTB
-				} else if (isFF && isVer >= isTZPSmartMinVer[0]) {isTZPSmart = true // minFF
+				} else if (isFF && !isTB && isVer >= isTZPSmartMinVer[0]) {isTZPSmart = true // minFF
 				}
 				// note: everything else is dumb: we can add blink/webkit or brave later
 				// lets just focus on gecko lies/bypasses
@@ -1418,8 +1405,6 @@ function outputPostSection(id) {
 		get_ua_iframes(isLog)
 		get_ua_workers()
 	}
-	if (id == "all" || id == "feature")
-		if (isFF) {get_fd_chrome(isLog)}
 	if (id == "all" || id == "storage") {
 		get_cookies()
 		get_storage()
@@ -1613,15 +1598,14 @@ function run_once() {
 		t00 = performance.now()
 		log_line(Math.round(performance.now()) + " : IMMEDIATE")
 	}
-	if (location.protocol == "file:") {isFile = true; note_file = " [file:/]"
+	if (location.protocol == "file:") {isFile = true
 	} else if (location.protocol == "https:") {isSecure = true}
 	// WARM
 	try {
-		log_perf("warmup start [md]",t00,"", t00 +" | "+ (gLoad ? "page load" : "global rerun"))
+		log_perf("warmup start [md]",t00,"", t00)
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			let t99; if (canPerf) {t99 = performance.now()}
-			let info = (canPerf ? t99 +" | ": "")
-				+ (gLoad ? "page load" : "global rerun")
+			let info = (canPerf ? t99 : "")
 			log_perf("warmup end [md]", t00, t99, info)
 		}
 	)} catch(e) {}
@@ -1697,7 +1681,7 @@ function run_once() {
 		}
 		log_perf("isEngine [global]",t0,"", aCounts.join(" | ") +" | "+ (isEngine == "" ? "unknown" : ""+ isEngine))
 	} catch(e) {
-		gErrorsOnce.push("_global: isEngine: " + e.name +" : "+ e.message)
+		log_error("_global: isEngine", e.name, e.message, 60, true)
 		log_perf("isEngine [global]",t0,"","error")
 	}
 
@@ -1742,7 +1726,7 @@ function run_once() {
 		}
 		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length +" | "+ isEngine)
 	} catch(e) {
-		gErrorsOnce.push("_global: isFF: " + e.name +" : "+ e.message)
+		log_error("_global: isFF", e.name, e.message, 60, true)
 		log_perf("isFF [global]",t0,"","error")
 	}
 	get_isArch(true) // saves 30ms+ later in prereq

@@ -145,7 +145,6 @@ let s0 = " <span class='",
 	isBraveMode = 0,
 	aBraveMode = ["unknown", "disabled", "standard", "strict"],
 	isChannel = "",
-	isChrome = "", // chrome://
 	isClientRect = 1, // first true method
 	aClientRect = [], // per method result
 	aClientRectNoise = {}, // per method noise
@@ -157,6 +156,7 @@ let s0 = " <span class='",
 	isLogo = zB0, // logo dimensions: assume blocked
 	isMark = "", // watermark dimensions
 	isOS = "",
+    	isOSError,
 	isPerf = true,
 	canPerf = false,
 	isResource = "",
