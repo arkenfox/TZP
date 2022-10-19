@@ -198,6 +198,10 @@ function set_fntList() {
 
 	// page load: fntMaster & fntMasterBase once
 	if (gLoad) {
+		// set isPlatformFont
+		if (isOS == "windows") {isPlatformFont = "MS Shell Dlg \\32"
+		} else if (isOS == "mac") {isPlatformFont = "-apple-system"}
+
 		// set baseMaster first three items
 		let baseMaster = ['monospace','sans-serif','serif']
 		if (isOS == "mac") {
