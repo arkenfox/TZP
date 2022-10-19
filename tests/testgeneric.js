@@ -255,18 +255,64 @@ function get_is95() {
 
 const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
-	try {
-		let el = dom.widget0
-		let font = getComputedStyle(el).getPropertyValue("font-family")
-		if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
-		} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
-		} else if (font == "Roboto") {isOS = "android"
-		} else if (font == "-apple-system") {isOS = "mac"
-		} else {isOS = "linux"}
+	function finish() {
+		// linux-panel not added until FF89, but we're not expecting widgets to fail until 102 minimum
+		if (isOS == "") {isOS = "android"
+		} else if (isOS == "win") {isOS = "windows"}
 		return resolve()
+	}
+	// try harder
+	function tryharder() {
+		try {
+			let path = "chrome://browser/content/extension-", suffix = "-panel.css", count = 0
+			// 1280128: FF51+ win/mac
+			// 1701257: FF89+ linux
+			let list = ["win","mac","linux"]
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.href = path + item + suffix
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				document.head.appendChild(css)
+				css.onload = function() {
+					isOS = item
+					count++
+					if (count == 3) {finish()}
+				}
+				css.onerror = function() {
+					count++
+					if (count == 3) {finish()}
+				}
+				document.head.removeChild(css)
+			})
+		} catch(e) {
+			console.error(e.name, e.emssage)
+			return resolve()
+		}
+	}
+	// widget font
+	let aIgnore = [
+		'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
+		'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
+	]
+	try {
+		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
+		if (aIgnore.includes(font)) {
+			// returns generic font-family if #41116 or eventually 1787790
+				// mac should still return -apple-system
+				// https://gitlab.torproject.org/tpo/applications/tor-browser/-/merge_requests/358
+			tryharder()
+		} else {
+			if (font.slice(0,12) == "MS Shell Dlg") {isOS = "windows"
+			} else if (font.slice(0,12) == "\"MS Shell Dl") {isOS = "windows" // FF57 has a slice and escape char issue
+			} else if (font == "-apple-system") {isOS = "mac"
+			} else if (font == "Roboto") {isOS = "android" // fallback or do some linux use Roboto?
+			} else {isOS = "linux"}
+			return resolve()
+		}
 	} catch(e) {
 		console.error(e.name, e.emssage)
-		return resolve()
+		tryharder()
 	}
 })
 
