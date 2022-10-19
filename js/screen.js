@@ -40,68 +40,11 @@ function get_fd_architecture() {
 	}
 }
 
-function get_fd_chrome(log = false) {
-	// runs post FP
-	let t0; if (canPerf) {t0 = performance.now()}
-	let os = ""
-	// display
-	function output(r) {
-		dom.fdChrome.innerHTML = r
-		isChrome = r
-		if (log) {log_perf("chrome [not in FP]",t0)}
-	}
-	// bail
-	if (isChrome !== "") {output(isChrome); return}
-	// run
-	dom.fdChrome.innerHTML = zB0
-	function run2() {
-		// android/linux
-		let img = new Image()
-		img.src = "chrome://branding/content/icon64.png"
-		img.style.visibility = "hidden"
-		document.body.appendChild(img)
-		img.onload = function() {output("Linux")}
-		img.onerror = function() {output("Android")}
-		document.body.removeChild(img)
-	}
-	function check(r) {
-		if (r == "") {run2()} else {output(r)}
-	}
-	function run() {
-		// win/mac
-		let c = "chrome://browser/content/extension-",
-			p = "-panel.css",
-			list = [c +'win'+ p, c +'mac'+ p],
-			x = 0
-		// ToDo: https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/40201
-		list.forEach(function(item) {
-			let css = document.createElement("link")
-			css.href = item
-			css.type = "text/css"
-			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				if (item === c +"win"+ p) {os = "Windows"}
-				if (item === c +"mac"+ p) {os = "Mac"}
-				x++
-				if (x == 2) {check(os)}
-			}
-			css.onerror = function() {
-				x++
-				if (x == 2) {check(os)}
-			}
-			document.head.removeChild(css)
-		})
-	}
-	run()
-}
-
 function get_fd_resources() {
 	if (!isFF) {
 		dom.fdResource = zNA
 		// and tidy the other nonFF items
 		dom.fdBrandingCss = zNA
-		dom.fdChrome = zNA
 		return "resources:n/a"
 	}
 
@@ -2097,6 +2040,14 @@ function outputFD() {
 	let r = (isFF ? isVer + (isVerPlus ? "+" : "") : zNA)
 	dom.fdVersion = r
 	section.push("version:"+ r)
+	// os
+	if (isFF) {
+		dom.fdChrome.innerHTML = (isOSError !== undefined ? isOSError : isOS)
+		section.push("os:"+ (isOSError !== undefined ? zErr : isOS))
+	} else {
+		dom.fdChrome.innerHTML = zNA
+		section.push("os:"+ zNA)
+	}
 
 	Promise.all([
 		get_fd_architecture(),
