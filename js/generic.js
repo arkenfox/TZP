@@ -261,6 +261,9 @@ const get_isBrave = () => new Promise(resolve => {
 		const names = Object.keys(x).sort()
 		for (const k of names) {res.push(k +":"+ x[k])}
 		let hash = sha1(res.join())
+
+console.log(hash, mini(res), res)
+
 		if (hash == "84e58a287055514c839182750856ce1d4a88c9e0") { // all true
 			isBrave = true
 		} else if (hash == "56d1c769c8fed6a92e31ff22169c9043480834d0") { // all but primary
