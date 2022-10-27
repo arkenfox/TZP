@@ -225,7 +225,6 @@ const get_isBrave = () => new Promise(resolve => {
 
 	// proceed
 	let t0; if (canPerf) {t0 = performance.now()}
-	let res = []
 	if (runSL && navigator.brave) {delete Navigator.prototype.brave}
 	const detectBrave = async () => {
 		const windowKeys = Object.keys(Object.getOwnPropertyDescriptors(window))
@@ -260,26 +259,22 @@ const get_isBrave = () => new Promise(resolve => {
 	}
 	;(async () => {
 		const x = await detectBrave()
-		const names = Object.keys(x).sort()
-		let aVisual = [], countTrue = 0
-		for (const k of names) {
-			res.push(k +":"+ x[k])
-			if (x[k] === true) {
-				aVisual.push("\u2713")
-				countTrue++
-			} else {
-				aVisual.push("\u2713")
+		let oRes = {"false": [],"true": []}, aVisual = []
+		for (const k of Object.keys(x).sort()) {
+			oRes[x[k]].push(k)
+			let code = (x[k] === true ? "\u2713" : "\u2715")
+			aVisual.push(code)
+		}
+		if (oRes["true"].length > 3) {
+			isBrave = true // at least 4 of 6
+			// alert any failures
+			if (oRes["false"].length) {
+				let strFalse = oRes["false"].join(", ")
+				console.error("isBrave check failures: "+ strFalse)
+				log_alert("_global: isBrave check failures: "+ strFalse, true)
 			}
 		}
-		let minihash = mini(res)
-		if (minihash == "56d341fe") { // all 6 true
-			isBrave = true
-		} else if (minihash == "ed7c5987") { // all but primary braveInNavigator
-			isBrave = true
-			gKnownOnce.push("_global:isBrave:navigator")
-			gBypassedOnce.push("_global:isBrave:navigator:true")
-		}
-		log_perf("isBrave [global]",t0,"", aVisual.join(" ") +" | "+ minihash +" | "+ isBrave)
+		log_perf("isBrave [global]",t0,"", aVisual.join(" ") +" | "+ isBrave)
 		if (!isBrave) {
 			return resolve()
 		} else {
