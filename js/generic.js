@@ -234,7 +234,9 @@ const get_isBrave = () => new Promise(resolve => {
 		return {
 			// moving to flags
 			// https://github.com/brave/brave-browser/issues/9586#issuecomment-840872720
+			/* false on agressive shield mode since at least 107
 			fileSystemAccessDisabled: !windowKeys.filter(key => fileSystemKeys.test(key)).length,
+			*/
 			webSerialDisabled: !('Serial' in window || 'SerialPort' in window),
 			reportingDisabled: !('ReportingObserver' in window),
 			// not strictly brave
@@ -259,19 +261,25 @@ const get_isBrave = () => new Promise(resolve => {
 	;(async () => {
 		const x = await detectBrave()
 		const names = Object.keys(x).sort()
-		for (const k of names) {res.push(k +":"+ x[k])}
-		let hash = sha1(res.join())
-
-console.log(hash, mini(res), res)
-
-		if (hash == "84e58a287055514c839182750856ce1d4a88c9e0") { // all true
+		let aVisual = [], countTrue = 0
+		for (const k of names) {
+			res.push(k +":"+ x[k])
+			if (x[k] === true) {
+				aVisual.push("\u2713")
+				countTrue++
+			} else {
+				aVisual.push("\u2713")
+			}
+		}
+		let minihash = mini(res)
+		if (minihash == "56d341fe") { // all 6 true
 			isBrave = true
-		} else if (hash == "56d1c769c8fed6a92e31ff22169c9043480834d0") { // all but primary
+		} else if (minihash == "ed7c5987") { // all but primary braveInNavigator
 			isBrave = true
 			gKnownOnce.push("_global:isBrave:navigator")
 			gBypassedOnce.push("_global:isBrave:navigator:true")
 		}
-		log_perf("isBrave [global]",t0,"",isBrave)
+		log_perf("isBrave [global]",t0,"", aVisual.join(" ") +" | "+ minihash +" | "+ isBrave)
 		if (!isBrave) {
 			return resolve()
 		} else {
