@@ -48,7 +48,7 @@ function getElementProp(id, prop, pseudo, noBlock) {
 		if (logPseudo) {console.log("pseudo "+ id +" "+ pseudo +": "+ item)}
 		return item
 	} catch(e) {
-		log_alert("_generic:element property "+ id +": "+ e.name)
+		log_alert("_generic: element property "+ id +": "+ e.name)
 		if (logPseudo) {console.log("pseudo "+ id +": "+ e.name +": "+ e.message)}
 		return "x"
 	}
@@ -184,12 +184,12 @@ const get_aSystemFont = () => new Promise(resolve => {
 function get_canPerf(runtype) {
 	// check performance.now
 	try {
-		if (runSP) {a=b}
+		if (runSP) {abc = def}
 		let testPerf = performance.now()
 		canPerf = true
 	} catch(e) {
 		canPerf = false
-		if (runtype == "log") {log_error("_global: performance.now:", e.name, e.message)}
+		if (runtype == "log") {log_error("_prereq: perf.now", e.name, e.message)}
 	}
 }
 
@@ -205,6 +205,7 @@ const get_isArch = (skip = false) => new Promise(resolve => {
 		// FF89+: 1703505: javascript.options.large_arraybuffers
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
+		if (runSE) {abc = def}
 		isArchErr = false
 		let test = new ArrayBuffer(Math.pow(2,32))
 		isArch = true
@@ -269,9 +270,7 @@ const get_isBrave = () => new Promise(resolve => {
 			isBrave = true // at least 4 of 6
 			// alert any failures
 			if (oRes["false"].length) {
-				let strFalse = oRes["false"].join(", ")
-				console.error("isBrave check failures: "+ strFalse)
-				log_alert("_global: isBrave check failures: "+ strFalse, true)
+				log_alert("_global: isBrave: "+ oRes["false"].join(", "), true)
 			}
 		}
 		log_perf("isBrave [global]",t0,"", aVisual.join(" ") +" | "+ isBrave)
@@ -292,7 +291,7 @@ const get_isBraveMode = () => new Promise(resolve => {
 	function set(mode) {
 		isBraveMode = mode
 		if (gRun) {
-			if (aBraveMode == 0) {log_alert("_global:isBraveMode: unknown")}
+			if (aBraveMode == 0) {log_alert("global: isBraveMode: unknown", true)}
 			log_perf("isBraveMode [global]",t0,"",aBraveMode[isBraveMode])
 		}
 	}
@@ -494,7 +493,7 @@ const get_isOS = () => new Promise(resolve => {
 		})
 	} catch(e) {
 		isOSError = log_error("_global: isOS", e.name, e.message, 60, true)
-		log_alert("global:isOS: unknown", true)
+		log_alert("global: isOS: unknown", true)
 		return resolve()
 	}
 })
@@ -535,14 +534,16 @@ const get_isRFP = () => new Promise(resolve => {
 			if (chk1 !== "no-preference") {isRFP = false}
 			let chk2 = getElementProp("#cssPCS","content",":after", true)
 			if (chk2 !== "light") {isRFP = false}
-			let chk3 = zD
-			try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {}
-			if (chk3 !== zD) {isRFP = false}
+			if (isVer > 77) {
+				let chk3 = zD
+				try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {} // FF78+
+				if (chk3 !== zD) {isRFP = false}
+			}
 		}
 		if (gRun) {log_perf("isRFP [prereq]",t0,gt0,isRFP)}
 		return resolve()
 	} catch(e) {
-		log_alert("_global:isRFP: " + e.name +" : "+ e.message)
+		log_alert("_prereq: isRFP: "+ e.name +" : "+ e.message)
 		if (gRun) {
 			log_error("_global: isRFP", e.name, e.message)
 		}
@@ -599,7 +600,8 @@ const get_isVer = () => new Promise(resolve => {
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
 
-		isVerMax = 107
+		isVerMax = 108
+		if ("undefined" === typeof onloadend) return 108 // 1574487
 		if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
@@ -760,7 +762,8 @@ const get_navKeys = () => new Promise(resolve => {
 		if (gRun) {log_perf("navKeys [prereq]",t0)}
 		return resolve()
 	} catch(e) {
-		log_alert("_global:get_navKeys: " + e.name +" : "+ e.message)
+		log_error("_prereq: nav keys", e.name, e.message)
+		log_alert("_prereq: nav keys: "+ e.name +" : "+ e.message)
 		return resolve()
 	}
 })
@@ -775,6 +778,7 @@ function getDynamicIframeWindow({
 	display = false
 }) {
 	try {
+		if (runSE) {abc = def}
 		const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
 		const length = context.length
 		const element = document.createElement(elementName)
@@ -1644,7 +1648,7 @@ function run_once() {
 			"gecko": [
 				"function" === typeof dump,
 				"boolean" === typeof fullScreen,
-				"object" === typeof onloadend,
+				"number" === typeof mozInnerScreenX,
 				"object" === typeof onabsolutedeviceorientation,
 				"function" === typeof scrollByLines,
 				"number" === typeof scrollMaxY,
@@ -1727,7 +1731,7 @@ function run_once() {
 			}
 			// alert if any isFF checks fail
 			if (aNo.length) {
-				log_alert("isFF: not found: "+ aNo.join(", "), true)
+				log_alert("_global: isFF: "+ aNo.join(", "), true)
 			}
 		}
 		log_perf("isFF [global]",t0,"", isFF +" | "+ found +"/"+ list.length +" | "+ isEngine)

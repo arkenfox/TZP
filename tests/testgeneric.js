@@ -127,7 +127,7 @@ const get_globals = () => new Promise(resolve => {
 		"gecko": [
 			"function" === typeof dump,
 			"boolean" === typeof fullScreen,
-			"object" === typeof onloadend,
+			"number" === typeof mozInnerScreenX,
 			"object" === typeof onabsolutedeviceorientation,
 			"function" === typeof scrollByLines,
 			"number" === typeof scrollMaxY,
@@ -146,6 +146,7 @@ const get_globals = () => new Promise(resolve => {
 			"function" === typeof setImmediate,
 		]
 	}
+
 	// array engine matches, so subsequent results doesn't override prev
 	let aEngine = []
 	for (const engine of Object.keys(oEngines).sort()) {
@@ -384,7 +385,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 107
+		isVerMax = 108
+		if ("undefined" === typeof onloadend) return 108 // 1574487
 		if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
 		try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
