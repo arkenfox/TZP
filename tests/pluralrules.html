@@ -382,12 +382,14 @@ function run_test(type) {
 			let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
 
 			let code = loop[j]
+			let intlPRcardinal = new Intl.PluralRules(code, {type:"cardinal"})
+			let intlPRordinal = new Intl.PluralRules(code, {type:"ordinal"})
 			// aListOne
 			for (let k=0; k < test_array.length; k++) {
 				let n = test_array[k]
 				// cardinal
 				try {
-					currentC = new Intl.PluralRules(code, {type:"cardinal"}).select(n)
+					currentC = intlPRcardinal.select(n)
 					if (type == "0") {
 						// catch first
 						if (c0 && currentC == "zero") {c0 = false; aListTwo.push(n)}
@@ -408,7 +410,7 @@ function run_test(type) {
 
 				// ordinal
 				try {
-					currentO = new Intl.PluralRules(code, {type:"ordinal"}).select(n)
+					currentO = intlPRordinal.select(n)
 					if (type == "0") {
 						// catch first
 						if (o0 && currentO == "zero") {o0 = false; aListTwo.push(n)}
