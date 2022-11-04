@@ -34,7 +34,6 @@
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
-	<tr><td class="blurb" id="isFF"></td></tr>
 	</table>
 
 	<!-- app lang -->
@@ -320,13 +319,12 @@ function outputAppLanguage() {
 		get_app_lang_dtd2()
 		test_iframe() // fires last two PoCs
 	}
-	else{
-		dom.isFF = "this test requires firefox"
-		return
-	}
 }
 
 function rerunAppLanguage() {
+	if (!isFF) {
+		return
+	}
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
@@ -338,7 +336,13 @@ function rerunAppLanguage() {
 	}, 170)
 }
 
-get_globals()
+Promise.all([
+	get_globals()
+]).then(function(){
+	if (!isFF) {
+		dom.appLang1.innerHTML = "this test requires "+ s4 + "GECKO" + sc +" ... and you're not it"
+	}
+})
 
 </script>
 </body>
