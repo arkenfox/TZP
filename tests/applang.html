@@ -34,6 +34,7 @@
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb" id="isFF"></td></tr>
 	</table>
 
 	<!-- app lang -->
@@ -318,6 +319,10 @@ function outputAppLanguage() {
 		get_app_lang_xmlparser()
 		get_app_lang_dtd2()
 		test_iframe() // fires last two PoCs
+	}
+	else{
+		dom.isFF = "this test requires firefox"
+		return
 	}
 }
 
