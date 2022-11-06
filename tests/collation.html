@@ -77,6 +77,22 @@ var list = [
 "am,amharic",
 "an,aragonese",
 "ar,arabic",
+"ar-bh, arabic (bahrain)",
+"ar-dz, arabic (algeria)",
+"ar-eg, arabic (egypt)",
+"ar-iq, arabic (iran)",
+"ar-jo, arabic (jordan)",
+"ar-kw, arabic (kuwait)",
+"ar-lb, arabic (lenanon)",
+"ar-ly, arabic (lybia)",
+"ar-mo, arabic (morocco)",
+"ar-om, arabic (oman)",
+"ar-qa, arabic (qatar)",
+"ar-sa, arabic (saudi arabia)",
+"ar-sy, arabic (syria)",
+"ar-tn, arabic (tunisia)",
+"ar-ae, arabic (uae)",
+"ar-ye, arabic (yemen)",
 "as,assamese",
 "ast,asturian",
 "av,avaric",
@@ -86,6 +102,7 @@ var list = [
 "be,belarusian",
 "bg,bulgarian",
 "bh,bihari",
+"bho,bhojpuri",
 "bi,bislama",
 "bm,bambara",
 "bn,bengali",
@@ -93,6 +110,7 @@ var list = [
 "br,breton",
 "bs,bosnian",
 "ca,catalan",
+"ca-valencia, catalan (valencia)",
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
@@ -107,22 +125,66 @@ var list = [
 "cy,welsh",
 "da,danish",
 "de,german",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"de-de,german (germany)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
 "dsb,lower sorbian",
 "dv,divehi",
 "dz,dzongkha",
 "ee,ewe",
 "el,greek",
 "en,english",
+"en-au,english (australia)",
+"en-be,english (belize)",
+"en-ca,english (canada)",
+"en-ie,english (ireland)",
+"en-jm,english (jamaica)",
+"en-nz,english (new zealand)",
+"en-ph,english (philippines)",
+"en-za,english (south africa)",
+"en-tt,english (trinidad and tobago)",
+"en-gb,english (united kingdom)",
+"en-us,english (united states)",
+"en-zw,english (zimbabwe)",
 "eo,esperanto",
 "es,spanish",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-es,spanish (spain)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-py,spanish (paraguay)",
+"es-pe,spanish (peru)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
 "et,estonian",
 "eu,basque",
 "fa,persian",
+"fa-ir,persian (iran)",
 "ff,fulah",
 "fi,finnish",
+"fil,filipino",
 "fj,fijian",
 "fo,faroese",
 "fr,french",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-fr,french (france)",
+"fr-lu,french (luxembourg)",
+"fr-mc,french (monaco)",
+"fr-ch,french (switzerland)",
 "fur,friulian",
 "fy,frisian",
 "ga,irish",
@@ -153,6 +215,7 @@ var list = [
 "io,ido",
 "is,icelandic",
 "it,italian",
+"it-ch,italian (switzerland)",
 "iu,inuktitut",
 "ja,japanese",
 "jv,javanese",
@@ -166,6 +229,8 @@ var list = [
 "km,khmer",
 "kn,kannada",
 "ko,korean",
+"ko-kp,korean (north korea)",
+"ko-kr,korean (south korea)",
 "kok,konkani",
 "kr,kanuri",
 "ks,kashmiri",
@@ -185,12 +250,13 @@ var list = [
 "lu,luba-katanga",
 "lv,latvian",
 "mai,maithili",
-"meh,sw tlaxiaco mixtec",
+"meh,southwestern tlaxiaco mixtec",
 "mg,malagasy",
 "mh,marshallese",
 "mi,maori",
 "mix,mixtepec mixtec",
 "mk,macedonian",
+"mk-mk,macedonian (north macedonia)",
 "ml,malayalam",
 "mn,mongolian",
 "mr,marathi",
@@ -203,6 +269,7 @@ var list = [
 "ne,nepali",
 "ng,ndonga",
 "nl,dutch",
+"nl-be,dutch (belgium)",
 "nn,norwegian nynorsk",
 "no,norwegian",
 "nr,ndebele south",
@@ -215,15 +282,22 @@ var list = [
 "or,odia",
 "os,ossetian",
 "pa,punjabi",
+"pa-in,punjabi (india)",
+"pa-pk,punjabi (pakistan)",
 "pi,pali",
 "pl,polish",
 "ps,pashto",
 "pt,portuguese",
+"pt-br,portuguese (brazil)",
+"pt-pt,portuguese (portugal)",
 "qu,quechua",
 "rm,rhaeto-romanic",
 "rn,kirundi",
 "ro,romanian",
+"ro-md,romanian (moldova)",
+"ro-ro,romanian (romania)",
 "ru,russian",
+"ru-md,russian (moldova)",
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sat,santali", // 1731528
@@ -239,12 +313,15 @@ var list = [
 "sn,shona",
 "so,somali",
 "son,songhay",
+"son-ml,songhay (mali)",
 "sq,albanian",
 "sr,serbian",
 "ss,siswati",
 "st,sotho southern",
 "su,sundanese",
 "sv,swedish",
+"sv-fi,swedish (finland)",
+"sv-se,swedish (sweden)",
 "sw,swahili",
 "szl,silesian", // 1691695
 "ta,tamil",
@@ -280,12 +357,12 @@ var list = [
 "za,zhuang",
 "zam,miahuatlán zapotec",
 "zh,chinese",
-"zh-cn,chinese china",
-"zh-Hans,chinese simple",
-"zh-Hant,chinese traditional",
-"zh-hk,chinese hong kong",
-"zh-sg,chinese singapore",
-"zh-tw,chinese taiwan",
+"zh-cn,chinese (china)",
+"zh-Hans,chinese (simple)",
+"zh-Hant,chinese (traditional)",
+"zh-hk,chinese (hong kong)",
+"zh-sg,chinese (singapore)",
+"zh-tw,chinese (taiwan)",
 "zu,zulu",
 ]
 
@@ -429,13 +506,6 @@ function legend() {
 				aCanonical.push(code +": "+ e.name)
 			}
 		}
-		// testing
-		//console.log(sha1(aCanonical.join()))
-		//console.log(aCanonical.join("\n"))
-		// FF60-69 : f0a110f5d84c34f13bc8a255d5cb8e5efb446a43 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
-		// FF70-90 : 38b9f79f5661b68285bfc552609da913d0969567 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
-		// FF91+   : 45a1ca5e49e32da595ce045e2378da23b8165774 : bh=bho, hye=hy,  no=no, tl=fil, tw=ak
-		// blink   : cfc37d7e331d37aef49539d54187c9fa4566661a : bh=bh,  hye=hy,  no=no, tl=fil, tw=tw
 	}
 	// output
 	useSupportedOnly = dom.supported.checked
@@ -516,10 +586,10 @@ function compare() {
 			for (let i = 0 ; i < list.length; i++) {
 				let control = valueA.localeCompare(valueB, "en-US")
 				let code = list[i].split(",")[0]
-				let name = list[i].split(",")[1]
+				let name = list[i].split(",")[1].trim()
 				let test = valueA.localeCompare(valueB, code)
 				if (control !== test) {
-					output.push(s12 + code.padStart(7) + sc +": "+ name)
+					output.push(s12 + code.padStart(12) + sc +": "+ name)
 				}
 			}
 			if (output.length == 1) {
@@ -584,7 +654,7 @@ function collator() {
 
 			// set control
 			chars = chars.sort(Intl.Collator("en").compare)
-			let control = mini_sha1(chars.join())
+			let control = mini(chars)
 			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
 				+ s12 +"   hash: "+ sc + control + s12 +" [en]"+ sc +"<br>"
 			output.push(strItem)
@@ -596,6 +666,8 @@ function collator() {
 			let diffs = [],
 				legendnew = [],
 				codes = []
+			let oTempData = {}
+
 			for (let i = 0 ; i < list.length; i++) {
 				// important: reset to original order
 				chars.sort()
@@ -606,81 +678,92 @@ function collator() {
 					// ignore unsupported
 				} else {
 					chars.sort(Intl.Collator(code).compare)
-					let test = mini_sha1(chars.join())
-					if (test == control) {
+					let hash = mini(chars)
+					if (hash == control) {
 						legendnew.push(code.padStart(7) +": "+ name)
 					} else {
 						codes.push(code)
 						legendnew.push(sg + code.padStart(7) +": "+ name + sc)
-						diffs.push(test +":"+ code +" ("+ name +")")
+						diffs.push(hash +":"+ code +":"+ name)
+						if (oTempData[hash] == undefined) {oTempData[hash] = []}
+						oTempData[hash].push(code +" "+ name)
 					}
 				}
 			}
+
 			// we have diffs
+			// sort by hash+locale so we can group hashes
+			diffs.sort()
 			if (diffs.length) {
 				// output colored legend
 				let header = s4 +"   LEGEND ["+ (useSupportedOnly ? aSupported.length +" supported" : aLocales.length) +"]"+ sc +"<br><br>"
 				dom.legend.innerHTML = header + legendnew.join("<br>")
-
-				// get one line per hash
-				diffs.sort()
-				let tmpH = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
-				let newArr = [], newArrPretty = []
+				let tmpH = "", tmpC = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
+				let newArr = []
 				for (let i = 0 ; i < diffs.length; i++) {
 					// get current item
 					tmpStr = diffs[i]
-					tmpH = tmpStr.substring(0,40) // first 40 chars = mini_sha1 hash
-					tmpL = tmpStr.substring(41, tmpStr.length) // skip colon and get the locale
-					locales += sg + tmpL.split("(")[0] + sc +"("+ tmpL.split("(")[1] +" "
+					tmpH = tmpStr.split(":")[0] // hash
+					tmpC = tmpStr.split(":")[1] // code
+					tmpL = tmpStr.split(":")[2] // locale name (assuming no more colons)
+					locales += sg + tmpC + sc +" "+ tmpL +" " // color up code
 					// grab next item
 					if (i < diffs.length - 1) {
-						nxtH = diffs[(i+1)].substring(0,40)
+						nxtH = diffs[(i+1)].split(":")[0]
 					} else {
 						nxtH = "end"
 					}
 					// build new item
 					if (nxtH !== tmpH) {
-						locales = locales.slice(0, -1)
-						newArr.push(locales +":"+ tmpH)
+						newArr.push(locales.trim() +":"+ tmpH)
 						locales = "" // reset
 					}
 				}
+
 				// sort newArr (i.e order by first locale)
 				newArr.sort()
-				newArrPretty.sort()
-				let localesHash = [],
-					lineItems = []
+				let lineItems = []
 				tmpH = "", tmpL = "", tmpStr = ""
 				let len = 0
 				// newArr
 				for (let i = 0 ; i < newArr.length; i++) {
 					tmpStr = newArr[i]
 					len = tmpStr.length
-					tmpH = tmpStr.substring(len-40,len)
-					tmpL = tmpStr.substring(0,len-41)
+					tmpL = tmpStr.split(":")[0]
+					tmpH = tmpStr.split(":")[1]
 					tmpStr = s12 + (i + 1).toString().padStart(3) +": "+ sc
 					// counter then hash then locales
 					lineItems.push (tmpStr + tmpH +"<br><ul><li>"+ tmpL +"</li></ul>")
-					// cleanup tring for localesHash array
-					tmpL = tmpL.replace(/\<span class='good'>/g, "")
-					tmpL = tmpL.replace(/\<\/span>/g, "")
-					localesHash.push(tmpL)
 				}
+
 				// results output
-				localesHash = mini_sha1(localesHash.join())
 				strItem = s12 +"  stats: "+ sc
 					+ sg + newArr.length +" unique"
 					+ sc +" in "+ sg + codes.length
 					+ (useSupportedOnly ? sc+ " of "+ sg + aSupported.length +" supported" + sc: sc)
-				output.push(strItem)
+				output.push(strItem +"<br>")
 
-				let ff = ""
-				if (localesHash == "21cbe4c4e47404815d31e64a619ec08d540cf5cd") {ff = "70+" // hye, no
-				} else if (localesHash == "f9f5d35a8c46ba1b813832e8cb37b9e03ab05a3f") {ff = "68-69" // zh-hk, zh-sg changed
-				} else if (localesHash == "51441ad32be68f5f37a8c15f738a88b480e4e678") {ff = "65-67" // ku,tk
-				} else if (localesHash == "8e779fd9464269b349ced64c90d9e3d3a71e9df6") {ff = "64 or lower"
+				// locales hash
+				let aLocaleGroups = []
+				for (const k of Object.keys(oTempData)) {
+					aLocaleGroups.push(oTempData[k])
 				}
-				strItem = s12 +"locales: "+ sc + localesHash + (ff == "" ? "" : s16 +" [FF"+ ff + "]"+ sc) +"<br>"
+				aLocaleGroups.sort()
+				let localesHash = mini(aLocaleGroups)
+				
+				let ff = ""
+				let charHash = mini(chars.sort())
+				// don't notate unless it's our own preset
+				if (isFF && charHash == "5a96db28") {
+					if (localesHash == "a95ad493") {ff = "70+"
+					} else if (localesHash == "fb2f3eef") {ff = "68-69"
+					} else if (localesHash == "68b3ae15") {ff = "65-67"
+					} else if (localesHash == "f6c29806") {ff = "59-64"
+					} else if (localesHash == "747c936b") {ff = "58 or lower"
+					} else {ff = zNEW}
+					if (ff !== zNEW) {ff = s16 +" [FF"+ ff + "]"+ sc}
+				}
+				strItem = s12 +"locales: "+ sc + localesHash + ff +"<br>"
 				output.push(strItem)
 
 				// details
@@ -701,7 +784,12 @@ function collator() {
 dom.supported.checked = true
 legend()
 check_example()
-collator()
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	collator()
+})
 
 </script>
 </body>
