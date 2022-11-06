@@ -68,6 +68,22 @@ var list = [
 "am,amharic",
 "an,aragonese",
 "ar,arabic",
+"ar-bh, arabic (bahrain)",
+"ar-dz, arabic (algeria)",
+"ar-eg, arabic (egypt)",
+"ar-iq, arabic (iran)",
+"ar-jo, arabic (jordan)",
+"ar-kw, arabic (kuwait)",
+"ar-lb, arabic (lenanon)",
+"ar-ly, arabic (lybia)",
+"ar-mo, arabic (morocco)",
+"ar-om, arabic (oman)",
+"ar-qa, arabic (qatar)",
+"ar-sa, arabic (saudi arabia)",
+"ar-sy, arabic (syria)",
+"ar-tn, arabic (tunisia)",
+"ar-ae, arabic (uae)",
+"ar-ye, arabic (yemen)",
 "as,assamese",
 "ast,asturian",
 "av,avaric",
@@ -77,6 +93,7 @@ var list = [
 "be,belarusian",
 "bg,bulgarian",
 "bh,bihari",
+"bho,bhojpuri",
 "bi,bislama",
 "bm,bambara",
 "bn,bengali",
@@ -84,6 +101,7 @@ var list = [
 "br,breton",
 "bs,bosnian",
 "ca,catalan",
+"ca-valencia, catalan (valencia)",
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
@@ -98,22 +116,66 @@ var list = [
 "cy,welsh",
 "da,danish",
 "de,german",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"de-de,german (germany)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
 "dsb,lower sorbian",
 "dv,divehi",
 "dz,dzongkha",
 "ee,ewe",
 "el,greek",
 "en,english",
+"en-au,english (australia)",
+"en-be,english (belize)",
+"en-ca,english (canada)",
+"en-ie,english (ireland)",
+"en-jm,english (jamaica)",
+"en-nz,english (new zealand)",
+"en-ph,english (philippines)",
+"en-za,english (south africa)",
+"en-tt,english (trinidad and tobago)",
+"en-gb,english (united kingdom)",
+"en-us,english (united states)",
+"en-zw,english (zimbabwe)",
 "eo,esperanto",
 "es,spanish",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-es,spanish (spain)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-py,spanish (paraguay)",
+"es-pe,spanish (peru)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
 "et,estonian",
 "eu,basque",
 "fa,persian",
+"fa-ir,persian (iran)",
 "ff,fulah",
 "fi,finnish",
+"fil,filipino",
 "fj,fijian",
 "fo,faroese",
 "fr,french",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-fr,french (france)",
+"fr-lu,french (luxembourg)",
+"fr-mc,french (monaco)",
+"fr-ch,french (switzerland)",
 "fur,friulian",
 "fy,frisian",
 "ga,irish",
@@ -144,6 +206,7 @@ var list = [
 "io,ido",
 "is,icelandic",
 "it,italian",
+"it-ch,italian (switzerland)",
 "iu,inuktitut",
 "ja,japanese",
 "jv,javanese",
@@ -157,6 +220,8 @@ var list = [
 "km,khmer",
 "kn,kannada",
 "ko,korean",
+"ko-kp,korean (north korea)",
+"ko-kr,korean (south korea)",
 "kok,konkani",
 "kr,kanuri",
 "ks,kashmiri",
@@ -176,12 +241,13 @@ var list = [
 "lu,luba-katanga",
 "lv,latvian",
 "mai,maithili",
-"meh,sw tlaxiaco mixtec",
+"meh,southwestern tlaxiaco mixtec",
 "mg,malagasy",
 "mh,marshallese",
 "mi,maori",
 "mix,mixtepec mixtec",
 "mk,macedonian",
+"mk-mk,macedonian (north macedonia)",
 "ml,malayalam",
 "mn,mongolian",
 "mr,marathi",
@@ -194,6 +260,7 @@ var list = [
 "ne,nepali",
 "ng,ndonga",
 "nl,dutch",
+"nl-be,dutch (belgium)",
 "nn,norwegian nynorsk",
 "no,norwegian",
 "nr,ndebele south",
@@ -206,15 +273,22 @@ var list = [
 "or,odia",
 "os,ossetian",
 "pa,punjabi",
+"pa-in,punjabi (india)",
+"pa-pk,punjabi (pakistan)",
 "pi,pali",
 "pl,polish",
 "ps,pashto",
 "pt,portuguese",
+"pt-br,portuguese (brazil)",
+"pt-pt,portuguese (portugal)",
 "qu,quechua",
 "rm,rhaeto-romanic",
 "rn,kirundi",
 "ro,romanian",
+"ro-md,romanian (moldova)",
+"ro-ro,romanian (romania)",
 "ru,russian",
+"ru-md,russian (moldova)",
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sat,santali", // 1731528
@@ -230,12 +304,15 @@ var list = [
 "sn,shona",
 "so,somali",
 "son,songhay",
+"son-ml,songhay (mali)",
 "sq,albanian",
 "sr,serbian",
 "ss,siswati",
 "st,sotho southern",
 "su,sundanese",
 "sv,swedish",
+"sv-fi,swedish (finland)",
+"sv-se,swedish (sweden)",
 "sw,swahili",
 "szl,silesian", // 1691695
 "ta,tamil",
@@ -271,12 +348,12 @@ var list = [
 "za,zhuang",
 "zam,miahuatlán zapotec",
 "zh,chinese",
-"zh-cn,chinese china",
-"zh-Hans,chinese simple",
-"zh-Hant,chinese traditional",
-"zh-hk,chinese hong kong",
-"zh-sg,chinese singapore",
-"zh-tw,chinese taiwan",
+"zh-cn,chinese (china)",
+"zh-Hans,chinese (simple)",
+"zh-Hant,chinese (traditional)",
+"zh-hk,chinese (hong kong)",
+"zh-sg,chinese (singapore)",
+"zh-tw,chinese (taiwan)",
 "zu,zulu",
 ]
 
@@ -333,26 +410,31 @@ function run_main(method, isLoopy) {
 		function getNotation(hash, method) {
 			let notation = ""
 			if (method == "C") {
-				if (hash == "3b56232ec292c89df7b091695691ec80337db3bf") {notation = " [FF91+]"
-				} else if (hash == "be17178a7587f2dc7217725b5dcc691368f1995b") {notation = " [FF78-90]"
-				} else if (hash == "fe1701c2a7b516e80a2416019a703eadec5aeb87") {notation = " [FF70-77]"
-				} else if (hash == "a1c42e941d133cb48e589afdd12fcdfcb4fff602") {notation = " [FF65-69]"
-				} else if (hash == "5aae08c4b2ec7e5ff4189632ae3fc197c8cd2091") {notation = " [FF59-64]"
-				} else if (hash == "83a4e7f35f712debc3d29a18e9ba5f9d6dc81f85") {notation = " [FF52-58]"
+				if (hash == "7ceb94a6") {notation = " [FF91+]"
+				} else if (hash == "07163e7d") {notation = " [FF78-90]" // 186
+				} else if (hash == "7c5535e9") {notation = " [FF70-77]" // 185
+				} else if (hash == "0822ee11") {notation = " [FF65-69]" // 182
+				} else if (hash == "7d1d5e24") {notation = " [FF59-64]" // 179
+				} else if (hash == "668af03e") {notation = " [FF52-58]" // 178
 				} else if (isFF) { notation = zNEW
 				}
 			} else {
-				if (hash == "01680dccae242ab9e4b430250bfab84c9c85125e") {notation = " [FF96+]" // 1738422: 152: sc
-				} else if (hash == "237ef6664a180247df91e157dc31ce045263ba10") {notation = " [FF91-95]" // 1714933: 151: no (instead of no->nb), sa
-				} else if (hash == "c4b53bd61a62888b78b368b72fc4d021c09409da") { // 150: mai, sat, su
-				 if (method == "DN") {notation = " [FF86-90]"} else {notation = " [FF78-90]"}
-				} else if (hash == "8234b8227c6bb94ceaff31c90e222ab715b9ee90") {notation = " [FF70-77]" // 147: hye->hy, no->nb, tl->fil, tw->ak
-				} else if (hash == "375f1624e9581914cdc880536568ffdfdc4647a1") {notation = " [FF65-69]" // 143: ia, jv, ku, mi, sd, tk, xh
-				} else if (hash == "2036ea21e7c0f6550a7af9949af89a8bd613bcc8") {notation = " [FF59-64]" // 136: tg, tt, wo
-				} else if (hash == "d5fbd4f53dac40f6af9d0c9efa2ad339db5e3e63") {notation = " [FF52-58]" // 133
+				if (hash == "e73fc2d6") {notation = " [FF96+]" // 152
+				} else if (hash == "a73b6346") {notation = " [FF91-95]" // 
+				} else if (hash == "51ddc587") { // 225
+				 if (method == "DN") {
+						notation = " [FF86-90]"
+				} else {
+					notation = " [FF78-90]"
+				}
+				} else if (hash == "c565d90c") {notation = " [FF70-77]" // 222
+				} else if (hash == "01f03482") {notation = " [FF65-69]" // 218
+				} else if (hash == "0d5e02cc") {notation = " [FF59-64]" // 211
+				} else if (hash == "8fd5b0f1") {notation = " [FF52-58]" // 208
 				} else if (isFF) { notation = zNEW
 				}
 			}
+			if (notation !== zNEW) notation = s12 + notation + sc
 			return notation
 		}
 		// get data
@@ -403,7 +485,7 @@ function run_main(method, isLoopy) {
 				}
 			}
 			// don't sort or remove any dupes
-			let hash = sha1(data.join())
+			let hash = mini(data.join())
 
 			// dupes
 			all.sort()
