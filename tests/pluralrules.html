@@ -34,14 +34,21 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules</span>
+			<span class="no_color">A proof to confirm the minimum set of numbers to return maximum entropy in Intl.pluralRules.
+			The first test checks all numbers from 0 to 102 inclusive. A second test checks only those numbers the first instance
+			we saw them, per option (cardinal, ordinal). An empty custom test will instead run the minimal example</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
+				<span class="btn4 btn" onClick="clearcustom()">[ clear input ]</span>
 				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [pluralrules]</span>
+				<br><br>
+				<textarea rows="2" placeholder="" style="width: 98%; resize: vertical" id="custom"></textarea>
 				<br><br><hr>
+				<br><span class="spaces" id="numbers2"></span>
+				<br><span class="spaces" id="results2"></span>
 				<br><span class="spaces" id="numbers1"></span>
 				<br><span class="spaces" id="results1"></span>
 				<br><span class="spaces" id="numbers0"></span>
@@ -63,6 +70,22 @@ var list = [
 "am,amharic",
 "an,aragonese",
 "ar,arabic",
+"ar-bh, arabic (bahrain)",
+"ar-dz, arabic (algeria)",
+"ar-eg, arabic (egypt)",
+"ar-iq, arabic (iran)",
+"ar-jo, arabic (jordan)",
+"ar-kw, arabic (kuwait)",
+"ar-lb, arabic (lenanon)",
+"ar-ly, arabic (lybia)",
+"ar-mo, arabic (morocco)",
+"ar-om, arabic (oman)",
+"ar-qa, arabic (qatar)",
+"ar-sa, arabic (saudi arabia)",
+"ar-sy, arabic (syria)",
+"ar-tn, arabic (tunisia)",
+"ar-ae, arabic (uae)",
+"ar-ye, arabic (yemen)",
 "as,assamese",
 "ast,asturian",
 "av,avaric",
@@ -72,6 +95,7 @@ var list = [
 "be,belarusian",
 "bg,bulgarian",
 "bh,bihari",
+"bho,bhojpuri",
 "bi,bislama",
 "bm,bambara",
 "bn,bengali",
@@ -79,6 +103,7 @@ var list = [
 "br,breton",
 "bs,bosnian",
 "ca,catalan",
+"ca-valencia, catalan (valencia)",
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
@@ -93,22 +118,66 @@ var list = [
 "cy,welsh",
 "da,danish",
 "de,german",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"de-de,german (germany)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
 "dsb,lower sorbian",
 "dv,divehi",
 "dz,dzongkha",
 "ee,ewe",
 "el,greek",
 "en,english",
+"en-au,english (australia)",
+"en-be,english (belize)",
+"en-ca,english (canada)",
+"en-ie,english (ireland)",
+"en-jm,english (jamaica)",
+"en-nz,english (new zealand)",
+"en-ph,english (philippines)",
+"en-za,english (south africa)",
+"en-tt,english (trinidad and tobago)",
+"en-gb,english (united kingdom)",
+"en-us,english (united states)",
+"en-zw,english (zimbabwe)",
 "eo,esperanto",
 "es,spanish",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-es,spanish (spain)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-py,spanish (paraguay)",
+"es-pe,spanish (peru)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
 "et,estonian",
 "eu,basque",
 "fa,persian",
+"fa-ir,persian (iran)",
 "ff,fulah",
 "fi,finnish",
+"fil,filipino",
 "fj,fijian",
 "fo,faroese",
 "fr,french",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-fr,french (france)",
+"fr-lu,french (luxembourg)",
+"fr-mc,french (monaco)",
+"fr-ch,french (switzerland)",
 "fur,friulian",
 "fy,frisian",
 "ga,irish",
@@ -139,6 +208,7 @@ var list = [
 "io,ido",
 "is,icelandic",
 "it,italian",
+"it-ch,italian (switzerland)",
 "iu,inuktitut",
 "ja,japanese",
 "jv,javanese",
@@ -152,6 +222,8 @@ var list = [
 "km,khmer",
 "kn,kannada",
 "ko,korean",
+"ko-kp,korean (north korea)",
+"ko-kr,korean (south korea)",
 "kok,konkani",
 "kr,kanuri",
 "ks,kashmiri",
@@ -171,12 +243,13 @@ var list = [
 "lu,luba-katanga",
 "lv,latvian",
 "mai,maithili",
-"meh,sw tlaxiaco mixtec",
+"meh,southwestern tlaxiaco mixtec",
 "mg,malagasy",
 "mh,marshallese",
 "mi,maori",
 "mix,mixtepec mixtec",
 "mk,macedonian",
+"mk-mk,macedonian (north macedonia)",
 "ml,malayalam",
 "mn,mongolian",
 "mr,marathi",
@@ -189,6 +262,7 @@ var list = [
 "ne,nepali",
 "ng,ndonga",
 "nl,dutch",
+"nl-be,dutch (belgium)",
 "nn,norwegian nynorsk",
 "no,norwegian",
 "nr,ndebele south",
@@ -201,15 +275,22 @@ var list = [
 "or,odia",
 "os,ossetian",
 "pa,punjabi",
+"pa-in,punjabi (india)",
+"pa-pk,punjabi (pakistan)",
 "pi,pali",
 "pl,polish",
 "ps,pashto",
 "pt,portuguese",
+"pt-br,portuguese (brazil)",
+"pt-pt,portuguese (portugal)",
 "qu,quechua",
 "rm,rhaeto-romanic",
 "rn,kirundi",
 "ro,romanian",
+"ro-md,romanian (moldova)",
+"ro-ro,romanian (romania)",
 "ru,russian",
+"ru-md,russian (moldova)",
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sat,santali", // 1731528
@@ -225,12 +306,15 @@ var list = [
 "sn,shona",
 "so,somali",
 "son,songhay",
+"son-ml,songhay (mali)",
 "sq,albanian",
 "sr,serbian",
 "ss,siswati",
 "st,sotho southern",
 "su,sundanese",
 "sv,swedish",
+"sv-fi,swedish (finland)",
+"sv-se,swedish (sweden)",
 "sw,swahili",
 "szl,silesian", // 1691695
 "ta,tamil",
@@ -266,26 +350,25 @@ var list = [
 "za,zhuang",
 "zam,miahuatlán zapotec",
 "zh,chinese",
-"zh-cn,chinese china",
-"zh-Hans,chinese simple",
-"zh-Hant,chinese traditional",
-"zh-hk,chinese hong kong",
-"zh-sg,chinese singapore",
-"zh-tw,chinese taiwan",
+"zh-cn,chinese (china)",
+"zh-Hans,chinese (simple)",
+"zh-Hant,chinese (traditional)",
+"zh-hk,chinese (hong kong)",
+"zh-sg,chinese (singapore)",
+"zh-tw,chinese (taiwan)",
 "zu,zulu",
 ]
 
 var aLegend = [],
 	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
-	aListOne = [], // 1st run
-	aListTwo = [], // 2nd run
-	main_buckets = [],
+	aSupported = []
+
+let aFirstCardinal = [],
+	aFirstOrdinal = []
+
+let main_buckets = [],
 	useSupportedOnly = true,
-	isDebug = false,
-	debug0 = [],
-	debug1 = [],
 	perf = ""
 
 s4 = s4.trim()
@@ -294,6 +377,10 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+
+function clearcustom() {
+	dom.custom.value = ""
+}
 
 function legend() {
 	// builds locales array and outputs a legend
@@ -326,243 +413,309 @@ function run_test(type) {
 
 	// vars
 	let t0 = performance.now()
-	let test_array = [], // numbers used
-		test_all = [], // result hash + locale code + result
-		go = true,
-		perfname = "all",
+	let aNosCardinal = [], // numbers used
+		aNosOrdinal = []
+
+	let test_all = [], // result hash + locale code + result
+		blinkStr = "",
 		str = ""
 
 	let	element = document.getElementById("results" + type)
 	let	elperf = document.getElementById("perf" + type)
+	let aTemp = []
 
 	// main test
 	if (type == "0") {
-		// reset
-		aListOne = []
-		aListTwo = []
+		aTemp = []
+		for (let i=0; i < 101; i++) {aTemp.push(i)}
+		aNosCardinal = aTemp
+		aNosOrdinal = aTemp
 		main_buckets = []
-		// build
-		for (let i=0; i < 101; i++) {aListOne.push(i)}
-		// temp smaller tests
-		//aListOne = [0,1,2,3,4,6,7,11,20,21,100]
-		//aListOne = [1,2,3,4,5,25,134,910293019,12,1412,15,2931,31231,3123,13231,91,0,231,33,728,2,291,24,479,291,778,919,93]
-		//aLocales = ['ar','br','bs','cs','cy','en','fr','ga','gd','gv','he','is','kw','lt','lv','mt','pl','ro','ru','sl','zh',]
-		//aLocales = ['ar','bo','bn','dz','en','fa','fi','gd','he','kw','ku','lv','se','sl','ss',]
-		test_array = aListOne
+	}
+	// first changes
+	if (type == "1") {
+		aNosCardinal = aFirstCardinal
+		aNosOrdinal = aFirstOrdinal
+		if (isEngine == "blink") {
+			if (!aNosOrdinal.includes(81)) {
+				aNosOrdinal.push(81) // chromium to keep lij unique from it,sc in ordinal (bug?)
+				blinkStr = " <sup>1</sup> <br><br><sup>1</sup> number 81 added to ordinal for blink for lij"
+			}
+		}
+	}
+	// custom
+	if (type == "2") {
+		let value = dom.custom.value
+		let go = false
+		value = value.trim()
+
+		if (value == "") {
+			// out minimal example
+			aNosCardinal = [0, 1, 2, 3, 7, 21, 100] // redundant: 4, 6, 11, 20
+			aNosOrdinal = [1, 2, 3, 5, 8, 10] // redundant: 0, 4, 6, 7, 9, 21
+			// display
+			dom.custom.value = "[" + aNosCardinal.join(", ") +"]"
+				+ "\n[" + aNosOrdinal.join(", ") +"]"
+		} else {
+			aNosCardinal = []
+			aNosOrdinal = []
+			// cardinal
+			let start1 = value.indexOf("["),
+				start2 = value.indexOf("]")
+			let str1 = value.slice(start1+1, start2)
+			aTemp = []
+			aTemp = str1.split(",")
+			aTemp.forEach(function(item) {
+				item = item.trim()
+				if (item !== "") {
+					item = item * 1
+					if (Number.isInteger(item)) {
+						aNosCardinal.push(item)
+					}
+				}
+			})
+			// ordinal
+			value = value.slice(start2+1, value.length)
+			start1 = value.indexOf("["),
+				start2 = value.indexOf("]")
+			let str2 = value.slice(start1+1, start2)
+			aTemp = []
+			aTemp = str2.split(",")
+			aTemp.forEach(function(item) {
+				item = item.trim()
+				if (item !== "") {
+					item = item * 1
+					if (Number.isInteger(item)) {
+						aNosOrdinal.push(item)
+					}
+				}
+			})
+			if (aNosCardinal.length || aNosOrdinal.length) {go = true}
+		}
+
+		if (go) {
+			// dedupe
+			aNosCardinal = aNosCardinal.filter(function(item, position) {return aNosCardinal.indexOf(item) === position})
+			aNosOrdinal = aNosOrdinal.filter(function(item, position) {return aNosOrdinal.indexOf(item) === position})
+			// sort
+			aNosCardinal.sort((a,b) => a-b)
+			aNosOrdinal.sort((a,b) => a-b)
+
+		}
+	}
+	// always sort the arrays
+	aNosCardinal.sort((a,b) => a-b)
+	aNosOrdinal.sort((a,b) => a-b)
+
+	// select locales to loop
+	useSupportedOnly = dom.supported.checked
+	let loop = useSupportedOnly ? aSupported : aLocales
+
+	if (aNosCardinal.length == 0 && aNosOrdinal == 0) {
+		let header = "CUSTOM TEST"
+		if (type == "1") {header = "<hr><br>FIRST CHANGES ONLY"}
+		document.getElementById("numbers" + type).innerHTML = s4 + header + sc
+		element.innerHTML = "<br>there are no numbers to check<br>"
+		return
 	}
 
-	// subsequent tests
-	if (aListOne.length == 0) {
-		go = false
-		dom.numbers1.innerHTML = sb +"ABORTED: "+ sc + "run the main test first"
+	for (let j=0; j < loop.length; j++) {
+		// reset cardinal
+		let prevC = "", currentC = "", tmp_resultC = []
+		let c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
+		// reset ordinal
+		let prevO = "", currentO = "", tmp_resultO = []
+		let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
+
+		let code = loop[j]
+		let intlPRcardinal = new Intl.PluralRules(code, {type:"cardinal"})
+		let intlPRordinal = new Intl.PluralRules(code, {type:"ordinal"})
+
+		// cardinal
+		for (let k=0; k < aNosCardinal.length; k++) {
+			let n = aNosCardinal[k]
+			try {
+				currentC = intlPRcardinal.select(n)
+				if (type == "0") {
+					// catch first change only: not EVERY change
+					if (c0 && currentC == "zero") {c0 = false; aFirstCardinal.push(n)}
+					if (c1 && currentC == "one") {c1 = false; aFirstCardinal.push(n)}
+					if (c2 && currentC == "two") {c2 = false; aFirstCardinal.push(n)}
+					if (c3 && currentC == "few") {c3 = false; aFirstCardinal.push(n)}
+					if (c4 && currentC == "many") {c4 = false; aFirstCardinal.push(n)}
+					if (c5 && currentC == "other") {c5 = false; aFirstCardinal.push(n)}
+				}
+			} catch(e) {
+				currentC = "error"
+			}
+			// record all changes
+			if (prevC !== currentC) {
+				tmp_resultC.push(n +": "+ currentC)
+			}
+			prevC = currentC
+		}
+		// ordinal
+		for (let k=0; k < aNosOrdinal.length; k++) {
+			let n = aNosOrdinal[k]
+			try {
+				currentO = intlPRordinal.select(n)
+				if (type == "0") {
+					// catch first change only: not EVERY change
+					if (o0 && currentO == "zero") {o0 = false; aFirstOrdinal.push(n)}
+					if (o1 && currentO == "one") {o1 = false; aFirstOrdinal.push(n)}
+					if (o2 && currentO == "two") {o2 = false; aFirstOrdinal.push(n)}
+					if (o3 && currentO == "few") {o3 = false; aFirstOrdinal.push(n)}
+					if (o4 && currentO == "many") {o4 = false; aFirstOrdinal.push(n)}
+					if (o5 && currentO == "other") {o5 = false; aFirstOrdinal.push(n)}
+				}
+			} catch(e) {
+				currentO = "error"
+			}
+			// record all changes
+			if (prevO !== currentO) {
+				tmp_resultO.push(n +": "+ currentO)
+			}
+			prevO = currentO
+		}
+		// array: hash-combined + code + resultC + resultO
+		let hashC = mini(tmp_resultC)
+		let hashO = mini(tmp_resultO)
+		let hashCombined = mini(hashC + hashO)
+		let strC = tmp_resultC.join(", ")
+		let strO = tmp_resultO.join(", ")
+		test_all.push(hashCombined +"~"+ code +"~"+ strC +"~"+ strO)
 	}
 
-	if (go) {
-		// small test
-		if (type == "1") {
-			test_array = aListTwo
-			if (isEngine == "blink") {
-				test_array.push(81) // chromium to keep lij unique from it,sc in ordinal (bug?)
-			}
-			perfname = "first changes only"
-		}
-		// always sort the array
-		test_array.sort((a,b) => a-b)
+	// clean up first changes
+	if (type == "0") {
+		aFirstCardinal = aFirstCardinal.filter(function(item, position) {return aFirstCardinal.indexOf(item) === position})
+		aFirstCardinal.sort((a,b) => a-b)
+		aFirstOrdinal = aFirstOrdinal.filter(function(item, position) {return aFirstOrdinal.indexOf(item) === position})
+		aFirstOrdinal.sort((a,b) => a-b)
+	}
 
-		useSupportedOnly = dom.supported.checked
-		let loop = useSupportedOnly ? aSupported : aLocales
+	if (type == "1" || type == "2") {
+		let typename = (type == "1" ? "first changes only" : "custom test")
+		let target = document.getElementById("numbers"+ type)
+		target.innerHTML = (type == "1" ? "<hr><br>" : "")
+			+ s4 + typename.toUpperCase() + sc
+			+ "<br><br>"+ s4 +"["+ aNosCardinal.length +"]" + sc
+			+ s12 + " cardinal: "+ sc +"["+ aNosCardinal.join(", ")
+			+ "] <br>"+ s4 +"["+ aNosOrdinal.length +"]" + sc
+			+ s12 + "  ordinal: "+ sc +"["+ aNosOrdinal.join(", ") +"]"
+			+ blinkStr
+	}
 
-		// for each locale
-		for (let j=0; j < loop.length; j++) {
-			// reset cardinal
-			let prevC = "", currentC = "", tmp_resultC = []
-			let c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
-			// reset ordinal
-			let prevO = "", currentO = "", tmp_resultO = []
-			let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
+	// perf
+	if (type == "0") {
+		perf = "all: "+ Math.round(performance.now()-t0)
+	} else if (type == "1") {
+		perf += " | 1st: "+ Math.round(performance.now()-t0)
+	} else {
+		dom.perf.innerHTML = perf +" | test: "+ Math.round(performance.now()-t0) +" ms"
+	}
 
-			let code = loop[j]
-			let intlPRcardinal = new Intl.PluralRules(code, {type:"cardinal"})
-			let intlPRordinal = new Intl.PluralRules(code, {type:"ordinal"})
-			// aListOne
-			for (let k=0; k < test_array.length; k++) {
-				let n = test_array[k]
-				// cardinal
-				try {
-					currentC = intlPRcardinal.select(n)
-					if (type == "0") {
-						// catch first
-						if (c0 && currentC == "zero") {c0 = false; aListTwo.push(n)}
-						if (c1 && currentC == "one") {c1 = false; aListTwo.push(n)}
-						if (c2 && currentC == "two") {c2 = false; aListTwo.push(n)}
-						if (c3 && currentC == "few") {c3 = false; aListTwo.push(n)}
-						if (c4 && currentC == "many") {c4 = false; aListTwo.push(n)}
-						if (c5 && currentC == "other") {c5 = false; aListTwo.push(n)}
-					}
-				} catch(e) {
-					currentC = "error"
-				}
-				// record all changes
-				if (prevC !== currentC) {
-					tmp_resultC.push(n +": "+ currentC)
-				}
-				prevC = currentC
-
-				// ordinal
-				try {
-					currentO = intlPRordinal.select(n)
-					if (type == "0") {
-						// catch first
-						if (o0 && currentO == "zero") {o0 = false; aListTwo.push(n)}
-						if (o1 && currentO == "one") {o1 = false; aListTwo.push(n)}
-						if (o2 && currentO == "two") {o2 = false; aListTwo.push(n)}
-						if (o3 && currentO == "few") {o3 = false; aListTwo.push(n)}
-						if (o4 && currentO == "many") {o4 = false; aListTwo.push(n)}
-						if (o5 && currentO == "other") {o5 = false; aListTwo.push(n)}
-					}
-				} catch(e) {
-					currentO = "error"
-				}
-				// record all changes
-				if (prevO !== currentO) {
-					tmp_resultO.push(n +": "+ currentO)
-				}
-				prevO = currentO
-			}
-			// array: hash-combined + code + resultC + resultO
-			let strC = tmp_resultC.join(", ")
-			let hashC = sha1(strC)
-			let strO = tmp_resultO.join(", ")
-			let hashO = sha1(strO)
-			let hashCombined = sha1(hashC + hashO)
-			test_all.push(hashCombined +"~"+ code +"~"+ strC +"~"+ strO)
-
-			if (isDebug) { // example
-				//if (code == "lij" || code == "it" || code == "sc") {
-				if (code == "en") {
-					if (type == "0") {
-						debug0.push(code)
-						debug0.push(hashC +":"+ strC)
-						debug0.push(hashO +":"+ strO)
-					} else {
-						debug1.push(code)
-						debug1.push(hashC +":"+ strC)
-						debug1.push(hashO +":"+ strO)
-					}
-				}
-			}
-		}
-		// set things in main test for small test
-		if (type == "0") {
-			// first changes
-			aListTwo = aListTwo.filter(function(item, position) {return aListTwo.indexOf(item) === position})
-			aListTwo.sort((a,b) => a-b)
-		} else if( type == "1") {
-			let blinkStr = isEngine == "blink" ? " [81 added for blink + lij]" : ""
-			dom.numbers1.innerHTML = s4 + perfname.toUpperCase() +" ["
-				+ aListTwo.length +"]"+ sc + blinkStr +"<br><br>"+ aListTwo.join(", ")
-			if (isDebug) {
-				console.debug("BIG test\n - " + debug0.join("\n - "))
-				console.debug("SMALL test\n - " + debug1.join("\n - "))
-			}
-		}
-		// perf
-		if (type == 0) {
-			perf = "all: "+ Math.round(performance.now()-t0)
+	// sort array & loop: get hash + code + result buckets, and code_total
+	test_all.sort()
+	let bucket_hash = [], bucket_code = [], bucket_resC = [], bucket_resO = []
+	let tmp_code = [], nextHash = "", code_total = 0
+	for (let i=0; i < test_all.length; i++) {
+		let part1 = test_all[i].split("~")[0],
+			part2 = test_all[i].split("~")[1],
+			part3 = test_all[i].split("~")[2],
+			part4 = test_all[i].split("~")[3]
+		// build code string
+		tmp_code.push(part2)
+		// grab next item
+		if (i < test_all.length - 1) {
+			nextHash = test_all[(i+1)].split("~")[0]
 		} else {
-			dom.perf.innerHTML = perf +" | 1st: "+ Math.round(performance.now()-t0) +" ms"
+			nextHash = "end"
 		}
-
-		// sort array & loop: get hash + code + result buckets, and code_total
-		test_all.sort()
-		let bucket_hash = [], bucket_code = [], bucket_resC = [], bucket_resO = []
-		let tmp_code = [], nextHash = "", code_total = 0
-
-		for (let i=0; i < test_all.length; i++) {
-			let part1 = test_all[i].split("~")[0],
-				part2 = test_all[i].split("~")[1],
-				part3 = test_all[i].split("~")[2],
-				part4 = test_all[i].split("~")[3]
-			// build code string
-			tmp_code.push(part2)
-			// grab next item
-			if (i < test_all.length - 1) {
-				nextHash = test_all[(i+1)].split("~")[0]
-			} else {
-				nextHash = "end"
-			}
-			// next hash is diff: write data
-			if (nextHash !== part1) {
-				bucket_hash.push(part1 + s4 +" ["+ tmp_code.length +"]"+ sc)
-				bucket_resC.push(part3)
-				bucket_resO.push(part4)
-				bucket_code.push(tmp_code.join(", "))
-				code_total += tmp_code.length
-				tmp_code = [] // reset tmp_code
-			}
+		// next hash is diff: write data
+		if (nextHash !== part1) {
+			bucket_hash.push(part1 + s4 +" ["+ tmp_code.length +"]"+ sc)
+			bucket_resC.push(part3)
+			bucket_resO.push(part4)
+			bucket_code.push(tmp_code.join(", "))
+			code_total += tmp_code.length
+			tmp_code = [] // reset tmp_code
 		}
+	}
 
-		// main
-		if (type == "0") {
-			// build pretty BEFORE sorting
-			let pretty = []
-			for (let i=0; i < bucket_hash.length; i++) {
-				let part1 = s4 +"hash: "+ sc + bucket_hash[i]
-				let part2 = "<ul><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
-				let part3 = "<li>" + s12 +"ordinal: "+ sc + bucket_resO[i] +"</li>"
-				let part4 = "<li>" + s12 +"locale: "+ sc + bucket_code[i] +"</li></ul>"
-				pretty.push(part1 + part2 + part3 + part4)
-			}
-			// remember main details
-			main_buckets = bucket_code
-			main_buckets.sort()
-			// output
-			str = code_total + (code_total == loop.length ? sg : sb) +" [match]"+ sc
-			str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aListOne.length +"]"+ sc +"<br>"
-				+"<ul><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
-				+"<li>"+ s12 +" locales hash: "+ sc + sha1(main_buckets.join()) +"</li>"
-				+"<li>"+ s12 +" locale check: "+ sc + str +"</li></ul>"
-			dom.numbers0.innerHTML = str
-			element.innerHTML = pretty.join("")
-		} else {
-			// set vars to compare to main
-			bucket_code.sort()
-			let check_count = bucket_code.length
-			let check_hash = sha1(bucket_code.join())
-			let main_hash = sha1(main_buckets.join())
-			// append results
-			let matchbad = sb +" [match]"+ sc, matchgood = sg +" [match]"+ sc
-			str = "<ul><li>" + s12 +"unique hashes:"+ sc
-			str += " "+ check_count + (check_count == main_buckets.length ? matchgood : matchbad)
-			str += "</li><li>"+ s12 +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
-			str += "</li></ul>"
-			element.innerHTML = str
-			if (check_hash !== main_hash) {
-				console.debug("MISMATCH\n" + "101 TEST buckets\n", main_buckets, "SMALL TEST buckets\n", bucket_code)
-			}
+	// main
+	if (type == "0") {
+		// build pretty BEFORE sorting
+		let pretty = []
+		for (let i=0; i < bucket_hash.length; i++) {
+			let part1 = s4 +"hash: "+ sc + bucket_hash[i]
+			let part2 = "<ul><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
+			let part3 = "<li>" + s12 +"ordinal: "+ sc + bucket_resO[i] +"</li>"
+			let part4 = "<li>" + s12 +"locale: "+ sc + bucket_code[i] +"</li></ul>"
+			pretty.push(part1 + part2 + part3 + part4)
+		}
+		// remember main details
+		main_buckets = bucket_code
+		main_buckets.sort()
+		// output
+		str = code_total + (code_total == loop.length ? sg : sb) +" [match]"+ sc
+		str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aNosCardinal.length +"]"+ sc +"<br>"
+			+"<ul><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
+			+"<li>"+ s12 +" locales hash: "+ sc + mini(main_buckets) +"</li>"
+			+"<li>"+ s12 +" locale check: "+ sc + str +"</li></ul>"
+		dom.numbers0.innerHTML = str
+		element.innerHTML = pretty.join("")
+	}
+
+	// first changes
+	if (type == "1" || type == "2") {
+		// set vars to compare to main
+		bucket_code.sort()
+		let check_count = bucket_code.length
+		let check_hash = mini(bucket_code)
+		let main_hash = mini(main_buckets)
+		// append results
+		let matchbad = sb +" [match]"+ sc, matchgood = sg +" [match]"+ sc
+		str = "<ul><li>" + s12 +"unique hashes:"+ sc
+		str += " "+ check_count + (check_count == main_buckets.length ? matchgood : matchbad)
+		str += "</li><li>"+ s12 +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
+		str += "</li></ul>"
+		element.innerHTML = str
+		if (check_hash !== main_hash) {
+			let testName = (type == "1" ? "FIRST CHANGES ONLY": "CUSTOM TEST" )
+			console.debug("MISMATCH\n" + "101 TEST buckets\n", main_buckets, testName +" buckets\n", bucket_code)
 		}
 	}
 }
 
 function run() {
-	//isDebug = true
 	perf = ""
 	dom.perf = ""
-	dom.numbers1 = "calculating..."
+	dom.numbers2 = ""
+	dom.numbers1 = ""
 	dom.numbers0 = ""
+	dom.results2 = ""
 	dom.results1 = ""
 	dom.results0 = ""
 	legend()
 	// delay so users see change and allow paint
 	setTimeout(function() {
 		run_test("0") // main test
-		run_test("1")
+		run_test("1") // 1st changes only
+		run_test("2") // custom
 	}, 1)
 }
 
 dom.supported.checked = true
+dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
+	+ "\n[0, 1, , ,  7  , 21, 100  ]"
+ 	+ "\n[1,2,  3  , 5, 8, 45 ,non integers ignored ]"
 legend()
-get_globals()
+Promise.all([
+	get_globals()
+]).then(function(){
+	run()
+})
 
 </script>
 </body>
