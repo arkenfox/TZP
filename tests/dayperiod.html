@@ -477,19 +477,19 @@ function run_main(method) {
 
 			// 3 methods x 5 dayPeriods
 			array.forEach(function(code) {
-				let aRes = [], aStr = []
+				let aRes = []
 				for (const k of Object.keys(oOptions)) {
-					let str = ""
+					let aTemp = []
 					if (oOptions[k].filter(x => x).length) {
 						for (let i = 0 ; i < 5; i++) {
 							if (oOptions[k][i]) {
-								aRes.push(get_dayperiod(days[i], code, k))
+								aTemp.push(get_dayperiod(days[i], code, k))
 							}
 						}
 					}
-					aStr.push(aRes.join(", "))
+					aRes.push(aTemp.join(", "))
 				}
-				data.push(mini(aRes.join(", ")) +"~~~"+ code +"~~~"+ aStr[0] +"~~~"+ aStr[1] +"~~~"+ aStr[2])
+				data.push(mini(aRes.join(", ")) +"~~~"+ code +"~~~"+ aRes[0] +"~~~"+ aRes[1] +"~~~"+ aRes[2])
 			})
 		} else {
 			array.forEach(function(code) {
