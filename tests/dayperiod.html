@@ -17,6 +17,7 @@
 	<style>
 		table {width: 780px;}
 		hr {color: #dcdc8c}
+		.pad {padding-bottom: 10px;)
 	</style>
 </head>
 <body>
@@ -27,24 +28,38 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="33%"><col width="67%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">dayPeriod
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Testing language results in dayPeriod</span>
+			<span class="no_color">A proof to confirm the minimum tests for maximum entropy with dayPeriod.
+			There are three options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
+			(<code>8:00</code>, <code>12:00</code>, <code>15:00</code>, <code>18:00</code>, <code>22:00</code>).
+			Maximum entropy is calculated by testing all fifteen combinations. Click custom to test.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ NARROW ]</span>
-				<span id="bshort" class="btn4 btn" onClick="run('short')">[ SHORT ]</span>
-				<span id="blong" class="btn4 btn" onClick="run('long')">[ LONG ]</span>
+				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
+				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
+				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
 				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [dtf]</span>
 			<br><br><hr><br>
+				<span class="hidden" id ="customoptions">
+					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow8"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
+					<div class="mono spaces pad"> SHORT: 8 <input type="checkbox" id="short8"> 12 <input type="checkbox" id="short12"> 15 <input type="checkbox" id="short15"> 18 <input type="checkbox" id="short18"> 22 <input type="checkbox" id="short22"></div>
+					<div class="mono spaces pad">  LONG: 8 <input type="checkbox" id="long8"> 12 <input type="checkbox" id="long12"> 15 <input type="checkbox" id="long15"> 18 <input type="checkbox" id="long18"> 22 <input type="checkbox" id="long22"></div>
+				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
+				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
+				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
+				<span class="btn4 btn" onClick="run_custom()">[ RUN ]</span>
+					<br><br><hr><br>
+				</span>
 				<span id ="results"></span>
 			</td></tr>
 	</table>
@@ -63,6 +78,22 @@ var list = [
 "am,amharic",
 "an,aragonese",
 "ar,arabic",
+"ar-bh, arabic (bahrain)",
+"ar-dz, arabic (algeria)",
+"ar-eg, arabic (egypt)",
+"ar-iq, arabic (iran)",
+"ar-jo, arabic (jordan)",
+"ar-kw, arabic (kuwait)",
+"ar-lb, arabic (lenanon)",
+"ar-ly, arabic (lybia)",
+"ar-mo, arabic (morocco)",
+"ar-om, arabic (oman)",
+"ar-qa, arabic (qatar)",
+"ar-sa, arabic (saudi arabia)",
+"ar-sy, arabic (syria)",
+"ar-tn, arabic (tunisia)",
+"ar-ae, arabic (uae)",
+"ar-ye, arabic (yemen)",
 "as,assamese",
 "ast,asturian",
 "av,avaric",
@@ -72,6 +103,7 @@ var list = [
 "be,belarusian",
 "bg,bulgarian",
 "bh,bihari",
+"bho,bhojpuri",
 "bi,bislama",
 "bm,bambara",
 "bn,bengali",
@@ -79,6 +111,7 @@ var list = [
 "br,breton",
 "bs,bosnian",
 "ca,catalan",
+"ca-valencia, catalan (valencia)",
 "cak,kaqchikel",
 "ce,chechen",
 "ch,chamorro",
@@ -93,22 +126,66 @@ var list = [
 "cy,welsh",
 "da,danish",
 "de,german",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"de-de,german (germany)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
 "dsb,lower sorbian",
 "dv,divehi",
 "dz,dzongkha",
 "ee,ewe",
 "el,greek",
 "en,english",
+"en-au,english (australia)",
+"en-be,english (belize)",
+"en-ca,english (canada)",
+"en-ie,english (ireland)",
+"en-jm,english (jamaica)",
+"en-nz,english (new zealand)",
+"en-ph,english (philippines)",
+"en-za,english (south africa)",
+"en-tt,english (trinidad and tobago)",
+"en-gb,english (united kingdom)",
+"en-us,english (united states)",
+"en-zw,english (zimbabwe)",
 "eo,esperanto",
 "es,spanish",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-es,spanish (spain)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-py,spanish (paraguay)",
+"es-pe,spanish (peru)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
 "et,estonian",
 "eu,basque",
 "fa,persian",
+"fa-ir,persian (iran)",
 "ff,fulah",
 "fi,finnish",
+"fil,filipino",
 "fj,fijian",
 "fo,faroese",
 "fr,french",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-fr,french (france)",
+"fr-lu,french (luxembourg)",
+"fr-mc,french (monaco)",
+"fr-ch,french (switzerland)",
 "fur,friulian",
 "fy,frisian",
 "ga,irish",
@@ -139,6 +216,7 @@ var list = [
 "io,ido",
 "is,icelandic",
 "it,italian",
+"it-ch,italian (switzerland)",
 "iu,inuktitut",
 "ja,japanese",
 "jv,javanese",
@@ -152,6 +230,8 @@ var list = [
 "km,khmer",
 "kn,kannada",
 "ko,korean",
+"ko-kp,korean (north korea)",
+"ko-kr,korean (south korea)",
 "kok,konkani",
 "kr,kanuri",
 "ks,kashmiri",
@@ -171,12 +251,13 @@ var list = [
 "lu,luba-katanga",
 "lv,latvian",
 "mai,maithili",
-"meh,sw tlaxiaco mixtec",
+"meh,southwestern tlaxiaco mixtec",
 "mg,malagasy",
 "mh,marshallese",
 "mi,maori",
 "mix,mixtepec mixtec",
 "mk,macedonian",
+"mk-mk,macedonian (north macedonia)",
 "ml,malayalam",
 "mn,mongolian",
 "mr,marathi",
@@ -189,6 +270,7 @@ var list = [
 "ne,nepali",
 "ng,ndonga",
 "nl,dutch",
+"nl-be,dutch (belgium)",
 "nn,norwegian nynorsk",
 "no,norwegian",
 "nr,ndebele south",
@@ -201,15 +283,22 @@ var list = [
 "or,odia",
 "os,ossetian",
 "pa,punjabi",
+"pa-in,punjabi (india)",
+"pa-pk,punjabi (pakistan)",
 "pi,pali",
 "pl,polish",
 "ps,pashto",
 "pt,portuguese",
+"pt-br,portuguese (brazil)",
+"pt-pt,portuguese (portugal)",
 "qu,quechua",
 "rm,rhaeto-romanic",
 "rn,kirundi",
 "ro,romanian",
+"ro-md,romanian (moldova)",
+"ro-ro,romanian (romania)",
 "ru,russian",
+"ru-md,russian (moldova)",
 "rw,kinyarwanda",
 "sa,sanskrit",
 "sat,santali", // 1731528
@@ -225,12 +314,15 @@ var list = [
 "sn,shona",
 "so,somali",
 "son,songhay",
+"son-ml,songhay (mali)",
 "sq,albanian",
 "sr,serbian",
 "ss,siswati",
 "st,sotho southern",
 "su,sundanese",
 "sv,swedish",
+"sv-fi,swedish (finland)",
+"sv-se,swedish (sweden)",
 "sw,swahili",
 "szl,silesian", // 1691695
 "ta,tamil",
@@ -266,12 +358,12 @@ var list = [
 "za,zhuang",
 "zam,miahuatlán zapotec",
 "zh,chinese",
-"zh-cn,chinese china",
-"zh-Hans,chinese simple",
-"zh-Hant,chinese traditional",
-"zh-hk,chinese hong kong",
-"zh-sg,chinese singapore",
-"zh-tw,chinese taiwan",
+"zh-cn,chinese (china)",
+"zh-Hans,chinese (simple)",
+"zh-Hant,chinese (traditional)",
+"zh-hk,chinese (hong kong)",
+"zh-sg,chinese (singapore)",
+"zh-tw,chinese (taiwan)",
 "zu,zulu",
 ]
 
@@ -281,7 +373,8 @@ var aLegend = [],
 	aSupported = [],
 	summary = [],
 	useSupportedOnly = true,
-	isDayPeriodSupported = false
+	isDayPeriodSupported = false,
+	localesHashAll = "" // to compare custom to
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -289,6 +382,35 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+const day8 = new Date("2019-01-30T08:00:00") // in the morning
+const day12 = new Date("2019-01-30T12:00:00") // noon
+const day15 = new Date("2019-01-30T15:00:00") // in the afternoon
+const day18 = new Date("2019-01-30T18:00:00") // in the evening
+const day22 = new Date("2019-01-30T22:00:00") // at night
+let days = [day8, day12, day15, day18, day22]
+
+function log_locales() {
+	console.log(sDetail["localegroups"].join("\n"))
+}
+
+function reset_custom(type) {
+	// check/uncheck everything
+	let checkState = (type == "all")
+	let aMethods = ["narrow","short","long"],
+		aTimes = [8,12,15,18,22]
+	for (let i = 0 ; i < aMethods.length ; i++) {
+		for (let j = 0 ; j < aTimes.length ; j++) {
+			document.getElementById(aMethods[i] + aTimes[j]).checked = checkState
+		}
+	}
+	if (type == "min") {
+		// min preset
+		dom.narrow8.checked = true
+		dom.narrow15.checked = true
+		dom.short12.checked = true
+		dom.long8.checked = true
+	}
+}
 
 function legend() {
 	// build once
@@ -329,32 +451,80 @@ function run_main(method) {
 	if (method == "all") {isAll = true; method = "narrow"}
 	useSupportedOnly = dom.supported.checked
 
+
+	// db0e433f all
 	try {
 		let array = useSupportedOnly ? aSupported : aLocales
-		array.forEach(function(code) {
-			let str ="", str2 = "", str3 = ""
-			// in the morning, noon, in the afternoon, in the evening, at night
-			str = get_dayperiod(new Date("2019-01-30T08:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, method)
-				+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, method)
-			if (!isAll) {
-				data.push(sha1(str) +"~~~"+ code +"~~~" + str)
-			} else {
-				str2 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "short")
-					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "short")
-				str3 = get_dayperiod(new Date("2019-01-30T08:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T12:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T15:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T18:00:00"), code, "long")
-					+", "+ get_dayperiod(new Date("2019-01-30T22:00:00"), code, "long")
-				data.push(sha1(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
+
+		if (method == "custom") {
+			/*
+			gecko min example: narrow8 narrow15 short12 long8
+			narrow3 + long1 = 130 (best pair)
+				+ short2 = 132  (picks up es-mx, es-pa)
+				+ narrow8 = 133 (picks up es-mx)
+			*/
+			let oOptions = {"narrow": [],"short": [],"long": []}
+			let aTimes = [8,12,15,18,22]
+			for (const k of Object.keys(oOptions)) {
+				aTimes.forEach(function(j) {
+					let check = document.getElementById(k +j).checked
+					oOptions[k].push(check)
+				})
 			}
-		})
+			let hasNarrow = oOptions["narrow"].filter(x => x).length > 0 ? true : false
+			let hasShort = oOptions["short"].filter(x => x).length > 0 ? true : false
+			let hasLong = oOptions["long"].filter(x => x).length > 0 ? true : false			
+
+			// 3 methods x 5 dayPeriods
+			array.forEach(function(code) {
+				let aRes = [], aStr = []
+				for (const k of Object.keys(oOptions)) {
+					let str = ""
+					if (oOptions[k].filter(x => x).length) {
+						for (let i = 0 ; i < 5; i++) {
+							if (oOptions[k][i]) {
+								aRes.push(get_dayperiod(days[i], code, k))
+							}
+						}
+					}
+					aStr.push(aRes.join(", "))
+				}
+				data.push(mini(aRes.join(", ")) +"~~~"+ code +"~~~"+ aStr[0] +"~~~"+ aStr[1] +"~~~"+ aStr[2])
+			})
+		} else {
+			array.forEach(function(code) {
+				// default narrow if all
+				let str ="", str2 = "", str3 = ""
+				str = get_dayperiod(days[0], code, method)
+					+", "+ get_dayperiod(days[1], code, method)
+					+", "+ get_dayperiod(days[2], code, method)
+					+", "+ get_dayperiod(days[3], code, method)
+					+", "+ get_dayperiod(days[4], code, method)
+				if (!isAll) {
+					data.push(mini(str) +"~~~"+ code +"~~~" + str)
+				} else {
+				// add short
+					str2 = get_dayperiod(days[0], code, "short")
+						+", "+ get_dayperiod(days[1], code, "short")
+						+", "+ get_dayperiod(days[2], code, "short")
+						+", "+ get_dayperiod(days[3], code, "short")
+						+", "+ get_dayperiod(days[4], code, "short")
+					// add long
+					str3 = get_dayperiod(days[0], code, "long")
+						+", "+ get_dayperiod(days[1], code, "long")
+						+", "+ get_dayperiod(days[2], code, "long")
+						+", "+ get_dayperiod(days[3], code, "long")
+						+", "+ get_dayperiod(days[4], code, "long")
+					data.push(mini(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
+				}
+			})
+		}
+
+		if (!data.length) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+
 		// get one line per hash
 		data.sort()
 		//console.debug(data)
@@ -378,13 +548,13 @@ function run_main(method) {
 			// build new item
 			if (next !== tmpH) {
 				aBucketsC.push(codes.join())
-				if (isAll) {
+				if (isAll || method == "custom") {
 					aBucketsM.push(tmpN +" | "+ tmpS +" | " + tmpL )
 				} else {
 					aBucketsM.push(tmpN)
 				}
 				let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
-				if (isAll) {
+				if (isAll || method == "custom") {
 					str += "<ul><li>"+ s16 +"N: "+ sc + tmpN +"</li>"
 						+ "<li>"+ s16 +"S: "+ sc + tmpS +"</li>"
 						+ "<li>"+ s16 +"L: "+ sc + tmpL +"</li>"
@@ -399,35 +569,44 @@ function run_main(method) {
 		// buckets
 		aBucketsC.sort() // locale code groups
 		aBucketsM.sort() // method
-		//console.debug(aBucketsM)
 
 		// display
-		let resultsHash = sha1(aBucketsM.join())
-		let localesHash = sha1(aBucketsC.join())
+		let resultsHash = mini(aBucketsM)
+		let localesHash = mini(aBucketsC)
+		sDetail["localegroups"] = aBucketsC
+		let localesBtn = "<span class='btn4 btnc' onClick='log_locales()'>[details]</span>"
+		let localesMatch = ""
+
 		if (isAll) {
 			method = "all"
-			// track FF version changes
-			// results
-			if (resultsHash == "51b9a0bf92c278297716aaba0c42d8ab99d8196d") {resultsHash += s4 +" [FF96+]"+ sc
-			} else if (resultsHash == "ac6185ab11f9f50f38457f56794e554699249a9b") {resultsHash += s4 +" [FF91-95]"+ sc
-			} else if (resultsHash == "d7cf5cafbaa4d2891099d3cf6c3f1f1fb39ef79e") {resultsHash += s4 +" [FF90]"+ sc
-			} else {resultsHash += zNEW
-			}
-			// locales
-			 // ignore non-supported = same as undefined = could be any supported locale
-			if (useSupportedOnly) {
-				if (localesHash == "a760b65d42061d28bdd0f573d9cf513833bc7945") {localesHash += s4 +" [FF96+]"+ sc
-				} else if (localesHash == "65f9190049b61ec3a2d14a273445a7bf1048e44d") {localesHash += s4 +" [FF91-95]"+ sc
-				} else if (localesHash == "9518690b69c7a74ff1c4b02a4bd36edeb31d3ee9") {localesHash += s4 +" [FF90]"+ sc
-				} else if (isFF) {localesHash += zNEW
+			localesHashAll = localesHash
+
+			if (isFF) {
+				// track FF version changes
+				// results
+				if (resultsHash == "350adf0c") {resultsHash += s4 +" [FF96+]"+ sc
+				} else if (resultsHash == "5c3a3429") {resultsHash += s4 +" [FF91-95]"+ sc
+				} else if (resultsHash == "2e28d277") {resultsHash += s4 +" [FF90]"+ sc
+				} else {resultsHash += zNEW
+				}
+				// locales
+				 // ignore non-supported = same as undefined = could be any supported locale
+				if (useSupportedOnly) {
+					if (localesHash == "db0e433f") {localesHash += s4 +" [FF96+]"+ sc
+					} else if (localesHash == "442988e3") {localesHash += s4 +" [FF91-95]"+ sc
+					} else if (localesHash == "e2f758d9") {localesHash += s4 +" [FF90]"+ sc
+					} else if (isFF) {localesHash += zNEW
+					}
 				}
 			}
+		} else if (method == "custom") {
+			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
 		}
 
 		let display = s4 + method.toUpperCase() +": "
 			+" ["+ aHash.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
 			+ spacer + s16 +"results: "+ sc + resultsHash +"<br>"
-			+ s12 +"locales: "+ sc + localesHash + spacer
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 			+"<br>"+ aHash.join("<br>")
 		dom.results.innerHTML = display
 
@@ -443,14 +622,36 @@ function run(method) {
 	if (isDayPeriodSupported) {
 		//reset
 		legend()
-		dom.results = "running test..."
-		dom.perf = ""
 		setBtn(method)
-		// delay so users see change and allow paint
-		setTimeout(function() {
-			run_main(method)
-		}, 1)
+		dom.perf = ""
+		dom.results = ""
+		let element = dom.customoptions
+
+		if (method == "custom") {
+			// unhide custom section
+			element.classList.remove("hidden")
+
+		} else {
+			// hide custom
+			element.classList.add("hidden")
+
+			dom.results = "running test..."
+			// delay so users see change and allow paint
+			setTimeout(function() {
+				run_main(method)
+			}, 1)
+		}
 	}
+}
+
+function run_custom() {
+	//reset
+	legend()
+	dom.perf = ""
+	dom.results = "running test..."
+	setTimeout(function() {
+		run_main("custom")
+	}, 1)
 }
 
 function run_test() {
@@ -483,6 +684,7 @@ function setBtn(method) {
 }
 
 dom.supported.checked = true
+reset_custom("min")
 legend()
 Promise.all([
 	get_globals()
