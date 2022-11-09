@@ -35,10 +35,10 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm the minimum tests for maximum entropy with dayPeriod.
-			There are three options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
+			options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
 			(<code>8:00</code>, <code>12:00</code>, <code>15:00</code>, <code>18:00</code>, <code>22:00</code>).
-			Maximum entropy is calculated by testing all fifteen combinations. Click custom to test.</span>
+			Click custom to test any configuration.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -371,7 +371,6 @@ var aLegend = [],
 	aLegendSupported = [],
 	aLocales = [],
 	aSupported = [],
-	summary = [],
 	useSupportedOnly = true,
 	isDayPeriodSupported = false,
 	localesHashAll = "" // to compare custom to
@@ -390,7 +389,7 @@ const day22 = new Date("2019-01-30T22:00:00") // at night
 let days = [day8, day12, day15, day18, day22]
 
 function log_locales() {
-	console.log(sDetail["localegroups"].join("\n"))
+	console.log(sDetail["localesGroups"].join("\n"))
 }
 
 function reset_custom(type) {
@@ -404,6 +403,12 @@ function reset_custom(type) {
 		}
 	}
 	if (type == "min") {
+		/*
+		gecko min example: narrow8 narrow15 short12 long8
+		narrow15 + long8 = 130 (best pair)
+			+ short12 = 132 (picks up es-co, es-pa)
+			+ narrow8 = 133 (picks up es-mx)
+		*/
 		// min preset
 		dom.narrow8.checked = true
 		dom.narrow15.checked = true
@@ -451,18 +456,10 @@ function run_main(method) {
 	if (method == "all") {isAll = true; method = "narrow"}
 	useSupportedOnly = dom.supported.checked
 
-
-	// db0e433f all
 	try {
 		let array = useSupportedOnly ? aSupported : aLocales
 
 		if (method == "custom") {
-			/*
-			gecko min example: narrow8 narrow15 short12 long8
-			narrow15 + long8 = 130 (best pair)
-				+ short12 = 132 (picks up es-co, es-pa)
-				+ narrow8 = 133 (picks up es-mx)
-			*/
 			let oOptions = {"narrow": [],"short": [],"long": []}
 			let aTimes = [8,12,15,18,22]
 			for (const k of Object.keys(oOptions)) {
@@ -471,9 +468,6 @@ function run_main(method) {
 					oOptions[k].push(check)
 				})
 			}
-			let hasNarrow = oOptions["narrow"].filter(x => x).length > 0 ? true : false
-			let hasShort = oOptions["short"].filter(x => x).length > 0 ? true : false
-			let hasLong = oOptions["long"].filter(x => x).length > 0 ? true : false			
 
 			// 3 methods x 5 dayPeriods
 			array.forEach(function(code) {
@@ -573,7 +567,7 @@ function run_main(method) {
 		// display
 		let resultsHash = mini(aBucketsM)
 		let localesHash = mini(aBucketsC)
-		sDetail["localegroups"] = aBucketsC
+		sDetail["localesGroups"] = aBucketsC
 		let localesBtn = "<span class='btn4 btnc' onClick='log_locales()'>[details]</span>"
 		let localesMatch = ""
 
@@ -581,22 +575,20 @@ function run_main(method) {
 			method = "all"
 			localesHashAll = localesHash
 
-			if (isFF) {
+			if (isFF && useSupportedOnly) {
 				// track FF version changes
+				// ignore when non-supported codes used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "350adf0c") {resultsHash += s4 +" [FF96+]"+ sc
-				} else if (resultsHash == "5c3a3429") {resultsHash += s4 +" [FF91-95]"+ sc
-				} else if (resultsHash == "2e28d277") {resultsHash += s4 +" [FF90]"+ sc
+				if (resultsHash == "350adf0c") {resultsHash += s14 +" [FF96+]"+ sc
+				} else if (resultsHash == "5c3a3429") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "2e28d277") {resultsHash += s14 +" [FF90]"+ sc
 				} else {resultsHash += zNEW
 				}
 				// locales
-				 // ignore non-supported = same as undefined = could be any supported locale
-				if (useSupportedOnly) {
-					if (localesHash == "db0e433f") {localesHash += s4 +" [FF96+]"+ sc
-					} else if (localesHash == "442988e3") {localesHash += s4 +" [FF91-95]"+ sc
-					} else if (localesHash == "e2f758d9") {localesHash += s4 +" [FF90]"+ sc
-					} else if (isFF) {localesHash += zNEW
-					}
+				if (localesHash == "db0e433f") {localesHash += s14 +" [FF96+]"+ sc
+				} else if (localesHash == "442988e3") {localesHash += s14 +" [FF91-95]"+ sc
+				} else if (localesHash == "e2f758d9") {localesHash += s14 +" [FF90]"+ sc
+				} else if (isFF) {localesHash += zNEW
 				}
 			}
 		} else if (method == "custom") {
