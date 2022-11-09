@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>listformat</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>pluralrules</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+		.pad {padding-bottom: 10px;)
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="33%"><col width="67%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">listformat
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
+			styles (<code>narrow</code>, <code>short</code>, <code>long</code>) and three types
+			(<code>conjunction</code>, <code>disjunction</code>, <code>unit</code>).
+			Click custom to test any configuration.</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
+				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
+				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
+				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [lf]</span>
+			<br><br><hr><br>
+				<span class="hidden" id ="customoptions">
+					<div class="mono spaces pad">NARROW: conjunction <input type="checkbox" id="narrowconjunction"> disjunction <input type="checkbox" id="narrowdisjunction"> unit <input type="checkbox" id="narrowunit"></div>
+					<div class="mono spaces pad"> SHORT: conjunction <input type="checkbox" id="shortconjunction"> disjunction <input type="checkbox" id="shortdisjunction"> unit <input type="checkbox" id="shortunit"></div>
+					<div class="mono spaces pad">  LONG: conjunction <input type="checkbox" id="longconjunction"> disjunction <input type="checkbox" id="longdisjunction"> unit <input type="checkbox" id="longunit"></div>
+				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
+				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
+				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
+				<span class="btn4 btn" onClick="run_custom()">[ RUN ]</span>
+					<br><br><hr><br>
+				</span>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = [
+"aa,afar",
+"ab,abkhazian",
+"ach,acholi",
+"ae,avestan",
+"af,afrikaans",
+"ak,akan",
+"am,amharic",
+"an,aragonese",
+"ar,arabic",
+"ar-bh, arabic (bahrain)",
+"ar-dz, arabic (algeria)",
+"ar-eg, arabic (egypt)",
+"ar-iq, arabic (iran)",
+"ar-jo, arabic (jordan)",
+"ar-kw, arabic (kuwait)",
+"ar-lb, arabic (lenanon)",
+"ar-ly, arabic (lybia)",
+"ar-mo, arabic (morocco)",
+"ar-om, arabic (oman)",
+"ar-qa, arabic (qatar)",
+"ar-sa, arabic (saudi arabia)",
+"ar-sy, arabic (syria)",
+"ar-tn, arabic (tunisia)",
+"ar-ae, arabic (uae)",
+"ar-ye, arabic (yemen)",
+"as,assamese",
+"ast,asturian",
+"av,avaric",
+"ay,aymara",
+"az,azerbaijani",
+"ba,bashkir",
+"be,belarusian",
+"bg,bulgarian",
+"bh,bihari",
+"bho,bhojpuri",
+"bi,bislama",
+"bm,bambara",
+"bn,bengali",
+"bo,tibetan",
+"br,breton",
+"bs,bosnian",
+"ca,catalan",
+"ca-valencia, catalan (valencia)",
+"cak,kaqchikel",
+"ce,chechen",
+"ch,chamorro",
+"ckb,central kurdish",
+"co,corsican",
+"cr,cree",
+"crh,crimean tatar",
+"cs,czech",
+"csb,kashubian",
+"cu,church slavic",
+"cv,chuvash",
+"cy,welsh",
+"da,danish",
+"de,german",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"de-de,german (germany)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
+"dsb,lower sorbian",
+"dv,divehi",
+"dz,dzongkha",
+"ee,ewe",
+"el,greek",
+"en,english",
+"en-au,english (australia)",
+"en-be,english (belize)",
+"en-ca,english (canada)",
+"en-ie,english (ireland)",
+"en-jm,english (jamaica)",
+"en-nz,english (new zealand)",
+"en-ph,english (philippines)",
+"en-za,english (south africa)",
+"en-tt,english (trinidad and tobago)",
+"en-gb,english (united kingdom)",
+"en-us,english (united states)",
+"en-zw,english (zimbabwe)",
+"eo,esperanto",
+"es,spanish",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-cr,spanish (costa rica)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-es,spanish (spain)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-ni,spanish (nicaragua)",
+"es-pa,spanish (panama)",
+"es-py,spanish (paraguay)",
+"es-pe,spanish (peru)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
+"et,estonian",
+"eu,basque",
+"fa,persian",
+"fa-ir,persian (iran)",
+"ff,fulah",
+"fi,finnish",
+"fil,filipino",
+"fj,fijian",
+"fo,faroese",
+"fr,french",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-fr,french (france)",
+"fr-lu,french (luxembourg)",
+"fr-mc,french (monaco)",
+"fr-ch,french (switzerland)",
+"fur,friulian",
+"fy,frisian",
+"ga,irish",
+"gd,scottish gaelic",
+"gl,galician",
+"gn,guarani",
+"gu,gujarati",
+"gv,manx",
+"ha,hausa",
+"haw,hawaiian",
+"he,hebrew",
+"hi,hindi",
+"hil,hiligaynon",
+"ho,hiri motu",
+"hr,croatian",
+"hsb,upper sorbian",
+"ht,haitian",
+"hu,hungarian",
+"hy,armenian",
+"hye,eastern armenian",
+"hz,herero",
+"ia,interlingua",
+"id,indonesian",
+"ie,interlingue",
+"ig,igbo",
+"ii,sichuan yi",
+"ik,inupiaq",
+"io,ido",
+"is,icelandic",
+"it,italian",
+"it-ch,italian (switzerland)",
+"iu,inuktitut",
+"ja,japanese",
+"jv,javanese",
+"ka,georgian",
+"kab,kabyle",
+"kg,kongo",
+"ki,kikuyu",
+"kj,kuanyama",
+"kk,kazakh",
+"kl,greenlandic",
+"km,khmer",
+"kn,kannada",
+"ko,korean",
+"ko-kp,korean (north korea)",
+"ko-kr,korean (south korea)",
+"kok,konkani",
+"kr,kanuri",
+"ks,kashmiri",
+"ku,kurdish",
+"kv,komi",
+"kw,cornish",
+"ky,kirghiz",
+"la,latin",
+"lb,luxembourgish",
+"lg,ganda",
+"li,limburgan",
+"lij,ligurian",
+"ln,lingala",
+"lo,lao",
+"lt,lithuanian",
+"ltg,latgalian",
+"lu,luba-katanga",
+"lv,latvian",
+"mai,maithili",
+"meh,southwestern tlaxiaco mixtec",
+"mg,malagasy",
+"mh,marshallese",
+"mi,maori",
+"mix,mixtepec mixtec",
+"mk,macedonian",
+"mk-mk,macedonian (north macedonia)",
+"ml,malayalam",
+"mn,mongolian",
+"mr,marathi",
+"ms,malay",
+"mt,maltese",
+"my,burmese",
+"na,nauru",
+"nb,norwegian bokmål",
+"nd,ndebele north",
+"ne,nepali",
+"ng,ndonga",
+"nl,dutch",
+"nl-be,dutch (belgium)",
+"nn,norwegian nynorsk",
+"no,norwegian",
+"nr,ndebele south",
+"nso,sotho northern",
+"nv,navajo",
+"ny,chichewa",
+"oc,occitan",
+"oj,ojibwa",
+"om,oromo",
+"or,odia",
+"os,ossetian",
+"pa,punjabi",
+"pa-in,punjabi (india)",
+"pa-pk,punjabi (pakistan)",
+"pi,pali",
+"pl,polish",
+"ps,pashto",
+"pt,portuguese",
+"pt-br,portuguese (brazil)",
+"pt-pt,portuguese (portugal)",
+"qu,quechua",
+"rm,rhaeto-romanic",
+"rn,kirundi",
+"ro,romanian",
+"ro-md,romanian (moldova)",
+"ro-ro,romanian (romania)",
+"ru,russian",
+"ru-md,russian (moldova)",
+"rw,kinyarwanda",
+"sa,sanskrit",
+"sat,santali", // 1731528
+"sc,sardinian",
+"sco,scots", // 1714293
+"sd,sindhi",
+"se,northern sami",
+"sg,sango",
+"si,sinhala",
+"sk,slovak",
+"sl,slovenian",
+"sm,samoan",
+"sn,shona",
+"so,somali",
+"son,songhay",
+"son-ml,songhay (mali)",
+"sq,albanian",
+"sr,serbian",
+"ss,siswati",
+"st,sotho southern",
+"su,sundanese",
+"sv,swedish",
+"sv-fi,swedish (finland)",
+"sv-se,swedish (sweden)",
+"sw,swahili",
+"szl,silesian", // 1691695
+"ta,tamil",
+"te,telugu",
+"tg,tajik",
+"th,thai",
+"ti,tigrinya",
+"tig,tigre",
+"tk,turkmen",
+"tl,tagalog",
+"tlh,klingon",
+"tn,tswana",
+"to,tonga",
+"tr,turkish",
+"trs,triqui", // 1583177
+"ts,tsonga",
+"tt,tatar",
+"tw,twi",
+"ty,tahitian",
+"ug,uighur",
+"uk,ukrainian",
+"ur,urdu",
+"uz,uzbek",
+"ve,venda",
+"vi,vietnamese",
+"vo,volapük",
+"wa,walloon",
+"wen,sorbian",
+"wo,wolof",
+"xh,xhosa",
+"yi,yiddish",
+"yo,yoruba",
+"za,zhuang",
+"zam,miahuatlán zapotec",
+"zh,chinese",
+"zh-cn,chinese (china)",
+"zh-Hans,chinese (simple)",
+"zh-Hant,chinese (traditional)",
+"zh-hk,chinese (hong kong)",
+"zh-sg,chinese (singapore)",
+"zh-tw,chinese (taiwan)",
+"zu,zulu",
+]
+
+var aLegend = [],
+	aLegendSupported = [],
+	aLocales = [],
+	aSupported = [],
+	useSupportedOnly = true,
+	isListFormatSupported = false,
+	localesHashAll = "" // to compare custom to
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+const day8 = new Date("2019-01-30T08:00:00") // in the morning
+const day12 = new Date("2019-01-30T12:00:00") // noon
+const day15 = new Date("2019-01-30T15:00:00") // in the afternoon
+const day18 = new Date("2019-01-30T18:00:00") // in the evening
+const day22 = new Date("2019-01-30T22:00:00") // at night
+let days = [day8, day12, day15, day18, day22]
+
+function log_locales() {
+	console.log(sDetail["localeGroups"].join("\n"))
+}
+
+function reset_custom(type) {
+	// check/uncheck everything
+	let checkState = (type == "all")
+	let aMethods = ["narrow","short","long"],
+		aTypes = ["conjunction","disjunction","unit"]
+	for (let i = 0 ; i < aMethods.length ; i++) {
+		for (let j = 0 ; j < aTypes.length ; j++) {
+			document.getElementById(aMethods[i] + aTypes[j]).checked = checkState
+		}
+	}
+	if (type == "min") {
+		/*
+		gecko min example
+		- shortunit + narrowunit = required (all but not either of those = no match)
+		- then one of conjunction (any style)
+		- then one of disjunction (any style)
+		*/
+		// min preset
+		dom.narrowconjunction.checked = true
+		dom.narrowdisjunction.checked = true
+		dom.narrowunit.checked = true
+		dom.shortunit.checked = true
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			if (isListFormatSupported) {
+				let test = Intl.ListFormat.supportedLocalesOf([code])
+				if (test.length) {
+					aSupported.push(code)
+					aLegendSupported.push(code.padStart(7) +": "+ name)
+				}
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	useSupportedOnly = dom.supported.checked
+	let aDisplay = aLegend
+	if (useSupportedOnly) {aDisplay = aLegendSupported}
+	let	header = s4 +"   LEGEND ["+ aDisplay.length
+		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
+}
+
+function get_dayperiod(date, code, option) {
+	// always use h12
+	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+	useSupportedOnly = dom.supported.checked
+
+	try {
+		let array = useSupportedOnly ? aSupported : aLocales
+		let	styles = ['narrow','short','long']
+		let types = ['conjunction', 'disjunction','unit']
+		let oOptions = {}
+
+		// select what to test
+		if (method == "custom") {
+			styles.forEach(function(s){
+				types.forEach(function(t){
+					oOptions[s + t] = document.getElementById(s +t).checked
+				})
+			})
+		} else {
+			if (method == "narrow") {styles = ["narrow"]}
+			if (method == "short") {styles = ["short"]}
+			if (method == "long") {styles = ["long"]}
+			styles.forEach(function(s){
+				types.forEach(function(t){
+					oOptions[s + t] = true
+				})
+			})
+		}
+		//test
+		array.forEach(function(code) {
+			let oStyles = {"narrow": [], "short": [], "long": []}
+			styles.forEach(function(s){
+				let aStyles = []
+				types.forEach(function(t){
+					if (oOptions[s + t] == true) {
+						oStyles[s].push(new Intl.ListFormat(code, {style: s, type: t}).format(["a","b","c"]))
+					}
+				})
+			})
+			let hash = mini(oStyles)
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
+				oTempData[hash]["short"] = oStyles["short"].join(" | ")
+				oTempData[hash]["long"] = oStyles["long"].join(" | ")
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = oTempData[n]
+		}
+
+		let resultsHash = mini(oData)
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oTempData)) {
+			localeGroups.push(oData[k]["locales"])
+			let strN = oData[k]["narrow"],
+				strS = oData[k]["short"],
+				strL = oData[k]["long"]
+			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
+			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
+			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ oData[k]["locales"].length +"]"+ sc
+				+ "<ul>" + strN + strS + strL
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"].join(", ") +"</li></ul>"
+			)
+		}
+		localeGroups.sort()
+		sDetail["localeGroups"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_locales()'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// FF78+ 1589095
+			if (isFF && useSupportedOnly) {
+				// results
+				if (resultsHash == "e51f7968") {resultsHash += s14 +" [FF101+]"+ sc
+				} else if (resultsHash == "892cbc4e") {resultsHash += s14 +" [FF96-100]"+ sc
+				} else if (resultsHash == "46b66cd0") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "e6b2b820") {resultsHash += s14 +" [FF78-90]"+ sc
+				} else {resultsHash += zNEW
+				}
+				// locales
+				if (localesHash == "4456c9c5") {localesHash += s14 +" [FF101+]"+ sc // 117
+				} else if (localesHash == "8fb2f865") {localesHash += s14 +" [FF96-100]"+ sc // 116
+				} else if (localesHash == "7687568b") {localesHash += s14 +" [FF91-95]"+ sc // 115
+				} else if (localesHash == "fe230175") {localesHash += s14 +" [FF78-90]"+ sc // 114
+				} else if (isFF) {localesHash += zNEW
+				}
+			}
+		} else if (method == "custom") {
+			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
+		}
+		// header
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+
+
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+	} catch(e) {
+		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isListFormatSupported) {
+		//reset
+		legend()
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		let element = dom.customoptions
+
+		if (method == "custom") {
+			// unhide custom section
+			element.classList.remove("hidden")
+
+		} else {
+			// hide custom
+			element.classList.add("hidden")
+			dom.results = ""
+			// delay so users see change and allow paint
+			setTimeout(function() {
+				run_main(method)
+			}, 1)
+		}
+	}
+}
+
+function run_custom() {
+	//reset
+	legend()
+	dom.perf = ""
+	dom.results = ""
+	setTimeout(function() {
+		run_main("custom")
+	}, 1)
+}
+
+function run_test() {
+	setBtn("all")
+	dom.results = ""
+	setTimeout(function() {
+		run_main("all")
+	}, 100)
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+// support
+try {
+	let supporttest = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
+	isListFormatSupported = true
+	dom.supported.checked = true
+} catch(e) {
+	isListFormatSupported = false
+	dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	dom.supported.checked = false
+}
+
+reset_custom("min")
+legend()
+Promise.all([
+	get_globals()
+]).then(function(){
+	run_test()
+})
+
+</script>
+</body>
+</html>
