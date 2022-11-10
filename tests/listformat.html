@@ -388,20 +388,25 @@ const day18 = new Date("2019-01-30T18:00:00") // in the evening
 const day22 = new Date("2019-01-30T22:00:00") // at night
 let days = [day8, day12, day15, day18, day22]
 
-function log_locales() {
-	console.log(sDetail["localeGroups"].join("\n"))
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
 }
 
 function reset_custom(type) {
 	// check/uncheck everything
 	let checkState = (type == "all")
-	let aMethods = ["narrow","short","long"],
-		aTypes = ["conjunction","disjunction","unit"]
-	for (let i = 0 ; i < aMethods.length ; i++) {
-		for (let j = 0 ; j < aTypes.length ; j++) {
-			document.getElementById(aMethods[i] + aTypes[j]).checked = checkState
-		}
-	}
+	let styles = ["narrow","short","long"],
+		types = ["conjunction","disjunction","unit"]
+	styles.forEach(function(s){
+		types.forEach(function(t){
+			document.getElementById(s +t).checked = checkState
+		})
+	})
 	if (type == "min") {
 		/*
 		gecko min example
@@ -479,7 +484,7 @@ function run_main(method) {
 				})
 			})
 		}
-		//test
+		//test: 3 styles x 3 types
 		array.forEach(function(code) {
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
@@ -494,42 +499,52 @@ function run_main(method) {
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
-				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
-				oTempData[hash]["short"] = oStyles["short"].join(" | ")
 				oTempData[hash]["long"] = oStyles["long"].join(" | ")
+				oTempData[hash]["short"] = oStyles["short"].join(" | ")
+				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
 			} else {
 				oTempData[hash]["locales"].push(code)
 			}
 		})
-
+		// handle empty
 		if (Object.keys(oTempData).length == 0) {
 			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
 			return
 		}
 		// order object
 		for (const n of Object.keys(oTempData).sort()) {
-			oData[n] = oTempData[n]
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
 		}
-
-		let resultsHash = mini(oData)
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oTempData)) {
 			localeGroups.push(oData[k]["locales"])
 			let strN = oData[k]["narrow"],
 				strS = oData[k]["short"],
-				strL = oData[k]["long"]
+				strL = oData[k]["long"],
+				localeCount = oData[k]["locales"].split(",").length
 			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
 			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
 			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
 			displaylist.push(
-				s12 + k + sc + s4 + " ["+ oData[k]["locales"].length +"]"+ sc
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
 				+ "<ul>" + strN + strS + strL
-				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"].join(", ") +"</li></ul>"
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
 		localeGroups.sort()
-		sDetail["localeGroups"] = localeGroups
-		let localesBtn = "<span class='btn4 btnc' onClick='log_locales()'>[details]</span>"
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
 		let localesHash = mini(localeGroups)
 
 		/*
@@ -540,41 +555,39 @@ function run_main(method) {
 		console.log(oTempData)
 		//*/
 
+		// notations
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// FF78+ 1589095
+			// track FF version changes: FF78+ 1589095
+			// ignore if non-supported used, which return same as undefined = user's resolved options
 			if (isFF && useSupportedOnly) {
 				// results
-				if (resultsHash == "e51f7968") {resultsHash += s14 +" [FF101+]"+ sc
-				} else if (resultsHash == "892cbc4e") {resultsHash += s14 +" [FF96-100]"+ sc
-				} else if (resultsHash == "46b66cd0") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "e6b2b820") {resultsHash += s14 +" [FF78-90]"+ sc
+				if (resultsHash == "1267d868") {resultsHash += s14 +" [FF101+]"+ sc
+				} else if (resultsHash == "04ec20ba") {resultsHash += s14 +" [FF96-100]"+ sc
+				} else if (resultsHash == "946de240") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "c4ad70e4") {resultsHash += s14 +" [FF78-90]"+ sc
 				} else {resultsHash += zNEW
 				}
 				// locales
-				if (localesHash == "4456c9c5") {localesHash += s14 +" [FF101+]"+ sc // 117
-				} else if (localesHash == "8fb2f865") {localesHash += s14 +" [FF96-100]"+ sc // 116
-				} else if (localesHash == "7687568b") {localesHash += s14 +" [FF91-95]"+ sc // 115
-				} else if (localesHash == "fe230175") {localesHash += s14 +" [FF78-90]"+ sc // 114
+				if (localesHash == "f798d35d") {localesHash += s14 +" [FF101+]"+ sc // 117
+				} else if (localesHash == "f0077373") {localesHash += s14 +" [FF96-100]"+ sc // 116
+				} else if (localesHash == "4c91b74b") {localesHash += s14 +" [FF91-95]"+ sc // 115
+				} else if (localesHash == "b65bd621") {localesHash += s14 +" [FF78-90]"+ sc // 114
 				} else if (isFF) {localesHash += zNEW
 				}
 			}
 		} else if (method == "custom") {
 			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
 		}
-		// header
+		// display
 		let display = s4 + method.toUpperCase() +": "
 			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
-			+ spacer + s16 +"results: "+ sc + resultsHash +"<br>"
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
-
-
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
-
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
-
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
 	}
