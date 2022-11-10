@@ -30,7 +30,7 @@
 	<table id="tb4">
 		<col width="33%"><col width="67%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">dayPeriod
+			<div class="nav-title">dayperiod
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
@@ -488,14 +488,13 @@ function run_main(method) {
 		array.forEach(function(code) {
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
-				let aStyles = []
 				times.forEach(function(t){
 					if (oOptions[s + t] == true) {
 						oStyles[s].push(get_dayperiod(oDays[t], code, s))
 					}
 				})
 			})
-			let hash = mini(oStyles)
+			let hash = mini(oStyles) +" " // make numbers sort like strings
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
@@ -523,7 +522,7 @@ function run_main(method) {
 			}
 		}
 		let localeGroups = [], displaylist = []
-		for (const k of Object.keys(oTempData)) {
+		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
 			let strN = oData[k]["narrow"],
 				strS = oData[k]["short"],
@@ -563,9 +562,9 @@ function run_main(method) {
 				// track FF version changes
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "c7070bb0") {resultsHash += s14 +" [FF96+]"+ sc
-				} else if (resultsHash == "916afb80") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "395fe9ef") {resultsHash += s14 +" [FF90]"+ sc
+				if (resultsHash == "302a744e") {resultsHash += s14 +" [FF96+]"+ sc
+				} else if (resultsHash == "e5db16f8") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "9206066d") {resultsHash += s14 +" [FF90]"+ sc
 				} else {resultsHash += zNEW
 				}
 				// locales
@@ -576,7 +575,7 @@ function run_main(method) {
 				}
 			}
 		} else if (method == "custom") {
-			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 
 		// display
