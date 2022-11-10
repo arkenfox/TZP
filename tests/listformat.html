@@ -488,14 +488,13 @@ function run_main(method) {
 		array.forEach(function(code) {
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
-				let aStyles = []
 				types.forEach(function(t){
 					if (oOptions[s + t] == true) {
 						oStyles[s].push(new Intl.ListFormat(code, {style: s, type: t}).format(["a","b","c"]))
 					}
 				})
 			})
-			let hash = mini(oStyles)
+			let hash = mini(oStyles) +" " // make numbers sort like strings
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
@@ -523,7 +522,7 @@ function run_main(method) {
 			}
 		}
 		let localeGroups = [], displaylist = []
-		for (const k of Object.keys(oTempData)) {
+		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
 			let strN = oData[k]["narrow"],
 				strS = oData[k]["short"],
@@ -563,10 +562,10 @@ function run_main(method) {
 			// ignore if non-supported used, which return same as undefined = user's resolved options
 			if (isFF && useSupportedOnly) {
 				// results
-				if (resultsHash == "1267d868") {resultsHash += s14 +" [FF101+]"+ sc
-				} else if (resultsHash == "04ec20ba") {resultsHash += s14 +" [FF96-100]"+ sc
-				} else if (resultsHash == "946de240") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "c4ad70e4") {resultsHash += s14 +" [FF78-90]"+ sc
+				if (resultsHash == "6d01f114") {resultsHash += s14 +" [FF101+]"+ sc
+				} else if (resultsHash == "4d16d06e") {resultsHash += s14 +" [FF96-100]"+ sc
+				} else if (resultsHash == "b4414f06") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "abbd3cda") {resultsHash += s14 +" [FF78-90]"+ sc
 				} else {resultsHash += zNEW
 				}
 				// locales
@@ -578,7 +577,7 @@ function run_main(method) {
 				}
 			}
 		} else if (method == "custom") {
-			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
