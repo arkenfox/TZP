@@ -51,9 +51,9 @@
 				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [dtf]</span>
 			<br><br><hr><br>
 				<span class="hidden" id ="customoptions">
-					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow8"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
-					<div class="mono spaces pad"> SHORT: 8 <input type="checkbox" id="short8"> 12 <input type="checkbox" id="short12"> 15 <input type="checkbox" id="short15"> 18 <input type="checkbox" id="short18"> 22 <input type="checkbox" id="short22"></div>
-					<div class="mono spaces pad">  LONG: 8 <input type="checkbox" id="long8"> 12 <input type="checkbox" id="long12"> 15 <input type="checkbox" id="long15"> 18 <input type="checkbox" id="long18"> 22 <input type="checkbox" id="long22"></div>
+					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow08"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
+					<div class="mono spaces pad"> SHORT: 8 <input type="checkbox" id="short08"> 12 <input type="checkbox" id="short12"> 15 <input type="checkbox" id="short15"> 18 <input type="checkbox" id="short18"> 22 <input type="checkbox" id="short22"></div>
+					<div class="mono spaces pad">  LONG: 8 <input type="checkbox" id="long08"> 12 <input type="checkbox" id="long12"> 15 <input type="checkbox" id="long15"> 18 <input type="checkbox" id="long18"> 22 <input type="checkbox" id="long22"></div>
 				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
 				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
 				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
@@ -381,27 +381,34 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
-const day8 = new Date("2019-01-30T08:00:00") // in the morning
-const day12 = new Date("2019-01-30T12:00:00") // noon
-const day15 = new Date("2019-01-30T15:00:00") // in the afternoon
-const day18 = new Date("2019-01-30T18:00:00") // in the evening
-const day22 = new Date("2019-01-30T22:00:00") // at night
-let days = [day8, day12, day15, day18, day22]
 
-function log_locales() {
-	console.log(sDetail["localesGroups"].join("\n"))
+const oDays = {
+	"08": new Date("2019-01-30T08:00:00"),
+	"12": new Date("2019-01-30T12:00:00"),
+	"15": new Date("2019-01-30T15:00:00"),
+	"18": new Date("2019-01-30T18:00:00"),
+	"22": new Date("2019-01-30T22:00:00")
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
 }
 
 function reset_custom(type) {
 	// check/uncheck everything
 	let checkState = (type == "all")
-	let aMethods = ["narrow","short","long"],
-		aTimes = [8,12,15,18,22]
-	for (let i = 0 ; i < aMethods.length ; i++) {
-		for (let j = 0 ; j < aTimes.length ; j++) {
-			document.getElementById(aMethods[i] + aTimes[j]).checked = checkState
-		}
-	}
+	let styles = ["narrow","short","long"],
+		times = ["08",12,15,18,22]
+	styles.forEach(function(s){
+		times.forEach(function(t){
+			document.getElementById(s +t).checked = checkState
+		})
+	})
 	if (type == "min") {
 		/*
 		gecko min example: narrow8 narrow15 short12 long8
@@ -410,10 +417,10 @@ function reset_custom(type) {
 			+ narrow8 = 133 (picks up es-mx)
 		*/
 		// min preset
-		dom.narrow8.checked = true
+		dom.narrow08.checked = true
 		dom.narrow15.checked = true
 		dom.short12.checked = true
-		dom.long8.checked = true
+		dom.long08.checked = true
 	}
 }
 
@@ -450,144 +457,121 @@ function get_dayperiod(date, code, option) {
 
 function run_main(method) {
 	let t0 = performance.now()
-	let data = []
+	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
-	let isAll = false
-	if (method == "all") {isAll = true; method = "narrow"}
 	useSupportedOnly = dom.supported.checked
 
 	try {
 		let array = useSupportedOnly ? aSupported : aLocales
-
+		let styles = ["narrow","short","long"]
+		let times = ["08",12,15,18,22]
+		let oOptions = {}
+		
+		// select what to test
 		if (method == "custom") {
-			let oOptions = {"narrow": [],"short": [],"long": []}
-			let aTimes = [8,12,15,18,22]
-			for (const k of Object.keys(oOptions)) {
-				aTimes.forEach(function(j) {
-					let check = document.getElementById(k +j).checked
-					oOptions[k].push(check)
+			styles.forEach(function(s){
+				times.forEach(function(t){
+					oOptions[s + t] = document.getElementById(s +t).checked
 				})
-			}
-
-			// 3 methods x 5 dayPeriods
-			array.forEach(function(code) {
-				let aRes = []
-				for (const k of Object.keys(oOptions)) {
-					let aTemp = []
-					if (oOptions[k].filter(x => x).length) {
-						for (let i = 0 ; i < 5; i++) {
-							if (oOptions[k][i]) {
-								aTemp.push(get_dayperiod(days[i], code, k))
-							}
-						}
-					}
-					aRes.push(aTemp.join(", "))
-				}
-				data.push(mini(aRes.join(", ")) +"~~~"+ code +"~~~"+ aRes[0] +"~~~"+ aRes[1] +"~~~"+ aRes[2])
 			})
 		} else {
-			array.forEach(function(code) {
-				// default narrow if all
-				let str ="", str2 = "", str3 = ""
-				str = get_dayperiod(days[0], code, method)
-					+", "+ get_dayperiod(days[1], code, method)
-					+", "+ get_dayperiod(days[2], code, method)
-					+", "+ get_dayperiod(days[3], code, method)
-					+", "+ get_dayperiod(days[4], code, method)
-				if (!isAll) {
-					data.push(mini(str) +"~~~"+ code +"~~~" + str)
-				} else {
-				// add short
-					str2 = get_dayperiod(days[0], code, "short")
-						+", "+ get_dayperiod(days[1], code, "short")
-						+", "+ get_dayperiod(days[2], code, "short")
-						+", "+ get_dayperiod(days[3], code, "short")
-						+", "+ get_dayperiod(days[4], code, "short")
-					// add long
-					str3 = get_dayperiod(days[0], code, "long")
-						+", "+ get_dayperiod(days[1], code, "long")
-						+", "+ get_dayperiod(days[2], code, "long")
-						+", "+ get_dayperiod(days[3], code, "long")
-						+", "+ get_dayperiod(days[4], code, "long")
-					data.push(mini(str +", "+ str2 +", "+ str3) +"~~~"+ code +"~~~"+ str +"~~~"+ str2 +"~~~"+ str3)
-				}
+			if (method == "narrow") {styles = ["narrow"]}
+			if (method == "short") {styles = ["short"]}
+			if (method == "long") {styles = ["long"]}
+			styles.forEach(function(s){
+				times.forEach(function(t){
+					oOptions[s + t] = true
+				})
 			})
 		}
-
-		if (!data.length) {
+		// test: 3 methods x 5 dayPeriods
+		array.forEach(function(code) {
+			let oStyles = {"narrow": [], "short": [], "long": []}
+			styles.forEach(function(s){
+				let aStyles = []
+				times.forEach(function(t){
+					if (oOptions[s + t] == true) {
+						oStyles[s].push(get_dayperiod(oDays[t], code, s))
+					}
+				})
+			})
+			let hash = mini(oStyles)
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				oTempData[hash]["long"] = oStyles["long"].join(" | ")
+				oTempData[hash]["short"] = oStyles["short"].join(" | ")
+				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
 			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
 			return
 		}
-
-		// get one line per hash
-		data.sort()
-		//console.debug(data)
-		let next = "", codes = []
-		let aHash = [], aBucketsC = [], aBucketsM = []
-		for (let i = 0 ; i < data.length; i++) {
-			// get current item
-			let parts = data[i].split("~~~")
-			let tmpH = parts[0] // hash
-			let tmpC = parts[1] // code
-			let tmpN = parts[2] // narrow (or the one tested)
-			let tmpS = parts[3] // short
-			let tmpL = parts[4] // long
-			codes.push(tmpC)
-			// grab next item
-			if (i < data.length - 1) {
-				next = data[(i+1)].split("~~~")[0]
-			} else {
-				next = "end"
-			}
-			// build new item
-			if (next !== tmpH) {
-				aBucketsC.push(codes.join())
-				if (isAll || method == "custom") {
-					aBucketsM.push(tmpN +" | "+ tmpS +" | " + tmpL )
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
 				} else {
-					aBucketsM.push(tmpN)
+					oData[n][p] = oTempData[n][p]
 				}
-				let str = s12 + tmpH + sc + s4 + " ["+ codes.length +"]"+ sc
-				if (isAll || method == "custom") {
-					str += "<ul><li>"+ s16 +"N: "+ sc + tmpN +"</li>"
-						+ "<li>"+ s16 +"S: "+ sc + tmpS +"</li>"
-						+ "<li>"+ s16 +"L: "+ sc + tmpL +"</li>"
-				} else {
-					str += "<ul><li>"+ s16 + method.slice(0,1).toUpperCase() +": "+ sc + tmpN +"</li>"
-				}
-				str += "<li>"+ s12 +"L: "+ sc + codes.join(", ") +"</li></ul>"
-				aHash.push(str)
-				codes = [] // reset
 			}
 		}
-		// buckets
-		aBucketsC.sort() // locale code groups
-		aBucketsM.sort() // method
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oTempData)) {
+			localeGroups.push(oData[k]["locales"])
+			let strN = oData[k]["narrow"],
+				strS = oData[k]["short"],
+				strL = oData[k]["long"],
+				localeCount = oData[k]["locales"].split(",").length
+			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
+			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
+			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul>" + strN + strS + strL
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
 
-		// display
-		let resultsHash = mini(aBucketsM)
-		let localesHash = mini(aBucketsC)
-		sDetail["localesGroups"] = aBucketsC
-		let localesBtn = "<span class='btn4 btnc' onClick='log_locales()'>[details]</span>"
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
 		let localesMatch = ""
-
-		if (isAll) {
-			method = "all"
+		if (method == "all") {
 			localesHashAll = localesHash
-
 			if (isFF && useSupportedOnly) {
 				// track FF version changes
-				// ignore when non-supported codes used, which return same as undefined = user's resolved options
+				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
-				if (resultsHash == "350adf0c") {resultsHash += s14 +" [FF96+]"+ sc
-				} else if (resultsHash == "5c3a3429") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "2e28d277") {resultsHash += s14 +" [FF90]"+ sc
+				if (resultsHash == "c7070bb0") {resultsHash += s14 +" [FF96+]"+ sc
+				} else if (resultsHash == "916afb80") {resultsHash += s14 +" [FF91-95]"+ sc
+				} else if (resultsHash == "395fe9ef") {resultsHash += s14 +" [FF90]"+ sc
 				} else {resultsHash += zNEW
 				}
 				// locales
-				if (localesHash == "db0e433f") {localesHash += s14 +" [FF96+]"+ sc
-				} else if (localesHash == "442988e3") {localesHash += s14 +" [FF91-95]"+ sc
-				} else if (localesHash == "e2f758d9") {localesHash += s14 +" [FF90]"+ sc
+				if (localesHash == "0bcb443d") {localesHash += s14 +" [FF96+]"+ sc // 133
+				} else if (localesHash == "d086dfed") {localesHash += s14 +" [FF91-95]"+ sc // 132
+				} else if (localesHash == "8c290857") {localesHash += s14 +" [FF90]"+ sc // 131
 				} else if (isFF) {localesHash += zNEW
 				}
 			}
@@ -595,16 +579,14 @@ function run_main(method) {
 			if (localesHash == localesHashAll) {localesMatch = green_tick + sg + " matches full test"+ sc}
 		}
 
+		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ aHash.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
-			+ spacer + s16 +"results: "+ sc + resultsHash +"<br>"
+			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" "+ resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
-			+"<br>"+ aHash.join("<br>")
-		dom.results.innerHTML = display
-
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
-
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
 	}
