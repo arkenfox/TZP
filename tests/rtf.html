@@ -21,6 +21,13 @@
 	</style>
 </head>
 <body>
+	<div class="offscreen">
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+	</div>
+	<div class="hidden">
+		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+	</div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -51,7 +58,6 @@
 				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
 				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [rtf]</span>
 			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -361,10 +367,7 @@ var list = [
 ]
 
 var aLegend = [],
-	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
-	useSupportedOnly = true,
 	isRTFSupported = false,
 	localesHashAll = "" // to compare min to
 
@@ -398,24 +401,21 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			if (isRTFSupported) {
 				let test = Intl.RelativeTimeFormat.supportedLocalesOf([code])
 				if (test.length) {
-					aSupported.push(code)
-					aLegendSupported.push(code.padStart(7) +": "+ name)
+					aLocales.push(code)
+					aLegend.push(code.padStart(7) +": "+ name)
 				}
+			} else {
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isRTFSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function get_dayperiod(date, code, option) {
@@ -427,10 +427,9 @@ function run_main(method) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
-	useSupportedOnly = dom.supported.checked
 
 	try {
-		let array = useSupportedOnly ? aSupported : aLocales
+		let array = aLocales
 		let	styles = ['narrow','short','long']
 		let times = [-3,-1,0,1,3]
 		let units = ["second","minute","hour","day","week","month","year","quarter"]
@@ -440,8 +439,8 @@ function run_main(method) {
 		// select what to test
 		if (method == "min") {
 			styles = ["narrow","long"]
-			times = [0,1,3]
-			units = ["second","day","year"]
+			//times = [0,1,3]
+			//units = ["second","day","year"]
 			/*
 			auto
 				day = 143 (538d5d4d)
@@ -451,7 +450,6 @@ function run_main(method) {
 			always
 				+ narrow (1, day) = 152: 9a13bc55 (adds es-py)
 			*/
-
 			minList = [
 				"alwaysnarrow1day",
 				"autonarrow0second",
@@ -463,6 +461,10 @@ function run_main(method) {
 				"autonarrow3day",
 				"autonarrow1year",
 			]
+			if (isVer < 96) {
+				if (isVer > 71) {minList.push("autonarrow-1week")} // FF72-95 adds es, es-es
+				if (isVer > 77) {minList.push("autonarrow3week")} // FF78-95 adds nn
+			}
 			sDetail["minlist"] = minList
 		} else {
 			if (method == "narrow") {styles = ["narrow"]}
@@ -488,7 +490,7 @@ function run_main(method) {
 				units.forEach(function(u){
 					times.forEach(function(t){
 						if (method == "min") {
-							let concat = s+t+u
+							let concat = s + t + u
 							if (minList.includes("always"+concat)) {
 								oStyles[s +"always"].push( IntlRTFn.format(t, u) )
 							}
@@ -496,6 +498,7 @@ function run_main(method) {
 								oStyles[s +"auto"].push( IntlRTF.format(t, u) )
 							}
 						} else {
+							let concat = s+t+u
 							oStyles[s +"always"].push( IntlRTFn.format(t, u) )
 							oStyles[s +"auto"].push( IntlRTF.format(t, u) )
 						}
@@ -602,7 +605,7 @@ function run_main(method) {
 			localesHashAll = localesHash
 			// track FF version changes: FF65+
 			// ignore if non-supported used, which return same as undefined = user's resolved options
-			if (isFF && useSupportedOnly) {
+			if (isFF) {
 				// results
 				if (resultsHash == "e0398964") {resultsHash += s14 +" [FF96+]"+ sc
 				} else if (resultsHash == "ff2b660b") {resultsHash += s14 +" [FF91-95]"+ sc
@@ -614,12 +617,12 @@ function run_main(method) {
 				} else {resultsHash += zNEW
 				}
 				// locales
-				if (localesHash == "9a13bc55") {localesHash += s14 +" [FF96+]"+ sc // 152
-				} else if (localesHash == "20f5478f") {localesHash += s14 +" [FF91-95]"+ sc // 151
-				} else if (localesHash == "39026219") {localesHash += s14 +" [FF78-90]"+ sc // 150
-				} else if (localesHash == "c693e058") {localesHash += s14 +" [FF72-77]"+ sc // 147
-				} else if (localesHash == "82083cba") {localesHash += s14 +" [FF70-71]"+ sc // 146
-				} else if (localesHash == "134993f4") {localesHash += s14 +" [FF65-69]"+ sc // 146
+				if (localesHash == "9a13bc55") {localesHash += s14 +" [FF96+]"+ sc // 152 - 9min check
+				} else if (localesHash == "20f5478f") {localesHash += s14 +" [FF91-95]"+ sc // 151 - 9min gets 149 (nn / es,es-es)
+				} else if (localesHash == "39026219") {localesHash += s14 +" [FF78-90]"+ sc // 150 - 9min gets 149 (es,es-es)
+				} else if (localesHash == "c693e058") {localesHash += s14 +" [FF72-77]"+ sc // 147 - 9min gets 146 (es,es-es)
+				} else if (localesHash == "82083cba") {localesHash += s14 +" [FF70-71]"+ sc // 146 - 9min check
+				} else if (localesHash == "134993f4") {localesHash += s14 +" [FF65-69]"+ sc // 146 - 9min check
 				} else if (isFF) {localesHash += zNEW
 				}
 			}
@@ -628,7 +631,7 @@ function run_main(method) {
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc + " " + minBtn
+			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc + " " + minBtn
 			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
@@ -642,7 +645,6 @@ function run_main(method) {
 function run(method) {
 	if (isRTFSupported) {
 		//reset
-		legend()
 		setBtn(method)
 		dom.perf = ""
 		dom.results = ""
@@ -651,14 +653,6 @@ function run(method) {
 			run_main(method)
 		}, 1)
 	}
-}
-
-function run_test() {
-	setBtn("all")
-	dom.results = ""
-	setTimeout(function() {
-		run_main("all")
-	}, 100)
 }
 
 function setBtn(method) {
@@ -674,22 +668,27 @@ function setBtn(method) {
 	el.classList.remove("btn4")
 }
 
-// support
-try {
-	let supporttest = new Intl.RelativeTimeFormat(undefined, {style: "short", numeric: "auto"})
-	isRTFSupported = true
-	dom.supported.checked = true
-} catch(e) {
-	isRTFSupported = false
-	dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
-	dom.supported.checked = false
-}
-
-legend()
 Promise.all([
 	get_globals()
 ]).then(function(){
-	run_test()
+	Promise.all([
+		get_is95(),
+		get_isVer(),
+	]).then(function(){
+		try {
+			let test = new Intl.RelativeTimeFormat(undefined, {style: "short", numeric: "auto"})
+			isRTFSupported = true
+		} catch(e) {
+			dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+		}
+		legend()
+		if (isRTFSupported) {
+			setBtn("all")
+			setTimeout(function() {
+				run_main("all")
+			}, 100)
+		}
+	})
 })
 
 </script>
