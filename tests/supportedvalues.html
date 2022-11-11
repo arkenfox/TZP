@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>supported values</title>
+<title>supportedvaluesof</title>
 <style>
 </style>
 </head>
@@ -29,7 +29,7 @@
 	<table id="tb4">
 		<col width="20%"><col width="20%"><col width="60%">
 		<thead><tr><th colspan="3">
-			<div class="nav-title">supported values
+			<div class="nav-title">supportedvaluesof
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
@@ -88,7 +88,9 @@ function run() {
 		let hash = mini(res), code = ""
 
 		if (isFF) {
-			if (hash == "b0bdfd07") {code = "108+" // 1630920: collation: big5han, gb2312 removed
+			if (hash == "29fb6e2f") {code = "108+"
+				// 1630920: collation: big5han, gb2312 removed
+				// 1799859: units: microsecond, nanosecond added
 			} else if (hash == "2cd0417d") {code = "105-107 | ESR102" // 1786025: backported to ESR102.3 : Europe/Kirov -> Europe/Kyiv
 			} else if (hash == "a3f9766a") {code = "101-104"
 			} else if (hash == "c55e582a") {code = "96-100"

@@ -50,7 +50,6 @@
 					<span class="s4">INTL.COLLATOR</span>
 					<span class="btn4 btn" onClick="collator()">[ run ]</span>
 					<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
-					<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [collator]</span>
 				<br><br>
 				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
 						style="width: 98%; resize: vertical" id="valueC"></textarea>
@@ -470,10 +469,7 @@ var compareExamples = [
 ]
 
 var aLegend = [],
-	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
-	useSupportedOnly = true,
 	counter = 0
 
 s4 = s4.trim()
@@ -492,28 +488,16 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			let test = Intl.Collator.supportedLocalesOf([code])
 			if (test.length) {
-				aSupported.push(code)
-				aLegendSupported.push(code.padStart(7) +": "+ name)
-			}
-			aLegend.push(code.padStart(7) +": "+ name)
-			// testing
-			try {
-				aCanonical.push(code +": "+ Intl.getCanonicalLocales(code))
-			} catch(e) {
-				aCanonical.push(code +": "+ e.name)
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let	header = s4 +"   LEGEND ["+ aLegend.length +" supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function reset(type) {
@@ -641,7 +625,6 @@ function collator() {
 
 	// good to go
 	if (go) {
-		useSupportedOnly = dom.supported.checked
 
 		// delay so user can see changes
 		setTimeout(function() {
@@ -674,20 +657,16 @@ function collator() {
 				let str = list[i].toLowerCase()
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
-				if (useSupportedOnly && aSupported.indexOf(code) == -1) {
-					// ignore unsupported
+				chars.sort(Intl.Collator(code).compare)
+				let hash = mini(chars)
+				if (hash == control) {
+					legendnew.push(code.padStart(7) +": "+ name)
 				} else {
-					chars.sort(Intl.Collator(code).compare)
-					let hash = mini(chars)
-					if (hash == control) {
-						legendnew.push(code.padStart(7) +": "+ name)
-					} else {
-						codes.push(code)
-						legendnew.push(sg + code.padStart(7) +": "+ name + sc)
-						diffs.push(hash +":"+ code +":"+ name)
-						if (oTempData[hash] == undefined) {oTempData[hash] = []}
-						oTempData[hash].push(code +" "+ name)
-					}
+					codes.push(code)
+					legendnew.push(sg + code.padStart(7) +": "+ name + sc)
+					diffs.push(hash +":"+ code +":"+ name)
+					if (oTempData[hash] == undefined) {oTempData[hash] = []}
+					oTempData[hash].push(code +" "+ name)
 				}
 			}
 
@@ -696,7 +675,7 @@ function collator() {
 			diffs.sort()
 			if (diffs.length) {
 				// output colored legend
-				let header = s4 +"   LEGEND ["+ (useSupportedOnly ? aSupported.length +" supported" : aLocales.length) +"]"+ sc +"<br><br>"
+				let header = s4 +"   LEGEND ["+ aLocales.length +" supported]"+ sc +"<br><br>"
 				dom.legend.innerHTML = header + legendnew.join("<br>")
 				let tmpH = "", tmpC = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
 				let newArr = []
@@ -739,8 +718,7 @@ function collator() {
 				// results output
 				strItem = s12 +"  stats: "+ sc
 					+ sg + newArr.length +" unique"
-					+ sc +" in "+ sg + codes.length
-					+ (useSupportedOnly ? sc+ " of "+ sg + aSupported.length +" supported" + sc: sc)
+					+ sc +" in "+ sg + codes.length + sc + " of "+ sg + aLocales.length +" supported" + sc
 				output.push(strItem +"<br>")
 
 				// locales hash
@@ -781,10 +759,9 @@ function collator() {
 	}
 }
 
-dom.supported.checked = true
+
 legend()
 check_example()
-
 Promise.all([
 	get_globals()
 ]).then(function(){

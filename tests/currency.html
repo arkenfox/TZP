@@ -42,7 +42,6 @@
 				<span id="brun" class="btn4 btnfirst" onClick="run('run')">[ RUN ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
 				<span id="bsum" class="btn4 btn" onClick="run('sum')">[ SUMMARY ]</span>
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [numberformat]</span>
 				<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -341,11 +340,8 @@ currencyMaster.push("zzz")
 
 var aLegend = [],
 	aLegendCurrency = [],
-	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
 	aCurrency = [],
-	useSupportedOnly = true,
 	useExample = false
 
 s4 = s4.trim()
@@ -363,22 +359,16 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			let test = Intl.NumberFormat.supportedLocalesOf([code])
 			if (test.length) {
-				aSupported.push(code)
-				aLegendSupported.push(code.padStart(7) +": "+ name)
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let	header = s4 +"   LEGEND ["+ aLegend.length +" supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function run_test(isSummary, isExample) {
@@ -387,15 +377,11 @@ function run_test(isSummary, isExample) {
 	let spacer = "<br><br>"
 	aCurrency.sort()
 
-	legend()
-	useSupportedOnly = dom.supported.checked
-	let loop = useSupportedOnly ? aSupported : aLocales
-
 	try {
 		if (isSummary) {
 			currencyMaster.forEach(function(cur) {
 				let curData = []
-				loop.forEach(function(code) {
+				aLocales.forEach(function(code) {
 					let res = undefined
 					res = Number(1234567.89).toLocaleString(code, {style: "currency", currency: cur, currencyDisplay: "symbol"})
 					if (res.length > 0) {
@@ -459,14 +445,14 @@ function run_test(isSummary, isExample) {
 				}
 			}
 			dom.results.innerHTML = s4 + display.length + sc
-				+ (useSupportedOnly ? sc +" from "+ s4 + loop.length + " supported" : " testing all " + loop.length) + sc + spacer
+				+ " from "+ s4 + aLocales.length + " supported" + sc + spacer
 				+ s16 +"currencies [" + aCurrency.length +"]"+ sc +"<br><br>"+ aCurrency.join(", ") + spacer
 				+ display.join("<br>")
 		}
 
 		//
 		if (!isSummary) {
-			loop.forEach(function(code) {
+			aLocales.forEach(function(code) {
 				let codeData = []
 				aCurrency.forEach(function(cur) {
 					let res = undefined
@@ -530,8 +516,8 @@ function run_test(isSummary, isExample) {
 				aBucketsR.sort()
 				aBucketsC.sort()
 				//console.debug(aBucketsC.join("\n"))
-				dom.results.innerHTML = s4 + aHash.length + sc +" from " + s4 + loop.length
-					+ (useSupportedOnly ? " supported" : "") + sc +" + undefined"+ spacer
+				dom.results.innerHTML = s4 + aHash.length + sc +" from " + s4 + aLocales.length
+					+ " supported" + sc +" + undefined"+ spacer
 					+ s16 +"currencies [" + aCurrency.length +"]"+ sc + "<br><br>"+ sc + aCurrency.join(", ") + spacer
 					+ s16 +"results: "+ sc + sha1(aBucketsR.join()) +"<br>"
 					+ s12 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
@@ -564,7 +550,6 @@ function run(type) {
 	}, 1)
 }
 
-dom.supported.checked = true
 legend()
 currencyMaster = currencyMaster.concat(currencyExample)
 currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})

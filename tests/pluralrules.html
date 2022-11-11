@@ -43,7 +43,6 @@
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
 				<span class="btn4 btn" onClick="clearcustom()">[ clear input ]</span>
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [pluralrules]</span>
 				<br><br>
 				<textarea rows="2" placeholder="" style="width: 98%; resize: vertical" id="custom"></textarea>
 				<br><br><hr>
@@ -360,9 +359,7 @@ var list = [
 ]
 
 var aLegend = [],
-	aLegendSupported = [],
-	aLocales = [],
-	aSupported = []
+	aLocales = []
 
 let aFirstCardinal = [],
 	aFirstOrdinal = []
@@ -383,7 +380,6 @@ function clearcustom() {
 }
 
 function legend() {
-	// builds locales array and outputs a legend
 	// build once
 	if (aLegend.length == 0) {
 		list.sort()
@@ -391,26 +387,19 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			let test = Intl.PluralRules.supportedLocalesOf([code])
 			if (test.length) {
-				aSupported.push(code)
-				aLegendSupported.push(code.padStart(7) +": "+ name)
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let header = s4 +"   LEGEND ["+ aLegend.length + " supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function run_test(type) {
-
 	// vars
 	let t0 = performance.now()
 	let aNosCardinal = [], // numbers used
@@ -507,10 +496,6 @@ function run_test(type) {
 	aNosCardinal.sort((a,b) => a-b)
 	aNosOrdinal.sort((a,b) => a-b)
 
-	// select locales to loop
-	useSupportedOnly = dom.supported.checked
-	let loop = useSupportedOnly ? aSupported : aLocales
-
 	if (aNosCardinal.length == 0 && aNosOrdinal == 0) {
 		let header = "CUSTOM TEST"
 		if (type == "1") {header = "<hr><br>FIRST CHANGES ONLY"}
@@ -519,7 +504,7 @@ function run_test(type) {
 		return
 	}
 
-	for (let j=0; j < loop.length; j++) {
+	for (let j=0; j < aLocales.length; j++) {
 		// reset cardinal
 		let prevC = "", currentC = "", tmp_resultC = []
 		let c0 = true, c1 = true, c2 = true, c3 = true, c4 = true, c5 = true
@@ -527,7 +512,7 @@ function run_test(type) {
 		let prevO = "", currentO = "", tmp_resultO = []
 		let o0 = true, o1 = true, o2 = true, o3 = true, o4 = true, o5 = true
 
-		let code = loop[j]
+		let code = aLocales[j]
 		let intlPRcardinal = new Intl.PluralRules(code, {type:"cardinal"})
 		let intlPRordinal = new Intl.PluralRules(code, {type:"ordinal"})
 
@@ -658,7 +643,7 @@ function run_test(type) {
 		main_buckets = bucket_code
 		main_buckets.sort()
 		// output
-		str = code_total + (code_total == loop.length ? sg : sb) +" [match]"+ sc
+		str = code_total + (code_total == aLocales.length ? sg : sb) +" [match]"+ sc
 		str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aNosCardinal.length +"]"+ sc +"<br>"
 			+"<ul><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
 			+"<li>"+ s12 +" locales hash: "+ sc + mini(main_buckets) +"</li>"
@@ -697,7 +682,6 @@ function run() {
 	dom.results2 = ""
 	dom.results1 = ""
 	dom.results0 = ""
-	legend()
 	// delay so users see change and allow paint
 	setTimeout(function() {
 		run_test("0") // main test
@@ -706,14 +690,14 @@ function run() {
 	}, 1)
 }
 
-dom.supported.checked = true
 dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
 	+ "\n[0, 1, , ,  7  , 21, 100  ]"
  	+ "\n[1,2,  3  , 5, 8, 45 ,non integers ignored ]"
-legend()
+
 Promise.all([
 	get_globals()
 ]).then(function(){
+	legend()
 	run()
 })
 

@@ -48,7 +48,6 @@
 				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
 				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [lf]</span>
 			<br><br><hr><br>
 				<span class="hidden" id ="customoptions">
 					<div class="mono spaces pad">NARROW: conjunction <input type="checkbox" id="narrowconjunction"> disjunction <input type="checkbox" id="narrowdisjunction"> unit <input type="checkbox" id="narrowunit"></div>
@@ -368,11 +367,8 @@ var list = [
 ]
 
 var aLegend = [],
-	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
-	useSupportedOnly = true,
-	isListFormatSupported = false,
+	isLFSupported = false,
 	localesHashAll = "" // to compare custom to
 
 s4 = s4.trim()
@@ -430,24 +426,21 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
-			if (isListFormatSupported) {
+			if (isLFSupported) {
 				let test = Intl.ListFormat.supportedLocalesOf([code])
 				if (test.length) {
-					aSupported.push(code)
-					aLegendSupported.push(code.padStart(7) +": "+ name)
+					aLocales.push(code)
+					aLegend.push(code.padStart(7) +": "+ name)
 				}
+			} else {
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isLFSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function get_dayperiod(date, code, option) {
@@ -459,10 +452,8 @@ function run_main(method) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
-	useSupportedOnly = dom.supported.checked
 
 	try {
-		let array = useSupportedOnly ? aSupported : aLocales
 		let	styles = ['narrow','short','long']
 		let types = ['conjunction', 'disjunction','unit']
 		let oOptions = {}
@@ -485,7 +476,7 @@ function run_main(method) {
 			})
 		}
 		//test: 3 styles x 3 types
-		array.forEach(function(code) {
+		aLocales.forEach(function(code) {
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
 				types.forEach(function(t){
@@ -560,7 +551,7 @@ function run_main(method) {
 			localesHashAll = localesHash
 			// track FF version changes: FF78+ 1589095
 			// ignore if non-supported used, which return same as undefined = user's resolved options
-			if (isFF && useSupportedOnly) {
+			if (isFF) {
 				// results
 				if (resultsHash == "6d01f114") {resultsHash += s14 +" [FF101+]"+ sc
 				} else if (resultsHash == "4d16d06e") {resultsHash += s14 +" [FF96-100]"+ sc
@@ -581,7 +572,7 @@ function run_main(method) {
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
 			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
@@ -593,9 +584,8 @@ function run_main(method) {
 }
 
 function run(method) {
-	if (isListFormatSupported) {
+	if (isLFSupported) {
 		//reset
-		legend()
 		setBtn(method)
 		dom.perf = ""
 		dom.results = ""
@@ -618,21 +608,14 @@ function run(method) {
 }
 
 function run_custom() {
-	//reset
-	legend()
-	dom.perf = ""
-	dom.results = ""
-	setTimeout(function() {
-		run_main("custom")
-	}, 1)
-}
-
-function run_test() {
-	setBtn("all")
-	dom.results = ""
-	setTimeout(function() {
-		run_main("all")
-	}, 100)
+	if (isLFSupported) {
+		//reset
+		dom.perf = ""
+		dom.results = ""
+		setTimeout(function() {
+			run_main("custom")
+		}, 1)
+	}
 }
 
 function setBtn(method) {
@@ -648,23 +631,24 @@ function setBtn(method) {
 	el.classList.remove("btn4")
 }
 
-// support
-try {
-	let supporttest = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
-	isListFormatSupported = true
-	dom.supported.checked = true
-} catch(e) {
-	isListFormatSupported = false
-	dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
-	dom.supported.checked = false
-}
-
-reset_custom("min")
-legend()
 Promise.all([
 	get_globals()
 ]).then(function(){
-	run_test()
+	// support
+	try {
+		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
+		isLFSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	reset_custom("min")
+	legend()
+	if (isLFSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
 })
 
 </script>

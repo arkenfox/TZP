@@ -48,7 +48,6 @@
 				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
 				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [dtf]</span>
 			<br><br><hr><br>
 				<span class="hidden" id ="customoptions">
 					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow08"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
@@ -368,11 +367,8 @@ var list = [
 ]
 
 var aLegend = [],
-	aLegendSupported = [],
 	aLocales = [],
-	aSupported = [],
-	useSupportedOnly = true,
-	isDayPeriodSupported = false,
+	isDPSupported = false,
 	localesHashAll = "" // to compare custom to
 
 s4 = s4.trim()
@@ -432,22 +428,16 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
 			if (test.length) {
-				aSupported.push(code)
-				aLegendSupported.push(code.padStart(7) +": "+ name)
+				aLocales.push(code)
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let	header = s4 +"   LEGEND ["+ aLegend.length + " supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function get_dayperiod(date, code, option) {
@@ -459,10 +449,8 @@ function run_main(method) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
-	useSupportedOnly = dom.supported.checked
 
 	try {
-		let array = useSupportedOnly ? aSupported : aLocales
 		let styles = ["narrow","short","long"]
 		let times = ["08",12,15,18,22]
 		let oOptions = {}
@@ -485,7 +473,7 @@ function run_main(method) {
 			})
 		}
 		// test: 3 methods x 5 dayPeriods
-		array.forEach(function(code) {
+		aLocales.forEach(function(code) {
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
 				times.forEach(function(t){
@@ -558,7 +546,7 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF && useSupportedOnly) {
+			if (isFF) {
 				// track FF version changes
 				// ignore if non-supported used, which return same as undefined = user's resolved options
 				// results
@@ -580,7 +568,7 @@ function run_main(method) {
 
 		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + (useSupportedOnly ? sc +" from "+ s4 + aSupported.length : "") +"]" + sc
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
 			+ spacer + s16 +"results: "+ sc + resultsHash +" "+ resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
@@ -592,9 +580,8 @@ function run_main(method) {
 }
 
 function run(method) {
-	if (isDayPeriodSupported) {
+	if (isDPSupported) {
 		//reset
-		legend()
 		setBtn(method)
 		dom.perf = ""
 		dom.results = ""
@@ -618,23 +605,24 @@ function run(method) {
 }
 
 function run_custom() {
-	//reset
-	legend()
-	dom.perf = ""
-	dom.results = "running test..."
-	setTimeout(function() {
-		run_main("custom")
-	}, 1)
+	if (isDPSupported) {
+		//reset
+		dom.perf = ""
+		dom.results = "running test..."
+		setTimeout(function() {
+			run_main("custom")
+		}, 1)
+	}
 }
 
 function run_test() {
 	let A = get_dayperiod(new Date("2019-01-30T08:00:00"), "en", "long")
 	let B = get_dayperiod(new Date("2019-01-30T12:00:00"), "en", "long")
 	if (A == B) {
-		isDayPeriodSupported = false
-		dom.results.innerHTML = s4 + "dayPeriod: not supported" + sc
+		isDPSupported = false
+		dom.results.innerHTML = s4 + "dayPeriod:" + sc + " not supported"
 	} else {
-		isDayPeriodSupported = true
+		isDPSupported = true
 		setBtn("all")
 		dom.results = "running test..."
 		setTimeout(function() {
@@ -656,13 +644,11 @@ function setBtn(method) {
 	el.classList.remove("btn4")
 }
 
-
-dom.supported.checked = true
-reset_custom("min")
-legend()
 Promise.all([
 	get_globals()
 ]).then(function(){
+	reset_custom("min")
+	legend()
 	run_test()
 })
 
