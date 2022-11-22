@@ -385,7 +385,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 108
+		isVerMax = 109
+		if (CSSKeyframesRule.prototype.hasOwnProperty("length")) return 109 // 1789776
 		if ("undefined" === typeof onloadend) return 108 // 1574487
 		if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
 		if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293

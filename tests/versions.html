@@ -209,7 +209,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 59, maxVer = 108, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 60, maxVer = 109, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -270,6 +270,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 109: 1789776
+		let t109 = performance.now()
+		let ver109 = (CSSKeyframesRule.prototype.hasOwnProperty("length")) // 0.01ms
+		rec(109, 109, "1789776", ver109, performance.now()-t109)
 
 		// 108: 1574487
 		let t108 = performance.now()
