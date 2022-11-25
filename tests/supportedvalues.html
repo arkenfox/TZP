@@ -88,7 +88,11 @@ function run() {
 		let hash = mini(res), code = ""
 
 		if (isFF) {
-			if (hash == "29fb6e2f") {code = "108+"
+			if (hash == "e4746fcc") {code = "109+"
+				// 1792775 ?
+				// collation drops reformed
+				// numberingsystem adds khmr + nagm
+			} else if (hash == "29fb6e2f") {code = "108+"
 				// 1630920: collation: big5han, gb2312 removed
 				// 1799859: units: microsecond, nanosecond added
 			} else if (hash == "2cd0417d") {code = "105-107 | ESR102" // 1786025: backported to ESR102.3 : Europe/Kirov -> Europe/Kyiv
