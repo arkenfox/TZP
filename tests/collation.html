@@ -427,17 +427,17 @@ function collator() {
 				}
 				aLocaleGroups.sort()
 				let localesHash = mini(aLocaleGroups)
-				
+
 				let ff = ""
 				let charHash = mini(chars.sort())
 				// don't notate unless it's our own preset
 				if (isFF && charHash == "5a96db28") {
-					if (localesHash == "81327b9a") {ff = "109+"
-					} else if (localesHash == "348457ab") {ff = "70-108"
-					} else if (localesHash == "a282eed7") {ff = "68-69"
-					} else if (localesHash == "10075dfd") {ff = "65-67"
-					} else if (localesHash == "3692151e") {ff = "59-64"
-					} else if (localesHash == "28cfaf53") {ff = "58 or lower"
+					if (localesHash == "f608f882") {ff = "109+"
+					} else if (localesHash == "a95ad493") {ff = "70-108"
+					} else if (localesHash == "fb2f3eef") {ff = "68-69"
+					} else if (localesHash == "68b3ae15") {ff = "65-67"
+					} else if (localesHash == "f6c29806") {ff = "59-64"
+					} else if (localesHash == "747c936b") {ff = "58 or lower"
 					} else {ff = zNEW}
 					if (ff !== zNEW) {ff = s16 +" [FF"+ ff + "]"+ sc}
 				}
