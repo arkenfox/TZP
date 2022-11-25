@@ -531,7 +531,8 @@ function get_intl_supportedlocales(num) {
 	// webkit items not in FF105
 		// note: older webkit only: make sure one in each: 'co','cv','oc','nso','tig'
 	WKnotGecko = [
-		'ba','co','cv','dv','gn','io','iu','nr','nso','nv','ny','oc','ss','st','tig','tn','ts','ve','wa'
+		'ba','co','dv','gn','io','iu','nr','nso','nv','ny','oc','ss','st','tig','tn','ts','ve','wa'
+		// 'cv' // cv is supported in FF109+
 	]
 	*/
 	// COLLATOR
@@ -569,13 +570,13 @@ function get_intl_supportedlocales(num) {
 	if (control.join("") == "Cc") {aCollator = ['mt']} // so while Mac !== Cc then only FF will test and report mt
 
 	let aList = [
-		["0bea6b5efcc437aeea70b7f35af0711e6cec9814", 50, ['eo','gl','ka','om'], aCollator, "Collator"],
-		["790e3b04199bd0b1b1132eccd6775d8fd22d8ea6", 50, ['as','fo','ln','ne','to'], ['co','nr','st','tig'], "DateTimeFormat"],
-		["aef0c6da2478d759e406af5ede5c19b31384b02c", 86, ['br','eu','ii','ks','ps'], ['cv','iu','nv','tn' ], "DisplayNames"],
-		["bb051f059f75b8d78c7c0554f7bee9a1bdf04c9f", 78, ['ee','gd','kk','lo','yi'], ['ba','io','oc','ve' ], "ListFormat"],
-		["44b2aba18a3f36f76240cb73ad38c8bc3a66c062", 50, ['bo','ha','lb','my','sq'], ['dv','ny','oc','ts' ], "NumberFormat"],
-		["8ef0a7f2554f893f131b36f05de01cdf5bb17620", 58, ['ki','lu','qu','rn','rw'], ['ba','co','gn','oc' ], "PluralRules"],
-		["d0b4844a8b0561638d4f355bc68aaaf5c1e04149", 65, ['cy','km','mg','os','sn'], ['gn','nso','ss','wa'], "RelativeTimeFormat"],
+		["f7e01839", 50, ['eo','gl','ka','om'], aCollator, "Collator"],
+		["2d45bfd6", 50, ['as','fo','ln','ne','to'], ['co','nr','st','tig'], "DateTimeFormat"],
+		["502f87c2", 86, ['br','eu','ii','ks','ps'], ['gn','iu','nv','tn' ], "DisplayNames"],
+		["a2d97917", 78, ['ee','gd','kk','lo','yi'], ['ba','io','oc','ve' ], "ListFormat"],
+		["3709a703", 50, ['bo','ha','lb','my','sq'], ['dv','ny','oc','ts' ], "NumberFormat"],
+		["73b49209", 58, ['ki','lu','qu','rn','rw'], ['ba','co','gn','oc' ], "PluralRules"],
+		["fc7fa0cc", 65, ['cy','km','mg','os','sn'], ['gn','nso','ss','wa'], "RelativeTimeFormat"],
 	]
 
 	num = (num - 5)
@@ -598,7 +599,7 @@ function get_intl_supportedlocales(num) {
 			} else if (type == "PluralRules") { res = Intl.PluralRules.supportedLocalesOf(list)
 			} else if (type == "RelativeTimeFormat") { res = Intl.RelativeTimeFormat.supportedLocalesOf(list)
 			}
-			let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
+			let hash = res.length > 0 ? mini(res) : "none"
 			//console.log(title, hash)
 			let bool = hash == expected
 			if (res.length > 0) {
