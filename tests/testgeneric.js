@@ -536,3 +536,6 @@ function togglerows(id, word) {
 	}
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
+
+if (location.protocol == "file:") {isFile = true}
+
