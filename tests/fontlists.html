@@ -110,7 +110,11 @@ let fntAlways = {
 let fntTBOther = {android: [], linux: [],mac: [], windows: []}
 let fntTB = {
 	android: [],linux: [],
-	mac: ["AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue", ".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Lucida Grande","Menlo","Monaco","STHeiti","Tahoma","Thonburi","Times","Times New Roman","Verdana",],
+	mac: [
+		// ESR102 whitelist minus bundled
+			// ToDo: mac: check PingFang + Songti variants from other: e.g. Songti SC Black","Songti SC Light","Songti TC Light"
+		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue",".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo","Monaco","PingFang HK","PingFang SC","PingFang TC","Songti SC","Songti TC","Tahoma","Thonburi","Times","Times New Roman","Verdana",
+	],
 	windows: [
 		// ESR102 whitelist
 		"Arial","Cambria Math","Consolas","Courier New","Georgia","Lucida Console","MS Gothic",
