@@ -64,7 +64,7 @@ let results = [],
 	data = {},
 	aPerf = [],
 	count = 0,
-	expected = 95,
+	expected = 96,
 	gt0, // global timer
 	bBlock = false, // throw a test error
 	bNum = false // display numbering instead of perf
@@ -631,6 +631,128 @@ function get_intl_supportedlocales(num) {
 		}
 	})
 }
+
+function get_intl_supportedvaluesof(num, title) {
+	// just use timeZone, the others are either identical or changed too much
+		/* 
+			gecko only
+Africa/Asmara - vs Africa/Asmera
+Africa/Timbuktu
+America/Argentina/Buenos_Aires - vs America/Buenos_Aires
+America/Argentina/Catamarca - vs America/Catamarca
+America/Argentina/ComodRivadavia
+America/Argentina/Cordoba - vs America/Cordoba
+America/Argentina/Jujuy
+America/Argentina/Mendoza
+America/Atikokan
+America/Ensenada
+America/Indiana/Indianapolis - vs America/Indianapolis
+America/Kentucky/Louisville - vs America/Louisville
+America/Nuuk
+America/Rosario
+Asia/Chongqing
+Asia/Harbin
+Asia/Ho_Chi_Minh - vs Asia/Saigon
+Asia/Kashgar
+Asia/Kathmandu - vs Asia/Katmandu
+Asia/Kolkata - vs Asia/Calcutta
+Asia/Tel_Aviv
+Asia/Yangon - vs Asia/Rangoon
+Atlantic/Faroe - vs Atlantic/Faeroe
+Atlantic/Jan_Mayen
+CET
+CST6CDT
+EET
+EST
+EST5EDT
+Etc/GMT+1
+Etc/GMT+10
+Etc/GMT+11
+Etc/GMT+12
+Etc/GMT+2
+Etc/GMT+3
+Etc/GMT+4
+Etc/GMT+5
+Etc/GMT+6
+Etc/GMT+7
+Etc/GMT+8
+Etc/GMT+9
+Etc/GMT-1
+Etc/GMT-10
+Etc/GMT-11
+Etc/GMT-12
+Etc/GMT-13
+Etc/GMT-14
+Etc/GMT-2
+Etc/GMT-3
+Etc/GMT-4
+Etc/GMT-5
+Etc/GMT-6
+Etc/GMT-7
+Etc/GMT-8
+Etc/GMT-9
+Europe/Belfast
+Europe/Kyiv - vs Europe/Kiev (changed in gecko FF109)
+Europe/Tiraspol
+Factory
+HST
+MET
+MST
+MST7MDT
+PST8PDT
+Pacific/Chuuk - vs Pacific/Truk
+Pacific/Kanton (added at some stage after 93)
+Pacific/Pohnpei - vs Pacific/Ponape
+WET
+
+		gecko does not have
+America/Godthab
+America/Jujuy
+America/Kralendijk
+America/Lower_Princes
+America/Marigot
+America/Mendoza
+America/Santa_Isabel
+America/St_Barthelemy
+Arctic/Longyearbyen
+Europe/Bratislava
+Europe/Busingen
+Europe/Mariehamn
+Europe/Podgorica
+Europe/San_Marino
+Europe/Vatican
+*/
+
+	try {
+		let t0; if (canPerf) {t0 = performance.now()}
+		if (bBlock) {bB = 1}
+		let aSupported = Intl.supportedValuesOf("timeZone")
+		let aExpected = ['CET','EET','EST','HST','MET','MST','WET',] // b7a58624
+		let res = aSupported.filter(x => aExpected.includes(x))
+
+		let hash = res.length > 0 ? mini(res) : "none"
+		let bool = hash == "b7a58624"
+
+		if (res.length > 0) {
+			if (res.join(", ").length < 48) {
+				hash = res.join(", ")
+			} else {
+				sDetail["specific_"+ title] = res
+				hash += buildButton(3, "specific_"+ title, res.length)
+			}
+		}
+		let perf = canPerf ? performance.now() - t0 : ""
+		fnRecord(num, title, hash, bool, "skip", perf)
+	} catch(e) {
+		// FF92- not supported
+		if (isVer < 93) {
+			fnRecord(num, title, zNA +": not supported", zNA)
+		} else {
+			fnRecord(num, title, e.name, zErr, e.message)
+		}
+	}
+}
+
 
 function get_js_client_hints(num, title) {
 	// testing: https://web.dev/user-agent-client-hints/
@@ -1735,7 +1857,7 @@ function get_window_props(num1, num2, title) {
 	let resE = []
 	try {
 		if (bBlock) {bB = 1}
-		// enuemrate
+		// enumerate
 		rec(num1, typeof KeyEvent, "KeyEvent")
 		rec(num1, typeof dump, "dump")
 		rec(num1, typeof fullScreen, "fullScreen")
@@ -1743,7 +1865,7 @@ function get_window_props(num1, num2, title) {
 		rec(num1, typeof mozInnerScreenX, "mozInnerScreenX")
 		rec(num1, typeof mozInnerScreenY, "mozInnerScreenY")
 		rec(num1, typeof onabsolutedeviceorientation, "onabsolutedeviceorientation")
-		rec(num1, typeof onbeforeinput, "onbeforeinput")
+		//rec(num1, typeof onbeforeinput, "onbeforeinput")
 		rec(num1, typeof onmozfullscreenchange, "onmozfullscreenchange")
 		rec(num1, typeof onmozfullscreenerror, "onmozfullscreenerror")
 		rec(num1, typeof scrollByLines, "scrollByLines")
@@ -1869,15 +1991,15 @@ function run() {
 		get_colorgamut(310, "[css] color-gamut")
 		get_nav_screen(170)
 		get_window_props(260, 450, "[properties] window")
-		get_obj_enumeration(734, "object enumeration")
+		get_obj_enumeration(750, "object enumeration")
 		get_last_prototype_keys(640, "[last x keys]") // 640+641
-		get_math(695, "math")
-		get_nav_values(150, 400, 720) // 100 expected, 400-410 not expected, 720.. specific
+		get_math(720, "math")
+		get_nav_values(150, 400, 740) // 100 expected, 400-410 not expected, 740.. specific
 		get_dates(620)
 		get_js_client_hints(320, "[js] client hints")
-		get_mimetypes(710, "mimetypes")
-		get_plugins(740, "plugins")
-		get_media_constraints(700, "[constraints] mediaDevices")
+		get_mimetypes(730, "mimetypes")
+		get_plugins(770, "plugins")
+		get_media_constraints(725, "[constraints] mediaDevices")
 	}, 1)
 
 	setTimeout(function() {
@@ -1913,7 +2035,8 @@ function run() {
 		get_nav_keys(85, 350, "[navigator] keys") // 85 expected, 350 not expected
 		get_intl_supportedlocales(655) // +5's: C, DTF, DN, LF, NF, PR, RTF
 		get_intl_canonical_locale(667, "Intl.getCanonicalLocales")
-		get_locale_compare(692, "locale.compare")
+		get_locale_compare(710, "locale.compare")
+		get_intl_supportedvaluesof(700, "Intl.supportedValuesOf") // timeZone
 	}, 1)
 
 	setTimeout(function() {
@@ -1921,7 +2044,7 @@ function run() {
 		get_moz_colors(90, "[colors] moz")
 		get_moz_fonts(102, "[fonts] moz")
 		get_errors(902)
-		get_stacklength(30,800,901) // 30-32 error properties, 800 = stack length, 901 = first error message
+		get_stacklength(30,850,901) // 30-32 error properties, 850 = stack length, 901 = first error message
 	}, 1)
 
 	setTimeout(function() {
@@ -1929,8 +2052,8 @@ function run() {
 		get_iframe_props(40, 330, "[properties] iframe") // 40 expected, 330 not expected,
 	}, 1)
 	setTimeout(function() {
-		get_permission(750, "[permissions] push")
-		get_storage_estimate(820, "storage estimate")
+		get_permission(800, "[permissions] push")
+		get_storage_estimate(870, "storage estimate")
 	}, 1)
 
 }
