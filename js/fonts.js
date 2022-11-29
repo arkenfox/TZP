@@ -1443,3 +1443,24 @@ function outputFonts() {
 }
 
 countJS("fonts")
+
+
+// temp for piero
+function get_fontface() {
+	let t0; if (canPerf) {t0 = performance.now()}
+	function getLocalFontFamily(font) {
+		return new FontFace(font, `local("${font}")`)
+			.load()
+			.then((font) => font.family)
+			.catch(() => null)
+	}
+	function loadFonts(fontList) {
+		return Promise.all(fontList.map(getLocalFontFamily))
+			.then(list => list.filter(font => font !== null))
+	}
+	loadFonts(fntList).then(fonts => console.log(fonts.join("\n"))
+	)
+}
+//get_fontface()
+
+
