@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+  <title>screen iframe</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<script src="testmain.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 480px;}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb1">
+		<col width="40%"><col width="60%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">screen iframe
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+
+		<tr><td colspan="2" class="center">top level document</td></tr>
+		<tr><td>screen</td><td class="c mono spaces" id="doc0"></td></tr>
+		<tr><td>available screen</td><td class="c mono spaces" id="doc1"></td></tr>
+		<tr><td>outer</td><td class="c mono spaces" id="doc2"></td></tr>
+		<tr><td>inner</td><td class="c mono spaces" id="doc3"></td></tr>
+
+		<tr><td colspan="2" class="center">a nested iframe</td></tr>
+		<tr><td>screen</td><td class="c mono spaces" id="nest0"></td></tr>
+		<tr><td>available screen</td><td class="c mono spaces" id="nest1"></td></tr>
+		<tr><td>outer</td><td class="c mono spaces" id="nest2"></td></tr>
+		<tr><td>inner</td><td class="c mono spaces" id="nest3"></td></tr>
+
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+function run() {
+	//let t0 = performance.now()
+
+	const getNestediFrameWindow = () => {
+		const numberOfIframes = window.length
+		const div = document.createElement('div')
+		//div.setAttribute('style', 'display:none') // this line causes RFP to return zero
+		document.body.appendChild(div)
+		const id = 'parent-nest'
+		const ghost = `
+	style="
+		height: 100vh;
+		width: 100vw;
+		position: absolute;
+		left: -10000px;
+		visibility: hidden;
+	"
+	`
+		div.innerHTML = `
+	<div ${ghost} id="${id}">
+		<iframe ${ghost}></iframe>
+	</div>
+	`
+		const el = document.getElementById(id)
+		return {
+			parent: !!el,
+			iframeWindow: window[numberOfIframes],
+			remove: () => el.parentNode.removeChild(el)
+		}
+	}
+
+	dom.doc0 =  screen.width +" x "+ screen.height
+	dom.doc1 =  screen.availWidth +" x "+ screen.availHeight
+	dom.doc2 =  window.outerWidth +" x "+ window.outerHeight
+	dom.doc3 =  window.innerWidth +" x "+ window.innerHeight
+
+	const nest = getNestediFrameWindow()
+	dom.nest0 =  nest.iframeWindow.screen.width +" x "+ nest.iframeWindow.screen.height
+	dom.nest1 =  nest.iframeWindow.screen.availWidth +" x "+ nest.iframeWindow.screen.availHeight
+	dom.nest2 =  nest.iframeWindow.window.outerWidth +" x "+ nest.iframeWindow.window.outerHeight
+	dom.nest3 =  nest.iframeWindow.window.innerWidth +" x "+ nest.iframeWindow.window.innerHeight
+
+	if (nest.parent) {
+			nest.remove()
+	}
+
+	// perf
+	//dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+}
+
+run()
+
+</script>
+</body>
+</html>
