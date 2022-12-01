@@ -14,7 +14,6 @@
 		.visual {
 			font-size: 96px !important;
 			font-style: normal !important;
-			font-weight: normal !important;
 			letter-spacing: normal !important;
 			line-break: auto !important;
 			line-height: 50% !important;
@@ -74,6 +73,7 @@ let baseFonts = ['monospace','sans-serif','serif','system-ui']
 let fntStrA = "mmmLLLmmmWWWwwwmmmllliii"
 let fntStrB = "ImLwWil"
 let isEverDetected = false // track across all four basefonts compares
+let fntWeight = "normal"
 
 let fntSystem = ["caption","icon","menu","message-box","small-caption","status-bar",
 	"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
@@ -131,7 +131,7 @@ function run() {
 			// only use the first one
 			setTimeout(function() {
 				let font = fntList[0].toLowerCase()
-				dom.visual = fntStrB
+				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntStrB +"</span>"
 				if (fntSystem.includes(font)) {
 					dom.visual.style.setProperty('--font', "")
 					dom.visual.style.font = font
@@ -143,7 +143,7 @@ function run() {
 				fntList = [font]
 				getFonts()
 				let strDetected = (isEverDetected ? sg +" [" : sb +" [NOT ") + "DETECTED]" + sc
-				dom.font.innerHTML = "<br><hr><br>" + s12 + "FONT: " + sc + font + strDetected +"<br><br>"
+				dom.font.innerHTML = "<br><hr><br>" + s12 + "FONT: " + sc + font  +" [font-weight: "+ fntWeight +"] " + strDetected +"<br><br>"
 			}, 150)
 		}
 	} else {
@@ -154,6 +154,12 @@ function run() {
 
 function getFonts() {
 	try {
+
+		// check fntWeight
+		fntWeight += ""
+		let fntWeightValid = ["100","200","300","400","500","600","700","800","900","950"]
+		if (!fntWeightValid.includes(fntWeight)) {fntWeight = "normal"}
+
 		const doc = document
 		const id = `font-fingerprint`
 		const div = doc.createElement('div')
@@ -167,7 +173,7 @@ function getFonts() {
 				left: -9999px!important;
 				font-size: 256px !important;
 				font-style: normal !important;
-				font-weight: normal !important;
+				font-weight: ` + fntWeight + ` !important;
 				letter-spacing: normal !important;
 				line-break: auto !important;
 				line-height: normal !important;
