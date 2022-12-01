@@ -62,7 +62,9 @@ let fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntBaseDimensions = "",
 	fntPoison = "",
 	baseFonts = ['monospace','sans-serif','serif'],
-	baseGeneric = baseFonts
+	baseGeneric = baseFonts,
+	fntWeight = "normal"
+	
 
 // remember results across the two tests
 let notFoundInMin = [],
@@ -112,8 +114,11 @@ let fntTB = {
 	android: [],linux: [],
 	mac: [
 		// ESR102 whitelist minus bundled
-			// ToDo: mac: check PingFang + Songti variants from other: e.g. Songti SC Black","Songti SC Light","Songti TC Light"
-		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Geneva","Georgia","Heiti TC","Helvetica","Helvetica Neue",".Helvetica Neue DeskInterface","Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6","Kailasa","Lucida Grande","Menlo","Monaco","PingFang HK","PingFang SC","PingFang TC","Songti SC","Songti TC","Tahoma","Thonburi","Times","Times New Roman","Verdana",
+		"AppleGothic","Apple Color Emoji","Arial","Arial Black","Arial Narrow","Courier","Courier New","Geneva",
+		"Georgia","Heiti TC","Helvetica","Helvetica Neue",".Helvetica Neue DeskInterface",
+		"Hiragino Kaku Gothic ProN","Hiragino Kaku Gothic ProN W3","Hiragino Kaku Gothic ProN W6",
+		"Kailasa","Lucida Grande","Menlo","Monaco","PingFang HK","PingFang SC","PingFang TC",
+		"Songti SC","Songti TC","Tahoma","Thonburi","Times","Times New Roman","Verdana",
 	],
 	windows: [
 		// ESR102 whitelist
@@ -486,7 +491,8 @@ function get_fonts(runtype) {
 
 					let foundhash = mini(data)
 					dom.results.innerHTML = display.join("<br>")
-						+"<p><details><summary>"+ s12 +"ALL FOUND FONTS ["+ data.length +"] "+ sc + foundhash + allStr + poisonString + "</summary><p>"
+						+"<p><details><summary>"+ s12 +"ALL FOUND FONTS ["+ data.length +"] "+ sc
+						+ foundhash + allStr + " [font-weight: "+ fntWeight +"]" + poisonString + "</summary><p>"
 						+ dataString + "<br><br></p></details>"
 				}
 			}
@@ -612,6 +618,11 @@ const getFonts = () => {
 			fntPoison = ""
 			oBaseFonts = {}
 
+			// check fntWeight
+			fntWeight += ""
+			let fntWeightValid = ["100","200","300","400","500","600","700","800","900","950",]
+			if (!fntWeightValid.includes(fntWeight)) {fntWeight = "normal"}
+
 			const doc = document // or iframe.contentWindow.document
 			const id = `font-fingerprint`
 			const div = doc.createElement('div')
@@ -625,7 +636,7 @@ const getFonts = () => {
 					left: -9999px!important;
 					font-size: 256px !important;
 					font-style: normal !important;
-					font-weight: normal !important;
+					font-weight: ` + fntWeight + ` !important;
 					letter-spacing: normal !important;
 					line-break: auto !important;
 					line-height: normal !important;
