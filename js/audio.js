@@ -385,7 +385,7 @@ console.log(hashMini)
 						}
 					})
 					.catch(function(e){
-						let eMsg = log_error("audio", sName, e.name, e.message)
+						let eMsg = log_error("audio: "+ sName, e.name, e.message)
 						dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
 						log_section("audio", t0, [sName +":"+ zErr])
 					})
