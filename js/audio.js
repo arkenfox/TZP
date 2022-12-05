@@ -331,6 +331,9 @@ function outputAudio() {
 					let copyTest = new Float32Array(bufferLen)
 					event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
 					let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
+
+console.log(typeof copyTest, copyTest)
+
 					Promise.all([
 						crypto.subtle.digest("SHA-256", getTest),
 						crypto.subtle.digest("SHA-256", copyTest),
