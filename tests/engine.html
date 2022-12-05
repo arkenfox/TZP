@@ -1069,6 +1069,9 @@ function get_moz_fonts(num, title) {
 			sDetail["expected_"+ title] = aResults
 		}
 		let hash = bool ? mini_sha1(aResults.join()) + buildButton(3, "expected_"+ title, aResults.length) : "none"
+		if (isVer > 108) {
+			bool = zNA; hash = zNA +": FF108 or lower" // 1802957
+		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
