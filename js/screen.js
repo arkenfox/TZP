@@ -2099,11 +2099,16 @@ function outputScreen() {
 }
 
 function outputStart() {
-	// cydec
-	let len = eval.toString().length
-	if (isFF && len !== 37) {
-		gKnownOnce.push("_global:eval.toString().length")
-		gBypassedOnce.push("_global:eval.toString().length:37")
+	// eval
+	try {
+		if (runSE) {abc = def}
+		let len = eval.toString().length
+		if (isFF && len !== 37) {
+			gKnownOnce.push("_global:eval.toString().length")
+			gBypassedOnce.push("_global:eval.toString().length:37")
+		}
+	} catch(e) {
+		log_error("_global: eval.toString().length", e.name, e.message)
 	}
 	// cosmetic
 	let items = document.getElementsByClassName("faint")
