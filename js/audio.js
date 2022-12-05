@@ -293,16 +293,21 @@ function outputAudio2() {
 function outputAudio() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let sName = "offlineaudiocontext"
-	let knownGood = [
-		124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,
-		124.04345808873768,124.04347503720783,124.04347527516074,124.04347657808103,124.04347721464,
-		124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,124.08072291687131,
-		124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,
-		124.08075528279005,124.08075643483608,]
-	if (isFF) {
-		knownGood = [35.7383295930922,35.73833039775491,35.73832903057337,
+
+	// ToDo: we should be using the hash not the sum but we need to move away from
+		// enumerating goodness with a math poc anyway due to changes and false negatives
+	let knownGood = [35.7383295930922,35.73833039775491,35.73832903057337,
 		35.73833402246237,35.74996018782258,35.7499681673944,35.74996031448245]
+	if (!isFF) {
+		knownGood = [
+			124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,
+			124.04345808873768,124.04347503720783,124.04347527516074,124.04347657808103,124.04347721464,
+			124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,124.08072291687131,
+			124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,
+			124.08075528279005,124.08075643483608,
+		]
 	}
+
 	try {
 		const bufferLen = 5000 // require 5000 to match knownGood
 		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
@@ -332,7 +337,7 @@ function outputAudio() {
 					event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
 					let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
 
-console.log(typeof copyTest, copyTest)
+console.log(copyTest)
 
 					Promise.all([
 						crypto.subtle.digest("SHA-256", getTest),
@@ -350,6 +355,10 @@ console.log(typeof copyTest, copyTest)
 						// get/copy
 						let hashG = sha1(byteArrayToHex(hashes[0]), "audio get")
 						let hashC = sha1(byteArrayToHex(hashes[1]), "audio copy")
+
+let hashMini = mini(byteArrayToHex(hashes[0]), "audio mini")
+console.log(hashMini)
+						
 						// lies
 						let isLies = false
 						if (isTZPSmart) {
@@ -374,6 +383,11 @@ console.log(typeof copyTest, copyTest)
 							dom.audioCopy.innerHTML = (isLies ? soL + hashC + scC : hashC)
 							log_section("audio", t0, [sName +":"+ (isLies ? zLIE : hashG)])
 						}
+					})
+					.catch(function(e){
+						let eMsg = log_error("audio", sName, e.name, e.message)
+						dom.audioCopy = eMsg; dom.audioGet = eMsg; dom.audioSum = eMsg
+						log_section("audio", t0, [sName +":"+ zErr])
 					})
 				} catch(e) {
 					let eMsg = log_error("audio: "+ sName, e.name, e.message)
