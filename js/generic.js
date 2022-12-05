@@ -470,6 +470,8 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	}
 	try {
+		// extensions can block chrome://
+		setTimeout(() => resolve("timeout"), 100)
 		let path = "chrome://browser/content/extension-", suffix = "-panel.css", count = 0
 		// 1280128: FF51+ win/mac
 		// 1701257: FF89+ linux
@@ -1352,7 +1354,11 @@ function countJS(filename) {
 			}
 			Promise.all([
 				get_isOS(), // this also sets isPlatformFont for font tests
-			]).then(function(){
+			]).then(function(results){
+				if (results[0] == "timeout") {
+					gMethodsOnce.push("_global:isOS:blocked")
+					log_perf("isOS [global]",t0,"","unknown [timeout]")
+				}
 				// block/smart
 				if (isFF & isVer < isTZPBlockMinVer[0]) {isTZPBlock = true // block old gecko
 				} else if (isEngine == "edgeHTML") {isTZPBlock = true // block edgeHTML
