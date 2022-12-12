@@ -465,7 +465,6 @@ function outputCanvas() {
 						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
 						
 //RFP test
-if (isRFP) {
 let dataTest = new Uint8Array(16 * 16)
 for (let x = 0; x < 16; x++){
 	for (let y = 0; y < 16; y++){
@@ -473,8 +472,8 @@ for (let x = 0; x < 16; x++){
 	}
 }
 let dataTestHash = mini(dataTest)
-console.log(dataTestHash)
-}
+console.log(dataTestHash, dataTest)
+
 						
 						return (known3.includes(data))
 					}
