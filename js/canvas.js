@@ -463,18 +463,6 @@ function outputCanvas() {
 						}
 						let data = mini(pathData.join(), "canvas [k] ispointinpath")
 						log_perf("isPointInPath [k] [canvas]",t1,gt0,data)
-						
-//RFP test
-let dataTest = new Uint8Array(16 * 16)
-for (let x = 0; x < 16; x++){
-	for (let y = 0; y < 16; y++){
-		dataTest[y * 16 + x] = context2.isPointInStroke(x, y)
-	}
-}
-let dataTestHash = mini(dataTest)
-console.log(dataTestHash, dataTest)
-
-						
 						return (known3.includes(data))
 					}
 				},
