@@ -377,7 +377,6 @@ rec(typeof cookieStore, "cookieStore", code, "object")
 rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
 rec(typeof onappinstalled, "onappinstalled", code, "object")
 rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
-rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object")
 rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
 rec(typeof onsearch, "onsearch", code, "object")
 rec(typeof openDatabase, "openDatabase", code, "function")
@@ -438,7 +437,6 @@ rec(typeof fullScreen, "fullScreen", code, "boolean")
 rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle", code, "function")
 rec(typeof mozInnerScreenX, "mozInnerScreenX", code, "number")
 rec(typeof mozInnerScreenY, "mozInnerScreenY", code, "number")
-rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object")
 rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code, "object")
 rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code, "object")
 rec(typeof scrollByLines, "scrollByLines", code, "function")
@@ -462,6 +460,8 @@ rec(typeof content, "content", code, "object") // removed FF101
 rec(typeof sidebar, "sidebar", code, "object") // removed FF102
 rec(typeof onloadend, "onloadend", code, "object") // removed FF107 1574487
 rec(typeof InstallTrigger, "InstallTrigger", code, "object") // to-be-deprecated (+prefs)
+rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object") // removed FF110 1689631
+
 	// prefs
 rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code, "object") // dom.vr.enabled (+ not in FF52)
 rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code, "object")
@@ -490,6 +490,7 @@ rec(typeof external, "external", code, "object")
 rec(typeof onauxclick, "onauxclick", code, "object")
 rec(typeof ondevicemotion, "ondevicemotion", code, "object")
 rec(typeof ondeviceorientation, "ondeviceorientation", code, "object")
+rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
 rec(typeof ondragexit, "ondragexit", code, "object") // touch
 rec(typeof onmessageerror, "onmessageerror", code, "object")
 rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
@@ -847,7 +848,6 @@ function get_miniEngine() {
 			"number" === typeof TEMPORARY,
 			"object" === typeof onappinstalled,
 			"object" === typeof onbeforeinstallprompt,
-			"object" === typeof ondeviceorientationabsolute,
 			"object" === typeof onpointerrawupdate,
 			"object" === typeof onsearch,
 			"boolean" === typeof originAgentCluster,
@@ -867,7 +867,6 @@ function get_miniEngine() {
 			"function" === typeof dump,
 			"boolean" === typeof fullScreen,
 			"number" === typeof mozInnerScreenX,
-			"object" === typeof onabsolutedeviceorientation,
 			"function" === typeof scrollByLines,
 			"number" === typeof scrollMaxY,
 			"function" === typeof setResizable,
