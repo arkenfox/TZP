@@ -1260,7 +1260,7 @@ function get_ua_doc() {
 					let strA = str.toLowerCase()
 					if (strA.indexOf("webkit") !== -1) {bs = true}
 				}
-				if (isOS !== "" && bs == false) {
+				if (isOS !== "" && bs == false && isVer < 109) { // FF109+: rv is frozen at 109 all platforms
 					// isVerPlus: allow the next version
 					let controlA = "", controlB = "", testA = str, testB = str
 					if (isRFP && isOS == "android" || isRFP && isVer < 102) {
