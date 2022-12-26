@@ -2,20 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=600">
+	<meta name="viewport" content="width=620">
 	<title>canvas rfp</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 580px;}
+		table {width: 600px;}
 		hr {color: #8cdcc1}
 	</style>
 </head>
 
 <body>
-	<div class="hidden"><canvas id="canvas" width="16" height="16"></canvas></div>
-
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -30,14 +28,15 @@
 		</th></tr></thead>
 
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Testing RFP characteristics in toDataURL [and by extension toBlob]</span>
+			<span class="no_color">Testing RFP characteristics in toDataURL [and by extension toBlob] </span>
+			 &nbsp &#x25BA; <span class="nothidden"><canvas id="canvas" width="16" height="16"></canvas> &nbsp &#x25C4;</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
-			<span class="btn9 btnfirst" onClick="run(100)">[ run 100 ]</span>
-			<span class="btn9 btn" onClick="run(500)">[ run 500 ]</span>
-			<span class="btn9 btn" onClick="run(1000)">[ run 1000 ]</span>
-			<span class="btn9 btn" onClick="run(5000)">[ run 5000 ]</span>
-			<span class="btn9 btn" onClick="run(20000)">[ run 20000 ]</span>
+			<span class="btn9 btnfirst" onClick="run_checks(100)">[ run 100 ]</span>
+			<span class="btn9 btn" onClick="run_checks(500)">[ run 500 ]</span>
+			<span class="btn9 btn" onClick="run_checks(1000)">[ run 1000 ]</span>
+			<span class="btn9 btn" onClick="run_checks(5000)">[ run 5000 ]</span>
+			<span class="btn9 btn" onClick="run_checks(20000)">[ run 20000 ]</span>
 			<br><br><hr>
 			<br><span class="spaces" style="color: #b3b3b3;" id="totals"></span>
 			<br><span class="spaces" style="color: #b3b3b3;" id="results"></span>
@@ -55,236 +54,47 @@ sg = sg.trim()
 s9 = s9.trim()
 s14 = s14.trim()
 
-let rules = [],
-	aData = [],
-	aBypass = [],
-	oTotal = {},
-	hasTotal = false, 
-	bypass = true, // bypass RFP checks and allow tests to run
-	testCount = 100, // autorun
-	testTotal = 0
+// data
+let aBypass = [], aRaw = [], oFail = {}, oPass = {}, rules = []
+//counts
+let countTest = 0, runningTotal = 0, runningPass = 0, runningMatch = 0, maxLines = 20, oRunningTotal = {}
 
-// build rules
 let is96 = (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc")
-let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14
-	+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + sc +" ... "+ s14
+let sizeW = 16, sizeH = 16
+//if (is96) {sizeH = 8} // smaller faster test for RFP96+ once I build rules and controls
 
-if (is96) {
-	rules = [
-		s14+ "190 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "186 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "182 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "178 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+function run_checks(max) {
+	/* STEP ONE	run some checks	*/
 
-		s14+ "190 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "186 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "182 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "178 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "174 "+ prefix + "VORK5CYII="+ sc,
-
-		s14+ "190 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "186 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "182 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "178 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
-	]
-} else {
-	rules = [
-		s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
-		s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
-
-		s14+ "174 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "170 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "166 "+ prefix + "VORK5CYII="+ sc,
-		s14+ "162 "+ prefix + "VORK5CYII="+ sc,
-
-		s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
-		s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
-	]
-}
-// pre-generate arrays
-for (let i=0; i < rules.length; i++) {
-	oTotal["rule"+ (i +"").padStart(2,"0")] = [0]
-}
-
-function analyse(data) {
-	let len = data.length,
-		slice1 = data.slice(69,70),
-		slice2 = data.slice(70,72),
-		slice3 = data.slice(72,80),
-		slice4 = data.slice(data.length - 10, data.length)
-	let strNew = s14 + len +sc +" : "
-		+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
-	if (slice1 == "A") {
-		// note: #order: anecdata most common
-		// FF96+
-		if (is96 && slice3 == "lEQVQ4T2") {
-			if (slice4 == "VORK5CYII=") {
-				if (len == 186) {return "6" // #1
-				} else if (len == 190) {return "5"
-				} else if (len == 182) {return "7"
-				} else if (len == 178) {return "8"
-				} else if (len == 174) {return "9"
-				}
-			} else if (slice4 == "5ErkJggg==") {
-				if (len == 186) {return "1" // #2
-				} else if (len == 190) {return "0"
-				} else if (len == 182) {return "2"
-				} else if (len == 178) {return "3"
-				} else if (len == 174) {return "4"
-				}
-			} else if (slice4 == "lFTkSuQmCC") {
-				if (len == 186) {return "11" // #3
-				} else if (len == 182) {return "12" // #4
-				} else if (len == 190) {return "10"
-				} else if (len == 178) {return "13"
-				} else if (len == 174) {return "14"
-				}
-			}
-
-		// FF78-95
-		} else if (!is96 && slice3 == "lEQVQ4jW") {
-			if (slice4 == "5ErkJggg==") {
-				if (len == 174) {return "0" // #1
-				} else if (len == 170) {return "1"
-				} else if (len == 166) {return "2"
-				} else if (len == 162) {return "3"
-				}
-			} else if (slice4 == "VORK5CYII=") {
-				if (len == 174) {return "4" // #2
-				} else if (len == 170) {return "5" // #4
-				} else if (len == 166) {return "6"
-				} else if (len == 162) {return "7"
-				}
-			} else if (slice4 == "lFTkSuQmCC") {
-				if (len == 170) {return "9" // #3
-				} else if (len == 174) {return "8"
-				} else if (len == 166) {return "10"
-				} else if (len == 162) {return "11"
-				}
-			}
-		}
-		return strNew
-	}
-	return strNew
-}
-
-
-function get_data() {
-	let realvalues = [
-		"8c70ed9a7dbe6d72e3d1a4e448522012661cfbed", // FF78-95
-		"bb0b94e1c96429c0a12d8999ac5697d3dfb63fbf" // FF96+
-	]
-	aData = []
-	let canvas = document.getElementById("canvas")
-	try {
-		let data = canvas.toDataURL()
-		let test = sha1(data)
-		if (isFF && realvalues.includes(test)) {
-			if (bypass) {
-				aBypass.push("canvas is not being spoofed")
-			} else {
-				aData.push("remove the RFP site exception and randomize")
-				return aData
-			}
-		}
-		let data2 = canvas.toDataURL()
-		if (data == data2) {
-			if (bypass) {
-				aBypass.push("canvas is not random per execution")
-			} else {
-				aData.push("this is not RFP as it is not random per execution")
-				return aData
-			}
-		}
-		// 1724331 FF96+ (also see 1737038)
-		if (data.length > 190 || data2.length > 190) { // was 180
-			if (bypass) {
-				aBypass.push("toDataURL lengths are too long")
-			} else {
-				aData.push("look, you're not fooling anyone, this is not RFP")
-				return aData
-			}
-		}
-
-		// looks good
-		aData.push(analyse(data))
-		aData.push(analyse(data2))
-		for (let i=2; i < testCount; i++) {
-			data = canvas.toDataURL()
-			aData.push(analyse(canvas.toDataURL()))
-		}
-		return aData
-	} catch(e) {
-		aData.push(e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message)
-		return aData
-	}
-}
-
-function run(howmany) {
+	// reset
 	dom.perf = ""
 	dom.results = ""
-	testCount = howmany
+	countTest = max
 	aBypass = []
+	if (runningTotal == 0) {dom.totals = ""}
 
 	// isFF
-	if (!isFF) {
-		if (bypass) {
-			aBypass.push("this is not gecko")
-		} else {
-			dom.results = "this test requires firefox"
-			return
-		}
-	}
+	if (!isFF) {aBypass.push("this is not gecko")}
 	// FF78+
-	if (isFF && !window.Document.prototype.hasOwnProperty("replaceChildren")) {
-		if (bypass) {
-			aBypass.push("this is not Firefox 78+")
-		} else {
-			dom.results = "this test requires firefox 78 or higher"
-			return
-		}
-	}
-	
+	if (isFF && !window.Document.prototype.hasOwnProperty("replaceChildren")) {aBypass.push("this is not Firefox 78+")}
 	// always recheck isRFP
 	Promise.all([
 		get_isRFP(),
 	]).then(function(){
 		// isRFP
-		if (isFF && !isRFP) {
-			if (bypass) {
-				aBypass.push("RFP is not enabled")
-			} else {
-				dom.results = "this test requires RFP to be enabled"
-				return
-			}
-		}
+		if (isFF && !isRFP) {aBypass.push("RFP is not enabled")}
 		// isFile
-		if (isFF && isFile) {
-			if (bypass) {
-				aBypass.push("RFP doesn't work on file scheme")
-			} else {
-				dom.results = "aw snap! RFP doesn't work on file:/// scheme"
-				return
-			}
-		}
+		if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
 		// heh
-		if (testTotal >= 200000) {
-			dom.results = "that's enough tests for now... go take a break"
-			return
-		}
-
-		// create canvas
+		if (runningTotal >= 200000) {dom.results = "that's enough tests for now... go take a break"; return}
+		// create canvas once per run
 		try {
 			let canvas = document.getElementById("canvas")
+			canvas.width = sizeW
+			canvas.height = sizeH // always reset canvas size since width+height are variable via console
 			let ctx = canvas.getContext('2d')
-			for (let x=0; x < 16; x++) {
-				for (let y=0; y < 16; y++) {
+			for (let x=0; x < sizeW; x++) {
+				for (let y=0; y < sizeH; y++) {
 					ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 					ctx.fillRect(x, y, 1, 1)
 				}
@@ -293,104 +103,435 @@ function run(howmany) {
 			dom.results.innerHTML = e.name === undefined ? "error" : sb+ e.name  + sc+": " + e.message
 			return
 		}
-		dom.results = "calculating..."
-
-		// ok, test away
-		let delay = 250
-		if (testCount > 1000) {delay = 45}
-
-		setTimeout(function(){
-			let t0 = performance.now()
-			// get results
-			Promise.all([
-				get_data()
-			]).then(function(results){
-				let data = results[0]
-				let display = []
-				if (data.length == 1) {
-					dom.results.innerHTML = data[0]
-					return
-				}
-				// debug
-				//data = ["1","1","2","2","8","11","0","3","3", rules[3]]
-				//data = ["1","1","2","2","8","11","0","3","3"]
-				//testCount = data.length
-
-				testTotal += data.length
-				data.sort()
-				display.push(s9 +"TESTS COMPLETED: " + data.length + sc +"<br>")
-				for (let i=0; i < rules.length; i++) {
-					let total = data.length
-					data = data.filter(x => ![""+i].includes(x))
-					let rulecount = total - data.length
-					if (rulecount > 0 ) {
-						display.push(("RULE"+ i).padEnd(6) + " : " + rules[i] +" : "+ s9 + (rulecount +"").padStart(5) + sc)
-						// update running totals
-						let curTotal = oTotal["rule"+ (i +"").padStart(2,"0")][0]
-						let newTotal = curTotal + rulecount
-						oTotal["rule"+ (i +"").padStart(2,"0")] = [newTotal]
-					}
-				}
-				let count = data.length
-				let countRFP = testCount - count
-
-				if (countRFP > 0) {
-					hasTotal = true
-					display.push(s9 +"".padStart(51) + "-----" + sc)
-					display.push(s9 +"TOTAL: ".padStart(51) + (countRFP +"").padStart(5) + sc)
-				}
-				if (count == 0) {
-					display.push(s9 +"<br>\u2713 NAILED IT"+ sc)
-				}
-				if (count > 0) {
-					let strRemainder = countRFP == 0 ? "RESULTS: " : "OTHER RESULTS: " 
-					if (data.length) {
-						data = data.filter(function(item, position) {return data.indexOf(item) === position})
-						let deduped = data.length == count ? "" : " [de-duped]"
-						display.push("<br>" + s9 + strRemainder + data.length + deduped + sc +"<br>")
-						display.push(data.join("<br>"))
-						if (countRFP == 0) {display.push(sb +"<br><br>\u2715 FAILED IT"+ sc)}
-					}
-				}
-				dom.results.innerHTML = display.join("<br>") +
-					(aBypass.length ? "<br><br>also... you failed to pass these basics<br><br>" + aBypass.join("<br>") : "")
-
-				// running totals
-				if (hasTotal) {
-					display = [s9 +"TOTAL TESTS: "+ testTotal + sc +"<br>"]
-					let displayTotal = []
-					for (let i=0; i < rules.length; i++) {
-						let curTotal = oTotal["rule"+ (i +"").padStart(2,"0")][0]
-						let strTotal = curTotal +""
-						if (strTotal.length > 5) {strTotal = "> 99999"}
-						strTotal = strTotal.padStart(7)
-						let ruleNo = "RULE"+ (i +"").padEnd(2)
-						strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s14 + ruleNo + sc +": "+ strTotal
-						displayTotal.push(strTotal)
-						if ((i % 4) == 3 || i+1 == rules.length) { // 4 per line plus final line
-							display.push(displayTotal.join(" | "))
-							displayTotal = []
-						}
-					}
-					display.push("<br><hr>")
-					dom.totals.innerHTML = display.join("<br>")
-				}
-
-				// perf
-				let t1 = performance.now()
-				let perItem = (t1-t0)/testCount
-				if (!Number.isInteger(perItem)) {perItem = perItem.toFixed(2)}
-				dom.perf.innerHTML = Math.round(t1-t0) +" ms | "+ perItem +" each"
-			})
-		}, delay)
+		// looks good
+		get_rawdata()
 	})
 }
 
+function get_rawdata() {
+	/* STEP TWO get raw data */
+
+	// info
+	dom.results = "calculating..."
+	// reset
+	oFail = {},
+	oPass = {}
+	aRaw = []
+
+	// FF expected values: boolean = stringified is96
+	// 1724331 FF96+ (also see 1737038)
+	let oControl = {
+		//widthxheight
+		"hash": {
+			"16x8": {"true": "a8d0bd06" },
+			"16x16": {"true": "bdcce913", "false": "b7bf4776"},
+		},
+		"lengths": {
+			"16x16": {
+				"true": [174,178,182,186,190],
+				"false": [162,166,170,174]
+			}
+		}
+	}
+
+	// test away
+	let delay = 250
+	if (countTest > 1000) {delay = 45}
+
+	setTimeout(function(){
+		try {
+			let t0 = performance.now()
+			let canvas = document.getElementById("canvas")
+
+			// first two tests
+			let testA = canvas.toDataURL(), hashA = mini(testA)
+			let testB = canvas.toDataURL(), hashB = mini(testA)
+			if (testA === testB) {aBypass.push("canvas is not random per execution")}
+			// FF
+			if (isFF) {
+				try {
+					let controlHash, controlLengths
+					controlHash = oControl["hash"][sizeW+"x"+sizeH][is96+""]
+					controlLengths = oControl["lengths"][sizeW+"x"+sizeH][is96+""]
+					if (testA === controlHash) {aBypass.push("canvas is not being spoofed")}
+					if (!controlLengths.includes(testA.length)) {aBypass.push("toDataURL lengths are too long")}
+				} catch(e) {
+					// don't return if missing control data, we want to allow different sizes in aRaw
+				}
+				/*
+				console.log(sizeW +" x "+ sizeH)
+				console.log(testA.length, testA)
+				console.log(testB.length, testB)
+				console.log(aBypass)
+				console.log(controlHash)
+				console.log(controlLengths)
+				//*/
+			}
+			// add existing two tests
+			aRaw.push(testA, testB)
+			// get the rest
+			for (let i=2; i < countTest; i++) {
+				aRaw.push(canvas.toDataURL())
+			}
+			// raw perf
+			let t1 = performance.now()
+			let perItem = (t1-t0)/countTest
+			if (!Number.isInteger(perItem)) {perItem = perItem.toFixed(2)}
+			dom.perf.innerHTML = Math.round(t1-t0) +" ms | "+ perItem +" each"
+
+			// next step
+			analyse_rawdata()
+
+		} catch(e) {
+			dom.results.innerHTML = (e.name === undefined ? "error" : sb + e.name + sc +": "+ e.message)
+		}
+	}, delay)
+}
+
+function analyse_rawdata() {
+	/* STEP THREE analyze raw data */
+
+	//console.log(aRaw)
+	try {
+		// get occurences of each
+		let oOccurrences = aRaw.reduce(function(occ, item) {
+			occ[item] = (occ[item] || 0) + 1
+			return occ
+		}, {})
+		//console.log(oOccurrences)
+
+
+		// keep counts by slice data + length
+		for (const k of Object.keys(oOccurrences)) {
+			let len = k.length
+			let count = oOccurrences[k]
+			let str
+			// default slices
+			let slice1 = k.slice(69,70),
+				slice2 = k.slice(70,72),
+				slice3 = k.slice(72,80),
+				slice4 = k.slice(len - 10, len)
+			if (rules.length) {
+				if (sizeW == 16 && sizeH == 16) {
+					if (slice1 == "A") {
+						// note: #order: anecdata most common
+						if (is96 && slice3 == "lEQVQ4T2") {
+							// FF96+
+							if (slice4 == "VORK5CYII=") {
+								if (len == 186) {str = "6" // #1
+								} else if (len == 190) {str = "5"
+								} else if (len == 182) {str = "7"
+								} else if (len == 178) {str = "8"
+								} else if (len == 174) {str = "9"
+								}
+							} else if (slice4 == "5ErkJggg==") {
+								if (len == 186) {str = "1" // #2
+								} else if (len == 190) {str = "0"
+								} else if (len == 182) {str = "2"
+								} else if (len == 178) {str = "3"
+								} else if (len == 174) {str = "4"
+								}
+							} else if (slice4 == "lFTkSuQmCC") {
+								if (len == 186) {str = "11" // #3
+								} else if (len == 182) {str = "12" // #4
+								} else if (len == 190) {str = "10"
+								} else if (len == 178) {str = "13"
+								} else if (len == 174) {str = "14"
+								}
+							}
+						} else if (!is96 && slice3 == "lEQVQ4jW") {
+							// FF78-95
+							if (slice4 == "5ErkJggg==") {
+								if (len == 174) {str = "0" // #1
+								} else if (len == 170) {str = "1"
+								} else if (len == 166) {str = "2"
+								} else if (len == 162) {str = "3"
+								}
+							} else if (slice4 == "VORK5CYII=") {
+								if (len == 174) {str = "4" // #2
+								} else if (len == 170) {str = "5" // #4
+								} else if (len == 166) {str = "6"
+								} else if (len == 162) {str = "7"
+								}
+							} else if (slice4 == "lFTkSuQmCC") {
+								if (len == 170) {str = "9" // #3
+								} else if (len == 174) {str = "8"
+								} else if (len == 166) {str = "10"
+								} else if (len == 162) {str = "11"
+								}
+							}
+						}
+					}
+				}
+			}
+			if (str !== undefined) {
+				oPass[str] = count
+			} else {
+				str = s14 + len +sc +" : "+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
+				oFail[str] = count
+			}
+		}
+		// next
+		output()
+
+	} catch(e) {
+		console.error(e.name, e.message)
+	}
+}
+
+function output() {
+
+	let display = []
+	display.push(s9 +"TESTS RUN: " + countTest + sc
+		+" ["+ sizeW +"w x "+ sizeH +"h]<br>"
+	)
+
+	// tests
+	/* simulate RFP
+	oPass = {"7": countTest - 33, "11": 33}
+	oFail = {}
+	aBypass = []
+	//*/
+
+	/* simulate 100% matches but one basic check fails
+	oPass = {"7": countTest - 33, "11": 33}
+	oFail = {}
+	aBypass = ["canvas is not random per execution"]
+	//*/
+
+	/* simulate 100% matches but multiple basic check fails
+	oPass = {"7": countTest - 33, "11": 33}
+	oFail = {}
+	aBypass = ["RFP is not enabled","canvas is not random per execution"]
+	//*/
+
+	/* simulate mixed: 1 nonmatch
+	oPass = {"7": countTest - 33, "11": 32}
+	oFail = { "<span class='s14'>274</span> : <span class='s14'>A</span>g0<span class='s14'>lEQVQ4T5</span> ... <span class='s14'>VORK5CYII=</span>": 1 }
+	aBypass = []
+	//*/
+
+	/* simulate mixed: 1 nonmatch + bypasses
+	oPass = {"7": countTest - 33, "11": 32}
+	oFail = { "<span class='s14'>274</span> : <span class='s14'>A</span>g0<span class='s14'>lEQVQ4T5</span> ... <span class='s14'>VORK5CYII=</span>": 1 }
+	aBypass = ["RFP is not enabled","canvas is not random per execution"]
+	//*/
+
+	/* simulate mixed: multi nonmatch
+	oPass = {"7": countTest - 33, "11": 25}
+	oFail = {
+		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>CCCCCCCC</span> ... <span class='s14'>VORK5CYII=</span>": 3,
+		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>AAAAAAAA</span> ... <span class='s14'>VORK5CYII=</span>": 5,
+	}
+	aBypass = []
+	//*/
+
+	/* simulate mixed: multi exceed maxLines
+	oPass = {"7": countTest - 33, "11": 23} // 10 fails
+	oFail = {
+		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>aaaaaaaa</span> ... <span class='s14'>VRYERUWUU=</span>": 1,
+		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>CCCCCCCC</span> ... <span class='s14'>GORK5CYII=</span>": 2,
+		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>bbbbbbbb</span> ... <span class='s14'>FPPDGhGSI=</span>": 1, // maxLines
+
+		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>XxXxXxXx</span> ... <span class='s14'>IuGTSFdd==</span>": 1, // sum the rest
+		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>uuuuuuuu</span> ... <span class='s14'>IuGTSFdd==</span>": 1,
+		"<span class='s14'>350</span> : <span class='s14'>A</span>g0<span class='s14'>grooooot</span> ... <span class='s14'>=IAMGROOT=</span>": 1,
+		"<span class='s14'>360</span> : <span class='s14'>A</span>g0<span class='s14'>iiiiiiii</span> ... <span class='s14'>=IAMGROOT=</span>": 2,
+		"<span class='s14'>370</span> : <span class='s14'>A</span>g0<span class='s14'>vvvvvvvv</span> ... <span class='s14'>=IAMGROOT=</span>": 1,
+	}
+	maxLines = 3
+	//*/
+
+	let countMatch = 0, // matches pattern
+		countPass = 0 // legit passes
+	let strBypass = ""
+	aBypass.forEach(function(item) {strBypass += "<li>"+ item +"</li>"})
+	if (strBypass !== "") {strBypass = "<ul>"+ strBypass + "</ul>"}
+
+	for (let i=0; i < rules.length; i++) {
+		if (oPass[i] !== undefined) {
+			countMatch += oPass[i]
+			display.push(("RULE"+ i).padEnd(6) + " : " + rules[i] +" : "+ s9 + (oPass[i] +"").padStart(5) + sc)
+			// update running match totals
+			let curTotal = oRunningTotal["rule"+ (i +"").padStart(2,"0")][0]
+			let newTotal = curTotal + oPass[i]
+			oRunningTotal["rule"+ (i +"").padStart(2,"0")] = [newTotal]
+			// track LEGIT pass
+			if (aBypass.length == 0) {countPass += oPass[i]}
+		}
+	}
+	let percentMatch = ((countMatch/countTest) * 100).toFixed(2)
+	// MATCHES
+	if (countMatch > 0) {
+		display.push(s9 +"".padStart(51) + "-----" + sc)
+		display.push(s9 +"TOTAL PATTERN MATCHES : ".padStart(51) + (countMatch +"").padStart(5) + sc)
+	}
+	// NON-MATCHES
+	let countFail = countTest - countMatch
+	if (countFail > 0) {
+		if (countMatch > 0) {display.push("<br>")}
+		if (percentMatch == 100) {percentMatch = ((countMatch/countTest) * 100).toFixed(3)} // ensure under 100.00
+		// only display the first x lines, sum the rest
+		let countLine = 0, countRemainder = 0
+		for (const k of Object.keys(oFail)) {
+			let countItem = oFail[k]
+			if (countLine < maxLines) {
+				countItem = countItem.toString()
+				display.push(k + sb + countItem.padStart(24) + sc)
+			} else {
+				countRemainder += countItem
+			}
+			countLine ++
+		}
+		if (countRemainder > 0) {
+			let keysRemaining = Object.keys(oFail).length - maxLines
+			let summary = keysRemaining +" other" + (keysRemaining > 1 ? "s" : "")
+			display.push(summary.padStart(51) + sb + (countRemainder +"").padStart(5) + sc)
+		}
+		display.push(sb +"".padStart(51) + "-----" + sc)
+		display.push(sb +"TOTAL NON-MATCHES : ".padStart(51) + (countFail +"").padStart(5) + sc)
+
+		// START ANALYSIS
+		display.push("<br><hr><br>"+ s9 +"ANALYSIS: "+ sc + sb +"\u2715 FAILED"+ sc
+			+" | PATTERN MATCHES "+ sb + percentMatch +"%"+ sc +" | PASSES "
+			+ (countPass === 0 ? sb +"ZERO" : s9 + countPass) + sc
+		)
+	}
+
+	// ANALYSIS
+	if (countMatch == countTest) {
+		if (aBypass.length) {
+			// e.g. RFP is on, but has canvas site exception and an
+			// extension matches RFP canvas but does not randomize per execution
+			display.push("<br><hr><br>"+ s9 +"ANALYSIS: "+ sc + sb +"\u2715 FAILED"+ sc
+				+" | PATTERN MATCHES "+ s9 + percentMatch +"%"+ sc +" | PASSES "+ sb +"ZERO"+ sc)
+		} else {
+			// we missed some control rules?
+			display.push("<br><hr><br>"+ s9 +"ANALYSIS: \u2713 NAILED"+ sc
+				+" | PATTERN MATCHES "+ s9 + percentMatch +"%"+ sc +" | PASSES "+ s9 + countTest + sc)
+		}
+	}
+	// BYPASS INFO
+	if (aBypass.length) {
+		display.push("<br>You "+ sb + (countMatch == countTest ? "": "also ") +"failed"+ sc +" to pass "
+			+ (aBypass.length == 1 ? "this basic check" : "these basic checks") +", so "
+			+ sb +"no soup for you!"+ sc +"<br><br>" + strBypass
+		)
+	}
+	// OUTPUT
+	dom.results.innerHTML = display.join("<br>")
+
+	// RUNNING TOTALS
+	runningTotal += countTest
+	runningPass += countPass
+	runningMatch += countMatch
+
+	let percentTotalMatch = ((runningMatch/runningTotal) * 100).toFixed(2)
+	let percentTotalPass = ((runningPass/runningTotal) * 100).toFixed(2)
+	let strTotalMatch = (percentTotalMatch < 100 ? sb : s9 ) + runningMatch +" ["+ percentTotalMatch +"%]" + sc
+	let strTotalPass = (percentTotalPass < 100 ? sb : s9 ) + runningPass + " ["+ percentTotalPass +"%]"+ sc
+	let strTotalTests = s9 +"RUNNING TOTALS: "+ sc +"TESTS "+ s9 + runningTotal + sc
+	let strPatternInfo = "<br><br>\u25BC PATTERN MATCHES ["+ sizeW +"w x "+ sizeH +"h]<br>"
+
+	let str = strTotalTests +" | MATCHES " + strTotalMatch +" | PASSES " + strTotalPass + strPatternInfo
+
+	display = [str]
+	if (rules.length == 0) {display.push("note: there are no pattern rules for this size")}
+	let displayTotal = []
+	for (let i=0; i < rules.length; i++) {
+		let curTotal = oRunningTotal["rule"+ (i +"").padStart(2,"0")][0]
+		let strTotal = curTotal +""
+		if (strTotal.length > 5) {strTotal = "> 99999"}
+		strTotal = strTotal.padStart(7)
+		let ruleNo = "RULE"+ (i +"").padEnd(2)
+		strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s14 + ruleNo + sc +": "+ strTotal
+		displayTotal.push(strTotal)
+		if ((i % 4) == 3 || i+1 == rules.length) { // 4 per line plus final line
+			display.push(displayTotal.join(" | "))
+			displayTotal = []
+		}
+	}
+	display.push("<br><hr>")
+	dom.totals.innerHTML = display.join("<br>")
+
+}
+
+function build_rules() {
+	// reset
+	rules = []
+	oRunningTotal = {}
+
+	let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14
+		+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + sc +" ... "+ s14
+	if (is96 && sizeW == 16 && sizeH == 16) {
+		rules = [
+			s14+ "190 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "186 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "182 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "178 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+
+			s14+ "190 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "186 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "182 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "178 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+
+			s14+ "190 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "186 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "182 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "178 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+		]
+	} else if (!is96 && sizeW == 16 && sizeH == 16) {
+		rules = [
+			s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
+			s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
+
+			s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "170 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "166 "+ prefix + "VORK5CYII="+ sc,
+			s14+ "162 "+ prefix + "VORK5CYII="+ sc,
+
+			s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
+			s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+		]
+	}
+	// pre-generate arrays
+	for (let i=0; i < rules.length; i++) {
+		oRunningTotal["rule"+ (i +"").padStart(2,"0")] = [0]
+	}
+}
+
+function set_size(width = 16, height = 16) {
+	// call from console
+	// even when we don't have rules, the non-match summaries give us the rule info
+
+	if (height > 16 || height < 2 || width > 16 || width < 2 ) {
+		console.log("try again: width and height: max value 16, min value 2")
+		return
+	} else {
+		console.log("setting sizes to "+ width +"w x "+ height +"h")
+	}
+	sizeW = width
+	sizeH = height
+	oRunningTotal
+	runningTotal = 0
+	runningPass = 0
+	runningMatch = 0
+	build_rules()
+}
+
+build_rules()
 setTimeout(function() {
 	Promise.all([
 		get_globals()
 	]).then(function(){
-		run(testCount)
+		run_checks(100)
 	})
 }, 50)
 
