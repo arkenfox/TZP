@@ -28,10 +28,20 @@
 		</th></tr></thead>
 
 		<tr><td colspan="2" class="intro">
-			<span class="no_color"><span class="s9">FF96+ </span>: testing RFP 
-				characteristics in toDataURL [and by extension toBlob] </span>
-				&nbsp &#x25BA; <span class="nothidden"><canvas id="canvas" width="16" height="16"></canvas>
-				&nbsp &#x25C4;</span>
+			<span class="s9">FF96+ </span>
+			<span class="no_color">: testing RFP characteristics in toDataURL [and by extension toBlob]</span>
+			&nbsp &#x25BA; <canvas id="canvas" width="16" height="16"></canvas> &nbsp &#x25C4; <br><br>
+			<details><summary><span class="no_color">click me for more info</span></summary>
+				<span class="no_color">
+					<ul>
+					<li>toDataURLs: <code>aRaw</code></li>
+					<li>change canvas dimensons: max 16, min 2: <code>set_size(width, height)</code></li>
+					<li>all coded patterns: <code>oControls</code></li>
+					<li>running a size with no patterns will still summarize possible RFP rules</li>
+					</ul>
+				</span>
+		</details>
+
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn9 btnfirst" onClick="run_checks(100)">[ run 100 ]</span>
@@ -101,8 +111,7 @@ function populate_rules() {
 }
 
 let is96 = (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc")
-let sizeW = 16, sizeH = 16
-//sizeH = 8 // smaller faster test
+let sizeW = 16, sizeH = 8 // smaller faster test
 
 function run_checks(max) {
 	/* STEP ONE	run some checks	*/
@@ -113,9 +122,11 @@ function run_checks(max) {
 	countTest = max
 	aBypass = []
 	if (runningTotal == 0) {
+		// reset
 		dom.totals = ""
 		oRunningTotal = {}
 		oRules = {}
+		hasRules = false
 		try {
 			// pre-generate arrays
 			if (oControl[sizeW +"x"+ sizeH] !== undefined) {
@@ -125,8 +136,8 @@ function run_checks(max) {
 					oRunningTotal[ruleNo] = [0]
 					oRules[k] = oControl[sizeW +"x"+ sizeH]["rules"][k]
 				}
+				hasRules = true
 			}
-			hasRules = true
 			//console.log(oRunningTotal)
 			//console.log(oRules)
 		} catch(e) {}
