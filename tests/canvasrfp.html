@@ -162,7 +162,7 @@ function get_rawdata() {
 				try {
 					controlHash = oControl["hash"][sizeW+"x"+sizeH][is96+""]
 					controlLengths = oControl["lengths"][sizeW+"x"+sizeH][is96+""]
-					if (testA === controlHash) {aBypass.push("canvas is not being spoofed")}
+					if (hashA === controlHash || hashB === controlHash) {aBypass.push("canvas is not being spoofed")}
 					if (!controlLengths.includes(testA.length)) {aBypass.push("toDataURL lengths are too long")}
 				} catch(e) {
 					console.error(e.name, e.message)
