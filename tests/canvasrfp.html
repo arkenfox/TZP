@@ -28,8 +28,10 @@
 		</th></tr></thead>
 
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Testing RFP characteristics in toDataURL [and by extension toBlob] </span>
-			 &nbsp &#x25BA; <span class="nothidden"><canvas id="canvas" width="16" height="16"></canvas> &nbsp &#x25C4;</span>
+			<span class="no_color"><span class="s9">FF96+ </span>: testing RFP 
+				characteristics in toDataURL [and by extension toBlob] </span>
+				&nbsp &#x25BA; <span class="nothidden"><canvas id="canvas" width="16" height="16"></canvas>
+				&nbsp &#x25C4;</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn9 btnfirst" onClick="run_checks(100)">[ run 100 ]</span>
@@ -55,15 +57,52 @@ s9 = s9.trim()
 s14 = s14.trim()
 
 // data
-let aBypass = [], aRaw = [], oFail = {}, oPass = {}
+let aBypass = [], aRaw = [], oFail = {}, oPass = {}, oRules = {}
 //counts
 let countTest = 0, runningTotal = 0, runningPass = 0, runningMatch = 0, maxLines = 20, oRunningTotal = {}
 // control
-let controlHash = "", controlLengths = [], rules = [], testA = "", testB = "", hashA = "", hashB = ""
+let controlHash = "", controlLengths = [], testA = "", testB = "", hashA = "", hashB = "", hasRules = false
+
+// FF96+ expected values: see 1724331 + 1737038
+let oControl = {
+	"16x16": {
+		"hash": "bdcce913",
+		"lengths": [174,178,182,186,190],
+		"ruleNos": {},
+		"rules": {},
+		"slice1": "lEQVQ4T2",
+		"slice2": ["5ErkJggg==","VORK5CYII=","lFTkSuQmCC"],
+	},
+	"16x8": {
+		"hash": "a8d0bd06",
+		"lengths": [166,170,174,178],
+		"ruleNos": {},
+		"rules": {},
+		"slice1": "lEQVQoU2",
+		"slice2": ["5ErkJggg==","VORK5CYII=","lFTkSuQmCC"],
+	},
+}
+
+function populate_rules() {
+	for (const k of Object.keys(oControl)) {
+		let ruleNo = 1
+		let lengths = oControl[k]["lengths"],
+			slice1 = oControl[k]["slice1"],
+			slice2 = oControl[k]["slice2"]
+		lengths.forEach(function(len) {
+			slice2.forEach(function(slice) {
+				let key = len +"..."+ slice1 +"..."+ slice
+				oControl[k]["rules"][key] = ruleNo
+				oControl[k]["ruleNos"][ruleNo] = key
+				ruleNo++
+			})
+		})
+	}
+}
 
 let is96 = (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc")
 let sizeW = 16, sizeH = 16
-//if (is96) {sizeH = 8} // smaller faster test for RFP96+ once I build rules and controls
+//sizeH = 8 // smaller faster test
 
 function run_checks(max) {
 	/* STEP ONE	run some checks	*/
@@ -73,12 +112,35 @@ function run_checks(max) {
 	dom.results = ""
 	countTest = max
 	aBypass = []
-	if (runningTotal == 0) {dom.totals = ""}
+	if (runningTotal == 0) {
+		dom.totals = ""
+		oRunningTotal = {}
+		oRules = {}
+		try {
+			// pre-generate arrays
+			if (oControl[sizeW +"x"+ sizeH] !== undefined) {
+				for (const k of Object.keys(oControl[sizeW +"x"+ sizeH]["rules"])) {
+					let ruleNo = oControl[sizeW +"x"+ sizeH]["rules"][k]
+					ruleNo = "rule" + (ruleNo +"").padStart(2, "0")
+					oRunningTotal[ruleNo] = [0]
+					oRules[k] = oControl[sizeW +"x"+ sizeH]["rules"][k]
+				}
+			}
+			hasRules = true
+			//console.log(oRunningTotal)
+			//console.log(oRules)
+		} catch(e) {}
+	}
 
 	// isFF
 	if (!isFF) {aBypass.push("this is not gecko")}
 	// FF78+
-	if (isFF && !window.Document.prototype.hasOwnProperty("replaceChildren")) {aBypass.push("this is not Firefox 78+")}
+	if (isFF && !window.Document.prototype.hasOwnProperty("replaceChildren")) {
+		aBypass.push("this is not Firefox 78+, when RFP canvas was added")
+	}
+	if (isFF && !is96) {
+		aBypass.push("this is not Firefox 96+, as per the test description")
+	}
 	// always recheck isRFP
 	Promise.all([
 		get_isRFP(),
@@ -88,7 +150,7 @@ function run_checks(max) {
 		// isFile
 		if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
 		// heh
-		if (runningTotal >= 200000) {dom.results = "that's enough tests for now... go take a break"; return}
+		if (runningTotal >= 500000) {dom.results = "that's enough tests for now... go take a break"; return}
 		// create canvas once per run
 		try {
 			let canvas = document.getElementById("canvas")
@@ -126,22 +188,6 @@ function get_rawdata() {
 	hashA = ""
 	hashB = ""
 
-	// FF expected values: boolean = stringified is96
-	// 1724331 FF96+ (also see 1737038)
-	let oControl = {
-		//widthxheight
-		"hash": {
-			"16x8": {"true": "a8d0bd06" },
-			"16x16": {"true": "bdcce913", "false": "b7bf4776"},
-		},
-		"lengths": {
-			"16x16": {
-				"true": [174,178,182,186,190],
-				"false": [162,166,170,174]
-			}
-		}
-	}
-
 	// test away
 	let delay = 250
 	if (countTest > 1000) {delay = 45}
@@ -160,12 +206,11 @@ function get_rawdata() {
 			// FF
 			if (isFF) {
 				try {
-					controlHash = oControl["hash"][sizeW+"x"+sizeH][is96+""]
-					controlLengths = oControl["lengths"][sizeW+"x"+sizeH][is96+""]
+					controlHash = oControl[sizeW+"x"+sizeH]["hash"]
+					controlLengths = oControl[sizeW+"x"+sizeH]["lengths"]
 					if (hashA === controlHash || hashB === controlHash) {aBypass.push("canvas is not being spoofed")}
-					if (!controlLengths.includes(testA.length)) {aBypass.push("toDataURL lengths are too long")}
 				} catch(e) {
-					console.error(e.name, e.message)
+					//console.error(e.name, e.message)
 					// don't return if missing control data, we want to allow different sizes in aRaw
 				}
 				/*
@@ -210,6 +255,7 @@ function analyse_rawdata() {
 		}, {})
 
 		// keep counts by slice data + length
+		// keep counts by slice data + length
 		for (const k of Object.keys(oOccurrences)) {
 			let len = k.length
 			let count = oOccurrences[k]
@@ -217,55 +263,10 @@ function analyse_rawdata() {
 			// default slices
 			let slice1 = k.slice(72,80),
 				slice2 = k.slice(len - 10, len)
-			if (rules.length) {
-				if (sizeW == 16 && sizeH == 16) {
-					// note: #order: anecdata most common
-					if (is96 && slice1 == "lEQVQ4T2") {
-						// FF96+
-						if (slice2 == "VORK5CYII=") {
-							if (len == 186) {str = "6" // #1
-							} else if (len == 190) {str = "5"
-							} else if (len == 182) {str = "7"
-							} else if (len == 178) {str = "8"
-							} else if (len == 174) {str = "9"
-							}
-						} else if (slice2 == "5ErkJggg==") {
-							if (len == 186) {str = "1" // #2
-							} else if (len == 190) {str = "0"
-							} else if (len == 182) {str = "2"
-							} else if (len == 178) {str = "3"
-							} else if (len == 174) {str = "4"
-							}
-						} else if (slice2 == "lFTkSuQmCC") {
-							if (len == 186) {str = "11" // #3
-							} else if (len == 182) {str = "12" // #4
-							} else if (len == 190) {str = "10"
-							} else if (len == 178) {str = "13"
-							} else if (len == 174) {str = "14"
-							}
-						}
-					} else if (!is96 && slice1 == "lEQVQ4jW") {
-						// FF78-95
-						if (slice2 == "5ErkJggg==") {
-							if (len == 174) {str = "0" // #1
-							} else if (len == 170) {str = "1"
-							} else if (len == 166) {str = "2"
-							} else if (len == 162) {str = "3"
-							}
-						} else if (slice2 == "VORK5CYII=") {
-							if (len == 174) {str = "4" // #2
-							} else if (len == 170) {str = "5" // #4
-							} else if (len == 166) {str = "6"
-							} else if (len == 162) {str = "7"
-							}
-						} else if (slice2 == "lFTkSuQmCC") {
-							if (len == 170) {str = "9" // #3
-							} else if (len == 174) {str = "8"
-							} else if (len == 166) {str = "10"
-							} else if (len == 162) {str = "11"
-							}
-						}
-					}
+			if (hasRules) {
+				let key = len +"..."+ slice1 +"..."+ slice2
+				if (Object.keys(oRules).includes(key)) {
+					str = oRules[key]
 				}
 			}
 			if (str !== undefined) {
@@ -292,7 +293,6 @@ function analyse_rawdata() {
 }
 
 function output() {
-
 	let display = []
 	display.push(s9 +"TESTS RUN: " + countTest + sc
 		+" ["+ sizeW +"w x "+ sizeH +"h]<br>"
@@ -359,19 +359,20 @@ function output() {
 	aBypass.forEach(function(item) {strBypass += "<li>"+ item +"</li>"})
 	if (strBypass !== "") {strBypass = "<ul>"+ strBypass + "</ul>"}
 
-	for (let i=0; i < rules.length; i++) {
-		if (oPass[i] !== undefined) {
-			countMatch += oPass[i]
-			display.push(("RULE"+ i).padEnd(6) + " : " + rules[i] +" : "+ s9 + (oPass[i] +"").padStart(5) + sc)
-			// update running match totals
-			let curTotal = oRunningTotal["rule"+ (i +"").padStart(2,"0")][0]
-			let newTotal = curTotal + oPass[i]
-			oRunningTotal["rule"+ (i +"").padStart(2,"0")] = [newTotal]
-			// track LEGIT pass
-			if (aBypass.length == 0) {countPass += oPass[i]}
-		}
+	for (const k of Object.keys(oPass)) {
+		let count = oPass[k]
+		countMatch += count
+		let rule = oControl[sizeW +"x" + sizeH]["ruleNos"][k]
+		display.push(("RULE"+ k).padEnd(6) + " : " + rule +" : "+ s9 + (oPass[k] +"").padStart(5) + sc)
+		// update running match totals
+		let curTotal = oRunningTotal["rule"+ (k +"").padStart(2,"0")][0]
+		let newTotal = curTotal + oPass[k]
+		oRunningTotal["rule"+ (k +"").padStart(2,"0")] = [newTotal]
+		// track LEGIT pass
+		if (aBypass.length == 0) {countPass += oPass[k]}
 	}
 	let percentMatch = ((countMatch/countTest) * 100).toFixed(2)
+
 	// MATCHES
 	if (countMatch > 0) {
 		display.push(s9 +"".padStart(39) + "-----" + sc)
@@ -443,13 +444,13 @@ function output() {
 	let strTotalPass = (percentTotalPass < 100 ? sb : s9 ) + runningPass + " ["+ percentTotalPass +"%]"+ sc
 	let strTotalTests = s9 +"RUNNING TOTALS: "+ sc +"TESTS "+ s9 + runningTotal + sc
 	let strPatternInfo = "<br><br>\u25BC PATTERN MATCHES ["+ sizeW +"w x "+ sizeH +"h]<br>"
-
 	let str = strTotalTests +" | MATCHES " + strTotalMatch +" | PASSES " + strTotalPass + strPatternInfo
-
 	display = [str]
-	if (rules.length == 0) {display.push("note: there are no pattern rules for this size")}
+
+	if (!hasRules) {display.push("note: there are no pattern rules for this size")}
 	let displayTotal = []
-	for (let i=0; i < rules.length; i++) {
+
+	for (let i=1; i < Object.keys(oRules).length +1; i++) {
 		let curTotal = oRunningTotal["rule"+ (i +"").padStart(2,"0")][0]
 		let strTotal = curTotal +""
 		if (strTotal.length > 5) {strTotal = "> 99999"}
@@ -457,70 +458,19 @@ function output() {
 		let ruleNo = "RULE"+ (i +"").padEnd(2)
 		strTotal = curTotal == 0 ? ruleNo +": "+ strTotal : s14 + ruleNo + sc +": "+ strTotal
 		displayTotal.push(strTotal)
-		if ((i % 4) == 3 || i+1 == rules.length) { // 4 per line plus final line
+		if (((i-1) % 4) == 3 || i == Object.keys(oRules).length) { // 4 per line plus final line
 			display.push(displayTotal.join(" | "))
 			displayTotal = []
 		}
 	}
 	display.push("<br><hr>")
 	dom.totals.innerHTML = display.join("<br>")
-
-}
-
-function build_rules() {
-	// reset
-	rules = []
-	oRunningTotal = {}
-
-	let prefix = "..."+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + "..."
-	if (is96 && sizeW == 16 && sizeH == 16) {
-		rules = [
-			"190"+ prefix + "5ErkJggg==",
-			"186"+ prefix + "5ErkJggg==",
-			"182"+ prefix + "5ErkJggg==",
-			"178"+ prefix + "5ErkJggg==",
-			"174"+ prefix + "5ErkJggg==",
-
-			"190"+ prefix + "VORK5CYII=",
-			"186"+ prefix + "VORK5CYII=",
-			"182"+ prefix + "VORK5CYII=",
-			"178"+ prefix + "VORK5CYII=",
-			"174"+ prefix + "VORK5CYII=",
-
-			"190"+ prefix + "lFTkSuQmCC",
-			"186"+ prefix + "lFTkSuQmCC",
-			"182"+ prefix + "lFTkSuQmCC",
-			"178"+ prefix + "lFTkSuQmCC",
-			"174"+ prefix + "lFTkSuQmCC",
-		]
-	} else if (!is96 && sizeW == 16 && sizeH == 16) {
-		rules = [
-			"174"+ prefix + "5ErkJggg==",
-			"170"+ prefix + "5ErkJggg==",
-			"166"+ prefix + "5ErkJggg==",
-			"162"+ prefix + "5ErkJggg==",
-
-			"174"+ prefix + "VORK5CYII=",
-			"170"+ prefix + "VORK5CYII=",
-			"166"+ prefix + "VORK5CYII=",
-			"162"+ prefix + "VORK5CYII=",
-
-			"174"+ prefix + "lFTkSuQmCC",
-			"170"+ prefix + "lFTkSuQmCC",
-			"166"+ prefix + "lFTkSuQmCC",
-			"162"+ prefix + "lFTkSuQmCC",
-		]
-	}
-	// pre-generate arrays
-	for (let i=0; i < rules.length; i++) {
-		oRunningTotal["rule"+ (i +"").padStart(2,"0")] = [0]
-	}
 }
 
 function set_size(width = 16, height = 16) {
 	// call from console
 	// even when we don't have rules, the non-match summaries give us the rule info
-
+	// e.g. run_check(500000) (or a million)
 	if (height > 16 || height < 2 || width > 16 || width < 2 ) {
 		console.log("try again: width and height: max value 16, min value 2")
 		return
@@ -529,14 +479,13 @@ function set_size(width = 16, height = 16) {
 	}
 	sizeW = width
 	sizeH = height
-	oRunningTotal
+	oRunningTotal = {}
 	runningTotal = 0
 	runningPass = 0
 	runningMatch = 0
-	build_rules()
 }
 
-build_rules()
+populate_rules()
 setTimeout(function() {
 	Promise.all([
 		get_globals()
