@@ -201,6 +201,7 @@ function get_rawdata() {
 function analyse_rawdata() {
 	/* STEP THREE analyze raw data */
 
+	//console.log("'" + aRaw.join("',\n'") + "'")
 	try {
 		// get occurences of each
 		let oOccurrences = aRaw.reduce(function(occ, item) {
@@ -214,58 +215,54 @@ function analyse_rawdata() {
 			let count = oOccurrences[k]
 			let str
 			// default slices
-			let slice1 = k.slice(69,70),
-				slice2 = k.slice(70,72),
-				slice3 = k.slice(72,80),
-				slice4 = k.slice(len - 10, len)
+			let slice1 = k.slice(72,80),
+				slice2 = k.slice(len - 10, len)
 			if (rules.length) {
 				if (sizeW == 16 && sizeH == 16) {
-					if (slice1 == "A") {
-						// note: #order: anecdata most common
-						if (is96 && slice3 == "lEQVQ4T2") {
-							// FF96+
-							if (slice4 == "VORK5CYII=") {
-								if (len == 186) {str = "6" // #1
-								} else if (len == 190) {str = "5"
-								} else if (len == 182) {str = "7"
-								} else if (len == 178) {str = "8"
-								} else if (len == 174) {str = "9"
-								}
-							} else if (slice4 == "5ErkJggg==") {
-								if (len == 186) {str = "1" // #2
-								} else if (len == 190) {str = "0"
-								} else if (len == 182) {str = "2"
-								} else if (len == 178) {str = "3"
-								} else if (len == 174) {str = "4"
-								}
-							} else if (slice4 == "lFTkSuQmCC") {
-								if (len == 186) {str = "11" // #3
-								} else if (len == 182) {str = "12" // #4
-								} else if (len == 190) {str = "10"
-								} else if (len == 178) {str = "13"
-								} else if (len == 174) {str = "14"
-								}
+					// note: #order: anecdata most common
+					if (is96 && slice1 == "lEQVQ4T2") {
+						// FF96+
+						if (slice2 == "VORK5CYII=") {
+							if (len == 186) {str = "6" // #1
+							} else if (len == 190) {str = "5"
+							} else if (len == 182) {str = "7"
+							} else if (len == 178) {str = "8"
+							} else if (len == 174) {str = "9"
 							}
-						} else if (!is96 && slice3 == "lEQVQ4jW") {
-							// FF78-95
-							if (slice4 == "5ErkJggg==") {
-								if (len == 174) {str = "0" // #1
-								} else if (len == 170) {str = "1"
-								} else if (len == 166) {str = "2"
-								} else if (len == 162) {str = "3"
-								}
-							} else if (slice4 == "VORK5CYII=") {
-								if (len == 174) {str = "4" // #2
-								} else if (len == 170) {str = "5" // #4
-								} else if (len == 166) {str = "6"
-								} else if (len == 162) {str = "7"
-								}
-							} else if (slice4 == "lFTkSuQmCC") {
-								if (len == 170) {str = "9" // #3
-								} else if (len == 174) {str = "8"
-								} else if (len == 166) {str = "10"
-								} else if (len == 162) {str = "11"
-								}
+						} else if (slice2 == "5ErkJggg==") {
+							if (len == 186) {str = "1" // #2
+							} else if (len == 190) {str = "0"
+							} else if (len == 182) {str = "2"
+							} else if (len == 178) {str = "3"
+							} else if (len == 174) {str = "4"
+							}
+						} else if (slice2 == "lFTkSuQmCC") {
+							if (len == 186) {str = "11" // #3
+							} else if (len == 182) {str = "12" // #4
+							} else if (len == 190) {str = "10"
+							} else if (len == 178) {str = "13"
+							} else if (len == 174) {str = "14"
+							}
+						}
+					} else if (!is96 && slice1 == "lEQVQ4jW") {
+						// FF78-95
+						if (slice2 == "5ErkJggg==") {
+							if (len == 174) {str = "0" // #1
+							} else if (len == 170) {str = "1"
+							} else if (len == 166) {str = "2"
+							} else if (len == 162) {str = "3"
+							}
+						} else if (slice2 == "VORK5CYII=") {
+							if (len == 174) {str = "4" // #2
+							} else if (len == 170) {str = "5" // #4
+							} else if (len == 166) {str = "6"
+							} else if (len == 162) {str = "7"
+							}
+						} else if (slice2 == "lFTkSuQmCC") {
+							if (len == 170) {str = "9" // #3
+							} else if (len == 174) {str = "8"
+							} else if (len == 166) {str = "10"
+							} else if (len == 162) {str = "11"
 							}
 						}
 					}
@@ -278,7 +275,7 @@ function analyse_rawdata() {
 					oPass[str] = oPass[str] + count
 				}
 			} else {
-				str = s14 + len +sc +" : "+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
+				str = len +"..."+ slice1 +"..."+ slice2
 				if (oFail[str] === undefined) {
 					oFail[str] = count
 				} else {
@@ -322,21 +319,21 @@ function output() {
 
 	/* simulate mixed: 1 nonmatch
 	oPass = {"7": countTest - 33, "11": 32}
-	oFail = { "<span class='s14'>274</span> : <span class='s14'>A</span>g0<span class='s14'>lEQVQ4T5</span> ... <span class='s14'>VORK5CYII=</span>": 1 }
+	oFail = { "274...lEQVQ4T5...VORK5CYII=": 1 }
 	aBypass = []
 	//*/
 
 	/* simulate mixed: 1 nonmatch + bypasses
 	oPass = {"7": countTest - 33, "11": 32}
-	oFail = { "<span class='s14'>274</span> : <span class='s14'>A</span>g0<span class='s14'>lEQVQ4T5</span> ... <span class='s14'>VORK5CYII=</span>": 1 }
+	oFail = { "274...lEQVQ4T5...VORK5CYII=": 1 }
 	aBypass = ["RFP is not enabled","canvas is not random per execution"]
 	//*/
 
 	/* simulate mixed: multi nonmatch
 	oPass = {"7": countTest - 33, "11": 25}
 	oFail = {
-		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>CCCCCCCC</span> ... <span class='s14'>VORK5CYII=</span>": 3,
-		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>AAAAAAAA</span> ... <span class='s14'>VORK5CYII=</span>": 5,
+		"274...lEQVQ4T5...VORK5CYII=": 3,
+		"280...BANANANA...WOOOOWEEE=": 5,
 	}
 	aBypass = []
 	//*/
@@ -344,15 +341,14 @@ function output() {
 	/* simulate mixed: multi exceed maxLines
 	oPass = {"7": countTest - 33, "11": 23} // 10 fails
 	oFail = {
-		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>aaaaaaaa</span> ... <span class='s14'>VRYERUWUU=</span>": 1,
-		"<span class='s14'>270</span> : <span class='s14'>A</span>g0<span class='s14'>CCCCCCCC</span> ... <span class='s14'>GORK5CYII=</span>": 2,
-		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>bbbbbbbb</span> ... <span class='s14'>FPPDGhGSI=</span>": 1, // maxLines
-
-		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>XxXxXxXx</span> ... <span class='s14'>IuGTSFdd==</span>": 1, // sum the rest
-		"<span class='s14'>300</span> : <span class='s14'>A</span>g0<span class='s14'>uuuuuuuu</span> ... <span class='s14'>IuGTSFdd==</span>": 1,
-		"<span class='s14'>350</span> : <span class='s14'>A</span>g0<span class='s14'>grooooot</span> ... <span class='s14'>=IAMGROOT=</span>": 1,
-		"<span class='s14'>360</span> : <span class='s14'>A</span>g0<span class='s14'>iiiiiiii</span> ... <span class='s14'>=IAMGROOT=</span>": 2,
-		"<span class='s14'>370</span> : <span class='s14'>A</span>g0<span class='s14'>vvvvvvvv</span> ... <span class='s14'>=IAMGROOT=</span>": 1,
+		"274...lEQVQ4T5...VORK5CYII=": 1,
+		"280...BANANANA...WOOOOWEEE=": 2,
+		"260...==TOR===...==BROWSER=": 1, // maxLines
+		"226...TZPTZPTZ...TZPTZPTZP=": 1, // sum the rest
+		"274...aEQVQ4T5...aORK5CYIa=": 1,
+		"274...bEQVQ4T5...bORK5CYIb=": 1,
+		"274...cEQVQ4T5...cORK5CYIc=": 2,
+		"274...dEQVQ4T5...dORK5CYId=": 1,
 	}
 	maxLines = 3
 	//*/
@@ -378,8 +374,8 @@ function output() {
 	let percentMatch = ((countMatch/countTest) * 100).toFixed(2)
 	// MATCHES
 	if (countMatch > 0) {
-		display.push(s9 +"".padStart(51) + "-----" + sc)
-		display.push(s9 +"TOTAL PATTERN MATCHES : ".padStart(51) + (countMatch +"").padStart(5) + sc)
+		display.push(s9 +"".padStart(39) + "-----" + sc)
+		display.push(s9 +"TOTAL PATTERN MATCHES : ".padStart(39) + (countMatch +"").padStart(5) + sc)
 	}
 	// NON-MATCHES
 	let countFail = countTest - countMatch
@@ -392,7 +388,7 @@ function output() {
 			let countItem = oFail[k]
 			if (countLine < maxLines) {
 				countItem = countItem.toString()
-				display.push(k + sb + countItem.padStart(24) + sc)
+				display.push(k + sb + countItem.padStart(17) + sc)
 			} else {
 				countRemainder += countItem
 			}
@@ -401,10 +397,10 @@ function output() {
 		if (countRemainder > 0) {
 			let keysRemaining = Object.keys(oFail).length - maxLines
 			let summary = keysRemaining +" other" + (keysRemaining > 1 ? "s" : "")
-			display.push(summary.padStart(51) + sb + (countRemainder +"").padStart(5) + sc)
+			display.push(summary.padStart(39) + sb + (countRemainder +"").padStart(5) + sc)
 		}
-		display.push(sb +"".padStart(51) + "-----" + sc)
-		display.push(sb +"TOTAL NON-MATCHES : ".padStart(51) + (countFail +"").padStart(5) + sc)
+		display.push(sb +"".padStart(39) + "-----" + sc)
+		display.push(sb +"TOTAL NON-MATCHES : ".padStart(39) + (countFail +"").padStart(5) + sc)
 
 		// START ANALYSIS
 		display.push("<br><hr><br>"+ s9 +"ANALYSIS: "+ sc + sb +"\u2715 FAILED"+ sc
@@ -476,44 +472,43 @@ function build_rules() {
 	rules = []
 	oRunningTotal = {}
 
-	let prefix = sc + "length : "+ s14 +"A"+ sc + "xx"+ s14
-		+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + sc +" ... "+ s14
+	let prefix = "..."+ (is96 ? "lEQVQ4T2" : "lEQVQ4jW") + "..."
 	if (is96 && sizeW == 16 && sizeH == 16) {
 		rules = [
-			s14+ "190 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "186 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "182 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "178 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
+			"190"+ prefix + "5ErkJggg==",
+			"186"+ prefix + "5ErkJggg==",
+			"182"+ prefix + "5ErkJggg==",
+			"178"+ prefix + "5ErkJggg==",
+			"174"+ prefix + "5ErkJggg==",
 
-			s14+ "190 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "186 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "182 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "178 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "174 "+ prefix + "VORK5CYII="+ sc,
+			"190"+ prefix + "VORK5CYII=",
+			"186"+ prefix + "VORK5CYII=",
+			"182"+ prefix + "VORK5CYII=",
+			"178"+ prefix + "VORK5CYII=",
+			"174"+ prefix + "VORK5CYII=",
 
-			s14+ "190 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "186 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "182 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "178 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
+			"190"+ prefix + "lFTkSuQmCC",
+			"186"+ prefix + "lFTkSuQmCC",
+			"182"+ prefix + "lFTkSuQmCC",
+			"178"+ prefix + "lFTkSuQmCC",
+			"174"+ prefix + "lFTkSuQmCC",
 		]
 	} else if (!is96 && sizeW == 16 && sizeH == 16) {
 		rules = [
-			s14+ "174 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "170 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "166 "+ prefix + "5ErkJggg=="+ sc,
-			s14+ "162 "+ prefix + "5ErkJggg=="+ sc,
+			"174"+ prefix + "5ErkJggg==",
+			"170"+ prefix + "5ErkJggg==",
+			"166"+ prefix + "5ErkJggg==",
+			"162"+ prefix + "5ErkJggg==",
 
-			s14+ "174 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "170 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "166 "+ prefix + "VORK5CYII="+ sc,
-			s14+ "162 "+ prefix + "VORK5CYII="+ sc,
+			"174"+ prefix + "VORK5CYII=",
+			"170"+ prefix + "VORK5CYII=",
+			"166"+ prefix + "VORK5CYII=",
+			"162"+ prefix + "VORK5CYII=",
 
-			s14+ "174 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "170 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "166 "+ prefix + "lFTkSuQmCC"+ sc,
-			s14+ "162 "+ prefix + "lFTkSuQmCC"+ sc,
+			"174"+ prefix + "lFTkSuQmCC",
+			"170"+ prefix + "lFTkSuQmCC",
+			"166"+ prefix + "lFTkSuQmCC",
+			"162"+ prefix + "lFTkSuQmCC",
 		]
 	}
 	// pre-generate arrays
