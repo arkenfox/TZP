@@ -191,15 +191,12 @@ function get_rawdata() {
 function analyse_rawdata() {
 	/* STEP THREE analyze raw data */
 
-	//console.log(aRaw)
 	try {
 		// get occurences of each
 		let oOccurrences = aRaw.reduce(function(occ, item) {
 			occ[item] = (occ[item] || 0) + 1
 			return occ
 		}, {})
-		//console.log(oOccurrences)
-
 
 		// keep counts by slice data + length
 		for (const k of Object.keys(oOccurrences)) {
@@ -265,10 +262,18 @@ function analyse_rawdata() {
 				}
 			}
 			if (str !== undefined) {
-				oPass[str] = count
+				if (oPass[str] === undefined) {
+					oPass[str] = count
+				} else {
+					oPass[str] = oPass[str] + count
+				}
 			} else {
 				str = s14 + len +sc +" : "+ s14 + slice1 + sc + slice2 + s14 + slice3 + sc +" ... "+ s14 + slice4 + sc
-				oFail[str] = count
+				if (oFail[str] === undefined) {
+					oFail[str] = count
+				} else {
+					oFail[str] = oFail[str] + count
+				}
 			}
 		}
 		// next
