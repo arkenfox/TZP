@@ -55,9 +55,11 @@ s9 = s9.trim()
 s14 = s14.trim()
 
 // data
-let aBypass = [], aRaw = [], oFail = {}, oPass = {}, rules = []
+let aBypass = [], aRaw = [], oFail = {}, oPass = {}
 //counts
 let countTest = 0, runningTotal = 0, runningPass = 0, runningMatch = 0, maxLines = 20, oRunningTotal = {}
+// control
+let controlHash = "", controlLengths = [], rules = [], testA = "", testB = "", hashA = "", hashB = ""
 
 let is96 = (Intl.PluralRules.supportedLocalesOf("sc").join() == "sc")
 let sizeW = 16, sizeH = 16
@@ -117,6 +119,12 @@ function get_rawdata() {
 	oFail = {},
 	oPass = {}
 	aRaw = []
+	controlHash = ""
+	controlLengths = []
+	testA = ""
+	testB = ""
+	hashA = ""
+	hashB = ""
 
 	// FF expected values: boolean = stringified is96
 	// 1724331 FF96+ (also see 1737038)
@@ -144,18 +152,20 @@ function get_rawdata() {
 			let canvas = document.getElementById("canvas")
 
 			// first two tests
-			let testA = canvas.toDataURL(), hashA = mini(testA)
-			let testB = canvas.toDataURL(), hashB = mini(testA)
+			testA = canvas.toDataURL()
+			hashA = mini(testA)
+			testB = canvas.toDataURL()
+			hashB = mini(testA)
 			if (testA === testB) {aBypass.push("canvas is not random per execution")}
 			// FF
 			if (isFF) {
 				try {
-					let controlHash, controlLengths
 					controlHash = oControl["hash"][sizeW+"x"+sizeH][is96+""]
 					controlLengths = oControl["lengths"][sizeW+"x"+sizeH][is96+""]
 					if (testA === controlHash) {aBypass.push("canvas is not being spoofed")}
 					if (!controlLengths.includes(testA.length)) {aBypass.push("toDataURL lengths are too long")}
 				} catch(e) {
+					console.error(e.name, e.message)
 					// don't return if missing control data, we want to allow different sizes in aRaw
 				}
 				/*
