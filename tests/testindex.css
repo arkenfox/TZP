@@ -23,8 +23,10 @@
 /* main */
 body {background-color: #161b22; color: #b3b3b3;}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
-code {background: #303030 !important; border: 1px solid rgba(255, 255, 255, .1);
-	padding: 1px; border-radius: 2px;}
+code {
+	background: rgba(142, 142, 145, 0.25) !important;
+	padding: 2px 6px; /* top and bottom | left and right */
+}
 a {color: black; text-decoration: none;}
 a.blue {color: #8ca7dc; text-decoration: none;}
 a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 1.2em}
