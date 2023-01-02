@@ -208,6 +208,7 @@ function fnRecord(order, description, result, match, error, perf) {
 }
 
 function get_colorgamut(num, title) {
+	// added in FF110+ 1422237
 	let q = "(color-gamut: ", res = "undefined", bolC = false
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
@@ -215,8 +216,13 @@ function get_colorgamut(num, title) {
 		if (window.matchMedia(q +"srgb)").matches) {res = "srgb"}
 		if (window.matchMedia(q +"p3)").matches) {res = "p3"}
 		if (window.matchMedia(q +"rec2020)").matches) {res = "rec2020"}
+		let bool = res == "undefined"
 		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, res, res == "undefined", "skip", perf)
+		if (isVer > 109) {
+			bool = zNA
+			res = zNA +": FF109 or lower"
+		}
+		fnRecord(num, title, res, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -1581,7 +1587,7 @@ function get_permission(num, title) {
 	try {
 		let t0; if (canPerf) {t0 = performance.now()}
 		if (bBlock) {bB = 1}
-		let userVis = "userVisibleOnly"
+		let userVis = "userVisibleOnly" // non-FF
 		navigator.permissions.query({name:"push"}).then(function(result) {
 			let res = result.state
 			let bool = (res == "prompt" || res == "denied" || res == "granted") ? true : false
@@ -1867,7 +1873,7 @@ function get_window_props(num1, num2, title) {
 		rec(num1, typeof getDefaultComputedStyle, "getDefaultComputedStyle")
 		rec(num1, typeof mozInnerScreenX, "mozInnerScreenX")
 		rec(num1, typeof mozInnerScreenY, "mozInnerScreenY")
-		rec(num1, typeof onabsolutedeviceorientation, "onabsolutedeviceorientation")
+		rec(num1, typeof onabsolutedeviceorientation, "onabsolutedeviceorientation") // removed FF110 1689631
 		//rec(num1, typeof onbeforeinput, "onbeforeinput")
 		rec(num1, typeof onmozfullscreenchange, "onmozfullscreenchange")
 		rec(num1, typeof onmozfullscreenerror, "onmozfullscreenerror")
@@ -1911,7 +1917,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof webkitConvertPointFromNodeToPage, "webkitConvertPointFromNodeToPage")
 		rec(num2, typeof webkitConvertPointFromPageToNode, "webkitConvertPointFromPageToNode")
 		rec(num2, typeof webkitIndexedDB, "webkitIndexedDB")
-			// gecko only
+			// blink only
 		rec(num2, typeof Keyboard, "Keyboard")
 		rec(num2, typeof KeyboardLayoutMap, "KeyboardLayoutMap")
 		rec(num2, typeof PERSISTENT, "PERSISTENT")
@@ -1928,7 +1934,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof onbeforexrselect, "onbeforexrselect")
 		rec(num2, typeof oncontextlost, "oncontextlost")
 		rec(num2, typeof oncontextrestored, "oncontextrestored")
-		rec(num2, typeof ondeviceorientationabsolute, "ondeviceorientationabsolute")
+		rec(num2, typeof ondeviceorientationabsolute, "ondeviceorientationabsolute") // FF110+ 1689631
 		rec(num2, typeof onsearch, "onsearch")
 		rec(num2, typeof openDatabase, "openDatabase")
 		rec(num2, typeof opr, "opr") // OPERA desktop at least
@@ -1943,6 +1949,12 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof webkitStorageInfo, "webkitStorageInfo")
 
 		// finish
+		// FF110+ 1689631 added ondeviceorientationabsolute
+			// I don't have a 110 test yet, but it's not important, there are lots of non-gecko props left
+		if (isVer > 109) {
+			resU = resU.filter(x => !["ondeviceorientationabsolute"].includes(x))
+		}
+
 		let boolU = resU.length == 0
 		let hashU = !boolU ? mini_sha1(resU.join()) : "none"
 		if (!boolU) {
