@@ -209,7 +209,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 60, maxVer = 109, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 61, maxVer = 110, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -270,6 +270,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 110: 1689631
+		let t110 = performance.now()
+		let ver110 = ("object" === typeof ondeviceorientationabsolute)
+		rec(110, 110, "1689631", ver110, performance.now()-t110) // 0.01ms
 
 		// 109: 1789776
 		let t109 = performance.now()
