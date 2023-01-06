@@ -7,6 +7,7 @@ let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	'0x061C','0x20E3','0xFFF9','0x0218','0x058F','0x08E4','0x09B3','0x1C50','0x2619',
 	// '0xFFFF', // we add this tofu later
 	],
+	fntCodeUsed = [],
 	fntStrA = "mmmLLLmmmWWWwwwmmmllliii",
 	fntStrB = "",
 	fntList = [], // what we use
@@ -17,8 +18,6 @@ let fntCode = ['0x20B9','0x2581','0x20BA','0xA73D','0xFFFD','0x20B8','0x05C6',
 	baseFonts = [], // what we test each font with
 	baseFontsNames = [], // baseFonts w/out any fallback fonts (used to create arrays etc)
 	baseFontsFull = [] // merged baseFonts + baseMaster
-
-fntCode.sort()
 
 /*** TEMP FUNCTIONS ***/
 function listfontsizes() {
@@ -1269,7 +1268,6 @@ function get_unicode() {
 			output()
 		}
 
-		let fntCodeUsed = fntCode
 		function filter_tofu() {
 			// skip FF android and TB: very little tofu
 			if (isFF && isOS == "android" || isTB) {
@@ -1295,7 +1293,7 @@ function get_unicode() {
 						fntTofuChars.push(String.fromCodePoint(code))
 					}
 				})
-				fntCodeUsed = fntCode.filter(x => !fntTofu.includes(x))
+				fntCodeUsed = fntCodeUsed.filter(x => !fntTofu.includes(x))
 				if (gRun) {
 					let tofuPerf = ""; if (canPerf) {tofuPerf = " | "+ (performance.now() - tofuStart) +" ms"}
 					log_debug("tofu", fntTofu.join(" ") + tofuPerf)
@@ -1303,8 +1301,12 @@ function get_unicode() {
 				}
 			} catch(e) {}
 		}
-		filter_tofu()
-		fntCodeUsed.push('0xFFFF') // ensure one tofu
+		// do once
+		if (fntCodeUsed.length == 0) {
+			fntCode.forEach(function(code) {fntCodeUsed.push(code)})
+			filter_tofu()
+			fntCodeUsed.push('0xFFFF') // ensure one tofu
+		}
 		run()
 	})
 }
