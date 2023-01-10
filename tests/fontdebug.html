@@ -68,12 +68,16 @@ sg = sg.trim()
 s3 = s3.trim()
 s12 = s12.trim()
 
-let fntList = []
-let baseFonts = ['monospace','sans-serif','serif','system-ui']
-let fntStrA = "mmmLLLmmmWWWwwwmmmllliii"
-let fntStrB = "ImLwWil"
-let isEverDetected = false // track across all four basefonts compares
-let fntWeight = "normal"
+let fntCodePoints = {
+	"tofu": ['0xFFFF'],
+}
+
+let fntList = [],
+	baseFonts = ['monospace','sans-serif','serif','system-ui'],
+	fntString = "Mōá?-" + get_fntCodes("tofu"),
+	fntWeight = "normal",
+	fntSize = "512px",
+	isEverDetected = false // track across all four basefonts compares
 
 let fntSystem = ["caption","icon","menu","message-box","small-caption","status-bar",
 	"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
@@ -86,6 +90,12 @@ element.addEventListener("keypress", function(event) {
 		run()
 	}
 })
+
+function get_fntCodes(name) {
+	let list = fntCodePoints[name], str = ""
+	list.forEach(function(code) {str += String.fromCodePoint(code)})
+	return str
+}
 
 function get_OS() {
 	// append widget font to baseFonts
@@ -131,7 +141,7 @@ function run() {
 			// only use the first one
 			setTimeout(function() {
 				let font = fntList[0].toLowerCase()
-				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntStrB +"</span>"
+				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntString +"</span>"
 				if (fntSystem.includes(font)) {
 					dom.visual.style.setProperty('--font', "")
 					dom.visual.style.font = font
@@ -171,7 +181,7 @@ function getFonts() {
 				--font: '';
 				position: absolute !important;
 				left: -9999px!important;
-				font-size: 256px !important;
+				font-size: ` + fntSize + ` !important;
 				font-style: normal !important;
 				font-weight: ` + fntWeight + ` !important;
 				letter-spacing: normal !important;
@@ -195,7 +205,7 @@ function getFonts() {
 			}
 			#${id}-detector::after {
 				font-family: var(--font);
-				content: '` + fntStrA + `';
+				content: '` + fntString + `';
 			}
 			</style>
 			<span id="${id}-detector"></span>`
