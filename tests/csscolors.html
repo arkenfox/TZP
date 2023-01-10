@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>css colors</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 780px}
+		hr {color: #a78cdc}
+	</style>
+</head>
+<body>
+
+	<div class="hidden"><span id="sColorElement"></span></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb14">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">css colors
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">FF102+. Check the console.log for copypasta.</span></td></tr>
+		<tr>
+			<td colspan="2" style="text-align: left;">
+			<hr><br>
+			<span class="no_color c mono spaces" id="summary"></span>
+			<br><br><hr><br>
+			<span class="no_color c mono spaces" id="results"></span></td>
+		</tr>
+	</table>
+	<br>
+<script>
+'use strict';
+
+let oColors = {
+	"all": {
+		"countcolor": 0,
+		"countsupported": 0,
+		"data": {},
+		"hash": "",
+	}
+}
+
+sb = sb.trim()
+sg = sg.trim()
+s14 = s14.trim()
+let rfp_green = sg+" [RFP]"+sc,
+ rfp_red = sb+" [RFP]"+sc
+
+function get_colors() {
+
+	/* https://www.w3.org/TR/css-color-4/ */
+	/* 95+: test_bug232227.html */
+	// sorted lists
+	let oList = {
+		"css4": [
+			'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color',
+			'-moz-hyperlinktext','-moz-visitedhyperlinktext',
+			'AccentColor','AccentColorText','ActiveText','ButtonBorder','ButtonFace','ButtonText',
+			'Canvas','CanvasText','Field','FieldText','GrayText','Highlight','HighlightText','LinkText',
+			'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText',
+		],
+		"moz": [ // FF102+:
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
+			'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // FF103: last two dropped
+		],
+		"moz_stand-in": [
+			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
+			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
+			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
+			'-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
+			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow',
+			'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
+			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
+			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		],
+		"system": [ // 23 "deprecated"
+			'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow',
+			'CaptionText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground',
+			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
+			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		],
+	}
+
+	/*
+	if (isVer < 94) {
+		oList["moz"].push('-moz-mac-buttonactivetext') // dropped FF94
+		oList["moz"].sort()
+		// FYI
+		//dropped FF90
+		//	'-moz-gtk-info-bar-text',
+		//dropped FF88
+		//	'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext', // dropped FF88
+		//dropped FF78-
+		//	'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
+		//	'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
+		//	'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
+		//	'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
+		//	'-moz-win-communications-toolbox','-moz-win-media-toolbox',
+	}
+	//*/
+
+	function rgba2hex(orig) {
+		var a, isPercent,
+			rgb = orig.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i),
+			alpha = (rgb && rgb[4] || "").trim(),
+			hex = rgb ?
+			(rgb[1] | 1 << 8).toString(16).slice(1) +
+			(rgb[2] | 1 << 8).toString(16).slice(1) +
+			(rgb[3] | 1 << 8).toString(16).slice(1) : orig;
+		if (alpha !== "") {a = alpha} else {a = 0o1}
+		// multiply before convert to HEX
+		a = ((a * 255) | 1 << 8).toString(16).slice(1)
+		hex = hex + a
+		return hex
+	}
+
+	try {
+		const element = dom.sColorElement
+		const strColor = "rgba(1, 2, 3, 0.5)"
+		let tmpAll = {}, count = 0
+		for (const type of Object.keys(oList)) {
+			let aTemp = []
+			let oTemp = {}
+			let aList = oList[type]
+			aList.forEach(function(style) {
+				element.style.backgroundColor = strColor // reset color
+				element.style.backgroundColor = style
+				let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
+				if (rgb !== strColor) { // drop obsolete
+					aTemp.push(style +":"+ rgb)
+					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
+				}
+			})
+			let tmpobj = {}
+			count = 0
+			for (const k of Object.keys(oTemp)) {tmpobj[rgba2hex(k)] = oTemp[k]} // rgba2hex
+			oColors[type] = {
+				"countcolor": 0,
+				"countsupported": 0,
+				"data": {},
+				"hash": "",
+			}
+			for (const k of Object.keys(tmpobj).sort()) {
+				oColors[type]["data"][k] = tmpobj[k]; count += tmpobj[k].length // sort/count
+				if (tmpAll[k] == undefined) {
+					tmpAll[k] = tmpobj[k]
+				} else {
+					tmpAll[k] = tmpAll[k].concat(tmpobj[k])
+				}
+			} 
+			oColors[type]["countcolor"] = Object.keys(tmpobj).length
+			oColors[type]["countsupported"] = count
+			oColors[type]["hash"] = mini(oColors[type]["data"])
+
+		}
+		// all
+		count = 0
+		for (const k of Object.keys(tmpAll).sort()) {
+			let data = tmpAll[k].sort()
+			oColors["all"]["data"][k] = data
+			count += data.length
+		} 
+		oColors.all.countcolor += Object.keys(tmpAll).length
+		oColors.all.countsupported += count
+		oColors.all.hash = mini(oColors["all"])
+		output()
+	} catch(e) {
+		console.error(e.name, e.message)
+		dom.summary = e.type +": "+ e.message
+	}
+}
+
+function output() {
+	let summary1 = [], summary2 = []
+	for (const k of Object.keys(oColors).sort()) {
+		let data = oColors[k]
+		let str = k
+		let len = k.length + 2
+		str = "<span class='btn14 btnc' onClick='display(`" + k +"`)'>"+  str +"</span>: " + data.hash
+		summary1.push(str)
+		str = data.countcolor + "/" + data.countsupported
+		str = (" ").repeat(len) + str.padEnd(8)
+		summary2.push(str)
+	}
+	dom.summary.innerHTML = "<b><u>SUMMARY</u></b>: " + summary1.join(" | ")
+		+ "<br>" + (" ").repeat(9) + summary2.join(" | ")
+	display("all")
+}
+
+function display(type) {
+	let results = []
+	let data = oColors[type]["data"]
+	let note = ""
+	if (type == "moz_stand-in") {
+		note = oColors[type]["hash"] == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
+	}
+	results.push(s14 + type + sc + ": " + oColors[type]["hash"]
+		+" ["+ oColors[type]["countcolor"] +"/"+ oColors[type]["countsupported"] +"]" + note
+		+ "<br><br>{"
+	)
+	for (const k of Object.keys(data)) {
+		results.push("  \""+ k +"\": <span style='color:#"+ k +"; border: 2px solid white'>\u2588\u2588\u2588</span>")
+		results.push("<ul>" + data[k].join(", ") + "</ul>")
+	}
+	dom.results.innerHTML = results.join("<br>") +"<br>}"
+	console.log(JSON.stringify(data, null, 2))
+}
+
+get_colors()
+
+</script>
+</body>
+</html>
