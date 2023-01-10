@@ -28,7 +28,8 @@
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">FF102+. Check the console.log for copypasta.</span></td></tr>
+		<tr><td colspan="2" class="intro"><span class="no_color">FF102+ <input type="checkbox" id="isLog">
+			&nbsp log to console</span></td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
 			<hr><br>
@@ -200,23 +201,26 @@ function output() {
 
 function display(type) {
 	let results = []
-	let data = oColors[type]["data"]
+	let data = oColors[type]["data"],
+		hash = oColors[type]["hash"],
+		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
+
 	let note = ""
 	if (type == "moz_stand-in") {
-		note = oColors[type]["hash"] == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
+		note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
 	}
-	results.push(s14 + type + sc + ": " + oColors[type]["hash"]
-		+" ["+ oColors[type]["countcolor"] +"/"+ oColors[type]["countsupported"] +"]" + note
-		+ "<br><br>{"
-	)
+	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + note + "<br><br>{")
 	for (const k of Object.keys(data)) {
 		results.push("  \""+ k +"\": <span style='color:#"+ k +"; border: 2px solid white'>\u2588\u2588\u2588</span>")
 		results.push("<ul>" + data[k].join(", ") + "</ul>")
 	}
 	dom.results.innerHTML = results.join("<br>") +"}"
-	console.log(JSON.stringify(data, null, 2))
+	if (dom.isLog.checked) {
+		console.log(type +": "+ hash + counts +"\n" + JSON.stringify(data, null, 2))
+	}
 }
 
+dom.isLog.checked = true
 get_colors()
 
 </script>
