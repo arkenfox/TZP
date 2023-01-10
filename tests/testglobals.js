@@ -303,6 +303,7 @@ var gLocales = [
 "sg,sango",
 "si,sinhala",
 "sk,slovak",
+"skr,saraiki", // 1808127
 "sl,slovenian",
 "sm,samoan",
 "sn,shona",
