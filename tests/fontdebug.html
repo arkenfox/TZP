@@ -120,7 +120,7 @@ function run() {
 	isEverDetected = false
 	// make sure we have a font
 	let valueF = dom.valueF.value
-	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
+	valueF = valueF.replace(/['"]+/g, "") // remove quote marks
 	valueF = valueF.trim()
 	if (valueF.length) {
 		let tmpArr = valueF.split(",")
