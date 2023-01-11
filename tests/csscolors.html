@@ -70,6 +70,12 @@ function get_colors() {
 			'Canvas','CanvasText','Field','FieldText','GrayText','Highlight','HighlightText','LinkText',
 			'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText',
 		],
+		"deprecated": [ // 23 "deprecated"
+			'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow',
+			'CaptionText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground',
+			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
+			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		],
 		"moz": [ // FF102+:
 			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
 			'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
@@ -84,12 +90,6 @@ function get_colors() {
 			'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
 			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
 			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
-		],
-		"system": [ // 23 "deprecated"
-			'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow',
-			'CaptionText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground',
-			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
-			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
 	}
 
@@ -129,8 +129,9 @@ function get_colors() {
 	try {
 		const element = dom.sColorElement
 		const strColor = "rgba(1, 2, 3, 0.5)"
-		let tmpAll = {}, count = 0
+		let tmpAll = {}, count = 0, typeNo = 0
 		for (const type of Object.keys(oList)) {
+			typeNo++
 			let aTemp = []
 			let oTemp = {}
 			let aList = oList[type]
@@ -154,24 +155,25 @@ function get_colors() {
 			}
 			for (const k of Object.keys(tmpobj).sort()) {
 				oColors[type]["data"][k] = tmpobj[k]; count += tmpobj[k].length // sort/count
-				if (tmpAll[k] == undefined) {
-					tmpAll[k] = tmpobj[k]
-				} else {
-					tmpAll[k] = tmpAll[k].concat(tmpobj[k])
-				}
-			} 
+				if (tmpAll[k] == undefined) {tmpAll[k] = []}
+				tmpAll[k][type] = []
+				tmpAll[k][type] = tmpAll[k].concat(tmpobj[k])
+
+			}
 			oColors[type]["countcolor"] = Object.keys(tmpobj).length
 			oColors[type]["countsupported"] = count
 			oColors[type]["hash"] = mini(oColors[type]["data"])
-
 		}
 		// all
 		count = 0
 		for (const k of Object.keys(tmpAll).sort()) {
-			let data = tmpAll[k].sort()
-			oColors["all"]["data"][k] = data
-			count += data.length
-		} 
+			oColors["all"]["data"][k] = {}
+			for (const name of Object.keys(tmpAll[k]).sort()) {
+				let data = tmpAll[k][name] // don't sort: leave in original groups
+				oColors["all"]["data"][k][name] = data
+				count += data.length
+			}
+		}
 		oColors.all.countcolor += Object.keys(tmpAll).length
 		oColors.all.countsupported += count
 		oColors.all.hash = mini(oColors["all"])
@@ -183,7 +185,7 @@ function get_colors() {
 }
 
 function output() {
-	let summary1 = [], summary2 = []
+	let summary1 = [], summary2 = [], typeNo = 0
 	for (const k of Object.keys(oColors).sort()) {
 		let data = oColors[k]
 		let str = k
@@ -193,6 +195,7 @@ function output() {
 		str = data.countcolor + "/" + data.countsupported
 		str = (" ").repeat(len) + str.padEnd(8)
 		summary2.push(str)
+		typeNo++
 	}
 	dom.summary.innerHTML = "<b><u>SUMMARY</u></b>: " + summary1.join(" | ")
 		+ "<br>" + (" ").repeat(9) + summary2.join(" | ")
@@ -212,7 +215,15 @@ function display(type) {
 	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + note + "<br><br>{")
 	for (const k of Object.keys(data)) {
 		results.push("  \""+ k +"\": <span style='color:#"+ k +"; border: 2px solid white'>\u2588\u2588\u2588</span>")
-		results.push("<ul>" + data[k].join(", ") + "</ul>")
+		let resultsStr = ""
+		if (type == "all") {
+			for (const name of Object.keys(data[k])) {
+				resultsStr += "<ul>"+ s14 + name + sc +": " + data[k][name].join(", ") +"</ul>"
+			}
+		} else {
+			resultsStr = "<ul>"+ data[k].join(", ") +"</ul>"
+		}
+		results.push(resultsStr)
 	}
 	dom.results.innerHTML = results.join("<br>") +"}"
 	if (dom.isLog.checked) {
@@ -220,7 +231,7 @@ function display(type) {
 	}
 }
 
-dom.isLog.checked = true
+//dom.isLog.checked = true
 get_colors()
 
 </script>
