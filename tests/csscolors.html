@@ -28,8 +28,9 @@
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">FF102+ <input type="checkbox" id="isLog">
-			&nbsp log to console</span></td></tr>
+		<tr><td colspan="2" class="intro"><span class="no_color">
+			<a target="_blank" class="blue" href="https://www.w3.org/TR/css-color-4/">https://www.w3.org/TR/css-color-4/</a> &nbsp |
+			&nbsp <input type="checkbox" id="isLog"> &nbsp log to console</span></td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
 			<hr><br>
@@ -79,7 +80,20 @@ function get_colors() {
 		"moz": [ // FF102+:
 			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
 			'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // FF103: last two dropped
+			// dropped FF103
+			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light',
+			// dropped FF94
+			'-moz-mac-buttonactivetext',
+			//dropped FF90
+			'-moz-gtk-info-bar-text',
+			// dropped FF88
+			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext',
+			//dropped FF78 or lower
+			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
+			'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
+			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
+			'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
+			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
 		],
 		"moz_stand-in": [
 			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
@@ -92,24 +106,6 @@ function get_colors() {
 			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		],
 	}
-
-	/*
-	if (isVer < 94) {
-		oList["moz"].push('-moz-mac-buttonactivetext') // dropped FF94
-		oList["moz"].sort()
-		// FYI
-		//dropped FF90
-		//	'-moz-gtk-info-bar-text',
-		//dropped FF88
-		//	'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext', // dropped FF88
-		//dropped FF78-
-		//	'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
-		//	'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
-		//	'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
-		//	'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
-		//	'-moz-win-communications-toolbox','-moz-win-media-toolbox',
-	}
-	//*/
 
 	function rgba2hex(orig) {
 		var a, isPercent,
@@ -135,6 +131,7 @@ function get_colors() {
 			let aTemp = []
 			let oTemp = {}
 			let aList = oList[type]
+			aList.sort()
 			aList.forEach(function(style) {
 				element.style.backgroundColor = strColor // reset color
 				element.style.backgroundColor = style
