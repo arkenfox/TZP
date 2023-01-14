@@ -202,10 +202,11 @@ function display(type) {
 	let data = oColors[type]["data"],
 		hash = oColors[type]["hash"],
 		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
-
 	let note = ""
-	if (type == "moz_stand-in" && "function" === typeof self.structuredClone) { //FF94+
-		note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
+	if (type == "moz_stand-in" && "function" === typeof self.structuredClone) { // FF94+
+		if (Object.keys(data).length) { // only gecko will have data
+			note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
+		}
 	}
 	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + note + "<br><br>{")
 	for (const k of Object.keys(data)) {
