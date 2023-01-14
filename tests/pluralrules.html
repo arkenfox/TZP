@@ -129,8 +129,8 @@ function run_test(type) {
 		if (isEngine == "blink") {
 			if (!aNosOrdinal.includes(81)) {
 				aNosOrdinal.push(81) // chromium to keep lij unique from it,sc in ordinal (bug?)
-				blinkStr = " <sup>1</sup> <br><br><sup>1</sup> number 81 added to ordinal for blink for lij"
 			}
+			blinkStr = " <sup>1</sup> <br><br><sup>1</sup> number 81 added to ordinal for blink for lij"
 		}
 	}
 	// custom
@@ -143,6 +143,9 @@ function run_test(type) {
 			// out minimal example
 			aNosCardinal = [0, 1, 2, 3, 7, 21, 100] // redundant: 4, 6, 11, 20
 			aNosOrdinal = [1, 2, 3, 5, 8, 10] // redundant: 0, 4, 6, 7, 9, 21
+			if (isEngine == "blink") {
+				aNosOrdinal.push(81)
+			}
 			// display
 			dom.custom.value = "[" + aNosCardinal.join(", ") +"]"
 				+ "\n[" + aNosOrdinal.join(", ") +"]"
