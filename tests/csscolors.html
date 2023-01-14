@@ -125,9 +125,8 @@ function get_colors() {
 	try {
 		const element = dom.sColorElement
 		const strColor = "rgba(1, 2, 3, 0.5)"
-		let tmpAll = {}, count = 0, typeNo = 0
+		let tmpAll = {}, count = 0
 		for (const type of Object.keys(oList)) {
-			typeNo++
 			let aTemp = []
 			let oTemp = {}
 			let aList = oList[type]
@@ -182,7 +181,7 @@ function get_colors() {
 }
 
 function output() {
-	let summary1 = [], summary2 = [], typeNo = 0
+	let summary1 = [], summary2 = []
 	for (const k of Object.keys(oColors).sort()) {
 		let data = oColors[k]
 		let str = k
@@ -192,7 +191,6 @@ function output() {
 		str = data.countcolor + "/" + data.countsupported
 		str = (" ").repeat(len) + str.padEnd(8)
 		summary2.push(str)
-		typeNo++
 	}
 	dom.summary.innerHTML = "<b><u>SUMMARY</u></b>: " + summary1.join(" | ")
 		+ "<br>" + (" ").repeat(9) + summary2.join(" | ")
@@ -206,12 +204,12 @@ function display(type) {
 		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
 
 	let note = ""
-	if (type == "moz_stand-in") {
+	if (type == "moz_stand-in" && "function" === typeof self.structuredClone) { //FF94+
 		note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
 	}
 	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + note + "<br><br>{")
 	for (const k of Object.keys(data)) {
-		results.push("  \""+ k +"\": <span style='color:#"+ k +"; border: 2px solid white'>\u2588\u2588\u2588</span>")
+		results.push("  \""+ k +"\": <span style='background-color:#"+ k +"; border: 1px solid white'> &nbsp </span>")
 		let resultsStr = ""
 		if (type == "all") {
 			for (const name of Object.keys(data[k])) {
