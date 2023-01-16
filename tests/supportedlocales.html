@@ -27,25 +27,27 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">supportedlocalesof
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Return supported locales, including mappings and duplicates, for each given Intl constructor</span>
+			<span class="no_color">Return supported locales, including mappings and duplicates,
+			for each given Intl constructor. The list is specially curated and used in TZP entropy
+			PoCs, and is not a complete list of all locales.</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
 				<span id="bC" class="btn4 btnfirst" onClick="run('C')">[ C ]</span>
 				<span id="bDTF" class="btn4 btn" onClick="run('DTF')">[DTF]</span>
-				<span id="bDN" class="btn4 btn" onClick="run('DN')">[ DN ]</span>
-				<span id="bLF" class="btn4 btn" onClick="run('LF')">[ LF ]</span>
+				<span id="bDN" class="btn4 btn" onClick="run('DN')">[DN]</span>
+				<span id="bLF" class="btn4 btn" onClick="run('LF')">[LF]</span>
 				<!--<span id="bLI" class="btn4 btn" onClick="run('LI')">[LI]</span>-->
-				<span id="bNF" class="btn4 btn" onClick="run('NF')">[ NF ]</span>
-				<span id="bPR" class="btn4 btn" onClick="run('PR')">[ PR ]</span>
+				<span id="bNF" class="btn4 btn" onClick="run('NF')">[NF]</span>
+				<span id="bPR" class="btn4 btn" onClick="run('PR')">[PR]</span>
 				<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[RTF]</span>
 				<span id="bS" class="btn4 btn" onClick="run('S')">[ S ]</span>
 				<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ALL]</span>
@@ -69,6 +71,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 function legend() {
 	// build once
@@ -79,6 +82,20 @@ function legend() {
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
 			aLocales.push(code)
+			let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+			if (name.includes("(")) {
+				let name0 = name.split("(")[0].trim()
+				let name1 = name.substring(
+					name.indexOf("(") + 1, 
+					name.lastIndexOf(")")
+				)
+				name1 = s99 +"("+ name1 + ")"+ sc
+				if (isSplit) {
+					name = name0 +"<br>"+ " ".repeat(4) + name1
+				} else {
+					name = name0 +" "+ name1
+				}
+			}
 			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
@@ -110,32 +127,21 @@ function run_main(method, isLoopy) {
 	try {
 		// hash
 		function getNotation(hash, method) {
+			if (!isFF) return ""
+			// only hash notate if 102+
+			let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+			if (!is102) {return ""}
+
 			let notation = ""
 			if (method == "C") {
-				if (hash == "56647795") {notation = " [FF110+]" // 189
-				} else if (hash == "7ceb94a6") {notation = " [FF91-109]" // 188
-				} else if (hash == "07163e7d") {notation = " [FF78-90]" // 186
-				} else if (hash == "7c5535e9") {notation = " [FF70-77]" // 185
-				} else if (hash == "0822ee11") {notation = " [FF65-69]" // 182
-				} else if (hash == "7d1d5e24") {notation = " [FF59-64]" // 179
-				} else if (hash == "668af03e") {notation = " [FF52-58]" // 178
-				} else if (isFF) { notation = zNEW
+				if (hash == "eeb1eadf") {notation = " [FF110+]" // 163
+				} else if (hash == "4afb0332") {notation = " [FF102-109]" // 162
+				} else { notation = zNEW
 				}
 			} else {
-				if (hash == "d67069fd") {notation = " [FF110+]" // 231 bh, bho, cv, raj
-				} else if (hash == "e73fc2d6") {notation = " [FF96-109]" // 227
-				} else if (hash == "a73b6346") {notation = " [FF91-95]" // 226
-				} else if (hash == "51ddc587") { // 225
-					if (method == "DN") {
-						notation = " [FF86-90]"
-					} else {
-						notation = " [FF78-90]"
-					}
-				} else if (hash == "c565d90c") {notation = " [FF70-77]" // 222
-				} else if (hash == "01f03482") {notation = " [FF65-69]" // 218
-				} else if (hash == "0d5e02cc") {notation = " [FF59-64]" // 211
-				} else if (hash == "8fd5b0f1") {notation = " [FF52-58]" // 208
-				} else if (isFF) { notation = zNEW
+				if (hash == "a9a98a4e") {notation = " [FF110+]" // 266 bho, cv, raj
+				} else if (hash == "79f8b151") {notation = " [FF102-109]" // 263
+				} else { notation = zNEW
 				}
 			}
 			if (notation !== zNEW) notation = s12 + notation + sc
@@ -218,7 +224,7 @@ function run_main(method, isLoopy) {
 			for (let i = 0 ; i < map.length; i++) {
 				let x = map[i].split(" -> ")[0] // tested
 				let y = map[i].split(" -> ")[1] // found
-				if (!aLocales.includes(y)) {
+				if (!aLocales.includes(y.toLowerCase())) { // case insenstive
 					notlist.push(s12 + y + sc +" ["+ x +"]")
 					notlistclean.push(y)
 				}
@@ -297,7 +303,21 @@ function run_main(method, isLoopy) {
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
 				if (nocase.includes(code.toLowerCase())) {
-					legend.push(sg + code.padStart(7) +": "+ name + sc)
+					let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+					if (name.includes("(")) {
+						let name0 = name.split("(")[0].trim()
+						let name1 = name.substring(
+							name.indexOf("(") + 1, 
+							name.lastIndexOf(")")
+						)
+						name1 = s99 +"("+ name1 + ")"+ sc
+						if (isSplit) {
+							name = name0 +"<br>"+ " ".repeat(4) + name1
+						} else {
+							name = name0 +" "+ name1
+						}
+					}
+					legend.push(sg + code.padStart(7) + sc +": "+ name)
 				} else {
 					if (nocasemap.includes(code)) {
 						legend.push(s14 + code.padStart(7) +": "+ name + sc)
