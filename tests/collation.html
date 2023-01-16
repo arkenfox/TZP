@@ -27,7 +27,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">collation</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Output is limited to results that do not match English.
@@ -62,7 +62,11 @@
 <script>
 'use strict';
 
-var list = gLocales
+var list = []
+gLocales.forEach(function(str) {
+	let code = str.split(",")[0]
+	if (Intl.Collator.supportedLocalesOf([code]).length) {list.push(str)}
+})
 
 var collatorExample = [
 	'a',
@@ -177,6 +181,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 function legend() {
 	// build once
@@ -190,6 +195,20 @@ function legend() {
 			let test = Intl.Collator.supportedLocalesOf([code])
 			if (test.length) {
 				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
 				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
@@ -358,14 +377,30 @@ function collator() {
 				let name = str.split(",")[1].trim()
 				chars.sort(Intl.Collator(code).compare)
 				let hash = mini(chars)
-				if (hash == control) {
-					legendnew.push(code.padStart(7) +": "+ name)
-				} else {
+				if (hash !== control) {
 					codes.push(code)
-					legendnew.push(sg + code.padStart(7) +": "+ name + sc)
 					diffs.push(hash +":"+ code +":"+ name)
 					if (oTempData[hash] == undefined) {oTempData[hash] = []}
 					oTempData[hash].push(code +" "+ name)
+				}
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				if (hash == control) {
+					legendnew.push(code.padStart(7) +": "+ name)
+				} else {
+					legendnew.push(sg + code.padStart(7) + sc +": "+ name)
 				}
 			}
 
@@ -374,7 +409,7 @@ function collator() {
 			diffs.sort()
 			if (diffs.length) {
 				// output colored legend
-				let header = s4 +"   LEGEND ["+ aLocales.length +" supported]"+ sc +"<br><br>"
+				let header = s4 +"   LEGEND ["+ list.length +" supported]"+ sc +"<br><br>"
 				dom.legend.innerHTML = header + legendnew.join("<br>")
 				let tmpH = "", tmpC = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
 				let newArr = []
@@ -417,7 +452,7 @@ function collator() {
 				// results output
 				strItem = s12 +"  stats: "+ sc
 					+ sg + newArr.length +" unique"
-					+ sc +" in "+ sg + codes.length + sc + " of "+ sg + aLocales.length +" supported" + sc
+					+ sc +" from "+ sg + codes.length + sc + " of "+ sg + aLocales.length + sc +" locales supported"
 				output.push(strItem +"<br>")
 
 				// locales hash
@@ -432,14 +467,14 @@ function collator() {
 				let charHash = mini(chars.sort())
 				// don't notate unless it's our own preset
 				if (isFF && charHash == "5a96db28") {
-					if (localesHash == "f608f882") {ff = "109+"
-					} else if (localesHash == "a95ad493") {ff = "70-108"
-					} else if (localesHash == "fb2f3eef") {ff = "68-69"
-					} else if (localesHash == "68b3ae15") {ff = "65-67"
-					} else if (localesHash == "f6c29806") {ff = "59-64"
-					} else if (localesHash == "747c936b") {ff = "58 or lower"
-					} else {ff = zNEW}
-					if (ff !== zNEW) {ff = s16 +" [FF"+ ff + "]"+ sc}
+					// only hash notate if 102+
+					let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+					if (is102) {
+						if (localesHash == "8f7f37d8") {ff = "110+"
+						} else if (localesHash == "18289e2f") {ff = "102-109"
+						} else {ff = zNEW}
+						if (ff !== zNEW) {ff = s16 +" [FF"+ ff + "]"+ sc}
+					}
 				}
 				strItem = s12 +"locales: "+ sc + localesHash + ff +"<br>"
 				output.push(strItem)

@@ -27,7 +27,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">timeZoneName
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -46,7 +46,6 @@
 				<span id="b4" class="btn4 btn" onClick="run('4')">[ SG ]</span>
 				<span id="b5" class="btn4 btn" onClick="run('5')">[ LG ]</span>
 				<!--<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ ALL ]</span>-->
-				<span class="btn4 btn"><input type="checkbox" id="supported" style="margin: 0; height: 12px"> supported [dtf]</span>
 			<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -58,10 +57,7 @@
 
 var list = gLocales,
 	aLegend = [],
-	aLegendSupported = [],
-	aLocales = [],
-	aSupported = [],
-	useSupportedOnly = true
+	aLocales = []
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -69,31 +65,40 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 function legend() {
-	// build once: legend, locales, supportedlocales
+	// build once
 	if (aLegend.length == 0) {
 		list.sort()
 		for (let i = 0 ; i < list.length; i++) {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
 			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
 			if (test.length) {
-				aSupported.push(code)
-				aLegendSupported.push(code.padStart(7) +": "+ name)
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
 		}
 	}
 	// output
-	useSupportedOnly = dom.supported.checked
-	let aDisplay = aLegend
-	if (useSupportedOnly) {aDisplay = aLegendSupported}
-	let	header = s4 +"   LEGEND ["+ aDisplay.length
-		+ (useSupportedOnly ? " supported" : "") +"]"+ sc +"<br><br>"
-	dom.legend.innerHTML = header + aDisplay.join("<br>")
+	let	header = s4 +"   LEGEND ["+ aLegend.length + " supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
 function run_main(type) {
@@ -142,11 +147,9 @@ function run_main(type) {
 		}
 	}
 
-	useSupportedOnly = dom.supported.checked
-	let loop = useSupportedOnly ? aSupported : aLocales
 	try {
 		// get data
-		loop.forEach(function(code) {
+		aLocales.forEach(function(code) {
 			let res = getTZNames(code)
 			if (res.length > 0) {
 				data.push(sha1(res) +":"+ code +":" + res)
@@ -154,11 +157,10 @@ function run_main(type) {
 		})
 
 		if (data.length) {
-			// if supported only, also add undefined
-			if (useSupportedOnly) {
-				let res = getTZNames(undefined)
-				data.push(sha1(res) +":undefined:" + res)
-			}
+			// add undefined
+			let res = getTZNames(undefined)
+			data.push(sha1(res) +":undefined:" + res)
+
 			// check types: FF91 extended timezonenames are type unknown
 			//if (tzUnknown.length) {console.debug("type: unknown\n", tzUnknown)}
 			//if (tzTZN.length) {console.debug("type: timeZoneName\n", tzTZN)}
@@ -197,7 +199,7 @@ function run_main(type) {
 			if (type !== "ALL") {
 				type = tzNames[0]
 				dom.results.innerHTML = s4 + type.toUpperCase() +" ["+ aHash.length
-					+ (useSupportedOnly ? sc +" from "+ s4 + loop.length +" supported"+ sc +" + undefined"+ s4 : "")
+					+ sc +" from "+ s4 + aLocales.length +" supported"+ sc +" + undefined"+ s4
 					+"]"+ sc	+ spacer
 					+ s16 +"results: "+ sc + sha1(aBucketsR.join()) +"<br>"
 					+ s12 +"locales: "+ sc + sha1(aBucketsC.join()) + spacer
@@ -247,7 +249,6 @@ function setBtn(type) {
 	el.classList.remove("btn4")
 }
 
-dom.supported.checked = true
 legend()
 
 </script>

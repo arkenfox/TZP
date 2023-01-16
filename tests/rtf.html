@@ -35,7 +35,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="33%"><col width="67%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">relativetimeformat
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -43,12 +43,9 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A proof to confirm minimum tests for maximum entropy:
-			from 2 numeric options (<code>auto</code>, <code>always</code>), 3
-			styles (<code>narrow</code>, <code>short</code>, <code>long</code>), 8 time
-			units (<code>second</code>, <code>minute</code>, <code>hour</code>, <code>day</code>,
-			<code>week</code>, <code>month</code>, <code>year</code>, <code>quarter</code>) and
-			5 amounts (<code>-3</code>, <code>-1</code>, <code>0</code>, <code>1</code>, <code>3</code>); total 240.
-			</span>
+			from <code>2</code> numeric options (auto, always), <code>3</code> styles (narrow, short, long),
+			<code>8</code> time	units (second, minute, hour, day, week, month, year, quarter) and
+			<code>5</code> amounts (-3, -1, 0, 1, 3).</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -70,7 +67,7 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	isRTFSupported = false,
+	isSupported = false,
 	localesHashAll = "" // to compare min to
 
 s4 = s4.trim()
@@ -79,6 +76,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 const day8 = new Date("2019-01-30T08:00:00") // in the morning
 const day12 = new Date("2019-01-30T12:00:00") // noon
@@ -104,20 +102,32 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			if (isRTFSupported) {
-				let test = Intl.RelativeTimeFormat.supportedLocalesOf([code])
-				if (test.length) {
-					aLocales.push(code)
-					aLegend.push(code.padStart(7) +": "+ name)
-				}
-			} else {
+			let go = true
+			if (isSupported) {
+				go = Intl.RelativeTimeFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
 				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
 				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isRTFSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -135,7 +145,7 @@ function run_main(method) {
 		let array = aLocales
 		let	styles = ['narrow','short','long']
 		let times = [-3,-1,0,1,3]
-		let units = ["second","minute","hour","day","week","month","year","quarter"]
+		let units = ["second","minute","hour","day","week","month","quarter","year"]
 		let minList = []
 		let oOptions = {}
 
@@ -144,26 +154,83 @@ function run_main(method) {
 			styles = ["narrow","long"]
 			//times = [0,1,3]
 			//units = ["second","day","year"]
-			/*
-			auto
-				day = 143 (538d5d4d)
-				+ second = 150 (e8e61be7)
 
-				+ narrow (1 year) = 151 (427a0e5b) - adds ar-ae
-			always
-				+ narrow (1, day) = 152: 9a13bc55 (adds es-py)
+			// TZP: en-US
+			// A: now, in 1s, in 1 second, in 3s, in 1d, in 3d, this qtr., in 0y
+			// B: today, tomorrow, next wk., next yr.
+			/*
+				ALWAYS
+				N: in 1d | in 0y
+				AUTO
+				N: now | in 1s | in 3s | today | tomorrow | in 3d | next wk. | this qtr. | next yr.
+				L: in 1 second
 			*/
 			minList = [
-				"alwaysnarrow1day",
-				"autonarrow0second",
-				"autonarrow1second",
-				"autonarrow3second",
-				"autolong1second",
-				"autonarrow0day",
-				"autonarrow1day",
-				"autonarrow3day",
-				"autonarrow1year",
+				"autonarrow0second",  // A: now
+				"autonarrow1second",  // A: in 1s
+				"autolong1second",    // A: in 1 second
+				"autonarrow3second",  // A: in 3s
+				"autonarrow0day",     // B: today 
+				"autonarrow1day",     // B: tomorrow
+				"alwaysnarrow1day",   // A: in 1d
+				"autonarrow3day",     // A: in 3d
+				"autonarrow1week",    // B: next wk.
+				"autonarrow0quarter", // A: this qtr.
+				"alwaysnarrow0year",  // A: in 0y
+				"autonarrow1year",    // B: next yr.
 			]
+
+/* troubleshooting list
+"narrow-3second",
+"narrow-1second",
+"narrow0second",
+"narrow1second",
+"narrow3second",
+
+"narrow-3minute",
+"narrow-1minute",
+"narrow0minute",
+"narrow1minute",
+"narrow3minute",
+
+"narrow-3hour",
+"narrow-1hour",
+"narrow0hour",
+"narrow1hour",
+"narrow3hour",
+
+"narrow-3day",
+"narrow-1day",
+"narrow0day",
+"narrow1day",
+"narrow3day",
+
+"narrow-3week",
+"narrow-1week",
+"narrow0week",
+"narrow1week",
+"narrow3week",
+
+"narrow-3month",
+"narrow-1month",
+"narrow0month",
+"narrow1month",
+"narrow-3second",
+"narrow3month",
+
+"narrow-3year",
+"narrow-1year",
+"narrow0year",
+"narrow1year",
+"narrow3year",
+
+"narrow-3quarter",
+"narrow-1quarter",
+"narrow0quarter",
+"narrow1quarter",
+"narrow3quarter",
+*/
+
 			if (isVer < 96) {
 				if (isVer > 71) {minList.push("autonarrow-1week")} // FF72-95 adds es, es-es
 				if (isVer > 77) {minList.push("autonarrow3week")} // FF78-95 adds nn
@@ -202,6 +269,7 @@ function run_main(method) {
 							}
 						} else {
 							let concat = s+t+u
+							//if (code == "en") {console.log(concat)}
 							oStyles[s +"always"].push( IntlRTFn.format(t, u) )
 							oStyles[s +"auto"].push( IntlRTF.format(t, u) )
 						}
@@ -306,29 +374,22 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// track FF version changes: FF65+
-			// ignore if non-supported used, which return same as undefined = user's resolved options
 			if (isFF) {
-				// results
-				if (resultsHash == "3e63eb28") {resultsHash += s14 +" [FF109+]"+ sc
-				} else if (resultsHash == "e0398964") {resultsHash += s14 +" [FF96-108]"+ sc
-				} else if (resultsHash == "ff2b660b") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "e3e2f8c6") {resultsHash += s14 +" [FF78-90]"+ sc
-				} else if (resultsHash == "6ce986e8") {resultsHash += s14 +" [FF72-77]"+ sc
-				} else if (resultsHash == "c34b2ce8") {resultsHash += s14 +" [FF70-71]"+ sc
-				} else if (resultsHash == "956803bc") {resultsHash += s14 +" [FF68-69]"+ sc
-				} else if (resultsHash == "5e9742d7") {resultsHash += s14 +" [FF65-67]"+ sc
-				} else {resultsHash += zNEW
-				}
-				// locales
-				if (localesHash == "b34ec390") {localesHash += s14 +" [FF109+]"+ sc // 156 - 9min check
-				} else if (localesHash == "9a13bc55") {localesHash += s14 +" [FF96-108]"+ sc // 152 - 9min check
-				} else if (localesHash == "20f5478f") {localesHash += s14 +" [FF91-95]"+ sc // 151 - 9min gets 149 (nn / es,es-es)
-				} else if (localesHash == "39026219") {localesHash += s14 +" [FF78-90]"+ sc // 150 - 9min gets 149 (es,es-es)
-				} else if (localesHash == "c693e058") {localesHash += s14 +" [FF72-77]"+ sc // 147 - 9min gets 146 (es,es-es)
-				} else if (localesHash == "82083cba") {localesHash += s14 +" [FF70-71]"+ sc // 146 - 9min check
-				} else if (localesHash == "134993f4") {localesHash += s14 +" [FF65-69]"+ sc // 146 - 9min check
-				} else if (isFF) {localesHash += zNEW
+				// only hash notate if 102+
+				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+				if (is102) {
+					// track FF version changes
+					// ignore if non-supported used, which return same as undefined = user's resolved options
+					// results
+					if (resultsHash == "514a5457") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "ea0caaee") {resultsHash += s14 +" [FF102-109]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "866e6a9f") {localesHash += s14 +" [FF110+]"+ sc // 226
+					} else if (localesHash == "5e62bbb4") {localesHash += s14 +" [FF102-109]"+ sc // 222
+					} else if (isFF) {localesHash += zNEW
+					}
 				}
 			}
 		} else if (method == "min") {
@@ -348,7 +409,7 @@ function run_main(method) {
 }
 
 function run(method) {
-	if (isRTFSupported) {
+	if (isSupported) {
 		//reset
 		setBtn(method)
 		dom.perf = ""
@@ -382,12 +443,12 @@ Promise.all([
 	]).then(function(){
 		try {
 			let test = new Intl.RelativeTimeFormat(undefined, {style: "short", numeric: "auto"})
-			isRTFSupported = true
+			isSupported = true
 		} catch(e) {
 			dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 		}
 		legend()
-		if (isRTFSupported) {
+		if (isSupported) {
 			setBtn("all")
 			setTimeout(function() {
 				run_main("all")

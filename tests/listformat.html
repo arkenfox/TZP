@@ -28,7 +28,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="33%"><col width="67%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">listformat
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -70,7 +70,7 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	isLFSupported = false,
+	isSupported = false,
 	localesHashAll = "" // to compare custom to
 
 s4 = s4.trim()
@@ -79,6 +79,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 const day8 = new Date("2019-01-30T08:00:00") // in the morning
 const day12 = new Date("2019-01-30T12:00:00") // noon
@@ -118,6 +119,7 @@ function reset_custom(type) {
 		dom.narrowdisjunction.checked = true
 		dom.narrowunit.checked = true
 		dom.shortunit.checked = true
+		dom.shortconjunction.checked = true
 	}
 }
 
@@ -129,20 +131,32 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			if (isLFSupported) {
-				let test = Intl.ListFormat.supportedLocalesOf([code])
-				if (test.length) {
-					aLocales.push(code)
-					aLegend.push(code.padStart(7) +": "+ name)
-				}
-			} else {
+			let go = true
+			if (isSupported) {
+				go = Intl.ListFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
 				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
 				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isLFSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -158,7 +172,7 @@ function run_main(method) {
 
 	try {
 		let	styles = ['narrow','short','long']
-		let types = ['conjunction', 'disjunction','unit']
+		let types = ['conjunction','disjunction','unit']
 		let oOptions = {}
 
 		// select what to test
@@ -252,24 +266,22 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			// track FF version changes: FF78+ 1589095
-			// ignore if non-supported used, which return same as undefined = user's resolved options
 			if (isFF) {
-				// results
-				if (resultsHash == "da981420") {resultsHash += s14 +" [FF110+]"+ sc
-				} else if (resultsHash == "6d01f114") {resultsHash += s14 +" [FF101-109]"+ sc
-				} else if (resultsHash == "4d16d06e") {resultsHash += s14 +" [FF96-100]"+ sc
-				} else if (resultsHash == "b4414f06") {resultsHash += s14 +" [FF91-95]"+ sc
-				} else if (resultsHash == "abbd3cda") {resultsHash += s14 +" [FF78-90]"+ sc
-				} else {resultsHash += zNEW
-				}
-				// locales
-				if (localesHash == "d3400c3c") {localesHash += s14 +" [FF110+]"+ sc // 119
-				} else if (localesHash == "f798d35d") {localesHash += s14 +" [FF101-109]"+ sc // 117
-				} else if (localesHash == "f0077373") {localesHash += s14 +" [FF96-100]"+ sc // 116
-				} else if (localesHash == "4c91b74b") {localesHash += s14 +" [FF91-95]"+ sc // 115
-				} else if (localesHash == "b65bd621") {localesHash += s14 +" [FF78-90]"+ sc // 114
-				} else if (isFF) {localesHash += zNEW
+				// only hash notate if 102+
+				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+				if (is102) {
+					// track FF version changes
+					// ignore if non-supported used, which return same as undefined = user's resolved options
+					// results
+					if (resultsHash == "7f671dd2") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "3d6afa30") {resultsHash += s14 +" [FF102-109]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "c245f34d") {localesHash += s14 +" [FF110+]"+ sc // 133
+					} else if (localesHash == "9a745470") {localesHash += s14 +" [FF102-109]"+ sc // 130
+					} else if (isFF) {localesHash += zNEW
+					}
 				}
 			}
 		} else if (method == "custom") {
@@ -289,7 +301,7 @@ function run_main(method) {
 }
 
 function run(method) {
-	if (isLFSupported) {
+	if (isSupported) {
 		//reset
 		setBtn(method)
 		dom.perf = ""
@@ -313,7 +325,7 @@ function run(method) {
 }
 
 function run_custom() {
-	if (isLFSupported) {
+	if (isSupported) {
 		//reset
 		dom.perf = ""
 		dom.results = ""
@@ -342,13 +354,13 @@ Promise.all([
 	// support
 	try {
 		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
-		isLFSupported = true
+		isSupported = true
 	} catch(e) {
 		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 	}
 	reset_custom("min")
 	legend()
-	if (isLFSupported) {
+	if (isSupported) {
 		setBtn("all")
 		setTimeout(function() {
 			run_main("all")
