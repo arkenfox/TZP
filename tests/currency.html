@@ -27,7 +27,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">currency
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -109,9 +109,6 @@ var	currencyMaster = [
 'GBP','TWD',
 ]
 
-var	currencyMaster = Intl.supportedValuesOf("currency")
-currencyMaster.push("zzz")
-
 /* iso codes
 - https://www.iso.org/iso-4217-currency-codes.html
 - https://en.wikipedia.org/wiki/ISO_4217
@@ -122,7 +119,8 @@ var aLegend = [],
 	aLegendCurrency = [],
 	aLocales = [],
 	aCurrency = [],
-	useExample = false
+	useExample = false,
+	isSupported = false
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -130,6 +128,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 function legend() {
 	// build once
@@ -142,12 +141,26 @@ function legend() {
 			let test = Intl.NumberFormat.supportedLocalesOf([code])
 			if (test.length) {
 				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
 				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	let	header = s4 +"   LEGEND ["+ aLegend.length +" supported]"+ sc +"<br><br>"
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -313,27 +326,44 @@ function run_test(isSummary, isExample) {
 }
 
 function run(type) {
-	dom.results.innerHTML = "running test..."
-	dom.perf = ""
-	setTimeout(function() {
-		if (type == "sum") {
-			aCurrency = currencyMaster
-			run_test(true)
-		} else if (type == "all") {
-			aCurrency = currencyMaster
-			run_test(false)
-		} else {
-			// use text field, if empty run example
-			aCurrency = currencyExample
-			run_test(false)
-		}
-	}, 1)
+	if (isSupported) {
+		dom.results.innerHTML = "running test..."
+		dom.perf = ""
+		setTimeout(function() {
+			if (type == "sum") {
+				aCurrency = currencyMaster
+				run_test(true)
+			} else if (type == "all") {
+				aCurrency = currencyMaster
+				run_test(false)
+			} else {
+				// use text field, if empty run example
+				aCurrency = currencyExample
+				run_test(false)
+			}
+		}, 1)
+	}
 }
 
-legend()
-currencyMaster = currencyMaster.concat(currencyExample)
-currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})
-currencyMaster.sort()
+Promise.all([
+	get_globals()
+]).then(function(){
+	// support
+	try {
+		let test = new Intl.RelativeTimeFormat(undefined)
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	legend()
+	if (isSupported) {
+		currencyMaster = Intl.supportedValuesOf("currency")
+		currencyMaster.push("zzz")
+		//currencyMaster = currencyMaster.concat(currencyExample)
+		//currencyMaster = currencyMaster.filter(function(item, position) {return currencyMaster.indexOf(item) === position})
+		//currencyMaster.sort()
+	}
+})
 
 </script>
 </body>
