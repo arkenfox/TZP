@@ -27,7 +27,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="30%"><col width="70%">
+		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">pluralrules
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -63,11 +63,13 @@ var list = gLocales,
 	aLegend = [],
 	aLocales = []
 
+
 let aFirstCardinal = [],
 	aFirstOrdinal = [],
 	main_buckets = [],
 	useSupportedOnly = true,
-	perf = ""
+	perf = "",
+	isSupported = false
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -75,6 +77,7 @@ s14 = s14.trim()
 s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
+s99 = s99.trim()
 
 function clearcustom() {
 	dom.custom.value = ""
@@ -88,15 +91,32 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			let test = Intl.PluralRules.supportedLocalesOf([code])
-			if (test.length) {
+			let go = true
+			if (isSupported) {
+				go = Intl.PluralRules.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
 				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
 				aLegend.push(code.padStart(7) +": "+ name)
 			}
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + " supported]"+ sc +"<br><br>"
+	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -378,20 +398,22 @@ function run_test(type) {
 }
 
 function run() {
-	perf = ""
-	dom.perf = ""
-	dom.numbers2 = ""
-	dom.numbers1 = ""
-	dom.numbers0 = ""
-	dom.results2 = ""
-	dom.results1 = ""
-	dom.results0 = ""
-	// delay so users see change and allow paint
-	setTimeout(function() {
-		run_test("0") // main test
-		run_test("1") // 1st changes only
-		run_test("2") // custom
-	}, 1)
+	if (isSupported) {
+		perf = ""
+		dom.perf = ""
+		dom.numbers2 = ""
+		dom.numbers1 = ""
+		dom.numbers0 = ""
+		dom.results2 = ""
+		dom.results1 = ""
+		dom.results0 = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_test("0") // main test
+			run_test("1") // 1st changes only
+			run_test("2") // custom
+		}, 1)
+	}
 }
 
 dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
@@ -401,8 +423,19 @@ dom.custom.placeholder = "two arrays [cardinal] then [ordinal] e.g."
 Promise.all([
 	get_globals()
 ]).then(function(){
+	// support
+	try {
+		let test = new Intl.PluralRules(undefined)
+		isSupported = true
+	} catch(e) {
+		dom.numbers2.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
 	legend()
-	run()
+	if (isSupported) {
+		setTimeout(function() {
+			run()
+		}, 1)
+	}
 })
 
 </script>
