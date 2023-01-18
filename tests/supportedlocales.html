@@ -68,7 +68,6 @@ var list = gLocales,
 s4 = s4.trim()
 s12 = s12.trim()
 s14 = s14.trim()
-s16 = s16.trim()
 sg = sg.trim()
 sb = sb.trim()
 s99 = s99.trim()
@@ -131,20 +130,19 @@ function run_main(method, isLoopy) {
 			// only hash notate if 102+
 			let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 			if (!is102) {return ""}
-
 			let notation = ""
 			if (method == "C") {
-				if (hash == "eeb1eadf") {notation = " [FF110+]" // 163
-				} else if (hash == "4afb0332") {notation = " [FF102-109]" // 162
+				if (hash == "c44c31bb") {notation = " [FF110+]"
+				} else if (hash == "213036f4") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
 			} else {
-				if (hash == "a9a98a4e") {notation = " [FF110+]" // 266 bho, cv, raj
-				} else if (hash == "79f8b151") {notation = " [FF102-109]" // 263
+				if (hash == "ac1c5516") {notation = " [FF110+]"
+				} else if (hash == "d3656bd5") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
 			}
-			if (notation !== zNEW) notation = s12 + notation + sc
+			if (notation !== zNEW) notation = s14 + notation + sc
 			return notation
 		}
 		// get data
@@ -212,7 +210,7 @@ function run_main(method, isLoopy) {
 				}
 				if (nextItem !== a) {
 					if (tmpCodes.length > 1) {
-						dupes.push(s16 + a + sc + s4 +" ["+ tmpCodes.length +"] "+ sc + tmpCodes.join(", "))
+						dupes.push(s14 + a + sc + s4 +" ["+ tmpCodes.length +"] "+ sc + tmpCodes.join(", "))
 						dupesclean.push(a)
 					}
 					tmpCodes = []
@@ -225,10 +223,10 @@ function run_main(method, isLoopy) {
 				let x = map[i].split(" -> ")[0] // tested
 				let y = map[i].split(" -> ")[1] // found
 				if (!aLocales.includes(y.toLowerCase())) { // case insenstive
-					notlist.push(s12 + y + sc +" ["+ x +"]")
+					notlist.push(s16 + y + sc +" ["+ x +"]")
 					notlistclean.push(y)
 				}
-				map2.push(s14 + x + sc + " -> "+ y)
+				map2.push(s12 + x + sc + " -> "+ y)
 			}
 			// color up results
 			if (!isLoopy) {
@@ -238,15 +236,15 @@ function run_main(method, isLoopy) {
 						let part1 = r.split(" -> ")[0],
 							part2 = r.split(" -> ")[1]
 						if (dupesclean.includes(part2)) {
-							data[i] = s14 + part1 +" -> "+ sc + s16 + part2 + sc
+							data[i] = s12 + part1 +" -> "+ sc + s14 + part2 + sc
 						} else if (notlistclean.includes(part2)) {
-							data[i] = s14 + part1 +" -> "+ sc + s12 + part2 + sc
+							data[i] = s12 + part1 +" -> "+ sc + s16 + part2 + sc
 						} else {
-							data[i] = s14 + r + sc
+							data[i] = s12 + r + sc
 						}
 					} else {
 						if (dupesclean.includes(r)) {
-							data[i] = s16 + r + sc
+							data[i] = s14 + r + sc
 						}
 					}
 				}
@@ -259,9 +257,9 @@ function run_main(method, isLoopy) {
 				// build summary
 				if (type == "lookup") {
 					lookupSummary = "<ul><li>" + hashLookup + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method) +"</li>"
-					if (map2.length) {lookupSummary += "<li>"+ s14 +"MAPPED: "+ sc + map2.join(", ") +"</li>"}
-					if (dupes.length) {lookupSummary += "<li>"+ s16 +"DUPES: "+ sc + dupes.join(", ") +"</li>"}
-					if (notlist.length) {lookupSummary += "<li>"+ s12 +"NOT LISTED: "+ sc + notlist.join(", ") +"</li>"}					
+					if (map2.length) {lookupSummary += "<li>"+ s12 +"MAPPED: "+ sc + map2.join(", ") +"</li>"}
+					if (dupes.length) {lookupSummary += "<li>"+ s14 +"DUPES: "+ sc + dupes.join(", ") +"</li>"}
+					if (notlist.length) {lookupSummary += "<li>"+ s16 +"NOT LISTED: "+ sc + notlist.join(", ") +"</li>"}					
 					lookupSummary += "</ul>"
 				} else {
 					str = s4 + getPretty(method).toUpperCase() + sc
@@ -284,9 +282,9 @@ function run_main(method, isLoopy) {
 					str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
 				}
 				str += spacer + data.join(", ")
-				if (map2.length) {str += spacer + s14 +"MAPPED"+ sc + spacer + map2.join("<br>")}
-				if (dupes.length) {str += spacer + s16 +"DUPES"+ sc + spacer + dupes.join("<br>")}
-				if (notlist.length) {str += spacer + s12 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+				if (map2.length) {str += spacer + s12 +"MAPPED"+ sc + spacer + map2.join("<br>")}
+				if (dupes.length) {str += spacer + s14 +"DUPES"+ sc + spacer + dupes.join("<br>")}
+				if (notlist.length) {str += spacer + s16 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
 				display.push(str)
 			}
 		}
@@ -320,7 +318,7 @@ function run_main(method, isLoopy) {
 					legend.push(sg + code.padStart(7) + sc +": "+ name)
 				} else {
 					if (nocasemap.includes(code)) {
-						legend.push(s14 + code.padStart(7) +": "+ name + sc)
+						legend.push(s12 + code.padStart(7) +": "+ name + sc)
 					} else {
 						legend.push(code.padStart(7) +": "+ name)
 					}
