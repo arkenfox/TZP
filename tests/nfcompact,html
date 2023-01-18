@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>numberformat: compact</title>
+<style>
+</style>
+</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>numberformat: compact</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 780px;}
+		hr {color: #dcdc8c}
+		.pad {padding-bottom: 10px;)
+	</style>
+</head>
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">numberformat : compact
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy: compactDisplay and useGrouping
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	localesHashAll = "" // to compare min to
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+s99 = s99.trim()
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"   LEGEND ["+ aLegend.length +" supported]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+	// ToDo: ChainNumberFormat (FF54)
+	let grouping = ["true", "false"]
+	let styles = ["short", "long"]
+	let items = [
+		0/0, 0, 1/10, 1/1000, 1.1, 200.2, 3333.3, 4444444.4, -5555555555.5, 6666666666666.6, 7777777777777777.7, 1e15
+	]
+
+	let tests = {
+		"true": {
+			"short": items,
+			"long": items,
+		},
+		"false": {
+			"short": items,
+			"long": items,
+		}
+	}
+
+	if (method == "min") {
+		tests = {
+			// FF109 or lower doesn't need 7777777777777777.7 but lets leave it there
+			"true": { // FF110+
+				"short": [-5555555555.5], // we need one negative
+				"long": [0/0, 3333.3, 6666666666666.6, 7777777777777777.7]
+			}
+		}
+	}
+
+	try {
+		//test: each useGrouping x each compactDisplay
+		aLocales.forEach(function(code) {
+			let oStyles = {
+				"false": {"short": [], "long": []},
+				"true": {"short": [], "long": []}
+			}
+			Object.keys(tests).forEach(function(g){
+				Object.keys(tests[g]).forEach(function(s){
+					// set formatter once per code
+					let gBool = g == "true" ? true : false
+					let formatter = new Intl.NumberFormat(code, {notation: "compact", compactDisplay: s, useGrouping: gBool })
+					tests[g][s].forEach(function(t){
+						oStyles[gBool][s].push(formatter.format(t))						
+					})
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {"false":{}, "true": {}}
+				oTempData[hash]["locales"] = [code]
+				oTempData[hash]["false"]["long"] = oStyles["false"]["long"].join(" | ")
+				oTempData[hash]["false"]["short"] = oStyles["false"]["short"].join(" | ")
+				oTempData[hash]["true"]["long"] = oStyles["true"]["long"].join(" | ")
+				oTempData[hash]["true"]["short"] = oStyles["true"]["short"].join(" | ")
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+
+
+			let strFS = oData[k]["false"]["short"],
+				strFL = oData[k]["false"]["long"],
+				strTS = oData[k]["true"]["short"],
+				strTL = oData[k]["true"]["long"],
+				localeCount = oData[k]["locales"].split(",").length
+
+			if (strFS.length) {strFS = "<li>"+ s16 +"S: "+ sc + strFS +"</li>"}
+			if (strFL.length) {strFL = "<li>"+ s16 +"L: "+ sc + strFL +"</li>"}
+			if (strTS.length) {strTS = "<li>"+ s16 +"S: "+ sc + strTS +"</li>"}
+			if (strTL.length) {strTL = "<li>"+ s16 +"L: "+ sc + strTL +"</li>"}
+
+			let strFalse = (strFS.length || strFL.length) ? s14 +"false"+ sc : ""
+			let strTrue = (strTS.length || strTL.length) ? s14 +"true"+ sc: ""
+
+			if (strFalse !== "") {strFalse += strFS + strFL}
+			if (strTrue !== "") {strTrue += strTS + strTL}
+
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul>"+ strFalse + strTrue
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			if (isFF) {
+				// only hash notate if 102+
+				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+				if (is102) {
+					// track FF version changes
+					// ignore if non-supported used, which return same as undefined = user's resolved options
+					// results
+					if (resultsHash == "ec922ab8") {resultsHash += s14 +" [FF111+]"+ sc
+					} else if (resultsHash == "fd5d59b5") {resultsHash += s14 +" [FF110]"+ sc
+					} else if (resultsHash == "6956cac0") {resultsHash += s14 +" [FF102-109]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "a5ba6419") {localesHash += s14 +" [FF111+]"+ sc // 133
+					} else if (localesHash == "f134ce07") {localesHash += s14 +" [FF110]"+ sc
+					} else if (localesHash == "50506db8") {localesHash += s14 +" [FF102-109]"+ sc // 130
+					} else if (isFF) {localesHash += zNEW
+					}
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+
+	} catch(e) {
+		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	//reset
+	setBtn(method)
+	dom.perf = ""
+	dom.results = ""
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		run_main(method)
+	}, 1)
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	legend()
+	setBtn("all")
+	setTimeout(function() {
+		run_main("all")
+	}, 100)
+})
+
+</script>
+</body>
+</html>
