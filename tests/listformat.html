@@ -81,13 +81,6 @@ sg = sg.trim()
 sb = sb.trim()
 s99 = s99.trim()
 
-const day8 = new Date("2019-01-30T08:00:00") // in the morning
-const day12 = new Date("2019-01-30T12:00:00") // noon
-const day15 = new Date("2019-01-30T15:00:00") // in the afternoon
-const day18 = new Date("2019-01-30T18:00:00") // in the evening
-const day22 = new Date("2019-01-30T22:00:00") // at night
-let days = [day8, day12, day15, day18, day22]
-
 function log_console(name) {
 	let hash = mini(sDetail[name])
 	if (name == "locales") {
@@ -273,13 +266,13 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "7f671dd2") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "3d6afa30") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "114571da") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "26ab4f2a") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "c245f34d") {localesHash += s14 +" [FF110+]"+ sc // 133
-					} else if (localesHash == "9a745470") {localesHash += s14 +" [FF102-109]"+ sc // 130
+					if (localesHash == "ab7f5221") {localesHash += s14 +" [FF110+]"+ sc // 133
+					} else if (localesHash == "fa67efc2") {localesHash += s14 +" [FF102-109]"+ sc // 130
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
