@@ -78,13 +78,6 @@ sg = sg.trim()
 sb = sb.trim()
 s99 = s99.trim()
 
-const day8 = new Date("2019-01-30T08:00:00") // in the morning
-const day12 = new Date("2019-01-30T12:00:00") // noon
-const day15 = new Date("2019-01-30T15:00:00") // in the afternoon
-const day18 = new Date("2019-01-30T18:00:00") // in the evening
-const day22 = new Date("2019-01-30T22:00:00") // at night
-let days = [day8, day12, day15, day18, day22]
-
 function log_console(name) {
 	let hash = mini(sDetail[name])
 	if (name == "locales") {
@@ -142,7 +135,6 @@ function run_main(method) {
 	let spacer = "<br><br>"
 
 	try {
-		let array = aLocales
 		let	styles = ['narrow','short','long']
 		let times = [-3,-1,0,1,3]
 		let units = ["second","minute","hour","day","week","month","quarter","year"]
@@ -151,9 +143,7 @@ function run_main(method) {
 
 		// select what to test
 		if (method == "min") {
-			styles = ["narrow","long"]
-			//times = [0,1,3]
-			//units = ["second","day","year"]
+			styles = ["narrow","short","long"]
 
 			// TZP: en-US
 			// A: now, in 1s, in 1 second, in 3s, in 1d, in 3d, this qtr., in 0y
@@ -165,6 +155,8 @@ function run_main(method) {
 				N: now | in 1s | in 3s | today | tomorrow | in 3d | next wk. | this qtr. | next yr.
 				L: in 1 second
 			*/
+
+			// FF65-67 & FF96-110+
 			minList = [
 				"autonarrow0second",  // A: now
 				"autonarrow1second",  // A: in 1s
@@ -179,62 +171,65 @@ function run_main(method) {
 				"alwaysnarrow0year",  // A: in 0y
 				"autonarrow1year",    // B: next yr.
 			]
+			// older versions need some help
+			if (isVer > 67 && isVer < 91) {
+				minList.push("autolong1week") // FF68-90
+			}
+			if (isVer > 71 && isVer < 96) {
+				minList.push("autoshort-1week") // FF72-95
+			}
 
 /* troubleshooting list
-"narrow-3second",
-"narrow-1second",
-"narrow0second",
-"narrow1second",
-"narrow3second",
+"autonarrow-3second",
+"autonarrow-1second",
+"autonarrow0second",
+"autonarrow1second",
+"autonarrow3second",
 
-"narrow-3minute",
-"narrow-1minute",
-"narrow0minute",
-"narrow1minute",
-"narrow3minute",
+"autonarrow-3minute",
+"autonarrow-1minute",
+"autonarrow0minute",
+"autonarrow1minute",
+"autonarrow3minute",
 
-"narrow-3hour",
-"narrow-1hour",
-"narrow0hour",
-"narrow1hour",
-"narrow3hour",
+"autonarrow-3hour",
+"autonarrow-1hour",
+"autonarrow0hour",
+"autonarrow1hour",
+"autonarrow3hour",
 
-"narrow-3day",
-"narrow-1day",
-"narrow0day",
-"narrow1day",
-"narrow3day",
+"autonarrow-3day",
+"autonarrow-1day",
+"autonarrow0day",
+"autonarrow1day",
+"autonarrow3day",
 
-"narrow-3week",
-"narrow-1week",
-"narrow0week",
-"narrow1week",
-"narrow3week",
+"autonarrow-3week",
+"autonarrow-1week",
+"autonarrow0week",
+"autonarrow1week",
+"autonarrow3week",
 
-"narrow-3month",
-"narrow-1month",
-"narrow0month",
-"narrow1month",
-"narrow-3second",
-"narrow3month",
+"autonarrow-3month",
+"autonarrow-1month",
+"autonarrow0month",
+"autonarrow1month",
+"autonarrow3month",
 
-"narrow-3year",
-"narrow-1year",
-"narrow0year",
-"narrow1year",
-"narrow3year",
+"autonarrow-3year",
+"autonarrow-1year",
+"autonarrow0year",
+"autonarrow1year",
+"autonarrow3year",
 
-"narrow-3quarter",
-"narrow-1quarter",
-"narrow0quarter",
-"narrow1quarter",
-"narrow3quarter",
+"autonarrow-3quarter",
+"autonarrow-1quarter",
+"autonarrow0quarter",
+"autonarrow1quarter",
+"autonarrow3quarter",
 */
 
-			if (isVer < 96) {
-				if (isVer > 71) {minList.push("autonarrow-1week")} // FF72-95 adds es, es-es
-				if (isVer > 77) {minList.push("autonarrow3week")} // FF78-95 adds nn
-			}
+
 			sDetail["minlist"] = minList
 		} else {
 			if (method == "narrow") {styles = ["narrow"]}
@@ -248,7 +243,7 @@ function run_main(method) {
 		}
 
 		//test: 3 styles x 5 times x 8 units = 120 results
-		array.forEach(function(code) {
+		aLocales.forEach(function(code) {
 			let oStyles = {
 				"narrowalways": [], "narrowauto": [],
 				"shortalways": [], "shortauto": [],
@@ -381,13 +376,13 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "514a5457") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "ea0caaee") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "2469a32f") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "07d68516") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "866e6a9f") {localesHash += s14 +" [FF110+]"+ sc // 226
-					} else if (localesHash == "5e62bbb4") {localesHash += s14 +" [FF102-109]"+ sc // 222
+					if (localesHash == "31c0505d") {localesHash += s14 +" [FF110+]"+ sc // 226
+					} else if (localesHash == "45bd18d2") {localesHash += s14 +" [FF102-109]"+ sc // 222
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -397,7 +392,7 @@ function run_main(method) {
 		}
 		// display
 		let display = s4 + method.toUpperCase() +": "
-			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc + " " + minBtn
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc + " " + minBtn
 			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
