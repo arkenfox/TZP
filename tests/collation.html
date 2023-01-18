@@ -173,7 +173,8 @@ var compareExamples = [
 
 var aLegend = [],
 	aLocales = [],
-	counter = 0
+	counter = 0,
+	oSortvsSearch = {}
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -344,6 +345,11 @@ function collator() {
 	// good to go
 	if (go) {
 
+		oSortvsSearch = {
+			"search_is_different": [],
+			"search_is_different_and_nonenglish": []
+		} // reset
+
 		// delay so user can see changes
 		setTimeout(function() {
 			let output = []
@@ -355,9 +361,13 @@ function collator() {
 
 			// set control
 			chars = chars.sort(Intl.Collator("en").compare)
-			let control = mini(chars)
+			let enhash = mini(chars)
+			chars.sort()
+			chars.sort(Intl.Collator("en", {usage: "search"}).compare)
+			let control = enhash +" | "+ mini(chars)
+
 			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
-				+ s12 +"   hash: "+ sc + control + s12 +" [en]"+ sc +"<br>"
+				+ s12 +"   hash: "+ sc + control + s12 +" [en: sort | search]"+ sc +"<br>"
 			output.push(strItem)
 			// results header
 			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
@@ -375,8 +385,18 @@ function collator() {
 				let str = list[i].toLowerCase()
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
-				chars.sort(Intl.Collator(code).compare)
+				chars.sort(Intl.Collator(code).compare) // usage: sort
 				let hash = mini(chars)
+				chars.sort()
+				chars.sort(Intl.Collator(code, {usage: "search"}).compare)
+				let hash2 = mini(chars)
+				if (hash !== hash2) {
+					oSortvsSearch["search_is_different"].push(code + ": " + hash +", " + hash2)
+					if (hash2 !== enhash) {
+						oSortvsSearch["search_is_different_and_nonenglish"].push(code + ": " + hash +", " + hash2)
+					}
+				}
+				hash += " | "+ hash2
 				if (hash !== control) {
 					codes.push(code)
 					diffs.push(hash +":"+ code +":"+ name)
@@ -470,10 +490,10 @@ function collator() {
 					// only hash notate if 102+
 					let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 					if (is102) {
-						if (localesHash == "8f7f37d8") {ff = "110+"
-						} else if (localesHash == "18289e2f") {ff = "102-109"
+						if (localesHash == "1da8496c") {ff = "110+"
+						} else if (localesHash == "786a7131") {ff = "102-109"
 						} else {ff = zNEW}
-						if (ff !== zNEW) {ff = s16 +" [FF"+ ff + "]"+ sc}
+						if (ff !== zNEW) {ff = s14 +" [FF"+ ff + "]"+ sc}
 					}
 				}
 				strItem = s12 +"locales: "+ sc + localesHash + ff +"<br>"
