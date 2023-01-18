@@ -111,14 +111,17 @@ function reset_custom(type) {
 	if (type == "min") {
 		// gecko min preset
 		dom.narrow08.checked = true
-		dom.narrow15.checked = true
-		dom.short12.checked = true
-		dom.short18.checked = true
 		dom.long08.checked = true
+		dom.short12.checked = true
+		dom.narrow15.checked = true
+		dom.short18.checked = true
+
 		// assuming 110 changes stick from ICU 72: 1792775
 		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
+			// FF90-109
 			dom.short22.checked = true
 		} else {
+			// FF110+
 			dom.short15.checked = true
 			dom.long22.checked = true // hopefully blink catches up
 		}
@@ -159,6 +162,7 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
+
 function get_dayperiod(date, code, option) {
 	// always use h12
 	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
@@ -193,11 +197,23 @@ function run_main(method) {
 		}
 		// test: 3 methods x 5 dayPeriods
 		aLocales.forEach(function(code) {
+
+			// set our three options once per code
+			let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "short"}),
+				dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "narrow"}),
+				dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "long"})
+
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
 				times.forEach(function(t){
 					if (oOptions[s + t] == true) {
-						oStyles[s].push(get_dayperiod(oDays[t], code, s))
+						if (s == "short") {
+							oStyles[s].push(dteS.format(oDays[t]))
+						} else if (s =="narrow") {
+							oStyles[s].push(dteN.format(oDays[t]))
+						} else {
+							oStyles[s].push(dteL.format(oDays[t]))
+						}
 					}
 				})
 			})
@@ -272,13 +288,13 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "c0012871") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "bc24c50a") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "b51c5347") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "89a8c934") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "7e73ac6f") {localesHash += s14 +" [FF110+]"+ sc // 199
-					} else if (localesHash == "e9fa5132") {localesHash += s14 +" [FF102-109]"+ sc // 192
+					if (localesHash == "2169e4ef") {localesHash += s14 +" [FF110+]"+ sc // 199
+					} else if (localesHash == "3cf81f66") {localesHash += s14 +" [FF102-109]"+ sc // 192
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
