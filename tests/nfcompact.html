@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>listformat</title>
+<title>numberformat: compact</title>
 <style>
 </style>
 </head>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>pluralrules</title>
+	<title>numberformat: compact</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -30,35 +30,19 @@
 	<table id="tb4">
 		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">listformat
+			<div class="nav-title">numberformat : compact
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
-			styles (<code>narrow</code>, <code>short</code>, <code>long</code>) and three types
-			(<code>conjunction</code>, <code>disjunction</code>, <code>unit</code>).
-			Click custom to test any configuration.</span>
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy: compactDisplay and useGrouping
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
-				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
-				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
-				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
 			<br><br><hr><br>
-				<span class="hidden" id ="customoptions">
-					<div class="mono spaces pad">NARROW: conjunction <input type="checkbox" id="narrowconjunction"> disjunction <input type="checkbox" id="narrowdisjunction"> unit <input type="checkbox" id="narrowunit"></div>
-					<div class="mono spaces pad"> SHORT: conjunction <input type="checkbox" id="shortconjunction"> disjunction <input type="checkbox" id="shortdisjunction"> unit <input type="checkbox" id="shortunit"></div>
-					<div class="mono spaces pad">  LONG: conjunction <input type="checkbox" id="longconjunction"> disjunction <input type="checkbox" id="longdisjunction"> unit <input type="checkbox" id="longunit"></div>
-				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
-				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
-				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
-				<span class="btn4 btn" onClick="run_custom()">[ RUN ]</span>
-					<br><br><hr><br>
-				</span>
 				<span id ="results"></span>
 			</td></tr>
 	</table>
@@ -70,8 +54,7 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	isSupported = false,
-	localesHashAll = "" // to compare custom to
+	localesHashAll = "" // to compare min to
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -90,32 +73,6 @@ function log_console(name) {
 	}
 }
 
-function reset_custom(type) {
-	// check/uncheck everything
-	let checkState = (type == "all")
-	let styles = ["narrow","short","long"],
-		types = ["conjunction","disjunction","unit"]
-	styles.forEach(function(s){
-		types.forEach(function(t){
-			document.getElementById(s +t).checked = checkState
-		})
-	})
-	if (type == "min") {
-		/*
-		gecko min example
-		- shortunit + narrowunit = required (all but not either of those = no match)
-		- then one of conjunction (any style)
-		- then one of disjunction (any style)
-		*/
-		// min preset
-		dom.narrowconjunction.checked = true
-		dom.narrowdisjunction.checked = true
-		dom.narrowunit.checked = true
-		dom.shortunit.checked = true
-		dom.shortconjunction.checked = true
-	}
-}
-
 function legend() {
 	// build once
 	if (aLegend.length == 0) {
@@ -124,10 +81,7 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			let go = true
-			if (isSupported) {
-				go = Intl.ListFormat.supportedLocalesOf([code]).length > 0
-			}
+			let go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
 			if (go) {
 				aLocales.push(code)
 				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
@@ -149,13 +103,8 @@ function legend() {
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"   LEGEND ["+ aLegend.length +" supported]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
-}
-
-function get_dayperiod(date, code, option) {
-	// always use h12
-	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
 }
 
 function run_main(method) {
@@ -163,45 +112,60 @@ function run_main(method) {
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
 
-	try {
-		let	styles = ['narrow','short','long']
-		let types = ['conjunction','disjunction','unit']
-		let oOptions = {}
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+	// ToDo: ChainNumberFormat (FF54)
+	let grouping = ["true", "false"]
+	let styles = ["short", "long"]
+	let items = [
+		0/0, 0, 1/10, 1/1000, 1.1, 200.2, 3333.3, 4444444.4, -5555555555.5, 6666666666666.6, 7777777777777777.7, 1e15
+	]
 
-		// select what to test
-		if (method == "custom") {
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					oOptions[s + t] = document.getElementById(s +t).checked
-				})
-			})
-		} else {
-			if (method == "narrow") {styles = ["narrow"]}
-			if (method == "short") {styles = ["short"]}
-			if (method == "long") {styles = ["long"]}
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					oOptions[s + t] = true
-				})
-			})
+	let tests = {
+		"true": {
+			"short": items,
+			"long": items,
+		},
+		"false": {
+			"short": items,
+			"long": items,
 		}
-		//test: 3 styles x 3 types
+	}
+
+	if (method == "min") {
+		tests = {
+			// FF109 or lower doesn't need 7777777777777777.7 but lets leave it there
+			"true": { // FF110+
+				"short": [-5555555555.5], // we need one negative
+				"long": [0/0, 3333.3, 6666666666666.6, 7777777777777777.7]
+			}
+		}
+	}
+
+	try {
+		//test: each useGrouping x each compactDisplay
 		aLocales.forEach(function(code) {
-			let oStyles = {"narrow": [], "short": [], "long": []}
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					if (oOptions[s + t] == true) {
-						oStyles[s].push(new Intl.ListFormat(code, {style: s, type: t}).format(["a","b","c"]))
-					}
+			let oStyles = {
+				"false": {"short": [], "long": []},
+				"true": {"short": [], "long": []}
+			}
+			Object.keys(tests).forEach(function(g){
+				Object.keys(tests[g]).forEach(function(s){
+					// set formatter once per code
+					let gBool = g == "true" ? true : false
+					let formatter = new Intl.NumberFormat(code, {notation: "compact", compactDisplay: s, useGrouping: gBool })
+					tests[g][s].forEach(function(t){
+						oStyles[gBool][s].push(formatter.format(t))						
+					})
 				})
 			})
 			let hash = mini(oStyles) +" " // make numbers sort like strings
 			if (oTempData[hash] == undefined) {
-				oTempData[hash] = {}
+				oTempData[hash] = {"false":{}, "true": {}}
 				oTempData[hash]["locales"] = [code]
-				oTempData[hash]["long"] = oStyles["long"].join(" | ")
-				oTempData[hash]["short"] = oStyles["short"].join(" | ")
-				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
+				oTempData[hash]["false"]["long"] = oStyles["false"]["long"].join(" | ")
+				oTempData[hash]["false"]["short"] = oStyles["false"]["short"].join(" | ")
+				oTempData[hash]["true"]["long"] = oStyles["true"]["long"].join(" | ")
+				oTempData[hash]["true"]["short"] = oStyles["true"]["short"].join(" | ")
 			} else {
 				oTempData[hash]["locales"].push(code)
 			}
@@ -225,16 +189,28 @@ function run_main(method) {
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
-			let strN = oData[k]["narrow"],
-				strS = oData[k]["short"],
-				strL = oData[k]["long"],
+
+
+			let strFS = oData[k]["false"]["short"],
+				strFL = oData[k]["false"]["long"],
+				strTS = oData[k]["true"]["short"],
+				strTL = oData[k]["true"]["long"],
 				localeCount = oData[k]["locales"].split(",").length
-			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
-			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
-			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
+
+			if (strFS.length) {strFS = "<li>"+ s16 +"S: "+ sc + strFS +"</li>"}
+			if (strFL.length) {strFL = "<li>"+ s16 +"L: "+ sc + strFL +"</li>"}
+			if (strTS.length) {strTS = "<li>"+ s16 +"S: "+ sc + strTS +"</li>"}
+			if (strTL.length) {strTL = "<li>"+ s16 +"L: "+ sc + strTL +"</li>"}
+
+			let strFalse = (strFS.length || strFL.length) ? s14 +"false"+ sc : ""
+			let strTrue = (strTS.length || strTL.length) ? s14 +"true"+ sc: ""
+
+			if (strFalse !== "") {strFalse += strFS + strFL}
+			if (strTrue !== "") {strTrue += strTS + strTL}
+
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>" + strN + strS + strL
+				+ "<ul>"+ strFalse + strTrue
 				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}
@@ -266,18 +242,20 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "114571da") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "26ab4f2a") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "ec922ab8") {resultsHash += s14 +" [FF111+]"+ sc
+					} else if (resultsHash == "fd5d59b5") {resultsHash += s14 +" [FF110]"+ sc
+					} else if (resultsHash == "6956cac0") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "ab7f5221") {localesHash += s14 +" [FF110+]"+ sc // 133
-					} else if (localesHash == "fa67efc2") {localesHash += s14 +" [FF102-109]"+ sc // 130
+					if (localesHash == "a5ba6419") {localesHash += s14 +" [FF111+]"+ sc // 133
+					} else if (localesHash == "f134ce07") {localesHash += s14 +" [FF110]"+ sc
+					} else if (localesHash == "50506db8") {localesHash += s14 +" [FF102-109]"+ sc // 130
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
 			}
-		} else if (method == "custom") {
+		} else if (method == "min") {
 			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 		// display
@@ -288,44 +266,22 @@ function run_main(method) {
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+
+
 	} catch(e) {
 		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
 	}
 }
 
 function run(method) {
-	if (isSupported) {
-		//reset
-		setBtn(method)
-		dom.perf = ""
-		dom.results = ""
-		let element = dom.customoptions
-
-		if (method == "custom") {
-			// unhide custom section
-			element.classList.remove("hidden")
-
-		} else {
-			// hide custom
-			element.classList.add("hidden")
-			dom.results = ""
-			// delay so users see change and allow paint
-			setTimeout(function() {
-				run_main(method)
-			}, 1)
-		}
-	}
-}
-
-function run_custom() {
-	if (isSupported) {
-		//reset
-		dom.perf = ""
-		dom.results = ""
-		setTimeout(function() {
-			run_main("custom")
-		}, 1)
-	}
+	//reset
+	setBtn(method)
+	dom.perf = ""
+	dom.results = ""
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		run_main(method)
+	}, 1)
 }
 
 function setBtn(method) {
@@ -344,21 +300,11 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
-	// support
-	try {
-		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
-		isSupported = true
-	} catch(e) {
-		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
-	}
-	reset_custom("min")
 	legend()
-	if (isSupported) {
-		setBtn("all")
-		setTimeout(function() {
-			run_main("all")
-		}, 100)
-	}
+	setBtn("all")
+	setTimeout(function() {
+		run_main("all")
+	}, 100)
 })
 
 </script>
