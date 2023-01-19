@@ -51,8 +51,10 @@
 					<span class="btn4 btn" onClick="collator()">[ run ]</span>
 					<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
 				<br><br>
-				<textarea rows="2" placeholder="comma delimited values: e.g: a,A,th,tw"
+				<textarea rows="3" placeholder="sort: comma delimited values: e.g: a,A,th,tw"
 						style="width: 98%; resize: vertical" id="valueC"></textarea>
+				<textarea rows="1" placeholder="search: comma delimited values: e.g: a,A,th,tw"
+						style="width: 98%; resize: vertical" id="valueD"></textarea>
 				<br><br>
 					<span class="spaces" id="output_collator"></span>
 			</td></tr>
@@ -68,7 +70,7 @@ gLocales.forEach(function(str) {
 	if (Intl.Collator.supportedLocalesOf([code]).length) {list.push(str)}
 })
 
-var collatorExample = [
+var collatorSort = [
 	'a',
 	'A',
 	'aa',
@@ -138,11 +140,15 @@ var collatorExample = [
 	'\u0B85',  //      TAMIL A
 	'\u0C05',  //     TELUGU A
 	'\u0E24',  //       THAI RU
-	// 80 covering 93
-	// 4a16f12e61d36648b0c8221007e9953b3256ddab
 ]
 
-//console.debug(collatorExample.join())
+var collatorSearch = [
+	// latin small
+	'\u0107',   // c + ACUTE
+	'\u0109',   // c + CIRCUMFLEX
+	'\u1ED9',   // o + CIRCUMFLEX + DOT BELOW
+	'\u00F6',   // o + DIAERESIS
+]
 
 var compareExamples = [
 	'\u0109,\u00E7\a',
@@ -225,16 +231,17 @@ function reset(type) {
 		dom.valueB.value = ""
 	} else {
 		dom.valueC.value = ""
+		dom.valueD.value = ""
 	}
 }
 
 function check_example() {
-	let control = collatorExample.length
+	let control = collatorSort.length
 	// make sure example is dupe free
-	collatorExample = collatorExample.filter(function (item, position) {
-		return collatorExample.indexOf(item) === position
+	collatorSort = collatorSort.filter(function (item, position) {
+		return collatorSort.indexOf(item) === position
 	})
-	if (collatorExample.length !== control) {
+	if (collatorSort.length !== control) {
 		console.debug("attention thorin: collation example contains dupes.. get your shit together")
 	}
 }
@@ -313,9 +320,11 @@ function collator() {
 	legend()
 	// vars
 	let valueC = dom.valueC.value,
-		chars = [],
-		isExample = false,
-		go = false
+		valueD = dom.valueD.value,
+		charsSort = [],
+		charsSearch = [],
+		goSort = false,
+		goSearch = false
 
 	// make sure we have at least two valid values
 	valueC = valueC.trim()
@@ -324,47 +333,74 @@ function collator() {
 		for (let i = 0 ; i < tmpArr.length; i++) {
 			let trimmed = tmpArr[i].trim()
 			if (trimmed.length) {
-				chars.push(trimmed)
+				charsSort.push(trimmed)
 			}
 		}
 		// make sure we have more than one item
-		chars = chars.filter(function (item, position) {
-			return chars.indexOf(item) === position
+		charsSort = charsSort.filter(function (item, position) {
+			return charsSort.indexOf(item) === position
 		})
-		if (chars.length > 1) {
-			go = true
-			dom.valueC.value = chars.join(", ")
+		if (charsSort.length > 1) {
+			goSort = true
+			dom.valueC.value = charsSort.join(", ")
 		}
 	} else {
-		// run example
-		chars = collatorExample
-		isExample = true
-		go = true
+		// use example
+		charsSort = collatorSort
+		goSort = true
+	}
+
+	valueD = valueD.trim()
+	if (valueD.length) {
+		let tmpArr = valueD.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				charsSearch.push(trimmed)
+			}
+		}
+		// make sure we have more than one item
+		charsSearch = charsSearch.filter(function (item, position) {
+			return charsSearch.indexOf(item) === position
+		})
+		if (charsSearch.length > 1) {
+			goSearch = true
+			dom.valueD.value = charsSearch.join(", ")
+		}
+	} else {
+		// use example
+		charsSearch = collatorSearch
+		goSearch = true
 	}
 
 	// good to go
-	if (go) {
-
+	if (goSort == true && goSearch == true) {
 		oSortvsSearch = {
-			"search_is_different": [],
-			"search_is_different_and_nonenglish": []
+			"search_is_nonenglish": [],
 		} // reset
 
 		// delay so user can see changes
 		setTimeout(function() {
 			let output = []
-			chars.sort()
-			let strItem = s4.trim() +"ITEMS: "+ sc + chars.length
-				+ (isExample ? s12 +" [example]"+ sc : "") +"<br><br>"
-				+ chars.join(", ") +"<br>"
+			// reset
+			charsSort.sort()
+			charsSearch.sort()
+			let exampleHash = mini(collatorSort.sort()) +" | "+ mini(collatorSearch.sort())
+			let thisHash = mini(charsSort.sort()) +" | "+ mini(charsSearch.sort())
+
+			// display chars used
+			let strItem = s4.trim() +"ITEMS: "+ sc + charsSort.length
+				+ (thisHash == exampleHash ? s12 +" [example]"+ sc : "") +"<br><br>"
+				+ s12 +"sort: "+ sc + charsSort.join(", ") +"<br><br>"
+				+ s12 +"search: "+ sc + charsSearch.join(", ") +"<br>"
 			output.push(strItem)
 
 			// set control
-			chars = chars.sort(Intl.Collator("en").compare)
-			let enhash = mini(chars)
-			chars.sort()
-			chars.sort(Intl.Collator("en", {usage: "search"}).compare)
-			let control = enhash +" | "+ mini(chars)
+			charsSort = charsSort.sort(Intl.Collator("en").compare)
+			let enHashSort = mini(charsSort)
+			charsSearch.sort(Intl.Collator("en", {usage: "search"}).compare)
+			let enHashSearch = mini(charsSearch)
+			let control = enHashSort +" | "+ enHashSearch
 
 			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
 				+ s12 +"   hash: "+ sc + control + s12 +" [en: sort | search]"+ sc +"<br>"
@@ -381,20 +417,20 @@ function collator() {
 
 			for (let i = 0 ; i < list.length; i++) {
 				// important: reset to original order
-				chars.sort()
 				let str = list[i].toLowerCase()
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
-				chars.sort(Intl.Collator(code).compare) // usage: sort
-				let hash = mini(chars)
-				chars.sort()
-				chars.sort(Intl.Collator(code, {usage: "search"}).compare)
-				let hash2 = mini(chars)
-				if (hash !== hash2) {
-					oSortvsSearch["search_is_different"].push(code + ": " + hash +", " + hash2)
-					if (hash2 !== enhash) {
-						oSortvsSearch["search_is_different_and_nonenglish"].push(code + ": " + hash +", " + hash2)
-					}
+
+				charsSort.sort()
+				charsSort.sort(Intl.Collator(code).compare)
+				let hash = mini(charsSort)
+
+				charsSearch.sort()
+				charsSearch.sort(Intl.Collator(code, {usage: "search"}).compare)
+				let hash2 = mini(charsSearch)
+
+				if (hash2 !== enHashSearch) {
+					oSortvsSearch["search_is_nonenglish"].push(code + ": " + hash +", " + hash2)
 				}
 				hash += " | "+ hash2
 				if (hash !== control) {
@@ -484,9 +520,8 @@ function collator() {
 				let localesHash = mini(aLocaleGroups)
 
 				let ff = ""
-				let charHash = mini(chars.sort())
 				// don't notate unless it's our own preset
-				if (isFF && charHash == "5a96db28") {
+				if (isFF && thisHash == exampleHash) {
 					// only hash notate if 102+
 					let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 					if (is102) {
