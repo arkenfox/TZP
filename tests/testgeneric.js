@@ -383,7 +383,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 110
+		isVerMax = 111
+		if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
 		if ("object" === typeof ondeviceorientationabsolute) return 110 // 1689631
 		if (CSSKeyframesRule.prototype.hasOwnProperty("length")) return 109 // 1789776
 		if ("undefined" === typeof onloadend) return 108 // 1574487
