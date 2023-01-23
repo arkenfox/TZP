@@ -29,8 +29,8 @@
 		<thead><tr><th colspan="2">chrome:// & resource://</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Enumeration of web accessible resources. 
-				<span class="s3">Firefox</span> list compiled from 91ESR + FF101-105, and Android FF101-106.
-				<span class="s3">Tor Browser</span> list compiled from 11.5-11.5.4 (91ESR) + 12.0a3 (102ESR), and Android 11.5.4.
+				<span class="s3">Firefox</span> list compiled from 91ESR + FF101-109, and Android FF101-109.
+				<span class="s3">Tor Browser</span> list compiled from 11.5-11.5.8 (91ESR) + 12.0-12.0.2 (102ESR), and Android 11.5.4-12.0.2.
 				Click counts to display details.
 			</span>
 		</td></tr>
@@ -93,7 +93,7 @@ function run(runtype) {
 	document.getElementById("otherHash"+ runtype).innerHTML = "&nbsp"
 	document.getElementById("detail"+ runtype).innerHTML = "&nbsp"
 	document.getElementById("jsHash"+ runtype).innerHTML = "tests are running"
-	document.getElementById("cssHash"+ runtype).innerHTML = "plesase wait"
+	document.getElementById("cssHash"+ runtype).innerHTML = "please wait"
 
 	// set list to use
 	let list = runtype == "FF" ? listFF : listTor
@@ -310,16 +310,24 @@ get_globals()
 		chrome://activity-stream/content/data/content/assets/heart.webp
 		chrome://activity-stream/content/data/content/assets/icon-removed-bookmark.svg
 		chrome://activity-stream/content/data/content/assets/long-zap.svg
+		chrome://activity-stream/content/data/content/assets/mobile-download-qr-existing-user-cn.svg
 		chrome://activity-stream/content/data/content/assets/mobile-download-qr-existing-user.svg
+		chrome://activity-stream/content/data/content/assets/mobile-download-qr-new-user-cn.svg
 		chrome://activity-stream/content/data/content/assets/mobile-download-qr-new-user.svg
+		chrome://activity-stream/content/data/content/assets/mr-colorways.avif
 		chrome://activity-stream/content/data/content/assets/mr-gratitude.svg
 		chrome://activity-stream/content/data/content/assets/mr-import.svg
 		chrome://activity-stream/content/data/content/assets/mr-mobilecrosspromo.svg
+		chrome://activity-stream/content/data/content/assets/mr-pinprivate.svg
 		chrome://activity-stream/content/data/content/assets/mr-pintaskbar.svg
+		chrome://activity-stream/content/data/content/assets/mr-privacysegmentation.svg
+		chrome://activity-stream/content/data/content/assets/mr-rtamo-background-image.svg
 		chrome://activity-stream/content/data/content/assets/mr-settodefault.svg
 		chrome://activity-stream/content/data/content/assets/noodle-C.svg
 		chrome://activity-stream/content/data/content/assets/noodle-outline-L.svg
 		chrome://activity-stream/content/data/content/assets/noodle-solid-L.svg
+		chrome://activity-stream/content/data/content/assets/person-typing.svg
+		chrome://activity-stream/content/data/content/assets/pocket-swoosh.svg
 		chrome://activity-stream/content/data/content/assets/proton-bkg.avif
 		chrome://activity-stream/content/data/content/assets/remote/mountain.svg
 		chrome://activity-stream/content/data/content/assets/remote/umbrella.png
@@ -494,6 +502,7 @@ get_globals()
 		chrome://browser/content/assets/moz-vpn.svg
 		chrome://browser/content/assets/private-promo-asset.svg
 		chrome://browser/content/assets/vpn-logo.svg
+		chrome://browser/content/blanktab.html
 		chrome://browser/content/blockedSite.js
 		chrome://browser/content/blockedSite.xhtml
 		chrome://browser/content/browser-a11yUtils.js
@@ -518,16 +527,23 @@ get_globals()
 		chrome://browser/content/browser-tabsintitlebar.js
 		chrome://browser/content/browser-thumbnails.js
 		chrome://browser/content/browser-toolbarKeyNav.js
+		chrome://browser/content/browser-unified-extensions.js
 		chrome://browser/content/browser-webrtc.js
 		chrome://browser/content/browser.css
 		chrome://browser/content/browser.js
 		chrome://browser/content/browser.xhtml
 		chrome://browser/content/built_in_addons.json
+		chrome://browser/content/callout-colorways-dark.svg
+		chrome://browser/content/callout-colorways.svg
+		chrome://browser/content/callout-tab-pickup-dark.svg
+		chrome://browser/content/callout-tab-pickup.svg
 		chrome://browser/content/certerror/aboutNetError.js
 		chrome://browser/content/certerror/aboutNetError.xhtml
 		chrome://browser/content/certerror/aboutNetErrorCodes.js
 		chrome://browser/content/certerror/supportpages/connection-not-secure.html
 		chrome://browser/content/certerror/supportpages/time-errors.html
+		chrome://browser/content/cfr-lightning-dark.svg
+		chrome://browser/content/cfr-lightning.svg
 		chrome://browser/content/child/ext-browser-content-only.js
 		chrome://browser/content/child/ext-browser.js
 		chrome://browser/content/child/ext-devtools-inspectedWindow.js
@@ -538,6 +554,16 @@ get_globals()
 		chrome://browser/content/child/ext-menus.js
 		chrome://browser/content/child/ext-omnibox.js
 		chrome://browser/content/child/ext-tabs.js
+		chrome://browser/content/colorway-background.svg
+		chrome://browser/content/colorways-card.mjs
+		chrome://browser/content/colorways/assets/independent-voices-activist.avif
+		chrome://browser/content/colorways/assets/independent-voices-collection-banner.avif
+		chrome://browser/content/colorways/assets/independent-voices-collection.avif
+		chrome://browser/content/colorways/assets/independent-voices-dreamer.avif
+		chrome://browser/content/colorways/assets/independent-voices-expressionist.avif
+		chrome://browser/content/colorways/assets/independent-voices-innovator.avif
+		chrome://browser/content/colorways/assets/independent-voices-playmaker.avif
+		chrome://browser/content/colorways/assets/independent-voices-visionary.avif
 		chrome://browser/content/colorways/colorwaycloset.css
 		chrome://browser/content/colorways/colorwaycloset.html
 		chrome://browser/content/colorways/colorwaycloset.js
@@ -558,6 +584,11 @@ get_globals()
 		chrome://browser/content/downloads/indicator.js
 		chrome://browser/content/ext-browser.json
 		chrome://browser/content/extension.css
+		chrome://browser/content/featureCallout.mjs
+		chrome://browser/content/firefoxview.css
+		chrome://browser/content/firefoxview.html
+		chrome://browser/content/firefoxview.mjs
+		chrome://browser/content/helpers.mjs
 		chrome://browser/content/history-swipe-arrow.svg
 		chrome://browser/content/ion.css
 		chrome://browser/content/ion.html
@@ -578,6 +609,8 @@ get_globals()
 		chrome://browser/content/logos/vpn-light.svg
 		chrome://browser/content/logos/vpn-promo-logo.svg
 		chrome://browser/content/microsoft-translator-attribution.png
+		chrome://browser/content/migration/migration-dialog.html
+		chrome://browser/content/migration/migration-wizard.mjs
 		chrome://browser/content/migration/migration.js
 		chrome://browser/content/migration/migration.xhtml
 		chrome://browser/content/monitor-card.js
@@ -706,6 +739,8 @@ get_globals()
 		chrome://browser/content/protections.mjs
 		chrome://browser/content/proxy-card.js
 		chrome://browser/content/proxy-card.mjs
+		chrome://browser/content/recently-closed-empty.svg
+		chrome://browser/content/recently-closed-tabs.mjs
 		chrome://browser/content/robot.ico
 		chrome://browser/content/safeMode.css
 		chrome://browser/content/safeMode.js
@@ -740,6 +775,7 @@ get_globals()
 		chrome://browser/content/screenshots/copy.svg
 		chrome://browser/content/screenshots/download-white.svg
 		chrome://browser/content/screenshots/download.svg
+		chrome://browser/content/screenshots/fileHelpers.mjs
 		chrome://browser/content/screenshots/icon-welcome-face-without-eyes.svg
 		chrome://browser/content/screenshots/menu-fullpage.svg
 		chrome://browser/content/screenshots/menu-visible.svg
@@ -758,6 +794,9 @@ get_globals()
 		chrome://browser/content/static-robot.png
 		chrome://browser/content/syncedtabs/sidebar.js
 		chrome://browser/content/syncedtabs/sidebar.xhtml
+		chrome://browser/content/tab-pickup-container.mjs
+		chrome://browser/content/tab-pickup-empty.svg
+		chrome://browser/content/tab-pickup-list.mjs
 		chrome://browser/content/tabbrowser-tab.js
 		chrome://browser/content/tabbrowser-tabs.js
 		chrome://browser/content/tabbrowser.css
@@ -895,6 +934,7 @@ get_globals()
 		chrome://browser/skin/history.svg
 		chrome://browser/skin/home.svg
 		chrome://browser/skin/identity-block/identity-block.css
+		chrome://browser/skin/identity-credential-notification.css
 		chrome://browser/skin/import.svg
 		chrome://browser/skin/indicator-accessibility.svg
 		chrome://browser/skin/ion.svg
@@ -907,6 +947,8 @@ get_globals()
 		chrome://browser/skin/menu-badged.svg
 		chrome://browser/skin/menu.svg
 		chrome://browser/skin/menupanel.css
+		chrome://browser/skin/migration/migration-dialog.css
+		chrome://browser/skin/migration/migration-wizard.css
 		chrome://browser/skin/monitor-base.png
 		chrome://browser/skin/monitor-border.png
 		chrome://browser/skin/new-tab.svg
@@ -1009,6 +1051,7 @@ get_globals()
 		chrome://browser/skin/synced-tabs.svg
 		chrome://browser/skin/syncedtabs/sidebar.css
 		chrome://browser/skin/tab-crashed.svg
+		chrome://browser/skin/tab-list-tree.css
 		chrome://browser/skin/tab.svg
 		chrome://browser/skin/tabbrowser/crashed.svg
 		chrome://browser/skin/tabbrowser/hourglass.svg
@@ -1077,10 +1120,14 @@ get_globals()
 		chrome://global/content/aboutGlean.css
 		chrome://global/content/aboutGlean.html
 		chrome://global/content/aboutGlean.js
+		chrome://global/content/aboutLogging.html
+		chrome://global/content/aboutLogging.js
 		chrome://global/content/aboutMemory.css
 		chrome://global/content/aboutMemory.js
 		chrome://global/content/aboutMemory.xhtml
 		chrome://global/content/aboutMozilla.css
+		chrome://global/content/aboutNetError.mjs
+		chrome://global/content/aboutNetError.xhtml
 		chrome://global/content/aboutNetworking.html
 		chrome://global/content/aboutNetworking.js
 		chrome://global/content/aboutPerformance.css
@@ -1180,6 +1227,8 @@ get_globals()
 		chrome://global/content/elements/menupopup.js
 		chrome://global/content/elements/message-bar.css
 		chrome://global/content/elements/message-bar.js
+		chrome://global/content/elements/moz-button-group.css
+		chrome://global/content/elements/moz-button-group.mjs
 		chrome://global/content/elements/moz-input-box.js
 		chrome://global/content/elements/named-deck.js
 		chrome://global/content/elements/notificationbox.js
@@ -1204,10 +1253,14 @@ get_globals()
 		chrome://global/content/httpsonlyerror/errorpage.js
 		chrome://global/content/httpsonlyerror/secure-broken.svg
 		chrome://global/content/license.html
+		chrome://global/content/lit-utils.mjs
 		chrome://global/content/minimal-xul.css
 		chrome://global/content/mozilla.html
 		chrome://global/content/netError.js
 		chrome://global/content/netError.xhtml
+		chrome://global/content/neterror/aboutNetErrorCodes.js
+		chrome://global/content/neterror/supportpages/connection-not-secure.html
+		chrome://global/content/neterror/supportpages/time-errors.html
 		chrome://global/content/notfound.wav
 		chrome://global/content/pictureinpicture/player.js
 		chrome://global/content/pictureinpicture/player.xhtml
@@ -1240,6 +1293,7 @@ get_globals()
 		chrome://global/content/toggle-group.css
 		chrome://global/content/TopLevelVideoDocument.js
 		chrome://global/content/treeUtils.js
+		chrome://global/content/vendor/lit.all.mjs
 		chrome://global/content/viewSourceUtils.js
 		chrome://global/content/viewZoomOverlay.js
 		chrome://global/content/widgets.css
@@ -1301,6 +1355,7 @@ get_globals()
 		chrome://global/skin/aboutHttpsOnlyError.css
 		chrome://global/skin/aboutLicense.css
 		chrome://global/skin/aboutMemory.css
+		chrome://global/skin/aboutNetError.css
 		chrome://global/skin/aboutNetworking.css
 		chrome://global/skin/aboutReader.css
 		chrome://global/skin/aboutReaderPocket.css
@@ -1321,6 +1376,7 @@ get_globals()
 		chrome://global/skin/dirListing/folder.png
 		chrome://global/skin/dirListing/up.png
 		chrome://global/skin/dropmarker.css
+		chrome://global/skin/error-pages.css
 		chrome://global/skin/findbar.css
 		chrome://global/skin/global-shared.css
 		chrome://global/skin/global.css
@@ -1396,6 +1452,7 @@ get_globals()
 		chrome://global/skin/in-content/common.css
 		chrome://global/skin/in-content/info-pages.css
 		chrome://global/skin/in-content/toggle-button.css
+		chrome://global/skin/in-content/wifi.svg
 		chrome://global/skin/media/audio-muted.svg
 		chrome://global/skin/media/audio.svg
 		chrome://global/skin/media/audioNoAudioButton.svg
@@ -1436,6 +1493,7 @@ get_globals()
 		chrome://global/skin/netError.css
 		chrome://global/skin/notification.css
 		chrome://global/skin/numberinput.css
+		chrome://global/skin/offlineSupportPages.css
 		chrome://global/skin/pictureinpicture/player.css
 		chrome://global/skin/pictureinpicture/texttracks.css
 		chrome://global/skin/popup.css
@@ -1551,6 +1609,7 @@ get_globals()
 		resource://activity-stream/lib/DiscoveryStreamFeed.jsm
 		resource://activity-stream/lib/DownloadsManager.jsm
 		resource://activity-stream/lib/FaviconFeed.jsm
+		resource://activity-stream/lib/FeatureCalloutMessages.jsm
 		resource://activity-stream/lib/FilterAdult.jsm
 		resource://activity-stream/lib/HighlightsFeed.jsm
 		resource://activity-stream/lib/InfoBar.jsm
@@ -1558,6 +1617,7 @@ get_globals()
 		resource://activity-stream/lib/MomentsPageHub.jsm
 		resource://activity-stream/lib/NewTabInit.jsm
 		resource://activity-stream/lib/OnboardingMessageProvider.jsm
+		resource://activity-stream/lib/PageEventManager.jsm
 		resource://activity-stream/lib/PanelTestProvider.jsm
 		resource://activity-stream/lib/PersistentCache.jsm
 		resource://activity-stream/lib/PersonalityProvider/NaiveBayesTextTagger.jsm
@@ -1631,9 +1691,11 @@ get_globals()
 		resource://devtools-client-jsonview/components/TextToolbar.js
 		resource://devtools-client-jsonview/converter-child.js
 		resource://devtools-client-jsonview/Converter.jsm
+		resource://devtools-client-jsonview/Converter.sys.mjs
 		resource://devtools-client-jsonview/json-viewer.js
 		resource://devtools-client-jsonview/lib/require.js
 		resource://devtools-client-jsonview/Sniffer.jsm
+		resource://devtools-client-jsonview/Sniffer.sys.mjs
 		resource://devtools-client-jsonview/viewer-config.js
 		resource://devtools-client-shared/async-store-helper.js
 		resource://devtools-client-shared/autocomplete-popup.js
@@ -1666,6 +1728,7 @@ get_globals()
 		resource://devtools-client-shared/components/reps/reps/big-int.js
 		resource://devtools-client-shared/components/reps/reps/comment-node.js
 		resource://devtools-client-shared/components/reps/reps/constants.js
+		resource://devtools-client-shared/components/reps/reps/custom-formatter.js
 		resource://devtools-client-shared/components/reps/reps/date-time.js
 		resource://devtools-client-shared/components/reps/reps/document-type.js
 		resource://devtools-client-shared/components/reps/reps/document.js
@@ -1674,6 +1737,7 @@ get_globals()
 		resource://devtools-client-shared/components/reps/reps/event.js
 		resource://devtools-client-shared/components/reps/reps/function.js
 		resource://devtools-client-shared/components/reps/reps/grip-array.js
+		resource://devtools-client-shared/components/reps/reps/grip-entry.js
 		resource://devtools-client-shared/components/reps/reps/grip-map-entry.js
 		resource://devtools-client-shared/components/reps/reps/grip-map.js
 		resource://devtools-client-shared/components/reps/reps/grip.js
@@ -1772,6 +1836,22 @@ get_globals()
 		resource://devtools-client-shared/remote-debugging/version-checker.js
 		resource://devtools-client-shared/screenshot.js
 		resource://devtools-client-shared/scroll.js
+		resource://devtools-client-shared/source-map-loader/index.js
+		resource://devtools-client-shared/source-map-loader/source-map.js
+		resource://devtools-client-shared/source-map-loader/utils/assert.js
+		resource://devtools-client-shared/source-map-loader/utils/assetRoot.js
+		resource://devtools-client-shared/source-map-loader/utils/createConsumer.js
+		resource://devtools-client-shared/source-map-loader/utils/fetchSourceMap.js
+		resource://devtools-client-shared/source-map-loader/utils/getOriginalStackFrames.js
+		resource://devtools-client-shared/source-map-loader/utils/index.js
+		resource://devtools-client-shared/source-map-loader/utils/network-request.js
+		resource://devtools-client-shared/source-map-loader/utils/sourceMapRequests.js
+		resource://devtools-client-shared/source-map-loader/utils/wasmRemap.js
+		resource://devtools-client-shared/source-map-loader/wasm-dwarf/convertToJSON.js
+		resource://devtools-client-shared/source-map-loader/wasm-dwarf/wasmAsset.js
+		resource://devtools-client-shared/source-map-loader/wasm-dwarf/wasmDwarfExpressions.js
+		resource://devtools-client-shared/source-map-loader/wasm-dwarf/wasmXScopes.js
+		resource://devtools-client-shared/source-map-loader/worker.js
 		resource://devtools-client-shared/source-map/assets/dwarf_to_json.wasm
 		resource://devtools-client-shared/source-map/assets/source-map-mappings.wasm
 		resource://devtools-client-shared/source-map/index.js
@@ -1793,6 +1873,7 @@ get_globals()
 		resource://devtools-client-shared/vendor/fluent-react.js
 		resource://devtools-client-shared/vendor/immutable.js
 		resource://devtools-client-shared/vendor/jszip.js
+		resource://devtools-client-shared/vendor/md5.js
 		resource://devtools-client-shared/vendor/react-dom-factories.js
 		resource://devtools-client-shared/vendor/react-dom-server.js
 		resource://devtools-client-shared/vendor/react-dom-test-utils.js
@@ -1806,6 +1887,20 @@ get_globals()
 		resource://devtools-client-shared/vendor/redux.js
 		resource://devtools-client-shared/vendor/reselect.js
 		resource://devtools-client-shared/vendor/seamless-immutable.js
+		resource://devtools-client-shared/vendor/source-map/lib/array-set.js
+		resource://devtools-client-shared/vendor/source-map/lib/base64-vlq.js
+		resource://devtools-client-shared/vendor/source-map/lib/base64.js
+		resource://devtools-client-shared/vendor/source-map/lib/binary-search.js
+		resource://devtools-client-shared/vendor/source-map/lib/mapping-list.js
+		resource://devtools-client-shared/vendor/source-map/lib/mappings.wasm
+		resource://devtools-client-shared/vendor/source-map/lib/read-wasm.js
+		resource://devtools-client-shared/vendor/source-map/lib/source-map-consumer.js
+		resource://devtools-client-shared/vendor/source-map/lib/source-map-generator.js
+		resource://devtools-client-shared/vendor/source-map/lib/source-node.js
+		resource://devtools-client-shared/vendor/source-map/lib/url.js
+		resource://devtools-client-shared/vendor/source-map/lib/util.js
+		resource://devtools-client-shared/vendor/source-map/lib/wasm.js
+		resource://devtools-client-shared/vendor/source-map/source-map.js
 		resource://devtools-client-shared/vendor/WasmDis.js
 		resource://devtools-client-shared/vendor/WasmParser.js
 		resource://devtools-client-shared/vendor/whatwg-url.js
@@ -1826,6 +1921,7 @@ get_globals()
 		resource://devtools-client-shared/widgets/Spectrum.js
 		resource://devtools-client-shared/widgets/TableWidget.js
 		resource://devtools-client-shared/widgets/tooltip/css-compatibility-tooltip-helper.js
+		resource://devtools-client-shared/widgets/tooltip/css-query-container-tooltip-helper.js
 		resource://devtools-client-shared/widgets/tooltip/EventTooltipHelper.js
 		resource://devtools-client-shared/widgets/tooltip/HTMLTooltip.js
 		resource://devtools-client-shared/widgets/tooltip/ImageTooltipHelper.js
@@ -2349,6 +2445,9 @@ get_globals()
 		chrome://global/content/aboutThirdParty.css
 		chrome://global/content/aboutThirdParty.html
 		chrome://global/content/aboutThirdParty.js
+		chrome://global/content/aboutWindowsMessages.css
+		chrome://global/content/aboutWindowsMessages.html
+		chrome://global/content/aboutWindowsMessages.js
 		chrome://global/content/printPageSetup.js
 		chrome://global/content/printPageSetup.xhtml
 		chrome://global/skin/icons/Landscape.png
@@ -2594,6 +2693,7 @@ get_globals()
 		chrome://browser/content/abouttbupdate/aboutTBUpdate.css
 		chrome://browser/content/abouttbupdate/aboutTBUpdate.js
 		chrome://browser/content/abouttbupdate/aboutTBUpdate.xhtml
+		chrome://browser/content/languageNotification.js
 		chrome://browser/content/manual/ar.html
 		chrome://browser/content/manual/bg.html
 		chrome://browser/content/manual/bn.html
@@ -2604,12 +2704,10 @@ get_globals()
 		chrome://browser/content/manual/el.html
 		chrome://browser/content/manual/en.html
 		chrome://browser/content/manual/es.html
-		chrome://browser/content/manual/et.html
 		chrome://browser/content/manual/fa.html
 		chrome://browser/content/manual/fr.html
 		chrome://browser/content/manual/ga.html
 		chrome://browser/content/manual/he.html
-		chrome://browser/content/manual/hi.html
 		chrome://browser/content/manual/hr.html
 		chrome://browser/content/manual/hu.html
 		chrome://browser/content/manual/id.html
@@ -2627,6 +2725,7 @@ get_globals()
 		chrome://browser/content/manual/nb-NO.html
 		chrome://browser/content/manual/nl.html
 		chrome://browser/content/manual/pl.html
+		chrome://browser/content/manual/ps.html
 		chrome://browser/content/manual/pt-BR.html
 		chrome://browser/content/manual/pt-PT.html
 		chrome://browser/content/manual/ro.html
@@ -2634,388 +2733,9 @@ get_globals()
 		chrome://browser/content/manual/sq.html
 		chrome://browser/content/manual/static/collapse.min.js
 		chrome://browser/content/manual/static/css/bootstrap-grid.css
-		chrome://browser/content/manual/static/css/bootstrap-grid.css.map
 		chrome://browser/content/manual/static/css/bootstrap-reboot.css
-		chrome://browser/content/manual/static/css/bootstrap-reboot.css.map
 		chrome://browser/content/manual/static/css/bootstrap.css
-		chrome://browser/content/manual/static/css/bootstrap.css.map
-		chrome://browser/content/manual/static/css/digital-climate-strike/button.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/close.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/footer.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/full-page.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/global.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/logo.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/main.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/main.css.map
-		chrome://browser/content/manual/static/css/digital-climate-strike/sr-only.css
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.eot
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.woff
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.woff2
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-narrow-800.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.eot
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.ttf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.woff
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.woff2
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.eot
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.ttf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.woff
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.woff2
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.eot
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.ttf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.woff
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.woff2
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.eot
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.otf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.ttf
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.woff
-		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.woff2
-		chrome://browser/content/manual/static/css/images/circle-pattern.png
-		chrome://browser/content/manual/static/css/images/circle-pattern.svg
-		chrome://browser/content/manual/static/css/images/donate-banner-mobile.png
-		chrome://browser/content/manual/static/css/images/donate-banner.png
-		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square.png
-		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square@2x.png
-		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square@3x.png
-		chrome://browser/content/manual/static/css/images/facebook-square/svg/facebook-square.svg
-		chrome://browser/content/manual/static/css/images/github/png/github.png
-		chrome://browser/content/manual/static/css/images/github/png/github@2x.png
-		chrome://browser/content/manual/static/css/images/github/png/github@3x.png
-		chrome://browser/content/manual/static/css/images/github/svg/github.svg
-		chrome://browser/content/manual/static/css/images/home/png/block-trackers.png
-		chrome://browser/content/manual/static/css/images/home/png/block-trackers@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/block-trackers@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/browse-freely.png
-		chrome://browser/content/manual/static/css/images/home/png/browse-freely@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/browse-freely@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/encryption.png
-		chrome://browser/content/manual/static/css/images/home/png/encryption@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/encryption@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/fingerprinting.png
-		chrome://browser/content/manual/static/css/images/home/png/fingerprinting@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/fingerprinting@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/surveillance.png
-		chrome://browser/content/manual/static/css/images/home/png/surveillance@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/surveillance@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/tape-purple.png
-		chrome://browser/content/manual/static/css/images/home/png/tape.png
-		chrome://browser/content/manual/static/css/images/home/png/use-tor.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-de@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-de@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-el@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-el@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es-AR@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es-AR@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-fr@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-fr@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ga@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ga@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hr@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hr@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hu@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hu@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-mk@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-mk@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-nl@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-nl@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-pt-BR@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-pt-BR@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ru@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ru@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-sv@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-sv@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-tr@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-tr@3x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-zh-CN@2x.png
-		chrome://browser/content/manual/static/css/images/home/png/yec-activist-zh-CN@3x.png
-		chrome://browser/content/manual/static/css/images/home/svg/block-trackers.svg
-		chrome://browser/content/manual/static/css/images/home/svg/browse-freely.svg
-		chrome://browser/content/manual/static/css/images/home/svg/encryption.svg
-		chrome://browser/content/manual/static/css/images/home/svg/fingerprinting.svg
-		chrome://browser/content/manual/static/css/images/home/svg/surveillance.svg
-		chrome://browser/content/manual/static/css/images/home/svg/tape-purple.svg
-		chrome://browser/content/manual/static/css/images/home/svg/tape.svg
-		chrome://browser/content/manual/static/css/images/home/svg/use-tor.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-de.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-el.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-en.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-es-AR.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-es.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-fr.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-ga.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-hr.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-hu.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-mk.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-nl.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-pt-BR.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-ru.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-sv.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-tr.svg
-		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-zh-CN.svg
-		chrome://browser/content/manual/static/css/images/icons/128x128/authority.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/badexit.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/bridge.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/country.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/directory.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/exit.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/fallbackdir.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/fast.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/fingerprint.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/guard.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/hibernating.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/hsdir.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/ipv4.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/ipv6.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/ipv6exit.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/noedconsensus.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/notrecommended.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/onion-alt.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/onion.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/reachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/reachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/relay.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/running.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/stable.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/tshirt.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/unmeasured.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/unreachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/unreachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/v2dir.png
-		chrome://browser/content/manual/static/css/images/icons/128x128/valid.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/authority.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/badexit.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/bridge.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/country.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/directory.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/exit.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/fallbackdir.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/fast.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/fingerprint.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/guard.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/hibernating.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/hsdir.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/ipv4.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/ipv6.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/ipv6exit.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/noedconsensus.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/notrecommended.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/onion-alt.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/onion.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/reachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/reachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/relay.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/running.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/stable.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/tshirt.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/unmeasured.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/unreachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/unreachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/v2dir.png
-		chrome://browser/content/manual/static/css/images/icons/16x16/valid.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/authority.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/badexit.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/bridge.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/country.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/directory.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/exit.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/fallbackdir.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/fast.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/fingerprint.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/guard.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/hibernating.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/hsdir.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/ipv4.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/ipv6.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/ipv6exit.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/noedconsensus.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/notrecommended.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/onion-alt.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/onion.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/reachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/reachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/relay.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/running.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/stable.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/tshirt.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/unmeasured.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/unreachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/unreachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/v2dir.png
-		chrome://browser/content/manual/static/css/images/icons/32x32/valid.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/authority.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/badexit.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/bridge.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/country.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/directory.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/exit.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/fallbackdir.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/fast.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/fingerprint.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/guard.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/hibernating.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/hsdir.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/ipv4.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/ipv6.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/ipv6exit.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/noedconsensus.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/notrecommended.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/onion-alt.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/onion.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/reachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/reachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/relay.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/running.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/stable.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/tshirt.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/unmeasured.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/unreachableipv4.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/unreachableipv6.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/v2dir.png
-		chrome://browser/content/manual/static/css/images/icons/64x64/valid.png
-		chrome://browser/content/manual/static/css/images/icons/font-awesome_4-7-0_instagram_256_0_ffffff_none.png
-		chrome://browser/content/manual/static/css/images/icons/font-awesome_4-7-0_linux_256_0_ffffff_none.png
-		chrome://browser/content/manual/static/css/images/instagram/png/instagram.png
-		chrome://browser/content/manual/static/css/images/instagram/png/instagram@2x.png
-		chrome://browser/content/manual/static/css/images/instagram/png/instagram@3x.png
-		chrome://browser/content/manual/static/css/images/instagram/svg/instagram.svg
-		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in.png
-		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in@2x.png
-		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in@3x.png
-		chrome://browser/content/manual/static/css/images/linkedin-in/svg/linkedin-in.svg
-		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont.png
-		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont@2x.png
-		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont@3x.png
-		chrome://browser/content/manual/static/css/images/mastodont/svg/mastodont.svg
-		chrome://browser/content/manual/static/css/images/onion-bg.png
-		chrome://browser/content/manual/static/css/images/onion-bg.svg
-		chrome://browser/content/manual/static/css/images/tb85/TB8.svg
-		chrome://browser/content/manual/static/css/images/tb85/tb85.png
-		chrome://browser/content/manual/static/css/images/tb85/tb85@2x.png
-		chrome://browser/content/manual/static/css/images/twitter/png/twitter.png
-		chrome://browser/content/manual/static/css/images/twitter/png/twitter@2x.png
-		chrome://browser/content/manual/static/css/images/twitter/png/twitter@3x.png
-		chrome://browser/content/manual/static/css/images/twitter/svg/twitter.svg
-		chrome://browser/content/manual/static/css/images/windows-logo/png/Shape.png
-		chrome://browser/content/manual/static/css/images/windows-logo/png/Shape@2x.png
-		chrome://browser/content/manual/static/css/images/windows-logo/svg/Shape.svg
-		chrome://browser/content/manual/static/css/images/x.svg
 		chrome://browser/content/manual/static/css/style.css
-		chrome://browser/content/manual/static/fonts/Corben/Corben-Bold.ttf
-		chrome://browser/content/manual/static/fonts/Corben/Corben.ttf
-		chrome://browser/content/manual/static/fonts/fontawesome/css/all.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/all.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/brands.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/brands.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/fontawesome.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/fontawesome.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/regular.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/regular.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/solid.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/solid.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/svg-with-js.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/svg-with-js.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/v4-shims.css
-		chrome://browser/content/manual/static/fonts/fontawesome/css/v4-shims.min.css
-		chrome://browser/content/manual/static/fonts/fontawesome/LICENSE.txt
-		chrome://browser/content/manual/static/fonts/fontawesome/png/dark/solid/arrow-down.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/facebook.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/instagram.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/linkedin.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/mastodon.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/twitter.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/youtube.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/regular/file-alt.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/arrow-down.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/arrow-right.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/comments.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/cube.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/flag.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/folder-open.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/hands-helping.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/key.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/life-ring.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/lock.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/paper-plane.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/signature.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/spider.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/table-tennis.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/android.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/apple.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/facebook.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/github.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/instagram.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/linkedin.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/linux.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/mastodon.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/twitter.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/windows.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/solid/arrow-down.png
-		chrome://browser/content/manual/static/fonts/fontawesome/png/white/solid/arrow-right.png
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.eot
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.svg
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.ttf
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.woff
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.woff2
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.eot
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.svg
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.ttf
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.woff
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.woff2
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.eot
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.svg
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.ttf
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.woff
-		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.woff2
-		chrome://browser/content/manual/static/fonts/grotesque/terminal-grotesque_open.otf
-		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Black.ttf
-		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Bold.ttf
-		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Light.ttf
-		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Regular.ttf
-		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Thin.ttf
-		chrome://browser/content/manual/static/fonts/Hanuman/OFL.txt
-		chrome://browser/content/manual/static/fonts/Kanit/kanit.woff2
-		chrome://browser/content/manual/static/fonts/LeagueGothic/LeagueGothic-Italic.otf
-		chrome://browser/content/manual/static/fonts/LeagueGothic/League_Gothic_Regular.woff
-		chrome://browser/content/manual/static/fonts/SourceCodePro/OFL.txt
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Black.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Bold.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-ExtraLight.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Light.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Medium.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Regular.ttf
-		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Semibold.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/OFL.txt
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Black.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-BlackItalic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Bold.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-BoldItalic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-ExtraLight.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-ExtraLightItalic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Italic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Light.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-LightItalic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Regular.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-SemiBold.ttf
-		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-SemiBoldItalic.ttf
-		chrome://browser/content/manual/static/fonts/SourceSerifPro/OFL.txt
-		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Bold.ttf
-		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Regular.ttf
-		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Semibold.ttf
-		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.eot
-		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.svg
-		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.ttf
-		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.woff
-		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.woff2
-		chrome://browser/content/manual/static/fonts/WhiteonBlack/WhiteOnBlack.ttf
-		chrome://browser/content/manual/static/images/album.jpg
 		chrome://browser/content/manual/static/images/android-censored.png
 		chrome://browser/content/manual/static/images/android-configure.png
 		chrome://browser/content/manual/static/images/android-connect.png
@@ -3031,18 +2751,11 @@ get_globals()
 		chrome://browser/content/manual/static/images/android-update-f-droid.png
 		chrome://browser/content/manual/static/images/android-update-google-play.png
 		chrome://browser/content/manual/static/images/android-view-logs.gif
-		chrome://browser/content/manual/static/images/black.svg
-		chrome://browser/content/manual/static/images/blog.jpg
 		chrome://browser/content/manual/static/images/bridge-qr.png
 		chrome://browser/content/manual/static/images/bridgemoji.png
-		chrome://browser/content/manual/static/images/bridges-dark-tb90.png
-		chrome://browser/content/manual/static/images/bridges-light-tb90.png
-		chrome://browser/content/manual/static/images/bridges.png
 		chrome://browser/content/manual/static/images/built-in-bridge.png
-		chrome://browser/content/manual/static/images/carousel.jpg
 		chrome://browser/content/manual/static/images/circuit_full.png
 		chrome://browser/content/manual/static/images/client-auth.png
-		chrome://browser/content/manual/static/images/color.svg
 		chrome://browser/content/manual/static/images/configure.png
 		chrome://browser/content/manual/static/images/connect.png
 		chrome://browser/content/manual/static/images/connection-assist-auto.png
@@ -3051,275 +2764,34 @@ get_globals()
 		chrome://browser/content/manual/static/images/connection-assist-test.png
 		chrome://browser/content/manual/static/images/connection-test-failure.png
 		chrome://browser/content/manual/static/images/connection-test-success.png
-		chrome://browser/content/manual/static/images/cover.jpg
-		chrome://browser/content/manual/static/images/dashboard.jpg
-		chrome://browser/content/manual/static/images/favicon.ico
-		chrome://browser/content/manual/static/images/favicon.png
 		chrome://browser/content/manual/static/images/gettor-bot-telegram.png
-		chrome://browser/content/manual/static/images/grid.jpg
-		chrome://browser/content/manual/static/images/home/png/block-trackers.png
-		chrome://browser/content/manual/static/images/home/png/block-trackers@2x.png
-		chrome://browser/content/manual/static/images/home/png/block-trackers@3x.png
-		chrome://browser/content/manual/static/images/home/png/browse-freely.png
-		chrome://browser/content/manual/static/images/home/png/browse-freely@2x.png
-		chrome://browser/content/manual/static/images/home/png/browse-freely@3x.png
-		chrome://browser/content/manual/static/images/home/png/encryption.png
-		chrome://browser/content/manual/static/images/home/png/encryption@2x.png
-		chrome://browser/content/manual/static/images/home/png/encryption@3x.png
-		chrome://browser/content/manual/static/images/home/png/fingerprinting.png
-		chrome://browser/content/manual/static/images/home/png/fingerprinting@2x.png
-		chrome://browser/content/manual/static/images/home/png/fingerprinting@3x.png
-		chrome://browser/content/manual/static/images/home/png/surveillance.png
-		chrome://browser/content/manual/static/images/home/png/surveillance@2x.png
-		chrome://browser/content/manual/static/images/home/png/surveillance@3x.png
-		chrome://browser/content/manual/static/images/home/png/take-back@3x.png
-		chrome://browser/content/manual/static/images/home/svg/block-trackers.svg
-		chrome://browser/content/manual/static/images/home/svg/browse-freely.svg
-		chrome://browser/content/manual/static/images/home/svg/encryption.svg
-		chrome://browser/content/manual/static/images/home/svg/fingerprinting.svg
-		chrome://browser/content/manual/static/images/home/svg/surveillance.svg
-		chrome://browser/content/manual/static/images/home/svg/take-back.svg
 		chrome://browser/content/manual/static/images/how-tor-works.png
 		chrome://browser/content/manual/static/images/http-website-error.png
 		chrome://browser/content/manual/static/images/https-only-mode.png
-		chrome://browser/content/manual/static/images/https.png
-		chrome://browser/content/manual/static/images/icons/128x128/authority.png
-		chrome://browser/content/manual/static/images/icons/128x128/badexit.png
-		chrome://browser/content/manual/static/images/icons/128x128/bridge.png
-		chrome://browser/content/manual/static/images/icons/128x128/country.png
-		chrome://browser/content/manual/static/images/icons/128x128/directory.png
-		chrome://browser/content/manual/static/images/icons/128x128/exit.png
-		chrome://browser/content/manual/static/images/icons/128x128/fallbackdir.png
-		chrome://browser/content/manual/static/images/icons/128x128/fast.png
-		chrome://browser/content/manual/static/images/icons/128x128/fingerprint.png
-		chrome://browser/content/manual/static/images/icons/128x128/guard.png
-		chrome://browser/content/manual/static/images/icons/128x128/hibernating.png
-		chrome://browser/content/manual/static/images/icons/128x128/hsdir.png
-		chrome://browser/content/manual/static/images/icons/128x128/ipv4.png
-		chrome://browser/content/manual/static/images/icons/128x128/ipv6.png
-		chrome://browser/content/manual/static/images/icons/128x128/ipv6exit.png
-		chrome://browser/content/manual/static/images/icons/128x128/noedconsensus.png
-		chrome://browser/content/manual/static/images/icons/128x128/notrecommended.png
-		chrome://browser/content/manual/static/images/icons/128x128/onion-alt.png
-		chrome://browser/content/manual/static/images/icons/128x128/onion.png
-		chrome://browser/content/manual/static/images/icons/128x128/reachableipv4.png
-		chrome://browser/content/manual/static/images/icons/128x128/reachableipv6.png
-		chrome://browser/content/manual/static/images/icons/128x128/relay.png
-		chrome://browser/content/manual/static/images/icons/128x128/running.png
-		chrome://browser/content/manual/static/images/icons/128x128/stable.png
-		chrome://browser/content/manual/static/images/icons/128x128/tshirt.png
-		chrome://browser/content/manual/static/images/icons/128x128/unmeasured.png
-		chrome://browser/content/manual/static/images/icons/128x128/unreachableipv4.png
-		chrome://browser/content/manual/static/images/icons/128x128/unreachableipv6.png
-		chrome://browser/content/manual/static/images/icons/128x128/v2dir.png
-		chrome://browser/content/manual/static/images/icons/128x128/valid.png
-		chrome://browser/content/manual/static/images/icons/16x16/authority.png
-		chrome://browser/content/manual/static/images/icons/16x16/badexit.png
-		chrome://browser/content/manual/static/images/icons/16x16/bridge.png
-		chrome://browser/content/manual/static/images/icons/16x16/country.png
-		chrome://browser/content/manual/static/images/icons/16x16/directory.png
-		chrome://browser/content/manual/static/images/icons/16x16/exit.png
-		chrome://browser/content/manual/static/images/icons/16x16/fallbackdir.png
-		chrome://browser/content/manual/static/images/icons/16x16/fast.png
-		chrome://browser/content/manual/static/images/icons/16x16/fingerprint.png
-		chrome://browser/content/manual/static/images/icons/16x16/guard.png
-		chrome://browser/content/manual/static/images/icons/16x16/hibernating.png
-		chrome://browser/content/manual/static/images/icons/16x16/hsdir.png
-		chrome://browser/content/manual/static/images/icons/16x16/ipv4.png
-		chrome://browser/content/manual/static/images/icons/16x16/ipv6.png
-		chrome://browser/content/manual/static/images/icons/16x16/ipv6exit.png
-		chrome://browser/content/manual/static/images/icons/16x16/noedconsensus.png
-		chrome://browser/content/manual/static/images/icons/16x16/notrecommended.png
-		chrome://browser/content/manual/static/images/icons/16x16/onion-alt.png
-		chrome://browser/content/manual/static/images/icons/16x16/onion.png
-		chrome://browser/content/manual/static/images/icons/16x16/reachableipv4.png
-		chrome://browser/content/manual/static/images/icons/16x16/reachableipv6.png
-		chrome://browser/content/manual/static/images/icons/16x16/relay.png
-		chrome://browser/content/manual/static/images/icons/16x16/running.png
-		chrome://browser/content/manual/static/images/icons/16x16/stable.png
-		chrome://browser/content/manual/static/images/icons/16x16/tshirt.png
-		chrome://browser/content/manual/static/images/icons/16x16/unmeasured.png
-		chrome://browser/content/manual/static/images/icons/16x16/unreachableipv4.png
-		chrome://browser/content/manual/static/images/icons/16x16/unreachableipv6.png
-		chrome://browser/content/manual/static/images/icons/16x16/v2dir.png
-		chrome://browser/content/manual/static/images/icons/16x16/valid.png
-		chrome://browser/content/manual/static/images/icons/32x32/authority.png
-		chrome://browser/content/manual/static/images/icons/32x32/badexit.png
-		chrome://browser/content/manual/static/images/icons/32x32/bridge.png
-		chrome://browser/content/manual/static/images/icons/32x32/country.png
-		chrome://browser/content/manual/static/images/icons/32x32/directory.png
-		chrome://browser/content/manual/static/images/icons/32x32/exit.png
-		chrome://browser/content/manual/static/images/icons/32x32/fallbackdir.png
-		chrome://browser/content/manual/static/images/icons/32x32/fast.png
-		chrome://browser/content/manual/static/images/icons/32x32/fingerprint.png
-		chrome://browser/content/manual/static/images/icons/32x32/guard.png
-		chrome://browser/content/manual/static/images/icons/32x32/hibernating.png
-		chrome://browser/content/manual/static/images/icons/32x32/hsdir.png
-		chrome://browser/content/manual/static/images/icons/32x32/ipv4.png
-		chrome://browser/content/manual/static/images/icons/32x32/ipv6.png
-		chrome://browser/content/manual/static/images/icons/32x32/ipv6exit.png
-		chrome://browser/content/manual/static/images/icons/32x32/noedconsensus.png
-		chrome://browser/content/manual/static/images/icons/32x32/notrecommended.png
-		chrome://browser/content/manual/static/images/icons/32x32/onion-alt.png
-		chrome://browser/content/manual/static/images/icons/32x32/onion.png
-		chrome://browser/content/manual/static/images/icons/32x32/reachableipv4.png
-		chrome://browser/content/manual/static/images/icons/32x32/reachableipv6.png
-		chrome://browser/content/manual/static/images/icons/32x32/relay.png
-		chrome://browser/content/manual/static/images/icons/32x32/running.png
-		chrome://browser/content/manual/static/images/icons/32x32/stable.png
-		chrome://browser/content/manual/static/images/icons/32x32/tshirt.png
-		chrome://browser/content/manual/static/images/icons/32x32/unmeasured.png
-		chrome://browser/content/manual/static/images/icons/32x32/unreachableipv4.png
-		chrome://browser/content/manual/static/images/icons/32x32/unreachableipv6.png
-		chrome://browser/content/manual/static/images/icons/32x32/v2dir.png
-		chrome://browser/content/manual/static/images/icons/32x32/valid.png
-		chrome://browser/content/manual/static/images/icons/64x64/authority.png
-		chrome://browser/content/manual/static/images/icons/64x64/badexit.png
-		chrome://browser/content/manual/static/images/icons/64x64/bridge.png
-		chrome://browser/content/manual/static/images/icons/64x64/country.png
-		chrome://browser/content/manual/static/images/icons/64x64/directory.png
-		chrome://browser/content/manual/static/images/icons/64x64/exit.png
-		chrome://browser/content/manual/static/images/icons/64x64/fallbackdir.png
-		chrome://browser/content/manual/static/images/icons/64x64/fast.png
-		chrome://browser/content/manual/static/images/icons/64x64/fingerprint.png
-		chrome://browser/content/manual/static/images/icons/64x64/guard.png
-		chrome://browser/content/manual/static/images/icons/64x64/hibernating.png
-		chrome://browser/content/manual/static/images/icons/64x64/hsdir.png
-		chrome://browser/content/manual/static/images/icons/64x64/ipv4.png
-		chrome://browser/content/manual/static/images/icons/64x64/ipv6.png
-		chrome://browser/content/manual/static/images/icons/64x64/ipv6exit.png
-		chrome://browser/content/manual/static/images/icons/64x64/noedconsensus.png
-		chrome://browser/content/manual/static/images/icons/64x64/notrecommended.png
-		chrome://browser/content/manual/static/images/icons/64x64/onion-alt.png
-		chrome://browser/content/manual/static/images/icons/64x64/onion.png
-		chrome://browser/content/manual/static/images/icons/64x64/reachableipv4.png
-		chrome://browser/content/manual/static/images/icons/64x64/reachableipv6.png
-		chrome://browser/content/manual/static/images/icons/64x64/relay.png
-		chrome://browser/content/manual/static/images/icons/64x64/running.png
-		chrome://browser/content/manual/static/images/icons/64x64/stable.png
-		chrome://browser/content/manual/static/images/icons/64x64/tshirt.png
-		chrome://browser/content/manual/static/images/icons/64x64/unmeasured.png
-		chrome://browser/content/manual/static/images/icons/64x64/unreachableipv4.png
-		chrome://browser/content/manual/static/images/icons/64x64/unreachableipv6.png
-		chrome://browser/content/manual/static/images/icons/64x64/v2dir.png
-		chrome://browser/content/manual/static/images/icons/64x64/valid.png
-		chrome://browser/content/manual/static/images/image1.png
-		chrome://browser/content/manual/static/images/image2.png
-		chrome://browser/content/manual/static/images/image3.png
-		chrome://browser/content/manual/static/images/image4.png
-		chrome://browser/content/manual/static/images/image5.png
-		chrome://browser/content/manual/static/images/image6.png
-		chrome://browser/content/manual/static/images/index.svg
-		chrome://browser/content/manual/static/images/jumbotron-narrow.jpg
-		chrome://browser/content/manual/static/images/jumbotron.png
-		chrome://browser/content/manual/static/images/justified-nav.jpg
 		chrome://browser/content/manual/static/images/linux-change-behavior-executable-files.png
 		chrome://browser/content/manual/static/images/linux-make-desktop-file-executable.png
 		chrome://browser/content/manual/static/images/macos-go-to-folder-menu.png
 		chrome://browser/content/manual/static/images/macos-go-to-folder-window.png
-		chrome://browser/content/manual/static/images/menu-new-identity.png
-		chrome://browser/content/manual/static/images/navbar-bottom.jpg
-		chrome://browser/content/manual/static/images/navbar-fixed.jpg
-		chrome://browser/content/manual/static/images/navbar-static.jpg
-		chrome://browser/content/manual/static/images/navbar.jpg
-		chrome://browser/content/manual/static/images/new-circuit-display.png
 		chrome://browser/content/manual/static/images/new_identity.png
-		chrome://browser/content/manual/static/images/nodes.png
-		chrome://browser/content/manual/static/images/noscript_menu.png
-		chrome://browser/content/manual/static/images/offcanvas.jpg
-		chrome://browser/content/manual/static/images/onion-bg.png
-		chrome://browser/content/manual/static/images/onion-bg.svg
 		chrome://browser/content/manual/static/images/onion-location.png
-		chrome://browser/content/manual/static/images/onion-website.png
-		chrome://browser/content/manual/static/images/padlock-onion.png
 		chrome://browser/content/manual/static/images/pluggable-transport.png
-		chrome://browser/content/manual/static/images/pluggable_transport_network_settings.png
-		chrome://browser/content/manual/static/images/powered/Powered_Gray.png
-		chrome://browser/content/manual/static/images/powered/Powered_Gray.svg
-		chrome://browser/content/manual/static/images/powered/Powered_Purple.png
-		chrome://browser/content/manual/static/images/powered/Powered_Purple.svg
-		chrome://browser/content/manual/static/images/powered/Powered_White.png
-		chrome://browser/content/manual/static/images/powered/Powered_White.svg
 		chrome://browser/content/manual/static/images/provide-bridge.png
 		chrome://browser/content/manual/static/images/proxy.png
-		chrome://browser/content/manual/static/images/purple.svg
 		chrome://browser/content/manual/static/images/quickstart.png
 		chrome://browser/content/manual/static/images/request-a-bridge.png
 		chrome://browser/content/manual/static/images/security-settings-anim.gif
-		chrome://browser/content/manual/static/images/security-settings-safest-tool.png
 		chrome://browser/content/manual/static/images/security-settings-safest.png
-		chrome://browser/content/manual/static/images/sign-in.jpg
-		chrome://browser/content/manual/static/images/slider.png
-		chrome://browser/content/manual/static/images/slider_window.png
-		chrome://browser/content/manual/static/images/starter-template.jpg
-		chrome://browser/content/manual/static/images/sticky-footer-navbar.jpg
-		chrome://browser/content/manual/static/images/sticky-footer.jpg
-		chrome://browser/content/manual/static/images/tor-and-https.svg
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Horizontal_Color.png
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Horizontal_Color.svg
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Icon.png
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Icon.svg
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Vertical_Color.png
-		chrome://browser/content/manual/static/images/tor-browser/Browser_Vertical_Color.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Big_Green.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Big_Green.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Big_Purple.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Big_Purple.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Green.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Green.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Purple.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Purple.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Small_Green.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Small_Green.svg
-		chrome://browser/content/manual/static/images/tor-download/Download_Small_Purple.png
-		chrome://browser/content/manual/static/images/tor-download/Download_Small_Purple.svg
 		chrome://browser/content/manual/static/images/tor-https-0.png
 		chrome://browser/content/manual/static/images/tor-https-1.png
 		chrome://browser/content/manual/static/images/tor-https-2.png
 		chrome://browser/content/manual/static/images/tor-https-3.png
-		chrome://browser/content/manual/static/images/tor-launcher-custom-bridges.png
-		chrome://browser/content/manual/static/images/tor-logo.svg
-		chrome://browser/content/manual/static/images/tor-logo/Black.png
-		chrome://browser/content/manual/static/images/tor-logo/Black.svg
-		chrome://browser/content/manual/static/images/tor-logo/Color.png
-		chrome://browser/content/manual/static/images/tor-logo/Color.svg
-		chrome://browser/content/manual/static/images/tor-logo/Purple.png
-		chrome://browser/content/manual/static/images/tor-logo/Purple.svg
-		chrome://browser/content/manual/static/images/tor-logo/White.png
-		chrome://browser/content/manual/static/images/tor-logo/White.svg
-		chrome://browser/content/manual/static/images/tor-logo1x.png
-		chrome://browser/content/manual/static/images/tor-logo@2x.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Gray.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Gray.svg
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Green.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Green.svg
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Purple.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Big_Purple.svg
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Gray.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Gray.svg
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Green.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Green.svg
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Purple.png
-		chrome://browser/content/manual/static/images/tor-support/Support_Small_Purple.svg
-		chrome://browser/content/manual/static/images/tr1.png
-		chrome://browser/content/manual/static/images/tr2.png
-		chrome://browser/content/manual/static/images/tr3.png
-		chrome://browser/content/manual/static/images/tr4.png
-		chrome://browser/content/manual/static/images/tr5.png
-		chrome://browser/content/manual/static/images/update-tb.png
 		chrome://browser/content/manual/static/images/update1.png
-		chrome://browser/content/manual/static/images/update2.png
 		chrome://browser/content/manual/static/images/update4.png
-		chrome://browser/content/manual/static/images/white.svg
 		chrome://browser/content/manual/static/js/anchor.min.js
 		chrome://browser/content/manual/static/js/bootstrap.bundle.js
-		chrome://browser/content/manual/static/js/bootstrap.bundle.js.map
 		chrome://browser/content/manual/static/js/bootstrap.bundle.min.js
-		chrome://browser/content/manual/static/js/bootstrap.bundle.min.js.map
 		chrome://browser/content/manual/static/js/bootstrap.js
-		chrome://browser/content/manual/static/js/bootstrap.js.map
 		chrome://browser/content/manual/static/js/bootstrap.min.js
-		chrome://browser/content/manual/static/js/bootstrap.min.js.map
 		chrome://browser/content/manual/static/js/clipboard.min.js
 		chrome://browser/content/manual/static/js/collapse.min.js
 		chrome://browser/content/manual/static/js/download.js
@@ -3718,6 +3190,650 @@ get_globals()
 		resource://torbutton-assets/yec-bg-3x.png
 		resource://torbutton-assets/yec-foreground-2x.png
 		resource://torbutton-assets/yec-foreground-3x.png
+
+		// 11.5
+		chrome://browser/content/manual/et.html
+		chrome://browser/content/manual/hi.html
+		chrome://browser/content/manual/static/css/bootstrap-grid.css.map
+		chrome://browser/content/manual/static/css/bootstrap-reboot.css.map
+		chrome://browser/content/manual/static/css/bootstrap.css.map
+		chrome://browser/content/manual/static/css/digital-climate-strike/button.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/close.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/footer.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/full-page.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/global.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/logo.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/main.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/main.css.map
+		chrome://browser/content/manual/static/css/digital-climate-strike/sr-only.css
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.eot
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.woff
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-800-web.woff2
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/greve-narrow-800.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.eot
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.ttf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.woff
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-black-web.woff2
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.eot
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.ttf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.woff
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-bold-web.woff2
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.eot
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.ttf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.woff
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-light-web.woff2
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.eot
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.otf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.ttf
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.woff
+		chrome://browser/content/manual/static/css/digital-climate-strike/webfonts/katwijk-mono-regular-web.woff2
+		chrome://browser/content/manual/static/css/images/circle-pattern.png
+		chrome://browser/content/manual/static/css/images/circle-pattern.svg
+		chrome://browser/content/manual/static/css/images/donate-banner-mobile.png
+		chrome://browser/content/manual/static/css/images/donate-banner.png
+		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square.png
+		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square@2x.png
+		chrome://browser/content/manual/static/css/images/facebook-square/png/facebook-square@3x.png
+		chrome://browser/content/manual/static/css/images/facebook-square/svg/facebook-square.svg
+		chrome://browser/content/manual/static/css/images/github/png/github.png
+		chrome://browser/content/manual/static/css/images/github/png/github@2x.png
+		chrome://browser/content/manual/static/css/images/github/png/github@3x.png
+		chrome://browser/content/manual/static/css/images/github/svg/github.svg
+		chrome://browser/content/manual/static/css/images/home/png/block-trackers.png
+		chrome://browser/content/manual/static/css/images/home/png/block-trackers@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/block-trackers@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/browse-freely.png
+		chrome://browser/content/manual/static/css/images/home/png/browse-freely@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/browse-freely@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/encryption.png
+		chrome://browser/content/manual/static/css/images/home/png/encryption@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/encryption@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/fingerprinting.png
+		chrome://browser/content/manual/static/css/images/home/png/fingerprinting@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/fingerprinting@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/surveillance.png
+		chrome://browser/content/manual/static/css/images/home/png/surveillance@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/surveillance@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/tape-purple.png
+		chrome://browser/content/manual/static/css/images/home/png/tape.png
+		chrome://browser/content/manual/static/css/images/home/png/use-tor.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-de@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-de@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-el@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-el@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-en@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es-AR@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es-AR@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-es@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-fr@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-fr@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ga@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ga@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hr@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hr@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hu@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-hu@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-mk@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-mk@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-nl@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-nl@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-pt-BR@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-pt-BR@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ru@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-ru@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-sv@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-sv@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-tr@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-tr@3x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-zh-CN@2x.png
+		chrome://browser/content/manual/static/css/images/home/png/yec-activist-zh-CN@3x.png
+		chrome://browser/content/manual/static/css/images/home/svg/block-trackers.svg
+		chrome://browser/content/manual/static/css/images/home/svg/browse-freely.svg
+		chrome://browser/content/manual/static/css/images/home/svg/encryption.svg
+		chrome://browser/content/manual/static/css/images/home/svg/fingerprinting.svg
+		chrome://browser/content/manual/static/css/images/home/svg/surveillance.svg
+		chrome://browser/content/manual/static/css/images/home/svg/tape-purple.svg
+		chrome://browser/content/manual/static/css/images/home/svg/tape.svg
+		chrome://browser/content/manual/static/css/images/home/svg/use-tor.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-de.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-el.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-en.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-es-AR.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-es.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-fr.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-ga.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-hr.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-hu.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-mk.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-nl.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-pt-BR.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-ru.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-sv.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-tr.svg
+		chrome://browser/content/manual/static/css/images/home/svg/yec-activist-zh-CN.svg
+		chrome://browser/content/manual/static/css/images/icons/128x128/authority.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/badexit.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/bridge.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/country.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/directory.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/exit.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/fallbackdir.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/fast.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/fingerprint.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/guard.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/hibernating.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/hsdir.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/ipv4.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/ipv6.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/ipv6exit.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/noedconsensus.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/notrecommended.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/onion-alt.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/onion.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/reachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/reachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/relay.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/running.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/stable.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/tshirt.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/unmeasured.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/unreachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/unreachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/v2dir.png
+		chrome://browser/content/manual/static/css/images/icons/128x128/valid.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/authority.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/badexit.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/bridge.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/country.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/directory.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/exit.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/fallbackdir.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/fast.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/fingerprint.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/guard.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/hibernating.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/hsdir.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/ipv4.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/ipv6.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/ipv6exit.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/noedconsensus.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/notrecommended.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/onion-alt.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/onion.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/reachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/reachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/relay.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/running.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/stable.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/tshirt.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/unmeasured.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/unreachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/unreachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/v2dir.png
+		chrome://browser/content/manual/static/css/images/icons/16x16/valid.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/authority.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/badexit.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/bridge.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/country.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/directory.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/exit.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/fallbackdir.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/fast.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/fingerprint.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/guard.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/hibernating.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/hsdir.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/ipv4.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/ipv6.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/ipv6exit.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/noedconsensus.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/notrecommended.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/onion-alt.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/onion.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/reachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/reachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/relay.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/running.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/stable.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/tshirt.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/unmeasured.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/unreachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/unreachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/v2dir.png
+		chrome://browser/content/manual/static/css/images/icons/32x32/valid.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/authority.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/badexit.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/bridge.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/country.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/directory.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/exit.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/fallbackdir.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/fast.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/fingerprint.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/guard.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/hibernating.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/hsdir.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/ipv4.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/ipv6.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/ipv6exit.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/noedconsensus.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/notrecommended.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/onion-alt.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/onion.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/reachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/reachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/relay.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/running.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/stable.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/tshirt.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/unmeasured.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/unreachableipv4.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/unreachableipv6.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/v2dir.png
+		chrome://browser/content/manual/static/css/images/icons/64x64/valid.png
+		chrome://browser/content/manual/static/css/images/icons/font-awesome_4-7-0_instagram_256_0_ffffff_none.png
+		chrome://browser/content/manual/static/css/images/icons/font-awesome_4-7-0_linux_256_0_ffffff_none.png
+		chrome://browser/content/manual/static/css/images/instagram/png/instagram.png
+		chrome://browser/content/manual/static/css/images/instagram/png/instagram@2x.png
+		chrome://browser/content/manual/static/css/images/instagram/png/instagram@3x.png
+		chrome://browser/content/manual/static/css/images/instagram/svg/instagram.svg
+		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in.png
+		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in@2x.png
+		chrome://browser/content/manual/static/css/images/linkedin-in/png/linkedin-in@3x.png
+		chrome://browser/content/manual/static/css/images/linkedin-in/svg/linkedin-in.svg
+		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont.png
+		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont@2x.png
+		chrome://browser/content/manual/static/css/images/mastodont/png/mastodont@3x.png
+		chrome://browser/content/manual/static/css/images/mastodont/svg/mastodont.svg
+		chrome://browser/content/manual/static/css/images/onion-bg.png
+		chrome://browser/content/manual/static/css/images/onion-bg.svg
+		chrome://browser/content/manual/static/css/images/tb85/TB8.svg
+		chrome://browser/content/manual/static/css/images/tb85/tb85.png
+		chrome://browser/content/manual/static/css/images/tb85/tb85@2x.png
+		chrome://browser/content/manual/static/css/images/twitter/png/twitter.png
+		chrome://browser/content/manual/static/css/images/twitter/png/twitter@2x.png
+		chrome://browser/content/manual/static/css/images/twitter/png/twitter@3x.png
+		chrome://browser/content/manual/static/css/images/twitter/svg/twitter.svg
+		chrome://browser/content/manual/static/css/images/windows-logo/png/Shape.png
+		chrome://browser/content/manual/static/css/images/windows-logo/png/Shape@2x.png
+		chrome://browser/content/manual/static/css/images/windows-logo/svg/Shape.svg
+		chrome://browser/content/manual/static/css/images/x.svg
+		chrome://browser/content/manual/static/fonts/Corben/Corben-Bold.ttf
+		chrome://browser/content/manual/static/fonts/Corben/Corben.ttf
+		chrome://browser/content/manual/static/fonts/fontawesome/css/all.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/all.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/brands.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/brands.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/fontawesome.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/fontawesome.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/regular.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/regular.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/solid.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/solid.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/svg-with-js.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/svg-with-js.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/v4-shims.css
+		chrome://browser/content/manual/static/fonts/fontawesome/css/v4-shims.min.css
+		chrome://browser/content/manual/static/fonts/fontawesome/LICENSE.txt
+		chrome://browser/content/manual/static/fonts/fontawesome/png/dark/solid/arrow-down.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/facebook.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/instagram.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/linkedin.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/mastodon.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/telegram.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/twitter.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/brands/youtube.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/regular/file-alt.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/arrow-down.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/arrow-right.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/comments.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/cube.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/flag.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/folder-open.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/hands-helping.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/key.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/life-ring.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/lock.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/magnifying-glass.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/paper-plane.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/signature.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/spider.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/primary/solid/table-tennis.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/android.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/apple.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/facebook.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/github.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/instagram.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/linkedin.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/linux.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/mastodon.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/twitter.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/brands/windows.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/solid/arrow-down.png
+		chrome://browser/content/manual/static/fonts/fontawesome/png/white/solid/arrow-right.png
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.eot
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.svg
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.ttf
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.woff
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-brands-400.woff2
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.eot
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.svg
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.ttf
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.woff
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-regular-400.woff2
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.eot
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.svg
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.ttf
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.woff
+		chrome://browser/content/manual/static/fonts/fontawesome/webfonts/fa-solid-900.woff2
+		chrome://browser/content/manual/static/fonts/grotesque/terminal-grotesque_open.otf
+		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Black.ttf
+		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Bold.ttf
+		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Light.ttf
+		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Regular.ttf
+		chrome://browser/content/manual/static/fonts/Hanuman/Hanuman-Thin.ttf
+		chrome://browser/content/manual/static/fonts/Hanuman/OFL.txt
+		chrome://browser/content/manual/static/fonts/Kanit/kanit.woff2
+		chrome://browser/content/manual/static/fonts/LeagueGothic/LeagueGothic-Italic.otf
+		chrome://browser/content/manual/static/fonts/LeagueGothic/League_Gothic_Regular.woff
+		chrome://browser/content/manual/static/fonts/SourceCodePro/OFL.txt
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Black.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Bold.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-ExtraLight.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Light.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Medium.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Regular.ttf
+		chrome://browser/content/manual/static/fonts/SourceCodePro/SourceCodePro-Semibold.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/OFL.txt
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Black.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-BlackItalic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Bold.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-BoldItalic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-ExtraLight.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-ExtraLightItalic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Italic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Light.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-LightItalic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-Regular.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-SemiBold.ttf
+		chrome://browser/content/manual/static/fonts/SourceSansPro/SourceSansPro-SemiBoldItalic.ttf
+		chrome://browser/content/manual/static/fonts/SourceSerifPro/OFL.txt
+		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Bold.ttf
+		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Regular.ttf
+		chrome://browser/content/manual/static/fonts/SourceSerifPro/SourceSerifPro-Semibold.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceGrotesk-Bold.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceGrotesk-Light.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceGrotesk-Medium.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceGrotesk-Regular.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceGrotesk-SemiBold.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceMono-Bold.ttf
+		chrome://browser/content/manual/static/fonts/Space/SpaceMono-Regular.ttf
+		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.eot
+		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.svg
+		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.ttf
+		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.woff
+		chrome://browser/content/manual/static/fonts/TorIcons/tor-icons.woff2
+		chrome://browser/content/manual/static/fonts/WhiteonBlack/WhiteOnBlack.ttf
+		chrome://browser/content/manual/static/images/album.jpg
+		chrome://browser/content/manual/static/images/black.svg
+		chrome://browser/content/manual/static/images/blog.jpg
+		chrome://browser/content/manual/static/images/bridges-dark-tb90.png
+		chrome://browser/content/manual/static/images/bridges-light-tb90.png
+		chrome://browser/content/manual/static/images/bridges.png
+		chrome://browser/content/manual/static/images/carousel.jpg
+		chrome://browser/content/manual/static/images/color.svg
+		chrome://browser/content/manual/static/images/cover.jpg
+		chrome://browser/content/manual/static/images/dashboard.jpg
+		chrome://browser/content/manual/static/images/favicon.ico
+		chrome://browser/content/manual/static/images/favicon.png
+		chrome://browser/content/manual/static/images/grid.jpg
+		chrome://browser/content/manual/static/images/home/png/block-trackers.png
+		chrome://browser/content/manual/static/images/home/png/block-trackers@2x.png
+		chrome://browser/content/manual/static/images/home/png/block-trackers@3x.png
+		chrome://browser/content/manual/static/images/home/png/browse-freely.png
+		chrome://browser/content/manual/static/images/home/png/browse-freely@2x.png
+		chrome://browser/content/manual/static/images/home/png/browse-freely@3x.png
+		chrome://browser/content/manual/static/images/home/png/encryption.png
+		chrome://browser/content/manual/static/images/home/png/encryption@2x.png
+		chrome://browser/content/manual/static/images/home/png/encryption@3x.png
+		chrome://browser/content/manual/static/images/home/png/fingerprinting.png
+		chrome://browser/content/manual/static/images/home/png/fingerprinting@2x.png
+		chrome://browser/content/manual/static/images/home/png/fingerprinting@3x.png
+		chrome://browser/content/manual/static/images/home/png/surveillance.png
+		chrome://browser/content/manual/static/images/home/png/surveillance@2x.png
+		chrome://browser/content/manual/static/images/home/png/surveillance@3x.png
+		chrome://browser/content/manual/static/images/home/png/take-back@3x.png
+		chrome://browser/content/manual/static/images/home/svg/block-trackers.svg
+		chrome://browser/content/manual/static/images/home/svg/browse-freely.svg
+		chrome://browser/content/manual/static/images/home/svg/encryption.svg
+		chrome://browser/content/manual/static/images/home/svg/fingerprinting.svg
+		chrome://browser/content/manual/static/images/home/svg/surveillance.svg
+		chrome://browser/content/manual/static/images/home/svg/take-back.svg
+		chrome://browser/content/manual/static/images/https.png
+		chrome://browser/content/manual/static/images/icons/128x128/authority.png
+		chrome://browser/content/manual/static/images/icons/128x128/badexit.png
+		chrome://browser/content/manual/static/images/icons/128x128/bridge.png
+		chrome://browser/content/manual/static/images/icons/128x128/country.png
+		chrome://browser/content/manual/static/images/icons/128x128/directory.png
+		chrome://browser/content/manual/static/images/icons/128x128/exit.png
+		chrome://browser/content/manual/static/images/icons/128x128/fallbackdir.png
+		chrome://browser/content/manual/static/images/icons/128x128/fast.png
+		chrome://browser/content/manual/static/images/icons/128x128/fingerprint.png
+		chrome://browser/content/manual/static/images/icons/128x128/guard.png
+		chrome://browser/content/manual/static/images/icons/128x128/hibernating.png
+		chrome://browser/content/manual/static/images/icons/128x128/hsdir.png
+		chrome://browser/content/manual/static/images/icons/128x128/ipv4.png
+		chrome://browser/content/manual/static/images/icons/128x128/ipv6.png
+		chrome://browser/content/manual/static/images/icons/128x128/ipv6exit.png
+		chrome://browser/content/manual/static/images/icons/128x128/noedconsensus.png
+		chrome://browser/content/manual/static/images/icons/128x128/notrecommended.png
+		chrome://browser/content/manual/static/images/icons/128x128/onion-alt.png
+		chrome://browser/content/manual/static/images/icons/128x128/onion.png
+		chrome://browser/content/manual/static/images/icons/128x128/reachableipv4.png
+		chrome://browser/content/manual/static/images/icons/128x128/reachableipv6.png
+		chrome://browser/content/manual/static/images/icons/128x128/relay.png
+		chrome://browser/content/manual/static/images/icons/128x128/running.png
+		chrome://browser/content/manual/static/images/icons/128x128/stable.png
+		chrome://browser/content/manual/static/images/icons/128x128/tshirt.png
+		chrome://browser/content/manual/static/images/icons/128x128/unmeasured.png
+		chrome://browser/content/manual/static/images/icons/128x128/unreachableipv4.png
+		chrome://browser/content/manual/static/images/icons/128x128/unreachableipv6.png
+		chrome://browser/content/manual/static/images/icons/128x128/v2dir.png
+		chrome://browser/content/manual/static/images/icons/128x128/valid.png
+		chrome://browser/content/manual/static/images/icons/16x16/authority.png
+		chrome://browser/content/manual/static/images/icons/16x16/badexit.png
+		chrome://browser/content/manual/static/images/icons/16x16/bridge.png
+		chrome://browser/content/manual/static/images/icons/16x16/country.png
+		chrome://browser/content/manual/static/images/icons/16x16/directory.png
+		chrome://browser/content/manual/static/images/icons/16x16/exit.png
+		chrome://browser/content/manual/static/images/icons/16x16/fallbackdir.png
+		chrome://browser/content/manual/static/images/icons/16x16/fast.png
+		chrome://browser/content/manual/static/images/icons/16x16/fingerprint.png
+		chrome://browser/content/manual/static/images/icons/16x16/guard.png
+		chrome://browser/content/manual/static/images/icons/16x16/hibernating.png
+		chrome://browser/content/manual/static/images/icons/16x16/hsdir.png
+		chrome://browser/content/manual/static/images/icons/16x16/ipv4.png
+		chrome://browser/content/manual/static/images/icons/16x16/ipv6.png
+		chrome://browser/content/manual/static/images/icons/16x16/ipv6exit.png
+		chrome://browser/content/manual/static/images/icons/16x16/noedconsensus.png
+		chrome://browser/content/manual/static/images/icons/16x16/notrecommended.png
+		chrome://browser/content/manual/static/images/icons/16x16/onion-alt.png
+		chrome://browser/content/manual/static/images/icons/16x16/onion.png
+		chrome://browser/content/manual/static/images/icons/16x16/reachableipv4.png
+		chrome://browser/content/manual/static/images/icons/16x16/reachableipv6.png
+		chrome://browser/content/manual/static/images/icons/16x16/relay.png
+		chrome://browser/content/manual/static/images/icons/16x16/running.png
+		chrome://browser/content/manual/static/images/icons/16x16/stable.png
+		chrome://browser/content/manual/static/images/icons/16x16/tshirt.png
+		chrome://browser/content/manual/static/images/icons/16x16/unmeasured.png
+		chrome://browser/content/manual/static/images/icons/16x16/unreachableipv4.png
+		chrome://browser/content/manual/static/images/icons/16x16/unreachableipv6.png
+		chrome://browser/content/manual/static/images/icons/16x16/v2dir.png
+		chrome://browser/content/manual/static/images/icons/16x16/valid.png
+		chrome://browser/content/manual/static/images/icons/32x32/authority.png
+		chrome://browser/content/manual/static/images/icons/32x32/badexit.png
+		chrome://browser/content/manual/static/images/icons/32x32/bridge.png
+		chrome://browser/content/manual/static/images/icons/32x32/country.png
+		chrome://browser/content/manual/static/images/icons/32x32/directory.png
+		chrome://browser/content/manual/static/images/icons/32x32/exit.png
+		chrome://browser/content/manual/static/images/icons/32x32/fallbackdir.png
+		chrome://browser/content/manual/static/images/icons/32x32/fast.png
+		chrome://browser/content/manual/static/images/icons/32x32/fingerprint.png
+		chrome://browser/content/manual/static/images/icons/32x32/guard.png
+		chrome://browser/content/manual/static/images/icons/32x32/hibernating.png
+		chrome://browser/content/manual/static/images/icons/32x32/hsdir.png
+		chrome://browser/content/manual/static/images/icons/32x32/ipv4.png
+		chrome://browser/content/manual/static/images/icons/32x32/ipv6.png
+		chrome://browser/content/manual/static/images/icons/32x32/ipv6exit.png
+		chrome://browser/content/manual/static/images/icons/32x32/noedconsensus.png
+		chrome://browser/content/manual/static/images/icons/32x32/notrecommended.png
+		chrome://browser/content/manual/static/images/icons/32x32/onion-alt.png
+		chrome://browser/content/manual/static/images/icons/32x32/onion.png
+		chrome://browser/content/manual/static/images/icons/32x32/reachableipv4.png
+		chrome://browser/content/manual/static/images/icons/32x32/reachableipv6.png
+		chrome://browser/content/manual/static/images/icons/32x32/relay.png
+		chrome://browser/content/manual/static/images/icons/32x32/running.png
+		chrome://browser/content/manual/static/images/icons/32x32/stable.png
+		chrome://browser/content/manual/static/images/icons/32x32/tshirt.png
+		chrome://browser/content/manual/static/images/icons/32x32/unmeasured.png
+		chrome://browser/content/manual/static/images/icons/32x32/unreachableipv4.png
+		chrome://browser/content/manual/static/images/icons/32x32/unreachableipv6.png
+		chrome://browser/content/manual/static/images/icons/32x32/v2dir.png
+		chrome://browser/content/manual/static/images/icons/32x32/valid.png
+		chrome://browser/content/manual/static/images/icons/64x64/authority.png
+		chrome://browser/content/manual/static/images/icons/64x64/badexit.png
+		chrome://browser/content/manual/static/images/icons/64x64/bridge.png
+		chrome://browser/content/manual/static/images/icons/64x64/country.png
+		chrome://browser/content/manual/static/images/icons/64x64/directory.png
+		chrome://browser/content/manual/static/images/icons/64x64/exit.png
+		chrome://browser/content/manual/static/images/icons/64x64/fallbackdir.png
+		chrome://browser/content/manual/static/images/icons/64x64/fast.png
+		chrome://browser/content/manual/static/images/icons/64x64/fingerprint.png
+		chrome://browser/content/manual/static/images/icons/64x64/guard.png
+		chrome://browser/content/manual/static/images/icons/64x64/hibernating.png
+		chrome://browser/content/manual/static/images/icons/64x64/hsdir.png
+		chrome://browser/content/manual/static/images/icons/64x64/ipv4.png
+		chrome://browser/content/manual/static/images/icons/64x64/ipv6.png
+		chrome://browser/content/manual/static/images/icons/64x64/ipv6exit.png
+		chrome://browser/content/manual/static/images/icons/64x64/noedconsensus.png
+		chrome://browser/content/manual/static/images/icons/64x64/notrecommended.png
+		chrome://browser/content/manual/static/images/icons/64x64/onion-alt.png
+		chrome://browser/content/manual/static/images/icons/64x64/onion.png
+		chrome://browser/content/manual/static/images/icons/64x64/reachableipv4.png
+		chrome://browser/content/manual/static/images/icons/64x64/reachableipv6.png
+		chrome://browser/content/manual/static/images/icons/64x64/relay.png
+		chrome://browser/content/manual/static/images/icons/64x64/running.png
+		chrome://browser/content/manual/static/images/icons/64x64/stable.png
+		chrome://browser/content/manual/static/images/icons/64x64/tshirt.png
+		chrome://browser/content/manual/static/images/icons/64x64/unmeasured.png
+		chrome://browser/content/manual/static/images/icons/64x64/unreachableipv4.png
+		chrome://browser/content/manual/static/images/icons/64x64/unreachableipv6.png
+		chrome://browser/content/manual/static/images/icons/64x64/v2dir.png
+		chrome://browser/content/manual/static/images/icons/64x64/valid.png
+		chrome://browser/content/manual/static/images/image1.png
+		chrome://browser/content/manual/static/images/image2.png
+		chrome://browser/content/manual/static/images/image3.png
+		chrome://browser/content/manual/static/images/image4.png
+		chrome://browser/content/manual/static/images/image5.png
+		chrome://browser/content/manual/static/images/image6.png
+		chrome://browser/content/manual/static/images/index.svg
+		chrome://browser/content/manual/static/images/jumbotron-narrow.jpg
+		chrome://browser/content/manual/static/images/jumbotron.png
+		chrome://browser/content/manual/static/images/justified-nav.jpg
+		chrome://browser/content/manual/static/images/menu-new-identity.png
+		chrome://browser/content/manual/static/images/navbar-bottom.jpg
+		chrome://browser/content/manual/static/images/navbar-fixed.jpg
+		chrome://browser/content/manual/static/images/navbar-static.jpg
+		chrome://browser/content/manual/static/images/navbar.jpg
+		chrome://browser/content/manual/static/images/new-circuit-display.png
+		chrome://browser/content/manual/static/images/nodes.png
+		chrome://browser/content/manual/static/images/noscript_menu.png
+		chrome://browser/content/manual/static/images/offcanvas.jpg
+		chrome://browser/content/manual/static/images/onion-bg.png
+		chrome://browser/content/manual/static/images/onion-bg.svg
+		chrome://browser/content/manual/static/images/onion-website.png
+		chrome://browser/content/manual/static/images/padlock-onion.png
+		chrome://browser/content/manual/static/images/pluggable_transport_network_settings.png
+		chrome://browser/content/manual/static/images/powered/Powered_Gray.png
+		chrome://browser/content/manual/static/images/powered/Powered_Gray.svg
+		chrome://browser/content/manual/static/images/powered/Powered_Purple.png
+		chrome://browser/content/manual/static/images/powered/Powered_Purple.svg
+		chrome://browser/content/manual/static/images/powered/Powered_White.png
+		chrome://browser/content/manual/static/images/powered/Powered_White.svg
+		chrome://browser/content/manual/static/images/purple.svg
+		chrome://browser/content/manual/static/images/security-settings-safest-tool.png
+		chrome://browser/content/manual/static/images/sign-in.jpg
+		chrome://browser/content/manual/static/images/slider.png
+		chrome://browser/content/manual/static/images/slider_window.png
+		chrome://browser/content/manual/static/images/starter-template.jpg
+		chrome://browser/content/manual/static/images/sticky-footer-navbar.jpg
+		chrome://browser/content/manual/static/images/sticky-footer.jpg
+		chrome://browser/content/manual/static/images/tor-and-https.svg
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Horizontal_Color.png
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Horizontal_Color.svg
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Icon.png
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Icon.svg
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Vertical_Color.png
+		chrome://browser/content/manual/static/images/tor-browser/Browser_Vertical_Color.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Big_Green.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Big_Green.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Big_Purple.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Big_Purple.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Green.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Green.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Purple.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Medium_Purple.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Small_Green.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Small_Green.svg
+		chrome://browser/content/manual/static/images/tor-download/Download_Small_Purple.png
+		chrome://browser/content/manual/static/images/tor-download/Download_Small_Purple.svg
+		chrome://browser/content/manual/static/images/tor-launcher-custom-bridges.png
+		chrome://browser/content/manual/static/images/tor-logo.svg
+		chrome://browser/content/manual/static/images/tor-logo/Black.png
+		chrome://browser/content/manual/static/images/tor-logo/Black.svg
+		chrome://browser/content/manual/static/images/tor-logo/Color.png
+		chrome://browser/content/manual/static/images/tor-logo/Color.svg
+		chrome://browser/content/manual/static/images/tor-logo/Purple.png
+		chrome://browser/content/manual/static/images/tor-logo/Purple.svg
+		chrome://browser/content/manual/static/images/tor-logo/White.png
+		chrome://browser/content/manual/static/images/tor-logo/White.svg
+		chrome://browser/content/manual/static/images/tor-logo1x.png
+		chrome://browser/content/manual/static/images/tor-logo@2x.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Gray.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Gray.svg
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Green.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Green.svg
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Purple.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Big_Purple.svg
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Gray.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Gray.svg
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Green.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Green.svg
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Purple.png
+		chrome://browser/content/manual/static/images/tor-support/Support_Small_Purple.svg
+		chrome://browser/content/manual/static/images/tr1.png
+		chrome://browser/content/manual/static/images/tr2.png
+		chrome://browser/content/manual/static/images/tr3.png
+		chrome://browser/content/manual/static/images/tr4.png
+		chrome://browser/content/manual/static/images/tr5.png
+		chrome://browser/content/manual/static/images/update-tb.png
+		chrome://browser/content/manual/static/images/update2.png
+		chrome://browser/content/manual/static/images/white.svg
+		chrome://browser/content/manual/static/images/yec-bg-desktop-2x.png
+		chrome://browser/content/manual/static/images/yec-bg-desktop-3x.png
+		chrome://browser/content/manual/static/images/yec-foreground-2x_12x.png
+		chrome://browser/content/manual/static/images/yec-foreground-2x_13x.png
+		chrome://browser/content/manual/static/js/bootstrap.bundle.js.map
+		chrome://browser/content/manual/static/js/bootstrap.bundle.min.js.map
+		chrome://browser/content/manual/static/js/bootstrap.js.map
+		chrome://browser/content/manual/static/js/bootstrap.min.js.map
 
 		// android
 		resource://torbutton-assets/forwardArrow.png
