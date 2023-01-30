@@ -315,8 +315,9 @@ function get_recursion(log = false) {
 }
 
 function get_perf1() {
+	// note: FF111+ 1813599 + 1811567: s/be 0's + length s/be 4
 	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
-	// get result
+	// get results
 	try {
 		performance.mark("a")
 		if (performance.mark === undefined) {
@@ -341,6 +342,7 @@ function get_perf1() {
 					performance.measure("y", undefined, "b")
 					performance.measure("z")
 					testM = performance.getEntriesByType("measure").length
+					valueM = testM
 				} catch(e) {
 					log_error("misc: perf measure", e.name, e.message)
 					testM = e.name === undefined? zErr : e.name
@@ -354,33 +356,15 @@ function get_perf1() {
 		dom.perf1 = display
 		return "perf_mark:"+ zErr
 	}
-	// sim
-	let ctrlE = "0, 0, 0, 0", ctrlM = 0
-	if (runSL) {
-		if (isRFP) {testE = "1, 4, 4, 1"} else {testE = ctrlE}
-	}
-	display = testE +" | "+ testM
+	// simplify perf as binary
+	let ctrlE = "0, 0, 0, 0"
 	if (valueE !== zErr) {valueE = testE == ctrlE ? "zero" : "not zero"}
-	if (valueM !== zErr) {valueM = testM == ctrlM ? "zero" : "not zero"}
-
+	// notation: FF111+: 1811567: we should have entries
 	if (isFF && isTZPSmart) {
+		let ctrlM = isVer > 110 ? 4 : 0
 		notation = testE == ctrlE && testM == ctrlM ? rfp_green : rfp_red
-		// non-RFP = not zero: lies/bypass incl. errors
-		if (!isRFP) {
-			let isLies = false
-			if (valueE == zErr || valueM == zErr) {isLies = true} // errors
-			if (ctrlE == testE || ctrlM == testM) {isLies = true} // zeros
-			if (isLies) {
-				notation = rfp_red
-				valueE = "not zero"
-				valueM = "not zero"
-				display = newColor(display, 2)
-				log_known(SECT18, METRIC, valueE+" | "+valueM)
-			}
-		}
-		if (isVer > 110) {notation = ""} // 1811567
 	}
-	dom.perf1.innerHTML = display + notation
+	dom.perf1.innerHTML = testE +" | "+ testM + notation
 	return "perf_mark:"+ valueE +" | "+ valueM
 }
 
