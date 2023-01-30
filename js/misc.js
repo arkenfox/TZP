@@ -318,12 +318,11 @@ function get_perf1() {
 	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
 	// get result
 	try {
-		if (runSE) {abc = def}
 		performance.mark("a")
 		if (performance.mark === undefined) {
 			display = zU + " | "+ zNA
 			dom.perf1 = display
-			return "perf_ mark:"+ display
+			return "perf_mark:"+ display
 		} else {
 				performance.mark("b")
 				try {
@@ -351,19 +350,9 @@ function get_perf1() {
 				performance.clearMeasures()
 		}
 	} catch(e) {
-		// bypass isFF non-RFP
 		display = log_error("misc: perf mark", e.name, e.message) +" | "+ zNA
-		let fpValue = zErr
-		if (isFF && isTZPSmart && !isRFP) {
-			fpValue = "not zero | not zero"
-			display = soB + display + scC + rfp_red
-			if (gRun) {
-				gKnown.push("misc:performance.mark")
-				gBypassed.push("misc:performance.mark:"+ fpValue)
-			}
-		}
-		dom.perf1.innerHTML = display
-		return "perf_mark:"+ fpValue
+		dom.perf1 = display
+		return "perf_mark:"+ zErr
 	}
 	// sim
 	let ctrlE = "0, 0, 0, 0", ctrlM = 0
@@ -385,15 +374,12 @@ function get_perf1() {
 				notation = rfp_red
 				valueE = "not zero"
 				valueM = "not zero"
-				if (gRun) {
-					gKnown.push("misc:performance.mark")
-					gBypassed.push("misc:performance.mark:"+valueE+" | "+valueM)
-				}
-				display = soB + display + scC
+				display = newColor(display, 2)
+				log_known(SECT18, METRIC, valueE+" | "+valueM)
 			}
 		}
+		if (isVer < 111) {notation = ""} // 1811567
 	}
-	// display
 	dom.perf1.innerHTML = display + notation
 	return "perf_mark:"+ valueE +" | "+ valueM
 }
@@ -483,7 +469,7 @@ function get_perf4() {
 		dom.perf4 = log_error("misc: perf navigation", e.name, e.message)
 		return "perf_navigation:"+ zErr
 	}
-	if (isTZPSmart) {notation = (r == zD ? rfp_green : rfp_red)} //78+: 1511941
+	if (isTZPSmart && isVer < 111) {notation = (r == zD ? rfp_green : rfp_red)} // 78-110: 1511941 - 1811567
 	dom.perf4.innerHTML = r + notation
 	return "perf_navigation:"+ r
 }
