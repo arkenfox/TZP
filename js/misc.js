@@ -378,7 +378,7 @@ function get_perf1() {
 				log_known(SECT18, METRIC, valueE+" | "+valueM)
 			}
 		}
-		if (isVer < 111) {notation = ""} // 1811567
+		if (isVer > 110) {notation = ""} // 1811567
 	}
 	dom.perf1.innerHTML = display + notation
 	return "perf_mark:"+ valueE +" | "+ valueM
