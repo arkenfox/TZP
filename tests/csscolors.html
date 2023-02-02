@@ -29,8 +29,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
-			<a target="_blank" class="blue" href="https://www.w3.org/TR/css-color-4/">https://www.w3.org/TR/css-color-4/</a> &nbsp |
-			&nbsp <input type="checkbox" id="isLog"> &nbsp log to console</span></td></tr>
+			<a target="_blank" class="blue" href="https://www.w3.org/TR/css-color-4/">https://www.w3.org/TR/css-color-4/</a>
 		<tr>
 			<td colspan="2" style="text-align: left;">
 			<hr><br>
@@ -48,6 +47,7 @@ let oColors = {
 		"countcolor": 0,
 		"countsupported": 0,
 		"data": {},
+		"databyname": [],
 		"hash": "",
 	}
 }
@@ -125,9 +125,8 @@ function get_colors() {
 	try {
 		const element = dom.sColorElement
 		const strColor = "rgba(1, 2, 3, 0.5)"
-		let tmpAll = {}, count = 0
+		let tmpAll = {}, aTempAll = [], count = 0
 		for (const type of Object.keys(oList)) {
-			let aTemp = []
 			let oTemp = {}
 			let aList = oList[type]
 			aList.sort()
@@ -136,7 +135,6 @@ function get_colors() {
 				element.style.backgroundColor = style
 				let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
 				if (rgb !== strColor) { // drop obsolete
-					aTemp.push(style +":"+ rgb)
 					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
 				}
 			})
@@ -147,21 +145,31 @@ function get_colors() {
 				"countcolor": 0,
 				"countsupported": 0,
 				"data": {},
+				"databyname": [],
 				"hash": "",
 			}
+			let aTemp = []
 			for (const k of Object.keys(tmpobj).sort()) {
 				oColors[type]["data"][k] = tmpobj[k]; count += tmpobj[k].length // sort/count
 				if (tmpAll[k] == undefined) {tmpAll[k] = []}
 				tmpAll[k][type] = []
 				tmpAll[k][type] = tmpAll[k].concat(tmpobj[k])
-
+				tmpobj[k].forEach(function(item) {
+					aTemp.push(item +": "+ k)
+				}) // array by name
 			}
 			oColors[type]["countcolor"] = Object.keys(tmpobj).length
 			oColors[type]["countsupported"] = count
 			oColors[type]["hash"] = mini(oColors[type]["data"])
+			aTempAll = aTempAll.concat(aTemp)
+			aTemp.sort()
+			oColors[type]["databyname"] = aTemp
+
 		}
 		// all
 		count = 0
+		aTempAll.sort()
+		oColors["all"]["databyname"] = aTempAll
 		for (const k of Object.keys(tmpAll).sort()) {
 			oColors["all"]["data"][k] = {}
 			for (const name of Object.keys(tmpAll[k]).sort()) {
@@ -172,12 +180,22 @@ function get_colors() {
 		}
 		oColors.all.countcolor += Object.keys(tmpAll).length
 		oColors.all.countsupported += count
-		oColors.all.hash = mini(oColors["all"])
+		oColors.all.hash = mini(oColors["all"]["data"])
 		output()
 	} catch(e) {
 		console.error(e.name, e.message)
 		dom.summary = e.type +": "+ e.message
 	}
+}
+
+function log_console(type, list) {
+	let data = oColors[type][list],
+		hash = mini(data),
+		counts = ""
+	if (list == "data") {
+		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
+	}
+	console.log(type +": "+ hash + counts +"\n" + JSON.stringify(data, null, 2))
 }
 
 function output() {
@@ -208,7 +226,12 @@ function display(type) {
 			note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
 		}
 	}
-	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + note + "<br><br>{")
+
+	let consoleBtns = " | CONSOLE: "
+		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`databyname`)'>[by name]</span> "
+		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`data`)'>[by color]</span> "
+
+	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + consoleBtns + note +"<br><br>{")
 	for (const k of Object.keys(data)) {
 		results.push("  \""+ k +"\": <span style='background-color:#"+ k +"; border: 1px solid white'> &nbsp </span>")
 		let resultsStr = ""
@@ -222,12 +245,8 @@ function display(type) {
 		results.push(resultsStr)
 	}
 	dom.results.innerHTML = results.join("<br>") +"}"
-	if (dom.isLog.checked) {
-		console.log(type +": "+ hash + counts +"\n" + JSON.stringify(data, null, 2))
-	}
 }
 
-//dom.isLog.checked = true
 get_colors()
 
 </script>
