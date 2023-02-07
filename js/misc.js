@@ -315,9 +315,14 @@ function get_recursion(log = false) {
 }
 
 function get_perf1() {
-	// note: FF111+ 1813599 + 1811567: s/be 0's + length s/be 4
+	// FF111+: 811567: test the timing
+	if (isVer > 110) {
+		dom.perf1.innerHTML = "FF111+ TBA"
+		return "perf_mark:TBA"
+	}
+
+	// FF110 or lower: testing the API mot the timing
 	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
-	// get results
 	try {
 		performance.mark("a")
 		if (performance.mark === undefined) {
@@ -361,8 +366,7 @@ function get_perf1() {
 	if (valueE !== zErr) {valueE = testE == ctrlE ? "zero" : "not zero"}
 	// notation: FF111+: 1811567: we should have entries
 	if (isFF && isTZPSmart) {
-		let ctrlM = isVer > 110 ? 4 : 0
-		notation = testE == ctrlE && testM == ctrlM ? rfp_green : rfp_red
+		notation = testE == ctrlE && testM == 0 ? rfp_green : rfp_red
 	}
 	dom.perf1.innerHTML = testE +" | "+ testM + notation
 	return "perf_mark:"+ valueE +" | "+ valueM
