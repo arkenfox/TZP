@@ -9,7 +9,7 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 600px;}
-		hr {color: #8cdcc1}
+		hr {color: #8cdcc1;}
 	</style>
 </head>
 
@@ -157,7 +157,12 @@ function run_checks(max) {
 		get_isRFP(),
 	]).then(function(){
 		// isRFP
-		if (isFF && !isRFP) {aBypass.push("RFP is not enabled")}
+		if (isFF && !isRFP) {
+			// isRFP needs a new test in FF111+: temporarily ignore
+			if (!HTMLElement.prototype.hasOwnProperty("translate")) {
+				aBypass.push("RFP is not enabled")
+			}
+		}
 		// isFile
 		if (isFF && isFile) {aBypass.push("RFP doesn't work on file scheme")}
 		// heh
