@@ -10,7 +10,7 @@
 	<style>
 		table {width: 580px;}
 		table td.bottom {vertical-align: bottom;}
-		hr {color: #8cdcc1}
+		hr {color: #8cdcc1;}
 	</style>
 </head>
 <body>
@@ -84,7 +84,8 @@
 function run() {
 	// vars
 	let clrSet = [], cellSet = [],
-		clrRead = [], cellRead = [], cellRead2 = [],
+		clrRead = [], clrRead2 = [],
+		cellRead = [], cellRead2 = [],
 		hashSet = "",
 		hashGetImage = "",
 		hashGetImage2 = "",
@@ -117,7 +118,7 @@ function run() {
 						let clrR = Math.floor(Math.random()*256),
 							clrG = Math.floor(Math.random()*256),
 							clrB = Math.floor(Math.random()*256)
-						let clrs = clrR +","+ clrG +","+ clrB +",255"
+						let clrs = clrR +", "+ clrG +", "+ clrB +", 255"
 						clrSet.push(clrR)
 						clrSet.push(clrG)
 						clrSet.push(clrB)
@@ -129,7 +130,7 @@ function run() {
 						ctxCtrl.fillRect(x, y, 1, 1)
 					}
 				}
-				hashSet = sha1(clrSet.join())
+				hashSet = mini(clrSet) +" | "+ mini(cellSet)
 				dom.sethash = hashSet
 
 				// getImageData
@@ -146,40 +147,52 @@ function run() {
 					cnvBlob.src = url
 				})
 
-				// read: getImageData
+				// 1st read
+				let testRead = ctxCtrl.getImageData(0,0, cWidth, cHeight).data
+				let aRead = []
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
-						let pixel = ctxCtrl.getImageData(x,y,1,1)
-						clrRead.push(pixel.data[0])
-						clrRead.push(pixel.data[1])
-						clrRead.push(pixel.data[2])
-						clrRead.push(pixel.data[3])
-
-						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
+						// we need to read x/y as the opoosite
+						// as getImageData reads down then across
+						// so we want the 0th quartet, then 20th, then 40th
+						let k = x + (y * cHeight)
+						aRead = testRead.slice(k*4, (k*4) + 4)
+						clrRead.push(aRead[0])
+						clrRead.push(aRead[1])
+						clrRead.push(aRead[2])
+						clrRead.push(aRead[3])
+						let pixel = aRead.join(", ")
 						cellRead.push(pixel)
-						// output READ visuals
+						// output READ visuals: just on the first read
 						ctxBig2.fillStyle = "rgba("+ pixel +")"
 						ctxBig2.fillRect(x*m, y*m, m, m)
 						ctxGet.fillStyle = "rgba("+ pixel +")"
 						ctxGet.fillRect(x, y, 1, 1)
 					}
 				}
-				hashGetImage = sha1(clrRead.join())
+				hashGetImage = mini(clrRead) +" | " + mini(cellRead)
 
-				// second read
-				let clrRead2 = []
+				// 2nd read
+				let testRead2 = ctxCtrl.getImageData(0,0, cWidth, cHeight).data
+				let aRead2 = []
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
-						let pixel = ctxCtrl.getImageData(x,y,1,1)
-						clrRead2.push(pixel.data[0])
-						clrRead2.push(pixel.data[1])
-						clrRead2.push(pixel.data[2])
-						clrRead2.push(pixel.data[3])
-						pixel = pixel.data[0] +","+ pixel.data[1] +","+ pixel.data[2] +","+ pixel.data[3]
+						// we need to read x/y as the opoosite
+						// as getImageData reads down then across
+						// so we want the 0th quartet, then 20th, then 40th
+						let k = x + (y * cHeight)
+						aRead2 = testRead2.slice(k*4, (k*4) + 4)
+						clrRead2.push(aRead2[0])
+						clrRead2.push(aRead2[1])
+						clrRead2.push(aRead2[2])
+						clrRead2.push(aRead2[3])
+						let pixel = aRead2.join(", ")
 						cellRead2.push(pixel)
 					}
 				}
-				hashGetImage2 = sha1(clrRead2.join())
+				hashGetImage2 = mini(clrRead2) +" | " + mini(cellRead2)
+
+				// output
 				if (hashGetImage2 == hashSet) {
 					dom.readhash2.innerHTML = hashGetImage2 + s9 +"[matches]"+ sc
 				} else {
@@ -223,10 +236,10 @@ function run() {
 					}
 					/*
 					if (changeC.length > 1) {
-						console.debug("read 1: pixels changed: ", sha1(changeC.join()) +"\n", changeC)
+						console.debug("read 1: pixels changed: ", mini(changeC) +"\n", changeC)
 					}
 					if (changeC2.length > 1) {
-						console.debug("read 2: pixels changed: ", sha1(changeC2.join()) +"\n", changeC2)
+						console.debug("read 2: pixels changed: ", mini(changeC2) +"\n", changeC2)
 					}
 					*/
 
@@ -302,8 +315,7 @@ function run() {
 					dom.readdiff.innerHTML = "  r: "+ strR +"<br>  g: "+ strG +"<br>  b: "+ strB +"<br>  a: "+ strA 
 				}
 				// perf
-				let t1 = performance.now()
-				dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+				dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 			}
 		} catch(e) {
 			dom.readhash.innerHTML = sb + e.name +": "+ sc + e.message
