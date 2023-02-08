@@ -11,7 +11,7 @@
 	<style>
 		table {width: 700px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
-		hr {color: #dcc18c}
+		hr {color: #dcc18c;}
 	</style>
 </head>
 
@@ -174,7 +174,7 @@ function fnDisplay() {
 		+"FAIL: ".padStart(7) + countFail + (isPass? sg : sb) +" ["+ percentFailed +"%]"+ sc
 	if (countNA > 0) {summary += "N/A: ".padStart(6) + countNA}
 	if (isFF) {
-		summary += s14+ "DEBUG".padStart(7) + sc +"RFP:".padStart(6) + (isRFP ? green_tick : red_cross)
+		summary += s14+ "DEBUG".padStart(7) + sc
 		let strVer = isVer
 		strVer += (isVer == isVerMax ? "+" : "")
 		strVer += (isVer == 52 ? " or lower" : "")
