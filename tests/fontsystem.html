@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,12 +9,40 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 680px;}
-		hr {color: #8ca7dc}
-		.small {font-size: 11px;}
+		hr {color: #8ca7dc;}
 	</style>
 </head>
 
 <body>
+	<div class="offscreen">
+		<div id="sysFont"></div>
+	</div>
+	<div class="hidden">
+		<input type="reset" value="" id="widgetbutton">
+		<input type="checkbox" id="widgetcheckbox">
+		<input type="color" id="widgetcolor">
+		<select id="widgetcombobox"><option value="a"></option></select>
+		<input type="radio" id="widgetradio">
+		<input type="text" id="widgettext">
+		<input type="date" id="widgetdatetime">
+		<input type="datetime-local" id="widgetdatetime-local">
+		<textarea id="widgettextarea"></textarea>
+		<input type="email" id="widgetemail">
+		<input type="file" id="widgetfile">
+		<input type="hidden" id="widgethidden">
+		<input type="image" id="widgetimage">
+		<input type="month" id="widgetmonth">
+		<input type="number" id="widgetnumber">
+		<input type="password" id="widgetpassword">
+		<input type="range" id="widgetrange">
+		<input type="reset" id="widgetreset">
+		<input type="search" id="widgetsearch">
+		<input type="submit" id="widgetsubmit">
+		<input type="time" id="widgettime">
+		<input type="tel" id="widgettel">
+		<input type="url" id="widgeturl">
+		<input type="week" id="widgetweek">
+	</div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -22,37 +50,47 @@
 	</table>
 
 	<table id="tb12">
-		<col width="25%"><col width="75%">
+		<col width="1%"><col width="99%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">system fonts</div>
 		</th></tr></thead>
-		<tr><td colspan="2"><br></td></tr>
+		<tr><td></td><td class="mono spaces" id="widgets"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td></td><td class="mono spaces" id="system"></td></tr>
+	</table>
+	<br>
+
+	<table id="tb12">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">check getComputedStyle</div>
+		</th></tr></thead>
 		<!-- always get span width, div height -->
 		<tr>
 			<td><div id="ctrlh0" style="font:caption"><span id="ctrlw0">caption</span></div></td>
 			<td><div id="testh0"><span id="testw0">caption</span></div></td>
 		</tr>
 		<tr><td id="cmeasure0"></td><td id="tmeasure0"></td></tr>
-		<tr><td id="hash0"></td><td class="small" id="data0"></td></tr>
+		<tr><td id="hash0"></td><td id="data0"></td></tr>
 		<tr>
 			<td><div id="ctrlh1" style="font:icon"><span id="ctrlw1">icon</span></div></td>
 			<td><div id="testh1"><span id="testw1">icon</span></div></td>
 		</tr>
 		<tr><td id="cmeasure1"></td><td id="tmeasure1"></td></tr>
-		<tr><td id="hash1"></td><td class="small" id="data1"></td></tr>
+		<tr><td id="hash1"></td><td id="data1"></td></tr>
 
 		<tr>
 			<td><div id="ctrlh2" style="font:menu"><span id="ctrlw2">menu</span></div></td>
 			<td><div id="testh2"><span id="testw2">menu</span></div></td>
 		</tr>
 		<tr><td id="cmeasure2"></td><td id="tmeasure2"></td></tr>
-		<tr><td id="hash2"></td><td class="small" id="data2"></td></tr>
+		<tr><td id="hash2"></td><td id="data2"></td></tr>
 		<tr>
 			<td><div id="ctrlh3" style="font:message-box"><span id="ctrlw3">message-box</span></div></td>
 			<td><div id="testh3"><span id="testw3">message-box</span></div></td>
 		</tr>
 		<tr><td id="cmeasure3"></td><td id="tmeasure3"></td></tr>
-		<tr><td id="hash3"></td><td class="small" id="data3"></td></tr>
+		<tr><td id="hash3"></td><td id="data3"></td></tr>
 		<tr>
 			<td><div id="ctrlh4" style="font:small-caption"><span id="ctrlw4">small-caption</span></div></td>
 			<td><div id="testh4"><span id="testw4">small-caption</span></div></td>
@@ -64,7 +102,7 @@
 			<td><div id="testh5"><span id="testw5">status-bar</span></div></td>
 		</tr>
 		<tr><td id="cmeasure5"></td><td id="tmeasure5"></td></tr>
-		<tr><td id="hash5"></td><td class="small" id="data5"></td></tr>
+		<tr><td id="hash5"></td><td id="data5"></td></tr>
 
 		<!-- moz -->
 		<tr><td colspan="2" class="center"><br>--- moz ---</td></tr>
@@ -73,29 +111,29 @@
 			<td><div id="testh6"><span id="testw6">-moz-desktop</span></div></td>
 		</tr>
 		<tr><td id="cmeasure6"></td><td id="tmeasure6"></td></tr>
-		<tr><td id="hash6"></td><td class="small" id="data6"></td></tr>
+		<tr><td id="hash6"></td><td id="data6"></td></tr>
 		<tr>
 			<td><div id="ctrlh7" style="font:-moz-document"><span id="ctrlw7">-moz-document</span></div></td>
 			<td><div id="testh7"><span id="testw7">-moz-document</span></div></td>
 		</tr>
 		<tr><td id="cmeasure7"></td><td id="tmeasure7"></td></tr>
-		<tr><td id="hash7"></td><td class="small" id="data7"></td></tr>
+		<tr><td id="hash7"></td><td id="data7"></td></tr>
 		<tr>
 			<td><div id="ctrlh8" style="font:-moz-info"><span id="ctrlw8">-moz-info</span></div></td>
 			<td><div id="testh8"><span id="testw8">-moz-info</span></div></td>
 		</tr>
 		<tr><td id="cmeasure8"></td><td id="tmeasure8"></td></tr>
-		<tr><td id="hash8"></td><td class="small" id="data8"></td></tr>
+		<tr><td id="hash8"></td><td id="data8"></td></tr>
 		<tr>
 			<td><div id="ctrlh9" style="font:-moz-pull-down-menu"><span id="ctrlw9">-moz-pull-down-menu</span></div></td>
 			<td><div id="testh9"><span id="testw9">-moz-pull-down-menu</span></div></td>
 		</tr>
 		<tr><td id="cmeasure9"></td><td id="tmeasure9"></td></tr>
-		<tr><td id="hash9"></td><td class="small" id="data9"></td></tr>
+		<tr><td id="hash9"></td><td id="data9"></td></tr>
 		<tr>
 			<td><div id="ctrlh10" style="font:-moz-window"><span id="ctrlw10">-moz-window</span></div></td>
 			<td><div id="testh10"><span id="testw10">-moz-window</span></div></td>
-		<tr><td id="hash10"></td><td class="small" id="data10"></td></tr>
+		<tr><td id="hash10"></td><td id="data10"></td></tr>
 		</tr>
 		<tr><td id="cmeasure10"></td><td id="tmeasure10"></td></tr>
 		<tr>
@@ -103,7 +141,7 @@
 			<td><div id="testh11"><span id="testw11">-moz-workspace</span></div></td>
 		</tr>
 		<tr><td id="cmeasure11"></td><td id="tmeasure11"></td></tr>
-		<tr><td id="hash11"></td><td class="small" id="data11"></td></tr>
+		<tr><td id="hash11"></td><td id="data11"></td></tr>
 
 		<!-- split these off -->
 		<tr>
@@ -111,25 +149,25 @@
 			<td><div id="testh12"><span id="testw12">-moz-dialog</span></div></td>
 		</tr>
 		<tr><td id="cmeasure12"></td><td id="tmeasure12"></td></tr>
-		<tr><td id="hash12"></td><td class="small" id="data12"></td></tr>
+		<tr><td id="hash12"></td><td id="data12"></td></tr>
 		<tr>
 			<td><div id="ctrlh13" style="font:-moz-button"><span id="ctrlw13">-moz-button</span></div></td>
 			<td><div id="testh13"><span id="testw13">-moz-button</span></div></td>
 		</tr>
 		<tr><td id="cmeasure13"></td><td id="tmeasure13"></td></tr>
-		<tr><td id="hash13"></td><td class="small" id="data13"></td></tr>
+		<tr><td id="hash13"></td><td id="data13"></td></tr>
 		<tr>
 			<td><div id="ctrlh14" style="font:-moz-field"><span id="ctrlw14">-moz-field</span></div></td>
 			<td><div id="testh14"><span id="testw14">-moz-field</span></div></td>
 		</tr>
 		<tr><td id="cmeasure14"></td><td id="tmeasure14"></td></tr>
-		<tr><td id="hash14"></td><td class="small" id="data14"></td></tr>
+		<tr><td id="hash14"></td><td id="data14"></td></tr>
 		<tr>
 			<td><div id="ctrlh15" style="font:-moz-list"><span id="ctrlw15">-moz-list</span></div></td>
 			<td><div id="testh15"><span id="testw15">-moz-list</span></div></td>
 		</tr>
 		<tr><td id="cmeasure15"></td><td id="tmeasure15"></td></tr>
-		<tr><td id="hash15"></td><td class="small" id="data15"></td></tr>
+		<tr><td id="hash15"></td><td id="data15"></td></tr>
 
 		<tr><td colspan="2" class="center"><br>--- system-ui ---</td></tr>
 		<tr><td>sample text</td><td>
@@ -144,66 +182,114 @@
 'use strict';
 
 s2 = s2.trim()
+s12 = s12.trim()
 s14 = s14.trim()
 
-for (let i=0; i < 16; i++) {
-	let ctrlW = document.getElementById("ctrlw"+i),
-		ctrlH = document.getElementById("ctrlh"+i),
-		testW = document.getElementById("testw"+i),
-		testH = document.getElementById("testh"+i),
-		hash = document.getElementById("hash"+i),
-		data = document.getElementById("data"+i)
+function check_computed() {
+	for (let i=0; i < 16; i++) {
+		let ctrlW = document.getElementById("ctrlw"+i),
+			ctrlH = document.getElementById("ctrlh"+i),
+			testW = document.getElementById("testw"+i),
+			testH = document.getElementById("testh"+i),
+			hash = document.getElementById("hash"+i),
+			data = document.getElementById("data"+i)
 
-	try {
-		// get control font + size
-		let font = getComputedStyle(ctrlW).getPropertyValue("font-family")
-		let size = window.getComputedStyle(ctrlW, null).getPropertyValue('font-size');
-
-		// apply control properties to test
-		//<font-variant-css21> || <‘font-stretch’> ] 
-		let propList = [
-			'font-family', 'font-size', 'font-style', 'font-weight',
-			//'font-variant', 'font-stretch',
-			//'text-decoration',
-			//'word-break','word-spacing',
-		]
-		let aData = [], aDataFirst = []
-		
-		for (const prop of propList) {
-			let value = getComputedStyle(ctrlW)[prop]
-			testW.style[prop] = value
-			if (i == 0) {
-				aDataFirst.push(s2 + prop +": "+ sc + value)
+		try {
+			let propList = ['font-family', 'font-size', 'font-style', 'font-weight',]
+			let aData = []
+			for (const prop of propList) {
+				let value = getComputedStyle(ctrlW)[prop]
+				testW.style[prop] = value
+				aData.push(value)
 			}
-			aData.push(value)
+			// always get span width, div height
+				// can't get div height to always match, so go with span height: seems to work
+				// also can be slightly out in decimal precision, e.g. zoomed
+				// lets try toFixed(4)
+			// measure control
+			let cSpan = ctrlW.getBoundingClientRect()
+			let cDiv = ctrlH.getBoundingClientRect()
+			let cMeasure = (cSpan.width).toFixed(4) +" x "+ (cSpan.height).toFixed(4)
+			document.getElementById("cmeasure"+i).innerHTML = cMeasure
+
+			// measure test
+			let tSpan = testW.getBoundingClientRect()
+			let tDiv = testH.getBoundingClientRect()
+			let tMeasure = (tSpan.width).toFixed(4) +" x "+ (tSpan.height).toFixed(4)
+			document.getElementById("tmeasure"+i).innerHTML = tMeasure
+				// and compare
+				+" "+ (cMeasure == tMeasure ? green_tick : red_cross) 
+
+			// data
+			hash.innerHTML = s14 + mini(aData.join()) + sc
+			data.innerHTML = aData.join(", ")
+
+		} catch(e) {
+			console.log(e.name, e.message)
 		}
-
-		// always get span width, div height
-			// can't get div height to always match, so go with span height: seems to work
-			// also can be slightly out in decimal precision, e.g. zoomed
-			// lets try toFixed(4)
-		// measure control
-		let cSpan = ctrlW.getBoundingClientRect()
-		let cDiv = ctrlH.getBoundingClientRect()
-		let cMeasure = (cSpan.width).toFixed(4) +" x "+ (cSpan.height).toFixed(4)
-		document.getElementById("cmeasure"+i).innerHTML = cMeasure
-
-		// measure test
-		let tSpan = testW.getBoundingClientRect()
-		let tDiv = testH.getBoundingClientRect()
-		let tMeasure = (tSpan.width).toFixed(4) +" x "+ (tSpan.height).toFixed(4)
-		document.getElementById("tmeasure"+i).innerHTML = tMeasure
-			// and compare
-			+" "+ (cMeasure == tMeasure ? green_tick : red_cross) 
-
-		// data
-		hash.innerHTML = s14 + mini(aData.join()) + sc
-		data.innerHTML = (i == 0 ? aDataFirst.join(", ") : aData.join(", "))
-
-	} catch(e) {
-		console.log(e.name, e.message)
 	}
 }
+
+function get_system() {
+	try {
+		let aList = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
+			'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+			'caption','icon','menu','message-box','small-caption','status-bar',
+		]
+		let aProps = ['font-size','font-style','font-weight','font-family']
+		let oRes = {}
+		let el = dom.sysFont
+		aList.forEach(function(name){
+			let aKeys = []
+			el.style.font = name
+			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
+			let key = aKeys.join(" ")
+			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+		})
+		let newobj = {}, display = []
+		for (const k of Object.keys(oRes).sort()) {
+			newobj[k] = oRes[k]
+			display.push(" \""+ k +"\"")
+			display.push("<ul>"+ oRes[k].join(", ") +"</ul>")
+		}
+		let hash = mini(newobj)
+		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + s14 + hash + sc +"<br><br>{<br>"
+			+ display.join("<br>") + "}"
+	} catch(e) {
+		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + e.name +": " + e.message
+	}
+}
+
+function get_widget() {
+	try {
+		let aList = [
+			'button','checkbox','color','combobox','datetime','datetime-local','email','file','hidden','image','month',
+			'number','password','radio','range','reset','search','submit','tel','text','textarea','time','url','week',
+		]
+		let oRes = {}
+		aList.forEach(function(name) {
+			let el = dom["widget"+ name]
+			let key = getComputedStyle(el).getPropertyValue("font-family")
+				+" "+ getComputedStyle(el).getPropertyValue("font-size")
+			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+		})
+		let newobj = {}, display = []
+		for (const k of Object.keys(oRes).sort()) {
+			newobj[k] = oRes[k]
+			display.push(" \""+ k +"\"")
+			display.push("<ul>"+ oRes[k].join(", ") +"</ul>")
+		}
+		let hash = mini(newobj), notation = ""
+		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + s14 + hash + sc +"<br><br>{<br>"
+			+ display.join("<br>") + "}"
+	} catch(e) {
+		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + e.name +": " + e.message
+	}
+}
+
+get_widget()
+get_system()
+check_computed()
 
 </script>
 </body>
