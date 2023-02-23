@@ -383,7 +383,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 111
+		isVerMax = 112
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) return 112 // 1756175
 		if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
 		if ("object" === typeof ondeviceorientationabsolute) return 110 // 1689631
 		if (CSSKeyframesRule.prototype.hasOwnProperty("length")) return 109 // 1789776
