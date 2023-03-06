@@ -156,6 +156,11 @@ function get_navigator() {
 
 		// DNT
 		let dnt = "", dntLie = false
+		try {
+			let dntTest = navigator.doNotTrack
+			if (gRun) {log_debug("dnt", cleanFn(dntTest))}
+		} catch(e) {}
+		
 		if (check_navKey("doNotTrack")) {
 			try {
 				dnt = navigator.doNotTrack
