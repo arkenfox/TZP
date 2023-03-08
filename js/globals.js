@@ -144,6 +144,8 @@ let s0 = " <span class='",
 	isBrave = false,
 	isBraveMode = 0,
 	aBraveMode = ["unknown", "disabled", "standard", "strict"],
+	isCanvasGet = "",
+	isCanvasGetChannels = "",
 	isChannel = "",
 	isClientRect = 1, // first true method
 	aClientRect = [], // per method result
