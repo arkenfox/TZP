@@ -67,6 +67,18 @@ function check_canvas_to(data) {
 
 function outputCanvas() {
 	let t0 = getNow()
+	// temp non-gecko exit until we enforce gecko only
+	if (!isFF) {
+		let metrics = ["getImageData","isPointInPath","isPointInStroke","toBlob","toDataURL"]
+		let aExit = []
+		metrics.forEach(function(item){
+			aExit.push(item +":"+ zNA)
+			dom[item].innerHTML = zNA
+		})
+		log_section("canvas", t0, aExit)
+		return
+	}
+
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = "93bd94c5"
 	// FF95+: compression changes 1724331 / 1737038 
 	const oKnown = {
