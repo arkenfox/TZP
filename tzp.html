@@ -82,8 +82,10 @@
 			<input type="datetime-local" id="widget7">
 			<textarea id="widget8"></textarea>
 		</div>
-		<div><canvas id="kcanvas1" width="16" height="16"></canvas>
-			<canvas id="kcanvas2" width="16" height="16"></canvas>
+		<div>
+			<canvas id="kcanvasGet" width="16" height="8"></canvas>
+			<canvas id="kcanvasPath" width="16" height="8"></canvas>
+			<canvas id="kcanvasTo" width="16" height="8"></canvas>
 		</div>
 		<!-- hide tor items: !src = 0x0 but "offscreen" = image placeholder size -->
 		<div>
@@ -543,17 +545,21 @@
 			<div class="nav-down"><a href="#webgld">&#9660;</a></div>
 			<div class="nav-right"><a name="canvasd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">Additonal canvas tests [iframes, workers, offscreen]
-			can be found at <a target="blank" class="blue" href="https://canvasblocker.kkapsner.de/test/test.html">CanvasBlocker</a></span>
+		<tr><td colspan="2" class="intro"><span class="no_color">These tests are only checking for
+			protection, not entropy. Additional canvas tests [iframes, workers, offscreen] can be found at
+			<a target="blank" class="blue" href="https://canvasblocker.kkapsner.de/test/test.html">CanvasBlocker</a></span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</span></div>
 			<span class="c" id="canvashash"></span></td></tr>
-		<tr><td>toDataURL</td><td class="c mono toDataURL"></td></tr>
-		<tr><td>toBlob</td><td class="c mono toBlob"></td></tr>
-		<tr><td>getImageData</td><td class="c mono getImageData"></td></tr>
-		<tr><td>isPointInPath</td><td class="c mono isPointInPath"></td></tr>
-		<tr><td>isPointInStroke</td><td class="c mono isPointInStroke"></td></tr>
+		<tr><td><a class="blue" href="tests/canvasnoise.html" target="blank">[PoC]</a>
+			&nbsp <div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">random per run</span></div>
+			&nbsp getImageData</td><td class="c mono" id="getImageData"></td></tr>
+		<tr><td>isPointInPath</td><td class="c mono" id="isPointInPath"></td></tr>
+		<tr><td>isPointInStroke</td><td class="c mono" id="isPointInStroke"></td></tr>
+		<tr><td>toBlob</td><td class="c mono" id="toBlob"></td></tr>
+		<tr><td><a class="blue" href="tests/canvasrfp.html" target="blank">[PoC]</a>
+			&nbsp toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td colspan="2"><span class="no_color">canvas code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
