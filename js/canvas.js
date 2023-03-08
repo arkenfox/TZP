@@ -398,7 +398,7 @@ function outputCanvas() {
 			run2[0].forEach(function(item){
 				let value = item.displayValue
 				if (value !== "skip") {
-					let	note = "", rfpvalue = ""
+					let	note = "", stats = "", rfpvalue = ""
 					name = item.name
 					if (oRes[name][1] == value) {
 						// persistent
@@ -410,12 +410,11 @@ function outputCanvas() {
 						rfpvalue = note == rfp_green ? " | RFP" : ""
 						if (name == "getImageData") {
 							check_canvas_get(oData[name], dataDrawn, 2, pixelcount)
-							note += isCanvasGet
+							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
 						oFP[name] = zLIE + " | persistent" + rfpvalue
-						dom[name].innerHTML = newColor(value) + " [persistent]"+ note
-						//log_known(SECT9, name)
+						dom[name].innerHTML = newColor(value) + note +" [persistent]"+ stats
 						if (gRun) {gKnown.push("canvas:"+ name)}
 					} else {
 						// per execution
@@ -428,12 +427,11 @@ function outputCanvas() {
 						}
 						rfpvalue = note == rfp_green ? " | RFP" : ""
 						if (name == "getImageData") {
-							note += isCanvasGet
+							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
 						oFP[name] = zLIE + " | per execution" + rfpvalue
-						dom[name].innerHTML = newColor(value) +" [per execution]"+ note
-						//log_known(SECT9, name)
+						dom[name].innerHTML = newColor(value) + note +" [per execution]"+ stats
 						if (gRun) {gKnown.push("canvas:"+ name)}
 					}
 				}
