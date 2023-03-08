@@ -111,7 +111,7 @@ function outputCanvas() {
 								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof data)
 								data = zErr
 							}
-							log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC])
+							log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
 							return data
 						} catch(e) {
 							oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
@@ -202,7 +202,7 @@ function outputCanvas() {
 										oData[METRIC] = reader.result
 										if ("string" === typeof reader.result) {
 											let data = mini(reader.result)
-											log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC])
+											log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
 											resolve(data)
 										} else {
 											oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof reader.result)
@@ -233,7 +233,7 @@ function outputCanvas() {
 							oData[METRIC] = data
 							if ("string" === typeof data) {
 								data = mini(data)
-								log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC])
+								log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
 								return data
 							} else {
 								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof data)
@@ -449,4 +449,3 @@ function outputCanvas() {
 }
 
 countJS(SECT9)
-
