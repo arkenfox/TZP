@@ -8,7 +8,10 @@ let is95 = false
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
-function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
+function getNow() {if (canPerf) {return performance.now()}; return}
+function newColor(str, color = 1) {
+	return "<code class='"+ (color == 1 ? "lies" : "bypass") +"'>"+ str +"</code>"
+}
 
 function cleanFn(item, skipArray = false) {
 	// catch strings as strings, tidy undefined, empty strings
@@ -1111,7 +1114,6 @@ function log_section_hash(name) {
 
 function log_section(name, time1, data) {
 	let t0; if (canPerf) {t0 = performance.now(); time1 = Math.round(t0-time1).toString()}
-
 	// PERF
 	if (gRun && gCount == (gCountExpected - 1)) {
 		if (canPerf) {dom.perfall = " "+ (isPerf ? Math.round(performance.now() - gt0) : "xxx") +" ms"}
