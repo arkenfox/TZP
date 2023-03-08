@@ -544,6 +544,17 @@ function outputMisc() {
 	let foundLies = lieList.filter(x => proxyLies.includes(x))
 	let isMathLies = (foundLies.length > 0)
 
+	// record perf fuckery
+	try {
+		let control = runSL ? -1 : 0
+		if (runSE) {foo++}
+		if (Math.trunc(performance.now() - performance.now()) !== control) {
+			if (isTZPSmart && gRun) {gMethods.push("_global:performance.now:tampered")}
+		}
+	} catch(e) {
+		log_error("misc:perf_now", e.name, e.message)
+	}
+
 	Promise.all([
 		get_reporting_api(),
 		get_svg(),
