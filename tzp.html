@@ -618,7 +618,6 @@
 	</table>
 
 	<!--fonts-->
-	<!--fonts-->
 	<table id="tb12">
 		<col width="35%"><a name="fonts"></a><col width="65%">
 		<thead><tr><th colspan="2">
@@ -627,14 +626,11 @@
 			<div class="nav-down"><a href="#mediad">&#9660;</a></div>
 			<div class="nav-right"><a name="fontsd"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">The font enumeration tests are Firefox only and OS
-			based to get metrics on stable fonts per OS. The <code>font fallback</code> test is a slower method that
-			may produce different results. Additional font enumeration tests can be found at <a target="blank" class="blue"
-			href="https://abrahamjuliot.github.io/creepjs/tests/fonts.html">CreepJS</a></span>
-		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
-			<span class="c" id="fontshash"></span><span class="c" id="fontBtns"></span></td></tr>
+			<span class="c" id="fontshash"></span><span class="c" id="fntBtn"></span>
+			<span class="c no_color bold" id="fntString"></span>
+		</td></tr>
 		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
 		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -668,13 +664,11 @@
 		<tr><td>[base sizes] fonts <sup>2, 3</sup></td><td class="c mono" id="fontBase"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="fontsSystem"></td></tr>
 		<tr><td>[widget] fonts</td><td class="c mono" id="fontsWidget"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('outputFontsFB')">[ click here ]</span>
-			font fallback <sup>4</sup></td><td class="mono gc" id="fontFB"></td></tr>
 		<!--glyphs-->
 		<tr><td colspan="2" class="center">--- glyphs ---</td></tr>
-		<tr><td>offset <sup>5</sup></td><td class="c mono" id="ugoffset"></td></tr>
-		<tr><td>clientrect <sup>5</sup></td><td class="c mono" id="ugclientrect"></td></tr>
-		<tr><td>[measureText] width <sup>5</sup></td><td class="c mono" id="ugwidth"></td></tr>
+		<tr><td>offset <sup>4</sup></td><td class="c mono" id="ugoffset"></td></tr>
+		<tr><td>clientrect <sup>4</sup></td><td class="c mono" id="ugclientrect"></td></tr>
+		<tr><td>[measureText] width <sup>4</sup></td><td class="c mono" id="ugwidth"></td></tr>
 		<!--tm-->
 		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
 		<tr><td>actualBoundingBoxAscent</td><td class="c mono" id="ugactualBoundingBoxAscent"></td></tr>
@@ -696,10 +690,8 @@
 			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>2</sup>
 			<span class="no_color">, </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>3</sup>
-			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/arthuredelstein/tordemos">Arthur Edelstein</a> <sup>4</sup>
 			<span class="no_color"> and </span><a target="_blank" class="blue"
-				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>5</sup>
+				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>4</sup>
 		</td></tr>
 	</table>
 

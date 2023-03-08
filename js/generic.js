@@ -1450,7 +1450,6 @@ function outputUser(name) {
 	} else if (name == "goNW") { goNW()
 	} else if (name == "goNW_UA") { goNW_UA()
 	} else if (name == "outputAudio2") { outputAudio2()
-	} else if (name == "outputFontsFB") { outputFontsFB()
 	} else if (name == "get_storage_manager") { get_storage_manager("click")
 	} else if (name == "get_pointer_event") { get_pointer_event()
 	}
