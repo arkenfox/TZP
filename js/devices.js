@@ -759,12 +759,6 @@ function get_plugins_mimetypes() {
 					if (mValue == mime99[0] && pValue == plugin99[0]) {
 						if (pdf !== "true" || pdfLies) {pdfBypass = true; fpValue = "true"}
 					}
-					// two legit nones
-						// note: RFP does not cover this yet: so allow 2 none + true
-						// except we already bypass isRFP nones
-					if (!isRFP && mValue == "none" && pValue == "none") {
-						if (pdf !== "false" || pdfLies) {pdfBypass = true; fpValue = "false"}
-					}
 				} else if (isFF) {
 					// FF98 or lower
 					if (pdf !== "undefined") {pdfBypass = true; fpValue = "undefined"}
@@ -778,15 +772,10 @@ function get_plugins_mimetypes() {
 						if (pdfBypass) {gBypassed.push("devices:pdfViewerEnabled:" + fpValue)}
 					}
 				}
-//oDebug["pdf"] = pdf
-//oDebug["pdfLies"] = pdfLies
-//oDebug["isRFP"] = isRFP
 				if (isVer > 98) {pdfNote = pdf == "true" ? rfp_green : rfp_red}
 				dom.pdf.innerHTML = pdf + pdfNote
 				return fpValue
 			}
-//let oDebug = {}
-
 			// set some PDF vars first
 			let pdf, pdfLies = false
 			try {
@@ -1109,9 +1098,6 @@ function get_touch() {
 
 			// ToDo: touch LIE/BYPASS
 			//let touchReal = ""
-			// if !isRFP then it must be 3xtrue or 3xfalse
-				// ^ we use MTP but only if that wasn't a lie and isn't blocked
-
 			// output
 			let str = touchRes.join(" | ")
 			dom.touchE.innerHTML = str

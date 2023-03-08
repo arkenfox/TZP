@@ -158,12 +158,11 @@ let s0 = " <span class='",
 	isLogo = zB0, // logo dimensions: assume blocked
 	isMark = "", // watermark dimensions
 	isOS = "",
-    	isOSError,
+	isOSError,
 	isPerf = true,
 	canPerf = false,
 	isResource = "",
 	isResourceMetric = "",
-	isRFP = false,
 	isSecure = false,
 	isTB = false,
 	isTBChannel = "",
@@ -197,8 +196,6 @@ let logChkList = false,
 	runSU = false, // ua (or use CB)
 // block
 	runPS = false, // block css pseudo: return x
-	runRF = false, // block isRFP = true
-	runSP = false, // performance.now()
 // cycle simulations
 	runCLR = false, // done: color
 	runDEP = false, // done: color/pixel depth

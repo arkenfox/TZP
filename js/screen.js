@@ -776,7 +776,7 @@ function get_scr_window(runtype) {
 				if (i < 8) {aMeasures.push(x)} else {aPos.push(x)}
 			} catch (e) {
 				log_error("screen: "+ aList[i], e.name, e.message)
-				if (i < 8) {aMeasures.push(zB0)} else {aPos.push(zB0)}
+				if (i < 8) {aMeasures.push(zErr)} else {aPos.push(zErr)}
 			}
 		}
 		if (runSL) {aPos = ["0",0,zB0,"0",0,"0",100,zB0]}
@@ -789,93 +789,42 @@ function get_scr_window(runtype) {
 		for (let i=0; i < aMeasures.length; i++) {
 			if (aMeasures[i] !== zB0) {aMeasures[i] = (typeof aMeasures[i] == "number" ? aMeasures[i] : "NaN")}
 		}
+
 		// screen positions
-		let rfpValue = "0, 0, 0, 0"
+		let rfpvalue = "0, 0, 0, 0"
 		let v0 = aPos[0], v1 = aPos[1], v2 = aPos[2], v3 = aPos[3]
 		let display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-		let fpValue = display, posNote = "", isPosLies = false
-		if (isFF) {
-			posNote = display == rfpValue ? rfp_green : rfp_red
-			// RFP bypass but !== resize (does not recheck isRFP)
-			if (isRFP && runtype !== "resize") {
-				if (display !== rfpValue) {
-				// color each one
-					if (v0 !== 0) {v0 = soB + v0 + scC}
-					if (v1 !== 0) {v1 = soB + v1 + scC}
-					if (v2 !== 0) {v2 = soB + v2+ scC}
-					if (v3 !== 0) {v3 = soB + v3 + scC}
-					display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-					if (gRun) {
-						gKnown.push("screen:screen positions")
-						gBypassed.push("screen:screen positions:"+ rfpValue)
-					}
-					fpValue = rfpValue
-				}
-			} else {
-				// left + top are always zero, availLeft + availTop depends on docker/taskbar pos
-				// note: not worth bypassing the first two if !== 0
-				if (v0 !== 0) {v0 = soL + v0 + scC; isPosLies = true}
-				if (v1 !== 0) {v1 = soL + v1 + scC; isPosLies = true}
-				if (v2 == "NaN") {v2 = soL + v2 + scC; isPosLies = true}
-				if (v3 == "NaN") {v3 = soL + v3 + scC; isPosLies = true}
+		let fpvalue = display, posNote = "", isPosLies = false
+		if (fpvalue.includes(zErr)) {
+			fpvalue = zErr
+		} else if (isTZPSmart) {
+			posNote = display == rfpvalue ? rfp_green : rfp_red
+			// left + top are always zero, availLeft + availTop depends on docker/taskbar pos
+			if (typeof v0 == "number" && v0 !== 0) {v0 = newColor(v0); isPosLies = true}
+			if (typeof v1 == "number" && v1 !== 0) {v1 = newColor(v1); isPosLies = true}
+			if (isPosLies) {
+				fpvalue = zLIE
 				display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-				if (gRun && isPosLies) {
-					gKnown.push("screen:screen positions")
-				}
-				// simplify FP value
-					// but record all four values as it is (more) stable (than window) and adds entropy
-				if (isPosLies) {fpValue = zLIE
-				} else if (fpValue.includes(zB0)) {fpValue = zB0
-				}
+				gKnown.push("screen:screen positions")
 			}
 		}
 		dom.posS.innerHTML = display + posNote
-		res.push("screen_positions:"+ fpValue)
+		res.push("screen_positions:"+ fpvalue)
 
 		// window positions
 		let v4 = aPos[4], v5 = aPos[5], v6 = aPos[6], v7 = aPos[7]
 		display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-		fpValue = display
-		posNote = ""
-		if (isFF) {
-			posNote = display == rfpValue ? rfp_green : rfp_red
-			// RFP bypass but !== resize (does not recheck isRFP)
-			if (isRFP && runtype !== "resize") {
-				if (display !== rfpValue) {
-				// color each one
-					if (v4 !== 0) {v4 = soB + v4 + scC}
-					if (v5 !== 0) {v5 = soB + v5 + scC}
-					if (v6 !== 0) {v6 = soB + v6 + scC}
-					if (v7 !== 0) {v7 = soB + v7 + scC}
-					display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-					if (gRun) {
-						gKnown.push("screen:window positions")
-						gBypassed.push("screen:window positions:"+ rfpValue)
-					}
-					fpValue = rfpValue
-				}
-			} else {
-				// fullscreen = all zeroes except the last one
-				// maximized = negatives
-				// we can't bypass but we can mark NaNs as a lie
-				isPosLies = false
-				if (v4 == "NaN") {v4 = soL + v4 + scC; isPosLies = true}
-				if (v5 == "NaN") {v5 = soL + v5 + scC; isPosLies = true}
-				if (v6 == "NaN") {v6 = soL + v6 + scC; isPosLies = true}
-				if (v7 == "NaN") {v7 = soL + v7 + scC; isPosLies = true}
-				display = v4 +", "+ v5 +", "+ v6 +", "+ v7
-				if (gRun && isPosLies) {
-					gKnown.push("screen:window positions")
-				}
-				// simplify FP value
-				if (isPosLies) {fpValue = zLIE
-				} else if (fpValue.includes(zB0)) {fpValue = zB0
-				} else if (fpValue !== "0, 0, 0, 0") {fpValue = "!zeros" // not super stable
-				}
-			}
+		fpvalue = display, posNote = ""
+		if (fpvalue.includes(zErr)) {
+			fpvalue = zErr
+		} else if (isTZPSmart) {
+			posNote = display == rfpvalue ? rfp_green : rfp_red
+			// fullscreen = all zeroes except the last one / maximized = negatives
+			// we already catch errors and NaNs
+			if (fpvalue !== rfpvalue) {fpvalue = "!zeros"} // not super stable
 		}
 		dom.posW.innerHTML = display + posNote
-		res.push("window_positions:"+ fpValue)
+		res.push("window_positions:"+ fpvalue)
 
 		let w1 = aMeasures[0], h1 = aMeasures[1],
 			w2 = aMeasures[2], h2 = aMeasures[3],
@@ -1157,299 +1106,6 @@ function get_scr_window_mm(runtype) {
 }
 
 /* UA */
-
-function get_ua_doc() {
-	return new Promise(resolve => {
-		let res = [],
-			str = "",
-			go = false,
-			goUA = false, // treat userAgent separatelt
-			lies = 0,
-			pre = "",
-			spoof = false,
-			match = false
-		if (isFF) {
-			go = true
-			if (isFork === undefined) {goUA = true} // we should ignore dealing with any 78+ forks
-			if (isRFP) {goUA = true} // unless they are using RFP
-		}
-		// arrows
-		function addArrow(property, state) {
-			let title = property
-			if (state) {
-				lies++
-				title += sb +"&#9654"+ sc
-			}
-			document.getElementById("l"+ property).innerHTML = title
-		}
-
-		function output(property, str) {
-			str = cleanFn(str)
-			res.push(property +":"+ str)
-			document.getElementById("n"+ property).innerHTML = "~"+str+"~"
-			return str
-		}
-
-		function get_property(property, good) {
-			// clear arrow
-			addArrow(property, false)
-			// treat blocked as lies
-			str = ""
-			try {str = navigator[property]} catch(e) {str = zB0}
-			// sim
-			if (go && runSU) {
-				if (property == "appCodeName") {str = "MoZilla"} // case
-				if (property == "appName") {str = " Netscape"} // leading space
-				if (property == "product") {str = "Gecko "} // trailing space
-				if (property == "buildID") {str = ""} // empty string: unexpected
-				if (property == "productSub") {str = undefined} // undefined
-				if (property == "vendor") {str = " "} // single space
-				if (property == "vendorSub") {str = zUQ} // undefined string
-				// these four are OS dependent
-				if (property == "appVersion") {str = "5.0 (windows)"}
-				if (property == "platform") {str = "win32"}
-				if (property == "oscpu") {str = "Windows NT 10.1; win64; x64"}
-				// android desktop mode
-				//if (property == "appVersion") {str = "5.0 (Android 10)"}
-				//if (property == "platform") {str = "Linux aarch64"}
-				//if (property == "oscpu") {str = "Linux aarch64"}
-			}
-			if (goUA && runSU) {
-				if (property == "userAgent") {str = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"}
-				//if (property == "userAgent") {str = "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"} // desktop
-			}
-
-			str = output(property, str)
-			if (good !== undefined) {
-				// BS
-				let arrow = ""
-				if (go == true && str !== good) {arrow = sb +"&#9654"+ sc; lies++}
-				document.getElementById("l"+ property).innerHTML = property + arrow
-			} else {
-				return str
-			}
-		}
-
-		// Notes
-		// 1693295 win capped at 10.0
-		// 1679929 mac capped at 10.15
-
-		function check_basics(str, property) {
-			// clear arrow
-			addArrow(property, false)
-			// for dynamic returns
-			let bs = false
-			if (str == zU) {bs = true
-			} else if (str == zUQ) {bs = true
-			} else if (str == zB0) {bs = true
-			} else if (str == "empty string") {bs = true
-			} else if (str.substring(0, 1) == " ") {bs = true
-			} else if (str.substring(str.length-1, str.length) == " ") {bs = true
-			} else if (str.indexOf("  ") !== -1) {bs = true
-			} else if (property == "userAgent") {
-				// STUFF
-				let v = isVer +".0",
-					v2 = (isVer + 1) +".0",
-					sub = "20100101",
-					sub2 = sub,
-					debug = []
-				// SAVE TME
-				if (str.indexOf(".0) Gecko/") == -1) {bs = true
-				} else if (str.indexOf(" Firefox/") == -1) {bs = true
-				} else {
-					let strA = str.toLowerCase()
-					if (strA.indexOf("webkit") !== -1) {bs = true}
-				}
-				if (isOS !== "" && bs == false && isVer < 109) { // FF109+: rv is frozen at 109 all platforms
-					// isVerPlus: allow the next version
-					let controlA = "", controlB = "", testA = str, testB = str
-					if (isRFP && isOS == "android" || isRFP && isVer < 102) {
-					// RFP ON
-						v = "78.0"
-						if (isVer > 90) {v = "91.0"}
-						if (isVer > 101) {v = 102 +".0"}
-						if (isVer > nxtESR - 1) {v = nxtESR +".0"}
-						v2 = v
-						// only allow v2 as next RFP number IF...
-						if (isVerPlus) {
-							if (isVer == 90) {v2 = "91.0"}
-							if (isVer == 101) {v2 = 102 +".0"}
-							if (isVer == nxtESR - 1) {v2 = nxtESR +".0"}
-						}
-						/* resistfingerprinting/test/browser/browser_navigator.js */
-						// NOTE: Android desktop mode uses linux userAgent and the use of
-						// Gecko/20100101 Firefox/XX.0" = bs detected = technically correct
-						// ToDo: we could ignore that in nonRFP and expose RFP bug (if it adds entropy and is a bug)
-						if (isOS == "windows") {
-							controlA = "Windows NT 10.0; Win64; x64; rv:"+ v +") Gecko/20100101"
-							controlB = "Windows NT 10.0; Win64; x64; rv:"+ v2 +") Gecko/20100101"
-						} else if (isOS == "linux") {
-							controlA = "X11; Linux x86_64; rv:"+ v +") Gecko/20100101"
-							controlB = "X11; Linux x86_64; rv:"+ v2 +") Gecko/20100101"
-						} else if (isOS == "mac") {
-							controlA = "Macintosh; Intel Mac OS X 10.15 rv:"+ v +") Gecko/20100101"
-							controlB = "Macintosh; Intel Mac OS X 10.15 rv:"+ v2 +") Gecko/20100101"
-						} else if (isOS == "android") {
-							if (isVer > 90) {
-								// FF91+: 1711179
-								controlA = "Android 10; Mobile; rv:"+ v +") Gecko/"+ v
-								controlB = "Android 10; Mobile; rv:"+ v2 +") Gecko/"+ v2
-							} else if (isVer < 88) {
-								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/20100101"
-								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/20100101"
-							} else {
-								controlA = "Android 9; Mobile; rv:"+ v +") Gecko/"+ v
-								controlB = "Android 9; Mobile; rv:"+ v2 +") Gecko/"+ v2
-							}
-						}
-						controlA = "Mozilla/5.0 ("+ controlA +" Firefox/"+ v
-						controlB = "Mozilla/5.0 ("+ controlB +" Firefox/"+ v2
-					} else {
-					// RFP OFF
-						// desktop: ends in "; rv:XX.0) Gecko/20100101 Firefox/XX.0"
-						// android: ends in "; rv:XX.0) Gecko/XX.0 Firefox/XX.0"
-						if (!isVerPlus) {v2 = v}
-						if (isOS == "android") {sub = v; sub2 = v2}
-						controlA = "; rv:"+ v +") Gecko/"+ sub +" Firefox/"+ v
-						controlB = "; rv:"+ v2 +") Gecko/"+ sub2 +" Firefox/"+ v2
-						testA = str.substring(str.length - controlA.length)
-						testB = str.substring(str.length - controlB.length)
-					}
-					// as long as one matches
-					if ((testA == controlA) + (testB == controlB) == 0) {bs = true}
-					// trap when RFP fails to get the nextESR
-					if (isOS == "android") {
-						if (bs && isRFP && !proxyLies.includes("Navigator.userAgent")) {
-							bs = false
-							dom.luserAgent.innerHTML = sb +"[NEXT RFP ESR VER FAIL] "+ sc + "userAgent"
-						}
-					}
-				}
-			}
-			return bs
-		}
-
-		// EASY (static values)
-		get_property("appCodeName", "Mozilla")
-		get_property("appName", "Netscape")
-		get_property("product", "Gecko")
-		get_property("buildID", "\"20181001000000\"")
-		get_property("productSub", "\"20100101\"")
-		get_property("vendor", "empty string")
-		get_property("vendorSub", "empty string")
-
-		// MORE COMPLEX: dynamic, per OS
-		// appVersion
-		str = get_property("appVersion")
-		if (go) {
-			spoof = check_basics(str, "appVersion")
-			if (!spoof) {
-				// dig deeper
-				if (isOS == "windows") {spoof = (str !== "5.0 (Windows)")}
-				if (isOS == "mac") {spoof = (str !== "5.0 (Macintosh)")}
-				if (isOS == "linux") {spoof = (str !== "5.0 (X11)")}
-				if (isOS == "android") {
-					// tighten this up to be more specific?
-					if (str.substring(0,13) == "5.0 (Android ") {match = true}
-					spoof = !match
-				}
-			}
-			if (spoof) {addArrow("appVersion", true)}
-		}
-		// platform
-		// ToDo: specific linux distro strings?
-		// ToDo: android: `Linux ${OSArch}` <-- any others
-		str = get_property("platform")
-		if (go) {
-			spoof = check_basics(str, "platform")
-			if (!spoof) {
-				// dig deeper
-				match = false
-				if (isOS == "windows") {spoof = (str !== "Win32")}
-				if (isOS == "mac") {spoof = (str !== "MacIntel")}
-				if (isOS == "linux") {
-					if (str == "Linux i686") {match = true}
-					else if (str == "Linux i686 on x86_64") {match = true}
-					else if (str == "Linux x86_64") {match = true}
-					spoof = !match
-				}
-				if (isOS == "android") {
-					if (str.substring(0,10) == "Linux armv") {match = true}
-					if (str.substring(0,11) == "Linux aarch") {match = true}
-					spoof = !match
-				}
-			}
-			if (spoof) {addArrow("platform", true)}
-		}
-
-		// oscpu
-		str = get_property("oscpu")
-		if (go) {
-			spoof = check_basics(str, "oscpu")
-			if (!spoof) {
-				// dig deeper
-				if (isOS == "windows") {
-					pre = "Windows NT "
-					// app64 + win64
-					if (str == pre +"10.0; Win64; x64") {match = true}
-					else if (str == pre +"6.3; Win64; x64") {match = true}
-					else if (str == pre +"6.2; Win64; x64") {match = true}
-					else if (str == pre +"6.1; Win64; x64") {match = true}
-					// app32 + win64
-					else if (str == pre +"10.0; WOW64") {match = true}
-					else if (str == pre +"6.3; WOW64") {match = true}
-					else if (str == pre +"6.2; WOW64") {match = true}
-					else if (str == pre +"6.1; WOW64") {match = true}
-					// app32 + win32
-					else if (str == pre +"10.0") {match = true}
-					else if (str == pre +"6.3") {match = true}
-					else if (str == pre +"6.2") {match = true}
-					else if (str == pre +"6.1") {match = true}
-					spoof = !match
-				}
-				if (isOS == "linux") {
-					// ToDo: specific linux distro strings?
-					pre = "Linux "
-					if (str == pre +"i686") {match = true}
-					else if (str == pre +"i686 on x86_64") {match = true}
-					else if (str == pre +"x86_64") {match = true}
-					spoof = !match
-				}
-				if (isOS == "mac") {
-					if (str.substring(0,14) == "Intel Mac OS X") {match = true}
-					spoof = !match
-				}
-				if (isOS == "android") {
-					pre = "Linux "
-					if (str.substring(0,10) == pre +"armv") {match = true}
-					if (str.substring(0,11) == pre +"aarch") {match = true}
-					spoof = !match
-				}
-			}
-			if (spoof) {addArrow("oscpu", true)}
-		}
-		// userAgent
-		str = get_property("userAgent")
-		if (goUA) {
-			spoof = check_basics(str, "userAgent")
-			if (!spoof) {
-				// DONE: RFP check, endstring, version
-				// ToDo: os, architecture, syntax/formula
-			}
-			if (spoof) {addArrow("userAgent", true)}
-		}
-		// lies
-		showhide("UA",(lies ? "table-row": "none"))
-		if (lies) {
-			lies += " pinocchio"+ (lies > 1 ? "s": "")
-			dom.uaLies.innerHTML = sb + lies + sc +" [based on feature detection]" + (runSU ? zSIM : "")
-			uaBS = true
-			if (gRun) {gKnown.push("useragent:navigator properties")}
-		}
-		// return
-		return resolve(res)
-	})
-}
 
 function get_ua_iframes(log = false) {
 	// runs post FP
@@ -1937,100 +1593,144 @@ function goNW_UA() {
 
 /* OUTPUT */
 
-function outputUA() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	// reset
-	uaBS = false
-	// lies
-	function get_pLies() {
-		if (proxyLies.includes("Navigator.userAgent")) {uaBS = true
-		} else if (proxyLies.includes("Navigator.appVersion")) {uaBS = true
-		} else if (proxyLies.includes("Navigator.platform")) {uaBS = true
-		} else if (proxyLies.includes("Navigator.oscpu")) {uaBS = true
-		} else if (!isFF) {
-			if (proxyLies.includes("Navigator.productSub")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.buildID")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.vendor")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.vendorSub")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.appCodeName")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.appName")) {uaBS = true
-			} else if (proxyLies.includes("Navigator.product")) {uaBS = true}
+function outputUA(os = isOS) {
+	let t0 = getNow()
+
+	let aReported = [], aFP = [], oComplex = {}
+
+	function outputStatic(property, reported, expected, isErr) {
+		reported = cleanFn(reported)
+		let display = reported
+		reported = isErr ? zErr : reported
+		let fpvalue = reported
+		if (isTZPSmart && reported !== expected) {
+			// always bypass errors, only bypass non-errors if proxyLies (else could be legit)
+			if (isErr || sData.proxy.includes("Navigator."+ property)) {
+				fpvalue = expected
+				display = newColor(display, 2)
+				if (gRun) {
+					gKnown.push("ua:"+ property)
+					gBypassed.push("ua:" + property +":"+ expected)
+				}
+			}
+		}
+		aReported.push(property +":"+ reported) // for uaDoc
+		aFP.push(property +":"+ fpvalue)
+		dom[property].innerHTML = "~"+display+"~"
+	}
+	function get_property(property, expected) {
+		let isErr = false, str = ""
+		try {
+			str = navigator[property]
+			if (runSE) {foo++}
+		} catch(e) {
+			isErr = true
+			str = log_error("ua", property, e.name, e.message)
+		}
+		if (expected !== undefined) {
+			outputStatic(property, str, expected, isErr)
+		} else {
+			oComplex[property] = [str, isErr]
 		}
 	}
-	Promise.all([
-		get_ua_doc(), // sets uaBS
-	]).then(function(results){
-		if (uaBS == false) {get_pLies()} // sets uaBS
-		// section
-		const ctrl = results[0].sort()
-		const ctrlhash = sha1(ctrl.join(), "ua")
-		let section = ctrl, display = ctrlhash
+	// STATIC
+	get_property("appCodeName", "Mozilla")
+	get_property("appName", "Netscape")
+	get_property("product", "Gecko")
+	get_property("buildID", "\"20181001000000\"")
+	get_property("productSub", "\"20100101\"")
+	get_property("vendor", "empty string")
+	get_property("vendorSub", "empty string")
+	// MORE COMPLEX
+	get_property("appVersion")
+	get_property("platform")
+	get_property("oscpu")
+	get_property("userAgent")
 
-		if (uaBS) {
-			section = ["ua:"+ zLIE]
-			display = soL + ctrlhash + scC
+	// RFP notation: nsRFPService.h
+	let oRFP = {
+		"android": {
+			"appVersion": "5.0 (Android 10)",
+			"oscpu": "Linux aarch64",
+			"platform": "Linux aarch64",
+			"ua_os": "Android 10; Mobile",
+		},
+		"linux": {
+			"appVersion": "5.0 (X11)",
+			"oscpu": "Linux x86_64",
+			"platform": "Linux x86_64",
+			"ua_os": "X11; Linux x86_64",
+		},
+		"mac": {
+			"appVersion": "5.0 (Macintosh)",
+			"oscpu": "Intel Mac OS X 10.15",
+			"platform": "MacIntel",
+			"ua_os": "Macintosh; Intel Mac OS X 10.15",
+		},
+		"windows": {
+			"appVersion": "5.0 (Windows)",
+			"platform": "Win32",
+			"oscpu": "Windows NT 10.0; Win64; x64",
+			"ua_os": "Windows NT 10.0; Win64; x64",
+		},
+	}
+	if (isTZPSmart) {
+		let uaVer = isVer, rvVer = isVer
+		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:", uaNext = uaRFP
+		if (os == "android") {
+			// android = ESR
+			uaVer = isVer < 115 ? 102 : 115
+			uaRFP += uaVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
 		} else {
-			// no lies: check bypasses
-			let sRep = section[8], sReal = ""
-			let n = sRep.lastIndexOf("/"),
-				vReported = sRep.slice(n+1, sRep.length)
-			let go = false
-			// so this only applies to ESR numbering
-			if (isRFP) {
-				if (isFork === undefined) {go = true}
-				if (isRFP && isOS == "android" || isRFP && isVer < 102) {
-					go = true
-				} else {
-					go = false
-				}
-				// skip open-ended versions if next version is ESR
-				// assuming isVer keeps up to date: e.g. 101+ can be 101 or 102
-				if (isVerPlus) {
-					if (isVer == (nxtESR - 1) && (vReported * 1) == nxtESR) {go = false}
-				}
-			}
-			// RFP: version
-			if (go) {
-				let vReal = isVer.toString() + ".0"
-				sReal = sRep.replace(new RegExp(vReported, 'g'), vReal)
-				if (sRep !== sReal) {
-					// notate open-ended
-					if (isVerPlus) {
-						sReal = sReal.replace("rv:"+ vReal, "rv:"+ vReal + "+")
-						sReal = sReal.replace("Firefox/"+ vReal, "Firefox/"+ vReal + "+")
-						sReal = sReal.replace("Gecko/"+ vReal, "Gecko/"+ vReal + "+") // android
-					}
-					section[8] = sReal
-					sReal = sReal.slice(10)
-					sRep = sRep.replace(new RegExp(vReported, 'g'), soB + vReported + scC)
-					dom.nuserAgent.innerHTML = "~"+ sRep.slice(10) +"~"
-					if (gRun) {
-						gKnown.push("ua:userAgent:version")
-						gBypassed.push("ua:userAgent:version:"+ sReal)
-					}
+			// desktop currently ignores rv freeze
+			uaRFP += rvVer +".0) Gecko/20100101 Firefox/"+ uaVer +".0"
+			uaNext += (rvVer +1) +".0) Gecko/20100101 Firefox/"+ (uaVer +1) +".0"
+			oRFP[os]["userAgentNext"] = uaNext
+		}
+		oRFP[os]["userAgent"] = uaRFP
+	}
+
+	for (const k of Object.keys(oComplex)) {
+		let notation = ""
+		//if (runSL && isTZPSmart) {sData.proxy.push("Navigator."+ k)}
+		let reported = oComplex[k][0],
+			isErr = oComplex[k][1]
+		reported = cleanFn(reported)
+		let display = "~"+ reported +"~"
+		let fpvalue = reported
+
+		if (isErr) {
+			display = "~"+ reported +"~"
+			fpvalue = zErr
+			reported = zErr
+		} else if (isTZPSmart) {
+			if (proxyLies.includes("Navigator."+ k)) {
+				fpvalue = zLIE
+				display = "~"+ newColor(reported) +"~"
+				if (gRun) {
+					gKnown.push("ua:"+ k)
 				}
 			}
-			// isBrave spaces
-			if (isBraveMode > 1) {
-				for (let i=0; i < section.length; i++) {
-					let item = section[i],
-						name = item.split(":")[0]
-					sRep = item.substring(name.length+1, item.length)
-					sReal = sRep.trim().replace(/\s+/g, " ")
-					if (sRep !== sReal) {
-						section[i] = name +":"+ sReal
-						document.getElementById("n"+ name).innerHTML = "~"+ sRep + "~ " + soB +"spaces"+ scC
-						if (gRun) {
-							gKnown.push("ua:"+ name)
-							gBypassed.push("ua:"+ name +":"+ sReal)
-						}
-					}
+			let rfpvalue = "~"+ oRFP[os][k] +"~"
+			if (rfpvalue !== "~undefined~") {
+				let isMatch = rfpvalue === display
+				if (k == "userAgent" && !isMatch && isVerPlus) {
+					isMatch = "~"+ oRFP[os][k +"Next"] +"~" == display
+				}
+				// ignore userAgent android open-ended version
+				if (k !== "userAgent" || os !== "android" || os == "android" && !isVerPlus) {
+					notation = isMatch ? rfp_green : rfp_red
 				}
 			}
 		}
-		dom.uaDoc.innerHTML = display
-		log_section("ua", t0, section)
-	})
+		aReported.push(k +":"+ reported) // for uaDoc
+		aFP.push(k +":"+ fpvalue)
+		dom[k].innerHTML = display + notation
+	}
+	aReported.sort()
+	aFP.sort()
+	dom.uaDoc = sha1(aReported.join())
+	log_section("ua", t0, aFP)
 }
 
 function outputFD() {
