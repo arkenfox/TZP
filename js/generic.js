@@ -184,15 +184,22 @@ const get_aSystemFont = () => new Promise(resolve => {
 	}
 })
 
-function get_canPerf(runtype) {
-	// check performance.now
+function get_canPerf() {
+	// canPerf
 	try {
-		if (runSP) {abc = def}
 		let testPerf = performance.now()
 		canPerf = true
 	} catch(e) {
 		canPerf = false
-		if (runtype == "log") {log_error("_prereq: perf.now", e.name, e.message)}
+	}
+	// isPerf
+	isPerf = true
+	if (isTZPSmart) {
+		try {
+			if (Math.trunc(performance.now() - performance.now()) !== 0) {isPerf = false}
+		} catch(e) {
+			isPerf = false
+		}
 	}
 }
 
@@ -499,59 +506,6 @@ const get_isOS = () => new Promise(resolve => {
 	} catch(e) {
 		isOSError = log_error("_global: isOS", e.name, e.message, 60, true)
 		log_alert("global: isOS: unknown", true)
-		return resolve()
-	}
-})
-
-const get_isRFP = () => new Promise(resolve => {
-	// FF56+: TZP main test no need to check this: see isTZPBlockMinVer
-	isRFP = false
-	isPerf = true
-	let t0; if (canPerf) {t0 = performance.now()}
-	let realPerf = true
-	if (runRF) {isPerf = false}
-	try {
-		if (Math.trunc(performance.now() - performance.now()) !== 0) {
-			isPerf = false
-			realPerf = false
-			if (gRun) {gMethods.push("_global:performance.now:tampered")}
-		}
-	} catch(e) {
-		isPerf = false
-		realPerf = false // ??
-	}
-	if (runRF) {isPerf = realPerf}
-	if (!isFF) {return resolve()}
-	try {
-		performance.mark("a")
-		let r = performance.getEntriesByName("a","mark").length
-			+ performance.getEntries().length
-			+ performance.getEntries({name:"a",entryType:"mark"}).length
-			+ performance.getEntriesByName("a","mark").length
-			performance.clearMarks()
-		isRFP = (r == 0)
-		// extra checks
-		if (!isPerf) {isRFP = false}
-		// extra checks: RFP toggled off-to-on requires page reload
-		// don't block pseudo
-		if (gLoad) {
-			let chk1 = getElementProp("#cssPRM","content",":after", true)
-			if (chk1 !== "no-preference") {isRFP = false}
-			let chk2 = getElementProp("#cssPCS","content",":after", true)
-			if (chk2 !== "light") {isRFP = false}
-			if (isVer > 77) {
-				let chk3 = zD
-				try {if (window.PerformanceNavigationTiming) {chk3 = zE}} catch(e) {} // FF78+
-				if (chk3 !== zD) {isRFP = false}
-			}
-		}
-		if (gRun) {log_perf("isRFP [prereq]",t0,gt0,isRFP)}
-		return resolve()
-	} catch(e) {
-		log_alert("_prereq: isRFP: "+ e.name +" : "+ e.message)
-		if (gRun) {
-			log_error("_global: isRFP", e.name, e.message)
-		}
 		return resolve()
 	}
 })
@@ -1436,8 +1390,8 @@ function outputPostSection(id) {
 		get_storage_manager()
 	}
 	if (id == "all" || id == "misc") {
-		get_perf2(isLog) // perf2 redundant: we have isRFP
-		get_recursion(isLog) // no entropy for isFF, also slows perf
+		get_perf2(isLog)
+		get_recursion(isLog)
 	}
 }
 
@@ -1598,11 +1552,10 @@ function outputSection(id, cls) {
 		setTimeout(function() {
 			if (canPerf) {gt0 = performance.now()}
 			Promise.all([
-				get_canPerf("log"),
+				get_canPerf(),
 				outputPrototypeLies(),
 				get_navKeys(),
 				get_isArch(),
-				get_isRFP(),
 				get_isClientRect(),
 			]).then(function(results){
 				output(location.toString())
