@@ -315,61 +315,48 @@ function get_recursion(log = false) {
 }
 
 function get_perf1() {
-	// FF111+: 811567: test the timing
-	if (isVer > 110) {
-		dom.perf1.innerHTML = "FF111+ TBA"
-		return "perf_mark:TBA"
-	}
-
-	// FF110 or lower: testing the API mot the timing
-	let testE = "", testM = "", display = "", valueE = "", valueM = "", notation = ""
+	let entries = "", valueEntries = "", ctrlEntries = "0, 0, 0, 0"
+	let measure = "", notation = ""
 	try {
 		performance.mark("a")
-		if (performance.mark === undefined) {
-			display = zU + " | "+ zNA
-			dom.perf1 = display
-			return "perf_mark:"+ display
-		} else {
-				performance.mark("b")
-				try {
-					testE = performance.getEntriesByName("b","mark").length
-						+", "+ performance.getEntries().length
-						+", "+ performance.getEntries({name:"b", entryType:"mark"}).length
-						+", "+ performance.getEntriesByName("b","mark").length
-				} catch(e) {
-					log_error("misc: perf getEntries", e.name, e.message)
-					testE = e.name === undefined? zErr : e.name
-					valueE = zErr
-				}
-				try {
-					performance.measure("w", "a", "b")
-					performance.measure("x", "a")
-					performance.measure("y", undefined, "b")
-					performance.measure("z")
-					testM = performance.getEntriesByType("measure").length
-					valueM = testM
-				} catch(e) {
-					log_error("misc: perf measure", e.name, e.message)
-					testM = e.name === undefined? zErr : e.name
-					valueM = zErr
-				}
-				performance.clearMarks()
-				performance.clearMeasures()
+		performance.mark("b")
+		// entries
+		try {
+			entries = performance.getEntriesByName("b","mark").length
+				+", "+ performance.getEntries().length
+				+", "+ performance.getEntries({name:"b", entryType:"mark"}).length
+				+", "+ performance.getEntriesByName("b","mark").length
+			valueEntries = entries !== ctrlEntries ? "not zero" : entries // make non-zero a stable FP
+		} catch(e) {
+			log_error("misc: perf_getEntries", e.name, e.message)
+			entries = zErr
+			valueEntries = zErr
 		}
+		// measure
+		try {
+			performance.measure("w", undefined, "b")
+			performance.measure("x")
+			performance.measure("y", "a", "b")
+			performance.measure("z", "a")
+			measure = performance.getEntriesByType("measure").length
+		} catch(e) {
+			log_error("misc: perf_measure", e.name, e.message)
+			measure = zErr
+		}
+		// cleanup
+		performance.clearMarks()
+		performance.clearMeasures()
+		// FF111+ 811567
+		if (isTZPSmart && isVer < 111) {
+			notation = entries == ctrlEntries && measure == 0 ? rfp_green : rfp_red
+		}
+		dom.perf1.innerHTML = entries +" | "+ measure + notation
+		return "perf_mark:"+ valueEntries +" | "+ measure
 	} catch(e) {
-		display = log_error("misc: perf mark", e.name, e.message) +" | "+ zNA
-		dom.perf1 = display
-		return "perf_mark:"+ zErr
+		log_error("misc: perf_mark", e.name, e.message)
+		dom.perf1.innerHTML = zErr +" | "+ zNA
+		return "perf_mark:"+ zErr +" | "+ zNA
 	}
-	// simplify perf as binary
-	let ctrlE = "0, 0, 0, 0"
-	if (valueE !== zErr) {valueE = testE == ctrlE ? "zero" : "not zero"}
-	// notation: FF111+: 1811567: we should have entries
-	if (isFF && isTZPSmart) {
-		notation = testE == ctrlE && testM == 0 ? rfp_green : rfp_red
-	}
-	dom.perf1.innerHTML = testE +" | "+ testM + notation
-	return "perf_mark:"+ valueE +" | "+ valueM
 }
 
 function get_perf2(log = false) {
