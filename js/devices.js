@@ -481,7 +481,7 @@ function get_media_devices() {
 						hash = mini(aPlain.join(";"), "devices media devices")
 						finish(aPlain.join(";"), aDisplay.join(" "), false)
 					} else {
-						devicesBS = false
+						devicesBS = proxyLies.includes("MediaDevices.enumerateDevices")
 						finish("none", "none")
 					}
 				} else {
