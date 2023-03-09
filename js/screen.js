@@ -805,7 +805,7 @@ function get_scr_window(runtype) {
 			if (isPosLies) {
 				fpvalue = zLIE
 				display = v0 +", "+ v1 +", "+ v2 +", "+ v3
-				gKnown.push("screen:screen positions")
+				if (gRun) {gKnown.push("screen:screen positions")}
 			}
 		}
 		dom.posS.innerHTML = display + posNote
