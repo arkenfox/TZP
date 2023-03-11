@@ -1561,20 +1561,20 @@ function outputSection(id, cls) {
 				let aTests = []
 				let m1, m2, m3, m4, m7, m8
 				// inner = outer = screen = available
+					// note: some are false positives at FS
 				try {m1 = screen.width +"" + screen.height} catch(e) {}
 				try {m2 = screen.availWidth +""+ screen.availHeight} catch(e) {}
 				try {m3 = window.outerWidth +""+ window.outerHeight} catch(e) {}
 				try {m4 = window.innerWidth +""+ window.innerHeight} catch(e) {}
 				try {m7 = navigator.hardwareConcurrency} catch(e) {} // hwc
-				try {m8 = Intl.DateTimeFormat(undefined).resolvedOptions().timeZone} catch(e) {} // tz
-				aTests.push(m1 == m2, m1 == m3, m1 == m4, m2 == m3, m2 == m4, m3 == m4, m7 == 2, m8 == "UTC")
+				aTests.push(m1 == m2, m1 == m3, m1 == m4, m2 == m3, m2 == m4, m3 == m4, m7 == 2)
 				// count true
 				let aBool = [], rfpcount = 0
 				aTests.forEach(function(item){
 					aBool.push(item == true ? "\u2713" : "\u2715")
 					if (item) {rfpcount++}
 				})
-				rfppath = rfpcount > 5
+				rfppath = rfpcount > 4
 				log_perf("rfp path [prereq]", tRFP, gt0, rfppath +" | "+ aBool.join(" "))
 			} catch(e) {console.error("rfppath", e.name, e.message)}
 		}
