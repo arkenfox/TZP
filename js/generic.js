@@ -559,8 +559,7 @@ const get_isVer = () => new Promise(resolve => {
 			// ^ we can skip < FF60 legacy checks now
 			// note: we can skip non-gecko checks: this only runs if isFF
 
-		isVerMax = 113
-		if (!CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle")) return 113 // 1294362
+		isVerMax = 112
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) return 112 // 1756175
 		if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
 		if ("object" === typeof ondeviceorientationabsolute) return 110 // 1689631
