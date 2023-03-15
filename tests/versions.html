@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 63, maxVer = 112, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 64, maxVer = 113, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -270,10 +270,15 @@ function outputVersion() {
 			}
 		}
 
+		// 113: 1294362
+		let t113 = performance.now()
+		let ver113 = (!CanvasRenderingContext2D.prototype.hasOwnProperty("mozTextStyle"))
+		rec(113, 113, "1294362", ver113, performance.now()-t113)
+
 		// 112: 1756175
 		let t112 = performance.now()
 		let ver112 = (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) // 0.01ms
-		rec(112, 112, "1756175", ver112, performance.now()-t112) //
+		rec(112, 112, "1756175", ver112, performance.now()-t112)
 
 		// 111: 1418449
 		let t111 = performance.now()
