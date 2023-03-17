@@ -68,7 +68,8 @@ function check_canvas_to(data) {
 function outputCanvas() {
 	let t0 = getNow()
 	// temp non-gecko exit until we enforce gecko only
-	if (!isFF) {
+	// temp exclude gecko < 95 due to compression changes
+	if (!isFF || isVer < 95) {
 		let metrics = ["getImageData","isPointInPath","isPointInStroke","toBlob","toDataURL"]
 		let aExit = []
 		metrics.forEach(function(item){
