@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -7,11 +7,10 @@
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 700px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
-		hr {color: #dcc18c;}
+		hr {color: var(--test3);}
 	</style>
 </head>
 
@@ -1253,6 +1252,10 @@ function get_moz_objects(num, name) {
 					hash = zNA + s3 +" ["+ hash +"]"+ sc + sb +" [not firefox default]"+ sc
 				}
 			}
+			if (isVer > 112 && name === "CanvasRenderingContext2D") { // 1822955
+				bool = zNA
+				hash = zNA +": FF112 or lower"
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -1819,8 +1822,9 @@ function get_window_moz(num) {
 				resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
 			} else {
 				// behind a pref: media.peerconnection.enabled
+				let note = isVer > 112 ? "" : sb +" [not firefox default]"+ sc // 1531812
 				boolM = zNA
-				resM = zNA + s3 +" ["+ resM +"]"+ sc + sb +" [not firefox default]"+ sc
+				resM = zNA + s3 +" ["+ resM +"]"+ sc + note
 			}
 		}
 		let perfM = canPerf ? performance.now() - t0M : ""
