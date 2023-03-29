@@ -395,8 +395,8 @@ function get_perf2(log = false) {
 					if (!goodRFP.includes(diff)) {isMatch = false}
 				}
 				// RFP: at least four 0's, and some 16.7, 16.6 (only RFP for now has decimals)
-				if (oCounts["16.6"] == 0) {isMatch = false
-				} else if (oCounts["16.7"] == 0) {isMatch = false
+				if (oCounts["16.6"] == undefined) {isMatch = false
+				} else if (oCounts["16.7"] == undefined) {isMatch = false
 				} else if (oCounts["0"] < 5) {isMatch = false}
 				/*
 					console.log(aData)
