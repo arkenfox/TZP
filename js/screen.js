@@ -1674,7 +1674,7 @@ function outputUA(os = isOS) {
 			"ua_os": "Windows NT 10.0; Win64; x64",
 		},
 	}
-	if (isTZPSmart) {
+	if (isTZPSmart && os !== "") {
 		let uaVer = isVer, rvVer = isVer
 		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:", uaNext = uaRFP
 		if (os == "android") {
@@ -1702,7 +1702,7 @@ function outputUA(os = isOS) {
 			display = "~"+ reported +"~"
 			fpvalue = zErr
 			reported = zErr
-		} else if (isTZPSmart) {
+		} else if (isTZPSmart && os !== "") {
 			if (proxyLies.includes("Navigator."+ k)) {
 				fpvalue = zLIE
 				display = "~"+ newColor(reported) +"~"
