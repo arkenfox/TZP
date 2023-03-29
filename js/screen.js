@@ -1605,7 +1605,7 @@ function outputUA(os = isOS) {
 		let fpvalue = reported
 		if (isTZPSmart && reported !== expected) {
 			// always bypass errors, only bypass non-errors if proxyLies (else could be legit)
-			if (isErr || sData.proxy.includes("Navigator."+ property)) {
+			if (isErr || proxyLies.includes("Navigator."+ property)) {
 				fpvalue = expected
 				display = newColor(display, 2)
 				if (gRun) {
@@ -1692,7 +1692,6 @@ function outputUA(os = isOS) {
 
 	for (const k of Object.keys(oComplex)) {
 		let notation = ""
-		//if (runSL && isTZPSmart) {sData.proxy.push("Navigator."+ k)}
 		let reported = oComplex[k][0],
 			isErr = oComplex[k][1]
 		reported = cleanFn(reported)
