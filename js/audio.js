@@ -17,6 +17,18 @@ function byteArrayToHex(arrayBuffer){
 	}).join("");
 }
 
+function check_audioLies() {
+	if (!isTZPSmart) {return false}
+	const audioList = [
+		"AnalyserNode.getByteFrequencyData","AnalyserNode.getByteTimeDomainData",
+		"AnalyserNode.getFloatFrequencyData","AnalyserNode.getFloatTimeDomainData",
+		"AudioBuffer.copyFromChannel","AudioBuffer.getChannelData",
+		"BiquadFilterNode.getFrequencyResponse",
+	]
+	if (runSL && isTZPSmart) {proxyLies.push("AudioBuffer.copyFromChannel")}
+	return audioList.some(lie => proxyLies.indexOf(lie) >= 0)
+}
+
 function get_audio2_context(run) {
 	return new Promise(resolve => {
 		try {
@@ -294,22 +306,19 @@ function outputAudio() {
 	let t0; if (canPerf) {t0 = performance.now()}
 	let sName = "offlineaudiocontext"
 
-	// ToDo: we should be using the hash not the sum but we need to move away from
-		// enumerating goodness with a math poc anyway due to changes and false negatives
-	let knownGood = [35.7383295930922,35.73833039775491,35.73832903057337,
-		35.73833402246237,35.74996018782258,35.7499681673944,35.74996031448245]
-	if (!isFF) {
-		knownGood = [
-			124.0434474653739,124.04344884395687,124.0434488439787,124.04344968475198,124.04345023652422,
-			124.04345808873768,124.04347503720783,124.04347527516074,124.04347657808103,124.04347721464,
-			124.04347730590962,124.0434806260746,124.04348210548778,124.080722568091,124.08072291687131,
-			124.08072618581355,124.08072787802666,124.08072787804849,124.08073069039528,124.08074500028306,
-			124.08075528279005,124.08075643483608,
-		]
-	}
+	// ToDo: math PoC to futureproof changes, remove false negatives
+	let documentedSums = [ // gecko data: not used
+		// .7383...
+		35.73832903057337,35.7383295930922,35.73833039775491,35.73833402246237,
+		// .7499
+		35.74996018782258,35.74996031448245,35.7499681673944,
+		35.74995414912701, // <- my android 113+: 1519004 ?
+	]
 
+	// ToDo: reduce bufferLen as long as it doesn't change entropy
+		// also: when we add RFP + math PoC we need only check for protection (like canvas)
 	try {
-		const bufferLen = 5000 // require 5000 to match knownGood
+		const bufferLen = 5000 // 5000 to match documented
 		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
 		dom.audioSupport = zE
 		try {
@@ -341,12 +350,10 @@ function outputAudio() {
 						crypto.subtle.digest("SHA-256", copyTest),
 					]).then(function(hashes){
 						// sum
-						let sum = 0, sum2 = 0, sum3 = 0
+						let sum = 0
 						for (let i=0; i < getTest.length; i++) {
 							let x = getTest[i]
 							if (i > (bufferLen-501) && i < bufferLen) {sum += Math.abs(x)}
-							sum2 += x
-							sum3 += Math.abs(x)
 						}
 						pxi_compressor.disconnect()
 						// get/copy
@@ -355,13 +362,10 @@ function outputAudio() {
 						// lies
 						let isLies = false
 						if (isTZPSmart) {
-							if (isBraveMode > 1 && !isFile) {isLies = true}
-							if (sum2 == sum3) {isLies = true}
-							if (runSL) {sum++}
-							if (isFF || isEngine == "blink") {
-								if (!knownGood.includes(sum)) {isLies = true}
+							if (isBraveMode > 1 && !isFile) {isLies = true
+							} else if (hashG !== hashC) {isLies = true
+							} else {isLies = check_audioLies()
 							}
-							if (hashG !== hashC) {isLies = true}
 						}
 						// display/FP
 						if (sum == 0 && hashG == "ca630f35dd78934792a4e2ba27cf95c340421db4") {
