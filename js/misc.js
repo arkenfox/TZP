@@ -394,10 +394,10 @@ function get_perf2(log = false) {
 					if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
 					if (!goodRFP.includes(diff)) {isMatch = false}
 				}
-				// RFP: at least four 0's, and some 16.7, 16.6 (only RFP for now has decimals)
+				// RFP: some 0, 16.7, 16.6 (only RFP for now has decimals)
 				if (oCounts["16.6"] == undefined) {isMatch = false
 				} else if (oCounts["16.7"] == undefined) {isMatch = false
-				} else if (oCounts["0"] < 5) {isMatch = false}
+				} else if (oCounts["0"] == undefined) {isMatch = false}
 				/*
 					console.log(aData)
 					console.log(aTimes)
