@@ -370,7 +370,7 @@ function get_perf2(log = false) {
 		let i = 0, aData = [], aTimes = [], aDiffs = [], oCounts = {}, p0
 		// collect
 		function run() {
-			if (i < 13) {
+			if (i < 10) {
 				if (i == 0) {p0 = performance.now()} else {aData.push(performance.now())}
 				i++
 			} else {
@@ -394,10 +394,9 @@ function get_perf2(log = false) {
 					if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
 					if (!goodRFP.includes(diff)) {isMatch = false}
 				}
-				// RFP: some 0, 16.7, 16.6 (only RFP for now has decimals)
+				// RFP: some 16.7, 16.6 (only RFP for now has decimals)
 				if (oCounts["16.6"] == undefined) {isMatch = false
-				} else if (oCounts["16.7"] == undefined) {isMatch = false
-				} else if (oCounts["0"] == undefined) {isMatch = false}
+				} else if (oCounts["16.7"] == undefined) {isMatch = false}
 				/*
 					console.log(aData)
 					console.log(aTimes)
