@@ -619,7 +619,7 @@ function get_scr_scrollbar(runtype) {
 						vWidth = cssW - vViewport
 					}
 					// lies
-					let vMin = (isFF ? 0 : -1) // allow -1 on non-Gecko
+					let vMin = -1
 					if ("number" !== typeof vWidth) {vLies = true
 					} else if (vWidth < vMin) {vLies = true}
 					vValue = vLies ? zLIE : vWidth
