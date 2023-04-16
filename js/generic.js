@@ -1355,15 +1355,6 @@ function countJS(filename) {
 					for (let i=0; i < items.length; i++) {items[i].style.display = "none"}
 				}
 
-				// some sims = isFF only: not fussy; only devs run these
-				if (!isFF) {
-					runSN = false
-					runSU = false
-					runRF = false
-					runCSS = false
-					runFNT = false
-					runWFS = false
-				}
 				if (!isTZPBlock) {
 					get_pointer_event() // pointer eventlistener
 				}
