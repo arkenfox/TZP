@@ -865,7 +865,10 @@ function get_pointer_event() {
 function get_pointer_hover() {
 	return new Promise(resolve => {
 		function get_mm(type, id) {
-			let x=zNS, x2="", f="fine", c="coarse", h="hover", n="none", q=type+": "
+			let x=zNS, x2="", f="fine", c="coarse", h="hover", n="none", q=type+":"
+		
+			let value = zNA
+
 			try {
 				if (runSE) {abc = def
 				} else if (runSL) {x = "banana"
@@ -874,12 +877,20 @@ function get_pointer_hover() {
 					if (window.matchMedia("("+ q + c +")").matches) x=c
 					if (window.matchMedia("("+ q + f +")").matches) x=f
 					if (window.matchMedia("("+ q + h +")").matches) x=h
+
+		if (window.matchMedia("("+ type +":fine").matches) value = "fine"
+		if (window.matchMedia("("+ type +":hover)").matches) value = "hover"
+		if (window.matchMedia("("+ type +":coarse)").matches) value = "coarse"
+		if (window.matchMedia("("+ type +":none)").matches) value = "none"
+
 				}
 			} catch(e) {
 				log_error("devices: matchmedia_"+ type, e.name, e.message)
 				x = zErr
 			}
 			x2 = getElementProp(id,"content",":after")
+
+			console.log(type +", "+ id +", old: "+ x +", css: "+ x2 +", new: "+ value)
 
 			// lies
 			if (isTZPSmart && x2 !== "x") {
