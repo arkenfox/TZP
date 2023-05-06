@@ -918,13 +918,13 @@ function get_pointer_hover() {
 		res.push("pointer_event:"+ (isLiesPE ? zLIE : r1))
 
 		// pointer
-		get_mm("pointer", "#cssP")
 		get_mm("any-pointer", "#cssAP")
+		get_mm("pointer", "#cssP")
 		let p = display.join(" | ")
 		// hover
 		display = []
-		get_mm("hover", "#cssH")
 		get_mm("any-hover", "#cssAH")
+		get_mm("hover", "#cssH")
 		let h = display.join(" | ")
 		// notate
 		if (isTZPSmart && isOS == "android") {
