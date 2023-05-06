@@ -865,33 +865,22 @@ function get_pointer_event() {
 function get_pointer_hover() {
 	return new Promise(resolve => {
 		function get_mm(type, id) {
-
-			// TZP1
 			let x=zNS, x2="", f="fine", c="coarse", h="hover", n="none", q=type+":"
-			// TZP2
-			let value = zNS // TZP2
-
 			try {
-				// TZP1
 				if (window.matchMedia("("+ q + f +")").matches) x=f
 				if (window.matchMedia("("+ q + h +")").matches) x=h
 				if (window.matchMedia("("+ q + c +")").matches) x=c
 				if (window.matchMedia("("+ q + n +")").matches) x=n
-
-				// TZP2
-				if (window.matchMedia("("+ type +":fine").matches) value = "fine"
-				if (window.matchMedia("("+ type +":hover)").matches) value = "hover"
-				if (window.matchMedia("("+ type +":coarse)").matches) value = "coarse"
-				if (window.matchMedia("("+ type +":none)").matches) value = "none"
 			} catch(e) {
 				log_error("devices: matchmedia_"+ type, e.name, e.message)
 				x = zErr
 			}
 			x2 = getElementProp(id,"content",":after")
-			console.log(type +", "+ id +", tzp1: "+ x +", css: "+ x2 +", tzp2: "+ value)
 
 			// lies
-			if (isTZPSmart && x2 !== "x") {
+				// exclude any-pointer from smarts (unless I can get css to show coarse)
+				// https://www.w3.org/TR/mediaqueries-4/ = "In the case of any-pointer, more than one of the values can match"
+			if (isTZPSmart && type !== "any-pointer" && x2 !== "x") {
 				if (x !== x2) {
 					display.push(soB + x + scC)
 					if (type.indexOf("oint") > 0) {pointerBS = true}
