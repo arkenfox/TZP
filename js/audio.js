@@ -95,6 +95,12 @@ function get_audio2_context(run) {
 				hash = mini_sha1(results.join())
 				let displayHash = isLie ? soL + hash + scC : hash
 				dom.audio1hash.innerHTML = displayHash + buildButton("11", sName, results.length +" keys") + note
+
+// tmp debug
+if (isOS == "android") {
+	dom.debugAll.innerHTML = hash + "<br>" + mini(sDetail[sName]) +"<br>"+ JSON.stringify(sDetail[sName], null, 2)
+}
+
 				log_perf("context run #"+ run +" [audio]",t0)
 				return resolve("keys:"+ (isLie ? zLIE : hash))
 			} else {
