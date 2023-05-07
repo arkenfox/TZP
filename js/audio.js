@@ -84,10 +84,9 @@ function get_audio2_context(run) {
 					}
 					// RFP notation
 					note = rfp_red
-
 					if (hash == "de8fd7c6816c16293e70f0491b1cf83968395f0e" && isOS == "windows") {note = rfp_green // 0.04
-					} else if (hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1" && isOS == "linux") {note = rfp_green // 0.02
-					} else if (hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e" && isOS == "android") {note = rfp_green // 0.02 (was 0.025?)
+					} else if (hash == "cb6fec6d4fce83d943b6f5aef82a450973097fb1" && isOS == "linux") {note = rfp_green // 0.025
+					} else if (hash == "325d1b92a5e390c21c116296b65c5c39fbbd331e" && isOS == "android") {note = rfp_green // 0.02
 					} else if (hash == "076e1691483e6680c092b9aecc5f2e5270bf32b9" && isOS == "mac") {note = rfp_green} // 512/44100 (RFP hardcodes samplerate)
 					// 0 latency
 					if (latencyError) {note += sb +" [0 latency]"+ sc}
