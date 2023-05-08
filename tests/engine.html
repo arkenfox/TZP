@@ -251,7 +251,11 @@ function get_dates(num) {
 		// FF: 63 and lower = NaN, 64+ = -2011
 		let bolB = false
 		if (resB == -2011) {bolB = true
-		} else if (isVer < 64 && isNaN(resB)) {bolB = true}
+		} else if (isVer < 64 && isNaN(resB)) {bolB = true
+		} else if (isVer > 112 && resB == 2011) {
+			bolB = zNA
+			resB = zNA +": FF112 or lower " + s3 +"["+ resB+"]" + sc
+		}
 		let perfB = canPerf ? performance.now() - t0B : ""
 		fnRecord(num+1, strB, resB, bolB, "skip", perfB)
 	} catch(e) {
@@ -264,7 +268,14 @@ function get_dates(num) {
 		if (bBlock) {bB = 1}
 		let resC = new Date("11-Nov-11")
 		let bolC = resC.toString() == "Invalid Date" ? true : false
-		if (!bolC) {resC = fnTrim(resC.toString(), 40)}
+		if (!bolC) {
+			if (isVer > 112) {
+				bolC = zNA
+				resC = zNA +": FF112 or lower " + s3 +"["+ fnTrim(resC.toString(), 23) +"]"+sc
+			} else {
+				resC = fnTrim(resC.toString(), 40)
+			}
+		}
 		let perfC = canPerf ? performance.now() - t0C : ""
 		fnRecord(num+2, strC, resC, bolC, "skip", perfC)
 	} catch(e) {
@@ -1716,17 +1727,13 @@ function get_stacklength(num1, num2, num3) {
 		} else {
 			fnRecord(num3, strRE, resRE, false, "skip", perf)
 		}
-		// stack length
+		// stack length: only for FYI purposes
 		let strSL = "stack length"
 		try {
 			if (bBlock) {bB = 1}
 			let resSL = e.stack.toString().length
-			let testSL = resSL == 8192 ? true : false
-			if (isFile) {
-				testSL = zNA
-				resSL = zNA +": file://"
-			}
-			fnRecord(num2, strSL, resSL, testSL, "skip", perf)
+			resSL = zNA +": FYI: "+ s3 +"["+ resSL +"]"+sc
+			fnRecord(num2, strSL, resSL, zNA, "skip", perf)
 		} catch(n) {
 			fnRecord(num2, strSL, n.name, zErr, n.message, perf)
 		}
