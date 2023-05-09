@@ -1588,7 +1588,7 @@ function run_once() {
 				"object" === typeof onappinstalled,
 				"object" === typeof onbeforeinstallprompt,
 				"object" === typeof onpointerrawupdate,
-				"object" === typeof onsearch,
+				//"object" === typeof onsearch,
 				"boolean" === typeof originAgentCluster,
 				"object" === typeof trustedTypes,
 				"function" === typeof webkitResolveLocalFileSystemURL,
