@@ -1,21 +1,18 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=900">
 	<title>engine properties</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
-	<!--<script src="testglobals.js"></script>
-	<script src="testgeneric.js"></script>-->
-	<!-- custom -->
 	<style>
 		table {width: 880px;}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
-		hr {color: #dcc18c}
+		hr {color: var(--test3);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -374,11 +371,9 @@ rec(typeof PERSISTENT, "PERSISTENT", code, "number")
 rec(typeof TEMPORARY, "TEMPORARY", code, "number")
 rec(typeof chrome, "chrome", code, "object") // edgeHTML
 rec(typeof cookieStore, "cookieStore", code, "object")
-rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
 rec(typeof onappinstalled, "onappinstalled", code, "object")
 rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
 rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
-rec(typeof onsearch, "onsearch", code, "object")
 rec(typeof openDatabase, "openDatabase", code, "function")
 rec(typeof originAgentCluster, "originAgentCluster", code, "boolean")
 rec(typeof trustedTypes, "trustedTypes", code, "object")
@@ -450,6 +445,10 @@ rec(typeof updateCommands, "updateCommands", code, "function")
 rec(typeof onbeforeinput, "onbeforeinput", code, "object") // FF87+
 rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
 rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
+rec(typeof onscrollend, "onscrollend", code, "object") // FF109+
+rec(typeof oncut, "oncut", code, "object") // FF110+
+rec(typeof oncopy, "oncopy", code, "object") // FF110+
+rec(typeof onpaste, "onpaste", code, "object") // FF110+
 	// deprecated
 rec(typeof mozPaintCount, "mozPaintCount", code, "number") // removed FF72
 rec(typeof onshow, "onshow", code, "object") // removed FF85 (+ not goanna or Waterfox Classic)
@@ -483,8 +482,6 @@ rec(typeof webkitIndexedDB, "webkitIndexedDB", code, "object")
 
 // blink + gecko (not seen in webkit)
 code = 50
-rec(typeof KeyboardEvent, "KeyboardEvent", code, "function")
-rec(typeof KeyframeEffect, "KeyframeEffect", code, "function")
 rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
 rec(typeof external, "external", code, "object")
 rec(typeof onauxclick, "onauxclick", code, "object")
@@ -506,8 +503,10 @@ rec(typeof scheduler, "scheduler", code, "object")
 code = 52
 rec(typeof defaultstatus, "defaultstatus", code, "string")
 rec(typeof defaultStatus, "defaultStatus", code, "string")
+rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
 rec(typeof oncancel, "oncancel", code, "object")
 rec(typeof onmousewheel, "onmousewheel", code, "object")
+rec(typeof onsearch, "onsearch", code, "object")
 rec(typeof styleMedia, "styleMedia", code, "object")
 rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame", code, "function")
 rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code, "function")
@@ -554,6 +553,8 @@ rec(typeof indexedDB, "indexedDB", code, "object")
 rec(typeof innerHeight, "innerHeight", code, "number")
 rec(typeof innerWidth, "innerWidth", code, "number")
 rec(typeof isSecureContext, "isSecureContext", code, "boolean")
+rec(typeof KeyboardEvent, "KeyboardEvent", code, "function")
+rec(typeof KeyframeEffect, "KeyframeEffect", code, "function")
 rec(typeof length, "length", code, "number")
 rec(typeof localStorage, "localStorage", code, "object")
 rec(typeof location, "location", code, "object")
@@ -773,10 +774,10 @@ function scrape() {
 				}
 			}
 		} catch(e) {}
-		// record sanitized
+		// silently record sanitized
 		let strDel = ""
 		if (aDelSS.length || aDelLS.length) {
-			strDel = sb +"REMOVED:"+ sc + "<br><br>"
+			strDel = sb +"REMOVED: "+ sc +"random state variables<br><br>"
 				+ (aDelLS.length ? "localStorage  : " + aDelLS.join(", ") +"<br>" : "")
 				+ (aDelSS.length ? "sessionStorage: " + aDelSS.join(", ") +"<br>" : "")
 				+"<br>"
