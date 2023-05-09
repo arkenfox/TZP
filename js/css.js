@@ -285,8 +285,15 @@ function get_computed_styles() {
 					distinctRep.push(value)
 					let j = (fileSchemeOverride && i==2 ? 1 : i)
 					let btn = buildButton("14", sNames[i] +"_reported_notglobal", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
-					sDetail["css_computed_styles"] = aReal
-					if (aFake.length) {
+
+					// until TZP2 lands, just ignore webkit diffs + return getcomputed
+					// getcomputed holds extra items: input-security, offset-anchor/distance/path/position/rotate, overscroll-behavior-x/y
+					if (isEngine === "webkit" && i = 0) {
+						sDetail["css_computed_styles"] = aReal
+					} else {
+						sDetail["css_computed_styles"] = aReal
+					}
+					if (aFake.length && isEngine !== "webkit") { // ignore webkit
 						fakeIndex.push(i)
 						sDetail[sNames[i] +"_reported_notglobal"] = aRep
 						sDetail[sNames[i] +"_fake_skip"] = aFake
@@ -305,6 +312,7 @@ function get_computed_styles() {
 				}
 			}
 
+			/*
 			if (isEngine === "webkit") {
 				let arr1 = [], arr2 = []
 				sDetail["css_getcomputed_reported_notglobal"].forEach(function(item){
@@ -327,6 +335,7 @@ function get_computed_styles() {
 					console.log(arrdiffs)
 				}
 			}
+			*/
 
 			distinctRep = distinctRep.filter(function(item, position) {return distinctRep.indexOf(item) === position})
 			distinctReal = distinctReal.filter(function(item, position) {return distinctReal.indexOf(item) === position})
