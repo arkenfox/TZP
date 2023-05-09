@@ -291,6 +291,7 @@ function get_gamepads() {
 
 function get_keyboard() {
 	return new Promise(resolve => {
+
 		let t0; if (canPerf) {t0 = performance.now()}
 		// reset
 		let sName = "devices_keyboard"
@@ -299,7 +300,7 @@ function get_keyboard() {
 
 		function color(string) {
 			string = (isFF? soB : soL) + string + scC
-			value = (isFF ? zNA : zLIE)
+			value = (isEngine === "blink") ? zLIE : zNA
 			if (gRun) {
 				gKnown.push("devices:keyboard")
 				if (isFF) {gBypassed.push("devices:keyboard:"+ value)}
