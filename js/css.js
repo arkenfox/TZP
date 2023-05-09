@@ -288,7 +288,7 @@ function get_computed_styles() {
 
 					// until TZP2 lands, just ignore webkit diffs + return getcomputed
 					// getcomputed holds extra items: input-security, offset-anchor/distance/path/position/rotate, overscroll-behavior-x/y
-					if (isEngine === "webkit" && i = 0) {
+					if (isEngine === "webkit" && i == 0) {
 						sDetail["css_computed_styles"] = aReal
 					} else {
 						sDetail["css_computed_styles"] = aReal
