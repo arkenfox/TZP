@@ -304,6 +304,30 @@ function get_computed_styles() {
 					btns.push("")
 				}
 			}
+
+			if (engine === "webkit") {
+				let arr1 = [], arr2 = []
+				sDetail["css_getcomputed_reported_notglobal"].forEach(function(item){
+					arr1.push(item)
+				})
+				sDetail["css_htmlelement_reported_notglobal"].forEach(function(item){
+					arr2.push(item)
+				})
+				arr1.sort()
+				arr2.sort()
+				let arr1hash = mini(arr1)
+				let arr2hash = mini(arr2)
+				console.log(arr1hash, arr2hash)
+				if (arr1hash !== arr2hash) {
+					let arrdiffs = {}
+					let diff1 = arr1.filter(x => !arr2.includes(x));
+					arrdiffs["inComputed"] = diff1
+					let diff2 = arr2.filter(x => !arr1.includes(x));
+					arrdiffs["inHTMLElement"] = diff2
+					console.log(arrdiffs)
+				}
+			}
+
 			distinctRep = distinctRep.filter(function(item, position) {return distinctRep.indexOf(item) === position})
 			distinctReal = distinctReal.filter(function(item, position) {return distinctReal.indexOf(item) === position})
 			let bCount = blankIndex.length
