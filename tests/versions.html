@@ -503,7 +503,8 @@ function outputVersion() {
 		rec(74, 74, "1565170", ver74, performance.now()-t74)
 
 		// 73: 1602163
-		let t73 = performance.now(), ver73 = (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
+		let t73 = performance.now(), ver73 = ("function" == typeof VideoPlaybackQuality
+			&& !VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
 		rec(73, 73, "1602163", ver73, performance.now()-t73)
 
 		// 72: 1591892
