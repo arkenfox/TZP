@@ -219,7 +219,10 @@ function get_colorgamut(num, title) {
 		let perf = canPerf ? performance.now() - t0 : ""
 		if (isVer > 109) {
 			bool = zNA
-			res = zNA +": FF109 or lower"
+			res = zNA +": FF109 or lower "+ s3 +"["+ res +"]"+ sc
+		} else if (!isFF) {
+			bool = zNA
+			res += " [FF109 or lower]"
 		}
 		fnRecord(num, title, res, bool, "skip", perf)
 	} catch(e) {
@@ -269,11 +272,16 @@ function get_dates(num) {
 		let resC = new Date("11-Nov-11")
 		let bolC = resC.toString() == "Invalid Date" ? true : false
 		if (!bolC) {
-			if (isVer > 112) {
-				bolC = zNA
-				resC = zNA +": FF112 or lower " + s3 +"["+ fnTrim(resC.toString(), 23) +"]"+sc
+			if (isFF) {
+				if (isVer > 112) {
+					bolC = zNA
+					resC = zNA +": FF112 or lower " + s3 +"["+ fnTrim(resC.toString(), 23) +"]"+sc
+				} else {
+					resC = fnTrim(resC.toString(), 40)
+				}
 			} else {
-				resC = fnTrim(resC.toString(), 40)
+				bolC = zNA
+				resC = fnTrim(resC.toString(), 22) +" [FF112 or lower]"
 			}
 		}
 		let perfC = canPerf ? performance.now() - t0C : ""
@@ -443,6 +451,7 @@ function get_installtrigger(num) {
 		if (isVer > 99 && !boolA) {
 			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA, "skip", perfA)
 		} else {
+			if (!isFF) {resA += " [FF99 or lower]"; boolA = zNA}
 			fnRecord(num, strA, resA, boolA, "skip", perfA)
 		}
 	} catch(e) {
@@ -458,6 +467,7 @@ function get_installtrigger(num) {
 		if (isVer > 99 && !resB) {
 			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA, "skip", perfB)
 		} else {
+			if (!isFF) {resB += " [FF99 or lower]" }
 			fnRecord(num+1, strB, resB, resB, "skip", perfB)
 		}
 	} catch(e) {
@@ -478,6 +488,7 @@ function get_installtrigger(num) {
 			if (isVer > 99 && !boolC) {
 				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA, "skip", perfC)
 			} else {
+				if (!isFF) {resC += " [FF99 or lower]"; boolC = zNA }
 				fnRecord(num+2, strC, resC, boolC, "skip", perfC)
 			}
 		} catch(e) {
@@ -1089,6 +1100,7 @@ function get_moz_fonts(num, title) {
 			bool = zNA; hash = zNA +": FF108 or lower" // 1802957
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
+		if (!isFF) {hash += " [FF108 or lower]"; bool = zNA}
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
@@ -1267,6 +1279,12 @@ function get_moz_objects(num, name) {
 				bool = zNA
 				hash = zNA +": FF112 or lower"
 			}
+		} else {
+			// non-FF
+			if (name === "CanvasRenderingContext2D") {
+				bool = zNA
+				hash += " [FF112 or lower]"
+			}
 		}
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
@@ -1423,6 +1441,9 @@ function get_nav_values(num1, num2, num3) {
 		// 1670058: FF95+ globalPrivacyControl
 		if (isVer > 94) {
 			resG = zNA +": FF94 or lower" + s3 +" ["+ resG +"]" + sc
+			boolG = zNA
+		} else if (!isFF) {
+			resG += " [FF94 or lower]"
 			boolG = zNA
 		}
 		let perfG = canPerf ? performance.now() - t0G : ""
@@ -1772,11 +1793,16 @@ function get_storage_estimate(num, title) {
 		navigator.storage.estimate().then(estimate => {
 			let quota = estimate.quota,
 				bool = false
-			if (isVer > 96) {
-				bool = zNA
-				quota = zNA +": variable in FF97+ "+ s3 +"["+ quota +"]"+ sc
+			if (isFF) {
+				if (isVer > 96) {
+					bool = zNA
+					quota = zNA +": variable in FF97+ "+ s3 +"["+ quota +"]"+ sc
+				} else {
+					if (quota > 2147000000 && quota < 2148000000) {bool = true}
+				}
 			} else {
-				if (quota > 2147000000 && quota < 2148000000) {bool = true}
+				bool = zNA
+				quota += " [FF96 or lower]"
 			}
 			let perf = canPerf ? performance.now() - t0 : ""
 			fnRecord(num, title, quota, bool, "skip", perf)
@@ -1827,12 +1853,13 @@ function get_window_moz(num) {
 			if (isEngine == "goanna" || isTB) {
 				boolM = zNA
 				resM = zNA +": "+ (isTB ? "Tor Browser" : "Palemoon") + s3 +" ["+ resM +"]"+ sc
-			} else {
-				// behind a pref: media.peerconnection.enabled
-				let note = isVer > 112 ? "" : sb +" [not firefox default]"+ sc // 1531812
+			} else if (isVer > 112) { // 1531812
 				boolM = zNA
-				resM = zNA + s3 +" ["+ resM +"]"+ sc + note
+				resM = zNA +": FF112 or lower"+ s3 +" ["+ resM +"]"+ sc
 			}
+		} else if (!isFF) {
+			boolM = zNA
+			resM += " [FF112 or lower]"
 		}
 		let perfM = canPerf ? performance.now() - t0M : ""
 		fnRecord(num+1, strM, resM, boolM, "skip", perfM)
