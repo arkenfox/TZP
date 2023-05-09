@@ -286,14 +286,8 @@ function get_computed_styles() {
 					let j = (fileSchemeOverride && i==2 ? 1 : i)
 					let btn = buildButton("14", sNames[i] +"_reported_notglobal", aRep.length +"|"+ res[j].moz +"|"+ res[j].webkit)
 
-					// until TZP2 lands, just ignore webkit diffs + return getcomputed
-					// getcomputed holds extra items: input-security, offset-anchor/distance/path/position/rotate, overscroll-behavior-x/y
-					if (isEngine === "webkit" && i == 0) {
-						sDetail["css_computed_styles"] = aReal
-					} else {
-						sDetail["css_computed_styles"] = aReal
-					}
-					if (aFake.length && isEngine !== "webkit") { // ignore webkit
+					sDetail["css_computed_styles"] = aReal
+					if (aFake.length) { // aFake is FF only
 						fakeIndex.push(i)
 						sDetail[sNames[i] +"_reported_notglobal"] = aRep
 						sDetail[sNames[i] +"_fake_skip"] = aFake
@@ -337,6 +331,22 @@ function get_computed_styles() {
 			}
 			*/
 
+			// webkit
+			// until TZP2 lands, just ignore webkit diffs + return getcomputed
+			// getcomputed holds extra items: input-security, offset-anchor/distance/path/position/rotate, overscroll-behavior-x/y
+			if (isEngine == "webkit") {
+				showhide("C", "table-row")
+				for (let i=0; i < values.length; i++) {
+					let hash = values[i]
+					let display = hash + btns[i]
+					document.getElementById("cStyles"+ i).innerHTML = display
+				}
+				sDetail["css_computed_styles"] = sDetail["css_getcomputed_reported_notglobal"]
+				log_perf("computed styles [css]",t0)				
+				return resolve("computed_styles:"+ values[0])
+			}
+
+			// everything else
 			distinctRep = distinctRep.filter(function(item, position) {return distinctRep.indexOf(item) === position})
 			distinctReal = distinctReal.filter(function(item, position) {return distinctReal.indexOf(item) === position})
 			let bCount = blankIndex.length
@@ -370,6 +380,7 @@ function get_computed_styles() {
 			} else {
 				if (bCount == 3) {value = zErr} else if (isSame) {value = distinctReal[0]} else {sDetail["css_computed_styles"] = []}
 			}
+
 			// output
 			for (let i=0; i < values.length; i++) {
 				let hash = values[i]
