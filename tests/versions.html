@@ -272,7 +272,8 @@ function outputVersion() {
 
 		// 114: 1826629 // slow ~2ms
 		let t114 = performance.now()
-		let ver114 = (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
+		let ver114 = ("function" === typeof CSS2Properties
+			&& CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
 		rec(114, 114, "1826629", ver114, performance.now()-t114)
 
 		// 113: 1709347
