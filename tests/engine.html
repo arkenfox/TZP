@@ -258,6 +258,9 @@ function get_dates(num) {
 		} else if (isVer > 112 && resB == 2011) {
 			bolB = zNA
 			resB = zNA +": FF112 or lower " + s3 +"["+ resB+"]" + sc
+		} else if (!isFF) {
+			bolB = zNA
+			resB += " [FF112 or lower]"
 		}
 		let perfB = canPerf ? performance.now() - t0B : ""
 		fnRecord(num+1, strB, resB, bolB, "skip", perfB)
