@@ -164,14 +164,13 @@ function return_lb_nw(w,h) {
 function return_mm_dpi(type, denominator) {
 	let r = ""
 	try {
-		let csstype = isEngine == "webkit" ? "min" : "max"
 		r = (function() {
 			let i = 1
 			for (1; i < 3001; i++) {
 				let n = i/denominator
-				if (matchMedia("("+ csstype +"-resolution:"+ n + type +")").matches === true) {return n}
+				if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
 			}
-			if (gRun) {
+			if (gRun && isEngine !== "webkit") {
 				gMethods.push("screen:matchmedia_"+ type +": > "+ (i-1)/denominator)
 			}
 			return zB0
@@ -269,31 +268,34 @@ function get_scr_dpi_dpr(runtype) {
 					+" | mmDPI : "+ mmDPI +" | dpi_x : "+ dpi_x +" | dpi_y : "+ dpi_y
 				)
 			}
-			// bypass matchmedia lies
-				// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
-				// ToDo: but only if drp2 wasn't blocked?
-				// so we want to use varDPI first
-			if (varDPI !== undefined && dpi_y !== 0) {
-				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - dpi_x)} else {diffDPI = 2}
-				if (mmDPI !== dpi_x && diffDPI > 1) {
-					mmDPI = soB + mmDPI + scC
-					if (gRun) {
-						gKnown.push("screen:matchmedia_dpi")
-						gBypassed.push("screen:matchmedia_dpi:"+ dpi_x)
+			if (isEngine !== "webkit") {
+				// bypass matchmedia lies
+					// if DPR !==1 & RFP is on: we get real varDPI,dpi_x/y (e.g. 250) but lies for cssDPI/mmDPI (e.g. 96)
+					// ToDo: but only if drp2 wasn't blocked?
+					// so we want to use varDPI first
+				if (varDPI !== undefined && dpi_y !== 0) {
+					if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - dpi_x)} else {diffDPI = 2}
+					if (mmDPI !== dpi_x && diffDPI > 1) {
+						mmDPI = soB + mmDPI + scC
+						if (gRun) {
+							gKnown.push("screen:matchmedia_dpi")
+							gBypassed.push("screen:matchmedia_dpi:"+ dpi_x)
+						}
+					}
+				} else if (cssDPI !== "x") {
+					if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
+					if (mmDPI !== cssDPI && diffDPI > 1) {
+						mmDPI = soB + mmDPI + scC
+						if (gRun) {
+							gKnown.push("screen:matchmedia_dpi")
+							gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
+						}
 					}
 				}
-			} else if (cssDPI !== "x") {
-				if (mmDPI !== zB0) {diffDPI = Math.abs(mmDPI - cssDPI)} else {diffDPI = 2}
-				if (mmDPI !== cssDPI && diffDPI > 1) {
-					mmDPI = soB + mmDPI + scC
-					if (gRun) {
-						gKnown.push("screen:matchmedia_dpi")
-						gBypassed.push("screen:matchmedia_dpi:"+ cssDPI)
-					}
-				}
+				dom.mmDPI.innerHTML = mmDPI +" | "+ mmDPPX +" | "+ mmDPCM
+			} else {
+				dom.mmDPI.innerHTML = zNA
 			}
-			dom.mmDPI.innerHTML = mmDPI +" | "+ mmDPPX +" | "+ mmDPCM
-
 			// varDPI is sancrosanct: don't bypass it with possible lies
 			dom.jsDPI.innerHTML = varDPI
 			if (logScreen) {
