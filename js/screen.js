@@ -164,16 +164,17 @@ function return_lb_nw(w,h) {
 function return_mm_dpi(type, denominator) {
 	let r = ""
 	try {
+		let csstype = isEngine == "webkit" ? "min" : "max"
 		r = (function() {
 			let i = 1
 			for (1; i < 3001; i++) {
 				let n = i/denominator
-				if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
+				if (matchMedia("("+ csstype +"-resolution:"+ n + type +")").matches === true) {return n}
 			}
 			if (gRun) {
 				gMethods.push("screen:matchmedia_"+ type +": > "+ (i-1)/denominator)
 			}
-			return zB0 
+			return zB0
 		})()
 	} catch(e) {
 		log_error("screen: matchmedia_"+ type, e.name, e.message)
