@@ -305,7 +305,7 @@ function get_computed_styles() {
 				}
 			}
 
-			if (engine === "webkit") {
+			if (isEngine === "webkit") {
 				let arr1 = [], arr2 = []
 				sDetail["css_getcomputed_reported_notglobal"].forEach(function(item){
 					arr1.push(item)
