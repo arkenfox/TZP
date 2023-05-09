@@ -299,8 +299,8 @@ function get_keyboard() {
 		sDetail[sName +"_fake_skip"] = []
 
 		function color(string) {
-			string = (isFF? soB : soL) + string + scC
-			value = (isEngine === "blink") ? zLIE : zNA
+			string = (isFF ? soB : soL) + string + scC
+			value = isFF ? zNA : zLIE
 			if (gRun) {
 				gKnown.push("devices:keyboard")
 				if (isFF) {gBypassed.push("devices:keyboard:"+ value)}
@@ -354,7 +354,7 @@ function get_keyboard() {
 			} else {
 				value = k
 				display = k
-				if (k == zU & isFF) {display = zNA; value = zNA} else {display = color(display)}
+				if (k == zU & isEngine !== "blink") {display = zNA; value = zNA} else {display = color(display)}
 				dom.nKeyboard.innerHTML = display
 				return resolve("keyboard:"+ value)
 			}
