@@ -383,8 +383,9 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 114
-			if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
+		isVerMax = 115
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
+		if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("reset")) return 113 // 1709347
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) return 112 // 1756175
 		if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
