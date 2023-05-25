@@ -6,7 +6,7 @@
 	<title>engine properties</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<style>
-		table {width: 880px;}
+		table {width: 90%; min-width: 600px; max-width: 880px}
 		#tb3 td:first-child { text-align: left; vertical-align: top;}
 		hr {color: var(--test3);}
 	</style>
@@ -73,42 +73,6 @@ function mini(str) {
 		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
 	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
-}
-
-function mini_sha1(str) {
-	return sha1(mini(str))
-}
-
-function sha1(str1){
-	for (var blockstart=0,
-		i = 0,
-		W = [],
-		H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
-		A, B, C, D, F, G,
-		word_array = [],
-		temp2,
-		s = unescape(encodeURI(str1)),
-		str_len = s.length;
-		i<=str_len;){
-		word_array[i>>2] |= (s.charCodeAt(i)||128)<<(8*(3-i++%4));
-	}
-	word_array[temp2 = ((str_len+8)>>6<<4)+15] = str_len<<3;
-	for (; blockstart <= temp2; blockstart += 16) {
-		A = H,i=0;
-		for (; i < 80;
-			A = [[
-				(G = ((s=A[0])<<5|s>>>27) + A[4] + (W[i] = (i<16) ? ~~word_array[blockstart + i] : G<<1|G>>>31) + 1518500249) + ((B=A[1]) & (C=A[2]) | ~B & (D=A[3])),
-				F = G + (B ^ C ^ D) + 341275144,
-				G + (B & C | B & D | C & D) + 882459459,
-				F + 1535694389
-			][0|i++/20] | 0, s, B<<30|B>>>2, C, D]
-		) {
-			G = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
-		}
-		for(i=5;i;) H[--i] = H[i] + A[i] | 0;
-	}
-	for(str1='';i<40;)str1 += (H[i>>3] >> (7-i++%8)*4 & 15).toString(16);
-	return str1
 }
 
 function copyclip(element) {
@@ -179,7 +143,8 @@ function collectProps () {
 				desc.type = typeof obj[prop];
 				if (desc.type === 'function') {
 					desc.value = obj[prop].toString();
-				} else if (desc.type === 'object') {
+				} else if (desc.type === 'object' && prop !== "opener") {
+					// don't enuemrate opener object
 					if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
 						objCache.add(obj[prop]);
 						desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1);
@@ -221,7 +186,7 @@ function output() {
 			data.sort()
 			gCount += data.length
 			if (data.length) {
-				let tHash = mini_sha1(data.join())
+				let tHash = mini(data)
 				gHash.push(n +": "+ tHash)
 				gDisplay.push(s3 + n.padStart(padNum) + sc +": "+ tHash + s3 +" ["+ data.length +"]"+ sc +"<br>")
 				gDisplay.push(data.join(", ") + "<br>")
@@ -232,7 +197,7 @@ function output() {
 		}
 		if (gDisplay.length) {
 			// get group hash
-			let hashG = gHash.length ? mini_sha1(gHash.join()) +" ["+ gCount +"]" : ""
+			let hashG = gHash.length ? mini(gHash) +" ["+ gCount +"]" : ""
 			// add group header
 			let strG = "", strExtra = "", strColor = s12
 				//only
@@ -743,14 +708,12 @@ function scrape() {
 		delete result.get_miniEngine
 		delete result.logConsole
 		delete result.mini
-		delete result.mini_sha1
 		delete result.output
 		delete result.rec
 		delete result.rerun
 		delete result.reset
 		delete result.run
 		delete result.scrape
-		delete result.sha1
 		//console.log(result)
 
 		// sanitize localStorage
@@ -784,7 +747,7 @@ function scrape() {
 		}
 
 		// hash it for easier compare
-		let hash = mini_sha1(result)
+		let hash = mini(result)
 		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
 
 		// check if any first level items are not in aList
