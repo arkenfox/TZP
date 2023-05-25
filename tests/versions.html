@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 65, maxVer = 114, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 66, maxVer = 115, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -269,6 +269,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 115: 1778909
+		let t115 = performance.now()
+		let ver115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+		rec(115, 115, "1778909", ver115, performance.now()-t115)
 
 		// 114: 1826629 // slow ~2ms
 		let t114 = performance.now()
@@ -503,7 +508,7 @@ function outputVersion() {
 		rec(74, 74, "1565170", ver74, performance.now()-t74)
 
 		// 73: 1602163
-		let t73 = performance.now(), ver73 = ("function" == typeof VideoPlaybackQuality
+		let t73 = performance.now(), ver73 = ("function" === typeof VideoPlaybackQuality
 			&& !VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
 		rec(73, 73, "1602163", ver73, performance.now()-t73)
 
