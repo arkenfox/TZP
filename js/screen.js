@@ -1678,14 +1678,15 @@ function outputUA(os = isOS) {
 		},
 	}
 	if (isTZPSmart && os !== "") {
-		let uaVer = isVer, rvVer = isVer
+		// 1818889: RFP 115+ uses rv freeze at 109
+		let uaVer = isVer, rvVer = (isVer > 114 ? 109 : isVer)
 		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:", uaNext = uaRFP
 		if (os == "android") {
 			// android = ESR
 			uaVer = isVer < 115 ? 102 : 115
-			uaRFP += uaVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
+			rvVer = isVer < 114 ? uaVer : 109
+			uaRFP += rvVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
 		} else {
-			// desktop currently ignores rv freeze
 			uaRFP += rvVer +".0) Gecko/20100101 Firefox/"+ uaVer +".0"
 			uaNext += (rvVer +1) +".0) Gecko/20100101 Firefox/"+ (uaVer +1) +".0"
 			oRFP[os]["userAgentNext"] = uaNext
