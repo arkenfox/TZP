@@ -1,55 +1,6 @@
 "use strict";
 
-const SECT9 = "canvas"
-
 /* outputCanvas() based on https://canvasblocker.kkapsner.de/test/ */
-
-function check_canvas_get(data, dataDrawn, runNo, pixelcount) {
-	// run1
-	if (runNo == 1) {
-		return mini(dataDrawn) == mini(data)
-	}
-
-	// run2
-	let aDrawn = [], aRead = []
-	let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
-
-	for (let x=0; x < pixelcount; x++) {
-		let k = x * 4
-		aDrawn = dataDrawn.slice(k, k+4)
-		aRead = data.slice(k, k+4)
-		// pixels
-		if (aDrawn.join() !== aRead.join()) { altP++ }
-		// channels
-		if (aDrawn[0] !== aRead[0]) { altR++}
-		if (aDrawn[1] !== aRead[1]) { altG++}
-		if (aDrawn[2] !== aRead[2]) { altB++}
-		if (aDrawn[3] !== aRead[3]) { altA++}
-		// ToDo: range: worth it?
-	}
-
-	// noise FP
-	let strFP = "", aNote = []
-	aNote.push("p"+ Math.floor((altP / pixelcount) * 100))
-	if (altR > 0) {strFP += "r"; aNote.push("r"+Math.floor((altR / pixelcount) * 100))}
-	if (altG > 0) {strFP += "g"; aNote.push("g"+ Math.floor((altG / pixelcount) * 100))}
-	if (altB > 0) {strFP += "b"; aNote.push("b"+ Math.floor((altB / pixelcount) * 100))}
-	if (altA > 0) {strFP += "a"; aNote.push("a"+ Math.floor((altA / pixelcount) * 100))}
-	isCanvasGetChannels = strFP
-	isCanvasGet = " [%: "+ aNote.join(" ") +"]"
-
-	// pixels: allow 1 collision
-	if (altP < (pixelcount - 1)) {return false}
-	// rgb: ran 100k tests: lowest was 124/128: allow 8 collsions
-	if (altR < (pixelcount - 8)) {return false}
-	if (altG < (pixelcount - 8)) {return false}
-	if (altB < (pixelcount - 8)) {return false}
-	// alpha: not randomized: collisons are much higher
-		// lowest was 96/128: allow 33%
-	if ((altA / pixelcount) < .66) {return false}
-
-	return true // RFP traits
-}
 
 function check_canvas_to(data) {
 	// only called if per-execution
@@ -66,20 +17,7 @@ function check_canvas_to(data) {
 }
 
 function outputCanvas() {
-	let t0 = getNow()
-	// temp non-gecko exit until we enforce gecko only
-	// temp exclude gecko < 95 due to compression changes
-	if (!isFF || isVer < 95) {
-		let metrics = ["getImageData","isPointInPath","isPointInStroke","toBlob","toDataURL"]
-		let aExit = []
-		metrics.forEach(function(item){
-			aExit.push(item +":"+ zNA)
-			dom[item].innerHTML = zNA
-		})
-		log_section("canvas", t0, aExit)
-		return
-	}
-
+	let t0 = nowFn()
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = "93bd94c5"
 	// FF95+: compression changes 1724331 / 1737038 
 	const oKnown = {
@@ -87,6 +25,45 @@ function outputCanvas() {
 		"isPointInStroke": "a77e328a",
 		"toBlob": "a8d0bd06",
 		"toDataURL": "a8d0bd06",
+	}
+	let isCanvasGet = "", isCanvasGetChannels = ""
+
+	function check_canvas_get(data, runNo) {
+		if (runNo == 1) {
+			return mini(dataDrawn) == mini(data)
+		}
+		// run2
+		let aDrawn = [], aRead = []
+		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
+		for (let x=0; x < pixelcount; x++) {
+			let k = x * 4
+			aDrawn = dataDrawn.slice(k, k+4)
+			aRead = data.slice(k, k+4)
+			if (aDrawn.join() !== aRead.join()) { altP++ } // pixels
+			if (aDrawn[0] !== aRead[0]) { altR++} // channels
+			if (aDrawn[1] !== aRead[1]) { altG++}
+			if (aDrawn[2] !== aRead[2]) { altB++}
+			if (aDrawn[3] !== aRead[3]) { altA++}
+			// ToDo: range: worth it?
+		}
+		// noise FP
+		let strFP = "", aNote = []
+		aNote.push("p"+ Math.floor((altP / pixelcount) * 100))
+		if (altR > 0) {strFP += "r"; aNote.push("r"+Math.floor((altR / pixelcount) * 100))}
+		if (altG > 0) {strFP += "g"; aNote.push("g"+ Math.floor((altG / pixelcount) * 100))}
+		if (altB > 0) {strFP += "b"; aNote.push("b"+ Math.floor((altB / pixelcount) * 100))}
+		if (altA > 0) {strFP += "a"; aNote.push("a"+ Math.floor((altA / pixelcount) * 100))}
+		isCanvasGetChannels = strFP
+		isCanvasGet = " [%: "+ aNote.join(" ") +"]"
+		// pixels: allow 1 collision
+		if (altP < (pixelcount - 1)) {return false}
+		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
+		if (altR < (pixelcount - 8)) {return false}
+		if (altG < (pixelcount - 8)) {return false}
+		if (altB < (pixelcount - 8)) {return false}
+		// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
+		if ((altA / pixelcount) < .66) {return false}
+		return true // RFP traits
 	}
 
 	let aStart = {}
@@ -109,13 +86,13 @@ function outputCanvas() {
 								data = mini(imageData.data)
 							} else {
 								data = cleanFn(imageData) +""
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof data)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof data)
 								data = zErr
 							}
-							log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
+							log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
 							return data
 						} catch(e) {
-							oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
+							oErrors[METRIC] = log_error(SECT9, METRIC, e)
 							return zErr
 						}
 					}
@@ -131,7 +108,7 @@ function outputCanvas() {
 							var context = getKnownPath()
 							var data = new Uint8Array(sizeW * sizeH)
 							var dataR = context.isPointInPath(0, 0)
-							if (runSL) {dataR = 0}
+							if (runST) {dataR = 0}
 							if ("boolean" === typeof dataR) {
 								for (let x = 0; x < sizeW; x++){
 									for (let y = 0; y < sizeH; y++){
@@ -142,12 +119,12 @@ function outputCanvas() {
 								oData[METRIC] = data
 								dataR = mini(data)
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof dataR)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof dataR)
 								dataR = zErr
 							}
 							return dataR
 						} catch(e) {
-							oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
+							oErrors[METRIC] = log_error(SECT9, METRIC, e)
 							return zErr
 						}
 					}
@@ -163,7 +140,7 @@ function outputCanvas() {
 							let context = getKnownPath()
 							var data = new Uint8Array(sizeW * sizeH)
 							var dataR = context.isPointInStroke(0, 0)
-							if (runSL) {dataR = "false"}
+							if (runST) {dataR = "false"}
 							if ("boolean" === typeof dataR) {
 								for (let x = 0; x < sizeW; x++){
 									for (let y = 0; y < sizeH; y++){
@@ -174,12 +151,12 @@ function outputCanvas() {
 								oData[METRIC] = data
 								dataR = mini(data)
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof dataR)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof dataR)
 								dataR = zErr
 							}
 							return dataR
 						} catch(e) {
-							oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
+							oErrors[METRIC] = log_error(SECT9, METRIC, e)
 							return zErr
 						}
 					}
@@ -191,33 +168,35 @@ function outputCanvas() {
 							const METRIC = "toBlob"
 							if (aSkip.includes(METRIC)) {resolve("skip")}
 							try {
-								var timeout = window.setTimeout(function(){
-									log_error(SECT9, METRIC, "timed out")
-									reject(zErr)
-								}, 750)
 								if (runSE) {foo++}
-								getKnownTo().canvas.toBlob(function(blob){
-									window.clearTimeout(timeout)
-									var reader = new FileReader()
-									reader.onload = function(){
-										oData[METRIC] = reader.result
-										if ("string" === typeof reader.result) {
-											let data = mini(reader.result)
-											log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
-											resolve(data)
-										} else {
-											oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof reader.result)
-											resolve(zErr)
+								var timeout = window.setTimeout(function(){
+									oErrors[METRIC] = log_error(SECT9, METRIC, zErrTime)
+									resolve(zErrTime)
+								}, 750)
+								if (!runTE) {
+									getKnownTo().canvas.toBlob(function(blob){
+										window.clearTimeout(timeout)
+										var reader = new FileReader()
+										reader.onload = function(){
+											oData[METRIC] = reader.result
+											if ("string" === typeof reader.result) {
+												let data = mini(reader.result)
+												log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
+												resolve(data)
+											} else {
+												oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof reader.result)
+												resolve(zErr)
+											}
 										}
-									}
-									reader.onerror = function(){
-										oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, "undefined [.onerror]")
-										reject(zErr)
-									}
-									reader.readAsDataURL(blob)
-								})
+										reader.onerror = function(){
+											oErrors[METRIC] = log_error(SECT9, METRIC, zErr +" undefined [.onerror]")
+											reject(zErr)
+										}
+										reader.readAsDataURL(blob)
+									})
+								}
 							} catch(e) {
-								oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
+								oErrors[METRIC] = log_error(SECT9, METRIC, e)
 								resolve(zErr)
 							}
 						})
@@ -234,14 +213,14 @@ function outputCanvas() {
 							oData[METRIC] = data
 							if ("string" === typeof data) {
 								data = mini(data)
-								log_perf(METRIC +" ["+ runNo +"] [canvas]", aStart[METRIC])
+								log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
 								return data
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType, typeof data)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof data)
 								return zErr
 							}
 						} catch(e) {
-							oErrors[METRIC] = log_error(SECT9, METRIC, e.name, e.message)
+							oErrors[METRIC] = log_error(SECT9, METRIC, e)
 							return zErr
 						}
 					}
@@ -292,25 +271,25 @@ function outputCanvas() {
 
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){
-					aStart[output.name] = getNow() // start perf here
+					aStart[output.name] = nowFn() // start perf here
 					var displayValue
 					try {
 						var supported = output.supported? output.supported(): isSupported(output);
 						if (supported){
 							displayValue = output.value()
 						} else {
-							oErrors[output.name] = log_error(SECT9, output.name, "Error", zNA)
+							oErrors[output.name] = log_error(SECT9, output.name, "Error")
 							displayValue = zErr
 						}
 					} catch(e) {
-						oErrors[output.name] = log_error(SECT9, output.name, e.name, e.message)
+						oErrors[output.name] = log_error(SECT9, output.name, e)
 						displayValue = zErr
 					}
 					Promise.resolve(displayValue).then(function(displayValue){
 						output.displayValue = displayValue
 						resolve(output)
 					}, function(e){
-						oErrors[output.name] = log_error(SECT9, output.name, e.name, e.message)
+						oErrors[output.name] = log_error(SECT9, output.name, e)
 						output.displayValue = zErr
 						resolve(zErr)
 					})
@@ -325,7 +304,7 @@ function outputCanvas() {
 	let oDrawn = {"get": false, "path": false, "to": false}
 	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
 
-	// create random getImageData
+	// random getImageData
 	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
 	let dataToDraw = [], aPixel = []
 	for (let x = 0; x < pixelcount; x++) {
@@ -348,18 +327,18 @@ function outputCanvas() {
 				value = item.displayValue
 			oRes[name] = {}
 			oRes[name][1] = value
-			if (value === zErr) {
+			if (value === zErr || value == zErrTime) {
 				aSkip.push(name)
 				oFP[name] = zErr
-				dom[name].innerHTML = oErrors[name]
-			} else if (!isTZPSmart) {
-				oFP[name] = value
-				dom[name].innerHTML = value
+				log_display(9, name, oErrors[name] + (isSmart ? rfp_red : ""))
+			} else if (!isSmart) {
+				oFP[name] = name == "getImageData" ? zNA : value // the test is random, return a stable FP
+				log_display(9, name, value)
 			} else {
 				if (name == "getImageData") {
-					if (check_canvas_get(oData["getImageData"], dataDrawn, 1)) {
+					if (check_canvas_get(oData["getImageData"], 1)) {
 						oFP[name] = "trustworthy" // the test is random, return a stable FP
-						dom[name].innerHTML = value + rfp_red
+						log_display(9, name, value + rfp_red) // display hash
 					} else {
 						oFP[name] = zLIE
 						countFake++
@@ -368,7 +347,7 @@ function outputCanvas() {
 					if (oKnown[name] == value) {
 						aSkip.push(name)
 						oFP[name] = value
-						dom[name].innerHTML = value + rfp_red
+						log_display(9, name, value + rfp_red)
 					} else {
 						oFP[name] = zLIE
 						countFake++
@@ -376,23 +355,15 @@ function outputCanvas() {
 				}
 			}
 		})
-		// only one run
-		if (!isTZPSmart || countFake == 0) {
-			//sDataTemp[zFP][9] = oFP
-			//log_section(9, t0)
-			let aResults = []
-			for (const k of Object.keys(oFP).sort()) {
-				aResults.push(k +":"+ oFP[k])
-			}
-			log_section("canvas", t0, aResults)
+
+		if (!isSmart || countFake == 0) {
+			sDataTemp[zFP][isScope][9] = oFP
+			log_section(9, t0)
 			return
 		}
 
 		// smart + some lies, do 2nd run
 		oDrawn = {"get": false, "path": false, "to": false}
-		isCanvasGet = ""
-		isCanvasGetChannels = ""
-
 		Promise.all([
 			known.createHashes(window, 2)
 		]).then(function(run2){
@@ -410,13 +381,13 @@ function outputCanvas() {
 						}
 						rfpvalue = note == rfp_green ? " | RFP" : ""
 						if (name == "getImageData") {
-							check_canvas_get(oData[name], dataDrawn, 2, pixelcount)
+							check_canvas_get(oData[name], 2)
 							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
-						oFP[name] = zLIE + " | persistent" + rfpvalue
-						dom[name].innerHTML = newColor(value) + note +" [persistent]"+ stats
-						if (gRun) {gKnown.push("canvas:"+ name)}
+						oFP[name] = zLIE +" | persistent"+ rfpvalue
+						log_display(9, name, colorFn(value) + note +" [persistent]"+ stats)
+						log_known(SECT9, name)
 					} else {
 						// per execution
 						if (name.slice(0,3) == "isP") {
@@ -424,29 +395,24 @@ function outputCanvas() {
 						} else if (name.slice(0,2) == "to") {
 							note = check_canvas_to(oData[name]) ? rfp_green : rfp_red
 						} else {
-							note = check_canvas_get(oData[name], dataDrawn, 2, pixelcount) ? rfp_green : rfp_red
+							note = check_canvas_get(oData[name], 2) ? rfp_green : rfp_red
 						}
 						rfpvalue = note == rfp_green ? " | RFP" : ""
 						if (name == "getImageData") {
 							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
-						oFP[name] = zLIE + " | per execution" + rfpvalue
-						dom[name].innerHTML = newColor(value) + note +" [per execution]"+ stats
-						if (gRun) {gKnown.push("canvas:"+ name)}
+						oFP[name] = zLIE +" | per execution"+ rfpvalue
+						log_display(9, name, colorFn(value) + note +" [per execution]"+ stats)
+						log_known(SECT9, name)
 					}
 				}
 			})
-			// ToDo: toDataURL vs toBlob bypass: worth it?
-			//sDataTemp[zFP][9] = oFP
-			//log_section(9, t0)
-			let aResults = []
-			for (const k of Object.keys(oFP).sort()) {
-				aResults.push(k +":"+ oFP[k])
-			}
-			log_section("canvas", t0, aResults)
+			sDataTemp[zFP][isScope][9] = oFP
+			log_section(9, t0)
 		})
 	})
 }
 
 countJS(SECT9)
+
