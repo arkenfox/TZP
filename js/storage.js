@@ -6,385 +6,316 @@ function lookup_cookie(name) {
 	let ca = decodedCookie.split(';')
 	for (let i=0 ; i < ca.length; i++) {
 		let c = ca[i]
-		while (c.charAt(0) == " ") {
-			c = c.substring(1)
-		}
-		if (c.indexOf(name) == 0) {
-			return c.substring(name.length, c.length)
-		}
+		while (c.charAt(0) == " ") {c = c.substring(1)}
+		if (c.indexOf(name) == 0) {return c.substring(name.length, c.length)}
 	}
 	return ""
 }
 
-function get_cookies() {
-	// support
-	try {
-		if (runSE) {abc = def}
-		dom.ctest0 = (navigator.cookieEnabled ? zE : zD)
-	} catch(e) {
-		dom.ctest0 = log_error("storage: cookie", e.name)
+const get_cookies = (skip) => new Promise(resolve => {
+	// note: don't use "cookie" in elements as adblockers might block display
+	const METRIC = "cookies"
+	function exit() {
+		let value = valueE + " | "+ valueS +" | "+ valueP
+		log_display(6, "ctest", value)
+		return resolve([METRIC, value])
 	}
-	// file://
-	if (isFile && isVer < 105) {
-		dom.ctest1 = zNA
-		dom.ctest2 = zNA
-		return
-	}
-	// session
+	let valueE, valueS = zNA, valueP = zNA // skip values
 	try {
-		if (runSE) {abc = def}
-		let rndA = "sc_"+ rnd_string()
-		let rndB = rnd_string()
-		document.cookie = rndA +"="+ rndB +"; SameSite=Strict"
-		let svalue = lookup_cookie(rndA)
-		if (svalue != "") {
-			if (logStorage) {
-				console.log(" set:", rndA.padStart(18) +" -", rndB)
-				console.log("read:", rndA.padStart(18) +" -", svalue)
-			}
-			dom.ctest1 = svalue == rndB ? zS : zF +": values do not match"
+		let test = navigator.cookieEnabled
+		if ("boolean" !== typeof test) {
+			valueE = zErr
+			log_error(SECT6, METRIC, zErrType + typeof test)
 		} else {
-			dom.ctest1 = zF
+			valueE = navigator.cookieEnabled ? zE : zD
 		}
 	} catch(e) {
-		dom.ctest1 = log_error("storage: session cookie", e.name)
-	}
-	// persistent
-	try {
-		if (runSE) {abc = def}
-		let rndC = "pc_"+ rnd_string()
-		let rndD = rnd_string()
-		let d = new Date()
-		d.setTime(d.getTime() + 86400000) // 1 day
-		let expires = "expires="+ d.toUTCString()
-		document.cookie = rndC +"="+ rndD +"; SameSite=Strict; "+ expires
-		let pvalue = lookup_cookie(rndC)
-		if (pvalue != "") {
-			if (logStorage) {
-				console.log(" set:", rndC.padStart(18) +" -", rndD)
-				console.log("read:", rndC.padStart(18) +" -", pvalue)
-			}
-			dom.ctest2 = pvalue == rndD ? zS : zF +": values do not match"
-		} else {
-			dom.ctest2 = zF
-		}
-	} catch(e) {
-		dom.ctest2 = log_error("storage: persistent cookie", e.name)
-	}
-}
-
-function get_storage() {
-	// LS support
-	try {
-		if (runSE) {abc = def}
-		dom.lstest0 = (typeof(localStorage) == "undefined" ? zD +": "+ zU : zE)
-	} catch(e) {
-		dom.lstest0 = log_error("storage: localStorage", e.name)
-	}
-	// SS support
-	try {
-		if (runSE) {abc = def}
-		dom.lstest2 = (typeof(sessionStorage) == "undefined" ? zD +": "+ zU : zE)
-	} catch(e) {
-		dom.lstest2 = log_error("storage: sessionStorage", e.name)
-	}
-	// file://
-	if (isFile && isVer < 105) {
-		dom.lstest1 = zNA
-		dom.lstest3 = zNA
-		return
-	}
-	// LS test
-	try {
-		if (runSE) {abc = def}
-		let rndE = "pls_"+ rnd_string()
-		let rndF = rnd_string()
-		localStorage.setItem(rndE, rndF)
-		let lsvalue = localStorage.getItem(rndE)
-		if (lsvalue == null) {
-			dom.lstest1 = zF
-		} else {
-			if (logStorage) {
-				console.log(" set:", rndE.padStart(18) +" -", rndF)
-				console.log("read:", rndE.padStart(18) +" -", lsvalue)
-			}
-			dom.lstest1 = lsvalue == rndF ? zS : zF +": values do not match"
-		}
-	} catch(e) {
-		dom.lstest1 = log_error("storage: localStorage test", e.name)
+		log_error(SECT6, METRIC, e)
+		valueE = zErr
 	}
 
-	// SS test
-	try {
-		if (runSE) {abc = def}
-		let rndStrG = "sls_"+ rnd_string()
-		let rndStrH = rnd_string()
-		sessionStorage.setItem(rndStrG, rndStrH)
-		let ssvalue = sessionStorage.getItem(rndStrG)
-		if (ssvalue == null) {
-			dom.lstest3 = zF
-		} else {
-			if (logStorage) {
-				console.log(" set:", rndStrG.padStart(18) +" -", rndStrH)
-				console.log("read:", rndStrG.padStart(18) +" -", ssvalue)
-			}
-			dom.lstest3 = ssvalue == rndStrH ? zS : zF +": values do not match"
-		}
-	} catch(e) {
-		dom.lstest3 = log_error("storage: sessionStorage test", e.name)
-	}
-}
-
-function get_idb() {
-	// support
-	try {
-		if (runSE) {abc = def}
-		dom.idb1 = !window.indexedDB ? zD : zE
-	} catch(e) {
-		dom.idb1 = log_error("storage: IDB", e.name)
-	}
-	// file://
-	if (isFile && isVer < 105) {
-		dom.idb2 = zNA
-		return
-	}
-	// test
-	try {
-		if (runSE) {abc = def}
-		let dbIDB = indexedDB.open("_testPBMode")
-		dbIDB.onerror = function() {
-			// pb mode
-			dom.idb2 = zF +": onerror"
-		}
-		dbIDB.onsuccess = function() {
-			let rndStrI = "idb_"+ rnd_string()
-			// normal mode
-			try {
-				let openIDB = indexedDB.open(rndStrI)
-				// create objectStore
-				openIDB.onupgradeneeded = function(event){
-					let dbObject = event.target.result
-					let dbStore = dbObject.createObjectStore("testIDB", {keyPath: "id"})
-				}
-				// test
-				openIDB.onsuccess = function(event) {
-					let dbObject = event.target.result
-					// start transaction
-					let dbTx = dbObject.transaction("testIDB", "readwrite")
-					let dbStore = dbTx.objectStore("testIDB")
-					// add data
-					let rndIndex = rnd_number()
-					let rndValue = rnd_string()
-					if (logStorage) {
-						console.log(" set:", rndStrI.padStart(18) +" -", rndIndex, rndValue)
-					}
-					dbStore.put( {id: rndIndex, value: rndValue} )
-					// query data
-					let getStr = dbStore.get(rndIndex)
-					getStr.onsuccess = function() {
-						if (logStorage) {
-							console.log("read:", rndStrI.padStart(18) +" -", getStr.result.id, getStr.result.value)
-						}
-						dom.idb2 = getStr.result.value == rndValue ? zS : zF +": values do not match"
-					}
-					// close transaction
-					dbTx.oncomplete = function() {dbObject.close()}
-				}
-			} catch(e) {
-				dom.idb2 = log_error("storage: IDB test", e.name)
-			}
-		}
-	} catch(e) {
-		dom.idb2 = log_error("storage: IDB test", e.name)
-	}
-}
-
-function get_workers() {
-	// worker support
-	if ("function" === typeof(Worker)) {
-		dom.work1 = zE
-		if (isFile) {
-			// isFile
-			dom.work2.innerHTML= zNA
-			dom.work3.innerHTML= zNA
-		} else {
-			// web worker
-			try {
-				let wwt = new Worker("js/storage_workers.js")
-				let rndStr1 = rnd_string()
-				// assume fail
-				dom.work2 = zF
-				// add listener
-				wwt.addEventListener("message", function(e) {
-					if (logStorage) {console.log("data <- web worker: "+ e.data)}
-					if ("TZP-"+ rndStr1 === e.data) {
-						dom.work2 = zS
-					}
-					wwt.terminate
-				}, false)
-				wwt.postMessage(rndStr1)
-			} catch(e) {
-				dom.work2 = log_error("storage: web worker test", e.name)
-			}
-			// shared worker
-			try {
-				let swt = new SharedWorker("js/storage_shared_worker.js")
-				let rndStr2 = rnd_string()
-				// assume fail
-				dom.work3 = zF
-				// add listener
-				swt.port.addEventListener("message", function(e) {
-					if (logStorage) {console.log("data <- shared worker: "+ e.data)}
-					if ("TZP-"+ rndStr2 === e.data) {
-						dom.work3 = zS
-					}
-					swt.port.close()
-				}, false)
-				swt.port.start()
-				swt.port.postMessage(rndStr2)
-			} catch(e) {
-				dom.work3 = log_error("storage: shared worker test", e.name)
-			}
-		}
-	} else {
-		// no worker
-		dom.work1 = zD; dom.work2 = zNA; dom.work3 = zNA
-	}
-}
-
-function get_service_workers() {
-	let output = ""
-	// support
-	if (isSecure) {
-		if (check_navKey("serviceWorker")) {
-			try {
-				// register
-				navigator.serviceWorker.register("js/storage_service_worker.js").then(function(registration) {
-					dom.swork2 = zS
-					// cache support
-					dom.swork3.innerHTML = note_ttc
-					// cache test
-					dom.swork4.innerHTML = note_ttc
-					// notifications support
-					dom.notif1.innerHTML = note_ttc
-					// notifications test
-					dom.notif2.innerHTML = note_ttc
-					// unregister
-					registration.unregister().then(function(boolean) {})
-				},
-				function(e) {
-					dom.swork2 = log_error("storage: service worker test", e.name)
-					dom.swork3 = zNA; dom.swork4 = zNA
-					dom.notif1 = zNA; dom.notif2 = zNA
-				})
-			} catch(e) {
-				dom.swork2 = log_error("storage: service worker test", e.name)
-				dom.swork3 = zNA; dom.swork4 = zNA
-				dom.notif1 = zNA; dom.notif2 = zNA
-			}
-		}	else {
-			// no sw
-			dom.swork2 = zNA; dom.swork3 = zNA; dom.swork4 = zNA
-			dom.notif1 = zNA; dom.notif2 = zNA
-		}
-	}	else {
-		// isFile
-		output = zNA
-		dom.swork2.innerHTML = output
-		dom.swork3.innerHTML = output; dom.swork4.innerHTML = output
-		dom.notif1.innerHTML = output; dom.notif2.innerHTML = output
-	}
-}
-
-function get_permissions(item) {
-	let userVis = "userVisibleOnly",
-		str = item +":"
-	let el = document.getElementById("p"+ item)
-	return new Promise(resolve => {
+	if (!skip) {
 		try {
-			if (runSE) {abc = def}
-			navigator.permissions.query({name:item}).then(function(result) {
-				el.innerHTML = result.state
-				return resolve(str + result.state)
-			}).catch(error => {
-				if ((error.message).includes(userVis)) {
-					el.innerHTML = userVis
-					str += userVis
-				} else {
-					el.innerHTML = error.type
-					str += error.type
-				}
-				return resolve(str)
+			let rndA = "sc_"+ rnd_string(), rndB = rnd_string()
+			document.cookie = rndA +"="+ rndB +"; SameSite=Strict"
+			valueS = lookup_cookie(rndA) == rndB ? zS : zF
+		} catch(e) {
+			log_error(SECT6, METRIC +"_session", e)
+			valueS = zErr
+		}
+		try {
+			let rndC = "pc_"+ rnd_string(), rndD = rnd_string()
+			let d = new Date()
+			d.setTime(d.getTime() + 86400000) // 1 day
+			let expires = "expires="+ d.toUTCString()
+			document.cookie = rndC +"="+ rndD +"; SameSite=Strict; "+ expires
+			valueP = lookup_cookie(rndC) == rndD ? zS : zF
+		} catch(e) {
+			log_error(SECT6, METRIC +" persistent", e)
+			valueP = zErr
+		}
+	}
+	exit()
+})
+
+const get_storage = (skip) => new Promise(resolve => {
+	const METRICLS = "localStorage", METRICSS = "sessionStorage"
+	function exit() {
+		valueL += " | "+ valueLTest
+		valueS += " | "+ valueSTest
+		log_display(6, "lstest", valueL)
+		log_display(6, "sstest", valueS)
+		return resolve([[METRICLS, valueL],[METRICSS, valueS]])
+	}
+	let valueL, valueS, valueLTest = zNA, valueSTest = zNA // skip values
+	// LS enabled
+	try {
+		valueL = "object" === typeof localStorage ? zE : zD
+	} catch(e) {
+		log_error(SECT6, METRICLS, e)
+		valueL = zErr
+	}
+	// SS enabled
+	try {
+		valueS = "object" === typeof sessionStorage ? zE : zD
+	} catch(e) {
+		log_error(SECT6, METRICSS, e)
+		valueS = zErr
+	}
+
+	// dom.storage.enabled
+	if (!skip) {
+		// LS test
+		try {
+			let rndA = "lsp_"+ rnd_string(), rndB = rnd_string()
+			localStorage.setItem(rndA, rndB)
+			valueLTest = localStorage.getItem(rndA) == rndB ? zS : zF
+		} catch(e) {
+			log_error(SECT6, METRICLS +" test", e.name)
+			valueLTest = zErr
+		}
+		// SS test
+		try {
+			let rndC = "lss_"+ rnd_string(), rndD = rnd_string()
+			sessionStorage.setItem(rndC, rndD)
+			valueSTest = sessionStorage.getItem(rndC) == rndD ? zS : zF
+		} catch(e) {
+			log_error(SECT6, METRICSS +" test", e.name)
+			valueSTest = zErr
+		}
+	}
+	exit()
+})
+
+const get_storage_manager = (delay = 170) => new Promise(resolve => {
+	// note: delay = 0 = silent run if permission granted
+	const METRIC = "storage_manager"
+	dom[METRIC] = ""
+	function exit(value) {
+		if (delay !== 0) {dom.storage_manager = value}
+		return resolve()
+	}
+	setTimeout(function() {
+		try {
+			navigator.storage.persist().then(function(persistent) {
+				navigator.storage.estimate().then(estimate => {
+					exit(`${estimate.usage} of ${estimate.quota} bytes`)
+				})
 			})
 		} catch(e) {
-			log_error("storage: "+ item, e.name, e.message)
-			el.innerHTML = zErr
-			return resolve(str + zErr)
+			exit(log_error(SECT6, METRIC, e))
 		}
-	})
-}
+	}, delay)
+})
 
-function get_storage_manager(runtype) {
-	// support
-	if (check_navKey("storage")) {
-		dom.storageMSupport = zE
-		if (isFile) {
-			dom.storageMProp.innerHTML = zNA
-			dom.storageMTest.innerHTML = zNA
-		} else {
-			// properties
-			if (runtype == "click") {
-				dom.storageMProp.innerHTML = "&nbsp"
-				dom.storageMTest.innerHTML = "&nbsp"
-				setTimeout(function() {
-					try {
-						navigator.storage.persist().then(function(persistent) {
-							if (persistent) dom.storageMProp="persistent"
-							else dom.storageMProp="not persistent"
-							navigator.storage.estimate().then(estimate => {
-								dom.storageMProp.textContent += ` (${estimate.usage} of ${estimate.quota} bytes)`
-							})
-						})
-					} catch(e) {
-						dom.storageMProp = zF +": "+ e.name
-					}
-					// ToDo: test
-					dom.storageMTest.innerHTML = note_ttc
-				}, 170)
+const get_storage_quota = () => new Promise(resolve => {
+	let t0 = nowFn()
+	const METRIC = "storage_quota"
+	function exit(value, display) {
+		log_display(6, METRIC, display)
+		log_perf(SECT6, METRIC, t0)
+		return resolve([METRIC, value])
+	}
+	try {
+		navigator.storage.estimate().then(estimate => {
+			let value = estimate.quota
+			if (Number.isInteger(value)) {
+				let display = value
+				value = Math.floor(value/(1073741824) * 10)/10 // round down
+				exit(value, value +"GB ["+ display +" bytes]")
+			} else {
+				exit(zErr, log_error(SECT6, METRIC, zErrType + typeof value))
 			}
+		})
+	} catch(e) {
+		exit(zErr, log_error(SECT6, METRIC, e))
+	}
+})
+
+const get_permissions = (item) => new Promise(resolve => {
+	const METRIC = "permission_"+ item
+	function exit(value) {
+		let notation = value == "prompt" ? "" : default_red
+		log_display(6, METRIC, value + notation)
+		if (item == "persistent-storage" && value == "granted") {
+			// silent run manager to force granted quota when run
+			Promise.all([
+				get_storage_manager(0)
+			]).then(function(){
+				return resolve([METRIC, value])
+			})
+		} else {
+			return resolve([METRIC, value])
 		}
 	}
-	else {
-		// not-supported
-		dom.storageMSupport = zD; dom.storageMProp = zNA; dom.storageMTest = zNA
+	try {
+		navigator.permissions.query({name:item}).then(function(r) {
+			exit(r.state)
+		}).catch(error => {
+			log_error(SECT6, METRIC, error)
+			exit(zErr)
+		})
+	} catch(e) {
+		log_error(SECT6, METRIC, e)
+		exit(zErr)
 	}
-}
+})
+
+const test_idb = (skip, log = false) => new Promise(resolve => {
+	let t0 = nowFn()
+	const METRIC = "indexedDB_test"
+	function exit(value) {
+		dom[METRIC] = value
+		if (log) {log_perf(SECTNF, METRIC, t0)}
+		return resolve()
+	}
+	if (skip) {
+		exit(zNA)
+	} else {
+		try {
+			let rndStrI = "idb_"+ rnd_string()
+			let openIDB = indexedDB.open(rndStrI)
+			// create
+			openIDB.onupgradeneeded = function(event){
+				let dbObject = event.target.result
+				let dbStore = dbObject.createObjectStore(METRIC, {keyPath:"id"})
+			}
+			openIDB.onsuccess = function(event) {
+				let dbObject = event.target.result
+				// start
+				let dbTx = dbObject.transaction(METRIC, "readwrite")
+				let dbStore = dbTx.objectStore(METRIC)
+				// add
+				let rndIndex = rnd_number()
+				let rndValue = rnd_string()
+				dbStore.put( {id: rndIndex, value: rndValue} )
+				// query
+				let getStr = dbStore.get(rndIndex)
+				getStr.onsuccess = function() {
+					exit(getStr.result.value == rndValue ? zS : zF)
+				}
+				// close
+				dbTx.oncomplete = function() {dbObject.close()}
+			}
+			openIDB.onerror = function(event) {exit(zF)}
+		} catch(e) {
+			exit(zErr)
+		}
+	}
+})
+
+const test_worker_service = (log = false) => new Promise(resolve => {
+	let t0 = performance.now()
+	const METRIC = "service_worker_test"
+	function exit(value) {
+		dom[METRIC] = value
+		if (log) {log_perf(SECTNF, METRIC, t0)}
+	}
+	try {
+		navigator.serviceWorker.register("js/storage_service_worker.js").then((registration) => {
+			exit(zS)
+			registration.unregister().then(function(boolean) {})
+		})
+    .catch((error) => {
+			exit(zErr)
+		})
+	} catch(e) {exit(zErr)}
+})
+
+const test_worker_shared = (log = false) => new Promise(resolve => {
+	let t0 = performance.now()
+	const METRIC = "shared_worker_test"
+	function exit(value) {
+		dom[METRIC] = value
+		if (log) {log_perf(SECTNF, METRIC, t0)}
+		return resolve()
+	}
+	try {
+		let shared = new SharedWorker("js/storage_shared_worker.js")
+		let rndStr2 = rnd_string()
+		shared.port.addEventListener("message", function(e) {
+			let value = ("TZP-"+ rndStr2 === e.data) ? zS : zF
+			shared.port.close()
+			exit(value)
+		}, false)
+		shared.onerror = function (err) {exit(zErr)}
+		shared.port.start()
+		shared.port.postMessage(rndStr2)
+	} catch(e) {
+		exit(zErr)
+	}
+})
+
+const test_worker_web = (skip, log = false) => new Promise(resolve => {
+	let t0 = performance.now()
+	const METRIC = "web_worker_test"
+	function exit(value) {
+		dom[METRIC] = value
+		if (log) {log_perf(SECTNF, METRIC, t0)}
+		return resolve()
+	}
+	if (skip) {
+		exit(zNA)
+	} else {
+		try {
+			let worker = new Worker("js/storage_workers.js")
+			let rndStr1 = rnd_string()
+			worker.addEventListener("message", function(e) {
+				let value = ("TZP-"+ rndStr1 === e.data) ? zS : zF
+				worker.terminate
+				exit(value)
+			}, false)
+			worker.onerror = function (e) {exit(zErr)}
+			worker.postMessage(rndStr1)
+		} catch(e) {
+			exit(zErr)
+		}
+	}
+})
 
 function outputStorage() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let	section = []
-	// appcache
-	let appCache = ("applicationCache" in window ? zE : zD)
-	dom.appcache = appCache
-	section.push("appCache:"+ appCache)
-	// storageM
-	let sm = (check_navKey("storage") ? zE : zD)
-	section.push("storage_manager:"+ sm)
-	// sw
-	let sw = (check_navKey("serviceWorker") ? zE : zD)
-	dom.swork1 = sw
-	section.push("service_worker:"+ sw)
+	// ToDo: notification support/test
+	let t0 = nowFn();
+	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
+	addDataDisplay(6, "worker", "function" === typeof Worker ? zE : zD)
 
+	// FF104- sanitizing issues
+	let skip = isFile && isVer < 105
 	Promise.all([
+		get_cookies(skip),
+		get_storage(skip),
 		get_permissions("notifications"),
+		get_permissions("persistent-storage"),
 		get_permissions("push"),
-		get_permissions("persistent-storage")
 	]).then(function(results){
-		results.forEach(function(currentResult) {
-			section.push(currentResult)
+		results.forEach(function(item) {addDataFromArray(6, item)})
+		Promise.all([
+			get_storage_quota()
+		]).then(function(results){
+			results.forEach(function(item) {addDataFromArray(6, item)})
+			log_section(6, t0)
 		})
-		log_section("storage", t0, section)
 	})
 }
 
-countJS("storage")
+countJS(SECT6)
