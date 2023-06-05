@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>numberformat: formattoparts</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 780px;}
+		hr {color: var(--test4);}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">numberformat: toparts
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">testing values, not entropy</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+			<hr><br>
+			<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+s99 = s99.trim()
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main() {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	let tests = {
+		"decimal": [1.2],
+		"group": [1000, 99999],
+		"infinity": [Infinity],
+		"minusSign": [-5],
+		"nan": ["a"]
+	}
+
+	function get_value(type, parts) {
+		try {
+			let str = "none"
+			for (let i = 0 ; i < parts.length; i++) {
+				if (parts[i]["type"] === type) {
+					str = parts[i]["value"]
+					str += str.length == 1 ? " ("+ str.charCodeAt(0) +")" : ""
+					return str // no need to keep checking
+				}
+			}
+			return str
+		} catch(e) {
+			return "error"
+		}
+	}
+
+	try {
+		aLocales.forEach(function(code) {
+			let formatter = new Intl.NumberFormat(code)
+			let oStyles = {}
+			Object.keys(tests).forEach(function(t){ // each type
+				oStyles[t] = []
+				tests[t].forEach(function(n){ // each number
+					let value = get_value(t, formatter.formatToParts(n))
+					oStyles[t].push(value)
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(tests).forEach(function(s){
+					oTempData[hash][s] = oStyles[s].join(" | ")
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = "aww snap, something went wrong"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+			let str = ""
+			for (const p of Object.keys(oData[k])) {
+				if (p !== "locales") {
+					str += "<li>"+ s16 + p +": "+ sc + oData[k][p] +"</li>"
+				}
+			}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul>"+ str
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// display
+		let display = s4 + localeGroups.length + sc +" from "+ s4 + aLocales.length + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	try {
+		// pointless if we can't use the feature being tested: FF58+
+		let test = new Intl.NumberFormat("en").formatToParts(1.1)
+		isSupported = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"ar-ae,arabic (united arabic emirates)",
+		"ar-dz,arabic (algeria)",
+		"de-ch,german (switzerland)",
+		"ff-adlm,fulah (adlam)",
+		"ru-ua,russian (ukraine)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"yue-cn,cantonese (china)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	legend()
+	if (isSupported) {
+		setTimeout(function() {
+			run_main()
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>
