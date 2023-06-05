@@ -2,26 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>listformat</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>pluralrules</title>
+	<title>listformat</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
-		hr {color: #dcdc8c}
+		hr {color: var(--test4);}
 		.pad {padding-bottom: 10px;)
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -149,7 +142,7 @@ function legend() {
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -264,15 +257,14 @@ function run_main(method) {
 				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 				if (is102) {
 					// track FF version changes
-					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "114571da") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "26ab4f2a") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "c967767a") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "528c7bbc") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "ab7f5221") {localesHash += s14 +" [FF110+]"+ sc // 133
-					} else if (localesHash == "fa67efc2") {localesHash += s14 +" [FF102-109]"+ sc // 130
+					if (localesHash == "5520ad5a") {localesHash += s14 +" [FF110+]"+ sc
+					} else if (localesHash == "ddcfb535") {localesHash += s14 +" [FF102-109]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -289,7 +281,7 @@ function run_main(method) {
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	} catch(e) {
-		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
 	}
 }
 
@@ -352,6 +344,21 @@ Promise.all([
 		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 	}
 	reset_custom("min")
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"bs-cyrl,bosnian (cyrillic)",
+		"en-in,english (india)",
+		"en-sg,english (singapore)",
+		"es-do,spanish (dominican republic)",
+		"es-us,spanish (united states)",
+		"ff-adlm,fulah (adlam)",
+		"hi-latn,hindi (latin)",
+		"ks-deva,kashmiri (devanagari)",
+		"pt-pt,portuguese (portugal)",
+		"yo-bj,yoruba (benin)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
 	if (isSupported) {
 		setBtn("all")
