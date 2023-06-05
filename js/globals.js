@@ -112,13 +112,14 @@ const screen_green = sgtick+"screens match]"+sc,
 // dynamic notation
 let tb_green = sgtick+"TB]"+sc,
 	tb_red = sbx+"TB]"+sc,
-	tb_standard = sgtick+"TB Standard]"+sc,
-	tb_safer = sgtick+"TB Safer]"+sc,
 	tb_slider_red = sbx+"TB Slider]"+sc,
 	lang_green = sgtick+"TB matches language]"+sc,
 	lang_red = sbx+"TB matches language]"+sc,
 	intl_green = sgtick+"TB matches locale]"+sc,
 	intl_red = sbx+"TB matches locale]"+sc
+
+let tb_standard = sg+"[TB Standard]"+sc,
+	tb_safer = sg+"[TB Safer]"+sc // don't tick/cross slider
 
 // run once
 let isArch = true,
