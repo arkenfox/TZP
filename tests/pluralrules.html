@@ -2,25 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>pluralrules</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
 	<title>pluralrules</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
-		hr {color: #dcdc8c}
+		hr {color: var(--test4);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -116,7 +109,7 @@ function legend() {
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -430,6 +423,7 @@ Promise.all([
 	} catch(e) {
 		dom.numbers2.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 	}
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
 	if (isSupported) {
 		setTimeout(function() {
