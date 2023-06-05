@@ -1343,8 +1343,8 @@ function outputFD() {
 			isTB = true
 			tb_green = sgtick+"MB]"+sc
 			tb_red = sbx+"MB]"+sc
-			tb_standard = sgtick+"MB Standard]"+sc
-			tb_safer = sgtick+"MB Safer]"+sc
+			tb_standard = sg+"[MB Standard]"+sc
+			tb_safer = sg+"[MB Safer]"+sc
 			lang_green = sgtick+"MB matches language]"+sc
 			lang_red = sbx+"MB matches language]"+sc
 			intl_green = sgtick+"MB matches locale]"+sc
