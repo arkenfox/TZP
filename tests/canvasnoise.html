@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -10,11 +10,11 @@
 	<style>
 		table {width: 580px;}
 		table td.bottom {vertical-align: bottom;}
-		hr {color: #8cdcc1;}
+		hr {color: var(--test9);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -152,7 +152,7 @@ function run() {
 				let aRead = []
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
-						// we need to read x/y as the opoosite
+						// we need to read x/y as the opposite
 						// as getImageData reads down then across
 						// so we want the 0th quartet, then 20th, then 40th
 						let k = x + (y * cHeight)
@@ -177,7 +177,7 @@ function run() {
 				let aRead2 = []
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
-						// we need to read x/y as the opoosite
+						// we need to read x/y as the opposite
 						// as getImageData reads down then across
 						// so we want the 0th quartet, then 20th, then 40th
 						let k = x + (y * cHeight)
