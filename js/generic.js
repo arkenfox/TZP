@@ -998,7 +998,7 @@ function log_section(name, time, scope = isScope) {
 			btnList.forEach(function(item) {
 				let total = 0
 				// propagate sData to gData
-				if (Object.keys(sData[item][scope]) !== undefined) {
+				if (sData[item][scope] !== undefined) {
 					if (gData[item][scope] == undefined) {gData[item][scope] = {}}
 					for (const s of Object.keys(sData[item][scope]).sort()) {
 						// everything is already sorted
