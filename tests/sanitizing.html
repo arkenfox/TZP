@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -7,14 +7,13 @@
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 680px;}
+		hr {color: var(--test6);}
 	</style>
 </head>
 
 <body>
-
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -25,7 +24,10 @@
 		<thead><tr><th colspan="2">sanitizing</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">Checks for specific existing persistent
 			local web storage entries. If no such data is found, it creates it. If at least one is found,
-			it will propagate to any others that do not exist.</span></td></tr>
+			it will propagate to any others that do not exist.</span>
+		<br><br><hr>
+
+		</td></tr>
 		<tr><td><div>
 				<div class="btn-left"><span class="btn6 btn" onClick="run_sanitize_check()">[ re-run ]</span></div>
 				<div>[navigator] cookieEnabled</div></div></td><td class="c" id="ckieE"></td>
