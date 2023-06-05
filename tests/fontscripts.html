@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,8 +9,8 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 90%; min-width: 600px; max-width: 1600px}
+		hr {color: var(--test12);}
 		ul.nomargin {padding-left: 0;}
-		hr {color: #8ca7dc}
 		#ugSpan {font-size: 10000%;}
 		a.sb {color: #dc8c8c;}
 		.groupleft {float: left;}
@@ -38,8 +38,8 @@
 		}
 	</style>
 </head>
-<body>
 
+<body>
 	<div class="offscreen">
 		<div id="ugDiv" class="normalized" style='font-size: 22pt;'><span id="ugSpan"><span id="ugSlot"></span></span></div>
 	</div>
@@ -843,6 +843,150 @@ let aBlocks = [
 	["thanaa", "07", [8,9,"A","B"], -14, , "Thaana_(Unicode_block)"],
 ]
 
+let aBlocksSkip = [
+	// to easily turn scripts on/off
+
+	// not for production as headers can remain and anchors get fucked up?
+	// all 129 scripts are listed here in different buckets for easily
+	// generating different everyCode lists
+
+	/* everything not in the other list
+	'adlam',
+	'bamum',
+	'bassa vah',
+	'ethiopic',
+	'nko',
+	'osmanya',
+	'tifinagh',
+	'vai',
+	'cherokee',
+	'deseret',
+	'osage',
+	'unified canadian aboriginal syllabics',
+	'old italic',
+	'balinese',
+	'bengali',
+	'buginese',
+	'buhid',
+	'devanagari',
+	'gujarati',
+	'gurmukhi',
+	'hanunoo',
+	'javanese',
+	'kannada',
+	'khmer',
+	'khmer symbols',
+	'lao',
+	'malayalam',
+	'modi',
+	'myanmar',
+	'new tai lue',
+	'oriya',
+	'phags-pa',
+	'sinhala',
+	'sundanese',
+	'tagalog',
+	'tagbanwa',
+	'tai le',
+	'tamil',
+	'telugu',
+	'thai',
+	'tibetan',
+	'cyrillic supplement',
+	'bopomofo',
+	'bopomofo extended',
+	'cjk compatibility',
+	'cjk compatibility forms',
+	'cjk symbols and punctuation',
+	'cjk radicals supplement',
+	'cjk unified ideographs',
+	'cjk unified ideographs extension-a',
+	'enclosed cjk letters and months',
+	'hangul compatibility jamo',
+	'hangul jamo',
+	'hangul syllables',
+	'hiragana',
+	'ideographic description characters',
+	'kanbun',
+	'katakana',
+	'katakana phonetic extensions',
+	'vertical forms',
+	'yi radicals',
+	'yi syllables',
+	'georgian',
+	'georgian extended',
+	'georgian supplement',
+	'greek and coptic',
+	'greek extended',
+	'armenian',
+	'halfwidth and fullwidth forms',
+	'mongolian',
+	'thanaa',
+	//*/
+	
+	/* list to reduce collection of all everyCode for fntString codepoints
+	// list excludes some obvious crap like modifiers, combining, blocks, latin
+	"ethiopic supplement",
+	"gothic",
+	"ogham",
+	"old turkic",
+	"runic",
+	"tamil supplement",
+	"cyrillic",
+	"cyrillic extended-a",
+	"cyrillic extended-b",
+	"cyrillic extended-c",
+	"glagolitic",
+	"cjk compatibility ideographs",
+	"cjk compatibility ideographs supplement",
+	"cjk unified ideographs extension-b",
+	"kangxi radicals",
+	"basic latin",
+	"latin-1 supplement",
+	"latin extended-a",
+	"latin extended-b",
+	"latin extended additional",
+	"ipa extensions",
+	"phonetic extensions",
+	"phonetic extensions supplement",
+	"spacing modifier letters",
+	"arabic",
+	"arabic presentation forms-a",
+	"arabic supplement",
+	"hebrew",
+	"mandaic",
+	"samaritan",
+	"syriac",
+	"alphabetic presentation forms",
+	"arrows",
+	"block elements",
+	"box drawing",
+	"braille patterns",
+	"currency symbols",
+	"dingbats",
+	"enclosed alphanumerics",
+	"general punctuation",
+	"geometric shapes",
+	"letterlike symbols",
+	"mathematical alphanumeric symbols",
+	"mathematical operators",
+	"miscellaneous mathematical symbols-a",
+	"miscellaneous mathematical symbols-b",
+	"miscellaneous symbols",
+	"miscellaneous technical",
+	"number forms",
+	"optical character recognition",
+	"superscripts and subscripts",
+	"supplemental arrows-a",
+	"supplemental arrows-b",
+	"supplemental mathematical operators",
+	"combining diacritical marks",
+	"combining diacritical marks for symbols",
+	"combining diacritical marks supplement",
+	"control pictures",
+	//*/
+]
+
 let aTest = [
 	// these are the "reduce" code points in some scripts
 	// known scripts where if the additonal code point is not supported, subsequent code points may not render
@@ -1158,7 +1302,7 @@ function generate() {
 
 		let aCountsMin = []
 		let aCountsMax = []
-
+		let namesDebug = []
 		aBlocks.forEach(function(data) {
 			let name = data[0].toLowerCase()
 			let anchor = strip(name)
@@ -1189,7 +1333,14 @@ function generate() {
 				oGroupHeader[grouptitle] = [groupStr]
 			} else {
 				name = data[0].toLowerCase()
+				namesDebug.push(name)
 				let go = !isTest
+				if (aBlocksSkip.includes(name)) {
+					go = false
+				} else {
+					go = true
+				}
+
 				if (isTest && aTest.includes(name)) {go = true}
 				if (go) {
 					oTempData[name] = {}
@@ -1294,6 +1445,7 @@ function generate() {
 				}
 			}
 		})
+		//console.log("'"+ namesDebug.join("',\n'") +"',")
 		aDisplay.push("<a name='end'></a>")
 		aDisplayMax.push("<a name='end'></a>")
 
@@ -1321,6 +1473,7 @@ function generate() {
 		// sort oTempData => sorted objects
 		const names = Object.keys(oTempData).sort()
 		dom.countScript.innerHTML = "["+ names.length +"]"
+		var everyCode = []
 		for (const k of names) {
 			oCodePoints[k] = oTempData[k]
 			if (oTempData[k]["range"] !== undefined) {
@@ -1334,6 +1487,9 @@ function generate() {
 			}
 			if (oTempData[k]["max used"] !== undefined) {
 				oCodesMax[k] = oTempData[k]["max used"]
+				if (aBlocksSkip.length > 0) {
+					everyCode = everyCode.concat(oCodesMax[k])
+				}
 			}
 			if (oTempData[k]["ignored"] !== undefined) {
 				oCodesIgnore[k] = oTempData[k]["ignored"]
@@ -1353,6 +1509,10 @@ function generate() {
 			if (oTempData[k]["min version"] !== undefined) {
 				oCodesMinVersion[k] = oTempData[k]["min version"]
 			}
+		}
+		if (aBlocksSkip.length > 0) {
+			console.log(everyCode.length, everyCode)
+			console.log("['"+ everyCode.join("','") +"']")
 		}
 		// return
 		return resolve()
