@@ -805,9 +805,8 @@ function output_section(section, scope) {
 		let aBtns = []
 		try {
 			btnList.forEach(function(item) {
-console.log(item)
 				let btn = "", source = {}, target = {}
-				if (sDataTemp[item][scope][name] !== undefined) {
+				if (sDataTemp[item][scope] !== undefined && sDataTemp[item][scope][name] !== undefined) {
 					if (sData[item][scope] == undefined) {sData[item][scope] = {}}
 					if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
 					for (const m of Object.keys(sDataTemp[item][scope][name]).sort()) {
