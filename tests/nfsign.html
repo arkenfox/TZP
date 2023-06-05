@@ -3,14 +3,13 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>listformat</title>
+	<title>numberformat: signdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 780px;}
 		hr {color: var(--test4);}
-		.pad {padding-bottom: 10px;)
 	</style>
 </head>
 
@@ -23,35 +22,19 @@
 	<table id="tb4">
 		<col width="32%"><col width="68%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">listformat
+			<div class="nav-title">numberformat: signdisplay
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
-			styles (<code>narrow</code>, <code>short</code>, <code>long</code>) and three types
-			(<code>conjunction</code>, <code>disjunction</code>, <code>unit</code>).
-			Click custom to test any configuration.</span>
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
-				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
-				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
 				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
-				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
 			<br><br><hr><br>
-				<span class="hidden" id ="customoptions">
-					<div class="mono spaces pad">NARROW: conjunction <input type="checkbox" id="narrowconjunction"> disjunction <input type="checkbox" id="narrowdisjunction"> unit <input type="checkbox" id="narrowunit"></div>
-					<div class="mono spaces pad"> SHORT: conjunction <input type="checkbox" id="shortconjunction"> disjunction <input type="checkbox" id="shortdisjunction"> unit <input type="checkbox" id="shortunit"></div>
-					<div class="mono spaces pad">  LONG: conjunction <input type="checkbox" id="longconjunction"> disjunction <input type="checkbox" id="longdisjunction"> unit <input type="checkbox" id="longunit"></div>
-				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
-				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
-				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
-				<span class="btn4 btn" onClick="run_custom()">[ RUN ]</span>
-					<br><br><hr><br>
-				</span>
 				<span id ="results"></span>
 			</td></tr>
 	</table>
@@ -64,7 +47,8 @@ var list = gLocales,
 	aLegend = [],
 	aLocales = [],
 	isSupported = false,
-	localesHashAll = "" // to compare custom to
+	isBigIntSupported = false,
+	localesHashAll = "" // to compare min to
 
 s4 = s4.trim()
 s12 = s12.trim()
@@ -83,32 +67,6 @@ function log_console(name) {
 	}
 }
 
-function reset_custom(type) {
-	// check/uncheck everything
-	let checkState = (type == "all")
-	let styles = ["narrow","short","long"],
-		types = ["conjunction","disjunction","unit"]
-	styles.forEach(function(s){
-		types.forEach(function(t){
-			document.getElementById(s +t).checked = checkState
-		})
-	})
-	if (type == "min") {
-		/*
-		gecko min example
-		- shortunit + narrowunit = required (all but not either of those = no match)
-		- then one of conjunction (any style)
-		- then one of disjunction (any style)
-		*/
-		// min preset
-		dom.narrowconjunction.checked = true
-		dom.narrowdisjunction.checked = true
-		dom.narrowunit.checked = true
-		dom.shortunit.checked = true
-		dom.shortconjunction.checked = true
-	}
-}
-
 function legend() {
 	// build once
 	if (aLegend.length == 0) {
@@ -119,7 +77,7 @@ function legend() {
 			let name = str.split(",")[1].trim()
 			let go = true
 			if (isSupported) {
-				go = Intl.ListFormat.supportedLocalesOf([code]).length > 0
+				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
 			}
 			if (go) {
 				aLocales.push(code)
@@ -146,55 +104,44 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-function get_dayperiod(date, code, option) {
-	// always use h12
-	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
-}
-
 function run_main(method) {
 	let t0 = performance.now()
 	let oData = {}, oTempData = {}
 	let spacer = "<br><br>"
 
-	try {
-		let	styles = ['narrow','short','long']
-		let types = ['conjunction','disjunction','unit']
-		let oOptions = {}
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
-		// select what to test
-		if (method == "custom") {
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					oOptions[s + t] = document.getElementById(s +t).checked
-				})
-			})
-		} else {
-			if (method == "narrow") {styles = ["narrow"]}
-			if (method == "short") {styles = ["short"]}
-			if (method == "long") {styles = ["long"]}
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					oOptions[s + t] = true
-				})
-			})
+	let items = [-1, -0, 0/0, 0, 1]
+	let tests = {
+		"always": items,
+		"auto": items,
+		"exceptZero": items,
+		//"negative":items, // RangeError: invalid value "negative" for option signDisplay
+		"never": items,
+	}
+	if (method == "min") {
+		tests = {
+			"always": [-1, 0/0]
 		}
-		//test: 3 styles x 3 types
+	}
+
+	try {
 		aLocales.forEach(function(code) {
-			let oStyles = {"narrow": [], "short": [], "long": []}
-			styles.forEach(function(s){
-				types.forEach(function(t){
-					if (oOptions[s + t] == true) {
-						oStyles[s].push(new Intl.ListFormat(code, {style: s, type: t}).format(["a","b","c"]))
-					}
+			let oStyles = {}
+			Object.keys(tests).forEach(function(s){
+				oStyles[s] = []
+				let formatter = new Intl.NumberFormat(code, {signDisplay: s})
+				tests[s].forEach(function(t){
+					oStyles[s].push(formatter.format(t))						
 				})
 			})
 			let hash = mini(oStyles) +" " // make numbers sort like strings
 			if (oTempData[hash] == undefined) {
 				oTempData[hash] = {}
 				oTempData[hash]["locales"] = [code]
-				oTempData[hash]["long"] = oStyles["long"].join(" | ")
-				oTempData[hash]["short"] = oStyles["short"].join(" | ")
-				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
+				Object.keys(tests).forEach(function(s){
+					oTempData[hash][s] = oStyles[s].join(" | ")
+				})
 			} else {
 				oTempData[hash]["locales"].push(code)
 			}
@@ -215,19 +162,20 @@ function run_main(method) {
 				}
 			}
 		}
+
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
-			let strN = oData[k]["narrow"],
-				strS = oData[k]["short"],
-				strL = oData[k]["long"],
-				localeCount = oData[k]["locales"].split(",").length
-			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
-			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
-			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
+			let localeCount = oData[k]["locales"].split(",").length
+			let str = ""
+			for (const p of Object.keys(oData[k])) {
+				if (p !== "locales") {
+					str += "<li>"+ s16 + p +": "+ sc + oData[k][p] +"</li>"
+				}
+			}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>" + strN + strS + strL
+				+ "<ul>"+ str
 				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}
@@ -258,18 +206,18 @@ function run_main(method) {
 				if (is102) {
 					// track FF version changes
 					// results
-					if (resultsHash == "c967767a") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "528c7bbc") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "282e7dc2") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "e8e76c36") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "5520ad5a") {localesHash += s14 +" [FF110+]"+ sc
-					} else if (localesHash == "ddcfb535") {localesHash += s14 +" [FF102-109]"+ sc
+					if (localesHash == "d4e99a1a") {localesHash += s14 +" [FF110+]"+ sc
+					} else if (localesHash == "422096c7") {localesHash += s14 +" [FF102-109]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
 			}
-		} else if (method == "custom") {
+		} else if (method == "min") {
 			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 		// display
@@ -291,31 +239,9 @@ function run(method) {
 		setBtn(method)
 		dom.perf = ""
 		dom.results = ""
-		let element = dom.customoptions
-
-		if (method == "custom") {
-			// unhide custom section
-			element.classList.remove("hidden")
-
-		} else {
-			// hide custom
-			element.classList.add("hidden")
-			dom.results = ""
-			// delay so users see change and allow paint
-			setTimeout(function() {
-				run_main(method)
-			}, 1)
-		}
-	}
-}
-
-function run_custom() {
-	if (isSupported) {
-		//reset
-		dom.perf = ""
-		dom.results = ""
+		// delay so users see change and allow paint
 		setTimeout(function() {
-			run_main("custom")
+			run_main(method)
 		}, 1)
 	}
 }
@@ -336,26 +262,35 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
-	// support
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+	// note: numberformat supported since at least FF29
+
+	// FF78+ : signDisplay
+	// FF93+ : negative
+
 	try {
-		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
-		isSupported = true
+		// pointless if we can't use the feature being tested: FF78+
+		let test = new Intl.NumberFormat("en", {signDisplay: "always"}).format(5)
+		test += ""
+		if (test.length > 1) {
+			isSupported = true
+		} else {
+			dom.results.innerHTML = s4 + "signDisplay:" + sc +" not supported"
+		}
 	} catch(e) {
 		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 	}
-	reset_custom("min")
+	// check bigint support: FF68+
+	try {
+		let y = BigInt("9999999999999999")
+		isBigIntSupported = true
+	} catch(e) {}
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"bs-cyrl,bosnian (cyrillic)",
-		"en-in,english (india)",
-		"en-sg,english (singapore)",
-		"es-do,spanish (dominican republic)",
-		"es-us,spanish (united states)",
+		"ar-dz,arabic (algeria)",
 		"ff-adlm,fulah (adlam)",
-		"hi-latn,hindi (latin)",
-		"ks-deva,kashmiri (devanagari)",
-		"pt-pt,portuguese (portugal)",
-		"yo-bj,yoruba (benin)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"yue-hans,cantonese (simplified)",
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})

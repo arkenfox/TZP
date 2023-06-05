@@ -2,25 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>formatting</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>formatting</title>
+	<title>compare locales</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
-		hr {color: #dcdc8c}
+		hr {color: var(--test4);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -29,12 +22,12 @@
 	<table id="tb4">
 		<col width="20%"><col width="80%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">formatting
+			<div class="nav-title">compare locales
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">Compare expected locale format to actual</span>
+			<span class="no_color">Compare two locales ... not built yet - leave one blank to use <code>undefined</code></span>
 			<span class="btn4 btn" onClick="rerun()">[ re-run ]</span>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
@@ -173,7 +166,6 @@ function get_data(lang) {
 						tzDays.forEach(function(day) {
 							tzNames.forEach(function(name) {
 								let tz = ""
-								let tzDate = new Date(day)
 								try {
 									let tzFormatter = Intl.DateTimeFormat(lang, {hour12: true, timeZoneName: name})
 									let tzDateString = tzFormatter.formatToParts(day).map(({type, value}) => {

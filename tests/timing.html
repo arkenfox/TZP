@@ -2,56 +2,56 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>timing</title>
-<style>
-.mono {font-family: monospace, "Courier New"; font-size: 11px; white-space: pre;}
-td {vertical-align: top;}
-.anim {
-  width: 5px;
-  height: 10px;
-  background-color: black;
-  position: relative;
-  animation-name: cssAnim;
-	animation-timing-function: linear;
-  animation-duration: 1s;
-}
-@keyframes cssAnim {
-	from {left: 0;}
-	to {left: 1000px;}
-}
-</style>
+	<title>timing</title>
+	<style>
+		.mono {font-family: monospace, "Courier New"; font-size: 11px; white-space: pre;}
+		td {vertical-align: top;}
+		.anim {
+			width: 5px;
+			height: 10px;
+			background-color: black;
+			position: relative;
+			animation-name: cssAnim;
+			animation-timing-function: linear;
+			animation-duration: 1s;
+		}
+		@keyframes cssAnim {
+			from {left: 0;}
+			to {left: 1000px;}
+		}
+	</style>
 </head>
 
 <body>
-<span><span id="anim"></span>&nbsp </span>
+	<span><span id="anim"></span>&nbsp </span>
 
-<table width="600">
-<col width="18%"><col width="18%"><col width="18%"><col width="23%"><col width="23%">
-<tr>
-	<td>date<br>setInterval</td>
-	<td>date<br>setTimeout</td>
-	<td>performance<br>now</td>
-	<td>performance<br>timeOrigin</td>
-	<td>event<br>timeStamp</td>
-	<td>css<br>animation</td>
-</tr>
-<tr>
-	<td><button onClick="logInterval()">run</button></td>
-	<td><button onClick="runTimeout()">run</button></td>
-	<td><button onClick="logPerfnow()">run</button></td>
-	<td><button onClick="logPerforigin()">run</button></td>
-	<td><button onClick="logEventTS()">run</button></td>
-	<td><button onClick="logCss()">run</button></td>
-</tr>
-<tr>
-	<td id="outputa" class="mono">&nbsp </td>
-	<td id="outputb" class="mono">&nbsp </td>
-	<td id="outputc" class="mono">&nbsp </td>
-	<td id="outputf" class="mono">&nbsp </td>
-	<td id="outputd" class="mono">&nbsp </td>
-	<td id="outpute" class="mono">&nbsp </td>
-</tr>
-</table>
+	<table width="600">
+	<col width="18%"><col width="18%"><col width="18%"><col width="23%"><col width="23%">
+	<tr>
+		<td>date<br>setInterval</td>
+		<td>date<br>setTimeout</td>
+		<td>performance<br>now</td>
+		<td>performance<br>timeOrigin</td>
+		<td>event<br>timeStamp</td>
+		<td>css<br>animation</td>
+	</tr>
+	<tr>
+		<td><button onClick="logInterval()">run</button></td>
+		<td><button onClick="runTimeout()">run</button></td>
+		<td><button onClick="logPerfnow()">run</button></td>
+		<td><button onClick="logPerforigin()">run</button></td>
+		<td><button onClick="logEventTS()">run</button></td>
+		<td><button onClick="logCss()">run</button></td>
+	</tr>
+	<tr>
+		<td id="outputa" class="mono">&nbsp </td>
+		<td id="outputb" class="mono">&nbsp </td>
+		<td id="outputc" class="mono">&nbsp </td>
+		<td id="outputf" class="mono">&nbsp </td>
+		<td id="outputd" class="mono">&nbsp </td>
+		<td id="outpute" class="mono">&nbsp </td>
+	</tr>
+	</table>
 
 <script>
 'use strict';

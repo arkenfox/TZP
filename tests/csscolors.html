@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,11 +9,11 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 780px}
-		hr {color: #a78cdc}
+		hr {color: var(--test14);}
 	</style>
 </head>
-<body>
 
+<body>
 	<div class="hidden"><span id="sColorElement"></span></div>
 
 	<table>
@@ -78,6 +78,14 @@ function get_colors() {
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
 		"moz": [ // FF102+:
+			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
+			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
+			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
+			'-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
+			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow',
+			'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
+			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
+			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
 			'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
 			// dropped FF103
@@ -94,16 +102,6 @@ function get_colors() {
 			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
 			'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
 			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
-		],
-		"moz_stand-in": [
-			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
-			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
-			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
-			'-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
-			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow',
-			'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
-			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
-			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		],
 	}
 
@@ -220,18 +218,11 @@ function display(type) {
 	let data = oColors[type]["data"],
 		hash = oColors[type]["hash"],
 		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
-	let note = ""
-	if (type == "moz_stand-in" && "function" === typeof self.structuredClone) { // FF94+
-		if (Object.keys(data).length) { // only gecko will have data
-			note = hash == "a9d06474" ? rfp_green +" [FF94+]" : rfp_red // 1734115
-		}
-	}
-
 	let consoleBtns = " | CONSOLE: "
 		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`databyname`)'>[by name]</span> "
 		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`data`)'>[by color]</span> "
 
-	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + consoleBtns + note +"<br><br>{")
+	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + consoleBtns +"<br><br>{")
 	for (const k of Object.keys(data)) {
 		results.push("  \""+ k +"\": <span style='background-color:#"+ k +"; border: 1px solid white'> &nbsp </span>")
 		let resultsStr = ""

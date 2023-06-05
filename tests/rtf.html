@@ -2,24 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>relativetimeformat</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>pluralrules</title>
+	<title>relativetimeformat</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
-		hr {color: #dcdc8c}
+		hr {color: var(--test4);}
 		.pad {padding-bottom: 10px;)
 	</style>
 </head>
+
 <body>
 	<div class="offscreen">
 		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
@@ -120,7 +114,7 @@ function legend() {
 		}
 	}
 	// output
-	let header = s4 +"   LEGEND ["+ aLegend.length + (isSupported ? " supported" : "") +"]"+ sc +"<br><br>"
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -331,7 +325,7 @@ function run_main(method) {
 
 				displaylist.push(
 					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-					+ "<ul>" + "<details><summary>details</summary>"+  strAlways + strAuto
+					+ "<ul>" + "<details><summary>details</summary>"+ strAlways + strAuto
 					+ "<li>"+ "</details>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 				)
 
@@ -376,13 +370,13 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "2469a32f") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "07d68516") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "ecee9fda") {resultsHash += s14 +" [FF110+]"+ sc
+					} else if (resultsHash == "2a941740") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "31c0505d") {localesHash += s14 +" [FF110+]"+ sc // 226
-					} else if (localesHash == "45bd18d2") {localesHash += s14 +" [FF102-109]"+ sc // 222
+					if (localesHash == "f89a86b9") {localesHash += s14 +" [FF110+]"+ sc
+					} else if (localesHash == "033bccd0") {localesHash += s14 +" [FF102-109]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -399,7 +393,7 @@ function run_main(method) {
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	} catch(e) {
-		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
 	}
 }
 
@@ -442,6 +436,43 @@ Promise.all([
 		} catch(e) {
 			dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
 		}
+		// add additional locales to core locales for this test
+		let aListExtra = [
+			"ar-ae,arabic (united arabic emirates)",
+			"ar-dz,arabic (algeria)",
+			"bs-cyrl,bosnian (cyrillic)",
+			//"dyo-sn,jola-fonyl (senegal)",
+			"en-at,english (austria)",
+			"en-au,english (australia)",
+			"en-ca,english (canada)",
+			"en-sg,english (singapore)",
+			"es-ar,spanish (argentina)",
+			"es-co,spanish (colombia)",
+			"es-mx,spanish (mexico)",
+			"es-py,spanish (paraguay)",
+			"es-us,spanish (united states)",
+			"ff-adlm,fulah (adlam)",
+			"fr-ca,french (canada)",
+			"hi-latn,hindi (latin)",
+			"ks-deva,kashmiri (devanagari)",
+			"pa-pk,punjabi (pakistan)",
+			"ps-pk,pashto (pakistan)",
+			"pt-gw,portuguese (guinea-bissau)",
+			"pt-pt,portuguese (portugal)",
+			"sd-deva,sindhi (devanagari)",
+			"se-fi,northern sami (finland)",
+			"shi-latn,tachelhit (latin)",
+			"sr-ba,serbian (bosnia & herzegovina)",
+			"sr-latn,serbian (latin)",
+			"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+			"ur-in,urdu (india)",
+			"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+			"vai-latn,vai (latin)",
+			"yo-bj,yoruba (benin)",
+			"yue-hans,cantonese (simplified)",
+		]
+		list = list.concat(aListExtra)
+		list = list.filter(function(item, position) {return list.indexOf(item) === position})
 		legend()
 		if (isSupported) {
 			setBtn("all")

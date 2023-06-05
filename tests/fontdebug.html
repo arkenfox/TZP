@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -8,8 +8,8 @@
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 680px;}
-		hr {color: #8ca7dc}
+		table {width: 730px;}
+		hr {color: var(--test12);}
 		.pad {padding-bottom: 5px; padding-top: 5px;}
 		.visual {
 			font-size: 96px !important;
@@ -120,7 +120,7 @@ function run() {
 	isEverDetected = false
 	// make sure we have a font
 	let valueF = dom.valueF.value
-	valueF = valueF.replace(/['"]+/g, "") // remove quote marks
+	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
 	valueF = valueF.trim()
 	if (valueF.length) {
 		let tmpArr = valueF.split(",")
@@ -141,14 +141,15 @@ function run() {
 			// only use the first one
 			setTimeout(function() {
 				let font = fntList[0].toLowerCase()
-				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntString +"</span>"
 				if (fntSystem.includes(font)) {
+					dom.visual.style.font = ""
 					dom.visual.style.setProperty('--font', "")
 					dom.visual.style.font = font
 				} else {
 					dom.visual.style.font = ""
 					dom.visual.style.fontFamily = font
 				}
+				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntString +"</span>"
 				dom.valueF.value = font
 				fntList = [font]
 				getFonts()

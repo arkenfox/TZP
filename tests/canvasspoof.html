@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -13,8 +13,8 @@
 		.wordwrap {word-break: break-all; padding-right: 30px;}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -118,6 +118,12 @@ function run() {
 
 	dom.unknown.style.display = "none" // rehide
 
+	let sizeW = 16, sizeH = 16
+	dom.control1.width = sizeW
+	dom.control1.height = sizeH
+	dom.control2.width = sizeW
+	dom.control2.height = sizeH
+
 	var known = {
 		createHashes: function(window){
 			let outputs = [
@@ -164,7 +170,7 @@ function run() {
 					name: "getImageData",
 					value: function(){
 						var context = getKnown()
-						let imageData = context.getImageData(0,0,16,16)
+						let imageData = context.getImageData(0,0,sizeW, sizeH)
 						let data = sha1(imageData.data)
 						return data
 					}
@@ -175,8 +181,8 @@ function run() {
 					value: function(){
 						let context2 = getKnownPath()
 						let pathData = []
-						for (let x = 0; x < 16; x++){
-							for (let y = 0; y < 16; y++){
+						for (let x = 0; x < sizeW; x++){
+							for (let y = 0; y < sizeH; y++){
 								pathData.push(context2.isPointInPath(x, y))
 							}
 						}
@@ -189,8 +195,8 @@ function run() {
 					value: function(){
 						let context2 = getKnownPath()
 						let pathStroke = []
-						for (let x = 0; x < 16; x++){
-							for (let y = 0; y < 16; y++){
+						for (let x = 0; x < sizeW; x++){
+							for (let y = 0; y < sizeH; y++){
 								pathStroke.push(context2.isPointInStroke(x, y))
 							}
 						}
@@ -204,8 +210,8 @@ function run() {
 			function getKnown(){
 				let canvas = document.getElementById("control1")
 				let ctx = canvas.getContext('2d')
-				for (let x=0; x < 16; x++) {
-					for (let y=0; y < 16; y++) {
+				for (let x=0; x < sizeW; x++) {
+					for (let y=0; y < sizeH; y++) {
 						ctx.fillStyle = "rgba(" + (x*y) +","+ (x*16) +","+ (y*16) +",255)"
 						ctx.fillRect(x, y, 1, 1)
 					}

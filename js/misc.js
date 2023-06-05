@@ -1,323 +1,247 @@
 'use strict';
 
-function get_component_shims() {
-	let sName = "misc_component_shims"
-	sDetail[sName] = []
-	let res, notation = ""
-	try {
-		if (runSE) {abc = def}
-		let keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
-		sDetail[sName] = keys
-		res = mini_sha1(keys.join(), "misc component shims")
-		dom.shim.innerHTML = res + buildButton("18", sName, keys.length) + (isTB ? tb_red : "")
-	} catch(e) {
-		if (isTB && isTZPSmart) {notation = (e.message == "Components is not defined" ? tb_green : tb_red)}
-		dom.shim.innerHTML = log_error("misc: component shims", e.name, e.message) + notation
-		res = zErr
-	}
-	return "component_shims:"+ res
-}
-
-function get_errors() {
-	return new Promise(resolve => {
-		let res = [], btn = "", note = "", hash
-		let sName = "misc_error_messages"
-		sDetail[sName] = []
-		try {null.bar} catch(e) {hash = e.message; res.push(hash)} // 0.06ms
-		if (!isFF) {
-			try {[...undefined].length} catch(e) {res.push(e.message)}
-			try {var a = {}; a.b = a; JSON.stringify(a)} catch(e) {res.push(e.message)}
-			try {(1).toString(1000)} catch(e) {res.push(e.message)}
-			try {var x = new Array(-1)} catch(e) {res.push(e.message)}
-			hash = mini_sha1(res.join(), "misc errors")
-			sDetail[sName] = res
-			btn = buildButton("18", sName)
-		}
-		// notation: 74+: 1259822: error_message_fix
-		if (isFF && isTZPSmart) {
-			if (hash !== "null has no properties" && hash !== "can't access property \"bar\" of null") {
-				note = zNEW
-			}
-		}
-		dom.miscError.innerHTML = hash + btn + note
-		return resolve("errors:"+ hash)
-	})
-}
-
-function get_iframe_props() {
-	/* https://github.com/abrahamjuliot/creepjs */
-	let sTrue = "misc_iframe_window_properties"
-	let sFake = sTrue + "_fake_skip"
-	let sSuspect = sTrue + "_suspect_skip"
-	let sAll = sTrue + "_reported_notglobal"
-	sDetail[sTrue] = []
-	sDetail[sFake] = []
-	sDetail[sSuspect] = []
-	sDetail[sAll] = []
-
-	let knownGood = [
-		// acculumative
-		// NoScript (TB)
-		'Element','HTMLElement','HTMLFrameElement','HTMLIFrameElement','HTMLObjectElement','MediaSource','URL','webkitURL',
-		// cydec
-		'CanvasRenderingContext2D','CSSStyleDeclaration','CSS2Properties','SharedWorker','Worker',
-		'MediaDevices','AudioNode','AnalyserNode','SpeechSynthesis','AudioBuffer',
-		'HTMLCanvasElement','SVGElement','SVGGraphicsElement','SVGTextContentElement','RTCPeerConnection',
-		'mozRTCPeerConnection','RTCDataChannel','RTCRtpReceiver','Date','Intl','Navigator','Geolocation',
-		// chameleon
-		'AbstractRange','Range','History','BaseAudioContext','AudioContext','OfflineAudioContext','FontFaceSet','Screen',
-		// CB
-		'MediaQueryList','WebGLRenderingContext','WebGL2RenderingContext','BiquadFilterNode',
-		'IIRFilterNode','CharacterData','Text','SVGGeometryElement','SVGPathElement','DOMRectReadOnly',
-		'DOMRect','SVGRect','IntersectionObserverEntry','TextMetrics',"OffscreenCanvas",
-		// Trace
-		'PluginArray',
-		// ScriptSafe
-		'Array','HTMLDivElement','MediaStreamTrack',
-		// AdBlocker Ultimate
-		'CustomEvent','String','WeakSet','decodeURI','decodeURIComponent','encodeURI','encodeURIComponent','escape','unescape',
-		// JShelter
-		'Gamepad','Math','PerformanceEntry','Promise','Proxy','VRFrameData',
-		'DataView','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Symbol',
-		'Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','XMLHttpRequest','XMLHttpRequestEventTarget',
-		"Error","GeolocationCoordinates","GeolocationPosition","GeolocationPositionError","TypeError","console",
-		"MimeTypeArray","Infinity","MimeType","NaN","Number","Plugin","isFinite","isNaN","parseFloat","parseInt",
-		"HTMLMediaElement","IdleDeadline","MediaCapabilities","Set",
-		"AudioDestinationNode","AudioParam","DynamicsCompressorNode","FileSystemEntry","FileSystemFileEntry",
-		"OfflineAudioCompletionEvent","Permissions","SubtleCrypto","WebGLShaderPrecisionFormat",
+function check_mathLies() {
+	if (!isSmart) {return false}
+	const mathList = [
+		"Math.acos","Math.acosh","Math.asinh","Math.atan","Math.atan2","Math.atanh",
+		"Math.cbrt","Math.cos","Math.cosh","Math.exp","Math.expm1","Math.log","Math.log10",
+		"Math.log1p","Math.sin","Math.sinh","Math.sqrt","Math.tan","Math.tanh"
 	]
-
-	try {
-		if (runSE) {abc = def}
-		// create & append
-		let id = "iframe-window-version"
-		let el = document.createElement("iframe")
-		el.setAttribute("id", id)
-		el.setAttribute('style', 'display: none')
-		document.body.appendChild(el)
-		// get props
-		let iframe = document.getElementById(id)
-		let contentWindow = iframe.contentWindow
-		let props = Object.getOwnPropertyNames(contentWindow)
-		// remove
-		iframe.parentNode.removeChild(iframe)
-		// lies
-		if (runSL) {
-			props.push("hdcd_canvas_getctx")
-			props.push("serviceWorker")
-		}
-		// original
-		let allProps = []
-		props.forEach(function(item) {allProps.push(item)})
-		//console.log(allProps.slice(allProps.indexOf("Performance"), allProps.length).join()) // last few items
-
-		// gecko BS
-		let suspectProps = [], fakeProps = [], suspectStr = "", fakeStr = ""
-		if (isFF && isTZPSmart) {
-			// suspect
-			suspectProps = props.slice(props.indexOf("Performance")+1)
-			let falsePos = ['Event','Location'] // false positives: console open
-			suspectProps = suspectProps.filter(x => !falsePos.includes(x))
-			if (suspectProps.length) {
-				sDetail[sSuspect] = suspectProps.sort()
-				suspectStr = buildButton("18", sSuspect, suspectProps.length + " suspect")
-				// fake
-				fakeProps = suspectProps.filter(x => !knownGood.includes(x))
-				if (fakeProps.length) {
-					props = props.filter(x => !fakeProps.includes(x))
-					sDetail[sFake] = fakeProps.sort()
-					fakeStr = buildButton("18", sFake, fakeProps.length + " lie"+ (fakeProps.length > 1 ? "s" : ""))
-				}
-			}
-		}
-		// sort (open console can affect order)
-		props.sort() // original or modified gecko
-		sDetail[sTrue] = props
-		allProps.sort() // reported
-		sDetail[sAll] = allProps
-
-		// display
-		let output = mini_sha1(allProps.join(), "misc iframe props")
-		let result = output
-		if (fakeProps.length) { // gecko smart only
-			output = soB + output + scC
-			result = mini_sha1(props.join(), "misc iframe props bypass")
-			// record lie/bypass
-			if (gRun) {
-				gKnown.push("misc:iframe window properties")
-				gBypassed.push("misc:iframe window properties:"+ result)
-			}
-		}
-		output += buildButton("18", sAll, sDetail[sAll].length) + suspectStr + fakeStr
-		dom.iProps.innerHTML = output
-		return "iframe_properties:"+ result
-	} catch(e) {
-		dom.iProps = log_error("misc: iframe window properties", e.name, e.message)
-		return "iframe_properties:"+ zErr
-	}
+	return mathList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 
-function get_math_other(isMathLies) {
-	// polyfills + non-trig
-	if (!isFF) {
-		dom.mathOther = zNA
-		return "math_other::n/a"
+const get_component_shims = () => new Promise(resolve => {
+	// ToDo: 1448046: isSmartMin=115 ? remove this metric
+	const METRIC = "component_interfaces"
+	let notation = ""
+	try {
+		if (runSE) {foo++}
+		const keys = Object.keys(Object.getOwnPropertyDescriptors(Components.interfaces))
+		const hash = mini(keys) // 102+ 6f0b1e35
+		addData(18, METRIC, keys, hash)
+		if (isTB && isSmart) {notation = tb_red}
+		log_display(18, METRIC, hash + addButton(18, METRIC, keys.length) + notation)
+		return resolve()
+	} catch(e) {
+		if (isTB && isSmart) {notation = (e+"" === "ReferenceError: Components is not defined" ? tb_green : tb_red)}
+		log_display(18, METRIC, log_error(SECT18, METRIC, e) + notation)
+		return resolve([METRIC, zErr])
 	}
-	function cbrt(x) {
+})
+
+const get_math_other = (isMathLies) => new Promise(resolve => {
+	const METRIC = "math_other"
+	function cbrt(x) { // polyfill: not used: also Math.PI > 1
 		let y = Math.pow(Math.abs(x), 1 / 3)
 		return x < 0 ? -y : y
 	}
-	let res = [], sName = "misc_math_other"
-	sDetail[sName] = []
-	sDetail[sName +"_reported_notglobal"] = []
 	try {
-		if (runSE) {abc = def}
-		// nothing else added to desktop so just look at android diffs to desktop
-		res.push(Math.log((1.5) / (0.5)) / 2) // original atanh(0.5)
-		res.push(cbrt(Math.PI)) // research
-		res.push(Math.cosh(1)) // research non-polyfill
-		res.push((Math.exp(1) + Math.exp(-1)) / 2) // research cosh(1)
-		res.push(Math.E - 1) // original expm1(1)
-		res.push(Math.exp(1) - 1) // research expm1(1)
-		let y = Math.E; res.push((y - 1 / y) / 2) // original sinh(1)
-		res.push((Math.exp(1) - Math.exp(-1)) / 2) // reseach sinh(1)
-		let hash = mini_sha1(res.join(), "math other")
-		let value = hash
-		if (isTZPSmart && isMathLies) {
-			sName += "_reported_notglobal"
-			hash = soL + hash + scC
-			value = zLIE
-			if (gRun) {gKnown.push("misc:math_other")}
+		if (runSE) {foo++}
+		let aTests = [
+			"(Math.E - 1 / Math.E) / 2",
+			"(Math.exp(1) + Math.exp(-1)) / 2",
+			"(Math.exp(1) - Math.exp(-1)) / 2",
+			"Math.E - 1",
+			"Math.cosh(1)",
+			"Math.exp(1) - 1",
+			"Math.log((1.5)/(0.5))/2",
+			"Math.pow(Math.abs(Math.PI), 1 / 3)",
+		]
+		let aValues = [
+			(Math.E - 1 / Math.E) / 2, // sinh(1)
+			(Math.exp(1) + Math.exp(-1)) / 2, // cosh(1)
+			(Math.exp(1) - Math.exp(-1)) / 2, // sinh(1) alt
+			Math.E - 1, // expm1(1)
+			Math.cosh(1),
+			Math.exp(1) - 1, // expm1(1) alt
+			Math.log((1.5) / (0.5)) / 2, 
+			Math.pow(Math.abs(Math.PI), 1 / 3), // cbrt(Math.PI)
+		]
+		let aRes = [], isTypeof = "number"
+		for (let i=0; i < aTests.length; i++) {
+			let x = aValues[i]
+			if (runST) {x = true}
+			if ("number" == typeof x) {
+				aRes.push([aTests[i], x])
+			} else {
+				isTypeof = typeof x
+				break
+			}
 		}
-		sDetail[sName] = res
-		let btn = buildButton("18", sName)
-		dom.mathOther.innerHTML = hash + btn
-		return "math_other:"+ value
+		let hash = mini(aRes), fpvalue
+		if ("number" !== isTypeof) {
+			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isTypeof))
+			return resolve([METRIC, zErr])
+		} else if (isMathLies) {
+			hash = colorFn(hash)
+			fpvalue = [METRIC, zLIE]
+			addDetail(METRIC, aRes)
+			log_known(SECT18, METRIC)
+		} else {
+			addData(18, METRIC, aRes, hash)
+		}
+		log_display(18, METRIC, hash + addButton(18, METRIC))
+		return resolve(fpvalue)
 	} catch(e) {
-		dom.mathOther = log_error("misc: math other", e.name, e.message)
-		return "math_polyfill_other:"+ zErr
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		return resolve([METRIC, zErr])
 	}
-}
+})
 
-function get_math_trig(isMathLies) {
-	// sin/cos/tan: we didn't get any extra entropy except in android
-		// this is really just checking RFP fixes this
-	let oMath = {
-		// 8x original cos
-		// add: 7x cos + 2x sin + 6x tan diffs in android vs desktop FF68+
-		"cos": [ 1e251, 1e140, 1e12, 1e130, 1e272, -1, 1e284, 1e75, 57*Math.E, 21*Math.LN2,
-			51*Math.LN2, 21*Math.LOG2E, 25*Math.SQRT2, 50*Math.SQRT1_2, 17*Math.LOG10E,
-		],
-		"sin": [ 7*Math.LOG10E, 35*Math.SQRT1_2],
-		"tan": [ 6*Math.E, 6*Math.LN2, 10*Math.LOG2E, 17*Math.SQRT2, 34*Math.SQRT1_2, 10*Math.LOG10E ],
-	}
-	let res = [], sName = "misc_math_trigonometric"
-	sDetail[sName] = []
-	sDetail[sName +"_reported_notglobal"] = []
+const get_math_trig = (isMathLies) => new Promise(resolve => {
+	const METRIC = "math_trig"
+	let notation = ""
 	try {
-		if (runSE) {abc = def}
+		if (runSE) {foo++}
+		const oMath = {
+			"cos": [
+				["-1",-1],["17*Math.LOG10E",17*Math.LOG10E],["1e12",1e12],["1e130",1e130],
+				["1e140",1e140],["1e251",1e251],["1e272",1e272],["1e284",1e284],["1e75",1e75],
+				["21*Math.LN2",21*Math.LN2],["21*Math.LOG2E",21*Math.LOG2E],["25*Math.SQRT2",25*Math.SQRT2],
+				["50*Math.SQRT1_2",50*Math.SQRT1_2],["51*Math.LN2",51*Math.LN2],["57*Math.E",57*Math.E],
+			],
+			"sin": [
+				["35*Math.SQRT1_2",35*Math.SQRT1_2],["7*Math.LOG10E",7*Math.LOG10E],
+			],
+			"tan": [
+				["10*Math.LOG10E",10*Math.LOG10E],["10*Math.LOG2E",10*Math.LOG2E],
+				["17*Math.SQRT2",17*Math.SQRT2],["34*Math.SQRT1_2",34*Math.SQRT1_2],
+				["6*Math.E",6*Math.E],["6*Math.LN2",6*Math.LN2],
+			],
+		}
+		let aRes = []
+		let isTypeof = "number"
 		for (const k of Object.keys(oMath)) {
-			let list = oMath[k]
-			list.forEach(function(value) {
-				res.push(Math[k](value))
+			oMath[k].forEach(function(item) {
+				let value = Math[k](item[1])
+				if (runST) {value = ""}
+				if ("number" == typeof value) {
+					aRes.push(["Math."+ k +"("+ item[0] +")", value])
+				} else {
+					isTypeof = typeof value
+				}
 			})
 		}
-		let hash = mini_sha1(res.join(), "math trigonometric")
-		let value = hash, notation = ""
-		if (isTZPSmart) {
-			if (isFF) {notation = rfp_red}
-			if (isMathLies) {
-				sName += "_reported_notglobal"
-				hash = soL + hash + scC
-				value = zLIE
-				if (gRun) {gKnown.push("misc:math_trigonometric")}
-			} else {
-				if (hash == "6f7196420acb040d37bb6ef3765a4c3bf9bcd5dd") {notation = rfp_green}
-			}
+		let hash = mini(aRes), fpvalue
+		if ("number" !== isTypeof) {
+			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isTypeof) + (isSmart ? rfp_red : ""))
+			return resolve([METRIC, zErr])
+		} else if (isMathLies) {
+			hash = colorFn(hash)
+			fpvalue = [METRIC, zLIE]
+			addDetail(METRIC, aRes)
+			log_known(SECT18, METRIC)
+		} else {
+			addData(18, METRIC, aRes, hash)
 		}
-		sDetail[sName] = res
-		let btn = buildButton("18", sName)
-		dom.mathTrig.innerHTML = hash + btn + notation
-		return "math_trigonometric:" + value
+		if (isSmart) {notation = hash == "a5833212" ? rfp_green : rfp_red}
+		log_display(18, METRIC, hash + addButton(18, METRIC) + notation)
+		return resolve(fpvalue)
 	} catch(e) {
-		dom.mathTrig = log_error("misc: math trigonometric", e.name, e.message)
-		return "math_trigonometric:"+ zErr
+		if (isSmart) {notation = rfp_red}
+		log_display(18, METRIC, log_error(SECT18, METRIC, e) + notation)
+		return resolve([METRIC, zErr])
 	}
-}
+})
 
-function get_nav_prototype() {
-	// use global
-	let sTrue = "misc_navigator_keys",
-		sFake = "misc_navigator_keys_fake_skip",
-		sMoved = "misc_navigator_keys_moved_method_skip",
-		sAll = "misc_navigator_keys_reported_notglobal"
-	sDetail[sTrue] = navKeys["trueKeys"]
-	sDetail[sFake] = navKeys["fakeKeys"]
-	sDetail[sMoved] = navKeys["movedKeys"]
-	sDetail[sAll] = navKeys["allKeys"]
-	let lieLength = navKeys["fakeKeys"].length,
-		movedLength = navKeys["movedKeys"].length,
-		fakeStr = "",
-		movedStr = ""
-	// output
-	if (navKeys["trueKeys"]) {
-		let realhash = mini_sha1(navKeys["trueKeys"].join(), "misc nav keys")
-		let display = realhash
-		// moved
-		if (movedLength) {
-			movedStr = buildButton("18", sMoved, movedLength +" moved")
-			// method
-			if (gRun) {
-				gMethods.push("misc:navigator keys: expected keys moved")
+function get_navigator() {
+	const METRIC = "navigator_keys"
+	try {
+		if (runSE) {foo++}
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+
+		/* these should match
+		let keysB = []
+		for (const key in navigator) {keysB.push(key)}
+		keysB.push("constructor")
+		console.log(mini(keys), mini(keysB))
+		//*/
+
+		let isLies = false, tamperBtn = ""
+
+		if (isSmart) {
+			let fake = [], missing = [], moved = [], oKeys = {}
+			// ToDo: check/expand these: e.g. javaEnabled?
+			const expected = [
+				"appCodeName","appName","appVersion","platform","product","productSub","userAgent",
+				"vendor","vendorSub","hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
+				"buildID","oscpu","taintEnabled","doNotTrack","cookieEnabled",
+				"pdfViewerEnabled", // FF99+: pdfViewerEnabled
+			]
+			if (runSL) {
+				keys.push("iamfake","anotherfake") // +fake
+				keys = keys.filter(x => !["buildID"].includes(x)) // +missing
+				keys = keys.filter(x => !["appName"].includes(x)); keys.push("appName") // +move
+			}
+			fake = keys.slice(keys.indexOf("constructor")+1) // after constructor
+			missing = expected.filter(x => !keys.includes(x)) // use keys so we don't dupe moved
+			moved = fake.filter(x => expected.includes(x)) // moved: expected after contructor
+			fake = fake.filter(x => !moved.includes(x)) // fake minus moved
+
+			if (missing.length) {oKeys["missing"] = missing.sort()}
+			if (moved.length) {oKeys["moved"] = moved.sort()}
+			if (fake.length) {oKeys["unexpected"] = fake.sort()}
+
+			let lieCount = missing.length + fake.length,
+				moveCount = moved.length
+			// tampered
+			if ((lieCount + moveCount) > 0) {
+				// ToDo: add to FP methods
+				isLies = true
+				let notation = []
+				if (lieCount > 0) {notation.push(lieCount +" lie"+ (lieCount > 1 ? "s" : ""))}
+				if (moveCount > 0) {notation.push(moveCount + " tampered")}
+				addDetail(METRIC +"_tampered", oKeys)
+				tamperBtn = addButton(18, METRIC +"_tampered", notation.join("/"))
 			}
 		}
-		// fake
-		if (lieLength) {
-			let hash = mini_sha1(navKeys["allKeys"].join(), "misc nav keys fake")
-			display = soB + hash + scC
-			fakeStr = buildButton("18", sFake, lieLength +" lie"+ (lieLength > 1 ? "s" : ""))
-			// lies
-			if (gRun) {
-				gKnown.push("misc:navigator keys")
-				gBypassed.push("misc:navigator keys:"+realhash)
-			}
+
+		// remove constructor
+		keys = keys.filter(x => !["constructor"].includes(x))
+		let hash = mini(keys)
+		let display = hash
+		if (isLies) {
+			addDetail(METRIC, keys) // don't sort
+			display = colorFn(display)
+			log_known(SECT18, METRIC)
 		}
-		dom.nProto.innerHTML = display + buildButton("18", sAll, navKeys["allKeys"].length) + fakeStr + movedStr
-		return "navigator_keys:"+ realhash
-	} else {
-		dom.nProto = soL + "none" + scC // empty array
-		if (gRun) {gKnown.push("misc:navigator keys")}
-		return "navigator_keys:"+ zLIE
+		log_display(18, METRIC, display + addButton(18, METRIC, keys.length) + tamperBtn)
+
+		if (isLies) {
+			return [METRIC, zLIE]
+		} else {
+			addData(18, METRIC, keys, hash)
+			return
+		}
+	} catch(e) {
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		return [METRIC, zErr]
 	}
 }
 
 function get_recursion(log = false) {
-	let level = 0, test1 = 0
-	let t0; if (canPerf) {t0 = performance.now()}
-	function recurse() {
-		level++
-		recurse()
-	}
-	try {
-		recurse()
-	} catch(e) {
-		test1 = level
-	}
+	let level = 0
+	let t0 = nowFn()
+	function recurse() {level++; recurse()}
+	try {recurse()} catch(e) {}
 	level = 0
 	try {
 		recurse()
 	} catch(e) {
 		// 2nd test is more accurate/stable
 		dom.recursion = level +" | "+ e.stack.toString().length
-		if (log) {log_perf("recursion [not in FP]",t0)}
-		return "stack_length:"+ e.stack.toString().length
+		if (log) {log_perf(SECTNF, "stack_depth", t0)}
+		return
 	}
 }
 
-function get_perf1() {
+function get_perf_mark_entries() {
+	// ToDo: isSmartMin=115 remove this metric
+	const METRIC = "perf_mark_entries"
 	let entries = "", valueEntries = "", ctrlEntries = "0, 0, 0, 0"
 	let measure = "", notation = ""
 	try {
+		if (runSE) {foo++}
 		performance.mark("a")
 		performance.mark("b")
 		// entries
@@ -328,7 +252,7 @@ function get_perf1() {
 				+", "+ performance.getEntriesByName("b","mark").length
 			valueEntries = entries !== ctrlEntries ? "not zero" : entries // make non-zero a stable FP
 		} catch(e) {
-			log_error("misc: perf_getEntries", e.name, e.message)
+			log_error(SECT18,"perf_getEntries", e)
 			entries = zErr
 			valueEntries = zErr
 		}
@@ -340,132 +264,92 @@ function get_perf1() {
 			performance.measure("z", "a")
 			measure = performance.getEntriesByType("measure").length
 		} catch(e) {
-			log_error("misc: perf_measure", e.name, e.message)
+			log_error(SECT18,"perf_measure", e)
 			measure = zErr
 		}
 		// cleanup
 		performance.clearMarks()
 		performance.clearMeasures()
 		// FF111+ 811567
-		if (isTZPSmart && isVer < 111) {
+		if (isSmart && isVer < 111) {
 			notation = entries == ctrlEntries && measure == 0 ? rfp_green : rfp_red
 		}
-		dom.perf1.innerHTML = entries +" | "+ measure + notation
-		return "perf_mark:"+ valueEntries +" | "+ measure
+		log_display(18, METRIC, entries +" | "+ measure + notation)
+		return [METRIC, valueEntries +" | "+ measure]
 	} catch(e) {
-		log_error("misc: perf_mark", e.name, e.message)
-		dom.perf1.innerHTML = zErr +" | "+ zNA
-		return "perf_mark:"+ zErr +" | "+ zNA
+		if (isSmart && isVer < 111) {notation = rfp_red}
+		log_display(18, METRIC, log_error(SECT18, METRIC, e) + notation)
+		return [METRIC, zErr]
 	}
 }
 
-function get_perf2(log = false) {
-	if (!isFF || isVer < 102) {
-		dom.perf2 = zNA
-		return
-	}
+function get_perf_now(log = false) {
 	// runs post FP
-	try {
-		let t0; if (canPerf) {t0 = performance.now()}
-		let i = 0, aData = [], aTimes = [], aDiffs = [], oCounts = {}, p0
-		// collect
-		function run() {
-			if (i < 10) {
-				if (i == 0) {p0 = performance.now()} else {aData.push(performance.now())}
-				i++
-			} else {
-				clearInterval(check)
-				output()
+	return new Promise(resolve => {
+		const METRIC = "perf_now"
+		try {
+			let t0 = nowFn()
+			if (runSE) {foo++}
+			let i = 0, aData = [], aTimes = [], aDiffs = [], oCounts = {}, p0
+			// collect
+			function run() {
+				if (i < 10) {
+					if (i == 0) {p0 = performance.now()} else {aData.push(performance.now())}
+					i++
+				} else {
+					clearInterval(check)
+					output()
+				}
+				// analyse
+				function output() {
+					let isMatch = true,
+						goodRFP = [0, 16.7, 16.6, 33.3, 33.4, 50, 66.6, 66.7]
+					// tidy times
+					for (let i=0; i < aData.length ; i++) {
+						let time = aData[i] - p0
+						aTimes.push(time.toFixed(1) * 1)
+					}
+					// collect diffs
+					for (let i=0; i < aTimes.length ; i++) {
+						let prev = (i == 0 ? 0 : aTimes[i-1])
+						let diff = (aTimes[i] - prev).toFixed(1) * 1
+						aDiffs.push(diff)
+						if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
+						if (!goodRFP.includes(diff)) {isMatch = false}
+					}
+					// RFP: at least one 16.7, 16.6 (only RFP for now has decimals)
+					if (oCounts["16.6"] == undefined && oCounts["16.7"] == undefined) {isMatch = false}
+					dom.perf_now.innerHTML = aDiffs.join(", ") + (isSmart ? (isMatch ? rfp_green : rfp_red) : "")
+					if (log) {log_perf(SECTNF, METRIC, t0)}
+					return resolve()
+				}
 			}
-			// analyse
-			function output() {
-				let isMatch = true,
-					goodRFP = [0, 16.7, 16.6, 33.3, 33.4]
-				// tidy times
-				for (let i=0; i < aData.length ; i++) {
-					let time = aData[i] - p0
-					aTimes.push(time.toFixed(1) * 1)
-				}
-				// collect diffs
-				for (let i=0; i < aTimes.length ; i++) {
-					let prev = (i == 0 ? 0 : aTimes[i-1])
-					let diff = (aTimes[i] - prev).toFixed(1) * 1
-					aDiffs.push(diff)
-					if (oCounts[diff] == undefined) {oCounts[diff] = 1} else {oCounts[diff]++}
-					if (!goodRFP.includes(diff)) {isMatch = false}
-				}
-				// RFP: some 16.7, 16.6 (only RFP for now has decimals)
-				if (oCounts["16.6"] == undefined) {isMatch = false
-				} else if (oCounts["16.7"] == undefined) {isMatch = false}
-				/*
-					console.log(aData)
-					console.log(aTimes)
-					console.log(aDiffs)
-					console.log(oCounts)
-				//*/
-				let notation = ""
-				if (isTZPSmart) {
-					notation = isMatch ? rfp_green : rfp_red
-				}
-				dom.perf2.innerHTML = aDiffs.join(", ") + notation
-				if (log) {log_perf("perf.now [not in FP]",t0)}
-			}
+			let check = setInterval(run, 7)
+		} catch(e) {
+			dom.perf_now.innerHTML = log_error(SECT18, METRIC, e) + (isSmart ? rfp_red : "")
+			return resolve()
 		}
-		let check = setInterval(run, 7)
-	} catch(e) {
-		dom.perf2 = log_error("misc: perf.now:", e.name, e.message)
-	}
+	})
 }
 
-function get_perf3() {
-	// loadEventEnd (also dom.enable_performance)
-	let r = ""
+function get_perf_timing() {
+	// dom.enable_performance
+	const METRIC = "perf_timing"
 	try {
-		if (runSE) {abc = def}
+		if (runSE) {foo++}
 		let timing = performance.timing
-		r = timing.navigationStart - timing.loadEventEnd
-		r = (r == 0 ? "zero" : "not zero")
-		dom.perf3.innerHTML = r
+		addDataDisplay(18, METRIC, (timing.loadEventEnd - timing.navigationStart) == 0 ? zD : zE)
 	} catch(e) {
-		dom.perf3 = log_error("misc: perf timing", e.name, e.message)
-		r = zErr
-	}
-	return "perf_timing:"+ r
-}
-
-function get_perf4() {
-	// also: dom.enable_performance_navigation_timing
-	let r = zD, notation = ""
-	try {
-		if (runSE) {abc = def}
-		if (window.PerformanceNavigationTiming) {r = zE}
-	} catch(e) {
-		dom.perf4 = log_error("misc: perf navigation", e.name, e.message)
-		return "perf_navigation:"+ zErr
-	}
-	if (isTZPSmart && isVer < 111) {notation = (r == zD ? rfp_green : rfp_red)} // 78-110: 1511941 - 1811567
-	dom.perf4.innerHTML = r + notation
-	return "perf_navigation:"+ r
-}
-
-function get_reporting_api() {
-	// FF65+
-	try {
-		if (runSE) {abc = def}
-		let observer = new ReportingObserver(function() {})
-		dom.reportingAPI = zE
-		return "reporting_observer:"+ zE
-	} catch(e) {
-		dom.reportingAPI = log_error("misc: reporting observer", e.name, e.message)
-		return "reporting_observer:"+ zErr
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		return [METRIC, zErr]
 	}
 }
 
 function get_svg() {
+	const METRIC = "svg_enabled"
 	try {
-		if (runSE) (abc = def)
+		if (runSE) {foo++}
 		dom.svgDiv.innerHTML = ""
-		//dom.svgDiv.offsetHeight == 0
 		const svgns = "http://www.w3.org/2000/svg"
 		let shape = document.createElementNS(svgns,"svg")
 		let rect = document.createElementNS(svgns,"rect")
@@ -473,94 +357,141 @@ function get_svg() {
 		rect.setAttribute("height",20)
 		shape.appendChild(rect)
 		dom.svgDiv.appendChild(shape)
-		let res = dom.svgDiv.offsetHeight > 0 ? zE : zD
+		const value = dom.svgDiv.offsetHeight > 0 ? zE : zD
 		dom.svgDiv.innerHTML = ""
-		dom.svgBasicTest = res
-		return "svg:"+ res
+		addDataDisplay(18, METRIC, value)
+		return
 	} catch(e) {
-		dom.svgBasicTest = log_error("misc: svg", e.name, e.message)
-		return "svg:"+ zErr
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		return [METRIC, zErr]
 	}
 }
 
-function get_wasm() {
-	let res = (() => {
-		try {
-			if (typeof WebAssembly === "object"	&& typeof WebAssembly.instantiate === "function") {
-				if (runSE) {abc = def}
-				const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00))
-				if (module instanceof WebAssembly.Module)
-					return new WebAssembly.Instance(module) instanceof WebAssembly.Instance
-			}
-		} catch(e) {
-			// we only get errors if wasm is enabled
-			log_error("misc: wasm", e.name, e.message)
-			return true
-		}
-		return false
-	})()
-	let r = (res ? zE : zD)
-	dom.wasm.innerHTML = r
-	return "wasm:"+ r
-}
-
-function get_windowcontent() {
+const get_window_props = () => new Promise(resolve => {
+	/* https://github.com/abrahamjuliot/creepjs */
+	let t0 = nowFn(), iframe
+	const METRIC = "window_properties"
 	try {
-		if (runSE) {abc = def}
-		let test = window.content
-		let test2 = content.name
-		dom.wincon = zE
-		return "window_content:"+ zE
+		if (runSE) {foo++}
+		// create & append
+		let id = "iframe-window-version"
+		let el = document.createElement("iframe")
+		el.setAttribute("id", id)
+		el.setAttribute("style", "display: none")
+		document.body.appendChild(el)
+		// get props
+		iframe = document.getElementById(id)
+		let contentWindow = iframe.contentWindow
+		let aProps = Object.getOwnPropertyNames(contentWindow)
+
+		// sim
+		if (runSL) {aProps.push("hdcd_canvas_getctx","serviceWorker")}
+		// cleanup
+		iframe.parentNode.removeChild(iframe)
+
+		// ToDo: isSmartMin=115 remove this metric
+		let perf = aProps.includes("PerformanceNavigationTiming") ? zE : zD
+		if (isSmart && isVer < 111) {perf += (perf == zD ? rfp_green : rfp_red)} // 78-110: 1511941 - 1811567
+		log_display(18, "perf_navigation", perf)
+		// wasm
+		let wasm = aProps.includes("WebAssembly") ? zE : zD
+		if (isSmart && isTB) {wasm += (wasm == zE ? tb_standard : tb_safer)}
+		log_display(18, "wasm", wasm)
+		// webgpu
+		let webgpu = aProps.includes("GPU") ? zE : zD
+		if (isSmart && isTB) {webgpu += (webgpu == zD ? tb_green : tb_red)}
+		log_display(18, "webgpu", webgpu)
+
+		let display = mini(aProps),
+			fpvalue = display,
+			tamperBtn = ""
+		let aTampered = aProps.slice(aProps.indexOf("Performance")+1)
+		let allowTampered = aProps.slice(aProps.indexOf("Performance")+1)
+		let aFilter = ['Event','Location']
+		if (isSmart) {
+			allowTampered = allowTampered.filter(x => !aFilter.includes(x))
+			if (allowTampered.length) {
+				// always record tampering
+				addDetail(METRIC +"_tampered", allowTampered.sort())
+				tamperBtn = addButton(18, METRIC +"_tampered", allowTampered.length + " tampered")
+			}
+			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41694
+				// allowlist NS 11.4.20+ - i.e remove false positives
+				// allow slider at safer
+			aFilter = ["Element","Event","HTMLCanvasElement","HTMLElement","HTMLFrameElement",
+				"HTMLIFrameElement","HTMLObjectElement","Location","MediaSource","Proxy","URL","webkitURL"
+			]
+			aTampered = aTampered.filter(x => !aFilter.includes(x))
+			if (aTampered.length) {
+				aTampered = aTampered.concat(allowTampered)
+				aTampered = aTampered.filter(function(item, position) {return aTampered.indexOf(item) === position})
+				addDetail(METRIC, aProps)
+				addDetail(METRIC +"_tampered", aTampered.sort())
+				tamperBtn = addButton(18, METRIC +"_tampered", aTampered.length + " tampered")
+				display = colorFn(display)
+				fpvalue = zLIE
+				log_known(SECT18, METRIC)
+				addData(18, METRIC, zLIE)
+			}
+		}
+		display += addButton(18, METRIC, aProps.length) + tamperBtn
+		if (fpvalue !== zLIE) {
+			addData(18, METRIC, aProps, fpvalue)
+			if (isOS !== "android" && isOS !== undefined) {
+				if (isSmart && !aTampered.length) {
+					let indexPerf = aProps.indexOf("Performance"),
+						indexEvent = aProps.indexOf("Event")
+					display += " [console " + (indexPerf < indexEvent ? "open" : "closed") +"]"
+				}
+			}
+		}
+		log_display(18, METRIC, display)
+		log_perf(SECT18, METRIC, t0)
+		return resolve()
 	} catch(e) {
-		dom.wincon = log_error("misc: window content", e.name, e.message)
-		return "window_content:"+ zErr
+		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
+		let eMsg = log_error(SECT18, METRIC, e)
+		let notation = (isSmart && isTB) ? rfp_red : ""
+		log_display(18, METRIC, eMsg)
+		log_display(18, "perf_navigation", eMsg + notation) // ToDo: 1448046: isSmartMin=115 ? remove this metric
+		log_display(18, "wasm", eMsg + (isSmart && isTB ? tb_slider_red : ""))
+		log_display(18, "webgpu", eMsg + notation)
+		return resolve([METRIC, zErr])
 	}
-}
+})
 
 function outputMisc() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let section = [], r = ""
+	let t0 = nowFn()
+	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
+	let isMathLies = check_mathLies()
 
-	let lieList = [
-		"Math.acos","Math.acosh","Math.asinh","Math.atan","Math.atan2","Math.atanh",
-		"Math.cbrt","Math.cos","Math.cosh","Math.exp","Math.expm1","Math.log","Math.log10",
-		"Math.log1p","Math.sin","Math.sinh","Math.sqrt","Math.tan","Math.tanh"
-	]
-	if (runSL) {gLies.push("Math.sin")}
-	let foundLies = lieList.filter(x => proxyLies.includes(x))
-	let isMathLies = (foundLies.length > 0)
-
-	// record perf fuckery
+	try {null.bar} catch(e) {
+		addDataDisplay(18, "error_message_fix", e.message) // FF74+: 1259822
+	}
 	try {
-		let control = runSL ? -1 : 0
-		if (runSE) {foo++}
-		if (Math.trunc(performance.now() - performance.now()) !== control) {
-			if (isTZPSmart && gRun) {gMethods.push("_global:performance.now:tampered")}
+		let control = 0
+		if (runSE) {foo++} else if (runST) {control = ""}
+		let diff = Math.trunc(performance.now() - performance.now())
+		if (diff !== control) {
+			log_error(SECT18, "perf_now", zErrInvalid +"expected 0")
 		}
 	} catch(e) {
-		log_error("misc:perf_now", e.name, e.message)
+		log_error(SECT18, "perf_now", e)
 	}
 
 	Promise.all([
-		get_reporting_api(),
 		get_svg(),
-		get_wasm(),
-		get_perf1(),
-		get_perf3(),
-		get_perf4(),
-		get_errors(),
+		get_perf_mark_entries(),
+		get_perf_timing(),
 		get_math_trig(isMathLies),
 		get_math_other(isMathLies),
 		get_component_shims(),
-		get_iframe_props(),
-		get_windowcontent(),
-		get_nav_prototype(),
+		get_window_props(),
+		get_navigator(),
 	]).then(function(results){
-		results.forEach(function(currentResult) {
-			section.push(currentResult)
-		})
-		log_section("misc", t0, section)
+		results.forEach(function(item) {addDataFromArray(18, item)})
+		log_section(18, t0)
 	})
 }
 
-countJS("misc")
+countJS(SECT18)

@@ -1,48 +1,88 @@
 :root{
-	--test1: #dc8c8c;
-	--test2: #dca78c;
-	--test3: #dcc18c;
-	--test4: #dcdc8c;
-	--test5: #c1dc8c;
-	--test6: #a7dc8c;
-	--test7: #8cdc8c;
-	--test8: #8cdca7;
-	--test9: #8cdcc1;
-	--test10: #8cdcdc;
-	--test11: #8cc1dc;
-	--test12: #8ca7dc;
-	--test13: #8c8cdc;
-	--test14: #a78cdc;
-	--test15: #c18cdc;
-	--test16: #dc8cdc;
-	--test17: #dc8cc1;
-	--test18: #dc8ca7;
+	/* sat 73 */
+	--test0: #b3b3b3;
+	--test1: #dc9d9d;
+	--test2: #dcb29d;
+	--test3: #dcc79d;
+	--test4: #dcdc9d;
+	--test5: #c7dc9d;
+	--test6: #b2dc9d;
+	--test7: #9ddc9d;
+	--test8: #9ddcb2;
+	--test9: #9ddcc7;
+	--test10: #9ddcdc;
+	--test11: #9dc7dc;
+	--test12: #9db2dc;
+	--test13: #9d9ddc;
+	--test14: #b29ddc;
+	--test15: #c79ddc;
+	--test16: #dc9ddc;
+	--test17: #dc9dc7;
+	--test18: #dc9db2;
 	--test99: #808080;
+	--testbad: #ff8787; /* sat 120 */
+	/* sat 90 */
+	--bg1: #f09b9b;
+	--bg2: #f0b89b;
+	--bg3: #f0d49b;
+	--bg4: #f0f09b;
+	--bg5: #d4f09b;
+	--bg6: #b8f09b;
+	--bg7: #9bf09b;
+	--bg8: #9bf0b8;
+	--bg9: #9bf0d4;
+	--bg10: #9bf0f0;
+	--bg11: #9bd4f0;
+	--bg12: #9bb8f0;
+	--bg13: #9b9bf0;
+	--bg14: #b89bf0;
+	--bg15: #d49bf0;
+	--bg16: #f09bf0;
+	--bg17: #f09bd4;
+	--bg18: #f09bb8;
+	--bg99: #808080;
 }
 
-/* main */
-body {background-color: #161b22; color: #b3b3b3;}
+body {background-color: #161b22; color: var(--test0);}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
 code {
 	background: rgba(142, 142, 145, 0.25) !important;
-	padding: 2px 6px; /* top and bottom | left and right */
+	padding: 2px 6px; /* top+bottom | left+ right */
 }
 a {color: black; text-decoration: none;}
-a.blue {color: #8ca7dc; text-decoration: none;}
-a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 1.2em}
-.no_color {color: #b3b3b3;}
+a.blue {color: var(--test12); text-decoration: none;}
+a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-height: 1.2em}
+.no_color {color: var(--test0);}
+.good {color: var(--test7);}
+.bad {color: var(--testbad);}
+.faint {color: var(--test99);}
 .hidden {display: none;}
-.offscreen {position: absolute; top: -2000%;}
-.group {font-weight: bold;}
-.mono {font-family: monospace, "Courier New";}
+.small {font-size: 10px;}
+.offscreen {
+	position: absolute !important;
+	top: -2000% !important;
+	left: 0px !important;
+}
+.bold {font-weight: bold;}
+.mono {font-family: monospace, "Courier New"; font-size: 12px;}
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
 
-/* notation colors */
-.faint {color: #606060;} /* #888888 darker off white */
-.good {color: #8cdca7;} /* test7 */
-.bad {color: #dc8c8c;}
+.cursive {font-family: cursive;}
+.emoji {font-family: emoji;}
+.fangsong {font-family: fangsong;}
+.fantasy {font-family: fantasy;}
+.math {font-family: math;}
+.monospace {font-family: monospace;}
+.none {font-family: none;}
+.sans-serif {font-family: sans-serif;}
+.serif {font-family: serif;}
+.system-ui {font-family: system-ui;}
+.ui-monospace {font-family: ui-monospace;}
+.ui-rounded {font-family: ui-rounded;}
+.ui-sans-serif {font-family: ui-sans-serif;}
+.ui-serif {font-family: ui-serif;}
 
 .normalized {
 	font-family: none;
@@ -94,8 +134,7 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 	padding-right: 8px;
 	cursor: pointer;
 }
-
-.btn0 {border-color: #b3b3b3; color: #b3b3b3;}
+.btn0 {border-color: var(--test0); color: var(--test0);}
 .btn1, .s1 {border-color: var(--test1); color: var(--test1);}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
 .btn3, .s3 {border-color: var(--test3); color: var(--test3);}
@@ -115,35 +154,42 @@ a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 
 .btn17, .s17 {border-color: var(--test17); color: var(--test17);}
 .btn18, .s18 {border-color: var(--test18); color: var(--test18);}
 .s99 {color: var(--test99);}
+.btnbad, .sbad {border-color: var(--testbad); color: var(--testbad);}
 .btn-left {float: left; position: relative; left: -10px; top: 0px;}
+.btn-right {float: right; position: relative; right: 10px; top: 0px; text-align: right;}
 
 /* tooltips */
-.icon {font-size: 10px; font-weight: bold; color: #b3b3b3; cursor: default;}
+.icon {font-size: 10px; font-weight: bold; color: var(--test0); cursor: default;}
 .ttip {position: relative; display: inline-block; border-bottom: 1px dotted black; color: white;}
 .ttip .ttxt {
-	visibility: hidden; width: 150px; background-color: #b3b3b3; color: black; text-align: center;
+	visibility: hidden; width: 150px; background-color: var(--test0); color: black; text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip .ttxtb {
-	visibility: hidden; width: 210px; background-color: #b3b3b3; color: black; text-align: center;
+	visibility: hidden; width: 210px; background-color: var(--test0); color: black; text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip .ttxtx {
-	visibility: hidden; width: 250px; background-color: #b3b3b3; color: black; text-align: center;
+	visibility: hidden; width: 250px; background-color: var(--test0); color: black; text-align: center;
 	border-radius: 6px; padding: 5px 0; position: absolute; z-index: 1; top: -12px; left: 130%;}
 .ttip:hover .ttxt, .ttip:hover .ttxtb, .ttip:hover .ttxtx {visibility: visible;}
 .ttip .ttxt::after, .ttip .ttxtb::after, .ttip .ttxtx::after {
 	content: " "; position: absolute; top: 50%; right: 100%; margin-top: -5px; border-width: 5px;
-	border-style: solid; border-color: transparent #b3b3b3 transparent transparent;}
+	border-style: solid; border-color: transparent var(--test0) transparent transparent;}
 
 /* table nav */
 div.nav-title {position: relative;}
-div.nav-up {position: absolute; left: 20px; top: 0px; width: 400px; text-align: left;}
 div.nav-down {position: absolute; right: 20px; top: 0px; width: 300px; text-align: right;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 400px; text-align: left;}
 
 /* tables */
-table {width: 900px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
+table {
+	width: 765px;
+	border-collapse: collapse;
+	margin: 0 auto 10px auto;
+	font-size: 12px;
+}
 tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
-td {padding-bottom: 3px; padding-top: 3px; padding-left: 10px;}
-th {color: black; font-weight: bold; font-size: 16px; padding: 3px 0;}
+td {padding-top: 2px; padding-bottom: 3px; padding-left: 10px;}
+th {color: black; font-size: 14px; padding: 3px 0;}
 
 table td:first-child { text-align: right; vertical-align: top;}
 table td.blurb {text-align: center; line-height: 1.5em;}
@@ -151,25 +197,25 @@ table td.center {text-align: center;}
 table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
 table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 
-#tb1 th {background-color: #f07878;}
-#tb2 th {background-color: #f0a078;}
-#tb3 th {background-color: #f0c878;}
-#tb4 th {background-color: #f0f078;}
-#tb5 th {background-color: #c8f078;}
-#tb6 th {background-color: #a0f078;}
-#tb7 th {background-color: #78f078;}
-#tb8 th {background-color: #78f0a0;}
-#tb9 th {background-color: #78f0c8;}
-#tb10 th {background-color: #78f0f0;}
-#tb11 th {background-color: #78c8f0;}
-#tb12 th {background-color: #78a0f0;}
-#tb13 th {background-color: #7878f0;}
-#tb14 th {background-color: #a078f0;}
-#tb15 th {background-color: #c878f0;}
-#tb16 th {background-color: #f078f0;}
-#tb17 th {background-color: #f078c8;}
-#tb18 th {background-color: #f078a0;}
-#tb99 th {background-color: #808080;}
+#tb1 th {background-color: var(--bg1);}
+#tb2 th {background-color: var(--bg2);}
+#tb3 th {background-color: var(--bg3);}
+#tb4 th {background-color: var(--bg4);}
+#tb5 th {background-color: var(--bg5);}
+#tb6 th {background-color: var(--bg6);}
+#tb7 th {background-color: var(--bg7);}
+#tb8 th {background-color: var(--bg8);}
+#tb9 th {background-color: var(--bg9);}
+#tb10 th {background-color: var(--bg10);}
+#tb11 th {background-color: var(--bg11);}
+#tb12 th {background-color: var(--bg12);}
+#tb13 th {background-color: var(--bg13);}
+#tb14 th {background-color: var(--bg14);}
+#tb15 th {background-color: var(--bg15);}
+#tb16 th {background-color: var(--bg16);}
+#tb17 th {background-color: var(--bg17);}
+#tb18 th {background-color: var(--bg18);}
+#tb99 th {background-color: var(--bg99);}
 
 #tb1 td:first-child {color: var(--test1);}
 #tb2 td:first-child {color: var(--test2);}
@@ -191,7 +237,11 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #tb18 td:first-child {color: var(--test18);}
 #tb99 td:first-child {color: var(--test99);}
 
-/* line-height */
+#lh-fingerprint-pt, #lh-fingerprint-px, #mathml-fingerprint {
+	position: fixed;
+	top: 0;
+	left: 0;
+}
 .measure {
 	font-size: 16px;
 	font-family: none;
@@ -206,9 +256,6 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 	white-space: nowrap;
 }
 .measureScale {
-	transform: scale(1.318567); /* cause decimals */
+	transform: scale(1.1234567); /* cause decimals */
 }
-.cssDocFont {
-	font-family: "Times New Roman", Times, serif;
-	/* font-family: "Meiryo", Times, serif; */
-}
+

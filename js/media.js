@@ -1,171 +1,248 @@
 'use strict';
- 
-let mediaBtns = ""
 
-function get_media(runtype) {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let list = []
-	// list
-	if (runtype == "video") {
-		let v = 'video/', v4 = v+'mp4; codecs="', vm = v+'mpeg; codec="',
-			vo = v+'ogg; codecs="', vw = v+'webm; codecs="', vx = v+'x-matroska; codecs="'
-		list = [
-			// test
-			v+'mp4; codecs=\'\'',v+'mp4; codecs=""',v+'mp4; codecs=',
-			// mimes
-			'application/ogg',v+'3gpp',v+'3gpp2',v+'avi',v+'h263',v+'mp2t',v+'mp4',v+'mpeg',v+'mpeg2',v+'mpeg4',
-			v+'msvideo',v+'ogg',v+'quicktime',v+'wavelet',v+'webm',v+'x-flv',v+'x-la-asf',v+'x-m4v',
-			v+'x-matroska',v+'x-mkv',v+'x-mng',v+'x-mpeg2',v+'x-ms-wmv',v+'x-msvideo',v+'x-theora',
-			// codecs
-			v4+'hev1"',v4+'hev1.1.6.L93.90"',v4+'hvc1.1.6.L93.90"',v4+'hev1.1.6.L93.B0"',v4+'hvc1.1.6.L93.B0"',
-			v4+'vp09.00.10.08"',v4+'vp09.00.50.08"',v4+'vp09.01.20.08.01"',v4+'vp09.01.20.08.01.01.01.01.00"',
-			v4+'vp09.02.10.10.01.09.16.09.01"',v4+'av01.0.08M.08"',vo+'dirac, flac"',vo+'dirac, vorbis"',
-			vo+'flac"',vo+'theora"',vo+'theora, flac"',vo+'theora, speex"',vo+'theora, vorbis"',vw+'vorbis"',
-			vw+'vp8"',vw+'vp8.0"',vw+'vp8.0, vorbis"',vw+'vp8, opus"',vw+'vp8, vorbis"',vw+'vp9"',vw+'vp9, opus"',
-			vw+'vp9, vorbis"',vx+'theora"',vx+'theora, vorbis"',
-			// other
-			v4+'avc1.42001e"',v4+'avc1.42001e, mp4a.40.2"',v4+'avc1.4d401e"',v4+'avc1.4d401e, mp4a.40.2"',
-			v4+'flac"',v4+'H.264, aac"',v4+'H.264, mp3"',vm+'H.264"',vo+'opus"',vw+'av1"',vw+'avc1.4d401e"',
-			vw+'avc1.42001e"',vw+'avc1.42001e, mp4a.40.2"',vx+'avc1.42001e"',vx+'avc1.42001e, mp4a.40.2"',
-			vx+'avc1.64001e"',vx+'avc1.640028"',vx+'avc1.64002a"',vx+'avc1.640030"',vx+'vp8"',vx+'vp8, opus"',
-			vx+'vp8, vorbis"',vx+'vp9"',vx+'vp9, mp4a.40.2"',vx+'vp9, opus"',vx+'vp9, vorbis"',
-		]
-	} else if (runtype == "audio") {
-		let a = 'audio/', a4 = a+'mp4; codecs="', am = a+'mpeg; codecs="', ao = a+'ogg; codecs="',
-			aw = a+'webm; codecs="', aw1 = a+'wav; codecs="', aw2 = a+'wave; codecs="',
-			ax1 = a+'x-wav; codecs="', ax2 = a+'x-pn-wav; codecs="'
-		list = [
-		// test
-			a+'mp4; codecs=\'\'',a+'mp4; codecs=""',a+'mp4; codecs=',
-		// mimes
-			//ignore: a+'x-scpls',a+'vnd.wave',a+'wma',a+'ec-3',a+'basic',a+'3gpp',a+'3gpp2',a+'mid',a+'aiff',a+'x-aiff',a+'ac-3',
-			'application/ogg',
-			a+'aac',a+'ac3',a+'flac',a+'midi',a+'mp3',a+'m4a',a+'mp4',a+'mpeg',a+'mpegurl',a+'wav',a+'wave',a+'webm',
-			a+'x-aac',a+'x-ac3',a+'x-flac',a+'x-midi',a+'x-m4a',a+'x-mpeg',a+'x-mpegurl',a+'x-wav',a+'x-pn-wav',
-		// codecs
-			//blink: a4+'mp4a.40"',a4+'mp4a.66"',a4+'mp4a.68"',a4+'mp4a.69"',a4+'mp4a.6B"',
-			//ignore: a4+'bogus"',ao+'speex"',
-			a4+'mp4a.40.2"',a4+'mp4a.40.29"',a4+'mp4a.40.5"',a4+'mp4a.67"',
-			a4+'mp3"',a4+'flac"',a4+'aac"',a4+'ac3"',am+'mp3"',ao+'opus"',ao+'flac"',ao+'vorbis"',
-			aw1+'0"',aw1+'1"',aw1+'2"',aw2+'0"',aw2+'1"',aw2+'2"',aw+'vorbis"',aw+'opus"',
-			ax1+'0"',ax1+'1"',ax1+'2"',ax2+'0"',ax2+'1"',ax2+'2"',ax2+'2"',
-		]
+let mediaBtn
+
+function get_autoplay() {
+	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getAutoplayPolicy
+	// a check on a specific element is more reliable (though it doesn't matter on page load)
+	const METRIC = "getAutoplayPolicy"
+	const METRICuser = METRIC +"_user"
+
+	try {
+		let atest, mtest
+		let ares = navigator.getAutoplayPolicy("audiocontext")
+		try {atest = navigator.getAutoplayPolicy(dom.audiotest)} catch(e) {
+			log_error(SECT13, METRIC, e)
+			atest = zErr
+		}
+		let mres = navigator.getAutoplayPolicy("mediaelement")
+		try {mtest = navigator.getAutoplayPolicy(dom.mediatest)} catch(e) {
+			log_error(SECT13, METRIC, e)
+			mtest = zErr
+		}
+		if (gLoad) {
+			if (runSE) {foo++}
+			isAutoPlay = (ares === atest ? ares : ares +", "+ atest)
+			+" | "+ (mres === mtest ? mres : mres +", "+ mtest)
+		} else {
+			if (runSE) {foo++}
+			log_display(13, METRICuser, (ares === atest ? ares : ares +", "+ atest)
+				+" | "+ (mres === mtest ? mres : mres +", "+ mtest)
+			)
+		}
+
+	} catch(e) {
+		if (gLoad) {
+			isAutoPlay = zErr
+			isAutoPlayErr = log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
+		} else {
+			// don't add user error to error FP
+			log_display(13, METRICuser, (e+"").slice(0,47) + "...")
+		}
 	}
 
-	list.sort()
-	if (logChkList) {
-		let preHash = mini(list.join(), "loglist media")
-		list = list.filter(function(item, position) {return list.indexOf(item) === position})
-		let postHash = mini(list.join(), "media list check")
-		if (preHash !== postHash) {console.error(runtype + " list mismatch", preHash, postHash)
-		} else {console.log(runtype + " list match", preHash, postHash)}
-		//console.log(runtype, list.length +"\n---\n"+ list.join("\n"))
-	}
-
-	// lists
-	let str = "media_"+ runtype +"_list_notglobal"
-	sDetail[str] = list
-	if (gLoad) {mediaBtns += buildButton("13", str, list.length +" "+ runtype)}
-
-	// clear
-	let sCan = "media_"+ runtype +"_canplaytype",
-		sType = "media_"+ runtype +"_istypesupported"
-	sDetail[sCan] = []
-	sDetail[sType] = []
-
-	// run
-	let canm = [], canp = [], src = [], rec = []
-	let obj = document.createElement(runtype)
-	list.forEach(function(item) {
-		let tmp = item.replace(runtype +"\/","") // remove leading "video/" or "audio/"
-		try {
-			let str = obj.canPlayType(item)
-			if (str == "maybe") {canm.push(tmp)}
-			if (str == "probably") {canp.push(tmp)}
-		} catch(e) {}
-		try {
-			if (MediaSource.isTypeSupported(item)) {src.push(tmp)}
-		} catch(e) {}
-		try {
-			if (MediaRecorder.isTypeSupported(item)) {rec.push(tmp)}
-		} catch(e) {}
-	})
-	// ToDo: media: remove audio/video element?
-
-	// blocks
-	let block1 = (canm.length == 0),
-		block2 = (canp.length == 0),
-		block3 = (rec.length == 0),
-		block4 = (src.length == 0)
-	if (gRun) {
-		if (block1) {gMethods.push("media:"+ runtype + " canPlayType maybe:" + zB0)}
-		if (block2) {gMethods.push("media:"+ runtype + " canPlayType probably:" + zB0)}
-		if (block3) {gMethods.push("media:"+ runtype + " isTypeSupported MediaRecorder:" + zB0)}
-		if (block4) {gMethods.push("media:"+ runtype + " isTypeSupported MediaSource:" + zB0)}
-	}
-	// merge
-	let hashcan = [], hashtype = []
-	if (!block1) {hashcan = ['==maybe==']; hashcan = hashcan.concat(canm)}
-	if (!block2) {hashcan.push("==probably=="); hashcan = hashcan.concat(canp)}
-	if (!block3) {hashtype = ['==mediarecorder==']; hashtype = hashtype.concat(rec)}
-	if (!block3) {hashtype.push("==mediasource=="); hashtype = hashtype.concat(src)}
-	// store
-	sDetail[sCan] = hashcan
-	sDetail[sType] = hashtype
-
-	// output
-	let ecan = document.getElementById(runtype +"can"),
-		etype = document.getElementById(runtype +"type")
-	let notation = ""
-	if (block1 && block2) {
-		hashcan = zB0
-		ecan.innerHTML = zB0
+	// page load
+	if (isAutoPlayErr == undefined) {
+		addDataDisplay(13, METRIC, isAutoPlay)
 	} else {
-		hashcan = mini_sha1(hashcan.join(), "media canplay")
-		notation = (block1 ? zB0 : canm.length) +"/"+ (block2 ? zB0 : canp.length)
-		ecan.innerHTML = hashcan + buildButton("13", sCan, notation)
+		addData(13, METRIC, isAutoPlay)
+		log_display(13, METRIC, isAutoPlayErr)
 	}
-	if (block3 && block4) {
-		hashtype = zB0
-		etype.innerHTML = zB0
-	} else {
-		hashtype = mini_sha1(hashtype.join(), "media istype")
-		notation = (block3 ? zB0 : rec.length) +"/"+ (block4 ? zB0 : src.length)
-		etype.innerHTML = hashtype + buildButton("13", sType, notation)
+	if (gLoad) {
+		log_display(13, METRICuser, zNA)
 	}
-	// return
-	log_perf(runtype +" [media]",t0)
-	return (["canPlay_"+ runtype +":"+ hashcan, "isTypeSupported_"+ runtype +":"+ hashtype])
+	return
+}
+
+function get_media(type) {
+	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
+	// https://cconcolato.github.io/media-mime-support/
+	let v = "video/", a = "audio/"
+	
+	// ToDo: add wmf: e.g. 1806552
+	let audiolist = [
+		'application/ogg',
+		a+'aac',
+		a+'flac',
+		a+'mp3',
+		a+'mp4',
+		a+'mp4; codecs=',
+		a+'mp4; codecs=""',
+		a+'mp4; codecs="flac"',
+		a+'mp4; codecs="mp3"',
+		//a+'mp4; codecs=\'\'',
+		a+'mpeg',
+		a+'mpeg; codecs="mp3"',
+		a+'ogg; codecs="flac"',
+		a+'ogg; codecs="opus"',
+		a+'ogg; codecs="vorbis"',
+		a+'wav',a+'wav; codecs="1"',
+		a+'wave',a+'wave; codecs="1"',
+		a+'webm',
+		a+'webm; codecs="opus"',
+		a+'webm; codecs="vorbis"',
+		a+'x-aac',
+		a+'x-flac',
+		a+'x-m4a',
+		a+'x-pn-wav',a+'x-pn-wav; codecs="1"',
+		a+'x-wav',a+'x-wav; codecs="1"',
+	]
+	let videolist = [
+		'application/ogg',
+		v+'video/3gpp',
+		v+'mp4',
+		v+'mp4; codecs=',
+		v+'mp4; codecs=""',
+		v+'mp4; codecs="av01.0.00M.12"', // 12bit
+		v+'mp4; codecs="avc1"',
+		v+'mp4; codecs="avc1.58000a"', // extended
+		v+'mp4; codecs="avc1.6e000a"', // high 10
+		v+'mp4; codecs="avc1.7a000a"', // high 4:2:2
+		v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
+		v+'mp4; codecs="avc3"',
+		v+'mp4; codecs="flac"',
+		v+'mp4; codecs="opus"',
+		v+'mp4; codecs="vp09.00.10.08"',
+		//v+'mp4; codecs=\'\'',
+		v+'ogg',
+		v+'ogg; codecs="flac"',
+		v+'ogg; codecs="opus"',
+		v+'ogg; codecs="theora"',
+		v+'ogg; codecs="theora, flac"',
+		v+'ogg; codecs="theora, speex"',
+		v+'ogg; codecs="theora, vorbis"',
+		v+'quicktime',
+		v+'webm',
+		v+'webm; codecs="av1"',
+		v+'webm; codecs="vorbis"',
+		v+'webm; codecs="vp8"',
+		v+'webm; codecs="vp8, opus"',
+		v+'webm; codecs="vp8, vorbis"',
+		v+'webm; codecs="vp9"',
+		v+'webm; codecs="vp9, opus"',
+		v+'webm; codecs="vp9, vorbis"',
+		v+'x-m4v',
+		v+'x-matroska',
+	]
+
+	if (gRun && mediaBtn == undefined) {
+		addDetail("audio_mimes", audiolist, "lists")
+		addDetail("video_mimes", videolist, "lists")
+		mediaBtn = addButton(13, "audio_mimes", audiolist.length +" audio", "btnc", "lists")
+			+ addButton(13, "video_mimes", videolist.length +" video", "btnc", "lists")
+	}
+
+	const METRICcan = "canPlayType_"+ type,
+		METRICtype = "isTypeSupported_"+ type
+
+	let oMedia = {
+		"canPlay": {"maybe": [],"probably": []},
+		"isType": {"recorder": [],"source": []}
+	}
+
+	try {
+		var obj = document.createElement(type)
+		// collect
+		let go1 = true, go2 = true, go3 = true, err1, err2, err3
+		let list = type == "audio" ? audiolist : videolist
+
+		list.forEach(function(item) {
+			let tmp = item.replace(type +"\/","") // strip "video/","audio/"
+			if (go1) {
+				try {
+					if (runSE) {foo++}
+					let str = obj.canPlayType(item)
+					if (str == "maybe" || str == "probably") {oMedia["canPlay"][str].push(tmp)}
+				} catch(e) {
+					go1 = false; err1 = log_error(SECT13, "canPlay", e, isScope, 25)
+				}
+			}
+			if (go2) {
+				try {
+					if (runSE) {foo++}
+					if (MediaRecorder.isTypeSupported(item)) {oMedia["isType"]["recorder"].push(tmp)}
+				} catch(e) {
+					go2 = false; err2 = log_error(SECT13, "mediarecorder", e, isScope, 25)
+				}
+			}
+			if (go3) {
+				try {
+					if (runSE) {foo++}
+					if (MediaSource.isTypeSupported(item)) {oMedia["isType"]["source"].push(tmp)}
+				} catch(e) {
+					go3 = false; err3 = log_error(SECT13, "mediasource", e, isScope, 25)
+				}
+			}
+		})
+
+		// canplay
+		let canDisplay
+		if (go1) {
+			let aMaybe = oMedia["canPlay"]["maybe"]
+			let aProbably = oMedia["canPlay"]["probably"]
+			if (aMaybe.length == 0 && aProbably.length == 0) {
+				canDisplay = "none"
+				addData(13, METRICcan, canDisplay)
+			} else {
+				let canobj = {}
+				if (aMaybe.length) {canobj["maybe"] = aMaybe}
+				if (aProbably.length) {canobj["probably"] = aProbably}
+				let canHash = mini(canobj)
+				canDisplay = canHash + addButton(13, METRICcan, aMaybe.length +"/" + aProbably.length)
+				addData(13, METRICcan, canobj, canHash)
+			}
+		} else {
+			canDisplay = err1
+			addData(13, METRICcan, zErr)
+		}
+		log_display(13, type +"can", canDisplay)
+
+		// isType
+		let typeDisplay
+		if (!go2 && !go3) {
+			typeDisplay = err2 // just display first error
+			addData(13, METRICtype, zErr)
+		} else {
+			let aRecorder = oMedia["isType"]["recorder"]
+			let aSource = oMedia["isType"]["source"]
+			if (aRecorder.length == 0 && aSource.length == 0) {
+				typeDisplay = "none"
+				addData(13, METRICtype, typeDisplay)
+			} else {
+				let typeobj = {}
+				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
+				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource}
+				let typeHash = mini(typeobj)
+				let notation = (go2 ? aRecorder.length : zErr) +"/"+ (go3 ? aSource.length : zErr)
+				typeDisplay = typeHash + addButton(13, METRICtype, notation)
+				addData(13, METRICtype, typeobj, typeHash)
+			}
+		}
+		log_display(13, type +"type", typeDisplay)
+
+		// ToDo: media: remove audio/video element?
+		return
+
+	} catch(e) {
+		let error = log_error(SECT13, type, e, 25)
+		log_display(13, type +"can", error)
+		log_display(13, type +"type", error)
+		addData(13, METRICcan, zErr)
+		addData(13, METRICtype, zErr)
+		return
+	}
 }
 
 function outputMedia() {
-	let t0; if (canPerf) {t0 = performance.now()}
-	let section = [], r = ""
-	// FF63+
-	r = check_navKey("mediaCapabilities") ? zE : zD
-	dom.nMediaC = r
-	section.push("mediaCapabilities:"+ r)
-	// FF71+
-	r = check_navKey("mediaSession") ? zE : zD
-	dom.nMediaS = r
-	section.push("mediaSession:"+ r)
-
+	let t0 = nowFn();
 	Promise.all([
 		get_media("audio"),
-		get_media("video")
-	]).then(function(results){
-		results.forEach(function(currentResult) {
-			if (Array.isArray(currentResult)) {
-				currentResult.forEach(function(item) {
-					section.push(item)
-				})
-			} else {
-				section.push(currentResult)
-			}
-			dom.mediaBtns.innerHTML = mediaBtns
-		})
-		log_section("media", t0, section)
+		get_media("video"),
+		get_autoplay(),
+	]).then(function(){
+		log_display(13, "mediaBtn", mediaBtn)
+		log_section(13, t0)
 	})
 }
 
-countJS("media")
+countJS(SECT13)

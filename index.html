@@ -16,15 +16,16 @@
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="tzp.html">take me to the main test</a></td></tr>
 	</table>
-	<table id="tb99">
-		<col width="1%"><col width="29%"><col width="70%">
-		<thead><tr><th colspan="3">index</th></tr></thead>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
-		<tr><td colspan="3" class="intro"><span class="no_color"><b>GITHUB</b></span><td></tr>
-		<tr><td colspan="2"><a class="blue" href="https://github.com/arkenfox/TZP/">repo</a></td><td>come and say hi</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
 
-		<tr><td colspan="3" class="intro"><span class="s3">FEATURE DETECTION</span><td></tr>
+	<table id="tb99">
+		<col width="1%"><col width="34%"><col width="65%">
+		<thead><tr><th colspan="3">index</th></tr></thead>
+		<tr><td colspan="3"></td></tr>
+		<tr><td colspan="3" class="intro"><span class="no_color"><b>GITHUB</b></span></td></tr>
+		<tr><td colspan="2"><a class="blue" href="https://github.com/arkenfox/TZP/">repo</a></td><td>come and say hi</td></tr>
+		<tr><td colspan="3"></td></tr>
+
+		<tr><td colspan="3" class="intro"><span class="s3">FEATURE DETECTION</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/chrome.html">chrome</a></td>
 				<td>enumeration of chrome:// + resource:// files</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/engine.html">engine</a></td>
@@ -33,55 +34,58 @@
 				<td>test: enumeration of engine properties</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/versions.html">versions</a></td>
 				<td>a history of version pocs tzp uses or considered</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s4">LANGUAGE / DATE/TIME</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s4">LANGUAGE / DATE/TIME</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/applang.html">app language</a></td>
 				<td>application language leaks</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/collation.html">collation</a></td>
-				<td>proof: min chars in Intl.Collator for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/currency.html">currency</a></td>
-				<td>test: TBA</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/dayperiod.html">dayperiod</a></td>
-				<td>proof: min times and options for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/formatting.html">formatting</a></td>
-				<td>test: compare expected locale formatting vs actual</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/listformat.html">listformat</a></td>
-				<td>proof: min styles and types for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/pluralrules.html">pluralrules</a></td>
-				<td>proof: min numbers for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/nfcompact.html">compact: numberformat</a></td>
-				<td>proof: min tests for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/rtf.html">relativetimeformat</a></td>
-				<td>proof: min tests for max results</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/localecompare.html">compare locales</a></td>
+				<td>test: compare locales</td></tr>
+
+			<tr><td colspan="2"><span class="no_color">intl</span></td><td>
+				<a class="blue" href="tests/collation.html">collation</a>
+			</td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nfcompact.html">compactdisplay</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nfcurrency.html">currencydisplay</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/dayperiod.html">dayperiod</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/listformat.html">listformat</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nfnotation.html">notation</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nftoparts.html">number</a>: formattoparts</td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/pluralrules.html">pluralrules</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/rtf.html">relativetimeformat</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nfsign.html">signdisplay</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/timezonename.html">timezonename</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/nfunit.html">unitdisplay</a></td></tr>
+
+			<tr><td colspan="2"><span class="no_color">resolvedoptions</span></td><td>
+				<a class="blue" href="tests/calendar.html">calendar</a>
+			</td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/hourcycle.html">hourcycle</a></td></tr>
+			<tr><td colspan="2"></td><td><a class="blue" href="tests/numberingsystem.html">numberingsystem</a></td></tr>
+
 			<tr><td colspan="2"><a class="blue" href="tests/supportedlocales.html">supportedlocales</a></td>
 				<td>test: supportedLocalesOf</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/supportedvalues.html">supportedvalues</a></td>
 				<td>test: supportedValuesOf</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/timezones.html">timezones</a></td>
 				<td>proof: min dates for max results</td></tr>
-			<tr><td colspan="2"><a class="blue" href="tests/timezonenames.html">timezonenames</a></td>
-				<td>test: TBA</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s6">COOKIES & STORAGE</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s6">COOKIES & STORAGE</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/sanitizing.html">sanitizing</a></td>
 				<td>... with zombies!</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<!--<tr><td colspan="3" class="intro"><span class="s8">SVG</span><td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
-
-		<tr><td colspan="3" class="intro"><span class="s9">CANVAS</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s9">CANVAS</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/canvasspoof.html">canvas spoof</a></td>
 				<td>canvas spoof detection</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/canvasnoise.html">canvas noise</a></td>
 				<td>canvas spoof fingerprinting</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/canvasrfp.html">canvas rfp</a></td>
 				<td>test: RFP random canvas characteristics</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s12">FONTS</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s12">FONTS</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/bridgemoji.html">bridge-moji</a></td>
 				<td>test: bridge-emoji set accessibilty, looks & feel</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/fontcheck.html">font check</a></td>
@@ -96,23 +100,23 @@
 				<td>test: system font exposure</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/fontview.html">script view</a></td>
 				<td>view: generic font-families per script</td></tr>
-			<!--<tr><td colspan="2"><a class="blue" href="tests/tmspoof.html">textmetric spoof</a></td>
-				<td>textmetric spoof detection</td></tr>-->
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s14">CSS</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s14">CSS</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/csscolors.html">css colors</a></td>
 				<td>view: css colors</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s15">ELEMENTS</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s15">ELEMENTS</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/domrectspoof.html">domrect spoof</a></td>
+				<td>domrect spoof detection</td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/domrectspoofratio.html"> [ratio] domrect spoof</a></td>
 				<td>domrect spoof detection</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/lineheight.html">lineheight</a></td>
 				<td>test: generic test to see what alters lineheight</td></tr>
-		<tr><td colspan="3"></td></tr> <!--spacer-->
+		<tr><td colspan="3"></td></tr>
 
-		<tr><td colspan="3" class="intro"><span class="s18">MISC</span><td></tr>
+		<tr><td colspan="3" class="intro"><span class="s18">MISC</span></td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/math.html">math</a></td>
 				<td>research: likely math functions and polyfills</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/mathdata.html">math data</a></td>
@@ -121,9 +125,16 @@
 				<td>math spoof detection</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/timing.html">timing</a></td>
 				<td>various RFP and timing tests</td></tr>
+		<tr><td colspan="3"></td></tr>
+
+		<tr><td colspan="3" class="intro"><span class="no_color"><b>OTHER</b></span></td></tr>
+			<tr><td colspan="2"><a class="blue" href="tests/readerview.html">reader view</a></td>
+				<td>test: generic test page</td></tr>
 			<tr><td colspan="2"><a class="blue" href="tests/windownamea.html">window.name</a></td>
 				<td>check window.name clearance per eTLD+1</td></tr>
+
 	</table>
 	<br>
+
 </body>
 </html>

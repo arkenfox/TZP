@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -6,44 +6,45 @@
 	<title>window.name [a]</title>
 	<!-- custom -->
 	<style>
-:root{
-	--test18: #dc8ca7;
-}
-body {background-color: #161b22; color: #b3b3b3;}
-h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
-code {background: #303030 !important; border: 1px solid rgba(255, 255, 255, .1);
-	padding: 1px; border-radius: 2px;}
-a {color: black; text-decoration: none;}
-a.blue {color: #8ca7dc; text-decoration: none;}
-a.return {color: #8ca7dc; text-decoration: none;  font-size: 14px; line-height: 1.2em}
-.mono {font-family: monospace, "Courier New";}
-.good {color: #8cdca7;} /* test7 */
-.bad {color: #dc8c8c;}
-.no_color {color: #b3b3b3;}
+		:root{
+			--test0: #b3b3b3;
+			--test7: #9ddc9d;
+			--test12: #9db2dc;
+			--test99: #808080;
+			--bg99: #808080;
+		}
+		body {background-color: #161b22; color: var(--test0);}
+		h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
+		a.blue {color: var(--test12); text-decoration: none;}
+		a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-height: 1.2em}
+		.no_color {color: #b3b3b3;}
+		.mono {font-family: monospace, "Courier New";}
+		.good {color: var(--test7);}
+		.bad {color: #ff6363;}
 
-div.nav-title {position: relative;}
-table {width: 480px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
-tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
-td {padding-bottom: 3px; padding-top: 3px; padding-left: 10px;}
-th {color: black; font-weight: bold; font-size: 16px; padding: 3px 0;}
-table td:first-child { text-align: right; vertical-align: top;}
-table td.blurb {text-align: center; line-height: 1.5em;}
-table td.center {text-align: center;}
-table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
-#tb18 th {background-color: #f078a0;}
-#tb18 td:first-child {color: var(--test18);}
+		div.nav-title {position: relative;}
+		table {width: 480px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
+		tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
+		td {padding-bottom: 3px; padding-top: 3px; padding-left: 10px;}
+		th {color: black; font-weight: bold; font-size: 16px; padding: 3px 0;}
+		table td:first-child { text-align: right; vertical-align: top;}
+		table td.blurb {text-align: center; line-height: 1.5em;}
+		table td.center {text-align: center;}
+		table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
+		#tb99 th {background-color: var(--bg99);}
+		#tb99 td:first-child {color: var(--test99);}
 
-.btn {background-color: #161b22;
-	display: inline-block;
-	font-size: 12px;
-	font-family: monospace, "Courier New";
-	font-weight: bold;
-	padding-left: 8px;
-	padding-right: 8px;
-	cursor: pointer;
-}
-.btn18, .s18 {border-color: var(--test18); color: var(--test18);}
-.btn-left {float: left; position: relative; left: -10px; top: 0px;}
+		.btn {background-color: #161b22;
+			display: inline-block;
+			font-size: 12px;
+			font-family: monospace, "Courier New";
+			font-weight: bold;
+			padding-left: 6px;
+			padding-right: 6px;
+			cursor: pointer;
+		}
+		.btn0 {border-color: var(--test0); color: var(--test0);}
+		.btn-left {float: left; position: relative; left: -10px; top: 0px;}
 	</style>
 </head>
 <body>
@@ -53,12 +54,12 @@ table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
 	<tr><td class="blurb"><a class="return" href="https://arkenfox.github.io/TZP/index.html">return to TZP index</a></td></tr>
 	</table>
 
-	<table id="tb18">
+	<table id="tb99">
 		<col width="40%"><col width="60%">
 		<thead><tr><th colspan="2"><div class="nav-title">window.name [a]</div>
 		</th></tr></thead>
 		<tr>
-			<td><div class="btn-left"><span class="btn18 btn" onClick="run()">[ re-run ]</span></div>current</td>
+			<td><div class="btn-left"><span class="btn0 btn" onClick="run()">[ re-run ]</span></div>current</td>
 			<td class="mono" id="current"></td></tr>
 		<tr><td>setting new</td><td class="mono" id="setnew"></td></tr>
 		<tr><td>check new</td><td class="mono" id="check"></td></tr>

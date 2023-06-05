@@ -1,7 +1,7 @@
 'use strict';
 
 addEventListener("message", function(e) {
-	let list = ['userAgent','appCodeName','appName','product','appVersion','platform'],
+	let list = ['appCodeName','appName','appVersion','platform','product','userAgent'],
 		res = [],
 		r = "",
 		zU = "undefined",
@@ -21,11 +21,10 @@ addEventListener("message", function(e) {
 		}
 		return item
 	}
-	for(let i=0; i < list.length; i++) {
-		try {r = navigator[list[i]]} catch(e) {r = "blocked"}
+	for (let i=0; i < list.length; i++) {
+		try {r = navigator[list[i]]} catch(e) {r = "error"}
 		r = cleanFn(r)
 		res.push(list[i] +":"+ r) // no spaces
 	}
-	res.sort() // always sort
 	self.postMessage(res)
 }, false)

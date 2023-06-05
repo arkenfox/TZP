@@ -2,14 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>dayperiod</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>pluralrules</title>
+	<title>dayperiod</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
@@ -20,8 +14,8 @@
 		.pad {padding-bottom: 10px;)
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -120,10 +114,14 @@ function reset_custom(type) {
 		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
 			// FF90-109
 			dom.short22.checked = true
-		} else {
+		} else if (isFF) {
 			// FF110+
 			dom.short15.checked = true
-			dom.long22.checked = true // hopefully blink catches up
+			dom.long22.checked = true
+		} else {
+			// non-FF: use both to cover bases
+			dom.short22.checked = true
+			dom.long22.checked = true
 		}
 	}
 }
@@ -158,7 +156,7 @@ function legend() {
 		}
 	}
 	// output
-	let	header = s4 +"   LEGEND ["+ aLegend.length + " supported]"+ sc +"<br><br>"
+	let	header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
@@ -286,15 +284,15 @@ function run_main(method) {
 				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 				if (is102) {
 					// track FF version changes
-					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "b51c5347") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "89a8c934") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "fe9c0751") {resultsHash += s14 +" [FF115+]"+ sc
+					} else if (resultsHash == "6f17d9ef") {resultsHash += s14 +" [FF110-114]"+ sc
+					} else if (resultsHash == "88fabda0") {resultsHash += s14 +" [FF102-109]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "2169e4ef") {localesHash += s14 +" [FF110+]"+ sc // 199
-					} else if (localesHash == "3cf81f66") {localesHash += s14 +" [FF102-109]"+ sc // 192
+					if (localesHash == "6b3f4b76") {localesHash += s14 +" [FF110+]"+ sc
+					} else if (localesHash == "02fbf16b") {localesHash += s14 +" [FF102-109]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -312,7 +310,7 @@ function run_main(method) {
 		// perf
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 	} catch(e) {
-		dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + e.message
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
 	}
 }
 
@@ -385,6 +383,43 @@ Promise.all([
 	get_globals()
 ]).then(function(){
 	reset_custom("min")
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"az-cyrl,azerbaijani (cyrillic)",
+		"bn-in,bengali (india)",
+		"bs-cyrl,bosnian (cyrillic)",
+		"en-au,english (australia)",
+		"en-ca,english (canada)",
+		"es-ar,spanish (argentina)",
+		"es-co,spanish (colombia)",
+		"es-do,spanish (dominican republic)",
+		"es-mx,spanish (mexico)",
+		"es-pa,spanish (panama)",
+		"fa-af,persian (afghanistan)",
+		"ff-adlm,fulah (adlam)",
+		"fr-ca,french (canada)",
+		"fr-ch,french (switzerland)",
+		"fr-sn,french (senegal)",
+		"hi-latn,hindi (latin)",
+		"ks-deva,kashmiri (devanagari)",
+		"pt-pt,portuguese (portugal)",
+		"ro-md,romanian (moldova)",
+		"sd-deva,sindhi (devanagari)",
+		"se-fi,northern sami (finland)",
+		"shi-latn,tachelhit (latin)",
+		"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
+		"sr-cyrl-me,serbian (cyrillic montenegro)",
+		"sr-cyrl-xk,serbian (cyrillic kosovo)",
+		"sr-latn,serbian (latin)",
+		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		"sr-latn-me,serbian (latin montenegro)",
+		"sr-latn-xk,serbian (latin kosovo)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"yo-bj,yoruba (benin)",
+		"yue-hans,cantonese (simplified)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
 	run_test()
 })

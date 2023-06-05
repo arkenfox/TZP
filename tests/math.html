@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -7,13 +7,13 @@
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
+		hr {color: var(--test18);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -49,14 +49,14 @@
 		<tr><td colspan="3"><hr></td></tr>
 		<tr><td colspan="3">DIFFS ANALYSIS</td></tr>
 		<tr><td colspan="2"></td><td class="s18">vs control</td></tr>
-		<tr><td colspan="2"></td><td class="mono">denoted in <span class="s1">pale red</span></td></tr>
+		<tr><td colspan="2"></td><td class="mono">denoted in <span class="sb">red</span></td></tr>
 		<tr><td colspan="2">function</td><td class="c mono spaces" id="diff1"></td></tr>
 		<tr><td colspan="2">polyfill</td><td class="c mono spaces" id="diff2"></td></tr>
 		<tr><td colspan="2">test no's</td><td class="c mono spaces" id="numbers"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
 		<tr><td colspan="2"></td><td class="s18">polyfill vs function</td></tr>
-		<tr><td colspan="2"></td><td class="mono">denoted with <span class = "s1">[match]</span></td></tr>
+		<tr><td colspan="2"></td><td class="mono">denoted with <span class = "sb">[match]</span></td></tr>
 		<tr><td colspan="2">diffs</td><td class="c mono spaces" id="diff0"></td></tr>
 		<tr><td colspan="3"></td></tr>
 
@@ -118,15 +118,14 @@ function get_engine() {
 		}
 	}
 	let hash = sha1(res.join())
-	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = s18 +"blink"+ sc
-	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = s18 +"webkit"+ sc
-	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = s18 +"edgeHTML"+ sc
-	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = s18 +"trident"+ sc // also presto if we don't use `let`
+	if (hash == "ede9ca53efbb1902cc213a0beb692fe1e58f9d7a") {engine = "blink"
+	} else if (hash == "05513f36d87dd78af60ab448736fd0898d36b7a9") {engine = "webkit"
+	} else if (hash == "38172d9426d77af71baa402940bad1336d3091d0") {engine = "edgeHTML"
+	} else if (hash == "36f067c652c8cfd9072580fca1f177f07da7ecf0") {engine = "trident" // also presto if we don't use `let`
 	} else if (hash == "225f4a612fdca4065043a4becff76a87ab324a74") {engine = "gecko [a]" // abraham
 	} else if (hash == "cb89002a8d6fabf859f679fd318dffda1b4ae0ea") {engine = "gecko [b]" // me
 	}
 	if (engine.substring(0,5) == "gecko") {
-		engine = s18 + engine + sc
 		// palemoon/basilisk: fails 53, passes 54
 		if ("function" !== typeof CSSMozDocumentRule && URL.prototype.hasOwnProperty("toJSON")) {
 			engine += "<br><br>but wait.. I did some extra tests<br>"
@@ -135,7 +134,7 @@ function get_engine() {
 	}
 	dom.perfE.innerHTML = Math.round(performance.now() - et0) +" ms"
 	dom.engine.innerHTML = s12.trim() + hash + sc +"<br> &middot; "+ res.join("<br> &middot; ")
-		+"<br>"+ s12.trim() +"engine:"+ sc + engine
+		+"<br>"+ s12.trim() +"engine: "+ sc + engine
 }
 
 function build_controlset(engine) {
@@ -358,7 +357,6 @@ function build_controlset(engine) {
 		return a == Infinity ? 1 : b == Infinity ? -1 : (a - b) / (a + b)
 	}
 
-
 function get_results() {
 	let t0 = performance.now()
 	// vars
@@ -442,17 +440,17 @@ function get_results() {
 
 		// color & pad
 		if (isFnDiff) {
-			fnResult = s1.trim() + fnResult.padStart(rPad) + sc
+			fnResult = sb.trim() + fnResult.padStart(rPad) + sc
 		} else {
 			fnResult = fnResult.padStart(rPad)
 		}
 		if (isPolyDiff) {
-			poly1Result = s1.trim() + poly1Result.padStart(rPad) + sc
+			poly1Result = sb.trim() + poly1Result.padStart(rPad) + sc
 		} else {
 			poly1Result = poly1Result.padStart(rPad)
 		}
 		if (isDiff) {
-			poly1Result += s1 +"[match]"+ sc
+			poly1Result += sb +"[match]"+ sc
 		}
 		if (poly1Result !== "") {
 			fnResult += ", " + poly1Result
@@ -463,7 +461,7 @@ function get_results() {
 		if (demarc == true) {
 			display.push(sColor.trim() + strDemarc +"<br>"+ fnName.toUpperCase() + sc)
 		}
-		display.push(kpad+": "+ sColor + fnValue.padEnd(vPad) + sc +": "+ fnResult)
+		display.push(kpad +": "+ fnValue.padEnd(vPad) +": "+ fnResult)
 		// remember last function
 		prevFn = fn[1]
 	}
@@ -514,7 +512,7 @@ function get_results() {
 				let part2 = array[i].split(":")[2]
 					part2 = (part2.toString()).padStart(rPad)
 				let part3 = array[i].split(":")[3]
-				output.push(s12.trim() + part1 + sc +" s/be "+ s3.trim() + part2 + sc +" got"+ s1 + part3 + sc)
+				output.push(s12.trim() + part1 + sc +" s/be "+ part2 +"  got "+ sb + part3 + sc)
 			}
 			document.getElementById("diff" + type).innerHTML = output.join("<br>")
 		} else {

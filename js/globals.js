@@ -2,209 +2,163 @@
 
 var dom;
 
-// global snapshot
-let jsFiles = [],
-	jsFilesExpected = 12,
-	gCount = 0,
-	gCountExpected = 14,
-	// alerts
-	gCheck = [],
-	gCheckOnce = [],
-	// FP
-	gData = [],
-	gDetail = {},
-	// prototype lies
-	gLies = [],
-	gLiesProxy = [],
-	gLiesDetail = {},
-	// errors
-	gErrors = [],
-	gErrorsOnce = [],
-	// known
-	gKnown = [],
-	gKnownDetail = {},
-	gKnownOnce = [],
-	// bypasses
-	gBypassed = [],
-	gBypassedOnce = [],
-	gBypassedNot = [],
-	// methods
+const SECTG = "_global", SECTP = "_prereq", SECTNF = "NON-FP",
+	SECT1 = "screen", SECT2 = "ua", SECT3 = "feature", SECT4 = "language",
+	SECT5 = "network", SECT6 = "storage", SECT7 = "devices", SECT9 = "canvas",
+	SECT10 = "webgl", SECT11 = "audio", SECT12 = "fonts", SECT13 = "media",
+	SECT14 = "css", SECT15 = "elements", SECT18 = "misc",
+	SECT98 = "prototype", SECT99 = "proxy"
+
+const sectionMap = {
+	1: SECT1, 2: SECT2, 3: SECT3, 4: SECT4, 5: SECT5, 6: SECT6, 7: SECT7, 9: SECT9,
+	10: SECT10, 11: SECT11, 12: SECT12, 13: SECT13, 14: SECT14, 15: SECT15, 18: SECT18,
+	//98: SECT98, 99: SECT99
+}
+
+let sectionOrder = [], sectionNames = []
+
+const btnList = ["errors"] // ToDo: expand e.g alerts, lies
+
+const jsFilesExpected = 14
+let gCountExpected = 15
+let jsFiles = 0, gCount = 0
+
+// global
+let gData = { // from sData
+		"errorsonce": {},
+		"perf": [],
+	},
+	gKnown = [], // known, methods, alerts
 	gMethods = [],
-	gMethodsDetail = {},
-	gMethodsOnce = [],
-	// debug
-	gDebug = [],
-	gDebugOnce = [],
-	// perf
-	gPerf = [],
-	gPerfDetail = [],
-	gPerfHash = 0, // excludes _global checks
-	gPerfHashDetail = []
+	gAlert = [],
+	gAlertOnce = []
 
-// section snapshot
-let sData = {},
-	sDetail = {},
-	sPerfDetail = []
-// fluid
-let protoLies = [],
-	proxyLies = [],
-	navKeys = {}
+// section
+let sData = {}, // final sorted section data: from sDataTemp
+	sDataTemp = {}, // unsorted section data
+	sDetail = {} // all clickables: lies, fake, valid etc
 
-// android
-let avh = "",
-	firstH = undefined,
-	firstW = undefined
-try {firstH = window.innerHeight} catch(e) {}
-try {firstW = window.innerWidth} catch(e) {}
+const zFP = "fingerprint",
+	zDOC = "document",
+	zIFRAME = "iframe"
+let isScope = zDOC
 
-// css
-let s0 = " <span class='",
-	smono = s0+"mono'>",
+// styles
+const s0 = " <span class='",
 	sb = s0+"bad'>",
 	sg = s0+"good'>",
-	sf = s0+"faint'>",
-	sn = s0+"neutral'>",
-	snc = s0+"no_color'>",
-	so = s0+"orange'>",
-	s1 = s0+"s1'>",
-	s2 = s0+"s2'>",
+	s1 = s0+"s1'>", // s1+s3+s99: used in perf details
 	s3 = s0+"s3'>",
-	s4 = s0+"s4'>",
-	s5 = s0+"s5'>",
-	s6 = s0+"s6'>",
-	s7 = s0+"s7'>",
-	s8 = s0+"s8'>",
-	s9 = s0+"s9'>",
-	s10 = s0+"s10'>",
-	s11 = s0+"s11'>",
-	s12 = s0+"s12'>",
-	s13 = s0+"s13'>",
-	s14 = s0+"s14'>",
-	s15 = s0+"s15'>",
-	s16 = s0+"s16'>",
-	s17 = s0+"s17'>",
-	s18 = s0+"s18'>",
 	s99 = s0+"s99'>",
-	sc = "</span>",
-	soL = "<code class='lies'>",
-	soB = "<code class='bypass'>",
-	scC = "</code>",
-// show/hide colors
-	zhide = "#161b22",
-	zshow = "#b3b3b3",
-// common results
-	zB0 = "blocked",
-	zD = "disabled",
+	sc = "</span>"
+
+// common
+const zD = "disabled",
 	zE = "enabled",
 	zErr = "error",
-	zNS = "not supported",
+	zErrType = "TypeError: ",
+	zErrTime = "timed out",
+	zErrInvalid = "Invalid: ",
+	zErrEmpty = "empty",
+	zErrParadox = "paradox",
 	zNA = "n/a",
 	zS = "success",
 	zF = "failed",
 	zU = "undefined",
 	zUQ = "\"undefined\"",
-	zFF = "Firefox",
-	zTB = "Tor Browser",
-	zSIM = " [sim]",
 	zNEW = sb+"[NEW]"+sc,
-	zLIE = "untrustworthy",
-// notes
-	tb_green = sg+"[TB]"+sc,
-	tb_red = sb+"[TB]"+sc,
-	tb_standard = sg+"[TB Standard]"+sc,
-	tb_safer = sg+"[TB Safer]"+sc,
-	rfp_green = sg+"[RFP]"+sc,
-	rfp_red = sb+"[RFP]"+sc,
-	rfp_random_green = sg+"[RFP random]"+sc,
-	rfp_random_red = sb+"[RFP random]"+sc,
-	lb_green = sg+"[LB]"+sc,
-	lb_red = sb+"[LB]"+sc,
-	nw_green = sg+"[RFP NewWin]"+sc,
-	nw_red = sb+"[RFP NewWin]"+sc,
-	enUS_green = sg+"[en-US]</span> ",
-	enUS_red = sb+"[en-US]</span> ",
-	spoof_both_green = sg+"[en-US + RFP]"+sc,
-	spoof_both_red = sb+"[en-US +/or RFP]"+sc,
-	default_tb_green = sg+"[TB default]"+sc,
-	default_tb_red = sb+"[TB default]"+sc,
-	default_ff_green = sg+"[FF default]"+sc,
-	default_ff_red = sb+"[FF default]"+sc,
-	note_random = "[random]"+sc,
-	note_noise = "[noise detected]"+sc,
-	match_green = sg+"[match]"+sc,
-	match_red = sb+"[match]"+sc,
-	note_file = "",
-	note_ttc = sf+"test to come"+sc,
-// other
-	isArch = false, // OS architecture
-	isArchErr = false,
-	isBaseFonts = false, // use whitelist/kBaseFonts
-	isPlatformFont = undefined, // from widget for baseFonts
-	aSystemFont = [], // for baseFontsFull
-	isBrave = false,
-	isBraveMode = 0,
-	aBraveMode = ["unknown", "disabled", "standard", "strict"],
-	isCanvasGet = "",
-	isCanvasGetChannels = "",
-	isChannel = "",
-	isClientRect = 1, // first true method
-	aClientRect = [], // per method result
-	aClientRectNoise = {}, // per method noise
-	isEngine = "",
-	isFF = false,
+	zLIE = "untrustworthy"
+
+// for android defaults: e.g desktop mode on/off vs TZP forcing width
+let isWindow = {}
+function get_scr_initial() {
+	let x, aList = ["innerHeight", "innerWidth", "outerHeight", "outerWidth"]
+	aList.forEach(function(k){
+		try {
+			x = window[k]
+			if (typeof x !== "number") {x = "NaN"}
+		} catch(e) {
+			x = zErr
+		}
+		isWindow[k] = x
+	})
+}
+get_scr_initial()
+let avh = "" // android
+
+// notation
+const sgtick = sg +"[<span class='health'>✓</span> ", // ✓ u2713
+	sbx = sb +"[<span class='health'>✕</span> ", // ✕ u2715
+	rfp_green = sgtick+"RFP]"+sc,
+	rfp_red = sbx+"RFP]"+sc,
+	lb_green = sgtick+"LB]"+sc,
+	lb_red = sbx+"LB]"+sc,
+	nw_green = sgtick+"RFP NewWin]"+sc,
+	nw_red = sbx+"RFP NewWin]"+sc,
+	default_green = sgtick+"default]"+sc,
+	default_red = sbx+"default]"+sc,
+	match_green = sgtick+"match]"+sc,
+	match_red = sbx+"match]"+sc,
+	green_tick = sg+"<span class='health'>✓</span>"+sc,
+	red_cross = sb+"<span class='health'>✕</span>"+ sc
+
+const screen_green = sgtick+"screens match]"+sc,
+	screen_red = sbx+"screens match]"+sc,
+	window_green = sgtick+"windows match]"+sc,
+	window_red = sbx+"windows match]"+sc,
+	sizes_green = sgtick+"screens + windows match]"+sc,
+	sizes_red = sbx+"screens + windows match]"+sc
+
+// dynamic notation
+let tb_green = sgtick+"TB]"+sc,
+	tb_red = sbx+"TB]"+sc,
+	tb_standard = sgtick+"TB Standard]"+sc,
+	tb_safer = sgtick+"TB Safer]"+sc,
+	tb_slider_red = sbx+"TB Slider]"+sc,
+	lang_green = sgtick+"TB matches language]"+sc,
+	lang_red = sbx+"TB matches language]"+sc,
+	intl_green = sgtick+"TB matches locale]"+sc,
+	intl_red = sbx+"TB matches locale]"+sc
+
+// run once
+let isArch = true,
+	isAutoPlay,
+	isAutoPlayErr,
+	isDevices,
+	isenUS = false, // temp var until RFP lands proper deterministic language/locales
 	isFile = false,
-	isFork = undefined,
-	isLoad = true,
-	isLogo = zB0, // logo dimensions: assume blocked
-	isMark = "", // watermark dimensions
-	isOS = "",
-	isOSError,
-	isPerf = true,
-	canPerf = false,
-	isResource = "",
-	isResourceMetric = "",
-	isSecure = false,
+	isGecko = false,
+	isLogo,
+	isMullvad = false,
+	isOS,
+	isOSErr,
+	isSystemFont = [],
 	isTB = false,
-	isTBChannel = "",
-	isTZPBlock = false,
-	isTZPBlockMinVer = [78, 10], // [FF, TB version]
-	isTZPSmart = false,
-	isTZPSmartMinVer = [78, 78, 10], // [FF, TB, TB version]
-	isVer = "",
-	isVerMax = "",
-	isVerPlus = false,
+	isVer,
+	isVerExtra = "",
+	isWordmark
+
+// other
+let isClientRect = 1,
+	isPerf = false
+
 // runtypes
-	gt0,
+let gt0, gt1,
 	gLoad = true,
 	gRun = true,
-	gClick = true
+	gClick = true,
+	isBlock = true,
+	isBlockMin = [102, 12], // [FF, equivalent TB version]
+	isSmart = false,
+	isSmartMin = 102 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
 /** DEV **/
-// check
-let logChkList = false,
-	logPerfHash = "", // "", all, sha1, mini, minisha1
-	logPerfMini = false, // we set this in code
-	logPerfSha1 = false, // ditto
-	logPerfMiniSha1 = false, // ditto
-	logPseudo = false,
-	logScreen = false,
-	logStorage = false,
-// simulate
-	runSE = false, // errors
+// sim
+let runSE = false, // errors
+	runST = false, // other errors
+	runTE = false, // timeout errors
 	runSL = false, // lies
-	runSN = false, // new
-	runSU = false, // ua (or use CB)
-// block
-	runPS = false, // block css pseudo: return x
-// cycle simulations
-	runCLR = false, // done: color
-	runDEP = false, // done: color/pixel depth
-	runCSS = false, // done: css styles
-	runFNT = false, // done: fonts
-	runMDV = false, // done: mediaDevices
-	runMTP = false, // done: maxTouchPoints
-	runSNC = false, // nav connection
-	runSNM = false, // done: nav mimeTypes
-	runSNP = false, // done: nav plugins
-	runUAI = false, // done: ua iframe
-	runWFS = false  // done: window.fullScreen
+	runPS = false, // block css pseudo
+// cycle sim
+	runUAI = false // ua iframe
+

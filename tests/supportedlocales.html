@@ -2,25 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>supportedlocalesof</title>
-<style>
-</style>
-</head>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>pluralrules</title>
+	<title>supportedlocalesof</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
-	<!-- custom -->
 	<style>
 		table {width: 780px;}
-		hr {color: #dcdc8c}
+		hr {color: var(--test4);}
 	</style>
 </head>
-<body>
 
+<body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
@@ -35,7 +28,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">Return supported locales, including mappings and duplicates,
-			for each given Intl constructor. The list is specially curated and used in TZP entropy
+			for each given Intl constructor. The list is a base list and supplemented in TZP entropy
 			PoCs, and is not a complete list of all locales.</span>
 		</td></tr>
 		<tr>
@@ -60,7 +53,7 @@
 <script>
 'use strict';
 
-var list = gLocales,
+var list = [],
 	aLegend = [],
 	aLocales = [],
 	aSummary = []
@@ -99,7 +92,7 @@ function legend() {
 		}
 	}
 	// output
-	dom.legend.innerHTML = s4 +"   LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"+ aLegend.join("<br>")
+	dom.legend.innerHTML = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"+ aLegend.join("<br>")
 }
 
 function run_main(method, isLoopy) {
@@ -132,13 +125,13 @@ function run_main(method, isLoopy) {
 			if (!is102) {return ""}
 			let notation = ""
 			if (method == "C") {
-				if (hash == "c44c31bb") {notation = " [FF110+]"
-				} else if (hash == "213036f4") {notation = " [FF102-109]"
+				if (hash == "51bba16a") {notation = " [FF110+]"
+				} else if (hash == "87327c85") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
 			} else {
-				if (hash == "ac1c5516") {notation = " [FF110+]"
-				} else if (hash == "d3656bd5") {notation = " [FF102-109]"
+				if (hash == "2f20e446") {notation = " [FF110+]"
+				} else if (hash == "efce786b") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
 			}
@@ -281,7 +274,7 @@ function run_main(method, isLoopy) {
 					str = spacer + "<hr>" + "<br>" + str + spacer
 					str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
 				}
-				str += spacer + data.join(", ")
+				str += spacer + "<span style='color: grey;'>" + data.join(", ") +"</span>"
 				if (map2.length) {str += spacer + s12 +"MAPPED"+ sc + spacer + map2.join("<br>")}
 				if (dupes.length) {str += spacer + s14 +"DUPES"+ sc + spacer + dupes.join("<br>")}
 				if (notlist.length) {str += spacer + s16 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
@@ -325,7 +318,7 @@ function run_main(method, isLoopy) {
 				}
 			}
 			// display legend
-			dom.legend.innerHTML = s4 +"   LEGEND ["+ legend.length +"]"+ sc +"<br><br>"+ legend.join("<br>")
+			dom.legend.innerHTML = s4 +"LEGEND ["+ legend.length +"]"+ sc +"<br><br>"+ legend.join("<br>")
 			// perf
 			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		}
@@ -393,6 +386,8 @@ legend()
 Promise.all([
 	get_globals()
 ]).then(function(){
+	list = gLocales
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	run("ALL")
 })
 
