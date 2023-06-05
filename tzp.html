@@ -13,34 +13,12 @@
 </head>
 
 <body>
-	<!-- domrect -->
+	<!--domrect-->
 	<div id="divrect" class="divrect1">
-		<div class="testRect" id="rect6"></div>
-		<div class="insideDOMRect">
-			<h1 class="testRect" id="rect0">https://browserleaks.com<i>/rects</i></h1>
-			<span class="testRect" id="rect1"><strong>Element.getClientRects (̿▀̿&thinsp;̿Ĺ̯̿̿▀̿ ̿)̄ </strong></span><br>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-			<span class="testRect" id="rect2">F i n g e r p r i n t i n g ?</span>
-		</div>
-		<select class="testRect" id="rect3"><option>&minus;&#1726;-</option></select>
-		<progress class="testRect" id="rect4"></progress>
-		<button class="testRect" id="rect5"></button>
+		<div class="testRect" id="rect1"></div>
 	</div>
 	<!--offscreen-->
 	<div class="offscreen">
-		<div id="measureDivLH" class="measure measureScale">
-			<div id="divLH">lineheight</div>
-		</div>
-		<div id="measureDivMath" class="measure">
-			<div id="mathmlCtrl">x=−b ±b2−4 ⁢a⁢c 2⁢a</div>
-			<div id="mathmlTest"><math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo><mi>b</mi>
-			<mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>
-			<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>
-			<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math></div>
-		</div>
 		<div class="cssDocFont" id="divDocFont">line height</div>
 		<img id="imageFS" width=0 height=0></img>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
@@ -48,39 +26,54 @@
 		<div><canvas id="ugCanvas" style='font-size: 22pt;'></canvas></div>
 		<div><span id="fontFBTest" style='white-space: nowrap; font-family: fontFallback;'></span></div>
 		<div class="normalized">
-			<div><span id="df1" style='font-family: serif;'></span></div>
-			<div><span id="df2" style='font-family: monospace;'></span></div>
+			<div><span id="dfsize"></span></div>
 		</div>
 		<div id="iframes"></div>
 		<div id="svgDiv"></div>
 		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
+		<!-- ensure codepoints have time for fallback mapping -->
 		<div>&#x20B9; &#x2581; &#x20BA; &#xA73D; &#xFFFD; &#x20B8; &#x05C6; &#x1E9E; &#x097F; &#xF003; &#x1CDA;
 			&#x17DD; &#x23AE; &#x0D02; &#x0B82; &#x115A; &#x2425; &#x302E; &#xA830; &#x2B06; &#x21E4; &#x20BD;
 			&#x2C7B; &#x20B0; &#xFBEE; &#xF810; &#xFFFF; &#x007F; &#x10A0; &#x1D790; &#x0700; &#x1950; &#x3095;
-			&#x532D; &#x061C; &#x20E3; &#xFFF9; &#x0218; &#x058F; &#x08E4; &#x09B3; &#x1C50; &#x2619;</div>
-		<div id="test89" style="width:1em">a &#x3000 b</div>
-		<div id="ctrl89" style="width:1em">a b</div>
-		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
-		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+			&#x532D; &#x061C; &#x20E3; &#xFFF9; &#x0218; &#x058F; &#x08E4; &#x09B3; &#x1C50; &#x2619;
+		</div>
 		<!-- don't hide: some forks can't detect it -->
 		<div><img id="branding" src="chrome://branding/content/about-wordmark.svg"></img></div>
+		<div><img id="aboutlogo" src="about:logo"></img></div>
+		<div><video id="mediatest"></video></div>
+		<div><audio id="audiotest"></audio></div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
 		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
 		<span id="sColorElement"></span>
-		<div id="dpr2" style="border: 0.1px solid;">Foo</div>
+		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
 		<div>
-			<input type="reset" value="" id="widget0">
-			<input type="checkbox" id="widget1">
-			<input type="color" id="widget2">
-			<select id="widget3"><option value="a"></option></select>
-			<input type="radio" id="widget4">
-			<input type="text" id="widget5">
-			<input type="date" id="widget6">
-			<input type="datetime-local" id="widget7">
-			<textarea id="widget8"></textarea>
+			<input type="reset" value="" id="widgetbutton">
+			<input type="checkbox" id="widgetcheckbox">
+			<input type="color" id="widgetcolor">
+			<select id="widgetcombobox"><option value="a"></option></select>
+			<input type="radio" id="widgetradio">
+			<input type="text" id="widgettext">
+			<input type="date" id="widgetdatetime">
+			<input type="datetime-local" id="widgetdatetime-local">
+			<textarea id="widgettextarea"></textarea>
+			<input type="email" id="widgetemail">
+			<input type="file" id="widgetfile">
+			<input type="hidden" id="widgethidden">
+			<input type="image" id="widgetimage">
+			<input type="month" id="widgetmonth">
+			<input type="number" id="widgetnumber">
+			<input type="password" id="widgetpassword">
+			<input type="range" id="widgetrange">
+			<input type="reset" id="widgetreset">
+			<input type="search" id="widgetsearch">
+			<input type="submit" id="widgetsubmit">
+			<input type="time" id="widgettime">
+			<input type="tel" id="widgettel">
+			<input type="url" id="widgeturl">
+			<input type="week" id="widgetweek">
 		</div>
 		<div>
 			<canvas id="kcanvasGet" width="16" height="8"></canvas>
@@ -89,13 +82,8 @@
 		</div>
 		<!-- hide tor items: !src = 0x0 but "offscreen" = image placeholder size -->
 		<div>
-			<img id="torbranding2" src="chrome://branding/content/about-wordmark.svg"></img>
+			<img id="brandinghidden" src="chrome://branding/content/about-wordmark.svg"></img>
 		</div>
-	</div>
-	<div class="hidden original" id="original">
-		<div>COPY | FORK of</div>
-		<!-- devs who host elsewhere: please respect/accredit my source/work and do not alter-->
-		<a class="return" href="https://arkenfox.github.io/TZP/tzp.html">TZP ORIGINAL</a>
 	</div>
 
 	<table>
@@ -104,38 +92,42 @@
 	</table>
 
 	<!--FPs-->
-	<table id="tb99">
-		<col width="25%"><a name="finger"></a><col width="75%">
+	<table id="tbfp">
+		<col width="26%"><a name="finger"></a><col width="74%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#finger">loose <span class="perf"><sup>1</sup></span> fingerprints</a>
-			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfall"></span></div>
+			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfAll"></span></div>
 			<div class="nav-down"><a href="#screend">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td>
-			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span></div>
-			&nbsp top level</td><td class="c mono" id="allhash"></td></tr>
-		<!--
-		<tr><td>iframe</td><td class="c mono faint" id="iframehash"></td></tr>
-		<tr><td>workers</td><td class="c mono faint" id="workershash"></td></tr>
-		<tr><td>user-gestures</td><td class="c mono faint" id="gesturehash"></td></tr>
-		-->
-		<tr><td>prototype lies <sup>2</sup></td><td class="c mono" id="prototypehash"></td></tr>
-		<tr><td>proxy lies <sup>2</sup></td><td class="c mono" id="proxyhash"></td></tr>
-		<tr><td>untrustworthy | known lies</td><td class="c mono" id="knownhash"></td></tr>
+			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span>
+			</div> &nbsp prototype | proxy <sup>2</sup></td>
+			<td class="mono">
+				<span class="c" id="protohash"></span>
+				<div class="btn-right"><span class="c" id="protohealth"></span></div>
+			</td></tr>
+		<tr><td>document</td><td class="mono">
+				<span class="c" id="documenthash"></span>
+				<div class="btn-right"><span class="c" id="documenthealth"></span></div>
+			</td></tr>
+		<tr><td>untrustworthy</td><td class="c mono" id="knownhash"></td></tr>
 		<tr><td>methods</td><td class="c mono" id="knownmethods"></td></tr>
 		<tr><td><div class="btn-left"><span class="btn btn1 c" id="allcheck" onClick="showMetrics(`alerts`)"></span></div>
-			&nbsp errors</td><td class="c mono" id="errorshash"></td></tr>
+			&nbsp errors</td><td class="c mono" id="documenterrorshash"></td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">fingerprints should always be considered 
+		<tr><td colspan="2"><span class="no_color">fingerprints are always 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
-			<sup>1</sup>, prototype/proxy lies code provided by <a target="_blank" class="blue"
-			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup></span>
+			<sup>1</sup>, prototype/proxy lies by
+				<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a>
+				<sup>2</sup>, json format by
+				<a target="_blank" class="blue" href="https://github.com/lydell/json-stringify-pretty-compact">Simon Lydell</a>
+			</span>
 		</td></tr>
 	</table>
 
 	<!--screen-->
 	<table id="tb1">
-		<col width="50%"><a name="screen"></a><col width="50%">
+		<col width="31%"><a name="screen"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#screen">screen</a>
 			<div class="nav-up"><a href="#finger">&#9650;</a> <span class="c perf" id="perfscreen"></span></div>
@@ -143,72 +135,105 @@
 			<div class="nav-right"><a name="screend"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn1 btn" onClick="outputSection(`1`)">[ re-run ]</span></div>
-			<span class="c" id="screenhash"></span></td></tr>
+			<div class="btn-left"><span class="btn1 btn" onClick="outputSection(1)">[ re-run ]</span></div>
+			<span class="c" id="screenhash"></span>
+		</td></tr>
+
+		<!--screen &#9679 dot-->
+		<tr><td>available screen <span class="bold scrgroup"> &#9679 </span></td>
+			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes_match"></span></td></tr>
 		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 500-2560</span></div>
-			&nbsp [css min-device-] screen resolution <sup>1</sup></td><td id="S"></td></tr>
-		<tr><td>[matchMedia] screen resolution <sup>2</sup></td><td class="c" id="mmScreen"></td></tr>
-		<tr><td>screen resolution <span class="group"> &#9679 </span></td>
-			<td><span class="c" id="mScreen"></span><span class="c" id="match"></span></td></tr>
-		<tr><td>available resolution <span class="group"> &#9679 </span></td><td class="c" id="mAvailable"></td></tr>
-		<tr><td>outer window <span class="group"> &#9679 </span></td><td class="c" id="mOuter"></td></tr>
-		<tr><td>inner window <span class="group"> &#9679 </span></td>
-			<td><span class="c" id="mInner"></span><span class="c" id="lbnw"></span></td></tr>
+			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
+			&nbsp [css min-device-] screen <sup>1</sup> <span class="bold scrgroup"> &#9679 </span></td>
+			<td class="mono" id="S"></td></tr>
+		<tr><td>[matchMedia] screen <sup>2</sup>
+			<span class="bold scrgroup"> &#9679 </span></td><td class="c mono" id="mmScreen"></td></tr>
+		<tr><td>screen <span class="bold scrgroup"> &#9679 </span></td>
+			<td class="border-bottom"><span class="c mono" id="mScreen">&nbsp</span></td></tr>
+
+		<!--inner &#9670 diamond-->
+		<tr><td>outer window <span class="bold wingroup"> &#9679 </span></td>
+			<td class="mono"><span class="c" id="mOuter"></span>
+			<span class="c" id="window_sizes_match"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">range 450-2560</span></div>
-			&nbsp [css min-] inner window <sup>1, 3</sup></td><td id="D"></td></tr>
-		<tr><td>[matchMedia] inner window <sup>2</sup></td><td class="c" id="mmInner"></td></tr>
-		<tr><td>visualViewport | viewport <sup>4</sup></td>
-			<td><span class="c" id="vViewport"></span> | <span class="c" id="eViewport"></span></td>
-		</tr>
-		<tr><td>[visualViewport | viewport | element] scrollbars</td><td class="c" id="mScrollbar"></td></tr>
+			<span class="ttxt">range 400-2560</span></div>
+			&nbsp [css min-] inner window <sup>1, 3</sup> <span class="bold wingroup"> &#9679 </span></td>
+			<td class="mono" id="D"></td></tr>
+		<tr><td>[matchMedia] inner window <sup>2</sup> <span class="bold wingroup"> &#9679 </span></td>
+			<td class="c mono" id="mmInner"></td></tr>
+		<tr><td>inner window <span class="bold wingroup"> &#9679 </span></td>
+			<td class="mono border-bottom">
+				<span class="c" id="mInner"></span>
+				<span class="c" id="letterboxing"></span>
+				<span class="c" id="new_window"></span>
+			</td></tr>
+
+		<!-- viewport/scrollbars-->
+		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vViewport"></td></tr>
+		<tr><td>visualViewport</td><td class="c mono" id="eViewport"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">visualViewport<br>viewport<br>element</span></div>
+			&nbsp scrollbars</td><td class="c mono border-bottom" id="mScrollbar"></td></tr>
+
+		<!-- the rest -->
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">left<br>top<br>availLeft<br>availTop</span></div>
-			&nbsp [screen] positions</td><td class="c" id="posS"></td></tr>
+				<span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
+			&nbsp [screen] positions</td><td class="c mono" id="screen_positions"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">screenX<br>screenY<br>mozInnerScreenX<br>mozInnerScreenY</span></div>
-			&nbsp [window] positions</td><td class="c" id="posW"></td></tr>
-		<tr><td>[css | matchMedia] display-mode</td><td><span id="cssDM"></span> | <span class="c" id="mmDM"></span></td></tr>
-		<tr><td>full screen</td><td class="c" id="fsState"></td></tr>
+				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
+			&nbsp [window] positions</td><td class="c mono" id="window_positions"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">full-screen-api.enabled</span></div>
-			&nbsp [api] full screen</td><td class="c" id="fsSupport"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click here ]</span>
+			<span class="ttxtb">mozFullScreenEnabled<br>fullScreen</span></div>
+			&nbsp display-mode | fullscreen</td>
+			<td class="mono"><span id="cssDM"></span> | <span id="display-mode"></span>
+				| <span class="c" id="mozFullScreenEnabled"></span> | <span class="c" id="fullScreen"></span></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span></div>
-			&nbsp [test] full screen <sup>4</sup></td><td class="c" id="fsLeak"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click here ]</span>
+			&nbsp fullscreen <sup>4</sup></td><td class="c mono" id="fsLeak"></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">will attempt to open a new<br>window as big as possible<br>and grab the dimensions</span></div>
-			&nbsp new window</td><td class="c" id="newWinLeak"></td></tr>
-		<tr class="togOS1"><td>[android] new window</td><td id="droidWin"></td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">FF83+<br>dom.indexedDB.privateBrowsing.enabled</span></div>
-			&nbsp private window</td><td class="c" id="IsPBMode"></td></tr>
-		<tr><td>[screen] orientation | mozOrientation | angle</td><td class="c" id="scrOrient"></td></tr>
-		<tr><td>[css] -moz- | orientation | aspect-ratio | device-aspect-ratio</td>
-			<td><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span></td></tr>
-		<tr><td>[matchMedia] -moz- | orientation | aspect-ratio | device-aspect-ratio</td><td class="c" id="mmO"></tr>
-		<tr><td>dpi</td><td class="c" id="jsDPI"></td ></tr>
+			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
+			&nbsp new window</td><td class="c mono" id="newWinLeak"></td></tr>
+		<!-- orientation-->
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">-moz-device-orientation
+			<br>orientation<br>aspect-ratio<br>device-aspect-ratio</span></div>	&nbsp [css] orientation</td>
+			<td class="mono"><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span>
+			</td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">-moz-device-orientation<br>orientation<br>aspect-ratio<br>device-aspect-ratio</span></div>
+			&nbsp [matchMedia] orientation</td><td class="c mono" id="mmO"></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">orientation.type<br>mozOrientation<br>orientation.angle</span></div>
+			&nbsp [screen] orientation</td><td class="c mono" id="scrOrient"></td></tr>
+		<!-- dpi-->
+		<tr><td>dpi</td><td class="c" id="dpi"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
-			&nbsp [css min-resolution] dpi</td><td id="P"></td></tr>
-		<!--<tr><td>[css] dppx</td><td id="PPX"></td></tr>
-		<tr><td>[css] dpcm</td><td id="PCM"></td></tr>-->
-		<tr><td>[matchMedia max-resolution] dpi | dppx | dpcm</td><td class="c" id="mmDPI"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">dom.visualviewport.enabled</span></div>
-			&nbsp [visual viewport] scale</td><td id="vvScale"></td></tr>
-		<!--<tr><td>zoom %</td><td class="c" id="jsZoom"></td></tr>-->
-		<tr><td>devicePixelRatio</td><td class="c" id="dpr"></td></tr>
-		<tr><td>[matchMedia -webkit- | -moz-] device-pixel-ratio</td>
-			<td><span class="c" id="mmDPRw"></span> | <span class="c" id="mmDPRm"></span></td></tr>
-		<tr class="togOS1"><td colspan="2" class="center">--- android ---</td></tr>
-		<tr class="togOS1"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_kbh()"></td></tr>
-		<tr class="togOS1"><td>keyboard height</td><td class="c" id="kbh"></td></tr>
-		<tr class="togOS1"><td>toolbar height</td><td class="c" id="tbh"></td></tr>
+			&nbsp [css min-resolution] dpi</td><td class="mono" id="P"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">max-resolution</span></div>
+			&nbsp [matchMedia] dpi | dppx | dpcm</td><td class="c mono" id="mmDPI"></td></tr>
+		<!--dpr-->
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">-moz-device-pixel-ratio<br>border width</span></div>
+			&nbsp devicePixelRatio</td>
+			<td><span class="c mono" id="devicePixelRatio_moz"></span> | <span class="c mono" id="devicePixelRatio_border"></span>
+		</td></tr>
+		<tr><td>[window] devicePixelRatio</td><td class="c mono" id="devicePixelRatio"></td></tr>
+		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
+
+		<tr class="togOS"><td colspan="2" class="center">--- android ---</td></tr>
+		<tr class="togOS"><td>initial outer window <span class="bold initialgroup"> &#9679 </span></td>
+			<td class="mono"><span id="initialOuter"></span><span id="window_initial"></span></td></tr>
+		<tr class="togOS"><td>initial inner window <span class="bold initialgroup"> &#9679 </span></td>
+			<td class="mono" id="initialInner"></td></tr>
+		<tr class="togOS"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
+		<tr class="togOS"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
+		<tr class="togOS"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
+		<tr class="togOS"><td>toolbar height</td><td class="c mono" id="tbh"></td></tr>
 		<tr><td colspan="2"></td></tr> <!-- spacer -->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
@@ -224,7 +249,7 @@
 
 	<!--ua-->
 	<table id="tb2">
-		<col width="35%"><a name="useragent"></a><col width="65%">
+		<col width="31%"><a name="useragent"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#useragent">user agent</a>
 			<div class="nav-up"><a href="#screen">&#9650;</a> <span class="c perf" id="perfua"></span></div>
@@ -232,8 +257,9 @@
 			<div class="nav-right"><a name="useragentd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(`2`)">[ re-run ]</span></div>
-			<span class="c" id="uahash"></span></td></tr>
+			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(2)">[ re-run ]</span></div>
+			<span class="c" id="uahash"></span>
+		</td></tr>
 		<tr><td>hash</td><td class="c mono" id="uaDoc"></td></tr>
 		<tr><td id="lappCodeName">appCodeName</td><td class="c spaces" id="appCodeName"></td></tr>
 		<tr><td id="lappName">appName</td><td class="c spaces" id="appName"></td></tr>
@@ -257,13 +283,13 @@
 			<tr class="togUA1"><td>nested</td><td class="c mono" id="uaIframe6"></td></tr>
 			<tr class="togUA1"><td>window access</td><td class="c mono" id="uaIframe7"></td></tr>
 		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[ show ]</span>
-			workers</td><td class="c mono faint" id="uaWorkers"></td></tr>
+			workers</td><td class="mono s99" id="uaWorkers">summary not coded</td></tr>
 			<tr class="togUA2"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
 			<tr class="togUA2"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
 			<tr class="togUA2"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
-			<tr class="togUA2"><td>nested worker</td><td class="c mono faint" id="uaWorker3"></td></tr>
-			<tr class="togUA2"><td>worker from blob</td><td class="c mono faint" id="uaWorker4"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('goNW_UA')">[ click here ]</span>
+			<tr class="togUA2"><td>nested worker</td><td class="mono s99" id="uaWorker3">test to come</td></tr>
+			<tr class="togUA2"><td>worker from blob</td><td class="mono s99" id="uaWorker4">test to come</td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('goNW_UA')">[ click ]</span>
 			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -272,7 +298,7 @@
 
 	<!--fd-->
 	<table id="tb3">
-		<col width="35%"><a name="feature"></a><col width="65%">
+		<col width="31%"><a name="feature"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#feature">feature detection</a>
 			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perffeature"></span></div>
@@ -280,22 +306,21 @@
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
-			These tests, tailored for <code>Gecko</code>, are to show that you cannot hide your
-			<code>engine</code> <a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
-			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, <code>version</code>
-			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a>, or <code>OS</code>.</span>
+			These tests are to show that you cannot hide your	engine
+			<a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
+			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, version
+			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a> or OS.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(`3`)">[ re-run ]</span></div>
-			<span class="c" id="featurehash"></span></td></tr>
+			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(3)">[ re-run ]</span></div>
+			<span class="c" id="featurehash"></span>
+		</td></tr>
 		<tr><td>[css] branding</td><td id="fdBrandingCss"></td></tr>
-		<tr><td id="browserlabel">[css] browser</td><td id="fdResourceCss"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">Firefox 89+<br>javascript.options.large_arraybuffers</span>
-			</div> &nbsp [platform] architecture</td><td class="c" id="fdArchOS"></td></tr>
-		<tr><td>version</td><td class="c" id="fdVersion"></td></tr>
-		<tr><td>[resource://] browser</td><td class="c" id="fdResource"></td></tr>
-		<tr><td>[chrome://] os</td><td class="c" id="fdChrome"></td></tr>
+		<tr><td>[css] browser</td><td id="fdResourceCss"></td></tr>
+		<tr><td>[platform] architecture</td><td class="c mono" id="os_architecture"></td></tr>
+		<tr><td>version</td><td class="c mono" id="version"></td></tr>
+		<tr><td>browser</td><td class="c mono" id="browser"></td></tr>
+		<tr><td>[chrome://] os</td><td class="c mono" id="os"></td></tr>
 		<tr><td>[css] os <sup>1</sup></td>
 			<td><span style="font-family: Arimo, DejaVu Serif, ABR;">Linux</span><span
 				style="font-family: Lucida Grande, ABR;">Mac</span><span
@@ -310,161 +335,176 @@
 
 	<!--language-->
 	<table id="tb4">
-		<col width="35%"><a name="language"></a><col width="65%">
+		<col width="31%"><a name="language"></a><col width="69%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#language">language & locale / date/time & format / geolocation</a>
+			<div class="nav-title"><a href="#language">language / locale / date/time & format / geolocation</a>
 			<div class="nav-up"><a href="#feature">&#9650;</a> <span class="c perf" id="perflanguage"></span></div>
-			<div class="nav-down"><a href="#headersd">&#9660;</a></div>
+			<div class="nav-down"><a href="#networkd">&#9660;</a></div>
 			<div class="nav-right"><a name="languaged"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(`4`)">[ re-run ]</span></div>
-			<span class="c" id="languagehash"></span></td></tr>
-		<!--<tr><td>hash</td><td class="c mono" id="lHashDoc"></td></tr>-->
-		<tr><td>language & locale</td><td class="c mono" id="lHash0"></td></tr>
-		<tr><td>timezone</td><td class="c mono" id="lHash1"></td></tr>
-		<tr><td>date/time & format</td><td class="c mono" id="lHash2"></td></tr>
-		<tr><td>geolocation</td><td class="c mono" id="lHash3"></td></tr>
-		<!--<tr><td colspan="2" class="center">--- other methods ---</td></tr>
-		<tr><td>nested iframe</td><td class="c mono faint" id="langIframe"></td></tr>
-		<tr><td>shared worker</td><td class="c mono" id="langWorker"></td></tr>-->
+			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(4)">[ re-run ]</span></div>
+			<span class="c" id="languagehash"></span>
+		</td></tr>
+		<!--geo-->
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">navigator<br>window<br>permission</span></div>
+			&nbsp geolocation</td><td class="c mono" id="geolocation"></td></tr>
+		<!--lang-->
+		<tr><td>language</td><td class="c mono" id="languages_language"></td></tr>
+		<tr><td>languages</td><td class="c mono" id="languages_languages"></td></tr>
+		<!--locale-->
+		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[ show ]</span>
+			locale</td><td class="c mono" id="locale"></td></tr>
+		<tr class ="togLO"><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
+			<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp locales</td><td class="c" id="localedata"></td></tr>
+		<tr><td>[intl] locale</td><td class="c mono" id="locale_intl"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">calendar<br>hourcycle<br>numberingsystem</span></div>
+			&nbsp [resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
+		<tr><td>[tolocalstring] locale</td><td class="c mono" id="locale_tolocalestring"></td></tr>
+		<!--dt-->
+		<tr><td>date/time</td><td class="c mono" id="datetimehash"></td></tr>
+		<tr><td>date/time & format</td><td class="c mono" id="datetimeformathash"></td></tr>
+		<!--tz-->
+		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
+		<tr><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp
+			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
+
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
-		<!--lang-->
-		<tr class="togL"><td></td><td class="s4">language & locale</td></tr>
-			<tr class="togL"><td>languages | language | languages[0]</td><td class="c" id="ldt2"></td></tr>
-			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
-				<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp resolvedOptions</td><td class="c" id="ldt9"></td></tr>
+		<!--locale-->
+		<tr class="togL"><td></td><td class="s4">locale</td></tr>
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/collation.html">[PoC]</a>
-				&nbsp collation</td><td class="c mono" id="ldt11"></td></tr>
-		<!--tz-->
-		<tr class="togL"><td></td><td class="s4">timezone</td></tr>
-			<tr class="togL"><td>timezoneOffset | getTime | Date.parse</td><td class="c" id="ldt12"></td></tr>
-			<tr class="togL"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp
-				[timezone offsets] Date.parse</td><td class="c mono" id="ldt14"></td></tr>
-			<tr class="togL"><td>[resolvedOptions] timezone</td><td class="c" id="ldt13"></td></tr>
-			<tr class="hidden"><td>spare</td><td class="c" id="ldt15"></td></tr>
-		<!--d/t-->
-		<tr class="togL"><td></td><td class="s4">date/time & format</td></tr>
-			<tr class="togL"><td>timeZoneNames</td><td class="c" id="ldt16"></td></tr>
-			<tr class="togL"><td>date/time</td><td class="c" id="ldt17"></td></tr>
-			<tr class="togL"><td>toString</td><td class="c" id="ldt18"></td></tr>
-			<tr class="togL"><td>[long] toLocaleString</td><td class="c" id="ldt19"></td></tr>
-			<tr class="togL"><td>[long] toLocaleDateString</td><td class="c" id="ldt20"></td></tr>
-			<tr class="togL"><td>[long] toLocaleTimeString</td><td class="c" id="ldt21"></td></tr>
-			<tr class="togL"><td>[long] Intl.DateTimeFormat</td><td class="c" id="ldt22"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.DateTimeFormat</td><td class="c" id="ldt23"></td></tr>
-			<tr class="togL"><td>toGMTString</td><td class="c" id="ldt24"></td></tr>
-			<tr class="togL"><td>toUTCString</td><td class="c" id="ldt25"></td></tr>
-			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt26"></td></tr>
-			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt27"></td></tr>
-			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt28"></td></tr>
-			<tr class="togL"><td>Intl.DateTimeFormat</td><td class="c" id="ldt29"></td></tr>
-			<tr class="togL"><td>[relatedYear | yearName] Intl.DateTimeFormat</td><td class="c" id="ldt43"></td></tr>
-			<tr class="togL"><td>[dateStyle | timeStyle] Intl.DateTimeFormat</td><td class="c" id="ldt46"></td></tr>
-			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt30"></td></tr>
-			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt31"></td></tr>
-			<tr class="togL"><td>[resolvedOptions] hourCycle</td><td class="c" id="ldt32"></td></tr>
-			<tr class="togL"><td>Intl.ListFormat</td><td class="c spaces" id="ldt45"></td></tr>
+				&nbsp collation</td><td class="c mono" id="ldt20"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfcompact.html">[PoC]</a>
+				&nbsp compact</td><td class="c" id="ldt21"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfcurrency.html">[PoC]</a>
+				&nbsp currency</td><td class="c" id="ldt22"></td></tr>
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/dayperiod.html">[PoC]</a>
-				&nbsp [dayPeriod] Intl.DateTimeFormat</td><td class="c" id="ldt44"></td></tr>
-			<tr class="togL"><td>[formatRange] Intl.DateTimeFormat</td><td class="c" id="ldt47"></td></tr>
+				&nbsp dayperiod</td><td class="c" id="ldt23"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/listformat.html">[PoC]</a>
+				&nbsp listformat</td><td class="c spaces" id="ldt24"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfnotation.html">[PoC]</a>
+				&nbsp notation</td><td class="c" id="ldt25"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nftoparts.html">[PoC]</a>
+				&nbsp [formatToParts] number</td><td class="c" id="ldt26"></td></tr>
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/pluralrules.html">[PoC]</a>
-				&nbsp [cardinal] Intl.PluralRules</td><td class="c" id="ldt48"></td></tr>
-			<tr class="togL"><td>[ordinal] Intl.PluralRules</td><td class="c" id="ldt49"></td></tr>
-			<tr class="togL"><td>Intl.RelativeTimeFormat</td><td class="c" id="ldt33"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.RelativeTimeFormat</td><td class="c" id="ldt34"></td></tr>
-			<tr class="togL"><td>Intl.NumberFormat</td><td class="c" id="ldt35"></td></tr>
-			<tr class="togL"><td>[formatToParts] Intl.NumberFormat</td><td class="c" id="ldt36"></td></tr>
-			<tr class="togL"><td>[BigInt] Intl.NumberFormat</td><td class="c" id="ldt37"></td></tr>
-			<tr class="togL"><td>[BigInt] toLocaleString</td><td class="c" id="ldt38"></td></tr>
-			<tr class="togL"><td>[currency] toLocaleString</td><td class="c" id="ldt39"></td></tr>
-			<tr class="togL"><td>[Intl.DateTimeFormat] calendar</td><td class="c" id="ldt40"></td></tr>
-			<tr class="togL"><td>[DateTime | RelativeTime] numberingSystem</td>
-				<td><span class="c" id="ldt41"></span> | <span class="c" id="ldt42"></span></td></tr>
-		<tr class="togL"><td></td><td class="s4">geolocation</td></tr>
-			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">geo.enabled</span></div> &nbsp [api | window] geolocation</td><td class="c" id="geo1"></td></tr>
-			<tr class="togL"><td><div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxtb">permissions.default.geo</span></div> &nbsp [permission] geolocation</td><td class="c" id="geo2"></td></tr>
+				&nbsp [cardinal] pluralrules</td><td class="c" id="ldt27"></td></tr>
+			<tr class="togL"><td>[ordinal] pluralrules</td><td class="c" id="ldt28"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/rtf.html">[PoC]</a>
+				&nbsp relativetime</td><td class="c" id="ldt29"></td></tr>
+			<tr class="togL"><td>[formatToParts] relativetime</td><td class="c" id="ldt30"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfsign.html">[PoC]</a>
+				&nbsp sign</td><td class="c" id="ldt31"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/timezonename.html">[PoC]</a>
+				&nbsp timezonename</td><td class="c" id="ldt32"></td></tr>
+			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfunit.html">[PoC]</a>
+				&nbsp unit</td><td class="c mono" id="ldt33"></td></tr>
+
+		<!--toLocaleString-->
+		<tr class="togL"><td></td><td class="s4">toLocaleString</td></tr>
+			<tr class="togL"><td>compact</td><td class="c" id="ldt35"></td></tr>
+			<tr class="togL"><td>currency</td><td class="c" id="ldt36"></td></tr>
+			<tr class="togL"><td>notation</td><td class="c" id="ldt37"></td></tr>
+			<tr class="togL"><td>sign</td><td class="c" id="ldt38"></td></tr>
+			<tr class="togL"><td>unit</td><td class="c mono" id="ldt39"></td></tr>
+		<!--d/t-->
+		<tr class="togL"><td></td><td class="s4">date/time</td></tr>
+			<tr class="togL"><td>date/time</td><td class="c" id="ldt41"></td></tr>
+			<tr class="togL"><td>toString</td><td class="c" id="ldt42"></td></tr>
+			<tr class="togL"><td>toGMTString</td><td class="c" id="ldt43"></td></tr>
+			<tr class="togL"><td>toUTCString</td><td class="c" id="ldt44"></td></tr>
+			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt45"></td></tr>
+		<!--d/t & f-->
+		<tr class="togL"><td></td><td class="s4">date/time & format</td></tr>
+			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt46"></td></tr>
+			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt47"></td></tr>
+			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt48"></td></tr>
+			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt49"></td></tr>
+			<tr class="togL"><td>[formatToParts] DateTimeFormat</td><td class="c" id="ldt50"></td></tr>
+			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt51"></td></tr>
+			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt52"></td></tr>
+			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt53"></td></tr>
+			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt54"></td></tr>
+			<tr class="togL"><td>datestyle | timestyle</td><td class="c" id="ldt55"></td></tr>
+			<tr class="togL"><td>formatrange</td><td class="c" id="ldt56"></td></tr>
+			<tr class="togL"><td>relatedyear | yearname</td><td class="c" id="ldt57"></td></tr>
+			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt58"></td></tr>
+			<tr class="togL"><td>timeZoneNames</td><td class="c" id="ldt59"></td></tr>
 		<tr class="togL" colspan="2"><td></td></tr>
 	</table>
 
-	<!--headers-->
+	<!--network-->
 	<table id="tb5">
-		<col width="35%"><a name="headers"></a><col width="65%">
+		<col width="31%"><a name="network"></a><col width="69%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#headers">http headers / networking</a>
-			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
+			<div class="nav-title"><a href="#network">network / http headers</a>
+			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfnetwork"></span></div>
 			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
-			<div class="nav-right"><a name="headersd"></a></div></div>
+			<div class="nav-right"><a name="networkd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(`5`)">[ re-run ]</span></div>
-			<span class="c" id="headershash"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">beacon.enabled</span></div>
-			&nbsp beacon</td><td class="c" id="nBeacon"></td></tr>
-		<tr><td>doNotTrack</td><td class="c" id="nDNT"></td></tr>
-		<tr><td>globalPrivacyControl</td><td class="c" id="nGPC"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.netinfo.enabled</span></div> connection</td><td class="c mono" id="nConnection"></td></tr>
-		<tr><td>onLine</td><td class="c" id="nOnLine"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(5)">[ re-run ]</span></div>
+			<span class="c" id="networkhash"></span>
+		</td></tr>
+		<tr><td>connection</td><td class="c mono" id="connection"></td></tr>
+		<tr><td>doNotTrack</td><td class="c mono" id="doNotTrack"></td></tr>
+		<tr><td>globalPrivacyControl</td><td class="c mono" id="globalPrivacyControl"></td></tr>
+		<tr><td colspan="2"></td></tr>
 	</table>
 
 	<!--storage-->
 	<table id="tb6">
-		<col width="50%"><a name="storage"></a><col width="50%">
+		<col width="31%"><a name="storage"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#storage">cookies & storage</a>
-			<div class="nav-up"><a href="#headers">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
+			<div class="nav-up"><a href="#network">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
 			<div class="nav-right"><a name="storaged"></a></div></div>
 		</th></tr></thead>
-		<tr><td colspan="2" class="intro"><span class="no_color">The <code>[cookie]</code>, <code>[localStorage]</code>,
-			<code>[sessionStorage]</code> and <code> [indexedDB]</code> tests, on each run, individually attempt to set a
-			new random name and value, and then to read them back. Only when it successfully reads back a matching value
-			is it deemed to be available and working.</span></td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn6 btn" onClick="outputSection(`6`)">[ re-run ]</span></div>
-			<span class="c" id="storagehash"></span></td></tr>
-		<tr><td>[navigator] cookieEnabled</td><td class="c" id="ctest0"></td></tr>
-		<tr><td>[javascript 1st party cookie] session | persistent</td>
-			<td><span class="c" id="ctest1"></span> | <span class="c" id="ctest2"></span></td></tr>
-		<tr><td>localStorage | test</td><td>
-			<span class="c" id="lstest0"></span> | <span class="c" id="lstest1"></span></td></tr>
-		<tr><td>sessionStorage | test</td><td><span class="c" id="lstest2"></span>	| <span class="c" id="lstest3"></span></td></tr>
-		<tr><td>indexedDB | test</td><td><span class="c" id="idb1"></span>	| <span class="c" id="idb2"></span></td></tr>
+			<div class="btn-left"><span class="btn6 btn" onClick="outputSection(6)">[ re-run ]</span></div>
+			<span class="c" id="storagehash"></span>
+		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">browser.cache.offline.enable</span></div>&nbsp appCache</td><td class="c" id="appcache"></td></tr>
-		<tr><td>worker</td><td class="c" id="work1"></td></tr>
-		<tr><td>web worker | shared worker</td><td>
-			<span class="c" id="work2"></span> | <span class="c" id="work3"></span></td></tr>
+			<span class="ttxtb">session | persistent<br>tests are JS 1st party</span></div>
+				&nbsp cookies</td><td class="c mono" id="ctest"></td></tr>
+		<tr><td>localStorage</td><td class="c mono" id="lstest"></td></tr>
+		<tr><td>sessionStorage</td><td class="c mono" id="sstest"></td></tr>
+		<tr><td>indexedDB</td><td class="mono"><span class="c" id="indexedDB"></span>	| <span class="c" id="indexedDB_test"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.serviceWorkers.enabled</span></div>	&nbsp service worker | test</td>
-			<td><span class="c" id="swork1"></span> | <span class="c" id="swork2"></span></td></tr>
+			<span class="ttxtb">worker | web | shared | service</span></div>
+			&nbsp workers</td><td class="mono"><span class="c" id="worker"></span>
+			| <span class="c" id="web_worker_test"></span>
+			| <span class="c" id="shared_worker_test"></span>
+			| <span class="c" id="service_worker_test"></span>
+		</td></tr>
+		<!--
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.caches.enabled</span></div> &nbsp service worker cache | test</td>
+			<span class="ttxt">dom.caches.enabled</span></div> &nbsp service worker cache</td>
 			<td><span class="c" id="swork3"></span> | <span class="c" id="swork4"></span></td></tr>
-		<tr><td>notifications | test</td><td><span class="c" id="notif1"></span> | <span class="c" id="notif2"></span></td></tr>
-		<tr><td>[permission] notifications | push | persistent-storage</td><td>
-			<span class="c" id="pnotifications"></span> | <span class="c" id="ppush">
-			</span> | <span class="c" id="ppersistent-storage"></span></td></tr>
+		<tr><td>notifications</td><td><span class="c" id="notif1"></span> | <span class="c" id="notif2"></span></td></tr>
+		-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.storageManager.enabled</span></div>
-			&nbsp storage manager</td><td class="c" id="storageMSupport"></td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click here ]</span>
-			[properties | test] storage manager</td>
-			<td><span class="c" id="storageMProp"></span> | <span class="c" id="storageMTest"></span></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+			<span class="ttxtb">notifications | push | persistent-storage</span></div>
+			&nbsp permissions</td><td class="mono"><span class="c" id="permission_notifications"></span>
+			| <span class="c" id="permission_push"></span>
+			| <span class="c" id="permission_persistent-storage"></span>
+			</td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click ]</span>
+			storage manager</td><td class="c mono" id="storage_manager"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">rounded down<br>one decimal precision</span></div>
+			&nbsp storage quota</td><td class="c mono" id="storage_quota"></td></tr>
+		<tr><td colspan="2"></td></tr>
 	</table>
 
 	<!--devices-->
 	<table id="tb7">
-		<col width="35%"><a name="devices"></a><col width="65%">
+		<col width="31%"><a name="devices"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#devices">devices & hardware</a>
 			<div class="nav-up"><a href="#storage">&#9650;</a> <span class="c perf" id="perfdevices"></span></div>
@@ -472,76 +512,55 @@
 			<div class="nav-right"><a name="devicesd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(`7`)">[ re-run ]</span></div>
-			<span class="c" id="deviceshash"></span></td></tr>
-		<tr><td>[screen] pixel depth | color depth</td>
-			<td><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
-		<tr><td>[css | matchMedia] color</td><td><span id="cssC"></span> | <span class="c" id="mmC"></span></td></tr>
-		<tr><td>[css | matchMedia] color gamut</td><td><span id="cssCG"></span> | <span class="c" id="mmCG"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.gamepad.enabled</span></div>
-			&nbsp gamepads</td><td class="c" id="gamepads"></td></tr>
+			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(7)">[ re-run ]</span></div>
+			<span class="c" id="deviceshash"></span>
+		</td></tr>
+		<tr><td>color</td>
+				<td class="mono"><span id="cssC"></span> | <span class="c" id="color"></span></td></tr>
+		<tr><td>pixel depth | color depth</td>
+			<td class="mono"><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
+		<tr><td>color gamut</td>
+			<td class="mono"><span id="cssCG"></span> | <span class="c" id="color-gamut"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
-			&nbsp hardwareConcurrency</td><td class="c" id="nHWC"></td></tr>
-		<tr><td>[css] any-hover | hover</td>
-			<td class="mono"><span id="cssAH"></span> | <span id="cssH"></span></td></tr>
-		<tr><td>[matchMedia] any-hover | hover</td>
-			<td><span class="c mono" id="mmH"></span></td></tr>
-		<tr><td>keyboard</td><td class="c mono" id="nKeyboard"></td></tr>
-		<tr><td>[api] pointer event</td><td class="c" id="pointer"></td></tr>
-		<tr><td>[css] any-pointer | pointer</td>
-			<td class="mono"><span id="cssAP"></span> | <span id="cssP"></span></tr>
-		<tr><td>[matchMedia] any-pointer | pointer</td>
-			<td><span class="c mono" id="mmP"></span></td></tr>
-		<tr><td id="pointertarget"><span class="btn btn0" onClick="outputUser('get_pointer_event')">[ mouse/tap here ]</span>
+			&nbsp hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
+		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span> | <span class="c" id="any-hover"></span></td></tr>
+		<tr><td>hover</td><td class="mono"><span id="cssH"></span> | <span class="c" id="hover"></span></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
+			&nbsp media devices</td><td class="c mono" id="mediaDevices"></td></tr>
+		<tr><td>mimeTypes</td><td class="c mono" id="mimeTypes"></td></tr>
+		<tr><td>plugins</td><td class="c mono" id="plugins"></td></tr>
+		<tr><td>pdfViewerEnabled</td><td class="c mono" id="pdf"></td></tr>
+		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span> | <span class="c" id="any-pointer"></span></td></tr>
+		<tr><td>pointer</td><td class="mono"><span id="cssP"></span> | <span class="c" id="pointer"></span></td></tr>
+		<tr><td id="pointertarget"><span class="btn btn0"
+			onClick="outputUser('get_pointer_event')">[ <span id="pointerlabel">mouse</span> ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">height<br>isPrimary<br>mozInputSource<br>pointerType<br>pressure<br>
 				tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
-			</div> &nbsp [data] pointer event <sup>1</sup></td><td class="c" id="ptEvent"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">media.webspeech.recognition.enable</span></div>
-			&nbsp speech recognition</td><td class="c" id="sRec"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">ontouchstart<br>ontouchend<br>TouchEvent</span>
-			</div>&nbsp [events] touch</td><td class="c" id="touchE"></td></tr>
-		<tr><td>[maxTouchPoints] touch</td><td class="c" id="touchM"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.vr.enabled</span></div>
-			&nbsp virtual reality</td><td class="c" id="vrdisplays"></td></tr>
-		<tr><td colspan="2" class="center">--- enumeration ---</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">pdfjs.disabled<br></span></div>
-			&nbsp pdfViewerEnabled</td><td class="c mono" id="pdf"></td></tr>
-		<tr><td><span id="pluginMini" class="c mono no_color"></span> plugins</td><td class="c gc mono" id="plugins"></td></tr>
-		<tr><td><span id="mimeMini" class="c mono no_color"></span> mimeTypes</td><td class="c gc mono" id="mimeTypes"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">media.navigator.enabled<br></span></div>
-			&nbsp media devices</td><td class="c mono" id="eMD"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">media.webspeech.synth.enabled</span></div>
-			&nbsp speech engines</td><td class="c mono" id="sEngines"></td></tr>
+			</div> &nbsp pointer event <sup>1</sup></td><td class="c mono" id="ptEvent"></td></tr>
+		<tr><td>speech engines</td><td class="c mono" id="speech_engines"></td></tr>
+		<tr><td>[maxTouchPoints] touch</td><td class="c mono" id="maxTouchPoints"></td></tr>
 		<tr><td colspan="2"><span class="no_color">pointer code based on work by </span>
-			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke <sup>1</sup></a></td></tr>
+			<a target="_blank" class="blue" href="https://patrickhlauke.github.io/touch/">Patrick Lauke</a> <sup>1</sup></td></tr>
 	</table>
 
 	<!--svg-->
 	<table id="tb8">
-		<col width="35%"><a name="svg"></a><col width="65%">
+		<col width="31%"><a name="svg"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#svg">svg</a>
 			<div class="nav-up"><a href="#devices">&#9650;</a> <span class="c perf" id="perfsvg"></span></div>
 			<div class="nav-down"><a href="#canvasd">&#9660;</a></div>
 			<div class="nav-right"><a name="svgd"></a></div></div>
 		</th></tr></thead>
-		<!--<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn8 btn" onClick="outputSection(`8`)">[ re-run ]</span></div>
-			<span class="c" id="svghash"></span></td></tr>-->
-		<tr><td>test</td><td>result</td></tr>
+		<tr><td>test</td><td class="mono">result</td></tr>
 	</table>
 
 	<!--canvas-->
 	<table id="tb9">
-		<col width="35%"><a name="canvas"></a><col width="65%">
+		<col width="31%"><a name="canvas"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#canvas">canvas</a>
 			<div class="nav-up"><a href="#svg">&#9650;</a> <span class="c perf" id="perfcanvas"></span></div>
@@ -553,8 +572,9 @@
 			<a target="blank" class="blue" href="https://canvasblocker.kkapsner.de/test/test.html">CanvasBlocker</a></span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(`9`)">[ re-run ]</span></div>
-			<span class="c" id="canvashash"></span></td></tr>
+			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(9)">[ re-run ]</span></div>
+			<span class="c" id="canvashash"></span>
+		</td></tr>
 		<tr><td><a class="blue" href="tests/canvasnoise.html" target="blank">[PoC]</a>
 			&nbsp <div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">random per run</span></div>
 			&nbsp getImageData</td><td class="c mono" id="getImageData"></td></tr>
@@ -563,7 +583,7 @@
 		<tr><td>toBlob</td><td class="c mono" id="toBlob"></td></tr>
 		<tr><td><a class="blue" href="tests/canvasrfp.html" target="blank">[PoC]</a>
 			&nbsp toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">canvas code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
 			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>
@@ -571,25 +591,27 @@
 
 	<!--webgl-->
 	<table id="tb10">
-		<col width="35%"><a name="webgl"></a><col width="65%">
+		<col width="31%"><a name="webgl"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#webgl">webgl</a>
 			<div class="nav-up"><a href="#canvas">&#9650;</a> <span class="c perf" id="perfwebgl"></span></div>
 			<div class="nav-down"><a href="#audiod">&#9660;</a></div>
 			<div class="nav-right"><a name="webgld"></a></div></div>
 		</th></tr></thead>
-		<tr><td>test</td><td>result</td></tr>
-		<!--<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn10 btn" onClick="outputSection(`10`)">[ re-run ]</span></div>
-			<span id="webglhash">section-hash-will-be-coming-just-hold-on</span></td></tr>
-		<tr><td colspan="2"><span class="no_color">webgl code based on work by </span>
-			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a></td></tr>-->
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><span class="btn10 btn" onClick="outputSection(10)">[ re-run ]</span></div>
+			<span class="c" id="webglhash"></span>
+		</td></tr>
+		<tr><td>experimental</td><td class="mono">result</td></tr>
+		<tr><td>webgl</td><td class="mono">result</td></tr>
+		<tr><td>webgl2</td><td class="mono">result</td></tr>
+		<tr><td colspan="3"><span class="no_color">webgl code by </span>
+			<a target="_blank" class="blue" href="https://gist.github.com/abrahamjuliot/7baf3be8c451d23f7a8693d7e28a35e2">Abraham Juliot</a></td></tr>
 	</table>
 
 	<!--audio-->
 	<table id="tb11">
-		<col width="35%"><a name="audio"></a><col width="65%">
+		<col width="31%"><a name="audio"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#audio">audio</a>
 			<div class="nav-up"><a href="#webgl">&#9650;</a> <span class="c perf" id="perfaudio"></span></div>
@@ -597,17 +619,15 @@
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(`11`, `c`)">[ re-run ]</span></div>
-			<span class="c" id="audiohash"></span></td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">dom.webaudio.enabled</span></div>
-			&nbsp [api] web audio</td><td class="c mono" id="audioSupport"></td></tr>
-		<tr><td>getChannelData <sup>1</sup></td><td class="c mono" id="audioGet"></td></tr>
-		<tr><td>copyFromChannel <sup>1</sup></td><td class="c mono" id="audioCopy"></td></tr>
-		<tr><td>sum <sup>1</sup></td><td class="c mono" id="audioSum"></td></tr>
+			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(11, `c`)">[ re-run ]</span></div>
+			<span class="c" id="audiohash"></span>
+		</td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">copyFromChannel<br>getChannelData<br>sum of buffer</span></div>
+			&nbsp offlineAudioContext <sup>1</sup></td><td class="c mono" id="offlineAudioContext"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('outputAudio2')">[ click here ]</span>
-			hash</td><td class="c2 mono" id="audiohash2"></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('outputAudio2')">[ click ]</span>
+			hash</td><td class="c2 gc mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
 		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
 		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 gc mono" id="audio3hash"></td></tr>
@@ -622,7 +642,7 @@
 
 	<!--fonts-->
 	<table id="tb12">
-		<col width="35%"><a name="fonts"></a><col width="65%">
+		<col width="31%"><a name="fonts"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#fonts">fonts</a>
 			<div class="nav-up"><a href="#audio">&#9650;</a> <span class="c perf" id="perffonts"></span></div>
@@ -630,77 +650,78 @@
 			<div class="nav-right"><a name="fontsd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(`12`)">[ re-run ]</span></div>
-			<span class="c" id="fontshash"></span><span class="c" id="fntBtn"></span>
-			<span class="c no_color bold" id="fntString"></span>
+			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(12)">[ re-run ]</span></div>
+			<span class="c" id="fontshash"></span><div class="btn-right"><span class="c" id="fntBtn"></span></div>
 		</td></tr>
-		<tr><td>default proportional font</td><td class="c" id="fontFCprop"></td></tr>
-		<tr><td>default font sizes</td><td class="c" id="fontFCsize"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">layout.css.font-loading-api.enabled</span></div>
-			&nbsp css font loading api</td><td class="c" id="fontCSS"></td></tr>
+		<tr><td>default proportional</td><td class="c mono" id="font_default_proportional"></td></tr>
+		<tr><td>default sizes</td><td class="c mono" id="font_default_sizes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
-			&nbsp document fonts</td><td class="c" id="fontDoc"></td></tr>
-		<!--support layout.css.font-tech.enabled-->
-		<tr><td colspan="2" class="center">--- support ---</td></tr>
-		<tr><td>font-format</td><td class="c mono" id="font-format"></td></tr>
-		<tr><td>font-tech</td><td class="c mono" id="font-tech"></td></tr>
-		<tr><td>[css | test] woff2 <sup>1</sup></td>
-			<td class="mono"><span id="cssWoff2"> </span> | <span class="c" id="fontWoff2"></span></td></tr>
+			&nbsp document fonts</td><td class="c mono" id="document_fonts"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">layout.css.font-tech.enabled</span></div>
+			&nbsp font-format | font-tech</td><td class="mono"><span class="c" id="font-format"></span> | <span class="c" id="font-tech"></span>
+		</td></tr>
+		<tr><td>[css | test] woff2 <sup>1</sup></td><td class="mono"><span id="cssWoff2"></span> | <span class="c" id="woff2"></span>
+		</td></tr>
 		<!--fonts-->
-		<tr><td colspan="2" class="center">--- fonts ---</td></tr>
-		<tr><td>[names] fonts <sup>2, 3</sup></td><td class="c mono" id="fontNames"></td></tr>
-		<tr><td><span id="labelF1" class="btn btn0" onClick="togglerows('F1','btn')">[ show ]</span>
-			[sizes] fonts <sup>2, 3</sup></td><td class="c mono" id="fontSizes"></td></tr>
-		<tr class="togF1"><td>offset <sup>2</sup></td><td class="c mono" id="fontsOffset"></td></tr>
-		<tr class="togF1"><td>client <sup>3</sup></td><td class="c mono" id="fontsClient"></td></tr>
-		<tr class="togF1"><td>scroll <sup>3</sup></td><td class="c mono" id="fontsScroll"></td></tr>
-		<tr class="togF1"><td>pixel <sup>3</sup></td><td class="c mono" id="fontsPixel"></td></tr>
-		<tr class="togF1"><td>pixelsize <sup>3</sup></td><td class="c mono" id="fontsPixelSize"></td></tr>
-		<tr class="togF1"><td>perspective <sup>3</sup></td><td class="c mono" id="fontsPerspective"></td></tr>
-		<tr class="togF1"><td>transform <sup>3</sup></td><td class="c mono" id="fontsTransform"></td></tr>
-		<tr class="togF1"><td>[number] pixel <sup>3</sup></td><td class="c mono" id="fontsPixelNumber"></td></tr>
-		<tr class="togF1"><td>[number] pixelsize <sup>3</sup></td><td class="c mono" id="fontsPixelSizeNumber"></td></tr>
-		<tr class="togF1"><td>[number] perspective <sup>3</sup></td><td class="c mono" id="fontsPerspectiveNumber"></td></tr>
-		<tr class="togF1"><td>[number] transform <sup>3</sup></td><td class="c mono" id="fontsTransformNumber"></td></tr>
-		<tr><td>[base sizes] fonts <sup>2, 3</sup></td><td class="c mono" id="fontBase"></td></tr>
-		<tr><td>[system] fonts</td><td class="c mono" id="fontsSystem"></td></tr>
-		<tr><td>[widget] fonts</td><td class="c mono" id="fontsWidget"></td></tr>
+		<tr><td></td><td><span class="s12">fonts</span></td></tr>
+		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[ show ]</span>
+			[sizes | names] fonts <sup>2</sup></td>
+			<td class="mono"><span class="c" id="fontsizes"></span> | <span class="c" id="fontnames"></span></td>
+		</tr>
+		<tr class="togF"><td>offset</td><td class="c mono" id="fontsOffset"></td></tr>
+		<tr class="togF"><td>client</td><td class="c mono" id="fontsClient"></td></tr>
+		<tr class="togF"><td>scroll</td><td class="c mono" id="fontsScroll"></td></tr>
+		<tr class="togF"><td>pixel</td><td class="c mono" id="fontsPixel"></td></tr>
+		<tr class="togF"><td>pixelsize</td><td class="c mono" id="fontsPixelSize"></td></tr>
+		<tr class="togF"><td>perspective</td><td class="c mono" id="fontsPerspective"></td></tr>
+		<tr class="togF"><td>transform</td><td class="c mono" id="fontsTransform"></td></tr>
+		<tr class="togF"><td>[number] pixel</td><td class="c mono" id="fontsPixelNumber"></td></tr>
+		<tr class="togF"><td>[number] pixelsize</td><td class="c mono" id="fontsPixelSizeNumber"></td></tr>
+		<tr class="togF"><td>[number] perspective</td><td class="c mono" id="fontsPerspectiveNumber"></td></tr>
+		<tr class="togF"><td>[number] transform</td><td class="c mono" id="fontsTransformNumber"></td></tr>
+		<tr><td>[base sizes] fonts <sup>2</sup></td><td class="c mono" id="fontsizes_base"></td></tr>
+		<tr><td>[system] fonts</td><td class="c mono" id="system_fonts"></td></tr>
+		<tr><td>[widget] fonts</td><td class="c mono" id="widget_fonts"></td></tr>
 		<!--glyphs-->
-		<tr><td colspan="2" class="center">--- glyphs ---</td></tr>
-		<tr><td>offset <sup>4</sup></td><td class="c mono" id="ugoffset"></td></tr>
-		<tr><td>clientrect <sup>4</sup></td><td class="c mono" id="ugclientrect"></td></tr>
-		<tr><td>[measureText] width <sup>4</sup></td><td class="c mono" id="ugwidth"></td></tr>
+		<tr><td></td><td><span class="s12">glyphs</span></td></tr>
+		<tr><td>offset <sup>3</sup></td><td class="c mono" id="glyphs_offset"></td></tr>
+		<tr><td>clientrect <sup>3</sup></td><td class="c mono" id="glyphs_clientrect"></td></tr>
+		<tr><td>[measureText] width <sup>3</sup></td><td class="c mono" id="glyphs_width"></td></tr>
 		<!--tm-->
-		<tr><td colspan="2" class="center">--- textmetrics ---</td></tr>
-		<tr><td>actualBoundingBoxAscent</td><td class="c mono" id="ugactualBoundingBoxAscent"></td></tr>
-		<tr><td>actualBoundingBoxDescent</td><td class="c mono" id="ugactualBoundingBoxDescent"></td></tr>
-		<tr><td>actualBoundingBoxLeft</td><td class="c mono" id="ugactualBoundingBoxLeft"></td></tr>
-		<tr><td>actualBoundingBoxRight</td><td class="c mono" id="ugactualBoundingBoxRight"></td></tr>
-		<tr><td>alphabeticBaseline</td><td class="c mono" id="ugalphabeticBaseline"></td></tr>
-		<tr><td>emHeightAscent</td><td class="c mono" id="ugemHeightAscent"></td></tr>
-		<tr><td>emHeightDescent</td><td class="c mono" id="ugemHeightDescent"></td></tr>
-		<tr><td>fontBoundingBoxAscent</td><td class="c mono" id="ugfontBoundingBoxAscent"></td></tr>
-		<tr><td>fontBoundingBoxDescent</td><td class="c mono" id="ugfontBoundingBoxDescent"></td></tr>
-		<tr><td>hangingBaseline</td><td class="c mono" id="ughangingBaseline"></td></tr>
-		<tr><td>ideographicBaseline</td><td class="c mono" id="ugideographicBaseline"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td></td><td><span class="s12">textmetrics</span></td></tr>
+		<tr><td>actualBoundingBoxAscent | Descent</td>
+			<td class="mono"><span class="c" id="textmetrics_actualBoundingBoxAscent"></span>
+			| <span class="c" id="textmetrics_actualBoundingBoxDescent"></span>
+		</td></tr>
+		<tr><td>actualBoundingBoxLeft | Right</td><td class="mono">
+			<span class="c" id="textmetrics_actualBoundingBoxLeft"></span> | <span class="c" id="textmetrics_actualBoundingBoxRight"></span>
+			</td></tr>
+		<tr><td>alphabeticBaseline</td><td class="c mono" id="textmetrics_alphabeticBaseline"></td></tr>
+		<tr><td>emHeightAscent | Descent</td><td class="mono">
+			<span class="c" id="textmetrics_emHeightAscent"></span> | <span class="c" id="textmetrics_emHeightDescent"></span>
+			</td></tr>
+		<tr><td>fontBoundingBoxAscent | Descent</td><td class="mono">
+			<span class="c" id="textmetrics_fontBoundingBoxAscent"></span> | <span class="c" id="textmetrics_fontBoundingBoxDescent"></span>
+			</td></tr>
+		<tr><td>hanging | ideographicBaseline</td><td class="mono">
+			<span class="c" id="textmetrics_hangingBaseline"></span> | <span class="c" id="textmetrics_ideographicBaseline"></span>
+			</td></tr>
+		<tr><td colspan="2"></td></tr>
 		<!--creds-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
 			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>1</sup>
 			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/Valve/fingerprintjs2">fingerprintjs2</a> <sup>2</sup>
-			<span class="no_color">, </span>
-			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>3</sup>
+			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>2</sup>
 			<span class="no_color"> and </span><a target="_blank" class="blue"
-				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>4</sup>
+				href="https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo">David Fifield & Serge Egelman</a> <sup>3</sup>
 		</td></tr>
 	</table>
 
 	<!--media-->
 	<table id="tb13">
-		<col width="35%"><a name="media"></a><col width="65%">
+		<col width="31%"><a name="media"></a><col width="69%">
 		<thead><tr><th colspan="3">
 			<div class="nav-title"><a href="#media">media</a>
 			<div class="nav-up"><a href="#fonts">&#9650;</a> <span class="c perf" id="perfmedia"></span></div>
@@ -708,24 +729,23 @@
 			<div class="nav-right"><a name="mediad"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(`13`)">[ re-run ]</span></div>
-			<span class="c" id="mediahash"></span><span class="c" id="mediaBtns"></span></td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">media.media-capabilities.enabled</span></div>
-			&nbsp mediaCapabilities</td><td class="c" id="nMediaC"></td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">dom.media.mediasession.enabled</span></div>
-			&nbsp [api] mediaSession</td><td class="c" id="nMediaS"></td></tr>
-		<tr><td>[canPlayType] audio</td><td class="c mono" id="audiocan"></td></tr>
-		<tr><td>[isTypeSupported] audio</td><td class="c mono" id="audiotype"></td></tr>
-		<tr><td>[canPlayType] video</td><td class="c mono" id="videocan"></td></tr>
-		<tr><td>[isTypeSupported] video</td><td class="c mono" id="videotype"></td></tr>
+			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(13)">[ re-run ]</span></div>
+			<span class="c" id="mediahash"></span><div class="btn-right"><span class="c" id="mediaBtn"></span></div>
+		</td></tr>
+		<tr><td>autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy"></td></tr>
+		<tr><td>[user] autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy_user"></td></tr>
+		<tr><td>[audio | video] canPlayType</td><td class="mono">
+			<span class="c spaces" id="audiocan"></span> | <span class="c" id="videocan"></span>
+		</td></tr>
+		<tr><td>[audio | video] isTypeSupported</td><td class="mono">
+			<span class="c spaces" id="audiotype"></span> | <span class="c" id="videotype"></span>
+		</td></tr>
 		<tr><td colspan="2"></td></tr>
 	</table>
 
 	<!--css-->
 	<table id="tb14">
-		<col width="35%"><a name="css"></a><col width="65%">
+		<col width="31%"><a name="css"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#css">css</a>
 			<div class="nav-up"><a href="#media">&#9650;</a> <span class="c perf" id="perfcss"></span></div>
@@ -733,39 +753,40 @@
 			<div class="nav-right"><a name="cssd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn14 btn" onClick="outputSection(`14`)">[ re-run ]</span></div>
-			<span class="c" id="csshash"></span></td></tr>
-		<tr><td>[-moz-] colors</td><td class="c mono" id="cssColormoz"></td></tr>
-		<tr><td>[stand-in] [-moz-] colors</td><td class="c mono" id="cssColormoz_stand-in"></td></tr>
-		<tr><td>[css4] system colors</td><td class="c mono" id="cssColorcss4"></td></tr>
-		<tr><td>[deprecated] system colors</td><td class="c mono" id="cssColorsystem"></td></tr>
-		<tr><td><span id="togCSSa">computed styles</span> <sup>1</sup></td><td class="c mono" id="cStyles0"></td></tr>
-		<tr class="togC" id="togCSSb"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="cStyles1"></td></tr>
-		<tr class="togC" id="togCSSc"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="cStyles2"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">ui.prefersReducedMotion</span></div>
-			&nbsp prefers-reduced-motion</td>
-			<td><span id="cssPRM"></span> | <span class="c" id="mmPRM"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">ui.systemUsesDarkTheme</span></div>
-			&nbsp prefers-color-scheme</td>
-			<td><span id="cssPCS"></span> | <span class="c" id="mmPCS"></span></td></tr>
-		<tr><td> prefers-contrast</td>
-			<td><span id="cssPC"></span> | <span class="c" id="mmPC"></span></td></tr>
-		<tr><td> forced-colors</td>
-			<td><span id="cssFC"></span> | <span class="c" id="mmFC"></span></td></tr>
-		<!--<tr><td>prefers-reduced-transparency</td>
-			<td><span id="cssPRT"></span> | <span class="c" id="mmPRT"></span></td></tr>
-		<tr><td>prefers-reduced-data</td>
-			<td><span id="cssPRD"></span> | <span class="c" id="mmPRD"></span></td></tr>
-		<tr><td>inverted-colors</td>
-			<td><span id="cssIC"></span> | <span class="c" id="mmIC"></span></td></tr>-->
-		<tr><td colspan="3"><span class="no_color">code provided by </span>
+			<div class="btn-left"><span class="btn14 btn" onClick="outputSection(14)">[ re-run ]</span></div>
+			<span class="c" id="csshash"></span>
+		</td></tr>
+		<tr><td>[css4] colors</td><td class="c mono" id="colors_css4"></td></tr>
+		<tr><td>[deprecated] colors</td><td class="c mono" id="colors_deprecated"></td></tr>
+		<tr><td><a class="blue" href="tests/csscolors.html" target="blank">[PoC]</a>
+			&nbsp [-moz-] colors</td><td class="c mono" id="colors_moz"></td></tr>
+		<tr><td><span id="labelC" class="btn btn0" onClick="togglerows('C','btn')">[ show ]</span>
+			computed styles <sup>1</sup></td><td class="c mono" id="computed_styles"></td></tr>
+		<tr class="togC"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="syles_getcomputed"></td></tr>
+		<tr class="togC"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="styles_htmlelement"></td></tr>
+		<tr class="togC"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="styles_cssrulelist"></td></tr>
+		<tr><td>forced-colors</td><td class="mono">
+			<span id="cssFC"></span> | <span class="c" id="forced-colors"></span></td></tr>
+		<tr><td>inverted-colors</td><td class="mono">
+			<span id="cssIC"></span> | <span class="c" id="inverted-colors"></span></td></tr>
+		<tr><td>prefers-color-scheme</td><td class="mono">
+			<span id="cssPCS"></span> | <span class="c" id="prefers-color-scheme"></span></td></tr>
+		<tr><td>prefers-contrast</td><td class="mono">
+			<span id="cssPC"></span> | <span class="c" id="prefers-contrast"></span></td></tr>
+		<tr><td>prefers-reduced-data</td><td class="mono">
+			<span id="cssPRD"></span> | <span class="c" id="prefers-reduced-data"></span></td></tr>
+		<tr><td>prefers-reduced-motion</td><td class="mono">
+			<span id="cssPRM"></span> | <span class="c" id="prefers-reduced-motion"></span></td></tr>		
+		<tr><td>prefers-reduced-transparency</td><td class="mono">
+			<span id="cssPRT"></span> | <span class="c" id="prefers-reduced-transparency"></span></td></tr>
+		<tr><td colspan="3"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
 	</table>
 
 	<!--elements-->
 	<table id="tb15">
-		<col width="35%"><a name="elements"></a><col width="65%">
+		<col width="31%"><a name="elements"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">
 				<a href="#elements">elements / widgets</a>
@@ -775,56 +796,47 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn15 btn" onClick="outputSection(`15`)">[ re-run ]</span></div>
-			<span class="c" id="elementshash"></span></td></tr>
+			<div class="btn-left"><span class="btn15 btn" onClick="outputSection(15)">[ re-run ]</span></div>
+			<span class="c" id="elementshash"></span>
+		</td></tr>
 		<tr><td>
-		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="elementkeys"></td></tr>
-		<tr><td>[clientrect] lineheight</td><td class="c mono" id="lineheight"></td></tr>
+		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="htmlelement_keys"></td></tr>
+		<tr><td><a class="blue" href="tests/lineheight.html" target="blank">[PoC]</a>
+			&nbsp line-height</td><td class="c mono" id="line-height"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp [offset] mathml</td><td class="c mono" id="mathml"></td></tr>
-
-		<tr><td colspan="2" class="center">--- clientrect ---</td></tr>
-		<tr><td>Element.getBoundingClientRect</td><td class="c mono" id="dr0"></td></tr>
-		<tr><td>Element.getClientRects</td><td class="c mono" id="dr1"></td></tr>
-		<tr><td>Range.getBoundingClientRect</td><td class="c mono" id="dr2"></td></tr>
-		<tr><td>Range.getClientRects</td><td class="c mono" id="dr3"></td></tr>
-		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color"></td></tr>
-		<tr><td colspan="3"><span class="no_color">code provided by <a target="_blank" class="blue"
-			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>, clientrect code based on work by
-			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a>
-			</span>
+			&nbsp mathml</td><td class="c mono" id="mathml"></td></tr>
+		<tr><td colspan="2"><span class="no_color">code by </span><a target="_blank" class="blue"
+			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
 	</table>
 
 	<!--ciphers-->
 	<table id="tb16">
-		<col width="35%"><a name="ciphers"></a><col width="65%">
+		<col width="31%"><a name="ciphers"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#ciphers">ciphers / tls</a>
 			<div class="nav-up"><a href="#elements">&#9650;</a></div>
 			<div class="nav-down"><a href="#spared">&#9660;</a></div>
 			<div class="nav-right"><a name="ciphersd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>test</td><td>result</td></tr>
+		<tr><td>test</td><td class="mono">result</td></tr>
 	</table>
 	<!--spare-->
 	<table id="tb17">
-		<col width="35%"><a name="spare"></a><col width="65%">
+		<col width="31%"><a name="spare"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#spare">oh no, i'm empty</a>
 			<div class="nav-up"><a href="#ciphers">&#9650;</a></div>
 			<div class="nav-down"><a href="#miscd">&#9660;</a></div>
 			<div class="nav-right"><a name="spared"></a></div></div>
 		</th></tr></thead>
-		<tr><td>test</td><td>result</td></tr>
+		<tr><td>test</td><td class="mono">result</td></tr>
 	</table>
 
-	<!--misc.js-->
+	<!--misc-->
 	<table id="tb18">
-		<col width="35%"><a name="misc"></a><col width="65%">
+		<col width="31%"><a name="misc"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#misc">miscellaneous</a>
 			<div class="nav-up"><a href="#spare">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
@@ -832,62 +844,67 @@
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(`18`)">[ re-run ]</span></div>
-			<span class="c" id="mischash"></span></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">Firefox 74+ : javascript.options.<br>property_error_message_fix</span>
-			</div> &nbsp errors</td><td class="c mono" id="miscError"></td></tr>
-		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
-			&nbsp [other] math</td><td class="c mono" id="mathOther"></td></tr>
-		<tr><td>[trigonometric] math</td><td class="c mono" id="mathTrig"></td></tr>
-		<tr><td>[getEntries* | measure] performance.mark</td><td class="c mono" id="perf1"></td></tr>
-		<tr><td>performance.now</td><td class="c mono" id="perf2"></td></tr>
-		<tr><td>[loadEventEnd] performance.timing</td><td class="c" id="perf3"></td></tr>
-		<tr><td>PerformanceNavigationTiming</td><td class="c" id="perf4"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">dom.reporting.enabled<br></span></div>
-			&nbsp [api] reporting</td><td class="c" id="reportingAPI"></td></tr>
-		<tr><td>stack depth | length</td><td class="c" id="recursion"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">svg.disabled</span></div>
-			&nbsp svg</td><td class="c" id="svgBasicTest"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">javascript.options.wasm</span></div>
-			&nbsp webassembly</td><td class="c" id="wasm"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtx">dom.window.content.untrusted.enabled</span></div>
-			&nbsp window.content</td><td class="c" id="wincon"></td></tr>
-		<tr><td colspan="2" class="center">------</td></tr>
+			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(18)">[ re-run ]</span></div>
+			<span class="c" id="mischash"></span>
+		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.use_components_shim</span></div>
-			&nbsp component interfaces</td><td class="c mono" id="shim"></td></tr>
-		<tr><td>iframe.contentWindow properties <sup>1</sup></td><td class="c mono" id="iProps"></td></tr>
-		<tr><td>navigator keys</td><td class="c mono" id="nProto"></td></tr>
-		<tr><td colspan="2"><span class="no_color">code provided by </span>
+			&nbsp component interfaces</td><td class="c mono" id="component_interfaces"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtx">Firefox 74+ : javascript.options.<br>property_error_message_fix</span></div>
+			&nbsp error message fix</td><td class="c mono" id="error_message_fix"></td></tr>
+		<tr><td><a class="blue" target="blank" href="tests/math.html">[PoC]</a>
+			&nbsp [other] math</td><td class="c mono" id="math_other"></td></tr>
+		<tr><td>[trigonometric] math</td><td class="c mono" id="math_trig"></td></tr>
+		<tr><td>navigator keys</td><td class="c mono" id="navigator_keys"></td></tr>
+		<tr><td>[entries] performance.mark</td><td class="c mono" id="perf_mark_entries"></td></tr>
+		<tr><td>performance.mark</td><td class="c mono" id="perf_mark"></td></tr>
+		<tr><td>performance.now</td><td class="c mono" id="perf_now"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">dom.enable_performance</span></div>
+			&nbsp performance.timing</td><td class="c mono" id="perf_timing"></td></tr>
+		<tr><td>PerformanceNavigationTiming</td><td class="c mono" id="perf_navigation"></td></tr>
+		<tr><td>stack depth | length</td><td class="c mono" id="recursion"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">svg.disabled</span></div>
+			&nbsp svg</td><td class="c mono" id="svg_enabled"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">javascript.options.wasm</span></div>
+			&nbsp wasm</td><td class="c mono" id="wasm"></td></tr>
+		<tr><td>webgpu</td><td class="c mono" id="webgpu"></td></tr>
+		<tr><td>[iframe] window properties <sup>1</sup></td><td class="c mono" id="window_properties"></td></tr>
+		<tr><td colspan="2"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
 	</table>
 
 	<!--perf-->
-	<table id="tb99">
-		<col width="1%"><col width="34%"><col width="65%">
+	<table id="tbperf">
+		<col width="1%"><col width="10%"><col width="89%">
 		<thead><tr><th colspan="3" class="showhide">
 			<span id="labelZ" class="btnb" onClick="togglerows('Z','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
-		<tr class="togZ"><td colspan="2"><span class="btn btn0 btnc" onClick="showMetrics(`gPerfDetail`)">[details]</span>
-			global perf</td><td class="mono spaces gc" id="perfG"></td></tr>
-		<tr class="togZ"><td colspan="2"><span class="btn btn0 btnc" onClick="showMetrics(`sPerfDetail`)">[details]</span>
-			click perf</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
-		<tr class="togZ"><td colspan="3"></td></tr> <!-- spacer -->
-		<tr class="togZ"><td colspan="3" class="center">--- debug ---</td></tr>
-		<tr class="togZ"><td colspan="3"></td></tr>
-		<tr class="togZ"><td></td><td colspan="2" class="mono spaces gc" id="debugAll"></td></tr>
+		<tr class="togZ"><td colspan="2">global perf
+			<br><span class="btnb mono no_color" onClick="output_perf('all',true)">[<span id="perfGBtn">more</span>]</span>
+			</td><td class="mono spaces gc" id="perfG"></td></tr>
+		<tr class="togZ"><td colspan="2">click perf
+			<br><span class="btnb mono no_color" onClick="output_perf('x',true)">[<span id="perfSBtn">more</span>]</span>
+			</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
 	</table>
-	<a name="theend"></a><br>
+	<a name="theend" id="theend"></a><br>
+
+	<div id="modaloverlay" onClick="hide_overlays()"></div>
+	<div id="overlay">
+		<div class="mono spaces pad"><span id="overlaytop"></span>
+			<div style="text-align: right" id="overlaybuttons">title</div>
+			<div id="overlayresults"></div>
+			</div>
+		</div>
+	</div>
 
 	<script src="js/prototypeLies.js"></script>
+	<script src="js/language.js"></script>
 	<script src="js/fonts.js"></script>
 	<script src="js/screen.js"></script>
-	<script src="js/language.js"></script>
 	<script src="js/storage.js"></script>
 	<script src="js/devices.js"></script>
 	<script src="js/audio.js"></script>
@@ -896,7 +913,8 @@
 	<script src="js/misc.js"></script>
 	<script src="js/media.js"></script>
 	<script src="js/canvas.js"></script>
-	<!--<script src="js/webgl.js"></script>-->
+	<script src="js/webgl.js"></script>
+	<script src="js/iframes.js"></script>
 
 </body>
 </html>
