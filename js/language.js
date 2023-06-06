@@ -498,7 +498,7 @@ function get_lang() {
 			}
 			addData(4, METRIC, fpvalue)
 			if (isSmart) {
-				if (isTB || isenUS) {
+				if (isTB) {
 					notation = value == oTempData["languages"]["language"] ? lang_green : lang_red
 				}
 			}
@@ -542,7 +542,7 @@ function get_lang() {
 			Object.keys(data).sort().forEach(function(item){value.push(data[item])})
 			value = value.join(" | ")
 			fpvalue = value
-			if (isSmart && isTB || isSmart && isenUS) {
+			if (isSmart && isTB) {
 				notation = intl_red
 				if (isValidLocale) {
 					METRIC2 = METRIC +"_check"
