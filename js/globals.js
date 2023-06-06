@@ -126,7 +126,6 @@ let isArch = true,
 	isAutoPlay,
 	isAutoPlayErr,
 	isDevices,
-	isenUS = false, // temp var until RFP lands proper deterministic language/locales
 	isFile = false,
 	isGecko = false,
 	isLogo,

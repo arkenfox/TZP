@@ -1350,13 +1350,6 @@ function outputFD() {
 			intl_green = sgtick+"MB matches locale]"+sc
 			intl_red = sbx+"MB matches locale]"+sc
 		}
-		let prefix = ""
-		if (!isTB && isenUS) {
-			lang_green = sgtick+"matches en-US]"+sc
-			lang_red = sbx+"matches en-US]"+sc
-			intl_green = sgtick+"matches en-US locale]"+sc
-			intl_red = sbx+"matches en-US locale]"+sc
-		}
 	}
 	// browser
 	let METRIC = "browser"
@@ -1393,13 +1386,13 @@ function outputFD() {
 	METRIC = "os_architecture"
 	let notation = ""
 	if (isArch === true) {
-		notation = (isTB && isSmart) ? tb_red : ""
+		notation = (isTB && isSmart) ? tb_red : "" // TB ESR115 health fail
 		log_display(3, METRIC, "64bit" + notation)
 		addData(3, METRIC, 64)
 	} else {
 		let isMsg = isArch === "RangeError: invalid array length"
 		if (isVer > 109 && isMsg) {
-			if (isTB && isSmart) {notation = tb_red} // TB ESR115 health fail
+			if (isTB && isSmart) {notation = tb_red}
 			log_display(3, METRIC, "32bit" + notation)
 			addData(3, METRIC, 32)
 		} else {

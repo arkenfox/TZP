@@ -1280,6 +1280,7 @@ function outputSection(id, cls) {
 	if (id == "all" || id == 1) {dom.kbt.value = ""}
 
 	function output() {
+		// we use 0ms timeouts to get accurate perf
 		if (!gRun) {gt0 = nowFn()} // single section timer
 		if (id == "all" || id == 3) {outputFD()} // do first to quickly set isMullvad
 		setTimeout(function() {if (id == "all" || id == 2) {outputUA()}}, 0)
@@ -1306,8 +1307,6 @@ function outputSection(id, cls) {
 			get_isClientRect(),
 			outputPrototypeLies(),
 		]).then(function(){
-			// set isenUS
-			try {isenUS = (navigator.language) == "en-US"} catch(e) {isenUS = false}
 			log_section(SECTP, gt0)
 			output()
 		})

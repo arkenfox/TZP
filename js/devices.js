@@ -403,24 +403,15 @@ function get_plugins_mimetypes() {
 }
 
 function get_pointer_event() {
-/*
-// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
-
-noRFP
-  desktop (no touch/pen)
-    1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d
-    0 | true |  5 |  touch |   1 |   0 | 0 | 0 | 0 | 0  5133f762: mobile touch
-    1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: laptop mouse
-    1 | true |  5 |  touch |   0 |   0 | 0 | 0 | 0 | 1  72d236a3: laptop touch
-    1 | true |  2 |    pen |   0 |   0 | 0 | 0 | 0 | 1  bef22060: laptop pen
-
-RFP
-    1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: desktop (no touch/pen)
-    1 | true |  5 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: mobile touch
-    1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: laptop mouse
-    1 | true |  1 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: laptop touch
-    1 | true |  2 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  4b23f9ac: laptop pen
-*/
+	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
+	/* https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
+	RFP
+	1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: desktop (no touch/pen)
+	1 | true |  5 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: mobile touch
+	1 | true |  1 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  c49e3f0d: laptop mouse
+	1 | true |  1 |  mouse | 0.5 |   0 | 0 | 0 | 0 | 1  098e0d22: laptop touch
+	1 | true |  2 |  mouse |   0 |   0 | 0 | 0 | 0 | 1  4b23f9ac: laptop pen
+	*/
 
 	if (window.PointerEvent === undefined) {
 		dom.ptEvent.innerHTML = "undefined"
@@ -433,7 +424,7 @@ RFP
 			'pressure','tangentialPressure','tiltX','tiltY','twist','width',]
 		let listType = ['number','boolean','number','string',
 			'number','number','number','number','number','number',]
-		let res = [], raw = []
+		let res = []
 		for (let i=0; i < list.length; i++) {
 			let value = ""
 			// ToDo: 1363508: RFP notations, see above
@@ -458,16 +449,10 @@ RFP
 			if (typeof value !== listType[i]) {
 				value = zErrType + typeof value
 			}
-			raw.push(value)
-			if (isSmart) {
-				if (i == 3) {
-					value += value == "mouse" ? rfp_green : rfp_red
-				}
-			}
 			res.push(value)
 		}
 
-		dom.ptEvent.innerHTML = res.join(" | ") + sg +"["+ mini(raw) +"]"+ sc
+		dom.ptEvent.innerHTML = res.join(" | ") + sg +"["+ mini(res) +"]"+ sc
 	})
 }
 
