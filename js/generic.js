@@ -815,7 +815,7 @@ function output_section(section, scope) {
 					let len = Object.keys(sData[item][scope][name]).length
 					// catch zero length: e.g. object cleared not deleted
 					if (len > 0) {
-						let btnText = len + " "+ (len = 1 ? item : item.slice(0,-1)) // single/plural
+						let btnText = len + " "+ (len == 1 ? item.slice(0,-1) : item) // single/plural
 						btn = addButton(0, item + name, btnText, "btns", scope)
 						aBtns.push(btn.trim())
 					}
