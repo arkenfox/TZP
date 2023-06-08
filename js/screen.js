@@ -1236,7 +1236,7 @@ function outputUA(os = isOS) {
 	}
 	if (isSmart && os !== undefined) {
 		// 1818889: RFP 115+ uses rv freeze at 109
-		let uaVer = isVer, rvVer = (isVer > 114 ? 109 : isVer)
+		let uaVer = isVer, rvVer = (isVer > 114 && isVer < 120 ? 109 : isVer)
 		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:", uaNext = uaRFP
 		if (os == "android") {
 			// android = ESR
@@ -1245,7 +1245,9 @@ function outputUA(os = isOS) {
 			uaRFP += rvVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
 		} else {
 			uaRFP += rvVer +".0) Gecko/20100101 Firefox/"+ uaVer +".0"
-			uaNext += (rvVer +1) +".0) Gecko/20100101 Firefox/"+ (uaVer +1) +".0"
+			// desktop next: only used if isVerExtra = "+" currently > 114
+			rvVer = (uaVer + 1) < 120 ? 109 : rvVer +1 // don't increment frozen
+			uaNext += (rvVer) +".0) Gecko/20100101 Firefox/"+ (uaVer +1) +".0"
 			oRFP[os]["userAgentNext"] = uaNext
 		}
 		oRFP[os]["userAgent"] = uaRFP
