@@ -188,7 +188,7 @@ function fnRecord(order, description, result, match, error, perf) {
 	if (error !== undefined && error !== "skip") {
 		let hash = mini(error)
 		if (hash !== "d8281b3c") { // assignment to undeclared variable bB
-			console.error(order, result, error)
+			//console.error(order, result, error)
 			hash = s3+ " ["+ hash +"]"+ sc
 		} else {
 			result = "test error thrown"; hash = ""
@@ -415,7 +415,7 @@ function get_iframe_props(num1, num2, title) {
 		let resE = "", boolE = false
 		if (arrayE.length) {
 			sDetail["expected_"+ title] = arrayE
-			resE = mini_sha1(arrayE.join()) + buildButton(3, "expected_"+ title, arrayE.length)
+			resE = mini(arrayE) + buildButton(3, "expected_"+ title, arrayE.length)
 			if (arrayE.length > 4) {boolE = true}
 		} else {
 			resE = "none"
@@ -427,7 +427,7 @@ function get_iframe_props(num1, num2, title) {
 		let resU = "", boolU = false
 		if (arrayU.length) {
 			sDetail["unexpected_"+ title] = arrayU
-			resU = mini_sha1(arrayU.join()) + buildButton(3, "unexpected_"+ title, arrayU.length)
+			resU = mini(arrayU) + buildButton(3, "unexpected_"+ title, arrayU.length)
 		} else {
 			resU = "none"
 			boolU = true
@@ -509,10 +509,10 @@ function get_intl_canonical_locale(num, title) {
 		list.forEach(function(i) {
 			res.push(Intl.getCanonicalLocales(i))
 		})
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		if (hash == "49ce6431a6b656b0cdce7fc8bff36cbf60f90558") {bool = true // FF91+
-		} else if (hash == "ca3fd91866c1a46b8d08c4c1b406e3201fd7fcd7") {bool = true // FF70-90
-		} else if (hash == "68cbf0ea5d3d3a6bc14f0d574341397d818ba886") {bool = true // FF52-69
+		let hash = res.length > 0 ? mini(res) : "none"
+		if (hash == "df6e312d") {bool = true // FF91+
+		} else if (hash == "6dc73a60") {bool = true // FF70-90
+		} else if (hash == "0e0d831d") {bool = true // FF52-69
 		}
 		// FF60-69 : bh=bh,  hye=hye, no=no, tl=tl,  tw=tw
 		// FF70-90 : bh=bho, hye=hy,  no=nb, tl=fil, tw=ak
@@ -793,7 +793,7 @@ function get_js_client_hints(num, title) {
 		if (res.length > 0) {
 			res.sort()
 			sDetail["unexpected_"+ title] = res
-			let hash = mini_sha1(res.join()) + buildButton(3, "unexpected_"+ title , res.length)
+			let hash = mini(res) + buildButton(3, "unexpected_"+ title , res.length)
 			fnRecord(num, title, hash, false, "skip", perf)
 		} else {
 			fnRecord(num, title, "none", true, "skip", perf)
@@ -887,8 +887,8 @@ function get_locale_compare(num, title) {
 		list.forEach(function(item) {
 			res.push(item[1].localeCompare(item[2], item[0]))
 		})
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		let bool = hash == "d4ed607dd4781454263f3c3fc6d92b55b2980ad2"
+		let hash = res.length > 0 ? mini(res) : "none"
+		let bool = hash == "2e086db5"
 		if (res.length > 0) {
 			hash = res.join(", ")
 		}
@@ -939,9 +939,9 @@ function get_math(num, title) {
 		} else if (hash == "cb89002a8d6fabf859f6") {engine = "gecko"
 		}
 		let bool = engine == "gecko" ? true : false
-		// now redo as mini_sha1
+		// now redo as mini
 		sDetail["expected_"+ title] = res
-		hash = mini_sha1(res.join()) + buildButton(3, "expected_"+ title, engine)
+		hash = mini(res) + buildButton(3, "expected_"+ title, engine)
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
@@ -963,8 +963,8 @@ function get_media_constraints(num, title) {
 		let res = Object.keys(data)
 		res = res.filter(x => !noiseFF.includes(x))
 		res.sort()
-		let hash = res.length > 0 ? mini_sha1(res.join()) : "none"
-		let bool = hash == "a4dfaab7d54b96d9a4ed91d06a20b77fa0df2a45" // FF52+
+		let hash = res.length > 0 ? mini(res) : "none"
+		let bool = hash == "27fb15ca" // FF52+
 		if (res.length > 0) {
 			sDetail["expected_"+ title] = res
 			hash += buildButton(3, "expected_"+ title, res.length)
@@ -1013,13 +1013,11 @@ function get_mimetypes(num, title) {
 						bool = true
 					}
 				}
-				let hash = mini_sha1(res.join())
+				let hash = mini(res)
 				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
 					// 1720353: hardcoded mimeTypes
-					if (hash == "5b8b5b83ff5790df763d417ec6e2adbbf0570c47") {
-						bool = true
-					}
+					if (hash == "d63af80f") {bool = true}
 				}
 				sDetail["expected_"+ title] = res
 				hash += buildButton(3, "expected_"+ title, res.length)
@@ -1062,7 +1060,7 @@ function get_moz_colors(num, title) {
 		if (bool) {
 			sDetail["expected_"+ title] = aRes
 		}
-		let hash = bool ? mini_sha1(aRes.join()) + buildButton(3, "expected_"+ title, aRes.length) : "none"
+		let hash = bool ? mini(aRes) + buildButton(3, "expected_"+ title, aRes.length) : "none"
 		let perf = canPerf ? performance.now() - t0 : ""
 		fnRecord(num, title, hash, bool, "skip", perf)
 	} catch(e) {
@@ -1098,7 +1096,7 @@ function get_moz_fonts(num, title) {
 		if (bool) {
 			sDetail["expected_"+ title] = aResults
 		}
-		let hash = bool ? mini_sha1(aResults.join()) + buildButton(3, "expected_"+ title, aResults.length) : "none"
+		let hash = bool ? mini(aResults) + buildButton(3, "expected_"+ title, aResults.length) : "none"
 		if (isVer > 108) {
 			bool = zNA; hash = zNA +": FF108 or lower" // 1802957
 		}
@@ -1259,7 +1257,7 @@ function get_moz_objects(num, name) {
 				hash = res.join(", ")
 			} else {
 				sDetail["expected_"+ title] = res
-				hash = mini_sha1(res.join()) + buildButton(3, "expected_"+ title, res.length)
+				hash = mini(res) + buildButton(3, "expected_"+ title, res.length)
 			}
 			bool = true
 		} else if (isFF) {
@@ -1333,7 +1331,7 @@ function get_nav_keys(num1, num2, title) {
 		let boolN = resN.length == 0
 		if (resN.length > 0) {
 			sDetail["unexpected_"+ title] = resN
-			resN = mini_sha1(resN.join()) + buildButton(3, "unexpected_"+ title, resN.length)
+			resN = mini(resN) + buildButton(3, "unexpected_"+ title, resN.length)
 		} else {
 			resN = "none"
 		}
@@ -1478,7 +1476,7 @@ function get_nav_values(num1, num2, num3) {
 					try {keys.push(key +": "+ keyboardLayoutMap.get(key))} catch(e) {keys.push(key +": e.name")}
 				})
 				sDetail["unexpected_"+ strK] = keys
-				let hash = mini_sha1(keys.join()) + buildButton(3, "unexpected_"+ strK , keys.length)
+				let hash = mini(keys) + buildButton(3, "unexpected_"+ strK , keys.length)
 				perfK = canPerf ? performance.now() - t0K : ""
 				fnRecord(numK, strK, hash, false, "skip", perfK)
 			})
@@ -1669,11 +1667,11 @@ function get_plugins(num, title) {
 				if (isFF && isVer < 85 && res.length == 1) {
 					if (res[0].split(":")[0] == "Shockwave Flash") {bool = true}
 				}
-				let hash = mini_sha1(res.join())
+				let hash = mini(res)
 				if (isVer > 98 || !isFF) { // allow non-FF to have the same
 					// FF99+: controlled by pdfjs.disabled
 					// 1720353: hardcoded mimeTypes
-					if (hash == "6232b915d6de71c787a36eb42b75d2b8e24aa4d3") {
+					if (hash == "b46e6634") {
 						bool = true
 					}
 				}
@@ -1928,7 +1926,7 @@ function get_window_props(num1, num2, title) {
 		rec(num1, typeof updateCommands, "updateCommands")
 		// finish
 		let boolE = resE.length > 0
-		let hashE = boolE ? mini_sha1(resE.join()) : "none"
+		let hashE = boolE ? mini(resE) : "none"
 		if (boolE) {
 			if (resE.join(", ").length < 48) {
 				hashE = resE.join(", ")
@@ -1997,7 +1995,7 @@ function get_window_props(num1, num2, title) {
 		}
 
 		let boolU = resU.length == 0
-		let hashU = !boolU ? mini_sha1(resU.join()) : "none"
+		let hashU = !boolU ? mini(resU) : "none"
 		if (!boolU) {
 			if (resU.join(", ").length < 48) {
 				hashU = resU.join(", ")
