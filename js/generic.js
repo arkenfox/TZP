@@ -1009,10 +1009,7 @@ function log_section(name, time, scope = isScope) {
 				}
 				if (total > 0) {
 					let btnText = total +" "+ (total == 1 ? item.slice(0,-1) : item) // single/plural
-					let btn = addButton(0, item, btnText, "btnc", scope)
-					dom[scope + item +"hash"].innerHTML = mini(gData[item][scope]) + btn
-				} else {
-					dom[scope + item +"hash"] = "none"
+					dom[scope + item +"hash"].innerHTML = addButton(0, item, btnText, "btnc", scope)
 				}
 			})
 		} catch(e) {
