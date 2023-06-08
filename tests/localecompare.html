@@ -114,7 +114,7 @@ let aIndex = [
 function detailConsole(name) {
 	name = name == "S" ? langS +" [simulated] " : "undefined"
 	let data = name == "undefined" ? arrayU : arrayS
-	let hash = sha1(data.join())
+	let hash = mini(data.join())
 	console.log(name, hash +"\n", data)
 }
 
@@ -149,7 +149,7 @@ function get_data(lang) {
 					'\u00F0','\u1DD9','\u1820','\u10350','\u0B05','\u0D85','\u0B85','\u0C05','\u0E24',]
 					chars.sort()
 					chars.sort(Intl.Collator(lang).compare)
-					return sha1(chars.join(), "language collation")
+					return mini(chars.join(), "language collation")
 				// timezone
 				} else if (item == 12) {return zNA // time not relevant
 				} else if (item == 13) {return Intl.DateTimeFormat(lang).resolvedOptions().timeZone
@@ -441,8 +441,8 @@ function get_diffs() {
 			// solution
 				// slice resolvedOptions off and display the undefined ones only
 
-		let hashS = sha1(arrayS.join())
-		let hashU = sha1(arrayU.join())
+		let hashS = mini(arrayS.join())
+		let hashU = mini(arrayU.join())
 		dom.hashS.innerHTML = hashS +" <span class='btn4 btnc' onclick='detailConsole(`S`)'>[details]</span>"
 		dom.hashU.innerHTML = hashU +" <span class='btn4 btnc' onclick='detailConsole(`U`)'>[details]</span>"
 		dom.lang.innerHTML = arrayL.join(" | ")
