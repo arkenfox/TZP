@@ -211,11 +211,11 @@ function run(runtype) {
 			foundO = otherHash.length,
 			foundA = allHash.length
 		// hashes
-		let hashI = mini_sha1(imgHash),
-			hashJ = mini_sha1(jsHash),
-			hashC = mini_sha1(cssHash),
-			hashO = mini_sha1(otherHash),
-			hashA = mini_sha1(allHash)
+		let hashI = mini(imgHash),
+			hashJ = mini(jsHash),
+			hashC = mini(cssHash),
+			hashO = mini(otherHash),
+			hashA = mini(allHash)
 		// remember data
 		sDetail["img"+ runtype] = imgHash
 		sDetail["js"+ runtype] = jsHash
@@ -245,7 +245,7 @@ function run(runtype) {
 			let countTested = imgUris.length + jsUris.length + cssUris.length + otherUris.length
 		stats = " ["+ foundA +"/"+ countTested +"]"
 		if (foundA) {stats = " <span class='btn3 btnc' onclick='display(`all`,`"+ runtype +"`)'>" + stats +"</span>"}
-		document.getElementById("allHash"+ runtype).innerHTML = mini_sha1(hashA) + stats
+		document.getElementById("allHash"+ runtype).innerHTML = mini(hashA) + stats
 
 		// label
 		document.getElementById("label" + runtype).innerHTML = "[ re-run ]"
