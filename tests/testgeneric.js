@@ -383,7 +383,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 115
+		isVerMax = 116
+		if (isNaN(Date.parse("-000000-01-01T00:00:00.000Z"))) return 116 // 1769088
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
 		if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("reset")) return 113 // 1709347
