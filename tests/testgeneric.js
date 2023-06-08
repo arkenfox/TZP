@@ -402,10 +402,10 @@ const get_isVer = () => new Promise(resolve => {
 			if (Array(1).includes()) return 102 // 1767541: regression FF99
 			return 101 // 1728999
 		}
-		if ("function" === typeof AbortSignal.timeout) return 100 // 1753309
+		if ("function" === typeof AbortSignal && "function" === typeof AbortSignal.timeout) return 100 // 1753309
 		try {newFn("class A { #x; h(o) { return !#x in o; }}")} catch(e) {if (e.message.length == 72) return 99} // 1711715 + 1756204
 		if (HTMLElement.prototype.hasOwnProperty("outerText")) return 98 // 1709790
-		if ("function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
+		if ("function" === typeof AbortSignal && "function" === typeof AbortSignal.prototype.throwIfAborted) return 97 // 1745372
 		if ("undefined" === typeof Object.toSource
 			&& "sc" === Intl.PluralRules.supportedLocalesOf("sc").join()) return 96 // 1738422
 			// ^ legacy perf: toSource (74+): FF68- very slow
@@ -428,7 +428,8 @@ const get_isVer = () => new Promise(resolve => {
 			} catch(e) {if (e.message.length == 66) {return 85}} // 1675240
 			// ^ replace ?
 		if ("function" === typeof PerformancePaintTiming) return 84 // 1518999
-		if (!window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
+		if ("undefined" === typeof Object.toSource
+			&& !window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest")) return 83 // 1665252
 		try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
 			// ^ ext fuckery: cydec
 		if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
@@ -436,7 +437,8 @@ const get_isVer = () => new Promise(resolve => {
 		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
 		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
 		if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
-		if (!test76.validity.rangeOverflow) return 76 // 1608010
+		if ("undefined" === typeof Object.toSource
+			&& !test76.validity.rangeOverflow) return 76 // 1608010
 		if ("function" === typeof Intl.Locale) return 75 // 1613713
 		if ("undefined" === typeof Object.toSource) return 74 // 1565170
 		if (!VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames")) return 73 // 1602163
@@ -458,7 +460,7 @@ const get_isVer = () => new Promise(resolve => {
 		if ("desc" === Symbol('desc').description) return 63 // 1472170
 		if ("function" === typeof console.timeLog) return 62 // 1458466
 		if ("object" === typeof CSS) return 61 // 1455805
-		if ("function" !== typeof Animation.prototype.updatePlaybackRate) return 60 // 1436659
+		if ("function" === typeof Animation.prototype.updatePlaybackRate) return 60 // 1436659
 		if (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled")) return 59 // 1336400
 		if ("function" === typeof Intl.PluralRules) return 58 // 1403318
 		if ("function" === typeof AbortSignal) return 57 // 1378342
@@ -510,12 +512,12 @@ function copyclip(element) {
 	}
 }
 
-function showDetail(name, useMini = false) {
+function showDetail(name, useMini = true) {
 	if (name == "all") {
 		console.log("ALL", sDetail)
 	} else {
 		let data = sDetail[name]
-		let hash = useMini ? mini(data.join()) : mini_sha1(data.join())
+		let hash = useMini ? mini(data) : mini_sha1(data.join())
 		// split+tidy name
 		name = name.replace(/\_/g, " ")
 		let n = name.indexOf(" "),
