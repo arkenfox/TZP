@@ -249,7 +249,7 @@ function outputMath(delay) {
 		]).then(function(results){
 			// run1
 			let run1 = results[0]
-			let run1hash = sha1(run1[0].join())
+			let run1hash = mini(run1[0].join())
 			let run1diff = run1[1]
 			let run1count = run1diff.length
 			run1count = (run1count == 0 ? sg: sb) +"["+ run1count +"]"+ sc
@@ -257,7 +257,7 @@ function outputMath(delay) {
 			dom.run1hash.innerHTML = run1hash + run1count
 			// run 2
 			let run2 = results[1]
-			let run2hash = sha1(run2[0].join())
+			let run2hash = mini(run2[0].join())
 			let run2diff = run2[1]
 			let run2count = run2diff.length
 			run2count = (run2count == 0 ? sg: sb) +"["+ run2count +"]"+ sc
