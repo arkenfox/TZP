@@ -99,20 +99,20 @@
 			<div class="nav-down"><a href="#screend">&#9660;</a></div></div>
 		</th></tr></thead>
 		<tr><td>
-			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span>
-			</div> &nbsp prototype | proxy <sup>2</sup></td>
+			<div class="btn-left"><span class="btn btn0" onClick="outputSection(`all`)">[ re-run ]</span></div>
+			prototype | proxy <sup>2</sup></td>
 			<td class="mono">
 				<span class="c" id="protohash"></span>
 				<div class="btn-right"><span class="c" id="protohealth"></span></div>
 			</td></tr>
-		<tr><td>document</td><td class="mono">
+		<tr><td><div class="btn-left"><span class="btn btn1 c" id="allcheck" onClick="showMetrics(`alerts`)"></span></div>
+				&nbsp document</td><td class="mono">
 				<span class="c" id="documenthash"></span>
+				<span class="c" id="documenterrorshash"></span>
 				<div class="btn-right"><span class="c" id="documenthealth"></span></div>
 			</td></tr>
 		<tr><td>untrustworthy</td><td class="c mono" id="knownhash"></td></tr>
 		<tr><td>methods</td><td class="c mono" id="knownmethods"></td></tr>
-		<tr><td><div class="btn-left"><span class="btn btn1 c" id="allcheck" onClick="showMetrics(`alerts`)"></span></div>
-			&nbsp errors</td><td class="c mono" id="documenterrorshash"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">fingerprints are always 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
@@ -219,7 +219,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">-moz-device-pixel-ratio<br>border width</span></div>
 			&nbsp devicePixelRatio</td>
-			<td><span class="c mono" id="devicePixelRatio_moz"></span> | <span class="c mono" id="devicePixelRatio_border"></span>
+			<td class="mono"><span class="c" id="devicePixelRatio_moz"></span> | <span class="c" id="devicePixelRatio_border"></span>
 		</td></tr>
 		<tr><td>[window] devicePixelRatio</td><td class="c mono" id="devicePixelRatio"></td></tr>
 		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
@@ -305,7 +305,7 @@
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
-			These tests are to show that you cannot hide your	engine
+			These tests are to show that you cannot hide your engine
 			<a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
 			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, version
 			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a> or OS.</span>
@@ -857,7 +857,7 @@
 		<tr><td>[trigonometric] math</td><td class="c mono" id="math_trig"></td></tr>
 		<tr><td>navigator keys</td><td class="c mono" id="navigator_keys"></td></tr>
 		<tr><td>[entries] performance.mark</td><td class="c mono" id="perf_mark_entries"></td></tr>
-		<tr><td>performance.mark</td><td class="c mono" id="perf_mark"></td></tr>
+		<!--<tr><td>performance.mark</td><td class="c mono" id="perf_mark"></td></tr>-->
 		<tr><td>performance.now</td><td class="c mono" id="perf_now"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.enable_performance</span></div>
