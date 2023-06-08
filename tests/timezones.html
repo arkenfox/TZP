@@ -811,7 +811,7 @@ function run_test(isLoopy) {
 				tzpdata.push(aYears[i] +": "+ tzyear.join(", "))
 			}
 			if (aYears.join() == "1879,1921,1952,1976,2018") {
-				tzpHash = mini_sha1(tzpdata.join())
+				tzpHash = mini(tzpdata.join())
 			} else {
 				tzpHash = zNA
 			}
@@ -827,7 +827,7 @@ function run_test(isLoopy) {
 				tzresults.push(diff)
 			}
 			//console.debug("matchHash (toLocaleString) data\n" + tzresults)
-			matchHash = mini_sha1(tzresults.join())
+			matchHash = mini(tzresults.join())
 		}
 
 		// select list and loop each timezone
@@ -857,7 +857,7 @@ function run_test(isLoopy) {
 			if (isInvalid) {
 				invalid.push(tzclean)
 			} else {
-				results.push(mini_sha1(tzresults.join()) +":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
+				results.push(mini(tzresults.join()) +":"+ tzclean +":"+ tz +":" + tzresults.join(", "))
 			}
 		}
 
@@ -896,7 +896,7 @@ function run_test(isLoopy) {
 		}
 		// hash of locales in buckets
 		buckets.sort()
-		let buckethash = mini_sha1(buckets.join("~")) // always include a unique bucket delimiter
+		let buckethash = mini(buckets.join("~")) // always include a unique bucket delimiter
 		//console.debug(buckets.join("\n"))
 
 		// buckets
@@ -967,7 +967,7 @@ function run_test(isLoopy) {
 
 				// build output
 				if (groupCount > 1) {
-					let groupHash = mini_sha1(groupTZ)
+					let groupHash = mini(groupTZ)
 					data.push(
 						s12 + groupNumber +": "+ groupHash + sc +" "
 						+ s4 +"["+ groupCount +"]"+ sc +"<br>"
@@ -1053,12 +1053,12 @@ function run_test(isLoopy) {
 					+" !== legend count " + sb + "(" + array.length +")"+ sc)
 			}
 			if (invalid.length) {
-				let invHash = mini_sha1(invalid.join()), invNote = ""
+				let invHash = mini(invalid.join()), invNote = ""
 				if (isFF) {
-					if (invHash == "c213a6d9275a613036a2f6decdd47fa2403dc149") {invNote = "[FF76-93 | ESR68]"
-					} else if (invHash == "ff770db26427051ab4987805a1bb8232ebd4c5bd") {invNote = "[FF65-75 | ESR68]"
-					} else if (invHash == "246543dd7beb6bbc291fc0c9967c27dec032bd25") { invNote = "[FF53-64]"
-					} else if (invHash == "8f0b6b38754838e68219bd4f217883926dc3b3d8") { invNote = "[FF52]"
+					if (invHash == "4e478d4b") {invNote = "[FF76-93 | ESR68]"
+					} else if (invHash == "f6849d01") {invNote = "[FF65-75 | ESR68]"
+					} else if (invHash == "9c934d1e") { invNote = "[FF53-64]"
+					} else if (invHash == "c1476da0") { invNote = "[FF52]"
 					}
 				}
 				info.push( title(invalid.length +" invalid", sb) + invHash +" "+ s14 + invNote + sc)
