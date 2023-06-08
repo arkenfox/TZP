@@ -159,7 +159,7 @@ function get_app_lang_dtd1() {
 				clearInterval(checking)
 				// notate
 				if (navigator.language == "en-US") {
-					dtd1 = (sha1(dtd1) == "4496d79dd1843c7c743647b45b4f0d76abf46bfe" ? enUS_green + dtd1 : enUS_red + dtd1)
+					dtd1 = (mini(dtd1) == "b10660d1" ? enUS_green + dtd1 : enUS_red + dtd1)
 				}
 				output_dtd1(dtd1)
 			}
@@ -197,7 +197,7 @@ function get_app_lang_dtd2() {
 				clearInterval(checking)
 				// notate
 				if (navigator.language == "en-US") {
-					dtd2 = (sha1(dtd2) == "4496d79dd1843c7c743647b45b4f0d76abf46bfe" ? enUS_green + dtd2 : enUS_red + dtd2)
+					dtd2 = (mini(dtd2) == "b10660d1" ? enUS_green + dtd2 : enUS_red + dtd2)
 				}
 				output_dtd2(dtd2)
 			}
@@ -219,15 +219,9 @@ function get_app_lang_mediadocument() {
 	function run_mediadocument() {
 		try {
 			let output = (iframe.contentWindow.document.title)
-
-			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels)"))
-				// 7bc392a516c338f8dc9b31d2583f0abaeed5dcf7
-			// console.debug(sha1("applang-image.png (PNG Image, 800 × 1 pixels) — Scaled (37%)")
-				// 97a0314b3d87e32c0b29d0f59ff51ff519d14239
-
 			// notate
 			if (navigator.language == "en-US") {
-				output = (sha1(output) == "97a0314b3d87e32c0b29d0f59ff51ff519d14239" ? enUS_green : enUS_red) + output
+				output = (mini(output) == "aeeeab13" ? enUS_green : enUS_red) + output
 			}
 			output_mediadocument(output)
 		} catch(e) {
@@ -298,7 +292,7 @@ function get_app_lang_xmlparser() {
 	}
 	// output
 	if (navigator.language == "en-US") {
-		output = (sha1(output) === "0e4bcf212e9bcdae045444087659ffc9672c7582" ? enUS_green + output : enUS_red + output)
+		output = (mini(output) === "2ebaf247" ? enUS_green + output : enUS_red + output)
 	}
 	dom.appLang5.innerHTML = output
 }
@@ -309,7 +303,7 @@ function outputAppLanguage() {
 		// dom.properties
 		let str = dom.appLang_1.validationMessage
 		if (navigator.language == "en-US") {
-			str = (sha1(str) == "c17ee6480cdfbdc082000efe84ca520283b761ef" ? enUS_green + str : enUS_red + str)
+			str = (mini(str) == "bb240b22" ? enUS_green + str : enUS_red + str)
 		}
 		dom.appLang1.innerHTML = str
 		// the others
