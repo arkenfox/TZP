@@ -430,6 +430,7 @@ const get_font_sizes = () => new Promise(resolve => {
 				font-size: ` + fntSize + ` !important;
 				font-style: normal !important;
 				font-weight: normal !important;
+				font-stretch: normal !important;
 				letter-spacing: normal !important;
 				line-break: auto !important;
 				line-height: normal !important;
@@ -919,9 +920,10 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		if (isSmart && isTB && isVer > 114) {
 			// this doesn't officially land in stable until TB13
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
-			if (os == "windows" || os == "android") {notation = hash == "41dd8a29" ? tb_green : tb_red
-			} else if (os == "mac") { notation = hash == "a10627b6" ? tb_green : tb_red
-			} else if (os == "linux") {notation = hash == "d330cb2e" ? tb_green : tb_red
+			if (os == "windows") {notation = hash == "c89fb033" ? tb_green : tb_red
+			} else if (os == "mac") { notation = sbx +" awaiting hash from pierov]"+sc //hash == "" ? tb_green : tb_red
+			} else if (os == "linux") {notation = sbx +" awaiting data from pierov]"+sc // hash == "" ? tb_green : tb_red
+			} else if (os == "android") {notation = sbx +" awaiting data from pierov]"+sc // hash == "" ? tb_green : tb_red
 			}
 		}
 		addData(12, METRIC, newobj, hash)
