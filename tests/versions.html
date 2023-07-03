@@ -270,10 +270,11 @@ function outputVersion() {
 			}
 		}
 
-		// 116: 1769088
+
+		// 116: 1839614
 		let t116 = performance.now()
-		let ver116 = (isNaN(Date.parse("-000000-01-01T00:00:00.000Z")))
-		rec(116, 116, "1769088", ver116, performance.now()-t116) // 0.015ms
+		let ver116 = (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering"))
+		rec(116, 116, "1839614", ver116, performance.now()-t116)
 
 		// 115: 1778909
 		let t115 = performance.now()
@@ -608,7 +609,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 50, oOther = {}
+	let countOther = 0, expectOther = 51, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -625,6 +626,12 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 116: 1769088
+			// ToDo: find something not date related (exts like to fuck with dates)
+		let t116 = performance.now()
+		let ver116 = (isNaN(Date.parse("-000000-01-01T00:00:00.000Z")))
+		rec(116, 116, "1769088", ver116, performance.now()-t116) // 0.015ms
 
 		// 107: 344060
 		let t107 = performance.now(), ver107
