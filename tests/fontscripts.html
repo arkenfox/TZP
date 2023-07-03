@@ -227,6 +227,10 @@ let	uv1x0x0 = "1.0.0 (1991)",
 	uv4x1 = "4.1 (2005)",
 	uv5x0 = "5.0 (2006)",
 	uv5x1 = "5.1 (2008)",
+	uv5x2 = "5.2 (2009)",
+	uv6x1 = "6.1 (2012)",
+	uv7x0 = "7.0 (2014)",
+	uv8x0 = "8.0 (2015)",
 	uv9x0 = "9.0 (2016)"
 
 let aBlocks = [
@@ -324,7 +328,15 @@ let aBlocks = [
 		], uv4x1
 	],
 	["buginese", "1A", [0,1], 0, ["1C","1D"], "Buginese_(Unicode_block)"],
-	["buhid", 17, [4,5,], -12, , "Buhid_(Unicode_block)"],
+	["buhid", 17, [4,5], -12, , "Buhid_(Unicode_block)"],
+	["chakma", 111, [0,1,2,3,4], -8, ["35"], "Chakma_(Unicode_block)",
+		[
+			"44","45","46", // 11.0
+			"47" // 13.0
+		], uv6x1
+	],
+	["cham", "AA", [0,1,2,3,4,5], , ["37","38","39","3A","3B","3C","3D","3E","3F","4E","4F","5A","5B"], "Cham_(Unicode_block)"],
+	["common indic number forms", "A8", [3], -6, , "Common_Indic_Number_Forms"],
 	["devanagari", "09", [0,1,2,3,4,5,6,7], , , "Devanagari_(Unicode_block)",
 		[
 			"71","72", // 5.1
@@ -333,6 +345,11 @@ let aBlocks = [
 			"78" // 7.0
 		], uv5x0
 	],
+	["dives akuru", 119, [0,1,2,3,4,5], -6,
+		["07","08","0A","0B","14","17","36","39","3A","47","48","49","4A","4B","4C","4D","4E","4F",],
+		"Dives_Akuru_(Unicode_block)"
+	],
+	["dogra", 118, [0,1,2,3,4], -20, , "Dogra_(Unicode_block)"],
 	["gujarati", "0A", [8,9,"A","B","C","D","E","F"], 0,
 		["80","84","8E","92","A9","B1","B4","BA","BB","C6","CA","CE","CF",
 		"D1","D2","D3","D4","D5","D6","D7","D8","D9","DA","DB","DC","DD","DE","DF",
@@ -355,7 +372,7 @@ let aBlocks = [
 	],
 	["hanunoo", 17, [2,3], -9, , "Hanunoo_(Unicode_block)"],
 	["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"], "Javanese_(Unicode_block)"],
-	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
+	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -12,
 		["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
 		"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
 		"Kannada_(Unicode_block)",
@@ -364,24 +381,46 @@ let aBlocks = [
 			"80", // 9.0
 			"84", // 11.0
 			"DD", // 14.0
+			"F3", // 15.0
 		], uv5x0
 	],
+	["kaithi", 110, [8,9,"A","B","C"], -2, ["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC"], "Kaithi_(Unicode_block)",
+		[
+			"CD", // 11.0
+			"C2", // 14.0
+		], uv5x2
+	],
+	["kawi", "11F", [0,1,2,3,4,5], -6, ["11","3B","3C","3D"], "Kawi_(Unicode_block)"],
 	["khmer", 17, [8,9,"A","B","C","D","E","F"], -6,
 		["DE","DF","EA","EB","EC","ED","EE","EF"], "Khmer_(Unicode_block)", , ,
 		["B4","B5"] // ignore: KIV AQ, KIV AA
 	],
 	["khmer symbols", 19, ["E","F"], , , "Khmer_Symbols"],
+	["khojki", 112, [0,1,2,3,4], -14, ["12"], "Khojki_(Unicode_block)",
+		[
+			"3E", // 9.0
+			"3F","40","41", // 15.0
+		], uv7x0
+	],
+	["khudawadi", 112, ["B","C","D","E","F"], -6, ["EB","EC","ED","EE","EF"], "Khudawadi_(Unicode_block)"],
 	["lao", "0E", [8,9,"A","B","C","D","E","F"], -32,
-		["80","83","85","8B","A4","A6","BE","BF","C5","C7","CE","CF","DA","DB"],
+		["80","83","85","8B","A4","A6","BE","BF","C5","C7","CF","DA","DB"],
 		"Lao_(Unicode_block)",
 		[
 			"DE","DF", // 6.1
 			"86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA", // 12.0
+			"CE", // 15.0
 		], uv1x0x1
 	],
+	["lepcha", "1C", [0,1,2,3,4], , ["38","39","3A","4A","4B","4C"], "Lepcha_(Unicode_block)"],
+	["limbu", 19, [0,1,2,3,4], , ["1F","2C","2D","2E","2F","3C","3D","3E","3F","41","42","43"], "Limbu_(Unicode_block)",
+		[
+			"1D","1E", // 7.0
+		], uv4x0
+	],
+	["mahajani", 111, [5,6,7], -9, , "Mahajani_(Unicode_block)"],
 	["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
-		["0D","11","45","49","50","51","52","53","64","65"],
-		"Malayalam_(Unicode_block)",
+		["0D","11","45","49","50","51","52","53","64","65"], "Malayalam_(Unicode_block)",
 		[
 			"29","3A","4E", // 6.0
 			"01", // 7.0
@@ -392,18 +431,34 @@ let aBlocks = [
 		], uv5x1,
 		["4E"] // ignore: letter dot reph
 	],
+	["meetei mayek", "AB", ["C","D","E","F"], -6, ["EE","EF"], "Meetei_Mayek_(Unicode_block)"],
 	["modi", 116, [0,1,2,3,4,5], -6, ["45","46","47","48","49","4A","4B","4C","4D","4E","4F"], "Modi_(Unicode_block)",],
+	["multani", 112, [8,9,"A"], -6, ["87","89","8E","9E"], "Multani_(Unicode_block)"],
 	["myanmar", 10, [0,1,2,3,4,5,6,7,8,9], 0, , "Myanmar_(Unicode_block)",
 		[
 			"9A","9B","9C","9D", // 5.2
 		], uv5x1
 	],
+	["myanmar extended-a", "AA", [6,7], , , "Myanmar_Extended-A",
+		[
+			"7C","7D","7E","7F", // 7.0
+		], uv5x2
+	],
+	["myanmar extended-b", "A9", ["E","F"], -1, , "Myanmar_Extended-B"],
+	["nag mundari", "1E4", ["D","E","F"], -6, , "Nag_Mundari_(Unicode_block)"],
 	["new tai lue", 19, [8,9,"A","B","C","D"], 0,
 		["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"],
 		"New_Tai_Lue_(Unicode_block)",
 		[
 			"AA","AB","DA", // 5.2
 		], uv4x1
+	],
+	["newa", 114, [0,1,2,3,4,5,6,7], -30, ["5C",], "Newa_(Unicode_block)",
+		[
+			"5E", // 11.0
+			"5F", // 12.0
+			"5A","60","61", // 13.0
+		], uv9x0
 	],
 	["oriya", "0B", [0,1,2,3,4,5,6,7], -8,
 		["00","04","0D","0E","11","12","29","31","34","3A","3B","45","46","49","4A","4E","4F",
@@ -415,6 +470,11 @@ let aBlocks = [
 		], uv5x1
 	],
 	["phags-pa", "A8", [4,5,6,7], -8, , "Phags-pa_(Unicode_block)"],
+	["saurashtra", "A8", [8,9,"A","B","C","D"], -6, ["C6","C7","C8","C9","CA","CB","CC","CD"], "Saurashtra_(Unicode_block)",
+		[
+			"C5", // 9.0
+		], uv5x1
+	],
 	["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
 		["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
 		"E0","E1","E2","E3","E4","E5","F0","F1"],
@@ -431,6 +491,12 @@ let aBlocks = [
 		], uv5x1,
 		["AB"] // ignore: sign virama
 	],
+	["sundanese supplement", "1C", ["C"], -8, , "Sundanese_Supplement"],
+	["syloti nagri", "A8", [0,1,2], -3, , "Syloti_Nagri_(Unicode_block)",
+		[
+			"2C", // 13.0
+		], uv4x1
+	],
 	["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"],
 		"Tagalog_(Unicode_block)",
 		[
@@ -439,6 +505,18 @@ let aBlocks = [
 	],
 	["tagbanwa", 17, [6,7], -12, ["6D","71"], "Tagbanwa_(Unicode_block)"],
 	["tai le", 19, [5,6,7], -11, ["6E","6F"], "Tai_Le_(Unicode_block)"],
+	["tai tham", "1A", [2,3,4,5,6,7,8,9,"A"], -2,
+		["5F","7D","7E","8A","8B","8C","8D","8E","8F","9A","9B","9C","9D","9E","9F"], "Tai_Tham_(Unicode_block)"
+	],
+	["tai viet", "AA", [8,9,"A","B","C","D"], ,
+		["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC","CD","CE","CF","D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA"], "Tai_Viet_(Unicode_block)"
+	],
+	["takri", 116, [8,9,"A","B","C"], -6, ["BA","BB","BC","BD","BE","BF"], "Takri_(Unicode_block)",
+		[
+			"B8", // 12.0
+			"B9", // 14.0
+		], uv6x1
+	],
 	["tamil", "0B", [8,9,"A","B","C","D","E","F"], -5,
 		["80","81","84","8B","8C","8D","91","96","97","98","9B","9D",
 		"A0","A1","A2","A5","A6","A7","AB","AC","AD","BA","BB","BC","BD",
@@ -446,7 +524,7 @@ let aBlocks = [
 		"D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DC","DD","DE","DF",
 		"E0","E1","E2","E3","E4","E5"], "Tamil_(Unicode_block)"
 	],
-	["tamil supplement", "11F", ["C","D","E","F"], 0,
+	["tamil supplement", "11F", ["C","D","E","F"], ,
 		["F2","F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], "Tamil_Supplement"
 	],
 	["telugu", "0C", [0,1,2,3,4,5,6,7], 0,
@@ -473,6 +551,7 @@ let aBlocks = [
 		], uv3x0,
 		["0C"] // ignore: mark delimiter tsheg bstar
 	],
+	["tirhuta", 114, [8,9,"A","B","C","D"], -6, ["C8","C9","CA","CB","CC","CD","CE","CF"], "Tirhuta_(Unicode_block)"],
 
 	// CYRILLIC
 	["cyrillic"],
@@ -587,10 +666,10 @@ let aBlocks = [
 	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_Radicals_(Unicode_block)"],
 		// ["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"], // full
 
-	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"],
-	// ["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
-
+	//["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"],
+	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
+	["lisu", "A4", ["D","E","F"], , , "Lisu_(Unicode_block)"],
 	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
 	["yi radicals", "A4", [9,"A","B","C"], -9, , "Yi_Radicals"],
 	["yi syllables", "A0", [0,1,2,3], , , "Yi_Syllables"],
@@ -634,7 +713,30 @@ let aBlocks = [
 		["A0","AD"], // ignore: NBSP, SHY
 	],
 	["latin extended-a", "01", [0,1,2,3,4,5,6,7], , , "Latin_Extended-A"],
-	["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], , , "Latin_Extended-B"],
+	["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F",20,21,22,23,24], , , "Latin_Extended-B"],
+	["latin extended-c", "2C", [6,7], , , "Latin_Extended-C"],
+	["latin extended-d", "A7", [2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , 
+		[
+			"CB","CC","CD","CE","CF","D2","D4","DA","DB","DC","DD","DE","DF",
+			"E0","E1","E2","E3","E4","E5","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF",
+			"F0","F1"
+		], "Latin_Extended-D",
+		[
+			"AE", // 9.0
+			"A7","B8","B9", // 11.0
+			"BA","BB","BC","BD","BE","BF","C2","C3","C4","C5","C6", // 12.0
+			"C7","C8","C9","CA","F5","F6", // 13.0
+			"C0","C1","D0","D1","D3","D5","D6","D7","D8","D9","F2","F3","F4", // 14.0
+		], uv8x0
+	],
+	["latin extended-e", "AB", [3,4,5,6], -4 , , "Latin_Extended-E",
+		[
+			"66","67", // 12.0
+			"68","69","6A","6B", // 13.0
+		], uv8x0
+	],
+	["latin extended-f", 107, [8,9,"A","B"], -5 , ["86","B1"], "Latin_Extended-F"],
+	["latin extended-g", "1DF", [0,1,2], -5 , ["1F","20","21","22","23","24"], "Latin_Extended-G"],
 	["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
 		"Latin_Extended_Additional",
 		[
@@ -860,38 +962,65 @@ let aBlocksSkip = [
 	'tifinagh',
 	'vai',
 	'cherokee',
+	'chakma',
 	'deseret',
 	'osage',
 	'unified canadian aboriginal syllabics',
 	'old italic',
+
 	'balinese',
 	'bengali',
 	'buginese',
 	'buhid',
+	'cham',
+	'common indic number forms',
 	'devanagari',
+	'dives akuru',
+	'dogra',
 	'gujarati',
 	'gurmukhi',
 	'hanunoo',
 	'javanese',
+	'kaithi',
+	'kawi',
 	'kannada',
 	'khmer',
 	'khmer symbols',
+	'khojki',
+	'khudawadi',
 	'lao',
+	'lepcha',
+	'limbu',
+	'mahajani',
 	'malayalam',
+	'meetei mayek',
 	'modi',
+	'multani',
 	'myanmar',
+	'myanmar extended-a',
+	'myanmar extended-b',
+	'nag mundari',
 	'new tai lue',
+	'newa',
 	'oriya',
 	'phags-pa',
+	'saurashtra',
 	'sinhala',
 	'sundanese',
+	'sundanese supplement',
+	'syloti nagri',
 	'tagalog',
 	'tagbanwa',
 	'tai le',
+	'tai tham',
+	'tai viet',
+	'takri',
 	'tamil',
 	'telugu',
 	'thai',
 	'tibetan',
+	'tirhuta',
+
 	'cyrillic supplement',
 	'bopomofo',
 	'bopomofo extended',
@@ -910,6 +1039,7 @@ let aBlocksSkip = [
 	'kanbun',
 	'katakana',
 	'katakana phonetic extensions',
+	'lisu',
 	'vertical forms',
 	'yi radicals',
 	'yi syllables',
@@ -945,6 +1075,11 @@ let aBlocksSkip = [
 	"latin-1 supplement",
 	"latin extended-a",
 	"latin extended-b",
+	"latin extended-c",
+	"latin extended-d",
+	"latin extended-e",
+	"latin extended-f",
+	"latin extended-g",
 	"latin extended additional",
 	"ipa extensions",
 	"phonetic extensions",
@@ -1512,7 +1647,7 @@ function generate() {
 		}
 		if (aBlocksSkip.length > 0) {
 			console.log(everyCode.length, everyCode)
-			console.log("['"+ everyCode.join("','") +"']")
+			//console.log("['"+ everyCode.join("','") +"']")
 		}
 		// return
 		return resolve()
@@ -1783,7 +1918,8 @@ function test(testDepth) {
 	let tofuFP = mini(fpTofuHashes.join())
 		+ " <span class='btn12 btnc' onClick='logConsole(`fptofu`)'>[summary]</span>"
 		+ " <span class='btn12 btnc' onClick='logConsole(`fpTofuData`)'>["+ countTofu +"]</span> "
-		+ Math.round((countTofu/countTested) * 100) + "%"
+		+ ((countTofu/countTested) * 100).toFixed(2) + "%"
+
 	if (countTofu == 0) {
 		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
 	}
