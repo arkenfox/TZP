@@ -39,10 +39,6 @@ function mini(str) {
 	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
 }
 
-function mini_sha1(str) {
-	return sha1(mini(str))
-}
-
 function sha1(str1){
 	for (var blockstart=0,
 		i = 0,
@@ -384,7 +380,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		isVerMax = 116
-		if (isNaN(Date.parse("-000000-01-01T00:00:00.000Z"))) return 116 // 1769088
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering")) return 116 // 1839614
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
 		if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("reset")) return 113 // 1709347
@@ -512,12 +508,12 @@ function copyclip(element) {
 	}
 }
 
-function showDetail(name, useMini = true) {
+function showDetail(name) {
 	if (name == "all") {
 		console.log("ALL", sDetail)
 	} else {
 		let data = sDetail[name]
-		let hash = useMini ? mini(data) : mini_sha1(data.join())
+		let hash = mini(data)
 		// split+tidy name
 		name = name.replace(/\_/g, " ")
 		let n = name.indexOf(" "),
