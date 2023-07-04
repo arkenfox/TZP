@@ -176,7 +176,10 @@ let oEnlarge = {
 	"arabic supplement": [16],
 	"arrows": [14],
 	"bengali": [14],
+	"buginese": [16],
+	"buhid": [16],
 	"bopomofo extended": [14],
+	"cherokee supplement": [16],
 	"combining diacritical marks": [20],
 	"combining diacritical marks for symbmols": [20],
 	"combining diacritical marks supplement": [20],
@@ -193,7 +196,8 @@ let oEnlarge = {
 	"ipa extensions": [14],
 	"kanbun": [16],
 	"katakana phonetic extensions": [16],
-	"mongolian": [20],
+	"mahajani": [16],
+	"mongolian": [16],
 	"ogham": [18],
 	"old turkic": [14],
 	"optical character recognition": [18],
@@ -202,6 +206,7 @@ let oEnlarge = {
 	"phonetic extensions supplement": [16],
 	"runic": [14],
 	"sinhala": [16],
+	"sora sompeng": [16],
 	"spacing modifier letters": [18],
 	"superscripts and subscripts": [18],
 	"supplemental arrows-a": [14],
@@ -257,6 +262,7 @@ let aBlocks = [
 	],
 	["ethiopic supplement", "13", [8,9], -6, , "Ethiopic_Supplement"],
 	//["medefaidrin", "16E", [4,5,6,7,8,9], -5, , "Medefaidrin_(Unicode_block)"], // noone supports this, reduce overhead/perf
+	["mende_kikakui", "1E8", [0,1,2,3,4,5,6,7,8,6,"A","B","C","D"], -9, ["C5","C6"], "Mende_Kikakui_(Unicode_block)"],
 	["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], "NKo_(Unicode_block)",
 		[
 			"FD","FE","FF", // 11.0
@@ -281,6 +287,7 @@ let aBlocks = [
 			"F5","F8","F9","FA","FB","FC","FD", // 8.0
 		], uv3x0
 	],
+	["cherokee supplement", "AB", [7,8,9,"A","B"], , , "Cherokee_Supplement"],
 	["deseret", "104", [0,1,2,3,4], , , "Deseret_(Unicode_block)"],
 	["osage", "104", ["B","C","D","E","F"], -4, ["D4","D5","D6","D7"], "Osage_(Unicode_block)"],
 	["unified canadian aboriginal syllabics", 1,
@@ -370,8 +377,15 @@ let aBlocks = [
 			"76", // 11.0
 		], uv4x0
 	],
+	["hanifi rohingya", "10D", [0,1,2,3], -6, ["28","29","2A","2B","2C","2D","2E","2F"], "Hanifi_Rohingya__(Unicode_block)"],
 	["hanunoo", 17, [2,3], -9, , "Hanunoo_(Unicode_block)"],
 	["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"], "Javanese_(Unicode_block)"],
+	["kaithi", 110, [8,9,"A","B","C"], -2, ["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC"], "Kaithi_(Unicode_block)",
+		[
+			"CD", // 11.0
+			"C2", // 14.0
+		], uv5x2
+	],
 	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -12,
 		["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
 		"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
@@ -384,13 +398,8 @@ let aBlocks = [
 			"F3", // 15.0
 		], uv5x0
 	],
-	["kaithi", 110, [8,9,"A","B","C"], -2, ["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC"], "Kaithi_(Unicode_block)",
-		[
-			"CD", // 11.0
-			"C2", // 14.0
-		], uv5x2
-	],
 	["kawi", "11F", [0,1,2,3,4,5], -6, ["11","3B","3C","3D"], "Kawi_(Unicode_block)"],
+	["kayah li", "A9", [0,1,2], , , "Kayah_Li_(Unicode_block)"],
 	["khmer", 17, [8,9,"A","B","C","D","E","F"], -6,
 		["DE","DF","EA","EB","EC","ED","EE","EF"], "Khmer_(Unicode_block)", , ,
 		["B4","B5"] // ignore: KIV AQ, KIV AA
@@ -432,7 +441,8 @@ let aBlocks = [
 		["4E"] // ignore: letter dot reph
 	],
 	["meetei mayek", "AB", ["C","D","E","F"], -6, ["EE","EF"], "Meetei_Mayek_(Unicode_block)"],
-	["modi", 116, [0,1,2,3,4,5], -6, ["45","46","47","48","49","4A","4B","4C","4D","4E","4F"], "Modi_(Unicode_block)",],
+	["modi", 116, [0,1,2,3,4,5], -6, ["45","46","47","48","49","4A","4B","4C","4D","4E","4F"], "Modi_(Unicode_block)"],
+	["mro", "16A", [4,5,6], , ["5F","6A","6B","6C","6D"], "Mro_(Unicode_block)"],
 	["multani", 112, [8,9,"A"], -6, ["87","89","8E","9E"], "Multani_(Unicode_block)"],
 	["myanmar", 10, [0,1,2,3,4,5,6,7,8,9], 0, , "Myanmar_(Unicode_block)",
 		[
@@ -460,6 +470,7 @@ let aBlocks = [
 			"5A","60","61", // 13.0
 		], uv9x0
 	],
+	["ol chiki", "1C", [5,6,7], , , "Ol_Chiki_(Unicode_block)"],
 	["oriya", "0B", [0,1,2,3,4,5,6,7], -8,
 		["00","04","0D","0E","11","12","29","31","34","3A","3B","45","46","49","4A","4E","4F",
 		"50","51","52","53","54","58","59","5A","5B","5E","64","65"],
@@ -469,6 +480,7 @@ let aBlocks = [
 			"55", // 13.0
 		], uv5x1
 	],
+	["pau cin hau", "11A", ["C","D","E","F"], -7, , "Pau_Cin_Hau_(Unicode_block)"],
 	["phags-pa", "A8", [4,5,6,7], -8, , "Phags-pa_(Unicode_block)"],
 	["saurashtra", "A8", [8,9,"A","B","C","D"], -6, ["C6","C7","C8","C9","CA","CB","CC","CD"], "Saurashtra_(Unicode_block)",
 		[
@@ -484,6 +496,7 @@ let aBlocks = [
 			"81", // 13.0
 		], uv3x0
 	],
+	["sora sompeng", 110, ["D","E","F"], -6, ["E9","EA","EB","EC","ED","EE","EF"], "Sora_Sompeng_(Unicode_block)"],
 	["sundanese", "1B", [8,9,"A","B"], , ,
 		"Sundanese_(Unicode_block)",
 		[
@@ -552,6 +565,8 @@ let aBlocks = [
 		["0C"] // ignore: mark delimiter tsheg bstar
 	],
 	["tirhuta", 114, [8,9,"A","B","C","D"], -6, ["C8","C9","CA","CB","CC","CD","CE","CF"], "Tirhuta_(Unicode_block)"],
+	["warang citi", 118, ["A","B","C","D","E","F"], , ["F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], "Warang_Citi_(Unicode_block)"],
+
 
 	// CYRILLIC
 	["cyrillic"],
@@ -957,11 +972,13 @@ let aBlocksSkip = [
 	'bamum',
 	'bassa vah',
 	'ethiopic',
+	'mende kikakui',
 	'nko',
 	'osmanya',
 	'tifinagh',
 	'vai',
 	'cherokee',
+	'cherokee supplement',
 	'chakma',
 	'deseret',
 	'osage',
@@ -979,11 +996,13 @@ let aBlocksSkip = [
 	'dogra',
 	'gujarati',
 	'gurmukhi',
+	'hanifi rohingya',
 	'hanunoo',
 	'javanese',
 	'kaithi',
-	'kawi',
 	'kannada',
+	'kawi',
+	'kayah li',
 	'khmer',
 	'khmer symbols',
 	'khojki',
@@ -995,6 +1014,7 @@ let aBlocksSkip = [
 	'malayalam',
 	'meetei mayek',
 	'modi',
+	'mro',
 	'multani',
 	'myanmar',
 	'myanmar extended-a',
@@ -1002,10 +1022,13 @@ let aBlocksSkip = [
 	'nag mundari',
 	'new tai lue',
 	'newa',
+	'ol chiki',
 	'oriya',
+	'pau cin hau',
 	'phags-pa',
 	'saurashtra',
 	'sinhala',
+	'sora sompeng',
 	'sundanese',
 	'sundanese supplement',
 	'syloti nagri',
@@ -1020,6 +1043,7 @@ let aBlocksSkip = [
 	'thai',
 	'tibetan',
 	'tirhuta',
+	'warang citi',
 
 	'cyrillic supplement',
 	'bopomofo',
