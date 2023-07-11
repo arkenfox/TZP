@@ -386,7 +386,7 @@ const get_isVer = () => new Promise(resolve => {
 		}
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 116) {isVerExtra = "+"}
+		} else if (verNo == 117) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -394,6 +394,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering")) return 116 // 1839614
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
 			if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
