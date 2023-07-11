@@ -897,6 +897,9 @@ const get_formats = () => new Promise(resolve => {
 })
 
 const get_system_fonts = (os = isOS) => new Promise(resolve => {
+	// ToDo: expand or reduce: e.g
+		// -moz-desktop seems deprecated
+		// FF117 1838222 '-moz-message-bar'
 	const METRIC = "system_fonts"
 	let aList = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
 		'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
@@ -920,10 +923,9 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		if (isSmart && isTB && isVer > 114) {
 			// this doesn't officially land in stable until TB13
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
-			if (os == "windows") {notation = hash == "c89fb033" ? tb_green : tb_red
-			} else if (os == "mac") { notation = sbx +" awaiting hash from pierov]"+sc //hash == "" ? tb_green : tb_red
-			} else if (os == "linux") {notation = sbx +" awaiting data from pierov]"+sc // hash == "" ? tb_green : tb_red
-			} else if (os == "android") {notation = sbx +" awaiting data from pierov]"+sc // hash == "" ? tb_green : tb_red
+			if (os == "windows" || os == "android") {notation = hash == "c89fb033" ? tb_green : tb_red
+			} else if (os == "mac") { notation = sbx +" awaiting TBv13 hash]"+sc //hash == "" ? tb_green : tb_red
+			} else if (os == "linux") {notation = sbx +" awaiting TBv13 hash]"+sc // hash == "" ? tb_green : tb_red
 			}
 		}
 		addData(12, METRIC, newobj, hash)
