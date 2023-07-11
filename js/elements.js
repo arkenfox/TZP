@@ -3,6 +3,9 @@
 const get_element_keys = () => new Promise(resolve => {
 	const METRIC = "htmlelement_keys"
 	const id = "html-element-version"
+	let check = (isSmart && isTB && isVer > 114)
+	let notation = check ? tb_red : ""
+
 	function cleanup() {
 		try {document.getElementById(id).remove()} catch(e) {}
 	}
@@ -26,12 +29,19 @@ const get_element_keys = () => new Promise(resolve => {
 			addData(15, METRIC, zLIE)
 		} else {
 			addData(15, METRIC, keys, hash)
+			if (check) {
+				if (isOS === "android") {
+					notation = sbx +" awaiting TBv13 hash]"+sc
+				} else {
+					if (hash === "463107cf") {notation = tb_green} // 273
+				}
+			}
 		}
-		log_display(15, METRIC, hash + addButton(15, METRIC, keys.length))
+		log_display(15, METRIC, hash + addButton(15, METRIC, keys.length) + notation)
 		return resolve()
 	} catch (e) {
 		cleanup()
-		log_display(15, METRIC, log_error(SECT15, METRIC, e))
+		log_display(15, METRIC, log_error(SECT15, METRIC, e) + notation)
 		return resolve([METRIC, zErr])
 	}
 })
