@@ -392,6 +392,9 @@ const get_window_props = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	const METRIC = "window_properties"
+	let check = (isSmart && isTB && isVer > 114)
+	let notation = check ? tb_red : ""
+
 	try {
 		if (runSE) {foo++}
 		// create & append
@@ -456,6 +459,23 @@ const get_window_props = () => new Promise(resolve => {
 			}
 		}
 		display += addButton(18, METRIC, aProps.length) + tamperBtn
+		// health
+		if (check && fpvalue !== zLIE) {
+			let aSorted = []
+			aProps.forEach(function(item) {aSorted.push(item)})
+			let hash = mini(aSorted.sort())
+			if (isMullvad) {
+				notation = sbx +" TBv13 "+ hash +"]"+sc
+			} else {
+				if (isOS == "android") {
+					notation = sbx +" TBv13 "+ hash +"]"+sc
+				} else {
+					if (hash == "226bc5ca" || hash == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
+				}
+			}
+		}
+		display += notation
+
 		if (fpvalue !== zLIE) {
 			addData(18, METRIC, aProps, fpvalue)
 			if (isOS !== "android" && isOS !== undefined) {
@@ -472,11 +492,12 @@ const get_window_props = () => new Promise(resolve => {
 	} catch(e) {
 		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
 		let eMsg = log_error(SECT18, METRIC, e)
-		let notation = (isSmart && isTB) ? rfp_red : ""
-		log_display(18, METRIC, eMsg)
-		log_display(18, "perf_navigation", eMsg + notation) // ToDo: 1448046: isSmartMin=115 ? remove this metric
+		let note = (isSmart && isTB) ? rfp_red : ""
+		log_display(18, "perf_navigation", eMsg + note) // ToDo: 1448046: isSmartMin=115 ? remove this metric
 		log_display(18, "wasm", eMsg + (isSmart && isTB ? tb_slider_red : ""))
-		log_display(18, "webgpu", eMsg + notation)
+		log_display(18, "webgpu", eMsg + note)
+
+		log_display(18, METRIC, eMsg + notation)
 		return resolve([METRIC, zErr])
 	}
 })
