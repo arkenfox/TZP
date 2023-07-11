@@ -1387,18 +1387,19 @@ function outputFD() {
 	// os arch: FF110+ pref removed: error means 32bit
 	METRIC = "os_architecture"
 	let notation = ""
+	let check = (isTB && isSmart && isVer < 110) // TB health check
 	if (isArch === true) {
-		notation = (isTB && isSmart) ? tb_red : "" // TB ESR115 health fail
+		notation = check ? tb_red : ""
 		log_display(3, METRIC, "64bit" + notation)
 		addData(3, METRIC, 64)
 	} else {
 		let isMsg = isArch === "RangeError: invalid array length"
 		if (isVer > 109 && isMsg) {
-			if (isTB && isSmart) {notation = tb_red}
+			if (check) {notation = tb_red}
 			log_display(3, METRIC, "32bit" + notation)
 			addData(3, METRIC, 32)
 		} else {
-			if (isTB && isSmart) {notation = (isMsg ? tb_green : tb_red)}
+			if (check) {notation = (isMsg ? tb_green : tb_red)}
 			log_display(3, METRIC, isArch + notation)
 			addData(3, METRIC, zErr)
 		}
