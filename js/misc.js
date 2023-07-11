@@ -146,6 +146,7 @@ const get_math_trig = (isMathLies) => new Promise(resolve => {
 
 function get_navigator() {
 	const METRIC = "navigator_keys"
+	let notation = ""
 	try {
 		if (runSE) {foo++}
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
@@ -188,11 +189,11 @@ function get_navigator() {
 			if ((lieCount + moveCount) > 0) {
 				// ToDo: add to FP methods
 				isLies = true
-				let notation = []
-				if (lieCount > 0) {notation.push(lieCount +" lie"+ (lieCount > 1 ? "s" : ""))}
-				if (moveCount > 0) {notation.push(moveCount + " tampered")}
+				let tmp = []
+				if (lieCount > 0) {tmp.push(lieCount +" lie"+ (lieCount > 1 ? "s" : ""))}
+				if (moveCount > 0) {tmp.push(moveCount + " tampered")}
 				addDetail(METRIC +"_tampered", oKeys)
-				tamperBtn = addButton(18, METRIC +"_tampered", notation.join("/"))
+				tamperBtn = addButton(18, METRIC +"_tampered", tmp.join("/"))
 			}
 		}
 
@@ -200,12 +201,31 @@ function get_navigator() {
 		keys = keys.filter(x => !["constructor"].includes(x))
 		let hash = mini(keys)
 		let display = hash
+		// isLies imples isSmart
 		if (isLies) {
 			addDetail(METRIC, keys) // don't sort
 			display = colorFn(display)
 			log_known(SECT18, METRIC)
 		}
-		log_display(18, METRIC, display + addButton(18, METRIC, keys.length) + tamperBtn)
+		// health: only do TB/MB as ESR is stable
+			// otherwise it's way too much work to track OSes/releases and beta/early etc
+		if (isSmart && isTB && isVer > 114) {
+			notation = tb_red
+			if (!isLies) {
+				if (isMullvad) {
+					// MB
+					if (hash === "1bfbd5d3") {notation = tb_green} // 37: mediaDevices, mediaSession
+				} else {
+					// TB
+						if (isOS == "android") {
+							if (hash === "3b7f79c3") {notation = tb_green} // 37: share, canShare (dom.webshare.enabled)
+						} else {
+							if (hash === "1054f985") {notation = tb_green} // 35
+						}
+					}
+			}
+		}
+		log_display(18, METRIC, display + addButton(18, METRIC, keys.length) + tamperBtn + notation)
 
 		if (isLies) {
 			return [METRIC, zLIE]
@@ -214,7 +234,8 @@ function get_navigator() {
 			return
 		}
 	} catch(e) {
-		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		if (isSmart && isTB) {notation = tb_red}
+		log_display(18, METRIC, log_error(SECT18, METRIC, e) + notation)
 		return [METRIC, zErr]
 	}
 }
