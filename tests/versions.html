@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 67, maxVer = 116, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 68, maxVer = 117, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -269,6 +269,11 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 117: 1842467
+		let t117 = performance.now()
+		let ver117 = (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch"))
+		rec(117, 117, "1842467", ver117, performance.now()-t117)
 
 
 		// 116: 1839614
