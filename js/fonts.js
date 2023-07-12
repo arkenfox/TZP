@@ -44,11 +44,6 @@ let fntMaster = {
 			// 7
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
 			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
-			// variants: not whitelisted but font-family
-			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
-			'Segoe UI Semilight', // 8
-			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
-			'Malgun Gothic Semilight', // 10
 			// aliases
 			'宋体','微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック',
 			// always
@@ -56,6 +51,14 @@ let fntMaster = {
 			/* ignore: expected + dupe sizes
 				'Helvetica','Small Fonts','Courier','MS Serif','Roman','Times'
 			//*/
+
+			/* variants are not stable on first run: either we get namesake detected + sizes or not detected
+				instead we will do these in a separate function where we apply font-weights
+			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
+			'Segoe UI Semilight', // 8
+			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
+			'Malgun Gothic Semilight', // 10
+			*/
 		],
 	},
 	// TB unexpected system: from kBaseFonts
@@ -85,26 +88,21 @@ let fntMaster = {
 			// ?
 			'AlternateGothic2 BT',
 			// 7
-			'Arial','Arial Black','Arial Narrow','Calibri','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia',
-			'Corbel','Courier New','Ebrima','Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic',
-			'MS PGothic','MS UI Gothic','MV Boli','Malgun Gothic','Marlett','Microsoft Himalaya','Microsoft JhengHei',
-			'Microsoft New Tai Lue','Microsoft PhagsPa','Microsoft Sans Serif','Microsoft Tai Le','Microsoft YaHei',
-			'Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB','Mongolian Baiti','NSimSun','PMingLiU-ExtB',
-			'Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Light','Segoe UI Semibold','Segoe UI Symbol',
+			'Arial','Calibri','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
+			'Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','MS PGothic','MS UI Gothic','MV Boli',
+			'Malgun Gothic','Marlett','Microsoft Himalaya','Microsoft JhengHei','Microsoft New Tai Lue','Microsoft PhagsPa',
+			'Microsoft Sans Serif','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
+			'Mongolian Baiti','NSimSun','PMingLiU-ExtB','Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Symbol',
 			'SimSun','SimSun-ExtB','Sylfaen','Symbol','Tahoma','Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
 			// 8
-			'Calibri Light', // = Calibri but optional on win7
-			'Calibri Light Italic','Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text','Segoe UI Semilight',
+			'Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
 			// 8.1
-			'Javanese Text','Leelawadee UI','Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
-			'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Segoe UI Emoji',
-			'Sitka Banner','Sitka Display','Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic','Yu Gothic Light',
+			'Javanese Text','Leelawadee UI','Segoe UI Emoji','Sitka Banner','Sitka Display',
+			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
-			'Bahnschrift','Candara Light','Corbel Light','HoloLens MDL2 Assets','Malgun Gothic Semilight','Segoe MDL2 Assets',
-			'Segoe UI Historic','Yu Gothic Medium','Yu Gothic UI','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
+			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// always
 			'MS Shell Dlg','MS Shell Dlg \\32', // aliases can map differently between window versions
-			//'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight', // not detected: variants?
 			/* ignore: expected + dupe sizes
 				'Cambria', // Cambria Math
 				'Courier', // Courier New
@@ -112,6 +110,20 @@ let fntMaster = {
 				'MS Sans Serif', // Microsoft Sans Serif
 				'MS Serif','Roman','Times', // TNR
 			//*/
+
+			/* variants are not stable on first run: either we get namesake detected + sizes or not detected
+				instead we will do these in a separate function where we apply font-weights
+			// 7
+			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold',
+			// 8
+			'Calibri Light','Calibri Light Italic','Segoe UI Semilight',
+			// 8.1
+			'Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
+			'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Yu Gothic Light',
+			// 10
+			'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight','Candara Light','Corbel Light',
+			'Malgun Gothic Semilight','Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
+			*/
 		],
 	},
 	'system': {
