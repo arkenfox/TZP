@@ -29,7 +29,7 @@ function get_colors() {
 			'-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect',
 			'-moz-mac-secondaryhighlight','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
 			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // ToDo: isSmartMin=115 remove these two dropped in FF103
-			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
+			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext', // -moz-menubartext dropped in FF117
 			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		],
 	}
@@ -76,7 +76,8 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = isVer < 103 ? "55cb9603" : "8b81edcf"
+					let check = "658c23ce" // FF117+
+					if (isVer < 103) {check = "55cb9603"} else if (isVer < 117) {check = "8b81edcf"}
 					notation = hash == check ? rfp_green : rfp_red // 1734115
 				}
 				log_display(14, METRIC, hash + btn + notation)
@@ -259,15 +260,17 @@ const get_mm_css = () => new Promise(resolve => {
 
 	let res = []
 	get_mm("prefers-reduced-motion","PRM","no-preference") // FF63+
+	get_mm("prefers-contrast","PC") // FF65+ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
 	get_mm("prefers-color-scheme","PCS","light") // FF67+: 1494034
 	get_mm("forced-colors","FC") // FF89+: 1659511
-	get_mm("prefers-contrast","PC") //1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
-	get_mm("prefers-reduced-transparency","PRT") // 1736914: layout.css.prefers-reduced-transparency.enabled
-	get_mm("inverted-colors","IC", "none", 500) // default disabled: FF114+: 1794628: layout.css.inverted-colors.enabled
+
+	get_mm("prefers-reduced-transparency","PRT") // FF95+: 1736914: layout.css.prefers-reduced-transparency.enabled
+		// default disabled: 1822176
+
+	get_mm("inverted-colors","IC", "none", 500) // FF114+: 1794628: layout.css.inverted-colors.enabled (default disabled)
+		// ToDo: inverted-colors watch for pref flip minVer
+
 	get_mm("prefers-reduced-data","PRD")
-
-	// ToDo: double-check inverted-colors is RFP protected, watch for pref flip minVer
-
 	return resolve(res)
 })
 
