@@ -52,8 +52,7 @@ let fntMaster = {
 				'Helvetica','Small Fonts','Courier','MS Serif','Roman','Times'
 			//*/
 
-			/* variants are not stable on first run: either we get namesake detected + sizes or not detected
-				instead we will do these in a separate function where we apply font-weights
+			/* variants
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
 			'Segoe UI Semilight', // 8
 			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
@@ -111,8 +110,7 @@ let fntMaster = {
 				'MS Serif','Roman','Times', // TNR
 			//*/
 
-			/* variants are not stable on first run: either we get namesake detected + sizes or not detected
-				instead we will do these in a separate function where we apply font-weights
+			/* variants
 			// 7
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold',
 			// 8
@@ -188,29 +186,24 @@ let fntMaster = {
 		],
 		'mac': ['American Typewriter Condensed','American Typewriter Condensed Light','American Typewriter Light','American Typewriter Semibold','Apple Braille Outline 6 Dot','Apple Braille Outline 8 Dot','Apple Braille Pinpoint 6 Dot','Apple Braille Pinpoint 8 Dot','Apple LiGothic Medium','Apple LiSung Light','Apple SD Gothic Neo Heavy','Apple SD Gothic Neo Light','Apple SD Gothic Neo Medium','Apple SD Gothic Neo SemiBold','Apple SD Gothic Neo UltraLight','Apple SD GothicNeo ExtraBold','Athelas','Avenir Book Oblique','Avenir Heavy Oblique','Avenir Light Oblique','Avenir Medium Oblique','Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold','Avenir Next Condensed Heavy','Avenir Next Condensed Medium','Avenir Next Condensed Ultra Light','Avenir Roman','Baoli SC','Baoli TC','Baskerville SemiBold','BiauKai','Bodoni 72 Book','Bodoni 72 Oldstyle Book','Bodoni 72 Smallcaps Book','Charcoal CY','Charter Roman','Copperplate Light','Damascus Light','Damascus Medium','Damascus Semi Bold','Futura Condensed ExtraBold','Futura Condensed Medium','Futura Medium','Geneva CY','Gill Sans Light','Gill Sans SemiBold','Gill Sans UltraBold','GungSeo','Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Heiti SC Light','Heiti SC Medium','Heiti TC Light','Heiti TC Medium','Helvetica CY Bold','Helvetica Light','Helvetica Neue Condensed Black','Helvetica Neue Condensed Bold','Helvetica Neue Light','Helvetica Neue Medium','Helvetica Neue UltraLight','Herculanum','Hiragino Kaku Gothic Pro W3','Hiragino Kaku Gothic Pro W6','Hiragino Kaku Gothic ProN','Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6','Hiragino Kaku Gothic Std W8','Hiragino Kaku Gothic StdN W8','Hiragino Maru Gothic Pro W4','Hiragino Mincho Pro W3','Hiragino Mincho Pro W6','Hiragino Sans CNS W3','Hiragino Sans CNS W6','Hoefler Text Black','ITF Devanagari Book','ITF Devanagari Demi','ITF Devanagari Light','ITF Devanagari Marathi Book','ITF Devanagari Marathi Demi','ITF Devanagari Marathi Light','ITF Devanagari Marathi Medium','ITF Devanagari Medium','Iowan Old Style Black','Iowan Old Style Bold','Iowan Old Style Italic','Iowan Old Style Roman','Iowan Old Style Titling','Kai','Kaiti SC','Kaiti SC Black','Kaiti TC','Kaiti TC Black','Klee Demibold','Klee Medium','Kohinoor Bangla Light','Kohinoor Bangla Medium','Kohinoor Bangla Semibold','Kohinoor Devanagari Light','Kohinoor Devanagari Medium','Kohinoor Devanagari Semibold','Kohinoor Gujarati Light','Kohinoor Gujarati Medium','Kohinoor Gujarati Semibold','Kohinoor Telugu Light','Kohinoor Telugu Medium','Kohinoor Telugu Semibold','Lantinghei SC Demibold','Lantinghei SC Extralight','Lantinghei SC Heavy','Lantinghei TC Demibold','Lantinghei TC Extralight','Lantinghei TC Heavy','LiHei Pro','LiSong Pro','Libian SC','Libian TC','LingWai SC Medium','LingWai TC Medium','Marion','Muna Black','Myriad Arabic','Myriad Arabic Black','Myriad Arabic Light','Myriad Arabic Semibold','Nanum Brush Script','Nanum Pen Script','NanumGothic','NanumGothic ExtraBold','NanumMyeongjo','NanumMyeongjo ExtraBold','New Peninim MT Bold Inclined','New Peninim MT Inclined','Optima ExtraBlack','Osaka','Osaka-Mono','PCMyungjo','Papyrus Condensed','Phosphate Inline','Phosphate Solid','PilGi','PingFang HK Light','PingFang HK Medium','PingFang HK Semibold','PingFang HK Ultralight','PingFang SC Light','PingFang SC Medium','PingFang SC Semibold','PingFang SC Ultralight','PingFang TC Light','PingFang TC Medium','PingFang TC Semibold','PingFang TC Ultralight','STFangsong','STHeiti','STIX Two Math','STIX Two Text','STKaiti','STXihei','Seravek','Seravek ExtraLight','Seravek Light','Seravek Medium','SignPainter-HouseScript Semibold','Skia Black','Skia Condensed','Skia Extended','Skia Light','Snell Roundhand Black','Songti SC Black','Songti SC Light','Songti TC Light','Sukhumvit Set Light','Sukhumvit Set Medium','Sukhumvit Set Semi Bold','Sukhumvit Set Text','Superclarendon','Superclarendon Black','Superclarendon Light','Thonburi Light','Times Roman','Toppan Bunkyu Gothic','Toppan Bunkyu Gothic Demibold','Toppan Bunkyu Gothic Regular','Toppan Bunkyu Midashi Gothic Extrabold','Toppan Bunkyu Midashi Mincho Extrabold','Toppan Bunkyu Mincho','Toppan Bunkyu Mincho Regular','Tsukushi A Round Gothic','Tsukushi A Round Gothic Bold','Tsukushi A Round Gothic Regular','Tsukushi B Round Gothic','Tsukushi B Round Gothic Bold','Tsukushi B Round Gothic Regular','Waseem Light','Wawati SC','Wawati TC','Weibei SC Bold','Weibei TC Bold','Xingkai SC Bold','Xingkai SC Light','Xingkai TC Bold','Xingkai TC Light','YuGothic Bold','YuGothic Medium','YuKyokasho Bold','YuKyokasho Medium','YuKyokasho Yoko Bold','YuKyokasho Yoko Medium','YuMincho +36p Kana Demibold','YuMincho +36p Kana Extrabold','YuMincho +36p Kana Medium','YuMincho Demibold','YuMincho Extrabold','YuMincho Medium','Yuanti SC','Yuanti SC Light','Yuanti TC','Yuanti TC Light','Yuppy SC','Yuppy TC',],
 		'windows': [
-			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','Arial Nova','Arial Nova Cond',
-			'Arial Nova Cond Light','Arial Nova Light','Arial Unicode MS','BIZ UDGothic','BIZ UDMincho','BIZ UDMincho Medium',
-			'BIZ UDPGothic','BIZ UDPMincho','BIZ UDPMincho Medium','Batang','BatangChe','Browallia New','BrowalliaUPC','Cordia New',
-			'DFKai-SB','CordiaUPC','DaunPenh','David','DengXian','DengXian Light','DilleniaUPC','DokChampa','Dotum','DotumChe',
-			'Estrangelo Edessa','EucrosiaUPC','Euphemia','FangSong','FrankRuehl','FreesiaUPC','Gautami','Georgia Pro','Georgia Pro Black',
-			'Georgia Pro Cond','Georgia Pro Cond Black','Georgia Pro Cond Light','Georgia Pro Cond Semibold','Georgia Pro Light',
-			'Georgia Pro Semibold','Gill Sans Nova','Gill Sans Nova Cond','Gill Sans Nova Cond Lt','Gill Sans Nova Cond Ultra Bold',
-			'Gill Sans Nova Cond XBd','Gill Sans Nova Light','Gill Sans Nova Ultra Bold','Gisha','Gulim','GulimChe','Gungsuh',
-			'GungsuhChe','Ink Free','IrisUPC','Iskoola Pota','JasmineUPC','KaiTi','Kalinga','Kartika','Khmer UI','KodchiangUPC',
-			'Kokila','Lao UI','Latha','Leelawadee','Levenim MT','LilyUPC','MS Mincho','MS PMincho','Mangal','Meiryo','Meiryo UI',
-			'Microsoft Uighur','MingLiU','MingLiU_HKSCS','Miriam','Miriam Fixed','MoolBoran','Narkisim','Neue Haas Grotesk Text Pro',
-			'Neue Haas Grotesk Text Pro Medium','Nyala','PMingLiU','Plantagenet Cherokee','Raavi','Rockwell Nova','Rockwell Nova Cond',
-			'Rockwell Nova Cond Light','Rockwell Nova Extra Bold','Rockwell Nova Light Italic','Rockwell Nova Rockwell','Rod',
-			'Sakkal Majalla','Sanskrit Text','Segoe Pseudo','Shonar Bangla','Shruti','SimHei','Simplified Arabic',
-			'Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
-			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting',
-			'Utsaah','Vani','Verdana Pro','Verdana Pro Black','Verdana Pro Cond','Verdana Pro Cond Black','Verdana Pro Cond Light',
-			'Verdana Pro Cond SemiBold','Verdana Pro Light','Verdana Pro SemiBold','Vijaya','Vrinda','Yu Mincho','Yu Mincho Demibold',
-			'Yu Mincho Light',
+			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','Arial Nova',
+			'BIZ UDGothic','BIZ UDMincho Medium','BIZ UDPGothic','BIZ UDPMincho Medium','Batang','BatangChe','Browallia New',
+			'BrowalliaUPC','Cordia New','DFKai-SB','CordiaUPC','DaunPenh','David','DengXian','DilleniaUPC','DokChampa','Dotum',
+			'DotumChe','Estrangelo Edessa','EucrosiaUPC','Euphemia','FangSong','FrankRuehl','FreesiaUPC','Gautami','Georgia Pro',
+			'Gill Sans Nova','Gisha','Gulim','GulimChe','Gungsuh','GungsuhChe','Ink Free','IrisUPC','Iskoola Pota','JasmineUPC',
+			'KaiTi','Kalinga','Kartika','Khmer UI','KodchiangUPC','Kokila','Lao UI','Latha','Leelawadee','Levenim MT','LilyUPC',
+			'MS Mincho','MS PMincho','Mangal','Meiryo','Meiryo UI','Microsoft Uighur','MingLiU','MingLiU_HKSCS','Miriam',
+			'Miriam Fixed','MoolBoran','Narkisim','Neue Haas Grotesk Text Pro','Nyala','PMingLiU','Plantagenet Cherokee','Raavi',
+			'Rockwell Nova','Rod','Sakkal Majalla','Sanskrit Text','Segoe Fluent Icons','Segoe UI Variable Display','Shonar Bangla',
+			'Shruti','SimHei','Simplified Arabic','Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho N-B',
+			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R',
+			'Urdu Typesetting','Utsaah','Vani','Verdana Pro',	'Vijaya','Vrinda','Yu Mincho',
 			// kBase but broken: see 1720408
 			'Franklin Gothic Medium',
-			// why not
-			'MS Reference Specialty','MS Outlook',
+			// MS products
+			'Arial Unicode MS','MS Reference Specialty','MS Outlook',
+			// MS downloads
+			'Cascadia Code','Cascadia Mono', // 11
 			// aliases: ignored by kBase
 			'宋体', // SimSun
 			'細明體', // MingLiU
@@ -223,6 +216,23 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐゴシック', // MS PGothic
 			'ＭＳ Ｐ明朝', // MS PMincho
+			/* ignore
+				'Segoe UI Variable Small','Segoe UI Variable Text', // samel size as Display and expected if Display exists
+			*/
+
+			/* variants
+				'Arial Nova Cond','Arial Nova Cond Light','Arial Nova Light',
+				'DengXian Light',
+				'Georgia Pro Black','Georgia Pro Cond','Georgia Pro Cond Black','Georgia Pro Cond Light',
+				'Georgia Pro Cond Semibold','Georgia Pro Light','Georgia Pro Semibold',
+				'Gill Sans Nova Cond','Gill Sans Nova Cond Lt','Gill Sans Nova Cond Ultra Bold','Gill Sans Nova Cond XBd',
+				'Gill Sans Nova Light','Gill Sans Nova Ultra Bold',
+				'Rockwell Nova Cond','Rockwell Nova Cond Light','Rockwell Nova Extra Bold',
+				'Verdana Pro Black',
+				'Verdana Pro Cond','Verdana Pro Cond Black','Verdana Pro Cond Light','Verdana Pro Cond SemiBold',
+				'Verdana Pro Light','Verdana Pro SemiBold',
+				'Yu Mincho Demibold','Yu Mincho Light',
+			*/
 		],
 	},
 }
@@ -251,7 +261,9 @@ function set_fntList(os = isOS) {
 		let baseSize = ['monospace','sans-serif','serif']
 		if ("windows" === os) {
 			// Mō = 124 +"á" = 125 +"Ω" = 127 (win7)
-			fntString = isTB ? "?-"+ get_fntCodes("tofu") : "Mō"
+			// Mō - 141 +"á" = 142 +"Ω" = 144 | Mō - 141 +tofu = 154 | (win11: have 182/186 fonts
+			let tofu = get_fntCodes("tofu")
+			fntString = isTB ? "?-"+ tofu : "Mō" + tofu
 			isPlatformFont = "MS Shell Dlg \\32"
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
