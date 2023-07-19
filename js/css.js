@@ -46,7 +46,7 @@ function get_colors() {
 		// multiply before convert to HEX
 		a = ((a * 255) | 1 << 8).toString(16).slice(1)
 		hex = hex + a
-		return hex
+		return hex + " "+ rgb[1] +"-"+ rgb[2] +"-"+ rgb[3]
 	}
 
 	let notation = ""
@@ -76,8 +76,8 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "658c23ce" // FF117+
-					if (isVer < 103) {check = "55cb9603"} else if (isVer < 117) {check = "8b81edcf"}
+					let check = "6f787957" // FF117+
+					if (isVer < 103) {check = "c0df6598"} else if (isVer < 117) {check = "788e7d22"}
 					notation = hash == check ? rfp_green : rfp_red // 1734115
 				}
 				log_display(14, METRIC, hash + btn + notation)
