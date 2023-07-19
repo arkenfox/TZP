@@ -117,7 +117,7 @@ function get_colors() {
 		// multiply before convert to HEX
 		a = ((a * 255) | 1 << 8).toString(16).slice(1)
 		hex = hex + a
-		return hex
+		return hex + " "+ rgb[1] +"-"+ rgb[2] +"-"+ rgb[3]
 	}
 
 	try {
@@ -224,7 +224,10 @@ function display(type) {
 
 	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + consoleBtns +"<br><br>{")
 	for (const k of Object.keys(data)) {
-		results.push("  \""+ k +"\": <span style='background-color:#"+ k +"; border: 1px solid white'> &nbsp </span>")
+		let k1 = k.split(" ")[0]
+		let k2 = k.split(" ")[1]
+
+		results.push("  \""+ k1 +"\": <span style='background-color:#"+ k1 +"; border: 1px solid white'> &nbsp </span> "+ k2)
 		let resultsStr = ""
 		if (type == "all") {
 			for (const name of Object.keys(data[k])) {
