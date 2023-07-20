@@ -44,14 +44,10 @@ let fntMaster = {
 			// 7
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
 			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
-			// aliases
-			'Helv','Helvetica','Tms Rmn',
-			'宋体','微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック',
-			// always
-			'MS Shell Dlg','MS Shell Dlg \\32',
-			/* ignore: expected + dupe sizes
-				'Helvetica','Small Fonts','Courier','MS Serif','Roman','Times'
-			//*/
+			// os substutions
+			'Helv','Helvetica','Tms Rmn','宋体','微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','MS Shell Dlg','MS Shell Dlg \\32',
+			// possibly ignore: expected + dupe sizes
+			'Small Fonts','Courier','MS Serif','Roman','Times'
 
 			/* variants
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
@@ -90,7 +86,7 @@ let fntMaster = {
 			// ?
 			'AlternateGothic2 BT',
 			// 7
-			'Arial','Calibri','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
+			'Arial','Calibri','Cambria','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
 			'Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','MS PGothic','MS UI Gothic','MV Boli',
 			'Malgun Gothic','Marlett','Microsoft Himalaya','Microsoft JhengHei','Microsoft New Tai Lue','Microsoft PhagsPa',
 			'Microsoft Sans Serif','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
@@ -103,17 +99,13 @@ let fntMaster = {
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
-			// aliased
-			'Helv','Helvetica','Tms Rmn',
-			// always
-			'MS Shell Dlg','MS Shell Dlg \\32', // aliases can map differently between window versions
-			/* ignore: expected + dupe sizes
-				'Cambria', // Cambria Math
-				'Courier', // Courier New
-				'Helvetica','Small Fonts', // Arial (which we catch if not in fonts, in bases)
-				'MS Sans Serif', // Microsoft Sans Serif
-				'MS Serif','Roman','Times', // TNR
-			//*/
+			// os substutions: can vary per OS/language
+			'Helv','Helvetica','MS Shell Dlg','MS Shell Dlg \\32','Tms Rmn',
+			// possibly ignore: expected + dupe sizes
+			'Courier', // Courier New
+			'Small Fonts', // Arial
+			'MS Sans Serif', // Microsoft Sans Serif
+			'MS Serif','Roman','Times', // TNR
 
 			/* variants
 			// 7
@@ -221,9 +213,9 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐゴシック', // MS PGothic
 			'ＭＳ Ｐ明朝', // MS PMincho
-			/* ignore
+			//* possibly ignore
 				'Segoe UI Variable Small','Segoe UI Variable Text', // same size as Display and expected if Display exists
-			*/
+			//*/
 
 			/* variants
 				'Arial Nova Cond','Arial Nova Cond Light','Arial Nova Light',
