@@ -45,6 +45,7 @@ let fntMaster = {
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
 			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
 			// aliases
+			'Helv','Helvetica','Tms Rmn',
 			'宋体','微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック',
 			// always
 			'MS Shell Dlg','MS Shell Dlg \\32',
@@ -64,9 +65,11 @@ let fntMaster = {
 	'blocklist': {
 		'android': [],
 		'linux': [
+			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41799
+				// aliased
+			'Arial','Courier New','Times New Roman',
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41644
-			'Arial','Courier','Courier New',
-			'Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
+			'Courier','Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX', // fedora
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
@@ -100,6 +103,8 @@ let fntMaster = {
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
+			// aliased
+			'Helv','Helvetica','Tms Rmn',
 			// always
 			'MS Shell Dlg','MS Shell Dlg \\32', // aliases can map differently between window versions
 			/* ignore: expected + dupe sizes
@@ -217,7 +222,7 @@ let fntMaster = {
 			'ＭＳ Ｐゴシック', // MS PGothic
 			'ＭＳ Ｐ明朝', // MS PMincho
 			/* ignore
-				'Segoe UI Variable Small','Segoe UI Variable Text', // samel size as Display and expected if Display exists
+				'Segoe UI Variable Small','Segoe UI Variable Text', // same size as Display and expected if Display exists
 			*/
 
 			/* variants
@@ -263,7 +268,7 @@ function set_fntList(os = isOS) {
 			// Mō = 124 +"á" = 125 +"Ω" = 127 (win7)
 			// Mō - 141 +"á" = 142 +"Ω" = 144 | Mō - 141 +tofu = 154 | (win11: have 182/186 fonts
 			let tofu = get_fntCodes("tofu")
-			fntString = isTB ? "?-"+ tofu : "Mō" + tofu
+			fntString = isTB ? "?-"+ tofu : "Mō"+ tofu
 			isPlatformFont = "MS Shell Dlg \\32"
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
@@ -1109,9 +1114,18 @@ const get_unicode = () => new Promise(resolve => {
 		"hangingBaseline": {},
 		"ideographicBaseline": {},
 	}
-	let aAll = [ // false = only get the first glyph measurement
+	let aAll = [
 		"width","actualBoundingBoxAscent","actualBoundingBoxDescent",
 		"actualBoundingBoxLeft","actualBoundingBoxRight",
+		/* test:  false = only get the first glyph measurement
+		"alphabeticBaseline",
+		"emHeightAscent",
+		"emHeightDescent",
+		"fontBoundingBoxAscent",
+		"fontBoundingBoxDescent",
+		"hangingBaseline",
+		"ideographicBaseline",
+		//*/
 	]
 	for (const k of Object.keys(oTM)) {
 		oTM[k]["data"] = []
