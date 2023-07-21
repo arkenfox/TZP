@@ -260,7 +260,8 @@ const get_mm_css = () => new Promise(resolve => {
 
 	let res = []
 	get_mm("prefers-reduced-motion","PRM","no-preference") // FF63+
-	get_mm("prefers-contrast","PC") // FF65+ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
+	get_mm("prefers-contrast","PC", "no-preference") // FF65+ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
+		// ^ 1656363^ enabled by default in FF101
 	get_mm("prefers-color-scheme","PCS","light") // FF67+: 1494034
 	get_mm("forced-colors","FC") // FF89+: 1659511
 
