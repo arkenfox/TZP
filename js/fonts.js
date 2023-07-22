@@ -44,10 +44,17 @@ let fntMaster = {
 			// 7
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
 			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
-			// os substutions
-			'Helv','Helvetica','Tms Rmn','宋体','微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','MS Shell Dlg','MS Shell Dlg \\32',
-			// possibly ignore: expected + dupe sizes
+			// FontSubstitutes
+			'Helv','Helvetica','Tms Rmn','MS Shell Dlg','MS Shell Dlg \\32',
+			// aliases
+			'宋体', // SimSun
+			'微软雅黑', // Microsoft YaHei
+			'ＭＳ ゴシック', // MS Gothic
+			'ＭＳ Ｐゴシック', // MS PGothic
+
+			/* ignore: expected + dupe sizes + they seem to be aliases
 			'Small Fonts','Courier','MS Serif','Roman','Times'
+			*/
 
 			/* variants
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
@@ -99,13 +106,16 @@ let fntMaster = {
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
-			// os substutions: can vary per OS/language
+			// FontSubstitutes
+				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
 			'Helv','Helvetica','MS Shell Dlg','MS Shell Dlg \\32','Tms Rmn',
-			// possibly ignore: expected + dupe sizes
+
+			/* ignore: expected + dupe sizes + they seem to be aliases
 			'Courier', // Courier New
 			'Small Fonts', // Arial
 			'MS Sans Serif', // Microsoft Sans Serif
 			'MS Serif','Roman','Times', // TNR
+			*/
 
 			/* variants
 			// 7
@@ -191,31 +201,30 @@ let fntMaster = {
 			'KaiTi','Kalinga','Kartika','Khmer UI','KodchiangUPC','Kokila','Lao UI','Latha','Leelawadee','Levenim MT','LilyUPC',
 			'MS Mincho','MS PMincho','Mangal','Meiryo','Meiryo UI','Microsoft Uighur','MingLiU','MingLiU_HKSCS','Miriam',
 			'Miriam Fixed','MoolBoran','Narkisim','Neue Haas Grotesk Text Pro','Nyala','PMingLiU','Plantagenet Cherokee','Raavi',
-			'Rockwell Nova','Rod','Sakkal Majalla','Sanskrit Text','Segoe Fluent Icons','Segoe UI Variable Display','Shonar Bangla',
-			'Shruti','SimHei','Simplified Arabic','Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho N-B',
-			'UD Digi Kyokasho N-R','UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R',
-			'Urdu Typesetting','Utsaah','Vani','Verdana Pro',	'Vijaya','Vrinda','Yu Mincho',
-			// kBase but broken: see 1720408
+			'Rockwell Nova','Rod','Sakkal Majalla','Sanskrit Text','Segoe Fluent Icons','Segoe UI Variable Display',
+			'Segoe UI Variable Small','Segoe UI Variable Text','Shonar Bangla','Shruti','SimHei','Simplified Arabic',
+			'Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
+			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting',
+			'Utsaah','Vani','Verdana Pro',	'Vijaya','Vrinda','Yu Mincho',
+			// aliases ^
+			'바탕', // Batang
+			'굴림', // Gulim
+			'굴림체', // GulimChe
+			'細明體', // MingLiU
+			'ＭＳ 明朝', // MS Mincho
+			'ＭＳ Ｐ明朝', // MS PMincho
+			'新細明體', // PMingLiU
+			// aliases: kBase but not detected in vis = 1
+			'微软雅黑', // Microsoft YaHei
+			'ＭＳ ゴシック', // MS Gothic
+			'ＭＳ Ｐゴシック', // MS PGothic
+			'宋体', // SimSun
+			// kBase but broken: 1720408
 			'Franklin Gothic Medium',
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook',
 			// MS downloads
 			'Cascadia Code','Cascadia Mono', // 11
-			// aliases: ignored by kBase
-			'宋体', // SimSun
-			'細明體', // MingLiU
-			'新細明體', // PMingLiU
-			'굴림',
-			'굴림체',
-			'바탕', // Batang
-			'微软雅黑', // Microsoft YaHei
-			'ＭＳ ゴシック', // MS Gothic
-			'ＭＳ 明朝', // MS Mincho
-			'ＭＳ Ｐゴシック', // MS PGothic
-			'ＭＳ Ｐ明朝', // MS PMincho
-			//* possibly ignore
-				'Segoe UI Variable Small','Segoe UI Variable Text', // same size as Display and expected if Display exists
-			//*/
 
 			/* variants
 				'Arial Nova Cond','Arial Nova Cond Light','Arial Nova Light',
