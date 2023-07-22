@@ -20,7 +20,8 @@ function get_colors() {
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
 		"moz": [ // FF102+:
-			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
+			'-moz-buttondefault', // dropped in FF117
+			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
 			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
 			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
 			'-moz-html-cellhighlighttext','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection',
@@ -29,8 +30,9 @@ function get_colors() {
 			'-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect',
 			'-moz-mac-secondaryhighlight','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
 			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // ToDo: isSmartMin=115 remove these two dropped in FF103
-			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext', // -moz-menubartext dropped in FF117
-			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+			'-moz-menubarhovertext',
+			'-moz-menubartext', // dropped in FF117
+			'-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
 		],
 	}
 
@@ -76,7 +78,7 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "6f787957" // FF117+
+					let check = "35b66b69" // FF117+
 					if (isVer < 103) {check = "c0df6598"} else if (isVer < 117) {check = "788e7d22"}
 					notation = hash == check ? rfp_green : rfp_red // 1734115
 				}
