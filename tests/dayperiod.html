@@ -114,13 +114,9 @@ function reset_custom(type) {
 		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
 			// FF90-109
 			dom.short22.checked = true
-		} else if (isFF) {
-			// FF110+
-			dom.short15.checked = true
-			dom.long22.checked = true
 		} else {
-			// non-FF: use both to cover bases
-			dom.short22.checked = true
+			// FF110+, also chrome since at least 115
+			dom.short15.checked = true
 			dom.long22.checked = true
 		}
 	}
