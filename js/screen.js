@@ -1385,7 +1385,7 @@ function outputFD() {
 	addData(3, METRIC, (hasErr ? zErr : isOS))
 
 	// os arch: FF110+ pref removed: error means 32bit
-	METRIC = "os_architecture"
+	METRIC = "browser_architecture"
 	let notation = ""
 	let check = (isTB && isSmart && isVer < 110) // TB health check
 	if (isArch === true) {
