@@ -45,15 +45,17 @@ let fntMaster = {
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
 			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
 			// FontSubstitutes
-			'Helv','Helvetica','Tms Rmn','MS Shell Dlg','MS Shell Dlg \\32',
-			// aliases
-			'宋体', // SimSun
+				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
+			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
+			'Helv','Helvetica','Times','Tms Rmn', // seems stable
+			// localized
 			'微软雅黑', // Microsoft YaHei
 			'ＭＳ ゴシック', // MS Gothic
 			'ＭＳ Ｐゴシック', // MS PGothic
+			'宋体', // SimSun
 
-			/* ignore: expected + dupe sizes + they seem to be aliases
-			'Small Fonts','Courier','MS Serif','Roman','Times'
+			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
 			*/
 
 			/* variants
@@ -108,13 +110,11 @@ let fntMaster = {
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-			'Helv','Helvetica','MS Shell Dlg','MS Shell Dlg \\32','Tms Rmn',
+			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
+			'Helv','Helvetica','Times','Tms Rmn', // seems stable
 
-			/* ignore: expected + dupe sizes + they seem to be aliases
-			'Courier', // Courier New
-			'Small Fonts', // Arial
-			'MS Sans Serif', // Microsoft Sans Serif
-			'MS Serif','Roman','Times', // TNR
+			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
 			*/
 
 			/* variants
@@ -206,15 +206,16 @@ let fntMaster = {
 			'Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
 			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting',
 			'Utsaah','Vani','Verdana Pro',	'Vijaya','Vrinda','Yu Mincho',
-			// aliases ^
+			// localized ^
 			'바탕', // Batang
 			'굴림', // Gulim
 			'굴림체', // GulimChe
 			'細明體', // MingLiU
+			'細明體_HKSCS', // MingLiU_HKSCS
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
-			// aliases: kBase but not detected in vis = 1
+			// localized: kBase but not detected in vis = 1
 			'微软雅黑', // Microsoft YaHei
 			'ＭＳ ゴシック', // MS Gothic
 			'ＭＳ Ｐゴシック', // MS PGothic
@@ -1234,7 +1235,9 @@ const get_unicode = () => new Promise(resolve => {
 	
 	function filter_tofu() {
 		// skip if little tofu
-		if (isOS == "android" || isTB) {return}
+		if (isOS == "android" || isOS == "mac" || isTB) {return}
+		if (isOS == "windows" && isVer > 115) {return} // win10+ = 5/21
+
 		let tofuStart = nowFn()
 		// check likely unsupported scripts
 			// e.g. win7-en: 12/21, +RFP = 20/21
@@ -1259,10 +1262,6 @@ const get_unicode = () => new Promise(resolve => {
 			fntCodes = fntCodes.filter(x => !fntTofu.includes(x))
 			log_perf(SECT12, "tofu", tofuStart, "", fntTofu.length +"/"+ fntTofuPossible.length)
 			t0 = nowFn()
-			//if (gRun) {
-			//	log_debug("tofu", fntTofu.join(" "))
-			//	log_debug("tofu", fntTofuChars.join(" "))
-			//}
 		} catch(e) {}
 	}
 	// do once
