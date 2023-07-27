@@ -407,6 +407,9 @@ const get_window_props = () => new Promise(resolve => {
 		iframe = document.getElementById(id)
 		let contentWindow = iframe.contentWindow
 		let aProps = Object.getOwnPropertyNames(contentWindow)
+		let aSorted = []
+		aProps.forEach(function(item) {aSorted.push(item)})
+		aSorted.sort()
 
 		// sim
 		if (runSL) {aProps.push("hdcd_canvas_getctx","serviceWorker")}
@@ -426,7 +429,7 @@ const get_window_props = () => new Promise(resolve => {
 		if (isSmart && isTB) {webgpu += (webgpu == zD ? tb_green : tb_red)}
 		log_display(18, "webgpu", webgpu)
 
-		let display = mini(aProps),
+		let display = mini(aSorted),
 			fpvalue = display,
 			tamperBtn = ""
 		let aTampered = aProps.slice(aProps.indexOf("Performance")+1)
@@ -461,23 +464,20 @@ const get_window_props = () => new Promise(resolve => {
 		display += addButton(18, METRIC, aProps.length) + tamperBtn
 		// health
 		if (check && fpvalue !== zLIE) {
-			let aSorted = []
-			aProps.forEach(function(item) {aSorted.push(item)})
-			let hash = mini(aSorted.sort())
 			if (isMullvad) {
 				notation = sbx +" TBv13 "+ hash +"]"+sc
 			} else {
 				if (isOS == "android") {
 					notation = sbx +" TBv13 "+ hash +"]"+sc
 				} else {
-					if (hash == "226bc5ca" || hash == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
+					if (fpvalue == "226bc5ca" || fpvalue == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
 				}
 			}
 		}
 		display += notation
 
 		if (fpvalue !== zLIE) {
-			addData(18, METRIC, aProps, fpvalue)
+			addData(18, METRIC, aSorted, fpvalue)
 			if (isOS !== "android" && isOS !== undefined) {
 				if (isSmart && !aTampered.length) {
 					let indexPerf = aProps.indexOf("Performance"),
