@@ -213,7 +213,7 @@ function get_isArch() {
 		let test = new ArrayBuffer(Math.pow(2,32))
 		log_perf(SECTG, METRIC, t0, "", 64)
 	} catch(e) {
-		isArch = log_error(SECT3, "os_architecture", e, isScope, 50, true) // persist error to sect3
+		isArch = log_error(SECT3, "browser_architecture", e, isScope, 50, true) // persist error to sect3
 		log_perf(SECTG, METRIC, t0, "", zErr)
 	}
 }
