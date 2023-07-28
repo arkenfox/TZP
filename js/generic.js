@@ -1319,7 +1319,6 @@ function run_immediate() {
 	get_isDevices()
 	if (location.protocol == "file:") {isFile = true}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
-	try {let test = new ArrayBuffer(Math.pow(2,32))} catch(e) {}
 	get_isGecko()
 	get_isArch()
 }
