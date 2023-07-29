@@ -108,7 +108,11 @@ function get_computed_styles() {
 	return new Promise(resolve => {
 		let t0 = nowFn()
 		const METRIC = "computed_styles"
-		const names = ["styles_getcomputed","styles_htmlelement","styles_cssrulelist"]
+		const names = ["styles_cssrulelist","styles_getcomputed","styles_htmlelement"]
+		let aErr = [false, false, false], isLies = false
+		let aHashes = [], intHashes = [], oDisplay = {}
+		let check = (isSmart && isTB && isVer > 114)
+		let notation = check ? tb_red : ""
 
 		let styleVersion = type => {
 			return new Promise(resolve => {
@@ -116,9 +120,9 @@ function get_computed_styles() {
 				try {
 					if (runSE) {foo++}
 					let cssStyleDeclaration = (
-						type == 0 ? getComputedStyle(document.body) :
-						type == 1 ? document.body.style :
-						type == 2 ? document.styleSheets[0].cssRules[0].style :
+						type == 0 ? document.styleSheets[0].cssRules[0].style :
+						type == 1 ? getComputedStyle(document.body) :
+						type == 2 ? document.body.style :
 						undefined
 					)
 					if (!cssStyleDeclaration) {
@@ -193,10 +197,17 @@ function get_computed_styles() {
 						keys
 					})
 				} catch(e) {
-					let eMsg = log_error(SECT14, names[type], e)
-					return resolve(eMsg)
+					aErr[type] = true
+					return resolve(log_error(SECT14, names[type], e))
 				}
 			})
+		}
+
+		function display() {
+			for (const k of Object.keys(oDisplay)) {
+				log_display(14, k, oDisplay[k])
+				log_perf(SECT14, METRIC, t0)
+			}
 		}
 
 		// run
@@ -205,15 +216,112 @@ function get_computed_styles() {
 			styleVersion(1),
 			styleVersion(2),
 		]).then(res => {
-			// analyse
-			for (let i=0; i < 3; i++) {
+			/* simulate
+				// different hashes: !isLies
+				res[0] = res[1]; aErr[0] = false
+				res[2]["keys"] = ["a","constructor"]
 
+				// different hashes: isLies
+				//res[2]["keys"] = ["a"]
+
+				// same hashes: constructor not last
+				//res[1]["keys"].push("a")
+				//res[2]["keys"].push("a")
+
+				// various errors
+				//res[0] = {}; aErr[0] = false
+				//res[1] = {"keys": ["a","b"]}
+				//res[2] = {"keys": 5}
+			//*/
+
+			// analyse
+			//console.log(res)
+			for (let i=0; i < 3; i++) {
+				let obj = res[i]
+				let type = names[i]
+				let eMsg = ""
+				if (aErr[i]) {
+					oDisplay[type] = obj // error already logged
+				} else {
+					// expected obj.keys (not null) = array
+					if ("object" == typeof obj && obj !== null && "undefined" !== typeof obj.keys && Array.isArray(obj.keys)) {
+						let data = obj.keys
+						if (data.length) {
+							let hash = mini(data)
+							aHashes.push(hash)
+							intHashes.push(i)
+							oDisplay[type] = hash
+							// last item should be constructor
+							// this only detects if items are added, not removed
+							if (data[data.length-1] !== "constructor") {
+								isLies = true
+							}
+						} else {
+							aErr[i] = true
+							oDisplay[type] = log_error(SECT14, type, zErrEmpty)
+						}
+					} else {
+						aErr[i] = true
+						oDisplay[type] = log_error(SECT14, type, zErrType + typeof obj)
+					}
+				}
 			}
 
-			log_perf(SECT14, METRIC, t0)
-			return resolve([[METRIC, "TBA"]])
+			// 3 errors
+			//console.log("errors",aErr)
+			if (aErr.every(x => x === true)) {
+				log_display(14, METRIC, zErr + notation)
+				addData(14, METRIC, zErr)
+				display()
+				return resolve()
+			}
+			// same hashes
+			//console.log("hashes",aHashes)
+			aHashes = aHashes.filter(function(item, position) {return aHashes.indexOf(item) === position})
+			if (aHashes.length === 1) {
+				//console.log("intHashes",intHashes)
+				//console.log("isLies",isLies)
+				let lookup = intHashes[0], hash = aHashes[0]
+				sDetail[isScope][METRIC] = res[lookup]["keys"]
+				let btn = addButton(14, METRIC, res[lookup]["keys"].length)
+				if (isSmart && isLies) {
+					addData(14, METRIC, zLIE)
+					hash = colorFn(hash)
+					log_known(SECT14, METRIC)
+				} else {
+					if (check && hash === "e32d06bd") {notation = tb_green}
+					addData(14, METRIC, res[lookup]["keys"], hash)
+				}
+				log_display(14, METRIC, hash + btn + notation)
+				display()
+				return resolve()
+			}
+			// mixed hashes
+				// for the first of each unique hash, add sDetail and modify display with a btn
+			let aDone = {}
+			intHashes.forEach(function(item) {
+				let name = names[item]
+				let hash = oDisplay[name]
+				if (aDone[hash] == undefined) {
+					aDone[hash] = name
+					// add sDetail + update display
+					sDetail[isScope][name] = res[item]["keys"]
+					let btn = addButton(14, name, res[item].length)
+					oDisplay[name] = hash + btn
+				}
+			})
+			let value = "mixed"
+			if (isSmart) {
+				// gecko is never mixed, so this must be some BS
+				value = colorFn(value)
+				log_known(SECT14, METRIC)
+				addData(14, METRIC, zLIE)
+			}
+			log_display(14, METRIC, value + notation)
+			display()
+			return resolve()
 		}).catch(error => {
-			//log_alert(SECT14, "computed_styles: " + e)
+			log_display(14, METRIC, log_error(SECT14, METRIC, error) + notation)
 			return resolve([[METRIC, zErr]])
 		})
 	})
@@ -246,7 +354,7 @@ const get_mm_css = () => new Promise(resolve => {
 				if (!isErr) {
 					display = colorFn(display)
 					value = zLIE
-					log_known(SECT4, METRIC)
+					log_known(SECT14, METRIC)
 				}
 			}
 			if (rfpvalue !== undefined) {
