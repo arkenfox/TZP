@@ -448,12 +448,62 @@ function get_lang() {
 		]).then(function(results){
 			//console.log(oTempData)
 			let hash, data, res, value, value2, fpvalue, METRIC, METRIC2, newobj, notation
+			// language = existing key, languages += value
+			const enUS = "en-US, en"
+			const oTBLang = {
+				"ar": enUS,
+				"ca": enUS,
+				"cs": "sk, "+ enUS,
+				"da": enUS,
+				"de": enUS,
+				"el-GR": "el, "+ enUS,
+				"en-US": "en",
+				"es-ES": "es, "+ enUS,
+				"fa-IR": "fa, "+ enUS,
+				"fi-FI": "fi, "+ enUS,
+				"fr": "fr-FR, "+ enUS,
+				"ga-IE": "ga, en-IE, en-GB, "+ enUS,
+				"he": "he-IL, "+ enUS,
+				"hu-HU": "hu, "+ enUS,
+				"id": enUS,
+				"is": enUS,
+				"ja": enUS,
+				"ka-GE": "ka, "+ enUS,
+				"ko-KR": "ko, "+ enUS,
+				"lt": enUS +", ru, pl",
+				"mk-MK": "mk, "+ enUS,
+				"ms": enUS,
+				"my": "en-GB, en",
+				"nb-NO": "nb, no-NO, no, nn-NO, nn, "+ enUS,
+				"nl": enUS,
+				"pl": enUS,
+				"pt-BR": "pt, "+ enUS,
+				"ro-RO": "ro, en-US, en-GB, en",
+				"ru-RU": "ru, "+ enUS,
+				"sq": "sq-AL, "+ enUS,
+				"sv-SE": "sv, "+ enUS,
+				"th": enUS,
+				"tr-TR": "tr, "+ enUS,
+				"uk-UA": "uk, "+ enUS,
+				"vi-VN": "vi, "+ enUS,
+				"zh-CN": "zh, zh-TW, zh-HK, "+ enUS,
+				"zh-TW": "zh, "+ enUS,
+			}
 
 			// LANGUAGES
 			METRIC = "languages"
 			data = oTempData[METRIC]
+			let langcheck = (isSmart && isTB && !isMullvad && isOS !== "android" && isVer > 114) // ToDo: android may differ, ignore for now
 			Object.keys(data).forEach(function(item){
-				log_display(4, METRIC +"_"+ item, data[item])
+				if (langcheck) {
+					notation = tb_red
+					if (item == "language") {
+						if (oTBLang[data[item]] !== undefined) {notation = tb_green}
+					} else {
+						if (data[item] == data.language +", "+ oTBLang[data.language]) {notation = tb_green}
+					}
+				}
+				log_display(4, METRIC +"_"+ item, data[item] + notation)
 				addData(4, item, data[item])
 			})
 
@@ -497,9 +547,23 @@ function get_lang() {
 				log_known(SECT4, METRIC)
 			}
 			addData(4, METRIC, fpvalue)
-			if (isSmart) {
-				if (isTB) {
-					notation = value == oTempData["languages"]["language"] ? lang_green : lang_red
+			if (langcheck) {
+				notation = tb_red
+				let lang0 = oTempData["languages"]["language"]
+				// only green if TB supported
+				if (oTBLang[lang0] !== undefined) {
+					let oExceptions = {
+						"el-GR": "el", "fa-IR": "fa", "fi-FI": "fi", "hu-HU": "hu", "it-it": "it",
+						"ka-GE": "ka", "ko-KR": "ko", "mk-MK": "mk", "ro-RO": "ro", "ru-RU": "ru",
+						"tr-TR": "tr", "uk-UA": "uk", "vi-VN": "vi", "zh-CN": "zh-Hans-CN", "zh-TW": "zh-Hant-TW",
+					}
+					if (oExceptions[lang0] !== undefined) {
+						// check exceptions first
+						if (value === oExceptions[lang0]) {notation = tb_green}
+					} else if (value == lang0) {
+						// exact match
+						notation = tb_green
+					}
 				}
 			}
 			log_display(4, METRIC, value + notation)
