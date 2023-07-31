@@ -301,7 +301,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#feature">feature detection</a>
 			<div class="nav-up"><a href="#useragent">&#9650;</a> <span class="c perf" id="perffeature"></span></div>
-			<div class="nav-down"><a href="#languaged">&#9660;</a></div>
+			<div class="nav-down"><a href="#regiond">&#9660;</a></div>
 			<div class="nav-right"><a name="featured"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
@@ -334,24 +334,24 @@
 
 	<!--language-->
 	<table id="tb4">
-		<col width="31%"><a name="language"></a><col width="69%">
+		<col width="31%"><a name="region"></a><col width="69%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#language">language / locale / date/time & format / geolocation</a>
-			<div class="nav-up"><a href="#feature">&#9650;</a> <span class="c perf" id="perflanguage"></span></div>
+			<div class="nav-title"><a href="#region">region: language, locale, format, date/time, geolocation</a>
+			<div class="nav-up"><a href="#feature">&#9650;</a> <span class="c perf" id="perfregion"></span></div>
 			<div class="nav-down"><a href="#networkd">&#9660;</a></div>
-			<div class="nav-right"><a name="languaged"></a></div></div>
+			<div class="nav-right"><a name="regiond"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(4)">[ re-run ]</span></div>
-			<span class="c" id="languagehash"></span>
+			<span class="c" id="regionhash"></span>
 		</td></tr>
 		<!--geo-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">navigator<br>window<br>permission</span></div>
 			&nbsp geolocation</td><td class="c mono" id="geolocation"></td></tr>
 		<!--lang-->
-		<tr><td>language</td><td class="c mono" id="languages_language"></td></tr>
-		<tr><td>languages</td><td class="c mono" id="languages_languages"></td></tr>
+		<tr><td>language</td><td class="c mono" id="language"></td></tr>
+		<tr><td>languages</td><td class="c mono" id="languages"></td></tr>
 		<!--locale-->
 		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[ show ]</span>
 			locale</td><td class="c mono" id="locale"></td></tr>
@@ -442,7 +442,7 @@
 		<col width="31%"><a name="network"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#network">network / http headers</a>
-			<div class="nav-up"><a href="#language">&#9650;</a> <span class="c perf" id="perfnetwork"></span></div>
+			<div class="nav-up"><a href="#region">&#9650;</a> <span class="c perf" id="perfnetwork"></span></div>
 			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
 			<div class="nav-right"><a name="networkd"></a></div></div>
 		</th></tr></thead>
@@ -902,7 +902,7 @@
 	</div>
 
 	<script src="js/prototypeLies.js"></script>
-	<script src="js/language.js"></script>
+	<script src="js/region.js"></script>
 	<script src="js/fonts.js"></script>
 	<script src="js/screen.js"></script>
 	<script src="js/storage.js"></script>
