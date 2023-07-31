@@ -356,7 +356,11 @@ const get_isTB = () => new Promise(resolve => {
 	if (!runTE) {
 		try {
 			let css = document.createElement("link")
-			css.href = "resource://torbutton-assets/aboutTor.css"
+			let asset = "resource://torbutton-assets/aboutTor.css"
+			if (isVer > 102) {
+				asset = "chrome://browser/locale/aboutTBUpdate.dtd" // may not work on android
+			}
+			css.href = asset
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
