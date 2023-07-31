@@ -1339,7 +1339,7 @@ function outputFD() {
 		}
 	}
 	// set isMullvad for diffs between TB vs MB; otherwise it _is_ TB in tests
-	if (gLoad) {
+	if (gLoad && !isTB) {
 		if (isWordmark + isLogo  == "400 x 32300 x 236" && isOS !== "android") {
 			isMullvad = true
 			isTB = true
@@ -1347,8 +1347,6 @@ function outputFD() {
 			tb_red = sbx+"MB]"+sc
 			tb_standard = sg+"[MB Standard]"+sc
 			tb_safer = sg+"[MB Safer]"+sc
-			lang_green = sgtick+"MB matches language]"+sc
-			lang_red = sbx+"MB matches language]"+sc
 			intl_green = sgtick+"MB matches locale]"+sc
 			intl_red = sbx+"MB matches locale]"+sc
 		}
