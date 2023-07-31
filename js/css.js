@@ -19,21 +19,28 @@ function get_colors() {
 			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
-		"moz": [ // FF102+:
-			'-moz-buttondefault', // dropped in FF117
-			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
-			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
-			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
-			'-moz-html-cellhighlighttext','-moz-mac-active-menuitem','-moz-mac-active-source-list-selection',
-			'-moz-mac-chrome-active','-moz-mac-chrome-inactive','-moz-mac-defaultbuttontext',
-			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuitem','-moz-mac-menupopup',
-			'-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-menutextdisable','-moz-mac-menutextselect',
-			'-moz-mac-secondaryhighlight','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', // ToDo: isSmartMin=115 remove these two dropped in FF103
-			'-moz-menubarhovertext',
-			'-moz-menubartext', // dropped in FF117
-			'-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
+		"moz": [ // FF117+:
+			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
+			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
+			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-active-menuitem',
+			'-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext',
+			'-moz-mac-focusring','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-menutextdisable',
+			'-moz-mac-menutextselect','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
 		],
+	}
+
+	if (isVer < 117) {
+		let aTmp = oList["moz"]
+		aTmp.push (
+			// removed FF117
+			"-moz-buttondefault","-moz-dragtargetzone","-moz-mac-chrome-active","-moz-mac-chrome-inactive",
+			"-moz-mac-menuselect","-moz-mac-menushadow","-moz-mac-secondaryhighlight","-moz-menubartext",
+			"-moz-win-communicationstext","-moz-win-mediatext",
+			// removed FF103
+			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', 
+		)
+		oList["moz"] = aTmp.sort()
 	}
 
 	function rgba2hex(orig) {
@@ -78,7 +85,7 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "35b66b69" // FF117+
+					let check = "5a00aa84" // FF117+
 					if (isVer < 103) {check = "c0df6598"} else if (isVer < 117) {check = "788e7d22"}
 					notation = hash == check ? rfp_green : rfp_red // 1734115
 				}
@@ -206,8 +213,8 @@ function get_computed_styles() {
 		function display() {
 			for (const k of Object.keys(oDisplay)) {
 				log_display(14, k, oDisplay[k])
-				log_perf(SECT14, METRIC, t0)
 			}
+			log_perf(SECT14, METRIC, t0)
 		}
 
 		// run
