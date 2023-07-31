@@ -33,7 +33,7 @@ const get_element_keys = () => new Promise(resolve => {
 				if (isOS === "android") {
 					notation = sbx +" awaiting TBv13 hash]"+sc
 				} else {
-					if (hash === "463107cf") {notation = tb_green} // 273
+					if (hash === "57b05d6c") {notation = tb_green} // 260
 				}
 			}
 		}
