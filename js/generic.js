@@ -1292,7 +1292,7 @@ function outputSection(id, cls) {
 		setTimeout(function() {if (id == "all" || id == 18) {outputMisc()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 10) {outputWebGL()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 1) {outputScreen()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 4) {outputLanguage()}}, 0)
+		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 14) {outputCSS()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 12) {outputFonts()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 15) {outputElements()}}, 0)

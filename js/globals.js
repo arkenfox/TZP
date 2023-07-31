@@ -3,7 +3,7 @@
 var dom;
 
 const SECTG = "_global", SECTP = "_prereq", SECTNF = "NON-FP",
-	SECT1 = "screen", SECT2 = "ua", SECT3 = "feature", SECT4 = "language",
+	SECT1 = "screen", SECT2 = "ua", SECT3 = "feature", SECT4 = "region",
 	SECT5 = "network", SECT6 = "storage", SECT7 = "devices", SECT9 = "canvas",
 	SECT10 = "webgl", SECT11 = "audio", SECT12 = "fonts", SECT13 = "media",
 	SECT14 = "css", SECT15 = "elements", SECT18 = "misc",

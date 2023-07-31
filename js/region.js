@@ -46,7 +46,7 @@ const get_geo = () => new Promise(resolve => {
 				notation = rhash == "94bf0c73" ? default_green : default_red
 			} else {
 				// FF72+: enabled, true, prompt
-				notation = rhash == "6046a6a8" ? "" : default_red
+				notation = rhash == "6046a6a8" ? default_green : default_red
 			}
 		}
 		log_display(4, METRIC, display + notation)
@@ -447,7 +447,7 @@ function get_lang() {
 			get_resolved("locale_resolvedoptions", localecode),
 		]).then(function(results){
 			//console.log(oTempData)
-			let hash, data, res, value, value2, fpvalue, METRIC, METRIC2, newobj, notation
+			let hash, data, res, value, value2, fpvalue, METRIC, METRIC2, newobj, notation = ""
 			// language = existing key, languages += value
 			const enUS = "en-US, en"
 			const oTBLang = {
@@ -495,6 +495,7 @@ function get_lang() {
 			data = oTempData[METRIC]
 			let langcheck = (isSmart && isTB && !isMullvad && isOS !== "android" && isVer > 114) // ToDo: android may differ, ignore for now
 			Object.keys(data).forEach(function(item){
+				METRIC = item
 				if (langcheck) {
 					notation = tb_red
 					if (item == "language") {
@@ -503,7 +504,7 @@ function get_lang() {
 						if (data[item] == data.language +", "+ oTBLang[data.language]) {notation = tb_green}
 					}
 				}
-				log_display(4, METRIC +"_"+ item, data[item] + notation)
+				log_display(4, METRIC, data[item] + notation)
 				addData(4, item, data[item])
 			})
 
@@ -988,7 +989,7 @@ function get_lang() {
 	})
 }
 
-function outputLanguage() {
+function outputRegion() {
 	let t0 = nowFn()
 	Promise.all([
 		get_lang(),
