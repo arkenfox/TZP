@@ -467,6 +467,7 @@ function get_lang() {
 				"hu-HU": "hu, "+ enUS,
 				"id": enUS,
 				"is": enUS,
+				"it-IT": "it, "+ enUS,
 				"ja": enUS,
 				"ka-GE": "ka, "+ enUS,
 				"ko-KR": "ko, "+ enUS,
@@ -554,7 +555,7 @@ function get_lang() {
 				// only green if TB supported
 				if (oTBLang[lang0] !== undefined) {
 					let oExceptions = {
-						"el-GR": "el", "fa-IR": "fa", "fi-FI": "fi", "hu-HU": "hu", "it-it": "it",
+						"el-GR": "el", "fa-IR": "fa", "fi-FI": "fi", "hu-HU": "hu", "it-IT": "it",
 						"ka-GE": "ka", "ko-KR": "ko", "mk-MK": "mk", "ro-RO": "ro", "ru-RU": "ru",
 						"tr-TR": "tr", "uk-UA": "uk", "vi-VN": "vi", "zh-CN": "zh-Hans-CN", "zh-TW": "zh-Hant-TW",
 					}
