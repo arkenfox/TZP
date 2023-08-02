@@ -356,11 +356,8 @@ const get_isTB = () => new Promise(resolve => {
 	if (!runTE) {
 		try {
 			let css = document.createElement("link")
-			let asset = "resource://torbutton-assets/aboutTor.css"
-			if (isVer > 102) {
-				asset = "chrome://browser/locale/aboutTBUpdate.dtd" // may not work on android
-			}
-			css.href = asset
+			// ToDo: TB13+: may not work on android
+			css.href = isVer > 102 ? "chrome://browser/locale/aboutTBUpdate.dtd" : "resource://torbutton-assets/aboutTor.css"
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
@@ -1085,19 +1082,19 @@ function countJS(filename) {
 
 	jsFiles++
 	if (jsFiles === 1) {
+		get_isVer() // as long as don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
 		gData["perf"].push([1, "RUN ONCE", nowFn()])
 		let t0 = nowFn()
 		Promise.all([
-			get_isVer(),
-			get_isTB(),
+			get_isTB()
 		]).then(function(results){
-			if ("boolean" !== typeof results[1] && zErr !== results[1]) {
+			if ("boolean" !== typeof results[0] && zErr !== results[0]) {
 				let METRIC = "isTB"
 				log_error(SECT3, METRIC, zErrTime, isScope, 50, true) // persist error to sect3
-				log_perf(SECTG, METRIC, results[1], "", zErrTime)
+				log_perf(SECTG, METRIC, results[0], "", zErrTime)
 				log_alert(SECTG, METRIC +": "+ zErrTime, true)
 			}
 			isBlock = isVer < isBlockMin[0]
@@ -1105,8 +1102,7 @@ function countJS(filename) {
 				run_block() // old gecko
 				return
 			}
- 
-			if (isVer >= isSmartMin) {isSmart = true}
+ 			if (isVer >= isSmartMin) {isSmart = true}
 			if (!isSmart) {run_basic()}
 
 			t0 = nowFn()
