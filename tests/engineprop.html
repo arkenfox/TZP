@@ -404,7 +404,6 @@ rec(typeof scrollByPages, "scrollByPages", code, "function")
 rec(typeof scrollMaxX, "scrollMaxX", code, "number")
 rec(typeof scrollMaxY, "scrollMaxY", code, "number")
 rec(typeof setResizable, "setResizable", code, "function")
-rec(typeof sizeToContent, "sizeToContent", code, "function")
 rec(typeof updateCommands, "updateCommands", code, "function")
 	// new
 rec(typeof onbeforeinput, "onbeforeinput", code, "object") // FF87+
@@ -425,6 +424,7 @@ rec(typeof sidebar, "sidebar", code, "object") // removed FF102
 rec(typeof onloadend, "onloadend", code, "object") // removed FF107 1574487
 rec(typeof InstallTrigger, "InstallTrigger", code, "object") // to-be-deprecated (+prefs)
 rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object") // removed FF110 1689631
+rec(typeof sizeToContent, "sizeToContent", code, "function") // removed nightly FF117+ 1832733 / 1600400
 
 	// prefs
 rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code, "object") // dom.vr.enabled (+ not in FF52)
@@ -834,7 +834,7 @@ function get_miniEngine() {
 			"function" === typeof scrollByLines,
 			"number" === typeof scrollMaxY,
 			"function" === typeof setResizable,
-			"function" === typeof sizeToContent,
+			//"function" === typeof sizeToContent, // removed nightly FF117+ 1832733 / 1600400
 			"function" === typeof updateCommands,
 		],
 		"edgeHTML": [
