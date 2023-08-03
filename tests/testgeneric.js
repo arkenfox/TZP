@@ -126,7 +126,7 @@ const get_globals = () => new Promise(resolve => {
 			"function" === typeof scrollByLines,
 			"number" === typeof scrollMaxY,
 			"function" === typeof setResizable,
-			"function" === typeof sizeToContent,
+			//"function" === typeof sizeToContent,  // removed nightly FF117+ 1832733 / 1600400
 			"function" === typeof updateCommands,
 		],
 		"edgeHTML": [
