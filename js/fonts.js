@@ -1,12 +1,16 @@
 'use strict';
 
 let fntCodePoints = {
+	// ToDo: create OS specific lists
+	// ToDo: update codepoints to be gecko specifc and cover unicode changes since fifield et al
 	"test": [ // sorted
+		//*
 		'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
 		'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
 		'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
 		'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
 		'0xA830','0xF003','0xF810','0xFBEE','0xFFF9','0xFFFD',
+		//*/
 	],
 	"tofu": ['0xFFFF'],
 	"tbwindows": ["0x0374"], // or "0x0375": +1 more size: not worth it
@@ -1233,41 +1237,61 @@ const get_unicode = () => new Promise(resolve => {
 		output()
 	}
 	
-	function filter_tofu() {
-		// skip if little tofu
-		if (isOS == "android" || isOS == "mac" || isTB) {return}
-		if (isOS == "windows" && isVer > 115) {return} // win10+ = 5/21
+	function reduce_codepoints() {
+		// s/be good script support
+		if (isOS == "android") {return}
+		let fntReduce = []
 
-		let tofuStart = nowFn()
-		// check likely unsupported scripts
-			// e.g. win7-en: 12/21, +RFP = 20/21
-		let fntTofuPossible = [
+		// windows
+		if (isOS == "windows") {
+			if (isTB) {
+				fntReduce = [
+					'0x09B3','0xF003','0xF810', // 3 tofu
+					'0x20B9', // = 0x20BA
+				]
+			} else if (isVer > 115) {
+				fntReduce = [
+					'0x007F', '0x09B3', '0xF003', '0xF810', '0xFFF9', // 5 tofu w/ all supplemental fonts
+					'0x20B9', // = 0x20BA
+					'0x3095', // = 0x532D
+				]
+			}
+		}
+		if (fntCodes.length) {
+			fntCodes = fntCodes.filter(x => !fntReduce.includes(x))
+			return
+		}
+		if (isTB) {return}
+
+		let reduceStart = nowFn()
+		// check likely unsupported scripts: e.g. win7: 12/21, +RFP = 20/21
+		let fntReducePossible = [
 			'0x007F','0x058F','0x0700','0x08E4','0x097F','0x09B3','0x0B82','0x0D02','0x10A0','0x115A','0x17DD',
 			'0x1C50','0x1CDA','0x20BD','0x2C7B','0xA73D','0xA830','0xF003','0xF810','0xFBEE','0xFFF9',
 		]
 		try {
-		let fntTofu = [], fntTofuChars = []
+		let fntReduceChars = []
 			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 			slot.style.fontFamily = "none"
 			slot.textContent = String.fromCodePoint('0xFFFF')
 			let tofuWidth = span.offsetWidth,
 				tofuHeight = div.offsetHeight
-			fntTofuPossible.forEach(function(code) {
+			fntReducePossible.forEach(function(code) {
 				slot.textContent = String.fromCodePoint(code)
 				if (span.offsetWidth == tofuWidth && div.offsetHeight == tofuHeight) {
-					fntTofu.push(code)
-					fntTofuChars.push(String.fromCodePoint(code))
+					fntReduce.push(code)
+					fntReduceChars.push(String.fromCodePoint(code))
 				}
 			})
-			fntCodes = fntCodes.filter(x => !fntTofu.includes(x))
-			log_perf(SECT12, "tofu", tofuStart, "", fntTofu.length +"/"+ fntTofuPossible.length)
+			fntCodes = fntCodes.filter(x => !fntReduce.includes(x))
+			log_perf(SECT12, "tofu", reduceStart, "", fntReduce.length +"/"+ fntReducePossible.length)
 			t0 = nowFn()
 		} catch(e) {}
 	}
 	// do once
 	if (fntCodes.length == 0) {
 		fntCodePoints["test"].forEach(function(code) {fntCodes.push(code)})
-		filter_tofu()
+		reduce_codepoints()
 		fntCodes.push('0xFFFF') // ensure tofu
 	}
 	run()
