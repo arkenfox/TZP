@@ -480,9 +480,14 @@ const get_window_props = () => new Promise(resolve => {
 			addData(18, METRIC, aSorted, fpvalue)
 			if (isOS !== "android" && isOS !== undefined) {
 				if (isSmart && !aTampered.length) {
+				/*
+           safer closed: "Performance" ... more items then "Event"
+        standard closed: "Performance" + no "Event"...
+         TB/FF/ALL open: "Performance" then "Event"...
+				*/
 					let indexPerf = aProps.indexOf("Performance"),
 						indexEvent = aProps.indexOf("Event")
-					display += " [console " + (indexPerf < indexEvent ? "open" : "closed") +"]"
+					display += " [console " + ( indexPerf + 1 == indexEvent ? "open" : "closed") +"]"
 				}
 			}
 		}
