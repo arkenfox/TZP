@@ -445,8 +445,8 @@ const get_window_props = () => new Promise(resolve => {
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41694
 				// allowlist NS 11.4.20+ - i.e remove false positives
 				// allow slider at safer
-			aFilter = ["Element","Event","HTMLCanvasElement","HTMLElement","HTMLFrameElement",
-				"HTMLIFrameElement","HTMLObjectElement","Location","MediaSource","Proxy","URL","webkitURL"
+			aFilter = ["Element","Event","HTMLCanvasElement","HTMLElement","HTMLFrameElement","HTMLIFrameElement",
+				"HTMLObjectElement","Location","MediaSource","OffscreenCanvas","Proxy","URL","webkitURL",
 			]
 			aTampered = aTampered.filter(x => !aFilter.includes(x))
 			if (aTampered.length) {
