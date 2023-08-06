@@ -1282,12 +1282,12 @@ function outputSection(id, cls) {
 		// we use 0ms timeouts to get accurate perf
 		if (!gRun) {gt0 = nowFn()} // single section timer
 		if (id == "all" || id == 3) {outputFD()} // do first to quickly set isMullvad
+		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 2) {outputUA()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 13) {outputMedia()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 5) {outputHeaders()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 18) {outputMisc()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 1) {outputScreen()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 14) {outputCSS()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 10) {outputWebGL()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 15) {outputElements()}}, 0)
