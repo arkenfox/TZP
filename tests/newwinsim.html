@@ -137,11 +137,11 @@ const resNative = [
 	//*/
 
 	//* temp portrait from resCommon
-	[ 768, 1024, "pXGA"],	       //   1.8%         // portrait 1.33
-	[ 810, 1080],                //   1.7%         // portrait 1.33
-	[1024, 1366],                //   0.7%         // portrait 1.33
-	[ 820, 1180],                //   0.6%         // portrait 1.43
-	[ 834, 1194],                //   0.5%         // portrait 1.43
+	[ 768, 1024, "pXGA"],        //   1.8%   // portrait 1.33
+	[ 810, 1080],                //   1.7%   // portrait 1.33
+	[1024, 1366],                //   0.7%   // portrait 1.33
+	[ 820, 1180],                //   0.6%   // portrait 1.43
+	[ 834, 1194],                //   0.5%   // portrait 1.43
 	//*/
 
 	// standards
@@ -229,12 +229,6 @@ const oResData = {
 }
 
 
-function run(runtype) {
-
-
-}
-
-
 // VARS
 let oData = {}
 let oRaw = {}
@@ -253,10 +247,11 @@ const oTests = {
 let oBuckets = {}
 let resUsed = []
 
-function calcAB(w, h, origin) {
+function calcAB(w, h, origin, basename) {
 	let res = []
 	for (const k of Object.keys(oTests)) {
 		let maxW = oTests[k][0], maxH = oTests[k][1], finalWidth, finalHeight
+
 		// height 100's
 		if (maxH < h) {
 			finalHeight = maxH
@@ -283,6 +278,10 @@ function calcAB(w, h, origin) {
 		} else {
 			oBuckets[k][inner].push(origin)
 		}
+		// ToDo: track all the sizes returned per baseName
+		if (oData[k] == undefined) {oData[k] = {}}
+		if (oData[k][basename] == undefined) {oData[k][basename] = []}
+		oData[k][basename].push(inner)
 	}
 	return res
 }
@@ -320,49 +319,34 @@ function calc(runtype) {
 				baseHeight = item[1]
 			let baseName = item[2] !== undefined ? item[2] : baseWidth +" x "+ baseHeight
 			let originName = item[2] !== undefined ? item[2] +" " : ""
-			oData[baseName] = {}
-			oRaw["1 resBase"].push(baseName)
+			oRaw["resBase"][baseName] = []
 			let AB = []
 			taskbarVariations.forEach(function(item) {
 				let w = item[0], h = item[1]
 				let availableWidth = baseWidth + w,
 					availableHeight = baseHeight + h
 				let nameAvailable = availableWidth +" x "+ availableHeight
-				oRaw["3 resAvailable"].push(nameAvailable)
-				oData[baseName][nameAvailable] = {}
+				oRaw["resAvailable"].push(nameAvailable)
+
 
 				// simplify: use a single default chrome
 					// default windows: no menu bar, density normal, toolbar only on newtab
 					// win11: -12 width, -91 height
-				oData[baseName][nameAvailable]["default"] = {}
 				let availableInnerWidth = availableWidth - 12,
 					availableInnerHeight = availableHeight - 91
 				let nameAvailableInner = originName + availableInnerWidth +" x "+ availableInnerHeight
-				oRaw["4 innerAvailable"].push(nameAvailableInner)
+				oRaw["innerAvailable"].push(nameAvailableInner)
 
-				oData[baseName][nameAvailable]["default"][nameAvailableInner] = {}
 				// A/B
-				AB = calcAB(availableInnerWidth, availableInnerHeight, nameAvailableInner)
-
-				/*
-					// A
-					//oData[baseName][nameAvailable]["default"][nameAvailableInner]["A"] = AB[0]
-					// B
-					//oData[baseName][nameAvailable]["default"][nameAvailableInner]["B"] = AB[1]
-					// C
-					//oData[baseName][nameAvailable]["default"][nameAvailableInner]["C"] = AB[2]
-				*/
+				AB = calcAB(availableInnerWidth, availableInnerHeight, nameAvailableInner, baseName)
 
 			})
-
-
-
 		} catch(e) {
 			console.log(e)
 		}
 	})
 
-	let intInner = oRaw["4 innerAvailable"].length
+	let intInner = oRaw["innerAvailable"].length
 	let display = [s3 + runtype + sc +" | "
 		+ s3 + resUsed.length + sc + " resolutions" + " | "
 		+ s3 + intInner + sc + " variations after os/chrome" + "<br>"
@@ -387,11 +371,17 @@ function calc(runtype) {
 	}
 	dom.results.innerHTML = display.join("<br>")
 
+	// cleanup buckets per res base: oData
+	for (const k of Object.keys(oData)) {
+		for (const j of Object.keys(oData[k])) {
+			let tmpArray = oData[k][j]
+			tmpArray = tmpArray.filter(function(item, position) {return tmpArray.indexOf(item) === position})
+			tmpArray.sort()
+			oData[k][j] = tmpArray
+		}
+	}
 	//console.log(oData)
 	//console.log(oRaw)
-	//console.log(mini(oRaw["4 innerAvailable"]))
-
-
 }
 
 function run(runtype) {
@@ -403,10 +393,9 @@ function run(runtype) {
 		oBuckets[k] = {}
 	}
 	oRaw = {
-		"1 resBase": [],
-		"2 resScaled": [], // skipped for now
-		"3 resAvailable": [], 
-		"4 innerAvailable": [], 
+		"resBase": {},
+		"resAvailable": [], 
+		"innerAvailable": [], 
 	}
 	// ToDo select res array to use
 	//resUsed = resCommon
