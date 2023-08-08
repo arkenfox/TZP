@@ -5,21 +5,23 @@ let intUAI = 0
 
 /* SCREEN */
 
-function return_lb(w,h) {
+function return_lb(w,h,isNew) {
 	// LB
+		// TB13 aligns with newwin steps
 	let wstep = 200, hstep = 200, bw = false, bh = false
-	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = 100}
+	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = isNew ? 200: 100}
 	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
 	bw = Number.isInteger(w/wstep)
 	bh = Number.isInteger(h/hstep)
 	return (bw && bh) ? lb_green : lb_red
 }
 
-function return_nw(w,h) {
+function return_nw(w,h, isNew) {
 	// NW
+		// TB13 changes to 1400 x 900 max
 	let wstep = 200, hstep = 100, bw = false, bh = false
-	if (w < 1001) {bw = Number.isInteger(w/wstep)}
-	if (h < 1001) {bh = Number.isInteger(h/hstep)}
+	if (w < (isNew ? 1401 : 1001)) {bw = Number.isInteger(w/wstep)}
+	if (h < (isNew ? 901 : 1001)) {bh = Number.isInteger(h/hstep)}
 	return (bw && bh) ? nw_green : nw_red
 }
 
@@ -647,8 +649,10 @@ function get_scr_window(runtype) {
 
 		// inner: LB/NW
 		if (isOS !== "android") {
-			log_display(1, "letterboxing", return_lb(w4,h4))
-			log_display(1, "new_window", return_nw(w4,h4))
+			// TB changes newwin to max 1400x900, and aligns LB to match NW steps
+			let isNewSteps = (isTB && isVer > 102)
+			log_display(1, "letterboxing", return_lb(w4,h4, isNewSteps))
+			log_display(1, "new_window", return_nw(w4,h4, isNewSteps))
 		}
 
 		// inner
