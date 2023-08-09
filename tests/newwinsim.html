@@ -26,7 +26,9 @@
 			<div class="nav-title">new window simulation</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A "what if" simulation of all possible new window sizes...</span>
+			<span class="no_color">A "what if" simulation of all possible new window sizes.
+			This is a worst case scenario, and not all variations would be likely,
+			e.g. rediculous scaling or having massive taskbar sizes on low-res displays</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn1 btnfirst" onClick="run('win7')">[ win7 ]</span>
@@ -308,7 +310,7 @@ function calc(runtype) {
 	let taskbarVariations = [], taskbarheights = [], taskbarwidths = []
 	try {
 		if (runtype == "win7") {
-			taskbarheights = [62, 48, 30, 0]
+			taskbarheights = [62, 30, 0]
 			taskbarwidths = [130, 62] // ignore 0, we already add this calc under height
 		} else if (runtype == "win11") {
 			taskbarheights = [48, 0]
@@ -321,7 +323,7 @@ function calc(runtype) {
 		taskbarwidths.forEach(function(w) {
 			taskbarVariations.push([-w, 0])
 		})
-		//console.log(taskbarVariations)
+		console.log(taskbarVariations)
 	} catch(e) {
 		console.log(e)
 	}
