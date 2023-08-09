@@ -22,12 +22,26 @@
 
 	<table id="tb1">
 		<col width="50%"><col width="50%">
-		<thead><tr><th colspan="2"><div class="nav-title">newwin sim</div>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">new window simulation</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<br>
+			<span class="no_color">A "what if" simulation of all possible new window sizes...</span>
+		</td></tr>
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn1 btnfirst" onClick="run('win7')">[ win7 ]</span>
 			<span class="btn1 btn" onClick="run('win11')">[ win11 ]</span>
 			<!--<span class="btn1 btn" onClick="run('mac')">[ mac ]</span>-->
+			<input type="checkbox" id="optDimensions"> <span class="no_color">show dimensions</span>
+			<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxtb" style="font-style: normal; font-family: serif;">
+					<br>When checked, each <b>available</b><br>
+					space is added to each test. e.g.
+					<li>FHD 1908 x 927</li><li>FHD 1908 x 941</li>
+					as two variations in <b>FHD</b><br><br>
+					This is for testing purposes<br> and creates a lot of noise.<br><br>
+					Unchecked, it only uses the<br>resolution name, e.g. <b>FHD</b><br>and appends a count.<br><br></span>
+			</div>
 			<br><br><hr>
 		</td></tr>
 		<tr>
@@ -41,6 +55,7 @@
 
 s1 = s1.trim()
 s3 = s3.trim()
+s99 = s99.trim()
 
 // actual resolutions reported (i.e not necessarily native)
 	// https://firefoxgraphics.github.io/telemetry/#view=monitors
@@ -313,6 +328,9 @@ function calc(runtype) {
 	// ToDo calculate chrome variations
 
 
+	// show available inner dimensions or use the short basename
+	let isDimensions = dom.optDimensions.checked
+
 	resUsed.forEach(function(item) {
 		try {
 			let baseWidth = item[0],
@@ -334,7 +352,8 @@ function calc(runtype) {
 					// win11: -12 width, -91 height
 				let availableInnerWidth = availableWidth - 12,
 					availableInnerHeight = availableHeight - 91
-				let nameAvailableInner = originName + availableInnerWidth +" x "+ availableInnerHeight
+				let nameAvailableInner = (isDimensions ? originName + availableInnerWidth +" x "+ availableInnerHeight : baseName)
+
 				oRaw["innerAvailable"].push(nameAvailableInner)
 
 				// A/B
@@ -360,6 +379,18 @@ function calc(runtype) {
 		for (const j of Object.keys(oBuckets[k]).sort()) {
 			let array = oBuckets[k][j].sort()
 			let count = array.length
+			if (!isDimensions) {
+				// lets dedupe the basenames in each bucket with a count if > 1
+				let tmpObj = {}, newArray = []
+				array.forEach(function(base) {
+					if (tmpObj[base] == undefined) {tmpObj[base] = 1} else {tmpObj[base] = tmpObj[base] + 1}
+				})
+				for (const m of Object.keys(tmpObj)) {
+					let note = (tmpObj[m] > 1) ? s99 +" ["+ tmpObj[m] +"]"+ sc : ""
+					newArray.push(m + note)
+				}
+				array = newArray
+			}
 			detail.push(s3 + j + sc + " [" + count +"] "
 				+ "<ul>" + array.join(", ") +"</ul>")
 		}
