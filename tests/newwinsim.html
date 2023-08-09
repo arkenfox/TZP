@@ -28,7 +28,8 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A "what if" simulation of all possible new window sizes.
 			This is a worst case scenario, and not all variations would be likely,
-			e.g. rediculous scaling or having massive taskbar sizes on low-res displays</span>
+			e.g. rediculous scaling or having massive taskbar sizes on low-res displays.
+			<code>p</code> means portrait e.g. <code>pXGA</code> is XGA in portrait mode.</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn1 btnfirst" onClick="run('win7')">[ win7 ]</span>
@@ -154,11 +155,11 @@ const resNative = [
 	//*/
 
 	//* temp portrait from resCommon
-	[ 768, 1024, "pXGA"],        //   1.8%   // portrait 1.33
-	[ 810, 1080],                //   1.7%   // portrait 1.33
-	[1024, 1366],                //   0.7%   // portrait 1.33
-	[ 820, 1180],                //   0.6%   // portrait 1.43
-	[ 834, 1194],                //   0.5%   // portrait 1.43
+	[ 768, 1024, "pXGA"],       //   1.8%   // portrait 1.33
+	[ 810, 1080, "p1080x810"],  //   1.7%   // portrait 1.33
+	[1024, 1366, "pWXGA-HD"],   //   0.7%   // portrait 1.33
+	[ 820, 1180, "p1180x820"],  //   0.6%   // portrait 1.43
+	[ 834, 1194, "p1194x834"],  //   0.5%   // portrait 1.43
 	//*/
 
 	// standards
@@ -194,7 +195,7 @@ const resNative = [
 	[ 3072, 1920, "Retina 16in"], // Apple 16" MacBook Pro
 	[ 3200, 1800, "WQXGA+"],
 	[ 3200, 2048, "WQSXGA"],
-	[ 3200, 2400, "WUXGA"],
+	[ 3200, 2400, "QWUXGA"],
 	[ 3240, 2160, "Surface Book 2"], // 15inch
 	[ 3440, 1440, "UWQHD"],
 	[ 3840, 1600, "UW4K"],
@@ -247,6 +248,7 @@ const oResData = {
 
 
 // VARS
+let aVariations = []
 let oData = {}
 let oRaw = {}
 const oTests = {
@@ -306,54 +308,77 @@ function calcAB(w, h, origin, basename) {
 
 function calc(runtype) {
 
-	// get taskbar variables
-	let taskbarVariations = [], taskbarheights = [], taskbarwidths = []
+	// build w/h variables
+	let taskbarheights = [], taskbarwidths = [], menubarheights = [], titlebardata = []
+	// compound per step
+	let defaultchrome = [] // this ain't right, we have to do this per density
+
+	if (runtype == "win7") {
+		taskbarheights = [62, 30, 0]
+		taskbarwidths = [130, 62] // ignore 0, we already add this calc under height
+		menubarheights = [15] // same on all densities
+		titlebardata = [[4, 27]] // [w, h] same on all densities
+		defaultchrome = [12, 98] // default: no menu bar, toolbar only on newtab, density normal
+	} else if (runtype == "win11") {
+		taskbarheights = [48, 0]
+		taskbarwidths = []
+		menubarheights = [28] // same on all densities
+		titlebardata = [[4, 33]] // [w, h] same on all densities
+		defaultchrome = [12, 91] // default: no menu bar, toolbar only on newtab, density normal
+	}
 	try {
-		if (runtype == "win7") {
-			taskbarheights = [62, 30, 0]
-			taskbarwidths = [130, 62] // ignore 0, we already add this calc under height
-		} else if (runtype == "win11") {
-			taskbarheights = [48, 0]
-			taskbarwidths = []
-		}
-		// calc taskbar variations
+		// taskbar
 		taskbarheights.forEach(function(h) {
-			taskbarVariations.push([0, -h])
+			aVariations.push([0, -h])
 		})
 		taskbarwidths.forEach(function(w) {
-			taskbarVariations.push([-w, 0])
+			aVariations.push([-w, 0])
 		})
-		console.log(taskbarVariations)
+		//console.log(aVariations)
+		// menubar
+		aVariations.forEach(function(item) {
+			menubarheights.forEach(function(h) {
+				aVariations.push([item[0], item[1] - h]) // only one: same per density in windows
+			})
+		})
+		//console.log(aVariations)
+		// titlebar
+		aVariations.forEach(function(item) {
+			titlebardata.forEach(function(pair) {
+			 aVariations.push([item[0] - pair[0], item[1] - pair[1]]) // only one: same per density in windows
+			})
+		})
 	} catch(e) {
 		console.log(e)
 	}
-	// ToDo calculate chrome variations
+	aVariations.sort()
+	//console.log(aVariations)
+
+	// ToDo apply chrome variations per density
 
 
 	// show available inner dimensions or use the short basename
 	let isDimensions = dom.optDimensions.checked
 
+	let nameCheck = []
 	resUsed.forEach(function(item) {
 		try {
 			let baseWidth = item[0],
 				baseHeight = item[1]
 			let baseName = item[2] !== undefined ? item[2] : baseWidth +" x "+ baseHeight
 			let originName = item[2] !== undefined ? item[2] +" " : ""
+			nameCheck.push(baseName)
 			oRaw["resBase"][baseName] = []
 			let AB = []
-			taskbarVariations.forEach(function(item) {
+			aVariations.forEach(function(item) {
 				let w = item[0], h = item[1]
 				let availableWidth = baseWidth + w,
 					availableHeight = baseHeight + h
 				let nameAvailable = availableWidth +" x "+ availableHeight
 				oRaw["resAvailable"].push(nameAvailable)
 
-
-				// simplify: use a single default chrome
-					// default windows: no menu bar, density normal, toolbar only on newtab
-					// win11: -12 width, -91 height
-				let availableInnerWidth = availableWidth - 12,
-					availableInnerHeight = availableHeight - 91
+				let availableInnerWidth = availableWidth - defaultchrome[0],
+					availableInnerHeight = availableHeight - defaultchrome[1]
 				let nameAvailableInner = (isDimensions ? originName + availableInnerWidth +" x "+ availableInnerHeight : baseName)
 
 				oRaw["innerAvailable"].push(nameAvailableInner)
@@ -366,11 +391,14 @@ function calc(runtype) {
 			console.log(e)
 		}
 	})
+	nameCheck.sort()
+	//console.log(nameCheck)
 
 	let intInner = oRaw["innerAvailable"].length
 	let display = [s3 + runtype + sc +" | "
-		+ s3 + resUsed.length + sc + " resolutions" + " | "
-		+ s3 + intInner + sc + " variations after os/chrome" + "<br>"
+		+ s3 + resUsed.length + sc + " base resolutions | "
+		+ s3 + aVariations.length + sc + " chrome/os variations | "
+		+ s3 + intInner + sc + " tests<br>"
 	]
 	for (const k of Object.keys(oTests)) {
 		let data = oBuckets[k]
@@ -400,7 +428,7 @@ function calc(runtype) {
 		display.push("<br>"+ s1 + k +": "+ sc + testname + s1 +" [" + (bucketcount+"").padStart(2, " ") +" buckets]" + sc
 			+"<br><details><summary>details</summary>" + detail.join("<br>") + "</details>"
 		)
-		console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n", data)
+		//console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n", data)
 	}
 	dom.results.innerHTML = display.join("<br>")
 
@@ -421,6 +449,7 @@ function run(runtype) {
 	// reset display
 	dom.results.innerHTML = ""
 	// reset vars
+	aVariations = []
 	oData = {}
 	for (const k of Object.keys(oTests)) {
 		oBuckets[k] = {}
