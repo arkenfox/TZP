@@ -309,53 +309,80 @@ function calcAB(w, h, origin, basename) {
 function calc(runtype) {
 
 	// build w/h variables
-	let taskbarheights = [], taskbarwidths = [], menubarheights = [], titlebardata = []
-	// compound per step
-	let defaultchrome = [] // this ain't right, we have to do this per density
-
+	let aTemp = [], taskbarheights = [], taskbarwidths = [], menubarheights = [], titlebardata = [], toolbardata = []
 	if (runtype == "win7") {
 		taskbarheights = [62, 30, 0]
 		taskbarwidths = [130, 62] // ignore 0, we already add this calc under height
 		menubarheights = [15] // same on all densities
 		titlebardata = [[4, 27]] // [w, h] same on all densities
-		defaultchrome = [12, 98] // default: no menu bar, toolbar only on newtab, density normal
+		toolbardata = [
+			[12, 85, 28], // compact: w, h, toolbarheight
+			[12, 98, 28], // normal
+			[12, 107, 34], // touch
+		]
 	} else if (runtype == "win11") {
 		taskbarheights = [48, 0]
 		taskbarwidths = []
 		menubarheights = [28] // same on all densities
 		titlebardata = [[4, 33]] // [w, h] same on all densities
-		defaultchrome = [12, 91] // default: no menu bar, toolbar only on newtab, density normal
+		toolbardata = [
+			[12, 78, 28], // compact: w, h, toolbarheight
+			[12, 91, 28], // normal
+			[12, 100, 34], // touch
+		]
 	}
 	try {
 		// taskbar
 		taskbarheights.forEach(function(h) {
-			aVariations.push([0, -h])
+			aTemp.push([0, -h])
 		})
 		taskbarwidths.forEach(function(w) {
-			aVariations.push([-w, 0])
+			aTemp.push([-w, 0])
 		})
-		//console.log(aVariations)
+		//console.log(aTemp)
 		// menubar
-		aVariations.forEach(function(item) {
+		aTemp.forEach(function(item) {
 			menubarheights.forEach(function(h) {
-				aVariations.push([item[0], item[1] - h]) // only one: same per density in windows
+				aTemp.push([item[0], item[1] - h]) // only one: same per density in windows
 			})
 		})
-		//console.log(aVariations)
+		//console.log(aTemp)
 		// titlebar
-		aVariations.forEach(function(item) {
+		aTemp.forEach(function(item) {
 			titlebardata.forEach(function(pair) {
-			 aVariations.push([item[0] - pair[0], item[1] - pair[1]]) // only one: same per density in windows
+			 aTemp.push([item[0] - pair[0], item[1] - pair[1]]) // only one: same per density in windows
 			})
 		})
+		//console.log(aTemp)
+		// chrome w/ + w/o toolbar at each density
+		for (let i = 0; i < aTemp.length; i++) {
+			let w0 = aTemp[i][0],
+				h0 = aTemp[i][1]
+
+			toolbardata.forEach(function(array) {
+				let wChrome = array[0], hChrome = array[1], tChrome = array[2]
+				// no toolbar
+				aVariations.push([w0 - wChrome, h0 - hChrome])
+				// tolbar
+				aVariations.push([w0 - wChrome, h0 - (hChrome + tChrome)])
+			})
+		}
 	} catch(e) {
 		console.log(e)
 	}
-	aVariations.sort()
+	// dedupe: e.g. 120 in win7 but only 96 are unique
+	let aUnique = []
+	aVariations.forEach(function(array) {
+		aUnique.push(array.join("x"))
+	})
+	aUnique.sort()
+	aUnique = aUnique.filter(function(item, position) {return aUnique.indexOf(item) === position})
+	aVariations = []
+	aUnique.forEach(function(item) {
+		let w = item.split("x")[0], h = item.split("x")[1]
+		aVariations.push([w * 1, h * 1])
+	})
 	//console.log(aVariations)
-
-	// ToDo apply chrome variations per density
-
 
 	// show available inner dimensions or use the short basename
 	let isDimensions = dom.optDimensions.checked
@@ -376,16 +403,9 @@ function calc(runtype) {
 					availableHeight = baseHeight + h
 				let nameAvailable = availableWidth +" x "+ availableHeight
 				oRaw["resAvailable"].push(nameAvailable)
-
-				let availableInnerWidth = availableWidth - defaultchrome[0],
-					availableInnerHeight = availableHeight - defaultchrome[1]
-				let nameAvailableInner = (isDimensions ? originName + availableInnerWidth +" x "+ availableInnerHeight : baseName)
-
+				let nameAvailableInner = (isDimensions ? originName + availableWidth +" x "+ availableHeight : baseName)
 				oRaw["innerAvailable"].push(nameAvailableInner)
-
-				// A/B
-				AB = calcAB(availableInnerWidth, availableInnerHeight, nameAvailableInner, baseName)
-
+				AB = calcAB(availableWidth, availableHeight, nameAvailableInner, baseName)
 			})
 		} catch(e) {
 			console.log(e)
@@ -397,8 +417,8 @@ function calc(runtype) {
 	let intInner = oRaw["innerAvailable"].length
 	let display = [s3 + runtype + sc +" | "
 		+ s3 + resUsed.length + sc + " base resolutions | "
-		+ s3 + aVariations.length + sc + " chrome/os variations | "
-		+ s3 + intInner + sc + " tests<br>"
+		+ s3 + aVariations.length + sc + " chrome/os unique size variations | "
+		+ s3 + intInner + sc + " tests per scenario<br>"
 	]
 	for (const k of Object.keys(oTests)) {
 		let data = oBuckets[k]
@@ -428,7 +448,7 @@ function calc(runtype) {
 		display.push("<br>"+ s1 + k +": "+ sc + testname + s1 +" [" + (bucketcount+"").padStart(2, " ") +" buckets]" + sc
 			+"<br><details><summary>details</summary>" + detail.join("<br>") + "</details>"
 		)
-		//console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n", data)
+		console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n", data)
 	}
 	dom.results.innerHTML = display.join("<br>")
 
