@@ -266,6 +266,11 @@ const oTests = {
 let oBuckets = {}
 let resUsed = []
 
+// ToDo: add an options UI for these?
+let ignoreCompact = false,
+	ignoreTitlebar = false,
+	ignoreMenubar = false
+
 function calcAB(w, h, origin, basename) {
 	let res = []
 	for (const k of Object.keys(oTests)) {
@@ -308,11 +313,17 @@ function calcAB(w, h, origin, basename) {
 
 function calc(runtype) {
 
+	let ignoreWin7DoubleSide = false
+
 	// build w/h variables
 	let aTemp = [], taskbarheights = [], taskbarwidths = [], menubarheights = [], titlebardata = [], toolbardata = []
+	let varCountNoDedupe = 0
 	if (runtype == "win7") {
 		taskbarheights = [62, 30, 0]
 		taskbarwidths = [130, 62] // ignore 0, we already add this calc under height
+		if (ignoreWin7DoubleSide) {
+			taskbarwidths = [62]
+		}
 		menubarheights = [15] // same on all densities
 		titlebardata = [[4, 27]] // [w, h] same on all densities
 		toolbardata = [
@@ -320,6 +331,12 @@ function calc(runtype) {
 			[12, 98, 28], // normal
 			[12, 107, 34], // touch
 		]
+		if (ignoreCompact) {
+			toolbardata = [
+				[12, 98, 28], // normal
+				[12, 107, 34], // touch
+			]
+		}
 	} else if (runtype == "win11") {
 		taskbarheights = [48, 0]
 		taskbarwidths = []
@@ -330,6 +347,12 @@ function calc(runtype) {
 			[12, 91, 28], // normal
 			[12, 100, 34], // touch
 		]
+		if (ignoreCompact) {
+			toolbardata = [
+				[12, 91, 28], // normal
+				[12, 100, 34], // touch
+			]
+		}
 	}
 	try {
 		// taskbar
@@ -340,20 +363,27 @@ function calc(runtype) {
 			aTemp.push([-w, 0])
 		})
 		//console.log(aTemp)
+
 		// menubar
-		aTemp.forEach(function(item) {
-			menubarheights.forEach(function(h) {
-				aTemp.push([item[0], item[1] - h]) // only one: same per density in windows
+		if (!ignoreMenubar) {
+			aTemp.forEach(function(item) {
+				menubarheights.forEach(function(h) {
+					aTemp.push([item[0], item[1] - h]) // only one: same per density in windows
+				})
 			})
-		})
-		//console.log(aTemp)
+			//console.log(aTemp)
+		}
+
 		// titlebar
-		aTemp.forEach(function(item) {
-			titlebardata.forEach(function(pair) {
-			 aTemp.push([item[0] - pair[0], item[1] - pair[1]]) // only one: same per density in windows
+		if (!ignoreTitlebar) {
+			aTemp.forEach(function(item) {
+				titlebardata.forEach(function(pair) {
+				 aTemp.push([item[0] - pair[0], item[1] - pair[1]]) // only one: same per density in windows
+				})
 			})
-		})
-		//console.log(aTemp)
+			//console.log(aTemp)
+		}
+
 		// chrome w/ + w/o toolbar at each density
 		for (let i = 0; i < aTemp.length; i++) {
 			let w0 = aTemp[i][0],
@@ -370,12 +400,14 @@ function calc(runtype) {
 	} catch(e) {
 		console.log(e)
 	}
+
 	// dedupe: e.g. 120 in win7 but only 96 are unique
 	let aUnique = []
 	aVariations.forEach(function(array) {
 		aUnique.push(array.join("x"))
 	})
 	aUnique.sort()
+	varCountNoDedupe = aUnique.length
 	aUnique = aUnique.filter(function(item, position) {return aUnique.indexOf(item) === position})
 	aVariations = []
 	aUnique.forEach(function(item) {
@@ -415,16 +447,15 @@ function calc(runtype) {
 	//console.log(nameCheck)
 
 	let intInner = oRaw["innerAvailable"].length
-	let display = [s3 + runtype + sc +" | "
-		+ s3 + resUsed.length + sc + " base resolutions | "
-		+ s3 + aVariations.length + sc + " chrome/os unique size variations | "
+	let display = [s3 + runtype.toUpperCase() + sc +" | "
+		+ s3 + resUsed.length + sc + " base res | "
+		+ s3 + aVariations.length + sc + " unique from "+ s3 + varCountNoDedupe + sc + " chrome/os variations | "
 		+ s3 + intInner + sc + " tests per scenario<br>"
 	]
 	for (const k of Object.keys(oTests)) {
 		let data = oBuckets[k]
 		let bucketcount = Object.keys(data).length
 		let testname = oTests[k][0] +" x " + (oTests[k][1]+"").padStart(4, " ")
-
 		let detail = []
 		for (const j of Object.keys(oBuckets[k]).sort()) {
 			let array = oBuckets[k][j].sort()
@@ -449,6 +480,9 @@ function calc(runtype) {
 			+"<br><details><summary>details</summary>" + detail.join("<br>") + "</details>"
 		)
 		console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n", data)
+		//if (k == "B" || k == "E") {
+		//	console.log(k +": "+ testname +" [" + bucketcount +" buckets]\n")
+		//}
 	}
 	dom.results.innerHTML = display.join("<br>")
 
