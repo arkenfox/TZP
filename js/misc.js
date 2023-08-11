@@ -465,10 +465,10 @@ const get_window_props = () => new Promise(resolve => {
 		// health
 		if (check && fpvalue !== zLIE) {
 			if (isMullvad) {
-				notation = sbx +" TBv13 "+ hash +"]"+sc
+				if (fpvalue == "0d0dd5d5" || fpvalue == "8815bd33") {notation = tb_green} // 823 standard | 822 safer
 			} else {
 				if (isOS == "android") {
-					notation = sbx +" TBv13 "+ hash +"]"+sc
+					notation = sbx +" TBv13 "+ fpvalue +"]"+sc
 				} else {
 					if (fpvalue == "226bc5ca" || fpvalue == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
 				}
