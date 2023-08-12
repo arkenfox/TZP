@@ -34,6 +34,7 @@ const get_audio2_context = (run, os = isOS) => new Promise(resolve => {
 		if (runSE) {foo++}
 		let t0 = nowFn()
 		let latencyError = false
+		// get unsorted
 		function a(a, b, c) {
 			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
 			d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
@@ -41,33 +42,29 @@ const get_audio2_context = (run, os = isOS) => new Promise(resolve => {
 		}
 		let f = new window.AudioContext
 		let obj
-		let results = {}
 		let	d = f.createAnalyser()
 		obj = a({}, f, "ac-")
 		obj = a(obj, f.destination, "ac-")
 		obj = a(obj, f.listener, "ac-")
 		obj = a(obj, d, "an-")
-		// get keys/value
-		for (const [key, value] of Object.entries(obj)) {
-			let testValue = value
-			if (key == "ac-outputLatency") {
-				// FF70+: nonRFP: can return 0.0 or 0
-				if (throwZero && run == 1) {testValue = 0}
-				latencyError = testValue === 0
-			}
-			if (runSL && key == "ac-channelCount") {testValue = 4} // sim a fake value
-			results[key] = testValue
-		}
-		// output
+
+		// FF70+: nonRFP: can return 0.0 or 0
+		if (throwZero && run == 1) {obj["ac-outputLatency"] = 0}
+		latencyError = obj["ac-outputLatency"] === 0
+		if (runSL) {obj["ac-channelCount"] = 4} // fake value
+
 		if (!latencyError || run == 2) {
 			let oCheck = {}, isLies = false, note = ""
 			let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
-			sDetail[zDOC][METRIC] = {}
-			for (const k of Object.keys(results).sort()) {
-				sDetail[zDOC][METRIC][k] = results[k]
-				oCheck[k] = subsetExclude.includes(k) ? "" : results[k]
+			// sort keys
+			let objnew = {}
+			for (const k of Object.keys(obj).sort()) {
+				objnew[k] = obj[k]
+				oCheck[k] = subsetExclude.includes(k) ? "" : obj[k]
 			}
-			let hash = mini(sDetail[zDOC][METRIC])
+			let hash = mini(objnew)
+			addDetail(METRIC, objnew, zDOC)
+
 			if (isSmart) {
 				if (mini(oCheck) !== "dfda7813") {isLies = true} // FF70+: keys [20] + expected hardcoded values [16]
 				if (os !== undefined) {
@@ -83,9 +80,9 @@ const get_audio2_context = (run, os = isOS) => new Promise(resolve => {
 				if (latencyError && isSmart) {note += sb +" [0 latency]"+ sc}
 			}
 			let displayHash = isLies ? colorFn(hash) : hash
-			dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(results).length +" keys") + note
+			dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + note
 			log_perf(SECT11, "context run #"+ run, t0)
-			return resolve([METRIC, (isLies ? zLIE : sDetail[zDOC][METRIC])])
+			return resolve([METRIC, (isLies ? zLIE : addData("none", METRIC, objnew, hash))])
 		} else {
 			log_perf(SECT11, "context run #"+ run, t0)
 			return resolve("redo")
@@ -139,19 +136,16 @@ const get_audio2_hybrid = () => new Promise(resolve => {
 				gain.disconnect()
 				// output
 				if (runSL) {results = []}
-				let hash = "", obj = {}, isEmpty = false, btn = ""
+				let hash = "", isEmpty = false
 				if (results.length) {
 					hash = mini(results)
-					addDetail(METRIC, results, zDOC)
-					btn = addButton(11, METRIC)
-					obj = addData("none", METRIC, results, hash)
 				} else {
 					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
 					isEmpty = true
 				}
-				dom.audio3hash.innerHTML = hash + btn
+				dom.audio3hash.innerHTML = hash
 				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : obj)])
+				return resolve([METRIC, (isEmpty ? zErr : hash)])
 			} catch(e) {
 				let eMsg = log_error(SECT11, METRIC, e)
 				dom.audio3hash = eMsg
@@ -197,19 +191,16 @@ const get_audio2_oscillator = () => new Promise(resolve => {
 				gain.disconnect()
 				// output
 				if (runSL) {results = []}
-				let hash = "", obj = {}, isEmpty = false, btn = ""
+				let hash = "", isEmpty = false
 				if (results.length) {
 					hash = mini(results)
-					addDetail(METRIC, results, zDOC)
-					btn = addButton(11, METRIC)
-					obj = addData("none", METRIC, results, hash)
 				} else {
 					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
 					isEmpty = true
 				}
-				dom.audio2hash.innerHTML = hash + btn
+				dom.audio2hash.innerHTML = hash
 				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : obj)])
+				return resolve([METRIC, (isEmpty ? zErr : hash)])
 			} catch(e) {
 				let eMsg = log_error(SECT11, METRIC, e)
 				dom.audio2hash = eMsg
@@ -310,6 +301,10 @@ function outputAudio() {
 		// .7499
 		35.74996018782258,35.74996031448245,35.7499681673944,
 		35.74995414912701, // <- my android 113+: 1519004 ?
+
+		// 1358149
+		35.749968223273754 
+
 	*/
 
 	// ToDo: reduce bufferLen as long as it doesn't change entropy
