@@ -4,8 +4,6 @@
 https://canvasblocker.kkapsner.de/test/
 https://audiofingerprint.openwpm.com/ */
 
-let throwZero = false
-
 function byteArrayToHex(arrayBuffer){
 	var chunks = [];
 	(new Uint32Array(arrayBuffer)).forEach(function(num){
@@ -28,12 +26,11 @@ function check_audioLies() {
 	return audioList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 
-const get_audio2_context = (run, os = isOS) => new Promise(resolve => {
+const get_audio2_context = (os = isOS) => new Promise(resolve => {
 	const METRIC = "audioContext_keys"
 	try {
 		if (runSE) {foo++}
 		let t0 = nowFn()
-		let latencyError = false
 		// get unsorted
 		function a(a, b, c) {
 			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
@@ -48,45 +45,45 @@ const get_audio2_context = (run, os = isOS) => new Promise(resolve => {
 		obj = a(obj, f.listener, "ac-")
 		obj = a(obj, d, "an-")
 
-		// FF70+: nonRFP: can return 0.0 or 0
-		if (throwZero && run == 1) {obj["ac-outputLatency"] = 0}
-		latencyError = obj["ac-outputLatency"] === 0
+		// sim
 		if (runSL) {obj["ac-channelCount"] = 4} // fake value
 
-		if (!latencyError || run == 2) {
-			let oCheck = {}, isLies = false, note = ""
-			let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
-			// sort keys
-			let objnew = {}
-			for (const k of Object.keys(obj).sort()) {
-				objnew[k] = obj[k]
-				oCheck[k] = subsetExclude.includes(k) ? "" : obj[k]
-			}
-			let hash = mini(objnew)
-			addDetail(METRIC, objnew, zDOC)
-
-			if (isSmart) {
-				if (mini(oCheck) !== "dfda7813") {isLies = true} // FF70+: keys [20] + expected hardcoded values [16]
-				if (os !== undefined) {
-					// RFP notation: includes 1564422 outputLatency
-					note = rfp_red
-					if (hash == "67a3eeee" && os == "windows") {note = rfp_green // 0.04
-					} else if (hash == "debdefc0" && os == "mac") {note = rfp_green // 512/44100 (RFP hardcodes samplerate)
-					} else if (hash == "2b9d44b0" && os == "android") {note = rfp_green // 0.02
-					} else if (hash == "9b69969b") {note = rfp_green // 0.025 catchall incl linux
-					}
-				}
-				// 0 latency
-				if (latencyError && isSmart) {note += sb +" [0 latency]"+ sc}
-			}
-			let displayHash = isLies ? colorFn(hash) : hash
-			dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + note
-			log_perf(SECT11, "context run #"+ run, t0)
-			return resolve([METRIC, (isLies ? zLIE : addData("none", METRIC, objnew, hash))])
-		} else {
-			log_perf(SECT11, "context run #"+ run, t0)
-			return resolve("redo")
+		let oCheck = {}, isLies = false, note = "", latencynote = ""
+		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
+		// sort keys
+		let objnew = {}
+		for (const k of Object.keys(obj).sort()) {
+			objnew[k] = obj[k]
+			oCheck[k] = subsetExclude.includes(k) ? "" : obj[k]
 		}
+		let hash = mini(objnew) // includes original latency
+
+		if (isSmart) {
+			if (mini(oCheck) !== "dfda7813") {isLies = true} // FF70+: keys [20] + expected hardcoded values [16]
+			if (os !== undefined) {
+				// RFP notation: includes 1564422 outputLatency
+				note = rfp_red
+				if (hash == "67a3eeee" && os == "windows") {note = rfp_green // 0.04
+				} else if (hash == "debdefc0" && os == "mac") {note = rfp_green // 512/44100 (RFP hardcodes latency)
+				} else if (hash == "2b9d44b0" && os == "android") {note = rfp_green // 0.02
+				} else if (hash == "9b69969b") {note = rfp_green // 0.025 catchall incl linux
+				}
+			}
+		}
+
+		// ac-outputLatency is variable per tab and even on page load
+			// so on non RFP hashes, change it to variable and display the original on screen
+		if (note !== rfp_green) {
+			latencynote = " [" + objnew["ac-outputLatency"]+ " latency]"
+			objnew["ac-outputLatency"] = "variable"
+			hash = mini(objnew)
+		}
+		let displayHash = isLies ? colorFn(hash) : hash
+		addDetail(METRIC, objnew, zDOC)
+		dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + note + latencynote
+		log_perf(SECT11, "context", t0)
+		return resolve([METRIC, (isLies ? zLIE : addData("none", METRIC, objnew, hash))])
+
 	} catch(e) {
 		let eMsg = log_error(SECT11, METRIC, e)
 		let notation = (isTB && !isMullvad) ? "" : rfp_red
@@ -250,21 +247,12 @@ function outputAudio2() {
 			]).then(function(results){
 				section[results[0][0]] = results[0][1] // oscillator
 				Promise.all([
-					get_audio2_context(1),
+					get_audio2_context(),
 					get_audio2_hybrid(),
 				]).then(function(results){
 					section[results[1][0]] = results[1][1] // hybrid
-					if (results[0] == "redo") {
-						Promise.all([
-							get_audio2_context(2),
-						]).then(function(results){
-							section[results[0][0]] = results[0][1] // context run#2
-							output()
-						})
-					} else {
-						section[results[0][0]] = results[0][1] // context run#1
-						output()
-					}
+					section[results[0][0]] = results[0][1] // context run#1
+					output()
 				})
 			})
 		} catch(e) {
