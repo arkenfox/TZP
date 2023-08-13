@@ -296,7 +296,13 @@ function get_computed_styles() {
 					hash = colorFn(hash)
 					log_known(SECT14, METRIC)
 				} else {
-					if (check && hash === "e32d06bd") {notation = tb_green}
+					if (check) {
+						/* win diff
+						layout.css.font-variations.enabled: fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+						*/
+						if (hash === "e32d06bd") {notation = tb_green // TB/MB win11 1102
+						} else if (hash === "e14684e7") {notation = tb_green} // TB/MB win7 1098
+					}
 					addData(14, METRIC, res[lookup]["keys"], hash)
 				}
 				log_display(14, METRIC, hash + btn + notation)
