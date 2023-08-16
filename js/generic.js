@@ -356,8 +356,8 @@ const get_isTB = () => new Promise(resolve => {
 	if (!runTE) {
 		try {
 			let css = document.createElement("link")
-			// ToDo: TB13+: may not work on android
-			css.href = isVer > 102 ? "chrome://browser/locale/aboutTBUpdate.dtd" : "resource://torbutton-assets/aboutTor.css"
+			// ToDo: TB13+: does not work on android
+			css.href = isVer > 102 ? "chrome://branding/content/tor-styles.css" : "resource://torbutton-assets/aboutTor.css"
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
