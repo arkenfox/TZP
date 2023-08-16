@@ -31,7 +31,7 @@ const get_element_keys = () => new Promise(resolve => {
 			addData(15, METRIC, keys, hash)
 			if (check) {
 				if (isOS === "android") {
-					notation = sbx +" awaiting TBv13 hash]"+sc
+					if (hash === "fb490d00") {notation = tb_green} // 264
 				} else {
 					if (hash === "463107cf") {notation = tb_green} // 273
 				}
