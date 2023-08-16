@@ -298,9 +298,10 @@ function get_computed_styles() {
 				} else {
 					if (check) {
 						/* win diff
-						layout.css.font-variations.enabled: fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+						layout.css.font-variations.enabled = locked false on win 7
+						fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
 						*/
-						if (hash === "e32d06bd") {notation = tb_green // TB/MB win11 1102
+						if (hash === "e32d06bd") {notation = tb_green // TB/MB win11 + linux, TB android: 1102
 						} else if (hash === "e14684e7") {notation = tb_green} // TB/MB win7 1098
 					}
 					addData(14, METRIC, res[lookup]["keys"], hash)
