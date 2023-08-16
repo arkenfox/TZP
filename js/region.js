@@ -281,7 +281,9 @@ function get_lang() {
 		function get_locales(name) {
 			function get_localeitem(item) {
 				try {
-					if (item == "collator") {return IntlC.resolvedOptions().locale
+					if (item == "collator") {
+						if (runSL) {return "en-FAKE"}
+						return IntlC.resolvedOptions().locale
 					} else if (item == "datetimeformat") {return IntlDTF.resolvedOptions().locale
 					} else if (item == "displaynames") {return new Intl.DisplayNames(localecode, {type: "region"}).resolvedOptions().locale
 					} else if (item == "listformat") {return new Intl.ListFormat(localecode).resolvedOptions().locale
@@ -448,61 +450,68 @@ function get_lang() {
 		]).then(function(results){
 			//console.log(oTempData)
 			let hash, data, res, value, value2, fpvalue, METRIC, METRIC2, newobj, notation = ""
-			// language = existing key, languages += value
 			const enUS = "en-US, en"
-			const oTBLang = {
-				"ar": enUS,
-				"ca": enUS,
-				"cs": "sk, "+ enUS,
-				"da": enUS,
-				"de": enUS,
-				"el-GR": "el, "+ enUS,
-				"en-US": "en",
-				"es-ES": "es, "+ enUS,
-				"fa-IR": "fa, "+ enUS,
-				"fi-FI": "fi, "+ enUS,
-				"fr": "fr-FR, "+ enUS,
-				"ga-IE": "ga, en-IE, en-GB, "+ enUS,
-				"he": "he-IL, "+ enUS,
-				"hu-HU": "hu, "+ enUS,
-				"id": enUS,
-				"is": enUS,
-				"it-IT": "it, "+ enUS,
-				"ja": enUS,
-				"ka-GE": "ka, "+ enUS,
-				"ko-KR": "ko, "+ enUS,
-				"lt": enUS +", ru, pl",
-				"mk-MK": "mk, "+ enUS,
-				"ms": enUS,
-				"my": "en-GB, en",
-				"nb-NO": "nb, no-NO, no, nn-NO, nn, "+ enUS,
-				"nl": enUS,
-				"pl": enUS,
-				"pt-BR": "pt, "+ enUS,
-				"ro-RO": "ro, en-US, en-GB, en",
-				"ru-RU": "ru, "+ enUS,
-				"sq": "sq-AL, "+ enUS,
-				"sv-SE": "sv, "+ enUS,
-				"th": enUS,
-				"tr-TR": "tr, "+ enUS,
-				"uk-UA": "uk, "+ enUS,
-				"vi-VN": "vi, "+ enUS,
-				"zh-CN": "zh, zh-TW, zh-HK, "+ enUS,
-				"zh-TW": "zh, "+ enUS,
+			let oSupported = {
+				// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
+				"ar": [enUS],
+				"ca": [enUS],
+				"cs": ["sk, "+ enUS],
+				"da": [enUS],
+				"de": [enUS],
+				"el-GR": ["el, "+ enUS, "el"],
+				"en-US": ["en"],
+				"es-ES": ["es, "+ enUS],
+				"fa-IR": ["fa, "+ enUS, "fa"],
+				"fi-FI": ["fi, "+ enUS, "fi"],
+				"fr": ["fr-FR, "+ enUS],
+				"ga-IE": ["ga, en-IE, en-GB, "+ enUS],
+				"he": ["he-IL, "+ enUS],
+				"hu-HU": ["hu, "+ enUS, "hu"],
+				"id": [enUS],
+				"is": [enUS],
+				"it-IT": ["it, "+ enUS, "it"],
+				"ja": [enUS],
+				"ka-GE": ["ka, "+ enUS, "ka"],
+				"ko-KR": ["ko, "+ enUS, "ko"],
+				"lt": [enUS +", ru, pl"],
+				"mk-MK": ["mk, "+ enUS, "mk"],
+				"ms": [enUS],
+				"my": ["en-GB, en"],
+				"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ enUS],
+				"nl": [enUS],
+				"pl": [enUS],
+				"pt-BR": ["pt, "+ enUS],
+				"ro-RO": ["ro, en-US, en-GB, en", "ro"],
+				"ru-RU": ["ru, "+ enUS, "ru"],
+				"sq": ["sq-AL, "+ enUS],
+				"sv-SE": ["sv, "+ enUS],
+				"th": [enUS],
+				"tr-TR": ["tr, "+ enUS, "tr"],
+				"uk-UA": ["uk, "+ enUS, "uk"],
+				"vi-VN": ["vi, "+ enUS, "vi"],
+				"zh-CN": ["zh, zh-TW, zh-HK, "+ enUS, "zh-Hans-CN"],
+				"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
+			}
+			if (isMullvad) {
+				// 22 of 38 supported
+				let notSupported = ["ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",]
+				notSupported.forEach(function(key){
+					delete oSupported[key]
+				})
 			}
 
 			// LANGUAGES
 			METRIC = "languages"
 			data = oTempData[METRIC]
-			let langcheck = (isSmart && isTB && !isMullvad && isOS !== "android" && isVer > 114) // ToDo: android may differ, ignore for now
+			let langcheck = (isSmart && isTB && isOS !== "android" && isVer > 114) // ToDo: android may differ, ignore for now
 			Object.keys(data).forEach(function(item){
 				METRIC = item
 				if (langcheck) {
 					notation = tb_red
 					if (item == "language") {
-						if (oTBLang[data[item]] !== undefined) {notation = tb_green}
+						if (oSupported[data[item]] !== undefined) {notation = tb_green}
 					} else {
-						if (data[item] == data.language +", "+ oTBLang[data.language]) {notation = tb_green}
+						if (data[item] == data.language +", "+ oSupported[data.language][0]) {notation = tb_green}
 					}
 				}
 				log_display(4, METRIC, data[item] + notation)
@@ -551,21 +560,11 @@ function get_lang() {
 			addData(4, METRIC, fpvalue)
 			if (langcheck) {
 				notation = tb_red
-				let lang0 = oTempData["languages"]["language"]
+				let key = oTempData["languages"]["language"]
 				// only green if TB supported
-				if (oTBLang[lang0] !== undefined) {
-					let oExceptions = {
-						"el-GR": "el", "fa-IR": "fa", "fi-FI": "fi", "hu-HU": "hu", "it-IT": "it",
-						"ka-GE": "ka", "ko-KR": "ko", "mk-MK": "mk", "ro-RO": "ro", "ru-RU": "ru",
-						"tr-TR": "tr", "uk-UA": "uk", "vi-VN": "vi", "zh-CN": "zh-Hans-CN", "zh-TW": "zh-Hant-TW",
-					}
-					if (oExceptions[lang0] !== undefined) {
-						// check exceptions first
-						if (value === oExceptions[lang0]) {notation = tb_green}
-					} else if (value == lang0) {
-						// exact match
-						notation = tb_green
-					}
+				if (oSupported[key] !== undefined) {
+					let expected = oSupported[key][1] == undefined ? key : oSupported[key][1]
+					if (value === expected) {notation = tb_green}
 				}
 			}
 			log_display(4, METRIC, value + notation)
