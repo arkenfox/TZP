@@ -956,11 +956,19 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
 		let hash = mini(newobj)
 		if (isSmart && isTB && isVer > 114) {
-			// this doesn't officially land in stable until TB13
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
-			if (os == "windows" || os == "android") {notation = hash == "c89fb033" ? tb_green : tb_red
-			} else if (os == "mac") { notation = sbx +" awaiting TBv13 hash]"+sc //hash == "" ? tb_green : tb_red
-			} else if (os == "linux") {notation = sbx +" awaiting TBv13 hash]"+sc // hash == "" ? tb_green : tb_red
+			notation = tb_red
+			if (os == "windows") {
+				/* "12px normal 400 sans-serif" */
+				if (hash == "c89fb033") {notation = tb_green}
+			} else if (os == "mac") {
+				if (hash == "") {notation = tb_green}
+			} else if (os == "linux") {
+				/* "15px normal 400 sans-serif" */
+				if (hash == "7b469d36") {notation = tb_green}
+			} else if (os == "android") {
+				/* currently "16px normal 400 " (computedStyle font-family is missing) */
+				if (hash == "") {notation = tb_green}
 			}
 		}
 		addData(12, METRIC, newobj, hash)
@@ -993,9 +1001,26 @@ const get_widget_fonts = (os = isOS) => new Promise(resolve => {
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
 		let hash = mini(newobj)
 		if (isSmart && isTB) {
-			if (os == "windows") {notation = hash == "c67d44bc" ? tb_green : tb_red
-			} else if (os == "mac") {notation = hash == "07a7a13c" ? tb_green : tb_red
-			} else if (os == "linux" || os == "android") {notation = hash == "dedd903d" ? tb_green : tb_red
+			notation = tb_red
+			if (os == "windows") {
+				/* 
+				"monospace 13.3333px": ["datetime", "datetime-local", "time"],
+				"monospace 13px": ["textarea"],
+				"sans-serif 13.3333px": [19 items],
+				"sans-serif 13px": ["image"]
+				*/
+				if (hash == "c67d44bc") {notation = tb_green}
+			} else if (os == "mac") {
+				if (hash == "07a7a13c") {notation = tb_green}
+			} else if (os == "linux" || os == "android") {
+				/*
+				"monospace 12px": ["textarea"],
+				"monospace 13.3333px": ["datetime", "datetime-local", "time"],
+				"sans-serif 13.3333px": [19 items],
+				"sans-serif 13px": ["image"]
+				*/
+				// regression: TBA13 is missing font-family on the 19 items
+				if (hash == "dedd903d") {notation = tb_green}
 			}
 		}
 		addData(12, METRIC, newobj, hash)
