@@ -145,7 +145,7 @@ const get_audio2_hybrid = () => new Promise(resolve => {
 				if (isSmart) {
 					// ToDo: add MB when patches backported
 					if (isVer > 117) {
-						//notation = rfp_red // technically, it could be new but unknown
+						notation = rfp_new
 						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
 						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
 						}
@@ -211,7 +211,7 @@ const get_audio2_oscillator = () => new Promise(resolve => {
 				if (isSmart) {
 					// ToDo: add MB when patches backported
 					if (isVer > 117) {
-						//notation = rfp_red // technically, it could be new but unknown
+						notation = rfp_new
 						if (hash == "e9f98e24") {notation = sgtick+"RFP x86/amd]"+sc
 						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc
 						}
@@ -368,7 +368,7 @@ function outputAudio() {
 								// don't notate FF lies
 								if (!isLies) {
 									// we have two results: ARM and non-ARM: but there could be others
-									notation = zNEW
+									notation = sbx +" FF118+ undocumented]"+ sc
 									if (hashC == "24fc63ce") {notation = sgtick+"FF118+ x86/amd]"+sc
 									} else if (hashC == "a34c73cd") {notation = sgtick+"FF118+ ARM]"+sc
 									}
