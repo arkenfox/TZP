@@ -80,6 +80,7 @@ const get_audio2_context = (os = isOS) => new Promise(resolve => {
 		}
 		let displayHash = isLies ? colorFn(hash) : hash
 		addDetail(METRIC, objnew, zDOC)
+
 		dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + note + latencynote
 		log_perf(SECT11, "context", t0)
 		return resolve([METRIC, (isLies ? zLIE : addData("none", METRIC, objnew, hash))])
@@ -94,6 +95,7 @@ const get_audio2_context = (os = isOS) => new Promise(resolve => {
 
 const get_audio2_hybrid = () => new Promise(resolve => {
 	const METRIC = "audio_hybrid"
+	let notation = ""
 	try {
 		if (runSE) {foo++}
 		let t0 = nowFn()
@@ -140,7 +142,16 @@ const get_audio2_hybrid = () => new Promise(resolve => {
 					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
 					isEmpty = true
 				}
-				dom.audio3hash.innerHTML = hash
+				if (isSmart) {
+					// ToDo: add MB when patches backported
+					if (isVer > 117) {
+						//notation = rfp_red // technically, it could be new but unknown
+						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
+						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
+						}
+					}
+				}
+				dom.audio3hash.innerHTML = hash + notation
 				log_perf(SECT11, METRIC, t0)
 				return resolve([METRIC, (isEmpty ? zErr : hash)])
 			} catch(e) {
@@ -159,6 +170,7 @@ const get_audio2_hybrid = () => new Promise(resolve => {
 
 const get_audio2_oscillator = () => new Promise(resolve => {
 	const METRIC = "audio_oscillator"
+	let notation = ""
 	try {
 		if (runSE) {foo++}
 		let t0 = nowFn()
@@ -195,7 +207,18 @@ const get_audio2_oscillator = () => new Promise(resolve => {
 					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
 					isEmpty = true
 				}
-				dom.audio2hash.innerHTML = hash
+
+				if (isSmart) {
+					// ToDo: add MB when patches backported
+					if (isVer > 117) {
+						//notation = rfp_red // technically, it could be new but unknown
+						if (hash == "e9f98e24") {notation = sgtick+"RFP x86/amd]"+sc
+						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc
+						}
+					}
+				}
+
+				dom.audio2hash.innerHTML = hash + notation
 				log_perf(SECT11, METRIC, t0)
 				return resolve([METRIC, (isEmpty ? zErr : hash)])
 			} catch(e) {
@@ -247,11 +270,11 @@ function outputAudio2() {
 			]).then(function(results){
 				section[results[0][0]] = results[0][1] // oscillator
 				Promise.all([
-					get_audio2_context(),
 					get_audio2_hybrid(),
+					get_audio2_context(),
 				]).then(function(results){
-					section[results[1][0]] = results[1][1] // hybrid
-					section[results[0][0]] = results[0][1] // context run#1
+					section[results[0][0]] = results[0][1] // hybrid
+					section[results[1][0]] = results[1][1] // context
 					output()
 				})
 			})
@@ -281,19 +304,7 @@ function outputAudio2() {
 function outputAudio() {
 	let t0 = nowFn()
 	let METRIC = "offlineAudioContext"
-	let notation = isTB && !isMullvad ? tb_red : default_red
-
-	/* documented gecko data
-		// .7383...
-		35.73832903057337,35.7383295930922,35.73833039775491,35.73833402246237,
-		// .7499
-		35.74996018782258,35.74996031448245,35.7499681673944,
-		35.74995414912701, // <- my android 113+: 1519004 ?
-
-		// 1358149
-		35.749968223273754 
-
-	*/
+	let notation = ""
 
 	// ToDo: reduce bufferLen as long as it doesn't change entropy
 	// also: when we add RFP + math PoC we need only check for protection (like canvas)
@@ -347,7 +358,24 @@ function outputAudio() {
 						}
 						// display/FP
 						let audioStr = hashC +" | "+ hashG +" | "+ sum
-						log_display(11, METRIC, (isLies ? colorFn(audioStr) : audioStr) + (isSmart && isTB && !isMullvad ? tb_red : ""))
+						if (isSmart) {
+							if (isTB && !isMullvad) {notation = tb_red
+							} else if (isMullvad) {
+								if (isLies) {notation = tb_red}
+								// ignore non lies MB until we get math patches
+								// we don't want anything green unless it's protected
+							} else if (isVer > 117) {
+								// don't notate FF lies
+								if (!isLies) {
+									// we have two results: ARM and non-ARM: but there could be others
+									notation = zNEW
+									if (hashC == "24fc63ce") {notation = sgtick+"FF118+ x86/amd]"+sc
+									} else if (hashC == "a34c73cd") {notation = sgtick+"FF118+ ARM]"+sc
+									}
+								}
+							}
+						}
+						log_display(11, METRIC, (isLies ? colorFn(audioStr) : audioStr) + notation)
 						if (isLies) {log_known(SECT11, METRIC)}
 						// only add hash to FP: detailed data not worth it
 						addData(11, METRIC, (isLies ? zLIE : hashG))
