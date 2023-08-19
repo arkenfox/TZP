@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 68, maxVer = 117, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 69, maxVer = 118, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -270,11 +270,21 @@ function outputVersion() {
 			}
 		}
 
+		/* FYI: CSS diffs ignore
+			alignTracks + justifyTracks + masonryAutoFlow : layout.css.grid-template-masonry-value.enabled
+			contentVisibility: layout.css.content-visibility.enabled 
+			fontVariantEmoji : layout.css.font-variant-emoji.enabled
+			offsetPosition : layout.css.motion-path-offset-position.enabled
+		*/
+		// 118: 1849010
+		let t118 = performance.now()
+		let ver118 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition"))
+		rec(118, 118, "1849010", ver118, performance.now()-t118)
+
 		// 117: 1842467
 		let t117 = performance.now()
 		let ver117 = (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch"))
 		rec(117, 117, "1842467", ver117, performance.now()-t117)
-
 
 		// 116: 1839614
 		let t116 = performance.now()
@@ -288,8 +298,7 @@ function outputVersion() {
 
 		// 114: 1826629 // slow ~2ms
 		let t114 = performance.now()
-		let ver114 = ("function" === typeof CSS2Properties
-			&& CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
+		let ver114 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
 		rec(114, 114, "1826629", ver114, performance.now()-t114)
 
 		// 113: 1709347
