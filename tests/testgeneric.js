@@ -379,11 +379,12 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 117
+		isVerMax = 118
+		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering")) return 116 // 1839614
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
-		if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
+		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("reset")) return 113 // 1709347
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) return 112 // 1756175
 		if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
@@ -430,7 +431,7 @@ const get_isVer = () => new Promise(resolve => {
 		try {if (1595289600000 === Date.parse('21 Jul 20 00:00:00 GMT')) {return 82}} catch(e) {} // 1655947
 			// ^ ext fuckery: cydec
 		if (new File(["x"], "a/b").name == "a/b") return 81 // 1650607
-		if (CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
+		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("appearance")) return 80 // 1620467
 		if ("function" === typeof Promise.any) return 79 // 1599769 shipped
 		if (window.Document.prototype.hasOwnProperty("replaceChildren")) return 78 // 1626015
 		if (window.IDBCursor.prototype.hasOwnProperty("request")) return 77 // 1536540
