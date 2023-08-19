@@ -255,89 +255,103 @@ const get_scr_subpixels = (runtype) => new Promise(resolve => {
 	return resolve(oSubpixels)
 })
 
-function get_scr_orientation() {
-	return new Promise(resolve => {
-		// mm
-		let mmNames = ["-moz-device-orientation","orientation","aspect-ratio","device-aspect-ratio"]
-		let mmRes = []
-		let l = "landscape", p = "portrait", q = "(orientation: ", s = "square", a = "aspect-ratio"
 
-		for (let i=0; i < 4; i++) {
-			try {
-				if (runSE) {foo++}
-				let value = undefined
-				if (i == 0) {
-					if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
-					if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
-				} else if (i == 1) {
-					if (window.matchMedia(q + p +")").matches) value = p
-					if (window.matchMedia(q + l +")").matches) value = l
-				} else if (i == 2) {
-					if (window.matchMedia("("+ a +":1/1)").matches) value = s
-					if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
-					if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
-				} else {
-					if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
-					if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
-					if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
-				}
-				if (value == undefined) {value = zU}
-				mmRes.push(value)
-			} catch(e) {
-				log_error(SECT1, "matchmedia_"+ mmNames[i], e)
-				mmRes.push(zErr)
-			}
-		}
-		// get css values
-		let cssRes = []
-		cssRes.push(getElementProp(SECT1, "#cssOm"))
-		cssRes.push(getElementProp(SECT1, "#cssO"))
-		cssRes.push(getElementProp(SECT1, "#cssAR"))
-		cssRes.push(getElementProp(SECT1, "#cssDAR"))
-		// lies
-		if (runSL) {mmRes = ["a","b","c","d"]}
-		let aDisplay = []
-		for (let i=0; i < 4; i++) {
-			if (isSmart && cssRes[i] !== "x" && cssRes[i] !== mmRes[i] && mmRes[i] !== zErr) {
-				aDisplay.push(colorFn(mmRes[i]))
-				log_known(SECT1, "matchmedia_"+ mmNames[i])
-			} else {
-				aDisplay.push(mmRes[i])
-			}
-		}
-		log_display(1, "mmO", aDisplay.join(" | "))
-
-		// screen*
+const get_scr_orientation = (type) => new Promise(resolve => {
+	let oScreen = {}, oWindow = {}
+	// matchmedia: sorted names
+	let names = [
+		["-moz-device-orientation", "#cssOm"],
+		["device-aspect-ratio", "#cssDAR"],
+		["aspect-ratio", "#cssAR"],
+		["orientation", "#cssO"],
+	]
+	let l = "landscape", p = "portrait", q = "(orientation: ", s = "square", a = "aspect-ratio"
+	let aWindow = [], aScreen = []
+	for (let i=0; i < names.length; i++) {
+		let value
 		try {
-			dom.scrOrient.innerHTML = (function() {
-				if (runSE) {foo++}
-				let names = ["orientation.type", "mozOrientation", "orientation.angle"]
-				let res = []
-				for (let i=0; i < 3; i++) {
-					try {
-						if (i == 0) { res.push(screen.orientation.type)
-						} else if (i == 1) { res.push(screen.mozOrientation)
-						} else { res.push(screen.orientation.angle)}
-					} catch(e) {
-						log_error(SECT1, "screen."+ names[i], e)
-						res.push(zErr)
-					}
-				}
-				let r = res.join(" | ")
-				r = r.replace(/landscape-secondary/g, "upside down")
-				r = r.replace(/-primary/g, "")
-				r = r.replace(/-secondary/g, "")
-				if (isSmart) {
-					r += (r == "landscape | landscape | 0" ? rfp_green : rfp_red)
-				}
-				return r
-			})()
+			if (runSE) {foo++}
+			if (i == 0) {
+				if (window.matchMedia("(-moz-device-orientation:"+ l +")").matches) value = l
+				if (window.matchMedia("(-moz-device-orientation:"+ p +")").matches) value = p
+			} else if (i == 1) {
+				if (window.matchMedia("(device-"+ a +":1/1)").matches) value = s
+				if (window.matchMedia("(min-device-"+ a +":10000/9999)").matches) value = l
+				if (window.matchMedia("(max-device-"+ a +":9999/10000)").matches) value = p
+			} else if (i == 2) {
+				if (window.matchMedia("("+ a +":1/1)").matches) value = s
+				if (window.matchMedia("(min-"+ a +":10000/9999)").matches) value = l
+				if (window.matchMedia("(max-"+ a +":9999/10000)").matches) value = p
+			} else {
+				if (window.matchMedia(q + p +")").matches) value = p
+				if (window.matchMedia(q + l +")").matches) value = l
+			}
+			if (value == undefined) {value = zU}
 		} catch(e) {
-			dom.scrOrient.innerHTML = log_error(SECT1, "orientation", e)
+			log_error(SECT1, names[i][0], e)
+			value = zErr
 		}
-		return resolve("skip")
-	})
-}
+		if (runSL) {value += "_fake"}
+		let display = value
+		// css
+		let isLies = false
+		let cssvalue = getElementProp(SECT1, names[i][1])
+		if (isSmart && value !== zErr && cssvalue !== "x") {
+			if (value !== cssvalue) {
+				display = colorFn(display)
+				value = zLIE
+				log_known(SECT1, names[i][0])
+			}
+		}
+		if (i < 2) {
+			aScreen.push(display)
+			oScreen[names[i][0]] = value
+			oScreen[names[i][0] +"_css"] = cssvalue
+		} else {
+			aWindow.push(display)
+			oWindow[names[i][0]] = value
+			oWindow[names[i][0] +"_css"] = cssvalue
+		}
+	}
+	log_display(1, "screen_mmorientation", aScreen.join(" | "))
+	log_display(1, "window_mmorientation", aWindow.join(" | "))
+
+	// screen
+	names = ["mozOrientation", "orientation.angle", "orientation.type"], aScreen = []
+	for (let i=0; i < 3; i++) {
+		let value
+		try {
+			if (runSE) {foo++}
+			if (i == 0) {value = screen.mozOrientation
+			} else if (i == 1) {value = screen.orientation.angle
+			} else {value = screen.orientation.type
+			}
+			if (value == undefined) {value = zU}
+		} catch(e) {
+			log_error(SECT1, names[i], e)
+			value = zErr
+		}
+		aScreen.push(value)
+		oScreen[names[i]] = value
+	}
+	let display = aScreen.join(" | ")
+	if (isSmart) {
+		// does this makes sense? e.g. we control the screen, based on inner, so it should reflect
+		// that, not sure about angle. i.e this is just lying about equivalency of already protected values?
+		// ... BUT we should continue to protect -primary vs -secondary
+		// ... AND we should make sure subpixels round up (e.g min)
+		display += (display == "landscape-primary | 0 | landscape-primary" ? rfp_green : rfp_red)
+	}
+	log_display(1, "screen_orientation", display)
+
+	if (type !== "resize") {
+		// objects are already sorted
+		addData(1, "screen_orientation", oScreen, mini(oScreen))
+		addData(1, "window_orientation", oWindow, mini(oWindow))
+	}
+	return resolve()
+})
+
 
 const get_scr_positions = (type) => new Promise(resolve => {
 	const METRIC = type +"_positions"
@@ -639,12 +653,6 @@ function get_scr_window(runtype) {
 		}
 		r = match ? screen_green : screen_red
 		dom.scrmatch.innerHTML = r
-		// color
-		let c = match ? "#9ddc9d" : "#ff7777"
-		let items = document.getElementsByClassName("scrgroup")
-		for (let i=0; i < items.length; i++) {
-			items[i].style.color = c
-		}
 		*/
 
 		// inner: LB/NW
@@ -1422,7 +1430,7 @@ function outputScreenResize(runtype) {
 			get_scr_subpixels(runtype),
 
 			get_scr_scrollbar(runtype), // gets viewport
-			get_scr_orientation(),
+			get_scr_orientation(runtype),
 			get_scr_window(runtype),
 			get_scr_window_mm(runtype),
 

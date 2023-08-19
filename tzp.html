@@ -138,51 +138,61 @@
 			<span class="c" id="screenhash"></span>
 		</td></tr>
 
-		<!--screen &#9679 dot-->
-		<tr><td>available screen <span class="bold scrgroup"> &#9679 </span></td>
+		<!--screen: positions > orientation > measurements-->
+		<tr><td>
+			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
+			&nbsp screen positions</td><td class="c mono" id="screen_positions"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
+			&nbsp orientation</td><td class="c mono" id="screen_orientation"></td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
+			device-aspect-ratio</span></div> &nbsp [css] orientation</td>
+			<td class="mono"><span id="cssOm"></span> | <span id="cssDAR"></span></td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
+			device-aspect-ratio</span></div> &nbsp [matchMedia] orientation</td>
+			<td class="mono border-bottom"><span id="screen_mmorientation"></span>
+			</td></tr>
+		<tr><td>available screen</td>
 			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes_match"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
-			&nbsp [css min-device-] screen <sup>1</sup> <span class="bold scrgroup"> &#9679 </span></td>
+			&nbsp [css min-device-] screen <sup>1</sup></td>
 			<td class="mono" id="S"></td></tr>
-		<tr><td>[matchMedia] screen <sup>2</sup>
-			<span class="bold scrgroup"> &#9679 </span></td><td class="c mono" id="mmScreen"></td></tr>
-		<tr><td>screen <span class="bold scrgroup"> &#9679 </span></td>
-			<td class="border-bottom"><span class="c mono" id="mScreen">&nbsp</span></td></tr>
+		<tr><td>[matchMedia] screen <sup>2</sup></td><td class="c mono" id="mmScreen"></td></tr>
+		<tr><td>screen</td><td class="border-bottom"><span class="c mono" id="mScreen">&nbsp</span></td></tr>
 
-		<!--inner &#9670 diamond-->
-		<tr><td>outer window <span class="bold wingroup"> &#9679 </span></td>
-			<td class="mono"><span class="c" id="mOuter"></span>
-			<span class="c" id="window_sizes_match"></span></td></tr>
+		<!--window: measurements > viewport/scrollbars > orientation > positions-->
+		<tr><td>outer window</td>
+			<td class="mono"><span class="c" id="mOuter"></span><span class="c" id="window_sizes_match"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">range 400-2560</span></div>
-			&nbsp [css min-] inner window <sup>1, 3</sup> <span class="bold wingroup"> &#9679 </span></td>
-			<td class="mono" id="D"></td></tr>
-		<tr><td>[matchMedia] inner window <sup>2</sup> <span class="bold wingroup"> &#9679 </span></td>
-			<td class="c mono" id="mmInner"></td></tr>
-		<tr><td>inner window <span class="bold wingroup"> &#9679 </span></td>
+			&nbsp [css min-] inner window <sup>1, 3</sup></td><td class="mono" id="D"></td></tr>
+		<tr><td>[matchMedia] inner window <sup>2</sup></td><td class="c mono" id="mmInner"></td></tr>
+		<tr><td>inner window</td>
 			<td class="mono border-bottom">
 				<span class="c" id="mInner"></span>
 				<span class="c" id="letterboxing"></span>
 				<span class="c" id="new_window"></span>
 			</td></tr>
-
-		<!-- viewport/scrollbars-->
 		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vViewport"></td></tr>
 		<tr><td>visualViewport</td><td class="c mono" id="eViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">visualViewport<br>viewport<br>element</span></div>
 			&nbsp scrollbars</td><td class="c mono border-bottom" id="mScrollbar"></td></tr>
-
-		<!-- the rest -->
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
-			&nbsp [screen] positions</td><td class="c mono" id="screen_positions"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
-			&nbsp [window] positions</td><td class="c mono" id="window_positions"></td></tr>
+			&nbsp window positions</td><td class="c mono" id="window_positions"></td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp [css] orientation</td>
+			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp [matchMedia] orientation</td>
+			<td class="mono border-bottom"><span id="window_mmorientation"></span></td></tr>
+
+		<!-- the rest -->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">mozFullScreenEnabled<br>fullScreen</span></div>
 			&nbsp display-mode | fullscreen</td>
@@ -196,18 +206,7 @@
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c mono" id="newWinLeak"></td></tr>
-		<!-- orientation-->
-		<tr>
-			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">-moz-device-orientation
-			<br>orientation<br>aspect-ratio<br>device-aspect-ratio</span></div>	&nbsp [css] orientation</td>
-			<td class="mono"><span id="cssOm"></span> | <span id="cssO"></span> | <span id="cssAR"></span> | <span id="cssDAR"></span>
-			</td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">-moz-device-orientation<br>orientation<br>aspect-ratio<br>device-aspect-ratio</span></div>
-			&nbsp [matchMedia] orientation</td><td class="c mono" id="mmO"></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">orientation.type<br>mozOrientation<br>orientation.angle</span></div>
-			&nbsp [screen] orientation</td><td class="c mono" id="scrOrient"></td></tr>
+
 		<!-- dpi-->
 		<tr><td>dpi</td><td class="c" id="dpi"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
