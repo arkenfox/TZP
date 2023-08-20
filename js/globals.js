@@ -91,7 +91,6 @@ const sgtick = sg +"[<span class='health'>✓</span> ", // ✓ u2713
 	sbx = sb +"[<span class='health'>✕</span> ", // ✕ u2715
 	rfp_green = sgtick+"RFP]"+sc,
 	rfp_red = sbx+"RFP]"+sc,
-	rfp_new = sbx+"RFP? undocumented]"+sc,
 	lb_green = sgtick+"LB]"+sc,
 	lb_red = sbx+"LB]"+sc,
 	nw_green = sgtick+"RFP NewWin]"+sc,
