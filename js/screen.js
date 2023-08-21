@@ -255,7 +255,6 @@ const get_scr_subpixels = (runtype) => new Promise(resolve => {
 	return resolve(oSubpixels)
 })
 
-
 const get_scr_orientation = (type) => new Promise(resolve => {
 	let oScreen = {}, oWindow = {}
 	// matchmedia: sorted names
@@ -427,8 +426,11 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 
 		// viewport
 		function get_sb_viewport() {
+			let eViewport = res[0][0] // calculated from element
 
 		}
+
+
 		/*
 		let eViewport = res[0][0] // calculated from element
 		let eWidth, eValue, eLies = false
@@ -1351,8 +1353,9 @@ function outputFD() {
 		}
 	}
 	// set isMullvad for diffs between TB vs MB; otherwise it _is_ TB in tests
-	if (gLoad && !isTB) {
-		if (isWordmark + isLogo  == "400 x 32300 x 236" && isOS !== "android") {
+	if (gLoad && !isTB && isOS !== "android") {
+		let aMBVersions = [102, 115]
+		if (aMBVersions.includes(isVer) && isWordmark + isLogo  == "400 x 32300 x 236") {
 			isMullvad = true
 			isTB = true
 			tb_green = sgtick+"MB]"+sc
