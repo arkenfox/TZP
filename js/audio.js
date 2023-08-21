@@ -145,7 +145,7 @@ const get_audio2_hybrid = () => new Promise(resolve => {
 				if (isSmart) {
 					// ToDo: add MB when patches backported
 					if (isVer > 117) {
-						notation = rfp_new
+						notation = rfp_red
 						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
 						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
 						}
