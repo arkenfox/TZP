@@ -176,7 +176,7 @@ const get_nav_gpc = () => new Promise(resolve => {
 	}
 	try {
 		let value = navigator[METRIC]
-		value = cleanFn(value)
+		if ("boolean" !== typeof value) {value = cleanFn(value)}
 		if (runST) {value = zUQ} else if (runSL && isSmart) {sData[SECT99].push("Navigator."+ METRIC)}
 		let display = value
 		if ("boolean" !== typeof value && value !== "undefined") {
