@@ -192,84 +192,93 @@ const get_mm_pointer = (group, type, id, rfpvalue) => new Promise(resolve => {
 })
 
 const get_media_devices = () => new Promise(resolve => {
-	// note: 1528042 FF115+
-	let t0 = nowFn()
+	let t0 = nowFn(), isLies = false, isLegacy = false
 	const METRIC = "mediaDevices"
-	let aPlain = [], notation = "", isLies = false
 
-	function set_notation(value) {
+	function set_notation(value = "") {
+		let legacy = isLegacy ? " [gUM legacy]" : ""
 		if (isSmart) {
 			if (isTB && !isMullvad) { // TB
 				return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
 			} else { // RFP
-				return mini(aPlain) == "5e58c44c" ? rfp_green : (isMullvad ? tb_red : rfp_red)
+				if (isLies) {return (isMullvad ? tb_red : rfp_red)}
+				let	rfplegacy = "02ab1e4c", rfpnew = "7a2e5d0c"
+				if (isVer < 115) {rfpnew = rfplegacy}
+				return ((value == rfplegacy || value == rfpnew) ? rfp_green : (isMullvad ? tb_red : rfp_red)) + legacy
 			}
 		}
-		return ""
+		return "" + legacy
 	}
-
-	function exit(result, display, applyColor = true) {
-		if (isLies) {
-			result = zLIE
-			if (applyColor) {display = colorFn(display)}
-			log_known(SECT7, METRIC)
-		}
-		// notate
-		notation = set_notation()
-		log_display(7, METRIC, display + notation)
+	function exit(result, display, check = "") {
+		log_display(7, METRIC, display + set_notation(check))
 		log_perf(SECT7, METRIC, t0)
 		return resolve([METRIC, result])
 	}
 
 	function analyse(devices) {
-		if (runST) {devices = 1}
-		if (typeof devices == "object" && Array.isArray(devices)) {
-			if (isSmart) {
-				let aSplit = (devices +"").split(",")
-				for (let i=0; i < aSplit.length; i++) {
-					if (aSplit[i] !== "[object MediaDeviceInfo]") {isLies = true}
-				}
-				if (sData[SECT99].includes("MediaDevices.enumerateDevices")) {isLies = true}
-			}
-			// enumerate
-			let aData = []
-			devices.forEach(function(d) {
-				if (d.kind !== undefined) {aData.push(d.kind)}
+		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
+		// 1843434: flipped FF119/120?
+		// the only difference in device objects is the id length, incl. RFP
+		try {
+			if (runST) {devices = {}}
+			if (typeof devices == "object" && Array.isArray(devices)) {
+				// lies
 				if (isSmart) {
-					if (d.groupId !== undefined) {
-						// deviceId
-						let chk = d.deviceId
-						if (chk.length !== 44) {isLies = true}
-						else if (chk.slice(-1) !== "=") {isLies = true}
-						// groupId
-						chk = d.groupId
-						if (chk.length !== 44) {isLies = true}
-						else if (chk.slice(-1) !== "=") {isLies = true}
+					if (sData[SECT99].includes("MediaDevices.enumerateDevices")) {isLies = true
+					} else if (devices.length) {
+						let aSplit = (devices +"").split(",")
+						for (let i=0; i < aSplit.length; i++) {
+							if (aSplit[i] !== "[object MediaDeviceInfo]") {isLies = true}
+						}
 					}
 				}
-			})
-			// count each kind
-			if (aData.length) {
-				let aDisplay = []
-				let map = aData.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map());
-				aData = [...map.entries()]
-				// build pretty/plain
-				aData.forEach(function(pair) {
-					let item = pair[0],
-						itemcount = pair[1]
-					aPlain.push(item +"; "+ itemcount)
-					if (isLies) {item = colorFn(item)}
-					aDisplay.push(item + " <span class='s7'>["+ itemcount +"]</span>")
-				})
-				exit(aPlain.join(" | "), aDisplay.join(" "), false)
+				// none
+				if (devices.length == 0) {
+					if (isLies) {
+						log_known(SECT7, METRIC)
+						exit(zLIE, colorFn("none"))
+					} else {
+						exit("none", "none")
+					}
+				} else {
+				// enumerate
+					// don't combine kind, keep order, record length not strings
+					// checking length of undefined (fake) will catch an error
+					if (runSE) {let testSE = (undefined).length}
+					let aData = [], sLen = new Set()
+					/* new code */
+					devices.forEach(function(d) {
+						let kind = d.kind, kindtest = kind.length,
+							dLen = d.deviceId.length,
+							gLen = d.groupId.length
+						aData.push([kind, dLen, gLen, d.label.length])
+						sLen.add(dLen)
+						sLen.add(gLen)
+						// isSmart: we could check valid lengths (0 or 44 in 115+, else 44: labels always 0)
+							// and if 44 is valid then the last char is "=", and we could check typeof
+					})
+					// should be a single item, either 44 or 0
+					// lets just keep it simple and get the first
+					isLegacy = [...sLen][0] !== 0
+
+					let hash = mini(aData)
+					if (isLies) {
+						hash = colorFn(hash)
+						log_known(SECT7, METRIC)
+						addDetail(METRIC, aData)
+						addData(7, METRIC, zLIE)
+					} else {
+						addData(7, METRIC, aData, hash)
+					}
+					log_display(7, METRIC, hash + addButton(7, METRIC, aData.length) + set_notation(hash))
+					return resolve()
+				}
+
 			} else {
-				isLies = false
-				exit("none", "none")
+				exit(zErr, log_error(SECT7, METRIC, zErrType + typeof devices))
 			}
-		} else {
-			// not an array
-			log_display(7, METRIC, log_error(SECT7, METRIC, zErrType + typeof devices) + (isSmart ? rfp_red : ""))
-			return resolve([METRIC, zErr])
+		} catch(e) {
+			exit(zErr, log_error(SECT7, METRIC, e), e)
 		}
 	}
 
@@ -285,15 +294,12 @@ const get_media_devices = () => new Promise(resolve => {
 		}).then(function(devices) {
 			if (!devices) {
 				exit(zErr, log_error(SECT7, METRIC, zErrTime)) // promise failed
-				return
 			} else {
 				analyse(devices)
 			}
 		})
 	} catch(e) {
-		notation = set_notation(e)
-		log_display(7, METRIC, log_error(SECT7, METRIC, e) + notation)
-		return resolve([METRIC, zErr])
+		exit(zErr, log_error(SECT7, METRIC, e), e) // promise failed
 	}
 })
 
