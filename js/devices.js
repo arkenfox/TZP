@@ -203,7 +203,8 @@ const get_media_devices = () => new Promise(resolve => {
 			} else { // RFP
 				if (isLies) {return (isMullvad ? tb_red : rfp_red)}
 				let	rfplegacy = "02ab1e4c", rfpnew = "7a2e5d0c"
-				if (isVer < 115) {rfpnew = rfplegacy}
+				if (isVer < 115) {rfpnew = rfplegacy
+				} else if (isMullvad) {rfplegacy = rfpnew} // tor-browser#42043
 				return ((value == rfplegacy || value == rfpnew) ? rfp_green : (isMullvad ? tb_red : rfp_red)) + legacy
 			}
 		}
