@@ -87,8 +87,12 @@ get_scr_initial()
 let avh = "" // android
 
 // notation
-const sgtick = sg +"[<span class='health'>✓</span> ", // ✓ u2713
-	sbx = sb +"[<span class='health'>✗</span> ", // ✕ u2717
+const tick = "✓", // u2713
+	cross = "✗", // u2717
+	green_tick = sg+"<span class='health'>"+ tick +"</span>"+sc,
+	red_cross = sb+"<span class='health'>"+ cross +"</span>"+ sc,
+	sgtick = sg +"[<span class='health'>"+ tick +"</span> ", 
+	sbx = sb +"[<span class='health'>" + cross +"</span> ",
 	rfp_green = sgtick+"RFP]"+sc,
 	rfp_red = sbx+"RFP]"+sc,
 	lb_green = sgtick+"LB]"+sc,
@@ -98,9 +102,7 @@ const sgtick = sg +"[<span class='health'>✓</span> ", // ✓ u2713
 	default_green = sgtick+"default]"+sc,
 	default_red = sbx+"default]"+sc,
 	match_green = sgtick+"match]"+sc,
-	match_red = sbx+"match]"+sc,
-	green_tick = sg+"<span class='health'>✓</span>"+sc,
-	red_cross = sb+"<span class='health'>✕</span>"+ sc
+	match_red = sbx+"match]"+sc
 
 const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,
