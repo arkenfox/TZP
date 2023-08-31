@@ -862,7 +862,7 @@ const get_fonts = () => new Promise(resolve => {
 							if (aNotInBase.length) {tmpObj["unexpected"] = aNotInBase}
 							addDetail(tmpName, tmpObj)
 							let brand = isTB ? (isMullvad ? "MB" : "TB") : "RFP"
-							fontNameHash += addButton("bad", tmpName, "<span class='health'>✕</span> "+ count +" "+ brand)
+							fontNameHash += addButton("bad", tmpName, "<span class='health'>"+ cross + "</span> "+ count +" "+ brand)
 						} else {
 							fontNameHash += isTB ? tb_green : rfp_green
 						}
