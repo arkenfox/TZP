@@ -233,11 +233,42 @@ function get_media(type) {
 	}
 }
 
+const get_midi = () => new Promise(resolve => {
+	let notation = "", count = 0
+	function exit(name, value) {
+		count++
+			if (isSmart && isVer > 109) {
+				notation = value == "prompt" ? default_green : default_red
+			}
+			addData(13, name, value)
+			log_display(13, name, value + notation)
+		if (count == 2) {
+			return resolve()
+		}
+	}
+	[false, true].forEach(function(bool) {
+		let METRIC = "permission_midi" + (bool == true ? "_sysex" : "")
+		try {
+			if (runSE) {foo++}
+			navigator.permissions.query({name: "midi", sysex: bool}).then(function(r) {
+				exit(METRIC, r.state)
+			}).catch(error => {
+				log_error(SECT13, METRIC, error)
+				exit(METRIC, zErr)
+			})
+		} catch(e) {
+			log_error(SECT13, METRIC, e)
+			exit(METRIC, zErr)
+		}
+	})
+})
+
 function outputMedia() {
 	let t0 = nowFn();
 	Promise.all([
 		get_media("audio"),
 		get_media("video"),
+		get_midi("midi"),
 		get_autoplay(),
 	]).then(function(){
 		log_display(13, "mediaBtn", mediaBtn)
