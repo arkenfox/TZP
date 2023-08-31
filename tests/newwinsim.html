@@ -247,15 +247,12 @@ let oData = {}
 let oRaw = {}
 const oTests = {
 	// width, height
-	"A": [1000,  900],
-	"B": [1000, 1000],
-	"C": [1200,  900],
-	"D": [1200, 1000],
-	"E": [1400,  900],
-	"F": [1400, 1000],
-	"G": [1600,  900],
-	"H": [1600, 1000],
-	"X": ["variable", 1000]
+	"ORIGINAL": [1000, 1000],
+	"NEW": [1400,  900],
+	"bigger": [1400, 1000],
+	"bigger-still": [1600,  900],
+	"even-bigger": [1600, 1000],
+	"X": ["variable up to 1400", 900]
 }
 let oBuckets = {}
 let resUsed = []
@@ -274,9 +271,9 @@ function calcAB(w, h, origin, basename) {
 		}
 		// width 200's
 		// variable steps
-		if (maxW == "variable") {
-			if (finalHeight == 1000) {maxW = 1400
-			} else if (finalHeight === 900) {maxW = 1200
+		if (maxW == "variable up to 1400") {
+			if (finalHeight == 900) {maxW = 1400
+			} else if (finalHeight === 800) {maxW = 1200
 			} else {maxW = 1000}
 		}
 		if (maxW < w) {
