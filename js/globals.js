@@ -88,7 +88,7 @@ let avh = "" // android
 
 // notation
 const sgtick = sg +"[<span class='health'>✓</span> ", // ✓ u2713
-	sbx = sb +"[<span class='health'>✕</span> ", // ✕ u2715
+	sbx = sb +"[<span class='health'>✗</span> ", // ✕ u2717
 	rfp_green = sgtick+"RFP]"+sc,
 	rfp_red = sbx+"RFP]"+sc,
 	lb_green = sgtick+"LB]"+sc,
