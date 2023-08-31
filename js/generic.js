@@ -801,8 +801,8 @@ function output_section(section, scope) {
 				if (gRun && isSmart) {
 					if ("string" == typeof str && str.includes("class='health'")) {
 						let hType
-						if (str.includes(">✓<")) {hType = "pass"
-						} else if (str.includes(">✕<")) {hType = "fail"}
+						if (str.includes(">"+ tick +"<")) {hType = "pass"
+						} else if (str.includes(">"+ cross +"<")) {hType = "fail"}
 						if (hType !== undefined) {
 							log_health(scope, hType, name, d)
 						}
