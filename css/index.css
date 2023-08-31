@@ -117,8 +117,8 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 	left: 0px !important;
 }
 .bold {font-weight: bold;}
-.mono {font-family: monospace, "Courier New"; font-size: 1em;}
-.monosmall {font-family: monospace, "Courier New"; font-size: 0.9em;}
+.mono {font-family: monospace, "Courier New"; font-size: 0.9em;}
+.monobigger {font-family: monospace, "Courier New"; font-size: 1em;}
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
