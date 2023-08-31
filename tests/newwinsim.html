@@ -28,23 +28,17 @@
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A "what if" simulation of all possible new window sizes.
 			This is a worst case scenario, and not all variations would be likely,
-			e.g. rediculous scaling or having massive taskbar sizes on low-res displays.
+			e.g. rediculous scaling or having massive taskbar sizes on low-res displays (I have tried to weed a few of these out).
 			<code>p</code> means portrait e.g. <code>pXGA</code> is XGA in portrait mode.</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
 			<span class="btn1 btnfirst" onClick="run('win7')">[ win7 ]</span>
 			<span class="btn1 btn" onClick="run('win11')">[ win11 ]</span>
 			<!--<span class="btn1 btn" onClick="run('mac')">[ mac ]</span>-->
-			<input type="checkbox" id="optDimensions"> <span class="no_color">show dimensions</span>
-			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxtb" style="font-style: normal; font-family: serif;">
-					<br>When checked, each <b>available</b><br>
-					space is added to each test. e.g.
-					<li>FHD 1908 x 927</li><li>FHD 1908 x 941</li>
-					as two variations in <b>FHD</b><br><br>
-					This is for testing purposes<br> and creates a lot of noise.<br><br>
-					Unchecked, it only uses the<br>resolution name, e.g. <b>FHD</b><br>and appends a count.<br><br></span>
-			</div>
+				| <span class="no_color">lock at default: </span>
+			<input type="checkbox" id="optCompact"> <span class="no_color">compact</span>
+			<input type="checkbox" id="optMenubar"> <span class="no_color">menubar</span>
+			<input type="checkbox" id="optTitlebar"> <span class="no_color">titlebar</span>
 			<br><br><hr>
 		</td></tr>
 		<tr>
@@ -265,11 +259,7 @@ const oTests = {
 }
 let oBuckets = {}
 let resUsed = []
-
-// ToDo: add an options UI for these?
-let ignoreCompact = false,
-	ignoreTitlebar = false,
-	ignoreMenubar = false
+let isDimensions = false // show available inner dimensions or use the short basename
 
 function calcAB(w, h, origin, basename) {
 	let res = []
@@ -314,6 +304,9 @@ function calcAB(w, h, origin, basename) {
 function calc(runtype) {
 
 	let ignoreWin7DoubleSide = false
+	let ignoreCompact = dom.optCompact.checked,
+		ignoreTitlebar = dom.optTitlebar.checked,
+		ignoreMenubar = dom.optMenubar.checked
 
 	// build w/h variables
 	let aTemp = [], taskbarheights = [], taskbarwidths = [], menubarheights = [], titlebardata = [], toolbardata = []
@@ -388,12 +381,11 @@ function calc(runtype) {
 		for (let i = 0; i < aTemp.length; i++) {
 			let w0 = aTemp[i][0],
 				h0 = aTemp[i][1]
-
 			toolbardata.forEach(function(array) {
 				let wChrome = array[0], hChrome = array[1], tChrome = array[2]
 				// no toolbar
 				aVariations.push([w0 - wChrome, h0 - hChrome])
-				// tolbar
+				// toolbar
 				aVariations.push([w0 - wChrome, h0 - (hChrome + tChrome)])
 			})
 		}
@@ -414,30 +406,49 @@ function calc(runtype) {
 		let w = item.split("x")[0], h = item.split("x")[1]
 		aVariations.push([w * 1, h * 1])
 	})
-	//console.log(aVariations)
+	//console.log(aVariations.join("\n"))
 
-	// show available inner dimensions or use the short basename
-	let isDimensions = dom.optDimensions.checked
+	// win7 variations that include double height taskbar
+	// these are unique so we don't need to check width
+	let aIgnoreHeights = [
+		-147, -160, -162, -169, -175, -184, -188, -190, -203, -218, // @ -12 width
+		-174, -187, -189, -196, -202, -211, -215, -217, -230, -245, // @ -16 width
+	]
+	let aIgnoreWidths = [-142, -146] // win7 variations that include expanded taskbar on side
 
 	let nameCheck = []
 	resUsed.forEach(function(item) {
 		try {
 			let baseWidth = item[0],
 				baseHeight = item[1]
+			let skipHeight = baseHeight < 800,
+				skipWidth = baseWidth < 1000
+
 			let baseName = item[2] !== undefined ? item[2] : baseWidth +" x "+ baseHeight
 			let originName = item[2] !== undefined ? item[2] +" " : ""
 			nameCheck.push(baseName)
 			oRaw["resBase"][baseName] = []
 			let AB = []
 			aVariations.forEach(function(item) {
-				let w = item[0], h = item[1]
-				let availableWidth = baseWidth + w,
-					availableHeight = baseHeight + h
-				let nameAvailable = availableWidth +" x "+ availableHeight
-				oRaw["resAvailable"].push(nameAvailable)
-				let nameAvailableInner = (isDimensions ? originName + availableWidth +" x "+ availableHeight : baseName)
-				oRaw["innerAvailable"].push(nameAvailableInner)
-				AB = calcAB(availableWidth, availableHeight, nameAvailableInner, baseName)
+				let go = true
+				if (runtype == "win7") {
+					if (skipHeight) {
+						if (aIgnoreWidths.includes(item[0])) {go = false}
+					}
+					if (go && skipHeight) {
+						if (aIgnoreHeights.includes(item[1])) {go = false}
+					}
+				}
+				if (go) {
+					let w = item[0], h = item[1]
+					let availableWidth = baseWidth + w,
+						availableHeight = baseHeight + h
+					let nameAvailable = availableWidth +" x "+ availableHeight
+					oRaw["resAvailable"].push(nameAvailable)
+					let nameAvailableInner = (isDimensions ? originName + availableWidth +" x "+ availableHeight : baseName)
+					oRaw["innerAvailable"].push(nameAvailableInner)
+					AB = calcAB(availableWidth, availableHeight, nameAvailableInner, baseName)
+				}
 			})
 		} catch(e) {
 			console.log(e)
@@ -452,6 +463,11 @@ function calc(runtype) {
 		+ s3 + aVariations.length + sc + " unique from "+ s3 + varCountNoDedupe + sc + " chrome/os variations | "
 		+ s3 + intInner + sc + " tests per scenario<br>"
 	]
+	display.push(s3 +"compact mode: "+ sc + (ignoreCompact ? "allowed" : "allowed")
+		+ s3 +" | menubar: "+ sc + (ignoreMenubar ? "default off" : "allowed")
+		+ s3 +" | titlebar: "+ sc + (ignoreTitlebar ? "default off" : "allowed")
+	)
+
 	for (const k of Object.keys(oTests)) {
 		let data = oBuckets[k]
 		let bucketcount = Object.keys(data).length
@@ -475,6 +491,7 @@ function calc(runtype) {
 			detail.push(s3 + j + sc + " [" + count +"] "
 				+ "<ul>" + array.join(", ") +"</ul>")
 		}
+
 
 		display.push("<br>"+ s1 + k +": "+ sc + testname + s1 +" [" + (bucketcount+"").padStart(2, " ") +" buckets]" + sc
 			+"<br><details><summary>details</summary>" + detail.join("<br>") + "</details>"
