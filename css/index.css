@@ -110,7 +110,7 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 .bad {color: var(--testbad);}
 .faint {color: var(--test99);}
 .hidden {display: none;}
-.health {font-size: 0.9em;}
+.health {font-size: 0.8em;}
 .offscreen {
 	position: absolute !important;
 	top: -2000% !important;
