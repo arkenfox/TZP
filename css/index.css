@@ -110,15 +110,15 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 .bad {color: var(--testbad);}
 .faint {color: var(--test99);}
 .hidden {display: none;}
-.health {font-size: 0.8em;}
+.health {font-size: 10px;}
 .offscreen {
 	position: absolute !important;
 	top: -2000% !important;
 	left: 0px !important;
 }
 .bold {font-weight: bold;}
-.mono {font-family: monospace, "Courier New"; font-size: 0.9em;}
-.monobigger {font-family: monospace, "Courier New"; font-size: 1em;}
+.mono {font-family: monospace, "Courier New"; font-size: 11px;}
+.monobigger {font-family: monospace, "Courier New"; font-size: 12px;}
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
