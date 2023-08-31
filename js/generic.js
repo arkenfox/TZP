@@ -282,12 +282,12 @@ const get_isOS = () => new Promise(resolve => {
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
-		// do something about mac/linux monospace being so huge
-		if (isOS === "mac" || isOS === "linux") {
+		// tweak monospace size
+		if (isOS === "windows" || isOS == "android") {
 			try {
 				let items = document.querySelectorAll('.mono')
 				for (let i=0; i < items.length; i++) {
-					items[i].classList.add("monosmall")
+					items[i].classList.add("monobigger")
 					items[i].classList.remove("mono")
 				}
 			} catch(e) {}
