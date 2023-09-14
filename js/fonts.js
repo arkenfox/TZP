@@ -1275,13 +1275,24 @@ const get_unicode = () => new Promise(resolve => {
 					'0x09B3','0xF003','0xF810', // 3 tofu
 					'0x20B9', // = 0x20BA
 				]
-			} else if (isVer > 115) {
+			} else if (isVer > 115) { // 116+ is win10+ only
 				fntReduce = [
 					'0x007F', '0x09B3', '0xF003', '0xF810', '0xFFF9', // 5 tofu w/ all supplemental fonts
 					'0x20B9', // = 0x20BA
 					'0x3095', // = 0x532D
 				]
 			}
+		}
+		// TB12 or lower: 0xFFFD is not stable
+		if (isTB && isVer < 115) {
+			// replacement character: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+			// https://thorin-oakenpants.github.io/testing/FFFD.html
+				// win FF: always Segoe UI
+				// win MB: always Malgun Gothic
+				// win TB102
+					// on first document tab/run (and reloading the same tab) = tahoma
+					// on subsequent tabs = Malgun Gothic
+			fntReduce.push(`0xFFFD`)
 		}
 		if (fntCodes.length) {
 			fntCodes = fntCodes.filter(x => !fntReduce.includes(x))
