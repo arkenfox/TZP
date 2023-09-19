@@ -24,15 +24,30 @@ let fntCodes = [],
 	fntDocEnabled = false
 
 let fntMaster = {
-	// TB bundled: reuse for android/linux
+	// TB13 bundled: reuse for android/linux
 	'bundled': {
 		// all: win/mac/linux: 97 sans, 21 serif
-		'allnotosans': ['Adlam','Balinese','Bamum','Bassa Vah','Batak','Bengali','Buginese','Buhid','Canadian Aboriginal','Chakma','Cham','Cherokee','Coptic','Deseret','Devanagari','Elbasan','Ethiopic','Georgian','Grantha','Gujarati','Gunjala Gondi','Gurmukhi','Hanifi Rohingya','Hanunoo','Javanese','Kannada','Kayah Li','Khmer','Khojki','Khudawadi','Lao','Lepcha','Limbu','Lisu','Mahajani','Malayalam','Mandaic','Masaram Gondi','Medefaidrin','Meetei Mayek','Mende Kikakui','Miao','Modi','Mongolian','Mro','Multani','Myanmar','NKo','New Tai Lue','Newa','Ol Chiki','Oriya','Osage','Osmanya','Pahawh Hmong','Pau Cin Hau','Rejang','Runic','Samaritan','Saurashtra','Sharada','Shavian','Sinhala','Sora Sompeng','Soyombo','Sundanese','Syloti Nagri','Symbols','Symbols2','Syriac','Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Takri','Tamil','Telugu','Thaana','Tifinagh','Tifinagh APT','Tifinagh Adrar','Tifinagh Agraw Imazighen','Tifinagh Ahaggar','Tifinagh Air','Tifinagh Azawagh','Tifinagh Ghat','Tifinagh Hawad','Tifinagh Rhissa Ixa','Tifinagh SIL','Tifinagh Tawellemmet','Tirhuta','Vai','Wancho','Warang Citi','Yi','Zanabazar Square',],
-		'allnotoserif': ['Balinese','Bengali','Devanagari','Dogra','Ethiopic','Georgian','Grantha','Gujarati','Gurmukhi','Hmong Nyiakeng','Kannada','Khmer','Khojki','Lao','Malayalam','Myanmar','Sinhala','Tamil','Telugu','Tibetan','Yezidi',],
+		'allnotosans': [
+			'Adlam','Balinese','Bamum','Bassa Vah','Batak','Bengali','Buginese','Buhid','Canadian Aboriginal','Chakma',
+			'Cham','Cherokee','Coptic','Deseret','Devanagari','Elbasan','Ethiopic','Georgian','Grantha','Gujarati',
+			'Gunjala Gondi','Gurmukhi','Hanifi Rohingya','Hanunoo','Javanese','Kannada','Kayah Li','Khmer','Khojki',
+			'Khudawadi','Lao','Lepcha','Limbu','Lisu','Mahajani','Malayalam','Mandaic','Masaram Gondi','Medefaidrin',
+			'Meetei Mayek','Mende Kikakui','Miao','Modi','Mongolian','Mro','Multani','Myanmar','NKo','New Tai Lue',
+			'Newa','Ol Chiki','Oriya','Osage','Osmanya','Pahawh Hmong','Pau Cin Hau','Rejang','Runic','Samaritan',
+			'Saurashtra','Sharada','Shavian','Sinhala','Sora Sompeng','Soyombo','Sundanese','Syloti Nagri','Symbols',
+			'Symbols 2','Syriac','Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Takri','Tamil','Telugu','Thaana',
+			'Tifinagh','Tifinagh APT','Tifinagh Adrar','Tifinagh Agraw Imazighen','Tifinagh Ahaggar','Tifinagh Air',
+			'Tifinagh Azawagh','Tifinagh Ghat','Tifinagh Hawad','Tifinagh Rhissa Ixa','Tifinagh SIL','Tifinagh Tawellemmet',
+			'Tirhuta','Vai','Wancho','Warang Citi','Yi','Zanabazar Square',
+		],
+		'allnotoserif': [
+			'Balinese','Bengali','Devanagari','Dogra','Ethiopic','Georgian','Grantha','Gujarati','Gurmukhi','Kannada',
+			'Khmer','Khojki','Lao','Malayalam','Myanmar','NP Hmong','Sinhala','Tamil','Telugu','Tibetan','Yezidi',
+		],
 		'android': [],
-			// then linux +16, mac +5, win +4
-		'linux': ['Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai','STIX Math','Tinos','Twemoji Mozilla',],
-		'mac': ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Math',],
+		// then linux +16, mac +5, win +4
+		'linux': ['Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai','STIX Two Math','Tinos','Twemoji Mozilla',],
+		'mac': ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',],
 		'windows': ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',],
 	},
 	// TB whitelist system
@@ -138,6 +153,8 @@ let fntMaster = {
 	'system': {
 		'android': [
 			// we start with bundled[all*] 118
+			// + old noto font names
+			'Noto Sans Symbols2','Noto Serif Hmong Nyiakeng',
 			// + common
 			'Droid Sans','Droid Sans Mono','Droid Serif','Roboto','Roboto Condensed',
 			// + MOAR notos
@@ -152,6 +169,8 @@ let fntMaster = {
 		],
 		'linux': [
 			// we start with bundled[linux] 134
+			// + old noto font names
+			'Noto Sans Symbols2','Noto Serif Hmong Nyiakeng',
 			// + always
 			'Arial','Courier','Courier New',
 			// + common notos
@@ -264,6 +283,26 @@ function set_fntList(os = isOS) {
 			"generic": [],
 		}
 
+		// diffs fom TB13: we can drop this once isSmart += 115
+		if (isTB && isVer < 115) {
+			// renamed: Noto Sans Symbols 2 (new) vs Noto Sans Symbols2 (old)
+			let tmpArray = fntMaster["bundled"]["allnotosans"]
+			tmpArray.push("Symbols2")
+			tmpArray = tmpArray.filter(x => !["Symbols 2"].includes(x))
+			fntMaster["bundled"]["allnotosans"] = tmpArray.sort()
+			// renamed: Noto Serif NP Hmong (new) vs Noto Serif Hmong Nyiakeng (old)
+			tmpArray = fntMaster["bundled"]["allnotoserif"]
+			tmpArray.push("Hmong Nyiakeng")
+			tmpArray = tmpArray.filter(x => !["NP Hmong"].includes(x))
+			fntMaster["bundled"]["allnotoserif"] = tmpArray.sort()
+			// mac/linux: STIX Two Math (new) vs STIX Math (old)
+			tmpArray = fntMaster["bundled"]["linux"]
+			tmpArray.push("STIX Math")
+			tmpArray = tmpArray.filter(x => !["STIX Two Math"].includes(x))
+			fntMaster["bundled"]["linux"] = tmpArray.sort()
+			fntMaster["bundled"]["mac"] = ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Math',]
+		}
+
 		// baseSize: add fallback for misconfigured/missing
 		// isPlatformFont: expected + can't be blocked + differs vs most fonts
 			// no entropy loss: size collisions of expected system fonts e.g. Tahoma
@@ -354,7 +393,6 @@ function set_fntList(os = isOS) {
 				log_alert(SECT12, "dupes in "+ os +" font list")
 				fntData["full"] = aCheck
 			}
-
 			// fntBtn
 			let str = "fonts_"+ os
 			fntData["full"].push(fntFake)
