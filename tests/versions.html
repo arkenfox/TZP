@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 69, maxVer = 118, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 70, maxVer = 119, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -276,6 +276,16 @@ function outputVersion() {
 			fontVariantEmoji : layout.css.font-variant-emoji.enabled
 			offsetPosition : layout.css.motion-path-offset-position.enabled
 		*/
+
+		// 119: 1817591
+		let t119 = performance.now()
+		try {
+			location.href = "http://a>b/"
+		} catch(e) {
+			debug.push("119 1817591 : "+ e.name)
+			rec(119, 119, "1817591", e.name === "SyntaxError", performance.now()-t119)
+		}
+
 		// 118: 1849010
 		let t118 = performance.now()
 		let ver118 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition"))
