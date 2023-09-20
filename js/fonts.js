@@ -283,24 +283,32 @@ function set_fntList(os = isOS) {
 			"generic": [],
 		}
 
-		// diffs fom TB13: we can drop this once isSmart += 115
-		if (isTB && isVer < 115) {
-			// renamed: Noto Sans Symbols 2 (new) vs Noto Sans Symbols2 (old)
-			let tmpArray = fntMaster["bundled"]["allnotosans"]
-			tmpArray.push("Symbols2")
-			tmpArray = tmpArray.filter(x => !["Symbols 2"].includes(x))
-			fntMaster["bundled"]["allnotosans"] = tmpArray.sort()
-			// renamed: Noto Serif NP Hmong (new) vs Noto Serif Hmong Nyiakeng (old)
-			tmpArray = fntMaster["bundled"]["allnotoserif"]
-			tmpArray.push("Hmong Nyiakeng")
-			tmpArray = tmpArray.filter(x => !["NP Hmong"].includes(x))
-			fntMaster["bundled"]["allnotoserif"] = tmpArray.sort()
-			// mac/linux: STIX Two Math (new) vs STIX Math (old)
-			tmpArray = fntMaster["bundled"]["linux"]
-			tmpArray.push("STIX Math")
-			tmpArray = tmpArray.filter(x => !["STIX Two Math"].includes(x))
-			fntMaster["bundled"]["linux"] = tmpArray.sort()
-			fntMaster["bundled"]["mac"] = ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Math',]
+		// diffs fom TB13
+		if (isTB) {
+			if (isVer < 115) {
+				// ToDo: isSmartMin=115 remove
+				// renamed: Noto Sans Symbols 2 (new) vs Noto Sans Symbols2 (old)
+				let tmpArray = fntMaster["bundled"]["allnotosans"]
+				tmpArray.push("Symbols2")
+				tmpArray = tmpArray.filter(x => !["Symbols 2"].includes(x))
+				fntMaster["bundled"]["allnotosans"] = tmpArray.sort()
+				// renamed: Noto Serif NP Hmong (new) vs Noto Serif Hmong Nyiakeng (old)
+				tmpArray = fntMaster["bundled"]["allnotoserif"]
+				tmpArray.push("Hmong Nyiakeng")
+				tmpArray = tmpArray.filter(x => !["NP Hmong"].includes(x))
+				fntMaster["bundled"]["allnotoserif"] = tmpArray.sort()
+				// mac/linux: STIX Two Math (new) vs STIX Math (old)
+				tmpArray = fntMaster["bundled"]["linux"]
+				tmpArray.push("STIX Math")
+				tmpArray = tmpArray.filter(x => !["STIX Two Math"].includes(x))
+				fntMaster["bundled"]["linux"] = tmpArray.sort()
+				fntMaster["bundled"]["mac"] = ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Math',]
+			} else {
+				// make sure old fonts + font names were removed
+				fntMaster.blocklist.windows.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2")
+				fntMaster.blocklist.linux.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2","STIX Math")
+				fntMaster.blocklist.mac.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2","STIX Math")
+			}
 		}
 
 		// baseSize: add fallback for misconfigured/missing
@@ -1321,7 +1329,7 @@ const get_unicode = () => new Promise(resolve => {
 				]
 			}
 		}
-		// TB12 or lower: 0xFFFD is not stable
+		// TB12 or lower: 0xFFFD is not stable (in windows)
 		if (isTB && isVer < 115) {
 			// replacement character: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
 			// https://thorin-oakenpants.github.io/testing/FFFD.html
