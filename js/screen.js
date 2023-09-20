@@ -147,7 +147,10 @@ const get_scr_subpixels = (runtype) => new Promise(resolve => {
 			value = zErr
 		}
 		let notation = ""
-		if (isSmart) {notation = value === 1 ? rfp_green : rfp_red}
+		if (isSmart) {
+			let rfpvalue = isTB && isVer > 102 ? 2 : 1
+			notation = value === rfpvalue ? rfp_green : rfp_red
+		}
 		log_display(1, METRICw, display + notation)
 		oSubpixels[METRICw] = value
 
