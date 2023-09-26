@@ -132,6 +132,13 @@ let fntMaster = {
 			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
 			'Helv','Helvetica','Times','Tms Rmn', // seems stable
 
+			// localized: kBase: detected FF120+: 1850672
+			'微软雅黑', // Microsoft YaHei
+			'ＭＳ ゴシック', // MS Gothic
+			'ＭＳ Ｐゴシック', // MS PGothic
+			'宋体', // SimSun
+      '游ゴシック', // Yu Gothic
+
 			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
 			*/
@@ -231,6 +238,7 @@ let fntMaster = {
 			'Utsaah','Vani','Verdana Pro','Vijaya','Vrinda','Yu Mincho',
 			// localized ^
 			'바탕', // Batang
+			'BIZ UDPゴシック', // BIZ UDPGothic
 			'굴림', // Gulim
 			'굴림체', // GulimChe
 			'細明體', // MingLiU
@@ -238,11 +246,7 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
-			// localized: kBase but not detected in vis = 1
-			'微软雅黑', // Microsoft YaHei
-			'ＭＳ ゴシック', // MS Gothic
-			'ＭＳ Ｐゴシック', // MS PGothic
-			'宋体', // SimSun
+
 			// kBase but broken: 1720408
 			'Franklin Gothic Medium',
 			// MS products
