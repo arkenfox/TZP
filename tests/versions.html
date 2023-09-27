@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 70, maxVer = 119, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 71, maxVer = 120, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -277,12 +277,16 @@ function outputVersion() {
 			offsetPosition : layout.css.motion-path-offset-position.enabled
 		*/
 
+		// 120: 1854937
+		let t120 = performance.now()
+		let ver120 = ("function" === typeof CSSPropertyRule)
+		rec(120, 120, "1854937", ver120, performance.now()-t120)
+
 		// 119: 1817591
 		let t119 = performance.now()
 		try {
 			location.href = "http://a>b/"
 		} catch(e) {
-			debug.push("119 1817591 : "+ e.name)
 			rec(119, 119, "1817591", e.name === "SyntaxError", performance.now()-t119)
 		}
 

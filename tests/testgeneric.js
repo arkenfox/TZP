@@ -338,8 +338,12 @@ const get_isTB = () => new Promise(resolve => {
 		// extensions can block resources://
 			// FF ~5ms, TB ~20ms
 		setTimeout(() => resolve(false), 100)
+
+		let source = "resource://torbutton-assets/aboutTor.css"
+		// ToDo: TB13+: does not work on android
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) {source = "chrome://browser/content/abouttor/aboutTor.css"} // FF115+
 		let css = document.createElement("link")
-		css.href = "resource://torbutton-assets/aboutTor.css"
+		css.href = source
 		css.type = "text/css"
 		css.rel = "stylesheet"
 		document.head.appendChild(css)
@@ -379,7 +383,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 119
+		isVerMax = 120
+		if ("function" === typeof CSSPropertyRule) return 120 // 1854937
 		try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467

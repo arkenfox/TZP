@@ -397,7 +397,7 @@ const get_isVer = () => new Promise(resolve => {
 		}
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 119) {isVerExtra = "+"}
+		} else if (verNo == 120) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -405,6 +405,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			if ("function" === typeof CSSPropertyRule) return 120 // 1854937
 			try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 			if (CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
