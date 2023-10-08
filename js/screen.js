@@ -1252,20 +1252,33 @@ function outputUA(os = isOS) {
 		},
 	}
 	if (isSmart && os !== undefined) {
-		// 1818889: RFP 115+ uses rv freeze at 109
+		// 1818889: RFP 115-119 freezes rv at 109
 		let uaVer = isVer, rvVer = (isVer > 114 && isVer < 120 ? 109 : isVer)
-		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:", uaNext = uaRFP
+		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:"
+		let uaNext = isVerExtra === "+" ? uaRFP : undefined
 		if (os == "android") {
-			// android = ESR
-			uaVer = isVer < 115 ? 102 : 115
-			rvVer = isVer < 114 ? uaVer : 109
-			uaRFP += rvVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
+			// android
+			if (isVer > 119) {
+				// 1806690: RFP 120+ drops matching ESR + frozen rv
+				uaRFP += uaVer +".0) Gecko/"+ isVer +".0 Firefox/"+ uaVer +".0"
+				if (isVerExtra === "+") {
+					// next: isVer is now at least 120 so we can ignore frozen rv
+					uaNext += (isVer + 1) +".0) Gecko/"+ (isVer + 1) +".0 Firefox/"+ (isVer + 1) +".0"
+					oRFP[os]["userAgentNext"] = uaNext
+				}
+			} else {
+				uaVer = isVer < 115 ? 102 : 115
+				rvVer = (isVer < 114 && isVer > 120) ? uaVer : 109
+				uaRFP += rvVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
+			}
 		} else {
+			// desktop
 			uaRFP += rvVer +".0) Gecko/20100101 Firefox/"+ uaVer +".0"
-			// desktop next: only used if isVerExtra = "+" currently > 114
-			rvVer = (uaVer + 1) < 120 ? 109 : rvVer +1 // don't increment frozen
-			uaNext += (rvVer) +".0) Gecko/20100101 Firefox/"+ (uaVer +1) +".0"
-			oRFP[os]["userAgentNext"] = uaNext
+			if (isVerExtra === "+") {
+				// next: isVer is now at least 120 so we can ignore frozen rv
+				uaNext += (uaVer + 1) +".0) Gecko/20100101 Firefox/"+ (uaVer + 1) +".0"
+				oRFP[os]["userAgentNext"] = uaNext
+			}
 		}
 		oRFP[os]["userAgent"] = uaRFP
 	}
@@ -1295,10 +1308,7 @@ function outputUA(os = isOS) {
 					if (k == "userAgent" && !isMatch && isVerExtra == "+") {
 						isMatch = "~"+ oRFP[os][k +"Next"] +"~" == display
 					}
-					// ignore userAgent android open-ended version
-					if (k !== "userAgent" || os !== "android" || os == "android" && isVerExtra !== "+") {
-						notation = isMatch ? rfp_green : rfp_red
-					}
+					notation = isMatch ? rfp_green : rfp_red
 				}
 			}
 		}
