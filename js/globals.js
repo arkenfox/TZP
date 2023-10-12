@@ -148,9 +148,9 @@ let gt0, gt1,
 	gRun = true,
 	gClick = true,
 	isBlock = true,
-	isBlockMin = [102, 12], // [FF, equivalent TB version]
+	isBlockMin = [115, 13], // [FF, equivalent TB version]
 	isSmart = false,
-	isSmartMin = 102 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
+	isSmartMin = 115 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
 /** DEV **/
 // sim
