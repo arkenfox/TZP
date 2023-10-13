@@ -58,7 +58,11 @@
 @media (color:18){#cssC:after{content:"18";}}
 @media (color:19){#cssC:after{content:"19";}}
 @media (color:20){#cssC:after{content:"20";}}
-@media (color:21){#cssC:after{content:"";}}
+@media (color:21){#cssC:after{content:"21";}}
+@media (color:22){#cssC:after{content:"22";}}
+@media (color:23){#cssC:after{content:"23";}}
+@media (color:24){#cssC:after{content:"24";}}
+@media (color:25){#cssC:after{content:"";}}
 
 #cssP:after{content:"n/a";}
 @media (pointer:fine){#cssP:after{content:"fine";}}
