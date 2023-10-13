@@ -66,11 +66,7 @@ const get_maxtouch = () => new Promise(resolve => {
 })
 
 const get_mm_color = () => new Promise(resolve => {
-	const METRIC = "color"
-	function exit(value, display) {
-		log_display(7, METRIC, display)
-		return resolve([METRIC, value])
-	}
+	const METRIC = "color", METRIC2 = METRIC +"_css"
 	let isErr = false, value, display
 	try {
 		if (runSE) {foo++}
@@ -85,61 +81,57 @@ const get_mm_color = () => new Promise(resolve => {
 	} catch(e) {
 		isErr = true; value = zErr; display = log_error(SECT7, METRIC, e)
 	}
+	let cssvalue = getElementProp(SECT7, "#cssC", METRIC2)
+	let isErrCss = cssvalue == zErr
 	if (isSmart) {
-		let cssvalue = getElementProp(SECT7, "#cssC")
-		if (value !== cssvalue && cssvalue !== "x") {
-			if (!isErr) {
+		if (!isErr && !isErrCss) {
+			if (value !== cssvalue) {
 				display = colorFn(display)
 				value = zLIE
 				log_known(SECT7, METRIC)
 			}
 		}
-		display += display === 8 ? rfp_green : rfp_red
+		display += display === 8 ? rfp_green : rfp_red // mm
+		log_display(7, METRIC2, (cssvalue === 8 ? rfp_green : rfp_red)) // css
 	}
-	exit(value, display)
+	log_display(7, METRIC, display)
+	return resolve([[METRIC, value], [METRIC2, cssvalue]])
 })
 
 const get_mm_colorgamut = () => new Promise(resolve => {
-	const METRIC = "color-gamut"
-	function exit(value, display) {
-		log_display(7, METRIC, display)
-		return resolve([METRIC, value])
-	}
+	const METRIC = "color-gamut", METRIC2 = METRIC +"_css"
+	let value = zNA, display = value, isErr = false
 	try {
 		if (runSE) {foo++}
-		let value = zNA, display = value
 		let q = "(color-gamut: "
 		if (window.matchMedia(q +"srgb)").matches) {value = "srgb"}
 		if (window.matchMedia(q +"p3)").matches) {value = "p3"}
 		if (window.matchMedia(q +"rec2020)").matches) {value = "rec2020"}
 		if (runSL) {value = "p3"}
 		display = value
-		if (isSmart) {
-			let cssvalue = getElementProp(SECT7, "#cssCG")
-			if (value !== cssvalue && cssvalue !== "x") {
+	} catch(e) {
+		isErr = true; value = zErr; display = log_error(SECT7, METRIC, e)
+	}
+	let cssvalue = getElementProp(SECT7, "#cssCG", METRIC2)
+	let isErrCss = cssvalue == zErr
+	if (isSmart) {
+		if (!isErr && !isErrCss) {
+			if (value !== cssvalue) {
 				display = colorFn(display)
 				value = zLIE
 				log_known(SECT7, METRIC)
 			}
-			// FF110+: 1422237
-			if (isVer > 109) {
-				display += display === "srgb" ? rfp_green : rfp_red
-			}
 		}
-		exit(value, display)
-	} catch(e) {
-		log_error(SECT7, METRIC, e)
-		log_display(7, METRIC, zErr + (isSmart ? rfp_red : ""))
-		return resolve([METRIC, zErr])
+		// FF110+: 1422237
+		display += display === "srgb" ? rfp_green : rfp_red // mm
+		log_display(7, METRIC2, (cssvalue === "srgb" ? rfp_green : rfp_red)) // css
 	}
+	log_display(7, METRIC, display)
+	return resolve([[METRIC, value], [METRIC2, cssvalue]])
 })
 
 const get_mm_pointer = (group, type, id, rfpvalue) => new Promise(resolve => {
-	const METRIC = type
-	function exit(value, display) {
-		log_display(7, type, display)
-		return resolve([METRIC, value])
-	}
+	const METRIC = type, METRIC2 = type +"_css"
 	let value = zNA, display = value, isErr = false
 	try {
 		if (runSE) {foo++}
@@ -168,14 +160,15 @@ const get_mm_pointer = (group, type, id, rfpvalue) => new Promise(resolve => {
 		display = log_error(SECT7, METRIC, e)
 		isErr = true; value = zErr
 	}
+	let cssvalue = getElementProp(SECT7, id, METRIC2)
+	let isErrCss = cssvalue == zErr
 	if (isSmart) {
 		if (value !== zErr) {
-			let cssvalue = getElementProp(SECT7, id)
-			if (group == 2 && cssvalue !== "x") {
-				let cssvalue2 = getElementProp(SECT7, id, ":before")
+			if (group == 2 && !isErrCss) {
+				let cssvalue2 = getElementProp(SECT7, id, METRIC2, ":before")
 				cssvalue = cssvalue2 + cssvalue
 			}
-			if (value !== cssvalue && cssvalue !== "x") {
+			if (value !== cssvalue && !isErrCss) {
 				display = colorFn(display)
 				value = zLIE
 				log_known(SECT7, METRIC)
@@ -183,12 +176,15 @@ const get_mm_pointer = (group, type, id, rfpvalue) => new Promise(resolve => {
 		}
 		// notate: FF74+ 1607316
 		if (type == "any-pointer" && isOS !== "android") {
-			display += display === "fine + fine" ? rfp_green : rfp_red
+			display += display === "fine + fine" ? rfp_green : rfp_red // mm
+			log_display(7, METRIC2, (cssvalue === "fine + fine" ? rfp_green : rfp_red)) // css
 		} else if (isOS == "android") {
-			display += display === rfpvalue ? rfp_green : rfp_red
+			display += display === rfpvalue ? rfp_green : rfp_red // mm
+			log_display(7, METRIC2, (cssvalue === rfpvalue ? rfp_green : rfp_red)) // css
 		}
 	}
-	exit(value, display)
+	log_display(7, type, display)
+	return resolve([[METRIC, value], [METRIC2, cssvalue]])
 })
 
 const get_media_devices = () => new Promise(resolve => {
@@ -202,10 +198,14 @@ const get_media_devices = () => new Promise(resolve => {
 				return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
 			} else { // RFP
 				if (isLies) {return (isMullvad ? tb_red : rfp_red)}
-				let	rfplegacy = "02ab1e4c", rfpnew = "7a2e5d0c"
-				if (isVer < 115) {rfpnew = rfplegacy
-				} else if (isMullvad) {rfplegacy = rfpnew} // tor-browser#42043
-				return ((value == rfplegacy || value == rfpnew) ? rfp_green : (isMullvad ? tb_red : rfp_red)) + legacy
+				let rfplegacy = "02ab1e4c", rfpnew = "7a2e5d0c"
+				if (isMullvad) {
+					// tor-browser#42043
+					return (value == rfpnew ? tb_green : tb_red) + legacy
+				} else {
+					// FF: ToDo: 1843434: add version check when flipped
+					return ((value == rfplegacy || value == rfpnew) ? rfp_green : rfp_red) + legacy
+				}
 			}
 		}
 		return "" + legacy
@@ -402,7 +402,6 @@ function get_plugins_mimetypes() {
 			get_plugins(),
 			get_mimetypes(),
 		]).then(function(results){
-
 
 			return resolve()
 		})

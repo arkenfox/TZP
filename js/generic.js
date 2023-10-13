@@ -121,7 +121,7 @@ function json_stringify(passedObj, options = {}) {
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function nowFn() {if (isPerf) {return performance.now()}; return}
-function colorFn(str) {return "<code class='lies'>"+ str +"</code>"}
+function colorFn(str) {return "<span class='lies'>"+ str +"</span>"}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 
@@ -158,19 +158,45 @@ function run_basic() {
 	}
 }
 
-function getElementProp(SECT, id, pseudo = ":after") {
-	if (runPS) {return "x"}
+function getElementProp(SECT, id, name, pseudo = ":after") {
+	// default none: https://www.w3.org/TR/CSS21/generate.html#content
 	try {
+		if (runSE) {foo++}
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue("content")
-		if (item == "none") {item = "x"}
-		item = item.replace(/"/g,"")
+		if (runPS) {item = "none"}
+		let originalitem = item
+		item = item.replace(/"/g,"") // trim quote marks
+		//console.log(SECT, id, name, pseudo, "~"+ item +"~", "~"+ originalitem +"~")
+
+		// out of range: screen/window returns "none"
+		if (id == "#S" || id == "#D") {
+			if (item == "none") {
+				item = "?"
+			} else if (pseudo == ":after") {
+				item = item.slice(3)				
+			}
+		} else if (id == "#P") {
+			// out of range: dpi returns ""
+			if (item == "") {item = "?"}
+		}
 		if (!isNaN(item * 1)) {item = item * 1} // number
-		if (item == "") {item = "x"} // blanks
+
+		// fuckery
+		if (item == "") {
+			log_error(SECT, name, zErrInvalid +"got ''")
+			item = zErr
+		} else if (originalitem == "none") {
+			// ignore screen/window
+			if (id !== "#S" && id !== "#D") {
+				log_error(SECT, name, zErrInvalid +"got 'none'")
+				item = zErr
+			}
+		}
 		return item
 	} catch(e) {
-		log_error(SECT, id, e)
-		return "x"
+		log_error(SECT, name, e)
+		return zErr
 	}
 }
 
@@ -272,6 +298,9 @@ function get_isGecko() {
 }
 
 const get_isOS = () => new Promise(resolve => {
+	if (!isGecko) {
+		return resolve()
+	}
 	let t0 = nowFn()
 	setTimeout(() => resolve(zErrTime), 100)
 	const METRIC = "isOS"
@@ -356,6 +385,9 @@ const get_isSystemFont = () => new Promise(resolve => {
 })
 
 const get_isTB = () => new Promise(resolve => {
+	if (!isGecko) {
+		return resolve(false)
+	}
 	let t0 = nowFn()
 	setTimeout(() => resolve(t0), 150)
 	const METRIC = "isTB"
@@ -388,13 +420,11 @@ const get_isTB = () => new Promise(resolve => {
 })
 
 const get_isVer = () => new Promise(resolve => {
+	if (!isGecko) {
+		return resolve()
+	}
 	let t0 = nowFn()
 	function output(verNo) {
-		if (!Number.isInteger(verNo)) {
-			log_perf(SECTG, "isVer", t0, "", verNo)
-			isVer = 0
-			return resolve()
-		}
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
 		} else if (verNo == 120) {isVerExtra = "+"}
@@ -428,7 +458,8 @@ const get_isVer = () => new Promise(resolve => {
 			}
 			return 101
 		} catch(e) {
-			return zErr
+			console.error(e)
+			return 0
 		}
 	}
 })
@@ -436,6 +467,9 @@ const get_isVer = () => new Promise(resolve => {
 /*** PREREQ ***/
 
 const get_isClientRect = () => new Promise(resolve => {
+	if (!isGecko) {
+		return resolve()
+	}
 	// determine valid domrect methods
 	let t0 = nowFn()
 	let aNames = ["Element.getBoundingClientRect", "Element.getClientRects",
@@ -547,16 +581,19 @@ function showMetrics(name, scope, isConsole = false) {
 	let data, showhash = true, results, color = 99
 
 	if (name == SECT98 || name == SECT99) { data = gData[name]
-	} else if (name == "fingerprint" || name == "errors" || name == "health") {
+	} else if (name == "fingerprint" || name == "errors" || name == "health" || name == "lies") {
 		data = gData[name][scope]
 	} else if (name == "fingerprint_summary") { data = gData[zFP][scope+"_summary"]
-	} else if (name == "untrustworthy") {data = gKnown
-	} else if (name == "known methods") {data = gMethods
 	} else if (name == "alerts") {data = gAlert; showhash = false
 	} else if (name.slice(0,6) == "errors") {
 		name = name.slice(6)
 		data = sData["errors"][scope][name]
 		name = name.toUpperCase() +": errors"
+		showhash = false
+	} else if (name.slice(0,4) == "lies") {
+		name = name.slice(4)
+		data = sData["lies"][scope][name]
+		name = name.toUpperCase() +": lies"
 		showhash = false
 	} else if (sectionNames.includes(name)) {
 		data = sData[zFP][scope][name]; name = name.toUpperCase()
@@ -611,7 +648,13 @@ function output_health(scope) {
 							} else if (metric == "fontnames") {
 								data = sDetail[scope]["fontnames_health"]
 							} else if (metric == "letterboxing" || metric == "new_window") {
-								data = gData[zFP][scope]["screen"]["metrics"]["window_inner"]
+								data = gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerWidth"]
+									+" x "+ gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerHeight"]
+							} else {
+								let aList = ["devicePixelRatio", "-moz-device-pixel-ratio", "dpi", "dpcm", "dppx", "dpi_css"]
+								if (aList.includes(metric)) {
+									data = gData[zFP][scope]["screen"]["metrics"]["pixels"]["metrics"][metric]
+								}
 							}
 							// handle non data so at least it shows in JSON display
 							if (data == undefined) { data =""}
@@ -731,7 +774,7 @@ function output_section(section, scope) {
 	try {
 		btnList.forEach(function(item) {
 			let once = item+"once"
-			if (gData[once][scope] !== undefined) {
+			if (gData[once] !== undefined && gData[once][scope] !== undefined) {
 				for (const s of Object.keys(gData[once][scope])) {
 					if (!sectionNames.includes(s)) {
 						// non-section: straight to sData: sorted
@@ -823,12 +866,19 @@ function output_section(section, scope) {
 			btnList.forEach(function(item) {
 				let btn = "", source = {}, target = {}
 				if (sDataTemp[item][scope] !== undefined && sDataTemp[item][scope][name] !== undefined) {
-					if (sData[item][scope] == undefined) {sData[item][scope] = {}}
-					if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
-					for (const m of Object.keys(sDataTemp[item][scope][name]).sort()) {
-						sData[item][scope][name][m] = sDataTemp[item][scope][name][m]
+					let len = 0
+						if (sData[item][scope] == undefined) {sData[item][scope] = {}}
+						if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
+					if (item == "errors") {
+						for (const m of Object.keys(sDataTemp[item][scope][name]).sort()) {
+							sData[item][scope][name][m] = sDataTemp[item][scope][name][m]
+						}
+						len = Object.keys(sData[item][scope][name]).length
+					} else {
+						let array = sDataTemp[item][scope][name].sort()
+						sData[item][scope][name] = array
+						len = array.length
 					}
-					let len = Object.keys(sData[item][scope][name]).length
 					// catch zero length: e.g. object cleared not deleted
 					if (len > 0) {
 						let btnText = len + " "+ (len == 1 ? item.slice(0,-1) : item) // single/plural
@@ -846,10 +896,8 @@ function output_section(section, scope) {
 
 /*** INCOMING ***/
 
-function addButton(color, name, text = "details", btn = "btnc", scope = isScope, color2 = undefined) {
-	text = "["+ text +"]"
-	if (color2 !== undefined) {text = colorFn(text)}
-	return " <span class='btn"+ color +" "+ btn +"' onClick='showMetrics(`"+ name +"`,`" + scope +"`)'>"+ text +"</span>"
+function addButton(color, name, text = "details", btn = "btnc", scope = isScope) {
+	return " <span class='btn"+ color +" "+ btn +"' onClick='showMetrics(`"+ name +"`,`" + scope +"`)'>["+ text +"]</span>"
 }
 
 function addData(section, metric, data, hash = undefined, includeDetail = true) {
@@ -954,8 +1002,11 @@ function log_health(scope, type, section, metric, h = "health") {
 	}
 }
 
-function log_known(section, metric) {
-	if (gRun) {gKnown.push(section +":" + metric)}
+function log_known(section, metric, scope = isScope) {
+	let obj = "lies"
+	if (sDataTemp[obj][scope] == undefined) {sDataTemp[obj][scope] = {}}
+	if (sDataTemp[obj][scope][section] == undefined) {sDataTemp[obj][scope][section] = []}
+	sDataTemp[obj][scope][section].push(metric)
 }
 
 function log_perf(section, metric = "", time1, time2, extra) {
@@ -1051,27 +1102,6 @@ function log_section(name, time, scope = isScope) {
 		gAlert = gAlert.concat(gAlertOnce)
 		gAlert = gAlert.filter(function(item, position) {return gAlert.indexOf(item) === position})
 		gAlert.sort()
-		gKnown = gKnown.filter(function(item, position) {return gKnown.indexOf(item) === position})
-		gKnown.sort()
-		gMethods = gMethods.filter(function(item, position) {return gMethods.indexOf(item) === position})
-		gMethods.sort()
-		// known
-		let knownStr = ""
-		if (gKnown.length) {
-			let knownText = gKnown.length +" lie"+ (gKnown.length > 1 ? "s" : "")
-			knownStr = mini(gKnown) + addButton(0, "untrustworthy", knownText, "btnc", zDOC, 1)
-		} else {
-			knownStr = isSmart ? "none" : zNA
-		}
-		dom.knownhash.innerHTML = knownStr
-		// methods
-		if (gMethods.length) {
-			let methodStr = gMethods.length +" noted"
-			let methodBtn = addButton(0, "known methods", methodStr)
-			dom.knownmethods.innerHTML = mini(gMethods) + methodBtn
-		} else {
-			dom.knownmethods = isSmart ? "none" : zNA
-		}
 		// alerts
 		dom.allcheck = (gAlert.length ? "[ alerts ]" : "")
 
@@ -1087,19 +1117,18 @@ function log_section(name, time, scope = isScope) {
 /*** RUN ***/
 
 function countJS(filename) {
-	if (!isGecko) {
+	if (!isGecko && !isAllowNonGecko) {
 		isBlock = true
 		run_block() // non-gecko
 		return
 	}
-
 	jsFiles++
 	if (jsFiles === 1) {
 		get_isVer() // as long as don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		gData["perf"].push([1, "RUN ONCE", nowFn()])
+		if (isGecko) {gData["perf"].push([1, "RUN ONCE", nowFn()])}
 		let t0 = nowFn()
 		Promise.all([
 			get_isTB()
@@ -1110,7 +1139,13 @@ function countJS(filename) {
 				log_perf(SECTG, METRIC, results[0], "", zErrTime)
 				log_alert(SECTG, METRIC +": "+ zErrTime, true)
 			}
-			isBlock = isVer < isBlockMin[0]
+			// might allow non-Gecko later
+			if (isGecko) {
+				isBlock = isVer < isBlockMin[0]
+			} else {
+				isBlock = false // allow non-gecko
+				isSmart = false // force basic mode
+			}
 			if (isBlock) {
 				run_block() // old gecko
 				return
@@ -1232,6 +1267,7 @@ function outputSection(id, cls) {
 		//*/
 		gData[zFP] = {"document":{}, "document_summary": {}}
 		gData["errors"] = {}
+		gData["lies"] = {}
 		if (!gLoad) { // don't wipe gLoad perf
 			gData["perf"] = []
 		}
@@ -1240,12 +1276,14 @@ function outputSection(id, cls) {
 			"errors": {},
 			"fingerprint": {"document":{}},
 			"health": {},
+			"lies": {},
 		}
 		// sDataTemp
 		sDataTemp = {
 			"display": {"document":{}},
 			"errors": {},
 			"fingerprint": {"document":{}},
+			"lies": {},
 			"perf": [],
 		}
 		sDetail = {}
@@ -1272,7 +1310,6 @@ function outputSection(id, cls) {
 		gCount = 0
 		gAlert = []
 		gKnown = []
-		gMethods = []
 		// reset section
 		sDetail = {}
 		get_isDevices()

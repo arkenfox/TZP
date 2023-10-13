@@ -31,7 +31,7 @@
 		<div id="svgDiv"></div>
 		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
 		<div id="sysFont"></div>
-		<!-- ensure codepoints have time for fallback mapping -->
+		<!-- ensure codepoints have time for fallback mapping	-->
 		<div>
 			<span> &#x20B9; </span><span> &#x2581; </span><span> &#x20BA; </span><span> &#xA73D; </span>
 			<span> &#x20B8; </span><span> &#x05C6; </span><span> &#x1E9E; </span><span> &#x097F; </span>
@@ -117,10 +117,9 @@
 				&nbsp document</td><td class="mono">
 				<span class="c" id="documenthash"></span>
 				<span class="c" id="documenterrorshash"></span>
+				<span class="c" id="documentlieshash"></span>
 				<div class="btn-right"><span class="c" id="documenthealth"></span></div>
 			</td></tr>
-		<tr><td>untrustworthy</td><td class="c mono" id="knownhash"></td></tr>
-		<tr><td>methods</td><td class="c mono" id="knownmethods"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">fingerprints are always 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
@@ -187,8 +186,8 @@
 		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vViewport"></td></tr>
 		<tr><td>visualViewport</td><td class="c mono" id="eViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">visualViewport<br>viewport<br>element</span></div>
-			&nbsp scrollbars</td><td class="c mono border-bottom" id="mScrollbar"></td></tr>
+			<span class="ttxt">scrollWidth<br>viewport<br>visualViewport</span></div>
+			&nbsp scrollbars</td><td class="c mono border-bottom" id="scrollbar_widths"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
@@ -215,20 +214,21 @@
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp new window</td><td class="c mono" id="newWinLeak"></td></tr>
 
-		<!-- dpi-->
-		<tr><td>dpi</td><td class="c" id="dpi"></td></tr>
+		<!-- pixels-->
+		<tr><td>[div] dpi</td><td class="c" id="dpi_div"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
-			&nbsp [css min-resolution] dpi</td><td class="mono" id="P"></td></tr>
+			&nbsp [css min-resolution] dpi</td><td class="mono"><span id="P"></span><span id="dpi_css"></span></td></tr>
+		<tr><td>[matchMedia] dpi</td><td class="mono">
+				<span class="c" id="dpi"></span>
+			</td></tr>
+		<tr><td>[matchMedia] dppx | dpcm</td><td class="mono">
+				<span class="c" id="dppx"></span> | <span class="c" id="dpcm"></span>
+			</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">max-resolution</span></div>
-			&nbsp [matchMedia] dpi | dppx | dpcm</td><td class="c mono" id="mmDPI"></td></tr>
-		<!--dpr-->
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">-moz-device-pixel-ratio<br>border width</span></div>
-			&nbsp devicePixelRatio</td>
-			<td class="mono"><span class="c" id="devicePixelRatio_moz"></span> | <span class="c" id="devicePixelRatio_border"></span>
-		</td></tr>
-		<tr><td>[window] devicePixelRatio</td><td class="c mono" id="devicePixelRatio"></td></tr>
+			<span class="ttxtb">-moz-device-pixel-ratio<br>-webkit-min-device-pixel-ratio<br>window</span></div> &nbsp devicePixelRatio</td><td class="mono">
+			<span class="c" id="-moz-device-pixel-ratio"></span> | <span class="c" id="-webkit-min-device-pixel-ratio"></span> | <span class="c" id="devicePixelRatio"></span>
+			</td></tr>
+		<tr><td>[border] devicePixelRatio</td><td class="mono"><span class="c" id="devicePixelRatio_border"></span></td></tr>
 		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
 
 		<tr class="togOS"><td colspan="2" class="center">--- android ---</td></tr>
@@ -321,8 +321,8 @@
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(3)">[ re-run ]</span></div>
 			<span class="c" id="featurehash"></span>
 		</td></tr>
-		<tr><td>[css] branding</td><td id="fdBrandingCss"></td></tr>
-		<tr><td>[css] browser</td><td id="fdResourceCss"></td></tr>
+		<tr><td>[css] branding</td><td class="mono" id="fdBrandingCss"></td></tr>
+		<tr><td>[css] browser</td><td class="mono" id="fdResourceCss"></td></tr>
 		<tr><td>[browser] architecture</td><td class="c mono" id="browser_architecture"></td></tr>
 		<tr><td>browser</td><td class="c mono" id="browser"></td></tr>
 		<tr><td>version</td><td class="c mono" id="version"></td></tr>
@@ -343,9 +343,9 @@
 	<table id="tb4">
 		<col width="31%"><a name="region"></a><col width="69%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#region">region: language, locale, format, date/time, geolocation</a>
+			<div class="nav-title"><a href="#region">region</a>
 			<div class="nav-up"><a href="#feature">&#9650;</a> <span class="c perf" id="perfregion"></span></div>
-			<div class="nav-down"><a href="#networkd">&#9660;</a></div>
+			<div class="nav-down"><a href="#headersd">&#9660;</a></div>
 			<div class="nav-right"><a name="regiond"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
@@ -407,7 +407,7 @@
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfsign.html">[PoC]</a>
 				&nbsp sign</td><td class="c" id="ldt31"></td></tr>
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/timezonename.html">[PoC]</a>
-				&nbsp timezonename</td><td class="c" id="ldt32"></td></tr>
+				&nbsp timezonename</td><td class="c mono" id="ldt32"></td></tr>
 			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfunit.html">[PoC]</a>
 				&nbsp unit</td><td class="c mono" id="ldt33"></td></tr>
 
@@ -444,18 +444,18 @@
 		<tr class="togL" colspan="2"><td></td></tr>
 	</table>
 
-	<!--network-->
+	<!--headers-->
 	<table id="tb5">
-		<col width="31%"><a name="network"></a><col width="69%">
+		<col width="31%"><a name="headers"></a><col width="69%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title"><a href="#network">network / http headers</a>
-			<div class="nav-up"><a href="#region">&#9650;</a> <span class="c perf" id="perfnetwork"></span></div>
+			<div class="nav-title"><a href="#headers">headers</a>
+			<div class="nav-up"><a href="#region">&#9650;</a> <span class="c perf" id="perfheaders"></span></div>
 			<div class="nav-down"><a href="#storaged">&#9660;</a></div>
-			<div class="nav-right"><a name="networkd"></a></div></div>
+			<div class="nav-right"><a name="headersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(5)">[ re-run ]</span></div>
-			<span class="c" id="networkhash"></span>
+			<span class="c" id="headershash"></span>
 		</td></tr>
 		<tr><td>connection</td><td class="c mono" id="connection"></td></tr>
 		<tr><td>doNotTrack</td><td class="c mono" id="doNotTrack"></td></tr>
@@ -468,7 +468,7 @@
 		<col width="31%"><a name="storage"></a><col width="69%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#storage">cookies & storage</a>
-			<div class="nav-up"><a href="#network">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
+			<div class="nav-up"><a href="#headers">&#9650;</a> <span class="c perf" id="perfstorage"></span></div>
 			<div class="nav-down"><a href="#devicesd">&#9660;</a></div>
 			<div class="nav-right"><a name="storaged"></a></div></div>
 		</th></tr></thead>
@@ -496,10 +496,10 @@
 		<tr><td>notifications</td><td><span class="c" id="notif1"></span> | <span class="c" id="notif2"></span></td></tr>
 		-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">notifications | push | persistent-storage</span></div>
+			<span class="ttxtb">notifications | persistent-storage | push</span></div>
 			&nbsp permissions</td><td class="mono"><span class="c" id="permission_notifications"></span>
-			| <span class="c" id="permission_push"></span>
 			| <span class="c" id="permission_persistent-storage"></span>
+			| <span class="c" id="permission_push"></span>
 			</td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('get_storage_manager')">[ click ]</span>
 			storage manager</td><td class="c mono" id="storage_manager"></td></tr>
@@ -523,24 +523,25 @@
 			<span class="c" id="deviceshash"></span>
 		</td></tr>
 		<tr><td>color</td>
-				<td class="mono"><span id="cssC"></span> | <span class="c" id="color"></span></td></tr>
+				<td class="mono"><span id="cssC"></span><span class="c" id="color_css"></span> | <span class="c" id="color"></span></td></tr>
 		<tr><td>pixel depth | color depth</td>
 			<td class="mono"><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
 		<tr><td>color gamut</td>
-			<td class="mono"><span id="cssCG"></span> | <span class="c" id="color-gamut"></span></td></tr>
+			<td class="mono"><span id="cssCG"></span><span class="c" id="color-gamut_css"></span> | <span class="c" id="color-gamut"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
-		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span> | <span class="c" id="any-hover"></span></td></tr>
-		<tr><td>hover</td><td class="mono"><span id="cssH"></span> | <span class="c" id="hover"></span></td></tr>
+		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span><span class="c" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
+		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="c" id="hover_css"></span> | <span class="c" id="hover"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp media devices</td><td class="c mono" id="mediaDevices"></td></tr>
 		<tr><td>mimeTypes</td><td class="c mono" id="mimeTypes"></td></tr>
 		<tr><td>plugins</td><td class="c mono" id="plugins"></td></tr>
 		<tr><td>pdfViewerEnabled</td><td class="c mono" id="pdf"></td></tr>
-		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span> | <span class="c" id="any-pointer"></span></td></tr>
-		<tr><td>pointer</td><td class="mono"><span id="cssP"></span> | <span class="c" id="pointer"></span></td></tr>
+		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
+			<span class="c" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
+		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="c" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
 		<tr><td id="pointertarget"><span class="btn btn0"
 			onClick="outputUser('get_pointer_event')">[ <span id="pointerlabel">mouse</span> ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
@@ -636,8 +637,8 @@
 		<tr><td><span class="btn btn0" onClick="outputUser('outputAudio2')">[ click ]</span>
 			hash</td><td class="c2 gc mono" id="audiohash2"></td></tr>
 		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
-		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
 		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 gc mono" id="audio3hash"></td></tr>
+		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">audio code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
@@ -774,15 +775,15 @@
 		<tr><td>forced-colors</td><td class="mono">
 			<span id="cssFC"></span> | <span class="c" id="forced-colors"></span></td></tr>
 		<tr><td>inverted-colors</td><td class="mono">
-			<span id="cssIC"></span> | <span class="c" id="inverted-colors"></span></td></tr>
+			<span id="cssIC"></span><span class="c" id="prefers-inverted-colors_css"></span> | <span class="c" id="inverted-colors"></span></td></tr>
 		<tr><td>prefers-color-scheme</td><td class="mono">
-			<span id="cssPCS"></span> | <span class="c" id="prefers-color-scheme"></span></td></tr>
+			<span id="cssPCS"></span><span class="c" id="prefers-color-scheme_css"></span> | <span class="c" id="prefers-color-scheme"></span></td></tr>
 		<tr><td>prefers-contrast</td><td class="mono">
-			<span id="cssPC"></span> | <span class="c" id="prefers-contrast"></span></td></tr>
+			<span id="cssPC"></span><span class="c" id="prefers-contrast_css"></span> | <span class="c" id="prefers-contrast"></span></td></tr>
 		<tr><td>prefers-reduced-data</td><td class="mono">
 			<span id="cssPRD"></span> | <span class="c" id="prefers-reduced-data"></span></td></tr>
 		<tr><td>prefers-reduced-motion</td><td class="mono">
-			<span id="cssPRM"></span> | <span class="c" id="prefers-reduced-motion"></span></td></tr>		
+			<span id="cssPRM"></span><span class="c" id="prefers-reduced-motion_css"></span> | <span class="c" id="prefers-reduced-motion"></span></td></tr>		
 		<tr><td>prefers-reduced-transparency</td><td class="mono">
 			<span id="cssPRT"></span> | <span class="c" id="prefers-reduced-transparency"></span></td></tr>
 		<tr><td colspan="3"><span class="no_color">code by </span>
@@ -869,7 +870,6 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.enable_performance</span></div>
 			&nbsp performance.timing</td><td class="c mono" id="perf_timing"></td></tr>
-		<tr><td>PerformanceNavigationTiming</td><td class="c mono" id="perf_navigation"></td></tr>
 		<tr><td>stack depth | length</td><td class="c mono" id="recursion"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">svg.disabled</span></div>

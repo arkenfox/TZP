@@ -119,7 +119,9 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 		try {
 			navigator.storage.persist().then(function(persistent) {
 				navigator.storage.estimate().then(estimate => {
-					exit(`${estimate.usage} of ${estimate.quota} bytes`)
+					// we don't care about estimate.usage
+					let value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
+					exit(value +"GB ["+ estimate.quota +" bytes]")
 				})
 			})
 		} catch(e) {
@@ -154,8 +156,9 @@ const get_storage_quota = () => new Promise(resolve => {
 
 const get_permissions = (item) => new Promise(resolve => {
 	const METRIC = "permission_"+ item
+	let notation = ""
 	function exit(value) {
-		let notation = value == "prompt" ? "" : default_red
+		if (isSmart) {notation = value == "prompt" ? "" : default_red}
 		log_display(6, METRIC, value + notation)
 		if (item == "persistent-storage" && value == "granted") {
 			// silent run manager to force granted quota when run

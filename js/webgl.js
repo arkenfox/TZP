@@ -342,7 +342,7 @@ function outputWebGL() {
 		const [webGL2Data, webGL2Errors] = webGL2
 		const [experimentalWebGLData, experimentalWebGLErrors] = experimentalWebGL
 
-		//*
+		/*
 		console.log('WebGLRenderingContext: ', mini(webGLData), webGLData)
 		if (webGLErrors.length) {console.log('webGL Errors',webGLErrors)}
 		console.log('WebGL2RenderingContext: ', webGL2Data)

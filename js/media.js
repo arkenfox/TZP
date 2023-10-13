@@ -237,7 +237,7 @@ const get_midi = () => new Promise(resolve => {
 	let notation = "", count = 0
 	function exit(name, value) {
 		count++
-			if (isSmart && isVer > 109) {
+			if (isSmart) {
 				notation = value == "prompt" ? default_green : default_red
 			}
 			addData(13, name, value)

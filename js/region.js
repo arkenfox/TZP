@@ -2,7 +2,6 @@
 
 const get_geo = () => new Promise(resolve => {
 	const METRIC = "geolocation"
-
 	// nav
 	let value, display
 	try {
@@ -25,7 +24,6 @@ const get_geo = () => new Promise(resolve => {
 		value = zErr, display = value
 		log_error(SECT4, METRIC +"_navigator", e)
 	}
-
 	// window
 	let geoWin
 	try {
@@ -87,7 +85,7 @@ const get_nav_connection = () => new Promise(resolve => {
 				if (isSmart && sData[SECT99].includes("Navigator.connection")) {
 					nav = zLIE
 					display = colorFn(display)
-					log_known(METRIC)
+					log_known(SECT5, METRIC)
 				}
 				finish(nav, display)
 			} else {
@@ -144,20 +142,22 @@ const get_nav_dnt = () => new Promise(resolve => {
 	// expected nav: i.e you can't remove it
 	const METRIC = "doNotTrack"
 	function exit(value, display) {
-		log_display(5, METRIC, display)
+		log_display(5, METRIC, display +"")
 		return resolve([METRIC, value])
 	}
 	try {
 		let value = navigator[METRIC]
 		if (runST) {value = 1}
 		let display = value
-		if ("1" !== value && "unspecified" !== value) {
-			if ("string" === typeof value) {
-				display = log_error(SECT5, METRIC, zErrInvalid + cleanFn(value))
-			} else {
-				display = log_error(SECT5, METRIC, zErrType + typeof value)
+		if (isGecko) {
+			if ("1" !== value && "unspecified" !== value) {
+				if ("string" === typeof value) {
+					display = log_error(SECT5, METRIC, zErrInvalid + cleanFn(value))
+				} else {
+					display = log_error(SECT5, METRIC, zErrType + typeof value)
+				}
+				value = zErr
 			}
-			value = zErr
 		}
 		exit(value, display)
 	} catch(e) {
@@ -171,7 +171,14 @@ const get_nav_gpc = () => new Promise(resolve => {
 	// privacy.globalprivacycontrol.enabled = true/false
 	const METRIC = "globalPrivacyControl"
 	function exit(value, display) {
-		log_display(5, METRIC, display)
+		let notation = ""
+		if (isSmart) {
+			notation = default_red
+			if (isVer > 119 && value === false) {notation = default_green
+			} else if (isVer < 120 && value == "undefined") {notation = default_green
+			}
+		}
+		log_display(5, METRIC, display + notation)
 		return resolve([METRIC, value])
 	}
 	try {
@@ -185,7 +192,7 @@ const get_nav_gpc = () => new Promise(resolve => {
 		} else if (isSmart && sData[SECT99].includes("Navigator."+ METRIC)) {
 			value = zLIE
 			display = colorFn(display)
-			log_known(SECT4, METRIC)
+			log_known(SECT5, METRIC)
 		}
 		exit(value, display)
 	} catch(e) {
@@ -240,12 +247,6 @@ function get_lang() {
 				"percent": both,
 				"second": {"long": [1], "narrow": [1], "short": [987654]},
 				"terabyte": optL,
-			}
-			// ToDo: isSmartMin=115 remove FF < 110 tweak
-			if (isVer < 110) {
-				tests["unit"]["month"] = {"narrow": [1], "short": [987654]}
-				tests["unit"]["day"] = optL
-				tests["unit"]["gallon"] = {"short": [987654]}
 			}
 		}
 		set_tests()
@@ -503,7 +504,7 @@ function get_lang() {
 			// LANGUAGES
 			METRIC = "languages"
 			data = oTempData[METRIC]
-			let langcheck = (isSmart && isTB && isOS !== "android" && isVer > 114) // ToDo: android may differ, ignore for now
+			let langcheck = (isSmart && isTB && isOS !== "android") // ToDo: android may differ, ignore for now
 			Object.keys(data).forEach(function(item){
 				METRIC = item
 				if (langcheck) {
@@ -551,11 +552,14 @@ function get_lang() {
 			} else if (res.length == 0) {
 				value = zErr
 				fpvalue = zErr
-			} else  {
+			} else {
 				value = "mixed"
-				fpvalue = zLIE
-				value = colorFn(value)
-				log_known(SECT4, METRIC)
+				fpvalue = "mixed"
+				if (isSmart) {
+					fpvalue = zLIE
+					value = colorFn(value)
+					log_known(SECT4, METRIC)
+				}
 			}
 			addData(4, METRIC, fpvalue)
 			if (langcheck) {
@@ -695,21 +699,11 @@ function get_lang() {
 					let period2 = dteL.format(hr08) // long08
 					if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
 					res.push( dteS.format(hr12)) // short12
-
-					// ToDo: isSmartMin=115 remove FF < 110 tweak
-					if (isVer > 109) {
-						// FF110+: assuming ICU 72: 1792775
-						period1 = dteN.format(hr15) // narrow15
-						period2 = dteS.format(hr15) // short15
-						if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
-						res.push( dteS.format(hr18)) // short18
-						res.push( dteL.format(hr22)) // long22
-					} else {
-						// FF109 or lower
-						res.push( dteN.format(hr15)) // narrow15
-						res.push( dteS.format(hr18)) // short18
-						res.push( dteS.format(hr22)) // short22
-					}
+					period1 = dteN.format(hr15) // narrow15
+					period2 = dteS.format(hr15) // short15
+					if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
+					res.push( dteS.format(hr18)) // short18
+					res.push( dteL.format(hr22)) // long22
 					return res.join(" | ")
 				} else if (item == 24) {
 					// ListFormat: 5 tests max required

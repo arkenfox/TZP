@@ -3,7 +3,7 @@
 const get_element_keys = () => new Promise(resolve => {
 	const METRIC = "htmlelement_keys"
 	const id = "html-element-version"
-	let check = (isSmart && isTB && isVer > 114)
+	let check = (isSmart && isTB)
 	let notation = check ? tb_red : ""
 
 	function cleanup() {

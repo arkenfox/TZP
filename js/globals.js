@@ -4,7 +4,7 @@ var dom;
 
 const SECTG = "_global", SECTP = "_prereq", SECTNF = "NON-FP",
 	SECT1 = "screen", SECT2 = "ua", SECT3 = "feature", SECT4 = "region",
-	SECT5 = "network", SECT6 = "storage", SECT7 = "devices", SECT9 = "canvas",
+	SECT5 = "headers", SECT6 = "storage", SECT7 = "devices", SECT9 = "canvas",
 	SECT10 = "webgl", SECT11 = "audio", SECT12 = "fonts", SECT13 = "media",
 	SECT14 = "css", SECT15 = "elements", SECT18 = "misc",
 	SECT98 = "prototype", SECT99 = "proxy"
@@ -17,7 +17,7 @@ const sectionMap = {
 
 let sectionOrder = [], sectionNames = []
 
-const btnList = ["errors"] // ToDo: expand e.g alerts, lies
+const btnList = ["errors", "lies"] // ToDo: expand e.g alerts
 
 const jsFilesExpected = 14
 let gCountExpected = 15
@@ -29,7 +29,6 @@ let gData = { // from sData
 		"perf": [],
 	},
 	gKnown = [], // known, methods, alerts
-	gMethods = [],
 	gAlert = [],
 	gAlertOnce = []
 
@@ -134,12 +133,12 @@ let isArch = true,
 	isOSErr,
 	isSystemFont = [],
 	isTB = false,
-	isVer,
+	isVer = 0,
 	isVerExtra = "",
 	isWordmark
 
 // other
-let isClientRect = 1,
+let isClientRect = 0,
 	isPerf = false
 
 // runtypes
@@ -147,8 +146,9 @@ let gt0, gt1,
 	gLoad = true,
 	gRun = true,
 	gClick = true,
+	isAllowNonGecko = false, // not supported: to see what other engines return
 	isBlock = true,
-	isBlockMin = [115, 13], // [FF, equivalent TB version]
+	isBlockMin = [102, 12], // [FF, equivalent TB version]
 	isSmart = false,
 	isSmartMin = 115 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 

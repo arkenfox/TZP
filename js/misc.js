@@ -11,7 +11,6 @@ function check_mathLies() {
 }
 
 const get_component_shims = () => new Promise(resolve => {
-	// ToDo: 1448046: isSmartMin=115 ? remove this metric
 	const METRIC = "component_interfaces"
 	let notation = ""
 	try {
@@ -207,22 +206,23 @@ function get_navigator() {
 			display = colorFn(display)
 			log_known(SECT18, METRIC)
 		}
-		// health: only do TB/MB as ESR is stable
+		// health: 115+ only do TB/MB as ESR is stable
 			// otherwise it's way too much work to track OSes/releases and beta/early etc
-		if (isSmart && isTB && isVer > 114) {
+		if (isSmart && isTB) {
 			notation = tb_red
 			if (!isLies) {
 				if (isMullvad) {
-					// MB
+					// MB13 desktop
 					if (hash === "1bfbd5d3") {notation = tb_green} // 37: mediaDevices, mediaSession
 				} else {
-					// TB
-						if (isOS == "android") {
-							if (hash === "3b7f79c3") {notation = tb_green} // 37: share, canShare (dom.webshare.enabled)
-						} else {
-							if (hash === "1054f985") {notation = tb_green} // 35
-						}
+					if (isOS == "android") {
+						// TBA13
+						if (hash === "3b7f79c3") {notation = tb_green} // 37: share, canShare (dom.webshare.enabled)
+					} else {
+						// TB13 desktop
+						if (hash === "1054f985") {notation = tb_green} // 35
 					}
+				}
 			}
 		}
 		log_display(18, METRIC, display + addButton(18, METRIC, keys.length) + tamperBtn + notation)
@@ -257,10 +257,9 @@ function get_recursion(log = false) {
 }
 
 function get_perf_mark_entries() {
-	// ToDo: isSmartMin=115 remove this metric
+	// FF111+ 1811567: no longer a health metric, but keep to detect timing fuckery
 	const METRIC = "perf_mark_entries"
-	let entries = "", valueEntries = "", ctrlEntries = "0, 0, 0, 0"
-	let measure = "", notation = ""
+	let entries = "", valueEntries = "", ctrlEntries = "0, 0, 0, 0", measure = ""
 	try {
 		if (runSE) {foo++}
 		performance.mark("a")
@@ -291,15 +290,10 @@ function get_perf_mark_entries() {
 		// cleanup
 		performance.clearMarks()
 		performance.clearMeasures()
-		// FF111+ 811567
-		if (isSmart && isVer < 111) {
-			notation = entries == ctrlEntries && measure == 0 ? rfp_green : rfp_red
-		}
-		log_display(18, METRIC, entries +" | "+ measure + notation)
+		log_display(18, METRIC, entries +" | "+ measure)
 		return [METRIC, valueEntries +" | "+ measure]
 	} catch(e) {
-		if (isSmart && isVer < 111) {notation = rfp_red}
-		log_display(18, METRIC, log_error(SECT18, METRIC, e) + notation)
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
 		return [METRIC, zErr]
 	}
 }
@@ -323,8 +317,8 @@ function get_perf_now(log = false) {
 				}
 				// analyse
 				function output() {
-					let isMatch = true,
-						goodRFP = [0, 16.7, 16.6, 33.3, 33.4, 50, 66.6, 66.7]
+					let isMatch = true
+					let goodRFP = [0, 16.6, 16.7, 33.3, 33.4, 50, 66.6, 66.7, 83.3, 83.4, 100, 116.6, 116.7]
 					// tidy times
 					for (let i=0; i < aData.length ; i++) {
 						let time = aData[i] - p0
@@ -392,7 +386,7 @@ const get_window_props = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	const METRIC = "window_properties"
-	let check = (isSmart && isTB && isVer > 114)
+	let check = (isSmart && isTB)
 	let notation = check ? tb_red : ""
 
 	try {
@@ -416,10 +410,6 @@ const get_window_props = () => new Promise(resolve => {
 		// cleanup
 		iframe.parentNode.removeChild(iframe)
 
-		// ToDo: isSmartMin=115 remove this metric
-		let perf = aProps.includes("PerformanceNavigationTiming") ? zE : zD
-		if (isSmart && isVer < 111) {perf += (perf == zD ? rfp_green : rfp_red)} // 78-110: 1511941 - 1811567
-		log_display(18, "perf_navigation", perf)
 		// wasm
 		let wasm = aProps.includes("WebAssembly") ? zE : zD
 		if (isSmart && isTB) {wasm += (wasm == zE ? tb_standard : tb_safer)}
@@ -464,11 +454,17 @@ const get_window_props = () => new Promise(resolve => {
 		display += addButton(18, METRIC, aProps.length) + tamperBtn
 		// health
 		if (check && fpvalue !== zLIE) {
+			// ToDo: touch devices
+				// "Touch", "TouchEvent", "TouchList","ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"
+				// e.g. is not in my windows touch-capable laptop but may be present in a tablet
+			// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
+				// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
+				// on touch devices: 0 (all false) 1 or 2 (all true)
 			if (isMullvad) {
 				if (fpvalue == "0d0dd5d5" || fpvalue == "8815bd33") {notation = tb_green} // 823 standard | 822 safer
 			} else {
 				if (isOS == "android") {
-					notation = sbx +" TBv13 "+ fpvalue +"]"+sc
+					if (fpvalue == "c70d9b44" || fpvalue == "6623eaa2") {notation = tb_green} // 783 standard | 782 safer
 				} else {
 					if (fpvalue == "226bc5ca" || fpvalue == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
 				}
@@ -498,7 +494,6 @@ const get_window_props = () => new Promise(resolve => {
 		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
 		let eMsg = log_error(SECT18, METRIC, e)
 		let note = (isSmart && isTB) ? rfp_red : ""
-		log_display(18, "perf_navigation", eMsg + note) // ToDo: 1448046: isSmartMin=115 ? remove this metric
 		log_display(18, "wasm", eMsg + (isSmart && isTB ? tb_slider_red : ""))
 		log_display(18, "webgpu", eMsg + note)
 
