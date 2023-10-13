@@ -73,7 +73,7 @@ const get_audio2_context = (os = isOS) => new Promise(resolve => {
 
 		// ac-outputLatency is variable per tab and even on page load
 			// so on non RFP hashes, change it to variable and display the original on screen
-		if (note !== rfp_green) {
+		if (isGecko && note !== rfp_green) {
 			latencynote = " [" + objnew["ac-outputLatency"]+ " latency]"
 			objnew["ac-outputLatency"] = "variable"
 			hash = mini(objnew)
