@@ -301,8 +301,8 @@ function get_computed_styles() {
 				} else {
 					if (check) {
 						if (isOS == "mac") {
-							/* mac 1102 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
-							if (hash === "75600d93") {notation = tb_green} // TB 1102
+							/* mac 1104 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
+							if (hash === "75b00d93") {notation = tb_green} // TB 1104
 						} else {
 							/* win diff
 							layout.css.font-variations.enabled = locked false on win 7
