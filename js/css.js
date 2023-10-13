@@ -19,20 +19,22 @@ function get_colors() {
 			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
-		"moz": [ // FF117+:
+		"moz": [ // FF120+:
 			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
 			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
 			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-active-menuitem',
 			'-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext',
-			'-moz-mac-focusring','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-menutextdisable',
-			'-moz-mac-menutextselect','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-			'-moz-menubarhovertext','-moz-menuhover','-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
+			'-moz-mac-focusring','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list',
+			'-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-menubarhovertext','-moz-menuhover',
+			'-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
 		],
 	}
 
-	if (isVer < 117) {
+	if (isVer < 120) { // ToDo: change to < 119 once beta backport confirmed
 		let aTmp = oList["moz"]
 		aTmp.push (
+			// removed/backported FF119 1857695
+			'-moz-mac-menutextdisable','-moz-mac-menutextselect',
 			// removed FF117
 			"-moz-buttondefault","-moz-dragtargetzone","-moz-mac-chrome-active","-moz-mac-chrome-inactive",
 			"-moz-mac-menuselect","-moz-mac-menushadow","-moz-mac-secondaryhighlight","-moz-menubartext",
@@ -85,9 +87,10 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "5a00aa84" // FF117+
-					if (isVer < 103) {check = "c0df6598"} else if (isVer < 117) {check = "788e7d22"}
-					notation = hash == check ? rfp_green : rfp_red // 1734115
+					let check = "47538602" // FF119+
+					if (isVer < 117) {check = "788e7d22" // 115-116
+					} else if (isVer < 119) {check = "5a00aa84"} // 117-118
+					notation = hash == check ? rfp_green : rfp_red
 				}
 				log_display(14, METRIC, hash + btn + notation)
 			} catch(e) {
@@ -118,7 +121,7 @@ function get_computed_styles() {
 		const names = ["styles_cssrulelist","styles_getcomputed","styles_htmlelement"]
 		let aErr = [false, false, false], isLies = false
 		let aHashes = [], intHashes = [], oDisplay = {}
-		let check = (isSmart && isTB && isVer > 114)
+		let check = (isSmart && isTB)
 		let notation = check ? tb_red : ""
 
 		let styleVersion = type => {
@@ -297,12 +300,17 @@ function get_computed_styles() {
 					log_known(SECT14, METRIC)
 				} else {
 					if (check) {
-						/* win diff
-						layout.css.font-variations.enabled = locked false on win 7
-						fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
-						*/
-						if (hash === "e32d06bd") {notation = tb_green // TB/MB win11 + linux, TB android: 1102
-						} else if (hash === "e14684e7") {notation = tb_green} // TB/MB win7 1098
+						if (isOS == "mac") {
+							/* mac 1102 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
+							if (hash === "75600d93") {notation = tb_green} // TB 1102
+						} else {
+							/* win diff
+							layout.css.font-variations.enabled = locked false on win 7
+							fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+							*/
+							if (hash === "e32d06bd") {notation = tb_green // TB/MB win11 + linux, TB android: 1102
+							} else if (hash === "e14684e7") {notation = tb_green} // TB/MB win7 1098
+						}
 					}
 					addData(14, METRIC, res[lookup]["keys"], hash)
 				}
@@ -343,7 +351,7 @@ function get_computed_styles() {
 
 const get_mm_css = () => new Promise(resolve => {
 	function get_mm(type, id, rfpvalue, minVer) {
-		const METRIC = type
+		const METRIC = type, METRIC2 = type +"_css"
 		let value = zNA, display = value, q = type, isErr = false
 		try {
 			if (window.matchMedia("("+ q +":no-preference)").matches) {value = "no-preference"
@@ -362,24 +370,26 @@ const get_mm_css = () => new Promise(resolve => {
 			display = log_error(SECT14, METRIC, e)
 			value = zErr
 		}
+		let cssvalue = getElementProp(SECT14, "#css"+ id, METRIC2)
+		let isErrCss = cssvalue == zErr
 		if (isSmart) {
-			let cssvalue = getElementProp(SECT14, "#css"+ id)
-			if (value !== cssvalue && cssvalue !== "x") {
-				if (!isErr) {
+			if (!isErr && !isErrCss) {
+				if (value !== cssvalue) {
 					display = colorFn(display)
 					value = zLIE
 					log_known(SECT14, METRIC)
 				}
 			}
 			if (rfpvalue !== undefined) {
-				// notate: only apply notation from when it was flipped
+				// notate from when it was flipped
 				if (minVer == undefined || minVer < isVer) {
-					display += display == rfpvalue ? rfp_green : rfp_red
+					display += display == rfpvalue ? rfp_green : rfp_red // mm
+					log_display(14, type +"_css", (cssvalue == rfpvalue ? rfp_green : rfp_red)) // css
 				}
 			}
 		}
 		log_display(14, type, display)
-		res.push([METRIC, value])
+		res.push([METRIC, value], [METRIC2, cssvalue])
 	}
 
 	let res = []
