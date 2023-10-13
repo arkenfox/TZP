@@ -97,9 +97,19 @@ let fntMaster = {
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX', // fedora
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
+			// TB12 fontnames, should have been removed
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math',
 		],
-		'mac': ['Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell',],
-		'windows': ['Calibri','Candara','Corbel','Impact','Ebrima','Gabriola',],
+		'mac': [
+			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell',
+			// TB12 fontnames, should have been removed
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math',
+		],
+		'windows': [
+			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola',
+			// TB12 fontnames, should have been removed
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2',
+		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
 	'base': {
@@ -120,6 +130,8 @@ let fntMaster = {
 			'Microsoft Sans Serif','Microsoft Tai Le','Microsoft YaHei','Microsoft Yi Baiti','MingLiU-ExtB','MingLiU_HKSCS-ExtB',
 			'Mongolian Baiti','NSimSun','PMingLiU-ExtB','Palatino Linotype','Segoe Print','Segoe Script','Segoe UI','Segoe UI Symbol',
 			'SimSun','SimSun-ExtB','Sylfaen','Symbol','Tahoma','Times New Roman','Trebuchet MS','Verdana','Webdings','Wingdings',
+			// 7 but not detected if font-vis < 3: 1720408
+			'Franklin Gothic Medium',
 			// 8
 			'Gadugi','Nirmala UI','Microsoft JhengHei UI','Microsoft YaHei UI','Myanmar Text',
 			// 8.1
@@ -127,21 +139,19 @@ let fntMaster = {
 			'Sitka Heading','Sitka Small','Sitka Subheading','Sitka Text','Yu Gothic',
 			// 10
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
-			// FontSubstitutes
-				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
-			'Helv','Helvetica','Times','Tms Rmn', // seems stable
-
-			// localized: kBase: detected FF120+: 1850672
+			// localized: kBase: detected FF119+: 1850672
 			'微软雅黑', // Microsoft YaHei
 			'ＭＳ ゴシック', // MS Gothic
 			'ＭＳ Ｐゴシック', // MS PGothic
 			'宋体', // SimSun
       '游ゴシック', // Yu Gothic
-
 			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
 			*/
+			// FontSubstitutes
+				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
+			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
+			'Helv','Helvetica','Times','Tms Rmn', // seems stable
 
 			/* variants
 			// 7
@@ -236,6 +246,8 @@ let fntMaster = {
 			'Simplified Arabic Fixed','Traditional Arabic','Tunga','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
 			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting',
 			'Utsaah','Vani','Verdana Pro','Vijaya','Vrinda','Yu Mincho',
+			// win11
+			'Sans Serif Collection',
 			// localized ^
 			'바탕', // Batang
 			'BIZ UDPゴシック', // BIZ UDPGothic
@@ -247,8 +259,6 @@ let fntMaster = {
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
 
-			// kBase but broken: 1720408
-			'Franklin Gothic Medium',
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook',
 			// MS downloads
@@ -285,34 +295,6 @@ function set_fntList(os = isOS) {
 			"base": [], "bundled": [], "full": [],
 			"control": [], "control_name": [],
 			"generic": [],
-		}
-
-		// diffs fom TB13
-		if (isTB) {
-			if (isVer < 115) {
-				// ToDo: isSmartMin=115 remove
-				// renamed: Noto Sans Symbols 2 (new) vs Noto Sans Symbols2 (old)
-				let tmpArray = fntMaster["bundled"]["allnotosans"]
-				tmpArray.push("Symbols2")
-				tmpArray = tmpArray.filter(x => !["Symbols 2"].includes(x))
-				fntMaster["bundled"]["allnotosans"] = tmpArray.sort()
-				// renamed: Noto Serif NP Hmong (new) vs Noto Serif Hmong Nyiakeng (old)
-				tmpArray = fntMaster["bundled"]["allnotoserif"]
-				tmpArray.push("Hmong Nyiakeng")
-				tmpArray = tmpArray.filter(x => !["NP Hmong"].includes(x))
-				fntMaster["bundled"]["allnotoserif"] = tmpArray.sort()
-				// mac/linux: STIX Two Math (new) vs STIX Math (old)
-				tmpArray = fntMaster["bundled"]["linux"]
-				tmpArray.push("STIX Math")
-				tmpArray = tmpArray.filter(x => !["STIX Two Math"].includes(x))
-				fntMaster["bundled"]["linux"] = tmpArray.sort()
-				fntMaster["bundled"]["mac"] = ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Math',]
-			} else {
-				// make sure old fonts + font names were removed
-				fntMaster.blocklist.windows.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2")
-				fntMaster.blocklist.linux.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2","STIX Math")
-				fntMaster.blocklist.mac.push("Noto Serif Hmong Nyiakeng","Noto Sans Symbols2","STIX Math")
-			}
 		}
 
 		// baseSize: add fallback for misconfigured/missing
@@ -992,6 +974,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 	]
 	let aProps = ['font-size','font-style','font-weight','font-family']
 	let oRes = {}, notation = ""
+	let check = (isSmart && isTB)
 	try {
 		if (runSE) {foo++}
 		let el = dom.sysFont
@@ -1005,14 +988,14 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		let newobj = {}, count = 0
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
 		let hash = mini(newobj)
-		if (isSmart && isTB && isVer > 114) {
+		if (check) {
 			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
 			notation = tb_red
 			if (os == "windows") {
 				/* "12px normal 400 sans-serif" */
 				if (hash == "c89fb033") {notation = tb_green}
 			} else if (os == "mac") {
-				if (hash == "") {notation = tb_green}
+				if (hash == "1dc326ac") {notation = tb_green}
 			} else if (os == "linux") {
 				/* "15px normal 400 sans-serif" */
 				if (hash == "7b469d36") {notation = tb_green}
@@ -1025,7 +1008,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		log_display(12, METRIC, hash + addButton(12, METRIC, Object.keys(newobj).length +"/"+ count) + notation)
 		return resolve()
 	} catch(e) {
-		notation = (isSmart && isTB && isVer > 14) ? tb_red : ""
+		notation = check ? tb_red : ""
 		log_display(12, METRIC, log_error(SECT12, METRIC, e) + notation)
 		return resolve([METRIC, zErr])
 	}
