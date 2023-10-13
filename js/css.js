@@ -30,7 +30,7 @@ function get_colors() {
 		],
 	}
 
-	if (isVer < 120) { // ToDo: change to < 119 once beta backport confirmed
+	if (isVer < 119) {
 		let aTmp = oList["moz"]
 		aTmp.push (
 			// removed/backported FF119 1857695
