@@ -25,11 +25,13 @@ function return_nw(w,h, isNew) {
 	return (bw && bh) ? nw_green : nw_red
 }
 
-const get_scr_fullscreen = () => new Promise(resolve => {
+const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 	let oRes = {}
+	let cssvalue = getElementProp(SECT1, "#cssDM", "display-mode_css")
+	let isErrCss = cssvalue == zErr
 
 	function get_display_mode() {
-		const METRIC = "display-mode"
+		const METRIC = "display-mode", METRIC2 = METRIC +"_css"
 		let value, display
 		try {
 			let q = "(display-mode:"
@@ -37,9 +39,8 @@ const get_scr_fullscreen = () => new Promise(resolve => {
 			if (window.matchMedia(q +"browser)").matches) {value = "browser"}
 			if (window.matchMedia(q +"minimal-ui)").matches) {value = "minimal-ui"}
 			display = value
-			if (isSmart) {
-				let cssCheck = getElementProp(SECT1, "#cssDM")
-				if (value !== cssCheck && cssCheck !== "x") {
+			if (isSmart && !isErrCss) {
+				if (value !== cssvalue) {
 					value = zLIE
 					display = colorFn(display)
 					log_known(SECT1, METRIC)
@@ -49,6 +50,41 @@ const get_scr_fullscreen = () => new Promise(resolve => {
 			log_error(SECT1, METRIC, e)
 			value = zErr
 			display = zErr
+		}
+		log_display(1, METRIC, display)
+		oRes[METRIC] = value
+		oRes[METRIC2] = cssvalue
+	}
+
+	// fullScreen
+	function get_fullScreen() {
+		const METRIC = "fullScreen"
+		let value, display
+		if (isGecko) {
+			try {
+				// ToDo: shouldn't this be a standard and work in blink etc?
+				value = window.fullScreen
+				if (runSE) {foo++} else if (runST) {value = undefined}
+				display = value
+				if ("boolean" !== typeof value) {
+					log_error(SECT1, METRIC, zErrType + typeof value)
+					value = zErr
+					display = zErr
+				} else if (isSmart && !isErrCss) {
+					let boolCss = cssvalue == "fullscreen" ? true : false
+					if (boolCss !== value) {
+						value = zLIE
+						display = colorFn(display)
+						log_known(SECT1, METRIC)
+					}
+				}
+			} catch(e) {
+				log_error(SECT1, METRIC, e)
+				value = zErr
+				display = value
+			}
+		} else {
+			value = zNA; display = value
 		}
 		log_display(1, METRIC, display)
 		oRes[METRIC] = value
@@ -69,193 +105,295 @@ const get_scr_fullscreen = () => new Promise(resolve => {
 		oRes[METRIC] = r
 	}
 
-	// fullScreen
-	function get_fullScreen() {
-		const METRIC = "fullScreen"
-		let value, display
-		try {
-			value = window.fullScreen
-			if (runSE) {foo++} else if (runST) {value = undefined}
-			display = value
-			if ("boolean" !== typeof value) {
-				log_error(SECT1, METRIC, zErrType + typeof value)
-				value = zErr
-				display = zErr
-			} else if (isSmart) {
-				let cssCheck = getElementProp(SECT1, "#cssDM")
-				if (cssCheck !== "x") {
-					cssCheck = cssCheck == "fullscreen" ? true : false
-					if (cssCheck !== value) {
-						value = zLIE
-						display = colorFn(display)
-						log_known(SECT1, METRIC)
-					}
-				}
-			}
-		} catch(e) {
-			log_error(SECT1, METRIC, e)
-			value = zErr
-			display = value
-		}
-		log_display(1, METRIC, display)
-		oRes[METRIC] = value
-	}
-
+	// do in order so oRes keys = sorted
 	get_display_mode()
-	get_mozFullScreenEnabled()
 	get_fullScreen()
-	return resolve(oRes)
+	get_mozFullScreenEnabled()
+	if (runtype !== "resize") {
+		addData(1, "fullscreen", oRes, mini(oRes))
+	}
+	return resolve()
 })
 
-const get_scr_subpixels = (runtype) => new Promise(resolve => {
-	function return_mm_dpi(type, denominator) {
-		const METRIC = "max-resolution_"+ type
-		let r = ""
-		try {
-			r = (function() {
-				let i = 1
-				for (1; i < 3001; i++) {
-					let n = i/denominator
-					if (matchMedia("(max-resolution:"+ n + type +")").matches === true) {return n}
-				}
-				log_error(SECT1, METRIC, zErrInvalid +"> "+ ((i-1)/denominator))
-				return zErr
-			})()
-		} catch(e) {
-			log_error(SECT1, METRIC, e)
-			return zErr
-		}
-		return r
-	}
-	function get_dpr() {
-		const METRICw = "devicePixelRatio", METRICb = "devicePixelRatio_border"
-		// DPR window
-		let value, display
-		try {
-			if (runSE) {foo++}
-			value = window.devicePixelRatio
-			display = value
-			if ("number" !== typeof value) {
-				log_error(SECT1, METRICw, zErrType + typeof value)
-				value = zErr
-				display = "NaN"
-			} else {
-				varDPR = value
-			}
-		} catch(e) {
-			display = log_error(SECT1, METRICw, e)
-			value = zErr
-		}
-		let notation = ""
-		if (isSmart) {
-			let rfpvalue = isTB && isVer > 102 ? 2 : 1
-			notation = value === rfpvalue ? rfp_green : rfp_red
-		}
-		log_display(1, METRICw, display + notation)
-		oSubpixels[METRICw] = value
-
-		// DPR border: 477157: don't notate this for health
-		value = undefined, display = undefined
-		try {
-			let el = dom.dprBorder
-			value = getComputedStyle(el).borderTopWidth
-			if ("string" == typeof value) {
-				let originalvalue = value
-				value = value.slice(0, -2) * 1
-				if (value > 0) {
-					value = 1/value
-					display = value
-					varDPR = value // use this over window.dpr
-				} else {
-					log_error(SECT1, METRICb, zErrInvalid + cleanFn(originalvalue))
-					value = zErr
-					display = "NaN"
-				}
-			} else {
-				// undefined, null, objects, arrays
-				log_error(SECT1, METRICb, zErrType + typeof value)
-				value = zErr
-				display = "NaN"
-			}
-		} catch(e) {
-			log_error(SECT1, METRICb, e)
-			value = zErr
-			display = zErr
-		}
-		log_display(1, METRICb, display)
-		oSubpixels[METRICb] = value
-		return
-	}
-
-	// DPI x 3 methods, DPPX, DPCM
-	function get_dpi() {
-		const METRIC = "dpi"
-		let mmDPPX = return_mm_dpi("dppx",100),
-			mmDPCM = return_mm_dpi("dpcm",10)
-		mmDPI = return_mm_dpi("dpi",1)
-		//note: divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
-
-		// measure div
-		try {dpi_x = Math.round(dom.divDPI.offsetWidth * varDPR)} catch(e) {dpi_x = zErr}
-		try {dpi_y = Math.round(dom.divDPI.offsetHeight * varDPR)} catch(e) {dpi_y = zErr}
-		let diffDPI = 0
-		varDPI = dpi_y // default
-		if (isSmart) {
-			// varDPI: fallback checks: allow 1 x diff; use highest value
-			if (dpi_y !== 0 && !isNaN(dpi_y)) {
-				// this is the one: RFP spoofs cssDPI and mmDPI
-				varDPI = dpi_y
-			} else if (cssDPI !== "x" && mmDPI !== zErr) {
-				diffDPI = Math.abs(mmDPI - cssDPI)
-				varDPI = (diffDPI == 1 ? mmDPI : cssDPI)
-			} else if (mmDPI !== zErr) {
-				varDPI = mmDPI
-			}
-		}
-		log_display(1, "mmDPI", mmDPI +" | "+ mmDPPX +" | "+ mmDPCM)
-		log_display(1, METRIC, varDPI)
-		oSubpixels[METRIC] = varDPI
-		return
-	}
-
-	// visualViewport scale
-	function get_vv_scale() {
-		// FF63+: dom.visualviewport.enabled
-		// FF91+: default true (desktop at least)
-		const METRIC = "visualViewport_scale"
-		let value = "", display = ""
-		try {
-			value = visualViewport.scale
-			if (runSE) {foo++} else if (runST) {value +=""}
-			display = value
-			if ("number" !== typeof value) {
-				log_error(SECT1, METRIC, zErrType + typeof vvScale)
-				display = "NaN"
-				value = zErr
-			}
-		} catch(e) {
-			display = log_error(SECT1, METRIC, e)
-			value = zErr
-		}
-		log_display(1, METRIC, display)
-		oSubpixels[METRIC] = value
-		return
-	}
-
-	// run
-		// if dpi_x/y stay at 0 = css blocked or offsetWidth blocked
+const get_scr_measure = (runtype) => new Promise(resolve => {
 	let t0 = nowFn()
-	let oSubpixels = {}
-	let varDPR, varDPI, mmDPI, dpi_x = 0, dpi_y = 0
-	let cssDPI = getElementProp(SECT1, "#P",":before")
-	// get
-	get_dpr()
-	get_dpi()
-	get_vv_scale()
-	if (runtype !== "resize") {
-		log_perf(SECT1, "dpi/dpr", t0, "", varDPI +" "+ cssDPI	+" "+ mmDPI +" "+ dpi_x +" "+ dpi_y)
+	Promise.all([
+		get_scr_mm(runtype, "measure"),
+	]).then(function(mmres){
+		let tmpScreen = {}, tmpWindow = {}, oScreen = {}, oWindow = {}
+
+		// matchmedia
+		tmpScreen["device-height"] = mmres[0]["device-height"]
+		tmpScreen["device-width"] = mmres[0]["device-width"]
+		tmpWindow["window_height"] = mmres[0]["window_height"]
+		tmpWindow["window_width"] = mmres[0]["window_width"]
+		// screen/window
+		let aList = [
+			"width","height","availWidth","availHeight", // scr
+			"outerWidth","outerHeight","innerWidth","innerHeight", // window
+		]
+		for (let i=0; i < 8; i++) {
+			let x
+			let prefix = (i < 2) ? "screen_" : "" // width/height is ambiguous: also clashes with matchmedia inner
+			try {
+				if (i < 4) {x = screen[aList[i]]
+				} else {x = window[aList[i]]
+				}
+				if (typeof x !== "number") {
+					log_error(SECT1, prefix + aList[i], zErrType + typeof x)
+					x = "NaN"
+				}
+			} catch (e) {
+				log_error(SECT1, prefix + aList[i], e)
+				x = zErr
+			}
+			if (i < 4) {tmpScreen[prefix + aList[i]] = x
+			} else {tmpWindow[aList[i]] = x
+			}
+		}
+		// css
+		let cList = [
+			["#S", "device-width_css", ":before"],
+			["#S", "device-height_css", ":after"],
+			["#D", "window_width_css", ":before"],
+			["#D", "window_height_css", ":after"],
+		]
+		cList.forEach(function(array) {
+			let value = getElementProp(SECT1, array[0], array[1], array[2])
+			if ("number" !== typeof value && value !== "?") {
+				log_error(SECT1, array[1], zErrType + typeof value)
+				value = "NaN"
+			}
+			// NaNs
+			if (array[0] == "#S") {
+				tmpScreen[array[1]] = value
+			} else {
+				tmpWindow[array[1]] = value
+			}
+		})
+
+		// reorder object
+		if (runtype !== "resize") {
+			for (const h of Object.keys(tmpScreen).sort()) {
+				oScreen[h] = tmpScreen[h]
+			}
+			for (const k of Object.keys(tmpWindow).sort()) {
+				oWindow[k] = tmpWindow[k]
+			}
+		}
+		
+		// just display it for now
+		log_display(1, "mAvailable", tmpScreen.availWidth +" x "+ tmpScreen.availHeight)
+		log_display(1, "mmScreen", tmpScreen["device-width"] +" x "+ tmpScreen["device-height"])
+		log_display(1, "mScreen", tmpScreen.screen_width +" x "+ tmpScreen.screen_height)
+		addData(1, "screen_sizes", oScreen, mini(oScreen))
+
+		log_display(1, "mOuter", tmpWindow.outerWidth +" x "+ tmpWindow.outerHeight)
+		log_display(1, "mmInner", tmpWindow.window_width +" x "+ tmpWindow.window_height)
+		log_display(1, "mInner", tmpWindow.innerWidth +" x "+ tmpWindow.innerHeight)
+		addData(1, "window_sizes", oWindow, mini(oWindow))
+
+		// inner: LB/NW
+		if (isSmart) {
+			if (isOS !== "android") {
+				// TB13 changes newwin to max 1400x900, and aligns LB to match NW steps
+				log_display(1, "letterboxing", return_lb(tmpWindow.innerWidth, tmpWindow.innerHeight, isTB))
+				log_display(1, "new_window", return_nw(tmpWindow.innerWidth, tmpWindow.innerHeight, isTB))
+			}
+		}
+
+	})
+	return resolve()
+
+	/*
+	// notate
+	let match = true, r = ""
+	if (mScreen !== mAvailable) {match = false
+	}	else if (mAvailable !== mOuter) {match = false
+	}	else if (mOuter !== mInner) {match = false
+	} else {
+		aMeasures.forEach(function(value) {
+			if (isNaN(value)) {match = false}
+		})
 	}
-	return resolve(oSubpixels)
+	r = match ? screen_green : screen_red
+	dom.scrmatch.innerHTML = r
+	*/
+
+	// inner
+	let newW = getElementProp(SECT1, "#D",":before"),
+		newH = getElementProp(SECT1, "#D"),
+		isLies = 0, oldW = w4, oldH = h4
+	if (newW !== "?") {
+		newW = newW * 1
+		if (newW == oldW-1) {newW = oldW}
+		if (newW !== oldW) {isLies++}
+	}
+	if (newH !== "?") {
+		newH = newH.slice(3) * 1
+		if (newH == oldH-1) {newH = oldH}
+		if (newH !== oldH) {isLies++}
+	}
+	if (isLies > 0) {
+		dom.mInner.innerHTML = colorFn(mInner)
+		log_known(SECT1, "window inner")
+	}
+	res["window_inner"] = (isLies > 0 ? zLIE : mInner)
+
+	// screen
+	newW = getElementProp(SECT1, "#S",":before")
+	newH = getElementProp(SECT1, "#S")
+	isLies = 0, oldW = w1, oldH = h1
+	if (newW !== "?") {
+		newW = newW * 1
+		if (newW == oldW-1) {newW = oldW}
+		if (newW !== oldW) {isLies++}
+	}
+	if (newH !== "?") {
+		newH = newH.slice(3) * 1
+		if (newH == oldH-1) {newH = oldH}
+		if (newH !== oldH) {isLies++}
+	}
+	if (["Screen.width","Screen.height"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {isLies++}
+	if (isLies > 0) {
+		dom.mScreen.innerHTML = colorFn(mScreen)
+		log_known(SECT1, "screen")
+	}
+	res["screen"] = (isLies > 0 ? zLIE : mScreen)
+
+	// screen available
+	isLies = false
+	if (["Screen.availWidth","Screen.availHeight"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {
+		isLies = true
+		dom.mAvailable.innerHTML = colorFn(mAvailable)
+		log_known(SECT1, "screen available")
+	}
+	res["screen_available"] = (isLies > 0 ? zLIE : mAvailable)
+
+	// outer
+	res["window_outer"] = mOuter
+		if (runtype !== "resize") {log_perf(SECT1, "scr/win",t0)}
+	// resolve
+	return resolve(res)
+
+})
+
+const get_scr_mm = (runtype, datatype) => new Promise(resolve => {
+	const unable = "unable to find upper bound"
+	const oList = {
+		"measure": [
+				["device-width", "device-width", "max-device-width", "px", 512, 0.01],
+				["device-height", "device-height", "max-device-height", "px", 512, 0.01],
+				["window_width", "width", "max-width", "px", 512, 0.01],
+				["window_height", "height", "max-height", "px", 512, 0.01],
+			],
+		"pixels": [
+			["-moz-device-pixel-ratio", "-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 4, 0.0000001],
+			["-webkit-min-device-pixel-ratio", "-webkit-min-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 4, 0.01],
+				// webkit seems limited to and rounds down to 0.25, 0.5, 1, 2, 4
+			["dpcm", "resolution", "max-resolution", "dpcm", 1e-5, 0.0000001],
+			["dpi", "resolution", "max-resolution", "dpi", 1e-5, 0.0000001],
+			["dppx", "resolution", "max-resolution", "dppx", 1e-5, 0.0000001],
+		]
+	}
+	let list = oList[datatype], maxCount = oList[datatype].length, count = 0, oData = {}
+	function exit(id, value) {
+		if (value == unable) {
+			log_error(SECT1, id, unable)
+			value = zErr
+		}
+		oData[id] = value
+		count++
+		if (count == maxCount) {
+			return resolve(oData)
+		}
+	}
+	function runTest(callback){
+		list.forEach(function(k){
+			let metric = k[0], lower = k[1], upper = k[2], suffix = k[3], epsilon = k[4], precision = k[5]
+			Promise.all([
+				callback(lower, upper, suffix, epsilon, precision),
+			]).then(function(result){
+				exit(metric, result[0])
+			}).catch(function(err){
+				exit(metric, err)
+			})
+		})
+	}
+	function searchValue(tester, maxValue, precision){
+		let minValue = 0
+		let ceiling = Math.pow(2, 32)
+		function stepUp(){
+			if (maxValue > ceiling || runST){
+				return Promise.reject(unable)
+			}
+			return tester(maxValue).then(function(testResult){
+				if (testResult === searchValue.isEqual){
+					return maxValue
+				}
+				else if (testResult === searchValue.isBigger){
+					minValue = maxValue
+					maxValue *= 2
+					return stepUp()
+				}
+				else {
+					return false
+				}
+			})
+		}
+		function binarySearch() {
+			if (maxValue - minValue < precision) {
+				return tester(minValue).then(function(testResult) {
+					if (testResult.isEqual) {return minValue
+					} else {
+						return tester(maxValue).then(function(testResult) {
+							if (testResult.isEqual) {return maxValue
+							} else {
+								return Promise.resolve(minValue) // +" to "+ maxValue // just return min
+							}
+						})
+					}
+				})
+			} else {
+				let pivot = (minValue + maxValue) / 2
+				return tester(pivot).then(function(testResult) {
+					if (testResult === searchValue.isEqual) {return pivot
+					} else if (testResult === searchValue.isBigger) {
+						minValue = pivot
+						return binarySearch()
+					} else {
+						maxValue = pivot
+						return binarySearch()
+					}
+				})
+			}
+		}
+		return stepUp().then(function(stepUpResult) {
+			if (stepUpResult){return stepUpResult
+			} else {return binarySearch()}
+		})
+	}
+	searchValue.isSmaller = -1
+	searchValue.isEqual = 0
+	searchValue.isBigger = 1
+
+	runTest(function(prefix, maxPrefix, suffix, maxValue, precision) {
+		return searchValue(function(valueToTest) {
+			try {
+				if (runSE) {foo++}
+				if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
+					return Promise.resolve(searchValue.isEqual)
+				} else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
+					return Promise.resolve(searchValue.isSmaller)
+				} else {
+					return Promise.resolve(searchValue.isBigger)
+				}
+			} catch(e) {
+				log_error(SECT1, prefix, e, isScope, 40)
+				return Promise.reject(zErr)
+			}
+		}, maxValue, precision)
+	})
 })
 
 const get_scr_orientation = (type) => new Promise(resolve => {
@@ -270,7 +408,8 @@ const get_scr_orientation = (type) => new Promise(resolve => {
 	let l = "landscape", p = "portrait", q = "(orientation: ", s = "square", a = "aspect-ratio"
 	let aWindow = [], aScreen = []
 	for (let i=0; i < names.length; i++) {
-		let value
+		let value, isErr = false
+		let METRIC = names[i][0], METRIC2 = METRIC +"_css"
 		try {
 			if (runSE) {foo++}
 			if (i == 0) {
@@ -290,15 +429,17 @@ const get_scr_orientation = (type) => new Promise(resolve => {
 			}
 			if (value == undefined) {value = zU}
 		} catch(e) {
-			log_error(SECT1, names[i][0], e)
+			log_error(SECT1, METRIC, e)
 			value = zErr
+			isErr = true
 		}
 		if (runSL) {value += "_fake"}
 		let display = value
 		// css
 		let isLies = false
-		let cssvalue = getElementProp(SECT1, names[i][1])
-		if (isSmart && value !== zErr && cssvalue !== "x") {
+		let cssvalue = getElementProp(SECT1, names[i][1], METRIC2)
+		let isErrCss = cssvalue == zErr
+		if (isSmart && !isErr && !isErrCss) {
 			if (value !== cssvalue) {
 				display = colorFn(display)
 				value = zLIE
@@ -307,12 +448,12 @@ const get_scr_orientation = (type) => new Promise(resolve => {
 		}
 		if (i < 2) {
 			aScreen.push(display)
-			oScreen[names[i][0]] = value
-			oScreen[names[i][0] +"_css"] = cssvalue
+			oScreen[METRIC] = value
+			oScreen[METRIC2] = cssvalue
 		} else {
 			aWindow.push(display)
-			oWindow[names[i][0]] = value
-			oWindow[names[i][0] +"_css"] = cssvalue
+			oWindow[METRIC] = value
+			oWindow[METRIC2] = cssvalue
 		}
 	}
 	log_display(1, "screen_mmorientation", aScreen.join(" | "))
@@ -354,6 +495,167 @@ const get_scr_orientation = (type) => new Promise(resolve => {
 	return resolve()
 })
 
+const get_scr_pixels = (runtype) => new Promise(resolve => {
+	function get_dpr() {
+		const METRICw = "devicePixelRatio", METRICb = "devicePixelRatio_border"
+		// DPR window
+		let value, display
+		try {
+			if (runSE) {foo++}
+			value = window.devicePixelRatio
+			display = value
+			if ("number" !== typeof value) {
+				log_error(SECT1, METRICw, zErrType + typeof value)
+				value = zErr
+				display = "NaN"
+			} else {
+				varDPR = value
+			}
+		} catch(e) {
+			display = log_error(SECT1, METRICw, e)
+			value = zErr
+		}
+		let notation = ""
+		if (isSmart) {
+			notation = value === (isTB ? 2 : 1) ? rfp_green : rfp_red
+		}
+		log_display(1, METRICw, display + notation)
+		oData[METRICw] = value
+
+		// DPR border: 477157: don't notate this for health
+		value = undefined, display = undefined
+		try {
+			let el = dom.dprBorder
+			value = getComputedStyle(el).borderTopWidth
+			if ("string" == typeof value) {
+				let originalvalue = value
+				value = value.slice(0, -2) * 1
+				if (value > 0) {
+					value = 1/value
+					display = value
+					varDPR = value // use this over window.dpr
+				} else {
+					log_error(SECT1, METRICb, zErrInvalid + cleanFn(originalvalue))
+					value = zErr
+					display = "NaN"
+				}
+			} else {
+				// undefined, null, objects, arrays
+				log_error(SECT1, METRICb, zErrType + typeof value)
+				value = zErr
+				display = "NaN"
+			}
+		} catch(e) {
+			log_error(SECT1, METRICb, e)
+			value = zErr
+			display = zErr
+		}
+		log_display(1, METRICb, display)
+		oData[METRICb] = value
+		return
+	}
+
+	// DPI
+	function get_dpi() {
+		const METRIC = "dpi_div", METRIC2 = "dpi_css"
+		//note: divDPI relies on css: if css is blocked (dpi_y = 0) this causes issues
+		// measure div
+		try {dpi_x = Math.round(dom.divDPI.offsetWidth * varDPR)} catch(e) {dpi_x = zErr}
+		try {dpi_y = Math.round(dom.divDPI.offsetHeight * varDPR)} catch(e) {dpi_y = zErr}
+		let diffDPI = 0
+		varDPI = dpi_y // default
+		if (isSmart) {
+			// varDPI: fallback checks: allow 1 x diff; use highest value
+			if (dpi_y !== 0 && !isNaN(dpi_y)) {
+				// this is the one: RFP spoofs cssDPI and mmDPI
+				varDPI = dpi_y
+			} else if ("number" == typeof cssDPI && mmDPI !== zErr) {
+				diffDPI = Math.abs(mmDPI - cssDPI)
+				varDPI = (diffDPI == 1 ? mmDPI : cssDPI)
+			} else if (mmDPI !== zErr) {
+				varDPI = mmDPI
+			}
+			// notate css
+			log_display(1, METRIC2, (cssDPI == 96 ? rfp_green : rfp_red))
+		}
+		log_display(1, METRIC, varDPI)
+		oData[METRIC2] = cssDPI
+		oData[METRIC] = varDPI
+		return
+	}
+
+	// visualViewport scale
+	function get_vv_scale() {
+		// FF63+: dom.visualviewport.enabled
+		// FF91+: default true (desktop at least)
+		const METRIC = "visualViewport_scale"
+		let value = "", display = ""
+		try {
+			value = visualViewport.scale
+			if (runSE) {foo++} else if (runST) {value +=""}
+			display = value
+			if ("number" !== typeof value) {
+				log_error(SECT1, METRIC, zErrType + typeof vvScale)
+				display = "NaN"
+				value = zErr
+			}
+		} catch(e) {
+			display = log_error(SECT1, METRIC, e)
+			value = zErr
+		}
+		log_display(1, METRIC, display)
+		if (runtype !== "resize") {
+			oData[METRIC] = value
+		}
+		return
+	}
+
+	// run
+		// if dpi_x/y stay at 0 = css blocked or offsetWidth blocked
+	let t0 = nowFn()
+	let oData = {}
+	let varDPR, varDPI, mmDPI, dpi_x = 0, dpi_y = 0
+	let cssDPI = getElementProp(SECT1, "#P", "dpi_css", ":before")
+	if (cssDPI !== "?" && cssDPI !== zErr) {
+		if ("number" !== typeof cssDPI) {
+			cssDPI = "NaN"
+			log_error(SECT1, "dpi_css", zErrType + typeof cssDPI)
+		}
+	}
+
+	// get
+	Promise.all([
+		get_scr_mm(runtype, "pixels")
+	]).then(function(results){
+
+		for (const k of Object.keys(results[0])) {
+			// expected 100% zoom values
+			let oMatch = {
+				"-moz-device-pixel-ratio": 1,
+				"-webkit-min-device-pixel-ratio": 1,
+				"dpcm": 37.79527499999999,
+				"dpi": 96.00000000000003,
+				"dppx": 1,
+			}
+			let value = results[0][k], notation = ""
+			if (isSmart && oMatch[k] !== undefined) {
+				notation = value == oMatch[k] ? rfp_green : rfp_red
+			}
+			oData[k] = value
+			log_display(1, k, value + notation)
+		}
+		get_dpr()
+		get_dpi()
+		get_vv_scale()
+		if (runtype !== "resize") {
+			let newobj = {}
+			for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
+			addData(1, "pixels", newobj, mini(newobj))
+			log_perf(SECT1, "pixels", t0, "", varDPI +" "+ cssDPI	+" "+ oData["dpi"] +" "+ dpi_x +" "+ dpi_y)
+		}
+		return resolve()
+	})
+})
 
 const get_scr_positions = (type) => new Promise(resolve => {
 	const METRIC = type +"_positions"
@@ -393,21 +695,31 @@ const get_scr_positions = (type) => new Promise(resolve => {
 })
 
 const get_scr_scrollbar = (runtype) => new Promise(resolve => {
-	// we need to wait for the viewport width
-	Promise.all([
-		get_scr_viewport(runtype)
-	]).then(function(res){
-		let t0 = nowFn()
-		// css inner width
-		let cssW = getElementProp(SECT1, "#D",":before")
+  // ui.useOverlayScrollbars: 0 = no, 1 = yes use-overlays
+	// win11 = overlay = very thin scrollbar
 
-		// element
-		function get_sb_element() {
-			const METRIC = "scollbar_element"
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
+		// widget.non-native-theme.scrollbar.style = values 1 to 5
+		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only?
+
+	Promise.all([
+		// get the viewport width: we only return zErr or a number
+		get_scr_viewport(runtype)
+	]).then(function(res) {
+		let t0 = nowFn()
+		let oData = {}, aDisplay = []
+
+		// css inner width
+		let cssW = getElementProp(SECT1, "#D", "innerWidth_css", ":before")
+
+		// scrollWidth
+		function get_scrollwidth(METRIC) {
 			let value, display
 			try {
-				value = (100 - dom.eScroll.scrollWidth)
-				if (runSE) {foo++}
+				let scrollWidth = dom.eScroll.scrollWidth
+				if ("number" !== typeof scrollWidth) {scrollWidth = "x"}
+				value = (100 - scrollWidth)
+				if (runSE) {foo++} else if (runST) {value = "x"}
 				if ("number" !== typeof value) {
 					log_error(SECT1, METRIC, zErrType + typeof value)
 					value = zErr
@@ -424,449 +736,132 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 				display = zErr
 				log_error(SECT1, METRIC, e)
 			}
-			return [display, value]
+			oData[METRIC] = value
+			aDisplay.push(display)
 		}
 
-		// viewport
-		function get_sb_viewport() {
-			let eViewport = res[0][0] // calculated from element
-
-		}
-
-
-		/*
-		let eViewport = res[0][0] // calculated from element
-		let eWidth, eValue, eLies = false
-		if (eViewport == zErr) {
-			eValue = eViewport
-			eWidth = eViewport
-		} else if (isSmart && "number" !== typeof eViewport) {
-			eWidth = "NaN"; eLies = true; eValue = zLIE
-		} else {
-			try {
-				eWidth = (window.innerWidth - eViewport)
-				eWidth = cleanFn(eWidth)
-				eValue = eWidth
-				if (isSmart) {
-					// leverage css value
-					let cssE = cssW
-					if (cssE !== "x" && "number" == typeof eWidth) {
-						if (cssE * 1 == eWidth - 1) {cssE = eWidth} // allow for min-
-						eWidth = cssE - eViewport
+		// viewport (calculated from element), visualViewport
+		function get_viewport(METRIC) {
+			let viewport = METRIC == "viewport" ? res[0][0] : res[0][1]
+			let value, display
+			if (viewport == zErr) {
+				value = zErr
+				display = zErr
+			} else {
+				try {
+					let innerwidth = window.innerWidth
+					if ("number" !== typeof innerwidth) {
+						log_error(SECT1, METRIC, zErrType + typeof value)
+						value = zErr
+						width = "NaN"
+					} else {
+						value = (innerWidth - viewport)
+						display = value
+						if (isSmart) {
+							// leverage css value
+							if (cssW !== "?") {
+								if (cssW * 1 == value - 1) {cssW = value} // allow for min-
+								value = cssW - viewport
+								display = value
+							}
+							// lies
+							if (value < -1) {
+								value = zLIE
+								display = colorFn(eWidth)
+								if (runtype !== "resize") {log_known(SECT1, METRIC)}								
+							}
+						}
 					}
-					// lies
-					let eMin = -1
-					if ("number" !== typeof eWidth) {eLies = true
-					} else if (eWidth < eMin) {eLies = true}
-					eValue = eLies ? zLIE : eWidth
+				} catch(e) {
+					value = zErr; display = zErr
+					log_error(SECT1, METRIC, e)
 				}
-			} catch(e) {
-				eWidth = zErr; eValue = zErr
-				log_error(SECT1, "scrollbar_viewport", e)
 			}
+			oData[METRIC] = value
+			aDisplay.push(display)
 		}
-		if (eLies) {
-			eWidth = colorFn(eWidth); if (runtype !== "resize") {log_known(SECT1, "scrollbar_viewport")}
-		}
-		*/
 
-		// visualViewport
-		function get_sb_visualviewport() {
-
-		}
-		/*
-		let vViewport = res[0][1]
-		let vValue, vWidth, vLies = false
-		if (vViewport == eViewport) {
-			vValue = eValue
-			vWidth = eWidth
-			vLies = eLies
-		} else if (vViewport == zErr) {
-			vValue = vViewport
-			vWidth = vViewport
-		} else if ("number" !== typeof vViewport) {
-			vWidth = "NaN"; vLies = true; vValue = zLIE
-		} else {
-			try {
-				vWidth = (window.innerWidth - vViewport)
-				vWidth = cleanFn(vWidth)
-				vValue = vWidth
-				if (isSmart) {
-					// leverage css value
-					if (cssW !== "x" && "number" == typeof vWidth) {
-						if (cssW * 1 == vWidth - 1) {cssW = vWidth} // allow for min-
-						vWidth = cssW - vViewport
-					}
-					// lies
-					let vMin = -1
-					if ("number" !== typeof vWidth) {vLies = true
-					} else if (vWidth < vMin) {vLies = true}
-					vValue = vLies ? zLIE : vWidth
-				}
-			} catch(e) {
-				vWidth = zErr; vValue = zErr
-				log_error(SECT1, "scrollbar_visualViewport", e)
-			}
-		}
-		if (vLies) {
-			vWidth = colorFn(vWidth); if (runtype !== "resize") {log_known(SECT1, "scrollbar_visualViewport")}
-		}
-		*/
-
-		get_sb_element()
-		get_sb_viewport()
-		get_sb_visualviewport()
-
-
-		// display
-		//dom.mScrollbar.innerHTML = vWidth +" | "+ eWidth +" | "+ elWidth
-		if (runtype !== "resize") {log_perf(SECT1, "scrollbars", t0)}
-		return resolve(["scrollbars", "TBA"])
+		get_scrollwidth("scrollWidth")
+		get_viewport("viewport")
+		get_viewport("visualViewport")
+		const METRIC = "scrollbar_widths"
+		log_display(1, METRIC, aDisplay.join(" | "))
+		addData(1, METRIC, oData, mini(oData))
+		if (runtype !== "resize") {log_perf(SECT1, METRIC, t0)}
+		return resolve()
 	})
 })
 
-function get_scr_viewport(runtype) {
+const get_scr_viewport = (runtype) => new Promise(resolve => {
 	let t0 = nowFn()
-	// element
-	let eViewport, evh, evw, eValue, eValid = false
-	try {
-		if (runSE) {foo++}
-		let e = document.createElement("div")
-		e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
-		document.documentElement.insertBefore(e,document.documentElement.firstChild)
-		evw = e.offsetWidth
-		evh = e.offsetHeight
-		document.documentElement.removeChild(e)
-		if (isSmart && "number" !== typeof evw || "number" !== typeof evh) {
-			eViewport = colorFn(cleanFn(evw) +" x "+ cleanFn(evh))
-			eValue = "NaN"
-			log_known(SECT1, "viewport")
-		} else {
-			eValid = true; eValue = evw
-			if (avh == "") {avh = evh} // get android height once
-			eViewport = cleanFn(evw) +" x "+ cleanFn(evh)
+	let oData = {}, aDisplay = []
+
+	// viewport
+	// visualViewport: note: FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
+	function get_viewport(type) {
+		let METRIC1 = "viewport_height", METRIC2 = "viewport_width"
+		if (type == "vViewport") {
+			METRIC1 = "visualViewport_height", METRIC2 = "visualViewport_width"
 		}
-	} catch(e) {
-		eViewport = log_error(SECT1,"viewport", e)
-		eValue = zErr
+		let wValue, hValue, wDisplay = "", hDisplay
+		try {
+			if (runSE) {foo++}
+			if (type == "eViewport") {
+				let e = document.createElement("div")
+				e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
+				document.documentElement.insertBefore(e,document.documentElement.firstChild)
+				wValue = e.offsetWidth
+				hValue = e.offsetHeight
+				document.documentElement.removeChild(e)
+			} else {
+				wValue = window.visualViewport.width
+				hValue = window.visualViewport.height
+			}
+			if (runST) {hValue = undefined}
+			if ("number" !== typeof hValue) {
+				log_error(SECT1, METRIC1, zErrType + typeof hValue)
+				hValue = zErr
+				hDisplay = "NaN"
+			} else {
+				hDisplay = hValue
+				if (avh == "") {avh = hValue} // get android height once
+			}
+			if (runST) {wValue = ""}
+			if ("number" !== typeof wValue) {
+				log_error(SECT1, METRIC2, zErrType + typeof wValue)
+				wValue = zErr
+				wDisplay = "NaN"
+			} else {
+				wDisplay = wValue
+			}
+		} catch(e) {
+			hValue = zErr; wValue = zErr
+			hDisplay = log_error(SECT1, METRIC1, e); wDisplay = ""
+			log_error(SECT1, METRIC2, e)
+		}
+		oData[METRIC1] = hValue
+		oData[METRIC2] = wValue
+		if (runtype !== "height") {
+			log_display(1, type, (wDisplay == "" ? hDisplay : wDisplay +" x "+ hDisplay))
+		}
 	}
 
-	// visualViewport
-	// note: FF63+ dom.visualviewport.enabled FF91+ default true (desktop at least)
-	let vViewport, vvw, vvh, vValue, vValid = false
-	try {
-		if (runSE) {foo++}
-		vvw = window.visualViewport.width
-		vvh = window.visualViewport.height
-		if (isSmart && "number" !== typeof vvw || "number" !== typeof vvh) {
-			vViewport = colorFn(cleanFn(vvw) +" x "+ cleanFn(vvh))
-			vValue = "NaN"
-			log_known(SECT1, "visualViewport size")
-		} else {
-			vValid = true; vValue = vvw
-			if (avh == "") {avh = vvh} // get android height once
-			vViewport = cleanFn(vvw) +" x "+ cleanFn(vvh)
-		}
-	} catch(e) {
-		vViewport = log_error(SECT1, "visualViewport size", e)
-		vValue = zErr
-	}
-
-	// get viewport height once on first load
-	if (avh == "") {avh = "undefined"}
-
+	get_viewport("eViewport")
+	get_viewport("vViewport")
+	if (avh == "") {avh = "undefined"} // get viewport height once on first load
 	// return
 	if (runtype == "height") {
-		return vValid ? evh : vvh // android tests
+		let vvh = oData["visualViewport_height"]
+		return resolve(vvh !== zErr ? vvh : oData["viewport_height"]) // android tests
 	} else {
-		dom.eViewport = eViewport
-		dom.vViewport.innerHTML = vViewport
 		// perf
 		if (runtype !== "resize") {
-			log_perf(SECT1, "viewport", t0, "", "e: "+ evh +" v: "+ vvh +" a: "+ avh)
+			addData(1, "viewport", oData, mini(oData))
+			log_perf(SECT1, "viewport", t0, "", "e: "+ oData["viewport_height"] +" v: "+ oData["visualViewport_height"] +" a: "+ avh)
 		}
-		return [eValue, vValue] // scrollbar
+		return resolve([oData["viewport_width"], oData["visualViewport_width"]]) // for scrollbar
 	}
-}
-
-function get_scr_window(runtype) {
-	return new Promise(resolve => {
-		let t0 = nowFn()
-		let res = {}
-		// MEASURE: ToDo: catch errors/undefined etc
-		let aMeasures = []
-		let aPos = []
-		let aList = [
-			"screen.width","screen.height","screen.availWidth","screen.availHeight",
-			"window.outerWidth","window.outerHeight","window.innerWidth","window.innerHeight",
-		]
-		for (let i=0; i < 8; i++) {
-			let x
-			try {
-				if (i == 0) {x = screen.width
-				} else if (i == 1) {x = screen.height
-				} else if (i == 2) {x = screen.availWidth
-				} else if (i == 3) {x = screen.availHeight
-				} else if (i == 4) {x = window.outerWidth
-				} else if (i == 5) {x = window.outerHeight
-				} else if (i == 6) {x = window.innerWidth
-				} else if (i == 7) {x = window.innerHeight
-				}
-				if (typeof x !== "number") {
-					log_error(SECT1, aList[i], zErrType + typeof x)
-					x = "NaN"
-				}
-			} catch (e) {
-				log_error(SECT1, aList[i], e)
-				x = zErr
-			}
-			aMeasures.push(x)
-		}
-
-		let w1 = aMeasures[0], h1 = aMeasures[1],
-			w2 = aMeasures[2], h2 = aMeasures[3],
-			w3 = aMeasures[4], h3 = aMeasures[5],
-			w4 = aMeasures[6], h4 = aMeasures[7]
-		let mScreen = w1 +" x "+ h1,
-			mAvailable = w2 +" x "+ h2,
-			mOuter = w3 +" x "+ h3,
-			mInner = w4 +" x "+ h4
-		// default display
-		dom.mScreen = mScreen
-		dom.mAvailable = mAvailable
-		dom.mOuter = mOuter
-		dom.mInner.innerHTML = mInner
-
-		if (!isSmart) {
-			res["screen"] = mScreen
-			res["screen_available"] = mAvailable
-			res["window_inner"] = mInner
-			res["window_outer"] = mOuter
-			return resolve(res)
-		}
-
-		/*
-		// notate
-		let match = true, r = ""
-		if (mScreen !== mAvailable) {match = false
-		}	else if (mAvailable !== mOuter) {match = false
-		}	else if (mOuter !== mInner) {match = false
-		} else {
-			aMeasures.forEach(function(value) {
-				if (isNaN(value)) {match = false}
-			})
-		}
-		r = match ? screen_green : screen_red
-		dom.scrmatch.innerHTML = r
-		*/
-
-		// inner: LB/NW
-		if (isOS !== "android") {
-			// TB changes newwin to max 1400x900, and aligns LB to match NW steps
-			let isNewSteps = (isTB && isVer > 102)
-			log_display(1, "letterboxing", return_lb(w4,h4, isNewSteps))
-			log_display(1, "new_window", return_nw(w4,h4, isNewSteps))
-		}
-
-		// inner
-		let newW = getElementProp(SECT1, "#D",":before"),
-			newH = getElementProp(SECT1, "#D"),
-			isLies = 0, oldW = w4, oldH = h4
-		if (newW !== "x") {
-			newW = newW * 1
-			if (newW == oldW-1) {newW = oldW}
-			if (newW !== oldW) {isLies++}
-		}
-		if (newH !== "x") {
-			newH = newH.slice(3) * 1
-			if (newH == oldH-1) {newH = oldH}
-			if (newH !== oldH) {isLies++}
-		}
-		if (isLies > 0) {
-			dom.mInner.innerHTML = colorFn(mInner)
-			log_known(SECT1, "window inner")
-		}
-		res["window_inner"] = (isLies > 0 ? zLIE : mInner)
-
-		// screen
-		newW = getElementProp(SECT1, "#S",":before")
-		newH = getElementProp(SECT1, "#S")
-		isLies = 0, oldW = w1, oldH = h1
-		if (newW !== "x") {
-			newW = newW * 1
-			if (newW == oldW-1) {newW = oldW}
-			if (newW !== oldW) {isLies++}
-		}
-		if (newH !== "x") {
-			newH = newH.slice(3) * 1
-			if (newH == oldH-1) {newH = oldH}
-			if (newH !== oldH) {isLies++}
-		}
-		if (["Screen.width","Screen.height"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {isLies++}
-		if (isLies > 0) {
-			dom.mScreen.innerHTML = colorFn(mScreen)
-			log_known(SECT1, "screen")
-		}
-		res["screen"] = (isLies > 0 ? zLIE : mScreen)
-
-		// screen available
-		isLies = false
-		if (["Screen.availWidth","Screen.availHeight"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {
-			isLies = true
-			dom.mAvailable.innerHTML = colorFn(mAvailable)
-			log_known(SECT1, "screen available")
-		}
-		res["screen_available"] = (isLies > 0 ? zLIE : mAvailable)
-
-		// outer
-		res["window_outer"] = mOuter
-
-		if (runtype !== "resize") {log_perf(SECT1, "scr/win",t0)}
-		// resolve
-		return resolve(res)
-	})
-}
-
-function get_scr_window_mm(runtype) {
-	return new Promise(resolve => {
-		let t0 = nowFn()
-		let count = 0, res = []
-		let unable = "unable to find upper bound"
-		// perf
-		function perf(id, str, type) {
-			if (runtype == "screen" && id == "devicePixelRatio_moz") {
-				addData(1, id, ("number" == typeof str ? str : zErr))
-			}
-			document.getElementById(id).innerHTML = str //== unable ? zErr : str
-			if (str == unable) {
-				log_error(SECT1, "matchmedia "+ type, unable)
-			}
-			count++
-			if (count == 3) {
-				if (runtype !== "resize") {log_perf(SECT1, "mm scr/win",t0)}
-				return resolve("skip")
-			}
-		}
-
-		function runTest(callback){
-			// screen
-			Promise.all([
-				callback("device-width", "max-device-width", "px", 512, 0.01), // 0.01
-				callback("device-height", "max-device-height", "px", 512, 0.01) // 0.01
-			]).then(function(device){
-				perf("mmScreen", device.join(" x "), "screen")
-			}).catch(function(err){
-				perf("mmScreen", err, "screen")
-			})
-			// inner
-			Promise.all([
-				callback("width", "max-width", "px", 512, 0.01),
-				callback("height", "max-height", "px", 512, 0.01)
-			]).then(function(inner){
-				perf("mmInner", inner.join(" x "), "inner")
-			}).catch(function(err){
-				perf("mmInner", err, "inner")
-			})
-			// moz
-			callback("-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 2, 0.0000001
-			).then(function(moz){
-				perf("devicePixelRatio_moz", moz, "-moz-device-pixel-ratio")
-			}).catch(function(err){
-				perf("devicePixelRatio_moz", err, "-moz-device-pixel-ratio")
-			})
-		}
-		function searchValue(tester, maxValue, precision){
-			let minValue = 0
-			let ceiling = Math.pow(2, 32)
-			function stepUp(){
-				if (maxValue > ceiling){
-					return Promise.reject("unable to find upper bound")
-				}
-				return tester(maxValue).then(function(testResult){
-					if (testResult === searchValue.isEqual){
-						return maxValue
-					}
-					else if (testResult === searchValue.isBigger){
-						minValue = maxValue
-						maxValue *= 2
-						return stepUp()
-					}
-					else {
-						return false
-					}
-				})
-			}
-			function binarySearch(){
-				if (maxValue - minValue < precision){
-					return tester(minValue).then(function(testResult){
-						if (testResult.isEqual){
-							return minValue
-						}
-						else {
-							return tester(maxValue).then(function(testResult){
-								if (testResult.isEqual){
-									return maxValue
-								}
-								else {
-									return Promise.resolve(
-										minValue // +" to "+ maxValue // just return min
-									)
-								}
-							})
-						}
-					})
-				}
-				else {
-					let pivot = (minValue + maxValue) / 2
-					return tester(pivot).then(function(testResult){
-						if (testResult === searchValue.isEqual){
-							return pivot
-						}
-						else if (testResult === searchValue.isBigger){
-							minValue = pivot
-							return binarySearch()
-						}
-						else {
-							maxValue = pivot
-							return binarySearch()
-						}
-					})
-				}
-			}
-			return stepUp().then(function(stepUpResult){
-				if (stepUpResult){
-					return stepUpResult
-				}
-				else {
-					return binarySearch()
-				}
-			})
-		}
-		searchValue.isSmaller = -1
-		searchValue.isEqual = 0
-		searchValue.isBigger = 1
-
-		runTest(function(prefix, maxPrefix, suffix, maxValue, precision){
-			return searchValue(function(valueToTest){
-				try {
-					//if (runSE) {foo++}
-					if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
-						return Promise.resolve(searchValue.isEqual)
-					}
-					else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
-						return Promise.resolve(searchValue.isSmaller)
-					}
-					else {
-						return Promise.resolve(searchValue.isBigger)
-					}
-				} catch(e) {
-					if (prefix == "-moz-device-pixel-ratio") {prefix = "devicePixelRatio_moz"}
-					return Promise.reject(log_error("screen", prefix, e, isScope, 40))
-				}
-			}, maxValue, precision)
-		})
-	})
-}
+})
 
 /* UA */
 
@@ -1013,7 +1008,8 @@ function get_android_tap() {
 
 function goFS() {
 	dom.fsLeak = ""
-	const initialState = getElementProp(SECT1, "#cssDM")
+	const initialState = getElementProp(SECT1, "#cssDM", "display-mode_css")
+
 	let ih1 = window.innerHeight,
 		delay = 1, n = 1,
 		sizeS = [], sizeE = []
@@ -1171,6 +1167,7 @@ function goNW_UA() {
 }
 
 /* OUTPUT */
+
 function outputUA(os = isOS) {
 	let t0 = nowFn()
 	let aReported = [], oComplex = {}
@@ -1252,31 +1249,20 @@ function outputUA(os = isOS) {
 		},
 	}
 	if (isSmart && os !== undefined) {
-		// 1818889: RFP 115-119 freezes rv at 109
-		let uaVer = isVer, rvVer = (isVer > 114 && isVer < 120 ? 109 : isVer)
-		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:"
-		let uaNext = isVerExtra === "+" ? uaRFP : undefined
-		if (os == "android") {
-			// android
-			if (isVer > 119) {
-				// 1806690: RFP 120+ drops matching ESR + frozen rv
-				uaRFP += uaVer +".0) Gecko/"+ isVer +".0 Firefox/"+ uaVer +".0"
-				if (isVerExtra === "+") {
-					// next: isVer is now at least 120 so we can ignore frozen rv
-					uaNext += (isVer + 1) +".0) Gecko/"+ (isVer + 1) +".0 Firefox/"+ (isVer + 1) +".0"
-					oRFP[os]["userAgentNext"] = uaNext
-				}
-			} else {
-				uaVer = isVer < 115 ? 102 : 115
-				rvVer = (isVer < 114 && isVer > 120) ? uaVer : 109
-				uaRFP += rvVer +".0) Gecko/"+ uaVer +".0 Firefox/"+ uaVer +".0"
-			}
+		let uaVer = isVer, isDroid = isOS == "android"
+		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:" // base
+		let uaNext = uaRFP // only used if ver+
+
+		if (uaVer < 120) {
+			// 1818889: RFP 115-119 rv=109, droid version = 115
+			uaRFP += "109.0) Gecko/"+ (isDroid ? "115.0" : "20100101") +" Firefox/"+ (isDroid? "115" : uaVer) +".0"
 		} else {
-			// desktop
-			uaRFP += rvVer +".0) Gecko/20100101 Firefox/"+ uaVer +".0"
+			// 1806690: RFP 120+ drops frozen rv + droid version spoof
+			uaRFP += uaVer +".0) Gecko/" + (isDroid ? uaVer +".0" : "20100101") +" Firefox/"+ uaVer +".0"
+			// next
 			if (isVerExtra === "+") {
-				// next: isVer is now at least 120 so we can ignore frozen rv
-				uaNext += (uaVer + 1) +".0) Gecko/20100101 Firefox/"+ (uaVer + 1) +".0"
+				let nxtVer = uaVer + 1
+				uaNext += nxtVer +".0) Gecko/"+ (isDroid ? nxtVer +".0" : "20100101") +" Firefox/"+ nxtVer +".0"
 				oRFP[os]["userAgentNext"] = uaNext
 			}
 		}
@@ -1323,6 +1309,19 @@ function outputUA(os = isOS) {
 
 function outputFD() {
 	let t0 = nowFn()
+
+	if (!isGecko) {
+		addData(3, "browser", "non-gecko")
+		log_display(3, "fdBrandingCss", zNA)
+		log_display(3, "fdResourceCss", zNA)
+		log_display(3, "browser", zNA)
+		log_display(3, "browser_architecture", zNA)
+		log_display(3, "os", zNA)
+		log_display(3, "version", zNA)
+		log_section(3, t0)
+		return
+	}
+
 	// logo
 	if (gLoad || isLogo == zErr || runST || runSE) {
 		try {
@@ -1382,6 +1381,7 @@ function outputFD() {
 	// browser
 	let METRIC = "browser"
 	let browser = (isMullvad ? "Mullvad Browser" : (isTB ? "Tor Browser" : "Firefox"))
+
 	log_display(3, METRIC, browser + " | "+ isLogo +" | "+ isWordmark)
 	addData(3, METRIC, browser)
 	addData(3, "logo", isLogo)
@@ -1399,34 +1399,29 @@ function outputFD() {
 		log_error(SECT3, METRIC, e)
 	}
 
-	// version
-	let r = isVer
-	if (isVerExtra !== "") {r += isVerExtra}
-	addDataDisplay(3, "version", r)
-
 	// os
 	METRIC = "os"
 	let hasErr = isOSErr !== undefined
 	log_display(3, METRIC, (hasErr ? isOSErr : isOS))
 	addData(3, METRIC, (hasErr ? zErr : isOS))
 
+	// version
+	let ver = isVer
+	if (isVerExtra !== "") {ver += isVerExtra}
+	addDataDisplay(3, "version", ver)
+
 	// os arch: FF110+ pref removed: error means 32bit
 	METRIC = "browser_architecture"
-	let notation = ""
-	let check = (isTB && isSmart && isVer < 110) // TB health check
 	if (isArch === true) {
-		notation = check ? tb_red : ""
-		log_display(3, METRIC, "64bit" + notation)
+		log_display(3, METRIC, "64bit")
 		addData(3, METRIC, 64)
 	} else {
 		let isMsg = isArch === "RangeError: invalid array length"
-		if (isVer > 109 && isMsg) {
-			if (check) {notation = tb_red}
-			log_display(3, METRIC, "32bit" + notation)
+		if (ver > 109 && isMsg) {
+			log_display(3, METRIC, "32bit")
 			addData(3, METRIC, 32)
 		} else {
-			if (check) {notation = (isMsg ? tb_green : tb_red)}
-			log_display(3, METRIC, isArch + notation)
+			log_display(3, METRIC, isArch)
 			addData(3, METRIC, zErr)
 		}
 	}
@@ -1440,15 +1435,14 @@ function outputScreenResize(runtype) {
 
 	return new Promise(resolve => {
 		Promise.all([
-			get_scr_fullscreen(),
+			get_scr_fullscreen(runtype),
 			get_scr_positions("screen"),
 			get_scr_positions("window"),
-			get_scr_subpixels(runtype),
+			get_scr_pixels(runtype),
 
 			get_scr_scrollbar(runtype), // gets viewport
 			get_scr_orientation(runtype),
-			get_scr_window(runtype),
-			get_scr_window_mm(runtype),
+			get_scr_measure(runtype),
 
 		]).then(function(results){
 			if (runtype !== "screen") {
