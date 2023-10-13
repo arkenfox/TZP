@@ -172,7 +172,8 @@ const get_nav_gpc = () => new Promise(resolve => {
 	const METRIC = "globalPrivacyControl"
 	function exit(value, display) {
 		let notation = ""
-		if (isSmart) {
+		// ToDo: add android health
+		if (isSmart && isOS !== "android") {
 			notation = default_red
 			if (isVer > 119 && value === false) {notation = default_green
 			} else if (isVer < 120 && value == "undefined") {notation = default_green
