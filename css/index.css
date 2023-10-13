@@ -56,10 +56,6 @@ code {
 	background: rgba(142, 142, 145, 0.25) !important;
 	padding: 2px 6px; /* top+bottom | left+ right */
 }
-code.lies {
-	background-color: rgba(255, 79, 79, 0.6) !important;
-	color: white;
-}
 
 #modaloverlay {
 	position: fixed;
@@ -122,6 +118,10 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
+.lies {
+	color: var(--test99);
+	text-decoration: underline; /*var(--test0);*/
+}
 
 .cursive {font-family: cursive;}
 .emoji {font-family: emoji;}
