@@ -172,38 +172,48 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 			}
 		})
 
-		// reorder object
-		if (runtype !== "resize") {
-			for (const h of Object.keys(tmpScreen).sort()) {
-				oScreen[h] = tmpScreen[h]
-			}
-			for (const k of Object.keys(tmpWindow).sort()) {
-				oWindow[k] = tmpWindow[k]
-			}
+		// order into new object
+		for (const h of Object.keys(tmpScreen).sort()) {
+			oScreen[h] = tmpScreen[h]
+		}
+		for (const k of Object.keys(tmpWindow).sort()) {
+			oWindow[k] = tmpWindow[k]
 		}
 
-		// just display it for now
-		log_display(1, "mAvailable", tmpScreen.availWidth +" x "+ tmpScreen.availHeight)
-		log_display(1, "mmScreen", tmpScreen["device-width"] +" x "+ tmpScreen["device-height"])
-		log_display(1, "mScreen", tmpScreen.screen_width +" x "+ tmpScreen.screen_height)
-		addData(1, "screen_sizes", oScreen, mini(oScreen))
+		// default display
+		let oDisplay = {
+			"mAvailable": tmpScreen.availWidth +" x "+ tmpScreen.availHeight,
+			"mmScreen": tmpScreen["device-width"] +" x "+ tmpScreen["device-height"],
+			"mScreen": tmpScreen.screen_width +" x "+ tmpScreen.screen_height,
+			"mOuter": tmpWindow.outerWidth +" x "+ tmpWindow.outerHeight,
+			"mmInner": tmpWindow.window_width +" x "+ tmpWindow.window_height,
+			"mInner": tmpWindow.innerWidth +" x "+ tmpWindow.innerHeight,
+		}
 
-		log_display(1, "mOuter", tmpWindow.outerWidth +" x "+ tmpWindow.outerHeight)
-		log_display(1, "mmInner", tmpWindow.window_width +" x "+ tmpWindow.window_height)
-		log_display(1, "mInner", tmpWindow.innerWidth +" x "+ tmpWindow.innerHeight)
+		// ToDo: oScreen/oWindow
+			// replace values if proxy lies or detected lies vs valid css: srings help with valid health
+			// record as known lies
+			// change display style
+
+
+		// display
+		for (const k of Object.keys(oDisplay)) {
+			log_display(1, k, oDisplay[k])
+		}
+		// data
+		addData(1, "screen_sizes", oScreen, mini(oScreen))
 		addData(1, "window_sizes", oWindow, mini(oWindow))
 
+		// notations
 		if (isSmart) {
-			// inner: LB/NW
-				// note TB13 changes newwin to max 1400x900, and aligns LB to match NW steps
+			// inner: LB/NW: note TB13 changes newwin to max 1400x900, and aligns LB to match NW steps
 			if (isOS !== "android") {
 				log_display(1, "letterboxing", return_lb(tmpWindow.innerWidth, tmpWindow.innerHeight, isTB))
 				log_display(1, "new_window", return_nw(tmpWindow.innerWidth, tmpWindow.innerHeight, isTB))
 			}
 			// screen_matches_inner
-			let notation = sizes_red
+			let isValid = false, notation = sizes_red
 			let aCompare = [oScreen.screen_width, oScreen.screen_height, oWindow.innerWidth, oWindow.innerHeight]
-			let isValid = true
 			for (let i=0; i < aCompare.length; i++) {
 				if ("number" !== typeof aCompare[i]) {
 					isValid = false
