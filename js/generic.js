@@ -650,6 +650,13 @@ function output_health(scope) {
 							} else if (metric == "letterboxing" || metric == "new_window") {
 								data = gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerWidth"]
 									+" x "+ gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerHeight"]
+							} else if (metric == "screen_matches_inner") {
+								data = {
+									"inner": gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerWidth"]
+										+" x "+ gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerHeight"],
+									"screen": gData[zFP][scope]["screen"]["metrics"]["screen_sizes"]["metrics"]["device-width"]
+										+" x "+ gData[zFP][scope]["screen"]["metrics"]["screen_sizes"]["metrics"]["device-height"],
+								}
 							} else {
 								let aList = ["devicePixelRatio", "-moz-device-pixel-ratio", "dpi", "dpcm", "dppx", "dpi_css"]
 								if (aList.includes(metric)) {
