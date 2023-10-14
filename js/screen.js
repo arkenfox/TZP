@@ -212,7 +212,7 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 				log_display(1, "new_window", return_nw(tmpWindow.innerWidth, tmpWindow.innerHeight, isTB))
 			}
 			// screen_matches_inner
-			let isValid = false, notation = sizes_red
+			let isValid = true, notation = sizes_red
 			let aCompare = [oScreen.screen_width, oScreen.screen_height, oWindow.innerWidth, oWindow.innerHeight]
 			for (let i=0; i < aCompare.length; i++) {
 				if ("number" !== typeof aCompare[i]) {
