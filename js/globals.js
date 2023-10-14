@@ -107,8 +107,8 @@ const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,
 	window_green = sgtick+"windows match]"+sc,
 	window_red = sbx+"windows match]"+sc,
-	sizes_green = sgtick+"screens + windows match]"+sc,
-	sizes_red = sbx+"screens + windows match]"+sc
+	sizes_green = sgtick+"screen matches inner]"+sc,
+	sizes_red = sbx+"screen matches inner]"+sc
 
 // dynamic notation
 let tb_green = sgtick+"TB]"+sc,
@@ -148,7 +148,7 @@ let gt0, gt1,
 	gClick = true,
 	isAllowNonGecko = false, // not supported: to see what other engines return
 	isBlock = true,
-	isBlockMin = [102, 12], // [FF, equivalent TB version]
+	isBlockMin = [102, 12], // [FF, equivalent TB version] isVer only goes to 102
 	isSmart = false,
 	isSmartMin = 115 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
