@@ -337,7 +337,8 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #rect1 {top: 0; left: 0; width:100px; height:100px; transform: rotate(45deg); padding: 0px; position: fixed;}
 #ugSpan {font-size: 10000%;}
 @font-face {font-family: "ABR"; src: url("../fonts/AdobeBlankRegular.ttf");}
-@font-face {font-family: "fontFallback"; src: url("../fonts/fontFallback.ttf");}
+@font-face {font-family: "graphite"; src: url("../fonts/Simple-Graphite-Font.ttf");}
+
 #fdResourceCss {
 	background-image: url("about:logo"), url("");
 	background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
@@ -348,4 +349,5 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 }
 #pointertarget {z-index: 50; display: block;}
 .cssDocFont {font-family: "Arial Black";}
+.cssGraphite {font-family: "graphite";}
 
