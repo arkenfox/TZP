@@ -340,7 +340,7 @@ function outputCanvas() {
 						oFP[name] = "trustworthy" // the test is random, return a stable FP
 						log_display(9, name, value + rfp_red) // display hash
 					} else {
-						oFP[name] = zLIE
+						oFP[name] = "protected"
 						countFake++
 					}
 				} else {
@@ -349,7 +349,7 @@ function outputCanvas() {
 						oFP[name] = value
 						log_display(9, name, value + rfp_red)
 					} else {
-						oFP[name] = zLIE
+						oFP[name] = "protected"
 						countFake++
 					}
 				}
@@ -385,9 +385,8 @@ function outputCanvas() {
 							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
-						oFP[name] = zLIE +" | persistent"+ rfpvalue
+						oFP[name] = "protected | persistent"+ rfpvalue
 						log_display(9, name, colorFn(value) + note +" [persistent]"+ stats)
-						log_known(SECT9, name)
 					} else {
 						// per execution
 						if (name.slice(0,3) == "isP") {
@@ -402,9 +401,8 @@ function outputCanvas() {
 							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
-						oFP[name] = zLIE +" | per execution"+ rfpvalue
+						oFP[name] = "protected | per execution"+ rfpvalue
 						log_display(9, name, colorFn(value) + note +" [per execution]"+ stats)
-						log_known(SECT9, name)
 					}
 				}
 			})
