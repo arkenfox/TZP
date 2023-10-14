@@ -196,7 +196,7 @@ let fntMaster = {
 				// notos
 			'Noto Color Emoji','Noto Mono','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
 				// western/symbols
-			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX','STIX Two Math','STIX Two Text','Symbola', // fedora
+			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX','STIX Two Text','Symbola', // fedora
 			'Dingbats','FreeMono','Jamrul','Kinnari','Ubuntu', // ubuntu
 				// scripts
 				// ubuntu
