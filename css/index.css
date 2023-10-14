@@ -50,6 +50,9 @@
   --jkey: #75bfff;
 }
 
+@font-face {font-family: "graphite"; src: url("../fonts/Simple-Graphite-Font.ttf");}
+.cssGraphite {font-family: "graphite";}
+
 body {background-color: var(--bg0); color: var(--test0);}
 h2 {color: var(--testh); font-size: 14px; text-align: center; margin-top: inherit;}
 code {
@@ -337,7 +340,6 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #rect1 {top: 0; left: 0; width:100px; height:100px; transform: rotate(45deg); padding: 0px; position: fixed;}
 #ugSpan {font-size: 10000%;}
 @font-face {font-family: "ABR"; src: url("../fonts/AdobeBlankRegular.ttf");}
-@font-face {font-family: "graphite"; src: url("../fonts/Simple-Graphite-Font.ttf");}
 
 #fdResourceCss {
 	background-image: url("about:logo"), url("");
@@ -349,5 +351,4 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 }
 #pointertarget {z-index: 50; display: block;}
 .cssDocFont {font-family: "Arial Black";}
-.cssGraphite {font-family: "graphite";}
 
