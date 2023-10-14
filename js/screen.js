@@ -171,15 +171,6 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 				tmpWindow[array[1]] = value
 			}
 		})
-
-		// order into new object
-		for (const h of Object.keys(tmpScreen).sort()) {
-			oScreen[h] = tmpScreen[h]
-		}
-		for (const k of Object.keys(tmpWindow).sort()) {
-			oWindow[k] = tmpWindow[k]
-		}
-
 		// default display
 		let oDisplay = {
 			"mAvailable": tmpScreen.availWidth +" x "+ tmpScreen.availHeight,
@@ -190,19 +181,29 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 			"mInner": tmpWindow.innerWidth +" x "+ tmpWindow.innerHeight,
 		}
 
-		// ToDo: oScreen/oWindow
-			// replace values if proxy lies or detected lies vs valid css: srings help with valid health
-			// record as known lies
-			// change display style
-
+		// order into new object
+		for (const h of Object.keys(tmpScreen).sort()) {
+			oScreen[h] = tmpScreen[h]
+		}
+		for (const k of Object.keys(tmpWindow).sort()) {
+			oWindow[k] = tmpWindow[k]
+		}
+		if (isSmart) {
+			// ToDo: oScreen/oWindow lies
+				// replace values if proxy lies or detected lies vs valid css: srings help with valid health
+				// record as known lies
+				// change display style
+		}
 
 		// display
 		for (const k of Object.keys(oDisplay)) {
 			log_display(1, k, oDisplay[k])
 		}
 		// data
-		addData(1, "screen_sizes", oScreen, mini(oScreen))
-		addData(1, "window_sizes", oWindow, mini(oWindow))
+		if (runtype !== "resize") {
+			addData(1, "screen_sizes", oScreen, mini(oScreen))
+			addData(1, "window_sizes", oWindow, mini(oWindow))
+		}
 
 		// notations
 		if (isSmart) {
