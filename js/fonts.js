@@ -963,6 +963,30 @@ const get_formats = () => new Promise(resolve => {
 	if (res.length) {return resolve(res)} else {return resolve()}
 })
 
+const get_graphite = () => new Promise(resolve => {
+	// ToDo: create a much smaller tff with just i+j in it
+		// and maybe load as base64
+	const METRIC = "graphite"
+	let res = "", notation = ""
+	function exit() {
+		log_display(12, METRIC, res + notation)
+		return resolve([METRIC, res])
+	}
+	if (fntDocEnabled) {
+		let test = dom.testGraphite.offsetWidth
+		let control = dom.ctrlGraphite.offsetWidth
+		res = (control === test ? zF : zS)
+		if (isTB && isSmart) {
+			notation = res === zS ? tb_standard : tb_safer
+		}
+		exit()
+	} else {
+		res = "document fonts blocked"
+		if (isTB && isSmart) {notation = tb_red}
+		exit()
+	}
+})
+
 const get_system_fonts = (os = isOS) => new Promise(resolve => {
 	// ToDo: expand or reduce: e.g
 		// -moz-desktop seems deprecated
@@ -1401,6 +1425,7 @@ function outputFonts() {
 		get_widget_fonts(),
 		get_woff2(),
 		get_fonts(), // uses fntDocEnabled
+		get_graphite(), // uses fntDocEnabled
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(12, item)})
 		log_display(12, "fntBtn", fntBtn)
