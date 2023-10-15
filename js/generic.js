@@ -1193,7 +1193,10 @@ function countJS(filename) {
 				overlay.addEventListener("keydown", (e) => {
 					console.log(e.key)
 				})
-				outputSection("load")
+				// graphite font is required
+				document.fonts.ready.then(() => {
+					outputSection("load")
+				})
 			})
 		})
 	}
