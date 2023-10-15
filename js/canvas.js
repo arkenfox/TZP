@@ -386,7 +386,7 @@ function outputCanvas() {
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
 						oFP[name] = "protected | persistent"+ rfpvalue
-						log_display(9, name, colorFn(value) + note +" [persistent]"+ stats)
+						log_display(9, name, value + note +" [persistent]"+ stats)
 					} else {
 						// per execution
 						if (name.slice(0,3) == "isP") {
@@ -402,7 +402,7 @@ function outputCanvas() {
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
 						oFP[name] = "protected | per execution"+ rfpvalue
-						log_display(9, name, colorFn(value) + note +" [per execution]"+ stats)
+						log_display(9, name, value + note +" [per execution]"+ stats)
 					}
 				}
 			})
@@ -413,4 +413,3 @@ function outputCanvas() {
 }
 
 countJS(SECT9)
-
