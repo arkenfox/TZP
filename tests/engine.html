@@ -240,6 +240,13 @@ function get_dates(num) {
 		let resA = new Date("19999-11-11")
 		let bolA = resA == "Invalid Date" ? true : false
 		if (!bolA) {resA = fnTrim(resA.toString(), 40)}
+		if (isVer > 119) {
+			bolA = zNA
+			resA = zNA +": FF119 or lower " + s3 +"["+ fnTrim(resA.toString(), 23) +"]" + sc
+		} else if (!isFF) {
+			bolA = zNA
+			resA += " [FF119 or lower]"
+		}
 		let perfA = canPerf ? performance.now() - t0A : ""
 		fnRecord(num, strA, resA, bolA, "skip", perfA)
 	} catch(e) {
@@ -1316,6 +1323,9 @@ function get_nav_keys(num1, num2, title) {
 		if (isVer > 95) {
 			// 1666203: FF96+ canShare
 			aNot = aNot.filter(x => !["canShare"].includes(x))
+			if (isVer > 119) {
+				aNot = aNot.filter(x => !["userActivation"].includes(x))
+			}
 		}
 		if (isVer > 94 || isEngine == "goanna") {
 			// 1670058: FF95+ globalPrivacyControl
