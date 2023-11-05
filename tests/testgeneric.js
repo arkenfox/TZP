@@ -340,8 +340,10 @@ const get_isTB = () => new Promise(resolve => {
 		setTimeout(() => resolve(false), 100)
 
 		let source = "resource://torbutton-assets/aboutTor.css"
-		// ToDo: TB13+: does not work on android
-		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) {source = "chrome://browser/content/abouttor/aboutTor.css"} // FF115+
+		// FF115+ change source: ToDo: TB13+: does not work on android
+		if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) {
+			source = "chrome://browser/content/abouttor/aboutTor.css"
+		}
 		let css = document.createElement("link")
 		css.href = source
 		css.type = "text/css"
@@ -384,7 +386,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		isVerMax = 120
-		if ("function" === typeof CSSPropertyRule) return 120 // 1854937
+		if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 		try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
