@@ -23,6 +23,8 @@ function json_highlight(json) {
 				cls = 'key';
 			} else {
 				cls = 'string';
+				// color undefined (aka "typeof undefined")
+				if (match == "\"typeof undefined\"") {cls = 'null';}
 			}
 		} else if (/true|false/.test(match)) {
 			cls = 'boolean';
@@ -53,6 +55,11 @@ function json_stringify(passedObj, options = {}) {
 		if (obj && typeof obj.toJSON === "function") {
 			obj = obj.toJSON();
 		}
+
+		// display undefined under an alias so we always have the right number of values
+		// this is just a display, it does not alter the fingerprint data
+		if (obj === undefined) {obj = "typeof undefined"}
+
 		const string = JSON.stringify(obj, replacer);
 		if (string === undefined) {
 			return string;
@@ -435,7 +442,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
-			if ("function" === typeof CSSPropertyRule) return 120 // 1854937
+			if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 			try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 			if (CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
@@ -832,7 +839,7 @@ function output_section(section, scope) {
 				gData[zFP][summary][name]["hash"] = hash
 				gData[zFP][summary][name]["metrics"] = {}
 				for (const k of Object.keys(data)) {
-					let value = ("object" == typeof data[k] ? data[k]["hash"] : data[k] )
+					let value = ("object" == typeof data[k] && data[k] !== null ? data[k]["hash"] : data[k] )
 					gData[zFP][summary][name]["metrics"][k] = value
 				}
 			}
@@ -1189,7 +1196,6 @@ function countJS(filename) {
 						hide_overlays()
 					}
 				}
-
 				overlay.addEventListener("keydown", (e) => {
 					console.log(e.key)
 				})
