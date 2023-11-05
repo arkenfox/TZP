@@ -827,16 +827,36 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 		if (type == "vViewport") {
 			METRIC1 = "visualViewport_height", METRIC2 = "visualViewport_width"
 		}
-		let wValue, hValue, wDisplay = "", hDisplay
+		let wValue, hValue, wDisplay = "", hDisplay, range
 		try {
 			if (runSE) {foo++}
 			if (type == "eViewport") {
-				let e = document.createElement("div")
-				e.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
-				document.documentElement.insertBefore(e,document.documentElement.firstChild)
-				wValue = e.offsetWidth
-				hValue = e.offsetHeight
-				document.documentElement.removeChild(e)
+				let target = document.createElement("div")
+				target.style.cssText = "position:fixed;top:0;left:0;bottom:0;right:0;"
+				document.documentElement.insertBefore(target,document.documentElement.firstChild)
+				if (isClientRect == -1) {
+					wValue = target.offsetWidth
+					hValue = target.offsetHeight
+				} else {
+					if (isClientRect > 1) {
+						range = document.createRange()
+						range.selectNode(target)
+					}
+					if (isClientRect < 1) {
+						wValue = target.getBoundingClientRect().width
+						hValue = target.getBoundingClientRect().height
+					} else if (isClientRect == 1) {
+						wValue = target.getClientRects()[0].width
+						hValue = target.getClientRects()[0].height
+					} else if (isClientRect == 2) {
+						wValue = range.getBoundingClientRect().width
+						hValue = range.getBoundingClientRect().height
+					} else if (isClientRect > 2) {
+						wValue = range.getClientRects()[0].width
+						hValue = range.getClientRects()[0].height
+					}
+				}
+				document.documentElement.removeChild(target)
 			} else {
 				wValue = window.visualViewport.width
 				hValue = window.visualViewport.height
