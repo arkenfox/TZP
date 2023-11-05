@@ -359,6 +359,13 @@ rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
 rec(typeof oncontextlost, "oncontextlost", code, "object")
 rec(typeof oncontextrestored, "oncontextrestored", code, "object")
 rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
+rec(typeof sharedStorage, "sharedStorage", code, "object")
+// newish: since last check; testing chrome 119
+rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object")
+rec(typeof fence, "fence", code, "object")
+rec(typeof onbeforetoggle, "onbeforetoggle", code, "object")
+rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
+rec(typeof credentialless, "credentialless", code, "boolean")
 	// other
 rec(typeof opr, "opr", code, "object") // OPERA (desktop at least)
 rec(typeof webkitStorageInfo, "webkitStorageInfo", code, "object") // to-be-deprecated see console
@@ -406,10 +413,8 @@ rec(typeof scrollMaxY, "scrollMaxY", code, "number")
 rec(typeof setResizable, "setResizable", code, "function")
 rec(typeof updateCommands, "updateCommands", code, "function")
 	// new
-rec(typeof onbeforeinput, "onbeforeinput", code, "object") // FF87+
 rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
 rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
-rec(typeof onscrollend, "onscrollend", code, "object") // FF109+
 rec(typeof oncut, "oncut", code, "object") // FF110+
 rec(typeof oncopy, "oncopy", code, "object") // FF110+
 rec(typeof onpaste, "onpaste", code, "object") // FF110+
@@ -463,13 +468,14 @@ rec(typeof ontouchstart, "ontouchstart", code, "object")
 rec(typeof orientation, "orientation", code, "number")
 rec(typeof requestIdleCallback, "requestIdleCallback", code, "function")
 rec(typeof scheduler, "scheduler", code, "object")
+rec(typeof onbeforeinput, "onbeforeinput", code, "object")
+rec(typeof onscrollend, "onscrollend", code, "object")
 
 // blink + webkit (not seen in gecko)
 code = 52
 rec(typeof defaultstatus, "defaultstatus", code, "string")
 rec(typeof defaultStatus, "defaultStatus", code, "string")
 rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
-rec(typeof oncancel, "oncancel", code, "object")
 rec(typeof onmousewheel, "onmousewheel", code, "object")
 rec(typeof onsearch, "onsearch", code, "object")
 rec(typeof styleMedia, "styleMedia", code, "object")
@@ -538,6 +544,7 @@ rec(typeof onanimationstart, "onanimationstart", code, "object")
 rec(typeof onbeforeprint, "onbeforeprint", code, "object")
 rec(typeof onbeforeunload, "onbeforeunload", code, "object")
 rec(typeof onblur, "onblur", code, "object")
+rec(typeof oncancel, "oncancel", code, "object")
 rec(typeof oncanplay, "oncanplay", code, "object")
 rec(typeof oncanplaythrough, "oncanplaythrough", code, "object")
 rec(typeof onchange, "onchange", code, "object")
