@@ -34,7 +34,11 @@
 		</td></tr>
 
 		<tr><td colspan="2"><hr></td></tr>
-		<tr><td colspan="2"><div class="btn-left"><span class="btn9 btn" onClick="run()">[ re-run ]</span></div>VISUALS</td></tr>
+		<tr><td colspan="2">
+			<div class="btn-left">
+				<span class="btn9 btn" onClick="run()">[ re-run ]</span>
+				<span><input id="optSolid" type="checkbox"> use a solid color</span><br><br>
+			</div>VISUALS</td></tr>
 		<tr><td class="bottom">control</td>
 			<td>
 				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp
@@ -99,6 +103,8 @@ function run() {
 		items[i].innerHTML = "&nbsp"
 	}
 
+	let optSolid = dom.optSolid.checked
+
 	// pause so users see change
 	setTimeout(function(){
 		try {
@@ -111,13 +117,19 @@ function run() {
 					ctxGet2 = dom.cnvGet2.getContext('2d'),
 					ctxBig2 = dom.cnvBig2.getContext('2d')
 
+				let clrR = Math.floor(Math.random()*256),
+					clrG = Math.floor(Math.random()*256),
+					clrB = Math.floor(Math.random()*256)
+
 				// output SET visuals
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
 						// get random color
-						let clrR = Math.floor(Math.random()*256),
-							clrG = Math.floor(Math.random()*256),
+						if (!optSolid) {
+							clrR = Math.floor(Math.random()*256)
+							clrG = Math.floor(Math.random()*256)
 							clrB = Math.floor(Math.random()*256)
+						}
 						let clrs = clrR +", "+ clrG +", "+ clrB +", 255"
 						clrSet.push(clrR)
 						clrSet.push(clrG)
