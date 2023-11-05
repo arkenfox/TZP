@@ -277,10 +277,17 @@ function outputVersion() {
 			offsetPosition : layout.css.motion-path-offset-position.enabled
 		*/
 
+		/* this is nightly only
 		// 120: 1854937
 		let t120 = performance.now()
 		let ver120 = ("function" === typeof CSSPropertyRule)
 		rec(120, 120, "1854937", ver120, performance.now()-t120)
+		*/
+
+		// 120: 1791079
+		let t120 = performance.now()
+		let ver120 = (window.hasOwnProperty("UserActivation"))
+		rec(120, 120, "1791079", ver120, performance.now()-t120) // 0.017ms
 
 		// 119: 1817591
 		let t119 = performance.now()
@@ -637,7 +644,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 51, oOther = {}
+	let countOther = 0, expectOther = 54, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -655,11 +662,25 @@ function outputVersion() {
 			}
 		}
 
+		// 120b: 1557650
+		let t120b = performance.now()
+		let ver120b = (new Date("19999-11-11").toString() !== "Invalid Date")
+		rec(120.2, 120, "1557650", ver120b, performance.now()-t120b, "d") // 0.22ms (on new rig)
+
+		// 120a: 449921
+		let t120a = performance.now()
+		let	ver120a = (new Date("1JAN2008").toString() !== "Invalid Date")
+		rec(120.1, 120, "449921", ver120a, performance.now()-t120a, "d") // 0.22ms (on new rig)
+
+		// 120: 1852422
+		let t120 = performance.now()
+		let ver120 = (new Date("01/01/2001 10:00Z").toString() !== "Invalid Date")
+		rec(120, 120, "1852422", ver120, performance.now()-t120, "d") // 0.22ms (on new rig)
+
 		// 116: 1769088
-			// ToDo: find something not date related (exts like to fuck with dates)
 		let t116 = performance.now()
 		let ver116 = (isNaN(Date.parse("-000000-01-01T00:00:00.000Z")))
-		rec(116, 116, "1769088", ver116, performance.now()-t116) // 0.015ms
+		rec(116, 116, "1769088", ver116, performance.now()-t116, "d") // 0.015ms
 
 		// 107: 344060
 		let t107 = performance.now(), ver107
@@ -1048,13 +1069,6 @@ function outputVersion() {
 		let test9 = new Date("11-Nov-11")
 		if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
 		rec(9,"Invalid Date", "1439800", ver9, performance.now()-t9, "ex")
-
-		// 1557650
-			// ext fuckery: cydec
-		let t8 = performance.now(), ver8 = xNC
-		let test8 = new Date("19999-11-11").toString()
-		if (test8 !== "Invalid Date") {ver8 = xOMG}
-		rec(8,"Invalid Date", "1557650", ver8, performance.now()-t8, "ex")
 
 		// 1515318: 63 and lower = NaN, 64+ = -2011
 		let t7 = performance.now(), ver7 = xNC
