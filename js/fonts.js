@@ -290,7 +290,9 @@ function get_fntCodes(name) {
 function set_fntList(os = isOS) {
 	let fntListBaseName = isTB ? "allowlist" : "kBaseFonts"
 
-	if (gLoad) {
+	if (gLoad || isFontSizesMore !== isFontSizesPrevious) {
+		isFontSizesPrevious = isFontSizesMore
+
 		fntData = {
 			"base": [], "bundled": [], "full": [],
 			"control": [], "control_name": [],
@@ -308,14 +310,14 @@ function set_fntList(os = isOS) {
 			// Mō - 141 +"á" = 142 +"Ω" = 144 | Mō - 141 +tofu = 154 | (win11: have 182/186 fonts
 			let tofu = get_fntCodes("tofu")
 			fntString = isTB ? "?-"+ tofu : "Mō"+ tofu
-			isPlatformFont = "MS Shell Dlg \\32"
+			if (!isFontSizesMore) {isPlatformFont = "MS Shell Dlg \\32"}
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
 				'sans-serif, Arial',
 				'serif, Times, Roman'
 			]
 		} else if ("mac" === os) {
-			isPlatformFont = "-apple-system"
+			if (!isFontSizesMore) {isPlatformFont = "-apple-system"}
 			baseSize = ['monospace, Menlo, Courier, \"Courier New\", Monaco',
 				'sans-serif',
 				'serif'
@@ -677,7 +679,7 @@ const get_font_sizes = () => new Promise(resolve => {
 							intDetected++
 						}
 					})
-					if (intDetected == intDetectedMax) {isDetected = true}
+					if (intDetected == intDetectedMax && !isFontSizesMore) {isDetected = true}
 					//isDetected = false // force max passes per font
 					return
 				})
@@ -829,13 +831,19 @@ const get_fonts = () => new Promise(resolve => {
 					basefont = item.split(":")[1],
 					size = item.split(":")[2]
 				aFontNames.push(font)
-				let fontitem = (basefont == firstBaseFont ? font : font +" "+ basefont) // strip off 1st pass noise
-				if (oSizes[size] == undefined) {oSizes[size] = []}
-				// exclude same-size per font: e.g. "w x h": ["A", "A sans-serif", "A serif"]
-				// no need: we never force 3-pass per font
-				//if (!oSizes[size].includes(font)) {
-					oSizes[size].push(fontitem)
-				//}
+				let fontitem = (basefont == firstBaseFont && !isFontSizesMore ? font : font +" "+ basefont) // strip off 1st pass noise
+				if (isFontSizesMore) {
+					// just record each font + size
+					if (oSizes[font] == undefined) {oSizes[font] = {}}
+					oSizes[font][basefont] =[size.split(" x ")[0] *1, size.split(" x ")[1] *1]
+				} else {
+					if (oSizes[size] == undefined) {oSizes[size] = []}
+					// exclude same-size per font: e.g. "w x h": ["A", "A sans-serif", "A serif"]
+						// ^ no need: we never force 3-pass per font
+					//if (!oSizes[size].includes(font)) {
+						oSizes[size].push(fontitem)
+					//}
+				}
 			})
 			// sort
 			let aNew = {}
@@ -843,7 +851,10 @@ const get_fonts = () => new Promise(resolve => {
 			// replace
 			oData[k]["newdata"] = aNew
 			oData[k]["hash"] = mini(aNew)
-			// dedupe: no need: we never force 3-pass per font
+			// dedupe
+			if (isFontSizesMore) {
+				aFontNames = aFontNames.filter(function(item, position) {return aFontNames.indexOf(item) === position})
+			}
 			oData[k][METRICN] = aFontNames
 		}
 		//console.log(oData)
@@ -903,7 +914,7 @@ const get_fonts = () => new Promise(resolve => {
 					let sizeHash = oData[k]["hash"]
 					let sizeLen = Object.keys(oData[k]["newdata"]).length
 					addData(12, METRIC, oData[k]["newdata"], sizeHash)
-					log_display(12, METRIC, sizeHash + addButton(12, METRIC, sizeLen))
+					log_display(12, METRIC, sizeHash + addButton(12, METRIC, (isFontSizesMore ? "details" : sizeLen)))
 					log_display(12, METRICN, fontNameHash)
 // temp: record size counts when running thousands of getFont loops
 //iFntTestCount = lenReturn
