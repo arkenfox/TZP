@@ -150,6 +150,7 @@ let gt0, gt1,
 	isBlock = true,
 	isBlockMin = [102, 12], // [FF, equivalent TB version] isVer only goes to 102
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
+	isFontSizesPrevious, 
 	isSmart = false,
 	isSmartMin = 115 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
