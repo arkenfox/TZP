@@ -24,7 +24,7 @@ function json_highlight(json) {
 			} else {
 				cls = 'string';
 				// color undefined (aka "typeof undefined")
-				if (match == "\"typeof undefined\"") {cls = 'null';}
+				//if (match == "\"typeof undefined\"") {cls = 'null';}
 			}
 		} else if (/true|false/.test(match)) {
 			cls = 'boolean';
@@ -58,7 +58,7 @@ function json_stringify(passedObj, options = {}) {
 
 		// display undefined under an alias so we always have the right number of values
 		// this is just a display, it does not alter the fingerprint data
-		if (obj === undefined) {obj = "typeof undefined"}
+		//if (obj === undefined) {obj = "typeof undefined"}
 
 		const string = JSON.stringify(obj, replacer);
 		if (string === undefined) {
@@ -1387,6 +1387,7 @@ function run_immediate() {
 	try {let v = speechSynthesis.getVoices()} catch(e) {}
 	get_isGecko()
 	get_isArch()
+	isFontSizesPrevious = isFontSizesMore
 }
 
 run_immediate()
