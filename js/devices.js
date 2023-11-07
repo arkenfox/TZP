@@ -304,109 +304,97 @@ const get_media_devices = () => new Promise(resolve => {
 	}
 })
 
-function get_mimetypes() {
-	return new Promise(resolve => {
-		// mimeTypes is an expected key
-		mimeBS = true
-		mimeMini = ""
+const get_pdf = () => new Promise(resolve => {
+	// FF99+ none/hardcoded: all three are expected nav keys
+	let oData = {"mimeTypes": "", "pdfViewerEnabled": "", "plugins": ""}
+
+	function get_obj(METRIC) {
 		try {
-			let m = navigator.mimeTypes
-			// cleanup
-			m = cleanFn(m)
-			let isObj = false, isObjFake = true
-			if (typeof m === "object") {
-				isObj = true
-				if (m+"" == "[object MimeTypeArray]") {
-					let miniKnown = [] // FF99+ none/hardcoded
-					try {
-						mimeMini = mini(m)
-					} catch(e) {
-						// chameleon: TypeError: cyclic object
-						log_error(SECT7, "mimeTypes", e)
+			let obj = navigator[METRIC]
+			let objName = METRIC.charAt(0).toUpperCase() + (METRIC.slice(1)).slice(0, -1) +"Array"
+			if (typeof obj === "object") {
+				try {
+					let mimeTest = mini(obj) // catch TypeError: cyclic object
+					if ("[object "+ objName +"]" === obj+"") {
+						if (obj.length) {
+							let res = []
+							for (let i=0; i < obj.length; i++) {
+								if ("mimeTypes" === METRIC) {
+									res.push( obj[i].type + (obj[i].description == "" ? ": * " : ": "+ obj[i].type)
+										+ (obj[i].suffixes == "" ? ": *" : ": "+ obj[i].suffixes))
+								} else {
+									res.push(obj[i].name + (obj[i].filename == "" ? ": * " : ": "+ obj[i].filename)
+										+ (obj[i].description == "" ? ": *" : ": "+ obj[i].description))
+								}
+							}
+							oData[METRIC] = res
+						} else {
+							oData[METRIC] = "none"
+						}
+						return
+					} else {
+						log_error(SECT7, METRIC, zErrInvalid +"expected [object "+ objName +"]")
+						oData[METRIC] = zErr
+						return
 					}
-					if (miniKnown.includes(mimeMini)) {isObjFake = false; mimeBS = false}
-				}
-			}
-			if (isObj) {
-				if (m.length) {
-					let res = []
-					for (let i=0; i < m.length; i++) {
-						res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
-							+ (m[i].suffixes == "" ? ": *" : ": "+ m[i].suffixes))
-					}
-					res.sort()
-					return resolve(res)
-				} else {
-					if (mimeMini !== "ac6c4fe7") {isObjFake = true; mimeBS = true}
-					return resolve(isObjFake ? m : "none") // we already set mimeBS = false on a legit object
+				} catch(e) {
+					log_error(SECT7, METRIC, e)
+					oData[METRIC] = zErr
+					return
 				}
 			} else {
-				return resolve(m)
+				log_error(SECT7, METRIC, zErrType + typeof obj)
+				oData[METRIC] = zErrType
+				return
 			}
 		} catch(e) {
-			log_error(SECT7, "mimeTypes", e)
-			return resolve(zErr)
+			log_error(SECT7, METRIC, e)
+			oData[METRIC] = zErr
+			return
 		}
-	})
-}
-
-function get_plugins() {
-	return new Promise(resolve => {
-		// plugins is an expected key
+	}
+	function get_pdfViewer() {
+		const METRIC = "pdfViewerEnabled"
 		try {
-			let p = navigator.plugins
-			// cleanup
-			p = cleanFn(p)
-			let isObj = false, isObjFake = true
-			if (typeof p === "object") {
-				isObj = true
-				if (p+"" === "[object PluginArray]") {
-					pluginMini = mini(p)
-					if (miniKnown.includes(pluginMini)) {isObjFake = false; pluginBS = false}
-				}
-			}
-			if (isObj) {
-				let res = []
-				if (p.length) {
-					for (let i=0; i < p.length; i++) {
-						res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
-							+ (p[i].description == "" ? ": *" : ": "+ p[i].description))
-					}
-					res.sort()
-					return resolve(res)
-				} else {
-					if (pluginMini !== "ac6c4fe7") {isObjFake = true; pluginBS = true}
-					return resolve(isObjFake? p : "none")
-				}
+			let res = navigator.pdfViewerEnabled
+			if ("boolean" === typeof res) {
+				oData[METRIC] = res
+				return
 			} else {
-				return resolve(p)
+				log_error(SECT7, METRIC, zErrType + typeof obj)
+				oData[METRIC] = zErrType
+				return
 			}
 		} catch(e) {
-			log_error(SECT7, "plugins", e)
-			return resolve(zErr)
+			log_error(SECT7, METRIC, e)
+			oData[METRIC] = zErr
+			return
 		}
-	})
-}
+	}
 
-function get_plugins_mimetypes() {
-	return new Promise(resolve => {
-		let t0 = nowFn()
+	Promise.all([
+		get_obj("mimeTypes"),
+		get_obj("plugins"),
+		get_pdfViewer("plugins"),
+	]).then(function(){
 
-		// FF99+ none/hardcoded
-		let knownGood = {
-			"plugins": ["ac6c4fe7","012c6754"],
-			"mimeTypes": ["ac6c4fe7","4f23f546"],
+		const METRIC = "pdf"
+		let hash = mini(oData), notation = ""
+		addData(7, METRIC, oData, hash)
+		if (isSmart) {
+			// lies
+			let isLies = false
+			if (!["91073152","beccb452"].includes(hash)) {isLies = true // enabled, disabled
+			} else {isLies = sData[SECT99].includes("pdfViewerEnabled")}
+			// not lies if just errors
+
+			// notate
+			notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
 		}
-
-		Promise.all([
-			get_plugins(),
-			get_mimetypes(),
-		]).then(function(results){
-
-			return resolve()
-		})
+		log_display(7, METRIC, hash + addButton(7, METRIC) + notation)
+		return resolve()
 	})
-}
+})
 
 function get_pointer_event() {
 	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
@@ -535,6 +523,7 @@ function outputDevices() {
 		get_device_integer("pixelDepth","Screen."),
 		get_device_integer("colorDepth","Screen."),
 		get_device_integer("hardwareConcurrency","Navigator."),
+		get_pdf(),
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(7, item)})
 		log_section(7, t0)
