@@ -207,10 +207,10 @@
 
 		<!-- the rest -->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">mozFullScreenEnabled<br>fullScreen</span></div>
+			<span class="ttxtb">display-mode<br>[css] display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>
 			&nbsp display-mode | fullscreen</td>
 			<td class="mono"><span id="cssDM"></span> | <span id="display-mode"></span>
-				| <span class="c" id="mozFullScreenEnabled"></span> | <span class="c" id="fullScreen"></span></td></tr>
+				| <span class="c" id="fullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span></div>
@@ -273,17 +273,17 @@
 			<span class="c" id="uahash"></span>
 		</td></tr>
 		<tr><td>hash</td><td class="c mono" id="uaDoc"></td></tr>
-		<tr><td id="lappCodeName">appCodeName</td><td class="c spaces" id="appCodeName"></td></tr>
-		<tr><td id="lappName">appName</td><td class="c spaces" id="appName"></td></tr>
-		<tr><td id="lappVersion">appVersion</td><td class="c spaces" id="appVersion"></td></tr>
-		<tr><td id="lbuildID">buildID</td><td class="c spaces" id="buildID"></td></tr>
-		<tr><td id="loscpu">oscpu</td><td class="c spaces" id="oscpu"></td></tr>
-		<tr><td id="lplatform">platform</td><td class="c spaces" id="platform"></td></tr>
-		<tr><td id="lproduct">product</td><td class="c spaces" id="product"></td></tr>
-		<tr><td id="lproductSub">productSub</td><td class="c spaces" id="productSub"></td></tr>
+		<tr><td id="lappCodeName">appCodeName</td><td class="c mono spaces" id="appCodeName"></td></tr>
+		<tr><td id="lappName">appName</td><td class="c mono spaces" id="appName"></td></tr>
+		<tr><td id="lappVersion">appVersion</td><td class="c mono spaces" id="appVersion"></td></tr>
+		<tr><td id="lbuildID">buildID</td><td class="c mono spaces" id="buildID"></td></tr>
+		<tr><td id="loscpu">oscpu</td><td class="c mono spaces" id="oscpu"></td></tr>
+		<tr><td id="lplatform">platform</td><td class="c mono spaces" id="platform"></td></tr>
+		<tr><td id="lproduct">product</td><td class="c mono spaces" id="product"></td></tr>
+		<tr><td id="lproductSub">productSub</td><td class="c mono spaces" id="productSub"></td></tr>
 		<tr><td id="luserAgent">userAgent</td><td class="c spaces" id="userAgent"></td></tr>
-		<tr><td id="lvendor">vendor</td><td class="c spaces" id="vendor"></td></tr>
-		<tr><td id="lvendorSub">vendorSub</td><td class="c spaces" id="vendorSub"></td></tr>
+		<tr><td id="lvendor">vendor</td><td class="c mono spaces" id="vendor"></td></tr>
+		<tr><td id="lvendorSub">vendorSub</td><td class="c mono spaces" id="vendorSub"></td></tr>
 		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
 		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[ show ]</span>
 			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
@@ -542,9 +542,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp media devices</td><td class="c mono" id="mediaDevices"></td></tr>
-		<tr><td>mimeTypes</td><td class="c mono" id="mimeTypes"></td></tr>
-		<tr><td>plugins</td><td class="c mono" id="plugins"></td></tr>
-		<tr><td>pdfViewerEnabled</td><td class="c mono" id="pdf"></td></tr>
+		<tr><td>pdf</td><td class="c mono" id="pdf"></td></tr>
 		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
 			<span class="c" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
 		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="c" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
