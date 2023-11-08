@@ -308,13 +308,13 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
-	let t0 = nowFn()
+
+	let t0 = nowFn(), count = 0
 	setTimeout(() => resolve(zErrTime), 100)
 	const METRIC = "isOS"
 	function exit() {
 		// FF51+ win/mac 1280128 / FF89+ linux 1701257 : min gecko > 88 so undefined = android
-		if (isOS == "win") {isOS = "windows"
-		} else if (isOS === undefined) {isOS = "android"}
+		if (isOS === undefined) {isOS = "android"}
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
@@ -331,6 +331,24 @@ const get_isOS = () => new Promise(resolve => {
 		log_perf(SECTG, METRIC, t0, "", isOS)
 		return resolve()
 	}
+
+	// FF121+: 1855861
+	const get_event = (css, item) => new Promise(resolve => {
+		css.onload = function() {
+			isOS = item == "win" ? "windows" : item
+			count++
+			document.head.removeChild(css)
+			exit() // we can only have one
+			return resolve()
+		}
+		css.onerror = function() {
+			count++
+			document.head.removeChild(css)
+			if (count == 3) {exit()}
+			return resolve()
+		}
+	})
+
 	if (!runTE) {
 		try {
 			if (runSE) {foo++}
@@ -338,20 +356,11 @@ const get_isOS = () => new Promise(resolve => {
 			let list = ["win","mac","linux"]
 			list.forEach(function(item) {
 				let css = document.createElement("link")
-				css.href = path + item + suffix
 				css.type = "text/css"
 				css.rel = "stylesheet"
+				css.href = path + item + suffix
 				document.head.appendChild(css)
-				css.onload = function() {
-					isOS = item
-					count++
-					if (count == 3) {exit()}
-				}
-				css.onerror = function() {
-					count++
-					if (count == 3) {exit()}
-				}
-				document.head.removeChild(css)
+				get_event(css, item)
 			})
 		} catch(e) {
 			isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
@@ -402,6 +411,23 @@ const get_isTB = () => new Promise(resolve => {
 		log_perf(SECTG, METRIC, t0, "", value)
 		return resolve(value)
 	}
+
+	// FF121+: 1855861
+	const get_event = (css) => new Promise(resolve => {
+		css.onload = function() {
+			isTB = true
+			document.head.removeChild(css)
+			exit(true)
+			return resolve()
+		}
+		css.onerror = function() {
+			isTB = false
+			document.head.removeChild(css)
+			exit(false)
+			return resolve()
+		}
+	})
+
 	if (!runTE) {
 		try {
 			let css = document.createElement("link")
@@ -410,14 +436,7 @@ const get_isTB = () => new Promise(resolve => {
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
-			css.onload = function() {
-				isTB = true
-				exit(true)
-			}
-			css.onerror = function() {
-				exit(false)
-			}
-			document.head.removeChild(css)
+			get_event(css)
 		} catch(e) {
 			log_error(SECT3, METRIC, e, isScope, 50, true) // persist error to sect3
 			log_alert(SECTG, METRIC +": "+ e.name, true)
