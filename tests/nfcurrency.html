@@ -158,18 +158,17 @@ function set_currency_lists() {
 		'DKK', // smn
 		'GBP', // nus
 		'KES', // dav, lyi
-		'KZT', // yue // FF102-109
 		'MZN', // rw, zgh
 		'PHP', // mt
 		'SZL', // nyn
 		'USD', // bo, dua, haw, ii, lkt, sah
 		'XAF', // kkj, mgo, nnh, rw
 		'ZMW', // bem
+		// FF121+ 1859752 ICU 74
+		'PLN', 
+		'XXX',
 	]
-	// FF110+ doesn't need KZT in min: move it to expanded
-	if (isFF && "object" === typeof ondeviceorientationabsolute) {
-		min = min.filter(x => !["KZT"].includes(x))
-	}
+
 	if (supported.length) {
 		min = min.filter(x => supported.includes(x))
 	}
@@ -181,23 +180,14 @@ function set_currency_lists() {
 	let expanded = [
 		'ANG','AOA','ARS','AWG','AZN','BAM','BBD','BIF','BMD','BOB',
 		'BSD','BWP','BYN','BZD','CDF','CNY','COP','CUP','DJF','DZD',
-		'ERN','ESP','ETB','FJD','FKP','FRF','GEL','GHS','GIP','GMD',
-		'GNF','GYD','HNL','HTG','JMD','KGS','KMF','KYD','LKR','LRD',
+		'ERN','ESP','ETB','FJD','FKP','FRF','GEL','GTQ','GHS','GIP','GMD',
+		'GNF','GYD','HNL','HTG','JMD','KGS','KMF','KYD','KZT','LKR','LRD',
 		'LUF','MDL','MGA','MKD','MMK','MOP','MRU','MUR','MWK','MYR',
-		'NAD','NGN','NIO','NZD','PGK','PKR','RWF','SBD','SCR','SDG',
+		'NAD','NGN','NIO','NOK','NZD','PAB','PGK','PKR','RWF','SBD','SCR','SDG',
 		'SGD','SHP','SLE','SOS','SRD','SSP','STN','SYP','TND','TOP',
 		'TTD','TZS','XCD','UGX','VUV','WST','ZAR',
 	]
 	
-	if (isFF) {
-		if ("object" === typeof ondeviceorientationabsolute) {
-			// FF110+ : add KZT from min
-			expanded.push("KZT")
-		} else {
-			// FF109: add SLL to expanded
-			expanded.push("SLL")
-		}
-	}
 	expanded = expanded.concat(min)
 	if (supported.length) {
 		expanded = expanded.filter(x => supported.includes(x))
@@ -215,21 +205,21 @@ function set_currency_lists() {
 		'CAD','CHE','CHF','CHW','CLE','CLF','CLP','CNH','CNX','COU',
 		'CRC','CSD','CSK','CUC','CVE','CYP','CZK','DDM','DEM','DOP',
 		'ECS','ECV','EEK','EGP','ESA','ESB','EUR','FIM','GEK','GHC',
-		'GNS','GQE','GRD','GTQ','GWE','GWP','HKD','HRD','HRK','HUF',
+		'GNS','GQE','GRD','GWE','GWP','HKD','HRD','HRK','HUF',
 		'IDR','IEP','ILP','ILR','ILS','INR','IQD','IRR','ISJ','ISK',
-		'ITL','JOD','JPY','KHR','KPW','KRH','KRO','KRW','KWD','LAK',
-		'LBP','LSL','LTL','LTT','LUC','LUL','LVL','LVR','LYD','MAD',
-		'MAF','MCF','MDC','MGF','MKN','MLF','MNT','MRO','MTL','MTP',
-		'MVP','MVR','MXN','MXP','MXV','MZE','MZM','NIC','NLG','NOK',
-		'NPR','OMR','PAB','PEI','PEN','PES','PLN','PLZ','PTE','PYG',
-		'QAR','RHD','ROL','RON','RSD','RUB','RUR','SAR','SDD','SDP',
-		'SEK','SIT','SKK','SLL','SRG','STD','SUR','SVC','THB','TJR',
-		'TJS','TMM','TMT','TPE','TRL','TRY','TWD','UAH','UAK','UGS',
-		'USN','USS','UYI','UYP','UYU','UYW','UZS','VEB','VED','VEF',
-		'VES','VND','VNN','XAG','XAU','XBA','XBB','XBC','XBD','XDR',
-		'XEU','XFO','XFU','XOF','XPD','XPF','XPT','XRE','XSU','XTS',
-		'XUA','XXX','YDD','YER','YUD','YUM','YUN','YUR','ZAL','ZMK',
-		'ZRN','ZRZ','ZWD','ZWL','ZWR',
+		'ITL','JOD','JPY','KHR','KPW','KRH','KRO','KRW','KWD',
+		'LAK','LBP','LSL','LTL','LTT','LUC','LUL','LVL','LVR','LYD',
+		'MAD','MAF','MCF','MDC','MGF','MKN','MLF','MNT','MRO','MTL',
+		'MTP','MVP','MVR','MXN','MXP','MXV','MZE','MZM','NIC','NLG',
+		'NPR','OMR','PEI','PEN','PES','PLZ','PTE',
+		'PYG','QAR','RHD','ROL','RON','RSD','RUB','RUR','SAR','SDD',
+		'SDP','SEK','SIT','SKK','SLL','SRG','STD','SUR','SVC','THB',
+		'TJR','TJS','TMM','TMT','TPE','TRL','TRY','TWD','UAH','UAK',
+		'UGS','USN','USS','UYI','UYP','UYU','UYW','UZS','VEB','VED',
+		'VEF','VES','VND','VNN','XAG','XAU','XBA','XBB','XBC','XBD',
+		'XDR','XEU','XFO','XFU','XOF','XPD','XPF','XPT','XRE','XSU',
+		'XTS','XUA','YDD','YER','YUD','YUM','YUN','YUR','ZAL',
+		'ZMK','ZRN','ZRZ','ZWD','ZWL','ZWR',
 	]
 	let all = expanded.concat(ignore) // so at least we have soomething if supported = empty
 	all = all.concat(supported) // in case anything new turns up
@@ -273,20 +263,22 @@ function run_main(method) {
 	if (method == "min") {
 		if (!optExpanded) {
 			tests = {
-				// 15 or 16 tests (we drop KZT in FF110+): if we only care about base language
+				// 17 tests (PLN, XXX for 121+ ICU tree 74)
 				"AED": name,
 				"AUD": name,
 				"BRL": name,
 				"DKK": name,
 				"GBP": symbol,
 				"KES": both,
-				"KZT": name,
 				"MZN": both,
 				"PHP": symbol,
 				"SZL": name,
 				"USD": both,
 				"XAF": name,
 				"ZMW": symbol,
+				// FF121+ 1859752 ICU 74
+				"PLN": symbol, 
+				"XXX": name,
 			}
 		} else {
 			tests = { // expanded currencies
@@ -304,6 +296,9 @@ function run_main(method) {
 				"USD": both,
 				"XAF": name,
 				"ZMW": symbol,
+				// FF121+ 1859752 ICU 74
+				"PLN": symbol, 
+				"XXX": name,
 			}
 			// note: FF109 also has SLL and symbol is all we need
 				// need for that so no need to code around
@@ -317,10 +312,6 @@ function run_main(method) {
 			aSymbol.forEach(function(c){
 				tests[c] = symbol
 			})
-			// FF110+ expanded doesn't need SLL
-			if (isFF && "object" === typeof ondeviceorientationabsolute) {
-				delete tests.SLL
-			}
 		}
 	} else if (method == "tiny") {
 		// smaller set that gets most base languages + bang for buck on expanded
@@ -500,32 +491,30 @@ function run_main(method) {
 				localesHashAll = localesHash
 			}
 			if (isFF) {
-				// only hash notate if 102+
-				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-				if (is102) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// track FF version changes
 					if (optExpanded) {
 						// expanded results
-						if (resultsHash == "45c1e55b") {resultsHash += s14 +" [FF115+]"+ sc
-						} else if (resultsHash == "bff093b9") {resultsHash += s14 +" [FF110-114]"+ sc
-						} else if (resultsHash == "880c47e9") {resultsHash += s14 +" [FF102-109]"+ sc
+						if (resultsHash == "f9e480a9") {resultsHash += s14 +" [FF121+]"+ sc // 1859752 ICU 74
+						} else if (resultsHash == "0f4e5a6f") {resultsHash += s14 +" [FF115-120]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// expanded locales
-						if (localesHash == "a135c7af") {localesHash += s14 +" [FF110+]"+ sc
-						} else if (localesHash == "22d0aada") {localesHash += s14 +" [FF102-109]"+ sc
+						if (localesHash == "cc5a7ac7") {localesHash += s14 +" [FF121+]"+ sc
+						} else if (localesHash == "44f9fbce") {localesHash += s14 +" [FF115-120]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					} else {
 						// results
-						if (resultsHash == "5eaf7308") {resultsHash += s14 +" [FF115+]"+ sc
-						} else if (resultsHash == "3f1d80af") {resultsHash += s14 +" [FF110-114]"+ sc
-						} else if (resultsHash == "976e701f") {resultsHash += s14 +" [FF102-109]"+ sc
+						if (resultsHash == "99202a3f") {resultsHash += s14 +" [FF121+]"+ sc
+						} else if (resultsHash == "9675f10b") {resultsHash += s14 +" [FF115-120]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// locales
-						if (localesHash == "32e62521") {localesHash += s14 +" [FF110+]"+ sc
-						} else if (localesHash == "bf9e8c60") {localesHash += s14 +" [FF102-109]"+ sc
+						if (localesHash == "c96d153e") {localesHash += s14 +" [FF121+]"+ sc
+						} else if (localesHash == "32e62521") {localesHash += s14 +" [FF115-120]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					}
@@ -656,6 +645,7 @@ Promise.all([
 		"en-ch,english (switzerland)",
 		"en-dk,english (denmark)",
 		"en-er,english (eritrea)",
+		"en-fi,english (finland)",
 		"en-fj,english (fiji)",
 		"en-fk,english (falkland islands)",
 		"en-gb,english (united kingdom)",
@@ -699,6 +689,7 @@ Promise.all([
 		"en-ws,english (samoa)",
 		"en-za,english (south africa)",
 		"en-zm,english (zambia)",
+		"es-419,spanish (latin america and the caribbean)",
 		"es-ar,spanish (argentina)",
 		"es-bo,spanish (bolivia)",
 		"es-br,spanish (brazil)",
@@ -789,6 +780,7 @@ Promise.all([
 		"ru-md,russian (moldova)",
 		"ru-ua,russian (ukraine)",
 		"sd-deva,sindhi (devanagari)",
+		"se-se,northern sami",
 		"shi-latn,tachelhit (latin)",
 		"so-dj,somali (djibouti)",
 		"so-et,somali (ethiopia)",
