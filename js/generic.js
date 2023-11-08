@@ -352,7 +352,7 @@ const get_isOS = () => new Promise(resolve => {
 	if (!runTE) {
 		try {
 			if (runSE) {foo++}
-			let path = "chrome://browser/content/extension-", suffix = "-panel.css", count = 0
+			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
 			let list = ["win","mac","linux"]
 			list.forEach(function(item) {
 				let css = document.createElement("link")
