@@ -145,46 +145,102 @@ function run(runtype) {
 		})
 	})
 	// CSS
+		// FF121+: 1855861: we need to promise events
+	let countCSS = 0, expectedCSS = 0
+	const get_eventCSS = (css, cssUri) => new Promise(resolve => {
+		css.onload = function() {
+			countCSS++
+			cssHash.push(cssUri)
+			allHash.push(cssUri)
+			document.head.removeChild(css)
+			return resolve(countCSS)
+		}
+		css.onerror = function() {
+			countCSS++
+			document.head.removeChild(css)
+			return resolve(countCSS)
+		}
+	})
 	const get_css = () => new Promise(resolve => {
-		let expected = cssUris.length, count = 0
+		expectedCSS = cssUris.length
+		countCSS = 0
+		let count = 0
 		cssUris.forEach(function(cssUri) {
 			let css = document.createElement("link")
 			css.href = cssUri
 			css.type = "text/css"
 			css.rel = "stylesheet"
-			document.head.appendChild(css)
-			css.onload = function() {
-				cssHash.push(cssUri)
-				allHash.push(cssUri)
-				count++
-				if (count == expected) {return resolve()}
-			};
-			css.onerror = function() {
-				count++
-				if (count == expected) {return resolve()}
-			};
-			document.head.removeChild(css)
+			document.head.appendChild(css, cssUri)
+			// FF120+ use promises
+			if (window.hasOwnProperty("UserActivation")) {
+				Promise.all([
+					get_eventCSS(css, cssUri)
+				]).then(function(){
+					if (countCSS == expectedCSS) {return resolve()}
+				})
+			} else {
+dom.cssHashTor.innerHTML = "i am groot"
+				css.onload = function() {
+					cssHash.push(cssUri)
+					allHash.push(cssUri)
+					count++
+					if (count == expectedCSS) {return resolve()}
+				};
+				css.onerror = function() {
+					count++
+					if (count == expectedCSS) {return resolve()}
+				};
+				document.head.removeChild(css)
+			}
 		})
 	})
 	// OTHER
+	let countOther = 0, expectedOther = 0
+	const get_eventOther = (css, otherUri) => new Promise(resolve => {
+		css.onload = function() {
+			countOther++
+			otherHash.push(otherUri)
+			allHash.push(otherUri)
+			document.head.removeChild(css)
+			return resolve()
+		}
+		css.onerror = function() {
+			countOther++
+			document.head.removeChild(css)
+			return resolve()
+		}
+	})
+
 	const get_other = () => new Promise(resolve => {
-		let expected = otherUris.length, count = 0
+		expectedOther = otherUris.length
+		countOther = 0
+		let count = 0
 		otherUris.forEach(function(otherUri) {
 			let other = document.createElement("link")
 			other.href = otherUri
 			other.rel = "stylesheet"
 			document.head.appendChild(other)
-			other.onload = function() {
-				otherHash.push(otherUri)
-				allHash.push(otherUri)
-				count++
-				if (count == expected) {return resolve()}
-			};
-			other.onerror = function() {
-				count++
-				if (count == expected) {return resolve()}
-			};
-			document.head.removeChild(other)
+			// FF120+ use promises
+			if (window.hasOwnProperty("UserActivation")) {
+				Promise.all([
+					get_eventOther(other, otherUri)
+				]).then(function(){
+					if (countOther == expectedOther) {return resolve()}
+				})
+			} else {
+dom.otherHashTor.innerHTML = "i am groot"
+				other.onload = function() {
+					otherHash.push(otherUri)
+					allHash.push(otherUri)
+					count++
+					if (count == expectedOther) {return resolve()}
+				};
+				other.onerror = function() {
+					count++
+					if (count == expectedOther) {return resolve()}
+				};
+				document.head.removeChild(other)
+			}
 		})
 	})
 
@@ -258,7 +314,7 @@ function run(runtype) {
 		get_other(),
 	]).then(function(results){
 		output()
-	})		
+	})
 }
 
 get_globals()
