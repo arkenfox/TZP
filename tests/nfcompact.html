@@ -256,23 +256,19 @@ function run_main(method) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			if (isFF) {
-				// only hash notate if 102+
-				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-				if (is102) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// track FF version changes
 					// results
 					if (resultsHash == "6790c350") {resultsHash += s14 +" [FF121+]"+ sc // 1859752 ICU 74
-					} else if (resultsHash == "c70db6cd") {resultsHash += s14 +" [FF115-120]"+ sc
-					} else if (resultsHash == "cea26b47") {resultsHash += s14 +" [FF111-114]"+ sc
-					} else if (resultsHash == "db1acfeb") {resultsHash += s14 +" [FF110]"+ sc
-					} else if (resultsHash == "5a323cd4") {resultsHash += s14 +" [FF102-109]"+ sc
+					} else if (resultsHash == "c70db6cd") {resultsHash += s14 +" [FF116-120]"+ sc
+					} else if (resultsHash == "04fa9a89") {resultsHash += s14 +" [FF115]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
 					if (localesHash == "7dd43c5d") {localesHash += s14 +" [FF121+]"+ sc
 					} else if (localesHash == "193159e8") {localesHash += s14 +" [FF115-120]"+ sc
-					} else if (localesHash == "95c4eb44") {localesHash += s14 +" [FF110-114]"+ sc
-					} else if (localesHash == "13a28795") {localesHash += s14 +" [FF102-109]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
