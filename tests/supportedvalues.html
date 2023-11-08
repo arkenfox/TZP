@@ -81,24 +81,12 @@ function run() {
 		let hash = mini(res), code = ""
 
 		if (isFF) {
-			// only hash notate if 102+
-			let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-			if (is102) {
-				if (hash == "deb2f155") {code = "FF110+"
-					// collation: - reformed
-					// numberSystem: + kawi, nagm
-				} else if (hash == "2439efb8") {code = "FF108-109"
-					// 1630920: collation: - big5han, gb2312
-					// timeZone: + America/Ciudad_Juarez
-					// unit: + microsecond, nanosecond
-				} else if (hash == "270ec306") {code = "ESR102"
-					// ESR102.6 + backported FF108 America/Ciudad_Juarez]
-				} else if (hash == "2cd0417d") {code = "FF105-107 | ESR102"
-					// 1786025: backported to ESR102.3 : Europe/Kiev -> Europe/Kyiv
-				} else if (hash == "a3f9766a") {code = "FF102-104"
+			// only hash notate if 115+
+			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+			if (is115) {
+				if (hash == "deb2f155") {code = s14 +" [FF115+]"+ sc
 				} else {code = zNEW
 				}
-				if (code !== zNEW) {code = s14 +" ["+ code +"]"+ sc}
 			}
 		}
 		dom.hashAll.innerHTML = hash + code
