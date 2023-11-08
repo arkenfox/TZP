@@ -276,19 +276,18 @@ function run_main(method) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			if (isFF) {
-				// only hash notate if 102+
-				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-				if (is102) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// track FF version changes
 					// results
-					if (resultsHash == "fe9c0751") {resultsHash += s14 +" [FF115+]"+ sc
-					} else if (resultsHash == "6f17d9ef") {resultsHash += s14 +" [FF110-114]"+ sc
-					} else if (resultsHash == "88fabda0") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "40135df8") {resultsHash += s14 +" [FF121+]"+ sc
+					} else if (resultsHash == "fe9c0751") {resultsHash += s14 +" [FF115-120]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "6b3f4b76") {localesHash += s14 +" [FF110+]"+ sc
-					} else if (localesHash == "02fbf16b") {localesHash += s14 +" [FF102-109]"+ sc
+					if (localesHash == "702eca59") {localesHash += s14 +" [FF121+]"+ sc
+					} else if (localesHash == "6b3f4b76") {localesHash += s14 +" [FF115-120]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
