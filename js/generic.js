@@ -453,7 +453,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 120) {isVerExtra = "+"}
+		} else if (verNo == 121) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -461,6 +461,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			try {if ("lij" === Intl.Collator.supportedLocalesOf("lij").join()) return 121} catch(e) {} // 1859752
 			if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 			try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 			if (CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
