@@ -139,11 +139,12 @@ function run_test(type) {
 	if (type == "1") {
 		aNosCardinal = aFirstCardinal
 		aNosOrdinal = aFirstOrdinal
-		if (isEngine == "blink") {
+		// FF121: 1859752 ICU 74 : lij
+			// to keep lij unique from it,sc in ordinal (bug?)
+		if (!isFF || "lij" === Intl.Collator.supportedLocalesOf("lij").join()) {
 			if (!aNosOrdinal.includes(81)) {
-				aNosOrdinal.push(81) // chromium to keep lij unique from it,sc in ordinal (bug?)
+				aNosOrdinal.push(81) // chromium 
 			}
-			blinkStr = " <sup>1</sup> <br><br><sup>1</sup> number 81 added to ordinal for blink for lij"
 		}
 	}
 	// custom
@@ -156,7 +157,7 @@ function run_test(type) {
 			// out minimal example
 			aNosCardinal = [0, 1, 2, 3, 7, 21, 100] // redundant: 4, 6, 11, 20
 			aNosOrdinal = [1, 2, 3, 5, 8, 10] // redundant: 0, 4, 6, 7, 9, 21
-			if (isEngine == "blink") {
+			if (!isFF || "lij" === Intl.Collator.supportedLocalesOf("lij").join()) {
 				aNosOrdinal.push(81)
 			}
 			// display
