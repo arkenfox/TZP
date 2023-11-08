@@ -125,12 +125,14 @@ function run_main(method, isLoopy) {
 			if (!is102) {return ""}
 			let notation = ""
 			if (method == "C") {
-				if (hash == "51bba16a") {notation = " [FF110+]"
+				if (hash == "248fdca9") {notation = " [FF121+]" // lij
+				} else if (hash == "51bba16a") {notation = " [FF110-120]"
 				} else if (hash == "87327c85") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
 			} else {
-				if (hash == "2f20e446") {notation = " [FF110+]"
+				if (hash == "13d29895") {notation = " [FF121+]" // lij
+				} else if (hash == "2f20e446") {notation = " [FF110-120]"
 				} else if (hash == "efce786b") {notation = " [FF102-109]"
 				} else { notation = zNEW
 				}
