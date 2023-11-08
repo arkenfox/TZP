@@ -250,16 +250,34 @@ function get_is95() {
 
 const get_isOS = () => new Promise(resolve => {
 	if (!isFF) {return resolve()}
-	function finish() {
+	function exit() {
 		// linux-panel not added until FF89, but we're not expecting widgets to fail until 102 minimum
-		if (isOS == "") {isOS = "android"
-		} else if (isOS == "win") {isOS = "windows"}
+		if (isOS == "") {isOS = "android"}
 		return resolve()
 	}
+
+	// FF121+: 1855861
+	let count = 0
+	const get_event = (css, item) => new Promise(resolve => {
+		css.onload = function() {
+			isOS = item == "win" ? "windows" : item
+			count++
+			document.head.removeChild(css)
+			exit() // we can only have one
+			return resolve()
+		}
+		css.onerror = function() {
+			count++
+			document.head.removeChild(css)
+			if (count == 3) {exit()}
+			return resolve()
+		}
+	})
+
 	// try harder
 	function tryharder() {
 		try {
-			let path = "chrome://browser/content/extension-", suffix = "-panel.css", count = 0
+			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
 			// 1280128: FF51+ win/mac
 			// 1701257: FF89+ linux
 			let list = ["win","mac","linux"]
@@ -269,29 +287,26 @@ const get_isOS = () => new Promise(resolve => {
 				css.type = "text/css"
 				css.rel = "stylesheet"
 				document.head.appendChild(css)
-				css.onload = function() {
-					isOS = item
-					count++
-					if (count == 3) {finish()}
-				}
-				css.onerror = function() {
-					count++
-					if (count == 3) {finish()}
-				}
-				document.head.removeChild(css)
+				get_event(css, item)
 			})
 		} catch(e) {
 			console.error(e.name, e.emssage)
 			return resolve()
 		}
 	}
+
 	// widget font
+	// requires widgetradio on dom
+	/*
+	<div class="hidden"><input type="radio" id="widgetradio"></div>
+	*/
 	let aIgnore = [
 		'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif','serif','system-ui',
 		'ui-monospace','ui-rounded','ui-serif','undefined', undefined 
 	]
 	try {
-		let font = getComputedStyle(dom.widget0).getPropertyValue("font-family")
+		let font = getComputedStyle(dom.widgetradio).getPropertyValue("font-family")
+
 		if (aIgnore.includes(font)) {
 			// returns generic font-family if #41116 or eventually 1787790
 				// mac should still return -apple-system
