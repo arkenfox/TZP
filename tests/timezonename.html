@@ -247,8 +247,6 @@ var oTimezones = {},
 	aLocalesExpanded = [],
 	isSupported = false,
 	isSupportedValues = false,
-	is102 = false,
-	is109orlower = false,
 	localesHashAll = "", // to compare min to
 	localesHashAllExpanded = "", // to compare min to
 	strMinWarning = " don't panic, it's working<br><br> ... running 'expanded' takes a few seconds",
@@ -415,7 +413,7 @@ function set_timezone_lists() {
 			"Melbourne","NSW","North","Perth","Queensland","South","Sydney","Tasmania","Victoria","West","Yancowinna",
 		],
 		"Europe": [
-			"Amsterdam","Andorra","Astrakhan","Athens","Belfast","Belgrade","Berlin","Bratislava","Brussels","Bucharest","Budapest",
+			"Amsterdam","Andorra","Astrakhan","Athens","Belgrade","Berlin","Bratislava","Brussels","Bucharest","Budapest",
 			"Busingen","Chisinau","Copenhagen","Dublin","Gibraltar","Guernsey","Helsinki","Istanbul","Jersey","Kaliningrad","Kiev",
 			"Kirov","Kyiv","Lisbon","Ljubljana","Luxembourg","Madrid","Malta","Mariehamn","Monaco","Moscow","Nicosia","Oslo",
 			"Paris","Podgorica","Prague","Riga","Rome","Samara","San_Marino","Saratov","Simferopol","Skopje","Sofia","Stockholm",
@@ -423,13 +421,13 @@ function set_timezone_lists() {
 			"Zagreb","Zaporozhye","Zurich",
 		],
 		"Indian": [
-			"Antananarivo","Christmas","Cocos","Comoro","Kerguelen","Mahe","Maldives","Mauritius","Mayotte","Reunion",
+			"Antananarivo","Christmas","Comoro","Kerguelen","Mahe","Maldives","Mauritius","Mayotte","Reunion",
 		],
 		"Pacific": [
 			"Apia","Auckland","Bougainville","Chatham","Chuuk","Easter","Efate","Enderbury","Fakaofo","Fiji","Funafuti",
 			"Galapagos","Gambier","Guadalcanal","Guam","Honolulu","Johnston","Kanton","Kiritimati","Kosrae","Kwajalein",
 			"Majuro","Marquesas","Midway","Nauru","Niue","Norfolk","Noumea","Palau","Pitcairn","Pohnpei","Ponape","Port_Moresby",
-			"Rarotonga","Samoa","Tahiti","Tarawa","Tongatapu","Truk","Wake","Wallis","Yap",
+			"Rarotonga","Samoa","Tahiti","Tarawa","Truk","Wake","Wallis","Yap",
 		],
 	}
 	let ignore = []
@@ -458,7 +456,7 @@ function run_main(method) {
 		// show a warning and add a button with isWarning = true
 		let confirmStr = "are you sure?"+ spacer
 			+"it can take <span class='bad'>up to a minute</span> (or more, on slower devices)" + spacer
-			+"it will <span class='bad'>make your fans whir</span>" + spacer +"<br>"
+			+"it might <span class='bad'>make your fans whir</span>" + spacer +"<br>"
 			+"<span class='btnbad btnfirst' onClick='run(`all_confirmed`)'>"
 			+"[ YES, i'm sure. RUN it ]</span>"
 		dom.results.innerHTML = confirmStr
@@ -486,23 +484,33 @@ function run_main(method) {
 		276/290 expanded locales: saves two shortG checks x 29 locales: not worth the perf
 
 	*/
-	// perf: doesn't add anything
-		// tzNames: short, long, shortOffset, longOffset
-				// 289 shortGeneric / 260 longGeneric: 298 combined
-		// tzDays: Jan
-	tzNames = ["shortGeneric","longGeneric"]
+
+	// perf: tzNames: drop some styles
+	/*
+		tested FF121: 1070 locales
+		- 315: all 6
+		- 313: shortGeneric + longGeneric
+		- 315: short
+	*/
+	tzNames = ["short","shortGeneric","longGeneric"]
 	tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
 
 	let tests = {}
 	let shortG = {"shortGeneric": tzDays},
 		longG = {"longGeneric": tzDays},
-		both = {"shortGeneric": tzDays, "longGeneric": tzDays}
+		keyShort = {"short": tzDays},
+		both = {"shortGeneric": tzDays, "longGeneric": tzDays},
+		everything = {
+			"short": tzDays,
+			"shortGeneric": tzDays,
+			"longGeneric": tzDays,
+		}
 
 	if (method == "all") {
-		// all supported timezones minus some crap x both (shortG/longG)
+		// all supported timezones minus some crap x both
 		let timezones = oTimezones["all"]
 		timezones.forEach(function(tz) {
-			tests[tz] = both
+			tests[tz] = everything
 		})
 	} else if (method == "min") {
 		if (optExpanded) {
@@ -538,25 +546,22 @@ function run_main(method) {
 				"Atlantic/Azores": shortG,
 				"Atlantic/Bermuda": both,
 				"Atlantic/South_Georgia": shortG,
+				"Europe/Belfast": keyShort,
 				"Europe/Isle_of_Man": shortG,
 				"Europe/London": shortG,
 				"Europe/Minsk": shortG,
 				"Europe/Sarajevo": both,
 				"Indian/Chagos": longG,
-				"Pacific/Saipan": shortG,
+				"Indian/Cocos": keyShort,
 				"Pacific/Pago_Pago": longG,
-			}
-			// 109 or lower
-			if (is109orlower || !isFF) { // !isFF fixes blink
-				tests["Africa/Addis_Ababa"] = longG
-				tests["Africa/Kigali"] = longG
-				tests["America/Miquelon"] = shortG
+				"Pacific/Saipan": shortG,
+				"Pacific/Tongatapu": shortG,
 			}
 			/* find missing
 			let newTZs = [
 			]
 			newTZs.forEach(function(tz) {
-				tests["America/"+tz] = shortG
+				tests["Europe/"+tz] = everything
 			})
 			//*/
 		} else {
@@ -564,18 +569,17 @@ function run_main(method) {
 				"Africa/Douala": longG,
 				"Africa/Lusaka": shortG,
 				"Africa/Nairobi": shortG,
+				"America/La_Paz": shortG,
 				"Asia/Phnom_Penh": shortG,
 				"Asia/Seoul": longG,
 				"Asia/Yerevan": shortG,
 				"Europe/Isle_of_Man": shortG,
 				"Europe/London": shortG,
 				"Indian/Chagos": longG,
-				"Pacific/Saipan": shortG,
+				"Indian/Cocos": keyShort,
 				"Pacific/Pago_Pago": longG,
-			}
-			// 109 or lower
-			if (is109orlower) {
-				tests["Africa/Kigali"] = longG
+				"Pacific/Saipan": shortG,
+				"Pacific/Tongatapu": shortG,
 			}
 		}
 	} else if (method == "tiny") {
@@ -682,8 +686,7 @@ function run_main(method) {
 						str += "<li>"+ s12 + not + sc +"</li>"
 					}
 					Object.keys(oData[h][not]).forEach(function(s){ // for each style
-						let abbrev = s.slice(0,1).toUpperCase()
-						str += s16 + abbrev +": "+ sc + oData[h][not][s] +"</br>"
+						str += s16 + s +": "+ sc + oData[h][not][s] +"</br>"
 					})
 					if (linecount == 1) {str += "</li>"}
 				}
@@ -728,32 +731,30 @@ function run_main(method) {
 				localesHashAll = localesHash
 			}
 			if (isFF) {
-				// only hash notate if 102+
-				if (is102) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// track FF version changes
 					if (optExpanded) {
 						// expanded results
-						if (resultsHash == "f9ca13f5") {resultsHash += s14 +" [FF115+]"+ sc
-						} else if (resultsHash == "414f33ba") {resultsHash += s14 +" [FF112-114]"+ sc
-						} else if (resultsHash == "2072c78a") {resultsHash += s14 +" [FF110-111]"+ sc
-						} else if (resultsHash == "01360e26") {resultsHash += s14 +" [FF102-109]"+ sc
+						if (resultsHash == "a3386dab") {resultsHash += s14 +" [FF121+]"+ sc
+						} else if (resultsHash == "531d45af") {resultsHash += s14 +" [FF115-120]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// expanded locales
-						if (localesHash == "6d3043b4") {localesHash += s14 +" [FF110+]"+ sc
-						} else if (localesHash == "dca4bb11") {localesHash += s14 +" [FF102-109]"+ sc
+						if (localesHash == "3553c45f") {localesHash += s14 +" [FF121+]"+ sc
+						} else if (localesHash == "489b276a") {localesHash += s14 +" [FF115-120]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					} else {
 						// results
-						if (resultsHash == "c083279c") {resultsHash += s14 +" [FF115+]"+ sc
-						} else if (resultsHash == "3fc60f1b") {resultsHash += s14 +" [FF110-114]"+ sc
-						} else if (resultsHash == "b40b4623") {resultsHash += s14 +" [FF102-109]"+ sc
+						if (resultsHash == "85f2b9d4") {resultsHash += s14 +" [FF121+]"+ sc
+						} else if (resultsHash == "e295da2b") {resultsHash += s14 +" [FF115-120]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// locales
-						if (localesHash == "2b77fc8d") {localesHash += s14 +" [FF110+]"+ sc
-						} else if (localesHash == "c8135e90") {localesHash += s14 +" [FF102-109]"+ sc
+						if (localesHash == "9fb8e4b4") {localesHash += s14 +" [FF121+]"+ sc
+						} else if (localesHash == "2b77fc8d") {localesHash += s14 +" [FF115-120]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					}
@@ -774,7 +775,7 @@ function run_main(method) {
 		// display
 		let display = s4 + method.toUpperCase() +": "
 			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc
-			+" &nbsp KEY: <span class='s16'>L</span> longGeneric <span class='s16'>S</span> shortGeneric"
+			//+" &nbsp KEY: <span class='s16'>L</span> longGeneric <span class='s16'>S</span> shortGeneric"
 			+ spacer
 			+ s12 +"timezones: "+ sc + tzBtn + spacer
 			+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
@@ -911,6 +912,7 @@ Promise.all([
 		"ko-kp,korean (north korea)",
 		"ks-deva,kashmiri (devanagari)",
 		"lrc-iq, northern luri (iraq)",
+		"ms-id,malay (indonesia)",
 		"ne-in,nepali (india)",
 		"nl-aw,dutch (aruba)",
 		"nl-be,dutch (belgium)",
@@ -955,17 +957,6 @@ Promise.all([
 	if (isSupportedValues) {
 		set_timezone_lists()
 	}
-
-	is102 = (isFF && CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-	is109orlower = (isFF && "object" !== typeof ondeviceorientationabsolute)
-
-	/* limit to 102+ in gecko
-	if (isFF & !is102) {
-		isSupported = false
-		isSupportedValues = false
-		dom.results.innerHTML = "this test requires FF102 or higher"
-	}
-	//*/
 
 	if (isSupported && isSupportedValues) {
 		setBtn("min")
