@@ -120,20 +120,18 @@ function run_main(method, isLoopy) {
 		// hash
 		function getNotation(hash, method) {
 			if (!isFF) return ""
-			// only hash notate if 102+
-			let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-			if (!is102) {return ""}
+			// only hash notate if 115+
+			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+			if (!is115) {return ""}
 			let notation = ""
 			if (method == "C") {
 				if (hash == "248fdca9") {notation = " [FF121+]" // lij
-				} else if (hash == "51bba16a") {notation = " [FF110-120]"
-				} else if (hash == "87327c85") {notation = " [FF102-109]"
+				} else if (hash == "51bba16a") {notation = " [FF115-120]"
 				} else { notation = zNEW
 				}
 			} else {
 				if (hash == "13d29895") {notation = " [FF121+]" // lij
-				} else if (hash == "2f20e446") {notation = " [FF110-120]"
-				} else if (hash == "efce786b") {notation = " [FF102-109]"
+				} else if (hash == "2f20e446") {notation = " [FF115-120]"
 				} else { notation = zNEW
 				}
 			}
