@@ -1027,11 +1027,12 @@ function get_android_tap() {
 		Promise.all([
 			get_scr_viewport("height")
 		]).then(function(result){
-			// avh: captured once on first load: s/be with toolbar visible
+			// avh: captured once on first load: s/be with toolbar visible at fit width (e.g. 1800)
 			// since the "tap/touch" event exits FS, we can rely on avh
-			// use absolute value: event also triggered losing focus
+			// event also triggered by losing focus
 			let vh_new = result[0]
-			dom.kbh = Math.abs(avh - vh_new)
+			dom.kbh = avh + " | " + vh_new +" | "+ (avh - vh_new)
+
 			// ToDo: keyboard height: use setInterval
 			// keyboard can be slow to open + it "slides" (stepped changes)
 			// instead check x times + return the max abs diff
