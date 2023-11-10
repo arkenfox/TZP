@@ -83,7 +83,7 @@ function get_scr_initial() {
 	})
 }
 get_scr_initial()
-let avh = "" // android
+let avh = "undefined" // android
 
 // notation
 const tick = "✓", // u2713
