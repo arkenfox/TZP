@@ -167,8 +167,8 @@ const get_nav_dnt = () => new Promise(resolve => {
 
 const get_nav_gpc = () => new Promise(resolve => {
 	// GPC: 1670058
-	// privacy.globalprivacycontrol.functionality.enabled = navigator
-	// privacy.globalprivacycontrol.enabled = true/false
+		// privacy.globalprivacycontrol.functionality.enabled = navigator
+		// privacy.globalprivacycontrol.enabled = true/false
 	const METRIC = "globalPrivacyControl"
 	function exit(value, display) {
 		let notation = ""
@@ -753,7 +753,9 @@ function get_lang() {
 					return res.join(" | ")
 				} else if (item == 27 || item == 28) {
 					// pluralrules
-					let nos = item == 27 ? [0, 1, 2, 3, 7, 21, 100] : [1, 2, 3, 5, 8, 10]
+						// FF121: 1859752 ICU 74 : lij
+						// ^ add ordinal 81 to keep lij unique from it,sc
+					let nos = item == 27 ? [0, 1, 2, 3, 7, 21, 100] : [1, 2, 3, 5, 8, 10, 81]
 					let formatter = item == 27 ? IntlPR : new Intl.PluralRules(localecode, {type: "ordinal"})
 					let prules = [], prev = "", current = ""
 					nos.forEach(function(num){

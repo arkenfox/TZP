@@ -400,7 +400,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 120
+		isVerMax = 121
+		try {if ("lij" === Intl.Collator.supportedLocalesOf("lij").join()) return 121} catch(e) {} // 1859752
 		if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 		try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010

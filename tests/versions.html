@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 71, maxVer = 120, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 72, maxVer = 121, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -283,6 +283,11 @@ function outputVersion() {
 		let ver120 = ("function" === typeof CSSPropertyRule)
 		rec(120, 120, "1854937", ver120, performance.now()-t120)
 		*/
+
+		// 121: 1859752
+		let t121 = performance.now()
+		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
+		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 
 		// 120: 1791079
 		let t120 = performance.now()

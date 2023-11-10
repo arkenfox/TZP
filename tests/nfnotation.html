@@ -247,18 +247,17 @@ function run_main(method) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			if (isFF) {
-				// only hash notate if 102+
-				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-				if (is102) {
-					// track FF version changes
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// results
-					if (resultsHash == "34d56154") {resultsHash += s14 +" [FF110+]"+ sc
-					} else if (resultsHash == "6803904f") {resultsHash += s14 +" [FF102-109]"+ sc
+					if (resultsHash == "1e81d008") {resultsHash += s14 +" [FF121+]"+ sc
+					} else if (resultsHash == "34d56154") {resultsHash += s14 +" [FF115-120]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "e0099d08") {localesHash += s14 +" [FF110+]"+ sc
-					} else if (localesHash == "615c9b45") {localesHash += s14 +" [FF102-109]"+ sc
+					if (localesHash == "53c677c3") {localesHash += s14 +" [FF121+]"+ sc
+					} else if (localesHash == "e0099d08") {localesHash += s14 +" [FF115-120]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
