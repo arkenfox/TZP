@@ -868,7 +868,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				hDisplay = "NaN"
 			} else {
 				hDisplay = hValue
-				if (avh == "") {avh = hValue} // get android height once
+				if (gLoad) {avh = hValue} // get android height once
 			}
 			if (runST) {wValue = ""}
 			if ("number" !== typeof wValue) {
@@ -892,7 +892,6 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 
 	get_viewport("eViewport")
 	get_viewport("vViewport")
-	if (avh == "") {avh = "undefined"} // get viewport height once on first load
 	// return
 	if (runtype == "height") {
 		let vvh = oData["visualViewport_height"]
@@ -1020,17 +1019,18 @@ function get_android_tbh() {
 }
 
 function get_android_tap() {
-	if (isBlock) {
+	if (isBlock || isOS !== "android") {
 		return
 	}
-	if (isOS == "android") {
-		// wait for keyboard
-		setTimeout(function() {
-			// use viewport: doesn't change on zoom
-			let vh_new = get_scr_viewport("height")
-			// Compare to avh (captured on first load: s/be with toolbar visible)
-			// Since the event exits FS, we can rely on avh
+	setTimeout(function() {
+		// use viewport: doesn't change on zoom
+		Promise.all([
+			get_scr_viewport("height")
+		]).then(function(result){
+			// avh: captured once on first load: s/be with toolbar visible
+			// since the "tap/touch" event exits FS, we can rely on avh
 			// use absolute value: event also triggered losing focus
+			let vh_new = result[0]
 			dom.kbh = Math.abs(avh - vh_new)
 			// ToDo: keyboard height: use setInterval
 			// keyboard can be slow to open + it "slides" (stepped changes)
@@ -1044,8 +1044,8 @@ function get_android_tap() {
 				iw = log_error(SECT1, "tap", e)
 			}
 			dom.tiw = iw
-		}, 1000)
-	}
+		})
+	}, 1000) // wait for keyboard
 }
 
 /* USER TESTS */
