@@ -542,7 +542,13 @@ const get_font_sizes = () => new Promise(resolve => {
 		const detectedViaTransformNumber = new Set()
 		const detectedViaPerspective = new Set()
 		const detectedViaPerspectiveNumber = new Set()
+		const detectedViaDomRectBounding = new Set()
+		const detectedViaDomRectBoundingRange = new Set()
+		const detectedViaDomRectClient = new Set()
+		const detectedViaDomRectClientRange = new Set()
 		const style = getComputedStyle(span)
+		const range = document.createRange()
+		range.selectNode(span)
 
 		const getDimensions = (span, style) => {
 			const transform = style.transformOrigin.split(' ')
@@ -552,6 +558,14 @@ const get_font_sizes = () => new Promise(resolve => {
 					// + Math.floor(Math.random() * 10), //
 				clientHeight: span.clientHeight,
 				clientWidth: span.clientWidth,
+				domrectboundingHeight: span.getBoundingClientRect().height,
+				domrectboundingWidth:span.getBoundingClientRect().width,
+				domrectboundingrangeHeight: range.getBoundingClientRect().height,
+				domrectboundingrangeWidth: range.getBoundingClientRect().width,
+				domrectclientHeight: span.getClientRects()[0].height,
+				domrectclientWidth: span.getClientRects()[0].width,
+				domrectclientrangeHeight: range.getClientRects()[0].height,
+				domrectclientrangeWidth: range.getClientRects()[0].width,
 				nperspectiveHeight: originPixelsToNumber(perspective[1]),
 				nperspectiveWidth: originPixelsToNumber(perspective[0]),
 				npixelHeight: pixelsToNumber(style.height),
@@ -612,6 +626,10 @@ const get_font_sizes = () => new Promise(resolve => {
 		// typeof: don't let each !typeof affect other methods
 		let aTests = [
 			["client", detectedViaClient],
+			["domrectbounding", detectedViaDomRectBounding],
+			["domrectboundingrange", detectedViaDomRectBoundingRange],
+			["domrectclient", detectedViaDomRectClient],
+			["domrectclientrange", detectedViaDomRectClientRange],
 			["offset", detectedViaOffset],
 			["npixel", detectedViaPixelNumber],
 			["npixelsize", detectedViaPixelSizeNumber],
@@ -708,6 +726,10 @@ const get_font_sizes = () => new Promise(resolve => {
 		const fontsPixelSizeNumber = [...detectedViaPixelSizeNumber]
 		const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
 		const fontsTransformNumber = [...detectedViaTransformNumber]
+		const fontsDomRectBounding = [...detectedViaDomRectBounding]
+		const fontsDomRectBoundingRange = [...detectedViaDomRectBoundingRange]
+		const fontsDomRectClient = [...detectedViaDomRectClient]
+		const fontsDomRectClientRange = [...detectedViaDomRectClientRange]
 
 		return resolve({
 			// match display order
@@ -722,6 +744,10 @@ const get_font_sizes = () => new Promise(resolve => {
 			fontsPixelSizeNumber,
 			fontsPerspectiveNumber,
 			fontsTransformNumber,
+			fontsDomRectBounding,
+			fontsDomRectBoundingRange,
+			fontsDomRectClient,
+			fontsDomRectClientRange,
 		})
 	} catch(e) {
 		log_error(SECT12, "fontsizes", e)
@@ -864,7 +890,7 @@ const get_fonts = () => new Promise(resolve => {
 		aIgnore.forEach(function(item) {
 			let el = item.split(":")[0],
 				value = item.split(":")[1]
-			document.getElementById(el).innerHTML = value
+			try {document.getElementById(el).innerHTML = value} catch(err) {}
 		})
 		// tmp nothing
 		if (!Object.keys(oData).length) {
@@ -872,6 +898,17 @@ const get_fonts = () => new Promise(resolve => {
 			addData(12, METRIC, zLIE)
 			addData(12, METRICN, zLIE)
 		}
+		// ToDo: display and return trustworthy result (with most precision)
+			// and display lie style for others if untrustworthy
+
+			// tmp result: domrect or transform
+			let selected = "fontsTransformNumber"
+			if (isClientRect == 0) {selected = "fontsDomRectBounding"
+			} else if (isClientRect == 1) {selected = "fontsDomRectClient"
+			} else if (isClientRect == 2) {selected = "fontsDomRectBoundingRange"
+			} else if (isClientRect == 3) {selected = "fontsDomRectClientRange"
+			}
+
 		for (const k of Object.keys(oData)) {
 			let aList = oData[k]["names"]
 			for (let i=0; i < aList.length; i++) {
@@ -883,7 +920,7 @@ const get_fonts = () => new Promise(resolve => {
 				}
 				log_display(12, aList[i], oData[k]["hash"] + btn)
 
-				if (aList[i] == "fontsTransformNumber") {
+				if (aList[i] == selected) {
 					// names: not needed in FP but include for upstream
 					let fontNameHash = mini(oData[k][METRICN])
 					let fontNameLen = oData[k][METRICN].length
