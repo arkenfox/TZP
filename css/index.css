@@ -54,6 +54,18 @@
 .cssGraphite {font-family: "graphite";}
 
 body {background-color: var(--bg0); color: var(--test0);}
+body::after {
+	content: "";
+	background: url('chrome://browser/skin/onionPattern.svg');
+	background-repeat: repeat;
+	opacity: 0.5;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	position: fixed;
+	z-index: -1;
+}
 h2 {color: var(--testh); font-size: 14px; text-align: center; margin-top: inherit;}
 code {
 	background: rgba(142, 142, 145, 0.25) !important;
@@ -351,3 +363,4 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 }
 #pointertarget {z-index: 50; display: block;}
 .cssDocFont {font-family: "Arial Black";}
+
