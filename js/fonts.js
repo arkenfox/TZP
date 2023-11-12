@@ -1233,6 +1233,11 @@ const get_unicode = () => new Promise(resolve => {
 				value = zErr
 			} else if (data.length) {
 				let value = group(name, METRIC, data)
+				// clientrect lies
+				if (isClientRect == -1 && name == "clientrect") {
+					value = colorFn(value)
+					log_known(SECT12, METRIC)
+				}
 				display = value + addButton(12, METRIC)
 				// notate
 				if (isTB && isSmart && name.slice(0,6) == "actual") {
@@ -1257,7 +1262,11 @@ const get_unicode = () => new Promise(resolve => {
 		})
 		// oObject + oDisplay: can be altered before final add/display
 		for (const k of Object.keys(oObject).sort()) {
-			addData(12, k, oObject[k]["data"], oObject[k]["hash"])
+			if (isClientRect == -1 && k == "glyphs_clientrect") {
+				addData(12, k, zLIE)
+			} else {
+				addData(12, k, oObject[k]["data"], oObject[k]["hash"])
+			}
 		}
 		// display
 		for (const k of Object.keys(oDisplay)) {
@@ -1306,6 +1315,8 @@ const get_unicode = () => new Promise(resolve => {
 	function run() {
 		let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot,
 			canvas = dom.ugCanvas, ctx = canvas.getContext("2d")
+		let rangeH, rangeW
+
 		// each char
 		fntCodes.forEach(function(code) {
 			let	codeString = String.fromCodePoint(code)
@@ -1333,20 +1344,35 @@ const get_unicode = () => new Promise(resolve => {
 					}
 				}
 				// clientrect
-				// ToDo: isClientRect: we only need one valid method
 				if (isClient) {
 					try {
 						if (runSE) {foo++}
-						let cDiv = div.getBoundingClientRect()
-						let cSpan = span.getBoundingClientRect()
-						let cWidth = cSpan.width,
-							cHeight = cDiv.height
+						let cDiv, cSpan
+						if (isClientRect > 1) {
+							rangeH = document.createRange()
+							rangeH.selectNode(div)
+							rangeW = document.createRange()
+							rangeW.selectNode(span)
+						}
+						if (isClientRect < 1) { // get a result regardless
+							cDiv = div.getBoundingClientRect().height
+							cSpan = span.getBoundingClientRect().width
+						} else if (isClientRect == 1) {
+							cDiv = div.getClientRects()[0].height
+							cSpan = span.getClientRects()[0].width
+						} else if (isClientRect == 2) {
+							cDiv = rangeH.getBoundingClientRect().height
+							cSpan = rangeW.getBoundingClientRect().width
+						} else if (isClientRect > 2) {
+							cDiv = rangeH.getClientRects()[0].height
+							cSpan = rangeW.getClientRects()[0].width
+						}
 						if (runST) {cWidth = "a", cHeight = null}
-						if ("number" === typeof cWidth && "number" === typeof cHeight) {
-							aClient.push([stylename, code, cWidth, cHeight])
+						if ("number" === typeof cSpan && "number" === typeof cDiv) {
+							aClient.push([stylename, code, cSpan, cDiv])
 						} else {
 							isClient = false // stop checking
-							oCatch["clientrect"] = log_error(SECT12, "glyphs_clientrect", zErrType + typeof cWidth +" x "+ typeof cHeight)
+							oCatch["clientrect"] = log_error(SECT12, "glyphs_clientrect", zErrType + typeof cSpan +" x "+ typeof cDiv)
 						}
 					} catch(e) {
 						oCatch["clientrect"] = log_error(SECT12, "glyphs_clientrect", e)
