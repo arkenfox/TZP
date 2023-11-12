@@ -30,7 +30,6 @@ function get_autoplay() {
 				+" | "+ (mres === mtest ? mres : mres +", "+ mtest)
 			)
 		}
-
 	} catch(e) {
 		if (gLoad) {
 			isAutoPlay = zErr
@@ -42,11 +41,17 @@ function get_autoplay() {
 	}
 
 	// page load
+	let notation = ""
 	if (isAutoPlayErr == undefined) {
-		addDataDisplay(13, METRIC, isAutoPlay)
-	} else {
+		if (isSmart) {
+			notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red
+		}
 		addData(13, METRIC, isAutoPlay)
-		log_display(13, METRIC, isAutoPlayErr)
+		log_display(13, METRIC, isAutoPlay + notation)
+	} else {
+		if (isSmart) {notation = default_red}
+		addData(13, METRIC, isAutoPlay)
+		log_display(13, METRIC, isAutoPlayErr + notation)
 	}
 	if (gLoad) {
 		log_display(13, METRICuser, zNA)
