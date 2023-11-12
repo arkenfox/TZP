@@ -253,8 +253,8 @@ function getFonts() {
 					let sColor = isDetected ? sg : sb
 					oResults[font][basefont].push(
 						pair[0].padStart(11)
-						+ ":   base " + s3 + (base[basefont][wName] +" x "+ base[basefont][hName]).padStart(36) + sc
-						+ "   got " + sColor + (dimensions[wName] +" x "+ dimensions[hName]).padStart(36) + sc
+						+ ": " + s3 + (base[basefont][wName] +" x "+ base[basefont][hName]).padStart(38) + sc
+						+ " vs " + sColor + (dimensions[wName] +" x "+ dimensions[hName]).padStart(38) + sc
 					)
 					//oResults[font][basefont].push("result: " + (isDetected ? sg +"detected" : sb+ "not detected") + sc)
 				})
@@ -263,7 +263,7 @@ function getFonts() {
 			})
 		})
 		// remove element
-		//try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
 
 		// DETAIL
 		//console.debug(oResults)
