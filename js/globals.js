@@ -138,7 +138,8 @@ let isArch = true,
 	isWordmark
 
 // other
-let isClientRect = 0,
+let aClientRect = [true, true, true, true],
+	isClientRect = 0,
 	isPerf = false
 
 // runtypes
