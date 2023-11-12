@@ -257,6 +257,10 @@ table td.secthash {
 	font-size: 12px;
 }
 table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
+tr td.border-bottom {
+	border-bottom: 1px solid var(--test99);
+	border-bottom-style: dashed;
+}
 
 #tb1 th {background-color: var(--bg1);}
 #tb2 th {background-color: var(--bg2);}
@@ -281,10 +285,6 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #tbperf th {background-color: var(--bg99);}
 
 #tb1 td:first-child {color: var(--test1);}
-	#tb1 tr td.border-bottom {
-		border-bottom: 1px solid var(--test99);
-		border-bottom-style: dashed;
-	}
 #tb2 td:first-child {color: var(--test2);}
 	#tb2 .togUA1 td:first-child {color: var(--test99);}
 	#tb2 .togUA2 td:first-child {color: var(--test99);}
