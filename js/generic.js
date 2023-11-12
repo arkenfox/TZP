@@ -493,23 +493,24 @@ const get_isVer = () => new Promise(resolve => {
 
 /*** PREREQ ***/
 
-const get_isClientRect = () => new Promise(resolve => {
+const get_isDomRect = () => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
 	// determine valid domrect methods
 	let t0 = nowFn()
-	let aNames = ["Element.getBoundingClientRect", "Element.getClientRects",
-		"Range.getBoundingClientRect", "Range.getClientRects"]
+	let aNames = ["element_getbounding", "element_getclient",
+		"range_getbounding", "range_getclient"]
+	// reset: assume lies
+	isDomRect = -1
+	aDomRect = [false, false, false, false]
+	oDomRect = {}
 
-	isClientRect = -1
-	aClientRect = [false, false, false, false]
-
-	let aClientRectNoise = {}, valid = "8e0cf57b", el = dom.rect1
-
+	let el = dom.rect1
 	for (let i=0; i < 4; i++) {
+		let METRIC = aNames[i]
+		oDomRect[METRIC] = []
 		try {
-			aClientRectNoise[i] = []
 			let obj = ""
 			if (i == 0) {
 				obj = el.getBoundingClientRect()
@@ -518,36 +519,51 @@ const get_isClientRect = () => new Promise(resolve => {
 			} else {
 				let range = document.createRange()
 				range.selectNode(el)
-				if (i == 2) {
-					obj = range.getBoundingClientRect()
-				} else {
-					obj = range.getClientRects()[0]
-				}
+				obj = (i == 2 ? range.getBoundingClientRect() : range.getClientRects()[0] )
 			}
 			// 3 unique values but collect all
 			let eX = -20.716659545898438,
 				eW = 141.41665649414062,
 				eR = 120.69999694824219
 			let expected = [eX, eX, eX, eX, eW, eW, eR, eR]
+			let expectedNames = ["x", "left", "y", "top", "width", "height", "right", "bottom"]
 			let array = [obj.x, obj.left, obj.y, obj.top, obj.width, obj.height, obj.right, obj.bottom]
-			aClientRect[i] = (mini(array) == valid ? true : false)
-			// record noise FP raw data
-			let aDiffs = []
-			for (let i=0; i < array.length; i++) {
-				aDiffs.push(expected[i] - array[i])
+			let hash = mini(array), isTrue = (hash == "8e0cf57b")
+			aDomRect[i] = isTrue
+			if (isTrue) {
+				oDomRect[METRIC] = hash
+			} else {
+				// analyse noise: variable/persistent across properties
+				let aDiffs = [], aProps = []
+				for (let i=0; i < array.length; i++) {
+					let diff = expected[i] - array[i]
+					if (diff !== 0) {
+						aProps.push(expectedNames[i])
+					}
+					aDiffs.push(diff)
+				}
+				// dedupe
+console.log(METRIC, "all", aDiffs)
+				aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
+console.log("deduped", aDiffs)
+				aProps.sort()
+				let what = aProps.length == 8 ? "all" : aProps.join(", ")
+				oDomRect[METRIC] = zLIE + " | " + what // + concat method: 
 			}
-			aClientRectNoise[i] = aDiffs
 		} catch(e) {
 			log_error(SECT15, aNames[i], e)
-			aClientRect[i] = zErr
-			aClientRectNoise[i] = zNA
+			aDomRect[i] = zErr
+			oDomRect[METRIC] = zErr
 		}
 	}
-	//aClientRect = [false, false, true, false]
-	isClientRect = aClientRect.indexOf(true)
-	//console.log(isClientRect, aClientRect)
 
-	log_perf(SECTP, "isClientRect",t0,"", aClientRect.join(", ") +" | "+ isClientRect)
+console.log(oDomRect)
+
+	//aDomRect = [false, false, false, true]
+	isDomRect = aDomRect.indexOf(true)
+	//console.log(isDomRect, aDomRect)
+
+	log_perf(SECTP, "isDomRect",t0,"", aDomRect.join(", ") +" | "+ isDomRect)
 	return resolve()
 })
 
@@ -1393,7 +1409,7 @@ function outputSection(id, cls) {
 		get_isPerf()
 		gt0 = nowFn()
 		Promise.all([
-			get_isClientRect(),
+			get_isDomRect(),
 			outputPrototypeLies(),
 		]).then(function(){
 			log_section(SECTP, gt0)
