@@ -613,14 +613,14 @@ const get_font_sizes = () => new Promise(resolve => {
 			baseObj[k] = {}
 			for (const j of Object.keys(base[k])) {
 				let x = base[k][j]
-				if (aClientRect[0] == false && j == "domrectboundingHeight") {x = zLIE
-				} else if (aClientRect[0] == false && j == "domrectboundingWidth") {x = zLIE
-				} else if (aClientRect[1] == false && j == "domrectclientHeight") {x = zLIE
-				} else if (aClientRect[1] == false && j == "domrectclientWidth") {x = zLIE
-				} else if (aClientRect[2] == false && j == "domrectboundingrangeHeight") {x = zLIE
-				} else if (aClientRect[2] == false && j == "domrectboundingrangeWidth") {x = zLIE
-				} else if (aClientRect[3] == false && j == "domrectclientrangeHeight") {x = zLIE
-				} else if (aClientRect[3] == false && j == "domrectclientrangeWidth") {x = zLIE
+				if (aDomRect[0] == false && j == "domrectboundingHeight") {x = zLIE
+				} else if (aDomRect[0] == false && j == "domrectboundingWidth") {x = zLIE
+				} else if (aDomRect[1] == false && j == "domrectclientHeight") {x = zLIE
+				} else if (aDomRect[1] == false && j == "domrectclientWidth") {x = zLIE
+				} else if (aDomRect[2] == false && j == "domrectboundingrangeHeight") {x = zLIE
+				} else if (aDomRect[2] == false && j == "domrectboundingrangeWidth") {x = zLIE
+				} else if (aDomRect[3] == false && j == "domrectclientrangeHeight") {x = zLIE
+				} else if (aDomRect[3] == false && j == "domrectclientrangeWidth") {x = zLIE
 				}
 				baseObj[k][j] = x
 			}
@@ -927,10 +927,10 @@ const get_fonts = () => new Promise(resolve => {
 
 			// tmp result: domrect or transform
 			let selected = "fontsTransformNumber"
-			if (isClientRect == 0) {selected = "fontsDomRectBounding"
-			} else if (isClientRect == 1) {selected = "fontsDomRectClient"
-			} else if (isClientRect == 2) {selected = "fontsDomRectBoundingRange"
-			} else if (isClientRect == 3) {selected = "fontsDomRectClientRange"
+			if (isDomRect == 0) {selected = "fontsDomRectBounding"
+			} else if (isDomRect == 1) {selected = "fontsDomRectClient"
+			} else if (isDomRect == 2) {selected = "fontsDomRectBoundingRange"
+			} else if (isDomRect == 3) {selected = "fontsDomRectClientRange"
 			}
 
 		for (const k of Object.keys(oData)) {
@@ -938,11 +938,11 @@ const get_fonts = () => new Promise(resolve => {
 			for (let i=0; i < aList.length; i++) {
 				let isLies = false
 				// style domrect lies
-					// we don't need to record known lies: we will get that directly from aClientRect in elements section
-				if (aClientRect[0] == false && aList[i] == "fontsDomRectBounding") {isLies = true
-				} else if (aClientRect[1] == false && aList[i] == "fontsDomRectClient") {isLies = true
-				} else if (aClientRect[2] == false && aList[i] == "fontsDomRectBoundingRange") {isLies = true
-				} else if (aClientRect[3] == false && aList[i] == "fontsDomRectClientRange") {isLies = true
+					// we don't need to record known lies: we will get that directly from aDomRect in elements section
+				if (aDomRect[0] == false && aList[i] == "fontsDomRectBounding") {isLies = true
+				} else if (aDomRect[1] == false && aList[i] == "fontsDomRectClient") {isLies = true
+				} else if (aDomRect[2] == false && aList[i] == "fontsDomRectBoundingRange") {isLies = true
+				} else if (aDomRect[3] == false && aList[i] == "fontsDomRectClientRange") {isLies = true
 				}
 
 				let btn = ""
@@ -1234,7 +1234,7 @@ const get_unicode = () => new Promise(resolve => {
 			} else if (data.length) {
 				let value = group(name, METRIC, data)
 				// clientrect lies
-				if (isClientRect == -1 && name == "clientrect") {
+				if (isDomRect == -1 && name == "clientrect") {
 					value = colorFn(value)
 					log_known(SECT12, METRIC)
 				}
@@ -1262,7 +1262,7 @@ const get_unicode = () => new Promise(resolve => {
 		})
 		// oObject + oDisplay: can be altered before final add/display
 		for (const k of Object.keys(oObject).sort()) {
-			if (isClientRect == -1 && k == "glyphs_clientrect") {
+			if (isDomRect == -1 && k == "glyphs_clientrect") {
 				addData(12, k, zLIE)
 			} else {
 				addData(12, k, oObject[k]["data"], oObject[k]["hash"])
@@ -1348,22 +1348,22 @@ const get_unicode = () => new Promise(resolve => {
 					try {
 						if (runSE) {foo++}
 						let cDiv, cSpan
-						if (isClientRect > 1) {
+						if (isDomRect > 1) {
 							rangeH = document.createRange()
 							rangeH.selectNode(div)
 							rangeW = document.createRange()
 							rangeW.selectNode(span)
 						}
-						if (isClientRect < 1) { // get a result regardless
+						if (isDomRect < 1) { // get a result regardless
 							cDiv = div.getBoundingClientRect().height
 							cSpan = span.getBoundingClientRect().width
-						} else if (isClientRect == 1) {
+						} else if (isDomRect == 1) {
 							cDiv = div.getClientRects()[0].height
 							cSpan = span.getClientRects()[0].width
-						} else if (isClientRect == 2) {
+						} else if (isDomRect == 2) {
 							cDiv = rangeH.getBoundingClientRect().height
 							cSpan = rangeW.getBoundingClientRect().width
-						} else if (isClientRect > 2) {
+						} else if (isDomRect > 2) {
 							cDiv = rangeH.getClientRects()[0].height
 							cSpan = rangeW.getClientRects()[0].width
 						}

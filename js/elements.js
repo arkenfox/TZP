@@ -76,15 +76,15 @@ const get_lh = () => new Promise(resolve => {
 			sizes.forEach(function(size) {
 				if (isLine) {
 					target = dom["lh"+ fontfamily + size]
-					if (isClientRect > 1) {
+					if (isDomRect > 1) {
 						range = document.createRange()
 						range.selectNode(target)
 					}
 					size = size + sizetype
-					if (isClientRect < 1) {height = target.getBoundingClientRect().height
-					} else if (isClientRect == 1) {height = target.getClientRects()[0].height
-					} else if (isClientRect == 2) {height = range.getBoundingClientRect().height
-					} else if (isClientRect > 2) {height = range.getClientRects()[0].height
+					if (isDomRect < 1) {height = target.getBoundingClientRect().height
+					} else if (isDomRect == 1) {height = target.getClientRects()[0].height
+					} else if (isDomRect == 2) {height = range.getBoundingClientRect().height
+					} else if (isDomRect > 2) {height = range.getClientRects()[0].height
 					}
 					if (runST) {height = true}
 					if ("number" === typeof height) {
@@ -117,7 +117,7 @@ const get_lh = () => new Promise(resolve => {
 			for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]; newobjcount++}
 			let hash = mini(newobj)
 			let btnTxt = newobjcount + " group" + (newobjcount > 1 ? "s" : "")
-			if (isSmart && isClientRect == -1) {
+			if (isSmart && isDomRect == -1) {
 				addData(15, METRIC, zLIE)
 				addDetail(METRIC, newobj)
 				display = colorFn(hash) + addButton(15, METRIC, btnTxt)
@@ -179,7 +179,7 @@ const get_mathml = () => new Promise(resolve => {
 				targetW = dom["mathmlspan"+size]
 				let isCtrlSize = size == sizectl
 				size = size + sizetype
-				if (isClientRect > 1) {
+				if (isDomRect > 1) {
 					// test
 					rangeH = document.createRange()
 					rangeH.selectNode(targetH)
@@ -191,19 +191,19 @@ const get_mathml = () => new Promise(resolve => {
 						rangeC.selectNode(targetC)
 					}
 				}
-				if (isClientRect < 1) { // get a result regardless
+				if (isDomRect < 1) { // get a result regardless
 					if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
 					height = targetH.getBoundingClientRect().height
 					width = targetW.getBoundingClientRect().width
-				} else if (isClientRect == 1) {
+				} else if (isDomRect == 1) {
 					if (isCtrlSize) {control = targetC.getClientRects()[0].height}
 					height = targetH.getClientRects()[0].height
 					width = targetW.getClientRects()[0].width
-				} else if (isClientRect == 2) {
+				} else if (isDomRect == 2) {
 					if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
 					height = rangeH.getBoundingClientRect().height
 					width = rangeW.getBoundingClientRect().width
-				} else if (isClientRect > 2) {
+				} else if (isDomRect > 2) {
 					if (isCtrlSize) {control = targetC.getClientRects()[0].height}
 					height = rangeH.getClientRects()[0].height
 					width = rangeW.getClientRects()[0].width
@@ -226,7 +226,7 @@ const get_mathml = () => new Promise(resolve => {
 			if (isSmart && isTB) {
 				displayEnabled += isZero ? tb_safer : tb_standard
 			}
-			if (isSmart && isClientRect == -1) {
+			if (isSmart && isDomRect == -1) {
 				hash = mini(oMath)
 				addData(15, METRIC, zLIE)
 				addDetail(METRIC, oMath)
