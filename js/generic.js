@@ -503,7 +503,9 @@ const get_isClientRect = () => new Promise(resolve => {
 		"Range.getBoundingClientRect", "Range.getClientRects"]
 
 	isClientRect = -1
-	let aClientRect = [], aClientRectNoise = {}, valid = "8e0cf57b", el = dom.rect1
+	aClientRect = [false, false, false, false]
+
+	let aClientRectNoise = {}, valid = "8e0cf57b", el = dom.rect1
 
 	for (let i=0; i < 4; i++) {
 		try {
@@ -528,7 +530,7 @@ const get_isClientRect = () => new Promise(resolve => {
 				eR = 120.69999694824219
 			let expected = [eX, eX, eX, eX, eW, eW, eR, eR]
 			let array = [obj.x, obj.left, obj.y, obj.top, obj.width, obj.height, obj.right, obj.bottom]
-			aClientRect.push(mini(array) == valid ? true : false)
+			aClientRect[i] = (mini(array) == valid ? true : false)
 			// record noise FP raw data
 			let aDiffs = []
 			for (let i=0; i < array.length; i++) {
@@ -537,12 +539,14 @@ const get_isClientRect = () => new Promise(resolve => {
 			aClientRectNoise[i] = aDiffs
 		} catch(e) {
 			log_error(SECT15, aNames[i], e)
-			aClientRect.push(zErr)
+			aClientRect[i] = zErr
 			aClientRectNoise[i] = zNA
 		}
 	}
-	//aClientRect = [false, true, false, false]
+	//aClientRect = [false, false, true, false]
 	isClientRect = aClientRect.indexOf(true)
+	//console.log(isClientRect, aClientRect)
+
 	log_perf(SECTP, "isClientRect",t0,"", aClientRect.join(", ") +" | "+ isClientRect)
 	return resolve()
 })
