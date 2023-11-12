@@ -603,14 +603,38 @@ const get_font_sizes = () => new Promise(resolve => {
 			acc[font.split(",")[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
 		}, {})
-		// tidy base
+		//console.log(base)
+
+		// copy base into new object: catch domrect lies
+			// this is the one we add to the FP
+			// original base is used for comparisons
+		let baseObj = {}
+		for (const k of Object.keys(base)) {
+			baseObj[k] = {}
+			for (const j of Object.keys(base[k])) {
+				let x = base[k][j]
+				if (aClientRect[0] == false && j == "domrectboundingHeight") {x = zLIE
+				} else if (aClientRect[0] == false && j == "domrectboundingWidth") {x = zLIE
+				} else if (aClientRect[1] == false && j == "domrectclientHeight") {x = zLIE
+				} else if (aClientRect[1] == false && j == "domrectclientWidth") {x = zLIE
+				} else if (aClientRect[2] == false && j == "domrectboundingrangeHeight") {x = zLIE
+				} else if (aClientRect[2] == false && j == "domrectboundingrangeWidth") {x = zLIE
+				} else if (aClientRect[3] == false && j == "domrectclientrangeHeight") {x = zLIE
+				} else if (aClientRect[3] == false && j == "domrectclientrangeWidth") {x = zLIE
+				}
+				baseObj[k][j] = x
+			}
+		}
+		//console.log(baseObj)
+
+		// tidy baseObj: reorder in groups based on hash
 		const METRICB = "fontsizes_base"
 		addDetail(METRICB, {})
 		let oTempBase = {}
 		for (const k of Object.keys(base)) {
-			let tmpHash = mini(base[k])
+			let tmpHash = mini(baseObj[k])
 			if (oTempBase[tmpHash] == undefined) {
-				oTempBase[tmpHash] = {"bases" : [k], "data" : base[k]}
+				oTempBase[tmpHash] = {"bases" : [k], "data" : baseObj[k]}
 			} else {
 				oTempBase[tmpHash]["bases"].push(k)
 			}
@@ -912,13 +936,22 @@ const get_fonts = () => new Promise(resolve => {
 		for (const k of Object.keys(oData)) {
 			let aList = oData[k]["names"]
 			for (let i=0; i < aList.length; i++) {
+				let isLies = false
+				// style domrect lies
+					// we don't need to record known lies: we will get that directly from aClientRect in elements section
+				if (aClientRect[0] == false && aList[i] == "fontsDomRectBounding") {isLies = true
+				} else if (aClientRect[1] == false && aList[i] == "fontsDomRectClient") {isLies = true
+				} else if (aClientRect[2] == false && aList[i] == "fontsDomRectBoundingRange") {isLies = true
+				} else if (aClientRect[3] == false && aList[i] == "fontsDomRectClientRange") {isLies = true
+				}
+
 				let btn = ""
 				if (i == 0) {
 					let tmpName = METRIC +"_"+ aList[i]
 					addDetail(tmpName, oData[k]["newdata"])
 					btn = addButton(12, tmpName)
 				}
-				log_display(12, aList[i], oData[k]["hash"] + btn)
+				log_display(12, aList[i], (isLies ? colorFn(oData[k]["hash"]) : oData[k]["hash"]) + btn)
 
 				if (aList[i] == selected) {
 					// names: not needed in FP but include for upstream
