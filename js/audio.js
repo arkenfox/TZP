@@ -26,8 +26,9 @@ function check_audioLies() {
 	return audioList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 
-const get_audio2_context = (os = isOS) => new Promise(resolve => {
-	const METRIC = "audioContext_keys"
+const get_audioContext = (os = isOS) => new Promise(resolve => {
+	const METRIC = "audioContext"
+	let notation = ""
 	try {
 		if (runSE) {foo++}
 		let t0 = nowFn()
@@ -47,267 +48,76 @@ const get_audio2_context = (os = isOS) => new Promise(resolve => {
 
 		// sim
 		if (runSL) {obj["ac-channelCount"] = 4} // fake value
-
-		let oCheck = {}, isLies = false, note = "", latencynote = ""
+		let oCheck = {}, isLies = false
 		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
 		// sort keys
 		let objnew = {}
+		// oCheck = FF70+: keys [20] + expected hardcoded values [16]
 		for (const k of Object.keys(obj).sort()) {
 			objnew[k] = obj[k]
 			oCheck[k] = subsetExclude.includes(k) ? "" : obj[k]
 		}
 		let hash = mini(objnew) // includes original latency
-
 		if (isSmart) {
-			if (mini(oCheck) !== "dfda7813") {isLies = true} // FF70+: keys [20] + expected hardcoded values [16]
+			if (mini(oCheck) !== "dfda7813") {
+				isLies = true
+				log_known(SECT11, METRIC)
+			}
 			if (os !== undefined) {
 				// RFP notation: includes 1564422 outputLatency
-				note = rfp_red
-				if (hash == "67a3eeee" && os == "windows") {note = rfp_green // 0.04
-				} else if (hash == "debdefc0" && os == "mac") {note = rfp_green // 512/44100 (RFP hardcodes latency)
-				} else if (hash == "2b9d44b0" && os == "android") {note = rfp_green // 0.02
-				} else if (hash == "9b69969b") {note = rfp_green // 0.025 catchall incl linux
+				// no need to check for lies: the hash covers the 16 hardcoded versions + all expected key names
+				notation = rfp_red
+				if (hash == "67a3eeee" && os == "windows") {notation = rfp_green // 0.04
+				} else if (hash == "debdefc0" && os == "mac") {notation = rfp_green // 512/44100 (RFP hardcodes latency)
+				} else if (hash == "2b9d44b0" && os == "android") {notation = rfp_green // 0.02
+				} else if (hash == "9b69969b") {notation = rfp_green // 0.025 catchall incl linux
 				}
 			}
 		}
-
-		// ac-outputLatency is variable per tab and even on page load
-			// so on non RFP hashes, change it to variable and display the original on screen
-		if (isGecko && note !== rfp_green) {
-			latencynote = " [" + objnew["ac-outputLatency"]+ " latency]"
-			objnew["ac-outputLatency"] = "variable"
+		// RFP gives a stable ac-outputLatency
+			// otherwise: with a preceeding test(s) e.g. oscillator: it can be variable per tab
+			// and even on page load (can depend on hardware?). And now we don't await a user
+			// test, the metric is useless if not an RFP hash. Return n/a to avoid any noise
+		if (isGecko && notation !== rfp_green) {
+			objnew["ac-outputLatency"] = zNA
 			hash = mini(objnew)
 		}
 		let displayHash = isLies ? colorFn(hash) : hash
-		addDetail(METRIC, objnew, zDOC)
 
-		dom.audio1hash.innerHTML = displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + note + latencynote
-		log_perf(SECT11, "context", t0)
-		return resolve([METRIC, (isLies ? zLIE : addData("none", METRIC, objnew, hash))])
+		if (isLies) {
+			addDetail(METRIC, objnew, zDOC)
+			addData(11, METRIC, zLIE)
+		} else {
+			addData(11, METRIC, objnew, hash)
+		}
+		if (isTB && !isMullvad) {notation = tb_red}
+		log_display(11, METRIC, displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + notation)
+		log_perf(SECT11, METRIC, t0)
+		return resolve()
 
 	} catch(e) {
-		let eMsg = log_error(SECT11, METRIC, e)
-		let notation = (isTB && !isMullvad) ? "" : rfp_red
-		dom.audio1hash.innerHTML = eMsg + (isSmart ? notation : "")
-		return resolve([METRIC, eMsg]) // user test: reflect error entropy
+		addData(11, METRIC, zErr)
+		if (isSmart) {
+			notation = rfp_red
+			if (isTB && !isMullvad) {	notation = (e+"" === "TypeError: window.AudioContext is not a constructor" ? tb_green : tb_red)	}
+		}
+		log_display(11, METRIC, log_error(SECT11, METRIC, e) + notation)
+		return resolve()
 	}
 })
 
-const get_audio2_hybrid = () => new Promise(resolve => {
-	const METRIC = "audio_hybrid"
-	let notation = ""
-	try {
-		if (runSE) {foo++}
-		let t0 = nowFn()
-		let results = []
-		let audioCtx = new window.AudioContext,
-			oscillator = audioCtx.createOscillator(),
-			analyser = audioCtx.createAnalyser(),
-			gain = audioCtx.createGain(),
-			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
+const get_offlineAudioContext = () => new Promise(resolve => {
+	let t0 = nowFn(), notation = ""
+	const METRIC = "offlineAudioContext"
 
-		// compressor
-		let compressor = audioCtx.createDynamicsCompressor()
-		compressor.threshold && (compressor.threshold.value = -50)
-		compressor.knee && (compressor.knee.value = 40)
-		compressor.ratio && (compressor.ratio.value = 12)
-		compressor.reduction && (compressor.reduction.value = -20)
-		compressor.attack && (compressor.attack.value = 0)
-		compressor.release && (compressor.release.value = .25)
-
-		gain.gain.value = 0 // 0 volume
-		oscillator.type = "triangle" // wave
-		oscillator.connect(compressor)
-		compressor.connect(analyser)
-		analyser.connect(scriptProcessor)
-		scriptProcessor.connect(gain)
-		gain.connect(audioCtx.destination)
-
-		scriptProcessor.onaudioprocess = function(bins) {
-		try {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				for (let i=0; i < bins.length; i++) {
-					results.push(bins[i])
-				}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// output
-				if (runSL) {results = []}
-				let hash = "", isEmpty = false
-				if (results.length) {
-					hash = mini(results)
-				} else {
-					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
-					isEmpty = true
-				}
-				if (isSmart) {
-					// ToDo: add MB when patches backported
-					if (isVer > 117) {
-						notation = rfp_red
-						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
-						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc
-						}
-					}
-				}
-				dom.audio3hash.innerHTML = hash + notation
-				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : hash)])
-			} catch(e) {
-				let eMsg = log_error(SECT11, METRIC, e)
-				dom.audio3hash = eMsg
-				return resolve([METRIC, eMsg])
-			}
-		}
-		oscillator.start(0)
-	} catch(e) {
-		let eMsg = log_error(SECT11, METRIC, e)
-		dom.audio3hash = eMsg
-		return resolve([METRIC, eMsg]) // user test: reflect error entropy
+	function outputErrors(display) {
+		log_display(11, METRIC, display + (isSmart ? notation : ""))
+		addData(11, METRIC, zErr)
+		return resolve()
 	}
-})
 
-const get_audio2_oscillator = () => new Promise(resolve => {
-	const METRIC = "audio_oscillator"
-	let notation = ""
-	try {
-		if (runSE) {foo++}
-		let t0 = nowFn()
-		let results = [],
-			audioCtx = new window.AudioContext
-		let oscillator = audioCtx.createOscillator(),
-			analyser = audioCtx.createAnalyser(),
-			gain = audioCtx.createGain(),
-			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
-
-		gain.gain.value = 0
-		oscillator.type = "triangle"
-		oscillator.connect(analyser)
-		analyser.connect(scriptProcessor)
-		scriptProcessor.connect(gain)
-		gain.connect(audioCtx.destination)
-
-		scriptProcessor.onaudioprocess = function(bins) {
-			try {
-				bins = new Float32Array(analyser.frequencyBinCount)
-				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				for (let i=0; i < bins.length; i++) {
-					results.push(bins[i])
-				}
-				analyser.disconnect()
-				scriptProcessor.disconnect()
-				gain.disconnect()
-				// output
-				if (runSL) {results = []}
-				let hash = "", isEmpty = false
-				if (results.length) {
-					hash = mini(results)
-				} else {
-					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
-					isEmpty = true
-				}
-
-				if (isSmart) {
-					// ToDo: add MB when patches backported
-					if (isVer > 117) {
-						notation = rfp_red
-						if (hash == "e9f98e24") {notation = sgtick+"RFP x86/amd]"+sc
-						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
-						}
-					}
-				}
-
-				dom.audio2hash.innerHTML = hash + notation
-				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : hash)])
-			} catch(e) {
-				let eMsg = log_error(SECT11, METRIC, e)
-				dom.audio2hash = eMsg
-				return resolve([METRIC, eMsg])
-			}
-		}
-		oscillator.start(0)
-	} catch(e) {
-		let eMsg = log_error(SECT11, METRIC, e)
-		dom.audio2hash = eMsg
-		return resolve([METRIC, eMsg]) // user test: reflect error entropy
-	}
-})
-
-function outputAudio2() {
-	if (!gClick) {return}
-
-	// notes
-	// if context run first, outputLatency *always* = 0 = incorrect : run it after oscillator
-	// if context not run first, outputLatency *sometimes* = 0 : try it again
-	gt0 = nowFn()
-	gClick = false
-	gRun = false
-	let section = {}
-
-	function output() {
-		const METRIC = "audio_user_gestures"
-		let obj = {}
-		for (const k of Object.keys(section).sort()) {
-			obj[k] = section[k]
-		}
-		let hash = mini(obj)
-		addDetail(METRIC, obj, zDOC)
-		dom.audiohash2.innerHTML = hash + addButton(0, METRIC, Object.keys(section).length +" metrics")
-
-		if (isPerf) {
-			sDataTemp["perf"].push([2, "audio2", performance.now() - gt0, performance.now()])
-			output_perf("audio2")
-		}
-		gClick = true
-	}
-	function run() {
-		try {
-			let test = new window.AudioContext
-			Promise.all([
-				get_audio2_oscillator(),
-			]).then(function(results){
-				section[results[0][0]] = results[0][1] // oscillator
-				Promise.all([
-					get_audio2_hybrid(),
-					get_audio2_context(),
-				]).then(function(results){
-					section[results[0][0]] = results[0][1] // hybrid
-					section[results[1][0]] = results[1][1] // context
-					output()
-				})
-			})
-		} catch(e) {
-			// output something
-			let eMsg = log_error(SECT11,"audio2", e)
-			dom.audio1hash = eMsg, dom.audio2hash = eMsg, dom.audio3hash = eMsg
-			dom.audiohash2 = zNA
-			gClick = true
-		}
-	}
-	// start
-	try {
-		let tbl = document.getElementById("tb11")
-		let cls = "c2"
-		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = ""})
-	} catch(e) {}
-
-	get_isPerf()
-	Promise.all([
-		outputPrototypeLies(),
-	]).then(function(){
-		run()
-	})
-}
-
-function outputAudio() {
-	let t0 = nowFn()
-	let METRIC = "offlineAudioContext"
-	let notation = ""
-
-	// ToDo: reduce bufferLen as long as it doesn't change entropy
-	// also: when we add RFP + math PoC we need only check for protection (like canvas)
+	// ToDo: maybe reduce bufferLen as long as it doesn't change entropy
+		// also: when we add RFP + math PoC we need only check for protection (like canvas)
 	try {
 		const bufferLen = 5000 // 5000 to match documented
 		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
@@ -379,7 +189,8 @@ function outputAudio() {
 						if (isLies) {log_known(SECT11, METRIC)}
 						// only add hash to FP: detailed data not worth it
 						addData(11, METRIC, (isLies ? zLIE : hashG))
-						log_section(11, t0)
+						log_perf(SECT11, METRIC, t0)
+						return resolve()
 					})
 					.catch(function(e){
 						outputErrors(log_error(SECT11, METRIC, e))
@@ -392,7 +203,7 @@ function outputAudio() {
 			outputErrors(log_error(SECT11, METRIC, e))
 		}
 	} catch(e) {
-		if (gRun) {dom.audiohash2 = zNA, dom.audio1hash = zNA, dom.audio2hash = zNA, dom.audio3hash = zNA}
+		if (gRun) {dom.audio_oscillator_compressor = zNA; dom.audio_oscillator = zNA; dom.audio_user_gestures = zNA}
 		if (isTB && !isMullvad) {
 			notation = e+"" === "TypeError: window.OfflineAudioContext is not a constructor" ? tb_green : tb_red
 		} else {
@@ -400,12 +211,215 @@ function outputAudio() {
 		}
 		outputErrors(log_error(SECT11, METRIC, e))
 	}
+})
 
-	function outputErrors(display) {
-		log_display(11, METRIC, display + (isSmart ? notation : ""))
-		addData(11, METRIC, zErr)
-		log_section(11, t0)
+const get_oscillator = () => new Promise(resolve => {
+	const METRIC = "audio_oscillator"
+	let notation = ""
+	try {
+		if (runSE) {foo++}
+		let t0 = nowFn()
+		let results = [],
+			audioCtx = new window.AudioContext
+		let oscillator = audioCtx.createOscillator(),
+			analyser = audioCtx.createAnalyser(),
+			gain = audioCtx.createGain(),
+			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
+
+		gain.gain.value = 0
+		oscillator.type = "triangle"
+		oscillator.connect(analyser)
+		analyser.connect(scriptProcessor)
+		scriptProcessor.connect(gain)
+		gain.connect(audioCtx.destination)
+
+		scriptProcessor.onaudioprocess = function(bins) {
+			try {
+				bins = new Float32Array(analyser.frequencyBinCount)
+				analyser.getFloatFrequencyData(bins) // JSShelter errors here
+				for (let i=0; i < bins.length; i++) {
+					results.push(bins[i])
+				}
+				analyser.disconnect()
+				scriptProcessor.disconnect()
+				gain.disconnect()
+				// output
+				if (runSL) {results = []}
+				let hash = "", isEmpty = false
+				if (results.length) {
+					hash = mini(results)
+				} else {
+					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
+					isEmpty = true
+				}
+				if (isSmart) {
+					// ToDo: add MB when patches backported
+					if (isVer > 117) {
+						notation = rfp_red
+						if (hash == "e9f98e24") {notation = sgtick+"RFP x86/amd]"+sc
+						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
+						}
+					}
+				}
+				dom[METRIC].innerHTML = hash + notation
+				log_perf(SECT11, METRIC, t0)
+				return resolve([METRIC, (isEmpty ? zErr : hash)])
+			} catch(e) {
+				let eMsg = log_error(SECT11, METRIC, e)
+				dom[METRIC] = eMsg
+				return resolve([METRIC, eMsg])
+			}
+		}
+		oscillator.start(0)
+	} catch(e) {
+		let eMsg = log_error(SECT11, METRIC, e)
+		dom[METRIC] = eMsg
+		return resolve([METRIC, eMsg]) // user test: reflect error entropy
 	}
+})
+
+const get_oscillator_compressor = () => new Promise(resolve => {
+	const METRIC = "audio_oscillator_compressor"
+	let notation = ""
+	try {
+		if (runSE) {foo++}
+		let t0 = nowFn()
+		let results = []
+		let audioCtx = new window.AudioContext,
+			oscillator = audioCtx.createOscillator(),
+			analyser = audioCtx.createAnalyser(),
+			gain = audioCtx.createGain(),
+			scriptProcessor = audioCtx.createScriptProcessor(4096, 1, 1)
+
+		// compressor
+		let compressor = audioCtx.createDynamicsCompressor()
+		compressor.threshold && (compressor.threshold.value = -50)
+		compressor.knee && (compressor.knee.value = 40)
+		compressor.ratio && (compressor.ratio.value = 12)
+		compressor.reduction && (compressor.reduction.value = -20)
+		compressor.attack && (compressor.attack.value = 0)
+		compressor.release && (compressor.release.value = .25)
+
+		gain.gain.value = 0 // 0 volume
+		oscillator.type = "triangle" // wave
+		oscillator.connect(compressor)
+		compressor.connect(analyser)
+		analyser.connect(scriptProcessor)
+		scriptProcessor.connect(gain)
+		gain.connect(audioCtx.destination)
+
+		scriptProcessor.onaudioprocess = function(bins) {
+		try {
+				bins = new Float32Array(analyser.frequencyBinCount)
+				analyser.getFloatFrequencyData(bins) // JSShelter errors here
+				for (let i=0; i < bins.length; i++) {
+					results.push(bins[i])
+				}
+				analyser.disconnect()
+				scriptProcessor.disconnect()
+				gain.disconnect()
+				// output
+				if (runSL) {results = []}
+				let hash = "", isEmpty = false
+				if (results.length) {
+					hash = mini(results)
+				} else {
+					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
+					isEmpty = true
+				}
+				if (isSmart) {
+					// ToDo: add MB when patches backported
+					if (isVer > 117) {
+						notation = rfp_red
+						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
+						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc
+						}
+					}
+				}
+				dom[METRIC].innerHTML = hash + notation
+				log_perf(SECT11, METRIC, t0)
+				return resolve([METRIC, (isEmpty ? zErr : hash)])
+			} catch(e) {
+				let eMsg = log_error(SECT11, METRIC, e)
+				dom[METRIC] = eMsg
+				return resolve([METRIC, eMsg])
+			}
+		}
+		oscillator.start(0)
+	} catch(e) {
+		let eMsg = log_error(SECT11, METRIC, e)
+		dom[METRIC] = eMsg
+		return resolve([METRIC, eMsg]) // user test: reflect error entropy
+	}
+})
+
+function outputAudioUser() {
+	if (!gClick) {return}
+	gt0 = nowFn()
+	gClick = false
+	gRun = false
+	let section = {}
+	const METRIC = "audio_user_gestures"
+
+	function output() {
+		let obj = {}
+		for (const k of Object.keys(section).sort()) {
+			obj[k] = section[k]
+		}
+		let hash = mini(obj)
+		addDetail(METRIC, obj, zDOC)
+		dom[METRIC].innerHTML = hash + addButton(0, METRIC, Object.keys(section).length +" metrics")
+
+		if (isPerf) {
+			sDataTemp["perf"].push([2, METRIC, performance.now() - gt0, performance.now()])
+			output_perf(METRIC)
+		}
+		gClick = true
+	}
+	function run() {
+		try {
+			let test = new window.AudioContext
+			Promise.all([
+				get_oscillator(),
+				get_oscillator_compressor(),
+			]).then(function(results){
+				section[results[0][0]] = results[0][1] // oscillator
+				section[results[1][0]] = results[1][1] // oscillator_compressor
+				output()
+			})
+		} catch(e) {
+			// output something
+			let eMsg = log_error(SECT11,"audio2", e)
+			dom.audio_oscillator_compressor = eMsg; dom.audio_oscillator = eMsg
+			dom[METRIC] = zNA
+			gClick = true
+		}
+	}
+	// start
+	try {
+		let tbl = document.getElementById("tb11")
+		let cls = "c2"
+		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = ""})
+	} catch(e) {}
+
+	get_isPerf()
+	Promise.all([
+		outputPrototypeLies(),
+	]).then(function(){
+		setTimeout(function() {
+			run()
+		}, 100) // delay so user sees it clear then recompute
+	})
+}
+
+function outputAudio() {
+	let t0 = nowFn()
+	Promise.all([
+		get_audioContext(),
+		get_offlineAudioContext(),
+	]).then(function(results){
+		log_section(11, t0)
+	})
 }
 
 countJS(SECT11)
