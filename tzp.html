@@ -648,21 +648,21 @@
 			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(11, `c`)">[ re-run ]</span></div>
 			<span class="c" id="audiohash"></span>
 		</td></tr>
+		<tr><td>audioContext <sup>1</sup></td><td class="c mono" id="audioContext"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">copyFromChannel<br>getChannelData<br>sum of buffer</span></div>
-			&nbsp offlineAudioContext <sup>1</sup></td><td class="c mono" id="offlineAudioContext"></td></tr>
+			&nbsp offlineAudioContext <sup>2</sup></td><td class="c mono" id="offlineAudioContext"></td></tr>
 		<tr><td colspan="2" class="center">------</td></tr>
-		<tr><td><span class="btn btn0" onClick="outputUser('outputAudio2')">[ click ]</span>
-			hash</td><td class="c2 gc mono" id="audiohash2"></td></tr>
-		<tr><td>audioContext <sup>2</sup></td><td class="c2 gc mono" id="audio1hash"></td></tr>
-		<tr><td>OscillatorNode/DynamicsCompressor <sup>2</sup></td><td class="c2 gc mono" id="audio3hash"></td></tr>
-		<tr><td>OscillatorNode <sup>2</sup></td><td class="c2 gc mono" id="audio2hash"></td></tr>
+		<tr><td><span class="btn btn0" onClick="outputUser('outputAudioUser')">[ click ]</span>
+			hash</td><td class="c2 gc mono" id="audio_user_gestures"></td></tr>
+		<tr><td>OscillatorNode <sup>1</sup></td><td class="c2 gc mono" id="audio_oscillator"></td></tr>
+		<tr><td>OscillatorNode/DynamicsCompressor <sup>1</sup></td><td class="c2 gc mono" id="audio_oscillator_compressor"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">audio code based on work by </span>
-			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
-			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a> <sup>1</sup>
+			<a target="_blank" class="blue" href="https://audiofingerprint.openwpm.com/">openWPM</a> <sup>1</sup>
 			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://audiofingerprint.openwpm.com/">openWPM</a> <sup>2</sup>
+			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>
+			<a target="_blank" class="blue" href="https://github.com/kkapsner/CanvasBlocker">CanvasBlocker</a> <sup>2</sup>
 		</td></tr>
 	</table>
 
@@ -689,7 +689,7 @@
 			&nbsp font-format | font-tech</td><td class="mono"><span class="c" id="font-format"></span> | <span class="c" id="font-tech"></span>
 		</td></tr>
 		<tr><td>[test] graphite <sup>1</sup></td><td><span class="c mono" id="graphite"></span>
-			<span class="mono"> | <span><span class="cssGraphite">the quick brown fox</span></td></tr>
+			<span class="mono"> | <span><span class="cssGraphite" id="txtGraphite">the quick brown fox</span></td></tr>
 		<tr><td>[css | test] woff2 <sup>2</sup></td><td class="mono"><span id="cssWoff2"></span> | <span class="c" id="woff2"></span>
 		</td></tr>
 		<!--fonts-->
