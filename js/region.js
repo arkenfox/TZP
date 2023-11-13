@@ -817,7 +817,6 @@ function get_lang() {
 							} catch (e) {} // ignore invalid
 						})
 					})
-					console.log(res)
 					return mini(res)
 
 // TOLOCALESTRING
