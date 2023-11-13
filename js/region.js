@@ -238,6 +238,7 @@ function get_lang() {
 				optL = {"long": [1]},
 				both = {"long": [1], "narrow": [1],}
 			tests["unit"] = {
+				"byte": optN, // FF121 ICU 74
 				"fahrenheit": both,
 				"foot": optL,
 				"hectare": {"long": [1], "short": [987654]},
@@ -804,19 +805,20 @@ function get_lang() {
 				} else if (item == 33) {
 					// nf: unit
 					let itemtest = Intl.NumberFormat(localecode, {style: "unit", unit: "day"}) // trap error
-					let res = []
+					let res = {}
 					Object.keys(tests["unit"]).sort().forEach(function(u){ // for each unit
+						res[u] = []
 						Object.keys(tests["unit"][u]).forEach(function(ud){ // for each unitdisplay
 							try {
 								let formatter = Intl.NumberFormat(localecode, {style: "unit", unit: u, unitDisplay: ud})
 								tests["unit"][u][ud].forEach(function(n){ // for each number
-									res.push(formatter.format(n))
+									res[u].push(formatter.format(n))
 								})
 							} catch (e) {} // ignore invalid
 						})
 					})
+					console.log(res)
 					return mini(res)
-
 
 // TOLOCALESTRING
 				} else if (item == 35) {
