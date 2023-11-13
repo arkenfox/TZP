@@ -209,9 +209,11 @@ function run_main(method) {
 	if (method == "min") {
 		let optN = {"narrow": [1]},
 			optL = {"long": [1]},
-			both = {"long": [1], "narrow": [1],}
+			both = {"long": [1], "narrow": [1],},
+			everything = {"long": [1], "narrow": [1], "short": [987654],}
+
 		tests = {
-			// FF110+
+			// FF115+
 			"fahrenheit": both,
 			"foot": optL,
 			"hectare": {"long": [1], "short": [987654]},
@@ -222,18 +224,20 @@ function run_main(method) {
 			"percent": both,
 			"second": {"long": [1], "narrow": [1], "short": [987654]},
 			"terabyte": optL,
+			// FF121+ ICU 74
+			"byte": optN,
 		}
+
 		// FF109 and lower needs some help: swap month long for short
 		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
 			tests["month"] = {"narrow": [1], "short": [987654]}
 			tests["day"] = optL
 			tests["gallon"] = {"short": [987654]}
 		}
-		if (!isFF) { // chrome
-			tests["gallon"] = {"short": [987654]}
-		}
-		// non-gecko: make month = all three to cover bases
 		if (!isFF) {
+			// chrome
+			tests["gallon"] = {"short": [987654]}
+			// non-gecko: make month = all three to cover bases
 			tests["month"] = {"long": [1], "narrow": [1], "short": [987654]}
 		}
 	} else {
@@ -371,20 +375,18 @@ function run_main(method) {
 		if (method == "all") {
 			localesHashAll = localesHash
 			if (isFF) {
-				// only hash notate if 102+
-				let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-				if (is102) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
 					// track FF version changes
 					// results
-					if (resultsHash == "56cd068d") {resultsHash += s14 +" [FF115+]"+ sc
-					} else if (resultsHash == "ea270e01") {resultsHash += s14 +" [FF110-114]"+ sc
-					} else if (resultsHash == "d03e5150") {resultsHash += s14 +" [FF108-109]"+ sc
-					} else if (resultsHash == "5f2dc74a") {resultsHash += s14 +" [FF102-107]"+ sc
+					if (resultsHash == "932cb57b") {resultsHash += s14 +" [FF121+]"+ sc
+					} else if (resultsHash == "56cd068d") {resultsHash += s14 +" [FF115-120]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "311f2902") {localesHash += s14 +" [FF110+]"+ sc
-					} else if (localesHash == "2532163f") {localesHash += s14 +" [FF102-109]"+ sc
+					if (localesHash == "9799fa47") {localesHash += s14 +" [FF121+]"+ sc
+					} else if (localesHash == "311f2902") {localesHash += s14 +" [FF115-120]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
