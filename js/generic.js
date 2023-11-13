@@ -1284,7 +1284,7 @@ function outputUser(fn) {
 	if (fn == "goFS") { goFS()
 	} else if (fn == "goNW") { goNW()
 	} else if (fn == "goNW_UA") { goNW_UA()
-	} else if (fn == "outputAudio2") {outputAudio2()
+	} else if (fn == "outputAudioUser") {outputAudioUser()
 	} else if (fn == "get_storage_manager") { get_storage_manager()
 	} else if (fn == "get_pointer_event") { get_pointer_event()
 	}
