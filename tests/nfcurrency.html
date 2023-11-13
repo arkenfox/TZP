@@ -62,7 +62,6 @@ var oCurrencies = {},
 	localesHashAll = "", // to compare min to
 	localesHashAllExpanded = "" // to compare min to
 
-
 s4 = s4.trim()
 s12 = s12.trim()
 s14 = s14.trim()
@@ -168,7 +167,6 @@ function set_currency_lists() {
 		'PLN', 
 		'XXX',
 	]
-
 	if (supported.length) {
 		min = min.filter(x => supported.includes(x))
 	}
@@ -249,7 +247,7 @@ function run_main(method) {
 		// ToDo: not that interested but not sure if this could replace some of the min currencies: potentially less overall tests
 	let useAccounting = method == "min" ? false : true
 
-	let tests = {}
+	let tests = {}, tmptests = []
 	let items = {
 		// these do not add anything
 			// "code", "narrowSymbol", or the values 0/0, 1000, 1000000
@@ -262,7 +260,7 @@ function run_main(method) {
 
 	if (method == "min") {
 		if (!optExpanded) {
-			tests = {
+			tmptests = {
 				// 17 tests (PLN, XXX for 121+ ICU tree 74)
 				"AED": name,
 				"AUD": name,
@@ -281,7 +279,7 @@ function run_main(method) {
 				"XXX": name,
 			}
 		} else {
-			tests = { // expanded currencies
+			tmptests = { // expanded currencies
 				// core languages
 				"AED": name,
 				"AUD": both,
@@ -300,18 +298,27 @@ function run_main(method) {
 				"PLN": symbol, 
 				"XXX": name,
 			}
-			// note: FF109 also has SLL and symbol is all we need
-				// need for that so no need to code around
 			let aBoth = ['GHS','NIO','SHP','STN','UGX']
 			aBoth.forEach(function(c){
-				tests[c] = both
+				tmptests[c] = both
 			})
-			let aIgnore = Object.keys(tests)
+			let aIgnore = Object.keys(tmptests)
 			aIgnore = aIgnore.concat(aBoth)
 			let aSymbol = oCurrencies.expanded.filter(x => !aIgnore.includes(x))
 			aSymbol.forEach(function(c){
-				tests[c] = symbol
+				tmptests[c] = symbol
 			})
+		}
+		// remove unsupported
+		let supported = oCurrencies["supported"]
+		for (const k of Object.keys(tmptests)) {
+			if (supported.length) {
+				if (supported.includes(k)) {
+					tests[k] = tmptests[k]
+				}
+			} else {
+				tests[k] = tmptests[k]
+			}
 		}
 	} else if (method == "tiny") {
 		// smaller set that gets most base languages + bang for buck on expanded
