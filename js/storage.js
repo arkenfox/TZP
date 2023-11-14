@@ -29,7 +29,11 @@ const get_caches = () => new Promise(resolve => {
 		return resolve([METRIC, zS])
 	})
 	.catch(function(e){
-		log_display(6, METRIC, log_error(SECT6, METRIC, e) + (isTB && isSmart ? tb_green: ""))
+		let notation = ""
+		if (isTB && isSmart) {
+			notation = e+"" === "SecurityError: The operation is insecure." ? tb_green: tb_red
+		}
+		log_display(6, METRIC, log_error(SECT6, METRIC, e) + notation)
 		return resolve([METRIC, zErr])
 	})
 })
