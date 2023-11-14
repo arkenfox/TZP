@@ -12,6 +12,28 @@ function lookup_cookie(name) {
 	return ""
 }
 
+const get_caches = () => new Promise(resolve => {
+	const METRIC = "caches"
+	// 1177968: check for dom.caches.enabled, pref removed in FF117
+	if (undefined === window.caches) {
+		log_display(6, METRIC, zD + (isTB && isSmart ? tb_red: ""))
+		return resolve([METRIC, zD])
+	}
+	// PB mode: DOMException: The operation is insecure.
+		// AFAICT not affected by any prefs
+		// also see 1742344
+	Promise.all([
+		window.caches.keys()
+	]).then(function(results){
+		log_display(6, METRIC, zS + (isTB && isSmart ? tb_red: ""))
+		return resolve([METRIC, zS])
+	})
+	.catch(function(e){
+		log_display(6, METRIC, log_error(SECT6, METRIC, e) + (isTB && isSmart ? tb_green: ""))
+		return resolve([METRIC, zErr])
+	})
+})
+
 const get_cookies = (skip) => new Promise(resolve => {
 	// note: don't use "cookie" in elements as adblockers might block display
 	const METRIC = "cookies"
@@ -305,6 +327,7 @@ function outputStorage() {
 	// FF104- sanitizing issues
 	let skip = isFile && isVer < 105
 	Promise.all([
+		get_caches(),
 		get_cookies(skip),
 		get_storage(skip),
 		get_permissions("notifications"),
