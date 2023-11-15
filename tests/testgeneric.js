@@ -401,7 +401,8 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		isVerMax = 121
-		try {if ("lij" === Intl.Collator.supportedLocalesOf("lij").join()) return 121} catch(e) {} // 1859752
+		//try {if ("lij" === Intl.Collator.supportedLocalesOf("lij").join()) return 121} catch(e) {} // 1859752 backed out
+		if ("function" === typeof Promise.withResolvers) return 121 // 1845586
 		if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 		try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 		if ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010

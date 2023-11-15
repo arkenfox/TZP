@@ -284,10 +284,17 @@ function outputVersion() {
 		rec(120, 120, "1854937", ver120, performance.now()-t120)
 		*/
 
-		// 121: 1859752
+		/*
+		// 121: 1859752 backed out
 		let t121 = performance.now()
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
+		*/
+
+		// 121: 1845586
+		let t121 = performance.now()
+		let ver121 = ("function" === typeof Promise.withResolvers)
+		rec(121, 121, "1845586", ver121, performance.now()-t121) //
 
 		// 120: 1791079
 		let t120 = performance.now()
