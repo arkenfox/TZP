@@ -1239,10 +1239,7 @@ function countJS(filename) {
 				overlay.addEventListener("keydown", (e) => {
 					console.log(e.key)
 				})
-				// graphite font is required
-				document.fonts.ready.then(() => {
-					outputSection("load")
-				})
+				outputSection("load")
 			})
 		})
 	}
