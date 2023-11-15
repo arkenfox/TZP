@@ -59,6 +59,54 @@ function get_autoplay() {
 	return
 }
 
+const get_clearkey = () => new Promise(resolve => {
+	const METRIC = "clearkey"
+	/*
+	https://w3c.github.io/encrypted-media/#common-key-systems
+	gecko only supports
+	- com.widevine.alpha : causes a DRM prompt if disabled so ignore
+	- org.w3.clearkey
+	note: media.gmp-gmpopenh264.enabled (about:plugins: activate state) = no effect
+	*/
+
+	// requestMediaKeySystemAccess is an expected nav property
+	let typecheck = typeof navigator.requestMediaKeySystemAccess
+	if ("function" !== typecheck) {
+		log_display(13, METRIC, log_error(SECT13, METRIC, zErrType + typecheck) + (isTB && isSmart ? tb_red: ""))
+		return resolve([METRIC, zErr])
+	}
+
+	let t0 = nowFn()
+	const config = {
+		initDataTypes: ['cenc'],
+		videoCapabilities: [{
+			contentType: 'video/mp4;codecs="avc1.4D401E"'
+		}]
+	}
+	navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {
+		let display = zS, value = zS
+		if (runSL) {key = {"keySystem" : "org.w3.clearkey"}}
+		// tampered
+		if (key +"" !== "[object MediaKeySystemAccess]") {
+			value = zLIE
+			display = colorFn(value)
+			log_known(SECT13, METRIC)
+		}
+		log_display(13, METRIC, display + (isTB && isSmart ? tb_red: ""))
+		log_perf(SECT13, METRIC, t0)
+		return resolve([METRIC, value])
+  })
+	.catch(function(e){
+		let notation = ""
+		if (isTB && isSmart) {
+			notation = e+"" === "NotSupportedError: CDM is not installed" ? tb_green: tb_red
+		}
+		log_display(13, METRIC, log_error(SECT13, METRIC, e) + notation)
+		log_perf(SECT13, METRIC, t0)
+		return resolve([METRIC, zErr])
+	})
+})
+
 function get_media(type) {
 	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
 	// https://cconcolato.github.io/media-mime-support/
@@ -268,14 +316,17 @@ const get_midi = () => new Promise(resolve => {
 	})
 })
 
+
 function outputMedia() {
 	let t0 = nowFn();
 	Promise.all([
 		get_media("audio"),
 		get_media("video"),
 		get_midi("midi"),
+		get_clearkey(),
 		get_autoplay(),
-	]).then(function(){
+	]).then(function(results){
+		results.forEach(function(item) {addDataFromArray(13, item)})
 		log_display(13, "mediaBtn", mediaBtn)
 		log_section(13, t0)
 	})

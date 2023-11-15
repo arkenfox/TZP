@@ -1365,7 +1365,6 @@ function outputSection(id, cls) {
 		// reset global
 		gCount = 0
 		gAlert = []
-		gKnown = []
 		// reset section
 		sDetail = {}
 		get_isDevices()

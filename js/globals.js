@@ -28,7 +28,6 @@ let gData = { // from sData
 		"errorsonce": {},
 		"perf": [],
 	},
-	gKnown = [], // known, methods, alerts
 	gAlert = [],
 	gAlertOnce = []
 
