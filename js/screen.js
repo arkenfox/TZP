@@ -1425,7 +1425,6 @@ function outputFD() {
 	// browser
 	let METRIC = "browser"
 	let browser = (isMullvad ? "Mullvad Browser" : (isTB ? "Tor Browser" : "Firefox"))
-	if (gLoad) {dom.txtGraphite = browser}
 
 	log_display(3, METRIC, browser + " | "+ isLogo +" | "+ isWordmark)
 	addData(3, METRIC, browser)
