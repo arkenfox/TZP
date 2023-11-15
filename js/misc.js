@@ -133,7 +133,10 @@ const get_math_trig = (isMathLies) => new Promise(resolve => {
 		} else {
 			addData(18, METRIC, aRes, hash)
 		}
-		if (isSmart) {notation = hash == "a5833212" ? rfp_green : rfp_red}
+		if (isSmart) {
+			// ToDo: 1852788 follow ups: currently only nightly/beta
+			notation = hash == "a5833212" ? rfp_green : rfp_red
+		}
 		log_display(18, METRIC, hash + addButton(18, METRIC) + notation)
 		return resolve(fpvalue)
 	} catch(e) {
@@ -143,13 +146,12 @@ const get_math_trig = (isMathLies) => new Promise(resolve => {
 	}
 })
 
-function get_navigator() {
+function get_navigator_keys() {
 	const METRIC = "navigator_keys"
 	let notation = ""
 	try {
 		if (runSE) {foo++}
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-
 		/* these should match
 		let keysB = []
 		for (const key in navigator) {keysB.push(key)}
@@ -162,12 +164,14 @@ function get_navigator() {
 		if (isSmart) {
 			let fake = [], missing = [], moved = [], oKeys = {}
 			// ToDo: check/expand these: e.g. javaEnabled?
-			const expected = [
-				"appCodeName","appName","appVersion","platform","product","productSub","userAgent",
-				"vendor","vendorSub","hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
-				"buildID","oscpu","taintEnabled","doNotTrack","cookieEnabled",
-				"pdfViewerEnabled", // FF99+: pdfViewerEnabled
+			let expected = [
+				"appCodeName","appName","appVersion","buildID","oscpu","platform","product","productSub","userAgent","vendor","vendorSub",
+				"hardwareConcurrency","language","languages","mimeTypes","onLine","plugins",
+				"taintEnabled","doNotTrack","cookieEnabled","pdfViewerEnabled",
+				"requestMediaKeySystemAccess",
 			]
+			if (isVer > 118) {expected.push("locks")} // 1851539
+			if (isVer > 119) {expected.push("userActivation")} // 1791079
 			if (runSL) {
 				keys.push("iamfake","anotherfake") // +fake
 				keys = keys.filter(x => !["buildID"].includes(x)) // +missing
@@ -529,7 +533,7 @@ function outputMisc() {
 		get_math_other(isMathLies),
 		get_component_shims(),
 		get_window_props(),
-		get_navigator(),
+		get_navigator_keys(),
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(18, item)})
 		log_section(18, t0)
