@@ -81,7 +81,8 @@ const get_clearkey = () => new Promise(resolve => {
 		initDataTypes: ['cenc'],
 		videoCapabilities: [{
 			contentType: 'video/mp4;codecs="avc1.4D401E"'
-		}]
+		}],
+		persistentState: "required" // see 1706121
 	}
 	navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {
 		let display = zS, value = zS
