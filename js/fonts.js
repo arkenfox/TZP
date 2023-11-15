@@ -1045,8 +1045,6 @@ const get_formats = () => new Promise(resolve => {
 })
 
 const get_graphite = () => new Promise(resolve => {
-	// ToDo: create a much smaller tff with just i+j in it
-		// and maybe load as base64
 	const METRIC = "graphite"
 	let res = "", notation = ""
 	function exit() {
