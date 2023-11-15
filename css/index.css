@@ -50,7 +50,7 @@
   --jkey: #75bfff;
 }
 
-@font-face {font-family: "graphite"; src: url("../fonts/Simple-Graphite-Font.ttf");}
+@font-face {font-family: "graphite"; src: url("../fonts/GraphiteWidthTest.ttf");}
 .cssGraphite {font-family: "graphite";}
 
 body {background-color: var(--bg0); color: var(--test0);}
