@@ -242,7 +242,6 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 	}
 	r = match ? screen_green : screen_red
 	dom.scrmatch.innerHTML = r
-	*/
 
 	// inner
 	let newW = getElementProp(SECT1, "#D",":before"),
@@ -299,7 +298,7 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 		if (runtype !== "resize") {log_perf(SECT1, "scr/win",t0)}
 	// resolve
 	return resolve(res)
-
+	*/
 })
 
 const get_scr_mm = (runtype, datatype) => new Promise(resolve => {
