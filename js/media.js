@@ -61,6 +61,7 @@ function get_autoplay() {
 
 const get_clearkey = () => new Promise(resolve => {
 	const METRIC = "clearkey"
+	let notation = ""
 	setTimeout(() => resolve([METRIC, zErrTime]), 20)
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
@@ -93,19 +94,23 @@ const get_clearkey = () => new Promise(resolve => {
 			display = colorFn(value)
 			log_known(SECT13, METRIC)
 		}
-		log_display(13, METRIC, display + (isTB && isSmart ? tb_red: ""))
+		if (isSmart) {
+			if (isTB) {notation = tb_red} else if (isOS == "android") {notation = default_red}
+		}
+		log_display(13, METRIC, display + notation)
 		return resolve([METRIC, value])
 	})
 	.catch(function(e){
-		let notation = ""
 		// "NotSupportedError: Key system is unsupported" = JShelter "media playback" (default unprotected)
 			// ^ strict (always) | little lies (12.5%)
-			// ^ we could test several dozen codecs
+			// ^ we pick up on little lies in canPlayType
 
 		// "NotSupportedError: Key system configuration is not supported" = PB
 		if (isSmart) {
 			if (isTB) {
 				notation = e+"" === "NotSupportedError: CDM is not installed" ? tb_green: tb_red
+			} else if (isOS === "android") {
+				notation = e+"" === "NotSupportedError: CDM is not installed" ? default_green: default_red
 			} else {
 				notation = (e +"" !== "NotSupportedError: Key system configuration is not supported") ? default_red : ""
 			}
@@ -122,6 +127,7 @@ function get_media(type) {
 	let t0 = nowFn()
 	
 	// ToDo: add wmf: e.g. 1806552
+	// lists are sorted
 	let audiolist = [
 		'application/ogg',
 		a+'aac',
@@ -151,7 +157,7 @@ function get_media(type) {
 	]
 	let videolist = [
 		'application/ogg',
-		v+'video/3gpp',
+		v+'3gpp',
 		v+'mp4',
 		v+'mp4; codecs=',
 		v+'mp4; codecs=""',
@@ -163,6 +169,8 @@ function get_media(type) {
 		v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
 		v+'mp4; codecs="avc3"',
 		v+'mp4; codecs="flac"',
+		v+'mp4; codecs="hev1.1.6.L93.B0"',
+		v+'mp4; codecs="hev1.2.4.L120.B0"',
 		v+'mp4; codecs="opus"',
 		v+'mp4; codecs="vp09.00.10.08"',
 		//v+'mp4; codecs=\'\'',
@@ -207,6 +215,11 @@ function get_media(type) {
 		// collect
 		let go1 = true, go2 = true, go3 = true, err1, err2, err3
 		let list = type == "audio" ? audiolist : videolist
+		/* check sorted
+		let originalhash = mini(list)
+		list.sort()
+		if (mini(list) !== originalhash) {console.log(type + " mime list is not sorted")}
+		//*/
 
 		list.forEach(function(item) {
 			let tmp = item.replace(type +"\/","") // strip "video/","audio/"
@@ -238,20 +251,50 @@ function get_media(type) {
 		})
 
 		// canplay
-		let canDisplay
+		let canDisplay, isLies = false
 		if (go1) {
 			let aMaybe = oMedia["canPlay"]["maybe"]
 			let aProbably = oMedia["canPlay"]["probably"]
 			if (aMaybe.length == 0 && aProbably.length == 0) {
 				canDisplay = "none"
-				addData(13, METRICcan, canDisplay)
+				if (isSmart) {
+					log_known(SECT13, METRICcan)
+					canDisplay = colorFn(canDisplay)
+					addData(13, METRICcan, zLIE)
+				} else {
+					addData(13, METRICcan, canDisplay)
+				}
 			} else {
 				let canobj = {}
 				if (aMaybe.length) {canobj["maybe"] = aMaybe}
 				if (aProbably.length) {canobj["probably"] = aProbably}
 				let canHash = mini(canobj)
+				// gecko lies
+				if (isSmart) {
+					// probably: only includes "codecs="something""
+					aProbably.forEach(function(item) {
+						if (!item.includes("codecs=\"")) {isLies = true}
+					})
+					if (!isLies) {
+						// maybe: doesn't include "codecs="something"" (i.e it has "mp4; codecs=","mp4; codecs=\"\"")
+						aMaybe.forEach(function(item) {
+							if (item.includes("codecs=\"")) {
+								if (item !== "mp4; codecs=\"\"") {isLies = true}
+							}
+						})
+					}
+					if (isLies) {
+						canHash = colorFn(canHash)
+						log_known(SECT13, METRICcan)
+					}
+				}
 				canDisplay = canHash + addButton(13, METRICcan, aMaybe.length +"/" + aProbably.length)
-				addData(13, METRICcan, canobj, canHash)
+				if (isLies) {
+					addDetail(METRICcan, canobj, zDOC)
+					addData(13, METRICcan, zLIE)
+				} else {
+					addData(13, METRICcan, canobj, canHash)
+				}
 			}
 		} else {
 			canDisplay = err1
@@ -269,7 +312,13 @@ function get_media(type) {
 			let aSource = oMedia["isType"]["source"]
 			if (aRecorder.length == 0 && aSource.length == 0) {
 				typeDisplay = "none"
-				addData(13, METRICtype, typeDisplay)
+				if (isSmart) {
+					log_known(SECT13, METRICtype)
+					typeDisplay = colorFn(typeDisplay)
+					addData(13, METRICtype, zLIE)
+				} else {
+					addData(13, METRICcan, typeDisplay)
+				}
 			} else {
 				let typeobj = {}
 				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
