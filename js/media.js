@@ -61,6 +61,7 @@ function get_autoplay() {
 
 const get_clearkey = () => new Promise(resolve => {
 	const METRIC = "clearkey"
+	setTimeout(() => resolve([METRIC, zErrTime]), 20)
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
@@ -75,14 +76,13 @@ const get_clearkey = () => new Promise(resolve => {
 		log_display(13, METRIC, log_error(SECT13, METRIC, zErrType + typecheck) + (isTB && isSmart ? tb_red: ""))
 		return resolve([METRIC, zErr])
 	}
-
-	let t0 = nowFn()
 	const config = {
 		initDataTypes: ['cenc'],
 		videoCapabilities: [{
 			contentType: 'video/mp4;codecs="avc1.4D401E"'
 		}],
-		persistentState: "required" // see 1706121
+		persistentState: "required"
+		// 1706121: PB mode currently throws an error
 	}
 	navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {
 		let display = zS, value = zS
@@ -94,16 +94,23 @@ const get_clearkey = () => new Promise(resolve => {
 			log_known(SECT13, METRIC)
 		}
 		log_display(13, METRIC, display + (isTB && isSmart ? tb_red: ""))
-		log_perf(SECT13, METRIC, t0)
 		return resolve([METRIC, value])
-  })
+	})
 	.catch(function(e){
 		let notation = ""
-		if (isTB && isSmart) {
-			notation = e+"" === "NotSupportedError: CDM is not installed" ? tb_green: tb_red
+		// "NotSupportedError: Key system is unsupported" = JShelter "media playback" (default unprotected)
+			// ^ strict (always) | little lies (12.5%)
+			// ^ we could test several dozen codecs
+
+		// "NotSupportedError: Key system configuration is not supported" = PB
+		if (isSmart) {
+			if (isTB) {
+				notation = e+"" === "NotSupportedError: CDM is not installed" ? tb_green: tb_red
+			} else {
+				notation = (e +"" !== "NotSupportedError: Key system configuration is not supported") ? default_red : ""
+			}
 		}
 		log_display(13, METRIC, log_error(SECT13, METRIC, e) + notation)
-		log_perf(SECT13, METRIC, t0)
 		return resolve([METRIC, zErr])
 	})
 })
@@ -112,6 +119,7 @@ function get_media(type) {
 	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
 	// https://cconcolato.github.io/media-mime-support/
 	let v = "video/", a = "audio/"
+	let t0 = nowFn()
 	
 	// ToDo: add wmf: e.g. 1806552
 	let audiolist = [
@@ -273,6 +281,7 @@ function get_media(type) {
 			}
 		}
 		log_display(13, type +"type", typeDisplay)
+		log_perf(SECT13, type, t0)
 
 		// ToDo: media: remove audio/video element?
 		return
@@ -319,14 +328,18 @@ const get_midi = () => new Promise(resolve => {
 
 
 function outputMedia() {
-	let t0 = nowFn();
+	let t0 = nowFn()
 	Promise.all([
+		get_clearkey(),
 		get_media("audio"),
 		get_media("video"),
 		get_midi("midi"),
-		get_clearkey(),
 		get_autoplay(),
 	]).then(function(results){
+		// clearkey timeout
+		if (results[0][1] === zErrTime) {
+			log_display(13, "clearkey", log_error(SECT13, "clearkey", zErrTime) + (isSmart ? default_red : ""))
+		}
 		results.forEach(function(item) {addDataFromArray(13, item)})
 		log_display(13, "mediaBtn", mediaBtn)
 		log_section(13, t0)
