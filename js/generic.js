@@ -632,6 +632,7 @@ function showMetrics(name, scope, isConsole = false) {
 	} else if (name == "fingerprint" || name == "errors" || name == "health" || name == "lies") {
 		data = gData[name][scope]
 	} else if (name == "fingerprint_summary") { data = gData[zFP][scope+"_summary"]
+	} else if (name == "fingerprint_list") { data = gData[zFP][scope+"_list"]
 	} else if (name == "alerts") {data = gAlert; showhash = false
 	} else if (name.slice(0,6) == "errors") {
 		name = name.slice(6)
@@ -855,6 +856,7 @@ function output_section(section, scope) {
 	}
 
 	// propagate data
+	let aMetricsList = []
 	aSection.forEach(function(number) {
 		let data = {}, hash, count
 		let name = sectionMap[number]
@@ -880,6 +882,7 @@ function output_section(section, scope) {
 				gData[zFP][summary][name]["hash"] = hash
 				gData[zFP][summary][name]["metrics"] = {}
 				for (const k of Object.keys(data)) {
+					aMetricsList.push(k)
 					let value = ("object" == typeof data[k] && data[k] !== null ? data[k]["hash"] : data[k] )
 					gData[zFP][summary][name]["metrics"][k] = value
 				}
@@ -947,6 +950,10 @@ function output_section(section, scope) {
 			console.error(e)
 		}
 	})
+	// metric list
+	if (gRun) {
+		gData[zFP][scope +"_list"] = aMetricsList.sort()
+	}
 }
 
 /*** INCOMING ***/
@@ -1086,6 +1093,7 @@ function log_section(name, time, scope = isScope) {
 	let nameStr = "number" === typeof name ? sectionMap[name] : name
 	if (gRun) {gData["perf"].push([2, nameStr, time, t0])}
 	if (nameStr == SECTP) {return}
+	//console.log(name, nameStr)
 
 	// SECTION RERUNS
 	if (!gRun) {
@@ -1111,6 +1119,7 @@ function log_section(name, time, scope = isScope) {
 			}
 			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(0, zFP, metricCount +" metrics")
 				+ addButton(0, zFP +"_summary", "summary")
+				+ addButton(0, zFP +"_list", "list")
 		} catch(e) {
 			console.log(e)
 		}
