@@ -160,24 +160,27 @@ const get_offlineAudioContext = () => new Promise(resolve => {
 						// get/copy
 						let hashG = mini(byteArrayToHex(hashes[0]))
 						let hashC = mini(byteArrayToHex(hashes[1]))
+						let display = hashC +" | "+ hashG +" | "+ sum, value = hashG
 						// lies
-						let isLies = false
 						if (isSmart) {
-							if (hashG !== hashC) {isLies = true
-							} else {isLies = check_audioLies()}
-						}
-						// display/FP
-						let audioStr = hashC +" | "+ hashG +" | "+ sum
-						if (isSmart) {
-							if (isTB && !isMullvad) {notation = tb_red
+							let isLies = false
+							if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
+							if (isLies) {
+								display = colorFn(display)
+								log_known(SECT11, METRIC)
+								value = zLIE
+							}
+							// notation
+							if (isTB && !isMullvad) {
+								notation = tb_red
 							} else if (isMullvad) {
 								if (isLies) {notation = tb_red}
-								// ignore non lies MB until we get math patches
-								// we don't want anything green unless it's protected
+								// ignore non lies MB until we get backported: we don't want anything green unless it's protected
 							} else if (isVer > 117) {
-								// don't notate FF lies
-								if (!isLies) {
-									// we have two results: ARM and non-ARM: but there could be others
+								if (isLies) {
+									notation = default_red
+								} else {
+									// two results: ARM and non-ARM
 									notation = sbx +"undocumented]"+ sc
 									if (hashC == "24fc63ce") {notation = sgtick+"x86/amd]"+sc
 									} else if (hashC == "a34c73cd") {notation = sgtick+"ARM]"+sc
@@ -185,10 +188,8 @@ const get_offlineAudioContext = () => new Promise(resolve => {
 								}
 							}
 						}
-						log_display(11, METRIC, (isLies ? colorFn(audioStr) : audioStr) + notation)
-						if (isLies) {log_known(SECT11, METRIC)}
-						// only add hash to FP: detailed data not worth it
-						addData(11, METRIC, (isLies ? zLIE : hashG))
+						log_display(11, METRIC, display + notation)
+						addData(11, METRIC, value) // only collect hash: detailed data not worth it
 						log_perf(SECT11, METRIC, t0)
 						return resolve()
 					})
