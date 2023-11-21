@@ -309,6 +309,10 @@ const get_pdf = () => new Promise(resolve => {
 	let oData = {"mimeTypes": "", "pdfViewerEnabled": "", "plugins": ""}
 
 	function get_obj(METRIC) {
+		function exit(value) {
+			oData[METRIC] = value
+			return
+		}
 		try {
 			let obj = navigator[METRIC]
 			let objName = METRIC.charAt(0).toUpperCase() + (METRIC.slice(1)).slice(0, -1) +"Array"
@@ -327,30 +331,21 @@ const get_pdf = () => new Promise(resolve => {
 										+ (obj[i].description == "" ? ": *" : ": "+ obj[i].description))
 								}
 							}
-							oData[METRIC] = res
+							exit(res)
 						} else {
-							oData[METRIC] = "none"
+							exit("none")
 						}
-						return
 					} else {
-						log_error(SECT7, METRIC, zErrInvalid +"expected [object "+ objName +"]")
-						oData[METRIC] = zErr
-						return
+						log_error(SECT7, METRIC, zErrInvalid +"expected [object "+ objName +"]"); exit(zErr +"A")
 					}
 				} catch(e) {
-					log_error(SECT7, METRIC, e)
-					oData[METRIC] = zErr
-					return
+					log_error(SECT7, METRIC, e); exit(zErr +"B")
 				}
 			} else {
-				log_error(SECT7, METRIC, zErrType + typeof obj)
-				oData[METRIC] = zErrType
-				return
+				log_error(SECT7, METRIC, zErrType + typeof obj); exit(zErr +"C")
 			}
 		} catch(e) {
-			log_error(SECT7, METRIC, e)
-			oData[METRIC] = zErr
-			return
+			log_error(SECT7, METRIC, e); exit(zErr +"D")
 		}
 	}
 	function get_pdfViewer() {
@@ -358,11 +353,11 @@ const get_pdf = () => new Promise(resolve => {
 		try {
 			let res = navigator.pdfViewerEnabled
 			if ("boolean" === typeof res) {
-				oData[METRIC] = res
+				oData[METRIC] = res; 
 				return
 			} else {
 				log_error(SECT7, METRIC, zErrType + typeof obj)
-				oData[METRIC] = zErrType
+				oData[METRIC] = zErr
 				return
 			}
 		} catch(e) {
@@ -377,7 +372,6 @@ const get_pdf = () => new Promise(resolve => {
 		get_obj("plugins"),
 		get_pdfViewer("plugins"),
 	]).then(function(){
-
 		const METRIC = "pdf"
 		let hash = mini(oData), notation = ""
 		addData(7, METRIC, oData, hash)
@@ -385,11 +379,22 @@ const get_pdf = () => new Promise(resolve => {
 			// lies
 			let isLies = false
 			if (!["91073152","beccb452"].includes(hash)) {isLies = true // enabled, disabled
-			} else {isLies = sData[SECT99].includes("pdfViewerEnabled")}
-			// not lies if just errors
+			} else if (sData[SECT99].includes("Navigator.pdfViewerEnabled")) {isLies = true
+			} else {
+				try {
+					let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+					if (keys.indexOf("pdfViewerEnabled") > keys.indexOf("constructor")) {isLies = true}
+				} catch(e) {}
+			}
+			// ToDo: lies vs errors
 
-			// notate
-			notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
+
+			// notate: FF116 1838415 dropped RFP protection
+			if (isVer < 116) {
+				notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
+			} else {
+				notation = isLies ? default_red : (hash == "91073152" ? default_green : default_red)
+			}
 		}
 		log_display(7, METRIC, hash + addButton(7, METRIC) + notation)
 		return resolve()
