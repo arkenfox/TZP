@@ -19,21 +19,22 @@ function get_colors() {
 			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
-		"moz": [ // FF120+:
+		"moz": [
 			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
 			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
-			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-active-menuitem',
-			'-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext',
-			'-moz-mac-focusring','-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list',
-			'-moz-mac-source-list-selection','-moz-mac-tooltip','-moz-menubarhovertext','-moz-menuhover',
+			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-defaultbuttontext',
+			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-menubarhovertext','-moz-menuhover',
 			'-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
 		],
 	}
 
-	if (isVer < 119) {
+	if (isVer < 121) {
 		let aTmp = oList["moz"]
 		aTmp.push (
-			// removed/backported FF119 1857695
+			// removed FF121: 1863691
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-menuitem',
+			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+			// removed FF119: 1857695
 			'-moz-mac-menutextdisable','-moz-mac-menutextselect',
 			// removed FF117
 			"-moz-buttondefault","-moz-dragtargetzone","-moz-mac-chrome-active","-moz-mac-chrome-inactive",
@@ -87,9 +88,11 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "47538602" // FF119+
+					let check = "651a1b85" // 121+
 					if (isVer < 117) {check = "788e7d22" // 115-116
-					} else if (isVer < 119) {check = "5a00aa84"} // 117-118
+					} else if (isVer < 119) {check = "5a00aa84" // 117-118
+					} else if (isVer < 121) {check = "47538602" // 119-120
+					}
 					notation = hash == check ? rfp_green : rfp_red
 				}
 				log_display(14, METRIC, hash + btn + notation)
