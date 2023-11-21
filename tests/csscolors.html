@@ -77,26 +77,30 @@ function get_colors() {
 			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
 			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
 		],
-		"moz": [ // FF102+:
-			'-moz-buttondefault','-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight',
-			'-moz-cellhighlighttext','-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext',
-			'-moz-dragtargetzone','-moz-eventreerow','-moz-field','-moz-fieldtext','-moz-html-cellhighlight',
-			'-moz-html-cellhighlighttext','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
-			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-mac-menuselect','-moz-mac-menushadow',
-			'-moz-mac-menutextdisable','-moz-mac-menutextselect','-moz-mac-secondaryhighlight',
-			'-moz-menubarhovertext','-moz-menubartext','-moz-menuhover','-moz-menuhovertext',
-			'-moz-nativehyperlinktext','-moz-oddtreerow','-moz-win-communicationstext','-moz-win-mediatext',
-			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-defaultbuttontext',
-			'-moz-mac-menuitem','-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
-			// dropped FF103
+		"moz": [
+			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
+			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
+			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-defaultbuttontext',
+			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-menubarhovertext','-moz-menuhover',
+			'-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
+			// removed FF121: 1863691
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-menuitem',
+			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+			// removed FF119: 1857695
+			'-moz-mac-menutextdisable','-moz-mac-menutextselect',
+			// removed FF117
+			"-moz-buttondefault","-moz-dragtargetzone","-moz-mac-chrome-active","-moz-mac-chrome-inactive",
+			"-moz-mac-menuselect","-moz-mac-menushadow","-moz-mac-secondaryhighlight","-moz-menubartext",
+			"-moz-win-communicationstext","-moz-win-mediatext",
+			// removed FF103
 			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light',
-			// dropped FF94
+			// removed FF94
 			'-moz-mac-buttonactivetext',
-			//dropped FF90
+			// removed FF90
 			'-moz-gtk-info-bar-text',
-			// dropped FF88
+			// removed FF88
 			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext',
-			//dropped FF78 or lower
+			// removed FF78 or lower
 			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
 			'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
 			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
