@@ -362,6 +362,13 @@ function outputCanvas() {
 			return
 		}
 
+		const canvasLiesMap = {
+			getImageData: "CanvasRenderingContext2D",
+			toBlob: "HTMLCanvasElement",
+			toDataURL: "HTMLCanvasElement",
+			convertToBlob: "OffscreenCanvas",
+		}
+
 		// smart + some lies, do 2nd run
 		oDrawn = {"get": false, "path": false, "to": false}
 		Promise.all([
@@ -378,8 +385,14 @@ function outputCanvas() {
 							note = (value === allZeros) ? rfp_green : rfp_red // all zeros
 						} else {
 							note = rfp_red
+							// FPP
+							if (isVer > 119) {
+								if (!sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
+									note = fpp_green
+								}
+							}
 						}
-						rfpvalue = note == rfp_green ? " | RFP" : ""
+						rfpvalue = note == rfp_green ? " | RFP" : (note == fpp_green ? " | FPP" : "")
 						if (name == "getImageData") {
 							check_canvas_get(oData[name], 2)
 							stats = isCanvasGet
