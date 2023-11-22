@@ -86,19 +86,17 @@ const get_clearkey = () => new Promise(resolve => {
 		// 1706121: PB mode currently throws an error
 	}
 	navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {
-		let display = zS, value = zS
-		if (runSL) {key = {"keySystem" : "org.w3.clearkey"}}
-		// tampered
-		if (key +"" !== "[object MediaKeySystemAccess]") {
-			value = zLIE
-			display = colorFn(value)
-			log_known(SECT13, METRIC)
-		}
 		if (isSmart) {
 			if (isTB) {notation = tb_red} else if (isOS == "android") {notation = default_red}
 		}
-		log_display(13, METRIC, display + notation)
-		return resolve([METRIC, value])
+		if (runSE) {key = {"keySystem" : "org.w3.clearkey"}}
+		if (key +"" !== "[object MediaKeySystemAccess]") {
+			log_display(13, METRIC, log_error(SECT13, METRIC, zErrInvalid +"expected [object MediaKeySystemAccess]"))
+			return resolve([METRIC, zErr])
+		} else {
+			log_display(13, METRIC, zS + notation)
+			return resolve([METRIC, zS])
+		}
 	})
 	.catch(function(e){
 		// "NotSupportedError: Key system is unsupported" = JShelter "media playback" (default unprotected)
@@ -169,7 +167,7 @@ function get_media(type) {
 		v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
 		v+'mp4; codecs="avc3"',
 		v+'mp4; codecs="flac"',
-		v+'mp4; codecs="hev1.1.6.L93.B0"',
+		v+'mp4; codecs="hev1.1.6.L93.B0"', // 1853448
 		v+'mp4; codecs="hev1.2.4.L120.B0"',
 		v+'mp4; codecs="opus"',
 		v+'mp4; codecs="vp09.00.10.08"',
@@ -251,8 +249,9 @@ function get_media(type) {
 		})
 
 		// canplay
-		let canDisplay, isLies = false
+		let canDisplay, canLies = false
 		if (go1) {
+			if (runSL) {oMedia["canPlay"] = {"maybe": [], "probably": []}}
 			let aMaybe = oMedia["canPlay"]["maybe"]
 			let aProbably = oMedia["canPlay"]["probably"]
 			if (aMaybe.length == 0 && aProbably.length == 0) {
@@ -271,25 +270,29 @@ function get_media(type) {
 				let canHash = mini(canobj)
 				// gecko lies
 				if (isSmart) {
-					// probably: only includes "codecs="something""
-					aProbably.forEach(function(item) {
-						if (!item.includes("codecs=\"")) {isLies = true}
-					})
-					if (!isLies) {
-						// maybe: doesn't include "codecs="something"" (i.e it has "mp4; codecs=","mp4; codecs=\"\"")
-						aMaybe.forEach(function(item) {
-							if (item.includes("codecs=\"")) {
-								if (item !== "mp4; codecs=\"\"") {isLies = true}
-							}
+					if (aMaybe.length == 0 || aProbably.length == 0) { // either is empty
+						canLies = true
+					} else {
+						// probably: should only include "codecs="something""
+						aProbably.forEach(function(item) {
+							if (!item.includes("codecs=\"")) {canLies = true}
 						})
+						if (!canLies) {
+							// maybe: shouldn't include "codecs="something"" (i.e it has "mp4; codecs=","mp4; codecs=\"\"")
+							aMaybe.forEach(function(item) {
+								if (item.includes("codecs=\"")) {
+									if (item !== "mp4; codecs=\"\"") {canLies = true}
+								}
+							})
+						}
 					}
-					if (isLies) {
+					if (canLies) {
 						canHash = colorFn(canHash)
 						log_known(SECT13, METRICcan)
 					}
 				}
 				canDisplay = canHash + addButton(13, METRICcan, aMaybe.length +"/" + aProbably.length)
-				if (isLies) {
+				if (canLies) {
 					addDetail(METRICcan, canobj, zDOC)
 					addData(13, METRICcan, zLIE)
 				} else {
@@ -303,11 +306,12 @@ function get_media(type) {
 		log_display(13, type +"can", canDisplay)
 
 		// isType
-		let typeDisplay
+		let typeDisplay, typeLies = false
 		if (!go2 && !go3) {
 			typeDisplay = err2 // just display first error
 			addData(13, METRICtype, zErr)
 		} else {
+			if (runSL) {oMedia["isType"]["recorder"] = []}
 			let aRecorder = oMedia["isType"]["recorder"]
 			let aSource = oMedia["isType"]["source"]
 			if (aRecorder.length == 0 && aSource.length == 0) {
@@ -324,9 +328,23 @@ function get_media(type) {
 				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
 				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource}
 				let typeHash = mini(typeobj)
+
+				// gecko lies
+				if (isSmart) {
+					if (aRecorder.length == 0 || aSource.length == 0) { // either is empty
+						typeLies = true
+						typeHash = colorFn(typeHash)
+						log_known(SECT13, METRICtype)
+					}
+				}
 				let notation = (go2 ? aRecorder.length : zErr) +"/"+ (go3 ? aSource.length : zErr)
 				typeDisplay = typeHash + addButton(13, METRICtype, notation)
-				addData(13, METRICtype, typeobj, typeHash)
+				if (typeLies) {
+					addDetail(METRICtype, typeobj, zDOC)
+					addData(13, METRICtype, zLIE)
+				} else {
+					addData(13, METRICtype, typeobj, typeHash)
+				}
 			}
 		}
 		log_display(13, type +"type", typeDisplay)
