@@ -100,7 +100,8 @@ const tick = "✓", // u2713
 	default_green = sgtick+"default]"+sc,
 	default_red = sbx+"default]"+sc,
 	match_green = sgtick+"match]"+sc,
-	match_red = sbx+"match]"+sc
+	match_red = sbx+"match]"+sc,
+	fpp_green = sgtick+"FPP]"+sc
 
 const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,
