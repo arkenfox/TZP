@@ -289,8 +289,9 @@ function get_fntCodes(name) {
 
 function set_fntList(os = isOS) {
 	let fntListBaseName = isTB ? "allowlist" : "kBaseFonts"
+	let build = (gLoad || isFontSizesMore !== isFontSizesPrevious)
 
-	if (gLoad || isFontSizesMore !== isFontSizesPrevious) {
+	if (build) {
 		isFontSizesPrevious = isFontSizesMore
 
 		fntData = {
@@ -393,7 +394,7 @@ function set_fntList(os = isOS) {
 			let str = "fonts_"+ os
 			fntData["full"].push(fntFake)
 			fntData["full"].sort()
-			fntBtn += addButton(12, str, fntData["full"].length, "btnc", "lists")
+			fntBtn = addButton(12, str, fntData["full"].length, "btnc", "lists")
 			if (fntData["base"].length) {
 				fntData["base"].sort()
 				fntBtn += addButton(12, str +"_"+ fntListBaseName, fntData["base"].length, "btnc", "lists")
@@ -409,7 +410,7 @@ function set_fntList(os = isOS) {
 	if (os === undefined) {return}
 
 	// fnt*Btn data
-	if (gRun) {
+	if (gRun || build) {
 		let str = "fonts_"+ os
 		addDetail(str, fntData["full"], "lists")
 		addDetail(str +"_"+ fntListBaseName, fntData["base"], "lists")
@@ -1052,6 +1053,7 @@ const get_graphite = () => new Promise(resolve => {
 		return resolve([METRIC, res])
 	}
 	if (fntDocEnabled) {
+		// ToDo: handle when font face is blocked
 		let test = dom.testGraphite.offsetWidth
 		let control = dom.ctrlGraphite.offsetWidth
 		res = (control === test ? zF : zS)
