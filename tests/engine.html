@@ -305,7 +305,13 @@ function get_dates(num) {
 		let t0D; if (canPerf) {t0D = performance.now()}
 		if (bBlock) {bB = 1}
 		let resD = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
-		let bolD = isNaN(resD) ? true : false
+		let bolD = ""
+		if (isVer > 120) {
+			bolD = zNA
+			resD = zNA +": FF120 or lower " + s3 +"["+ fnTrim(resD.toString(), 23) +"]"+sc
+		} else {
+			bolD = isNaN(resD) ? true : false
+		}
 		let perfD = canPerf ? performance.now() - t0D : ""
 		fnRecord(num+3, strD, resD, bolD, "skip", perfD)
 	} catch(e) {
@@ -317,7 +323,13 @@ function get_dates(num) {
 		let t0E; if (canPerf) {t0E = performance.now()}
 		if (bBlock) {bB = 1}
 		let resE = Date.parse("Mercredi 8 Septembre 2021")
-		let bolE = isNaN(resE) ? true : false
+		let bolE = ""
+		if (isVer > 121) { // awaiting v122 test
+			bolE = zNA
+			resE = zNA +": FF121 or lower " + s3 +"["+ fnTrim(resE.toString(), 23) +"]"+sc
+		} else {
+			bolE = isNaN(resE) ? true : false
+		}
 		let perfE = canPerf ? performance.now() - t0E : ""
 		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
 	} catch(e) {
@@ -329,7 +341,13 @@ function get_dates(num) {
 		let t0F; if (canPerf) {t0F = performance.now()}
 		if (bBlock) {bB = 1}
 		let resF = Date.parse('2022-08-08') - Date.parse('2022-08-8')
-		let bolF = resF == 0
+		let bolF = ""
+		if (isVer > 120) {
+			bolF = zNA
+			resF = zNA +": FF120 or lower " + s3 +"["+ fnTrim(resF.toString(), 23) +"]"+sc
+		} else {
+			bolF = resF == 0
+		}
 		let perfF = canPerf ? performance.now() - t0F : ""
 		fnRecord(num+6, strF, resF, bolF, "skip", perfF)
 	} catch(e) {
@@ -1324,6 +1342,7 @@ function get_nav_keys(num1, num2, title) {
 			// 1666203: FF96+ canShare
 			aNot = aNot.filter(x => !["canShare"].includes(x))
 			if (isVer > 119) {
+				// 1791079: FF120+
 				aNot = aNot.filter(x => !["userActivation"].includes(x))
 			}
 		}
