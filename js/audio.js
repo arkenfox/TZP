@@ -215,7 +215,7 @@ const get_offlineAudioContext = () => new Promise(resolve => {
 })
 
 const get_oscillator = () => new Promise(resolve => {
-	const METRIC = "audio_oscillator"
+	const METRIC = "oscillator"
 	let notation = ""
 	try {
 		if (runSE) {foo++}
@@ -280,7 +280,7 @@ const get_oscillator = () => new Promise(resolve => {
 })
 
 const get_oscillator_compressor = () => new Promise(resolve => {
-	const METRIC = "audio_oscillator_compressor"
+	const METRIC = "oscillator_compressor"
 	let notation = ""
 	try {
 		if (runSE) {foo++}
@@ -360,7 +360,7 @@ function outputAudioUser() {
 	gClick = false
 	gRun = false
 	let section = {}
-	const METRIC = "audio_user_gestures"
+	const METRIC = "audio_user"
 
 	function output() {
 		let obj = {}
