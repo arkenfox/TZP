@@ -204,7 +204,7 @@ const get_offlineAudioContext = () => new Promise(resolve => {
 			outputErrors(log_error(SECT11, METRIC, e))
 		}
 	} catch(e) {
-		if (gRun) {dom.audio_oscillator_compressor = zNA; dom.audio_oscillator = zNA; dom.audio_user_gestures = zNA}
+		if (gRun) {dom.oscillator_compressor = zNA; dom.oscillator = zNA; dom.audio_user = zNA}
 		if (isTB && !isMullvad) {
 			notation = e+"" === "TypeError: window.OfflineAudioContext is not a constructor" ? tb_green : tb_red
 		} else {
@@ -391,7 +391,7 @@ function outputAudioUser() {
 		} catch(e) {
 			// output something
 			let eMsg = log_error(SECT11,"audio2", e)
-			dom.audio_oscillator_compressor = eMsg; dom.audio_oscillator = eMsg
+			dom.oscillator_compressor = eMsg; dom.oscillator = eMsg
 			dom[METRIC] = zNA
 			gClick = true
 		}
