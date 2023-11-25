@@ -510,10 +510,23 @@ function outputMisc() {
 	let t0 = nowFn()
 	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
 	let isMathLies = check_mathLies()
-
 	try {null.bar} catch(e) {
 		addDataDisplay(18, "error_message_fix", e.message) // FF74+: 1259822
 	}
+	// resource timing
+	let METRIC = "perf_resource"
+	try {
+		if (isFile) {
+			addDataDisplay(18, METRIC, zNA)
+		} else {
+			let len = performance.getEntriesByType('resource').length
+			addDataDisplay(18, METRIC, (len > 0 ? zE : zD))
+		}
+	} catch(e) {
+		log_display(18, METRIC, log_error(SECT18, METRIC, e))
+		addData(18, METRIC, zErr)
+	}
+	// catch some perf fuckery
 	try {
 		let control = 0
 		if (runSE) {foo++} else if (runST) {control = ""}
