@@ -419,9 +419,9 @@ function get_pointer_event() {
 	let target = window.document.getElementById("pointertarget")
 	target.addEventListener("pointerover", (event) => {
 		// get data
-		let list = ['height','isPrimary','mozInputSource','pointerType',
+		let list = ['height','isPrimary','mozInputSource','mozPressure','pointerType',
 			'pressure','tangentialPressure','tiltX','tiltY','twist','width',]
-		let listType = ['number','boolean','number','string',
+		let listType = ['number','boolean','number','number','string',
 			'number','number','number','number','number','number',]
 		let res = []
 		for (let i=0; i < list.length; i++) {
@@ -431,13 +431,14 @@ function get_pointer_event() {
 				if (i == 0) {value = event.height // RFP 1
 				} else if (i == 1) {value = event.isPrimary // RFP true
 				} else if (i == 2) {value = event.mozInputSource
-				} else if (i == 3) {value = event.pointerType // RFP mouse
-				} else if (i == 4) {value = event.pressure // RFP: 0 if not active, 0.5 if active
-				} else if (i == 5) {value = event.tangentialPressure // RFP 0
-				} else if (i == 6) {value = event.tiltX // RFP 0
-				} else if (i == 7) {value = event.tiltY // RFP 0
-				} else if (i == 8) {value = event.twist // RFP 0
-				} else if (i == 9) {value = event.width // RFP 1
+				} else if (i == 3) {value = event.mozPressure // 1534199: does this match pressure?
+				} else if (i == 4) {value = event.pointerType // RFP mouse
+				} else if (i == 5) {value = event.pressure // RFP: 0 if not active, 0.5 if active
+				} else if (i == 6) {value = event.tangentialPressure // RFP 0
+				} else if (i == 7) {value = event.tiltX // RFP 0
+				} else if (i == 8) {value = event.tiltY // RFP 0
+				} else if (i == 9) {value = event.twist // RFP 0
+				} else if (i == 10) {value = event.width // RFP 1
 				}
 			} catch(e) {
 				value = e.name
