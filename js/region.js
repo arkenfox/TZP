@@ -172,12 +172,12 @@ const get_nav_gpc = () => new Promise(resolve => {
 	const METRIC = "globalPrivacyControl"
 	function exit(value, display) {
 		let notation = ""
-		// ToDo: add android health
-		if (isSmart && isOS !== "android") {
-			notation = default_red
-			if (isVer > 119 && value === false) {notation = default_green
-			} else if (isVer < 120 && value == "undefined") {notation = default_green
+		if (isSmart) {
+			if (isVer < 120) {
+				notation = (value == "undefined" ? default_green : default_red)
 			}
+			// FF120+ desktop (not sure about android): gpc enabled: default false, but true pbmode
+			// since we can't really distinguish PBmode (cache aside for now) then don't both notating
 		}
 		log_display(5, METRIC, display + notation)
 		return resolve([METRIC, value])
