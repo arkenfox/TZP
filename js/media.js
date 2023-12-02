@@ -136,6 +136,10 @@ function get_media(type) {
 		a+'mp4; codecs=""',
 		a+'mp4; codecs="flac"',
 		a+'mp4; codecs="mp3"',
+		a+'mp4; codecs="mp4a.40.2"',
+		a+'mp4; codecs="mp4a.40.5"',
+		a+'mp4; codecs="mp4a.40.29"',
+		a+'mp4; codecs="mp4a.67"',
 		//a+'mp4; codecs=\'\'',
 		a+'mpeg',
 		a+'mpeg; codecs="mp3"',
@@ -159,6 +163,7 @@ function get_media(type) {
 		v+'mp4',
 		v+'mp4; codecs=',
 		v+'mp4; codecs=""',
+		//v+'mp4; codecs="av01.0.08M.08"', // 8bit
 		v+'mp4; codecs="av01.0.00M.12"', // 12bit
 		v+'mp4; codecs="avc1"',
 		v+'mp4; codecs="avc1.58000a"', // extended
@@ -169,6 +174,8 @@ function get_media(type) {
 		v+'mp4; codecs="flac"',
 		v+'mp4; codecs="hev1.1.6.L93.B0"', // 1853448
 		v+'mp4; codecs="hev1.2.4.L120.B0"',
+		v+'mp4; codecs="hvc1.1.6.L93.B0"',
+		v+'mp4; codecs="hvc1.2.4.L120.B0"',
 		v+'mp4; codecs="opus"',
 		v+'mp4; codecs="vp09.00.10.08"',
 		//v+'mp4; codecs=\'\'',
