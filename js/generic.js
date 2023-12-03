@@ -263,6 +263,30 @@ function get_isDevices() {
 	)} catch(e) {}
 }
 
+const get_isFileSystem = () => new Promise(resolve => {
+	// meta: 1748667
+	// note: pref change (dom.fs.enabled) requires new reload: so we can run once
+	let t0 = nowFn()
+	const METRIC = "isFileSystem"
+	function exit(value) {
+		isFileSystem = value
+		log_perf(SECTG, METRIC, t0, "", value)
+		return resolve()
+	}
+	if ("function" !== typeof navigator.storage.getDirectory) {
+		exit(zD)
+	}
+	Promise.all([
+		navigator.storage.getDirectory()
+	]).then(function(){
+		exit(zE)
+	})
+	.catch(function(e){
+		isFileSystemError = log_error(SECT6, "filesystem", e, isScope, 50, true) // persist error to sect6
+		exit(zErr)
+	})
+})
+
 function get_isGecko() {
 	let t0 = nowFn()
 	const METRIC = "isGecko"
@@ -1195,7 +1219,8 @@ function countJS(filename) {
 		if (isGecko) {gData["perf"].push([1, "RUN ONCE", nowFn()])}
 		let t0 = nowFn()
 		Promise.all([
-			get_isTB()
+			get_isTB(),
+			get_isFileSystem()
 		]).then(function(results){
 			if ("boolean" !== typeof results[0] && zErr !== results[0]) {
 				let METRIC = "isTB"
