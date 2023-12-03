@@ -27,6 +27,121 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 		+ functionName +"(`"+ part1 +"`"+ part2 + ")'>["+ displayText +"]</span>"
 }
 
+/*** JSON ***/
+
+function json_highlight(json) {
+	if (typeof json != 'string') {
+		json = json_stringify(json);
+	}
+	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+		var cls = 'number';
+		if (/^"/.test(match)) {
+			if (/:$/.test(match)) {
+				cls = 'key';
+			} else {
+				cls = 'string';
+				// color undefined (aka "typeof undefined")
+				//if (match == "\"typeof undefined\"") {cls = 'null';}
+			}
+		} else if (/true|false/.test(match)) {
+			cls = 'boolean';
+		} else if (/null/.test(match)) {
+			cls = 'null';
+		}
+		return '<span class="'+ cls +'">'+ match +'</span>';
+	})
+}
+
+function json_stringify(passedObj, options = {}) {
+	/* https://github.com/lydell/json-stringify-pretty-compact */
+	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
+	const indent = JSON.stringify(
+		[1],
+		undefined,
+		options.indent === undefined ? 2 : options.indent
+	).slice(2, -3);
+	const maxLength =
+		indent === ""
+			? Infinity
+			: options.maxLength === undefined
+			? 65 // was 80
+			: options.maxLength;
+	let { replacer } = options;
+
+	return (function _stringify(obj, currentIndent, reserved) {
+		if (obj && typeof obj.toJSON === "function") {
+			obj = obj.toJSON();
+		}
+
+		// display undefined under an alias so we always have the right number of values
+		// this is just a display, it does not alter the fingerprint data
+		//if (obj === undefined) {obj = "typeof undefined"}
+
+		const string = JSON.stringify(obj, replacer);
+		if (string === undefined) {
+			return string;
+		}
+		const length = maxLength - currentIndent.length - reserved;
+		if (string.length <= length) {
+			const prettified = string.replace(
+				stringOrChar,
+				(match, stringLiteral) => {
+					return stringLiteral || `${match} `;
+				}
+			);
+			if (prettified.length <= length) {
+				return prettified;
+			}
+		}
+		if (replacer != null) {
+			obj = JSON.parse(string);
+			replacer = undefined;
+		}
+		if (typeof obj === "object" && obj !== null) {
+			const nextIndent = currentIndent + indent;
+			const items = [];
+			let index = 0;
+			let start;
+			let end;
+			if (Array.isArray(obj)) {
+				start = "[";
+				end = "]";
+				const { length } = obj;
+				for (; index < length; index++) {
+					items.push(
+						_stringify(obj[index], nextIndent, index === length - 1 ? 0 : 1) ||
+						"null"
+					);
+				}
+			} else {
+				start = "{";
+				end = "}";
+				const keys = Object.keys(obj);
+				const { length } = keys;
+				for (; index < length; index++) {
+					const key = keys[index];
+					const keyPart = `${JSON.stringify(key)}: `;
+					const value = _stringify(
+						obj[key],
+						nextIndent,
+						keyPart.length + (index === length - 1 ? 0 : 1)
+					);
+					if (value !== undefined) {
+						items.push(keyPart + value);
+					}
+				}
+			}
+			if (items.length > 0) {
+				return [start, indent + items.join(`,\n${nextIndent}`), end].join(
+				`\n${currentIndent}`
+				);
+			}
+		}
+	return string;
+	})(passedObj, "", 0);
+}
+
 /*** HASH ***/
 
 function mini(str) {
