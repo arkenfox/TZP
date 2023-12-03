@@ -138,8 +138,10 @@ let videolist = [
 	v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
 	v+'mp4; codecs="avc3"',
 	v+'mp4; codecs="flac"',
-	v+'mp4; codecs="hev1.1.6.L93.B0"',
+	v+'mp4; codecs="hev1.1.6.L93.B0"', // 1853448
 	v+'mp4; codecs="hev1.2.4.L120.B0"',
+	v+'mp4; codecs="hvc1.1.6.L93.B0"',
+	v+'mp4; codecs="hvc1.2.4.L120.B0"',
 	v+'mp4; codecs="opus"',
 	v+'mp4; codecs="vp09.00.10.08"',
 	v+'mp4; codecs="vp09.00.50.08"',
@@ -224,7 +226,7 @@ function display(item) {
 	let hash = mini(data)
 	let count = ""
 	if (item == "audiolist" || item == "videolist") {count = s13 +" ["+ data.length +"]"+ sc}
-	dom.details.innerHTML = s13 + item + ": " +sc + hash + count +"<br>"+ JSON.stringify(data, null, 2)
+	dom.details.innerHTML = s13 + item + ": " +sc + hash + count +"<br>"+ json_highlight(data) //JSON.stringify(data, null, 2)
 }
 
 function getButton(name, text = "details") {
@@ -247,6 +249,7 @@ function get_media(type) {
 		// collect
 		let go1 = true, go2 = true, go3 = true, err1, err2, err3
 		let list = oData[type +"list"]
+		list.sort()
 
 		list.forEach(function(item) {
 			let tmp = item.replace(type +"\/","") // strip "video/","audio/"
@@ -338,7 +341,7 @@ function run() {
 		get_media("audio"),
 		get_media("video"),
 	]).then(function(){
-		dom.perf = Math.round(performance.now() - t0) + "ms"
+		dom.perf = Math.round(performance.now() - t0) + " ms"
 	})	
 }
 
