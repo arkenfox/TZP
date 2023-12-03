@@ -282,7 +282,7 @@ const get_isFileSystem = () => new Promise(resolve => {
 		exit(zE)
 	})
 	.catch(function(e){
-		isFileSystemError = log_error(SECT6, "filesystem", e, isScope, 50, true) // persist error to sect6
+		isFileSystemError = e+""
 		exit(zErr)
 	})
 })
