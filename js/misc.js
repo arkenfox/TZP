@@ -511,9 +511,19 @@ function outputMisc() {
 	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
 	let isMathLies = check_mathLies()
 	try {null.bar} catch(e) {
-		addDataDisplay(18, "error_message_fix", e.message) // FF74+: 1259822
+		let notation = ""
+		if (isSmart && isTB) {
+			notation = (e+"" === "TypeError: null has no properties" ? tb_green : tb_red)
+		}
+		addDataDisplay(18, "error_message_fix", e.message + notation) // FF74+: 1259822
 	}
-	// resource timing
+	/* other perf prefs are reflected in window properties
+		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
+		dom.enable_performance_navigation_timing: PerformanceNavigationTiming
+		dom.performance.time_to_contentful_paint.enabled: ?
+	*/
+
+	// dom.enable_resource_timing
 	let METRIC = "perf_resource"
 	try {
 		if (isFile) {
