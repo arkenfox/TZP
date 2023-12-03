@@ -20,7 +20,7 @@ const get_caches = () => new Promise(resolve => {
 		return resolve([METRIC, zD])
 	}
 	// PB mode: DOMException: The operation is insecure.
-		// AFAICT not affected by any prefs
+		// FF122: 1864684: dom.cache.privatebrowsing.enabled
 		// also see 1742344
 	Promise.all([
 		window.caches.keys()
@@ -82,6 +82,20 @@ const get_cookies = (skip) => new Promise(resolve => {
 		}
 	}
 	exit()
+})
+
+const get_filesystem = () => new Promise(resolve => {
+	const METRIC = "filesystem"
+	let display = isFileSystem, notation = ""
+	if (isFileSystem === zErr) {
+		display = isFileSystemError
+	}
+	if (isSmart) {
+		// FF111: 1811001: dom.fs.enabled = true
+		if (isFileSystem === zD) {notation = default_red}
+	}
+	log_display(6, METRIC, display + notation)
+	return resolve([METRIC, isFileSystem])
 })
 
 const get_storage = (skip) => new Promise(resolve => {
@@ -324,7 +338,7 @@ const test_worker_web = (skip, log = false) => new Promise(resolve => {
 
 function outputStorage() {
 	// ToDo: notification support/test
-	let t0 = nowFn();
+	let t0 = nowFn()
 	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
 	addDataDisplay(6, "worker", "function" === typeof Worker ? zE : zD)
 
@@ -334,6 +348,7 @@ function outputStorage() {
 		get_caches(),
 		get_cookies(skip),
 		get_storage(skip),
+		get_filesystem(),
 		get_permissions("notifications"),
 		get_permissions("persistent-storage"),
 		get_permissions("push"),
