@@ -41,7 +41,18 @@
 	--bg17: #f09bd4;
 	--bg18: #f09bb8;
 	--bg99: #808080;
+
+	--jstring: #ff7de9;
+	--jboolean: #86de74;
+	--jnull: #939395;
+	--jkey: #75bfff;
 }
+
+/* JSON */
+.string {color: var(--jstring);}
+.boolean, .number {color: var(--jboolean);}
+.null {color: var(--jnull);}
+.key {color: var(--jkey);}
 
 body {background-color: #161b22; color: var(--test0);}
 h2 {color: white; font-size: 14px; text-align: center; margin-top: inherit;}
