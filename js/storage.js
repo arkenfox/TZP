@@ -87,12 +87,18 @@ const get_cookies = (skip) => new Promise(resolve => {
 const get_filesystem = () => new Promise(resolve => {
 	const METRIC = "filesystem"
 	let display = isFileSystem, notation = ""
+
 	if (isFileSystem === zErr) {
-		display = isFileSystemError
+		display = log_error(SECT6, "filesystem", isFileSystemError)
 	}
 	if (isSmart) {
-		// FF111: 1811001: dom.fs.enabled = true
-		if (isFileSystem === zD) {notation = default_red}
+		// PBmode: SecurityError: Security error when calling GetDirectory
+		if (isTB) {
+			notation = (isFileSystemError === "SecurityError: Security error when calling GetDirectory" ? tb_green : tb_red)
+		} else {
+			// FF111: 1811001: dom.fs.enabled = true
+			if (isFileSystem === zD) {notation = default_red}
+		}
 	}
 	log_display(6, METRIC, display + notation)
 	return resolve([METRIC, isFileSystem])
