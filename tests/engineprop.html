@@ -26,9 +26,26 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
-			<span class="btn3 btnfirst" onClick="rerun()">[ run ]</span>
-			<span class="btn3 btn" onClick="logConsole(`list`)">[ log list ]</span>
-			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span>
+			<span class="btn3 btnfirst" onClick="rerun()">[ run test ]</span>
+			<span class="btn3 btn" onClick="logConsole(`list`)">[ log list ]</span> | 
+			<span class="btn3 btn" onClick="scrape()">[ scrape ]</span> | 
+			<span class="btn3 btn">
+				<select name="items" id="items">
+<option value="w">caches</option>
+<option value="w">console</option>
+<option value="w">crypto</option>
+<option value="w">CSS</option>
+<option value="p">CSS2Properties</option>
+<option value="p">CanvasRenderingContext2D</option>
+<option value="w">clientInformation</option>
+<option value="p">Element</option>
+<option value="p">Headers</option>
+<option value="w">navigator</option>
+<option value="w">performance</option>
+<option value="w">screen</option>
+				</select> 
+			<span onClick="get_engineItem()">[ run item ]</span>
+			</span> | 
 			<span class="btn3 btn" onClick="copyclip(`results`)">[ copy ]</span>
 			<br><br>
 			<hr>
@@ -276,6 +293,125 @@ function collectProps () {
 	}
 }
 
+function get_engineProp(item) {
+	try {
+		let objCache = new Set()
+		let order = {}
+		objCache.add(window.self)
+		// prevent us decending into the DOM
+		objCache.add(document);
+		objCache.add(document.activeElement);
+		//objCache.add(event?.currentTarget); // FF73 or lower this causes a syntax error
+		if (self.event && event.currentTarget) objCache.add(event.currentTarget)
+		function get_perf_props(item) {
+			const recursionAllowed = new Set();
+			recursionAllowed.add('navigator');
+			function extractObjectProps (obj, breadcrumbs = [], depth = 0) {
+				if (depth >= 5) {
+					return {}
+				}
+				const props = {}
+				const proplist = []
+				for (const prop in obj) {
+					proplist.push(prop)
+				}
+				let proptemp = []
+				proplist.forEach((prop) => {
+					proptemp.push(prop)
+				})
+				if (proptemp.length) {
+					if ("object" === typeof obj && obj !== null) {
+						let name = (obj+"").slice(8, -1)
+						order[name] = {}
+						order[name]["count"] = proptemp.length
+						order[name]["hash"] = mini(proptemp)
+						order[name]["data"] = proptemp
+					}
+				}
+				proplist.sort().forEach((prop) => {
+					try {
+						const desc = Object.getOwnPropertyDescriptor(obj, prop) || {}
+						if (typeof obj[prop] === 'function') {
+							desc.length = obj[prop].toString().length
+						}
+						desc.type = typeof obj[prop]
+						if (desc.type === 'function') {
+							desc.value = obj[prop].toString()
+						} else if (desc.type === 'object' && prop !== "opener") {
+							// don't enuemrate opener object
+							//if (!objCache.has(obj[prop])) { // || recursionAllowed.has(prop)) {
+							if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
+								objCache.add(obj[prop])
+								desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1)
+							}
+							delete desc.value
+						}
+						props[prop] = desc
+					} catch (e) {
+						console.warn(`Error for ${breadcrumbs.join('.')}.${prop}`, e)
+					}
+				})
+				return props
+			}
+			return extractObjectProps(item)
+		}
+		let data = get_perf_props(item)
+		let datahash = mini(data)
+		let oData = {
+			"data": {
+				hash: datahash,
+				metrics: data,
+			}
+		}
+		if (Object.keys(order).length) {
+			// reorder order
+			let neworder = {}
+			for (const k of Object.keys(order).sort()) {neworder[k] = order[k]}
+			let orderhash = mini(neworder)
+			oData["order"] = {"hash": orderhash, "metrics": neworder}
+		}
+		return oData
+	} catch(e) {
+		return e+""
+	}
+}
+
+function get_engineItem() {
+	domresult.innerHTML = ""
+	domperf.innerHTML = ""
+
+	setTimeout(function() {
+		tstart = performance.now()
+		let selection = document.getElementById("items")
+		let type = selection.value
+		let name = selection.options[selection.selectedIndex].text
+		let displayname = s3 + name + sc + ": "
+		let item
+
+		try {
+			if ("w" === type) {
+				item = window[name]
+			} else if ("p" === type) {
+				item = window[name].prototype
+			}
+			if (item !== undefined) {
+				let oData = get_engineProp(item)
+				if ("string" == typeof oData) {
+					domresult.innerHTML = displayname + oData
+				} else {
+					let hash = mini(oData)
+					domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms"
+					domresult.innerHTML = displayname + hash + "<br><br>" + json_highlight(oData)
+				}
+			} else {
+				domresult.innerHTML = displayname + "oophs... not coded yet"
+			}
+		} catch(e) {
+			domresult.innerHTML = displayname + e+""
+		}
+	}, 170)
+}
+
 function logConsole(name) {
 	let array = [], str = ""
 	if (name == "list") { array = aList; str = "TEST LIST"
@@ -435,375 +571,374 @@ function run() {
 		tstart = performance.now()
 		let code
 
-/** LEVEL ONE ***/
+		/* LEVEL ONE */
+		// undetermined: status confirmed in EOL comments
+		code = 98
+		//rec(typeof keys, "keys", code) // NFI where I got this from
 
-// undetermined: status confirmed in EOL comments
-code = 98
-//rec(typeof keys, "keys", code) // NFI where I got this from
+		// blink only
+		code = 10
+		rec(typeof Keyboard, "Keyboard", code, "function")
+		rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap", code, "function")
+		rec(typeof PERSISTENT, "PERSISTENT", code, "number")
+		rec(typeof TEMPORARY, "TEMPORARY", code, "number")
+		rec(typeof chrome, "chrome", code, "object") // edgeHTML
+		rec(typeof cookieStore, "cookieStore", code, "object")
+		rec(typeof onappinstalled, "onappinstalled", code, "object")
+		rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
+		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
+		rec(typeof openDatabase, "openDatabase", code, "function")
+		rec(typeof originAgentCluster, "originAgentCluster", code, "boolean")
+		rec(typeof trustedTypes, "trustedTypes", code, "object")
+		rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code, "function")
+		rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code, "function")
+			// android
+		rec(typeof getDigitalGoodsService, "getDigitalGoodsService", code, "function")
+			// not in Brave (or android)
+		rec(typeof showDirectoryPicker, "showDirectoryPicker", code, "function")
+		rec(typeof showOpenFilePicker, "showOpenFilePicker", code, "function")
+		rec(typeof showSaveFilePicker, "showSaveFilePicker", code, "function")
+			// newish: not in v90
+		rec(typeof getScreenDetails, "getScreenDetails", code, "function")
+		rec(typeof launchQueue, "launchQueue", code, "object") // + not in Brave (or android)
+		rec(typeof navigation, "navigation", code, "object")
+		rec(typeof onbeforematch, "onbeforematch", code, "object")
+		rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
+		rec(typeof oncontextlost, "oncontextlost", code, "object")
+		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
+		rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
+		rec(typeof sharedStorage, "sharedStorage", code, "object")
+		// newish: since last check; testing chrome 119
+		rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object")
+		rec(typeof fence, "fence", code, "object")
+		rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
+		rec(typeof credentialless, "credentialless", code, "boolean")
+			// other
+		rec(typeof opr, "opr", code, "object") // OPERA (desktop at least)
+		rec(typeof webkitStorageInfo, "webkitStorageInfo", code, "object") // to-be-deprecated see console
 
-// blink only
-code = 10
-rec(typeof Keyboard, "Keyboard", code, "function")
-rec(typeof KeyboardLayoutMap, "KeyboardLayoutMap", code, "function")
-rec(typeof PERSISTENT, "PERSISTENT", code, "number")
-rec(typeof TEMPORARY, "TEMPORARY", code, "number")
-rec(typeof chrome, "chrome", code, "object") // edgeHTML
-rec(typeof cookieStore, "cookieStore", code, "object")
-rec(typeof onappinstalled, "onappinstalled", code, "object")
-rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
-rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
-rec(typeof openDatabase, "openDatabase", code, "function")
-rec(typeof originAgentCluster, "originAgentCluster", code, "boolean")
-rec(typeof trustedTypes, "trustedTypes", code, "object")
-rec(typeof webkitRequestFileSystem, "webkitRequestFileSystem", code, "function")
-rec(typeof webkitResolveLocalFileSystemURL, "webkitResolveLocalFileSystemURL", code, "function")
-	// android
-rec(typeof getDigitalGoodsService, "getDigitalGoodsService", code, "function")
-	// not in Brave (or android)
-rec(typeof showDirectoryPicker, "showDirectoryPicker", code, "function")
-rec(typeof showOpenFilePicker, "showOpenFilePicker", code, "function")
-rec(typeof showSaveFilePicker, "showSaveFilePicker", code, "function")
-	// newish: not in v90
-rec(typeof getScreenDetails, "getScreenDetails", code, "function")
-rec(typeof launchQueue, "launchQueue", code, "object") // + not in Brave (or android)
-rec(typeof navigation, "navigation", code, "object")
-rec(typeof onbeforematch, "onbeforematch", code, "object")
-rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
-rec(typeof oncontextlost, "oncontextlost", code, "object")
-rec(typeof oncontextrestored, "oncontextrestored", code, "object")
-rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
-rec(typeof sharedStorage, "sharedStorage", code, "object")
-// newish: since last check; testing chrome 119
-rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object")
-rec(typeof fence, "fence", code, "object")
-rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
-rec(typeof credentialless, "credentialless", code, "boolean")
-	// other
-rec(typeof opr, "opr", code, "object") // OPERA (desktop at least)
-rec(typeof webkitStorageInfo, "webkitStorageInfo", code, "object") // to-be-deprecated see console
+		// edgeHTML only
+		code = 11
+		/* notes: has
+			blink only: chrome, offscreenBuffering
+			gecko only: ondevicelight, onvrdisplayactivate, onvrdisplayconnect, onvrdisplaydeactivate, onvrdisplaydisconnect, onvrdisplaypresentchange
+			webkit only: browser, getMatchedCSSRules, webkitConvertPointFromNodeToPage, webkitConvertPointFromPageToNode
+			also pairs are a mess
+		*/
+		rec(typeof clearImmediate, "clearImmediate", code, "function")
+		rec(typeof msWriteProfilerMark, "msWriteProfilerMark", code, "function")
+		rec(typeof oncompassneedscalibration, "oncompassneedscalibration", code, "object")
+		rec(typeof onmsgesturechange, "onmsgesturechange", code, "object")
+		rec(typeof onmsgesturedoubletap, "onmsgesturedoubletap", code, "object")
+		rec(typeof onmsgestureend, "onmsgestureend", code, "object")
+		rec(typeof onmsgesturehold, "onmsgesturehold", code, "object")
+		rec(typeof onmsgesturestart, "onmsgesturestart", code, "object")
+		rec(typeof onmsgesturetap, "onmsgesturetap", code, "object")
+		rec(typeof onmsinertiastart, "onmsinertiastart", code, "object")
+		rec(typeof onreadystatechange, "onreadystatechange", code, "object")
+		rec(typeof onvrdisplayblur, "onvrdisplayblur", code, "object")
+		rec(typeof onvrdisplayfocus, "onvrdisplayfocus", code, "object")
+		rec(typeof onvrdisplaypointerrestricted, "onvrdisplaypointerrestricted", code, "object")
+		rec(typeof onvrdisplaypointerunrestricted, "onvrdisplaypointerunrestricted", code, "object")
+		rec(typeof setImmediate, "setImmediate", code, "function")
 
-// edgeHTML only
-code = 11
-	/* notes: has
-		blink only: chrome, offscreenBuffering
-		gecko only: ondevicelight, onvrdisplayactivate, onvrdisplayconnect, onvrdisplaydeactivate, onvrdisplaydisconnect, onvrdisplaypresentchange
-		webkit only: browser, getMatchedCSSRules, webkitConvertPointFromNodeToPage, webkitConvertPointFromPageToNode
-		also pairs are a mess
-	*/
-rec(typeof clearImmediate, "clearImmediate", code, "function")
-rec(typeof msWriteProfilerMark, "msWriteProfilerMark", code, "function")
-rec(typeof oncompassneedscalibration, "oncompassneedscalibration", code, "object")
-rec(typeof onmsgesturechange, "onmsgesturechange", code, "object")
-rec(typeof onmsgesturedoubletap, "onmsgesturedoubletap", code, "object")
-rec(typeof onmsgestureend, "onmsgestureend", code, "object")
-rec(typeof onmsgesturehold, "onmsgesturehold", code, "object")
-rec(typeof onmsgesturestart, "onmsgesturestart", code, "object")
-rec(typeof onmsgesturetap, "onmsgesturetap", code, "object")
-rec(typeof onmsinertiastart, "onmsinertiastart", code, "object")
-rec(typeof onreadystatechange, "onreadystatechange", code, "object")
-rec(typeof onvrdisplayblur, "onvrdisplayblur", code, "object")
-rec(typeof onvrdisplayfocus, "onvrdisplayfocus", code, "object")
-rec(typeof onvrdisplaypointerrestricted, "onvrdisplaypointerrestricted", code, "object")
-rec(typeof onvrdisplaypointerunrestricted, "onvrdisplaypointerunrestricted", code, "object")
-rec(typeof setImmediate, "setImmediate", code, "function")
+		// gecko only
+		code = 12
+			// stable FF52+
+		rec(typeof KeyEvent, "KeyEvent", code, "function")
+		rec(typeof dump, "dump", code, "function")
+		rec(typeof fullScreen, "fullScreen", code, "boolean")
+		rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle", code, "function")
+		rec(typeof mozInnerScreenX, "mozInnerScreenX", code, "number")
+		rec(typeof mozInnerScreenY, "mozInnerScreenY", code, "number")
+		rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code, "object")
+		rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code, "object")
+		rec(typeof scrollByLines, "scrollByLines", code, "function")
+		rec(typeof scrollByPages, "scrollByPages", code, "function")
+		rec(typeof scrollMaxX, "scrollMaxX", code, "number")
+		rec(typeof scrollMaxY, "scrollMaxY", code, "number")
+		rec(typeof setResizable, "setResizable", code, "function")
+		rec(typeof updateCommands, "updateCommands", code, "function")
+			// new
+		rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
+		rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
+		rec(typeof oncut, "oncut", code, "object") // FF110+
+		rec(typeof oncopy, "oncopy", code, "object") // FF110+
+		rec(typeof onpaste, "onpaste", code, "object") // FF110+
+			// deprecated
+		rec(typeof mozPaintCount, "mozPaintCount", code, "number") // removed FF72
+		rec(typeof onshow, "onshow", code, "object") // removed FF85 (+ not goanna or Waterfox Classic)
+		rec(typeof ondevicelight, "ondevicelight", code, "object") // removed FF89
+		rec(typeof ondeviceproximity, "ondeviceproximity", code, "object") // removed FF89
+		rec(typeof onuserproximity, "onuserproximity", code, "object") // removed FF89
+		rec(typeof content, "content", code, "object") // removed FF101
+		rec(typeof sidebar, "sidebar", code, "object") // removed FF102
+		rec(typeof onloadend, "onloadend", code, "object") // removed FF107 1574487
+		rec(typeof InstallTrigger, "InstallTrigger", code, "object") // to-be-deprecated (+prefs)
+		rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object") // removed FF110 1689631
+		rec(typeof sizeToContent, "sizeToContent", code, "function") // removed nightly FF117+ 1832733 / 1600400
 
-// gecko only
-code = 12
-	// stable FF52+
-rec(typeof KeyEvent, "KeyEvent", code, "function")
-rec(typeof dump, "dump", code, "function")
-rec(typeof fullScreen, "fullScreen", code, "boolean")
-rec(typeof getDefaultComputedStyle, "getDefaultComputedStyle", code, "function")
-rec(typeof mozInnerScreenX, "mozInnerScreenX", code, "number")
-rec(typeof mozInnerScreenY, "mozInnerScreenY", code, "number")
-rec(typeof onmozfullscreenchange, "onmozfullscreenchange", code, "object")
-rec(typeof onmozfullscreenerror, "onmozfullscreenerror", code, "object")
-rec(typeof scrollByLines, "scrollByLines", code, "function")
-rec(typeof scrollByPages, "scrollByPages", code, "function")
-rec(typeof scrollMaxX, "scrollMaxX", code, "number")
-rec(typeof scrollMaxY, "scrollMaxY", code, "number")
-rec(typeof setResizable, "setResizable", code, "function")
-rec(typeof updateCommands, "updateCommands", code, "function")
-	// new
-rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
-rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
-rec(typeof oncut, "oncut", code, "object") // FF110+
-rec(typeof oncopy, "oncopy", code, "object") // FF110+
-rec(typeof onpaste, "onpaste", code, "object") // FF110+
-	// deprecated
-rec(typeof mozPaintCount, "mozPaintCount", code, "number") // removed FF72
-rec(typeof onshow, "onshow", code, "object") // removed FF85 (+ not goanna or Waterfox Classic)
-rec(typeof ondevicelight, "ondevicelight", code, "object") // removed FF89
-rec(typeof ondeviceproximity, "ondeviceproximity", code, "object") // removed FF89
-rec(typeof onuserproximity, "onuserproximity", code, "object") // removed FF89
-rec(typeof content, "content", code, "object") // removed FF101
-rec(typeof sidebar, "sidebar", code, "object") // removed FF102
-rec(typeof onloadend, "onloadend", code, "object") // removed FF107 1574487
-rec(typeof InstallTrigger, "InstallTrigger", code, "object") // to-be-deprecated (+prefs)
-rec(typeof onabsolutedeviceorientation, "onabsolutedeviceorientation", code, "object") // removed FF110 1689631
-rec(typeof sizeToContent, "sizeToContent", code, "function") // removed nightly FF117+ 1832733 / 1600400
+			// prefs
+		rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code, "object") // dom.vr.enabled (+ not in FF52)
+		rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code, "object")
+		rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code, "object") // (+ not in FF52)
+		rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code, "object")
+		rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code, "object")
+		rec(typeof u2f, "u2f", code, "object") // security.webauth.u2f
 
-	// prefs
-rec(typeof onvrdisplayactivate, "onvrdisplayactivate", code, "object") // dom.vr.enabled (+ not in FF52)
-rec(typeof onvrdisplayconnect, "onvrdisplayconnect", code, "object")
-rec(typeof onvrdisplaydeactivate, "onvrdisplaydeactivate", code, "object") // (+ not in FF52)
-rec(typeof onvrdisplaydisconnect, "onvrdisplaydisconnect", code, "object")
-rec(typeof onvrdisplaypresentchange, "onvrdisplaypresentchange", code, "object")
-rec(typeof u2f, "u2f", code, "object") // security.webauth.u2f
+		// webkit only
+		code = 14
+		rec(typeof browser, "browser", code, "object")
+		rec(typeof getMatchedCSSRules, "getMatchedCSSRules", code, "function")
+		rec(typeof safari, "safari", code, "object")
+		rec(typeof showModalDialog, "showModalDialog", code, "function")
+		rec(typeof webkitCancelRequestAnimationFrame, "webkitCancelRequestAnimationFrame", code, "function")
+		rec(typeof webkitConvertPointFromNodeToPage, "webkitConvertPointFromNodeToPage", code, "function")
+		rec(typeof webkitConvertPointFromPageToNode, "webkitConvertPointFromPageToNode", code, "function")
+		rec(typeof webkitIndexedDB, "webkitIndexedDB", code, "object")
 
-// webkit only
-code = 14
-rec(typeof browser, "browser", code, "object")
-rec(typeof getMatchedCSSRules, "getMatchedCSSRules", code, "function")
-rec(typeof safari, "safari", code, "object")
-rec(typeof showModalDialog, "showModalDialog", code, "function")
-rec(typeof webkitCancelRequestAnimationFrame, "webkitCancelRequestAnimationFrame", code, "function")
-rec(typeof webkitConvertPointFromNodeToPage, "webkitConvertPointFromNodeToPage", code, "function")
-rec(typeof webkitConvertPointFromPageToNode, "webkitConvertPointFromPageToNode", code, "function")
-rec(typeof webkitIndexedDB, "webkitIndexedDB", code, "object")
+		// blink + gecko (not seen in webkit)
+		code = 50
+		rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
+		rec(typeof external, "external", code, "object")
+		rec(typeof onauxclick, "onauxclick", code, "object")
+		rec(typeof onbeforeinput, "onbeforeinput", code, "object")
+		rec(typeof onbeforetoggle, "onbeforetoggle", code, "object") // FF122+ 1867326 (and 1823359)
+		rec(typeof ondevicemotion, "ondevicemotion", code, "object")
+		rec(typeof ondeviceorientation, "ondeviceorientation", code, "object")
+		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
+		rec(typeof ondragexit, "ondragexit", code, "object") // touch
+		rec(typeof onmessageerror, "onmessageerror", code, "object")
+		rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
+		rec(typeof onscrollend, "onscrollend", code, "object")
+		rec(typeof ontouchcancel, "ontouchcancel", code, "object")
+		rec(typeof ontouchend, "ontouchend", code, "object")
+		rec(typeof ontouchmove, "ontouchmove", code, "object")
+		rec(typeof ontouchstart, "ontouchstart", code, "object")
+		rec(typeof orientation, "orientation", code, "number")
+		rec(typeof requestIdleCallback, "requestIdleCallback", code, "function")
+		rec(typeof scheduler, "scheduler", code, "object")
 
-// blink + gecko (not seen in webkit)
-code = 50
-rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
-rec(typeof external, "external", code, "object")
-rec(typeof onauxclick, "onauxclick", code, "object")
-rec(typeof onbeforeinput, "onbeforeinput", code, "object")
-rec(typeof onbeforetoggle, "onbeforetoggle", code, "object") // FF122+ 1867326 (and 1823359)
-rec(typeof ondevicemotion, "ondevicemotion", code, "object")
-rec(typeof ondeviceorientation, "ondeviceorientation", code, "object")
-rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
-rec(typeof ondragexit, "ondragexit", code, "object") // touch
-rec(typeof onmessageerror, "onmessageerror", code, "object")
-rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
-rec(typeof onscrollend, "onscrollend", code, "object")
-rec(typeof ontouchcancel, "ontouchcancel", code, "object")
-rec(typeof ontouchend, "ontouchend", code, "object")
-rec(typeof ontouchmove, "ontouchmove", code, "object")
-rec(typeof ontouchstart, "ontouchstart", code, "object")
-rec(typeof orientation, "orientation", code, "number")
-rec(typeof requestIdleCallback, "requestIdleCallback", code, "function")
-rec(typeof scheduler, "scheduler", code, "object")
+		// blink + webkit (not seen in gecko)
+		code = 52
+		rec(typeof defaultstatus, "defaultstatus", code, "string")
+		rec(typeof defaultStatus, "defaultStatus", code, "string")
+		rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
+		rec(typeof onmousewheel, "onmousewheel", code, "object")
+		rec(typeof onsearch, "onsearch", code, "object")
+		rec(typeof styleMedia, "styleMedia", code, "object")
+		rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame", code, "function")
+		rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code, "function")
 
-// blink + webkit (not seen in gecko)
-code = 52
-rec(typeof defaultstatus, "defaultstatus", code, "string")
-rec(typeof defaultStatus, "defaultStatus", code, "string")
-rec(typeof offscreenBuffering, "offscreenBuffering", code, "boolean") // edgeHTML
-rec(typeof onmousewheel, "onmousewheel", code, "object")
-rec(typeof onsearch, "onsearch", code, "object")
-rec(typeof styleMedia, "styleMedia", code, "object")
-rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame", code, "function")
-rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code, "function")
+		// gecko + webkit (not seen in blink)
+		code = 54
+		rec(typeof onanimationcancel, "onanimationcancel", code, "object")
 
-// gecko + webkit (not seen in blink)
-code = 54
-rec(typeof onanimationcancel, "onanimationcancel", code, "object")
+		// I: IGNORE: confirmed common in blink, gecko, webkit
+		code = 99
+		rec(typeof addEventListener, "addEventListener", code, "function")
+		rec(typeof alert, "alert", code, "function")
+		rec(typeof applicationCache, "applicationCache", code, "object")
+			// ^ gecko confirmed: pref-to-be-deprecated (appCache itself is deprecated: the API does nothing)
+			// ^ ignore: appCache would have been in other older engine(s) releases
+		rec(typeof atob, "atob", code, "function")
+		rec(typeof blur, "blur", code, "function")
+		rec(typeof btoa, "btoa", code, "function")
+		rec(typeof caches, "caches", code, "object")
+		rec(typeof cancelAnimationFrame, "cancelAnimationFrame", code, "function")
+		rec(typeof captureEvents, "captureEvents", code, "function")
+		rec(typeof clearInterval, "clearInterval", code, "function")
+		rec(typeof clearTimeout, "clearTimeout", code, "function")
+		rec(typeof clientInformation, "clientInformation", code, "object")
+		rec(typeof close, "close", code, "function")
+		rec(typeof closed, "closed", code, "boolean")
+		rec(typeof confirm, "confirm", code, "function")
+		rec(typeof createImageBitmap, "createImageBitmap", code, "function")
+		rec(typeof crossOriginIsolated, "crossOriginIsolated", code, "boolean")
+		rec(typeof crypto, "crypto", code, "object")
+		rec(typeof customElements, "customElements", code, "object")
+		rec(typeof devicePixelRatio, "devicePixelRatio", code, "number")
+		rec(typeof dispatchEvent, "dispatchEvent", code, "function")
+		rec(typeof document, "document", code, "object")
+		rec(typeof fetch, "fetch", code, "function")
+		rec(typeof find, "find", code, "function")
+		rec(typeof focus, "focus", code, "function")
+		rec(typeof frameElement, "frameElement", code, "object")
+		rec(typeof frames, "frames", code, "object")
+		rec(typeof getComputedStyle, "getComputedStyle", code, "function")
+		rec(typeof getSelection, "getSelection", code, "function")
+		rec(typeof history, "history", code, "object")
+		rec(typeof indexedDB, "indexedDB", code, "object")
+		rec(typeof innerHeight, "innerHeight", code, "number")
+		rec(typeof innerWidth, "innerWidth", code, "number")
+		rec(typeof isSecureContext, "isSecureContext", code, "boolean")
+		rec(typeof KeyboardEvent, "KeyboardEvent", code, "function")
+		rec(typeof KeyframeEffect, "KeyframeEffect", code, "function")
+		rec(typeof length, "length", code, "number")
+		rec(typeof localStorage, "localStorage", code, "object")
+		rec(typeof location, "location", code, "object")
+		rec(typeof locationbar, "locationbar", code, "object")
+		rec(typeof matchMedia, "matchMedia", code, "function")
+		rec(typeof menubar, "menubar", code, "object")
+		rec(typeof moveBy, "moveBy", code, "function")
+		rec(typeof moveTo, "moveTo", code, "function")
+		rec(typeof name, "name", code, "string")
+		rec(typeof navigator, "navigator", code, "object")
+		rec(typeof onabort, "onabort", code, "object")
+		rec(typeof onafterprint, "onafterprint", code, "object")
+		rec(typeof onanimationend, "onanimationend", code, "object")
+		rec(typeof onanimationiteration, "onanimationiteration", code, "object")
+		rec(typeof onanimationstart, "onanimationstart", code, "object")
+		rec(typeof onbeforeprint, "onbeforeprint", code, "object")
+		rec(typeof onbeforeunload, "onbeforeunload", code, "object")
+		rec(typeof onblur, "onblur", code, "object")
+		rec(typeof oncancel, "oncancel", code, "object")
+		rec(typeof oncanplay, "oncanplay", code, "object")
+		rec(typeof oncanplaythrough, "oncanplaythrough", code, "object")
+		rec(typeof onchange, "onchange", code, "object")
+		rec(typeof onclick, "onclick", code, "object")
+		rec(typeof onclose, "onclose", code, "object")
+		rec(typeof oncontextmenu, "oncontextmenu", code, "object")
+		rec(typeof oncuechange, "oncuechange", code, "object")
+		rec(typeof ondblclick, "ondblclick", code, "object")
+		rec(typeof ondrag, "ondrag", code, "object")
+		rec(typeof ondragend, "ondragend", code, "object")
+		rec(typeof ondragenter, "ondragenter", code, "object")
+		rec(typeof ondragleave, "ondragleave", code, "object")
+		rec(typeof ondragover, "ondragover", code, "object")
+		rec(typeof ondragstart, "ondragstart", code, "object")
+		rec(typeof ondrop, "ondrop", code, "object")
+		rec(typeof ondurationchange, "ondurationchange", code, "object")
+		rec(typeof onemptied, "onemptied", code, "object")
+		rec(typeof onended, "onended", code, "object")
+		rec(typeof onerror, "onerror", code, "object")
+		rec(typeof onfocus, "onfocus", code, "object")
+		rec(typeof onformdata, "onformdata", code, "object")
+		rec(typeof ongotpointercapture, "ongotpointercapture", code, "object")
+		rec(typeof onhashchange, "onhashchange", code, "object")
+		rec(typeof oninput, "oninput", code, "object")
+		rec(typeof oninvalid, "oninvalid", code, "object")
+		rec(typeof onkeydown, "onkeydown", code, "object")
+		rec(typeof onkeypress, "onkeypress", code, "object")
+		rec(typeof onkeyup, "onkeyup", code, "object")
+		rec(typeof onlanguagechange, "onlanguagechange", code, "object")
+		rec(typeof onload, "onload", code, "object")
+		rec(typeof onloadeddata, "onloadeddata", code, "object")
+		rec(typeof onloadedmetadata, "onloadedmetadata", code, "object")
+		rec(typeof onloadstart, "onloadstart", code, "object")
+		rec(typeof onlostpointercapture, "onlostpointercapture", code, "object")
+		rec(typeof onmessage, "onmessage", code, "object")
+		rec(typeof onmousedown, "onmousedown", code, "object")
+		rec(typeof onmouseenter, "onmouseenter", code, "object")
+		rec(typeof onmouseleave, "onmouseleave", code, "object")
+		rec(typeof onmousemove, "onmousemove", code, "object")
+		rec(typeof onmouseout, "onmouseout", code, "object")
+		rec(typeof onmouseover, "onmouseover", code, "object")
+		rec(typeof onmouseup, "onmouseup", code, "object")
+		rec(typeof onoffline, "onoffline", code, "object")
+		rec(typeof ononline, "ononline", code, "object")
+		rec(typeof onpagehide, "onpagehide", code, "object")
+		rec(typeof onpageshow, "onpageshow", code, "object")
+		rec(typeof onpause, "onpause", code, "object")
+		rec(typeof onplay, "onplay", code, "object")
+		rec(typeof onplaying, "onplaying", code, "object")
+		rec(typeof onpointercancel, "onpointercancel", code, "object")
+		rec(typeof onpointerdown, "onpointerdown", code, "object")
+		rec(typeof onpointerenter, "onpointerenter", code, "object")
+		rec(typeof onpointerleave, "onpointerleave", code, "object")
+		rec(typeof onpointermove, "onpointermove", code, "object")
+		rec(typeof onpointerout, "onpointerout", code, "object")
+		rec(typeof onpointerover, "onpointerover", code, "object")
+		rec(typeof onpointerup, "onpointerup", code, "object")
+		rec(typeof onpopstate, "onpopstate", code, "object")
+		rec(typeof onprogress, "onprogress", code, "object")
+		rec(typeof onratechange, "onratechange", code, "object")
+		rec(typeof onrejectionhandled, "onrejectionhandled", code, "object")
+		rec(typeof onreset, "onreset", code, "object")
+		rec(typeof onresize, "onresize", code, "object")
+		rec(typeof onscroll, "onscroll", code, "object")
+		rec(typeof onsecuritypolicyviolation, "onsecuritypolicyviolation", code, "object")
+		rec(typeof onseeked, "onseeked", code, "object")
+		rec(typeof onseeking, "onseeking", code, "object")
+		rec(typeof onselect, "onselect", code, "object")
+		rec(typeof onselectionchange, "onselectionchange", code, "object")
+		rec(typeof onselectstart, "onselectstart", code, "object")
+		rec(typeof onslotchange, "onslotchange", code, "object")
+		rec(typeof onstalled, "onstalled", code, "object")
+		rec(typeof onstorage, "onstorage", code, "object")
+		rec(typeof onsubmit, "onsubmit", code, "object")
+		rec(typeof onsuspend, "onsuspend", code, "object")
+		rec(typeof ontimeupdate, "ontimeupdate", code, "object")
+		rec(typeof ontoggle, "ontoggle", code, "object")
+		rec(typeof ontransitioncancel, "ontransitioncancel", code, "object")
+		rec(typeof ontransitionend, "ontransitionend", code, "object")
+		rec(typeof ontransitionrun, "ontransitionrun", code, "object")
+		rec(typeof ontransitionstart, "ontransitionstart", code, "object")
+		rec(typeof onunhandledrejection, "onunhandledrejection", code, "object")
+		rec(typeof onunload, "onunload", code, "object")
+		rec(typeof onvolumechange, "onvolumechange", code, "object")
+		rec(typeof onwaiting, "onwaiting", code, "object")
+		rec(typeof onwebkitanimationend, "onwebkitanimationend", code, "object")
+		rec(typeof onwebkitanimationiteration, "onwebkitanimationiteration", code, "object")
+		rec(typeof onwebkitanimationstart, "onwebkitanimationstart", code, "object")
+		rec(typeof onwebkittransitionend, "onwebkittransitionend", code, "object")
+		rec(typeof onwheel, "onwheel", code, "object")
+		rec(typeof open, "open", code, "function")
+		rec(typeof opener, "opener", code, "object")
+		rec(typeof origin, "origin", code, "string")
+		rec(typeof outerHeight, "outerHeight", code, "number")
+		rec(typeof outerWidth, "outerWidth", code, "number")
+		rec(typeof pageXOffset, "pageXOffset", code, "number")
+		rec(typeof pageYOffset, "pageYOffset", code, "number")
+		rec(typeof parent, "parent", code, "object")
+		rec(typeof performance, "performance", code, "object")
+		rec(typeof personalbar, "personalbar", code, "object")
+		rec(typeof postMessage, "postMessage", code, "function")
+		rec(typeof print, "print", code, "function")
+		rec(typeof prompt, "prompt", code, "function")
+		rec(typeof queueMicrotask, "queueMicrotask", code, "function")
+		rec(typeof releaseEvents, "releaseEvents", code, "function")
+		rec(typeof removeEventListener, "removeEventListener", code, "function")
+		rec(typeof reportError, "reportError", code, "function")
+		rec(typeof requestAnimationFrame, "requestAnimationFrame", code, "function")
+		rec(typeof resizeBy, "resizeBy", code, "function")
+		rec(typeof resizeTo, "resizeTo", code, "function")
+		rec(typeof screen, "screen", code, "object")
+		rec(typeof screenLeft, "screenLeft", code, "number")
+		rec(typeof screenTop, "screenTop", code, "number")
+		rec(typeof screenX, "screenX", code, "number")
+		rec(typeof screenY, "screenY", code, "number")
+		rec(typeof scroll, "scroll", code, "function")
+		rec(typeof scrollBy, "scrollBy", code, "function")
+		rec(typeof scrollTo, "scrollTo", code, "function")
+		rec(typeof scrollX, "scrollX", code, "number")
+		rec(typeof scrollY, "scrollY", code, "number")
+		rec(typeof scrollbars, "scrollbars", code, "object")
+		rec(typeof self, "self", code, "object")
+		rec(typeof sessionStorage, "sessionStorage", code, "object")
+		rec(typeof setInterval, "setInterval", code, "function")
+		rec(typeof setTimeout, "setTimeout", code, "function")
+		rec(typeof speechSynthesis, "speechSynthesis", code, "object")
+		rec(typeof status, "status", code, "string")
+		rec(typeof statusbar, "statusbar", code, "object")
+		rec(typeof stop, "stop", code, "function")
+		rec(typeof structuredClone, "structuredClone", code, "function")
+		rec(typeof toolbar, "toolbar", code, "object")
+		rec(typeof top, "top", code, "object")
+		rec(typeof visualViewport, "visualViewport", code, "object")
+		rec(typeof window, "window", code, "object")
 
-// I: IGNORE: confirmed common in blink, gecko, webkit
-code = 99
-rec(typeof addEventListener, "addEventListener", code, "function")
-rec(typeof alert, "alert", code, "function")
-rec(typeof applicationCache, "applicationCache", code, "object")
-	// ^ gecko confirmed: pref-to-be-deprecated (appCache itself is deprecated: the API does nothing)
-	// ^ ignore: appCache would have been in other older engine(s) releases
-rec(typeof atob, "atob", code, "function")
-rec(typeof blur, "blur", code, "function")
-rec(typeof btoa, "btoa", code, "function")
-rec(typeof caches, "caches", code, "object")
-rec(typeof cancelAnimationFrame, "cancelAnimationFrame", code, "function")
-rec(typeof captureEvents, "captureEvents", code, "function")
-rec(typeof clearInterval, "clearInterval", code, "function")
-rec(typeof clearTimeout, "clearTimeout", code, "function")
-rec(typeof clientInformation, "clientInformation", code, "object")
-rec(typeof close, "close", code, "function")
-rec(typeof closed, "closed", code, "boolean")
-rec(typeof confirm, "confirm", code, "function")
-rec(typeof createImageBitmap, "createImageBitmap", code, "function")
-rec(typeof crossOriginIsolated, "crossOriginIsolated", code, "boolean")
-rec(typeof crypto, "crypto", code, "object")
-rec(typeof customElements, "customElements", code, "object")
-rec(typeof devicePixelRatio, "devicePixelRatio", code, "number")
-rec(typeof dispatchEvent, "dispatchEvent", code, "function")
-rec(typeof document, "document", code, "object")
-rec(typeof fetch, "fetch", code, "function")
-rec(typeof find, "find", code, "function")
-rec(typeof focus, "focus", code, "function")
-rec(typeof frameElement, "frameElement", code, "object")
-rec(typeof frames, "frames", code, "object")
-rec(typeof getComputedStyle, "getComputedStyle", code, "function")
-rec(typeof getSelection, "getSelection", code, "function")
-rec(typeof history, "history", code, "object")
-rec(typeof indexedDB, "indexedDB", code, "object")
-rec(typeof innerHeight, "innerHeight", code, "number")
-rec(typeof innerWidth, "innerWidth", code, "number")
-rec(typeof isSecureContext, "isSecureContext", code, "boolean")
-rec(typeof KeyboardEvent, "KeyboardEvent", code, "function")
-rec(typeof KeyframeEffect, "KeyframeEffect", code, "function")
-rec(typeof length, "length", code, "number")
-rec(typeof localStorage, "localStorage", code, "object")
-rec(typeof location, "location", code, "object")
-rec(typeof locationbar, "locationbar", code, "object")
-rec(typeof matchMedia, "matchMedia", code, "function")
-rec(typeof menubar, "menubar", code, "object")
-rec(typeof moveBy, "moveBy", code, "function")
-rec(typeof moveTo, "moveTo", code, "function")
-rec(typeof name, "name", code, "string")
-rec(typeof navigator, "navigator", code, "object")
-rec(typeof onabort, "onabort", code, "object")
-rec(typeof onafterprint, "onafterprint", code, "object")
-rec(typeof onanimationend, "onanimationend", code, "object")
-rec(typeof onanimationiteration, "onanimationiteration", code, "object")
-rec(typeof onanimationstart, "onanimationstart", code, "object")
-rec(typeof onbeforeprint, "onbeforeprint", code, "object")
-rec(typeof onbeforeunload, "onbeforeunload", code, "object")
-rec(typeof onblur, "onblur", code, "object")
-rec(typeof oncancel, "oncancel", code, "object")
-rec(typeof oncanplay, "oncanplay", code, "object")
-rec(typeof oncanplaythrough, "oncanplaythrough", code, "object")
-rec(typeof onchange, "onchange", code, "object")
-rec(typeof onclick, "onclick", code, "object")
-rec(typeof onclose, "onclose", code, "object")
-rec(typeof oncontextmenu, "oncontextmenu", code, "object")
-rec(typeof oncuechange, "oncuechange", code, "object")
-rec(typeof ondblclick, "ondblclick", code, "object")
-rec(typeof ondrag, "ondrag", code, "object")
-rec(typeof ondragend, "ondragend", code, "object")
-rec(typeof ondragenter, "ondragenter", code, "object")
-rec(typeof ondragleave, "ondragleave", code, "object")
-rec(typeof ondragover, "ondragover", code, "object")
-rec(typeof ondragstart, "ondragstart", code, "object")
-rec(typeof ondrop, "ondrop", code, "object")
-rec(typeof ondurationchange, "ondurationchange", code, "object")
-rec(typeof onemptied, "onemptied", code, "object")
-rec(typeof onended, "onended", code, "object")
-rec(typeof onerror, "onerror", code, "object")
-rec(typeof onfocus, "onfocus", code, "object")
-rec(typeof onformdata, "onformdata", code, "object")
-rec(typeof ongotpointercapture, "ongotpointercapture", code, "object")
-rec(typeof onhashchange, "onhashchange", code, "object")
-rec(typeof oninput, "oninput", code, "object")
-rec(typeof oninvalid, "oninvalid", code, "object")
-rec(typeof onkeydown, "onkeydown", code, "object")
-rec(typeof onkeypress, "onkeypress", code, "object")
-rec(typeof onkeyup, "onkeyup", code, "object")
-rec(typeof onlanguagechange, "onlanguagechange", code, "object")
-rec(typeof onload, "onload", code, "object")
-rec(typeof onloadeddata, "onloadeddata", code, "object")
-rec(typeof onloadedmetadata, "onloadedmetadata", code, "object")
-rec(typeof onloadstart, "onloadstart", code, "object")
-rec(typeof onlostpointercapture, "onlostpointercapture", code, "object")
-rec(typeof onmessage, "onmessage", code, "object")
-rec(typeof onmousedown, "onmousedown", code, "object")
-rec(typeof onmouseenter, "onmouseenter", code, "object")
-rec(typeof onmouseleave, "onmouseleave", code, "object")
-rec(typeof onmousemove, "onmousemove", code, "object")
-rec(typeof onmouseout, "onmouseout", code, "object")
-rec(typeof onmouseover, "onmouseover", code, "object")
-rec(typeof onmouseup, "onmouseup", code, "object")
-rec(typeof onoffline, "onoffline", code, "object")
-rec(typeof ononline, "ononline", code, "object")
-rec(typeof onpagehide, "onpagehide", code, "object")
-rec(typeof onpageshow, "onpageshow", code, "object")
-rec(typeof onpause, "onpause", code, "object")
-rec(typeof onplay, "onplay", code, "object")
-rec(typeof onplaying, "onplaying", code, "object")
-rec(typeof onpointercancel, "onpointercancel", code, "object")
-rec(typeof onpointerdown, "onpointerdown", code, "object")
-rec(typeof onpointerenter, "onpointerenter", code, "object")
-rec(typeof onpointerleave, "onpointerleave", code, "object")
-rec(typeof onpointermove, "onpointermove", code, "object")
-rec(typeof onpointerout, "onpointerout", code, "object")
-rec(typeof onpointerover, "onpointerover", code, "object")
-rec(typeof onpointerup, "onpointerup", code, "object")
-rec(typeof onpopstate, "onpopstate", code, "object")
-rec(typeof onprogress, "onprogress", code, "object")
-rec(typeof onratechange, "onratechange", code, "object")
-rec(typeof onrejectionhandled, "onrejectionhandled", code, "object")
-rec(typeof onreset, "onreset", code, "object")
-rec(typeof onresize, "onresize", code, "object")
-rec(typeof onscroll, "onscroll", code, "object")
-rec(typeof onsecuritypolicyviolation, "onsecuritypolicyviolation", code, "object")
-rec(typeof onseeked, "onseeked", code, "object")
-rec(typeof onseeking, "onseeking", code, "object")
-rec(typeof onselect, "onselect", code, "object")
-rec(typeof onselectionchange, "onselectionchange", code, "object")
-rec(typeof onselectstart, "onselectstart", code, "object")
-rec(typeof onslotchange, "onslotchange", code, "object")
-rec(typeof onstalled, "onstalled", code, "object")
-rec(typeof onstorage, "onstorage", code, "object")
-rec(typeof onsubmit, "onsubmit", code, "object")
-rec(typeof onsuspend, "onsuspend", code, "object")
-rec(typeof ontimeupdate, "ontimeupdate", code, "object")
-rec(typeof ontoggle, "ontoggle", code, "object")
-rec(typeof ontransitioncancel, "ontransitioncancel", code, "object")
-rec(typeof ontransitionend, "ontransitionend", code, "object")
-rec(typeof ontransitionrun, "ontransitionrun", code, "object")
-rec(typeof ontransitionstart, "ontransitionstart", code, "object")
-rec(typeof onunhandledrejection, "onunhandledrejection", code, "object")
-rec(typeof onunload, "onunload", code, "object")
-rec(typeof onvolumechange, "onvolumechange", code, "object")
-rec(typeof onwaiting, "onwaiting", code, "object")
-rec(typeof onwebkitanimationend, "onwebkitanimationend", code, "object")
-rec(typeof onwebkitanimationiteration, "onwebkitanimationiteration", code, "object")
-rec(typeof onwebkitanimationstart, "onwebkitanimationstart", code, "object")
-rec(typeof onwebkittransitionend, "onwebkittransitionend", code, "object")
-rec(typeof onwheel, "onwheel", code, "object")
-rec(typeof open, "open", code, "function")
-rec(typeof opener, "opener", code, "object")
-rec(typeof origin, "origin", code, "string")
-rec(typeof outerHeight, "outerHeight", code, "number")
-rec(typeof outerWidth, "outerWidth", code, "number")
-rec(typeof pageXOffset, "pageXOffset", code, "number")
-rec(typeof pageYOffset, "pageYOffset", code, "number")
-rec(typeof parent, "parent", code, "object")
-rec(typeof performance, "performance", code, "object")
-rec(typeof personalbar, "personalbar", code, "object")
-rec(typeof postMessage, "postMessage", code, "function")
-rec(typeof print, "print", code, "function")
-rec(typeof prompt, "prompt", code, "function")
-rec(typeof queueMicrotask, "queueMicrotask", code, "function")
-rec(typeof releaseEvents, "releaseEvents", code, "function")
-rec(typeof removeEventListener, "removeEventListener", code, "function")
-rec(typeof reportError, "reportError", code, "function")
-rec(typeof requestAnimationFrame, "requestAnimationFrame", code, "function")
-rec(typeof resizeBy, "resizeBy", code, "function")
-rec(typeof resizeTo, "resizeTo", code, "function")
-rec(typeof screen, "screen", code, "object")
-rec(typeof screenLeft, "screenLeft", code, "number")
-rec(typeof screenTop, "screenTop", code, "number")
-rec(typeof screenX, "screenX", code, "number")
-rec(typeof screenY, "screenY", code, "number")
-rec(typeof scroll, "scroll", code, "function")
-rec(typeof scrollBy, "scrollBy", code, "function")
-rec(typeof scrollTo, "scrollTo", code, "function")
-rec(typeof scrollX, "scrollX", code, "number")
-rec(typeof scrollY, "scrollY", code, "number")
-rec(typeof scrollbars, "scrollbars", code, "object")
-rec(typeof self, "self", code, "object")
-rec(typeof sessionStorage, "sessionStorage", code, "object")
-rec(typeof setInterval, "setInterval", code, "function")
-rec(typeof setTimeout, "setTimeout", code, "function")
-rec(typeof speechSynthesis, "speechSynthesis", code, "object")
-rec(typeof status, "status", code, "string")
-rec(typeof statusbar, "statusbar", code, "object")
-rec(typeof stop, "stop", code, "function")
-rec(typeof structuredClone, "structuredClone", code, "function")
-rec(typeof toolbar, "toolbar", code, "object")
-rec(typeof top, "top", code, "object")
-rec(typeof visualViewport, "visualViewport", code, "object")
-rec(typeof window, "window", code, "object")
-
-// LEVEL 2
-// I don't think we need bother with level 2 for a mini isEngine
-/*
-if ("undefined" !== typeof caches) {
-	rec(typeof caches.delete, "caches.delete")
-	rec(typeof caches.has, "caches.has")
-	rec(typeof caches.keys, "caches.keys")
-	rec(typeof caches.match, "caches.match")
-	rec(typeof caches.open, "caches.open")
-}
-*/
+		// LEVEL 2
+		// I don't think we need bother with level 2 for a mini isEngine
+		/*
+		if ("undefined" !== typeof caches) {
+			rec(typeof caches.delete, "caches.delete")
+			rec(typeof caches.has, "caches.has")
+			rec(typeof caches.keys, "caches.keys")
+			rec(typeof caches.match, "caches.match")
+			rec(typeof caches.open, "caches.open")
+		}
+		*/
 		output()
 	} catch(e) {
 		console.error(e.name, e.message)
@@ -825,6 +960,8 @@ function scrape() {
 		delete result.collectProps
 		delete result.compare
 		delete result.copyclip
+		delete result.get_engineItem
+		delete result.get_engineProp
 		delete result.get_miniEngine
 		delete result.json_highlight
 		delete result.json_stringify
@@ -870,7 +1007,7 @@ function scrape() {
 
 		// hash it for easier compare
 		let hash = mini(result)
-		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms | "
+		domperf.innerHTML = Math.round((performance.now() - tstart)) +" ms"
 
 		// check if any first level items are not in aList
 		let strNew = ""
@@ -883,7 +1020,6 @@ function scrape() {
 		}
 		domresult.innerHTML = strNew + strDel + s3 + "HASH: "+ sc + hash +"<br><br>"
 			+ json_highlight(result)
-			//+ JSON.stringify(result, null, 2)
 
 	}, 100)
 }
@@ -926,7 +1062,6 @@ function compare() {
 	console.log("COMMON IN GECKO + WEBKIT ONLY: "+ GWonly.length +"\n" + GWonly.join("\n"))
 }
 //compare()
-
 
 function get_miniEngine() {
 	let tstart = performance.now()
