@@ -510,21 +510,27 @@ function outputMisc() {
 	let t0 = nowFn()
 	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
 	let isMathLies = check_mathLies()
+
+	let METRIC = "error_message_fix"
 	try {null.bar} catch(e) {
 		let notation = ""
 		if (isSmart && isTB) {
 			notation = (e+"" === "TypeError: null has no properties" ? tb_green : tb_red)
 		}
-		addDataDisplay(18, "error_message_fix", e.message + notation) // FF74+: 1259822
+		log_display(18, METRIC, e.message + notation)
+		addData(18, METRIC, e.message) // FF74+: 1259822
 	}
+
 	/* other perf prefs are reflected in window properties
 		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
 		dom.enable_performance_navigation_timing: PerformanceNavigationTiming
-		dom.performance.time_to_contentful_paint.enabled: ?
-	*/
+		dom.enable_event_timing: EventCounts, PerformanceEventTiming
 
+		dom.performance.time_to_contentful_paint.enabled: ?
+		dom.enable_performance: ?
+	*/
 	// dom.enable_resource_timing
-	let METRIC = "perf_resource"
+	METRIC = "perf_resource"
 	try {
 		if (isFile) {
 			addDataDisplay(18, METRIC, zNA)
