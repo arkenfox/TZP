@@ -123,7 +123,7 @@ let tb_standard = sg+"[TB Standard]"+sc,
 // run once
 let isArch = true,
 	isAutoPlay,
-	isAutoPlayErr,
+	isAutoPlayError,
 	isDevices,
 	isFile = false,
 	isFileSystem,
