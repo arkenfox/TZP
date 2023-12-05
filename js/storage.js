@@ -204,7 +204,7 @@ const get_permissions = (item) => new Promise(resolve => {
 	const METRIC = "permission_"+ item
 	let notation = ""
 	function exit(value) {
-		if (isSmart) {notation = value == "prompt" ? "" : default_red}
+		if (isSmart) {notation = value == "prompt" ? default_green : default_red}
 		log_display(6, METRIC, value + notation)
 		if (item == "persistent-storage" && value == "granted") {
 			// silent run manager to force granted quota when run
