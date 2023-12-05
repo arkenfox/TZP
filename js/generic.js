@@ -251,6 +251,38 @@ function get_isArch() {
 	}
 }
 
+function get_isAutoplay() {
+	// get non-user-gesture values once
+	let t0 = nowFn()
+	const METRIC = "getAutoplayPolicy"
+	try {
+		let atest, mtest
+		let ares = navigator.getAutoplayPolicy("audiocontext")
+		try {
+			atest = navigator.getAutoplayPolicy(dom.audiotest)
+		} catch(e) {
+			log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
+			atest = zErr
+		}
+		let mres = navigator.getAutoplayPolicy("mediaelement")
+		try {
+			mtest = navigator.getAutoplayPolicy(dom.mediatest)
+		} catch(e) {
+			log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
+			mtest = zErr
+		}
+		// combine
+		isAutoPlay = (ares === atest ? ares : ares +", "+ atest) +" | "+ (mres === mtest ? mres : mres +", "+ mtest)
+		log_perf(SECTG, "isAutoPlay", t0)
+		return
+	} catch(e) {
+		isAutoPlay = zErr
+		isAutoPlayError = log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
+		log_perf(SECTG, "isAutoPlay", t0, "", zErr)
+		return
+	}
+}
+
 function get_isDevices() {
 	isDevices = undefined
 	let t0 = nowFn()
@@ -1220,7 +1252,8 @@ function countJS(filename) {
 		let t0 = nowFn()
 		Promise.all([
 			get_isTB(),
-			get_isFileSystem()
+			get_isFileSystem(),
+			get_isAutoplay(),
 		]).then(function(results){
 			if ("boolean" !== typeof results[0] && zErr !== results[0]) {
 				let METRIC = "isTB"
