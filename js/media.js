@@ -5,56 +5,33 @@ let mediaBtn
 function get_autoplay() {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getAutoplayPolicy
 	// a check on a specific element is more reliable (though it doesn't matter on page load)
+
+	// cached from page load
 	const METRIC = "getAutoplayPolicy"
-	const METRICuser = METRIC +"_user"
-
-	try {
-		let atest, mtest
-		let ares = navigator.getAutoplayPolicy("audiocontext")
-		try {atest = navigator.getAutoplayPolicy(dom.audiotest)} catch(e) {
-			log_error(SECT13, METRIC, e)
-			atest = zErr
-		}
-		let mres = navigator.getAutoplayPolicy("mediaelement")
-		try {mtest = navigator.getAutoplayPolicy(dom.mediatest)} catch(e) {
-			log_error(SECT13, METRIC, e)
-			mtest = zErr
-		}
-		if (gLoad) {
-			if (runSE) {foo++}
-			isAutoPlay = (ares === atest ? ares : ares +", "+ atest)
-			+" | "+ (mres === mtest ? mres : mres +", "+ mtest)
-		} else {
-			if (runSE) {foo++}
-			log_display(13, METRICuser, (ares === atest ? ares : ares +", "+ atest)
-				+" | "+ (mres === mtest ? mres : mres +", "+ mtest)
-			)
-		}
-	} catch(e) {
-		if (gLoad) {
-			isAutoPlay = zErr
-			isAutoPlayErr = log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
-		} else {
-			// don't add user error to error FP
-			log_display(13, METRICuser, (e+"").slice(0,47) + "...")
-		}
-	}
-
-	// page load
 	let notation = ""
-	if (isAutoPlayErr == undefined) {
-		if (isSmart) {
-			notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red
-		}
+	if (isAutoPlayError === undefined) {
+		if (isSmart) {notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red}
 		addData(13, METRIC, isAutoPlay)
 		log_display(13, METRIC, isAutoPlay + notation)
 	} else {
-		if (isSmart) {notation = default_red}
 		addData(13, METRIC, isAutoPlay)
-		log_display(13, METRIC, isAutoPlayErr + notation)
+		log_display(13, METRIC, isAutoPlayError + (isSmart ? default_red : ""))
 	}
+	// user: not part of FP; don't record errors etc
+	const METRICuser = METRIC +"_user"
 	if (gLoad) {
 		log_display(13, METRICuser, zNA)
+		return
+	}
+	try {
+		let atest, mtest
+		let ares = navigator.getAutoplayPolicy("audiocontext")
+		try {atest = navigator.getAutoplayPolicy(dom.audiotest)} catch(e) {atest = zErr}
+		let mres = navigator.getAutoplayPolicy("mediaelement")
+		try {mtest = navigator.getAutoplayPolicy(dom.mediatest)} catch(e) {mtest = zErr}
+		log_display(13, METRICuser, (ares === atest ? ares : ares +", "+ atest) +" | "+ (mres === mtest ? mres : mres +", "+ mtest))
+	} catch(e) {
+		log_display(13, METRICuser, (e+"").slice(0,47) + "...")
 	}
 	return
 }
