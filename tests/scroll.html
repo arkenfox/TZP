@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>scrolling</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 480px;}
+		hr {color: var(--test13);}
+		#scrolltarget {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			height: 1px;
+			width: 1px;
+			overflow: scroll;
+			z-index: -999;
+		}
+		#scrollinner {
+			height: 4px;
+			width: 4px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="scrolltarget"><div id="scrollinner"></div></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb7">
+		<col width="30%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">scrolling
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">minimalist (and faster!) smooth scrolling  test using an element based on
+				<a class="blue" target ="_blank" href="https://dlrobertson.com/examples/scrollinto-view-scrollend.html">Dan Robertson's</a> test.
+				<br><br>prefs<ul>
+					<li><code>RFP</code></li>
+					<li><code>general.smoothScroll</code></li>
+					<li><code>ui.prefersReducedMotion</code> (0 = off, 1 = on)</li>
+				</ul>
+			</span>
+		</td></tr>
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn7 btnfirst" onClick="run(130)">[ run ]</span>
+			<br><br><hr>
+		</td></tr>
+		<tr><td>Scroll Event Count</td><td><span class="c mono spaces" id="eResult"></span></td></tr>
+		<tr><td></td><td><span class="c mono spaces" id="eDetail"></span></td></tr>
+	</table>
+	<br>
+
+<script>
+// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/42070
+// https://dlrobertson.com/examples/scrollinto-view-scrollend.html
+
+// note: drop document scroll: issues with movement, innerwindow size etc
+// note: drop scrollend: adds nothing AFAICT
+
+function run() {
+	dom.eResult = ""
+	dom.eDetail = ""
+
+	setTimeout(function() {
+		let t0 = performance.now()
+		let eScrollCount = 0
+		let eEvents = [], dEvents = []
+		async function setup() {
+			function onTargetScroll(e) {
+				eScrollCount++
+				dom.eResult = eScrollCount + (eScrollCount > 2 ? " (smooth scroll enabled)": "")
+				eEvents.push(eScrollCount +": "+ Math.round(performance.now() - t0) +" ms")
+				dom.eDetail.innerHTML = eEvents.join("<br>")
+				e.stopPropagation()
+			}
+			scrolltarget.addEventListener("scroll", onTargetScroll)
+			scrolltarget.scrollTo(0, 0)
+		}
+		function test1() {
+			scrollinner.scrollIntoView({inline: "end", block: "end", behavior: "smooth"});
+		}
+		let tests = [
+			setup,
+			test1,
+		]
+		async function test() {
+			for (let i = 0; i < tests.length; i++) {
+				await new Promise(resolve => setTimeout(() => {
+					tests[i]()
+					resolve()
+				}, 1))
+			}
+		}
+		test()
+	}, 130)
+
+}
+run()
+
+</script>
+</body>
