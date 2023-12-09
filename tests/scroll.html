@@ -21,8 +21,8 @@
 			z-index: -999;
 		}
 		#scrollinner {
-			height: 4px;
-			width: 4px;
+			height: 3px;
+			width: 3px;
 		}
 	</style>
 </head>
@@ -71,6 +71,8 @@
 function run() {
 	dom.eResult = ""
 	dom.eDetail = ""
+	// always start in the middle to ensure a count of 3 if smooth scroll
+	scrolltarget.scrollTo(1, 1)
 
 	setTimeout(function() {
 		let t0 = performance.now()
