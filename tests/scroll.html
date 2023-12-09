@@ -22,13 +22,13 @@
 		}
 		#scrollinner {
 			height: 3px;
-			width: 3px;
+			width: 50px;
 		}
 	</style>
 </head>
 
 <body>
-	<div id="scrolltarget"><div id="scrollinner"></div></div>
+	<!--<div id="scrolltarget"><div id="scrollinner"></div></div>-->
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -43,7 +43,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">minimalist (and faster!) smooth scrolling  test using an element based on
+			<span class="no_color">minimalist (and faster!) smooth scrolling test using an element based on
 				<a class="blue" target ="_blank" href="https://dlrobertson.com/examples/scrollinto-view-scrollend.html">Dan Robertson's</a> test.
 				<br><br>prefs<ul>
 					<li><code>RFP</code></li>
@@ -53,60 +53,101 @@
 			</span>
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
-			<span class="btn7 btnfirst" onClick="run(130)">[ run ]</span>
+			<span class="btn7 btnfirst" onClick="run(130)">[ run ]</span> |
+				<span>select length
+				<input type="radio" id="len" name="len" value="4"><label>4</label>
+				<input type="radio" id="len" name="len" value="10"><label>10</label>
+				<input type="radio" id="len" name="len" value="50" checked><label>50</label>
+				<input type="radio" id="len" name="len" value="100"><label>100</label>
+				<input type="radio" id="len" name="len" value="600"><label>600</label>
+			</span>
 			<br><br><hr>
 		</td></tr>
-		<tr><td>Scroll Event Count</td><td><span class="c mono spaces" id="eResult"></span></td></tr>
-		<tr><td></td><td><span class="c mono spaces" id="eDetail"></span></td></tr>
+		<tr><td>smooth scroll</td><td><span class="c mono spaces" id="result"></span></td></tr>
+		<tr><td>scroll events</td><td><span class="c mono spaces" id="count"></span></td></tr>
+		<tr><td></td><td><span class="c mono spaces" id="detail"></span></td></tr>
 	</table>
 	<br>
 
 <script>
 // https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/42070
 // https://dlrobertson.com/examples/scrollinto-view-scrollend.html
+	// note: drop document scroll: issues with movement, innerwindow size etc
 
-// note: drop document scroll: issues with movement, innerwindow size etc
-// note: drop scrollend: adds nothing AFAICT
+// ToDo: what does it return on android
+
+const get_scroll = () => new Promise(resolve => {
+	let t0 = performance.now()
+	let eScrollCount = 0, eEndCount = 0, eEvents = []
+
+	function exit() {
+		return resolve(eScrollCount)
+	}
+
+	function onTargetScroll(e) {
+		eScrollCount++
+		dom.count = eScrollCount + (eScrollCount > 2 ? " (smooth scroll enabled)": "")
+		eEvents.push(eScrollCount +": "+ Math.round(performance.now() - t0) +" ms")
+		dom.detail.innerHTML = eEvents.join("<br>")
+		e.stopPropagation()
+		if (eScrollCount > 2) {exit()}
+	}
+	function onTargetScrollend(e) {
+		eEndCount++
+		eEvents.push("scrollend "+ eEndCount +": "+ Math.round(performance.now() - t0) +" ms")
+		dom.detail.innerHTML = eEvents.join("<br>")
+		exit() // we only ever expect 1 scrollend
+	}
+
+	try {
+		// recreate element: this means it's always at 0,0 and no need to run setup
+		try {document.getElementById("scrolltarget").remove()} catch(e) {}
+		const doc = document
+		const id = `scrolltarget`
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		doc.getElementById(id).innerHTML = "<div id='scrollinner'></div>"
+		// set element width
+		let len = document.querySelector('input[name="len"]:checked').value
+		// don't use len == 3 as this would be 2 scroll events which can periodically also happen without smooth scroll
+			// and if we don't use 3, then we don't need to reset the posiiton (1,1) because (0,0) is good
+		dom.scrollinner.style.width = len +"px"
+		// reset scroll position
+			// without this sometimes we can end up with 1 event (with smooth scroll = false)
+			// we should promise this before we run the test
+		scrolltarget.scrollTo(0, 0)
+
+		setTimeout(function() {
+			eScrollCount = 0
+			eEndCount = 0
+			eEvents = []
+			// add listeners
+			scrolltarget.addEventListener("scroll", onTargetScroll)
+			scrolltarget.addEventListener("scrollend", onTargetScrollend)	
+			scrollinner.scrollIntoView({inline: "end", block: "end", behavior: "smooth"});
+		}, 20) // ensure we only get 1 scrollend
+
+	} catch(e) {
+		return resolve(e+"")
+	}
+
+})
 
 function run() {
-	dom.eResult = ""
-	dom.eDetail = ""
-	// always start in the middle to ensure a count of 3 if smooth scroll
-	scrolltarget.scrollTo(1, 1)
-
-	setTimeout(function() {
-		let t0 = performance.now()
-		let eScrollCount = 0
-		let eEvents = [], dEvents = []
-		async function setup() {
-			function onTargetScroll(e) {
-				eScrollCount++
-				dom.eResult = eScrollCount + (eScrollCount > 2 ? " (smooth scroll enabled)": "")
-				eEvents.push(eScrollCount +": "+ Math.round(performance.now() - t0) +" ms")
-				dom.eDetail.innerHTML = eEvents.join("<br>")
-				e.stopPropagation()
-			}
-			scrolltarget.addEventListener("scroll", onTargetScroll)
-			scrolltarget.scrollTo(0, 0)
+	dom.result = ""
+	dom.count = ""
+	dom.detail = ""
+	let t0 = performance.now()
+	Promise.all([
+		get_scroll()
+	]).then(function(results){
+		let smoothScroll = results[0]
+		if ("number" === typeof smoothScroll) {
+			smoothScroll = (results[0] > 2 ? "enabled" : "disabled")
 		}
-		function test1() {
-			scrollinner.scrollIntoView({inline: "end", block: "end", behavior: "smooth"});
-		}
-		let tests = [
-			setup,
-			test1,
-		]
-		async function test() {
-			for (let i = 0; i < tests.length; i++) {
-				await new Promise(resolve => setTimeout(() => {
-					tests[i]()
-					resolve()
-				}, 1))
-			}
-		}
-		test()
-	}, 130)
-
+		dom.result = smoothScroll + " [" + (Math.round(performance.now() - t0) +" ms]")
+	})
 }
 run()
 
