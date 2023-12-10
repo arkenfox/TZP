@@ -453,68 +453,19 @@ function get_lang() {
 		]).then(function(results){
 			//console.log(oTempData)
 			let hash, data, res, value, value2, fpvalue, METRIC, METRIC2, newobj, notation = ""
-			const enUS = "en-US, en"
-			let oSupported = {
-				// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
-				"ar": [enUS],
-				"ca": [enUS],
-				"cs": ["sk, "+ enUS],
-				"da": [enUS],
-				"de": [enUS],
-				"el-GR": ["el, "+ enUS, "el"],
-				"en-US": ["en"],
-				"es-ES": ["es, "+ enUS],
-				"fa-IR": ["fa, "+ enUS, "fa"],
-				"fi-FI": ["fi, "+ enUS, "fi"],
-				"fr": ["fr-FR, "+ enUS],
-				"ga-IE": ["ga, en-IE, en-GB, "+ enUS],
-				"he": ["he-IL, "+ enUS],
-				"hu-HU": ["hu, "+ enUS, "hu"],
-				"id": [enUS],
-				"is": [enUS],
-				"it-IT": ["it, "+ enUS, "it"],
-				"ja": [enUS],
-				"ka-GE": ["ka, "+ enUS, "ka"],
-				"ko-KR": ["ko, "+ enUS, "ko"],
-				"lt": [enUS +", ru, pl"],
-				"mk-MK": ["mk, "+ enUS, "mk"],
-				"ms": [enUS],
-				"my": ["en-GB, en"],
-				"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ enUS],
-				"nl": [enUS],
-				"pl": [enUS],
-				"pt-BR": ["pt, "+ enUS],
-				"ro-RO": ["ro, en-US, en-GB, en", "ro"],
-				"ru-RU": ["ru, "+ enUS, "ru"],
-				"sq": ["sq-AL, "+ enUS],
-				"sv-SE": ["sv, "+ enUS],
-				"th": [enUS],
-				"tr-TR": ["tr, "+ enUS, "tr"],
-				"uk-UA": ["uk, "+ enUS, "uk"],
-				"vi-VN": ["vi, "+ enUS, "vi"],
-				"zh-CN": ["zh, zh-TW, zh-HK, "+ enUS, "zh-Hans-CN"],
-				"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
-			}
-			if (isMullvad) {
-				// 22 of 38 supported
-				let notSupported = ["ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",]
-				notSupported.forEach(function(key){
-					delete oSupported[key]
-				})
-			}
-
 			// LANGUAGES
 			METRIC = "languages"
 			data = oTempData[METRIC]
-			let langcheck = (isSmart && isTB && isOS !== "android") // ToDo: android may differ, ignore for now
 			Object.keys(data).forEach(function(item){
 				METRIC = item
-				if (langcheck) {
+				if (isLocalesSupported) {
 					notation = tb_red
-					if (item == "language") {
-						if (oSupported[data[item]] !== undefined) {notation = tb_green}
-					} else {
-						if (data[item] == data.language +", "+ oSupported[data.language][0]) {notation = tb_green}
+					if (languagesSupported[data.language] !== undefined) {
+						if (item == "language") {
+							 {notation = tb_green}
+						} else {
+							if (data[item] == data.language +", "+ languagesSupported[data.language][0]) {notation = tb_green}
+						}
 					}
 				}
 				log_display(4, METRIC, data[item] + notation)
@@ -564,16 +515,43 @@ function get_lang() {
 				}
 			}
 			addData(4, METRIC, fpvalue)
-			if (langcheck) {
+			if (isLocalesSupported) {
 				notation = tb_red
 				let key = oTempData["languages"]["language"]
 				// only green if TB supported
-				if (oSupported[key] !== undefined) {
-					let expected = oSupported[key][1] == undefined ? key : oSupported[key][1]
+				if (languagesSupported[key] !== undefined) {
+					let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
 					if (value === expected) {notation = tb_green}
 				}
 			}
+			let isLocaleValue = fpvalue
 			log_display(4, METRIC, value + notation)
+
+			// validation messages: now we have our locale
+			METRIC = "validation_messages"
+			notation = ""
+			try {
+				const validationnames = ['checkbox','file','number','text']
+				let data = {}
+				validationnames.forEach(function(item) {
+					data[item] = dom["widget"+item].validationMessage
+				})
+				let hash = mini(data)
+				addData(4, METRIC, data, hash)
+				if (isLocalesSupported) {
+					notation = intl_red
+					if (isValidLocale) {
+						if (localesSupported[isLocaleValue] !== undefined) {
+							if (hash === localesSupported[isLocaleValue]["v"]) {notation = intl_green}
+						}
+					}
+				}
+				log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
+			} catch(e) {
+				if (isLocalesSupported) {notation = intl_red}
+				addData(4, METRIC, zErr)
+				log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
+			}
 
 			// reset our vars to use the reported locale
 			if (isValidLocale) {
@@ -604,7 +582,6 @@ function get_lang() {
 			}
 			addData(4, METRIC, newobj, hash)
 			log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
-
 
 			// LOCALE resolvedoptions
 			METRIC = "locale_resolvedoptions", notation = ""
@@ -989,6 +966,107 @@ function get_lang() {
 
 function outputRegion() {
 	let t0 = nowFn()
+
+	// do once
+	if (gLoad) {
+		isLocalesSupported = (isSmart && isTB && isOS !== "android") // ToDo: android may differ, ignore for now
+		// populate regardless: handy to flip boolean in FF
+		languagesSupported = {
+			// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
+			"ar": [enUS],
+			"ca": [enUS],
+			"cs": ["sk, "+ enUS],
+			"da": [enUS],
+			"de": [enUS],
+			"el-GR": ["el, "+ enUS, "el"],
+			"en-US": ["en"],
+			"es-ES": ["es, "+ enUS],
+			"fa-IR": ["fa, "+ enUS, "fa"],
+			"fi-FI": ["fi, "+ enUS, "fi"],
+			"fr": ["fr-FR, "+ enUS],
+			"ga-IE": ["ga, en-IE, en-GB, "+ enUS],
+			"he": ["he-IL, "+ enUS],
+			"hu-HU": ["hu, "+ enUS, "hu"],
+			"id": [enUS],
+			"is": [enUS],
+			"it-IT": ["it, "+ enUS, "it"],
+			"ja": [enUS],
+			"ka-GE": ["ka, "+ enUS, "ka"],
+			"ko-KR": ["ko, "+ enUS, "ko"],
+			"lt": [enUS +", ru, pl"],
+			"mk-MK": ["mk, "+ enUS, "mk"],
+			"ms": [enUS],
+			"my": ["en-GB, en"],
+			"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ enUS],
+			"nl": [enUS],
+			"pl": [enUS],
+			"pt-BR": ["pt, "+ enUS],
+			"ro-RO": ["ro, en-US, en-GB, en", "ro"],
+			"ru-RU": ["ru, "+ enUS, "ru"],
+			"sq": ["sq-AL, "+ enUS],
+			"sv-SE": ["sv, "+ enUS],
+			"th": [enUS],
+			"tr-TR": ["tr, "+ enUS, "tr"],
+			"uk-UA": ["uk, "+ enUS, "uk"],
+			"vi-VN": ["vi, "+ enUS, "vi"],
+			"zh-CN": ["zh, zh-TW, zh-HK, "+ enUS, "zh-Hans-CN"],
+			"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
+		}
+		localesSupported = {
+			"ar": {"v": "c68ac56e"},
+			"ca": {"v": "6bb85efe"},
+			"cs": {"v": "1d62ed36"},
+			"da": {"v": "dd93df14"},
+			"de": {"v": "9134b369"},
+			"el": {"v": "a256eaa9"},
+			"en-US": {"v": "8bf16aa8"},
+			"es-ES": {"v": "c7c886ea"},
+			"fa": {"v": "1579a017"},
+			"fi": {"v": "bc9542fe"},
+			"fr": {"v": "f03eda05"},
+			"ga-IE": {"v": "b97de16b"},
+			"he": {"v": "bda29d66"},
+			"hu": {"v": "c85f46d5"},
+			"id": {"v": "b17d090d"},
+			"is": {"v": "7b8a21b4"},
+			"it": {"v": "7401e2be"},
+			"ja": {"v": "987f230d"},
+			"ka": {"v": "10de8631"},
+			"ko": {"v": "1566ce2e"},
+			"lt": {"v": "b4db82e2"},
+			"mk": {"v": "8bf16aa8"}, // same as english
+			"ms": {"v": "b25dc300"},
+			"my": {"v": "470bb59a"},
+			"nb-NO": {"v": "e73dfdb2"},
+			"nl": {"v": "04385cfb"},
+			"pl": {"v": "c5c4d289"},
+			"pt-BR": {"v": "6b28c534"},
+			"ro": {"v": "fd53fcca"},
+			"ru": {"v": "568d2d33"},
+			"sq": {"v": "16884fda"},
+			"sv-SE": {"v": "8232ab1f"},
+			"th": {"v": "a692941f"},
+			"tr": {"v": "a7c829f5"},
+			"uk": {"v": "5931e0f1"},
+			"vi": {"v": "feff31f1"},
+			"zh-Hans-CN": {"v": "cc830c32"},
+			"zh-Hant-TW": {"v": "bcc578fe"},
+		}
+		if (isMullvad) {
+			// 22 of 38 supported
+			let notSupported = [
+				// lang
+				"ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",
+				// + locales
+				"el","hu","ka","mk","ro","uk","vi",
+			]
+			notSupported.forEach(function(key){
+				delete languagesSupported[key]
+				delete localesSupported[key]
+			})
+		}
+	}
+
 	Promise.all([
 		get_lang(),
 		get_geo(),
