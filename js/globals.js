@@ -67,6 +67,12 @@ const zD = "disabled",
 	zNEW = sb+"[NEW]"+sc,
 	zLIE = "untrustworthy"
 
+// region
+const enUS = "en-US, en"
+let languagesSupported = {},
+	localesSupported = {},
+	isLocalesSupported = false
+
 // for android defaults: e.g desktop mode on/off vs TZP forcing width
 let isWindow = {}
 function get_scr_initial() {
