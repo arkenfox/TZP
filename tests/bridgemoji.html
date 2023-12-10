@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=720">
+	<meta name="viewport" content="width=760">
 	<title>bridge-moji</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 700px;}
+		table {width: 740px;}
 		.dark {
 			color: white;
 			background-color: #1c1b22
@@ -108,18 +108,18 @@ function run_random(array) {
 			let r = Math.floor(Math.random() * array.length)
 			if(arr.indexOf(r) === -1) {arr.push(r); line.push(array[r]) }
 		}
-		data.push(line.join(" "))
+		data.push(line.join(""))
 	}
-	// group into fours
-	function groupByFour([a,b,c,d,...rest]){
-		if (rest.length === 0) return [[a,b,c,d].filter(x => x!==undefined)]
-		return [[a,b,c,d]].concat(groupByFour(rest))
+	// group into lines
+	function groupLines([a,b,c,d,e,...rest]){
+		if (rest.length === 0) return [[a,b,c,d,e].filter(x => x!==undefined)]
+		return [[a,b,c,d,e]].concat(groupLines(rest))
 	}
-	let newData = groupByFour(data)
+	let newData = groupLines(data)
 	// display
 	let display = []
 	newData.forEach(function(array){
-		display.push("  "+ array.join("    "))
+		display.push(array.join("   "))
 	})
 	dom.results.innerHTML = display.join("<br>")
 }
