@@ -66,7 +66,7 @@ let results = [],
 	expected = 96,
 	gt0, // global timer
 	bBlock = false, // throw a test error
-	bNum = false // display numbering instead of perf
+	bNum = true // display numbering instead of perf
 
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -415,11 +415,9 @@ function get_iframe_props(num1, num2, title) {
 		'webkitRequestFileSystem','webkitResolveLocalFileSystemURL','webkitStorageInfo']
 	// FYI: don't use MIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
 
-	if (isVer > 92) {
-		// FF93+ "dom.weblocks.enabled"
-		// 1739233: FF96+ Lock
-		listU = listU.filter(x => !["Lock"].includes(x))
-	}
+	if (isVer > 121) { listU = listU.filter(x => !["WakeLock"].includes(x)) } // FF122+ dom.screenwakelock.enabled: 1589554
+	if (isVer > 92) { listU = listU.filter(x => !["Lock"].includes(x)) } // FF93+ "dom.weblocks.enabled": 1739233: FF96+ Lock
+
 	try {
 		if (bBlock) {bB = 1}
 		// create & append iframe
@@ -1338,24 +1336,13 @@ function get_nav_keys(num1, num2, title) {
 			"serial","setAppBadge","unregisterProtocolHandler","usb","userActivation","userAgentData","wakeLock",
 			"webkitGetUserMedia","webkitPersistentStorage","webkitTemporaryStorage","xr","SharedWorker","Worker"]
 		// FYI: don't use requestMIDIAccess: FF60+ behind dom.webmidi.enabled... 1752906: FF99+ default enabled
-		if (isVer > 95) {
-			// 1666203: FF96+ canShare
-			aNot = aNot.filter(x => !["canShare"].includes(x))
-			if (isVer > 119) {
-				// 1791079: FF120+
-				aNot = aNot.filter(x => !["userActivation"].includes(x))
-			}
-		}
-		if (isVer > 94 || isEngine == "goanna") {
-			// 1670058: FF95+ globalPrivacyControl
-			// PM 30
-			aNot = aNot.filter(x => !["globalPrivacyControl"].includes(x))
-		}
-		if (isVer > 92) {
-			// FF93+ "dom.weblocks.enabled"
-			// 1739233: FF96+ locks
-			aNot = aNot.filter(x => !["locks"].includes(x))
-		}
+
+		if (isVer > 121) { aNot = aNot.filter(x => !["wakeLock"].includes(x)) } // FF122+ dom.screenwakelock.enabled 1589554
+		if (isVer > 119) { aNot = aNot.filter(x => !["userActivation"].includes(x)) } // 1791079: FF120+
+		if (isVer > 95) {aNot = aNot.filter(x => !["canShare"].includes(x)) } // 1666203: FF96+ canShare
+		if (isVer > 94 || isEngine == "goanna") { aNot = aNot.filter(x => !["globalPrivacyControl"].includes(x))} // 1670058: FF95+ globalPrivacyControl | PM 30
+		if (isVer > 92) { aNot = aNot.filter(x => !["locks"].includes(x)) } // FF93+ dom.weblocks.enabled: 1739233: FF96+ locks
+
 		let resN = aNavKeys.filter(x => aNot.includes(x))
 		let boolN = resN.length == 0
 		if (resN.length > 0) {

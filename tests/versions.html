@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 72, maxVer = 121, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 73, maxVer = 122, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -290,6 +290,16 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 122: 1867558 (slow)
+		let t122 = performance.now(), ver122 = false
+		try {
+			let el = document.documentElement
+			el.style.zIndex = "calc(1 / abs(-0))" // default = auto
+			if (getComputedStyle(el).zIndex > 0) {ver122 = true}
+			el.style.zIndex = "auto"
+		} catch(e) {}
+		rec(122, 122, "1867558", ver122, performance.now()-t122) // 0.73ms
 
 		// 121: 1845586
 		let t121 = performance.now()
@@ -656,7 +666,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 54, oOther = {}
+	let countOther = 0, expectOther = 55, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -673,6 +683,14 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 122: 1862910
+		let t122 = performance.now()
+		let	ver122 = false
+		if ("function" === typeof Promise.withResolvers) { // 121 or lower is slow, so only check if 121+
+			ver122 = !isNaN(Date.parse("Mercredi 8 Septembre 2021")) ? true : false
+		}
+		rec(122, 122, "1862910", ver122, performance.now()-t122, "d") // 122: 0.1 | 121 = 1.1
 
 		// 120b: 1557650
 		let t120b = performance.now()
@@ -1093,12 +1111,6 @@ function outputVersion() {
 		let test6 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
 		if (!isNaN(test6)) {ver6 = xOMG}
 		rec(6,"NaN", "1599375", ver6, performance.now()-t6)
-
-		// 1730155
-		let t5 = performance.now(), ver5 = xNC
-		let test5 = Date.parse("Mercredi 8 Septembre 2021")
-		if (!isNaN(test5)) {ver5 = xOMG}
-		rec(5,"NaN", "1730155", ver5, performance.now()-t5)
 
 		// 1742592 related
 		let t4 = performance.now(), ver4 = xNC
