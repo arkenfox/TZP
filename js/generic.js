@@ -509,7 +509,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 121) {isVerExtra = "+"}
+		} else if (verNo == 122) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -517,8 +517,17 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
-			//try {if ("lij" === Intl.Collator.supportedLocalesOf("lij").join()) return 121} catch(e) {} // 1859752 - backed out
-			if ("function" === typeof Promise.withResolvers) return 121 // 1845586
+			if ("function" === typeof Promise.withResolvers) {
+				// 122: 1867558 (0.725ms slow)
+				try {
+					let el = document.documentElement
+					el.style.zIndex = "calc(1 / abs(-0))"
+					let test = getComputedStyle(el).zIndex
+					el.style.zIndex = "auto"
+					if (test > 0) {return 122}
+				} catch(e) {}
+				return 121 // 1845586
+			}
 			if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
 			try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
 			if (CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
