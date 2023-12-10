@@ -776,7 +776,7 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 					if ("number" !== typeof innerwidth) {
 						log_error(SECT1, METRIC, zErrType + typeof value)
 						value = zErr
-						width = "NaN"
+						display = "NaN"
 					} else {
 						value = (innerWidth - viewport)
 						display = value
@@ -790,7 +790,7 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 							// lies
 							if (value < -1) {
 								value = zLIE
-								display = colorFn(eWidth)
+								display = colorFn(display)
 								if (runtype !== "resize") {log_known(SECT1, METRIC)}								
 							}
 						}
@@ -1215,6 +1215,16 @@ function goNW_UA() {
 function outputUA(os = isOS) {
 	let t0 = nowFn()
 	let aReported = [], oComplex = {}
+	/*
+	windows:
+	- FF88+ 1693295: capped at 10.0
+	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
+	mac:
+	- FF87+ 1679929: capped at 10.15
+	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
+	android:
+	- FF122+ 1865766: android hardcoded to 10.0
+	*/
 
 	function outputStatic(property, reported, expected, isErr) {
 		reported = cleanFn(reported)
