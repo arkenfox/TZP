@@ -22,15 +22,15 @@ function get_colors() {
 		"moz": [
 			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
 			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
-			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-mac-defaultbuttontext',
-			'-moz-mac-disabledtoolbartext','-moz-mac-focusring','-moz-menubarhovertext','-moz-menuhover',
-			'-moz-menuhovertext','-moz-nativehyperlinktext','-moz-oddtreerow',
+			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-menubarhovertext',
+			'-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
 		],
 	}
-
-	if (isVer < 121) {
+	if (isVer < 122) {
 		let aTmp = oList["moz"]
 		aTmp.push (
+			// removed FF122: 1867854
+			'-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext', '-moz-mac-focusring','-moz-nativehyperlinktext', 
 			// removed FF121: 1863691
 			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-menuitem',
 			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
@@ -88,10 +88,11 @@ function get_colors() {
 				let btn = addButton(14, METRIC, Object.keys(newobj).length +"/"+ count)
 				addData(14, METRIC, newobj, hash)
 				if (isSmart && type == "moz") {
-					let check = "651a1b85" // 121+
+					let check = "283089dc" // 122+
 					if (isVer < 117) {check = "788e7d22" // 115-116
 					} else if (isVer < 119) {check = "5a00aa84" // 117-118
 					} else if (isVer < 121) {check = "47538602" // 119-120
+					} else if (isVer < 122) {check = "651a1b85" // 121
 					}
 					notation = hash == check ? rfp_green : rfp_red
 				}
