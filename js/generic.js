@@ -305,7 +305,7 @@ const get_isFileSystem = () => new Promise(resolve => {
 		log_perf(SECTG, METRIC, t0, "", value)
 		return resolve()
 	}
-	if ("function" !== typeof navigator.storage.getDirectory) {
+	if (navigator.storage == undefined || "function" !== typeof navigator.storage.getDirectory) {
 		exit(zD)
 	}
 	Promise.all([
