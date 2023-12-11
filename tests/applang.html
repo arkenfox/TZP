@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=700">
+	<meta name="viewport" content="width=800">
 	<title>app language</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
-		table {width: 680px;}
+		table {width: 780px;}
 	</style>
 </head>
 
@@ -19,14 +19,18 @@
 		<!-- appLang_4 can't be hidden otherwise "Scaled..." is not in the title -->
 		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
 	</div>
+
 	<!-- hidden -->
 	<div class="hidden">
 		<div>
-			<iframe id="iframeTest"></iframe>
-			<form><input id="appLang_1" required="" type="text"></form>
-			<iframe id="appLang_2"></iframe>
-			<iframe id="appLang_3"></iframe>
+			<input id="widgetcheckbox" required="" type="checkbox">
+			<input id="widgetfile" required="" type="file">
+			<input id="widgetnumber" required="" type="number">
+			<input id="widgettext" required="" type="text">
 		</div>
+		<iframe id="iframeTest"></iframe>
+		<iframe id="appLang_2"></iframe>
+		<iframe id="appLang_3"></iframe>
 	</div>
 
 	<table>
@@ -36,17 +40,20 @@
 
 	<!-- app lang -->
 	<table id="tb4">
-		<col width="30%"></a><col width="70%">
+		<col width="25%"></a><col width="75%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
 		<tr><td><div>
-			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="rerunAppLanguage()">[ run ]</span></div>
+			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
 			<div>dtd <sup>1</sup></div></div></td><td class="c" id="appLang2"></td></tr>
 		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c" id="appLang3"></td></tr>
-		<tr><td>dom.properties <sup>3</sup></td><td class="c" id="appLang1"></td></tr>
-		<tr><td>MediaDocument.properties <sup>3</sup></td><td class="c" id="appLang4"></td></tr>
-		<tr><td>xmlparser.properties <sup>3</sup></td><td class="c" id="appLang5"></td></tr>
-		<tr><td colspan="2"></td></tr>
+		<tr><td>media <sup>3</sup></td><td class="c" id="appLang4"></td></tr>
+
+		<tr><td>xml media error <sup>3</sup></td><td class="c" id="xml_media_error"></td></tr>
+		<tr><td>xml errors <sup>3</sup></td><td class="c spaces" id="xml_errors"></td></tr>
+		<tr><td>validation messages <sup>3</sup></td><td class="c spaces" id="validation_messages"></td></tr>
+
 		<!--credits-->
+		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">app language code based on work by Alex Catarineu </span>
 			<a target="_blank" class="blue" href="https://acatarineu.github.io/fp/locale.html">here</a> <sup>1</sup>
 			<span class="no_color"> and </span>
@@ -123,6 +130,8 @@ function test_iframe() {
 
 function get_app_lang_dtd1() {
 	// only call if iframes != blocked: no result = bugzilla fix
+	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
+
 	let dtd1 = ""
 	function output_dtd1(output) {
 		dom.appLang2.innerHTML = output
@@ -274,49 +283,109 @@ function get_app_lang_mediadocument() {
 	let checking = setInterval(check_image, 50)
 }
 
-function get_app_lang_xmlparser() {
-	let doc = (new DOMParser).parseFromString('getyourlocale', 'application/xhtml+xml')
-	let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-	// strip location
-	let start = str.search("http")
-	if (start == -1) { start = str.search("file")}
-	let end = str.search("html") + 4
-	let output = str.slice(0,start-1) + str.slice(end)
-	// strip anchor
-	start = output.search("#")
-	if (start !== -1) {
-		let strTemp = output.substring(start, output.length)
-		strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
-		end = strTemp.search(" ")
-		output = output.slice(0,start) + output.slice(start+end,output.length)
-	}
-	// output
-	if (navigator.language == "en-US") {
-		output = (mini(output) === "2ebaf247" ? enUS_green + output : enUS_red + output)
-	}
-	dom.appLang5.innerHTML = output
-}
-
-function outputAppLanguage() {
-	// FF only
-	if (isFF) {
-		// dom.properties
-		let str = dom.appLang_1.validationMessage
-		if (navigator.language == "en-US") {
-			str = (mini(str) == "bb240b22" ? enUS_green + str : enUS_red + str)
-		}
-		dom.appLang1.innerHTML = str
-		// the others
-		get_app_lang_xmlparser()
-		get_app_lang_dtd2()
-		test_iframe() // fires last two PoCs
-	}
-}
-
-function rerunAppLanguage() {
-	if (!isFF) {
+function get_xml_media_error() {
+	let t0 = performance.now()
+	let id = "iframe-xml-media"
+	function exit(value) {
+		// remove iframe
+		try {document.getElementById(id).remove()} catch(err) {}
+		dom.xml_media_error = value
 		return
 	}
+	try {
+		let xmlTarget = document.createElement("iframe")
+		xmlTarget.setAttribute("id", id)
+		xmlTarget.setAttribute("style", "display: none")
+		document.body.appendChild(xmlTarget)
+		// base64 800w x 1h png
+		xmlTarget.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
+		xmlTarget.addEventListener("load", function(){
+			try {
+				let xmlTitle = this.contentWindow.document.title
+				exit(xmlTitle)
+			} catch(err) {
+				exit(err+"")
+			}
+		})
+	} catch(e) {
+		exit(e+"")
+	}
+}
+
+function get_xml_errors() {
+	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString
+	try {
+		let xmlList = {"no_root": '',"syntax": 'a'}
+		let xmlData = {}, notation = ""
+		for (const k of Object.keys(xmlList)) {
+			try {
+				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
+				let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+				// strip location
+				let start = xmlStr.search("http")
+				if (start == -1) { start = xmlStr.search("file")}
+				let end = xmlStr.search("html") + 4
+				let xmlRes = xmlStr.slice(0,start-1) + xmlStr.slice(end)
+				// strip anchor
+				start = xmlRes.search("#")
+				if (start !== -1) {
+					let strTemp = xmlRes.substring(start, xmlRes.length)
+					strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
+					end = strTemp.search(" ")
+					xmlRes = xmlRes.slice(0,start) + xmlRes.slice(start+end, xmlRes.length)
+				}
+				xmlData[k] = xmlRes
+			} catch(err) {}
+		}
+		let hash = mini(xmlData)
+		if (navigator.language == "en-US") {
+			notation = (hash === "a26ed946" ? enUS_green : enUS_red) + "<br>"
+		}
+		dom.xml_errors.innerHTML = notation.trim() + json_highlight(xmlData)
+		return
+	} catch(e) {
+		dom.xml_errors = e+""
+		return
+	}
+}
+
+function get_validation_messages() {
+	try {
+		const validationnames = ['checkbox','file','number','text']
+		let data = {}
+		validationnames.forEach(function(item) {
+			data[item] = dom["widget"+item].validationMessage
+		})
+		let hash = mini(data)
+		let notation = ""
+		if (navigator.language == "en-US") {
+			notation = (hash === "8bf16aa8" ? enUS_green : enUS_red) + "<br>"
+		}
+		dom.validation_messages.innerHTML = notation.trim() + json_highlight(data)
+		return
+	} catch(e) {
+		dom.validation_messages = e+""
+		return
+	}
+}
+
+function output() {
+	// FF only
+	if (!isFF) {return}
+	get_validation_messages()
+	get_xml_errors()
+	get_xml_media_error()
+
+return
+
+	// the others
+	get_app_lang_dtd2()
+	test_iframe() // fires last two PoCs
+
+}
+
+function run() {
+	if (!isFF) {return}
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
@@ -324,7 +393,7 @@ function rerunAppLanguage() {
 	}
 	// pause so users see change
 	setTimeout(function() {
-		outputAppLanguage()
+		output()
 	}, 170)
 }
 
