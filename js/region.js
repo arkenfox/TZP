@@ -531,18 +531,61 @@ function get_lang() {
 			METRIC = "validation_messages"
 			notation = ""
 			try {
-				const validationnames = ['checkbox','file','number','text']
-				let data = {}
-				validationnames.forEach(function(item) {
-					data[item] = dom["widget"+item].validationMessage
+				const vList = ['checkbox','file','number','text']
+				let vData = {}
+				vList.forEach(function(item) {
+					vData[item] = dom["widget"+item].validationMessage
 				})
-				let hash = mini(data)
-				addData(4, METRIC, data, hash)
+				let hash = mini(vData)
+				addData(4, METRIC, vData, hash)
 				if (isLocalesSupported) {
 					notation = intl_red
 					if (isValidLocale) {
 						if (localesSupported[isLocaleValue] !== undefined) {
 							if (hash === localesSupported[isLocaleValue]["v"]) {notation = intl_green}
+						}
+					}
+				}
+				log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
+			} catch(e) {
+				if (isLocalesSupported) {notation = intl_red}
+				addData(4, METRIC, zErr)
+				log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
+			}
+			// xml errors (now we have our locale)
+			METRIC = "xml_errors"
+			notation = ""
+			try {
+				let xmlList = {"no_root": '',"syntax": 'a'}
+				let xmlData = {}
+				for (const k of Object.keys(xmlList)) {
+					try {
+						let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
+						let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+
+						// strip location
+						let start = xmlStr.search("http")
+						if (start == -1) { start = xmlStr.search("file")}
+						let end = xmlStr.search("html") + 4
+						let xmlRes = xmlStr.slice(0,start-1) + xmlStr.slice(end)
+						// strip anchor
+						start = xmlRes.search("#")
+						if (start !== -1) {
+							let strTemp = xmlRes.substring(start, xmlRes.length)
+							strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
+							end = strTemp.search(" ")
+							xmlRes = xmlRes.slice(0,start) + xmlRes.slice(start+end, xmlRes.length)
+						}
+						xmlData[k] = xmlRes
+					} catch(err) {}
+				}
+				let hash = mini(xmlData)
+				addData(4, METRIC, xmlData, hash)
+				if (isLocalesSupported) {
+					notation = intl_red
+					if (isValidLocale) {
+						if (localesSupported[isLocaleValue] !== undefined) {
+							if (hash === localesSupported[isLocaleValue]["xml"]) {notation = intl_green}
 						}
 					}
 				}
@@ -1013,44 +1056,47 @@ function outputRegion() {
 			"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
 		}
 		localesSupported = {
-			"ar": {"v": "c68ac56e"},
-			"ca": {"v": "6bb85efe"},
-			"cs": {"v": "1d62ed36"},
-			"da": {"v": "dd93df14"},
-			"de": {"v": "9134b369"},
-			"el": {"v": "a256eaa9"},
-			"en-US": {"v": "8bf16aa8"},
-			"es-ES": {"v": "c7c886ea"},
-			"fa": {"v": "1579a017"},
-			"fi": {"v": "bc9542fe"},
-			"fr": {"v": "f03eda05"},
-			"ga-IE": {"v": "b97de16b"},
-			"he": {"v": "bda29d66"},
-			"hu": {"v": "c85f46d5"},
-			"id": {"v": "b17d090d"},
-			"is": {"v": "7b8a21b4"},
-			"it": {"v": "7401e2be"},
-			"ja": {"v": "987f230d"},
-			"ka": {"v": "10de8631"},
-			"ko": {"v": "1566ce2e"},
-			"lt": {"v": "b4db82e2"},
-			"mk": {"v": "8bf16aa8"}, // same as english
-			"ms": {"v": "b25dc300"},
-			"my": {"v": "470bb59a"},
-			"nb-NO": {"v": "e73dfdb2"},
-			"nl": {"v": "04385cfb"},
-			"pl": {"v": "c5c4d289"},
-			"pt-BR": {"v": "6b28c534"},
-			"ro": {"v": "fd53fcca"},
-			"ru": {"v": "568d2d33"},
-			"sq": {"v": "16884fda"},
-			"sv-SE": {"v": "8232ab1f"},
-			"th": {"v": "a692941f"},
-			"tr": {"v": "a7c829f5"},
-			"uk": {"v": "5931e0f1"},
-			"vi": {"v": "feff31f1"},
-			"zh-Hans-CN": {"v": "cc830c32"},
-			"zh-Hant-TW": {"v": "bcc578fe"},
+			"ar": {"xml": "c09478d3", "v": "c68ac56e"},
+			"ca": {"xml": "d013d2c3", "v": "6bb85efe"},
+			"cs": {"xml": "ce9b30ff", "v": "1d62ed36"},
+			"da": {"xml": "70e7bdfe", "v": "dd93df14"},
+			"de": {"xml": "71510a2f", "v": "9134b369"},
+			"el": {"xml": "4a06ff0d", "v": "a256eaa9"},
+			"en-US": {"xml": "a26ed946", "v": "8bf16aa8"},
+			"es-ES": {"xml": "d9180d02", "v": "c7c886ea"},
+			"fa": {"xml": "3ba57b00", "v": "1579a017"},
+			"fi": {"xml": "deb36457", "v": "bc9542fe"},
+			"fr": {"xml": "22c1bd23", "v": "f03eda05"},
+			"ga-IE": {"xml": "7ad59498", "v": "b97de16b"},
+			"he": {"xml": "fc85673d", "v": "bda29d66"},
+			"hu": {"xml": "6e3decb0", "v": "c85f46d5"},
+			"id": {"xml": "2734c963", "v": "b17d090d"},
+			"is": {"xml": "d06104c6", "v": "7b8a21b4"},
+			"it": {"xml": "3897e650", "v": "7401e2be"},
+			"ja": {"xml": "52afd1de", "v": "987f230d"},
+			"ka": {"xml": "c92fb275", "v": "10de8631"},
+			"ko": {"xml": "d6c137ab", "v": "1566ce2e"},
+			"lt": {"xml": "0eae58e8", "v": "b4db82e2"},
+			// ToDo: mk validation same as english: ToDo: what is this falling back to?
+				// it's not app language (I was in italian)
+				// it's not language (I was italian)
+			"mk": {"xml": "d08f485f", "v": "8bf16aa8"},
+			"ms": {"xml": "68e660d1", "v": "b25dc300"},
+			"my": {"xml": "4893f8c5", "v": "470bb59a"},
+			"nb-NO": {"xml": "d4d0fbe3", "v": "e73dfdb2"},
+			"nl": {"xml": "786aa0fe", "v": "04385cfb"},
+			"pl": {"xml": "106ed7e7", "v": "c5c4d289"},
+			"pt-BR": {"xml": "d338abd8", "v": "6b28c534"},
+			"ro": {"xml": "10a5de0a", "v": "fd53fcca"},
+			"ru": {"xml": "004129a3", "v": "568d2d33"},
+			"sq": {"xml": "b92cc92b", "v": "16884fda"},
+			"sv-SE": {"xml": "1a85c1db", "v": "8232ab1f"},
+			"th": {"xml": "2bf45639", "v": "a692941f"},
+			"tr": {"xml": "e3c57886", "v": "a7c829f5"},
+			"uk": {"xml": "b1b5256e", "v": "5931e0f1"},
+			"vi": {"xml": "d0b6ee88", "v": "feff31f1"},
+			"zh-Hans-CN": {"xml": "d4f5054b", "v": "cc830c32"},
+			"zh-Hant-TW": {"xml": "400f36f2", "v": "bcc578fe"},
 		}
 		if (isMullvad) {
 			// 22 of 38 supported
