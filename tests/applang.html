@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=800">
 	<title>app language</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
+  <link rel="stylesheet" type="text/css" href="chrome://global/locale/intl.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
@@ -48,7 +49,7 @@
 		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c" id="appLang3"></td></tr>
 		<tr><td>media <sup>3</sup></td><td class="c" id="appLang4"></td></tr>
 
-		<tr><td>xml media error <sup>3</sup></td><td class="c" id="xml_media_error"></td></tr>
+		<!--<tr><td>xml media error <sup>3</sup></td><td class="c" id="xml_media_error"></td></tr>-->
 		<tr><td>xml errors <sup>3</sup></td><td class="c spaces" id="xml_errors"></td></tr>
 		<tr><td>validation messages <sup>3</sup></td><td class="c spaces" id="validation_messages"></td></tr>
 
@@ -298,13 +299,21 @@ function get_xml_media_error() {
 		// can't be hidden otherwise "Scaled..." is not in the title -->
 		xmlTarget.classList.add("offscreen")
 		document.body.appendChild(xmlTarget)
-		// base64 800w x 1h png
-		xmlTarget.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs
+			// Data URLs are treated as unique opaque origins
+			// base64 800w x 1h png
+			//"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
+		let b64data = "iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
+		let blob = new Blob(b64data, {type: "image/png"})
+		//let blob = atob(b64data)
+		//let url = URL.createObjectURL(blob)
+		//xmlTarget.src = url
 		xmlTarget.addEventListener("load", function(){
 			try {
 				let xmlTitle = this.contentWindow.document.title
 				exit(xmlTitle)
 			} catch(err) {
+				
 				exit(err+"")
 			}
 		})
@@ -375,7 +384,7 @@ function output() {
 	if (!isFF) {return}
 	get_validation_messages()
 	get_xml_errors()
-	get_xml_media_error()
+	//get_xml_media_error()
 	// the others
 	get_app_lang_dtd2()
 	test_iframe() // fires last two PoCs
