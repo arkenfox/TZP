@@ -289,13 +289,14 @@ function get_xml_media_error() {
 	function exit(value) {
 		// remove iframe
 		try {document.getElementById(id).remove()} catch(err) {}
-		dom.xml_media_error = value
+		dom.xml_media_error.innerHTML = value
 		return
 	}
 	try {
 		let xmlTarget = document.createElement("iframe")
 		xmlTarget.setAttribute("id", id)
-		xmlTarget.setAttribute("style", "display: none")
+		// can't be hidden otherwise "Scaled..." is not in the title -->
+		xmlTarget.classList.add("offscreen")
 		document.body.appendChild(xmlTarget)
 		// base64 800w x 1h png
 		xmlTarget.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
@@ -375,13 +376,9 @@ function output() {
 	get_validation_messages()
 	get_xml_errors()
 	get_xml_media_error()
-
-return
-
 	// the others
 	get_app_lang_dtd2()
 	test_iframe() // fires last two PoCs
-
 }
 
 function run() {
