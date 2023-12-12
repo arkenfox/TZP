@@ -1137,7 +1137,7 @@ function outputRegion() {
 			"tr": {v: "05623887", xml: "09a2b85c"},
 			"uk": {v: "0ff7de14", xml: "2989c268"},
 			"vi": {v: "e1cde994", xml: "a87bbc82"},
-			"zh-Hans-CN": {v:"9c846ddc", xml: "1f4a5c1b"},
+			"zh-Hans-CN": {v:"9c846ddc", xml: "f6112799"},
 			"zh-Hant-TW": {v: "59a93745", xml: "94ff0e78"},
 		}
 		if (isMullvad) {
