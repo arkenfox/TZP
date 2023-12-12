@@ -5,7 +5,6 @@
 	<meta name="viewport" content="width=800">
 	<title>app language</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
-  <link rel="stylesheet" type="text/css" href="chrome://global/locale/intl.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
@@ -20,14 +19,22 @@
 		<!-- appLang_4 can't be hidden otherwise "Scaled..." is not in the title -->
 		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
 	</div>
-
-	<!-- hidden -->
 	<div class="hidden">
 		<div>
-			<input id="widgetcheckbox" required="" type="checkbox">
-			<input id="widgetfile" required="" type="file">
-			<input id="widgetnumber" required="" type="number">
-			<input id="widgettext" required="" type="text">
+			<input type="text" required id="widgettext">
+			<input type="checkbox" required id="widgetcheckbox">
+			<select required id="widgetcombobox"><option></option></select>
+			<input type="date" id="widgetdatetime" value="2024-01-01" max="2023-01-01">
+			<input type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-01-01">
+			<input type="email" id="widgetemail" value="a">
+			<input type="file" required id="widgetfile">
+			<input type="number" required id="widgetnumber">
+			<input type="number" id="widgetmax" max="2" value="3">
+			<input type="number" id="widgetmin" min="2" value="1">
+			<input type="number" id="widgetstep" min="2" step="2" value="3">
+			<input type="radio" required name="radiogroup" id="widgetradio">
+			<input type="url" id="widgeturl" value="a">
+			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
 		</div>
 		<iframe id="iframeTest"></iframe>
 		<iframe id="appLang_2"></iframe>
@@ -41,18 +48,15 @@
 
 	<!-- app lang -->
 	<table id="tb4">
-		<col width="25%"></a><col width="75%">
+		<col width="20%"></a><col width="80%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
 		<tr><td><div>
 			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
-			<div>dtd <sup>1</sup></div></div></td><td class="c" id="appLang2"></td></tr>
-		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c" id="appLang3"></td></tr>
-		<tr><td>media <sup>3</sup></td><td class="c" id="appLang4"></td></tr>
-
-		<!--<tr><td>xml media error <sup>3</sup></td><td class="c" id="xml_media_error"></td></tr>-->
-		<tr><td>xml errors <sup>3</sup></td><td class="c spaces" id="xml_errors"></td></tr>
-		<tr><td>validation messages <sup>3</sup></td><td class="c spaces" id="validation_messages"></td></tr>
-
+			<div>dtd <sup>1</sup></div></div></td><td class="c mono" id="appLang2"></td></tr>
+		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c mono" id="appLang3"></td></tr>
+		<tr><td>media <sup>3</sup></td><td class="c mono" id="appLang4"></td></tr>
+		<tr><td>validation errors <sup>3</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
+		<tr><td>xml errors <sup>3</sup></td><td class="c mono spaces" id="xml_errors"></td></tr>
 		<!--credits-->
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">app language code based on work by Alex Catarineu </span>
@@ -67,9 +71,7 @@
 
 <script>
 'use strict';
-
 var dtd2 = ""
-
 // error notes
 let se = sb+"[test error: ",
 	error_file_cors = sn+"[file:] [Cross-Origin Request Blocked]"+sc,
@@ -284,74 +286,55 @@ function get_app_lang_mediadocument() {
 	let checking = setInterval(check_image, 50)
 }
 
-function get_xml_media_error() {
-	let t0 = performance.now()
-	let id = "iframe-xml-media"
-	function exit(value) {
-		// remove iframe
-		try {document.getElementById(id).remove()} catch(err) {}
-		dom.xml_media_error.innerHTML = value
-		return
-	}
-	try {
-		let xmlTarget = document.createElement("iframe")
-		xmlTarget.setAttribute("id", id)
-		// can't be hidden otherwise "Scaled..." is not in the title -->
-		xmlTarget.classList.add("offscreen")
-		document.body.appendChild(xmlTarget)
-		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs
-			// Data URLs are treated as unique opaque origins
-			// base64 800w x 1h png
-			//"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
-		let b64data = "iVBORw0KGgoAAAANSUhEUgAAAyAAAAABCAQAAACMYQLtAAAAF0lEQVR42mP8X88wCkbBKBgFo2AUkAwAYAoBgK0N7CYAAAAASUVORK5CYII="
-		let blob = new Blob(b64data, {type: "image/png"})
-		//let blob = atob(b64data)
-		//let url = URL.createObjectURL(blob)
-		//xmlTarget.src = url
-		xmlTarget.addEventListener("load", function(){
-			try {
-				let xmlTitle = this.contentWindow.document.title
-				exit(xmlTitle)
-			} catch(err) {
-				
-				exit(err+"")
-			}
-		})
-	} catch(e) {
-		exit(e+"")
-	}
-}
-
 function get_xml_errors() {
 	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString
+		// https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction
+		// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties
+		// https://www.w3.org/TR/xml/
+	let t0 = performance.now()
 	try {
-		let xmlList = {"no_root": '',"syntax": 'a'}
+		const xmlList = {
+			"n02": 'a', // syntax error
+			"n03": '', // no root element found
+			"n04": '<>', // not well-formed
+			"n05": '<?', // unclosed token
+			"n07": '<x></X>', // mismatched tag
+			"n08": '<x xmlns:x="." xmlns:x=".">', // duplicate attribute
+			"n09": '<x></x><x>', // junk after document element
+			"n11": '<x>&x;</x>', // undefined entity
+			"n14": '<x>&#x0;', // reference to invalid character number
+			"n20": '<x><![CDATA[', // unclosed CDATA section
+			"n28": '<x xmlns:x=""></x>', // must not undeclare prefix
+			"n30": '<?xml versin="1.0"?>', // XML declaration not well-formed
+		}
 		let xmlData = {}, notation = ""
 		for (const k of Object.keys(xmlList)) {
 			try {
 				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
 				let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-				// strip location
-				let start = xmlStr.search("http")
-				if (start == -1) { start = xmlStr.search("file")}
-				let end = xmlStr.search("html") + 4
-				let xmlRes = xmlStr.slice(0,start-1) + xmlStr.slice(end)
-				// strip anchor
-				start = xmlRes.search("#")
-				if (start !== -1) {
-					let strTemp = xmlRes.substring(start, xmlRes.length)
-					strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
-					end = strTemp.search(" ")
-					xmlRes = xmlRes.slice(0,start) + xmlRes.slice(start+end, xmlRes.length)
+				//split into parts: works back to FF52 and works with LTR
+					// the name (XML Parsing Error), location (Location) and line parts (Line Number 1, Column 1)
+					// create entropy but they are the same for all errors, record these once to reduce noise
+				let parts = xmlStr.split("\n")
+				if (k == "n02") {
+					let strName = parts[0].split(":")[0]
+					let strLoc = parts[1].split(":")[0]
+					let strLine = parts[2]
+					xmlData["n00"] = strName +": " + strLoc +": "+ strLine
 				}
-				xmlData[k] = xmlRes
-			} catch(err) {}
+				xmlData[k] = parts[0].split(":")[1].trim()
+			} catch(err) {
+				//console.log(k, err+"")
+			}
 		}
 		let hash = mini(xmlData)
 		if (navigator.language == "en-US") {
-			notation = (hash === "a26ed946" ? enUS_green : enUS_red) + "<br>"
+			notation = (hash === "b49b92e2" ? enUS_green : enUS_red).trim() +" "
 		}
-		dom.xml_errors.innerHTML = notation.trim() + json_highlight(xmlData)
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties'"
+			+" target='blank'>searchfox xmlparser</a>"
+		dom.xml_errors.innerHTML = notation + hash + perf + alink +"<br>"+ json_highlight(xmlData)
 		return
 	} catch(e) {
 		dom.xml_errors = e+""
@@ -359,47 +342,83 @@ function get_xml_errors() {
 	}
 }
 
-function get_validation_messages() {
+function get_validation_errors() {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
+		// https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+		// https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+
+	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
+	// InvalidDate* - input types date/month/time/week in gecko fall back to type="text"
+	let t0 = performance.now()
 	try {
-		const validationnames = ['checkbox','file','number','text']
-		let data = {}
-		validationnames.forEach(function(item) {
-			data[item] = dom["widget"+item].validationMessage
-		})
-		let hash = mini(data)
-		let notation = ""
-		if (navigator.language == "en-US") {
-			notation = (hash === "8bf16aa8" ? enUS_green : enUS_red) + "<br>"
+		const vList = {
+			BadInputNumber: 'number', // this returns ValueMissing on chrome
+			CheckboxMissing: 'checkbox',
+			DateTimeRangeOverflow: 'datetime',
+			DateTimeRangeUnderflow: 'datetimeunder',
+			FileMissing: 'file',
+			InvalidEmail: 'email',
+			InvalidURL: "url",
+			//InvalidDateMonth: '', // Please enter a valid month
+			//InvalidDateTime: '', // Please enter valid date and time
+			//InvalidDateWeek: '', // Please enter a valid week
+			NumberRangeOverflow: 'max',
+			NumberRangeUnderflow: 'min',
+			PatternMismatch: 'tel',
+			RadioMissing: 'radio',
+			SelectMissing: 'combobox',
+			StepMismatch: 'step',
+			ValueMissing: 'text',
 		}
-		dom.validation_messages.innerHTML = notation.trim() + json_highlight(data)
+		let vData = {}
+		for (const k of Object.keys(vList)) {
+			try {
+				if (vList[k] !== "") {
+					let msg = dom["widget"+ vList[k]].validationMessage
+					if (msg !== "") {
+						vData[k] = msg
+					}
+				}
+			} catch(e) {
+				//console.log(k, e+"")
+			}
+		}
+		let hash = mini(vData)
+		let notation = ""
+		if (isFF && navigator.language == "en-US") {
+			notation = (hash === "e29f9dc9" ? enUS_green : enUS_red).trim() + " "
+		}
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties'"
+			+" target='blank'>searchfox dom.properties</a>"
+		dom.validation_errors.innerHTML = notation + hash + perf + alink + "<br>"+ json_highlight(vData)
 		return
 	} catch(e) {
-		dom.validation_messages = e+""
+		dom.validation_errors = e+""
 		return
 	}
-}
-
-function output() {
-	// FF only
-	if (!isFF) {return}
-	get_validation_messages()
-	get_xml_errors()
-	//get_xml_media_error()
-	// the others
-	get_app_lang_dtd2()
-	test_iframe() // fires last two PoCs
 }
 
 function run() {
-	if (!isFF) {return}
-	// clear
-	let items = document.getElementsByClassName("c")
-	for(let i=0; i < items.length; i++) {
-		items[i].innerHTML = "&nbsp"
+	if (!isFF) {
+		dom.validation_errors.innerHTML = "&nbsp"
+	} else {
+		// clear
+		let items = document.getElementsByClassName("c")
+		for(let i=0; i < items.length; i++) {
+			items[i].innerHTML = "&nbsp"
+		}
 	}
 	// pause so users see change
 	setTimeout(function() {
-		output()
+		get_validation_errors()
+		// FF only
+		if (!isFF) {return}
+		get_xml_errors()
+		get_app_lang_dtd2()
+		test_iframe() // fires last two PoCs
 	}, 170)
 }
 
@@ -407,7 +426,11 @@ Promise.all([
 	get_globals()
 ]).then(function(){
 	if (!isFF) {
-		dom.appLang1.innerHTML = "this test requires "+ s4 + "GECKO" + sc +" ... and you're not it"
+		let str = "gecko only"
+		dom.appLang2 = str
+		dom.appLang3 = str
+		dom.appLang4 = str
+		dom.xml_errors = str
 	}
 })
 
