@@ -11,16 +11,8 @@ function get_autoplay() {
 	let notation = ""
 	if (isAutoPlayError === undefined) {
 		if (isSmart) {
-			/* desktop + android: disallowed, allowed-muted | allowed-muted
-			media.autoplay.blocking_policy = 0
-			media.autoplay.default = 1 (audio only)
-			*/
-			// ToDo: TB115 + desktop match but FF android (120 + 122 at least) = "disallowed | disallowed"
-			// despite new nightly install and checking about:config values and settings
-			// Is this a system setting (can't find any) or a fenix tweak?
-			if (isTB || isOS !== "android") {
-				notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red
-			}
+			// Note: android (120+ at least) returns "disallowed | disallowed" if phone is on "Do Not Disturb"
+			notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red
 		}
 		addData(13, METRIC, isAutoPlay)
 		log_display(13, METRIC, isAutoPlay + notation)
