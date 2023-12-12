@@ -72,30 +72,36 @@
 		<span id="sColorElement"></span>
 		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
 		<div>
+			<!--validation-->
+			<input type="text" required id="widgettext">
+			<input type="checkbox" required id="widgetcheckbox">
+			<select required id="widgetcombobox"><option></option></select>
+			<input required type="date" id="widgetdatetime" value="2024-01-01" max="2023-01-01">
+			<input required type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-01-01">
+			<input type="email" id="widgetemail" value="a">
+			<input type="file" required id="widgetfile">
+			<input type="number" required id="widgetnumber">
+			<input type="number" id="widgetmax" max="2" value="3">
+			<input type="number" id="widgetmin" min="2" value="1">
+			<input type="number" id="widgetstep" min="2" step="2" value="3">
+			<input type="radio" required name="radiogroup" id="widgetradio">
+			<input type="url" id="widgeturl" value="a">
+			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
+			<!--the rest-->
 			<input type="reset" value="" id="widgetbutton">
-			<input type="checkbox" required="" id="widgetcheckbox">
 			<input type="color" id="widgetcolor">
-			<select id="widgetcombobox"><option value="a"></option></select>
-			<input type="radio" id="widgetradio">
-			<input type="date" id="widgetdatetime">
 			<input type="datetime-local" id="widgetdatetime-local">
-			<textarea id="widgettextarea"></textarea>
-			<input type="email" id="widgetemail">
-			<input type="file" required="" id="widgetfile">
 			<input type="hidden" id="widgethidden">
 			<input type="image" id="widgetimage">
 			<input type="month" id="widgetmonth">
-			<input type="number" required="" id="widgetnumber">
 			<input type="password" id="widgetpassword">
 			<input type="range" id="widgetrange">
 			<input type="reset" id="widgetreset">
 			<input type="search" id="widgetsearch">
 			<input type="submit" id="widgetsubmit">
-			<input type="text" required="" id="widgettext">
 			<input type="time" id="widgettime">
-			<input type="tel" id="widgettel">
-			<input type="url" id="widgeturl">
 			<input type="week" id="widgetweek">
+			<textarea id="widgettextarea"></textarea>
 		</div>
 		<div>
 			<canvas id="kcanvasGet" width="16" height="8"></canvas>
@@ -390,8 +396,6 @@
 			<span class="ttxt">calendar<br>hourcycle<br>numberingsystem</span></div>
 			&nbsp [resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
 		<tr><td>[tolocalstring] locale</td><td class="c mono" id="locale_tolocalestring"></td></tr>
-		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
-		<tr><td>xml errors</td><td class="c mono" id="xml_errors"></td></tr>
 		<!--dt-->
 		<tr><td>date/time</td><td class="c mono" id="datetimehash"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="datetimeformathash"></td></tr>
@@ -399,6 +403,9 @@
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
 		<tr><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
+		<!--errors-->
+		<tr><td>validation errors</td><td class="c mono" id="validation_errors"></td></tr>
+		<tr><td>xml errors</td><td class="c mono" id="xml_errors"></td></tr>
 
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
