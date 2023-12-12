@@ -528,14 +528,32 @@ function get_lang() {
 			log_display(4, METRIC, value + notation)
 
 			// validation messages: now we have our locale
-			METRIC = "validation_messages"
+			METRIC = "validation_errors"
 			notation = ""
 			try {
-				const vList = ['checkbox','file','number','text']
+				const vList = {
+					BadInputNumber: 'number',
+					CheckboxMissing: 'checkbox',
+					DateTimeRangeOverflow: 'datetime',
+					DateTimeRangeUnderflow: 'datetimeunder',
+					FileMissing: 'file',
+					InvalidEmail: 'email',
+					InvalidURL: "url",
+					NumberRangeOverflow: 'max',
+					NumberRangeUnderflow: 'min',
+					PatternMismatch: 'tel',
+					RadioMissing: 'radio',
+					SelectMissing: 'combobox',
+					StepMismatch: 'step',
+					ValueMissing: 'text',
+				}
 				let vData = {}
-				vList.forEach(function(item) {
-					vData[item] = dom["widget"+item].validationMessage
-				})
+				for (const k of Object.keys(vList)) {
+					try {
+						let msg = dom["widget"+ vList[k]].validationMessage
+						if (msg !== "") {vData[k] = msg}
+					} catch(e) {}
+				}
 				let hash = mini(vData)
 				addData(4, METRIC, vData, hash)
 				if (isLocalesSupported) {
@@ -546,7 +564,9 @@ function get_lang() {
 						}
 					}
 				}
-				log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
+				let vGot = Object.keys(vData).length
+				let vDetails = vGot === 14 ? "details" : vGot +"/14"
+				log_display(4, METRIC, hash + addButton(4, METRIC, vDetails) + notation)
 			} catch(e) {
 				if (isLocalesSupported) {notation = intl_red}
 				addData(4, METRIC, zErr)
@@ -556,27 +576,43 @@ function get_lang() {
 			METRIC = "xml_errors"
 			notation = ""
 			try {
-				let xmlList = {"no_root": '',"syntax": 'a'}
-				let xmlData = {}
+				const xmlList = {
+					"n02": 'a',
+					"n03": '',
+					"n04": '<>',
+					"n05": '<?',
+					"n07": '<x></X>',
+					"n08": '<x xmlns:x="." xmlns:x=".">',
+					"n09": '<x></x><x>',
+					"n11": '<x>&x;</x>',
+					"n14": '<x>&#x0;',
+					"n20": '<x><![CDATA[',
+					"n28": '<x xmlns:x=""></x>',
+					"n30": '<?xml versin="1.0"?>',
+				}
+				let xmlData = {}, delimiter = ":"
 				for (const k of Object.keys(xmlList)) {
 					try {
 						let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
 						let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-
-						// strip location
-						let start = xmlStr.search("http")
-						if (start == -1) { start = xmlStr.search("file")}
-						let end = xmlStr.search("html") + 4
-						let xmlRes = xmlStr.slice(0,start-1) + xmlStr.slice(end)
-						// strip anchor
-						start = xmlRes.search("#")
-						if (start !== -1) {
-							let strTemp = xmlRes.substring(start, xmlRes.length)
-							strTemp = strTemp.replace(/(?:\r|\n).*$/, ' ')
-							end = strTemp.search(" ")
-							xmlRes = xmlRes.slice(0,start) + xmlRes.slice(start+end, xmlRes.length)
+						//split into parts: works back to FF52 and works with LTR
+						let parts = xmlStr.split("\n")
+						if (k == "n02") {
+							// programatically determine delimiter
+								// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+							let strLoc = parts[1]
+							let schema = isFile ? "file://" : "https://"
+							let index = strLoc.indexOf(schema) - 2
+							if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+							if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+							delimiter = strLoc.charAt(index)
+							strLoc = strLoc.slice(0, index)
+							let strName = parts[0].split(delimiter)[0]
+							let strLine = parts[2]
+							xmlData["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+							xmlData["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
 						}
-						xmlData[k] = xmlRes
+						xmlData[k] = parts[0].split(delimiter)[1].trim()
 					} catch(err) {}
 				}
 				let hash = mini(xmlData)
@@ -589,7 +625,9 @@ function get_lang() {
 						}
 					}
 				}
-				log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
+				let xmlGot = Object.keys(xmlData).length
+				let xmlDetails = xmlGot === 14 ? "details" : xmlGot +"/14"
+				log_display(4, METRIC, hash + addButton(4, METRIC, xmlDetails) + notation)
 			} catch(e) {
 				if (isLocalesSupported) {notation = intl_red}
 				addData(4, METRIC, zErr)
@@ -1056,47 +1094,51 @@ function outputRegion() {
 			"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
 		}
 		localesSupported = {
-			"ar": {"xml": "c09478d3", "v": "c68ac56e"},
-			"ca": {"xml": "d013d2c3", "v": "6bb85efe"},
-			"cs": {"xml": "ce9b30ff", "v": "1d62ed36"},
-			"da": {"xml": "70e7bdfe", "v": "dd93df14"},
-			"de": {"xml": "71510a2f", "v": "9134b369"},
-			"el": {"xml": "4a06ff0d", "v": "a256eaa9"},
-			"en-US": {"xml": "a26ed946", "v": "8bf16aa8"},
-			"es-ES": {"xml": "d9180d02", "v": "c7c886ea"},
-			"fa": {"xml": "3ba57b00", "v": "1579a017"},
-			"fi": {"xml": "deb36457", "v": "bc9542fe"},
-			"fr": {"xml": "22c1bd23", "v": "f03eda05"},
-			"ga-IE": {"xml": "7ad59498", "v": "b97de16b"},
-			"he": {"xml": "fc85673d", "v": "bda29d66"},
-			"hu": {"xml": "6e3decb0", "v": "c85f46d5"},
-			"id": {"xml": "2734c963", "v": "b17d090d"},
-			"is": {"xml": "d06104c6", "v": "7b8a21b4"},
-			"it": {"xml": "3897e650", "v": "7401e2be"},
-			"ja": {"xml": "52afd1de", "v": "987f230d"},
-			"ka": {"xml": "c92fb275", "v": "10de8631"},
-			"ko": {"xml": "d6c137ab", "v": "1566ce2e"},
-			"lt": {"xml": "0eae58e8", "v": "b4db82e2"},
-			// ToDo: mk validation same as english: ToDo: what is this falling back to?
-				// it's not app language (I was in italian)
-				// it's not language (I was italian)
-			"mk": {"xml": "d08f485f", "v": "8bf16aa8"},
-			"ms": {"xml": "68e660d1", "v": "b25dc300"},
-			"my": {"xml": "4893f8c5", "v": "470bb59a"},
-			"nb-NO": {"xml": "d4d0fbe3", "v": "e73dfdb2"},
-			"nl": {"xml": "786aa0fe", "v": "04385cfb"},
-			"pl": {"xml": "106ed7e7", "v": "c5c4d289"},
-			"pt-BR": {"xml": "d338abd8", "v": "6b28c534"},
-			"ro": {"xml": "10a5de0a", "v": "fd53fcca"},
-			"ru": {"xml": "004129a3", "v": "568d2d33"},
-			"sq": {"xml": "b92cc92b", "v": "16884fda"},
-			"sv-SE": {"xml": "1a85c1db", "v": "8232ab1f"},
-			"th": {"xml": "2bf45639", "v": "a692941f"},
-			"tr": {"xml": "e3c57886", "v": "a7c829f5"},
-			"uk": {"xml": "b1b5256e", "v": "5931e0f1"},
-			"vi": {"xml": "d0b6ee88", "v": "feff31f1"},
-			"zh-Hans-CN": {"xml": "d4f5054b", "v": "cc830c32"},
-			"zh-Hant-TW": {"xml": "400f36f2", "v": "bcc578fe"},
+			"ar": {v: "9fa7589d", xml: "aaffcd08"},
+			"ca": {v: "f357beb7", xml: "7beb7ea5"},
+			"cs": {v: "aba57df4", xml: "f2b4bcae"},
+			"da": {v: "d9827dd4", xml: "1a0c5509"},
+			"de": {v: "9d1afee7", xml: "68446b62"},
+			// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
+				// changing to spoof english returns n30.. phew!
+			"el": {v: "f79d4f6d", xml: "0d108497"},
+			"en-US": {v: "e29f9dc9", xml: "7d699e6d"},
+			"es-ES": {v: "c5869938", xml: "5de681ef"},
+			"fa": {v: "0e4865f6", xml: "999d2774"},
+			"fi": {v: "9e5c52b8", xml: "bfd2e337"},
+			"fr": {v: "34d60989", xml: "7c23726c"},
+			"ga-IE": {v: "664f97a2", xml: "c2ef923b"},
+			// he: xml n28 + n30 = english
+			"he": {v: "190a5791", xml: "06d23609"},
+			"hu": {v: "41d3ec54", xml: "fc6a4518"},
+			"id": {v: "b7a10cb1", xml: "a1523a88"},
+			"is": {v: "f5a54602", xml: "5acd311d"},
+			"it": {v: "dcfd7d74", xml: "0de8610d"},
+			"ja": {v: "faf9fd23", xml: "986a79a4"},
+			"ka": {v: "706a5318", xml: "0732462e"},
+			"ko": {v: "c23cb712", xml: "55386c69"},
+			"lt": {v: "36518f84", xml: "b0466824"},
+			// mk: v = english, and xml n30 = english but is would-be-n39 (same as el)
+				// and n28 = english
+			"mk": {v: "e29f9dc9", xml: "a85f1290"},
+			"ms": {v: "eda0f943", xml: "ad5a2234"},
+			// my: two items in english: date+over/under
+			"my": {v: "45e1804c", xml: "a0194cad"},
+			// nb-NO: xml most is english
+			"nb-NO": {v: "4a30cadc", xml: "2808247b"},
+			"nl": {v: "e76737e7", xml: "dbfd6c59"},
+			"pl": {v: "f9319f36", xml: "f4033f7f"},
+			"pt-BR": {v: "7febcf44", xml: "6f34c571"},
+			"ro": {v: "4a3ecc22", xml: "0b2be0cc"},
+			"ru": {v: "cfdcb459", xml: "a0b4b56f"},
+			"sq": {v: "920f04d4", xml: "49380742"},
+			"sv-SE": {v: "812b8c4a", xml: "c3d602ca"},
+			"th": {v: "40cd0883", xml: "225110a2"},
+			"tr": {v: "05623887", xml: "09a2b85c"},
+			"uk": {v: "0ff7de14", xml: "2989c268"},
+			"vi": {v: "e1cde994", xml: "a87bbc82"},
+			"zh-Hans-CN": {v:"9c846ddc", xml: "1f4a5c1b"},
+			"zh-Hant-TW": {v: "59a93745", xml: "94ff0e78"},
 		}
 		if (isMullvad) {
 			// 22 of 38 supported
