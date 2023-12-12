@@ -307,7 +307,7 @@ function get_xml_errors() {
 			"n28": '<x xmlns:x=""></x>', // must not undeclare prefix
 			"n30": '<?xml versin="1.0"?>', // XML declaration not well-formed
 		}
-		let xmlData = {}, notation = ""
+		let xmlData = {}, notation = "", delimiter = ":"
 		for (const k of Object.keys(xmlList)) {
 			try {
 				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
@@ -317,19 +317,32 @@ function get_xml_errors() {
 					// create entropy but they are the same for all errors, record these once to reduce noise
 				let parts = xmlStr.split("\n")
 				if (k == "n02") {
-					let strName = parts[0].split(":")[0]
-					let strLoc = parts[1].split(":")[0]
+					// programatically determine delimiter
+						// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+					let strLoc = parts[1]
+					let schema = isFile ? "file://" : "https://"
+					let index = strLoc.indexOf(schema) - 2
+					if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+					if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+					delimiter = strLoc.charAt(index)
+					strLoc = strLoc.slice(0, index)
+					let strName = parts[0].split(delimiter)[0]
 					let strLine = parts[2]
-					xmlData["n00"] = strName +": " + strLoc +": "+ strLine
+					xmlData["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+					xmlData["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+					//console.log(xmlStr)
+					//console.log(parts)
+					//console.log(strLoc, schema, index, "~"+delimiter+"~")
+					//console.log(mini(strName +": " + strLoc +": "+ strLine), strName +": " + strLoc +": "+ strLine)
 				}
-				xmlData[k] = parts[0].split(":")[1].trim()
+				xmlData[k] = parts[0].split(delimiter)[1].trim()
 			} catch(err) {
-				//console.log(k, err+"")
+				console.log(k, err+"")
 			}
 		}
 		let hash = mini(xmlData)
 		if (navigator.language == "en-US") {
-			notation = (hash === "b49b92e2" ? enUS_green : enUS_red).trim() +" "
+			notation = (hash === "7d699e6d" ? enUS_green : enUS_red).trim() +" "
 		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties'"
