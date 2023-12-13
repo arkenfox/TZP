@@ -216,9 +216,6 @@ function get_app_lang_dtd2() {
 
 function get_media_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
-
-	// let's not check for image loading or try and create/load iframes = slow
-	// just use existing
 	let t0 = performance.now()
 	try {
 		let mList = {
@@ -235,7 +232,6 @@ function get_media_messages() {
 				title = target.contentWindow.document.title
 				//strip image name to reduce noise
 				title = title.replace(mList[k], "")
-				title = title.replace(mList[k]+" ", "")
 			} else {
 				try {
 					const image = target.contentWindow.document.querySelector('img')
@@ -252,7 +248,7 @@ function get_media_messages() {
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties'"
 			+" target='blank'>searchfox MediaDocument</a>"
-		dom.media_messages.innerHTML = notation + hash + perf + alink +"<br>"+ json_highlight(mData)
+		dom.media_messages.innerHTML = hash + perf + alink +"<br>"+ json_highlight(mData)
 		return
 	} catch(e) {
 		dom.media_messages = e+""
