@@ -305,7 +305,8 @@ function get_lang() {
 			let res = []
 			let list = [
 				"collator","datetimeformat","displaynames","listformat",
-				"numberformat","pluralrules","relativetimeformat", //"segmenter",
+				"numberformat","pluralrules","relativetimeformat",
+				"segmenter", // FF122+ 1423593
 			]
 			list.forEach(function(item) {
 				oTempData[name][item] = tidyResult(get_localeitem(item))
