@@ -15,11 +15,8 @@
 <body>
 	<!-- offscreen -->
 	<div class="offscreen">
-		<div><img id="imageTest" src="" alt="i am groot"></div>
-		<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
-		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
-		<!-- testing -->
 		<div>
+			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
 			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
@@ -60,7 +57,6 @@
 			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
 			<div>dtd <sup>1</sup></div></div></td><td class="c mono" id="appLang2"></td></tr>
 		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c mono" id="appLang3"></td></tr>
-		<tr><td>media <sup>3</sup></td><td class="c mono" id="appLang4"></td></tr>
 
 		<tr><td>media messages <sup>3</sup></td><td class="c mono spaces" id="media_messages"></td></tr>
 		<tr><td>validation errors <sup>3</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
@@ -100,15 +96,12 @@ function test_iframe() {
 			if (isFile) {
 				// file: Cross-Origin Request Blocked
 				dom.appLang2.innerHTML = error_file_cors
-				dom.appLang4.innerHTML = error_file_cors
 			} else {
 				// iframe is blocked
 				dom.appLang2.innerHTML = error_iframe
-				dom.appLang4.innerHTML = error_iframe
 			}
 		} else {
 			// iframes are good: call functions
-			get_app_lang_mediadocument()
 			get_app_lang_dtd1()
 		}
 	}
@@ -156,17 +149,8 @@ function get_app_lang_dtd1() {
 			dtd1 = iframe.contentDocument.getElementById("DTD1").innerText
 		} catch(e) {
 			if (isFile) {
-				// could be CORS or the patch: check MediaDocument result
 				setTimeout(function() {
-					let str = dom.appLang4.textContent
-					if ( str == "[file:] [Cross-Origin Request Blocked]") {
-						dtdtemp = error_file_cors
-					} else if (str == "") {
-						// should never happen, we waited a whole sec
-						dtdtemp = sg +"[bugzilla 467035]</span> or "+ error_file_cors
-					} else {
-						dtdtemp = sg +"[bugzilla 467035]"+ sc
-					}
+					dtdtemp = error_file_cors
 				}, 1000) // get this done before the check_dtd1 runs out
 			}
 		}
@@ -230,67 +214,6 @@ function get_app_lang_dtd2() {
 	let checking = setInterval(check_dtd2, 50)
 }
 
-function get_app_lang_mediadocument() {
-	// MediaDocument.properties
-	let iframe = dom.appLang_4
-	function output_mediadocument(string) {
-		dom.appLang4.innerHTML = string
-	}
-	function run_mediadocument() {
-		try {
-			let output = (iframe.contentWindow.document.title)
-			// notate
-				// b2e6ac6c: "applang-image.png (PNG Image, 800 × 1 pixels) - Scaled (37%)" <- older FF's
-				// aeeeab13: "applang-image.png (PNG Image, 800 × 1 pixels) — Scaled (37%)" <- hyphen to emdash
-			if (navigator.language == "en-US") {
-				let hash = mini(output)
-				output = ((hash == "aeeeab13" || hash == "b2e6ac6c") ? enUS_green : enUS_red) + output
-			}
-			output_mediadocument(output)
-		} catch(e) {
-			output_mediadocument(e+"")
-		}
-	}
-	function check_mediadocument() {
-		let iframe = dom.appLang_4
-		// load the iframe
-		if (iframe.src == "") {
-			iframe.src="applang-image.png"
-			iframe.addEventListener("load", function(){
-				let title = this.contentWindow.document.title
-				run_mediadocument()
-			})
-		} else {
-			console.debug("applang4 already loaded")
-			// already loaded
-			run_mediadocument()
-		}
-	}
-
-	// keep checking if image loaded, but stop after x tries
-	let image = dom.imageTest
-	image.src="applang-image.png" // 1px high
-	let counter = 0
-	function check_image() {
-		if (counter < 60) {
-			if (image.offsetHeight == 1) {
-				// empty_src=0px, broken_src= approx 24px
-				// extensions blocking images = if placeholders = approx 20px
-				// therefore: if 1px then our image was loaded
-				clearInterval(checking)
-				image.src="" // reset src
-				check_mediadocument()
-			}
-		} else {
-			clearInterval(checking)
-			output_mediadocument(error_image)
-			image.src="" // reset src
-		}
-		counter++
-	}
-	let checking = setInterval(check_image, 50)
-}
-
 function get_media_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
 
@@ -305,29 +228,27 @@ function get_media_messages() {
 			"Scaled": "applang-image.png",
 			"Unsupported": "applang-unsupported.png", // todo
 		}
-		let mData = {}, notation = ""
+		let mData = {}
 		for (const k of Object.keys(mList)) {
-			let target = dom["iframe-media"+k], source = target.src, title = ""
-			if (k === "Invalid") {
+			let target = dom["iframe-media"+k], title = ""
+			if (k === "Scaled") {
+				title = target.contentWindow.document.title
+				//strip image name to reduce noise
+				title = title.replace(mList[k], "")
+				title = title.replace(mList[k]+" ", "")
+			} else {
 				try {
 					const image = target.contentWindow.document.querySelector('img')
 					title = image.alt
+					title = title.replace(target.src, "") // remove noise
 				} catch(err) {
 					title = err+""
 				}
-			} else {
-				title = target.contentWindow.document.title
 			}
-			//strip image name to reduce noise
-			mData[k] = title
-			title = title.replace(mList[k], "")
-			title = title.replace(mList[k]+" ", "")
 			title = title.trim()
+			mData[k] = title
 		}
 		let hash = mini(mData)
-		if (navigator.language == "SKIP en-US") {
-			notation = (hash === "x" ? enUS_green : enUS_red).trim() +" "
-		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties'"
 			+" target='blank'>searchfox MediaDocument</a>"
@@ -360,7 +281,7 @@ function get_xml_errors() {
 			"n28": '<x xmlns:x=""></x>', // must not undeclare prefix
 			"n30": '<?xml versin="1.0"?>', // XML declaration not well-formed
 		}
-		let xmlData = {}, notation = "", delimiter = ":"
+		let xmlData = {}, delimiter = ":"
 		for (const k of Object.keys(xmlList)) {
 			try {
 				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
@@ -394,13 +315,10 @@ function get_xml_errors() {
 			}
 		}
 		let hash = mini(xmlData)
-		if (navigator.language == "en-US") {
-			notation = (hash === "7d699e6d" ? enUS_green : enUS_red).trim() +" "
-		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties'"
 			+" target='blank'>searchfox xmlparser</a>"
-		dom.xml_errors.innerHTML = notation + hash + perf + alink +"<br>"+ json_highlight(xmlData)
+		dom.xml_errors.innerHTML = hash + perf + alink +"<br>"+ json_highlight(xmlData)
 		return
 	} catch(e) {
 		dom.xml_errors = e+""
@@ -452,14 +370,10 @@ function get_validation_errors() {
 			}
 		}
 		let hash = mini(vData)
-		let notation = ""
-		if (isFF && navigator.language == "en-US") {
-			notation = (hash === "e29f9dc9" ? enUS_green : enUS_red).trim() + " "
-		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties'"
 			+" target='blank'>searchfox dom.properties</a>"
-		dom.validation_errors.innerHTML = notation + hash + perf + alink + "<br>"+ json_highlight(vData)
+		dom.validation_errors.innerHTML = hash + perf + alink + "<br>"+ json_highlight(vData)
 		return
 	} catch(e) {
 		dom.validation_errors = e+""
@@ -497,7 +411,6 @@ Promise.all([
 		let str = "gecko only"
 		dom.appLang2 = str
 		dom.appLang3 = str
-		dom.appLang4 = str
 		dom.media_messages = str
 		dom.xml_errors = str
 	}
