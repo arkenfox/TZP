@@ -16,8 +16,14 @@
 	<!-- offscreen -->
 	<div class="offscreen">
 		<div><img id="imageTest" src=""></div>
-		<!-- appLang_4 can't be hidden otherwise "Scaled..." is not in the title -->
+		<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
+		<!-- testing -->
+		<div>
+			<iframe id="iframe-mediaInvalid" width="100" height="30" src="doesnotexist.png"></iframe>
+			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
+			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
+		</div>
 	</div>
 	<div class="hidden">
 		<div>
@@ -48,13 +54,15 @@
 
 	<!-- app lang -->
 	<table id="tb4">
-		<col width="20%"></a><col width="80%">
+		<col width="18%"></a><col width="82%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
 		<tr><td><div>
 			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
 			<div>dtd <sup>1</sup></div></div></td><td class="c mono" id="appLang2"></td></tr>
 		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c mono" id="appLang3"></td></tr>
 		<tr><td>media <sup>3</sup></td><td class="c mono" id="appLang4"></td></tr>
+
+		<tr><td>media messages <sup>3</sup></td><td class="c mono spaces" id="media_messages"></td></tr>
 		<tr><td>validation errors <sup>3</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
 		<tr><td>xml errors <sup>3</sup></td><td class="c mono spaces" id="xml_errors"></td></tr>
 		<!--credits-->
@@ -128,7 +136,7 @@ function test_iframe() {
 		}
 		counter++
 	}
-	let checking = setInterval(check_iframe, 50)
+	let checking = setInterval(check_iframe, isFile ? 1 : 50)
 }
 
 function get_app_lang_dtd1() {
@@ -232,18 +240,15 @@ function get_app_lang_mediadocument() {
 		try {
 			let output = (iframe.contentWindow.document.title)
 			// notate
+				// b2e6ac6c: "applang-image.png (PNG Image, 800 × 1 pixels) - Scaled (37%)" <- older FF's
+				// aeeeab13: "applang-image.png (PNG Image, 800 × 1 pixels) — Scaled (37%)" <- hyphen to emdash
 			if (navigator.language == "en-US") {
-				output = (mini(output) == "aeeeab13" ? enUS_green : enUS_red) + output
+				let hash = mini(output)
+				output = ((hash == "aeeeab13" || hash == "b2e6ac6c") ? enUS_green : enUS_red) + output
 			}
 			output_mediadocument(output)
 		} catch(e) {
-			if (isFile) {
-				// file: Cross-Origin Request Blocked
-				output_mediadocument(error_file_cors)
-			} else {
-			// iframe blocked
-				output_mediadocument(error_iframe)
-			}
+			output_mediadocument(e+"")
 		}
 	}
 	function check_mediadocument() {
@@ -284,6 +289,42 @@ function get_app_lang_mediadocument() {
 		counter++
 	}
 	let checking = setInterval(check_image, 50)
+}
+
+function get_media_messages() {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
+
+	// let's not check for image loading or try and create/load iframes = slow
+	// just use existing
+	let t0 = performance.now()
+	try {
+		let mList = {
+			"Invalid": "doesnotexist.png", // see alt attribute
+			"Scaled": "applang-image.png",
+			"Unsupported": "applang-unsupported.png", // todo
+		}
+		let mData = {}, notation = ""
+		for (const k of Object.keys(mList)) {
+			let target = dom["iframe-media"+k], source = target.src, title = ""
+			title = target.contentWindow.document.title
+			//strip image name to reduce noise
+			title = title.replace(mList[k], "")
+			title = title.trim()
+			mData[k] = title
+		}
+		let hash = mini(mData)
+		if (navigator.language == "SKIP en-US") {
+			notation = (hash === "x" ? enUS_green : enUS_red).trim() +" "
+		}
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties'"
+			+" target='blank'>searchfox MediaDocument</a>"
+		dom.media_messages.innerHTML = notation + hash + perf + alink +"<br>"+ json_highlight(mData)
+		return
+	} catch(e) {
+		dom.media_messages = e+""
+		return
+	}
 }
 
 function get_xml_errors() {
@@ -430,6 +471,8 @@ function run() {
 		// FF only
 		if (!isFF) {return}
 		get_xml_errors()
+		get_media_messages() // testing
+
 		get_app_lang_dtd2()
 		test_iframe() // fires last two PoCs
 	}, 170)
@@ -443,6 +486,7 @@ Promise.all([
 		dom.appLang2 = str
 		dom.appLang3 = str
 		dom.appLang4 = str
+		dom.media_messages = str
 		dom.xml_errors = str
 	}
 })
