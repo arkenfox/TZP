@@ -19,7 +19,7 @@
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
-			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
+			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.jp2"></iframe>
 		</div>
 	</div>
 	<div class="hidden">
@@ -187,6 +187,8 @@ function get_app_lang_dtd2() {
 	}
 	// load it up
 	let iframe = dom.appLang_3
+	// ? chrome://global/locale/netError.dtd
+
 	iframe.src="data:application/xml;charset=utf-8,%3C%21DOCTYPE%20html%20SYSTEM%20%22chrome%3A%2F%2Fglobal%2Flocale%2FnetError.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%2F%3E%0D%0A%20%20%3C%2Fhead%3E%0D%0A%20%20%3Cbody%3E%3Cspan%20id%3D%22text-container%22%3E%26loadError.label%3B%3C%2Fspan%3E%0D%0A%20%20%3Cscript%3E%0D%0A%20%20window.addEventListener%28%27message%27%2C%20%28e%29%20%3D%3E%20%7B%0D%0A%20%20%20%20e.source.postMessage%28document.getElementById%28%27text-container%27%29.innerText%2C%20%27%2A%27%29%3B%0D%0A%20%20%7D%29%3B%0D%0A%20%20%3C%2Fscript%3E%0D%0A%20%20%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E";
 	iframe.addEventListener('load', () => {
 		window.addEventListener('message', ({ data }) => dtd2 = data)
@@ -219,11 +221,9 @@ function get_media_messages() {
 	let t0 = performance.now()
 	try {
 		let mList = {
-			"Invalid": "applang-invalid.png",
-				// ^ https://arkenfox.github.io/TZP/tests/applang-invalid.png
-				// alt = "The image “https://arkenfox.github.io/TZP/tests/applang-invalid.png” cannot be displayed because it contains errors."
+			"Invalid": "applang-invalid.png", // 0-byte file
 			"Scaled": "applang-image.png",
-			"Unsupported": "applang-unsupported.png", // todo
+			"Unsupported": "applang-unsupported.jp2", // ToDo
 		}
 		let mData = {}
 		for (const k of Object.keys(mList)) {
