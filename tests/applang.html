@@ -15,7 +15,7 @@
 <body>
 	<!-- offscreen -->
 	<div class="offscreen">
-		<div><img id="imageTest" src=""></div>
+		<div><img id="imageTest" src="" alt="i am groot"></div>
 		<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 		<div><iframe id="appLang_4" src="applang-image.png"></iframe></div>
 		<!-- testing -->
@@ -299,18 +299,30 @@ function get_media_messages() {
 	let t0 = performance.now()
 	try {
 		let mList = {
-			"Invalid": "doesnotexist.png", // see alt attribute
+			"Invalid": "applang-invalid.png",
+				// ^ https://arkenfox.github.io/TZP/tests/applang-invalid.png
+				// alt = "The image “https://arkenfox.github.io/TZP/tests/applang-invalid.png” cannot be displayed because it contains errors."
 			"Scaled": "applang-image.png",
 			"Unsupported": "applang-unsupported.png", // todo
 		}
 		let mData = {}, notation = ""
 		for (const k of Object.keys(mList)) {
 			let target = dom["iframe-media"+k], source = target.src, title = ""
-			title = target.contentWindow.document.title
+			if (k === "Invalid") {
+				try {
+					const image = target.contentWindow.document.querySelector('img')
+					title = image.alt
+				} catch(err) {
+					title = err+""
+				}
+			} else {
+				title = target.contentWindow.document.title
+			}
 			//strip image name to reduce noise
-			title = title.replace(mList[k], "")
-			title = title.trim()
 			mData[k] = title
+			title = title.replace(mList[k], "")
+			title = title.replace(mList[k]+" ", "")
+			title = title.trim()
 		}
 		let hash = mini(mData)
 		if (navigator.language == "SKIP en-US") {
