@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>HTML*ELement</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 780px;}
+		hr {color: var(--test15);}
+		span.indent {
+			display:inline-block;margin-left:10px;
+		}
+		.grey {color: grey;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="1%"><col width="99%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">HTML*Element
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color"></span>
+				<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
+				<input type="checkbox" id="optSort"> <span class="no_color">sort</span>
+			</span>
+		</td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td></td><td class="mono spaces" id="details">click counts to list their results here</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+s4 = s4.trim()
+s6 = s6.trim()
+s15 = s15.trim()
+
+let oData = {}
+const htmlList = {
+	"group1": ["main", "1main","hidden"],
+	HTMLAnchorElement: HTMLAnchorElement.prototype,
+	HTMLBodyElement: HTMLBodyElement.prototype,
+	HTMLCanvasElement: HTMLCanvasElement.prototype,
+	HTMLElement: HTMLElement.prototype, // ?
+	HTMLFrameSetElement: HTMLFrameSetElement.prototype,
+	HTMLIFrameElement: HTMLIFrameElement.prototype,
+	HTMLImageElement: HTMLImageElement.prototype,
+	HTMLInputElement: HTMLInputElement.prototype,
+	HTMLLinkElement: HTMLLinkElement.prototype,
+	HTMLMediaElement: HTMLMediaElement.prototype,
+	HTMLScriptElement: HTMLScriptElement.prototype,
+	HTMLSelectElement: HTMLSelectElement.prototype,
+	HTMLStyleElement: HTMLStyleElement.prototype,
+	HTMLTemplateElement: HTMLTemplateElement.prototype,
+	HTMLVideoElement: HTMLVideoElement.prototype,
+	"group2": ["same as blink (sorted)", "2same", "hiddenv"],
+	HTMLAreaElement: HTMLAreaElement.prototype,
+	HTMLButtonElement: HTMLButtonElement.prototype,
+	HTMLDialogElement: HTMLDialogElement.prototype,
+	HTMLEmbedElement: HTMLEmbedElement.prototype,
+	HTMLFieldSetElement: HTMLFieldSetElement.prototype,
+	HTMLFormElement: HTMLFormElement.prototype,
+	HTMLFrameElement: HTMLFrameElement.prototype,
+	HTMLHRElement: HTMLHRElement.prototype,
+	HTMLLabelElement: HTMLLabelElement.prototype,
+	HTMLMetaElement: HTMLMetaElement.prototype,
+	HTMLMeterElement: HTMLMeterElement.prototype,
+	HTMLOListElement: HTMLOListElement.prototype,
+	HTMLObjectElement: HTMLObjectElement.prototype,
+	HTMLOptionElement: HTMLOptionElement.prototype,
+	HTMLOptionsCollection: HTMLOptionsCollection.prototype,
+	HTMLOutputElement: HTMLOutputElement.prototype,
+	HTMLProgressElement: HTMLProgressElement.prototype,
+	HTMLSourceElement: HTMLSourceElement.prototype,
+	HTMLTableCellElement: HTMLTableCellElement.prototype,
+	HTMLTableColElement: HTMLTableColElement.prototype,
+	HTMLTableElement: HTMLTableElement.prototype,
+	HTMLTableRowElement: HTMLTableRowElement.prototype,
+	HTMLTableSectionElement: HTMLTableSectionElement.prototype,
+	HTMLTextAreaElement: HTMLTextAreaElement.prototype,
+	HTMLTrackElement: HTMLTrackElement.prototype,
+	"group3": ["super boring","3boring","hiddenx"],
+	HTMLAudioElement: HTMLAudioElement.prototype,
+	HTMLBRElement: HTMLBRElement.prototype,
+	HTMLBaseElement: HTMLBaseElement.prototype,
+	HTMLDListElement: HTMLDListElement.prototype,
+	HTMLDataElement: HTMLDataElement.prototype,
+	HTMLDataListElement: HTMLDataListElement.prototype,
+	HTMLDivElement: HTMLDivElement.prototype,
+	HTMLDocument: HTMLDocument.prototype,
+	HTMLHeadElement: HTMLHeadElement.prototype,
+	HTMLHeadingElement: HTMLHeadingElement.prototype,
+	HTMLHtmlElement: HTMLHtmlElement.prototype,
+	HTMLLegendElement: HTMLLegendElement.prototype,
+	HTMLLIElement: HTMLLIElement.prototype,
+	HTMLMapElement: HTMLMapElement.prototype,
+	HTMLModElement: HTMLModElement.prototype,
+	HTMLOptGroupElement: HTMLOptGroupElement.prototype,
+	HTMLParagraphElement: HTMLParagraphElement.prototype,
+	HTMLPictureElement: HTMLPictureElement.prototype,
+	HTMLPreElement: HTMLPreElement.prototype,
+	HTMLQuoteElement: HTMLQuoteElement.prototype,
+	HTMLSpanElement: HTMLSpanElement.prototype,
+	HTMLTableCaptionElement: HTMLTableCaptionElement.prototype,
+	HTMLTimeElement: HTMLTimeElement.prototype,
+	HTMLTitleElement: HTMLTitleElement.prototype,
+	HTMLUListElement: HTMLUListElement.prototype,
+	HTMLUnknownElement: HTMLUnknownElement.prototype,
+	// error
+	//HTMLFormControlsCollection
+}
+
+function run() {
+	// e.g. https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
+
+	let t0 = performance.now()
+	let optSort = dom.optSort.checked
+	try {
+		let display = [], toggle = "", group = "", name = "", groups = []
+
+		for (const k of Object.keys(htmlList)) {
+			if (k.slice(0,5) === "group") {
+				name = htmlList[k][0]
+				group = htmlList[k][1]
+				toggle = htmlList[k][2]
+				groups.push(group)
+				oData[group] = {}
+				display.push(
+					"<br><hr>"
+					+ "<span id='label"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('"+ toggle +"','expand')\">[ expand ]</span> "
+					+ "<span id='"+ group +"'></span> "
+					+ name.toUpperCase() +"<br><br>"
+				)
+			} else {
+				if (optSort) {
+					oData[group][k] = Object.getOwnPropertyNames(htmlList[k]).sort()
+				} else {
+					oData[group][k] = Object.getOwnPropertyNames(htmlList[k])
+				}
+				let hash = mini(oData[group][k])
+				display.push(
+					s15 + k.padStart(25) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc +"<br>"+
+					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + oData[group][k].join(", ") +"</span>" + "<br>]</span>"
+				)
+			}
+		}
+		let strAll = s15 +"ALL"+ sc +": "+ s6 + mini(oData) + sc
+			+ " <span class='btn15 btnc' onclick='console.log(oData)'>[console]</span> "
+			+ (optSort ? "sorted" : "unsorted")
+		dom.details.innerHTML = strAll +"<br>"+ display.join("")
+		// add sub hashes
+		groups.forEach(function(g) {
+			let hash = mini(oData[g])
+			dom[g].innerHTML = s6 + hash + sc
+		})
+		dom.perf = Math.round(performance.now() - t0) +" ms"
+	} catch (e) {
+		dom.details = e+""
+	}
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	run()
+})
+
+</script>
+</body>
+</html>
