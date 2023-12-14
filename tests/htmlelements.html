@@ -171,19 +171,22 @@ function run() {
 				)
 			} else if ("object" === typeof htmlList[k]) {
 				let array = Object.getOwnPropertyNames(htmlList[k])
-				// get items after constructor
-				let fake = array.slice(array.indexOf("constructor")+1) // after constructor
-				// 
-				oData[group][k] = (optSort ? array.sort() : array)
-				let hash = mini(array), countFake = "", strData = oData[group][k].join(", ")
-
+				let fake = array.slice(array.indexOf("constructor")+1) // tampered: after constructor
+				if (optSort) {array.sort()}
+				let tmpArray = []
+				array.forEach(function(item) {tmpArray.push(item)})
+				oData[group][k] = tmpArray
+				let hash = mini(tmpArray), countFake = ""
+				// count + color each fake individually
 				if (fake.length) {
 					countFake = " "+ sb + "("+ fake.length +")"+ sc
-					strData = strData.replace(fake.join(", "), sb + fake.join(", ") + sc)
+					fake.forEach(function(item) {
+						array[array.indexOf(item)] = sb + item + sc
+					})
 				}
 				display.push(
 					s15 + k.padStart(25) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc + countFake +"<br>"+
-					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + strData +"</span>" + "<br>]</span>"
+					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + array.join(", ") +"</span>" + "<br>]</span>"
 				)
 			}
 		}
