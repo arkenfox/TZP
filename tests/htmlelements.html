@@ -8,7 +8,7 @@
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 780px;}
+		table {width: 90%; min-width: 600px; max-width: 780px}
 		hr {color: var(--test15);}
 		span.indent {
 			display:inline-block;margin-left:10px;
@@ -45,9 +45,9 @@
 <script>
 'use strict';
 
-s4 = s4.trim()
 s6 = s6.trim()
 s15 = s15.trim()
+sb = sb.trim()
 
 let oData = {}
 const htmlList = {
@@ -149,8 +149,10 @@ try {
 function run() {
 	// e.g. https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
 
+	oData = {}
 	let t0 = performance.now()
 	let optSort = dom.optSort.checked
+
 	try {
 		let display = [], toggle = "", group = "", groups = []
 		for (const k of Object.keys(htmlList)) {
@@ -168,15 +170,20 @@ function run() {
 					+ name.toUpperCase() +" <span class='grey'>... "+ byline +"</span><br><br>"
 				)
 			} else if ("object" === typeof htmlList[k]) {
-				if (optSort) {
-					oData[group][k] = Object.getOwnPropertyNames(htmlList[k]).sort()
-				} else {
-					oData[group][k] = Object.getOwnPropertyNames(htmlList[k])
+				let array = Object.getOwnPropertyNames(htmlList[k])
+				// get items after constructor
+				let fake = array.slice(array.indexOf("constructor")+1) // after constructor
+				// 
+				oData[group][k] = (optSort ? array.sort() : array)
+				let hash = mini(array), countFake = "", strData = oData[group][k].join(", ")
+
+				if (fake.length) {
+					countFake = " "+ sb + "("+ fake.length +")"+ sc
+					strData = strData.replace(fake.join(", "), sb + fake.join(", ") + sc)
 				}
-				let hash = mini(oData[group][k])
 				display.push(
-					s15 + k.padStart(25) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc +"<br>"+
-					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + oData[group][k].join(", ") +"</span>" + "<br>]</span>"
+					s15 + k.padStart(25) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc + countFake +"<br>"+
+					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + strData +"</span>" + "<br>]</span>"
 				)
 			}
 		}
@@ -190,7 +197,7 @@ function run() {
 			let hash = mini(oData[g])
 			let notation = ""
 			// keep an eye on these two
-			if (isFF && is102) {
+			if (isFF && is102 && !optSort) {
 				if (g == "2stable") {
 					/* TB = "c43ffeaa"
 						TB has no script which adds (after constructor)
