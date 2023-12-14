@@ -51,33 +51,48 @@ s15 = s15.trim()
 
 let oData = {}
 const htmlList = {
-	"group1": ["main", "1main","hidden"],
+	"group1": ["main", "1main", "hidden", "changes since FF115"],
+	// changes since FF115 (at least on windows)
+	// property added unless prefixed with a minus sign
+	HTMLButtonElement: HTMLButtonElement.prototype,
+		// ^ (122/nightly) popoverTargetElement, popoverTargetAction
+	HTMLElement: HTMLElement.prototype,
+		// ^ (117) oncancel
+	HTMLIFrameElement: HTMLIFrameElement.prototype,
+		// ^ (121) loading
+	HTMLInputElement: HTMLInputElement.prototype,
+		// ^ (116) dirName
+	HTMLMediaElement: HTMLMediaElement.prototype,
+		// ^ (116) setSinkId, sinkId
+		// (122/nightly) showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
+		// (122/nightly) -ondragexit
+	HTMLSelectElement: HTMLSelectElement.prototype,
+		// ^ (122/nightly) showPicker
+	HTMLTemplateElement: HTMLTemplateElement.prototype,
+		// (122/nightly) shadowRootMode, shadowRootDelegatesFocus
+	HTMLTextAreaElement: HTMLTextAreaElement.prototype,
+		// ^ (116) dirName
+	HTMLVideoElement: HTMLVideoElement.prototype,
+
+	"group2": ["interesting", "2interesting", "hiddenk", "changes since FF102"],
+	HTMLCanvasElement: HTMLCanvasElement.prototype,
+	HTMLFormElement: HTMLFormElement.prototype,
+	HTMLMetaElement: HTMLMetaElement.prototype,
+	HTMLSourceElement: HTMLSourceElement.prototype,
+
+	"group3": ["stable", "2stable", "hiddenv", "AFAICT since FF102 at least on desktop"],
 	HTMLAnchorElement: HTMLAnchorElement.prototype,
 	HTMLBodyElement: HTMLBodyElement.prototype,
-	HTMLCanvasElement: HTMLCanvasElement.prototype,
-	HTMLElement: HTMLElement.prototype, // ?
-	HTMLFrameSetElement: HTMLFrameSetElement.prototype,
-	HTMLIFrameElement: HTMLIFrameElement.prototype,
-	HTMLImageElement: HTMLImageElement.prototype,
-	HTMLInputElement: HTMLInputElement.prototype,
-	HTMLLinkElement: HTMLLinkElement.prototype,
-	HTMLMediaElement: HTMLMediaElement.prototype,
-	HTMLScriptElement: HTMLScriptElement.prototype,
-	HTMLSelectElement: HTMLSelectElement.prototype,
-	HTMLStyleElement: HTMLStyleElement.prototype,
-	HTMLTemplateElement: HTMLTemplateElement.prototype,
-	HTMLVideoElement: HTMLVideoElement.prototype,
-	"group2": ["same as blink (sorted)", "2same", "hiddenv"],
 	HTMLAreaElement: HTMLAreaElement.prototype,
-	HTMLButtonElement: HTMLButtonElement.prototype,
-	HTMLDialogElement: HTMLDialogElement.prototype,
+	HTMLDialogElement: undefined, // FF98+ HTMLDialogElement.prototype,
 	HTMLEmbedElement: HTMLEmbedElement.prototype,
 	HTMLFieldSetElement: HTMLFieldSetElement.prototype,
-	HTMLFormElement: HTMLFormElement.prototype,
 	HTMLFrameElement: HTMLFrameElement.prototype,
+	HTMLFrameSetElement: HTMLFrameSetElement.prototype,
 	HTMLHRElement: HTMLHRElement.prototype,
+	HTMLImageElement: HTMLImageElement.prototype,
 	HTMLLabelElement: HTMLLabelElement.prototype,
-	HTMLMetaElement: HTMLMetaElement.prototype,
+	HTMLLinkElement: HTMLLinkElement.prototype,
 	HTMLMeterElement: HTMLMeterElement.prototype,
 	HTMLOListElement: HTMLOListElement.prototype,
 	HTMLObjectElement: HTMLObjectElement.prototype,
@@ -85,15 +100,16 @@ const htmlList = {
 	HTMLOptionsCollection: HTMLOptionsCollection.prototype,
 	HTMLOutputElement: HTMLOutputElement.prototype,
 	HTMLProgressElement: HTMLProgressElement.prototype,
-	HTMLSourceElement: HTMLSourceElement.prototype,
+	HTMLScriptElement: HTMLScriptElement.prototype,
+	HTMLStyleElement: HTMLStyleElement.prototype,
 	HTMLTableCellElement: HTMLTableCellElement.prototype,
 	HTMLTableColElement: HTMLTableColElement.prototype,
 	HTMLTableElement: HTMLTableElement.prototype,
 	HTMLTableRowElement: HTMLTableRowElement.prototype,
 	HTMLTableSectionElement: HTMLTableSectionElement.prototype,
-	HTMLTextAreaElement: HTMLTextAreaElement.prototype,
 	HTMLTrackElement: HTMLTrackElement.prototype,
-	"group3": ["super boring","3boring","hiddenx"],
+
+	"group4": ["super boring","3boring","hiddenx", "really F boring"],
 	HTMLAudioElement: HTMLAudioElement.prototype,
 	HTMLBRElement: HTMLBRElement.prototype,
 	HTMLBaseElement: HTMLBaseElement.prototype,
@@ -124,17 +140,23 @@ const htmlList = {
 	//HTMLFormControlsCollection
 }
 
+try {
+	if (HTMLDialogElement.prototype !== undefined) {
+		htmlList["HTMLDialogElement"] = HTMLDialogElement.prototype
+	}
+} catch(e) {}
+
 function run() {
 	// e.g. https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
 
 	let t0 = performance.now()
 	let optSort = dom.optSort.checked
 	try {
-		let display = [], toggle = "", group = "", name = "", groups = []
-
+		let display = [], toggle = "", group = "", groups = []
 		for (const k of Object.keys(htmlList)) {
 			if (k.slice(0,5) === "group") {
-				name = htmlList[k][0]
+				let name = htmlList[k][0]
+				let byline = htmlList[k][3]
 				group = htmlList[k][1]
 				toggle = htmlList[k][2]
 				groups.push(group)
@@ -143,9 +165,9 @@ function run() {
 					"<br><hr>"
 					+ "<span id='label"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('"+ toggle +"','expand')\">[ expand ]</span> "
 					+ "<span id='"+ group +"'></span> "
-					+ name.toUpperCase() +"<br><br>"
+					+ name.toUpperCase() +" <span class='grey'>... "+ byline +"</span><br><br>"
 				)
-			} else {
+			} else if ("object" === typeof htmlList[k]) {
 				if (optSort) {
 					oData[group][k] = Object.getOwnPropertyNames(htmlList[k]).sort()
 				} else {
@@ -163,9 +185,24 @@ function run() {
 			+ (optSort ? "sorted" : "unsorted")
 		dom.details.innerHTML = strAll +"<br>"+ display.join("")
 		// add sub hashes
+		let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 		groups.forEach(function(g) {
 			let hash = mini(oData[g])
-			dom[g].innerHTML = s6 + hash + sc
+			let notation = ""
+			// keep an eye on these two
+			if (is102) {
+				if (g == "2stable") {
+					/* TB = "c43ffeaa"
+						TB has no script which adds (after constructor)
+						HTMLFrameElement: get contentWindow, get contentDocument
+						HTMLObjectElement: get contentWindow, get contentDocument
+					*/
+					notation = (hash == "ae0c7c78" || hash == "c43ffeaa") ? green_tick : zNEW
+				} else if (g == "3boring") {
+					notation = hash == "d32e42ea" ? green_tick : zNEW
+				}
+			}
+			dom[g].innerHTML = s6 + hash + sc + notation
 		})
 		dom.perf = Math.round(performance.now() - t0) +" ms"
 	} catch (e) {
