@@ -680,7 +680,6 @@ function showhide(id, style) {
 }
 
 function togglerows(id, word) {
-console.log(word)
 	let items = document.getElementsByClassName("tog"+ id)
 	let	style = items[0].style.display == "table-row" ? "none" : "table-row"
 	for (let i=0; i < items.length; i++) {items[i].style.display = style}
