@@ -38,7 +38,7 @@
 		</td></tr>
 		<tr><td colspan="2"><hr></td></tr>
 		<tr><td colspan="2"></td></tr>
-		<tr><td></td><td class="mono spaces" id="details">click counts to list their results here</td></tr>
+		<tr><td></td><td class="mono spaces" id="details"></td></tr>
 	</table>
 	<br>
 
@@ -50,117 +50,79 @@ s15 = s15.trim()
 sb = sb.trim()
 
 let oData = {}
-const htmlList = {
-	"group1": ["main", "1main", "hidden", "changes since FF115"],
+let aEverything = []
+
+let htmlList = [
+	1,
 	// changes since FF115 (at least on windows)
 	// property added unless prefixed with a minus sign
-	HTMLButtonElement: HTMLButtonElement.prototype,
+	'Button',
 		// ^ (122/nightly) popoverTargetElement, popoverTargetAction
-	HTMLElement: HTMLElement.prototype,
+	'Element',
 		// ^ (117) oncancel
-	HTMLIFrameElement: HTMLIFrameElement.prototype,
+	'IFrame',
 		// ^ (121) loading
-	HTMLInputElement: HTMLInputElement.prototype,
+	'Input',
 		// ^ (116) dirName
-	HTMLMediaElement: HTMLMediaElement.prototype,
+	'Media',
 		// ^ (116) setSinkId, sinkId
 		// (122/nightly) showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
 		// (122/nightly) -ondragexit
-	HTMLSelectElement: HTMLSelectElement.prototype,
+	'Select',
 		// ^ (122/nightly) showPicker
-	HTMLTemplateElement: HTMLTemplateElement.prototype,
+	'Template',
 		// (122/nightly) shadowRootMode, shadowRootDelegatesFocus
-	HTMLTextAreaElement: HTMLTextAreaElement.prototype,
+	'TextArea',
 		// ^ (116) dirName
-	HTMLVideoElement: HTMLVideoElement.prototype,
+	'Video',
+	2,
+	'Canvas','Form','Frame','Meta','Object','Source',
+	3,
+	'Body','Dialog','FrameSet','Image','Link','Meter','Output','Progress','Script','Style',
+	4,
+	'Anchor','Area','Embed','FieldSet','HR','Label','OList','Option','OptionsCollection',
+	'Table','TableCell','TableCol','TableRow','TableSection','Track',
+	5,
+	'Audio','BR','Base','DList','Data','DataList','Div','Document',
+	'FormControlsCollection','Head','Heading','Html','LI','Legend',
+	'Map','Mod','OptGroup','Paragraph','Picture','Pre','Quote','Span',
+	'TableCaption','Time','Title','UList','Unknown',
+]
 
-	"group2": ["interesting", "2interesting", "hiddenk", "changes since FF102"],
-	HTMLCanvasElement: HTMLCanvasElement.prototype,
-	HTMLFormElement: HTMLFormElement.prototype,
-	HTMLMetaElement: HTMLMetaElement.prototype,
-	HTMLSourceElement: HTMLSourceElement.prototype,
-
-	"group3": ["stable", "2stable", "hiddenv", "AFAICT since FF102 at least on desktop"],
-	HTMLAnchorElement: HTMLAnchorElement.prototype,
-	HTMLBodyElement: HTMLBodyElement.prototype,
-	HTMLAreaElement: HTMLAreaElement.prototype,
-	HTMLDialogElement: undefined, // FF98+ HTMLDialogElement.prototype,
-	HTMLEmbedElement: HTMLEmbedElement.prototype,
-	HTMLFieldSetElement: HTMLFieldSetElement.prototype,
-	HTMLFrameElement: HTMLFrameElement.prototype,
-	HTMLFrameSetElement: HTMLFrameSetElement.prototype,
-	HTMLHRElement: HTMLHRElement.prototype,
-	HTMLImageElement: HTMLImageElement.prototype,
-	HTMLLabelElement: HTMLLabelElement.prototype,
-	HTMLLinkElement: HTMLLinkElement.prototype,
-	HTMLMeterElement: HTMLMeterElement.prototype,
-	HTMLOListElement: HTMLOListElement.prototype,
-	HTMLObjectElement: HTMLObjectElement.prototype,
-	HTMLOptionElement: HTMLOptionElement.prototype,
-	HTMLOptionsCollection: HTMLOptionsCollection.prototype,
-	HTMLOutputElement: HTMLOutputElement.prototype,
-	HTMLProgressElement: HTMLProgressElement.prototype,
-	HTMLScriptElement: HTMLScriptElement.prototype,
-	HTMLStyleElement: HTMLStyleElement.prototype,
-	HTMLTableCellElement: HTMLTableCellElement.prototype,
-	HTMLTableColElement: HTMLTableColElement.prototype,
-	HTMLTableElement: HTMLTableElement.prototype,
-	HTMLTableRowElement: HTMLTableRowElement.prototype,
-	HTMLTableSectionElement: HTMLTableSectionElement.prototype,
-	HTMLTrackElement: HTMLTrackElement.prototype,
-
-	"group4": ["super boring","3boring","hiddenx", "really F boring"],
-	HTMLAudioElement: HTMLAudioElement.prototype,
-	HTMLBRElement: HTMLBRElement.prototype,
-	HTMLBaseElement: HTMLBaseElement.prototype,
-	HTMLDListElement: HTMLDListElement.prototype,
-	HTMLDataElement: HTMLDataElement.prototype,
-	HTMLDataListElement: HTMLDataListElement.prototype,
-	HTMLDivElement: HTMLDivElement.prototype,
-	HTMLDocument: HTMLDocument.prototype,
-	HTMLHeadElement: HTMLHeadElement.prototype,
-	HTMLHeadingElement: HTMLHeadingElement.prototype,
-	HTMLHtmlElement: HTMLHtmlElement.prototype,
-	HTMLLegendElement: HTMLLegendElement.prototype,
-	HTMLLIElement: HTMLLIElement.prototype,
-	HTMLMapElement: HTMLMapElement.prototype,
-	HTMLModElement: HTMLModElement.prototype,
-	HTMLOptGroupElement: HTMLOptGroupElement.prototype,
-	HTMLParagraphElement: HTMLParagraphElement.prototype,
-	HTMLPictureElement: HTMLPictureElement.prototype,
-	HTMLPreElement: HTMLPreElement.prototype,
-	HTMLQuoteElement: HTMLQuoteElement.prototype,
-	HTMLSpanElement: HTMLSpanElement.prototype,
-	HTMLTableCaptionElement: HTMLTableCaptionElement.prototype,
-	HTMLTimeElement: HTMLTimeElement.prototype,
-	HTMLTitleElement: HTMLTitleElement.prototype,
-	HTMLUListElement: HTMLUListElement.prototype,
-	HTMLUnknownElement: HTMLUnknownElement.prototype,
-	// error
-	//HTMLFormControlsCollection
+let ignoreList = ['Element','Document','FormControlsCollection','OptionsCollection']
+for (let i=0; i < htmlList.length; i++) {
+	let value = htmlList[i]
+	if ("string" === typeof value) {
+		let suffix = ignoreList.includes(value) ? "" : "Element"
+		htmlList[i] = 'HTML' + value + suffix
+	}
 }
 
-try {
-	if (HTMLDialogElement.prototype !== undefined) {
-		htmlList["HTMLDialogElement"] = HTMLDialogElement.prototype
-	}
-} catch(e) {}
+let groupInfo = {
+	1: ["main", "1main", "hidden", "changes since FF115"],
+	2: ["interesting", "2interesting", "hiddenk", "changes since FF98 or known extension f*kery"],
+	3: ["stable98", "2stable98", "hiddenv", "AFAICT FF98+ at least on desktop"],
+	4: ["stable52", "3stable52", "hiddenw", "AFAICT FF52+ at least on desktop"],
+	5: ["super boring","4boring","hiddenx", "boring AF + stable FF70+ <sup>(once HTMLDocument settled down)</sup>"],
+}
 
 function run() {
 	// e.g. https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
 
 	oData = {}
+	aEverything = []
 	let t0 = performance.now()
 	let optSort = dom.optSort.checked
 
 	try {
-		let display = [], toggle = "", group = "", groups = []
-		for (const k of Object.keys(htmlList)) {
-			if (k.slice(0,5) === "group") {
-				let name = htmlList[k][0]
-				let byline = htmlList[k][3]
-				group = htmlList[k][1]
-				toggle = htmlList[k][2]
+		let display = [], toggle = "", group = "", groups = [], name = ""
+
+		htmlList.forEach(function(k) {
+			if ("number" == typeof k) {
+				name = groupInfo[k][0]
+				let byline = groupInfo[k][3]
+				group = groupInfo[k][1]
+				toggle = groupInfo[k][2]
 				groups.push(group)
 				oData[group] = {}
 				display.push(
@@ -169,52 +131,91 @@ function run() {
 					+ "<span id='"+ group +"'></span> "
 					+ name.toUpperCase() +" <span class='grey'>... "+ byline +"</span><br><br>"
 				)
-			} else if ("object" === typeof htmlList[k]) {
-				let array = Object.getOwnPropertyNames(htmlList[k])
-				let fake = array.slice(array.indexOf("constructor")+1) // tampered: after constructor
-				if (optSort) {array.sort()}
-				let tmpArray = []
-				array.forEach(function(item) {tmpArray.push(item)})
-				oData[group][k] = tmpArray
-				let hash = mini(tmpArray), countFake = ""
-				// count + color each fake individually
-				if (fake.length) {
-					countFake = " "+ sb + "("+ fake.length +")"+ sc
-					fake.forEach(function(item) {
-						array[array.indexOf(item)] = sb + item + sc
-					})
+			} else {
+				if (window[k] !== undefined) {
+					let data = window[k].prototype
+					try {
+						let array = Object.getOwnPropertyNames(data)
+						let fake = array.slice(array.indexOf("constructor")+1) // tampered: after constructor
+						if (optSort) {array.sort()}
+						let tmpArray = []
+						array.forEach(function(item) {
+							tmpArray.push(item)
+							aEverything.push(item)
+						})
+						oData[group][k] = tmpArray
+						let hash = mini(tmpArray), countFake = ""
+						// count + color each fake individually
+						if (fake.length) {
+							countFake = " "+ sb + "("+ fake.length +")"+ sc
+							fake.forEach(function(item) {
+								array[array.indexOf(item)] = sb + item + sc
+							})
+						}
+						display.push(
+							s15 + k.padStart(30) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc + countFake +"<br>"+
+							"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + array.join(", ") +"</span>" + "<br>]</span>"
+						)
+					} catch(e) {
+						console.log(k, "not an array", e+"")
+					}					
+				} else {
+					console.log(k, "is undefined")
+					// doesn't exist
 				}
-				display.push(
-					s15 + k.padStart(25) + sc + ": "+ hash + s15 +" ("+ oData[group][k].length +")"+ sc + countFake +"<br>"+
-					"<span class='tog" + toggle +" hidden grey'>[<br>" + "<span class='indent'>" + array.join(", ") +"</span>" + "<br>]</span>"
-				)
 			}
-		}
+		})
+
+		// display
 		let strAll = s15 +"ALL"+ sc +": "+ s6 + mini(oData) + sc
 			+ " <span class='btn15 btnc' onclick='console.log(oData)'>[console]</span> "
 			+ (optSort ? "sorted" : "unsorted")
 		dom.details.innerHTML = strAll +"<br>"+ display.join("")
+
 		// add sub hashes
-		let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
 		groups.forEach(function(g) {
 			let hash = mini(oData[g])
 			let notation = ""
-			// keep an eye on these two
-			if (isFF && is102 && !optSort) {
-				if (g == "2stable") {
-					/* TB = "c43ffeaa"
-						TB has no script which adds (after constructor)
-						HTMLFrameElement: get contentWindow, get contentDocument
-						HTMLObjectElement: get contentWindow, get contentDocument
-					*/
-					notation = (hash == "ae0c7c78" || hash == "c43ffeaa") ? green_tick : zNEW
-				} else if (g == "3boring") {
-					notation = hash == "d32e42ea" ? green_tick : zNEW
+			// notate
+			if (isFF && !optSort) {
+				if (g == "2stable98") {
+					if (HTMLElement.prototype.hasOwnProperty("outerText")) { // FF98+
+						notation = (hash == "bd1065f2") ? green_tick : zNEW
+					}
+				} else if (g == "3stable52") {
+					notation = (hash == "d3ce4fc4") ? green_tick : zNEW
+				} else if (g == "4boring") {
+					// FF70+ HTMLDocument finally stabilized at constructor only
+					let is70 = ("function" === typeof Intl.RelativeTimeFormat
+							&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+					if (is70) {
+						notation = hash == "078ef8c3" ? green_tick : zNEW
+					}
 				}
 			}
 			dom[g].innerHTML = s6 + hash + sc + notation
 		})
-		dom.perf = Math.round(performance.now() - t0) +" ms"
+		dom.perf = Math.round(performance.now() - t0) +" ms"					
+
+		//* everything
+		//console.log(aEverything) // 815 all : 749 (no constructors)
+		aEverything.sort() // order is artifical due to htmlList so lets remove that here
+		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
+		let aPOC = aEverything.filter(x => !["constructor"].includes(x)) // remove constructor
+		//console.log("'"+ aPOC.join("','") +"'") // 447
+		//*/
+
+		/* so what is in both or only in each
+		// nightly 122
+		let aTZP = ['ATTRIBUTE_NODE','CDATA_SECTION_NODE','COMMENT_NODE','DOCUMENT_FRAGMENT_NODE','DOCUMENT_NODE','DOCUMENT_POSITION_CONTAINED_BY','DOCUMENT_POSITION_CONTAINS','DOCUMENT_POSITION_DISCONNECTED','DOCUMENT_POSITION_FOLLOWING','DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC','DOCUMENT_POSITION_PRECEDING','DOCUMENT_TYPE_NODE','ELEMENT_NODE','ENTITY_NODE','ENTITY_REFERENCE_NODE','NOTATION_NODE','PROCESSING_INSTRUCTION_NODE','TEXT_NODE','accessKey','accessKeyLabel','addEventListener','after','align','animate','append','appendChild','ariaAtomic','ariaAutoComplete','ariaBusy','ariaChecked','ariaColCount','ariaColIndex','ariaColIndexText','ariaColSpan','ariaCurrent','ariaDescription','ariaDisabled','ariaExpanded','ariaHasPopup','ariaHidden','ariaInvalid','ariaKeyShortcuts','ariaLabel','ariaLevel','ariaLive','ariaModal','ariaMultiLine','ariaMultiSelectable','ariaOrientation','ariaPlaceholder','ariaPosInSet','ariaPressed','ariaReadOnly','ariaRelevant','ariaRequired','ariaRoleDescription','ariaRowCount','ariaRowIndex','ariaRowIndexText','ariaRowSpan','ariaSelected','ariaSetSize','ariaSort','ariaValueMax','ariaValueMin','ariaValueNow','ariaValueText','assignedSlot','attachInternals','attachShadow','attributes','autocapitalize','autofocus','baseURI','before','blur','checkVisibility','childElementCount','childNodes','children','classList','className','click','clientHeight','clientLeft','clientTop','clientWidth','cloneNode','closest','compareDocumentPosition','contains','contentEditable','convertPointFromNode','convertQuadFromNode','convertRectFromNode','dataset','dir','dispatchEvent','draggable','enterKeyHint','firstChild','firstElementChild','focus','getAnimations','getAttribute','getAttributeNS','getAttributeNames','getAttributeNode','getAttributeNodeNS','getBoundingClientRect','getBoxQuads','getClientRects','getElementsByClassName','getElementsByTagName','getElementsByTagNameNS','getRootNode','hasAttribute','hasAttributeNS','hasAttributes','hasChildNodes','hasPointerCapture','hidden','hidePopover','id','inert','innerHTML','innerText','inputMode','insertAdjacentElement','insertAdjacentHTML','insertAdjacentText','insertBefore','isConnected','isContentEditable','isDefaultNamespace','isEqualNode','isSameNode','lang','lastChild','lastElementChild','localName','lookupNamespaceURI','lookupPrefix','matches','mozMatchesSelector','mozRequestFullScreen','namespaceURI','nextElementSibling','nextSibling','nodeName','nodeType','nodeValue','nonce','normalize','offsetHeight','offsetLeft','offsetParent','offsetTop','offsetWidth','onabort','onanimationcancel','onanimationend','onanimationiteration','onanimationstart','onauxclick','onbeforeinput','onbeforetoggle','onblur','oncancel','oncanplay','oncanplaythrough','onchange','onclick','onclose','oncontextmenu','oncopy','oncuechange','oncut','ondblclick','ondrag','ondragend','ondragenter','ondragleave','ondragover','ondragstart','ondrop','ondurationchange','onemptied','onended','onerror','onfocus','onformdata','onfullscreenchange','onfullscreenerror','ongotpointercapture','oninput','oninvalid','onkeydown','onkeypress','onkeyup','onload','onloadeddata','onloadedmetadata','onloadstart','onlostpointercapture','onmousedown','onmouseenter','onmouseleave','onmousemove','onmouseout','onmouseover','onmouseup','onmozfullscreenchange','onmozfullscreenerror','onpaste','onpause','onplay','onplaying','onpointercancel','onpointerdown','onpointerenter','onpointerleave','onpointermove','onpointerout','onpointerover','onpointerup','onprogress','onratechange','onreset','onresize','onscroll','onscrollend','onsecuritypolicyviolation','onseeked','onseeking','onselect','onselectionchange','onselectstart','onslotchange','onstalled','onsubmit','onsuspend','ontimeupdate','ontoggle','ontransitioncancel','ontransitionend','ontransitionrun','ontransitionstart','onvolumechange','onwaiting','onwebkitanimationend','onwebkitanimationiteration','onwebkitanimationstart','onwebkittransitionend','onwheel','outerHTML','outerText','ownerDocument','parentElement','parentNode','part','popover','prefix','prepend','previousElementSibling','previousSibling','querySelector','querySelectorAll','releaseCapture','releasePointerCapture','remove','removeAttribute','removeAttributeNS','removeAttributeNode','removeChild','removeEventListener','replaceChild','replaceChildren','replaceWith','requestFullscreen','requestPointerLock','role','scroll','scrollBy','scrollHeight','scrollIntoView','scrollLeft','scrollLeftMax','scrollTo','scrollTop','scrollTopMax','scrollWidth','setAttribute','setAttributeNS','setAttributeNode','setAttributeNodeNS','setCapture','setHTMLUnsafe','setPointerCapture','shadowRoot','showPopover','slot','spellcheck','style','tabIndex','tagName','textContent','title','toggleAttribute','togglePopover','translate','webkitMatchesSelector']
+		let onlyTZP = aTZP.filter(x => !aPOC.includes(x))
+		let onlyPOC = aPOC.filter(x => !aTZP.includes(x))
+		let aCommon = aPOC.filter(x => aTZP.includes(x))
+		console.log("onlyTZP", onlyTZP.length+"\n", "['"+ onlyTZP.join("','") +"']" )
+		console.log("onlyPOC", onlyPOC.length+"\n", "['"+ onlyPOC.join("','") +"']" )
+		console.log("aCommon", aCommon.length+"\n", "['"+ aCommon.join("','") +"']" )
+		//*/
+
 	} catch (e) {
 		dom.details = e+""
 	}
