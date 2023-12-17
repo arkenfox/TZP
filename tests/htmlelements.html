@@ -51,15 +51,26 @@ sb = sb.trim()
 
 let oData = {}
 let aEverything = []
+let is70 = ("function" === typeof Intl.RelativeTimeFormat
+		&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+let is92 = ("function" === typeof Object.hasOwn)
+let is111 = (HTMLElement.prototype.hasOwnProperty("translate"))
 
 let htmlList = [
-	1,
-	// changes since FF115 (at least on windows)
+	/*
+	0,
+	//*/
+
+	5,
+	// changes since FF115 (at least on windows) or exhibit extension fuckery
 	// property added unless prefixed with a minus sign
+	'Element', // Element (not HTML+item+Element)
 	'Button',
 		// ^ (122/nightly) popoverTargetElement, popoverTargetAction
-	'Element',
+	'HTMLElement', // HTMLElement
 		// ^ (117) oncancel
+	'Frame',
+		// ^ ext fuckery
 	'IFrame',
 		// ^ (121) loading
 	'Input',
@@ -68,6 +79,8 @@ let htmlList = [
 		// ^ (116) setSinkId, sinkId
 		// (122/nightly) showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
 		// (122/nightly) -ondragexit
+	'Object',
+	 // ^ ext fuckery
 	'Select',
 		// ^ (122/nightly) showPicker
 	'Template',
@@ -75,36 +88,86 @@ let htmlList = [
 	'TextArea',
 		// ^ (116) dirName
 	'Video',
-	2,
-	'Canvas','Form','Frame','Meta','Object','Source',
-	3,
-	'Body','Dialog','FrameSet','Image','Link','Meter','Output','Progress','Script','Style',
-	4,
-	'Anchor','Area','Embed','FieldSet','HR','Label','OList','Option','OptionsCollection',
-	'Table','TableCell','TableCol','TableRow','TableSection','Track',
-	5,
-	'Audio','BR','Base','DList','Data','DataList','Div','Document',
-	'FormControlsCollection','Head','Heading','Html','LI','Legend',
-	'Map','Mod','OptGroup','Paragraph','Picture','Pre','Quote','Span',
-	'TableCaption','Time','Title','UList','Unknown',
+
+	6,
+	// changes since FF104 (but stable since FF111 - that is not in current ESR115 cycle)
+		// last checked 122
+	'Canvas', // last change 105 = cf7b9afc
+	'Form', // last change 111 = bff84eef
+	'Meta', // last change 106 = d32c1bc0
+	'Source', // last change 108 = e74ef3df
+
+	7, // stable since FF92
+	'Body',
+	'FrameSet',
+	'Image',
+	'Link',
+	'Menu', // changed 85
+	'Meter',
+	'Output',
+	'Param', // changed 85
+	'Progress',
+	'Script',
+	'Slot', // new in 63, changed 66 92
+	'Style',
+
+	8, // stable since FF70
+	'AllCollection', // changed 64
+	'Document', // changed 57, 58, 60, 61, 68, 69, 70
+
+	9, // stable since FF52
+	'Anchor','Area','Audio','BR','Base','HTMLCollection','DList','Data','DataList','Details',
+	'Dialog', // new 98 but not changed since
+	'Directory','Div','Embed','FieldSet','Font','FormControlsCollection','HR','Head','Heading',
+	'Html','Label','LI','Legend','Map',
+	'Marquee', // new 65 but not changed since
+	'Mod','OList','OptGroup','Option','OptionsCollection',
+	'Paragraph','Picture','Pre','Quote','Span',
+	'Table','TableCaption','TableCell','TableCol','TableRow',
+	'TableSection','Time','Title','Track','UList','Unknown',
+
 ]
 
-let ignoreList = ['Element','Document','FormControlsCollection','OptionsCollection']
-for (let i=0; i < htmlList.length; i++) {
-	let value = htmlList[i]
-	if ("string" === typeof value) {
-		let suffix = ignoreList.includes(value) ? "" : "Element"
-		htmlList[i] = 'HTML' + value + suffix
-	}
+let groupInfo = {
+	0: ["more", "0more", "hiddenm", "add MOAR stuff"],
+
+	// elements section
+	5: ["main", "5main", "hiddenu", "changes since FF115 | show extension tampering"],
+	6: ["recent", "6recent", "hiddenv", "changes since FF104 (stable since FF111)"],
+	7: ["stable92","7stable92", "hiddenx", "AFAICT FF92+"],
+	8: ["stable70","8stable70","hiddeny", "AFAICT FF70+"],
+	9: ["stable52","9stable52", "hiddenz", "AFAICT FF52+ or since items added"],
 }
 
-let groupInfo = {
-	1: ["main", "1main", "hidden", "changes since FF115"],
-	2: ["interesting", "2interesting", "hiddenk", "changes since FF98 or known extension f*kery"],
-	3: ["stable98", "2stable98", "hiddenv", "AFAICT FF98+ at least on desktop"],
-	4: ["stable52", "3stable52", "hiddenw", "AFAICT FF52+ at least on desktop"],
-	5: ["super boring","4boring","hiddenx", "boring AF + stable FF70+ <sup>(once HTMLDocument settled down)</sup>"],
+function tidyList() {
+	let ignoreList = [
+		'AllCollection','Document','FormControlsCollection','OptionsCollection'
+	]
+	let doNothing = ['Element','HTMLElement','HTMLCollection']
+	let currentNo = 0, tList = []
+	
+	for (let i=0; i < htmlList.length; i++) {
+		let value = htmlList[i]
+		if ("string" === typeof value) {
+			if (currentNo > 4) {
+				if (!doNothing.includes(value)) {
+					let suffix = ignoreList.includes(value) ? "" : "Element"
+					value = 'HTML' + value + suffix
+					htmlList[i] = value
+				}
+			}
+			tList.push(value)
+		} else {
+			if (tList.length) {
+				tList.sort()
+				//console.log(currentNo, "'"+ tList.join("','") +"'")
+			}
+			tList = []
+			currentNo = value
+		}
+	}
 }
+tidyList()
 
 function run() {
 	// e.g. https://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
@@ -166,10 +229,19 @@ function run() {
 			}
 		})
 
+		//* everything
+		//console.log(aEverything) // 815 all : 749 (no constructors)
+		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
+		aEverything.sort() // order is artifical due to htmlList so lets remove that here
+		aEverything = aEverything.filter(x => !["constructor"].includes(x)) // remove constructor
+		//console.log("['"+ aEverything.join("','") +"']") // 447
+		//*/
+
 		// display
 		let strAll = s15 +"ALL"+ sc +": "+ s6 + mini(oData) + sc
 			+ " <span class='btn15 btnc' onclick='console.log(oData)'>[console]</span> "
-			+ (optSort ? "sorted" : "unsorted")
+			+ (optSort ? "sorted" : "unsorted") +" | unique values: "+ mini(aEverything)
+			+" ["+ aEverything.length +"] "
 		dom.details.innerHTML = strAll +"<br>"+ display.join("")
 
 		// add sub hashes
@@ -178,43 +250,23 @@ function run() {
 			let notation = ""
 			// notate
 			if (isFF && !optSort) {
-				if (g == "2stable98") {
-					if (HTMLElement.prototype.hasOwnProperty("outerText")) { // FF98+
-						notation = (hash == "bd1065f2") ? green_tick : zNEW
-					}
-				} else if (g == "3stable52") {
-					notation = (hash == "d3ce4fc4") ? green_tick : zNEW
-				} else if (g == "4boring") {
-					// FF70+ HTMLDocument finally stabilized at constructor only
-					let is70 = ("function" === typeof Intl.RelativeTimeFormat
-							&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
-					if (is70) {
-						notation = hash == "078ef8c3" ? green_tick : zNEW
-					}
+				let firstchar = g.slice(0,1)
+				if (firstchar == "6" && is111) { notation = (hash == "b0cb1af2") ? green_tick : zNEW
+				} else if (firstchar == "7" && is92) { notation = (hash == "4c9f8cea") ? green_tick : zNEW
+				} else if (firstchar == "8" && is70) { notation = hash == "eb335cf8" ? green_tick : zNEW
+				} else if (firstchar == "9") {
+					// we have 3 hashes since we added stable items since they were added
+					let good = [
+						"6f0d97a9", // FF97+ dialog added
+						"7cd5e14a", // FF65-97 marquee added
+						"6fda9d97", // FF52-64 
+					]
+					notation = good.includes(hash) ? green_tick : zNEW
 				}
 			}
 			dom[g].innerHTML = s6 + hash + sc + notation
 		})
 		dom.perf = Math.round(performance.now() - t0) +" ms"					
-
-		//* everything
-		//console.log(aEverything) // 815 all : 749 (no constructors)
-		aEverything.sort() // order is artifical due to htmlList so lets remove that here
-		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
-		let aPOC = aEverything.filter(x => !["constructor"].includes(x)) // remove constructor
-		//console.log("'"+ aPOC.join("','") +"'") // 447
-		//*/
-
-		/* so what is in both or only in each
-		// nightly 122
-		let aTZP = ['ATTRIBUTE_NODE','CDATA_SECTION_NODE','COMMENT_NODE','DOCUMENT_FRAGMENT_NODE','DOCUMENT_NODE','DOCUMENT_POSITION_CONTAINED_BY','DOCUMENT_POSITION_CONTAINS','DOCUMENT_POSITION_DISCONNECTED','DOCUMENT_POSITION_FOLLOWING','DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC','DOCUMENT_POSITION_PRECEDING','DOCUMENT_TYPE_NODE','ELEMENT_NODE','ENTITY_NODE','ENTITY_REFERENCE_NODE','NOTATION_NODE','PROCESSING_INSTRUCTION_NODE','TEXT_NODE','accessKey','accessKeyLabel','addEventListener','after','align','animate','append','appendChild','ariaAtomic','ariaAutoComplete','ariaBusy','ariaChecked','ariaColCount','ariaColIndex','ariaColIndexText','ariaColSpan','ariaCurrent','ariaDescription','ariaDisabled','ariaExpanded','ariaHasPopup','ariaHidden','ariaInvalid','ariaKeyShortcuts','ariaLabel','ariaLevel','ariaLive','ariaModal','ariaMultiLine','ariaMultiSelectable','ariaOrientation','ariaPlaceholder','ariaPosInSet','ariaPressed','ariaReadOnly','ariaRelevant','ariaRequired','ariaRoleDescription','ariaRowCount','ariaRowIndex','ariaRowIndexText','ariaRowSpan','ariaSelected','ariaSetSize','ariaSort','ariaValueMax','ariaValueMin','ariaValueNow','ariaValueText','assignedSlot','attachInternals','attachShadow','attributes','autocapitalize','autofocus','baseURI','before','blur','checkVisibility','childElementCount','childNodes','children','classList','className','click','clientHeight','clientLeft','clientTop','clientWidth','cloneNode','closest','compareDocumentPosition','contains','contentEditable','convertPointFromNode','convertQuadFromNode','convertRectFromNode','dataset','dir','dispatchEvent','draggable','enterKeyHint','firstChild','firstElementChild','focus','getAnimations','getAttribute','getAttributeNS','getAttributeNames','getAttributeNode','getAttributeNodeNS','getBoundingClientRect','getBoxQuads','getClientRects','getElementsByClassName','getElementsByTagName','getElementsByTagNameNS','getRootNode','hasAttribute','hasAttributeNS','hasAttributes','hasChildNodes','hasPointerCapture','hidden','hidePopover','id','inert','innerHTML','innerText','inputMode','insertAdjacentElement','insertAdjacentHTML','insertAdjacentText','insertBefore','isConnected','isContentEditable','isDefaultNamespace','isEqualNode','isSameNode','lang','lastChild','lastElementChild','localName','lookupNamespaceURI','lookupPrefix','matches','mozMatchesSelector','mozRequestFullScreen','namespaceURI','nextElementSibling','nextSibling','nodeName','nodeType','nodeValue','nonce','normalize','offsetHeight','offsetLeft','offsetParent','offsetTop','offsetWidth','onabort','onanimationcancel','onanimationend','onanimationiteration','onanimationstart','onauxclick','onbeforeinput','onbeforetoggle','onblur','oncancel','oncanplay','oncanplaythrough','onchange','onclick','onclose','oncontextmenu','oncopy','oncuechange','oncut','ondblclick','ondrag','ondragend','ondragenter','ondragleave','ondragover','ondragstart','ondrop','ondurationchange','onemptied','onended','onerror','onfocus','onformdata','onfullscreenchange','onfullscreenerror','ongotpointercapture','oninput','oninvalid','onkeydown','onkeypress','onkeyup','onload','onloadeddata','onloadedmetadata','onloadstart','onlostpointercapture','onmousedown','onmouseenter','onmouseleave','onmousemove','onmouseout','onmouseover','onmouseup','onmozfullscreenchange','onmozfullscreenerror','onpaste','onpause','onplay','onplaying','onpointercancel','onpointerdown','onpointerenter','onpointerleave','onpointermove','onpointerout','onpointerover','onpointerup','onprogress','onratechange','onreset','onresize','onscroll','onscrollend','onsecuritypolicyviolation','onseeked','onseeking','onselect','onselectionchange','onselectstart','onslotchange','onstalled','onsubmit','onsuspend','ontimeupdate','ontoggle','ontransitioncancel','ontransitionend','ontransitionrun','ontransitionstart','onvolumechange','onwaiting','onwebkitanimationend','onwebkitanimationiteration','onwebkitanimationstart','onwebkittransitionend','onwheel','outerHTML','outerText','ownerDocument','parentElement','parentNode','part','popover','prefix','prepend','previousElementSibling','previousSibling','querySelector','querySelectorAll','releaseCapture','releasePointerCapture','remove','removeAttribute','removeAttributeNS','removeAttributeNode','removeChild','removeEventListener','replaceChild','replaceChildren','replaceWith','requestFullscreen','requestPointerLock','role','scroll','scrollBy','scrollHeight','scrollIntoView','scrollLeft','scrollLeftMax','scrollTo','scrollTop','scrollTopMax','scrollWidth','setAttribute','setAttributeNS','setAttributeNode','setAttributeNodeNS','setCapture','setHTMLUnsafe','setPointerCapture','shadowRoot','showPopover','slot','spellcheck','style','tabIndex','tagName','textContent','title','toggleAttribute','togglePopover','translate','webkitMatchesSelector']
-		let onlyTZP = aTZP.filter(x => !aPOC.includes(x))
-		let onlyPOC = aPOC.filter(x => !aTZP.includes(x))
-		let aCommon = aPOC.filter(x => aTZP.includes(x))
-		console.log("onlyTZP", onlyTZP.length+"\n", "['"+ onlyTZP.join("','") +"']" )
-		console.log("onlyPOC", onlyPOC.length+"\n", "['"+ onlyPOC.join("','") +"']" )
-		console.log("aCommon", aCommon.length+"\n", "['"+ aCommon.join("','") +"']" )
-		//*/
 
 	} catch (e) {
 		dom.details = e+""
