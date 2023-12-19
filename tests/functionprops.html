@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>function properties</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 90%; min-width: 600px; max-width: 780px}
+		hr {color: var(--test18);}
+		span.indent {
+			display:inline-block;margin-left:10px;
+		}
+		.grey {color: grey;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb18">
+		<thead><tr><th>
+			<div class="nav-title">function properties
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			<div class="nav-down"><span class="c perf" id="totalCount"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td class="intro">
+			<span class="no_color"></span>
+				<span class="btn18 btnfirst" onClick="run()">[ run ]</span> &nbsp &nbsp 
+				<select name="items" id="optList" onChange="run()"></select> &nbsp &nbsp
+				<input type="checkbox" id="optSort"> <span class="no_color">sort</span>
+			</span>
+		</td></tr>
+		<tr><td><hr></td></tr>
+		<tr><td></td></tr>
+		<tr><td style="text-align: left; color: var(--test0);" class="mono spaces" id="details"></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+s13 = s13.trim()
+s18 = s18.trim()
+sb = sb.trim()
+
+let oData = {}
+let aEverything = []
+let maxPad = 0
+let totalCount = 0
+
+let stuff = {
+leftovers: [
+'AbortController',
+'AbortSignal',
+'AbstractRange',
+'AggregateError',
+'Animation',
+'AnimationEffect',
+'AnimationEvent',
+'AnimationPlaybackEvent',
+'AnimationTimeline',
+'Array',
+'ArrayBuffer',
+'Attr',
+'AuthenticatorAssertionResponse',
+'AuthenticatorAttestationResponse',
+'AuthenticatorResponse',
+'BarProp',
+'BeforeUnloadEvent',
+'BigInt',
+'BigInt64Array',
+'BigUint64Array',
+'Blob',
+'BlobEvent',
+'Boolean',
+'BroadcastChannel',
+'ByteLengthQueuingStrategy', // streams
+'CDATASection',
+'CaretPosition',
+'CharacterData',
+'Clipboard',
+'ClipboardEvent',
+'ClipboardItem',
+'CloseEvent',
+'Comment',
+'CompositionEvent', // entering text
+'CompressionStream',
+'ContentVisibilityAutoStateChangeEvent',
+'CountQueuingStrategy', // streams
+'Credential',
+'CredentialsContainer',
+'Crypto',
+'CryptoKey',
+'CustomElementRegistry',
+'CustomEvent',
+'DOMException',
+'DOMImplementation',
+'DOMMatrix',
+'DOMMatrixReadOnly',
+'DOMParser',
+'DOMPoint',
+'DOMPointReadOnly',
+'DOMQuad',
+'DOMRect',
+'DOMRectList',
+'DOMRectReadOnly',
+'DOMRequest',
+'DOMStringList',
+'DOMStringMap',
+'DOMTokenList',
+'DataTransfer',
+'DataTransferItem',
+'DataTransferItemList',
+'DataView',
+'Date',
+'DecompressionStream',
+'DeviceMotionEvent',
+'DeviceOrientationEvent',
+'Directory',
+'Document',
+'DocumentFragment',
+'DocumentTimeline',
+'DocumentType',
+'DragEvent',
+'ElementInternals',
+'Error',
+'ErrorEvent',
+'EvalError',
+'Event',
+'EventCounts',
+'EventSource',
+'EventTarget',
+'File',
+'FileList',
+'FileReader',
+'FinalizationRegistry',
+'Float32Array',
+'Float64Array',
+'FocusEvent',
+'FontFace',
+'FontFaceSet',
+'FontFaceSetLoadEvent',
+'FormData',
+'FormDataEvent',
+'Gamepad',
+'GamepadAxisMoveEvent',
+'GamepadButton',
+'GamepadButtonEvent',
+'GamepadEvent',
+'GamepadHapticActuator',
+'GamepadPose',
+'Geolocation',
+'GeolocationCoordinates',
+'GeolocationPosition',
+'GeolocationPositionError',
+'HashChangeEvent',
+'Headers',
+'Highlight',
+'HighlightRegistry',
+'History',
+'IdentityCredential',
+'IdleDeadline',
+'Image',
+'ImageBitmap',
+'ImageBitmapRenderingContext',
+'ImageData',
+'InputEvent',
+'Int16Array',
+'Int32Array',
+'Int8Array',
+'InternalError',
+'IntersectionObserver',
+'IntersectionObserverEntry',
+'KeyboardEvent',
+'KeyframeEffect',
+'LargestContentfulPaint',
+'Location',
+'Lock',
+'LockManager',
+'Map',
+'MessageChannel',
+'MessageEvent',
+'MessagePort',
+'MimeType',
+'MimeTypeArray',
+'MouseEvent',
+'MouseScrollEvent',
+'MutationEvent',
+'MutationObserver',
+'MutationRecord',
+'NamedNodeMap',
+'NavigationPreloadManager',
+'Node',
+'NodeIterator',
+'NodeList',
+'Notification',
+'Number',
+'Object',
+'Option',
+'PageTransitionEvent',
+'PaintRequest',
+'PaintRequestList',
+'PannerNode',
+'PermissionStatus',
+'Permissions',
+'Plugin',
+'PluginArray',
+'PointerEvent',
+'PopStateEvent',
+'PopupBlockedEvent',
+'ProcessingInstruction',
+'ProgressEvent',
+'Promise',
+'PromiseRejectionEvent',
+'PublicKeyCredential',
+'PushManager',
+'PushSubscription',
+'PushSubscriptionOptions',
+'RadioNodeList',
+'Range',
+'RangeError',
+'ReadableByteStreamController',
+'ReadableStream',
+'ReadableStreamBYOBReader',
+'ReadableStreamBYOBRequest',
+'ReadableStreamDefaultController',
+'ReadableStreamDefaultReader',
+'ReferenceError',
+'RegExp',
+'Request',
+'ResizeObserver',
+'ResizeObserverEntry',
+'ResizeObserverSize',
+'Response',
+'Scheduler',
+'Screen',
+'ScreenOrientation',
+'ScriptProcessorNode',
+'ScrollAreaEvent',
+'SecurityPolicyViolationEvent',
+'Selection',
+'ServiceWorker',
+'ServiceWorkerContainer',
+'ServiceWorkerRegistration',
+'Set',
+'ShadowRoot',
+'SharedWorker',
+'SourceBuffer',
+'SourceBufferList',
+'SpeechSynthesis',
+'SpeechSynthesisErrorEvent',
+'SpeechSynthesisEvent',
+'SpeechSynthesisUtterance',
+'SpeechSynthesisVoice',
+'StaticRange',
+'StereoPannerNode',
+'String',
+'SubmitEvent',
+'SubtleCrypto',
+'Symbol',
+'SyntaxError',
+'TaskController',
+'TaskPriorityChangeEvent',
+'TaskSignal',
+'Text',
+'TextDecoder',
+'TextDecoderStream',
+'TextEncoder',
+'TextEncoderStream',
+'TextMetrics',
+'TextTrack',
+'TextTrackCue',
+'TextTrackCueList',
+'TextTrackList',
+'TimeEvent',
+'TimeRanges',
+'ToggleEvent',
+'TrackEvent',
+'TransformStream',
+'TransformStreamDefaultController',
+'TransitionEvent',
+'TreeWalker',
+'TypeError',
+'UIEvent',
+'URIError',
+'URL',
+'URLSearchParams',
+'Uint16Array',
+'Uint32Array',
+'Uint8Array',
+'Uint8ClampedArray',
+'UserActivation',
+'ValidityState',
+'VisualViewport',
+'WakeLock',
+'WakeLockSentinel',
+'WaveShaperNode',
+'WeakMap',
+'WeakRef',
+'WeakSet',
+'WebKitCSSMatrix',
+'WebSocket',
+'WebTransport',
+'WebTransportBidirectionalStream',
+'WebTransportDatagramDuplexStream',
+'WebTransportError',
+'WebTransportReceiveStream',
+'WebTransportSendStream',
+'WheelEvent',
+'Window',
+'Worker',
+'Worklet',
+'WritableStream',
+'WritableStreamDefaultController',
+'WritableStreamDefaultWriter',
+'XMLDocument',
+'XMLHttpRequest',
+'XMLHttpRequestEventTarget',
+'XMLHttpRequestUpload',
+'XMLSerializer',
+'XPathEvaluator',
+'XPathExpression',
+'XPathResult',
+'XSLTProcessor',
+]}
+//console.log(stuff.leftovers.length)
+
+let oList = {
+/*
+	"TEMPLATE": {
+		pad: 0,
+		data: {
+			1: {
+				title: 'main',
+				desc: '',
+				prefix: '',
+				items: [
+				],
+			},
+		},
+	},
+*/
+
+	"Audio": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'Audio',
+				ignore: [
+'Audio','AnalyserNode','BaseAudioContext','BiquadFilterNode','ChannelMergerNode',
+'ChannelSplitterNode','ConvolverNode','ConstantSourceNode','DelayNode',
+'DynamicsCompressorNode','GainNode','IIRFilterNode',
+'OfflineAudioCompletionEvent','OfflineAudioContext','OscillatorNode','PeriodicWave',
+				],
+				items: [
+'Buffer','BufferSourceNode','Context','DestinationNode','Listener','Node',
+'Param','ParamMap','ProcessingEvent','ScheduledSourceNode','Worklet','WorkletNode',
+				],
+			},
+		},
+	},
+
+	"Canvas": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'Canvas',
+				ignore: ['OffscreenCanvas','OffscreenCanvasRenderingContext2D','Path2D',],
+				items: ['CaptureMediaStream','Gradient','Pattern','RenderingContext2D',],
+			},
+		},
+	},
+
+	"CSS": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'CSS',
+				suffix: 'Rule',
+				ignore: [
+'CSSAnimation','CSSRule','CSSRuleList','CSSStyleDeclaration','CSSStyleSheet','CSSTransition','StyleSheet','StyleSheetList',
+				],
+				items: [
+'Condition','Container','CounterStyle','FontFace','FontFeatureValues','FontPaletteValues','Grouping','Import','Keyframe',
+'Keyframes','LayerBlock','LayerStatement','Media','MozDocument','Namespace','Page','Property','Style','Supports',
+				],
+			},
+		},
+	},
+
+	"Element": {
+		pad: 0,
+		data: {
+			5: {
+				// changes since FF115 (at least on windows) or exhibit extension fuckery
+				// property added unless prefixed with a minus sign
+				title: 'main',
+				desc: "changes since FF115 | show extension tampering",
+				prefix: 'HTML',
+				suffix: 'Element',
+				ignore: [
+					'Element',
+					'HTMLElement',
+						// ^ (117) oncancel
+					'MathMLElement',
+						// ^ (122/nightly) ondragexit, -onbeforetoggle
+						// (117) onauxclick, -oncancel, -onauxclick,
+				],
+				items: [
+					'Button',
+						// ^ (122/nightly) popoverTargetElement, popoverTargetAction
+					'Frame',
+						// ^ ext fuckery
+					'IFrame',
+						// ^ (121) loading
+					'Input',
+						// ^ (116) dirName
+					'Media',
+						// ^ (116) setSinkId, sinkId
+						// (122/nightly) showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
+						// (122/nightly) -ondragexit
+					'Object',
+						// ^ ext fuckery
+					'Select',
+						// ^ (122/nightly) showPicker
+					'Template',
+						// (122/nightly) shadowRootMode, shadowRootDelegatesFocus
+					'TextArea',
+						// ^ (116) dirName
+					'Video',
+						// ^(122/nightly) disablePictureInPicture
+				],
+			},
+			6: {
+				// changes since FF104 (but stable since FF111 - that is not in current ESR115 cycle)
+				// last checked 122
+				title: 'recent',
+				desc: "changes since FF104 (stable since FF111)",
+				prefix: 'HTML',
+				suffix: 'Element',
+				items: [
+					'Canvas', // last change 105 = cf7b9afc
+					'Form', // last change 111 = bff84eef
+					'Meta', // last change 106 = d32c1bc0
+					'Source', // last change 108 = e74ef3df
+				],
+			},
+			7: {
+				// stable since FF92
+				title: 'stable92',
+				desc: 'AFAICT FF92+',
+				prefix: 'HTML',
+				suffix: 'Element',
+				items: [
+					'Body',
+					'FrameSet',
+					'Image',
+					'Link',
+					'Menu', // changed 85
+					'Meter',
+					'Output',
+					'Param', // changed 85
+					'Progress',
+					'Script',
+					'Slot', // new in 63, changed 66 92
+					'Style',
+				],
+			},
+			8: {
+				// stable since FF70
+				title: 'stable70',
+				desc: 'AFAICT FF70+',
+				ignore: [
+					'HTMLAllCollection', // changed 64
+					'HTMLDocument' // changed 57, 58, 60, 61, 68, 69, 70
+				],
+			},
+			9: {
+				// stable since FF52
+				title: 'stable52',
+				desc: 'AFAICT FF52+ | since items added',
+				prefix: 'HTML',
+				suffix: 'Element',
+				ignore: ['HTMLCollection','HTMLFormControlsCollection','HTMLOptionsCollection'],
+				items: [
+					'Anchor','Area','Audio','BR','Base','DList','Data','DataList','Details',
+					'Dialog', // new 98 but not changed since
+					'Directory','Div','Embed','FieldSet','Font','HR','Head','Heading',
+					'Html','Label','LI','Legend','Map',
+					'Marquee', // new 65 but not changed since
+					'Mod','OList','OptGroup','Option',
+					'Paragraph','Picture','Pre','Quote','Span',
+					'Table','TableCaption','TableCell','TableCol','TableRow',
+					'TableSection','Time','Title','Track','UList','Unknown',
+				],
+			},
+		},
+	},
+
+	"GPU": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'GPU',
+				ignore: ['GPU'],
+				items: [
+'Adapter','AdapterInfo','BindGroup','BindGroupLayout','Buffer','CanvasContext','CommandBuffer',
+'CommandEncoder','CompilationInfo','CompilationMessage','ComputePassEncoder','ComputePipeline',
+'Device','DeviceLostInfo','Error','InternalError','OutOfMemoryError','PipelineLayout','QuerySet',
+'Queue','RenderBundle','RenderBundleEncoder','RenderPassEncoder','RenderPipeline','Sampler',
+'ShaderModule','SupportedFeatures','SupportedLimits','Texture','TextureView','UncapturedErrorEvent',
+'ValidationError',
+				],
+			},
+		},
+	},
+
+	"Media": {
+		// webcodecs
+		pad: 0,
+		data: {
+			1: {
+				title: 'media',
+				prefix: 'Media',
+				items: [
+'Capabilities','CapabilitiesInfo','DeviceInfo','Devices','ElementAudioSourceNode','EncryptedEvent',
+'Error','KeyError','KeyMessageEvent','KeySession','KeyStatusMap','KeySystemAccess','Keys','List',
+'Metadata','QueryList','QueryListEvent','Recorder','RecorderErrorEvent','Session','Source',
+'Stream','StreamAudioDestinationNode','StreamAudioSourceNode','StreamEvent','StreamTrack',
+'StreamTrackAudioSourceNode','StreamTrackEvent',
+				],
+			},
+			2: {
+				// 
+				title: 'midi',
+				prefix: 'MIDI',
+				items: [
+'Access','ConnectionEvent','Input','InputMap','MessageEvent','Output','OutputMap','Port',
+				],
+			},
+			5: {
+				// 
+				title: 'video',
+				prefix: 'Video',
+				ignore: ['EncodedVideoChunk','VTTCue','VTTRegion',],
+				items: [
+'ColorSpace','Decoder','Frame','PlaybackQuality',
+				],
+			},
+		},
+	},
+
+	"Performance": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'Performance',
+				ignore: ['Performance'],
+				items: [
+'Performance','Entry','EventTiming','Mark','Measure','Navigation','NavigationTiming',
+'Observer','ObserverEntryList','PaintTiming','ResourceTiming','ServerTiming','Timing',
+				],
+			},
+		},
+	},
+
+	"RTC": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'RTC',
+				items: [
+'Certificate','DTMFSender','DTMFToneChangeEvent','DataChannel','DataChannelEvent','DtlsTransport',
+'EncodedAudioFrame','EncodedVideoFrame','IceCandidate','PeerConnection','PeerConnectionIceEvent',
+'RtpReceiver','RtpScriptTransform','RtpSender','RtpTransceiver','SctpTransport','SessionDescription',
+'StatsReport','TrackEvent',
+				],
+			},
+		},
+	},
+
+	"Storage": {
+		pad: 0,
+		data: {
+			2: {
+				title: 'cache',
+				ignore: ['Cache','CacheStorage',],
+			},
+			4: {
+				title: 'filesystem',
+				prefix: 'FileSystem',
+				ignore: ['FileSystem',],
+				items: [
+'DirectoryEntry','DirectoryHandle','DirectoryReader','Entry',
+'FileEntry','FileHandle','Handle','WritableFileStream',
+				],
+			},
+			5: {
+				title: 'idb',
+				prefix: 'IDB',
+				items: [
+'Cursor','CursorWithValue','Database','Factory','Index','KeyRange','ObjectStore',
+'OpenDBRequest','Request','Transaction','VersionChangeEvent',
+				],
+			},
+			8: {
+				title: 'storage',
+				prefix: 'Storage',
+				ignore: ['Storage',],
+				items: ['Event','Manager',],
+			},
+		},
+	},
+
+	"SVG": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'SVG',
+				items: [
+'AElement','Angle','AnimateElement','AnimateMotionElement','AnimateTransformElement','AnimatedAngle',
+'AnimatedBoolean','AnimatedEnumeration','AnimatedInteger','AnimatedLength','AnimatedLengthList',
+'AnimatedNumber','AnimatedNumberList','AnimatedPreserveAspectRatio','AnimatedRect','AnimatedString',
+'AnimatedTransformList','AnimationElement','CircleElement','ClipPathElement','ComponentTransferFunctionElement',
+'DefsElement','DescElement','Element','EllipseElement','FEBlendElement','FEColorMatrixElement',
+'FEComponentTransferElement','FECompositeElement','FEConvolveMatrixElement','FEDiffuseLightingElement',
+'FEDisplacementMapElement','FEDistantLightElement','FEDropShadowElement','FEFloodElement','FEFuncAElement',
+'FEFuncBElement','FEFuncGElement','FEFuncRElement','FEGaussianBlurElement','FEImageElement','FEMergeElement',
+'FEMergeNodeElement','FEMorphologyElement','FEOffsetElement','FEPointLightElement','FESpecularLightingElement',
+'FESpotLightElement','FETileElement','FETurbulenceElement','FilterElement','ForeignObjectElement','GElement',
+'GeometryElement','GradientElement','GraphicsElement','ImageElement','Length','LengthList','LineElement',
+'LinearGradientElement','MPathElement','MarkerElement','MaskElement','Matrix','MetadataElement','Number',
+'NumberList','PathElement','PatternElement','Point','PointList','PolygonElement','PolylineElement',
+'PreserveAspectRatio','RadialGradientElement','Rect','RectElement','SVGElement','ScriptElement','SetElement',
+'StopElement','StringList','StyleElement','SwitchElement','SymbolElement','TSpanElement','TextContentElement',
+'TextElement','TextPathElement','TextPositioningElement','TitleElement','Transform','TransformList','UseElement',
+'ViewElement',
+				],
+			},
+		},
+	},
+
+	"WebGL": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'WebGL',
+				items: [
+'2RenderingContext','ActiveInfo','Buffer','ContextEvent','Framebuffer','Program',
+'Query','Renderbuffer','RenderingContext','Sampler','Shader','ShaderPrecisionFormat',
+'Sync','Texture','TransformFeedback','UniformLocation','VertexArrayObject',
+				],
+			},
+		},
+	},
+}
+
+function build_list() {
+	let optItems = []
+	totalCount = 0
+	for (const n of Object.keys(oList)) {
+		let count = 0
+		optItems.push(n)
+		let kdata = oList[n].data
+		let max = 0
+		for (const k of Object.keys(kdata)) {
+			// include ignore items
+			let ignore = (kdata[k].ignore !== undefined) ? kdata[k].ignore : []
+			let tmpItems = ignore
+			// add prefix/suffix & sort items
+			if (kdata[k].items !== undefined) {
+				let prefix = (kdata[k].prefix !== undefined) ? kdata[k].prefix : ""
+				let suffix = (kdata[k].suffix !== undefined) ? kdata[k].suffix : ""
+				// add prefix/suffix to items
+				kdata[k].items.forEach(function(item) {
+					if (!ignore.includes(item))	{item = prefix + item + suffix}
+					tmpItems.push(item)
+				})
+				tmpItems.forEach(function(i) {
+					if (i.length > max) {max = i.length}
+				})
+			}
+			// replace items with new sorted list
+			kdata[k].items = tmpItems.sort()
+			count = count + tmpItems.length
+		}
+		oList[n].pad = max + 4
+		oList[n]["count"] = count
+		totalCount += count
+		if (n.length > maxPad) {maxPad = n.length}
+	}
+	// populate combobox
+	optItems.sort()
+	let optList = dom.optList
+	optItems.forEach(function(opt) {
+		var el = document.createElement("option")
+		el.textContent = opt
+		el.value = opt
+		optList.appendChild(el)
+	})
+	// set a default
+	if (optItems.includes("Element")) {
+		optList.value = "Element"
+	} else {
+		optList.value = optItems[0]
+	}
+	dom.totalCount = totalCount
+}
+
+function run() {
+	// https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API
+
+	oData = {}
+	aEverything = []
+	let t0 = performance.now()
+	let optSort = dom.optSort.checked
+	let optList = dom.optList.value
+	let tmpList = oList[optList]
+	let tmpObj = tmpList.data
+	let padlen = tmpList.pad
+
+	try {
+		let display = [], groups = []
+		for (const k of Object.keys(tmpObj).sort()) {
+			let data = tmpObj[k]
+			if (data.items !== undefined && data.items.length) {
+				let name = (data.title !== undefined ? data.title.toLowerCase() : "")
+				let group = k + name
+				oData[group] = {}
+				let tmpDisplay = []
+				groups.push(group)
+
+				data.items.forEach(function(item) {
+					if (window[item] !== undefined) {
+						try {
+							let edata = window[item].prototype
+							let array = Object.getOwnPropertyNames(edata)
+							let fake = array.slice(array.indexOf("constructor")+1) // tampered: after constructor
+							if (optSort) {array.sort()}
+							let tmpArray = []
+							array.forEach(function(n) {
+								tmpArray.push(n)
+								aEverything.push(n)
+							})
+							oData[group][item] = tmpArray
+							let hash = mini(tmpArray), countFake = ""
+							// count + color each fake individually
+							if (fake.length) {
+								countFake = " "+ sb + "("+ fake.length +")"+ sc
+								fake.forEach(function(item) {
+									array[array.indexOf(item)] = sb + item + sc
+								})
+							}
+							tmpDisplay.push(
+								s18 + item.padStart(padlen) + sc + ": "+ hash + s18 +" ("+ oData[group][item].length +")"+ sc + countFake +"<br>"+
+								"<span class='toghidden" + k +" hidden grey'>[<br>" + "<span class='indent'>" + array.join(", ") +"</span>" + "<br>]</span>"
+							)
+						} catch(e) {
+							console.log(item, e+"")
+						}
+					} else {
+						console.log(item, "is undefined")
+					}
+				})
+				// calculate group hashes + notate
+				let hash = mini(oData[group]), notation = ""
+				if (isFF && !optSort) {
+					if (optList === "Element") {
+						if (k == "6" && isVer > 110) { notation = (hash == "b0cb1af2") ? green_tick : zNEW
+						} else if (k == "7" && isVer > 91) { notation = (hash == "4c9f8cea") ? green_tick : zNEW
+						} else if (k == "8" && isVer > 69) { notation = hash == "eb335cf8" ? green_tick : zNEW
+						} else if (k == "9") {
+							// we have 3 hashes since we added stable items since they were added
+							let good = [
+								"5a65ab0d", // FF98+ dialog added
+								"682df4ae", // FF65+ marquee added
+								"3cc158fb", // FF52-64 
+							]
+							notation = good.includes(hash) ? green_tick : zNEW
+						}
+					}
+				}
+				// display: add group header + details
+				let strDesc = (data.desc !== undefined && data.desc.length) ? " <span class='grey'>... "+ data.desc +"</span>" : ""
+				display.push(
+					"<br><hr>"
+					+ "<span id='labelhidden"+ k +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ k +"','expand')\">[ expand ]</span> "
+					+ s13 + hash + sc + notation +" "+ name.toUpperCase() + strDesc +"<br><br>"
+				)
+				display.push(tmpDisplay.join(""))
+			}
+		}
+
+		//* everything
+		//console.log(aEverything) // 815 all : 749 (no constructors)
+		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
+		aEverything.sort() // order is artifical due to htmlList so lets remove that here
+		aEverything = aEverything.filter(x => !["constructor"].includes(x)) // remove constructor
+		//console.log("['"+ aEverything.join("','") +"']") // 447
+		//*/
+
+		// display
+		let strAll = s18 + (optList.toUpperCase()).padStart(maxPad) + sc +": "+ s13 + mini(oData) + sc
+			+ " <span class='btn18 btnc' onclick='console.log(oData)'>[console]</span> "
+			+ (optSort ? "sorted" : "unsorted") +" | unique values: "
+			+ s13 + mini(aEverything) + sc
+			+ " <span class='btn18 btnc' onclick='console.log(aEverything)'>[" + aEverything.length +"]</span>"
+
+		dom.details.innerHTML = strAll +"<br>"+ display.join("")
+		// perf
+		dom.perf = Math.round(performance.now() - t0) +" ms"
+		dom.totalCount = tmpList.count + "/"+ totalCount
+	} catch(e) {
+		dom.details = e+""
+	}
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	Promise.all([
+		get_isVer()
+	]).then(function(){
+		build_list()
+		run()
+	})
+})
+
+</script>
+</body>
+</html>
