@@ -51,6 +51,7 @@ s18 = s18.trim()
 sb = sb.trim()
 
 let oData = {}
+let oPost = {}
 let aEverything = []
 let maxPad = 0
 let totalCount = 0
@@ -737,12 +738,14 @@ function run() {
 	// https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API
 
 	oData = {}
+	oPost = {}
 	aEverything = []
 	let t0 = performance.now()
 	let optSort = dom.optSort.checked
 	let optList = dom.optList.value
 	let tmpList = oList[optList]
 	let tmpObj = tmpList.data
+	let tmpPost = {}
 	let padlen = tmpList.pad
 
 	try {
@@ -776,6 +779,7 @@ function run() {
 								fake.forEach(function(item) {
 									array[array.indexOf(item)] = sb + item + sc
 								})
+								tmpPost[item] = fake
 							}
 							tmpDisplay.push(
 								s18 + item.padStart(padlen) + sc + ": "+ hash + s18 +" ("+ oData[group][item].length +")"+ sc + countFake +"<br>"+
@@ -817,13 +821,24 @@ function run() {
 			}
 		}
 
-		//* everything
-		//console.log(aEverything) // 815 all : 749 (no constructors)
 		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
 		aEverything.sort() // order is artifical due to htmlList so lets remove that here
-		aEverything = aEverything.filter(x => !["constructor"].includes(x)) // remove constructor
 		//console.log("['"+ aEverything.join("','") +"']") // 447
-		//*/
+
+		// post constructor items
+		let postCount = 0, strPost = ""
+		for (const k of Object.keys(tmpPost).sort()) {
+			oPost[k] = tmpPost[k]
+			postCount += oPost[k].length
+		}
+		if (postCount > 0) {
+			let posttoggle = "post"
+			strPost = "<br>"
+				+ "<span id='labelhidden"+ posttoggle +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ posttoggle +"','expand')\">[ expand ]</span> "
+				+ s13 + mini(oPost) + sc + sb +" [" + postCount +"] "+ sc + "items after constructor"
+				+ "<span class='toghidden" + posttoggle +" hidden grey'>[<br>" + "<span class='indent'>" + json_highlight(oPost) +"</span>" + "<br>]</span>"
+				+"<br>"
+		}
 
 		// display
 		let strAll = s18 + (optList.toUpperCase()).padStart(maxPad) + sc +": "+ s13 + mini(oData) + sc
@@ -832,7 +847,7 @@ function run() {
 			+ s13 + mini(aEverything) + sc
 			+ " <span class='btn18 btnc' onclick='console.log(aEverything)'>[" + aEverything.length +"]</span>"
 
-		dom.details.innerHTML = strAll +"<br>"+ display.join("")
+		dom.details.innerHTML = strAll +"<br>"+ strPost + display.join("")
 		// perf
 		dom.perf = Math.round(performance.now() - t0) +" ms"
 		dom.totalCount = tmpList.count + "/"+ totalCount
