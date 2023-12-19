@@ -564,8 +564,8 @@ let oList = {
 				prefix: 'Performance',
 				ignore: ['Performance'],
 				items: [
-'Performance','Entry','EventTiming','Mark','Measure','Navigation','NavigationTiming',
-'Observer','ObserverEntryList','PaintTiming','ResourceTiming','ServerTiming','Timing',
+'Entry','EventTiming','Mark','Measure','Navigation','NavigationTiming','Observer',
+'ObserverEntryList','PaintTiming','ResourceTiming','ServerTiming','Timing',
 				],
 			},
 		},
@@ -634,14 +634,14 @@ let oList = {
 'FEDisplacementMapElement','FEDistantLightElement','FEDropShadowElement','FEFloodElement','FEFuncAElement',
 'FEFuncBElement','FEFuncGElement','FEFuncRElement','FEGaussianBlurElement','FEImageElement','FEMergeElement',
 'FEMergeNodeElement','FEMorphologyElement','FEOffsetElement','FEPointLightElement','FESpecularLightingElement',
-'FESpotLightElement','FETileElement','FETurbulenceElement','FilterElement','ForeignObjectElement','GElement',
-'GeometryElement','GradientElement','GraphicsElement','ImageElement','Length','LengthList','LineElement',
-'LinearGradientElement','MPathElement','MarkerElement','MaskElement','Matrix','MetadataElement','Number',
-'NumberList','PathElement','PatternElement','Point','PointList','PolygonElement','PolylineElement',
+'FESpotLightElement','FETileElement','FETurbulenceElement','FilterElement','ForeignObjectElement',
+'GElement','GeometryElement','GradientElement','GraphicsElement','ImageElement','Length','LengthList',
+'LineElement','LinearGradientElement','MPathElement','MarkerElement','MaskElement','Matrix','MetadataElement',
+'Number','NumberList','PathElement','PatternElement','Point','PointList','PolygonElement','PolylineElement',
 'PreserveAspectRatio','RadialGradientElement','Rect','RectElement','SVGElement','ScriptElement','SetElement',
 'StopElement','StringList','StyleElement','SwitchElement','SymbolElement','TSpanElement','TextContentElement',
-'TextElement','TextPathElement','TextPositioningElement','TitleElement','Transform','TransformList','UseElement',
-'ViewElement',
+'TextElement','TextPathElement','TextPositioningElement','TitleElement','Transform','TransformList',
+'UseElement','ViewElement',
 				],
 			},
 		},
@@ -671,25 +671,44 @@ function build_list() {
 		let kdata = oList[n].data
 		let max = 0
 		for (const k of Object.keys(kdata)) {
+			let expected = 0
 			// include ignore items
-			let ignore = (kdata[k].ignore !== undefined) ? kdata[k].ignore : []
-			let tmpItems = ignore
-			// add prefix/suffix & sort items
+			let tmpItems = []
+			// add prefix/suffix to items
 			if (kdata[k].items !== undefined) {
+				expected = expected + kdata[k].items.length
 				let prefix = (kdata[k].prefix !== undefined) ? kdata[k].prefix : ""
 				let suffix = (kdata[k].suffix !== undefined) ? kdata[k].suffix : ""
 				// add prefix/suffix to items
 				kdata[k].items.forEach(function(item) {
-					if (!ignore.includes(item))	{item = prefix + item + suffix}
+					tmpItems.push(prefix + item + suffix)
+				})
+			}
+			// _then_ add ignore items
+			if (kdata[k].ignore !== undefined) {
+				expected = expected + kdata[k].ignore.length
+				kdata[k].ignore.forEach(function(item) {
 					tmpItems.push(item)
 				})
-				tmpItems.forEach(function(i) {
-					if (i.length > max) {max = i.length}
-				})
+			}
+			// get padding
+			tmpItems.forEach(function(i) {
+				if (i.length > max) {max = i.length}
+			})
+			// check for dupes
+			let oldCount = tmpItems.length
+			tmpItems = tmpItems.filter(function(item, position) {return tmpItems.indexOf(item) === position})
+			let newCount = tmpItems.length
+			if (newCount !== oldCount) {
+				console.error(n, k, "has duplicates")
+			}
+			// check expected numbers
+			if (newCount !== expected) {
+				console.error(n, k, "expected", expected, "got", newCount)
 			}
 			// replace items with new sorted list
 			kdata[k].items = tmpItems.sort()
-			count = count + tmpItems.length
+			count = count + newCount
 		}
 		oList[n].pad = max + 4
 		oList[n]["count"] = count
