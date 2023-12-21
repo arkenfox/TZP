@@ -51,89 +51,58 @@ s18 = s18.trim()
 sb = sb.trim()
 
 let oData = {}
-let oPost = {}
 let aEverything = []
 let maxPad = 0
-let totalCount = 0
 
 let stuff = {
 leftovers: [
-'AbortController',
-'AbortSignal',
+// events
+'AnimationEvent','AnimationPlaybackEvent','BeforeUnloadEvent','BlobEvent','ClipboardEvent',
+'CloseEvent','CompositionEvent','ContentVisibilityAutoStateChangeEvent','CustomEvent',
+'DragEvent','ErrorEvent','FocusEvent','FormDataEvent','HashChangeEvent','InputEvent',
+'KeyboardEvent','MessageEvent','MutationEvent','PageTransitionEvent','PopStateEvent',
+'PopupBlockedEvent','ProgressEvent','PromiseRejectionEvent','ScrollAreaEvent',
+'SecurityPolicyViolationEvent','SubmitEvent','TaskPriorityChangeEvent','TimeEvent',
+'ToggleEvent','TrackEvent','TransitionEvent','UIEvent','WheelEvent',
+
+'Array','ArrayBuffer','DataView',
+'BigInt','Boolean','Number','String',
+'AbortController','AbortSignal',
 'AbstractRange',
-'AggregateError',
-'Animation',
-'AnimationEffect',
-'AnimationEvent',
-'AnimationPlaybackEvent',
-'AnimationTimeline',
-'Array',
-'ArrayBuffer',
+'Animation','AnimationEffect','AnimationTimeline',
 'Attr',
-'AuthenticatorAssertionResponse',
-'AuthenticatorAttestationResponse',
-'AuthenticatorResponse',
-'BarProp',
-'BeforeUnloadEvent',
-'BigInt',
-'BigInt64Array',
-'BigUint64Array',
+'AuthenticatorAssertionResponse','AuthenticatorAttestationResponse','AuthenticatorResponse',
 'Blob',
-'BlobEvent',
-'Boolean',
 'BroadcastChannel',
 'ByteLengthQueuingStrategy', // streams
 'CDATASection',
 'CaretPosition',
 'CharacterData',
-'Clipboard',
-'ClipboardEvent',
-'ClipboardItem',
-'CloseEvent',
+'Clipboard','ClipboardItem',
 'Comment',
-'CompositionEvent', // entering text
 'CompressionStream',
-'ContentVisibilityAutoStateChangeEvent',
 'CountQueuingStrategy', // streams
-'Credential',
-'CredentialsContainer',
-'Crypto',
-'CryptoKey',
+'Credential','CredentialsContainer',
+'Crypto','CryptoKey',
 'CustomElementRegistry',
-'CustomEvent',
 'DOMException',
 'DOMImplementation',
-'DOMMatrix',
-'DOMMatrixReadOnly',
+'DOMMatrix', 'DOMMatrixReadOnly',
 'DOMParser',
-'DOMPoint',
-'DOMPointReadOnly',
-'DOMQuad',
-'DOMRect',
-'DOMRectList',
-'DOMRectReadOnly',
+'DOMPoint','DOMPointReadOnly',
+'DOMQuad','DOMRect','DOMRectList','DOMRectReadOnly',
 'DOMRequest',
 'DOMStringList',
 'DOMStringMap',
 'DOMTokenList',
-'DataTransfer',
-'DataTransferItem',
-'DataTransferItemList',
-'DataView',
+'DataTransfer','DataTransferItem','DataTransferItemList',
 'Date',
 'DecompressionStream',
-'DeviceMotionEvent',
-'DeviceOrientationEvent',
 'Directory',
 'Document',
 'DocumentFragment',
 'DocumentTimeline',
 'DocumentType',
-'DragEvent',
-'ElementInternals',
-'Error',
-'ErrorEvent',
-'EvalError',
 'Event',
 'EventCounts',
 'EventSource',
@@ -142,185 +111,69 @@ leftovers: [
 'FileList',
 'FileReader',
 'FinalizationRegistry',
-'Float32Array',
-'Float64Array',
-'FocusEvent',
-'FontFace',
-'FontFaceSet',
-'FontFaceSetLoadEvent',
 'FormData',
-'FormDataEvent',
-'Gamepad',
-'GamepadAxisMoveEvent',
-'GamepadButton',
-'GamepadButtonEvent',
-'GamepadEvent',
-'GamepadHapticActuator',
-'GamepadPose',
-'Geolocation',
-'GeolocationCoordinates',
-'GeolocationPosition',
-'GeolocationPositionError',
-'HashChangeEvent',
 'Headers',
-'Highlight',
-'HighlightRegistry',
+'Highlight','HighlightRegistry',
 'History',
 'IdentityCredential',
 'IdleDeadline',
-'Image',
-'ImageBitmap',
-'ImageBitmapRenderingContext',
-'ImageData',
-'InputEvent',
-'Int16Array',
-'Int32Array',
-'Int8Array',
-'InternalError',
-'IntersectionObserver',
-'IntersectionObserverEntry',
-'KeyboardEvent',
+'Image','ImageBitmap','ImageBitmapRenderingContext','ImageData',
+'IntersectionObserver','IntersectionObserverEntry',
 'KeyframeEffect',
 'LargestContentfulPaint',
-'Location',
+'Location', // the url
 'Lock',
 'LockManager',
 'Map',
-'MessageChannel',
-'MessageEvent',
-'MessagePort',
-'MimeType',
-'MimeTypeArray',
-'MouseEvent',
-'MouseScrollEvent',
-'MutationEvent',
-'MutationObserver',
-'MutationRecord',
+'MessageChannel','MessagePort',
+'MutationObserver','MutationRecord',
 'NamedNodeMap',
 'NavigationPreloadManager',
 'Node',
 'NodeIterator',
 'NodeList',
-'Notification',
-'Number',
 'Object',
-'Option',
-'PageTransitionEvent',
-'PaintRequest',
-'PaintRequestList',
-'PannerNode',
-'PermissionStatus',
-'Permissions',
-'Plugin',
-'PluginArray',
-'PointerEvent',
-'PopStateEvent',
-'PopupBlockedEvent',
+'PaintRequest','PaintRequestList',
+'PermissionStatus','Permissions',
 'ProcessingInstruction',
-'ProgressEvent',
 'Promise',
-'PromiseRejectionEvent',
 'PublicKeyCredential',
-'PushManager',
-'PushSubscription',
-'PushSubscriptionOptions',
+'PushManager','PushSubscription','PushSubscriptionOptions',
 'RadioNodeList',
 'Range',
-'RangeError',
-'ReadableByteStreamController',
-'ReadableStream',
-'ReadableStreamBYOBReader',
-'ReadableStreamBYOBRequest',
-'ReadableStreamDefaultController',
-'ReadableStreamDefaultReader',
-'ReferenceError',
+'ReadableByteStreamController','ReadableStream','ReadableStreamBYOBReader','ReadableStreamBYOBRequest','ReadableStreamDefaultController','ReadableStreamDefaultReader',
 'RegExp',
 'Request',
-'ResizeObserver',
-'ResizeObserverEntry',
-'ResizeObserverSize',
+'ResizeObserver','ResizeObserverEntry','ResizeObserverSize',
 'Response',
 'Scheduler',
-'Screen',
-'ScreenOrientation',
-'ScriptProcessorNode',
-'ScrollAreaEvent',
-'SecurityPolicyViolationEvent',
+'Screen','ScreenOrientation',
 'Selection',
-'ServiceWorker',
-'ServiceWorkerContainer',
-'ServiceWorkerRegistration',
 'Set',
 'ShadowRoot',
 'SharedWorker',
-'SourceBuffer',
-'SourceBufferList',
-'SpeechSynthesis',
-'SpeechSynthesisErrorEvent',
-'SpeechSynthesisEvent',
-'SpeechSynthesisUtterance',
-'SpeechSynthesisVoice',
 'StaticRange',
-'StereoPannerNode',
-'String',
-'SubmitEvent',
 'SubtleCrypto',
 'Symbol',
-'SyntaxError',
 'TaskController',
-'TaskPriorityChangeEvent',
 'TaskSignal',
 'Text',
-'TextDecoder',
-'TextDecoderStream',
-'TextEncoder',
-'TextEncoderStream',
-'TextMetrics',
-'TextTrack',
-'TextTrackCue',
-'TextTrackCueList',
-'TextTrackList',
-'TimeEvent',
+'TextDecoder','TextDecoderStream','TextEncoder','TextEncoderStream',
 'TimeRanges',
-'ToggleEvent',
-'TrackEvent',
 'TransformStream',
 'TransformStreamDefaultController',
-'TransitionEvent',
 'TreeWalker',
-'TypeError',
-'UIEvent',
-'URIError',
 'URL',
 'URLSearchParams',
-'Uint16Array',
-'Uint32Array',
-'Uint8Array',
-'Uint8ClampedArray',
 'UserActivation',
 'ValidityState',
 'VisualViewport',
-'WakeLock',
-'WakeLockSentinel',
-'WaveShaperNode',
-'WeakMap',
-'WeakRef',
-'WeakSet',
-'WebKitCSSMatrix',
+'WakeLock','WakeLockSentinel',
+'WeakMap','WeakRef','WeakSet',
 'WebSocket',
-'WebTransport',
-'WebTransportBidirectionalStream',
-'WebTransportDatagramDuplexStream',
-'WebTransportError',
-'WebTransportReceiveStream',
-'WebTransportSendStream',
-'WheelEvent',
-'Window',
-'Worker',
+'WebTransport','WebTransportBidirectionalStream','WebTransportDatagramDuplexStream','WebTransportReceiveStream','WebTransportSendStream',
 'Worklet',
-'WritableStream',
-'WritableStreamDefaultController',
-'WritableStreamDefaultWriter',
+'WritableStream','WritableStreamDefaultController','WritableStreamDefaultWriter',
 'XMLDocument',
 'XMLHttpRequest',
 'XMLHttpRequestEventTarget',
@@ -330,6 +183,14 @@ leftovers: [
 'XPathExpression',
 'XPathResult',
 'XSLTProcessor',
+/*
+
+'BigInt64Array','BigUint64Array','Float32Array','Float64Array','Int16Array','Int32Array','Int8Array','Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray',
+	// ^ all = BYTES_PER_ELEMENT, constructor
+'BarProp', // obsolete
+'SVGMatrix','WebKitCSSMatrix' // aliases of DOMMatrix
+'Window', // = constructor
+*/
 ]}
 //console.log(stuff.leftovers.length)
 
@@ -349,16 +210,81 @@ let oList = {
 	},
 */
 
+	"_testing": {
+		pad: 0,
+		data: {
+			1: {
+				title: 'devices',
+				items: [
+'DeviceMotionEvent','DeviceOrientationEvent',
+'Gamepad','GamepadAxisMoveEvent','GamepadButton','GamepadButtonEvent','GamepadEvent','GamepadHapticActuator','GamepadPose',
+'MediaDeviceInfo','MediaDevices',
+'MimeType','MimeTypeArray',
+'MouseEvent','MouseScrollEvent',
+'Plugin','PluginArray',
+'PointerEvent',
+'SpeechSynthesis','SpeechSynthesisErrorEvent','SpeechSynthesisEvent','SpeechSynthesisUtterance','SpeechSynthesisVoice',
+				],
+			},
+			2: {
+				title: 'fonts',
+				items: [
+'FontFace','FontFaceSet','FontFaceSetLoadEvent','TextMetrics',
+				],
+			},
+			3: {
+				title: "region",
+				items: [
+'Geolocation','GeolocationCoordinates','GeolocationPosition','GeolocationPositionError',]
+			},
+			4: {
+				title: 'errors',
+				items: [
+'AggregateError','Error','EvalError','GPUError','InternalError','RangeError',
+'ReferenceError','SyntaxError','TypeError','URIError','WebTransportError',
+				],
+			},
+		},
+	},
+
+	"All": {
+		pad: 0,
+		data: {
+"a": {items: ['AbortController','AbortSignal','AbstractRange','AggregateError','AnalyserNode','Animation','AnimationEffect','AnimationEvent','AnimationPlaybackEvent','AnimationTimeline','Array','ArrayBuffer','Attr','Audio','AudioBuffer','AudioBufferSourceNode','AudioContext','AudioDestinationNode','AudioListener','AudioNode','AudioParam','AudioParamMap','AudioProcessingEvent','AudioScheduledSourceNode','AudioWorklet','AudioWorkletNode','AuthenticatorAssertionResponse','AuthenticatorAttestationResponse','AuthenticatorResponse',]},
+"b": {items: ['BarProp','BaseAudioContext','BeforeUnloadEvent','BigInt','BigInt64Array','BigUint64Array','BiquadFilterNode','Blob','BlobEvent','Boolean','BroadcastChannel','ByteLengthQueuingStrategy',]},
+"c": {items: ['CDATASection','CSS2Properties','CSSAnimation','CSSConditionRule','CSSContainerRule','CSSCounterStyleRule','CSSFontFaceRule','CSSFontFeatureValuesRule','CSSFontPaletteValuesRule','CSSGroupingRule','CSSImportRule','CSSKeyframeRule','CSSKeyframesRule','CSSLayerBlockRule','CSSLayerStatementRule','CSSMediaRule','CSSMozDocumentRule','CSSNamespaceRule','CSSPageRule','CSSPropertyRule','CSSRule','CSSRuleList','CSSStyleDeclaration','CSSStyleRule','CSSStyleSheet','CSSSupportsRule','CSSTransition','Cache','CacheStorage','CanvasCaptureMediaStream','CanvasGradient','CanvasPattern','CanvasRenderingContext2D','CaretPosition','ChannelMergerNode','ChannelSplitterNode','CharacterData','Clipboard','ClipboardEvent','ClipboardItem','CloseEvent','Comment','CompositionEvent','CompressionStream','ConstantSourceNode','ContentVisibilityAutoStateChangeEvent','ConvolverNode','CountQueuingStrategy','Credential','CredentialsContainer','Crypto','CryptoKey','CustomElementRegistry','CustomEvent',]},
+"d": {items: ['DOMException','DOMImplementation','DOMMatrix','DOMMatrixReadOnly','DOMParser','DOMPoint','DOMPointReadOnly','DOMQuad','DOMRect','DOMRectList','DOMRectReadOnly','DOMRequest','DOMStringList','DOMStringMap','DOMTokenList','DataTransfer','DataTransferItem','DataTransferItemList','DataView','Date','DecompressionStream','DelayNode','DeviceMotionEvent','DeviceOrientationEvent','Directory','Document','DocumentFragment','DocumentTimeline','DocumentType','DragEvent','DynamicsCompressorNode',]},
+"e": {items: ['Element','ElementInternals','EncodedVideoChunk','Error','ErrorEvent','EvalError','Event','EventCounts','EventSource','EventTarget',]},
+"f": {items: ['File','FileList','FileReader','FileSystem','FileSystemDirectoryEntry','FileSystemDirectoryHandle','FileSystemDirectoryReader','FileSystemEntry','FileSystemFileEntry','FileSystemFileHandle','FileSystemHandle','FileSystemWritableFileStream','FinalizationRegistry','Float32Array','Float64Array','FocusEvent','FontFace','FontFaceSet','FontFaceSetLoadEvent','FormData','FormDataEvent','Function',]},
+"g": {items: ['GPU','GPUAdapter','GPUAdapterInfo','GPUBindGroup','GPUBindGroupLayout','GPUBuffer','GPUCanvasContext','GPUCommandBuffer','GPUCommandEncoder','GPUCompilationInfo','GPUCompilationMessage','GPUComputePassEncoder','GPUComputePipeline','GPUDevice','GPUDeviceLostInfo','GPUError','GPUInternalError','GPUOutOfMemoryError','GPUPipelineLayout','GPUQuerySet','GPUQueue','GPURenderBundle','GPURenderBundleEncoder','GPURenderPassEncoder','GPURenderPipeline','GPUSampler','GPUShaderModule','GPUSupportedFeatures','GPUSupportedLimits','GPUTexture','GPUTextureView','GPUUncapturedErrorEvent','GPUValidationError','GainNode','Gamepad','GamepadAxisMoveEvent','GamepadButton','GamepadButtonEvent','GamepadEvent','GamepadHapticActuator','GamepadPose','Geolocation','GeolocationCoordinates','GeolocationPosition','GeolocationPositionError',]},
+"h": {items: ['HTMLAllCollection','HTMLAnchorElement','HTMLAreaElement','HTMLAudioElement','HTMLBRElement','HTMLBaseElement','HTMLBodyElement','HTMLButtonElement','HTMLCanvasElement','HTMLCollection','HTMLDListElement','HTMLDataElement','HTMLDataListElement','HTMLDetailsElement','HTMLDialogElement','HTMLDirectoryElement','HTMLDivElement','HTMLDocument','HTMLElement','HTMLEmbedElement','HTMLFieldSetElement','HTMLFontElement','HTMLFormControlsCollection','HTMLFormElement','HTMLFrameElement','HTMLFrameSetElement','HTMLHRElement','HTMLHeadElement','HTMLHeadingElement','HTMLHtmlElement','HTMLIFrameElement','HTMLImageElement','HTMLInputElement','HTMLLIElement','HTMLLabelElement','HTMLLegendElement','HTMLLinkElement','HTMLMapElement','HTMLMarqueeElement','HTMLMediaElement','HTMLMenuElement','HTMLMetaElement','HTMLMeterElement','HTMLModElement','HTMLOListElement','HTMLObjectElement','HTMLOptGroupElement','HTMLOptionElement','HTMLOptionsCollection','HTMLOutputElement','HTMLParagraphElement','HTMLParamElement','HTMLPictureElement','HTMLPreElement','HTMLProgressElement','HTMLQuoteElement','HTMLScriptElement','HTMLSelectElement','HTMLSlotElement','HTMLSourceElement','HTMLSpanElement','HTMLStyleElement','HTMLTableCaptionElement','HTMLTableCellElement','HTMLTableColElement','HTMLTableElement','HTMLTableRowElement','HTMLTableSectionElement','HTMLTemplateElement','HTMLTextAreaElement','HTMLTimeElement','HTMLTitleElement','HTMLTrackElement','HTMLUListElement','HTMLUnknownElement','HTMLVideoElement','HashChangeEvent','Headers','Highlight','HighlightRegistry','History',]},
+"i": {items: ['IDBCursor','IDBCursorWithValue','IDBDatabase','IDBFactory','IDBIndex','IDBKeyRange','IDBObjectStore','IDBOpenDBRequest','IDBRequest','IDBTransaction','IDBVersionChangeEvent','IIRFilterNode','IdentityCredential','IdleDeadline','Image','ImageBitmap','ImageBitmapRenderingContext','ImageData','InputEvent','Int16Array','Int32Array','Int8Array','InternalError','IntersectionObserver','IntersectionObserverEntry',]},
+"k": {items: ['KeyboardEvent','KeyframeEffect',]},
+"l": {items: ['LargestContentfulPaint','Location','Lock','LockManager',]},
+"m": {items: ['MIDIAccess','MIDIConnectionEvent','MIDIInput','MIDIInputMap','MIDIMessageEvent','MIDIOutput','MIDIOutputMap','MIDIPort','Map','MathMLElement','MediaCapabilities','MediaCapabilitiesInfo','MediaDeviceInfo','MediaDevices','MediaElementAudioSourceNode','MediaEncryptedEvent','MediaError','MediaKeyError','MediaKeyMessageEvent','MediaKeySession','MediaKeyStatusMap','MediaKeySystemAccess','MediaKeys','MediaList','MediaMetadata','MediaQueryList','MediaQueryListEvent','MediaRecorder','MediaRecorderErrorEvent','MediaSession','MediaSource','MediaStream','MediaStreamAudioDestinationNode','MediaStreamAudioSourceNode','MediaStreamEvent','MediaStreamTrack','MediaStreamTrackAudioSourceNode','MediaStreamTrackEvent','MessageChannel','MessageEvent','MessagePort','MimeType','MimeTypeArray','MouseEvent','MouseScrollEvent','MutationEvent','MutationObserver','MutationRecord',]},
+"n": {items: ['NamedNodeMap','NavigationPreloadManager','Navigator','Node','NodeIterator','NodeList','Notification','Number',]},
+"o": {items: ['Object','OfflineAudioCompletionEvent','OfflineAudioContext','OffscreenCanvas','OffscreenCanvasRenderingContext2D','Option','OscillatorNode',]},
+"p": {items: ['PageTransitionEvent','PaintRequest','PaintRequestList','PannerNode','Path2D','Performance','PerformanceEntry','PerformanceEventTiming','PerformanceMark','PerformanceMeasure','PerformanceNavigation','PerformanceNavigationTiming','PerformanceObserver','PerformanceObserverEntryList','PerformancePaintTiming','PerformanceResourceTiming','PerformanceServerTiming','PerformanceTiming','PeriodicWave','PermissionStatus','Permissions','Plugin','PluginArray','PointerEvent','PopStateEvent','PopupBlockedEvent','ProcessingInstruction','ProgressEvent','Promise','PromiseRejectionEvent','PublicKeyCredential','PushManager','PushSubscription','PushSubscriptionOptions',]},
+"r": {items: ['RTCCertificate','RTCDTMFSender','RTCDTMFToneChangeEvent','RTCDataChannel','RTCDataChannelEvent','RTCDtlsTransport','RTCEncodedAudioFrame','RTCEncodedVideoFrame','RTCIceCandidate','RTCPeerConnection','RTCPeerConnectionIceEvent','RTCRtpReceiver','RTCRtpScriptTransform','RTCRtpSender','RTCRtpTransceiver','RTCSctpTransport','RTCSessionDescription','RTCStatsReport','RTCTrackEvent','RadioNodeList','Range','RangeError','ReadableByteStreamController','ReadableStream','ReadableStreamBYOBReader','ReadableStreamBYOBRequest','ReadableStreamDefaultController','ReadableStreamDefaultReader','ReferenceError','RegExp','Request','ResizeObserver','ResizeObserverEntry','ResizeObserverSize','Response',]},
+"s": {items: ['SVGAElement','SVGAngle','SVGAnimateElement','SVGAnimateMotionElement','SVGAnimateTransformElement','SVGAnimatedAngle','SVGAnimatedBoolean','SVGAnimatedEnumeration','SVGAnimatedInteger','SVGAnimatedLength','SVGAnimatedLengthList','SVGAnimatedNumber','SVGAnimatedNumberList','SVGAnimatedPreserveAspectRatio','SVGAnimatedRect','SVGAnimatedString','SVGAnimatedTransformList','SVGAnimationElement','SVGCircleElement','SVGClipPathElement','SVGComponentTransferFunctionElement','SVGDefsElement','SVGDescElement','SVGElement','SVGEllipseElement','SVGFEBlendElement','SVGFEColorMatrixElement','SVGFEComponentTransferElement','SVGFECompositeElement','SVGFEConvolveMatrixElement','SVGFEDiffuseLightingElement','SVGFEDisplacementMapElement','SVGFEDistantLightElement','SVGFEDropShadowElement','SVGFEFloodElement','SVGFEFuncAElement','SVGFEFuncBElement','SVGFEFuncGElement','SVGFEFuncRElement','SVGFEGaussianBlurElement','SVGFEImageElement','SVGFEMergeElement','SVGFEMergeNodeElement','SVGFEMorphologyElement','SVGFEOffsetElement','SVGFEPointLightElement','SVGFESpecularLightingElement','SVGFESpotLightElement','SVGFETileElement','SVGFETurbulenceElement','SVGFilterElement','SVGForeignObjectElement','SVGGElement','SVGGeometryElement','SVGGradientElement','SVGGraphicsElement','SVGImageElement','SVGLength','SVGLengthList','SVGLineElement','SVGLinearGradientElement','SVGMPathElement','SVGMarkerElement','SVGMaskElement','SVGMatrix','SVGMetadataElement','SVGNumber','SVGNumberList','SVGPathElement','SVGPatternElement','SVGPoint','SVGPointList','SVGPolygonElement','SVGPolylineElement','SVGPreserveAspectRatio','SVGRadialGradientElement','SVGRect','SVGRectElement','SVGSVGElement','SVGScriptElement','SVGSetElement','SVGStopElement','SVGStringList','SVGStyleElement','SVGSwitchElement','SVGSymbolElement','SVGTSpanElement','SVGTextContentElement','SVGTextElement','SVGTextPathElement','SVGTextPositioningElement','SVGTitleElement','SVGTransform','SVGTransformList','SVGUseElement','SVGViewElement','Scheduler','Screen','ScreenOrientation','ScriptProcessorNode','ScrollAreaEvent','SecurityPolicyViolationEvent','Selection','ServiceWorker','ServiceWorkerContainer','ServiceWorkerRegistration','Set','ShadowRoot','SharedWorker','SourceBuffer','SourceBufferList','SpeechSynthesis','SpeechSynthesisErrorEvent','SpeechSynthesisEvent','SpeechSynthesisUtterance','SpeechSynthesisVoice','StaticRange','StereoPannerNode','Storage','StorageEvent','StorageManager','String','StyleSheet','StyleSheetList','SubmitEvent','SubtleCrypto','Symbol','SyntaxError',]},
+"t": {items: ['TaskController','TaskPriorityChangeEvent','TaskSignal','Text','TextDecoder','TextDecoderStream','TextEncoder','TextEncoderStream','TextMetrics','TextTrack','TextTrackCue','TextTrackCueList','TextTrackList','TimeEvent','TimeRanges','ToggleEvent','TrackEvent','TransformStream','TransformStreamDefaultController','TransitionEvent','TreeWalker','TypeError',]},
+"u": {items: ['UIEvent','URIError','URL','URLSearchParams','Uint16Array','Uint32Array','Uint8Array','Uint8ClampedArray','UserActivation',]},
+"v": {items: ['VTTCue','VTTRegion','ValidityState','VideoColorSpace','VideoDecoder','VideoFrame','VideoPlaybackQuality','VisualViewport',]},
+"w": {items: ['WakeLock','WakeLockSentinel','WaveShaperNode','WeakMap','WeakRef','WeakSet','WebGL2RenderingContext','WebGLActiveInfo','WebGLBuffer','WebGLContextEvent','WebGLFramebuffer','WebGLProgram','WebGLQuery','WebGLRenderbuffer','WebGLRenderingContext','WebGLSampler','WebGLShader','WebGLShaderPrecisionFormat','WebGLSync','WebGLTexture','WebGLTransformFeedback','WebGLUniformLocation','WebGLVertexArrayObject','WebKitCSSMatrix','WebSocket','WebTransport','WebTransportBidirectionalStream','WebTransportDatagramDuplexStream','WebTransportError','WebTransportReceiveStream','WebTransportSendStream','WheelEvent','Window','Worker','Worklet','WritableStream','WritableStreamDefaultController','WritableStreamDefaultWriter',]},
+"x": {items: ['XMLDocument','XMLHttpRequest','XMLHttpRequestEventTarget','XMLHttpRequestUpload','XMLSerializer','XPathEvaluator','XPathExpression','XPathResult','XSLTProcessor',]},
+		},
+	},
+
 	"Audio": {
 		pad: 0,
 		data: {
 			1: {
 				prefix: 'Audio',
 				ignore: [
-'Audio','AnalyserNode','BaseAudioContext','BiquadFilterNode','ChannelMergerNode',
-'ChannelSplitterNode','ConvolverNode','ConstantSourceNode','DelayNode',
-'DynamicsCompressorNode','GainNode','IIRFilterNode',
-'OfflineAudioCompletionEvent','OfflineAudioContext','OscillatorNode','PeriodicWave',
+'Audio','AnalyserNode','BaseAudioContext','BiquadFilterNode','ChannelMergerNode','ChannelSplitterNode',
+'ConvolverNode','ConstantSourceNode','DelayNode','DynamicsCompressorNode','GainNode','IIRFilterNode',
+'MediaElementAudioSourceNode','OfflineAudioContext','OfflineAudioCompletionEvent','OscillatorNode',
+'PannerNode','PeriodicWave','ScriptProcessorNode','StereoPannerNode','WaveShaperNode',
 				],
 				items: [
 'Buffer','BufferSourceNode','Context','DestinationNode','Listener','Node',
@@ -399,44 +325,51 @@ let oList = {
 	"Element": {
 		pad: 0,
 		data: {
+			4: {
+				// changes since FF104 (but stable since FF111 - that is not in current ESR115 cycle)
+				// last checked 122
+				desc: "checkin'",
+				items: ['ElementInternals',],
+			},
 			5: {
 				// changes since FF115 (at least on windows) or exhibit extension fuckery
-				// property added unless prefixed with a minus sign
+				// future = beta/nightly/experiment = will eventually land
 				title: 'main',
 				desc: "changes since FF115 | show extension tampering",
 				prefix: 'HTML',
 				suffix: 'Element',
 				ignore: [
 					'Element',
+						// future: setHTMLUnsafe, getBoxQuads, convertQuadFromNode, convertRectFromNode, convertPointFromNode
+						// 119: role, 41 x aria*
 					'HTMLElement',
-						// ^ (117) oncancel
+						// future: showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
+						// 117: oncancel
 					'MathMLElement',
-						// ^ (122/nightly) ondragexit, -onbeforetoggle
-						// (117) onauxclick, -oncancel, -onauxclick,
+						// 117: onauxclick, -oncancel, -onauxclick,
 				],
 				items: [
 					'Button',
-						// ^ (122/nightly) popoverTargetElement, popoverTargetAction
+						// future: popoverTargetElement, popoverTargetAction
 					'Frame',
-						// ^ ext fuckery
+						// ext fuckery
 					'IFrame',
-						// ^ (121) loading
+						// 121: loading
 					'Input',
-						// ^ (116) dirName
+						// 116: dirName
 					'Media',
-						// ^ (116) setSinkId, sinkId
-						// (122/nightly) showPopover, hidePopover, togglePopover, popover, onbeforetoggle, -ondragexit
-						// (122/nightly) -ondragexit
+						// future: allowedToPlay
+						// 116: setSinkId, sinkId
 					'Object',
-						// ^ ext fuckery
+						// ext fuckery
 					'Select',
-						// ^ (122/nightly) showPicker
+						// 122b: showPicker
 					'Template',
-						// (122/nightly) shadowRootMode, shadowRootDelegatesFocus
+						// future: shadowRootMode, shadowRootDelegatesFocus
 					'TextArea',
-						// ^ (116) dirName
+						// 116: dirName
 					'Video',
-						// ^(122/nightly) disablePictureInPicture
+						// 122b: disablePictureInPicture
 				],
 			},
 			6: {
@@ -489,7 +422,7 @@ let oList = {
 				desc: 'AFAICT FF52+ | since items added',
 				prefix: 'HTML',
 				suffix: 'Element',
-				ignore: ['HTMLCollection','HTMLFormControlsCollection','HTMLOptionsCollection'],
+				ignore: ['HTMLCollection','HTMLFormControlsCollection','HTMLOptionsCollection'], // 'Option', // = same as HTMLOptionElement
 				items: [
 					'Anchor','Area','Audio','BR','Base','DList','Data','DataList','Details',
 					'Dialog', // new 98 but not changed since
@@ -514,7 +447,7 @@ let oList = {
 				items: [
 'Adapter','AdapterInfo','BindGroup','BindGroupLayout','Buffer','CanvasContext','CommandBuffer',
 'CommandEncoder','CompilationInfo','CompilationMessage','ComputePassEncoder','ComputePipeline',
-'Device','DeviceLostInfo','Error','InternalError','OutOfMemoryError','PipelineLayout','QuerySet',
+'Device','DeviceLostInfo','InternalError','OutOfMemoryError','PipelineLayout','QuerySet',
 'Queue','RenderBundle','RenderBundleEncoder','RenderPassEncoder','RenderPipeline','Sampler',
 'ShaderModule','SupportedFeatures','SupportedLimits','Texture','TextureView','UncapturedErrorEvent',
 'ValidationError',
@@ -530,8 +463,9 @@ let oList = {
 			1: {
 				title: 'media',
 				prefix: 'Media',
+				ignore: ['SourceBuffer','SourceBufferList',],
 				items: [
-'Capabilities','CapabilitiesInfo','DeviceInfo','Devices','ElementAudioSourceNode','EncryptedEvent',
+'Capabilities','CapabilitiesInfo','EncryptedEvent',
 'Error','KeyError','KeyMessageEvent','KeySession','KeyStatusMap','KeySystemAccess','Keys','List',
 'Metadata','QueryList','QueryListEvent','Recorder','RecorderErrorEvent','Session','Source',
 'Stream','StreamAudioDestinationNode','StreamAudioSourceNode','StreamEvent','StreamTrack',
@@ -539,7 +473,6 @@ let oList = {
 				],
 			},
 			2: {
-				// 
 				title: 'midi',
 				prefix: 'MIDI',
 				items: [
@@ -547,10 +480,11 @@ let oList = {
 				],
 			},
 			5: {
-				// 
 				title: 'video',
 				prefix: 'Video',
-				ignore: ['EncodedVideoChunk','VTTCue','VTTRegion',],
+				ignore: [
+'EncodedVideoChunk','TextTrack','TextTrackCue','TextTrackCueList','TextTrackList','VTTCue','VTTRegion',
+				],
 				items: [
 'ColorSpace','Decoder','Frame','PlaybackQuality',
 				],
@@ -572,28 +506,9 @@ let oList = {
 		},
 	},
 
-	"RTC": {
-		pad: 0,
-		data: {
-			1: {
-				prefix: 'RTC',
-				items: [
-'Certificate','DTMFSender','DTMFToneChangeEvent','DataChannel','DataChannelEvent','DtlsTransport',
-'EncodedAudioFrame','EncodedVideoFrame','IceCandidate','PeerConnection','PeerConnectionIceEvent',
-'RtpReceiver','RtpScriptTransform','RtpSender','RtpTransceiver','SctpTransport','SessionDescription',
-'StatsReport','TrackEvent',
-				],
-			},
-		},
-	},
-
 	"Storage": {
 		pad: 0,
 		data: {
-			2: {
-				title: 'cache',
-				ignore: ['Cache','CacheStorage',],
-			},
 			4: {
 				title: 'filesystem',
 				prefix: 'FileSystem',
@@ -613,9 +528,16 @@ let oList = {
 			},
 			8: {
 				title: 'storage',
-				prefix: 'Storage',
-				ignore: ['Storage',],
-				items: ['Event','Manager',],
+				ignore: [
+'Cache','CacheStorage',
+'Storage','StorageEvent','StorageManager',
+				],
+			},
+			9: {
+				title: 'workers',
+				ignore: [
+'Notification','ServiceWorker','ServiceWorkerContainer','ServiceWorkerRegistration','Worker',
+				],
 			},
 		},
 	},
@@ -637,7 +559,7 @@ let oList = {
 'FEMergeNodeElement','FEMorphologyElement','FEOffsetElement','FEPointLightElement','FESpecularLightingElement',
 'FESpotLightElement','FETileElement','FETurbulenceElement','FilterElement','ForeignObjectElement',
 'GElement','GeometryElement','GradientElement','GraphicsElement','ImageElement','Length','LengthList',
-'LineElement','LinearGradientElement','MPathElement','MarkerElement','MaskElement','Matrix','MetadataElement',
+'LineElement','LinearGradientElement','MPathElement','MarkerElement','MaskElement','MetadataElement',
 'Number','NumberList','PathElement','PatternElement','Point','PointList','PolygonElement','PolylineElement',
 'PreserveAspectRatio','RadialGradientElement','Rect','RectElement','SVGElement','ScriptElement','SetElement',
 'StopElement','StringList','StyleElement','SwitchElement','SymbolElement','TSpanElement','TextContentElement',
@@ -661,11 +583,26 @@ let oList = {
 			},
 		},
 	},
+
+	"WebRTC": {
+		pad: 0,
+		data: {
+			1: {
+				prefix: 'RTC',
+				items: [
+'Certificate','DTMFSender','DTMFToneChangeEvent','DataChannel','DataChannelEvent','DtlsTransport',
+'EncodedAudioFrame','EncodedVideoFrame','IceCandidate','PeerConnection','PeerConnectionIceEvent',
+'RtpReceiver','RtpScriptTransform','RtpSender','RtpTransceiver','SctpTransport','SessionDescription',
+'StatsReport','TrackEvent',
+				],
+			},
+		},
+	},
+
 }
 
 function build_list() {
 	let optItems = []
-	totalCount = 0
 	for (const n of Object.keys(oList)) {
 		let count = 0
 		optItems.push(n)
@@ -713,7 +650,6 @@ function build_list() {
 		}
 		oList[n].pad = max + 4
 		oList[n]["count"] = count
-		totalCount += count
 		if (n.length > maxPad) {maxPad = n.length}
 	}
 	// populate combobox
@@ -731,60 +667,70 @@ function build_list() {
 	} else {
 		optList.value = optItems[0]
 	}
-	dom.totalCount = totalCount
 }
 
 function run() {
 	// https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API
 
-	oData = {}
-	oPost = {}
-	aEverything = []
-	let t0 = performance.now()
+let t0 = performance.now()
 	let optSort = dom.optSort.checked
 	let optList = dom.optList.value
 	let tmpList = oList[optList]
 	let tmpObj = tmpList.data
-	let tmpPost = {}
 	let padlen = tmpList.pad
+	let tmpData ={}, tmpPost = {}, aDisplay = [], tmpDisplay = []
 
 	try {
-		let display = [], groups = []
 		for (const k of Object.keys(tmpObj).sort()) {
-			let data = tmpObj[k]
-			if (data.items !== undefined && data.items.length) {
-				let name = (data.title !== undefined ? data.title.toLowerCase() : "")
-				let group = k + name
-				oData[group] = {}
-				let tmpDisplay = []
-				groups.push(group)
+			let groupdata = tmpObj[k]
+			if (groupdata.items !== undefined) {
+				let name, group
+				if (optList.toLowerCase() == "all") {
+					name = k
+					group = k
+				} else {
+					name = (groupdata.title !== undefined ? groupdata.title.toLowerCase() : "")
+					group = k + name
+				}
+				tmpData[group] = {}
+				tmpDisplay = []
 
-				data.items.forEach(function(item) {
+				groupdata.items.forEach(function(item) {
 					if (window[item] !== undefined) {
 						try {
-							let edata = window[item].prototype
-							let array = Object.getOwnPropertyNames(edata)
-							let fake = array.slice(array.indexOf("constructor")+1) // tampered: after constructor
+							let array = Object.getOwnPropertyNames(window[item].prototype)
+
+							// post constructor
+							let strPost = "", aPost = [], tmpArray = [], strData
+							let isPost = (array[array.length -1] !== "constructor")
+							if (isPost) {
+								aPost = array.slice(array.indexOf("constructor")+1)
+								strPost = " "+ sb + "("+ aPost.length +")"+ sc
+							}
+
+							// now sort array
 							if (optSort) {array.sort()}
-							let tmpArray = []
-							array.forEach(function(n) {
-								tmpArray.push(n)
-								aEverything.push(n)
-							})
-							oData[group][item] = tmpArray
-							let hash = mini(tmpArray), countFake = ""
-							// count + color each fake individually
-							if (fake.length) {
-								countFake = " "+ sb + "("+ fake.length +")"+ sc
-								fake.forEach(function(item) {
-									array[array.indexOf(item)] = sb + item + sc
+							let hash = mini(array)
+							tmpData[group][item] = array
+
+							// count + color each post item individually, record post data
+							if (isPost) {
+								array.forEach(function(n) {
+									tmpArray.push(n)
 								})
-								tmpPost[item] = fake
+								aPost.forEach(function(item) {
+									tmpArray[tmpArray.indexOf(item)] = sb + item + sc
+								})
+								tmpPost[item] = aPost
+								strData = tmpArray.join(", ")
+							} else {
+								strData = array.join(", ")
 							}
 							tmpDisplay.push(
-								s18 + item.padStart(padlen) + sc + ": "+ hash + s18 +" ("+ oData[group][item].length +")"+ sc + countFake +"<br>"+
-								"<span class='toghidden" + k +" hidden grey'>[<br>" + "<span class='indent'>" + array.join(", ") +"</span>" + "<br>]</span>"
+								s18 + item.padStart(padlen) + sc + ": "+ hash + s18 +" ("+ tmpData[group][item].length +")"+ sc + (isPost ? strPost : "") +"<br>"+
+								"<span class='toghidden" + k +" hidden grey'>[<br>" + "<span class='indent'>" + strData +"</span>" + "<br>]</span>"
 							)
+
 						} catch(e) {
 							console.log(item, e+"")
 						}
@@ -793,7 +739,7 @@ function run() {
 					}
 				})
 				// calculate group hashes + notate
-				let hash = mini(oData[group]), notation = ""
+				let hash = mini(tmpData[group]), notation = ""
 				if (isFF && !optSort) {
 					if (optList === "Element") {
 						if (k == "6" && isVer > 110) { notation = (hash == "b0cb1af2") ? green_tick : zNEW
@@ -811,26 +757,44 @@ function run() {
 					}
 				}
 				// display: add group header + details
-				let strDesc = (data.desc !== undefined && data.desc.length) ? " <span class='grey'>... "+ data.desc +"</span>" : ""
-				display.push(
+				let strDesc = (groupdata.desc !== undefined && groupdata.desc.length) ? " <span class='grey'>... "+ groupdata.desc +"</span>" : ""
+				aDisplay.push(
 					"<br><hr>"
 					+ "<span id='labelhidden"+ k +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ k +"','expand')\">[ expand ]</span> "
 					+ s13 + hash + sc + notation +" "+ name.toUpperCase() + strDesc +"<br><br>"
 				)
-				display.push(tmpDisplay.join(""))
+				aDisplay.push(tmpDisplay.join(""))
 			}
 		}
 
-		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
-		aEverything.sort() // order is artifical due to htmlList so lets remove that here
-		//console.log("['"+ aEverything.join("','") +"']") // 447
-
 		// post constructor items
-		let postCount = 0, strPost = ""
+		let oPost = {}, postCount = 0, strPost = ""
 		for (const k of Object.keys(tmpPost).sort()) {
 			oPost[k] = tmpPost[k]
 			postCount += oPost[k].length
 		}
+		// finish perf here so I can optimize
+		dom.perf = Math.round(performance.now() - t0) +" ms"
+
+		// collect everything for testing purposes
+		let newObj = {}
+		aEverything = []
+		for (const k of Object.keys(tmpData)) {
+			for (const j of Object.keys(tmpData[k])) {
+				newObj[j] = tmpData[k][j]
+				aEverything = aEverything.concat(tmpData[k][j])
+			}
+		}
+		aEverything = aEverything.filter(function(item, position) {return aEverything.indexOf(item) === position}) // deduped
+		aEverything.sort() // order is artifical due to htmlList so lets remove that here
+		//console.log("['"+ aEverything.join("','") +"']") // 447
+
+		// oData = sorted without subsections
+		oData = {}
+		for (const k of Object.keys(newObj).sort()) {
+			oData[k] = newObj[k]
+		}
+
 		if (postCount > 0) {
 			let posttoggle = "post"
 			strPost = "<br>"
@@ -847,10 +811,9 @@ function run() {
 			+ s13 + mini(aEverything) + sc
 			+ " <span class='btn18 btnc' onclick='console.log(aEverything)'>[" + aEverything.length +"]</span>"
 
-		dom.details.innerHTML = strAll +"<br>"+ strPost + display.join("")
-		// perf
-		dom.perf = Math.round(performance.now() - t0) +" ms"
-		dom.totalCount = tmpList.count + "/"+ totalCount
+		dom.details.innerHTML = strAll +"<br>"+ strPost + aDisplay.join("")
+		dom.totalCount = tmpList.count
+
 	} catch(e) {
 		dom.details = e+""
 	}
