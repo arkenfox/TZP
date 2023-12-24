@@ -609,9 +609,9 @@ const get_isDomRect = () => new Promise(resolve => {
 					aDiffs.push(diff)
 				}
 				// dedupe
-console.log(METRIC, "all", aDiffs)
+//console.log(METRIC, "all", aDiffs)
 				aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
-console.log("deduped", aDiffs)
+//console.log("deduped", aDiffs)
 				aProps.sort()
 				let what = aProps.length == 8 ? "all" : aProps.join(", ")
 				oDomRect[METRIC] = zLIE + " | " + what // + concat method: 
@@ -1295,7 +1295,11 @@ function countJS(filename) {
 					log_alert(SECTG, METRIC +": "+ zErrTime, true)
 				}
 				// do once
-				get_pointer_event()
+				let target = dom.pointertarget
+				target.addEventListener("pointerover", (event) => {
+					get_pointer_event(event)
+				})
+
 				if (isOS == "android") {
 					dom.pointerlabel = "tap"
 					showhide("OS","table-row")

@@ -377,18 +377,20 @@ const get_pdf = () => new Promise(resolve => {
 		addData(7, METRIC, oData, hash)
 		if (isSmart) {
 			// lies
+				// ignore errors (which we collect), we don't care if all three are errors (unlikely)
+				// just return lies if not one of our expected etc
 			let isLies = false
-			if (!["91073152","beccb452"].includes(hash)) {isLies = true // enabled, disabled
-			} else if (sData[SECT99].includes("Navigator.pdfViewerEnabled")) {isLies = true
+			if (!["91073152","beccb452"].includes(hash)) {
+				isLies = true // enabled, disabled
+			} else if (
+				sData[SECT99].includes("Navigator.pdfViewerEnabled")) {
+				isLies = true
 			} else {
 				try {
 					let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 					if (keys.indexOf("pdfViewerEnabled") > keys.indexOf("constructor")) {isLies = true}
 				} catch(e) {}
 			}
-			// ToDo: lies vs errors
-
-
 			// notate: FF116 1838415 dropped RFP protection
 			if (isVer < 116) {
 				notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
@@ -401,7 +403,7 @@ const get_pdf = () => new Promise(resolve => {
 	})
 })
 
-function get_pointer_event() {
+function get_pointer_event(event) {
 	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
 	/* https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
 	RFP
@@ -416,44 +418,39 @@ function get_pointer_event() {
 		dom.ptEvent.innerHTML = "undefined"
 		return
 	}
-	let target = window.document.getElementById("pointertarget")
-	target.addEventListener("pointerover", (event) => {
-		// get data
-		let list = ['height','isPrimary','mozInputSource','mozPressure','pointerType',
-			'pressure','tangentialPressure','tiltX','tiltY','twist','width',]
-		let listType = ['number','boolean','number','number','string',
-			'number','number','number','number','number','number',]
-		let res = []
-		for (let i=0; i < list.length; i++) {
-			let value = ""
-			// ToDo: 1363508: RFP notations, see above
-			try {
-				if (i == 0) {value = event.height // RFP 1
-				} else if (i == 1) {value = event.isPrimary // RFP true
-				} else if (i == 2) {value = event.mozInputSource
-				} else if (i == 3) {value = event.mozPressure // 1534199: does this match pressure?
-				} else if (i == 4) {value = event.pointerType // RFP mouse
-				} else if (i == 5) {value = event.pressure // RFP: 0 if not active, 0.5 if active
-				} else if (i == 6) {value = event.tangentialPressure // RFP 0
-				} else if (i == 7) {value = event.tiltX // RFP 0
-				} else if (i == 8) {value = event.tiltY // RFP 0
-				} else if (i == 9) {value = event.twist // RFP 0
-				} else if (i == 10) {value = event.width // RFP 1
-				}
-			} catch(e) {
-				value = e.name
-			}
-			if (value == "") {
-			} else if (value == zU) {value = zUQ
-			} else if (value === undefined) {value = zU}
-			if (typeof value !== listType[i]) {
-				value = zErrType + typeof value
-			}
-			res.push(value)
-		}
 
-		dom.ptEvent.innerHTML = res.join(" | ") + sg +"["+ mini(res) +"]"+ sc
-	})
+	let oData = {}, oDisplay = []
+	let oList = {
+		isPrimary: "boolean", // RFP true
+		pressure: "number", // RFP: 0 if not active, 0.5 if active
+		mozPressure: "number",
+		pointerType: "string", // RFP mouse
+		mozInputSource: "number",
+		tangentialPressure: "number", // RFP 0
+		tiltX: "number", // RFP 0
+		tiltY: "number", // RFP 0
+		twist: "number", // RFP 0
+		width: "number", // RFP 1
+		height: "number", // RFP 1
+	}
+	for (const k of Object.keys(oList).sort()) {
+		try {
+			let value = event[k]
+			let expected = oList[k]
+			if (value === "") {value = "empty string"
+			} else if (value === undefined) {value = "undefined"
+			} else if (value === "undefined") {value = "\"undefined\""
+			}
+			if (typeof value !== expected) {
+				value = "type error: "+ typeof value
+			}
+			oData[k] = value
+			oDisplay.push(value)
+		} catch(e) {
+			oData[k] = e.name
+		}
+	}
+	dom.ptEvent.innerHTML = oDisplay.join(" | ") + sg +"["+ mini(oData) +"]"+ sc
 }
 
 const get_speech_engines = () => new Promise(resolve => {
