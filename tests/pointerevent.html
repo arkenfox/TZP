@@ -43,8 +43,7 @@
 		<tr><td colspan"2"> &nbsp; </tr>
 		<tr>
 			<td>
-				<!--<div class="pointer" id="target" onClick="run()"> <!-- do I need an onClick event-->
-				<div class="pointer" id="target" onClick="run()">
+				<div class="pointer" id="target">
 					<div class="flex-item">mouse over<div>
 					<div class="flex-item"> 🧀 <div>
 					<div class="flex-item">touch<div>
@@ -108,7 +107,6 @@ function run(event) {
 	dom.results.innerHTML = strHash + "<br><br>" + oDisplay.join("<br>")
 
 }
-
 
 let target = dom.target
 target.addEventListener("pointerover", (event) => {
