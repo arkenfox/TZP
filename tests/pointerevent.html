@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>pointer event</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 480px;}
+		hr {color: var(--test7);}
+		.pointer {
+			float: left;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 220px;
+			width: 100px;
+			color: var(--test0);
+			border: 2px solid var(--test7);
+		}
+		.flex-item {
+			text-align: center;
+			margin: 10px;
+		}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb7">
+		<col width="35%"><col width="65%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">pointer event</div>
+		</th></tr></thead>
+		<tr><td colspan"2"> &nbsp; </tr>
+		<tr>
+			<td>
+				<!--<div class="pointer" id="target" onClick="run()"> <!-- do I need an onClick event-->
+				<div class="pointer" id="target" onClick="run()">
+					<div class="flex-item">mouse over<div>
+					<div class="flex-item"> 🧀 <div>
+					<div class="flex-item">touch<div>
+					<div class="flex-item"> 👆 <div>
+					<div class="flex-item">pen<div>
+					<div class="flex-item"> ✏️ <div>
+				<div>
+			</td>
+		<td class="mono spaces" style="text-align: left; vertical-align: top;" id="results">results</td>
+		</tr>
+
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1363508
+
+let padlen = 18
+let oData = {}
+s6 = s6.trim()
+
+function run(event) {
+	let oList = {
+		isPrimary: "boolean", // RFP true
+		pressure: "number", // RFP: 0 if not active, 0.5 if active
+		mozPressure: "number",
+		pointerType: "string", // RFP mouse
+		mozInputSource: "number",
+		tangentialPressure: "number", // RFP 0
+		tiltX: "number", // RFP 0
+		tiltY: "number", // RFP 0
+		twist: "number", // RFP 0
+		width: "number", // RFP 1
+		height: "number", // RFP 1
+	}
+	let oTemp = {}, oDisplay = []
+	oData = {}
+
+	for (const k of Object.keys(oList)) {
+		try {
+			let value = event[k]
+			let expected = oList[k]
+			if (value === "") {value = "empty string"
+			} else if (value === undefined) {value = "undefined"
+			} else if (value === "undefined") {value = "\"undefined\""
+			}
+			if (typeof value !== expected) {
+				value = "type error: "+ typeof value
+			}
+			oTemp[k] = value
+			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
+		} catch(e) {
+			oTemp[k] = e.name
+		}
+	}
+	// reorder so it matches TZP
+	for (const k of Object.keys(oTemp).sort()) {oData[k] = oTemp[k]}
+	let hash = mini(oData)
+	let strHash = s6 + ("hash").padStart(padlen) +": "+ sc + hash
+	dom.results.innerHTML = strHash + "<br><br>" + oDisplay.join("<br>")
+
+}
+
+
+let target = dom.target
+target.addEventListener("pointerover", (event) => {
+	run(event)
+})
+
+</script>
+</body>
