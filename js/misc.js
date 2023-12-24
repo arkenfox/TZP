@@ -392,6 +392,7 @@ const get_window_props = () => new Promise(resolve => {
 	const METRIC = "window_properties"
 	let check = (isSmart && isTB)
 	let notation = check ? tb_red : ""
+	let strConsole = ""
 
 	try {
 		if (runSE) {foo++}
@@ -405,9 +406,7 @@ const get_window_props = () => new Promise(resolve => {
 		iframe = document.getElementById(id)
 		let contentWindow = iframe.contentWindow
 		let aProps = Object.getOwnPropertyNames(contentWindow)
-		let aSorted = []
-		aProps.forEach(function(item) {aSorted.push(item)})
-		aSorted.sort()
+		let aSorted = Object.getOwnPropertyNames(contentWindow).sort()
 
 		// sim
 		if (runSL) {aProps.push("hdcd_canvas_getctx","serviceWorker")}
@@ -423,29 +422,24 @@ const get_window_props = () => new Promise(resolve => {
 		if (isSmart && isTB) {webgpu += (webgpu == zD ? tb_green : tb_red)}
 		log_display(18, "webgpu", webgpu)
 
-		let display = mini(aSorted),
-			fpvalue = display,
-			tamperBtn = ""
+		let display = mini(aSorted), fpvalue = display, tamperBtn = ""
+
 		let aTampered = aProps.slice(aProps.indexOf("Performance")+1)
-		let allowTampered = aProps.slice(aProps.indexOf("Performance")+1)
-		let aFilter = ['Event','Location']
+		// filter: these can be after Performance if console is open/has selected storage tab
+		let aFilter = ['Event','Location'] 
+		aTampered = aTampered.filter(x => !aFilter.includes(x))
+
 		if (isSmart) {
-			allowTampered = allowTampered.filter(x => !aFilter.includes(x))
-			if (allowTampered.length) {
-				// always record tampering
-				addDetail(METRIC +"_tampered", allowTampered.sort())
-				tamperBtn = addButton(18, METRIC +"_tampered", allowTampered.length + " tampered")
-			}
-			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41694
-				// allowlist NS 11.4.20+ - i.e remove false positives
-				// allow slider at safer
-			aFilter = ["Element","Event","HTMLCanvasElement","HTMLElement","HTMLFrameElement","HTMLIFrameElement",
-				"HTMLObjectElement","Location","MediaSource","OffscreenCanvas","Proxy","URL","webkitURL",
-			]
-			aTampered = aTampered.filter(x => !aFilter.includes(x))
+			// always record sorted tampering
 			if (aTampered.length) {
-				aTampered = aTampered.concat(allowTampered)
-				aTampered = aTampered.filter(function(item, position) {return aTampered.indexOf(item) === position})
+				addDetail(METRIC +"_tampered", aTampered.sort())
+				tamperBtn = addButton(18, METRIC +"_tampered", aTampered.length + " tampered")
+			}
+			// get hash (array is sorted) to exempt NS exact matches
+			let tamperHash = mini(aTampered)
+			let goodTamper = ["c36227b3","d3ed1b76"] // c36227b3 standard [5] | d3ed1b76 safer [11]
+			// return untrustworthy is tampering && !NS
+			if (aTampered.length > 0 && !goodTamper.includes(tamperHash)) {
 				addDetail(METRIC, aProps)
 				addDetail(METRIC +"_tampered", aTampered.sort())
 				tamperBtn = addButton(18, METRIC +"_tampered", aTampered.length + " tampered")
@@ -453,6 +447,16 @@ const get_window_props = () => new Promise(resolve => {
 				fpvalue = zLIE
 				log_known(SECT18, METRIC)
 				addData(18, METRIC, zLIE)
+			} else {
+				if (isOS !== "android" && isOS !== undefined) {
+					/*
+						 safer closed: "Performance" ... more items then "Event"
+					standard closed: "Performance" + no "Event"...
+					 TB/FF/ALL open: "Performance" then "Event"...
+					*/
+					let indexPerf = aProps.indexOf("Performance"), indexEvent = aProps.indexOf("Event")
+					strConsole = " [console " + ( indexPerf + 1 == indexEvent ? "open" : "closed") +"]"
+				}
 			}
 		}
 		display += addButton(18, METRIC, aProps.length) + tamperBtn
@@ -474,22 +478,9 @@ const get_window_props = () => new Promise(resolve => {
 				}
 			}
 		}
-		display += notation
-
+		display += notation + strConsole
 		if (fpvalue !== zLIE) {
 			addData(18, METRIC, aSorted, fpvalue)
-			if (isOS !== "android" && isOS !== undefined) {
-				if (isSmart && !aTampered.length) {
-				/*
-           safer closed: "Performance" ... more items then "Event"
-        standard closed: "Performance" + no "Event"...
-         TB/FF/ALL open: "Performance" then "Event"...
-				*/
-					let indexPerf = aProps.indexOf("Performance"),
-						indexEvent = aProps.indexOf("Event")
-					display += " [console " + ( indexPerf + 1 == indexEvent ? "open" : "closed") +"]"
-				}
-			}
 		}
 		log_display(18, METRIC, display)
 		log_perf(SECT18, METRIC, t0)
