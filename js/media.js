@@ -180,11 +180,14 @@ function get_media(type) {
 		v+'x-matroska',
 	]
 
-	if (gRun && mediaBtn == undefined) {
+	if (gRun && type == "audio") {
 		addDetail("audio_mimes", audiolist, "lists")
 		addDetail("video_mimes", videolist, "lists")
-		mediaBtn = addButton(13, "audio_mimes", audiolist.length +" audio", "btnc", "lists")
-			+ addButton(13, "video_mimes", videolist.length +" video", "btnc", "lists")
+		if (mediaBtn == undefined) {
+			mediaBtn = addButton(13, "audio_mimes", audiolist.length +" audio", "btnc", "lists")
+				+ addButton(13, "video_mimes", videolist.length +" video", "btnc", "lists")
+			log_display(13, "mediaBtn", mediaBtn)
+		}
 	}
 
 	const METRICcan = "canPlayType_"+ type,
@@ -395,7 +398,7 @@ function outputMedia() {
 			log_display(13, "clearkey", log_error(SECT13, "clearkey", zErrTime) + (isSmart ? default_red : ""))
 		}
 		results.forEach(function(item) {addDataFromArray(13, item)})
-		log_display(13, "mediaBtn", mediaBtn)
+		//log_display(13, "mediaBtn", mediaBtn)
 		log_section(13, t0)
 	})
 }
