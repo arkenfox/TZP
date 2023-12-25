@@ -390,9 +390,7 @@ const get_window_props = () => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	let t0 = nowFn(), iframe
 	const METRIC = "window_properties"
-	let check = (isSmart && isTB)
-	let notation = check ? tb_red : ""
-	let strConsole = ""
+	let tamperBtn = "", notation = "", strConsole = "", isLies = false
 
 	try {
 		if (runSE) {foo++}
@@ -406,13 +404,8 @@ const get_window_props = () => new Promise(resolve => {
 		iframe = document.getElementById(id)
 		let contentWindow = iframe.contentWindow
 		let aProps = Object.getOwnPropertyNames(contentWindow)
-		let aSorted = Object.getOwnPropertyNames(contentWindow).sort()
-
-		// sim
-		if (runSL) {aProps.push("hdcd_canvas_getctx","serviceWorker")}
 		// cleanup
 		iframe.parentNode.removeChild(iframe)
-
 		// wasm
 		let wasm = aProps.includes("WebAssembly") ? zE : zD
 		if (isSmart && isTB) {wasm += (wasm == zE ? tb_standard : tb_safer)}
@@ -422,46 +415,42 @@ const get_window_props = () => new Promise(resolve => {
 		if (isSmart && isTB) {webgpu += (webgpu == zD ? tb_green : tb_red)}
 		log_display(18, "webgpu", webgpu)
 
-		let display = mini(aSorted), fpvalue = display, tamperBtn = ""
-
-		let aTampered = aProps.slice(aProps.indexOf("Performance")+1)
-		// filter: these can be after Performance if console is open/has selected storage tab
-		let aFilter = ['Event','Location'] 
-		aTampered = aTampered.filter(x => !aFilter.includes(x))
-
 		if (isSmart) {
-			// always record sorted tampering
+			// tampered: filter items for console open etc
+			if (runSL) {aProps.push("fake")}
+			let aTampered = aProps.slice(aProps.indexOf("Performance")+1)
+			aTampered = aTampered.filter(x => !['Event','Location'].includes(x))
 			if (aTampered.length) {
 				addDetail(METRIC +"_tampered", aTampered.sort())
 				tamperBtn = addButton(18, METRIC +"_tampered", aTampered.length + " tampered")
+				// isLies: exempt exact NS hashes
+				if (!["c36227b3","d3ed1b76"].includes(mini(aTampered))) {isLies = true}
 			}
-			// get hash (array is sorted) to exempt NS exact matches
-			let tamperHash = mini(aTampered)
-			let goodTamper = ["c36227b3","d3ed1b76"] // c36227b3 standard [5] | d3ed1b76 safer [11]
-			// return untrustworthy is tampering && !NS
-			if (aTampered.length > 0 && !goodTamper.includes(tamperHash)) {
-				addDetail(METRIC, aProps)
-				addDetail(METRIC +"_tampered", aTampered.sort())
-				tamperBtn = addButton(18, METRIC +"_tampered", aTampered.length + " tampered")
-				display = colorFn(display)
-				fpvalue = zLIE
-				log_known(SECT18, METRIC)
-				addData(18, METRIC, zLIE)
-			} else {
-				if (isOS !== "android" && isOS !== undefined) {
-					/*
-						 safer closed: "Performance" ... more items then "Event"
-					standard closed: "Performance" + no "Event"...
-					 TB/FF/ALL open: "Performance" then "Event"...
-					*/
-					let indexPerf = aProps.indexOf("Performance"), indexEvent = aProps.indexOf("Event")
-					strConsole = " [console " + ( indexPerf + 1 == indexEvent ? "open" : "closed") +"]"
-				}
+			// notate console
+			if (!isLies && isOS !== "android" && isOS !== undefined) {
+				/* safer closed: "Performance" ... more items then "Event"
+				standard closed: "Performance" + no "Event"...
+				 TB/FF/ALL open: "Performance" then "Event"...
+				*/
+				let indexPerf = aProps.indexOf("Performance"), indexEvent = aProps.indexOf("Event")
+				strConsole = " [console " + ( indexPerf + 1 == indexEvent ? "open" : "closed") +"]"
 			}
 		}
-		display += addButton(18, METRIC, aProps.length) + tamperBtn
-		// health
-		if (check && fpvalue !== zLIE) {
+		// sort, hash, record detail etc
+		let display = mini(aProps.sort()), fpvalue = display
+		if (isLies) {
+			display = colorFn(display)
+			fpvalue = zLIE
+			log_known(SECT18, METRIC)
+			addDetail(METRIC, aProps)
+			addData(18, METRIC, zLIE)
+		} else {
+			addData(18, METRIC, aProps, fpvalue)
+		}
+
+		// notate
+		if (isSmart && isTB) {
+			notation = tb_red
 			// ToDo: touch devices
 				// "Touch", "TouchEvent", "TouchList","ontouchcancel", "ontouchend", "ontouchmove", "ontouchstart"
 				// e.g. is not in my windows touch-capable laptop but may be present in a tablet
@@ -478,10 +467,7 @@ const get_window_props = () => new Promise(resolve => {
 				}
 			}
 		}
-		display += notation + strConsole
-		if (fpvalue !== zLIE) {
-			addData(18, METRIC, aSorted, fpvalue)
-		}
+		display += addButton(18, METRIC, aProps.length) + tamperBtn + notation + strConsole
 		log_display(18, METRIC, display)
 		log_perf(SECT18, METRIC, t0)
 		return resolve()
