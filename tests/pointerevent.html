@@ -25,6 +25,9 @@
 			text-align: center;
 			margin: 10px;
 		}
+		.grey {
+			color: grey;
+		}
 	</style>
 </head>
 
@@ -72,7 +75,7 @@ function run(event) {
 		pressure: "number", // RFP: 0 if not active, 0.5 if active
 		mozPressure: "number",
 		pointerType: "string", // RFP mouse
-		mozInputSource: "number",
+		mozInputSource: "number", // mouse = 1, pen = 2, touch = 5
 		tangentialPressure: "number", // RFP 0
 		tiltX: "number", // RFP 0
 		tiltY: "number", // RFP 0
@@ -82,8 +85,13 @@ function run(event) {
 	}
 	let oTemp = {}, oDisplay = []
 	oData = {}
+	let lines = ["pressure", "pointerType", "tangentialPressure"]
+	let divider = "<span class='grey'>" + "----------".padStart(padlen) +"--------"+ sc
 
 	for (const k of Object.keys(oList)) {
+		if (lines.includes(k)) {
+			oDisplay.push(divider)
+		}
 		try {
 			let value = event[k]
 			let expected = oList[k]
