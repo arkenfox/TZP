@@ -7,7 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<style>
 		table {width: 480px;}
-		hr {color: var(--test18);}
 		span.indent {
 			display:inline-block;
 			margin-left:20px;
@@ -111,7 +110,6 @@ const get_isRecursion_worker = () => new Promise(resolve => {
 	try {
 		let worker = new Worker("recursion_worker.js")
 		worker.addEventListener("message", function(msg) {
-			console.log(msg)
 			for (const k of Object.keys(msg.data)) {
 				document.getElementById(k).innerHTML = msg.data[k]
 			}
