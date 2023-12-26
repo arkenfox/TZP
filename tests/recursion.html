@@ -110,9 +110,8 @@ const get_isRecursion_worker = () => new Promise(resolve => {
 	const METRIC = "isRecursion"
 	try {
 		let worker = new Worker("recursion_worker.js")
-		worker.addEventListener("message", function(data) {
-			console.log(data)
-			for (const k of Object.keys(data)) {
+		worker.addEventListener("message", function(msg) {
+			for (const k of Object.keys(msg.data)) {
 				document.getElementById(k).innerHTML = data[k]
 			}
 			worker.terminate
