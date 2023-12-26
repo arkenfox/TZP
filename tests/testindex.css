@@ -188,12 +188,11 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 
 /* table nav */
 div.nav-title {position: relative;}
-div.nav-down {position: absolute; right: 20px; top: 0px; width: 300px; text-align: right;}
-div.nav-up {position: absolute; left: 20px; top: 0px; width: 400px; text-align: left;}
+div.nav-down {position: absolute; right: 20px; top: 0px; width: 100px; text-align: right;}
+div.nav-up {position: absolute; left: 20px; top: 0px; width: 100px; text-align: left;}
 
 /* tables */
 table {
-	width: 765px;
 	border-collapse: collapse;
 	margin: 0 auto 10px auto;
 	font-size: 12px;
