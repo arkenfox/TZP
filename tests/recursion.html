@@ -2,11 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="recursion" content="width=400">
+	<meta name="recursion" content="width=500">
 	<title>recursion</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<style>
-		table {width: 380px;}
+		table {width: 480px;}
 		span.indent {
 			display:inline-block;
 			margin-left:20px;
@@ -24,7 +24,7 @@
 	</table>
 
 	<table id="tb18">
-		<col width="43%"><col width="57%">
+		<col width="40%"><col width="60%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">recursion | stack length
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -53,20 +53,8 @@
 	</table>
 	<br>
 
-</body>
 <script>
 'use strict';
-
-// this still reflects the parent result when loaded as an iframe
-/*
-e.g. TZP document: using file:// scheme = not realistic - just looking for stability)
-
-        ASAP in globals.js TZP = 39342 | 6272
-                           TZP = 39181 | 5888
-   console get_recursion() TZP =  1508 | 5888
-		this page as iframe on TZP = 39310 | 6272
-    this page on it's own      = 39341 | 7040
-*/
 
 const get_isRecursion_doc = () => new Promise(resolve => {
 	let t0 = performance.now()
@@ -148,4 +136,5 @@ function run(type) {
 }
 
 </script>
+</body>
 </html>
