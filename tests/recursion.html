@@ -111,9 +111,9 @@ const get_isRecursion_worker = () => new Promise(resolve => {
 	try {
 		let worker = new Worker("recursion_worker.js")
 		worker.addEventListener("message", function(data) {
-			cosole.log(data)
+			console.log(data)
 			for (const k of Object.keys(data)) {
-				document.getElementById("k").innerHTML = data[k]
+				document.getElementById(k).innerHTML = data[k]
 			}
 			worker.terminate
 		}, false)
