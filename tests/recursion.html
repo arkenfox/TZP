@@ -58,16 +58,6 @@
 <script>
 'use strict';
 
-function mini(str) {
-	// https://stackoverflow.com/a/22429679
-	const json = `${JSON.stringify(str)}`
-	let i, len, hash = 0x811c9dc5
-	for (i = 0, len = json.length; i < len; i++) {
-		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
-	}
-	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
-}
-
 // this still reflects the parent result when loaded as an iframe
 /*
 e.g. TZP document: using file:// scheme = not realistic - just looking for stability)
@@ -121,6 +111,7 @@ const get_isRecursion_worker = () => new Promise(resolve => {
 	try {
 		let worker = new Worker("recursion_worker.js")
 		worker.addEventListener("message", function(data) {
+			cosole.log(data)
 			for (const k of Object.keys(data)) {
 				document.getElementById("k").innerHTML = data[k]
 			}
