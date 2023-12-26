@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="recursion" content="width=500">
+	<title>recursion</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<style>
+		table {width: 480px;}
+		hr {color: var(--test18);}
+		span.indent {
+			display:inline-block;
+			margin-left:20px;
+			margin-bottom: 10px;
+		}
+		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
+		.grey {color: grey;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb18">
+		<col width="40%"><col width="70%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">recursion | stack length
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="c perf" id="type"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr>
+			<td><span class="btnfirst btn" onClick="run('doc')">[ run ]</span> DOCUMENT</td>
+			<td class="mono">
+				<span class='s14'>RUN 1:</span><br><span class='indent grey'>level: <span id="doc1"></span><br>stack: <span id="doc2"></span></span><br>
+				<span class='s14'>RUN 2:</span><br><span class='indent grey'>level: <span id="doc3"></span><br>stack: <span id="doc4"></span></span>
+			</td>
+		</tr>
+		<tr>
+			<td><span class="btnfirst btn" onClick="run('worker')">[ run ]</span> WORKER</td>
+			<td class="mono">
+				<span class='s14'>RUN 1:</span><br><span class='indent grey'>level: <span id="worker1"></span><br>stack: <span id="worker2"></span></span><br>
+				<span class='s14'>RUN 2:</span><br><span class='indent grey'>level: <span id="worker3"></span><br>stack: <span id="worker4"></span></span>
+			</td>
+		</tr>
+		<tr>
+			<td><span class="btnfirst btn" onClick="run('iframe')">[ run ]</span> IFRAME</td>
+			<td><iframe id="targetiframe" style="border: none;"></iframe></td>
+		</tr>
+
+	</table>
+	<br>
+
+</body>
+<script>
+'use strict';
+
+function mini(str) {
+	// https://stackoverflow.com/a/22429679
+	const json = `${JSON.stringify(str)}`
+	let i, len, hash = 0x811c9dc5
+	for (i = 0, len = json.length; i < len; i++) {
+		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
+	}
+	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
+}
+
+// this still reflects the parent result when loaded as an iframe
+/*
+e.g. TZP document: using file:// scheme = not realistic - just looking for stability)
+
+        ASAP in globals.js TZP = 39342 | 6272
+                           TZP = 39181 | 5888
+   console get_recursion() TZP =  1508 | 5888
+		this page as iframe on TZP = 39310 | 6272
+    this page on it's own      = 39341 | 7040
+*/
+
+const get_isRecursion_doc = () => new Promise(resolve => {
+	let t0 = performance.now()
+	try {
+		let level = 0
+		function recurse() {level++; recurse()}
+		try {
+			recurse()
+		} catch(e) {
+			document.getElementById("doc1").innerHTML = level
+			document.getElementById("doc2").innerHTML = e.stack.toString().length
+		}
+		level = 0
+		try {
+			recurse()
+		} catch(e) {
+			// 2nd test is more accurate/stable
+			document.getElementById("doc3").innerHTML = level
+			document.getElementById("doc4").innerHTML = e.stack.toString().length
+			document.getElementById("perf").innerHTML = Math.round(performance.now() - t0) +"ms"
+			return resolve()
+		}
+	} catch(e) {
+		console.error(e)
+		document.getElementById("doc1").innerHTML = e.name
+		return resolve()
+	}
+})
+
+function get_isRecursion_iframe() {
+	try {
+		let element = document.getElementById("targetiframe")
+		element.src = "recursion_iframe.html"
+	} catch(e) {
+		console.log(e+"")
+	}
+}
+
+const get_isRecursion_worker = () => new Promise(resolve => {
+	const METRIC = "isRecursion"
+	try {
+		let worker = new Worker("recursion_worker.js")
+		worker.addEventListener("message", function(data) {
+			for (const k of Object.keys(data)) {
+				document.getElementById("k").innerHTML = data[k]
+			}
+			worker.terminate
+		}, false)
+		worker.postMessage("")
+	} catch(e) {
+		console.error(e)
+		document.getElementById("worker1").innerHTML = e.name
+	}
+})
+
+function run(type) {
+
+	document.getElementById("type").innerHTML = (type == "doc" ? "document" : type)
+	document.getElementById("perf").innerHTML = ""
+	if (type == "iframe") {
+		let element = document.getElementById("targetiframe")
+		element.src = ""
+	} else {
+		for (let i=1; i < 5; i++) {
+			document.getElementById(type+i).innerHTML = ""
+		}
+	}
+	// delay
+	setTimeout(function() {
+		if (type == "doc") {
+			get_isRecursion_doc()
+		} else if (type == "worker") {
+			get_isRecursion_worker()
+		} else if (type == "iframe") {
+			get_isRecursion_iframe()
+		}
+	}, 100)
+
+}
+
+</script>
+</html>
