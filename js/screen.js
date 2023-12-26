@@ -96,6 +96,10 @@ const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 		let r = ""
 		try {
 			r = document.mozFullScreenEnabled
+			if ("boolean" !== typeof r) {
+				log_error(SECT1, METRIC, zErrType + typeof r)
+				r = zErr
+			}
 		} catch(e) {
 			r = zErr
 			log_error(SECT1, METRIC, e)
@@ -500,6 +504,7 @@ const get_scr_orientation = (type) => new Promise(resolve => {
 		aScreen.push(value)
 		oScreen[names[i]] = value
 	}
+
 	let display = aScreen.join(" | ")
 	if (isSmart) {
 		// does this makes sense? e.g. we control the screen, based on inner, so it should reflect
@@ -1365,13 +1370,10 @@ function outputFD() {
 	let t0 = nowFn()
 
 	if (!isGecko) {
-		addData(3, "browser", "non-gecko")
+		let aList = ['browser','browser_architecture','logo','os','version','workdmark']
+		aList.forEach(function(item) {addDataDisplay(3, item, zNA)})
 		log_display(3, "fdBrandingCss", zNA)
 		log_display(3, "fdResourceCss", zNA)
-		log_display(3, "browser", zNA)
-		log_display(3, "browser_architecture", zNA)
-		log_display(3, "os", zNA)
-		log_display(3, "version", zNA)
 		log_section(3, t0)
 		return
 	}
