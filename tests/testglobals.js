@@ -45,7 +45,6 @@ let s0 = " <span class='",
 // other
 	canPerf = false,
 	is95 = false,
-	isBrave = false,
 	isEngine = "",
 	isEnginePretty = "", // results string with perf
 	isFF = false,
@@ -82,7 +81,6 @@ var gLocales = [
 "ho,hiri motu",
 "ht,haitian",
 "hz,herero",
-"ie,interlingue",
 "ik,inupiaq",
 "io,ido",
 "iu,inuktitut",
@@ -98,7 +96,6 @@ var gLocales = [
 "nr,south ndebele",
 "nv,navajo",
 "ny,chichewa",
-"oc,occitan",
 "oj,ojibwa",
 "pi,pali",
 "sm,samoan",
@@ -110,7 +107,6 @@ var gLocales = [
 "ve,venda",
 "vo,volapük",
 "wa,walloon",
-"za,zhuang",
 	//*/
 
 "af,afrikaans",
@@ -160,6 +156,7 @@ var gLocales = [
 "hy,armenian",
 "ia,interlingua",
 "id,indonesian",
+"ie,interlingue",
 "ig,igbo",
 "ii,sichuan yi",
 "is,icelandic",
@@ -199,6 +196,7 @@ var gLocales = [
 "nl,dutch",
 "nn,norwegian nynorsk",
 "no,norwegian",
+"oc,occitan",
 "om,oromo",
 "or,odia",
 "os,ossetian",
@@ -247,6 +245,7 @@ var gLocales = [
 "xh,xhosa",
 "yi,yiddish",
 "yo,yoruba",
+"za,zhuang",
 "zh,chinese",
 "zu,zulu",
 
@@ -278,7 +277,7 @@ var gLocales = [
 "nyn,nyankole",
 "raj,rajasthani",
 "sah,yakut",
-"sat,santali", // 1731528
+"sat,santali", // 1731528, 1852843
 "sco,scots", // 1714293
 "smn,inari sámi",
 "vai,vai",
@@ -313,7 +312,7 @@ var gLocales = [
 "ksf,bafia",
 "ksh,colognian",
 "lag,langi",
-"lij,ligurian", // keep for blink pluralrules
+"lij,ligurian",
 "lkt,lakota",
 "lrc, northern luri",
 "ltg,latgalian",
