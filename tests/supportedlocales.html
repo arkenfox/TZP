@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
@@ -16,7 +16,7 @@
 <body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb4">
@@ -125,13 +125,13 @@ function run_main(method, isLoopy) {
 			if (!is115) {return ""}
 			let notation = ""
 			if (method == "C") {
-				if (hash == "248fdca9") {notation = " [FF121+]" // lij
-				} else if (hash == "51bba16a") {notation = " [FF115-120]"
+				//if (hash == "248fdca9") {notation = " [FF121+]" // lij
+				if (hash == "51bba16a") {notation = " [FF115+]"
 				} else { notation = zNEW
 				}
 			} else {
-				if (hash == "13d29895") {notation = " [FF121+]" // lij
-				} else if (hash == "2f20e446") {notation = " [FF115-120]"
+				//if (hash == "13d29895") {notation = " [FF121+]" // lij
+				if (hash == "2f20e446") {notation = " [FF115+]"
 				} else { notation = zNEW
 				}
 			}
@@ -274,7 +274,7 @@ function run_main(method, isLoopy) {
 					str = spacer + "<hr>" + "<br>" + str + spacer
 					str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
 				}
-				str += spacer + "<span style='color: grey;'>" + data.join(", ") +"</span>"
+				str += spacer + "<span class='faint'>" + data.join(", ") +"</span>"
 				if (map2.length) {str += spacer + s12 +"MAPPED"+ sc + spacer + map2.join("<br>")}
 				if (dupes.length) {str += spacer + s14 +"DUPES"+ sc + spacer + dupes.join("<br>")}
 				if (notlist.length) {str += spacer + s16 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
