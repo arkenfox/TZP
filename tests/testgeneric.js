@@ -515,7 +515,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 122
+		isVerMax = 123
+		if ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) return 123
 		if ("function" === typeof Promise.withResolvers) {
 			// 122: 1867558 (0.725ms slow)
 			try {
