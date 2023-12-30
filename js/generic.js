@@ -517,7 +517,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
-			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus") return 123 // 1871745
+			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) return 123 // 1871745
 			if ("function" === typeof Promise.withResolvers) {
 				// 122: 1867558 (0.725ms slow)
 				try {
