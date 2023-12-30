@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=500">
+	<meta name="viewport" content="width=400">
 	<title>window.name [a]</title>
 	<!-- custom -->
 	<style>
@@ -23,7 +23,10 @@
 		.bad {color: #ff6363;}
 
 		div.nav-title {position: relative;}
-		table {width: 480px; border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;}
+		table {
+			width: 97%; min-width: 380px; max-width: 480px;
+			border-collapse: collapse; margin: 0 auto 10px auto; font-size: 12px;
+		}
 		tbody:before {content: "-"; display: block; line-height: 1em; color: transparent;}
 		td {padding-bottom: 3px; padding-top: 3px; padding-left: 10px;}
 		th {color: black; font-weight: bold; font-size: 16px; padding: 3px 0;}
