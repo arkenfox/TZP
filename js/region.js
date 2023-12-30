@@ -1,70 +1,6 @@
 'use strict';
 
-const get_geo = () => new Promise(resolve => {
-	const METRIC = "geolocation"
-	// nav
-	let value, display
-	try {
-		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		/* test
-		keys = keys.filter(x => !["geolocation"].includes(x))
-		keys.push("geolocation")
-		//*/
-		value = keys.includes(METRIC) ? zE : zD
-		display = value
-		if (isSmart) {
-			// this only detects enabled as untrustworthy
-			if (keys.indexOf(METRIC) > keys.indexOf("constructor")) {
-				value = zLIE
-				display = colorFn(zE)
-				log_known(SECT4, METRIC +"_navigator")
-			}
-		}
-	} catch(e) {
-		value = zErr, display = value
-		log_error(SECT4, METRIC +"_navigator", e)
-	}
-	// window
-	let geoWin
-	try {
-		geoWin = "Geolocation" in window ? true : false
-	} catch(e) {
-		geoWin = zErr
-		log_error(SECT4, METRIC +"_window", e)
-	}
-	value += " | "+ geoWin
-	display += " | "+ geoWin
-
-	function exit() {
-		let notation = ""
-		if (isSmart) {
-			let rhash = mini(display) // use display
-			if (isTB) {
-				// TB ESR78+: disabled, true, prompt
-				notation = rhash == "94bf0c73" ? default_green : default_red
-			} else {
-				// FF72+: enabled, true, prompt
-				notation = rhash == "6046a6a8" ? default_green : default_red
-			}
-		}
-		log_display(4, METRIC, display + notation)
-		return resolve([[METRIC, value]])
-	}
-	function geoState(state) {
-		value += " | "+ state
-		display += " | "+ state
-		exit()
-	}
-	try {
-		if (runSE) {foo++}
-		navigator.permissions.query({name:"geolocation"}).then(e => geoState(e.state))
-	} catch(e) {
-		log_error(SECT4, METRIC +"_permission", e)
-		value += " | "+ zErr
-		display += " | "+ zErr
-		exit()
-	}
-})
+/* HEADERS */
 
 const get_nav_connection = () => new Promise(resolve => {
 	const METRIC = "connection"
@@ -201,57 +137,322 @@ const get_nav_gpc = () => new Promise(resolve => {
 	}
 })
 
-function outputHeaders() {
-	let t0 = nowFn()
-	Promise.all([
-		get_nav_dnt(),
-		get_nav_gpc(),
-		get_nav_connection(),
-	]).then(function(results){
-		results.forEach(function(item) {addDataFromArray(5, item)})
-		log_section(5, t0)
-	})
-}
+/* REGION */
 
-function get_lang() {
-	return new Promise(resolve => {
-
-		let d = new Date("January 30, 2019 13:00:00"),
-			o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
-				minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
-		let amWorker = false
-		let localecode = undefined
-		let IntlC, IntlDTF, IntlDTFo, IntlNF, IntlPR, IntlRTF
-
-		// set some test data
-		let tests = {
-			"ftp": { // nf, formattoparts
-				"decimal": [1.2],
-				"group": [1000, 99999],
-				"infinity": [Infinity],
-				"minusSign": [-5],
-				"nan": ["a"]
+const get_geo = () => new Promise(resolve => {
+	const METRIC = "geolocation"
+	// nav
+	let value, display
+	try {
+		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+		/* test
+		keys = keys.filter(x => !["geolocation"].includes(x))
+		keys.push("geolocation")
+		//*/
+		value = keys.includes(METRIC) ? zE : zD
+		display = value
+		if (isSmart) {
+			// this only detects enabled as untrustworthy
+			if (keys.indexOf(METRIC) > keys.indexOf("constructor")) {
+				value = zLIE
+				display = colorFn(zE)
+				log_known(SECT4, METRIC +"_navigator")
 			}
 		}
-		function set_tests() {
-			let optN = {"narrow": [1]},
-				optL = {"long": [1]},
-				both = {"long": [1], "narrow": [1],}
-			tests["unit"] = {
-				"byte": optN, // FF121 ICU 74
-				"fahrenheit": both,
-				"foot": optL,
-				"hectare": {"long": [1], "short": [987654]},
-				"kilometer-per-hour": optN,
-				"millimeter": optN,
-				"month": both,
-				"nanosecond": optN,
-				"percent": both,
-				"second": {"long": [1], "narrow": [1], "short": [987654]},
-				"terabyte": optL,
+	} catch(e) {
+		value = zErr, display = value
+		log_error(SECT4, METRIC +"_navigator", e)
+	}
+	// window
+	let geoWin
+	try {
+		geoWin = "Geolocation" in window ? true : false
+	} catch(e) {
+		geoWin = zErr
+		log_error(SECT4, METRIC +"_window", e)
+	}
+	value += " | "+ geoWin
+	display += " | "+ geoWin
+
+	function exit() {
+		let notation = ""
+		if (isSmart) {
+			let rhash = mini(display) // use display
+			if (isTB) {
+				// TB ESR78+: disabled, true, prompt
+				notation = rhash == "94bf0c73" ? default_green : default_red
+			} else {
+				// FF72+: enabled, true, prompt
+				notation = rhash == "6046a6a8" ? default_green : default_red
 			}
 		}
-		set_tests()
+		log_display(4, METRIC, display + notation)
+		return resolve([[METRIC, value]])
+	}
+	function geoState(state) {
+		value += " | "+ state
+		display += " | "+ state
+		exit()
+	}
+	try {
+		if (runSE) {foo++}
+		navigator.permissions.query({name:"geolocation"}).then(e => geoState(e.state))
+	} catch(e) {
+		log_error(SECT4, METRIC +"_permission", e)
+		value += " | "+ zErr
+		display += " | "+ zErr
+		exit()
+	}
+})
+
+const get_isLocaleSmart = () => new Promise(resolve => {
+	// limited to TB/MB
+		// ToDo: android may differ, ignore for now
+	isLocaleSmart = (isSmart && isTB && isOS !== "android")
+	if (!isLocaleSmart) {
+		return
+	}
+	const en = "en-US, en"
+	languagesSupported = {
+		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
+		"ar": [en],
+		"ca": [en],
+		"cs": ["sk, "+ en],
+		"da": [en],
+		"de": [en],
+		"el-GR": ["el, "+ en, "el"],
+		"en-US": ["en"],
+		"es-ES": ["es, "+ en],
+		"fa-IR": ["fa, "+ en, "fa"],
+		"fi-FI": ["fi, "+ en, "fi"],
+		"fr": ["fr-FR, "+ en],
+		"ga-IE": ["ga, en-IE, en-GB, "+ en],
+		"he": ["he-IL, "+ en],
+		"hu-HU": ["hu, "+ en, "hu"],
+		"id": [en],
+		"is": [en],
+		"it-IT": ["it, "+ en, "it"],
+		"ja": [en],
+		"ka-GE": ["ka, "+ en, "ka"],
+		"ko-KR": ["ko, "+ en, "ko"],
+		"lt": [en +", ru, pl"],
+		"mk-MK": ["mk, "+ en, "mk"],
+		"ms": [en],
+		"my": ["en-GB, en"],
+		"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ en],
+		"nl": [en],
+		"pl": [en],
+		"pt-BR": ["pt, "+ en],
+		"ro-RO": ["ro, en-US, en-GB, en", "ro"],
+		"ru-RU": ["ru, "+ en, "ru"],
+		"sq": ["sq-AL, "+ en],
+		"sv-SE": ["sv, "+ en],
+		"th": [en],
+		"tr-TR": ["tr, "+ en, "tr"],
+		"uk-UA": ["uk, "+ en, "uk"],
+		"vi-VN": ["vi, "+ en, "vi"],
+		"zh-CN": ["zh, zh-TW, zh-HK, "+ en, "zh-Hans-CN"],
+		"zh-TW": ["zh, "+ en, "zh-Hant-TW"],
+	}
+	localesSupported = {
+		"ar": {v: "9fa7589d", xml: "aaffcd08"},
+		"ca": {v: "f357beb7", xml: "7beb7ea5"},
+		"cs": {v: "aba57df4", xml: "f2b4bcae"},
+		"da": {v: "d9827dd4", xml: "1a0c5509"},
+		"de": {v: "9d1afee7", xml: "68446b62"},
+		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
+			// changing to spoof english returns n30.. phew!
+		"el": {v: "f79d4f6d", xml: "0d108497"},
+		"en-US": {v: "e29f9dc9", xml: "7d699e6d"},
+		"es-ES": {v: "c5869938", xml: "5de681ef"},
+		"fa": {v: "0e4865f6", xml: "999d2774"},
+		"fi": {v: "9e5c52b8", xml: "bfd2e337"},
+		"fr": {v: "34d60989", xml: "7c23726c"},
+		"ga-IE": {v: "664f97a2", xml: "c2ef923b"},
+		// he: xml n28 + n30 = english
+		"he": {v: "190a5791", xml: "06d23609"},
+		"hu": {v: "41d3ec54", xml: "fc6a4518"},
+		"id": {v: "b7a10cb1", xml: "a1523a88"},
+		"is": {v: "f5a54602", xml: "5acd311d"},
+		"it": {v: "dcfd7d74", xml: "0de8610d"},
+		"ja": {v: "faf9fd23", xml: "986a79a4"},
+		"ka": {v: "706a5318", xml: "0732462e"},
+		"ko": {v: "c23cb712", xml: "55386c69"},
+		"lt": {v: "36518f84", xml: "b0466824"},
+		// mk: v = english, and xml n30 = english but is would-be-n39 (same as el)
+			// and n28 = english
+		"mk": {v: "e29f9dc9", xml: "a85f1290"},
+		"ms": {v: "eda0f943", xml: "ad5a2234"},
+		// my: two items in english: date+over/under
+		"my": {v: "45e1804c", xml: "a0194cad"},
+		// nb-NO: xml most is english
+		"nb-NO": {v: "4a30cadc", xml: "2808247b"},
+		"nl": {v: "e76737e7", xml: "dbfd6c59"},
+		"pl": {v: "f9319f36", xml: "f4033f7f"},
+		"pt-BR": {v: "7febcf44", xml: "6f34c571"},
+		"ro": {v: "4a3ecc22", xml: "0b2be0cc"},
+		"ru": {v: "cfdcb459", xml: "a0b4b56f"},
+		"sq": {v: "920f04d4", xml: "49380742"},
+		"sv-SE": {v: "812b8c4a", xml: "c3d602ca"},
+		"th": {v: "40cd0883", xml: "225110a2"},
+		"tr": {v: "05623887", xml: "09a2b85c"},
+		"uk": {v: "0ff7de14", xml: "2989c268"},
+		"vi": {v: "e1cde994", xml: "a87bbc82"},
+		"zh-Hans-CN": {v:"9c846ddc", xml: "f6112799"},
+		"zh-Hant-TW": {v: "59a93745", xml: "94ff0e78"},
+	}
+	if (isMullvad) {
+		// 22 of 38 supported
+		let notSupported = [
+			// lang
+			"ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",
+			// + locales
+			"el","hu","ka","mk","ro","uk","vi",
+		]
+		notSupported.forEach(function(key){
+			delete languagesSupported[key]
+			delete localesSupported[key]
+		})
+	}
+	return resolve()
+})
+
+const get_validation_messages = () => new Promise(resolve => {
+	const	METRIC = "validation_messages"
+	let data = {}, notation = ""
+	const list = {
+		BadInputNumber: 'number',
+		CheckboxMissing: 'checkbox',
+		DateTimeRangeOverflow: 'datetime',
+		DateTimeRangeUnderflow: 'datetimeunder',
+		FileMissing: 'file',
+		InvalidEmail: 'email',
+		InvalidURL: "url",
+		NumberRangeOverflow: 'max',
+		NumberRangeUnderflow: 'min',
+		PatternMismatch: 'tel',
+		RadioMissing: 'radio',
+		SelectMissing: 'combobox',
+		StepMismatch: 'step',
+		ValueMissing: 'text',
+	}
+	for (const k of Object.keys(list)) {
+		try {
+			let msg = dom["widget"+ list[k]].validationMessage
+			if (msg !== "") {data[k] = msg}
+		} catch(e) {}
+	}
+	let hash = mini(data)
+	addData(4, METRIC, data, hash)
+	if (isLocaleSmart) {
+		notation = intl_red
+		if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
+			if (hash === localesSupported[isLocaleValue]["v"]) {notation = intl_green}
+		}
+	}
+	let count = Object.keys(data).length
+	let details = count === 14 ? "details" : count +"/14"
+	log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
+	return resolve()
+})
+
+const get_xml_errors = () => new Promise(resolve => {
+	const METRIC = "xml_errors"
+	if (!isGecko) {
+		addDataDisplay(4, METRIC, zNA)
+		return resolve()
+	}
+	let data = {}, delimiter = ":", notation = ""
+	const list = {
+		n02: 'a',
+		n03: '',
+		n04: '<>',
+		n05: '<?',
+		n07: '<x></X>',
+		n08: '<x xmlns:x="." xmlns:x=".">',
+		n09: '<x></x><x>',
+		n11: '<x>&x;</x>',
+		n14: '<x>&#x0;',
+		n20: '<x><![CDATA[',
+		n28: '<x xmlns:x=""></x>',
+		n30: '<?xml versin="1.0"?>',
+	}
+	for (const k of Object.keys(list)) {
+		try {
+			let doc = (new DOMParser).parseFromString(list[k], 'application/xml')
+			let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+			//split into parts: works back to FF52 and works with LTR
+			let parts = str.split("\n")
+			if (k == "n02") {
+				// programatically determine delimiter
+					// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+				let strLoc = parts[1]
+				let schema = isFile ? "file://" : "https://"
+				let index = strLoc.indexOf(schema) - 2
+				if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+				if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+				delimiter = strLoc.charAt(index)
+				strLoc = strLoc.slice(0, index)
+				let strName = parts[0].split(delimiter)[0]
+				let strLine = parts[2]
+				data["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+				data["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+			}
+			data[k] = parts[0].split(delimiter)[1].trim()
+		} catch(err) {}
+	}
+	let hash = mini(data)
+	addData(4, METRIC, data, hash)
+	if (isLocaleSmart) {
+		notation = intl_red
+		if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
+			if (hash === localesSupported[isLocaleValue]["xml"]) {notation = intl_green}
+		}
+	}
+	let count = Object.keys(data).length
+	let details = count === 14 ? "details" : count +"/14"
+	log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
+	return resolve()
+})
+
+const get_lang = () => new Promise(resolve => {
+
+	let d = new Date("January 30, 2019 13:00:00"),
+		o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+			minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
+	let amWorker = false
+	let localecode = undefined
+	let IntlC, IntlDTF, IntlDTFo, IntlNF, IntlPR, IntlRTF
+
+	// set some test data
+	let tests = {
+		"ftp": { // nf, formattoparts
+			"decimal": [1.2],
+			"group": [1000, 99999],
+			"infinity": [Infinity],
+			"minusSign": [-5],
+			"nan": ["a"]
+		}
+	}
+	function set_tests() {
+		let optN = {"narrow": [1]},
+			optL = {"long": [1]},
+			both = {"long": [1], "narrow": [1],}
+		tests["unit"] = {
+			"byte": optN, // FF121 ICU 74
+			"fahrenheit": both,
+			"foot": optL,
+			"hectare": {"long": [1], "short": [987654]},
+			"kilometer-per-hour": optN,
+			"millimeter": optN,
+			"month": both,
+			"nanosecond": optN,
+			"percent": both,
+			"second": {"long": [1], "narrow": [1], "short": [987654]},
+			"terabyte": optL,
+		}
+	}
+	set_tests()
 
 		function tidyResult(result) {
 			if (result == zU) {result = zUQ
@@ -459,7 +660,7 @@ function get_lang() {
 			data = oTempData[METRIC]
 			Object.keys(data).forEach(function(item){
 				METRIC = item
-				if (isLocalesSupported) {
+				if (isLocaleSmart) {
 					notation = tb_red
 					if (languagesSupported[data.language] !== undefined) {
 						if (item == "language") {
@@ -484,7 +685,7 @@ function get_lang() {
 			log_display(4, METRIC +"data", value)
 
 			// LOCALE
-			let isValidLocale = false
+			isLocaleValid = false
 			res = res.filter(x => ![zErr].includes(x))
 			res = res.filter(function(item, position) {return res.indexOf(item) === position})
 //res = ["a","b"]
@@ -497,7 +698,7 @@ function get_lang() {
 				let	test = Intl.DateTimeFormat.supportedLocalesOf([value])
 				if (test.length == 1) {
 					localecode = value
-					isValidLocale = true
+					isLocaleValid = true
 				} else {
 					fpvalue = zLIE
 					value = colorFn(value)
@@ -516,7 +717,7 @@ function get_lang() {
 				}
 			}
 			addData(4, METRIC, fpvalue)
-			if (isLocalesSupported) {
+			if (isLocaleSmart) {
 				notation = tb_red
 				let key = oTempData["languages"]["language"]
 				// only green if TB supported
@@ -525,118 +726,11 @@ function get_lang() {
 					if (value === expected) {notation = tb_green}
 				}
 			}
-			let isLocaleValue = fpvalue
+			isLocaleValue = fpvalue
 			log_display(4, METRIC, value + notation)
 
-			// validation messages: now we have our locale
-			METRIC = "validation_errors"
-			notation = ""
-			try {
-				const vList = {
-					BadInputNumber: 'number',
-					CheckboxMissing: 'checkbox',
-					DateTimeRangeOverflow: 'datetime',
-					DateTimeRangeUnderflow: 'datetimeunder',
-					FileMissing: 'file',
-					InvalidEmail: 'email',
-					InvalidURL: "url",
-					NumberRangeOverflow: 'max',
-					NumberRangeUnderflow: 'min',
-					PatternMismatch: 'tel',
-					RadioMissing: 'radio',
-					SelectMissing: 'combobox',
-					StepMismatch: 'step',
-					ValueMissing: 'text',
-				}
-				let vData = {}
-				for (const k of Object.keys(vList)) {
-					try {
-						let msg = dom["widget"+ vList[k]].validationMessage
-						if (msg !== "") {vData[k] = msg}
-					} catch(e) {}
-				}
-				let hash = mini(vData)
-				addData(4, METRIC, vData, hash)
-				if (isLocalesSupported) {
-					notation = intl_red
-					if (isValidLocale) {
-						if (localesSupported[isLocaleValue] !== undefined) {
-							if (hash === localesSupported[isLocaleValue]["v"]) {notation = intl_green}
-						}
-					}
-				}
-				let vGot = Object.keys(vData).length
-				let vDetails = vGot === 14 ? "details" : vGot +"/14"
-				log_display(4, METRIC, hash + addButton(4, METRIC, vDetails) + notation)
-			} catch(e) {
-				if (isLocalesSupported) {notation = intl_red}
-				addData(4, METRIC, zErr)
-				log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
-			}
-			// xml errors (now we have our locale)
-			METRIC = "xml_errors"
-			notation = ""
-			try {
-				const xmlList = {
-					"n02": 'a',
-					"n03": '',
-					"n04": '<>',
-					"n05": '<?',
-					"n07": '<x></X>',
-					"n08": '<x xmlns:x="." xmlns:x=".">',
-					"n09": '<x></x><x>',
-					"n11": '<x>&x;</x>',
-					"n14": '<x>&#x0;',
-					"n20": '<x><![CDATA[',
-					"n28": '<x xmlns:x=""></x>',
-					"n30": '<?xml versin="1.0"?>',
-				}
-				let xmlData = {}, delimiter = ":"
-				for (const k of Object.keys(xmlList)) {
-					try {
-						let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
-						let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-						//split into parts: works back to FF52 and works with LTR
-						let parts = xmlStr.split("\n")
-						if (k == "n02") {
-							// programatically determine delimiter
-								// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
-							let strLoc = parts[1]
-							let schema = isFile ? "file://" : "https://"
-							let index = strLoc.indexOf(schema) - 2
-							if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
-							if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
-							delimiter = strLoc.charAt(index)
-							strLoc = strLoc.slice(0, index)
-							let strName = parts[0].split(delimiter)[0]
-							let strLine = parts[2]
-							xmlData["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
-							xmlData["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
-						}
-						xmlData[k] = parts[0].split(delimiter)[1].trim()
-					} catch(err) {}
-				}
-				let hash = mini(xmlData)
-				addData(4, METRIC, xmlData, hash)
-				if (isLocalesSupported) {
-					notation = intl_red
-					if (isValidLocale) {
-						if (localesSupported[isLocaleValue] !== undefined) {
-							if (hash === localesSupported[isLocaleValue]["xml"]) {notation = intl_green}
-						}
-					}
-				}
-				let xmlGot = Object.keys(xmlData).length
-				let xmlDetails = xmlGot === 14 ? "details" : xmlGot +"/14"
-				log_display(4, METRIC, hash + addButton(4, METRIC, xmlDetails) + notation)
-			} catch(e) {
-				if (isLocalesSupported) {notation = intl_red}
-				addData(4, METRIC, zErr)
-				log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
-			}
-
 			// reset our vars to use the reported locale
-			if (isValidLocale) {
+			if (isLocaleValid) {
 				try {IntlC = Intl.Collator(localecode)} catch(e) {} // 2
 				try {IntlDTF = Intl.DateTimeFormat(localecode)} catch(e) {} // 5
 				try {IntlDTFo = Intl.DateTimeFormat(localecode, o)} catch(e) {} // 3
@@ -674,7 +768,7 @@ function get_lang() {
 			fpvalue = value
 			if (isSmart && isTB) {
 				notation = intl_red
-				if (isValidLocale) {
+				if (isLocaleValid) {
 					METRIC2 = METRIC +"_check"
 					get_resolved(METRIC2)
 					data = oTempData[METRIC2]
@@ -1043,125 +1137,36 @@ function get_lang() {
 
 		// ToDo: more type checking
 			// e.g. Object.prototype.toString.call(value) == "[object Date]"
-	})
-}
+})
 
 function outputRegion() {
 	let t0 = nowFn()
-
-	// do once
 	if (gLoad) {
-		isLocalesSupported = (isSmart && isTB && isOS !== "android") // ToDo: android may differ, ignore for now
-		// populate regardless: handy to flip boolean in FF
-		languagesSupported = {
-			// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
-			"ar": [enUS],
-			"ca": [enUS],
-			"cs": ["sk, "+ enUS],
-			"da": [enUS],
-			"de": [enUS],
-			"el-GR": ["el, "+ enUS, "el"],
-			"en-US": ["en"],
-			"es-ES": ["es, "+ enUS],
-			"fa-IR": ["fa, "+ enUS, "fa"],
-			"fi-FI": ["fi, "+ enUS, "fi"],
-			"fr": ["fr-FR, "+ enUS],
-			"ga-IE": ["ga, en-IE, en-GB, "+ enUS],
-			"he": ["he-IL, "+ enUS],
-			"hu-HU": ["hu, "+ enUS, "hu"],
-			"id": [enUS],
-			"is": [enUS],
-			"it-IT": ["it, "+ enUS, "it"],
-			"ja": [enUS],
-			"ka-GE": ["ka, "+ enUS, "ka"],
-			"ko-KR": ["ko, "+ enUS, "ko"],
-			"lt": [enUS +", ru, pl"],
-			"mk-MK": ["mk, "+ enUS, "mk"],
-			"ms": [enUS],
-			"my": ["en-GB, en"],
-			"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ enUS],
-			"nl": [enUS],
-			"pl": [enUS],
-			"pt-BR": ["pt, "+ enUS],
-			"ro-RO": ["ro, en-US, en-GB, en", "ro"],
-			"ru-RU": ["ru, "+ enUS, "ru"],
-			"sq": ["sq-AL, "+ enUS],
-			"sv-SE": ["sv, "+ enUS],
-			"th": [enUS],
-			"tr-TR": ["tr, "+ enUS, "tr"],
-			"uk-UA": ["uk, "+ enUS, "uk"],
-			"vi-VN": ["vi, "+ enUS, "vi"],
-			"zh-CN": ["zh, zh-TW, zh-HK, "+ enUS, "zh-Hans-CN"],
-			"zh-TW": ["zh, "+ enUS, "zh-Hant-TW"],
-		}
-		localesSupported = {
-			"ar": {v: "9fa7589d", xml: "aaffcd08"},
-			"ca": {v: "f357beb7", xml: "7beb7ea5"},
-			"cs": {v: "aba57df4", xml: "f2b4bcae"},
-			"da": {v: "d9827dd4", xml: "1a0c5509"},
-			"de": {v: "9d1afee7", xml: "68446b62"},
-			// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
-				// changing to spoof english returns n30.. phew!
-			"el": {v: "f79d4f6d", xml: "0d108497"},
-			"en-US": {v: "e29f9dc9", xml: "7d699e6d"},
-			"es-ES": {v: "c5869938", xml: "5de681ef"},
-			"fa": {v: "0e4865f6", xml: "999d2774"},
-			"fi": {v: "9e5c52b8", xml: "bfd2e337"},
-			"fr": {v: "34d60989", xml: "7c23726c"},
-			"ga-IE": {v: "664f97a2", xml: "c2ef923b"},
-			// he: xml n28 + n30 = english
-			"he": {v: "190a5791", xml: "06d23609"},
-			"hu": {v: "41d3ec54", xml: "fc6a4518"},
-			"id": {v: "b7a10cb1", xml: "a1523a88"},
-			"is": {v: "f5a54602", xml: "5acd311d"},
-			"it": {v: "dcfd7d74", xml: "0de8610d"},
-			"ja": {v: "faf9fd23", xml: "986a79a4"},
-			"ka": {v: "706a5318", xml: "0732462e"},
-			"ko": {v: "c23cb712", xml: "55386c69"},
-			"lt": {v: "36518f84", xml: "b0466824"},
-			// mk: v = english, and xml n30 = english but is would-be-n39 (same as el)
-				// and n28 = english
-			"mk": {v: "e29f9dc9", xml: "a85f1290"},
-			"ms": {v: "eda0f943", xml: "ad5a2234"},
-			// my: two items in english: date+over/under
-			"my": {v: "45e1804c", xml: "a0194cad"},
-			// nb-NO: xml most is english
-			"nb-NO": {v: "4a30cadc", xml: "2808247b"},
-			"nl": {v: "e76737e7", xml: "dbfd6c59"},
-			"pl": {v: "f9319f36", xml: "f4033f7f"},
-			"pt-BR": {v: "7febcf44", xml: "6f34c571"},
-			"ro": {v: "4a3ecc22", xml: "0b2be0cc"},
-			"ru": {v: "cfdcb459", xml: "a0b4b56f"},
-			"sq": {v: "920f04d4", xml: "49380742"},
-			"sv-SE": {v: "812b8c4a", xml: "c3d602ca"},
-			"th": {v: "40cd0883", xml: "225110a2"},
-			"tr": {v: "05623887", xml: "09a2b85c"},
-			"uk": {v: "0ff7de14", xml: "2989c268"},
-			"vi": {v: "e1cde994", xml: "a87bbc82"},
-			"zh-Hans-CN": {v:"9c846ddc", xml: "f6112799"},
-			"zh-Hant-TW": {v: "59a93745", xml: "94ff0e78"},
-		}
-		if (isMullvad) {
-			// 22 of 38 supported
-			let notSupported = [
-				// lang
-				"ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",
-				// + locales
-				"el","hu","ka","mk","ro","uk","vi",
-			]
-			notSupported.forEach(function(key){
-				delete languagesSupported[key]
-				delete localesSupported[key]
-			})
-		}
+		get_isLocaleSmart()
 	}
-
 	Promise.all([
-		get_lang(),
+		get_lang(), // sets isLocaleValid, isLocaleSmart
 		get_geo(),
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(4, item)})
-		log_section(4, t0)
+		Promise.all([
+			get_validation_messages(),
+			get_xml_errors(),
+		]).then(function(){
+			log_section(4, t0)
+		})
+	})
+}
+
+function outputHeaders() {
+	let t0 = nowFn()
+	Promise.all([
+		get_nav_dnt(),
+		get_nav_gpc(),
+		get_nav_connection(),
+	]).then(function(results){
+		results.forEach(function(item) {addDataFromArray(5, item)})
+		log_section(5, t0)
 	})
 }
 
