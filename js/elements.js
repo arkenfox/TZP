@@ -11,7 +11,7 @@ const get_element_keys = () => new Promise(resolve => {
 	}
 	try {
 		if (runSE) {foo++}
-		const element = document.createElement('a') // was 'div'
+		const element = document.createElement('a')
 		element.setAttribute("id", id)
 		document.body.appendChild(element)
 		const htmlElement = document.getElementById(id)
@@ -32,9 +32,12 @@ const get_element_keys = () => new Promise(resolve => {
 			addData(15, METRIC, keys, hash)
 			if (check) {
 				if (isOS === "android") {
-					if (hash === "fb490d00") {notation = tb_green} // 264
+					// a = 3b1df61c 289 alpha NS 11.4.11 <-- Sept 2022 version WTF!!
+					// a = fa8b991f 302 release NS 11.4.24 (+ 13 NS items e.g. get/value)
+					if (hash === "3b1df61c") {notation = tb_green} // fb490d00 div 264
 				} else {
-					if (hash === "463107cf") {notation = tb_green} // 273
+					// desktop NZ 11.4.29
+					if (hash === "156e1033") {notation = tb_green} // a 298 | 463107cf div 273 
 				}
 			}
 		}
