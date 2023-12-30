@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=600">
+	<meta name="viewport" content="width=500">
 	<title>domrect spoof detection</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 580px;}
+		table {width: 480px;}
 		hr {color: var(--test15);}
 		#rectTest {
 			background-color: #545aa7;
@@ -30,34 +30,34 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb15">
-		<col width="15%"><col width="25%"><col width="60%">
-		<thead><tr><th colspan="3">
+		<col width="13%"><col width="12%"><col width="25%"><col width="50%">
+		<thead><tr><th colspan="4">
 			<div class="nav-title">domrect spoof detection
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td colspan="3" class="intro">
+		<tr><td colspan="4" class="intro">
 			<span class="no_color">Measures a fixed element, rotated to forced decimal precision. On gecko
 			this is an expected known result at any zoom level (try it: it auto-runs on resize) and on any platform.
 			</span>
 		</td></tr>
-		<tr><td colspan="3"><hr></td></tr>
-		<tr><td colspan="2">expected gecko</td><td class="mono spaces" id="expected"></td></tr>
-		<tr><td colspan="3"></td></tr>
+		<tr><td colspan="4"><hr></td></tr>
+		<tr><td colspan="2">expected gecko</td><td colspan="2" class="mono spaces" id="expected"></td></tr>
+		<tr><td colspan="4"></td></tr>
 
-		<tr><td colspan="3"><hr></td></tr>
-		<tr><td colspan="2">Element.getBoundingClientRect</td><td class="mono" id="res0"></td></tr>
-		<tr><td colspan="2">Element.getClientRects</td><td class="mono" id="res1"></td></tr>
-		<tr><td colspan="2">range.getBoundingClientRect</td><td class="mono" id="res2"></td></tr>
-		<tr><td colspan="2">range.getClientRects</td><td class="mono" id="res3"></td></tr>
-		<tr><td colspan="3"></td></tr>
+		<tr><td colspan="4"><hr></td></tr>
+		<tr><td colspan="3">Element.getBoundingClientRect</td><td class="mono" id="res0"></td></tr>
+		<tr><td colspan="3">Element.getClientRects</td><td class="mono" id="res1"></td></tr>
+		<tr><td colspan="3">range.getBoundingClientRect</td><td class="mono" id="res2"></td></tr>
+		<tr><td colspan="3">range.getClientRects</td><td class="mono" id="res3"></td></tr>
+		<tr><td colspan="4"></td></tr>
 
-		<tr><td colspan="3"><hr></td></tr>
-		<tr><td>history</td><td colspan="2" class="mono spaces" id="history"></td></tr>
+		<tr><td colspan="4"><hr></td></tr>
+		<tr><td>history</td><td colspan="3" class="mono spaces" id="history"></td></tr>
 
 	</table>
 	<br>
