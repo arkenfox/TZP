@@ -33,7 +33,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#feature">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb3">
@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 73, maxVer = 122, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 74, maxVer = 123, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -290,6 +290,11 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 123: 1871745
+		let t123 = performance.now()
+		let ver123 = ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus"))
+		rec(123, 123, "1871745", ver123, performance.now()-t123)
 
 		// 122: 1867558 (slow)
 		let t122 = performance.now(), ver122 = false
