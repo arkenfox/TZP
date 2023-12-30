@@ -8,7 +8,7 @@
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
-		table {width: 780px;}
+		table {width: 97%; min-width: 580px; max-width: 780px}
 	</style>
 </head>
 
@@ -19,7 +19,7 @@
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
-			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.jp2"></iframe>
+			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
 		</div>
 	</div>
 	<div class="hidden">
@@ -39,177 +39,103 @@
 			<input type="url" id="widgeturl" value="a">
 			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
 		</div>
-		<iframe id="iframeTest"></iframe>
-		<iframe id="appLang_2"></iframe>
-		<iframe id="appLang_3"></iframe>
 	</div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
 	</table>
 
 	<!-- app lang -->
 	<table id="tb4">
-		<col width="18%"></a><col width="82%">
+		<col width="25%"></a><col width="75%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
-		<tr><td><div>
+		<tr><td>
 			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
-			<div>dtd <sup>1</sup></div></div></td><td class="c mono" id="appLang2"></td></tr>
-		<tr><td>dtd nullprinciple <sup>2</sup></td><td class="c mono" id="appLang3"></td></tr>
+			media messages <sup>1</sup></td><td class="c mono spaces" id="media_messages"></td></tr>
+		<tr><td>validation errors <sup>1</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
+		<tr><td>xml errors <sup>1</sup></td><td class="c mono spaces" id="xml_errors"></td></tr>
 
-		<tr><td>media messages <sup>3</sup></td><td class="c mono spaces" id="media_messages"></td></tr>
-		<tr><td>validation errors <sup>3</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
-		<tr><td>xml errors <sup>3</sup></td><td class="c mono spaces" id="xml_errors"></td></tr>
 		<!--credits-->
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2"><span class="no_color">app language code based on work by Alex Catarineu </span>
-			<a target="_blank" class="blue" href="https://acatarineu.github.io/fp/locale.html">here</a> <sup>1</sup>
-			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://acatarineu.github.io/fp/locale_nullprincipal.html">here</a> <sup>2</sup>
-			<span class="no_color"> and </span>
-			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>3</sup>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span>
+			<!--DTD
+				https://acatarineu.github.io/fp/locale.html"
+				https://acatarineu.github.io/fp/locale_nullprincipal.html
+			-->
+			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>1</sup>
 			</td></tr>
 		</table>
 	<br>
 
 <script>
 'use strict';
-var dtd2 = ""
-// error notes
-let se = sb+"[test error: ",
-	error_file_cors = sn+"[file:] [Cross-Origin Request Blocked]"+sc,
-	error_iframe = se+"iframe]"+sc,
-	error_image = se+"image]"+sc,
-	enUS_green = sg+"[en-US]</span> ",
-	enUS_red = sb+"[en-US]</span> "
 
-function test_iframe() {
-	let iframeBlocked = true // assume blocked
-
-	// test an iframe: if loaded call other functions
-	function output_iframe() {
-		// clear iframe
-		iframe.src=""
-		// output
-		if (iframeBlocked == true) {
-			if (isFile) {
-				// file: Cross-Origin Request Blocked
-				dom.appLang2.innerHTML = error_file_cors
-			} else {
-				// iframe is blocked
-				dom.appLang2.innerHTML = error_iframe
-			}
-		} else {
-			// iframes are good: call functions
-			get_app_lang_dtd1()
-		}
-	}
-
-	let iframe = dom.iframeTest
-	iframe.src="applang-iframetest.html"
-	iframe.addEventListener("load", function(){
-		try {
-			let testerror = iframe.contentWindow.document.getElementById("test")
-			iframeBlocked = false
-		} catch(e) {}
-	})
-
-	// keep checking iframe loaded, but stop after x tries
-	let counter = 0
-	function check_iframe() {
-		if (counter < 60) {
-			if (iframeBlocked == false) {
-				clearInterval(checking)
-				output_iframe()
-			}
-		} else {
-			clearInterval(checking)
-			output_iframe()
-		}
-		counter++
-	}
-	let checking = setInterval(check_iframe, isFile ? 1 : 50)
-}
-
-function get_app_lang_dtd1() {
-	// only call if iframes != blocked: no result = bugzilla fix
+function get_dtd1() {
 	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
-
-	let dtd1 = ""
-	function output_dtd1(output) {
-		dom.appLang2.innerHTML = output
+	// if spoofing english we would expect "Problem loading page"
+	let isDone = false
+	setTimeout(() => output("timed out"), 600)
+	function output(value) {
+		if (!isDone) {
+			isDone = true
+			dom.dtd1 = value
+			return
+		}
 	}
-	// load it
-	let iframe = dom.appLang_2,
-		dtdtemp = ""
-	iframe.src="applang.xml"
-	iframe.addEventListener('load', () => {
+	function next() {
 		try {
-			dtd1 = iframe.contentDocument.getElementById("DTD1").innerText
-		} catch(e) {
-			if (isFile) {
-				setTimeout(function() {
-					dtdtemp = error_file_cors
-				}, 1000) // get this done before the check_dtd1 runs out
-			}
-		}
-	})
-	// keep checking dtd1 != blank x times
-	let counter = 0
-	function check_dtd1() {
-		if (counter < 30) {
-			if (dtd1 !== "") {
-				clearInterval(checking)
-				// notate
-				if (navigator.language == "en-US") {
-					dtd1 = (mini(dtd1) == "b10660d1" ? enUS_green + dtd1 : enUS_red + dtd1)
+			let iframe = dom.iframedtd1
+			iframe.src="applang.xml"
+			iframe.addEventListener('load', () => {
+				try {
+					let res = iframe.contentDocument.getElementById("DTD1").innerText
+					output(res)
+				} catch(e) {
+					output(e+"")
 				}
-				output_dtd1(dtd1)
-			}
-		} else {
-			clearInterval(checking)
-			if (dtdtemp == "") {dtdtemp = sg +"[bugzilla 467035]"+ sc}
-			output_dtd1(dtdtemp)
+			})
+		} catch(e) {
+			output(e+"")
 		}
-		counter++
 	}
-	let checking = setInterval(check_dtd1, 50)
 }
 
-function get_app_lang_dtd2() {
+function get_dtd2() {
 	// dtd nullprinciple
-	dtd2 = ""
-	function output_dtd2(output) {
-		dom.appLang3.innerHTML = output
-		// as good a time as any to flip the button
-		dom.runbutton.innerHTML = "[ re-run ]"
-	}
-	// load it up
-	let iframe = dom.appLang_3
-	// ? chrome://global/locale/netError.dtd
+	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
+	// if spoofing english we would expect "Problem loading page"
 
+	// on my FF i get "[object Object]" Object is { msg: "getUrlParent" }
+	// on test suites I get timed out
+
+	let dtd2
+	function output(value) {
+		//console.log(dtd2)
+		dom.dtd2.innerHTML = value
+		return
+	}
+	// set source
+	let iframe = dom.iframedtd2
+	// ? chrome://global/locale/netError.dtd
 	iframe.src="data:application/xml;charset=utf-8,%3C%21DOCTYPE%20html%20SYSTEM%20%22chrome%3A%2F%2Fglobal%2Flocale%2FnetError.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%2F%3E%0D%0A%20%20%3C%2Fhead%3E%0D%0A%20%20%3Cbody%3E%3Cspan%20id%3D%22text-container%22%3E%26loadError.label%3B%3C%2Fspan%3E%0D%0A%20%20%3Cscript%3E%0D%0A%20%20window.addEventListener%28%27message%27%2C%20%28e%29%20%3D%3E%20%7B%0D%0A%20%20%20%20e.source.postMessage%28document.getElementById%28%27text-container%27%29.innerText%2C%20%27%2A%27%29%3B%0D%0A%20%20%7D%29%3B%0D%0A%20%20%3C%2Fscript%3E%0D%0A%20%20%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E";
 	iframe.addEventListener('load', () => {
 		window.addEventListener('message', ({ data }) => dtd2 = data)
 		iframe.contentWindow.postMessage('foo', '*')
 	})
-	// keep checking dtd2 not blank, but stop after x tries
+
+	// keep checking dtd2 not undefined, but stop after x tries
 	let counter = 0
 	function check_dtd2() {
+		//console.log(counter, "dtd2 is", dtd2)
 		if (counter < 30) {
-			if (dtd2 !== "") {
-				console.log(dtd2)
+			if (dtd2 !== undefined) {
 				clearInterval(checking)
-				// notate
-				if (navigator.language == "en-US") {
-					dtd2 = (mini(dtd2) == "b10660d1" ? enUS_green + dtd2 : enUS_red + dtd2)
-				}
-				output_dtd2(dtd2)
+				output(dtd2 +"")
 			}
 		} else {
 			clearInterval(checking)
-			output_dtd2(sg +"[bugzilla 467035]"+ sc)
+			output("timed out")
 		}
 		counter++
 	}
@@ -223,7 +149,8 @@ function get_media_messages() {
 		let mList = {
 			"Invalid": "applang-invalid.png", // 0-byte file
 			"Scaled": "applang-image.png",
-			"Unsupported": "applang-unsupported.jp2", // ToDo
+			"Unsupported": "applang-unsupported.jpg",
+				// ^ToDo: can't use jp2 etc because that prompts for user interaction
 		}
 		let mData = {}
 		for (const k of Object.keys(mList)) {
@@ -264,20 +191,22 @@ function get_xml_errors() {
 	let t0 = performance.now()
 	try {
 		const xmlList = {
-			"n02": 'a', // syntax error
-			"n03": '', // no root element found
-			"n04": '<>', // not well-formed
-			"n05": '<?', // unclosed token
-			"n07": '<x></X>', // mismatched tag
-			"n08": '<x xmlns:x="." xmlns:x=".">', // duplicate attribute
-			"n09": '<x></x><x>', // junk after document element
-			"n11": '<x>&x;</x>', // undefined entity
-			"n14": '<x>&#x0;', // reference to invalid character number
-			"n20": '<x><![CDATA[', // unclosed CDATA section
-			"n28": '<x xmlns:x=""></x>', // must not undeclare prefix
-			"n30": '<?xml versin="1.0"?>', // XML declaration not well-formed
+			n02: 'a', // syntax error
+			n03: '', // no root element found
+			n04: '<>', // not well-formed
+			n05: '<', // unclosed token
+			n07: '<x></X>', // mismatched tag
+			n08: '<x x:x="" x:x="">', // duplicate attribute
+			n09: '<x></x><x', // junk after document element
+			n11: '<x>&x;', // undefined entity
+			n14: '<x>&#x0;', // reference to invalid character number
+			n20: '<x><![CDATA[', // unclosed CDATA section
+			n27: '<x:x>', // prefix not bound to a namespace
+			n28: '<x xmlns:x=""></x>', // must not undeclare prefix
+			n30: '<?xml v=""?>', // XML declaration not well-formed
 		}
 		let xmlData = {}, delimiter = ":"
+		// 'application/xml','application/xhtml+xml','text/xml','image/svg+xml' : same errors
 		for (const k of Object.keys(xmlList)) {
 			try {
 				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
@@ -307,7 +236,7 @@ function get_xml_errors() {
 				}
 				xmlData[k] = parts[0].split(delimiter)[1].trim()
 			} catch(err) {
-				console.log(k, err+"")
+				//console.log(k, err+"")
 			}
 		}
 		let hash = mini(xmlData)
@@ -353,7 +282,7 @@ function get_validation_errors() {
 			ValueMissing: 'text',
 		}
 		let vData = {}
-		for (const k of Object.keys(vList)) {
+		for (const k of Object.keys(vList).sort()) {
 			try {
 				if (vList[k] !== "") {
 					let msg = dom["widget"+ vList[k]].validationMessage
@@ -378,6 +307,7 @@ function get_validation_errors() {
 }
 
 function run() {
+	get_xml_errors()
 	if (!isFF) {
 		dom.validation_errors.innerHTML = "&nbsp"
 	} else {
@@ -393,10 +323,8 @@ function run() {
 		// FF only
 		if (!isFF) {return}
 		get_xml_errors()
-		get_media_messages() // testing
-
-		get_app_lang_dtd2()
-		test_iframe() // fires last two PoCs
+		get_media_messages()
+		dom.runbutton.innerHTML = "[ re-run ]"
 	}, 170)
 }
 
@@ -405,8 +333,8 @@ Promise.all([
 ]).then(function(){
 	if (!isFF) {
 		let str = "gecko only"
-		dom.appLang2 = str
-		dom.appLang3 = str
+		dom.dtd1 = str
+		dom.dtd2 = str
 		dom.media_messages = str
 		dom.xml_errors = str
 	}
