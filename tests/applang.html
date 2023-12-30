@@ -2,13 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=700">
 	<title>app language</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
-		table {width: 97%; min-width: 580px; max-width: 780px}
+		table {width: 97%; min-width: 480px; max-width: 680px}
+		hr {color: var(--test4);}
 	</style>
 </head>
 
@@ -50,12 +51,29 @@
 	<table id="tb4">
 		<col width="25%"></a><col width="75%">
 		<thead><tr><th colspan="2">application language</th></tr></thead>
-		<tr><td>
-			<div class="btn-left"><span class="btn4 btn" id="runbutton" onClick="run()">[ run ]</span></div>
-			media messages <sup>1</sup></td><td class="c mono spaces" id="media_messages"></td></tr>
-		<tr><td>validation errors <sup>1</sup></td><td class="c mono spaces" id="validation_errors"></td></tr>
-		<tr><td>xml errors <sup>1</sup></td><td class="c mono spaces" id="xml_errors"></td></tr>
+		<tr><td colspan="2" class="intro">
+			<span class="btn-left btn4 btn" onClick="run()">[ run ]</span>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
 
+		<tr><td colspan="2" style="text-align: left;">
+			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
+				<br><br><span class="c mono spaces no_color" id="media_messages"></span><span>
+			</div>
+
+			<br>
+			<div>VALIDATION ERRORS <sup>1</sup> &nbsp; 
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
+				<br><br><span class="c mono spaces no_color" id="validation_errors"></span>
+			</div>
+
+			<br>
+			<div>XML ERRORS <sup>1</sup> &nbsp; 
+			<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties' target='blank'>searchfox xmlparser</a>
+			<br><br><span class="c mono spaces no_color" id="xml_errors"></span>
+			</div>
+		</td></tr>
 		<!--credits-->
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
@@ -173,9 +191,7 @@ function get_media_messages() {
 		}
 		let hash = mini(mData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties'"
-			+" target='blank'>searchfox MediaDocument</a>"
-		dom.media_messages.innerHTML = hash + perf + alink +"<br>"+ json_highlight(mData)
+		dom.media_messages.innerHTML = hash + perf + "<br>"+ json_highlight(mData)
 		return
 	} catch(e) {
 		dom.media_messages = e+""
@@ -241,9 +257,7 @@ function get_xml_errors() {
 		}
 		let hash = mini(xmlData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties'"
-			+" target='blank'>searchfox xmlparser</a>"
-		dom.xml_errors.innerHTML = hash + perf + alink +"<br>"+ json_highlight(xmlData)
+		dom.xml_errors.innerHTML = hash + perf + "<br>"+ json_highlight(xmlData)
 		return
 	} catch(e) {
 		dom.xml_errors = e+""
@@ -296,9 +310,7 @@ function get_validation_errors() {
 		}
 		let hash = mini(vData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		let alink = " <a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties'"
-			+" target='blank'>searchfox dom.properties</a>"
-		dom.validation_errors.innerHTML = hash + perf + alink + "<br>"+ json_highlight(vData)
+		dom.validation_errors.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
 		return
 	} catch(e) {
 		dom.validation_errors = e+""
@@ -324,7 +336,6 @@ function run() {
 		if (!isFF) {return}
 		get_xml_errors()
 		get_media_messages()
-		dom.runbutton.innerHTML = "[ re-run ]"
 	}, 170)
 }
 
