@@ -342,6 +342,8 @@ function get_computed_styles() {
 				value = colorFn(value)
 				log_known(SECT14, METRIC)
 				addData(14, METRIC, zLIE)
+			} else {
+				addData(14, METRIC, "mixed")
 			}
 			log_display(14, METRIC, value + notation)
 			display()
