@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=800">
+	<meta name="viewport" content="width=500">
 	<title>css colors</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 780px}
+		table {width: 97%; min-width: 480px; max-width: 580px;}
 		hr {color: var(--test14);}
 	</style>
 </head>
@@ -55,8 +55,7 @@ let oColors = {
 sb = sb.trim()
 sg = sg.trim()
 s14 = s14.trim()
-let rfp_green = sg+" [RFP]"+sc,
- rfp_red = sb+" [RFP]"+sc
+s16 = s16.trim()
 
 function get_colors() {
 
@@ -202,19 +201,18 @@ function log_console(type, list) {
 }
 
 function output() {
-	let summary1 = [], summary2 = []
+	let summary1 = [], summary2 = [], summary3 = []
 	for (const k of Object.keys(oColors).sort()) {
 		let data = oColors[k]
 		let str = k
-		let len = k.length + 2
-		str = "<span class='btn14 btnc' onClick='display(`" + k +"`)'>"+  str +"</span>: " + data.hash
+		let counts = data.countcolor + "/" + data.countsupported
+		counts = counts.padStart(6)
+		str = "<span class='btn14 btnc' onClick='display(`" + k +"`)'>"+  str +"</span>: "+ counts
 		summary1.push(str)
-		str = data.countcolor + "/" + data.countsupported
-		str = (" ").repeat(len) + str.padEnd(8)
-		summary2.push(str)
+		let len = k.length + 8
+		summary2.push(s16 + (data.hash).padEnd(len) +sc)
 	}
-	dom.summary.innerHTML = "<b><u>SUMMARY</u></b>: " + summary1.join(" | ")
-		+ "<br>" + (" ").repeat(9) + summary2.join(" | ")
+	dom.summary.innerHTML = summary1.join(" | ") +"<br>"+ summary2.join(" | ")
 	display("all")
 }
 
