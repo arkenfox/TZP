@@ -180,6 +180,7 @@ let fntMaster = {
 			// ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
 			'Dancing Script',
 			'SamsungKorean_v2.0', // 1674683
+			'One UI Sans KR VF', // 1865238
 			// + defaults: https://searchfox.org/mozilla-central/source/modules/libpref/init/all.js#3041
 				// ToDo: check names are correct + add: 'HYSerif','MotoyaLCedar','MotoyaLMaru','NanumGothic','SmartGothic',
 			'Arial','Asana Math','Cambria Math','Charis SIL Compact','DejaVu Math TeX Gyre','DejaVu Sans','DejaVu Serif','Droid Sans Fallback','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Thai','Google Sans','Latin Modern Math','Libertinus Math','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR','Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','SEC CJK JP','SEC CJK KR','SEC CJK SC','SEC CJK TC','SEC Mono CJK JP','SEC Mono CJK KR','SEC Mono CJK SC','SEC Mono CJK TC','STIX Math','STIX Two Math','STIXGeneral','TeX Gyre Bonum Math','TeX Gyre Pagella Math','TeX Gyre Schola','TeX Gyre Termes Math','XITS Math',
