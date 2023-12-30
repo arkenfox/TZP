@@ -425,7 +425,7 @@ function get_pointer_event(event) {
 		pressure: "number", // RFP: 0 if not active, 0.5 if active
 		mozPressure: "number",
 		pointerType: "string", // RFP mouse
-		mozInputSource: "number",
+		mozInputSource: "number", // mouse = 1, pen = 2, touch = 5
 		tangentialPressure: "number", // RFP 0
 		tiltX: "number", // RFP 0
 		tiltY: "number", // RFP 0
@@ -435,15 +435,11 @@ function get_pointer_event(event) {
 	}
 	for (const k of Object.keys(oList).sort()) {
 		try {
-			let value = event[k]
-			let expected = oList[k]
-			if (value === "") {value = "empty string"
-			} else if (value === undefined) {value = "undefined"
-			} else if (value === "undefined") {value = "\"undefined\""
-			}
+			let value = event[k],expected = oList[k]
 			if (typeof value !== expected) {
-				value = "type error: "+ typeof value
+				value = zErr // zErrType + typeof value
 			}
+			value = cleanFn(value)
 			oData[k] = value
 			oDisplay.push(value)
 		} catch(e) {
@@ -516,7 +512,6 @@ function outputDevices() {
 		get_media_devices(),
 		get_speech_engines(),
 		get_maxtouch(),
-		//get_plugins_mimetypes(),
 		get_mm_pointer(1, "pointer","#cssP","coarse"),
 		get_mm_pointer(2, "any-pointer","#cssAP","coarse + coarse"),
 		get_mm_pointer(3, "hover","#cssH","none"),

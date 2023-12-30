@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
@@ -16,7 +16,7 @@
 <body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb4">
@@ -504,24 +504,20 @@ function run_main(method) {
 					// track FF version changes
 					if (optExpanded) {
 						// expanded results
-						if (resultsHash == "f9e480a9") {resultsHash += s14 +" [FF121+]"+ sc // 1859752 ICU 74
-						} else if (resultsHash == "0f4e5a6f") {resultsHash += s14 +" [FF115-120]"+ sc
+						if (resultsHash == "0f4e5a6f") {resultsHash += s14 +" [FF115+]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// expanded locales
-						if (localesHash == "cc5a7ac7") {localesHash += s14 +" [FF121+]"+ sc
-						} else if (localesHash == "44f9fbce") {localesHash += s14 +" [FF115-120]"+ sc
+						if (localesHash == "44f9fbce") {localesHash += s14 +" [FF115+]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					} else {
 						// results
-						if (resultsHash == "99202a3f") {resultsHash += s14 +" [FF121+]"+ sc
-						} else if (resultsHash == "9675f10b") {resultsHash += s14 +" [FF115-120]"+ sc
+						if (resultsHash == "9675f10b") {resultsHash += s14 +" [FF115+]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// locales
-						if (localesHash == "c96d153e") {localesHash += s14 +" [FF121+]"+ sc
-						} else if (localesHash == "32e62521") {localesHash += s14 +" [FF115-120]"+ sc
+						if (localesHash == "32e62521") {localesHash += s14 +" [FF115+]"+ sc
 						} else if (isFF) {localesHash += zNEW
 						}
 					}

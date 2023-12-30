@@ -398,7 +398,6 @@ function outputMedia() {
 			log_display(13, "clearkey", log_error(SECT13, "clearkey", zErrTime) + (isSmart ? default_red : ""))
 		}
 		results.forEach(function(item) {addDataFromArray(13, item)})
-		//log_display(13, "mediaBtn", mediaBtn)
 		log_section(13, t0)
 	})
 }

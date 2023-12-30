@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=700">
+	<meta name="viewport" content="width=500">
 	<title>script view</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 680px;}
+		table {width: 480px;}
 		hr {color: var(--test12);}
 		optgroup {font-style:normal;}
 		.chars {
@@ -24,7 +24,7 @@
 <body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb12">
@@ -892,6 +892,8 @@ function generate() {
 					// slice results
 					aChars = aChars.slice(0, remove)
 				}
+				// limit size for display
+				aChars = aChars.slice(0, 100)
 				oDisplay[name] = aChars
 			}
 		})
@@ -914,7 +916,7 @@ function run(type) {
 	let display = ""
 	if (type == "scripts") {
 		if (oDisplay[name] !== undefined) {
-			let spacer = aSpacer.includes(name) ? " " : ""		
+			let spacer = aSpacer.includes(name) ? " " : ""
 			display = "<span class='chars'>"+ spacer + oDisplay[name].join(ZWNJ + spacer) + "</span>"
 		}
 	} else if (type == "languages") {

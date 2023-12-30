@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=760">
+	<meta name="viewport" content="width=500">
 	<title>bridge-moji</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 740px;}
+		table {width: 480px;}
 		.dark {
 			color: white;
 			background-color: #1c1b22
@@ -17,8 +17,8 @@
 			color: black;
 			background-color: #ffffff
 		}
-		.twenty {
-			font-size: 20px;
+		.large {
+			font-size: 16px;
 		}
 		.pad {line-height: 2}
 	</style>
@@ -27,7 +27,7 @@
 <body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb12">
@@ -44,11 +44,11 @@
 				dark <input id="rdark" type="radio" name="radio" value="dark" onchange="handleTheme(this)" checked>
 			</span>
 			<br><br>
-			<textarea rows="16" class="dark twenty"
+			<textarea rows="4" class="dark large"
 				placeholder="comma delimited values: e.g: 🔥, ☎️, 🌽"
-				style="width: 98%;" id="valueE"></textarea>
+				style="width: 98%; resize: vertical;" id="valueE"></textarea>
 			<br><br>
-			<div class="spaces twenty pad" class="dark" id="results"></div>
+			<div class="spaces large pad" class="dark" id="results"></div>
 			</td>
 		</tr>
 	</table>
@@ -111,9 +111,9 @@ function run_random(array) {
 		data.push(line.join(""))
 	}
 	// group into lines
-	function groupLines([a,b,c,d,e,...rest]){
-		if (rest.length === 0) return [[a,b,c,d,e].filter(x => x!==undefined)]
-		return [[a,b,c,d,e]].concat(groupLines(rest))
+	function groupLines([a,b,c,d,...rest]){
+		if (rest.length === 0) return [[a,b,c,d].filter(x => x!==undefined)]
+		return [[a,b,c,d]].concat(groupLines(rest))
 	}
 	let newData = groupLines(data)
 	// display

@@ -405,7 +405,7 @@ const get_window_props = () => new Promise(resolve => {
 		let contentWindow = iframe.contentWindow
 		let aProps = Object.getOwnPropertyNames(contentWindow)
 		// cleanup
-		iframe.parentNode.removeChild(iframe)
+		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
 		// wasm
 		let wasm = aProps.includes("WebAssembly") ? zE : zD
 		if (isSmart && isTB) {wasm += (wasm == zE ? tb_standard : tb_safer)}

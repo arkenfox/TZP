@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -20,13 +20,11 @@
 			width: 100px;
 			color: var(--test0);
 			border: 2px solid var(--test7);
+			cursor: pointer;
 		}
 		.flex-item {
 			text-align: center;
 			margin: 10px;
-		}
-		.grey {
-			color: grey;
 		}
 	</style>
 </head>
@@ -35,7 +33,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#devices">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb7">
@@ -43,7 +41,7 @@
 		<thead><tr><th colspan="2">
 			<div class="nav-title">pointer event</div>
 		</th></tr></thead>
-		<tr><td colspan"2"> &nbsp; </tr>
+		<tr><td colspan"2"> </tr>
 		<tr>
 			<td>
 				<div class="pointer" id="target">
@@ -55,7 +53,7 @@
 					<div class="flex-item"> ✏️ <div>
 				<div>
 			</td>
-		<td class="mono spaces" style="text-align: left; vertical-align: top;" id="results">results</td>
+		<td class="mono spaces" style="text-align: left; vertical-align: top;" id="results"></td>
 		</tr>
 
 	</table>
@@ -86,7 +84,7 @@ function run(event) {
 	let oTemp = {}, oDisplay = []
 	oData = {}
 	let lines = ["pressure", "pointerType", "tangentialPressure"]
-	let divider = "<span class='grey'>" + "----------".padStart(padlen) +"--------"+ sc
+	let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
 
 	for (const k of Object.keys(oList)) {
 		if (lines.includes(k)) {
@@ -95,13 +93,6 @@ function run(event) {
 		try {
 			let value = event[k]
 			let expected = oList[k]
-			if (value === "") {value = "empty string"
-			} else if (value === undefined) {value = "undefined"
-			} else if (value === "undefined") {value = "\"undefined\""
-			}
-			if (typeof value !== expected) {
-				value = "type error: "+ typeof value
-			}
 			oTemp[k] = value
 			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
 		} catch(e) {

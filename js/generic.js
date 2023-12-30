@@ -148,7 +148,7 @@ function cleanFn(item, skipArray = false) {
 }
 
 function run_block() {
-	let msg = "<br><span style='font-size: 24px;'><b>TZP requires "
+	let msg = "<span style='font-size: 16px;'><b>TZP requires "
 		+ (isTB ? "Tor Browser" : "Firefox") +" v" + isBlockMin[(isTB ? 1 : 0)] +"+<b></span>"
 	let msgItems = document.getElementsByClassName("secthash")
 	for (let i=0; i < msgItems.length; i++) {	msgItems[i].innerHTML = msg	}
@@ -509,7 +509,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 122) {isVerExtra = "+"}
+		} else if (verNo == 123) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -517,6 +517,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus") return 123 // 1871745
 			if ("function" === typeof Promise.withResolvers) {
 				// 122: 1867558 (0.725ms slow)
 				try {
@@ -622,9 +623,7 @@ const get_isDomRect = () => new Promise(resolve => {
 			oDomRect[METRIC] = zErr
 		}
 	}
-
-console.log(oDomRect)
-
+	//console.log(oDomRect)
 	//aDomRect = [false, false, false, true]
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)

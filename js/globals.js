@@ -68,10 +68,11 @@ const zD = "disabled",
 	zLIE = "untrustworthy"
 
 // region
-const enUS = "en-US, en"
 let languagesSupported = {},
 	localesSupported = {},
-	isLocalesSupported = false
+	isLocaleSmart = false,
+	isLocaleValid = false,
+	isLocaleValue
 
 // for android defaults: e.g desktop mode on/off vs TZP forcing width
 let isWindow = {}

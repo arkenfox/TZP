@@ -11,20 +11,21 @@ const get_element_keys = () => new Promise(resolve => {
 	}
 	try {
 		if (runSE) {foo++}
-		const element = document.createElement("div")
+		const element = document.createElement('a') // was 'div'
 		element.setAttribute("id", id)
 		document.body.appendChild(element)
 		const htmlElement = document.getElementById(id)
 		const keys = []
 		for (const key in htmlElement) {keys.push(key)}
 		cleanup()
-		let hash = mini(keys) //18527130
+		let hash = mini(keys) // 18527130
 		// cydec
 			// changes order, removes some keys
 			// got to be a better way than enumerating missing
 		const aExpected = ["scrollWidth","scrollHeight","clientWidth","clientHeight"]
 		if (isSmart && (keys.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {
 			hash = colorFn(hash)
+			log_known(SECT15, METRIC)
 			addDetail(METRIC, keys)
 			addData(15, METRIC, zLIE)
 		} else {

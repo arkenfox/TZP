@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="viewport" content="width=700">
+	<meta name="viewport" content="width=500">
 	<title>system fonts</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 680px;}
+		table {width: 480px;}
 		hr {color: var(--test12);}
 	</style>
 </head>
@@ -46,7 +46,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb12">
@@ -246,15 +246,11 @@ function get_system() {
 			let key = aKeys.join(" ")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
 		})
-		let newobj = {}, display = []
-		for (const k of Object.keys(oRes).sort()) {
-			newobj[k] = oRes[k]
-			display.push(" \""+ k +"\"")
-			display.push("<ul>"+ oRes[k].join(", ") +"</ul>")
-		}
+		let newobj = {}
+		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
 		let hash = mini(newobj)
-		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + s14 + hash + sc +"<br><br>{<br>"
-			+ display.join("<br>") + "}"
+		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
+
 	} catch(e) {
 		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + e.name +": " + e.message
 	}
@@ -273,15 +269,10 @@ function get_widget() {
 				+" "+ getComputedStyle(el).getPropertyValue("font-size")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
 		})
-		let newobj = {}, display = []
-		for (const k of Object.keys(oRes).sort()) {
-			newobj[k] = oRes[k]
-			display.push(" \""+ k +"\"")
-			display.push("<ul>"+ oRes[k].join(", ") +"</ul>")
-		}
+		let newobj = {}
+		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
 		let hash = mini(newobj), notation = ""
-		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + s14 + hash + sc +"<br><br>{<br>"
-			+ display.join("<br>") + "}"
+		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
 	} catch(e) {
 		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + e.name +": " + e.message
 	}

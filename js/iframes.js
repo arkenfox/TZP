@@ -35,9 +35,9 @@ function getDynamicIframeWindow({
 		const iframeWindow = contentWindow ? element.contentWindow : context[length]
 
 		let res = []
-		let navigator = iframeWindow.navigator
 
 		if (test == "ua") {
+			let navigator = iframeWindow.navigator
 			let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 				'platform','product','productSub','userAgent','vendor','vendorSub'],
 				r = ""
@@ -53,7 +53,8 @@ function getDynamicIframeWindow({
 		document.body.removeChild(element)
 		return res
 	} catch(e) {
-		return [zErr, log_error("ua","iframe", e)]
+		console.log(e)
+		return res.push(zErr)
 	}
 }
 

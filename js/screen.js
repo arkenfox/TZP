@@ -1229,6 +1229,8 @@ function outputUA(os = isOS) {
 	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
 	android:
 	- FF122+ 1865766: android hardcoded to 10.0
+	linux/android:
+	- FF123+ 1861847: hardcode (pref) architecture at `Linux armv81` (android) and `Linux x86_64` (on hold?) desktop
 	*/
 
 	function outputStatic(property, reported, expected, isErr) {
@@ -1370,7 +1372,7 @@ function outputFD() {
 	let t0 = nowFn()
 
 	if (!isGecko) {
-		let aList = ['browser','browser_architecture','logo','os','version','workdmark']
+		let aList = ['browser','browser_architecture','logo','os','version','wordmark']
 		aList.forEach(function(item) {addDataDisplay(3, item, zNA)})
 		log_display(3, "fdBrandingCss", zNA)
 		log_display(3, "fdResourceCss", zNA)

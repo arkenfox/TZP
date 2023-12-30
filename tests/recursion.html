@@ -7,20 +7,14 @@
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<style>
 		table {width: 480px;}
-		span.indent {
-			display:inline-block;
-			margin-left:20px;
-			margin-bottom: 10px;
-		}
-		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
-		.grey {color: grey;}
+		span.indent {margin-bottom: 10px;}
 	</style>
 </head>
 
 <body>
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#misc">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb18">
@@ -34,20 +28,21 @@
 		<tr>
 			<td><span class="btnfirst btn" onClick="run('doc')">[ run ]</span> DOCUMENT</td>
 			<td class="mono">
-				<span class='s14'>RUN 1:</span><br><span class='indent grey'>level: <span id="doc1"></span><br>stack: <span id="doc2"></span></span><br>
-				<span class='s14'>RUN 2:</span><br><span class='indent grey'>level: <span id="doc3"></span><br>stack: <span id="doc4"></span></span>
+				<span class='s14'>RUN 1:</span><br><span class='indent faint'>level: <span id="doc1"></span><br>stack: <span id="doc2"></span></span><br>
+				<span class='s14'>RUN 2:</span><br><span class='indent faint'>level: <span id="doc3"></span><br>stack: <span id="doc4"></span></span>
 			</td>
 		</tr>
 		<tr>
 			<td><span class="btnfirst btn" onClick="run('worker')">[ run ]</span> WORKER</td>
 			<td class="mono">
-				<span class='s14'>RUN 1:</span><br><span class='indent grey'>level: <span id="worker1"></span><br>stack: <span id="worker2"></span></span><br>
-				<span class='s14'>RUN 2:</span><br><span class='indent grey'>level: <span id="worker3"></span><br>stack: <span id="worker4"></span></span>
+				<span class='s14'>RUN 1:</span><br><span class='indent faint'>level: <span id="worker1"></span><br>stack: <span id="worker2"></span></span><br>
+				<span class='s14'>RUN 2:</span><br><span class='indent faint'>level: <span id="worker3"></span><br>stack: <span id="worker4"></span></span>
 			</td>
 		</tr>
 		<tr>
 			<td><span class="btnfirst btn" onClick="run('iframe')">[ run ]</span> IFRAME</td>
-			<td><iframe id="targetiframe" width="150" style="border: none;"></iframe></td>
+			<!--<td id="iframehere"><iframe id="targetiframe" width="150" style="border: none;"></iframe></td>-->
+			<td id="iframehere" class="mono faint"></td>
 		</tr>
 
 	</table>
@@ -55,6 +50,10 @@
 
 <script>
 'use strict';
+
+function perf(t0) {
+	document.getElementById("perf").innerHTML = Math.round(performance.now() - t0) +" ms"
+}
 
 const get_isRecursion_doc = () => new Promise(resolve => {
 	let t0 = performance.now()
@@ -74,7 +73,7 @@ const get_isRecursion_doc = () => new Promise(resolve => {
 			// 2nd test is more accurate/stable
 			document.getElementById("doc3").innerHTML = level
 			document.getElementById("doc4").innerHTML = e.stack.toString().length
-			document.getElementById("perf").innerHTML = Math.round(performance.now() - t0) +"ms"
+			perf(t0)
 			return resolve()
 		}
 	} catch(e) {
@@ -85,15 +84,34 @@ const get_isRecursion_doc = () => new Promise(resolve => {
 })
 
 function get_isRecursion_iframe() {
+	let t0 = performance.now()
+	let iframe
+	let id = "targetiframe"
 	try {
-		let element = document.getElementById("targetiframe")
-		element.src = "recursion_iframe.html"
+		// create & append
+		let el = document.createElement("iframe")
+		el.setAttribute("id", id)
+		el.width = "200"
+		el.setAttribute("style", "border: none")
+		const node = document.getElementById("iframehere")
+		node.appendChild(el)
+		// add iframe
+		iframe = document.getElementById(id)
+		iframe.addEventListener("error", event => {
+			document.getElementById("iframehere").innerHTML = event.type
+		})
+		iframe.onload = function() {
+			// slow AF
+		}
+		iframe.src = "recursion_iframe.html"
 	} catch(e) {
-		console.log(e+"")
+		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
+		document.getElementById("iframehere").innerHTML = e.name
 	}
 }
 
 const get_isRecursion_worker = () => new Promise(resolve => {
+	let t0 = performance.now()
 	const METRIC = "isRecursion"
 	try {
 		let worker = new Worker("recursion_worker.js")
@@ -101,6 +119,7 @@ const get_isRecursion_worker = () => new Promise(resolve => {
 			for (const k of Object.keys(msg.data)) {
 				document.getElementById(k).innerHTML = msg.data[k]
 			}
+			perf(t0)
 			worker.terminate
 		}, false)
 		worker.postMessage("")
@@ -115,8 +134,9 @@ function run(type) {
 	document.getElementById("type").innerHTML = (type == "doc" ? "document" : type)
 	document.getElementById("perf").innerHTML = ""
 	if (type == "iframe") {
-		let element = document.getElementById("targetiframe")
-		element.src = ""
+		// remove iframe
+		let iframe = document.getElementById("targetiframe")
+		try {iframe.parentNode.removeChild(iframe)} catch(err) {}
 	} else {
 		for (let i=1; i < 5; i++) {
 			document.getElementById(type+i).innerHTML = ""

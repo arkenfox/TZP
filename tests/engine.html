@@ -27,7 +27,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#feature">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb3">
@@ -66,7 +66,7 @@ let results = [],
 	expected = 96,
 	gt0, // global timer
 	bBlock = false, // throw a test error
-	bNum = true // display numbering instead of perf
+	bNum = false // display numbering instead of perf
 
 function fnTrim(str, len) {
 	str = str.replace(/(\r\n|\n|\r)/gm,"")
@@ -89,17 +89,15 @@ function logPerf() {
 
 function fnDisplay() {
 	// perf
-	let perfValue = ""
-	if (canPerf) {
-		perfValue = Math.round(performance.now() - gt0) +" ms"
-		let perfTop = perfValue
-		// remove the first 5 items: section headers + hr
-		if (aPerf.length) {
-			perfTop = "<span style='cursor: pointer;' onClick='logPerf()'>" + perfTop +"</span>"
-			aPerf.splice(0, 5)
-		}
-		dom.perf.innerHTML = perfTop
+	let perfValue = Math.round(performance.now() - gt0) +" ms"		
+	let perfTop = perfValue
+	// remove the first 5 items: section headers + hr
+	if (aPerf.length) {
+		perfTop = "<span style='cursor: pointer;' onClick='logPerf()'>" + perfTop +"</span>"
+		aPerf.splice(0, 5)
 	}
+	dom.perf.innerHTML = perfTop
+
 	// data -> ordered results
 	const names = Object.keys(data).sort((a,b) => a-b)
 	for (const k of names) {results.push(k +"~~~"+ data[k])}
@@ -162,8 +160,7 @@ function fnDisplay() {
 	let summary = ""
 	if (isFFvalid) {
 		let needStr = "... who needs "+ s3+ (expected - 5) + " tests" + sc
-			+ " and "+ s3 + "several hundred metrics" + sc
-			+ (canPerf ? " in "+ s3 + perfValue + sc : "") + "?"
+			+ " and "+ s3 + "several hundred metrics" + sc + " in "+ s3 + perfValue + sc + "?"
 		summary += s14 +"MINI TESTS "+ sc + needStr +"<br><br>"
 			+ "engine: "+ isEnginePretty.trim() +"<br><br>"
 			+ " gecko: "+ isFFpretty.trim() +"<br><br><hr><br>"
@@ -185,6 +182,10 @@ function fnDisplay() {
 }
 
 function fnRecord(order, description, result, match, error, perf) {
+	if ("number" === typeof perf) {
+		perf = performance.now() - perf
+	}
+
 	if (error !== undefined && error !== "skip") {
 		let hash = mini(error)
 		if (hash !== "d8281b3c") { // assignment to undeclared variable bB
@@ -210,13 +211,12 @@ function get_colorgamut(num, title) {
 	// added in FF110+ 1422237
 	let q = "(color-gamut: ", res = "undefined", bolC = false
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		if (window.matchMedia(q +"srgb)").matches) {res = "srgb"}
 		if (window.matchMedia(q +"p3)").matches) {res = "p3"}
 		if (window.matchMedia(q +"rec2020)").matches) {res = "rec2020"}
 		let bool = res == "undefined"
-		let perf = canPerf ? performance.now() - t0 : ""
 		if (isVer > 109) {
 			bool = zNA
 			res = zNA +": FF109 or lower "+ s3 +"["+ res +"]"+ sc
@@ -224,7 +224,7 @@ function get_colorgamut(num, title) {
 			bool = zNA
 			res += " [FF109 or lower]"
 		}
-		fnRecord(num, title, res, bool, "skip", perf)
+		fnRecord(num, title, res, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -235,7 +235,7 @@ function get_dates(num) {
 	// 1557650
 	let strA = "[5 digit year] new Date"
 	try {
-		let t0A; if (canPerf) {t0A = performance.now()}
+		let t0A = performance.now()
 		if (bBlock) {bB = 1}
 		let resA = new Date("19999-11-11")
 		let bolA = resA == "Invalid Date" ? true : false
@@ -247,15 +247,14 @@ function get_dates(num) {
 			bolA = zNA
 			resA += " [FF119 or lower]"
 		}
-		let perfA = canPerf ? performance.now() - t0A : ""
-		fnRecord(num, strA, resA, bolA, "skip", perfA)
+		fnRecord(num, strA, resA, bolA, "skip", t0A)
 	} catch(e) {
 		fnRecord(num, strA, e.name, zErr, e.message)
 	}
 	// 1515318
 	let strB = "[hyphen] new Date"
 	try {
-		let t0B; if (canPerf) {t0B = performance.now()}
+		let t0B = performance.now()
 		if (bBlock) {bB = 1}
 		let resB = new Date("31-Mar-2011").getFullYear()
 		// FF: 63 and lower = NaN, 64+ = -2011
@@ -269,15 +268,14 @@ function get_dates(num) {
 			bolB = zNA
 			resB += " [FF112 or lower]"
 		}
-		let perfB = canPerf ? performance.now() - t0B : ""
-		fnRecord(num+1, strB, resB, bolB, "skip", perfB)
+		fnRecord(num+1, strB, resB, bolB, "skip", t0B)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zErr, e.message)
 	}
 	// 1439800
 	let strC = "[string] new Data"
 	try {
-		let t0C; if (canPerf) {t0C = performance.now()}
+		let t0C = performance.now()
 		if (bBlock) {bB = 1}
 		let resC = new Date("11-Nov-11")
 		let bolC = resC.toString() == "Invalid Date" ? true : false
@@ -294,15 +292,14 @@ function get_dates(num) {
 				resC = fnTrim(resC.toString(), 22) +" [FF112 or lower]"
 			}
 		}
-		let perfC = canPerf ? performance.now() - t0C : ""
-		fnRecord(num+2, strC, resC, bolC, "skip", perfC)
+		fnRecord(num+2, strC, resC, bolC, "skip", t0C)
 	} catch(e) {
 		fnRecord(num+2, strC, e.name, zErr, e.message)
 	}
 	// 1599375
 	let strD = "[+0000 UTC] Date.parse"
 	try {
-		let t0D; if (canPerf) {t0D = performance.now()}
+		let t0D = performance.now()
 		if (bBlock) {bB = 1}
 		let resD = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
 		let bolD = ""
@@ -312,15 +309,14 @@ function get_dates(num) {
 		} else {
 			bolD = isNaN(resD) ? true : false
 		}
-		let perfD = canPerf ? performance.now() - t0D : ""
-		fnRecord(num+3, strD, resD, bolD, "skip", perfD)
+		fnRecord(num+3, strD, resD, bolD, "skip", t0D)
 	} catch(e) {
 		fnRecord(num+3, strD, e.name, zErr, e.message)
 	}
 	// 1730155
 	let strE = "[localized] Date.parse"
 	try {
-		let t0E; if (canPerf) {t0E = performance.now()}
+		let t0E = performance.now()
 		if (bBlock) {bB = 1}
 		let resE = Date.parse("Mercredi 8 Septembre 2021")
 		let bolE = ""
@@ -330,15 +326,14 @@ function get_dates(num) {
 		} else {
 			bolE = isNaN(resE) ? true : false
 		}
-		let perfE = canPerf ? performance.now() - t0E : ""
-		fnRecord(num+4, strE, resE, bolE, "skip", perfE)
+		fnRecord(num+4, strE, resE, bolE, "skip", t0E)
 	} catch(e) {
 		fnRecord(num+4, strE, e.name, zErr, e.message)
 	}
 	// 1783731
 	let strF = "[subtraction] Date.parse"
 	try {
-		let t0F; if (canPerf) {t0F = performance.now()}
+		let t0F = performance.now()
 		if (bBlock) {bB = 1}
 		let resF = Date.parse('2022-08-08') - Date.parse('2022-08-8')
 		let bolF = ""
@@ -348,8 +343,7 @@ function get_dates(num) {
 		} else {
 			bolF = resF == 0
 		}
-		let perfF = canPerf ? performance.now() - t0F : ""
-		fnRecord(num+6, strF, resF, bolF, "skip", perfF)
+		fnRecord(num+6, strF, resF, bolF, "skip", t0F)
 	} catch(e) {
 		fnRecord(num+6, strF, e.name, zErr, e.message)
 	}
@@ -372,7 +366,7 @@ function get_errors(num) {
 		["var x = @","SyntaxError: illegal character U+0040","SyntaxError: illegal character"],
 	]
 	tests.forEach(function(array) {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		try {
 			newFn(array[0])
 		} catch(e) {
@@ -383,8 +377,7 @@ function get_errors(num) {
 			} else {
 				if (str == array[1] || str == array[2] || str == array[3]) {bool = true}
 			}
-			let perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num, "error", str, bool, "skip", perf)
+			fnRecord(num, "error", str, bool, "skip", t0)
 			num++
 		}
 	})
@@ -393,19 +386,18 @@ function get_errors(num) {
 function get_eval_length(num, title) {
 	let bool = false
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let test = eval.toString().length
 		if (test == 37) {bool = true}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, test, bool, "skip", perf)
+		fnRecord(num, title, test, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
 }
 
 function get_iframe_props(num1, num2, title) {
-	let t0; if (canPerf) {t0 = performance.now()}
+	let t0 = performance.now()
 	// just a small sample
 	let listE = ['dump','fullScreen','getDefaultComputedStyle','mozInnerScreenX',
 		'mozInnerScreenY','netscape','onmozfullscreenchange','onmozfullscreenerror']
@@ -455,10 +447,9 @@ function get_iframe_props(num1, num2, title) {
 			resU = "none"
 			boolU = true
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
 		// record
-		fnRecord(num1, title, resE, boolE, "skip", perf)
-		fnRecord(num2, title, resU, boolU, "skip", perf)
+		fnRecord(num1, title, resE, boolE, "skip", t0)
+		fnRecord(num2, title, resU, boolU, "skip", t0)
 	} catch(e) {
 		fnRecord(num1, title, e.name, zErr, e.message)
 		fnRecord(num2, title, e.name, zErr, e.message)
@@ -469,16 +460,15 @@ function get_installtrigger(num) {
 	// FF100+: 1754441 behind prefs slated for deprecation
 	let strA = "[typeof] InstallTrigger", boolA = false
 	try {
-		let t0A; if (canPerf) {t0A = performance.now()}
+		let t0A = performance.now()
 		if (bBlock) {bB = 1}
 		let resA = typeof InstallTrigger
 		if (resA == "object") {boolA = true}
-		let perfA = canPerf ? performance.now() - t0A : ""
 		if (isVer > 99 && !boolA) {
-			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA, "skip", perfA)
+			fnRecord(num, strA, zNA +": FF99 or lower" + s3 +" ["+ resA +"]"+ sc, zNA, "skip", t0A)
 		} else {
 			if (!isFF) {resA += " [FF99 or lower]"; boolA = zNA}
-			fnRecord(num, strA, resA, boolA, "skip", perfA)
+			fnRecord(num, strA, resA, boolA, "skip", t0A)
 		}
 	} catch(e) {
 		fnRecord(num, strA, e.name, zErr, e.message)
@@ -486,15 +476,14 @@ function get_installtrigger(num) {
 
 	let strB = "[window] InstallTrigger", boolB = false
 	try {
-		let t0B; if (canPerf) {t0B = performance.now()}
+		let t0B = performance.now()
 		if (bBlock) {bB = 1}
 		let resB = "InstallTrigger" in window
-		let perfB = canPerf ? performance.now() - t0B : ""
 		if (isVer > 99 && !resB) {
-			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA, "skip", perfB)
+			fnRecord(num+1, strB, zNA +": FF99 or lower" + s3 +" ["+ resB +"]"+ sc, zNA, "skip", t0B)
 		} else {
 			if (!isFF) {resB += " [FF99 or lower]" }
-			fnRecord(num+1, strB, resB, resB, "skip", perfB)
+			fnRecord(num+1, strB, resB, resB, "skip", t0B)
 		}
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zErr, e.message)
@@ -506,16 +495,15 @@ function get_installtrigger(num) {
 		fnRecord(num+2, strC, zNA +": FF61+ required", zNA)
 	} else {
 		try {
-			let t0C; if (canPerf) {t0C = performance.now()}
+			let t0C = performance.now()
 			if (bBlock) {bB = 1}
 			let resC = typeof InstallTriggerImpl
 			if (resC == "function") {boolC = true}
-			let perfC = canPerf ? performance.now() - t0C : ""
 			if (isVer > 99 && !boolC) {
-				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA, "skip", perfC)
+				fnRecord(num+2, strC, zNA +": FF99 or lower" + s3 +" ["+ resC +"]"+ sc, zNA, "skip", t0C)
 			} else {
 				if (!isFF) {resC += " [FF99 or lower]"; boolC = zNA }
-				fnRecord(num+2, strC, resC, boolC, "skip", perfC)
+				fnRecord(num+2, strC, resC, boolC, "skip", t0C)
 			}
 		} catch(e) {
 			fnRecord(num+2, strC, e.name, zErr, e.message)
@@ -525,7 +513,7 @@ function get_installtrigger(num) {
 
 function get_intl_canonical_locale(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let list = ['bh','hye','no','tl','tw'], bool = false
 		let res = []
@@ -550,8 +538,7 @@ function get_intl_canonical_locale(num, title) {
 				hash += buildButton(3, "specific_"+ title, "details")
 			}
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -635,7 +622,7 @@ function get_intl_supportedlocales(num) {
 	num = (num - 5)
 	aList.forEach(function(array) {
 		num += 5
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		let expected = array[0],
 			errVer = array[1],
 			list = array[2].concat(array[3]).sort(),
@@ -663,8 +650,7 @@ function get_intl_supportedlocales(num) {
 					hash += buildButton(3, "specific_"+ title, res.length)
 				}
 			}
-			let perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num, title, hash, bool, "skip", perf)
+			fnRecord(num, title, hash, bool, "skip", t0)
 		} catch(e) {
 			if (isFF) {
 				if (isVer >= errVer) {
@@ -777,7 +763,7 @@ Europe/Vatican
 */
 
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let aSupported = Intl.supportedValuesOf("timeZone")
 		let aExpected = ['CET','EET','EST','HST','MET','MST','WET',] // b7a58624
@@ -794,8 +780,7 @@ Europe/Vatican
 				hash += buildButton(3, "specific_"+ title, res.length)
 			}
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		// FF92- not supported
 		if (isVer < 93) {
@@ -812,18 +797,17 @@ function get_js_client_hints(num, title) {
 	// https://user-agent-client-hints.glitch.me/javascript.html
 	// TypeError can't access property "X", navigator.X is undefined
 	function output() {
-		let perf = canPerf ? performance.now() - t0 : ""
 		if (res.length > 0) {
 			res.sort()
 			sDetail["unexpected_"+ title] = res
 			let hash = mini(res) + buildButton(3, "unexpected_"+ title , res.length)
-			fnRecord(num, title, hash, false, "skip", perf)
+			fnRecord(num, title, hash, false, "skip", t0)
 		} else {
-			fnRecord(num, title, "none", true, "skip", perf)
+			fnRecord(num, title, "none", true, "skip", t0)
 		}
 	}
 	let res = []
-	let t0; if (canPerf) {t0 = performance.now()}
+	let t0 = performance.now()
 
 	try {
 		let resB = navigator.userAgentData.brands
@@ -859,14 +843,13 @@ function get_last_prototype_keys(num1, title) {
 	// HTMLAnchorElement
 	let title1 = title +" HTMLAnchorElement"
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		Object.keys(HTMLAnchorElement.prototype)
 		let props1 = Object.getOwnPropertyNames(HTMLAnchorElement.prototype) // includes the constructor
 		let res1 = props1.slice(-3).join(", ")
 		// search, hash, constructor
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num1, title1, res1, res1 == "search, hash, constructor", "skip", perf)
+		fnRecord(num1, title1, res1, res1 == "search, hash, constructor", "skip", t0)
 	} catch(e) {
 		fnRecord(num1, title1, e.name, zErr, e.message)
 	}
@@ -875,7 +858,7 @@ function get_last_prototype_keys(num1, title) {
 	let title2 = title +" HTMLLinkElement"
 	let num2 = num1 + 1
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		Object.keys(HTMLLinkElement.prototype)
 		let props2 = Object.getOwnPropertyNames(HTMLLinkElement.prototype) // includes the constructor
@@ -883,8 +866,7 @@ function get_last_prototype_keys(num1, title) {
 		let bool2 = res2 == "as, sheet, constructor"
 		// 52-55: integrity, sheet, constructor
 		if (isVer <= 56 && res2 == "integrity, sheet, constructor") {bool2 = true}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num2, title2, res2, bool2, "skip", perf)
+		fnRecord(num2, title2, res2, bool2, "skip", t0)
 	} catch(e) {
 		fnRecord(num2, title2, e.name, zErr, e.message)
 	}
@@ -892,7 +874,7 @@ function get_last_prototype_keys(num1, title) {
 
 function get_locale_compare(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let list = [
 			["cy","n","ng"],
@@ -915,8 +897,7 @@ function get_locale_compare(num, title) {
 		if (res.length > 0) {
 			hash = res.join(", ")
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -933,7 +914,7 @@ function get_math(num, title) {
 		}
 	}
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let res = []
 		for(let i=0; i < 6; i++) {
@@ -965,8 +946,7 @@ function get_math(num, title) {
 		// now redo as mini
 		sDetail["expected_"+ title] = res
 		hash = mini(res) + buildButton(3, "expected_"+ title, engine)
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -974,7 +954,7 @@ function get_math(num, title) {
 
 function get_media_constraints(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let noiseFF = [
 			'groupId', // FF70+
@@ -992,8 +972,7 @@ function get_media_constraints(num, title) {
 			sDetail["expected_"+ title] = res
 			hash += buildButton(3, "expected_"+ title, res.length)
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		// e.g. TB disables mediaDevices
 		let error = mini(e.name +": "+ e.message), isNA = false
@@ -1014,14 +993,13 @@ function get_media_constraints(num, title) {
 
 function get_mimetypes(num, title) {
 	try {
-		let t0, perf; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		if ("mimeTypes" in navigator) {
 			let res = [], bool = false
 			let m = navigator.mimeTypes
 			if (m.length == 0) {
-				perf = canPerf ? performance.now() - t0 : ""
-				fnRecord(num, title, "none", true, "skip", perf)
+				fnRecord(num, title, "none", true, "skip", t0)
 			} else {
 				for (let i=0; i < m.length; i++) {
 					res.push( m[i].type + (m[i].description == "" ? ": * " : ": "+ m[i].type)
@@ -1044,8 +1022,7 @@ function get_mimetypes(num, title) {
 				}
 				sDetail["expected_"+ title] = res
 				hash += buildButton(3, "expected_"+ title, res.length)
-				perf = canPerf ? performance.now() - t0 : ""
-				fnRecord(num, title, hash, bool, "skip", perf)
+				fnRecord(num, title, hash, bool, "skip", t0)
 			}
 		} else {
 			fnRecord(num, title, e.name, zErr)
@@ -1066,7 +1043,7 @@ function get_moz_colors(num, title) {
 	]
 	aList.sort()
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let aRes = []
 		let element = dom.mozColor
@@ -1084,8 +1061,7 @@ function get_moz_colors(num, title) {
 			sDetail["expected_"+ title] = aRes
 		}
 		let hash = bool ? mini(aRes) + buildButton(3, "expected_"+ title, aRes.length) : "none"
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -1096,7 +1072,7 @@ function get_moz_fonts(num, title) {
 		m = "-moz-",
 		aFonts = [m+"window",m+"desktop",m+"document",m+"workspace",m+"info",m+"pull-down-menu",m+"dialog",m+"button",m+"list",m+"field"]
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		let el = dom.mozFont
 		if (bBlock) {bB = 1}
 		aFonts.forEach(function(font){
@@ -1123,9 +1099,8 @@ function get_moz_fonts(num, title) {
 		if (isVer > 108) {
 			bool = zNA; hash = zNA +": FF108 or lower" // 1802957
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
 		if (!isFF) {hash += " [FF108 or lower]"; bool = zNA}
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -1134,7 +1109,7 @@ function get_moz_fonts(num, title) {
 function get_moz_objects(num, name) {
 	let title = "["+ name +"] moz"
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let res = []
 		let oList = {}
@@ -1310,8 +1285,7 @@ function get_moz_objects(num, name) {
 				hash += " [FF112 or lower]"
 			}
 		}
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, hash, bool, "skip", perf)
+		fnRecord(num, title, hash, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -1319,7 +1293,7 @@ function get_moz_objects(num, name) {
 
 function get_nav_keys(num1, num2, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let aNavKeys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
 		// expected FF only
@@ -1327,8 +1301,7 @@ function get_nav_keys(num1, num2, title) {
 		let resE = aNavKeys.filter(x => aExpected.includes(x))
 		let boolE = resE.length == 3 ? true : false
 		resE = resE.length > 0 ? resE.join(", ") : "none"
-		let perfE = canPerf ? performance.now() - t0 : ""
-		fnRecord(num1, title, resE, boolE, "skip", perfE)
+		fnRecord(num1, title, resE, boolE, "skip", t0)
 
 		// not expected: blink items
 		let aNot = ["canShare","clearAppBadge","deviceMemory","getBattery","getInstalledRelatedApps",
@@ -1351,8 +1324,7 @@ function get_nav_keys(num1, num2, title) {
 		} else {
 			resN = "none"
 		}
-		let perfN = canPerf ? performance.now() - t0 : ""
-		fnRecord(num2, title, resN, boolN, "skip", perfN)
+		fnRecord(num2, title, resN, boolN, "skip", t0)
 	} catch(e) {
 		fnRecord(num1, title, e.name, zErr, e.message)
 		fnRecord(num2, title, e.name, zErr, e.message)
@@ -1362,23 +1334,21 @@ function get_nav_keys(num1, num2, title) {
 function get_nav_screen(num) {
 	let strA = "[left] screen", boolA = false
 	try {
-		let t0A; if (canPerf) {t0A = performance.now()}
+		let t0A = performance.now()
 		if (bBlock) {bB = 1}
 		let resA = screen.left
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
-		let perfA = canPerf ? performance.now() - t0A : ""
-		fnRecord(num, strA, resA, boolA, "skip", perfA)
+		fnRecord(num, strA, resA, boolA, "skip", t0A)
 	} catch(e) {
 		fnRecord(num, strA, e.name, zErr, e.message)
 	}
 	let strB = "[top] screen", boolB = false
 	try {
-		let t0B; if (canPerf) {t0B = performance.now()}
+		let t0B = performance.now()
 		if (bBlock) {bB = 1}
 		let resB = screen.top
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
-		let perfB = canPerf ? performance.now() - t0B : ""
-		fnRecord(num+1, strB, resB, boolB, "skip", perfB)
+		fnRecord(num+1, strB, resB, boolB, "skip", t0B)
 	} catch(e) {
 		fnRecord(num+1, strB, e.name, zErr, e.message)
 	}
@@ -1388,7 +1358,7 @@ function get_nav_values(num1, num2, num3) {
 	// expected
 	let strA = "[oscpu] navigator", boolA = false
 	try {
-		let t0A; if (canPerf) {t0A = performance.now()}
+		let t0A = performance.now()
 		if (bBlock) {bB = 1}
 		let resA = navigator.oscpu
 		if (typeof resA !== "string") {
@@ -1399,8 +1369,7 @@ function get_nav_values(num1, num2, num3) {
 			} else if (resA == zU) {resA = zUQ
 			} else {boolA = true}
 		}
-		let perfA = canPerf ? performance.now() - t0A : ""
-		fnRecord(num1, strA, resA, boolA, "skip", perfA)
+		fnRecord(num1, strA, resA, boolA, "skip", t0A)
 	} catch(e) {
 		fnRecord(num1, strA, e.name, zErr, e.message)
 	}
@@ -1409,12 +1378,11 @@ function get_nav_values(num1, num2, num3) {
 	// bluetooth
 	let strBT = "[bluetooth] navigator", boolBT = false, numBT = num2
 	try {
-		let t0BT; if (canPerf) {t0BT = performance.now()}
+		let t0BT = performance.now()
 		if (bBlock) {bB = 1}
 		let resBT = navigator.bluetooth
 		if (resBT === undefined) {
-			let perfBT = canPerf ? performance.now() - t0BT : ""
-			fnRecord(numBT, strBT, zU, true, "skip", perfBT)
+			fnRecord(numBT, strBT, zU, true, "skip", t0BT)
 		} else {
 			try {
 				navigator.bluetooth.getAvailability().then(available => {
@@ -1434,13 +1402,12 @@ function get_nav_values(num1, num2, num3) {
 	// deviceMemory
 	let strDM = "[deviceMemory] navigator", boolDM = false, numDM = num2+2
 	try {
-		let t0DM; if (canPerf) {t0DM = performance.now()}
+		let t0DM = performance.now()
 		if (bBlock) {bB = 1}
 		let resDM = navigator.deviceMemory
 		if (resDM == undefined) {boolDM = true}
 		resDM = fnClean(resDM)
-		let perfDM = canPerf ? performance.now() - t0DM : ""
-		fnRecord(numDM, strDM, resDM, boolDM, "skip", perfDM)
+		fnRecord(numDM, strDM, resDM, boolDM, "skip", t0DM)
 	} catch(e) {
 		fnRecord(numDM, strDM, e.name, zErr, e.message)
 	}
@@ -1448,7 +1415,7 @@ function get_nav_values(num1, num2, num3) {
 	// globalprivacycontrol
 	let strG = "[gpc] navigator", boolG = false, numG = num2+6
 	try {
-		let t0G; if (canPerf) {t0G = performance.now()}
+		let t0G = performance.now()
 		if (bBlock) {bB = 1}
 		let resG = navigator.globalPrivacyControl
 		resG = fnClean(resG)
@@ -1463,21 +1430,19 @@ function get_nav_values(num1, num2, num3) {
 			resG += " [FF94 or lower]"
 			boolG = zNA
 		}
-		let perfG = canPerf ? performance.now() - t0G : ""
-		fnRecord(numG, strG, resG, boolG, "skip", perfG)
+		fnRecord(numG, strG, resG, boolG, "skip", t0G)
 	} catch(e) {
 		fnRecord(numG, strG, e.name, zErr, e.message)
 	}
 
 	// keyboard
 	let strK = "[keyboard] navigator", numK = num2+8
-	let t0K, perfK; if (canPerf) {t0K = performance.now()}
+	let t0K = performance.now()
 	try {
 		if (bBlock) {bB = 1}
 		let resK = navigator.keyboard
 		if (resK == undefined) {
-			perfK = canPerf ? performance.now() - t0K : ""
-			fnRecord(numK, strK, "undefined", true, "skip", perfK)
+			fnRecord(numK, strK, "undefined", true, "skip", t0K)
 		} else {
 			let keys = []
 			// https://wicg.github.io/keyboard-map/
@@ -1493,8 +1458,7 @@ function get_nav_values(num1, num2, num3) {
 				})
 				sDetail["unexpected_"+ strK] = keys
 				let hash = mini(keys) + buildButton(3, "unexpected_"+ strK , keys.length)
-				perfK = canPerf ? performance.now() - t0K : ""
-				fnRecord(numK, strK, hash, false, "skip", perfK)
+				fnRecord(numK, strK, hash, false, "skip", t0K)
 			})
 		}
 	} catch(e) {
@@ -1504,13 +1468,12 @@ function get_nav_values(num1, num2, num3) {
 	// vendor
 	let strV = "[vendor] navigator", boolV = false, numV = num2+10
 	try {
-		let t0V; if (canPerf) {t0V = performance.now()}
+		let t0V = performance.now()
 		if (bBlock) {bB = 1}
 		let resV = navigator.vendor
 		if (resV == "") {boolV = true}
 		resV = fnClean(resV)
-		let perfV = canPerf ? performance.now() - t0V : ""
-		fnRecord(numV, strV, resV, boolV, "skip", perfV)
+		fnRecord(numV, strV, resV, boolV, "skip", t0V)
 	} catch(e) {
 		fnRecord(numV, strV, e.name, zErr, e.message)
 	}
@@ -1518,7 +1481,7 @@ function get_nav_values(num1, num2, num3) {
 	// specific
 	let strX = "[buildID] navigator", boolX = false
 	try {
-		let t0X; if (canPerf) {t0X = performance.now()}
+		let t0X = performance.now()
 		if (bBlock) {bB = 1}
 		let resX = navigator.buildID
 		if (isVer > 63) {
@@ -1541,14 +1504,13 @@ function get_nav_values(num1, num2, num3) {
 				if (resX == "20100101") {boolX = true}
 			}
 		}
-		let perfX = canPerf ? performance.now() - t0X : ""
-		fnRecord(num3, strX, resX, boolX, "skip", perfX)
+		fnRecord(num3, strX, resX, boolX, "skip", t0X)
 	} catch(e) {
 		fnRecord(num3, strX, e.name, zErr, e.message)
 	}
 	// DNT: FF: 1, unspecified
 	let strDNT = "[doNotTrack] navigator", boolDNT = false, numDNT = num3+2
-	let t0DNT; if (canPerf) {t0DNT = performance.now()}
+	let t0DNT = performance.now()
 	try {
 		if (bBlock) {bB = 1}
 		let testDNT = navigator.doNotTrack
@@ -1557,16 +1519,15 @@ function get_nav_values(num1, num2, num3) {
 		} else {
 			testDNT = fnClean(testDNT)
 		}
-		let perfDNT = canPerf ? performance.now() - t0DNT : ""
 		if (isFF && !boolDNT) {
 			// PM not supported: returns undefined
 			if (isEngine == "goanna" && testDNT == "undefined") {
-				fnRecord(numDNT, strDNT, testDNT, true, "skip", perfDNT)
+				fnRecord(numDNT, strDNT, testDNT, true, "skip", t0DNT)
 			} else {
-				fnRecord(numDNT, strDNT, testDNT, zErr, "skip", perfDNT)
+				fnRecord(numDNT, strDNT, testDNT, zErr, "skip", t0DNT)
 			}
 		} else {
-			fnRecord(numDNT, strDNT, testDNT, boolDNT, "skip", perfDNT)
+			fnRecord(numDNT, strDNT, testDNT, boolDNT, "skip", t0DNT)
 		}
 	} catch(e) {
 		fnRecord(numDNT, strDNT, e.name, zErr, e.message)
@@ -1574,12 +1535,11 @@ function get_nav_values(num1, num2, num3) {
 
 	let strY = "[productSub] navigator", boolY = false, numY = num3+4
 	try {
-		let t0Y; if (canPerf) {t0Y = performance.now()}
+		let t0Y = performance.now()
 		if (bBlock) {bB = 1}
 		let resY = navigator.productSub
 		if (resY == "20100101") {boolY = true} else {resY = fnClean(resY)}
-		let perfY = canPerf ? performance.now() - t0Y : ""
-		fnRecord(numY, strY, resY, boolY, "skip", perfY)
+		fnRecord(numY, strY, resY, boolY, "skip", t0Y)
 	} catch(e) {
 		fnRecord(numY, strY, e.name, zErr, e.message)
 	}
@@ -1588,7 +1548,7 @@ function get_nav_values(num1, num2, num3) {
 	// getbattery
 	let strB = "[getBattery] navigator", boolB = false, numB = num2+4
 	let resB = []
-	let t0B, perfB; if (canPerf) {t0B = performance.now()}
+	let t0B = performance.now()
 	try {
 		if (bBlock) {bB = 1}
 		// not going to add eventlisteners
@@ -1597,25 +1557,22 @@ function get_nav_values(num1, num2, num3) {
 			try {resB.push((battery.charging ? "": "not ") +"charging")} catch(e) {resB.push("error")}
 			try {resB.push(battery.chargingTime)} catch(e) {resB.push("error")}
 			try {resB.push(battery.dischargingTime)} catch(e) {resB.push("error")}
-			perfB = canPerf ? performance.now() - t0B : ""
-			fnRecord(numB, strB, resB.join(", "), false, "skip", perfB)
+			fnRecord(numB, strB, resB.join(", "), false, "skip", t0B)
 		})
 	} catch(e) {
 		if (e.name == "TypeError" && e.message.substring(0,38) == "navigator.getBattery is not a function") {
 			if (e.message == "navigator.getBattery is not a function") {boolB = true} // webkit wil be false
-			perfB = canPerf ? performance.now() - t0B : ""
-			fnRecord(numB, strB, e.name, boolB, e.message, perfB)
+			fnRecord(numB, strB, e.name, boolB, e.message, t0B)
 		} else {
 			fnRecord(numB, strB, e.name, zErr, e.message)
 		}
 	}
-
 }
 
 function get_obj_enumeration(num, title) {
 	// 1762188
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let t = ['a','b'], result = []
 		for (let i in t) {
@@ -1628,8 +1585,7 @@ function get_obj_enumeration(num, title) {
 		}
 		let res = result.join(",") // nonFF = 0,0,a,a,0,1,a,b,1,0,b,a,1,1,b,b
 		let bool = res == "0,0,a,a,0,1,a,b,1,0,b,a" ? true : false
-		let perf = canPerf ? performance.now() - t0 : ""
-		fnRecord(num, title, res, bool, "skip", perf)
+		fnRecord(num, title, res, bool, "skip", t0)
 	} catch(e) {
 		fnRecord(num, title, e.name, zErr, e.message)
 	}
@@ -1637,18 +1593,16 @@ function get_obj_enumeration(num, title) {
 
 function get_permission(num, title) {
 	try {
-		let t0; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		let userVis = "userVisibleOnly" // non-FF
 		navigator.permissions.query({name:"push"}).then(function(result) {
 			let res = result.state
 			let bool = (res == "prompt" || res == "denied" || res == "granted") ? true : false
-			let perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num, title, res, bool, "skip", perf)
+			fnRecord(num, title, res, bool, "skip", t0)
 		}).catch(error => {
-			let perfErr = canPerf ? performance.now() - t0 : ""
 			if ((error.message).includes(userVis)) {
-				fnRecord(num, title, userVis, false, "skip", perfErr)
+				fnRecord(num, title, userVis, false, "skip", t0)
 			} else {
 				fnRecord(num, title, error.name, zErr, error.message)
 			}
@@ -1665,14 +1619,13 @@ function get_permission(num, title) {
 
 function get_plugins(num, title) {
 	try {
-		let t0, perf; if (canPerf) {t0 = performance.now()}
+		let t0 = performance.now()
 		if (bBlock) {bB = 1}
 		if ("plugins" in navigator) {
 			let res = [], bool = false
 			let p = navigator.plugins
 			if (p.length == 0) {
-				perf = canPerf ? performance.now() - t0 : ""
-				fnRecord(num, title, "none", true, "skip", perf)
+				fnRecord(num, title, "none", true, "skip", t0)
 			} else {
 				for (let i=0; i < p.length; i++) {
 					res.push(p[i].name + (p[i].filename == "" ? ": * " : ": "+ p[i].filename)
@@ -1693,8 +1646,7 @@ function get_plugins(num, title) {
 				}
 				sDetail["expected_"+ title] = res
 				hash += buildButton(3, "expected_"+ title, res.length)
-				perf = canPerf ? performance.now() - t0 : ""
-				fnRecord(num, title, hash, bool, "skip", perf)
+				fnRecord(num, title, hash, bool, "skip", t0)
 			}
 		} else {
 			fnRecord(num, title, e.name, zErr)
@@ -1705,7 +1657,7 @@ function get_plugins(num, title) {
 }
 
 function get_stacklength(num1, num2, num3) {
-	let t0; if (canPerf) {t0 = performance.now()}
+	let t0 = performance.now()
 	let level = 0, test1 = 0
 	function recurse() {
 		level++
@@ -1721,49 +1673,48 @@ function get_stacklength(num1, num2, num3) {
 		recurse()
 	} catch(e) {
 		// timing an error property lookup is not the same as generating a alow recurse one
-		let t0E; if (canPerf) {t0E = performance.now()}
 		// columnNumber
 		let strCN = "[columnNumber] error", errCN = false
 		try {
+			let t0E = performance.now()
 			if (bBlock) {bB = 1}
 			let resCN = e.columnNumber
 			let testCN = resCN == undefined? false : true
-			let perfCN = canPerf ? performance.now() - t0E : ""
-			fnRecord(num1, strCN, resCN, testCN, "skip", perfCN)
+			fnRecord(num1, strCN, resCN, testCN, "skip", t0E)
 		} catch(n) {
 			fnRecord(num1, strCN, n.name, zErr, n.message)
 		}
 		// fileName
 		let strFN = "[fileName] error", errFN = false
 		try {
+			let t0F = performance.now()
 			if (bBlock) {bB = 1}
 			let resFN = e.fileName
 			if (resFN !== undefined) {resFN = resFN.slice(0,8) + "..."}
 			let testFN = resFN == undefined? false : true
-			let perfFN = canPerf ? performance.now() - t0E : ""
-			fnRecord(num1+1, strFN, resFN, testFN, "skip", perfFN)
+			fnRecord(num1+1, strFN, resFN, testFN, "skip", t0F)
 		} catch(n) {
 			fnRecord(num1+1, strFN, n.name, zErr, n.message)
 		}
 		// lineNumber
 		let strLN = "[lineNumber] error", errLN = false
 		try {
+			let t0LN = performance.now()
 			if (bBlock) {bB = 1}
 			let resLN = e.lineNumber
 			let testLN = resLN == undefined? false : true
-			let perfLN = canPerf ? performance.now() - t0E : ""
-			fnRecord(num1+2, strLN, resLN, testLN, "skip", perfLN)
+			fnRecord(num1+2, strLN, resLN, testLN, "skip", t0LN)
 		} catch(n) {
 			fnRecord(num1+2, strLN, n.name, zErr, n.message)
 		}
 
 		// first error
-		let perf = canPerf ? performance.now() - t0 : ""
+		let perf = (t0- performance.now()) + performance.now()
 		let strRE = "error", resRE = e.name +": "+ e.message
 		if (resRE == "InternalError: too much recursion") {
 			fnRecord(num3, strRE, resRE, true, "skip", perf)
 		} else {
-			fnRecord(num3, strRE, resRE, false, "skip", perf)
+			fnRecord(num3, strRE, resRE, false, "skip", )
 		}
 		// stack length: only for FYI purposes
 		let strSL = "stack length"
@@ -1804,7 +1755,7 @@ function get_storage_estimate(num, title) {
 		// chrome:     204974075 incognito android
 
 	// ToDo: check if FF97+ new storage quota is based on disk or free disk space size
-	let t0; if (canPerf) {t0 = performance.now()}
+	let t0 = performance.now()
 	try {
 		if (bBlock) {bB = 1}
 		navigator.storage.estimate().then(estimate => {
@@ -1821,8 +1772,7 @@ function get_storage_estimate(num, title) {
 				bool = zNA
 				quota += " [FF96 or lower]"
 			}
-			let perf = canPerf ? performance.now() - t0 : ""
-			fnRecord(num, title, quota, bool, "skip", perf)
+			fnRecord(num, title, quota, bool, "skip", t0)
 		})
 	} catch(e) {
 		if (isEngine == "webkit") {
@@ -1846,22 +1796,21 @@ function get_window_moz(num) {
 
 	let strC = "[CSSMozDocumentRule] window"
 	try {
-		let t0C; if (canPerf) {t0C = performance.now()}
+		let t0C = performance.now()
 		if (bBlock) {bB = 1}
 		let resC = typeof CSSMozDocumentRule
 		let boolC = "function" === typeof CSSMozDocumentRule // FF53+
 		if (!boolC && isVer == 52) {
 			boolC = "object" === resC
 		}
-		let perfC = canPerf ? performance.now() - t0C : ""
-		fnRecord(num, strC, resC, boolC, "skip", perfC)
+		fnRecord(num, strC, resC, boolC, "skip", t0C)
 	} catch(e) {
 		fnRecord(num, strC, e.name, zErr, e.message)
 	}
 
 	let strM = "[mozRTCPeerConnection] window"
 	try {
-		let t0M; if (canPerf) {t0M = performance.now()}
+		let t0M = performance.now()
 		if (bBlock) {bB = 1}
 		let resM = typeof mozRTCPeerConnection
 		let boolM = "function" === typeof mozRTCPeerConnection
@@ -1878,31 +1827,29 @@ function get_window_moz(num) {
 			boolM = zNA
 			resM += " [FF112 or lower]"
 		}
-		let perfM = canPerf ? performance.now() - t0M : ""
-		fnRecord(num+1, strM, resM, boolM, "skip", perfM)
+		fnRecord(num+1, strM, resM, boolM, "skip", t0M)
 	} catch(e) {
+console.log(e)
 		fnRecord(num+1, strM, e.name, zErr, e.message)
 	}
 
 	let strA = "[mozInnerScreenX] window", boolA = false
 	try {
-		let t0A; if (canPerf) {t0A = performance.now()}
+		let t0A = performance.now()
 		if (bBlock) {bB = 1}
 		let resA = window.mozInnerScreenX
 		if (!isNaN(resA)) {boolA = true} else {resA = fnClean(resA)}
-		let perfA = canPerf ? performance.now() - t0A : ""
-		fnRecord(num+2, strA, resA, boolA, "skip", perfA)
+		fnRecord(num+2, strA, resA, boolA, "skip", t0A)
 	} catch(e) {
 		fnRecord(num+2, strA, e.name, zErr, e.message)
 	}
 	let strB = "[mozInnerScreenY] window", boolB = false
 	try {
-		let t0B; if (canPerf) {t0B = performance.now()}
+		let t0B = performance.now()
 		if (bBlock) {bB = 1}
 		let resB = window.mozInnerScreenY
 		if (!isNaN(resB)) {boolB = true} else {resB = fnClean(resB)}
-		let perfB = canPerf ? performance.now() - t0B : ""
-		fnRecord(num+3, strB, resB, boolB, "skip", perfB)
+		fnRecord(num+3, strB, resB, boolB, "skip", t0B)
 	} catch(e) {
 		fnRecord(num+3, strB, e.name, zErr, e.message)
 	}
@@ -1917,7 +1864,7 @@ function get_window_props(num1, num2, title) {
 	}
 
 	// expected
-	let t0E; if (canPerf) {t0E = performance.now()}
+	let t0E = performance.now()
 	let resE = []
 	try {
 		if (bBlock) {bB = 1}
@@ -1951,14 +1898,13 @@ function get_window_props(num1, num2, title) {
 				hashE += buildButton(3, "expected_"+ title, resE.length)
 			}
 		}
-		let perfE = canPerf ? performance.now() - t0E : ""
-		fnRecord(num1, title, hashE, boolE, "skip", perfE)
+		fnRecord(num1, title, hashE, boolE, "skip", t0E)
 	} catch(e) {
 		fnRecord(num1, title, e.name, zErr, e.message)
 	}
 
 	// unexpected
-	let t0U; if (canPerf) {t0U = performance.now()}
+	let t0U = performance.now()
 	let resU = []
 	try {
 		if (bBlock) {bB = 1}
@@ -2020,8 +1966,7 @@ function get_window_props(num1, num2, title) {
 				hashU += buildButton(3, "unexpected_"+ title, resU.length)
 			}
 		}
-		let perfU = canPerf ? performance.now() - t0U : ""
-		fnRecord(num2, title, hashU, boolU, "skip", perfU)
+		fnRecord(num2, title, hashU, boolU, "skip", t0U)
 	} catch(e) {
 		fnRecord(num2, title, e.name, zErr, e.message)
 	}
@@ -2054,7 +1999,7 @@ function run() {
 	// stagger to get more accurate perf
 
 	setTimeout(function() {
-		if (canPerf) {gt0 = performance.now()}
+		gt0 = performance.now()
 		aPerf.push(["START 1", gt0])
 		get_installtrigger(50) // 50-52
 		get_eval_length(630, "eval.toString().length")

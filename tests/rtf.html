@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
@@ -25,7 +25,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb4">
@@ -370,13 +370,11 @@ function run_main(method) {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "800d026e") {resultsHash += s14 +" [FF121+]"+ sc
-					} else if (resultsHash == "ecee9fda") {resultsHash += s14 +" [FF115-120]"+ sc
+					if (resultsHash == "ecee9fda") {resultsHash += s14 +" [FF115+]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "0968b9c6") {localesHash += s14 +" [FF121+]"+ sc
-					} else if (localesHash == "f89a86b9") {localesHash += s14 +" [FF115-120]"+ sc
+					if (localesHash == "f89a86b9") {localesHash += s14 +" [FF115+]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
