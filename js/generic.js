@@ -427,6 +427,27 @@ const get_isOS = () => new Promise(resolve => {
 	}
 })
 
+const get_isRecursion = () => new Promise(resolve => {
+	// 2nd test is more accurate/stable
+	const METRIC = "isRecursion"
+	let t0 = nowFn()
+	let level = 0
+	function recurse() {level++; recurse()}
+	try {recurse()} catch(e) {}
+	level = 0
+	try {
+		recurse()
+	} catch(e) {
+		let stacklen = e.stack.toString().length
+		// display value
+		isRecursion = [level +" | "+ stacklen]
+		log_perf(SECTG, METRIC, t0, "", isRecursion.join())
+		// metric values: round down to hundreds
+		isRecursion.push(Math.floor(level/(1000) * 10)/10 +"k", Math.floor(stacklen/(1000) * 10)/10 +"k")
+		return resolve()
+	}
+})
+
 const get_isSystemFont = () => new Promise(resolve => {
 	if (!isGecko) {return resolve()}
 	function exit(value) {
@@ -1348,7 +1369,6 @@ function outputPostSection(id) {
 	if (id == "all" || id == "misc") {
 		Promise.all([
 			get_perf_now(isLog),
-			get_recursion(isLog),
 		]).then(function(){
 			if (id == "all") {output_perf(id)}
 		})
@@ -1498,6 +1518,7 @@ function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
 	gData["perf"].push([1, "IMMEDIATE", t00])
+	get_isRecursion()
 	get_isDevices()
 	if (location.protocol == "file:") {isFile = true}
 	try {let v = speechSynthesis.getVoices()} catch(e) {}

@@ -32,8 +32,8 @@ const get_element_keys = () => new Promise(resolve => {
 			addData(15, METRIC, keys, hash)
 			if (check) {
 				if (isOS === "android") {
-					// a = 3b1df61c 289 alpha NS 11.4.11 <-- Sept 2022 version WTF!!
-					// a = fa8b991f 302 release NS 11.4.24 (+ 13 NS items e.g. get/value)
+					// a = 3b1df61c 289   alpha 13.5a3 NS 11.4.11 <-- Sept 2022 version WTF!!
+					// a = fa8b991f 302 release 13.0.8 NS 11.4.24 (+ 13 NS items e.g. get/value)
 					if (hash === "3b1df61c") {notation = tb_green} // fb490d00 div 264
 				} else {
 					// desktop NZ 11.4.29
