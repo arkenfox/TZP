@@ -304,105 +304,6 @@ const get_media_devices = () => new Promise(resolve => {
 	}
 })
 
-const get_pdf = () => new Promise(resolve => {
-	// FF99+ none/hardcoded: all three are expected nav keys
-	let oData = {"mimeTypes": "", "pdfViewerEnabled": "", "plugins": ""}
-
-	function get_obj(METRIC) {
-		function exit(value) {
-			oData[METRIC] = value
-			return
-		}
-		try {
-			let obj = navigator[METRIC]
-			let objName = METRIC.charAt(0).toUpperCase() + (METRIC.slice(1)).slice(0, -1) +"Array"
-			if (typeof obj === "object") {
-				try {
-					let mimeTest = mini(obj) // catch TypeError: cyclic object
-					if ("[object "+ objName +"]" === obj+"") {
-						if (obj.length) {
-							let res = []
-							for (let i=0; i < obj.length; i++) {
-								if ("mimeTypes" === METRIC) {
-									res.push( obj[i].type + (obj[i].description == "" ? ": * " : ": "+ obj[i].type)
-										+ (obj[i].suffixes == "" ? ": *" : ": "+ obj[i].suffixes))
-								} else {
-									res.push(obj[i].name + (obj[i].filename == "" ? ": * " : ": "+ obj[i].filename)
-										+ (obj[i].description == "" ? ": *" : ": "+ obj[i].description))
-								}
-							}
-							exit(res)
-						} else {
-							exit("none")
-						}
-					} else {
-						log_error(SECT7, METRIC, zErrInvalid +"expected [object "+ objName +"]"); exit(zErr +"A")
-					}
-				} catch(e) {
-					log_error(SECT7, METRIC, e); exit(zErr +"B")
-				}
-			} else {
-				log_error(SECT7, METRIC, zErrType + typeof obj); exit(zErr +"C")
-			}
-		} catch(e) {
-			log_error(SECT7, METRIC, e); exit(zErr +"D")
-		}
-	}
-	function get_pdfViewer() {
-		const METRIC = "pdfViewerEnabled"
-		try {
-			let res = navigator.pdfViewerEnabled
-			if ("boolean" === typeof res) {
-				oData[METRIC] = res; 
-				return
-			} else {
-				log_error(SECT7, METRIC, zErrType + typeof obj)
-				oData[METRIC] = zErr
-				return
-			}
-		} catch(e) {
-			log_error(SECT7, METRIC, e)
-			oData[METRIC] = zErr
-			return
-		}
-	}
-
-	Promise.all([
-		get_obj("mimeTypes"),
-		get_obj("plugins"),
-		get_pdfViewer("plugins"),
-	]).then(function(){
-		const METRIC = "pdf"
-		let hash = mini(oData), notation = ""
-		addData(7, METRIC, oData, hash)
-		if (isSmart) {
-			// lies
-				// ignore errors (which we collect), we don't care if all three are errors (unlikely)
-				// just return lies if not one of our expected etc
-			let isLies = false
-			if (!["91073152","beccb452"].includes(hash)) {
-				isLies = true // enabled, disabled
-			} else if (
-				sData[SECT99].includes("Navigator.pdfViewerEnabled")) {
-				isLies = true
-			} else {
-				try {
-					let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-					if (keys.indexOf("pdfViewerEnabled") > keys.indexOf("constructor")) {isLies = true}
-				} catch(e) {}
-			}
-			// notate: FF116 1838415 dropped RFP protection
-			if (isVer < 116) {
-				notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
-			} else {
-				notation = isLies ? default_red : (hash == "91073152" ? default_green : default_red)
-			}
-		}
-		log_display(7, METRIC, hash + addButton(7, METRIC) + notation)
-		return resolve()
-	})
-})
-
 function get_pointer_event(event) {
 	// ToDo: also look at radiusX/Y, screenX/Y, clientX/Y
 	/* https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/28535#note_2906361
@@ -460,14 +361,34 @@ const get_speech_engines = () => new Promise(resolve => {
 		log_perf(SECT7, METRIC, t0)
 		return resolve()
 	}
+
 	function populateVoiceList() {
-		let res = []
+		let res = [], ignoreLen, ignoreStr
+		/* examples
+			"urn:moz-tts:android:hr_HR"
+			"urn:moz-tts:sapi:Microsoft David - English (United States)?en-US"
+			"urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy"
+		*/
+		let oIgnore = {
+			android: "urn:moz-tts:android:",
+			mac: "urn:moz-tts:osx:com.apple.eloquence.",
+			windows: "urn:moz-tts:sapi:",
+		}
+		if (oIgnore[isOS] !== undefined) {
+			ignoreLen = oIgnore[isOS].length
+			ignoreStr = oIgnore[isOS]
+		}
 		try {
 			if (runSE) {foo++}
 			let v = speechSynthesis.getVoices()
-			v.forEach(function(i){
+			v.forEach(function(i) {
+				// reduce redundancy/noise
+					// only record default if true and localService if false
+					// ignore voiceURI if it matches expected
+				let uriStr = i.voiceURI, isURI = true
+				if (ignoreStr !== undefined && uriStr.slice(0,ignoreLen) === ignoreStr) {isURI = false}
 				res.push(
-					i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? " | localService" : "")	+" | "+ i.voiceURI
+					i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? "" : " | false") + (isURI ? " | "+ uriStr : "")
 				)
 			})
 			if (runST) {v = []} else if (runSL && isSmart) {sData[SECT99].push("speechSynthesis.getVoices")}
@@ -501,6 +422,9 @@ const get_speech_engines = () => new Promise(resolve => {
 	}
 	try {
 		populateVoiceList()
+		if (speechSynthesis.onvoiceschanged !== undefined) {
+			speechSynthesis.onvoiceschanged = populateVoiceList;
+		}
 	} catch(e) {
 		exit(zErr, log_error(SECT7, METRIC, e))
 	}
@@ -508,6 +432,11 @@ const get_speech_engines = () => new Promise(resolve => {
 
 function outputDevices() {
 	let t0 = nowFn()
+
+	const METRIC = "recursion"
+	log_display(7, METRIC, isRecursion[0])
+	addData(7, METRIC, isRecursion[1] + " | "+ isRecursion[2])
+
 	Promise.all([
 		get_media_devices(),
 		get_speech_engines(),
@@ -521,7 +450,6 @@ function outputDevices() {
 		get_device_integer("pixelDepth","Screen."),
 		get_device_integer("colorDepth","Screen."),
 		get_device_integer("hardwareConcurrency","Navigator."),
-		get_pdf(),
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(7, item)})
 		log_section(7, t0)
