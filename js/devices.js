@@ -365,12 +365,12 @@ const get_speech_engines = () => new Promise(resolve => {
 	function populateVoiceList() {
 		let res = [], ignoreLen, ignoreStr
 		/* examples
-			"urn:moz-tts:android:hr_HR"
+			"moz-tts:android:hr_HR"
 			"urn:moz-tts:sapi:Microsoft David - English (United States)?en-US"
 			"urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy"
 		*/
 		let oIgnore = {
-			android: "urn:moz-tts:android:",
+			android: "moz-tts:android:",
 			mac: "urn:moz-tts:osx:com.apple.eloquence.",
 			windows: "urn:moz-tts:sapi:",
 		}
