@@ -244,21 +244,104 @@ function get_navigator_keys() {
 	}
 }
 
-function get_recursion(log = false) {
-	let level = 0
-	let t0 = nowFn()
-	function recurse() {level++; recurse()}
-	try {recurse()} catch(e) {}
-	level = 0
-	try {
-		recurse()
-	} catch(e) {
-		// 2nd test is more accurate/stable
-		dom.recursion = level +" | "+ e.stack.toString().length
-		if (log) {log_perf(SECTNF, "stack_depth", t0)}
-		return
+const get_pdf = () => new Promise(resolve => {
+	// FF99+ none/hardcoded: all three are expected nav keys
+	let oData = {"mimeTypes": "", "pdfViewerEnabled": "", "plugins": ""}
+
+	function get_obj(METRIC) {
+		function exit(value) {
+			oData[METRIC] = value
+			return
+		}
+		try {
+			let obj = navigator[METRIC]
+			let objName = METRIC.charAt(0).toUpperCase() + (METRIC.slice(1)).slice(0, -1) +"Array"
+			if (typeof obj === "object") {
+				try {
+					let mimeTest = mini(obj) // catch TypeError: cyclic object
+					if ("[object "+ objName +"]" === obj+"") {
+						if (obj.length) {
+							let res = []
+							for (let i=0; i < obj.length; i++) {
+								if ("mimeTypes" === METRIC) {
+									res.push( obj[i].type + (obj[i].description == "" ? ": * " : ": "+ obj[i].type)
+										+ (obj[i].suffixes == "" ? ": *" : ": "+ obj[i].suffixes))
+								} else {
+									res.push(obj[i].name + (obj[i].filename == "" ? ": * " : ": "+ obj[i].filename)
+										+ (obj[i].description == "" ? ": *" : ": "+ obj[i].description))
+								}
+							}
+							exit(res)
+						} else {
+							exit("none")
+						}
+					} else {
+						log_error(SECT18, METRIC, zErrInvalid +"expected [object "+ objName +"]"); exit(zErr +"A")
+					}
+				} catch(e) {
+					log_error(SECT18, METRIC, e); exit(zErr +"B")
+				}
+			} else {
+				log_error(SECT18, METRIC, zErrType + typeof obj); exit(zErr +"C")
+			}
+		} catch(e) {
+			log_error(SECT18, METRIC, e); exit(zErr +"D")
+		}
 	}
-}
+	function get_pdfViewer() {
+		const METRIC = "pdfViewerEnabled"
+		try {
+			let res = navigator.pdfViewerEnabled
+			if ("boolean" === typeof res) {
+				oData[METRIC] = res; 
+				return
+			} else {
+				log_error(SECT7, METRIC, zErrType + typeof obj)
+				oData[METRIC] = zErr
+				return
+			}
+		} catch(e) {
+			log_error(SECT7, METRIC, e)
+			oData[METRIC] = zErr
+			return
+		}
+	}
+
+	Promise.all([
+		get_obj("mimeTypes"),
+		get_obj("plugins"),
+		get_pdfViewer("plugins"),
+	]).then(function(){
+		const METRIC = "pdf"
+		let hash = mini(oData), notation = ""
+		addData(18, METRIC, oData, hash)
+		if (isSmart) {
+			// lies
+				// ignore errors (which we collect), we don't care if all three are errors (unlikely)
+				// just return lies if not one of our expected etc
+			let isLies = false
+			if (!["91073152","beccb452"].includes(hash)) {
+				isLies = true // enabled, disabled
+			} else if (
+				sData[SECT99].includes("Navigator.pdfViewerEnabled")) {
+				isLies = true
+			} else {
+				try {
+					let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
+					if (keys.indexOf("pdfViewerEnabled") > keys.indexOf("constructor")) {isLies = true}
+				} catch(e) {}
+			}
+			// notate: FF116 1838415 dropped RFP protection
+			if (isVer < 116) {
+				notation = isLies ? rfp_red : (hash == "91073152" ? rfp_green : rfp_red)
+			} else {
+				notation = isLies ? default_red : (hash == "91073152" ? default_green : default_red)
+			}
+		}
+		log_display(18, METRIC, hash + addButton(18, METRIC) + notation)
+		return resolve()
+	})
+})
 
 function get_perf_mark_entries() {
 	// FF111+ 1811567: no longer a health metric, but keep to detect timing fuckery
@@ -540,6 +623,7 @@ function outputMisc() {
 		get_component_shims(),
 		get_window_props(),
 		get_navigator_keys(),
+		get_pdf(),
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(18, item)})
 		log_section(18, t0)
