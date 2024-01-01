@@ -331,10 +331,10 @@ function run() {
 	// pause so users see change
 	setTimeout(function() {
 		get_validation_errors()
+		get_media_messages()
 		// FF only
 		if (!isFF) {return}
 		get_xml_errors()
-		get_media_messages()
 	}, 170)
 }
 
