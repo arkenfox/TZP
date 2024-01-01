@@ -63,9 +63,9 @@
 			</div>
 
 			<br>
-			<div>VALIDATION ERRORS <sup>1</sup> &nbsp; 
+			<div>VALIDATION MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
-				<br><br><span class="c mono spaces no_color" id="validation_errors"></span>
+				<br><br><span class="c mono spaces no_color" id="validation_messages"></span>
 			</div>
 
 			<br>
@@ -265,7 +265,7 @@ function get_xml_errors() {
 	}
 }
 
-function get_validation_errors() {
+function get_validation_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
 		// https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
@@ -310,17 +310,18 @@ function get_validation_errors() {
 		}
 		let hash = mini(vData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.validation_errors.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
+		dom.validation_messages.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
 		return
 	} catch(e) {
-		dom.validation_errors = e+""
+		dom.validation_messages = e+""
 		return
 	}
 }
 
 function run() {
 	if (!isFF) {
-		dom.validation_errors.innerHTML = "&nbsp"
+		dom.media_messages.innerHTML = "&nbsp"
+		dom.validation_messages.innerHTML = "&nbsp"
 	} else {
 		// clear
 		let items = document.getElementsByClassName("c")
@@ -330,7 +331,7 @@ function run() {
 	}
 	// pause so users see change
 	setTimeout(function() {
-		get_validation_errors()
+		get_validation_messages()
 		get_media_messages()
 		// FF only
 		if (!isFF) {return}
@@ -343,7 +344,6 @@ Promise.all([
 ]).then(function(){
 	if (!isFF) {
 		let str = "gecko only"
-		dom.media_messages = str
 		dom.xml_errors = str
 	}
 })
