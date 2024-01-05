@@ -29,20 +29,19 @@
 
 	<table id="tb12">
 		<thead><tr><th colspan="2"><div class="nav-title">script view</div></th></tr></thead>
-		<!--<tr><td class="intro">
-			<span class="no_color"></span>
-		</td></tr>-->
 		<tr>
 			<td style="text-align: left; vertical-align: bottom;">
 				<span class="btn12 btnfirst">
 					<form>
-						<label for="scripts">Choose a script:</label>
+						<label for="scripts"> &nbsp script:</label>
 						<select name="scripts" id="scripts" onChange="run(`scripts`)" onClick="run(`scripts`)"><option></option></select>
+						<span class="btn12 btnfirst" onClick="run_next('scripts')"> &nbsp [ &nbsp next &nbsp ]</span>
 					</form><br>
 					<form>
-						<label for="scripts">..or a language:</label>
+						<label for="scripts">language:</label>
 						<select name="languages" id="languages" onChange="run(`languages`)" onClick="run(`languages`)"><option></option></select>
-					</form>
+						<span class="btn12 btnfirst" onClick="run_next('languages')"> &nbsp [ &nbsp next &nbsp ]</span>
+					</form><br>
 				</span>
 			</td>
 		</tr>
@@ -69,82 +68,91 @@
 
 let oSentence = {
 	// using: https://github.com/mozilla-l10n/focusios-l10n
-	"arabic": "امسح تأريخ جلسة التصفح كله و كلمات السر و الكعكات في أي وقت بنقرة واحدة.",
-	"burmese": "ရှာဖွေမှုမှတ်တမ်း၊ စကားဝှက်များနှင့် အခြား စသည်တို့ကို တစ်ခါတို့ထိရုံဖြင့် ဖျက်နိုင်သည်။",
-	"catalan": "Esborreu l'historial de navegació, les contrasenyes i les galetes quan vulgueu amb un sol toc.",
-	"chinese (china)": "随时一键清除您的所有浏览记录、密码及 Cookie。",
-	"chinese (taiwan)": "只要輕鬆一點，就能清除這次上網的所有瀏覽紀錄、儲存密碼、Cookie 等資料。",
-	"danish": "Du kan når som helst slette hele din browserhistorik, dine gemte adgangskoder og dine cookies med et enkelt tryk.",
-	"dutch": "Wis uw volledige surfgeschiedenis, wachtwoorden en cookies wanneer u wilt met één tik.",
-	"english": "Clear your entire browsing session history, passwords, cookies anytime with a single tap.",
-	"farsi": "تمام تاریخچه،‌کلمه عبور،‌و کوکی های جلسه مرورگر خود را در هر زمانی تنها با یک لمس پاک کنید.",
-	"french": "Supprimez votre historique de navigation, vos mots de passe, vos cookies et plus encore, d’une simple pression.",
-	"georgian": "გაასუფთავეთ მონახულებული გვერდები, პაროლები და ა.შ. ნებისმიერ დროს, მხოლოდ ერთი შეხებით.",
-	"german": "Löschen Sie mit einer einzigen Berührung die gesamte Chronik, Passwörter und Cookies Ihrer Sitzung.",
-	"greek": "Απαλοιφή ιστορικού περιήγησης, κωδικών πρόσβασης, cookies ανά πάσα στιγμή, με ένα πάτημα.",
-	"hebrew": "ניתן בכל עת לנקות את כל היסטורית הגלישה שלך, הסיסמאות והעוגיות בהקשה אחת.",
-	"hungarian": "Törölje az összes böngészési előzményét, jelszavát, és sütijét bármikor, egyetlen koppintással.",
-	"icelandic": "Hreinsa feril, lykilorð, vefkökur hvenær sem er með einni snertingu.",
-	"indonesian": "Bersihkan semua riwayat sesi penjelajahan, sandi, dan kuki Anda kapan pun dalam sekali ketuk saja.",
-	"irish": "Scrios fianáin chomh maith le do stair chuardaigh agus stair bhrabhsála.", // different sentence
-	"italian": "Cancella l’intera cronologia di navigazione, le password e i cookie con un semplice tocco, in qualunque momento.",
-	"japanese": "ブラウジングセッション履歴やパスワード、Cookie を、いつでもワンタップですべて消去できます。",
-	"khmer": "មាត្រា ១ មនុស្សទាំងអស់ កើតមកមានសេរីភាព និងសមភាព ក្នុងផ្នែកសេចក្ដីថ្លៃថ្នូរនិងសិទ្ធិ។ មនុស្ស មានវិចារណញ្ញាណនិងសតិសម្បជញ្ញៈជាប់ពីកំណើត ហើយគប្បីប្រព្រឹត្ដចំពោះគ្នាទៅវិញទៅមក ក្នុង ស្មារតីភាតរភាពជាបងប្អូន។",
+
+	// TB supported
+	"ar (arabic)": "امسح تأريخ جلسة التصفح كله و كلمات السر و الكعكات في أي وقت بنقرة واحدة.",
+	"ca (catalan)": "Esborreu l'historial de navegació, les contrasenyes i les galetes quan vulgueu amb un sol toc.",
+	"cs (czech)": "Vyčistěte kdykoli celou vaši historii prohlížení, hesla a soubory cookie jedním klepnutím.",
+	"da (danish)": "Du kan når som helst slette hele din browserhistorik, dine gemte adgangskoder og dine cookies med et enkelt tryk.",
+	"de (german)": "Löschen Sie mit einer einzigen Berührung die gesamte Chronik, Passwörter und Cookies Ihrer Sitzung.",
+	"el (greek)": "Απαλοιφή ιστορικού περιήγησης, κωδικών πρόσβασης, cookies ανά πάσα στιγμή, με ένα πάτημα.",
+	"en (english)": "Clear your entire browsing session history, passwords, cookies anytime with a single tap.",
+	"es-ES (spanish spain)": "Limpia todo el historial de navegación de tu sesión, contraseñas y cookies en cualquier momento con tan solo un clic.",
+	"fa (persian)": "تمام تاریخچه،‌کلمه عبور،‌و کوکی های جلسه مرورگر خود را در هر زمانی تنها با یک لمس پاک کنید.",
+	"fi (finnish)": "Tyhjennä koko selaushistoriasi, salasanat ja evästeet milloin tahansa yhdellä napautuksella.",
+	"fr (french)": "Supprimez votre historique de navigation, vos mots de passe, vos cookies et plus encore, d’une simple pression.",
+	"ga (irish)": "Scrios fianáin chomh maith le do stair chuardaigh agus stair bhrabhsála.", // different sentence
+	"he (hebrew)": "ניתן בכל עת לנקות את כל היסטורית הגלישה שלך, הסיסמאות והעוגיות בהקשה אחת.",
+	"hu (hungarian)": "Törölje az összes böngészési előzményét, jelszavát, és sütijét bármikor, egyetlen koppintással.",
+	"id (indonesian)": "Bersihkan semua riwayat sesi penjelajahan, sandi, dan kuki Anda kapan pun dalam sekali ketuk saja.",
+	"is (icelandic)": "Hreinsa feril, lykilorð, vefkökur hvenær sem er með einni snertingu.",
+	"it (italian)": "Cancella l’intera cronologia di navigazione, le password e i cookie con un semplice tocco, in qualunque momento.",
+	"ja (japanese)": "ブラウジングセッション履歴やパスワード、Cookie を、いつでもワンタップですべて消去できます。",
+	"ka (georgian)": "გაასუფთავეთ მონახულებული გვერდები, პაროლები და ა.შ. ნებისმიერ დროს, მხოლოდ ერთი შეხებით.",
+	"ko (korean)": "브라우징 세션 기록이나 비밀번호, 쿠키를 언제나 탭 한번으로 삭제합니다.",
+	"lt (lithuanian)": "Bet kuriuo metu išvalykite visą savo naršymo žurnalą, slaptažodžius ir slapukus vienu bakstelėjimu.",
+	"mk (macedonian) ": "Сакам да разменам пари/натнички чекови.", // I want to exchange some money/travellers cheques.
+	"ms (malay)": "Buang seluruh sejarah pelayaran, kata laluan dan kuki dengan sekali tekan sahaja.",
+	"my (burmese)": "ရှာဖွေမှုမှတ်တမ်း၊ စကားဝှက်များနှင့် အခြား စသည်တို့ကို တစ်ခါတို့ထိရုံဖြင့် ဖျက်နိုင်သည်။",
+	"nl (dutch)": "Wis uw volledige surfgeschiedenis, wachtwoorden en cookies wanneer u wilt met één tik.",
+	"nn (norwegian nynorsk)": "Slett hele nettleserhistorikken din, passord, infokapsler når som helst med ett trykk.", // tb is actually nb-no = norwegian bokmål
+	"pl (polish)": "Usuwaj całą historię przeglądania, hasła i ciasteczka jednym stuknięciem.",
+	"pt-BR (portuguese brazil": "Limpe todo o histórico, senhas e cookies da sessão de navegação quando quiser, com um simples toque.",
+	"ro (romanian)": "Șterge întregul istoric al sesiunii, parolele și cookie-urile oricând, cu o singură atingere.",
+	"ru (russian)": "В любой момент стирайте одним нажатием всю историю просмотров, пароли и куки.",
+	"sq (albanian)": "Fshini kurdo, me një prekje të vetme, historikun e shfletimit për sesionin, fjalëkalimet, cookie-t.",
+	"sv (swedish)": "Rensa hela din webbhistorik, lösenord, kakor när som helst med ett enda tryck.",
+	"th (thai)": "ล้างประวัติ, รหัสผ่าน และคุกกี้ในวาระการท่องเว็บทั้งหมดของคุณได้ทุกเวลาด้วยการแตะครั้งเดียว",
+	"tr (turkish)": "İstediğiniz zaman tek bir dokunuşla gezinti geçmişinizi, parolaları ve çerezleri temizleyebilirsiniz.",
+	"uk (ukrainian)": "Будь-коли стирайте всю історію перегляду, паролі та куки одним дотиком.",
+	"vi (vietnamese)": "Xóa toàn bộ lịch sử duyệt web, mật khẩu, cookie bất kỳ lúc nào chỉ với một cú chạm.",
+	"zh-cn (chinese china)": "随时一键清除您的所有浏览记录、密码及 Cookie。",
+	"zh-tw (chinese taiwan": "只要輕鬆一點，就能清除這次上網的所有瀏覽紀錄、儲存密碼、Cookie 等資料。",
+
+	// other
+	"am (amharic)": "በአንድ ጊዜ መታ በማድረግ ሁሉንም የአሰሳ ክፍለ ጊዜ ታሪክዎን ፣ የይለፍ ቃሎችን ፣ ኩኪዎችን በማንኛውም ጊዜ ያጽዱ።</",
+	"an (aragonese)": "Borra l'historial completo d'a sesión de navegación, claus, cookies, en qualsequier momento con un simple toque.",
+	"ast (asturian)": "Llimpia cuando quieras y con un calcu les cookies, l'historial de restolar y les contraseñes.",
+	"az (azerbaijani)": "Tək bir toxunuşla istədiyiniz vaxt səyahət sessiyanızın tarixçəsini, parolları və çərəzləri təmizləyin.",
+	"be (belarusian)": "Сцірайце ўсю гісторыю аглядання, паролі і кукі калі захочаце ў адзін націск.",
+	"bg (bulgarian)": "Изчистване по всяко време с едно докосване на цялата сесия на разглеждане: история, пароли и бисквитки.",
+	"bn (bengali)": "আপনার সম্পূর্ণ ব্রাউজিং সেশনের ইতিহাস, পাসওয়ার্ডগুলি, কুকিকে একবার ট্যাপ করে যে কোনো সময় সাফ করুন।",
+	"bs (bosnian)": "Izbrišite svoju historiju pretraživanja, lozinke i kolačiće bilo kada s jednim dodirom.",
+	"co (corsican)": "Squassate a vostra cronolugia di navigazione, e vostre parolle d’intesa, i vostri canistrelli, à ogni mumentu, cù un’incalcata simplice.",
+	"cy (welsh)": "Cliriwch hanes pori, cyfrineiriau, cwcis eich sesiwn unrhyw bryd gydag un cyffyrddiad.",
+	"dsb (lower sorbian)": "Wulašujśo swóju póseźeńsku historiju, swóje gronidła a cookieje kuždy cas z jadnym dotyknjenim.",
+	"eo (esperanto)": "Iam ajn, per nura tuŝeto, viŝi vian tutan retuman seancan historion, pasvortojn, kuketojn.",
+	"et (estonian)": "Kustuta ühe puudutusega kogu lehitsemise seansi ajalugu, paroolid ja küpsised.",
+	"eu (basque)": "Sakatze hutsarekin, garbitu edozein unetan zure nabigatze-historia osoa, pasahitzak eta cookieak.",
+	"gd (scottish gaelic)": "Falamhaich eachdraidh an t-seisein bhrabhsaidh, na faclan-faire agus briosgaidean agad uair sam bith le aon ghnogag.",
+	"gl (galician)": "Borre todo o seu historial de sesións de navegación, contrasinais e cookies en calquera momento cun só toque.",
+	"gu (gujarati)": "કંઈક અલગ શોધી રહ્યાં છો? કોઈ અલગ શોધ એન્જિન પસંદ કરો. ગોપનીયતા સૂચના.", // mix of two different sentence
+	"hi (hindi)": "अपने ब्राउज़िंग सत्र का इतिहास, कूटशब्दो, और स्मृतिशेषों को किसी भी समय एक टैप में मिटाएँ.",
+	"hsb (upper sorbian)": "Zhašejće swoju posedźensku historiju, swoje hesła a placki kóždy čas z jednym podótkom.",
+	"hy (armenian)": "Մաքրում է դիտարկումների պատմությունը, գաղտնաբառերը և ավելին՝ մեկ սեղմամբ:",
+	"ia (interlingua)": "Vacua tote le chronologia, contrasignos e cookies de tu session de navigation, quando tu vole, con un sol tocco.",
+	"kab (kabyle)": "Kkes amazray inek tiγimit n tuinigin, awalen inek uffiren d wayen nniḍen d ayen fessusen s waṭas.",
+	"kk (kazakh)": "Шолулар тарихын, парольдерді және cookies файлдарын кез келген уақытта бір шертумен өшіріңіз.",
+	"km (khmer)": "មាត្រា ១ មនុស្សទាំងអស់ កើតមកមានសេរីភាព និងសមភាព ក្នុងផ្នែកសេចក្ដីថ្លៃថ្នូរនិងសិទ្ធិ។ មនុស្ស មានវិចារណញ្ញាណនិងសតិសម្បជញ្ញៈជាប់ពីកំណើត ហើយគប្បីប្រព្រឹត្ដចំពោះគ្នាទៅវិញទៅមក ក្នុង ស្មារតីភាតរភាពជាបងប្អូន។",
 		// Article 1 of the Universal Declaration of Human Rights
 		// ^ All human beings are born free and equal in dignity and rights.
 		// ^ They are endowed with reason and conscience and should act towards one another in a spirit of brotherhood.
-	"korean": "브라우징 세션 기록이나 비밀번호, 쿠키를 언제나 탭 한번으로 삭제합니다.",
-	"lithuanian": "Bet kuriuo metu išvalykite visą savo naršymo žurnalą, slaptažodžius ir slapukus vienu bakstelėjimu.",
-	"macedonian ": "Сакам да разменам пари/натнички чекови.", // I want to exchange some money/travellers cheques.
-	"malay": "Buang seluruh sejarah pelayaran, kata laluan dan kuki dengan sekali tekan sahaja.",
-	"norwegian": "Slett hele nettleserhistorikken din, passord, infokapsler når som helst med ett trykk.",
-	"polish": "Usuwaj całą historię przeglądania, hasła i ciasteczka jednym stuknięciem.",
-	"portuguese (brazil)": "Limpe todo o histórico, senhas e cookies da sessão de navegação quando quiser, com um simples toque.",
-	"romanian": "Șterge întregul istoric al sesiunii, parolele și cookie-urile oricând, cu o singură atingere.",
-	"russian": "В любой момент стирайте одним нажатием всю историю просмотров, пароли и куки.",
-	"spanish (argentina)": "Limpiá todo tu historial de navegación, contraseñas y cookies para esta sesión en cualquier momento con tan solo un toque.",
-	"spanish (spain)": "Limpia todo el historial de navegación de tu sesión, contraseñas y cookies en cualquier momento con tan solo un clic.",
-	"swedish": "Rensa hela din webbhistorik, lösenord, kakor när som helst med ett enda tryck.",
-	"thai": "ล้างประวัติ, รหัสผ่าน และคุกกี้ในวาระการท่องเว็บทั้งหมดของคุณได้ทุกเวลาด้วยการแตะครั้งเดียว",
-	"turkish": "İstediğiniz zaman tek bir dokunuşla gezinti geçmişinizi, parolaları ve çerezleri temizleyebilirsiniz.",
-	"vietnamese": "Xóa toàn bộ lịch sử duyệt web, mật khẩu, cookie bất kỳ lúc nào chỉ với một cú chạm.",
+	"kn (kannada)": "ನಿಮ್ಮ ಸಂಪೂರ್ಣ ಬ್ರೌಸಿಂಗ್ ಸೆಷನ್ ಇತಿಹಾಸ, ಪಾಸ್ವರ್ಡ್ಗಳು, ಕುಕೀಸ್ ಅನ್ನು ಒಮ್ಮೆ ತಟ್ಟುವುದರಿಂದ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ತೆರವುಗೊಳಿಸಿ.",
+	"lo (lao)": "ລືບປະຫວັດເຊສຊັນການທ່ອງເວັບ, ລະຫັດຜ່ານ ແລະ ອື່ນໆທັງຫມົດຂອງທ່ານໂດຍການແຕະບາດດຽວ.",
+	"lv (latvian)": "Tas ļauj jums uzņemt un augšupielādēt fotoattēlus. Vietnes, ko apmeklējat, var pieprasīt jūsu atrašanās vietu.", // mix of two different sentence
+	"mr (marathi)": "आपला संपूर्ण ब्राऊझिंग इतिहास, पासवर्ड आणि कुकीज केव्हाही एका टॅप मध्ये नष्ट करा.",
+	"ne (nepali)": "एक क्लिकमा नै तपाईंको सम्पुर्ण ब्राउजिङ्ग इतिहास, पासवर्डहरु, कुकिजहरु कुनैपनि समयमा खाली हुनेछ ।",
+	"pa (punjabi)": "ਆਪਣੇ ਪੂਰੇ ਬਰਾਊਜ਼ਿੰਗ ਸ਼ੈਸ਼ਨ ਅਤੀਤ, ਪਾਸਵਰਡ, ਕੂਕੀਜ਼ ਨੂੰ ਕਿਸੇ ਵੀ ਵੇਲੇ ਇੱਕ ਛੋਹ ਨਾਲ ਮਿਟਾ ਦਿਓ।",
+	"ses (koyraboro senni)": "Woo ga naŋ war ma biyey zaa k'i zijandi. Interneti nungey kaŋ war g'i naaru ga hin ka war gorodogoo hãa.", // mix of two different sentence
+	"si (sinhala)": "ඔබගේ සමස්ත පිරික්සුම් වාර ඉතිහාසය, මුරපද, දත්තකඩ ඕනෑම විටෙක තනි තට්ටු කිරීමකින් මකන්න.",
+	"sk (slovak)": "Kedykoľvek si vyčistite celú históriu prehliadania, heslá a cookies. Stačí vám na to jedno ťuknutie.",
+	"sl (slovenian)": "Kadarkoli izbrišite celotno zgodovino brskanja, gesla in piškotke z enim dotikom.",
+	"ta (tamil)": "உங்கள் ஒட்டுமொத்த உலாவல் அமர்வு வரலாறு, கடவுச்சொற்கள், நினைவிகளை எந்நேரத்திலும் ஒரே தட்டில் துடைக்கவும்.",
+	"te (telugu)": "ఎప్పుడైనా కేవలం ఒకే నొక్కుతో మీ విహరణ సెషను చరిత్ర అంతా, సంకేతపదాలు, కుకీలు తుడిచివేసుకోండి.",
+	"tl (tagalog)": "I-clear ang iyong buong kasaysayan ng session sa pagba-browse, mga password, cookies anumang oras na may isang solong tapikin.",
+	"tt (tatar)": "Бер басу аша бөтен гизү тарихын, серсүзләрне һәм кукиларны теләсә кайчан бетерә аласыз.",
+	"uz (uzbek)": "Istalgan vaqtida bir ishora bilan brauzer tarixi, parol va cookie fayllarni tozalab tashlang.",
 }
-
-let aPartial = [
-	// partial range: i.e start..end is not the full assigned range
-
-	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
-	"basic latin", // C0 controls ignored
-	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
-	"latin-1 supplement", // 008x + 009x ignored, control codes
-	"mathematical alphanumeric symbols", // 996 code points
-
-	// partial: reduce entropy duplicity
-		// i.e a lot of chars are the same measurements: east asian languages
-	"cjk radicals supplement",
-	"enclosed cjk letters and months",
-	"hangul compatibility jamo",
-	"hangul jamo",
-	"kangxi radicals",
-	"hiragana",
-	"katakana",
-
-	// partial! doh! way too big
-		// also east asian measurments seem to all be the same per script
-	"cjk unified ideographs", // 20,992 code points
-	"cjk unified ideographs extension-a", // 6,592 code points
-	"cjk unified ideographs extension-b", // 42,720 code points
-	"hangul syllables", // 11,172 code points
-	"yi syllables",  // 1,165 code points
-]
-
-let aSelective = [
-	// not all blocks in the range is used: i.e not "contiguous"
-		// be careful to not exclude later assigned code points
-		// or reduce size entropy per script
-	"enclosed cjk letters and months",
-	"hangul jamo",
-]
 
 let aSpacer = [
 	"combining diacritical marks",
@@ -152,53 +160,6 @@ let aSpacer = [
 	"combining diacritical marks supplement",
 	"cyrillic extended-a",
 ]
-
-let oEnlarge = {
-	"alphabetic presentation forms": [14],
-	"arabic": [16],
-	"arabic presentation forms-a": [16],
-	"arabic supplement": [16],
-	"arrows": [14],
-	"bengali": [14],
-	"bopomofo extended": [14],
-	"combining diacritical marks": [20],
-	"combining diacritical marks for symbmols": [20],
-	"combining diacritical marks supplement": [20],
-	"control pictures": [16],
-	"cyrillic extended-a": [22],
-	"deseret": [14],
-	"devanagari": [14],
-	"ethiopic": [14],
-	"ethiopic supplement": [16],
-	"general punctuation": [16],
-	"glagolitic": [14],
-	"hangul jamo": [14],
-	"hebrew": [18],
-	"ipa extensions": [14],
-	"kanbun": [16],
-	"katakana phonetic extensions": [16],
-	"mongolian": [20],
-	"ogham": [18],
-	"old turkic": [14],
-	"optical character recognition": [18],
-	"oriya": [14],
-	"phonetic extensions": [16],
-	"phonetic extensions supplement": [16],
-	"runic": [14],
-	"sinhala": [16],
-	"spacing modifier letters": [18],
-	"superscripts and subscripts": [18],
-	"supplemental arrows-a": [14],
-	"supplemental arrows-b": [14],
-	"syriac": [16],
-	"tai le": [14],
-	"telugu": [16],
-	"thai": [14],
-	"thanaa": [16],
-	"tibetan": [18],
-	"vertical forms": [16],
-	"yi syllables": [16],
-}
 
 let	uv1x0x0 = "1.0.0 (1991)",
 	uv1x0x1 = "1.0.1 (1992)",
@@ -211,6 +172,10 @@ let	uv1x0x0 = "1.0.0 (1991)",
 	uv4x1 = "4.1 (2005)",
 	uv5x0 = "5.0 (2006)",
 	uv5x1 = "5.1 (2008)",
+	uv5x2 = "5.2 (2009)",
+	uv6x1 = "6.1 (2012)",
+	uv7x0 = "7.0 (2014)",
+	uv8x0 = "8.0 (2015)",
 	uv9x0 = "9.0 (2016)"
 
 let aBlocks = [
@@ -237,6 +202,7 @@ let aBlocks = [
 	],
 	["ethiopic supplement", "13", [8,9], -6, , "Ethiopic_Supplement"],
 	//["medefaidrin", "16E", [4,5,6,7,8,9], -5, , "Medefaidrin_(Unicode_block)"], // noone supports this, reduce overhead/perf
+	["mende_kikakui", "1E8", [0,1,2,3,4,5,6,7,8,6,"A","B","C","D"], -9, ["C5","C6"], "Mende_Kikakui_(Unicode_block)"],
 	["nko", "07", ["C","D","E","F"], 0, ["FB","FC"], "NKo_(Unicode_block)",
 		[
 			"FD","FE","FF", // 11.0
@@ -261,12 +227,14 @@ let aBlocks = [
 			"F5","F8","F9","FA","FB","FC","FD", // 8.0
 		], uv3x0
 	],
+	["cherokee supplement", "AB", [7,8,9,"A","B"], , , "Cherokee_Supplement"],
 	["deseret", "104", [0,1,2,3,4], , , "Deseret_(Unicode_block)"],
 	["osage", "104", ["B","C","D","E","F"], -4, ["D4","D5","D6","D7"], "Osage_(Unicode_block)"],
-	["unified canadian aboriginal syllabics", 1,
-		[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",
-		50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",
-		60,61,62,63,64,65,66,67], , , "Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)",
+
+	["unified canadian aboriginal syllabics", 1, 
+		//[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62,63,64,65,66,67], , , // full
+		[40,41,42,43,44,45,67], , , // selective
+		"Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)",
 		[
 			"400","677","678","679","67A","67B","67C","67D","67E","67F", // 5.2
 		], uv3x0
@@ -308,7 +276,15 @@ let aBlocks = [
 		], uv4x1
 	],
 	["buginese", "1A", [0,1], 0, ["1C","1D"], "Buginese_(Unicode_block)"],
-	["buhid", 17, [4,5,], -12, , "Buhid_(Unicode_block)"],
+	["buhid", 17, [4,5], -12, , "Buhid_(Unicode_block)"],
+	["chakma", 111, [0,1,2,3,4], -8, ["35"], "Chakma_(Unicode_block)",
+		[
+			"44","45","46", // 11.0
+			"47" // 13.0
+		], uv6x1
+	],
+	["cham", "AA", [0,1,2,3,4,5], , ["37","38","39","3A","3B","3C","3D","3E","3F","4E","4F","5A","5B"], "Cham_(Unicode_block)"],
+	["common indic number forms", "A8", [3], -6, , "Common_Indic_Number_Forms"],
 	["devanagari", "09", [0,1,2,3,4,5,6,7], , , "Devanagari_(Unicode_block)",
 		[
 			"71","72", // 5.1
@@ -317,6 +293,11 @@ let aBlocks = [
 			"78" // 7.0
 		], uv5x0
 	],
+	["dives akuru", 119, [0,1,2,3,4,5], -6,
+		["07","08","0A","0B","14","17","36","39","3A","47","48","49","4A","4B","4C","4D","4E","4F",],
+		"Dives_Akuru_(Unicode_block)"
+	],
+	["dogra", 118, [0,1,2,3,4], -20, , "Dogra_(Unicode_block)"],
 	["gujarati", "0A", [8,9,"A","B","C","D","E","F"], 0,
 		["80","84","8E","92","A9","B1","B4","BA","BB","C6","CA","CE","CF",
 		"D1","D2","D3","D4","D5","D6","D7","D8","D9","DA","DB","DC","DD","DE","DF",
@@ -337,9 +318,16 @@ let aBlocks = [
 			"76", // 11.0
 		], uv4x0
 	],
+	["hanifi rohingya", "10D", [0,1,2,3], -6, ["28","29","2A","2B","2C","2D","2E","2F"], "Hanifi_Rohingya__(Unicode_block)"],
 	["hanunoo", 17, [2,3], -9, , "Hanunoo_(Unicode_block)"],
 	["javanese", "A9", [8,9,"A","B","C","D"], 0, ["CE","DA","DB","DC","DD"], "Javanese_(Unicode_block)"],
-	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -13,
+	["kaithi", 110, [8,9,"A","B","C"], -2, ["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC"], "Kaithi_(Unicode_block)",
+		[
+			"CD", // 11.0
+			"C2", // 14.0
+		], uv5x2
+	],
+	["kannada", "0C", [8,9,"A","B","C","D","E","F"], -12,
 		["8D","91","A9","B4","BA","BB","C5","C9","CE","CF",
 		"D0","D1","D2","D3","D4","D7","D8","D9","DA","DB","DC","DF","E4","E5","F0"],
 		"Kannada_(Unicode_block)",
@@ -348,25 +336,41 @@ let aBlocks = [
 			"80", // 9.0
 			"84", // 11.0
 			"DD", // 14.0
+			"F3", // 15.0
 		], uv5x0
 	],
+	["kawi", "11F", [0,1,2,3,4,5], -6, ["11","3B","3C","3D"], "Kawi_(Unicode_block)"],
+	["kayah li", "A9", [0,1,2], , , "Kayah_Li_(Unicode_block)"],
 	["khmer", 17, [8,9,"A","B","C","D","E","F"], -6,
 		["DE","DF","EA","EB","EC","ED","EE","EF"], "Khmer_(Unicode_block)", , ,
 		["B4","B5"] // ignore: KIV AQ, KIV AA
 	],
 	["khmer symbols", 19, ["E","F"], , , "Khmer_Symbols"],
+	["khojki", 112, [0,1,2,3,4], -14, ["12"], "Khojki_(Unicode_block)",
+		[
+			"3E", // 9.0
+			"3F","40","41", // 15.0
+		], uv7x0
+	],
+	["khudawadi", 112, ["B","C","D","E","F"], -6, ["EB","EC","ED","EE","EF"], "Khudawadi_(Unicode_block)"],
 	["lao", "0E", [8,9,"A","B","C","D","E","F"], -32,
-		["80","83","85","8B","A4","A6","BE","BF","C5","C7","CE","CF","DA","DB"],
+		["80","83","85","8B","A4","A6","BE","BF","C5","C7","CF","DA","DB"],
 		"Lao_(Unicode_block)",
 		[
 			"DE","DF", // 6.1
 			"86","89","8C","8E","8F","90","91","92","93","98","A0","A8","A9","AC","BA", // 12.0
+			"CE", // 15.0
 		], uv1x0x1
 	],
-	["modi", 116, [0,1,2,3,4,5], -6, ["45","46","47","48","49","4A","4B","4C","4D","4E","4F"], "Modi_(Unicode_block)",],
+	["lepcha", "1C", [0,1,2,3,4], , ["38","39","3A","4A","4B","4C"], "Lepcha_(Unicode_block)"],
+	["limbu", 19, [0,1,2,3,4], , ["1F","2C","2D","2E","2F","3C","3D","3E","3F","41","42","43"], "Limbu_(Unicode_block)",
+		[
+			"1D","1E", // 7.0
+		], uv4x0
+	],
+	["mahajani", 111, [5,6,7], -9, , "Mahajani_(Unicode_block)"],
 	["malayalam", "0D", [0,1,2,3,4,5,6,7], 0,
-		["0D","11","45","49","50","51","52","53","64","65"],
-		"Malayalam_(Unicode_block)",
+		["0D","11","45","49","50","51","52","53","64","65"], "Malayalam_(Unicode_block)",
 		[
 			"29","3A","4E", // 6.0
 			"01", // 7.0
@@ -377,11 +381,22 @@ let aBlocks = [
 		], uv5x1,
 		["4E"] // ignore: letter dot reph
 	],
+	["meetei mayek", "AB", ["C","D","E","F"], -6, ["EE","EF"], "Meetei_Mayek_(Unicode_block)"],
+	["modi", 116, [0,1,2,3,4,5], -6, ["45","46","47","48","49","4A","4B","4C","4D","4E","4F"], "Modi_(Unicode_block)"],
+	["mro", "16A", [4,5,6], , ["5F","6A","6B","6C","6D"], "Mro_(Unicode_block)"],
+	["multani", 112, [8,9,"A"], -6, ["87","89","8E","9E"], "Multani_(Unicode_block)"],
 	["myanmar", 10, [0,1,2,3,4,5,6,7,8,9], 0, , "Myanmar_(Unicode_block)",
 		[
 			"9A","9B","9C","9D", // 5.2
 		], uv5x1
 	],
+	["myanmar extended-a", "AA", [6,7], , , "Myanmar_Extended-A",
+		[
+			"7C","7D","7E","7F", // 7.0
+		], uv5x2
+	],
+	["myanmar extended-b", "A9", ["E","F"], -1, , "Myanmar_Extended-B"],
+	["nag mundari", "1E4", ["D","E","F"], -6, , "Nag_Mundari_(Unicode_block)"],
 	["new tai lue", 19, [8,9,"A","B","C","D"], 0,
 		["AC","AD","AE","AF","CA","CB","CC","CD","CE","CF","DB","DC","DD"],
 		"New_Tai_Lue_(Unicode_block)",
@@ -389,6 +404,14 @@ let aBlocks = [
 			"AA","AB","DA", // 5.2
 		], uv4x1
 	],
+	["newa", 114, [0,1,2,3,4,5,6,7], -30, ["5C",], "Newa_(Unicode_block)",
+		[
+			"5E", // 11.0
+			"5F", // 12.0
+			"5A","60","61", // 13.0
+		], uv9x0
+	],
+	["ol chiki", "1C", [5,6,7], , , "Ol_Chiki_(Unicode_block)"],
 	["oriya", "0B", [0,1,2,3,4,5,6,7], -8,
 		["00","04","0D","0E","11","12","29","31","34","3A","3B","45","46","49","4A","4E","4F",
 		"50","51","52","53","54","58","59","5A","5B","5E","64","65"],
@@ -398,7 +421,13 @@ let aBlocks = [
 			"55", // 13.0
 		], uv5x1
 	],
+	["pau cin hau", "11A", ["C","D","E","F"], -7, , "Pau_Cin_Hau_(Unicode_block)"],
 	["phags-pa", "A8", [4,5,6,7], -8, , "Phags-pa_(Unicode_block)"],
+	["saurashtra", "A8", [8,9,"A","B","C","D"], -6, ["C6","C7","C8","C9","CA","CB","CC","CD"], "Saurashtra_(Unicode_block)",
+		[
+			"C5", // 9.0
+		], uv5x1
+	],
 	["sinhala", "0D", [8,9,"A","B","C","D","E","F"], -11,
 		["80","84","97","98","99","B2","BC","BE","BF","C7","C8","C9","CB","CC","CD","CE","D5","D7",
 		"E0","E1","E2","E3","E4","E5","F0","F1"],
@@ -408,12 +437,19 @@ let aBlocks = [
 			"81", // 13.0
 		], uv3x0
 	],
+	["sora sompeng", 110, ["D","E","F"], -6, ["E9","EA","EB","EC","ED","EE","EF"], "Sora_Sompeng_(Unicode_block)"],
 	["sundanese", "1B", [8,9,"A","B"], , ,
 		"Sundanese_(Unicode_block)",
 		[
 			"AB","AC","AD","BA","BB","BC","BD","BE","BF", // 6.1
 		], uv5x1,
 		["AB"] // ignore: sign virama
+	],
+	["sundanese supplement", "1C", ["C"], -8, , "Sundanese_Supplement"],
+	["syloti nagri", "A8", [0,1,2], -3, , "Syloti_Nagri_(Unicode_block)",
+		[
+			"2C", // 13.0
+		], uv4x1
 	],
 	["tagalog", 17, [0,1,], 0, ["16","17","18","19","1A","1B","1C","1D","1E"],
 		"Tagalog_(Unicode_block)",
@@ -423,6 +459,18 @@ let aBlocks = [
 	],
 	["tagbanwa", 17, [6,7], -12, ["6D","71"], "Tagbanwa_(Unicode_block)"],
 	["tai le", 19, [5,6,7], -11, ["6E","6F"], "Tai_Le_(Unicode_block)"],
+	["tai tham", "1A", [2,3,4,5,6,7,8,9,"A"], -2,
+		["5F","7D","7E","8A","8B","8C","8D","8E","8F","9A","9B","9C","9D","9E","9F"], "Tai_Tham_(Unicode_block)"
+	],
+	["tai viet", "AA", [8,9,"A","B","C","D"], ,
+		["C3","C4","C5","C6","C7","C8","C9","CA","CB","CC","CD","CE","CF","D0","D1","D2","D3","D4","D5","D6","D7","D8","D9","DA"], "Tai_Viet_(Unicode_block)"
+	],
+	["takri", 116, [8,9,"A","B","C"], -6, ["BA","BB","BC","BD","BE","BF"], "Takri_(Unicode_block)",
+		[
+			"B8", // 12.0
+			"B9", // 14.0
+		], uv6x1
+	],
 	["tamil", "0B", [8,9,"A","B","C","D","E","F"], -5,
 		["80","81","84","8B","8C","8D","91","96","97","98","9B","9D",
 		"A0","A1","A2","A5","A6","A7","AB","AC","AD","BA","BB","BC","BD",
@@ -430,7 +478,7 @@ let aBlocks = [
 		"D1","D2","D3","D4","D5","D6","D8","D9","DA","DB","DC","DD","DE","DF",
 		"E0","E1","E2","E3","E4","E5"], "Tamil_(Unicode_block)"
 	],
-	["tamil supplement", "11F", ["C","D","E","F"], 0,
+	["tamil supplement", "11F", ["C","D","E","F"], ,
 		["F2","F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], "Tamil_Supplement"
 	],
 	["telugu", "0C", [0,1,2,3,4,5,6,7], 0,
@@ -457,6 +505,8 @@ let aBlocks = [
 		], uv3x0,
 		["0C"] // ignore: mark delimiter tsheg bstar
 	],
+	["tirhuta", 114, [8,9,"A","B","C","D"], -6, ["C8","C9","CA","CB","CC","CD","CE","CF"], "Tirhuta_(Unicode_block)"],
+	["warang citi", 118, ["A","B","C","D","E","F"], , ["F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], "Warang_Citi_(Unicode_block)"],
 
 	// CYRILLIC
 	["cyrillic"],
@@ -516,8 +566,8 @@ let aBlocks = [
 	],
 	["cjk compatibility forms", "FE", [3,4], , , "CJK_Compatibility_Forms"],
 	["cjk compatibility ideographs", "F",
-		[90,91,92,93,94,95,96,97,98,99,"9A","9B","9C","9D","9E","9F",
-		"A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","AA","AB","AC","AD","AE","AF"], -38, ["A6E","A6F"],
+		//[90,91,92,93,94,95,96,97,98,99,"9A","9B","9C","9D","9E","9F","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","AA","AB","AC","AD","AE","AF"], -38, ["A6E","A6F"], // full
+		[90,91,92,93,94,"A2","A6","AF"], -6, ["A6E","A6F"], // selective
 		"CJK_Compatibility_Ideographs",
 		[
 			"A6B","A6C","A6D", // 5.2
@@ -525,23 +575,22 @@ let aBlocks = [
 		], uv4x1
 	],
 	["cjk compatibility ideographs supplement", "2F",
-		[80,81,82,83,84,85,86,87,88,89,"8A","8B","8C","8D","8E","8F",
-			90,91,92,93,94,95,96,97,98,"9A","9B","9C","9D","9E","9F","A0","A1"
-		], -2, ,
+		//[80,81,82,83,84,85,86,87,88,89,"8A","8B","8C","8D","8E","8F", 90,91,92,93,94,95,96,97,98,"9A","9B","9C","9D","9E","9F","A0","A1"], -2, , // full
+		[82,83,84,87,88,89,"9B",], , , // selective
 		"CJK_Compatibility_Ideographs_Supplement"
 	],
 	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
 		["00"] // ignore: ID SP
 	],
-	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"],
-		// ["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"], // full
+	["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"],
 
 	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"],
 	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"],
 	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"],
 
-	["enclosed cjk letters and months", "32", [1,2,4,5,7,"A","C","F"], , ["1F"], // 2,A adds size entropy for this script
-		//["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
+	["enclosed cjk letters and months", "32",
+		// [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
+		[1,2,4,5,7,"A","C","F"], , ["1F"], // selective
 		"Enclosed_CJK_Letters_and_Months",
 		[
 			"1D","1E","50","7C","7D","CC","CD","CE","CF", // 4.0
@@ -550,31 +599,32 @@ let aBlocks = [
 			"FF", // 12.1
 		], uv3x2
 	],
-	["hangul compatibility jamo", 31, [3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , ,
-		// ["hangul compatibility jamo", 31, [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
+	["hangul compatibility jamo", 31,
+		// [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
+		[3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , , // selective
 		["64"] // ignore: HF
 	],
-	["hangul jamo", 11, [5,"A","B","F"], , , "Hangul_Jamo_(Unicode_block)",
-		// ["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)", // full
+	["hangul jamo", 11,
+		// [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , // full
+		[5,"A","B","F"], , , // selective
+		"Hangul_Jamo_(Unicode_block)",
 		[
 			"5A","5B","5C","5D","5E","A3","A4","A5","A6","A7","FA","FB","FC","FD","FE","FF", // 5.2
 		], uv1x1,
 		["5F","60"] // ignore: HCF hangul choseong filler, HJF hangul jungseong filler
 	],
 	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"],
-
-	["hiragana", 30, [6,7,8,9], , ["97","98"], "Hiragana_(Unicode_block)"],
-	// ["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"], // full
-
+	["hiragana", 30,
+		// [4,5,6,7,8,9], , // full
+		[6,7,8,9], , // selective
+		["40","97","98"], "Hiragana_(Unicode_block)"
+	],
 	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
-	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_Radicals_(Unicode_block)"],
-		// ["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"], // full
-
-	["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"],
-	// ["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
-
+	["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"],
+	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"],
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
+	["lisu", "A4", ["D","E","F"], , , "Lisu_(Unicode_block)"],
 	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
 	["yi radicals", "A4", [9,"A","B","C"], -9, , "Yi_Radicals"],
 	["yi syllables", "A0", [0,1,2,3], , , "Yi_Syllables"],
@@ -618,7 +668,30 @@ let aBlocks = [
 		["A0","AD"], // ignore: NBSP, SHY
 	],
 	["latin extended-a", "01", [0,1,2,3,4,5,6,7], , , "Latin_Extended-A"],
-	["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F", 20, 21,22,23,24], , , "Latin_Extended-B"],
+	["latin extended-b", 0, [18,19,"1A","1B","1C","1D","1E","1F",20,21,22,23,24], , , "Latin_Extended-B"],
+	["latin extended-c", "2C", [6,7], , , "Latin_Extended-C"],
+	["latin extended-d", "A7", [2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , 
+		[
+			"CB","CC","CD","CE","CF","D2","D4","DA","DB","DC","DD","DE","DF",
+			"E0","E1","E2","E3","E4","E5","E6","E7","E8","E9","EA","EB","EC","ED","EE","EF",
+			"F0","F1"
+		], "Latin_Extended-D",
+		[
+			"AE", // 9.0
+			"A7","B8","B9", // 11.0
+			"BA","BB","BC","BD","BE","BF","C2","C3","C4","C5","C6", // 12.0
+			"C7","C8","C9","CA","F5","F6", // 13.0
+			"C0","C1","D0","D1","D3","D5","D6","D7","D8","D9","F2","F3","F4", // 14.0
+		], uv8x0
+	],
+	["latin extended-e", "AB", [3,4,5,6], -4 , , "Latin_Extended-E",
+		[
+			"66","67", // 12.0
+			"68","69","6A","6B", // 13.0
+		], uv8x0
+	],
+	["latin extended-f", 107, [8,9,"A","B"], -5 , ["86","B1"], "Latin_Extended-F"],
+	["latin extended-g", "1DF", [0,1,2], -5 , ["1F","20","21","22","23","24"], "Latin_Extended-G"],
 	["latin extended additional", "1E", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
 		"Latin_Extended_Additional",
 		[
@@ -847,6 +920,7 @@ function generate() {
 	// build combobox contents
 	// display first option
 	return new Promise(resolve => {
+		let charSizesBig = {}
 		let aSuffix = [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"]
 		oDisplay = {}
 		let aOptions = []
@@ -881,7 +955,7 @@ function generate() {
 						let string = "0x"+ prefix + range[i] + aSuffix[j]
 						let match = ""+ range[i] + aSuffix[j]
 						if (ignore.includes(match)) {
-							//
+							// don't add
 						} else if (!nonassigned.includes(match)) {
 							aChars.push(String.fromCodePoint(string))
 						}
@@ -893,10 +967,15 @@ function generate() {
 					aChars = aChars.slice(0, remove)
 				}
 				// limit size for display
-				aChars = aChars.slice(0, 100)
+				if (aChars.length > 160) {
+					charSizesBig[name] = aChars.length
+					aChars = aChars.slice(0, 160)
+				}
 				oDisplay[name] = aChars
 			}
 		})
+		console.log(charSizesBig)
+
 		// populate options
 		dom.scripts.innerHTML = aOptions.join("")
 		run("scripts")
@@ -909,6 +988,14 @@ function generate() {
 		// return
 		return resolve()
 	})
+}
+
+function run_next(type) {
+	// because on android it's a PITA to use comboboxes
+	let target = document.getElementById(type)
+	target.selectedIndex++
+	if (target.value == "") {target.selectedIndex++} // end of list, return to top
+	run(type)
 }
 
 function run(type) {
