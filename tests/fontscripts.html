@@ -131,8 +131,8 @@
 
 let aPartial = [
 	// partial range: i.e start..end is not the full assigned range
-
-	"arabic presentation forms-a", // 631 code points: too much to reduce and ignore
+	"unified canadian aboriginal syllabics", // 640 code points
+	"arabic presentation forms-a", // 631 code points
 	"basic latin", // C0 controls ignored
 	"general punctuation", // 200x and 206x ignored, e.g. birectional, non-printing etc
 	"latin-1 supplement", // 008x + 009x ignored, control codes
@@ -140,13 +140,12 @@ let aPartial = [
 
 	// partial: reduce entropy duplicity
 		// i.e a lot of chars are the same measurements: east asian languages
-	"cjk radicals supplement",
+	"cjk compatibility ideographs",
+	"cjk compatibility ideographs supplement",
 	"enclosed cjk letters and months",
 	"hangul compatibility jamo",
 	"hangul jamo",
-	"kangxi radicals",
 	"hiragana",
-	"katakana",
 
 	// partial! doh! way too big
 		// also east asian measurments seem to all be the same per script
@@ -161,8 +160,11 @@ let aSelective = [
 	// not all blocks in the range is used: i.e not "contiguous"
 		// be careful to not exclude later assigned code points
 		// or reduce size entropy per script
+	"cjk compatibility ideographs",
+	"cjk compatibility ideographs supplement",
 	"enclosed cjk letters and months",
 	"hangul jamo",
+	"unified canadian aboriginal syllabics",
 ]
 
 let aSpacer = [
@@ -293,10 +295,11 @@ let aBlocks = [
 	["cherokee supplement", "AB", [7,8,9,"A","B"], , , "Cherokee_Supplement"],
 	["deseret", "104", [0,1,2,3,4], , , "Deseret_(Unicode_block)"],
 	["osage", "104", ["B","C","D","E","F"], -4, ["D4","D5","D6","D7"], "Osage_(Unicode_block)"],
-	["unified canadian aboriginal syllabics", 1,
-		[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",
-		50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",
-		60,61,62,63,64,65,66,67], , , "Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)",
+
+	["unified canadian aboriginal syllabics", 1, 
+		//[40,41,42,43,44,45,46,47,48,49,"4A","4B","4C","4D","4E","4F",50,51,52,53,54,55,56,57,58,59,"5A","5B","5C","5D","5E","5F",60,61,62,63,64,65,66,67], , , // full
+		[40,41,42,43,44,45,67], , , // selective
+		"Unified_Canadian_Aboriginal_Syllabics_(Unicode_block)",
 		[
 			"400","677","678","679","67A","67B","67C","67D","67E","67F", // 5.2
 		], uv3x0
@@ -570,7 +573,6 @@ let aBlocks = [
 	["tirhuta", 114, [8,9,"A","B","C","D"], -6, ["C8","C9","CA","CB","CC","CD","CE","CF"], "Tirhuta_(Unicode_block)"],
 	["warang citi", 118, ["A","B","C","D","E","F"], , ["F3","F4","F5","F6","F7","F8","F9","FA","FB","FC","FD","FE"], "Warang_Citi_(Unicode_block)"],
 
-
 	// CYRILLIC
 	["cyrillic"],
 	["cyrillic", "04", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ,
@@ -629,8 +631,8 @@ let aBlocks = [
 	],
 	["cjk compatibility forms", "FE", [3,4], , , "CJK_Compatibility_Forms"],
 	["cjk compatibility ideographs", "F",
-		[90,91,92,93,94,95,96,97,98,99,"9A","9B","9C","9D","9E","9F",
-		"A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","AA","AB","AC","AD","AE","AF"], -38, ["A6E","A6F"],
+		//[90,91,92,93,94,95,96,97,98,99,"9A","9B","9C","9D","9E","9F","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9","AA","AB","AC","AD","AE","AF"], -38, ["A6E","A6F"], // full
+		[90,91,92,93,94,"A2","A6","AF"], -6, ["A6E","A6F"], // selective
 		"CJK_Compatibility_Ideographs",
 		[
 			"A6B","A6C","A6D", // 5.2
@@ -638,23 +640,22 @@ let aBlocks = [
 		], uv4x1
 	],
 	["cjk compatibility ideographs supplement", "2F",
-		[80,81,82,83,84,85,86,87,88,89,"8A","8B","8C","8D","8E","8F",
-			90,91,92,93,94,95,96,97,98,"9A","9B","9C","9D","9E","9F","A0","A1"
-		], -2, ,
+		//[80,81,82,83,84,85,86,87,88,89,"8A","8B","8C","8D","8E","8F", 90,91,92,93,94,95,96,97,98,"9A","9B","9C","9D","9E","9F","A0","A1"], -2, , // full
+		[82,83,84,87,88,89,"9B",], , , // selective
 		"CJK_Compatibility_Ideographs_Supplement"
 	],
 	["cjk symbols and punctuation", 30, [0,1,2,3], , , "CJK_Symbols_and_Punctuation", , ,
 		["00"] // ignore: ID SP
 	],
-	["cjk radicals supplement", "2E", [8,9,"A","B"], , ["9A"], "CJK_Radicals_Supplement"],
-		// ["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"], // full
+	["cjk radicals supplement", "2E", [8,9,"A","B","C","D","E","F"], -12, ["9A"], "CJK_Radicals_Supplement"],
 
 	["cjk unified ideographs", "4E", [0,1,2,3], , , "CJK_Unified_Ideographs_(Unicode_block)"],
 	["cjk unified ideographs extension-a", 34, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_A"],
 	["cjk unified ideographs extension-b", 200, [0,1,2,3], , , "CJK_Unified_Ideographs_Extension_B"],
 
-	["enclosed cjk letters and months", "32", [1,2,4,5,7,"A","C","F"], , ["1F"], // 2,A adds size entropy for this script
-		//["enclosed cjk letters and months", "32", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
+	["enclosed cjk letters and months", "32",
+		// [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , ["1F"], // full
+		[1,2,4,5,7,"A","C","F"], , ["1F"], // selective
 		"Enclosed_CJK_Letters_and_Months",
 		[
 			"1D","1E","50","7C","7D","CC","CD","CE","CF", // 4.0
@@ -663,29 +664,30 @@ let aBlocks = [
 			"FF", // 12.1
 		], uv3x2
 	],
-	["hangul compatibility jamo", 31, [3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , ,
-		// ["hangul compatibility jamo", 31, [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
+	["hangul compatibility jamo", 31,
+		// [3,4,5,6,7,8], , ["30"], "Hangul_Compatibility_Jamo", , , // full
+		[3,4,5,6], , ["30","8F"], "Hangul_Compatibility_Jamo", , , // selective
 		["64"] // ignore: HF
 	],
-	["hangul jamo", 11, [5,"A","B","F"], , , "Hangul_Jamo_(Unicode_block)",
-		// ["hangul jamo", 11, [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , "Hangul_Jamo_(Unicode_block)", // full
+	["hangul jamo", 11,
+		// [0,1,2,3,4,5,6,7,8,9,"A","B","C","D","E","F"], , , // full
+		[5,"A","B","F"], , , // selective
+		"Hangul_Jamo_(Unicode_block)",
 		[
 			"5A","5B","5C","5D","5E","A3","A4","A5","A6","A7","FA","FB","FC","FD","FE","FF", // 5.2
 		], uv1x1,
 		["5F","60"] // ignore: HCF hangul choseong filler, HJF hangul jungseong filler
 	],
 	["hangul syllables", "AC", [0,1,2,3], , , "Hangul_Syllables"],
-
-	["hiragana", 30, [6,7,8,9], , ["97","98"], "Hiragana_(Unicode_block)"],
-	// ["hiragana", 30, [4,5,6,7,8,9], , ["40","97","98"], "Hiragana_(Unicode_block)"], // full
-
+	["hiragana", 30,
+		// [4,5,6,7,8,9], , // full
+		[6,7,8,9], , // selective
+		["40","97","98"], "Hiragana_(Unicode_block)"
+	],
 	["ideographic description characters", "2F", ["F"], -4, , "Ideographic_Description_Characters_(Unicode_block)"],
 	["kanbun", 31, [9], , , "Kanbun_(Unicode_block)"],
-	["kangxi radicals", "2F", [0,1,2,3], , , "Kangxi_Radicals_(Unicode_block)"],
-		// ["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"], // full
-
-	//["katakana", 30, ["A","B","C","D"], , , "Katakana_(Unicode_block)"],
-	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"], // full
+	["kangxi radicals", "2F", [0,1,2,3,4,5,6,7,8,9,"A","B","C","D"], -10, , "Kangxi_Radicals_(Unicode_block)"],
+	["katakana", 30, ["A","B","C","D","E","F"], , , "Katakana_(Unicode_block)"],
 	["katakana phonetic extensions", 31, ["F"], , , "Katakana_Phonetic_Extensions"],
 	["lisu", "A4", ["D","E","F"], , , "Lisu_(Unicode_block)"],
 	["vertical forms", "FE", [1], -6, , "Vertical_Forms"],
@@ -1198,12 +1200,8 @@ let styles = ["none","sans-serif","serif","monospace","cursive","fantasy"]
 let fpTofuData = {},
 		fpTofuHashes = [],
 		// size
-		fpSizeDataOffset = {},
-		fpSizeDataBounding = {},
 		fpSizeDataClient = {},
 		// hashes
-		fpSizeHashesOffset = [],
-		fpSizeHashesBounding = [],
 		fpSizeHashesClient = [],
 		// unique sizes
 		fpSizeClientUnique = []
@@ -1367,10 +1365,6 @@ function logConsole(type, name) {
 	} else if (type == "version") {oUsed = oCodesMinVersion; logStr = "unicode [min version if reduced]"
 	} else if (type == "fpTofuData") {
 		oUsed = fpTofuData; logStr = "tofu | "+ testParams
-	} else if (type == "fpSizeDataOffset") {
-		oUsed = fpSizeDataOffset; logStr = "offset | "+ testParams
-	} else if (type == "fpSizeDataBounding") {
-		oUsed = fpSizeDataBounding; logStr = "getBounding | "+ testParams
 	} else if (type == "fpSizeDataClient") {
 		oUsed = fpSizeDataClient; logStr = "getClientRects | "+ testParams
 	} else if (type == "fptofuscript") {
@@ -1385,8 +1379,6 @@ function logConsole(type, name) {
 		logStr="sizes ["+ name +"] | "+ testParams
 		console.log(
 			logStr+"\n"+
-			"offset\n", (isOffset ? prettyObjectArray(fpSizeDataOffset[name]) : "n/a"),
-			"\ngetBounding\n", (isBounding ? prettyObjectArray(fpSizeDataBounding[name]) : "n/a"),
 			"\ngetClientRects\n", prettyObjectArray(fpSizeDataClient[name])
 		)
 		return
@@ -1395,10 +1387,6 @@ function logConsole(type, name) {
 	// arrays
 	if (type == "fptofu") {
 		logStr = "tofu fingerprint | "+ testParams +" | "+ mini(fpTofuHashes.join()) +"\n  "+ fpTofuHashes.join("\n  ")
-	} else if (type == "fpSizeOffset") {
-		logStr = "offset | "+ testParams +" | "+ mini(fpSizeHashesOffset.join()) +"\n  "+ fpSizeHashesOffset.join("\n  ")
-	} else if (type == "fpSizeBounding") {
-		logStr = "getBounding | "+ testParams +" | "+ mini(fpSizeHashesBounding.join()) +"\n  "+ fpSizeHashesBounding.join("\n  ")
 	} else if (type == "fpSizeClient") {
 		logStr = "getClientRects | "+ testParams +" | "+ mini(fpSizeHashesClient.join()) +"\n  "+ fpSizeHashesClient.join("\n  ")
 	}
@@ -1449,9 +1437,7 @@ function generate() {
 			+ s12 + "tofu size: ".padStart(16) + sc +"<span id='runningTofuSize'></span><br>"
 			+ s12 + "parameters: ".padStart(16) + sc +"<span id='runningParameters'></span><br>"
 			+ s12 +"tofu: ".padStart(16) + sc +"<br>"
-			+ s12 +"offset: ".padStart(16) + sc +"<span id='runningStatus'></span><br>"
-			+ s12 +"getBounding: ".padStart(16) + sc +"<br>"
-			+ s12 +"getClientRects: ".padStart(16) + sc +"</span><br>"
+			+ s12 +"getClientRects: ".padStart(16) + sc + "<span id='runningStatus'></span></span><br>"
 		aDisplay.push(strFP)
 		aDisplayMax.push(strFP)
 
@@ -1701,17 +1687,21 @@ function run() {
 			get_tofu_size(),
 			reset(),
 		]).then(function(results){
-			isRunning = true
-			dom.perf.innerHTML = "running ..."
-			dom.runningStatus = "running ... "+ get_count("testing ")
-			dom.runningTofuSize.innerHTML = tofuSize + " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
-			let testDepth = document.querySelector('input[name="depth"]:checked').value
-			testParams = (testDepth == "ALL" ? "all" : "up to "+ testDepth)
-				+" | "+ (dom.allassigned.checked ? "max" : "reduced")
-			dom.runningParameters = testParams
-			setTimeout(function() {
-				test(testDepth)
-			}, 1)
+			try {
+				isRunning = true
+				dom.perf.innerHTML = "running ..."
+				dom.runningStatus = "running ... "+ get_count("testing ")
+				dom.runningTofuSize.innerHTML = tofuSize + " <span class='btn12 btnc' onClick='logConsole(`tofusize`)'>[details]</span>"
+				let testDepth = document.querySelector('input[name="depth"]:checked').value
+				testParams = (testDepth == "ALL" ? "all" : "up to "+ testDepth)
+					+" | "+ (dom.allassigned.checked ? "max" : "reduced")
+				dom.runningParameters = testParams
+				setTimeout(function() {
+					test(testDepth)
+				}, 1)
+			} catch(e) {
+				console.log(e)
+			}
 		})
 	}
 }
@@ -1734,19 +1724,13 @@ function test(testDepth) {
 	fpTofuData = {}
 	fpTofuHashes = []
 	// reset size data
-	fpSizeDataOffset = {}
-	fpSizeDataBounding = {}
 	fpSizeDataClient = {}
 	// reset size hashes
-	fpSizeHashesOffset = []
-	fpSizeHashesBounding = []
 	fpSizeHashesClient = []
 	// reset unique sizes
 	fpSizeClientUnique = []
 	
 	let oTempTofu = {},
-		oTempSizeOffset = {},
-		oTempSizeBounding = {},
 		oTempSizeClient = {},
 		oTempSizeClientUnique = {}
 
@@ -1766,7 +1750,7 @@ function test(testDepth) {
 
 				let displayA = []
 				let aTofu = []
-				let aSizeOffset = [], aSizeBounding = [], aSizeClient = []
+				let aSizeClient = []
 				let anchorColor = "no_color", nameColor = s12, partial = ""
 				let	maxDepth = (testDepth > codes.length ? codes.length : testDepth)
 				maxDepth = maxDepth * 1
@@ -1783,20 +1767,6 @@ function test(testDepth) {
 				for (let i=0; i < codesA.length; i++) {
 					let character = String.fromCodePoint(codesA[i])
 					slot.textContent = character
-
-					// offset: w=span h=div
-					if (isOffset) {
-						let whOffset = span.offsetWidth + " x " + div.offsetHeight
-						aSizeOffset.push(codesA[i] +": "+ whOffset)
-					}
-
-					// bounding: w=div h=span
-					if (isBounding) {
-						let bDiv = div.getBoundingClientRect()
-						let bSpan = span.getBoundingClientRect()
-						let whBounding = bSpan.width +" x "+ bDiv.height
-						aSizeBounding.push(codesA[i] +": "+ whBounding)
-					}
 
 					// client: w=span, h=div
 					let cDiv = div.getClientRects()
@@ -1843,12 +1813,6 @@ function test(testDepth) {
 					oTempTofu[name] = {"hash": tofuHash, "data": aTofu}
 				}
 
-				if (isOffset) {
-					oTempSizeOffset[name] = {"hash": mini(aSizeOffset.join()), "data": aSizeOffset}
-				}
-				if (isBounding) {
-					oTempSizeBounding[name] = {"hash": mini(aSizeBounding.join()), "data": aSizeBounding}
-				}
 				oTempSizeClient[name] = {"hash": mini(aSizeClient.join()), "data": aSizeClient}
 
 				// remainder
@@ -1910,20 +1874,6 @@ function test(testDepth) {
 		fpTofuHashes.push(nameT +": "+ oTempTofu[nameT]["hash"])
 	}
 	// sort sizes
-	if (isOffset) {
-		const namesOffset = Object.keys(oTempSizeOffset).sort()
-		for (const nameO of namesOffset) {
-			fpSizeDataOffset[nameO] = oTempSizeOffset[nameO]
-			fpSizeHashesOffset.push(nameO +": "+ oTempSizeOffset[nameO]["hash"])
-		}
-	}
-	if (isBounding) {
-		const namesBounding = Object.keys(oTempSizeBounding).sort()
-		for (const nameB of namesBounding) {
-			fpSizeDataBounding[nameB] = oTempSizeBounding[nameB]
-			fpSizeHashesBounding.push(nameB +": "+ oTempSizeBounding[nameB]["hash"])
-		}
-	}
 	const namesClient = Object.keys(oTempSizeClient).sort()
 	for (const nameC of namesClient) {
 		fpSizeDataClient[nameC] = oTempSizeClient[nameC]
@@ -1950,19 +1900,6 @@ function test(testDepth) {
 	if (countTofu == 0) {
 		tofuFP = testParams == "all | max" ? sg + "OMG! CONGRATS: NO TOFU"+ sc : sg +"none"+ sc +": up your test parameters"
 	}
-
-	let sizeFPOffset = zNA
-	if (isOffset) {
-		sizeFPOffset = mini(fpSizeHashesOffset.join())
-			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeOffset`)'>[summary]</span>"
-			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataOffset`)'>["+ countTested +"]</span> "
-	}
-	let sizeFPBounding = zNA
-	if (isBounding) {
-		sizeFPBounding = mini(fpSizeHashesBounding.join())
-			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeBounding`)'>[summary]</span>"
-			+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataBounding`)'>["+ countTested +"]</span> "
-	}
 	let sizeFPClient = mini(fpSizeHashesClient.join())
 		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeClient`)'>[summary]</span>"
 		+ " <span class='btn12 btnc' onClick='logConsole(`fpSizeDataClient`)'>["+ countTested +"]</span> "
@@ -1972,8 +1909,6 @@ function test(testDepth) {
 		+ s12 +"tofu size: ".padStart(16) + sc + tofuSize + tofuSizeBtn + "<br>"
 		+ s12 +"parameters: ".padStart(16) + sc + testParams +"<br>"
 		+ s12 +"tofu: ".padStart(16) + sc + tofuFP +"<br>"
-		+ s12 +"offset: ".padStart(16) + sc + sizeFPOffset +"<br>"
-		+ s12 +"getBounding: ".padStart(16) + sc + sizeFPBounding +"<br>"
 		+ s12 +"getClientRects: ".padStart(16) + sc + sizeFPClient +"</span><br>"
 
 	// display visuals
@@ -2007,13 +1942,6 @@ function test(testDepth) {
 
 //dom.allassigned.checked = true
 let isRunning = true
-let isBounding = false
-let isOffset = false
-
-if (isFF) {
-	isBounding = true
-	isOffset = true
-}
 
 setTimeout(function() {
 	Promise.all([
