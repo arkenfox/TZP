@@ -39,9 +39,9 @@
 		<div class="cssGraphite" style="font-size: 300px;"><span id="testGraphite">+</span><span id="ctrlGraphite">-</span></div>
 		<img id="imageFS" width=0 height=0></img>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
-		<div id="ugDiv" class="normalized" style='font-size: 22pt;'><span id="ugSpan"><span id="ugSlot"></span></span></div>
-		<div><canvas id="ugCanvas" style='font-size: 22pt;'></canvas></div>
 		<div class="normalized">
+			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
+			<div><canvas id="ugCanvas"></canvas></div>
 			<div><span id="dfsize"></span></div>
 		</div>
 		<div id="svgDiv"></div>
@@ -121,7 +121,7 @@
 
 	<!--FPs-->
 	<table id="tbfp">
-		<col width="26%"><a name="finger"></a><col width="74%">
+		<col width="25%"><a name="finger"></a><col width="75%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title"><a href="#finger">loose <span class="perf"><sup>1</sup></span> fingerprints</a>
 			<div class="nav-up"><a href="#top">&#9650;</a> <span class="c perf" id="perfAll"></span></div>
@@ -657,7 +657,7 @@
 		<tr><td><span class="btn btn0" onClick="outputUser('outputAudioUser')">[ click ]</span>
 			hash</td><td class="c2 gc mono" id="audio_user"></td></tr>
 		<tr><td>OscillatorNode <sup>1</sup></td><td class="c2 gc mono" id="oscillator"></td></tr>
-		<tr><td>OscillatorNode/DynamicsCompressor <sup>1</sup></td><td class="c2 gc mono" id="oscillator_compressor"></td></tr>
+		<tr><td>+DynamicsCompressor <sup>1</sup></td><td class="c2 gc mono" id="oscillator_compressor"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">audio code based on work by </span>
 			<a target="_blank" class="blue" href="https://audiofingerprint.openwpm.com/">openWPM</a> <sup>1</sup>
