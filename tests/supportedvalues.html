@@ -20,25 +20,25 @@
 	</table>
 
 	<table id="tb4">
-		<col width="20%"><col width="20%"><col width="60%">
-		<thead><tr><th colspan="3">
+		<col width="40%"><col width="60%">
+		<thead><tr><th colspan="2">
 			<div class="nav-title">supportedvaluesof
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td colspan="3" class="intro">
+		<tr><td colspan="2" class="intro">
 			<span class="no_color">Return supported values for each parameter</span>
 		</td></tr>
-		<tr><td colspan="3"><hr><br></td></tr>
-		<tr><td colspan="2">hash</td><td class="mono spaces" id="hashAll"></td></tr>
-		<tr><td colspan="2">calendar</td><td class="mono spaces" id="calendar"></td></tr>
-		<tr><td colspan="2">collation</td><td class="mono spaces" id="collation"></td></tr>
-		<tr><td colspan="2">currency</td><td class="mono spaces" id="currency"></td></tr>
-		<tr><td colspan="2">numberingSystem</td><td class="mono spaces" id="numberingSystem"></td></tr>
-		<tr><td colspan="2">timeZone</td><td class="mono spaces" id="timeZone"></td></tr>
-		<tr><td colspan="2">unit</td><td class="mono spaces" id="unit"></td></tr>
-		<tr><td colspan="3"><br><hr><br></td></tr>
-		<tr><td id="detailslabel">click counts</td><td colspan="2" class="mono spaces" id="details">to list their results here</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td>hash</td><td class="mono spaces" id="hashAll"></td></tr>
+		<tr><td>calendar</td><td class="mono spaces" id="calendar"></td></tr>
+		<tr><td>collation</td><td class="mono spaces" id="collation"></td></tr>
+		<tr><td>currency</td><td class="mono spaces" id="currency"></td></tr>
+		<tr><td>numberingSystem</td><td class="mono spaces" id="numberingSystem"></td></tr>
+		<tr><td>timeZone</td><td class="mono spaces" id="timeZone"></td></tr>
+		<tr><td>unit</td><td class="mono spaces" id="unit"></td></tr>
+		<tr><td colspan="2"><br><hr></td></tr>
+		<tr><td colspan="2" style="text-align: left; color: var(--test0);" class="mono spaces" id="details">click counts to list their results here</td></tr>
 	</table>
 	<br>
 
@@ -46,21 +46,13 @@
 'use strict';
 
 s4 = s4.trim()
-s12 = s12.trim()
 s14 = s14.trim()
-s16 = s16.trim()
-sg = sg.trim()
-sb = sb.trim()
 
 let oData = {}
 
 function display(item) {
-	dom.detailslabel = item
-	if (item == "timeZone") {
-		dom.details.innerHTML = oData[item].join("<br>")
-	} else {
-		dom.details.innerHTML = oData[item].join(", ")
-	}
+	let delim = (item == "timeZone" ? "<br>" : ", ")
+	dom.details.innerHTML = s4 + item + sc +"<br><span class='faint'>[<br><span class='indent'>" + oData[item].join(delim) + "</span><br>]</span>"
 }
 
 function run() {
