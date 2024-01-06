@@ -45,9 +45,10 @@
 	--bg99: #808080;
 
 	--jstring: #ff7de9;
-  --jboolean: #86de74;
-  --jnull: #939395;
-  --jkey: #75bfff;
+	--jboolean: #86de74;
+	--jnull: #939395;
+	--jkey: #75bfff;
+	--link: #9db2dc; /* test12: so basic mode ignores it */
 }
 
 body {background-color: var(--bg0); color: var(--test0);}
@@ -99,8 +100,8 @@ div.pad {
 .key {color: var(--jkey);}
 
 a {color: black; text-decoration: none;}
-a.blue {color: var(--test12); text-decoration: none;}
-a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-height: 1.2em}
+a.blue {color: var(--link); text-decoration: none;}
+a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-height: 1.2em}
 .no_color {color: var(--test0);}
 .good {color: var(--test7);}
 .bad {color: var(--testbad);}
@@ -204,7 +205,7 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 .s99 {color: var(--test99);}
 .btngood, .sgood {border-color: var(--test7); color: var(--test7);}
 .btnbad, .sbad {border-color: var(--testbad); color: var(--testbad);}
-.btn-left {float: left; position: relative; left: -10px; top: 0px;}
+.btn-left {float: left; position: relative; left: -15px; top: 0px;}
 .btn-right {float: right; position: relative; right: 10px; top: 0px; text-align: right;}
 
 /* tooltips */
@@ -335,7 +336,7 @@ tr td.border-bottom {
 #divrect {position: fixed; padding: 8px; opacity: 0; z-index: -1;}
 .divrect1 {top: 0; left: 0;}
 #rect1 {top: 0; left: 0; width:100px; height:100px; transform: rotate(45deg); padding: 0px; position: fixed;}
-#ugSpan {font-size: 10000%;}
+#ugSpan {font-size: 22000px;}
 @font-face {font-family: "ABR"; src: url("../fonts/AdobeBlankRegular.ttf");}
 
 @font-face {
