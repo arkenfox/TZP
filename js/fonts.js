@@ -180,6 +180,7 @@ let fntMaster = {
 			// ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
 			'Dancing Script',
 			'SamsungKorean_v2.0', // 1674683
+			'SamsungColorEmoji', // 1872510
 			'One UI Sans KR VF', // 1865238
 			// + defaults: https://searchfox.org/mozilla-central/source/modules/libpref/init/all.js#3041
 				// ToDo: check names are correct + add: 'HYSerif','MotoyaLCedar','MotoyaLMaru','NanumGothic','SmartGothic',
@@ -1224,6 +1225,7 @@ const get_unicode = () => new Promise(resolve => {
 			const METRIC = prefix + name
 			let isString = true
 			let data = array[1] == undefined ? oTM[name]["data"] : array[1]
+
 			let display = "", value = ""
 			let errCheck = oCatch[name]
 			if (errCheck !== undefined) {
