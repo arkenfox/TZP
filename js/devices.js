@@ -435,7 +435,7 @@ function outputDevices() {
 
 	const METRIC = "recursion"
 	log_display(7, METRIC, isRecursion[0])
-	addData(7, METRIC, isRecursion[1] + " | "+ isRecursion[2])
+	addData(7, METRIC, isRecursion[1])
 
 	Promise.all([
 		get_media_devices(),
