@@ -763,17 +763,12 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 			if (hash == mini(oCheck)) {
 				notation = locale_green
 			} else {
-				isLies = true
-				hash = colorFn(hash)
-				log_known(SECT4, METRIC)
-				addDetail(METRIC, oData)
 				addDetail(METRIC +"_check", oCheck)
 				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
-				addData(4, METRIC, zLIE)
 			}
 		}
 	}
-	if (!isLies) {addData(4, METRIC, oData, hash)}
+	addData(4, METRIC, oData, hash)
 	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
 	log_perf(SECT4, METRIC, t0)
 	return resolve()
