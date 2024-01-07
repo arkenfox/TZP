@@ -391,10 +391,10 @@
 			<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
 			<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp locales</td><td class="c" id="localedata"></td></tr>
 		<tr><td>[intl] locale</td><td class="c mono" id="locale_intl"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">calendar<br>hourcycle<br>numberingsystem</span></div>
-			&nbsp [resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
-		<tr><td>[tolocalstring] locale</td><td class="c mono" id="locale_tolocalestring"></td></tr>
+		<tr><td>[resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
+		<tr><td>[tolocalstring] locale</td><td class="mono">
+			<span class="c" id="locale_tolocalestring"></span> <span class="c" id="locale_tolocalestring_matches_intl"></span>
+		</td></tr>
 		<!--dt-->
 		<tr><td>date/time</td><td class="c mono" id="datetimehash"></td></tr>
 		<tr><td>date/time & format</td><td class="c mono" id="datetimeformathash"></td></tr>
@@ -409,42 +409,6 @@
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
-		<!--locale-->
-		<tr class="togL"><td></td><td class="s4">locale</td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/collation.html">[PoC]</a>
-				&nbsp collation</td><td class="c mono" id="ldt20"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfcompact.html">[PoC]</a>
-				&nbsp compact</td><td class="c" id="ldt21"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfcurrency.html">[PoC]</a>
-				&nbsp currency</td><td class="c" id="ldt22"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/dayperiod.html">[PoC]</a>
-				&nbsp dayperiod</td><td class="c" id="ldt23"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/listformat.html">[PoC]</a>
-				&nbsp listformat</td><td class="c spaces" id="ldt24"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfnotation.html">[PoC]</a>
-				&nbsp notation</td><td class="c" id="ldt25"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nftoparts.html">[PoC]</a>
-				&nbsp [formatToParts] number</td><td class="c" id="ldt26"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/pluralrules.html">[PoC]</a>
-				&nbsp [cardinal] pluralrules</td><td class="c" id="ldt27"></td></tr>
-			<tr class="togL"><td>[ordinal] pluralrules</td><td class="c" id="ldt28"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/rtf.html">[PoC]</a>
-				&nbsp relativetime</td><td class="c" id="ldt29"></td></tr>
-			<tr class="togL"><td>[formatToParts] relativetime</td><td class="c" id="ldt30"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfsign.html">[PoC]</a>
-				&nbsp sign</td><td class="c" id="ldt31"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/timezonename.html">[PoC]</a>
-				&nbsp timezonename</td><td class="c mono" id="ldt32"></td></tr>
-			<tr class="togL"><td><a class="blue" target="blank" href="tests/nfunit.html">[PoC]</a>
-				&nbsp unit</td><td class="c mono" id="ldt33"></td></tr>
-
-		<!--toLocaleString-->
-		<tr class="togL"><td></td><td class="s4">toLocaleString</td></tr>
-			<tr class="togL"><td>compact</td><td class="c" id="ldt35"></td></tr>
-			<tr class="togL"><td>currency</td><td class="c" id="ldt36"></td></tr>
-			<tr class="togL"><td>notation</td><td class="c" id="ldt37"></td></tr>
-			<tr class="togL"><td>sign</td><td class="c" id="ldt38"></td></tr>
-			<tr class="togL"><td>unit</td><td class="c mono" id="ldt39"></td></tr>
 		<!--d/t-->
 		<tr class="togL"><td></td><td class="s4">date/time</td></tr>
 			<tr class="togL"><td>date/time</td><td class="c" id="ldt41"></td></tr>
