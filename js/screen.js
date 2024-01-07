@@ -1432,8 +1432,6 @@ function outputFD() {
 			tb_red = sbx+"MB]"+sc
 			tb_standard = sg+"[MB Standard]"+sc
 			tb_safer = sg+"[MB Safer]"+sc
-			intl_green = sgtick+"MB matches locale]"+sc
-			intl_red = sbx+"MB matches locale]"+sc
 		}
 	}
 	// browser
