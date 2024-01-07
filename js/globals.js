@@ -95,24 +95,24 @@ const tick = "✓", // u2713
 	rfp_red = sbx+"RFP]"+sc,
 	lb_green = sgtick+"LB]"+sc,
 	lb_red = sbx+"LB]"+sc,
-	nw_green = sgtick+"RFP NewWin]"+sc,
-	nw_red = sbx+"RFP NewWin]"+sc,
+	nw_green = sgtick+"RFP newwin]"+sc,
+	nw_red = sbx+"RFP newwin]"+sc,
 	default_green = sgtick+"default]"+sc,
 	default_red = sbx+"default]"+sc,
 	match_green = sgtick+"match]"+sc,
 	match_red = sbx+"match]"+sc,
 	fpp_green = sgtick+"FPP]"+sc,
-	locale_green = sgtick+"matches locale]"+sc,
-	locale_red = sbx+"matches locale]"+sc,
-	intl_green = sgtick+"matches intl]"+sc,
-	intl_red = sbx+"matches intl]"+sc
+	locale_green = sgtick+" locale]"+sc,
+	locale_red = sbx+" locale]"+sc,
+	intl_green = sgtick+" intl]"+sc,
+	intl_red = sbx+" intl]"+sc
 
 const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,
 	window_green = sgtick+"windows match]"+sc,
 	window_red = sbx+"windows match]"+sc,
-	sizes_green = sgtick+"screen matches inner]"+sc,
-	sizes_red = sbx+"screen matches inner]"+sc
+	sizes_green = sgtick+"screen = inner]"+sc,
+	sizes_red = sbx+"screen = inner]"+sc
 
 // dynamic notation
 let tb_green = sgtick+"TB]"+sc,
