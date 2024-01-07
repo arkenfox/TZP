@@ -253,11 +253,11 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 
 const set_oIntlTests = () => new Promise(resolve => {
 
-	let optN = {"narrow": [1]}, optL = {"long": [1]}, both = {"long": [1], "narrow": [1]}
+	let unitN = {"narrow": [1]}, unitL = {"long": [1]}, unitB = {"long": [1], "narrow": [1]}
 	let tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)],
-		shortG = {"shortGeneric": tzDays},
-		longG = {"longGeneric": tzDays},
-		keyShort = {"short": tzDays}
+		tzSG = {"shortGeneric": tzDays},
+		tzLG = {"longGeneric": tzDays},
+		tzS = {"short": tzDays}
 
 	oIntlTests = {
 		"collation": [
@@ -267,7 +267,7 @@ const set_oIntlTests = () => new Promise(resolve => {
 			'\u09A4','\u09CE','\u0A85','\u0B05','\u0B85','\u0C05','\u0C85','\u0D85','\u0E24','\u0E9A','\u10350','\u10D0','\u1208',
 			'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A',
 		],
-		"compact": [0/0, 1000, 2e6, 6.6e12, 7e15],
+		"compact": [[-1100000000,"short"], [0/0,"long"], [1000,"long"], [2e6,"long"], [6.6e12,"long"], [7e15,"long"]],
 		"currency": [
 			[{style: "currency", currency: "USD", currencySign: "accounting"}, -1000],
 			[{style: "currency", currency: "USD", currencyDisplay: "name"}, -1],
@@ -276,7 +276,13 @@ const set_oIntlTests = () => new Promise(resolve => {
 		"listformat": [
 			["narrow","conjunction"],["narrow","disjunction"],["narrow","unit"],["short","conjunction"],["short","unit"]
 		],
-		"number_formattoparts": { // nf, formattoparts
+		"notation": [
+			[0/0, "standard", "decimal"],
+			[-1000, "standard", "decimal"],
+			[987654, "standard", "decimal"],
+			[1000, "standard", "percent"]
+		],
+		"number_formattoparts": {
 			"decimal": [1.2],"group": [1000, 99999],"infinity": [Infinity],"minusSign": [-5],"nan": ["a"]
 		},
 		"pluralrules": {
@@ -288,36 +294,39 @@ const set_oIntlTests = () => new Promise(resolve => {
 		],
 		"sign": [-1, 0/0],
 		"timezonename": {
-			"Africa/Douala": longG,
-			"Africa/Lusaka": shortG,
-			"Africa/Nairobi": shortG,
-			"America/La_Paz": shortG,
-			"Asia/Phnom_Penh": shortG,
-			"Asia/Seoul": longG,
-			"Asia/Yerevan": shortG,
-			"Europe/Isle_of_Man": shortG,
-			"Europe/London": shortG,
-			"Indian/Chagos": longG,
-			"Indian/Cocos": keyShort,
-			"Pacific/Pago_Pago": longG,
-			"Pacific/Saipan": shortG,
-			"Pacific/Tongatapu": shortG,
+			"Africa/Douala": tzLG,
+			"Africa/Lusaka": tzSG,
+			"Africa/Nairobi": tzSG,
+			"America/La_Paz": tzSG,
+			"Asia/Phnom_Penh": tzSG,
+			"Asia/Seoul": tzLG,
+			"Asia/Yerevan": tzSG,
+			"Europe/Isle_of_Man": tzSG,
+			"Europe/London": tzSG,
+			"Indian/Chagos": tzLG,
+			"Indian/Cocos": tzS,
+			"Pacific/Pago_Pago": tzLG,
+			"Pacific/Saipan": tzSG,
+			"Pacific/Tongatapu": tzSG,
 		},
 		"unit": {
-			"byte": optN, // ICU 74
-			"fahrenheit": both,
-			"foot": optL,
+			"byte": unitN, // ICU 74
+			"fahrenheit": unitB,
+			"foot": unitL,
 			"hectare": {"long": [1], "short": [987654]},
-			"kilometer-per-hour": optN,
-			"millimeter": optN,
-			"month": both,
-			"nanosecond": optN,
-			"percent": both,
+			"kilometer-per-hour": unitN,
+			"millimeter": unitN,
+			"month": unitB,
+			"nanosecond": unitN,
+			"percent": unitB,
 			"second": {"long": [1], "narrow": [1], "short": [987654]},
-			"terabyte": optL,
+			"terabyte": unitL,
 		}
 	}
-	try {oIntlTests["compact"].push(BigInt("987354000000000000"))} catch(e) {}
+	try {oIntlTests["compact"].push([BigInt("987354000000000000"),"long"])} catch(e) {}
+	let nBig = 987654
+	try {nBig = BigInt("987354000000000000")} catch(e) {}
+	oIntlTests["notation"].push([nBig, "scientific","decimal"])
 
 })
 
@@ -512,14 +521,9 @@ const get_locale_intl = () => new Promise(resolve => {
 				res = oIntlTests[m].sort() // always re-sort
 				return res.sort(C.compare).join(", ")
 			} else if (m == "compact") {
-				let formatter = new Intl.NumberFormat(code, {notation: "compact", compactDisplay: "short", useGrouping: true})
-				res.push(formatter.format(-1100000000))
-				formatter = new Intl.NumberFormat(code, {notation: "compact", compactDisplay: "long", useGrouping: true})
-				oIntlTests[m].forEach(function(num){res.push(formatter.format(num))})
-				return res.join(" | ")
+				oIntlTests[m].forEach(function(pair){let f = pair[1] == "long" ? NFCl : NFCs; res.push(f.format(pair[0]))})
 			} else if (m == "currency") {
 				oIntlTests[m].forEach(function(pair) {res.push(Intl.NumberFormat(code, pair[0]).format(pair[1]))})
-				return res.join(" | ")
 			} else if (m == "dayperiod") {
 				const hr08 = new Date("2019-01-30T08:00:00")
 				const hr12 = new Date("2019-01-30T12:00:00")
@@ -540,19 +544,16 @@ const get_locale_intl = () => new Promise(resolve => {
 				if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
 				res.push( dteS.format(hr18)) // short18
 				res.push( dteL.format(hr22)) // long22
-				return res.join(" | ")
 			} else if (m == "listformat") {
 				oIntlTests[m].forEach(function(pair) {res.push(new Intl.ListFormat(code,{style: pair[0], type: pair[1]}).format(["a","b","c"]))})
-				return res.join(" | ")
 			} else if (m == "notation") {
-				let nBig = 987654
-				try {nBig = BigInt("987354000000000000")} catch(e) {}
-				res.push( Intl.NumberFormat(code, {notation: "scientific", style: "decimal"}).format(nBig))
-				res.push( NF.format(0/0)) // default standard/decimal
-				res.push( NF.format(-1000))
-				res.push( NF.format(987654))
-				res.push( Intl.NumberFormat(code, {notation: "standard", style: "percent"}).format(1000))
-				return res.join(" | ")
+				oIntlTests[m].forEach(function(array) {
+					if (array[1] == "standard" && array[2] == "decimal") {
+						res.push(NF.format(array[0])) // default standard/decimal
+					} else {
+						res.push(Intl.NumberFormat(code, {notation: array[1], style: array[2]}).format(array[0]))
+					}
+				})
 			} else if (m == "number_formattoparts") {
 				function get_value(type, parts) {
 					try {
@@ -567,12 +568,11 @@ const get_locale_intl = () => new Promise(resolve => {
 						return str
 					} catch(e) {return " error"}
 				}
-				Object.keys(oIntlTests[m]).forEach(function(t){ // each type
-					oIntlTests[m][t].forEach(function(n){ // each number
-						res.push(get_value(t, NF.formatToParts(n)))
+				Object.keys(oIntlTests[m]).forEach(function(type){
+					oIntlTests[m][type].forEach(function(num){
+						res.push(get_value(type, NF.formatToParts(num)))
 					})
 				})
-				return res.join(" | ")
 			} else if (m == "pluralrules") {
 				let tmpobj = {}
 				for (const k of Object.keys(oIntlTests[m])) {
@@ -602,27 +602,23 @@ const get_locale_intl = () => new Promise(resolve => {
 					RTF.format(0,"quarter"), // autonarrow0quarter
 					IntlRTFalways.format(0,"year") // alwaysnarrow0year
 				)
-				return res.join(" | ")
 			} else if (m == "relativetime_formattoparts") {
 				// rtf: 4 of 12 min: auto narrow
 				function parts(length, value) {
-					let output = ""
-					let tmp = RTF.formatToParts(length, value)
+					let output = "", tmp = RTF.formatToParts(length, value)
 					for (let x=0; x < tmp.length; x++) {output += tmp[x].value}
 					return output
 				}
 				oIntlTests[m].forEach(function(pair) {res.push(parts(pair[0], pair[1]))})
-				return res.join(" | ")
 			} else if (m == "sign") {
 				let formatter = new Intl.NumberFormat(code, {signDisplay: "always"})
 				oIntlTests[m].forEach(function(num){res.push(formatter.format(num))})
-				return res.join(" | ")
 			} else if (m == "timezonename") {
 				let tmpobj = {}
 				let tests = oIntlTests[m]
-				Object.keys(tests).forEach(function(tz){ // for each tz
+				Object.keys(tests).forEach(function(tz){
 					res = []
-					Object.keys(tests[tz]).forEach(function(tzn){ // for each tzname
+					Object.keys(tests[tz]).forEach(function(tzn){
 						try {
 							// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 							let formatter = Intl.DateTimeFormat(code, {hour12: true, timeZone: tz, timeZoneName: tzn})
@@ -636,9 +632,9 @@ const get_locale_intl = () => new Promise(resolve => {
 				let itemtest = Intl.NumberFormat(code, {style: "unit", unit: "day"}) // trap error
 				let tmpobj = {}
 				let tests = oIntlTests[m]
-				Object.keys(tests).sort().forEach(function(u){ // for each unit
+				Object.keys(tests).sort().forEach(function(u){
 					res = []
-					Object.keys(tests[u]).forEach(function(ud){ // for each unitdisplay
+					Object.keys(tests[u]).forEach(function(ud){
 						try {
 							let formatter = Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud})
 							tests[u][ud].forEach(function(n){res.push(formatter.format(n))})
@@ -648,6 +644,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				})
 				return {"hash": mini(tmpobj), "metrics": tmpobj}
 			}
+			return res.join(" | ")
 		} catch(e) {
 			log_error(SECT4, METRIC +"_"+ m, e)
 			return zErr
@@ -660,7 +657,8 @@ const get_locale_intl = () => new Promise(resolve => {
 		"pluralrules","relativetime","relativetime_formattoparts","sign","timezonename","unit"
 	]
 	let strings = ["compact","currency","notation","sign","unit"]
-	let C = oConst.C, DTF = oConst.DTF, NF = oConst.NF, PR = oConst.PR, RTF = oConst.RTF
+	let C = oConst.C, DTF = oConst.DTF, NF = oConst.NF, NFCl = oConst.NFCl, NFCs = oConst.NFCs, PR = oConst.PR, RTF = oConst.RTF
+
 	metrics.forEach(function(m) {
 		let value = get_metric(m, undefined) 
 		oData[m] = value
@@ -674,6 +672,8 @@ const get_locale_intl = () => new Promise(resolve => {
 		C = oConst.C2
 		DTF = oConst.DTF2
 		NF = oConst.NF2
+		NFCl = oConst.NFCl2
+		NFCs = oConst.NFCs2
 		PR = oConst.PR2
 		RTF = oConst.RTF2
 		metrics.forEach(function(m) {
@@ -782,44 +782,29 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 		try {
 			let res = []
 			if (m == "compact") {
-				res.push( (-1100000000).toLocaleString(code, {notation: "compact", compactDisplay: "short", useGrouping: true}) )
-				oIntlTests[m].forEach(function(num){
-					res.push( (num).toLocaleString(code, {notation: "compact", compactDisplay: "long", useGrouping: true}) )
-				})
-				return res.join(" | ")
+				oIntlTests[m].forEach(function(pair){res.push((pair[0]).toLocaleString(code, {notation: "compact", compactDisplay: pair[1], useGrouping: true}))})
 			} else if (m == "currency") {
 				oIntlTests[m].forEach(function(pair) {res.push(Number(pair[1]).toLocaleString(code, pair[0]))})
-				return res.join(" | ")
 			} else if (m == "notation") {
-				let nBig = 987654
-				try {nBig = BigInt("987354000000000000")} catch(e) {}
-				res.push( (nBig).toLocaleString(code, {notation: "scientific", style: "decimal"}))
-				let opt = {notation: "standard", style: "decimal"}
-				res.push( (0/0).toLocaleString(code, opt) )
-				res.push( (-1000).toLocaleString(code, opt) )
-				res.push( (987654).toLocaleString(code, opt) )
-				res.push( (1000).toLocaleString(code, {notation: "standard", style: "percent"}))
-				return res.join(" | ")
+				oIntlTests[m].forEach(function(array) {res.push((array[0]).toLocaleString(code, {notation: array[1], style: array[2]}))})
 			} else if (m == "sign") {
 				oIntlTests[m].forEach(function(num){res.push((num).toLocaleString(code, {signDisplay: "always"}))})
-				return res.join(" | ")
 			} else if (m == "unit") {
-				let itemtest = (1).toLocaleString("en", {style: "unit", unit: "day"}) // trap error
+				let test = (1).toLocaleString("en", {style: "unit", unit: "day"}) // trap error
 				let tmpobj = {}
 				let tests = oIntlTests[m]
-				Object.keys(tests).sort().forEach(function(u){ // each unit
+				Object.keys(tests).sort().forEach(function(u){
 					res = []
-					Object.keys(tests[u]).forEach(function(ud){ // each unitdisplay
+					Object.keys(tests[u]).forEach(function(ud){
 						try {
-							tests[u][ud].forEach(function(n){ // each number
-								res.push( (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud}) )
-							})
+							tests[u][ud].forEach(function(n){res.push( (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud}))})
 						} catch (e) {} // ignore invalid
 					tmpobj[u] = res.join(" | ")
 					})
 				})
 				return {"hash": mini(tmpobj), "metrics": tmpobj}
 			}
+			return res.join(" | ")
 		} catch(e) {
 			log_error(SECT4, METRIC +"_"+ m, e)
 			return zErr
@@ -1231,6 +1216,8 @@ function outputRegion() {
 	try {oConst.DTF = Intl.DateTimeFormat()} catch(e) {} // 5
 	try {oConst.DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {} // 3
 	try {oConst.NF = new Intl.NumberFormat()} catch(e) {} // 8
+	try {oConst.NFCl = new Intl.NumberFormat(undefined, {notation: "compact", compactDisplay: "long", useGrouping: true})} catch(e) {}
+	try {oConst.NFCs = new Intl.NumberFormat(undefined, {notation: "compact", compactDisplay: "short", useGrouping: true})} catch(e) {}
 	try {oConst.PR = new Intl.PluralRules()} catch(e) {} // 2
 	try {oConst.RTF = new Intl.RelativeTimeFormat(undefined, {style: "narrow", numeric: "auto"})} catch(e) {} // 3
 
@@ -1245,6 +1232,8 @@ function outputRegion() {
 			try {oConst.DTF2 = Intl.DateTimeFormat(isLocaleValue)} catch(e) {}
 			try {oConst.DTFo2 = Intl.DateTimeFormat(isLocaleValue, o)} catch(e) {}
 			try {oConst.NF2 = new Intl.NumberFormat(isLocaleValue)} catch(e) {}
+			try {oConst.NFCl2 = new Intl.NumberFormat(isLocaleValue, {notation: "compact", compactDisplay: "long", useGrouping: true})} catch(e) {}
+			try {oConst.NFCs2 = new Intl.NumberFormat(isLocaleValue, {notation: "compact", compactDisplay: "short", useGrouping: true})} catch(e) {}
 			try {oConst.PR2 = new Intl.PluralRules(isLocaleValue)} catch(e) {}
 			try {oConst.RTF2 = new Intl.RelativeTimeFormat(isLocaleValue, {style: "narrow", numeric: "auto"})} catch(e) {}
 		}
