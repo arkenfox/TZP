@@ -67,13 +67,6 @@ const zD = "disabled",
 	zNEW = sb+"[NEW]"+sc,
 	zLIE = "untrustworthy"
 
-// region
-let languagesSupported = {},
-	localesSupported = {},
-	isLocaleSmart = false,
-	isLocaleValid = false,
-	isLocaleValue
-
 // for android defaults: e.g desktop mode on/off vs TZP forcing width
 let isWindow = {}
 function get_scr_initial() {
@@ -108,7 +101,11 @@ const tick = "✓", // u2713
 	default_red = sbx+"default]"+sc,
 	match_green = sgtick+"match]"+sc,
 	match_red = sbx+"match]"+sc,
-	fpp_green = sgtick+"FPP]"+sc
+	fpp_green = sgtick+"FPP]"+sc,
+	locale_green = sgtick+"matches locale]"+sc,
+	locale_red = sbx+"matches locale]"+sc,
+	intl_green = sgtick+"matches intl]"+sc,
+	intl_red = sbx+"matches intl]"+sc
 
 const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,
@@ -120,9 +117,7 @@ const screen_green = sgtick+"screens match]"+sc,
 // dynamic notation
 let tb_green = sgtick+"TB]"+sc,
 	tb_red = sbx+"TB]"+sc,
-	tb_slider_red = sbx+"TB Slider]"+sc,
-	intl_green = sgtick+"TB matches locale]"+sc,
-	intl_red = sbx+"TB matches locale]"+sc
+	tb_slider_red = sbx+"TB Slider]"+sc
 
 let tb_standard = sg+"[TB Standard]"+sc,
 	tb_safer = sg+"[TB Safer]"+sc // don't tick/cross slider
@@ -146,6 +141,16 @@ let isArch = true,
 	isVer = 0,
 	isVerExtra = "",
 	isWordmark
+
+// region
+let languagesSupported = {},
+	localesSupported = {},
+	isLanguageSmart = false,
+	isLocaleValid = false,
+	isLocaleValue,
+	isTimeZoneValue,
+	oConst = {}, // constructors
+	oIntlTests = {}
 
 // other
 let aDomRect = [true, true, true, true],
