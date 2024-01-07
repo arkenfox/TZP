@@ -684,10 +684,13 @@ const get_locale_intl = () => new Promise(resolve => {
 	let isLies = false, btnDiff = ""
 	if (isSmart) {
 		notation = locale_red
-		if (isLocaleValid && hash == mini(oCheck)) {notation = locale_green}
-		if (notation !== locale_green) {
-			addDetail(METRIC +"_check", oCheck)
-			btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+		if (isLocaleValid) {
+			if (hash == mini(oCheck)) {
+				notation = locale_green
+			} else {
+				addDetail(METRIC +"_check", oCheck)
+				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+			}
 		}
 	}
 	addData(4, METRIC, oData, hash)
@@ -756,15 +759,18 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 	let isLies = false, btnDiff = ""
 	if (isSmart) {
 		notation = locale_red
-		if (isLocaleValid && hash == mini(oCheck)) {notation = locale_green}
-		if (notation !== locale_green) {
-			isLies = true
-			hash = colorFn(hash)
-			log_known(SECT4, METRIC)
-			addDetail(METRIC, oData)
-			addDetail(METRIC +"_check", oCheck)
-			btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
-			addData(4, METRIC, zLIE)
+		if (isLocaleValid) {
+			if (hash == mini(oCheck)) {
+				notation = locale_green
+			} else {
+				isLies = true
+				hash = colorFn(hash)
+				log_known(SECT4, METRIC)
+				addDetail(METRIC, oData)
+				addDetail(METRIC +"_check", oCheck)
+				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+				addData(4, METRIC, zLIE)
+			}
 		}
 	}
 	if (!isLies) {addData(4, METRIC, oData, hash)}
@@ -840,10 +846,13 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 	if (isSmart) {
 		log_display(4, METRIC +"_matches_intl", (hash == isIntlHash ? intl_green : intl_red))
 		notation = locale_red
-		if (isLocaleValid && hash == mini(oCheck)) {notation = locale_green}
-		if (notation !== locale_green) {
-			addDetail(METRIC +"_check", oCheck)
-			btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+		if (isLocaleValid) {
+			if (hash == mini(oCheck)) {
+				notation = locale_green
+			} else {
+				addDetail(METRIC +"_check", oCheck)
+				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+			}
 		}
 	}
 	addData(4, METRIC, oData, hash)
