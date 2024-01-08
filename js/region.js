@@ -427,6 +427,7 @@ const get_language_locale = () => new Promise(resolve => {
 
 	// LOCALES
 	function get_locmetric(m) {
+		let METRIC = "locales_"+ m
 		let r
 		try {
 			if (m == "collator") {if (runSL) {r = "en-FAKE"}; r = oConst.C.resolvedOptions().locale
@@ -441,12 +442,12 @@ const get_language_locale = () => new Promise(resolve => {
 			if (runSL) {r = "fa"}
 //r="fa" //test
 			if ("string" !== typeof r) {
-				log_error(SECT4, m, zErrType + typeof r); r = zErr
+				log_error(SECT4, METRIC, zErrType + typeof r); r = zErr
 			}
 			let check = Intl.DateTimeFormat.supportedLocalesOf([r])
 			return r
 		} catch(e) {
-			log_error(SECT4, m, e)
+			log_error(SECT4, METRIC, e)
 			return zErr
 		}
 	}
@@ -603,6 +604,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				let formatter = new Intl.NumberFormat(code, {signDisplay: "always"})
 				oIntlTests[m].forEach(function(num){res.push(formatter.format(num))})
 			} else if (m == "timezonename") {
+				let test = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"}) // trap error
 				let tmpobj = {}
 				let tests = oIntlTests[m]
 				Object.keys(tests).forEach(function(tz){
@@ -623,7 +625,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				})
 				return {"hash": mini(tmpobj), "metrics": tmpobj}
 			} else if (m == "unit") {
-				let itemtest = Intl.NumberFormat(code, {style: "unit", unit: "day"}) // trap error
+				let test = Intl.NumberFormat(code, {style: "unit", unit: "day"}) // trap error
 				let tmpobj = {}
 				let tests = oIntlTests[m]
 				Object.keys(tests).sort().forEach(function(u){
@@ -784,8 +786,8 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 				oIntlTests[m].forEach(function(array) {res.push((array[0]).toLocaleString(code, {notation: array[1], style: array[2]}))})
 			} else if (m == "sign") {
 				oIntlTests[m].forEach(function(num){res.push((num).toLocaleString(code, {signDisplay: "always"}))})
-
 			} else if (m == "timezonename") {
+				let test = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"}) // trap error
 				let tmpobj = {}
 				let tests = oIntlTests[m]
 				Object.keys(tests).forEach(function(tz){
@@ -802,7 +804,6 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 					})
 				})
 				return {"hash": mini(tmpobj), "metrics": tmpobj}
-
 			} else if (m == "unit") {
 				let test = (1).toLocaleString("en", {style: "unit", unit: "day"}) // trap error
 				let tmpobj = {}

@@ -296,12 +296,12 @@ const get_pdf = () => new Promise(resolve => {
 				oData[METRIC] = res; 
 				return
 			} else {
-				log_error(SECT7, METRIC, zErrType + typeof obj)
+				log_error(SECT18, METRIC, zErrType + typeof obj)
 				oData[METRIC] = zErr
 				return
 			}
 		} catch(e) {
-			log_error(SECT7, METRIC, e)
+			log_error(SECT18, METRIC, e)
 			oData[METRIC] = zErr
 			return
 		}
