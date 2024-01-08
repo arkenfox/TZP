@@ -709,15 +709,15 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 			// DTF
 			} else if (m == "calendar") {r = DTF.resolvedOptions().calendar
 			} else if (m == "day") {r = DTF.resolvedOptions().day
-			} else if (m == "hourcycle") {r = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
+			} else if (m == "hourCycle") {r = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
 			} else if (m == "month") {r = DTF.resolvedOptions().month
-			} else if (m == "numberingsystem_dtf") {r = DTF.resolvedOptions().numberingSystem
+			} else if (m == "numberingSystem_dtf") {r = DTF.resolvedOptions().numberingSystem
 			// NF
-			} else if (m == "numberingsystem_nf") {r = NF.resolvedOptions().numberingSystem
+			} else if (m == "numberingSystem_nf") {r = NF.resolvedOptions().numberingSystem
 			// PR
 			} else if (m == "pluralCategories") {r = PR.resolvedOptions().pluralCategories.join(", ")
 			// RTF
-			} else if (m == "numberingsystem_rtf") {r = RTF.resolvedOptions().numberingSystem
+			} else if (m == "numberingSystem_rtf") {r = RTF.resolvedOptions().numberingSystem
 			}
 			if (type !== typeof r) {
 				log_error(SECT4, METRIC +"_"+ m, zErrType + typeof r); r = zErr
@@ -734,8 +734,8 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 	let oData = {}, oCheck = {}
 	let C = oConst.C, DTF = oConst.DTF, NF = oConst.NF, PR = oConst.PR, RTF = oConst.RTF
 	let metrics = [
-		"calendar","caseFirst","day","hourcycle","ignorePunctuation","month",
-		"numberingsystem_dtf","numberingsystem_nf","numberingsystem_rtf","pluralCategories",
+		"calendar","caseFirst","day","hourCycle","ignorePunctuation","month",
+		"numberingSystem_dtf","numberingSystem_nf","numberingSystem_rtf","pluralCategories",
 	]
 	metrics.forEach(function(m) {
 		oData[m] = get_metric(m, undefined)
