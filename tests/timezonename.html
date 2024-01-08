@@ -472,6 +472,7 @@ function run_main(method) {
 	// full
 	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
 	let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
+	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
 
 	/* FULL TEST
 		207/219 base languages
@@ -493,18 +494,19 @@ function run_main(method) {
 		- 315: short
 	*/
 	tzNames = ["short","shortGeneric","longGeneric"]
-	tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
-
-	let tests = {}
-	let shortG = {"shortGeneric": tzDays},
-		longG = {"longGeneric": tzDays},
-		keyShort = {"short": tzDays},
-		both = {"shortGeneric": tzDays, "longGeneric": tzDays},
+	//tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
+	// use a date not a number (Date.UTC) so we're compat with toLocaleString etc
+	tzDays = [new Date("August 1, 2019 0:00:00 UTC")]
+	let tzSG = {"shortGeneric": tzDays},
+		tzLG = {"longGeneric": tzDays},
+		tzS = {"short": tzDays}
+	let both = {"shortGeneric": tzDays, "longGeneric": tzDays},
 		everything = {
 			"short": tzDays,
 			"shortGeneric": tzDays,
 			"longGeneric": tzDays,
 		}
+	let tests = {}
 
 	if (method == "all") {
 		// all supported timezones minus some crap x both
@@ -516,46 +518,46 @@ function run_main(method) {
 		if (optExpanded) {
 			// expanded
 			tests = {
-				"Africa/Douala": longG,
-				"Africa/Lusaka": shortG,
-				"Africa/Nairobi": shortG,
-				"Africa/Windhoek": shortG,
-				"America/Bogota": shortG,
-				"America/Caracas": shortG,
-				"America/Cayenne": shortG,
-				"America/Guayaquil": shortG,
-				"America/Guyana": shortG,
-				"America/La_Paz": shortG,
-				"America/Lima": shortG,
-				"America/Montevideo": shortG,
-				"America/Paramaribo": shortG,
-				"America/Rosario": shortG,
-				"America/Toronto": longG,
-				"America/Winnipeg": longG,
-				"Asia/Dili": shortG,
-				"Asia/Hong_Kong": shortG,
-				"Asia/Kolkata": shortG,
-				"Asia/Kuching": shortG,
-				"Asia/Muscat": shortG,
-				"Asia/Nicosia": longG,
-				"Asia/Phnom_Penh": longG,
-				"Asia/Seoul": longG,
-				"Asia/Singapore": shortG,
-				"Asia/Yangon": shortG,
-				"Asia/Yerevan": shortG,
-				"Atlantic/Azores": shortG,
+				"Africa/Douala": tzLG,
+				"Africa/Lusaka": tzSG,
+				"Africa/Nairobi": tzSG,
+				"Africa/Windhoek": tzSG,
+				"America/Bogota": tzSG,
+				"America/Caracas": tzSG,
+				"America/Cayenne": tzSG,
+				"America/Guayaquil": tzSG,
+				"America/Guyana": tzSG,
+				"America/La_Paz": tzSG,
+				"America/Lima": tzSG,
+				"America/Montevideo": tzSG,
+				"America/Paramaribo": tzSG,
+				"America/Rosario": tzSG,
+				"America/Toronto": tzLG,
+				"America/Winnipeg": tzLG,
+				"Asia/Dili": tzSG,
+				"Asia/Hong_Kong": tzSG,
+				"Asia/Kolkata": tzSG,
+				"Asia/Kuching": tzSG,
+				"Asia/Muscat": tzSG,
+				"Asia/Nicosia": tzLG,
+				"Asia/Phnom_Penh": tzLG,
+				"Asia/Seoul": tzLG,
+				"Asia/Singapore": tzSG,
+				"Asia/Yangon": tzSG,
+				"Asia/Yerevan": tzSG,
+				"Atlantic/Azores": tzSG,
 				"Atlantic/Bermuda": both,
-				"Atlantic/South_Georgia": shortG,
-				"Europe/Belfast": keyShort,
-				"Europe/Isle_of_Man": shortG,
-				"Europe/London": shortG,
-				"Europe/Minsk": shortG,
+				"Atlantic/South_Georgia": tzSG,
+				"Europe/Belfast": tzS,
+				"Europe/Isle_of_Man": tzSG,
+				"Europe/London": tzSG,
+				"Europe/Minsk": tzSG,
 				"Europe/Sarajevo": both,
-				"Indian/Chagos": longG,
-				"Indian/Cocos": keyShort,
-				"Pacific/Pago_Pago": longG,
-				"Pacific/Saipan": shortG,
-				"Pacific/Tongatapu": shortG,
+				"Indian/Chagos": tzLG,
+				"Indian/Cocos": tzS,
+				"Pacific/Pago_Pago": tzLG,
+				"Pacific/Saipan": tzSG,
+				"Pacific/Tongatapu": tzSG,
 			}
 			/* find missing
 			let newTZs = [
@@ -566,38 +568,44 @@ function run_main(method) {
 			//*/
 		} else {
 			tests = {
-				"Africa/Douala": longG,
-				"Africa/Lusaka": shortG,
-				"Africa/Nairobi": shortG,
-				"America/La_Paz": shortG,
-				"Asia/Phnom_Penh": shortG,
-				"Asia/Seoul": longG,
-				"Asia/Yerevan": shortG,
-				"Europe/Isle_of_Man": shortG,
-				"Europe/London": shortG,
-				"Indian/Chagos": longG,
-				"Indian/Cocos": keyShort,
-				"Pacific/Pago_Pago": longG,
-				"Pacific/Saipan": shortG,
-				"Pacific/Tongatapu": shortG,
+				"Africa/Douala": tzLG,
+				"Africa/Lusaka": tzSG,
+				"Africa/Nairobi": tzSG,
+				"America/La_Paz": tzSG,
+				"Asia/Phnom_Penh": tzSG,
+				"Asia/Seoul": tzLG,
+				"Asia/Yerevan": tzSG,
+				"Europe/Isle_of_Man": tzSG,
+				"Europe/London": tzSG,
+				"Indian/Chagos": tzLG,
+				"Indian/Cocos": tzS,
+				"Pacific/Pago_Pago": tzLG,
+				"Pacific/Saipan": tzSG,
+				"Pacific/Tongatapu": tzSG,
 			}
 		}
 	} else if (method == "tiny") {
 		// wee fast test with bang for buck
 		/* 
-			EXPANDED
-			Seoul 213 + Douala 224 + London 232 + Hong Kong 238 + Muscat 243
-			after that it;s small pickups of < 3 (well one has a 3 left)
+			last tested FF123
 
-			LIST
-			Seoul 185 + Douala 193 + London 199 + Hong Kong 200 + Muscat adds nothing
+			EXPANDED: max entropy = 311
+			- Seoul 223 + Douala 234 + London 242 + Hong Kong 248 + Muscat 254 | after that it's small pickups of < 3
+			- 254 (5 tests) out of 311 max (40 tests) = 82%
+			- the remaining 35 tests would pickup 57 more buckets
+				- not worth it overall - and some of this may be equivalency of other tests
+				- althought we are trying to test as much as possible for regressions and lies and custom formatting etc
+
+			LIST: max entropy = 213
+			- Seoul 191 + Douala 199 + London 205 + Hong Kong 206 (+ Muscat adds nothing)
+			- 206 (5 tests) out of 213 max (14 tests - or 15 if you count we added Muscat) = 97% = pretty good for major locales
 		*/
 		tests = {
-			"Asia/Seoul": longG,
-			"Africa/Douala": longG,
-			"Europe/London": shortG,
-			"Asia/Hong_Kong": shortG,
-			"Asia/Muscat": shortG,
+			"Asia/Seoul": tzLG,
+			"Africa/Douala": tzLG,
+			"Europe/London": tzSG,
+			"Asia/Hong_Kong": tzSG,
+			"Asia/Muscat": tzSG,
 		}
 	}
 
@@ -619,7 +627,11 @@ function run_main(method) {
 					oStyles[tz][tzn] = []
 					try {
 						// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-						let formatter = Intl.DateTimeFormat(code, {hour12: true, timeZone: tz, timeZoneName: tzn})
+							// IDK if this is really needed here but it can't hurt
+							// we use y+m+d numeric so we toLocaleString will match
+							// ^ does not affect entropy or hashes at all which are stable across timezones: e.g. TB at UTC vs my machine
+						let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
+						let formatter = Intl.DateTimeFormat(code, option)
 						tests[tz][tzn].forEach(function(d){ // for each date
 							oStyles[tz][tzn].push(formatter.format(d))
 							/* what do we  get if we only use the name

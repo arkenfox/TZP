@@ -43,12 +43,24 @@
 
 var list = gLocales,
 	aLegend = [],
-	aLocales = []
+	aLocales = [],
+	oData = {}
 
 s4 = s4.trim()
 s12 = s12.trim()
+s14 = s14.trim()
 s16 = s16.trim()
+snc = snc.trim()
 s99 = s99.trim()
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
 
 function legend() {
 	// build once
@@ -84,7 +96,7 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-let oData = {}
+
 function run_main() {
 	let t0 = performance.now()
 	oData = {}
@@ -172,36 +184,57 @@ function run_main() {
 		for (const n of Object.keys(oTempData).sort()) {
 			oData[n] = oTempData[n]
 		}
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		//console.log(oData)
 
-		let displaylist = []
+		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
-
+			localeGroups.push(oData[k]["locales"])
 			let localeCount = oData[k].locales.length
 			let datalist = []
 			for (const j of Object.keys(oData[k].data).sort()) {
-				datalist.push(s16 + j + sc +": "+ oData[k].data[j])
+				datalist.push(snc + j + sc +": "+ oData[k].data[j])
 			}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc +"<br>"
-					+ "<span class='indent'>"+ datalist.join("<br>")
-					+"<br>"+ s12 +"L: "+ sc + oData[k].locales.join(", ")
-				+"</span>"
-
+					+ "<span class='indent faint'>"+ datalist.join("<br>")
+					+"<br>"+ s12 +"L: "+ sc + oData[k].locales.join(", ") +"</span>"
 			)
-
 		}
-		// hashes
+
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
 		let resultsHash = mini(oData)
-		//aHashes.sort()
-		//console.log(aHashes.join("\n"))
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		// notations
+		if (isFF) {
+			// only hash notate if 115+
+			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+			if (is115) {
+				// track FF version changes
+				// results
+				if (resultsHash == "7f7a9769") {resultsHash += s14 +" [FF121+]"+ sc
+				} else if (resultsHash == "09a9661a") {resultsHash += s14 +" [FF115-120]"+ sc
+				} else {resultsHash += zNEW
+				}
+				// locales
+				if (localesHash == "706f17d6") {localesHash += s14 +" [FF115+]"+ sc
+				} else if (isFF) {localesHash += zNEW
+				}
+			}
+		}
 
 		// display
 		let display = s4 + Object.keys(oData).length + sc +" from "+ s4 + aLocales.length + sc
-			+ spacer + s16 +"results: "+ sc + resultsHash + spacer
-		dom.results.innerHTML = display +"<br>"+ displaylist.join("<br><br>")
-		// perf
-		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
 
 	} catch(e) {
 		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message

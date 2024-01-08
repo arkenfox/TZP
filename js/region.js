@@ -254,10 +254,9 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 const set_oIntlTests = () => new Promise(resolve => {
 
 	let unitN = {"narrow": [1]}, unitL = {"long": [1]}, unitB = {"long": [1], "narrow": [1]}
-	let tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)],
-		tzSG = {"shortGeneric": tzDays},
+	let tzDays = [new Date("August 1, 2019 0:00:00 UTC")],
 		tzLG = {"longGeneric": tzDays},
-		tzS = {"short": tzDays}
+		tzSG = {"shortGeneric": tzDays}
 
 	oIntlTests = {
 		"collation": [
@@ -286,7 +285,7 @@ const set_oIntlTests = () => new Promise(resolve => {
 			"decimal": [1.2],"group": [1000, 99999],"infinity": [Infinity],"minusSign": [-5],"nan": ["a"]
 		},
 		"pluralrules": {
-			"cardinal": [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74 : add ordinal 81 to keep lij unique from it,sc
+			"cardinal": [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74: add ordinal 81 to keep lij unique from it,sc
 			"ordinal": [1, 2, 3, 5, 8, 10, 81]
 		},
 		"relativetime_formattoparts": [
@@ -295,19 +294,10 @@ const set_oIntlTests = () => new Promise(resolve => {
 		"sign": [-1, 0/0],
 		"timezonename": {
 			"Africa/Douala": tzLG,
-			"Africa/Lusaka": tzSG,
-			"Africa/Nairobi": tzSG,
-			"America/La_Paz": tzSG,
-			"Asia/Phnom_Penh": tzSG,
+			"Asia/Hong_Kong": tzSG,
+			"Asia/Muscat": tzSG,
 			"Asia/Seoul": tzLG,
-			"Asia/Yerevan": tzSG,
-			"Europe/Isle_of_Man": tzSG,
 			"Europe/London": tzSG,
-			"Indian/Chagos": tzLG,
-			"Indian/Cocos": tzS,
-			"Pacific/Pago_Pago": tzLG,
-			"Pacific/Saipan": tzSG,
-			"Pacific/Tongatapu": tzSG,
 		},
 		"unit": {
 			"byte": unitN, // ICU 74
@@ -398,7 +388,7 @@ const get_geo = () => new Promise(resolve => {
 })
 
 const get_language_locale = () => new Promise(resolve => {
-	let t0 = nowFn(), notation = ""
+	let notation = ""
 	isLocaleValid = false
 	isLocaleValue = undefined
 
@@ -506,7 +496,6 @@ const get_language_locale = () => new Promise(resolve => {
 		}
 	}
 	log_display(4, METRIC, value + notation)
-	log_perf(SECT4, "language_locale", t0)
 	return resolve()
 })
 
@@ -548,7 +537,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				oIntlTests[m].forEach(function(pair) {res.push(new Intl.ListFormat(code,{style: pair[0], type: pair[1]}).format(["a","b","c"]))})
 			} else if (m == "notation") {
 				oIntlTests[m].forEach(function(array) {
-					if (array[1] == "standard" && array[2] == "decimal") {
+					if (array[1] + array[2] == "standarddecimal") {
 						res.push(NF.format(array[0])) // default standard/decimal
 					} else {
 						res.push(Intl.NumberFormat(code, {notation: array[1], style: array[2]}).format(array[0]))
@@ -577,7 +566,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				let tmpobj = {}
 				for (const k of Object.keys(oIntlTests[m])) {
 					res = []
-					let formatter = k == "cardinal" ? PR : new Intl.PluralRules(code, {type: "ordinal"})
+					let formatter = k == "cardinal" ? PR : PRo
 					let nos = oIntlTests[m][k], prev = "", current = ""
 					nos.forEach(function(num){
 						current = formatter.select(num)
@@ -621,8 +610,13 @@ const get_locale_intl = () => new Promise(resolve => {
 					Object.keys(tests[tz]).forEach(function(tzn){
 						try {
 							// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-							let formatter = Intl.DateTimeFormat(code, {hour12: true, timeZone: tz, timeZoneName: tzn})
-							tests[tz][tzn].forEach(function(dte){res.push(formatter.format(dte))})
+								// ^ IDK if this is really needed here but it can't hurt
+								// we use y+m+d numeric so toLocaleString will match
+							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
+							let formatter = Intl.DateTimeFormat(code, option)
+							tests[tz][tzn].forEach(function(dte){
+								res.push(formatter.format(dte))
+							})
 						} catch (e) {} // ignore invalid
 						tmpobj[tz] = res.join(" | ")
 					})
@@ -656,8 +650,9 @@ const get_locale_intl = () => new Promise(resolve => {
 		"collation","compact", "currency", "dayperiod", "listformat","notation","number_formattoparts",
 		"pluralrules","relativetime","relativetime_formattoparts","sign","timezonename","unit"
 	]
-	let strings = ["compact","currency","notation","sign","unit"]
-	let C = oConst.C, DTF = oConst.DTF, NF = oConst.NF, NFCl = oConst.NFCl, NFCs = oConst.NFCs, PR = oConst.PR, RTF = oConst.RTF
+	let strings = ["compact","currency","notation","sign","timezonename","unit"]
+	let C = oConst.C, DTF = oConst.DTF, NF = oConst.NF, NFCl = oConst.NFCl,
+		NFCs = oConst.NFCs, PR = oConst.PR, PRo = oConst.PRo, RTF = oConst.RTF
 
 	metrics.forEach(function(m) {
 		let value = get_metric(m, undefined) 
@@ -675,6 +670,7 @@ const get_locale_intl = () => new Promise(resolve => {
 		NFCl = oConst.NFCl2
 		NFCs = oConst.NFCs2
 		PR = oConst.PR2
+		PRo = oConst.PRo2
 		RTF = oConst.RTF2
 		metrics.forEach(function(m) {
 			oCheck[m] = get_metric(m, isLocaleValue)
@@ -700,8 +696,8 @@ const get_locale_intl = () => new Promise(resolve => {
 })
 
 const get_locale_resolvedoptions = () => new Promise(resolve => {
-	let t0 = nowFn(), notation = ""
 	const METRIC = "locale_resolvedoptions"
+	let notation = ""
 
 	function get_metric(m, code) {
 		let r
@@ -770,7 +766,6 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 	}
 	addData(4, METRIC, oData, hash)
 	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
-	log_perf(SECT4, METRIC, t0)
 	return resolve()
 })
 
@@ -789,6 +784,25 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 				oIntlTests[m].forEach(function(array) {res.push((array[0]).toLocaleString(code, {notation: array[1], style: array[2]}))})
 			} else if (m == "sign") {
 				oIntlTests[m].forEach(function(num){res.push((num).toLocaleString(code, {signDisplay: "always"}))})
+
+			} else if (m == "timezonename") {
+				let tmpobj = {}
+				let tests = oIntlTests[m]
+				Object.keys(tests).forEach(function(tz){
+					res = []
+					Object.keys(tests[tz]).forEach(function(tzn){
+						try {
+							// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
+							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
+							tests[tz][tzn].forEach(function(dte){
+								res.push((dte).toLocaleString(code, option))
+							})
+						} catch (e) {} // ignore invalid
+						tmpobj[tz] = res.join(" | ")
+					})
+				})
+				return {"hash": mini(tmpobj), "metrics": tmpobj}
+
 			} else if (m == "unit") {
 				let test = (1).toLocaleString("en", {style: "unit", unit: "day"}) // trap error
 				let tmpobj = {}
@@ -812,7 +826,7 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 	}
 
 	let oData = {}, oCheck = {}
-	let metrics = ["compact","currency","notation","sign","unit"]
+	let metrics = ["compact","currency","notation","sign","timezonename","unit"]
 	metrics.forEach(function(m) {
 		oData[m] = get_metric(m, undefined)
 	})
@@ -842,8 +856,8 @@ const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
 })
 
 const get_timezone = () => new Promise(resolve => {
-	let t0 = nowFn(), notation = ""
 	const METRIC = "timezone"
+	let notation = ""
 	isTimeZoneValue = undefined
 
 	function get_metric() {
@@ -883,7 +897,6 @@ const get_timezone = () => new Promise(resolve => {
 	}
 	log_display(4, METRIC, (tz == zErr ? eMsg : tz) + notation)
 	addData(4, METRIC, (isLies? zLIE: tz))
-	log_perf(SECT4, METRIC, t0)
 	return resolve()
 })
 
@@ -1095,8 +1108,14 @@ const get_xml_errors = () => new Promise(resolve => {
 
 const get_lang = () => new Promise(resolve => {
 
-	let d = new Date("January 30, 2019 13:00:00"),
-		o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
+	// set date
+		// previously this was = new Date("January 30, 2019 13:00:00")
+		// as this hardcodes it the same for everyone: ignores your timezone
+		// back when we wanted to get the same hash to check RFP was working
+		// instead we will use Date.UTC as this is anumber and adjusts to your timezone
+		// we will get max entropy in Intl.DateTimeFormat, so let these ones reflect entropy
+	let d = new Date(Date.UTC(2023, 0, 30, 30))
+	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
 	let amWorker = false
 
@@ -1211,14 +1230,15 @@ function outputRegion() {
 	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 		minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
 	oConst = {}
-	// set undefined once: used in x items
-	try {oConst.C = Intl.Collator()} catch(e) {} // 2
-	try {oConst.DTF = Intl.DateTimeFormat()} catch(e) {} // 5
-	try {oConst.DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {} // 3
-	try {oConst.NF = new Intl.NumberFormat()} catch(e) {} // 8
+	// set undefined once
+	try {oConst.C = Intl.Collator()} catch(e) {}
+	try {oConst.DTF = Intl.DateTimeFormat()} catch(e) {}
+	try {oConst.DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
+	try {oConst.NF = new Intl.NumberFormat()} catch(e) {}
 	try {oConst.NFCl = new Intl.NumberFormat(undefined, {notation: "compact", compactDisplay: "long", useGrouping: true})} catch(e) {}
 	try {oConst.NFCs = new Intl.NumberFormat(undefined, {notation: "compact", compactDisplay: "short", useGrouping: true})} catch(e) {}
-	try {oConst.PR = new Intl.PluralRules()} catch(e) {} // 2
+	try {oConst.PR = new Intl.PluralRules()} catch(e) {}
+	try {oConst.PRo = new Intl.PluralRules(undefined, {type: "ordinal"})} catch(e) {}
 	try {oConst.RTF = new Intl.RelativeTimeFormat(undefined, {style: "narrow", numeric: "auto"})} catch(e) {} // 3
 
 	Promise.all([
@@ -1235,6 +1255,7 @@ function outputRegion() {
 			try {oConst.NFCl2 = new Intl.NumberFormat(isLocaleValue, {notation: "compact", compactDisplay: "long", useGrouping: true})} catch(e) {}
 			try {oConst.NFCs2 = new Intl.NumberFormat(isLocaleValue, {notation: "compact", compactDisplay: "short", useGrouping: true})} catch(e) {}
 			try {oConst.PR2 = new Intl.PluralRules(isLocaleValue)} catch(e) {}
+			try {oConst.PRo2 = new Intl.PluralRules(isLocaleValue, {type: "ordinal"})} catch(e) {}
 			try {oConst.RTF2 = new Intl.RelativeTimeFormat(isLocaleValue, {style: "narrow", numeric: "auto"})} catch(e) {}
 		}
 
