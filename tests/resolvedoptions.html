@@ -272,7 +272,9 @@ Promise.all([
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
-	run()
+	setTimeout(function() {
+		run()
+	}, 100)
 })
 
 </script>
