@@ -16,7 +16,7 @@ function check_canvas_to(data) {
 	return false
 }
 
-function outputCanvas() {
+const outputCanvas = () => new Promise(resolve => {
 	let t0 = nowFn()
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = "93bd94c5"
 	// FF95+: compression changes 1724331 / 1737038 
@@ -359,7 +359,7 @@ function outputCanvas() {
 		if (!isSmart || countFake == 0) {
 			sDataTemp[zFP][isScope][9] = oFP
 			log_section(9, t0)
-			return
+			return resolve(SECT9)
 		}
 
 		const canvasLiesMap = {
@@ -421,8 +421,9 @@ function outputCanvas() {
 			})
 			sDataTemp[zFP][isScope][9] = oFP
 			log_section(9, t0)
+			return resolve(SECT9)
 		})
 	})
-}
+})
 
 countJS(SECT9)
