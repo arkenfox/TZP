@@ -566,7 +566,7 @@ const get_window_props = () => new Promise(resolve => {
 	}
 })
 
-function outputMisc() {
+const outputMisc = () => new Promise(resolve => {
 	let t0 = nowFn()
 	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
 	let isMathLies = check_mathLies()
@@ -627,7 +627,8 @@ function outputMisc() {
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(18, item)})
 		log_section(18, t0)
+		return resolve(SECT18)
 	})
-}
+})
 
 countJS(SECT18)

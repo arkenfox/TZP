@@ -1217,7 +1217,7 @@ function goNW_UA() {
 
 /* OUTPUT */
 
-function outputUA(os = isOS) {
+const outputUA = (os = isOS) => new Promise(resolve => {
 	let t0 = nowFn()
 	let aReported = [], oComplex = {}
 	/*
@@ -1366,7 +1366,8 @@ function outputUA(os = isOS) {
 	aReported.sort()
 	log_display(2, "uaDoc", mini(aReported))
 	log_section(2, t0)
-}
+	return resolve(SECT2)
+})
 
 function outputFD() {
 	let t0 = nowFn()
@@ -1532,7 +1533,7 @@ function outputScreenResize(runtype) {
 	})
 }
 
-function outputScreen() {
+const outputScreen = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		outputScreenResize("screen"),
@@ -1560,7 +1561,8 @@ function outputScreen() {
 			window.addEventListener("resize", outputScreenResize)
 		}
 		log_section(1, t0)
+		return resolve(SECT1)
 	})
-}
+})
 
 countJS(SECT1)

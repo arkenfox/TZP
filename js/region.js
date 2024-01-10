@@ -1160,7 +1160,7 @@ const get_lang = () => new Promise(resolve => {
 		// e.g. Object.prototype.toString.call(value) == "[object Date]"
 })
 
-function outputRegion() {
+const outputRegion = () => new Promise(resolve => {
 	let t0 = nowFn()
 	if (gLoad) {
 		set_isLanguageSmart()
@@ -1185,12 +1185,13 @@ function outputRegion() {
 				get_locale_tolocalestring(results[1]), // uses isIntlHash
 			]).then(function(){
 				log_section(4, t0)
+				return resolve(SECT4)
 			})
 		})
 	})
-}
+})
 
-function outputHeaders() {
+const outputHeaders = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		get_nav_dnt(),
@@ -1199,8 +1200,9 @@ function outputHeaders() {
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(5, item)})
 		log_section(5, t0)
+		return resolve(SECT5)
 	})
-}
+})
 
 countJS(SECT4)
 

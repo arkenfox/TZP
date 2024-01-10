@@ -430,7 +430,7 @@ const get_speech_engines = () => new Promise(resolve => {
 	}
 })
 
-function outputDevices() {
+const outputDevices = () => new Promise(resolve => {
 	let t0 = nowFn()
 
 	const METRIC = "recursion"
@@ -453,7 +453,8 @@ function outputDevices() {
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(7, item)})
 		log_section(7, t0)
+		return resolve(SECT7)
 	})
-}
+})
 
 countJS(SECT7)

@@ -1459,9 +1459,9 @@ function outputSection(id, cls) {
 	isScope = zDOC
 
 	if (id == "load") {
-		// set sectionOrder, sectionNames
+		// set sectionOrder, sectionNames, sectionNos
 		let tmpObj = {}
-		for (const k of Object.keys(sectionMap)) {tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
+		for (const k of Object.keys(sectionMap)) {sectionNos[sectionMap[k]] = k; tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
 		for (const n of Object.keys(tmpObj).sort()) {sectionOrder.push(tmpObj[n])}
 		sectionNames.sort()
 	}
@@ -1543,24 +1543,43 @@ function outputSection(id, cls) {
 	// reset
 	if (id == "all" || id == 1) {dom.kbt.value = ""}
 
+	var promiseSection = async function(x) {
+		let n = Number.isInteger(x) ? x : sectionNos[x]
+		if (n == 1) { return(outputScreen())}
+		if (n == 2) { return(outputUA())}
+		if (n == 3) { return(outputFD())}
+		if (n == 4) { return(outputRegion())}
+		if (n == 5) { return(outputHeaders())}
+		if (n == 6) { return(outputStorage())}
+		if (n == 7) { return(outputDevices())}
+		if (n == 9) { return(outputCanvas())}
+		if (n == 10) { return(outputWebGL())}
+		if (n == 11) { return(outputAudio())}
+		if (n == 12) { return(outputFonts())}
+		if (n == 13) { return(outputMedia())}
+		if (n == 14) { return(outputCSS())}
+		if (n == 15) { return(outputElements())}
+		if (n == 18) { return(outputMisc())}
+	}
+
 	function output() {
-		// we use 0ms timeouts to get accurate perf
-		if (!gRun) {gt0 = nowFn()} // single section timer
-		if (id == "all" || id == 3) {outputFD()} // do first to quickly set isMullvad
-		setTimeout(function() {if (id == "all" || id == 2) {outputUA()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 13) {outputMedia()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 5) {outputHeaders()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 18) {outputMisc()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 1) {outputScreen()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 14) {outputCSS()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 10) {outputWebGL()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 15) {outputElements()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 12) {outputFonts()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 7) {outputDevices()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 9) {outputCanvas()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 6) {outputStorage()}}, 0)
-		setTimeout(function() {if (id == "all" || id == 11) {outputAudio()}}, 0)
+		if (id == "all") {
+			// run sequentially awaiting each before running the next
+			// order: use number or section name: names are easier to code with
+			// NOTE:
+				// always start with 3 (feature) as it sets isMullvad
+				// 3, 2, 1, 5, 18, 14 are fast and don't trip anything up
+			let order = [3, 2, 1, 5, 18, 14, 'canvas', 'media', 'region', 'storage', 'elements', 'audio', 'devices', 'webgl', 'fonts']
+			const forEachSection = async (iterable, action) => {
+				for (const n of iterable) {
+					await promiseSection(n)
+				}
+			}
+			forEachSection(order, promiseSection)
+		} else {
+			gt0 = nowFn() // single section timer
+			promiseSection(id)
+		}
 	}
 
 	if (gRun) {gData["perf"].push([1, "DOCUMENT START", nowFn()])}

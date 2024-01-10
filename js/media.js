@@ -383,8 +383,7 @@ const get_midi = () => new Promise(resolve => {
 	})
 })
 
-
-function outputMedia() {
+const outputMedia = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		get_clearkey(),
@@ -399,7 +398,8 @@ function outputMedia() {
 		}
 		results.forEach(function(item) {addDataFromArray(13, item)})
 		log_section(13, t0)
+		return resolve()
 	})
-}
+})
 
 countJS(SECT13)
