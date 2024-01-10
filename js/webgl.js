@@ -330,8 +330,11 @@ function getWebGL(contextType) {
 	return [data, errors]
 }
 
-function outputWebGL() {
+const outputWebGL = () => new Promise(resolve => {
 	let t0 = nowFn()
+	log_section(10, t0)
+	return resolve()
+
 	Promise.all([
 		getWebGL('webgl'),
 		getWebGL('webgl2'),
@@ -353,11 +356,13 @@ function outputWebGL() {
 
 		// do something with the erorrs...
 		log_section(10, t0)
+		return resolve()
 
 	}).catch(error => {
 		console.error(error)
 		log_section(10, t0)
+		return resolve()
 	})
-}
+})
 
 countJS(SECT10)
