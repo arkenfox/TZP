@@ -9,7 +9,15 @@ let fntCodePoints = {
 		'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
 		'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
 		'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-		'0xA830','0xF003','0xF810','0xFBEE','0xFFF9','0xFFFD',
+		'0xA830','0xF003','0xF810','0xFBEE','0xFFF9',
+		// '0xFFFD', // problematic
+			// replacement character: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+			// https://thorin-oakenpants.github.io/testing/FFFD.html
+			// win FF: always Segoe UI
+			// win MB: always Malgun Gothic
+			// win TB102
+				// on first document tab/run (and reloading the same tab) = tahoma
+				// on subsequent tabs = Malgun Gothic
 		//*/
 	],
 	"tofu": ['0xFFFF'],
@@ -1434,39 +1442,6 @@ const get_unicode = () => new Promise(resolve => {
 		// s/be good script support
 		if (isOS == "android") {return}
 		let fntReduce = []
-
-		// windows
-		if (isOS == "windows") {
-			if (isTB) {
-				fntReduce = [
-					'0x09B3','0xF003','0xF810', // 3 tofu
-					'0x20B9', // = 0x20BA
-				]
-			} else if (isVer > 115) { // 116+ is win10+ only
-				fntReduce = [
-					'0x007F', '0x09B3', '0xF003', '0xF810', '0xFFF9', // 5 tofu w/ all supplemental fonts
-					'0x20B9', // = 0x20BA
-					'0x3095', // = 0x532D
-				]
-			}
-		}
-		// TB12 or lower: 0xFFFD is not stable (in windows)
-		if (isTB && isVer < 115) {
-			// replacement character: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
-			// https://thorin-oakenpants.github.io/testing/FFFD.html
-				// win FF: always Segoe UI
-				// win MB: always Malgun Gothic
-				// win TB102
-					// on first document tab/run (and reloading the same tab) = tahoma
-					// on subsequent tabs = Malgun Gothic
-			fntReduce.push(`0xFFFD`)
-		}
-		if (fntCodes.length) {
-			fntCodes = fntCodes.filter(x => !fntReduce.includes(x))
-			return
-		}
-		if (isTB) {return}
-
 		let reduceStart = nowFn()
 		// check likely unsupported scripts: e.g. win7: 12/21, +RFP = 20/21
 		let fntReducePossible = [
@@ -1474,7 +1449,6 @@ const get_unicode = () => new Promise(resolve => {
 			'0x1C50','0x1CDA','0x20BD','0x2C7B','0xA73D','0xA830','0xF003','0xF810','0xFBEE','0xFFF9',
 		]
 		try {
-		let fntReduceChars = []
 			let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
 			slot.style.fontFamily = "none"
 			slot.textContent = String.fromCodePoint('0xFFFF')
@@ -1484,7 +1458,6 @@ const get_unicode = () => new Promise(resolve => {
 				slot.textContent = String.fromCodePoint(code)
 				if (span.offsetWidth == tofuWidth && div.offsetHeight == tofuHeight) {
 					fntReduce.push(code)
-					fntReduceChars.push(String.fromCodePoint(code))
 				}
 			})
 			fntCodes = fntCodes.filter(x => !fntReduce.includes(x))
