@@ -580,6 +580,68 @@ const get_isVer = () => new Promise(resolve => {
 	}
 })
 
+function get_isXML() {
+	// get once super early and clear the console
+		// it's not going to change between tests
+		// e.g. change app lang and it requires closing and a new tab
+	if (!isGecko) {
+		isXML = zNA
+		return
+	}
+	let t0 = nowFn()
+	const METRIC = "xml_errors"
+	let delimiter = ":", notation = ""
+	const list = {
+		n02: 'a',
+		n03: '',
+		n04: '<>',
+		n05: '<?',
+		n07: '<x></X>',
+		n08: '<x xmlns:x="." xmlns:x=".">',
+		n09: '<x></x><x>',
+		n11: '<x>&x;</x>',
+		n14: '<x>&#x0;',
+		n20: '<x><![CDATA[',
+		n28: '<x xmlns:x=""></x>',
+		n30: '<?xml versin="1.0"?>',
+	}
+	try {
+		let parser = new DOMParser
+		if (runSE) {foo++}
+		for (const k of Object.keys(list)) {
+			try {
+				let doc = parser.parseFromString(list[k], 'application/xml')
+				let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+				//split into parts: works back to FF52 and works with LTR
+				let parts = str.split("\n")
+				if (k == "n02") {
+					// programatically determine delimiter
+						// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+					let strLoc = parts[1]
+					let schema = isFile ? "file://" : "https://"
+					let index = strLoc.indexOf(schema) - 2
+					if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+					if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+					delimiter = strLoc.charAt(index)
+					strLoc = strLoc.slice(0, index)
+					let strName = parts[0].split(delimiter)[0]
+					let strLine = parts[2]
+					isXML["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+					isXML["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+				}
+				isXML[k] = parts[0].split(delimiter)[1].trim()
+			} catch(err) {}
+		}
+		console.clear()
+		log_perf(SECTG, "isXML", t0)
+		return
+	} catch(e) {
+		isXML = log_error(SECT4, METRIC, e, isScope, 50, true) // persist error to sect4
+		log_perf(SECTG, "isXML", t0, "", zErr)
+		return
+	}
+}
+
 /*** PREREQ ***/
 
 const get_isDomRect = () => new Promise(resolve => {
@@ -1519,6 +1581,7 @@ function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
 	gData["perf"].push([1, "IMMEDIATE", t00])
+	get_isGecko()
 	get_isRecursion()
 	get_isDevices()
 	if (location.protocol == "file:") {isFile = true}
@@ -1530,11 +1593,10 @@ function run_immediate() {
 		let warmNFcompact = new Intl.NumberFormat(undefined, {notation: "compact"}).format(1)
 		let warmNFunit = new Intl.NumberFormat(undefined, {style: "unit", unit: "hectare"}).format(1)
 	} catch(e) {}
-
 	try {let w = speechSynthesis.getVoices()} catch(e) {}
-	get_isGecko()
+	get_isXML()
 	get_isArch()
-	isFontSizesPrevious = isFontSizesMore
+
 }
 
 run_immediate()
