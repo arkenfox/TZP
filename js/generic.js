@@ -1485,8 +1485,8 @@ function outputSection(id, cls) {
 		// we use 0ms timeouts to get accurate perf
 		if (!gRun) {gt0 = nowFn()} // single section timer
 		if (id == "all" || id == 3) {outputFD()} // do first to quickly set isMullvad
-		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 2) {outputUA()}}, 0)
+		setTimeout(function() {if (id == "all" || id == 4) {outputRegion()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 13) {outputMedia()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 5) {outputHeaders()}}, 0)
 		setTimeout(function() {if (id == "all" || id == 18) {outputMisc()}}, 0)
@@ -1522,7 +1522,16 @@ function run_immediate() {
 	get_isRecursion()
 	get_isDevices()
 	if (location.protocol == "file:") {isFile = true}
-	try {let v = speechSynthesis.getVoices()} catch(e) {}
+	// warm ups
+	try {let warmDTF = Intl.DateTimeFormat().resolvedOptions()} catch(e) {}
+	try {let warmTZ = Intl.DateTimeFormat(undefined, {timeZone: "Europe/London", timeZoneName: "shortGeneric"}).format(new Date)} catch(e) {}
+	// not sure if these extra Intls add any more gecko priming
+	try {
+		let warmNFcompact = new Intl.NumberFormat(undefined, {notation: "compact"}).format(1)
+		let warmNFunit = new Intl.NumberFormat(undefined, {style: "unit", unit: "hectare"}).format(1)
+	} catch(e) {}
+
+	try {let w = speechSynthesis.getVoices()} catch(e) {}
 	get_isGecko()
 	get_isArch()
 	isFontSizesPrevious = isFontSizesMore
