@@ -415,7 +415,8 @@ const get_mm_css = () => new Promise(resolve => {
 	return resolve(res)
 })
 
-function outputCSS() {
+
+const outputCSS = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		get_mm_css(),
@@ -424,7 +425,8 @@ function outputCSS() {
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(14, item)})
 		log_section(14, t0)
+		return resolve(SECT14)
 	})
-}
+})
 
 countJS(SECT14)
