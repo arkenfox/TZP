@@ -257,7 +257,7 @@ const get_mathml = () => new Promise(resolve => {
 	}
 })
 
-function outputElements() {
+const outputElements = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		get_element_keys(),
@@ -266,7 +266,8 @@ function outputElements() {
 	]).then(function(results){
 		results.forEach(function(item) {addDataFromArray(15, item)})
 		log_section(15, t0)
+		return resolve(SECT15)
 	})
-}
+})
 
 countJS(SECT15)
