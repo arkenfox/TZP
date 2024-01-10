@@ -1169,7 +1169,6 @@ const outputRegion = () => new Promise(resolve => {
 
 	Promise.all([
 		get_geo(),
-		get_xml_errors(),
 		get_language_locale(), // sets isLocaleValid/Value
 		get_timezone(), // sets isTimeZoneValue
 	]).then(function(){
@@ -1179,7 +1178,7 @@ const outputRegion = () => new Promise(resolve => {
 			get_lang(),
 			//get_timezone_offsets(),
 			get_validation_messages(),
-
+			get_xml_errors(),
 		]).then(function(results){
 			Promise.all([
 				get_locale_tolocalestring(results[1]), // uses isIntlHash
