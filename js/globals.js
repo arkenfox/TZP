@@ -149,7 +149,6 @@ let languagesSupported = {},
 	isLocaleValid = false,
 	isLocaleValue,
 	isTimeZoneValue,
-	oConst = {}, // constructors
 	oIntlTests = {}
 
 // other
