@@ -15,7 +15,9 @@ const sectionMap = {
 	//98: SECT98, 99: SECT99
 }
 
-let sectionOrder = [], sectionNames = []
+let sectionOrder = [], // numerical order for objects
+	sectionNames = [], // lookup names by number
+	sectionNos = {} // lookup numbers by name
 
 const btnList = ["errors", "lies"] // ToDo: expand e.g alerts
 
