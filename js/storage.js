@@ -342,7 +342,7 @@ const test_worker_web = (skip, log = false) => new Promise(resolve => {
 	}
 })
 
-function outputStorage() {
+const outputStorage = () => new Promise(resolve => {
 	// ToDo: notification support/test
 	let t0 = nowFn()
 	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
@@ -365,8 +365,9 @@ function outputStorage() {
 		]).then(function(results){
 			results.forEach(function(item) {addDataFromArray(6, item)})
 			log_section(6, t0)
+			return resolve(SECT6)
 		})
 	})
-}
+})
 
 countJS(SECT6)
