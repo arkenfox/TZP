@@ -1495,7 +1495,7 @@ const get_woff2 = () => new Promise(resolve => {
 	}
 })
 
-function outputFonts() {
+const outputFonts = () => new Promise(resolve => {
 	let t0 = nowFn()
 	set_fntList()
 	Promise.all([
@@ -1513,7 +1513,8 @@ function outputFonts() {
 		results.forEach(function(item) {addDataFromArray(12, item)})
 		log_display(12, "fntBtn", fntBtn)
 		log_section(12, t0)
+		return resolve(SECT12)
 	})
-}
+})
 
 countJS(SECT12)
