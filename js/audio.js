@@ -413,14 +413,15 @@ function outputAudioUser() {
 	})
 }
 
-function outputAudio() {
+const outputAudio = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
 		get_audioContext(),
 		get_offlineAudioContext(),
 	]).then(function(results){
 		log_section(11, t0)
+		return resolve(SECT11)
 	})
-}
+})
 
 countJS(SECT11)
