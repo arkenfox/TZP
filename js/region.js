@@ -257,6 +257,10 @@ const set_oIntlTests = () => new Promise(resolve => {
 	let tzDays = [new Date("August 1, 2019 0:00:00 UTC")],
 		tzLG = {"longGeneric": tzDays},
 		tzSG = {"shortGeneric": tzDays}
+	let curN = {"name": [-1]},
+		curS = {"symbol": [1000]},
+		curB = {"name": [-1], "symbol": [1000]},
+		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
 
 	oIntlTests = {
 		"collation": [
@@ -266,21 +270,20 @@ const set_oIntlTests = () => new Promise(resolve => {
 			'\u09A4','\u09CE','\u0A85','\u0B05','\u0B85','\u0C05','\u0C85','\u0D85','\u0E24','\u0E9A','\u10350','\u10D0','\u1208',
 			'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A',
 		],
-		"compact": [[-1100000000,"short"], [0/0,"long"], [1000,"long"], [2e6,"long"], [6.6e12,"long"], [7e15,"long"]],
-		"currency": [
-			[{style: "currency", currency: "USD", currencySign: "accounting"}, -1000],
-			[{style: "currency", currency: "USD", currencyDisplay: "name"}, -1],
-			[{style: "currency", currency: "USD", currencyDisplay: "symbol"}, 1000]
-		],
-		"listformat": [
-			["narrow","conjunction"],["narrow","disjunction"],["narrow","unit"],["short","conjunction"],["short","unit"]
-		],
-		"notation": [
-			[0/0, "standard", "decimal"],
-			[-1000, "standard", "decimal"],
-			[987654, "standard", "decimal"],
-			[1000, "standard", "percent"]
-		],
+		"compact": {
+			"long": [0/0, 1000, 2e6, 6.6e12, 7e15],
+			"short": [-1100000000],
+		},
+		"currency": {"KES": curB, "MOP": curS, "USD": curA, "XXX": curN,},
+		"dayperiod": {"long": [8,22], "narrow": [8,15], "short": [12,15,18]},
+		"listformat": {
+			"narrow": ["conjunction","disjunction","unit"],
+			"short": ["conjunction","unit"]
+		},
+		"notation": {
+			"scientific": {"decimal": []},
+			"standard": {"decimal": [0/0, -1000, 987654], "percent": [1000]},
+		},
 		"numberformat_ftp": {
 			"decimal": [1.2],"group": [1000, 99999],"infinity": [Infinity],"minusSign": [-5],"nan": ["a"]
 		},
@@ -288,10 +291,14 @@ const set_oIntlTests = () => new Promise(resolve => {
 			"cardinal": [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74: add ordinal 81 to keep lij unique from it,sc
 			"ordinal": [1, 2, 3, 5, 8, 10, 81]
 		},
-		"relativetimeformat_ftp": [
-			["0","day"],["1","day"],["1","week"],["1","year"]
-		],
-		"sign": [-1, 0/0],
+		"relativetimeformat": { // 8 of 12
+			"always": {"narrow": [[1, "day"], [0, "year"]]},
+			"auto": {"long": [[1, "second"]],"narrow": [[3,"day"],[0,"quarter"],[0,"second"],[1,"second"],[3,"second"]]},
+		},
+		"relativetimeformat_ftp": { // 4 of 12
+			"auto": {"narrow": [[0,"day"],[1,"day"],[1,"week"],[1,"year"]]}
+		},
+		"sign": {"always": [-1, 0/0]},
 		"timezonename": {
 			"Africa/Douala": tzLG,
 			"Asia/Hong_Kong": tzSG,
@@ -313,10 +320,10 @@ const set_oIntlTests = () => new Promise(resolve => {
 			"terabyte": unitL,
 		}
 	}
-	try {oIntlTests["compact"].push([BigInt("987354000000000000"),"long"])} catch(e) {}
+	try {oIntlTests["compact"]["long"].push(BigInt("987354000000000000"))} catch(e) {}
 	let nBig = 987654
 	try {nBig = BigInt("987354000000000000")} catch(e) {}
-	oIntlTests["notation"].push([nBig, "scientific","decimal"])
+	oIntlTests["notation"]["scientific"]["decimal"].push(nBig)
 
 })
 
@@ -388,7 +395,7 @@ const get_geo = () => new Promise(resolve => {
 })
 
 const get_language_locale = () => new Promise(resolve => {
-	let notation = ""
+	// reset
 	isLocaleValid = false
 	isLocaleValue = undefined
 
@@ -409,7 +416,7 @@ const get_language_locale = () => new Promise(resolve => {
 			return zErr
 		}
 	}
-	let oData = {}, metrics = ['language','languages']
+	let oData = {}, metrics = ['language','languages'], notation = ""
 	metrics.forEach(function(m) {oData[m] = cleanFn(get_langmetric(m))})
 	Object.keys(oData).forEach(function(METRIC){
 		notation = ""
@@ -500,53 +507,60 @@ const get_language_locale = () => new Promise(resolve => {
 })
 
 const get_locale_intl = () => new Promise(resolve => {
-	const METRIC = "locale_intl"
+	const METRICintl = "locale_intl", METRICstring = "locale_tolocalestring"
 	let t0 = nowFn(), notation = ""
 
-	function get_metric(m, code) {
+	function get_metric(m, code, isIntl = true) {
 		try {
-			let res = [], tests = oIntlTests[m]
+			let obj = {}, tests = oIntlTests[m], value
 			if (m == "collation") {
-				res = tests.sort() // always re-sort
-				return res.sort(Intl.Collator(code).compare).join(", ")
+				let data = tests.sort() // always re-sort
+				return data.sort(Intl.Collator(code).compare).join(", ")
 			} else if (m == "compact") {
-				let formatter = {
-					"long": new Intl.NumberFormat(code, {notation: "compact", compactDisplay: "long", useGrouping: true}),
-					"short": new Intl.NumberFormat(code, {notation: "compact", compactDisplay: "short", useGrouping: true})
-				}
-				tests.forEach(function(pair){res.push(formatter[pair[1]].format(pair[0]))})
+				Object.keys(tests).forEach(function(key) {
+					let option = {notation: m, compactDisplay: key, useGrouping: true}, data = [], formatter
+					if (isIntl) {formatter = new Intl.NumberFormat(code, option)}
+					tests[key].forEach(function(n) {
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option))
+						data.push(value)
+					})
+					obj[key] = data
+				})
 			} else if (m == "currency") {
-				tests.forEach(function(pair) {res.push(Intl.NumberFormat(code, pair[0]).format(pair[1]))})
+				Object.keys(tests).forEach(function(key) {
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						let option = s == "accounting" ? {style: m, currency: key, currencySign: s} : {style: m, currency: key, currencyDisplay: s}, data = []
+						tests[key][s].forEach(function(n) {
+							value = (isIntl ? Intl.NumberFormat(code, option).format(n) : (n).toLocaleString(code, option));
+							data.push(value)
+						})
+						obj[key][s] = data
+					})
+				})
 			} else if (m == "dayperiod") {
-				const hr08 = new Date("2019-01-30T08:00:00")
-				const hr12 = new Date("2019-01-30T12:00:00")
-				const hr15 = new Date("2019-01-30T15:00:00")
-				const hr18 = new Date("2019-01-30T18:00:00")
-				const hr22 = new Date("2019-01-30T22:00:00")
-				// 3 options: always use h12
-				let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "short"}),
-					dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "narrow"}),
-					dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "long"})
-				// 6 or 7 tests max required
-				let period1 = dteN.format(hr08) // narrow08
-				let period2 = dteL.format(hr08) // long08
-				if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
-				res.push( dteS.format(hr12)) // short12
-				period1 = dteN.format(hr15) // narrow15
-				period2 = dteS.format(hr15) // short15
-				if (period1 == period2) {res.push(period1)} else {res.push(period1 +" / "+ period2)}
-				res.push( dteS.format(hr18)) // short18
-				res.push( dteL.format(hr22)) // long22
+				Object.keys(tests).forEach(function(key) {
+					let formatter = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: key}), data = []
+					tests[key].forEach(function(item) {data.push(formatter.format(dayperiods[item]))})
+					obj[key] = data
+				})
 			} else if (m == "listformat") {
-				tests.forEach(function(pair) {res.push(new Intl.ListFormat(code, {style: pair[0], type: pair[1]}).format(["a","b","c"]))})
+				Object.keys(tests).forEach(function(key) {
+					let data = []
+					tests[key].forEach(function(item) {data.push(new Intl.ListFormat(code, {style: key, type: item}).format(["a","b","c"]))})
+					obj[key] = data
+				})
 			} else if (m == "notation") {
-				let formatter = Intl.NumberFormat(code)
-				tests.forEach(function(array) {
-					if (array[1] + array[2] == "standarddecimal") {
-						res.push(formatter.format(array[0])) // default standard/decimal
-					} else {
-						res.push(Intl.NumberFormat(code, {notation: array[1], style: array[2]}).format(array[0]))
-					}
+				Object.keys(tests).forEach(function(key) {
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						let formatter = (isIntl ? Intl.NumberFormat(code, {notation: key, style: s}) : undefined), data = []
+						tests[key][s].forEach(function(n){
+							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {notation: key, style: s}))
+							data.push(value)
+						})
+						obj[key][s] = data
+					})
 				})
 			} else if (m == "numberformat_ftp") {
 				function get_value(type, parts) {
@@ -560,96 +574,106 @@ const get_locale_intl = () => new Promise(resolve => {
 							}
 						}
 						return str
-					} catch(e) {return " error"}
+					} catch(e) {return " error"} // why is this " error" and not zErr
 				}
-				let formatter = Intl.NumberFormat(code)
-				Object.keys(tests).forEach(function(type){
-					tests[type].forEach(function(num){
-						res.push(get_value(type, formatter.formatToParts(num)))
-					})
+				let formatter = Intl.NumberFormat(code), res = []
+				Object.keys(tests).forEach(function(key){
+					tests[key].forEach(function(num){res.push(get_value(key, formatter.formatToParts(num)))})
 				})
+				return res.join(" | ")
 			} else if (m == "pluralrules") {
-				let tmpobj = {}
-				for (const k of Object.keys(oIntlTests[m])) {
-					res = []
-					let formatter = new Intl.PluralRules(code, {type: k})
-					let nos = tests[k], prev = "", current = ""
-					nos.forEach(function(num){
-						current = formatter.select(num)
-						if (prev !== current) {res.push(num +": "+ current)}
+				for (const key of Object.keys(tests)) {
+					let formatter = new Intl.PluralRules(code, {type: key}), nos = tests[key], prev="", current="", data = []
+					nos.forEach(function(n) {
+						current = formatter.select(n)
+						if (prev !== current) {data.push(n +": "+ current)}
 						prev = current
 					})
-					tmpobj[k] = res.join(" | ")
+					obj[key] = data
 				}
-				return {"hash": mini(tmpobj), "metrics": tmpobj}
 			} else if (m == "relativetimeformat") {
-				// rtf: 8 of 12 min
-				let RTF = new Intl.RelativeTimeFormat(code, {style: "narrow", numeric: "auto"})
-				let IntlRTFlong = new Intl.RelativeTimeFormat(code, {style: "long", numeric: "auto"})
-				let IntlRTFalways = new Intl.RelativeTimeFormat(code, {style: "narrow", numeric: "always"})
-				res.push(
-					RTF.format(0,"second"), // autonarrow0second
-					RTF.format(1,"second"), // autonarrow1second
-					IntlRTFlong.format(1,"second"),	// autolong1second
-					RTF.format(3,"second"), // autonarrow3second
-					IntlRTFalways.format(1,"day"), // alwaysnarrow1day
-					RTF.format(3,"day"), // autonarrow3day
-					RTF.format(0,"quarter"), // autonarrow0quarter
-					IntlRTFalways.format(0,"year") // alwaysnarrow0year
-				)
+				Object.keys(tests).forEach(function(key) {
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(item) {
+						let formatter = new Intl.RelativeTimeFormat(code, {style: item, numeric: key}), data = []
+						tests[key][item].forEach(function(pair){data.push(formatter.format(pair[0], pair[1]))})
+						obj[key][item] = data
+					})
+				})
 			} else if (m == "relativetimeformat_ftp") {
-				// rtf: 4 of 12 min: auto narrow
 				function parts(length, value) {
-					let output = "", tmp = RTF.formatToParts(length, value)
+					let output = "", tmp = formatter.formatToParts(length, value)
 					for (let x=0; x < tmp.length; x++) {output += tmp[x].value}
 					return output
 				}
-				let RTF = new Intl.RelativeTimeFormat(code, {style: "narrow", numeric: "auto"})
-				oIntlTests[m].forEach(function(pair) {res.push(parts(pair[0], pair[1]))})
+				let formatter, data = []
+				Object.keys(tests).forEach(function(key) {
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						formatter = new Intl.RelativeTimeFormat(code, {style: s, numeric: key}), data = []
+						tests[key][s].forEach(function(pair){data.push(parts(pair[0], pair[1]))})
+						obj[key][s] = data
+					})
+				})
 			} else if (m == "sign") {
-				let formatter = new Intl.NumberFormat(code, {signDisplay: "always"})
-				tests.forEach(function(num){res.push(formatter.format(num))})
+				Object.keys(tests).forEach(function(key) {
+					let formatter = (isIntl ? new Intl.NumberFormat(code, {signDisplay: key}) : undefined), data = []
+					tests[key].forEach(function(n){
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {signDisplay: key}))
+						data.push(value)
+					})
+					obj[key] = data
+				})
 			} else if (m == "timezonename") {
-				let tmpobj = {}
 				Object.keys(tests).forEach(function(tz){
-					res = []
+					let data = []
 					Object.keys(tests[tz]).forEach(function(tzn){
 						try {
-							// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-								// ^ IDK if this is really needed here but it can't hurt
-								// we use y+m+d numeric so toLocaleString will match
+							// use y+m+d numeric so toLocaleString matches
+							// use hour12 in case - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
-							let formatter = Intl.DateTimeFormat(code, option)
-							tests[tz][tzn].forEach(function(dte){res.push(formatter.format(dte))})
+							let formatter = (isIntl ? Intl.DateTimeFormat(code, option) : undefined)
+							tests[tz][tzn].forEach(function(dte){
+								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option))
+								data.push(value)
+							})
 						} catch (e) {} // ignore invalid
-						if (res.length) {tmpobj[tz] = res.join(" | ")}
+						if (data.length) {obj[tz] = data}
 					})
 				})
-				if (!Object.keys(tmpobj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"})} // trap error
-				return {"hash": mini(tmpobj), "metrics": tmpobj}
+				if (!Object.keys(obj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"})} // trap error
 			} else if (m == "unit") {
-				let tmpobj = {}
 				Object.keys(tests).sort().forEach(function(u){
-					res = []
+					let data = []
 					Object.keys(tests[u]).forEach(function(ud){
 						try {
-							let formatter = Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud})
-							tests[u][ud].forEach(function(n){res.push(formatter.format(n))})
+							let formatter = (isIntl ? Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud}) : undefined)
+							tests[u][ud].forEach(function(n){
+								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud}))
+								data.push(value)
+							})
 						} catch (e) {} // ignore invalid
 					})
-					if (res.length) {tmpobj[u] = res.join(" | ")}
+					if (data.length) {obj[u] = data}
 				})
-				if (!Object.keys(tmpobj).length) {let trap = Intl.NumberFormat(code, {style: "unit", unit: "day"})} // trap error
-				return {"hash": mini(tmpobj), "metrics": tmpobj}
+				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(code, {style: "unit", unit: "day"})} // trap error
 			}
-			return res.join(" | ")
+			return {"hash": mini(obj), "metrics": obj}
 		} catch(e) {
 			log_error(SECT4, METRIC +"_"+ m, e)
 			return zErr
 		}
 	}
 
-	let oData = {}, oString = {}, oCheck = {}
+	// INTL
+	let METRIC = METRICintl, oData = {}, oString = {}, oCheck = {}
+	let dayperiods = { // set per run
+		8: new Date("2019-01-30T08:00:00"),
+		12: new Date("2019-01-30T12:00:00"),
+		15: new Date("2019-01-30T15:00:00"),
+		18: new Date("2019-01-30T18:00:00"),
+		22: new Date("2019-01-30T22:00:00"),
+	}
 	let metrics = [
 		"collation","compact", "currency", "dayperiod", "listformat","notation","numberformat_ftp",
 		"pluralrules","relativetimeformat","relativetimeformat_ftp","sign","timezonename","unit"
@@ -663,7 +687,6 @@ const get_locale_intl = () => new Promise(resolve => {
 			oString[m] = value
 		}
 	})
-
 	if (isSmart && isLocaleValid) {metrics.forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue)})}
 	let hash = mini(oData)
 	let isLies = false, btnDiff = ""
@@ -681,7 +704,34 @@ const get_locale_intl = () => new Promise(resolve => {
 	addData(4, METRIC, oData, hash)
 	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
 	log_perf(SECT4, METRIC, t0)
-	return resolve(mini(oString))
+
+	// strings
+	t0 = nowFn()
+	METRIC = METRICstring
+	let oDataS = {}, oCheckS = {}, notationS = ""
+	strings.forEach(function(m) {
+		oDataS[m] = get_metric(m, undefined, false)
+	})
+	if (isSmart && isLocaleValid) {strings.forEach(function(m) {oCheckS[m] = get_metric(m, isLocaleValue, false)})}
+	let hashS = mini(oDataS)
+	let isLiesS = false, btnDiffS = ""
+	if (isSmart) {
+		log_display(4, METRIC +"_matches_intl", (hashS == mini(oString) ? intl_green : intl_red))
+		notationS = locale_red
+		if (isLocaleValid) {
+			if (hashS == mini(oCheckS)) {
+				notationS = locale_green
+			} else {
+				addDetail(METRIC +"_check", oCheckS)
+				btnDiffS = addButton(4, METRIC +"_check", isLocaleValue +" check")
+			}
+		}
+	}
+	addData(4, METRIC, oDataS, hashS)
+	log_display(4, METRIC, hashS + addButton(4, METRIC) + btnDiffS + notationS)
+	log_perf(SECT4, METRIC, t0)
+
+	return resolve()
 })
 
 const get_locale_resolvedoptions = () => new Promise(resolve => {
@@ -751,135 +801,169 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 	return resolve()
 })
 
-const get_locale_tolocalestring = (isIntlHash) => new Promise(resolve => {
-	let t0 = nowFn(), notation = ""
-	const METRIC = "locale_tolocalestring"
-
-	function get_metric(m, code) {
-		try {
-			let res = [], tests = oIntlTests[m]
-			if (m == "compact") {
-				tests.forEach(function(pair){res.push((pair[0]).toLocaleString(code, {notation: "compact", compactDisplay: pair[1], useGrouping: true}))})
-			} else if (m == "currency") {
-				tests.forEach(function(pair) {res.push(Number(pair[1]).toLocaleString(code, pair[0]))})
-			} else if (m == "notation") {
-				tests.forEach(function(array) {res.push((array[0]).toLocaleString(code, {notation: array[1], style: array[2]}))})
-			} else if (m == "sign") {
-				tests.forEach(function(num){res.push((num).toLocaleString(code, {signDisplay: "always"}))})
-			} else if (m == "timezonename") {
-				let tmpobj = {} 
-				Object.keys(tests).forEach(function(tz){
-					res = []
-					Object.keys(tests[tz]).forEach(function(tzn){
-						try {
-							// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
-							tests[tz][tzn].forEach(function(dte){res.push((dte).toLocaleString(code, option))})
-						} catch (e) {} // ignore invalid
-						if (res.length) {tmpobj[tz] = res.join(" | ")}
-					})
-				})
-				if (!Object.keys(tmpobj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"})} // trap error
-				return {"hash": mini(tmpobj), "metrics": tmpobj}
-			} else if (m == "unit") {
-				let tmpobj = {}
-				Object.keys(tests).sort().forEach(function(u){
-					res = []
-					Object.keys(tests[u]).forEach(function(ud){
-						try {
-							tests[u][ud].forEach(function(n){res.push( (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud}))})
-						} catch (e) {} // ignore invalid
-						if (res.length) {tmpobj[u] = res.join(" | ")}
-					})
-				})
-				if (!Object.keys(tmpobj).length) {let trap = (1).toLocaleString("en", {style: "unit", unit: "day"})} // trap error
-				return {"hash": mini(tmpobj), "metrics": tmpobj}
-			}
-			return res.join(" | ")
-		} catch(e) {
-			log_error(SECT4, METRIC +"_"+ m, e)
-			return zErr
-		}
-	}
-
-	let oData = {}, oCheck = {}
-	let metrics = ["compact","currency","notation","sign","timezonename","unit"]
-	metrics.forEach(function(m) {
-		oData[m] = get_metric(m, undefined)
-	})
-	if (isSmart && isLocaleValid) {
-		metrics.forEach(function(m) {
-			oCheck[m] = get_metric(m, isLocaleValue)
-		})
-	}
-	let hash = mini(oData)
-	let isLies = false, btnDiff = ""
-	if (isSmart) {
-		log_display(4, METRIC +"_matches_intl", (hash == isIntlHash ? intl_green : intl_red))
-		notation = locale_red
-		if (isLocaleValid) {
-			if (hash == mini(oCheck)) {
-				notation = locale_green
-			} else {
-				addDetail(METRIC +"_check", oCheck)
-				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
-			}
-		}
-	}
-	addData(4, METRIC, oData, hash)
-	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
-	log_perf(SECT4, METRIC, t0)
-	return resolve()
-})
-
 const get_timezone = () => new Promise(resolve => {
+	let t0 = nowFn(), notation = ""
 	const METRIC = "timezone"
-	let notation = ""
+	const METRICtzo = "timezone_offsets"
+
+	// reset
+	isTimeZoneValid = false
 	isTimeZoneValue = undefined
 
-	function get_metric() {
-		let r
+	function get_tz() {
 		try {
 			if (runSE) {foo++}
-			r = Intl.DateTimeFormat().resolvedOptions().timeZone
+			let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+			if ("string" !== typeof tz) {
+				return ([zErr, log_error(SECT4, METRIC, zErrType + typeof tz)])
+			} else if (tz === "") {
+				return ([zErr, log_error(SECT4, METRIC, zErrInvalid + "empty string")])
+			} else {
+				try {
+					let tztest = (new Date("January 1, 2018 13:00:00 UTC")).toLocaleString('en', {timeZone: tz})
+					return (tz)
+				} catch(e) {
+					return ([zErr, log_error(SECT4, METRIC, e)]) // not supported
+				}
+			}
 		} catch(e) {
-			eMsg = log_error(SECT4, METRIC, e)
-			return zErr
+			return ([zErr, log_error(SECT4, METRIC, e)])
 		}
-		if ("string" !== typeof r) {
-			eMsg = log_error(SECT4, METRIC, zErrType + typeof r); r = zErr
-		} else if (r === "") {
-			eMsg = log_error(SECT4, METRIC, zErrInvalid + "empty string"); r = zErr
-		}
-		return r
 	}
 
-	let eMsg
-	let tz = get_metric()
-	let isLies = false
-	if (isSmart) {
-		notation = tz == "UTC" ? rfp_green : rfp_red		
-		// is it valid?
-		if (tz !== zErr) {
+	function get_offsets(name) {
+		function get_offsetitem(item) {
 			try {
-				let control = new Date("January 1, 2018 13:00:00 UTC")
-				let test = control.toLocaleString('en', {timeZone: tz})
-				isTimeZoneValue = tz
+				if (item == "offsets") {
+					let k = 60000, yr = 2021
+					try {yr = Date().split` `[3]} catch(e) {
+						try {yr = new Date().getFullYear()} catch(e) {}
+					}
+					let months = ["January","April","July","October"]
+					let control = [], real = [], test = [], test2 = []
+					months.forEach(function(month) {
+						let date = month +" 1, "+ yr +" 13:00:00"
+						control.push(new Date(date +" UTC"))
+						real.push(new Date(date))
+					})
+					let tzres = {"gettime": [], "gettimezoneoffset": [], "date.parse": []}
+					let subitem = "gettimezoneoffset"
+					try {
+						for (let i = 0; i < real.length; i++) {
+							tzres[subitem].push(real[i].getTimezoneOffset())
+						}
+					} catch(e) {
+						tzres[subitem] = [zErr]
+						log_error(SECT4, subitem, e)
+					}
+					subitem = "gettime"
+					try {
+						for (let i = 0; i < control.length; i++) {
+							tzres[subitem].push(
+								((real[i].getTime() - control[i].getTime())/k)
+							)
+						}
+					} catch(e) {
+						tzres[subitem] = [zErr]
+						log_error(SECT4, subitem, e)
+					}
+					subitem = "date.parse"
+					try {
+						for (let i = 0; i < control.length; i++) {
+							tzres[subitem].push(
+								((Date.parse(real[i]) - Date.parse(control[i]))/k)
+							)
+						}
+					} catch(e) {
+						tzres[subitem] = [zErr]
+						log_error(SECT4, subitem, e)
+					}
+					return tzres
+				} else if (item == "date.parse_years") {
+					let tzres = {},
+						days = ["January 1","July 1",],
+						years = [1879,1921,1952,1976,2018]
+					years.forEach(function(year) {
+						tzres[year] = []
+						days.forEach(function(day) {
+							let datetime = day +", "+ year +" 13:00:00"
+							let control = new Date(datetime +" UTC")
+							let test = new Date(datetime)
+							let diff = ((Date.parse(test) - Date.parse(control))/60000)
+							tzres[year].push(diff)
+						})
+					})
+					return tzres
+				}
 			} catch(e) {
-				isLies = true
-				log_error(SECT4, METRIC, e)
-				tz = colorFn(tz)
+				log_error(SECT4, item, e)
+				return zErr
 			}
 		}
+		let oData = {}
+		let list = ["offsets","date.parse_years"]
+		list.forEach(function(item) {
+			let data = get_offsetitem(item)
+			if (item == "offsets") {
+				Object.keys(data).forEach(function(test) {
+					oData[test] = data[test]
+				})
+			} else {
+				oData[item] = data
+			}
+		})
+		let newobj = {}
+		Object.keys(oData).sort().forEach(function(item){newobj[item] = oData[item]})
+		return oData
 	}
-	log_display(4, METRIC, (tz == zErr ? eMsg : tz) + notation)
-	addData(4, METRIC, (isLies? zLIE: tz))
-	return resolve()
-})
 
-const get_timezone_offsets = () => new Promise(resolve => {
-	const METRIC = "timezone_offsets"
-	let t0 = nowFn(), notation = ""
+	Promise.all([
+		get_tz(),
+		get_offsets("timezone_offsets"),
+	]).then(function(res){
+		// TZ
+		let tz = res[0], tzdisplay = tz, tznotation = ""
+		if ("string" !== typeof tz) {
+			// error
+			tzdisplay = res[0][1]
+			tz = zErr
+		}
+		// TZOffsets
+		/*
+		checks
+		- date.parse, gettime, gettimezoneoffset == the same
+		- s/be no NaNs
+    - we can use isTimeZoneValue to recalculate and compare
+		*/
+
+		// not smart, just output tz and tzoffsets
+		if (!isSmart) {
+			log_display(4, METRIC, tzdisplay)
+			addData(4, METRIC, tz)
+			log_display(4, METRICtzo, "TBA")
+			addData(4, METRICtzo, "TBA")
+			log_perf(SECT4, METRIC+"/offsets", t0)
+			return resolve()
+		}
+
+		// smart and no errors in tz
+		// now we should only be isSmart + no errors in tz
+		// we can trap errors in the tzo object and then rule it untrustworthy: a bit like pdf with 3 items
+			// isTimeZoneValid = true, isTimeZoneValue = undefined, tz = the value
+			// we can alter/set these after using timezoneoffsets
+		/* notation = hash == "afbc2194" ? rfp_green : rfp_red */
+
+		// if either are untrustworthy then both are
+
+		// tmp: output tz
+		isTimeZoneValue = tz
+		tznotation = tz == "UTC" ? rfp_green : rfp_red
+		log_display(4, METRIC, tzdisplay + tznotation)
+		addData(4, METRIC, tz)
+
+		log_perf(SECT4, METRIC+"/offsets", t0)
+		return resolve()
+	})
 
 	/* example
   "timezone_offsets": {
@@ -898,90 +982,7 @@ const get_timezone_offsets = () => new Promise(resolve => {
     }
   },
 	*/
-	//console.log(isTimeZoneValue)
-	/*
-		checks
-		- date.parse, gettime, gettimezoneoffset == the same
-		- s/be no NaNs
-    - we can use isTimeZoneValue to recalculate and compare
-	*/
 
-	function get_offset(item) {
-		try {
-			if (item == "offsets") {
-				let k = 60000, yr = 2021
-				try {yr = Date().split` `[3]} catch(e) {
-					try {yr = new Date().getFullYear()} catch(e) {}
-				}
-				let months = ["January","April","July","October"]
-				let control = [], real = [], test = [], test2 = []
-				months.forEach(function(month) {
-					let date = month +" 1, "+ yr +" 13:00:00"
-					control.push(new Date(date +" UTC"))
-					real.push(new Date(date))
-				})
-				let tzres = {"gettime": [], "gettimezoneoffset": [], "date.parse": []}
-				let subitem = "gettimezoneoffset"
-				try {
-					for (let i = 0; i < real.length; i++) {
-						tzres[subitem].push(real[i].getTimezoneOffset())
-					}
-				} catch(e) {
-					tzres[subitem] = [zErr]
-					log_error(SECT4, subitem, e)
-				}
-				subitem = "gettime"
-				try {
-					for (let i = 0; i < control.length; i++) {
-						tzres[subitem].push(
-							((real[i].getTime() - control[i].getTime())/k)
-						)
-					}
-				} catch(e) {
-					tzres[subitem] = [zErr]
-					log_error(SECT4, subitem, e)
-				}
-				subitem = "date.parse"
-				try {
-					for (let i = 0; i < control.length; i++) {
-						tzres[subitem].push(
-							((Date.parse(real[i]) - Date.parse(control[i]))/k)
-						)
-					}
-				} catch(e) {
-					tzres[subitem] = [zErr]
-					log_error(SECT4, subitem, e)
-				}
-				return tzres
-			} else if (item == "date.parse_years") {
-				let tzres = {},
-					days = ["January 1","July 1",],
-					years = [1879,1921,1952,1976,2018]
-				years.forEach(function(year) {
-					tzres[year] = []
-					days.forEach(function(day) {
-						let datetime = day +", "+ year +" 13:00:00"
-						let control = new Date(datetime +" UTC")
-						let test = new Date(datetime)
-						let diff = ((Date.parse(test) - Date.parse(control))/60000)
-						tzres[year].push(diff)
-					})
-				})
-				return tzres
-			}
-		} catch(e) {
-			log_error(SECT4, item, e)
-			return zErr
-		}
-	}
-
-/*
-		notation = hash == "afbc2194" ? rfp_green : rfp_red
-*/
-
-
-	log_perf(SECT4, METRIC, t0)
-	return resolve()
 })
 
 const get_validation_messages = () => new Promise(resolve => {
@@ -1044,48 +1045,66 @@ const get_xml_errors = () => new Promise(resolve => {
 	return resolve()
 })
 
-const get_lang = () => new Promise(resolve => {
+const get_dates = () => new Promise(resolve => {
+	// dates
+		// we will be getting entropy from DFT using hardcoded dates, i.e using the exact same date/time so we
+		// always get e.g. Tuesday or PM or 24hr: see: overall hashes match across different timezones with DTF
+		// pocs (intl locale): and this will be covered under locales_intl with DTF + corresponding tolocalestrings
 
-	// set date
-		// previously this was = new Date("January 30, 2019 13:00:00")
-		// as this hardcodes it the same for everyone: ignores your timezone
-		// back when we wanted to get the same hash to check RFP was working
-		// instead we will use Date.UTC as this is anumber and adjusts to your timezone
-		// we will get max entropy in Intl.DateTimeFormat, so let these ones reflect entropy
-	let d = new Date(Date.UTC(2023, 0, 30, 30))
+	// the only real reason we would want the actual date/time to vary is to see if they're
+	// lying even though we already check veracity with tz offsets, and the only reason to get a
+	// _current_ time is for clock skew (which would make the FP change and is out of scope for now)
+
+	// but lets use this section to actually let rip and not worry about timezones
+	// so everything here we want the date/time to vary by timezone
+
+	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
+	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
+	let d2 = new Date("January 01, 2019 00:00:01") // for toGMT/UTC strings
+	
 	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
-	let amWorker = false
-
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
 
+	// this intial lot just see if can get two timezones to differ on every result
+	// then later we will craft some max entropy with various dates and styles/options
 	function get_item(item) {
 		let itemPad = "item "+ item
 		try {
-// DATETIME
-			if (item == 41) {return (amWorker ? ""+ d : d)
-			} else if (item == 42) {return d.toString()
-			} else if (item == 43) {return d.toGMTString()
-			} else if (item == 44) {return d.toUTCString()
-			} else if (item == 45) {return d.toTimeString()
-
-// DATETIME & FORMAT (can use localecode)
+// STRINGS
+			if (item == 41) {return d2.toGMTString()
+			} else if (item == 42) {return d2.toUTCString()
+			} else if (item == 43) {return d.toTimeString()
+			} else if (item == 44) {return d // a date object
+			} else if (item == 45) {return d.toString() // redundant?
 			} else if (item == 46) {return d.toLocaleString(localecode, o)
 			} else if (item == 47) {return d.toLocaleDateString(localecode, o)
 			} else if (item == 48) {return d.toLocaleTimeString(localecode, o)
-			} else if (item == 49) {return DTFo.format(d)
-			} else if (item == 50) {
+			} else if (item == 49) {return d.toLocaleTimeString(localecode)
+			} else if (item == 50) {return d.toLocaleString(localecode)
+			} else if (item == 51) {return [d].toLocaleString(localecode)
+
+// DTF
+	// most of these will go live in locales_intl
+	// and what we return here will be equivalency of the above strings
+			} else if (item == 52) {return DTFo.format(d)
+			} else if (item == 53) {
 				let f = Intl.DateTimeFormat(localecode, { weekday: "long", month: "long", day: "numeric",
 					year: "numeric", hour: "numeric", minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long" })
 				let temp = f.formatToParts(d)
 				return temp.map(function(entry){return entry.value}).join("")
-			} else if (item == 51) {return d.toLocaleString(localecode)
-			} else if (item == 52) {return [d].toLocaleString(localecode)
-			} else if (item == 53) {return d.toLocaleDateString(localecode)
 			} else if (item == 54) {return Intl.DateTimeFormat().format(d)
 			} else if (item == 55) {
+				// relatedYear, yearName
+				let tmp = Intl.DateTimeFormat(localecode, {relatedYear: "long"}).formatToParts(d)
+					tmp = tmp.map(function(entry){return entry.value}).join("")
+				let tmpb = Intl.DateTimeFormat(localecode, {year: "numeric", yearName: "long"}).formatToParts(d)
+					tmpb = tmpb.map(function(entry){return entry.value}).join("")
+				return tmp += " | "+ tmpb
+
+			} else if (item == 56) {
 				// 1557718: 79+
 				let list = ["short", "medium","long"], res43 = []
 				list.forEach(function(s){
@@ -1093,28 +1112,14 @@ const get_lang = () => new Promise(resolve => {
 					res43.push(style.format(d))
 				})
 				return res43.join(" | ")
-			} else if (item == 56) {
-				// FF91+: 1653024: formatRange
-				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
-					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
-					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
-				return DTFo.formatRange(date1, date2) +" | "+ DTFo.formatRange(date1, date3)
 			} else if (item == 57) {
-				// relatedYear, yearName
-				let tmp = Intl.DateTimeFormat(localecode, {relatedYear: "long"}).formatToParts(d)
-					tmp = tmp.map(function(entry){return entry.value}).join("")
-				let tmpb = Intl.DateTimeFormat(localecode, {year: "numeric", yearName: "long"}).formatToParts(d)
-					tmpb = tmpb.map(function(entry){return entry.value}).join("")
-				return tmp += " | "+ tmpb
-			} else if (item == 58) {return d.toLocaleTimeString(localecode)
-			} else if (item == 59) {
 				// FF91+: 1710429
 				// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 				// FF91: extended TZNs are type "unknown"
 				let tzRes = []
 				try {
 					let tzNames = ["longGeneric","shortGeneric"]
-					let tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
+					let tzDays = [d]
 					let tz
 					tzDays.forEach(function(day) {
 						tzNames.forEach(function(name) {
@@ -1136,6 +1141,12 @@ const get_lang = () => new Promise(resolve => {
 					log_error(SECT4, itemPad +": timeZoneName", e)
 					return zErr
 				}
+			} else if (item == 58) {
+				// FF91+: 1653024: formatRange
+				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
+					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
+					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
+				return DTFo.formatRange(date1, date2) +" | "+ DTFo.formatRange(date1, date3)
 			} else {
 				return "skip"
 			}
@@ -1170,18 +1181,16 @@ const outputRegion = () => new Promise(resolve => {
 	Promise.all([
 		get_geo(),
 		get_language_locale(), // sets isLocaleValid/Value
-		get_timezone(), // sets isTimeZoneValue
 	]).then(function(){
 		Promise.all([
 			get_locale_resolvedoptions(),
-			get_locale_intl(), // gets isIntlHash
-			get_lang(),
-			//get_timezone_offsets(),
+			get_locale_intl(),
+			get_timezone(), // sets isTimeZoneValid/Value
 			get_validation_messages(),
 			get_xml_errors(),
 		]).then(function(results){
 			Promise.all([
-				get_locale_tolocalestring(results[1]), // uses isIntlHash
+				get_dates(), // will use isTimeZomeValid/Value + isLocaleValid/Value
 			]).then(function(){
 				log_section(4, t0)
 				return resolve(SECT4)

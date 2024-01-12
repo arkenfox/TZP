@@ -245,7 +245,6 @@ function run_main(method) {
 	// "currencySign": we only need one per locale
 		// only useful when not using the min test: e.g. it adds to tiny/usd and we will include it in ALL for completeness
 		// ToDo: not that interested but not sure if this could replace some of the min currencies: potentially less overall tests
-	let useAccounting = method == "min" ? false : true
 
 	let tests = {}, tmptests = []
 	let items = {
@@ -254,59 +253,60 @@ function run_main(method) {
 		"name": [-1],
 		"symbol": [1000],
 	}
-	let name = {"name": [-1]},
-		symbol = {"symbol": [1000]},
-		both = {"name": [-1], "symbol": [1000]}
+	let curN = {"name": [-1]},
+		curS = {"symbol": [1000]},
+		curB = {"name": [-1], "symbol": [1000]},
+		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
 
 	if (method == "min") {
 		if (!optExpanded) {
 			tmptests = {
 				// 17 tests (PLN, XXX for 121+ ICU tree 74)
-				"AED": name,
-				"AUD": name,
-				"BRL": name,
-				"DKK": name,
-				"GBP": symbol,
-				"KES": both,
-				"MZN": both,
-				"PHP": symbol,
-				"SZL": name,
-				"USD": both,
-				"XAF": name,
-				"ZMW": symbol,
+				"AED": curN,
+				"AUD": curN,
+				"BRL": curN,
+				"DKK": curN,
+				"GBP": curS,
+				"KES": curB,
+				"MZN": curB,
+				"PHP": curS,
+				"SZL": curN,
+				"USD": curB,
+				"XAF": curN,
+				"ZMW": curS,
 				// FF121+ 1859752 ICU 74
-				"PLN": symbol, 
-				"XXX": name,
+				"PLN": curS,
+				"XXX": curN,
 			}
 		} else {
 			tmptests = { // expanded currencies
 				// core languages
-				"AED": name,
-				"AUD": both,
-				"BRL": symbol,
-				"DKK": both,
-				"GBP": both,
-				"KES": symbol,
-				"KZT": both,
-				"MZN": symbol,
-				"PHP": symbol,
-				"SZL": both,
-				"USD": both,
-				"XAF": name,
-				"ZMW": symbol,
+				"AED": curN,
+				"AUD": curB,
+				"BRL": curS,
+				"DKK": curB,
+				"GBP": curB,
+				"KES": curS,
+				"KZT": curB,
+				"MZN": curS,
+				"PHP": curS,
+				"SZL": curB,
+				"USD": curB,
+				"XAF": curN,
+				"ZMW": curS,
 				// FF121+ 1859752 ICU 74
-				"PLN": symbol, 
-				"XXX": name,
+				"PLN": curS, 
+				"XXX": curN,
 			}
 			let aBoth = ['GHS','NIO','SHP','STN','UGX']
 			aBoth.forEach(function(c){
-				tmptests[c] = both
+				tmptests[c] = curB
 			})
 			let aIgnore = Object.keys(tmptests)
 			aIgnore = aIgnore.concat(aBoth)
 			let aSymbol = oCurrencies.expanded.filter(x => !aIgnore.includes(x))
 			aSymbol.forEach(function(c){
-				tmptests[c] = symbol
+				tmptests[c] = curS
 			})
 		}
 		// remove unsupported
@@ -322,28 +322,43 @@ function run_main(method) {
 		}
 	} else if (method == "tiny") {
 		// smaller set that gets most base languages + bang for buck on expanded
+		/*
+		old: 271: 4 currencies + 7 tests (base locales 205)
+			"USD": curA,
+			"XAF": curN,
+			"KES": curB,
+			"GBP": curS,
+
+		FF123+: optExpanded: accumative
+			// 407 = max
+			// 244 = USD (w/o accounting)
+			// 285 = expanded min (14 currencies 17 tests)
+
+		USD-curB 244 + XXX-curN = 255 + KES-curB = 265 + USD-acounting = 271
+		anything after that is not worth it: most add one one more per test
+		*/
 		tests = {
-			// instead of 15 or 16 tests: run 6 because after that the pickups are minimal
-			/* FF110+
-			optExpanded: accumative
-				USD = base 234 + XAF name = 243 + KES both = 252 + GBP symbol = 255/269 (if we ran all)
-				+ accounting = 260
-			base locales
-				USD = base 186 + XAF name = 192 + KES both = 196 + GBP symbol = 197/207
-				+ accounting = 199
-			*/
-			"USD": both,
-			"XAF": name,
-			"KES": both,
-			"GBP": symbol,
-			/*
-			"AED": name,"AUD": name,"BRL": name,"DKK": name,"KZT": name,"MZN": both,
-			"PHP": symbol,"SZL": name,"ZMW": symbol,
-			//*/
+			"USD": curA, // 244
+			"XXX": curN, // 255
+			"KES": curB, // 265 + USD-accounting = 271
+			"MOP": curS, // 275
+			//"GBP": curS, // 278
+			//"GHS": curS, // 278
+			//"DJF": curS, // 278
+			//"ERN": curS, // 278
+			//"GNF": curS, // 278
+			//"LUF": curS, // 278
+			//"MRU": curS, // 278
+			//"RWF": curS, // 278
+			//"SGD": curS, // 278
+			//"SSP": curS, // 278
+			//"XAF": curN, // 278
 		}
 	} else if (method == "usd") {
 		tests = {
-			"USD": both,
+			// with accounting: 195 + 253
+			// w/out 191, 244
+			"USD": curA
 		}
 	} else {
 		let currencies = []
@@ -374,15 +389,15 @@ function run_main(method) {
 			oStyles = {}
 			Object.keys(tests).sort().forEach(function(c){ // for each currency: sort for consistency
 				oStyles[c] = {}
-				// add a single accounting on the all/tiny/usd
-				if (useAccounting && c == "USD") {
-					let formatterAccounting = Intl.NumberFormat(code, {style: "currency", currency: "USD", currencySign: "accounting"})
-					oStyles[c]["accounting"] = [formatterAccounting.format(-1000)]
-				}
 				Object.keys(tests[c]).forEach(function(cd){ // for each currencyDisplay
 					oStyles[c][cd] = []
 					try {
-						let formatter = Intl.NumberFormat(code, {style: "currency", currency: c, currencyDisplay: cd})
+						let option = {style: "currency", currency: c, currencyDisplay: cd}
+						if (cd == "accounting") {
+							option = {style: "currency", currency: c, currencySign: cd}
+						}
+
+						let formatter = Intl.NumberFormat(code, option)
 						tests[c][cd].forEach(function(n){ // for each number
 							oStyles[c][cd].push(formatter.format(n))
 						})
@@ -459,7 +474,7 @@ function run_main(method) {
 		// hashes + btns
 		sDetail["currencies"] = Object.keys(tests).sort()
 		let curStr = Object.keys(tests).length, curBtn = ""
-		if (curStr < 5) {
+		if (curStr < 6) {
 			let aCur = []
 			for (const k of Object.keys(tests)) {aCur.push(k)}
 			curBtn = aCur.join(", ") + s4 +" ["+ curStr +"]"+ sc
@@ -504,7 +519,7 @@ function run_main(method) {
 					// track FF version changes
 					if (optExpanded) {
 						// expanded results
-						if (resultsHash == "0f4e5a6f") {resultsHash += s14 +" [FF115+]"+ sc
+						if (resultsHash == "66ef5f0b") {resultsHash += s14 +" [FF115+]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// expanded locales
@@ -513,7 +528,7 @@ function run_main(method) {
 						}
 					} else {
 						// results
-						if (resultsHash == "9675f10b") {resultsHash += s14 +" [FF115+]"+ sc
+						if (resultsHash == "0455c360") {resultsHash += s14 +" [FF115+]"+ sc
 						} else {resultsHash += zNEW
 						}
 						// locales
