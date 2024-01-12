@@ -734,7 +734,6 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 		// get the viewport width: we only return zErr or a number
 		get_scr_viewport(runtype)
 	]).then(function(res) {
-		let t0 = nowFn()
 		let oData = {}, aDisplay = []
 
 		// css inner width
@@ -815,7 +814,6 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 		const METRIC = "scrollbar_widths"
 		log_display(1, METRIC, aDisplay.join(" | "))
 		addData(1, METRIC, oData, mini(oData))
-		if (runtype !== "resize") {log_perf(SECT1, METRIC, t0)}
 		return resolve()
 	})
 })
