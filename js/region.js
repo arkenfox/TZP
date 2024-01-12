@@ -507,10 +507,7 @@ const get_language_locale = () => new Promise(resolve => {
 })
 
 const get_locale_intl = () => new Promise(resolve => {
-	const METRICintl = "locale_intl", METRICstring = "locale_tolocalestring"
-	let t0 = nowFn(), notation = ""
-
-	function get_metric(m, code, isIntl = true) {
+	function get_metric(m, code, isIntl) {
 		try {
 			let obj = {}, tests = oIntlTests[m], value
 			if (m == "collation") {
@@ -521,8 +518,7 @@ const get_locale_intl = () => new Promise(resolve => {
 					let option = {notation: m, compactDisplay: key, useGrouping: true}, data = [], formatter
 					if (isIntl) {formatter = new Intl.NumberFormat(code, option)}
 					tests[key].forEach(function(n) {
-						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option))
-						data.push(value)
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
 					})
 					obj[key] = data
 				})
@@ -532,8 +528,7 @@ const get_locale_intl = () => new Promise(resolve => {
 					Object.keys(tests[key]).forEach(function(s) {
 						let option = s == "accounting" ? {style: m, currency: key, currencySign: s} : {style: m, currency: key, currencyDisplay: s}, data = []
 						tests[key][s].forEach(function(n) {
-							value = (isIntl ? Intl.NumberFormat(code, option).format(n) : (n).toLocaleString(code, option));
-							data.push(value)
+							value = (isIntl ? Intl.NumberFormat(code, option).format(n) : (n).toLocaleString(code, option)); data.push(value)
 						})
 						obj[key][s] = data
 					})
@@ -556,8 +551,7 @@ const get_locale_intl = () => new Promise(resolve => {
 					Object.keys(tests[key]).forEach(function(s) {
 						let formatter = (isIntl ? Intl.NumberFormat(code, {notation: key, style: s}) : undefined), data = []
 						tests[key][s].forEach(function(n){
-							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {notation: key, style: s}))
-							data.push(value)
+							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {notation: key, style: s})); data.push(value)
 						})
 						obj[key][s] = data
 					})
@@ -619,8 +613,7 @@ const get_locale_intl = () => new Promise(resolve => {
 				Object.keys(tests).forEach(function(key) {
 					let formatter = (isIntl ? new Intl.NumberFormat(code, {signDisplay: key}) : undefined), data = []
 					tests[key].forEach(function(n){
-						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {signDisplay: key}))
-						data.push(value)
+						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {signDisplay: key})); data.push(value)
 					})
 					obj[key] = data
 				})
@@ -634,8 +627,7 @@ const get_locale_intl = () => new Promise(resolve => {
 							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
 							let formatter = (isIntl ? Intl.DateTimeFormat(code, option) : undefined)
 							tests[tz][tzn].forEach(function(dte){
-								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option))
-								data.push(value)
+								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option)); data.push(value)
 							})
 						} catch (e) {} // ignore invalid
 						if (data.length) {obj[tz] = data}
@@ -649,8 +641,7 @@ const get_locale_intl = () => new Promise(resolve => {
 						try {
 							let formatter = (isIntl ? Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud}) : undefined)
 							tests[u][ud].forEach(function(n){
-								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud}))
-								data.push(value)
+								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud})); data.push(value)
 							})
 						} catch (e) {} // ignore invalid
 					})
@@ -665,73 +656,51 @@ const get_locale_intl = () => new Promise(resolve => {
 		}
 	}
 
-	// INTL
-	let METRIC = METRICintl, oData = {}, oString = {}, oCheck = {}
-	let dayperiods = { // set per run
+	const dayperiods = { // set per run
 		8: new Date("2019-01-30T08:00:00"),
 		12: new Date("2019-01-30T12:00:00"),
 		15: new Date("2019-01-30T15:00:00"),
 		18: new Date("2019-01-30T18:00:00"),
 		22: new Date("2019-01-30T22:00:00"),
 	}
-	let metrics = [
-		"collation","compact", "currency", "dayperiod", "listformat","notation","numberformat_ftp",
-		"pluralrules","relativetimeformat","relativetimeformat_ftp","sign","timezonename","unit"
-	]
-	let strings = ["compact","currency","notation","sign","timezonename","unit"]
-	metrics.forEach(function(m) {
-		let value = get_metric(m, undefined) 
-		oData[m] = value
-		// create an intl version of tolocalestring
-		if (strings.includes(m)) {
-			oString[m] = value
-		}
-	})
-	if (isSmart && isLocaleValid) {metrics.forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue)})}
-	let hash = mini(oData)
-	let isLies = false, btnDiff = ""
-	if (isSmart) {
-		notation = locale_red
-		if (isLocaleValid) {
-			if (hash == mini(oCheck)) {
-				notation = locale_green
-			} else {
-				addDetail(METRIC +"_check", oCheck)
-				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+	const oMetrics = {
+		"intl" : [
+			"collation","compact", "currency", "dayperiod", "listformat","notation","numberformat_ftp",
+			"pluralrules","relativetimeformat","relativetimeformat_ftp","sign","timezonename","unit"
+		],
+		"tolocalestring": ["compact","currency","notation","sign","timezonename","unit"],
+	}
+	let t0 = nowFn(), notation = ""
+	let METRIC, oString = {}
+	Object.keys(oMetrics).forEach(function(list){
+		METRIC = "locale_"+ list
+		let t0 = nowFn(), isIntl = list == "intl", notation = ""
+		let oData = {}, oCheck = {}
+		oMetrics[list].forEach(function(m) {
+			let value = get_metric(m, undefined, isIntl) 
+			oData[m] = value
+			if (isIntl && oMetrics["tolocalestring"].includes(m)) {oString[m] = value} // create an intl version of tolocalestring
+		})
+		if (isSmart && isLocaleValid) {oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isIntl)})}
+		let hash = mini(oData)
+		let isLies = false, btnDiff = ""
+		if (isSmart) {
+			if (!isIntl) {log_display(4, METRIC +"_matches_intl", (hash == mini(oString) ? intl_green : intl_red))}
+			notation = locale_red
+			if (isLocaleValid) {
+				if (hash == mini(oCheck)) {
+					notation = locale_green
+				} else {
+					addDetail(METRIC +"_check", oCheck)
+					btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
+				}
 			}
 		}
-	}
-	addData(4, METRIC, oData, hash)
-	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
-	log_perf(SECT4, METRIC, t0)
-
-	// strings
-	t0 = nowFn()
-	METRIC = METRICstring
-	let oDataS = {}, oCheckS = {}, notationS = ""
-	strings.forEach(function(m) {
-		oDataS[m] = get_metric(m, undefined, false)
+		addData(4, METRIC, oData, hash)
+		log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
+		log_perf(SECT4, METRIC, t0)
+		if (!isIntl) {return resolve()}
 	})
-	if (isSmart && isLocaleValid) {strings.forEach(function(m) {oCheckS[m] = get_metric(m, isLocaleValue, false)})}
-	let hashS = mini(oDataS)
-	let isLiesS = false, btnDiffS = ""
-	if (isSmart) {
-		log_display(4, METRIC +"_matches_intl", (hashS == mini(oString) ? intl_green : intl_red))
-		notationS = locale_red
-		if (isLocaleValid) {
-			if (hashS == mini(oCheckS)) {
-				notationS = locale_green
-			} else {
-				addDetail(METRIC +"_check", oCheckS)
-				btnDiffS = addButton(4, METRIC +"_check", isLocaleValue +" check")
-			}
-		}
-	}
-	addData(4, METRIC, oDataS, hashS)
-	log_display(4, METRIC, hashS + addButton(4, METRIC) + btnDiffS + notationS)
-	log_perf(SECT4, METRIC, t0)
-
-	return resolve()
 })
 
 const get_locale_resolvedoptions = () => new Promise(resolve => {
@@ -1046,19 +1015,6 @@ const get_xml_errors = () => new Promise(resolve => {
 })
 
 const get_dates = () => new Promise(resolve => {
-	// dates
-		// we will be getting entropy from DFT using hardcoded dates, i.e using the exact same date/time so we
-		// always get e.g. Tuesday or PM or 24hr: see: overall hashes match across different timezones with DTF
-		// pocs (intl locale): and this will be covered under locales_intl with DTF + corresponding tolocalestrings
-
-	// the only real reason we would want the actual date/time to vary is to see if they're
-	// lying even though we already check veracity with tz offsets, and the only reason to get a
-	// _current_ time is for clock skew (which would make the FP change and is out of scope for now)
-
-	// but lets use this section to actually let rip and not worry about timezones
-	// so everything here we want the date/time to vary by timezone
-
-	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
 	let d2 = new Date("January 01, 2019 00:00:01") // for toGMT/UTC strings
 	
@@ -1067,9 +1023,6 @@ const get_dates = () => new Promise(resolve => {
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
-
-	// this intial lot just see if can get two timezones to differ on every result
-	// then later we will craft some max entropy with various dates and styles/options
 	function get_item(item) {
 		let itemPad = "item "+ item
 		try {
@@ -1085,10 +1038,7 @@ const get_dates = () => new Promise(resolve => {
 			} else if (item == 49) {return d.toLocaleTimeString(localecode)
 			} else if (item == 50) {return d.toLocaleString(localecode)
 			} else if (item == 51) {return [d].toLocaleString(localecode)
-
 // DTF
-	// most of these will go live in locales_intl
-	// and what we return here will be equivalency of the above strings
 			} else if (item == 52) {return DTFo.format(d)
 			} else if (item == 53) {
 				let f = Intl.DateTimeFormat(localecode, { weekday: "long", month: "long", day: "numeric",
@@ -1167,8 +1117,6 @@ const get_dates = () => new Promise(resolve => {
 		}
 	}
 	return resolve()
-	// ToDo: more type checking
-		// e.g. Object.prototype.toString.call(value) == "[object Date]"
 })
 
 const outputRegion = () => new Promise(resolve => {
