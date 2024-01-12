@@ -149,8 +149,9 @@ let isArch = true,
 let languagesSupported = {},
 	localesSupported = {},
 	isLanguageSmart = false,
-	isLocaleValid = false,
+	isLocaleValid,
 	isLocaleValue,
+	isTimeZoneValid,
 	isTimeZoneValue,
 	oIntlTests = {}
 
