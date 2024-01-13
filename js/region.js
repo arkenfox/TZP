@@ -557,24 +557,18 @@ const get_locale_intl = () => new Promise(resolve => {
 					})
 				})
 			} else if (m == "numberformat_ftp") {
-				function get_value(type, parts) {
-					try {
-						let str = "none"
-						for (let i = 0 ; i < parts.length; i++) {
-							if (parts[i]["type"] === type) {
-								str = parts[i]["value"]
-								str = str.length == 1 ? str.charCodeAt(0) : str
-								return str // stop checking
-							}
-						}
-						return str
-					} catch(e) {return " error"} // why is this " error" and not zErr
+				function get_value(type, aParts) {
+					for (let i = 0 ; i < aParts.length; i++) {
+						if (aParts[i].type === type) {str = aParts[i].value; return (str.length == 1 ? str.charCodeAt(0) : str)}
+					}
+					return "none"
 				}
-				let formatter = Intl.NumberFormat(code), res = []
+				let formatter = Intl.NumberFormat(code), str
 				Object.keys(tests).forEach(function(key){
-					tests[key].forEach(function(num){res.push(get_value(key, formatter.formatToParts(num)))})
+					let data = []
+					tests[key].forEach(function(num){data.push(get_value(key, formatter.formatToParts(num)))})
+					obj[key] = data
 				})
-				return res.join(" | ")
 			} else if (m == "pluralrules") {
 				for (const key of Object.keys(tests)) {
 					let formatter = new Intl.PluralRules(code, {type: key}), nos = tests[key], prev="", current="", data = []
@@ -1017,12 +1011,12 @@ const get_xml_errors = () => new Promise(resolve => {
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
 	let d2 = new Date("January 01, 2019 00:00:01") // for toGMT/UTC strings
-	
 	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
+
 	function get_item(item) {
 		let itemPad = "item "+ item
 		try {
@@ -1053,7 +1047,6 @@ const get_dates = () => new Promise(resolve => {
 				let tmpb = Intl.DateTimeFormat(localecode, {year: "numeric", yearName: "long"}).formatToParts(d)
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
-
 			} else if (item == 56) {
 				// 1557718: 79+
 				let list = ["short", "medium","long"], res43 = []
