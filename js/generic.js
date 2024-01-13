@@ -771,6 +771,7 @@ function togglerows(id, word) {
 /*** OUTGOING ***/
 
 function showMetrics(name, scope, isConsole = false) {
+	let t0 = nowFn()
 	let btns = "<span class='btn0 btnc' onClick='showMetrics(`"
 		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
 
@@ -802,16 +803,18 @@ function showMetrics(name, scope, isConsole = false) {
 		console.log((scope == undefined ? "" : scope.toUpperCase() +": ") + name +": "+ (showhash ? mini(data) : ""), data)
 		return
 	}
-	// populate overlay
-	btns += " <span class='btn0 btnc' onClick='copyclip(`overlayresults`)'>[COPY]</span>"
+	// clear so we always start at the top, add btns, display
+	dom.overlayresults.innerHTML = ""
+	dom.overlaybuttons.innerHTML = btns + " <span class='btn0 btnc' onClick='copyclip(`overlayresults`)'>[COPY]</span>"
 		+ " <span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span>"
-	dom.overlayresults.innerHTML = (scope == undefined ? "" : scope.toUpperCase() +": ")
-		+ name +": "+ (showhash ? mini(data) : "") + "<br>"+ json_highlight(data)
-	dom.overlaybuttons.innerHTML = btns
-	// show overlay
 	dom.modaloverlay.style.display = "block"
 	dom.overlay.style.display = "block"
-	dom.overlaytop.scrollIntoView(true) // so we're always at the top
+	// delay so overlay is painted
+	setTimeout(function() {
+		dom.overlayresults.innerHTML = (scope == undefined ? "" : scope.toUpperCase() +": ")
+			+ name +": "+ (showhash ? mini(data) : "") + "<br>"+ json_highlight(data)
+		//console.log(name, scope, performance.now() - t0)
+	}, 0)
 }
 
 function output_health(scope) {
