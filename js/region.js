@@ -189,51 +189,51 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"zh-TW": ["zh, "+ en, "zh-Hant-TW"],
 	}
 	localesSupported = {
-		"ar": {v: "9fa7589d", xml: "aaffcd08"},
-		"ca": {v: "f357beb7", xml: "7beb7ea5"},
-		"cs": {v: "aba57df4", xml: "f2b4bcae"},
-		"da": {v: "d9827dd4", xml: "1a0c5509"},
-		"de": {v: "9d1afee7", xml: "68446b62"},
+		"ar": {v: "07d71cf7", xml: "ebfbdc43"},
+		"ca": {v: "078cf77d", xml: "81f31519"},
+		"cs": {v: "6d9bfbae", xml: "45f277f7"},
+		"da": {v: "7de7af9a", xml: "44535972"},
+		"de": {v: "b19fdc07", xml: "f4b2a56f"},
 		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
 			// changing to spoof english returns n30.. phew!
-		"el": {v: "f79d4f6d", xml: "0d108497"},
-		"en-US": {v: "e29f9dc9", xml: "7d699e6d"},
-		"es-ES": {v: "c5869938", xml: "5de681ef"},
-		"fa": {v: "0e4865f6", xml: "999d2774"},
-		"fi": {v: "9e5c52b8", xml: "bfd2e337"},
-		"fr": {v: "34d60989", xml: "7c23726c"},
-		"ga-IE": {v: "664f97a2", xml: "c2ef923b"},
+		"el": {v: "751237cd", xml: "da8c80af"},
+		"en-US": {v: "ca1379a9", xml: "945f8952"},
+		"es-ES": {v: "f38c42d8", xml: "3eeba3bc"},
+		"fa": {v: "b0fc1056", xml: "113d0a7e"},
+		"fi": {v: "1c9d3518", xml: "71abeeec"},
+		"fr": {v: "ecf19d29", xml: "74f5df3d"},
+		"ga-IE": {v: "94554142", xml: "d9761e70"},
 		// he: xml n28 + n30 = english
-		"he": {v: "190a5791", xml: "06d23609"},
-		"hu": {v: "41d3ec54", xml: "fc6a4518"},
-		"id": {v: "b7a10cb1", xml: "a1523a88"},
-		"is": {v: "f5a54602", xml: "5acd311d"},
-		"it": {v: "dcfd7d74", xml: "0de8610d"},
-		"ja": {v: "faf9fd23", xml: "986a79a4"},
-		"ka": {v: "706a5318", xml: "0732462e"},
-		"ko": {v: "c23cb712", xml: "55386c69"},
-		"lt": {v: "36518f84", xml: "b0466824"},
+		"he": {v: "719480b1", xml: "39eec79d"},
+		"hu": {v: "d971141a", xml: "9f537fe6"},
+		"id": {v: "127595ab", xml: "79f3851e"},
+		"is": {v: "406b58a2", xml: "7f3e38b8"},
+		"it": {v: "5a05a494", xml: "469cb2af"},
+		"ja": {v: "f9945303", xml: "6823cee8"},
+		"ka": {v: "dcc8149e", xml: "4e712712"},
+		"ko": {v: "ff83b5d8", xml: "fc4c50ed"},
+		"lt": {v: "11e6923e", xml: "f50f2b50"},
 		// mk: v = english, and xml n30 = english but is would-be-n39 (same as el)
-			// and n28 = english
-		"mk": {v: "e29f9dc9", xml: "a85f1290"},
-		"ms": {v: "eda0f943", xml: "ad5a2234"},
+			// and n27 + n28 = english
+		"mk": {v: "ca1379a9", xml: "3b22df8b"},
+		"ms": {v: "5f74b3a3", xml: "f23d0969"},
 		// my: two items in english: date+over/under
-		"my": {v: "45e1804c", xml: "a0194cad"},
+		"my": {v: "d060ec4c", xml: "11d4d458"},
 		// nb-NO: xml most is english
-		"nb-NO": {v: "4a30cadc", xml: "2808247b"},
-		"nl": {v: "e76737e7", xml: "dbfd6c59"},
-		"pl": {v: "f9319f36", xml: "f4033f7f"},
-		"pt-BR": {v: "7febcf44", xml: "6f34c571"},
-		"ro": {v: "4a3ecc22", xml: "0b2be0cc"},
-		"ru": {v: "cfdcb459", xml: "a0b4b56f"},
-		"sq": {v: "920f04d4", xml: "49380742"},
-		"sv-SE": {v: "812b8c4a", xml: "c3d602ca"},
-		"th": {v: "40cd0883", xml: "225110a2"},
-		"tr": {v: "05623887", xml: "09a2b85c"},
-		"uk": {v: "0ff7de14", xml: "2989c268"},
-		"vi": {v: "e1cde994", xml: "a87bbc82"},
-		"zh-Hans-CN": {v:"9c846ddc", xml: "f6112799"},
-		"zh-Hant-TW": {v: "59a93745", xml: "94ff0e78"},
+		"nb-NO": {v: "5db1a87c", xml: "50426960"},
+		"nl": {v: "85aa822d", xml: "b03574e4"},
+		"pl": {v: "a72f8196", xml: "c1295e2b"},
+		"pt-BR": {v: "a40cfb3e", xml: "96f79e68"},
+		"ro": {v: "141b9b9c", xml: "cf85bb64"},
+		"ru": {v: "96f8f013", xml: "2178a2b6"},
+		"sq": {v: "3a73dbb4", xml: "a732eca1"},
+		"sv-SE": {v: "c92daf04", xml: "80f52165"},
+		"th": {v: "780cb4e3", xml: "51247f02"},
+		"tr": {v: "73fb7f4d", xml: "1e9d0192"},
+		"uk": {v: "0ca13474", xml: "cc85d2f5"},
+		"vi": {v: "0d2ec98e", xml: "7cf3c6f9"},
+		"zh-Hans-CN": {v:"6945537c", xml: "328cc79b"},
+		"zh-Hant-TW": {v: "487a7ce5", xml: "87abb9fa"},
 	}
 	if (isMullvad) {
 		// 22 of 38 supported
@@ -1003,7 +1003,7 @@ const get_xml_errors = () => new Promise(resolve => {
 		}
 	}
 	let count = Object.keys(isXML).length
-	let details = count === 14 ? "details" : count +"/14"
+	let details = count === 15 ? "details" : count +"/15"
 	log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
 	return resolve()
 })

@@ -602,6 +602,7 @@ function get_isXML() {
 		n11: '<x>&x;</x>',
 		n14: '<x>&#x0;',
 		n20: '<x><![CDATA[',
+		n27: '<x:x>',
 		n28: '<x xmlns:x=""></x>',
 		n30: '<?xml versin="1.0"?>',
 	}
