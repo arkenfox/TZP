@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
@@ -28,8 +28,8 @@
 			<input type="text" required id="widgettext">
 			<input type="checkbox" required id="widgetcheckbox">
 			<select required id="widgetcombobox"><option></option></select>
-			<input type="date" id="widgetdatetime" value="2024-01-01" max="2023-01-01">
-			<input type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-01-01">
+			<input type="date" id="widgetdatetime" value="2024-01-01" max="2023-12-31">
+			<input type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-12-31">
 			<input type="email" id="widgetemail" value="a">
 			<input type="file" required id="widgetfile">
 			<input type="number" required id="widgetnumber">
@@ -205,27 +205,28 @@ function get_xml_errors() {
 		// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties
 		// https://www.w3.org/TR/xml/
 	let t0 = performance.now()
+	const xmlList = {
+		n02: 'a', // syntax error
+		n03: '', // no root element found
+		n04: '<>', // not well-formed
+		n05: '<', // unclosed token
+		n07: '<x></X>', // mismatched tag
+		n08: '<x x:x="" x:x="">', // duplicate attribute
+		n09: '<x></x><x', // junk after document element
+		n11: '<x>&x;', // undefined entity
+		n14: '<x>&#x0;', // reference to invalid character number
+		n20: '<x><![CDATA[', // unclosed CDATA section
+		n27: '<x:x>', // prefix not bound to a namespace
+		n28: '<x xmlns:x=""></x>', // must not undeclare prefix
+		n30: '<?xml v=""?>', // XML declaration not well-formed
+	}
 	try {
-		const xmlList = {
-			n02: 'a', // syntax error
-			n03: '', // no root element found
-			n04: '<>', // not well-formed
-			n05: '<', // unclosed token
-			n07: '<x></X>', // mismatched tag
-			n08: '<x x:x="" x:x="">', // duplicate attribute
-			n09: '<x></x><x', // junk after document element
-			n11: '<x>&x;', // undefined entity
-			n14: '<x>&#x0;', // reference to invalid character number
-			n20: '<x><![CDATA[', // unclosed CDATA section
-			n27: '<x:x>', // prefix not bound to a namespace
-			n28: '<x xmlns:x=""></x>', // must not undeclare prefix
-			n30: '<?xml v=""?>', // XML declaration not well-formed
-		}
 		let xmlData = {}, delimiter = ":"
+		let parser = new DOMParser
 		// 'application/xml','application/xhtml+xml','text/xml','image/svg+xml' : same errors
 		for (const k of Object.keys(xmlList)) {
 			try {
-				let xmlDoc = (new DOMParser).parseFromString(xmlList[k], 'application/xml')
+				let xmlDoc = parser.parseFromString(xmlList[k], 'application/xml')
 				let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
 				//split into parts: works back to FF52 and works with LTR
 					// the name (XML Parsing Error), location (Location) and line parts (Line Number 1, Column 1)
