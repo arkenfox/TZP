@@ -10,6 +10,15 @@
 	<style>
 		table {width: 97%; min-width: 480px; max-width: 680px}
 		hr {color: var(--test4);}
+		.floatright {
+			float: right;
+			display: block;
+			width: 200px;
+			color: var(--test0);
+		}
+		.flex-item {
+			margin: 5px;
+		}
 	</style>
 </head>
 
@@ -57,23 +66,36 @@
 		<tr><td colspan="2"><hr><br></td></tr>
 
 		<tr><td colspan="2" style="text-align: left;">
+			<div class="floatright">
+				<div class="flex-item"><input id="buttonwidth" type="button"></div>
+				<div class="flex-item"><input id="datewidth" type="date"></div>
+				<div class="flex-item"><input id="filewidth" type="file"></div>
+				<div class="flex-item"><input id="resetwidth" type="reset"></div>
+				<div class="flex-item"><input id="submitwidth" type="submit"></div>
+				<div class="flex-item"><input id="timewidth" type="time"></div><br>
+			</div>
+			<div>ELEMENT WIDTHS &nbsp; <br>
+				<br><span class="c mono spaces no_color" id="element_widths"></span><span>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
 			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
 				<br><br><span class="c mono spaces no_color" id="media_messages"></span><span>
 			</div>
-
 			<br>
 			<div>VALIDATION MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
 				<br><br><span class="c mono spaces no_color" id="validation_messages"></span>
 			</div>
-
 			<br>
 			<div>XML ERRORS <sup>1</sup> &nbsp; 
 			<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties' target='blank'>searchfox xmlparser</a>
 			<br><br><span class="c mono spaces no_color" id="xml_errors"></span>
 			</div>
 		</td></tr>
+
 		<!--credits-->
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code based on work by </span>
@@ -82,7 +104,9 @@
 				https://acatarineu.github.io/fp/locale_nullprincipal.html
 			-->
 			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>1</sup>
-			</td></tr>
+			</td>
+		</tr>
+
 		</table>
 	<br>
 
@@ -160,6 +184,25 @@ function get_dtd2() {
 	let checking = setInterval(check_dtd2, 50)
 }
 
+function get_element_widths() {
+	let t0 = performance.now()
+	try {
+		let aList = ['button','date','file','reset','submit','time']
+		let oData = {}, target
+		aList.forEach(function(n) {
+			target = dom[n +"width"]
+			oData[n]  = target.getBoundingClientRect().width
+		})
+		let hash = mini(oData)
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		dom.element_widths.innerHTML = hash + perf + "<br>"+ json_highlight(oData)
+		return
+	} catch(e) {
+		dom.element_widths = e+""
+		return
+	}
+}
+
 function get_media_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
 	let t0 = performance.now()
@@ -200,10 +243,12 @@ function get_media_messages() {
 }
 
 function get_xml_errors() {
+	if (!isFF) {return}
 	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString
 		// https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction
 		// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties
 		// https://www.w3.org/TR/xml/
+	console.clear()
 	let t0 = performance.now()
 	const xmlList = {
 		n02: 'a', // syntax error
@@ -259,9 +304,11 @@ function get_xml_errors() {
 		let hash = mini(xmlData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		dom.xml_errors.innerHTML = hash + perf + "<br>"+ json_highlight(xmlData)
+		console.clear()
 		return
 	} catch(e) {
 		dom.xml_errors = e+""
+		console.clear()
 		return
 	}
 }
@@ -321,6 +368,7 @@ function get_validation_messages() {
 
 function run() {
 	if (!isFF) {
+		dom.element_widths.innerHTML = "&nbsp"
 		dom.media_messages.innerHTML = "&nbsp"
 		dom.validation_messages.innerHTML = "&nbsp"
 	} else {
@@ -332,11 +380,12 @@ function run() {
 	}
 	// pause so users see change
 	setTimeout(function() {
+		get_xml_errors()
 		get_validation_messages()
 		get_media_messages()
+		get_element_widths()
 		// FF only
-		if (!isFF) {return}
-		get_xml_errors()
+
 	}, 170)
 }
 
