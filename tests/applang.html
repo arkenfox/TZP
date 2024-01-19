@@ -42,9 +42,9 @@
 			<input type="email" id="widgetemail" value="a">
 			<input type="file" required id="widgetfile">
 			<input type="number" required id="widgetnumber">
-			<input type="number" id="widgetmax" max="2" value="3">
-			<input type="number" id="widgetmin" min="2" value="1">
-			<input type="number" id="widgetstep" min="2" step="2" value="3">
+			<input type="number" id="widgetmax" max="1974.3" value="2000">
+			<input type="number" id="widgetmin" min="8026.5" value="1">
+			<input type="number" id="widgetstep" min="1.2345" step="1005.5545" value="2">
 			<input type="radio" required name="radiogroup" id="widgetradio">
 			<input type="url" id="widgeturl" value="a">
 			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
@@ -59,7 +59,11 @@
 	<!-- app lang -->
 	<table id="tb4">
 		<col width="25%"></a><col width="75%">
-		<thead><tr><th colspan="2">application language</th></tr></thead>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">application language
+			<div class="nav-up"><span class="c perf" id="locale"></span></div>
+			</div>
+		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="btn-left btn4 btn" onClick="run()">[ run ]</span>
 		</td></tr>
@@ -201,6 +205,17 @@ function get_element_widths() {
 		dom.element_widths = e+""
 		return
 	}
+}
+
+function get_locale() {
+	// just get one
+	let locale
+	try {
+		locale = Intl.DateTimeFormat().resolvedOptions().locale
+	} catch(e) {
+		locale = zErr
+	}
+	dom.locale.innerHTML = locale
 }
 
 function get_media_messages() {
@@ -368,6 +383,7 @@ function get_validation_messages() {
 
 function run() {
 	if (!isFF) {
+		dom.locale.innerHTML = "&nbsp"
 		dom.element_widths.innerHTML = "&nbsp"
 		dom.media_messages.innerHTML = "&nbsp"
 		dom.validation_messages.innerHTML = "&nbsp"
@@ -380,6 +396,8 @@ function run() {
 	}
 	// pause so users see change
 	setTimeout(function() {
+
+		get_locale()
 		get_xml_errors()
 		get_validation_messages()
 		get_media_messages()
@@ -392,6 +410,7 @@ function run() {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_locale()
 	if (!isFF) {
 		let str = "gecko only"
 		dom.xml_errors = str
