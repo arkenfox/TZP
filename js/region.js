@@ -189,51 +189,52 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"zh-TW": ["zh, "+ en, "zh-Hant-TW"],
 	}
 	localesSupported = {
-		"ar": {v: "07d71cf7", xml: "ebfbdc43"},
-		"ca": {v: "078cf77d", xml: "81f31519"},
-		"cs": {v: "6d9bfbae", xml: "45f277f7"},
-		"da": {v: "7de7af9a", xml: "44535972"},
-		"de": {v: "b19fdc07", xml: "f4b2a56f"},
+		// v hashes are without localized NumberRangeOver/Underflow: we'll wait til that lands in stable
+		"ar": {v: "8634a06c", xml: "ebfbdc43"},
+		"ca": {v: "448ed85c", xml: "81f31519"},
+		"cs": {v: "df366b6d", xml: "45f277f7"},
+		"da": {v: "2ee855e1", xml: "44535972"},
+		"de": {v: "9262b362", xml: "f4b2a56f"},
 		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
 			// changing to spoof english returns n30.. phew!
-		"el": {v: "751237cd", xml: "da8c80af"},
-		"en-US": {v: "ca1379a9", xml: "945f8952"},
-		"es-ES": {v: "f38c42d8", xml: "3eeba3bc"},
-		"fa": {v: "b0fc1056", xml: "113d0a7e"},
-		"fi": {v: "1c9d3518", xml: "71abeeec"},
-		"fr": {v: "ecf19d29", xml: "74f5df3d"},
-		"ga-IE": {v: "94554142", xml: "d9761e70"},
+		"el": {v: "8fca38ce", xml: "da8c80af"},
+		"en-US": {v: "41310558", xml: "945f8952"},
+		"es-ES": {v: "f4383b69", xml: "3eeba3bc"},
+		"fa": {v: "bdf109cf", xml: "113d0a7e"},
+		"fi": {v: "a51809e3", xml: "71abeeec"},
+		"fr": {v: "9619061e", xml: "74f5df3d"},
+		"ga-IE": {v: "2bf1321d", xml: "d9761e70"},
 		// he: xml n28 + n30 = english
-		"he": {v: "719480b1", xml: "39eec79d"},
-		"hu": {v: "d971141a", xml: "9f537fe6"},
-		"id": {v: "127595ab", xml: "79f3851e"},
-		"is": {v: "406b58a2", xml: "7f3e38b8"},
-		"it": {v: "5a05a494", xml: "469cb2af"},
-		"ja": {v: "f9945303", xml: "6823cee8"},
-		"ka": {v: "dcc8149e", xml: "4e712712"},
-		"ko": {v: "ff83b5d8", xml: "fc4c50ed"},
-		"lt": {v: "11e6923e", xml: "f50f2b50"},
-		// mk: v = english, and xml n30 = english but is would-be-n39 (same as el)
+		"he": {v: "e47dbb82", xml: "39eec79d"},
+		"hu": {v: "8891e8c9", xml: "9f537fe6"},
+		"id": {v: "b2dbd886", xml: "79f3851e"},
+		"is": {v: "816f53ff", xml: "7f3e38b8"},
+		"it": {v: "9b6c1185", xml: "469cb2af"},
+		"ja": {v: "48645d06", xml: "6823cee8"},
+		"ka": {v: "aee130cb", xml: "4e712712"},
+		"ko": {v: "d3b54047", xml: "fc4c50ed"},
+		"lt": {v: "cf6fc0e1", xml: "f50f2b50"},
+		// mk: v = english but not number formating, and xml n30 = english but is would-be-n39 (same as el)
 			// and n27 + n28 = english
-		"mk": {v: "ca1379a9", xml: "3b22df8b"},
-		"ms": {v: "5f74b3a3", xml: "f23d0969"},
+		"mk": {v: "1120c05c", xml: "3b22df8b"},
+		"ms": {v: "9dadbc64", xml: "f23d0969"},
 		// my: two items in english: date+over/under
-		"my": {v: "d060ec4c", xml: "11d4d458"},
+		"my": {v: "475aae83", xml: "11d4d458"},
 		// nb-NO: xml most is english
-		"nb-NO": {v: "5db1a87c", xml: "50426960"},
-		"nl": {v: "85aa822d", xml: "b03574e4"},
-		"pl": {v: "a72f8196", xml: "c1295e2b"},
-		"pt-BR": {v: "a40cfb3e", xml: "96f79e68"},
-		"ro": {v: "141b9b9c", xml: "cf85bb64"},
-		"ru": {v: "96f8f013", xml: "2178a2b6"},
-		"sq": {v: "3a73dbb4", xml: "a732eca1"},
-		"sv-SE": {v: "c92daf04", xml: "80f52165"},
-		"th": {v: "780cb4e3", xml: "51247f02"},
-		"tr": {v: "73fb7f4d", xml: "1e9d0192"},
-		"uk": {v: "0ca13474", xml: "cc85d2f5"},
-		"vi": {v: "0d2ec98e", xml: "7cf3c6f9"},
-		"zh-Hans-CN": {v:"6945537c", xml: "328cc79b"},
-		"zh-Hant-TW": {v: "487a7ce5", xml: "87abb9fa"},
+		"nb-NO": {v: "0f0769e7", xml: "50426960"},
+		"nl": {v: "87dcc6d6", xml: "b03574e4"},
+		"pl": {v: "cc11d211", xml: "c1295e2b"},
+		"pt-BR": {v: "c05c32a9", xml: "96f79e68"},
+		"ro": {v: "27e33087", xml: "cf85bb64"},
+		"ru": {v: "22559568", xml: "2178a2b6"},
+		"sq": {v: "9a1acbb7", xml: "a732eca1"},
+		"sv-SE": {v: "84a56587", xml: "80f52165"},
+		"th": {v: "8448474c", xml: "51247f02"},
+		"tr": {v: "596b91c6", xml: "1e9d0192"},
+		"uk": {v: "c5c19b3d", xml: "cc85d2f5"},
+		"vi": {v: "21828319", xml: "7cf3c6f9"},
+		"zh-Hans-CN": {v:"55d25655", xml: "328cc79b"},
+		"zh-Hant-TW": {v: "8e4cfa0e", xml: "87abb9fa"},
 	}
 	if (isMullvad) {
 		// 22 of 38 supported
@@ -1016,7 +1017,6 @@ const get_dates = () => new Promise(resolve => {
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
-
 	function get_item(item) {
 		let itemPad = "item "+ item
 		try {
