@@ -42,7 +42,7 @@ function get_autoplay() {
 const get_clearkey = () => new Promise(resolve => {
 	const METRIC = "clearkey"
 	let notation = ""
-	setTimeout(() => resolve([METRIC, zErrTime]), 20)
+	setTimeout(() => resolve([METRIC, zErrTime]), 100)
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
