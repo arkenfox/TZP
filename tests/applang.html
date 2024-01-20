@@ -76,15 +76,18 @@
 				<div class="flex-item"><input id="edate" type="date"></div>
 				<div class="flex-item"><input id="edatetime-local" type="datetime-local"></div>
 				<div class="flex-item"><details id="edetails"></details></div>
+				<div class="flex-item"><input id="edirectory" webkitdirectory type="file"></div>
 				<div class="flex-item"><input id="efile" type="file"></div>
+				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
 				<div class="flex-item"><input id="ereset" type="reset"></div>
 				<div><select id="eselect"><select></div>
 				<div><select multiple="" id="eselect_multiple"><option></option><select></div>
 				<div class="flex-item"><input id="esubmit" type="submit"></div>
 				<div class="flex-item"><input id="etime" type="time"></div><br>
 			</div>
-			<div>ELEMENT WIDTHS &nbsp; <br>
-				<br><span class="c mono spaces no_color" id="elements"></span><span>
+			<div>ELEMENTS &nbsp;
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForms</a>
+				<br><br><span class="c mono spaces no_color" id="elements"></span><span>
 			</div>
 		</td></tr>
 
@@ -206,8 +209,8 @@ function get_elements() {
 	let t0 = performance.now()
 	try {
 		let aList = [
-			'button','color','date','datetime-local','details','file',
-			'reset','select','select_multiple','submit','time'
+			'button','color','date','datetime-local','details','directory',
+			'file','files','reset','select','select_multiple','submit','time'
 		]
 		let oData = {}, target
 		aList.forEach(function(n) {
