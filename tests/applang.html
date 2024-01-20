@@ -12,8 +12,8 @@
 		hr {color: var(--test4);}
 		.floatright {
 			float: right;
-			display: block;
-			width: 200px;
+			display: inline;
+			width: 250px;
 			color: var(--test0);
 		}
 		.flex-item {
@@ -71,15 +71,29 @@
 
 		<tr><td colspan="2" style="text-align: left;">
 			<div class="floatright">
-				<div class="flex-item"><input id="buttonwidth" type="button"></div>
-				<div class="flex-item"><input id="datewidth" type="date"></div>
-				<div class="flex-item"><input id="filewidth" type="file"></div>
-				<div class="flex-item"><input id="resetwidth" type="reset"></div>
-				<div class="flex-item"><input id="submitwidth" type="submit"></div>
-				<div class="flex-item"><input id="timewidth" type="time"></div><br>
+				<div class="flex-item"><input id="ebutton" type="button"></div>
+				<div class="flex-item"><input id="ecolor" type="color"></div>
+				<div class="flex-item"><input id="edate" type="date"></div>
+				<div class="flex-item"><input id="edatetime-local" type="datetime-local"></div>
+				<div class="flex-item"><details id="edetails"></details></div>
+				<div class="flex-item"><input id="efile" type="file"></div>
+				<div class="flex-item"><input id="ereset" type="reset"></div>
+				<div><select id="eselect"><select></div>
+				<div><select multiple="" id="eselect_multiple"><option></option><select></div>
+				<div class="flex-item"><input id="esubmit" type="submit"></div>
+				<div class="flex-item"><input id="etime" type="time"></div><br>
 			</div>
 			<div>ELEMENT WIDTHS &nbsp; <br>
-				<br><span class="c mono spaces no_color" id="element_widths"></span><span>
+				<br><span class="c mono spaces no_color" id="elements"></span><span>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="floatright">
+				<div><input id="numericinput" type="number" min="6" step="2" /></div>
+			</div>
+			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span><br>
+				<br><span class="c mono spaces no_color" id="numeric_input"></span><span>
 			</div>
 		</td></tr>
 
@@ -188,21 +202,24 @@ function get_dtd2() {
 	let checking = setInterval(check_dtd2, 50)
 }
 
-function get_element_widths() {
+function get_elements() {
 	let t0 = performance.now()
 	try {
-		let aList = ['button','date','file','reset','submit','time']
+		let aList = [
+			'button','color','date','datetime-local','details','file',
+			'reset','select','select_multiple','submit','time'
+		]
 		let oData = {}, target
 		aList.forEach(function(n) {
-			target = dom[n +"width"]
-			oData[n]  = target.getBoundingClientRect().width
+			target = dom['e'+n]
+			oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 		})
 		let hash = mini(oData)
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.element_widths.innerHTML = hash + perf + "<br>"+ json_highlight(oData)
+		dom.elements.innerHTML = hash + perf + "<br>"+ json_highlight(oData)
 		return
 	} catch(e) {
-		dom.element_widths = e+""
+		dom.elements = e+""
 		return
 	}
 }
@@ -253,6 +270,93 @@ function get_media_messages() {
 		return
 	} catch(e) {
 		dom.media_messages = e+""
+		return
+	}
+}
+
+function get_numeric_inputs() {
+	let target = dom.numericinput
+	let oTests = {
+		arab: ['٤','٦'],
+		arabext: ['۴','۶'],
+		latn: ['4',4,'6',6,],
+		mymr: ['၄','၆'],
+		x: ['x']
+	}
+	let oData = {}
+	for (const k of Object.keys(oTests)) {
+		oData[k] = {}
+		oTests[k].forEach(function(n) {
+			target.value = n
+			let value = target.value
+			let charName = "char", charValue, j = n
+			if ("string" === typeof n) {
+				charValue = n.charCodeAt(0)
+			} else {
+				charName = "number"; charValue = n; j = n +"n"
+			}
+			let validity = target.checkValidity()
+			oData[k][j] = {}
+			oData[k][j][charName] = charValue
+			oData[k][j]["value"] = value
+			oData[k][j]["validity"] = validity
+		})
+	}
+	let toggle = "num"
+	dom.numericinputhash.innerHTML = mini(oData)
+		+" <span id='labelhidden"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ toggle +"','expand')\">[ expand ]</span>"
+	dom.numeric_input.innerHTML = "<span class='toghidden" + toggle +" hidden'>"+ json_highlight(oData) +"</span>"
+}
+
+function get_validation_messages() {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
+		// https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+		// https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+
+	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
+	// InvalidDate* - input types date/month/time/week in gecko fall back to type="text"
+	let t0 = performance.now()
+	try {
+		const vList = {
+			BadInputNumber: 'number', // this returns ValueMissing on chrome
+			CheckboxMissing: 'checkbox',
+			DateTimeRangeOverflow: 'datetime',
+			DateTimeRangeUnderflow: 'datetimeunder',
+			FileMissing: 'file',
+			InvalidEmail: 'email',
+			InvalidURL: "url",
+			//InvalidDateMonth: '', // Please enter a valid month
+			//InvalidDateTime: '', // Please enter valid date and time
+			//InvalidDateWeek: '', // Please enter a valid week
+			NumberRangeOverflow: 'max',
+			NumberRangeUnderflow: 'min',
+			PatternMismatch: 'tel',
+			RadioMissing: 'radio',
+			SelectMissing: 'combobox',
+			StepMismatch: 'step',
+			ValueMissing: 'text',
+		}
+		let vData = {}
+		for (const k of Object.keys(vList).sort()) {
+			try {
+				if (vList[k] !== "") {
+					let msg = dom["widget"+ vList[k]].validationMessage
+					if (msg !== "") {
+						vData[k] = msg
+					}
+				}
+			} catch(e) {
+				//console.log(k, e+"")
+			}
+		}
+		let hash = mini(vData)
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		dom.validation_messages.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
+		return
+	} catch(e) {
+		dom.validation_messages = e+""
 		return
 	}
 }
@@ -328,82 +432,23 @@ function get_xml_errors() {
 	}
 }
 
-function get_validation_messages() {
-	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
-		// https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
-		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
-		// https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
-		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
-
-	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
-	// InvalidDate* - input types date/month/time/week in gecko fall back to type="text"
-	let t0 = performance.now()
-	try {
-		const vList = {
-			BadInputNumber: 'number', // this returns ValueMissing on chrome
-			CheckboxMissing: 'checkbox',
-			DateTimeRangeOverflow: 'datetime',
-			DateTimeRangeUnderflow: 'datetimeunder',
-			FileMissing: 'file',
-			InvalidEmail: 'email',
-			InvalidURL: "url",
-			//InvalidDateMonth: '', // Please enter a valid month
-			//InvalidDateTime: '', // Please enter valid date and time
-			//InvalidDateWeek: '', // Please enter a valid week
-			NumberRangeOverflow: 'max',
-			NumberRangeUnderflow: 'min',
-			PatternMismatch: 'tel',
-			RadioMissing: 'radio',
-			SelectMissing: 'combobox',
-			StepMismatch: 'step',
-			ValueMissing: 'text',
-		}
-		let vData = {}
-		for (const k of Object.keys(vList).sort()) {
-			try {
-				if (vList[k] !== "") {
-					let msg = dom["widget"+ vList[k]].validationMessage
-					if (msg !== "") {
-						vData[k] = msg
-					}
-				}
-			} catch(e) {
-				//console.log(k, e+"")
-			}
-		}
-		let hash = mini(vData)
-		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.validation_messages.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
-		return
-	} catch(e) {
-		dom.validation_messages = e+""
-		return
-	}
-}
-
 function run() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = "&nbsp"
+	}
 	if (!isFF) {
-		dom.locale.innerHTML = "&nbsp"
-		dom.element_widths.innerHTML = "&nbsp"
-		dom.media_messages.innerHTML = "&nbsp"
-		dom.validation_messages.innerHTML = "&nbsp"
-	} else {
-		// clear
-		let items = document.getElementsByClassName("c")
-		for(let i=0; i < items.length; i++) {
-			items[i].innerHTML = "&nbsp"
-		}
+		dom.xml_errors = "gecko only"
 	}
 	// pause so users see change
 	setTimeout(function() {
-
 		get_locale()
+		get_numeric_inputs()
 		get_xml_errors()
 		get_validation_messages()
 		get_media_messages()
-		get_element_widths()
-		// FF only
-
+		get_elements()
 	}, 170)
 }
 
@@ -412,10 +457,11 @@ Promise.all([
 ]).then(function(){
 	get_locale()
 	if (!isFF) {
-		let str = "gecko only"
-		dom.xml_errors = str
+		dom.xml_errors = "gecko only"
 	}
 })
+
+
 
 </script>
 </body>
