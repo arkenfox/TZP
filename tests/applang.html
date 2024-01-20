@@ -17,9 +17,10 @@
 			color: var(--test0);
 		}
 		.flex-item {
-			margin: 5px;
+			margin: 0px 0px 10px 0px;
 		}
-		#edetails {display: inline;}
+		#ebutton, #ecolor, #edate, #edatetime-local, #edetails, #edirectory, #efile, #efiles,
+		#enumber, #ereset, #eselect, #eselect_multiple, #esubmit, #etime {display: inline;}
 	</style>
 </head>
 
@@ -80,22 +81,20 @@
 				<div class="flex-item"><input id="edirectory" webkitdirectory type="file"></div>
 				<div class="flex-item"><input id="efile" type="file"></div>
 				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
+				<div class="flex-item"><input id="enumber" type="number" min="6" step="2"></div>
 				<div class="flex-item"><input id="ereset" type="reset"></div>
-				<div><select id="eselect"><select></div>
-				<div><select multiple="" id="eselect_multiple"><option></option><select></div>
+				<div class="flex-item"><select id="eselect"><select></div>
+				<div class="flex-item"><select multiple="" id="eselect_multiple"><option></option><select></div>
 				<div class="flex-item"><input id="esubmit" type="submit"></div>
 				<div class="flex-item"><input id="etime" type="time"></div><br>
 			</div>
 			<div>ELEMENTS &nbsp;
-				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForms</a>
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForm</a>
 				<br><br><span class="c mono spaces no_color" id="elements"></span><span>
 			</div>
 		</td></tr>
 
 		<tr><td colspan="2" style="text-align: left;">
-			<div class="floatright">
-				<div><input id="numericinput" type="number" min="6" step="2" /></div>
-			</div>
 			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span><br>
 				<br><span class="c mono spaces no_color" id="numeric_input"></span><span>
 			</div>
@@ -211,9 +210,10 @@ function get_elements() {
 	try {
 		let aList = [
 			'button','color','date','datetime-local','details','directory',
-			'file','files','reset','select','select_multiple','submit','time'
+			'file','files','number','reset','select','select_multiple','submit','time'
 		]
 		let oData = {}, target
+		aList.sort()
 		aList.forEach(function(n) {
 			target = dom['e'+n]
 			oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
@@ -279,7 +279,7 @@ function get_media_messages() {
 }
 
 function get_numeric_inputs() {
-	let target = dom.numericinput
+	let target = dom.enumber
 	let oTests = {
 		arab: ['٤','٦'],
 		arabext: ['۴','۶'],
