@@ -115,6 +115,12 @@ let fntMaster = {
 		],
 		'windows': [
 			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola',
+			// MS bundled
+			'Gill Sans','Gill Sans MT',
+			// FontSubstitutes
+			'ﾍﾙﾍﾞﾁｶ', // arial
+			'ﾀｲﾑｽﾞﾛﾏﾝ', // times new roman
+			'ｸｰﾘｴ', // courier -> courier new
 			// TB12 fontnames, should have been removed
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2',
 		],
@@ -128,13 +134,18 @@ let fntMaster = {
 			'-apple-system',
 			//kBaseFonts
 			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery','Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial','Arial Black','Arial Hebrew','Arial Hebrew Scholar','Arial Narrow','Arial Rounded MT Bold','Arial Unicode MS','Avenir','Avenir Next','Ayuthaya',
-			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Big Caslon Medium','Bodoni 72','Bodoni 72 Oldstyle','Bodoni 72 Smallcaps','Bodoni Ornaments','Bradley Hand','Brush Script MT',
+			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Big Caslon','Bodoni 72','Bodoni 72 Oldstyle','Bodoni 72 Smallcaps','Bodoni Ornaments','Bradley Hand','Brush Script MT',
 			'Chalkboard','Chalkboard SE','Chalkduster','Charter','Cochin','Comic Sans MS','Copperplate','Corsiva Hebrew','Courier','Courier New',
 			'DIN Alternate','DIN Condensed','Damascus','DecoType Naskh','Devanagari MT','Devanagari Sangam MN','Didot','Diwan Kufi','Diwan Thuluth',
 			'Euphemia UCAS',
 			'Farah','Farisi','Futura',
 			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN','Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
-			'Heiti SC','Heiti TC','Helvetica','Helvetica Neue','Hiragino Maru Gothic ProN','Hiragino Mincho ProN','Hiragino Sans','Hiragino Sans GB','Hoefler Text',
+			'Heiti SC','Heiti TC','Helvetica','Helvetica Neue','Hoefler Text',
+				'Hiragino Maru Gothic ProN','Hiragino Maru Gothic ProN W4',
+				'Hiragino Mincho ProN','Hiragino Mincho ProN W3','Hiragino Mincho ProN W6',
+				'Hiragino Sans','Hiragino Sans W0','Hiragino Sans W1','Hiragino Sans W2','Hiragino Sans W3','Hiragino Sans W4',
+					'Hiragino Sans W5','Hiragino Sans W6','Hiragino Sans W7','Hiragino Sans W8','Hiragino Sans W9',
+				'Hiragino Sans GB','Hiragino Sans GB W3','Hiragino Sans GB W6',
 			'ITF Devanagari','ITF Devanagari Marathi','Impact','InaiMathi',
 			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla','Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
 			'Lao MN','Lao Sangam MN','Lucida Grande','Luminari',
@@ -151,15 +162,7 @@ let fntMaster = {
 			'Verdana',
 			'Waseem','Webdings','Wingdings','Wingdings 2','Wingdings 3',
 			'Zapf Dingbats','Zapfino',
-			/* variants/weights (to double check)
-			'Avenir Black','Avenir Black Oblique','Avenir Book','Avenir Heavy','Avenir Light','Avenir Medium','Avenir Oblique',
-			'Avenir Next Demi Bold','Avenir Next Heavy','Avenir Next Medium','Avenir Next Ultra Light',
-			'Charter Black',
-			'Hiragino Maru Gothic ProN W4','Hiragino Mincho ProN W3','Hiragino Mincho ProN W6',
-			'Hiragino Sans GB W3','Hiragino Sans GB W6','Hiragino Sans W0','Hiragino Sans W1','Hiragino Sans W2','Hiragino Sans W3','Hiragino Sans W4','Hiragino Sans W5','Hiragino Sans W6','Hiragino Sans W7','Hiragino Sans W8','Hiragino Sans W9',
-			'Hoefler Text Ornaments',
-			'SignPainter-HouseScript',
-			*/
+
 		],
 		'windows': [
 			// ?
@@ -274,7 +277,51 @@ let fntMaster = {
 			'Amiri', // libreoffice
 			// ToDo: expand
 		],
-		'mac': ['American Typewriter Condensed','American Typewriter Condensed Light','American Typewriter Light','American Typewriter Semibold','Apple Braille Outline 6 Dot','Apple Braille Outline 8 Dot','Apple Braille Pinpoint 6 Dot','Apple Braille Pinpoint 8 Dot','Apple LiGothic Medium','Apple LiSung Light','Apple SD Gothic Neo Heavy','Apple SD Gothic Neo Light','Apple SD Gothic Neo Medium','Apple SD Gothic Neo SemiBold','Apple SD Gothic Neo UltraLight','Apple SD GothicNeo ExtraBold','Athelas','Avenir Book Oblique','Avenir Heavy Oblique','Avenir Light Oblique','Avenir Medium Oblique','Avenir Next Condensed Bold','Avenir Next Condensed Demi Bold','Avenir Next Condensed Heavy','Avenir Next Condensed Medium','Avenir Next Condensed Ultra Light','Avenir Roman','Baoli SC','Baoli TC','Baskerville SemiBold','BiauKai','Bodoni 72 Book','Bodoni 72 Oldstyle Book','Bodoni 72 Smallcaps Book','Charcoal CY','Charter Roman','Copperplate Light','Damascus Light','Damascus Medium','Damascus Semi Bold','Futura Condensed ExtraBold','Futura Condensed Medium','Futura Medium','Geneva CY','Gill Sans Light','Gill Sans SemiBold','Gill Sans UltraBold','GungSeo','Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Heiti SC Light','Heiti SC Medium','Heiti TC Light','Heiti TC Medium','Helvetica CY Bold','Helvetica Light','Helvetica Neue Condensed Black','Helvetica Neue Condensed Bold','Helvetica Neue Light','Helvetica Neue Medium','Helvetica Neue UltraLight','Herculanum','Hiragino Kaku Gothic Pro W3','Hiragino Kaku Gothic Pro W6','Hiragino Kaku Gothic ProN','Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6','Hiragino Kaku Gothic Std W8','Hiragino Kaku Gothic StdN W8','Hiragino Maru Gothic Pro W4','Hiragino Mincho Pro W3','Hiragino Mincho Pro W6','Hiragino Sans CNS W3','Hiragino Sans CNS W6','Hoefler Text Black','ITF Devanagari Book','ITF Devanagari Demi','ITF Devanagari Light','ITF Devanagari Marathi Book','ITF Devanagari Marathi Demi','ITF Devanagari Marathi Light','ITF Devanagari Marathi Medium','ITF Devanagari Medium','Iowan Old Style Black','Iowan Old Style Bold','Iowan Old Style Italic','Iowan Old Style Roman','Iowan Old Style Titling','Kai','Kaiti SC','Kaiti SC Black','Kaiti TC','Kaiti TC Black','Klee Demibold','Klee Medium','Kohinoor Bangla Light','Kohinoor Bangla Medium','Kohinoor Bangla Semibold','Kohinoor Devanagari Light','Kohinoor Devanagari Medium','Kohinoor Devanagari Semibold','Kohinoor Gujarati Light','Kohinoor Gujarati Medium','Kohinoor Gujarati Semibold','Kohinoor Telugu Light','Kohinoor Telugu Medium','Kohinoor Telugu Semibold','Lantinghei SC Demibold','Lantinghei SC Extralight','Lantinghei SC Heavy','Lantinghei TC Demibold','Lantinghei TC Extralight','Lantinghei TC Heavy','LiHei Pro','LiSong Pro','Libian SC','Libian TC','LingWai SC Medium','LingWai TC Medium','Marion','Muna Black','Myriad Arabic','Myriad Arabic Black','Myriad Arabic Light','Myriad Arabic Semibold','Nanum Brush Script','Nanum Pen Script','NanumGothic','NanumGothic ExtraBold','NanumMyeongjo','NanumMyeongjo ExtraBold','New Peninim MT Bold Inclined','New Peninim MT Inclined','Optima ExtraBlack','Osaka','Osaka-Mono','PCMyungjo','Papyrus Condensed','Phosphate Inline','Phosphate Solid','PilGi','PingFang HK Light','PingFang HK Medium','PingFang HK Semibold','PingFang HK Ultralight','PingFang SC Light','PingFang SC Medium','PingFang SC Semibold','PingFang SC Ultralight','PingFang TC Light','PingFang TC Medium','PingFang TC Semibold','PingFang TC Ultralight','STFangsong','STHeiti','STIX Two Math','STIX Two Text','STKaiti','STXihei','Seravek','Seravek ExtraLight','Seravek Light','Seravek Medium','SignPainter-HouseScript Semibold','Skia Black','Skia Condensed','Skia Extended','Skia Light','Snell Roundhand Black','Songti SC Black','Songti SC Light','Songti TC Light','Sukhumvit Set Light','Sukhumvit Set Medium','Sukhumvit Set Semi Bold','Sukhumvit Set Text','Superclarendon','Superclarendon Black','Superclarendon Light','Thonburi Light','Times Roman','Toppan Bunkyu Gothic','Toppan Bunkyu Gothic Demibold','Toppan Bunkyu Gothic Regular','Toppan Bunkyu Midashi Gothic Extrabold','Toppan Bunkyu Midashi Mincho Extrabold','Toppan Bunkyu Mincho','Toppan Bunkyu Mincho Regular','Tsukushi A Round Gothic','Tsukushi A Round Gothic Bold','Tsukushi A Round Gothic Regular','Tsukushi B Round Gothic','Tsukushi B Round Gothic Bold','Tsukushi B Round Gothic Regular','Waseem Light','Wawati SC','Wawati TC','Weibei SC Bold','Weibei TC Bold','Xingkai SC Bold','Xingkai SC Light','Xingkai TC Bold','Xingkai TC Light','YuGothic Bold','YuGothic Medium','YuKyokasho Bold','YuKyokasho Medium','YuKyokasho Yoko Bold','YuKyokasho Yoko Medium','YuMincho +36p Kana Demibold','YuMincho +36p Kana Extrabold','YuMincho +36p Kana Medium','YuMincho Demibold','YuMincho Extrabold','YuMincho Medium','Yuanti SC','Yuanti SC Light','Yuanti TC','Yuanti TC Light','Yuppy SC','Yuppy TC',],
+		'mac': [
+			'Academy Engraved LET','Adelle Sans Devanagari','AkayaKanadaka','AkayaTelivigala','Annai MN','Apple LiGothic',
+				'Apple LiSung','Arima Koshi','Arima Madurai','Athelas','Avenir Next Condensed',
+			'Bai Jamjuree','Baloo 2','Baloo Bhai 2','Baloo Bhaijaan','Baloo Bhaina 2','Baloo Chettan 2','Baloo Da 2','Baloo Paaji 2',
+				'Baloo Tamma 2','Baloo Tammudu 2','Baloo Thambi 2','Baoli SC','Baoli TC','BiauKaiHK','BiauKaiTC','BIZ UDGothic',
+				'BIZ UDMincho','BM Dohyeon','BM Hanna 11yrs Old','BM Hanna Air','BM Hanna Pro','BM Jua','BM Kirang Haerang','BM Yeonsung','Brill',
+			'Cambay Devanagari','Canela','Canela Deck','Canela Text','Chakra Petch','Charm','Charmonman',
+			'Domaine Display',
+			'Fahkwang','Founders Grotesk','Founders Grotesk Condensed','Founders Grotesk Text',
+			'Gotu','Grantha Sangam MN','Graphik','Graphik Compact','GungSeo',
+			'Hannotate SC','Hannotate TC','HanziPen SC','HanziPen TC','HeadLineA','Hei','Herculanum',
+				'Hiragino Kaku Gothic Pro W3','Hiragino Kaku Gothic Pro W6',
+				'Hiragino Kaku Gothic ProN','Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
+				'Hiragino Kaku Gothic Std W8','Hiragino Kaku Gothic StdN W8',
+				'Hiragino Maru Gothic Pro W4',
+				'Hiragino Mincho Pro W3','Hiragino Mincho Pro W6',
+				'Hiragino Sans CNS','Hiragino Sans CNS W3','Hiragino Sans CNS W6',
+				'Hubballi',
+			'Jaini','Jaini Purva',
+			'Iowan Old Style','Iowan Old Style Black',
+			'K2D','Kai','Kaiti SC','Kaiti TC','Katari','Kavivanar','Kigelia','Kigellia Arabic','Klee','Kodchasan','KoHo','Krub',
+			'Lahore Gurmukhi','Lantinghei SC','Lantinghei TC','Lava Devanagari','Lava Kannada','Lava Telugu',
+				'LiHei Pro','LiSong Pro','Libian SC','Libian TC','LingWai SC','LingWai TC',
+			'Maku','Mali','Marion','Modak','Mukta','Mukta Malar','Mukta Vaani',
+				'Myriad Arabic','Myriad Arabic Black','Myriad Arabic Light','Myriad Arabic Semibold',
+			'Nanum Brush Script','Nanum Gothic','NanumGothic ExtraBold','Nanum Myeongjo','Nanum Pen Script','Niramit','Noto Serif Kannada',
+			'October Compressed Devanagari','October Compressed Gujarati','October Compressed Gurmukhi','October Compressed Kannada',
+				'October Compressed Meetei Mayek','October Compressed Odia','October Compressed Ol Chiki','October Compressed Tamil','October Compressed Telugu',
+			'October Condensed Devanagari','October Condensed Gujarati','October Condensed Gurmukhi','October Condensed Kannada',
+				'October Condensed Meetei Mayek','October Condensed Odia','October Condensed Ol Chiki','October Condensed Tamil','October Condensed Telugu',
+			'October Devanagari','October Gujarati','October Gurmukhi','October Kannada',
+				'October Meetei Mayek','October Odia','October Ol Chiki','October Tamil','October Telugu',
+			'Osaka','Osaka-Mono',
+			'Padyakke Exapnded One','Party LET','PCMyungjo','PilGi','Produkt','Proxima Nova','PSL Ornanong Pro','Publico Headline','Publico Text',
+			'Quotes Caps','Quotes Script',
+			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script',
+				'Seravek','Seravek ExtraLight','Seravek Light','Seravek Medium','Shobhika','SimSong','Spot Mono','Srisakdi',
+				'STFangsong','STHeiti','STIX Two Math','STIX Two Text','STKaiti','Superclarendon',
+			'Tiro Bangla','Tiro Devanagari Hindi','Tiro Devanagari Marathi','Tiro Devanagari Sanskrit','Tiro Gurmukhi',
+				'Tiro Kannada','Tiro Tamil','Tiro Telugu','Toppan Bunkyu Gothic','Toppan Bunkyu Midashi Gothic',
+				'Toppan Bunkyu Midashi Mincho','Toppan Bunkyu Mincho','Tsukushi A Round Gothic','Tsukushi B Round Gothic',
+			'Wawati SC','Wawati TC','Weibei SC','Weibei TC',
+			'Xingkai SC','Xingkai TC',
+			'Yuanti SC','Yuanti TC','YuGothic','YuKyokasho','YuKyokasho Yoko','YuMincho','YuMincho +36p Kana','Yuppy SC','Yuppy TC',
+		],
 		'windows': [
 			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','Arial Nova',
 			'BIZ UDGothic','BIZ UDPGothic','Batang','BatangChe','Browallia New','BrowalliaUPC','Cordia New','DFKai-SB',
@@ -303,7 +350,7 @@ let fntMaster = {
 			'新細明體', // PMingLiU
 
 			// MS products
-			'Arial Unicode MS','MS Reference Specialty','MS Outlook',
+			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 			// MS downloads
 			'Cascadia Code','Cascadia Mono', // 11
 
@@ -1191,9 +1238,9 @@ const get_widget_fonts = (os = isOS) => new Promise(resolve => {
 				"sans-serif 13.3333px": [19 items],
 				"sans-serif 13px": ["image"]
 				*/
-				if (hash == "c67d44bc") {notation = tb_green}
+				if (hash == "644e21bb") {notation = tb_green}
 			} else if (os == "mac") {
-				if (hash == "07a7a13c") {notation = tb_green}
+				if (hash == "880f1e5d") {notation = tb_green}
 			} else if (os == "linux" || os == "android") {
 				/*
 				"monospace 12px": ["textarea"],
@@ -1202,7 +1249,7 @@ const get_widget_fonts = (os = isOS) => new Promise(resolve => {
 				"sans-serif 13px": ["image"]
 				*/
 				// regression: TBA13 is missing font-family on the 19 items
-				if (hash == "dedd903d") {notation = tb_green}
+				if (hash == "139d597c") {notation = tb_green}
 			}
 		}
 		addData(12, METRIC, newobj, hash)
