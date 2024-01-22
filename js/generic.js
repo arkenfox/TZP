@@ -595,16 +595,16 @@ function get_isXML() {
 		n02: 'a',
 		n03: '',
 		n04: '<>',
-		n05: '<?',
+		n05: '<',
 		n07: '<x></X>',
-		n08: '<x xmlns:x="." xmlns:x=".">',
+		n08: '<x x:x="" x:x="">',
 		n09: '<x></x><x>',
-		n11: '<x>&x;</x>',
+		n11: '<x>&x;',
 		n14: '<x>&#x0;',
 		n20: '<x><![CDATA[',
 		n27: '<x:x>',
 		n28: '<x xmlns:x=""></x>',
-		n30: '<?xml versin="1.0"?>',
+		n30: '<?xml v=""?>',
 	}
 	try {
 		let parser = new DOMParser
