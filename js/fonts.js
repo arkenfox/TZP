@@ -1166,8 +1166,8 @@ const get_widget_fonts = (os = isOS) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
 	const METRIC = "widget_fonts"
 	let aList = [
-		'button','checkbox','color','combobox','datetime','datetime-local','email','file','hidden','image','month',
-		'number','password','radio','range','reset','search','submit','tel','text','textarea','time','url','week',
+		'button','checkbox','color','datetime','datetime-local','email','file','hidden','image','month',
+		'number','password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
 	]
 	let notation = ""
 	try {
