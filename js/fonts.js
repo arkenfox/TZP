@@ -306,15 +306,15 @@ let fntMaster = {
 			'Osaka','Osaka-Mono',
 			'Padyakke Expanded One','Party LET','PCMyungjo','PilGi','Produkt','Proxima Nova','PSL Ornanong Pro','Publico Headline','Publico Text',
 			'Quotes Caps','Quotes Script',
-			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script',
-				'Seravek','Seravek ExtraLight','Seravek Light','Seravek Medium','Shobhika','SimSong','Spot Mono','Srisakdi',
-				'STFangsong','STHeiti','STIX Two Math','STIX Two Text','STKaiti','Superclarendon',
+			'Sama Devanagari','Sama Gujarati','Sama Gurmukhi','Sama Kannada','Sama Malayalam','Sama Tamil','Sarabun','Sauber Script','Seravek',
+				'Shobhika','SimSong','Spot Mono','Srisakdi','STFangsong','STHeiti','STIX Two Math','STIX Two Text','STKaiti','Superclarendon',
 			'Tiro Bangla','Tiro Devanagari Hindi','Tiro Devanagari Marathi','Tiro Devanagari Sanskrit','Tiro Gurmukhi',
 				'Tiro Kannada','Tiro Tamil','Tiro Telugu','Toppan Bunkyu Gothic','Toppan Bunkyu Midashi Gothic',
 				'Toppan Bunkyu Midashi Mincho','Toppan Bunkyu Mincho','Tsukushi A Round Gothic','Tsukushi B Round Gothic',
 			'Wawati SC','Wawati TC','Weibei SC','Weibei TC',
 			'Xingkai SC','Xingkai TC',
 			'Yuanti SC','Yuanti TC','YuGothic','YuKyokasho','YuKyokasho Yoko','YuMincho','YuMincho +36p Kana','Yuppy SC','Yuppy TC',
+
 			/* variants
 			'Hiragino Kaku Gothic Pro W3','Hiragino Kaku Gothic Pro W6',
 			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
@@ -324,7 +324,7 @@ let fntMaster = {
 			'Hiragino Sans CNS W3','Hiragino Sans CNS W6',
 			'Iowan Old Style Black',
 			'Myriad Arabic Black','Myriad Arabic Light','Myriad Arabic Semibold',
-			'NanumGothic ExtraBold',
+			'NanumGothic ExtraBold','Seravek ExtraLight','Seravek Light','Seravek Medium',
 			*/
 		],
 		'windows': [
