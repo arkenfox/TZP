@@ -31,13 +31,14 @@
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
 			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
+			<div><span id="dfsize"></span></div>
+			<div id="sysFont"></div>
 		</div>
 	</div>
 	<div class="hidden">
 		<div>
 			<input type="text" required id="widgettext">
 			<input type="checkbox" required id="widgetcheckbox">
-			<select required id="widgetcombobox"><option></option></select>
 			<input type="date" id="widgetdatetime" value="2024-01-01" max="2023-12-31">
 			<input type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-12-31">
 			<input type="email" id="widgetemail" value="a">
@@ -47,8 +48,18 @@
 			<input type="number" id="widgetmin" min="8026.5" value="1">
 			<input type="number" id="widgetstep" min="1.2345" step="1005.5545" value="2">
 			<input type="radio" required name="radiogroup" id="widgetradio">
+			<select required id="widgetselect"><option></option></select>
 			<input type="url" id="widgeturl" value="a">
 			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
+			<!-- the rest not covered by the visually displayed ones -->
+			<input type="hidden" id="ehidden">
+			<input type="image" id="eimage">
+			<input type="month" id="emonth">
+			<input type="password" id="epassword">
+			<input type="range" id="erange">
+			<input type="search" id="esearch">
+			<textarea id="etextarea"></textarea>
+			<input type="week" id="eweek">
 		</div>
 	</div>
 
@@ -85,10 +96,11 @@
 				<div class="flex-item"><input id="efile" type="file"></div>
 				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
 				<div class="flex-item"><input id="enumber" type="number" min="6" step="2"></div>
+				<div class="flex-item"><input id="ereset" type="reset"> &nbsp; <select id="eselect"><option></option></select></div>
 				<div class="flex-item">
-<select multiple="" id="eselect_multiple"><option></option><select> &nbsp;
-<input id="ereset" type="reset"> &nbsp;
-<select id="eselect"><option></option><select>
+					<select multiple="" id="eselectempty"><option id="optempty"></option></select> &nbsp;
+					<select multiple="" id="eselectspaces"><option id="optspaces"> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
+					<select multiple="" id="eselectstring"><option id="optstring">Mōá?-&#xffff;</option></select> &nbsp;
 				</div>
 				<div class="flex-item"><input id="esubmit" type="submit"></div>
 				<div class="flex-item"><input id="etime" type="time"></div><br>
@@ -100,8 +112,14 @@
 		</td></tr>
 
 		<tr><td colspan="2" style="text-align: left;">
+			<div>FONTS &nbsp; <span class="c mono no_color" id="fontshash"></span><br>
+				<br><span class="c mono spaces no_color" id="fonts"></span><span><br>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
 			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span><br>
-				<br><span class="c mono spaces no_color" id="numeric_input"></span><span>
+				<br><span class="c mono spaces no_color" id="numeric_input"></span><span><br>
 			</div>
 		</td></tr>
 
@@ -138,6 +156,10 @@
 
 <script>
 'use strict';
+
+let isSystemFont = [],
+	baseFonts = [],
+	fntString = "Mōá?-&#xffff;"
 
 function get_dtd1() {
 	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
@@ -210,28 +232,152 @@ function get_dtd2() {
 	let checking = setInterval(check_dtd2, 50)
 }
 
+const get_default_proportional = () => new Promise(resolve => {
+	const METRIC = "default_proportional"
+	let res
+	try {
+		res = window.getComputedStyle(document.body,null).getPropertyValue("font-family")
+	} catch(e) {
+		res = e+""
+	}
+	return resolve([METRIC, res])
+})
+
+const get_default_sizes = () => new Promise(resolve => {
+	const METRIC = "default_sizes"
+	try {
+		let oRes = {}
+		let el = dom.dfsize
+		let styles = [ // sorted
+			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
+		]
+		styles.forEach(function(style) {
+			el.style.fontFamily = style
+			let size = getComputedStyle(el).getPropertyValue("font-size")
+			if (oRes[size] == undefined) {oRes[size] = []}
+			oRes[size].push(style)
+		})
+		let fpObj = {}
+		for (const k of Object.keys(oRes).sort()) {fpObj[k] = oRes[k]} // sort obj
+		return resolve([METRIC, fpObj])
+	} catch(e) {
+		return resolve([METRIC, e+""])
+	}
+})
+
 function get_elements() {
+	// ui.useOverlayScrollbars: 0=on, 1=off
+	// windows 11 on -> off (en-US)
+		//  empty 29 -> 12 = -17
+		// spaces 49 -> 32 = -17
+		// string 78 -> 61 = -17
+		// matches scrollbar in document/viewport/element
+		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
+
 	let t0 = performance.now()
 	try {
 		let aList = [
 			'button','checkbox','color','date','datetime-local','details','directory',
 			'file','files','number','radio','reset','select','select_multiple','submit','time'
 		]
-		let oData = {}, target
+		let aSelect = ['empty','spaces','string']
+		let oData = {}, target, oSelect = {}
 		aList.sort()
+		aSelect.sort()
 		aList.forEach(function(n) {
-			target = dom['e'+n]
-			oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+		 if (n == "select_multiple") {
+				// note: number of options makes no difference
+				aSelect.forEach(function(n) {
+					target = dom['eselect'+n]
+					oSelect[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+					target = dom["opt"+n]
+					oSelect[n+"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+				})
+				oData[n] = oSelect
+			} else {
+				target = dom['e'+n]
+				oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+			}
 		})
-		let hash = mini(oData)
+		let hash = mini(oData), notation = ""
+		// check windows 11 dpr = 1 (my machine)
+		if (isFile) {
+			notation = (hash == "535d1095" ? green_tick : red_cross)
+		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.elements.innerHTML = hash + perf + "<br>"+ json_highlight(oData)
+		dom.elements.innerHTML = hash + notation + perf + "<br>"+ json_highlight(oData)
 		return
 	} catch(e) {
 		dom.elements = e+""
 		return
 	}
 }
+
+function get_fonts() {
+	let t0 = performance.now()
+	Promise.all([
+		get_default_proportional(),
+		get_default_sizes(),
+		get_font_sizes(),
+		get_widget_fonts(),
+	]).then(function(results){
+		let oData = {}
+		results.forEach(function(item) {
+			let METRIC = item[0]
+			if ("object" === typeof item[1]) {
+				let hash = mini(item[1])
+				oData[METRIC] = {"hash": hash, "metrics": item[1]}
+			} else {
+				oData[METRIC] = item[1]
+			}
+		})
+		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
+		let hash = mini(oData), notation = "", toggle = "fonts"
+		// check windows 11 dpr = 1 (my machine)
+		if (isFile) {
+			notation = (hash == "91921f18" ? green_tick : red_cross)
+		}
+		dom.fontshash.innerHTML = hash + notation + perf
+			+" <span id='labelhidden"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ toggle +"','expand')\">[ expand ]</span>"
+		dom.fonts.innerHTML = "<span class='toghidden" + toggle +" hidden'>"+ json_highlight(oData) +"</span><br>"
+	})
+}
+
+const get_isSystemFont = () => new Promise(resolve => {
+	if (!isFF) {return resolve()}
+	// first aFont per computed family
+	let aFonts = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
+		'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+		'caption','icon','menu','message-box','small-caption','status-bar'
+	]
+	baseFonts = [
+		'monospace, Menlo, Consolas, Courier, \"Courier New\", Monaco, \"Lucida Console\"',
+		'sans-serif, Arial',
+		'serif, Times, Roman'
+	]
+	baseFonts = baseFonts.concat([
+		'cursive','fantasy','fangsong','system-ui',
+		'ui-monospace','ui-rounded','ui-serif','math','emoji','none' // redudnant not used in TZP but include here
+	])
+	baseFonts.sort()
+	try {
+		let el = dom.sysFont, data = []
+		aFonts.forEach(function(font){
+			el.style.font = font
+			let family = getComputedStyle(el)["font-family"]
+			if (!data.includes(family)) {
+				data.push(family)
+				isSystemFont.push(font)
+			}
+		})
+		baseFonts = baseFonts.concat(isSystemFont)
+		baseFonts.sort()
+		return resolve()
+	} catch(e) {
+		return resolve()
+	}
+})
 
 function get_locale() {
 	// just get one
@@ -314,7 +460,7 @@ function get_numeric_inputs() {
 	let toggle = "num"
 	dom.numericinputhash.innerHTML = mini(oData)
 		+" <span id='labelhidden"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ toggle +"','expand')\">[ expand ]</span>"
-	dom.numeric_input.innerHTML = "<span class='toghidden" + toggle +" hidden'>"+ json_highlight(oData) +"</span>"
+	dom.numeric_input.innerHTML = "<span class='toghidden" + toggle +" hidden'>"+ json_highlight(oData) +"</span><br>"
 }
 
 function get_validation_messages() {
@@ -343,7 +489,7 @@ function get_validation_messages() {
 			NumberRangeUnderflow: 'min',
 			PatternMismatch: 'tel',
 			RadioMissing: 'radio',
-			SelectMissing: 'combobox',
+			SelectMissing: 'select',
 			StepMismatch: 'step',
 			ValueMissing: 'text',
 		}
@@ -369,6 +515,84 @@ function get_validation_messages() {
 		return
 	}
 }
+
+const get_widget_fonts = (os = isOS) => new Promise(resolve => {
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+	const METRIC = "widget_fonts"
+	let oList = {
+		'button': 'e',
+		'checkbox': 'e',
+		'color': 'e',
+		'datetime': 'widget',
+		'datetime-local': 'e',
+		'email': 'widget',
+		'file': 'e',
+		'hidden': 'e',
+		'image': 'e',
+		'month': 'e',
+		'number': 'e',
+		'password': 'e',
+		'radio': 'e',
+		'range': 'e',
+		'reset': 'e',
+		'search': 'e',
+		'select': 'e',
+		'submit': 'e',
+		'tel': 'widget',
+		'text': 'widget',
+		'textarea': 'e',
+		'time': 'e',
+		'url': 'widget',
+		'week': 'e',
+	}
+
+	try {
+		let oRes = {}
+		for (const k of Object.keys(oList).sort()) {
+			let el = dom[oList[k] + k]
+			let key = getComputedStyle(el).getPropertyValue("font-family")
+				+" "+ getComputedStyle(el).getPropertyValue("font-size")
+			if (oRes[key] == undefined) {oRes[key] = [k]} else {oRes[key].push(k)}
+		}
+		let newobj = {}
+		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
+		return resolve([METRIC, newobj])
+	} catch(e) {
+		return resolve([METRIC, zErr])
+	}
+})
+
+function run() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = "&nbsp"
+	}
+	if (!isFF) {
+		dom.xml_errors = "gecko only"
+	}
+	// pause so users see change
+	setTimeout(function() {
+		get_locale()
+		get_numeric_inputs()
+		get_xml_errors()
+		get_validation_messages()
+		get_media_messages()
+		get_elements()
+		get_fonts()
+	}, 170)
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_locale()
+	if (!isFF) {
+		dom.xml_errors = "gecko only"
+	} else {
+		get_isSystemFont()
+	}
+})
 
 function get_xml_errors() {
 	if (!isFF) {return}
@@ -441,35 +665,99 @@ function get_xml_errors() {
 	}
 }
 
-function run() {
-	// clear
-	let items = document.getElementsByClassName("c")
-	for(let i=0; i < items.length; i++) {
-		items[i].innerHTML = "&nbsp"
-	}
-	if (!isFF) {
-		dom.xml_errors = "gecko only"
-	}
-	// pause so users see change
-	setTimeout(function() {
-		get_locale()
-		get_numeric_inputs()
-		get_xml_errors()
-		get_validation_messages()
-		get_media_messages()
-		get_elements()
-	}, 170)
-}
 
-Promise.all([
-	get_globals()
-]).then(function(){
-	get_locale()
-	if (!isFF) {
-		dom.xml_errors = "gecko only"
+const get_font_sizes = () => new Promise(resolve => {
+	/* https://github.com/abrahamjuliot/creepjs */
+	const METRIC = "fontsizes_base"
+	const fntSize = "512px"
+
+	if (!isFF) {return resolve([METRIC, zNA])}
+	try {
+		const doc = document // or iframe.contentWindow.document
+		const id = `font-fingerprint`
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		doc.getElementById(id).innerHTML = `
+			<style>
+			#${id}-detector {
+				--font: '';
+				position: absolute !important;
+				left: -9999px!important;
+				font-size: ` + fntSize + ` !important;
+				font-style: normal !important;
+				font-weight: normal !important;
+				font-stretch: normal !important;
+				letter-spacing: normal !important;
+				line-break: auto !important;
+				line-height: normal !important;
+				text-transform: none !important;
+				text-align: left !important;
+				text-decoration: none !important;
+				text-shadow: none !important;
+				white-space: normal !important;
+				word-break: normal !important;
+				word-spacing: normal !important;
+				/* in order to test scrollWidth, clientWidth, etc. */
+				padding: 0 !important;
+				margin: 0 !important;
+				/* in order to test inlineSize and blockSize */
+				writing-mode: horizontal-tb !important;
+				/* for transform and perspective */
+				transform-origin: unset !important;
+				perspective-origin: unset !important;
+			}
+			#${id}-detector::after {
+				font-family: var(--font);
+				content: '`+ fntString +`';
+			}
+			</style>
+			<span id="${id}-detector"></span>`
+
+		const span = doc.getElementById(`${id}-detector`)
+		const style = getComputedStyle(span)
+		const detectedViaDomRectClient = new Set()
+
+		const getDimensions = (span, style) => {
+			const dimensions = {
+				height: span.getClientRects()[0].height,
+				width: span.getClientRects()[0].width,
+			}
+			return dimensions
+		}
+
+		// base sizes
+		const base = baseFonts.reduce((acc, font) => {
+			if (isSystemFont.includes(font)) { // not a family
+				span.style.setProperty('--font', "")
+				span.style.font = font
+			} else {
+				span.style.font = ""
+				span.style.setProperty('--font', font)
+			}
+			const dimensions = getDimensions(span, style)
+			acc[font.split(",")[0]] = dimensions // use only first name, i.e w/o fallback
+			return acc
+		}, {})
+
+		// tidy base: reorder in groups based on hash
+		let oTempBase = {}
+		for (const k of Object.keys(base)) {
+			let tmpHash = mini(base[k])
+			if (oTempBase[tmpHash] == undefined) {
+				oTempBase[tmpHash] = {"bases" : [k], "data" : base[k]}
+			} else {
+				oTempBase[tmpHash]["bases"].push(k)
+			}
+		}
+		span.style.font = "" // reset
+		try {document.getElementById(id).remove()} catch(e) {} // remove element
+		return resolve([METRIC, oTempBase])
+	} catch(e) {
+		try {document.getElementById(id).remove()} catch(e) {} // remove element
+		return resolve([METRIC, e+""])
 	}
 })
-
 
 
 </script>
