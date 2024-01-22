@@ -125,8 +125,8 @@ function get_computed_styles() {
 		const names = ["styles_cssrulelist","styles_getcomputed","styles_htmlelement"]
 		let aErr = [false, false, false], isLies = false
 		let aHashes = [], intHashes = [], oDisplay = {}
-		let check = (isSmart && isTB)
-		let notation = check ? tb_red : ""
+		let isTBSmart = (isSmart && isTB)
+		let notation = isTBSmart ? tb_red : ""
 
 		let styleVersion = type => {
 			return new Promise(resolve => {
@@ -303,7 +303,7 @@ function get_computed_styles() {
 					hash = colorFn(hash)
 					log_known(SECT14, METRIC)
 				} else {
-					if (check) {
+					if (isTBSmart) {
 						if (isOS == "mac") {
 							/* mac 1104 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
 							if (hash === "75b00d93") {notation = tb_green} // TB 1104

@@ -964,7 +964,7 @@ const get_validation_messages = () => new Promise(resolve => {
 		NumberRangeUnderflow: 'min',
 		PatternMismatch: 'tel',
 		RadioMissing: 'radio',
-		SelectMissing: 'combobox',
+		SelectMissing: 'select',
 		StepMismatch: 'step',
 		ValueMissing: 'text',
 	}
