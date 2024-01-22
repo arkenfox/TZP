@@ -3,8 +3,8 @@
 const get_element_keys = () => new Promise(resolve => {
 	const METRIC = "htmlelement_keys"
 	const id = "html-element-version"
-	let check = (isSmart && isTB)
-	let notation = check ? tb_red : ""
+	let isTBSmart = (isSmart && isTB)
+	let notation = isTBSmart ? tb_red : ""
 
 	function cleanup() {
 		try {document.getElementById(id).remove()} catch(e) {}
@@ -30,14 +30,13 @@ const get_element_keys = () => new Promise(resolve => {
 			addData(15, METRIC, zLIE)
 		} else {
 			addData(15, METRIC, keys, hash)
-			if (check) {
+			if (isTBSmart) {
 				if (isOS === "android") {
-					// a = 3b1df61c 289   alpha 13.5a3 NS 11.4.11 <-- Sept 2022 version WTF!!
-					// a = fa8b991f 302 release 13.0.8 NS 11.4.24 (+ 13 NS items e.g. get/value)
-					if (hash === "3b1df61c") {notation = tb_green} // fb490d00 div 264
+					// fa8b991f: NoScript 11.4.24 (+ 13 NS items e.g. get/value)
+					if (hash === "fa8b991f") {notation = tb_green}
 				} else {
-					// desktop NZ 11.4.29
-					if (hash === "156e1033") {notation = tb_green} // a 298 | 463107cf div 273 
+					// desktop NoScript 11.4.29
+					if (hash === "156e1033") {notation = tb_green}
 				}
 			}
 		}
