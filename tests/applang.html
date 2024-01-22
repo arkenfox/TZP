@@ -19,8 +19,7 @@
 		.flex-item {
 			margin: 0px 0px 10px 0px;
 		}
-		#ebutton, #ecolor, #edate, #edatetime-local, #edetails, #edirectory, #efile, #efiles,
-		#enumber, #ereset, #eselect, #eselect_multiple, #esubmit, #etime {display: inline;}
+		#edetails {display: inline;}
 	</style>
 </head>
 
@@ -73,8 +72,12 @@
 
 		<tr><td colspan="2" style="text-align: left;">
 			<div class="floatright">
-				<div class="flex-item"><input id="ebutton" type="button"></div>
-				<div class="flex-item"><input id="ecolor" type="color"></div>
+				<div class="flex-item">
+<input id="ebutton" type="button"> &nbsp;
+<input id="ecolor" type="color"> &nbsp;
+<input id="echeckbox" type="checkbox"> &nbsp;
+<input id="eradio" type="radio">
+				</div>
 				<div class="flex-item"><input id="edate" type="date"></div>
 				<div class="flex-item"><input id="edatetime-local" type="datetime-local"></div>
 				<div class="flex-item"><details id="edetails"></details></div>
@@ -82,9 +85,11 @@
 				<div class="flex-item"><input id="efile" type="file"></div>
 				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
 				<div class="flex-item"><input id="enumber" type="number" min="6" step="2"></div>
-				<div class="flex-item"><input id="ereset" type="reset"></div>
-				<div class="flex-item"><select id="eselect"><select></div>
-				<div class="flex-item"><select multiple="" id="eselect_multiple"><option></option><select></div>
+				<div class="flex-item">
+<select multiple="" id="eselect_multiple"><option></option><select> &nbsp;
+<input id="ereset" type="reset"> &nbsp;
+<select id="eselect"><option></option><select>
+				</div>
 				<div class="flex-item"><input id="esubmit" type="submit"></div>
 				<div class="flex-item"><input id="etime" type="time"></div><br>
 			</div>
@@ -209,8 +214,8 @@ function get_elements() {
 	let t0 = performance.now()
 	try {
 		let aList = [
-			'button','color','date','datetime-local','details','directory',
-			'file','files','number','reset','select','select_multiple','submit','time'
+			'button','checkbox','color','date','datetime-local','details','directory',
+			'file','files','number','radio','reset','select','select_multiple','submit','time'
 		]
 		let oData = {}, target
 		aList.sort()
