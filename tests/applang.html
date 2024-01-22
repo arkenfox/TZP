@@ -96,14 +96,19 @@
 				<div class="flex-item"><input id="efile" type="file"></div>
 				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
 				<div class="flex-item"><input id="enumber" type="number" min="6" step="2"></div>
-				<div class="flex-item"><input id="ereset" type="reset"> &nbsp; <select id="eselect"><option></option></select></div>
+				<!-- important: each multiple select must be on a separate line -->
 				<div class="flex-item">
 					<select multiple="" id="eselectempty"><option id="optempty"></option></select> &nbsp;
-					<select multiple="" id="eselectspaces"><option id="optspaces"> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
-					<select multiple="" id="eselectstring"><option id="optstring">Mōá?-&#xffff;</option></select> &nbsp;
+					<input id="ereset" type="reset"> &nbsp; <select id="eselect"><option></option></select>
 				</div>
-				<div class="flex-item"><input id="esubmit" type="submit"></div>
-				<div class="flex-item"><input id="etime" type="time"></div><br>
+				<div class="flex-item">
+					<select multiple="" id="eselectspaces"><option id="optspaces"> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
+					<input id="esubmit" type="submit">
+				</div>
+				<div class="flex-item">
+					<select multiple="" id="eselectstring"><option id="optstring">Mōá?-&#xffff;</option></select> &nbsp;
+					<input id="etime" type="time">
+				</div><br>
 			</div>
 			<div>ELEMENTS &nbsp;
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForm</a>
@@ -289,21 +294,33 @@ function get_elements() {
 		 if (n == "select_multiple") {
 				// note: number of options makes no difference
 				aSelect.forEach(function(n) {
-					target = dom['eselect'+n]
-					oSelect[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-					target = dom["opt"+n]
-					oSelect[n+"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+					try {
+						target = dom['eselect'+n]
+						oSelect[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+					} catch(e) {
+						oSelect[n] = zErr
+					}
+					try {
+						target = dom["opt"+n]
+						oSelect[n+"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+					} catch(e) {
+						oSelect[n+"_option"] = zErr
+					}
 				})
 				oData[n] = oSelect
 			} else {
-				target = dom['e'+n]
-				oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+				try {
+					target = dom['e'+n]
+					oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+				} catch(e) {
+					oData[n] = zErr
+				}
 			}
 		})
 		let hash = mini(oData), notation = ""
 		// check windows 11 dpr = 1 (my machine)
 		if (isFile) {
-			notation = (hash == "535d1095" ? green_tick : red_cross)
+			notation = (hash == "e7263bf1" ? green_tick : red_cross)
 		}
 		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
 		dom.elements.innerHTML = hash + notation + perf + "<br>"+ json_highlight(oData)
