@@ -227,9 +227,9 @@ const get_globals = () => new Promise(resolve => {
 		],
 		"webkit": [
 			"object" === typeof browser,
-			"function" === typeof getMatchedCSSRules,
+			//"function" === typeof getMatchedCSSRules,
 			"object" === typeof safari,
-			"function" === typeof showModalDialog,
+			//"function" === typeof showModalDialog,
 			"function" === typeof webkitConvertPointFromNodeToPage,
 			"function" === typeof webkitCancelRequestAnimationFrame,
 			"object" === typeof webkitIndexedDB,
