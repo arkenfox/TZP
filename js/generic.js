@@ -364,13 +364,26 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
+	// FF124+: 1874232: this method is obsolete
+	if (isVer > 123) {
+		// temp return: we need to find another method
+		return resolve()
+	}
 
 	let t0 = nowFn(), count = 0
 	setTimeout(() => resolve(zErrTime), 100)
 	const METRIC = "isOS"
 	function exit() {
 		// FF51+ win/mac 1280128 / FF89+ linux 1701257 : min gecko > 88 so undefined = android
-		if (isOS === undefined) {isOS = "android"}
+		if (isOS === undefined) {
+			// temp: while we don't have a 124 isVer, see return above for < 123
+			// if undefined assume it's broken, sorry android 123 users but at least desktop 123 works
+			if (isVerExtra == "+") {
+				return resolve()
+			} else {
+				isOS = "android"
+			}
+		}
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
