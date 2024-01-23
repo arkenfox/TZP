@@ -703,12 +703,8 @@ function run() {
 		rec(typeof external, "external", code, "object")
 		rec(typeof onauxclick, "onauxclick", code, "object")
 		rec(typeof onbeforeinput, "onbeforeinput", code, "object")
-		rec(typeof onbeforetoggle, "onbeforetoggle", code, "object") // FF122+ 1867326 (and 1823359)
-		rec(typeof ondevicemotion, "ondevicemotion", code, "object")
-		rec(typeof ondeviceorientation, "ondeviceorientation", code, "object")
 		rec(typeof ondeviceorientationabsolute, "ondeviceorientationabsolute", code, "object") // FF110+ 1689631
 		rec(typeof ondragexit, "ondragexit", code, "object") // touch
-		rec(typeof onmessageerror, "onmessageerror", code, "object")
 		rec(typeof onorientationchange, "onorientationchange", code, "object") // mobile/tablet
 		rec(typeof onscrollend, "onscrollend", code, "object")
 		rec(typeof ontouchcancel, "ontouchcancel", code, "object")
@@ -790,6 +786,7 @@ function run() {
 		rec(typeof onanimationiteration, "onanimationiteration", code, "object")
 		rec(typeof onanimationstart, "onanimationstart", code, "object")
 		rec(typeof onbeforeprint, "onbeforeprint", code, "object")
+		rec(typeof onbeforetoggle, "onbeforetoggle", code, "object") // FF122+ 1867326 (and 1823359)
 		rec(typeof onbeforeunload, "onbeforeunload", code, "object")
 		rec(typeof onblur, "onblur", code, "object")
 		rec(typeof oncancel, "oncancel", code, "object")
@@ -801,6 +798,8 @@ function run() {
 		rec(typeof oncontextmenu, "oncontextmenu", code, "object")
 		rec(typeof oncuechange, "oncuechange", code, "object")
 		rec(typeof ondblclick, "ondblclick", code, "object")
+		rec(typeof ondevicemotion, "ondevicemotion", code, "object")
+		rec(typeof ondeviceorientation, "ondeviceorientation", code, "object")
 		rec(typeof ondrag, "ondrag", code, "object")
 		rec(typeof ondragend, "ondragend", code, "object")
 		rec(typeof ondragenter, "ondragenter", code, "object")
@@ -828,6 +827,7 @@ function run() {
 		rec(typeof onloadstart, "onloadstart", code, "object")
 		rec(typeof onlostpointercapture, "onlostpointercapture", code, "object")
 		rec(typeof onmessage, "onmessage", code, "object")
+		rec(typeof onmessageerror, "onmessageerror", code, "object")
 		rec(typeof onmousedown, "onmousedown", code, "object")
 		rec(typeof onmouseenter, "onmouseenter", code, "object")
 		rec(typeof onmouseleave, "onmouseleave", code, "object")
@@ -1078,9 +1078,9 @@ function get_miniEngine() {
 		],
 		"webkit": [
 			"object" === typeof browser,
-			"function" === typeof getMatchedCSSRules,
+			//"function" === typeof getMatchedCSSRules,
 			"object" === typeof safari,
-			"function" === typeof showModalDialog,
+			//"function" === typeof showModalDialog,
 			"function" === typeof webkitConvertPointFromNodeToPage,
 			"function" === typeof webkitCancelRequestAnimationFrame,
 			"object" === typeof webkitIndexedDB,
