@@ -659,12 +659,6 @@ function run() {
 		rec(typeof scrollMaxY, "scrollMaxY", code, "number")
 		rec(typeof setResizable, "setResizable", code, "function")
 		rec(typeof updateCommands, "updateCommands", code, "function")
-			// new
-		rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
-		rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
-		rec(typeof oncut, "oncut", code, "object") // FF110+
-		rec(typeof oncopy, "oncopy", code, "object") // FF110+
-		rec(typeof onpaste, "onpaste", code, "object") // FF110+
 			// deprecated
 		rec(typeof mozPaintCount, "mozPaintCount", code, "number") // removed FF72
 		rec(typeof onshow, "onshow", code, "object") // removed FF85 (+ not goanna or Waterfox Classic)
@@ -729,6 +723,11 @@ function run() {
 		// gecko + webkit (not seen in blink)
 		code = 54
 		rec(typeof onanimationcancel, "onanimationcancel", code, "object")
+		rec(typeof oncopy, "oncopy", code, "object") // FF110+
+		rec(typeof oncut, "oncut", code, "object") // FF110+
+		rec(typeof ongamepadconnected, "ongamepadconnected", code, "object") // FF89+
+		rec(typeof ongamepaddisconnected, "ongamepaddisconnected", code, "object") // FF89+
+		rec(typeof onpaste, "onpaste", code, "object") // FF110+
 
 		// I: IGNORE: confirmed common in blink, gecko, webkit
 		code = 99
