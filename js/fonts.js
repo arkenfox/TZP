@@ -445,6 +445,8 @@ function set_fntList(os = isOS) {
 				'sans-serif',
 				'serif'
 			]
+		} else if ("android" == os) {
+			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
 		}
 
 		// baseCtrl: 1-pass or 3-pass
