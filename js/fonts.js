@@ -447,7 +447,8 @@ function set_fntList(os = isOS) {
 			]
 		} else if ("android" == os) {
 			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
-			fntString = '?-' // try this
+			// original full string: sizes 132, detected 148
+			fntString = 'M?-' // "?-" 70 + 145
 		}
 
 		// baseCtrl: 1-pass or 3-pass
