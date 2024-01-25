@@ -447,9 +447,7 @@ function set_fntList(os = isOS) {
 			]
 		} else if ("android" == os) {
 			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
-			// original full string: sizes 132, detected 148
-			fntString = '?-'+ tofu // "?-" 70 + 145
-			dom.audio_user.innerHTML = fntString // tmp output so I can see what's going on
+			fntString = '?-'+ tofu
 		}
 
 		// baseCtrl: 1-pass or 3-pass
