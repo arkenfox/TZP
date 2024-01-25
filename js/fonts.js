@@ -428,10 +428,10 @@ function set_fntList(os = isOS) {
 			// means not detected/recorded - but we _know_ it should be there
 		let isPlatformFont
 		let baseSize = ['monospace','sans-serif','serif']
+		let tofu = get_fntCodes("tofu")
 		if ("windows" === os) {
 			// Mō = 124 +"á" = 125 +"Ω" = 127 (win7)
 			// Mō - 141 +"á" = 142 +"Ω" = 144 | Mō - 141 +tofu = 154 | (win11: have 182/186 fonts
-			let tofu = get_fntCodes("tofu")
 			fntString = isTB ? "?-"+ tofu : "Mō"+ tofu
 			if (!isFontSizesMore) {isPlatformFont = "MS Shell Dlg \\32"}
 			baseSize = [
@@ -448,7 +448,8 @@ function set_fntList(os = isOS) {
 		} else if ("android" == os) {
 			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
 			// original full string: sizes 132, detected 148
-			fntString = 'M?-' // "?-" 70 + 145
+			fntString = '?-'+ tofu // "?-" 70 + 145
+			dom.audio_user.innerHTML = fntString // tmp output so I can see what's going on
 		}
 
 		// baseCtrl: 1-pass or 3-pass
