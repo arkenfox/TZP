@@ -32,29 +32,62 @@ let fntCodes = [],
 	fntDocEnabled = false
 
 let fntMaster = {
+	// android core noto fonts
+	'android': {
+		'notoboth': [
+			// sans: 5+ except tibetan 9+
+			// serifs: 9+ except tibetan 12+
+			'Armenian','Bengali','CJK JP','Devanagari','Ethiopic','Georgian','Gujarati','Gurmukhi','Hebrew','Kannada',
+			'Khmer','Lao','Malayalam','Myanmar','Sinhala','Tamil','Telugu','Thai','Tibetan',
+		],
+		'notosans': [
+			// 5+
+			'Adlam','Avestan','Balinese','Bamum','Batak','Bengali UI','Brahmi','Buginese','Buhid','Canadian Aboriginal','Carian',
+			'Cham','Cherokee','Coptic','Cuneiform','Cypriot','Deseret','Devanagari UI','Egyptian Hieroglyphs','Glagolitic','Gothic',
+			'Gujarati UI','Gurmukhi UI','Hanunoo','Imperial Aramaic','Inscriptional Pahlavi','Inscriptional Parthian','Javanese',
+			'Kaithi','Kayah Li','Kharoshthi','Khmer UI','Lao UI','Lepcha','Limbu','Linear B','Lisu','Lycian','Lydian','Malayalam UI',
+			'Mandaic','Meetei Mayek','Mongolian','Myanmar UI','NKo','New Tai Lue','Ogham','Ol Chiki','Old Italic','Old Persian',
+			'Old South Arabian','Old Turkic','Oriya','Oriya UI','Osmanya','Phags Pa','Phoenician','Rejang','Runic','Samaritan',
+			'Saurashtra','Shavian','Sundanese','Syloti Nagri','Symbols','Syriac Eastern','Syriac Estrangela','Syriac Western',
+			'Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Tamil UI','Telugu UI','Thaana','Thai UI','Tifinagh','Ugaritic','Vai','Yi',
+			// 9+
+			'Ahom','Anatolian Hieroglyphs','Bassa Vah','Bhaiksuki','Chakma','Elbasan','Hatran','Linear A','Manichaean','Marchen',
+			'Meroitic','Miao','Mro','Multani','Nabataean','Newa','Old North Arabian','Old Permic','Osage','Pahawh Hmong','Palmyrene',
+			'Pau Cin Hau','Sharada','Sinhala UI','Sora Sompeng',
+			// 12+
+			'Grantha','Gunjala Gondi','Hanifi Rohingya','Khojki','Masaram Gondi','Medefaidrin','Modi','Soyombo','Takri','Wancho','Warang Citi',
+		],
+		'notoserif': [
+			'Italic', // 5+
+			'Dogra','Nyiakeng Puachue Hmong','Yezidi', // 12+
+		],
+	},
 	// TB13 bundled: reuse for android/linux
 	'bundled': {
-		// all: win/mac/linux: 97 sans, 21 serif
-		'allnotosans': [
-			'Adlam','Balinese','Bamum','Bassa Vah','Batak','Bengali','Buginese','Buhid','Canadian Aboriginal','Chakma',
-			'Cham','Cherokee','Coptic','Deseret','Devanagari','Elbasan','Ethiopic','Georgian','Grantha','Gujarati',
-			'Gunjala Gondi','Gurmukhi','Hanifi Rohingya','Hanunoo','Javanese','Kannada','Kayah Li','Khmer','Khojki',
-			'Khudawadi','Lao','Lepcha','Limbu','Lisu','Mahajani','Malayalam','Mandaic','Masaram Gondi','Medefaidrin',
-			'Meetei Mayek','Mende Kikakui','Miao','Modi','Mongolian','Mro','Multani','Myanmar','NKo','New Tai Lue',
-			'Newa','Ol Chiki','Oriya','Osage','Osmanya','Pahawh Hmong','Pau Cin Hau','Rejang','Runic','Samaritan',
-			'Saurashtra','Sharada','Shavian','Sinhala','Sora Sompeng','Soyombo','Sundanese','Syloti Nagri','Symbols',
-			'Symbols 2','Syriac','Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Takri','Tamil','Telugu','Thaana',
-			'Tifinagh','Tifinagh APT','Tifinagh Adrar','Tifinagh Agraw Imazighen','Tifinagh Ahaggar','Tifinagh Air',
-			'Tifinagh Azawagh','Tifinagh Ghat','Tifinagh Hawad','Tifinagh Rhissa Ixa','Tifinagh SIL','Tifinagh Tawellemmet',
-			'Tirhuta','Vai','Wancho','Warang Citi','Yi','Zanabazar Square',
+		// all: win/mac/linux: 80sans-only 4serif-only 17both: total 118, sorted hash: 8949a424
+		'notoboth': [
+			'Balinese','Bengali','Devanagari','Ethiopic','Georgian','Grantha','Gujarati','Gurmukhi','Kannada','Khmer',
+			'Khojki','Lao','Malayalam','Myanmar','Sinhala','Tamil','Telugu',
 		],
-		'allnotoserif': [
-			'Balinese','Bengali','Devanagari','Dogra','Ethiopic','Georgian','Grantha','Gujarati','Gurmukhi','Kannada',
-			'Khmer','Khojki','Lao','Malayalam','Myanmar','NP Hmong','Sinhala','Tamil','Telugu','Tibetan','Yezidi',
+		'notosans': [
+			'Adlam','Bamum','Bassa Vah','Batak','Buginese','Buhid','Canadian Aboriginal','Chakma','Cham','Cherokee',
+			'Coptic','Deseret','Elbasan','Gunjala Gondi','Hanifi Rohingya','Hanunoo','Javanese','Kayah Li','Khudawadi',
+			'Lepcha','Limbu','Lisu','Mahajani','Mandaic','Masaram Gondi','Medefaidrin','Meetei Mayek','Mende Kikakui',
+			'Miao','Modi','Mongolian','Mro','Multani','NKo','New Tai Lue','Newa','Ol Chiki','Oriya','Osage','Osmanya',
+			'Pahawh Hmong','Pau Cin Hau','Rejang','Runic','Samaritan','Saurashtra','Sharada','Shavian','Sora Sompeng',
+			'Soyombo','Sundanese','Syloti Nagri','Symbols','Symbols 2','Syriac','Tagalog','Tagbanwa','Tai Le','Tai Tham',
+			'Tai Viet','Takri','Thaana','Tifinagh','Tifinagh APT','Tifinagh Adrar','Tifinagh Agraw Imazighen',
+			'Tifinagh Ahaggar','Tifinagh Air','Tifinagh Azawagh','Tifinagh Ghat','Tifinagh Hawad','Tifinagh Rhissa Ixa',
+			'Tifinagh SIL','Tifinagh Tawellemmet','Tirhuta','Vai','Wancho','Warang Citi','Yi','Zanabazar Square',
 		],
+		'notoserif': ['Dogra','NP Hmong','Tibetan','Yezidi',],
 		'android': [],
-		// then linux +16, mac +5, win +4
-		'linux': ['Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR','Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai','STIX Two Math','Tinos','Twemoji Mozilla',],
+		// notos then linux +16, mac +5, win +4
+		'linux': [
+			'Arimo','Cousine','Noto Naskh Arabic','Noto Sans Armenian','Noto Sans Hebrew','Noto Sans JP','Noto Sans KR',
+			'Noto Sans SC','Noto Sans TC','Noto Sans Thai','Noto Serif Armenian','Noto Serif Hebrew','Noto Serif Thai',
+			'STIX Two Math','Tinos','Twemoji Mozilla',
+		],
 		'mac': ['Noto Sans Armenian','Noto Sans Hebrew','Noto Serif Armenian','Noto Serif Hebrew','STIX Two Math',],
 		'windows': ['Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',],
 	},
@@ -63,66 +96,58 @@ let fntMaster = {
 		'android': [],
 		'linux': [],
 		'mac': [
-			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New','Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','.Helvetica Neue DeskInterface','Hiragino Kaku Gothic ProN','Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6','Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC','Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
+			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New','Geneva',
+			'Georgia','Heiti TC','Helvetica','Helvetica Neue','.Helvetica Neue DeskInterface','Hiragino Kaku Gothic ProN',
+			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC','Songti TC',
+			'Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
+			/* variants
+			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
+			*/
 		],
 		'windows': [
 			// 7
-			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli','Malgun Gothic',
-			'Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen','Tahoma','Times New Roman','Verdana',
+			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli',
+			'Malgun Gothic','Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen',
+			'Tahoma','Times New Roman','Verdana',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
-			'Helv','Helvetica','Times','Tms Rmn', // seems stable
+			'MS Shell Dlg','MS Shell Dlg \\32',
+			'Helv','Helvetica','Times','Tms Rmn',
 			// localized
-			'微软雅黑', // Microsoft YaHei
-			'ＭＳ ゴシック', // MS Gothic
-			'ＭＳ Ｐゴシック', // MS PGothic
-			'宋体', // SimSun
-
-			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
-			*/
-
-			/* variants
-			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
-			'Segoe UI Semilight', // 8
-			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
-			'Malgun Gothic Semilight', // 10
+			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
+			/* ignore
+			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
+			// variants
+				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
+				'Segoe UI Semilight', // 8
+				'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
+				'Malgun Gothic Semilight', // 10
 			*/
 		],
 	},
-	// TB unexpected system: from kBaseFonts
+	// TB unexpected
 	'blocklist': {
 		'android': [],
 		'linux': [
-			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41799
-				// aliased
-			'Arial','Courier New','Times New Roman',
-			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41644
+			'Arial','Courier New','Times New Roman', // aliases
 			'Courier','Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX', // fedora
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
-			// TB12 fontnames, should have been removed
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math',
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 		],
 		'mac': [
-			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell',
-			// TB12 fontnames, should have been removed
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math',
+			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 		],
 		'windows': [
-			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola',
-			// MS bundled
-			'Gill Sans','Gill Sans MT',
-			// FontSubstitutes
-			'ﾍﾙﾍﾞﾁｶ', // arial
-			'ﾀｲﾑｽﾞﾛﾏﾝ', // times new roman
-			'ｸｰﾘｴ', // courier -> courier new
-			// TB12 fontnames, should have been removed
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2',
+			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola', // system
+			'Gill Sans','Gill Sans MT', // MS bundled
+			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // FontSubstitutes: Arial, TNR, Courier -> Courier New
+			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2', // TB12 fontnames
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -133,42 +158,69 @@ let fntMaster = {
 			// always
 			'-apple-system',
 			//kBaseFonts
-			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery','Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial','Arial Black','Arial Hebrew','Arial Hebrew Scholar','Arial Narrow','Arial Rounded MT Bold','Arial Unicode MS','Avenir','Avenir Next','Ayuthaya',
-			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Big Caslon','Bodoni 72','Bodoni 72 Oldstyle','Bodoni 72 Smallcaps','Bodoni Ornaments','Bradley Hand','Brush Script MT',
-			'Chalkboard','Chalkboard SE','Chalkduster','Charter','Cochin','Comic Sans MS','Copperplate','Corsiva Hebrew','Courier','Courier New',
-			'DIN Alternate','DIN Condensed','Damascus','DecoType Naskh','Devanagari MT','Devanagari Sangam MN','Didot','Diwan Kufi','Diwan Thuluth',
+			'Al Bayan','Al Nile','Al Tarikh','American Typewriter','Andale Mono','Apple Braille','Apple Chancery',
+				'Apple Color Emoji','Apple SD Gothic Neo','Apple Symbols','AppleGothic','AppleMyungjo','Arial',
+				'Arial Black','Arial Hebrew','Arial Hebrew Scholar','Arial Narrow','Arial Rounded MT Bold',
+				'Arial Unicode MS','Avenir','Avenir Next','Ayuthaya',
+			'Baghdad','Bangla MN','Bangla Sangam MN','Baskerville','Beirut','Big Caslon','Bodoni 72',
+				'Bodoni 72 Oldstyle','Bodoni 72 Smallcaps','Bodoni Ornaments','Bradley Hand','Brush Script MT',
+			'Chalkboard','Chalkboard SE','Chalkduster','Charter','Cochin','Comic Sans MS','Copperplate',
+				'Corsiva Hebrew','Courier','Courier New',
+			'DIN Alternate','DIN Condensed','Damascus','DecoType Naskh','Devanagari MT','Devanagari Sangam MN',
+				'Didot','Diwan Kufi','Diwan Thuluth',
 			'Euphemia UCAS',
 			'Farah','Farisi','Futura',
-			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN','Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
-			'Heiti SC','Heiti TC','Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN','Hiragino Mincho ProN','Hiragino Sans','Hiragino Sans GB',
+			'GB18030 Bitmap','Galvji','Geeza Pro','Geneva','Georgia','Gill Sans','Gujarati MT','Gujarati Sangam MN',
+				'Gurmukhi MN','Gurmukhi MT','Gurmukhi Sangam MN',
+			'Heiti SC','Heiti TC','Helvetica','Helvetica Neue','Hoefler Text','Hiragino Maru Gothic ProN',
+				'Hiragino Mincho ProN','Hiragino Sans','Hiragino Sans GB',
 			'ITF Devanagari','ITF Devanagari Marathi','Impact','InaiMathi',
-			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla','Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
+			'Kailasa','Kannada MN','Kannada Sangam MN','Kefa','Khmer MN','Khmer Sangam MN','Kohinoor Bangla',
+				'Kohinoor Devanagari','Kohinoor Gujarati','Kohinoor Telugu','Kokonor','Krungthep','KufiStandardGK',
 			'Lao MN','Lao Sangam MN','Lucida Grande','Luminari',
-			'Malayalam MN','Malayalam Sangam MN','Marker Felt','Menlo','Microsoft Sans Serif','Mishafi','Mishafi Gold','Monaco','Mshtakan','Mukta Mahee','Muna','Myanmar MN','Myanmar Sangam MN',
+			'Malayalam MN','Malayalam Sangam MN','Marker Felt','Menlo','Microsoft Sans Serif','Mishafi','Mishafi Gold',
+				'Monaco','Mshtakan','Mukta Mahee','Muna','Myanmar MN','Myanmar Sangam MN',
 			'Nadeem','New Peninim MT','Noteworthy',
 			'Noto Nastaliq Urdu',
-			'Noto Sans Adlam','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Bamum','Noto Sans Bassa Vah','Noto Sans Batak','Noto Sans Bhaiksuki','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid','Noto Sans Canadian Aboriginal','Noto Sans Carian','Noto Sans Caucasian Albanian','Noto Sans Chakma','Noto Sans Cham','Noto Sans Coptic','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Duployan','Noto Sans Egyptian Hieroglyphs','Noto Sans Elbasan','Noto Sans Glagolitic','Noto Sans Gothic','Noto Sans Gunjala Gondi','Noto Sans Hanifi Rohingya','Noto Sans Hanunoo','Noto Sans Hatran','Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian','Noto Sans Javanese','Noto Sans Kaithi','Noto Sans Kannada','Noto Sans Kayah Li','Noto Sans Kharoshthi','Noto Sans Khojki','Noto Sans Khudawadi','Noto Sans Lepcha','Noto Sans Limbu','Noto Sans Linear A','Noto Sans Linear B','Noto Sans Lisu','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Mahajani','Noto Sans Mandaic','Noto Sans Manichaean','Noto Sans Marchen','Noto Sans Masaram Gondi','Noto Sans Meetei Mayek','Noto Sans Mende Kikakui','Noto Sans Meroitic','Noto Sans Miao','Noto Sans Modi','Noto Sans Mongolian','Noto Sans Mro','Noto Sans Multani','Noto Sans Myanmar','Noto Sans Nabataean','Noto Sans New Tai Lue','Noto Sans Newa','Noto Sans NKo','Noto Sans Ol Chiki','Noto Sans Old Hungarian','Noto Sans Old Italic','Noto Sans Old North Arabian','Noto Sans Old Permic','Noto Sans Old Persian','Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Oriya','Noto Sans Osage','Noto Sans Osmanya','Noto Sans Pahawh Hmong','Noto Sans Palmyrene','Noto Sans Pau Cin Hau','Noto Sans PhagsPa','Noto Sans Phoenician','Noto Sans Psalter Pahlavi','Noto Sans Rejang','Noto Sans Samaritan','Noto Sans Saurashtra','Noto Sans Sharada','Noto Sans Siddham','Noto Sans Sora Sompeng','Noto Sans Sundanese','Noto Sans Syloti Nagri','Noto Sans Syriac','Noto Sans Tagalog','Noto Sans Tagbanwa','Noto Sans Tai Le','Noto Sans Tai Tham','Noto Sans Tai Viet','Noto Sans Takri','Noto Sans Thaana','Noto Sans Tifinagh','Noto Sans Tirhuta','Noto Sans Ugaritic','Noto Sans Vai','Noto Sans Wancho','Noto Sans Warang Citi','Noto Sans Yi','Noto Sans Zawgyi',
+			'Noto Sans Adlam','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Bamum','Noto Sans Bassa Vah',
+				'Noto Sans Batak','Noto Sans Bhaiksuki','Noto Sans Brahmi','Noto Sans Buginese','Noto Sans Buhid',
+				'Noto Sans Canadian Aboriginal','Noto Sans Carian','Noto Sans Caucasian Albanian','Noto Sans Chakma',
+				'Noto Sans Cham','Noto Sans Coptic','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Duployan',
+				'Noto Sans Egyptian Hieroglyphs','Noto Sans Elbasan','Noto Sans Glagolitic','Noto Sans Gothic',
+				'Noto Sans Gunjala Gondi','Noto Sans Hanifi Rohingya','Noto Sans Hanunoo','Noto Sans Hatran',
+				'Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian',
+				'Noto Sans Javanese','Noto Sans Kaithi','Noto Sans Kannada','Noto Sans Kayah Li','Noto Sans Kharoshthi',
+				'Noto Sans Khojki','Noto Sans Khudawadi','Noto Sans Lepcha','Noto Sans Limbu','Noto Sans Linear A',
+				'Noto Sans Linear B','Noto Sans Lisu','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Mahajani',
+				'Noto Sans Mandaic','Noto Sans Manichaean','Noto Sans Marchen','Noto Sans Masaram Gondi',
+				'Noto Sans Meetei Mayek','Noto Sans Mende Kikakui','Noto Sans Meroitic','Noto Sans Miao','Noto Sans Modi',
+				'Noto Sans Mongolian','Noto Sans Mro','Noto Sans Multani','Noto Sans Myanmar','Noto Sans Nabataean',
+				'Noto Sans New Tai Lue','Noto Sans Newa','Noto Sans NKo','Noto Sans Ol Chiki','Noto Sans Old Hungarian',
+				'Noto Sans Old Italic','Noto Sans Old North Arabian','Noto Sans Old Permic','Noto Sans Old Persian',
+				'Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Oriya','Noto Sans Osage','Noto Sans Osmanya',
+				'Noto Sans Pahawh Hmong','Noto Sans Palmyrene','Noto Sans Pau Cin Hau','Noto Sans PhagsPa','Noto Sans Phoenician',
+				'Noto Sans Psalter Pahlavi','Noto Sans Rejang','Noto Sans Samaritan','Noto Sans Saurashtra','Noto Sans Sharada',
+				'Noto Sans Siddham','Noto Sans Sora Sompeng','Noto Sans Sundanese','Noto Sans Syloti Nagri','Noto Sans Syriac',
+				'Noto Sans Tagalog','Noto Sans Tagbanwa','Noto Sans Tai Le','Noto Sans Tai Tham','Noto Sans Tai Viet',
+				'Noto Sans Takri','Noto Sans Thaana','Noto Sans Tifinagh','Noto Sans Tirhuta','Noto Sans Ugaritic',
+				'Noto Sans Vai','Noto Sans Wancho','Noto Sans Warang Citi','Noto Sans Yi','Noto Sans Zawgyi',
 			'Noto Serif Ahom','Noto Serif Balinese','Noto Serif Hmong Nyiakeng','Noto Serif Myanmar','Noto Serif Yezidi',
 			'Optima','Oriya MN','Oriya Sangam MN',
-			'PT Mono','PT Sans','PT Sans Caption','PT Sans Narrow','PT Serif','PT Serif Caption','Palatino','Papyrus','Phosphate','PingFang HK','PingFang SC','PingFang TC','Plantagenet Cherokee',
+			'PT Mono','PT Sans','PT Sans Caption','PT Sans Narrow','PT Serif','PT Serif Caption','Palatino','Papyrus',
+				'Phosphate','PingFang HK','PingFang SC','PingFang TC','Plantagenet Cherokee',
 			'Raanana','Rockwell',
-			'STIXGeneral','STIXIntegralsD','STIXIntegralsSm','STIXIntegralsUp','STIXIntegralsUpD','STIXIntegralsUpSm','STIXNonUnicode','STIXSizeFiveSym','STIXSizeFourSym','STIXSizeOneSym','STIXSizeThreeSym','STIXSizeTwoSym','STIXVariants','STSong','Sana','Sathu','Savoye LET','Shree Devanagari 714','SignPainter','Silom','Sinhala MN','Sinhala Sangam MN','Skia','Snell Roundhand','Songti SC','Songti TC','Sukhumvit Set','Symbol',
-			'Tahoma','Tamil MN','Tamil Sangam MN','Telugu MN','Telugu Sangam MN','Thonburi','Times','Times New Roman','Trattatello','Trebuchet MS',
+			'STIXGeneral','STIXIntegralsD','STIXIntegralsSm','STIXIntegralsUp','STIXIntegralsUpD','STIXIntegralsUpSm',
+				'STIXNonUnicode','STIXSizeFiveSym','STIXSizeFourSym','STIXSizeOneSym','STIXSizeThreeSym','STIXSizeTwoSym',
+				'STIXVariants','STSong','Sana','Sathu','Savoye LET','Shree Devanagari 714','SignPainter','Silom','Sinhala MN',
+				'Sinhala Sangam MN','Skia','Snell Roundhand','Songti SC','Songti TC','Sukhumvit Set','Symbol',
+			'Tahoma','Tamil MN','Tamil Sangam MN','Telugu MN','Telugu Sangam MN','Thonburi','Times','Times New Roman',
+				'Trattatello','Trebuchet MS',
 			'Verdana',
 			'Waseem','Webdings','Wingdings','Wingdings 2','Wingdings 3',
 			'Zapf Dingbats','Zapfino',
-
-			/* variants: require weight to be stable
-			'Hiragino Maru Gothic ProN W4','Hiragino Mincho ProN W3','Hiragino Mincho ProN W6',
-			'Hiragino Sans W0','Hiragino Sans W1','Hiragino Sans W2','Hiragino Sans W3','Hiragino Sans W4',
-			'Hiragino Sans W5','Hiragino Sans W6','Hiragino Sans W7','Hiragino Sans W8','Hiragino Sans W9',
-			'Hiragino Sans GB W3','Hiragino Sans GB W6',
-			*/
-
 		],
 		'windows': [
-			// ?
-			'AlternateGothic2 BT',
+			'AlternateGothic2 BT', // ?
 			// 7
 			'Arial','Calibri','Cambria','Cambria Math','Candara','Comic Sans MS','Consolas','Constantia','Corbel','Courier New','Ebrima',
 			'Gabriola','Georgia','Impact','Lucida Console','Lucida Sans Unicode','MS Gothic','MS PGothic','MS UI Gothic','MV Boli',
@@ -186,60 +238,62 @@ let fntMaster = {
 			// 10
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// localized: kBase: detected FF119+: 1850672
-			'微软雅黑', // Microsoft YaHei
-			'ＭＳ ゴシック', // MS Gothic
-			'ＭＳ Ｐゴシック', // MS PGothic
-			'宋体', // SimSun
-      '游ゴシック', // Yu Gothic
-			/* ignore: https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-			'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
-			*/
+			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
 			// FontSubstitutes
-				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
 			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
 			'Helv','Helvetica','Times','Tms Rmn', // seems stable
-
-			/* variants
-			// 7
-			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold',
-			// 8
-			'Calibri Light','Calibri Light Italic','Segoe UI Semilight',
-			// 8.1
-			'Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
-			'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Yu Gothic Light',
-			// 10
-			'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight','Candara Light','Corbel Light',
-			'Malgun Gothic Semilight','Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
+			/* ignore
+			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
+			// variants
+				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
+				'Calibri Light','Calibri Light Italic','Segoe UI Semilight', // 8
+				// 8.1
+				'Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
+				'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Yu Gothic Light',
+				// 10
+				'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight','Candara Light','Corbel Light',
+				'Malgun Gothic Semilight','Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
 			*/
 		],
 	},
 	'system': {
 		'android': [
-			// we start with bundled[all*] 118
-			// + old noto font names
-			'Noto Sans Symbols2','Noto Serif Hmong Nyiakeng',
-			// + common
-			'Droid Sans','Droid Sans Mono','Droid Serif','Roboto','Roboto Condensed',
-			// + MOAR notos
-			'Noto Color Emoji','Noto Emoji','Noto Kufi Arabic','Noto Mono','Noto Naskh Arabic','Noto Nastaliq Urdu','Noto Sans','Noto Sans Adlam Unjoined','Noto Sans Anatolian Hieroglyphs','Noto Sans Arabic','Noto Sans Armenian','Noto Sans Avestan','Noto Sans Brahmi','Noto Sans CJK JP','Noto Sans CJK KR','Noto Sans CJK SC','Noto Sans CJK TC','Noto Sans Carian','Noto Sans Cuneiform','Noto Sans Cypriot','Noto Sans Display','Noto Sans Egyptian Hieroglyphs','Noto Sans Glagolitic','Noto Sans Gothic','Noto Sans Hebrew','Noto Sans Imperial Aramaic','Noto Sans Inscriptional Pahlavi','Noto Sans Inscriptional Parthian','Noto Sans JP','Noto Sans KR','Noto Sans Kaithi','Noto Sans Kharoshthi','Noto Sans Linear B','Noto Sans Lycian','Noto Sans Lydian','Noto Sans Mono','Noto Sans Ogham','Noto Sans Old Italic','Noto Sans Old Persian','Noto Sans Old South Arabian','Noto Sans Old Turkic','Noto Sans Phags Pa','Noto Sans Phoenician','Noto Sans SC','Noto Sans Syriac Eastern','Noto Sans Syriac Estrangela','Noto Sans Syriac Western','Noto Sans TC','Noto Sans Thai','Noto Sans Tibetan','Noto Sans Ugaritic','Noto Serif','Noto Serif Armenian','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC','Noto Serif Display','Noto Serif Hebrew','Noto Serif Thai',
-			// + vendor
-			// ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
-			'Dancing Script',
+			// all
+			'AndroidClock Regular','Dancing Script','Droid Sans Mono','Carrois Gothic SC','Coming Soon','Cutive Mono',
+			'Noto Color Emoji','Noto Naskh Arabic','Noto Naskh Arabic UI','Roboto',
+			// 12+
+			'Noto Color Emoji Flags','Source Sans Pro Regular',
+			// + common + self
+			'Droid Sans','Droid Serif','Noto Sans','Noto Serif','Roboto Condensed',
+			// + vendor: ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
 			'SamsungKorean_v2.0', // 1674683
 			'SamsungColorEmoji', // 1872510
 			'One UI Sans KR VF', // 1865238
-			// + defaults: https://searchfox.org/mozilla-central/source/modules/libpref/init/all.js#3041
-				// ToDo: check names are correct + add: 'HYSerif','MotoyaLCedar','MotoyaLMaru','NanumGothic','SmartGothic',
-			'Arial','Asana Math','Cambria Math','Charis SIL Compact','DejaVu Math TeX Gyre','DejaVu Sans','DejaVu Serif','Droid Sans Fallback','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Thai','Google Sans','Latin Modern Math','Libertinus Math','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR','Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','SEC CJK JP','SEC CJK KR','SEC CJK SC','SEC CJK TC','SEC Mono CJK JP','SEC Mono CJK KR','SEC Mono CJK SC','SEC Mono CJK TC','STIX Math','STIX Two Math','STIXGeneral','TeX Gyre Bonum Math','TeX Gyre Pagella Math','TeX Gyre Schola','TeX Gyre Termes Math','XITS Math',
+			// + me
+			'Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
+			// + defaults
+			'SEC CJK JP','SEC CJK KR','SEC CJK SC','SEC CJK TC','SEC Mono CJK JP','SEC Mono CJK KR','SEC Mono CJK SC',
+			'SEC Mono CJK TC',
+			/* defaults
+				// https://searchfox.org/mozilla-central/source/modules/libpref/init/all.js#3041
+				// ToDo: check names are correct
+					'HYSerif','MotoyaLCedar','MotoyaLMaru','NanumGothic','SmartGothic',
+				// ToDo: possibles: but I don't have them (Android 11), they seem out of date
+					'Arial','Asana Math','Cambria Math','Charis SIL Compact','DejaVu Math TeX Gyre','DejaVu Sans',
+					'DejaVu Serif','Droid Sans Fallback','Droid Sans Hebrew','Droid Sans Japanese','Droid Sans Thai',
+					'Google Sans','Latin Modern Math','Libertinus Math','Noto Sans Mono CJK JP','Noto Sans Mono CJK KR',
+					'Noto Sans Mono CJK SC','Noto Sans Mono CJK TC','STIX Math','STIX Two Math','STIXGeneral',
+					'TeX Gyre Bonum Math','TeX Gyre Pagella Math','TeX Gyre Schola','TeX Gyre Termes Math','XITS Math',
+			*/
 		],
 		'linux': [
-			// we start with bundled[linux] 134
-			// + old noto font names
-			'Noto Sans Symbols2','Noto Serif Hmong Nyiakeng',
+			// self
+			'Noto Sans','Noto Serif',
 			// + always
 			'Arial','Courier','Courier New',
 			// + common notos
-			'Noto Emoji','Noto Sans','Noto Serif','Noto Sans Tibetan',
+			'Noto Emoji','Noto Sans Tibetan',
 			// + some selective kBase ubuntu or fedora
 				// notos
 			'Noto Color Emoji','Noto Mono','Noto Serif CJK JP','Noto Serif CJK KR','Noto Serif CJK SC','Noto Serif CJK TC',
@@ -314,18 +368,6 @@ let fntMaster = {
 			'Wawati SC','Wawati TC','Weibei SC','Weibei TC',
 			'Xingkai SC','Xingkai TC',
 			'Yuanti SC','Yuanti TC','YuGothic','YuKyokasho','YuKyokasho Yoko','YuMincho','YuMincho +36p Kana','Yuppy SC','Yuppy TC',
-
-			/* variants
-			'Hiragino Kaku Gothic Pro W3','Hiragino Kaku Gothic Pro W6',
-			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
-			'Hiragino Kaku Gothic Std W8','Hiragino Kaku Gothic StdN W8',
-			'Hiragino Maru Gothic Pro W4',
-			'Hiragino Mincho Pro W3','Hiragino Mincho Pro W6',
-			'Hiragino Sans CNS W3','Hiragino Sans CNS W6',
-			'Iowan Old Style Black',
-			'Myriad Arabic Black','Myriad Arabic Light','Myriad Arabic Semibold',
-			'NanumGothic ExtraBold','Seravek ExtraLight','Seravek Light','Seravek Medium',
-			*/
 		],
 		'windows': [
 			'Aharoni','Aldhabi','Andalus','Angsana New','AngsanaUPC','Aparajita','Arabic Typesetting','Arial Nova',
@@ -353,25 +395,10 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
-
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 			// MS downloads
 			'Cascadia Code','Cascadia Mono', // 11
-
-			/* variants
-				'Arial Nova Cond','Arial Nova Cond Light','Arial Nova Light',
-				'BIZ UDMincho Medium','BIZ UDPMincho Medium','DengXian Light',
-				'Georgia Pro Black','Georgia Pro Cond','Georgia Pro Cond Black','Georgia Pro Cond Light',
-				'Georgia Pro Cond Semibold','Georgia Pro Light','Georgia Pro Semibold',
-				'Gill Sans Nova Cond','Gill Sans Nova Cond Lt','Gill Sans Nova Cond Ultra Bold','Gill Sans Nova Cond XBd',
-				'Gill Sans Nova Light','Gill Sans Nova Ultra Bold',
-				'Rockwell Nova Cond','Rockwell Nova Cond Light','Rockwell Nova Extra Bold',
-				'Verdana Pro Black',
-				'Verdana Pro Cond','Verdana Pro Cond Black','Verdana Pro Cond Light','Verdana Pro Cond SemiBold',
-				'Verdana Pro Light','Verdana Pro SemiBold',
-				'Yu Mincho Demibold','Yu Mincho Light',
-			*/
 		],
 	},
 }
@@ -440,34 +467,37 @@ function set_fntList(os = isOS) {
 		// lists
 		if (os !== undefined) {
 			let fntFake = "--00"+ rnd_string()
-			let array = [], aBundled = []
-			fntMaster["bundled"]["allnotosans"].forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt)})
-			fntMaster["bundled"]["allnotoserif"].forEach(function(fnt) {aBundled.push("Noto Serif "+ fnt)})
-			if (os == "linux" || isTB) {
+			let array = []
+
+			if (isTB && os !== "android") {
+				// desktop TB
+				// build bundled
+				let aBundled = []
+				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt, "Noto Serif "+ fnt)})
+				fntMaster.bundled.notosans.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt)})
+				fntMaster.bundled.notoserif.forEach(function(fnt) {aBundled.push("Noto Serif "+ fnt)})
 				aBundled = aBundled.concat(fntMaster["bundled"][os])
-			}
-			if (os == "android") {
-				// android
-				aBundled = aBundled.concat(fntMaster["system"][os])
-				array = array.concat(aBundled)
-				fntData["full"] = array
-			} else if (isTB) {
-				// TB
+				// combine allow/block lists
 				array = array.concat(aBundled)
 				fntData["bundled"] = array
 				array = array.concat(fntMaster["allowlist"][os])
 				fntData["base"] = array
 				array = array.concat(fntMaster["blocklist"][os])
 				fntData["full"] = array
-			} else {
-				// FF
-				if (os == "linux") {
-					array = aBundled.concat(fntMaster["system"][os])
-				} else {
-					array = fntMaster["base"][os]
-					fntData["base"] = array
-					array = array.concat(fntMaster["system"][os])
-				}
+			} else if (os == "android") {
+				// android
+				// build notos
+				fntMaster.android.notoboth.forEach(function(fnt) {array.push("Noto Sans "+ fnt, "Noto Serif "+ fnt)})
+				fntMaster.android.notosans.forEach(function(fnt) {array.push("Noto Sans "+ fnt)})
+				fntMaster.android.notoserif.forEach(function(fnt) {array.push("Noto Serif "+ fnt)})
+				// add extras
+				array = array.concat(fntMaster["system"][os])
+				fntData["full"] = array
+			} else if (!isTB) {
+				// desktop FF
+				array = fntMaster["base"][os]
+				fntData["base"] = array
+				array = array.concat(fntMaster["system"][os])
 				fntData["full"] = array
 			}
 			// -control from lists
