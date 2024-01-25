@@ -365,38 +365,32 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	}
 	// FF124+: 1874232: this method is obsolete
-	if (isVer > 123) {
-		// temp return: we need to find another method
-		return resolve()
-	}
 
 	let t0 = nowFn(), count = 0
-	setTimeout(() => resolve(zErrTime), 100)
 	const METRIC = "isOS"
+	if (isVer > 123) {
+		exit()
+	}
+
+	setTimeout(() => resolve(zErrTime), 100)
 	function exit() {
 		// FF51+ win/mac 1280128 / FF89+ linux 1701257 : min gecko > 88 so undefined = android
 		if (isOS === undefined) {
-			// temp: while we don't have a 124 isVer, see return above for < 123
+			// temp: while we don't have a 124 isVer, see return above for > 123
 			// if undefined assume it's broken, sorry android 123 users but at least desktop 123 works
 			if (isVerExtra == "+") {
+//isOS = "android" // testing
+				log_perf(SECTG, METRIC, t0, "", isOS+"")
 				return resolve()
 			} else {
 				isOS = "android"
+				return resolve()
 			}
 		}
+//isOS = "android"
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
-		// tweak monospace size
-		if (isOS === "windows" || isOS == "android") {
-			try {
-				let items = document.querySelectorAll('.mono')
-				for (let i=0; i < items.length; i++) {
-					items[i].classList.add("monobigger")
-					items[i].classList.remove("mono")
-				}
-			} catch(e) {}
-		}
 		log_perf(SECTG, METRIC, t0, "", isOS)
 		return resolve()
 	}
@@ -1393,6 +1387,16 @@ function countJS(filename) {
 					isOSErr = log_error(SECT3, "os", zErrTime, isScope, 50, true) // persist error to sect3
 					log_perf(SECTG, METRIC, t0, "", zErrTime)
 					log_alert(SECTG, METRIC +": "+ zErrTime, true)
+				}
+				// tweak monospace size: ToDo: this is bad design
+				if (isOS === "windows" || isOS == "android") {
+					try {
+						let items = document.querySelectorAll('.mono')
+						for (let i=0; i < items.length; i++) {
+							items[i].classList.add("monobigger")
+							items[i].classList.remove("mono")
+						}
+					} catch(e) {}
 				}
 				// do once
 				let target = dom.pointertarget
