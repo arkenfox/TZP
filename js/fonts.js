@@ -447,7 +447,7 @@ function set_fntList(os = isOS) {
 			]
 		} else if ("android" == os) {
 			// see android list notes: Roboto is not guaranteed unless Android 9+
-			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
+			if (!isFontSizesMore) {isPlatformFont = "Dancing Script"}
 			fntString = '?-'+ tofu
 		}
 
