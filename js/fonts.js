@@ -35,30 +35,28 @@ let fntMaster = {
 	// android core noto fonts
 	'android': {
 		'notoboth': [
-			// sans: 5+ except tibetan 9+
+			// sans: 5+ except CJK JP + Gujarati + Gurmukhi + Tibetan 9+
 			// serifs: 9+ except tibetan 12+
 			'Armenian','Bengali','CJK JP','Devanagari','Ethiopic','Georgian','Gujarati','Gurmukhi','Hebrew','Kannada',
 			'Khmer','Lao','Malayalam','Myanmar','Sinhala','Tamil','Telugu','Thai','Tibetan',
 		],
 		'notosans': [
 			// 5+
-			'Adlam','Avestan','Balinese','Bamum','Batak','Bengali UI','Brahmi','Buginese','Buhid','Canadian Aboriginal','Carian',
-			'Cham','Cherokee','Coptic','Cuneiform','Cypriot','Deseret','Devanagari UI','Egyptian Hieroglyphs','Glagolitic','Gothic',
-			'Gujarati UI','Gurmukhi UI','Hanunoo','Imperial Aramaic','Inscriptional Pahlavi','Inscriptional Parthian','Javanese',
-			'Kaithi','Kayah Li','Kharoshthi','Khmer UI','Lao UI','Lepcha','Limbu','Linear B','Lisu','Lycian','Lydian','Malayalam UI',
-			'Mandaic','Meetei Mayek','Mongolian','Myanmar UI','NKo','New Tai Lue','Ogham','Ol Chiki','Old Italic','Old Persian',
-			'Old South Arabian','Old Turkic','Oriya','Oriya UI','Osmanya','Phags Pa','Phoenician','Rejang','Runic','Samaritan',
-			'Saurashtra','Shavian','Sundanese','Syloti Nagri','Symbols','Syriac Eastern','Syriac Estrangela','Syriac Western',
-			'Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Tamil UI','Telugu UI','Thaana','Thai UI','Tifinagh','Ugaritic','Vai','Yi',
+			'Bengali UI','Devanagari UI','Khmer UI','Lao UI','Malayalam UI','Myanmar UI','Symbols','Tamil UI','Telugu UI','Thai UI',
 			// 9+
-			'Ahom','Anatolian Hieroglyphs','Bassa Vah','Bhaiksuki','Chakma','Elbasan','Hatran','Linear A','Manichaean','Marchen',
-			'Meroitic','Miao','Mro','Multani','Nabataean','Newa','Old North Arabian','Old Permic','Osage','Pahawh Hmong','Palmyrene',
-			'Pau Cin Hau','Sharada','Sinhala UI','Sora Sompeng',
+			'Adlam','Ahom','Anatolian Hieroglyphs','Avestan','Balinese','Bamum','Bassa Vah','Batak','Bhaiksuki','Brahmi','Buginese','Buhid',
+			'Canadian Aboriginal','Carian','Chakma','Cham','Cherokee','Coptic','Cuneiform','Cypriot','Deseret','Egyptian Hieroglyphs',
+			'Elbasan','Glagolitic','Gothic','Gujarati UI','Gurmukhi UI','Hanunoo','Hatran','Imperial Aramaic','Inscriptional Pahlavi',
+			'Inscriptional Parthian','Javanese','Kaithi','Kayah Li','Kharoshthi','Lepcha','Limbu','Linear A','Linear B','Lisu','Lycian',
+			'Lydian','Mandaic','Manichaean','Marchen','Meetei Mayek','Meroitic','Miao','Mongolian','Mro','Multani','Nabataean','Newa',
+			'New Tai Lue','NKo','Ogham','Ol Chiki','Old Italic','Old North Arabian','Old Permic','Old Persian','Old South Arabian',
+			'Old Turkic','Oriya','Oriya UI','Osage','Osmanya','Pahawh Hmong','Palmyrene','Pau Cin Hau','Phags Pa','Phoenician','Rejang',
+			'Runic','Samaritan','Saurashtra','Sharada','Shavian','Sinhala UI','Sora Sompeng','Sundanese','Syloti Nagri','Syriac Eastern',
+			'Syriac Estrangela','Syriac Western','Tagalog','Tagbanwa','Tai Le','Tai Tham','Tai Viet','Thaana','Tifinagh','Ugaritic','Vai','Yi',
 			// 12+
 			'Grantha','Gunjala Gondi','Hanifi Rohingya','Khojki','Masaram Gondi','Medefaidrin','Modi','Soyombo','Takri','Wancho','Warang Citi',
 		],
 		'notoserif': [
-			'Italic', // 5+
 			'Dogra','Nyiakeng Puachue Hmong','Yezidi', // 12+
 		],
 	},
@@ -260,8 +258,10 @@ let fntMaster = {
 	'system': {
 		'android': [
 			// all
-			'AndroidClock Regular','Dancing Script','Droid Sans Mono','Carrois Gothic SC','Coming Soon','Cutive Mono',
-			'Noto Color Emoji','Noto Naskh Arabic','Noto Naskh Arabic UI','Roboto',
+			'AndroidClock Regular','Carrois Gothic SC','Cutive Mono','Dancing Script','Droid Sans Mono',
+			'Noto Color Emoji','Noto Naskh Arabic', // ignore 'Coming Soon Regular', see 'Coming Soon'
+			// 9+
+			'Coming Soon','Noto Naskh Arabic UI','Roboto',
 			// 12+
 			'Noto Color Emoji Flags','Source Sans Pro Regular',
 			// + common + self
@@ -446,6 +446,7 @@ function set_fntList(os = isOS) {
 				'serif'
 			]
 		} else if ("android" == os) {
+			// see android list notes: Roboto is not guaranteed unless Android 9+
 			if (!isFontSizesMore) {isPlatformFont = "Roboto"}
 			fntString = '?-'+ tofu
 		}
