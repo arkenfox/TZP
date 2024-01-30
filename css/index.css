@@ -83,6 +83,7 @@ code {
 	border: 2px solid var(--test0);
 	background-color: var(--bg0);
 	z-index: 1000;
+	overscroll-behavior: contain;
 }
 #overlaybuttons {
 	position: fixed;
