@@ -10,6 +10,7 @@
 	<style>
 		table {width: 97%; min-width: 580px; max-width: 780px;}
 		hr {color: var(--test4);}
+		div.pad {pad-bottom: 10px;}
 	</style>
 </head>
 
@@ -678,7 +679,7 @@ s16 = s16.trim()
 function build_dates(year) {
 	// reset
 	aDates = []
-	let suffix = " 13:00:00 UTC"
+	let suffix = "13:00:00 UTC"
 	if (year !== undefined && year !== "") {
 		// single year
 		aYears = [year]
@@ -811,23 +812,30 @@ function run_test(isLoopy) {
 				tzpdata.push(aYears[i] +": "+ tzyear.join(", "))
 			}
 			if (aYears.join() == "1879,1921,1952,1976,2018") {
+				// TZP hash : Reykjavik is ... "1879: 16.133333333333333, 16.133333333333333"
+					// but in toLocale hash it is 1879: 0.13333333333333333, 0.13333333333333333
+					// why exactly ? (not that I think it affects entropy)
 				tzpHash = mini(tzpdata.join())
+				console.log("TZP HASH/DATA", tzpHash+"\n", tzpdata)
 			} else {
 				tzpHash = zNA
 			}
 
 			// get matching hash
 			tzresults = []
+			let tzcontrol = []
 			for (let i = 0 ; i < aDates.length; i++) {
 				let control = new Date(aDates[i])
 				// note: we need to make sure control+test are the same format (en)
 					// otherwise the string can mix e.g. 1/7 vs 7/1
 				let test = control.toLocaleString("en")
+				tzcontrol.push(control)
 				let diff = ((Date.parse(test) - Date.parse(control))/k)
 				tzresults.push(diff)
 			}
-			//console.debug("matchHash (toLocaleString) data\n" + tzresults)
 			matchHash = mini(tzresults.join())
+			console.debug("toLocale HASH/DATA", matchHash+"\n", tzresults)
+			console.debug("control DATA\n", tzcontrol)
 		}
 
 		// select list and loop each timezone
@@ -1197,6 +1205,8 @@ function start() {
 		})
 		newlist.sort()
 		oLists["supported"] = newlist
+		// temp testing
+		//oLists["supported"] = ["Atlantic/Reykjavik"]
 	} catch(e) {
 		dom.useSupported.checked = false 
 		dom.elementSupported.style.display = "none"
