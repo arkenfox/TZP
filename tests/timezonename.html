@@ -36,9 +36,11 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
-				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
-				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[ TINY ]</span>
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ALL]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[MIN]</span>
+				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[TINY]</span>
+				<span id="butc" class="btn4 btn" onClick="run('utc')">[UTC]</span>
+				<span id="breykjavik" class="btn4 btn" onClick="run('reykjavik')">[reykjavik]</span>
 				<input type="checkbox" id="optExpanded"> expand locales
 			<br><br><hr><br>
 				<span id ="results"></span>
@@ -606,6 +608,16 @@ function run_main(method) {
 			"Europe/London": tzSG,
 			"Asia/Hong_Kong": tzSG,
 			"Asia/Muscat": tzSG,
+			// temp test UTC replacement
+			"Atlantic/Reykjavik": both
+		}
+	} else if (method == "utc") {
+		tests = {
+			"UTC": both
+		}
+	} else if (method == "reykjavik") {
+		tests = {
+			"Atlantic/Reykjavik": both
 		}
 	}
 
