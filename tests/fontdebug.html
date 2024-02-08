@@ -167,6 +167,18 @@ function getFonts() {
 	try {
 
 		// check fntWeight
+/*
+font-weight: 100;
+font-weight: 200;
+font-weight: 300;
+font-weight: 400; // normal
+font-weight: 500;
+font-weight: 600;
+font-weight: 700; // bold
+font-weight: 800;
+font-weight: 900;
+*/
+
 		fntWeight += ""
 		let fntWeightValid = ["100","200","300","400","500","600","700","800","900","950"]
 		if (!fntWeightValid.includes(fntWeight)) {fntWeight = "normal"}
