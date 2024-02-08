@@ -823,7 +823,7 @@ const get_timezone = () => new Promise(resolve => {
 							if ("number" === typeof offset && !isNaN(offset)) {
 								oData[method][year].push(offset)
 							} else {
-								let offsetType = isNan(offset) ? "NaN": typeof offset
+								let offsetType = isNaN(offset) ? "NaN": typeof offset
 								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + offsetType)
 							}
 						} catch(e) {
