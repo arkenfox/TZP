@@ -189,50 +189,50 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"zh-TW": ["zh, "+ en, "zh-Hant-TW"],
 	}
 	localesSupported = {
-		// v hashes are without localized NumberRangeOver/Underflow: we'll wait til that lands in stable
-		"ar": {v: "8634a06c", xml: "ebfbdc43"},
-		"ca": {v: "448ed85c", xml: "81f31519"},
-		"cs": {v: "df366b6d", xml: "45f277f7"},
-		"da": {v: "2ee855e1", xml: "44535972"},
-		"de": {v: "9262b362", xml: "f4b2a56f"},
+		// v hashes are with localized NumberRangeOver/Underflow
+		"ar": {v: "1dfb5b8c", xml: "ebfbdc43"},
+		"ca": {v: "6b3bb3d8", xml: "81f31519"},
+		"cs": {v: "de3ab0ad", xml: "45f277f7"},
+		"da": {v: "479797a1", xml: "44535972"},
+		"de": {v: "f9e2eae6", xml: "f4b2a56f"},
 		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
 			// changing to spoof english returns n30.. phew!
-		"el": {v: "8fca38ce", xml: "da8c80af"},
+		"el": {v: "b1a88a13", xml: "da8c80af"},
 		"en-US": {v: "41310558", xml: "945f8952"},
-		"es-ES": {v: "f4383b69", xml: "3eeba3bc"},
-		"fa": {v: "bdf109cf", xml: "113d0a7e"},
-		"fi": {v: "a51809e3", xml: "71abeeec"},
-		"fr": {v: "9619061e", xml: "74f5df3d"},
+		"es-ES": {v: "97c3f5a9", xml: "3eeba3bc"},
+		"fa": {v: "8ef57409", xml: "113d0a7e"},
+		"fi": {v: "3e29e6e7", xml: "71abeeec"},
+		"fr": {v: "34e28fa2", xml: "74f5df3d"},
 		"ga-IE": {v: "2bf1321d", xml: "d9761e70"},
 		// he: xml n28 + n30 = english
 		"he": {v: "e47dbb82", xml: "39eec79d"},
-		"hu": {v: "8891e8c9", xml: "9f537fe6"},
-		"id": {v: "b2dbd886", xml: "79f3851e"},
-		"is": {v: "816f53ff", xml: "7f3e38b8"},
-		"it": {v: "9b6c1185", xml: "469cb2af"},
+		"hu": {v: "dad6d689", xml: "9f537fe6"},
+		"id": {v: "71224946", xml: "79f3851e"},
+		"is": {v: "d150027b", xml: "7f3e38b8"},
+		"it": {v: "3b781f09", xml: "469cb2af"},
 		"ja": {v: "48645d06", xml: "6823cee8"},
-		"ka": {v: "aee130cb", xml: "4e712712"},
+		"ka": {v: "40feb44f", xml: "4e712712"},
 		"ko": {v: "d3b54047", xml: "fc4c50ed"},
-		"lt": {v: "cf6fc0e1", xml: "f50f2b50"},
+		"lt": {v: "d5f9b95d", xml: "f50f2b50"},
 		// mk: v = english but not number formating, and xml n30 = english but is would-be-n39 (same as el)
 			// and n27 + n28 = english
-		"mk": {v: "1120c05c", xml: "3b22df8b"},
+		"mk": {v: "333aae58", xml: "3b22df8b"},
 		"ms": {v: "9dadbc64", xml: "f23d0969"},
 		// my: two items in english: date+over/under
-		"my": {v: "475aae83", xml: "11d4d458"},
+		"my": {v: "43cc3aa3", xml: "11d4d458"},
 		// nb-NO: xml most is english
-		"nb-NO": {v: "0f0769e7", xml: "50426960"},
-		"nl": {v: "87dcc6d6", xml: "b03574e4"},
-		"pl": {v: "cc11d211", xml: "c1295e2b"},
-		"pt-BR": {v: "c05c32a9", xml: "96f79e68"},
-		"ro": {v: "27e33087", xml: "cf85bb64"},
-		"ru": {v: "22559568", xml: "2178a2b6"},
-		"sq": {v: "9a1acbb7", xml: "a732eca1"},
-		"sv-SE": {v: "84a56587", xml: "80f52165"},
-		"th": {v: "8448474c", xml: "51247f02"},
-		"tr": {v: "596b91c6", xml: "1e9d0192"},
-		"uk": {v: "c5c19b3d", xml: "cc85d2f5"},
-		"vi": {v: "21828319", xml: "7cf3c6f9"},
+		"nb-NO": {v: "84ce54eb", xml: "50426960"},
+		"nl": {v: "326cbfd2", xml: "b03574e4"},
+		"pl": {v: "95ad4851", xml: "c1295e2b"},
+		"pt-BR": {v: "de2c3569", xml: "96f79e68"},
+		"ro": {v: "d72a350b", xml: "cf85bb64"},
+		"ru": {v: "2391fbec", xml: "2178a2b6"},
+		"sq": {v: "e0259277", xml: "a732eca1"},
+		"sv-SE": {v: "d9d7828b", xml: "80f52165"},
+		"th": {v: "8448474c", xml: "e29567ce"},
+		"tr": {v: "169730ca", xml: "1e9d0192"},
+		"uk": {v: "24cce2c1", xml: "cc85d2f5"},
+		"vi": {v: "b8137d59", xml: "7cf3c6f9"},
 		"zh-Hans-CN": {v:"55d25655", xml: "328cc79b"},
 		"zh-Hant-TW": {v: "8e4cfa0e", xml: "87abb9fa"},
 	}
@@ -767,186 +767,219 @@ const get_locale_resolvedoptions = () => new Promise(resolve => {
 
 const get_timezone = () => new Promise(resolve => {
 	let t0 = nowFn(), notation = ""
-	const METRIC = "timezone"
-	const METRICtzo = "timezone_offsets"
-
+	const METRICtz = "timezone"
+	const METRIC = "timezone_offsets"
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
+	let days = ["January 1","July 1"], years = [1879, 1921, 1952, 1976, 2018]
 
 	function get_tz() {
 		try {
 			if (runSE) {foo++}
 			let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 			if ("string" !== typeof tz) {
-				return ([zErr, log_error(SECT4, METRIC, zErrType + typeof tz)])
+				return ([zErr, log_error(SECT4, METRICtz, zErrType + typeof tz)])
 			} else if (tz === "") {
-				return ([zErr, log_error(SECT4, METRIC, zErrInvalid + "empty string")])
+				return ([zErr, log_error(SECT4, METRICtz, zErrInvalid + "empty string")])
 			} else {
 				try {
 					let tztest = (new Date("January 1, 2018 13:00:00 UTC")).toLocaleString('en', {timeZone: tz})
 					return (tz)
 				} catch(e) {
-					return ([zErr, log_error(SECT4, METRIC, e)]) // not supported
+					return ([zErr, log_error(SECT4, METRICtz, e)]) // not supported
 				}
 			}
 		} catch(e) {
-			return ([zErr, log_error(SECT4, METRIC, e)])
+			return ([zErr, log_error(SECT4, METRICtz, e)])
 		}
 	}
 
-	function get_offsets(name) {
-		function get_offsetitem(item) {
-			try {
-				if (item == "offsets") {
-					let k = 60000, yr = 2021
-					try {yr = Date().split` `[3]} catch(e) {
-						try {yr = new Date().getFullYear()} catch(e) {}
-					}
-					let months = ["January","April","July","October"]
-					let control = [], real = [], test = [], test2 = []
-					months.forEach(function(month) {
-						let date = month +" 1, "+ yr +" 13:00:00"
-						control.push(new Date(date +" UTC"))
-						real.push(new Date(date))
-					})
-					let tzres = {"gettime": [], "gettimezoneoffset": [], "date.parse": []}
-					let subitem = "gettimezoneoffset"
-					try {
-						for (let i = 0; i < real.length; i++) {
-							tzres[subitem].push(real[i].getTimezoneOffset())
-						}
-					} catch(e) {
-						tzres[subitem] = [zErr]
-						log_error(SECT4, subitem, e)
-					}
-					subitem = "gettime"
-					try {
-						for (let i = 0; i < control.length; i++) {
-							tzres[subitem].push(
-								((real[i].getTime() - control[i].getTime())/k)
-							)
-						}
-					} catch(e) {
-						tzres[subitem] = [zErr]
-						log_error(SECT4, subitem, e)
-					}
-					subitem = "date.parse"
-					try {
-						for (let i = 0; i < control.length; i++) {
-							tzres[subitem].push(
-								((Date.parse(real[i]) - Date.parse(control[i]))/k)
-							)
-						}
-					} catch(e) {
-						tzres[subitem] = [zErr]
-						log_error(SECT4, subitem, e)
-					}
-					return tzres
-				} else if (item == "date.parse_years") {
-					let tzres = {},
-						days = ["January 1","July 1",],
-						years = [1879,1921,1952,1976,2018]
-					years.forEach(function(year) {
-						tzres[year] = []
-						days.forEach(function(day) {
-							let datetime = day +", "+ year +" 13:00:00"
-							let control = new Date(datetime +" UTC")
-							let test = new Date(datetime)
-							let diff = ((Date.parse(test) - Date.parse(control))/60000)
-							tzres[year].push(diff)
-						})
-					})
-					return tzres
-				}
-			} catch(e) {
-				log_error(SECT4, item, e)
-				return zErr
-			}
-		}
-		let oData = {}
-		let list = ["offsets","date.parse_years"]
-		list.forEach(function(item) {
-			let data = get_offsetitem(item)
-			if (item == "offsets") {
-				Object.keys(data).forEach(function(test) {
-					oData[test] = data[test]
-				})
-			} else {
-				oData[item] = data
-			}
+	function get_offsets() {
+		let aMethods = ["date.parse","getTime","getTimezoneOffset"]
+		let oData = {},
+			oErrors = {}
+		aMethods.forEach(function(method) {
+			oData[method] = {}
+			years.forEach(function(year) {oData[method][year] = []})
 		})
-		let newobj = {}
-		Object.keys(oData).sort().forEach(function(item){newobj[item] = oData[item]})
+		years.forEach(function(year) {
+			days.forEach(function(day) {
+				try {
+					if (runSE) {foo++}
+					let datetime = day +", "+ year +" 13:00:00"
+					let control = new Date(datetime +" UTC")
+					let test = new Date(datetime)
+					aMethods.forEach(function(method) {
+						let offset
+						try {
+							if (method == "date.parse") {
+								offset = ((Date.parse(test) - Date.parse(control))/60000)
+							} else if (method == "getTime") {
+								offset = (test.getTime() - control.getTime())/60000
+							} else {
+								offset = test.getTimezoneOffset()
+							}
+							if ("number" == typeof offset) {
+								oData[method][year].push(offset)
+							} else {
+								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + typeof offset)
+							}
+						} catch(e) {
+							oErrors[method] = log_error(SECT4, METRIC +"_"+ method, e)
+						}
+					})
+				} catch(e) {
+					oData = log_error(SECT4, METRIC, e)
+				}
+			})
+		})
+		if (oData !== zErr) {
+			for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
+		}
 		return oData
 	}
 
 	Promise.all([
 		get_tz(),
-		get_offsets("timezone_offsets"),
+		get_offsets(),
 	]).then(function(res){
+
 		// TZ
-		let tz = res[0], tzdisplay = tz, tznotation = ""
+		let tz = res[0], tzdisplay = tz
 		if ("string" !== typeof tz) {
-			// error
 			tzdisplay = res[0][1]
 			tz = zErr
-		}
-		// TZOffsets
-		/*
-		checks
-		- date.parse, gettime, gettimezoneoffset == the same
-		- s/be no NaNs
-    - we can use isTimeZoneValue to recalculate and compare
-		*/
-
-		// not smart, just output tz and tzoffsets
-		if (!isSmart) {
-			log_display(4, METRIC, tzdisplay)
-			addData(4, METRIC, tz)
-			log_display(4, METRICtzo, "TBA")
-			addData(4, METRICtzo, "TBA")
-			log_perf(SECT4, METRIC+"/offsets", t0)
-			return resolve()
+		} else if (isSmart) {
+			isTimeZoneValue = tz
 		}
 
-		// smart and no errors in tz
-		// now we should only be isSmart + no errors in tz
-		// we can trap errors in the tzo object and then rule it untrustworthy: a bit like pdf with 3 items
-			// isTimeZoneValid = true, isTimeZoneValue = undefined, tz = the value
-			// we can alter/set these after using timezoneoffsets
-		/* notation = hash == "afbc2194" ? rfp_green : rfp_red */
+		// OFFSETS
+		let oOffsets = res[1], offset = "", display = "", notation = ""
+		let go = true, aHash = {}, countErr = 0, allHash
 
-		// if either are untrustworthy then both are
+		// stop: overall error
+		if ("string" == typeof oOffsets) {
+			if (isSmart) {notation = tz_red}
+			log_display(4, METRIC, oOffsets + notation)
+			addData(4, METRIC, zErr)
+			go = false
+		}
+		// display errors + collect hashes
+		if (go) {
+			for (const k of Object.keys(oOffsets)) {
+				if ("string" == typeof oOffsets[k]) {
+					log_display(4, k, oOffsets[k])
+					countErr++
+				} else {
+					let hash = mini(oOffsets[k])
+					if (aHash[hash] == undefined) {aHash[hash] = []}
+					aHash[hash].push(k)
+				}
+			}
+			// stop: all errors
+			if (countErr == 3) {
+				if (isSmart) {notation = tz_red}
+				log_display(4, METRIC, zErr + notation)
+				addData(4, METRIC, zErr)
+				go = false
+			}
+		}
 
-		// tmp: output tz
-		isTimeZoneValue = tz
-		tznotation = tz == "UTC" ? rfp_green : rfp_red
-		log_display(4, METRIC, tzdisplay + tznotation)
-		addData(4, METRIC, tz)
+		// display hashes + btns
+		if (go) {
+			let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
+			for (const k of Object.keys(aHash)) {
+				allHash = k
+				let items = aHash[k]
+				for (let i=0; i < items.length; i++) {
+					let metric = items[i], btn = ""
+					if (isHashMixed && i == 0) {
+						// btns for 1st of each hash
+						sDetail[isScope][METRIC +"_"+ metric] = oOffsets[metric]
+						btn = addButton(4, METRIC +"_"+ metric)
+					}
+					log_display(4, metric, k + btn)
+				}
+			}
+			// stop: not all same + valid
+			if (isHashMixed) {
+				display = "mixed"
+				offset = display
+				if (isSmart) {
+					notation = tz_red
+					display = colorFn(display)
+					offset = zLIE
+					log_known(SECT4, METRIC)
+				}
+				log_display(4, METRIC, display + notation)
+				addData(4, METRIC, offset)
+				go = false
+			}
+		}
 
-		log_perf(SECT4, METRIC+"/offsets", t0)
+		// all 3 valid + same
+		if (go) {
+			let isLies = false
+			if (isSmart) {
+				notation = tz_red
+				if (isTimeZoneValue !== undefined) {
+					try {
+						let oTest = {}
+						// just use date.parse
+						years.forEach(function(year) {
+							oTest[year] = []
+							days.forEach(function(day) {
+								let datetime = day +", "+ year +" 13:00:00"
+								let control = new Date(datetime)
+								let test = control.toLocaleString("en", {timeZone: "UTC"})
+								control = control.toLocaleString("en", {timeZone: isTimeZoneValue})
+								let diff = ((Date.parse(test) - Date.parse(control))/60000)
+								oTest[year].push(diff)
+							})
+						})
+						let testHash = mini(oTest)
+						notation = testHash === allHash ? tz_green : tz_red
+						if (testHash !== allHash) {isLies = true} else {isTimeZoneValid = true}
+					} catch(e) {}
+				}
+			}
+			// display
+			let btn = addButton(4, METRIC) 
+			if (isLies) {
+				display = colorFn(allHash)
+				log_known(SECT4, METRIC)
+				sDetail[isScope][METRIC] = oOffsets["getTime"]
+				addData(4, METRIC, zLIE)
+			} else {
+				offset = allHash
+				display = offset
+				addData(4, METRIC, oOffsets["getTime"], allHash)
+			}
+			log_display(4, METRIC, display + btn + notation)
+		}
+
+		// TZ: after isTimeZoneValid: i.e both match or both are suspect
+		if (isSmart) {
+			if (!isTimeZoneValid) {
+				tzdisplay = colorFn(tzdisplay)
+				tz = zLIE
+				log_known(SECT4, METRICtz)
+				notation = rfp_red
+			} else {
+				let goodTZ = ['UTC']
+				// ToDo: swap value based on isVer when it lands upstream
+					// and also when TB's patch lands in stable
+				if (isTB) {goodTZ.push('Atlantic/Reykjavik')}
+				notation = goodTZ.includes(tz) ? rfp_green : rfp_red
+			}
+		}
+		log_display(4, METRICtz, tzdisplay + notation)
+		addData(4, METRICtz, tz)
+
+		log_perf(SECT4, METRIC, t0)
 		return resolve()
 	})
-
-	/* example
-  "timezone_offsets": {
-    "hash": "b95c161a",
-    "metrics": {
-      "date.parse": [-780, -780, -720, -780],
-      "date.parse_years": {
-        "1879": [-690, -690],
-        "1921": [-690, -690],
-        "1952": [-720, -720],
-        "1976": [-780, -720],
-        "2018": [-780, -720]
-      },
-      "gettime": [-780, -780, -720, -780],
-      "gettimezoneoffset": [-780, -780, -720, -780]
-    }
-  },
-	*/
-
 })
 
 const get_validation_messages = () => new Promise(resolve => {
