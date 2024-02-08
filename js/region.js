@@ -822,10 +822,10 @@ const get_timezone = () => new Promise(resolve => {
 							}
 
 if (year == 1879 && method == "date.parse") {
-	console.log(offset, typeof offset)
+	console.log(offset, typeof offset, isNaN(offset))
 }
 
-							if ("number" == typeof offset) {
+							if ("number" === typeof offset) {
 								oData[method][year].push(offset)
 							} else {
 								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + typeof offset)
