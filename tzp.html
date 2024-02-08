@@ -387,7 +387,7 @@
 		<!--locale-->
 		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[ show ]</span>
 			locale</td><td class="c mono" id="locale"></td></tr>
-		<tr class ="togLO"><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togLO"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
 			<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp locales</td><td class="c" id="localedata"></td></tr>
 		<tr><td>[intl] locale</td><td class="c mono" id="locale_intl"></td></tr>
@@ -400,8 +400,13 @@
 		<tr><td>[to*string] dates</td><td class="c mono" id="dates_to_string"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp
+		<tr><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a>
+			<span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
+		<tr class="togTO"><td>date.parse</td><td class="c mono" id="date.parse"></td></tr>
+		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
+		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
+
 		<!--errors-->
 		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
 		<tr><td>xml errors</td><td class="c mono" id="xml_errors"></td></tr>
