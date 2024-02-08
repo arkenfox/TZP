@@ -27,7 +27,7 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="no_color">A proof to confirm minimum tests for maximum entropy</span>
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat date-time components</span>
 		</td></tr>
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
@@ -42,6 +42,7 @@
 
 <script>
 'use strict';
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
 
 var list = gLocales,
 	aLegend = [],
@@ -119,8 +120,6 @@ function run_main(method = "all") {
 	let dateA = new Date("January 18, 2023 1:00:00"),
 		dateB = new Date("January 20, 2023 13:00:00")
 
-	//aLocales = ["de","en","fr"] //temp
-
 	// https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	let testsAll = {
 		"day": {
@@ -130,15 +129,25 @@ function run_main(method = "all") {
 				"numeric": {day: "numeric"},
 			},
 		},
+		"era": {
+			dates: [new Date("-000001"), new Date("0002")],
+			options: {
+				"long": {era: "long"},
+				"narrow": {era: "narrow"},
+				"short": {era: "short"},
+			},
+		},
+/* leave dateStyle/timeStyle for an overall dates test
 		"dateStyle": {
 			dates: [dateA],
 			options: {
-				"short": {dateStyle: "short"},
-				"medium": {dateStyle: "medium"},
-				"long": {dateStyle: "long"},
 				"full": {dateStyle: "full"},
+				"long": {dateStyle: "long"},
+				"medium": {dateStyle: "medium"},
+				"short": {dateStyle: "short"},
 			},
 		},
+*/
 		"hour": {
 			dates: [dateA, dateB],
 			options: {
@@ -185,9 +194,11 @@ function run_main(method = "all") {
 				new Date("2023-12-15"),
 			],
 			options: {
-				"short": {month: "short"},
-				"narrow": {month: "narrow"},
+				"2-digit": {month: "2-digit"},
 				"long": {month: "long"},
+				"narrow": {month: "narrow"},
+				"numeric": {month: "numeric"},
+				"short": {month: "short"},
 			},
 		},
 		"second": {
@@ -208,9 +219,9 @@ function run_main(method = "all") {
 				new Date("January 22, 2023 13:00:00"),
 			],
 			options: {
-				"short": {weekday: "short"},
-				"narrow": {weekday: "narrow"},
 				"long": {weekday: "long"},
+				"narrow": {weekday: "narrow"},
+				"short": {weekday: "short"},
 			},
 		},
 		"year": {
@@ -222,20 +233,22 @@ function run_main(method = "all") {
 		},
 	}
 	let testsMin = {
+/*
 		"dateStyle": [
 			[dateA, {"short": {dateStyle: "short"}, "medium": {dateStyle: "medium"}, "full": {dateStyle: "full"}}]
 		],
+*/
+		"era": [
+			[new Date("-000001"), {"long": {era: "long"}}],
+		],
 		"hour": [
 			[dateA, {"numeric": {hour: "numeric"}}],
-			[dateB, {"numeric": {hour: "numeric"}}],
 		],
 		"hourCycle": [
 			[dateA, {"h112": {hour: "2-digit", hourCycle: "h11"}}], // adds like 2 items
 		],
 		"month": [
-			[dateA, {"short": {month: "short"}}],
-			[new Date("2023-07-15"), {"short": {month: "short"}}],
-			[new Date("2023-08-15"), {"short": {month: "short"}}],
+			[new Date("2023-01-15"), {"short": {month: "short"}}],
 			[new Date("2023-09-15"), {"short": {month: "short"}}],
 			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
 		],
@@ -243,13 +256,16 @@ function run_main(method = "all") {
 			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}]
 		],
+
+
 	}
 
 	let tests = method == "all" ? testsAll : testsMin
 
 	let oConst = {}
 	oData = {}
-	let constructors = []
+
+	//aLocales = ['en']
 	try {
 		aLocales.forEach(function(code) {
 			let oTempData = {}
@@ -272,10 +288,12 @@ function run_main(method = "all") {
 					try {oConst.MoN = new Intl.DateTimeFormat(code, {month: "narrow"})} catch(e) {}
 					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric"})} catch(e) {}
 					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11"})} catch(e) {}
+					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long"})} catch(e) {}
+/*
 					try {oConst.DaS = new Intl.DateTimeFormat(code, {dateStyle: "short"})} catch(e) {}
 					try {oConst.DaM = new Intl.DateTimeFormat(code, {dateStyle: "medium"})} catch(e) {}
 					try {oConst.DaF = new Intl.DateTimeFormat(code, {dateStyle: "full"})} catch(e) {}
-
+*/
 					let array = tests[test]
 					array.forEach(function(item) {
 						let date = item[0]
@@ -285,7 +303,6 @@ function run_main(method = "all") {
 								oTempData[test][opt] = []
 							}
 							let constructor = test.slice(0,1).toUpperCase() + test.slice(1,2) + opt.slice(0,1).toUpperCase()
-							constructors.push(constructor)
 							let formatter = oConst[constructor]
 							oTempData[test][opt].push(formatter.format(date))
 						})
@@ -310,24 +327,23 @@ function run_main(method = "all") {
 		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
 		//console.log(oData)
 
-		if (method == "min" && constructors.length) {
-			constructors = constructors.filter(function(item, position) {return constructors.indexOf(item) === position})
-			console.log("min constructors used\n", constructors)
-		}
-
 		let localeGroups = [], displaylist = []
 		for (const k of Object.keys(oData)) {
 			localeGroups.push(oData[k]["locales"])
 			let localeCount = oData[k]["locales"].length
 			let str = ""
 			for (const p of Object.keys(oData[k]["data"])) {
-
 				str += s14 + p +": "+ sc
 				for (const i of Object.keys(oData[k]["data"][p]).sort()) {
+					let option
 					let slicelen = (p == "hourCycle" ? 5 : 1)
-					str += "<li>"+ s16 + i.slice(0,slicelen).toUpperCase() +": "+ sc + oData[k]["data"][p][i].join(", ") +"</li>"
+					if (i == "numeric") {
+						option = "Num"
+					} else {
+						option = i.slice(0,slicelen).toUpperCase()
+					}
+					str += "<li>"+ s16 + option +": "+ sc + oData[k]["data"][p][i].join(", ") +"</li>"
 				}
-
 			}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
@@ -364,11 +380,11 @@ function run_main(method = "all") {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "813acf54") {resultsHash += s14 +" [FF115+]"+ sc
+					if (resultsHash == "93199132") {resultsHash += s14 +" [FF115+]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "daacf780") {localesHash += s14 +" [FF115+]"+ sc
+					if (localesHash == "9993fd6e") {localesHash += s14 +" [FF115+]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -376,7 +392,6 @@ function run_main(method = "all") {
 		} else if (method == "min") {
 			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
-
 
 		// display
 		let display = s4 + localeGroups.length + sc +" from "+ s4 + aLocales.length + sc
@@ -443,60 +458,36 @@ Promise.all([
 		"de-at,german (austria)",
 		"de-lu,german (luxembourg)",
 		"ee-tg,éwé (togo)",
-		"en-ae,english (united arab emirates)",
 		"en-ag,english (antigua & barbuda)",
 		"en-ai,english (anguilla)",
 		"en-au,english (australia)",
-		"en-be,english (belgium)",
 		"en-bi,english (burundi)",
-		"en-bz,english (belize)",
 		"en-ca,english (canada)",
 		"en-ch,english (switzerland)",
-		"en-hk,english (hong kong)",
 		"en-ie,english (ireland)",
 		"en-il,english (israel)",
-		"en-in,english (india)",
-		"en-nz,english (new zealand)",
-		"en-pk,english (pakistan)",
-		"en-se,english (sweden)",
-		"en-sg,english (singapore)",
-		"en-za,english (south africa)",
-		"en-zw,english (zimbabwe)",
 		"es-ar,spanish (argentina)",
-		"es-bo,spanish (bolivia)",
 		"es-cl,spanish (chile)",
 		"es-co,spanish (colombia)",
 		"es-do,spanish (dominican republic)",
-		"es-gt,spanish (guatemala)",
-		"es-hn,spanish (honduras)",
-		"es-mx,spanish (mexico)",
-		"es-pa,spanish (panama)",
 		"es-pe,spanish (peru)",
 		"es-ph,spanish (philippines)",
-		"es-py,spanish (paraguay)",
-		"es-us,spanish (united states)",
-		"es-uy,spanish (uruguay)",
 		"es-ve,spanish (venezuela)",
 		"fa-af,persian (afghanistan)",
 		"ff-adlm,fulah (adlam)",
 		"ff-adlm-gh,fulah (adlam ghana)",
 		"ff-gh,fulah (ghana)",
-		"fr-be,french (belgium)",
 		"fr-ca,french (canada)",
-		"fr-ch,french (switzerland)",
 		"fr-cm,french (cameroon)",
 		"fr-dj,french (djibouti)",
 		"fr-ma,french (morocco)",
 		"ha-gh,hausa (ghana)",
 		"hi-latn,hindi (latin)",
 		"hr-ba,croatian (bosnia & herzegovina)",
-		"it-ch,italian (switzerland)",
 		"ks-deva,kashmiri (devanagari)",
 		"lrc-iq,northern luri (iraq)",
-		"ms-bn,malay (brunei)",
 		"ms-id,malay (indonesia)",
 		"ne-in,nepali (india)",
-		"nl-be,dutch (belgium)",
 		"om-ke,oromo (kenya)",
 		"pa-arab,punjabi (arabic)",
 		"ps-pk,pashto (pakistan)",
@@ -516,14 +507,15 @@ Promise.all([
 		"sr-latn-me,serbian (latin montenegro)",
 		"sr-latn-xk,serbian (latin kosovo)",
 		"ta-lk,tamil (sri lanka)",
+		"ti-er,tigrinya (eritrea)",
 		"tr-cy,turkish (cyprus)",
 		"ur-in,urdu (india)",
 		"uz-af,uzbek (afghanistan)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"vai-latn,vai (latin)",
 		"yo-bj,yoruba (benin)",
+		"yue-hans,cantonese (simplified)",
 		"zh-hans-hk,chinese (simplified hong kong)",
-		"zh-hans-mo,chinese (simplified macau)",
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
