@@ -820,6 +820,11 @@ const get_timezone = () => new Promise(resolve => {
 							} else {
 								offset = test.getTimezoneOffset()
 							}
+
+if (year == 1879 && method == "date.parse") {
+	console.log(offset, typeof offset)
+}
+
 							if ("number" == typeof offset) {
 								oData[method][year].push(offset)
 							} else {
