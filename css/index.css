@@ -156,7 +156,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 }
 
 /* show/hide */
-.togC, .togF, .togL, .togLO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
+.togC, .togF, .togL, .togLO, .togTO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
 
 /* run/re-run, click here */
 .btn {background-color: var(--bg0);
@@ -290,7 +290,7 @@ tr td.border-bottom {
 #tb3 td:first-child {color: var(--test3);}
 #tb4 td:first-child {color: var(--test4);}
 	#tb4 .togLO td:first-child {color: var(--test99);}
-	#tb4 .togTZ td:first-child {color: var(--test99);}
+	#tb4 .togTO td:first-child {color: var(--test99);}
 #tb5 td:first-child {color: var(--test5);}
 #tb6 td:first-child {color: var(--test6);}
 #tb7 td:first-child {color: var(--test7);}

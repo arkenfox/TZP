@@ -1226,7 +1226,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	- FF87+ 1679929: capped at 10.15
 	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
 	android:
-	- FF122+ 1865766: android hardcoded to 10.0
+	- FF122+ 1865766: android hardcoded to 10.0 - partially backed out
 	linux/android:
 	- FF123+ 1861847: hardcode (pref) architecture at `Linux armv81` (android) and `Linux x86_64` (on hold?) desktop
 	*/

@@ -364,30 +364,12 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
-	// FF124+: 1874232: this method is obsolete
 
 	let t0 = nowFn(), count = 0
 	const METRIC = "isOS"
-	if (isVer > 123) {
-		exit()
-	}
-
-	setTimeout(() => resolve(zErrTime), 100)
-	function exit() {
+	function exit(checkUndefined = false) {
 		// FF51+ win/mac 1280128 / FF89+ linux 1701257 : min gecko > 88 so undefined = android
-		if (isOS === undefined) {
-			// temp: while we don't have a 124 isVer, see return above for > 123
-			// if undefined assume it's broken, sorry android 123 users but at least desktop 123 works
-			if (isVerExtra == "+") {
-//isOS = "android" // testing
-				log_perf(SECTG, METRIC, t0, "", isOS+"")
-				return resolve()
-			} else {
-				isOS = "android"
-				return resolve()
-			}
-		}
-//isOS = "android"
+		if (checkUndefined && isOS === undefined) {isOS = "android"}
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
@@ -395,41 +377,59 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	}
 
-	// FF121+: 1855861
-	const get_event = (css, item) => new Promise(resolve => {
-		css.onload = function() {
-			isOS = item == "win" ? "windows" : item
-			count++
-			document.head.removeChild(css)
-			exit() // we can only have one
-			return resolve()
-		}
-		css.onerror = function() {
-			count++
-			document.head.removeChild(css)
-			if (count == 3) {exit()}
-			return resolve()
-		}
-	})
+	if (isVer > 123) {
+		testnew()
+	} else {
+		testold()
+	}
 
-	if (!runTE) {
-		try {
-			if (runSE) {foo++}
-			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
-			let list = ["win","mac","linux"]
-			list.forEach(function(item) {
-				let css = document.createElement("link")
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				css.href = path + item + suffix
-				document.head.appendChild(css)
-				get_event(css, item)
-			})
-		} catch(e) {
-			isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
-			log_alert(SECTG, METRIC +": "+ zErr, true)
-			log_perf(SECTG, METRIC, t0, "", zErr)
-			return resolve()
+	function testnew() {
+		// FF124+: 1874232: the css method is (mostly) obsolete
+			// added: chrome://browser/content/extension-popup-panel.css
+			// ^ is this desktop only?
+			// chrome://browser/content/extension.css is apparrently desktop only
+		exit()
+	}
+
+	// FF89-123: note isBlockMin is 102 so we don't care about < 89
+		// 1280128: FF51+ win/mac | 1701257: FF89+ linux
+	function testold() {
+		setTimeout(() => resolve(zErrTime), 100)
+		// FF121+: 1855861
+		const get_event = (css, item) => new Promise(resolve => {
+			css.onload = function() {
+				isOS = item == "win" ? "windows" : item
+				count++
+				document.head.removeChild(css)
+				exit(true) // we can only have one
+				return resolve()
+			}
+			css.onerror = function() {
+				count++
+				document.head.removeChild(css)
+				if (count == 3) {exit(true)}
+				return resolve()
+			}
+		})
+		if (!runTE) {
+			try {
+				if (runSE) {foo++}
+				let path = "chrome://browser/content/extension-", suffix = "-panel.css"
+				let list = ["win","mac","linux"]
+				list.forEach(function(item) {
+					let css = document.createElement("link")
+					css.type = "text/css"
+					css.rel = "stylesheet"
+					css.href = path + item + suffix
+					document.head.appendChild(css)
+					get_event(css, item)
+				})
+			} catch(e) {
+				isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
+				log_alert(SECTG, METRIC +": "+ zErr, true)
+				log_perf(SECTG, METRIC, t0, "", zErr)
+				return resolve()
+			}
 		}
 	}
 })
@@ -538,19 +538,28 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 123) {isVerExtra = "+"}
+		} else if (verNo == 124) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
 	output(cascade())
 
 	function cascade() {
+		let el = document.documentElement
 		try {
-			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) return 123 // 1871745
+			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
+				// 124: 1867569
+				try {
+					el.style.zIndex = "calc(1 / max(-0, 0))"
+					let test = getComputedStyle(el).zIndex
+					el.style.zIndex = "auto"
+					if (test > 0) {return 124}
+				} catch(e) {}
+				return 123 // 1871745
+			}
 			if ("function" === typeof Promise.withResolvers) {
 				// 122: 1867558 (0.725ms slow)
 				try {
-					let el = document.documentElement
 					el.style.zIndex = "calc(1 / abs(-0))"
 					let test = getComputedStyle(el).zIndex
 					el.style.zIndex = "auto"

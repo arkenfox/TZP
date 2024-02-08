@@ -107,7 +107,9 @@ const tick = "✓", // u2713
 	locale_green = sgtick+" locale]"+sc,
 	locale_red = sbx+" locale]"+sc,
 	intl_green = sgtick+" intl]"+sc,
-	intl_red = sbx+" intl]"+sc
+	intl_red = sbx+" intl]"+sc,
+	tz_green = sgtick+" timezone]"+sc,
+	tz_red = sbx+" timezone]"+sc
 
 const screen_green = sgtick+"screens match]"+sc,
 	screen_red = sbx+"screens match]"+sc,

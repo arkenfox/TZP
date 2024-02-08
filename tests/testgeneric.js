@@ -421,7 +421,6 @@ const get_isOS = () => new Promise(resolve => {
 	]
 	try {
 		let font = getComputedStyle(dom.widgetradio).getPropertyValue("font-family")
-
 		if (aIgnore.includes(font)) {
 			// returns generic font-family if #41116 or eventually 1787790
 				// mac should still return -apple-system
@@ -515,12 +514,21 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 123
-		if ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) return 123
+		isVerMax = 124
+		let el = document.documentElement
+		if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
+			// 124: 1867569
+			try {
+				el.style.zIndex = "calc(1 / max(-0, 0))"
+				let test = getComputedStyle(el).zIndex
+				el.style.zIndex = "auto"
+				if (test > 0) {return 124}
+			} catch(e) {}
+			return 123 // 1871745
+		}
 		if ("function" === typeof Promise.withResolvers) {
 			// 122: 1867558 (0.725ms slow)
 			try {
-				let el = document.documentElement
 				el.style.zIndex = "calc(1 / abs(-0))"
 				let test = getComputedStyle(el).zIndex
 				el.style.zIndex = "auto"
