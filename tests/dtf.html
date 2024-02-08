@@ -137,17 +137,16 @@ function run_main(method = "all") {
 				"short": {era: "short"},
 			},
 		},
-/* leave dateStyle/timeStyle for an overall dates test
-		"dateStyle": {
-			dates: [dateA],
+		// this adds nothing on it's own: what adds entropy is the delimiters and decimal separator
+		// we can add this to an existing test in min (I hope), we only need 1
+		"fractionalSecondDigits": {
+			dates: [new Date("2022-06-11T01:12:34.5678Z")],
 			options: {
-				"full": {dateStyle: "full"},
-				"long": {dateStyle: "long"},
-				"medium": {dateStyle: "medium"},
-				"short": {dateStyle: "short"},
+				"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1},
+				"2": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2},
+				"3": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 3},
 			},
 		},
-*/
 		"hour": {
 			dates: [dateA, dateB],
 			options: {
@@ -202,7 +201,8 @@ function run_main(method = "all") {
 			},
 		},
 		"second": {
-			dates: [dateA],
+			//dates: [dateA],
+			dates: [new Date("2022-06-11T01:12:34.5678Z")],
 			options: {
 				"2-digit": {second: "2-digit"},
 				"numeric": {second: "numeric"},
@@ -233,13 +233,12 @@ function run_main(method = "all") {
 		},
 	}
 	let testsMin = {
-/*
-		"dateStyle": [
-			[dateA, {"short": {dateStyle: "short"}, "medium": {dateStyle: "medium"}, "full": {dateStyle: "full"}}]
-		],
-*/
 		"era": [
-			[new Date("-000001"), {"long": {era: "long"}}],
+			// to match TZP we will add controlling the year-month-day part (in TZP this is needed to get toLocaleString to match)
+			[new Date("-000001"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+		],
+		"fractionalSecondDigits": [
+			[new Date("2022-06-11T01:12:34.5678Z"), {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
 		],
 		"hour": [
 			[dateA, {"numeric": {hour: "numeric"}}],
@@ -256,8 +255,6 @@ function run_main(method = "all") {
 			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}]
 		],
-
-
 	}
 
 	let tests = method == "all" ? testsAll : testsMin
@@ -265,7 +262,7 @@ function run_main(method = "all") {
 	let oConst = {}
 	oData = {}
 
-	//aLocales = ['en']
+	aLocales = ['en']
 	try {
 		aLocales.forEach(function(code) {
 			let oTempData = {}
@@ -289,11 +286,7 @@ function run_main(method = "all") {
 					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric"})} catch(e) {}
 					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11"})} catch(e) {}
 					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long"})} catch(e) {}
-/*
-					try {oConst.DaS = new Intl.DateTimeFormat(code, {dateStyle: "short"})} catch(e) {}
-					try {oConst.DaM = new Intl.DateTimeFormat(code, {dateStyle: "medium"})} catch(e) {}
-					try {oConst.DaF = new Intl.DateTimeFormat(code, {dateStyle: "full"})} catch(e) {}
-*/
+					try {oConst.Fr1 = new Intl.DateTimeFormat(code, {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1})} catch(e) {}
 					let array = tests[test]
 					array.forEach(function(item) {
 						let date = item[0]
@@ -380,11 +373,11 @@ function run_main(method = "all") {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "93199132") {resultsHash += s14 +" [FF115+]"+ sc
+					if (resultsHash == "dee29d43") {resultsHash += s14 +" [FF115+]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "9993fd6e") {localesHash += s14 +" [FF115+]"+ sc
+					if (localesHash == "86c0f15f") {localesHash += s14 +" [FF115+]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -447,6 +440,7 @@ Promise.all([
 		"ar-dz,arabic (algeria)",
 		"ar-il,arabic (israel)",
 		"ar-iq,arabic (iraq)",
+		"ar-ly,arabic (libya)",
 		"ar-ma,arabic (morocco)",
 		"ar-mr,arabic (mauritania)",
 		"ar-sa,arabic (saudi arabia)",
@@ -456,22 +450,27 @@ Promise.all([
 		"bs-cyrl,bosnian (cyrillic)",
 		"ckb-ir,central kurdish (iran)",
 		"de-at,german (austria)",
+		"de-ch,german (switzerland)",
 		"de-lu,german (luxembourg)",
 		"ee-tg,éwé (togo)",
 		"en-ag,english (antigua & barbuda)",
 		"en-ai,english (anguilla)",
+		"en-at,english (austria)",
 		"en-au,english (australia)",
 		"en-bi,english (burundi)",
 		"en-ca,english (canada)",
 		"en-ch,english (switzerland)",
+		"en-dk,english (denmark)",
 		"en-ie,english (ireland)",
 		"en-il,english (israel)",
+		"es-419,spanish (latin america and the caribbean)",
 		"es-ar,spanish (argentina)",
 		"es-cl,spanish (chile)",
 		"es-co,spanish (colombia)",
 		"es-do,spanish (dominican republic)",
 		"es-pe,spanish (peru)",
 		"es-ph,spanish (philippines)",
+		"es-uy,spanish (uruguay)",
 		"es-ve,spanish (venezuela)",
 		"fa-af,persian (afghanistan)",
 		"ff-adlm,fulah (adlam)",
@@ -484,8 +483,10 @@ Promise.all([
 		"ha-gh,hausa (ghana)",
 		"hi-latn,hindi (latin)",
 		"hr-ba,croatian (bosnia & herzegovina)",
+		"it-ch,italian (switzerland)",
 		"ks-deva,kashmiri (devanagari)",
 		"lrc-iq,northern luri (iraq)",
+		"ms-bn,malay (brunei)",
 		"ms-id,malay (indonesia)",
 		"ne-in,nepali (india)",
 		"om-ke,oromo (kenya)",
@@ -493,6 +494,7 @@ Promise.all([
 		"ps-pk,pashto (pakistan)",
 		"pt-ao,portuguese (angola)",
 		"pt-mo,portuguese (macau)",
+		"qu-bo,quechua (bolivia)",
 		"ro-md,romanian (moldova)",
 		"sd-deva,sindhi (devanagari)",
 		"se-fi,northern sami (finland)",
@@ -506,6 +508,8 @@ Promise.all([
 		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
 		"sr-latn-me,serbian (latin montenegro)",
 		"sr-latn-xk,serbian (latin kosovo)",
+		"sv-fi,swedish (finland)",
+		"sw-cd,swahili (congo kinshasa)",
 		"ta-lk,tamil (sri lanka)",
 		"ti-er,tigrinya (eritrea)",
 		"tr-cy,turkish (cyprus)",
