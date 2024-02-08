@@ -395,6 +395,8 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
+			// font substitutes
+			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ','ｺﾞｼｯｸ', // Arial, TNR, Courier -> Courier New, MS Gothic
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 			// MS downloads
@@ -447,6 +449,7 @@ function set_fntList(os = isOS) {
 			]
 		} else if ("android" == os) {
 			// see android list notes: Roboto is not guaranteed unless Android 9+
+			// ToDo: we should test a mini set of android fonts and use a detected one
 			if (!isFontSizesMore) {isPlatformFont = "Dancing Script"}
 			fntString = '?-'+ tofu
 		}
