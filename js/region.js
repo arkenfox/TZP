@@ -262,6 +262,8 @@ const set_oIntlTests = () => new Promise(resolve => {
 		curS = {"symbol": [1000]},
 		curB = {"name": [-1], "symbol": [1000]},
 		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
+	let dateA = new Date("January 18, 2023 1:00:00"),
+		dateB = new Date("January 20, 2023 13:00:00")
 
 	oIntlTests = {
 		"collation": [
@@ -280,6 +282,30 @@ const set_oIntlTests = () => new Promise(resolve => {
 		"listformat": {
 			"narrow": ["conjunction","disjunction","unit"],
 			"short": ["conjunction","unit"]
+		},
+		"datetimeformat": {
+			"era": {
+				// we need to control the date part so toLocaleString matches
+				"long": [{era: "long", year: "numeric", month: "numeric", day: "numeric"}, [new Date("-000001")]]
+			},
+			"fractionalSecondDigits": {
+				"1": [{minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}, [new Date("2022-06-11T01:12:34.5678Z")]]
+			},
+			"hour": {
+				"numeric": [{hour: "numeric"}, [dateA]],
+			},
+			"hourCycle": {
+				"h11-2-digit": [{hour: "2-digit", hourCycle: "h11"}, [dateA]]
+			},
+			"month": {
+				"narrow": [{month: "narrow"}, [new Date("2023-11-15")] ],
+				"short": [{month: "short"}, [new Date("2023-01-15"), new Date("2023-09-15")]],
+			},
+			"weekday": {
+				"long": [{weekday: "long"}, [dateA, dateB]],
+				"narrow": [{weekday: "narrow"}, [dateA, dateB]],
+				"short": [{weekday: "short"}, [dateB]],
+			},
 		},
 		"notation": {
 			"scientific": {"decimal": []},
@@ -534,6 +560,18 @@ const get_locale_intl = () => new Promise(resolve => {
 						obj[key][s] = data
 					})
 				})
+			} else if (m == "datetimeformat") {
+				Object.keys(tests).forEach(function(key) {
+					obj[key] = {}
+					Object.keys(tests[key]).forEach(function(s) {
+						let option = tests[key][s][0]
+						let formatter = new Intl.DateTimeFormat(code, option), data = []
+						tests[key][s][1].forEach(function(n){
+							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
+						})
+						obj[key][s] = data
+					})
+				})
 			} else if (m == "dayperiod") {
 				Object.keys(tests).forEach(function(key) {
 					let formatter = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: key}), data = []
@@ -660,10 +698,10 @@ const get_locale_intl = () => new Promise(resolve => {
 	}
 	const oMetrics = {
 		"intl" : [
-			"collation","compact", "currency", "dayperiod", "listformat","notation","numberformat_ftp",
+			"collation","compact", "currency", "datetimeformat","dayperiod", "listformat","notation","numberformat_ftp",
 			"pluralrules","relativetimeformat","relativetimeformat_ftp","sign","timezonename","unit"
 		],
-		"tolocalestring": ["compact","currency","notation","sign","timezonename","unit"],
+		"tolocalestring": ["compact","currency","datetimeformat","notation","sign","timezonename","unit"],
 	}
 	let t0 = nowFn(), notation = ""
 	let METRIC, oString = {}
