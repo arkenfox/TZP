@@ -118,7 +118,9 @@ function run_main(method = "all") {
 	*/
 
 	let dateA = new Date("January 18, 2023 1:00:00"),
-		dateB = new Date("January 20, 2023 13:00:00")
+		dateB = new Date("January 20, 2023 13:00:00"),
+		dateFSD = new Date("2022-03-11T01:12:34.5678"), // no Z: we want metric to be timezone resistent
+		dateEra = new Date(-1, -11, -30)
 
 	// https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	let testsAll = {
@@ -130,7 +132,7 @@ function run_main(method = "all") {
 			},
 		},
 		"era": {
-			dates: [new Date("-000001"), new Date("0002")],
+			dates: [dateEra, new Date("January 01, 0001 1:00:00")],
 			options: {
 				"long": {era: "long"},
 				"narrow": {era: "narrow"},
@@ -138,9 +140,8 @@ function run_main(method = "all") {
 			},
 		},
 		// this adds nothing on it's own: what adds entropy is the delimiters and decimal separator
-		// we can add this to an existing test in min (I hope), we only need 1
 		"fractionalSecondDigits": {
-			dates: [new Date("2022-06-11T01:12:34.5678Z")],
+			dates: [dateFSD],
 			options: {
 				"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1},
 				"2": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 2},
@@ -179,7 +180,7 @@ function run_main(method = "all") {
 		},
 		"month": {
 			dates: [
-				dateA,
+				new Date("2023-01-15"),
 				new Date("2023-02-15"),
 				new Date("2023-03-15"),
 				new Date("2023-04-15"),
@@ -202,7 +203,7 @@ function run_main(method = "all") {
 		},
 		"second": {
 			//dates: [dateA],
-			dates: [new Date("2022-06-11T01:12:34.5678Z")],
+			dates: [dateFSD],
 			options: {
 				"2-digit": {second: "2-digit"},
 				"numeric": {second: "numeric"},
@@ -235,10 +236,10 @@ function run_main(method = "all") {
 	let testsMin = {
 		"era": [
 			// to match TZP we will add controlling the year-month-day part (in TZP this is needed to get toLocaleString to match)
-			[new Date("-000001"), {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
+			[dateEra, {"long": {era: "long", year: "numeric", month: "numeric", day: "numeric"}}],
 		],
 		"fractionalSecondDigits": [
-			[new Date("2022-06-11T01:12:34.5678Z"), {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
+			[dateFSD, {"1": {minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}}]
 		],
 		"hour": [
 			[dateA, {"numeric": {hour: "numeric"}}],
@@ -373,7 +374,7 @@ function run_main(method = "all") {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "dee29d43") {resultsHash += s14 +" [FF115+]"+ sc
+					if (resultsHash == "72c1b3f5") {resultsHash += s14 +" [FF115+]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
