@@ -262,8 +262,18 @@ const set_oIntlTests = () => new Promise(resolve => {
 		curS = {"symbol": [1000]},
 		curB = {"name": [-1], "symbol": [1000]},
 		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
-	let dateA = new Date("January 18, 2023 1:00:00"),
-		dateB = new Date("January 20, 2023 13:00:00")
+
+	// all dates must be timezone resistent: we do not want the noise: we are checking locales
+	// and want to maintain max entropy checks: timezone entropy  is in the timezonename
+	let dates = {
+		FSD: new Date("2023-06-11T01:12:34.5678"), // no Z
+		Era: new Date(-1, -11, -30),
+		Jan: new Date("2023-01-15"),
+		Sep: new Date("2023-09-15"),
+		Nov: new Date("2023-11-15"),
+		Wed: new Date("January 18, 2023 1:00:00"), // doubles as hour 1
+		Fri: new Date("January 20, 2023 13:00:00"), // doubles as hour 13
+	}
 
 	oIntlTests = {
 		"collation": [
@@ -286,25 +296,25 @@ const set_oIntlTests = () => new Promise(resolve => {
 		"datetimeformat": {
 			"era": {
 				// we need to control the date part so toLocaleString matches
-				"long": [{era: "long", year: "numeric", month: "numeric", day: "numeric"}, [new Date("-000001")]]
+				"long": [{era: "long", year: "numeric", month: "numeric", day: "numeric"}, [dates.Era]]
 			},
 			"fractionalSecondDigits": {
-				"1": [{minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}, [new Date("2022-06-11T01:12:34.5678Z")]]
+				"1": [{minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}, [dates.FSD]]
 			},
 			"hour": {
-				"numeric": [{hour: "numeric"}, [dateA]],
+				"numeric": [{hour: "numeric"}, [dates.Wed]],
 			},
 			"hourCycle": {
-				"h11-2-digit": [{hour: "2-digit", hourCycle: "h11"}, [dateA]]
+				"h11-2-digit": [{hour: "2-digit", hourCycle: "h11"}, [dates.Wed]]
 			},
 			"month": {
-				"narrow": [{month: "narrow"}, [new Date("2023-11-15")] ],
-				"short": [{month: "short"}, [new Date("2023-01-15"), new Date("2023-09-15")]],
+				"narrow": [{month: "narrow"}, [dates.Nov] ],
+				"short": [{month: "short"}, [dates.Jan, dates.Sep]],
 			},
 			"weekday": {
-				"long": [{weekday: "long"}, [dateA, dateB]],
-				"narrow": [{weekday: "narrow"}, [dateA, dateB]],
-				"short": [{weekday: "short"}, [dateB]],
+				"long": [{weekday: "long"}, [dates.Wed, dates.Fri]],
+				"narrow": [{weekday: "narrow"}, [dates.Wed, dates.Fri]],
+				"short": [{weekday: "short"}, [dates.Fri]],
 			},
 		},
 		"notation": {
@@ -1123,7 +1133,7 @@ const get_dates = () => new Promise(resolve => {
 				// 1557718: 79+
 				let list = ["short", "medium","long"], res43 = []
 				list.forEach(function(s){
-					let style = Intl.DateTimeFormat(localecode, {timeStyle: s,	dateStyle: s})
+					let style = Intl.DateTimeFormat(localecode, {timeStyle: s, dateStyle: s})
 					res43.push(style.format(d))
 				})
 				return res43.join(" | ")
