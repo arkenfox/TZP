@@ -3,13 +3,14 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
-	<title>numberformat: signdisplay</title>
+	<title>signdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 97%; min-width: 480px; max-width: 580px;}
+		table {width: 97%; min-width: 580px; max-width: 680px;}
 		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
 	</style>
 </head>
 
@@ -20,7 +21,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="40%"><col width="60%">
+		<col width="200px">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">numberformat: signdisplay
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -175,7 +176,7 @@ function run_main(method) {
 			}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>"+ str
+				+ "<ul class='main'>"+ str
 				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}

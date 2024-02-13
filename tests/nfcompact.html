@@ -3,13 +3,14 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
-	<title>numberformat: compactdisplay</title>
+	<title>compactdisplay</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 97%; min-width: 580px; max-width: 680px;}
 		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
 	</style>
 </head>
 
@@ -20,7 +21,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="40%"><col width="60%">
+		<col width="200px"><col>
 		<thead><tr><th colspan="2">
 			<div class="nav-title">numberformat : compactdisplay
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -230,7 +231,7 @@ function run_main(method) {
 			}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>"+ strFalse + strTrue
+				+ "<ul class='main'>"+ strFalse + strTrue
 				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}

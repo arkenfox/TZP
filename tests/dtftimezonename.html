@@ -8,8 +8,9 @@
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 780px;}
+		table {width: 97%; min-width: 680px; max-width: 780px;}
 		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
 	</style>
 </head>
 
@@ -20,9 +21,9 @@
 	</table>
 
 	<table id="tb4">
-		<col width="32%"><col width="68%">
+		<col width="200px">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">timezonename
+			<div class="nav-title">datetimeformat: timezonename
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
@@ -719,7 +720,7 @@ function run_main(method) {
 			if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
 			displaylist.push(
 				s12 + h + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>"+ str
+				+ "<ul class='main'>"+ str
 				+ "<li>"+ s12 +"L: "+ sc + oData[h]["locales"] +"</li></ul>"
 			)
 		}
@@ -931,7 +932,7 @@ Promise.all([
 		"hi-latn,hindi (latin)",
 		"ko-kp,korean (north korea)",
 		"ks-deva,kashmiri (devanagari)",
-		"lrc-iq, northern luri (iraq)",
+		"lrc-iq,northern luri (iraq)",
 		"ms-id,malay (indonesia)",
 		"ne-in,nepali (india)",
 		"nl-aw,dutch (aruba)",

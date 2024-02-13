@@ -3,13 +3,15 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=600">
-	<title>listformat</title>
+	<title>dayperiod</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
+	<!-- custom -->
 	<style>
 		table {width: 97%; min-width: 580px; max-width: 680px;}
-		hr {color: var(--test4);}
+		hr {color: #dcdc8c}
+		ul.main {margin-left: -20px;}
 		.pad {padding-bottom: 10px;)
 	</style>
 </head>
@@ -21,16 +23,16 @@
 	</table>
 
 	<table id="tb4">
-		<col width="40%"><col width="60%">
+		<col width="200px"><col>
 		<thead><tr><th colspan="2">
-			<div class="nav-title">listformat
+			<div class="nav-title">datetimeformat: dayperiod
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
-			styles (<code>narrow</code>, <code>short</code>, <code>long</code>) and three types
-			(<code>conjunction</code>, <code>disjunction</code>, <code>unit</code>).
+			options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
+			(<code>8:00</code>, <code>12:00</code>, <code>15:00</code>, <code>18:00</code>, <code>22:00</code>).
 			Click custom to test any configuration.</span>
 		</td></tr>
 		<tr>
@@ -43,9 +45,9 @@
 				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
 			<br><br><hr><br>
 				<span class="hidden" id ="customoptions">
-					<div class="mono spaces pad">NARROW: conjunction <input type="checkbox" id="narrowconjunction"> disjunction <input type="checkbox" id="narrowdisjunction"> unit <input type="checkbox" id="narrowunit"></div>
-					<div class="mono spaces pad"> SHORT: conjunction <input type="checkbox" id="shortconjunction"> disjunction <input type="checkbox" id="shortdisjunction"> unit <input type="checkbox" id="shortunit"></div>
-					<div class="mono spaces pad">  LONG: conjunction <input type="checkbox" id="longconjunction"> disjunction <input type="checkbox" id="longdisjunction"> unit <input type="checkbox" id="longunit"></div>
+					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow08"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
+					<div class="mono spaces pad"> SHORT: 8 <input type="checkbox" id="short08"> 12 <input type="checkbox" id="short12"> 15 <input type="checkbox" id="short15"> 18 <input type="checkbox" id="short18"> 22 <input type="checkbox" id="short22"></div>
+					<div class="mono spaces pad">  LONG: 8 <input type="checkbox" id="long08"> 12 <input type="checkbox" id="long12"> 15 <input type="checkbox" id="long15"> 18 <input type="checkbox" id="long18"> 22 <input type="checkbox" id="long22"></div>
 				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
 				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
 				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
@@ -74,6 +76,14 @@ sg = sg.trim()
 sb = sb.trim()
 s99 = s99.trim()
 
+const oDays = {
+	"08": new Date("2019-01-30T08:00:00"),
+	"12": new Date("2019-01-30T12:00:00"),
+	"15": new Date("2019-01-30T15:00:00"),
+	"18": new Date("2019-01-30T18:00:00"),
+	"22": new Date("2019-01-30T22:00:00")
+}
+
 function log_console(name) {
 	let hash = mini(sDetail[name])
 	if (name == "locales") {
@@ -87,25 +97,29 @@ function reset_custom(type) {
 	// check/uncheck everything
 	let checkState = (type == "all")
 	let styles = ["narrow","short","long"],
-		types = ["conjunction","disjunction","unit"]
+		times = ["08",12,15,18,22]
 	styles.forEach(function(s){
-		types.forEach(function(t){
+		times.forEach(function(t){
 			document.getElementById(s +t).checked = checkState
 		})
 	})
 	if (type == "min") {
-		/*
-		gecko min example
-		- shortunit + narrowunit = required (all but not either of those = no match)
-		- then one of conjunction (any style)
-		- then one of disjunction (any style)
-		*/
-		// min preset
-		dom.narrowconjunction.checked = true
-		dom.narrowdisjunction.checked = true
-		dom.narrowunit.checked = true
-		dom.shortunit.checked = true
-		dom.shortconjunction.checked = true
+		// gecko min preset
+		dom.narrow08.checked = true
+		dom.long08.checked = true
+		dom.short12.checked = true
+		dom.narrow15.checked = true
+		dom.short18.checked = true
+
+		// assuming 110 changes stick from ICU 72: 1792775
+		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
+			// FF90-109
+			dom.short22.checked = true
+		} else {
+			// FF110+, also chrome since at least 115
+			dom.short15.checked = true
+			dom.long22.checked = true
+		}
 	}
 }
 
@@ -117,11 +131,8 @@ function legend() {
 			let str = list[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			let go = true
-			if (isSupported) {
-				go = Intl.ListFormat.supportedLocalesOf([code]).length > 0
-			}
-			if (go) {
+			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
+			if (test.length) {
 				aLocales.push(code)
 				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
 				if (name.includes("(")) {
@@ -142,9 +153,10 @@ function legend() {
 		}
 	}
 	// output
-	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	let	header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
+
 
 function get_dayperiod(date, code, option) {
 	// always use h12
@@ -157,14 +169,14 @@ function run_main(method) {
 	let spacer = "<br><br>"
 
 	try {
-		let	styles = ['narrow','short','long']
-		let types = ['conjunction','disjunction','unit']
+		let styles = ["narrow","short","long"]
+		let times = ["08",12,15,18,22]
 		let oOptions = {}
-
+		
 		// select what to test
 		if (method == "custom") {
 			styles.forEach(function(s){
-				types.forEach(function(t){
+				times.forEach(function(t){
 					oOptions[s + t] = document.getElementById(s +t).checked
 				})
 			})
@@ -173,18 +185,30 @@ function run_main(method) {
 			if (method == "short") {styles = ["short"]}
 			if (method == "long") {styles = ["long"]}
 			styles.forEach(function(s){
-				types.forEach(function(t){
+				times.forEach(function(t){
 					oOptions[s + t] = true
 				})
 			})
 		}
-		//test: 3 styles x 3 types
+		// test: 3 methods x 5 dayPeriods
 		aLocales.forEach(function(code) {
+
+			// set our three options once per code
+			let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "short"}),
+				dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "narrow"}),
+				dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "long"})
+
 			let oStyles = {"narrow": [], "short": [], "long": []}
 			styles.forEach(function(s){
-				types.forEach(function(t){
+				times.forEach(function(t){
 					if (oOptions[s + t] == true) {
-						oStyles[s].push(new Intl.ListFormat(code, {style: s, type: t}).format(["a","b","c"]))
+						if (s == "short") {
+							oStyles[s].push(dteS.format(oDays[t]))
+						} else if (s =="narrow") {
+							oStyles[s].push(dteN.format(oDays[t]))
+						} else {
+							oStyles[s].push(dteL.format(oDays[t]))
+						}
 					}
 				})
 			})
@@ -227,7 +251,7 @@ function run_main(method) {
 			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>" + strN + strS + strL
+				+ "<ul class='main'>" + strN + strS + strL
 				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}
@@ -258,11 +282,11 @@ function run_main(method) {
 				if (is115) {
 					// track FF version changes
 					// results
-					if (resultsHash == "c967767a") {resultsHash += s14 +" [FF115+]"+ sc
+					if (resultsHash == "fe9c0751") {resultsHash += s14 +" [FF115+]"+ sc
 					} else {resultsHash += zNEW
 					}
 					// locales
-					if (localesHash == "5520ad5a") {localesHash += s14 +" [FF115+]"+ sc
+					if (localesHash == "6b3f4b76") {localesHash += s14 +" [FF115+]"+ sc
 					} else if (isFF) {localesHash += zNEW
 					}
 				}
@@ -270,10 +294,11 @@ function run_main(method) {
 		} else if (method == "custom") {
 			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
+
 		// display
 		let display = s4 + method.toUpperCase() +": "
 			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
-			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ spacer + s16 +"results: "+ sc + resultsHash +" "+ resultsBtn +"<br>"
 			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
 		// perf
@@ -298,7 +323,8 @@ function run(method) {
 		} else {
 			// hide custom
 			element.classList.add("hidden")
-			dom.results = ""
+
+			dom.results = "running test..."
 			// delay so users see change and allow paint
 			setTimeout(function() {
 				run_main(method)
@@ -311,10 +337,26 @@ function run_custom() {
 	if (isSupported) {
 		//reset
 		dom.perf = ""
-		dom.results = ""
+		dom.results = "running test..."
 		setTimeout(function() {
 			run_main("custom")
 		}, 1)
+	}
+}
+
+function run_test() {
+	let A = get_dayperiod(new Date("2019-01-30T08:00:00"), "en", "long")
+	let B = get_dayperiod(new Date("2019-01-30T12:00:00"), "en", "long")
+	if (A == B) {
+		isSupported = false
+		dom.results.innerHTML = s4 + "dayPeriod:" + sc + " not supported"
+	} else {
+		isSupported = true
+		setBtn("all")
+		dom.results = "running test..."
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
 	}
 }
 
@@ -334,36 +376,46 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
-	// support
-	try {
-		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
-		isSupported = true
-	} catch(e) {
-		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
-	}
 	reset_custom("min")
 	// add additional locales to core locales for this test
 	let aListExtra = [
+		"az-cyrl,azerbaijani (cyrillic)",
+		"bn-in,bengali (india)",
 		"bs-cyrl,bosnian (cyrillic)",
-		"en-in,english (india)",
-		"en-sg,english (singapore)",
+		"en-au,english (australia)",
+		"en-ca,english (canada)",
+		"es-ar,spanish (argentina)",
+		"es-co,spanish (colombia)",
 		"es-do,spanish (dominican republic)",
-		"es-us,spanish (united states)",
+		"es-mx,spanish (mexico)",
+		"es-pa,spanish (panama)",
+		"fa-af,persian (afghanistan)",
 		"ff-adlm,fulah (adlam)",
+		"fr-ca,french (canada)",
+		"fr-ch,french (switzerland)",
+		"fr-sn,french (senegal)",
 		"hi-latn,hindi (latin)",
 		"ks-deva,kashmiri (devanagari)",
 		"pt-pt,portuguese (portugal)",
+		"ro-md,romanian (moldova)",
+		"sd-deva,sindhi (devanagari)",
+		"se-fi,northern sami (finland)",
+		"shi-latn,tachelhit (latin)",
+		"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
+		"sr-cyrl-me,serbian (cyrillic montenegro)",
+		"sr-cyrl-xk,serbian (cyrillic kosovo)",
+		"sr-latn,serbian (latin)",
+		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		"sr-latn-me,serbian (latin montenegro)",
+		"sr-latn-xk,serbian (latin kosovo)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
 		"yo-bj,yoruba (benin)",
+		"yue-hans,cantonese (simplified)",
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
-	if (isSupported) {
-		setBtn("all")
-		setTimeout(function() {
-			run_main("all")
-		}, 100)
-	}
+	run_test()
 })
 
 </script>

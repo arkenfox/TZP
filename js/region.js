@@ -264,7 +264,7 @@ const set_oIntlTests = () => new Promise(resolve => {
 		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
 
 	// all dates must be timezone resistent: we do not want the noise: we are checking locales
-	// and want to maintain max entropy checks: timezone entropy  is in the timezonename
+	// and want to maintain max entropy checks: timezone entropy == timezonename
 	let dates = {
 		FSD: new Date("2023-06-11T01:12:34.5678"), // no Z
 		Era: new Date(-1, -11, -30),
@@ -844,7 +844,7 @@ const get_timezone = () => new Promise(resolve => {
 	}
 
 	function get_offsets() {
-		let aMethods = ["date.parse","getTime","getTimezoneOffset"]
+		let aMethods = ["date.parse","date.valueOf","getTime","getTimezoneOffset","Symbol.toPrimitive"]
 		let oData = {},
 			oErrors = {}
 		aMethods.forEach(function(method) {
@@ -862,7 +862,11 @@ const get_timezone = () => new Promise(resolve => {
 						let offset
 						try {
 							if (method == "date.parse") {
-								offset = ((Date.parse(test) - Date.parse(control))/60000)
+								offset = (Date.parse(test) - Date.parse(control))/60000
+							} else if (method == "date.valueOf") {
+								offset = (test.valueOf() - control.valueOf())/60000
+							} else if (method == "Symbol.toPrimitive") {
+								offset = (test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number'))/60000
 							} else if (method == "getTime") {
 								offset = (test.getTime() - control.getTime())/60000
 							} else {
@@ -927,7 +931,7 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			}
 			// stop: all errors
-			if (countErr == 3) {
+			if (countErr == 5) {
 				if (isSmart) {notation = tz_red}
 				log_display(4, METRIC, zErr + notation)
 				addData(4, METRIC, zErr)
@@ -967,7 +971,7 @@ const get_timezone = () => new Promise(resolve => {
 			}
 		}
 
-		// all 3 valid + same
+		// all valid + same
 		if (go) {
 			let isLies = false
 			if (isSmart) {
@@ -1093,19 +1097,17 @@ const get_xml_errors = () => new Promise(resolve => {
 
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
-	let d2 = new Date("January 01, 2019 00:00:01") // for toGMT/UTC strings
 	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
 			minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long"}
 	let localecode = undefined
 	let DTFo
 	try {DTFo = Intl.DateTimeFormat(undefined, o)} catch(e) {}
+
 	function get_item(item) {
 		let itemPad = "item "+ item
 		try {
 // STRINGS
-			if (item == 41) {return d2.toGMTString()
-			} else if (item == 42) {return d2.toUTCString()
-			} else if (item == 43) {return d.toTimeString()
+			if (item == 43) {return d.toTimeString()
 			} else if (item == 44) {return d // a date object
 			} else if (item == 45) {return d.toString() // redundant?
 			} else if (item == 46) {return d.toLocaleString(localecode, o)
@@ -1130,13 +1132,7 @@ const get_dates = () => new Promise(resolve => {
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
 			} else if (item == 56) {
-				// 1557718: 79+
-				let list = ["short", "medium","long"], res43 = []
-				list.forEach(function(s){
-					let style = Intl.DateTimeFormat(localecode, {timeStyle: s, dateStyle: s})
-					res43.push(style.format(d))
-				})
-				return res43.join(" | ")
+				return "skip"
 			} else if (item == 57) {
 				// FF91+: 1710429
 				// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
@@ -1181,7 +1177,7 @@ const get_dates = () => new Promise(resolve => {
 		}
 	}
 
-	for (let i=41; i < 60; i++) {
+	for (let i=43; i < 60; i++) {
 		let result = get_item(i)
 		if (result == zU) {result = zUQ
 		} else if (result === undefined) {result = zU

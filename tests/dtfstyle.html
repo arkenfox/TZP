@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>date-&-timestyle</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 680px; max-width: 780px;}
+		hr {color: var(--test4);}
+		li.dates {margin-left: 10px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px"><col>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">datetimeformat: date-&-timestyle
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy with DateTimeFormat date-&-timeStyles.
+			Numbers will vary depending on the timezone. To check all timezones, type <code>run_all()</code> in the console and
+			go make a cup of tea.</span>
+			<span id="alert"></span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+				<select name="timezones" id="timezones" onChange="run(`all`)"><option></option></select>
+				<span class="btn4 btnfirst" onClick="run('next')"> &nbsp; [ &#9654 ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	localesHashAll = "", // to compare min to
+	oData = {},
+	tzData = {},
+	tzDataAll = {},
+	aTZ = [],
+	oCheck = {},
+	isAuto = false,
+	spacer = "<br><br>"
+
+s1 = s1.trim()
+s4 = s4.trim()
+s8 = s8.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+s99 = s99.trim()
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		// populate tz options once as well
+		try {
+			try {
+				aTZ = Intl.supportedValuesOf('timeZone')
+			} catch(e) {} // supportedValuesOf not supported
+			// add anything else that will work
+			let testDate = new Date()
+			let testTZ = []
+			gTimezones.forEach(function(n) {
+				try {
+					let test = testDate.toLocaleString('en', {timeZone: n})
+					testTZ.push(n)
+				} catch(e) {}
+			})
+			// is there anything in supported not in gTimezones
+			let aMissing = aTZ.filter(x => !gTimezones.includes(x))
+			if (aMissing.length) {
+				console.log("suported timezones missing in gTimezones\n", aMissing)
+				dom.alert.innerHTML = "<br>"+ s1 +"[alert] supported timezones missing in gTimezones"+ sc
+			}
+
+			aTZ = aTZ.concat(testTZ)
+			aTZ = aTZ.filter(function(item, position) {return aTZ.indexOf(item) === position})
+			aTZ.sort()
+			// arrange into an object
+			let optTZ = {}
+			aTZ.forEach(function(n) {
+				let group, name
+				if (n.includes("/")) {
+					group = n.split("/")[0]
+					name = n.slice(group.length +1) //+1 remove the "/"
+				} else {
+					group = "AAA" // tmp group name, we want it first alphabetically
+					name = n
+				}
+				if (optTZ[group] == undefined) {optTZ[group] = []}
+				optTZ[group].push(name)
+			})
+			//console.log(optTZ)
+			let aOptions = []
+			// always add undefined as our first
+			aOptions.push("<optgroup label = '"+ "misc" +"'>")
+			aOptions.push("<option value = '"+ "undefined" +"'> "+ "undefined" +"</option>")
+			for (const k of Object.keys(optTZ).sort()) {
+				let prefix = k+"/"
+				if (k == "AAA") {
+					prefix = ""
+				} else {
+					aOptions.push("<hr>")
+					aOptions.push("<optgroup label = '"+ k.toUpperCase() +"'>")
+				}
+				optTZ[k].forEach(function(tz) {
+					aOptions.push("<option value = '"+ prefix + tz +"'> "+ prefix + tz +"</option>")
+				})
+			}
+			dom.timezones.innerHTML = aOptions.join("")
+		} catch(e) {
+			console.log(e)
+		}
+
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+const run_main = (method = "all", tz) => new Promise(resolve => {
+	let t0 = performance.now()
+	/*
+	Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
+
+ 	new Date("January 14, 2023 1:00:00") vs Date.UTC(2023, 0, 14, 1)
+	- a string e.g. "January 14, 2023 1:00:00" is not affected by your timezone
+	- Date.UTC is a number e.g. Date.UTC(2023, 0, 14, 1) and is affected by your timezone
+
+	so for this test we want universal hashes so we will use a string, so e.g.
+	AM/PM will be in order, and we get the correct two weekdays
+	*/
+
+	// skip the auto all tests if I hardcoded them to speed up tests
+	if (isAuto && method == "all") {
+		if (Object.keys(tzDataAll).length) {
+			return resolve()
+		}
+	}
+
+	if (isAuto) {
+		let step = method == "all" ? 1 : 2
+		let tzstep = ((aTZ.indexOf(tz) + 1)+"").padStart(3) +"/" + aTZ.length
+		dom.results.innerHTML = "step "+ step +" of 2 ["+ method +"] "+ spacer + s16 + tzstep + sc + " "+ tz 
+	}
+
+	//console.log(isAuto, "running", tz)
+	if (!isAuto) {
+		if (tz == undefined) {
+			tz = dom.timezones.value
+		} else {
+			try {
+				dom.timezones.value = tz
+			} catch(e) {
+				console.log(e)
+			}
+		}
+	}
+	if (tz == "undefined") {tz = undefined}
+	//tz = "America/Paramaribo" // temp
+
+	let dates = {
+		// cover the seasons, key weekdays, am/pm
+		Jan: new Date("January 5, 2024 13:12:34"), // jan, fri pm
+		May: new Date("May 9, 2024 01:12:34"), // thur <-- adds something
+		Jul: new Date("July 5, 2024 01:12:34"), // july, fri am
+		Sep: new Date("September 6, 2024 01:12:34"), // sep, wed
+		Nov: new Date("November 6, 2024 01:12:34"), // nov wed am
+
+		// testing: cover all months and weekdays
+		/*
+		Feb: new Date("February 5, 2024 13:12:34"), //mon
+		Apr: new Date("April 10, 2024 13:12:34"), // apr, wed pm
+		Mar: new Date("March 5, 2024 13:12:34"), // tues
+		Jun: new Date("June 8, 2024 01:12:34"), // sat
+		Aug: new Date("August 4, 2024 01:12:34"), // sun
+		Oct: new Date("October 5, 2024 01:12:34"),
+		Dec: new Date("December 6, 2024 01:12:34"),
+		//*/
+	}
+	
+	if (tz !== undefined) {
+		try {
+			// when we pass a defined tz to timeZone options, it changes the
+			// date: so we should calculate the offset for each one and change
+			// it so it ends up being real world
+			for (const k of Object.keys(dates)) {
+				// lets just test one first
+				let original = dates[k]
+				let originalepoch = Date.parse(original)
+				// e.g. 1704413554000
+				let testDate = dates[k].toLocaleString('en', {timeZone: tz})
+				let testepoch = Date.parse(testDate)
+				let diff = (originalepoch - testepoch)
+				// so Europe/London is 46800000 behind (the diff is positive)
+				// so the new date would be to add the diff
+				let newepoch = originalepoch + diff
+				let newDate = new Date(newepoch) // will this work?
+				/*
+				console.log(tz)
+				console.log("original", originalepoch, original)
+				console.log("test", testepoch, testDate, diff)
+				console.log("new", Date.parse(newDate), newDate)
+				console.log("=======")
+				//*/
+				dates[k] = newDate
+			}
+		} catch(e) {
+			// catch invalid timezones
+			dom.results.innerHTML = s16 + e.name + ": "+ sc + e.message
+		}
+	}
+
+	let testsAll = {
+		"date-&-timeStyle": {
+			// 16 tests, 4 options
+			dates: [
+				dates.Jan, dates.May, dates.Jul, dates.Sep, dates.Nov, // original
+				//dates.Jan, dates.Feb, dates.Mar, dates.Apr, dates.May, dates.Jun, dates.Jul, dates.Aug, dates.Sep, dates.Oct, dates.Nov, dates.Dec
+			],
+			options: {
+				"full": {dateStyle: "full", timeStyle: "full", timeZone: tz},
+				"long": {dateStyle: "long", timeStyle: "long", timeZone: tz},
+				"medium": {dateStyle: "medium", timeStyle: "medium", timeZone: tz},
+				"short": {dateStyle: "short", timeStyle: "short", timeZone: tz},
+			},
+		},
+	}
+	let testsMin = {
+		"date-&-timeStyle": [
+			// 9 tests over 5 dates, 3 options (use as few combos of options as possible)
+				// this is pretty much it: can't inmprove and seems to always cover everything
+			[dates.Jan,
+				{
+					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
+					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to all 469 tz's
+					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
+					// ^ SF's timeStyle full adds entropy to Antarctica/Troll, Europe/Guernsey, Europe/Isle_of_Man, Europe/Jersey
+					// but we still need a dateStyle short somewhere
+/*
+					"DF": {dateStyle: "full", timeZone: tz},
+					"DL": {dateStyle: "long", timeZone: tz},
+					"DM": {dateStyle: "medium", timeZone: tz},
+					"DS": {dateStyle: "short", timeZone: tz},
+					"FF": {dateStyle: "full", timeStyle: "full", timeZone: tz},
+					"FL": {dateStyle: "full", timeStyle: "long", timeZone: tz},
+					"FS": {dateStyle: "full", timeStyle: "short", timeZone: tz},
+					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz},
+					"LF": {dateStyle: "long", timeStyle: "full", timeZone: tz},
+					"LL": {dateStyle: "long", timeStyle: "long", timeZone: tz},
+					"LM": {dateStyle: "long", timeStyle: "medium", timeZone: tz},
+					"LS": {dateStyle: "long", timeStyle: "short", timeZone: tz},
+					"MF": {dateStyle: "medium", timeStyle: "full", timeZone: tz},
+					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz},
+					"MM": {dateStyle: "medium", timeStyle: "medium", timeZone: tz},
+					"MS": {dateStyle: "medium", timeStyle: "short", timeZone: tz},
+					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
+					"SL": {dateStyle: "short", timeStyle: "long", timeZone: tz},
+					"SM": {dateStyle: "short", timeStyle: "medium", timeZone: tz},
+					"SS": {dateStyle: "short", timeStyle: "short", timeZone: tz},
+					"TF": {timeStyle: "full", timeZone: tz},
+					"TL": {timeStyle: "long", timeZone: tz},
+					"TM": {timeStyle: "medium", timeZone: tz},
+					"TS": {timeStyle: "short", timeZone: tz}
+//*/
+				}
+			],
+			[dates.May,
+				{
+					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
+				}
+			],
+			[dates.Jul,
+				{
+					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to 432 tz's
+				}
+			],
+			[dates.Sep,
+				{
+					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
+					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to all 469 tz's
+					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
+					// ^ SF adds entropy in Europe/Dublin via timeStyle full
+						// but we still need a dateStyle short somewhere
+						// and we don't want another constructor, so we'll just reuse SF
+				}
+			],
+			[dates.Nov,
+				{
+					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
+				}
+			],
+		],
+	}
+
+	let tests = method == "all" ? testsAll : testsMin
+
+	let oConst = {}
+	oData = {}
+
+	//aLocales = ['en']
+	try {
+		aLocales.forEach(function(code) {
+			let oTempData = {}
+			Object.keys(tests).sort().forEach(function(test) {
+				oTempData[test] = {}
+				if (method == "all") {
+					Object.keys(tests[test].options).forEach(function(opt) {
+						oTempData[test][opt] = []
+						let formatter = new Intl.DateTimeFormat(code, tests[test].options[opt])
+						let dates = tests[test].dates
+						dates.forEach(function(date){
+							oTempData[test][opt].push(formatter.format(date))
+						})
+					})
+				} else {
+					/*
+					try {oConst.DaDF = new Intl.DateTimeFormat(code, {dateStyle: "full", timeZone: tz})} catch(e) {}
+					try {oConst.DaDL = new Intl.DateTimeFormat(code, {dateStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaDM = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaDS = new Intl.DateTimeFormat(code, {dateStyle: "short", timeZone: tz})} catch(e) {}
+					try {oConst.DaFF = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+					try {oConst.DaFL = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaFS = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "short", timeZone: tz})} catch(e) {}
+					try {oConst.DaLF = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "full", timeZone: tz})} catch(e) {}
+					try {oConst.DaLL = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaLM = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaLS = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "short", timeZone: tz})} catch(e) {}
+					try {oConst.DaMF = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "full", timeZone: tz})} catch(e) {}
+					try {oConst.DaMM = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaMS = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "short", timeZone: tz})} catch(e) {}
+					try {oConst.DaSL = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaSM = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaSS = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+					try {oConst.DaTF = new Intl.DateTimeFormat(code, {timeStyle: "full", timeZone: tz})} catch(e) {}
+					try {oConst.DaTL = new Intl.DateTimeFormat(code, {timeStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaTM = new Intl.DateTimeFormat(code, {timeStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaTS = new Intl.DateTimeFormat(code, {timeStyle: "short", timeZone: tz})} catch(e) {}
+					//*/
+
+					try {oConst.DaFM = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
+					try {oConst.DaML = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
+					try {oConst.DaSF = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
+
+					let array = tests[test]
+					array.forEach(function(item) {
+						let date = item[0]
+						let styles = item[1]
+						Object.keys(styles).forEach(function(opt) {
+							if (oTempData[test][opt] == undefined) {
+								oTempData[test][opt] = []
+							}
+							let constructor = test.slice(0,1).toUpperCase() + test.slice(1,2) + opt.slice(0,2).toUpperCase()
+							let formatter = oConst[constructor]
+							oTempData[test][opt].push(formatter.format(date))
+						})
+					})
+				}
+			})
+			//console.log(oTempData)
+
+			let hash = mini(oTempData)
+			if (oData[hash] == undefined) {
+				oData[hash] = {}
+				oData[hash]["locales"] = [code]
+				oData[hash]["data"] = {}
+				for (const k of Object.keys(oTempData).sort()) {
+					oData[hash]["data"][k] = oTempData[k]
+				}
+			} else {
+				oData[hash]["locales"].push(code)
+			}
+		})
+		// perf
+		if (!isAuto) {
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+			//console.log(oData)
+		}
+
+		let oOptions = {
+			"F": "full",
+			"M": "medium",
+			"L": "long",
+			"S": "short",
+			"FM": "full-medium",
+			"ML": "medium-long",
+			"SF": "short-full",
+		}
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].length
+			if (!isAuto) {
+				let str = ""
+				for (const p of Object.keys(oData[k]["data"])) {
+					//str += s14 + p +": "+ sc
+					for (const i of Object.keys(oData[k]["data"][p]).sort()) {
+						let option
+						if (i.length == 2) {
+							option = (oOptions[i] !== undefined ? oOptions[i] : i.toLowerCase())
+						} else {
+							option = i+"-"+i
+						}
+						let linedata = "<li class='dates'>"+ oData[k]["data"][p][i].join("</li><li class='dates'>") + "</li>"
+						str += "<li>"+ s16 + option +": "+ sc + linedata +"</li>"
+					}
+				}
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>"+ str
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"].join(", ") +"</li></ul>"
+				)
+			}
+		}
+
+		// hashes + btns
+		let resultsBtn = "", localesBtn = ""
+		localeGroups.sort()
+		if (!isAuto) {
+			sDetail["results"] = oData
+			resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+			sDetail["locales"] = localeGroups
+			localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		}
+		let resultsHash = mini(oData)
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// don't notate anything: the numbers can change depending on your timezone
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+
+		if (tz !== undefined) {
+			if (tzData[tz] == undefined) {
+				tzData[tz] = {}
+			}
+			tzData[tz][method] = [localeGroups.length, localesHash]
+		}
+
+		if (!isAuto) {
+			// display
+			let display = s8 +"timeZone: "+ sc + tz
+				+ spacer + s4 + localeGroups.length + sc +" from "+ s4 + aLocales.length + sc
+				+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+				+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+			dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		}
+
+		return resolve()
+
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+		return resolve()
+	}
+})
+
+function run_summary() {
+	// clear isAuto
+	isAuto = false
+	let aCheck = []
+	for (const k of Object.keys(tzData).sort()) {
+		aCheck.push(k +": "+ tzData[k].all[0])
+		if (tzData[k].min == undefined) {
+			oCheck["missing"].push(k)
+		} else {
+			let strAll = tzData[k]["all"].join(", ")
+			let strMin = tzData[k]["min"].join(", ")
+			if (strAll == strMin) {
+				oCheck["match"].push(k +": " + strAll)
+			} else {
+				strAll = s14 + tzData[k]["all"][0] + sc +" ["+ tzData[k]["all"][1] +"]"
+				strMin = s14 + tzData[k]["min"][0] + sc +" ["+ tzData[k]["min"][1] +"]"
+				oCheck["mismatch"].push(k +": "+ strAll +" vs " + strMin)
+			}
+		}
+	}
+	let display = []
+	let count = oCheck["match"].length
+	let expected = aTZ.length
+	display.push(s14 +"MATCH: "+ sc + count +"/"+ expected)
+	count = oCheck["missing"].length
+	if (oCheck["missing"].length) {
+		display.push("<br>" + s14 +"MISSING: "+ sc + count +"<br>")
+		display.push(oCheck["missing"].join("<br>"))
+	}
+	count = oCheck["mismatch"].length
+	if (oCheck["mismatch"].length) {
+		display.push("<br>" + s14 +"MISMATCH: "+ sc + count +"<br>")
+		display.push(oCheck["mismatch"].join("<br>"))
+	}
+	dom.results.innerHTML = s16 + "ALL vs MIN"  + sc + spacer
+		+ display.join("<br>")
+		+ spacer +"<hr><br>"+ s16 +"ENTROPY:"+ sc +" (number of locale results per timezone)" + sc + spacer + aCheck.join("<br>") + spacer
+	console.log(oCheck)
+}
+
+const run_both = (tz) => new Promise(resolve => {
+	setTimeout(function(){
+		Promise.all([
+			run_main("all", tz)
+		]).then(function(){
+			setTimeout(function(){
+				Promise.all([
+					run_main("min", tz)
+				]).then(function(){
+					return resolve()
+				})
+			}, 1)
+		})
+	}, 1)
+})
+
+function run_all() {
+	// prevent user runs
+	isAuto = true
+	// reset buttons
+	setBtn()
+	// clear displays
+	dom.perf = ""
+	dom.results = ""
+	// reset data
+	oCheck = {"match": [], "mismatch": [], "missing": []}
+	tzData = {}
+
+	// speed up tesys by using a hardcoded "all"
+	if (Object.keys(tzDataAll).length) {
+		for (const k of Object.keys(tzDataAll).sort()) {
+			tzData[k] = {}
+			tzData[k]["all"] = tzDataAll[k]["all"]
+		}
+	}
+	// loop timezones
+	for (let i=0; i < aTZ.length; i++) {
+		let tz = aTZ[i]
+		Promise.all([
+			run_both(tz)
+		]).then(function(){
+			if (i == (aTZ.length - 1)) {
+				run_summary()
+			}
+		})
+	}
+}
+
+function run(method) {
+	if (isAuto) {
+		// do not allow user clicks to interfer with an auto run
+		return
+	}
+	if (isSupported) {
+		if (method == "next") {
+			method = "all"
+			let target = dom.timezones
+			target.selectedIndex++
+			if (target.value == "") {target.selectedIndex++} // end of list, return to top
+		}
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	if (!isAuto) {
+		// set btn
+		let el = document.getElementById("b"+ method)
+		el.classList.add("btn8")
+		el.classList.remove("btn4")
+	}
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	try {
+		// pointless if we can't use the feature being tested: FF58+
+		let formatF = new Intl.DateTimeFormat('en', {dateStyle: "full", timeStyle: "full"})
+		let formatS = new Intl.DateTimeFormat('en', {dateStyle: "short", timeStyle: "short"})
+		let testDate = new Date("January 5, 2024")
+		if (formatF.format(testDate) !== formatS.format(testDate)) {
+			isSupported = true
+		} else {
+			dom.results.innerHTML = s4 + "dateStyle | timeStyle:" + sc + " not supported"
+		}
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"af-na,afrikaans (namibia)",
+		"ar-ae,arabic (united arabic emirates)",
+		"ar-dz,arabic (algeria)",
+		"ar-il,arabic (israel)",
+		"ar-iq,arabic (iraq)",
+		"ar-km,arabic (cosmoros)",
+		"ar-ma,arabic (morocco)",
+		"ar-mr,arabic (mauritania)",
+		"ar-sa,arabic (saudi arabia)",
+		"az-cyrl,azerbaijani (cyrillic)",
+		"bn-in,bengali (india)",
+		"bo-in,tibetan (india)",
+		"bs-cyrl,bosnian (cyrillic)",
+		"ckb-ir,central kurdish (iran)",
+		"de-at,german (austria)",
+		"de-ch,german (switzerland)",
+		"ee-tg,éwé (togo)",
+		"en-001,english",
+		"en-150,english (europe)",
+		"en-ae,english (united arab emirates)",
+		"en-au,english (australia)",
+		"en-be,english (belgium)",
+		"en-bi,english (burundi)",
+		"en-bw,english (botswana)",
+		"en-bz,english (belize)",
+		"en-ca,english (canada)",
+		"en-ch,english (switzerland)",
+		"en-dk,english (denmark)",
+		"en-er,english (eritrea)",
+		"en-fi,english (finland)",
+		"en-gb,english (united kingdom)",
+		"en-gu,english (guam)",
+		"en-gy,english (guyana)",
+		"en-hk,english (hong kong)",
+		"en-ie,english (ireland)",
+		"en-il,english (israel)",
+		"en-in,english (india)",
+		"en-ke,english (kenya)",
+		"en-mh,english (marshall islands)",
+		"en-mo,english (macau)",
+		"en-mt,english (malta)",
+		"en-my,english (malaysia)",
+		"en-nz,english (new zealand)",
+		"en-pk,english (pakistan)",
+		"en-se,english (sweden)",
+		"en-sg,english (singapore)",
+		"en-za,english (south africa)",
+		"en-zw,english (zimbabwe)",
+		"es-ar,spanish (argentina)",
+		"es-bo,spanish (bolivia)",
+		"es-br,spanish (brazil)",
+		"es-cl,spanish (chile)",
+		"es-co,spanish (colombia)",
+		"es-do,spanish (dominican republic)",
+		"es-ec,spanish (ecuador)",
+		"es-gt,spanish (guatemala)",
+		"es-hn,spanish (honduras)",
+		"es-mx,spanish (mexico)",
+		"es-pa,spanish (panama)",
+		"es-pe,spanish (peru)",
+		"es-ph,spanish (philippines)",
+		"es-py,spanish (paraguay)",
+		"es-us,spanish (united states)",
+		"es-uy,spanish (uruguay)",
+		"es-ve,spanish (venezuela)",
+		"fa-af,persian (afghanistan)",
+		"ff-adlm,fulah (adlam)",
+		"ff-adlm-gh,fulah (adlam ghana)",
+		"ff-gh,fulah (ghana)",
+		"fr-be,french (belgium)",
+		"fr-ca,french (canada)",
+		"fr-ch,french (switzerland)",
+		"fr-dj,french (djibouti)",
+		"fr-gf,french (french guiana)",
+		"fr-ma,french (morocco)",
+		"fr-ml,french (mali)",
+		"ha-gh,hausa (ghana)",
+		"hi-latn,hindi (latin)",
+		"hr-ba,croatian (bosnia & herzegovina)",
+		"it-ch,italian (switzerland)",
+		"ko-kp,korean (north korea)",
+		"ks-deva,kashmiri (devanagari)",
+		"lrc-iq,northern luri (iraq)",
+		"ms-bn,malay (brunei)",
+		"ms-id,malay (indonesia)",
+		"ne-in,nepali (india)",
+		"nl-be,dutch (belgium)",
+		"nl-sr,dutch (suriname)",
+		"om-ke,oromo (kenya)",
+		"pa-arab,punjabi (arabic)",
+		"ps-pk,pashto (pakistan)",
+		"pt-ao,portuguese (angola)",
+		"pt-ch,portuguese (switzerland)",
+		"pt-mo,portuguese (macau)",
+		"qu-bo,quechua (bolivia)",
+		"qu-ec,quechua (ecuador)",
+		"sd-deva,sindhi (devanagari)",
+		"se-fi,northern sami (finland)",
+		"shi-latn,tachelhit (latin)",
+		"so-ke,somali (kenya)",
+		"sq-mk,albanian (macedonia)",
+		"sr-ba,serbian (bosnia & herzegovina)",
+		"sr-cyrl-me,serbian (cyrillic montenegro)",
+		"sr-latn,serbian (latin)",
+		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		"sr-latn-me,serbian (latin montenegro)",
+		"sw-ke,swahili (kenya)",
+		"ta-lk,tamil (sri lanka)",
+		"ta-my,tamil (malaysia)",
+		"tr-cy,turkish (cyprus)",
+		"ur-in,urdu (india)",
+		"uz-arab,uzbek (arabic)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"vai-latn,vai (latin)",
+		"yo-bj,yoruba (benin)",
+		"yue-cn,cantonese (china)",
+		"zh-hans-hk,chinese (simplified hong kong)",
+
+// unused usual suspects
+/*
+"ar-bh,arabic (bahrain)",
+"ar-dj,arabic (djibouti)",
+"ar-er,arabic (eritrea)",
+"ar-lb,arabic (lebanon)",
+"ar-ly,arabic (libya)",
+"ar-so,arabic (somalia)",
+"ar-ss,arabic (south sudan)",
+"ar-tn,arabic (tunisia)",
+"ca-fr,catalan (france)",
+"de-li,german (liechtenstein)",
+"de-lu,german (luxembourg)",
+"dyo-sn,jola-fonyl (senegal)",
+"en-ag,english (antigua & barbuda)",
+"en-ai,english (anguilla)",
+"en-at,english (austria)",
+"en-bb,english (barbados)",
+"en-bm,english (bermuda)",
+"en-bs,english (bahamas)",
+"en-cc,english (cocos islands)",
+"en-fj,english (fiji)",
+"en-fk,english (falkland islands)",
+"en-gg,english (guernsey)",
+"en-gh,english (ghana)",
+"en-gi,english (gibraltar)",
+"en-gm,english (gambia)",
+"en-jm,english (jamaica)",
+"en-ky,english (cayman islands)",
+"en-lr,english (liberia)",
+"en-ls,english (lesotho)",
+"en-mg,english (madagascar)",
+"en-mu,english (mauritius)",
+"en-mw,english (malawai)",
+"en-na,english (namibia)",
+"en-ng,english (nigeria)",
+"en-pg,english (papua new guinea)",
+"en-pr,english (puerto rico)",
+"en-rw,english (rwanda)",
+"en-sb,english (solomon islands)",
+"en-sc,english (seychelles)",
+"en-sh,english (saint helena)",
+"en-sl,english (sierra leone)",
+"en-ss,english (south sudan)",
+"en-sx,english (sint maarten)",
+"en-sz,english (swaziland)",
+"en-to,english (tonga)",
+"en-tt,english (trinidad & tobago)",
+"en-tz,english (tanzania)",
+"en-ug,english (uganda)",
+"en-vu,english (vanuatu)",
+"en-ws,english (samoa)",
+"en-zm,english (zambia)",
+"es-419,spanish (latin america and the caribbean)",
+"es-bz,spanish (belize)",
+"es-cr,spanish (costa rica)",
+"es-cu,spanish (cuba)",
+"es-gq,spanish (equatorial guinea)",
+"es-ni,spanish (nicaragua)",
+"es-pr,spanish (puerto rico)",
+"es-sv,spanish (el salvador)",
+"ff-adlm-bf,fulah (adlam burkina faso)",
+"ff-adlm-gm,fulah (adlam gambia)",
+"ff-adlm-lr,fulah (adlamd liberia)",
+"ff-adlm-mr,fulah (adlam mauritania)",
+"ff-adlm-ng,fulah (adlam nigeria)",
+"ff-adlm-sl,fulah (adlam sierra leone)",
+"ff-gn,fulah (guinea)",
+"ff-mr,fulah (mauritania)",
+"fo-dk,faroese (denmark)",
+"fr-bi,french (burundi)",
+"fr-cd,french (congo kinshasa)",
+"fr-cm,french (cameroon)",
+"fr-dz,french (algeria)",
+"fr-gn,french (guinea)",
+"fr-gp,french (guadeloupe)",
+"fr-ht,french (haiti)",
+"fr-km,french (comoros)",
+"fr-lu,french (luxembourg)",
+"fr-mg,french (madagascar)",
+"fr-mr,french (mauritania)",
+"fr-mu,french (mauritius)",
+"fr-rw,french (rwanda)",
+"fr-sc,french (seychelles)",
+"fr-sn,french (senegal)",
+"fr-sy,french (syria)",
+"fr-tn,french (tunisia)",
+"fr-vu,french (vanuatu)",
+"kea-cv,kabuverdianu (cape verde)",
+"ln-ao,lingala (angola)",
+"mas-tz,masia (tanzania)",
+"ms-sg,malay (singapore)",
+"nl-aw,dutch (aruba)",
+"nl-bq,dutch (caribbean netherlands)",
+"nl-cw,dutch (curaçao)",
+"os-ru,ossetian (russia)",
+"pa-pk,punjabi (pakistan)",
+"pt-cv,portuguese (cape verde)",
+"pt-gw,portuguese (guinea-bissau)",
+"pt-lu,portuguese (luxembourg)",
+"pt-mz,portuguese (mazambique)",
+"pt-pt,portuguese (portugal)",
+"pt-st,portuguese (são tomé & príncipe)",
+"ro-md,romanian (moldova)",
+"ru-by,russian (belarus)",
+"ru-kg,russian (kyrgyzstan)",
+"ru-kz,russian (kazakhstan)",
+"ru-md,russian (moldova)",
+"ru-ua,russian (ukraine)",
+"se-se,northern sami",
+"so-dj,somali (djibouti)",
+"so-et,somali (ethiopia)",
+"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
+"sr-cyrl-xk,serbian (cyrillic kosovo)",
+"sr-latn-xk,serbian (latin kosovo)",
+"sr-me,serbian (montenegro)",
+"sr-xk,serbian (kosovo)",
+"sv-fi,swedish (finland)",
+"sw-cd,swahili (congo kinshasa)",
+"sw-ug,swahili (uganda)",
+"ta-sg,tamil (singapore)",
+"teo-ke,teso (kenya)",
+"ti-er,tigrinya (eritrea)",
+"tr-tr,turkish (turkey)",
+"uz-af,uzbek (afghanistan)",
+"yue-hans,cantonese (simplified)",
+"zh-hans-mo,chinese (simplified macau)",
+"zh-hant-mo,chinese (traditional macau)",
+//*/
+
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>

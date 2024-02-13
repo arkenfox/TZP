@@ -3,13 +3,14 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
-	<title>numberformat: notation</title>
+	<title>notation</title>
 	<link rel="stylesheet" type="text/css" href="testindex.css">
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 780px;}
+		table {width: 97%; min-width: 580px; max-width: 780px;}
 		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
 	</style>
 </head>
 
@@ -20,7 +21,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="32%"><col width="68%">
+		<col width="200px">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">numberformat: notation
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -202,25 +203,25 @@ function run_main(method) {
 		}
 
 		let localeGroups = [], displaylist = []
-		for (const h of Object.keys(oData)) { // for each hash
-			localeGroups.push(oData[h]["locales"])
-			let localeCount = oData[h]["locales"].split(",").length
+		for (const k of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+
 			let str = ""
-			for (const not of Object.keys(oData[h])) { // for each notation
+			for (const not of Object.keys(oData[k])) { // for each notation
 				if (not !== "locales") {
 					str += "<li>"+ s12 + not + sc +"</li>"
-					Object.keys(oData[h][not]).forEach(function(s){ // for each style
-						str += s16 + s +": "+ sc + oData[h][not][s] +"</br>"
+					Object.keys(oData[k][not]).forEach(function(s){ // for each style
+						str += s16 + s +": "+ sc + oData[k][not][s] +"</br>"
 					})
 				}
 			}
 			// wrap into details for long lists
 			if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
-
 			displaylist.push(
-				s12 + h + sc + s4 + " ["+ localeCount +"]"+ sc
-				+ "<ul>"+ str
-				+ "<li>"+ s12 +"L: "+ sc + oData[h]["locales"] +"</li></ul>"
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>"+ str
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
 			)
 		}
 
