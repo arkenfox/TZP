@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>timezonename</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 680px; max-width: 780px;}
+		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">datetimeformat: timezonename
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy in timeZoneName.
+			The default test covers base languages, but you can expand locales to expose
+			<span class="s4">regional differences</span> on all three tests.
+			The <code>TINY</code> test is a minimalist hardcoded test built for speed.
+			</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ALL]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[MIN]</span>
+				<span id="btiny" class="btn4 btn" onClick="run('tiny')">[TINY]</span>
+				<span id="butc" class="btn4 btn" onClick="run('utc')">[UTC]</span>
+				<span id="breykjavik" class="btn4 btn" onClick="run('reykjavik')">[reykjavik]</span>
+				<input type="checkbox" id="optExpanded"> expand locales
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let tzIgnore = [
+// MISC: acronyms and old-timey aliases: adds nothing
+"CET",
+"CST6CDT",
+"Cuba",
+"EET",
+"EST",
+"EST5EDT",
+"Egypt",
+"Eire",
+"Factory",
+"GB",
+"GB-Eire",
+"GMT",
+"GMT+0",
+"GMT-0",
+"GMT0",
+"Greenwich",
+"HST",
+"Hongkong",
+"Iceland",
+"Iran",
+"Israel",
+"Jamaica",
+"Japan",
+"Kwajalein",
+"Libya",
+"MET",
+"MST",
+"MST7MDT",
+"NZ",
+"NZ-CHAT",
+"Navajo",
+"PRC",
+"PST8PDT",
+"Poland",
+"Portugal",
+"ROC",
+"ROK",
+"Singapore",
+"Turkey",
+"UCT",
+"UTC",
+"Universal",
+"W-SU",
+"WET",
+"Zulu",
+
+"Brazil/Acre",
+"Brazil/DeNoronha",
+"Brazil/East",
+"Brazil/West",
+"Canada/Atlantic",
+"Canada/Central",
+"Canada/Eastern",
+"Canada/Mountain",
+"Canada/Newfoundland",
+"Canada/Pacific",
+"Canada/Saskatchewan",
+"Canada/Yukon",
+"Chile/Continental",
+"Chile/EasterIsland",
+"Etc/GMT",
+"Etc/GMT+0",
+"Etc/GMT+1",
+"Etc/GMT+10",
+"Etc/GMT+11",
+"Etc/GMT+12",
+"Etc/GMT+2",
+"Etc/GMT+3",
+"Etc/GMT+4",
+"Etc/GMT+5",
+"Etc/GMT+6",
+"Etc/GMT+7",
+"Etc/GMT+8",
+"Etc/GMT+9",
+"Etc/GMT-0",
+"Etc/GMT-1",
+"Etc/GMT-10",
+"Etc/GMT-11",
+"Etc/GMT-12",
+"Etc/GMT-13",
+"Etc/GMT-14",
+"Etc/GMT-2",
+"Etc/GMT-3",
+"Etc/GMT-4",
+"Etc/GMT-5",
+"Etc/GMT-6",
+"Etc/GMT-7",
+"Etc/GMT-8",
+"Etc/GMT-9",
+"Etc/GMT0",
+"Etc/Greenwich",
+"Etc/UCT",
+"Etc/UTC",
+"Etc/Universal",
+"Etc/Zulu",
+"Mexico/BajaNorte",
+"Mexico/BajaSur",
+"Mexico/General",
+"US/Alaska",
+"US/Aleutian",
+"US/Arizona",
+"US/Central",
+"US/East-Indiana",
+"US/Eastern",
+"US/Hawaii",
+"US/Indiana-Starke",
+"US/Michigan",
+"US/Mountain",
+"US/Pacific",
+"US/Samoa"
+]
+
+let oTZData = {
+	"Africa": [
+		"Abidjan","Accra","Addis_Ababa","Algiers","Asmara","Asmera","Bamako","Bangui","Banjul","Bissau","Blantyre",
+		"Brazzaville","Bujumbura","Cairo","Casablanca","Ceuta","Conakry","Dakar","Dar_es_Salaam","Djibouti","Douala",
+		"El_Aaiun","Freetown","Gaborone","Harare","Johannesburg","Juba","Kampala","Khartoum","Kigali","Kinshasa",
+		"Lagos","Libreville","Lome","Luanda","Lubumbashi","Lusaka","Malabo","Maputo","Maseru","Mbabane","Mogadishu",
+		"Monrovia","Nairobi","Ndjamena","Niamey","Nouakchott","Ouagadougou","Porto-Novo","Sao_Tome","Timbuktu",
+		"Tripoli","Tunis","Windhoek",
+	],
+	"America": [
+		"Adak","Anchorage","Anguilla","Antigua","Araguaina","Argentina/Buenos_Aires","Argentina/Catamarca",
+		"Argentina/ComodRivadavia","Argentina/Cordoba","Argentina/Jujuy","Argentina/La_Rioja","Argentina/Mendoza",
+		"Argentina/Rio_Gallegos","Argentina/Salta","Argentina/San_Juan","Argentina/San_Luis","Argentina/Tucuman",
+		"Argentina/Ushuaia","Aruba","Asuncion","Atikokan","Atka","Bahia","Bahia_Banderas","Barbados","Belem","Belize",
+		"Blanc-Sablon","Boa_Vista","Bogota","Boise","Buenos_Aires","Cambridge_Bay","Campo_Grande","Cancun","Caracas",
+		"Catamarca","Cayenne","Cayman","Chicago","Chihuahua","Ciudad_Juarez","Coral_Harbour","Cordoba","Costa_Rica",
+		"Creston","Cuiaba","Curacao","Danmarkshavn","Dawson","Dawson_Creek","Denver","Detroit","Dominica","Edmonton",
+		"Eirunepe","El_Salvador","Ensenada","Fort_Nelson","Fort_Wayne","Fortaleza","Glace_Bay","Godthab","Goose_Bay",
+		"Grand_Turk","Grenada","Guadeloupe","Guatemala","Guayaquil","Guyana","Halifax","Havana","Hermosillo",
+		"Indiana/Indianapolis","Indiana/Knox","Indiana/Marengo","Indiana/Petersburg","Indiana/Tell_City",
+		"Indiana/Vevay","Indiana/Vincennes","Indiana/Winamac","Indianapolis","Inuvik","Iqaluit","Jamaica","Jujuy",
+		"Juneau","Kentucky/Louisville","Kentucky/Monticello","Knox_IN","Kralendijk","La_Paz","Lima","Los_Angeles",
+		"Louisville","Lower_Princes","Maceio","Managua","Manaus","Marigot","Martinique","Matamoros","Mazatlan",
+		"Mendoza","Menominee","Merida","Metlakatla","Mexico_City","Miquelon","Moncton","Monterrey","Montevideo",
+		"Montreal","Montserrat","Nassau","New_York","Nipigon","Nome","Noronha","North_Dakota/Beulah",
+		"North_Dakota/Center","North_Dakota/New_Salem","Nuuk","Ojinaga","Panama","Pangnirtung","Paramaribo",
+		"Phoenix","Port-au-Prince","Port_of_Spain","Porto_Acre","Porto_Velho","Puerto_Rico","Punta_Arenas",
+		"Rainy_River","Rankin_Inlet","Recife","Regina","Resolute","Rio_Branco","Rosario","Santa_Isabel","Santarem",
+		"Santiago","Santo_Domingo","Sao_Paulo","Scoresbysund","Shiprock","Sitka","St_Barthelemy","St_Johns",
+		"St_Kitts","St_Lucia","St_Thomas","St_Vincent","Swift_Current","Tegucigalpa","Thule","Thunder_Bay","Tijuana",
+		"Toronto","Tortola","Vancouver","Virgin","Whitehorse","Winnipeg","Yakutat","Yellowknife",
+	],
+	"Antarctica": [
+		"Casey","Davis","DumontDUrville","Macquarie","Mawson","McMurdo","Palmer","Rothera","South_Pole","Syowa","Troll","Vostok",
+	],
+	"Arctic": [
+		"Longyearbyen",
+	],
+	"Asia": [
+		"Aden","Almaty","Amman","Anadyr","Aqtau","Aqtobe","Ashgabat","Ashkhabad","Atyrau","Baghdad","Bahrain","Baku",
+		"Bangkok","Barnaul","Beirut","Bishkek","Brunei","Calcutta","Chita","Choibalsan","Chongqing","Chungking","Colombo",
+		"Dacca","Damascus","Dhaka","Dili","Dubai","Dushanbe","Famagusta","Gaza","Harbin","Hebron","Ho_Chi_Minh","Hong_Kong",
+		"Hovd","Irkutsk","Istanbul","Jakarta","Jayapura","Jerusalem","Kabul","Kamchatka","Karachi","Kashgar","Kathmandu",
+		"Katmandu","Khandyga","Kolkata","Krasnoyarsk","Kuala_Lumpur","Kuching","Kuwait","Macao","Macau","Magadan","Makassar",
+		"Manila","Muscat","Nicosia","Novokuznetsk","Novosibirsk","Omsk","Oral","Phnom_Penh","Pontianak","Pyongyang","Qatar",
+		"Qostanay","Qyzylorda","Rangoon","Riyadh","Saigon","Sakhalin","Samarkand","Seoul","Shanghai","Singapore",
+		"Srednekolymsk","Taipei","Tashkent","Tbilisi","Tehran","Tel_Aviv","Thimbu","Thimphu","Tokyo","Tomsk","Ujung_Pandang",
+		"Ulaanbaatar","Ulan_Bator","Urumqi","Ust-Nera","Vientiane","Vladivostok","Yakutsk","Yangon","Yekaterinburg","Yerevan",
+	],
+	"Atlantic": [
+		"Azores","Bermuda","Canary","Cape_Verde","Faeroe","Faroe","Jan_Mayen","Madeira","Reykjavik","South_Georgia",
+		"St_Helena","Stanley",
+	],
+	"Australia": [
+		"ACT","Adelaide","Brisbane","Broken_Hill","Canberra","Currie","Darwin","Eucla","Hobart","LHI","Lindeman","Lord_Howe",
+		"Melbourne","NSW","North","Perth","Queensland","South","Sydney","Tasmania","Victoria","West","Yancowinna",
+	],
+	"Europe": [
+		"Amsterdam","Andorra","Astrakhan","Athens","Belfast","Belgrade","Berlin","Bratislava","Brussels","Bucharest",
+		"Budapest","Busingen","Chisinau","Copenhagen","Dublin","Gibraltar","Guernsey","Helsinki","Isle_of_Man","Istanbul",
+		"Jersey","Kaliningrad","Kiev","Kirov","Kyiv","Lisbon","Ljubljana","London","Luxembourg","Madrid","Malta",
+		"Mariehamn","Minsk","Monaco","Moscow","Nicosia","Oslo","Paris","Podgorica","Prague","Riga","Rome","Samara",
+		"San_Marino","Sarajevo","Saratov","Simferopol","Skopje","Sofia","Stockholm","Tallinn","Tirane","Tiraspol",
+		"Ulyanovsk","Uzhgorod","Vaduz","Vatican","Vienna","Vilnius","Volgograd","Warsaw","Zagreb","Zaporozhye","Zurich",
+	],
+	"Indian": [
+		"Antananarivo","Chagos","Christmas","Cocos","Comoro","Kerguelen","Mahe","Maldives","Mauritius","Mayotte","Reunion",
+	],
+	"Pacific": [
+		"Apia","Auckland","Bougainville","Chatham","Chuuk","Easter","Efate","Enderbury","Fakaofo","Fiji","Funafuti",
+		"Galapagos","Gambier","Guadalcanal","Guam","Honolulu","Johnston","Kanton","Kiritimati","Kosrae","Kwajalein",
+		"Majuro","Marquesas","Midway","Nauru","Niue","Norfolk","Noumea","Pago_Pago","Palau","Pitcairn","Pohnpei",
+		"Ponape","Port_Moresby","Rarotonga","Saipan","Samoa","Tahiti","Tarawa","Tongatapu","Truk","Wake","Wallis","Yap",
+	],
+}
+
+var oTimezones = {},
+	oLists = {},
+	aLegend = [],
+	aLocales = [],
+	aLegendExpanded = [],
+	aLocalesExpanded = [],
+	isSupported = false,
+	isSupportedValues = false,
+	localesHashAll = "", // to compare min to
+	localesHashAllExpanded = "", // to compare min to
+	strMinWarning = " don't panic, it's working<br><br> ... running 'expanded' takes a few seconds",
+	strMaxWarning = " don't panic, it's working<br><br> ... running 'ALL' can take over a minute"
+
+s4 = s4.trim()
+s12 = s12.trim()
+s14 = s14.trim()
+s16 = s16.trim()
+sg = sg.trim()
+sb = sb.trim()
+s99 = s99.trim()
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "timezones") {
+		console.log(name +": " + sDetail[name].length +"\n"+ sDetail[name].join(", "))
+	} else if (name == "timezonesall") {
+		console.log("all supported timezones" +": " + sDetail[name].length +"\n"+ sDetail[name].join(", \n"))
+	} else if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else if (sDetail[name] !== undefined) {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend(method) {
+	// build once
+	let optExpanded = dom.optExpanded.checked
+	method = optExpanded ? "expanded" : "list"
+	let list = oLists[method]
+
+	let proceed = false
+	if (method == "list") {
+		if (aLegend.length == 0) {proceed = true}
+	} else {
+		if (aLegendExpanded.length == 0) {proceed = true}
+	}
+
+	if (proceed) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.DateTimeFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				if (method == "list") {
+					aLocales.push(code)
+				} else {
+					aLocalesExpanded.push(code)
+				}
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				if (method == "list") {
+					aLegend.push(code.padStart(7) +": "+ name)
+				} else {
+					aLegendExpanded.push(code.padStart(7) +": "+ name)
+				}
+			}
+		}
+	}
+	// output
+	let aDisplay = (method == "list" ? aLegend : aLegendExpanded)
+	let header = s4 +"LEGEND ["+ aDisplay.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aDisplay.join("<br>")
+}
+
+function set_timezone_lists() {
+
+	// everything
+	let everything = []
+	Object.keys(oTZData).forEach(function(region){
+		oTZData[region].forEach(function(tz){
+			everything.push(region +"/"+ tz)
+		})
+	})
+	everything = everything.concat(tzIgnore)
+	everything.sort()
+	everything = everything.filter(function(item, position) {return everything.indexOf(item) === position}) // dedupe in case of typos
+	oTimezones["everything"] = everything
+
+	// FF93+: supportedValuesOf
+	let supported = Intl.supportedValuesOf("timeZone")
+	supported.sort()
+	oTimezones["supported"] = supported
+
+	// all
+	let all = everything
+	all = all.filter(x => !tzIgnore.includes(x))
+	all = all.filter(x => supported.includes(x))
+	all.sort()
+	all = all.filter(function(item, position) {return all.indexOf(item) === position})
+	oTimezones["all"] = all
+
+	// these don't add anything in gecko
+	// we could do a filter for supported vs ignored to check blink
+	// keep a list of what is ignored so I can easily mod/check things
+	let oIgnoreData = {
+		"Africa": [
+			"Abidjan","Accra","Addis_Ababa","Algiers","Asmara","Asmera","Bamako","Bangui","Banjul","Bissau","Blantyre",
+			"Brazzaville","Bujumbura","Cairo","Casablanca","Ceuta","Conakry","Dakar","Dar_es_Salaam","Djibouti","El_Aaiun",
+			"Freetown","Gaborone","Harare","Johannesburg","Juba","Kampala","Khartoum","Kigali","Kinshasa","Lagos",
+			"Libreville","Lome","Luanda","Lubumbashi","Malabo","Maputo","Maseru","Mbabane","Mogadishu","Monrovia",
+			"Ndjamena","Niamey","Nouakchott","Ouagadougou","Porto-Novo","Sao_Tome","Timbuktu","Tripoli","Tunis",
+		],
+		"America": [
+			"Adak","Anchorage","Anguilla","Antigua","Araguaina","Argentina/Buenos_Aires","Argentina/Catamarca",
+			"Argentina/ComodRivadavia","Argentina/Cordoba","Argentina/Jujuy","Argentina/La_Rioja","Argentina/Mendoza",
+			"Argentina/Rio_Gallegos","Argentina/Salta","Argentina/San_Juan","Argentina/San_Luis","Argentina/Tucuman",
+			"Argentina/Ushuaia","Aruba","Asuncion","Atikokan","Atka","Bahia","Bahia_Banderas","Barbados","Belem","Belize",
+			"Blanc-Sablon","Boa_Vista","Boise","Buenos_Aires","Cambridge_Bay","Campo_Grande","Cancun","Catamarca",
+			"Cayman","Chicago","Chihuahua","Ciudad_Juarez","Coral_Harbour","Cordoba","Costa_Rica","Creston","Cuiaba",
+			"Curacao","Danmarkshavn","Dawson","Dawson_Creek","Denver","Detroit","Dominica","Edmonton","Eirunepe",
+			"El_Salvador","Ensenada","Fort_Nelson","Fort_Wayne","Fortaleza","Glace_Bay","Godthab","Goose_Bay","Grand_Turk",
+			"Grenada","Guadeloupe","Guatemala","Halifax","Havana","Hermosillo","Indiana/Indianapolis","Indiana/Knox","Indiana/Marengo",
+			"Indiana/Petersburg","Indiana/Tell_City","Indiana/Vevay","Indiana/Vincennes","Indiana/Winamac","Indianapolis",
+			"Inuvik","Iqaluit","Jamaica","Jujuy","Juneau","Kentucky/Louisville","Kentucky/Monticello","Knox_IN","Kralendijk",
+			"Los_Angeles","Louisville","Lower_Princes","Maceio","Managua","Manaus","Marigot","Martinique","Matamoros",
+			"Mazatlan","Mendoza","Menominee","Merida","Metlakatla","Mexico_City","Miquelon","Moncton","Monterrey","Montreal",
+			"Montserrat","Nassau","New_York","Nipigon","Nome","Noronha","North_Dakota/Beulah","North_Dakota/Center",
+			"North_Dakota/New_Salem","Nuuk","Ojinaga","Panama","Pangnirtung","Phoenix","Port-au-Prince","Port_of_Spain",
+			"Porto_Acre","Porto_Velho","Puerto_Rico","Punta_Arenas","Rainy_River","Rankin_Inlet","Recife","Regina",
+			"Resolute","Rio_Branco","Santa_Isabel","Santarem","Santiago","Santo_Domingo","Sao_Paulo","Scoresbysund",
+			"Shiprock","Sitka","St_Barthelemy","St_Johns","St_Kitts","St_Lucia","St_Thomas","St_Vincent","Swift_Current",
+			"Tegucigalpa","Thule","Thunder_Bay","Tijuana","Tortola","Vancouver","Virgin","Whitehorse","Yakutat","Yellowknife",
+		],
+		"Antarctica": [
+			"Casey","Davis","DumontDUrville","Macquarie","Mawson","McMurdo","Palmer","Rothera","South_Pole","Syowa","Troll","Vostok",
+		],
+		"Arctic": [
+			"Longyearbyen",
+		],
+		"Asia": [
+			"Aden","Almaty","Amman","Anadyr","Aqtau","Aqtobe","Ashgabat","Ashkhabad","Atyrau","Baghdad","Bahrain","Baku","Bangkok",
+			"Barnaul","Beirut","Bishkek","Brunei","Calcutta","Chita","Choibalsan","Chongqing","Chungking","Colombo","Dacca",
+			"Damascus","Dhaka","Dubai","Dushanbe","Famagusta","Gaza","Harbin","Hebron","Ho_Chi_Minh","Hovd","Irkutsk","Istanbul",
+			"Jakarta","Jayapura","Jerusalem","Kabul","Kamchatka","Karachi","Kashgar","Kathmandu","Katmandu","Khandyga","Krasnoyarsk",
+			"Kuala_Lumpur","Kuwait","Macao","Macau","Magadan","Makassar","Manila","Novokuznetsk","Novosibirsk","Omsk","Oral",
+			"Pontianak","Pyongyang","Qatar","Qostanay","Qyzylorda","Rangoon","Riyadh","Saigon","Sakhalin","Samarkand","Shanghai",
+			"Srednekolymsk","Taipei","Tashkent","Tbilisi","Tehran","Tel_Aviv","Thimbu","Thimphu","Tokyo","Tomsk","Ujung_Pandang",
+			"Ulaanbaatar","Ulan_Bator","Urumqi","Ust-Nera","Vientiane","Vladivostok","Yakutsk","Yekaterinburg",
+		],
+		"Atlantic": [
+			"Canary","Cape_Verde","Faeroe","Faroe","Jan_Mayen","Madeira","Reykjavik","St_Helena","Stanley",
+		],
+		"Australia": [
+			"ACT","Adelaide","Brisbane","Broken_Hill","Canberra","Currie","Darwin","Eucla","Hobart","LHI","Lindeman","Lord_Howe",
+			"Melbourne","NSW","North","Perth","Queensland","South","Sydney","Tasmania","Victoria","West","Yancowinna",
+		],
+		"Europe": [
+			"Amsterdam","Andorra","Astrakhan","Athens","Belgrade","Berlin","Bratislava","Brussels","Bucharest","Budapest",
+			"Busingen","Chisinau","Copenhagen","Dublin","Gibraltar","Guernsey","Helsinki","Istanbul","Jersey","Kaliningrad","Kiev",
+			"Kirov","Kyiv","Lisbon","Ljubljana","Luxembourg","Madrid","Malta","Mariehamn","Monaco","Moscow","Nicosia","Oslo",
+			"Paris","Podgorica","Prague","Riga","Rome","Samara","San_Marino","Saratov","Simferopol","Skopje","Sofia","Stockholm",
+			"Tallinn","Tirane","Tiraspol","Ulyanovsk","Uzhgorod","Vaduz","Vatican","Vienna","Vilnius","Volgograd","Warsaw",
+			"Zagreb","Zaporozhye","Zurich",
+		],
+		"Indian": [
+			"Antananarivo","Christmas","Comoro","Kerguelen","Mahe","Maldives","Mauritius","Mayotte","Reunion",
+		],
+		"Pacific": [
+			"Apia","Auckland","Bougainville","Chatham","Chuuk","Easter","Efate","Enderbury","Fakaofo","Fiji","Funafuti",
+			"Galapagos","Gambier","Guadalcanal","Guam","Honolulu","Johnston","Kanton","Kiritimati","Kosrae","Kwajalein",
+			"Majuro","Marquesas","Midway","Nauru","Niue","Norfolk","Noumea","Palau","Pitcairn","Pohnpei","Ponape","Port_Moresby",
+			"Rarotonga","Samoa","Tahiti","Tarawa","Truk","Wake","Wallis","Yap",
+		],
+	}
+	let ignore = []
+	Object.keys(oIgnoreData).forEach(function(region){
+		oIgnoreData[region].forEach(function(tz){
+			ignore.push(region +"/"+ tz)
+		})
+	})
+	ignore = ignore.concat(tzIgnore)
+	ignore = ignore.filter(x => supported.includes(x))
+	ignore.sort()
+	ignore = ignore.filter(function(item, position) {return ignore.indexOf(item) === position}) // dedupe in case of typos
+	oTimezones["ignore"] = ignore
+
+	// expanded: not used: we will hardcode them
+	let expanded = supported.length ? supported : tzList
+	expanded = expanded.filter(x => !ignore.includes(x))
+	expanded.sort()
+	oTimezones["expanded"] = expanded
+
+}
+
+function run_main(method) {
+	let spacer = "<br><br>"
+	if (method == "all") {
+		// show a warning and add a button with isWarning = true
+		let confirmStr = "are you sure?"+ spacer
+			+"it can take <span class='bad'>up to a minute</span> (or more, on slower devices)" + spacer
+			+"it might <span class='bad'>make your fans whir</span>" + spacer +"<br>"
+			+"<span class='btnbad btnfirst' onClick='run(`all_confirmed`)'>"
+			+"[ YES, i'm sure. RUN it ]</span>"
+		dom.results.innerHTML = confirmStr
+		return
+	}
+	if (method == "all_confirmed") {method = "all"}
+
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+
+	let optExpanded = dom.optExpanded.checked
+
+	// full
+	let tzNames = ["short","long","shortOffset","longOffset","shortGeneric","longGeneric"]
+	let tzDays = [Date.UTC(2019, 1, 1, 13, 0, 0), Date.UTC(2019, 7, 1, 0, 0, 0)]
+	// Date.UTC(year, monthIndex, day, hour, minute, second, millisecond)
+
+	/* FULL TEST
+		207/219 base languages
+    298/725 all locales
+		298/310 expanded locales
+
+		NAMES ONLY
+		205/219 base languages
+    276/725 all locales
+		276/290 expanded locales: saves two shortG checks x 29 locales: not worth the perf
+
+	*/
+
+	// perf: tzNames: drop some styles
+	/*
+		tested FF121: 1070 locales
+		- 315: all 6
+		- 313: shortGeneric + longGeneric
+		- 315: short
+	*/
+	tzNames = ["short","shortGeneric","longGeneric"]
+	//tzDays = [Date.UTC(2019, 7, 1, 0, 0, 0)]
+	// use a date not a number (Date.UTC) so we're compat with toLocaleString etc
+	tzDays = [new Date("August 1, 2019 0:00:00 UTC")]
+	let tzSG = {"shortGeneric": tzDays},
+		tzLG = {"longGeneric": tzDays},
+		tzS = {"short": tzDays}
+	let both = {"shortGeneric": tzDays, "longGeneric": tzDays},
+		everything = {
+			"short": tzDays,
+			"shortGeneric": tzDays,
+			"longGeneric": tzDays,
+		}
+	let tests = {}
+
+	if (method == "all") {
+		// all supported timezones minus some crap x both
+		let timezones = oTimezones["all"]
+		timezones.forEach(function(tz) {
+			tests[tz] = everything
+		})
+	} else if (method == "min") {
+		if (optExpanded) {
+			// expanded
+			tests = {
+				"Africa/Douala": tzLG,
+				"Africa/Lusaka": tzSG,
+				"Africa/Nairobi": tzSG,
+				"Africa/Windhoek": tzSG,
+				"America/Bogota": tzSG,
+				"America/Caracas": tzSG,
+				"America/Cayenne": tzSG,
+				"America/Guayaquil": tzSG,
+				"America/Guyana": tzSG,
+				"America/La_Paz": tzSG,
+				"America/Lima": tzSG,
+				"America/Montevideo": tzSG,
+				"America/Paramaribo": tzSG,
+				"America/Rosario": tzSG,
+				"America/Toronto": tzLG,
+				"America/Winnipeg": tzLG,
+				"Asia/Dili": tzSG,
+				"Asia/Hong_Kong": tzSG,
+				"Asia/Kolkata": tzSG,
+				"Asia/Kuching": tzSG,
+				"Asia/Muscat": tzSG,
+				"Asia/Nicosia": tzLG,
+				"Asia/Phnom_Penh": tzLG,
+				"Asia/Seoul": tzLG,
+				"Asia/Singapore": tzSG,
+				"Asia/Yangon": tzSG,
+				"Asia/Yerevan": tzSG,
+				"Atlantic/Azores": tzSG,
+				"Atlantic/Bermuda": both,
+				"Atlantic/South_Georgia": tzSG,
+				"Europe/Belfast": tzS,
+				"Europe/Isle_of_Man": tzSG,
+				"Europe/London": tzSG,
+				"Europe/Minsk": tzSG,
+				"Europe/Sarajevo": both,
+				"Indian/Chagos": tzLG,
+				"Indian/Cocos": tzS,
+				"Pacific/Pago_Pago": tzLG,
+				"Pacific/Saipan": tzSG,
+				"Pacific/Tongatapu": tzSG,
+			}
+			/* find missing
+			let newTZs = [
+			]
+			newTZs.forEach(function(tz) {
+				tests["Europe/"+tz] = everything
+			})
+			//*/
+		} else {
+			tests = {
+				"Africa/Douala": tzLG,
+				"Africa/Lusaka": tzSG,
+				"Africa/Nairobi": tzSG,
+				"America/La_Paz": tzSG,
+				"Asia/Phnom_Penh": tzSG,
+				"Asia/Seoul": tzLG,
+				"Asia/Yerevan": tzSG,
+				"Europe/Isle_of_Man": tzSG,
+				"Europe/London": tzSG,
+				"Indian/Chagos": tzLG,
+				"Indian/Cocos": tzS,
+				"Pacific/Pago_Pago": tzLG,
+				"Pacific/Saipan": tzSG,
+				"Pacific/Tongatapu": tzSG,
+			}
+		}
+	} else if (method == "tiny") {
+		// wee fast test with bang for buck
+		/* 
+			last tested FF123
+
+			EXPANDED: max entropy = 311
+			- Seoul 223 + Douala 234 + London 242 + Hong Kong 248 + Muscat 254 | after that it's small pickups of < 3
+			- 254 (5 tests) out of 311 max (40 tests) = 82%
+			- the remaining 35 tests would pickup 57 more buckets
+				- not worth it overall - and some of this may be equivalency of other tests
+				- althought we are trying to test as much as possible for regressions and lies and custom formatting etc
+
+			LIST: max entropy = 213
+			- Seoul 191 + Douala 199 + London 205 + Hong Kong 206 (+ Muscat adds nothing)
+			- 206 (5 tests) out of 213 max (14 tests - or 15 if you count we added Muscat) = 97% = pretty good for major locales
+		*/
+		tests = {
+			"Asia/Seoul": tzLG,
+			"Africa/Douala": tzLG,
+			"Europe/London": tzSG,
+			"Asia/Hong_Kong": tzSG,
+			"Asia/Muscat": tzSG,
+			// temp test UTC replacement
+			"Atlantic/Reykjavik": both
+		}
+	} else if (method == "utc") {
+		tests = {
+			"UTC": both
+		}
+	} else if (method == "reykjavik") {
+		tests = {
+			"Atlantic/Reykjavik": both
+		}
+	}
+
+	let tzUsed = []
+	Object.keys(tests).forEach(function(tz) {
+		tzUsed.push(tz)
+	})
+	tzUsed.sort()
+	sDetail["timezones"] = tzUsed
+
+	let oStyles = {}
+	let array = optExpanded ? aLocalesExpanded : aLocales
+	try {
+		array.forEach(function(code) { // for each locale
+			oStyles = {}
+			Object.keys(tests).sort().forEach(function(tz){ // for each tz
+				oStyles[tz] = {}
+				Object.keys(tests[tz]).forEach(function(tzn){ // for each tzname
+					oStyles[tz][tzn] = []
+					try {
+						// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
+							// IDK if this is really needed here but it can't hurt
+							// we use y+m+d numeric so we toLocaleString will match
+							// ^ does not affect entropy or hashes at all which are stable across timezones: e.g. TB at UTC vs my machine
+						let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
+						let formatter = Intl.DateTimeFormat(code, option)
+						tests[tz][tzn].forEach(function(d){ // for each date
+							oStyles[tz][tzn].push(formatter.format(d))
+							/* what do we  get if we only use the name
+							let tzDateString = formatter.formatToParts(d).map(({type, value}) => {
+								if (type == "timeZoneName" || type == "unknown") {
+									oStyles[tz][tzn].push(value)
+								}
+							})
+							//*/
+						})
+					} catch (e) {
+						//console.log(e.name, e.message)
+					} // ignore invalid
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(oStyles).forEach(function(tz){ // each tz
+					oTempData[hash][tz] = {}
+					Object.keys(oStyles[tz]).forEach(function(tzn){ // for each tzname
+						if (oStyles[tz][tzn].length) {
+							oTempData[hash][tz][tzn] = oStyles[tz][tzn].join(" | ")
+						}
+					})
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		//console.log(oTempData)
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order in new object
+		for (const h of Object.keys(oTempData).sort()) { // for each hash
+			oData[h] = {}
+			for (const tz of Object.keys(oTempData[h]).sort()) { // for each tz
+				if (tz == "locales") {
+					oData[h][tz] = oTempData[h][tz].join(", ")
+				} else {
+					if (Object.keys(oTempData[h][tz]).length) {
+						oData[h][tz] = oTempData[h][tz]
+					}
+				}
+			}
+		}
+		//console.log(oData)
+
+		let localeGroups = [], displaylist = []
+		for (const h of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[h]["locales"])
+			let localeCount = oData[h]["locales"].split(",").length
+			let str = ""
+			for (const not of Object.keys(oData[h])) { // for each notation
+				if (not !== "locales") {
+					let linecount = Object.keys(oData[h][not]).length
+					if (linecount == 1) {
+						str += "<li>"+ s12 + not +": "+ sc
+					} else {
+						str += "<li>"+ s12 + not + sc +"</li>"
+					}
+					Object.keys(oData[h][not]).forEach(function(s){ // for each style
+						str += s16 + s +": "+ sc + oData[h][not][s] +"</br>"
+					})
+					if (linecount == 1) {str += "</li>"}
+				}
+			}
+			// wrap into details for long lists
+			if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
+			displaylist.push(
+				s12 + h + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>"+ str
+				+ "<li>"+ s12 +"L: "+ sc + oData[h]["locales"] +"</li></ul>"
+			)
+		}
+
+		// hashes + btns
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		sDetail["results"] = oData
+
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		sDetail["timezonesall"] = oTimezones["supported"]
+		let tzBtn = "<span class='btn4 btnc' onClick='log_console(`timezones`)'>[" + tzUsed.length + "]</span>"
+			+" from <span class='btn4 btnc' onClick='log_console(`timezonesall`)'>[" + oTimezones["supported"].length + "]</span>"
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			if (optExpanded) {
+				localesHashAllExpanded = localesHash
+			} else {
+				localesHashAll = localesHash
+			}
+			if (isFF) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
+					// track FF version changes
+					if (optExpanded) {
+						// expanded results
+						if (resultsHash == "531d45af") {resultsHash += s14 +" [FF115+]"+ sc
+						} else {resultsHash += zNEW
+						}
+						// expanded locales
+						if (localesHash == "489b276a") {localesHash += s14 +" [FF115+]"+ sc
+						} else if (isFF) {localesHash += zNEW
+						}
+					} else {
+						// results
+						if (resultsHash == "e295da2b") {resultsHash += s14 +" [FF115+]"+ sc
+						} else {resultsHash += zNEW
+						}
+						// locales
+						if (localesHash == "2b77fc8d") {localesHash += s14 +" [FF115+]"+ sc
+						} else if (isFF) {localesHash += zNEW
+						}
+					}
+				}
+			}
+		} else if (method == "min") {
+			// don't notate if user hasn't run all
+			if (optExpanded) {
+				if (localesHashAllExpanded !== "") {
+					localesMatch = localesHash == localesHashAllExpanded ? green_tick : red_cross
+				}
+			} else {
+				if (localesHashAll !== "") {
+					localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+				}
+			}
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + array.length +"]" + sc
+			//+" &nbsp KEY: <span class='s16'>L</span> longGeneric <span class='s16'>S</span> shortGeneric"
+			+ spacer
+			+ s12 +"timezones: "+ sc + tzBtn + spacer
+			+ s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported && isSupportedValues) {
+		let optExpanded = dom.optExpanded.checked
+		// set legend
+		legend(method)
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		let status = "calculating ..."
+		if (method == "all_confirmed") {
+			status += strMaxWarning
+		} else if (method == "min" && optExpanded) {
+			status += strMinWarning
+		}
+		dom.results.innerHTML = status
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	if (method == "all_confirmed") {method = "all"}
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+
+	dom.optExpanded.checked = false
+
+	try {
+		// FF91+: pointless if we can't use the feature being tested
+		let formatter = Intl.DateTimeFormat("en-US", {hour12: true, timeZoneName: "longGeneric"})
+		isSupported = true
+		// FF93+: to simplify matters and help perf, we also require supportedValuesOf
+		let test = Intl.supportedValuesOf("timeZone")
+		isSupportedValues = true
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+
+	// set lists
+	let list = gLocales
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	list.sort()
+	oLists["list"] = list
+	// expanded: add additional locales to core locales for this test
+	let listExtra = [
+		"ar-ae,arabic (united arabic emirates)",
+		"ar-bh,arabic (bahrain)",
+		"ar-ly,arabic (libya)",
+		"ar-sa,arabic (saudi arabia)",
+		"ar-tn,arabic (tunisia)",
+		"az-cyrl,azerbaijani (cyrillic)",
+		"bs-cyrl,bosnian (cyrillic)",
+		"ckb-ir,central kurdish (iran)",
+		"de-ch,german (switzerland)",
+		"en-ae,english (united arab emirates)",
+		"en-ag,english (antigua & barbuda)",
+		"en-at,english (austria)",
+		"en-au,english (australia)",
+		"en-be,english (belgium)",
+		"en-bm,english (bermuda)",
+		"en-bw,english (botswana)",
+		"en-bz,english (belize)",
+		"en-ca,english (canada)",
+		"en-ch,english (switzerland)",
+		"en-gb,english (united kingdom)",
+		"en-gu,english (guam)",
+		"en-gy,english (guyana)",
+		"en-hk,english (hong kong)",
+		"en-ie,english (ireland)",
+		"en-in,english (india)",
+		"en-jm,english (jamaica)",
+		"en-mh,english (marshall islands)",
+		"en-mo,english (macau)",
+		"en-my,english (malaysia)",
+		"en-nz,english (new zealand)",
+		"en-pr,english (puerto rico)",
+		"en-se,english (sweden)",
+		"en-sg,english (singapore)",
+		"en-za,english (south africa)",
+		"en-zw,english (zimbabwe)",
+		"es-ar,spanish (argentina)",
+		"es-bo,spanish (bolivia)",
+		"es-br,spanish (brazil)",
+		"es-bz,spanish (belize)",
+		"es-cl,spanish (chile)",
+		"es-co,spanish (colombia)",
+		"es-cr,spanish (costa rica)",
+		"es-do,spanish (dominican republic)",
+		"es-ec,spanish (ecuador)",
+		"es-mx,spanish (mexico)",
+		"es-pa,spanish (panama)",
+		"es-pe,spanish (peru)",
+		"es-pr,spanish (puerto rico)",
+		"es-us,spanish (united states)",
+		"es-uy,spanish (uruguay)",
+		"es-ve,spanish (venezuela)",
+		"fa-af,persian (afghanistan)",
+		"ff-adlm,fulah (adlam)",
+		"fr-be,french (belgium)",
+		"fr-ca,french (canada)",
+		"fr-ch,french (switzerland)",
+		"fr-gf,french (french guiana)",
+		"fr-gp,french (guadeloupe)",
+		"fr-tn,french (tunisia)",
+		"hi-latn,hindi (latin)",
+		"ko-kp,korean (north korea)",
+		"ks-deva,kashmiri (devanagari)",
+		"lrc-iq,northern luri (iraq)",
+		"ms-id,malay (indonesia)",
+		"ne-in,nepali (india)",
+		"nl-aw,dutch (aruba)",
+		"nl-be,dutch (belgium)",
+		"nl-sr,dutch (suriname)",
+		"pa-pk,punjabi (pakistan)",
+		"ps-pk,pashto (pakistan)",
+		"pt-ao,portuguese (angola)",
+		"pt-ch,portuguese (switzerland)",
+		"pt-cv,portuguese (cape verde)",
+		"qu-bo,quechua (bolivia)",
+		"qu-ec,quechua (ecuador)",
+		"ro-md,romanian (moldova)",
+		"ru-ua,russian (ukraine)",
+		"sd-deva,sindhi (devanagari)",
+		"se-fi,northern sami (finland)",
+		"shi-latn,tachelhit (latin)",
+		"sr-ba,serbian (bosnia & herzegovina)",
+		"sr-cyrl-me,serbian (cyrillic montenegro)",
+		"sr-latn,serbian (latin)",
+		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		"sr-latn-xk,serbian (latin kosovo)",
+		"sr-me,serbian (montenegro)",
+		"sr-xk,serbian (kosovo)",
+		"sw-cd,swahili (congo kinshasa)",
+		"sw-ke,swahili (kenya)",
+		"ta-my,tamil (malaysia)",
+		"ur-in,urdu (india)",
+		"uz-af,uzbek (afghanistan)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"vai-latn,vai (latin)",
+		"yo-bj,yoruba (benin)",
+		"yue-hans,cantonese (simplified)",
+		"zh-hans-hk,chinese (simplified hong kong)",
+		"zh-hans-mo,chinese (simplified macau)",
+	]
+	let expanded = listExtra.concat(list)
+	expanded = expanded.filter(function(item, position) {return expanded.indexOf(item) === position})
+	expanded.sort()
+	oLists["expanded"] = expanded
+
+	legend()
+	if (isSupportedValues) {
+		set_timezone_lists()
+	}
+
+	if (isSupported && isSupportedValues) {
+		setBtn("min")
+		dom.results = "calculating ..."
+		setTimeout(function() {
+			run_main("min")
+		}, 50)
+	}
+})
+
+</script>
+</body>
+</html>
