@@ -8,8 +8,9 @@
 	<script src="testglobals.js"></script>
 	<script src="testgeneric.js"></script>
 	<style>
-		table {width: 97%; min-width: 480px; max-width: 580px;}
+		table {width: 97%; min-width: 580px; max-width: 680px;}
 		hr {color: var(--test4);}
+		ul.main {margin-left: -20px;}
 	</style>
 </head>
 
@@ -20,7 +21,7 @@
 	</table>
 
 	<table id="tb4">
-		<col width="40%"><col width="60%">
+		<col width="200px">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">pluralrules
 			<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -352,7 +353,7 @@ function run_test(type) {
 		let pretty = []
 		for (let i=0; i < bucket_hash.length; i++) {
 			let part1 = s4 +"hash: "+ sc + bucket_hash[i]
-			let part2 = "<ul><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
+			let part2 = "<ul class='main'><li>" + s12 +"cardinal: "+ sc + bucket_resC[i] +"</li>"
 			let part3 = "<li>" + s12 +"ordinal: "+ sc + bucket_resO[i] +"</li>"
 			let part4 = "<li>" + s12 +"locale: "+ sc + bucket_code[i] +"</li></ul>"
 			pretty.push(part1 + part2 + part3 + part4)
@@ -363,7 +364,7 @@ function run_test(type) {
 		// output
 		str = code_total + (code_total == aLocales.length ? sg : sb) +" [match]"+ sc
 		str = "<hr><br>"+ s4 +"ALL NUMBERS ["+ aNosCardinal.length +"]"+ sc +"<br>"
-			+"<ul><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
+			+"<ul class='main'><li>"+ s12 +"unique hashes: "+ sc + main_buckets.length +"</li>"
 			+"<li>"+ s12 +" locales hash: "+ sc + mini(main_buckets) +"</li>"
 			+"<li>"+ s12 +" locale check: "+ sc + str +"</li></ul>"
 		dom.numbers0.innerHTML = str
@@ -379,7 +380,7 @@ function run_test(type) {
 		let main_hash = mini(main_buckets)
 		// append results
 		let matchbad = sb +" [match]"+ sc, matchgood = sg +" [match]"+ sc
-		str = "<ul><li>" + s12 +"unique hashes:"+ sc
+		str = "<ul class='main'><li>" + s12 +"unique hashes:"+ sc
 		str += " "+ check_count + (check_count == main_buckets.length ? matchgood : matchbad)
 		str += "</li><li>"+ s12 +" locales hash: "+ sc + check_hash + (check_hash == main_hash ? matchgood : matchbad)
 		str += "</li></ul>"
