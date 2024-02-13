@@ -313,13 +313,14 @@ const get_pdf = () => new Promise(resolve => {
 		get_pdfViewer("plugins"),
 	]).then(function(){
 		const METRIC = "pdf"
-		let hash = mini(oData), notation = ""
-		addData(18, METRIC, oData, hash)
+		let hash = mini(oData), notation = "", isLies = false
 		if (isSmart) {
 			// lies
 				// ignore errors (which we collect), we don't care if all three are errors (unlikely)
 				// just return lies if not one of our expected etc
-			let isLies = false
+			if (runSL) {
+				oData = {"mimeTypes": "none", "pdfViewerEnabled": true, "plugins": "none"}; hash = "34d9a685"
+			}
 			if (!["91073152","beccb452"].includes(hash)) {
 				isLies = true // enabled, disabled
 			} else if (
@@ -337,6 +338,14 @@ const get_pdf = () => new Promise(resolve => {
 			} else {
 				notation = isLies ? default_red : (hash == "91073152" ? default_green : default_red)
 			}
+		}
+		if (isLies) {
+			hash = colorFn(hash)
+			addData(18, METRIC, zLIE)
+			sDetail[isScope][METRIC] = oData
+			log_known(SECT18, METRIC)
+		} else {
+			addData(18, METRIC, oData, hash)
 		}
 		log_display(18, METRIC, hash + addButton(18, METRIC) + notation)
 		return resolve()
