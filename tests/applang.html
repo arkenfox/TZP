@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=500">
 	<title>app language</title>
   <link rel="stylesheet" type="text/css" href="testindex.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css">
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
@@ -19,11 +20,26 @@
 		.flex-item {
 			margin: 0px 0px 10px 0px;
 		}
+		.fixed {
+			top: 0;
+			left: 0;
+			width:230px;
+			height:100px;
+			padding: 0px;
+			position: fixed;
+			display: inline;
+		}
+		.bigger {
+			font-size: 250px;
+		}
 		#edetails {display: inline;}
 	</style>
 </head>
 
 <body>
+
+	<div class="fixed normalized" id="elementsdiv"></div>
+
 	<!-- offscreen -->
 	<div class="offscreen">
 		<div>
@@ -32,9 +48,14 @@
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
 			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
 			<div><span id="dfsize"></span></div>
+			<div><input id="enumber" type="number" min="6" step="2"></div>
 			<div id="sysFont"></div>
 		</div>
+		<div class="bigger">
+			<q id="intlcss_quote" lang="fr"></q>
+		</div>
 	</div>
+
 	<div class="hidden">
 		<div>
 			<input type="text" required id="widgettext">
@@ -72,7 +93,7 @@
 	<table id="tb4">
 		<col width="25%"></a><col width="75%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">application language
+			<div class="nav-title">application language &hellip; &ldquo; &rdquo; &lsquo; &rsquo; 
 			<div class="nav-up"><span class="c perf" id="locale"></span></div>
 			</div>
 		</th></tr></thead>
@@ -83,65 +104,49 @@
 
 		<tr><td colspan="2" style="text-align: left;">
 			<div class="floatright">
-				<div class="flex-item">
-<input id="ebutton" type="button"> &nbsp;
-<input id="ecolor" type="color"> &nbsp;
-<input id="echeckbox" type="checkbox"> &nbsp;
-<input id="eradio" type="radio">
-				</div>
-				<div class="flex-item"><input id="edate" type="date"></div>
-				<div class="flex-item"><input id="edatetime-local" type="datetime-local"></div>
-				<div class="flex-item"><details id="edetails"></details></div>
-				<div class="flex-item"><input id="edirectory" webkitdirectory type="file"></div>
-				<div class="flex-item"><input id="efile" type="file"></div>
-				<div class="flex-item"><input id="efiles" multiple="" type="file"></div>
-				<div class="flex-item"><input id="enumber" type="number" min="6" step="2"></div>
-				<!-- important: each multiple select must be on a separate line -->
-				<div class="flex-item">
-					<select multiple="" id="eselectempty"><option id="optempty"></option></select> &nbsp;
-					<input id="ereset" type="reset"> &nbsp; <select id="eselect"><option></option></select>
-				</div>
-				<div class="flex-item">
-					<select multiple="" id="eselectspaces"><option id="optspaces"> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
-					<input id="esubmit" type="submit">
-				</div>
-				<div class="flex-item">
-					<select multiple="" id="eselectstring"><option id="optstring">Mōá?-&#xffff;</option></select> &nbsp;
-					<input id="etime" type="time">
-				</div><br>
+				<!-- smaller visuals -->
+				<div class="flex-item"><q lang="fr"></q></div>
 			</div>
+			<div>CSS &nbsp;
+				<span class='blue'>chrome://global/locale/intl.css</span>
+				<br><br><span class="c mono spaces no_color" id="css"> &nbsp; </span><span>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
 			<div>ELEMENTS &nbsp;
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForm</a>
-				<br><br><span class="c mono spaces no_color" id="elements"></span><span>
-			</div>
-		</td></tr>
-
-		<tr><td colspan="2" style="text-align: left;">
-			<div>FONTS &nbsp; <span class="c mono no_color" id="fontshash"></span><br>
-				<br><span class="c mono spaces no_color" id="fonts"></span><span><br>
-			</div>
-		</td></tr>
-
-		<tr><td colspan="2" style="text-align: left;">
-			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span><br>
-				<br><span class="c mono spaces no_color" id="numeric_input"></span><span><br>
+				<br><br><span class="c mono spaces no_color" id="elements"> &nbsp; </span><span>
 			</div>
 		</td></tr>
 
 		<tr><td colspan="2" style="text-align: left;">
 			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
-				<br><br><span class="c mono spaces no_color" id="media_messages"></span><span>
+				<br><br><span class="c mono spaces no_color" id="media_messages"> &nbsp; </span><span>
 			</div>
 			<br>
 			<div>VALIDATION MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
-				<br><br><span class="c mono spaces no_color" id="validation_messages"></span>
+				<br><br><span class="c mono spaces no_color" id="validation_messages"> &nbsp; </span>
 			</div>
 			<br>
 			<div>XML ERRORS <sup>1</sup> &nbsp; 
 			<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties' target='blank'>searchfox xmlparser</a>
-			<br><br><span class="c mono spaces no_color" id="xml_errors"></span>
+			<br><br><span class="c mono spaces no_color" id="xml_errors"> &nbsp; </span>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
+			<div><hr><br></div
+			<div>FONTS &nbsp; <span class="c mono no_color" id="fontshash"></span><br>
+				<br><span class="c mono spaces no_color" id="fonts"> &nbsp; </span><span><br>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
+			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span><br>
+				<br><span class="c mono spaces no_color" id="numeric_input"> &nbsp; </span><span><br>
 			</div>
 		</td></tr>
 
@@ -271,6 +276,36 @@ const get_default_sizes = () => new Promise(resolve => {
 	}
 })
 
+function get_css() {
+	// ToDo: we also have chrome://global/content/widgets.css
+		// e.g. chrome://global/skin/richlistbox.css
+	try {
+		let aList = [
+			'quote'
+		]
+		let oData = {}, target
+		aList.sort()
+		aList.forEach(function(n) {
+			try {
+				target = dom['intlcss_'+n]
+				oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+			} catch(e) {
+				oData[n] = zErr
+			}
+		})
+		let hash = mini(oData), notation = ""
+		// check windows 11 dpr = 1 (my machine)
+		if (isFile) {
+			//notation = (hash == "e7263bf1" ? green_tick : red_cross)
+		}
+		dom.css.innerHTML = hash + notation +"<br>"+ json_highlight(oData) +"<br><br>"
+		return
+	} catch(e) {
+		dom.css = e+""
+		return
+	}
+}
+
 function get_elements() {
 	// ui.useOverlayScrollbars: 0=on, 1=off
 	// windows 11 on -> off (en-US)
@@ -280,51 +315,95 @@ function get_elements() {
 		// matches scrollbar in document/viewport/element
 		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
 
-	let t0 = performance.now()
+	let oList = {
+		'input': [
+			'button','checkbox','color','date','datetime-local','details','directory','file','files',
+			'number','radio','reset','submit','time',
+		],
+		'select': ['select'],
+		'select_multiple': ['select'],
+		'details': ["details"],
+	}
+	let oSelectOptions = {
+		"empty": "<option id='elementoption'></option>",
+		"spaces": "<option id='elementoption'> &nbsp;  &nbsp;  &nbsp; </option>",
+		"string": "<option id='elementoption'>Mōá?-&#xffff;</option>",
+	}
+	let oData = {}, oSelect = {}, target
+
 	try {
-		let aList = [
-			'button','checkbox','color','date','datetime-local','details','directory',
-			'file','files','number','radio','reset','select','select_multiple','submit','time'
-		]
-		let aSelect = ['empty','spaces','string']
-		let oData = {}, target, oSelect = {}
-		aList.sort()
-		aSelect.sort()
-		aList.forEach(function(n) {
-		 if (n == "select_multiple") {
-				// note: number of options makes no difference
-				aSelect.forEach(function(n) {
-					try {
-						target = dom['eselect'+n]
-						oSelect[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-					} catch(e) {
-						oSelect[n] = zErr
-					}
-					try {
-						target = dom["opt"+n]
-						oSelect[n+"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-					} catch(e) {
-						oSelect[n+"_option"] = zErr
-					}
-				})
-				oData[n] = oSelect
-			} else {
-				try {
-					target = dom['e'+n]
-					oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-				} catch(e) {
-					oData[n] = zErr
+		const parent = dom.elementsdiv
+		for (const k of Object.keys(oList)) {
+			const element = document.createElement(k)
+			oList[k].forEach(function(item) {
+				let type = item
+				if (item == "directory" || item == "files") {
+					type = "file"
 				}
-			}
-		})
-		let hash = mini(oData), notation = ""
-		// check windows 11 dpr = 1 (my machine)
-		if (isFile) {
-			notation = (hash == "e7263bf1" ? green_tick : red_cross)
+				let id = 'element'+item
+				try {
+					element.setAttribute("id", id)
+					parent.appendChild(element)
+					target = dom[id]
+					if (k !== "select" && k !== "select_multiple") {
+						target.type = type
+					}
+					target.setAttribute("style","display:inline;")
+					target.removeAttribute("multiple")
+					target.removeAttribute("webkitdirectory")
+
+					if (item == "files") {
+						target.setAttribute("multiple","")
+					} else if (item == "directory") {
+						target.setAttribute("webkitdirectory","")
+					} else if (item == "select") {
+						target.innerHTML = "<option></option>"
+					}
+					if (k == "select_multiple") {
+						// we want to change the element to multi
+						target.setAttribute("multiple","")
+						//now we want to cycle the options
+						for (const o of Object.keys(oSelectOptions).sort()) {
+							target.innerHTML = oSelectOptions[o]
+							try {
+								oSelect[o] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+							} catch(e) {
+								oSelect[o] = zErr
+							}
+							try {
+								let opttarget = dom.elementoption
+								oSelect[o+"_option"] = [opttarget.getBoundingClientRect().width, opttarget.getBoundingClientRect().height]
+							} catch(e) {
+								oSelect[o+"_option"] = zErr
+							}
+						}
+						oData[k] = oSelect
+					} else {
+						try {
+							oData[item] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+						} catch(e) {
+							oData[k] = zErr
+						}
+						if (k !== "select") {
+							dom.elementsdiv.innerHTML = ""
+						}
+					}
+				} catch(e) {
+					//console.log(item, e)
+				}
+			})
 		}
-		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.elements.innerHTML = hash + notation + perf + "<br>"+ json_highlight(oData)
+		dom.elementsdiv.innerHTML = ""
+		let newData = {}
+		for (const k of Object.keys(oData).sort()) {newData[k] = oData[k]} // sort
+		let hash = mini(newData), notation = ""
+		if (isFile) {
+			//notation = (hash == "e7263bf1" ? green_tick : red_cross)
+		}
+		dom.elements.innerHTML = hash + notation +"<br>"+ json_highlight(newData) +"<br><br>"
 		return
+		//console.log(oData)
+
 	} catch(e) {
 		dom.elements = e+""
 		return
@@ -409,7 +488,6 @@ function get_locale() {
 
 function get_media_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
-	let t0 = performance.now()
 	try {
 		let mList = {
 			"Invalid": "applang-invalid.png", // 0-byte file
@@ -437,8 +515,7 @@ function get_media_messages() {
 			mData[k] = title
 		}
 		let hash = mini(mData)
-		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.media_messages.innerHTML = hash + perf + "<br>"+ json_highlight(mData)
+		dom.media_messages.innerHTML = hash +"<br>"+ json_highlight(mData)
 		return
 	} catch(e) {
 		dom.media_messages = e+""
@@ -486,10 +563,22 @@ function get_validation_messages() {
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
 		// https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
 		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+/*
+	InvalidDate=Please enter a valid date.
+	InvalidDateMonth=Please enter a valid month.
+	InvalidDateTime=Please enter valid date and time.
+	InvalidDateWeek=Please enter a valid week.
+	InvalidTime=Please enter a valid time.
+	PatternMismatchWithTitle=Please match the requested format: %S.
+	StepMismatchOneValue=Please select a valid value. The nearest valid value is %S.
+	TextTooLong=Please shorten this text to %S characters or less (you are currently using %S characters).
+	TextTooShort=Please use at least %S characters (you are currently using %S characters).
+	TimeReversedRangeUnderflowAndOverflow=Please select a value between %1$S and %2$S.
+*/
 
 	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
-	// InvalidDate* - input types date/month/time/week in gecko fall back to type="text"
-	let t0 = performance.now()
+		// ^ but we should add manual tests for those
+	// InvalidDate/Time/Week/Month - can't set invalid values via JS
 	try {
 		const vList = {
 			BadInputNumber: 'number', // this returns ValueMissing on chrome
@@ -499,9 +588,6 @@ function get_validation_messages() {
 			FileMissing: 'file',
 			InvalidEmail: 'email',
 			InvalidURL: "url",
-			//InvalidDateMonth: '', // Please enter a valid month
-			//InvalidDateTime: '', // Please enter valid date and time
-			//InvalidDateWeek: '', // Please enter a valid week
 			NumberRangeOverflow: 'max',
 			NumberRangeUnderflow: 'min',
 			PatternMismatch: 'tel',
@@ -524,8 +610,7 @@ function get_validation_messages() {
 			}
 		}
 		let hash = mini(vData)
-		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.validation_messages.innerHTML = hash + perf +"<br>"+ json_highlight(vData)
+		dom.validation_messages.innerHTML = hash +"<br>"+ json_highlight(vData)
 		return
 	} catch(e) {
 		dom.validation_messages = e+""
@@ -583,7 +668,7 @@ function run() {
 	// clear
 	let items = document.getElementsByClassName("c")
 	for(let i=0; i < items.length; i++) {
-		items[i].innerHTML = "&nbsp"
+		items[i].innerHTML = " &nbsp; "
 	}
 	if (!isFF) {
 		dom.xml_errors = "gecko only"
@@ -596,6 +681,7 @@ function run() {
 		get_validation_messages()
 		get_media_messages()
 		get_elements()
+		get_css()
 		get_fonts()
 	}, 170)
 }
@@ -618,7 +704,6 @@ function get_xml_errors() {
 		// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties
 		// https://www.w3.org/TR/xml/
 	console.clear()
-	let t0 = performance.now()
 	const xmlList = {
 		n02: 'a', // syntax error
 		n03: '', // no root element found
@@ -671,8 +756,7 @@ function get_xml_errors() {
 			}
 		}
 		let hash = mini(xmlData)
-		let perf = " ["+ Math.round(performance.now() - t0) +" ms]"
-		dom.xml_errors.innerHTML = hash + perf + "<br>"+ json_highlight(xmlData)
+		dom.xml_errors.innerHTML = hash +"<br>"+ json_highlight(xmlData)
 		console.clear()
 		return
 	} catch(e) {
