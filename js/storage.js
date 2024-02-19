@@ -25,8 +25,8 @@ const get_caches = () => new Promise(resolve => {
 	Promise.all([
 		window.caches.keys()
 	]).then(function(results){
-		log_display(6, METRIC, zS + (isTB && isSmart ? tb_red: ""))
-		return resolve([METRIC, zS])
+		log_display(6, METRIC, zE + (isTB && isSmart ? tb_red: ""))
+		return resolve([METRIC, zE])
 	})
 	.catch(function(e){
 		let notation = ""
