@@ -820,7 +820,7 @@ const get_timezone = () => new Promise(resolve => {
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
-	let days = ["January 1","July 1"], years = [1879, 1921, 1952, 1976, 2018]
+	let days = ["January 1","July 1"], years = [1879, 1921, 1952, 1976, 2025]
 
 	function get_tz() {
 		try {

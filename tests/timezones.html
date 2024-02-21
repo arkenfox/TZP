@@ -567,9 +567,21 @@ function run(isLoopy) {
 		// anything prior to 1879 is redundant
 			// tested: every year from 0-2100
 			// tested: negative years
-		//aYears = [1879,1884,1894,1900,1921,1952,1957,1976,2018,]
-		aYears = [1879,1921,1952,1976,2018]
+		// use a year in the future to catch some changes from tzdata
+		aYears = [1879,1921,1952,1976,2025]
+/*
+old: using 2018
+unique:  49 groups (>1) 173 timezones
+      : 296 groups (=1) 296 timezones
+ total: 345 groups .... 469 timezones
 
+new: using 2025
+unique:  48 groups (>1) 171 timezones <- less shared
+      : 298 groups (=1) 298 timezones <- more unique
+ total: 346 groups .... 469 timezones <- more hashes
+ kaching! matches
+
+*/
 		// test flips
 		//aDays = ["January 1","April 1","July 1","October 1"]  // do four days: no extra entropy
 		//for (let i = 1879; i < 2030; i++) {aYears.push(i)}    // 1879+
