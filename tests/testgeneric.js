@@ -668,6 +668,18 @@ function copyclip(element) {
 	}
 }
 
+function hide_overlays() {
+	dom.modaloverlay.style.display = "none"
+	dom.overlay.style.display = "none"
+}
+
+function show_overlay() {
+	// this just displays it, test PoCs wil need to populate it beforehabd
+	dom.modaloverlay.style.display = "block"
+	dom.overlay.style.display = "block"
+}
+
+
 function showDetail(name) {
 	if (name == "all") {
 		console.log("ALL", sDetail)
