@@ -39,14 +39,15 @@
 	<div id="overlay">
 		<div class="mono spaces pad"><span id="overlaytop"></span>
 			<div style="text-align: right;" id="overlaybuttons"><span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span></div>
-			<p>These are examples only. The real test creates, measures, and then removes each element individually, as the order of and presence of other elements can affect results.</p>
+			<p>These are examples only. The real test creates, measures, and then removes each element individually, as the order of and/or the presence of other elements can affect results.</p>
 			<div class="normalized">
 <p>
 	<input style="display:inline;" type="button"> &nbsp;
 	<input style="display:inline;" type="checkbox"> &nbsp;
 	<input style="display:inline;" type="radio"> &nbsp;
 	<input style="display:inline;" type="color"> &nbsp;
-	<select style="display:inline;"><option></option></select>
+	<input style="display:inline;" type="reset">
+	<select style="display:inline;"><option></option></select> &nbsp;
 </p>
 <p>
 	<input style="display:inline;" type="date"> &nbsp;
@@ -56,11 +57,10 @@
 <p><input style="display:inline;" type="file" webkitdirectory directory></p>
 <p><input style="display:inline;" type="file" ></p>
 <p><input style="display:inline;" type="file" multiple=""></p>
-<p><input style="display:inline;" type="number"></p>
-<p><input type="reset" style="display:inline;"> <input type="submit" style="display:inline;">
-<p><select multiple="" style="display:inline;"><option></option></select></p>
-<p><select multiple="" style="display:inline;"><option> &nbsp;  &nbsp;  &nbsp; </option></select></p>
-<p><select multiple="" style="display:inline;"><option>Mōá?-&#xffff;</option></select></p>
+<p><input style="display:inline;" type="number"> &nbsp; <input type="submit" style="display:inline;"></p>
+<p><select style="display:inline;" multiple=""><option></option></select></p>
+<p><select style="display:inline;" multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option></select></p>
+<p><select style="display:inline;" multiple=""><option>Mōá?-&#xffff;</option></select></p>
 <p><details style="display:inline;"></details></p>
 			</div>
 		</div>
@@ -305,68 +305,43 @@ function get_elements() {
 		// matches scrollbar in document/viewport/element
 		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
 
-	// 8-10ms perf
+	// 6-7ms perf
 
 	let tmpData = {}, target
-	let inline = ' style="display:inline;"'
-	let oSelectOptions = {
-		"empty": "<option id='optionempty'></option>",
-		"spaces": "<option id='optionspaces'> &nbsp;  &nbsp;  &nbsp; </option>",
-		"string": "<option id='optionstring'>Mōá?-&#xffff;</option>",
-	}
-
 	let oList = {
-		'button': '<input id="idbutton" type="button"' + inline +">",
-		'checkbox': '<input id="idcheckbox" type="checkbox"' + inline +">",
-		'color': '<input id="idcolor" type="color"' + inline +">",
-		'date': '<input id="iddate" type="date"' + inline +">",
-		'datetime-local': '<input id="iddatetime-local" type="datetime-local"' + inline +">",
-		'directory': '<input id="iddirectory" webkitdirectory directory type="file"' + inline +">",
-		'file': '<input id="idfile" type="file"' + inline +">",
-		'files': '<input id="idfiles" multiple="" type="file"' + inline +">",
-		'number': '<input id="idnumber" type="number"' + inline +">",
-		'radio': '<input id="idradio" type="radio"' + inline +">",
-		'reset': '<input id="idreset" type="reset"' + inline +">",
-		'submit': '<input id="idsubmit" type="submit"' + inline +">",
-		'time': '<input id="idtime" type="time"' + inline +">",
-		'select': '<select id="idselect"' + inline +">" + oSelectOptions.empty +"</select>",
-		'select_multiple_empty': '<select multiple="" id="idselect_multiple_empty"' + inline +">" + oSelectOptions.empty +"</select>",
-		'select_multiple_spaces': '<select multiple="" id="idselect_multiple_spaces"' + inline +">" + oSelectOptions.spaces +"</select>",
-		'select_multiple_string': '<select multiple="" id="idselect_multiple_string"' + inline +">" + oSelectOptions.string +"</select>",
-		'details': '<details id="iddetails"' + inline +"></details>",
+		button: '<input id="X" type="button">',
+		checkbox: '<input id="X" type="checkbox">',
+		color: '<input id="X" type="color">',
+		date: '<input id="X" type="date">',
+		"datetime-local": '<input id="X" type="datetime-local">',
+		directory: '<input id="X" webkitdirectory directory type="file">',
+		file: '<input id="X" type="file">',
+		files: '<input id="X" multiple="" type="file">',
+		number: '<input id="X" type="number">',
+		radio: '<input id="X" type="radio">',
+		reset: '<input id="X" type="reset">',
+		submit: '<input id="X" type="submit">',
+		time: '<input id="X" type="time">',
+		select: '<select id="X"><option id="Y"></option></select>',
+		select_m_empty: '<select multiple="" id="X"><option id="Y"></option></select>',
+		select_m_spaces: '<select multiple="" id="X"><option id="Y"> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
+		select_m_string: '<select multiple="" id="X"><option id="Y">Mōá?-&#xffff;</option></select>',
+		details: '<details id="X"></details>',
 	}
-	/*
-<input type="button" style="display:inline;">
-<input type="checkbox" style="display:inline;">
-<input type="color" style="display:inline;">
-<input type="date" style="display:inline;">
-<input type="datetime-local" style="display:inline;">
-<input webkitdirectory directory type="file" style="display:inline;">
-<input type="file" style="display:inline;">
-<input multiple="" type="file" style="display:inline;">
-<input type="number" style="display:inline;">
-<input type="radio" style="display:inline;">
-<input type="reset" style="display:inline;">
-<input type="submit" style="display:inline;">
-<input type="time" style="display:inline;">
-<select style="display:inline;"><option></option></select>
-<select multiple="" style="display:inline;"><option></option></select>
-<select multiple="" style="display:inline;"><option> &nbsp;  &nbsp;  &nbsp; </option></select>
-<select multiple="" style="display:inline;"><option>Mōá?-&#xffff;</option></select>
-<details style="display:inline;"></details>
-	*/
 
 	try {
 		const parent = dom.elementsdiv
-		parent.innerHTML = "" // redundant
 		for (const k of Object.keys(oList)) {
+			// important to clear the div so no other elements can affect measurements
+			parent.innerHTML = ""
 			try {
 				parent.innerHTML = oList[k] //+" "+ k
-				target = document.getElementById("id"+k)
-				if (k.slice(0,15) == "select_multiple") {
+				target = document.getElementById("X")
+				target.setAttribute("style","display:inline;")
+				if (k.slice(0,8) == "select_m") {
 					let group = "select_multiple"
 					if (tmpData[group] == undefined) {tmpData[group] = {}}
-					let method = k.slice(16, k.length)
+					let method = k.slice(9, k.length)
 					// element
 					try {
 						tmpData[group][method] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
@@ -375,7 +350,7 @@ function get_elements() {
 					}
 					// option
 					try {
-						target = document.getElementById("option"+ method)
+						target = document.getElementById("Y")
 						tmpData[group][method +"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 					} catch(e) {
 						tmpData[group][method +"_option"] = ["error"]
@@ -383,16 +358,12 @@ function get_elements() {
 				} else {
 					tmpData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 				}
-				// important to clear the div so no other elements can affect measurements
-				parent.innerHTML = ""
 			} catch(e) {
 				tmpData[k] = ["error"]
 				console.log(k, e)
-				parent.innerHTML = ""
 			}
 		}
-		parent.innerHTML = "" // redundant
-
+		parent.innerHTML = "" // just in case
 		let oData = {}
 		for (const k of Object.keys(tmpData).sort()) {oData[k] = tmpData[k]} // sort
 		let hash = mini(oData)
