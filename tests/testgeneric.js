@@ -514,25 +514,24 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 124
+		isVerMax = 125
 		let el = document.documentElement
+		try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
 		if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
-			// 124: 1867569
 			try {
 				el.style.zIndex = "calc(1 / max(-0, 0))"
 				let test = getComputedStyle(el).zIndex
 				el.style.zIndex = "auto"
-				if (test > 0) {return 124}
+				if (test > 0) {return 124} // 1867569
 			} catch(e) {}
 			return 123 // 1871745
 		}
 		if ("function" === typeof Promise.withResolvers) {
-			// 122: 1867558 (0.725ms slow)
 			try {
 				el.style.zIndex = "calc(1 / abs(-0))"
 				let test = getComputedStyle(el).zIndex
 				el.style.zIndex = "auto"
-				if (test > 0) {return 122}
+				if (test > 0) {return 122} // 1867558
 			} catch(e) {}
 			return 121 // 1845586
 		}
@@ -678,7 +677,6 @@ function show_overlay() {
 	dom.modaloverlay.style.display = "block"
 	dom.overlay.style.display = "block"
 }
-
 
 function showDetail(name) {
 	if (name == "all") {

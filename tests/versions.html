@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 75, maxVer = 124, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 76, maxVer = 125, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -290,6 +290,13 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 125: 1872793
+		let t125 = performance.now(), ver125 = false
+		try {
+			ver125 = "Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")
+		} catch(e) {}
+		rec(125, 125, "1872793", ver125, performance.now()-t125, "d") // 0.05ms when invalid, 0.2+ when valid
 
 		// 124: 1867569 (slow, like 122)
 		let t124 = performance.now(), ver124 = false
