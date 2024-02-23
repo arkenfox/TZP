@@ -388,6 +388,7 @@ const get_isOS = () => new Promise(resolve => {
 			// added: chrome://browser/content/extension-popup-panel.css
 			// ^ is this desktop only?
 			// chrome://browser/content/extension.css is apparrently desktop only
+//isOS = "windows"
 		exit()
 	}
 
@@ -538,7 +539,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 124) {isVerExtra = "+"}
+		} else if (verNo == 125) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -547,23 +548,22 @@ const get_isVer = () => new Promise(resolve => {
 	function cascade() {
 		let el = document.documentElement
 		try {
+			try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
 			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
-				// 124: 1867569
 				try {
 					el.style.zIndex = "calc(1 / max(-0, 0))"
 					let test = getComputedStyle(el).zIndex
 					el.style.zIndex = "auto"
-					if (test > 0) {return 124}
+					if (test > 0) {return 124} // 1867569
 				} catch(e) {}
 				return 123 // 1871745
 			}
 			if ("function" === typeof Promise.withResolvers) {
-				// 122: 1867558 (0.725ms slow)
 				try {
 					el.style.zIndex = "calc(1 / abs(-0))"
 					let test = getComputedStyle(el).zIndex
 					el.style.zIndex = "auto"
-					if (test > 0) {return 122}
+					if (test > 0) {return 122} // 1867558
 				} catch(e) {}
 				return 121 // 1845586
 			}
