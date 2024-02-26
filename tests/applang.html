@@ -9,7 +9,7 @@
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
-		table {width: 97%; min-width: 480px; max-width: 680px}
+		table {width: 97%; min-width: 580px; max-width: 780px}
 		hr {color: var(--test4);}
 		.fixed {
 			top: 0;
@@ -34,7 +34,6 @@
 <body>
 
 	<div class="fixed normalized" id="elementsdiv"></div>
-
 	<div id="modaloverlay" onClick="hide_overlays()"></div>
 	<div id="overlay">
 		<div class="mono spaces pad"><span id="overlaytop"></span>
@@ -69,6 +68,9 @@
 	<!-- offscreen -->
 	<div class="offscreen">
 		<div>
+			<div class="bigger">
+				<q id="intlcss_quote-fr" lang="fr"></q>
+			</div>
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
@@ -76,9 +78,6 @@
 			<div><span id="dfsize"></span></div>
 			<div><input id="enumber" type="number" min="6" step="2"></div>
 			<div id="sysFont"></div>
-		</div>
-		<div class="bigger">
-			<q id="intlcss_quote-fr" lang="fr"></q>
 		</div>
 	</div>
 
@@ -134,7 +133,8 @@
 			</div>
 			<div>ELEMENTS &nbsp;
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForm</a>
-				<span class="btn btn0" onCLick="show_overlay()">[ show examples ]</span>
+				<span class="btn btn0" onCLick="show_overlay()">[ show _some_ examples ]</span>
+					<input id="optTransform" checked type="checkbox"> &nbsp; transform <input id="optExpand" type="checkbox"> &nbsp; all inputs
 				<p class="c mono spaces no_color" id="elements"> &nbsp; </p>
 			</div>
 			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
@@ -173,6 +173,8 @@
 
 <script>
 'use strict';
+
+let isLocale = ""
 
 try {
 	// escape to close
@@ -308,6 +310,8 @@ function get_elements() {
 	// 6-7ms perf
 
 	let tmpData = {}, target
+	let isTransform = dom.optTransform.checked
+
 	let oList = {
 		button: '<input id="X" type="button">',
 		checkbox: '<input id="X" type="checkbox">',
@@ -329,6 +333,29 @@ function get_elements() {
 		details: '<details id="X"></details>',
 	}
 
+	let oListExtra = {
+		// redundant: should always = number
+		datetime: '<input id="X" type="datetime">',
+		email: '<input id="X" type="email">',
+		month: '<input id="X" type="month">',
+		password: '<input id="X" type="password">',
+		progress: '<progress id="X"></progress>',
+		search: '<input id="X" type="search">',
+		tel: '<input id="X" type="tel">',
+		text: '<input id="X" type="text">',
+		url: '<input id="X" type="url">',
+		week: '<input id="X" type="week">',
+		// last of the inputs
+		textarea: '<textarea id="X"></textarea>',
+		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
+	}
+
+	if (dom.optExpand.checked) {
+		for (const k of Object.keys(oListExtra)) {
+			oList[k] = oListExtra[k]
+		}
+	}
+
 	try {
 		const parent = dom.elementsdiv
 		for (const k of Object.keys(oList)) {
@@ -338,25 +365,37 @@ function get_elements() {
 				parent.innerHTML = oList[k] //+" "+ k
 				target = document.getElementById("X")
 				target.setAttribute("style","display:inline;")
+				if (isTransform) {
+					target.classList.add("measureScale")
+				}
 				if (k.slice(0,8) == "select_m") {
 					let group = "select_multiple"
 					if (tmpData[group] == undefined) {tmpData[group] = {}}
 					let method = k.slice(9, k.length)
 					// element
 					try {
-						tmpData[group][method] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+						tmpData[group][method] = [
+							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+						]
 					} catch(e) {
 						tmpData[group][method] = ["error"]
 					}
 					// option
 					try {
 						target = document.getElementById("Y")
-						tmpData[group][method +"_option"] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+						tmpData[group][method +"_option"] = [
+							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+						]
 					} catch(e) {
 						tmpData[group][method +"_option"] = ["error"]
 					}
 				} else {
-					tmpData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+					tmpData[k] = [
+						target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+						target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+					]
 				}
 			} catch(e) {
 				tmpData[k] = ["error"]
@@ -366,8 +405,12 @@ function get_elements() {
 		parent.innerHTML = "" // just in case
 		let oData = {}
 		for (const k of Object.keys(tmpData).sort()) {oData[k] = tmpData[k]} // sort
-		let hash = mini(oData)
-		dom.elements.innerHTML = hash +"<br>"+ json_highlight(oData)
+		let hash = mini(oData), notation = ""
+		if (isFile && isLocale == "en-US") {
+			// checking spoof english on my setup
+			notation = (hash == "79af21a7" ? green_tick: red_cross)
+		}
+		dom.elements.innerHTML = hash + notation +"<br>"+ json_highlight(oData, 105)
 		return
 	} catch(e) {
 		dom.elements = e+""
@@ -378,13 +421,12 @@ function get_elements() {
 
 function get_locale() {
 	// just get one
-	let locale
 	try {
-		locale = Intl.DateTimeFormat().resolvedOptions().locale
+		isLocale = Intl.DateTimeFormat().resolvedOptions().locale
 	} catch(e) {
-		locale = zErr
+		isLocale = zErr
 	}
-	dom.locale.innerHTML = locale
+	dom.locale.innerHTML = isLocale
 }
 
 function get_media_messages() {
