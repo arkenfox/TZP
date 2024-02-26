@@ -26,7 +26,7 @@ function check_audioLies() {
 	return audioList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 
-const get_audioContext = (os = isOS) => new Promise(resolve => {
+const get_audio_context = (os = isOS) => new Promise(resolve => {
 	const METRIC = "audioContext"
 	let notation = ""
 	try {
@@ -106,7 +106,7 @@ const get_audioContext = (os = isOS) => new Promise(resolve => {
 	}
 })
 
-const get_offlineAudioContext = () => new Promise(resolve => {
+const get_audio_offline = () => new Promise(resolve => {
 	let t0 = nowFn(), notation = ""
 	const METRIC = "offlineAudioContext"
 
@@ -119,89 +119,87 @@ const get_offlineAudioContext = () => new Promise(resolve => {
 	// ToDo: maybe reduce bufferLen as long as it doesn't change entropy
 		// also: when we add RFP + math PoC we need only check for protection (like canvas)
 	try {
-		const bufferLen = 5000 // 5000 to match documented
-		let context = new window.OfflineAudioContext(1, bufferLen, 44100)
 		if (runSE) {foo++}
-		try {
-			// oscillator
-			let pxi_oscillator = context.createOscillator()
-			pxi_oscillator.type = "triangle"
-			pxi_oscillator.frequency.value = 1e4
-			// compressor
-			let pxi_compressor = context.createDynamicsCompressor()
-			pxi_compressor.threshold && (pxi_compressor.threshold.value = -50)
-			pxi_compressor.knee && (pxi_compressor.knee.value = 40)
-			pxi_compressor.ratio && (pxi_compressor.ratio.value = 12)
-			pxi_compressor.reduction && (pxi_compressor.reduction.value = -20)
-			pxi_compressor.attack && (pxi_compressor.attack.value = 0)
-			pxi_compressor.release && (pxi_compressor.release.value = .25)
-			// connect nodes
-			pxi_oscillator.connect(pxi_compressor)
-			pxi_compressor.connect(context.destination)
-			// process
-			pxi_oscillator.start(0)
-			context.startRendering()
-			context.oncomplete = function(event) {
-				try {
-					let copyTest = new Float32Array(bufferLen)
-					event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
-					let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
-					Promise.all([
-						crypto.subtle.digest("SHA-1", getTest),
-						crypto.subtle.digest("SHA-1", copyTest),
-					]).then(function(hashes){
-						// sum
-						let sum = 0
-						for (let i=0; i < getTest.length; i++) {
-							let x = getTest[i]
-							if (i > (bufferLen-501) && i < bufferLen) {sum += Math.abs(x)}
+		const bufferLen = 5000 // 5000 to match documented
+		const context = new window.OfflineAudioContext(1, bufferLen, 44100)
+		const dynamicsCompressor = context.createDynamicsCompressor()
+		const oscillator = context.createOscillator()
+
+		// set
+		oscillator.type = "triangle"
+		oscillator.frequency.value = 10000
+		dynamicsCompressor.threshold && (dynamicsCompressor.threshold.value = -50)
+		dynamicsCompressor.knee && (dynamicsCompressor.knee.value = 40)
+		dynamicsCompressor.attack && (dynamicsCompressor.attack.value = 0)
+		dynamicsCompressor.ratio && (dynamicsCompressor.ratio.value = 12)
+		dynamicsCompressor.reduction && (dynamicsCompressor.reduction.value = -20) // does this do anything
+		dynamicsCompressor.release && (dynamicsCompressor.release.value = .25)
+		// connect
+		dynamicsCompressor.connect(context.destination)
+		oscillator.connect(dynamicsCompressor)
+		// start
+		oscillator.start(0)
+		context.startRendering()
+
+		context.oncomplete = function(event) {
+			try {
+				dynamicsCompressor.disconnect()
+				let copyTest = new Float32Array(bufferLen)
+				event.renderedBuffer.copyFromChannel(copyTest, 0) // JSShelter errors here
+				let getTest = event.renderedBuffer.getChannelData(0) // JSShelter errors here
+				Promise.all([
+					crypto.subtle.digest("SHA-1", getTest),
+					crypto.subtle.digest("SHA-1", copyTest),
+				]).then(function(hashes){
+					// sum
+					let sum = 0
+					for (let i=0; i < getTest.length; i++) {
+						let x = getTest[i]
+						if (i > (bufferLen-501) && i < bufferLen) {sum += Math.abs(x)}
+					}
+					// get/copy
+					let hashG = mini(byteArrayToHex(hashes[0]))
+					let hashC = mini(byteArrayToHex(hashes[1]))
+					let display = hashC +" | "+ hashG +" | "+ sum, value = hashG
+					// lies
+					if (isSmart) {
+						let isLies = false
+						if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
+						if (isLies) {
+							display = colorFn(display)
+							log_known(SECT11, METRIC)
+							value = zLIE
 						}
-						pxi_compressor.disconnect()
-						// get/copy
-						let hashG = mini(byteArrayToHex(hashes[0]))
-						let hashC = mini(byteArrayToHex(hashes[1]))
-						let display = hashC +" | "+ hashG +" | "+ sum, value = hashG
-						// lies
-						if (isSmart) {
-							let isLies = false
-							if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
+						// notation
+						if (isTB && !isMullvad) {
+							notation = tb_red
+						} else if (isMullvad) {
+							if (isLies) {notation = tb_red}
+							// ignore non lies MB until we get backported: we don't want anything green unless it's protected
+						} else if (isVer > 117) {
 							if (isLies) {
-								display = colorFn(display)
-								log_known(SECT11, METRIC)
-								value = zLIE
-							}
-							// notation
-							if (isTB && !isMullvad) {
-								notation = tb_red
-							} else if (isMullvad) {
-								if (isLies) {notation = tb_red}
-								// ignore non lies MB until we get backported: we don't want anything green unless it's protected
-							} else if (isVer > 117) {
-								if (isLies) {
-									notation = default_red
-								} else {
-									// two results: ARM and non-ARM
-									notation = sbx +"undocumented]"+ sc
-									if (hashC == "24fc63ce") {notation = sgtick+"x86/amd]"+sc
-									} else if (hashC == "a34c73cd") {notation = sgtick+"ARM]"+sc
-									}
+								notation = default_red
+							} else {
+								// two results: ARM and non-ARM
+								notation = sbx +"undocumented]"+ sc
+								if (isVer > 123 && hashC == "a7c1fbb6") {notation = sgtick+"x86/amd]"+sc // 1877221
+								} else if (hashC == "24fc63ce") {notation = sgtick+"x86/amd]"+sc
+								} else if (hashC == "a34c73cd") {notation = sgtick+"ARM]"+sc
 								}
 							}
 						}
-						log_display(11, METRIC, display + notation)
-						addData(11, METRIC, value) // only collect hash: detailed data not worth it
-						log_perf(SECT11, METRIC, t0)
-						return resolve()
-					})
-					.catch(function(e){
-						outputErrors(log_error(SECT11, METRIC, e))
-					})
-				} catch(e) {
+					}
+					log_display(11, METRIC, display + notation)
+					addData(11, METRIC, value) // only collect hash: detailed data not worth it
+					log_perf(SECT11, METRIC, t0)
+					return resolve()
+				})
+				.catch(function(e){
 					outputErrors(log_error(SECT11, METRIC, e))
-				}
+				})
+			} catch(e) {
+				outputErrors(log_error(SECT11, METRIC, e))
 			}
-		} catch(e) {
-			outputErrors(log_error(SECT11, METRIC, e))
 		}
 	} catch(e) {
 		if (gRun) {dom.oscillator_compressor = zNA; dom.oscillator = zNA; dom.audio_user = zNA}
@@ -416,8 +414,8 @@ function outputAudioUser() {
 const outputAudio = () => new Promise(resolve => {
 	let t0 = nowFn()
 	Promise.all([
-		get_audioContext(),
-		get_offlineAudioContext(),
+		get_audio_context(),
+		get_audio_offline(),
 	]).then(function(results){
 		log_section(11, t0)
 		return resolve(SECT11)
