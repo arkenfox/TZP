@@ -29,9 +29,9 @@ function buildButton(colorCode, arrayName, displayText, functionName, btnType) {
 
 /*** JSON ***/
 
-function json_highlight(json) {
+function json_highlight(json, maxWidth = 65) {
 	if (typeof json != 'string') {
-		json = json_stringify(json);
+		json = json_stringify(json, maxWidth);
 	}
 	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
@@ -53,7 +53,7 @@ function json_highlight(json) {
 	})
 }
 
-function json_stringify(passedObj, options = {}) {
+function json_stringify(passedObj, maxWidth = 65, options = {}) {
 	/* https://github.com/lydell/json-stringify-pretty-compact */
 	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
 	const indent = JSON.stringify(
@@ -65,7 +65,7 @@ function json_stringify(passedObj, options = {}) {
 		indent === ""
 			? Infinity
 			: options.maxLength === undefined
-			? 65 // was 80
+			? maxWidth // was 80
 			: options.maxLength;
 	let { replacer } = options;
 
