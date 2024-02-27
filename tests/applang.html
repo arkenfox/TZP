@@ -32,8 +32,7 @@
 </head>
 
 <body>
-
-	<div class="fixed normalized" id="elementsdiv"></div>
+	<div class="fixed normalized" id="elementsdiv"> </div>
 	<div id="modaloverlay" onClick="hide_overlays()"></div>
 	<div id="overlay">
 		<div class="mono spaces pad"><span id="overlaytop"></span>
@@ -56,6 +55,7 @@
 <p><input style="display:inline;" type="file" webkitdirectory directory></p>
 <p><input style="display:inline;" type="file" ></p>
 <p><input style="display:inline;" type="file" multiple=""></p>
+<p><input style="display:inline; color: var(--test0);" type="image"></p>
 <p><input style="display:inline;" type="number"> &nbsp; <input type="submit" style="display:inline;"></p>
 <p><select style="display:inline;" multiple=""><option></option></select></p>
 <p><select style="display:inline;" multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option></select></p>
@@ -273,15 +273,17 @@ function get_css() {
 		// e.g. chrome://global/skin/richlistbox.css
 	try {
 		let aList = [
-			'quote-fr'
+			'quote-fr',
 		]
 		let oData = {}, target
 		aList.sort()
 		aList.forEach(function(n) {
 			try {
-				target = dom['intlcss_'+n]
+				try {target = dom['intlcss_'+n]} catch(e) {}
+				if (target == undefined) {target = dom[n]}
 				oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 			} catch(e) {
+				console.log(e)
 				oData[n] = zErr
 			}
 		})
@@ -311,6 +313,7 @@ function get_elements() {
 
 	let tmpData = {}, target
 	let isTransform = dom.optTransform.checked
+	let isExpanded = dom.optExpand.checked
 
 	let oList = {
 		button: '<input id="X" type="button">',
@@ -321,6 +324,7 @@ function get_elements() {
 		directory: '<input id="X" webkitdirectory directory type="file">',
 		file: '<input id="X" type="file">',
 		files: '<input id="X" multiple="" type="file">',
+		image: '<input id="X" type="image">',
 		number: '<input id="X" type="number">',
 		radio: '<input id="X" type="radio">',
 		reset: '<input id="X" type="reset">',
@@ -350,7 +354,7 @@ function get_elements() {
 		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
 	}
 
-	if (dom.optExpand.checked) {
+	if (isExpanded) {
 		for (const k of Object.keys(oListExtra)) {
 			oList[k] = oListExtra[k]
 		}
@@ -358,6 +362,13 @@ function get_elements() {
 
 	try {
 		const parent = dom.elementsdiv
+		// just skew the parent, this seems sufficient to transform all elements
+			// and bonus, we require this for input type image anyway
+		if (isTransform) {
+			parent.classList.add("measureScale")
+		} else {
+			parent.classList.remove("measureScale")
+		}
 		for (const k of Object.keys(oList)) {
 			// important to clear the div so no other elements can affect measurements
 			parent.innerHTML = ""
@@ -365,9 +376,6 @@ function get_elements() {
 				parent.innerHTML = oList[k] //+" "+ k
 				target = document.getElementById("X")
 				target.setAttribute("style","display:inline;")
-				if (isTransform) {
-					target.classList.add("measureScale")
-				}
 				if (k.slice(0,8) == "select_m") {
 					let group = "select_multiple"
 					if (tmpData[group] == undefined) {tmpData[group] = {}}
@@ -406,9 +414,9 @@ function get_elements() {
 		let oData = {}
 		for (const k of Object.keys(tmpData).sort()) {oData[k] = tmpData[k]} // sort
 		let hash = mini(oData), notation = ""
-		if (isFile && isLocale == "en-US") {
-			// checking spoof english on my setup
-			notation = (hash == "79af21a7" ? green_tick: red_cross)
+		if (isFile && isExpanded && isLocale == "en-US") {
+			// checking TB13 spoof english on my setup
+			notation = (hash == "af2ad919" ? green_tick: red_cross)
 		}
 		dom.elements.innerHTML = hash + notation +"<br>"+ json_highlight(oData, 105)
 		return
@@ -583,42 +591,58 @@ function get_xml_errors() {
 		n28: '<x xmlns:x=""></x>', // must not undeclare prefix
 		n30: '<?xml v=""?>', // XML declaration not well-formed
 	}
+
+	let oMimeTypes = ['application/xml','application/xhtml+xml','image/svg+xml','text/xml',] // 'text/html',
+
 	try {
 		let xmlData = {}, delimiter = ":"
 		let parser = new DOMParser
-		// 'application/xml','application/xhtml+xml','text/xml','image/svg+xml' : same errors
-		for (const k of Object.keys(xmlList)) {
-			try {
-				let xmlDoc = parser.parseFromString(xmlList[k], 'application/xml')
-				let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-				//split into parts: works back to FF52 and works with LTR
-					// the name (XML Parsing Error), location (Location) and line parts (Line Number 1, Column 1)
-					// create entropy but they are the same for all errors, record these once to reduce noise
-				let parts = xmlStr.split("\n")
-				if (k == "n02") {
-					// programatically determine delimiter
-						// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
-					let strLoc = parts[1]
-					let schema = isFile ? "file://" : "https://"
-					let index = strLoc.indexOf(schema) - 2
-					if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
-					if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
-					delimiter = strLoc.charAt(index)
-					strLoc = strLoc.slice(0, index)
-					let strName = parts[0].split(delimiter)[0]
-					let strLine = parts[2]
-					xmlData["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
-					xmlData["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
-					//console.log(xmlStr)
-					//console.log(parts)
-					//console.log(strLoc, schema, index, "~"+delimiter+"~")
-					//console.log(mini(strName +": " + strLoc +": "+ strLine), strName +": " + strLoc +": "+ strLine)
+		oMimeTypes.forEach(function(mimetype) {
+			let oTemp = {}
+			for (const k of Object.keys(xmlList)) {
+
+				try {
+					let xmlDoc = parser.parseFromString(xmlList[k], mimetype)
+					let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+					//split into parts: works back to FF52 and works with LTR
+						// the name (XML Parsing Error), location (Location) and line parts (Line Number 1, Column 1)
+						// create entropy but they are the same for all errors, record these once to reduce noise
+					let parts = xmlStr.split("\n")
+					if (k == "n02") {
+						// programatically determine delimiter
+							// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+						let strLoc = parts[1]
+						let schema = isFile ? "file://" : "https://"
+						let index = strLoc.indexOf(schema) - 2
+						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+						delimiter = strLoc.charAt(index)
+						strLoc = strLoc.slice(0, index)
+						let strName = parts[0].split(delimiter)[0]
+						let strLine = parts[2]
+						oTemp["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+						oTemp["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+						//console.log(xmlStr)
+						//console.log(parts)
+						//console.log(strLoc, schema, index, "~"+delimiter+"~")
+						//console.log(mini(strName +": " + strLoc +": "+ strLine), strName +": " + strLoc +": "+ strLine)
+					}
+					oTemp[k] = parts[0].split(delimiter)[1].trim()
+				} catch(err) {
+					oTemp[k] = err+""
 				}
-				xmlData[k] = parts[0].split(delimiter)[1].trim()
-			} catch(err) {
-				//console.log(k, err+"")
 			}
-		}
+			console.log(mimetype, oTemp)
+			let hashTemp = mini(oTemp)
+			if (xmlData[hashTemp] == undefined) {
+				xmlData[hashTemp] = {
+					"mimeTypes": [mimetype],
+					"metrics": oTemp,
+				}
+			} else {
+				xmlData[hashTemp]["mimeTypes"].push(mimetype)
+			}
+		})
 		let hash = mini(xmlData)
 		dom.xml_errors.innerHTML = hash +"<br>"+ json_highlight(xmlData)
 		console.clear()
@@ -659,8 +683,6 @@ Promise.all([
 		dom.xml_errors = "gecko only"
 	}
 })
-
-
 
 </script>
 </body>
