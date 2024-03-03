@@ -122,7 +122,7 @@ function get_computed_styles() {
 	return new Promise(resolve => {
 		let t0 = nowFn()
 		const METRIC = "computed_styles"
-		const names = ["styles_cssrulelist","styles_getcomputed","styles_htmlelement"]
+		const names = ['styles_cssrulelist','styles_getcomputed','styles_htmlelement','styles_domparser']
 		let aErr = [false, false, false], isLies = false
 		let aHashes = [], intHashes = [], oDisplay = {}
 		let isTBSmart = (isSmart && isTB)
@@ -133,10 +133,16 @@ function get_computed_styles() {
 				// get CSSStyleDeclaration
 				try {
 					if (runSE) {foo++}
+					let parserdoc
+					if (type == 3) {
+						let parser = new DOMParser
+						parserdoc = parser.parseFromString("<p></p>", "text/html")
+					}
 					let cssStyleDeclaration = (
 						type == 0 ? document.styleSheets[0].cssRules[0].style :
 						type == 1 ? getComputedStyle(document.body) :
 						type == 2 ? document.body.style :
+						type == 3 ? parserdoc.body.style :
 						undefined
 					)
 					if (!cssStyleDeclaration) {
@@ -229,6 +235,7 @@ function get_computed_styles() {
 			styleVersion(0),
 			styleVersion(1),
 			styleVersion(2),
+			styleVersion(3),
 		]).then(res => {
 			/* simulate
 				// different hashes: !isLies
@@ -247,10 +254,10 @@ function get_computed_styles() {
 				//res[1] = {"keys": ["a","b"]}
 				//res[2] = {"keys": 5}
 			//*/
-
 			// analyse
 			//console.log(res)
-			for (let i=0; i < 3; i++) {
+
+			for (let i=0; i < res.length; i++) {
 				let obj = res[i]
 				let type = names[i]
 				let eMsg = ""
@@ -281,7 +288,7 @@ function get_computed_styles() {
 				}
 			}
 
-			// 3 errors
+			// max errors
 			//console.log("errors",aErr)
 			if (aErr.every(x => x === true)) {
 				log_display(14, METRIC, zErr + notation)
