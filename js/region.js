@@ -847,17 +847,10 @@ const get_timezone = () => new Promise(resolve => {
 	}
 
 	function get_offsets() {
-		let oData = {},
-			oErrors = {},
-			oDebug = {}
+		let oData = {}, oErrors = {}
 		aMethods.forEach(function(method) {
 			oData[method] = {}
-			oDebug[method] = {}
-			years.forEach(function(year) {
-				oData[method][year] = []
-				oDebug[method][year] = []
-			})
-
+			years.forEach(function(year) {oData[method][year] = []})
 		})
 		years.forEach(function(year) {
 			days.forEach(function(day) {
@@ -885,13 +878,11 @@ const get_timezone = () => new Promise(resolve => {
 									offset = test - control
 								}
 							}
-							let newoffset = offset/k
-							oDebug[method][year].push([offset, newoffset])
-							if ("number" === typeof offset && "number" == typeof newoffset) {
-								oData[method][year].push(newoffset)
+							if ("number" === typeof offset && !Number.isNaN(offset)) {
+								oData[method][year].push(offset/k)
 							} else {
-								let eMsg = log_error(SECT4, METRIC +"_"+ method, zErrType + typeof offset)
-								oErrors[method] = eMsg +" ["+ offset +"]"
+								let offsetType = Number.isNaN(offset) ? "NaN": typeof offset
+								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + offsetType)
 							}
 						} catch(e) {
 							oErrors[method] = log_error(SECT4, METRIC +"_"+ method, e)
@@ -902,7 +893,6 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			})
 		})
-		console.log(oDebug)
 		if (oData !== zErr) {
 			for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
 		}
