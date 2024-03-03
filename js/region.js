@@ -821,6 +821,9 @@ const get_timezone = () => new Promise(resolve => {
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
 	let days = ["January 1","July 1"], years = [1879, 1921, 1952, 1976, 2025]
+	let aMethods = [
+		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
+	]
 
 	function get_tz() {
 		try {
@@ -844,7 +847,6 @@ const get_timezone = () => new Promise(resolve => {
 	}
 
 	function get_offsets() {
-		let aMethods = ["date.parse","date.valueOf","getTime","getTimezoneOffset","Symbol.toPrimitive"]
 		let oData = {},
 			oErrors = {}
 		aMethods.forEach(function(method) {
@@ -859,24 +861,29 @@ const get_timezone = () => new Promise(resolve => {
 					let control = new Date(datetime +" UTC")
 					let test = new Date(datetime)
 					aMethods.forEach(function(method) {
-						let offset
+						let offset, k= 60000
 						try {
-							if (method == "date.parse") {
-								offset = (Date.parse(test) - Date.parse(control))/60000
-							} else if (method == "date.valueOf") {
-								offset = (test.valueOf() - control.valueOf())/60000
-							} else if (method == "Symbol.toPrimitive") {
-								offset = (test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number'))/60000
-							} else if (method == "getTime") {
-								offset = (test.getTime() - control.getTime())/60000
-							} else {
+							if (method == "getTimezoneOffset") {
 								offset = test.getTimezoneOffset()
-							}
-							if ("number" === typeof offset && !isNaN(offset)) {
-								oData[method][year].push(offset)
+								k = 1
 							} else {
-								let offsetType = isNaN(offset) ? "NaN": typeof offset
-								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + offsetType)
+								if (method == "date.parse") {
+									offset = Date.parse(test) - Date.parse(control)
+								} else if (method == "date.valueOf") {
+									offset = test.valueOf() - control.valueOf()
+								} else if (method == "Symbol.toPrimitive") {
+									offset = test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number')
+								} else if (method == "getTime") {
+									offset = test.getTime() - control.getTime()
+								} else if (method == "date") {
+									offset = test - control
+								}
+							}
+							if ("number" === typeof offset) {
+								oData[method][year].push(offset/k)
+							} else {
+								let eMsg = log_error(SECT4, METRIC +"_"+ method, zErrType + typeof offset)
+								oErrors[method] = eMsg +" ["+ offset +"]"
 							}
 						} catch(e) {
 							oErrors[method] = log_error(SECT4, METRIC +"_"+ method, e)
@@ -931,7 +938,7 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			}
 			// stop: all errors
-			if (countErr == 5) {
+			if (countErr == aMethods.length) {
 				if (isSmart) {notation = tz_red}
 				log_display(4, METRIC, zErr + notation)
 				addData(4, METRIC, zErr)
