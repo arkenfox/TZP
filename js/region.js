@@ -848,10 +848,16 @@ const get_timezone = () => new Promise(resolve => {
 
 	function get_offsets() {
 		let oData = {},
-			oErrors = {}
+			oErrors = {},
+			oDebug = {}
 		aMethods.forEach(function(method) {
 			oData[method] = {}
-			years.forEach(function(year) {oData[method][year] = []})
+			oDebug[method] = {}
+			years.forEach(function(year) {
+				oData[method][year] = []
+				oDebug[method][year] = []
+			})
+
 		})
 		years.forEach(function(year) {
 			days.forEach(function(day) {
@@ -861,7 +867,7 @@ const get_timezone = () => new Promise(resolve => {
 					let control = new Date(datetime +" UTC")
 					let test = new Date(datetime)
 					aMethods.forEach(function(method) {
-						let offset, k= 60000
+						let offset, k = 60000
 						try {
 							if (method == "getTimezoneOffset") {
 								offset = test.getTimezoneOffset()
@@ -879,6 +885,7 @@ const get_timezone = () => new Promise(resolve => {
 									offset = test - control
 								}
 							}
+							oDebug[method][year].push(offset)
 							if ("number" === typeof offset) {
 								oData[method][year].push(offset/k)
 							} else {
@@ -894,6 +901,7 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			})
 		})
+		console.log(oDebug)
 		if (oData !== zErr) {
 			for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
 		}
