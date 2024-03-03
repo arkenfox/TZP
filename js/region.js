@@ -885,9 +885,10 @@ const get_timezone = () => new Promise(resolve => {
 									offset = test - control
 								}
 							}
-							oDebug[method][year].push(offset)
-							if ("number" === typeof offset) {
-								oData[method][year].push(offset/k)
+							let newoffset = offset/k
+							oDebug[method][year].push([offset, newoffset])
+							if ("number" === typeof offset && "number" == typeof newoffset) {
+								oData[method][year].push(newoffset)
 							} else {
 								let eMsg = log_error(SECT4, METRIC +"_"+ method, zErrType + typeof offset)
 								oErrors[method] = eMsg +" ["+ offset +"]"
