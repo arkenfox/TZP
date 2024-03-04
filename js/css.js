@@ -133,16 +133,11 @@ function get_computed_styles() {
 				// get CSSStyleDeclaration
 				try {
 					if (runSE) {foo++}
-					let parserdoc
-					if (type == 3) {
-						let parser = new DOMParser
-						parserdoc = parser.parseFromString("<p></p>", "text/html")
-					}
 					let cssStyleDeclaration = (
 						type == 0 ? document.styleSheets[0].cssRules[0].style :
 						type == 1 ? getComputedStyle(document.body) :
 						type == 2 ? document.body.style :
-						type == 3 ? parserdoc.body.style :
+						type == 3 ? ((new DOMParser).parseFromString("<p></p>", "text/html")).body.style :
 						undefined
 					)
 					if (!cssStyleDeclaration) {
@@ -154,7 +149,7 @@ function get_computed_styles() {
 						ownEnumerablePropertyNames = [],
 						cssVar = /^--.*$/
 					Object.keys(cssStyleDeclaration).forEach(key => {
-						let numericKey = !isNaN(key),
+						let numericKey = !Number.isNaN(key),
 							value = cssStyleDeclaration[key],
 							customPropKey = cssVar.test(key),
 							customPropValue = cssVar.test(value)
