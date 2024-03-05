@@ -241,7 +241,7 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 	}	else if (mOuter !== mInner) {match = false
 	} else {
 		aMeasures.forEach(function(value) {
-			if (isNaN(value)) {match = false}
+			if (Number.isNaN(value)) {match = false}
 		})
 	}
 	r = match ? screen_green : screen_red
@@ -594,7 +594,7 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 		varDPI = dpi_y // default
 		if (isSmart) {
 			// varDPI: fallback checks: allow 1 x diff; use highest value
-			if (dpi_y !== 0 && !isNaN(dpi_y)) {
+			if (dpi_y !== 0 && !Number.isNaN(dpi_y)) {
 				// this is the one: RFP spoofs cssDPI and mmDPI
 				varDPI = dpi_y
 			} else if ("number" == typeof cssDPI && mmDPI !== zErr) {
@@ -1431,6 +1431,8 @@ function outputFD() {
 			tb_red = sbx+"MB]"+sc
 			tb_standard = sg+"[MB Standard]"+sc
 			tb_safer = sg+"[MB Safer]"+sc
+			tb_lh_green = sgtick+"MB == one line-height]"+sc
+			tb_lh_red = sbx+"MB == one line-height]"+sc
 		}
 	}
 	// browser
