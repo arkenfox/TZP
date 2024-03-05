@@ -87,8 +87,10 @@ get_scr_initial()
 let avh = "undefined" // android
 
 // notation
-const tick = "✓", // u2713
-	cross = "✗", // u2717
+	// https://en.wikipedia.org/wiki/Check_mark
+	// https://en.wikipedia.org/wiki/X_mark
+const tick = "✓", // ✓ u2713, 🗸 u1F5F8
+	cross = "✗", // ✗ u2717, 🗴 u!F5F4, 🞩 u1F7A9
 	green_tick = sg+"<span class='health'>"+ tick +"</span>"+sc,
 	red_cross = sb+"<span class='health'>"+ cross +"</span>"+ sc,
 	sgtick = sg +"[<span class='health'>"+ tick +"</span> ", 
@@ -118,10 +120,12 @@ const screen_green = sgtick+"screens match]"+sc,
 	sizes_green = sgtick+"screen = inner]"+sc,
 	sizes_red = sbx+"screen = inner]"+sc
 
-// dynamic notation
+// dynamic TB/MB notation
 let tb_green = sgtick+"TB]"+sc,
 	tb_red = sbx+"TB]"+sc,
-	tb_slider_red = sbx+"TB Slider]"+sc
+	tb_slider_red = sbx+"TB Slider]"+sc,
+	tb_lh_green = sgtick+"TB = one line-height]"+sc,
+	tb_lh_red = sbx+"TB = one line-height]"+sc
 
 let tb_standard = sg+"[TB Standard]"+sc,
 	tb_safer = sg+"[TB Safer]"+sc // don't tick/cross slider
