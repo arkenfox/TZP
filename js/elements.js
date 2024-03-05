@@ -52,8 +52,12 @@ const get_element_keys = () => new Promise(resolve => {
 const get_lh = () => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = "line-height",
-		sizes = [1,16,93,203,333],
-		sizetype = "px", // always use px for stability
+		sizes = [159.487, 201.333, 333.666], // use decimals to trigger extra precision
+			// test FF windows
+			// looks like we need multiple sizes just in case
+				// e.g. 317px = 5 groups (6 if pt) but 333px = 6 (5 if pt)
+				// e.g. 201.333 = 5 groups (both) but 201 fixes px but not pt
+		sizetype = "pt",
 		fonts = ['cursive','emoji','fangsong','fantasy','monospace','sans-serif','serif','system-ui','ui-serif',]
 
 	try {
@@ -64,26 +68,19 @@ const get_lh = () => new Promise(resolve => {
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
 		div.classList.add("measure")
-		let divcontent = ""
-		fonts.forEach(function(fontfamily) {
-			divcontent += "<div class='"+ fontfamily +"'>"
-			sizes.forEach(function(size) {
-				divcontent += "<div style='font-size:"+ size + sizetype +";' id='lh"+ fontfamily + size +"' class='measureScale'>.</div>"
-			})
-			divcontent += "</div>"
-		})
-		doc.getElementById(id).innerHTML = divcontent
 
 		let oLine = {}, isLine = true, isErr = "", target, range, height
 		fonts.forEach(function(fontfamily) {
 			sizes.forEach(function(size) {
+				size += sizetype
+				// create + measure each individually as previous elements can affect subsequent ones
+				dom[id].innerHTML = "<div style='font-size:"+ size +";' id='lhtarget' class='measureScale " + fontfamily +"'>.</div>"
 				if (isLine) {
-					target = dom["lh"+ fontfamily + size]
+					target = dom["lhtarget"]
 					if (isDomRect > 1) {
 						range = document.createRange()
 						range.selectNode(target)
 					}
-					size = size + sizetype
 					if (isDomRect < 1) {height = target.getBoundingClientRect().height
 					} else if (isDomRect == 1) {height = target.getClientRects()[0].height
 					} else if (isDomRect == 2) {height = range.getBoundingClientRect().height
@@ -102,13 +99,13 @@ const get_lh = () => new Promise(resolve => {
 		})
 		try {document.getElementById("lh-fingerprint").remove()} catch(e) {} // remove element
 
-		let display = ""
+		let display = "", notation = "", groupcount = 0
 		if (isErr !== "") {
 			display = isErr
 			addData(15, METRIC, zErr)
 		} else {
 			// hash/sort
-			let tmpobj = {}, newobj = {}, newobjcount = 0
+			let tmpobj = {}, newobj = {}
 			for (const k of Object.keys(oLine)) {
 				let hash = mini(oLine[k])
 				if (tmpobj[hash] == undefined) {
@@ -117,9 +114,9 @@ const get_lh = () => new Promise(resolve => {
 					tmpobj[hash]["group"].push(k)
 				}
 			}
-			for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]; newobjcount++}
+			for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]; groupcount++}
 			let hash = mini(newobj)
-			let btnTxt = newobjcount + " group" + (newobjcount > 1 ? "s" : "")
+			let btnTxt = groupcount + " group" + (groupcount > 1 ? "s" : "")
 			if (isSmart && isDomRect == -1) {
 				addData(15, METRIC, zLIE)
 				addDetail(METRIC, newobj)
@@ -130,7 +127,10 @@ const get_lh = () => new Promise(resolve => {
 				addData(15, METRIC, newobj, hash)
 			}
 		}
-		log_display(15, METRIC, display)
+		if (isSmart && isTB) {
+			notation = (groupcount == 1 ? tb_lh_green : tb_lh_red)
+		}
+		log_display(15, METRIC, display + notation)
 		log_perf(SECT15, METRIC, t0)
 		return resolve()
 
