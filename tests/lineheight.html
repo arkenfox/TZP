@@ -39,6 +39,14 @@
 				<span class="serif">.</span>
 				<span class="system-ui">.</span>
 			</span>
+			<br><br>
+			<span class="no_color">
+				<span class="btnfirst btn15" onClick="run()">[ run ]</span>
+				<input name="optSizes" type="radio" id="optTZP"> TZP &nbsp; |
+				<input name="optSizes" type="radio" id="optCustom"> CUSTOM
+				&nbsp; <input type="text" style="width: 48%" id="customSizes">
+				&nbsp; <span class="btn btn15" onClick="reset()">[ reset ]</span>
+			</span>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
@@ -61,6 +69,15 @@ sb = sb.trim()
 sg = sg.trim()
 s6 = s6.trim()
 s15 = s15.trim()
+
+function reset() {
+	dom.customSizes.value = sizesCustom.join(", ")
+}
+
+dom.optCustom.checked = true
+let sizesTZP = [159.487, 201.333, 333.666]
+let sizesCustom = [1,16,93,203,333] //,417,513,595,709,811,867,993]
+reset()
 
 function logConsole(group, name) {
 	let logStr = group.toUpperCase() +": "+ name
@@ -95,43 +112,63 @@ function get_lh() {
 		)
 	}
 	fonts.sort()
-	const sizes = [1,16,93,203,333] //,417,513,595,709,811,867,993]
+
+	let sizes = []
+	let isCustom = dom.optCustom.checked
+	if (!isCustom) {
+		sizes = sizesTZP
+	} else {
+		try {
+			let data = dom.customSizes.value
+			data = data.replace(/'/g,'') // remove all '
+			data = data.replace(/\"/g,'') // remove all "
+			data = data.replace(/ /g,'') // remove all spaces
+			// split
+			let aData = data.split(",")
+			aData.forEach(function(n){
+				n = n.trim()
+				if (n.length) { // can't be zero-length
+					let test = n * 1
+					if (typeof test == "number" && !Number.isNaN(test)) { // must a number and not NaN
+						if (test > 0) { // must be positive
+							sizes.push(test)
+						}
+					}
+				}
+			})
+			if (sizes.length == 0) {
+				dom.results.innerHTML = "enter some sizes: e.g. "+ sizesCustom.join(", ")
+				return
+			}
+		} catch(e) {
+			dom.results.innerHTML = e.name +": " + e.message
+			return
+		}
+	}
 
 	// reset
 	oEverything = {}
 	let display = []
 	let oLine = {}
 	let isLine = true
+	let isSingle = sizes.length == 1
 
 	try {
 		let target
+		let id = "lh-fingerprint"
+		try {
+			let doc = document
+			let div = doc.createElement('div')
+			div.setAttribute('id', id)
+			doc.body.appendChild(div)
+			div.classList.add("measure")
+		} catch(e) {
+			try {document.getElementById(id).remove()} catch(e) {} // remove element
+			dom.results.innerHTML = e.name +": " + e.message
+			return
+		}
+
 		sizetypes.forEach(function(sizetype) {
-
-			// create per sizetype div + elements
-			let id = "lh-fingerprint-"+ sizetype
-			try {
-				let doc = document
-				let div = doc.createElement('div')
-				div.setAttribute('id', id)
-				doc.body.appendChild(div)
-				div.classList.add("measure")
-				let divcontent = ""
-				fonts.forEach(function(fontfamily) {
-					divcontent += "<div class='"+ fontfamily +"'>"
-					sizes.forEach(function(size) {
-						divcontent += "<div style='font-size:"+ size + sizetype +";' id='lh"
-							+ fontfamily + size + sizetype +"' class='measureScale'>.</div>"
-					})
-					divcontent += "</div>"
-				})
-				doc.getElementById(id).innerHTML = divcontent
-			} catch(e) {
-				try {document.getElementById(id).remove()} catch(e) {} // remove element
-				isLine = false
-				dom.results.innerHTML = e.name +": " + e.message
-				return
-			}
-
 			let oTempValues = {},
 				oTempStyles = {},
 				oTempData = {}
@@ -139,13 +176,19 @@ function get_lh() {
 			fonts.forEach(function(fontfamily) {
 				sizes.forEach(function(size) {
 					size += sizetype
+					// create + measure each individually as previous elements can affect subsequent ones
+					dom[id].innerHTML = "<div style='font-size:"+ size +";' id='lhtarget' class='measureScale " + fontfamily +"'>.</div>"
 					if (isLine) {
-						target = dom["lh"+ fontfamily + size]
+						target = dom["lhtarget"]
 						try {
 							let elDiv = target.getBoundingClientRect()
 							let height = elDiv.height
-							if (oLine[sizetype][fontfamily] == undefined) {oLine[sizetype][fontfamily] = {}}
-							oLine[sizetype][fontfamily][size] = height
+							if (isSingle) {
+								oLine[sizetype][fontfamily] = height
+							} else {
+								if (oLine[sizetype][fontfamily] == undefined) {oLine[sizetype][fontfamily] = {}}
+								oLine[sizetype][fontfamily][size] = height
+							}
 						} catch(e) {
 							isLine = false
 							dom.results.innerHTML = e.name +": " + e.message
@@ -153,11 +196,12 @@ function get_lh() {
 					}
 				})
 			})
-			try {document.getElementById(id).remove()} catch(e) {console.log(e.name, e.message)} // remove element
 		})
+		try {document.getElementById(id).remove()} catch(e) {console.log(e.name, e.message)} // remove element
 	} catch(e) {
 		isLine = false
 		dom.results.innerHTML = e.name +": " + e.message
+		try {document.getElementById(id).remove()} catch(e) {console.log(e.name, e.message)} // remove element
 	}
 
 	// errors
@@ -167,6 +211,7 @@ function get_lh() {
 		return
 	}
 
+	display.push(s6 +"sizes: "+ sc + sizes.join(", ") +"<br><br><hr>")
 	sizetypes.forEach(function(sizetype) {
 		oEverything[sizetype] = {}
 		// hash/sort
@@ -197,12 +242,18 @@ function get_lh() {
 		for (const k of Object.keys(tmpobj).sort()) {
 			newobj[k] = tmpobj[k]
 			let fontStr = newobj[k]["group"].join(", ")
-			let aData = []
-			for (const len of Object.keys(newobj[k]["metrics"])) {
+			let strData = ""
+			if (isSingle) {
+				strData = newobj[k]["metrics"]
+			} else {
+				let aData = []
+				for (const len of Object.keys(newobj[k]["metrics"])) {
 				aData.push(newobj[k]["metrics"][len])
+				}
+				strData = aData.join(", ")
 			}
 			tmpDisplay.push(s6 + k + sc + ": <b>" + fontStr
-				+"</b><p class='faint' style='margin: 5px 0px 0px 20px;'>"+ aData.join(", ") +"</p>")
+				+"</b><p class='faint' style='margin: 5px 0px 0px 20px;'>"+ strData +"</p>")
 		}
 		let typehash = mini(newobj)
 		oEverything[sizetype]["data"] = newobj
@@ -217,8 +268,6 @@ function get_lh() {
 	dom.results.innerHTML = display.join("<br>")
 	// perf
 	dom.perf.innerHTML = Math.round(performance.now() -t0) +" ms"
-
-
 }
 
 function run() {
@@ -236,7 +285,6 @@ get_lh()
 if (isFile) {
 	window.addEventListener("resize", get_lh)
 }
-
 
 </script>
 </body>
