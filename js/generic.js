@@ -142,7 +142,7 @@ function cleanFn(item, skipArray = false) {
 	} else if (item === undefined || item === true || item === false || item === null) {item += ""
 	} else if (!skipArray && item == "") {item = "empty string"
 	} else if (typeof item === "string") {
-		if (!isNaN(item*1)) {item = "\"" + item + "\""}
+		if (!Number.isNaN(item*1)) {item = "\"" + item + "\""}
 	}
 	return item
 }
@@ -187,7 +187,7 @@ function getElementProp(SECT, id, name, pseudo = ":after") {
 			// out of range: dpi returns ""
 			if (item == "") {item = "?"}
 		}
-		if (!isNaN(item * 1)) {item = item * 1} // number
+		if (!Number.isNaN(item * 1)) {item = item * 1} // number
 
 		// fuckery
 		if (item == "") {
