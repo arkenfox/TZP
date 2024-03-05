@@ -22,7 +22,7 @@ onconnect = function(e) {
 			} else if (item === undefined || item === true || item === false || item === null) {item += ""
 			} else if (item == "") {item = "empty string"
 			} else if (typeof item == "string") {
-				if (!isNaN(item*1)) {item = "\"" + item + "\""}
+				if (!Number.isNaN(item*1)) {item = "\"" + item + "\""}
 			}
 			return item
 		}

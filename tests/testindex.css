@@ -289,7 +289,7 @@ table td.showhide {text-align: center; padding-top: 7px; padding-bottom: 7px;}
 #tb18 td:first-child {color: var(--test18);}
 #tb99 td:first-child {color: var(--test99);}
 
-#lh-fingerprint-pt, #lh-fingerprint-px, #mathml-fingerprint {
+#lh-fingerprint, #mathml-fingerprint {
 	position: fixed;
 	top: 0;
 	left: 0;
