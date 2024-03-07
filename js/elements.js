@@ -52,13 +52,13 @@ const get_element_keys = () => new Promise(resolve => {
 const get_lh = () => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = "line-height",
-		sizes = [159.487, 201.333, 333.666], // use decimals to trigger extra precision
-			// test FF windows
-			// looks like we need multiple sizes just in case
-				// e.g. 317px = 5 groups (6 if pt) but 333px = 6 (5 if pt)
-				// e.g. 201.333 = 5 groups (both) but 201 fixes px but not pt
-		sizetype = "pt",
+		sizetype = "px",
 		fonts = ['cursive','emoji','fangsong','fantasy','monospace','sans-serif','serif','system-ui','ui-serif',]
+
+	let sizes = [2.9, 3.9, 4.9, 159.9, 201.9, 333.9]
+	// ToDo: tailor sizes per TB/FF and per platform
+	// ToDo: can we remove some fonts since 6 is the max groups
+		// e.g. ui-serif == serif
 
 	try {
 		if (runSE) {foo++}
@@ -99,7 +99,7 @@ const get_lh = () => new Promise(resolve => {
 		})
 		try {document.getElementById("lh-fingerprint").remove()} catch(e) {} // remove element
 
-		let display = "", notation = "", groupcount = 0
+		let display = "", groupcount = 0
 		if (isErr !== "") {
 			display = isErr
 			addData(15, METRIC, zErr)
@@ -127,10 +127,7 @@ const get_lh = () => new Promise(resolve => {
 				addData(15, METRIC, newobj, hash)
 			}
 		}
-		if (isSmart && isTB) {
-			notation = (groupcount == 1 ? tb_lh_green : tb_lh_red)
-		}
-		log_display(15, METRIC, display + notation)
+		log_display(15, METRIC, display)
 		log_perf(SECT15, METRIC, t0)
 		return resolve()
 
