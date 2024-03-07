@@ -1431,8 +1431,6 @@ function outputFD() {
 			tb_red = sbx+"MB]"+sc
 			tb_standard = sg+"[MB Standard]"+sc
 			tb_safer = sg+"[MB Safer]"+sc
-			tb_lh_green = sgtick+"MB == one line-height]"+sc
-			tb_lh_red = sbx+"MB == one line-height]"+sc
 		}
 	}
 	// browser

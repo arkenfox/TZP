@@ -123,9 +123,7 @@ const screen_green = sgtick+"screens match]"+sc,
 // dynamic TB/MB notation
 let tb_green = sgtick+"TB]"+sc,
 	tb_red = sbx+"TB]"+sc,
-	tb_slider_red = sbx+"TB Slider]"+sc,
-	tb_lh_green = sgtick+"TB = one line-height]"+sc,
-	tb_lh_red = sbx+"TB = one line-height]"+sc
+	tb_slider_red = sbx+"TB Slider]"+sc
 
 let tb_standard = sg+"[TB Standard]"+sc,
 	tb_safer = sg+"[TB Safer]"+sc // don't tick/cross slider

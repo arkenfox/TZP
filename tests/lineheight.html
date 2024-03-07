@@ -28,8 +28,7 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
 			<span class="no_color">basic line-height test, using clientrect, with different variables</span>
-			<span class="btn15 btn" onClick="run()">[ re-run ]</span>
-				<input type="checkbox" name="expand" style="margin: 0; height: 12px" onClick='run()'> <span class="no_color">expand font-styles
+			&nbsp; | &nbsp; <input type="checkbox" name="expand" style="margin: 0; height: 12px" onClick='run()'> <span class="no_color">expand font-styles
 			</span> &nbsp
 			<span class="measure">
 				<span class="cursive">.</span>
@@ -42,21 +41,16 @@
 			<br><br>
 			<span class="no_color">
 				<span class="btnfirst btn15" onClick="run()">[ run ]</span>
-				<input name="optSizes" type="radio" id="optTZP"> TZP &nbsp; |
-				<input name="optSizes" type="radio" id="optCustom"> CUSTOM
-				&nbsp; <input type="text" style="width: 48%" id="customSizes">
-				&nbsp; <span class="btn btn15" onClick="reset()">[ reset ]</span>
+				&nbsp;<input type="text" style="width: 45%" id="sizes">
+				&nbsp;<span class="btn btn15" onClick="resetsizes()">[ reset ]</span>
+				<span class="btn btn15" onClick="clearsizes()">[ clear ]</span>
 			</span>
 		</td></tr>
 		<tr>
 			<td colspan="2" style="text-align: left;">
 			<hr><br>
-			<!--
-			<span class="no_color c mono spaces" id="summary"><b><u>SUMMARY</u></b></span>
-			<br><br><hr><br>-->
 			<span class="no_color c mono spaces" id="results"></span></td>
 		</tr>
-
 	</table>
 	<br>
 
@@ -70,15 +64,9 @@ sg = sg.trim()
 s6 = s6.trim()
 s15 = s15.trim()
 
-function reset() {
-	dom.customSizes.value = sizesCustom.join(", ")
-}
-
-dom.optCustom.checked = true
-let sizesTZP = [159.487, 201.333, 333.666]
-let sizesCustom = [1,16,93,203,333] //,417,513,595,709,811,867,993]
-reset()
-
+function resetsizes() {dom.sizes.value = sizesTZP.join(", ")}
+function clearsizes() {dom.sizes.value = ""}
+function logSizes() {console.log(sizes)}
 function logConsole(group, name) {
 	let logStr = group.toUpperCase() +": "+ name
 	let data = oEverything[group][name]
@@ -86,10 +74,20 @@ function logConsole(group, name) {
 	console.log(logStr +": "+ mini(data), "\n", data, "\n", results)
 }
 
+let sizesTZP = [2.9, 3.9, 4.9, 159.9, 201.9, 333.9]
+let sizes = []
+resetsizes()
+
+let oPresets = {
+	"tzp": sizesTZP,
+}
+
+function buildpresets() {}
+buildpresets()
+
 function get_lh() {
 	let t0 = performance.now()
 	let sizetypes = ["px","pt"]
-	sizetypes.sort()
 	let fonts = [
 		// https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#values
 		'cursive',
@@ -112,14 +110,15 @@ function get_lh() {
 		)
 	}
 	fonts.sort()
+	sizes = [] // reset
 
-	let sizes = []
-	let isCustom = dom.optCustom.checked
-	if (!isCustom) {
-		sizes = sizesTZP
-	} else {
-		try {
-			let data = dom.customSizes.value
+	try {
+		let data = dom.sizes.value
+		data = data.trim()
+		// is it a preset
+		if (oPresets[data.toLowerCase()] !== undefined) {
+			sizes = oPresets[data.toLowerCase()]
+		} else {
 			data = data.replace(/'/g,'') // remove all '
 			data = data.replace(/\"/g,'') // remove all "
 			data = data.replace(/ /g,'') // remove all spaces
@@ -130,20 +129,23 @@ function get_lh() {
 				if (n.length) { // can't be zero-length
 					let test = n * 1
 					if (typeof test == "number" && !Number.isNaN(test)) { // must a number and not NaN
-						if (test > 0) { // must be positive
-							sizes.push(test)
-						}
+						if (test > 0) {sizes.push(test)} // must be positive
 					}
 				}
 			})
 			if (sizes.length == 0) {
-				dom.results.innerHTML = "enter some sizes: e.g. "+ sizesCustom.join(", ")
+				dom.results.innerHTML = "enter some sizes: e.g. "+ sizesTZP.join(", ")
 				return
 			}
-		} catch(e) {
-			dom.results.innerHTML = e.name +": " + e.message
-			return
 		}
+	} catch(e) {
+		dom.results.innerHTML = e.name +": " + e.message
+		return
+	}
+
+	if (sizes.length == 0) {
+		dom.results.innerHTML = "no sizes specified"
+		return
 	}
 
 	// reset
@@ -211,7 +213,11 @@ function get_lh() {
 		return
 	}
 
-	display.push(s6 +"sizes: "+ sc + sizes.join(", ") +"<br><br><hr>")
+	if (sizes.length < 30) {
+		display.push(s6 +"sizes: "+ sc + sizes.join(", ") +"<br><br><hr>")
+	} else {
+		display.push(s6 +"sizes: "+ sc + "<span class='btn15 btnc' onClick='logSizes()'>"+ sizes.length +" sizes"+ sc +"<br><br><hr>")
+	}
 	sizetypes.forEach(function(sizetype) {
 		oEverything[sizetype] = {}
 		// hash/sort
@@ -232,14 +238,19 @@ function get_lh() {
 		aGroups.sort()
 		oEverything[sizetype]["groups"] = aGroups
 		let grouphash = mini(aGroups)
+		let groupcount = oEverything[sizetype]["groups"].length
 		let groupHeader = "<b><u>"+ sizetype.toUpperCase() +"</u> " //+ </b>"
 		if (sizetype !== sizetypes[0]) {groupHeader = "<hr><br>"+ groupHeader}
-		let groupBtn = " group: "
+		let groupBtn = " group: ["+ groupcount +"] "
 			+ s15 + "<span class='btn15 btnc' onClick='logConsole(`"+ sizetype + "`,`groups`)'>" + grouphash + sc + sc
 		groupHeader += groupBtn
 
+		if (isFile) {
+			console.log(sizetype, groupcount)
+		}
+
 		let tmpDisplay = []
-		for (const k of Object.keys(tmpobj).sort()) {
+		for (const k of Object.keys(tmpobj)) {
 			newobj[k] = tmpobj[k]
 			let fontStr = newobj[k]["group"].join(", ")
 			let strData = ""
