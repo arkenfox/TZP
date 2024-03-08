@@ -11,6 +11,7 @@
 	<style>
 		table {width: 97%; min-width: 580px; max-width: 780px}
 		hr {color: var(--test4);}
+		#tb4 td {padding-left: 0px;}
 		.fixed {
 			top: 0;
 			left: 0;
@@ -23,61 +24,19 @@
 		.bigger {
 			font-size: 250px;
 		}
-		/* tweak overlay for this PoC */
-		#overlay {
-			width: 500px;
-			min-width: 300px;
-		}
 	</style>
 </head>
 
 <body>
-	<div class="fixed normalized" id="elementsdiv"> </div>
-	<div id="modaloverlay" onClick="hide_overlays()"></div>
-	<div id="overlay">
-		<div class="mono spaces pad"><span id="overlaytop"></span>
-			<div style="text-align: right;" id="overlaybuttons"><span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span></div>
-			<p>These are examples only. The real test creates, measures, and then removes each element individually, as the order of and/or the presence of other elements can affect results.</p>
-			<div class="normalized">
-<p>
-	<input style="display:inline;" type="button"> &nbsp;
-	<input style="display:inline;" type="checkbox"> &nbsp;
-	<input style="display:inline;" type="radio"> &nbsp;
-	<input style="display:inline;" type="color"> &nbsp;
-	<input style="display:inline;" type="reset">
-	<select style="display:inline;"><option></option></select> &nbsp;
-</p>
-<p>
-	<input style="display:inline;" type="date"> &nbsp;
-	<input style="display:inline;" type="time">
-	</p>
-<p><input style="display:inline;" type="datetime-local"></p>
-<p><input style="display:inline;" type="file" webkitdirectory directory></p>
-<p><input style="display:inline;" type="file" ></p>
-<p><input style="display:inline;" type="file" multiple=""></p>
-<p><input style="display:inline; color: var(--test0);" type="image"></p>
-<p><input style="display:inline;" type="number"> &nbsp; <input type="submit" style="display:inline;"></p>
-<p><select style="display:inline;" multiple=""><option></option></select></p>
-<p><select style="display:inline;" multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option></select></p>
-<p><select style="display:inline;" multiple=""><option>Mōá?-&#xffff;</option></select></p>
-<p><details style="display:inline;"></details></p>
-			</div>
-		</div>
-	</div>
-
+	<div class="fixed normalized"><div class="bigger measureScale" id="elementsdiv"></div></div>
 	<!-- offscreen -->
 	<div class="offscreen">
 		<div>
-			<div class="bigger">
-				<q id="intlcss_quote-fr" lang="fr"></q>
-			</div>
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
 			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
-			<div><span id="dfsize"></span></div>
 			<div><input id="enumber" type="number" min="6" step="2"></div>
-			<div id="sysFont"></div>
 		</div>
 	</div>
 
@@ -123,19 +82,13 @@
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro">
-			<span class="btn-left btn4 btn" onClick="run()">[ run ]</span>
+			<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
 		<tr><td colspan="2" style="text-align: left;">
 			<div>CSS &nbsp;
 				<span class='blue'>chrome://global/locale/intl.css</span>
 				<p class="c mono spaces no_color" id="css"> &nbsp; </p>
-			</div>
-			<div>ELEMENTS &nbsp;
-				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/HtmlForm.properties' target='blank'>searchfox HtmlForm</a>
-				<span class="btn btn0" onCLick="show_overlay()">[ show _some_ examples ]</span>
-					<input id="optTransform" checked type="checkbox"> &nbsp; transform <input id="optExpand" type="checkbox"> &nbsp; all inputs
-				<p class="c mono spaces no_color" id="elements"> &nbsp; </p>
 			</div>
 			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
 				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
@@ -167,35 +120,13 @@
 			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>1</sup>
 			</td>
 		</tr>
-
-		</table>
+	</table>
 	<br>
 
 <script>
 'use strict';
 
 let isLocale = ""
-
-try {
-	// escape to close
-	document.onkeydown = function(evt) {
-		evt = evt || window.event;
-		var isEscape = false;
-		if ("key" in evt) {
-			isEscape = (evt.key === "Escape" || evt.key === "Esc");
-		} else {
-			isEscape = (evt.keyCode === 27);
-		}
-		if (isEscape) {
-			hide_overlays()
-		}
-	}
-	overlay.addEventListener("keydown", (e) => {
-		console.log(e.key)
-	})
-} catch(e) {
-	console.log(e)
-}
 
 function get_dtd1() {
 	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
@@ -271,160 +202,34 @@ function get_dtd2() {
 function get_css() {
 	// ToDo: we also have chrome://global/content/widgets.css
 		// e.g. chrome://global/skin/richlistbox.css
-	try {
-		let aList = [
-			'quote-fr',
-		]
-		let oData = {}, target
-		aList.sort()
-		aList.forEach(function(n) {
-			try {
-				try {target = dom['intlcss_'+n]} catch(e) {}
-				if (target == undefined) {target = dom[n]}
-				oData[n] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
-			} catch(e) {
-				console.log(e)
-				oData[n] = zErr
-			}
-		})
-		let hash = mini(oData), notation = ""
-		// check windows 11 dpr = 1 (my machine)
-		if (isFile) {
-			//notation = (hash == "e7263bf1" ? green_tick : red_cross)
-		}
-		dom.css.innerHTML = hash + notation +"<br>"+ json_highlight(oData)
-		return
-	} catch(e) {
-		dom.css = e+""
-		return
-	}
-}
-
-function get_elements() {
-	// ui.useOverlayScrollbars: 0=on, 1=off
-	// windows 11 on -> off (en-US)
-		//  empty 29 -> 12 = -17
-		// spaces 49 -> 32 = -17
-		// string 78 -> 61 = -17
-		// matches scrollbar in document/viewport/element
-		// I expect this will _have_ to leak subpixels given we are measuring with clientRect
-
-	// 6-7ms perf
-
-	let tmpData = {}, target
-	let isTransform = dom.optTransform.checked
-	let isExpanded = dom.optExpand.checked
-
+	const parent = dom.elementsdiv
 	let oList = {
-		button: '<input id="X" type="button">',
-		checkbox: '<input id="X" type="checkbox">',
-		color: '<input id="X" type="color">',
-		date: '<input id="X" type="date">',
-		"datetime-local": '<input id="X" type="datetime-local">',
-		directory: '<input id="X" webkitdirectory directory type="file">',
-		file: '<input id="X" type="file">',
-		files: '<input id="X" multiple="" type="file">',
-		image: '<input id="X" type="image">',
-		number: '<input id="X" type="number">',
-		radio: '<input id="X" type="radio">',
-		reset: '<input id="X" type="reset">',
-		submit: '<input id="X" type="submit">',
-		time: '<input id="X" type="time">',
-		select: '<select id="X"><option id="Y"></option></select>',
-		select_m_empty: '<select multiple="" id="X"><option id="Y"></option></select>',
-		select_m_spaces: '<select multiple="" id="X"><option id="Y"> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-		select_m_string: '<select multiple="" id="X"><option id="Y">Mōá?-&#xffff;</option></select>',
-		details: '<details id="X"></details>',
+		"quote-fr": "<q id='X' lang='fr'></q>",
 	}
-
-	let oListExtra = {
-		// redundant: should always = number
-		datetime: '<input id="X" type="datetime">',
-		email: '<input id="X" type="email">',
-		month: '<input id="X" type="month">',
-		password: '<input id="X" type="password">',
-		progress: '<progress id="X"></progress>',
-		search: '<input id="X" type="search">',
-		tel: '<input id="X" type="tel">',
-		text: '<input id="X" type="text">',
-		url: '<input id="X" type="url">',
-		week: '<input id="X" type="week">',
-		// last of the inputs
-		textarea: '<textarea id="X"></textarea>',
-		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
-	}
-
-	if (isExpanded) {
-		for (const k of Object.keys(oListExtra)) {
-			oList[k] = oListExtra[k]
-		}
-	}
-
 	try {
-		const parent = dom.elementsdiv
-		// just skew the parent, this seems sufficient to transform all elements
-			// and bonus, we require this for input type image anyway
-		if (isTransform) {
-			parent.classList.add("measureScale")
-		} else {
-			parent.classList.remove("measureScale")
-		}
-		for (const k of Object.keys(oList)) {
+		let oData = {}, target
+		for (const k of Object.keys(oList).sort()) {
 			// important to clear the div so no other elements can affect measurements
 			parent.innerHTML = ""
+			let data = []
 			try {
 				parent.innerHTML = oList[k] //+" "+ k
 				target = document.getElementById("X")
-				target.setAttribute("style","display:inline;")
-				if (k.slice(0,8) == "select_m") {
-					let group = "select_multiple"
-					if (tmpData[group] == undefined) {tmpData[group] = {}}
-					let method = k.slice(9, k.length)
-					// element
-					try {
-						tmpData[group][method] = [
-							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-						]
-					} catch(e) {
-						tmpData[group][method] = ["error"]
-					}
-					// option
-					try {
-						target = document.getElementById("Y")
-						tmpData[group][method +"_option"] = [
-							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-						]
-					} catch(e) {
-						tmpData[group][method +"_option"] = ["error"]
-					}
-				} else {
-					tmpData[k] = [
-						target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-						target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-					]
-				}
+				oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
 			} catch(e) {
-				tmpData[k] = ["error"]
-				console.log(k, e)
+				console.log(e)
+				oData[k] = zErr
 			}
 		}
-		parent.innerHTML = "" // just in case
-		let oData = {}
-		for (const k of Object.keys(tmpData).sort()) {oData[k] = tmpData[k]} // sort
+		parent.innerHTML = ""
 		let hash = mini(oData), notation = ""
-		if (isFile && isExpanded && isLocale == "en-US") {
-			// checking TB13 spoof english on my setup
-			notation = (hash == "af2ad919" ? green_tick: red_cross)
-		}
-		dom.elements.innerHTML = hash + notation +"<br>"+ json_highlight(oData, 105)
+		dom.css.innerHTML = hash + notation +"<br>"+ json_highlight(oData)
 		return
 	} catch(e) {
-		dom.elements = e+""
+		parent.innerHTML = ""
+		dom.css = e+""
 		return
 	}
-
 }
 
 function get_locale() {
@@ -530,24 +335,27 @@ function get_validation_messages() {
 	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
 		// ^ but we should add manual tests for those
 	// InvalidDate/Time/Week/Month - can't set invalid values via JS
+
+	// dom
+	let domvalue, domhash
+	const vList = {
+		BadInputNumber: 'number', // this returns ValueMissing on chrome
+		CheckboxMissing: 'checkbox',
+		DateTimeRangeOverflow: 'datetime',
+		DateTimeRangeUnderflow: 'datetimeunder',
+		FileMissing: 'file',
+		InvalidEmail: 'email',
+		InvalidURL: "url",
+		NumberRangeOverflow: 'max',
+		NumberRangeUnderflow: 'min',
+		PatternMismatch: 'tel',
+		RadioMissing: 'radio',
+		SelectMissing: 'select',
+		StepMismatch: 'step',
+		ValueMissing: 'text',
+	}
+	let vData = {}
 	try {
-		const vList = {
-			BadInputNumber: 'number', // this returns ValueMissing on chrome
-			CheckboxMissing: 'checkbox',
-			DateTimeRangeOverflow: 'datetime',
-			DateTimeRangeUnderflow: 'datetimeunder',
-			FileMissing: 'file',
-			InvalidEmail: 'email',
-			InvalidURL: "url",
-			NumberRangeOverflow: 'max',
-			NumberRangeUnderflow: 'min',
-			PatternMismatch: 'tel',
-			RadioMissing: 'radio',
-			SelectMissing: 'select',
-			StepMismatch: 'step',
-			ValueMissing: 'text',
-		}
-		let vData = {}
 		for (const k of Object.keys(vList).sort()) {
 			try {
 				if (vList[k] !== "") {
@@ -560,13 +368,84 @@ function get_validation_messages() {
 				//console.log(k, e+"")
 			}
 		}
-		let hash = mini(vData)
-		dom.validation_messages.innerHTML = hash +"<br>"+ json_highlight(vData)
-		return
+		domhash = mini(vData)
+		domvalue = domhash +" [DOM]<br>"+ json_highlight(vData)
 	} catch(e) {
-		dom.validation_messages = e+""
-		return
+		domvalue = "DOM: "+ e+""
 	}
+
+	// domparser
+	let dommatch_green = sg+"[✓ matches DOM]"+sc
+	let dommatch_red = sb+"[✗ matches DOM]"+sc
+	let parservalue, parserhash
+	const aList = ['application/xml','application/xhtml+xml','image/svg+xml','text/html','text/xml']
+	const oList = {
+		BadInputNumber: "<input type='number' required>",
+		CheckboxMissing: "<input type='checkbox' required>",
+		DateTimeRangeOverflow: "<input type='date' value='2024-01-01' max='2023-12-31'>",
+		DateTimeRangeUnderflow: "<input type='date' value='2022-01-01' min='2023-12-31'>",
+		FileMissing: "<input type='file' required>",
+		InvalidEmail: "<input type='email' value='a'>",
+		InvalidURL: "<input type='url' value='a'>",
+		NumberRangeOverflow: "<input type='number' max='1974.3' value='2000'>",
+		NumberRangeUnderflow: "<input type='number' min='8026.5' value='1'>",
+		PatternMismatch: "<input type='tel' pattern='[0-9]{1}' value='a'>",
+		RadioMissing: "<input type='radio' required name='radiogroup'>",
+		SelectMissing: "<select required><option></option></select>",
+		StepMismatch: "<input type='number' min='1.2345' step='1005.5545' value='2'>",
+		ValueMissing: "<input type='text' required>",
+	}
+	let oData = {}
+	try {
+		let parser = new DOMParser
+		aList.forEach(function(key) {
+			let tmpObj = {}
+			for (const k of Object.keys(oList)) {
+				try {
+					let doc = parser.parseFromString(oList[k], "text/html")
+					let msg = doc.activeElement.children[0].validationMessage
+					//if (key == "text/xml") {msg = msg +"b"} // change one mimetype to be different
+					tmpObj[k] = msg // +"b" // make all the same hash but different
+				} catch(e) {
+					tmpObj[k] = zErr
+				}
+			}
+			parserhash = mini(tmpObj)
+			if (oData[parserhash] == undefined) {
+				oData[parserhash] = {
+					"data": tmpObj,
+					"mimeTypes": []
+				}
+			}
+			oData[parserhash]["mimeTypes"].push(key)
+		})
+	} catch(e) {
+		parservalue = "DOMParser: "+ e+""
+	}
+
+	if (parservalue == undefined) { // not an error
+		let parsercount = Object.keys(oData).length
+		if (parsercount == 1 && parserhash == domhash) { // single hash for all five and it matches
+			parservalue = parserhash +" [DOMParser] "+ dommatch_green +"<br><br>" + aList.join(", ")
+		} else {
+			let oMini = {}
+			let tmpHash = (parsercount == 1 ? parserhash : "mixed results")
+			parservalue = tmpHash + " [DOMParser] "+ dommatch_red
+			if (parsercount == 1) {
+				oMini[parserhash] = oData[parserhash]["data"]
+				parservalue += "<br><br>" + json_highlight(oMini)
+			} else {
+				console.log("DOMParser\n", oData)
+				parservalue += " check the console"
+				
+				for (const k of Object.keys(oData).sort()) {
+					oMini[k] = oData[k]["mimeTypes"]
+				}
+				parservalue += "<br><br>" + json_highlight(oMini)
+			}
+		}
+	}
+	dom.validation_messages.innerHTML = parservalue +"<br><br>"+ domvalue
 }
 
 function get_xml_errors() {
@@ -596,8 +475,8 @@ function get_xml_errors() {
 
 	try {
 		let xmlData = {}, delimiter = ":"
-		let parser = new DOMParser
 		oMimeTypes.forEach(function(mimetype) {
+			let parser = new DOMParser
 			let oTemp = {}
 			for (const k of Object.keys(xmlList)) {
 
@@ -632,7 +511,7 @@ function get_xml_errors() {
 					oTemp[k] = err+""
 				}
 			}
-			console.log(mimetype, oTemp)
+			//console.log(mimetype, oTemp)
 			let hashTemp = mini(oTemp)
 			if (xmlData[hashTemp] == undefined) {
 				xmlData[hashTemp] = {
@@ -666,11 +545,11 @@ function run() {
 	// pause so users see change
 	setTimeout(function() {
 		get_locale()
-		get_numeric_inputs()
 		get_xml_errors()
+		get_numeric_inputs()
 		get_validation_messages()
+		//get_validation_parser()
 		get_media_messages()
-		get_elements()
 		get_css()
 	}, 170)
 }
