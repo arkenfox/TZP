@@ -124,7 +124,7 @@ dom.optTransform.checked = true
 dom.optExpand.checked = false
 dom.optVertical.checked = false
 dom.optUnstyled.checked = false
-dom.optEverything.checked = false //false
+dom.optEverything.checked = false
 
 let oData = {}
 
@@ -236,16 +236,18 @@ function get_elements() {
 		email: '<input id="X" type="email">',
 		month: '<input id="X" type="month">',
 		password: '<input id="X" type="password">',
-		progress: '<progress id="X"></progress>',
 		search: '<input id="X" type="search">',
 		tel: '<input id="X" type="tel">',
 		text: '<input id="X" type="text">',
 		url: '<input id="X" type="url">',
 		week: '<input id="X" type="week">',
-		// last of the inputs
+		// last of the inputs/forms
+		progress: '<progress id="X"></progress>',
 		textarea: '<textarea id="X"></textarea>',
 		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
 	}
+
+	let aNumberGroup = ['number','datetime','email','month','password','search','tel','text','url','week',]
 
 	if (isExpanded) {
 		for (const k of Object.keys(oListExtra)) {
@@ -283,14 +285,16 @@ function get_elements() {
 						target = document.getElementById("X")
 						target.setAttribute("style","display:inline; writing-mode: "+ writingstring +";")
 						if (isUnstyled) {target.classList.add('unstyled')}
-						if (k.slice(0,8) == "select_m") {
-							let group = "select_multiple"
+
+						let isNumberGroup = (aNumberGroup.includes(k) && isExpanded)
+						if (k.slice(0,8) == "select_m" || isNumberGroup) {
+							let group = isNumberGroup ? "number [in gecko these should be identical]" : "select_multiple"
 							if (isEverything) {
 								if (tmpData[style][writingstyle][group] == undefined) {tmpData[style][writingstyle][group] = {}}
 							} else {
 								if (tmpData[group] == undefined) {tmpData[group] = {}}
 							}
-							let method = k.slice(9, k.length)
+							let method = isNumberGroup ? k : k.slice(9, k.length)
 							// element
 							try {
 								data = [
@@ -303,16 +307,18 @@ function get_elements() {
 								if (isEverything) { tmpData[style][writingstyle][group][method] = ["error"] } else { tmpData[group][method] = ["error"] }
 							}
 							// option
-							data = []
-							try {
-								target = document.getElementById("Y")
-								data = [
-									target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-									target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-								]
-								if (isEverything) { tmpData[style][writingstyle][group][method +"_option"] = data } else { tmpData[group][method +"_option"] = data }
-							} catch(e) {
-								if (isEverything) { tmpData[style][writingstyle][group][method +"_option"] = ["error"] } else { tmpData[group][method +"_option"] = ["error"] }
+							if (!isNumberGroup) {
+								data = []
+								try {
+									target = document.getElementById("Y")
+									data = [
+										target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+										target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+									]
+									if (isEverything) { tmpData[style][writingstyle][group][method +"_option"] = data } else { tmpData[group][method +"_option"] = data }
+								} catch(e) {
+									if (isEverything) { tmpData[style][writingstyle][group][method +"_option"] = ["error"] } else { tmpData[group][method +"_option"] = ["error"] }
+								}
 							}
 						} else {
 							data = [
@@ -323,7 +329,7 @@ function get_elements() {
 						}
 					} catch(e) {
 						if (isEverything) { tmpData[style][writingstyle][k] = ["error"] } else { tmpData[k] = ["error"] }
-						console.log(k, e)
+						//console.log(k, e)
 					}
 				}
 			})
@@ -331,7 +337,19 @@ function get_elements() {
 
 		parent.innerHTML = "" // just in case
 		oData = {} // reset
-		for (const k of Object.keys(tmpData).sort()) {oData[k] = tmpData[k]}
+		for (const k of Object.keys(tmpData).sort()) {
+			if (isEverything) {
+				oData[k] = {}
+				for (const j of Object.keys(tmpData[k]).sort()) {
+					oData[k][j] = {}
+					for (const m of Object.keys(tmpData[k][j]).sort()) {
+						oData[k][j][m] = tmpData[k][j][m]
+					}
+				}
+			} else {
+				oData[k] = tmpData[k]
+			}
+		}
 		let hash = mini(oData), notation = ""
 
 		let t1 = performance.now()
