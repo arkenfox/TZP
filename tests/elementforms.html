@@ -124,7 +124,7 @@ dom.optTransform.checked = true
 dom.optExpand.checked = false
 dom.optVertical.checked = false
 dom.optUnstyled.checked = false
-dom.optEverything.checked = true //false
+dom.optEverything.checked = false //false
 
 let oData = {}
 
@@ -135,7 +135,6 @@ function style_demo() {
 	// flip style in examples
 	let addstyle = dom.demoNative.checked ? "native" : "mozInputs"
 	let remstyle = addstyle == "native" ? "mozInputs" : "native"
-
 	try {
 		let items = document.querySelectorAll("."+ remstyle)
 		for (let i=0; i < items.length; i++) {
@@ -152,6 +151,7 @@ function style_everything() {
 	dom.optVertical.disabled = isEverything
 	dom.optUnstyled.disabled = isEverything
 }
+style_everything()
 
 try {
 	// escape to close
@@ -175,9 +175,7 @@ try {
 }
 
 function get_elements() {
-	dom.elements.innerHTML = " &nbsp; "
 	let t0 = performance.now()
-
 	// ui.useOverlayScrollbars: 0=on, 1=off
 	// windows 11 on -> off (en-US)
 		//  empty 29 -> 12 = -17
