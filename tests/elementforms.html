@@ -247,13 +247,19 @@ function get_elements() {
 		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
 	}
 
-	let aNumberGroup = ['number','datetime','email','month','password','search','tel','text','url','week',]
+	let aNumberGroup = ['number','datetime','email','password','search','tel','text','url',]
+	let strNumberTitle = "generic [should be identical]"
+
+	if (isFF) {
+		aNumberGroup.push('month','week') // different in chrome
+	}
 
 	if (isExpanded) {
 		for (const k of Object.keys(oListExtra)) {
 			oList[k] = oListExtra[k]
 		}
 	}
+	
 
 	try {
 		const parent = dom.elementsdiv
@@ -276,6 +282,7 @@ function get_elements() {
 				if (isEverything) {writingstring = writingstyle}
 				//console.log(isUnstyled, writingstyle)
 
+				let isNumberString, isNumberCount = 0
 				for (const k of Object.keys(oList).sort()) {
 					// important to clear the div so no other elements can affect measurements
 					parent.innerHTML = ""
@@ -288,11 +295,17 @@ function get_elements() {
 
 						let isNumberGroup = (aNumberGroup.includes(k) && isExpanded)
 						if (k.slice(0,8) == "select_m" || isNumberGroup) {
-							let group = isNumberGroup ? "number [in gecko these should be identical]" : "select_multiple"
+							let group = isNumberGroup ? strNumberTitle : "select_multiple"
 							if (isEverything) {
-								if (tmpData[style][writingstyle][group] == undefined) {tmpData[style][writingstyle][group] = {}}
+								if (tmpData[style][writingstyle][group] == undefined) {
+									tmpData[style][writingstyle][group] = {}
+									if (isExpanded && isNumberGroup) {tmpData[style][writingstyle][group]["_identical"] = ""}
+								}
 							} else {
-								if (tmpData[group] == undefined) {tmpData[group] = {}}
+								if (tmpData[group] == undefined) {
+									tmpData[group] = {}
+									if (isExpanded && isNumberGroup) {tmpData[group]["_identical"] = ""}
+								}
 							}
 							let method = isNumberGroup ? k : k.slice(9, k.length)
 							// element
@@ -301,8 +314,15 @@ function get_elements() {
 									target.getBoundingClientRect().width, target.getBoundingClientRect().height,
 									target.getBoundingClientRect().x, target.getBoundingClientRect().y,
 								]
+								if (isNumberGroup) {
+									if (isNumberString = "undefined") {
+										isNumberString = data.join(",")
+										isNumberCount++
+									} else {
+										if (data.join(",") == isNumberString) {isNumberCount++}
+									}
+								}
 								if (isEverything) { tmpData[style][writingstyle][group][method] = data } else { tmpData[group][method] = data }
-								
 							} catch(e) {
 								if (isEverything) { tmpData[style][writingstyle][group][method] = ["error"] } else { tmpData[group][method] = ["error"] }
 							}
@@ -330,6 +350,15 @@ function get_elements() {
 					} catch(e) {
 						if (isEverything) { tmpData[style][writingstyle][k] = ["error"] } else { tmpData[k] = ["error"] }
 						//console.log(k, e)
+					}
+				}
+				if (isExpanded) {
+					// check numbercount
+					let allIdentical = (aNumberGroup.length == isNumberCount) +"" // make it a string so it stands out
+					if (isEverything) {
+						tmpData[style][writingstyle][strNumberTitle]["_identical"] = allIdentical
+					} else {
+						tmpData[strNumberTitle]["_identical"] = allIdentical
 					}
 				}
 			})
@@ -407,7 +436,12 @@ function run() {
 		get_elements()
 	}, 170)
 }
-run()
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	run()
+})
 
 </script>
 </body>
