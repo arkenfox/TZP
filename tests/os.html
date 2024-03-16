@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>os</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 480px;}
+		hr {color: var(--test3);}
+		#tb3 td {padding-left: 0px;}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#devices">return to TZP index</a></td></tr>
+	</table>
+
+	<!-- app lang -->
+	<table id="tb3">
+		<thead><tr><th>
+			<div class="nav-title">os
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td class="intro">
+			<span class="no_color">gecko (FF89+) only: testing os detection logic</span>
+		</td></tr>
+		<tr><td><hr><br></td></tr>
+		<tr><td style="text-align: left;">
+			<div>OS &nbsp;
+				<p class="c mono spaces no_color" id="os"> &nbsp; </p><br>
+			</div>
+			<div>DEBUG
+				<p class="c mono spaces no_color" id="debug"> &nbsp; </p>
+			</div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+// https://bugzilla.mozilla.org/show_bug.cgi?id=1363508
+
+s3 = s3.trim()
+s13 = s13.trim()
+sb = sb.trim()
+sg = sg.trim()
+
+let aDebug = [],
+	thisOS = undefined,
+	t0,
+	pad = 25,
+	isTimeOut = false,
+	isThrowError = false
+
+let notNormal = sb +" not normal"+ sc +" [now you <b><u>really</u></b> stand out]",
+	goodResult = sg +"result: "+ sc,
+	badResult = sb +"result: "+ sc
+
+let oMessages = {
+	1: goodResult +"you are not gecko",
+	2: goodResult +"update your browser" +"<br><br><div class='indent faint'>this PoC requires FF89+ to be fully effective</div>",
+	3: badResult +"timed out:"+ notNormal,
+	4: badResult,
+	4: goodResult,
+}
+
+const get_old_OS = () => new Promise(resolve => {
+	// FF89-123
+	// 1280128: FF51+ win/mac | 1701257: FF89+ linux, therefore undefined = android
+	function exit() {
+		if (thisOS === undefined) {thisOS = "android"}
+		return resolve()
+	}
+	setTimeout(() => resolve("timed out"), 100)
+
+	if (!isTimeOut) {
+		// FF121+: 1855861
+		const get_event = (css, item) => new Promise(resolve => {
+			css.onload = function() {
+					thisOS = item == "win" ? "windows" : item
+					count++
+					document.head.removeChild(css)
+					aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
+					if (count == 3) {exit()}
+					//exit(true) // comment out: test all three for debugging
+					return resolve()
+				}
+			css.onerror = function() {
+				count++
+				document.head.removeChild(css)
+				aDebug.push(s3 + (item +": ").padStart(pad) + sc + red_cross +" not detected")
+				if (count == 3) {exit()}
+				return resolve()
+			}
+		})
+
+		let count = 0
+		try {
+			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
+			aDebug.push(s13 + "chrome:// test: ".padStart(pad) + sc +"browser/content/extension-*"+ suffix)
+			if (isThrowError) {foo++}
+			let list = ["win", "mac","linux"]
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				css.href = path + item + suffix
+				document.head.appendChild(css)
+				get_event(css, item)
+			})
+		} catch(e) {
+			oMessages[4] = badResult + "error:" + notNormal + "<br><br><div class='indent faint'>"+ e +"</div>"
+			aDebug.push(sb + ("error: ").padStart(pad) + sc + e.name)
+			return resolve("error")
+		}
+	}
+})
+
+const get_desktop = () => new Promise(resolve => {
+	function exit() {
+		return resolve()
+	}
+	setTimeout(() => resolve("timed out"), 100)
+
+	if (!isTimeOut) {
+		// FF124+: 1874232
+			// added: chrome://browser/content/extension-popup-panel.css
+		// also: chrome://browser/content/extension.css is apparently desktop only?
+
+		const get_event = (css, item) => new Promise(resolve => {
+			css.onload = function() {
+					count++
+					document.head.removeChild(css)
+					aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
+					if (count == 2) {exit()}
+					return resolve()
+				}
+			css.onerror = function() {
+				count++
+				document.head.removeChild(css)
+				aDebug.push(s3 + (item +": ").padStart(pad) + sc + red_cross +" not detected")
+				if (count == 2) {exit()}
+				return resolve()
+			}
+		})
+
+		let count = 0
+		try {
+			if (isThrowError) {foo++}
+			let path = "chrome://browser/content/", suffix = ".css"
+			aDebug.push(s13 + "chrome:// test: ".padStart(pad) + sc + path +"*.css")
+			let list = ['extension-popup-panel','extension']
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				css.href = path + item + suffix
+				document.head.appendChild(css)
+				get_event(css, item)
+			})
+		} catch(e) {
+			oMessages[4] = badResult + "error:" + notNormal + "<br><br><div class='indent faint'>"+ e +"</div>"
+			aDebug.push(sb + ("error: ").padStart(pad) + sc + e.name)
+			return resolve("error")
+		}
+	}
+
+})
+
+function run() {
+	t0 = performance.now()
+	dom.os.innerHTML = ""
+	dom.debug.innerHTML = ""
+
+	function exit(type) {
+		dom.perf = Math.round((performance.now() - t0)) + " ms"
+		dom.debug.innerHTML = aDebug.join("<br>")
+		if (type < 6) {
+			dom.os.innerHTML = oMessages[type]
+		} else {
+			dom.os.innerHTML = "pending"
+		}
+	}
+
+	if (!isFF) {
+		exit(1)
+	} else if (isVer < 89) {
+		exit(2)
+	} else if (isVer < 124) {
+		Promise.all([
+			get_old_OS()
+		]).then(function(res){
+			let result = res[0]
+			if (result == "timed out") {
+				aDebug.push(sb + ("timed out: ").padStart(pad) + sc)
+				exit(3)
+			} else if (result == "error") {
+				exit(4)
+			} else {
+				oMessages[5] = goodResult + thisOS
+				exit(5)
+			}
+		})
+	} else {
+		Promise.all([
+			get_desktop()
+		]).then(function(res){
+			let result = res[0]
+			if (result == "timed out") {
+				aDebug.push(sb + ("timed out: ").padStart(pad) + sc)
+			}
+			exit()
+
+		})
+	}
+}
+
+setTimeout(function() {
+	// do not call the global get_isOS
+	// don't even use isOS
+	Promise.all([
+		get_globals()
+	]).then(function(){
+		Promise.all([
+			get_isVer()
+		]).then(function(){
+			aDebug.push(s13 + "gecko test: ".padStart(pad) + sc + isFF)
+			if (isFF) {
+				let isVerOpen  = (isVer == isVerMax +"")
+				aDebug.push(s13 + "version test: ".padStart(pad) + sc + isVer + (isVerOpen ? "+" : (isVer == 52 ? " or lower" : "")))
+			}
+			run()
+		})
+	})
+}, 25)
+
+</script>
+</body>
+</html>
