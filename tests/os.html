@@ -58,7 +58,8 @@ let aDebug = [],
 	t0,
 	pad = 25,
 	isTimeOut = false,
-	isThrowError = false
+	isThrowError = false,
+	useNew
 
 let notNormal = sb +" not normal"+ sc +" [now you <b><u>really</u></b> stand out]",
 	goodResult = sg +"result: "+ sc,
@@ -69,10 +70,12 @@ let oMessages = {
 	2: goodResult +"update your browser" +"<br><br><div class='indent faint'>this PoC requires FF89+ to be fully effective</div>",
 	3: badResult +"timed out:"+ notNormal,
 	4: badResult,
-	4: goodResult,
+	5: goodResult,
+	6: badResult +"mixed chrome:// test results",
+	7: "pending",
 }
 
-const get_old_OS = () => new Promise(resolve => {
+const get_thisOS = () => new Promise(resolve => {
 	// FF89-123
 	// 1280128: FF51+ win/mac | 1701257: FF89+ linux, therefore undefined = android
 	function exit() {
@@ -81,83 +84,51 @@ const get_old_OS = () => new Promise(resolve => {
 	}
 	setTimeout(() => resolve("timed out"), 100)
 
+	if (useNew) {thisOS = 0} // count instead
 	if (!isTimeOut) {
 		// FF121+: 1855861
+		// FF124+: 1874232
+			// new: chrome://browser/content/extension-popup-panel.css
+			// fallback: chrome://browser/content/extension.css
+			// both these are desktop only
+
 		const get_event = (css, item) => new Promise(resolve => {
 			css.onload = function() {
+				if (useNew) {
+					//desktop vs android
+					thisOS++
+				} else {
 					thisOS = item == "win" ? "windows" : item
-					count++
-					document.head.removeChild(css)
-					aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
-					if (count == 3) {exit()}
-					//exit(true) // comment out: test all three for debugging
-					return resolve()
 				}
+				count++
+				document.head.removeChild(css)
+				aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
+				if (count == maxCount) {exit()}
+				//exit(true) // comment out: test all three for debugging
+				return resolve()
+			}
 			css.onerror = function() {
 				count++
 				document.head.removeChild(css)
 				aDebug.push(s3 + (item +": ").padStart(pad) + sc + red_cross +" not detected")
-				if (count == 3) {exit()}
+				if (count == maxCount) {exit()}
 				return resolve()
 			}
 		})
 
-		let count = 0
+		let count = 0, maxCount
 		try {
 			let path = "chrome://browser/content/extension-", suffix = "-panel.css"
-			aDebug.push(s13 + "chrome:// test: ".padStart(pad) + sc +"browser/content/extension-*"+ suffix)
-			if (isThrowError) {foo++}
 			let list = ["win", "mac","linux"]
-			list.forEach(function(item) {
-				let css = document.createElement("link")
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				css.href = path + item + suffix
-				document.head.appendChild(css)
-				get_event(css, item)
-			})
-		} catch(e) {
-			oMessages[4] = badResult + "error:" + notNormal + "<br><br><div class='indent faint'>"+ e +"</div>"
-			aDebug.push(sb + ("error: ").padStart(pad) + sc + e.name)
-			return resolve("error")
-		}
-	}
-})
-
-const get_desktop = () => new Promise(resolve => {
-	function exit() {
-		return resolve()
-	}
-	setTimeout(() => resolve("timed out"), 100)
-
-	if (!isTimeOut) {
-		// FF124+: 1874232
-			// added: chrome://browser/content/extension-popup-panel.css
-		// also: chrome://browser/content/extension.css is apparently desktop only?
-
-		const get_event = (css, item) => new Promise(resolve => {
-			css.onload = function() {
-					count++
-					document.head.removeChild(css)
-					aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
-					if (count == 2) {exit()}
-					return resolve()
-				}
-			css.onerror = function() {
-				count++
-				document.head.removeChild(css)
-				aDebug.push(s3 + (item +": ").padStart(pad) + sc + red_cross +" not detected")
-				if (count == 2) {exit()}
-				return resolve()
+			if (useNew) {
+				list = ['extension-popup-panel','extension']
+				path = "chrome://browser/content/", suffix = ".css"
+				aDebug.push(s13 + "124+ chrome:// test: ".padStart(pad) + sc + path +"*.css")
+			} else {
+				aDebug.push(s13 + "89-123 chrome:// test: ".padStart(pad) + sc +"browser/content/extension-*"+ suffix)
 			}
-		})
-
-		let count = 0
-		try {
 			if (isThrowError) {foo++}
-			let path = "chrome://browser/content/", suffix = ".css"
-			aDebug.push(s13 + "chrome:// test: ".padStart(pad) + sc + path +"*.css")
-			let list = ['extension-popup-panel','extension']
+			maxCount = list.length
 			list.forEach(function(item) {
 				let css = document.createElement("link")
 				css.type = "text/css"
@@ -172,31 +143,26 @@ const get_desktop = () => new Promise(resolve => {
 			return resolve("error")
 		}
 	}
-
 })
 
 function run() {
 	t0 = performance.now()
 	dom.os.innerHTML = ""
 	dom.debug.innerHTML = ""
+	let notation = ""
 
 	function exit(type) {
 		dom.perf = Math.round((performance.now() - t0)) + " ms"
 		dom.debug.innerHTML = aDebug.join("<br>")
-		if (type < 6) {
-			dom.os.innerHTML = oMessages[type]
-		} else {
-			dom.os.innerHTML = "pending"
-		}
+		if (type < 8) {dom.os.innerHTML = oMessages[type]} else {dom.os.innerHTML = "pending"}
 	}
-
 	if (!isFF) {
 		exit(1)
 	} else if (isVer < 89) {
 		exit(2)
-	} else if (isVer < 124) {
+	} else {
 		Promise.all([
-			get_old_OS()
+			get_thisOS()
 		]).then(function(res){
 			let result = res[0]
 			if (result == "timed out") {
@@ -205,20 +171,34 @@ function run() {
 			} else if (result == "error") {
 				exit(4)
 			} else {
-				oMessages[5] = goodResult + thisOS
-				exit(5)
+				if (useNew) {
+					// logis: must be 0 or 2, not 1, so I can pickup on changes
+					if (thisOS == 0) {
+						thisOS = "android"
+						notation = green_tick +" none detected"
+					} else if (thisOS == 2) {
+						thisOS = "desktop"
+						notation = green_tick +" both detected"
+					} else {
+						notation = red_cross +" mixed results"
+						thisOS = undefined
+					}
+					aDebug.push(s13 + "desktop test: ".padStart(pad) + sc + notation)
+				}
+				// thisOS s/be (no errors or timeouts)
+					// old: android, linux, mac, windows
+					// new: android or desktop or undefined
+				if (thisOS == undefined) {
+					exit(6) // something changed upstream: address it
+				} else if (thisOS !== "desktop") {
+					oMessages[5] = goodResult + thisOS
+					exit(5) // bingo!
+				} else {
+					oMessages[7] = "pending: "+ thisOS
+					// desktop needws more digging
+					exit(7)
+				}
 			}
-		})
-	} else {
-		Promise.all([
-			get_desktop()
-		]).then(function(res){
-			let result = res[0]
-			if (result == "timed out") {
-				aDebug.push(sb + ("timed out: ").padStart(pad) + sc)
-			}
-			exit()
-
 		})
 	}
 }
@@ -234,6 +214,7 @@ setTimeout(function() {
 		]).then(function(){
 			aDebug.push(s13 + "gecko test: ".padStart(pad) + sc + isFF)
 			if (isFF) {
+				useNew = isVer > 123
 				let isVerOpen  = (isVer == isVerMax +"")
 				aDebug.push(s13 + "version test: ".padStart(pad) + sc + isVer + (isVerOpen ? "+" : (isVer == 52 ? " or lower" : "")))
 			}
