@@ -364,73 +364,65 @@ const get_isOS = () => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
-
-	let t0 = nowFn(), count = 0
+	setTimeout(() => resolve(zErrTime), 100)
+	let t0 = nowFn(), failed = 0
 	const METRIC = "isOS"
-	function exit(checkUndefined = false) {
-		// FF51+ win/mac 1280128 / FF89+ linux 1701257 : min gecko > 88 so undefined = android
-		if (checkUndefined && isOS === undefined) {isOS = "android"}
-		// set icon
-		let pngURL = "url('chrome://branding/content/"+ (isOS == "android" ? "fav" : "") + "icon64.png')"
-		dom.fdResourceCss.style.backgroundImage = pngURL
-		log_perf(SECTG, METRIC, t0, "", isOS)
+
+	function exit(value) {
+		isOS = value
+		log_perf(SECTG, METRIC, t0, "", isOS +"")
 		return resolve()
 	}
 
-	if (isVer > 123) {
-		testnew()
-	} else {
-		testold()
-	}
-
-	function testnew() {
-		// FF124+: 1874232: the css method is (mostly) obsolete
-			// added: chrome://browser/content/extension-popup-panel.css
-			// ^ is this desktop only?
-			// chrome://browser/content/extension.css is apparrently desktop only
-//isOS = "windows"
+	function tidy(value) {
+		// set icon
+		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
+		dom.fdResourceCss.style.backgroundImage = pngURL
+		// quick exit
+		if (value !== list[0]) {exit(value); return}
+		// FF124 desktop: dig deeper
 		exit()
 	}
 
-	// FF89-123: note isBlockMin is 102 so we don't care about < 89
+	// FF89-123: isBlockMin is 102 so we don't care about < 89
 		// 1280128: FF51+ win/mac | 1701257: FF89+ linux
-	function testold() {
-		setTimeout(() => resolve(zErrTime), 100)
-		// FF121+: 1855861
-		const get_event = (css, item) => new Promise(resolve => {
-			css.onload = function() {
-				isOS = item == "win" ? "windows" : item
-				count++
-				document.head.removeChild(css)
-				exit(true) // we can only have one
-				return resolve()
-			}
-			css.onerror = function() {
-				count++
-				document.head.removeChild(css)
-				if (count == 3) {exit(true)}
-				return resolve()
-			}
-		})
-		if (!runTE) {
-			try {
-				if (runSE) {foo++}
-				let path = "chrome://browser/content/extension-", suffix = "-panel.css"
-				let list = ["win","mac","linux"]
-				list.forEach(function(item) {
-					let css = document.createElement("link")
-					css.type = "text/css"
-					css.rel = "stylesheet"
-					css.href = path + item + suffix
-					document.head.appendChild(css)
-					get_event(css, item)
-				})
-			} catch(e) {
-				isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
-				log_alert(SECTG, METRIC +": "+ zErr, true)
-				log_perf(SECTG, METRIC, t0, "", zErr)
-				return resolve()
-			}
+	// FF121+: 1855861
+	// FF124+:
+		// chrome://browser/content/extension.css
+		// chrome://browser/content/extension-popup-panel.css (fallback FF124+: 1874232)
+		// ^ both these are desktop only
+	let path = "chrome://browser/content/extension-", suffix = "-panel.css", list = ["win","mac","linux"]
+	if (isVer > 123) {path = "chrome://browser/content/", suffix = ".css", list = ['extension']}
+	const get_event = (css, item) => new Promise(resolve => {
+		css.onload = function() {
+			if (item == "win") {item = "windows"}
+			document.head.removeChild(css)
+			tidy(item) // we only need the first
+			return resolve()
+		}
+		css.onerror = function() {
+			failed++
+			document.head.removeChild(css)
+			if (failed == list.length) {tidy("android")} // all failed
+			return resolve()
+		}
+	})
+	if (!runTE) {
+		try {
+			if (runSE) {foo++}
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				css.href = path + item + suffix
+				document.head.appendChild(css)
+				get_event(css, item)
+			})
+		} catch(e) {
+			isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
+			log_alert(SECTG, METRIC +": "+ zErr, true)
+			log_perf(SECTG, METRIC, t0, "", zErr)
+			return resolve()
 		}
 	}
 })
