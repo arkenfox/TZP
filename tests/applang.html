@@ -336,9 +336,7 @@ function get_validation_messages() {
 		// ^ but we should add manual tests for those
 	// InvalidDate/Time/Week/Month - can't set invalid values via JS
 
-	// dom
-	let domvalue, domhash
-	const vList = {
+	const dList = {
 		BadInputNumber: 'number', // this returns ValueMissing on chrome
 		CheckboxMissing: 'checkbox',
 		DateTimeRangeOverflow: 'datetime',
@@ -354,22 +352,21 @@ function get_validation_messages() {
 		StepMismatch: 'step',
 		ValueMissing: 'text',
 	}
-	let vData = {}
+
+	// dom
+	let domvalue, domhash
+	let dData = {}
 	try {
-		for (const k of Object.keys(vList).sort()) {
+		for (const k of Object.keys(dList).sort()) {
 			try {
-				if (vList[k] !== "") {
-					let msg = dom["widget"+ vList[k]].validationMessage
-					if (msg !== "") {
-						vData[k] = msg
-					}
-				}
+				let msg = dom["widget"+ dList[k]].validationMessage
+				dData[k] = msg
 			} catch(e) {
-				//console.log(k, e+"")
+				dData[k] = zErr
 			}
 		}
-		domhash = mini(vData)
-		domvalue = domhash +" [DOM]<br>"+ json_highlight(vData)
+		domhash = mini(dData)
+		domvalue = domhash +" [DOM]<br>"+ json_highlight(dData)
 	} catch(e) {
 		domvalue = "DOM: "+ e+""
 	}
@@ -378,8 +375,7 @@ function get_validation_messages() {
 	let dommatch_green = sg+"[✓ matches DOM]"+sc
 	let dommatch_red = sb+"[✗ matches DOM]"+sc
 	let parservalue, parserhash
-	const aList = ['application/xml','application/xhtml+xml','image/svg+xml','text/html','text/xml']
-	const oList = {
+	const pList = {
 		BadInputNumber: "<input type='number' required>",
 		CheckboxMissing: "<input type='checkbox' required>",
 		DateTimeRangeOverflow: "<input type='date' value='2024-01-01' max='2023-12-31'>",
@@ -395,54 +391,30 @@ function get_validation_messages() {
 		StepMismatch: "<input type='number' min='1.2345' step='1005.5545' value='2'>",
 		ValueMissing: "<input type='text' required>",
 	}
-	let oData = {}
+	let pData = {}
 	try {
 		let parser = new DOMParser
-		aList.forEach(function(key) {
-			let tmpObj = {}
-			for (const k of Object.keys(oList)) {
-				try {
-					let doc = parser.parseFromString(oList[k], "text/html")
-					let msg = doc.activeElement.children[0].validationMessage
-					//if (key == "text/xml") {msg = msg +"b"} // change one mimetype to be different
-					tmpObj[k] = msg // +"b" // make all the same hash but different
-				} catch(e) {
-					tmpObj[k] = zErr
-				}
+		for (const k of Object.keys(pList)) {
+			try {
+				let doc = parser.parseFromString(pList[k], 'text/html')
+				let msg = doc.activeElement.children[0].validationMessage
+				pData[k] = msg // +"b" // test alter hash
+			} catch(e) {
+				oData[k] = zErr
 			}
-			parserhash = mini(tmpObj)
-			if (oData[parserhash] == undefined) {
-				oData[parserhash] = {
-					"data": tmpObj,
-					"mimeTypes": []
-				}
-			}
-			oData[parserhash]["mimeTypes"].push(key)
-		})
+		}
+		parserhash = mini(pData)
 	} catch(e) {
 		parservalue = "DOMParser: "+ e+""
 	}
 
 	if (parservalue == undefined) { // not an error
-		let parsercount = Object.keys(oData).length
-		if (parsercount == 1 && parserhash == domhash) { // single hash for all five and it matches
-			parservalue = parserhash +" [DOMParser] "+ dommatch_green +"<br><br>" + aList.join(", ")
+		if (parserhash == domhash) {
+			parservalue = parserhash +" [DOMParser] "+ dommatch_green
 		} else {
-			let oMini = {}
-			let tmpHash = (parsercount == 1 ? parserhash : "mixed results")
-			parservalue = tmpHash + " [DOMParser] "+ dommatch_red
-			if (parsercount == 1) {
-				oMini[parserhash] = oData[parserhash]["data"]
-				parservalue += "<br><br>" + json_highlight(oMini)
-			} else {
-				console.log("DOMParser\n", oData)
-				parservalue += " check the console"
-				
-				for (const k of Object.keys(oData).sort()) {
-					oMini[k] = oData[k]["mimeTypes"]
-				}
-				parservalue += "<br><br>" + json_highlight(oMini)
-			}
+			parservalue = parserhash +" [DOMParser] "+ dommatch_red
+			console.log("DOMParser\n", pData)
+			parservalue += " check the console"
 		}
 	}
 	dom.validation_messages.innerHTML = parservalue +"<br><br>"+ domvalue
