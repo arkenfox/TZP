@@ -8,6 +8,21 @@ function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
 
+function cleanFn(item, skipArray = false) {
+	// strings, tidy undefined, empty strings
+	if (typeof item === "number" || typeof item === "bigint") { return item
+	} else if (item == zU) {item = zUQ
+	} else if (item == "true" || item == "false" || item == "null") {item = "\"" + item + "\""
+	} else if (!skipArray && Array.isArray(item)) {
+		item = !item.length ? "empty array" : "array"
+	} else if (item === undefined || item === true || item === false || item === null) {item += ""
+	} else if (!skipArray && item == "") {item = "empty string"
+	} else if (typeof item === "string") {
+		if (!Number.isNaN(item*1)) {item = "\"" + item + "\""}
+	}
+	return item
+}
+
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
 	return new Proxy(dom, {
