@@ -15,33 +15,34 @@
 
 <body>
 	<div class="offscreen">
-		<div id="sysFont"></div>
+		<div id="sysFont">hello world</div>
 	</div>
 	<div class="hidden">
-		<input type="reset" value="" id="widgetbutton">
-		<input type="checkbox" id="widgetcheckbox">
-		<input type="color" id="widgetcolor">
-		<select id="widgetcombobox"><option value="a"></option></select>
-		<input type="radio" id="widgetradio">
-		<input type="text" id="widgettext">
-		<input type="date" id="widgetdatetime">
-		<input type="datetime-local" id="widgetdatetime-local">
-		<textarea id="widgettextarea"></textarea>
-		<input type="email" id="widgetemail">
-		<input type="file" id="widgetfile">
-		<input type="hidden" id="widgethidden">
-		<input type="image" id="widgetimage">
-		<input type="month" id="widgetmonth">
-		<input type="number" id="widgetnumber">
-		<input type="password" id="widgetpassword">
-		<input type="range" id="widgetrange">
-		<input type="reset" id="widgetreset">
-		<input type="search" id="widgetsearch">
-		<input type="submit" id="widgetsubmit">
-		<input type="time" id="widgettime">
-		<input type="tel" id="widgettel">
-		<input type="url" id="widgeturl">
-		<input type="week" id="widgetweek">
+		<!--widget fonts-->
+		<input type="reset" id="wgtbutton">
+		<input type="checkbox" id="wgtcheckbox">
+		<input type="color" id="wgtcolor">
+		<input type="date" id="wgtdate">
+		<input type="datetime-local" id="wgtdatetime-local">
+		<input type="email" id="wgtemail">
+		<input type="file" id="wgtfile">
+		<input type="hidden" id="wgthidden">
+		<input type="image" id="wgtimage">
+		<input type="month" id="wgtmonth">
+		<input type="number" id="wgtnumber">
+		<input type="password" id="wgtpassword">
+		<input type="radio" id="wgtradio">
+		<input type="range" id="wgtrange">
+		<input type="reset" id="wgtreset">
+		<input type="search" id="wgtsearch">
+		<select id="wgtselect"><option></option></select>
+		<input type="submit" id="wgtsubmit">
+		<input type="tel" id="wgttel">
+		<input type="text" id="wgttext">
+		<textarea id="wgttextarea"></textarea>
+		<input type="time" id="wgttime">
+		<input type="url" id="wgturl">
+		<input type="week" id="wgtweek">
 	</div>
 
 	<table>
@@ -232,15 +233,24 @@ function check_computed() {
 
 function get_system() {
 	try {
-		let aList = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
-			'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+		let aList = [
+			// has never applied
+			'-moz-button-group',
+			// 1802957: FF109+: no longer applied: 
+			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
+			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+			// 1838222: FF117+: has never applied
+			'-moz-message-bar',
+			// the rest
 			'caption','icon','menu','message-box','small-caption','status-bar',
 		]
+		aList.sort()
 		let aProps = ['font-size','font-style','font-weight','font-family']
 		let oRes = {}
 		let el = dom.sysFont
 		aList.forEach(function(name){
 			let aKeys = []
+			el.style.font = "" // always clear in case a font is invalid/deprecated
 			el.style.font = name
 			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
 			let key = aKeys.join(" ")
@@ -259,12 +269,12 @@ function get_system() {
 function get_widget() {
 	try {
 		let aList = [
-			'button','checkbox','color','combobox','datetime','datetime-local','email','file','hidden','image','month',
-			'number','password','radio','range','reset','search','submit','tel','text','textarea','time','url','week',
+			'button','checkbox','color','date','datetime-local','email','file','hidden','image','month',
+			'number','password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
 		]
 		let oRes = {}
 		aList.forEach(function(name) {
-			let el = dom["widget"+ name]
+			let el = dom["wgt"+ name]
 			let key = getComputedStyle(el).getPropertyValue("font-family")
 				+" "+ getComputedStyle(el).getPropertyValue("font-size")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
