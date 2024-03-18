@@ -86,13 +86,14 @@ const get_lh = () => new Promise(resolve => {
 					} else if (isDomRect == 2) {height = range.getBoundingClientRect().height
 					} else if (isDomRect > 2) {height = range.getClientRects()[0].height
 					}
-					if (runST) {height = true}
-					if ("number" === typeof height) {
+					if (runSE) {foo++} else if (runST) {height = []}
+					let hType = typeFn(height)
+					if ("number" === hType) {
 						if (oLine[fontfamily] == undefined) {oLine[fontfamily] = {}}
 						oLine[fontfamily][size] = height
 					} else {
 						isLine = false
-						isErr = log_error(SECT15, METRIC, zErrType + typeof height)
+						isErr = log_error(SECT15, METRIC, zErrType + hType)
 					}
 				}
 			})
@@ -173,6 +174,7 @@ const get_mathml = () => new Promise(resolve => {
 		let rangeC,	rangeW, rangeH
 		let targetC = dom["mathmldivctrl"], targetH, targetW
 		let oMath = {}, isMath = true, errMath = "", isDiff
+		let wType, hType
 		sizes.forEach(function(size) {
 			if (isMath) {
 				targetH = dom["mathmldiv"+size]
@@ -208,12 +210,15 @@ const get_mathml = () => new Promise(resolve => {
 					height = rangeH.getClientRects()[0].height
 					width = rangeW.getClientRects()[0].width
 				}
-				if ("number" !== typeof height) {
-					isMath = false
-					errMath = log_error(SECT15, METRIC, zErrType + typeof control)
-				} else {
+				if (runST) {width = {}, height = ' '}
+				wType = typeFn(width)
+				hType = typeFn(height)
+				if ("number" === wType && "number" === hType) {
 					if (isCtrlSize) {isDiff = height - control}
 					oMath[size] = [width, height]
+				} else {
+					isMath = false
+					errMath = log_error(SECT15, METRIC, zErrType + (wType == hType ? wType : wType +" x "+ hType))
 				}
 			}
 		})
