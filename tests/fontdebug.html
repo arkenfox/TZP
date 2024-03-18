@@ -10,7 +10,6 @@
 	<style>
 		table {width: 730px;}
 		hr {color: var(--test12);}
-		.pad {padding-bottom: 5px; padding-top: 5px;}
 		.visual {
 			font-size: 96px !important;
 			font-style: normal !important;
@@ -223,14 +222,14 @@ font-weight: 900;
 			let strPixel = base[k]["npixelWidth"] + " x " + base[k]["npixelHeight"]
 			let strTransform = base[k]["ntransformWidth"] + " x " + base[k]["ntransformHeight"]
 
-			display.push("<div class='pad'><u>"+ k + "</u></div>"
+			display.push("<span><u>"+ k + "</u></span><br>"
 				+ "offset ".padStart(13) + s3 + strOffset.padStart(12) + sc
 				+ " | npixel " + s3 + strPixel.padStart(17) + sc
-				+ " | ntransform " + s3 + strTransform.padStart(17) + sc
+				+ " | ntransform " + s3 + strTransform.padStart(17) + sc +"<br>"
 			)
 		}
 		let hash = mini(base)
-		dom.base.innerHTML = s12+ "BASEFONTS: "+ sc + hash +"<br>" + display.join("<br>") + "<br>"
+		dom.base.innerHTML = s12+ "BASEFONTS: "+ sc + hash +"<br><br>" + display.join("<br>")
 
 		let aTestsValid = [
 			["clientrect"],
@@ -284,7 +283,7 @@ font-weight: 900;
 			for (const j of Object.keys(oResults[k])) {
 				let tmpArray = oResults[k][j]
 				display.push(
-					"<div class='pad'><u>"+ j +"</u></div>" + tmpArray.join("<br>")
+					"<span><u>"+ j +"</u></span><br>" + tmpArray.join("<br>") + "<br>"
 				)
 			}
 		}

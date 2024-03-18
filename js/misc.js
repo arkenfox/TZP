@@ -56,20 +56,21 @@ const get_math_other = (isMathLies) => new Promise(resolve => {
 			Math.log((1.5) / (0.5)) / 2, 
 			Math.pow(Math.abs(Math.PI), 1 / 3), // cbrt(Math.PI)
 		]
-		let aRes = [], isTypeof = "number"
+		let aRes = [], isErr
 		for (let i=0; i < aTests.length; i++) {
 			let x = aValues[i]
-			if (runST) {x = true}
-			if ("number" == typeof x) {
+			if (runST) {x = NaN}
+			let xType = typeof x
+			if ("number" == xType && !Number.isNaN(x)) {
 				aRes.push([aTests[i], x])
 			} else {
-				isTypeof = typeof x
+				isErr = ("number" == xType && Number.isNaN(x) ? "NaN" : xType)
 				break
 			}
 		}
 		let hash = mini(aRes), fpvalue
-		if ("number" !== isTypeof) {
-			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isTypeof))
+		if (isErr !== undefined) {
+			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isErr))
 			return resolve([METRIC, zErr])
 		} else if (isMathLies) {
 			hash = colorFn(hash)
@@ -108,22 +109,22 @@ const get_math_trig = (isMathLies) => new Promise(resolve => {
 				["6*Math.E",6*Math.E],["6*Math.LN2",6*Math.LN2],
 			],
 		}
-		let aRes = []
-		let isTypeof = "number"
+		let aRes = [], isErr
 		for (const k of Object.keys(oMath)) {
 			oMath[k].forEach(function(item) {
-				let value = Math[k](item[1])
-				if (runST) {value = ""}
-				if ("number" == typeof value) {
-					aRes.push(["Math."+ k +"("+ item[0] +")", value])
+				let x = Math[k](item[1])
+				if (runST) {x = ""}
+				let xType = typeof x
+				if ("number" == xType && !Number.isNaN(x)) {
+					aRes.push(["Math."+ k +"("+ item[0] +")", x])
 				} else {
-					isTypeof = typeof value
+					isErr = ("number" == xType && Number.isNaN(x) ? "NaN" : xType)
 				}
 			})
 		}
 		let hash = mini(aRes), fpvalue
-		if ("number" !== isTypeof) {
-			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isTypeof) + (isSmart ? rfp_red : ""))
+		if (isErr !== undefined) {
+			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isErr) + (isSmart ? rfp_red : ""))
 			return resolve([METRIC, zErr])
 		} else if (isMathLies) {
 			hash = colorFn(hash)
@@ -602,7 +603,7 @@ const outputMisc = () => new Promise(resolve => {
 	METRIC = "perf_resource"
 	try {
 		if (isFile) {
-			addDataDisplay(18, METRIC, zNA)
+			addDataDisplay(18, METRIC, zSKIP)
 		} else {
 			let len = performance.getEntriesByType('resource').length
 			addDataDisplay(18, METRIC, (len > 0 ? zE : zD))

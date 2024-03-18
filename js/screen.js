@@ -143,7 +143,8 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 				if (i < 4) {x = screen[aList[i]]
 				} else {x = window[aList[i]]
 				}
-				if (typeof x !== "number") {
+				if (runST) {x = NaN}
+				if ("number" !== typeof x || Number.isNaN(x)) {
 					log_error(SECT1, prefix + aList[i], zErrType + typeof x)
 					x = "NaN"
 				}
@@ -416,7 +417,7 @@ const get_scr_mm = (runtype, datatype) => new Promise(resolve => {
 					return Promise.resolve(searchValue.isBigger)
 				}
 			} catch(e) {
-				log_error(SECT1, prefix, e, isScope, 40)
+				log_error(SECT1, prefix, e, isScope)
 				return Promise.reject(zErr)
 			}
 		}, maxValue, precision)
@@ -529,10 +530,10 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 		// DPR window
 		let value, display
 		try {
-			if (runSE) {foo++}
 			value = window.devicePixelRatio
+			if (runSE) {foo++} else if (runST) {value = NaN}
 			display = value
-			if ("number" !== typeof value) {
+			if ("number" !== typeof value || Number.isNaN(value)) {
 				log_error(SECT1, METRICw, zErrType + typeof value)
 				value = zErr
 				display = "NaN"
@@ -540,7 +541,8 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 				varDPR = value
 			}
 		} catch(e) {
-			display = log_error(SECT1, METRICw, e)
+			log_error(SECT1, METRICw, e)
+			display = zErr
 			value = zErr
 		}
 		let notation = ""
@@ -686,7 +688,7 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 })
 
 const get_scr_positions = (type) => new Promise(resolve => {
-	const METRIC = type +"_positions"
+	const METRIC = type +"_position"
 	let oRes = {}, notation = "", aDisplay = [], aList, check, x
 	if (type == "screen") {
 		// screen notes
@@ -743,14 +745,12 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 		function get_scrollwidth(METRIC) {
 			let value, display
 			try {
-				let scrollWidth = dom.eScroll.scrollWidth
-				if ("number" !== typeof scrollWidth) {scrollWidth = "x"}
-				value = (100 - scrollWidth)
-				if (runSE) {foo++} else if (runST) {value = "x"}
-				if ("number" !== typeof value) {
+				value = 100 - dom.eScroll.scrollWidth
+				if (runSE) {foo++} else if (runST) {value = NaN}
+				if ("number" !== typeof value || Number.isNaN(value)) {
 					log_error(SECT1, METRIC, zErrType + typeof value)
 					value = zErr
-					display = "NaN"
+					display = zErr
 				} else if (isSmart & value < 0) {
 					display = colorFn(value)
 					value = zLIE
@@ -767,50 +767,84 @@ const get_scr_scrollbar = (runtype) => new Promise(resolve => {
 			aDisplay.push(display)
 		}
 
-		// viewport (calculated from element), visualViewport
-		function get_viewport(METRIC) {
-			let viewport = METRIC == "viewport" ? res[0][0] : res[0][1]
+		function get_scrollelement(METRIC) {
 			let value, display
-			if (viewport == zErr) {
+			try {
+				let target = dom.eScrollinner
+				let range, width
+				if (isDomRect == -1) {
+					width = target.offsetWidth
+				} else {
+					if (isDomRect > 1) {
+						range = document.createRange()
+						range.selectNode(target)
+					}
+					if (isDomRect < 1) {width = target.getBoundingClientRect().width
+					} else if (isDomRect == 1) {width = target.getClientRects()[0].width
+					} else if (isDomRect == 2) {width = range.getBoundingClientRect().width
+					} else if (isDomRect > 2) {width = range.getClientRects()[0].width
+					}
+				}
+				if (runSE) {foo++} else if (runST) {width = NaN}
+				if ("number" === typeof width && !Number.isNaN(width)) {
+					// 100 set in html, not affected by zoom
+					value = 100 - width
+					display = value
+				} else {
+					value = zErr
+					display = zErr
+					log_error(SECT1, METRIC, zErrType + typeof width)
+				}
+			} catch(e) {
 				value = zErr
 				display = zErr
-			} else {
-				try {
-					let innerwidth = window.innerWidth
-					if ("number" !== typeof innerwidth) {
-						log_error(SECT1, METRIC, zErrType + typeof value)
-						value = zErr
-						display = "NaN"
-					} else {
-						value = (innerWidth - viewport)
-						display = value
-						if (isSmart) {
-							// leverage css value
-							if (cssW !== "?") {
-								if (cssW * 1 == value - 1) {cssW = value} // allow for min-
-								value = cssW - viewport
-								display = value
-							}
-							// lies
-							if (value < -1) {
-								value = zLIE
-								display = colorFn(display)
-								if (runtype !== "resize") {log_known(SECT1, METRIC)}								
-							}
-						}
-					}
-				} catch(e) {
-					value = zErr; display = zErr
-					log_error(SECT1, METRIC, e)
-				}
+				if (runtype !== "resize") {log_error(SECT1, METRIC, e)}
 			}
 			oData[METRIC] = value
 			aDisplay.push(display)
 		}
 
-		get_scrollwidth("scrollWidth")
-		get_viewport("viewport")
-		get_viewport("visualViewport")
+		// viewport (calculated from element), visualViewport
+		// note: res from get_scr_viewport: falls back to offsetWidth if domrect compromised
+		function get_viewport(METRIC) {
+			let viewport = METRIC == "scrollbar_viewport" ? res[0][0] : res[0][1]
+			let value, display
+			try {
+				let innerwidth = window.innerWidth
+				value = (innerWidth - viewport)
+				display = value
+				if ("number" !== typeof value || Number.isNaN(value)) {
+					log_error(SECT1, METRIC, zErrType + typeof value)
+					value = zErr
+					display = zErr
+				} else {
+					if (isSmart) {
+						// leverage css value
+						if (cssW !== "?") {
+							if (cssW * 1 == value - 1) {cssW = value} // allow for min-
+							value = cssW - viewport
+							display = value
+						}
+						// lies
+						if (value < -1) {
+							value = zLIE
+							display = colorFn(display)
+							if (runtype !== "resize") {log_known(SECT1, METRIC)}								
+						}
+					}
+				}
+			} catch(e) {
+				value = zErr; display = zErr
+				if (runtype !== "resize") {log_error(SECT1, METRIC, e)}
+			}
+			oData[METRIC] = value
+			aDisplay.push(display)
+		}
+
+		get_scrollelement("scrollbar_element")
+		get_scrollwidth("scrollbar_scrollWidth")
+		get_viewport("scrollbar_viewport")
+		get_viewport("scrollbar_visualViewport")
 		const METRIC = "scrollbar_widths"
 		log_display(1, METRIC, aDisplay.join(" | "))
 		addData(1, METRIC, oData, mini(oData))
@@ -864,19 +898,19 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				hValue = window.visualViewport.height
 			}
 			if (runST) {hValue = undefined}
-			if ("number" !== typeof hValue) {
+			if ("number" !== typeof hValue || Number.isNaN(hValue)) {
 				log_error(SECT1, METRIC1, zErrType + typeof hValue)
 				hValue = zErr
-				hDisplay = "NaN"
+				hDisplay = zErr
 			} else {
 				hDisplay = hValue
 				if (gLoad) {avh = hValue} // get android height once
 			}
 			if (runST) {wValue = ""}
-			if ("number" !== typeof wValue) {
-				log_error(SECT1, METRIC2, zErrType + typeof wValue)
+			if ("number" !== typeof wValue || Number.isNaN(wValue)) {
+				log_error(SECT1, METRIC2, zErrType + typeof hValue)
 				wValue = zErr
-				wDisplay = "NaN"
+				wDisplay = zErr
 			} else {
 				wDisplay = wValue
 			}
@@ -929,7 +963,7 @@ function get_ua_workers() {
 	// web
 	let el0 = dom.uaWorker0, test0 = ""
 	if (isFile) {
-		el0.innerHTML = zNA
+		el0.innerHTML = zSKIP
 	} else {
 		try {
 			let workernav = new Worker("js/worker_ua.js")
@@ -1073,7 +1107,7 @@ function goFS() {
 			setTimeout(function() {
 				let iw = document.mozFullScreenElement.clientWidth,
 					ih = document.mozFullScreenElement.clientHeight
-				dom.fsLeak = screen.width +" x "+ screen.height +" [screen] "+ iw +" x "+ ih +" [mozFullScreenElement client]"
+				dom.fsLeak.innerHTML = screen.width +" x "+ screen.height +" [screen] "+ iw +" x "+ ih +" [mozFullScreenElement client]"
 				exitFS()
 				// TB desktop warning panel
 				if (isTB && isOS !== "android") {

@@ -32,10 +32,10 @@
 	<div id="divrect" class="divrect1">
 		<div class="testRect" id="rect1"></div>
 	</div>
-
 	<!--offscreen-->
 	<div class="offscreen">
-		<div class="cssDocFont" id="divDocFont">line height</div>
+		<div id="sysFont"></div>
+		<div class="cssDocFont" id="divDocFont"></div>
 		<div class="cssGraphite" style="font-size: 300px;"><span id="testGraphite">+</span><span id="ctrlGraphite">-</span></div>
 		<img id="imageFS" width=0 height=0></img>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
@@ -45,9 +45,8 @@
 			<div><span id="dfsize"></span></div>
 		</div>
 		<div id="svgDiv"></div>
-		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"></div>
-		<div id="sysFont"></div>
-		<!-- ensure codepoints have time for fallback mapping	-->
+		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"><div id="eScrollinner"></div></div>
+		<!-- ensure codepoints have time for async fallback -->
 		<div>
 			<span> &#x20B9; </span><span> &#x2581; </span><span> &#x20BA; </span><span> &#xA73D; </span>
 			<span> &#x20B8; </span><span> &#x05C6; </span><span> &#x1E9E; </span><span> &#x097F; </span>
@@ -72,36 +71,31 @@
 		<span id="sColorElement"></span>
 		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
 		<div>
-			<!--validation-->
-			<input type="text" required id="widgettext">
-			<input type="checkbox" required id="widgetcheckbox">
-			<input required type="date" id="widgetdatetime" value="2024-01-01" max="2023-12-31">
-			<input required type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-12-31">
-			<input type="email" id="widgetemail" value="a">
-			<input type="file" required id="widgetfile">
-			<input type="number" required id="widgetnumber">
-			<input type="number" id="widgetmax" max="1974.3" value="2000">
-			<input type="number" id="widgetmin" min="8026.5" value="1">
-			<input type="number" id="widgetstep" min="1.2345" step="1005.5545" value="2">
-			<input type="radio" required name="radiogroup" id="widgetradio">
-			<select required id="widgetselect"><option></option></select>
-			<input type="url" id="widgeturl" value="a">
-			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
-			<!--the rest-->
-			<input type="reset" value="" id="widgetbutton">
-			<input type="color" id="widgetcolor">
-			<input type="datetime-local" id="widgetdatetime-local">
-			<input type="hidden" id="widgethidden">
-			<input type="image" id="widgetimage">
-			<input type="month" id="widgetmonth">
-			<input type="password" id="widgetpassword">
-			<input type="range" id="widgetrange">
-			<input type="reset" id="widgetreset">
-			<input type="search" id="widgetsearch">
-			<input type="submit" id="widgetsubmit">
-			<input type="time" id="widgettime">
-			<input type="week" id="widgetweek">
-			<textarea id="widgettextarea"></textarea>
+			<!--widget fonts-->
+			<input type="reset" id="wgtbutton">
+			<input type="checkbox" id="wgtcheckbox">
+			<input type="color" id="wgtcolor">
+			<input type="date" id="wgtdate">
+			<input type="datetime-local" id="wgtdatetime-local">
+			<input type="email" id="wgtemail">
+			<input type="file" id="wgtfile">
+			<input type="hidden" id="wgthidden">
+			<input type="image" id="wgtimage">
+			<input type="month" id="wgtmonth">
+			<input type="number" id="wgtnumber">
+			<input type="password" id="wgtpassword">
+			<input type="radio" id="wgtradio">
+			<input type="range" id="wgtrange">
+			<input type="reset" id="wgtreset">
+			<input type="search" id="wgtsearch">
+			<select id="wgtselect"><option></option></select>
+			<input type="submit" id="wgtsubmit">
+			<input type="tel" id="wgttel">
+			<input type="text" id="wgttext">
+			<textarea id="wgttextarea"></textarea>
+			<input type="time" id="wgttime">
+			<input type="url" id="wgturl">
+			<input type="week" id="wgtweek">
 		</div>
 		<div>
 			<canvas id="kcanvasGet" width="16" height="8"></canvas>
@@ -169,7 +163,7 @@
 		<!--screen: positions > orientation > measurements-->
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
-			&nbsp screen positions</td><td class="c mono" id="screen_positions"></td></tr>
+			&nbsp screen positions</td><td class="c mono" id="screen_position"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
 			&nbsp orientation</td><td class="c mono" id="screen_orientation"></td></tr>
@@ -211,12 +205,12 @@
 		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="eViewport"></td></tr>
 		<tr><td>visualViewport</td><td class="c mono" id="vViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">scrollWidth<br>viewport<br>visualViewport</span></div>
+			<span class="ttxt">element<br>scrollWidth<br>viewport<br>visualViewport</span></div>
 			&nbsp scrollbars</td><td class="c mono border-bottom" id="scrollbar_widths"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
-			&nbsp window positions</td><td class="c mono" id="window_positions"></td></tr>
+			&nbsp window position</td><td class="c mono" id="window_position"></td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp [css] orientation</td>
 			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
@@ -400,20 +394,17 @@
 		<tr><td>[to*string] dates</td><td class="c mono" id="dates_to_string"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a>
-			<span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
+		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
 		<tr class="togTO"><td>date</td><td class="c mono" id="date"></td></tr>
-		<tr class="togTO"><td>date.parse</td><td class="c mono" id="date.parse"></td></tr>
+		<tr class="togTO"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp; date.parse</td><td class="c mono" id="date.parse"></td></tr>
 		<tr class="togTO"><td>date.valueOf</td><td class="c mono" id="date.valueOf"></td></tr>
 		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
 		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
 		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
-
 		<!--errors-->
 		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
 		<tr><td>xml errors</td><td class="c mono" id="xml_errors"></td></tr>
-
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
@@ -663,16 +654,17 @@
 		</td></tr>
 		<!--fonts-->
 		<tr><td></td><td><span class="s12">fonts</span></td></tr>
+		<tr><td>[groups] fonts <sup>3</sup></td><td class="c mono" id="fontsizes_groups"></td></tr>
 		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[ show ]</span>
 			[sizes | names] fonts <sup>3</sup></td>
 			<td class="mono"><span class="c" id="fontsizes"></span> | <span class="c" id="fontnames"></span></td>
 		</tr>
-		<tr class="togF"><td>offset</td><td class="c mono" id="fontsOffset"></td></tr>
 		<tr class="togF"><td>client</td><td class="c mono" id="fontsClient"></td></tr>
-		<tr class="togF"><td>scroll</td><td class="c mono" id="fontsScroll"></td></tr>
+		<tr class="togF"><td>offset</td><td class="c mono" id="fontsOffset"></td></tr>
+		<tr class="togF"><td>perspective</td><td class="c mono" id="fontsPerspective"></td></tr>
 		<tr class="togF"><td>pixel</td><td class="c mono" id="fontsPixel"></td></tr>
 		<tr class="togF"><td>pixelsize</td><td class="c mono" id="fontsPixelSize"></td></tr>
-		<tr class="togF"><td>perspective</td><td class="c mono" id="fontsPerspective"></td></tr>
+		<tr class="togF"><td>scroll</td><td class="c mono" id="fontsScroll"></td></tr>
 		<tr class="togF"><td>transform</td><td class="c mono border-bottom" id="fontsTransform"></td></tr>
 		<tr class="togF"><td>[number] pixel</td><td class="c mono" id="fontsPixelNumber"></td></tr>
 		<tr class="togF"><td>pixelsize</td><td class="c mono border-bottom" id="fontsPixelSizeNumber"></td></tr>
@@ -694,21 +686,21 @@
 		<!--tm-->
 		<tr><td></td><td><span class="s12">textmetrics</span></td></tr>
 		<tr><td>actualBoundingBoxAscent | Descent</td>
-			<td class="mono"><span class="c" id="textmetrics_actualBoundingBoxAscent"></span>
-			| <span class="c" id="textmetrics_actualBoundingBoxDescent"></span>
+			<td class="mono"><span class="c spaces" id="actualBoundingBoxAscent"></span>
+			| <span class="c" id="actualBoundingBoxDescent"></span>
 		</td></tr>
 		<tr><td>actualBoundingBoxLeft | Right</td><td class="mono">
-			<span class="c" id="textmetrics_actualBoundingBoxLeft"></span> | <span class="c" id="textmetrics_actualBoundingBoxRight"></span>
+			<span class="c spaces" id="actualBoundingBoxLeft"></span> | <span class="c" id="actualBoundingBoxRight"></span>
 			</td></tr>
-		<tr><td>alphabeticBaseline</td><td class="c mono" id="textmetrics_alphabeticBaseline"></td></tr>
+		<tr><td>alphabeticBaseline</td><td class="c mono" id="alphabeticBaseline"></td></tr>
 		<tr><td>emHeightAscent | Descent</td><td class="mono">
-			<span class="c" id="textmetrics_emHeightAscent"></span> | <span class="c" id="textmetrics_emHeightDescent"></span>
+			<span class="c spaces" id="emHeightAscent"></span> | <span class="c" id="emHeightDescent"></span>
 			</td></tr>
 		<tr><td>fontBoundingBoxAscent | Descent</td><td class="mono">
-			<span class="c" id="textmetrics_fontBoundingBoxAscent"></span> | <span class="c" id="textmetrics_fontBoundingBoxDescent"></span>
+			<span class="c spaces" id="fontBoundingBoxAscent"></span> | <span class="c" id="fontBoundingBoxDescent"></span>
 			</td></tr>
 		<tr><td>hanging | ideographicBaseline</td><td class="mono">
-			<span class="c" id="textmetrics_hangingBaseline"></span> | <span class="c" id="textmetrics_ideographicBaseline"></span>
+			<span class="c spaces" id="hangingBaseline"></span> | <span class="c" id="ideographicBaseline"></span>
 			</td></tr>
 		<tr><td colspan="2"></td></tr>
 		<!--creds-->
@@ -902,11 +894,22 @@
 	<a name="theend" id="theend"></a><br>
 
 	<div id="modaloverlay" onClick="hide_overlays()"></div>
+
+<!---->
 	<div id="overlay">
-		<div class="mono spaces pad"><span id="overlaytop"></span>
-			<div style="text-align: right" id="overlaybuttons">title</div>
-			<div id="overlayresults"></div>
-			</div>
+		<div class="mono spaces pad">
+			<div id="overlaybuttons" class="nospaces">
+				<span id="overlaybutton"></span>
+				<span class='btn0 btnc' onClick='copyclip(`overlayresults`)'>[COPY]</span>
+				<span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span>
+				<div id="overlayoptions"><br>
+					<p><u>FORMAT</u></p>
+					<p>sectioned <input type="radio" name="optFormat" onchange="overlay_format('')" id="optFP"></p>
+					<p>flat <input type="radio" name="optFormat" onchange="overlay_format('_flat')" id="optFP_flat"></p>
+					<p>summary <input type="radio" name="optFormat" onchange="overlay_format('_summary')" id="optFP_summary"></p>
+					<p>list <input type="radio" name="optFormat" onchange="overlay_format('_list')" id="optFP_list"></p>
+				</div>
+			</div><div id="overlaytitle"></div><br><div id="overlayresults"></div>
 		</div>
 	</div>
 

@@ -190,51 +190,51 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 	}
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		"ar": {v: "1dfb5b8c", xml: "ebfbdc43"},
-		"ca": {v: "6b3bb3d8", xml: "81f31519"},
-		"cs": {v: "de3ab0ad", xml: "45f277f7"},
-		"da": {v: "479797a1", xml: "44535972"},
-		"de": {v: "f9e2eae6", xml: "f4b2a56f"},
+		"ar": {v: "1dfb5b8c", x: "ebfbdc43"},
+		"ca": {v: "6b3bb3d8", x: "81f31519"},
+		"cs": {v: "de3ab0ad", x: "45f277f7"},
+		"da": {v: "479797a1", x: "44535972"},
+		"de": {v: "f9e2eae6", x: "f4b2a56f"},
 		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
 			// changing to spoof english returns n30.. phew!
-		"el": {v: "b1a88a13", xml: "da8c80af"},
-		"en-US": {v: "41310558", xml: "945f8952"},
-		"es-ES": {v: "97c3f5a9", xml: "3eeba3bc"},
-		"fa": {v: "8ef57409", xml: "113d0a7e"},
-		"fi": {v: "3e29e6e7", xml: "71abeeec"},
-		"fr": {v: "34e28fa2", xml: "74f5df3d"},
-		"ga-IE": {v: "2bf1321d", xml: "d9761e70"},
+		"el": {v: "b1a88a13", x: "da8c80af"},
+		"en-US": {v: "41310558", x: "945f8952"},
+		"es-ES": {v: "97c3f5a9", x: "3eeba3bc"},
+		"fa": {v: "8ef57409", x: "113d0a7e"},
+		"fi": {v: "3e29e6e7", x: "71abeeec"},
+		"fr": {v: "34e28fa2", x: "74f5df3d"},
+		"ga-IE": {v: "2bf1321d", x: "d9761e70"},
 		// he: xml n28 + n30 = english
-		"he": {v: "e47dbb82", xml: "39eec79d"},
-		"hu": {v: "dad6d689", xml: "9f537fe6"},
-		"id": {v: "71224946", xml: "79f3851e"},
-		"is": {v: "d150027b", xml: "7f3e38b8"},
-		"it": {v: "3b781f09", xml: "469cb2af"},
-		"ja": {v: "48645d06", xml: "6823cee8"},
-		"ka": {v: "40feb44f", xml: "4e712712"},
-		"ko": {v: "d3b54047", xml: "fc4c50ed"},
-		"lt": {v: "d5f9b95d", xml: "f50f2b50"},
+		"he": {v: "e47dbb82", x: "39eec79d"},
+		"hu": {v: "dad6d689", x: "9f537fe6"},
+		"id": {v: "71224946", x: "79f3851e"},
+		"is": {v: "d150027b", x: "7f3e38b8"},
+		"it": {v: "3b781f09", x: "469cb2af"},
+		"ja": {v: "48645d06", x: "6823cee8"},
+		"ka": {v: "40feb44f", x: "4e712712"},
+		"ko": {v: "d3b54047", x: "fc4c50ed"},
+		"lt": {v: "d5f9b95d", x: "f50f2b50"},
 		// mk: v = english but not number formating, and xml n30 = english but is would-be-n39 (same as el)
 			// and n27 + n28 = english
-		"mk": {v: "333aae58", xml: "3b22df8b"},
-		"ms": {v: "9dadbc64", xml: "f23d0969"},
+		"mk": {v: "333aae58", x: "3b22df8b"},
+		"ms": {v: "9dadbc64", x: "f23d0969"},
 		// my: two items in english: date+over/under
-		"my": {v: "43cc3aa3", xml: "11d4d458"},
+		"my": {v: "43cc3aa3", x: "11d4d458"},
 		// nb-NO: xml most is english
-		"nb-NO": {v: "84ce54eb", xml: "50426960"},
-		"nl": {v: "326cbfd2", xml: "b03574e4"},
-		"pl": {v: "95ad4851", xml: "c1295e2b"},
-		"pt-BR": {v: "de2c3569", xml: "96f79e68"},
-		"ro": {v: "d72a350b", xml: "cf85bb64"},
-		"ru": {v: "2391fbec", xml: "2178a2b6"},
-		"sq": {v: "e0259277", xml: "a732eca1"},
-		"sv-SE": {v: "d9d7828b", xml: "80f52165"},
-		"th": {v: "8448474c", xml: "e29567ce"},
-		"tr": {v: "169730ca", xml: "1e9d0192"},
-		"uk": {v: "24cce2c1", xml: "cc85d2f5"},
-		"vi": {v: "b8137d59", xml: "7cf3c6f9"},
-		"zh-Hans-CN": {v:"55d25655", xml: "328cc79b"},
-		"zh-Hant-TW": {v: "8e4cfa0e", xml: "87abb9fa"},
+		"nb-NO": {v: "84ce54eb", x: "50426960"},
+		"nl": {v: "326cbfd2", x: "b03574e4"},
+		"pl": {v: "95ad4851", x: "c1295e2b"},
+		"pt-BR": {v: "de2c3569", x: "96f79e68"},
+		"ro": {v: "d72a350b", x: "cf85bb64"},
+		"ru": {v: "2391fbec", x: "2178a2b6"},
+		"sq": {v: "e0259277", x: "a732eca1"},
+		"sv-SE": {v: "d9d7828b", x: "80f52165"},
+		"th": {v: "8448474c", x: "e29567ce"},
+		"tr": {v: "169730ca", x: "1e9d0192"},
+		"uk": {v: "24cce2c1", x: "cc85d2f5"},
+		"vi": {v: "b8137d59", x: "7cf3c6f9"},
+		"zh-Hans-CN": {v:"55d25655", x: "328cc79b"},
+		"zh-Hant-TW": {v: "8e4cfa0e", x: "87abb9fa"},
 	}
 	if (isMullvad) {
 		// 22 of 38 supported
@@ -824,6 +824,7 @@ const get_timezone = () => new Promise(resolve => {
 	let aMethods = [
 		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
 	]
+	let isTimeZoneErr = false
 
 	function get_tz() {
 		try {
@@ -842,6 +843,7 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			}
 		} catch(e) {
+			isTimeZoneErr = true
 			return ([zErr, log_error(SECT4, METRICtz, e)])
 		}
 	}
@@ -1020,7 +1022,7 @@ const get_timezone = () => new Promise(resolve => {
 
 		// TZ: after isTimeZoneValid: i.e both match or both are suspect
 		if (isSmart) {
-			if (!isTimeZoneValid) {
+			if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
 				tzdisplay = colorFn(tzdisplay)
 				tz = zLIE
 				log_known(SECT4, METRICtz)
@@ -1043,56 +1045,74 @@ const get_timezone = () => new Promise(resolve => {
 
 const get_validation_messages = () => new Promise(resolve => {
 	const	METRIC = "validation_messages"
-	let data = {}, notation = ""
-	const list = {
-		BadInputNumber: 'number',
-		CheckboxMissing: 'checkbox',
-		DateTimeRangeOverflow: 'datetime',
-		DateTimeRangeUnderflow: 'datetimeunder',
-		FileMissing: 'file',
-		InvalidEmail: 'email',
-		InvalidURL: "url",
-		NumberRangeOverflow: 'max',
-		NumberRangeUnderflow: 'min',
-		PatternMismatch: 'tel',
-		RadioMissing: 'radio',
-		SelectMissing: 'select',
-		StepMismatch: 'step',
-		ValueMissing: 'text',
-	}
-	for (const k of Object.keys(list)) {
-		try {
-			let msg = dom["widget"+ list[k]].validationMessage
-			if (msg !== "") {data[k] = msg}
-		} catch(e) {}
-	}
-	let hash = mini(data)
-	addData(4, METRIC, data, hash)
-	if (isLanguageSmart) {
-		notation = locale_red
-		if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
-			if (hash === localesSupported[isLocaleValue]["v"]) {notation = locale_green}
+	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
+		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
+		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
+	const pString = "<input type='number' required>"
+		+ "<input type='checkbox' required>"
+		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
+		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
+		+ "<input type='file' required>"
+		+ "<input type='email' value='a'>"
+		+ "<input type='url' value='a'>"
+		+ "<input type='number' max='1974.3' value='2000'>"
+		+ "<input type='number' min='8026.5' value='1'>"
+		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
+		+ "<input type='radio' required name='radiogroup'>"
+		+ "<select required><option></option></select>"
+		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
+		+ "<input type='text' required>"
+
+	let data = {}
+	let notation = isLanguageSmart ? locale_red : ""
+	try {
+		if (runSE) {foo++}
+		let collection = ((new DOMParser).parseFromString(pString, 'text/html')).body.children
+		let cType = typeFn(collection)
+		if ("object" === cType) {
+			for (const k of Object.keys(collection)) {
+				try {
+					let msg = collection[k].validationMessage
+					if (runST) {msg = undefined}
+					let sType = typeFn(msg)
+					data[aNames[k]] = ("string" == sType ? msg : zErrType + sType)
+				} catch(e) {
+					data[aNames[k]] = zErr
+				}
+			}
+			let hash = mini(data)
+			let count = Object.keys(data).length
+			let details = count === aNames.length ? "details" : count +"/" + aNames.length
+			addData(4, METRIC, data, hash)
+			if (isLanguageSmart) {
+				if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
+					if (hash === localesSupported[isLocaleValue].v) {notation = locale_green}
+				}
+			}
+			log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
+		} else {
+			log_display(4, METRIC, log_error(SECT4, METRIC, zErrType + cType) + notation)
 		}
+	} catch(e) {
+		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
+		addData(4, METRIC, zErr)
 	}
-	let count = Object.keys(data).length
-	let details = count === 14 ? "details" : count +"/14"
-	log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
 	return resolve()
 })
 
 const get_xml_errors = () => new Promise(resolve => {
 	const METRIC = "xml_errors"
+	let notation = isLanguageSmart ? locale_red : ""
 	if ("string" == typeof isXML) {
-		log_display(4, METRIC, isXML)
+		log_display(4, METRIC, isXML + notation)
 		addData(4, METRIC, (isXML == zNA ? zNA : zErr))
 		return resolve()
 	}
-	let hash = mini(isXML), notation = ""
+	let hash = mini(isXML)
 	addData(4, METRIC, isXML, hash)
 	if (isLanguageSmart) {
-		notation = locale_red
 		if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
-			if (hash === localesSupported[isLocaleValue]["xml"]) {notation = locale_green}
+			if (hash === localesSupported[isLocaleValue].x) {notation = locale_green}
 		}
 	}
 	let count = Object.keys(isXML).length

@@ -137,7 +137,7 @@ function get_computed_styles() {
 						type == 0 ? document.styleSheets[0].cssRules[0].style :
 						type == 1 ? getComputedStyle(document.body) :
 						type == 2 ? document.body.style :
-						type == 3 ? ((new DOMParser).parseFromString("<p></p>", "text/html")).body.style :
+						type == 3 ? ((new DOMParser).parseFromString("", "text/html")).body.style :
 						undefined
 					)
 					if (!cssStyleDeclaration) {

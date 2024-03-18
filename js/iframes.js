@@ -9,6 +9,7 @@ function getDynamicIframeWindow({
 	violateSOP = true, // SameOriginPolicy
 	display = false
 }) {
+	let res = []
 	try {
 		if (runSE) {foo++}
 		const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
@@ -33,9 +34,6 @@ function getDynamicIframeWindow({
 			element.setAttribute('src', source)
 		}
 		const iframeWindow = contentWindow ? element.contentWindow : context[length]
-
-		let res = []
-
 		if (test == "ua") {
 			let navigator = iframeWindow.navigator
 			let list = ['appCodeName','appName','appVersion','buildID','oscpu',
@@ -53,7 +51,7 @@ function getDynamicIframeWindow({
 		document.body.removeChild(element)
 		return res
 	} catch(e) {
-		console.log(e)
+		//console.log(e)
 		return res.push(zErr)
 	}
 }

@@ -46,8 +46,15 @@ const get_clearkey = () => new Promise(resolve => {
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
-	- com.widevine.alpha : causes a DRM prompt if disabled so ignore
-	- org.w3.clearkey
+		'com.widevine.alpha' triggers DRM prompt if disabled so ignore
+		'org.w3.clearkey'
+	other
+		'com.microsoft.playready',
+		'com.youtube.playready',
+		'webkit-org.w3.clearkey',
+		'com.adobe.primetime',
+		'com.adobe.access',
+		'com.apple.fairplay'
 	note: media.gmp-gmpopenh264.enabled (about:plugins: activate state) = no effect
 	*/
 

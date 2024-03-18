@@ -348,7 +348,7 @@ const outputStorage = () => new Promise(resolve => {
 	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
 	addDataDisplay(6, "worker", "function" === typeof Worker ? zE : zD)
 
-	// FF104- sanitizing issues
+	// skip FF104 or lower due to sanitizing issues
 	let skip = isFile && isVer < 105
 	Promise.all([
 		get_caches(),

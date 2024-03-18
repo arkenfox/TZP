@@ -132,8 +132,42 @@ function colorFn(str) {return "<span class='lies'>"+ str +"</span>"}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 
+function typeFn(item, isSimple = false) {
+	// return a more detailed result
+	let type = typeof item
+	if ("number" === type) {
+		if (Number.isNaN(item)) {type = "NaN"} else if (Infinity === item) {type = Infinity}
+	} else if ("string" === type) {
+		if (!isSimple) {
+			if ("" === item) {type = "empty string"} else if ("" === item.trim()) {type = "whitespace"}
+		}
+	} else if ("object" === type) {
+		if (null === item) {type = "null"
+		} else if (Array.isArray(item)) {
+			type = "array"
+			if (!isSimple) {type = !item.length ? "empty array" : "array"}
+		} else {
+			if (!isSimple) {
+				try {if (0 === Object.keys(item).length) {type = "empty object"}} catch(e) {}
+			}
+		}
+	}
+	// do nothing: undefined, bigint, boolean, function
+	return type
+}
+
+function testtypeFn(isSimple = false) {
+	let bigint = 9007199254740991
+	try {bigint = BigInt(9007199254740991)} catch(e) {}
+	let data = ['a','','  ', 1, 1.2, Infinity, NaN, [], [1], {}, {a: 1}, null,
+		true, false, bigint, undefined, function foobar() {},]
+	data.forEach(function(item) {typeFn(item, isSimple)})
+}
+
 function cleanFn(item, skipArray = false) {
 	// strings, tidy undefined, empty strings
+	// ToDo: fixup logic e.g. what about NaN !Number.isNaN(item) in first line
+	// we should try and get rid of this fucntion
 	if (typeof item === "number" || typeof item === "bigint") { return item
 	} else if (item == zU) {item = zUQ
 	} else if (item == "true" || item == "false" || item == "null") {item = "\"" + item + "\""
@@ -374,14 +408,37 @@ const get_isOS = () => new Promise(resolve => {
 		return resolve()
 	}
 
+	function trysomethingelse() {
+		exit()
+	}
+
+	function tryfonts() {
+		exit()
+	}
+
 	function tidy(value) {
 		// set icon
 		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
 		dom.fdResourceCss.style.backgroundImage = pngURL
 		// quick exit
 		if (value !== list[0]) {exit(value); return}
-		// FF124 desktop: dig deeper
-		exit()
+		// FF124+ desktop: dig deeper
+		// the easiest way is to check for '-apple-system', 'MS Shell Dlg','MS Shell Dlg \\32'
+			// we could check a widget fonts but that fails in TB windows, may change
+			// and getComputedStyle can report the wrong font, so detect the actual fonts
+		try {
+			// test doc fonts enabled
+			let fntTest = "\"Arial Black\""
+			let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
+			let fntEnabled = (font == fntTest ? true : false)
+			if (!fntEnabled) {
+				if (font.slice(0,11) == "Arial Black") {fntEnabled = true} // ext may strip quotes marks
+			}
+			if (fntEnabled) {tryfonts()} else {trysomethingelse()}
+		} catch(e) {
+			// don't log anything, we test this in the fonts section
+			trysomethingelse()
+		}
 	}
 
 	// FF89-123: isBlockMin is 102 so we don't care about < 89
@@ -457,13 +514,20 @@ const get_isSystemFont = () => new Promise(resolve => {
 	}
 	// first aFont per computed family
 	let t0 = nowFn()
-	let aFonts = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
-		'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
-		'caption','icon','menu','message-box','small-caption','status-bar'
-	]
+	// add 'default-font' so it's easy to see what it pairs with in baseFonts
+	let aFonts = ['caption','default-font','icon','menu','message-box','small-caption','status-bar']
+	// 1802957: FF109+: no longer applied
+	if (isVer < 109) {
+		aFonts.push(
+			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
+			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+		)
+	}
+	aFonts.sort()
 	try {
 		let el = dom.sysFont, data = []
 		aFonts.forEach(function(font){
+			el.style.font = "" // always clear in case a font is invalid/deprecated
 			el.style.font = font
 			let family = getComputedStyle(el)["font-family"]
 			if (!data.includes(family)) {
@@ -596,6 +660,7 @@ function get_isXML() {
 		isXML = zNA
 		return
 	}
+
 	let t0 = nowFn()
 	const METRIC = "xml_errors"
 	let delimiter = ":", notation = ""
@@ -621,25 +686,32 @@ function get_isXML() {
 			try {
 				let doc = parser.parseFromString(list[k], 'application/xml')
 				let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-				//split into parts: works back to FF52 and works with LTR
-				let parts = str.split("\n")
-				if (k == "n02") {
-					// programatically determine delimiter
-						// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
-					let strLoc = parts[1]
-					let schema = isFile ? "file://" : "https://"
-					let index = strLoc.indexOf(schema) - 2
-					if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
-					if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
-					delimiter = strLoc.charAt(index)
-					strLoc = strLoc.slice(0, index)
-					let strName = parts[0].split(delimiter)[0]
-					let strLine = parts[2]
-					isXML["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
-					isXML["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+				let sType = typeFn(str)
+				if ("string" == sType) {
+					//split into parts: works back to FF52 and works with LTR
+					let parts = str.split("\n")
+					if (parts.length == 3 && k == "n02") {
+						// programatically determine delimiter
+							// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+						let strLoc = parts[1]
+						let schema = isFile ? "file://" : "https://"
+						let index = strLoc.indexOf(schema) - 2
+						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+						delimiter = strLoc.charAt(index)
+						strLoc = strLoc.slice(0, index)
+						let strName = parts[0].split(delimiter)[0]
+						let strLine = parts[2]
+						isXML["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+						isXML["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+					}
+					isXML[k] = parts[0].split(delimiter)[1].trim()
+				} else {
+					isXML[k] = zErrType + sType
 				}
-				isXML[k] = parts[0].split(delimiter)[1].trim()
-			} catch(err) {}
+			} catch(err) {
+				isXML[k] = zErr
+			}
 		}
 		console.clear()
 		log_perf(SECTG, "isXML", t0)
@@ -717,7 +789,8 @@ const get_isDomRect = () => new Promise(resolve => {
 		}
 	}
 	//console.log(oDomRect)
-	//aDomRect = [false, false, false, true]
+	//aDomRect = [false, true, false, true]
+	//aDomRect = [false, false, false, false]
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
 
@@ -758,6 +831,13 @@ function copyclip(element) {
 function hide_overlays() {
 	dom.modaloverlay.style.display = "none"
 	dom.overlay.style.display = "none"
+	dom.overlayresults.innerHTML = "" // clear so we always start at the top
+}
+
+function overlay_format(type) {
+	dom.overlayresults.innerHTML = ""
+	isJSONformat = type +""
+	showMetrics('fingerprint', isJSONscope)
 }
 
 function showhide(id, style) {
@@ -777,20 +857,20 @@ function togglerows(id, word) {
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
 
-/*** OUTGOING ***/
-
 function showMetrics(name, scope, isConsole = false) {
 	let t0 = nowFn()
-	let btns = "<span class='btn0 btnc' onClick='showMetrics(`"
+	let isVisible = dom.modaloverlay.style.display == "block"
+	let btn = "<span class='btn0 btnc' onClick='showMetrics(`"
 		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
 
 	let data, showhash = true, results, color = 99
-
 	if (name == SECT98 || name == SECT99) { data = gData[name]
-	} else if (name == "fingerprint" || name == "errors" || name == "health" || name == "lies") {
+	} else if (name == "fingerprint") {
+		isJSONscope = scope
+		name += isJSONformat
+		data = gData[zFP][scope + isJSONformat]
+	} else if (name == "errors" || name == "health" || name == "lies") {
 		data = gData[name][scope]
-	} else if (name == "fingerprint_summary") { data = gData[zFP][scope+"_summary"]
-	} else if (name == "fingerprint_list") { data = gData[zFP][scope+"_list"]
 	} else if (name == "alerts") {data = gAlert; showhash = false
 	} else if (name.slice(0,6) == "errors") {
 		name = name.slice(6)
@@ -812,25 +892,38 @@ function showMetrics(name, scope, isConsole = false) {
 		console.log((scope == undefined ? "" : scope.toUpperCase() +": ") + name +": "+ (showhash ? mini(data) : ""), data)
 		return
 	}
-	// clear so we always start at the top, add btns, display
-	dom.overlayresults.innerHTML = ""
-	dom.overlaybuttons.innerHTML = btns + " <span class='btn0 btnc' onClick='copyclip(`overlayresults`)'>[COPY]</span>"
-		+ " <span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span>"
-	dom.modaloverlay.style.display = "block"
-	dom.overlay.style.display = "block"
-	// delay so overlay is painted
-	setTimeout(function() {
-		dom.overlayresults.innerHTML = (scope == undefined ? "" : scope.toUpperCase() +": ")
-			+ name +": "+ (showhash ? mini(data) : "") + "<br>"+ json_highlight(data)
-		//console.log(name, scope, performance.now() - t0)
-	}, 0)
+	let display
+	if (name == "fingerprint" || name == "fingerprint_flat") {
+		display = sDataTemp["cache"][scope + isJSONformat]
+	} else {
+		display = json_highlight(data)
+	}
+
+	//add btn, show/hide options, display
+	dom.overlaytitle.innerHTML = (scope == undefined ? "" : scope.toUpperCase() +": ")
+		+ name +": "+ (showhash ? mini(data) : "")
+	if (isVisible) {
+		// avoid reflow
+		dom.overlayresults.innerHTML = display
+	} else {
+		dom.overlaybutton.innerHTML = btn
+		dom.overlayoptions.style.display = (name == "fingerprint" ? "block" : "none")
+		dom.modaloverlay.style.display = "block"
+		dom.overlay.style.display = "block"
+		// delay so overlay is painted
+		setTimeout(function() {
+			dom.overlayresults.innerHTML = display
+		}, 0)
+	}
+	//console.log(name, scope, performance.now() - t0, isVisible)
 }
+
+/*** OUTGOING ***/
 
 function output_health(scope) {
 	if (!isSmart) {return}
 	// sort sData to gData
 	let h = "health"
-
 	gData[h] = {}
 	gData[h][scope] = {}
 
@@ -1016,7 +1109,7 @@ function output_section(section, scope) {
 	}
 
 	// propagate data
-	let aMetricsList = []
+	let aMetricsList = [], flatdata = {}
 	aSection.forEach(function(number) {
 		let data = {}, hash, count
 		let name = sectionMap[number]
@@ -1026,6 +1119,7 @@ function output_section(section, scope) {
 			let obj = sDataTemp[zFP][scope][number]
 			for (const k of Object.keys(obj).sort()) {
 				data[k] = obj[k]
+				if (gRun) {flatdata[k] = obj[k]}
 			}
 			sData[zFP][scope][name] = data
 			hash = mini(data)
@@ -1036,13 +1130,12 @@ function output_section(section, scope) {
 				gData[zFP][scope][name] = {}
 				gData[zFP][scope][name]["hash"] = hash
 				gData[zFP][scope][name]["metrics"] = data
-				// FP summary
+				// summary
 				let summary = scope+"_summary"
 				gData[zFP][summary][name] = {}
 				gData[zFP][summary][name]["hash"] = hash
 				gData[zFP][summary][name]["metrics"] = {}
 				for (const k of Object.keys(data)) {
-					aMetricsList.push(k)
 					let value = ("object" == typeof data[k] && data[k] !== null ? data[k]["hash"] : data[k] )
 					gData[zFP][summary][name]["metrics"][k] = value
 				}
@@ -1110,9 +1203,20 @@ function output_section(section, scope) {
 			console.error(e)
 		}
 	})
-	// metric list
 	if (gRun) {
-		gData[zFP][scope +"_list"] = aMetricsList.sort()
+		// flat
+		let flat = scope+"_flat"
+		gData[zFP][flat] = {}
+		for (const k of Object.keys(flatdata).sort()) {
+			aMetricsList.push(k)
+			gData[zFP][flat][k] = flatdata[k]
+		}
+		// metric list
+		gData[zFP][scope +"_list"] = aMetricsList
+		// cache big jsons displays
+		sDataTemp["cache"] = {}
+		sDataTemp["cache"][scope] = json_highlight(gData[zFP][scope])
+		sDataTemp["cache"][flat] = json_highlight(gData[zFP][flat])
 	}
 }
 
@@ -1187,7 +1291,10 @@ function log_display(section, id, str) {
 }
 
 function log_error(section, metric, error = zErr, scope = isScope, len = 50, isOnce = false) {
+	/*
+	if (len !== 50) {console.log(len, section, metric)}
 	if (len == "") {len = 50}
+	//*/
 	if (error == "" || error === null) {error = zErr} else {error += ""}
 	// collect
 	if (gRun && isOnce) {
@@ -1202,7 +1309,12 @@ function log_error(section, metric, error = zErr, scope = isScope, len = 50, isO
 		sDataTemp[obj][scope][section][metric] =error
 	}
 	// return display
-	if (error.length > len) {error = error.slice(0,len-3) + "..."}
+	if (error.length > len) {
+		error = error.slice(0,len-3) + "..." // trim it
+	} else if (error.length < len && len == 25) {
+		error = error.padEnd(len, ' ') // only pad short stuff
+	}
+	//console.log("~" + error +"~", len)
 	return error
 }
 
@@ -1273,13 +1385,8 @@ function log_section(name, time, scope = isScope) {
 
 		// FP
 		try {
-			let metricCount = 0
-			for (const k of Object.keys(gData[zFP][scope])) {
-				metricCount += Object.keys(gData[zFP][scope][k]["metrics"]).length
-			}
+			let metricCount = gData[zFP][scope +"_list"].length
 			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(0, zFP, metricCount +" metrics")
-				+ addButton(0, zFP +"_summary", "summary")
-				+ addButton(0, zFP +"_list", "list")
 		} catch(e) {
 			console.log(e)
 		}
@@ -1352,6 +1459,7 @@ function countJS(filename) {
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
+		dom["optFP"+ isJSONformat].checked = true // do once
 		if (isGecko) {gData["perf"].push([1, "RUN ONCE", nowFn()])}
 		let t0 = nowFn()
 		Promise.all([
@@ -1422,9 +1530,6 @@ function countJS(filename) {
 						hide_overlays()
 					}
 				}
-				overlay.addEventListener("keydown", (e) => {
-					console.log(e.key)
-				})
 				outputSection("load")
 			})
 		})
@@ -1637,7 +1742,6 @@ function run_immediate() {
 	try {let w = speechSynthesis.getVoices()} catch(e) {}
 	get_isXML()
 	get_isArch()
-
 }
 
 run_immediate()

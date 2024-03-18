@@ -43,7 +43,7 @@ const get_maxtouch = () => new Promise(resolve => {
 		if (runSE) {foo++} else if (runST) {value = undefined
 		} else if (runSL && isSmart) {sData[SECT99].push("Navigator.maxTouchPoints")}
 		display = value
-		if (typeof value !== "number") {
+		if (typeof value !== "number" || Number.isNaN(value)) {
 			display = log_error(SECT7, METRIC, zErrType + typeof value)
 			value = zErr
 		} else if (!Number.isInteger(value) || value < 0) {
@@ -336,11 +336,15 @@ function get_pointer_event(event) {
 	}
 	for (const k of Object.keys(oList).sort()) {
 		try {
-			let value = event[k],expected = oList[k]
+			let value = event[k],
+				expected = oList[k]
 			if (typeof value !== expected) {
-				value = zErr // zErrType + typeof value
+				value = "err" // zErrType + typeof value
+			} else if ("number" == expected && Number.isNaN(value)) {
+				value = "NaN" // zErrType + typeof value
+			} else {
+				value = cleanFn(value)
 			}
-			value = cleanFn(value)
 			oData[k] = value
 			oDisplay.push(value)
 		} catch(e) {

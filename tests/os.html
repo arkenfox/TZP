@@ -16,6 +16,9 @@
 </head>
 
 <body>
+	<div class="offscreen">
+		<div class="cssDocFont" id="divDocFont"></div>
+	</div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -46,7 +49,6 @@
 
 <script>
 'use strict';
-// https://bugzilla.mozilla.org/show_bug.cgi?id=1363508
 
 s3 = s3.trim()
 s13 = s13.trim()
@@ -59,6 +61,7 @@ let aDebug = [],
 	pad = 25,
 	isTimeOut = false,
 	isThrowError = false,
+	isThrowFontError = false,
 	useNew
 
 let notNormal = sb +" not normal"+ sc +" [now you <b><u>really</u></b> stand out]",
@@ -75,9 +78,13 @@ let oMessages = {
 	7: "pending",
 }
 
-const get_thisOS = () => new Promise(resolve => {
-	// FF89-123
-	// 1280128: FF51+ win/mac | 1701257: FF89+ linux, therefore undefined = android
+function finish(type) {
+	dom.perf = Math.round((performance.now() - t0)) + " ms"
+	dom.debug.innerHTML = aDebug.join("<br>")
+	if (type < 8) {dom.os.innerHTML = oMessages[type]} else {dom.os.innerHTML = "pending"}
+}
+
+const check_css = () => new Promise(resolve => {
 	function exit() {
 		if (thisOS === undefined) {thisOS = "android"}
 		return resolve()
@@ -86,11 +93,14 @@ const get_thisOS = () => new Promise(resolve => {
 
 	if (useNew) {thisOS = 0} // count instead
 	if (!isTimeOut) {
-		// FF121+: 1855861
-		// FF124+: 1874232
-			// new: chrome://browser/content/extension-popup-panel.css
-			// fallback: chrome://browser/content/extension.css
-			// both these are desktop only
+
+	// FF89-123
+		// 1280128: FF51+ win/mac | 1701257: FF89+ linux, therefore undefined = android
+	// FF121+: 1855861
+	// FF124+: 1874232
+		// new: chrome://browser/content/extension-popup-panel.css
+		// fallback: chrome://browser/content/extension.css
+		// both these are desktop only
 
 		const get_event = (css, item) => new Promise(resolve => {
 			css.onload = function() {
@@ -104,7 +114,7 @@ const get_thisOS = () => new Promise(resolve => {
 				document.head.removeChild(css)
 				aDebug.push(s3 + (item +": ").padStart(pad) + sc + green_tick +" detected")
 				if (count == maxCount) {exit()}
-				//exit(true) // comment out: test all three for debugging
+				//exit(true) // comment out: test all for debugging
 				return resolve()
 			}
 			css.onerror = function() {
@@ -145,31 +155,80 @@ const get_thisOS = () => new Promise(resolve => {
 	}
 })
 
+function check_docfonts() {
+	// FF124+ desktop: dig deeper
+	// the easiest way is to check for '-apple-system', 'MS Shell Dlg','MS Shell Dlg \\32'
+		// we could check a widget fonts but that fails in TB windows, may change
+		// and getComputedStyle can report the wrong font, so detect the actual fonts
+	try {
+		if (isThrowFontError) {groot++}
+		// test doc fonts enabled
+		let fntTest = "\"Arial Black\""
+		let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
+		let fntEnabled = (font == fntTest ? true : false)
+		if (!fntEnabled) {
+			if (font.slice(0,11) == "Arial Black") {fntEnabled = true} // ext may strip quotes marks
+		}
+		if (fntEnabled) {
+			aDebug.push(s13 + "document fonts test: ".padStart(pad) + sc + green_tick +" enabled")
+			try_fonts()
+		} else {
+			aDebug.push(s13 + "document fonts test: ".padStart(pad) + sc + red_cross +" disabled")
+			try_somethingelse()
+		}
+	} catch(e) {
+		// don't log anything, we test this in the fonts section
+		aDebug.push(s13 + "document fonts test: ".padStart(pad) + sc + zErr)
+		aDebug.push("<span class='faint'>"+ sb + (e.name +": ").padStart(pad) + sc + e.message +"</span>")
+		try_somethingelse()
+	}
+}
+
+function try_somethingelse() {
+	aDebug.push(s13 + "alternative test: ".padStart(pad) + sc)
+	// is there anything that is win/mac specific that can't be flipped with a pref
+
+	finish(7)
+}
+
+function try_fonts() {
+	// test for '-apple-system', 'MS Shell Dlg','MS Shell Dlg \\32'
+	// add a poison pill
+	// check against all three font-families (serif, sans-serif, monospace)
+
+
+	aDebug.push(s13 + "font test: ".padStart(pad) + sc)
+	finish(7)
+}
+
 function run() {
 	t0 = performance.now()
 	dom.os.innerHTML = ""
 	dom.debug.innerHTML = ""
+	aDebug = []
 	let notation = ""
 
-	function exit(type) {
-		dom.perf = Math.round((performance.now() - t0)) + " ms"
-		dom.debug.innerHTML = aDebug.join("<br>")
-		if (type < 8) {dom.os.innerHTML = oMessages[type]} else {dom.os.innerHTML = "pending"}
+	aDebug.push(s13 + "gecko test: ".padStart(pad) + sc + isFF)
+	if (isFF) {
+		useNew = isVer > 123
+		let isVerOpen  = (isVer == isVerMax +"")
+		aDebug.push(s13 + "version test: ".padStart(pad) + sc + isVer + (isVerOpen ? "+" : (isVer == 52 ? " or lower" : "")))
 	}
+
 	if (!isFF) {
-		exit(1)
+		finish(1)
 	} else if (isVer < 89) {
-		exit(2)
+		finish(2)
 	} else {
 		Promise.all([
-			get_thisOS()
+			check_css()
 		]).then(function(res){
 			let result = res[0]
 			if (result == "timed out") {
 				aDebug.push(sb + ("timed out: ").padStart(pad) + sc)
-				exit(3)
+				finish(3)
 			} else if (result == "error") {
-				exit(4)
+				finish(4)
 			} else {
 				if (useNew) {
 					// logis: must be 0 or 2, not 1, so I can pickup on changes
@@ -189,14 +248,14 @@ function run() {
 					// old: android, linux, mac, windows
 					// new: android or desktop or undefined
 				if (thisOS == undefined) {
-					exit(6) // something changed upstream: address it
+					finish(6) // something changed upstream: address it
 				} else if (thisOS !== "desktop") {
 					oMessages[5] = goodResult + thisOS
-					exit(5) // bingo!
+					finish(5) // bingo!
 				} else {
-					oMessages[7] = "pending: "+ thisOS
 					// desktop needws more digging
-					exit(7)
+					oMessages[7] = "pending: "+ thisOS
+					check_docfonts()
 				}
 			}
 		})
@@ -212,12 +271,6 @@ setTimeout(function() {
 		Promise.all([
 			get_isVer()
 		]).then(function(){
-			aDebug.push(s13 + "gecko test: ".padStart(pad) + sc + isFF)
-			if (isFF) {
-				useNew = isVer > 123
-				let isVerOpen  = (isVer == isVerMax +"")
-				aDebug.push(s13 + "version test: ".padStart(pad) + sc + isVer + (isVerOpen ? "+" : (isVer == 52 ? " or lower" : "")))
-			}
 			run()
 		})
 	})

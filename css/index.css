@@ -86,9 +86,13 @@ code {
 }
 #overlaybuttons {
 	position: fixed;
-	right: 25px;
-	z-index: 1010;
+	float: right;
+	right: 45px;
+	width: fit-content;
+	text-align: right;
 }
+
+
 div.pad {
 	padding: 0px 25px 15px /* top left+right bottom */
 }
@@ -118,6 +122,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .monobigger {font-family: monospace, "Courier New"; font-size: 12px;}
 .strike {text-decoration: line-through;}
 .spaces {white-space: pre-wrap;}
+.nospaces {white-space: normal;}
 .perf {font-family: monospace, "Courier New"; font-size: 12px; white-space: pre-wrap;}
 .lies {
 	color: var(--test99);
@@ -162,7 +167,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
-	font-weight: bold;
+	/*font-weight: bold;*/ /* bold looks out of place on macs */
 	padding-left: 6px;
 	padding-right: 6px;
 	cursor: pointer;
