@@ -67,7 +67,8 @@ const zD = "disabled",
 	zU = "undefined",
 	zUQ = "\"undefined\"",
 	zNEW = sb+"[NEW]"+sc,
-	zLIE = "untrustworthy"
+	zLIE = "untrustworthy",
+	zSKIP = "skipped"
 
 // for android defaults: e.g desktop mode on/off vs TZP forcing width
 let isWindow = {}
@@ -76,7 +77,7 @@ function get_scr_initial() {
 	aList.forEach(function(k){
 		try {
 			x = window[k]
-			if (typeof x !== "number") {x = "NaN"}
+			if (typeof x !== "number" || Number.isNaN(x) ) {x = "NaN"}
 		} catch(e) {
 			x = zErr
 		}
@@ -163,7 +164,9 @@ let languagesSupported = {},
 let aDomRect = [true, true, true, true],
 	isDomRect = 0,
 	oDomRect = {},
-	isPerf = false
+	isPerf = false,
+	isJSONformat = "",
+	isJSONscope = "document"
 
 // runtypes
 let gt0, gt1,
