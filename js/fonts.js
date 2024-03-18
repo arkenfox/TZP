@@ -1221,7 +1221,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 	}
 	aList.sort()
 	let aProps = ['font-size','font-style','font-weight','font-family']
-	let oRes = {}, notation = ""
+	let oRes = {}
 	let isTBSmart = (isSmart && isTB)
 	let notation = isTBSmart ? tb_red : ""
 	try {
