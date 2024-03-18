@@ -1201,14 +1201,25 @@ const get_graphite = () => new Promise(resolve => {
 })
 
 const get_system_fonts = (os = isOS) => new Promise(resolve => {
-	// ToDo: expand or reduce: e.g
-		// -moz-desktop seems deprecated
-		// FF117 1838222 '-moz-message-bar'
 	const METRIC = "system_fonts"
-	let aList = ['-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
-		'-moz-field','-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+	let aList = [
 		'caption','icon','menu','message-box','small-caption','status-bar',
 	]
+	if (isVer < 109) {
+		aList.push(
+			// has never applied
+			'-moz-button-group',
+			// 1802957: FF109+: no longer applied 
+			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
+			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
+			// 1838222: FF117+: has never applied
+			'-moz-message-bar',
+			// invalid: we already collect the default font family + size (and it will be normal 400px)
+				// so this is just to confirm the no-longer applied ones are the same
+			'-default',
+		)
+	}
+	aList.sort()
 	let aProps = ['font-size','font-style','font-weight','font-family']
 	let oRes = {}, notation = ""
 	let isTBSmart = (isSmart && isTB)
@@ -1217,6 +1228,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		let el = dom.sysFont
 		aList.forEach(function(name){
 			let aKeys = []
+			el.style.font = "" // always clear in case a font is invalid/deprecated
 			el.style.font = name
 			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
 			let key = aKeys.join(" ")
@@ -1230,12 +1242,12 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 			notation = tb_red
 			if (os == "windows") {
 				/* "12px normal 400 sans-serif" */
-				if (hash == "c89fb033") {notation = tb_green}
+				if (hash == "a75e7a17") {notation = tb_green}
 			} else if (os == "mac") {
-				if (hash == "1dc326ac") {notation = tb_green}
+				if (hash == "") {notation = tb_green}
 			} else if (os == "linux") {
 				/* "15px normal 400 sans-serif" */
-				if (hash == "7b469d36") {notation = tb_green}
+				if (hash == "") {notation = tb_green}
 			} else if (os == "android") {
 				/* currently "16px normal 400 " (computedStyle font-family is missing) */
 				if (hash == "") {notation = tb_green}
