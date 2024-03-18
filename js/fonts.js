@@ -1345,7 +1345,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 			'-moz-message-bar',
 			// invalid: we already collect the default font family + size (and it will be normal 400px)
 				// so this is just to confirm the no-longer applied ones are the same
-			'-default',
+			'default-font',
 		)
 	}
 	aList.sort()
@@ -1682,7 +1682,7 @@ const get_unicode = () => new Promise(resolve => {
 						// textmetrics
 						for (const k of Object.keys(oTM)) {
 							if (oTM[k]["proceed"]) {
-								let prefix = k == "width" ? "glyphs_" : "textmetrics_"
+								let prefix = k == "width" ? "glyphs_" : ""
 								try {
 									let isOnce = oTM[k]["all"] == false && isFirst
 									if (oTM[k]["all"] || isOnce) {
@@ -1698,7 +1698,7 @@ const get_unicode = () => new Promise(resolve => {
 											}
 										} else {
 											oTM[k]["proceed"] = false // stop checking
-											let len = (k == "width" || k == "alphabeticBaseline") ? 50 : 22
+											let len = (k == "width" || k == "alphabeticBaseline") ? 50 : 25
 											oCatch[k] = log_error(SECT12, prefix + k, zErrType + mType, isScope, len)
 										}
 									}
@@ -1711,8 +1711,8 @@ const get_unicode = () => new Promise(resolve => {
 					} catch(e) {
 						for (const k of Object.keys(oTM)) {
 							if (oTM[k]["proceed"]) {
-								let m = (k == "width" ? "glyphs" : "textmetrics") +"_"+ k
-								let len = (k == "width" || k == "alphabeticBaseline") ? 50 : 22
+								let m = (k == "width" ? "glyphs_" : "") + k
+								let len = (k == "width" || k == "alphabeticBaseline") ? 50 : 25
 								oCatch[k] = log_error(SECT12, m, e, isScope, len)
 							}
 						}
