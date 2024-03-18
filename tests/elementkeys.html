@@ -10,6 +10,7 @@
 	<style>
 		table {width: 90%; min-width: 480px; max-width: 780px}
 		hr {color: var(--test15);}
+		#tb15 td {padding-left: 0px;}
 	</style>
 </head>
 
@@ -60,11 +61,12 @@ let aListIgnore = [
 
 	// = span
 	'abbr','acronym','address','applet','article','aside','b',
-	'basefont','bdi','bdo','big','center','cite','code','dd','dfn','dt','em',
-	'figcaption','figure','footer','head','header','hgroup','i','isindex',
-	'kbd','keygen','main','mark','menuitem','nav','nextid','noframes','noscript',
-	'picture','plaintext','rb','rbc','rp','rt','rtc','ruby','s','samp','section',
-	'small','strike','strong','sub','summary','sup','tt','u','var','wbr',
+	'basefont','bdi','bdo','big','center','cite','code','dd','dfn','dt',
+	'element-details','em','figcaption','figure','footer','head','header','hgroup','i','isindex',
+	'kbd','keygen','main','mark','menuitem','nav','nextid','nobr','noembed',
+	'noframes','noscript','picture','plaintext','portal','rb','rbc','rp','rt',
+	'rtc','ruby','s','samp','search','section','small','strike','strong','sub',
+	'summary','sup','tt','u','var','wbr',
 
 	// input types = input
 	'input|button','input|checkbox','input|color','input|date','input|datetime',
@@ -98,6 +100,7 @@ let aList = [
 	'img',
 	'input', // changed 123
 	'link',
+	'marquee',
 	'meta',
 	'meter',
 	'object',
@@ -108,6 +111,7 @@ let aList = [
 	'progress',
 	'script',
 	'select', // changed 123n
+	'slot',
 	'source',
 	'style',
 	'table',
@@ -159,6 +163,8 @@ let oData = {}
 let oCommon = {}
 let aEverything = []
 
+let isDOMParser = false
+
 function run() {
 	// gecko: d6d0fc0e [630]
 	// blink: bc6d18f5 [646]
@@ -170,7 +176,7 @@ function run() {
 	aEverything = []
 	let tmpHash = {}
 	let oOrder = {}
-	let splitValue = isFF ? "click" : "title"
+	let splitValue = isFF ? "click" : "title" // title works for chrome + safari
 	/* interesting (without extension fuckery which I have not tested)
 		FF122
 		except for 'select', the last 310 items are the same
@@ -193,24 +199,101 @@ function run() {
 	}
 
 	try {
-		// create one parent div to hold the others
-		const parent = document.createElement('div')
-		parent.setAttribute("id", parentid)
-		document.body.appendChild(parent)
+		let htmlElement
+		let parser
+		let parent
+		/* 
+			   dom = 18ms cold, 10ms rerun 
+			parser =  8ms cold,  5ms rerun (so far: 8 default items still to correctly add/enumerate)
+		so about twice as fast
+
+		we could use parser where possible but DOM where we have to
+		- we should reduce what we NEED to test first
+
+		HTMLElementKeys was using a div
+		- cydec was missing items: clientHeight clientWidth scrollHeight scrollWidth
+			- does using the parser fix this?
+			- are we still picking up those four items in prototype/proxy lies?
+
+		- NoScript
+			- every element had 13 items split with a space = we would still detect this
+		*/
+
+		if (isDOMParser) {
+			parser = new DOMParser
+		} else {
+			// create one parent div to hold the others
+			parent = document.createElement('div')
+			parent.setAttribute("id", parentid)
+			document.body.appendChild(parent)
+		}
 		// loop elements
 		tmpList.forEach(function(el) {
 			let item = el.split("|")[0]
 			let type = el.split("|")[1]
+			let keys = []
 			try {
-				const id = "target"+el
-				const element = document.createElement(item)
-				element.setAttribute("id", id)
-				parent.appendChild(element)
-				if (type !== undefined) {
-					document.getElementById(id).type = type
+				// method
+				if (isDOMParser) {
+					// this is faster, but some elements it seems we can't do this way
+						// base, basefont, body, caption, col, colgroup, frame, frameset, head, html, link, meta,
+						// noframes, noscript, script, style, tbody, td, template, tfoot, th, thead, title, tr
+						// ^ these end up with nothing
+
+					/* broken in default 61* elements
+						body,		// doc.body
+						html,		// doc.all[0]
+						meta,		// doc.all[3]
+						script,	// doc.all[3]
+						style,	// doc.all[3]
+						title,	// doc.all[3]
+
+						col,
+						frame,
+						frameset,
+						link,
+						tbody,
+						td,
+						template,
+						tr
+					*/
+
+					let tmpitem = item
+					if (item == "title") {
+						tmpitem = "<html><head><title></head></html>"
+					} else if (item == "meta") {
+						tmpitem = "<html><head><meta></head></html>"
+					} else if (item == "script") {
+						tmpitem = "<html></html><script>"
+					} else if (item == "style") {
+						tmpitem = "<html><style></html>"
+					}
+
+					let str = "<"+ tmpitem + (type == undefined ? "": " type='" + type +"'") + ">"
+					let doc = parser.parseFromString(str, "text/html")
+
+					if (item == "body") {
+						htmlElement = doc.body
+					} else if (item == "head") { // all elements
+						htmlElement = doc.head
+					} else if (item == "html") {
+						htmlElement = doc.all[0]
+					} else if (item == "meta" || item == "script" || item == "style" || item == "title") {
+						htmlElement = doc.all[3]
+					} else {
+						htmlElement = doc.body.firstChild // firstElementChild ?
+					}
+				} else {
+					const id = "target"+el
+					const element = document.createElement(item)
+					element.setAttribute("id", id)
+					parent.appendChild(element)
+					if (type !== undefined) {
+						document.getElementById(id).type = type
+					}
+					htmlElement = document.getElementById(id)
 				}
-				const htmlElement = document.getElementById(id)
-				let keys = []
+
 				for (const key in htmlElement) {keys.push(key)}
 				// get pre + post `click` (gecko)
 				let splitIndex = keys.indexOf(splitValue)
