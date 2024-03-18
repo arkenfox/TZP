@@ -87,7 +87,7 @@ code {
 #overlaybuttons {
 	position: fixed;
 	float: right;
-	right: 45px;
+	right: 25px;
 	width: fit-content;
 	text-align: right;
 }
