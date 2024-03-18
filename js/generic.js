@@ -860,12 +860,14 @@ function togglerows(id, word) {
 function showMetrics(name, scope, isConsole = false) {
 	let t0 = nowFn()
 	let isVisible = dom.modaloverlay.style.display == "block"
+	let isShowFormat = false
 	let btn = "<span class='btn0 btnc' onClick='showMetrics(`"
 		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
 
 	let data, showhash = true, results, color = 99
 	if (name == SECT98 || name == SECT99) { data = gData[name]
 	} else if (name == "fingerprint") {
+		isShowFormat = true
 		isJSONscope = scope
 		name += isJSONformat
 		data = gData[zFP][scope + isJSONformat]
@@ -907,7 +909,7 @@ function showMetrics(name, scope, isConsole = false) {
 		dom.overlayresults.innerHTML = display
 	} else {
 		dom.overlaybutton.innerHTML = btn
-		dom.overlayoptions.style.display = (name == "fingerprint" ? "block" : "none")
+		dom.overlayoptions.style.display = (isShowFormat ? "block" : "none")
 		dom.modaloverlay.style.display = "block"
 		dom.overlay.style.display = "block"
 		// delay so overlay is painted
