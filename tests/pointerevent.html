@@ -11,6 +11,8 @@
 	<style>
 		table {width: 480px;}
 		hr {color: var(--test7);}
+		#tb7 td {padding-left: 0px;}
+
 		.pointer {
 			float: left;
 			display: flex;
@@ -45,13 +47,8 @@
 		<tr>
 			<td>
 				<div class="pointer" id="target">
-					<div class="flex-item">mouse over<div>
-					<div class="flex-item"> 🧀 <div>
-					<div class="flex-item">touch<div>
-					<div class="flex-item"> 👆 <div>
-					<div class="flex-item">pen<div>
-					<div class="flex-item"> ✏️ <div>
-				<div>
+					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T<div>
+				</div>
 			</td>
 		<td class="mono spaces" style="text-align: left; vertical-align: top;" id="results"></td>
 		</tr>
@@ -91,8 +88,15 @@ function run(event) {
 			oDisplay.push(divider)
 		}
 		try {
-			let value = event[k]
-			let expected = oList[k]
+			let value = event[k],
+				expected = oList[k]
+			if (typeof value !== expected) {
+				value = "err" // zErrType + typeof value
+			} else if ("number" == expected && Number.isNaN(value)) {
+				value = "NaN" // zErrType + typeof value
+			} else {
+				value = cleanFn(value)
+			}
 			oTemp[k] = value
 			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
 		} catch(e) {
