@@ -1223,6 +1223,7 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 	let aProps = ['font-size','font-style','font-weight','font-family']
 	let oRes = {}, notation = ""
 	let isTBSmart = (isSmart && isTB)
+	let notation = isTBSmart ? tb_red : ""
 	try {
 		if (runSE) {foo++}
 		let el = dom.sysFont
@@ -1238,18 +1239,17 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
 		let hash = mini(newobj)
 		if (isTBSmart) {
-			// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
-			notation = tb_red
 			if (os == "windows") {
 				/* "12px normal 400 sans-serif" */
 				if (hash == "a75e7a17") {notation = tb_green}
 			} else if (os == "mac") {
-				if (hash == "") {notation = tb_green}
+				if (hash == "0b6c0dbe") {notation = tb_green}
 			} else if (os == "linux") {
 				/* "15px normal 400 sans-serif" */
-				if (hash == "") {notation = tb_green}
+				if (hash == "48e3d1b4") {notation = tb_green}
 			} else if (os == "android") {
-				/* currently "16px normal 400 " (computedStyle font-family is missing) */
+				// regression: TBA currently "16px normal 400 " (computedStyle font-family is missing)
+					// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
 				if (hash == "") {notation = tb_green}
 			}
 		}
@@ -1257,7 +1257,6 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 		log_display(12, METRIC, hash + addButton(12, METRIC, Object.keys(newobj).length +"/"+ count) + notation)
 		return resolve()
 	} catch(e) {
-		notation = isTBSmart ? tb_red : ""
 		log_display(12, METRIC, log_error(SECT12, METRIC, e) + notation)
 		return resolve([METRIC, zErr])
 	}
