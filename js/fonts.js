@@ -574,10 +574,13 @@ const get_default_sizes = () => new Promise(resolve => {
 		let oRes = {}
 		let el = dom.dfsize
 		let styles = [ // sorted
-			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+			'cursive','default-font','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
 			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
 		]
 		styles.forEach(function(style) {
+			// always clear in case a font is invalid/deprecated: e.g. our "default-font"
+			el.style.fontSize = ""
+			el.style.fontFamily = ""
 			el.style.fontFamily = style
 			let size = getComputedStyle(el).getPropertyValue("font-size")
 			if (oRes[size] == undefined) {oRes[size] = []}
