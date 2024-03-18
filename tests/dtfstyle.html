@@ -59,6 +59,8 @@ var list = gLocales,
 	oData = {},
 	tzData = {},
 	tzDataAll = {},
+	isMax,
+	isMin,
 	aTZ = [],
 	oCheck = {},
 	isAuto = false,
@@ -358,7 +360,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 	let oConst = {}
 	oData = {}
 
-	//aLocales = ['en']
+	//aLocales = ['en','fr']
 	try {
 		aLocales.forEach(function(code) {
 			let oTempData = {}
@@ -507,7 +509,17 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			if (tzData[tz] == undefined) {
 				tzData[tz] = {}
 			}
-			tzData[tz][method] = [localeGroups.length, localesHash]
+			let buckets = localeGroups.length
+			if (method == "all") {
+				if (isMax == undefined) {
+					isMax = buckets
+					isMin = buckets
+				} else {
+					if (buckets > isMax) {isMax = buckets}
+					if (buckets < isMin) {isMin = buckets}
+				}
+			}
+			tzData[tz][method] = [buckets, localesHash]
 		}
 
 		if (!isAuto) {
@@ -547,6 +559,9 @@ function run_summary() {
 			}
 		}
 	}
+	oCheck["max"] = isMax
+	oCheck["min"] = isMin
+
 	let display = []
 	let count = oCheck["match"].length
 	let expected = aTZ.length
@@ -561,6 +576,7 @@ function run_summary() {
 		display.push("<br>" + s14 +"MISMATCH: "+ sc + count +"<br>")
 		display.push(oCheck["mismatch"].join("<br>"))
 	}
+	display.push("<br>" + s14 +"RANGE: "+ sc + isMin +" - "+ isMax)
 	dom.results.innerHTML = s16 + "ALL vs MIN"  + sc + spacer
 		+ display.join("<br>")
 		+ spacer +"<hr><br>"+ s16 +"ENTROPY:"+ sc +" (number of locale results per timezone)" + sc + spacer + aCheck.join("<br>") + spacer
@@ -592,8 +608,10 @@ function run_all() {
 	dom.perf = ""
 	dom.results = ""
 	// reset data
-	oCheck = {"match": [], "mismatch": [], "missing": []}
+	oCheck = {"match": [], "max": 0, "min": 0, "mismatch": [], "missing": [] }
 	tzData = {}
+	isMax = undefined
+	isMin = undefined
 
 	// speed up tesys by using a hardcoded "all"
 	if (Object.keys(tzDataAll).length) {
