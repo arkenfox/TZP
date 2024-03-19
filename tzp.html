@@ -63,14 +63,13 @@
 		<!-- don't hide: some forks can't detect it -->
 		<div><img id="branding" src="chrome://branding/content/about-wordmark.svg"></img></div>
 		<div><img id="aboutlogo" src="about:logo"></img></div>
-		<div><video id="mediatest"></video></div>
-		<div><audio id="audiotest"></audio></div>
+		<div><video id="mediatest"></video><audio id="audiotest"></audio></div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
 		<span id="sColorElement"></span>
 		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
-		<div>
+		<div class="normalized">
 			<!--widget fonts-->
 			<input type="reset" id="wgtbutton">
 			<input type="checkbox" id="wgtcheckbox">
@@ -676,6 +675,7 @@
 		<tr class="togF"><td>client range</td><td class="c mono border-bottom" id="fontsDomRectClientRange"></td></tr>
 
 		<tr><td>[base sizes] fonts <sup>3</sup></td><td class="c mono" id="fontsizes_base"></td></tr>
+		<tr><td>[moz] fonts</td><td class="c mono" id="moz_fonts"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="system_fonts"></td></tr>
 		<tr><td>[widget] fonts</td><td class="c mono" id="widget_fonts"></td></tr>
 		<!--glyphs-->

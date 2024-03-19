@@ -57,9 +57,13 @@
 				<div class="nav-up"><span class="perf" id="language"></span></div>
 			</div>
 		</th></tr></thead>
-		<tr><td></td><td class="mono spaces" id="widgets"></td></tr>
+		<tr><td></td><td class="mono spaces" id="moz"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td></td><td class="mono spaces" id="system"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td></td><td class="mono spaces" id="widgets"></td></tr>
+		<tr><td colspan="2"></td></tr>
+
 	</table>
 	<br>
 
@@ -233,15 +237,39 @@ function check_computed() {
 	}
 }
 
-function get_system() {
+function get_moz() {
 	try {
 	// 1802957: FF109+: -moz no longer applied but keep for regression testing
 		// add bogus '-default-font' to check they are falling back to actual default
 		let aList = [
-			'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
-			'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
-			'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
+			'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
+			'-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window','-moz-workspace',
 		]
+		let aProps = ['font-size','font-style','font-weight','font-family']
+		let oRes = {}
+		let el = dom.sysFont
+		aList.forEach(function(name){
+			let aKeys = []
+			el.style.font = "" // always clear in case a font is invalid/deprecated
+			el.style.font = name
+			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
+			let key = aKeys.join(" ")
+			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+		})
+		let newobj = {}
+		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
+		let hash = mini(newobj)
+		dom.moz.innerHTML = s12 +"MOZ: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
+	} catch(e) {
+		dom.moz.innerHTML = s12 +"MOZ: "+ sc + e.name +": " + e.message
+	}
+}
+
+function get_system() {
+	try {
+	// 1802957: FF109+: -moz no longer applied but keep for regression testing
+		// add bogus '-default-font' to check they are falling back to actual default
+		let aList = ['caption','icon','menu','message-box','small-caption','status-bar']
 		let aProps = ['font-size','font-style','font-weight','font-family']
 		let oRes = {}
 		let el = dom.sysFont
@@ -290,6 +318,7 @@ try {
 console.log(e)
 }
 
+get_moz()
 get_widget()
 get_system()
 check_computed()

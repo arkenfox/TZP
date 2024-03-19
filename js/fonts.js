@@ -1333,65 +1333,74 @@ const get_graphite = () => new Promise(resolve => {
 })
 
 const get_system_fonts = (os = isOS) => new Promise(resolve => {
-	const METRIC = "system_fonts"
-	let aList = [
-		'caption','icon','menu','message-box','small-caption','status-bar',
-	]
-	if (isVer < 109) {
-		aList.push(
-			// has never applied
-			'-moz-button-group',
-			// 1802957: FF109+: no longer applied 
-			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
-			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
-			// 1838222: FF117+: has never applied
-			'-moz-message-bar',
-			// invalid: we already collect the default font family + size (and it will be normal 400px)
-				// so this is just to confirm the no-longer applied ones are the same
-			'default-font',
-		)
+	// 1802957: FF109+: -moz no longer applied but keep for regression testing
+		// add bogus '-default-font' to check they are falling back to actual default
+	let oList = {
+		moz: [
+			'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
+			'-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window','-moz-workspace',
+		],
+		system: ['caption','icon','menu','message-box','small-caption','status-bar']
 	}
-	aList.sort()
 	let aProps = ['font-size','font-style','font-weight','font-family']
-	let oRes = {}
 	let isTBSmart = (isSmart && isTB)
-	let notation = isTBSmart ? tb_red : ""
-	try {
-		if (runSE) {foo++}
-		let el = dom.sysFont
-		aList.forEach(function(name){
-			let aKeys = []
-			el.style.font = "" // always clear in case a font is invalid/deprecated
-			el.style.font = name
-			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
-			let key = aKeys.join(" ")
-			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
-		})
-		let newobj = {}, count = 0
-		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
-		let hash = mini(newobj)
-		if (isTBSmart) {
-			if (os == "windows") {
-				/* "12px normal 400 sans-serif" */
-				if (hash == "a75e7a17") {notation = tb_green}
-			} else if (os == "mac") {
-				if (hash == "0b6c0dbe") {notation = tb_green}
-			} else if (os == "linux") {
-				/* "15px normal 400 sans-serif" */
-				if (hash == "48e3d1b4") {notation = tb_green}
-			} else if (os == "android") {
-				// regression: TBA currently "16px normal 400 " (computedStyle font-family is missing)
-					// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
-				if (hash == "") {notation = tb_green}
+
+	for (const k of Object.keys(oList)) {
+		let notation = ""
+		if (isTBSmart) {notation = k == "moz" ? default_red: tb_red}
+		const METRIC = k +"_fonts" 
+		let oRes = {}
+		try {
+			let el = dom.sysFont
+			if (runSE) {foo++}
+			oList[k].forEach(function(name){
+				let aKeys = []
+				el.style.font = "" // always clear in case a font is invalid/deprecated
+				el.style.font = name
+				for (const j of aProps) {aKeys.push(getComputedStyle(el)[j])}
+				let key = aKeys.join(" ")
+				if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+			})
+			let newobj = {}, count = 0
+			for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
+			let hash = mini(newobj)
+			if (isTBSmart) {
+				// regression: TBA computedStyle font-family is missing
+				// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
+				if (k == "moz") {
+					if (os == "windows" || os == "mac") {
+						if (hash == "062ff345") {notation = default_green} // "16px normal 400 serif"
+					} else if (os == "linux") {
+						if (hash == "") {notation = default_green}
+					} else if (os == "android") {
+						if (hash == "") {notation = default_green}
+					}
+				} else {
+					if (os == "windows") {
+						if (hash == "a75e7a17") {notation = tb_green} // "12px normal 400 sans-serif"
+					} else if (os == "mac") {
+						if (hash == "0b6c0dbe") {notation = tb_green}
+						/* mac
+						"11px normal 400 -apple-system": ["message-box", "status-bar"],
+						"11px normal 700 -apple-system": ["small-caption"],
+						"12px normal 400 -apple-system": ["icon"],
+						"13px normal 400 -apple-system": ["caption", "menu"]
+						*/
+					} else if (os == "linux") {
+						if (hash == "48e3d1b4") {notation = tb_green} // "15px normal 400 sans-serif"
+					} else if (os == "android") {
+						if (hash == "") {notation = tb_green}
+					}
+				}
 			}
+			addData(12, METRIC, newobj, hash)
+			log_display(12, METRIC, hash + addButton(12, METRIC, Object.keys(newobj).length +"/"+ count) + notation)
+		} catch(e) {
+			log_display(12, METRIC, log_error(SECT12, METRIC, e) + notation)
+			addData(12, METRIC, zErr)
 		}
-		addData(12, METRIC, newobj, hash)
-		log_display(12, METRIC, hash + addButton(12, METRIC, Object.keys(newobj).length +"/"+ count) + notation)
-		return resolve()
-	} catch(e) {
-		log_display(12, METRIC, log_error(SECT12, METRIC, e) + notation)
-		return resolve([METRIC, zErr])
 	}
+	return resolve()
 })
 
 const get_widget_fonts = (os = isOS) => new Promise(resolve => {
