@@ -142,7 +142,7 @@ const get_nav_gpc = () => new Promise(resolve => {
 const set_isLanguageSmart = () => new Promise(resolve => {
 	// limited to TB/MB
 		// ToDo: android may differ, ignore for now
-	isLanguageSmart = (isSmart && isTB && isOS !== "android")
+	isLanguageSmart = (isSmart && isTB && isOS !== "android" && isOS !== undefined)
 	if (!isLanguageSmart) {
 		return
 	}
@@ -206,7 +206,7 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"fr": {v: "34e28fa2", x: "74f5df3d"},
 		"ga-IE": {v: "2bf1321d", x: "d9761e70"},
 		// he: xml n27 n28 n30 = english
-		"he": {v: "e47dbb82", x: "158b58fb"},
+		"he": {v: "e47dbb82", x: "786876d5"},
 		"hu": {v: "dad6d689", x: "9f537fe6"},
 		"id": {v: "71224946", x: "79f3851e"},
 		"is": {v: "d150027b", x: "7f3e38b8"},
