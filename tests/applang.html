@@ -451,7 +451,6 @@ function get_xml_errors() {
 			let parser = new DOMParser
 			let oTemp = {}
 			for (const k of Object.keys(xmlList)) {
-
 				try {
 					let xmlDoc = parser.parseFromString(xmlList[k], mimetype)
 					let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
@@ -468,22 +467,21 @@ function get_xml_errors() {
 						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
 						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
 						delimiter = strLoc.charAt(index)
-						strLoc = strLoc.slice(0, index)
+						strLoc = ": "+ strLoc.slice(0, index)
 						let strName = parts[0].split(delimiter)[0]
-						let strLine = parts[2]
-						oTemp["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+						let strLine = parts[2] == undefined ? "" : ": "+ parts[2] // eg hebrew is only 2 lines
+						oTemp["n00"] = strName + strLoc + strLine
 						oTemp["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
 						//console.log(xmlStr)
 						//console.log(parts)
 						//console.log(strLoc, schema, index, "~"+delimiter+"~")
-						//console.log(mini(strName +": " + strLoc +": "+ strLine), strName +": " + strLoc +": "+ strLine)
 					}
 					oTemp[k] = parts[0].split(delimiter)[1].trim()
 				} catch(err) {
 					oTemp[k] = err+""
 				}
 			}
-			//console.log(mimetype, oTemp)
+			console.log(mimetype, oTemp)
 			let hashTemp = mini(oTemp)
 			if (xmlData[hashTemp] == undefined) {
 				xmlData[hashTemp] = {
