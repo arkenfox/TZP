@@ -149,6 +149,7 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 	const en = "en-US, en"
 	languagesSupported = {
 		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
+			// on mac the locale = ja-JP not ja
 		"ar": [en],
 		"ca": [en],
 		"cs": ["sk, "+ en],
@@ -204,8 +205,8 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"fi": {v: "3e29e6e7", x: "71abeeec"},
 		"fr": {v: "34e28fa2", x: "74f5df3d"},
 		"ga-IE": {v: "2bf1321d", x: "d9761e70"},
-		// he: xml n28 + n30 = english
-		"he": {v: "e47dbb82", x: "39eec79d"},
+		// he: xml n27 n28 n30 = english
+		"he": {v: "e47dbb82", x: "158b58fb"},
 		"hu": {v: "dad6d689", x: "9f537fe6"},
 		"id": {v: "71224946", x: "79f3851e"},
 		"is": {v: "d150027b", x: "7f3e38b8"},
@@ -215,7 +216,7 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"ko": {v: "d3b54047", x: "fc4c50ed"},
 		"lt": {v: "d5f9b95d", x: "f50f2b50"},
 		// mk: v = english but not number formating, and xml n30 = english but is would-be-n39 (same as el)
-			// and n27 + n28 = english
+			// and n27 n28 = english
 		"mk": {v: "333aae58", x: "3b22df8b"},
 		"ms": {v: "9dadbc64", x: "f23d0969"},
 		// my: two items in english: date+over/under
