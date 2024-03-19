@@ -82,7 +82,6 @@ const outputPrototypeLies = () => new Promise(resolve => {
 				apiFunction.call(proto)
 				return true
 			} catch (error) {
-				if (isTB) {console.clear()}
 				return error.constructor.name != 'TypeError'
 			}
 		}
