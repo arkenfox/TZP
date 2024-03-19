@@ -404,6 +404,7 @@ const get_isOS = () => new Promise(resolve => {
 
 	function exit(value) {
 		isOS = value
+if (isFile) {isOS = "windows"} // temp
 		log_perf(SECTG, METRIC, t0, "", isOS +"")
 		return resolve()
 	}
@@ -686,7 +687,7 @@ function get_isXML() {
 				if ("string" == sType) {
 					//split into parts: works back to FF52 and works with LTR
 					let parts = str.split("\n")
-					if (parts.length == 3 && k == "n02") {
+					if (k == "n02") {
 						// programatically determine delimiter
 							// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
 						let strLoc = parts[1]
@@ -695,12 +696,13 @@ function get_isXML() {
 						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
 						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
 						delimiter = strLoc.charAt(index)
-						strLoc = strLoc.slice(0, index)
+						strLoc = ": "+ strLoc.slice(0, index)
 						let strName = parts[0].split(delimiter)[0]
-						let strLine = parts[2]
-						isXML["n00"] = strName +": " + strLoc +": "+ strLine // weird on LTR but who cares
+						let strLine = parts[2] == undefined ? "" : ": "+ parts[2] // eg hebrew is only 2 lines
+						isXML["n00"] = strName + strLoc + strLine
 						isXML["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
 					}
+					// this is always the error message
 					isXML[k] = parts[0].split(delimiter)[1].trim()
 				} else {
 					isXML[k] = zErrType + sType
@@ -709,7 +711,7 @@ function get_isXML() {
 				isXML[k] = zErr
 			}
 		}
-		console.clear()
+		if (gClear) {console.clear()}
 		log_perf(SECTG, "isXML", t0)
 		return
 	} catch(e) {
@@ -1715,6 +1717,7 @@ function outputSection(id, cls) {
 			get_isDomRect(),
 			outputPrototypeLies(),
 		]).then(function(){
+			if (isTB && gClear) {console.clear()}
 			log_section(SECTP, gt0)
 			output()
 		})

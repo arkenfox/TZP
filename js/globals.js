@@ -173,6 +173,7 @@ let gt0, gt1,
 	gLoad = true,
 	gRun = true,
 	gClick = true,
+	gClear = true, // clear console of xml and TB's prototype/proxy errors
 	isAllowNonGecko = false, // not supported: to see what other engines return
 	isBlock = true,
 	isBlockMin = [102, 12], // [FF, equivalent TB version] isVer only goes to 102
