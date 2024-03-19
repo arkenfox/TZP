@@ -513,17 +513,13 @@ const get_isSystemFont = () => new Promise(resolve => {
 		return resolve()
 	}
 	// first aFont per computed family
+		// add '-default-font' (alphabetically first) so it's easy to see what it pairs with in baseFonts
 	let t0 = nowFn()
-	// add 'default-font' so it's easy to see what it pairs with in baseFonts
-	let aFonts = ['caption','default-font','icon','menu','message-box','small-caption','status-bar']
-	// 1802957: FF109+: no longer applied
-	if (isVer < 109) {
-		aFonts.push(
-			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
-			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
-		)
-	}
-	aFonts.sort()
+	let aList = [
+		'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
+		'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
+		'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
+	]
 	try {
 		let el = dom.sysFont, data = []
 		aFonts.forEach(function(font){
