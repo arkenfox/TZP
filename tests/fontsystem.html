@@ -53,7 +53,9 @@
 	<table id="tb12">
 		<col width="1%"><col width="99%">
 		<thead><tr><th colspan="2">
-			<div class="nav-title">system fonts</div>
+			<div class="nav-title">system fonts
+				<div class="nav-up"><span class="perf" id="language"></span></div>
+			</div>
 		</th></tr></thead>
 		<tr><td></td><td class="mono spaces" id="widgets"></td></tr>
 		<tr><td colspan="2"></td></tr>
@@ -233,20 +235,13 @@ function check_computed() {
 
 function get_system() {
 	try {
+	// 1802957: FF109+: -moz no longer applied but keep for regression testing
+		// add bogus '-default-font' to check they are falling back to actual default
 		let aList = [
-			// has never applied
-			'-moz-button-group',
-			// 1802957: FF109+: no longer applied: 
-			'-moz-button','-moz-desktop','-moz-dialog','-moz-document','-moz-field',
-			'-moz-info','-moz-list','-moz-pull-down-menu','-moz-window','-moz-workspace',
-			// 1838222: FF117+: has never applied
-			'-moz-message-bar',
-			// the rest
-			'caption','icon','menu','message-box','small-caption','status-bar',
-			// invalid: to confirm the no-longer applied ones are the same
-			'default-font',
+			'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
+			'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
+			'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
 		]
-		aList.sort()
 		let aProps = ['font-size','font-style','font-weight','font-family']
 		let oRes = {}
 		let el = dom.sysFont
@@ -262,7 +257,6 @@ function get_system() {
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
 		let hash = mini(newobj)
 		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
-
 	} catch(e) {
 		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + e.name +": " + e.message
 	}
@@ -288,6 +282,12 @@ function get_widget() {
 	} catch(e) {
 		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + e.name +": " + e.message
 	}
+}
+
+try {
+	dom.language.innerHTML = navigator.language
+} catch(e) {
+console.log(e)
 }
 
 get_widget()
