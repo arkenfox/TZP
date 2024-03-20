@@ -816,6 +816,9 @@ function copyclip(element) {
 			let regex = /<br\s*[\/]?>/gi
 			content = content.replace(regex, "\r\n")
 			content = content.replace(/<\/?span[^>]*>/g,"")
+			if (element == "overlayresults") {
+				content = document.getElementById("overlaytitle").innerHTML +"\n\n"+ content
+			}
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 			}, function() {
@@ -899,6 +902,7 @@ function showMetrics(name, scope, isConsole = false, isTyping = false) {
 	let t0 = nowFn()
 	let isVisible = dom.modaloverlay.style.display == "block"
 	let isShowFormat = false
+	let isFilter
 	let btn = "<span class='btn0 btnc' onClick='showMetrics(`"
 		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
 
@@ -909,10 +913,12 @@ function showMetrics(name, scope, isConsole = false, isTyping = false) {
 		isJSONscope = scope
 		name += isJSONformat
 		if (isJSONformat == "_filter") {
-			showhash = false
-			let value = (dom.optFilter.value).trim()
-			if (value.length > 2) {
-				data = filterMetrics(scope, value.toLowerCase())
+			isFilter = (dom.optFilter.value).trim()
+			if (isFilter.length > 2) {
+				data = filterMetrics(scope, isFilter.toLowerCase())
+				name += "_"+ isFilter
+			} else {
+				showhash = false
 			}
 		} else {
 			data = gData[zFP][scope + isJSONformat]
