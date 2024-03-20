@@ -902,7 +902,6 @@ function showMetrics(name, scope, isConsole = false, isTyping = false) {
 	let t0 = nowFn()
 	let isVisible = dom.modaloverlay.style.display == "block"
 	let isShowFormat = false
-	let isFilter
 	let btn = "<span class='btn0 btnc' onClick='showMetrics(`"
 		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
 
@@ -913,10 +912,11 @@ function showMetrics(name, scope, isConsole = false, isTyping = false) {
 		isJSONscope = scope
 		name += isJSONformat
 		if (isJSONformat == "_filter") {
-			isFilter = (dom.optFilter.value).trim()
-			if (isFilter.length > 2) {
-				data = filterMetrics(scope, isFilter.toLowerCase())
-				name += "_"+ isFilter
+			let value = (dom.optFilter.value).trim()
+			if (value.length > 2) {
+				value = value.toLowerCase()
+				data = filterMetrics(scope, value)
+				name += "_"+ value
 			} else {
 				showhash = false
 			}
