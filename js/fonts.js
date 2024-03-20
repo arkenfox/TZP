@@ -1159,7 +1159,8 @@ const get_fonts = () => new Promise(resolve => {
 		})
 		if (Object.keys(oGroups).length) {
 			let grouphash = mini(oGroups)
-			let notation = (isSmart ? (grouphash == "b2e75cc4" ? "" : default_red) : "") // only notate badness
+			let aGood = ['b2e75cc4','421e59bc'] // sometimes the 4x "numbers" are the same
+			let notation = (isSmart ? (aGood.includes(grouphash) ? "" : default_red) : "") // only notate badness
 			addData(12, METRICG, oGroups, grouphash)
 			let grpBtn = addButton(12, METRICG)
 			log_display(12, METRICG, grouphash + grpBtn + notation)
@@ -1365,15 +1366,11 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 			for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]; count += newobj[k].length}
 			let hash = mini(newobj)
 			if (isTBSmart) {
-				// regression: TBA computedStyle font-family is missing
-				// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
 				if (k == "moz") {
-					if (os == "windows" || os == "mac") {
+					if (os == "windows" || os == "mac" || os == "linux") {
 						if (hash == "062ff345") {notation = default_green} // "16px normal 400 serif"
-					} else if (os == "linux") {
-						if (hash == "") {notation = default_green}
 					} else if (os == "android") {
-						if (hash == "") {notation = default_green}
+						if (hash == "49b80107") {notation = default_green} // "16px normal 400 sans-serif"
 					}
 				} else {
 					if (os == "windows") {
@@ -1389,6 +1386,8 @@ const get_system_fonts = (os = isOS) => new Promise(resolve => {
 					} else if (os == "linux") {
 						if (hash == "48e3d1b4") {notation = tb_green} // "15px normal 400 sans-serif"
 					} else if (os == "android") {
+						// regression: TBA computedStyle font-family is missing
+						// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
 						if (hash == "") {notation = tb_green}
 					}
 				}
@@ -1448,7 +1447,7 @@ const get_widget_fonts = (os = isOS) => new Promise(resolve => {
 				"sans-serif 13px": ["image"]
 				*/
 				// regression: TBA13 is missing font-family on the 19 items
-					// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
+				// ^ https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41646
 				if (hash == "99054729") {notation = tb_green}
 			}
 		}
