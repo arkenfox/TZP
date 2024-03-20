@@ -868,7 +868,24 @@ function showMetrics(name, scope, isConsole = false) {
 		isShowFormat = true
 		isJSONscope = scope
 		name += isJSONformat
-		data = gData[zFP][scope + isJSONformat]
+		if (isJSONformat == "_filter") {
+			showhash = false
+			let value = (dom.optFilter.value).trim()
+			if (value.length > 2) {
+				value = value.toLowerCase()
+				let lookup = gData[zFP][scope +"_flat"]
+				let list = gData[zFP][scope + "_list"]
+				list.forEach(function(item) {
+					let itemLC = item.toLowerCase() // case insensitive
+					if (itemLC.includes(value)) {
+						if (data == undefined) {data = {}}
+						data[item] = lookup[item]
+					}
+				})
+			}
+		} else {
+			data = gData[zFP][scope + isJSONformat]
+		}
 	} else if (name == "errors" || name == "health" || name == "lies") {
 		data = gData[name][scope]
 	} else if (name == "alerts") {data = gAlert; showhash = false
@@ -889,14 +906,16 @@ function showMetrics(name, scope, isConsole = false) {
 	}
 	// log to console
 	if (isConsole) {
-		console.log((scope == undefined ? "" : scope.toUpperCase() +": ") + name +": "+ (showhash ? mini(data) : ""), data)
+		if (data !== undefined) {
+			console.log((scope == undefined ? "" : scope.toUpperCase() +": ") + name +": "+ (showhash ? mini(data) : ""), data)
+		}
 		return
 	}
 	let display
 	if (name == "fingerprint" || name == "fingerprint_flat") {
 		display = sDataTemp["cache"][scope + isJSONformat]
 	} else {
-		display = json_highlight(data)
+		display = data !== undefined ? json_highlight(data) : ""
 	}
 
 	//add btn, show/hide options, display
