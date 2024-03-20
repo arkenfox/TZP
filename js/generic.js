@@ -855,7 +855,47 @@ function togglerows(id, word) {
 	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
 }
 
-function showMetrics(name, scope, isConsole = false) {
+function filterMetrics(scope, value) {
+	let t0 = nowFn()
+	let data
+	let lookup = gData[zFP][scope +"_flat"]
+	let list = gData[zFP][scope + "_list"]
+	list.forEach(function(item) {
+		let itemLC = item.toLowerCase() // case insensitive
+		if (itemLC.includes(value)) {
+			if (data == undefined) {data = {}}
+			data[item] = lookup[item]
+		} else {
+			// check metric keys
+			if ("object" == typeof lookup[item]) {
+				try {
+					let tmpObj = {}
+					for (const key of Object.keys(lookup[item].metrics)) {
+						let keyLC = key.toLowerCase()
+						if (keyLC.includes(value)) {
+							tmpObj[key] = lookup[item]["metrics"][key]
+						}
+					}
+					if (Object.keys(tmpObj).length) {
+						let newObj = {
+							"hash": mini(tmpObj),
+							"metrics": tmpObj
+						}
+						if (data == undefined) {data = {}}
+						data[item] = newObj
+					}
+				} catch(e) {}
+			}
+		}
+	})
+	//console.log(performance.now() - t0, "filter")
+	return data
+}
+
+function showMetrics(name, scope, isConsole = false, isTyping = false) {
+	// do nothing if triggered by typing but filter is not selected
+	if (isTyping && isJSONformat !== "_filter") {return}
+
 	let t0 = nowFn()
 	let isVisible = dom.modaloverlay.style.display == "block"
 	let isShowFormat = false
@@ -872,16 +912,7 @@ function showMetrics(name, scope, isConsole = false) {
 			showhash = false
 			let value = (dom.optFilter.value).trim()
 			if (value.length > 2) {
-				value = value.toLowerCase()
-				let lookup = gData[zFP][scope +"_flat"]
-				let list = gData[zFP][scope + "_list"]
-				list.forEach(function(item) {
-					let itemLC = item.toLowerCase() // case insensitive
-					if (itemLC.includes(value)) {
-						if (data == undefined) {data = {}}
-						data[item] = lookup[item]
-					}
-				})
+				data = filterMetrics(scope, value.toLowerCase())
 			}
 		} else {
 			data = gData[zFP][scope + isJSONformat]
