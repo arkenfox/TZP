@@ -149,7 +149,6 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 	const en = "en-US, en"
 	languagesSupported = {
 		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
-			// on mac the locale = ja-JP not ja
 		"ar": [en],
 		"ca": [en],
 		"cs": ["sk, "+ en],
@@ -236,6 +235,13 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 		"vi": {v: "b8137d59", x: "7cf3c6f9"},
 		"zh-Hans-CN": {v:"55d25655", x: "328cc79b"},
 		"zh-Hant-TW": {v: "8e4cfa0e", x: "87abb9fa"},
+	}
+	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
+	if (isOS == "mac") {
+		languagesSupported['ja'].push('ja-JP')
+		let macvalue = localesSupported.ja
+		delete localesSupported['ja']
+		localesSupported["ja-JP"] = macvalue
 	}
 	if (isMullvad) {
 		// 22 of 38 supported
