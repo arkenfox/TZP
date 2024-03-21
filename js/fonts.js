@@ -270,6 +270,7 @@ let fntMaster = {
 			'Droid Sans','Droid Serif','Noto Sans','Noto Serif','Roboto Condensed',
 			// + vendor: ToDo: SamsungOneUI*, SamsungNeo*, vendor specific
 			'SamsungKorean_v2.0', // 1674683
+			'SamsungKorean_v3.0',
 			'SamsungColorEmoji', // 1872510
 			'One UI Sans KR VF', // 1865238
 			// + me
