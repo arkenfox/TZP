@@ -859,13 +859,14 @@ function togglerows(id, word) {
 }
 
 function filterMetrics(scope, value) {
+	// example: /(?=.*?(string1))(?=.*?(string2))/i;
+		// ToDo: regex: replace toLoweCasze() with leading+trailing / and an i (case insentitive)
 	let t0 = nowFn()
 	let data
 	let lookup = gData[zFP][scope +"_flat"]
 	let list = gData[zFP][scope + "_list"]
 	list.forEach(function(item) {
-		let itemLC = item.toLowerCase() // case insensitive
-		if (itemLC.includes(value)) {
+		if ((item.toLowerCase()).match(value) !== null) {
 			if (data == undefined) {data = {}}
 			data[item] = lookup[item]
 		} else {
@@ -874,8 +875,7 @@ function filterMetrics(scope, value) {
 				try {
 					let tmpObj = {}
 					for (const key of Object.keys(lookup[item].metrics)) {
-						let keyLC = key.toLowerCase()
-						if (keyLC.includes(value)) {
+						if ((key.toLowerCase()).match(value) !== null) {
 							tmpObj[key] = lookup[item]["metrics"][key]
 						}
 					}
@@ -912,11 +912,18 @@ function showMetrics(name, scope, isConsole = false, isTyping = false) {
 		isJSONscope = scope
 		name += isJSONformat
 		if (isJSONformat == "_filter") {
-			let value = (dom.optFilter.value).trim()
-			if (value.length > 2) {
-				value = value.toLowerCase()
-				data = filterMetrics(scope, value)
-				name += "_"+ value
+			let values = (dom.optFilter.value).split(`*`)
+			let search = "", value = []
+			values.forEach(function(v){
+				v = v.trim()
+				if (v.length > 2) {
+					search += '(?=.*?('+ v.toLowerCase() +'))'
+					value.push(v)
+				}
+			})
+			if (value.length) {
+				data = filterMetrics(scope, search)
+				name += "_"+ value.join("*").toLowerCase()
 			} else {
 				showhash = false
 			}
