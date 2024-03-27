@@ -125,7 +125,6 @@ const get_scr_measure = (runtype) => new Promise(resolve => {
 		get_scr_mm(runtype, "measure"),
 	]).then(function(mmres){
 		let tmpScreen = {}, tmpWindow = {}, oScreen = {}, oWindow = {}
-
 		// matchmedia
 		tmpScreen["device-height"] = mmres[0]["device-height"]
 		tmpScreen["device-width"] = mmres[0]["device-width"]
@@ -310,15 +309,15 @@ const get_scr_mm = (runtype, datatype) => new Promise(resolve => {
 	const unable = "unable to find upper bound"
 	const oList = {
 		"measure": [
-				["device-width", "device-width", "max-device-width", "px", 512, 0.01],
-				["device-height", "device-height", "max-device-height", "px", 512, 0.01],
-				["window_width", "width", "max-width", "px", 512, 0.01],
-				["window_height", "height", "max-height", "px", 512, 0.01],
-			],
+			["device-width", "device-width", "max-device-width", "px", 512, 0.01],
+			["device-height", "device-height", "max-device-height", "px", 512, 0.01],
+			["window_width", "width", "max-width", "px", 512, 0.01],
+			["window_height", "height", "max-height", "px", 512, 0.01],
+		],
 		"pixels": [
 			["-moz-device-pixel-ratio", "-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 4, 0.0000001],
 			["-webkit-min-device-pixel-ratio", "-webkit-min-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 4, 0.01],
-				// webkit seems limited to and rounds down to 0.25, 0.5, 1, 2, 4
+				// ^ webkit seems limited to and rounds down to 0.25, 0.5, 1, 2, 4
 			["dpcm", "resolution", "max-resolution", "dpcm", 1e-5, 0.0000001],
 			["dpi", "resolution", "max-resolution", "dpi", 1e-5, 0.0000001],
 			["dppx", "resolution", "max-resolution", "dppx", 1e-5, 0.0000001],
@@ -657,7 +656,6 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm(runtype, "pixels")
 	]).then(function(results){
-
 		for (const k of Object.keys(results[0])) {
 			// expected 100% zoom values
 			let oMatch = {
@@ -1340,6 +1338,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 			"oscpu": "Windows NT 10.0; Win64; x64",
 			"ua_os": "Windows NT 10.0; Win64; x64",
 		},
+	}
+	if (isVer > 122) { // 1861847
+		oRFP.android.oscpu = "Linux armv81"
+		oRFP.android.platform = "Linux armv81"
 	}
 	if (isSmart && os !== undefined) {
 		let uaVer = isVer, isDroid = isOS == "android"
