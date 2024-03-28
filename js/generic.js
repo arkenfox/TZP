@@ -516,7 +516,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 	// first aFont per computed family
 		// add '-default-font' (alphabetically first) so it's easy to see what it pairs with in baseFonts
 	let t0 = nowFn()
-	let aList = [
+	let aFonts = [
 		'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
 		'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
 		'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
