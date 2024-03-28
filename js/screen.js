@@ -1258,9 +1258,11 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	- FF87+ 1679929: capped at 10.15
 	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
 	android:
-	- FF122+ 1865766: android hardcoded to 10.0 - partially backed out
+	- FF122+ 1865766: hardcod to 10.0 - partially backed out
+	- FF123+ 1861847: hardcod oscpu/platform to "Linux armv81"
+	- FF126+ 1860417: Linux added to appVersion + ua_os
 	linux/android:
-	- FF123+ 1861847: hardcode (pref) architecture at `Linux armv81` (android) and `Linux x86_64` (on hold?) desktop
+	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
 	*/
 
 	function outputStatic(property, reported, expected, isErr) {
@@ -1315,10 +1317,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	// RFP notation: nsRFPService.h
 	let oRFP = {
 		"android": {
-			"appVersion": "5.0 (Android 10)",
-			"oscpu": "Linux aarch64",
-			"platform": "Linux aarch64",
-			"ua_os": "Android 10; Mobile",
+			"appVersion": "5.0 (Linux; Android 10)",
+			"oscpu": "Linux armv81",
+			"platform": "Linux armv81",
+			"ua_os": "Linux; Android 10; Mobile",
 		},
 		"linux": {
 			"appVersion": "5.0 (X11)",
@@ -1339,11 +1341,17 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 			"ua_os": "Windows NT 10.0; Win64; x64",
 		},
 	}
-	if (isVer > 122) { // 1861847
-		oRFP.android.oscpu = "Linux armv81"
-		oRFP.android.platform = "Linux armv81"
-	}
 	if (isSmart && os !== undefined) {
+		if (os == "android") {
+			if (isVer < 123) { // 1861847
+				oRFP.android.oscpu = "Linux aarch64"
+				oRFP.android.platform = "Linux aarch64"
+			}
+			if (isVer < 126) { // 1860417
+				oRFP.android.appVersion = "5.0 (Android 10)"
+				oRFP.android.ua_os = "Android 10; Mobile"
+			}
+		}
 		let uaVer = isVer, isDroid = isOS == "android"
 		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:" // base
 		let uaNext = uaRFP // only used if ver+
