@@ -114,19 +114,18 @@ let fntMaster = {
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
 			'MS Shell Dlg \\32',
-			// TB FontSubstitutes
+			// TB FontSubstitutes that point to whitelisted fonts
 			'Arabic Transparent','Arial (Arabic)','Arial (Hebrew)','Arial Baltic','Arial CE','Arial CYR',
 			'Arial Greek','Arial TUR','Courier','Courier New (Hebrew)','Courier New Baltic','Courier New CE',
-			'Courier New CYR','Courier New Greek','Courier New TUR','Helv','Helvetica','MS Shell Dlg 2',
-			'Tahoma Armenian','Times','Times New Roman (Hebrew)','Times New Roman Baltic','Times New Roman CE',
-			'Times New Roman CYR','Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Shell Dlg',
-			'MS Serif Greek','MS Sans Serif Greek','Small Fonts Greek',
+			'Courier New CYR','Courier New Greek','Courier New TUR','Helvetica','MS Shell Dlg 2','Tahoma Armenian',
+			'Times','Times New Roman (Hebrew)','Times New Roman Baltic','Times New Roman CE','Times New Roman CYR',
+			'Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Serif Greek','Small Fonts Greek',
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
 			// localized
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
 			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-			'MS Sans Serif','MS Serif','Small Fonts','Roman',
+			'MS Serif','Small Fonts','Roman',
 			/* ignore
 			// variants
 				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
@@ -153,9 +152,9 @@ let fntMaster = {
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
 		'windows': [
-			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola', // system
+			'Calibri','Impact', // 'Candara','Corbel','Ebrima','Gabriola', // system
 			'Gill Sans','Gill Sans MT', // MS bundled
-			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2', // TB12 fontnames
+			'Noto Serif Hmong Nyiakeng', //'Noto Sans Symbols2', // TB12 fontnames
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -447,6 +446,7 @@ function set_fntList(os = isOS) {
 			// Mō - 141 +"á" = 142 +"Ω" = 144 | Mō - 141 +tofu = 154 | (win11: have 182/186 fonts
 			fntString = isTB ? "?-"+ tofu : "Mō"+ tofu
 			if (!isFontSizesMore) {isPlatformFont = "MS Shell Dlg \\32"}
+			if (isTB) {isPlatformFont = undefined} // detect all fonts: cost 188->226 measurements taken
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
 				'sans-serif, Arial',
@@ -468,6 +468,7 @@ function set_fntList(os = isOS) {
 		// baseCtrl: 1-pass or 3-pass
 		// baseCtrlNames: remove fallback e.g. "serif, X" -> "serif"
 		let baseCtrl = isPlatformFont === undefined ? baseSize : [isPlatformFont]
+
 		fntData["control"] = baseCtrl
 		let baseCtrlNames = []
 		baseCtrl.forEach(function(name) {
