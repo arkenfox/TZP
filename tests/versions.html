@@ -208,7 +208,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 76, maxVer = 125, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 77, maxVer = 126, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -290,6 +290,13 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 126: 1887611
+		let t126 = performance.now(), ver126 = false
+		try {
+			ver126 = "function" === typeof URL.parse
+		} catch(e) {}
+		rec(126, 126, "1887611", ver126, performance.now()-t126) // 0.25ms
 
 		// 125: 1872793
 		let t125 = performance.now(), ver125 = false
