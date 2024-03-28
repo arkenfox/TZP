@@ -111,21 +111,24 @@ let fntMaster = {
 			'Arial','Cambria Math','Consolas','Courier New','Georgia','Lucida Console','MS Gothic','MS PGothic','MV Boli',
 			'Malgun Gothic','Microsoft Himalaya','Microsoft JhengHei','Microsoft YaHei','Segoe UI','SimSun','Sylfaen',
 			'Tahoma','Times New Roman','Verdana',
+			// localized
+			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
+			// system aliases
+				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+				// should always be the same but lets test everything in TB
+			'MS Serif','Courier','Small Fonts','Roman', // TNR, Courier New, Arial, TNR
+			// isPlatformFont
+			'MS Shell Dlg \\32',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-			'MS Shell Dlg \\32',
-			// TB FontSubstitutes that point to whitelisted fonts
+				// TB FontSubstitutes -> whitelisted
 			'Arabic Transparent','Arial (Arabic)','Arial (Hebrew)','Arial Baltic','Arial CE','Arial CYR',
-			'Arial Greek','Arial TUR','Courier','Courier New (Hebrew)','Courier New Baltic','Courier New CE',
+			'Arial Greek','Arial TUR','Courier New (Hebrew)','Courier New Baltic','Courier New CE',
 			'Courier New CYR','Courier New Greek','Courier New TUR','Helvetica','MS Shell Dlg 2','Tahoma Armenian',
 			'Times','Times New Roman (Hebrew)','Times New Roman Baltic','Times New Roman CE','Times New Roman CYR',
 			'Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Serif Greek','Small Fonts Greek',
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
-			// localized
-			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
-			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-			'MS Serif','Small Fonts','Roman',
 			/* ignore
 			// variants
 				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
@@ -152,7 +155,8 @@ let fntMaster = {
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
 		'windows': [
-			'Calibri','Impact', // 'Candara','Corbel','Ebrima','Gabriola', // system
+			'Calibri', //'Impact','Candara','Corbel','Ebrima','Gabriola', // system
+			'MS Dlg Shell', // system that should point to Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
 			'Noto Serif Hmong Nyiakeng', //'Noto Sans Symbols2', // TB12 fontnames
 		],
@@ -246,12 +250,25 @@ let fntMaster = {
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// localized: kBase: detected FF119+: 1850672
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
-			// FontSubstitutes
-			'MS Shell Dlg','MS Shell Dlg \\32', // might differ based on system locale/install
-			'Helv','Helvetica','Times','Tms Rmn', // seems stable
+			// isPlatformFont
+			'MS Shell Dlg \\32',
+			// common FontSubstitutes that point to kBase fonts
+			'MS Shell Dlg','MS Shell Dlg 2', // can differ
+			// non-common FontSubstitutes
+			'Arial (Arabic)','Arial (Hebrew)','MS Serif Greek','ﾍﾙﾍﾞﾁｶ', // ja = arial
 			/* ignore
-			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
+			// common subs
+				'Arabic Transparent','Arial Baltic','Arial CE','Arial CYR','Arial Greek','Arial TUR',
+				'Courier New Baltic','Courier New CE','Courier New CYR','Courier New Greek','Courier New TUR',
+				'Helv','Helvetica','Tahoma Armenian','Times','Times New Roman Baltic','Times New Roman CE',
+				'Times New Roman CYR','Times New Roman Greek','Times New Roman TUR','Tms Rmn',
+			// non-common subs: redundant
+				'Courier New (Hebrew)','Times New Roman (Hebrew)','Small Fonts Greek',
+				'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
+				'ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // TNR, Courier -> Courier New
+			// system aliases: should always be the same AFAICT
+				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
+				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman', // Microsoft Sans Serif, TNR, Courier New, Arial, TNR
 			// variants
 				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
 				'Calibri Light','Calibri Light Italic','Segoe UI Semilight', // 8
@@ -405,8 +422,11 @@ let fntMaster = {
 			'ＭＳ 明朝', // MS Mincho
 			'ＭＳ Ｐ明朝', // MS PMincho
 			'新細明體', // PMingLiU
-			// font substitutes
-			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ','ｺﾞｼｯｸ', // Arial, TNR, Courier -> Courier New, MS Gothic
+			// fontSubs
+			'KaiTi_GB2312', // simplified chinese
+			// fontSubs redundant
+				// '標準明朝', // ＭＳ 明朝 -> MS Mincho
+				// 'FangSong_GB2312',
 			// MS products
 			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
 			// MS downloads
