@@ -95,10 +95,10 @@ let fntMaster = {
 		'android': [],
 		'linux': [],
 		'mac': [
-			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New','Geneva',
-			'Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
-			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC','Songti TC',
-			'Tahoma','Thonburi','Times','Times New Roman','Verdana',
+			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
+			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
+			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC',
+			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
 			/* variants
@@ -112,13 +112,21 @@ let fntMaster = {
 			'Tahoma','Times New Roman','Verdana',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
-			'MS Shell Dlg','MS Shell Dlg \\32',
-			'Helv','Helvetica','Times','Tms Rmn',
+			'MS Shell Dlg \\32',
+			// TB FontSubstitutes
+			'Arabic Transparent','Arial (Arabic)','Arial (Hebrew)','Arial Baltic','Arial CE','Arial CYR',
+			'Arial Greek','Arial TUR','Courier','Courier New (Hebrew)','Courier New Baltic','Courier New CE',
+			'Courier New CYR','Courier New Greek','Courier New TUR','Helv','Helvetica','MS Shell Dlg 2',
+			'Tahoma Armenian','Times','Times New Roman (Hebrew)','Times New Roman Baltic','Times New Roman CE',
+			'Times New Roman CYR','Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Shell Dlg',
+			'MS Serif Greek','MS Sans Serif Greek','Small Fonts Greek',
+			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
+			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
 			// localized
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun
-			/* ignore
 			// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
-				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman',
+			'MS Sans Serif','MS Serif','Small Fonts','Roman',
+			/* ignore
 			// variants
 				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
 				'Segoe UI Semilight', // 8
@@ -146,7 +154,6 @@ let fntMaster = {
 		'windows': [
 			'Calibri','Candara','Corbel','Impact','Ebrima','Gabriola', // system
 			'Gill Sans','Gill Sans MT', // MS bundled
-			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // FontSubstitutes: Arial, TNR, Courier -> Courier New
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2', // TB12 fontnames
 		],
 	},
@@ -494,6 +501,12 @@ function set_fntList(os = isOS) {
 				fntData["base"] = array
 				array = array.concat(fntMaster["blocklist"][os])
 				fntData["full"] = array
+				// windows/mac
+				if (os !== "linux") {
+					array = fntData["base"]
+					array = array.filter(x => !fntData["bundled"].includes(x))
+					fntData["system"] = array
+				}
 			} else if (os == "android") {
 				// android
 				// build notos
@@ -512,10 +525,12 @@ function set_fntList(os = isOS) {
 			}
 			// -control from lists
 			if (isPlatformFont !== undefined) {
-				let fntKeys = ["base","bundled","full"]
+				let fntKeys = ["base","bundled","full","system"]
 				fntKeys.forEach(function(key) {
+					if (fntData[key] !== undefined) {
 					let array = fntData[key]
 					 fntData[key] = array.filter(x => ![isPlatformFont].includes(x))
+					}
 				})
 			}
 			// dupes
@@ -535,9 +550,16 @@ function set_fntList(os = isOS) {
 				fntBtn += addButton(12, str +"_"+ fntListBaseName, fntData["base"].length, "btnc", "lists")
 			}
 			// bundled: TB desktop
-			if (isTB && os !== "android" && fntData["bundled"].length) {
-				fntData["bundled"].sort()
-				fntBtn += addButton(12, str +"_bundled", fntData["bundled"].length, "btnc", "lists")
+			if (isTB && os !== "android") {
+				if (fntData["bundled"].length) {
+					fntData["bundled"].sort()
+					fntBtn += addButton(12, str +"_bundled", fntData["bundled"].length, "btnc", "lists")
+				}
+				// win/mac system
+				if (os !== "linux" && fntData["system"].length) {
+					fntData["system"].sort()
+					fntBtn += addButton(12, str +"_system", fntData["system"].length, "btnc", "lists")
+				}
 			}
 		}
 	}
@@ -550,6 +572,7 @@ function set_fntList(os = isOS) {
 		addDetail(str, fntData["full"], "lists")
 		addDetail(str +"_"+ fntListBaseName, fntData["base"], "lists")
 		addDetail(str +"_bundled", fntData["bundled"], "lists")
+		addDetail(str +"_system", fntData["system"], "lists")
 	}
 }
 
@@ -794,7 +817,7 @@ const get_font_sizes = () => new Promise(resolve => {
 		for (const k of Object.keys(baseObj)) {
 			let tmpHash = mini(baseObj[k])
 			if (oTempBase[tmpHash] == undefined) {
-				oTempBase[tmpHash] = {"bases": [k], "data": baseObj[k]}
+				oTempBase[tmpHash] = {"bases": [k], "metrics": baseObj[k]}
 			} else {
 				oTempBase[tmpHash]["bases"].push(k)
 			}
@@ -849,7 +872,7 @@ const get_font_sizes = () => new Promise(resolve => {
 		if (aDomRect[3] == false) {aRemove.push('domrectclientrangeHeight','domrectclientrangeWidth')}
 		aRemove = aRemove.filter(function(item, position) {return aRemove.indexOf(item) === position})
 		aRemove.forEach(function(m) {
-			for (const k of Object.keys(oTempBase)) {delete oTempBase[k]["data"][m]}
+			for (const k of Object.keys(oTempBase)) {delete oTempBase[k]["metrics"][m]}
 		})
 		fntBases = oTempBase
 
@@ -976,6 +999,19 @@ const get_fonts = () => new Promise(resolve => {
 					}
 
 				}
+				// cleanup: final rehash & sort
+				let tmpBases = {}
+				for (const h of Object.keys(fntBases)) {
+					let key = fntBases[h]["bases"].join(" ")
+					let hash = mini(fntBases[h]["metrics"])
+					tmpBases[key] = {
+						hash: hash,
+						metrics: fntBases[h]["metrics"]
+					}
+				}
+				fntBases = {}
+				for (const k of Object.keys(tmpBases).sort()) {fntBases[k] = tmpBases[k]}
+				
 				display = mini(fntBases)
 				baseBtn = addButton(12, METRICB, len +"/"+ fntData["generic"].length)
 				addData(12, METRICB, fntBases, display, true)
@@ -1221,16 +1257,25 @@ const get_fonts = () => new Promise(resolve => {
 
 					// names: notate if we have base fonts
 					if (isSmart && fntData["base"].length) {
-						let aNotInBase = oData[k][METRICN], aMissing = []
+						let aNotInBase = oData[k][METRICN], aMissing = [], aMissingSystem = []
+						// ToDo: windows and maybe mac
+							// add missing system fonts: they are all expected
+							// ... but I use MS Shell Dlg \\32, so some will be missing: Tahoma for example
+							// I will need to exempt them
 						aNotInBase = aNotInBase.filter(x => !fntData["base"].includes(x))
 						if (isTB) {
 							aMissing = fntData["bundled"]
 							aMissing = aMissing.filter(x => !oData[k][METRICN].includes(x))
+							if (fntData["system"].length) {
+								aMissingSystem = fntData["system"]
+								aMissingSystem = aMissingSystem.filter(x => !oData[k][METRICN].includes(x))
+							}
 						}
-						let count = aNotInBase.length + aMissing.length
+						let count = aNotInBase.length + aMissing.length + aMissingSystem.length
 						if (count > 0) {
 							let tmpName = METRICN +"_health", tmpObj = {}
 							if (aMissing.length) {tmpObj["missing_bundled"] = aMissing}
+							if (aMissingSystem.length) {tmpObj["missing_system"] = aMissingSystem}
 							if (aNotInBase.length) {tmpObj["unexpected"] = aNotInBase}
 							addDetail(tmpName, tmpObj)
 							let brand = isTB ? (isMullvad ? "MB" : "TB") : "RFP"
@@ -1475,16 +1520,17 @@ const get_unicode = () => new Promise(resolve => {
 	function group(name, objname, data) {
 		// group by style then char
 		let newobj = {}
-		styles.forEach(function(style) {newobj[style] = []})
+		styles.forEach(function(style) {newobj[style] = {}})
 		if (name == "offset" || name == "clientrect") {
 			data.forEach(function(item) {
-				newobj[item[0]].push([item[1], item[2], item[3]]) // width + height
+				//newobj[item[0]].push([item[1], item[2], item[3]]) // width + height
+				newobj[item[0]][item[1]] = [item[2], item[3]] // width + height
 			})
 		} else {
 			// width only
 			data.forEach(function(item) {
 				if (oTM[name]["all"]) {
-					newobj[item[0]].push([item[1], item[2]])
+					newobj[item[0]][item[1]] = item[2]
 				} else {
 					newobj[item[0]] = item[1]
 				}
