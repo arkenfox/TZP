@@ -529,7 +529,8 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 125
+		isVerMax = 126
+		if ("function" === typeof URL.parse) {return 126}
 		let el = document.documentElement
 		try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
 		if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
