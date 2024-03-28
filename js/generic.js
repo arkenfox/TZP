@@ -592,16 +592,17 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < 102) {isVerExtra = " or lower"
-		} else if (verNo == 125) {isVerExtra = "+"}
+		} else if (verNo == 126) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
 	output(cascade())
 
 	function cascade() {
-		let el = document.documentElement
 		try {
+			if ("function" === typeof URL.parse) {return 126}
 			try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
+			let el = document.documentElement
 			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
 				try {
 					el.style.zIndex = "calc(1 / max(-0, 0))"
