@@ -95,13 +95,14 @@ let fntMaster = {
 		'android': [],
 		'linux': [],
 		'mac': [
-			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
+			'AppleGothic','Apple Color Emoji','Arial','Courier','Courier New',
 			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
 			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC',
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
 			/* variants
+			'Arial Black','Arial Narrow',
 			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
 			*/
 		],
