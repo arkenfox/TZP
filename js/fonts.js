@@ -1619,6 +1619,7 @@ const get_unicode = () => new Promise(resolve => {
 		// oObject + oDisplay: can be altered before final add/display
 		for (const k of Object.keys(oObject).sort()) {
 			if (isDomRect == -1 && k == "glyphs_clientrect") {
+				sDetail[isScope][k] = oObject[k]["data"]
 				addData(12, k, zLIE)
 			} else {
 				addData(12, k, oObject[k]["data"], oObject[k]["hash"])
