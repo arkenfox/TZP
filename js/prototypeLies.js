@@ -808,6 +808,11 @@ const outputPrototypeLies = () => new Promise(resolve => {
 				'getVoices'
 			]
 		})
+		searchLies(() => StorageManager, {
+			target: [
+				'estimate',
+			]
+		})
 		searchLies(() => String, {
 			target: [
 				'fromCodePoint'
