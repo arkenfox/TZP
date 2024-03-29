@@ -158,7 +158,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	const METRIC = "storage_manager"
 	dom[METRIC] = ""
 	function exit(value) {
-		if (delay !== 0) {dom.storage_manager = value}
+		if (delay !== 0) {dom[METRIC].innerHTML = value}
 		return resolve()
 	}
 	setTimeout(function() {
@@ -167,7 +167,9 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 				navigator.storage.estimate().then(estimate => {
 					// we don't care about estimate.usage
 					let value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
-					exit(value +"GB ["+ estimate.quota +" bytes]")
+					value += "GB ["+ estimate.quota +" bytes]"
+					if (sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
+					exit(value)
 				})
 			})
 		} catch(e) {
@@ -190,9 +192,15 @@ const get_storage_quota = () => new Promise(resolve => {
 			if (Number.isInteger(value)) {
 				let display = value
 				value = Math.floor(value/(1073741824) * 10)/10 // round down
-				exit(value, value +"GB ["+ display +" bytes]")
+				display = value +"GB ["+ display +" bytes]"
+				if (sData[SECT99].includes("StorageManager.estimate")) {
+					display = colorFn(display)
+					value = zLIE
+					log_known(SECT6, METRIC)
+				}
+				exit(value, display)
 			} else {
-				exit(zErr, log_error(SECT6, METRIC, zErrType + typeof value))
+				exit(zErr, log_error(SECT6, METRIC, zErrType + typeFn(value)))
 			}
 		})
 	} catch(e) {
