@@ -1593,8 +1593,10 @@ const get_unicode = () => new Promise(resolve => {
 				let value = group(name, METRIC, data)
 				// lies
 				let isLies = false
-				if (isDomRect == -1 && name == "clientrect") {isLies = true}
-				if (sData[SECT99].includes("TextMetrics." + name)) {isLies = true}
+				if (isSmart) {
+					if (isDomRect == -1 && name == "clientrect") {isLies = true
+					} else if (sData[SECT99].includes("TextMetrics." + name)) {isLies = true}
+				}
 				if (isLies) {
 					value = colorFn(value)
 					log_known(SECT12, METRIC)
