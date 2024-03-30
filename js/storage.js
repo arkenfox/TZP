@@ -168,7 +168,7 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 					// we don't care about estimate.usage
 					let value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
 					value += "GB ["+ estimate.quota +" bytes]"
-					if (sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
+					if (isSmart && sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
 					exit(value)
 				})
 			})
@@ -193,7 +193,7 @@ const get_storage_quota = () => new Promise(resolve => {
 				let display = value
 				value = Math.floor(value/(1073741824) * 10)/10 // round down
 				display = value +"GB ["+ display +" bytes]"
-				if (sData[SECT99].includes("StorageManager.estimate")) {
+				if (isSmart && sData[SECT99].includes("StorageManager.estimate")) {
 					display = colorFn(display)
 					value = zLIE
 					log_known(SECT6, METRIC)
