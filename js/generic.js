@@ -1805,6 +1805,10 @@ function run_immediate() {
 		let warmNFunit = new Intl.NumberFormat(undefined, {style: "unit", unit: "hectare"}).format(1)
 	} catch(e) {}
 	try {let w = speechSynthesis.getVoices()} catch(e) {}
+	try {
+		const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
+		navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {}).catch(function(e){})
+	} catch(e) {}
 	get_isXML()
 	get_isArch()
 }
