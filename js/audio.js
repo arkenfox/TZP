@@ -22,7 +22,7 @@ function check_audioLies() {
 		"AudioBuffer.copyFromChannel","AudioBuffer.getChannelData",
 		"BiquadFilterNode.getFrequencyResponse",
 	]
-	if (runSL && isSmart) {sData[SECT99].push("AudioBuffer.copyFromChannel")}
+	if (runSL) {sData[SECT99].push("AudioBuffer.copyFromChannel")}
 	return audioList.some(lie => sData[SECT99].indexOf(lie) >= 0)
 }
 

@@ -12,12 +12,12 @@ const get_device_integer = (METRIC, proxyCheck) => new Promise(resolve => {
 		let value = 2 == expected ? navigator[METRIC] : screen[METRIC]
 		if (runSE) {foo++
 		} else if (runST) {value += ""
-		} else if (runSL && isSmart) {sData[SECT99].push(proxyCheck + METRIC)
+		} else if (runSL) {sData[SECT99].push(proxyCheck + METRIC)
 		}
 		let display = value
 		if (Number.isInteger(value)) {
 			if (isSmart) {
-				if (sData[SECT99].includes(proxyCheck + METRIC)) {
+				if (isProxy && sData[SECT99].includes(proxyCheck + METRIC)) {
 					display = colorFn(display)
 					value = zLIE
 					log_known(SECT7, METRIC)
@@ -26,7 +26,7 @@ const get_device_integer = (METRIC, proxyCheck) => new Promise(resolve => {
 			}
 			exit(value, display)
 		} else {
-			exit(zErr, log_error(SECT7, METRIC, zErrType + typeof value))
+			exit(zErr, log_error(SECT7, METRIC, zErrType + typeFn(value)))
 		}
 	} catch(e) {
 		log_error(SECT7, METRIC, e, isScope)
@@ -37,24 +37,29 @@ const get_device_integer = (METRIC, proxyCheck) => new Promise(resolve => {
 const get_maxtouch = () => new Promise(resolve => {
 	// maxTouchPoints: FF64+: RFP 1363508
 	const METRIC = "maxTouchPoints"
-	let value, display, isLies = false, notation = ""
+	let value, display, notation = ""
 	try {
 		value = navigator.maxTouchPoints
-		if (runSE) {foo++} else if (runST) {value = undefined
-		} else if (runSL && isSmart) {sData[SECT99].push("Navigator.maxTouchPoints")}
+		if (runSE) {foo++
+		} else if (runST) {value = 10.1
+		} else if (runSL) {sData[SECT99].push("Navigator.maxTouchPoints")
+		}
 		display = value
-		if (typeof value !== "number" || Number.isNaN(value)) {
-			display = log_error(SECT7, METRIC, zErrType + typeof value)
-			value = zErr
-		} else if (!Number.isInteger(value) || value < 0) {
-			display = log_error(SECT7, METRIC, zErrInvalid + "got "+ value)
-			value = zErr
-		} else if (isSmart) {
-			if (sData[SECT99].includes("Navigator.maxTouchPoints")) {
-				display = colorFn(display)
-				value = zLIE
-				log_known(SECT7, "maxtouchpoints")
+		let vType = typeFn(value)
+		if ("number" == vType) {
+			if (!Number.isInteger(value) || value < 0) {
+				display = log_error(SECT7, METRIC, zErrInvalid + "got "+ value)
+				value = zErr
+			} else if (isProxy) {
+				if (sData[SECT99].includes("Navigator.maxTouchPoints")) {
+					display = colorFn(display)
+					value = zLIE
+					log_known(SECT7, "maxtouchpoints")
+				}
 			}
+		} else {
+			display = log_error(SECT7, METRIC, zErrType + vType)
+			value = zErr
 		}
 	} catch(e) {
 		display = log_error(SECT7, METRIC, e)
@@ -198,7 +203,7 @@ const get_media_devices = () => new Promise(resolve => {
 				return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
 			} else { // RFP
 				if (isLies) {return (isMullvad ? tb_red : rfp_red)}
-				let rfplegacy = "02ab1e4c", rfpnew = "7a2e5d0c"
+				let rfplegacy = "54a59537", rfpnew = "75e77887"
 				if (isMullvad) {
 					// tor-browser#42043
 					return (value == rfpnew ? tb_green : tb_red) + legacy
@@ -222,10 +227,11 @@ const get_media_devices = () => new Promise(resolve => {
 		// the only difference in device objects is the id length, incl. RFP
 		try {
 			if (runST) {devices = {}}
-			if (typeof devices == "object" && Array.isArray(devices)) {
+			let dType = typeFn(devices)
+			if (dType.includes("array")) {
 				// lies
 				if (isSmart) {
-					if (sData[SECT99].includes("MediaDevices.enumerateDevices")) {isLies = true
+					if (isProxy && sData[SECT99].includes("MediaDevices.enumerateDevices")) {isLies = true
 					} else if (devices.length) {
 						let aSplit = (devices +"").split(",")
 						for (let i=0; i < aSplit.length; i++) {
@@ -246,15 +252,16 @@ const get_media_devices = () => new Promise(resolve => {
 					// don't combine kind, keep order, record length not strings
 					// checking length of undefined (fake) will catch an error
 					if (runSE) {let testSE = (undefined).length}
-					let aData = [], sLen = new Set()
-					/* new code */
+					let aData = {}, sLen = new Set(), index = 0
 					devices.forEach(function(d) {
 						let kind = d.kind, kindtest = kind.length,
 							dLen = d.deviceId.length,
-							gLen = d.groupId.length
-						aData.push([kind, dLen, gLen, d.label.length])
+							gLen = d.groupId.length,
+							indexKey = (index+"").padStart(2,"0")
+						aData[indexKey+"-"+kind] = [dLen, gLen, d.label.length]
 						sLen.add(dLen)
 						sLen.add(gLen)
+						index ++
 						// isSmart: we could check valid lengths (0 or 44 in 115+, else 44: labels always 0)
 							// and if 44 is valid then the last char is "=", and we could check typeof
 					})
@@ -274,9 +281,8 @@ const get_media_devices = () => new Promise(resolve => {
 					log_display(7, METRIC, hash + addButton(7, METRIC, aData.length) + set_notation(hash))
 					return resolve()
 				}
-
 			} else {
-				exit(zErr, log_error(SECT7, METRIC, zErrType + typeof devices))
+				exit(zErr, log_error(SECT7, METRIC, zErrType + dType))
 			}
 		} catch(e) {
 			exit(zErr, log_error(SECT7, METRIC, e), e)
@@ -395,10 +401,10 @@ const get_speech_engines = () => new Promise(resolve => {
 					i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? "" : " | false") + (isURI ? " | "+ uriStr : "")
 				)
 			})
-			if (runST) {v = []} else if (runSL && isSmart) {sData[SECT99].push("speechSynthesis.getVoices")}
+			if (runST) {v = []} else if (runSL) {sData[SECT99].push("speechSynthesis.getVoices")}
 			if ("object" === typeof v && (v+"").slice(0,29) == "[object SpeechSynthesisVoice]") {
 				let value = "", btn = ""
-				let isLie = isSmart ? sData[SECT99].includes("speechSynthesis.getVoices") : false
+				let isLie = isProxy ? sData[SECT99].includes("speechSynthesis.getVoices") : false
 				value = mini(res)
 				if (isSmart && isLie) {
 					addDetail(METRIC, res)

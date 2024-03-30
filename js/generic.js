@@ -591,7 +591,7 @@ const get_isVer = () => new Promise(resolve => {
 	let t0 = nowFn()
 	function output(verNo) {
 		isVer = verNo
-		if (verNo < 102) {isVerExtra = " or lower"
+		if (verNo < isBlockMin[0]) {isVerExtra = " or lower"
 		} else if (verNo == 126) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
@@ -1782,6 +1782,7 @@ function outputSection(id, cls) {
 			outputPrototypeLies(),
 		]).then(function(){
 			if (isTB && gClear) {console.clear()}
+			if (runSL) {isProxy = true}
 			log_section(SECTP, gt0)
 			output()
 		})

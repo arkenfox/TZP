@@ -10,7 +10,7 @@
 	<style>
 		table {width: 97%; min-width: 580px; max-width: 950px}
 		hr {color: var(--test12);}
-		ul.nomargin {padding-left: 0;}
+		#tb12 td {padding-left: 0px;}
 		#ugSpan {font-size: 10000%;}
 		a.sb {color: #dc8c8c;}
 		.groupleft {float: left;}
@@ -27,7 +27,6 @@
 		}
 		div.nav-down {width: 300px;}
 		div.nav-up {width: 300px;}
-
 		code.purple {
 			background-color: rgba(150, 100, 240, 0.4) !important;
 			padding-left: 2px !important;
@@ -38,6 +37,9 @@
 		div.chars {
 			direction:ltr;
 			unicode-bidi:bidi-override;
+		}
+		li {
+			margin-left: 20px;
 		}
 	</style>
 </head>
@@ -1514,7 +1516,7 @@ function generate() {
 					if (aSelective.includes(name)) {isPartial.push("S")}
 					oTempData[name]["partial"] = isPartial.length ? isPartial.join(", ") : false
 					// legend
-					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li>")
+					aLegendClean.push("<li><a class='no_color' href='#"+ anchor +"'>"+ name +"</a></li></span>")
 
 					let aCodesMin = [],
 						aCodesMax = [],

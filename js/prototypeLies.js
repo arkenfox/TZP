@@ -4,13 +4,14 @@
 /* modified for gecko only */
 
 const outputPrototypeLies = () => new Promise(resolve => {
+	sData[SECT98] = {}
+	sData[SECT99] = []
 	if (!isSmart) {
 		dom.protohash = zNA
 		return resolve()
 	}
 	let t0 = nowFn()
-	sData[SECT98] = {}
-	sData[SECT99] = []
+	isProxy = false
 
 	const getIframe = () => {
 		try {
@@ -884,6 +885,7 @@ const outputPrototypeLies = () => new Promise(resolve => {
 	sData[SECT98] = {}
 	for (const k of Object.keys(lieDetail).sort()) {sData[SECT98][k] = lieDetail[k]}
 	sData[SECT99] = tamperingList.sort()
+	if (tamperingList.length) {isProxy = true}
 	if (!gRun) {return resolve()}
 
 	// gData

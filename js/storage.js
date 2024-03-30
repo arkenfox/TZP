@@ -49,11 +49,12 @@ const get_cookies = (skip) => new Promise(resolve => {
 	let valueE, valueS = zNA, valueP = zNA // skip values
 	try {
 		let test = navigator.cookieEnabled
-		if ("boolean" !== typeof test) {
-			valueE = zErr
-			log_error(SECT6, METRIC, zErrType + typeof test)
-		} else {
+		let tType = typeFn(test)
+		if ("boolean" === tType) {
 			valueE = navigator.cookieEnabled ? zE : zD
+		} else {
+			valueE = zErr
+			log_error(SECT6, METRIC, zErrType + tType)
 		}
 	} catch(e) {
 		log_error(SECT6, METRIC, e)
@@ -116,14 +117,14 @@ const get_storage = (skip) => new Promise(resolve => {
 	let valueL, valueS, valueLTest = zNA, valueSTest = zNA // skip values
 	// LS enabled
 	try {
-		valueL = "object" === typeof localStorage ? zE : zD
+		valueL = "object" === typeFn(localStorage, true) ? zE : zD
 	} catch(e) {
 		log_error(SECT6, METRICLS, e)
 		valueL = zErr
 	}
 	// SS enabled
 	try {
-		valueS = "object" === typeof sessionStorage ? zE : zD
+		valueS = "object" === typeFn(sessionStorage, true) ? zE : zD
 	} catch(e) {
 		log_error(SECT6, METRICSS, e)
 		valueS = zErr
@@ -166,15 +167,19 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 			navigator.storage.persist().then(function(persistent) {
 				navigator.storage.estimate().then(estimate => {
 					// we don't care about estimate.usage
-					let value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
-					value += "GB ["+ estimate.quota +" bytes]"
-					if (isSmart && sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
-					exit(value)
-				})
-			})
-		} catch(e) {
-			exit(log_error(SECT6, METRIC, e))
-		}
+					let value = estimate.quota
+					let vType = typeFn(value)
+					if ("number" == vType && Number.isInteger(value)) {
+						value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
+						value += "GB ["+ estimate.quota +" bytes]"
+						if (isProxy && sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
+						exit(value)
+					} else {
+						exit(log_error(SECT6, METRIC, zErrType + vType))
+					}
+				}).catch(function(e){exit(log_error(SECT6, METRIC, e))})
+			}).catch(function(e){exit(log_error(SECT6, METRIC, e))})
+		} catch(e) {exit(log_error(SECT6, METRIC, e))}
 	}, delay)
 })
 
@@ -189,23 +194,21 @@ const get_storage_quota = () => new Promise(resolve => {
 	try {
 		navigator.storage.estimate().then(estimate => {
 			let value = estimate.quota
-			if (Number.isInteger(value)) {
+			if (runSE) {foo++} else if (runST) {value = undefined}
+			let vType = typeFn(value)
+			if ("number" == vType && Number.isInteger(value)) {
 				let display = value
 				value = Math.floor(value/(1073741824) * 10)/10 // round down
 				display = value +"GB ["+ display +" bytes]"
-				if (isSmart && sData[SECT99].includes("StorageManager.estimate")) {
+				if (isProxy && sData[SECT99].includes("StorageManager.estimate")) {
 					display = colorFn(display)
 					value = zLIE
 					log_known(SECT6, METRIC)
 				}
 				exit(value, display)
-			} else {
-				exit(zErr, log_error(SECT6, METRIC, zErrType + typeFn(value)))
-			}
-		})
-	} catch(e) {
-		exit(zErr, log_error(SECT6, METRIC, e))
-	}
+			} else {exit(zErr, log_error(SECT6, METRIC, zErrType + vType))}
+		}).catch(function(e){exit(zErr, log_error(SECT6, METRIC, e))})
+	} catch(e) {exit(zErr, log_error(SECT6, METRIC, e))}
 })
 
 const get_permissions = (item) => new Promise(resolve => {
@@ -354,7 +357,7 @@ const outputStorage = () => new Promise(resolve => {
 	// ToDo: notification support/test
 	let t0 = nowFn()
 	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
-	addDataDisplay(6, "worker", "function" === typeof Worker ? zE : zD)
+	addDataDisplay(6, "worker", "function" === typeFn(Worker) ? zE : zD)
 
 	// skip FF104 or lower due to sanitizing issues
 	let skip = isFile && isVer < 105
