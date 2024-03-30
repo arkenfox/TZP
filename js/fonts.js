@@ -101,9 +101,6 @@ let fntMaster = {
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
-			/* not detected: need to be whitelisted
-			'Arial Black','Arial Narrow',
-			*/
 			/* variants
 			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
 			*/
@@ -155,6 +152,8 @@ let fntMaster = {
 			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
+			// not detected: we may whitelist these
+			'Arial Black','Arial Narrow',
 		],
 		'windows': [
 			'Calibri', //'Impact','Candara','Corbel','Ebrima','Gabriola', // system
@@ -451,9 +450,8 @@ function set_fntList(os = isOS) {
 		isFontSizesPrevious = isFontSizesMore
 
 		fntData = {
-			"base": [], "bundled": [], "full": [],
-			"control": [], "control_name": [],
-			"generic": [],
+			"system": [], "bundled": [], "base": [], "unexpected": [], "full": [],
+			"control": [], "control_name": [], "generic": [], 
 		}
 
 		// baseSize: add fallback for misconfigured/missing
@@ -490,7 +488,6 @@ function set_fntList(os = isOS) {
 		// baseCtrl: 1-pass or 3-pass
 		// baseCtrlNames: remove fallback e.g. "serif, X" -> "serif"
 		let baseCtrl = isPlatformFont === undefined ? baseSize : [isPlatformFont]
-
 		fntData["control"] = baseCtrl
 		let baseCtrlNames = []
 		baseCtrl.forEach(function(name) {
@@ -509,29 +506,7 @@ function set_fntList(os = isOS) {
 		if (os !== undefined) {
 			let fntFake = "--00"+ rnd_string()
 			let array = []
-
-			if (isTB && os !== "android") {
-				// desktop TB
-				// build bundled
-				let aBundled = []
-				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt, "Noto Serif "+ fnt)})
-				fntMaster.bundled.notosans.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt)})
-				fntMaster.bundled.notoserif.forEach(function(fnt) {aBundled.push("Noto Serif "+ fnt)})
-				aBundled = aBundled.concat(fntMaster["bundled"][os])
-				// combine allow/block lists
-				array = array.concat(aBundled)
-				fntData["bundled"] = array
-				array = array.concat(fntMaster["allowlist"][os])
-				fntData["base"] = array
-				array = array.concat(fntMaster["blocklist"][os])
-				fntData["full"] = array
-				// windows/mac
-				if (os !== "linux") {
-					array = fntData["base"]
-					array = array.filter(x => !fntData["bundled"].includes(x))
-					fntData["system"] = array
-				}
-			} else if (os == "android") {
+			if (os == "android") {
 				// android
 				// build notos
 				fntMaster.android.notoboth.forEach(function(fnt) {array.push("Noto Sans "+ fnt, "Noto Serif "+ fnt)})
@@ -540,16 +515,34 @@ function set_fntList(os = isOS) {
 				// add extras
 				array = array.concat(fntMaster["system"][os])
 				fntData["full"] = array
-			} else if (!isTB) {
+				fntData["full"].push(fntFake)
+			} else if (isTB) {
+				// desktop TB
+				let aBundled = []
+				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt, "Noto Serif "+ fnt)})
+				fntMaster.bundled.notosans.forEach(function(fnt) {aBundled.push("Noto Sans "+ fnt)})
+				fntMaster.bundled.notoserif.forEach(function(fnt) {aBundled.push("Noto Serif "+ fnt)})
+				aBundled = aBundled.concat(fntMaster["bundled"][os])
+				array = array.concat(aBundled)
+				fntData["bundled"] = array
+				fntData["system"] = fntMaster["allowlist"][os]
+				array = array.concat(fntMaster["allowlist"][os])
+				fntData["base"] = array
+				fntMaster["blocklist"][os].push(fntFake)
+				fntData["unexpected"] = fntMaster["blocklist"][os]
+				array = array.concat(fntMaster["blocklist"][os])
+				fntData["full"] = array
+			} else {
 				// desktop FF
 				array = fntMaster["base"][os]
 				fntData["base"] = array
 				array = array.concat(fntMaster["system"][os])
 				fntData["full"] = array
+				fntData["full"].push(fntFake)
 			}
 			// -control from lists
 			if (isPlatformFont !== undefined) {
-				let fntKeys = ["base","bundled","full","system"]
+				let fntKeys = ["base","full","system","bundled"]
 				fntKeys.forEach(function(key) {
 					if (fntData[key] !== undefined) {
 					let array = fntData[key]
@@ -564,26 +557,30 @@ function set_fntList(os = isOS) {
 				log_alert(SECT12, "dupes in "+ os +" font list")
 				fntData["full"] = aCheck
 			}
-			// fntBtn
-			let str = "fonts_"+ os
-			fntData["full"].push(fntFake)
+			// sort
+			fntData["bundled"].sort()
+			fntData["system"].sort()
+			fntData["unexpected"].sort()
+			fntData["base"].sort()
 			fntData["full"].sort()
-			fntBtn = addButton(12, str, fntData["full"].length, "btnc", "lists")
-			if (fntData["base"].length) {
-				fntData["base"].sort()
-				fntBtn += addButton(12, str +"_"+ fntListBaseName, fntData["base"].length, "btnc", "lists")
-			}
-			// bundled: TB desktop
-			if (isTB && os !== "android") {
-				if (fntData["bundled"].length) {
-					fntData["bundled"].sort()
-					fntBtn += addButton(12, str +"_bundled", fntData["bundled"].length, "btnc", "lists")
+			// fntBtns
+			let str = "fonts_"+ os, fntBtnBundled, fntBtnSystem, fntBtnBase, fntBtnUnexpected, fntBtnAll
+			fntBtnBundled = addButton(12, str +"_bundled", fntData["bundled"].length, "btnc", "lists")
+			fntBtnSystem = addButton(12, str +"_system", fntData["system"].length, "btnc", "lists")
+			fntBtnUnexpected = addButton(12, str +"_unexpected", fntData["unexpected"].length, "btnc", "lists")
+			fntBtnBase = addButton(12, str +"_"+ fntListBaseName, fntData["base"].length, "btnc", "lists")
+			fntBtnAll = addButton(12, str, fntData["full"].length, "btnc", "lists")
+			// fntBtn
+			if (os == "android") {
+				fntBtn = fntBtnAll
+			} else if (isTB) {
+				if (os == "linux") {
+					fntBtn = fntBtnBundled +" + "+ fntBtnUnexpected +" = "+ fntBtnAll
+				} else {
+					fntBtn = fntBtnSystem +" + "+ fntBtnBundled +" = "+ fntBtnBase +" + "+ fntBtnUnexpected + " = "+ fntBtnAll					
 				}
-				// win/mac system
-				if (os !== "linux" && fntData["system"].length) {
-					fntData["system"].sort()
-					fntBtn += addButton(12, str +"_system", fntData["system"].length, "btnc", "lists")
-				}
+ 			} else {
+				fntBtn = (os !== "linux" ? fntBtnBase : "") + fntBtnAll
 			}
 		}
 	}
@@ -593,10 +590,11 @@ function set_fntList(os = isOS) {
 	// fnt*Btn data
 	if (gRun || build) {
 		let str = "fonts_"+ os
-		addDetail(str, fntData["full"], "lists")
-		addDetail(str +"_"+ fntListBaseName, fntData["base"], "lists")
-		addDetail(str +"_bundled", fntData["bundled"], "lists")
 		addDetail(str +"_system", fntData["system"], "lists")
+		addDetail(str +"_bundled", fntData["bundled"], "lists")
+		addDetail(str +"_"+ fntListBaseName, fntData["base"], "lists")
+		addDetail(str +"_unexpected", fntData["unexpected"], "lists")
+		addDetail(str, fntData["full"], "lists")
 	}
 }
 
@@ -1595,7 +1593,7 @@ const get_unicode = () => new Promise(resolve => {
 				let isLies = false
 				if (isSmart) {
 					if (isDomRect == -1 && name == "clientrect") {isLies = true
-					} else if (sData[SECT99].includes("TextMetrics." + name)) {isLies = true}
+					} else if (isProxy && sData[SECT99].includes("TextMetrics." + name)) {isLies = true}
 				}
 				if (isLies) {
 					value = colorFn(value)
