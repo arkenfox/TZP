@@ -12,13 +12,15 @@ const get_nav_connection = () => new Promise(resolve => {
 	}
 	try {
 		let nav = navigator.connection
-		if (runSE) {foo++} else if (runST) {nav = null
-		} else if (runSL && isSmart) {sData[SECT99].push("Navigator.connection")}
+		if (runSE) {foo++
+		} else if (runST) {nav = null
+		} else if (runSL) {sData[SECT99].push("Navigator.connection")
+		}
 		if (nav === undefined || "object" === typeof nav) {
 			if (nav === undefined) {
 				nav +=""
 				let display = nav
-				if (isSmart && sData[SECT99].includes("Navigator.connection")) {
+				if (isProxy && sData[SECT99].includes("Navigator.connection")) {
 					nav = zLIE
 					display = colorFn(display)
 					log_known(SECT5, METRIC)
@@ -47,7 +49,7 @@ const get_nav_connection = () => new Promise(resolve => {
 						let hash = mini(oNetwork), isLies = false
 						if (isSmart) {
 							notation = default_red
-							if (sData[SECT99].includes("Navigator.connection")) {
+							if (isProxy && sData[SECT99].includes("Navigator.connection")) {
 								addDetail(METRIC, oNetwork)
 								log_display(5, METRIC, colorFn(hash) + addButton(5, METRIC) + notation)
 								log_known(SECT5, METRIC)
@@ -121,12 +123,12 @@ const get_nav_gpc = () => new Promise(resolve => {
 	try {
 		let value = navigator[METRIC]
 		if ("boolean" !== typeof value) {value = cleanFn(value)}
-		if (runST) {value = zUQ} else if (runSL && isSmart) {sData[SECT99].push("Navigator."+ METRIC)}
+		if (runST) {value = zUQ} else if (runSL) {sData[SECT99].push("Navigator."+ METRIC)}
 		let display = value
 		if ("boolean" !== typeof value && value !== "undefined") {
 			value = zErr
 			display = log_error(SECT5, METRIC, zErrType + typeof value)
-		} else if (isSmart && sData[SECT99].includes("Navigator."+ METRIC)) {
+		} else if (isProxy && sData[SECT99].includes("Navigator."+ METRIC)) {
 			value = zLIE
 			display = colorFn(display)
 			log_known(SECT5, METRIC)
@@ -141,8 +143,9 @@ const get_nav_gpc = () => new Promise(resolve => {
 
 const set_isLanguageSmart = () => new Promise(resolve => {
 	// limited to TB/MB
+		// resource://gre/res/multilocale.txt
 		// ToDo: android may differ, ignore for now
-	isLanguageSmart = (isSmart && isTB && isOS !== "android" && isOS !== undefined)
+	isLanguageSmart = (isSmart && isTB && isOS !== "android") // && isOS !== undefined)
 	if (!isLanguageSmart) {
 		return
 	}
@@ -831,27 +834,26 @@ const get_timezone = () => new Promise(resolve => {
 	let aMethods = [
 		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
 	]
-	let isTimeZoneErr = false
+	let isTimeZoneErr = true
 
 	function get_tz() {
 		try {
-			if (runSE) {foo++}
 			let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-			if ("string" !== typeof tz) {
-				return ([zErr, log_error(SECT4, METRICtz, zErrType + typeof tz)])
-			} else if (tz === "") {
-				return ([zErr, log_error(SECT4, METRICtz, zErrInvalid + "empty string")])
+			if (runSE) {foo++} else if (runST) {tz = "groot"}
+			let tzType = typeFn(tz)
+			if ("string" !== tzType) {
+				return ([log_error(SECT4, METRICtz, zErrType + tzType)])
 			} else {
 				try {
 					let tztest = (new Date("January 1, 2018 13:00:00 UTC")).toLocaleString('en', {timeZone: tz})
+					isTimeZoneErr = false
 					return (tz)
 				} catch(e) {
-					return ([zErr, log_error(SECT4, METRICtz, e)]) // not supported
+					return ([log_error(SECT4, METRICtz, e)]) // not supported
 				}
 			}
 		} catch(e) {
-			isTimeZoneErr = true
-			return ([zErr, log_error(SECT4, METRICtz, e)])
+			return ([log_error(SECT4, METRICtz, e)])
 		}
 	}
 
@@ -913,14 +915,9 @@ const get_timezone = () => new Promise(resolve => {
 		get_offsets(),
 	]).then(function(res){
 
-		// TZ
+		// TZ: we returned a string (valid but could be a lie) or an array [error]
 		let tz = res[0], tzdisplay = tz
-		if ("string" !== typeof tz) {
-			tzdisplay = res[0][1]
-			tz = zErr
-		} else if (isSmart) {
-			isTimeZoneValue = tz
-		}
+		if ("string" !== typeof tz) {tz = zErr} else {isTimeZoneValue = tz}
 
 		// OFFSETS
 		let oOffsets = res[1], offset = "", display = "", notation = ""
@@ -1008,7 +1005,16 @@ const get_timezone = () => new Promise(resolve => {
 						})
 						let testHash = mini(oTest)
 						notation = testHash === allHash ? tz_green : tz_red
-						if (testHash !== allHash) {isLies = true} else {isTimeZoneValid = true}
+						if (testHash !== allHash) {
+							isLies = true
+						} else {
+							// finally
+								// legit timezonename
+								// legit looking offset values
+								// all offsets methods match
+								// a control matches using the timezonename
+							isTimeZoneValid = true
+						}
 					} catch(e) {}
 				}
 			}
@@ -1027,7 +1033,7 @@ const get_timezone = () => new Promise(resolve => {
 			log_display(4, METRIC, display + btn + notation)
 		}
 
-		// TZ: after isTimeZoneValid: i.e both match or both are suspect
+		// TZ: after isTimeZoneValid
 		if (isSmart) {
 			if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
 				tzdisplay = colorFn(tzdisplay)
