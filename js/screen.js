@@ -1261,7 +1261,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	- FF122+ 1865766: hardcod to 10.0 - partially backed out
 	- FF123+ 1861847: hardcod oscpu/platform to "Linux armv81"
 	- FF126+ 1860417: Linux added to appVersion + ua_os
-	linux/android:
+	linux:
 	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
 	*/
 
@@ -1273,12 +1273,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		if (isSmart && reported !== expected) {
 			if (isErr) {
 				fpvalue = zErr
-			} else if (sData[SECT99].includes("Navigator."+ property)) {
-				// lies
+			} else if (isProxy && sData[SECT99].includes("Navigator."+ property)) {
 				display = colorFn(display)
 				log_known(SECT2, property)
 			}
-			// health
 			notation = rfp_red
 		}
 		aReported.push(property +":"+ reported) // for uaDoc
@@ -1342,14 +1340,12 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		},
 	}
 	if (isSmart && os !== undefined) {
-		if (os == "android") {
-			if (isVer < 123) { // 1861847
-				oRFP.android.oscpu = "Linux aarch64"
+		if (os == "android" && isVer < 126) {
+			oRFP.android.appVersion = "5.0 (Android 10)" // 1860417
+			oRFP.android.ua_os = "Android 10; Mobile"
+			if (isVer < 123) {
+				oRFP.android.oscpu = "Linux aarch64" // 1861847
 				oRFP.android.platform = "Linux aarch64"
-			}
-			if (isVer < 126) { // 1860417
-				oRFP.android.appVersion = "5.0 (Android 10)"
-				oRFP.android.ua_os = "Android 10; Mobile"
 			}
 		}
 		let uaVer = isVer, isDroid = isOS == "android"
@@ -1374,7 +1370,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 
 	for (const k of Object.keys(oComplex)) {
 		let notation = ""
-		if (runSL && isSmart) {sData[SECT99].push("Navigator."+ k)}
+		if (runSL) {sData[SECT99].push("Navigator."+ k)}
 		let reported = oComplex[k][0],
 			isErr = oComplex[k][1]
 		reported = cleanFn(reported)
@@ -1386,7 +1382,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 			fpvalue = zErr
 			reported = zErr
 		} else if (isSmart) {
-			if (sData[SECT99].includes("Navigator."+ k)) {
+			if (isProxy && sData[SECT99].includes("Navigator."+ k)) {
 				fpvalue = zLIE
 				display = "~"+ colorFn(reported) +"~" + rfp_red
 				log_known(SECT2, k)
