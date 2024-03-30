@@ -121,7 +121,17 @@ function run() {
 					clrG = Math.floor(Math.random()*256),
 					clrB = Math.floor(Math.random()*256)
 
-				// output SET visuals
+				// add some input
+				let fpText = "iloa"
+				ctxCtrl.font = "16px monospace";
+				ctxCtrl.textBaseline = "top";
+				ctxCtrl.textBaseline = "alphabetic";
+				ctxCtrl.fillStyle = "red";
+				ctxCtrl.fillText(fpText,0,16);
+				ctxCtrl.fillStyle = "green";
+				ctxCtrl.fillText(fpText,3,14);
+
+				// then overwrite with SET visuals
 				for (let x=0; x < cWidth; x++) {
 					for (let y=0; y < cHeight; y++) {
 						// get random color
@@ -142,6 +152,7 @@ function run() {
 						ctxCtrl.fillRect(x, y, 1, 1)
 					}
 				}
+
 				hashSet = mini(clrSet) +" | "+ mini(cellSet)
 				dom.sethash = hashSet
 
