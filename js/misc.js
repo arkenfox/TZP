@@ -56,29 +56,29 @@ const get_math_other = (isMathLies) => new Promise(resolve => {
 			Math.log((1.5) / (0.5)) / 2, 
 			Math.pow(Math.abs(Math.PI), 1 / 3), // cbrt(Math.PI)
 		]
-		let aRes = [], isErr
+		let oData = {}, isErr
 		for (let i=0; i < aTests.length; i++) {
 			let x = aValues[i]
 			if (runST) {x = NaN}
 			let xType = typeof x
 			if ("number" == xType && !Number.isNaN(x)) {
-				aRes.push([aTests[i], x])
+				oData[aTests[i]] = x
 			} else {
 				isErr = ("number" == xType && Number.isNaN(x) ? "NaN" : xType)
 				break
 			}
 		}
-		let hash = mini(aRes), fpvalue
+		let hash = mini(oData), fpvalue
 		if (isErr !== undefined) {
 			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isErr))
 			return resolve([METRIC, zErr])
 		} else if (isMathLies) {
 			hash = colorFn(hash)
 			fpvalue = [METRIC, zLIE]
-			addDetail(METRIC, aRes)
+			addDetail(METRIC, oData)
 			log_known(SECT18, METRIC)
 		} else {
-			addData(18, METRIC, aRes, hash)
+			addData(18, METRIC, oData, hash)
 		}
 		log_display(18, METRIC, hash + addButton(18, METRIC))
 		return resolve(fpvalue)
@@ -109,34 +109,34 @@ const get_math_trig = (isMathLies) => new Promise(resolve => {
 				["6*Math.E",6*Math.E],["6*Math.LN2",6*Math.LN2],
 			],
 		}
-		let aRes = [], isErr
+		let oData = {}, isErr
 		for (const k of Object.keys(oMath)) {
 			oMath[k].forEach(function(item) {
 				let x = Math[k](item[1])
 				if (runST) {x = ""}
 				let xType = typeof x
 				if ("number" == xType && !Number.isNaN(x)) {
-					aRes.push(["Math."+ k +"("+ item[0] +")", x])
+					oData["Math."+ k +"("+ item[0] +")"] = x
 				} else {
 					isErr = ("number" == xType && Number.isNaN(x) ? "NaN" : xType)
 				}
 			})
 		}
-		let hash = mini(aRes), fpvalue
+		let hash = mini(oData), fpvalue
 		if (isErr !== undefined) {
 			log_display(18, METRIC, log_error(SECT18, METRIC, zErrType + isErr) + (isSmart ? rfp_red : ""))
 			return resolve([METRIC, zErr])
 		} else if (isMathLies) {
 			hash = colorFn(hash)
 			fpvalue = [METRIC, zLIE]
-			addDetail(METRIC, aRes)
+			addDetail(METRIC, oData)
 			log_known(SECT18, METRIC)
 		} else {
-			addData(18, METRIC, aRes, hash)
+			addData(18, METRIC, oData, hash)
 		}
 		if (isSmart) {
 			// ToDo: 1852788 follow ups: currently only nightly/beta
-			notation = hash == "a5833212" ? rfp_green : rfp_red
+			notation = hash == "d240b02e" ? rfp_green : rfp_red
 		}
 		log_display(18, METRIC, hash + addButton(18, METRIC) + notation)
 		return resolve(fpvalue)
@@ -324,8 +324,7 @@ const get_pdf = () => new Promise(resolve => {
 			}
 			if (!["91073152","beccb452"].includes(hash)) {
 				isLies = true // enabled, disabled
-			} else if (
-				sData[SECT99].includes("Navigator.pdfViewerEnabled")) {
+			} else if (isProxy && sData[SECT99].includes("Navigator.pdfViewerEnabled")) {
 				isLies = true
 			} else {
 				try {
@@ -578,7 +577,7 @@ const get_window_props = () => new Promise(resolve => {
 
 const outputMisc = () => new Promise(resolve => {
 	let t0 = nowFn()
-	if (runSL && isSmart) {sData[SECT99].push("Math.sin")}
+	if (runSL) {sData[SECT99].push("Math.sin")}
 	let isMathLies = check_mathLies()
 
 	let METRIC = "error_message_fix"
