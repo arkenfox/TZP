@@ -101,8 +101,10 @@ let fntMaster = {
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
-			/* variants
+			/* not detected: need to be whitelisted
 			'Arial Black','Arial Narrow',
+			*/
+			/* variants
 			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
 			*/
 		],
@@ -1567,7 +1569,7 @@ const get_unicode = () => new Promise(resolve => {
 		return hash // for display
 	}
 
-	let oObject = {}, oDisplay = {}
+	let oObject = {}
 	function output() {
 		let res = []
 		let aList = [["offset", aOffset], ["clientrect", aClient]]
@@ -1589,10 +1591,17 @@ const get_unicode = () => new Promise(resolve => {
 				value = zErr
 			} else if (data.length) {
 				let value = group(name, METRIC, data)
-				// clientrect lies
-				if (isDomRect == -1 && name == "clientrect") {
+				// lies
+				let isLies = false
+				if (isDomRect == -1 && name == "clientrect") {isLies = true}
+				if (sData[SECT99].includes("TextMetrics." + name)) {isLies = true}
+				if (isLies) {
 					value = colorFn(value)
 					log_known(SECT12, METRIC)
+					sDetail[isScope][METRIC] = oObject[METRIC]["data"]
+					addData(12, METRIC, zLIE)
+				} else {
+					addData(12, METRIC, oObject[METRIC]["data"], oObject[METRIC]["hash"])
 				}
 				display = value + addButton(12, METRIC)
 				// notate
@@ -1614,21 +1623,8 @@ const get_unicode = () => new Promise(resolve => {
 				}
 			}
 			if (isString) {res.push([METRIC, value])}
-			oDisplay[METRIC] = display
+			log_display(12, METRIC, display)
 		})
-		// oObject + oDisplay: can be altered before final add/display
-		for (const k of Object.keys(oObject).sort()) {
-			if (isDomRect == -1 && k == "glyphs_clientrect") {
-				sDetail[isScope][k] = oObject[k]["data"]
-				addData(12, k, zLIE)
-			} else {
-				addData(12, k, oObject[k]["data"], oObject[k]["hash"])
-			}
-		}
-		// display
-		for (const k of Object.keys(oDisplay)) {
-			log_display(12, k, oDisplay[k])
-		}
 		log_perf(SECT12, "unicode glyphs",t0)
 		return resolve(res)
 	}
