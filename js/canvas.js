@@ -77,16 +77,16 @@ const outputCanvas = () => new Promise(resolve => {
 						const METRIC = "getImageData"
 						if (aSkip.includes(METRIC)) {return "skip"}
 						try {
-							if (runSE) {foo++}
 							var context = getKnownGet()
 							let imageData = context.getImageData(0,0, sizeW, sizeH)
-							let data = ""
-							if (typeof imageData == "object" && imageData +"" == "[object ImageData]") {
+							if (runSE) {foo++} else if (runST) {imageData = null}
+							let iType = typeFn(imageData, true)
+							let data
+							if ("object" == iType && imageData +"" == "[object ImageData]") {
 								oData[METRIC] = imageData.data
 								data = mini(imageData.data)
 							} else {
-								data = cleanFn(imageData) +""
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof data)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeFn(imageData))
 								data = zErr
 							}
 							log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
@@ -104,12 +104,12 @@ const outputCanvas = () => new Promise(resolve => {
 						const METRIC = "isPointInPath"
 						if (aSkip.includes(METRIC)) {return "skip"}
 						try {
-							if (runSE) {foo++}
 							var context = getKnownPath()
 							var data = new Uint8Array(sizeW * sizeH)
 							var dataR = context.isPointInPath(0, 0)
-							if (runST) {dataR = 0}
-							if ("boolean" === typeof dataR) {
+							if (runSE) {foo++} else if (runST) {dataR = 0}
+							let dType = typeFn(dataR)
+							if ("boolean" === dType) {
 								for (let x = 0; x < sizeW; x++){
 									for (let y = 0; y < sizeH; y++){
 										data[y * sizeW + x] = context.isPointInPath(x, y)
@@ -119,7 +119,7 @@ const outputCanvas = () => new Promise(resolve => {
 								oData[METRIC] = data
 								dataR = mini(data)
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof dataR)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + dType)
 								dataR = zErr
 							}
 							return dataR
@@ -136,12 +136,12 @@ const outputCanvas = () => new Promise(resolve => {
 						const METRIC = "isPointInStroke"
 						if (aSkip.includes(METRIC)) {return "skip"}
 						try {
-							if (runSE) {foo++}
 							let context = getKnownPath()
 							var data = new Uint8Array(sizeW * sizeH)
 							var dataR = context.isPointInStroke(0, 0)
-							if (runST) {dataR = "false"}
-							if ("boolean" === typeof dataR) {
+							if (runSE) {foo++} else if (runST) {dataR = "false"}
+							let dType = typeFn(dataR)
+							if ("boolean" === dType) {
 								for (let x = 0; x < sizeW; x++){
 									for (let y = 0; y < sizeH; y++){
 										data[y * sizeW + x] = context.isPointInStroke(x, y)
@@ -151,7 +151,7 @@ const outputCanvas = () => new Promise(resolve => {
 								oData[METRIC] = data
 								dataR = mini(data)
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof dataR)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + dType)
 								dataR = zErr
 							}
 							return dataR
@@ -178,13 +178,16 @@ const outputCanvas = () => new Promise(resolve => {
 										window.clearTimeout(timeout)
 										var reader = new FileReader()
 										reader.onload = function(){
-											oData[METRIC] = reader.result
-											if ("string" === typeof reader.result) {
+											let value = reader.result
+											if (runST) {value = ""}
+											oData[METRIC] = value
+											let rType = typeFn(value)
+											if ("string" === rType ) {
 												let data = mini(reader.result)
 												log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
 												resolve(data)
 											} else {
-												oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof reader.result)
+												oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + rType)
 												resolve(zErr)
 											}
 										}
@@ -208,15 +211,16 @@ const outputCanvas = () => new Promise(resolve => {
 						let METRIC = "toDataURL"
 						if (aSkip.includes(METRIC)) {return "skip"}
 						try {
-							if (runSE) {foo++}
 							let data = getKnownTo().canvas.toDataURL()
+							if (runSE) {foo++} else if (runST) {data = undefined}
+							let dType = typeFn(data)
 							oData[METRIC] = data
-							if ("string" === typeof data) {
+							if ("string" === dType) {
 								data = mini(data)
 								log_perf(SECT9, METRIC +" ["+ runNo +"]", aStart[METRIC], "", data)
 								return data
 							} else {
-								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + typeof data)
+								oErrors[METRIC] = log_error(SECT9, METRIC, zErrType + dType)
 								return zErr
 							}
 						} catch(e) {
