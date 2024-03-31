@@ -33,28 +33,36 @@ const outputCanvas = () => new Promise(resolve => {
 			return mini(dataDrawn) == mini(data)
 		}
 		// run2
-		let aDrawn = [], aRead = []
+		let aDrawn = [], aRead = [], indexChanged = []
 		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
 		for (let x=0; x < pixelcount; x++) {
 			let k = x * 4
 			aDrawn = dataDrawn.slice(k, k+4)
 			aRead = data.slice(k, k+4)
-			if (aDrawn.join() !== aRead.join()) { altP++ } // pixels
+			if (aDrawn.join() !== aRead.join()) { // pixels
+				altP++
+				indexChanged.push(k)
+			}
 			if (aDrawn[0] !== aRead[0]) { altR++} // channels
 			if (aDrawn[1] !== aRead[1]) { altG++}
 			if (aDrawn[2] !== aRead[2]) { altB++}
 			if (aDrawn[3] !== aRead[3]) { altA++}
 			// ToDo: range: worth it?
 		}
+		// stealth check: anything in changed not in font
+		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
+		let isInputOnly = aNotInFonts == 0
+
 		// noise FP
 		let strFP = "", aNote = []
+		
 		aNote.push("p"+ Math.floor((altP / pixelcount) * 100))
 		if (altR > 0) {strFP += "r"; aNote.push("r"+Math.floor((altR / pixelcount) * 100))}
 		if (altG > 0) {strFP += "g"; aNote.push("g"+ Math.floor((altG / pixelcount) * 100))}
 		if (altB > 0) {strFP += "b"; aNote.push("b"+ Math.floor((altB / pixelcount) * 100))}
 		if (altA > 0) {strFP += "a"; aNote.push("a"+ Math.floor((altA / pixelcount) * 100))}
-		isCanvasGetChannels = strFP
-		isCanvasGet = " [%: "+ aNote.join(" ") +"]"
+		isCanvasGetChannels = (isInputOnly ? "stealth | " : "") + strFP
+		isCanvasGet = " ["+ (isInputOnly ? "stealth " : "")  +"%: "+ aNote.join(" ") +"]"
 		// pixels: allow 1 collision
 		if (altP < (pixelcount - 1)) {return false}
 		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
@@ -324,7 +332,7 @@ const outputCanvas = () => new Promise(resolve => {
 
 	// random getImageData
 	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
-	let dataToDraw = [], aPixel = []
+	let dataToDraw = [], indexFont = []
 	let solidR = Math.floor(Math.random()*256),
 		solidG = Math.floor(Math.random()*256),
 		solidB = Math.floor(Math.random()*256)
@@ -354,6 +362,7 @@ const outputCanvas = () => new Promise(resolve => {
 				dataDrawn[k+3] = 255
 				dataToDraw.push("rgba("+ valueR +","+ valueG +","+ valueB +",255)")
 			} else {
+				indexFont.push(k)
 				// solid: 15
 				dataDrawn[k] = solidR
 				dataDrawn[k+1] = solidG
@@ -430,10 +439,17 @@ const outputCanvas = () => new Promise(resolve => {
 							note = (value === allZeros) ? rfp_green : rfp_red // all zeros
 						} else {
 							note = rfp_red
+							if (name == "getImageData") {
+								check_canvas_get(oData[name], 2)
+							}
 							// FPP
 							if (isVer > 119) {
-								if (!sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
-									note = fpp_green
+								if (isProxy && !sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
+									let isStealth = false
+									if (name == "getImageData") {
+										isStealth = isCanvasGetChannels.includes("stealth")
+									}
+									if (!isStealth) {note = fpp_green}
 								}
 							}
 						}
