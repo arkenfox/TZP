@@ -125,7 +125,7 @@ function run() {
 
 				// fill big visual with our random color
 				ctxBig.fillStyle = "rgba("+ solidClrs +")"
-				ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
+				//ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
 				if (optSolid) {
 					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
 					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
@@ -140,12 +140,17 @@ function run() {
 					let clrR = Math.floor(Math.random()*256),
 						clrG = Math.floor(Math.random()*256),
 						clrB = Math.floor(Math.random()*256)
-					// ensure it's properly covered
+					// ensure background is correct color
 					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
-					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
+					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height)
 					// then trigger stealth mode
-					ctxCtrl.fillText("a",0,10)
-					// then overwrite half the pixels with random values
+						// only the text area is altered, so try and make it cover all of it
+					let fpText = "\u2588\u2588\u2588\u2588" // full block
+					ctxCtrl.font = "512px sans-serif" // large
+					ctxCtrl.textBaseline = "top"
+					ctxCtrl.textBaseline = "alphabetic"
+					ctxCtrl.fillText(fpText,0,0)
+					// then overwrite a % of the pixels with random values
 					for (let x=0; x < cWidth; x++) {
 						let xEven = (x % 2 == 0)
 						for (let y=0; y < cHeight; y++) {
@@ -153,9 +158,9 @@ function run() {
 							// xEven + yEven == 1 = checkerboard = 1/2
 							// xEven + yEven == 2 = another 1/4
 							// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
-							let go = (xEven + yEven == 1 || xEven + yEven == 2) // 1/4th
+							let go = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
 							if (!go) {
-								if ((x * y) % 3 == 0 ) {go = true} // brings us down to 1/8th or 50 pixels
+								if ((x * y) % 3 == 0 ) {go = true} // brings us up to 351/400
 							}
 							if (go) {
 								// get random color
