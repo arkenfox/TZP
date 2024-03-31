@@ -136,6 +136,7 @@ function run() {
 					}
 				}
 
+				let indexFont = []
 				if (!optSolid) {
 					let clrR = Math.floor(Math.random()*256),
 						clrG = Math.floor(Math.random()*256),
@@ -143,7 +144,7 @@ function run() {
 					// ensure background is correct color
 					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
 					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height)
-					// then trigger stealth mode
+					// trigger stealth mode
 						// only the text area is altered, so try and make it cover all of it
 					let fpText = "\u2588\u2588\u2588\u2588" // full block
 					ctxCtrl.font = "512px sans-serif" // large
@@ -151,9 +152,12 @@ function run() {
 					ctxCtrl.textBaseline = "alphabetic"
 					ctxCtrl.fillText(fpText,0,0)
 					// then overwrite a % of the pixels with random values
+					let counter = -1
 					for (let x=0; x < cWidth; x++) {
 						let xEven = (x % 2 == 0)
 						for (let y=0; y < cHeight; y++) {
+							counter ++
+							let k = counter * 4
 							let yEven = (y % 2 == 0)
 							// xEven + yEven == 1 = checkerboard = 1/2
 							// xEven + yEven == 2 = another 1/4
@@ -178,6 +182,7 @@ function run() {
 								ctxCtrl.fillStyle = "rgba("+ clrs +")"
 								ctxCtrl.fillRect(x, y, 1, 1)
 							} else {
+								indexFont.push(k)
 								//don't touch the canvas but record solid colors
 								clrSet.push(solidR)
 								clrSet.push(solidG)
@@ -229,6 +234,15 @@ function run() {
 					}
 				}
 				hashGetImage = mini(clrRead) +" | " + mini(cellRead)
+
+				let indexChanged = []
+				for (let i=0; i < cellSet.length; i++) {
+					if (cellSet[i] !== cellRead[i]) {
+						indexChanged.push(i * 4)
+					}
+				}
+				let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
+				let isInputOnly = aNotInFonts == 0
 
 				// 2nd read
 				let testRead2 = ctxCtrl.getImageData(0,0, cWidth, cHeight).data
@@ -324,6 +338,7 @@ function run() {
 						+", a: "+ changeA.length
 						+"<br>   combos altered: "+ tmpchan.length +" ["+ tmpchan.join(", ") +"]"
 						+"<br>     combo counts: "+ JSON.stringify(counts)
+						+"<br>     stealth mode: "+ (isInputOnly ? sb+"yes"+sc +" [input only changed]" : "no")
 
 					// diffs
 					let tmpR = changeR.filter(function(item, position) {return changeR.indexOf(item) === position})
