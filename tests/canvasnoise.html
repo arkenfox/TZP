@@ -125,10 +125,12 @@ function run() {
 
 				// fill big visual with our random color
 				ctxBig.fillStyle = "rgba("+ solidClrs +")"
-				//ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
+				ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
+				// ensure background is correct color in ctrl
+				ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
+				ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
+
 				if (optSolid) {
-					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
-					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
 					let total = cWidth * cHeight
 					for (let i=0; i < total; i++) {
 						clrSet.push(solidR, solidG, solidB, 255)
@@ -141,16 +143,32 @@ function run() {
 					let clrR = Math.floor(Math.random()*256),
 						clrG = Math.floor(Math.random()*256),
 						clrB = Math.floor(Math.random()*256)
-					// ensure background is correct color
-					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
-					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height)
-					// trigger stealth mode
-						// only the text area is altered, so try and make it cover all of it
 					let fpText = "\u2588\u2588\u2588\u2588" // full block
+					// order matters: if I stroke text over fillText then i lose fillText diffs
+					//*
+					// trigger fillText stealth
+						// only the text area is altered, so try and make it cover all of it
 					ctxCtrl.font = "512px sans-serif" // large
 					ctxCtrl.textBaseline = "top"
 					ctxCtrl.textBaseline = "alphabetic"
 					ctxCtrl.fillText(fpText,0,0)
+					//*/
+
+					//*
+					// trigger strokeText stealth: don't overwrite half the fillText
+					fpText = "x"
+					ctxCtrl.font = "16px sans-serif"
+					ctxCtrl.strokeStyle ="rgba("+ solidClrs +")"
+					for (let x=6; x < cWidth/2; x++) {
+						for (let y=6; y < cHeight/2; y++) {
+							ctxCtrl.strokeText(fpText,x,y)
+						}
+					}
+					//*/
+					// if both we get 49 | fillText only ~40+ | strokeText only ~30
+
+
+
 					// then overwrite a % of the pixels with random values
 					let counter = -1
 					for (let x=0; x < cWidth; x++) {
