@@ -136,14 +136,10 @@ function run() {
 					}
 				}
 
-
-
-
 				if (!optSolid) {
 					let clrR = Math.floor(Math.random()*256),
 						clrG = Math.floor(Math.random()*256),
 						clrB = Math.floor(Math.random()*256)
-
 					// trigger stealth mode
 					let fpText = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
 					ctxCtrl.font = "48px Arial, monospace"
@@ -151,16 +147,18 @@ function run() {
 					ctxCtrl.textBaseline = "alphabetic"
 					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
 					ctxCtrl.fillText(fpText,0,10)
-
 					// then overwrite half the pixels with random values
 					for (let x=0; x < cWidth; x++) {
 						let xEven = (x % 2 == 0)
 						for (let y=0; y < cHeight; y++) {
 							let yEven = (y % 2 == 0)
-							// checkerboard
-							// if row is even + column is odd
-							// or column is odd + row is even
-							let go = (xEven + yEven == 1)
+							// xEven + yEven == 1 = checkerboard = 1/2
+							// xEven + yEven == 2 = another 1/4
+							// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
+							let go = (xEven + yEven == 1 || xEven + yEven == 2) // 1/4th
+							if (!go) {
+								if ((x * y) % 3 == 0 ) {go = true} // brings us down to 1/8th or 50 pixels
+							}
 							if (go) {
 								// get random color
 								clrR = Math.floor(Math.random()*256)
