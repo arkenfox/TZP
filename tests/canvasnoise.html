@@ -110,49 +110,83 @@ function run() {
 		try {
 			let t0 = performance.now()
 			let cnvBig = dom.cnvBig
+			let cnvCtrl = dom.cnvCtrl
 			if (cnvBig.getContext) {
 				let ctxBig = cnvBig.getContext('2d'),
-					ctxCtrl = dom.cnvCtrl.getContext('2d'),
+					ctxCtrl = cnvCtrl.getContext('2d'),
 					ctxGet = dom.cnvGet.getContext('2d'),
 					ctxGet2 = dom.cnvGet2.getContext('2d'),
 					ctxBig2 = dom.cnvBig2.getContext('2d')
 
-				let clrR = Math.floor(Math.random()*256),
-					clrG = Math.floor(Math.random()*256),
-					clrB = Math.floor(Math.random()*256)
+				let solidR = Math.floor(Math.random()*256),
+					solidG = Math.floor(Math.random()*256),
+					solidB = Math.floor(Math.random()*256)
+				let solidClrs = solidR +", "+ solidG +", "+ solidB +", 255"
 
-				// add some input
-				let fpText = "iloa"
-				ctxCtrl.font = "16px monospace";
-				ctxCtrl.textBaseline = "top";
-				ctxCtrl.textBaseline = "alphabetic";
-				ctxCtrl.fillStyle = "red";
-				ctxCtrl.fillText(fpText,0,16);
-				ctxCtrl.fillStyle = "green";
-				ctxCtrl.fillText(fpText,3,14);
-
-				// then overwrite with SET visuals
-				for (let x=0; x < cWidth; x++) {
-					for (let y=0; y < cHeight; y++) {
-						// get random color
-						if (!optSolid) {
-							clrR = Math.floor(Math.random()*256)
-							clrG = Math.floor(Math.random()*256)
-							clrB = Math.floor(Math.random()*256)
-						}
-						let clrs = clrR +", "+ clrG +", "+ clrB +", 255"
-						clrSet.push(clrR)
-						clrSet.push(clrG)
-						clrSet.push(clrB)
-						clrSet.push(255)
-						cellSet.push(clrs)
-						ctxBig.fillStyle = "rgba("+ clrs +")"
-						ctxBig.fillRect(x*m, y*m, m, m)
-						ctxCtrl.fillStyle = "rgba("+ clrs +")"
-						ctxCtrl.fillRect(x, y, 1, 1)
+				// fill big visual with our random color
+				ctxBig.fillStyle = "rgba("+ solidClrs +")"
+				ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
+				if (optSolid) {
+					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
+					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
+					let total = cWidth * cHeight
+					for (let i=0; i < total; i++) {
+						clrSet.push(solidR, solidG, solidB, 255)
+						cellSet.push(solidClrs)
 					}
 				}
 
+
+
+
+				if (!optSolid) {
+					let clrR = Math.floor(Math.random()*256),
+						clrG = Math.floor(Math.random()*256),
+						clrB = Math.floor(Math.random()*256)
+
+					// trigger stealth mode
+					let fpText = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
+					ctxCtrl.font = "48px Arial, monospace"
+					ctxCtrl.textBaseline = "top"
+					ctxCtrl.textBaseline = "alphabetic"
+					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
+					ctxCtrl.fillText(fpText,0,10)
+
+					// then overwrite half the pixels with random values
+					for (let x=0; x < cWidth; x++) {
+						let xEven = (x % 2 == 0)
+						for (let y=0; y < cHeight; y++) {
+							let yEven = (y % 2 == 0)
+							// checkerboard
+							// if row is even + column is odd
+							// or column is odd + row is even
+							let go = (xEven + yEven == 1)
+							if (go) {
+								// get random color
+								clrR = Math.floor(Math.random()*256)
+								clrG = Math.floor(Math.random()*256)
+								clrB = Math.floor(Math.random()*256)
+								let clrs = clrR +", "+ clrG +", "+ clrB +", 255"
+								clrSet.push(clrR)
+								clrSet.push(clrG)
+								clrSet.push(clrB)
+								clrSet.push(255)
+								cellSet.push(clrs)
+								ctxBig.fillStyle = "rgba("+ clrs +")"
+								ctxBig.fillRect(x*m, y*m, m, m)
+								ctxCtrl.fillStyle = "rgba("+ clrs +")"
+								ctxCtrl.fillRect(x, y, 1, 1)
+							} else {
+								//don't touch the canvas but record solid colors
+								clrSet.push(solidR)
+								clrSet.push(solidG)
+								clrSet.push(solidB)
+								clrSet.push(255)
+								cellSet.push(solidClrs)
+							}
+						}
+					}
+				}
 				hashSet = mini(clrSet) +" | "+ mini(cellSet)
 				dom.sethash = hashSet
 
