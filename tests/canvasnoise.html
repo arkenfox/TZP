@@ -140,13 +140,11 @@ function run() {
 					let clrR = Math.floor(Math.random()*256),
 						clrG = Math.floor(Math.random()*256),
 						clrB = Math.floor(Math.random()*256)
-					// trigger stealth mode
-					let fpText = "\u2588\u2588\u2588\u2588\u2588\u2588\u2588"
-					ctxCtrl.font = "48px Arial, monospace"
-					ctxCtrl.textBaseline = "top"
-					ctxCtrl.textBaseline = "alphabetic"
+					// ensure it's properly covered
 					ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
-					ctxCtrl.fillText(fpText,0,10)
+					ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
+					// then trigger stealth mode
+					ctxCtrl.fillText("a",0,10)
 					// then overwrite half the pixels with random values
 					for (let x=0; x < cWidth; x++) {
 						let xEven = (x % 2 == 0)
