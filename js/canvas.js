@@ -251,11 +251,25 @@ const outputCanvas = () => new Promise(resolve => {
 				let canvas = dom.kcanvasGet
 				let ctx = canvas.getContext('2d')
 				if (oDrawn["get"]) {return ctx}
+				// color the background
+				ctx.fillStyle = "rgba("+ solidClrs +")"
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				// trigger stealth mode
+					// write text onto every pixel
+				let fpText = "\u2588\u2588\u2588\u2588" // full block
+				ctx.font = "512px sans-serif" // large
+				ctx.textBaseline = "top"
+				ctx.textBaseline = "alphabetic"
+				ctx.fillText(fpText,0,0)
 				// swap x/y loop order to match getImageData uint
+				let ignore = "rgba("+ solidClrs +")"
 				for (let y=0; y < sizeH; y++) {
 					for (let x=0; x < sizeW; x++) {
-						ctx.fillStyle = dataToDraw[(y * sizeW) + x]
-						ctx.fillRect(x, y, 1, 1)
+						let style = dataToDraw[(y * sizeW) + x]
+						if (style !== ignore) {
+							ctx.fillStyle = style
+							ctx.fillRect(x, y, 1, 1)
+						}
 					}
 				}
 				oDrawn["get"] = true
@@ -311,16 +325,43 @@ const outputCanvas = () => new Promise(resolve => {
 	// random getImageData
 	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
 	let dataToDraw = [], aPixel = []
-	for (let x = 0; x < pixelcount; x++) {
-		let k = x * 4
-		let valueR = Math.floor(Math.random()*256),
-			valueG = Math.floor(Math.random()*256),
-			valueB = Math.floor(Math.random()*256)
-		dataDrawn[k] = valueR
-		dataDrawn[k+1] = valueG
-		dataDrawn[k+2] = valueB
-		dataDrawn[k+3] = 255
-		dataToDraw.push("rgba("+ valueR +","+ valueG +","+ valueB +",255)")
+	let solidR = Math.floor(Math.random()*256),
+		solidG = Math.floor(Math.random()*256),
+		solidB = Math.floor(Math.random()*256)
+	let solidClrs = solidR +","+ solidG +","+ solidB +",255"
+	let counter = -1
+	for (let x=0; x < sizeW; x++) {
+		let xEven = (x % 2 == 0)
+		for (let y=0; y < sizeH; y++) {
+			counter ++
+			let k = counter * 4
+			let yEven = (y % 2 == 0)
+			// xEven + yEven == 1 = checkerboard = 1/2
+			// xEven + yEven == 2 = another 1/4
+			// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
+			let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
+			if (!isRandom) {
+				if ((x * y) % 3 == 0 ) {isRandom = true} // brings us to 113/128
+			}
+			if (isRandom) {
+				// random: 113
+				let valueR = Math.floor(Math.random()*256),
+					valueG = Math.floor(Math.random()*256),
+					valueB = Math.floor(Math.random()*256)
+				dataDrawn[k] = valueR
+				dataDrawn[k+1] = valueG
+				dataDrawn[k+2] = valueB
+				dataDrawn[k+3] = 255
+				dataToDraw.push("rgba("+ valueR +","+ valueG +","+ valueB +",255)")
+			} else {
+				// solid: 15
+				dataDrawn[k] = solidR
+				dataDrawn[k+1] = solidG
+				dataDrawn[k+2] = solidB
+				dataDrawn[k+3] = 255
+				dataToDraw.push("rgba("+ solidClrs +")")
+			}
+		}
 	}
 
 	Promise.all([
