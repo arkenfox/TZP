@@ -25,8 +25,8 @@ const outputCanvas = () => new Promise(resolve => {
 	const oKnown = {
 		"isPointInPath": "db0e3f08",
 		"isPointInStroke": "a77e328a",
-		"toBlob": "3afc375a", // "a8d0bd06" old value without fillText barbie pink
-		"toDataURL": "3afc375a", //"a8d0bd06",
+		"toBlob": "3afc375a",
+		"toDataURL": "3afc375a",
 	}
 	let isCanvasGet = "", isCanvasGetChannels = "", isGetStealth = false
 
@@ -446,11 +446,13 @@ const outputCanvas = () => new Promise(resolve => {
 			log_section(9, t0)
 			return resolve(SECT9)
 		}
-		const canvasLiesMap = {
+		const proxyMap = {
+			convertToBlob: "OffscreenCanvas",
 			getImageData: "CanvasRenderingContext2D",
+			isPointInPath: "CanvasRenderingContext2D",
+			isPointInStroke: "CanvasRenderingContext2D",
 			toBlob: "HTMLCanvasElement",
 			toDataURL: "HTMLCanvasElement",
-			convertToBlob: "OffscreenCanvas",
 		}
 
 		// smart + some lies, do 2nd run
@@ -475,12 +477,12 @@ const outputCanvas = () => new Promise(resolve => {
 					if (oRes[name][1] == value) {
 						// persistent
 						if (name.slice(0,3) == "isP") {
-							note = (value === allZeros) ? rfp_green : rfp_red // all zeros
+							note = (value === allZeros && !sData[SECT99].includes(proxyMap[name] +"."+ name) ) ? rfp_green : rfp_red // all zeros
 						} else {
 							note = rfp_red
 							// FPP: 119+ and no proxy lies and no getImageData stealth
 							if (isVer > 119) {
-								if (!sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
+								if (!sData[SECT99].includes(proxyMap[name] +"."+ name)) {
 									if (!isGetStealth) {note = fpp_green}
 								}
 							}
