@@ -18,6 +18,8 @@ function check_canvas_to(data) {
 
 const outputCanvas = () => new Promise(resolve => {
 	let t0 = nowFn()
+	let aStart = {}
+
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = "93bd94c5"
 	// FF95+: compression changes 1724331 / 1737038 
 	const oKnown = {
@@ -26,15 +28,16 @@ const outputCanvas = () => new Promise(resolve => {
 		"toBlob": "3afc375a", // "a8d0bd06" old value without fillText barbie pink
 		"toDataURL": "3afc375a", //"a8d0bd06",
 	}
-	let isCanvasGet = "", isCanvasGetChannels = ""
+	let isCanvasGet = "", isCanvasGetChannels = "", isGetStealth = false
 
 	function check_canvas_get(data, runNo) {
 		let isMatch = mini(dataDrawn) == mini(data)
 		// run1 return if a match or not
 		if (runNo == 1) {return isMatch}
-		// run2 return if RFP-like and create stats etc
-		if (isMatch) {return "skip"} // quick exit
+		// run2 quick exit: return skip if nothing to do
+		if (isMatch) {return "skip"}
 
+		// run2 otherwise return if RFP-like and create strings
 		let aDrawn = [], aRead = [], indexChanged = []
 		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
 		for (let x=0; x < pixelcount; x++) {
@@ -53,7 +56,7 @@ const outputCanvas = () => new Promise(resolve => {
 		}
 		// stealth check: anything in changed not in font
 		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
-		let isInputOnly = aNotInFonts.length == 0
+		isGetStealth = aNotInFonts.length == 0
 
 		// noise FP
 		let strFP = "", aNote = []
@@ -62,8 +65,8 @@ const outputCanvas = () => new Promise(resolve => {
 		if (altG > 0) {strFP += "g"; aNote.push("g"+ Math.floor((altG / pixelcount) * 100))}
 		if (altB > 0) {strFP += "b"; aNote.push("b"+ Math.floor((altB / pixelcount) * 100))}
 		if (altA > 0) {strFP += "a"; aNote.push("a"+ Math.floor((altA / pixelcount) * 100))}
-		isCanvasGetChannels = (isInputOnly ? "stealth | " : "") + strFP
-		isCanvasGet = " ["+ (isInputOnly ? "stealth " : "")  +"%: "+ aNote.join(" ") +"]"
+		isCanvasGetChannels = (isGetStealth ? "stealth | " : "") + strFP
+		isCanvasGet = " ["+ (isGetStealth ? "stealth " : "")  +"%: "+ aNote.join(" ") +"]"
 		// pixels: allow 1 collision
 		if (altP < (pixelcount - 1)) {return false}
 		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
@@ -75,7 +78,6 @@ const outputCanvas = () => new Promise(resolve => {
 		return true // RFP traits
 	}
 
-	let aStart = {}
 	var known = {
 		createHashes: function(window, runNo){
 			let outputs = [
@@ -476,14 +478,10 @@ const outputCanvas = () => new Promise(resolve => {
 							note = (value === allZeros) ? rfp_green : rfp_red // all zeros
 						} else {
 							note = rfp_red
-							// FPP
+							// FPP: 119+ and no proxy lies and no getImageData stealth
 							if (isVer > 119) {
-								if (isProxy && !sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
-									let isStealth = false
-									if (name == "getImageData") {
-										isStealth = isCanvasGetChannels.includes("stealth")
-									}
-									if (!isStealth) {note = fpp_green}
+								if (!sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
+									if (!isGetStealth) {note = fpp_green}
 								}
 							}
 						}
