@@ -23,16 +23,18 @@ const outputCanvas = () => new Promise(resolve => {
 	const oKnown = {
 		"isPointInPath": "db0e3f08",
 		"isPointInStroke": "a77e328a",
-		"toBlob": "a8d0bd06",
-		"toDataURL": "a8d0bd06",
+		"toBlob": "3afc375a", // "a8d0bd06" old value without fillText barbie pink
+		"toDataURL": "3afc375a", //"a8d0bd06",
 	}
 	let isCanvasGet = "", isCanvasGetChannels = ""
 
 	function check_canvas_get(data, runNo) {
-		if (runNo == 1) {
-			return mini(dataDrawn) == mini(data)
-		}
-		// run2
+		let isMatch = mini(dataDrawn) == mini(data)
+		// run1 return if a match or not
+		if (runNo == 1) {return isMatch}
+		// run2 return if RFP-like and create stats etc
+		if (isMatch) {return "skip"} // quick exit
+
 		let aDrawn = [], aRead = [], indexChanged = []
 		let altP = 0, altR = 0, altG = 0, altB = 0, altA = 0, altAll = 0
 		for (let x=0; x < pixelcount; x++) {
@@ -51,11 +53,10 @@ const outputCanvas = () => new Promise(resolve => {
 		}
 		// stealth check: anything in changed not in font
 		let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
-		let isInputOnly = aNotInFonts == 0
+		let isInputOnly = aNotInFonts.length == 0
 
 		// noise FP
 		let strFP = "", aNote = []
-		
 		aNote.push("p"+ Math.floor((altP / pixelcount) * 100))
 		if (altR > 0) {strFP += "r"; aNote.push("r"+Math.floor((altR / pixelcount) * 100))}
 		if (altG > 0) {strFP += "g"; aNote.push("g"+ Math.floor((altG / pixelcount) * 100))}
@@ -246,10 +247,24 @@ const outputCanvas = () => new Promise(resolve => {
 				let canvas = dom.kcanvasTo
 				let ctx = canvas.getContext('2d')
 				if (oDrawn["to"]) {return ctx}
+				// color the background
+				ctx.fillStyle = "rgba("+ solidPink +")"
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				// trigger fillText stealth
+				let fpText = "\u2588\u2588\u2588\u2588" // full block
+				ctx.font = "512px sans-serif" // large
+				ctx.textBaseline = "top"
+				ctx.textBaseline = "alphabetic"
+				ctx.fillText(fpText,0,0)
 				for (let x = 0; x < sizeW; x++) {
+					let xEven = (x % 2 == 0)
 					for (let y = 0; y < sizeH; y++) {
-						ctx.fillStyle = "rgba("+ (x*y) +","+ (x * 16) +","+ (y * 16) +",255)"
-						ctx.fillRect(x, y, 1, 1)
+						let yEven = (y % 2 == 0)
+						let isRandom = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
+						if (isRandom) {
+							ctx.fillStyle = "rgba("+ (x*y) +","+ (x * 16) +","+ (y * 16) +",255)"
+							ctx.fillRect(x, y, 1, 1)
+						}
 					}
 				}
 				oDrawn["to"] = true
@@ -262,13 +277,24 @@ const outputCanvas = () => new Promise(resolve => {
 				// color the background
 				ctx.fillStyle = "rgba("+ solidClrs +")"
 				ctx.fillRect(0, 0, sizeW, sizeH)
-				// trigger stealth mode
-					// write text onto every pixel
+				// trigger fillText stealth: try to cover every pixel
 				let fpText = "\u2588\u2588\u2588\u2588" // full block
 				ctx.font = "512px sans-serif" // large
 				ctx.textBaseline = "top"
 				ctx.textBaseline = "alphabetic"
 				ctx.fillText(fpText,0,0)
+				/*
+				// trigger strokeText stealth
+					// don't overwrite all the fillText
+					// see PoC notes: too risky
+				fpText = "-"
+				ctx.font = "16px monospace"
+				ctx.strokeStyle ="rgba("+ solidClrs +")"
+				for (let x=0; x < sizeW/2; x++) {
+					for (let y=0; y < sizeH/2; y++) {ctx.strokeText(fpText,x,y)}
+				}
+				//*/
+				// now color the rest with our random colors
 				// swap x/y loop order to match getImageData uint
 				let ignore = "rgba("+ solidClrs +")"
 				for (let y=0; y < sizeH; y++) {
@@ -329,6 +355,7 @@ const outputCanvas = () => new Promise(resolve => {
 		// if input is faked, it would also be faked the second time
 	let oDrawn = {"get": false, "path": false, "to": false}
 	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
+	let solidPink = "224,33,138,255" // go Barbie!
 
 	// random getImageData
 	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
@@ -390,7 +417,9 @@ const outputCanvas = () => new Promise(resolve => {
 				log_display(9, name, value)
 			} else {
 				if (name == "getImageData") {
-					if (check_canvas_get(oData["getImageData"], 1)) {
+					// run 1 check returns mini(dataDrawn) == mini(data)
+					let getCheck = check_canvas_get(oData["getImageData"], 1)
+					if (getCheck) {
 						oFP[name] = "trustworthy" // the test is random, return a stable FP
 						log_display(9, name, value + rfp_red) // display hash
 					} else {
@@ -415,7 +444,6 @@ const outputCanvas = () => new Promise(resolve => {
 			log_section(9, t0)
 			return resolve(SECT9)
 		}
-
 		const canvasLiesMap = {
 			getImageData: "CanvasRenderingContext2D",
 			toBlob: "HTMLCanvasElement",
@@ -428,9 +456,18 @@ const outputCanvas = () => new Promise(resolve => {
 		Promise.all([
 			known.createHashes(window, 2)
 		]).then(function(run2){
+
 			run2[0].forEach(function(item){
 				let value = item.displayValue
-				if (value !== "skip") {
+				let checkValue = value
+				// getImageData doesn't get a "skip" so we handle it differently
+				// run2 check returns skip is nothing to do, or true/false if RFP-like
+				if (item.name == "getImageData") {
+					// determine if trustworthy, and get stats etc in advance
+					let getCheck = check_canvas_get(oData["getImageData"], 2)
+					if (getCheck == "skip") {checkValue = "skip"}
+				}
+				if (checkValue !== "skip") {
 					let	note = "", stats = "", rfpvalue = ""
 					name = item.name
 					if (oRes[name][1] == value) {
@@ -439,9 +476,6 @@ const outputCanvas = () => new Promise(resolve => {
 							note = (value === allZeros) ? rfp_green : rfp_red // all zeros
 						} else {
 							note = rfp_red
-							if (name == "getImageData") {
-								check_canvas_get(oData[name], 2)
-							}
 							// FPP
 							if (isVer > 119) {
 								if (isProxy && !sData[SECT99].includes(canvasLiesMap[name] +"."+ name)) {
@@ -455,7 +489,6 @@ const outputCanvas = () => new Promise(resolve => {
 						}
 						rfpvalue = note == rfp_green ? " | RFP" : (note == fpp_green ? " | FPP" : "")
 						if (name == "getImageData") {
-							check_canvas_get(oData[name], 2)
 							stats = isCanvasGet
 							rfpvalue += " | "+ isCanvasGetChannels
 						}
