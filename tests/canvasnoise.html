@@ -37,7 +37,8 @@
 		<tr><td colspan="2">
 			<div class="btn-left">
 				<span class="btn9 btn" onClick="run()">[ re-run ]</span>
-				<span><input id="optSolid" type="checkbox"> use a solid color</span><br><br>
+				<span><input id="optSolid" type="checkbox"> use a solid color</span>
+				<span><input id="optStroke" type="checkbox"> use strokeText</span><br><br>
 			</div>VISUALS</td></tr>
 		<tr><td class="bottom">control</td>
 			<td>
@@ -104,6 +105,7 @@ function run() {
 	}
 
 	let optSolid = dom.optSolid.checked
+	let optStroke = dom.optStroke.checked
 
 	// pause so users see change
 	setTimeout(function(){
@@ -144,31 +146,54 @@ function run() {
 						clrG = Math.floor(Math.random()*256),
 						clrB = Math.floor(Math.random()*256)
 					let fpText = "\u2588\u2588\u2588\u2588" // full block
-					// order matters: if I stroke text over fillText then i lose fillText diffs
-					//*
+					// order matters
 					// trigger fillText stealth
 						// only the text area is altered, so try and make it cover all of it
 					ctxCtrl.font = "512px sans-serif" // large
 					ctxCtrl.textBaseline = "top"
 					ctxCtrl.textBaseline = "alphabetic"
 					ctxCtrl.fillText(fpText,0,0)
-					//*/
-
-					//*
 					// trigger strokeText stealth: don't overwrite half the fillText
-					fpText = "x"
-					ctxCtrl.font = "16px sans-serif"
-					ctxCtrl.strokeStyle ="rgba("+ solidClrs +")"
-					for (let x=6; x < cWidth/2; x++) {
-						for (let y=6; y < cHeight/2; y++) {
-							ctxCtrl.strokeText(fpText,x,y)
+					if (optStroke) {
+						fpText = "-" // straight, less curves
+						ctxCtrl.font = "16px monospace" // even straighter
+						ctxCtrl.strokeStyle ="rgba("+ solidClrs +")"
+						for (let x=0; x < cWidth/2; x++) {
+							for (let y=0; y < cHeight/4; y++) { // divide by 4 to match TZP size
+								ctxCtrl.strokeText(fpText,x,y)
+							}
 						}
 					}
-					//*/
-					// if both we get 49 | fillText only ~40+ | strokeText only ~30
+					/* results
+						fillText only
+							 49 : CB = has at least fillText
+						fillText + strokeText
+							 49 : CB = only fillText
+							 49 : CB = has fillText + strokeText
+							~14 : CB = only strokeText
+                0 : false positive: can't get any on my machine but see below
+					*/
+					/* strokeText can create false positives (aliasing?)
+						on my machine: windows, dpi=1, en* language default fonts, default text size etc
+						 - 10k tests on TZP main: `-` char and monospace = zero false positives
+								zoom doesn't seem to affect it
 
+						on my machine running 100 tests: false positives
+						'a' monospace  = 98% (9 affected cells)
+						'x' monospace  = 84% (9)
+						'|' monospace  = 75% (5)
+						'-' monospace  =  0% = also 0 with 10k tests
 
+						'a' sans-serif = 99% (7 affected cells overall)
+						'x' sans-serif = 94% (7)
+						'|' sans-serif = 51% (5)
+						'-' sans-serif = 16% (1)
 
+						Too risky to use in production given all the variables across platforms/users
+						e.g. even if we decided that if only 1 (or 2) indexFonts changed and if only
+						indexFonts changed, i.e it is in stealth mode, means a false positive: at the
+						end of the day we really can't be sure. We need to deal in absolutes
+					*/
 					// then overwrite a % of the pixels with random values
 					let counter = -1
 					for (let x=0; x < cWidth; x++) {
