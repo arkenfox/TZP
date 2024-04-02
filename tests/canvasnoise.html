@@ -120,9 +120,10 @@ function run() {
 					ctxGet2 = dom.cnvGet2.getContext('2d'),
 					ctxBig2 = dom.cnvBig2.getContext('2d')
 
-				let solidR = Math.floor(Math.random()*256),
-					solidG = Math.floor(Math.random()*256),
-					solidB = Math.floor(Math.random()*256)
+				// note: all random values we don't use 255 so RFP-white shows up in all it's glory
+				let solidR = Math.floor(Math.random()*255),
+					solidG = Math.floor(Math.random()*255),
+					solidB = Math.floor(Math.random()*255)
 				let solidClrs = solidR +", "+ solidG +", "+ solidB +", 255"
 
 				// fill big visual with our random color
@@ -142,9 +143,9 @@ function run() {
 
 				let indexFont = []
 				if (!optSolid) {
-					let clrR = Math.floor(Math.random()*256),
-						clrG = Math.floor(Math.random()*256),
-						clrB = Math.floor(Math.random()*256)
+					let clrR = Math.floor(Math.random()*255),
+						clrG = Math.floor(Math.random()*255),
+						clrB = Math.floor(Math.random()*255)
 					let fpText = "\u2588\u2588\u2588\u2588" // full block
 					// order matters
 					// trigger fillText stealth
@@ -171,9 +172,9 @@ function run() {
 							 49 : CB = only fillText
 							 49 : CB = has fillText + strokeText
 							~14 : CB = only strokeText
-                0 : false positive: can't get any on my machine but see below
-					*/
-					/* strokeText can create false positives (aliasing?)
+							  0 : false positive: can't get any on my machine but see below
+
+						strokeText can create false positives (aliasing?, bezier curves etc)
 						on my machine: windows, dpi=1, en* language default fonts, default text size etc
 						 - 10k tests on TZP main: `-` char and monospace = zero false positives
 								zoom doesn't seem to affect it
