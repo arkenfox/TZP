@@ -415,8 +415,7 @@ const get_isOS = () => new Promise(resolve => {
 
 	function tryfonts() {
 		// FF124+ desktop: check for '-apple-system', 'MS Shell Dlg \\32'
-
-		// test doc fonts enabled
+		// check doc fonts enabled
 		let fntEnabled = false
 		try {
 			let fntTest = "\"Arial Black\""
@@ -427,13 +426,25 @@ const get_isOS = () => new Promise(resolve => {
 			}
 		} catch(e) {}
 		if (!fntEnabled) {trysomethingelse(); return}
-
-		// test fonts using mini test
-		Promise.all([
-			get_font_sizes(false)
-		]).then(function(res){
-			//console.log(res)
-			exit()
+		// test fonts
+		get_font_sizes(false).then(res => {
+			if ("object" == typeFn(res)) {
+				let aDetected = []
+				res.fontsPerspectiveNumber.forEach(function(fnt){
+					aDetected.push(fnt.split(":")[0])
+				})
+				let expected = aDetected[0]
+				if (aDetected.length == 1) {
+					if (expected == "MS Shell Dlg \\32") {exit("windows")
+					} else if (expected == "-apple-system") {exit("mac")}
+				} else if (aDetected.length == 0) {
+					exit("linux")
+				} else {
+					trysomethingelse()
+				}
+			} else {
+				trysomethingelse()
+			}
 		})
 	}
 
