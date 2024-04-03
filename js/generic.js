@@ -202,30 +202,26 @@ function run_basic() {
 function getElementProp(SECT, id, name, pseudo = ":after") {
 	// default none: https://www.w3.org/TR/CSS21/generate.html#content
 	try {
-		if (runSE) {foo++}
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
 		item = item.getPropertyValue("content")
-		if (runPS) {item = "none"}
+		if (runSE) {foo++} else if (runPS) {item = "none"}
 		let originalitem = item
 		item = item.replace(/"/g,"") // trim quote marks
-		//console.log(SECT, id, name, pseudo, "~"+ item +"~", "~"+ originalitem +"~")
 
-		// out of range: screen/window returns "none"
 		if (id == "#S" || id == "#D") {
-			if (item == "none") {
-				item = "?"
-			} else if (pseudo == ":after") {
-				item = item.slice(3)				
-			}
+			// out of range: screen/window returns "none"
+			if (item == "none") {item = "?"} else if (pseudo == ":after") {item = item.slice(3)}
 		} else if (id == "#P") {
 			// out of range: dpi returns ""
 			if (item == "") {item = "?"}
 		}
-		if (!Number.isNaN(item * 1)) {item = item * 1} // number
+		// numbers
+		let iType = typeFn(item)
+		if ("string" == typeFn(item) && !Number.isNaN(item * 1)) {item = item * 1} // number
 
 		// fuckery
 		if (item == "") {
-			log_error(SECT, name, zErrInvalid +"got ''")
+			log_error(SECT, name, zErrInvalid +"got "+ iType)
 			item = zErr
 		} else if (originalitem == "none") {
 			// ignore screen/window
@@ -403,42 +399,64 @@ const get_isOS = () => new Promise(resolve => {
 	const METRIC = "isOS"
 
 	function exit(value) {
+		// set icon
+		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
+		dom.fdResourceCss.style.backgroundImage = pngURL
+		// set isOS
 		isOS = value
-if (isFile) {isOS = "windows"} // temp
 		log_perf(SECTG, METRIC, t0, "", isOS +"")
 		return resolve()
 	}
 
 	function trysomethingelse() {
+		// put on my thinking cap
 		exit()
 	}
 
 	function tryfonts() {
-		exit()
-	}
+		// FF124+ desktop: check for '-apple-system', 'MS Shell Dlg \\32'
 
-	function tidy(value) {
-		// set icon
-		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
-		dom.fdResourceCss.style.backgroundImage = pngURL
-		// quick exit
-		if (value !== list[0]) {exit(value); return}
-		// FF124+ desktop: dig deeper
-		// the easiest way is to check for '-apple-system', 'MS Shell Dlg','MS Shell Dlg \\32'
-			// we could check a widget fonts but that fails in TB windows, may change
-			// and getComputedStyle can report the wrong font, so detect the actual fonts
+		// test doc fonts enabled
+		let fntEnabled = false
 		try {
-			// test doc fonts enabled
 			let fntTest = "\"Arial Black\""
 			let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
-			let fntEnabled = (font == fntTest ? true : false)
+			fntEnabled = (font == fntTest ? true : false)
 			if (!fntEnabled) {
 				if (font.slice(0,11) == "Arial Black") {fntEnabled = true} // ext may strip quotes marks
 			}
-			if (fntEnabled) {tryfonts()} else {trysomethingelse()}
+		} catch(e) {}
+		if (!fntEnabled) {trysomethingelse(); return}
+
+		// test fonts using mini test
+		Promise.all([
+			get_font_sizes(false)
+		]).then(function(res){
+			//console.log(res)
+			exit()
+		})
+	}
+
+	function trywidget() {
+		// FF124+ desktop
+			// note: TB hides system fonts on linux/windows but not mac
+			// getComputedStyle can report the wrong font, but FF itself reports one of these two
+		try {
+			let aIgnore = [
+			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined]
+			let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
+			//font = "sans-serif" // simulate TB/RFP-when-it-gets-it
+			if (aIgnore.includes(font)) {
+				tryfonts()
+			} else {
+				let value = "linux"
+				if (font.slice(0,12) == "MS Shell Dlg") {value = "windows"
+				} else if (font == "-apple-system") {value = "mac"}
+				exit(value)
+			}
 		} catch(e) {
-			// don't log anything, we test this in the fonts section
-			trysomethingelse()
+			tryfonts()
 		}
 	}
 
@@ -453,15 +471,20 @@ if (isFile) {isOS = "windows"} // temp
 	if (isVer > 123) {path = "chrome://browser/content/", suffix = ".css", list = ['extension']}
 	const get_event = (css, item) => new Promise(resolve => {
 		css.onload = function() {
-			if (item == "win") {item = "windows"}
 			document.head.removeChild(css)
-			tidy(item) // we only need the first
+			// we only need the first
+			if (isVer > 123) {
+				trywidget()
+			} else {
+				if (item == "win") {item = "windows"}
+				exit(item)
+			}
 			return resolve()
 		}
 		css.onerror = function() {
 			failed++
 			document.head.removeChild(css)
-			if (failed == list.length) {tidy("android")} // all failed
+			if (failed == list.length) {exit("android")} // all failed
 			return resolve()
 		}
 	})
@@ -860,6 +883,7 @@ function togglerows(id, word) {
 }
 
 function filterMetrics(scope, value) {
+	// metric keys
 	// example: /(?=.*?(string1))(?=.*?(string2))/i;
 		// ToDo: regex: replace toLoweCasze() with leading+trailing / and an i (case insentitive)
 	let t0 = nowFn()
@@ -878,13 +902,24 @@ function filterMetrics(scope, value) {
 					for (const key of Object.keys(lookup[item].metrics)) {
 						if ((key.toLowerCase()).match(value) !== null) {
 							tmpObj[key] = lookup[item]["metrics"][key]
+						} else {
+							// go deeper
+							let oNested = lookup[item]["metrics"][key]
+							if ("object" == typeof oNested) {
+								try {
+									let tmpNest = {}
+									for (const n of Object.keys(oNested)) {
+										if ((n.toLowerCase()).match(value) !== null) {
+											tmpNest[n] = oNested[n]
+										} // should we go deeper?
+									}
+									if (Object.keys(tmpNest).length) {tmpObj[key] = tmpNest}
+								} catch(e) {}
+							}
 						}
 					}
 					if (Object.keys(tmpObj).length) {
-						let newObj = {
-							"hash": mini(tmpObj),
-							"metrics": tmpObj
-						}
+						let newObj = {"hash": mini(tmpObj),"metrics": tmpObj}
 						if (data == undefined) {data = {}}
 						data[item] = newObj
 					}
@@ -1727,6 +1762,8 @@ function outputSection(id, cls) {
 		try {sDataTemp["display"][isScope][id] = {}} catch(e) {}
 		try {delete sData["errors"][isScope][name]} catch(e) {}
 		try {delete sDataTemp["errors"][isScope][name]} catch(e) {}
+		try {delete sData["lies"][isScope][name]} catch(e) {}
+		try {delete sDataTemp["lies"][isScope][name]} catch(e) {}
 		let tbl = document.getElementById("tb"+ id)
 		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
 		gRun = false
@@ -1794,9 +1831,10 @@ function run_immediate() {
 	let t00 = nowFn()
 	gData["perf"].push([1, "IMMEDIATE", t00])
 	get_isGecko()
+	if (location.protocol == "file:") {isFile = true}
 	get_isRecursion()
 	get_isDevices()
-	if (location.protocol == "file:") {isFile = true}
+	try {navigator.storage.getDirectory()} catch(e) {}
 	// warm ups
 	try {let warmDTF = Intl.DateTimeFormat().resolvedOptions()} catch(e) {}
 	try {let warmTZ = Intl.DateTimeFormat(undefined, {timeZone: "Europe/London", timeZoneName: "shortGeneric"}).format(new Date)} catch(e) {}
@@ -1815,4 +1853,3 @@ function run_immediate() {
 }
 
 run_immediate()
-

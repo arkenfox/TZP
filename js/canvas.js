@@ -362,9 +362,9 @@ const outputCanvas = () => new Promise(resolve => {
 	// random getImageData
 	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
 	let dataToDraw = [], indexFont = []
-	let solidR = Math.floor(Math.random()*256),
-		solidG = Math.floor(Math.random()*256),
-		solidB = Math.floor(Math.random()*256)
+	let solidR = Math.floor(Math.random()*255),
+		solidG = Math.floor(Math.random()*255),
+		solidB = Math.floor(Math.random()*255)
 	let solidClrs = solidR +","+ solidG +","+ solidB +",255"
 	let counter = -1
 	for (let x=0; x < sizeW; x++) {
@@ -382,9 +382,9 @@ const outputCanvas = () => new Promise(resolve => {
 			}
 			if (isRandom) {
 				// random: 113
-				let valueR = Math.floor(Math.random()*256),
-					valueG = Math.floor(Math.random()*256),
-					valueB = Math.floor(Math.random()*256)
+				let valueR = Math.floor(Math.random()*255),
+					valueG = Math.floor(Math.random()*255),
+					valueB = Math.floor(Math.random()*255)
 				dataDrawn[k] = valueR
 				dataDrawn[k+1] = valueG
 				dataDrawn[k+2] = valueB

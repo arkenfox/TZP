@@ -51,10 +51,10 @@ const get_maxtouch = () => new Promise(resolve => {
 				display = log_error(SECT7, METRIC, zErrInvalid + "got "+ value)
 				value = zErr
 			} else if (isProxy) {
-				if (sData[SECT99].includes("Navigator.maxTouchPoints")) {
+				if (sData[SECT99].includes("Navigator."+ METRIC)) {
 					display = colorFn(display)
 					value = zLIE
-					log_known(SECT7, "maxtouchpoints")
+					log_known(SECT7, METRIC)
 				}
 			}
 		} else {
@@ -74,14 +74,14 @@ const get_mm_color = () => new Promise(resolve => {
 	const METRIC = "color", METRIC2 = METRIC +"_css"
 	let isErr = false, value, display
 	try {
-		if (runSE) {foo++}
 		value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
 			return i
 		})()
-		if (runST) {value += ""} else if (runSL) {value = 3}
-		display = cleanFn(value)
+		if (runSE) {foo++} else if (runST) {value = 4.5} else if (runSL) {value = 3}
+		display = value
 		if (!Number.isInteger(value)) {
-			isErr = true; value = zErr; display = log_error(SECT7, METRIC, zErrType + typeof value)
+			display = log_error(SECT7, METRIC, zErrType + typeFn(value))
+			isErr = true; value = zErr; 
 		}
 	} catch(e) {
 		isErr = true; value = zErr; display = log_error(SECT7, METRIC, e)

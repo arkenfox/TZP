@@ -358,62 +358,59 @@ function get_computed_styles() {
 }
 
 const get_mm_css = () => new Promise(resolve => {
-	function get_mm(type, id, rfpvalue, minVer) {
-		const METRIC = type, METRIC2 = type +"_css"
-		let value = zNA, display = value, q = type, isErr = false
+	// https://searchfox.org/mozilla-central/source/servo/components/style/gecko/media_features.rs#690
+
+	// key: [valid test values], css pseudo id, rfp value if needed, start version for notation if needed
+		// only notate from when the mediaquery is enabled by default _and_ rfp is applied
+	const oTests = {
+		"prefers-reduced-motion": [['no-preference','reduce'], "PRM", "no-preference"], // FF63+
+		"prefers-contrast": [['no-preference','high','low'], "PC", "no-preference"], // FF65+
+			// ^ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
+			// ^ 1656363^ enabled by default in FF101
+		"prefers-color-scheme": [['light','dark','no-preference'], "PCS","light"], // FF67+: 1494034
+			// ^ FF79+: 1643656: no-preference obsolete
+		"forced-colors": [['none','active'], "FC"], // FF89+: 1659511
+		"prefers-reduced-transparency": [['no-preference','reduce'], "PRT"], // FF95+: 1736914
+			// ^ layout.css.prefers-reduced-transparency.enabled
+			// ^ 1822176: default disabled: 
+		"inverted-colors": [['none','inverted'], "IC"], // FF114+
+			// ^ 1794628: layout.css.inverted-colors.enabled (default disabled)
+			// ^ ToDo: notation when pref flips: check RFP = "none"
+		"prefers-reduced-data": [['no-preference','reduce'], "PRD"], // ?
+	}
+	let res = []
+	for (const k of Object.keys(oTests)) {
+		let value = zNA, display, k2 = k +"_css", aTests = oTests[k][0]
 		try {
-			if (window.matchMedia("("+ q +":no-preference)").matches) {value = "no-preference"
-			} else if (window.matchMedia("("+ q +":light)").matches) {value = "light"
-			} else if (window.matchMedia("("+ q +":dark)").matches) {value = "dark"
-			} else if (window.matchMedia("("+ q +":reduce)").matches) {value = "reduce"
-			} else if (window.matchMedia("("+ q +":none)").matches) {value = "none"
-			} else if (window.matchMedia("("+ q +":high)").matches) {value = "high"
-			} else if (window.matchMedia("("+ q +":low)").matches) {value = "low"
-			} else if (window.matchMedia("("+ q +":active)").matches) {value = "active"
+			for (let i=0; i < aTests.length; i++) {
+				if (window.matchMedia("("+ k +":"+ aTests[i] +")").matches) {value = aTests[i]; break}
 			}
-			if (runSE) {foo++} else if (runSL) {value = "fake"}
+			if (runSE) {foo++} else if (runSL) {value = "not-"+ value}
 			display = value
 		} catch(e) {
-			isErr = true
-			display = log_error(SECT14, METRIC, e)
+			display = log_error(SECT14, k, e)
 			value = zErr
 		}
-		let cssvalue = getElementProp(SECT14, "#css"+ id, METRIC2)
-		let isErrCss = cssvalue == zErr
+		let cssvalue = getElementProp(SECT14, "#css"+ oTests[k][1], k2)
 		if (isSmart) {
-			if (!isErr && !isErrCss) {
+			if (value !== zErr && cssvalue !== zErr) {
 				if (value !== cssvalue) {
 					display = colorFn(display)
 					value = zLIE
-					log_known(SECT14, METRIC)
+					log_known(SECT14, k)
 				}
 			}
-			if (rfpvalue !== undefined) {
-				// notate from when it was flipped
-				if (minVer == undefined || minVer < isVer) {
-					display += display == rfpvalue ? rfp_green : rfp_red // mm
-					log_display(14, type +"_css", (cssvalue == rfpvalue ? rfp_green : rfp_red)) // css
+			let rfp = oTests[k][2], startVer = oTests[k][3]
+			if (rfp !== undefined) {
+				if (startVer == undefined || startVer <= isVer) {
+					display += display == rfp ? rfp_green : rfp_red // mm
+					log_display(14, k2, (cssvalue == rfp ? rfp_green : rfp_red)) // css
 				}
 			}
 		}
-		log_display(14, type, display)
-		res.push([METRIC, value], [METRIC2, cssvalue])
+		log_display(14, k, display)
+		res.push([k, value], [k2, cssvalue])
 	}
-
-	let res = []
-	get_mm("prefers-reduced-motion","PRM","no-preference") // FF63+
-	get_mm("prefers-contrast","PC", "no-preference") // FF65+ 1506364: layout.css.prefers-contrast.enabled / browser.display.prefers_low_contrast
-		// ^ 1656363^ enabled by default in FF101
-	get_mm("prefers-color-scheme","PCS","light") // FF67+: 1494034
-	get_mm("forced-colors","FC") // FF89+: 1659511
-
-	get_mm("prefers-reduced-transparency","PRT") // FF95+: 1736914: layout.css.prefers-reduced-transparency.enabled
-		// default disabled: 1822176
-
-	get_mm("inverted-colors","IC", "none", 500) // FF114+: 1794628: layout.css.inverted-colors.enabled (default disabled)
-		// ToDo: inverted-colors watch for pref flip minVer
-
-	get_mm("prefers-reduced-data","PRD")
 	return resolve(res)
 })
 

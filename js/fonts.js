@@ -434,6 +434,12 @@ let fntMaster = {
 			'Cascadia Code','Cascadia Mono', // 11
 		],
 	},
+	// help determine OS
+	"mini": [
+		//'Dancing Script','Roboto', // also help determine isPlatformFont for android
+		'-apple-system',
+		'MS Shell Dlg \\32',
+	],
 }
 
 function get_fntCodes(name) {
@@ -665,7 +671,7 @@ const get_document_fonts = () => new Promise(resolve => {
 	return resolve([METRIC, fpvalue])
 })
 
-const get_font_sizes = () => new Promise(resolve => {
+const get_font_sizes = (isMain = true) => new Promise(resolve => {
 	/* https://github.com/abrahamjuliot/creepjs */
 	try {
 		fntBases = {} // reset
@@ -815,8 +821,41 @@ const get_font_sizes = () => new Promise(resolve => {
 			}
 		}
 
+		let fntGeneric = [], fntTest = [], fntControl = []
+		let aTests = [], aTestsValid = [], aRemove = []
+		if (isMain) {
+			fntControl = fntData["control"]
+			fntGeneric = fntData["generic"]
+			fntTest = fntData["full"]
+			aTests = [
+				["client", detectedViaClient],
+				["domrectbounding", detectedViaDomRectBounding],
+				["domrectboundingrange", detectedViaDomRectBoundingRange],
+				["domrectclient", detectedViaDomRectClient],
+				["domrectclientrange", detectedViaDomRectClientRange],
+				["offset", detectedViaOffset],
+				["npixel", detectedViaPixelNumber],
+				["npixelsize", detectedViaPixelSizeNumber],
+				["nperspective", detectedViaPerspectiveNumber],
+				["ntransform", detectedViaTransformNumber],
+				["pixel", detectedViaPixel],
+				["pixelsize", detectedViaPixelSize],
+				["perspective", detectedViaPerspective],
+				["scroll", detectedViaScroll],
+				["transform", detectedViaTransform],
+			]
+		} else {
+			fntControl = ['monospace, Consolas, Menlo, "Courier New\"','sans-serif, Arial','serif, "Times New Roman\"']
+			fntGeneric = fntControl
+			fntTest = fntMaster["mini"]
+			aTests = [
+				["npixel", detectedViaPixelNumber],
+				["nperspective", detectedViaPerspectiveNumber],
+			]
+		}
+
 		// base sizes
-		const base = fntData["generic"].reduce((acc, font) => {
+		let base = fntGeneric.reduce((acc, font) => {
 			if (isSystemFont.includes(font)) { // not a family
 				span.style.setProperty('--font', "")
 				span.style.font = font
@@ -832,45 +871,28 @@ const get_font_sizes = () => new Promise(resolve => {
 
 		// copy base into new object, regroup by hashs
 		let baseObj = {}, oTempBase = {}
-		for (const k of Object.keys(base)) {
-			baseObj[k] = {}
-			for (const j of Object.keys(base[k])) {baseObj[k][j] = base[k][j]}
-		}
-		for (const k of Object.keys(baseObj)) {
-			let tmpHash = mini(baseObj[k])
-			if (oTempBase[tmpHash] == undefined) {
-				oTempBase[tmpHash] = {"bases": [k], "metrics": baseObj[k]}
-			} else {
-				oTempBase[tmpHash]["bases"].push(k)
+		if (isMain) {
+			for (const k of Object.keys(base)) {
+				baseObj[k] = {}
+				for (const j of Object.keys(base[k])) {baseObj[k][j] = base[k][j]}
+			}
+			for (const k of Object.keys(baseObj)) {
+				let tmpHash = mini(baseObj[k])
+				if (oTempBase[tmpHash] == undefined) {
+					oTempBase[tmpHash] = {"bases": [k], "metrics": baseObj[k]}
+				} else {
+					oTempBase[tmpHash]["bases"].push(k)
+				}
 			}
 		}
 		//console.log(base)
 		//console.log(oTempBase)
 
-		// type checks
-		let aTests = [
-			["client", detectedViaClient],
-			["domrectbounding", detectedViaDomRectBounding],
-			["domrectboundingrange", detectedViaDomRectBoundingRange],
-			["domrectclient", detectedViaDomRectClient],
-			["domrectclientrange", detectedViaDomRectClientRange],
-			["offset", detectedViaOffset],
-			["npixel", detectedViaPixelNumber],
-			["npixelsize", detectedViaPixelSizeNumber],
-			["nperspective", detectedViaPerspectiveNumber],
-			["ntransform", detectedViaTransformNumber],
-			["pixel", detectedViaPixel],
-			["pixelsize", detectedViaPixelSize],
-			["perspective", detectedViaPerspective],
-			["scroll", detectedViaScroll],
-			["transform", detectedViaTransform],
-		]
-		let aTestsValid = [], aRemove = []
+		// test validity
+		let baseStyle = "monospace" // we need a base style: we'll always have monospace
 		aTests.forEach(function(pair) {
 			let wName = pair[0] +"Width", hName = pair[0] +"Height"
-			// we need a base object: we'll always have monospace
-			let baseObj = "monospace"
-			let wValue = base[baseObj][wName], hValue = base[baseObj][hName]
+			let wValue = base[baseStyle][wName], hValue = base[baseStyle][hName]
 			let wType = typeFn(wValue)
 			let hType = typeFn(hValue)
 			if ("number" == wType && "number" == hType) {
@@ -887,30 +909,34 @@ const get_font_sizes = () => new Promise(resolve => {
 				aRemove.push(wName, hName)
 			}
 		})
-		// expand removals, take out the garbage + stash in fntBases
-		if (aDomRect[0] == false) {aRemove.push('domrectboundingHeight','domrectboundingWidth')}
-		if (aDomRect[1] == false) {aRemove.push('domrectclientHeight','domrectclientWidth')}
-		if (aDomRect[2] == false) {aRemove.push('domrectboundingrangeHeight','domrectboundingrangeWidth')}
-		if (aDomRect[3] == false) {aRemove.push('domrectclientrangeHeight','domrectclientrangeWidth')}
-		aRemove = aRemove.filter(function(item, position) {return aRemove.indexOf(item) === position})
-		aRemove.forEach(function(m) {
-			for (const k of Object.keys(oTempBase)) {delete oTempBase[k]["metrics"][m]}
-		})
-		fntBases = oTempBase
 
-		// return if not doing font sizes
-		if (!fntData["full"].length || fntDocEnabled == false) {
-			return resolve("baseonly")
+		if (isMain) {
+			// expand removals, take out the garbage + stash in fntBases
+			if (aDomRect[0] == false) {aRemove.push('domrectboundingHeight','domrectboundingWidth')}
+			if (aDomRect[1] == false) {aRemove.push('domrectclientHeight','domrectclientWidth')}
+			if (aDomRect[2] == false) {aRemove.push('domrectboundingrangeHeight','domrectboundingrangeWidth')}
+			if (aDomRect[3] == false) {aRemove.push('domrectclientrangeHeight','domrectclientrangeWidth')}
+			aRemove = aRemove.filter(function(item, position) {return aRemove.indexOf(item) === position})
+			aRemove.forEach(function(m) {
+				for (const k of Object.keys(oTempBase)) {delete oTempBase[k]["metrics"][m]}
+			})
+			fntBases = oTempBase
+			// return if not doing font sizes
+			if (!fntTest.length || fntDocEnabled == false) {
+				return resolve("baseonly")
+			}
 		}
 
 		// measure
+//let counter = 0
 		if (aTestsValid.length) {
 			let isDetected = false, intDetected = 0, intDetectedMax = aTestsValid.length
-			fntData["full"].forEach(font => {
+			fntTest.forEach(font => {
 				isDetected = false // have we found it
 				intDetected = 0 // in all valid methods
-				fntData["control"].forEach(basefont => {
+				fntControl.forEach(basefont => {
 					if (isDetected) {return}
+//counter++
 					intDetected = 0 // reset per control
 					const family = "'"+ font +"', "+ basefont	
 					span.style.setProperty('--font', family)
@@ -930,17 +956,20 @@ const get_font_sizes = () => new Promise(resolve => {
 				})
 			})
 		}
+//console.log(counter)
 
 		// tidy lies: none/all in Sets
-		aTests.forEach(function(pair) {
-			if (pair[1].size == 0) {
-				pair[1].clear()
-				pair[1].add("none")
-			} else if (pair[1].size == fntData["full"].length) {
-				pair[1].clear()
-				pair[1].add("all") // includes fake font
-			}
-		})
+		if (isMain) {
+			aTests.forEach(function(pair) {
+				if (pair[1].size == 0) {
+					pair[1].clear()
+					pair[1].add("none")
+				} else if (pair[1].size == fntData["full"].length) {
+					pair[1].clear()
+					pair[1].add("all") // includes fake font
+				}
+			})
+		}
 
 		const fontsScroll = [...detectedViaScroll]
 		const fontsOffset = [...detectedViaOffset]
@@ -957,24 +986,31 @@ const get_font_sizes = () => new Promise(resolve => {
 		const fontsDomRectBoundingRange = [...detectedViaDomRectBoundingRange]
 		const fontsDomRectClient = [...detectedViaDomRectClient]
 		const fontsDomRectClientRange = [...detectedViaDomRectClientRange]
-		return resolve({
-			// match display order so we output detail links for the first of each hash
-			fontsClient,
-			fontsOffset,
-			fontsPerspective,
-			fontsPixel,
-			fontsPixelSize,
-			fontsScroll,
-			fontsTransform,
-			fontsPixelNumber,
-			fontsPixelSizeNumber,
-			fontsPerspectiveNumber,
-			fontsTransformNumber,
-			fontsDomRectBounding,
-			fontsDomRectBoundingRange,
-			fontsDomRectClient,
-			fontsDomRectClientRange,
-		})
+		if (isMain) {
+			return resolve({
+				// match display order so we output detail links for the first of each hash
+				fontsClient,
+				fontsOffset,
+				fontsPerspective,
+				fontsPixel,
+				fontsPixelSize,
+				fontsScroll,
+				fontsTransform,
+				fontsPixelNumber,
+				fontsPixelSizeNumber,
+				fontsPerspectiveNumber,
+				fontsTransformNumber,
+				fontsDomRectBounding,
+				fontsDomRectBoundingRange,
+				fontsDomRectClient,
+				fontsDomRectClientRange,
+			})
+		} else {
+			return resolve({
+				fontsPixelNumber,
+				fontsPerspectiveNumber,
+			})
+		}
 	} catch(e) {
 		log_error(SECT12, "fontsizes", e)
 		return resolve(zErr)
@@ -1010,8 +1046,9 @@ const get_fonts = () => new Promise(resolve => {
 	function get_baseHash() {
 		let display = "", baseBtn = ""
 		try {
-			let len = Object.keys(fntBases).length // recorded earlier
-			if (len > 0) {
+			let bType = typeFn(fntBases)
+			if ("object" == bType) {
+				let len = Object.keys(fntBases).length // recorded earlier
 				if (fntData["full"].length && fntDocEnabled) {
 					// fntBases will need changes and rehashes
 					// if we found more garbage
@@ -1019,7 +1056,6 @@ const get_fonts = () => new Promise(resolve => {
 						console.log("WE NEED TO CHECK & UPDATE fntBASES")
 						console.log(aRemove)
 					}
-
 				}
 				// cleanup: final rehash & sort
 				let tmpBases = {}
@@ -1033,12 +1069,11 @@ const get_fonts = () => new Promise(resolve => {
 				}
 				fntBases = {}
 				for (const k of Object.keys(tmpBases).sort()) {fntBases[k] = tmpBases[k]}
-				
 				display = mini(fntBases)
 				baseBtn = addButton(12, METRICB, len +"/"+ fntData["generic"].length)
 				addData(12, METRICB, fntBases, display, true)
 			} else {
-				display = log_error(SECT12, METRICB, zErrEmpty)
+				display = log_error(SECT12, METRICB, zErrType + bType)
 				addData(12, METRICB, zErr)
 			}
 		} catch(e) {
@@ -1052,10 +1087,11 @@ const get_fonts = () => new Promise(resolve => {
 	get_font_sizes().then(res => {
 		try {document.getElementById("font-fingerprint").remove()} catch(e) {} // remove element
 		// quick exits
-		if (res == "baseonly") {
+		let rType = typeFn(res)
+		if ("baseonly" === res) {
 			exit(zNA)
 			return
-		} else if ("string" === typeof res) {
+		} else if ("string" === rType) {
 			exit(zErr)
 			return
 		}
@@ -1076,8 +1112,7 @@ const get_fonts = () => new Promise(resolve => {
 		//console.log(res)
 		let oData = {}, aIgnore = [], aSimpleLies = [], oValid = {}
 		let ignoreList = ["none", "all", "invalid size", "unknown"]
-
-		if (typeof res === "object" && res !== null) {
+		if ("object" === rType) {
 			for (let name in res) {
 				let data = res[name], hash = "unknown"
 				// note: do not sort: these are "fontnames:size" and fntList was already sorted
@@ -1105,6 +1140,12 @@ const get_fonts = () => new Promise(resolve => {
 					}
 				}
 			}
+		} else {
+			// ToDo: we need to check baseFonts: could be an error or we could add it
+			// atm it just displays + records zErr
+			log_error(SECT12, METRIC, zErrType + rType)
+			exit(zErr)
+			return
 		}
 
 		// collect size buckets, font names
