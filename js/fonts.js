@@ -847,9 +847,9 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 		} else {
 			fntControl = ['monospace, Consolas, Menlo, "Courier New\"','sans-serif, Arial','serif, "Times New Roman\"']
 			fntGeneric = fntControl
-			fntTest = fntMaster["mini"]
+			fntTest = ["--00"+ rnd_string()]
+			fntTest = fntTest.concat(fntMaster["mini"])
 			aTests = [
-				["npixel", detectedViaPixelNumber],
 				["nperspective", detectedViaPerspectiveNumber],
 			]
 		}
@@ -1006,10 +1006,7 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 				fontsDomRectClientRange,
 			})
 		} else {
-			return resolve({
-				fontsPixelNumber,
-				fontsPerspectiveNumber,
-			})
+			return resolve({fontsPerspectiveNumber})
 		}
 	} catch(e) {
 		log_error(SECT12, "fontsizes", e)
