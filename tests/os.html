@@ -218,10 +218,12 @@ function check_widgetfonts() {
 		if (isThrowWidgetError) {green_eggs_and_ham++}
 		let aIgnore = [
 		'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-		'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined]
+		'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined, '']
 		let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
 		//font = "Roboto"
-		aDebug.push(s13 + "widget font: ".padStart(pad) + sc + font)
+		//font = "" // godamnit pierov
+		let fontDisplay = font == "" ? "empty string" : font
+		aDebug.push(s13 + "widget font: ".padStart(pad) + sc + fontDisplay)
 		let display, value
 		if (isFF) {
 			if (aIgnore.includes(font)) {
