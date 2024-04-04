@@ -23,6 +23,30 @@ function cleanFn(item, skipArray = false) {
 	return item
 }
 
+function typeFn(item, isSimple = false) {
+	// return a more detailed result
+	let type = typeof item
+	if ("number" === type) {
+		if (Number.isNaN(item)) {type = "NaN"} else if (Infinity === item) {type = Infinity}
+	} else if ("string" === type) {
+		if (!isSimple) {
+			if ("" === item) {type = "empty string"} else if ("" === item.trim()) {type = "whitespace"}
+		}
+	} else if ("object" === type) {
+		if (null === item) {type = "null"
+		} else if (Array.isArray(item)) {
+			type = "array"
+			if (!isSimple) {type = !item.length ? "empty array" : "array"}
+		} else {
+			if (!isSimple) {
+				try {if (0 === Object.keys(item).length) {type = "empty object"}} catch(e) {}
+			}
+		}
+	}
+	// do nothing: undefined, bigint, boolean, function
+	return type
+}
+
 function getUniqueElements() {
 	const dom = document.getElementsByTagName('*')
 	return new Proxy(dom, {
