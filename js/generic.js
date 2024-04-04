@@ -455,9 +455,10 @@ const get_isOS = () => new Promise(resolve => {
 		try {
 			let aIgnore = [
 			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined]
+			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined, '']
 			let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
 			//font = "sans-serif" // simulate TB/RFP-when-it-gets-it
+			//font = '' // simulate TBA
 			if (aIgnore.includes(font)) {
 				tryfonts()
 			} else {
