@@ -605,14 +605,11 @@ function run() {
 		rec(typeof navigation, "navigation", code, "object")
 		rec(typeof onbeforematch, "onbeforematch", code, "object")
 		rec(typeof onbeforexrselect, "onbeforexrselect", code, "object")
-		rec(typeof oncontextlost, "oncontextlost", code, "object")
-		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
 		rec(typeof queryLocalFonts, "queryLocalFonts", code, "function")
 		rec(typeof sharedStorage, "sharedStorage", code, "object")
 		// newish: since last check; testing chrome 119
 		rec(typeof documentPictureInPicture, "documentPictureInPicture", code, "object")
 		rec(typeof fence, "fence", code, "object")
-		rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
 		rec(typeof credentialless, "credentialless", code, "boolean")
 			// other
 		rec(typeof opr, "opr", code, "object") // OPERA (desktop at least)
@@ -709,6 +706,8 @@ function run() {
 		rec(typeof orientation, "orientation", code, "number")
 		rec(typeof requestIdleCallback, "requestIdleCallback", code, "function")
 		rec(typeof scheduler, "scheduler", code, "object")
+		rec(typeof oncontextlost, "oncontextlost", code, "object")
+		rec(typeof oncontextrestored, "oncontextrestored", code, "object")
 
 		// blink + webkit (not seen in gecko)
 		code = 52
@@ -720,6 +719,7 @@ function run() {
 		rec(typeof styleMedia, "styleMedia", code, "object")
 		rec(typeof webkitCancelAnimationFrame, "webkitCancelAnimationFrame", code, "function")
 		rec(typeof webkitRequestAnimationFrame, "webkitRequestAnimationFrame", code, "function")
+		rec(typeof oncontentvisibilityautostatechange, "oncontentvisibilityautostatechange", code, "object")
 
 		// gecko + webkit (not seen in blink)
 		code = 54
