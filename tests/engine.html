@@ -1950,10 +1950,14 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof webkitStorageInfo, "webkitStorageInfo")
 
 		// finish
-		// FF110+ 1689631 added ondeviceorientationabsolute
-			// I don't have a 110 test yet, but it's not important, there are lots of non-gecko props left
 		if (isVer > 109) {
+			// FF110+ 1689631
 			resU = resU.filter(x => !["ondeviceorientationabsolute"].includes(x))
+			if (isVer > 125) {
+				// FF126: 1887729
+				resU = resU.filter(x => !["oncontextlost"].includes(x))
+				resU = resU.filter(x => !["oncontextrestored"].includes(x))
+			}
 		}
 
 		let boolU = resU.length == 0
