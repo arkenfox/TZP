@@ -341,8 +341,7 @@ function try_somethingelse() {
 	let key = "05"
 	aDebug.push(s13 + "HTMLMediaElement: ".padStart(pad) + sc + "currentTime")
 	try {
-		let props = Object.getOwnPropertyNames(window.HTMLMediaElement.prototype)
-		let value = props.includes("currentTime") ? "not linux" : "linux"
+		let value = HTMLMediaElement.prototype.hasOwnProperty("currentTime") ? "not linux" : "linux" // 0.008ms
 		aDebug.push(sg + "result: ".padStart(pad) + sc + value +"<br>")
 		oResults[key] = value
 	} catch(e) {
