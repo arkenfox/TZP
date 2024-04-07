@@ -12,7 +12,7 @@
 		table {width: 480px;}
 		hr {color: var(--test3);}
 		#tb3 td {padding-left: 0px;}
-		.center {
+		.oscenter {
 			text-align: center;
 		}
 	</style>
@@ -28,7 +28,7 @@
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
-	<tr><td class="blurb"><a class="return" href="../index.html#devices">return to TZP index</a></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#feature">return to TZP index</a></td></tr>
 	</table>
 
 	<table id="tb3">
@@ -55,11 +55,6 @@
 <script>
 'use strict';
 
-s3 = s3.trim()
-s13 = s13.trim()
-sb = sb.trim()
-sg = sg.trim()
-
 let aDebug = [],
 	oResults = {},
 	t0,
@@ -82,6 +77,7 @@ let oMap = {
 	"02": "chrome",
 	"03": "widget",
 	"04": "fonts",
+	"05": "currentTime",
 }
 
 function finish(type) {
@@ -171,7 +167,7 @@ const check_css = (isNew) => new Promise(resolve => {
 			})
 		} catch(e) {
 			aDebug.push(sb + ("error: ").padStart(pad) + sc)
-			aDebug.push("<div class='center faint'>"+ e +"</div>")
+			aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
 			return resolve("error")
 		}
 	}
@@ -206,7 +202,7 @@ function check_docfonts() {
 		aDebug.push(s13 + "document fonts: ".padStart(pad) + sc)
 		aDebug.push(s13 + "fonts: ".padStart(pad) + sc + zNA)
 		aDebug.push(sb + "error: ".padStart(pad) + sc)
-		aDebug.push("<div class='center faint'>"+ e +"</div>")
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
 		oResults[key] = zNA
 		try_somethingelse()
 	}
@@ -250,7 +246,7 @@ function check_widgetfonts() {
 	} catch(e) {
 		aDebug.push(s13 + "widget font: ".padStart(pad) + sc)
 		aDebug.push(sb + "error: ".padStart(pad) + sc)
-		aDebug.push("<div class='center faint'>"+ e +"</div>")
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
 		oResults[key] = zNA
 		check_docfonts()
 	}
@@ -337,9 +333,23 @@ function run() {
 }
 
 function try_somethingelse() {
-	//aDebug.push(s13 + "alternative test: ".padStart(pad) + sc)
-	// is there anything that is win/mac specific that can't be flipped with a pref
-	aDebug.push(s13 + "something else: ".padStart(pad) + sc +"pending")
+	// is there anything that is platform specific that can't be flipped with a pref
+
+	// FF34+ 848954
+	// linux doesn't have a currentTime property in HTMLMediaElement
+	// https://searchfox.org/mozilla-central/source/dom/html/HTMLMediaElement.h#37
+	let key = "05"
+	aDebug.push(s13 + "HTMLMediaElement: ".padStart(pad) + sc + "currentTime")
+	try {
+		let props = Object.getOwnPropertyNames(window.HTMLMediaElement.prototype)
+		let value = props.includes("currentTime") ? "not linux" : "linux"
+		aDebug.push(sg + "result: ".padStart(pad) + sc + value +"<br>")
+		oResults[key] = value
+	} catch(e) {
+		aDebug.push(sb + "error: ".padStart(pad) + sc)
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+		oResults[key] = zNA
+	}
 
 	finish()
 }
@@ -513,7 +523,7 @@ function try_fonts() {
 		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
 		aDebug.push(s13 + "fonts: ".padStart(pad) + sc)
 		aDebug.push(sb + "error: ".padStart(pad) + sc)
-		aDebug.push("<div class='center faint'>"+ e +"</div>")
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
 		oResults[key] = zNA
 		try_somethingelse()
 	}
