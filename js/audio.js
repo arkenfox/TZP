@@ -28,11 +28,10 @@ function check_audioLies() {
 
 const get_audio_context = (os = isOS) => new Promise(resolve => {
 	const METRIC = "audioContext"
-	let notation = ""
+	let t0 = nowFn(), notation = isSmart ? rfp_red : ""
+
 	try {
-		if (runSE) {foo++}
-		let t0 = nowFn()
-		// get unsorted
+		// unsorted
 		function a(a, b, c) {
 			for (let d in b) "dopplerFactor" === d || "speedOfSound" === d || "currentTime" ===
 			d || "number" !== typeof b[d] && "string" !== typeof b[d] || (a[(c ? c : "") + d] = b[d])
@@ -46,59 +45,59 @@ const get_audio_context = (os = isOS) => new Promise(resolve => {
 		obj = a(obj, f.listener, "ac-")
 		obj = a(obj, d, "an-")
 
-		// sim
-		if (runSL) {obj["ac-channelCount"] = 4} // fake value
-		let oCheck = {}, isLies = false
-		let subsetExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
-		// sort keys
-		let objnew = {}
-		// oCheck = FF70+: keys [20] + expected hardcoded values [16]
+		// sort, type check etc
+		if (runSE) {foo++} else if (runSL) {obj["ac-channelCount"] = "4"; obj["an-fftSize"] = null} // change hardcoded and type
+		let oHardcoded = {} // FF70+: keys [20] + expected hardcoded values [16]
+		let hardcodeExclude = ["ac-outputLatency","ac-sampleRate","ac-maxChannelCount","an-channelCount"]
+		let numberExclude = ["ac-channelCountMode","ac-channelInterpretation","ac-state","an-channelCountMode","an-channelInterpretation"]
+
+		let objnew = {}, isLies = false
 		for (const k of Object.keys(obj).sort()) {
 			objnew[k] = obj[k]
-			oCheck[k] = subsetExclude.includes(k) ? "" : obj[k]
-		}
-		let hash = mini(objnew) // includes original latency
-		if (isSmart) {
-			if (mini(oCheck) !== "dfda7813") {
-				isLies = true
-				log_known(SECT11, METRIC)
-			}
-			if (os !== undefined) {
-				// RFP notation: includes 1564422 outputLatency
-				// no need to check for lies: the hash covers the 16 hardcoded versions + all expected key names
-				notation = rfp_red
-				if (hash == "67a3eeee" && os == "windows") {notation = rfp_green // 0.04
-				} else if (hash == "debdefc0" && os == "mac") {notation = rfp_green // 512/44100 (RFP hardcodes latency)
-				} else if (hash == "2b9d44b0" && os == "android") {notation = rfp_green // 0.02
-				} else if (hash == "9b69969b") {notation = rfp_green // 0.025 catchall incl linux
+			if (isSmart) {
+				oHardcoded[k] = hardcodeExclude.includes(k) ? "" : obj[k]
+				// regardless of hardcoded check, catch all type check entropy
+				let typeCheck = typeFn(obj[k])
+				let typeMatch = numberExclude.includes(k) ? "string" : "number"
+				if (typeMatch !== typeCheck) {
+					log_error(SECT11, METRIC +"_"+ k, zErrType + typeCheck)
+					isLies = true
 				}
 			}
 		}
-		// RFP gives a stable ac-outputLatency
-			// otherwise: with a preceeding test(s) e.g. oscillator: it can be variable per tab
-			// and even on page load (can depend on hardware?). And now we don't await a user
-			// test, the metric is useless if not an RFP hash. Return n/a to avoid any noise
+	
+		let hash = mini(objnew) // includes original latency
+		if (isSmart) {
+			if (mini(oHardcoded) !== "dfda7813") {isLies = true}
+			if (os !== undefined) {
+				// RFP notation: includes 1564422 outputLatency
+				if (hash == "67a3eeee" && os == "windows") {notation = rfp_green // 0.04
+				} else if (hash == "debdefc0" && os == "mac") {notation = rfp_green // 512/44100 (RFP hardcodes latency)
+				} else if (hash == "2b9d44b0" && os == "android") {notation = rfp_green // 0.02
+				} else if (hash == "9b69969b") {notation = rfp_green} // 0.025 catchall incl linux
+			}
+			if (isTB && !isMullvad) {notation = tb_red} // TB should be an error
+		}
+		// RFP gives a stable hardcoded ac-outputLatency
+			// non-RFP can be variable per tab - return n/a to avoid any noise
 		if (isGecko && notation !== rfp_green) {
 			objnew["ac-outputLatency"] = zNA
 			hash = mini(objnew)
 		}
-		let displayHash = isLies ? colorFn(hash) : hash
-
 		if (isLies) {
+			hash = colorFn(hash)
+			log_known(SECT11, METRIC)
 			addDetail(METRIC, objnew, zDOC)
 			addData(11, METRIC, zLIE)
 		} else {
 			addData(11, METRIC, objnew, hash)
 		}
-		if (isTB && !isMullvad) {notation = tb_red}
-		log_display(11, METRIC, displayHash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + notation)
+		log_display(11, METRIC, hash + addButton(11, METRIC, Object.keys(objnew).length +" keys") + notation)
 		log_perf(SECT11, METRIC, t0)
 		return resolve()
-
 	} catch(e) {
 		addData(11, METRIC, zErr)
 		if (isSmart) {
-			notation = rfp_red
 			if (isTB && !isMullvad) {	notation = (e+"" === "TypeError: window.AudioContext is not a constructor" ? tb_green : tb_red)	}
 		}
 		log_display(11, METRIC, log_error(SECT11, METRIC, e) + notation)
@@ -175,7 +174,6 @@ const get_audio_offline = () => new Promise(resolve => {
 							notation = tb_red
 						} else if (isMullvad) {
 							if (isLies) {notation = tb_red}
-							// ignore non lies MB until we get backported: we don't want anything green unless it's protected
 						} else if (isVer > 117) {
 							if (isLies) {
 								notation = default_red
@@ -184,8 +182,7 @@ const get_audio_offline = () => new Promise(resolve => {
 								notation = sbx +"undocumented]"+ sc
 								if (isVer > 123 && hashC == "a7c1fbb6") {notation = sgtick+"x86/amd]"+sc // 1877221
 								} else if (hashC == "24fc63ce") {notation = sgtick+"x86/amd]"+sc
-								} else if (hashC == "a34c73cd") {notation = sgtick+"ARM]"+sc
-								}
+								} else if (hashC == "a34c73cd") {notation = sgtick+"ARM]"+sc}
 							}
 						}
 					}
@@ -213,11 +210,19 @@ const get_audio_offline = () => new Promise(resolve => {
 })
 
 const get_oscillator = () => new Promise(resolve => {
+	let t0 = nowFn()
 	const METRIC = "oscillator"
-	let notation = ""
+	let notation = (isSmart && isVer > 117) ? rfp_red : ""
+
+	function exit(display, value) {
+		if (value == undefined) {value = display}
+		dom[METRIC].innerHTML = display + notation
+		log_perf(SECT11, METRIC, t0)
+		return resolve([METRIC, value])
+	}
+
 	try {
 		if (runSE) {foo++}
-		let t0 = nowFn()
 		let results = [],
 			audioCtx = new window.AudioContext
 		let oscillator = audioCtx.createOscillator(),
@@ -236,52 +241,42 @@ const get_oscillator = () => new Promise(resolve => {
 			try {
 				bins = new Float32Array(analyser.frequencyBinCount)
 				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				for (let i=0; i < bins.length; i++) {
-					results.push(bins[i])
-				}
+				if ("object" !== typeFn(bins)) {throw zErrType +"Float32Array: "+ typeFn(bins)}
+				for (let i=0; i < bins.length; i++) {results.push(bins[i])}
 				analyser.disconnect()
 				scriptProcessor.disconnect()
 				gain.disconnect()
 				// output
 				if (runSL) {results = []}
-				let hash = "", isEmpty = false
-				if (results.length) {
-					hash = mini(results)
-				} else {
-					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
-					isEmpty = true
-				}
+				let typeCheck = typeFn(results[0])
+				if ("number" !== typeCheck) {throw zErrType + typeCheck}
+				let hash = mini(results)
 				if (isSmart) {
-					// ToDo: add MB when patches backported
-					if (isVer > 117) {
-						notation = rfp_red
+					if (isTB && !isMullvad) {
+						notation = tb_red // TB should be an error
+					} else if (isVer > 123) {
+						if (hash == "5b3956a9") {notation = sgtick+"x86/amd]"+sc // 1877221
+						} else if (hash == "f263f055") {notation = sgtick+"RFP ARM]"+sc}
+					} else if (isVer > 117) {
 						if (hash == "e9f98e24") {notation = sgtick+"RFP x86/amd]"+sc
-						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc
-						}
+						} else if (hash == "1348e98d") {notation = sgtick+"RFP ARM]"+sc}
 					}
 				}
-				dom[METRIC].innerHTML = hash + notation
-				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : hash)])
+				exit(hash)
 			} catch(e) {
-				let eMsg = log_error(SECT11, METRIC, e)
-				dom[METRIC] = eMsg
-				return resolve([METRIC, eMsg])
+				exit(log_error(SECT11, METRIC, e), e+"")
 			}
 		}
 		oscillator.start(0)
 	} catch(e) {
-		let eMsg = log_error(SECT11, METRIC, e)
-		dom[METRIC] = eMsg
-		return resolve([METRIC, eMsg]) // user test: reflect error entropy
+		exit(log_error(SECT11, METRIC, e), e+"")
 	}
 })
 
 const get_oscillator_compressor = () => new Promise(resolve => {
 	const METRIC = "oscillator_compressor"
-	let notation = ""
+	let notation = (isSmart && isVer > 117) ? rfp_red : ""
 	try {
-		if (runSE) {foo++}
 		let t0 = nowFn()
 		let results = []
 		let audioCtx = new window.AudioContext,
@@ -311,33 +306,30 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 		try {
 				bins = new Float32Array(analyser.frequencyBinCount)
 				analyser.getFloatFrequencyData(bins) // JSShelter errors here
-				for (let i=0; i < bins.length; i++) {
-					results.push(bins[i])
-				}
+				if ("object" !== typeFn(bins)) {throw zErrType +"Float32Array: "+ typeFn(bins)}
+				for (let i=0; i < bins.length; i++) {results.push(bins[i])}
 				analyser.disconnect()
 				scriptProcessor.disconnect()
 				gain.disconnect()
-				// output
-				if (runSL) {results = []}
-				let hash = "", isEmpty = false
-				if (results.length) {
-					hash = mini(results)
-				} else {
-					hash = log_error(SECT11, METRIC, zErrEmpty +": "+ cleanFn(results)) // empty array
-					isEmpty = true
-				}
+				// check
+				if (runSE) {foo++} else if (runSL) {results = []}
+				let typeCheck = typeFn(results[0])
+				if ("number" !== typeCheck) {throw zErrType + typeCheck}
+				let hash = mini(results)
 				if (isSmart) {
-					// ToDo: add MB when patches backported
-					if (isVer > 117) {
-						notation = rfp_red
+					if (isTB && !isMullvad) {
+						notation = tb_red // TB should be an error
+					} else if (isVer > 123) {
+						if (hash == "e08487bf") {notation = sgtick+"x86/amd]"+sc // 1877221
+						} else if (hash == "1f38e089") {notation = sgtick+"RFP ARM]"+sc}
+					} else if (isVer > 117) {
 						if (hash == "bafe56d6") {notation = sgtick+"RFP x86/amd]"+sc
-						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc
-						}
+						} else if (hash == "c54b7aa9") {notation = sgtick+"RFP ARM]"+sc}
 					}
 				}
 				dom[METRIC].innerHTML = hash + notation
 				log_perf(SECT11, METRIC, t0)
-				return resolve([METRIC, (isEmpty ? zErr : hash)])
+				return resolve([METRIC, hash])
 			} catch(e) {
 				let eMsg = log_error(SECT11, METRIC, e)
 				dom[METRIC] = eMsg
