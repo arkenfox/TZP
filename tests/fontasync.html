@@ -68,8 +68,7 @@
 		<col width="15%"><col width="85%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">font async
-				<div class="nav-up"><span class="c perf" id="perf"></span></div>
-				<div class="nav-down"><span class="c perf" id="tofuSize"></span></div>
+				<div class="nav-up"><span class="c perf" id="locale"></span></div>
 			</div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="intro"><span class="no_color">
@@ -164,12 +163,23 @@ function build(style) {
 	fntCodes.sort()
 	fntCodes.forEach(function(code) {
 		let id = code.slice(2)
-		let string = "<span class='box " + style +"' id='b"+ id +"'><span class='info'>"+ id +"</span><div class='glyph'><span> &#x"+ id +"; </span></div></span>\n"
+		let string = "<span class='box " + style +"' id='b"+ id +"'><span class='info'>"+ id +"</span><div class='glyph'><span>&#x"+ id +";</span></div></span>\n"
 		tmpArray.push(string)
 	})
 	//console.log(tmpArray[0])
 	dom.glyphs.innerHTML = tmpArray.join("")
 }
+
+function get_locale() {
+	let locale
+	try {
+		locale = Intl.DateTimeFormat().resolvedOptions().locale
+	} catch(e) {
+		locale = zErr
+	}
+	dom.locale.innerHTML = locale
+}
+get_locale()
 
 function rebuild() {
 	let style = document.querySelector('input[name="family"]:checked').value
@@ -349,7 +359,6 @@ function runall() {
 	isColor = false
 	dom.results = ""
 	dom.details = ""
-	dom.tofuSize = ""
 	rebuild()
 	oData = {}
 	oData = {
