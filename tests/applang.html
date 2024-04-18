@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>app language</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 780px}
+		.appfixed {
+			top: 0;
+			left: 0;
+			padding: 0px;
+			position: fixed;
+			display: inline;
+			width:fit-content;
+			height:fit-content;
+		}
+		.appbigger {
+			font-size: 250px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="appfixed normalized"><div class="appbigger measureScale" id="elementsdiv"></div></div>
+	<!-- offscreen -->
+	<div class="offscreen">
+		<div>
+			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
+			<iframe id="iframe-mediaInvalid" width="100" height="30" src="applang-invalid.png"></iframe>
+			<iframe id="iframe-mediaScaled" width="100" height="30" src="applang-image.png"></iframe>
+			<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>
+			<div><input id="enumber" type="number" min="6" step="2"></div>
+		</div>
+	</div>
+
+	<div class="hidden">
+		<div>
+			<input type="text" required id="widgettext">
+			<input type="checkbox" required id="widgetcheckbox">
+			<input type="date" id="widgetdatetime" value="2024-01-01" max="2023-12-31">
+			<input type="date" id="widgetdatetimeunder" value="2022-01-01" min="2023-12-31">
+			<input type="email" id="widgetemail" value="a">
+			<input type="file" required id="widgetfile">
+			<input type="number" required id="widgetnumber">
+			<input type="number" id="widgetmax" max="1974.3" value="2000">
+			<input type="number" id="widgetmin" min="8026.5" value="1">
+			<input type="number" id="widgetstep" min="1.2345" step="1005.5545" value="2">
+			<input type="radio" required name="radiogroup" id="widgetradio">
+			<select required id="widgetselect"><option></option></select>
+			<input type="url" id="widgeturl" value="a">
+			<input type="tel" id="widgettel" pattern="[0-9]{1}" value="a">
+			<!-- the rest not covered by the visually displayed ones -->
+			<input type="hidden" id="ehidden">
+			<input type="image" id="eimage">
+			<input type="month" id="emonth">
+			<input type="password" id="epassword">
+			<input type="range" id="erange">
+			<input type="search" id="esearch">
+			<textarea id="etextarea"></textarea>
+			<input type="week" id="eweek">
+		</div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<!-- app lang -->
+	<table id="tb4">
+		<col width="25%"><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">application language &hellip; &ldquo; &rdquo; &lsquo; &rsquo; 
+			<div class="nav-up"><span class="c perf" id="locale"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="btn4 btnfirst" onClick="run()">[ run ]</span>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div>CSS &nbsp;
+				<span class='blue'>chrome://global/locale/intl.css</span>
+				<p class="c mono spaces no_color" id="css"> &nbsp; </p>
+			</div>
+			<div>MEDIA MESSAGES <sup>1</sup> &nbsp; 
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties' target='blank'>searchfox MediaDocument</a>
+				<p class="c mono spaces no_color" id="media_messages"> &nbsp; </p>
+			</div>
+			<div>VALIDATION MESSAGES <sup>1</sup> &nbsp; 
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties' target='blank'>searchfox dom.properties</a>
+				<p class="c mono spaces no_color" id="validation_messages"> &nbsp; </p>
+			</div>
+			<div>XML ERRORS <sup>1</sup> &nbsp; 
+				<a class='blue' href='https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties' target='blank'>searchfox xmlparser</a>
+				<p class="c mono spaces no_color" id="xml_errors"> &nbsp; </p>
+			</div>
+		</td></tr>
+
+		<tr><td colspan="2" style="text-align: left;">
+			<div>NUMERIC INPUT &nbsp; <span class="c mono no_color" id="numericinputhash"></span>
+				<p class="c mono spaces no_color" id="numeric_input"> &nbsp; </p>
+			</div>
+		</td></tr>
+
+		<!--credits-->
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><span class="no_color">code based on work by </span>
+			<!--DTD
+				https://acatarineu.github.io/fp/locale.html"
+				https://acatarineu.github.io/fp/locale_nullprincipal.html
+			-->
+			<a target="_blank" class="blue" href="https://trac.torproject.org/projects/tor/ticket/30683">z3t on HackerOne</a> <sup>1</sup>
+			</td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let isLocale = ""
+
+function get_dtd1() {
+	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
+	// if spoofing english we would expect "Problem loading page"
+	let isDone = false
+	setTimeout(() => output("timed out"), 600)
+	function output(value) {
+		if (!isDone) {
+			isDone = true
+			dom.dtd1 = value
+			return
+		}
+	}
+	function next() {
+		try {
+			let iframe = dom.iframedtd1
+			iframe.src="applang.xml"
+			iframe.addEventListener('load', () => {
+				try {
+					let res = iframe.contentDocument.getElementById("DTD1").innerText
+					output(res)
+				} catch(e) {
+					output(e+"")
+				}
+			})
+		} catch(e) {
+			output(e+"")
+		}
+	}
+}
+
+function get_dtd2() {
+	// dtd nullprinciple
+	// FF70+ https://bugzilla.mozilla.org/show_bug.cgi?id=467035
+	// if spoofing english we would expect "Problem loading page"
+
+	// on my FF i get "[object Object]" Object is { msg: "getUrlParent" }
+	// on test suites I get timed out
+
+	let dtd2
+	function output(value) {
+		//console.log(dtd2)
+		dom.dtd2.innerHTML = value
+		return
+	}
+	// set source
+	let iframe = dom.iframedtd2
+	// ? chrome://global/locale/netError.dtd
+	iframe.src="data:application/xml;charset=utf-8,%3C%21DOCTYPE%20html%20SYSTEM%20%22chrome%3A%2F%2Fglobal%2Flocale%2FnetError.dtd%22%3E%3Chtml%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxhtml%22%3E%3Chead%3E%3Cmeta%20charset%3D%22utf-8%22%2F%3E%0D%0A%20%20%3C%2Fhead%3E%0D%0A%20%20%3Cbody%3E%3Cspan%20id%3D%22text-container%22%3E%26loadError.label%3B%3C%2Fspan%3E%0D%0A%20%20%3Cscript%3E%0D%0A%20%20window.addEventListener%28%27message%27%2C%20%28e%29%20%3D%3E%20%7B%0D%0A%20%20%20%20e.source.postMessage%28document.getElementById%28%27text-container%27%29.innerText%2C%20%27%2A%27%29%3B%0D%0A%20%20%7D%29%3B%0D%0A%20%20%3C%2Fscript%3E%0D%0A%20%20%3C%2Fbody%3E%0D%0A%3C%2Fhtml%3E";
+	iframe.addEventListener('load', () => {
+		window.addEventListener('message', ({ data }) => dtd2 = data)
+		iframe.contentWindow.postMessage('foo', '*')
+	})
+
+	// keep checking dtd2 not undefined, but stop after x tries
+	let counter = 0
+	function check_dtd2() {
+		//console.log(counter, "dtd2 is", dtd2)
+		if (counter < 30) {
+			if (dtd2 !== undefined) {
+				clearInterval(checking)
+				output(dtd2 +"")
+			}
+		} else {
+			clearInterval(checking)
+			output("timed out")
+		}
+		counter++
+	}
+	let checking = setInterval(check_dtd2, 50)
+}
+
+function get_css() {
+	// ToDo: we also have chrome://global/content/widgets.css
+		// e.g. chrome://global/skin/richlistbox.css
+	const parent = dom.elementsdiv
+	let oList = {
+		"quote-fr": "<q id='X' lang='fr'></q>",
+	}
+	try {
+		let oData = {}, target
+		for (const k of Object.keys(oList).sort()) {
+			// important to clear the div so no other elements can affect measurements
+			parent.innerHTML = ""
+			let data = []
+			try {
+				parent.innerHTML = oList[k] //+" "+ k
+				target = document.getElementById("X")
+				oData[k] = [target.getBoundingClientRect().width, target.getBoundingClientRect().height]
+			} catch(e) {
+				console.log(e)
+				oData[k] = zErr
+			}
+		}
+		parent.innerHTML = ""
+		let hash = mini(oData), notation = ""
+		dom.css.innerHTML = hash + notation +"<br>"+ json_highlight(oData)
+		return
+	} catch(e) {
+		parent.innerHTML = ""
+		dom.css = e+""
+		return
+	}
+}
+
+function get_locale() {
+	// just get one
+	try {
+		isLocale = Intl.DateTimeFormat().resolvedOptions().locale
+	} catch(e) {
+		isLocale = zErr
+	}
+	dom.locale.innerHTML = isLocale
+}
+
+function get_media_messages() {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
+	try {
+		let mList = {
+			"Invalid": "applang-invalid.png", // 0-byte file
+			"Scaled": "applang-image.png",
+			"Unsupported": "applang-unsupported.jpg",
+				// ^ToDo: can't use jp2 etc because that prompts for user interaction
+		}
+		let mData = {}
+		for (const k of Object.keys(mList)) {
+			let target = dom["iframe-media"+k], title = ""
+			if (k === "Scaled") {
+				title = target.contentWindow.document.title
+				//strip image name to reduce noise
+				title = title.replace(mList[k], "")
+			} else {
+				try {
+					const image = target.contentWindow.document.querySelector('img')
+					title = image.alt
+					title = title.replace(target.src, "") // remove noise
+				} catch(err) {
+					title = err+""
+				}
+			}
+			title = title.trim()
+			mData[k] = title
+		}
+		let hash = mini(mData)
+		dom.media_messages.innerHTML = hash +"<br>"+ json_highlight(mData)
+		return
+	} catch(e) {
+		dom.media_messages = e+""
+		return
+	}
+}
+
+function get_numeric_inputs() {
+	let target = dom.enumber
+	let oTests = {
+		arab: ['٤','٦'],
+		arabext: ['۴','۶'],
+		latn: ['4',4,'6',6,],
+		mymr: ['၄','၆'],
+		x: ['x']
+	}
+	let oData = {}
+	for (const k of Object.keys(oTests)) {
+		oData[k] = {}
+		oTests[k].forEach(function(n) {
+			target.value = n
+			let value = target.value
+			let charName = "char", charValue, j = n
+			if ("string" === typeof n) {
+				charValue = n.charCodeAt(0)
+			} else {
+				charName = "number"; charValue = n; j = n +"n"
+			}
+			let validity = target.checkValidity()
+			oData[k][j] = {}
+			oData[k][j][charName] = charValue
+			oData[k][j]["value"] = value
+			oData[k][j]["validity"] = validity
+		})
+	}
+	let toggle = "num"
+	dom.numericinputhash.innerHTML = mini(oData)
+		+" <span id='labelhidden"+ toggle +"' class='btnfirst btn0' onClick=\"togglerows('hidden"+ toggle +"','expand')\">[ expand ]</span>"
+	dom.numeric_input.innerHTML = "<span class='toghidden" + toggle +" hidden'>"+ json_highlight(oData) +"</span><br>"
+}
+
+function get_validation_messages() {
+	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/dom/dom.properties
+		// https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+		// https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
+		// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+/*
+	InvalidDate=Please enter a valid date.
+	InvalidDateMonth=Please enter a valid month.
+	InvalidDateTime=Please enter valid date and time.
+	InvalidDateWeek=Please enter a valid week.
+	InvalidTime=Please enter a valid time.
+	PatternMismatchWithTitle=Please match the requested format: %S.
+	StepMismatchOneValue=Please select a valid value. The nearest valid value is %S.
+	TextTooLong=Please shorten this text to %S characters or less (you are currently using %S characters).
+	TextTooShort=Please use at least %S characters (you are currently using %S characters).
+	TimeReversedRangeUnderflowAndOverflow=Please select a value between %1$S and %2$S.
+*/
+
+	// tooLong + tooShort constraints require the user: https://developer.mozilla.org/en-US/docs/Web/API/ValidityState/tooShort
+		// ^ but we should add manual tests for those
+	// InvalidDate/Time/Week/Month - can't set invalid values via JS
+
+	const dList = {
+		BadInputNumber: 'number', // this returns ValueMissing on chrome
+		CheckboxMissing: 'checkbox',
+		DateTimeRangeOverflow: 'datetime',
+		DateTimeRangeUnderflow: 'datetimeunder',
+		FileMissing: 'file',
+		InvalidEmail: 'email',
+		InvalidURL: "url",
+		NumberRangeOverflow: 'max',
+		NumberRangeUnderflow: 'min',
+		PatternMismatch: 'tel',
+		RadioMissing: 'radio',
+		SelectMissing: 'select',
+		StepMismatch: 'step',
+		ValueMissing: 'text',
+	}
+
+	// dom
+	let domvalue, domhash
+	let dData = {}
+	try {
+		for (const k of Object.keys(dList).sort()) {
+			try {
+				let msg = dom["widget"+ dList[k]].validationMessage
+				dData[k] = msg
+			} catch(e) {
+				dData[k] = zErr
+			}
+		}
+		domhash = mini(dData)
+		domvalue = domhash +" [DOM]<br>"+ json_highlight(dData)
+	} catch(e) {
+		domvalue = "DOM: "+ e+""
+	}
+
+	// domparser
+	let dommatch_green = sg+"[✓ matches DOM]"+sc
+	let dommatch_red = sb+"[✗ matches DOM]"+sc
+	let parservalue, parserhash
+	const pList = {
+		BadInputNumber: "<input type='number' required>",
+		CheckboxMissing: "<input type='checkbox' required>",
+		DateTimeRangeOverflow: "<input type='date' value='2024-01-01' max='2023-12-31'>",
+		DateTimeRangeUnderflow: "<input type='date' value='2022-01-01' min='2023-12-31'>",
+		FileMissing: "<input type='file' required>",
+		InvalidEmail: "<input type='email' value='a'>",
+		InvalidURL: "<input type='url' value='a'>",
+		NumberRangeOverflow: "<input type='number' max='1974.3' value='2000'>",
+		NumberRangeUnderflow: "<input type='number' min='8026.5' value='1'>",
+		PatternMismatch: "<input type='tel' pattern='[0-9]{1}' value='a'>",
+		RadioMissing: "<input type='radio' required name='radiogroup'>",
+		SelectMissing: "<select required><option></option></select>",
+		StepMismatch: "<input type='number' min='1.2345' step='1005.5545' value='2'>",
+		ValueMissing: "<input type='text' required>",
+	}
+	let pData = {}
+	try {
+		let parser = new DOMParser
+		for (const k of Object.keys(pList)) {
+			try {
+				let doc = parser.parseFromString(pList[k], 'text/html')
+				let msg = doc.activeElement.children[0].validationMessage
+				pData[k] = msg // +"b" // test alter hash
+			} catch(e) {
+				oData[k] = zErr
+			}
+		}
+		parserhash = mini(pData)
+	} catch(e) {
+		parservalue = "DOMParser: "+ e+""
+	}
+
+	if (parservalue == undefined) { // not an error
+		if (parserhash == domhash) {
+			parservalue = parserhash +" [DOMParser] "+ dommatch_green
+		} else {
+			parservalue = parserhash +" [DOMParser] "+ dommatch_red
+			console.log("DOMParser\n", pData)
+			parservalue += " check the console"
+		}
+	}
+	dom.validation_messages.innerHTML = parservalue +"<br><br>"+ domvalue
+}
+
+function get_xml_errors() {
+	if (!isFF) {return}
+	// https://developer.mozilla.org/en-US/docs/Web/API/DOMParser/parseFromString
+		// https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction
+		// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/xmlparser.properties
+		// https://www.w3.org/TR/xml/
+	console.clear()
+	const xmlList = {
+		n02: 'a', // syntax error
+		n03: '', // no root element found
+		n04: '<>', // not well-formed
+		n05: '<', // unclosed token
+		n07: '<x></X>', // mismatched tag
+		n08: '<x x:x="" x:x="">', // duplicate attribute
+		n09: '<x></x><x', // junk after document element
+		n11: '<x>&x;', // undefined entity
+		n14: '<x>&#x0;', // reference to invalid character number
+		n20: '<x><![CDATA[', // unclosed CDATA section
+		n27: '<x:x>', // prefix not bound to a namespace
+		n28: '<x xmlns:x=""></x>', // must not undeclare prefix
+		n30: '<?xml v=""?>', // XML declaration not well-formed
+	}
+
+	let oMimeTypes = ['application/xml','application/xhtml+xml','image/svg+xml','text/xml',] // 'text/html',
+
+	try {
+		let xmlData = {}, delimiter = ":"
+		oMimeTypes.forEach(function(mimetype) {
+			let parser = new DOMParser
+			let oTemp = {}
+			for (const k of Object.keys(xmlList)) {
+				try {
+					let xmlDoc = parser.parseFromString(xmlList[k], mimetype)
+					let xmlStr = (xmlDoc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+					//split into parts: works back to FF52 and works with LTR
+						// the name (XML Parsing Error), location (Location) and line parts (Line Number 1, Column 1)
+						// create entropy but they are the same for all errors, record these once to reduce noise
+					let parts = xmlStr.split("\n")
+					if (k == "n02") {
+						// programatically determine delimiter
+							// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+						let strLoc = parts[1]
+						let schema = isFile ? "file://" : "https://"
+						let index = strLoc.indexOf(schema) - 2
+						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+						delimiter = strLoc.charAt(index)
+						strLoc = ": "+ strLoc.slice(0, index)
+						let strName = parts[0].split(delimiter)[0]
+						let strLine = parts[2] == undefined ? "" : ": "+ parts[2] // eg hebrew is only 2 lines
+						oTemp["n00"] = strName + strLoc + strLine
+						oTemp["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
+						//console.log(xmlStr)
+						//console.log(parts)
+						//console.log(strLoc, schema, index, "~"+delimiter+"~")
+					}
+					oTemp[k] = parts[0].split(delimiter)[1].trim()
+				} catch(err) {
+					oTemp[k] = err+""
+				}
+			}
+			console.log(mimetype, oTemp)
+			let hashTemp = mini(oTemp)
+			if (xmlData[hashTemp] == undefined) {
+				xmlData[hashTemp] = {
+					"mimeTypes": [mimetype],
+					"metrics": oTemp,
+				}
+			} else {
+				xmlData[hashTemp]["mimeTypes"].push(mimetype)
+			}
+		})
+		let hash = mini(xmlData)
+		dom.xml_errors.innerHTML = hash +"<br>"+ json_highlight(xmlData)
+		console.clear()
+		return
+	} catch(e) {
+		dom.xml_errors = e+""
+		console.clear()
+		return
+	}
+}
+
+function run() {
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = " &nbsp; "
+	}
+	if (!isFF) {
+		dom.xml_errors = "gecko only"
+	}
+	// pause so users see change
+	setTimeout(function() {
+		get_locale()
+		get_xml_errors()
+		get_numeric_inputs()
+		get_validation_messages()
+		//get_validation_parser()
+		get_media_messages()
+		get_css()
+	}, 170)
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	get_locale()
+	if (!isFF) {
+		dom.xml_errors = "gecko only"
+	}
+})
+
+</script>
+</body>
+</html>
