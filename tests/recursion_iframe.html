@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="recursion" content="width=300">
+	<style>
+		.s14 {color: #b29ddc;}
+		.s18 {color: #dc9db2;}
+		.faint {color: #808080;}
+		.mono {font-family: monospace, "Courier New"; font-size: 12px;}
+		.spaces {white-space: pre-wrap;}
+		.top {
+			position: fixed;
+			top: 0px;
+			left: 0px;
+		}
+	</style>
+</head>
+
+<body>
+<div class="top mono">
+	<span class='indent faint'>level: <span id="doc1"></span><br>stack: <span id="doc2"></span></span>
+</div>
+
+</body>
+<script>
+'use strict';
+
+const iframe_function = () => new Promise(resolve => {
+	try {
+		let level = 0
+		function recurse() {level++; recurse()}
+		try {recurse()} catch(e) {}
+		level = 0
+		try {
+			recurse()
+		} catch(e) {
+			document.getElementById("doc1").innerHTML = level
+			document.getElementById("doc2").innerHTML = e.stack.toString().length
+			return resolve()
+		}
+	} catch(e) {
+		console.error(e)
+		document.getElementById("doc1").innerHTML = e.name
+		return resolve()
+	}
+})
+iframe_function()
+
+</script>
+</html>

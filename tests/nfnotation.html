@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>notation</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 780px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">numberformat: notation
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy:
+			excluding compact, currency and unit as they are covered elsewhere</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="ball" class="btn4 btnfirst" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	isBigIntSupported = false,
+	localesHashAll = "" // to compare min to
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.NumberFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	let tests = {}
+	let nBig
+	if (isBigIntSupported) {
+		nBig = BigInt("987354000000000000")
+	}
+	if (method == "min") {
+		tests = {
+			"scientific": {
+				"decimal": [987654], // swap with bigint
+			},
+			"standard": {
+				"decimal": [0/0, -1000, 987654],
+				"percent": [1000],
+			},
+		}
+		if (isBigIntSupported) {
+			tests.scientific.decimal = [nBig] // replace: use at least 1 bigint (either works for entropy)
+		}
+	} else {
+		// standard (default), scientific, engineering
+		// style: decimal (default), currency, percent, unit
+		tests = {
+			"engineering": {
+				"decimal": [-1, 0, 0/0, 1/10, 1/1000, 987654],
+			},
+			"scientific": {
+				"decimal": [-1, 0, 0/0, 1/10, 1/1000, 987654],
+			},
+			"standard": {
+				"decimal": [-1, 0, 0/0, 1/10, -1000, 987654],
+				"percent": [1/100, 1000, 987654321, Infinity],
+			},
+		}
+		if (isBigIntSupported) {
+			tests.engineering.decimal.push(nBig)
+			tests.scientific.decimal.push(nBig)
+			tests.standard.decimal.push(nBig)
+		}
+	}
+
+	let oStyles = {}
+	try {
+		aLocales.forEach(function(code) { // for each locale
+			oStyles = {}
+			Object.keys(tests).sort().forEach(function(not){ // for each notation
+				oStyles[not] = {}
+				Object.keys(tests[not]).forEach(function(s){ // for each style
+					oStyles[not][s] = []
+					try {
+						let formatter = Intl.NumberFormat(code, {notation: not, style: s})
+						tests[not][s].forEach(function(n){ // for each number
+							oStyles[not][s].push(formatter.format(n))
+						})
+					} catch (e) {console.log(e.name, e.message)} // ignore invalid
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				Object.keys(oStyles).forEach(function(not){ // each notation
+					oTempData[hash][not] = {}
+					Object.keys(oStyles[not]).forEach(function(s){ // for each style
+						if (oStyles[not][s].length) {
+							oTempData[hash][not][s] = oStyles[not][s].join(" | ")
+						}
+					})
+				})
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order in new object
+		for (const h of Object.keys(oTempData).sort()) { // for each hash
+			oData[h] = {}
+			for (const not of Object.keys(oTempData[h]).sort()) { // for each notation
+				if (not == "locales") {
+					oData[h][not] = oTempData[h][not].join(", ")
+				} else {
+					if (Object.keys(oTempData[h][not]).length) {
+						oData[h][not] = oTempData[h][not]
+					}
+				}
+			}
+		}
+
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) { // for each hash
+			localeGroups.push(oData[k]["locales"])
+			let localeCount = oData[k]["locales"].split(",").length
+
+			let str = ""
+			for (const not of Object.keys(oData[k])) { // for each notation
+				if (not !== "locales") {
+					str += "<li>"+ s12 + not + sc +"</li>"
+					Object.keys(oData[k][not]).forEach(function(s){ // for each style
+						str += s16 + s +": "+ sc + oData[k][not][s] +"</br>"
+					})
+				}
+			}
+			// wrap into details for long lists
+			if (Object.keys(tests).length > 15) {str = "<details><summary>details</summary>"+ str +"</details>"}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>"+ str
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+
+		// hashes + btns
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		sDetail["results"] = oData
+
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			if (isFF) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
+					// results
+					if (resultsHash == "34d56154") {resultsHash += s14 +" [FF115+]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "e0099d08") {localesHash += s14 +" [FF115+]"+ sc
+					} else if (isFF) {localesHash += zNEW
+					}
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
+	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+
+	// standard (default), scientific, engineering
+	// style: decimal (default), currency, percent, unit
+
+	try {
+		// pointless if we can't use the feature being tested: FF78+
+		let test = new Intl.NumberFormat("en-US", {notation: "scientific"}).format(987654321)
+		if (test.length == 7) {
+			isSupported = true
+		} else {
+			dom.results.innerHTML = s4 + "notation:" + sc +" not supported"
+		}
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+	}
+	// check bigint support: FF68+
+	try {
+		let y = BigInt("9999999999999999")
+		isBigIntSupported = true
+	} catch(e) {}
+
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"ar-ae,arabic (united arabic emirates)",
+		"ar-dz,arabic (algeria)",
+		"de-ch,german (switzerland)",
+		"en-au,english (australia)",
+		"en-se,english (sweden)",
+		"ff-adlm,fulah (adlam)",
+		"fr-ch,french (switzerland)",
+		"ru-ua,russian (ukraine)",
+		"ur-in,urdu (india)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"yue-hans,cantonese (simplified)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	legend()
+	if (isSupported) {
+		setBtn("all")
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+})
+
+</script>
+</body>
+</html>

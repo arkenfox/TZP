@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=700">
+	<title>font debug</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 730px;}
+		.visual {
+			font-size: 96px !important;
+			font-style: normal !important;
+			letter-spacing: normal !important;
+			line-break: auto !important;
+			line-height: 50% !important;
+			text-transform: none !important;
+			text-align: left !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			word-spacing: normal !important;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="hidden"><input type="reset" value="" id="widget0"></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<col width="20%"><col width="80%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">font debug</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">test a font or font-family </span>
+			&nbsp; <input id="valueF" type="text" value="Arial">
+			&nbsp; <span class="no_color">
+				e.g. <code>caption</code>, <code>-moz-info</code>, <code>arial</code>
+				, <code>MS Shell Dlg \32</code>
+			</span>
+		</td></tr>
+		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
+			<span class="btn12 btnfirst" onClick="run()">[ run ]</span>
+			<hr>
+			<br>
+			<div class="spaces" style="color: #b3b3b3;" id="base"></div>
+			<div class="spaces" style="color: #b3b3b3;" id="font"></div>
+			<div class="spaces visual" style="color: #b3b3b3;" id="visual"></div>
+			<div class="spaces" style="color: #b3b3b3;" id="detail"></div>
+			</td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let fntCodePoints = {
+	"tofu": ['0xFFFF'],
+}
+
+let fntList = [],
+	baseFonts = ['monospace','sans-serif','serif','system-ui'],
+	fntString = "Mōá?-" + get_fntCodes("tofu"),
+	fntWeight = "normal",
+	fntSize = "512px",
+	isEverDetected = false // track across all four basefonts compares
+
+let fntSystem = ["caption","icon","menu","message-box","small-caption","status-bar",
+	"-moz-window", "-moz-desktop", "-moz-document", "-moz-workspace", "-moz-info",
+	"-moz-pull-down-menu", "-moz-dialog", "-moz-button", "-moz-list", "-moz-field",
+]
+
+let element = dom.valueF
+element.addEventListener("keypress", function(event) {
+	if (event.key === "Enter") {
+		run()
+	}
+})
+
+function get_fntCodes(name) {
+	let list = fntCodePoints[name], str = ""
+	list.forEach(function(code) {str += String.fromCodePoint(code)})
+	return str
+}
+
+function get_OS() {
+	// append widget font to baseFonts
+	let el = dom.widget0
+	try {
+		let font = getComputedStyle(el).getPropertyValue("font-family")
+		baseFonts.push(font)
+		return
+	} catch(e) {
+		return
+	}
+}
+get_OS()
+
+function run() {
+	// reset
+	fntList = []
+	dom.font = ""
+	dom.base = ""
+	dom.visual = ""
+	dom.detail = ""
+	isEverDetected = false
+	// make sure we have a font
+	let valueF = dom.valueF.value
+	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
+	valueF = valueF.trim()
+	if (valueF.length) {
+		let tmpArr = valueF.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				fntList.push(trimmed)
+			}
+		}
+		// make sure we have at least one item
+		fntList = fntList.filter(function (item, position) {
+			return fntList.indexOf(item) === position
+		})
+		if (!fntList.length) {
+			dom.base = "aww, snap! try adding a font"
+			return
+		} else {
+			// only use the first one
+			setTimeout(function() {
+				let font = fntList[0].toLowerCase()
+				if (fntSystem.includes(font)) {
+					dom.visual.style.font = ""
+					dom.visual.style.setProperty('--font', "")
+					dom.visual.style.font = font
+				} else {
+					dom.visual.style.font = ""
+					dom.visual.style.fontFamily = font
+				}
+				dom.visual.innerHTML = "<span style ='font-weight:"+ fntWeight +"'>"+ fntString +"</span>"
+				dom.valueF.value = font
+				fntList = [font]
+				getFonts()
+				let strDetected = (isEverDetected ? sg +" [" : sb +" [NOT ") + "DETECTED]" + sc
+				dom.font.innerHTML = "<br><hr><br>" + s12 + "FONT: " + sc + font  +" [font-weight: "+ fntWeight +"] " + strDetected +"<br><br>"
+			}, 150)
+		}
+	} else {
+		dom.base = "aww, snap! try adding a font"
+		return
+	}
+}
+
+function getFonts() {
+	try {
+
+		// check fntWeight
+/*
+font-weight: 100;
+font-weight: 200;
+font-weight: 300;
+font-weight: 400; // normal
+font-weight: 500;
+font-weight: 600;
+font-weight: 700; // bold
+font-weight: 800;
+font-weight: 900;
+*/
+
+		fntWeight += ""
+		let fntWeightValid = ["100","200","300","400","500","600","700","800","900","950"]
+		if (!fntWeightValid.includes(fntWeight)) {fntWeight = "normal"}
+
+		const doc = document
+		const id = `font-fingerprint`
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		set_element(id)
+
+		const span = doc.getElementById(`${id}-detector`)
+		const style = getComputedStyle(span)
+		const pixelsToNumber = pixels => +pixels.replace('px','')
+		const originPixelsToNumber = pixels => 2*pixels.replace('px', '')
+		const getDimensions = (span, style) => {
+			const transform = style.transformOrigin.split(' ')
+			const dimensions = {
+				clientrectWidth:span.getBoundingClientRect().width,
+				clientrectHeight: span.getBoundingClientRect().height,
+				offsetWidth: span.offsetWidth,
+				offsetHeight: span.offsetHeight,
+				npixelHeight: pixelsToNumber(style.height),
+				npixelWidth: pixelsToNumber(style.width),
+				ntransformHeight: originPixelsToNumber(transform[1]),
+				ntransformWidth: originPixelsToNumber(transform[0]),
+			}
+			return dimensions
+		}
+
+		// BASE
+		const base = baseFonts.reduce((acc, font) => {
+			span.style.setProperty('--font', font)
+			const dimensions = getDimensions(span, style)
+			acc[font.split(",")[0]] = dimensions
+			return acc
+		}, {})
+
+		let display = [], baseMaxLen = 0
+		for (const k of Object.keys(base)) {
+			let lenOffset = (base[k]["offsetWidth"] + " x " + base[k]["offsetHeight"]).length
+			let lenPixel = (base[k]["npixelWidth"] + " x " + base[k]["npixelHeight"]).length
+			let lenTransform = (base[k]["ntransformWidth"] + " x " + base[k]["ntransformHeight"]).length
+			if (lenOffset > baseMaxLen) {baseMaxLen = lenOffset}
+			if (lenPixel > baseMaxLen) {baseMaxLen = lenPixel}
+			if (lenTransform > baseMaxLen) {baseMaxLen = lenTransform}
+		}
+		baseMaxLen += 2
+
+		for (const k of Object.keys(base)) {
+			let strOffset = base[k]["offsetWidth"] + " x " + base[k]["offsetHeight"]
+			let strPixel = base[k]["npixelWidth"] + " x " + base[k]["npixelHeight"]
+			let strTransform = base[k]["ntransformWidth"] + " x " + base[k]["ntransformHeight"]
+			display.push("<span><u>"+ k + "</u></span><br>"
+				+ "offset ".padStart(10) + s3 + strOffset.padStart(12) + sc
+				+ " | npixel " + s3 + strPixel.padStart(baseMaxLen) + sc
+				+ " | ntransform " + s3 + strTransform.padStart(baseMaxLen) + sc +"<br>"
+			)
+		}
+		let hash = mini(base)
+		dom.base.innerHTML = s12+ "BASEFONTS: "+ sc + hash +"<br><br>" + display.join("<br>")
+
+		let aTestsValid = [
+			["clientrect"],
+			["offset"],
+			["npixel"],
+			["ntransform"],
+		]
+
+		let isDetected = false, resultMaxLen = 0
+		let oResults = {}
+		fntList.forEach(font => {
+			// we're only testing a single font, we don't need a font key
+			baseFonts.forEach(basefont => {
+				oResults[basefont] = {}
+				isDetected = false // reset
+				if (fntSystem.includes(font)) {
+					span.style.setProperty('--font', "")
+					span.style.font = font
+				} else {
+					const family = "'"+ font +"', "+ basefont	
+					span.style.font = ""
+					span.style.setProperty('--font', family)
+				}
+				const style = getComputedStyle(span)
+				const dimensions = getDimensions(span, style)
+				basefont = basefont.split(",")[0] // switch to short generic name
+				aTestsValid.forEach(function(pair) {
+					let wName = pair[0] +"Width", hName = pair[0] +"Height"
+					if (dimensions[wName] != base[basefont][wName] || dimensions[hName] != base[basefont][hName]) {
+						isDetected = true
+					}
+					let lenResult = (dimensions[wName] +" x "+ dimensions[hName]).length
+					if (lenResult > resultMaxLen) {resultMaxLen = lenResult}
+					oResults[basefont][pair[0]] = [
+						isDetected, base[basefont][wName] +" x "+ base[basefont][hName],
+						dimensions[wName] +" x "+ dimensions[hName]
+					]
+				})
+				if (isDetected) {isEverDetected = true}
+				return
+			})
+		})
+		resultMaxLen += 2
+		// remove element
+		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+
+		// DETAIL
+		//console.debug(oResults)
+		display = []
+		for (const k of Object.keys(oResults)) {
+			let aTemp = []
+			for (const j of Object.keys(oResults[k])) {
+				let aData = oResults[k][j]
+				let sColor = aData[0] ? sg : sb
+				let strBase = aData[1].padStart(baseMaxLen)
+				let strResult = aData[2].padStart(resultMaxLen)
+				aTemp.push( j.padStart(11) +":" + s3 + strBase + sc + " vs " + sColor + strResult + sc)
+			}
+			display.push("<span><u>"+ k +"</u></span><br>" + aTemp.join("<br>") +"<br>")
+		}
+		hash = mini(display)
+		dom.detail.innerHTML = "<br><br><hr><br>" + s12 + "DETAIL: " + sc + hash +"<br><br>"+ display.join("<br>")
+
+	} catch(e) {
+		console.debug(e.name, e.message)
+		// remove element
+		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+	}
+}
+
+function set_element(id) {
+	document.getElementById(id).innerHTML = `
+		<style>
+		#${id}-detector {
+			--font: '';
+			position: absolute !important;
+			left: -9999px!important;
+			font-size: ` + fntSize + ` !important;
+			font-style: normal !important;
+			font-weight: ` + fntWeight + ` !important;
+			letter-spacing: normal !important;
+			line-break: auto !important;
+			line-height: normal !important;
+			text-transform: none !important;
+			text-align: left !important;
+			text-decoration: none !important;
+			text-shadow: none !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			word-spacing: normal !important;
+			/* in order to test scrollWidth, clientWidth, etc. */
+			padding: 0 !important;
+			margin: 0 !important;
+			/* in order to test inlineSize and blockSize */
+			writing-mode: horizontal-tb !important;
+			/* for transform and perspective */
+			transform-origin: unset !important;
+			perspective-origin: unset !important;
+		}
+		#${id}-detector::after {
+			font-family: var(--font);
+			content: '` + fntString + `';
+		}
+		</style>
+		<span id="${id}-detector"></span>`
+}
+
+</script>
+</body>
+</html>

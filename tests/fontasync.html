@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>font async</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 580px;}
+		#ugSpan {font-size: 22000px;}
+		.changed {
+			background: rgba(142, 142, 145, 0.3);
+		}
+		.zero {
+			background: rgba(220, 121, 189, 0.3);
+		}
+		.changedzero {
+			background: linear-gradient(rgba(142, 142, 145, 0.4), rgba(142, 142, 145, 0.2), rgba(220, 121, 189, 0.4));
+		}
+		span.box {
+			display: inline-block;
+			position: relative;
+			margin-top: 2px;
+			width: 47px;
+			height: 60px;
+			border: 1px solid grey;
+			font-size: 24px;
+			text-align: center;
+			vertical-align: top;
+		}
+		span.info {
+			display: block;
+			position: relative;
+			padding-top: 2px;
+			width: 48px;
+			height: 15px;
+			font-size: 10px;
+			text-align: center;
+			border-bottom: 1px solid grey;
+			font-family: sans-serif;
+		}
+		div.glyph {
+			display: block;
+			position: relative;
+			padding-top: 4px;
+			width: 48px;
+			font-size: 24px;
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="offscreen">
+		<div class="normalized">
+			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
+		</div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">font async
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="c perf" id="tofuSize"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">
+				Testing <a target="_blank" class="blue" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1676966#c54">async font fallback</a>.
+				You need a new browser session and no history.<br>
+				<div class="mono">DISPLAY: 
+					<input type="radio" id="family" name="family" value="cursive" onClick='rebuild()'><label> cursive </label>
+					<input type="radio" id="family" name="family" value="monospace" onClick='rebuild()'><label> monospace </label>
+					<input type="radio" id="family" name="family" value="sans-serif" onClick='rebuild()' checked><label> sans-serif </label>
+					<input type="radio" id="family" name="family" value="serif" onClick='rebuild()'><label> serif </label>
+					<input type="radio" id="family" name="family" value="system-ui" onClick='rebuild()'><label> system-ui </label>
+				</div>
+		</td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<span class="no_color" id="glyphs"></span>
+		</td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<br>SUMMARY: &nbsp; <span class="no_color c mono spaces" id="results"></span>
+			<br>
+		</td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<br>DETAILS: &nbsp; <span class="btn0 btnc" onclick="copyclip(`details`)">[COPY]</span>
+			<br><br><span class="no_color c mono spaces" id="details"></span>
+		</td></tr>
+	</table>
+	<br>
+<script>
+'use strict';
+
+/* NOTES: items that change
+
+TB/MB windows 11 examples (using fontasync)
+- was tofu + 0x0700, 0x1950, 0x1C50, 0x1CDA, 0x21E4, 0x23AE, 0x2425, 0x2581, 0x2619, 0xFFF9
+- was non-tofu + 0x2B06 (TB), 0x1CDA (TB/MB)
+- so up to 12 but at least they all fall back
+- with fall back they seem consistent on cold loads + reruns vs subsequent tabs + reloads
+
+file://
+TBn failed: 0x0700, 0x1950, 0x1C50, 0x2425, 00x2619, 0xFFF9
+ - at 500 | 383
+TBb failed: 0x0700, 0x1950, 0x2425, 00x2619, 0xFFF9 
+ - at 566 | 433
+TBa no failures
+ - at 567 | 367
+
+FF125b (using FPP)
+- 0xFFF9 rendered as tofu then fallsback
+
+typically am https first connection is going to be way slower
+e.g. FF
+  708: immediate
+  856: doc start
+e.g. TB (yikes)
+ 4717: immediate
+ 5233: doc start
+
+is there any way to speed up this async fallback?
+- is offscreen an issue? i.e do we move have them in view initially
+   - e.g. fixed overlay (so in sight)
+- change order put problematic ones before the others
+- maybe not show anything else (less rendering)
+
+*/
+
+let fntCodes = [
+	// sorted
+	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
+	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
+	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
+	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
+	'0xA830','0xF003','0xF810','0xFBEE',
+	//*
+		'0xFFF9', // maybe problematic
+		'0xFFFD', // problematic
+		// https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+		// https://thorin-oakenpants.github.io/testing/FFFD.html
+		// replacement chars cab be problematic on first session run/reload vs subsequent tabs
+			// i can actually see this flip over in FF
+	//*/
+	'0xFFFF', // tofu for visuals
+]
+let styles = ["cursive","monospace","sans-serif","serif","system-ui"]
+let oData = {}, counter = 0
+let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
+
+function build(style) {
+	let tmpArray = []
+	fntCodes.sort()
+	fntCodes.forEach(function(code) {
+		let id = code.slice(2)
+		let string = "<span class='box " + style +"' id='b"+ id +"'><span class='info'>"+ id +"</span><div class='glyph'><span> &#x"+ id +"; </span></div></span>\n"
+		tmpArray.push(string)
+	})
+	//console.log(tmpArray[0])
+	dom.glyphs.innerHTML = tmpArray.join("")
+}
+
+function rebuild() {
+	let style = document.querySelector('input[name="family"]:checked').value
+	// build so everything is clear
+	build(style)
+	// color stuff
+	if (isColor) {
+		let data = oData.displayChanges[style]
+		for (const k of Object.keys(data.text)) {
+			dom["b"+k].classList.add(data.text[k])
+		}
+		data.bg.forEach(function(id) {
+			dom[id].classList.add('changed')
+		})
+		data.zero.forEach(function(id) {
+			let style = (data.bg.includes("b"+id)) ? "changedzero" : "zero"
+			dom["b"+id].classList.add(style)
+		})
+	}
+}
+
+function display(name) {
+	let data = oData[name]
+	let hash = mini(data)
+	if (name == "1data") {name = "1st test"
+	} else if (name == "2data") {name = "2nd test"
+	} else if (name == "sizeChanges") {name = "differences"}
+	dom.details.innerHTML = name +": "+ hash +"<br>"+ json_highlight(data)
+
+}
+
+function output() {
+	// analyse
+	oData["2tofu"] = {}
+	oData["sizeChanges"] = {}
+	oData["displayChanges"] = {}
+	oData["groupChanges"] = {}
+	for (const style of Object.keys(oData["2data"])) {
+		oData["sizeChanges"][style] = {}
+		oData["groupChanges"][style] = {1:[], 2:[], 3:[], 4:[]}
+		oData["displayChanges"][style] = {
+			"bg": [], "text": {}, "zero": []
+		}
+
+		let tofuSize = oData["tofuSize"][style]
+		// match any tofu sizes
+		for (const code of Object.keys(oData["2data"][style])) {
+			// tofu size info
+			let run2 = oData["2data"][style][code]
+			let run2String = run2.join(" x ")
+			let isTofu = run2String == tofuSize
+			if (isTofu) {
+				if (oData["2tofu"][style] == undefined) {oData["2tofu"][style] = []}
+				oData["2tofu"][style].push(code)
+			}
+			// all size changes
+			let id = code.slice(2)
+			let run1 = oData["1data"][style][code]
+			let run1String = run1.join(" x ")
+			let isChanged = run1String !== run2String
+			if (isChanged) {
+				let firstchange = "n/a"
+				oData["displayChanges"][style]["bg"].push("b"+id)
+				// non-tofu items that change are not recorded
+				try {
+					firstchange = Math.round(oData["3data"][style][code][run2String])
+				} catch(e) {}
+				oData["sizeChanges"][style][code] = [run1String, run2String, firstchange]
+			}
+			let state = oData["1tofu"][style].includes(code) * 1
+			state += ""+(isTofu) * 1
+			if (state == "00") {
+				// not tofu both times
+				if (isChanged) {
+					oData["displayChanges"][style]["text"][id] = 'bad'
+					oData["groupChanges"][style][3].push(code)
+				}
+			} else if (state == "11") {
+				// tofu both times
+				oData["displayChanges"][style]["text"][id] = 'good'
+				oData["groupChanges"][style][1].push(code)
+			} else if (state == "10") {
+				// was tofu then fellback
+				oData["displayChanges"][style]["text"][id] = 's12'
+				oData["groupChanges"][style][2].push(code)
+			} else {
+				// last state can only be 01
+				// wasn't tofu but then was
+					// could be possible that a fallback legit font == tofu size
+				oData["displayChanges"][style]["text"][id] = 's3'
+				oData["groupChanges"][style][4].push(code)
+			}
+			// run2: zero width or height
+			if (run2[0] === 0 || run2[1] === 0) {
+				oData["displayChanges"][style]["zero"].push(id)
+			}
+		}
+	}
+	/* test: mixed gradients: changed AND final zero-width
+	oData["displayChanges"]["sans-serif"]["bg"].push('b097F')
+	oData["displayChanges"]["sans-serif"]["zero"].push('097F')
+	//*/
+	console.log(oData)
+	isColor = true
+	rebuild()
+
+	// output data
+		// clickable links
+		// diffs including _when_ they changed
+	let display = ""
+	let hash1 = mini(oData["1data"])
+	let hash2 = mini(oData["2data"])
+
+// " <span class='btn4 btnc' onclick='display(`" + item + "`)'>[" + array.length +"]</span>"
+	if (hash1 == hash2) {
+		display ="both tests: <span class='btn12 btnc' onclick='display(`1data`)'>" + hash1 +"</span>"
+	} else {
+		display = "1st test: <span class='btn12 btnc' onclick='display(`1data`)'>" + hash1 +"</span> | "
+			+"2nd test: <span class='btn12 btnc' onclick='display(`2data`)'>" + hash2 +"</span> | "
+			+"<span class='btn12 btnc' onclick='display(`sizeChanges`)'>diffs</span>"
+	}
+	dom.results.innerHTML = display
+}
+
+const run = (type) => new Promise(resolve => {
+	// just grab data
+	try {
+		let aCodes = fntCodes
+		let key
+		if (type == "3data") {
+			counter++
+		}
+		if (oData[type] == undefined) {oData[type] = {}}
+
+		styles.forEach(function(style) {
+			slot.style.fontFamily = style
+			if (oData[type][style] == undefined) {oData[type][style] = {}}
+			if (type == "3data") {
+				aCodes = oData["1tofu"][style]
+				//oData[type][style][key] = {}
+			}
+			aCodes.forEach(function(code) {
+				let item = String.fromCodePoint(code)
+				slot.textContent = item
+				// use clientrect for precision
+				let width = span.getBoundingClientRect().width,
+					height = div.getBoundingClientRect().height
+				if (type == "3data") {
+					if (oData[type][style][code] == undefined) {oData[type][style][code] = {}}
+					let key = width +" x "+ height
+					if (oData[type][style][code][key] == undefined) {
+						oData[type][style][code][key] = performance.now()
+					}
+				} else {
+					oData[type][style][code] = [width, height]
+				}
+			})
+		})
+		slot.textContent = ""
+		if (type == "2data") {
+			output()
+		}
+		return resolve(true)
+	} catch(e) {
+		slot.textContent = ""
+		dom.results.innerHTML = e
+		return resolve(e+"")
+	}
+})
+
+// run immediately, then after a delay
+let timer = 1500
+let delay = 16
+let isColor = false
+function runall() {
+	// reset
+	isColor = false
+	dom.results = ""
+	dom.details = ""
+	dom.tofuSize = ""
+	rebuild()
+	oData = {}
+	oData = {
+		"1start": performance.now()
+	}
+	counter = 0
+
+	// do it
+	Promise.all([
+		run("1data")
+	]).then(function(results){
+		dom.results.innerHTML = sg + "1st test: completed" + sc
+			+ " ... 2nd test: will run in <span id='countdown'>2000</span> ms"
+		let target = dom.countdown
+		let t0 = performance.now()
+		if (results[0]) {
+			// build tofu list
+			oData["tofuSize"] = {}
+			oData["1tofu"] = {}
+			for (const style of Object.keys(oData["1data"])) {
+				// get tofu size PER style
+				let array = oData["1data"][style]['0xFFFF']
+				let tofuSize = array.join(" x ")
+				oData["tofuSize"][style] = tofuSize 
+				// match any tofu sizes
+				for (const code of Object.keys(oData["1data"][style])) {
+					array = oData["1data"][style][code]
+					if (array.join(" x ") == tofuSize) {
+						if (oData["1tofu"][style] == undefined) {oData["1tofu"][style] = []}
+						oData["1tofu"][style].push(code)
+					}
+				}
+			}
+			function measure() {
+				let time = (timer - Math.round(performance.now() - t0))
+				target.innerHTML = time
+				if (time < delay) {
+					clearInterval(loop)
+					oData["2start"] = performance.now()
+					dom.results.innerHTML = ""
+					run("2data")
+				} else {
+					run("3data")
+				}
+			}
+			let loop = setInterval(measure, delay)
+		} else {
+			dom.results.innerHTML = results[0]
+		}
+	})
+}
+runall()
+
+</script>
+</body>
+</html>

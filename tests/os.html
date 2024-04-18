@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>os</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 480px;}
+		.oscenter {
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="offscreen">
+		<div class="cssDocFont" id="divDocFont"></div>
+	</div>
+	<div class="hidden">
+		<input type="radio" id="wgtradio">
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#feature">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb3">
+		<thead><tr><th>
+			<div class="nav-title">os
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td class="intro">
+			<span class="no_color">gecko (FF89+) only: testing os detection logic</span>
+		</td></tr>
+		<tr><td><hr><br></td></tr>
+		<tr><td style="text-align: left;">
+			<div>OS &nbsp;
+				<p class="c mono spaces no_color" id="os"> &nbsp; </p><br>
+			</div>
+			<div>DEBUG
+				<p class="c mono spaces no_color" id="debug"> &nbsp; </p>
+			</div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let aDebug = [],
+	oResults = {},
+	t0,
+	pad = 25,
+	isTimeOut = false,
+	isThrowError = false,
+	isThrowWidgetError = false,
+	isThrowDocFontError = false,
+	isThrowFontError = false,
+	isOnlyGecko = false
+
+let notNormal = sb +" not normal"+ sc +" [now you <b><u>really</u></b> stand out]",
+	goodResult = sg +"result: "+ sc,
+	badResult = sb +"result: "+ sc
+
+let oMap = {
+	1: goodResult +"you are not gecko",
+	2: goodResult +"update your browser" +"<br><br><div class='indent faint'>this PoC requires FF89+ to be fully effective</div>",
+	"01": "desktop",
+	"02": "chrome",
+	"03": "widget",
+	"04": "fonts",
+	"05": "currentTime",
+}
+
+function finish(type) {
+	dom.perf = Math.round((performance.now() - t0)) + " ms"
+	dom.debug.innerHTML = aDebug.join("<br>")
+	if (!isFF) (type = 1)
+	if (type !== undefined && type < 3) {
+		dom.os.innerHTML = oMap[type]
+		return
+	} else {
+		let display = []
+		for (const k of Object.keys(oResults)) {
+			let name = oMap[k]
+			display.push(s13 + (name+": ").padStart(15) +sc + oResults[k])
+		}
+		dom.os.innerHTML = display.join("<br>")
+	}
+}
+
+const check_css = (isNew) => new Promise(resolve => {
+	setTimeout(() => resolve("timed out"), 100)
+
+	// FF89-123
+		// 1280128: FF51+ win/mac | 1701257: FF89+ linux, therefore undefined = android
+	// FF121+: 1855861
+	// FF124+: 1874232
+		// new: chrome://browser/content/extension-popup-panel.css
+		// fallback: chrome://browser/content/extension.css
+		// both these are desktop only
+
+	let newCounter = 0, tmpOS
+	function exit() {
+		return resolve((isNew ? newCounter : tmpOS))
+	}
+	const get_event = (css, item) => new Promise(resolve => {
+		css.onload = function() {
+			if (isNew) {
+				//desktop vs android
+				newCounter++
+			} else {
+				tmpOS = item == "win" ? "windows" : item
+			}
+			count++
+			document.head.removeChild(css)
+			aDebug.push(s3 + (item +": ").padStart(pad) + sc +"detected")
+			if (count == maxCount) {exit()}
+			return resolve()
+		}
+		css.onerror = function() {
+			count++
+			document.head.removeChild(css)
+			aDebug.push(s3 + (item +": ").padStart(pad) + sc +"not detected")
+			if (count == maxCount) {exit()}
+			return resolve()
+		}
+	})
+
+	let count = 0, maxCount
+	let path = "chrome://browser/content/extension-", suffix = "-panel.css"
+	let list = ["win", "mac","linux"]
+	if (isNew) {
+		list = ['extension']
+		if (isFF && isVer > 123) {
+			list = ['extension-popup-panel','extension']
+		}
+		path = "chrome://browser/content/", suffix = ".css"
+		if (isFF) {
+			let string = (isVer > 123 ? "124+ " : "89+ ") + "desktop: "
+			aDebug.push(s13 + string.padStart(pad) + sc + path +"*.css")
+		} else {
+			aDebug.push(s13 + "desktop: ".padStart(pad) + sc + path +"*.css")
+		}
+	} else {
+		aDebug.push(s13 + "89-123 chrome://: ".padStart(pad) + sc +"browser/content/extension-*"+ suffix)
+	}
+	if (!isTimeOut) {
+		try {
+			if (isThrowError) {hortonhearsawho++}
+			maxCount = list.length
+			list.forEach(function(item) {
+				let css = document.createElement("link")
+				css.type = "text/css"
+				css.rel = "stylesheet"
+				css.href = path + item + suffix
+				document.head.appendChild(css)
+				get_event(css, item)
+			})
+		} catch(e) {
+			aDebug.push(sb + ("error: ").padStart(pad) + sc)
+			aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+			return resolve("error")
+		}
+	}
+})
+
+function check_docfonts() {
+	// FF124+ desktop: dig deeper
+	// the easiest way is to check for '-apple-system', 'MS Shell Dlg','MS Shell Dlg \\32'
+		// we could check a widget fonts but that fails in TB windows, may change
+		// and getComputedStyle can report the wrong font, so detect the actual fonts
+
+	let key = "04" // this is for fonts test if we fail
+	try {
+		if (isThrowDocFontError) {i_am_groot++}
+		// test doc fonts enabled
+		let fntTest = "\"Arial Black\""
+		let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
+		let fntEnabled = (font == fntTest ? true : false)
+		if (!fntEnabled) {
+			if (font.slice(0,11) == "Arial Black") {fntEnabled = true} // ext may strip quotes marks
+		}
+		if (fntEnabled) {
+			aDebug.push(s13 + "document fonts: ".padStart(pad) + sc +"enabled")
+			try_fonts()
+		} else {
+			aDebug.push(s13 + "document fonts: ".padStart(pad) + sc +"disabled")
+			aDebug.push(s13 + "fonts: ".padStart(pad) + sc + zNA +"<br>")
+			oResults[key] = zNA
+			try_somethingelse()
+		}
+	} catch(e) {
+		aDebug.push(s13 + "document fonts: ".padStart(pad) + sc)
+		aDebug.push(s13 + "fonts: ".padStart(pad) + sc + zNA)
+		aDebug.push(sb + "error: ".padStart(pad) + sc)
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+		oResults[key] = zNA
+		try_somethingelse()
+	}
+}
+
+function check_widgetfonts() {
+	let key = "03"
+	try {
+		if (isThrowWidgetError) {green_eggs_and_ham++}
+		let aIgnore = [
+		'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+		'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined, '']
+		let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
+		//font = "Roboto"
+		//font = "" // godamnit pierov
+		let fontDisplay = font == "" ? "empty string" : font
+		aDebug.push(s13 + "widget font: ".padStart(pad) + sc + fontDisplay)
+		let display, value
+		if (isFF) {
+			if (aIgnore.includes(font)) {
+				value = zNA
+				display = sb + ("result: ").padStart(pad) + sc + "too generic"
+			} else {
+				let systemfont
+				if (font.slice(0,12) == "MS Shell Dlg") {systemfont = "windows"
+				} else if (font == "-apple-system") {systemfont = "mac"}
+				if (systemfont !== undefined) {
+					value = systemfont
+					display = sg + ("result: ").padStart(pad) + sc + value
+				} else {
+					value = font
+					display = s13 + ("result: ").padStart(pad) + sc + "maybe useful"
+				}
+			}
+		} else {
+			display = s3 + ("result: ").padStart(pad) + sc + zNA
+		}
+		if (display !== undefined) {aDebug.push(display +"<br>")}
+		if (isFF) {oResults[key] = value}
+		check_docfonts()
+	} catch(e) {
+		aDebug.push(s13 + "widget font: ".padStart(pad) + sc)
+		aDebug.push(sb + "error: ".padStart(pad) + sc)
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+		oResults[key] = zNA
+		check_docfonts()
+	}
+}
+
+function run() {
+	t0 = performance.now()
+	dom.os.innerHTML = ""
+	dom.debug.innerHTML = ""
+	aDebug = []
+	oResults = {}
+	let notation = "", isVerOpen, isVerFull
+
+	let resFF = isOnlyGecko ? isFF : (isFF ? true : zNA)
+	aDebug.push(s13 + "gecko: ".padStart(pad) + sc + resFF)
+
+	if (isFF) {
+		isVerOpen = (isVer == isVerMax +"")
+		isVerFull = isVer + (isVerOpen ? "+" : "")
+		aDebug.push(s13 + "version: ".padStart(pad) + sc + isVer + (isVerOpen ? "+" : (isVer == 52 ? " or lower" : "")) +"<br>")
+	} else {
+		aDebug.push(s13 + "version: ".padStart(pad) + sc + zNA +"<br>")
+	}
+
+	function analyze(isNew, result) {
+		let key = isNew ? "01" : "02"
+		let value = result, display
+		if (result == "timed out") {
+			display = sb + ("timed out: ").padStart(pad) + sc
+			value = zNA
+		} else if (result == "error") {
+			value = zNA
+		} else {
+			if (isFF && isNew) {
+				// 6 results: 0,1,2 for > 123 and < 124
+				if (result == 0) {
+					value = "android"
+					display = sg + "result: ".padStart(pad) + sc + value
+				} else if (isVer > 123 && result == 1) {
+					value = "desktop"
+					display = sg + "result: ".padStart(pad) + sc + value + sb +" [but only 1 of 2]"+ sc
+				} else {
+					value = "desktop"
+					display = sg + "result: ".padStart(pad) + sc + value
+				}
+			} else if (isFF && !isNew) {
+				if (result == undefined) {
+					if (isVer > 123) {
+						value = zNA
+						display = s13 + "result: ".padStart(pad) + sc + value
+					} else {
+						value = "android" // FF123 or lower nothing found: assume android
+						display = sg + "result: ".padStart(pad) + sc + value
+					}
+				} else {
+					// if not undefined, we can only have windows/mac/linux
+					display = sg + "result: ".padStart(pad) + sc + result
+				}
+			} else {
+				display = s13 + "result: ".padStart(pad) + sc + zNA
+			}
+		}
+		if (display !== undefined) {aDebug.push(display +"<br>")}
+		if (isFF) {oResults[key] = value}
+	}
+
+	if (isOnlyGecko && !isFF) {
+		finish(1)
+	} else if (isOnlyGecko && !isFF || isFF && isVer < 89) {
+		finish(2)
+	} else {
+		Promise.all([
+			check_css(true)
+		]).then(function(res){
+			analyze(true, res[0])
+			Promise.all([
+				check_css(false)
+			]).then(function(res){
+				analyze(false, res[0])
+				check_widgetfonts()
+			})
+		})
+	}
+}
+
+function try_somethingelse() {
+	// is there anything that is platform specific that can't be flipped with a pref
+
+	// FF34+ 848954
+	// linux doesn't have a currentTime property in HTMLMediaElement
+	// https://searchfox.org/mozilla-central/source/dom/html/HTMLMediaElement.h#37
+	// hmm ok , not what I thought it was
+	/*
+	let key = "05"
+	aDebug.push(s13 + "HTMLMediaElement: ".padStart(pad) + sc + "currentTime")
+	try {
+		let value = HTMLMediaElement.prototype.hasOwnProperty("currentTime") ? "not linux" : "linux" // 0.008ms
+		aDebug.push(sg + "result: ".padStart(pad) + sc + value +"<br>")
+		oResults[key] = value
+	} catch(e) {
+		aDebug.push(sb + "error: ".padStart(pad) + sc)
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+		oResults[key] = zNA
+	}
+	*/
+
+	aDebug.push(s13 + "something else: ".padStart(pad) + sc +"pending")
+
+	finish()
+}
+
+
+setTimeout(function() {
+	// do not call the global get_isOS
+	// don't even use isOS
+	Promise.all([
+		get_globals()
+	]).then(function(){
+		Promise.all([
+			get_isVer()
+		]).then(function(){
+			run()
+		})
+	})
+}, 25)
+
+function try_fonts() {
+	let key = "04"
+	let fntFake = "--00"+ rnd_string()
+	let fntSize = "512px"
+	let fntString = "Mōá?-"+ String.fromCodePoint('0xFFFF')
+	let fntTest = [
+		'Dancing Script','Roboto',
+		'-apple-system',
+		'MS Shell Dlg \\32',
+	]
+	fntTest.push(fntFake)
+	fntTest.sort()
+	let fntControl = ['monospace, Consolas, Menlo, "Courier New\"','sans-serif, Arial','serif, "Times New Roman\"']
+	let fntGeneric = fntControl
+
+	try {
+		if (isThrowFontError) {let_them_eat_cake++}
+		const doc = document // or iframe.contentWindow.document
+		const id = `font-fingerprint`
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		set_element(id, fntSize, fntString)
+
+		const span = doc.getElementById(`${id}-detector`)
+		const originPixelsToNumber = pixels => 2*pixels.replace('px', '')
+		const detectedFonts = new Set()
+		const style = getComputedStyle(span)
+		let getDimensions = (span, style) => {
+			const transform = style.transformOrigin.split(' ')
+			const dimensions = {
+				height: originPixelsToNumber(transform[1]),
+				width: originPixelsToNumber(transform[0]),
+			}
+			return dimensions
+		}
+
+		// base sizes
+		let base = fntGeneric.reduce((acc, font) => {
+			span.style.font = ""
+			span.style.setProperty('--font', font)
+			const dimensions = getDimensions(span, style)
+			acc[font.split(",")[0]] = dimensions // use only first name, i.e w/o fallback
+			return acc
+		}, {})
+		span.style.font = "" // reset
+
+		// test validity
+		let baseStyle = "monospace"
+		let wValue = base[baseStyle].width,
+			hValue = base[baseStyle].height
+		let wType = typeFn(wValue)
+		let hType = typeFn(hValue)
+		if ("number" !== wType || "number" !== hType) {
+			try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+			aDebug.push(s13 + "fonts: ".padStart(pad) + sc)
+			aDebug.push(sb + "type error: ".padStart(pad) + sc + wType +" x "+ hType +"<br>")
+			oResults[key] = zNA
+			try_somethingelse()
+			return
+		}
+
+		let isDetected = false
+		fntTest.forEach(font => {
+			isDetected = false // have we found it
+			fntControl.forEach(basefont => {
+				if (isDetected) {return}
+				const family = "'"+ font +"', "+ basefont	
+				span.style.setProperty('--font', family)
+				const style = getComputedStyle(span)
+				const dimensions = getDimensions(span, style)
+				basefont = basefont.split(",")[0] // switch to short generic name
+				if (dimensions.width != base[basefont].width || dimensions.height != base[basefont].height) {
+					detectedFonts.add(font)
+					isDetected = true // we're only testing one method
+				}
+				return
+			})
+		})
+
+		let aFonts = [...detectedFonts]
+		// testing
+		//aFonts = ['Dancing Script','Roboto','-apple-system','MS Shell Dlg \\32']
+		//aFonts.push(fntFake)
+		//aFonts = ['MS Shell Dlg \\32']
+		//aFonts = ['-apple-system']
+		//aFonts = ['-apple-system','MS Shell Dlg \\32']
+		//aFonts = ['Dancing Script','Roboto']
+		//aFonts = ['Roboto']
+		//aFonts = ['Dancing Script']
+		//aFonts = []
+
+		aFonts.sort()
+		let len = aFonts.length, display, value
+
+		if (len == 1) {
+			let fnt0 = aFonts[0]
+			aDebug.push(s13 + "fonts: ".padStart(pad) + sc + fnt0)
+			if (fnt0 == "MS Shell Dlg \\32") { value = "windows"
+			} else if (fnt0 == "-apple-system") {value = "mac"}
+			if (value !== undefined) {
+				display = sg + "result: ".padStart(pad) + sc + value
+			}
+		} else {
+			if (len == 2) {
+				aDebug.push(s13 + "fonts: ".padStart(pad) + sc + aFonts.join(", "))
+			} else {
+				aDebug.push(s13 + "fonts: ".padStart(pad) + sc + (aFonts.length ? len : "none") + " detected")
+				aFonts.forEach(function(f) {
+					aDebug.push("".padStart(pad) + f)
+				})
+			}
+		}
+		if (aFonts.join() == "Dancing Script,Roboto" || aFonts.join() == "Dancing Script" || aFonts.join() == "Roboto") {
+			if (oResults["01"] == "android" && oResults["03"] == "Roboto") {
+				value = "android"
+				display = sg + "result: ".padStart(pad) + sc + value + sg +" [see desktop + widget test]"+ sc
+			} else if (oResults["01"] !== "desktop" && oResults["03"] == "Roboto" && aFonts.includes('Dancing Script')) {
+				value = "android"
+				display = sg + "result: ".padStart(pad) + sc + value + sg +" [Dancing Script + widget test]"+ sc
+			} else {
+				value = aFonts.join()
+				display = s13 + "result: ".padStart(pad) + sc + "maybe android"+ sc
+			}
+		}
+		if (len == 0) {
+			if (oResults["01"] == "desktop" && oResults["03"] !== "windows" && oResults["03"] !== "mac") {
+				value = "linux"
+				display = sg + "result: ".padStart(pad) + sc + "linux"+ sc +" [see desktop + widget test]"+ sc
+			}
+		}
+		if (aFonts.includes(fntFake)) {
+			// also covers all fonts returned
+			value = zNA
+			display = sb + "result: ".padStart(pad) + sc + "fake font detected"
+		} else if ( aFonts.includes("-apple-system") && aFonts.includes('MS Shell Dlg \\32') ) {
+			value = zNA
+			display = sb + "result: ".padStart(pad) + sc + "windows and mac detected"
+		}
+
+		if (display == undefined) {
+			value = (len == 0 ? "none" : aFonts.join(", "))
+			display = s13 + "result: ".padStart(pad) + sc + "pending"+ sc
+		}
+		if (display !== undefined) {
+			aDebug.push(display +"<br>")
+			oResults[key] = value
+			try_somethingelse()
+			return
+		}
+	} catch(e) {
+		try {document.getElementById("font-fingerprint").remove()} catch(e) {}
+		aDebug.push(s13 + "fonts: ".padStart(pad) + sc)
+		aDebug.push(sb + "error: ".padStart(pad) + sc)
+		aDebug.push("<div class='oscenter faint'>"+ e +"</div>")
+		oResults[key] = zNA
+		try_somethingelse()
+	}
+}
+
+function set_element(id, fntSize, fntString) {
+	document.getElementById(id).innerHTML = `
+		<style>
+		#${id}-detector {
+			--font: '';
+			position: absolute !important;
+			left: -9999px!important;
+			font-size: ` + fntSize + ` !important;
+			font-style: normal !important;
+			font-weight: normal !important;
+			letter-spacing: normal !important;
+			line-break: auto !important;
+			line-height: normal !important;
+			text-transform: none !important;
+			text-align: left !important;
+			text-decoration: none !important;
+			text-shadow: none !important;
+			white-space: normal !important;
+			word-break: normal !important;
+			word-spacing: normal !important;
+			/* in order to test scrollWidth, clientWidth, etc. */
+			padding: 0 !important;
+			margin: 0 !important;
+			/* in order to test inlineSize and blockSize */
+			writing-mode: horizontal-tb !important;
+			/* for transform and perspective */
+			transform-origin: unset !important;
+			perspective-origin: unset !important;
+		}
+		#${id}-detector::after {
+			font-family: var(--font);
+			content: '` + fntString + `';
+		}
+		</style>
+		<span id="${id}-detector"></span>`
+}
+
+</script>
+</body>
+</html>

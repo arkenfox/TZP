@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>collation</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px"><col>
+		<thead><tr><th colspan="2">collation</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Output is limited to results that do not match English.
+			Clicking run with no inputs will instead run examples</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<!-- localeCompare -->
+				<hr><br>
+					<span class="s4">LOCALECOMPARE</span>
+					<span class="btn4 btn" onClick="compare()">[ run ]</span>
+					<span class="btn4 btn" onClick="reset(`compare`)">[ clear input ]</span>
+				<br><br>
+				<input type="text" placeholder="a" id="valueA"> &nbsp; <input type="text" placeholder="A" id="valueB">
+				<br>
+				<br><span class="spaces" id="output_compare"></span>
+				<!-- Intl.Collator -->
+				<br><br><hr><br>
+					<span class="s4">INTL.COLLATOR</span>
+					<span class="btn4 btn" onClick="collator()">[ run ]</span>
+					<span class="btn4 btn" onClick="reset(`collator`)">[ clear input ]</span>
+				<br><br>
+				<textarea rows="3" placeholder="sort: comma delimited values: e.g: a,A,th,tw"
+						style="width: 98%; resize: vertical" id="valueC"></textarea>
+				<textarea rows="1" placeholder="search: comma delimited values: e.g: a,A,th,tw"
+						style="width: 98%; resize: vertical" id="valueD"></textarea>
+				<br><br>
+					<span class="spaces" id="output_collator"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = []
+gLocales.forEach(function(str) {
+	let code = str.split(",")[0]
+	if (Intl.Collator.supportedLocalesOf([code]).length) {list.push(str)}
+})
+
+var collatorSort = [
+	'a',
+	'A',
+	'aa',
+	'ch', // cs,sk,sq,uz
+	'ez',
+	'kz',
+	'ng',
+	'ph',
+	'ts','tt', // ew, ha
+	'y',
+	// latin small
+	'\u00E2',   // a + CIRCUMFLEX
+	'\u00E4',   // a + DIAERESIS
+	'\u01FB',   // a + RING ABOVE + ACUTE
+	'\u0107',   // c + ACUTE
+	'\u0109',   // c + CIRCUMFLEX
+	'\u00E7\a', // c + CEDILLA
+	'\u00EB',   // e + DIAERESIS
+	'\u00ED',   // i + ACUTE
+	'\u00EE',   // i + CIRCUMFLEX
+	'\u0137\a', // k + CEDILLA
+	'\u0144',   // n + ACUTE
+	'\u00F1',   // n + TILDE
+	'\u1ED9',   // o + CIRCUMFLEX + DOT BELOW
+	'\u00F6',   // o + DIAERESIS
+	'\u1EE3',   // o + HORN + DOT BELOW
+	// other
+	'\u0627',  //     ARABIC ALEF
+	'\u0649',  //     ARABIC ALEF MAKSURA
+	'\u06CC',  //     ARABIC FARSI YEH
+	'\u06C6',  //     ARABIC OE
+	'\u06C7',  //     ARABIC U
+	'\u06FD',  //     ARABIC SINDHI AMPERSAND
+	'\u0561',  //   ARMENIAN AYB small
+	'\u09A4',  //    BENGALI TA
+	'\u09CE',  //    BENGALI KHANDA TA
+	'\u311A',  //   BOPOMOFO A
+	'\u0453',  //   CYRILLIC GJE small
+	'\uA647',  //   CYRILLIC IOTA small
+	'\u0503',  //   CYRILLIC KOMI DJE small
+	'\u0439',  //   CYRILLIC SHORT I small
+	'\u0457',  //   CYRILLIC YI small
+	'\u040E',  //   CYRILLIC SHORT U capital
+	'\u04F0',  //   CYRILLIC U + DIAERESIS capital
+	'\u4E2D',  //        CJK Ideograph
+	'\u0934',  // DEVANAGARI LLLA
+	'\u0935',  // DEVANAGARI VA
+	'\u1208',  //   ETHIOPIC SYLLABLE LA (amharic)
+	'\u10D0',  // 	GEORGIAN AN
+	'\u03B1',  //      GREEK ALPHA small
+	'\u0A85',  //   GUJARATI A
+	'\u3147',  //     HANGUL IEUNG
+	'\u05EA',  //     HEBREW TAV
+	'\uFB4A',  //     HEBREW TAV + DAGESH
+	'\u0C85',  //    KANNADA A
+	'\u1780',  //      KHMER KA
+	'\u0E9A',  //        LAO BO
+	'\u1D95',  //      LATIN SCHWA + RETROFLEX HOOK
+	'\u025B',  //      LATIN SMALL OPEN E
+	'\u0149',  //      LATIN SMALL N PRECEDED BY APOSTROPHE
+	'\u00F0',  //      LATIN SMALL ETH small
+	'\u1DD9',  // COMBINING LATIN SMALL LETTER ETH
+	'\u1820',  //  MONGOLIAN A
+	'\u10350', // OLD PERMIC AN
+	'\u0B05',  //      ORIYA A
+	'\u0D85',  //    SINHALA AYANNA
+	'\u0B85',  //      TAMIL A
+	'\u0C05',  //     TELUGU A
+	'\u0E24',  //       THAI RU
+]
+
+var collatorSearch = [
+	// latin small
+	'\u0107',   // c + ACUTE
+	'\u0109',   // c + CIRCUMFLEX
+	'\u1ED9',   // o + CIRCUMFLEX + DOT BELOW
+	'\u00F6',   // o + DIAERESIS
+]
+
+var compareExamples = [
+	'\u0109,\u00E7\a',
+	'a,\u03B1',
+	'\u0107,\u0109',
+	'c,ch',
+	'\u00EB,ez',
+	'\u0137\a,kz',
+	'\u1ED9,\u1EE3',
+	'\u0109,ch',
+	'\u0627,\u06FD',
+	'a,A',
+	'\u00E7\a,ch',
+	'\u0144,\u00F1',
+	'n,ng',
+	'\u00ED,\u00EE',
+	'r,\u0453',
+	'\u00F6,\u1EE3',
+	'\u00F1,ng',
+	'\u0107,ch',
+	'ts,tt',
+	'\u1D95,\u025B',
+	'\u040E,\u04F0',
+	'u,\u04F0',
+	'x,y',
+	'\u05EA,\uFB4A',
+]
+
+var aLegend = [],
+	aLocales = [],
+	counter = 0,
+	oSortvsSearch = {}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		let aCanonical = []
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let test = Intl.Collator.supportedLocalesOf([code])
+			if (test.length) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let	header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function reset(type) {
+	if (type == "compare") {
+		dom.valueA.value = ""
+		dom.valueB.value = ""
+	} else {
+		dom.valueC.value = ""
+		dom.valueD.value = ""
+	}
+}
+
+function check_example() {
+	let control = collatorSort.length
+	// make sure example is dupe free
+	collatorSort = collatorSort.filter(function (item, position) {
+		return collatorSort.indexOf(item) === position
+	})
+	if (collatorSort.length !== control) {
+		console.debug("attention thorin: collation example contains dupes.. get your shit together")
+	}
+}
+
+function compare() {
+	function example() {
+		valueA = compareExamples[counter].split(",")[0]
+		valueB = compareExamples[counter].split(",")[1]
+		counter++
+		if (counter == compareExamples.length) {counter = 0}
+	}
+	// clear
+	let el = dom.output_compare
+	// vars
+	let valueA = dom.valueA.value,
+		valueB = dom.valueB.value,
+		isExample = false,
+		go = false
+	// make sure we have two valid values
+	valueA = valueA.trim()
+	valueB = valueB.trim()
+	if (valueA.length && valueB.length) {
+		if (valueA !== valueB) {
+			dom.valueA.value = valueA
+			dom.valueB.value = valueB
+			go = true
+		}
+	}
+	// run random example
+	if (valueA.length == 0 && valueB.length == 0) {
+		isExample = true
+		example()
+		go = true
+	}
+	if (!isExample) {
+		el.innerHTML = "&nbsp"
+	}
+	// good to go
+	if (go) {
+		// delay so user can see changes
+		setTimeout(function() {
+			let output = [], str = ""
+			if (isExample) {
+				str = "example " + s12 + (counter == 0 ? compareExamples.length : counter)
+					+ sc +" of "+ s12 + compareExamples.length + sc +": comparing "
+					+ s12 + valueA + sc +" and "+ s12 + valueB + sc +"<br>"
+				output.push(str)
+			} else {
+				str = "comparing " + s12 + valueA + sc +" and "+ s12 + valueB + sc +"<br>"
+				output.push(str)
+			}
+			for (let i = 0 ; i < list.length; i++) {
+				let control = valueA.localeCompare(valueB, "en-US")
+				let code = list[i].split(",")[0]
+				let name = list[i].split(",")[1].trim()
+				let test = valueA.localeCompare(valueB, code)
+				if (control !== test) {
+					output.push(s12 + code.padStart(12) + sc +": "+ name)
+				}
+			}
+			if (output.length == 1) {
+				output.push("    nothing to report")
+			}
+			el.innerHTML = output.join("<br>")
+		}, 170)
+	} else {
+		// crash and burn
+		el.innerHTML = "please provide two different values"
+	}
+}
+
+function collator() {
+	// clear
+	let el = dom.output_collator
+	el.innerHTML = "&nbsp"
+	legend()
+	// vars
+	let valueC = dom.valueC.value,
+		valueD = dom.valueD.value,
+		charsSort = [],
+		charsSearch = [],
+		goSort = false,
+		goSearch = false
+
+	// make sure we have at least two valid values
+	valueC = valueC.trim()
+	if (valueC.length) {
+		let tmpArr = valueC.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				charsSort.push(trimmed)
+			}
+		}
+		// make sure we have more than one item
+		charsSort = charsSort.filter(function (item, position) {
+			return charsSort.indexOf(item) === position
+		})
+		if (charsSort.length > 1) {
+			goSort = true
+			dom.valueC.value = charsSort.join(", ")
+		}
+	} else {
+		// use example
+		charsSort = collatorSort
+		goSort = true
+	}
+
+	valueD = valueD.trim()
+	if (valueD.length) {
+		let tmpArr = valueD.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				charsSearch.push(trimmed)
+			}
+		}
+		// make sure we have more than one item
+		charsSearch = charsSearch.filter(function (item, position) {
+			return charsSearch.indexOf(item) === position
+		})
+		if (charsSearch.length > 1) {
+			goSearch = true
+			dom.valueD.value = charsSearch.join(", ")
+		}
+	} else {
+		// use example
+		charsSearch = collatorSearch
+		goSearch = true
+	}
+
+	// good to go
+	if (goSort == true && goSearch == true) {
+		oSortvsSearch = {
+			"search_is_nonenglish": [],
+		} // reset
+
+		// delay so user can see changes
+		setTimeout(function() {
+			let output = []
+			// reset
+			charsSort.sort()
+			charsSearch.sort()
+			//console.log(mini(charsSort), mini(charsSearch))
+			let exampleHash = mini(collatorSort.sort()) +" | "+ mini(collatorSearch.sort())
+			let thisHash = mini(charsSort.sort()) +" | "+ mini(charsSearch.sort())
+
+			// display chars used
+			let strItem = s4.trim() +"ITEMS: "+ sc + charsSort.length
+				+ (thisHash == exampleHash ? s12 +" [example]"+ sc : "") +"<br><br>"
+				+ s12 +"sort: "+ sc + charsSort.join(", ") +"<br><br>"
+				+ s12 +"search: "+ sc + charsSearch.join(", ") +"<br>"
+			output.push(strItem)
+
+			// set control
+			charsSort = charsSort.sort(Intl.Collator("en").compare)
+			let enHashSort = mini(charsSort)
+			charsSearch.sort(Intl.Collator("en", {usage: "search"}).compare)
+			let enHashSearch = mini(charsSearch)
+			let control = enHashSort +" | "+ enHashSearch
+
+			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
+				+ s12 +"   hash: "+ sc + control + s12 +" [en: sort | search]"+ sc +"<br>"
+			output.push(strItem)
+			// results header
+			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
+			output.push(strItem)
+
+			// loop
+			let diffs = [],
+				legendnew = [],
+				codes = []
+			let oTempData = {}
+
+			for (let i = 0 ; i < list.length; i++) {
+				// important: reset to original order
+				let str = list[i].toLowerCase()
+				let code = str.split(",")[0].trim()
+				let name = str.split(",")[1].trim()
+
+				charsSort.sort()
+				charsSort.sort(Intl.Collator(code).compare)
+				let hash = mini(charsSort)
+
+				charsSearch.sort()
+				charsSearch.sort(Intl.Collator(code, {usage: "search"}).compare)
+				let hash2 = mini(charsSearch)
+
+				if (hash2 !== enHashSearch) {
+					oSortvsSearch["search_is_nonenglish"].push(code + ": " + hash +", " + hash2)
+				}
+				hash += " | "+ hash2
+				if (hash !== control) {
+					codes.push(code)
+					diffs.push(hash +":"+ code +":"+ name)
+					if (oTempData[hash] == undefined) {oTempData[hash] = []}
+					oTempData[hash].push(code +" "+ name)
+				}
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				if (hash == control) {
+					legendnew.push(code.padStart(7) +": "+ name)
+				} else {
+					legendnew.push(sg + code.padStart(7) + sc +": "+ name)
+				}
+			}
+
+			// we have diffs
+			// sort by hash+locale so we can group hashes
+			diffs.sort()
+			if (diffs.length) {
+				// output colored legend
+				let	header = s4 +"LEGEND ["+ list.length +"]"+ sc +"<br><br>"
+				dom.legend.innerHTML = header + legendnew.join("<br>")
+				let tmpH = "", tmpC = "", tmpL = "", tmpStr = "", nxtH = "", locales = ""
+				let newArr = []
+				for (let i = 0 ; i < diffs.length; i++) {
+					// get current item
+					tmpStr = diffs[i]
+					tmpH = tmpStr.split(":")[0] // hash
+					tmpC = tmpStr.split(":")[1] // code
+					tmpL = tmpStr.split(":")[2] // locale name (assuming no more colons)
+					locales += sg + tmpC + sc +" "+ tmpL +" " // color up code
+					// grab next item
+					if (i < diffs.length - 1) {
+						nxtH = diffs[(i+1)].split(":")[0]
+					} else {
+						nxtH = "end"
+					}
+					// build new item
+					if (nxtH !== tmpH) {
+						newArr.push(locales.trim() +":"+ tmpH)
+						locales = "" // reset
+					}
+				}
+
+				// sort newArr (i.e order by first locale)
+				newArr.sort()
+				let lineItems = []
+				tmpH = "", tmpL = "", tmpStr = ""
+				let len = 0
+				// newArr
+				for (let i = 0 ; i < newArr.length; i++) {
+					tmpStr = newArr[i]
+					len = tmpStr.length
+					tmpL = tmpStr.split(":")[0]
+					tmpH = tmpStr.split(":")[1]
+					tmpStr = s12 + (i + 1).toString().padStart(3) +": "+ sc
+					// counter then hash then locales
+					lineItems.push (tmpStr + tmpH +"<br><ul><li>"+ tmpL +"</li></ul>")
+				}
+
+				// results output
+				strItem = s12 +"  stats: "+ sc
+					+ sg + newArr.length +" unique"
+					+ sc +" from "+ sg + codes.length + sc + " of "+ sg + aLocales.length + sc +" locales supported"
+				output.push(strItem +"<br>")
+
+				// locales hash
+				let aLocaleGroups = []
+				for (const k of Object.keys(oTempData)) {
+					aLocaleGroups.push(oTempData[k])
+				}
+				aLocaleGroups.sort()
+				let localesHash = mini(aLocaleGroups)
+
+				let ff = ""
+				// don't notate unless it's our own preset
+				if (isFF && thisHash == exampleHash) {
+					// only hash notate if 102+
+					let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+					if (is102) {
+						if (localesHash == "a7d80e7c") {ff = "110+"
+						} else if (localesHash == "ec4e8131") {ff = "102-109"
+						} else {ff = zNEW}
+						if (ff !== zNEW) {ff = s14 +" [FF"+ ff + "]"+ sc}
+					}
+				}
+				strItem = s12 +"locales: "+ sc + localesHash + ff +"<br>"
+				output.push(strItem)
+
+				// details
+				strItem = s4.trim() +"DETAILS"+ sc +"<br>"
+				output.push(strItem)
+				output.push(lineItems.join("<br>"))
+			} else {
+				output.push("nothing to report")
+			}
+			el.innerHTML = output.join("<br>")
+		}, 170)
+	} else {
+		// crash and burn
+		el.innerHTML = "please provide two different values"
+	}
+}
+
+check_example()
+Promise.all([
+	get_globals()
+]).then(function(){
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"bs-cyrl,bosnian (cyrillic)",
+		"fr-ca,french (canada)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	legend()
+	collator()
+})
+
+</script>
+</body>
+</html>

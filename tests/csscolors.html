@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>css colors</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 480px; max-width: 580px;}
+	</style>
+</head>
+
+<body>
+	<div class="hidden"><span id="sColorElement"></span></div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#css">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb14">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">css colors
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">
+			<a target="_blank" class="blue" href="https://www.w3.org/TR/css-color-4/">https://www.w3.org/TR/css-color-4/</a>
+		</span></td></tr>
+		<tr>
+			<td colspan="2" style="text-align: left;">
+			<hr><br>
+			<span class="no_color c mono spaces" id="summary"></span>
+			<br><br><hr><br>
+			<span class="no_color c mono spaces" id="results"></span></td>
+		</tr>
+	</table>
+	<br>
+<script>
+'use strict';
+
+let oColors = {
+	"all": {
+		"countcolor": 0,
+		"countsupported": 0,
+		"data": {},
+		"databyname": [],
+		"hash": "",
+	}
+}
+
+function get_colors() {
+
+	/* https://www.w3.org/TR/css-color-4/ */
+	/* 95+: test_bug232227.html */
+	// sorted lists
+	let oList = {
+		"css4": [
+			'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color',
+			'-moz-hyperlinktext','-moz-visitedhyperlinktext',
+			'AccentColor','AccentColorText','ActiveText','ButtonBorder','ButtonFace','ButtonText',
+			'Canvas','CanvasText','Field','FieldText','GrayText','Highlight','HighlightText','LinkText',
+			'Mark','MarkText','SelectedItem','SelectedItemText','VisitedText',
+		],
+		"deprecated": [ // 23 "deprecated"
+			'ActiveBorder','ActiveCaption','AppWorkspace','Background','ButtonHighlight','ButtonShadow',
+			'CaptionText','InactiveBorder','InactiveCaption','InactiveCaptionText','InfoBackground',
+			'InfoText','Menu','MenuText','Scrollbar','ThreeDDarkShadow','ThreeDFace','ThreeDHighlight',
+			'ThreeDLightShadow','ThreeDShadow','Window','WindowFrame','WindowText',
+		],
+		"moz": [
+			'-moz-buttonhoverface','-moz-buttonhovertext','-moz-cellhighlight','-moz-cellhighlighttext',
+			'-moz-combobox','-moz-comboboxtext','-moz-dialog','-moz-dialogtext','-moz-eventreerow','-moz-field',
+			'-moz-fieldtext','-moz-html-cellhighlight','-moz-html-cellhighlighttext','-moz-menubarhovertext',
+			'-moz-menuhover','-moz-menuhovertext','-moz-oddtreerow',
+			// removed FF122: 1867854
+			'-moz-mac-defaultbuttontext','-moz-mac-disabledtoolbartext', '-moz-mac-focusring','-moz-nativehyperlinktext', 
+			// removed FF121: 1863691
+			'-moz-mac-active-menuitem','-moz-mac-active-source-list-selection','-moz-mac-menuitem',
+			'-moz-mac-menupopup','-moz-mac-source-list','-moz-mac-source-list-selection','-moz-mac-tooltip',
+			// removed FF119: 1857695
+			'-moz-mac-menutextdisable','-moz-mac-menutextselect',
+			// removed FF117
+			"-moz-buttondefault","-moz-dragtargetzone","-moz-mac-chrome-active","-moz-mac-chrome-inactive",
+			"-moz-mac-menuselect","-moz-mac-menushadow","-moz-mac-secondaryhighlight","-moz-menubartext",
+			"-moz-win-communicationstext","-moz-win-mediatext",
+			// removed FF103
+			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light',
+			// removed FF94
+			'-moz-mac-buttonactivetext',
+			// removed FF90
+			'-moz-gtk-info-bar-text',
+			// removed FF88
+			'-moz-mac-vibrancy-dark','-moz-mac-vibrancy-light','-moz-win-accentcolor','-moz-win-accentcolortext',
+			// removed FF78 or lower
+			'-moz-accent-color','-moz-accent-color-foreground','-moz-appearance','-moz-colheaderhovertext',
+			'-moz-colheadertext','-moz-gtk-buttonactivetext','-moz-mac-accentdarkestshadow',
+			'-moz-mac-accentdarkshadow','-moz-mac-accentface','-moz-mac-accentlightesthighlight',
+			'-moz-mac-accentlightshadow','-moz-mac-accentregularhighlight','-moz-mac-accentregularshadow',
+			'-moz-win-communications-toolbox','-moz-win-media-toolbox',
+		],
+	}
+
+	function rgba2hex(orig) {
+		var a, isPercent,
+			rgb = orig.replace(/\s/g, '').match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i),
+			alpha = (rgb && rgb[4] || "").trim(),
+			hex = rgb ?
+			(rgb[1] | 1 << 8).toString(16).slice(1) +
+			(rgb[2] | 1 << 8).toString(16).slice(1) +
+			(rgb[3] | 1 << 8).toString(16).slice(1) : orig;
+		if (alpha !== "") {a = alpha} else {a = 0o1}
+		// multiply before convert to HEX
+		a = ((a * 255) | 1 << 8).toString(16).slice(1)
+		hex = hex + a
+		return hex + " "+ rgb[1] +"-"+ rgb[2] +"-"+ rgb[3]
+	}
+
+	try {
+		const element = dom.sColorElement
+		const strColor = "rgba(1, 2, 3, 0.5)"
+		let tmpAll = {}, aTempAll = [], count = 0
+		for (const type of Object.keys(oList)) {
+			let oTemp = {}
+			let aList = oList[type]
+			aList.sort()
+			aList.forEach(function(style) {
+				element.style.backgroundColor = strColor // reset color
+				element.style.backgroundColor = style
+				let rgb = window.getComputedStyle(element, null).getPropertyValue("background-color")
+				if (rgb !== strColor) { // drop obsolete
+					if (oTemp[rgb] == undefined) {oTemp[rgb] = [style]} else {oTemp[rgb].push(style)}
+				}
+			})
+			let tmpobj = {}
+			count = 0
+			for (const k of Object.keys(oTemp)) {tmpobj[rgba2hex(k)] = oTemp[k]} // rgba2hex
+			oColors[type] = {
+				"countcolor": 0,
+				"countsupported": 0,
+				"data": {},
+				"databyname": [],
+				"hash": "",
+			}
+			let aTemp = []
+			for (const k of Object.keys(tmpobj).sort()) {
+				oColors[type]["data"][k] = tmpobj[k]; count += tmpobj[k].length // sort/count
+				if (tmpAll[k] == undefined) {tmpAll[k] = []}
+				tmpAll[k][type] = []
+				tmpAll[k][type] = tmpAll[k].concat(tmpobj[k])
+				tmpobj[k].forEach(function(item) {
+					aTemp.push(item +": "+ k)
+				}) // array by name
+			}
+			oColors[type]["countcolor"] = Object.keys(tmpobj).length
+			oColors[type]["countsupported"] = count
+			oColors[type]["hash"] = mini(oColors[type]["data"])
+			aTempAll = aTempAll.concat(aTemp)
+			aTemp.sort()
+			oColors[type]["databyname"] = aTemp
+
+		}
+		// all
+		count = 0
+		aTempAll.sort()
+		oColors["all"]["databyname"] = aTempAll
+		for (const k of Object.keys(tmpAll).sort()) {
+			oColors["all"]["data"][k] = {}
+			for (const name of Object.keys(tmpAll[k]).sort()) {
+				let data = tmpAll[k][name] // don't sort: leave in original groups
+				oColors["all"]["data"][k][name] = data
+				count += data.length
+			}
+		}
+		oColors.all.countcolor += Object.keys(tmpAll).length
+		oColors.all.countsupported += count
+		oColors.all.hash = mini(oColors["all"]["data"])
+		output()
+	} catch(e) {
+		console.error(e.name, e.message)
+		dom.summary = e.type +": "+ e.message
+	}
+}
+
+function log_console(type, list) {
+	let data = oColors[type][list],
+		hash = mini(data),
+		counts = ""
+	if (list == "data") {
+		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
+	}
+	console.log(type +": "+ hash + counts +"\n" + JSON.stringify(data, null, 2))
+}
+
+function output() {
+	let summary1 = [], summary2 = [], summary3 = []
+	for (const k of Object.keys(oColors).sort()) {
+		let data = oColors[k]
+		let str = k
+		let counts = data.countcolor + "/" + data.countsupported
+		counts = counts.padStart(6)
+		str = "<span class='btn14 btnc' onClick='display(`" + k +"`)'>"+  str +"</span>: "+ counts
+		summary1.push(str)
+		let len = k.length + 8
+		summary2.push(s16 + (data.hash).padEnd(len) +sc)
+	}
+	dom.summary.innerHTML = summary1.join(" | ") +"<br>"+ summary2.join(" | ")
+	display("all")
+}
+
+function display(type) {
+	let results = []
+	let data = oColors[type]["data"],
+		hash = oColors[type]["hash"],
+		counts = " ["+ oColors[type]["countcolor"] + "/" + oColors[type]["countsupported"] +"]"
+	let consoleBtns = " | CONSOLE: "
+		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`databyname`)'>[by name]</span> "
+		+ "<span class='btn14 btnc' onClick='log_console(`" + type +"`,`data`)'>[by color]</span> "
+
+	results.push(s14 + type + sc + ": " + oColors[type]["hash"] + counts + consoleBtns +"<br><br>{")
+	for (const k of Object.keys(data)) {
+		let k1 = k.split(" ")[0]
+		let k2 = k.split(" ")[1]
+
+		results.push("  \""+ k1 +"\": <span style='background-color:#"+ k1 +"; border: 1px solid white'> &nbsp </span> "+ k2)
+		let resultsStr = ""
+		if (type == "all") {
+			for (const name of Object.keys(data[k])) {
+				resultsStr += "<ul>"+ s14 + name + sc +": " + data[k][name].join(", ") +"</ul>"
+			}
+		} else {
+			resultsStr = "<ul>"+ data[k].join(", ") +"</ul>"
+		}
+		results.push(resultsStr)
+	}
+	dom.results.innerHTML = results.join("<br>") +"}"
+}
+
+get_colors()
+
+</script>
+</body>
+</html>

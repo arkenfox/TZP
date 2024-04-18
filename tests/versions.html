@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=700">
+	<title>versions</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 680px;}
+	</style>
+	<style id="test73">
+		.a{border-width: 1px; border-style: solid; border-color: black; border-image: linear-gradient(white,black);}
+	</style>
+</head>
+
+<body>
+	<div class="hidden">
+		<div id="test73"></div>
+		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+		<output id="test90a">a</output>
+		<select id="test107"></select>
+	</div>
+	<div class="offscreen">
+		<div id="test89" style="width:1em">a &#x3000; b</div>
+		<div id="ctrl89" style="width:1em">a b</div>
+		<span id="test81a"></span><span id="test81b"></span>
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#feature">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb3">
+		<col width="1%"><col width="33%"><col width="33%"><col width="32%"><col width="1%">
+		<thead><tr><th colspan="5"><div class="nav-title">versions</div></th></tr></thead>
+		<tr><td colspan="5" class="intro">
+			<span class="no_color">Gecko version-specific PoCs : &nbsp;
+				&nbsp; <b><span class='good'> &#x2713; </span></b> &nbsp; pass
+				&nbsp; <b><span class='bad'> &#x2715; </span></b> &nbsp; fail
+				&nbsp; <b><span class='s4'> &#x2715; </span></b> &nbsp; error
+				&nbsp; <b> &#x2715; </b> &nbsp; n/a &nbsp;
+				&nbsp; <b><span class='s3'> d </span></b> &nbsp; dom
+				&nbsp; <b><span class='s3'> p </span></b> &nbsp; pref
+				&nbsp; <b><span class='s14'> ex | fb </span></b> &nbsp; extension | fallback
+			</span>
+		</td></tr>
+		<!-- tzp -->
+		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">TZP</span><span id="perftzp" class="c mono spaces"></span></td></tr>
+		<tr><td></td>
+			<td class="c mono spaces" id="tzp1" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="tzp2" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="tzp3" style="vertical-align: top;"></td>
+			<td></td>
+		</tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alerttzp1"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alerttzp2"></td><td></td></tr>
+		<!-- other-->
+		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">OTHER</span><span id="perfother" class="c mono spaces"></span></td></tr>
+		<tr><td></td>
+			<td class="c mono spaces" id="other1" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="other2" style="vertical-align: top;"></td>
+			<td class="c mono spaces" id="other3" style="vertical-align: top;"></td>
+			<td></td>
+		</tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alertother1"></td><td></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="alertother2"></td><td></td></tr>
+		<!-- watch -->
+		<!--<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">WATCH</span></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="watchlist"></td><td></td></tr>-->
+
+		<!-- debug-->
+		<tr><td colspan="4"><hr></td><td></td></tr>
+		<tr><td></td><td colspan="4"><span class="s3">DEBUG</span></td></tr>
+		<tr><td></td><td colspan="3" class="c mono spaces" id="debug"></td><td></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let debug = []
+
+function outputVersion() {
+
+	let xS = green_tick,
+		xF = red_cross,
+		xB = yellow_block,
+		xNA = white_na,
+		xNC = sb +"no change "+ sc,
+		xOMG = sg +"has landed"+ sc,
+		strA = "<a href='https://bugzilla.mozilla.org/",
+		strB = "' class='blue' target='_blank'>",
+		strC = "</a>",
+		t0 = performance.now()
+
+	debug.push("engine: "+ isEnginePretty.trim() +"<br>")
+	debug.push(" gecko: "+ isFFpretty.trim() +"<br>")
+
+	let gTZP, gOther, gWatch // global timers
+	let runtype
+
+	function output(type) {
+		// vars
+		let results = [], expected, elAlert
+		// data -> results in descending order
+		if (type == "tzp") {
+			const names = Object.keys(oTZP).sort((a,b) => b-a)
+			for (const k of names) {results.push(oTZP[k])}
+			expected = expectTZP
+			elAlert = dom.alerttzp2
+		} else if (type == "other") {
+			const names = Object.keys(oOther).sort((a,b) => b-a)
+			for (const k of names) {results.push(oOther[k])}
+			expected = expectOther
+			elAlert = dom.alertother2
+		} else {
+			const names = Object.keys(oWatch).sort((a,b) => b-a)
+			for (const k of names) {results.push(oWatch[k])}
+			expected = expectWatch
+			elAlert = dom.alertwatch2
+		}
+		// we duped on unique object names
+		if (results.length !== expected) {
+			elAlert.innerHTML = sb.trim() + "DISPLAY ALERT: expected "+ expected +" got "+ results.length + sc + "<br>"
+		}
+		// build display data
+		let display = [], prevV = "", prevB = "", prefix = 0
+		for (let i=0; i < results.length; i++) {
+			let id = results[i].split("~")[0].trim(),
+				bug = results[i].split("~")[1],
+				result = results[i].split("~")[2],
+				perf = results[i].split("~")[3],
+				note = results[i].split("~")[4],
+				highlow = false
+			// round perf
+			perf = Math.round(perf*1)
+			// pigyback fastpath parameter
+			if (note == "<" || note == ">") {highlow = true}
+			// version
+			if (Number.isInteger(id * 1)) {
+				if (highlow) {id = note + id}
+				if (id !== prevV) {id = s3 + id.padStart(3) + sc} else {id = "".padStart(3)}
+			}
+			// extra
+			let extra = ""
+			if (note !== "" && !highlow) {
+				// limit to two chars
+				let color = s3
+				if (note.length > 2) {note = note.substring(0,2)}
+				if (note == "ex" || note == "fb") {color = s14}
+				extra = color + note.padStart(3) + sc
+			} else {
+				extra = "".padStart(3)
+			}
+			// bugzilla
+			if (bug !== "") {
+				bug = bug +""
+				prefix = 9 - bug.length
+				bug = "".padStart(prefix) + strA + bug + strB + bug + strC + extra
+			} else {
+				bug = "".padStart(9) + extra
+			}
+			// perf
+			perf = perf * 1
+			// color up legit slow
+			perf = (perf > 1 && perf < 50 ? sb + (perf + "").padStart(5) + sc : (perf + "").padStart(5)) + " ms"
+			display.push(id + bug + result + perf)
+			prevV = results[i].split("~")[0].trim()
+			if (highlow) {prevV = note +" "+ prevV}
+			prevB = results[i].split("~")[1]
+		}
+		// split into three columns: make sure we split with a version number
+		let cutpoint = Math.ceil(display.length/3)
+		let splitpoint = ""
+		for (let i = cutpoint; i < cutpoint + 5; i++) {
+			let test = display[i]
+			if (splitpoint == "" & test.slice(0,1) !== " ") {splitpoint = i}
+		}
+		let display1 = display.slice(0, splitpoint)
+		// split the rest in half
+		display = display.slice(splitpoint, display.length)
+		cutpoint = Math.ceil(display.length/2)
+		splitpoint = ""
+		for (let i = cutpoint; i < cutpoint + 5; i++) {
+			let test = display[i]
+			if (splitpoint == "" & test.slice(0,1) !== " ") {splitpoint = i}
+		}
+		let display2 = display.slice(0, splitpoint)
+		let display3 = display.slice(splitpoint, display.length)
+		// output
+		document.getElementById(type+"1").innerHTML = display1.join("<br>")
+		document.getElementById(type+"2").innerHTML = display2.join("<br>")
+		document.getElementById(type+"3").innerHTML = display3.join("<br>")
+		// debug
+		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
+	}
+
+	let countTZP = 0, expectTZP = 77, maxVer = 126, oTZP = {}, oResults = {}
+	function run_tzp() {
+		// start global timer
+		gTZP = performance.now()
+		// record
+		function rec(order, version, bug, result, perf, note = "") {
+			oResults[order] = [version, (performance.now() - gTZP) +" ms", result]
+			// do as little as possible to not affect perf
+			if (result === true) {
+				result = xS
+				//oResults[order] = version +"~"+ 
+			} else if (result === false || result === undefined || result == "") {
+				result = xF
+			}
+			oTZP[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
+			countTZP++
+			// now do stuff after we have finished
+			if (countTZP == expectTZP) {
+				let totalPerf = Math.round((performance.now() - gTZP))
+				let strSuccess = ""
+				if (isFF) {
+					//console.debug(oResults)
+					let results = []
+					const names = Object.keys(oResults).sort((a,b) => b-a)
+					for (const k of names) {results.push(oResults[k])}
+
+					// loop: stop at first success: so this covers dual tests where one fails and one passes
+						// e.g. [105, "0 ms", true]
+					let myVer = "", myPerf = ""
+					for (let i = 0; i < results.length; i++) {
+						let array = results[i]
+						if (array[2]) {
+							myVer = array[0]
+							myPerf = array[1]
+							break
+						}
+					}
+					// cleanup false results
+					let is52 = false
+					if (myVer == "") {is52 = true}
+					if ("function" !== typeof CSSMozDocumentRule) {is52 = true} // Palemoon/Basilisk
+					// waterfox classic: 57 pass, 56 fail
+					if ("function" === typeof AbortSignal && "undefined" !== typeof HTMLAppletElement) {
+						// but waterfox (v78) also fails 56, so test that as well
+						if (!window.Document.prototype.hasOwnProperty("replaceChildren")) {
+							is52 = true
+						}
+					}
+					if (is52) {
+						myVer = "52 or lower"
+						myPerf = totalPerf +" ms"
+					}
+					if (myVer == maxVer) {myVer += "+"}
+					strSuccess = " "+ s14 + " [result: FF"+ myVer +" | "+ myPerf +"]"+ sc
+				}
+				dom.perftzp.innerHTML = "".padStart(3) + expectTZP +" tests | "+ totalPerf +" ms" + strSuccess
+				output("tzp")
+			} else if (countTZP > expectTZP) {
+				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
+			}
+		}
+
+		/* FYI: CSS diffs ignore
+			alignTracks + justifyTracks + masonryAutoFlow : layout.css.grid-template-masonry-value.enabled
+			contentVisibility: layout.css.content-visibility.enabled 
+			fontVariantEmoji : layout.css.font-variant-emoji.enabled
+			offsetPosition : layout.css.motion-path-offset-position.enabled
+		*/
+
+		/* this is nightly only
+		// 120: 1854937
+		let t120 = performance.now()
+		let ver120 = ("function" === typeof CSSPropertyRule)
+		rec(120, 120, "1854937", ver120, performance.now()-t120)
+		*/
+
+		/*
+		// 121: 1859752 backed out
+		let t121 = performance.now()
+		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
+		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
+		*/
+
+		// 126: 1887611
+		let t126 = performance.now(), ver126 = false
+		try {
+			ver126 = "function" === typeof URL.parse
+		} catch(e) {}
+		rec(126, 126, "1887611", ver126, performance.now()-t126) // 0.25ms
+
+		// 125: 1872793
+		let t125 = performance.now(), ver125 = false
+		try {
+			ver125 = "Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")
+		} catch(e) {}
+		rec(125, 125, "1872793", ver125, performance.now()-t125, "d") // 0.05ms when invalid, 0.2+ when valid
+
+		// 124: 1867569 (slow, like 122)
+		let t124 = performance.now(), ver124 = false
+		try {
+			let el124 = document.documentElement
+			el124.style.zIndex = "calc(1 / max(-0, 0))" // default = auto
+			let test124 = getComputedStyle(el124).zIndex
+			debug.push("124 1867569 : "+ test124)
+			if (test124 > 0) {ver124 = true}
+			el124.style.zIndex = "auto"
+		} catch(e) {}
+		rec(124, 124, "1867569", ver124, performance.now()-t124) //
+
+		// 123: 1871745
+		let t123 = performance.now()
+		let ver123 = ("function" === typeof CSS2Properties && !CSS2Properties.prototype.hasOwnProperty("MozUserFocus"))
+		rec(123, 123, "1871745", ver123, performance.now()-t123)
+
+		// 122: 1867558 (slow)
+		let t122 = performance.now(), ver122 = false
+		try {
+			let el122 = document.documentElement
+			el122.style.zIndex = "calc(1 / abs(-0))" // default = auto
+			let test122 = getComputedStyle(el122).zIndex
+			debug.push("122 1867558 : "+ test122)
+			if (test122 > 0) {ver122 = true}
+			el122.style.zIndex = "auto"
+		} catch(e) {}
+		rec(122, 122, "1867558", ver122, performance.now()-t122) // 0.73ms
+
+		// 121: 1845586
+		let t121 = performance.now()
+		let ver121 = ("function" === typeof Promise.withResolvers)
+		rec(121, 121, "1845586", ver121, performance.now()-t121) //
+
+		// 120: 1791079
+		let t120 = performance.now()
+		let ver120 = (window.hasOwnProperty("UserActivation"))
+		rec(120, 120, "1791079", ver120, performance.now()-t120) // 0.017ms
+
+		// 119: 1817591
+		let t119 = performance.now()
+		try {
+			location.href = "http://a>b/"
+		} catch(e) {
+			rec(119, 119, "1817591", e.name === "SyntaxError", performance.now()-t119)
+		}
+
+		// 118: 1849010
+		let t118 = performance.now()
+		let ver118 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition"))
+		rec(118, 118, "1849010", ver118, performance.now()-t118)
+
+		// 117: 1842467
+		let t117 = performance.now()
+		let ver117 = (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch"))
+		rec(117, 117, "1842467", ver117, performance.now()-t117)
+
+		// 116: 1839614
+		let t116 = performance.now()
+		let ver116 = (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering"))
+		rec(116, 116, "1839614", ver116, performance.now()-t116)
+
+		// 115: 1778909
+		let t115 = performance.now()
+		let ver115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+		rec(115, 115, "1778909", ver115, performance.now()-t115)
+
+		// 114: 1826629 // slow ~2ms
+		let t114 = performance.now()
+		let ver114 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity"))
+		rec(114, 114, "1826629", ver114, performance.now()-t114)
+
+		// 113: 1709347
+		let t113 = performance.now()
+		let ver113 = (CanvasRenderingContext2D.prototype.hasOwnProperty("reset"))
+		rec(113, 113, "1709347", ver113, performance.now()-t113)
+
+		// 112: 1756175
+		let t112 = performance.now()
+		let ver112 = (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) // 0.01ms
+		rec(112, 112, "1756175", ver112, performance.now()-t112)
+
+		// 111: 1418449
+		let t111 = performance.now()
+		let ver111 = (HTMLElement.prototype.hasOwnProperty("translate")) // 0.1ms
+		rec(111, 111, "1418449", ver111, performance.now()-t111) //
+
+		// 110: 1689631
+		let t110 = performance.now()
+		let ver110 = ("object" === typeof ondeviceorientationabsolute)
+		rec(110, 110, "1689631", ver110, performance.now()-t110) // 0.01ms
+
+		// 109: 1789776
+		let t109 = performance.now()
+		let ver109 = (CSSKeyframesRule.prototype.hasOwnProperty("length")) // 0.01ms
+		rec(109, 109, "1789776", ver109, performance.now()-t109)
+
+		// 108: 1574487
+		let t108 = performance.now()
+		let ver108 = ("undefined" === typeof onloadend)
+		rec(108, 108, "1574487", ver108, performance.now()-t108)
+
+		// 107: 1174097
+		let t107 = performance.now()
+		let ver107 = (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) // 0.07ms
+		rec(107, 107, "1174097", ver107, performance.now()-t107)
+
+		// 106: 1777293
+		let t106 = performance.now()
+		let ver106 = (Element.prototype.hasOwnProperty("checkVisibility")) // 0.009 ms
+		rec(106, 106, "1777293", ver106, performance.now()-t106)
+
+		// 105: 830716
+			// 105: Function object could not be cloned. 36
+			// 94-104: The object could not be cloned. 31
+			// 93-: structuredClone is not defined. 30
+		let t105 = performance.now(), ver105
+		try {structuredClone((() => {}))} catch(e) {ver105 = (e.message.length == 36)}
+		rec(105, 105, "830716", ver105, performance.now()-t105) // 0.15ms
+
+		// 104: 1712623
+		let t104 = performance.now()
+		let ver104 = (SVGStyleElement.prototype.hasOwnProperty("disabled"))
+		rec(104, 104, "1712623", ver104, performance.now()-t104)
+
+		// 103: 1772494
+		let t103 = performance.now()
+		let ver103 = (undefined === new ErrorEvent("error").error)
+		rec(103, 103, "1772494", ver103, performance.now()-t103)
+
+		// 102: 1767541: regression FF99, hence check for v101
+		let t102 = performance.now()
+		let ver102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
+		rec(102, 102, "1767541", ver102, performance.now()-t102)
+
+		// 101: 1728999
+		let t101 = performance.now(), ver101 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction"))
+		rec(101, 101, "1728999", ver101, performance.now()-t101)
+
+		// 100: 1753309: legacy check: FF56- AbortSignal
+		let t100 = performance.now(), ver100 = ("function" === typeof AbortSignal
+			&& "function" === typeof AbortSignal.timeout)
+		rec(100, 100, "1753309", ver100, performance.now()-t100)
+
+		// 99: 1711715 + 1756204
+			// note: FF90+ javascript.options.experimental.private_fields : default true
+		let t99 = performance.now(), ver99
+		try {
+			newFn("class A { #x; h(o) { return !#x in o; }}")
+		} catch(e) {
+			// 99+ : invalid use of private name in unary expression without object reference (72) (pref has no effect)
+			// 98- : private names aren't valid in this context (pref = true)
+			// 98- : private fields are not currently supported (pref = false / no-pref)
+			//debug.push(" 99 1711715 : "+ e.name +" : "+ e.message)
+			ver99 = (e.message.length == 72)
+		}
+		rec(99, 99, "1711715", ver99, performance.now()-t99)
+
+		// 98: 1709790
+		let t98 = performance.now(), ver98 = (HTMLElement.prototype.hasOwnProperty("outerText"))
+		rec(98, 98, "1709790", ver98, performance.now()-t98)
+
+		// 97: 1745372: legacy check: FF56- AbortSignal
+		let t97 = performance.now(), ver97 = ("function" === typeof AbortSignal
+			&& "function" === typeof AbortSignal.prototype.throwIfAborted)
+		rec(97, 97, "1745372", ver97, performance.now()-t97)
+
+		// 96: 1738422: legacy check + perf: toSource (74+): FF68- very slow: FF57- Intl.PluralRules
+		let t96 = performance.now(), ver96
+		try {ver96 = ("undefined" === typeof Object.toSource
+			&& "sc" == Intl.PluralRules.supportedLocalesOf("sc").join())} catch(e) {ver96 = xB}
+		rec(96, 96, "1738422", ver96, performance.now()-t96)
+
+		// 95: 1723674: fast path: dom.crypto.randomUUID.enabled = true (default)
+		let t95p = performance.now(), ver95p = ("function" === typeof crypto.randomUUID)
+		rec(95.1, 95, "1723674", ver95p, performance.now()-t95p, "p")
+
+		// 95: 1674204 : slow
+			// note: en-US, windows
+			// FF60-65 wraps identical           : 93/93 = 1 (offscreen: if not offscreen uses page width)
+			// FF66-94 wraps 2020-1 vs 2020-12   : 45/53 = 0.8490566037735849
+			// FF95+   wraps 2020-1 x twice that : 47/93 = approx 0.5
+		let t95 = performance.now(), ver95
+		try {
+			let w95 = dom.test95a.offsetWidth, h95 = dom.test95b.offsetWidth
+			let test95 = w95/h95
+			debug.push(" 95 1674204 : "+ w95 +"/"+ h95 +" = " +test95)
+			ver95 = (test95 > 0.4 && test95 < 0.6)
+		} catch(e) {
+			debug.push(" 95 1674204 : "+ e.name +": "+ e.message)
+			ver95 = xB
+		}
+		rec(95, 95, "1674204", ver95, performance.now()-t95, "d")
+
+		// 94: 1722576
+		let t94 = performance.now(), ver94 = ("function" === typeof self.structuredClone)
+		rec(94, 94, "1722576", ver94, performance.now()-t94)
+
+		// 93: 1722448
+		let t93 = performance.now(), ver93 = ("function" === typeof self.reportError)
+		rec(93, 93, "1722448", ver93, performance.now()-t93)
+
+		// 92: 1721149
+		let t92 = performance.now(), ver92 = ("function" === typeof Object.hasOwn)
+		rec(92, 92, "1721149", ver92, performance.now()-t92)
+
+		// 91: 1717072: fast path: dom.window.clientinformation.enabled = true (default)
+		let t91p = performance.now(), ver91p = ("object" === typeof window.clientInformation)
+		rec(91.1, 91, "1717072", ver91p, performance.now()-t91p, "p")
+
+		// 91: 1714933: legacy perf: toSource (74+): FF70- very slow
+		let t91 = performance.now(), ver91
+		try {ver91 = ("undefined" === typeof Object.toSource
+			&& "sa" == Intl.Collator.supportedLocalesOf("sa").join())} catch(e) {ver91 = xB}
+		rec(91, 91, "1714933", ver91, performance.now()-t91)
+
+		// 90: 1681371 shipped
+		let t90 = performance.now(), ver90 = ("function" == typeof Array.prototype.at)
+		rec(90, 90, "1681371", ver90, performance.now()-t90)
+
+		// 89: 1684316: legacy check: FF64- CountQueuingStrategy
+		let t89 = performance.now(), ver89 = ("function" === typeof CountQueuingStrategy
+			&& ! new CountQueuingStrategy({highWaterMark: 1}).hasOwnProperty("highWaterMark"))
+		rec(89, 89, "1684316", ver89, performance.now()-t89)
+
+		// 88: 1497557
+		let t88 = performance.now(), ver88 = (":" === document.createElement("a").protocol)
+		rec(88,88, "1497557", ver88, performance.now()-t88)
+
+		// 87: 1688335
+		let t87 = performance.now(), ver87 = (undefined === console.length)
+		rec(87, 87, "1688335", ver87, performance.now()-t87)
+
+		// 86: 1654116 shipped
+		let t86 = performance.now(), ver86 = ("function" === typeof Intl.DisplayNames)
+		rec(86, 86, "1654116", ver86, performance.now()-t86)
+
+		// 85: 1675240
+			// 85+: RegExp.prototype.global getter called on non-RegExp object: string
+			// 84-: get global method called on incompatible string
+		let t85 = performance.now(), ver85
+		try {
+			Object.getOwnPropertyDescriptor(RegExp.prototype, "global").get.call("/a")
+		} catch(e) {
+			ver85 = (e.message.length == 66)
+		}
+		rec(85, 85, "1675240", ver85, performance.now()-t85)
+
+		// 84: 1518999
+		let t84 = performance.now(), ver84 = ("function" === typeof PerformancePaintTiming)
+		rec(84, 84, "1518999", ver84, performance.now()-t84)
+
+		// 83: 1665252: legacy check: toSource (74+): FF55- false positive
+		let t83 = performance.now(), ver83 = ("undefined" === typeof Object.toSource
+			&& !window.HTMLIFrameElement.prototype.hasOwnProperty("allowPaymentRequest"))
+		rec(83, 83, "1665252", ver83, performance.now()-t83)
+
+		// 82: 1655947
+			// ext fuckery: cydec
+		let t82 = performance.now(), ver82
+		try {ver82 = (1595289600000 === Date.parse("21 Jul 20 00:00:00 GMT"))} catch(e) {ver82 = xB}
+		rec(82, 82, "1655947", ver82, performance.now()-t82, "ex")
+
+		// 81: 1650607: legacy check: toSource (74+): 52 false positive
+		let t81 = performance.now(), ver81 = ("undefined" === typeof Object.toSource
+			&& new File(["x"], "a/b").name == "a/b")
+		rec(81, 81, "1650607", ver81, performance.now()-t81)
+
+		// 80: 1620467
+			// blink check: CSS2Properties
+		let t80 = performance.now(), ver80 = ("function" === typeof CSS2Properties
+			&& CSS2Properties.prototype.hasOwnProperty("appearance"))
+		rec(80, 80, "1620467", ver80, performance.now()-t80)
+
+		// 79: 1599769 shipped
+		let t79 = performance.now(), ver79 = ("function" === typeof Promise.any)
+		rec(79, 79, "1599769", ver79, performance.now()-t79)
+
+		// 78: 1626015
+		let t78 = performance.now(), ver78 = (window.Document.prototype.hasOwnProperty("replaceChildren"))
+		rec(78, 78, "1626015", ver78, performance.now()-t78)
+
+		// 77: 1536540
+		let t77 = performance.now(), ver77 = (window.IDBCursor.prototype.hasOwnProperty("request"))
+		rec(77, 77, "1536540", ver77, performance.now()-t77)
+
+		// 76: 1608010: legacy check toSource (74+) FF56- false positive
+		let t76 = performance.now(), ver76 = ("undefined" === typeof Object.toSource && !test76.validity.rangeOverflow)
+		rec(76, 76, "1608010", ver76, performance.now()-t76, "d")
+
+		// 75: 1613713
+		let t75 = performance.now(), ver75 = ("function" === typeof Intl.Locale)
+		rec(75, 75, "1613713", ver75, performance.now()-t75)
+
+		// 74 1565170
+		let t74 = performance.now(), ver74 = ("undefined" === typeof Object.toSource)
+		rec(74, 74, "1565170", ver74, performance.now()-t74)
+
+		// 73: 1602163
+		let t73 = performance.now(), ver73 = ("function" === typeof VideoPlaybackQuality
+			&& !VideoPlaybackQuality.prototype.hasOwnProperty("corruptedVideoFrames"))
+		rec(73, 73, "1602163", ver73, performance.now()-t73)
+
+		// 72: 1591892
+		let t72 = performance.now(), ver72 = ("boolean" === typeof self.crossOriginIsolated)
+		rec(72, 72, "1591892", ver72, performance.now()-t72)
+
+		// 71: 1549176
+		let t71 = performance.now(), ver71 = ("function" === typeof Promise.allSettled)
+		rec(71, 71, "1549176", ver71, performance.now()-t71)
+
+		// 70: 1473229: legacy check: FF64- Intl.RelativeTimeFormat
+			// ext fuckery: chameleon
+		let t70e = performance.now(), ver70e = ("function" === typeof Intl.RelativeTimeFormat
+			&& "function" === typeof Intl.RelativeTimeFormat.prototype.formatToParts)
+		rec(70.1, 70, "1473229", ver70e, performance.now()-t70e, "ex")
+
+		// 70: 1435818: fallback
+		let t70 = performance.now(), ver70
+		try {newFn("let t = 1_050"); ver70 = true} catch(e) {}
+		rec(70, 70, "1435818", ver70, performance.now()-t70, "fb")
+
+		// 69: 1557121
+		let t69 = performance.now(), ver69 = ("function" === typeof Blob.prototype.text)
+		rec(69, 69, "1557121", ver69, performance.now()-t69)
+
+		// 68: 1548773
+		let t68 = performance.now(), ver68 = (!HTMLObjectElement.prototype.hasOwnProperty("typeMustMatch"))
+		rec(68, 68, "1548773", ver68, performance.now()-t68)
+
+		// 67: 1531830
+		let t67 = performance.now(), ver67 = ("function" === typeof String.prototype.matchAll)
+		rec(67, 67, "1531830", ver67, performance.now()-t67)
+
+		// 66: 1425685: legacy check: FF60- HTMLSlotElement
+		let t66 = performance.now(), ver66 = ("function" === typeof HTMLSlotElement
+			&& "function" === typeof HTMLSlotElement.prototype.assignedElements)
+		rec(66, 66, "1425685", ver66, performance.now()-t66)
+
+		// 65: 1334813
+		let t65 = performance.now(), ver65 = (1 === DataView.length)
+		rec(65, 65, "1334813", ver65, performance.now()-t65)
+
+		// 64: 1498860
+		let t64 = performance.now(), ver64 = ("number" === typeof window.screenTop)
+		rec(64, 64, "1498860", ver64, performance.now()-t64)
+
+		// 63: 1472170
+		let t63 = performance.now(), ver63 = ("desc" === Symbol('desc').description)
+		rec(63, 63, "1472170", ver63, performance.now()-t63)
+
+		// 62: 1458466
+		let t62 = performance.now(), ver62 = ("function" === typeof console.timeLog)
+		rec(62, 62, "1458466", ver62, performance.now()-t62)
+
+		// 61: 1455805
+		let t61 = performance.now(), ver61 = ("object" === typeof CSS)
+		rec(61, 61, "1455805", ver61, performance.now()-t61)
+
+		// 60: 1436659
+		let t60 = performance.now(), ver60 = ("function" === typeof Animation.prototype.updatePlaybackRate)
+		rec(60, 60, "1436659", ver60, performance.now()-t60)
+
+		// 59: 1336400
+		let t59 = performance.now(), ver59 = (!HTMLMediaElement.prototype.hasOwnProperty("mozAutoplayEnabled"))
+		rec(59, 59, "1336400", ver59, performance.now()-t59)
+
+		// 58: 1403318
+		let t58 = performance.now(), ver58 = ("function" === typeof Intl.PluralRules)
+		rec(58, 58, "1403318", ver58, performance.now()-t58)
+
+		// 57: 1378342
+		let t57 = performance.now(), ver57 = ("function" === typeof AbortSignal)
+		rec(57, 57, "1378342", ver57, performance.now()-t57)
+
+		// 56: 1279218
+		let t56 = performance.now(), ver56 = ("function" !== typeof HTMLAppletElement)
+		rec(56, 56, "1279218", ver56, performance.now()-t56)
+
+		// 55: 1351795
+		let t55 = performance.now(), ver55 = ("undefined" === typeof console.timeline)
+		rec(55, 55, "1351795", ver55, performance.now()-t55)
+
+		// 54: 1337702
+		let t54 = performance.now(), ver54 = (URL.prototype.hasOwnProperty("toJSON"))
+		rec(54, 54, "1337702", ver54, performance.now()-t54)
+
+		// 53: 
+		let t53 = performance.now(), ver53 = ("function" === typeof CSSMozDocumentRule)
+		rec(53, 53, "", ver53, performance.now()-t53)
+
+	}
+	run_tzp()
+
+	let countOther = 0, expectOther = 55, oOther = {}
+	function run_other() {
+		// start global timer
+		gOther = performance.now()
+		// record
+		function rec(order, version, bug, result, perf, note = "") {
+			if (result === true) {result = xS
+			} else if (result === false || result === undefined) {result = xF}
+			oOther[order] = version +"~"+ bug +"~"+ result +"~"+ perf +"~"+ note
+			countOther++
+			if (countOther == expectOther) {
+				dom.perfother = "".padStart(3) + expectOther +" tests | "+ Math.round((performance.now() - gOther)) +" ms"
+				output("other")
+			} else if (countOther > expectOther) {
+				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
+			}
+		}
+
+		// 122: 1862910
+		let t122 = performance.now()
+		let	ver122 = false
+		if ("function" === typeof Promise.withResolvers) { // 121 or lower is slow, so only check if 121+
+			ver122 = !isNaN(Date.parse("Mercredi 8 Septembre 2021")) ? true : false
+		}
+		rec(122, 122, "1862910", ver122, performance.now()-t122, "d") // 122: 0.1 | 121 = 1.1
+
+		// 120b: 1557650
+		let t120b = performance.now()
+		let ver120b = (new Date("19999-11-11").toString() !== "Invalid Date")
+		rec(120.2, 120, "1557650", ver120b, performance.now()-t120b, "d") // 0.22ms (on new rig)
+
+		// 120a: 449921
+		let t120a = performance.now()
+		let	ver120a = (new Date("1JAN2008").toString() !== "Invalid Date")
+		rec(120.1, 120, "449921", ver120a, performance.now()-t120a, "d") // 0.22ms (on new rig)
+
+		// 120: 1852422
+		let t120 = performance.now()
+		let ver120 = (new Date("01/01/2001 10:00Z").toString() !== "Invalid Date")
+		rec(120, 120, "1852422", ver120, performance.now()-t120, "d") // 0.22ms (on new rig)
+
+		// 116: 1769088
+		let t116 = performance.now()
+		let ver116 = (isNaN(Date.parse("-000000-01-01T00:00:00.000Z")))
+		rec(116, 116, "1769088", ver116, performance.now()-t116, "d") // 0.015ms
+
+		// 107: 344060
+		let t107 = performance.now(), ver107
+		// false positives FF52-57
+		if (Element.prototype.hasOwnProperty("checkVisibility")) {
+			try {
+				dom.test107.options.length = -1
+				ver107 = true
+			} catch(e) {} // NotSupportedError Operation is not supported
+		}
+		rec(107, 107, "344060", ver107, performance.now()-t107, "d")
+
+		// 101a: 1764050
+		let t101a = performance.now(), ver101a
+		try {
+			ver101a = Intl.supportedValuesOf("currency").includes("SLE")
+		} catch(e) {}
+		rec(101.1, 101, "1764050", ver101a, performance.now()-t101a)
+
+		// 101: 1752808
+		let t101 = performance.now(), ver101
+		try {
+			let test101 = new Intl.NumberFormat("en", {style:"currency", currency:"USD", maximumFractionDigits:2, notation:"compact"}).format(1773500)
+			ver101 = (test101 == "$1.77M")
+			debug.push("101 1752808 : "+ test101)
+		} catch(e) {}
+		rec(101, 101, "1752808", ver101, performance.now()-t101)
+
+		// 99: 1720353
+			// ext fuckery possible/likely due to mimeTypes/plugins
+		let t99 = performance.now(), ver99 = ("pdfViewerEnabled" in navigator)
+		rec(99, 99, "1720353", ver99, performance.now()-t99, "ex")
+
+		// 96: 1738422
+			// ext fuckery: chameleon, cydec
+		let t96 = performance.now(), ver96
+		try {
+			//let date96 = 
+			let test96 = new Date(Date.UTC(2012,12-1,6,12,0,0)).toLocaleString("zh-Hans-CN", {timeZone: "Asia/Shanghai", timeZoneName: "long"})
+			ver96 = (test96 == "2012/12/6 中国标准时间 20:00:00")
+		} catch(e) {
+			debug.push(" 96 1738422 : "+ e.name +": "+ e.message)
+			ver96 = xB
+		}
+		rec(96,96, "1738422", ver96, performance.now()-t96, "ex")
+
+		// 94: 1729239
+		let t94 = performance.now(), ver94 = ("function" === typeof HTMLScriptElement.supports)
+		rec(94, 94, "1729239", ver94, performance.now()-t94)
+
+		// 93b: 1670033
+		let t93b = performance.now(), ver93b = ("function" === typeof Intl.supportedValuesOf)
+		rec(93.1, 93, "1670033", ver93b, performance.now()-t93b)
+
+		// 93a: 1328672
+		let t93a = performance.now(), ver93a
+		try {
+			ver93a = (!isNaN(new Date("1997-03-08 11:19:10-07").getTime()))
+		} catch(e) {
+			debug.push(" 93 1328672 : "+ e.name +": "+ e.message)
+			ver93a = xB
+		}
+		rec(93, 93, "1328672", ver93a, performance.now()-t93a)
+
+		// 91b: 1284868
+			// ext fuckery: cydec
+		let t91b = performance.now(), ver91b
+		try {
+			let test91b = new Intl.DateTimeFormat('en-US', {second: "2-digit", hour12: false})
+			ver91b = ("07" == test91b.format(new Date('2016/06/06 15:05:07')))
+		} catch(e) {
+			debug.push(" 91 1284868 : "+ e.name +": "+ e.message)
+			ver91b = xB
+		}
+		rec(91.1, 91, "1284868", ver91b, performance.now()-t91b, "ex")
+
+		// 91a: 1710429: very slow cold ~15-20ms, slow 4-5ms
+		let t91a = performance.now(), ver91a
+		try {
+			let t91 = Intl.DateTimeFormat(undefined, {timeZoneName: "longGeneric"}).format(new Date("January 30, 2019 13:00:00"))
+			ver91a = true
+		} catch(e) {}
+		rec(91, 91, "1710429", ver91a, performance.now()-t91a)
+
+		// 90b: 1520434
+			// 90+: start offset of Int32Array should be a multiple of 4
+			// 89-: attempting to construct out-of-bounds TypedArray on ArrayBuffer
+		let t90b = performance.now(), ver90b
+		try {let tst90b = new Int32Array(new ArrayBuffer(4096), 7)} catch(e) {ver90b = (e.message.length == 52)}
+		rec(90.1, 90, "1520434", ver90b, performance.now()-t90b)
+
+		// 90a: 1537689
+		let t90a = performance.now(), ver90a
+		try {ver90a = (dom.test90a.defaultValue == "a")} catch(e) {}
+		rec(90, 90, "1537689", ver90a, performance.now()-t90a, "d")
+
+		// 89: 1703213
+		let t89 = performance.now(), ver89
+		try {
+			ver89 = ((dom.ctrl89.offsetHeight/dom.test89.offsetHeight) > 0.85)
+		} catch(e) {
+			debug.push(" 89 1703213 : "+ e.name +": "+ e.message)
+			ver89 = xB
+		}
+		rec(89, 89, "1703213", ver89, performance.now()-t89, "d")
+
+		// 88: 1670124
+			// FF88+: the escapes \8 and \9 can't be used...
+			// FF87-: no error
+		let t88 = performance.now(), ver88
+		try {newFn('"use strict" \n"\\8"')} catch(e) {ver88 = true}
+		rec(88, 88, "1670124", ver88, performance.now()-t88)
+
+		// 87b: 944846
+		let t87b = performance.now(), ver87b
+		try {ver87b = ((12345).toExponential(3) == 1.235e+4)} catch(e) {}
+		rec(87.1, 87, "944846", ver87b, performance.now()-t87b)
+
+		// 87a: 1676708
+		let t87a = performance.now(), ver87a
+		try {
+			let test87a = new Date("Wed Nov 11 2020 19:18:50 GMT+0010 (Central European Standard Time)").toUTCString()
+			ver87a = (test87a !== "Wed, 11 Nov 2020 09:18:50 GMT")
+		} catch(e) {}
+		rec(87, 87, "1676708", ver87a, performance.now()-t87a)
+
+		// 86: 1685482
+			// 86+: an expression X in 'for (X of Y)' must not start with 'async of' (64)
+			// 85-: expected '=>' on the same line after an argument list, got '[' (62)
+		let t86 = performance.now(), ver86
+		try {newFn('for (async of [])')} catch(e) {ver86 = (e.message.length == 64)}
+		rec(86,86, "1685482", ver86, performance.now()-t86)
+
+		//85 possibles? : 1445482 1670062 1635561 
+
+		// 84: 1673440
+			// 84+: illegal character U+0040
+			// 83-: illegal character
+		let t84 = performance.now(), ver84
+		try {newFn("var x = @")} catch(e) {ver84 = (e.message.length == 24)}
+		rec(84, 84, "1673440", ver84, performance.now()-t84)
+
+		// 83: 1667094
+		let t83 = performance.now(), ver83
+		try {
+			let obj = {exec() {return function(){}}}; let t = RegExp.prototype.test.call(obj,'')
+			ver83 = true
+		} catch(e) {}
+		rec(83.2, 83, "1667094", ver83, performance.now()-t83)
+
+		// 83a: 1665746: legacy check: toSource (74+): 52 false postive
+		let t83a = performance.now(), ver83a
+		try {
+			let a83 = new Set([1,2,3]); let b83 = new Set([2,3,4]); let c83 = new Set(...a83, ...b83);
+		} catch(e) {
+			ver83a = ("undefined" === typeof Object.toSource && e.message == "1 is not iterable")
+			//debug.push(" 83 1665746 : " + e.name +": "+ e.message)
+		}
+		rec(83.1, 83, "1665746", ver83a, performance.now()-t83a)
+
+		// 81a: 1657437: legacy check: toSource (74+): 52 false positive
+			// this is unstable in Tor Browser: change from offscreen: use existing visible spans
+		let t81a = performance.now(), ver81a = xF
+		try {
+			dom.test81a.innerHTML = "AB"
+			dom.test81b.innerHTML = "A &#013;B"
+			let w81a = dom.test81a.offsetWidth
+			let w81b = dom.test81b.offsetWidth
+			dom.test81a.textContent = ""
+			dom.test81b.textContent = ""
+			//console.debug(w81a, w81b)
+			ver81a = ("undefined" === typeof Object.toSource && w81a < w81b)
+		} catch(e) {
+			ver81a = xB
+			debug.push(" 83 1657437 : " + e.name +": "+ e.message)
+		}
+		rec(81, 81, "1657437", ver81a, performance.now()-t81a, "d")
+
+		// 80: 1651732: legacy check: toSource (74+): 52 false positive
+		let t80 = performance.now(), ver80
+		try {
+			let obj80 = {[Symbol.toPrimitive]: () => Symbol()}
+			let proxy80 = (new Proxy({},{get: (obj80, prop, proxy80) => prop}))
+			try {
+				for (let i = 0; i < 11; i++) {if (typeof proxy80[obj80] == 'symbol') {}}
+				ver80 = ("undefined" === typeof Object.toSource)
+			} catch (e) {}
+			rec(80.1, 80, "1651732", ver80, performance.now()-t80)
+		} catch(e) {
+			debug.push(" 80 1651732 : " + e.name +": "+ e.message)			
+			rec(80.1,80, "1651732", xB, performance.now()-t80)
+		}
+
+		// 79p: 1639246 shipped: javascript.options.weakrefs = true (default)
+		let t79p = performance.now(), ver79p = ("function" === typeof WeakRef)
+		rec(79.4, 79, "1639246", ver79p, performance.now()-t79p, "p")
+
+		// 79a: 1639591 shipped (FF77 added 1629106)
+			// 79+: SyntaxError invalid assignment left-hand side (33)
+			// 78-: SyntaxError expected expression, got '?' (28)
+		let t79a = performance.now(), ver79a
+		try {newFn("let z = (3 ??= 3 * 3)")} catch(e) {ver79a = (e.message.length == 33)}
+		rec(79.3, 79, "1639591", ver79a, performance.now()-t79a)
+
+		// 79b: 1557718
+			// ext fuckery: cydec
+		let t79b = performance.now(), ver79b
+		try {
+			ver79b = (new Intl.DateTimeFormat("en", {timeStyle: "short"}).format(new Date()).includes(':'))
+		} catch(e) {ver79b = xB}
+		rec(79.2, 79, "1557718", ver79b, performance.now()-t79b, "ex")
+
+		// 79: 1413504
+		let t79c = performance.now(), ver79c
+		try {
+			ver79c = ("1" !== new Intl.NumberFormat("en", {numberingSystem: "gong"}).format(1))
+		} catch(e) {ver79c = xB}
+		rec(79.1, 79, "1413504", ver79c, performance.now()-t79c)
+
+		// 79: 1644878: legacy check: toSource (74+): 52 false positive
+			// 79+: entries method called on incompatible boolean
+			// 78-: std_Map_iterator method called on incompatible boolean (54)
+		let t79 = performance.now(), ver79
+		try {Map.prototype.entries.call(true)} catch(e) {
+			ver79 = ("undefined" === typeof Object.toSource && e.message.length == 45)
+		}
+		rec(79, 79, "1644878", ver79, performance.now()-t79)
+
+		// 78a: 1589095
+		let t78a = performance.now(), ver78a
+		try {
+			let test78a = new Intl.ListFormat(undefined,{style: 'long', type: 'unit'}).format(['a','b','c'])
+			ver78a = true
+		} catch(e) {}
+		rec(78.2, 78, "1589095", ver78a, performance.now()-t78a)
+
+		// 78b: 1634135
+		let t78b = performance.now(), ver78b
+		try {let regex78b = new RegExp('b'); ver78b = (regex78b.dotAll == false)} catch(e) {ver78b = xB}
+		rec(78.1, 78, "1634135", ver78b, performance.now()-t78b)
+
+		// 78c: 1633836
+		let t78c = performance.now(), ver78c
+		try {let test78c = new Intl.NumberFormat(undefined, {style:"unit", unit:"percent"}).format(1/2); ver78c = true} catch(e) {}
+		rec(78, 78, "1633836", ver78c, performance.now()-t78c)
+
+		// 77: 1627285
+		let t77 = performance.now(), ver77 = (isNaN(new DOMRect(0, 0, NaN, NaN).top))
+		rec(77.1, 77, "1627285", ver77, performance.now()-t77)
+
+		// 77a: 1608168
+		let t77a = performance.now(), ver77a
+		try {("aa").replaceAll("a","b"); ver77a = true} catch(e) {}
+		rec(77, 77, "1608168", ver77a, performance.now()-t77a)
+
+		// 75: 1615600
+			// 75+: 2.5 can't be converted to BigInt because it isn't an integer (60)
+			// 74-: BigInt is not defined (21)
+		let t75 = performance.now(), ver75
+		try {let test75 = BigInt(2.5)} catch(e) {ver75 = (e.message.length == 60)}
+		rec(75, 75, "1615600", ver75, performance.now()-t75)
+
+		// 74: 1605835
+		let t74 = performance.now(), ver74
+		try {newFn("let t = ({ 1n: 1 })"); ver74 = true} catch(e) {}
+		rec(74, 74, "1605835", ver74, performance.now()-t74)
+
+		// 73: 1605803
+		let t73 = performance.now(), ver73
+		try {ver73 = (getComputedStyle(dom.test73).content == "normal")} catch(e) {}
+		rec(73, 73, "1605803", ver73, performance.now()-t73, "d")
+
+		// 72a: 1441976
+		let t72a = performance.now(), ver72a
+		try {if (BatteryManager in window) {}} catch(e) {ver72a = true}
+		rec(72.2, 72, "1441976", ver72a, performance.now()-t72a)
+
+		// 72b: 1566141
+		let t72b = performance.now(), ver72b
+		try {let test72 = (newFn("null ?? 'foo'")); ver72b = true} catch(e) {}
+		rec(72.1, 72, "1566141", ver72b, performance.now()-t72b)
+
+		// 72c: 1589072
+			// 72+: underscore can appear only between digits, not after the last digit in a number (79)
+			// 71-: identifier starts immediately after numeric literal (51)
+		let t72c = performance.now(), ver72c
+		try {newFn('let a = 100_00_;')} catch(e) {ver72c = (e.message.length == 79)}
+		rec(72, 72, "1589072", ver72c, performance.now()-t72c)
+
+		// 71: 1575980 [charAt[17]]
+			// FF71+: StaticRange requires at least 1 argument, but only 0 were passed
+			// ^ error_fix: StaticRange constructor: At least 1 argument required, but only 0 passed
+			// FF70-: Illegal constructor
+			// FF68-: StaticRange is not defined
+		let t71 = performance.now(), ver71
+		try {
+			let test71 = new StaticRange()
+		} catch(e) {
+			ver71 = ("function" === typeof StaticRange && (e.message).charAt(0) == "S")
+			// ^ legacy check: 68- StaticRange
+		}
+		rec(71, 71, "1575980", ver71, performance.now()-t71)
+
+		// 69: 1558387
+		let t69 = performance.now(), ver69 = ("undefined" === typeof window.DOMError)
+		rec(69, 69, "1558387", ver69, performance.now()-t69)
+
+		// 68: 1550949
+		let t68 = performance.now(), ver68
+		try {ver68 = isNaN(Date.parse("T00:00:00Z"))} catch(e) {
+			debug.push(" 68 "+ e.name +" : "+ e.message)
+			ver68 = xB
+		}
+		rec(68, 68, "1550949", ver68, performance.now()-t68)
+
+		// 66: 1514664
+		let t66 = performance.now(), ver66 = ("function" === typeof TextEncoder.prototype.encodeInto)
+		rec(66, 66, "1514664", ver66, performance.now()-t66)
+
+		// 65b: 1499026
+		let t65b = performance.now(), ver65b
+		try {ver65b = ("ia" == Intl.DateTimeFormat.supportedLocalesOf("ia").join())} catch(e) {ver65b = xB}
+		rec(65.1, 65, "1499026", ver65b, performance.now()-t65b)
+
+		// 65a: 1504334
+		let t65a = performance.now(), ver65a = ("function" === typeof Intl.RelativeTimeFormat)
+		rec(65, 65, "1504334", ver65a, performance.now()-t65a)
+		
+		// 61: 1434007
+		let t61 = performance.now(), ver61
+		try {let test61a = (' a').trimStart(); ver61 = true} catch(e) {}
+		rec(61, 61, "1434007", ver61, performance.now()-t61)
+
+		// 59: 1405993
+		let t59 = performance.now(), ver59
+		try {ver59 = ("tt" == Intl.DateTimeFormat.supportedLocalesOf("tt").join())} catch(e) {ver59 = xB}
+		rec(59, 59, "1405993", ver59, performance.now()-t59)
+
+		// 55: 1354974: isFF check: this test hangs blink
+		if (isFF) {
+			let t55 = performance.now(), ver55
+			try {
+				let maxIndex = Math.pow(2, 31)
+				let list55 = []
+				list55[maxIndex - 1] = 'a'
+				list55[maxIndex - 0] = 'b'
+				if (list55[maxIndex] !== 'b') {
+				} else if (list55.slice()[maxIndex] !== 'b') {
+				} else if (list55.slice(maxIndex - 1).length !== 2) {
+				} else {
+					ver55 = true
+				}
+			} catch(e) {}
+			rec(55, 55, "1354974", ver55, performance.now()-t55)
+		} else {
+			rec(55, 55, "1354974", xNA, 0)
+		}
+
+		// 54: 1050755
+		let t54 = performance.now(), ver54
+		try {
+			let test54 = [Date.UTC(), Date.UTC(1)]
+			ver54 = (isNaN(test54[1]) == false)
+		} catch(e) {}
+		rec(54, 54, "1050755", ver54, performance.now()-t54)
+
+		// 53: 1317307
+		let t53 = performance.now(), ver53
+		try {Object.defineProperty([], "length", {get(){}})} catch(e) {if (e.name == "TypeError") {ver53 = true}}
+		rec(53, 53, "1317307", ver53, performance.now()-t53)
+
+		// 52: 837961
+		let t52 = performance.now(), ver52
+		try {let test52 = new Intl.DateTimeFormat(undefined, {timeZone: "Europe/Warsaw"}); ver52 = true} catch(e) {}
+		rec(52, 52, "837961", ver52, performance.now()-t52)
+	}
+	run_other()
+
+	function run_watch() {
+		// watch
+		// 1274354: META
+
+		// 1439800
+			// ext fuckery: cydec
+		let t9 = performance.now(), ver9 = xNC
+		let test9 = new Date("11-Nov-11")
+		if (test9.toString() !== "Invalid Date") {ver9 = xOMG}
+		rec(9,"Invalid Date", "1439800", ver9, performance.now()-t9, "ex")
+
+		// 1515318: 63 and lower = NaN, 64+ = -2011
+		let t7 = performance.now(), ver7 = xNC
+		let test7 = new Date("31-Mar-2011").getFullYear()
+		if (test7 !== -2011 && !isNaN(test7)) {ver7 = xOMG + (isFF ? " [" + test7 +"]" : "")}
+		rec(7,"-2011", "1515318", ver7, performance.now()-t7)
+
+		// 1599375
+		let t6 = performance.now(), ver6 = xNC
+		let test6 = Date.parse("2019-11-26 07:39:58.286157072 +0000 UTC")
+		if (!isNaN(test6)) {ver6 = xOMG}
+		rec(6,"NaN", "1599375", ver6, performance.now()-t6)
+
+		// 1742592 related
+		let t4 = performance.now(), ver4 = xNC
+		try {
+			let lf4 = new Intl.ListFormat("en")
+			let test4 = "~"+ lf4.format(["", "B"]) +"~"
+			if (test4 !== "~ and B~") {ver4 = xOMG}
+		} catch(e) {
+			ver4 = " "+ zNA + " error "
+		}
+		rec(4,"\" and B\"", "1742592", ver4, performance.now()-t4)
+	}
+
+}
+
+function run() {
+	setTimeout(function() {
+		Promise.all([
+			get_globals()
+		]).then(function(){
+			outputVersion()
+		})
+	}, 50)	
+}
+run()
+
+</script>
+</body>
+</html>

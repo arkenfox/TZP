@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+  <title>canvas spoof fingerprinting</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<style>
+		table {width: 480px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#canvas">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb9">
+		<col width="18%"><col width="82%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">canvas spoof fingerprinting
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Creates a random canvas with known results, reads it back, and analyzes
+				the	differences. <code>getImageData</code> is being tested, but <code>toDataURL</code> and
+				<code>toBlob</code> can also be "decoded" (albeit a little differently)</span>
+		</td></tr>
+
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2">
+			<div class="btn-left">
+				<span class="btn9 btn" onClick="run()">[ re-run ]</span>
+				<span><input id="optSolid" type="checkbox"> use a solid color</span>
+				<span><input id="optStroke" type="checkbox"> use strokeText</span><br><br>
+			</div>VISUALS</td></tr>
+		<tr><td class="bottom padr">control</td>
+			<td>
+				<canvas id="cnvBig" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp;
+				<canvas id="cnvCtrl" width="20" height="20" style="border:1px solid white;"></canvas>
+					&nbsp; <span class="s9"> &#9664; what we set</span>
+			</td></tr>
+		<tr><td></td><td><span class="intro">The control that we read values from, pixel by pixel</span></td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td class="bottom padr">1st read<br>getImageData</td>
+			<td>
+				<canvas id="cnvBig2" width="180" height="180" style="border:5px solid white;"></canvas> &nbsp;
+				<canvas id="cnvGet" width="20" height="20" style="border:1px solid white;"></canvas>
+					&nbsp; <span class="s9"> &#9664; what we got back</span></td></tr>
+		<tr><td></td><td><span class="intro">What we have read back from the control, pixel by pixel</span></td></tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr>
+			<td class="bottom padr">results</td>
+			<td>
+				<span class="s9">
+					<canvas id="cnvGet2" width="20" height="20" style="border:1px solid white;" src=""></canvas>
+						&nbsp; &#9664; getImageData &nbsp;
+					<img id="cnvURL" width="20" height="20" style="border:1px solid white;" src="">
+						&nbsp; &#9664; toDataURL &nbsp;
+					<img id="cnvBlob" width="20" height="20" style="border:1px solid white;" src="">
+						&nbsp; &#9664; toBlob
+				</span>
+			</td>
+		</tr>
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr><td colspan="2"></td></tr> <!-- spacer -->
+
+		<!-- DATA -->
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td colspan="2">DATA ANALYSIS</td></tr>
+		<tr><td class="padr">control</td><td class="c mono" id="sethash"></td></tr>
+		<tr><td class="padr">1st read</td><td class="c mono" id="readhash"></td></tr>
+		<tr><td class="padr">2nd read</td><td class="c mono" id="readhash2"></td></tr>
+		<tr><td class="padr">stats</td><td class="c mono" id="readstats"></td></tr>
+		<tr><td class="padr">diffs</td><td class="c mono" id="readdiff"></td></tr>
+
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+function run() {
+	// vars
+	let clrSet = [], cellSet = [],
+		clrRead = [], clrRead2 = [],
+		cellRead = [], cellRead2 = [],
+		hashSet = "",
+		hashGetImage = "",
+		hashGetImage2 = "",
+		cWidth = 20,
+		cHeight = 20,
+		m = 9 // multplier for large visuals
+
+	// clear
+	let items = document.getElementsByClassName("c")
+	for(let i=0; i < items.length; i++) {
+		items[i].innerHTML = "&nbsp"
+	}
+
+	let optSolid = dom.optSolid.checked
+	let optStroke = dom.optStroke.checked
+
+	// pause so users see change
+	setTimeout(function(){
+		try {
+			let t0 = performance.now()
+			let cnvBig = dom.cnvBig
+			let cnvCtrl = dom.cnvCtrl
+			if (cnvBig.getContext) {
+				let ctxBig = cnvBig.getContext('2d'),
+					ctxCtrl = cnvCtrl.getContext('2d'),
+					ctxGet = dom.cnvGet.getContext('2d'),
+					ctxGet2 = dom.cnvGet2.getContext('2d'),
+					ctxBig2 = dom.cnvBig2.getContext('2d')
+
+				// note: all random values we don't use 255 so RFP-white shows up in all it's glory
+				let solidR = Math.floor(Math.random()*255),
+					solidG = Math.floor(Math.random()*255),
+					solidB = Math.floor(Math.random()*255)
+				let solidClrs = solidR +", "+ solidG +", "+ solidB +", 255"
+
+				// fill big visual with our random color
+				ctxBig.fillStyle = "rgba("+ solidClrs +")"
+				ctxBig.fillRect(0, 0, cnvBig.width, cnvBig.height);
+				// ensure background is correct color in ctrl
+				ctxCtrl.fillStyle = "rgba("+ solidClrs +")"
+				ctxCtrl.fillRect(0, 0, cnvCtrl.width, cnvCtrl.height);
+
+				if (optSolid) {
+					let total = cWidth * cHeight
+					for (let i=0; i < total; i++) {
+						clrSet.push(solidR, solidG, solidB, 255)
+						cellSet.push(solidClrs)
+					}
+				}
+
+				let indexFont = []
+				if (!optSolid) {
+					let clrR = Math.floor(Math.random()*255),
+						clrG = Math.floor(Math.random()*255),
+						clrB = Math.floor(Math.random()*255)
+					let fpText = "\u2588\u2588\u2588\u2588" // full block
+					// order matters
+					// trigger fillText stealth
+						// only the text area is altered, so try and make it cover all of it
+					ctxCtrl.font = "512px sans-serif" // large
+					ctxCtrl.textBaseline = "top"
+					ctxCtrl.textBaseline = "alphabetic"
+					ctxCtrl.fillText(fpText,0,0)
+					// trigger strokeText stealth: don't overwrite half the fillText
+					if (optStroke) {
+						fpText = "-" // straight, less curves
+						ctxCtrl.font = "16px monospace" // even straighter
+						ctxCtrl.strokeStyle ="rgba("+ solidClrs +")"
+						for (let x=0; x < cWidth/2; x++) {
+							for (let y=0; y < cHeight/4; y++) { // divide by 4 to match TZP size
+								ctxCtrl.strokeText(fpText,x,y)
+							}
+						}
+					}
+					/* results
+						fillText only
+							 49 : CB = has at least fillText
+						fillText + strokeText
+							 49 : CB = only fillText
+							 49 : CB = has fillText + strokeText
+							~14 : CB = only strokeText
+							  0 : false positive: can't get any on my machine but see below
+
+						strokeText can create false positives (aliasing?, bezier curves etc)
+						on my machine: windows, dpi=1, en* language default fonts, default text size etc
+						 - 10k tests on TZP main: `-` char and monospace = zero false positives
+								zoom doesn't seem to affect it
+
+						on my machine running 100 tests: false positives
+						'a' monospace  = 98% (9 affected cells)
+						'x' monospace  = 84% (9)
+						'|' monospace  = 75% (5)
+						'-' monospace  =  0% = also 0 with 10k tests
+
+						'a' sans-serif = 99% (7 affected cells overall)
+						'x' sans-serif = 94% (7)
+						'|' sans-serif = 51% (5)
+						'-' sans-serif = 16% (1)
+
+						Too risky to use in production given all the variables across platforms/users
+						e.g. even if we decided that if only 1 (or 2) indexFonts changed and if only
+						indexFonts changed, i.e it is in stealth mode, means a false positive: at the
+						end of the day we really can't be sure. We need to deal in absolutes
+					*/
+					// then overwrite a % of the pixels with random values
+					let counter = -1
+					for (let x=0; x < cWidth; x++) {
+						let xEven = (x % 2 == 0)
+						for (let y=0; y < cHeight; y++) {
+							counter ++
+							let k = counter * 4
+							let yEven = (y % 2 == 0)
+							// xEven + yEven == 1 = checkerboard = 1/2
+							// xEven + yEven == 2 = another 1/4
+							// xEven + yEven == 0 = the remainder: of which we can further reduce e.g. multples of 3
+							let go = (xEven + yEven == 1 || xEven + yEven == 2) // 3/4ths
+							if (!go) {
+								if ((x * y) % 3 == 0 ) {go = true} // brings us up to 351/400
+							}
+							if (go) {
+								// get random color
+								clrR = Math.floor(Math.random()*255)
+								clrG = Math.floor(Math.random()*255)
+								clrB = Math.floor(Math.random()*255)
+								let clrs = clrR +", "+ clrG +", "+ clrB +", 255"
+								clrSet.push(clrR)
+								clrSet.push(clrG)
+								clrSet.push(clrB)
+								clrSet.push(255)
+								cellSet.push(clrs)
+								ctxBig.fillStyle = "rgba("+ clrs +")"
+								ctxBig.fillRect(x*m, y*m, m, m)
+								ctxCtrl.fillStyle = "rgba("+ clrs +")"
+								ctxCtrl.fillRect(x, y, 1, 1)
+							} else {
+								indexFont.push(k)
+								//don't touch the canvas but record solid colors
+								clrSet.push(solidR)
+								clrSet.push(solidG)
+								clrSet.push(solidB)
+								clrSet.push(255)
+								cellSet.push(solidClrs)
+							}
+						}
+					}
+				}
+				hashSet = mini(clrSet) +" | "+ mini(cellSet)
+				dom.sethash = hashSet
+
+				// getImageData
+				let imageData = ctxCtrl.getImageData(0,0, cnvCtrl.width, cnvCtrl.height)
+				ctxGet2.putImageData(imageData, 0, 0)
+
+				// toDataURL
+				let dataURL = cnvCtrl.toDataURL("image/png")
+				cnvURL.src = dataURL
+
+				// toBlob
+				cnvCtrl.toBlob(function(blob) {
+					let url = URL.createObjectURL(blob)
+					cnvBlob.src = url
+				})
+
+				// 1st read
+				let testRead = ctxCtrl.getImageData(0,0, cWidth, cHeight).data
+				let aRead = []
+				for (let x=0; x < cWidth; x++) {
+					for (let y=0; y < cHeight; y++) {
+						// we need to read x/y as the opposite
+						// as getImageData reads down then across
+						// so we want the 0th quartet, then 20th, then 40th
+						let k = x + (y * cHeight)
+						aRead = testRead.slice(k*4, (k*4) + 4)
+						clrRead.push(aRead[0])
+						clrRead.push(aRead[1])
+						clrRead.push(aRead[2])
+						clrRead.push(aRead[3])
+						let pixel = aRead.join(", ")
+						cellRead.push(pixel)
+						// output READ visuals: just on the first read
+						ctxBig2.fillStyle = "rgba("+ pixel +")"
+						ctxBig2.fillRect(x*m, y*m, m, m)
+						ctxGet.fillStyle = "rgba("+ pixel +")"
+						ctxGet.fillRect(x, y, 1, 1)
+					}
+				}
+				hashGetImage = mini(clrRead) +" | " + mini(cellRead)
+
+				let indexChanged = []
+				for (let i=0; i < cellSet.length; i++) {
+					if (cellSet[i] !== cellRead[i]) {
+						indexChanged.push(i * 4)
+					}
+				}
+				let aNotInFonts = indexChanged.filter(x => !indexFont.includes(x))
+				let isInputOnly = aNotInFonts == 0
+
+				// 2nd read
+				let testRead2 = ctxCtrl.getImageData(0,0, cWidth, cHeight).data
+				let aRead2 = []
+				for (let x=0; x < cWidth; x++) {
+					for (let y=0; y < cHeight; y++) {
+						// we need to read x/y as the opposite
+						// as getImageData reads down then across
+						// so we want the 0th quartet, then 20th, then 40th
+						let k = x + (y * cHeight)
+						aRead2 = testRead2.slice(k*4, (k*4) + 4)
+						clrRead2.push(aRead2[0])
+						clrRead2.push(aRead2[1])
+						clrRead2.push(aRead2[2])
+						clrRead2.push(aRead2[3])
+						let pixel = aRead2.join(", ")
+						cellRead2.push(pixel)
+					}
+				}
+				hashGetImage2 = mini(clrRead2) +" | " + mini(cellRead2)
+
+				// output
+				if (hashGetImage2 == hashSet) {
+					dom.readhash2.innerHTML = hashGetImage2 + s9 +" [matches]"+ sc
+				} else {
+					dom.readhash2.innerHTML = sb + hashGetImage2 + sc
+						+ (hashGetImage2 == hashGetImage ? " [cached]" : " [per-execution]")
+				}
+
+				if (hashGetImage == hashSet) {
+					dom.readhash.innerHTML = hashGetImage + s9 +" [matches]"+ sc
+				} else {
+					dom.readhash.innerHTML = sb + hashGetImage + sc
+
+					// analyze
+					let changeR = [], changeG = [], changeB = [], changeA = [], changeC = [], changeC2 = [], channels = []
+					let absR = [], absG = [], absB = []
+					let negR = 0, negG = 0, negB = 0, z = 0
+					let chan = ""
+
+					for (let i=0; i < clrSet.length; i++) {
+						let diff = clrRead[i] - clrSet[i]
+						if (z==0) {
+							if (diff !== 0) {chan += "r"; changeR.push(diff); absR.push(Math.abs(diff)); if(diff < 0) {negR++}}
+							z = 1
+						} else if (z==1) {
+							if (diff !== 0) {chan += "g"; changeG.push(diff); absG.push(Math.abs(diff)); if(diff < 0) {negG++}}
+							z = 2
+						} else if (z==2) {
+							if (diff !== 0) {chan += "b"; changeB.push(diff); absB.push(Math.abs(diff)); if(diff < 0) {negB++}}
+							z = 3
+						} else {
+							if (diff !== 0) {chan += "a"; changeA.push(diff)}
+							if (chan !== "") {channels.push(chan)}
+							z = 0
+							chan = ""
+						}
+					}
+					// what co-ordinates changed
+					for (let i=0; i < cellSet.length; i++) {
+						if (cellSet[i] !== cellRead[i]) {changeC.push(i)}
+						if (cellSet[i] !== cellRead2[i]) {changeC2.push(i)}
+					}
+					/*
+					if (changeC.length > 1) {
+						console.debug("read 1: pixels changed: ", mini(changeC) +"\n", changeC)
+					}
+					if (changeC2.length > 1) {
+						console.debug("read 2: pixels changed: ", mini(changeC2) +"\n", changeC2)
+					}
+					*/
+
+					// channels
+					let counts = {}
+					channels.forEach(function(c) {
+						counts[c] = (counts[c] || 0) + 1
+					})
+					let tmpchan = channels.filter(function(item, position) {return channels.indexOf(item) === position})
+					tmpchan.sort()
+
+					let chancount = 0, chanstring = ""
+					if (changeR.length) {chancount++; chanstring = "r"}
+					if (changeG.length) {chancount++; chanstring += "g"}
+					if (changeB.length) {chancount++; chanstring += "b"}
+					if (changeA.length) {chancount++; chanstring += "a"}
+
+					// stats
+					dom.readstats.innerHTML = "    cells changed: "+ changeC.length
+						+"<br> channels changed: "+ chancount +" [" + chanstring +"]"
+						+"<br>   channel counts: r: "+ changeR.length
+						+", g: "+ changeG.length
+						+", b: "+ changeB.length
+						+", a: "+ changeA.length
+						+"<br>   combos altered: "+ tmpchan.length +" ["+ tmpchan.join(", ") +"]"
+						+"<br>     combo counts: "+ JSON.stringify(counts)
+						+"<br>     stealth mode: "+ (isInputOnly ? sb +"yes"+ sc +" [input only changed]" : "no")
+
+					// diffs
+					let tmpR = changeR.filter(function(item, position) {return changeR.indexOf(item) === position})
+					let tmpG = changeG.filter(function(item, position) {return changeG.indexOf(item) === position})
+					let tmpB = changeB.filter(function(item, position) {return changeB.indexOf(item) === position})
+					let tmpA = changeA.filter(function(item, position) {return changeA.indexOf(item) === position})
+					// sort diffs numerically
+					tmpR.sort(function(a, b){return a-b})
+					tmpG.sort(function(a, b){return a-b})
+					tmpB.sort(function(a, b){return a-b})
+					tmpA.sort(function(a, b){return a-b})
+					// for each we want a count and a spread (max/min)
+					// +/- split (ignore a)
+					let strR = "n/a", strG = "n/a", strB = "n/a", strA = "n/a"
+					if (tmpR.length) {
+						strR = tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] +", "+ (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+						strR += " "+ negR +"/"+ (changeR.length-negR)
+					}
+					if (tmpG.length) {
+						strG = tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] +", "+ (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+						strG += " "+ negG +"/" + (changeG.length-negG)
+					}
+					if (tmpB.length) {
+						strB = tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] +", "+ (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+						strB += " "+ negB +"/"+ (changeB.length-negB)
+					}
+					if (tmpA.length) {
+						strA = tmpA.length +" ["+ tmpA[0] +" to "+ tmpA[tmpA.length-1] +", "+ (tmpA[tmpA.length-1]-tmpA[0]) +"]"
+					}
+				
+					// absolute stats (ignore a)
+					tmpR = absR.filter(function(item, position) {return absR.indexOf(item) === position})
+					tmpG = absG.filter(function(item, position) {return absG.indexOf(item) === position})
+					tmpB = absB.filter(function(item, position) {return absB.indexOf(item) === position})
+					tmpR.sort(function(a, b){return a-b})
+					tmpG.sort(function(a, b){return a-b})
+					tmpB.sort(function(a, b){return a-b})
+					if (tmpR.length) {
+						strR += " ... " + tmpR.length +" ["+ tmpR[0] +" to "+ tmpR[tmpR.length-1] +", "+ (tmpR[tmpR.length-1]-tmpR[0]) +"]"
+					}
+					if (tmpG.length) {
+						strG += " ... " + tmpG.length +" ["+ tmpG[0] +" to "+ tmpG[tmpG.length-1] +", "+ (tmpG[tmpG.length-1]-tmpG[0]) +"]"
+					}
+					if (tmpB.length) {
+						strB += " ... " + tmpB.length +" ["+ tmpB[0] +" to "+ tmpB[tmpB.length-1] +", "+ (tmpB[tmpB.length-1]-tmpB[0]) +"]"
+					}
+					dom.readdiff.innerHTML = "  r: "+ strR +"<br>  g: "+ strG +"<br>  b: "+ strB +"<br>  a: "+ strA 
+				}
+				// perf
+				dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+			}
+		} catch(e) {
+			dom.readhash.innerHTML = sb + e.name +": "+ sc + e.message
+		}
+	}, 170)
+}
+
+run()
+
+</script>
+</body>
+</html>

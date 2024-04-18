@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>dayperiod</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<!-- custom -->
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+		.pad {padding-bottom: 10px;)
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px"><col>
+		<thead><tr><th colspan="2">
+			<div class="nav-title">datetimeformat: dayperiod
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy: from three
+			options (<code>narrow</code>, <code>short</code>, <code>long</code>) and five times
+			(<code>8:00</code>, <code>12:00</code>, <code>15:00</code>, <code>18:00</code>, <code>22:00</code>).
+			Click custom to test any configuration.</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
+				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
+				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bcustom" class="btn4 btn" onClick="run('custom')">[ CUSTOM ]</span>
+			<br><br><hr><br>
+				<span class="hidden" id ="customoptions">
+					<div class="mono spaces pad">NARROW: 8 <input type="checkbox" id="narrow08"> 12 <input type="checkbox" id="narrow12"> 15 <input type="checkbox" id="narrow15"> 18 <input type="checkbox" id="narrow18"> 22 <input type="checkbox" id="narrow22"></div>
+					<div class="mono spaces pad"> SHORT: 8 <input type="checkbox" id="short08"> 12 <input type="checkbox" id="short12"> 15 <input type="checkbox" id="short15"> 18 <input type="checkbox" id="short18"> 22 <input type="checkbox" id="short22"></div>
+					<div class="mono spaces pad">  LONG: 8 <input type="checkbox" id="long08"> 12 <input type="checkbox" id="long12"> 15 <input type="checkbox" id="long15"> 18 <input type="checkbox" id="long18"> 22 <input type="checkbox" id="long22"></div>
+				<span class="btn4 btnfirst" onClick="reset_custom('clear')">[ CLEAR ]</span>
+				<span class="btn4 btn" onClick="reset_custom('min')">[ RESET MIN ]</span>
+				<span class="btn4 btn" onClick="reset_custom('all')">[ ALL ]</span>
+				<span class="btn4 btn" onClick="run_custom()">[ RUN ]</span>
+					<br><br><hr><br>
+				</span>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	localesHashAll = "" // to compare custom to
+
+const oDays = {
+	"08": new Date("2019-01-30T08:00:00"),
+	"12": new Date("2019-01-30T12:00:00"),
+	"15": new Date("2019-01-30T15:00:00"),
+	"18": new Date("2019-01-30T18:00:00"),
+	"22": new Date("2019-01-30T22:00:00")
+}
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function reset_custom(type) {
+	// check/uncheck everything
+	let checkState = (type == "all")
+	let styles = ["narrow","short","long"],
+		times = ["08",12,15,18,22]
+	styles.forEach(function(s){
+		times.forEach(function(t){
+			document.getElementById(s +t).checked = checkState
+		})
+	})
+	if (type == "min") {
+		// gecko min preset
+		dom.narrow08.checked = true
+		dom.long08.checked = true
+		dom.short12.checked = true
+		dom.narrow15.checked = true
+		dom.short18.checked = true
+
+		// assuming 110 changes stick from ICU 72: 1792775
+		if (isFF && "object" !== typeof ondeviceorientationabsolute) {
+			// FF90-109
+			dom.short22.checked = true
+		} else {
+			// FF110+, also chrome since at least 115
+			dom.short15.checked = true
+			dom.long22.checked = true
+		}
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let test = Intl.DateTimeFormat.supportedLocalesOf([code])
+			if (test.length) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let	header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+
+function get_dayperiod(date, code, option) {
+	// always use h12
+	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	try {
+		let styles = ["narrow","short","long"]
+		let times = ["08",12,15,18,22]
+		let oOptions = {}
+		
+		// select what to test
+		if (method == "custom") {
+			styles.forEach(function(s){
+				times.forEach(function(t){
+					oOptions[s + t] = document.getElementById(s +t).checked
+				})
+			})
+		} else {
+			if (method == "narrow") {styles = ["narrow"]}
+			if (method == "short") {styles = ["short"]}
+			if (method == "long") {styles = ["long"]}
+			styles.forEach(function(s){
+				times.forEach(function(t){
+					oOptions[s + t] = true
+				})
+			})
+		}
+		// test: 3 methods x 5 dayPeriods
+		aLocales.forEach(function(code) {
+
+			// set our three options once per code
+			let dteS = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "short"}),
+				dteN = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "narrow"}),
+				dteL = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: "long"})
+
+			let oStyles = {"narrow": [], "short": [], "long": []}
+			styles.forEach(function(s){
+				times.forEach(function(t){
+					if (oOptions[s + t] == true) {
+						if (s == "short") {
+							oStyles[s].push(dteS.format(oDays[t]))
+						} else if (s =="narrow") {
+							oStyles[s].push(dteN.format(oDays[t]))
+						} else {
+							oStyles[s].push(dteL.format(oDays[t]))
+						}
+					}
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				oTempData[hash]["long"] = oStyles["long"].join(" | ")
+				oTempData[hash]["short"] = oStyles["short"].join(" | ")
+				oTempData[hash]["narrow"] = oStyles["narrow"].join(" | ")
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let strN = oData[k]["narrow"],
+				strS = oData[k]["short"],
+				strL = oData[k]["long"],
+				localeCount = oData[k]["locales"].split(",").length
+			if (strN.length) {strN = "<li>"+ s16 +"N: "+ sc + strN +"</li>"}
+			if (strS.length) {strS = "<li>"+ s16 +"S: "+ sc + strS +"</li>"}
+			if (strL.length) {strL = "<li>"+ s16 +"L: "+ sc + strL +"</li>"}
+			displaylist.push(
+				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+				+ "<ul class='main'>" + strN + strS + strL
+				+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+			)
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			if (isFF) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
+					// track FF version changes
+					// results
+					if (resultsHash == "fe9c0751") {resultsHash += s14 +" [FF115+]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "6b3f4b76") {localesHash += s14 +" [FF115+]"+ sc
+					} else if (isFF) {localesHash += zNEW
+					}
+				}
+			}
+		} else if (method == "custom") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc
+			+ spacer + s16 +"results: "+ sc + resultsHash +" "+ resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		let element = dom.customoptions
+
+		if (method == "custom") {
+			// unhide custom section
+			element.classList.remove("hidden")
+
+		} else {
+			// hide custom
+			element.classList.add("hidden")
+
+			dom.results = "running test..."
+			// delay so users see change and allow paint
+			setTimeout(function() {
+				run_main(method)
+			}, 1)
+		}
+	}
+}
+
+function run_custom() {
+	if (isSupported) {
+		//reset
+		dom.perf = ""
+		dom.results = "running test..."
+		setTimeout(function() {
+			run_main("custom")
+		}, 1)
+	}
+}
+
+function run_test() {
+	let A = get_dayperiod(new Date("2019-01-30T08:00:00"), "en", "long")
+	let B = get_dayperiod(new Date("2019-01-30T12:00:00"), "en", "long")
+	if (A == B) {
+		isSupported = false
+		dom.results.innerHTML = s4 + "dayPeriod:" + sc + " not supported"
+	} else {
+		isSupported = true
+		setBtn("all")
+		dom.results = "running test..."
+		setTimeout(function() {
+			run_main("all")
+		}, 100)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	reset_custom("min")
+	// add additional locales to core locales for this test
+	let aListExtra = [
+		"az-cyrl,azerbaijani (cyrillic)",
+		"bn-in,bengali (india)",
+		"bs-cyrl,bosnian (cyrillic)",
+		"en-au,english (australia)",
+		"en-ca,english (canada)",
+		"es-ar,spanish (argentina)",
+		"es-co,spanish (colombia)",
+		"es-do,spanish (dominican republic)",
+		"es-mx,spanish (mexico)",
+		"es-pa,spanish (panama)",
+		"fa-af,persian (afghanistan)",
+		"ff-adlm,fulah (adlam)",
+		"fr-ca,french (canada)",
+		"fr-ch,french (switzerland)",
+		"fr-sn,french (senegal)",
+		"hi-latn,hindi (latin)",
+		"ks-deva,kashmiri (devanagari)",
+		"pt-pt,portuguese (portugal)",
+		"ro-md,romanian (moldova)",
+		"sd-deva,sindhi (devanagari)",
+		"se-fi,northern sami (finland)",
+		"shi-latn,tachelhit (latin)",
+		"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
+		"sr-cyrl-me,serbian (cyrillic montenegro)",
+		"sr-cyrl-xk,serbian (cyrillic kosovo)",
+		"sr-latn,serbian (latin)",
+		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+		"sr-latn-me,serbian (latin montenegro)",
+		"sr-latn-xk,serbian (latin kosovo)",
+		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+		"yo-bj,yoruba (benin)",
+		"yue-hans,cantonese (simplified)",
+	]
+	list = list.concat(aListExtra)
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	legend()
+	run_test()
+})
+
+</script>
+</body>
+</html>

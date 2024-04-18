@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=800">
+	<title>supportedlocalesof</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 780px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="32%"><col width="68%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">supportedlocalesof
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">Return supported locales, including mappings and duplicates,
+			for each given Intl constructor. The list is a base list and supplemented in TZP entropy
+			PoCs, and is not a complete list of all locales.</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="bC" class="btn4 btnfirst" onClick="run('C')">[ C ]</span>
+				<span id="bDTF" class="btn4 btn" onClick="run('DTF')">[DTF]</span>
+				<span id="bDN" class="btn4 btn" onClick="run('DN')">[DN]</span>
+				<span id="bLF" class="btn4 btn" onClick="run('LF')">[LF]</span>
+				<!--<span id="bLI" class="btn4 btn" onClick="run('LI')">[LI]</span>-->
+				<span id="bNF" class="btn4 btn" onClick="run('NF')">[NF]</span>
+				<span id="bPR" class="btn4 btn" onClick="run('PR')">[PR]</span>
+				<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[RTF]</span>
+				<span id="bS" class="btn4 btn" onClick="run('S')">[ S ]</span>
+				<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ALL]</span>
+				<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = [],
+	aLegend = [],
+	aLocales = [],
+	aSummary = []
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			aLocales.push(code)
+			let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+			if (name.includes("(")) {
+				let name0 = name.split("(")[0].trim()
+				let name1 = name.substring(
+					name.indexOf("(") + 1, 
+					name.lastIndexOf(")")
+				)
+				name1 = s99 +"("+ name1 + ")"+ sc
+				if (isSplit) {
+					name = name0 +"<br>"+ " ".repeat(4) + name1
+				} else {
+					name = name0 +" "+ name1
+				}
+			}
+			aLegend.push(code.padStart(7) +": "+ name)
+		}
+	}
+	// output
+	dom.legend.innerHTML = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"+ aLegend.join("<br>")
+}
+
+function run_main(method, isLoopy) {
+	let t0 = performance.now()
+	let legend = [], data = [], map = [], nocase = [], nocasemap = [], all = []
+	let spacer = "<br><br>", hashLookup = "", lookupSummary = ""
+	let display = []
+
+	function getPretty(method) {
+		let pretty = ""
+		if (method == "C") {pretty = "collator"
+		} else if (method == "DTF") {pretty = "datetimeformat"
+		} else if (method == "DN") {pretty = "displaynames"
+		} else if (method == "LF") {pretty = "listformat"
+		} else if (method == "LI") {pretty = "localeinfo"
+		} else if (method == "NF") {pretty = "numberformat"
+		} else if (method == "PR") {pretty = "pluralrules"
+		} else if (method == "RTF") {pretty = "relativetimeformat"
+		} else if (method == "S") {pretty = "segmenter"
+		}
+		return pretty
+	}
+
+	try {
+		// hash
+		function getNotation(hash, method) {
+			if (!isFF) return ""
+			// only hash notate if 115+
+			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+			if (!is115) {return ""}
+			let notation = ""
+			if (method == "C") {
+				//if (hash == "248fdca9") {notation = " [FF121+]" // lij
+				if (hash == "51bba16a") {notation = " [FF115+]"
+				} else { notation = zNEW
+				}
+			} else {
+				//if (hash == "13d29895") {notation = " [FF121+]" // lij
+				if (hash == "2f20e446") {notation = " [FF115+]"
+				} else { notation = zNEW
+				}
+			}
+			if (notation !== zNEW) notation = s14 + notation + sc
+			return notation
+		}
+		// get data
+		function getSupported(type, method) {
+			data = []
+			map = []
+			all = []
+			for (let i = 0 ; i < list.length; i++) {
+				// split: code, name
+				let code = list[i].split(",")[0]
+				let name = list[i].split(",")[1]
+				// test
+				let test = ""
+				if (method == "C") {
+					test = Intl.Collator.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "DTF") {
+					test = Intl.DateTimeFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "DN") {
+					test = Intl.DisplayNames.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "LF") {
+					test = Intl.ListFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "LI") {
+					test = Intl.LocaleInfo.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "NF") {
+					test = Intl.NumberFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "PR") {
+					test = Intl.PluralRules.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "RTF") {
+					test = Intl.RelativeTimeFormat.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "S") {
+					test = Intl.Segmenter.supportedLocalesOf([code], {localeMatcher: type})
+				}
+				if (test.length) {
+					let found = test[0]
+					all.push(found +":"+ code)
+					if (type == "lookup") {
+						nocase.push(found.toLowerCase())
+						if (code.toLowerCase() !== found.toLowerCase()) {
+							nocasemap.push(code)
+						}
+					}
+					if (code.toLowerCase() !== found.toLowerCase()) {
+						map.push(code +" -> "+ found)
+						data.push(code +" -> "+ found)
+					} else {
+						data.push(found)
+					}
+				}
+			}
+			// don't sort or remove any dupes
+			let hash = mini(data.join())
+
+			// dupes
+			all.sort()
+			let dupes = [], dupesclean = [], tmpCodes = [], tmpCount = 0
+			let nextItem = ""
+			for (let i = 0 ; i < all.length; i++) {
+				let a = all[i].split(":")[0] // found locale
+				let b = all[i].split(":")[1] // tested code
+				tmpCodes.push(b)
+				if (i < all.length - 1) {
+					nextItem = all[(i+1)].split(":")[0]
+				} else {
+					nextItem = "end"
+				}
+				if (nextItem !== a) {
+					if (tmpCodes.length > 1) {
+						dupes.push(s14 + a + sc + s4 +" ["+ tmpCodes.length +"] "+ sc + tmpCodes.join(", "))
+						dupesclean.push(a)
+					}
+					tmpCodes = []
+					tmpCount = 0
+				}
+			}
+			// not in legend
+			let notlist = [], notlistclean = [], map2 = []
+			for (let i = 0 ; i < map.length; i++) {
+				let x = map[i].split(" -> ")[0] // tested
+				let y = map[i].split(" -> ")[1] // found
+				if (!aLocales.includes(y.toLowerCase())) { // case insenstive
+					notlist.push(s16 + y + sc +" ["+ x +"]")
+					notlistclean.push(y)
+				}
+				map2.push(s12 + x + sc + " -> "+ y)
+			}
+			// color up results
+			if (!isLoopy) {
+				for (let i = 0 ; i < data.length; i++) {
+					let r = data[i]
+					if (map.includes(r)) {
+						let part1 = r.split(" -> ")[0],
+							part2 = r.split(" -> ")[1]
+						if (dupesclean.includes(part2)) {
+							data[i] = s12 + part1 +" -> "+ sc + s14 + part2 + sc
+						} else if (notlistclean.includes(part2)) {
+							data[i] = s12 + part1 +" -> "+ sc + s16 + part2 + sc
+						} else {
+							data[i] = s12 + r + sc
+						}
+					} else {
+						if (dupesclean.includes(r)) {
+							data[i] = s14 + r + sc
+						}
+					}
+				}
+			}
+			// output
+			let str = ""
+			if (type == "lookup") {hashLookup = hash}
+
+			if (isLoopy) {
+				// build summary
+				if (type == "lookup") {
+					lookupSummary = "<ul><li>" + hashLookup + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method) +"</li>"
+					if (map2.length) {lookupSummary += "<li>"+ s12 +"MAPPED: "+ sc + map2.join(", ") +"</li>"}
+					if (dupes.length) {lookupSummary += "<li>"+ s14 +"DUPES: "+ sc + dupes.join(", ") +"</li>"}
+					if (notlist.length) {lookupSummary += "<li>"+ s16 +"NOT LISTED: "+ sc + notlist.join(", ") +"</li>"}					
+					lookupSummary += "</ul>"
+				} else {
+					str = s4 + getPretty(method).toUpperCase() + sc
+						+ (hash == hashLookup ? "" : sb +" [localeMatcher mismatch]"+ sc)
+					str += "<br>" + lookupSummary
+					aSummary.push(str)
+				}
+			} else {
+				str = s4 + type.toUpperCase() + sc
+				if (type == "lookup") {
+					str = s4 + getPretty(method).toUpperCase() + sc + spacer + str + spacer
+					str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method)
+					// nocase used to color legend items
+					nocase.sort()
+					nocase = nocase.filter(function(item, position) {return nocase.indexOf(item) === position})
+					nocasemap.sort()
+					nocasemap = nocasemap.filter(function(item, position) {return nocasemap.indexOf(item) === position})
+				} else {
+					str = spacer + "<hr>" + "<br>" + str + spacer
+					str += hash + s4 +" ["+ data.length +"]"+ sc + (hash == hashLookup ? sg : sb) +" [match]"+ sc
+				}
+				str += spacer + "<span class='faint'>" + data.join(", ") +"</span>"
+				if (map2.length) {str += spacer + s12 +"MAPPED"+ sc + spacer + map2.join("<br>")}
+				if (dupes.length) {str += spacer + s14 +"DUPES"+ sc + spacer + dupes.join("<br>")}
+				if (notlist.length) {str += spacer + s16 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+				display.push(str)
+			}
+		}
+
+		getSupported("lookup", method)
+		getSupported("best fit", method)
+
+		if (!isLoopy) {
+			dom.results.innerHTML = display.join("<br>")
+			// build + color legend
+			for (let i = 0 ; i < list.length; i++) {
+				// split: code, name
+				let str = list[i].toLowerCase()
+				let code = str.split(",")[0].trim()
+				let name = str.split(",")[1].trim()
+				if (nocase.includes(code.toLowerCase())) {
+					let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+					if (name.includes("(")) {
+						let name0 = name.split("(")[0].trim()
+						let name1 = name.substring(
+							name.indexOf("(") + 1, 
+							name.lastIndexOf(")")
+						)
+						name1 = s99 +"("+ name1 + ")"+ sc
+						if (isSplit) {
+							name = name0 +"<br>"+ " ".repeat(4) + name1
+						} else {
+							name = name0 +" "+ name1
+						}
+					}
+					legend.push(sg + code.padStart(7) + sc +": "+ name)
+				} else {
+					if (nocasemap.includes(code)) {
+						legend.push(s12 + code.padStart(7) +": "+ name + sc)
+					} else {
+						legend.push(code.padStart(7) +": "+ name)
+					}
+				}
+			}
+			// display legend
+			dom.legend.innerHTML = s4 +"LEGEND ["+ legend.length +"]"+ sc +"<br><br>"+ legend.join("<br>")
+			// perf
+			dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+		}
+	} catch(e) {
+		// catch unsupported
+		let msg = e.message
+		if (isFF) {msg = msg.replace("can't access property \"supportedLocalesOf\", ", "")} // trim *error_fix
+		if (isLoopy) {
+			let x = s4 + getPretty(method).toUpperCase() + sc
+				+ "<ul><li>"+ e.name +": "+ msg +"</li></ul>"
+			aSummary.push(x)
+		} else {
+			dom.results.innerHTML = "<br>"+ s4 + e.name +": "+ sc + msg
+		}
+	}
+}
+
+function run(method) {
+	//reset
+	legend()
+	dom.results = ""
+	dom.perf = ""
+	setBtn(method)
+	// delay so users see change and allow paint
+	setTimeout(function() {
+		if (method == "ALL") {
+			run_all()
+		} else {
+			run_main(method, false)
+		}
+	}, 250)
+}
+
+function run_all() {
+	let t0 = performance.now()
+	aSummary = []
+	run_main("C", true)
+	run_main("DTF", true)
+	run_main("DN", true)
+	run_main("LF", true)
+	//run_main("LI", true)
+	run_main("NF", true)
+	run_main("PR", true)
+	run_main("RTF", true)
+	run_main("S", true)
+	dom.results.innerHTML = aSummary.join("<br>")
+	let t1 = performance.now()
+	dom.perf.innerHTML = Math.round(t1-t0) +"ms"
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+legend()
+Promise.all([
+	get_globals()
+]).then(function(){
+	list = gLocales
+	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	run("ALL")
+})
+
+</script>
+</body>
+</html>

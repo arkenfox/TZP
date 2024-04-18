@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>media</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 480px;}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#media">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb13">
+		<col width="1%"><col width="24%"><col width="75%">
+		<thead><tr><th colspan="3">
+			<div class="nav-title">media
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="3" class="intro">
+			<span class="no_color">Testing <code>canPlayType</code> + <code>isTypeSupported</code> with large
+				<span class='btn13 btnc mono' onClick='display(`audiolist`)'>audio</span> +
+				<span class='btn13 btnc mono' onClick='display(`videolist`)'>video</span> lists
+			</span>
+		</td></tr>
+		<tr><td colspan="3"><hr><br></td></tr>
+		<tr><td colspan="2" class="padr">canPlayType</td><td class="mono">
+			<span class="c" id="audiocan"></span> | <span class="c" id="videocan"></span></td></tr>
+		<tr><td colspan="2" class="padr">isTypeSupported</td><td class="mono">
+			<span class="c" id="audiotype"></span> | <span class="c" id="videotype"></span></td></tr>
+		<tr><td colspan="3"><br><hr><br></td></tr>
+		<tr><td></td>
+			<td colspan="2" class="mono spaces" id="details"></td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let v = "video/", a = "audio/"
+let audiolist = [
+	'application/ogg',
+	a+'3gpp', 
+	a+'3gpp2', 
+	a+'aac',
+	a+'flac',
+	a+'mp3',
+	a+'mp4',
+	a+'mp4; codecs=',
+	a+'mp4; codecs=""',
+	a+'mp4; codecs="flac"',
+	a+'mp4; codecs="mp3"',
+	a+'mp4; codecs=\'\'',
+	a+'mpeg',
+	a+'mpeg; codecs="mp3"',
+	a+'ogg; codecs="flac"',
+	a+'ogg; codecs="opus"',
+	a+'ogg; codecs="vorbis"',
+	a+'wav',
+	a+'wav; codecs="1"',
+	a+'wave',
+	a+'wave; codecs="1"',
+	a+'webm',
+	a+'webm; codecs="opus"',
+	a+'webm; codecs="vorbis"',
+	a+'x-aac',
+	a+'x-flac',
+	a+'x-m4a',
+	a+'x-pn-wav',
+	a+'x-pn-wav; codecs="1"',
+	a+'x-wav',
+	a+'x-wav; codecs="1"',
+
+	a+'mp4; codecs="mp4a.40"',
+	a+'mp4; codecs="mp4a.40.1"',
+	a+'mp4; codecs="mp4a.40.2"',
+	a+'mp4; codecs="mp4a.40.3"',
+	a+'mp4; codecs="mp4a.40.4"',
+	a+'mp4; codecs="mp4a.40.5"',
+	a+'mp4; codecs="mp4a.40.6"',
+	a+'mp4; codecs="mp4a.40.7"',
+	a+'mp4; codecs="mp4a.40.8"',
+	a+'mp4; codecs="mp4a.40.9"',
+	a+'mp4; codecs="mp4a.40.12"',
+	a+'mp4; codecs="mp4a.40.13"',
+	a+'mp4; codecs="mp4a.40.14"',
+	a+'mp4; codecs="mp4a.40.15"',
+	a+'mp4; codecs="mp4a.40.16"',
+	a+'mp4; codecs="mp4a.40.17"',
+	a+'mp4; codecs="mp4a.40.19"',
+	a+'mp4; codecs="mp4a.40.20"',
+	a+'mp4; codecs="mp4a.40.21"',
+	a+'mp4; codecs="mp4a.40.22"',
+	a+'mp4; codecs="mp4a.40.23"',
+	a+'mp4; codecs="mp4a.40.24"',
+	a+'mp4; codecs="mp4a.40.25"',
+	a+'mp4; codecs="mp4a.40.26"',
+	a+'mp4; codecs="mp4a.40.27"',
+	a+'mp4; codecs="mp4a.40.28"',
+	a+'mp4; codecs="mp4a.40.29"',
+	a+'mp4; codecs="mp4a.40.32"',
+	a+'mp4; codecs="mp4a.40.33"',
+	a+'mp4; codecs="mp4a.40.34"',
+	a+'mp4; codecs="mp4a.40.35"',
+	a+'mp4; codecs="mp4a.40.36"',
+	a+'mp4; codecs="mp4a.66"',
+	a+'mp4; codecs="mp4a.67"',
+	a+'mp4; codecs="mp4a.68"',
+	a+'mp4; codecs="mp4a.69"',
+	a+'mp4; codecs="mp4a.6B"',
+	a+'mp4; codecs=".mp3"',
+]
+let videolist = [
+	'application/ogg',
+	v+'3gpp',
+	v+'3gpp2',
+	v+'mp4',
+	v+'mp4; codecs=',
+	v+'mp4; codecs=""',
+	//v+'mp4; codecs="av01.0.00M.12"', // 12bit // get add it below
+	v+'mp4; codecs="avc1"',
+	v+'mp4; codecs="avc1.58000a"', // extended
+	v+'mp4; codecs="avc1.6e000a"', // high 10
+	v+'mp4; codecs="avc1.7a000a"', // high 4:2:2
+	v+'mp4; codecs="avc1.f4000a"', // high 4:4:4
+	v+'mp4; codecs="avc3"',
+	v+'mp4; codecs="flac"',
+	v+'mp4; codecs="hev1.1.6.L93.B0"', // 1853448
+	v+'mp4; codecs="hev1.2.4.L120.B0"',
+	v+'mp4; codecs="hvc1.1.6.L93.B0"',
+	v+'mp4; codecs="hvc1.2.4.L120.B0"',
+	v+'mp4; codecs="opus"',
+	v+'mp4; codecs="vp09.00.10.08"',
+	v+'mp4; codecs="vp09.00.50.08"',
+	v+'mp4; codecs="vp09.00.51.08.01.01.01.01.00"',
+	v+'mp4; codecs=\'\'',
+	v+'ogg',
+	v+'ogg; codecs="flac"',
+	v+'ogg; codecs="opus"',
+	v+'ogg; codecs="theora"',
+	v+'ogg; codecs="theora, flac"',
+	v+'ogg; codecs="theora, speex"',
+	v+'ogg; codecs="theora, vorbis"',
+	v+'quicktime',
+	v+'webm',
+	v+'webm; codecs="av1"',
+	v+'webm; codecs="vorbis"',
+	v+'webm; codecs="vp8"',
+	v+'webm; codecs="vp8, opus"',
+	v+'webm; codecs="vp8, vorbis"',
+	v+'webm; codecs="vp9"',
+	v+'webm; codecs="vp9, opus"',
+	v+'webm; codecs="vp9, vorbis"',
+	v+'x-m4v',
+	v+'x-matroska',
+]
+let videomp4 = [
+	"3gvo","a3d1","a3d2","a3d3","a3d4","a3ds","ac-3","ac-4","alac","alaw","av01","avc2","avc4","avcp","dra1",
+	"drac","dts+","dts-","dtsc","dtse","dtsh","dtsl","dtsx","dvav","dvhe","ec-3","enca","encf","encm","encs",
+	"enct","encv","fdp","g719","g726","hev1","hvc1","hvt1","ixse","lhv1","lhe1","lht1","m2ts","m4ae","mett",
+	"metx","mha1","mha2","mhm1","mhm2","mjp2","mlix","mlpa","mp4a","mp4s","mp4v","mvc1","mvc2","mvc3","mvc4",
+	"mvd1","mvd2","mvd3","mvd4","oksd","pm2t","prtp","raw","resv","rm2t","rrtp","rsrp","rtmd","rtp","s263",
+	"samr","sawb","sawp","sevc","sm2t","sqcp","srtp","ssmv","stpp","stgs","svc1","svc2","svcm","tc64","tmcd",
+	"twos","tx3g","ulaw","unid","urim","vc-1","vp08","vp09","wvtt",
+]
+let videoavc1 = [
+	"42000a","42000b","42000c","42000d","420014","420015","420016","42001e","42001f","420020",
+	"420028","420029","42002a","420032","420033","420034","42400a","42400b","42400c","42400d",
+	"424014","424015","424016","42401e","42401f","424020","424028","424029","42402a","424032",
+	"424033","424034","4d000a","4d000b","4d000c","4d000d","4d0014","4d0015","4d0016","4d001e",
+	"4d001f","4d0020","4d0028","4d0029","4d002a","4d0032","4d0033","4d0034","4d400a","4d400b",
+	"4d400c","4d400d","4d4014","4d4015","4d4016","4d401e","4d401f","4d4020","4d4028","4d4029",
+	"4d402a","4d4032","4d4033","4d4034","58000b","58000c","58000d","580014","580015","580016",
+	"58001e","58001f","580020","580028","580029","58002a","580032","580033","580034","64000a",
+	"64000b","64000c","64000d","640014","640015","640016","64001e","64001f","640020","640028",
+	"640029","64002a","640032","640033","640034","64080a","64080b","64080c","64080d","640814",
+	"640815","640816","64081e","64081f","640820","640828","640829","64082a","640832","640833",
+	"640834","6e000b","6e000c","6e000d","6e0014","6e0015","6e0016","6e001e","6e001f","6e0020",
+	"6e0028","6e0029","6e002a","6e0032","6e0033","6e0034","6e100a","6e100b","6e100c","6e100d",
+	"6e1014","6e1015","6e1016","6e101e","6e101f","6e1020","6e1028","6e1029","6e102a","6e1032",
+	"6e1033","6e1034","7a000b","7a000c","7a000d","7a0014","7a0015","7a0016","7a001e","7a001f",
+	"7a0020","7a0028","7a0029","7a002a","7a0032","7a0033","7a0034","7a100a","7a100b","7a100c",
+	"7a100d","7a1014","7a1015","7a1016","7a101e","7a101f","7a1020","7a1028","7a1029","7a102a",
+	"7a1032","7a1033","7a1034","f4000b","f4000c","f4000d","f40014","f40015","f40016","f4001e",
+	"f4001f","f40020","f40028","f40029","f4002a","f40032","f40033","f40034","f4100a","f4100b",
+	"f4100c","f4100d","f41014","f41015","f41016","f4101e","f4101f","f41020","f41028","f41029",
+	"f4102a","f41032","f41033","f41034","2c000a","2c000b","2c000c","2c000d","2c0014","2c0015",
+	"2c0016","2c001e","2c001f","2c0020","2c0028","2c0029","2c002a","2c0032","2c0033","2c0034",
+]
+let a1 = [0, 1, 2],
+	a2 = ["00","01","02","03","04","05","06","07","08","09",10,11,12,13,14,15,16,17,18,19,20,21,22,23,31],
+	a3 = ["H","M"],
+	a4 = ["08","10","12"]
+let videoav01 = []
+a1.forEach(function(part1) {
+	a2.forEach(function(part2) {
+		a3.forEach(function(part3) {
+			a4.forEach(function(part4) {
+				let value = part1 +"."+ part2 +""+ part3 +"."+ part4
+				videoav01.push(value)
+			})
+		})
+	})
+})
+videomp4.forEach(function(codec) {videolist.push('video/mp4; codecs="'+ codec +'"')})
+videoavc1.forEach(function(codec) {videolist.push('video/mp4; codecs="avc1.'+ codec +'"')})
+videoav01.forEach(function(codec) {videolist.push('video/mp4; codecs="av01.'+ codec +'"')})
+
+let oData = {}
+
+function display(item) {
+	let data = oData[item]
+	let hash = mini(data)
+	let count = ""
+	if (item == "audiolist" || item == "videolist") {count = s13 +" ["+ data.length +"]"+ sc}
+	dom.details.innerHTML = s13 + item + ": " +sc + hash + count +"<br>"+ json_highlight(data) //JSON.stringify(data, null, 2)
+}
+
+function getButton(name, text = "details") {
+	return " <span class='btn13 btnc' onClick='display(`"+ name +"`)'>["+ text +"]</span>"
+}
+
+function get_media(type) {
+	// https://privacycheck.sec.lrz.de/active/fp_cpt/fp_can_play_type.html
+	// https://cconcolato.github.io/media-mime-support/
+	const METRICcan = "canPlayType_"+ type,
+		METRICtype = "isTypeSupported_"+ type
+
+	let oMedia = {
+		"canPlay": {"maybe": [],"probably": []},
+		"isType": {"recorder": [],"source": []}
+	}
+
+	try {
+		var obj = document.createElement(type)
+		// collect
+		let go1 = true, go2 = true, go3 = true, err1, err2, err3
+		let list = oData[type +"list"]
+		list.sort()
+
+		list.forEach(function(item) {
+			let tmp = item.replace(type +"\/","") // strip "video/","audio/"
+			if (go1) {
+				try {
+					let str = obj.canPlayType(item)
+					if (str == "maybe" || str == "probably") {oMedia["canPlay"][str].push(tmp)}
+				} catch(e) {
+					go1 = false; err1 = zErr; console.log(type, "canPlayType", e)
+				}
+			}
+			if (go2) {
+				try {
+					if (MediaRecorder.isTypeSupported(item)) {oMedia["isType"]["recorder"].push(tmp)}
+				} catch(e) {
+					go2 = false; err2 = zErr; console.log(type, "MediaRecorder", e)
+				}
+			}
+			if (go3) {
+				try {
+					if (MediaSource.isTypeSupported(item)) {oMedia["isType"]["source"].push(tmp)}
+				} catch(e) {
+					go3 = false; err3 = zErr; console.log(type, "MediaSource", e)
+				}
+			}
+		})
+
+		// canplay
+		let canDisplay
+		if (go1) {
+			let aMaybe = oMedia["canPlay"]["maybe"]
+			let aProbably = oMedia["canPlay"]["probably"]
+			if (aMaybe.length == 0 && aProbably.length == 0) {
+				canDisplay = "none"
+			} else {
+				let canobj = {}
+				if (aMaybe.length) {canobj["maybe"] = aMaybe}
+				if (aProbably.length) {canobj["probably"] = aProbably}
+				let canHash = mini(canobj)
+				canDisplay = canHash + getButton(METRICcan, aMaybe.length +"/" + aProbably.length)
+				oData[METRICcan] = canobj
+			}
+		} else {
+			canDisplay = err1
+		}
+		dom[type +"can"].innerHTML = canDisplay
+
+		// isType
+		let typeDisplay
+		if (!go2 && !go3) {
+			typeDisplay = err2 // just display first error
+		} else {
+			let aRecorder = oMedia["isType"]["recorder"]
+			let aSource = oMedia["isType"]["source"]
+			if (aRecorder.length == 0 && aSource.length == 0) {
+				typeDisplay = "none"
+			} else {
+				let typeobj = {}
+				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
+				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource}
+				let typeHash = mini(typeobj)
+				let notation = (go2 ? aRecorder.length : zErr) +"/"+ (go3 ? aSource.length : zErr)
+				typeDisplay = typeHash + getButton(METRICtype, notation)
+				oData[METRICtype] = typeobj
+			}
+		}
+		dom[type +"type"].innerHTML = typeDisplay
+
+		// ToDo: media: remove audio/video element?
+		return
+
+	} catch(e) {
+		console.log(e)
+		dom[type +"can"].innerHTML = zErr
+		dom[type +"type"].innerHTML = zErr
+		return
+	}
+}
+
+function run() {
+	// reset
+	dom.details = "click counts to list their results here"
+	oData = {}
+	oData["audiolist"] = audiolist
+	oData["videolist"] = videolist
+
+	let t0 = performance.now()
+	Promise.all([
+		get_media("audio"),
+		get_media("video"),
+	]).then(function(){
+		dom.perf = Math.round(performance.now() - t0) + " ms"
+	})	
+}
+
+// do once
+audiolist.sort()
+let audiocount = audiolist.length
+audiolist = audiolist.filter(function(item, position) {return audiolist.indexOf(item) === position})
+if (audiolist.length !== audiocount) {console.log("audiolist has dupes")}
+
+videolist.sort()
+let videocount = videolist.length
+//console.log(videolist.join("\n"))
+videolist = videolist.filter(function(item, position) {return videolist.indexOf(item) === position})
+if (videolist.length !== videocount) {console.log("videolist has dupes", videocount, videolist.length)}
+
+run()
+
+</script>
+</body>
+</html>

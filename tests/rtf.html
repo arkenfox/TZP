@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=600">
+	<title>relativetimeformat</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 580px; max-width: 680px;}
+		ul.main {margin-left: -20px;}
+	</style>
+</head>
+
+<body>
+	<div class="offscreen">
+		<div id="test95a" style="width: min-content; hyphens: auto; border: 1px solid red">2020-1</div>
+		<div id="test95b" style="width: min-content; hyphens: auto; border: 1px solid red">2020-12020-1</div>
+	</div>
+	<div class="hidden">
+		<div><input type="time" min="14:00:00" max="12:00:00" value="15:00:00" id="test76"></div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#region">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb4">
+		<col width="200px">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">relativetimeformat
+			<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">A proof to confirm minimum tests for maximum entropy:
+			from <code>2</code> numeric options (auto, always), <code>3</code> styles (narrow, short, long),
+			<code>8</code> time	units (second, minute, hour, day, week, month, year, quarter) and
+			<code>5</code> amounts (-3, -1, 0, 1, 3).</span>
+		</td></tr>
+		<tr>
+			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<span id="bnarrow" class="btn4 btnfirst" onClick="run('narrow')">[ N ]</span>
+				<span id="bshort" class="btn4 btn" onClick="run('short')">[ S ]</span>
+				<span id="blong" class="btn4 btn" onClick="run('long')">[ L ]</span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
+			</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+var list = gLocales,
+	aLegend = [],
+	aLocales = [],
+	isSupported = false,
+	localesHashAll = "" // to compare min to
+
+function log_console(name) {
+	let hash = mini(sDetail[name])
+	if (name == "locales") {
+		console.log(name +": " + hash +"\n"+ sDetail["locales"].join("\n"))
+	} else {
+		console.log(name +": " + hash +"\n", sDetail[name])
+	}
+}
+
+function legend() {
+	// build once
+	if (aLegend.length == 0) {
+		list.sort()
+		for (let i = 0 ; i < list.length; i++) {
+			let str = list[i].toLowerCase()
+			let code = str.split(",")[0].trim()
+			let name = str.split(",")[1].trim()
+			let go = true
+			if (isSupported) {
+				go = Intl.RelativeTimeFormat.supportedLocalesOf([code]).length > 0
+			}
+			if (go) {
+				aLocales.push(code)
+				let isSplit = (name.includes("(") && (name.length + code.length) > 32)
+				if (name.includes("(")) {
+					let name0 = name.split("(")[0].trim()
+					let name1 = name.substring(
+						name.indexOf("(") + 1, 
+						name.lastIndexOf(")")
+					)
+					name1 = s99 +"("+ name1 + ")"+ sc
+					if (isSplit) {
+						name = name0 +"<br>"+ " ".repeat(4) + name1
+					} else {
+						name = name0 +" "+ name1
+					}
+				}
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
+		}
+	}
+	// output
+	let header = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"
+	dom.legend.innerHTML = header + aLegend.join("<br>")
+}
+
+function get_dayperiod(date, code, option) {
+	// always use h12
+	return new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: option}).format(date)
+}
+
+function run_main(method) {
+	let t0 = performance.now()
+	let oData = {}, oTempData = {}
+	let spacer = "<br><br>"
+
+	try {
+		let	styles = ['narrow','short','long']
+		let times = [-3,-1,0,1,3]
+		let units = ["second","minute","hour","day","week","month","quarter","year"]
+		let minList = []
+		let oOptions = {}
+
+		// select what to test
+		if (method == "min") {
+			styles = ["narrow","short","long"]
+
+			// TZP: en-US
+			// A: now, in 1s, in 1 second, in 3s, in 1d, in 3d, this qtr., in 0y
+			// B: today, tomorrow, next wk., next yr.
+			/*
+				ALWAYS
+				N: in 1d | in 0y
+				AUTO
+				N: now | in 1s | in 3s | today | tomorrow | in 3d | next wk. | this qtr. | next yr.
+				L: in 1 second
+			*/
+
+			// FF65-67 & FF96-110+
+			minList = [
+				"autonarrow0second",  // A: now
+				"autonarrow1second",  // A: in 1s
+				"autolong1second",    // A: in 1 second
+				"autonarrow3second",  // A: in 3s
+				"autonarrow0day",     // B: today 
+				"autonarrow1day",     // B: tomorrow
+				"alwaysnarrow1day",   // A: in 1d
+				"autonarrow3day",     // A: in 3d
+				"autonarrow1week",    // B: next wk.
+				"autonarrow0quarter", // A: this qtr.
+				"alwaysnarrow0year",  // A: in 0y
+				"autonarrow1year",    // B: next yr.
+			]
+			// older versions need some help
+			if (isVer > 67 && isVer < 91) {
+				minList.push("autolong1week") // FF68-90
+			}
+			if (isVer > 71 && isVer < 96) {
+				minList.push("autoshort-1week") // FF72-95
+			}
+
+/* troubleshooting list
+"autonarrow-3second",
+"autonarrow-1second",
+"autonarrow0second",
+"autonarrow1second",
+"autonarrow3second",
+
+"autonarrow-3minute",
+"autonarrow-1minute",
+"autonarrow0minute",
+"autonarrow1minute",
+"autonarrow3minute",
+
+"autonarrow-3hour",
+"autonarrow-1hour",
+"autonarrow0hour",
+"autonarrow1hour",
+"autonarrow3hour",
+
+"autonarrow-3day",
+"autonarrow-1day",
+"autonarrow0day",
+"autonarrow1day",
+"autonarrow3day",
+
+"autonarrow-3week",
+"autonarrow-1week",
+"autonarrow0week",
+"autonarrow1week",
+"autonarrow3week",
+
+"autonarrow-3month",
+"autonarrow-1month",
+"autonarrow0month",
+"autonarrow1month",
+"autonarrow3month",
+
+"autonarrow-3year",
+"autonarrow-1year",
+"autonarrow0year",
+"autonarrow1year",
+"autonarrow3year",
+
+"autonarrow-3quarter",
+"autonarrow-1quarter",
+"autonarrow0quarter",
+"autonarrow1quarter",
+"autonarrow3quarter",
+*/
+
+
+			sDetail["minlist"] = minList
+		} else {
+			if (method == "narrow") {styles = ["narrow"]}
+			if (method == "short") {styles = ["short"]}
+			if (method == "long") {styles = ["long"]}
+			styles.forEach(function(s){
+				units.forEach(function(u){
+					oOptions[s + u] = true
+				})
+			})
+		}
+
+		//test: 3 styles x 5 times x 8 units = 120 results
+		aLocales.forEach(function(code) {
+			let oStyles = {
+				"narrowalways": [], "narrowauto": [],
+				"shortalways": [], "shortauto": [],
+				"longalways": [], "longauto": []
+			}
+			styles.forEach(function(s){
+				let IntlRTF = new Intl.RelativeTimeFormat(code, {style: s, numeric: "auto"})
+				let IntlRTFn = new Intl.RelativeTimeFormat(code, {style: s, numeric: "always"})
+				units.forEach(function(u){
+					times.forEach(function(t){
+						if (method == "min") {
+							let concat = s + t + u
+							if (minList.includes("always"+concat)) {
+								oStyles[s +"always"].push( IntlRTFn.format(t, u) )
+							}
+							if (minList.includes("auto"+concat)) {
+								oStyles[s +"auto"].push( IntlRTF.format(t, u) )
+							}
+						} else {
+							let concat = s+t+u
+							//if (code == "en") {console.log(concat)}
+							oStyles[s +"always"].push( IntlRTFn.format(t, u) )
+							oStyles[s +"auto"].push( IntlRTF.format(t, u) )
+						}
+					})
+				})
+			})
+			let hash = mini(oStyles) +" " // make numbers sort like strings
+			if (oTempData[hash] == undefined) {
+				oTempData[hash] = {}
+				oTempData[hash]["locales"] = [code]
+				oTempData[hash]["longalways"] = oStyles["longalways"].join(" | ")
+				oTempData[hash]["longauto"] = oStyles["longauto"].join(" | ")
+				oTempData[hash]["shortalways"] = oStyles["shortalways"].join(" | ")
+				oTempData[hash]["shortauto"] = oStyles["shortauto"].join(" | ")
+				oTempData[hash]["narrowalways"] = oStyles["narrowalways"].join(" | ")
+				oTempData[hash]["narrowauto"] = oStyles["narrowauto"].join(" | ")
+			} else {
+				oTempData[hash]["locales"].push(code)
+			}
+		})
+		// handle empty
+		if (Object.keys(oTempData).length == 0) {
+			dom.results.innerHTML = s4 + method.toUpperCase() +": " + sc + " try again"
+			return
+		}
+		// order object
+		for (const n of Object.keys(oTempData).sort()) {
+			oData[n] = {}
+			for (const p of Object.keys(oTempData[n]).sort()) {
+				if (p == "locales") {
+					oData[n][p] = oTempData[n][p].join(", ")
+				} else {
+					oData[n][p] = oTempData[n][p]
+				}
+			}
+		}
+		let localeGroups = [], displaylist = []
+		for (const k of Object.keys(oData)) {
+			localeGroups.push(oData[k]["locales"])
+			let alwaysN = oData[k]["narrowalways"],
+				alwaysS = oData[k]["shortalways"],
+				alwaysL = oData[k]["longalways"]
+			let autoN = oData[k]["narrowauto"],
+				autoS = oData[k]["shortauto"],
+				autoL = oData[k]["longauto"]
+			let localeCount = oData[k]["locales"].split(",").length
+
+			if (alwaysN.length) {alwaysN = "<li>"+ s16 +"N: "+ sc + alwaysN +"</li>"}
+			if (alwaysS.length) {alwaysS = "<li>"+ s16 +"S: "+ sc + alwaysS +"</li>"}
+			if (alwaysL.length) {alwaysL = "<li>"+ s16 +"L: "+ sc + alwaysL +"</li>"}
+
+			if (autoN.length) {autoN = "<li>"+ s16 +"N: "+ sc + autoN +"</li>"}
+			if (autoS.length) {autoS = "<li>"+ s16 +"S: "+ sc + autoS +"</li>"}
+			if (autoL.length) {autoL = "<li>"+ s16 +"L: "+ sc + autoL +"</li>"}
+
+			let strAlways = "", strAuto = ""
+			if (alwaysN.length + alwaysS.length + alwaysL.length > 0) {
+				strAlways = s12 +"ALWAYS"+ sc + alwaysN + alwaysS + alwaysL
+			}
+			if (autoN.length + autoS.length + autoL.length > 0) {
+				strAuto = s12 + "AUTO"+ sc + autoN + autoS + autoL
+			}
+			if (method == "all") {
+
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>" + "<details><summary>details</summary>"+ strAlways + strAuto
+					+ "<li>"+ "</details>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
+
+			} else {
+				displaylist.push(
+					s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc
+					+ "<ul class='main'>" + strAlways + strAuto
+					+ "<li>"+ s12 +"L: "+ sc + oData[k]["locales"] +"</li></ul>"
+				)
+			}
+		}
+		// hashes + btns
+		sDetail["results"] = oData
+		let resultsBtn = "<span class='btn4 btnc' onClick='log_console(`results`)'>[details]</span>"
+		let resultsHash = mini(oData)
+		localeGroups.sort()
+		sDetail["locales"] = localeGroups
+		let localesBtn = "<span class='btn4 btnc' onClick='log_console(`locales`)'>[details]</span>"
+		let localesHash = mini(localeGroups)
+		let minBtn = ""
+		if (method == "min") {
+			minBtn = "<span class='btn12 btnc' onClick='log_console(`minlist`)'>["
+				+ minList.length + " tests]</span>"
+		}
+
+		/*
+		console.log(localesHash)
+		console.log(localeGroups)
+		console.log(resultsHash)
+		console.log(oData)
+		console.log(oTempData)
+		//*/
+
+		// notations
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			if (isFF) {
+				// only hash notate if 115+
+				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
+				if (is115) {
+					// track FF version changes
+					// ignore if non-supported used, which return same as undefined = user's resolved options
+					// results
+					if (resultsHash == "ecee9fda") {resultsHash += s14 +" [FF115+]"+ sc
+					} else {resultsHash += zNEW
+					}
+					// locales
+					if (localesHash == "f89a86b9") {localesHash += s14 +" [FF115+]"+ sc
+					} else if (isFF) {localesHash += zNEW
+					}
+				}
+			}
+		} else if (method == "min") {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
+		}
+		// display
+		let display = s4 + method.toUpperCase() +": "
+			+" ["+ localeGroups.length + sc +" from "+ s4 + aLocales.length +"]" + sc + " " + minBtn
+			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
+		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
+		// perf
+		dom.perf.innerHTML = Math.round(performance.now() - t0) +" ms"
+	} catch(e) {
+		dom.results.innerHTML = s4 + e.name +": "+ sc + e.message
+	}
+}
+
+function run(method) {
+	if (isSupported) {
+		//reset
+		setBtn(method)
+		dom.perf = ""
+		dom.results = ""
+		// delay so users see change and allow paint
+		setTimeout(function() {
+			run_main(method)
+		}, 1)
+	}
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	Promise.all([
+		get_is95(),
+		get_isVer(),
+	]).then(function(){
+		try {
+			let test = new Intl.RelativeTimeFormat(undefined, {style: "short", numeric: "auto"})
+			isSupported = true
+		} catch(e) {
+			dom.results.innerHTML = s4 + e.name +":" + sc +" "+ e.message
+		}
+		// add additional locales to core locales for this test
+		let aListExtra = [
+			"ar-ae,arabic (united arabic emirates)",
+			"ar-dz,arabic (algeria)",
+			"bs-cyrl,bosnian (cyrillic)",
+			//"dyo-sn,jola-fonyl (senegal)",
+			"en-at,english (austria)",
+			"en-au,english (australia)",
+			"en-ca,english (canada)",
+			"en-sg,english (singapore)",
+			"es-ar,spanish (argentina)",
+			"es-co,spanish (colombia)",
+			"es-mx,spanish (mexico)",
+			"es-py,spanish (paraguay)",
+			"es-us,spanish (united states)",
+			"ff-adlm,fulah (adlam)",
+			"fr-ca,french (canada)",
+			"hi-latn,hindi (latin)",
+			"ks-deva,kashmiri (devanagari)",
+			"pa-pk,punjabi (pakistan)",
+			"ps-pk,pashto (pakistan)",
+			"pt-gw,portuguese (guinea-bissau)",
+			"pt-pt,portuguese (portugal)",
+			"sd-deva,sindhi (devanagari)",
+			"se-fi,northern sami (finland)",
+			"shi-latn,tachelhit (latin)",
+			"sr-ba,serbian (bosnia & herzegovina)",
+			"sr-latn,serbian (latin)",
+			"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+			"ur-in,urdu (india)",
+			"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+			"vai-latn,vai (latin)",
+			"yo-bj,yoruba (benin)",
+			"yue-hans,cantonese (simplified)",
+		]
+		list = list.concat(aListExtra)
+		list = list.filter(function(item, position) {return list.indexOf(item) === position})
+		legend()
+		if (isSupported) {
+			setBtn("all")
+			setTimeout(function() {
+				run_main("all")
+			}, 100)
+		}
+	})
+})
+
+</script>
+</body>
+</html>
