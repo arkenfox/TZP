@@ -174,7 +174,7 @@ function display(name) {
 	if (name == "1data") {name = "1st test"
 	} else if (name == "2data") {name = "2nd test"
 	} else if (name == "sizeChanges") {name = "differences"}
-	dom.details.innerHTML = name +": "+ hash +"<br>"+ json_highlight(data)
+	dom.details.innerHTML = name +": "+ hash +"<br>"+ json_highlight(data, 130)
 
 }
 
