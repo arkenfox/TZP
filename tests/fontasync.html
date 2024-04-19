@@ -102,58 +102,25 @@
 <script>
 'use strict';
 
-/* NOTES: items that change
-
-TB/MB windows 11 examples (using fontasync)
-- was tofu + 0x0700, 0x1950, 0x1C50, 0x1CDA, 0x21E4, 0x23AE, 0x2425, 0x2581, 0x2619, 0xFFF9
-- was non-tofu + 0x2B06 (TB), 0x1CDA (TB/MB)
-- so up to 12 but at least they all fall back
-- with fall back they seem consistent on cold loads + reruns vs subsequent tabs + reloads
-
-file://
-TBn failed: 0x0700, 0x1950, 0x1C50, 0x2425, 00x2619, 0xFFF9
- - at 500 | 383
-TBb failed: 0x0700, 0x1950, 0x2425, 00x2619, 0xFFF9 
- - at 566 | 433
-TBa no failures
- - at 567 | 367
-
-FF125b (using FPP)
-- 0xFFF9 rendered as tofu then fallsback
-
-typically am https first connection is going to be way slower
-e.g. FF
-  708: immediate
-  856: doc start
-e.g. TB (yikes)
- 4717: immediate
- 5233: doc start
-
-is there any way to speed up this async fallback?
-- is offscreen an issue? i.e do we move have them in view initially
-   - e.g. fixed overlay (so in sight)
-- change order put problematic ones before the others
-- maybe not show anything else (less rendering)
-
-*/
-
 let fntCodes = [
 	// sorted
 	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
 	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
 	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
 	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-	'0xA830','0xF003','0xF810','0xFBEE',
-	//*
-		'0xFFF9', // maybe problematic
-		'0xFFFD', // problematic
-		// https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
-		// https://thorin-oakenpants.github.io/testing/FFFD.html
-		// replacement chars cab be problematic on first session run/reload vs subsequent tabs
-			// i can actually see this flip over in FF
+	'0xA830','0xF003','0xF810','0xFBEE','0xFFF9',
+	/* '0xFFFD',
+		replacement character: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+		this char seems to be really problematic on TB/MB
+			// win FF: always Segoe UI
+			// win TB102
+				// on first document tab/run (and reloading the same tab) = tahoma
+				// on subsequent tabs = Malgun Gothic
+			// win TB115 I can get two measurements - it's a lottery
 	//*/
 	'0xFFFF', // tofu for visuals
 ]
+
 let styles = ["cursive","monospace","sans-serif","serif","system-ui"]
 let oData = {}, counter = 0
 let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
