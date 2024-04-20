@@ -623,7 +623,7 @@ const get_default_sizes = () => new Promise(resolve => {
 	const METRIC = "font_default_sizes"
 	const styles = ["monospace","sans-serif","serif"]
 	const scripts = {
-		arabic: "ar", aremenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
+		arabic: "ar", armenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
 		georgian: "ka", greek: "el", gujurati: "gu", gurmukhi: "pa", hebrew: "he", japanese: "ja",
 		kannada: "kn", khmer: "km", korean: "ko", latin: "en", malayalam: "ml", mathematics: "x-math",
 		odia: "or", other: "my", "simplified chinese": "zh-CN", sinhala: "si", tamil: "ta", telugu: "te",
