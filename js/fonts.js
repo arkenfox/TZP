@@ -654,7 +654,7 @@ const get_default_sizes = () => new Promise(resolve => {
 		let hash = mini(newobj)
 		addData(12, METRIC, newobj, hash)
 		if (isSmart) {
-			if (isOS == "windows" && hash == "2e627758") {notation = default_green}
+			if (isOS == "windows" && hash == "d798cdbd") {notation = default_green}
 		}
 		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
 		return resolve()
