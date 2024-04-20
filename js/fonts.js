@@ -621,28 +621,42 @@ const get_default_proportional = () => new Promise(resolve => {
 
 const get_default_sizes = () => new Promise(resolve => {
 	const METRIC = "font_default_sizes"
+	const styles = ["monospace","sans-serif","serif"]
+	const scripts = {
+		arabic: "ar", aremenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
+		georgian: "ka", greek: "el", gujurati: "gu", gurmukhi: "pa", hebrew: "he", japanese: "ja",
+		kannada: "kn", khmer: "km", korean: "ko", latin: "en", malayalam: "ml", mathematics: "x-math",
+		odia: "or", other: "my", "simplified chinese": "zh-CN", sinhala: "si", tamil: "ta", telugu: "te",
+		thai: "th", tibetan: "bo","traditional chinese (hong kong)": "zh-HK",
+		"traditional chinese (taiwan)": "zh-TW","unified canadian syllabary": "cr",
+	}
+	let notation = isSmart ? default_red : ""
 	try {
-		if (runSE) {foo++}
-		let oRes = {}
-		let el = dom.dfsize
-		let styles = [ // sorted
-			'cursive','default-font','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-			'serif','system-ui','ui-monospace','ui-rounded','ui-sans-serif','ui-serif',
-		]
-		styles.forEach(function(style) {
-			// always clear in case a font is invalid/deprecated: e.g. our "default-font"
-			el.style.fontSize = ""
-			el.style.fontFamily = ""
-			el.style.fontFamily = style
-			let size = getComputedStyle(el).getPropertyValue("font-size")
-			if (oRes[size] == undefined) {oRes[size] = []}
-			oRes[size].push(style)
-		})
-		let fpObj = {}
-		for (const k of Object.keys(oRes).sort()) {fpObj[k] = oRes[k]} // sort obj
-		let hash = mini(fpObj)
-		addData(12, METRIC, fpObj, hash)
-		log_display(12, METRIC, hash + addButton(12, METRIC))
+		const el = dom.dfsize
+		let data = {}
+		for (const k of Object.keys(scripts)) {
+			let lang = scripts[k]
+			el.setAttribute('lang', lang)
+			let aSizes = []
+			styles.forEach(function(style) {
+				// always clear
+				el.style.fontSize = ""
+				el.style.fontFamily = ""
+				el.style.fontFamily = style
+				let size = getComputedStyle(el).getPropertyValue("font-size").slice(0,-2)
+				aSizes.push(size)
+			})
+			let sizes = aSizes.join("-")
+			if (data[sizes] == undefined) {data[sizes] = [k]} else {data[sizes].push(k)}
+		}
+		let newobj = {}
+		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
+		let hash = mini(newobj)
+		addData(12, METRIC, newobj, hash)
+		if (isSmart) {
+			if (isOS == "windows" && hash == "2e627758") {notation = default_green}
+		}
+		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
 		return resolve()
 	} catch(e) {
 		log_display(12, METRIC, log_error(SECT12, METRIC, e))
