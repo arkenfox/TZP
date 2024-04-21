@@ -1408,7 +1408,7 @@ const get_script_defaults = () => new Promise(resolve => {
 		thai: "th", tibetan: "bo","traditional chinese (hong kong)": "zh-HK",
 		"traditional chinese (taiwan)": "zh-TW","unified canadian syllabary": "cr",
 	}
-	let notation = isSmart && isTB ? default_red : "" // limit to TB
+	let notation = isSmart ? default_red : ""
 	try {
 		const el = dom.dfsize,
 			elpro = dom.dfproportion
@@ -1436,9 +1436,12 @@ const get_script_defaults = () => new Promise(resolve => {
 		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
 		let hash = mini(newobj)
 		addData(12, METRIC, newobj, hash)
-		// notation
-		if (isSmart && isTB) {
-			if (isOS == "windows" && hash == "e5179dbb") {notation = default_green}
+		if (isSmart) {
+			if (isOS == "windows" && hash == "e5179dbb") {notation = default_green
+			} else if (isOS == "linux" && hash =="632e080a") {notation = default_green
+			} else if (isOS == "mac") {notation = "" // ToDo
+			} else if (isOS == "android" && hash =="a4253645") {notation = default_green
+			}
 		}
 		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
 		return resolve()
