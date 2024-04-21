@@ -604,66 +604,6 @@ function set_fntList(os = isOS) {
 	}
 }
 
-const get_default_proportional = () => new Promise(resolve => {
-	const METRIC = "font_default_proportional"
-	let res, fpvalue
-	try {
-		if (runSE) {foo++}
-		res = window.getComputedStyle(document.body,null).getPropertyValue("font-family")
-		fpvalue = res
-	} catch(e) {
-		res = log_error(SECT12, METRIC, e)
-		fpvalue = zErr
-	}
-	log_display(12, METRIC, res)
-	return resolve([METRIC, fpvalue])
-})
-
-const get_default_sizes = () => new Promise(resolve => {
-	const METRIC = "font_default_sizes"
-	const styles = ["monospace","sans-serif","serif"]
-	const scripts = {
-		arabic: "ar", armenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
-		georgian: "ka", greek: "el", gujurati: "gu", gurmukhi: "pa", hebrew: "he", japanese: "ja",
-		kannada: "kn", khmer: "km", korean: "ko", latin: "en", malayalam: "ml", mathematics: "x-math",
-		odia: "or", other: "my", "simplified chinese": "zh-CN", sinhala: "si", tamil: "ta", telugu: "te",
-		thai: "th", tibetan: "bo","traditional chinese (hong kong)": "zh-HK",
-		"traditional chinese (taiwan)": "zh-TW","unified canadian syllabary": "cr",
-	}
-	let notation = isSmart ? default_red : ""
-	try {
-		const el = dom.dfsize
-		let data = {}
-		for (const k of Object.keys(scripts)) {
-			let lang = scripts[k]
-			el.setAttribute('lang', lang)
-			let aSizes = []
-			styles.forEach(function(style) {
-				// always clear
-				el.style.fontSize = ""
-				el.style.fontFamily = ""
-				el.style.fontFamily = style
-				let size = getComputedStyle(el).getPropertyValue("font-size").slice(0,-2)
-				aSizes.push(size)
-			})
-			let sizes = aSizes.join("-")
-			if (data[sizes] == undefined) {data[sizes] = [k]} else {data[sizes].push(k)}
-		}
-		let newobj = {}
-		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
-		let hash = mini(newobj)
-		addData(12, METRIC, newobj, hash)
-		if (isSmart) {
-			if (isOS == "windows" && hash == "d798cdbd") {notation = default_green}
-		}
-		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
-		return resolve()
-	} catch(e) {
-		log_display(12, METRIC, log_error(SECT12, METRIC, e))
-		return resolve([METRIC, zErr])
-	}
-})
-
 const get_document_fonts = () => new Promise(resolve => {
 	fntDocEnabled = false // reset global
 	const METRIC = "document_fonts", fntTest = "\"Arial Black\""
@@ -1453,6 +1393,61 @@ const get_graphite = () => new Promise(resolve => {
 	}
 })
 
+const get_script_defaults = () => new Promise(resolve => {
+	const METRIC = "script_defaults"
+	if (!isGecko) {
+		addDataDisplay(4, METRIC, zNA)
+		return resolve()
+	}
+	const styles = ["monospace","sans-serif","serif"]
+	const scripts = {
+		arabic: "ar", armenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
+		georgian: "ka", greek: "el", gujurati: "gu", gurmukhi: "pa", hebrew: "he", japanese: "ja",
+		kannada: "kn", khmer: "km", korean: "ko", latin: "en", malayalam: "ml", mathematics: "x-math",
+		odia: "or", other: "my", "simplified chinese": "zh-CN", sinhala: "si", tamil: "ta", telugu: "te",
+		thai: "th", tibetan: "bo","traditional chinese (hong kong)": "zh-HK",
+		"traditional chinese (taiwan)": "zh-TW","unified canadian syllabary": "cr",
+	}
+	let notation = isSmart && isTB ? default_red : "" // limit to TB
+	try {
+		const el = dom.dfsize,
+			elpro = dom.dfproportion
+		let data = {}
+		for (const k of Object.keys(scripts)) {
+			let lang = scripts[k]
+			elpro.style.fontFamily = ""
+			elpro.setAttribute('lang', lang)
+			let font = getComputedStyle(elpro).getPropertyValue("font-family")
+			let tmp = [font]
+			el.setAttribute('lang', lang)
+			styles.forEach(function(style) {
+				// always clear
+				el.style.fontSize = ""
+				el.removeAttribute('font-family')
+				el.style.fontFamily = ""
+				el.style.fontFamily = style
+				let size = getComputedStyle(el).getPropertyValue("font-size").slice(0,-2)
+				tmp.push(size)
+			})
+			let key = tmp.join("-")
+			if (data[key] == undefined) {data[key] = [k]} else {data[key].push(k)}
+		}
+		let newobj = {}
+		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
+		let hash = mini(newobj)
+		addData(12, METRIC, newobj, hash)
+		// notation
+		if (isSmart && isTB) {
+			if (isOS == "windows" && hash == "e5179dbb") {notation = default_green}
+		}
+		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
+		return resolve()
+	} catch(e) {
+		log_display(12, METRIC, log_error(SECT12, METRIC, e))
+		return resolve([METRIC, zErr])
+	}
+})
+
 const get_system_fonts = (os = isOS) => new Promise(resolve => {
 	// 1802957: FF109+: -moz no longer applied but keep for regression testing
 		// add bogus '-default-font' to check they are falling back to actual default
@@ -1916,8 +1911,7 @@ const outputFonts = () => new Promise(resolve => {
 	set_fntList()
 	Promise.all([
 		get_document_fonts(), // sets fntDocEnabled
-		get_default_proportional(),
-		get_default_sizes(),
+		get_script_defaults(),
 		get_unicode(),
 		get_formats(),
 		get_system_fonts(),
