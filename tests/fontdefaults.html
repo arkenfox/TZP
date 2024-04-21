@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>script defaults</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 480px;}
+	</style>
+</head>
+
+<body>
+	<div class="offscreen">
+		<div class="normalized"><span id="dfsize"></span></div>
+		<div><span id="dfproportion"></span></div>
+	</div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#fonts">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb12">
+		<thead><tr><th>
+			<div class="nav-title">script defaults</div>
+		</th></tr></thead>
+		<tr><td class="intro"><span class="no_color">
+			Testing default proportional font-family, and sizes per
+			<a target="_blank" class="blue" href="https://en.wikipedia.org/wiki/Writing_system">writing system</a>
+			as per <code>Settings</code> > <code>General</code> > <code> Language and Appearance</code> > <code> Fonts</code> > <code> Advanced</code>
+		</span></td></tr>
+		<tr><td><hr><br></td></tr>
+		<tr>
+			<td class="mono" style="text-align: left">
+			<span class="spaces no_color" id="results"></span>
+			</td>
+		</tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+function run() {
+
+	const styles = ["monospace","sans-serif","serif"]
+	const scripts = {
+		arabic: "ar", armenian: "hy", bengali: "bn", cyrillic: "ru", devanagari: "hi", ethiopic: "gez",
+		georgian: "ka", greek: "el", gujurati: "gu", gurmukhi: "pa", hebrew: "he", japanese: "ja",
+		kannada: "kn", khmer: "km", korean: "ko", latin: "en", malayalam: "ml", mathematics: "x-math",
+		odia: "or", other: "my", "simplified chinese": "zh-CN", sinhala: "si", tamil: "ta", telugu: "te",
+		thai: "th", tibetan: "bo","traditional chinese (hong kong)": "zh-HK",
+		"traditional chinese (taiwan)": "zh-TW","unified canadian syllabary": "cr",
+	}
+	try {
+		const el = dom.dfsize,
+			elpro = dom.dfproportion
+		let data = {}
+		for (const k of Object.keys(scripts)) {
+			let lang = scripts[k]
+			elpro.style.fontFamily = ""
+			elpro.setAttribute('lang', lang)
+			let font = getComputedStyle(elpro).getPropertyValue("font-family")
+			let tmp = [font]
+			el.setAttribute('lang', lang)
+			styles.forEach(function(style) {
+				// always clear
+				el.style.fontSize = ""
+				el.removeAttribute('font-family')
+				el.style.fontFamily = ""
+				el.style.fontFamily = style
+				let size = getComputedStyle(el).getPropertyValue("font-size").slice(0,-2)
+				tmp.push(size)
+			})
+			let key = tmp.join("-")
+			if (data[key] == undefined) {data[key] = [k]} else {data[key].push(k)}
+		}
+		let newobj = {}
+		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
+		let hash = mini(newobj)
+		dom.results.innerHTML = hash + "<br><br>" + json_highlight(newobj)
+
+	} catch(e) {
+		dom.results.innerHTML = s12 + e.name +": "+ sc + e.message
+	}
+}
+run()
+
+</script>
+</body>
+</html>
