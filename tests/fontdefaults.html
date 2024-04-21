@@ -35,6 +35,7 @@
 		<tr><td><hr><br></td></tr>
 		<tr>
 			<td class="mono" style="text-align: left">
+
 			<span class="spaces no_color" id="results"></span>
 			</td>
 		</tr>
@@ -81,7 +82,7 @@ function run() {
 		let newobj = {}
 		for (const k of Object.keys(data).sort()) {newobj[k] = data[k]} // sort obj
 		let hash = mini(newobj)
-		dom.results.innerHTML = hash + "<br><br>" + json_highlight(newobj)
+		dom.results.innerHTML = s12+ hash + sc +" <span class='btn0 btnc' onclick='copyclip(`results`)'>[COPY]</span><br><br>"+ json_highlight(newobj)
 
 	} catch(e) {
 		dom.results.innerHTML = s12 + e.name +": "+ sc + e.message
