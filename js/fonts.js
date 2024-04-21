@@ -1438,9 +1438,9 @@ const get_script_defaults = () => new Promise(resolve => {
 		addData(12, METRIC, newobj, hash)
 		if (isSmart) {
 			if (isOS == "windows" && hash == "e5179dbb") {notation = default_green
-			} else if (isOS == "linux" && hash =="632e080a") {notation = default_green
+			} else if (isOS == "linux" && hash =="a4253645") {notation = default_green
 			} else if (isOS == "mac") {notation = "" // ToDo
-			} else if (isOS == "android" && hash =="a4253645") {notation = default_green
+			} else if (isOS == "android" && hash =="632e080a") {notation = default_green
 			}
 		}
 		log_display(12, METRIC, hash + addButton(12, METRIC) + notation)
