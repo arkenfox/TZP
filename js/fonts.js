@@ -1439,7 +1439,7 @@ const get_script_defaults = () => new Promise(resolve => {
 		if (isSmart) {
 			if (isOS == "windows" && hash == "e5179dbb") {notation = default_green
 			} else if (isOS == "linux" && hash =="a4253645") {notation = default_green
-			} else if (isOS == "mac" && hash = "884ca29d") {notation = default_green
+			} else if (isOS == "mac" && hash == "884ca29d") {notation = default_green
 			} else if (isOS == "android" && hash =="632e080a") {notation = default_green
 			}
 		}
