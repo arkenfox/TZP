@@ -34,6 +34,7 @@ function get_scr_fs_measure() {
 
 	// grab first value
 	let w = window.innerWidth, h = window.innerHeight, size = w +" x "+ h // initial size
+	let neww, newh
 	let delay = 25, max = 40 // 40 x 25 = 1sec
 
 	function check_size() {
@@ -44,9 +45,9 @@ function get_scr_fs_measure() {
 			let lastSize = lastValue.split(":")[1]
 			let stepsTaken = ((lastValue.split(":")[0]) * 1)
 			let timeTaken = stepsTaken * delay
+			let diff = "[diff: "+ (neww - w) +" x "+ (newh - h) +"]"
 			timeTaken = Math.ceil(timeTaken/50) * 50 // round up in 50s
-			// add toolbar height
-			size = size + s1 +" &#9654 "+ sc + lastSize + s1 +" <b>[~"+ timeTaken +" ms]</b> "+ sc
+			size = size + s1 +" &#9654 "+ sc + lastSize + s1 +" <b>[~"+ timeTaken +" ms]</b> "+ sc + diff
 		}
 		dom.fsSize.innerHTML = size
 		gFS = false // reset
@@ -61,7 +62,8 @@ function get_scr_fs_measure() {
 		} else {
 			// grab changes
 			try {
-				let newsize = window.innerWidth +" x "+ window.innerHeight
+				neww = window.innerWidth, newh = window.innerHeight
+				let newsize = neww +" x "+ newh
 				if (newsize !== current) {
 					nochange = 0
 					oDiffs.push(n+":"+newsize)
