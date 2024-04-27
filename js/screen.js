@@ -25,6 +25,62 @@ function return_nw(w,h, isNew) {
 	return (bw && bh) ? nw_green : nw_red
 }
 
+function get_scr_fs_measure() {
+	// called for desktop if in FS
+	// triggered by resize events as well
+	if (gFS) {return} // don't run if already running
+	gFS = true // set running state
+	dom.fsSize = ""
+
+	// grab first value
+	let w = window.innerWidth, h = window.innerHeight, size = w +" x "+ h // initial size
+	let delay = 25, max = 40 // 40 x 25 = 1sec
+
+	function check_size() {
+		if (!gFS) {return} // stop if FS exited during the process
+		let len = oDiffs.length
+		if (len > 1) {
+			let lastValue = oDiffs[len-1]
+			let lastSize = lastValue.split(":")[1]
+			let stepsTaken = ((lastValue.split(":")[0]) * 1)
+			let timeTaken = stepsTaken * delay
+			timeTaken = Math.ceil(timeTaken/50) * 50 // round up in 50s
+			// add toolbar height
+			size = size + s1 +" &#9654 "+ sc + lastSize + s1 +" <b>[~"+ timeTaken +" ms]</b> "+ sc
+		}
+		dom.fsSize.innerHTML = size
+		gFS = false // reset
+	}
+
+	let current = size, oDiffs = [], nochange = 0
+	function build_sizes() {
+		if (!gFS) {n = max} // expedite exit if FS exited
+		if (n >= max) {
+			clearInterval(checking)
+			check_size()
+		} else {
+			// grab changes
+			try {
+				let newsize = window.innerWidth +" x "+ window.innerHeight
+				if (newsize !== current) {
+					nochange = 0
+					oDiffs.push(n+":"+newsize)
+					current = newsize
+				} else {
+					nochange++
+					if (nochange > 5) {n = max} // exit
+				}
+			} catch(e) {
+				clearInterval(checking)
+				check_size()
+			}
+		}
+		n++
+	}
+	let n = 1 // setInterval counter
+	let checking = setInterval(build_sizes, delay)
+}
+
 const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 	let oRes = {}
 	let cssvalue = getElementProp(SECT1, "#cssDM", "display-mode_css")
@@ -54,6 +110,12 @@ const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 		log_display(1, METRIC, display)
 		oRes[METRIC] = value
 		oRes[METRIC2] = cssvalue
+		// get FS measurments if in FS
+		if (value === "fullscreen" && isOS !== "android") { // android doesn't have a resize event
+			get_scr_fs_measure()
+		} else {
+			gFS = false // cancel run state
+		}
 	}
 
 	// fullScreen
@@ -104,7 +166,6 @@ const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 			r = zErr
 			log_error(SECT1, METRIC, e)
 		}
-		if (r !== true) {dom.fsLeak = zNA}
 		log_display(1, METRIC, r)
 		oRes[METRIC] = r
 	}
@@ -1086,12 +1147,10 @@ function get_android_tap() {
 /* USER TESTS */
 
 function goFS() {
-	dom.fsLeak = ""
 	const initialState = getElementProp(SECT1, "#cssDM", "display-mode_css")
 
-	let ih1 = window.innerHeight,
-		delay = 1, n = 1,
-		sizeS = [], sizeE = []
+	let ih1 = window.innerHeight, delay = 1000, n = 1
+
 	function exitFS() {
 		// if we were already in FS mode, allow a transition
 		let exitdelay = initialState == "browser" ? 1 : 400
@@ -1122,11 +1181,14 @@ function goFS() {
 	}
 	if (document.mozFullScreenEnabled) {
 		let element = dom.imageFS
-		if (isOS == "android") {delay = 1000}
-		element.mozRequestFullScreen()
-		document.addEventListener("mozfullscreenchange", getFS)
+		if (isOS == "android") {
+			document.addEventListener("mozfullscreenchange", getFS)
+			element.mozRequestFullScreen()
+		} else {
+			document.documentElement.requestFullscreen()
+		}
 	} else {
-		dom.fsLeak = zNA
+		dom.fsSize = zNA
 	}
 }
 

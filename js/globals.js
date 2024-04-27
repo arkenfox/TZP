@@ -174,6 +174,7 @@ let gt0, gt1,
 	gLoad = true,
 	gRun = true,
 	gClick = true,
+	gFS = false, // don't run FS measurements if already tiggered
 	gClear = true, // clear console of xml and TB's prototype/proxy errors
 	isAllowNonGecko = false, // not supported: to see what other engines return
 	isBlock = true,
