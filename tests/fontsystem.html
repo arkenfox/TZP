@@ -57,6 +57,8 @@
 				<div class="nav-up"><span class="perf" id="language"></span></div>
 			</div>
 		</th></tr></thead>
+		<tr><td></td><td class="mono spaces" id="default"></td></tr>
+		<tr><td colspan="2"></td></tr>
 		<tr><td></td><td class="mono spaces" id="moz"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td></td><td class="mono spaces" id="system"></td></tr>
@@ -188,6 +190,9 @@
 <script>
 'use strict';
 
+let oDefault = {}, oData = {}
+
+
 function check_computed() {
 	for (let i=0; i < 16; i++) {
 		let ctrlW = document.getElementById("ctrlw"+i),
@@ -234,6 +239,7 @@ function check_computed() {
 }
 
 function get_moz() {
+	const METRIC = "moz"
 	try {
 	// 1802957: FF109+: -moz no longer applied but keep for regression testing
 		// add bogus '-default-font' to check they are falling back to actual default
@@ -251,17 +257,33 @@ function get_moz() {
 			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
 			let key = aKeys.join(" ")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+			// defaults
+			try {
+				let props = getDefaultComputedStyle(el)
+				let tmphash = mini(props)
+				if (oDefault[tmphash] == undefined) {
+					oDefault[tmphash] = {"hash": tmphash, "items": [name], "metrics": props}
+				} else {
+					oDefault[tmphash].items.push(name)
+				}
+			} catch(e) {}
 		})
+		// sort
 		let newobj = {}
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
 		let hash = mini(newobj)
-		dom.moz.innerHTML = s12 +"MOZ: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
+		// display
+		dom.moz.innerHTML = s12 +"MOZ: "+ sc
+			+"<br>"+ s14 + hash + sc +"<br>" + json_highlight(newobj)
+		return
 	} catch(e) {
 		dom.moz.innerHTML = s12 +"MOZ: "+ sc + e.name +": " + e.message
+		return
 	}
 }
 
 function get_system() {
+	const METRIC = "system"
 	try {
 	// 1802957: FF109+: -moz no longer applied but keep for regression testing
 		// add bogus '-default-font' to check they are falling back to actual default
@@ -276,17 +298,33 @@ function get_system() {
 			for (const k of aProps) {aKeys.push(getComputedStyle(el)[k])}
 			let key = aKeys.join(" ")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+			// defaults
+			try {
+				let props = getDefaultComputedStyle(el)
+				let tmphash = mini(props)
+				if (oDefault[tmphash] == undefined) {
+					oDefault[tmphash] = {"hash": tmphash, "items": [name], "metrics": props}
+				} else {
+					oDefault[tmphash].items.push(name)
+				}
+			} catch(e) {}
 		})
+		// sort
 		let newobj = {}
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
 		let hash = mini(newobj)
-		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
+		// display
+		dom.system.innerHTML = s12 +"SYSTEM: "+ sc
+			+"<br>"+ s14 + hash + sc +"<br>" + json_highlight(newobj)
+		return
 	} catch(e) {
 		dom.system.innerHTML = s12 +"SYSTEM: "+ sc + e.name +": " + e.message
+		return
 	}
 }
 
 function get_widget() {
+	const METRIC = "widget"
 	try {
 		let aList = [
 			'button','checkbox','color','date','datetime-local','email','file','hidden','image','month',
@@ -298,26 +336,65 @@ function get_widget() {
 			let key = getComputedStyle(el).getPropertyValue("font-family")
 				+" "+ getComputedStyle(el).getPropertyValue("font-size")
 			if (oRes[key] == undefined) {oRes[key] = [name]} else {oRes[key].push(name)}
+			// defaults
+			try {
+				let props = getDefaultComputedStyle(el)
+				let tmphash = mini(props)
+				if (oDefault[tmphash] == undefined) {
+					oDefault[tmphash] = {"hash": tmphash, "items": [name], "metrics": props}
+				} else {
+					oDefault[tmphash].items.push(name)
+				}
+			} catch(e) {}
 		})
+		// sort
 		let newobj = {}
 		for (const k of Object.keys(oRes).sort()) {newobj[k] = oRes[k]}
-		let hash = mini(newobj), notation = ""
-		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + s14 + hash + sc +"<br>" + json_highlight(newobj)
+		let hash = mini(newobj)
+		// display
+		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc
+			+"<br>"+ s14 + hash + sc +"<br>" + json_highlight(newobj)
+		return
 	} catch(e) {
 		dom.widgets.innerHTML = s12 +"WIDGETS: "+ sc + e.name +": " + e.message
+		return
 	}
 }
 
 try {
 	dom.language.innerHTML = navigator.language
 } catch(e) {
-console.log(e)
+	console.log(e)
 }
 
-get_moz()
-get_widget()
-get_system()
-check_computed()
+function logConsole() {
+	console.log(oData)
+}
+
+Promise.all([
+	get_moz(),
+	get_system(),
+	get_widget(),
+]).then(function(){
+
+	const METRIC = "getDefaultComputedStyle"
+	if (Object.keys(oDefault).length) {
+		let tmpObj = {}
+		for (const k of Object.keys(oDefault).sort()) {
+			let group = oDefault[k].items.sort()
+			oData[k] = {"group": group, "metrics": oDefault[k]["metrics"]}
+			tmpObj[k] = group.join(", ")
+		}
+		let defhash = mini(oData)
+		let btn = " <span class='btn12 btnc' onclick='logConsole()'>[details]</span>"
+		dom.default.innerHTML = s12 + METRIC +": "+ sc
+				+"<br><br>"+ s14 + defhash + sc + btn +"<br>" + json_highlight(tmpObj)
+	} else {
+		dom.default.innerHTML = s12 + METRIC +": "+ sc +"<br>n/a"
+	}
+
+	check_computed()
+})
 
 </script>
 </body>
