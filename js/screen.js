@@ -125,7 +125,7 @@ const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 		oRes[METRIC] = value
 		oRes[METRIC2] = cssvalue
 		// get FS measurments if in FS
-		if (value === "fullscreen" && isOS !== "android") { // android doesn't have a resize event
+		if (value === "fullscreen" && isOS !== "android") {
 			get_scr_fs_measure()
 		} else {
 			gFS = false // cancel run state
@@ -1166,9 +1166,8 @@ function goFS() {
 		Promise.all([
 			document.documentElement.requestFullscreen(),
 		]).then(function(results){
-			// if already fullscreen then there is no resize event
-			// so call it once request if fullfilled
-			if (initialState == "fullscreen") {get_scr_fs_measure()}
+			// if already fullscreen|android there is no resize event so call it once request fullfilled
+			if (initialState == "fullscreen" || isOS == "android") {get_scr_fs_measure()}
 		})
 	} catch(e) {
 		dom.fsSize.innerHTML = e+""
