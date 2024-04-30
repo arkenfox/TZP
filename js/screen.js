@@ -47,6 +47,7 @@ function get_scr_fs_measure() {
 	target.innerHTML = ""
 
 	function check_size() {
+		clearInterval(checking)
 		let len = oDiffs.length
 		if (len > 0) {
 			let lastValue = oDiffs[len-1]
@@ -65,7 +66,7 @@ function get_scr_fs_measure() {
 	let current = size, oDiffs = [], nochange = 0
 	function build_sizes() {
 		if (n >= max) {
-			throw ""
+			check_size()
 		} else {
 			// grab changes
 			try {
@@ -82,10 +83,9 @@ function get_scr_fs_measure() {
 					current = newsize
 				} else {
 					nochange++
-					if (nochange > 24) {throw ""} // exit
+					if (nochange > 25) {check_size()} // exit
 				}
 			} catch(e) {
-				clearInterval(checking)
 				check_size()
 			}
 		}
