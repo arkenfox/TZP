@@ -31,20 +31,49 @@ function get_scr_fs_measure() {
 	if (gFS) {return} // don't run if already running
 	gFS = true // set running state
 	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
-	let w, h, neww, newh, target
+	let w, h, w1, h1
 	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+	let target = document.fullscreenElement, range, data
 
-	// initial size
 	if (isElementFS) {
-		w = document.fullscreenElement.clientWidth
-		h = document.fullscreenElement.clientHeight
-		target = dom.fsElement
-	} else {
-		w = window.innerWidth; h = window.innerHeight
-		target = dom.fsSize
+		if (isDomRect > 1) {
+			range = document.createRange()
+			range.selectNode(target)
+		}
+		if (isDomRect == 0) {
+			data = document.fullscreenElement.getBoundingClientRect()
+		} else if (isDomRect == 1) {
+			data = document.fullscreenElement.getClientRects()[0]
+		}
 	}
-	let size = w +" x "+ h
-	target.innerHTML = ""
+
+	function measure() {
+		if (isElementFS) {
+			// use domrect but fallback to client
+			if (isDomRect == -1) {
+				w = document.fullscreenElement.clientWidth
+				h = document.fullscreenElement.clientHeight
+			} else if (isDomRect < 1) {
+				w = data.width; h = data.height
+			} else if (isDomRect == 1) {
+				w = data.width; h = data.height
+			} else if (isDomRect == 2) {
+				data = range.getBoundingClientRect()
+				w = data.width; h = data.height
+			} else if (isDomRect > 2) {
+				data = range.getClientRects()[0]
+				w = data.width; h = data.height
+			}
+		} else {
+			w = window.innerWidth; h = window.innerHeight
+		}
+		if (w1 == undefined) {w1 = w; h1 = h} // remember first values
+		return w +" x "+ h
+	}
+	// initial size
+	let size = measure()
+	let output = isElementFS ? dom.fsElement : dom.fsSize
+	output.innerHTML = ""
 
 	function check_size() {
 		clearInterval(checking)
@@ -54,11 +83,11 @@ function get_scr_fs_measure() {
 			let lastSize = lastValue.split(":")[1]
 			let stepsTaken = ((lastValue.split(":")[0]) * 1)
 			let timeTaken = stepsTaken * delay
-			let diff = "[diff: "+ (neww - w) +" x "+ (newh - h) +"]"
+			let diff = "[diff: "+ (w - w1) +" x "+ (h - h1) +"]"
 			timeTaken = Math.ceil(timeTaken/50) * 50 // round up in 50s
 			size = size + s1 +" &#9654 "+ sc + lastSize + s1 +" <b>[~"+ timeTaken +" ms]</b> "+ sc + diff
 		}
-		target.innerHTML = size
+		output.innerHTML = size
 		if (isElementFS) {document.exitFullscreen()}
 		gFS = false // reset
 	}
@@ -70,13 +99,7 @@ function get_scr_fs_measure() {
 		} else {
 			// grab changes
 			try {
-				if (isElementFS) {
-					neww = document.fullscreenElement.clientWidth
-					newh = document.fullscreenElement.clientHeight
-				} else {
-					neww = window.innerWidth; newh = window.innerHeight
-				}
-				let newsize = neww +" x "+ newh
+				let newsize = measure()
 				if (newsize !== current) {
 					nochange = 0
 					oDiffs.push(n+":"+newsize)
