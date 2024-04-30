@@ -27,26 +27,29 @@ function return_nw(w,h, isNew) {
 
 function get_scr_fs_measure() {
 	// triggered by resize events if in FS
-	// called by goFS if already in FS
+	// called by goFS
 	if (gFS) {return} // don't run if already running
 	gFS = true // set running state
-	dom.fsSize = ""
-	let w, h, neww, newh
-
+	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
+	let w, h, neww, newh, target
 	let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+
 	// initial size
 	if (isElementFS) {
-		w = document.documentElement.clientWidth
-		h = document.documentElement.clientHeight
+		w = document.fullscreenElement.clientWidth
+		h = document.fullscreenElement.clientHeight
+		target = dom.fsElement
 	} else {
 		w = window.innerWidth; h = window.innerHeight
+		target = dom.fsSize
 	}
 	let size = w +" x "+ h
+	target.innerHTML = ""
 
 	function check_size() {
-		if (!gFS) {return} // stop if FS exited during the process
+		clearInterval(checking)
 		let len = oDiffs.length
-		if (len > 1) {
+		if (len > 0) {
 			let lastValue = oDiffs[len-1]
 			let lastSize = lastValue.split(":")[1]
 			let stepsTaken = ((lastValue.split(":")[0]) * 1)
@@ -55,24 +58,21 @@ function get_scr_fs_measure() {
 			timeTaken = Math.ceil(timeTaken/50) * 50 // round up in 50s
 			size = size + s1 +" &#9654 "+ sc + lastSize + s1 +" <b>[~"+ timeTaken +" ms]</b> "+ sc + diff
 		}
-		dom.fsSize.innerHTML = size + s1 + (isElementFS ? "[fullscreenElement]" : "[inner]") + sc
+		target.innerHTML = size
+		if (isElementFS) {document.exitFullscreen()}
 		gFS = false // reset
-		if(isOS == "android") {document.exitFullscreen()}
 	}
 
 	let current = size, oDiffs = [], nochange = 0
-	let delay = 25, max = 40, n = 1 // 40 x 25 = 1sec
 	function build_sizes() {
-		if (!gFS) {n = max} // expedite exit if FS exited
 		if (n >= max) {
-			clearInterval(checking)
 			check_size()
 		} else {
 			// grab changes
 			try {
 				if (isElementFS) {
-					neww = document.documentElement.clientWidth
-					newh = document.documentElement.clientHeight
+					neww = document.fullscreenElement.clientWidth
+					newh = document.fullscreenElement.clientHeight
 				} else {
 					neww = window.innerWidth; newh = window.innerHeight
 				}
@@ -83,10 +83,9 @@ function get_scr_fs_measure() {
 					current = newsize
 				} else {
 					nochange++
-					if (nochange > 5) {n = max} // exit
+					if (nochange > 25) {check_size()} // exit
 				}
 			} catch(e) {
-				clearInterval(checking)
 				check_size()
 			}
 		}
@@ -125,7 +124,8 @@ const get_scr_fullscreen = (runtype) => new Promise(resolve => {
 		oRes[METRIC] = value
 		oRes[METRIC2] = cssvalue
 		// get FS measurments if in FS
-		if (value === "fullscreen" && isOS !== "android") {
+		let isElementFS = document.fullscreen || document.webkitIsFullscreen || false
+		if (!isElementFS && value === "fullscreen" && isOS !== "android") {
 			get_scr_fs_measure()
 		} else {
 			gFS = false // cancel run state
@@ -1161,17 +1161,16 @@ function get_android_tap() {
 /* USER TESTS */
 
 function goFS() {
-	const initialState = getElementProp(SECT1, "#cssDM", "display-mode_css")
+	gFS = false
 	try {
+		let element = dom.elementFS
+		element.style.opacity = 0
 		Promise.all([
-			document.documentElement.requestFullscreen(),
+			element.requestFullscreen()
 		]).then(function(results){
-			// if already fullscreen|android there is no resize event so call it once request fullfilled
-			if (initialState == "fullscreen" || isOS == "android") {get_scr_fs_measure()}
+			get_scr_fs_measure()
 		})
-	} catch(e) {
-		dom.fsSize.innerHTML = e+""
-	}
+	} catch(e) {dom.fsSize.innerHTML = e+""}
 }
 
 function goNW() {

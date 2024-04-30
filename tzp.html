@@ -37,7 +37,7 @@
 		<div id="sysFont"></div>
 		<div class="cssDocFont" id="divDocFont"></div>
 		<div class="cssGraphite" style="font-size: 300px;"><span id="testGraphite">+</span><span id="ctrlGraphite">-</span></div>
-		<img id="imageFS" width=0 height=0>
+		<div id="elementFS" width=0 height=0></div>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
 		<div class="normalized">
 			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
@@ -225,16 +225,17 @@
 			<td class="mono"><span id="cssDM"></span> | <span id="display-mode"></span>
 				| <span class="c" id="fullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
-			<div id="fsBtn" class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span> &nbsp;</div>
-			fullscreen <sup>4</sup></td><td class="c mono" id="fsSize"></td></tr>
+			<div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span> &nbsp; </div>
+			fullscreen <sup>4</sup></td><td class="c mono" id="fsElement"></td></tr>
+		<tr><td><span class="mono no_color">[F11]</span> fullscreen</td><td class="c mono" id="fsSize"></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp; new window</td><td class="c mono" id="newWinLeak"></td></tr>
 
 		<!-- pixels-->
-		<tr><td>[div] dpi</td><td class="c" id="dpi_div"></td></tr>
+		<tr><td>[div] dpi</td><td class="c mono" id="dpi_div"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
 			&nbsp; [css min-resolution] dpi</td><td class="mono"><span id="P"></span><span id="dpi_css"></span></td></tr>
 		<tr><td>[matchMedia] dpi</td><td class="mono">
