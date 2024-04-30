@@ -1627,8 +1627,6 @@ function countJS(filename) {
 				if (isOS == "android") {
 					dom.pointerlabel = "tap"
 					showhide("OS","table-row")
-				} else {
-					dom.fsBtn.style.display = "none"
 				}
 				// escape to close
 				document.onkeydown = function(evt) {
