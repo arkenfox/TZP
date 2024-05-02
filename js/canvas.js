@@ -481,7 +481,8 @@ const outputCanvas = () => new Promise(resolve => {
 						} else {
 							note = rfp_red
 							// FPP: 119+ and no proxy lies and no getImageData stealth
-							if (isVer > 119) {
+							// exclude TB14+ as PB mode falls back to FPP with canvas exceptions
+							if (isVer > 119 && !isTB) {
 								if (!sData[SECT99].includes(proxyMap[name] +"."+ name)) {
 									if (!isGetStealth) {note = fpp_green}
 								}
