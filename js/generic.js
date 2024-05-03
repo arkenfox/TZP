@@ -627,7 +627,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < isBlockMin[0]) {isVerExtra = " or lower"
-		} else if (verNo == 126) {isVerExtra = "+"}
+		} else if (verNo == 127) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -635,6 +635,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 			if ("function" === typeof URL.parse) {return 126}
 			try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
 			let el = document.documentElement

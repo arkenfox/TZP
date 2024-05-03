@@ -644,7 +644,8 @@ const get_scr_pixels = (runtype) => new Promise(resolve => {
 		}
 		let notation = ""
 		if (isSmart) {
-			notation = value === (isTB ? 2 : 1) ? rfp_green : rfp_red
+			// FF127: 1554751
+			notation = value === ((isTB || isVer > 126) ? 2 : 1) ? rfp_green : rfp_red
 		}
 		log_display(1, METRICw, display + notation)
 		oData[METRICw] = value

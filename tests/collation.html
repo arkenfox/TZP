@@ -382,13 +382,20 @@ function collator() {
 
 			// set control
 			charsSort = charsSort.sort(Intl.Collator("en").compare)
-			let enHashSort = mini(charsSort)
+			let ensortdata = [charsSort.join(", ")]
+			let ensorthash = mini(ensortdata)
 			charsSearch.sort(Intl.Collator("en", {usage: "search"}).compare)
-			let enHashSearch = mini(charsSearch)
-			let control = enHashSort +" | "+ enHashSearch
+			let ensearchdata = [charsSearch.join(", ")]
+			let ensearchhash = mini(ensearchdata)
+			let entmpobj = {
+				"search": ensearchdata,
+				"sort": ensortdata,
+			}
+			let control = mini(entmpobj)
+			let control_display = ensearchhash +" | "+ ensorthash +" | "+ control
 
-			strItem = s4.trim() +"CONTROL "+ sc +"<br><br>"
-				+ s12 +"   hash: "+ sc + control + s12 +" [en: sort | search]"+ sc +"<br>"
+			strItem = s4.trim() +"CONTROL: "+ sc + sg + "en"+ sc +"<br><br>"
+				+ s12 +"   hash: "+ sc + control_display + s12 +" [search | sort | both]"+ sc +"<br>"
 			output.push(strItem)
 			// results header
 			strItem = s4.trim() +"RESULTS"+ sc +"<br>"
@@ -406,19 +413,28 @@ function collator() {
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
 
-				charsSort.sort()
-				charsSort.sort(Intl.Collator(code).compare)
-				let hash = mini(charsSort)
-
 				charsSearch.sort()
 				charsSearch.sort(Intl.Collator(code, {usage: "search"}).compare)
-				let hash2 = mini(charsSearch)
+				let searchdata = [charsSearch.join(", ")]
+				let searchhash = mini(searchdata)
 
-				if (hash2 !== enHashSearch) {
-					oSortvsSearch["search_is_nonenglish"].push(code + ": " + hash +", " + hash2)
+				charsSort.sort()
+				charsSort.sort(Intl.Collator(code, {usage: "sort"}).compare)
+				let sortdata = [charsSort.join(", ")]
+				let sorthash = mini(sortdata)
+
+				let tmpobj = {
+					"search": searchdata,
+					"sort": sortdata,
 				}
-				hash += " | "+ hash2
-				if (hash !== control) {
+				let combinedhash = mini(tmpobj)
+
+				if (searchhash !== ensearchhash) {
+					oSortvsSearch["search_is_nonenglish"].push(code + ": " + searchhash +", " + sorthash)
+				}
+
+				let hash = searchhash +" | "+ sorthash +" | "+ combinedhash // search then sort then combined
+				if (combinedhash !== control) {
 					codes.push(code)
 					diffs.push(hash +":"+ code +":"+ name)
 					if (oTempData[hash] == undefined) {oTempData[hash] = []}
@@ -438,7 +454,7 @@ function collator() {
 						name = name0 +" "+ name1
 					}
 				}
-				if (hash == control) {
+				if (combinedhash == control) {
 					legendnew.push(code.padStart(7) +": "+ name)
 				} else {
 					legendnew.push(sg + code.padStart(7) + sc +": "+ name)
@@ -513,10 +529,10 @@ function collator() {
 						if (localesHash == "a7d80e7c") {ff = "110+"
 						} else if (localesHash == "ec4e8131") {ff = "102-109"
 						} else {ff = zNEW}
-						if (ff !== zNEW) {ff = s14 +" [FF"+ ff + "]"+ sc}
+						if (ff !== zNEW) {ff = s14 +"[FF"+ ff + "]"+ sc}
 					}
 				}
-				strItem = s12 +"locales: "+ sc + localesHash + ff +"<br>"
+				strItem = s12 +"locales: "+ sc + localesHash +" "+ ff +"<br>"
 				output.push(strItem)
 
 				// details
