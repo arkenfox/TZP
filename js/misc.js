@@ -549,13 +549,18 @@ const get_window_props = () => new Promise(resolve => {
 			// dom.w3c_touch_events.enabled: 0=disabled (macOS) 1=enabled 2=autodetect (linux/win/android)
 				// autodetection is currently only supported on Windows and GTK3 (and assumed on Android)
 				// on touch devices: 0 (all false) 1 or 2 (all true)
+
+			// #42315 +EventCounts +PerformancEventTiming TB13.0.15+ (ESR115.11)
 			if (isMullvad) {
 				if (fpvalue == "0d0dd5d5" || fpvalue == "8815bd33") {notation = tb_green} // 823 standard | 822 safer
+				if (fpvalue == "666609cb" || fpvalue == "969877a9") {notation = tb_green} // 825 standard | 824 safer #42315
 			} else {
 				if (isOS == "android") {
 					if (fpvalue == "c70d9b44" || fpvalue == "6623eaa2") {notation = tb_green} // 783 standard | 782 safer
+					if (fpvalue == "14c38142" || fpvalue == "23d10520") {notation = tb_green} // 785 standard | 784 safer #42315
 				} else {
 					if (fpvalue == "226bc5ca" || fpvalue == "df3d8de8") {notation = tb_green} // 774 standard | 773 safer
+					if (fpvalue == "7d50bf8c" || fpvalue == "7a49e32a") {notation = tb_green} // 776 standard | 775 safer #42315
 				}
 			}
 		}
