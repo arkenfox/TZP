@@ -9,6 +9,28 @@ function getUniqueElements() {
 	})
 }
 
+let isLoaded = {}
+function loadFn(item) {
+	isLoaded[item] = performance.now()
+}
+function loadIframes() {
+	let iframe
+	try {
+		iframe = dom.InvalidImage
+		iframe.addEventListener("load", loadFn('Invalid'), {once: true})
+		iframe.src = "images/InvalidImage.png"
+	} catch(e) {
+		isLoaded["InvalidError"] = e+""
+	}
+	try {
+		iframe = dom.ScaledImage
+		iframe.addEventListener("load", loadFn('Scaled'), {once: true})
+		iframe.src = "images/ScaledImage.png"
+	} catch(e) {
+		isLoaded["ScaledError"] = e+""
+	}
+}
+
 /*** JSON ***/
 
 function json_highlight(json) {
