@@ -1069,13 +1069,9 @@ const get_media_messages = () => new Promise(resolve => {
 				title = target.contentWindow.document.title
 				title = title.replace(name +".png", "") // strip image name to reduce noise
 			} else {
-				try {
-					const image = target.contentWindow.document.querySelector('img')
-					title = image.alt
-					title = title.replace(target.src, "") // remove noise
-				} catch(e) {
-					title = e+""
-				}
+				const image = target.contentWindow.document.querySelector('img')
+				title = image.alt
+				title = title.replace(target.src, "") // remove noise
 			}
 			data[name] = title.trim()
 		}
