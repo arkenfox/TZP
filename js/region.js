@@ -1056,6 +1056,118 @@ const get_timezone = () => new Promise(resolve => {
 	})
 })
 
+const get_timezone_offset = () => new Promise(resolve => {
+	let notation = isSmart ? rfp_red : ""
+	const METRIC = "timezone_offset"
+	if (!isGecko) {
+		addDataDisplay(4, METRIC, zNA)
+		return resolve()
+	}
+	try {
+		function checkMatch() {
+			if (lastNew === xsltNew) {return true}
+			// diff it: without using new Date()
+			let lParts = lastNew.split(" "), lTime = lParts[1].split(":")
+			let xParts = xsltNew.split(" "), xTime = xParts[1].split(":")
+			if (lParts[0] == xParts[0]) {
+				// same day
+				let oDiff = {
+					h: (lTime[0] * 1) - (xTime[0] * 1),
+					min: (lTime[1] * 1) - (xTime[1] * 1),
+					s: (lTime[2] * 1) - (xTime[2] * 1),
+				}
+				// same date: only worry about time
+				// lets be cautious and allow up to 3 seconds: jank, also leap seconds
+				let secondsDiff = (oDiff.h * 3600) + (oDiff.min * 60) + oDiff.s
+				return (Math.abs(secondsDiff) < 4) // abs !important to cover being ahead or behind
+			} else {
+				return false
+			}
+		}
+		// setup
+		const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:date="http://exslt.org/dates-and-times"'
+			+' extension-element-prefixes="date"><xsl:output method="html" /><xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
+		let doc = (new DOMParser).parseFromString(xslText, "text/xml")
+		let xsltProcessor = new XSLTProcessor
+		// grab
+		xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
+		let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
+		let lastMod = doc.lastModified // quickly grab lastMod since it updates each time we call it
+		let date = new Date() // if we need it
+		let xsltMod = fragment.childNodes[0].nodeValue
+		// format mods
+		let lastNew = lastMod.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2")
+		let xOffset = xsltMod.slice(-6)
+		let xsltNew = (xsltMod.slice(0,-10)).replace('T',' ')
+		// check isMatch
+		let isMatch = checkMatch()
+		if (!isMatch) {
+			// ~0.2 ms used to grab our mods: only 1 in 86,400 seconds tick
+			// over a day so we'd have to be really unlucky to hit this
+				// try it again: we need a new processor
+			xsltProcessor = new XSLTProcessor
+			xsltProcessor.importStylesheet(doc)
+			fragment = xsltProcessor.transformToFragment(doc, document)
+			lastMod = doc.lastModified
+			xsltMod = fragment.childNodes[0].nodeValue
+			date = new Date()
+			lastNew = lastMod.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2")
+			xOffset = xsltMod.slice(-6)
+			xsltNew = (xsltMod.slice(0,-10)).replace('T',' ')
+			isMatch = checkMatch()
+		}
+		// get xMinutes in getTimezoneoffset format
+			// we use this for timezone notation
+			// *1 works as it ignores leading 0's and returns a number
+			// flip the sign but drop if positive or 0 to match calculated or getTimezoneOffset
+		let xMinutes = ((xOffset.slice(1,3) * 1)*60) + (xOffset.slice(4,6)*1)
+		let xSign = (xOffset[0] == "+" ? (xMinutes == 0 ? "": "-") : "")
+		xMinutes = xSign + xMinutes
+		// collect all four data points
+		let oData = {
+			d: "",
+			l: "",
+			t: "",
+			x: xOffset + (xMinutes == "0" ? "" : " ["+ xMinutes +"]"),
+		}
+		if (isMatch) {oData.l = oData.x}
+		//try catch these
+			// l: if !isMatch get the offset for lastMod
+			// d: get the offset for the date using diff from utc vs now
+			// t: get the offset for the date using timezonename (leverage isTimeZomeValid/Value)
+			// chamelon causes date.parse to error (or lie)
+				// and getTimezoneOffset is spoofed
+				// but who knows what will happen with an initial empty new Date()
+
+		// ToDo: add the two other offset checks + adjust our data + notation check
+		// ToDo: add tz_red/green notation
+		let data
+		if (isMatch) {
+			data = oData.x
+			if (isSmart) {notation = data == "+00:00" ? rfp_green : rfp_red}
+			log_display(4, METRIC, data + notation)
+			addData(4, METRIC, data)
+		} else {
+			// ToDo: display something including all mismatches
+			// so I guess thats xslt, last, offset(utc-now), offset(using timezonename)
+			data = lastNew +" | "+ xsltNew +" ["+ xMinutes +"]"
+			let display = data
+			if (isSmart) {
+				display = log_known(SECT4, METRIC, display)
+				addData(4, METRIC, zLIE)
+			} else {
+				addData(4, METRIC, data)
+			}
+			log_display(4, METRIC, display + notation)
+		}
+		return resolve()
+	} catch(e) {
+		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
+		addData(4, METRIC, zErr)
+		return resolve()
+	}
+})
+
 const get_media_messages = () => new Promise(resolve => {
 	const METRIC = "media_messages"
 	let notation = isLanguageSmart && !isFile ? locale_red : ""
@@ -1284,6 +1396,7 @@ const outputRegion = () => new Promise(resolve => {
 			get_xml_messages(),
 		]).then(function(results){
 			Promise.all([
+				get_timezone_offset(), // will use isTimeZomeValid/Value
 				get_dates(), // will use isTimeZomeValid/Value + isLocaleValid/Value
 			]).then(function(){
 				log_section(4, t0)
