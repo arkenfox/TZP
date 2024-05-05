@@ -1810,7 +1810,7 @@ function outputSection(id, cls) {
 			// NOTE:
 				// always start with 3 (feature) as it sets isMullvad
 				// 3, 2, 1, 5, 18, 14 are fast and don't trip anything up
-			let order = [3, 2, 1, 5, 18, 14, 'canvas', 'media', 'storage', 'elements', 'audio', 'devices', 'region', 'webgl', 'fonts']
+			let order = [3, 2, 1, 5, 18, 14, 'canvas', 'media', 'storage', 'elements', 'audio', 'devices', 'webgl', 'fonts', 'region']
 			const forEachSection = async (iterable, action) => {
 				for (const n of iterable) {
 					await promiseSection(n)
