@@ -142,13 +142,13 @@ const get_nav_gpc = () => new Promise(resolve => {
 /* REGION */
 
 const set_isLanguageSmart = () => new Promise(resolve => {
-	// limited to TB/MB
+	// set once: ignore android for now
+	if (isOS === "android" || !gLoad || !isSmart) {return}
+
+	// TB/MB always or FF if we the locale matches
 		// resource://gre/res/multilocale.txt
-		// ToDo: android may differ, ignore for now
-	isLanguageSmart = (isSmart && isTB && isOS !== "android") // && isOS !== undefined)
-	if (!isLanguageSmart) {
-		return
-	}
+	isLanguageSmart = isTB
+
 	const en = "en-US, en"
 	languagesSupported = {
 		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
@@ -1264,15 +1264,17 @@ const get_dates = () => new Promise(resolve => {
 
 const outputRegion = () => new Promise(resolve => {
 	let t0 = nowFn()
-	if (gLoad) {
-		set_isLanguageSmart()
-		set_oIntlTests()
-	}
+	set_isLanguageSmart() // required for TB/MB health in get_language_locale()
 
 	Promise.all([
 		get_geo(),
 		get_language_locale(), // sets isLocaleValid/Value
 	]).then(function(){
+		// add smarts if locale matches: i.e we can notate messages in FF
+		if (isGecko && isSmart && isOS !== "android") {
+			if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
+		}
+
 		Promise.all([
 			get_locale_resolvedoptions(),
 			get_locale_intl(),
@@ -1304,5 +1306,6 @@ const outputHeaders = () => new Promise(resolve => {
 	})
 })
 
+set_oIntlTests()
 countJS(SECT4)
 
