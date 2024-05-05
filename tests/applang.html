@@ -33,7 +33,7 @@
 			<!-- applang-image.png can't be hidden otherwise "Scaled..." is not in the title -->
 			<iframe id="InvalidImage" width="100" height="30" src="applang-invalid.png"></iframe>
 			<iframe id="ScaledImage" width="100" height="30" src="applang-image.png"></iframe>
-			<!--<iframe id="iframe-mediaUnsupported" width="100" height="30" src="applang-unsupported.png"></iframe>-->
+			<!--<iframe id="iframe-UnsupportedImage" width="100" height="30" src="applang-unsupported.png"></iframe>-->
 			<div><input id="enumber" type="number" min="6" step="2"></div>
 		</div>
 	</div>
@@ -250,7 +250,7 @@ function get_media_messages() {
 		}
 		let mData = {}
 		for (const k of Object.keys(mList)) {
-			let target = dom["iframe-media"+k], title = ""
+			let target = dom[k], title = ""
 			if (k === "ScaledImage") {
 				title = target.contentWindow.document.title
 				//strip image name to reduce noise
