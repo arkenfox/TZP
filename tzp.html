@@ -48,6 +48,11 @@
 		<div><span id="dfproportion"></span></div>
 		<div id="svgDiv"></div>
 		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"><div id="eScrollinner"></div></div>
+		<div>
+			<!-- ScaledImage.png can't be hidden otherwise "Scaled..." is not in the title -->
+			<iframe id="InvalidImage" width="100" height="30" src="InvalidImage.png"></iframe>
+			<iframe id="ScaledImage" width="100" height="30" src="ScaledImage.png"></iframe>
+		</div>
 		<!-- ensure codepoints have time for async fallback -->
 		<div>
 			<span> &#x20B9; </span><span> &#x2581; </span><span> &#x20BA; </span><span> &#xA73D; </span>
@@ -394,6 +399,10 @@
 		<!--dt-->
 		<tr><td>[intl] dates</td><td class="c mono" id="dates_intl"></td></tr>
 		<tr><td>[to*string] dates</td><td class="c mono" id="dates_to_string"></td></tr>
+		<!--messages-->
+		<tr><td>media messages</td><td class="c mono" id="media_messages"></td></tr>
+		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
+		<tr><td>xml messages</td><td class="c mono" id="xml_messages"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
 		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
@@ -404,9 +413,6 @@
 		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
 		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
 		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
-		<!--errors-->
-		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
-		<tr><td>xml errors</td><td class="c mono" id="xml_errors"></td></tr>
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
