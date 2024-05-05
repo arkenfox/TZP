@@ -193,51 +193,51 @@ const set_isLanguageSmart = () => new Promise(resolve => {
 	}
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		"ar": {v: "1dfb5b8c", x: "ebfbdc43"},
-		"ca": {v: "6b3bb3d8", x: "81f31519"},
-		"cs": {v: "de3ab0ad", x: "45f277f7"},
-		"da": {v: "479797a1", x: "44535972"},
-		"de": {v: "f9e2eae6", x: "f4b2a56f"},
+		"ar": {m: "1f9a06e3", v: "1dfb5b8c", x: "ebfbdc43"},
+		"ca": {m: "d856d812", v: "6b3bb3d8", x: "81f31519"},
+		"cs": {m: "c92accb0", v: "de3ab0ad", x: "45f277f7"},
+		"da": {m: "39169214", v: "479797a1", x: "44535972"},
+		"de": {m: "298d11c6", v: "f9e2eae6", x: "f4b2a56f"},
 		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
 			// changing to spoof english returns n30.. phew!
-		"el": {v: "b1a88a13", x: "da8c80af"},
-		"en-US": {v: "41310558", x: "945f8952"},
-		"es-ES": {v: "97c3f5a9", x: "3eeba3bc"},
-		"fa": {v: "8ef57409", x: "113d0a7e"},
-		"fi": {v: "3e29e6e7", x: "71abeeec"},
-		"fr": {v: "34e28fa2", x: "74f5df3d"},
-		"ga-IE": {v: "2bf1321d", x: "d9761e70"},
+		"el": {m: "7053311d", v: "b1a88a13", x: "da8c80af"},
+		"en-US": {m: "05c30936", v: "41310558", x: "945f8952"},
+		"es-ES": {m: "96b78cbd", v: "97c3f5a9", x: "3eeba3bc"},
+		"fa": {m: "6648d919", v: "8ef57409", x: "113d0a7e"},
+		"fi": {m: "82d079c7", v: "3e29e6e7", x: "71abeeec"},
+		"fr": {m: "024d0fce", v: "34e28fa2", x: "74f5df3d"},
+		"ga-IE": {m: "97fca229", v: "2bf1321d", x: "d9761e70"},
 		// he: xml n27 n28 n30 = english
-		"he": {v: "e47dbb82", x: "786876d5"},
-		"hu": {v: "dad6d689", x: "9f537fe6"},
-		"id": {v: "71224946", x: "79f3851e"},
-		"is": {v: "d150027b", x: "7f3e38b8"},
-		"it": {v: "3b781f09", x: "469cb2af"},
-		"ja": {v: "48645d06", x: "6823cee8"},
-		"ka": {v: "40feb44f", x: "4e712712"},
-		"ko": {v: "d3b54047", x: "fc4c50ed"},
-		"lt": {v: "d5f9b95d", x: "f50f2b50"},
-		// mk: v = english but not number formating, and xml n30 = english but is would-be-n39 (same as el)
+		"he": {m: "cdde832b", v: "e47dbb82", x: "786876d5"},
+		"hu": {m: "db7366e6", v: "dad6d689", x: "9f537fe6"},
+		"id": {m: "1e275882", v: "71224946", x: "79f3851e"},
+		"is": {m: "204c8f73", v: "d150027b", x: "7f3e38b8"},
+		"it": {m: "716e7242", v: "3b781f09", x: "469cb2af"},
+		"ja": {m: "ab56d7cb", v: "48645d06", x: "6823cee8"},
+		"ka": {m: "6961b7e4", v: "40feb44f", x: "4e712712"},
+		"ko": {m: "c758b027", v: "d3b54047", x: "fc4c50ed"},
+		"lt": {m: "c36fbafb", v: "d5f9b95d", x: "f50f2b50"},
+		// mk: v = english but not number format, and xml n30 = english but is would-be-n39 (same as el)
 			// and n27 n28 = english
-		"mk": {v: "333aae58", x: "3b22df8b"},
-		"ms": {v: "9dadbc64", x: "f23d0969"},
+		"mk": {m: "78274f1b", v: "333aae58", x: "3b22df8b"},
+		"ms": {m: "3e26c6be", v: "9dadbc64", x: "f23d0969"},
 		// my: two items in english: date+over/under
-		"my": {v: "43cc3aa3", x: "11d4d458"},
+		"my": {m: "939f2013", v: "43cc3aa3", x: "11d4d458"},
 		// nb-NO: xml most is english
-		"nb-NO": {v: "84ce54eb", x: "50426960"},
-		"nl": {v: "326cbfd2", x: "b03574e4"},
-		"pl": {v: "95ad4851", x: "c1295e2b"},
-		"pt-BR": {v: "de2c3569", x: "96f79e68"},
-		"ro": {v: "d72a350b", x: "cf85bb64"},
-		"ru": {v: "2391fbec", x: "2178a2b6"},
-		"sq": {v: "e0259277", x: "a732eca1"},
-		"sv-SE": {v: "d9d7828b", x: "80f52165"},
-		"th": {v: "8448474c", x: "e29567ce"},
-		"tr": {v: "169730ca", x: "1e9d0192"},
-		"uk": {v: "24cce2c1", x: "cc85d2f5"},
-		"vi": {v: "b8137d59", x: "7cf3c6f9"},
-		"zh-Hans-CN": {v:"55d25655", x: "328cc79b"},
-		"zh-Hant-TW": {v: "8e4cfa0e", x: "87abb9fa"},
+		"nb-NO": {m: "1d496fea", v: "84ce54eb", x: "50426960"},
+		"nl": {m: "e1d3b281", v: "326cbfd2", x: "b03574e4"},
+		"pl": {m: "0bd88e98", v: "95ad4851", x: "c1295e2b"},
+		"pt-BR": {m: "39835e93", v: "de2c3569", x: "96f79e68"},
+		"ro": {m: "3e321768", v: "d72a350b", x: "cf85bb64"},
+		"ru": {m: "8e9b7945", v: "2391fbec", x: "2178a2b6"},
+		"sq": {m: "91943e67", v: "e0259277", x: "a732eca1"},
+		"sv-SE": {m: "bc792ce2", v: "d9d7828b", x: "80f52165"},
+		"th": {m: "a32d70a7", v: "8448474c", x: "e29567ce"},
+		"tr": {m: "4217ef80", v: "169730ca", x: "1e9d0192"},
+		"uk": {m: "3e2b3e39", v: "24cce2c1", x: "cc85d2f5"},
+		"vi": {m: "bba6c980", v: "b8137d59", x: "7cf3c6f9"},
+		"zh-Hans-CN": {m: "550ea53e", v:"55d25655", x: "328cc79b"},
+		"zh-Hant-TW": {m: "66b515a4", v: "8e4cfa0e", x: "87abb9fa"},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if (isOS == "mac") {
@@ -1057,8 +1057,8 @@ const get_timezone = () => new Promise(resolve => {
 })
 
 const get_media_messages = () => new Promise(resolve => {
-	const	METRIC = "media_messages"
-	let notation = ""
+	const METRIC = "media_messages"
+	let notation = isLanguageSmart && !isFile ? locale_red : ""
 	try {
 		let aList = ['Invalid','Scaled']
 		let data = {}
@@ -1077,6 +1077,11 @@ const get_media_messages = () => new Promise(resolve => {
 		}
 		let hash = mini(data)
 		addData(4, METRIC, data, hash)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
+				if (hash === localesSupported[isLocaleValue].m) {notation = locale_green}
+			}
+		}
 		log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
 		return resolve()
 	} catch(e) {
