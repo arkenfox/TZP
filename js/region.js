@@ -1060,6 +1060,7 @@ const get_media_messages = () => new Promise(resolve => {
 	const METRIC = "media_messages"
 	let notation = isLanguageSmart && !isFile ? locale_red : ""
 	try {
+		isLoaded["Start"] = performance.now()
 		let aList = ['Invalid','Scaled']
 		let data = {}
 		for (const k of aList) {
