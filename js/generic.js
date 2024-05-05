@@ -9,28 +9,6 @@ function getUniqueElements() {
 	})
 }
 
-let isLoaded = {}
-function loadFn(item) {
-	isLoaded[item] = performance.now()
-}
-function loadIframes() {
-	let iframe
-	try {
-		iframe = dom.InvalidImage
-		iframe.addEventListener("load", loadFn('Invalid'), {once: true})
-		iframe.src = "images/InvalidImage.png"
-	} catch(e) {
-		isLoaded["InvalidError"] = e+""
-	}
-	try {
-		iframe = dom.ScaledImage
-		iframe.addEventListener("load", loadFn('Scaled'), {once: true})
-		iframe.src = "images/ScaledImage.png"
-	} catch(e) {
-		isLoaded["ScaledError"] = e+""
-	}
-}
-
 /*** JSON ***/
 
 function json_highlight(json) {
@@ -1589,7 +1567,10 @@ function countJS(filename) {
 	}
 	jsFiles++
 	if (jsFiles === 1) {
-		loadIframes()
+		// esp in TB and F5 this helps ensure/force images are loaded in time
+		try {dom.InvalidImage.src = "images/InvalidImage.png"} catch(e) {}
+		try {dom.ScaledImage.src = "images/ScaledImage.png"} catch(e) {}
+
 		get_isVer() // as long as don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
