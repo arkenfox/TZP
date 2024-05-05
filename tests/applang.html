@@ -231,7 +231,6 @@ function get_css() {
 }
 
 function get_locale() {
-	// just get one
 	try {
 		isLocale = Intl.DateTimeFormat().resolvedOptions().locale
 	} catch(e) {
@@ -244,15 +243,15 @@ function get_media_messages() {
 	// https://searchfox.org/mozilla-central/source/dom/locales/en-US/chrome/layout/MediaDocument.properties
 	try {
 		let mList = {
-			"Invalid": "applang-invalid.png", // 0-byte file
-			"Scaled": "applang-image.png",
-			"Unsupported": "applang-unsupported.jpg",
+			"InvalidImage": "applang-invalid.png", // 0-byte file
+			"ScaledImage": "applang-image.png",
+			//"Unsupported": "applang-unsupported.jpg",
 				// ^ToDo: can't use jp2 etc because that prompts for user interaction
 		}
 		let mData = {}
 		for (const k of Object.keys(mList)) {
 			let target = dom["iframe-media"+k], title = ""
-			if (k === "Scaled") {
+			if (k === "ScaledImage") {
 				title = target.contentWindow.document.title
 				//strip image name to reduce noise
 				title = title.replace(mList[k], "")
