@@ -1589,6 +1589,7 @@ function countJS(filename) {
 	}
 	jsFiles++
 	if (jsFiles === 1) {
+		loadIframes()
 		get_isVer() // as long as don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
