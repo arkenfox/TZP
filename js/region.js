@@ -1056,6 +1056,40 @@ const get_timezone = () => new Promise(resolve => {
 	})
 })
 
+const get_media_messages = () => new Promise(resolve => {
+	const	METRIC = "media_messages"
+	let notation = ""
+	try {
+		let aList = ['Invalid','Scaled']
+		let data = {}
+		for (const k of aList) {
+			let name = k+"Image"
+			let target = dom[name], title = ""
+			if (k === "Scaled") {
+				title = target.contentWindow.document.title
+				title = title.replace(name +".png", "") // strip image name to reduce noise
+			} else {
+				try {
+					const image = target.contentWindow.document.querySelector('img')
+					title = image.alt
+					title = title.replace(target.src, "") // remove noise
+				} catch(e) {
+					title = e+""
+				}
+			}
+			data[name] = title.trim()
+		}
+		let hash = mini(data)
+		addData(4, METRIC, data, hash)
+		log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
+		return resolve()
+	} catch(e) {
+		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
+		addData(4, METRIC, zErr)
+		return resolve()
+	}
+})
+
 const get_validation_messages = () => new Promise(resolve => {
 	const	METRIC = "validation_messages"
 	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
@@ -1113,10 +1147,10 @@ const get_validation_messages = () => new Promise(resolve => {
 	return resolve()
 })
 
-const get_xml_errors = () => new Promise(resolve => {
-	const METRIC = "xml_errors"
+const get_xml_messages = () => new Promise(resolve => {
+	const METRIC = "xml_messages"
 	let notation = isLanguageSmart ? locale_red : ""
-	if ("string" == typeof isXML) {
+	if ("string" === typeof isXML) {
 		log_display(4, METRIC, isXML + notation)
 		addData(4, METRIC, (isXML == zNA ? zNA : zErr))
 		return resolve()
@@ -1128,9 +1162,7 @@ const get_xml_errors = () => new Promise(resolve => {
 			if (hash === localesSupported[isLocaleValue].x) {notation = locale_green}
 		}
 	}
-	let count = Object.keys(isXML).length
-	let details = count === 15 ? "details" : count +"/15"
-	log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
+	log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
 	return resolve()
 })
 
@@ -1244,8 +1276,9 @@ const outputRegion = () => new Promise(resolve => {
 			get_locale_resolvedoptions(),
 			get_locale_intl(),
 			get_timezone(), // sets isTimeZoneValid/Value
+			get_media_messages(),
 			get_validation_messages(),
-			get_xml_errors(),
+			get_xml_messages(),
 		]).then(function(results){
 			Promise.all([
 				get_dates(), // will use isTimeZomeValid/Value + isLocaleValid/Value
