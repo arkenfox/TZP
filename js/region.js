@@ -1060,9 +1060,6 @@ const get_media_messages = () => new Promise(resolve => {
 	const METRIC = "media_messages"
 	let notation = isLanguageSmart && !isFile ? locale_red : ""
 	try {
-		let test1 = dom.complete1, test2 = dom.complete2
-		console.log(test1.complete, test2.complete)
-
 		let aList = ['Invalid','Scaled']
 		let data = {}
 		for (const k of aList) {
