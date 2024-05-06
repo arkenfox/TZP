@@ -1153,7 +1153,7 @@ const get_timezone_offset = () => new Promise(resolve => {
 			data = lastNew +" | "+ xsltNew +" ["+ xMinutes +"]"
 			let display = data
 			if (isSmart) {
-				log_known(SECT4, METRIC, display)
+				log_known(SECT4, METRIC)
 				display = colorFn(display)
 				addData(4, METRIC, zLIE)
 			} else {
