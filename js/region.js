@@ -1123,7 +1123,6 @@ const get_timezone_offset = () => new Promise(resolve => {
 		let xMinutes = ((xOffset.slice(1,3) * 1)*60) + (xOffset.slice(4,6)*1)
 		let xSign = (xOffset[0] == "+" ? (xMinutes == 0 ? "": "-") : "")
 		xMinutes = xSign + xMinutes
-		/*
 		// collect all four data points
 		let oData = {
 			d: "",
@@ -1139,41 +1138,29 @@ const get_timezone_offset = () => new Promise(resolve => {
 			// chamelon causes date.parse to error (or lie)
 				// and getTimezoneOffset is spoofed
 				// but who knows what will happen with an initial empty new Date()
+
 		// ToDo: add the two other offset checks + adjust our data + notation check
 		// ToDo: add tz_red/green notation
-		*/
-
 		let data
 		if (isMatch) {
-			data = xOffset + (xMinutes == "0" ? "" : " ["+ xMinutes +"]")
+			data = oData.x
 			if (isSmart) {notation = data == "+00:00" ? rfp_green : rfp_red}
 			log_display(4, METRIC, data + notation)
 			addData(4, METRIC, data)
-			return resolve()
-		}
-
-console.debug("RAW",
-	"\n - lastMod", lastMod,
-	"\n - xsltMod", xsltMod,
-	"\nFORMAT", xsltMod,
-	"\n - lastNew", lastNew,
-	"\n - xsltNew", xsltNew,
-	"\n - xMinutes", xMinutes,
-	"\nMATCH", isMatch,
-)
-
-		// ToDo: display something including all mismatches
-		// so I guess thats xslt, last, offset(utc-now), offset(using timezonename)
-		data = lastNew +" | "+ xsltNew +" ["+ xMinutes +"]"
-		let display = data
-
-		if (isSmart) {
-			display = log_known(SECT4, METRIC, display)
-			addData(4, METRIC, zLIE)
 		} else {
-			addData(4, METRIC, data)
+			// ToDo: display something including all mismatches
+			// so I guess thats xslt, last, offset(utc-now), offset(using timezonename)
+			data = lastNew +" | "+ xsltNew +" ["+ xMinutes +"]"
+			let display = data
+			if (isSmart) {
+				log_known(SECT4, METRIC, display)
+				display = colorFn(display)
+				addData(4, METRIC, zLIE)
+			} else {
+				addData(4, METRIC, data)
+			}
+			log_display(4, METRIC, display + notation)
 		}
-		log_display(4, METRIC, display + notation)
 		return resolve()
 	} catch(e) {
 		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
