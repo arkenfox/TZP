@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 78, maxVer = 127, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 79, maxVer = 128, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -285,6 +285,16 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 128: 1887817
+			// FF52-122: TypeError: Document.parseHTMLUnsafe is not a function
+			// FF123-27: [Exception... "Unexpected error"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)" ...
+		let t128 = performance.now(), ver128 = false
+		try {
+			Document.parseHTMLUnsafe('<p></p>')
+			ver128 = true
+		} catch(e) {}
+		rec(128, 128, "1887817", ver128, performance.now()-t128) // 0.08ms
 
 		// 127: 1894248
 		let t127 = performance.now(), ver127 = false
