@@ -1041,11 +1041,8 @@ const get_timezone = () => new Promise(resolve => {
 				log_known(SECT4, METRICtz)
 				notation = rfp_red
 			} else {
-				let goodTZ = ['UTC']
-				// ToDo: swap value based on isVer when it lands upstream
-					// and also when TB's patch lands in stable
-				if (isTB) {goodTZ.push('Atlantic/Reykjavik')}
-				notation = goodTZ.includes(tz) ? rfp_green : rfp_red
+				let goodTZ = (isTB || isVer > 127) ? 'Atlantic/Reykjavik' : 'UTC'
+				notation = goodTZ == tz ? rfp_green : rfp_red
 			}
 		}
 		log_display(4, METRICtz, tzdisplay + notation)
