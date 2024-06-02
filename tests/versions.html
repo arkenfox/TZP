@@ -287,11 +287,13 @@ function outputVersion() {
 		*/
 
 		// 128: 1887817
+			// FF123-27: Error: Permission denied to access property "lastModified"
+			// ^ if console closed: NS_ERROR_UNEXPECTED:
+			// ^ we need to check a property otherwise no error is thrown if the console is open
 			// FF52-122: TypeError: Document.parseHTMLUnsafe is not a function
-			// FF123-27: [Exception... "Unexpected error"  nsresult: "0x8000ffff (NS_ERROR_UNEXPECTED)" ...
 		let t128 = performance.now(), ver128 = false
 		try {
-			Document.parseHTMLUnsafe('<p></p>')
+			let test128 = Document.parseHTMLUnsafe('<p></p>').lastModified
 			ver128 = true
 		} catch(e) {}
 		rec(128, 128, "1887817", ver128, performance.now()-t128) // 0.08ms
