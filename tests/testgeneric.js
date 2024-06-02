@@ -554,7 +554,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		isVerMax = 128
-		try {Document.parseHTMLUnsafe('<p></p>'); return 128} catch(e) {} // 1887817
+		try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
 		try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 		if ("function" === typeof URL.parse) {return 126}
 		let el = document.documentElement
