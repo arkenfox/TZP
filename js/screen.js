@@ -1382,10 +1382,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	// RFP notation: nsRFPService.h
 	let oRFP = {
 		"android": {
-			"appVersion": "5.0 (Linux; Android 10)",
+			"appVersion": "5.0 (Android 10)", //"5.0 (Linux; Android 10)",
 			"oscpu": "Linux armv81",
 			"platform": "Linux armv81",
-			"ua_os": "Linux; Android 10; Mobile",
+			"ua_os": "Android 10; Mobile", //"Linux; Android 10; Mobile",
 		},
 		"linux": {
 			"appVersion": "5.0 (X11)",
@@ -1407,15 +1407,9 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 		},
 	}
 	if (isSmart && os !== undefined) {
-		if (os == "android" && isVer < 126) {
-			/* 1860417
-			oRFP.android.appVersion = "5.0 (Android 10)"
-			oRFP.android.ua_os = "Android 10; Mobile"
-			//*/
-			if (isVer < 123) {
-				oRFP.android.oscpu = "Linux aarch64" // 1861847
-				oRFP.android.platform = "Linux aarch64"
-			}
+		if (isVer < 123) {
+			oRFP.android.oscpu = "Linux aarch64" // 1861847
+			oRFP.android.platform = "Linux aarch64"
 		}
 		let uaVer = isVer, isDroid = isOS == "android"
 		let uaRFP = "Mozilla/5.0 (" + oRFP[os].ua_os +"; rv:" // base
