@@ -1327,7 +1327,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	android:
 	- FF122+ 1865766: hardcod to 10.0 - partially backed out
 	- FF123+ 1861847: hardcod oscpu/platform to "Linux armv81"
-	- FF126+ 1860417: Linux added to appVersion + ua_os
+	- FF126+ [pending: they shipped an intervention instead] 1860417: Linux added to appVersion + ua_os
 	linux:
 	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
 	*/
@@ -1408,8 +1408,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	}
 	if (isSmart && os !== undefined) {
 		if (os == "android" && isVer < 126) {
-			oRFP.android.appVersion = "5.0 (Android 10)" // 1860417
+			/* 1860417
+			oRFP.android.appVersion = "5.0 (Android 10)"
 			oRFP.android.ua_os = "Android 10; Mobile"
+			//*/
 			if (isVer < 123) {
 				oRFP.android.oscpu = "Linux aarch64" // 1861847
 				oRFP.android.platform = "Linux aarch64"
