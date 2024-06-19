@@ -217,15 +217,15 @@ function get_navigator_keys() {
 			notation = tb_red
 			if (!isLies) {
 				if (isMullvad) {
-					// MB13 desktop
-					if (hash === "1bfbd5d3") {notation = tb_green} // 37: mediaDevices, mediaSession
+					if ('1bfbd5d3' == hash) {notation = tb_green} // MB13: 37: mediaDevices, mediaSession
+					if ('0824e17d' == hash) {notation = tb_green} // MB13: 38: +sendBeacon
 				} else {
-					if (isOS == "android") {
-						// TBA13
-						if (hash === "3b7f79c3") {notation = tb_green} // 37: share, canShare (dom.webshare.enabled)
+					if ('android' == isOS) {
+						if ('3b7f79c3' == hash) {notation = tb_green} // TBA13: 37: share, canShare (dom.webshare.enabled)
+						if ('c9d2ff93' == hash) {notation = tb_green} // TBA13: 38: +sendBeacon
 					} else {
-						// TB13 desktop
-						if (hash === "1054f985") {notation = tb_green} // 35
+						if ('1054f985' == hash) {notation = tb_green} // TB13: 35
+						if ('e61225b5' == hash) {notation = tb_green} // TB13: 36: +sendBeacon
 					}
 				}
 			}
