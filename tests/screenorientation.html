@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=400">
+	<title>screen orientation</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 380px;}
+		#tb1 td {padding-right: 10px;}
+		@media (-moz-device-orientation:portrait){#cssMoz:after{content:"portrait";}}
+		@media (-moz-device-orientation:landscape){#cssMoz:after{content:"landscape";}}
+		@media (device-aspect-ratio:1/1){#cssDAR:after{content:"square";}}
+		@media (min-device-aspect-ratio:10000/9999){#cssDAR:after{content:"landscape";}}
+		@media (max-device-aspect-ratio:9999/10000){#cssDAR:after{content:"portrait";}}
+	</style>
+</head>
+
+<body>
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#screen">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb1">
+		<col width="50%"><col width="50%">
+		<thead><tr><th colspan="2"><div class="nav-title">screen orientation</div></th></tr></thead>
+		<tr><td colspan="2" class="intro"><span class="no_color">Testing screen values and actions:
+			<code>screen.orientation</code> change and <code>window</code> resize listeners</span></td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr><td>
+			<div class="btn-left"><span class="btn1 btn" onClick="run()">[ re-run ]</span>
+			</div>last updated</td><td class='mono' id="last"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+
+		<tr><td>-moz-device-orientation</td><td class='mono' id="-moz-device-orientation"></td></tr>
+		<tr><td>[pseudo] -moz-device-orientation</td><td class='mono' id="-moz-device-orientation_css"></td></tr>
+		<tr><td>device-aspect-ratio</td><td class='mono' id="device-aspect-ratio"></td></tr>
+		<tr><td>[pseudo] device-aspect-ratio</td><td class='mono' id="device-aspect-ratio_css"></td></tr>
+		<tr><td>mozOrientation</td><td class='mono' id="mozOrientation"></td></tr>
+		<tr><td>orientation.angle</td><td class='mono' id="orientation.angle"></td></tr>
+		<tr><td>orientation.type</td><td class='mono' id="orientation.type"></td></tr>
+		<tr><td colspan="2"></td></tr>
+		<tr><td><span class="no_color">hash<span></td><td class='mono' id="hash"></td></tr>
+
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td>[css] -moz-device-orientation</td><td class='mono' id="cssMoz"></td></tr>
+		<tr><td>[css] device-aspect-ratio</td><td class='mono' id="cssDAR"></td></tr>
+
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let isLoaded = false
+let option = {day: '2-digit', month: '2-digit', year: 'numeric', hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric'}
+
+function run() {
+
+	let list = [
+		'-moz-device-orientation', 'device-aspect-ratio', 'mozOrientation', 'orientation.angle', 'orientation.type'
+	]
+	let oData = {}
+	let l = 'landscape', p = 'portrait', q = '(orientation: ', s = 'square', a = 'aspect-ratio'
+
+	list.forEach(function(item) {
+		let value, cssID
+		try {
+			if ('-moz-device-orientation' == item) {
+				cssID = '#cssMoz'
+				if (window.matchMedia('(-moz-device-orientation:'+ l +')').matches) value = l
+				if (window.matchMedia('(-moz-device-orientation:'+ p +')').matches) value = p
+			} else if ('device-aspect-ratio' == item) {
+				cssID = '#cssDAR'
+				if (window.matchMedia('(device-'+ a +':1/1)').matches) value = s
+				if (window.matchMedia('(min-device-'+ a +':10000/9999)').matches) value = l
+				if (window.matchMedia('(max-device-'+ a +':9999/10000)').matches) value = p
+			} else if ('mozOrientation' == item) {
+				value = screen.mozOrientation
+			} else if ('orientation.angle' == item) {
+				value = screen.orientation.angle
+			} else {
+				value = screen.orientation.type
+			}
+		} catch(e) {
+			value = e +''
+		}
+		oData[item] = value
+		if (cssID !== undefined) {
+			let cssvalue
+			try {
+				let target = window.getComputedStyle(document.querySelector(cssID), ':after')
+				cssvalue = target.getPropertyValue('content')
+				cssvalue = cssvalue.replace(/['"]+/g, '')
+			} catch(e) {
+				cssvalue = e+''
+			}
+			oData[item +'_css'] = cssvalue
+		}
+	})
+
+
+	for (const k of Object.keys(oData)) {dom[k].innerHTML = oData[k]}
+	dom.hash.innerHTML = s1 + mini(oData) + sc
+
+	let last = (new Date()).toLocaleDateString("en", option)
+	dom.last.innerHTML = last.split(', ')[1]
+
+	if (isLoaded == false) {
+		screen.orientation.addEventListener('change', run)
+		window.addEventListener('resize', run)
+		isLoaded = true
+	}
+}
+
+
+run()
+
+</script>
+</body>
+</html>
