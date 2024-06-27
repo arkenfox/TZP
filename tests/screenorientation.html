@@ -32,7 +32,7 @@
 		<tr><td colspan="2"><hr></td></tr>
 
 		<tr><td>
-			<div class="btn-left"><span class="btn1 btn" onClick="run()">[ re-run ]</span>
+			<div class="btn-left"><span class="btn1 btn" onClick="run('manual')">[ re-run ]</span>
 			</div>last updated</td><td class='mono' id="last"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><hr></td></tr>
@@ -112,7 +112,9 @@ function run(trigger) {
 	})
 
 	for (const k of Object.keys(oData)) {dom[k].innerHTML = oData[k]}
-	dom.hash.innerHTML = s1 + mini(oData) + sc
+	let hash = mini(oData)
+	let notation = hash == 'a1de035c' ? sg +' [RFP desktop]' + sc : ''
+	dom.hash.innerHTML = s1 + hash + sc + notation
 	dom.size.innerHTML = window.innerWidth +' x '+ window.innerHeight
 	let last = (new Date()).toLocaleDateString("en", option)
 	last = last.split(', ')[1]
@@ -130,7 +132,7 @@ function run(trigger) {
 
 }
 
-run('load')
+run('loaded')
 setTimeout(function(){
 	screen.orientation.addEventListener('change', function(){run('change')})
 	window.addEventListener('resize', function(){run('resize')})
