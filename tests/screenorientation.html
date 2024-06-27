@@ -52,6 +52,11 @@
 		<tr><td>[css] -moz-device-orientation</td><td class='mono' id="cssMoz"></td></tr>
 		<tr><td>[css] device-aspect-ratio</td><td class='mono' id="cssDAR"></td></tr>
 
+		<tr><td colspan="2"></td></tr>
+		<tr><td colspan="2"><hr></td></tr>
+		<tr><td>[inner] window size</td><td class='mono' id="size"></td></tr>
+		<tr><td>events</td><td class='mono' id="events"></td></tr>
+
 	</table>
 	<br>
 
@@ -60,8 +65,9 @@
 
 let isLoaded = false
 let option = {day: '2-digit', month: '2-digit', year: 'numeric', hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric'}
+let aEvents = []
 
-function run() {
+function run(trigger) {
 
 	let list = [
 		'-moz-device-orientation', 'device-aspect-ratio', 'mozOrientation', 'orientation.angle', 'orientation.type'
@@ -105,22 +111,31 @@ function run() {
 		}
 	})
 
-
 	for (const k of Object.keys(oData)) {dom[k].innerHTML = oData[k]}
 	dom.hash.innerHTML = s1 + mini(oData) + sc
-
+	dom.size.innerHTML = window.innerWidth +' x '+ window.innerHeight
 	let last = (new Date()).toLocaleDateString("en", option)
-	dom.last.innerHTML = last.split(', ')[1]
+	last = last.split(', ')[1]
+	dom.last.innerHTML = last
 
-	if (isLoaded == false) {
-		screen.orientation.addEventListener('change', run)
-		window.addEventListener('resize', run)
-		isLoaded = true
-	}
+		aEvents.push(trigger + ": " + last)
+
+	try {
+		if (aEvents.length) {
+			//limit to four events
+			if (aEvents.length > 5) {aEvents = aEvents.slice(-5)}
+			dom.events.innerHTML = aEvents.join("<br>")
+		}
+	} catch(e) {}
+
 }
 
+run('load')
+setTimeout(function(){
+	screen.orientation.addEventListener('change', function(){run('change')})
+	window.addEventListener('resize', function(){run('resize')})
+}, 100)
 
-run()
 
 </script>
 </body>
