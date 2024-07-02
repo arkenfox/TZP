@@ -21,25 +21,32 @@
 	</table>
 
 	<table id="tb1">
-		<col width="40%"><col width="60%">
+		<col width="30%"><col width="70%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">screen iframe
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
 			</div>
 		</th></tr></thead>
 
-		<tr><td colspan="2" class="center">top level document</td></tr>
+		<tr><td></td><td class="s1">top level document</td></tr>
 		<tr><td>screen</td><td class="c mono spaces" id="doc0"></td></tr>
 		<tr><td>available screen</td><td class="c mono spaces" id="doc1"></td></tr>
 		<tr><td>outer</td><td class="c mono spaces" id="doc2"></td></tr>
 		<tr><td>inner</td><td class="c mono spaces" id="doc3"></td></tr>
 
 		<tr><td colspan="2"></td></tr>
-		<tr><td colspan="2" class="center">nested iframe</td></tr>
+		<tr><td></td><td class="s1">nested iframe | 100vh 100vw</td></tr>
 		<tr><td>screen</td><td class="c mono spaces" id="nest0"></td></tr>
 		<tr><td>available screen</td><td class="c mono spaces" id="nest1"></td></tr>
 		<tr><td>outer</td><td class="c mono spaces" id="nest2"></td></tr>
 		<tr><td>inner</td><td class="c mono spaces" id="nest3"></td></tr>
+
+		<tr><td colspan="2"></td></tr>
+		<tr><td></td><td class="s1">nested iframe</td></tr>
+		<tr><td>screen</td><td class="c mono spaces" id="nest4"></td></tr>
+		<tr><td>available screen</td><td class="c mono spaces" id="nest5"></td></tr>
+		<tr><td>outer</td><td class="c mono spaces" id="nest6"></td></tr>
+		<tr><td>inner</td><td class="c mono spaces" id="nest7"></td></tr>
 
 	</table>
 	<br>
@@ -78,21 +85,58 @@ function run() {
 		}
 	}
 
+	const getNestediFrameWindow2 = () => {
+		const numberOfIframes = window.length
+		const div = document.createElement('div')
+		//div.setAttribute('style', 'display:none') // this line will cause inner to return zero
+		document.body.appendChild(div)
+		const id = 'parent-nest2'
+		const ghost = `
+			style="
+				/*
+				height: 100vh;
+				width: 100vw;
+				*/
+				position: absolute;
+				left: -10000px;
+				visibility: hidden;
+			"
+			`
+		div.innerHTML = `
+	<div ${ghost} id="${id}">
+		<iframe ${ghost}></iframe>
+	</div>
+	`
+		const el = document.getElementById(id)
+		return {
+			parent: !!el,
+			iframeWindow: window[numberOfIframes],
+			remove: () => el.parentNode.removeChild(el)
+		}
+	}
+
 	dom.doc0 =  screen.width +" x "+ screen.height
 	dom.doc1 =  screen.availWidth +" x "+ screen.availHeight
 	dom.doc2 =  window.outerWidth +" x "+ window.outerHeight
 	dom.doc3 =  window.innerWidth +" x "+ window.innerHeight
 
 	const nest = getNestediFrameWindow()
-	dom.nest0 =  nest.iframeWindow.screen.width +" x "+ nest.iframeWindow.screen.height
-	dom.nest1 =  nest.iframeWindow.screen.availWidth +" x "+ nest.iframeWindow.screen.availHeight
-	dom.nest2 =  nest.iframeWindow.window.outerWidth +" x "+ nest.iframeWindow.window.outerHeight
-	dom.nest3 =  nest.iframeWindow.window.innerWidth +" x "+ nest.iframeWindow.window.innerHeight
+	let target = nest.iframeWindow.screen
+	dom.nest0 =  target.width +" x "+ target.height
+	dom.nest1 =  target.availWidth +" x "+ target.availHeight
+	target = nest.iframeWindow.window
+	dom.nest2 =  target.outerWidth +" x "+ target.outerHeight
+	dom.nest3 =  target.innerWidth +" x "+ target.innerHeight
+	if (nest.parent) {nest.remove()}
 
-	if (nest.parent) {
-			nest.remove()
-	}
-
+	const nest2 = getNestediFrameWindow2()
+	target = nest2.iframeWindow.screen
+	dom.nest4 =  target.width +" x "+ target.height
+	dom.nest5 =  target.availWidth +" x "+ target.availHeight
+	target = nest2.iframeWindow.window
+	dom.nest6 =  target.outerWidth +" x "+ target.outerHeight
+	dom.nest7 =  target.innerWidth +" x "+ target.innerHeight
+	if (nest2.parent) {nest2.remove()}
 
 }
 
