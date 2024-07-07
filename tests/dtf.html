@@ -368,12 +368,13 @@ function run_main(method = "all") {
 					// track FF version changes
 					// ignore if non-supported used, which return same as undefined = user's resolved options
 					// results
-					if (resultsHash == "72c1b3f5") {resultsHash += s14 +" [FF115+]"+ sc
-					} else {resultsHash += zNEW
+					if (resultsHash == "80c3fd6b") {resultsHash += s14 +" [FF127+]"+ sc
+					} else if (resultsHash == "72c1b3f5") {resultsHash += s14 +" [FF115-126]"+ sc
+					} else {resultsHash += ' '+ zNEW
 					}
 					// locales
 					if (localesHash == "86c0f15f") {localesHash += s14 +" [FF115+]"+ sc
-					} else if (isFF) {localesHash += zNEW
+					} else {localesHash += ' '+ zNEW
 					}
 				}
 			}

@@ -553,8 +553,14 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 128
+		isVerMax = 129
+		if ("function" === typeof CSS2Properties
+			&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
+
+		// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
+		// ToDo: replace or add a fallback
 		try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
+
 		try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 		if ("function" === typeof URL.parse) {return 126}
 		let el = document.documentElement

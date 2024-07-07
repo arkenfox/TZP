@@ -627,7 +627,7 @@ const get_isVer = () => new Promise(resolve => {
 	function output(verNo) {
 		isVer = verNo
 		if (verNo < isBlockMin[0]) {isVerExtra = " or lower"
-		} else if (verNo == 128) {isVerExtra = "+"}
+		} else if (verNo == 129) {isVerExtra = "+"}
 		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
 		return resolve()
 	}
@@ -635,6 +635,10 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		try {
+			if ("function" === typeof CSS2Properties
+				&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
+			// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
+			// ToDo: replace or add a fallback
 			try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
 			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 			if ("function" === typeof URL.parse) {return 126}

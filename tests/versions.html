@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 79, maxVer = 128, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 80, maxVer = 129, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -272,13 +272,6 @@ function outputVersion() {
 			offsetPosition : layout.css.motion-path-offset-position.enabled
 		*/
 
-		/* this is nightly only
-		// 120: 1854937
-		let t120 = performance.now()
-		let ver120 = ("function" === typeof CSSPropertyRule)
-		rec(120, 120, "1854937", ver120, performance.now()-t120)
-		*/
-
 		/*
 		// 121: 1859752 backed out
 		let t121 = performance.now()
@@ -286,11 +279,17 @@ function outputVersion() {
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
 
+		// 129: 1595620
+		let t129 = performance.now()
+		let ver129 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings"))
+		rec(129, 129, "1595620", ver129, performance.now()-t129) // 0.6ms
+
 		// 128: 1887817
 			// FF123-27: Error: Permission denied to access property "lastModified"
 			// ^ if console closed: NS_ERROR_UNEXPECTED:
 			// ^ we need to check a property otherwise no error is thrown if the console is open
 			// FF52-122: TypeError: Document.parseHTMLUnsafe is not a function
+		// relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
 		let t128 = performance.now(), ver128 = false
 		try {
 			let test128 = Document.parseHTMLUnsafe('<p></p>').lastModified
@@ -713,7 +712,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 55, oOther = {}
+	let countOther = 0, expectOther = 56, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -730,6 +729,13 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 129: 1796785
+		let t129 = performance.now(), ver129 = false
+		try {
+			ver129 = ("function" === typeof PerformanceResourceTiming && PerformanceResourceTiming.prototype.hasOwnProperty("responseStatus"))
+		} catch(e) {}
+		rec(129, 129, "1796785", ver129, performance.now()-t129) // 0.04ms
 
 		// 122: 1862910
 		let t122 = performance.now()
