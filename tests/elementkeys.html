@@ -42,132 +42,136 @@
 
 // ignore: checked in gecko + blink (desktop)
 	// all match even unsorted
-let aListIgnore = [
-	'caption','h1','h2','h3','h4','h5','h6','p', // = div
-	'ins', // = del
-	'xmp', // = pre
-	'colgroup', // = col
-	'dl','menu', // = dir
-	'q', // = blockquote
-	'tfoot','thead', // = tbody
-	'th', // = td
+let oListIgnore = {
+	"CHECK": [
+		// input types = input
+		'input|button','input|checkbox','input|color','input|date','input|datetime',
+		'input|datetime-local','input|file','input|image','input|month','input|number',
+		'input|password','input|radio','input|range','input|reset','input|search',
+		'input|submit','input|tel','input|text','input|time','input|url','input|week',
+	],
+	"STABLE": [
+		'caption','h1','h2','h3','h4','h5','h6','p', // = div
+		'ins', // = del
+		'xmp', // = pre
+		'dl','menu', // = dir
+		'q', // = blockquote
+		'tfoot','thead', // = tbody
+		'th', // = td
+		'colgroup', // = col
 
-	// = span
-	'abbr','acronym','address','applet','article','aside','b',
-	'basefont','bdi','bdo','big','center','cite','code','dd','dfn','dt',
-	'element-details','em','figcaption','figure','footer','head','header','hgroup','i','isindex',
-	'kbd','keygen','main','mark','menuitem','nav','nextid','nobr','noembed',
-	'noframes','noscript','picture','plaintext','portal','rb','rbc','rp','rt',
-	'rtc','ruby','s','samp','search','section','small','strike','strong','sub',
-	'summary','sup','tt','u','var','wbr',
+		// = span
+		'abbr','acronym','address','applet','article','aside','b',
+		'basefont','bdi','bdo','big','center','cite','code','dd','dfn','dt',
+		'element-details','em','figcaption','figure','footer','head','header','hgroup','i','isindex',
+		'kbd','keygen','main','mark','menuitem','nav','nextid','nobr','noembed',
+		'noframes','noscript','picture','plaintext','portal','rb','rbc','rp','rt',
+		'rtc','ruby','s','samp','search','section','small','strike','strong','sub',
+		'summary','sup','tt','u','var','wbr',
+	],
+}
 
-	// input types = input
-	'input|button','input|checkbox','input|color','input|date','input|datetime',
-	'input|datetime-local','input|file','input|image','input|month','input|number',
-	'input|password','input|radio','input|range','input|reset','input|search',
-	'input|submit','input|tel','input|text','input|time','input|url','input|week',
-]
+let oList = {
+	// as of 130 nightly
+	"CHECK": [
+		// elements: 11ms cold | 7ms warm
+		// domparser: 3ms cold | 2ms warm
 
-// reduce: checked in gecko + blink (desktop)
-let aListReduce = [
-
-]
-
-let aList = [
-	// gecko nightly 122 numbers
-	'a',
-	'area',
-	'audio',
-	'body',
-	'button', // changed 123
-	'canvas',
-	'col',
-	'dialog',
-	'embed',
-	'fieldset',
-	'form',
-	'frame',
-	'frameset',
-	'hr',
-	'iframe', // changed 121?
-	'img',
-	'input', // changed 123
-	'link',
-	'marquee',
-	'meta',
-	'meter',
-	'object',
-	'ol',
-	'option',
-	'output',
-	'param',
-	'progress',
-	'script',
-	'select', // changed 123n
-	'slot',
-	'source',
-	'style',
-	'table',
-	'tbody',
-	'td',
-	'template', // changed 123 nightly (at least)
-	'textarea',
-	'tr',
-	'track',
-	'video', // changed 123n
-
-
-//* only 1 to 3 pre items
-	// likely super boring and stable since forever
-
-	'base', // href, target
-	'blockquote', // cite
-	'br', // clear
-	'data', // value
-	'datalist', // options
-	'del', // cite, dateTime
-	'details', // open
-	'dir', // compact
-	'div', // align
-	'font', // color, face, size
-	'html', // version
-	'label', // form, htmlFor, control
-	'legend', // form, align
-	'li', // value, type
-	'map', // name, areas
-	'optgroup', // disabled, label
-	'pre', // width
-	'span', // nothing found
-	'time', // dateTime
-	'title', // text
-	'ul', // compact, type
-//*/
-
-]
-
-let aListValid = aList.concat(aListIgnore)
-aListValid = aListValid.concat(aListReduce)
-aListValid.sort()
-aList.sort() // why not
-//console.log("'"+ elements.join("','")+"'")
-//console.log(aList.length)
+		// changes since FF56
+		'audio', // 58, 59, 101, 115, 116, 128, 130n
+		'button', // 110, 125
+		'details', // 130n (name)
+		'iframe', // 74, 83, 121
+		'img', // 63, 68, 75, 130n (fetchPriority)
+		'input', // 57, 101, 110, 116, 125
+		'marquee', // 65, 126 (removed onbounce, onfinish, onstart)
+		'select', // 59, 110, 122
+		'template', // 123 (shadowRootMode, shadowRootDelegatesFocus), 125 (shadowRootClonable), 128 (shadowRootSerializable)
+		'textarea', // 59, 110, 116
+		'video', // 58, 59, 101, 115, 116, 122, 128, 130n
+	],
+	//*
+	"OTHER": [
+		'script', // 59, 65, 130n (fetchPriority)
+		'link', // 78, 130n (fetchPriority)
+		'form', // 75, 111 (rel, relList)
+		'source', // 108 (width, height)
+		'meta', // 106 (media)
+		'canvas', // 74, 105
+		'dialog', // first added in 98 (show, showModal, close, open, returnValue)
+		'slot', // assignedNodes + name (63) assignedElements (66), assign (92)
+		'body', // 57, 69, 89
+		'frameset', // 57, 69, 89
+	],
+	"STABLE": [
+		'object', // 68
+		'meter', // 56 (labels)
+		'progress', // 56 (labels)
+		'style', // disabled, media, type, sheet (scoped removed in 55)
+		// super boring
+		// FF52-130+
+		'a',
+		'area',
+		'base', // href, target
+		'blockquote', // cite
+		'br', // clear
+		'col',
+		'data', // value
+		'datalist', // options
+		'del', // cite, dateTime
+		'dir', // compact
+		'div', // align
+		'embed',
+		'fieldset',
+		'font', // color, face, size
+		'frame',
+		'html', // version
+		'hr', // align, color, noShade, size, width
+		'label', // form, htmlFor, control
+		'legend', // form, align
+		'li', // value, type
+		'map', // name, areas
+		'ol', // reversed, start, type, compact
+		'optgroup', // disabled, label
+		'option',
+		'output',
+		'param', // name, value, type, valueType
+		'pre', // width
+		'span', // nothing found
+		'table',
+		'tbody',
+		'td',
+		'time', // dateTime
+		'title', // text
+		'tr',
+		'track',
+		'ul', // compact, type
+	],
+	//*/
+}
 
 let oData = {}
 let oCommon = {}
 let aEverything = []
+let oPreHash = {}
 
-let isDOMParser = false
+let isDOMParser = true
+// DOMParser can't be used for these
+let aNoParser = [
+	'link','template','frameset','base','basefont','caption','col','colgroup',
+	'frame','noframes','noscript','tbody','td','tfoot','th','thead','tr'
+]
 
 function run() {
-	// gecko: d6d0fc0e [630]
-	// blink: bc6d18f5 [646]
 
 	// set/reset
 	let t0 = performance.now()
 	oData = {}
 	oCommon = {}
 	aEverything = []
+	oPreHash = {}
 	let tmpHash = {}
+	let tmpPreHash = {}
 	let oOrder = {}
 	let splitValue = isFF ? "click" : "title" // title works for chrome + safari
 	/* interesting (without extension fuckery which I have not tested)
@@ -178,23 +182,25 @@ function run() {
 		select doesn't have 'remove'
 
 		postClick actually equals span
-
 	*/
 
-	let tmpList = aList
-	if (dom.optAll.checked) {
-		tmpList = aListValid
+	let tmpList = {}, totalElements = 0
+	for (const k of Object.keys(oList)) {
+		let aList = oList[k]
+		if (dom.optAll.checked) {
+			if (oListIgnore[k] !== undefined) {aList = aList.concat(oListIgnore[k])}
+		}
+		totalElements += aList.length
+		tmpList[k] = aList.sort()
 	}
 	const parentid = "elementsdiv"
-
 	function cleanup() {
 		try {document.getElementById(parentid).remove()} catch(e) {}
 	}
 
 	try {
 		let htmlElement
-		let parser
-		let parent
+		let parser = new DOMParser
 		/* 
 			   dom = 18ms cold, 10ms rerun 
 			parser =  8ms cold,  5ms rerun (so far: 8 default items still to correctly add/enumerate)
@@ -212,132 +218,125 @@ function run() {
 			- every element had 13 items split with a space = we would still detect this
 		*/
 
-		if (isDOMParser) {
-			parser = new DOMParser
-		} else {
-			// create one parent div to hold the others
-			parent = document.createElement('div')
-			parent.setAttribute("id", parentid)
-			document.body.appendChild(parent)
-		}
+		// create one parent div to hold the others
+		let parent = document.createElement('div')
+		parent.setAttribute("id", parentid)
+		document.body.appendChild(parent)
+
 		// loop elements
-		tmpList.forEach(function(el) {
-			let item = el.split("|")[0]
-			let type = el.split("|")[1]
-			let keys = []
-			try {
-				// method
-				if (isDOMParser) {
-					// this is faster, but some elements it seems we can't do this way
-						// base, basefont, body, caption, col, colgroup, frame, frameset, head, html, link, meta,
-						// noframes, noscript, script, style, tbody, td, template, tfoot, th, thead, title, tr
-						// ^ these end up with nothing
+		for (const k of Object.keys(tmpList).sort()) {
+			let aList = tmpList[k]
+			tmpHash[k] = {}
+			tmpPreHash[k] = {}
 
-					/* broken in default 61* elements
-						body,		// doc.body
-						html,		// doc.all[0]
-						meta,		// doc.all[3]
-						script,	// doc.all[3]
-						style,	// doc.all[3]
-						title,	// doc.all[3]
+			aList.forEach(function(el) {
+				let item = el.split("|")[0]
+				let type = el.split("|")[1]
+				let keys = []
+				try {
+					// method
+					if (isDOMParser && !aNoParser.includes(el)) {
+						// this is faster, but some elements it seems we can't do this way
+						/* broken in default 61* elements
+							body,		// doc.body
+							html,		// doc.all[0]
+							meta,		// doc.all[3]
+							script,	// doc.all[3]
+							style,	// doc.all[3]
+							title,	// doc.all[3]
+						*/
 
-						col,
-						frame,
-						frameset,
-						link,
-						tbody,
-						td,
-						template,
-						tr
-					*/
-
-					let tmpitem = item
-					if (item == "title") {
-						tmpitem = "<html><head><title></head></html>"
-					} else if (item == "meta") {
-						tmpitem = "<html><head><meta></head></html>"
-					} else if (item == "script") {
-						tmpitem = "<html></html><script>"
-					} else if (item == "style") {
-						tmpitem = "<html><style></html>"
-					}
-
-					let str = "<"+ tmpitem + (type == undefined ? "": " type='" + type +"'") + ">"
-					let doc = parser.parseFromString(str, "text/html")
-
-					if (item == "body") {
-						htmlElement = doc.body
-					} else if (item == "head") { // all elements
-						htmlElement = doc.head
-					} else if (item == "html") {
-						htmlElement = doc.all[0]
-					} else if (item == "meta" || item == "script" || item == "style" || item == "title") {
-						htmlElement = doc.all[3]
-					} else {
-						htmlElement = doc.body.firstChild // firstElementChild ?
-					}
-				} else {
-					const id = "target"+el
-					const element = document.createElement(item)
-					element.setAttribute("id", id)
-					parent.appendChild(element)
-					if (type !== undefined) {
-						document.getElementById(id).type = type
-					}
-					htmlElement = document.getElementById(id)
-				}
-
-				for (const key in htmlElement) {keys.push(key)}
-				// get pre + post `click` (gecko)
-				let splitIndex = keys.indexOf(splitValue)
-				let aPre = [], aPost = []
-				// what if `click` or `title` is missing: every post will be an empty array
-					// ^ not worth coding to exclude empty arrays
-				aPre = keys.slice(0, splitIndex)
-				aPre.forEach(function(j) {aEverything.push(j)})
-				aPost = keys.slice(splitIndex, keys.length)
-				let prehash = mini(aPre)
-				let posthash = mini(aPost)
-				// posthash tampering
-				if (oCommon[posthash] == undefined) {
-					aPost.forEach(function(j) {aEverything.push(j)})
-					oCommon[posthash] = {}
-					oCommon[posthash]["data"] = aPost
-					oCommon[posthash]["display"] = []
-					let aCommonTamper = []
-					aPost.forEach(function(r) {
-						if (r.includes(" ")) {
-							oCommon[posthash]["display"].push(sb + r + sc)
-							aCommonTamper.push(r)
-						} else {
-							oCommon[posthash]["display"].push(r)
+						let tmpitem = item
+						if (item == "title") {
+							tmpitem = "<html><head><title></head></html>"
+						} else if (item == "meta") {
+							tmpitem = "<html><head><meta></head></html>"
+						} else if (item == "script") {
+							tmpitem = "<html></html><script>"
+						} else if (item == "style") {
+							tmpitem = "<html><style></html>"
 						}
-					})
-					if (aCommonTamper.length) {
-						oCommon[posthash]["tampered"] = aCommonTamper
-					}
-				}
-				// prehash tampering
-				// ^ ToDo
 
-				let hash = mini(keys) // always use full keys hash so we get unique items
-				// record each unique hash + keys + count
-				// we need to use the full hash because two elements could have the same pre but different post
-				if (tmpHash[hash] == undefined) {
-					tmpHash[hash] = {
-						"count": aPre.length,
-						"data": keys,
-						"elements": [],
-						"predata": aPre,
-						"prehash": prehash,
-						"posthash": posthash
+						let str = "<"+ tmpitem + (type == undefined ? "": " type='" + type +"'") + ">"
+						let doc = parser.parseFromString(str, "text/html")
+
+						if (item == "body") {
+							htmlElement = doc.body
+						} else if (item == "head") { // all elements
+							htmlElement = doc.head
+						} else if (item == "html") {
+							htmlElement = doc.all[0]
+						} else if (item == "meta" || item == "script" || item == "style" || item == "title") {
+							htmlElement = doc.all[3]
+						} else {
+							htmlElement = doc.body.firstChild // firstElementChild ?
+						}
+					} else {
+						const id = "target"+el
+						const element = document.createElement(item)
+						element.setAttribute("id", id)
+						parent.appendChild(element)
+						if (type !== undefined) {
+							document.getElementById(id).type = type
+						}
+						htmlElement = document.getElementById(id)
 					}
+
+					for (const key in htmlElement) {keys.push(key)}
+					// get pre + post `click` (gecko)
+					let splitIndex = keys.indexOf(splitValue)
+					let aPre = [], aPost = []
+					// what if `click` or `title` is missing: every post will be an empty array
+						// ^ not worth coding to exclude empty arrays
+					aPre = keys.slice(0, splitIndex)
+					aPre.forEach(function(j) {aEverything.push(j)})
+					aPost = keys.slice(splitIndex, keys.length)
+					let prehash = mini(aPre)
+					let posthash = mini(aPost)
+					// posthash tampering
+					if (oCommon[posthash] == undefined) {
+						aPost.forEach(function(j) {aEverything.push(j)})
+						oCommon[posthash] = {}
+						oCommon[posthash]["data"] = aPost
+						oCommon[posthash]["display"] = []
+						let aCommonTamper = []
+						aPost.forEach(function(r) {
+							if (r.includes(" ")) {
+								oCommon[posthash]["display"].push(sb + r + sc)
+								aCommonTamper.push(r)
+							} else {
+								oCommon[posthash]["display"].push(r)
+							}
+						})
+						if (aCommonTamper.length) {
+							oCommon[posthash]["tampered"] = aCommonTamper
+						}
+					}
+					// prehash tampering
+					// ^ ToDo
+
+					let hash = mini(keys) // always use full keys hash so we get unique items
+					// record each unique hash + keys + count
+					// we need to use the full hash because two elements could have the same pre but different post
+					if (tmpHash[k][hash] == undefined) {
+						tmpHash[k][hash] = {
+							"count": aPre.length,
+							"data": keys,
+							"elements": [],
+							"predata": aPre,
+							"prehash": prehash,
+							"posthash": posthash
+						}
+					}
+					tmpHash[k][hash]["elements"].push(el)
+					// record post hashes separately
+					if (tmpPreHash[k][prehash] == undefined) {tmpPreHash[k][prehash] = []}
+					tmpPreHash[k][prehash].push(el)
+				} catch(e) {
+					console.log(el, e+"")
 				}
-				tmpHash[hash]["elements"].push(el)
-			} catch(e) {
-				console.log(el, e+"")
-			}
-		})
+			})
+		}
 		// remove parent div
 		cleanup()
 		dom.perf = Math.round(performance.now() - t0) +" ms"
@@ -352,16 +351,29 @@ function run() {
 
 		// sort into oData by hash, and determine oOrder (by first element name)
 		for (const k of Object.keys(tmpHash).sort()) {
-			oData[k] = tmpHash[k]
-			let aTmp = oData[k].elements.sort() // sort array in oData
-			oOrder[aTmp[0]] = k
+			oData[k] = {}
+			oOrder[k] = {}
+			for (const j of Object.keys(tmpHash[k]).sort()) {
+				oData[k][j] = tmpHash[k][j]
+				let aTmp = oData[k][j].elements.sort() // sort array in oData
+				oOrder[k][aTmp[0]] = j
+			}
 		}
-
+		for (const k of Object.keys(tmpPreHash).sort()) {
+			oPreHash[k] = {}
+			for (const j of Object.keys(tmpPreHash[k]).sort()) {
+				oPreHash[k][j] = tmpPreHash[k][j].sort()
+			}
+		}
 		// display
-		let display = []
+		let display = [], totalResults = 0
+		for (const k of Object.keys(oData)) {
+			totalResults += Object.keys(oData[k]).length
+		}
 		let strAll = s15 +"ALL"+ sc +": "+ s6 + mini(oData) + sc
 			+" <span class='btn15 btnc' onclick='console.log(oData)'>[console]</span> | unique values: "+ s6 + mini(aEverything) + sc
-			+" <span class='btn15 btnc' onclick='console.log(aEverything)'>[" + aEverything.length +"]</span> | "+ tmpList.length +" elements<br><br><hr>"
+			+" <span class='btn15 btnc' onclick='console.log(aEverything)'>[" + aEverything.length +"]</span> | "
+			+ totalElements +" elements | " + totalResults +" hashes<br><br><hr>"
 		display.push(strAll)
 
 		// display common
@@ -378,30 +390,44 @@ function run() {
 					+	"<span class='toghidden" + toggle +" hidden faint'>[<br>" + "<span class='indent'>" + obj.display.join(", ") +"</span><br>]</span>"
 			)
 		}
-		display.push("<br><hr>")
-
-		// display pre
-		toggle = "pre"
-		display.push(
-			"<span id='labelhidden" + toggle + "' class='btnfirst btn0' onClick=\"togglerows('hidden" + toggle +"','expand')\">[ expand ]</span> "
-			+ s15 + "DIFFS"+ sc +"<br>"
-		)
-
-		for (const j of Object.keys(oOrder).sort()) {
-			let k = oOrder[j]
-			let obj = oData[oOrder[j]]
-			let commonhash = obj.posthash
-			countTampered = ""
-			if (oCommon[commonhash] !== undefined) {
-				if (oCommon[commonhash].tampered !== undefined) {
-					countTampered = sb +" ["+ oCommon[commonhash].tampered.length +"]"+ sc
+		for (const m of Object.keys(oOrder).sort()) {
+			display.push("<br><hr>")
+			// display pre
+			toggle = "pre"+ m
+			let notation = '', hash = mini(oPreHash[m])
+			if (isFF && !dom.optAll.checked) {
+				if ('STABLE' == m) {
+					if (hash == "74df70ef") {notation = sg +' ['+ green_tick +' FF68+]'+ sc
+					} else if (hash == "6b68a739") {notation = sg +' ['+ green_tick +' FF56-67]'+ sc
+					} else if (hash == '729f9c8d') {notation = sg +' ['+ green_tick +' FF55]'+ sc
+					} else if (hash == 'b4fa0221') {notation = sg +' ['+ green_tick +' FF52-54]'+ sc
+					} else {notation = ''+ zNEW
+					}
 				}
 			}
+
+			let preString = " | hash <span class='btn15 btnc' onclick='console.log(oPreHash[\""+ m +"\"])'>["+ hash +"]</span>"
 			display.push(
-				s6 + k + sc +": " + obj.prehash + (" ["+ obj.predata.length +"]").padStart(5)
-				+ " + "+ s15 + obj.posthash + sc + countTampered +": "+ obj.elements.join(", ")
-				+	"<span class='toghidden" + toggle +" hidden faint'>[<br>" + "<span class='indent'>" + obj.predata.join(", ") +"</span><br>]</span>"
+				"<span id='labelhidden" + toggle + "' class='btnfirst btn0' onClick=\"togglerows('hidden" + toggle +"','expand')\">[ expand ]</span> "
+				+ s12 + m + sc + preString + notation +" | "+ tmpList[m].length +" elements | "+ Object.keys(oData[m]).length +" hashes<br>"
 			)
+
+			for (const j of Object.keys(oOrder[m]).sort()) {
+				let k = oOrder[m][j]
+				let obj = oData[m][k]
+				let commonhash = obj.posthash
+				countTampered = ""
+				if (oCommon[commonhash] !== undefined) {
+					if (oCommon[commonhash].tampered !== undefined) {
+						countTampered = sb +" ["+ oCommon[commonhash].tampered.length +"]"+ sc
+					}
+				}
+				display.push(
+					s6 + k + sc +": " + obj.prehash + (" ["+ obj.predata.length +"]").padStart(5)
+					+ " + "+ s15 + obj.posthash + sc + countTampered +": "+ obj.elements.join(", ")
+					+	"<span class='toghidden" + toggle +" hidden faint'>[<br>" + "<span class='indent'>" + obj.predata.join(", ") +"</span><br>]</span>"
+				)
+			}
 		}
 
 		dom.details.innerHTML = display.join("<br>")
