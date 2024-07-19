@@ -1,165 +1,120 @@
 'use strict';
 
 function lookup_cookie(name) {
-	name += "="
+	name += '='
 	let decodedCookie = decodeURIComponent(document.cookie)
 	let ca = decodedCookie.split(';')
-	for (let i=0 ; i < ca.length; i++) {
+	for (let i=0; i < ca.length; i++) {
 		let c = ca[i]
-		while (c.charAt(0) == " ") {c = c.substring(1)}
+		while (c.charAt(0) == ' ') {c = c.substring(1)}
 		if (c.indexOf(name) == 0) {return c.substring(name.length, c.length)}
 	}
-	return ""
+	return ''
 }
 
-const get_caches = () => new Promise(resolve => {
-	const METRIC = "caches"
-	// 1177968: check for dom.caches.enabled, pref removed in FF117
-	if (undefined === window.caches) {
-		log_display(6, METRIC, zD + (isTB && isSmart ? tb_red: ""))
-		return resolve([METRIC, zD])
+const get_caches = (METRIC) => new Promise(resolve => {
+	let t0 = nowFn()
+	let notation = isTB ? default_red : ''
+	function exit(display, value) {
+		// don't use caches for element name == window.caches !== a function
+		addDisplay(6, 'window.caches', display,'', notation)
+		addData(6, METRIC, value)
+		log_perf(6, METRIC, t0)
+		return resolve()
 	}
 	// PB mode: DOMException: The operation is insecure.
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
-		// also see 1742344
+		// also see 1742344 / 1714354
 	Promise.all([
 		window.caches.keys()
-	]).then(function(results){
-		log_display(6, METRIC, zE + (isTB && isSmart ? tb_red: ""))
-		return resolve([METRIC, zE])
-	})
-	.catch(function(e){
-		let notation = ""
-		if (isTB && isSmart) {
-			notation = e+"" === "SecurityError: The operation is insecure." ? tb_green: tb_red
-		}
-		log_display(6, METRIC, log_error(SECT6, METRIC, e) + notation)
-		return resolve([METRIC, zErr])
+	]).then(function(){
+		if (isTB && isVer > 121) {notation = default_green}
+		exit(zE, zE)
+	}).catch(function(e){
+		if (isTB && isVer < 122 && e+'' == 'SecurityError: The operation is insecure.') {notation = default_green}
+		exit(log_error(6, METRIC, e), zErr)
 	})
 })
 
-const get_cookies = (skip) => new Promise(resolve => {
-	// note: don't use "cookie" in elements as adblockers might block display
-	const METRIC = "cookies"
-	function exit() {
-		let value = valueE + " | "+ valueS +" | "+ valueP
-		log_display(6, "ctest", value)
-		return resolve([METRIC, value])
-	}
-	let valueE, valueS = zNA, valueP = zNA // skip values
+const get_cookies = (METRIC) => new Promise(resolve => {
+	let value
 	try {
 		let test = navigator.cookieEnabled
-		let tType = typeFn(test)
-		if ("boolean" === tType) {
-			valueE = navigator.cookieEnabled ? zE : zD
-		} else {
-			valueE = zErr
-			log_error(SECT6, METRIC, zErrType + tType)
-		}
+		if (runST) {test = undefined}
+		let typeCheck = typeFn(test)
+		if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+		value = navigator.cookieEnabled ? zE : zD
 	} catch(e) {
-		log_error(SECT6, METRIC, e)
-		valueE = zErr
+		log_error(6, METRIC, e); value = zErr
 	}
 
-	if (!skip) {
-		try {
-			let rndA = "sc_"+ rnd_string(), rndB = rnd_string()
-			document.cookie = rndA +"="+ rndB +"; SameSite=Strict"
-			valueS = lookup_cookie(rndA) == rndB ? zS : zF
-		} catch(e) {
-			log_error(SECT6, METRIC +"_session", e)
-			valueS = zErr
-		}
-		try {
-			let rndC = "pc_"+ rnd_string(), rndD = rnd_string()
-			let d = new Date()
-			d.setTime(d.getTime() + 86400000) // 1 day
-			let expires = "expires="+ d.toUTCString()
-			document.cookie = rndC +"="+ rndD +"; SameSite=Strict; "+ expires
-			valueP = lookup_cookie(rndC) == rndD ? zS : zF
-		} catch(e) {
-			log_error(SECT6, METRIC +" persistent", e)
-			valueP = zErr
-		}
+	try {
+		let rndA = 'session_'+ rnd_string(), rndB = rnd_string()
+		document.cookie = rndA +'='+ rndB +'; SameSite=Strict'
+		value += ' | '+ (lookup_cookie(rndA) == rndB ? zS : zF)
+	} catch(e) {
+		log_error(6, METRIC +'_session', e); value += ' | '+ zErr
 	}
-	exit()
+	try {
+		let rndC = 'persistent_'+ rnd_string(), rndD = rnd_string()
+		let d = new Date()
+		d.setTime(d.getTime() + 86400000) // 1 day
+		let expires = 'expires='+ d.toUTCString()
+		document.cookie = rndC +'='+ rndD +'; SameSite=Strict; '+ expires
+		value += ' | '+ (lookup_cookie(rndC) == rndD ? zS : zF)
+	} catch(e) {
+		log_error(6, METRIC +' persistent', e); value += ' | '+ zErr
+	}
+	// don't use cookie in element names == adblockers might block display
+	addDisplay(6, 'ctest', value)
+	addData(6, METRIC, value)
+	return resolve()
 })
 
-const get_filesystem = () => new Promise(resolve => {
-	const METRIC = "filesystem"
-	let display = isFileSystem, notation = ""
-
+const get_filesystem = (METRIC) => new Promise(resolve => {
+	let display = isFileSystem, notation = ''
 	if (isFileSystem === zErr) {
-		display = log_error(SECT6, "filesystem", isFileSystemError)
+		display = log_error(6, METRIC, isFileSystemError)
 	}
-	if (isSmart) {
-		// PBmode: SecurityError: Security error when calling GetDirectory
-		if (isTB) {
-			notation = (isFileSystemError === "SecurityError: Security error when calling GetDirectory" ? tb_green : tb_red)
-		} else {
-			// FF111: 1811001: dom.fs.enabled = true
-			if (isFileSystem === zD) {notation = default_red}
-		}
+	// PBmode: SecurityError: Security error when calling GetDirectory
+	if (isTB) {
+		notation = ('SecurityError: Security error when calling GetDirectory' == isFileSystemError ? tb_green : tb_red)
+	} else {
+		// FF111: 1811001: dom.fs.enabled = true
+		if (isFileSystem == zD) {notation = default_red}
 	}
-	log_display(6, METRIC, display + notation)
-	return resolve([METRIC, isFileSystem])
+	addBoth(6, METRIC, display,'', notation, isFileSystem)
+	return resolve()
 })
 
-const get_storage = (skip) => new Promise(resolve => {
-	const METRICLS = "localStorage", METRICSS = "sessionStorage"
-	function exit() {
-		valueL += " | "+ valueLTest
-		valueS += " | "+ valueSTest
-		log_display(6, "lstest", valueL)
-		log_display(6, "sstest", valueS)
-		return resolve([[METRICLS, valueL],[METRICSS, valueS]])
-	}
-	let valueL, valueS, valueLTest = zNA, valueSTest = zNA // skip values
-	// LS enabled
+const get_storage = (METRIC) => new Promise(resolve => {
+	// dom.storage.enabled
+	let value
+	let item = ('localStorage' == METRIC ? localStorage : sessionStorage)
 	try {
-		valueL = "object" === typeFn(localStorage, true) ? zE : zD
+		value = 'object' == typeFn(item, true) ? zE : zD
 	} catch(e) {
-		log_error(SECT6, METRICLS, e)
-		valueL = zErr
-	}
-	// SS enabled
-	try {
-		valueS = "object" === typeFn(sessionStorage, true) ? zE : zD
-	} catch(e) {
-		log_error(SECT6, METRICSS, e)
-		valueS = zErr
+		log_error(6, METRIC, e); value = zErr
 	}
 
-	// dom.storage.enabled
-	if (!skip) {
-		// LS test
-		try {
-			let rndA = "lsp_"+ rnd_string(), rndB = rnd_string()
-			localStorage.setItem(rndA, rndB)
-			valueLTest = localStorage.getItem(rndA) == rndB ? zS : zF
-		} catch(e) {
-			log_error(SECT6, METRICLS +" test", e.name)
-			valueLTest = zErr
-		}
-		// SS test
-		try {
-			let rndC = "lss_"+ rnd_string(), rndD = rnd_string()
-			sessionStorage.setItem(rndC, rndD)
-			valueSTest = sessionStorage.getItem(rndC) == rndD ? zS : zF
-		} catch(e) {
-			log_error(SECT6, METRICSS +" test", e.name)
-			valueSTest = zErr
-		}
+	let prefix = ('localStorage' == METRIC ? 'local_' : 'session_')
+	try {
+		let rndA = prefix + rnd_string(), rndB = rnd_string()
+		item.setItem(rndA, rndB)
+		value += ' | '+ (item.getItem(rndA) == rndB ? zS : zF)
+	} catch(e) {
+		log_error(6, METRIC +'_test', e.name); value += ' | '+ zErr
 	}
-	exit()
+	addBoth(6, METRIC, value)
+	return resolve()
 })
 
 const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
-	const METRIC = "storage_manager"
-	dom[METRIC] = ""
+	const METRIC = 'storage_manager'
+	dom[METRIC] = ''
 	function exit(value) {
-		if (delay !== 0) {dom[METRIC].innerHTML = value}
+		dom[METRIC].innerHTML = value
 		return resolve()
 	}
 	setTimeout(function() {
@@ -168,131 +123,115 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 				navigator.storage.estimate().then(estimate => {
 					// we don't care about estimate.usage
 					let value = estimate.quota
-					let vType = typeFn(value)
-					if ("number" == vType && Number.isInteger(value)) {
+					let typeCheck = typeFn(value)
+					if ('number' === typeCheck && Number.isInteger(value)) {
 						value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
-						value += "GB ["+ estimate.quota +" bytes]"
-						if (isProxy && sData[SECT99].includes("StorageManager.estimate")) {value = colorFn(value)}
+						value += 'GB ['+ estimate.quota +' bytes]'
+						if (isProxyLie('StorageManager.estimate')) {value = log_known(6, METRIC, value)}
 						exit(value)
 					} else {
-						exit(log_error(SECT6, METRIC, zErrType + vType))
+						throw zErrType + typeCheck
 					}
-				}).catch(function(e){exit(log_error(SECT6, METRIC, e))})
-			}).catch(function(e){exit(log_error(SECT6, METRIC, e))})
-		} catch(e) {exit(log_error(SECT6, METRIC, e))}
+				}).catch(function(e){exit(log_error(6, METRIC, e))})
+			}).catch(function(e){exit(log_error(6, METRIC, e))})
+		} catch(e) {exit(log_error(6, METRIC, e))}
 	}, delay)
 })
 
-const get_storage_quota = () => new Promise(resolve => {
-	let t0 = nowFn()
-	const METRIC = "storage_quota"
-	function exit(value, display) {
-		log_display(6, METRIC, display)
-		log_perf(SECT6, METRIC, t0)
-		return resolve([METRIC, value])
+const get_storage_quota = (METRIC) => new Promise(resolve => {
+	let isLies = false
+	function exit(display, value) {
+		addBoth(6, METRIC, display,'','', value, isLies)
+		return resolve()
 	}
 	try {
 		navigator.storage.estimate().then(estimate => {
 			let value = estimate.quota
-			if (runSE) {foo++} else if (runST) {value = undefined}
-			let vType = typeFn(value)
-			if ("number" == vType && Number.isInteger(value)) {
-				let display = value
-				value = Math.floor(value/(1073741824) * 10)/10 // round down
-				display = value +"GB ["+ display +" bytes]"
-				if (isProxy && sData[SECT99].includes("StorageManager.estimate")) {
-					display = colorFn(display)
-					value = zLIE
-					log_known(SECT6, METRIC)
-				}
-				exit(value, display)
-			} else {exit(zErr, log_error(SECT6, METRIC, zErrType + vType))}
-		}).catch(function(e){exit(zErr, log_error(SECT6, METRIC, e))})
-	} catch(e) {exit(zErr, log_error(SECT6, METRIC, e))}
+			if (runST) {value = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck && !Number.isInteger(value)) {throw zErrType + typeCheck}
+			let display = value
+			value = Math.floor(value/(1073741824) * 10)/10 // round down
+			display = value +'GB ['+ display +' bytes]'
+			if (isProxyLie('StorageManager.estimate')) {isLies = true}
+			exit(display, value)
+		}).catch(function(e){exit(log_error(6, METRIC, e), zErr)})
+	} catch(e) {exit(log_error(6, METRIC, e), zErr)}
 })
 
 const get_permissions = (item) => new Promise(resolve => {
-	const METRIC = "permission_"+ item
-	let notation = ""
-	function exit(value) {
-		if (isSmart) {notation = value == "prompt" ? default_green : default_red}
-		log_display(6, METRIC, value + notation)
-		if (item == "persistent-storage" && value == "granted") {
+	const METRIC = 'permission_'+ item
+	function exit(display, value) {
+		if (value == undefined) {value = display}
+		let notation = value == 'prompt' ? default_green : default_red
+		addBoth(6, METRIC, display,'', notation, value)
+
+		if (item === 'persistent-storage' && value === 'granted') {
 			// silent run manager to force granted quota when run
-			Promise.all([
-				get_storage_manager(0)
-			]).then(function(){
-				return resolve([METRIC, value])
-			})
+			Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
 		} else {
-			return resolve([METRIC, value])
+			return resolve()
 		}
 	}
 	try {
 		navigator.permissions.query({name:item}).then(function(r) {
 			exit(r.state)
-		}).catch(error => {
-			log_error(SECT6, METRIC, error)
-			exit(zErr)
+		}).catch(e => {
+			exit(log_error(6, METRIC, e), zErr)
 		})
 	} catch(e) {
-		log_error(SECT6, METRIC, e)
-		exit(zErr)
+		exit(log_error(6, METRIC, e), zErr)
 	}
 })
 
-const test_idb = (skip, log = false) => new Promise(resolve => {
+const test_idb = (log = false) => new Promise(resolve => {
 	let t0 = nowFn()
-	const METRIC = "indexedDB_test"
+	const METRIC = 'indexedDB_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
 		return resolve()
 	}
-	if (skip) {
-		exit(zNA)
-	} else {
-		try {
-			let rndStrI = "idb_"+ rnd_string()
-			let openIDB = indexedDB.open(rndStrI)
-			// create
-			openIDB.onupgradeneeded = function(event){
-				let dbObject = event.target.result
-				let dbStore = dbObject.createObjectStore(METRIC, {keyPath:"id"})
-			}
-			openIDB.onsuccess = function(event) {
-				let dbObject = event.target.result
-				// start
-				let dbTx = dbObject.transaction(METRIC, "readwrite")
-				let dbStore = dbTx.objectStore(METRIC)
-				// add
-				let rndIndex = rnd_number()
-				let rndValue = rnd_string()
-				dbStore.put( {id: rndIndex, value: rndValue} )
-				// query
-				let getStr = dbStore.get(rndIndex)
-				getStr.onsuccess = function() {
-					exit(getStr.result.value == rndValue ? zS : zF)
-				}
-				// close
-				dbTx.oncomplete = function() {dbObject.close()}
-			}
-			openIDB.onerror = function(event) {exit(zF)}
-		} catch(e) {
-			exit(zErr)
+	try {
+		let rndStrI = 'idb_'+ rnd_string()
+		let openIDB = indexedDB.open(rndStrI)
+		// create
+		openIDB.onupgradeneeded = function(event){
+			let dbObject = event.target.result
+			let dbStore = dbObject.createObjectStore(METRIC, {keyPath:'id'})
 		}
+		openIDB.onsuccess = function(event) {
+			let dbObject = event.target.result
+			// start
+			let dbTx = dbObject.transaction(METRIC, 'readwrite')
+			let dbStore = dbTx.objectStore(METRIC)
+			// add
+			let rndIndex = rnd_number()
+			let rndValue = rnd_string()
+			dbStore.put( {id: rndIndex, value: rndValue} )
+			// query
+			let getStr = dbStore.get(rndIndex)
+			getStr.onsuccess = function() {
+				exit(getStr.result.value == rndValue ? zS : zF)
+			}
+			// close
+			dbTx.oncomplete = function() {dbObject.close()}
+		}
+		openIDB.onerror = function(event) {exit(zF)}
+	} catch(e) {
+		exit(zErr)
 	}
 })
 
 const test_worker_service = (log = false) => new Promise(resolve => {
 	let t0 = performance.now()
-	const METRIC = "service_worker_test"
+	const METRIC = 'service_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
 	}
 	try {
-		navigator.serviceWorker.register("js/storage_service_worker.js").then((registration) => {
+		navigator.serviceWorker.register('js/storage_service_worker.js').then((registration) => {
 			exit(zS)
 			registration.unregister().then(function(boolean) {})
 		})
@@ -304,17 +243,17 @@ const test_worker_service = (log = false) => new Promise(resolve => {
 
 const test_worker_shared = (log = false) => new Promise(resolve => {
 	let t0 = performance.now()
-	const METRIC = "shared_worker_test"
+	const METRIC = 'shared_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
 		return resolve()
 	}
 	try {
-		let shared = new SharedWorker("js/storage_shared_worker.js")
+		let shared = new SharedWorker('js/storage_shared_worker.js')
 		let rndStr2 = rnd_string()
-		shared.port.addEventListener("message", function(e) {
-			let value = ("TZP-"+ rndStr2 === e.data) ? zS : zF
+		shared.port.addEventListener('message', function(e) {
+			let value = ('TZP-'+ rndStr2 === e.data) ? zS : zF
 			shared.port.close()
 			exit(value)
 		}, false)
@@ -326,22 +265,22 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 	}
 })
 
-const test_worker_web = (skip, log = false) => new Promise(resolve => {
+const test_worker_web = (log = false) => new Promise(resolve => {
 	let t0 = performance.now()
-	const METRIC = "web_worker_test"
+	const METRIC = 'web_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
 		return resolve()
 	}
-	if (skip) {
-		exit(zNA)
+	if (isFile) {
+		exit(zSKIP)
 	} else {
 		try {
-			let worker = new Worker("js/storage_workers.js")
+			let worker = new Worker('js/storage_workers.js')
 			let rndStr1 = rnd_string()
-			worker.addEventListener("message", function(e) {
-				let value = ("TZP-"+ rndStr1 === e.data) ? zS : zF
+			worker.addEventListener('message', function(e) {
+				let value = ('TZP-'+ rndStr1 === e.data) ? zS : zF
 				worker.terminate
 				exit(value)
 			}, false)
@@ -355,30 +294,22 @@ const test_worker_web = (skip, log = false) => new Promise(resolve => {
 
 const outputStorage = () => new Promise(resolve => {
 	// ToDo: notification support/test
-	let t0 = nowFn()
-	addDataDisplay(6, "indexedDB", "indexedDB" in window ? zE : zD)
-	addDataDisplay(6, "worker", "function" === typeFn(Worker) ? zE : zD)
+	addBoth(6, 'indexedDB', 'indexedDB' in window ? zE : zD)
+	addBoth(6, 'worker', 'function' == typeFn(Worker) ? zE : zD)
 
-	// skip FF104 or lower due to sanitizing issues
-	let skip = isFile && isVer < 105
 	Promise.all([
-		get_caches(),
-		get_cookies(skip),
-		get_storage(skip),
-		get_filesystem(),
-		get_permissions("notifications"),
-		get_permissions("persistent-storage"),
-		get_permissions("push"),
-	]).then(function(results){
-		results.forEach(function(item) {addDataFromArray(6, item)})
-		Promise.all([
-			get_storage_quota()
-		]).then(function(results){
-			results.forEach(function(item) {addDataFromArray(6, item)})
-			log_section(6, t0)
-			return resolve(SECT6)
-		})
+		get_cookies('cookies'),
+		get_storage('localStorage'),
+		get_storage('sessionStorage'),
+		get_caches('caches'),
+		get_permissions('notifications'),
+		get_permissions('persistent-storage'),
+		get_permissions('push'),
+		get_filesystem('filesystem'),
+		get_storage_quota('storage_quota')
+	]).then(function(){
+		return resolve()
 	})
 })
 
-countJS(SECT6)
+countJS(6)
