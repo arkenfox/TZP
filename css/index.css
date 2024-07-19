@@ -64,7 +64,7 @@ code {
 	left: 0px;
 	width: 100%;
 	height: 100%;
-	z-index: 990;
+	z-index: 900;
 	display: none;
 }
 #overlay {
@@ -84,14 +84,24 @@ code {
 	z-index: 1000;
 	overscroll-behavior: contain;
 }
+#overlaytop {
+	position: sticky;
+	top: 0;
+	background-color: var(--bg0);
+	border-bottom: 1px solid var(--test0);
+	padding: 18px 25px;
+	z-index: 1000;
+}
+#overlaycontent {
+	position: absolute;
+	margin: 15px 25px 10px;
+	padding-bottom: 15px;
+}
 #overlaybuttons {
-	position: fixed;
 	float: right;
-	right: 25px;
 	width: fit-content;
 	text-align: right;
 }
-
 
 div.pad {
 	padding: 0px 25px 15px /* top left+right bottom */
@@ -112,7 +122,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .bad {color: var(--testbad);}
 .faint {color: var(--test99);}
 .hidden {display: none;}
-.health {font-size: 10px;}
+.health, .healthsilent {font-size: 10px;}
 .offscreen {
 	position: absolute !important;
 	top: -2000% !important;
@@ -161,14 +171,13 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 }
 
 /* show/hide */
-.togC, .togF, .togL, .togLO, .togTO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
+.togC, .togF, .togL, .togLO, .togT, .togTM, .togTO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
 
 /* run/re-run, click here */
 .btn {background-color: var(--bg0);
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
-	/*font-weight: bold;*/ /* bold looks out of place on macs */
 	padding-left: 6px;
 	padding-right: 6px;
 	cursor: pointer;
@@ -183,7 +192,6 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 }
 /* section metrics/counts: underline, padded, bold */
 .btns {
-	font-weight: bold;
 	text-decoration: underline;
 	padding-left: 8px;
 	padding-right: 8px;
@@ -208,7 +216,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .btn16, .s16 {border-color: var(--test16); color: var(--test16);}
 .btn17, .s17 {border-color: var(--test17); color: var(--test17);}
 .btn18, .s18 {border-color: var(--test18); color: var(--test18);}
-.s99 {color: var(--test99);}
+.btn99, .s99 {border-color: var(--test99); color: var(--test99);}
 .btngood, .sgood {border-color: var(--test7); color: var(--test7);}
 .btnbad, .sbad {border-color: var(--testbad); color: var(--testbad);}
 .btn-left {float: left; position: relative; left: -15px; top: 0px;}
@@ -232,7 +240,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	border-style: solid; border-color: transparent var(--test0) transparent transparent;}
 
 /* table nav */
-div.nav-title {position: relative;}
+div.nav-title {position: relative; font-weight: bold;}
 div.nav-down {position: absolute; right: 5px; top: 0px; width: 250px; text-align: right;}
 div.nav-up {position: absolute; left: 5px; top: 0px; width: 250px; text-align: left;}
 div.nav-right {position: absolute; right: 5px; top: -2px; width: 0px;}
@@ -251,7 +259,7 @@ th {color: black; font-size: 14px; padding: 3px 0;}
 table td:first-child { text-align: right; vertical-align: top;}
 table td.blurb {text-align: center; line-height: 1.5em;}
 table td.center {text-align: center;}
-table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px;}
+table td.intro {text-align: left; line-height: 1.5em; padding-bottom: 10px; padding-left: 0px;}
 table td.secthash {
 	text-align: left;
 	vertical-align: top;
@@ -265,6 +273,10 @@ tr td.border-bottom {
 	border-bottom: 1px solid var(--test99);
 	border-bottom-style: dashed;
 }
+
+div.scroll {width: 100px; overflow-y: scroll;}
+div.scrollauto {scrollbar-width: auto;}
+div.scrollthin {scrollbar-width: thin;}
 
 #tb1 th {background-color: var(--bg1);}
 #tb2 th {background-color: var(--bg2);}
@@ -287,6 +299,7 @@ tr td.border-bottom {
 #tb99 th {background-color: var(--bg99);}
 #tbfp th {background-color: var(--bg99);}
 #tbperf th {background-color: var(--bg99);}
+#tbblock th {background-color: var(--bg99);}
 
 #tb1 td:first-child {color: var(--test1);}
 #tb2 td:first-child {color: var(--test2);}
@@ -295,6 +308,7 @@ tr td.border-bottom {
 #tb3 td:first-child {color: var(--test3);}
 #tb4 td:first-child {color: var(--test4);}
 	#tb4 .togLO td:first-child {color: var(--test99);}
+	#tb4 .togTM td:first-child {color: var(--test99);}
 	#tb4 .togTO td:first-child {color: var(--test99);}
 #tb5 td:first-child {color: var(--test5);}
 #tb6 td:first-child {color: var(--test6);}
@@ -311,12 +325,13 @@ tr td.border-bottom {
 #tb15 td:first-child {color: var(--test15);}
 #tb16 td:first-child {color: var(--test16);}
 #tb17 td:first-child {color: var(--test17);}
+	#tb17 .togT td:first-child {color: var(--test99);}
 #tb18 td:first-child {color: var(--test18);}
 #tb99 td:first-child {color: var(--test99);}
 #tbfp td:first-child {color: var(--test99);}
 #tbperf td:first-child {color: var(--test99);}
 
-#lh-fingerprint, #mathml-fingerprint {
+#lh-fp, #mathml-fp {
 	position: fixed;
 	top: 0;
 	left: 0;
