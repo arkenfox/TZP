@@ -220,7 +220,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 .btngood, .sgood {border-color: var(--test7); color: var(--test7);}
 .btnbad, .sbad {border-color: var(--testbad); color: var(--testbad);}
 .btn-left {float: left; position: relative; left: -15px; top: 0px;}
-.btn-right {float: right; position: relative; right: 10px; top: 0px; text-align: right;}
+.btn-right {float: right; position: relative; top: 0px; text-align: right;}
 
 /* tooltips */
 .icon {font-size: 10px; font-weight: bold; color: var(--test0); cursor: default;}
