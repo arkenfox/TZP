@@ -9,7 +9,6 @@ function getDynamicIframeWindow({
 	violateSOP = true, // SameOriginPolicy
 	display = false
 }) {
-	let res = []
 	try {
 		if (runSE) {foo++}
 		const elementName = nestIframeInContainerDiv ? 'div' : 'iframe'
@@ -34,50 +33,35 @@ function getDynamicIframeWindow({
 			element.setAttribute('src', source)
 		}
 		const iframeWindow = contentWindow ? element.contentWindow : context[length]
-		if (test == "ua") {
+		let data = {}, r
+		if ('ua' == test) {
 			let navigator = iframeWindow.navigator
 			let list = ['appCodeName','appName','appVersion','buildID','oscpu',
-				'platform','product','productSub','userAgent','vendor','vendorSub'],
-				r = ""
-			for (let i=0; i < list.length; i++) {
+				'platform','product','productSub','userAgent','vendor','vendorSub']
+			list.forEach(function(p) {
 				try {
-					r = cleanFn(navigator[list[i]])
+					r = navigator[p]
+					if ("string" !== typeof r) {throw zErr}
+					if ('' == r) {r = 'empty string'}
 				} catch(e) {
-					r = zErr
+					r = e
 				}
-				res.push(list[i] +":"+ r)
-			}
+				data[p] = r
+			})
 		}
 		document.body.removeChild(element)
-		return res
+		return {'data': data, 'hash': mini(data)}
 	} catch(e) {
-		//console.log(e)
-		return res.push(zErr)
+		return e+''
 	}
 }
 
 function get_ua_iframes(log = false) {
 	// runs post FP
 	let t0 = nowFn()
-	// clear
-	let str1 = "ua", str2 = str1 +"_diff"
-	let aNames = [str2, str2 +"_content docroot", str2 + "_content with url", str2 +"_window docroot",
-		str2 +"_window with url", str2 + "_iframe access", str2 + "_nested", str2 +"_window access",
-	]
-	// control
-	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
-		'platform','product','productSub','userAgent','vendor','vendorSub'],
-		res = [], r = ""
-	var ctrl = [], simA = [], simB = []
 
-	list.forEach(function(prop) {
-		try {r = cleanFn(navigator[prop])} catch(e) {r = zErr}
-		ctrl.push(prop +":"+ r)
-		if (prop == "appCodeName") {r = "SIM A"}
-		simA.push(prop +":"+ r)
-		if (prop == "appCodeName") {r = "SIM B"}
-		simB.push(prop +":"+ r)
-	})
+	let aNames = ["content_docroot", "content_with_url", "window_docroot",
+		"window_with_url", "iframe_access", "nested", "window_access"]
 
 	// get data
 	Promise.all([
@@ -89,113 +73,77 @@ function get_ua_iframes(log = false) {
 		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: "ua"}), // nested
 		getDynamicIframeWindow({context: window, test: "ua"}), // window access
 	]).then(function(results){
+		const ctrlHash = mini(sDetail.document.ua_reported)
+		/* test some errors
+		results[0] = "i am not groot"
+		results[2] = "i am groot"
+		//*/
+		/* test some different hashes
+		results[4].data.appCodeName = "Godzilla"
+		let tmpHash = mini(results[4].data)
+		results[4].hash = tmpHash
+		results[6].data.appName = "Navigator"
+		tmpHash = mini(results[6].data)
+		results[6].hash = tmpHash
+		//*/
 
-		const ctrlhash = mini(ctrl)
-		// sim
-		if (runUAI) {
-			let err1 = [zErr, "TypeError: blah blah"], err2 = [zErr, "ReferenceError: rocket is a not a space rabbit"]
-			if (intUAI == 0) {
-				results = [ [], [], [], [], [], [], [] ] // all empty
-			} else if (intUAI == 1) {
-				results = [ undefined, null, true, "banana", {}, 45, false ] // all typeof
-			} else if (intUAI == 2) {
-				results = [ err1, err2, err2, err1, err2, err2, err1 ] // all errors
-			} else if (intUAI == 3) {
-				results = [ [], true, 75, err1, [], {}, err2 ] // all mixed
-			} else if (intUAI == 4) {
-				results[1] = [], results[3] = [] // 2 empty
-			} else if (intUAI == 5) {
-				results[0] = "banana", results[4] = null // 2 typeof
-			} else if (intUAI == 6) {
-				results[2] = err2, results[5] = err1 // 2 errors
-			} else if (intUAI == 7) {
-				results[1] = err1, results[3] = [], results[6] = "" // 3 mixed errors
-			} else if (intUAI == 8) {
-				results = [ simA, simA, simA, simA, simA, simA, simA ] // all diff: same-diff
-			} else if (intUAI == 9) {
-				results = [ simA, simA, simB, simB, simA, simB, simA ] // all diff: mixed-diffs
-			} else if (intUAI == 10) {
-				results[0] = simB, results[1] = [], results[2] = simB, results[3] = err1, results[5] = simB // mixed errors, some same-diff
-			} else if (intUAI == 11) {
-				results[0] = simA, results[2] = simB, results[3] = err2, results[4] = simA // 1 error, some multi-diff
-			}
-		}
-
-		// loop iframe results
-		let aError = [], aDistinct = [], validArray = 0, aDisplay = []
-		for (let i=1; i < 8; i++) {
-			let data = results[i-1]
-			let name = aNames[i].replace(/\ua_navigator_iframe_diff_/g, "")
-			if (Array.isArray(data)) {
-				let hash = mini(data)
-				if (data.length == 0) {
-					aDisplay.push(zErrEmpty +": "+ cleanFn(data))
-					aError.push(name)
-				} else if (data.length == 2 && data[0] == zErr) {
-					aDisplay.push(data[1])
-					aError.push(name)
+		let oData = {}, oDisplay = {}, oHashes = {}, countErrors = 0
+		for (let i=0; i < results.length; i++) {
+			let item = results[i]
+			let name = "ua_"+ aNames[i]
+			if ("string" === typeof item) {
+				dom[name].innerHTML = item
+				countErrors++
+			} else {
+				if (oHashes[item.hash] == undefined) {
+					oHashes[item.hash] = {"group": [name], "data": item.data}
 				} else {
-					aDisplay.push(hash)
-					validArray = i-1
-					if (hash !== ctrlhash) {
-						aDistinct.push(hash)
-						let diffs = []
-						for (let j = 0; j < data.length; j++) {if (data[j] !== ctrl[j]) {diffs.push(data[j])}}
-						addDetail(aNames[0], diffs, zIFRAME)
-					}
-				}
-				document.getElementById("uaIframe"+ i).innerHTML = aDisplay[i-1]
-			} else {
-				let tmp = log_error("ua","iframe", zErrType + typeof data)
-				aDisplay.push(tmp)
-				aError.push(name)
-				document.getElementById("uaIframe"+ i).innerHTML = tmp
-			}
-		}
-		let errCount = aError.length
-		aDistinct = aDistinct.filter(function(item, position) {return aDistinct.indexOf(item) === position})
-		// iframe summary
-		let summary = ""
-		let errNote = ""
-		if (errCount > 0 && errCount < 7) {errNote = " <span class='s2'>[" + errCount +" error"+ (errCount > 1 ? "s]" : "]") + "</span>"}
-		// single line
-		if (aDistinct.length < 2) {
-			let diffBtn = ""
-			if (errCount == 7) {
-				summary = zErr
-			} else {
-				summary = mini(results[validArray])
-				if (aDistinct.length > 0) {diffBtn = addButton(2, aNames[0], "diff", "btnc", zIFRAME)}
-				summary += (aDistinct.length > 0 ? match_red : match_green) + diffBtn + errNote
-			}
-		}	else {
-			// multi-line
-			summary = "mixed results" + match_red + errNote
-			for (let i=1; i < 8; i++) {
-				let data = results[i-1]
-				if (Array.isArray(data)) {
-					let hash = mini(data)
-					if (data.length > 0 && data.length !== 2) {
-						if (hash !== ctrlhash) {
-							let diffs = []
-							for (let j = 0; j < data.length; j++) {if (data[j] !== ctrl[j]) {diffs.push(data[j])}}
-							addDetail(aNames[i], diffs, zIFRAME)
-							hash += addButton(2, aNames[i], "diff", "btnc", zIFRAME)
-							document.getElementById("uaIframe"+ i).innerHTML = hash
-						}
-					}
+					oHashes[item.hash]["group"].push(name)
 				}
 			}
 		}
-		if (runUAI) {
-			let nmeUAI = ["errors: all empty", "errors: all typeof", "errors: all zErr",
-				"errors: all mixed","errors: 2 empty", "errors: 2 type of", "errors: 2 zErr",
-				"errors: 3 mixed","diffs: all same-diff","diffs: all mixed-diffs",
-				"mixed: 2 errors-mixed | 2 same-diff", "mixed: 1 error | multi-diff"]
-			console.log("SIM #"+ intUAI +" UA iframes:", nmeUAI[intUAI])
-			intUAI++; intUAI = intUAI % nmeUAI.length
+
+		let summary = "", btn = "", errString = ""
+		if (countErrors > 0 && countErrors < results.length) {
+			errString += " <span class='s2'>["+ countErrors +" error"+ (countErrors > 1 ? "s" : "") +"]</span>"+ sc
 		}
-		dom.uaIframes.innerHTML = summary
+		if (countErrors == results.length) {
+			// all errors
+			summary = zErr
+		} else if (Object.keys(oHashes).length == 1) {
+			// single hash
+			let singleHash, notation = match_green
+			for (const k of Object.keys(oHashes)) {
+				singleHash = k
+				if (k !== ctrlHash) {
+					notation = match_red
+					btn = addButton(2, "ua_iframe", "details", "btnc", zIFRAME)
+					addDetail("ua_iframe", oHashes[k].data, zIFRAME)
+				}
+				let items = oHashes[k].group
+				items.forEach(function(item) {oDisplay[item] = k})
+			}
+			summary = singleHash + btn + notation
+		} else {
+			// multiple hashes
+			for (const k of Object.keys(oHashes)) {
+				let items = oHashes[k].group
+				for (let i=0; i < items.length; i++) {
+					// reset
+					btn = ""
+					let name = items[i]
+					// 1st of each non-match: add details
+					if (i == 0 && k !== ctrlHash) {
+						btn = addButton(2, name, "details", "btnc", zIFRAME)
+						addDetail(name, oHashes[k].data, zIFRAME)
+					}
+					oDisplay[name] = k + btn
+				}
+				summary = "mixed results" + match_red
+			}
+		}
+		for (const k of Object.keys(oDisplay)) {dom[k].innerHTML = oDisplay[k]}
+		dom.uaIframes.innerHTML = summary + errString
 		if (log) {log_perf(SECTNF, "ua iframes", t0)}
 	})
 }
