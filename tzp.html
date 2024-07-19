@@ -4,21 +4,21 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=800">
 	<title>TZP</title>
+	<link rel="preload" href="images/InvalidImage.png" as="image">
+	<link rel="preload" href="images/ScaledImage.png" as="image">
 	<link rel="icon" type="image/png" href="chrome://branding/content/icon32.png">
 	<link rel="stylesheet" type="text/css" href="css/index.css">
 	<link rel="stylesheet" type="text/css" href="css/media.css">
 	<link rel="stylesheet" type="text/css" href="css/window_size.css">
 	<link rel="stylesheet" type="text/css" href="css/screen_size.css">
-	<link rel="preload" href="images/InvalidImage.png" as="image">
-	<link rel="preload" href="images/ScaledImage.png" as="image">
 	<script src="js/globals.js"></script>
 	<script src="js/generic.js"></script>
 	<style>
 		body::after {
 			content: "";
-			background: url('chrome://browser/skin/onionPattern.svg');
+			background: url('chrome://global/content/torconnect/onion-pattern.svg');
 			background-repeat: repeat;
-			opacity: 0.6;
+			opacity: 0.075;
 			top: 0;
 			left: 0;
 			bottom: 0;
@@ -54,20 +54,22 @@
 		</div>
 		<div><span id="dfproportion"></span></div>
 		<div id="svgDiv"></div>
-		<div id="eScroll" style="width: 100px; height: 50px; border: 0px; overflow-y: scroll;"><div id="eScrollinner"></div></div>
+		<div id="scrollauto" class="scroll scrollauto"><div id="innerscrollauto"></div></div>
+		<div id="scrollthin" class="scroll scrollthin"><div id="innerscrollthin"></div></div>
+
 		<!-- ensure codepoints have time for async fallback -->
 		<div>
-			<span> &#x20B9; </span><span> &#x2581; </span><span> &#x20BA; </span><span> &#xA73D; </span>
-			<span> &#x20B8; </span><span> &#x05C6; </span><span> &#x1E9E; </span><span> &#x097F; </span>
-			<span> &#xF003; </span><span> &#x1CDA; </span><span> &#x17DD; </span><span> &#x23AE; </span>
-			<span> &#x0D02; </span><span> &#x0B82; </span><span> &#x115A; </span><span> &#x2425; </span>
-			<span> &#x302E; </span><span> &#xA830; </span><span> &#x2B06; </span><span> &#x21E4; </span>
-			<span> &#x20BD; </span><span> &#x2C7B; </span><span> &#x20B0; </span><span> &#xFBEE; </span>
-			<span> &#xF810; </span><span> &#xFFFF; </span><span> &#x007F; </span><span> &#x10A0; </span>
-			<span> &#x0700; </span><span> &#x1950; </span><span> &#x3095; </span><span> &#x532D; </span>
-			<span> &#x061C; </span><span> &#x20E3; </span><span> &#xFFF9; </span><span> &#x0218; </span>
-			<span> &#x058F; </span><span> &#x08E4; </span><span> &#x09B3; </span><span> &#x1C50; </span>
-			<span> &#x2619; </span><span> &#xFFFD; </span><span> &#x1D790; </span>
+			<span> &#x007F; </span><span> &#x0218; </span><span> &#x058F; </span><span> &#x05C6; </span>
+			<span> &#x061C; </span><span> &#x0700; </span><span> &#x08E4; </span><span> &#x097F; </span>
+			<span> &#x09B3; </span><span> &#x0B82; </span><span> &#x0D02; </span><span> &#x10A0; </span>
+			<span> &#x115A; </span><span> &#x17DD; </span><span> &#x1950; </span><span> &#x1C50; </span>
+			<span> &#x1CDA; </span><span> &#x1D790; </span><span> &#x1E9E; </span><span> &#x20B0; </span>
+			<span> &#x20B8; </span><span> &#x20B9; </span><span> &#x20BA; </span><span> &#x20BD; </span>
+			<span> &#x20E3; </span><span> &#x21E4; </span><span> &#x23AE; </span><span> &#x2425; </span>
+			<span> &#x2581; </span><span> &#x2619; </span><span> &#x2B06; </span><span> &#x2C7B; </span>
+			<span> &#x302E; </span><span> &#x3095; </span><span> &#x532D; </span><span> &#xA73D; </span>
+			<span> &#xA830; </span><span> &#xF003; </span><span> &#xF810; </span><span> &#xFBEE; </span>
+			<span> &#xFFF9; </span><span> &#xFFFD; </span><span> &#xFFFF; </span>
 		</div>
 		<!-- don't hide: some forks can't detect it -->
 		<div><img id="branding" src="chrome://branding/content/about-wordmark.svg"></div>
@@ -121,6 +123,7 @@
 		<tr><td class="blurb" id="index"><a class="return" href="index.html">return to TZP index</a></td></tr>
 	</table>
 
+	<span id="tzpcontent">
 	<!--FPs-->
 	<table id="tbfp">
 		<col width="25%"><col width="75%">
@@ -136,11 +139,9 @@
 				<span class="c" id="protohash"></span>
 				<div class="btn-right"><span class="c" id="protohealth"></span></div>
 			</td></tr>
-		<tr><td><div class="btn-left"><span class="btn btn1 c" id="allcheck" onClick="showMetrics(`alerts`)"></span></div>
-				&nbsp; document</td><td class="mono">
+		<tr><td><div>document</td><td class="mono">
 				<span class="c" id="documenthash"></span>
-				<span class="c" id="documenterrorshash"></span>
-				<span class="c" id="documentlieshash"></span>
+				<span class="c" id="documentbtns"></span>
 				<div class="btn-right"><span class="c" id="documenthealth"></span></div>
 			</td></tr>
 		<tr><td colspan="2"></td></tr>
@@ -166,15 +167,23 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn1 btn" onClick="outputSection(1)">[ re-run ]</span></div>
 			<span class="c" id="screenhash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 
-		<!--screen: positions > orientation > measurements-->
+		<!--screen: positions-->
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
 			&nbsp; screen positions</td><td class="c mono" id="screen_position"></td></tr>
+
+		<!--screen: orientation-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
-			&nbsp; orientation</td><td class="c mono" id="screen_orientation"></td></tr>
+			&nbsp; orientation</td><td class="mono">
+				<span class="c" id="screen_orientation_mozOrientation"></span>
+				| <span class="c" id="screen_orientation_orientation.angle"></span>
+				| <span class="c" id="screen_orientation_orientation.type"></span>
+				<span class="c" id="screen_orientation"></span>
+			</td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
 			device-aspect-ratio</span></div> &nbsp; [css] orientation</td>
@@ -182,10 +191,13 @@
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
 			device-aspect-ratio</span></div> &nbsp; [matchMedia] orientation</td>
-			<td class="mono border-bottom"><span id="screen_mmorientation"></span>
+			<td class="mono border-bottom">
+				<span class="c" id="screen_orientation_-moz-device-orientation"></span> | <span class="c" id="screen_orientation_device-aspect-ratio"></span>
 			</td></tr>
+
+		<!--screen: measurements-->
 		<tr><td>available screen</td>
-			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes_match"></span></td></tr>
+			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes"></span></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-device-] screen <sup>1</sup></td>
@@ -194,12 +206,12 @@
 		<tr><td>screen</td>
 			<td class="mono border-bottom">
 				<span class="c" id="mScreen"></span>
-				<span class="c" id="screen_matches_inner"></span>
+				<span class="c" id="screen_size_matches_inner"></span>
 		</td></tr>
 
 		<!--window: measurements > viewport/scrollbars > orientation > positions-->
 		<tr><td>outer window</td>
-			<td class="mono"><span class="c" id="mOuter"></span><span class="c" id="window_sizes_match"></span></td></tr>
+			<td class="mono"><span class="c" id="mOuter"></span><span class="c" id="window_sizes"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-] inner window <sup>1, 3</sup></td><td class="mono" id="D"></td></tr>
@@ -207,14 +219,17 @@
 		<tr><td>inner window</td>
 			<td class="mono border-bottom">
 				<span class="c" id="mInner"></span>
-				<span class="c" id="letterboxing"></span>
-				<span class="c" id="new_window"></span>
+				<span class="c" id="window_letterbox"></span>
+				<span class="c" id="window_newwin"></span>
 			</td></tr>
-		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="eViewport"></td></tr>
-		<tr><td>visualViewport</td><td class="c mono" id="vViewport"></td></tr>
+		<tr class="togOS"><td>[initial] outer window</span></td><td class="mono" id="initialOuter"></td></tr>
+		<tr class="togOS"><td>inner window</td><td class="mono border-bottom"><span id="initialInner"></span>
+			<span class="c" id="window_sizes_initial"></span></td></tr>
+		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
+		<tr><td>visualViewport</td><td class="c mono" id="vp_visualViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">element<br>scrollWidth<br>viewport<br>visualViewport</span></div>
-			&nbsp; scrollbars</td><td class="c mono border-bottom" id="scrollbar_widths"></td></tr>
+			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)<br>viewport<br>visualViewport</span></div>
+			&nbsp; scrollbars</td><td class="c mono border-bottom" id="scrollbars"></td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
@@ -224,14 +239,16 @@
 			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp; [matchMedia] orientation</td>
-			<td class="mono border-bottom"><span id="window_mmorientation"></span></td></tr>
+			<td class="mono border-bottom">
+				<span class="c" id="window_orientation_aspect-ratio"></span> | <span class="c" id="window_orientation_orientation"></span>
+			</td></tr>
 
 		<!-- the rest -->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">display-mode<br>[css] display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>
+			<span class="ttxtb">[css] display-mode<br>display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>
 			&nbsp; display-mode | fullscreen</td>
-			<td class="mono"><span id="cssDM"></span> | <span id="display-mode"></span>
-				| <span class="c" id="fullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
+			<td class="mono"><span id="cssDM"></span> | <span class="c" id="display-mode"></span>
+				| <span class="c" id="windowfullScreen"></span> | <span class="c" id="mozFullScreenEnabled"></span></td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goFS')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb"><b>DON'T PANIC</b> as you briefly<br>enter and then exit full screen</span> &nbsp; </div>
@@ -245,25 +262,22 @@
 		<!-- pixels-->
 		<tr><td>[div] dpi</td><td class="c mono" id="dpi_div"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
-			&nbsp; [css min-resolution] dpi</td><td class="mono"><span id="P"></span><span id="dpi_css"></span></td></tr>
+			&nbsp; [css min-resolution] dpi</td><td class="mono"><span id="P"></span><span class="cssc" id="pixels_dpi_css"></span></td></tr>
 		<tr><td>[matchMedia] dpi</td><td class="mono">
-				<span class="c" id="dpi"></span>
+				<span class="c" id="pixels_dpi"></span>
 			</td></tr>
 		<tr><td>[matchMedia] dppx | dpcm</td><td class="mono">
-				<span class="c" id="dppx"></span> | <span class="c" id="dpcm"></span>
+				<span class="c" id="pixels_dppx"></span> | <span class="c" id="pixels_dpcm"></span>
 			</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">-moz-device-pixel-ratio<br>-webkit-min-device-pixel-ratio<br>window</span></div> &nbsp; devicePixelRatio</td><td class="mono">
-			<span class="c" id="-moz-device-pixel-ratio"></span> | <span class="c" id="-webkit-min-device-pixel-ratio"></span> | <span class="c" id="devicePixelRatio"></span>
+			<span class="c" id="pixels_-moz-device-pixel-ratio"></span>
+				| <span class="c" id="pixels_-webkit-min-device-pixel-ratio"></span> | <span class="c" id="pixels_devicePixelRatio"></span>
 			</td></tr>
 		<tr><td>[border] devicePixelRatio</td><td class="mono"><span class="c" id="devicePixelRatio_border"></span></td></tr>
 		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
 
 		<tr class="togOS"><td colspan="2" class="center">--- android ---</td></tr>
-		<tr class="togOS"><td>initial outer window <span class="bold initialgroup"> &#9679; </span></td>
-			<td class="mono"><span id="initialOuter"></span><span id="window_initial"></span></td></tr>
-		<tr class="togOS"><td>initial inner window <span class="bold initialgroup"> &#9679; </span></td>
-			<td class="mono" id="initialInner"></td></tr>
 		<tr class="togOS"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
 		<tr class="togOS"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
 		<tr class="togOS"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
@@ -293,8 +307,9 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn2 btn" onClick="outputSection(2)">[ re-run ]</span></div>
 			<span class="c" id="uahash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td>hash</td><td class="c mono" id="uaDoc"></td></tr>
+		<tr><td>hash</td><td class="c mono" id="ua_reported"></td></tr>
 		<tr><td id="lappCodeName">appCodeName</td><td class="c mono spaces" id="appCodeName"></td></tr>
 		<tr><td id="lappName">appName</td><td class="c mono spaces" id="appName"></td></tr>
 		<tr><td id="lappVersion">appVersion</td><td class="c mono spaces" id="appVersion"></td></tr>
@@ -309,13 +324,13 @@
 		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
 		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[ show ]</span>
 			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
-			<tr class="togUA1"><td>[contentWindow] document root</td><td class="c mono" id="uaIframe1"></td></tr>
-			<tr class="togUA1"><td>[contentWindow] with URL</td><td class="c mono" id="uaIframe2"></td></tr>
-			<tr class="togUA1"><td>[window] document root</td><td class="c mono" id="uaIframe3"></td></tr>
-			<tr class="togUA1"><td>[window] with URL</td><td class="c mono" id="uaIframe4"></td></tr>
-			<tr class="togUA1"><td>iframe access</td><td class="c mono" id="uaIframe5"></td></tr>
-			<tr class="togUA1"><td>nested</td><td class="c mono" id="uaIframe6"></td></tr>
-			<tr class="togUA1"><td>window access</td><td class="c mono" id="uaIframe7"></td></tr>
+			<tr class="togUA1"><td>[contentWindow] document root</td><td class="c mono" id="ua_content_docroot"></td></tr>
+			<tr class="togUA1"><td>[contentWindow] with URL</td><td class="c mono" id="ua_content_with_url"></td></tr>
+			<tr class="togUA1"><td>[window] document root</td><td class="c mono" id="ua_window_docroot"></td></tr>
+			<tr class="togUA1"><td>[window] with URL</td><td class="c mono" id="ua_window_with_url"></td></tr>
+			<tr class="togUA1"><td>iframe access</td><td class="c mono" id="ua_iframe_access"></td></tr>
+			<tr class="togUA1"><td>nested</td><td class="c mono" id="ua_nested"></td></tr>
+			<tr class="togUA1"><td>window access</td><td class="c mono" id="ua_window_access"></td></tr>
 		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[ show ]</span>
 			workers</td><td class="mono s99" id="uaWorkers">summary not coded</td></tr>
 			<tr class="togUA2"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
@@ -343,16 +358,20 @@
 			These tests are to show that you cannot hide your engine
 			<a class="blue" target="blank" href="tests/engineprop.html">[PoC1]</a>
 			+ <a class="blue" target="blank" href="tests/engine.html">[PoC2]</a>, version
-			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a> or OS.</span>
+			<a class="blue" target="blank" href="tests/versions.html">[PoC]</a> or OS
+			<a class="blue" target="blank" href="tests/os.html">[PoC]</a>.</span>
 		</td></tr>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn3 btn" onClick="outputSection(3)">[ re-run ]</span></div>
 			<span class="c" id="featurehash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>[css] branding</td><td class="mono" id="fdBrandingCss"></td></tr>
 		<tr><td>[css] browser</td><td class="mono" id="fdResourceCss"></td></tr>
 		<tr><td>[browser] architecture</td><td class="c mono" id="browser_architecture"></td></tr>
-		<tr><td>browser</td><td class="c mono" id="browser"></td></tr>
+		<tr><td>browser</td><td class="mono">
+			<span class="c" id="browser"></span> | <span class="c" id="logo"></span> | <span class="c" id="wordmark"></span>
+			</td></tr>
 		<tr><td>version</td><td class="c mono" id="version"></td></tr>
 		<tr><td>[chrome://] os</td><td class="c mono" id="os"></td></tr>
 		<tr><td>[css] os <sup>1</sup></td>
@@ -379,11 +398,13 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn4 btn" onClick="outputSection(4)">[ re-run ]</span></div>
 			<span class="c" id="regionhash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<!--geo-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">navigator<br>window<br>permission</span></div>
-			&nbsp; geolocation</td><td class="c mono" id="geolocation"></td></tr>
+			&nbsp; geolocation</td><td class="mono"><span class="c" id="geolocation_navigator"></span> | <span class="c" id="geolocation"></span>
+			</td></tr>
 		<!--lang-->
 		<tr><td>language</td><td class="c mono" id="language"></td></tr>
 		<tr><td>languages</td><td class="c mono" id="languages"></td></tr>
@@ -404,41 +425,51 @@
 		<!--messages-->
 		<tr><td>media messages</td><td class="c mono" id="media_messages"></td></tr>
 		<tr><td>validation messages</td><td class="c mono" id="validation_messages"></td></tr>
-		<tr><td>xml messages</td><td class="c mono" id="xml_messages"></td></tr>
+		<tr><td>XML messages</td><td class="c mono" id="xml_messages"></td></tr>
+		<tr><td>XSLT messages</td><td class="c mono" id="xslt_messages"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td>[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
+		<tr><td><span id="labelTM" class="btn btn0" onClick="togglerows('TM','btn')">[ show ]</span>
+			[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
+		<tr class="togTM"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
+		<tr class="togTM"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
+		<tr class="togTM"><td>iframe</td><td class="c mono" id="timezone_offset_iframe"></td></tr>
+		<tr class="togTM"><td>parseFromString</td><td class="c mono" id="timezone_offset_string"></td></tr>
+		<tr class="togTM"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_unsafe"></td></tr>
+		<tr class="togTM"><td>EXSLT</td><td class="c mono" id="timezone_offset_exslt"></td></tr>
 		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
 		<tr class="togTO"><td>date</td><td class="c mono" id="date"></td></tr>
-		<tr class="togTO"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a> &nbsp; date.parse</td><td class="c mono" id="date.parse"></td></tr>
+		<tr class="togTO"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a>
+			&nbsp; date.parse</td><td class="c mono" id="date.parse"></td></tr>
 		<tr class="togTO"><td>date.valueOf</td><td class="c mono" id="date.valueOf"></td></tr>
 		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
 		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
 		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
+
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
 		<!--date/time + formatting-->
 		<tr class="togL"><td></td><td class="s4">[to*string] dates</td></tr>
-			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt43"></td></tr>
-			<tr class="togL"><td>date/time</td><td class="c" id="ldt44"></td></tr>
-			<tr class="togL"><td>toString</td><td class="c" id="ldt45"></td></tr>
-			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt46"></td></tr>
-			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt47"></td></tr>
-			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt48"></td></tr>
-			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt49"></td></tr>
-			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt50"></td></tr>
-			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt51"></td></tr>
+			<tr class="togL"><td>toTimeString</td><td class="c" id="ldt1"></td></tr>
+			<tr class="togL"><td>date/time</td><td class="c" id="ldt2"></td></tr>
+			<tr class="togL"><td>toString</td><td class="c" id="ldt3"></td></tr>
+			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt4"></td></tr>
+			<tr class="togL"><td>toLocaleDateString</td><td class="c" id="ldt5"></td></tr>
+			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt6"></td></tr>
+			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt7"></td></tr>
+			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt8"></td></tr>
+			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt9"></td></tr>
 
 		<!--Intl.DateTimeFormat-->
 		<tr class="togL"><td></td><td class="s4">[intl] dates</td></tr>
-			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt52"></td></tr>
-			<tr class="togL"><td>[formatToParts] DateTimeFormat</td><td class="c" id="ldt53"></td></tr>
-			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt54"></td></tr>
-			<tr class="togL"><td>relatedyear | yearname</td><td class="c" id="ldt55"></td></tr>
-			<tr class="togL"><td>timeZoneNames</td><td class="c" id="ldt57"></td></tr>
-			<tr class="togL"><td>formatrange</td><td class="c" id="ldt58"></td></tr>
+			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt10"></td></tr>
+			<tr class="togL"><td>[formatToParts] DateTimeFormat</td><td class="c" id="ldt11"></td></tr>
+			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt12"></td></tr>
+			<tr class="togL"><td>relatedyear | yearname</td><td class="c" id="ldt13"></td></tr>
+			<tr class="togL"><td>timeZoneNames</td><td class="c" id="ldt14"></td></tr>
+			<tr class="togL"><td>formatrange</td><td class="c" id="ldt15"></td></tr>
 		<tr class="togL" colspan="2"><td></td></tr>
 	</table>
 
@@ -454,6 +485,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn5 btn" onClick="outputSection(5)">[ re-run ]</span></div>
 			<span class="c" id="headershash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>connection</td><td class="c mono" id="connection"></td></tr>
 		<tr><td>doNotTrack</td><td class="c mono" id="doNotTrack"></td></tr>
@@ -473,13 +505,14 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn6 btn" onClick="outputSection(6)">[ re-run ]</span></div>
 			<span class="c" id="storagehash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td>caches</td><td class="c mono" id="caches"></td></tr>
+		<tr><td>caches</td><td class="c mono" id="window.caches"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">session | persistent<br>tests are JS 1st party</span></div>
 				&nbsp; cookies</td><td class="c mono" id="ctest"></td></tr>
-		<tr><td>localStorage</td><td class="c mono" id="lstest"></td></tr>
-		<tr><td>sessionStorage</td><td class="c mono" id="sstest"></td></tr>
+		<tr><td>localStorage</td><td class="c mono" id="localStorage"></td></tr>
+		<tr><td>sessionStorage</td><td class="c mono" id="sessionStorage"></td></tr>
 		<tr><td>indexedDB</td><td class="mono"><span class="c" id="indexedDB"></span>	| <span class="c" id="indexedDB_test"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">worker | web | shared | service</span></div>
@@ -514,24 +547,25 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn7 btn" onClick="outputSection(7)">[ re-run ]</span></div>
 			<span class="c" id="deviceshash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>color</td>
-				<td class="mono"><span id="cssC"></span><span class="c" id="color_css"></span> | <span class="c" id="color"></span></td></tr>
+				<td class="mono"><span id="cssC"></span><span class="cssc" id="color_css"></span> | <span class="c" id="color"></span></td></tr>
 		<tr><td>pixel depth | color depth</td>
 			<td class="mono"><span class="c" id="pixelDepth"></span> | <span class="c" id="colorDepth"></span></td></tr>
 		<tr><td>color gamut</td>
-			<td class="mono"><span id="cssCG"></span><span class="c" id="color-gamut_css"></span> | <span class="c" id="color-gamut"></span></td></tr>
+			<td class="mono"><span id="cssCG"></span><span class="cssc" id="color-gamut_css"></span> | <span class="c" id="color-gamut"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.maxHardwareConcurrency</span></div>
 			&nbsp; hardwareConcurrency</td><td class="c mono" id="hardwareConcurrency"></td></tr>
-		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span><span class="c" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
-		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="c" id="hover_css"></span> | <span class="c" id="hover"></span></td></tr>
+		<tr><td>any-hover</td><td class="mono"><span id="cssAH"></span><span class="cssc" id="any-hover_css"></span> | <span class="c" id="any-hover"></span></td></tr>
+		<tr><td>hover</td><td class="mono"><span id="cssH"></span><span class="cssc" id="hover_css"></span> | <span class="c" id="hover"></span></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">media.navigator.enabled<br>media.peerconnection.enabled</span></div>
 			&nbsp; media devices</td><td class="c mono" id="mediaDevices"></td></tr>
 		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
-			<span class="c" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
-		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="c" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
+			<span class="cssc" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
+		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="cssc" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
 		<tr><td id="pointertarget"><span class="btn btn0">[ <span id="pointerlabel">mouse</span> ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">height<br>isPrimary<br>mozInputSource<br>mozPressure<br>pointerType<br>pressure<br>
@@ -572,6 +606,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn9 btn" onClick="outputSection(9)">[ re-run ]</span></div>
 			<span class="c" id="canvashash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td><a class="blue" href="tests/canvasnoise.html" target="blank">[PoC]</a>
 			&nbsp; <div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">random per run</span></div>
@@ -599,6 +634,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn10 btn" onClick="outputSection(10)">[ re-run ]</span></div>
 			<span class="c" id="webglhash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>experimental</td><td class="mono">result</td></tr>
 		<tr><td>webgl</td><td class="mono">result</td></tr>
@@ -617,8 +653,9 @@
 			<div class="nav-right"><a name="audiod"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
-			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(11, `c`)">[ re-run ]</span></div>
+			<div class="btn-left"><span class="btn11 btn" onClick="outputSection(11)">[ re-run ]</span></div>
 			<span class="c" id="audiohash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>audioContext <sup>1</sup></td><td class="c mono" id="audioContext"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -649,7 +686,8 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn12 btn" onClick="outputSection(12)">[ re-run ]</span></div>
-			<span class="c" id="fontshash"></span><div class="btn-right"><span class="c" id="fntBtn"></span></div>
+			<span class="c" id="fontshash"></span>
+			<div class="btn-right"><span class="c" id="fntBtn"></span></div>
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">browser.display.use_document_fonts</span></div>
@@ -693,27 +731,26 @@
 		<tr><td>[widget] fonts</td><td class="c mono" id="widget_fonts"></td></tr>
 		<!--glyphs-->
 		<tr><td></td><td><span class="s12">glyphs</span></td></tr>
-		<tr><td>offset <sup>4</sup></td><td class="c mono" id="glyphs_offset"></td></tr>
 		<tr><td>clientrect <sup>4</sup></td><td class="c mono" id="glyphs_clientrect"></td></tr>
 		<tr><td>[measureText] width <sup>4</sup></td><td class="c mono" id="glyphs_width"></td></tr>
 		<!--tm-->
 		<tr><td></td><td><span class="s12">textmetrics</span></td></tr>
 		<tr><td>actualBoundingBoxAscent | Descent</td>
-			<td class="mono"><span class="c spaces" id="actualBoundingBoxAscent"></span>
-			| <span class="c" id="actualBoundingBoxDescent"></span>
+			<td class="mono"><span class="c spaces" id="glyphs_actualBoundingBoxAscent"></span>
+			| <span class="c" id="glyphs_actualBoundingBoxDescent"></span>
 		</td></tr>
 		<tr><td>actualBoundingBoxLeft | Right</td><td class="mono">
-			<span class="c spaces" id="actualBoundingBoxLeft"></span> | <span class="c" id="actualBoundingBoxRight"></span>
+			<span class="c spaces" id="glyphs_actualBoundingBoxLeft"></span> | <span class="c" id="glyphs_actualBoundingBoxRight"></span>
 			</td></tr>
-		<tr><td>alphabeticBaseline</td><td class="c mono" id="alphabeticBaseline"></td></tr>
+		<tr><td>alphabeticBaseline</td><td class="c mono" id="glyphs_alphabeticBaseline"></td></tr>
 		<tr><td>emHeightAscent | Descent</td><td class="mono">
-			<span class="c spaces" id="emHeightAscent"></span> | <span class="c" id="emHeightDescent"></span>
+			<span class="c spaces" id="glyphs_emHeightAscent"></span> | <span class="c" id="glyphs_emHeightDescent"></span>
 			</td></tr>
 		<tr><td>fontBoundingBoxAscent | Descent</td><td class="mono">
-			<span class="c spaces" id="fontBoundingBoxAscent"></span> | <span class="c" id="fontBoundingBoxDescent"></span>
+			<span class="c spaces" id="glyphs_fontBoundingBoxAscent"></span> | <span class="c" id="glyphs_fontBoundingBoxDescent"></span>
 			</td></tr>
 		<tr><td>hanging | ideographicBaseline</td><td class="mono">
-			<span class="c spaces" id="hangingBaseline"></span> | <span class="c" id="ideographicBaseline"></span>
+			<span class="c spaces" id="glyphs_hangingBaseline"></span> | <span class="c" id="glyphs_ideographicBaseline"></span>
 			</td></tr>
 		<tr><td colspan="2"></td></tr>
 		<!--creds-->
@@ -739,7 +776,8 @@
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn13 btn" onClick="outputSection(13)">[ re-run ]</span></div>
-			<span class="c" id="mediahash"></span><div class="btn-right"><span id="mediaBtn"></span></div></td></tr>
+			<span class="c" id="mediahash"></span>
+			<div class="btn-right"><span id="mediaBtn"></span></div></td></tr>
 		<tr><td>autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy"></td></tr>
 		<tr><td>[user] autoplaypolicy</td><td class="c mono" id="getAutoplayPolicy_user"></td></tr>
 		<tr><td>clearkey</td><td class="c mono" id="clearkey"></td></tr>
@@ -764,6 +802,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn14 btn" onClick="outputSection(14)">[ re-run ]</span></div>
 			<span class="c" id="csshash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>[css4] colors</td><td class="c mono" id="colors_css4"></td></tr>
 		<tr><td>[deprecated] colors</td><td class="c mono" id="colors_deprecated"></td></tr>
@@ -771,24 +810,24 @@
 			&nbsp; [-moz-] colors</td><td class="c mono" id="colors_moz"></td></tr>
 		<tr><td><span id="labelC" class="btn btn0" onClick="togglerows('C','btn')">[ show ]</span>
 			computed styles <sup>1</sup></td><td class="c mono" id="computed_styles"></td></tr>
-		<tr class="togC"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="styles_cssrulelist"></td></tr>
-		<tr class="togC"><td>DOMParser <sup>1</sup></td><td class="c mono" id="styles_domparser"></td></tr>
-		<tr class="togC"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="styles_getcomputed"></td></tr>
-		<tr class="togC"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="styles_htmlelement"></td></tr>
+		<tr class="togC"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="computed_styles_cssrulelist"></td></tr>
+		<tr class="togC"><td>DOMParser <sup>1</sup></td><td class="c mono" id="computed_styles_domparser"></td></tr>
+		<tr class="togC"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="computed_styles_getcomputed"></td></tr>
+		<tr class="togC"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="computed_styles_htmlelement"></td></tr>
 		<tr><td>forced-colors</td><td class="mono">
-			<span id="cssFC"></span> | <span class="c" id="forced-colors"></span></td></tr>
+			<span id="cssFC"></span><span class="cssc" id="forced-colors_css"></span> | <span class="c" id="forced-colors"></span></td></tr>
 		<tr><td>inverted-colors</td><td class="mono">
-			<span id="cssIC"></span><span class="c" id="prefers-inverted-colors_css"></span> | <span class="c" id="inverted-colors"></span></td></tr>
+			<span id="cssIC"></span><span class="cssc" id="inverted-colors_css"></span> | <span class="c" id="inverted-colors"></span></td></tr>
 		<tr><td>prefers-color-scheme</td><td class="mono">
-			<span id="cssPCS"></span><span class="c" id="prefers-color-scheme_css"></span> | <span class="c" id="prefers-color-scheme"></span></td></tr>
+			<span id="cssPCS"></span><span class="cssc" id="prefers-color-scheme_css"></span> | <span class="c" id="prefers-color-scheme"></span></td></tr>
 		<tr><td>prefers-contrast</td><td class="mono">
-			<span id="cssPC"></span><span class="c" id="prefers-contrast_css"></span> | <span class="c" id="prefers-contrast"></span></td></tr>
+			<span id="cssPC"></span><span class="cssc" id="prefers-contrast_css"></span> | <span class="c" id="prefers-contrast"></span></td></tr>
 		<tr><td>prefers-reduced-data</td><td class="mono">
-			<span id="cssPRD"></span> | <span class="c" id="prefers-reduced-data"></span></td></tr>
+			<span id="cssPRD"></span><span class="cssc" id="prefers-reduced-data_css"></span> | <span class="c" id="prefers-reduced-data"></span></td></tr>
 		<tr><td>prefers-reduced-motion</td><td class="mono">
-			<span id="cssPRM"></span><span class="c" id="prefers-reduced-motion_css"></span> | <span class="c" id="prefers-reduced-motion"></span></td></tr>		
+			<span id="cssPRM"></span><span class="cssc" id="prefers-reduced-motion_css"></span> | <span class="c" id="prefers-reduced-motion"></span></td></tr>		
 		<tr><td>prefers-reduced-transparency</td><td class="mono">
-			<span id="cssPRT"></span> | <span class="c" id="prefers-reduced-transparency"></span></td></tr>
+			<span id="cssPRT"></span><span class="cssc" id="prefers-reduced-transparency_css"></span> | <span class="c" id="prefers-reduced-transparency"></span></td></tr>
 		<tr><td colspan="3"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -808,6 +847,7 @@
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn15 btn" onClick="outputSection(15)">[ re-run ]</span></div>
 			<span class="c" id="elementshash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td>
 		<tr><td><a class="blue" href="tests/domrectspoof.html" target="blank">[PoC]</a>
@@ -829,21 +869,40 @@
 		<thead><tr><th colspan="2"><a name="ciphers"></a>
 			<div class="nav-title"><a href="#ciphers">ciphers / tls</a>
 			<div class="nav-up"><a href="#elements">&#9650;</a></div>
-			<div class="nav-down"><a href="#spared">&#9660;</a></div>
+			<div class="nav-down"><a href="#timingd">&#9660;</a></div>
 			<div class="nav-right"><a name="ciphersd"></a></div></div>
 		</th></tr></thead>
 		<tr><td>test</td><td class="mono">result</td></tr>
 	</table>
-	<!--spare-->
+
+	<!--timing-->
 	<table id="tb17">
 		<col width="31%"><col width="69%">
-		<thead><tr><th colspan="2"><a name="spare"></a>
-			<div class="nav-title"><a href="#spare">oh no, i'm empty</a>
-			<div class="nav-up"><a href="#ciphers">&#9650;</a></div>
+		<thead><tr><th colspan="2"><a name="timing"></a>
+			<div class="nav-title"><a href="#timing">timing</a>
+			<div class="nav-up"><a href="#ciphers">&#9650;</a> <span class="c perf" id="perftiming"></span></div>
 			<div class="nav-down"><a href="#miscd">&#9660;</a></div>
-			<div class="nav-right"><a name="spared"></a></div></div>
+			<div class="nav-right"><a name="timingd"></a></div></div>
 		</th></tr></thead>
-		<tr><td>test</td><td class="mono">result</td></tr>
+		<tr><td colspan="2" class="secthash">
+			<div class="btn-left"><span class="btn99 btn" style="cursor: default;">[ re-run ]</span></div>
+			<span class="c" id="timinghash"></span>
+			<div class="btn-right"></div>
+		</td></tr>
+		</td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">dom.enable_performance</span></div>
+			&nbsp; performance.timing</td><td class="c mono" id="perf_timing"></td></tr>
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">dom.enable_resource_timing</span></div>
+			&nbsp; resource timing</td><td class="c mono" id="perf_resource"></td></tr>
+		<tr><td><span id="labelT" class="btn btn0" onClick="togglerows('T','btn')">[ show ]</span>
+			timing precision</td><td class="c mono" id="timing_precision"></td></tr>
+		<tr class="togT"><td>date</td><td class="c mono" id="timing_precision_date"></td></tr>
+		<tr class="togT"><td>EXSLT</td><td class="c mono" id="timing_precision_exslt"></td></tr>
+		<tr class="togT"><td>mark</td><td class="c mono" id="timing_precision_mark"></td></tr>
+		<tr class="togT"><td>now</td><td class="c mono" id="timing_precision_now"></td></tr>
+		<tr class="togT"><td>timestamp</td><td class="c mono" id="timing_precision_timestamp"></td></tr>
 	</table>
 
 	<!--misc-->
@@ -851,13 +910,14 @@
 		<col width="31%"><col width="69%">
 		<thead><tr><th colspan="2"><a name="misc"></a>
 			<div class="nav-title"><a href="#misc">miscellaneous</a>
-			<div class="nav-up"><a href="#spare">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
+			<div class="nav-up"><a href="#timing">&#9650;</a> <span class="c perf" id="perfmisc"></span></div>
 			<div class="nav-down"><a href="#theend">&#9660;</a></div>
 			<div class="nav-right"><a name="miscd"></a></div></div>
 		</th></tr></thead>
 		<tr><td colspan="2" class="secthash">
 			<div class="btn-left"><span class="btn18 btn" onClick="outputSection(18)">[ re-run ]</span></div>
 			<span class="c" id="mischash"></span>
+			<div class="btn-right"></div>
 		</td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.use_components_shim</span></div>
@@ -869,24 +929,15 @@
 			&nbsp; [other] math</td><td class="c mono" id="math_other"></td></tr>
 		<tr><td>[trigonometric] math</td><td class="c mono" id="math_trig"></td></tr>
 		<tr><td>navigator keys</td><td class="c mono" id="navigator_keys"></td></tr>
-		<tr><td>[entries] performance.mark</td><td class="c mono" id="perf_mark_entries"></td></tr>
-		<!--<tr><td>performance.mark</td><td class="c mono" id="perf_mark"></td></tr>-->
-		<tr><td>performance.now</td><td class="c mono" id="perf_now"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.enable_performance</span></div>
-			&nbsp; performance.timing</td><td class="c mono" id="perf_timing"></td></tr>
 		<tr><td>pdf</td><td class="c mono" id="pdf"></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxtb">dom.enable_resource_timing</span></div>
-			&nbsp; resource timing</td><td class="c mono" id="perf_resource"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">svg.disabled</span></div>
 			&nbsp; svg</td><td class="c mono" id="svg_enabled"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">javascript.options.wasm</span></div>
 			&nbsp; wasm</td><td class="c mono" id="wasm"></td></tr>
-		<tr><td>webgpu</td><td class="c mono" id="webgpu"></td></tr>
-		<tr><td>[iframe] window properties <sup>1</sup></td><td class="c mono" id="window_properties"></td></tr>
+		<tr><td>[iframe] window properties <sup>1</sup></td>
+			<td class="mono"><span class="c" id="window_properties"></span><span class="c" id="consolestatus"></span></td></tr>
 		<tr><td colspan="2"><span class="no_color">code by </span>
 			<a target="_blank" class="blue" href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -905,26 +956,37 @@
 			</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
 	</table>
 	<a name="theend" id="theend"></a><br>
+	</span> <!-- end of "tzpcontent" span-->
 
-	<div id="modaloverlay" onClick="hide_overlays()"></div>
+	<!--block-->
+	<div id='blockmsg' style="display: none;"></div>
 
-<!---->
-	<div id="overlay">
-		<div class="mono spaces pad">
-			<div id="overlaybuttons" class="nospaces">
-				<span id="overlaybutton"></span>
-				<span class='btn0 btnc' onClick='copyclip(`overlayresults`)'>[COPY]</span>
-				<span class='btn0 btnc' onClick='hide_overlays()'>[CLOSE]</span>
-				<div id="overlayoptions"><br>
-					<p><u>FORMAT</u></p>
-					<p>sectioned <input type="radio" name="optFormat" onchange="overlay_format('')" id="optFP"></p>
-					<p>flat <input type="radio" name="optFormat" onchange="overlay_format('_flat')" id="optFP_flat"></p>
-					<p>summary <input type="radio" name="optFormat" onchange="overlay_format('_summary')" id="optFP_summary"></p>
-					<p>list <input type="radio" name="optFormat" onchange="overlay_format('_list')" id="optFP_list"></p>
-					<p>filter <input type="radio" name="optFormat" onchange="overlay_format('_filter')" id="optFP_filter"></p>
-					<p><input type="text" id="optFilter" style="width:110px;" placeholder="min 3 chars" oninput="showMetrics('fingerprint','document', false, true)"></p>
+	<!--overlay-->
+	<div id="modaloverlay" onClick="metricsAction('close')"></div>
+	<div id="overlay" class='mono'>
+		<div id="overlaytop">
+			<span id="metricsTitle"></span>
+			<span id="overlaybuttons">
+				<span class='btn0 btnc' onClick="metricsAction('download')" id="metricDownload">[DOWNLOAD]</span>
+				<span class='btn0 btnc' onClick="metricsAction('console')">[CONSOLE]</span>
+				<span class='btn0 btnc' onClick="copyclip('metricsDisplay')" id="metricsBtnCopy">[COPY]</span>
+				<span class='btn0 btnc' onClick="metricsAction('close')">[CLOSE]</span>
+				<br><br>
+				<div id="metricOptions"><br><p><u>FORMAT</u></p>
+					<p id="optDetail">detail <input type="radio" name="optOverlay" id="optFormat_detail" value="_detail" checked onchange="metricsAction()"></p>
+					<p>summary <input type="radio" name="optOverlay" id="optFormat_summary" value="_summary" onchange="metricsAction()"></p>
+					<p id="optFlat">flat <input type="radio" name="optOverlay" id="optFormat_flat" value="_flat" onchange="metricsAction()"></p>
+					<p id="optList">list <input type="radio" name="optOverlay" id="optFormat_list"value="_list" onchange="metricsAction()"></p>
+					<span id="groupHealth">
+						–––<p>all <input type="radio" name="optHealth" checked id="healthAll" onchange="metricsAction()"></p>
+						<p><span class="good">✓ </span><input type="radio" name="optHealth" id="healthPass" onchange="metricsAction()"></p>
+						<p><span class="bad">✗ </span><input type="radio" name="optHealth" id="healthFail" onchange="metricsAction()"></p>
+					</span>
 				</div>
-			</div><div id="overlaytitle"></div><br><div id="overlayresults"></div>
+			</span>
+		</div>
+		<div id="overlaycontent">
+			<span id="metricsDisplay" class="spaces"></span>
 		</div>
 	</div>
 
