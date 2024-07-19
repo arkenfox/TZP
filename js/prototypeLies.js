@@ -3,7 +3,8 @@
 /* https://github.com/abrahamjuliot/creepjs */
 /* modified for gecko only */
 
-const outputPrototypeLies = () => new Promise(resolve => {
+const outputPrototypeLies = (isResize = false) => new Promise(resolve => {
+	if (isResize) {return resolve()}
 	sData[SECT98] = {}
 	sData[SECT99] = []
 	if (!isSmart) {
@@ -11,7 +12,6 @@ const outputPrototypeLies = () => new Promise(resolve => {
 		return resolve()
 	}
 	let t0 = nowFn()
-	isProxy = false
 
 	const getIframe = () => {
 		try {
@@ -399,7 +399,7 @@ const outputPrototypeLies = () => new Promise(resolve => {
 
 		// API Function Test
 		const getLies = ({ apiFunction, proto, obj = null, lieProps }) => {
-			if (typeof apiFunction != 'function') {
+			if ('function' != typeof apiFunction) {
 				return {
 					lied: false,
 					lieTypes: []
@@ -502,7 +502,7 @@ const outputPrototypeLies = () => new Promise(resolve => {
 							// search if function
 							try {
 								const apiFunction = proto[name] // may trigger TypeError
-								if (typeof apiFunction == 'function') {
+								if ('function' == typeof apiFunction) {
 									res = getLies({
 										apiFunction: proto[name],
 										proto,
@@ -514,7 +514,7 @@ const outputPrototypeLies = () => new Promise(resolve => {
 									return
 								}
 								// since there is no TypeError and the typeof is not a function,
-								// handle invalid values and ingnore name, length, and constants
+								// handle invalid values and ignore name, length, and constants
 								if (
 									name != 'name' &&
 									name != 'length' &&
@@ -885,7 +885,6 @@ const outputPrototypeLies = () => new Promise(resolve => {
 	sData[SECT98] = {}
 	for (const k of Object.keys(lieDetail).sort()) {sData[SECT98][k] = lieDetail[k]}
 	sData[SECT99] = tamperingList.sort()
-	if (tamperingList.length) {isProxy = true}
 	if (!gRun) {return resolve()}
 
 	// gData
@@ -900,7 +899,5 @@ const outputPrototypeLies = () => new Promise(resolve => {
 	log_perf(SECTP, SECT98 +"/"+ SECT99, t0)
 	return resolve()
 })
-
-// eg: sData[SECT99].includes('Math.sin')
 
 countJS(SECTP)
