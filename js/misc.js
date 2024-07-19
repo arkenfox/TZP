@@ -16,6 +16,7 @@ function get_timing(METRIC) {
 		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
 		'other': [0, 16.6, 16.7, 33.3, 33.4, 50, 66.6, 66.7, 83.3, 83.4]
 	}
+	let aNotInteger = ['mark','now','timestamp']
 	let str, data, notation, aFail = []
 	sDetail.document[METRIC] = {}
 	sDetail.document[METRIC +'_data'] = {}
@@ -34,14 +35,10 @@ function get_timing(METRIC) {
 			if ('string' == typeof aTimes) {throw aTimes}
 			// get diffs
 			let aDiffs = [], aTotal = []
-			// ToDo: check for a decimal as only RFP has decimals | check not all 0
-			// by using elapsed time since the start for each diff, we get more chances to
-				// a: hit a decimal with 16/33/66/83 | b: not be all 0
 			let start = aTimes[0] 
 			let typeCheck = typeFn(start)
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
-			// RFP event timeStamp is never an integer
-			if ('timestamp' == k && Number.isInteger(start)) {isMatch = false}
+			if (aNotInteger.includes[k] && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
 				let diff = ((aTimes[i] - start) % 100).toFixed(1) * 1 // drop hundreds
 				aDiffs.push(diff)
