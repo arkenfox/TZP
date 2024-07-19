@@ -1,312 +1,214 @@
 'use strict';
 
-const get_device_integer = (METRIC, proxyCheck) => new Promise(resolve => {
+function get_device_integer(METRIC, proxyCheck) {
 	// concurrency: 1630089: macOS reports physical cores instead of logical
 		// capped at dom.maxHardwareConcurrency e.g 1728741
-	function exit(value, display) {
-		log_display(7, METRIC, display)
-		return resolve([METRIC, value])
-	}
-	let expected = METRIC == "hardwareConcurrency" ? 2 : 24
+	let value, data ='', expected = 'hardwareConcurrency' == METRIC ? 2 : 24
 	try {
-		let value = 2 == expected ? navigator[METRIC] : screen[METRIC]
-		if (runSE) {foo++
-		} else if (runST) {value += ""
-		} else if (runSL) {sData[SECT99].push(proxyCheck + METRIC)
-		}
-		let display = value
-		if (Number.isInteger(value)) {
-			if (isSmart) {
-				if (isProxy && sData[SECT99].includes(proxyCheck + METRIC)) {
-					display = colorFn(display)
-					value = zLIE
-					log_known(SECT7, METRIC)
-				}
-				display += display === expected ? rfp_green : rfp_red
-			}
-			exit(value, display)
-		} else {
-			exit(zErr, log_error(SECT7, METRIC, zErrType + typeFn(value)))
-		}
+		value = 2 == expected ? navigator[METRIC] : screen[METRIC]
+		if (runST) {value += ''} else if (runSL) {addProxyLie(proxyCheck + METRIC)}
+		if (!Number.isInteger(value)) {throw zErrType + typeFn(value)}
 	} catch(e) {
-		log_error(SECT7, METRIC, e, isScope)
-		exit(zErr, zErr + (isSmart ? rfp_red : ""))
+		value = e; data = ('hardwareConcurrency' == METRIC ? zErrLog : zErrShort)
 	}
-})
+	addBoth(7, METRIC, value,'', (value == expected ? rfp_green : rfp_red), data, isProxyLie(proxyCheck + METRIC))
+	return
+}
 
-const get_maxtouch = () => new Promise(resolve => {
-	// maxTouchPoints: FF64+: RFP 1363508
-	const METRIC = "maxTouchPoints"
-	let value, display, notation = ""
+function get_maxtouch(METRIC) {
+	// https://www.w3.org/TR/pointerevents/#extensions-to-the-navigator-interface
+	// FF64+: RFP 1363508
+	let value, data =''
 	try {
-		value = navigator.maxTouchPoints
-		if (runSE) {foo++
-		} else if (runST) {value = 10.1
-		} else if (runSL) {sData[SECT99].push("Navigator.maxTouchPoints")
-		}
-		display = value
-		let vType = typeFn(value)
-		if ("number" == vType) {
-			if (!Number.isInteger(value) || value < 0) {
-				display = log_error(SECT7, METRIC, zErrInvalid + "got "+ value)
-				value = zErr
-			} else if (isProxy) {
-				if (sData[SECT99].includes("Navigator."+ METRIC)) {
-					display = colorFn(display)
-					value = zLIE
-					log_known(SECT7, METRIC)
-				}
-			}
-		} else {
-			display = log_error(SECT7, METRIC, zErrType + vType)
-			value = zErr
-		}
+		value = navigator[METRIC]
+		if (runST) {value = undefined} else if (runSI) {value = -5} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
+		let typeCheck = typeFn(value)
+		if ('number' !== typeCheck) {throw zErrType + typeCheck}
+		if (!Number.isInteger(value) || value < 0) {throw zErrInvalid + 'expected +Integer: got '+ value}
 	} catch(e) {
-		display = log_error(SECT7, METRIC, e)
-		value = zErr
+		value = e; data = zErrLog
 	}
-	if (isSmart) {notation = display === 0 ? rfp_green : rfp_red}
-	log_display(7, METRIC, display + notation)
-	return resolve([METRIC, value])
-})
+	addBoth(7, METRIC, value,'', (0 == value ? rfp_green : rfp_red), data, isProxyLie('Navigator.'+ METRIC))
+	return
+}
 
-const get_mm_color = () => new Promise(resolve => {
-	const METRIC = "color", METRIC2 = METRIC +"_css"
-	let isErr = false, value, display
+function get_mm_color(METRIC) {
+	let value, data ='', isLies = false
+	let cssvalue = getElementProp(7, '#cssC', METRIC +'_css')
+
 	try {
-		value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia("(color:"+ i +")").matches === true) {return i}}
+		value = (function() {for (let i=0; i < 1000; i++) {if (matchMedia('(color:'+ i +')').matches === true) {return i}}
 			return i
 		})()
-		if (runSE) {foo++} else if (runST) {value = 4.5} else if (runSL) {value = 3}
-		display = value
-		if (!Number.isInteger(value)) {
-			display = log_error(SECT7, METRIC, zErrType + typeFn(value))
-			isErr = true; value = zErr; 
-		}
+		if (runSI) {value = 4.5} else if (runSL) {value = 3}
+		let typeCheck = typeFn(value)
+		if (!Number.isInteger(value)) {throw ('number' == typeCheck ? zErrInvalid +'expected Integer: got '+ value: zErrType + typeCheck)}
+		// lies
+		if (cssvalue !== zErr && value !== cssvalue) {isLies = true}
 	} catch(e) {
-		isErr = true; value = zErr; display = log_error(SECT7, METRIC, e)
+		value = e; data = zErrShort
 	}
-	let cssvalue = getElementProp(SECT7, "#cssC", METRIC2)
-	let isErrCss = cssvalue == zErr
-	if (isSmart) {
-		if (!isErr && !isErrCss) {
-			if (value !== cssvalue) {
-				display = colorFn(display)
-				value = zLIE
-				log_known(SECT7, METRIC)
-			}
-		}
-		display += display === 8 ? rfp_green : rfp_red // mm
-		log_display(7, METRIC2, (cssvalue === 8 ? rfp_green : rfp_red)) // css
-	}
-	log_display(7, METRIC, display)
-	return resolve([[METRIC, value], [METRIC2, cssvalue]])
-})
+	addBoth(7, METRIC, value,'', (8 == value ? rfp_green : rfp_red), data, isLies)
+	addBoth(7, METRIC +'_css','','', (8 == cssvalue ? rfp_green : rfp_red), cssvalue)
+	return
+}
 
-const get_mm_colorgamut = () => new Promise(resolve => {
-	const METRIC = "color-gamut", METRIC2 = METRIC +"_css"
-	let value = zNA, display = value, isErr = false
+function get_mm_colorgamut(METRIC) {
+	let value, data ='', isLies = false
+	let cssvalue = getElementProp(7, '#cssCG', METRIC +'_css')
 	try {
-		if (runSE) {foo++}
-		let q = "(color-gamut: "
-		if (window.matchMedia(q +"srgb)").matches) {value = "srgb"}
-		if (window.matchMedia(q +"p3)").matches) {value = "p3"}
-		if (window.matchMedia(q +"rec2020)").matches) {value = "rec2020"}
-		if (runSL) {value = "p3"}
-		display = value
+		let q = '(color-gamut: '
+		if (window.matchMedia(q +'srgb)').matches) {value = 'srgb'}
+		if (window.matchMedia(q +'p3)').matches) {value = 'p3'}
+		if (window.matchMedia(q +'rec2020)').matches) {value = 'rec2020'}
+		if (isGecko) { // can only be a valid value or undefined
+			if (runST) {value = undefined} else if (runSL) {value = 'p3'}
+		} else if (undefined == value) {value = zNA} // non-Gecko
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		if (cssvalue !== zErr && value !== cssvalue) {isLies = true}
 	} catch(e) {
-		isErr = true; value = zErr; display = log_error(SECT7, METRIC, e)
+		value = e; data = zErrShort
 	}
-	let cssvalue = getElementProp(SECT7, "#cssCG", METRIC2)
-	let isErrCss = cssvalue == zErr
-	if (isSmart) {
-		if (!isErr && !isErrCss) {
-			if (value !== cssvalue) {
-				display = colorFn(display)
-				value = zLIE
-				log_known(SECT7, METRIC)
-			}
-		}
-		// FF110+: 1422237
-		display += display === "srgb" ? rfp_green : rfp_red // mm
-		log_display(7, METRIC2, (cssvalue === "srgb" ? rfp_green : rfp_red)) // css
-	}
-	log_display(7, METRIC, display)
-	return resolve([[METRIC, value], [METRIC2, cssvalue]])
-})
+	addBoth(7, METRIC, value,'', ('srgb' == value ? rfp_green : rfp_red), data, isLies) // FF110+: 1422237
+	addBoth(7, METRIC +'_css','','', ('srgb' == cssvalue ? rfp_green : rfp_red), cssvalue)
+	return
+}
 
-const get_mm_pointer = (group, type, id, rfpvalue) => new Promise(resolve => {
-	const METRIC = type, METRIC2 = type +"_css"
-	let value = zNA, display = value, isErr = false
+function get_mm_pointer(group, type, id, rfpvalue) {
+	const METRIC = type
+	let value, data ='', notation ='', cssnotation ='', isLies = false
 	try {
-		if (runSE) {foo++}
 		if (group == 3) {
-			if (window.matchMedia("("+ type +":hover)").matches) value = "hover"
-			if (window.matchMedia("("+ type +":none)").matches) value = "none"
+			if (window.matchMedia('('+ type +':hover)').matches) value = 'hover'
+			if (window.matchMedia('('+ type +':none)').matches) value = 'none'
 		} else {
-			if (window.matchMedia("("+ type +":fine").matches) {value = "fine" // fine over coarse
-			} else if (window.matchMedia("("+ type +":coarse)").matches) {value = "coarse"
-			} else if (window.matchMedia("("+ type +":none)").matches) {value = "none"
-			}
+			if (window.matchMedia('('+ type +':fine').matches) {value = 'fine' // fine over coarse
+			} else if (window.matchMedia('('+ type +':coarse)').matches) {value = 'coarse'
+			} else if (window.matchMedia('('+ type +':none)').matches) {value = 'none'}
 			if (group == 2) {
 				// https://www.w3.org/TR/mediaqueries-4/#any-input
-					// "any-pointer, more than one of the values can match" / none = only if the others are not present
+					// 'any-pointer, more than one of the values can match' / none = only if the others are not present
 				let value2 = zNA
-				if (window.matchMedia("("+ type +":coarse").matches) {value2 = "coarse" // coarse over fine
-				} else if (window.matchMedia("("+ type +":fine)").matches) {value2 = "fine"
-				} else if (window.matchMedia("("+ type +":none)").matches) {value2 = "none"
-				}
-				value += " + "+ value2
+				if (window.matchMedia('('+ type +':coarse').matches) {value2 = 'coarse' // coarse over fine
+				} else if (window.matchMedia('('+ type +':fine)').matches) {value2 = 'fine'
+				} else if (window.matchMedia('('+ type +':none)').matches) {value2 = 'none'}
+				value += ' + '+ value2
 			}
 		}
-		if (runSL) {value = zNA}
-		display = value
+		if (runST) {value = undefined} else if (runSL) {value = zNA}
+		let typeCheck = typeFn(value)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
 	} catch(e) {
-		display = log_error(SECT7, METRIC, e)
-		isErr = true; value = zErr
+		value = e; data = zErrShort
 	}
-	let cssvalue = getElementProp(SECT7, id, METRIC2)
-	let isErrCss = cssvalue == zErr
-	if (isSmart) {
-		if (value !== zErr) {
-			if (group == 2 && !isErrCss) {
-				let cssvalue2 = getElementProp(SECT7, id, METRIC2, ":before")
-				cssvalue = cssvalue2 + cssvalue
-			}
-			if (value !== cssvalue && !isErrCss) {
-				display = colorFn(display)
-				value = zLIE
-				log_known(SECT7, METRIC)
-			}
-		}
-		// notate: FF74+ 1607316
-		if (type == "any-pointer" && isOS !== "android") {
-			display += display === "fine + fine" ? rfp_green : rfp_red // mm
-			log_display(7, METRIC2, (cssvalue === "fine + fine" ? rfp_green : rfp_red)) // css
-		} else if (isOS == "android") {
-			display += display === rfpvalue ? rfp_green : rfp_red // mm
-			log_display(7, METRIC2, (cssvalue === rfpvalue ? rfp_green : rfp_red)) // css
-		}
-	}
-	log_display(7, type, display)
-	return resolve([[METRIC, value], [METRIC2, cssvalue]])
-})
 
-const get_media_devices = () => new Promise(resolve => {
-	let t0 = nowFn(), isLies = false, isLegacy = false
-	const METRIC = "mediaDevices"
+	let cssvalue = getElementProp(7, id, METRIC +'_css')
+	if (group == 2 && cssvalue !== zErr) {cssvalue = getElementProp(7, id, METRIC +'_css', ':before') + cssvalue}
+	if (value !== zErrShort && cssvalue !== zErr) {isLies = (value !== cssvalue)}
+
+	// notate: FF74+ 1607316
+	if ('any-pointer' == type && 'android' !== isOS) {
+		notation = ('fine + fine' == value ? rfp_green : rfp_red)
+		cssnotation = ('fine + fine' == cssvalue ? rfp_green : rfp_red)
+	} else if ('android' == isOS) {
+		notation = (value == rfpvalue ? rfp_green : rfp_red)
+		cssnotation = (cssvalue == rfpvalue ? rfp_green : rfp_red)
+	}
+	addBoth(7, METRIC, value,'', notation, data, isLies)
+	addBoth(7, METRIC +'_css','','', cssnotation, cssvalue)
+	return
+}
+
+const get_media_devices = (METRIC) => new Promise(resolve => {
+	let t0 = nowFn(), isLegacy = false
 
 	function set_notation(value = "") {
 		let legacy = isLegacy ? " [gUM legacy]" : ""
-		if (isSmart) {
-			if (isTB && !isMullvad) { // TB
-				return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
-			} else { // RFP
-				if (isLies) {return (isMullvad ? tb_red : rfp_red)}
-				let rfplegacy = "54a59537", rfpnew = "75e77887"
-				if (isMullvad) {
-					// tor-browser#42043
-					return (value == rfpnew ? tb_green : tb_red) + legacy
-				} else {
-					// FF: ToDo: 1843434: add version check when flipped
-					return ((value == rfplegacy || value == rfpnew) ? rfp_green : rfp_red) + legacy
-				}
+		if (isTB && !isMullvad) { // TB
+			return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
+		} else { // RFP
+			let rfplegacy = "54a59537", rfpnew = "75e77887"
+			if (isMullvad) {
+				// tor-browser#42043
+				return (value == rfpnew ? tb_green : tb_red) + legacy
+			} else {
+				// FF: ToDo: 1843434: add version check when flipped
+				return ((value == rfplegacy || value == rfpnew) ? rfp_green : rfp_red) + legacy
 			}
 		}
-		return "" + legacy
-	}
-	function exit(result, display, check = "") {
-		log_display(7, METRIC, display + set_notation(check))
-		log_perf(SECT7, METRIC, t0)
-		return resolve([METRIC, result])
+		return ''+ legacy
 	}
 
 	function analyse(devices) {
 		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
 		// 1843434: flipped FF119/120?
 		// the only difference in device objects is the id length, incl. RFP
+		let hash ='none', btn ='', data =''
 		try {
-			if (runST) {devices = {}}
-			let dType = typeFn(devices)
-			if (dType.includes("array")) {
-				// lies
-				if (isSmart) {
-					if (isProxy && sData[SECT99].includes("MediaDevices.enumerateDevices")) {isLies = true
-					} else if (devices.length) {
-						let aSplit = (devices +"").split(",")
-						for (let i=0; i < aSplit.length; i++) {
-							if (aSplit[i] !== "[object MediaDeviceInfo]") {isLies = true}
-						}
-					}
+			if (runST) {devices = undefined} else if (runSI) {devices = [{}]}
+			let typeCheck = typeFn(devices, true)
+			if ("array" !== typeCheck) {throw zErrType + typeFn(devices)}
+			if (devices.length > 0) {
+				// tampered
+				let aSplit = (devices +"").split(",")
+				let expected = "[object MediaDeviceInfo]"
+				for (let i=0; i < aSplit.length; i++) {
+					if (aSplit[i] !== expected ) {throw zErrInvalid +"expected "+ expected +": got "+ aSplit[i]}
 				}
-				// none
-				if (devices.length == 0) {
-					if (isLies) {
-						log_known(SECT7, METRIC)
-						exit(zLIE, colorFn("none"))
-					} else {
-						exit("none", "none")
-					}
-				} else {
 				// enumerate
 					// don't combine kind, keep order, record length not strings
 					// checking length of undefined (fake) will catch an error
-					if (runSE) {let testSE = (undefined).length}
-					let aData = {}, sLen = new Set(), index = 0
-					devices.forEach(function(d) {
-						let kind = d.kind, kindtest = kind.length,
-							dLen = d.deviceId.length,
-							gLen = d.groupId.length,
-							indexKey = (index+"").padStart(2,"0")
-						aData[indexKey+"-"+kind] = [dLen, gLen, d.label.length]
-						sLen.add(dLen)
-						sLen.add(gLen)
-						index ++
-						// isSmart: we could check valid lengths (0 or 44 in 115+, else 44: labels always 0)
-							// and if 44 is valid then the last char is "=", and we could check typeof
-					})
-					// should be a single item, either 44 or 0
-					// lets just keep it simple and get the first
-					isLegacy = [...sLen][0] !== 0
-
-					let hash = mini(aData)
-					if (isLies) {
-						hash = colorFn(hash)
-						log_known(SECT7, METRIC)
-						addDetail(METRIC, aData)
-						addData(7, METRIC, zLIE)
-					} else {
-						addData(7, METRIC, aData, hash)
-					}
-					log_display(7, METRIC, hash + addButton(7, METRIC, aData.length) + set_notation(hash))
-					return resolve()
-				}
-			} else {
-				exit(zErr, log_error(SECT7, METRIC, zErrType + dType))
+				data = {}
+				let sLen = new Set(), index = 0
+				devices.forEach(function(d) {
+					let kind = d.kind, kindtest = kind.length,
+						dLen = d.deviceId.length,
+						gLen = d.groupId.length,
+						indexKey = (index+"").padStart(2,"0")
+					data[indexKey+"-"+kind] = [dLen, gLen, d.label.length]
+					sLen.add(dLen)
+					sLen.add(gLen)
+					index ++
+					// we could check valid lengths (0 or 44 in 115+, else 44: labels always 0)
+						// and if 44 is valid then the last char is "=", and we could type check
+				})
+				// should be a single item, either 44 or 0
+				// lets just keep it simple and get the first
+				isLegacy = [...sLen][0] !== 0
+				hash = mini(data); btn = addButton(7, METRIC, data.length)
 			}
 		} catch(e) {
-			exit(zErr, log_error(SECT7, METRIC, e), e)
+			hash = e; data = zErrLog
 		}
+		addBoth(7, METRIC, hash, btn, set_notation(hash), data, isProxyLie("MediaDevices.enumerateDevices"))
+		log_perf(7, METRIC, t0)
+		return resolve()
 	}
 
-	if (gRun && isDevices !== undefined) {
-		analyse(isDevices)
-	} else try {
-		if (runSE) {foo++}
-		// await devices
-		promiseRaceFulfilled({
-			promise: navigator.mediaDevices.enumerateDevices(),
-			responseType: Array,
-			limit: 2000 // increase race limit for slow system/networks
-		}).then(function(devices) {
-			if (!devices) {
-				exit(zErr, log_error(SECT7, METRIC, zErrTime)) // promise failed
-			} else {
-				analyse(devices)
-			}
-		})
-	} catch(e) {
-		exit(zErr, log_error(SECT7, METRIC, e), e) // promise failed
+	if (gLoad && isDevices !== undefined) {
+		analyse(isDevices) // warmup success
+	} else {
+		try {
+			let timer = 2000
+			if (runSG) {timer = 0} // timed out
+			// await devices
+			promiseRaceFulfilled({
+				promise: navigator.mediaDevices.enumerateDevices(),
+				responseType: Array,
+				limit: timer // increase race limit for slow system/networks
+			}).then(function(devices) {
+				if (!devices) {
+					addBoth(7, METRIC, zErrTime,'', set_notation(zErrTime), zErrLog) // promise failed
+					return resolve()
+				} else {
+					analyse(devices)
+				}
+			})
+		} catch(e) {
+			addBoth(7, METRIC, e,'', set_notation(e+''), zErrLog)
+			return resolve()
+		}
 	}
 })
 
@@ -342,33 +244,22 @@ function get_pointer_event(event) {
 	}
 	for (const k of Object.keys(oList).sort()) {
 		try {
-			let value = event[k],
-				expected = oList[k]
-			if (typeof value !== expected) {
-				value = "err" // zErrType + typeof value
-			} else if ("number" == expected && Number.isNaN(value)) {
-				value = "NaN" // zErrType + typeof value
-			} else {
-				value = cleanFn(value)
-			}
+			let value = event[k], expected = oList[k]
+			if (typeFn(value) !== expected) {throw "err"}
 			oData[k] = value
 			oDisplay.push(value)
 		} catch(e) {
-			oData[k] = e.name
+			oData[k] = "err"
 		}
 	}
 	dom.ptEvent.innerHTML = oDisplay.join(" | ") + sg +"["+ mini(oData) +"]"+ sc
 }
 
-const get_speech_engines = () => new Promise(resolve => {
+const get_speech_engines = (METRIC) => new Promise(resolve => {
 	// media.webspeech.synth.enabled
-	const METRIC = "speech_engines"
-	let t0 = nowFn()
-	function exit(value, display) {
-		if (value == zErr || value == "none" || value == zLIE) {addData(7, METRIC, value)}
-		if (isSmart) {display += display == "none" ? rfp_green : rfp_red}
-		log_display(7, METRIC, display)
-		log_perf(SECT7, METRIC, t0)
+	let t0 = nowFn(), notation = rfp_red, isLies = false
+	function exit(display, value) {
+		addBoth(7, METRIC, display,'', notation, value, isLies)
 		return resolve()
 	}
 
@@ -380,54 +271,43 @@ const get_speech_engines = () => new Promise(resolve => {
 			"urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy"
 		*/
 		let oIgnore = {
-			android: "moz-tts:android:",
-			mac: "urn:moz-tts:osx:com.apple.eloquence.",
-			windows: "urn:moz-tts:sapi:",
+			android: 'moz-tts:android:',
+			mac: 'urn:moz-tts:osx:com.apple.eloquence.',
+			windows: 'urn:moz-tts:sapi:',
 		}
 		if (oIgnore[isOS] !== undefined) {
 			ignoreLen = oIgnore[isOS].length
 			ignoreStr = oIgnore[isOS]
 		}
 		try {
-			if (runSE) {foo++}
 			let v = speechSynthesis.getVoices()
-			v.forEach(function(i) {
-				// reduce redundancy/noise
-					// only record default if true and localService if false
-					// ignore voiceURI if it matches expected
-				let uriStr = i.voiceURI, isURI = true
-				if (ignoreStr !== undefined && uriStr.slice(0,ignoreLen) === ignoreStr) {isURI = false}
-				res.push(
-					i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? "" : " | false") + (isURI ? " | "+ uriStr : "")
-				)
-			})
-			if (runST) {v = []} else if (runSL) {sData[SECT99].push("speechSynthesis.getVoices")}
-			if ("object" === typeof v && (v+"").slice(0,29) == "[object SpeechSynthesisVoice]") {
-				let value = "", btn = ""
-				let isLie = isProxy ? sData[SECT99].includes("speechSynthesis.getVoices") : false
-				value = mini(res)
-				if (isSmart && isLie) {
-					addDetail(METRIC, res)
-				} else {
-					addData(7, METRIC, res, value)
-				}
-				btn = addButton(7, METRIC, res.length)
-				let display = value
-				if (isSmart && isLie) {
-					value = zLIE
-					display = colorFn(display)
-					log_known(SECT7, METRIC)
-				}
-				exit(value, display + btn)
+			if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie("speechSynthesis.getVoices")}
+			let typeCheck = typeFn(v, true)
+			if ("array" !== typeCheck) {throw zErrType + typeFn(v)}
+			if (v.length) {
+				let expected = "[object SpeechSynthesisVoice]"
+				if ((v+"").slice(0,29) !== "[object SpeechSynthesisVoice]") {throw zErrInvalid +"expected "+ expected}
+			}
+			if (v.length == 0) {
+				notation = rfp_green
+				exit('none','none')
 			} else {
-				if ("object" === typeof v && v.length == 0) {
-					exit("none", "none")
-				} else {
-					exit(zErr, log_error(SECT7, METRIC, zErrType + typeof v))
-				}
+				// enumerate: reduce redundancy/noise
+					// only record default if true and localService if false | ignore voiceURI if it matches expected
+				v.forEach(function(i) {
+					let uriStr = i.voiceURI, isURI = true
+					if (ignoreStr !== undefined && uriStr.slice(0,ignoreLen) === ignoreStr) {isURI = false}
+					res.push(
+						i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? "" : " | false") + (isURI ? " | "+ uriStr : "")
+					)
+				})
+				let hash = mini(res)
+				addBoth(7, METRIC, hash, addButton(7, METRIC, res.length), notation, res, isProxyLie("speechSynthesis.getVoices"))
+				log_perf(7, METRIC, t0)
+				return resolve()
 			}
 		} catch(e) {
-			exit(zErr, log_error(SECT7, METRIC, e))
+			exit(e, zErrLog)
 		}
 	}
 	try {
@@ -436,35 +316,28 @@ const get_speech_engines = () => new Promise(resolve => {
 			speechSynthesis.onvoiceschanged = populateVoiceList;
 		}
 	} catch(e) {
-		exit(zErr, log_error(SECT7, METRIC, e))
+		exit(e, zErrLog)
 	}
 })
 
 const outputDevices = () => new Promise(resolve => {
-	let t0 = nowFn()
-
-	const METRIC = "recursion"
-	log_display(7, METRIC, isRecursion[0])
-	addData(7, METRIC, isRecursion[1])
-
+	addBoth(7, 'recursion', isRecursion[0],'','', isRecursion[1])
 	Promise.all([
-		get_media_devices(),
-		get_speech_engines(),
-		get_maxtouch(),
-		get_mm_pointer(1, "pointer","#cssP","coarse"),
-		get_mm_pointer(2, "any-pointer","#cssAP","coarse + coarse"),
-		get_mm_pointer(3, "hover","#cssH","none"),
-		get_mm_pointer(3, "any-hover","#cssAH","none"),
-		get_mm_color(),
-		get_mm_colorgamut(),
-		get_device_integer("pixelDepth","Screen."),
-		get_device_integer("colorDepth","Screen."),
-		get_device_integer("hardwareConcurrency","Navigator."),
-	]).then(function(results){
-		results.forEach(function(item) {addDataFromArray(7, item)})
-		log_section(7, t0)
-		return resolve(SECT7)
+		get_media_devices('mediaDevices'),
+		get_speech_engines('speech_engines'),
+		get_maxtouch('maxTouchPoints'),
+		get_mm_pointer(1, 'pointer','#cssP','coarse'),
+		get_mm_pointer(2, 'any-pointer','#cssAP','coarse + coarse'),
+		get_mm_pointer(3, 'hover','#cssH','none'),
+		get_mm_pointer(3, 'any-hover','#cssAH','none'),
+		get_mm_color('color'),
+		get_mm_colorgamut('color-gamut'),
+		get_device_integer('pixelDepth','Screen.'),
+		get_device_integer('colorDepth','Screen.'),
+		get_device_integer('hardwareConcurrency','Navigator.'),
+	]).then(function(){
+		return resolve()
 	})
 })
 
-countJS(SECT7)
+countJS(7)

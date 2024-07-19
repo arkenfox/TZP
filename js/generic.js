@@ -9,146 +9,33 @@ function getUniqueElements() {
 	})
 }
 
-/*** JSON ***/
-
-function json_highlight(json) {
-	if (typeof json != 'string') {
-		json = json_stringify(json);
-	}
-	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-		var cls = 'number';
-		if (/^"/.test(match)) {
-			if (/:$/.test(match)) {
-				cls = 'key';
-			} else {
-				cls = 'string';
-				// color undefined (aka "typeof undefined")
-				//if (match == "\"typeof undefined\"") {cls = 'null';}
-			}
-		} else if (/true|false/.test(match)) {
-			cls = 'boolean';
-		} else if (/null/.test(match)) {
-			cls = 'null';
-		}
-		return '<span class="'+ cls +'">'+ match +'</span>';
-	})
-}
-
-function json_stringify(passedObj, options = {}) {
-	/* https://github.com/lydell/json-stringify-pretty-compact */
-	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
-	const indent = JSON.stringify(
-		[1],
-		undefined,
-		options.indent === undefined ? 2 : options.indent
-	).slice(2, -3);
-	const maxLength =
-		indent === ""
-			? Infinity
-			: options.maxLength === undefined
-			? 65 // was 80
-			: options.maxLength;
-	let { replacer } = options;
-
-	return (function _stringify(obj, currentIndent, reserved) {
-		if (obj && typeof obj.toJSON === "function") {
-			obj = obj.toJSON();
-		}
-
-		// display undefined under an alias so we always have the right number of values
-		// this is just a display, it does not alter the fingerprint data
-		//if (obj === undefined) {obj = "typeof undefined"}
-
-		const string = JSON.stringify(obj, replacer);
-		if (string === undefined) {
-			return string;
-		}
-		const length = maxLength - currentIndent.length - reserved;
-		if (string.length <= length) {
-			const prettified = string.replace(
-				stringOrChar,
-				(match, stringLiteral) => {
-					return stringLiteral || `${match} `;
-				}
-			);
-			if (prettified.length <= length) {
-				return prettified;
-			}
-		}
-		if (replacer != null) {
-			obj = JSON.parse(string);
-			replacer = undefined;
-		}
-		if (typeof obj === "object" && obj !== null) {
-			const nextIndent = currentIndent + indent;
-			const items = [];
-			let index = 0;
-			let start;
-			let end;
-			if (Array.isArray(obj)) {
-				start = "[";
-				end = "]";
-				const { length } = obj;
-				for (; index < length; index++) {
-					items.push(
-						_stringify(obj[index], nextIndent, index === length - 1 ? 0 : 1) ||
-						"null"
-					);
-				}
-			} else {
-				start = "{";
-				end = "}";
-				const keys = Object.keys(obj);
-				const { length } = keys;
-				for (; index < length; index++) {
-					const key = keys[index];
-					const keyPart = `${JSON.stringify(key)}: `;
-					const value = _stringify(
-						obj[key],
-						nextIndent,
-						keyPart.length + (index === length - 1 ? 0 : 1)
-					);
-					if (value !== undefined) {
-						items.push(keyPart + value);
-					}
-				}
-			}
-			if (items.length > 0) {
-				return [start, indent + items.join(`,\n${nextIndent}`), end].join(
-				`\n${currentIndent}`
-				);
-			}
-		}
-	return string;
-	})(passedObj, "", 0);
-}
-
 /*** GENERIC ***/
 
 const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function nowFn() {if (isPerf) {return performance.now()}; return}
-function colorFn(str) {return "<span class='lies'>"+ str +"</span>"}
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
+function removeElementFn(id) {try {dom[id].remove()} catch(e) {}}
+function addProxyLie(value) {sData[SECT99].push(value)}
+function isProxyLie(value) {return sData[SECT99].includes(value)}
 
 function typeFn(item, isSimple = false) {
 	// return a more detailed result
 	let type = typeof item
-	if ("number" === type) {
-		if (Number.isNaN(item)) {type = "NaN"} else if (Infinity === item) {type = Infinity}
-	} else if ("string" === type) {
+	if ('string' === type) {
 		if (!isSimple) {
-			if ("" === item) {type = "empty string"} else if ("" === item.trim()) {type = "whitespace"}
+			if ('' === item) {type = 'empty string'} else if ('' === item.trim()) {type = 'whitespace'}
 		}
-	} else if ("object" === type) {
-		if (null === item) {type = "null"
-		} else if (Array.isArray(item)) {
-			type = "array"
-			if (!isSimple) {type = !item.length ? "empty array" : "array"}
+	} else if ('number' === type) {
+		if (Number.isNaN(item)) {type = 'NaN'} else if (Infinity === item) {type = Infinity}
+	} else if ('object' === type) {
+		if (Array.isArray(item)) {
+			type = 'array'
+			if (!isSimple && !item.length) {type = 'empty array'}
+		} else if (null === item) {type = 'null'
 		} else {
 			if (!isSimple) {
-				try {if (0 === Object.keys(item).length) {type = "empty object"}} catch(e) {}
+				try {if (0 === Object.keys(item).length) {type = 'empty object'}} catch(e) {}
 			}
 		}
 	}
@@ -161,78 +48,58 @@ function testtypeFn(isSimple = false) {
 	try {bigint = BigInt(9007199254740991)} catch(e) {}
 	let data = ['a','','  ', 1, 1.2, Infinity, NaN, [], [1], {}, {a: 1}, null,
 		true, false, bigint, undefined, function foobar() {},]
-	data.forEach(function(item) {typeFn(item, isSimple)})
-}
-
-function cleanFn(item, skipArray = false) {
-	// strings, tidy undefined, empty strings
-	// ToDo: fixup logic e.g. what about NaN !Number.isNaN(item) in first line
-	// we should try and get rid of this fucntion
-	if (typeof item === "number" || typeof item === "bigint") { return item
-	} else if (item == zU) {item = zUQ
-	} else if (item == "true" || item == "false" || item == "null") {item = "\"" + item + "\""
-	} else if (!skipArray && Array.isArray(item)) {
-		item = !item.length ? "empty array" : "array"
-	} else if (item === undefined || item === true || item === false || item === null) {item += ""
-	} else if (!skipArray && item == "") {item = "empty string"
-	} else if (typeof item === "string") {
-		if (!Number.isNaN(item*1)) {item = "\"" + item + "\""}
-	}
-	return item
+	data.forEach(function(item) {console.log(item, typeFn(item, isSimple))})
 }
 
 function run_block() {
-	let msg = "<span style='font-size: 16px;'><b>TZP requires "
-		+ (isTB ? "Tor Browser" : "Firefox") +" v" + isBlockMin[(isTB ? 1 : 0)] +"+<b></span>"
-	let msgItems = document.getElementsByClassName("secthash")
-	for (let i=0; i < msgItems.length; i++) {	msgItems[i].innerHTML = msg	}
+	log_perf(SECTG, 'isBlock','')
+	try {
+		dom.tzpcontent.style.display = 'none'
+		dom.blockmsg.style.display = 'block'
+		let msg = "<center><br><span style='font-size: 14px;'><b>" + (isGecko ? 'Gah.' : 'Aw, Snap!')
+			+"<br><br>TZP requires "+ (isTB ? 'Tor Browser' : 'Firefox') +' v' + isBlockMin[(isTB ? 1 : 0)] +'+<b></span></center>'
+		dom.blockmsg.innerHTML = msg
+	} catch(e) {}
 }
 
 function run_basic() {
-	for (let i = 1; i < 19; i++) {
-		document.body.style.setProperty("--test"+i, "#d4c1b3")
-		document.body.style.setProperty("--bg"+i, "#808080")
+	log_perf(SECTG, 'isBasic','')
+	for (let i=1; i < 19; i++) {
+		document.body.style.setProperty('--test'+i, '#d4c1b3')
+		document.body.style.setProperty('--bg'+i, '#808080')
 	}
-	let items = document.getElementsByClassName("nav-down")
+	document.body.style.setProperty('--testbad', '#d4c1b3')
+	let items = document.getElementsByClassName('nav-down')
 	for (let i=0; i < items.length; i++) {
 		items[i].innerHTML = (items[i].innerHTML).replace(/</, "<span class='perf'>basic mode</span> <")
 	}
 }
 
-function getElementProp(SECT, id, name, pseudo = ":after") {
+function getElementProp(sect, id, name, pseudo = ':after') {
 	// default none: https://www.w3.org/TR/CSS21/generate.html#content
 	try {
 		let item = window.getComputedStyle(document.querySelector(id), pseudo)
-		item = item.getPropertyValue("content")
-		if (runSE) {foo++} else if (runPS) {item = "none"}
-		let originalitem = item
-		item = item.replace(/"/g,"") // trim quote marks
-
-		if (id == "#S" || id == "#D") {
-			// out of range: screen/window returns "none"
-			if (item == "none") {item = "?"} else if (pseudo == ":after") {item = item.slice(3)}
-		} else if (id == "#P") {
-			// out of range: dpi returns ""
-			if (item == "") {item = "?"}
+		item = item.getPropertyValue('content')
+		//console.log(sect, pseudo, id, name, item)
+		if (runSI && !runSL) {item = 'none'} // don't error if runSL
+		let typeCheck = typeFn(item, true)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		item = item.replace(/"/g,'') // trim quote marks
+		// screen(S) + window(D) + dpi(P:before) return none or ? when out of range
+		if ('#S' == id || '#D' == id || '#P' == id) {
+			if (':after' == pseudo && ' x ' == item.slice(0,3)) {item = item.slice(3)} // S/D remove leading ' x '
+			if ('none' == item || '' == item) {item = '?'} // return consistent ? for out of range/blocked
 		}
-		// numbers
-		let iType = typeFn(item)
-		if ("string" == typeFn(item) && !Number.isNaN(item * 1)) {item = item * 1} // number
-
-		// fuckery
-		if (item == "") {
-			log_error(SECT, name, zErrInvalid +"got "+ iType)
-			item = zErr
-		} else if (originalitem == "none") {
-			// ignore screen/window
-			if (id !== "#S" && id !== "#D") {
-				log_error(SECT, name, zErrInvalid +"got 'none'")
-				item = zErr
-			}
-		}
+		// everything else should have a value: so "none" means css was blocked
+		if ('none' == item) {throw zErrInvalid +"got 'none'"}
+		// our css rules use "none " (trailing space) so we can detect when the css blocked
+			// trim it for our return to compare to matchMedia
+		if ('none ' == item) {item = 'none'} 
+		// return numbers
+		if ('string' === typeCheck && !Number.isNaN(item * 1)) {item = item * 1}
 		return item
 	} catch(e) {
-		log_error(SECT, name, e)
+		log_error(sect, name, e)
 		return zErr
 	}
 }
@@ -240,8 +107,8 @@ function getElementProp(SECT, id, name, pseudo = ":after") {
 function mini(str) {
 	// https://stackoverflow.com/a/22429679
 	const json = `${JSON.stringify(str)}`
-	let i, len, hash = 0x811c9dc5
-	for (i = 0, len = json.length; i < len; i++) {
+	let len = json.length, hash = 0x811c9dc5
+	for (let i=0; i < len; i++) {
 		hash = Math.imul(31, hash) + json.charCodeAt(i) | 0
 	}
 	return ('0000000' + (hash >>> 0).toString(16)).slice(-8)
@@ -265,77 +132,75 @@ const promiseRaceFulfilled = async ({
 
 /*** GLOBAL ONCE ***/
 
-function get_isArch() {
+function get_isArch(METRIC) {
 	if (!isGecko) {return}
 	// FF89-109: javascript.options.large_arraybuffers
 	// note: pref change requires new origin/tab/reload: so we can run once
-	let t0 = nowFn()
-	const METRIC = "isArch"
+	let t0 = nowFn(), value
 	try {
-		if (runSE) {foo++}
+		if (runSG) {foo++}
 		let test = new ArrayBuffer(Math.pow(2,32))
-		log_perf(SECTG, METRIC, t0, "", 64)
+		value = 64
 	} catch(e) {
-		isArch = log_error(SECT3, "browser_architecture", e, isScope, 50, true) // persist error to sect3
-		log_perf(SECTG, METRIC, t0, "", zErr)
+		isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist error to sect3
+		value = zErr
 	}
+	log_perf(SECTG, METRIC, t0,'', value)
 }
 
-function get_isAutoplay() {
+function get_isAutoplay(METRIC) {
 	// get non-user-gesture values once
 	let t0 = nowFn()
-	const METRIC = "getAutoplayPolicy"
 	try {
-		let atest, mtest
-		let ares = navigator.getAutoplayPolicy("audiocontext")
+		let aTest, mTest
+		let aPolicy = navigator.getAutoplayPolicy('audiocontext')
 		try {
-			atest = navigator.getAutoplayPolicy(dom.audiotest)
+			if (runSG) {foo++}
+			aTest = navigator.getAutoplayPolicy(dom.audiotest)
 		} catch(e) {
-			log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
-			atest = zErr
+			log_error(13, METRIC +'_audio', e, isScope, true) // persist error to sect13
+			aTest = zErr
 		}
-		let mres = navigator.getAutoplayPolicy("mediaelement")
+		let mPolicy = navigator.getAutoplayPolicy('mediaelement')
 		try {
-			mtest = navigator.getAutoplayPolicy(dom.mediatest)
+			if (runSG) {bar++}
+			mTest = navigator.getAutoplayPolicy(dom.mediatest)
 		} catch(e) {
-			log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
-			mtest = zErr
+			log_error(13, METRIC +'_media', e, isScope, true) // persist error to sect13
+			mTest = zErr
 		}
 		// combine
-		isAutoPlay = (ares === atest ? ares : ares +", "+ atest) +" | "+ (mres === mtest ? mres : mres +", "+ mtest)
-		log_perf(SECTG, "isAutoPlay", t0)
-		return
+		isAutoPlay = (aPolicy === aTest ? aPolicy : aPolicy +', '+ aTest) +' | '+ (mPolicy === mTest ? mPolicy : mPolicy +', '+ mTest)
 	} catch(e) {
 		isAutoPlay = zErr
-		isAutoPlayError = log_error(SECT13, METRIC, e, isScope, 50, true) // persist error to sect13
-		log_perf(SECTG, "isAutoPlay", t0, "", zErr)
-		return
+		isAutoPlayError = log_error(13, METRIC, e, isScope, true) // persist error to sect13
 	}
+	log_perf(SECTG, 'isAutoPlay', t0,'', (isAutoPlay == zErr ? zErr : ''))
+	return
 }
 
 function get_isDevices() {
 	isDevices = undefined
 	let t0 = nowFn()
 	try {
-		if (runSE) {foo++}
+		if (runSG) {foo++}
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			isDevices = devices
-			if (gLoad) {log_perf(SECTG, "isDevices", t0, "", nowFn())}
+			if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', Math.round(nowFn()))}
 		}
 	)} catch(e) {}
 }
 
-const get_isFileSystem = () => new Promise(resolve => {
+const get_isFileSystem = (METRIC) => new Promise(resolve => {
 	// meta: 1748667
 	// note: pref change (dom.fs.enabled) requires new reload: so we can run once
 	let t0 = nowFn()
-	const METRIC = "isFileSystem"
 	function exit(value) {
 		isFileSystem = value
-		log_perf(SECTG, METRIC, t0, "", value)
+		log_perf(SECTG, METRIC, t0,'', value)
 		return resolve()
 	}
-	if (navigator.storage == undefined || "function" !== typeof navigator.storage.getDirectory) {
+	if (navigator.storage == undefined || 'function' !== typeof navigator.storage.getDirectory) {
 		exit(zD)
 	}
 	Promise.all([
@@ -344,34 +209,32 @@ const get_isFileSystem = () => new Promise(resolve => {
 		exit(zE)
 	})
 	.catch(function(e){
-		isFileSystemError = e+""
+		isFileSystemError = e+''
 		exit(zErr)
 	})
 })
 
-function get_isGecko() {
-	let t0 = nowFn()
-	const METRIC = "isGecko"
+function get_isGecko(METRIC) {
+	let t0 = nowFn(), value
 	try {
 		let list = [
-			[DataTransfer, "DataTransfer", "mozSourceNode"],
-			[Document, "Document", "mozFullScreen"],
-			[HTMLCanvasElement, "HTMLCanvasElement", "mozPrintCallback"],
-			[HTMLElement, "HTMLElement", "onmozfullscreenerror"],
-			[HTMLInputElement, "HTMLInputElement", "mozIsTextField"],
-			[HTMLVideoElement, "HTMLVideoElement", "mozDecodedFrames"],
-			[IDBIndex, "IDBIndex", "mozGetAllKeys"],
-			[IDBObjectStore, "IDBObjectStore", "mozGetAll"],
-			[Screen, "Screen", "mozOrientation"],
-			[SVGElement, "SVGElement", "onmozfullscreenchange"] 
+			[DataTransfer, 'DataTransfer', 'mozSourceNode'],
+			[Document, 'Document', 'mozFullScreen'],
+			[HTMLCanvasElement, 'HTMLCanvasElement', 'mozPrintCallback'],
+			[HTMLElement, 'HTMLElement', 'onmozfullscreenerror'],
+			[HTMLInputElement, 'HTMLInputElement', 'mozIsTextField'],
+			[HTMLVideoElement, 'HTMLVideoElement', 'mozDecodedFrames'],
+			[IDBIndex, 'IDBIndex', 'mozGetAllKeys'],
+			[IDBObjectStore, 'IDBObjectStore', 'mozGetAll'],
+			[Screen, 'Screen', 'mozOrientation'],
+			[SVGElement, 'SVGElement', 'onmozfullscreenchange'] 
 		]
 		let obj, prop, aNo = []
 		list.forEach(function(array) {
 			obj = array[0]
 			prop = array[2]
-			if ("function" === typeof obj
-				&& ("object" === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))
-			) {
+			if ('function' === typeof obj
+				&& ('object' === typeof Object.getOwnPropertyDescriptor(obj.prototype, prop))) {
 			} else {
 				aNo.push(array[1])
 			}
@@ -380,44 +243,53 @@ function get_isGecko() {
 		if (found > 5) {
 			isGecko = true
 			// alert if any gecko checks fail
-			if (aNo.length) {
-				log_alert(SECTG, METRIC +": "+ aNo.join(", "), true)
-			}
+			if (aNo.length) {log_alert(SECTG, METRIC, aNo.join(', '), isScope, true)}
 		}
-		log_perf(SECTG, METRIC, t0,"", isGecko +" | "+ found +"/"+ list.length)
+		value = isGecko +' | '+ found +'/'+ list.length
 	} catch(e) {
-		log_perf(SECTG, METRIC, t0, "", zErr)
+		value = zErr
 	}
+	log_perf(SECTG, METRIC, t0,'', value)
+	return
 }
 
-const get_isOS = () => new Promise(resolve => {
+const get_isOS = (METRIC) => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve()
 	}
-	setTimeout(() => resolve(zErrTime), 100)
-	let t0 = nowFn(), failed = 0
-	const METRIC = "isOS"
+	let t0 = nowFn(), failed = 0, isDone = false
+	//setTimeout(() => resolve(zErrTime), 100)
+	setTimeout(function() {
+		// if we haven't moved onto widgets or finished
+		if (!isDone) {
+			isOSErr = log_error(3, "os", zErrTime, isScope, true) // persist timeout error to sect3
+			trywidget(true)
+		}
+	}, 100)
 
 	function exit(value) {
-		// set icon
+		isDone = true // block timeout
 		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
-		dom.fdResourceCss.style.backgroundImage = pngURL
-		// set isOS
+		dom.fdResourceCss.style.backgroundImage = pngURL // set icon
 		isOS = value
 		log_perf(SECTG, METRIC, t0, "", isOS +"")
+		if (isOS == undefined) {
+			log_alert(SECTG, METRIC, "undefined", isScope, true)
+		}
 		return resolve()
 	}
 
 	function trysomethingelse() {
-		// put on my thinking cap
+		// now what?
 		exit()
 	}
 
-	function tryfonts() {
+	function tryfonts(hadError = false) {
 		// FF124+ desktop: check for '-apple-system', 'MS Shell Dlg \\32'
 		// check doc fonts enabled
 		let fntEnabled = false
 		try {
+			if (runSG) {foo++}
 			let fntTest = "\"Arial Black\""
 			let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
 			fntEnabled = (font == fntTest ? true : false)
@@ -428,31 +300,36 @@ const get_isOS = () => new Promise(resolve => {
 		if (!fntEnabled) {trysomethingelse(); return}
 		// test fonts
 		get_font_sizes(false).then(res => {
-			if ("object" == typeFn(res)) {
+			if ("array" == typeFn(res)) {
 				let aDetected = []
-				res.fontsPerspectiveNumber.forEach(function(fnt){
+				res.forEach(function(fnt){
 					aDetected.push(fnt.split(":")[0])
 				})
 				let expected = aDetected[0]
 				if (aDetected.length == 1) {
-					if (expected == "MS Shell Dlg \\32") {exit("windows")
-					} else if (expected == "-apple-system") {exit("mac")}
+					let value = "android"
+					if (expected == "MS Shell Dlg \\32") {value = "windows"
+					} else if (expected == "-apple-system") {value = "mac"}
+					exit(value)
 				} else if (aDetected.length == 0) {
 					exit("linux")
 				} else {
 					trysomethingelse()
 				}
 			} else {
+				// don't record error: we do this test in fonts with base
 				trysomethingelse()
 			}
 		})
 	}
 
-	function trywidget() {
+	function trywidget(hadError = false) {
+		isDone = true // block timeout
 		// FF124+ desktop
 			// note: TB hides system fonts on linux/windows but not mac
 			// getComputedStyle can report the wrong font, but FF itself reports one of these two
 		try {
+			if (runSG) {foo++}
 			let aIgnore = [
 			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
 			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined, '']
@@ -460,15 +337,19 @@ const get_isOS = () => new Promise(resolve => {
 			//font = "sans-serif" // simulate TB/RFP-when-it-gets-it
 			//font = '' // simulate TBA
 			if (aIgnore.includes(font)) {
-				tryfonts()
+				tryfonts(hadError)
 			} else {
 				let value = "linux"
 				if (font.slice(0,12) == "MS Shell Dlg") {value = "windows"
 				} else if (font == "-apple-system") {value = "mac"}
+				// hadError means chrome test failed (error/timeout)
+				// so we can't rely on android already detected
+				if (hadError && font == "Roboto") {value = "android"}
 				exit(value)
 			}
 		} catch(e) {
-			tryfonts()
+			// don't record error: we do this test in fonts
+			tryfonts(hadError)
 		}
 	}
 
@@ -501,10 +382,11 @@ const get_isOS = () => new Promise(resolve => {
 		}
 	})
 	if (!runTE) {
+		// we could timeout or error: either way we move to trywidget
 		try {
-			if (runSE) {foo++}
+			let css
 			list.forEach(function(item) {
-				let css = document.createElement("link")
+				if (!runSG) {css = document.createElement("link")}
 				css.type = "text/css"
 				css.rel = "stylesheet"
 				css.href = path + item + suffix
@@ -512,10 +394,8 @@ const get_isOS = () => new Promise(resolve => {
 				get_event(css, item)
 			})
 		} catch(e) {
-			isOSErr = log_error(SECT3, "os", e, isScope, 50, true) // persist error to sect3
-			log_alert(SECTG, METRIC +": "+ zErr, true)
-			log_perf(SECTG, METRIC, t0, "", zErr)
-			return resolve()
+			isOSErr = log_error(3, "os", e, isScope, true) // persist error to sect3
+			trywidget(true)
 		}
 	}
 })
@@ -543,14 +423,16 @@ const get_isRecursion = () => new Promise(resolve => {
 })
 
 const get_isSystemFont = () => new Promise(resolve => {
-	if (!isGecko) {return resolve()}
+	if (!isGecko) {
+		return resolve()
+	}
+	let t0 = nowFn()
 	function exit(value) {
 		log_perf(SECTG, "isSystemFont", t0, "", value)
 		return resolve()
 	}
 	// first aFont per computed family
 		// add '-default-font' (alphabetically first) so it's easy to see what it pairs with in baseFonts
-	let t0 = nowFn()
 	let aFonts = [
 		'-default-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
 		'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window',
@@ -574,72 +456,72 @@ const get_isSystemFont = () => new Promise(resolve => {
 	}
 })
 
-const get_isTB = () => new Promise(resolve => {
+const get_isTB = (METRIC) => new Promise(resolve => {
 	if (!isGecko) {
 		return resolve(false)
 	}
-	let t0 = nowFn()
-	setTimeout(() => resolve(t0), 150)
-	const METRIC = "isTB"
+	let t0 = nowFn(), isDone = false
+	setTimeout(function() {
+		if (!isDone) {
+			log_error(3, METRIC, zErrTime, isScope, true) // persist error to sect3
+			log_alert(SECTG, METRIC, zErrTime, isScope, true)
+			exit(zErrTime)
+		}
+	}, 150)
+
 	function exit(value) {
+		isDone = true
+		try {document.head.removeChild(css)} catch(e) {}
+		if ("boolean" === typeFn(value)) {isTB = value}
 		log_perf(SECTG, METRIC, t0, "", value)
 		return resolve(value)
 	}
-
 	// FF121+: 1855861
-	const get_event = (css) => new Promise(resolve => {
-		css.onload = function() {
-			isTB = true
-			document.head.removeChild(css)
-			exit(true)
-			return resolve()
-		}
-		css.onerror = function() {
-			isTB = false
-			document.head.removeChild(css)
-			exit(false)
-			return resolve()
-		}
+	const get_event = () => new Promise(resolve => {
+		css.onload = function() {exit(true)}
+		css.onerror = function() {exit(false)}
 	})
-
-	if (!runTE) {
+	let css = document.createElement("link")
+	if (!runSG) {
 		try {
-			let css = document.createElement("link")
 			// ToDo: TB13+: does not work on android
 			css.href = isVer > 102 ? "chrome://browser/content/abouttor/aboutTor.css" : "resource://torbutton-assets/aboutTor.css"
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
-			get_event(css)
+			get_event()
 		} catch(e) {
-			log_error(SECT3, METRIC, e, isScope, 50, true) // persist error to sect3
-			log_alert(SECTG, METRIC +": "+ e.name, true)
+			log_error(3, METRIC, e, isScope, true) // persist error to sect3
+			log_alert(SECTG, METRIC, e.name, isScope, true)
 			exit(zErr)
 		}
 	}
 })
 
-const get_isVer = () => new Promise(resolve => {
-	if (!isGecko) {
-		return resolve()
-	}
+function get_isVer(METRIC) {
+	if (!isGecko) {return}
 	let t0 = nowFn()
-	function output(verNo) {
-		isVer = verNo
-		if (verNo < isBlockMin[0]) {isVerExtra = " or lower"
-		} else if (verNo == 129) {isVerExtra = "+"}
-		log_perf(SECTG, "isVer", t0, "", isVer + isVerExtra)
-		return resolve()
-	}
-	output(cascade())
+
+	isVer = cascade()
+	if (isVer < isBlockMin[0]) {isVerExtra = " or lower"
+	} else if (isVer == 129) {isVerExtra = "+"}
+	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
+	// gecko block mode
+	isBlock = isVer < isBlockMin[0]
+	if (isBlock) {run_block(); return}
+	// set basic mode
+	if (isVer >= isSmartMin) {isSmart = true} else {run_basic()}
+	return
 
 	function cascade() {
 		try {
 			if ("function" === typeof CSS2Properties
 				&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
+
 			// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
 			// ToDo: replace or add a fallback
 			try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
+
 			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 			if ("function" === typeof URL.parse) {return 126}
 			try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
@@ -689,86 +571,58 @@ const get_isVer = () => new Promise(resolve => {
 			return 0
 		}
 	}
-})
+}
 
-function get_isXML() {
-	// get once super early and clear the console
-		// it's not going to change between tests
+const get_isXML = (METRIC) => new Promise(resolve => {
+	if (!isGecko) {isXML = zNA; return resolve()}
+	// get once ASAP +clear console: not going to change between tests
 		// e.g. change app lang and it requires closing and a new tab
-	if (!isGecko) {
-		isXML = zNA
-		return
-	}
-
-	let t0 = nowFn()
-	const METRIC = "xml_errors"
-	let delimiter = ":", notation = ""
+	let t0 = nowFn(), delimiter = ':'
 	const list = {
-		n02: 'a',
-		n03: '',
-		n04: '<>',
-		n05: '<',
-		n07: '<x></X>',
-		n08: '<x x:x="" x:x="">',
-		n09: '<x></x><x>',
-		n11: '<x>&x;',
-		n14: '<x>&#x0;',
-		n20: '<x><![CDATA[',
-		n27: '<x:x>',
-		n28: '<x xmlns:x=""></x>',
-		n30: '<?xml v=""?>',
+		n02: 'a', n03: '', n04: '<>', n05: '<', n07: '<x></X>', n08: '<x x:x="" x:x="">',
+		n09: '<x></x><x>', n11: '<x>&x;', n14: '<x>&#x0;', n20: '<x><![CDATA[', n27: '<x:x>',
+		n28: '<x xmlns:x=""></x>', n30: '<?xml v=""?>'
 	}
 	try {
 		let parser = new DOMParser
-		if (runSE) {foo++}
 		for (const k of Object.keys(list)) {
-			try {
-				let doc = parser.parseFromString(list[k], 'application/xml')
-				let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-				let sType = typeFn(str)
-				if ("string" == sType) {
-					//split into parts: works back to FF52 and works with LTR
-					let parts = str.split("\n")
-					if (k == "n02") {
-						// programatically determine delimiter
-							// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
-						let strLoc = parts[1]
-						let schema = isFile ? "file://" : "https://"
-						let index = strLoc.indexOf(schema) - 2
-						if (strLoc.charAt(index + 1) !== " ") {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
-						if (strLoc.charAt(index) == " ") {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
-						delimiter = strLoc.charAt(index)
-						strLoc = ": "+ strLoc.slice(0, index)
-						let strName = parts[0].split(delimiter)[0]
-						let strLine = parts[2] == undefined ? "" : ": "+ parts[2] // eg hebrew is only 2 lines
-						isXML["n00"] = strName + strLoc + strLine
-						isXML["n01"] = delimiter +" (" + delimiter.charCodeAt(0) +")"
-					}
-					// this is always the error message
-					isXML[k] = parts[0].split(delimiter)[1].trim()
-				} else {
-					isXML[k] = zErrType + sType
-				}
-			} catch(err) {
-				isXML[k] = zErr
+			let doc = parser.parseFromString(list[k], 'application/xml')
+			let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
+			if (runST) {str = ''}
+			let typeCheck = typeFn(str)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			//split into parts: works back to FF52 and works with LTR
+			let parts = str.split('\n')
+			if ('n02' == k) {
+				// programatically determine delimiter
+					// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
+				let strLoc = parts[1]
+				let schema = isFile ? 'file://' : 'https://'
+				let index = strLoc.indexOf(schema) - 2
+				if (strLoc.charAt(index + 1) !== ' ') {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
+				if (strLoc.charAt(index) == ' ') {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
+				delimiter = strLoc.charAt(index)
+				strLoc = ': '+ strLoc.slice(0, index)
+				let strName = parts[0].split(delimiter)[0]
+				let strLine = parts[2] == undefined ? '' : ': '+ parts[2] // eg hebrew is only 2 lines
+				isXML['n00'] = strName + strLoc + strLine
+				isXML['n01'] = delimiter +' (' + delimiter.charCodeAt(0) +')'
 			}
+			// this is always the error message
+			isXML[k] = parts[0].split(delimiter)[1].trim()
 		}
-		if (gClear) {console.clear()}
-		log_perf(SECTG, "isXML", t0)
-		return
 	} catch(e) {
-		isXML = log_error(SECT4, METRIC, e, isScope, 50, true) // persist error to sect4
-		log_perf(SECTG, "isXML", t0, "", zErr)
-		return
+		isXML = e+''
 	}
-}
+	if (gClear) {console.clear()}
+	log_perf(SECTG, 'isXML', t0,'', ('string' == typeof isXML ? zErr : ''))
+	return resolve()
+})
 
 /*** PREREQ ***/
 
-const get_isDomRect = () => new Promise(resolve => {
-	if (!isGecko) {
-		return resolve()
-	}
+function get_isDomRect() {
+	if (!isGecko || !isSmart) {return}
 	// determine valid domrect methods
 	let t0 = nowFn()
 	let aNames = ["element_getbounding", "element_getclient",
@@ -823,20 +677,20 @@ const get_isDomRect = () => new Promise(resolve => {
 				oDomRect[METRIC] = zLIE + " | " + what // + concat method: 
 			}
 		} catch(e) {
-			log_error(SECT15, aNames[i], e)
+			log_error(15, aNames[i], e)
 			aDomRect[i] = zErr
 			oDomRect[METRIC] = zErr
 		}
 	}
 	//console.log(oDomRect)
-	//aDomRect = [false, true, false, true]
-	//aDomRect = [false, false, false, false]
+	//aDomRect = [false, true, false, false]
+	if (runSL) {aDomRect = [false, false, false, false]}
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
 
 	log_perf(SECTP, "isDomRect",t0,"", aDomRect.join(", ") +" | "+ isDomRect)
-	return resolve()
-})
+	return
+}
 
 function get_isPerf() {
 	try {
@@ -851,266 +705,402 @@ function get_isPerf() {
 /** CLICKING **/
 
 function copyclip(element) {
-	if ("clipboard" in navigator) {
+	if ('clipboard' in navigator) {
 		try {
-			let content = document.getElementById(element).innerHTML
+			let content = dom[element].innerHTML
 			// remove spans, change linebreaks
 			let regex = /<br\s*[\/]?>/gi
-			content = content.replace(regex, "\r\n")
-			content = content.replace(/<\/?span[^>]*>/g,"")
-			if (element == "overlayresults") {
-				content = document.getElementById("overlaytitle").innerHTML +"\n\n"+ content
+			content = content.replace(regex, '\r\n')
+			content = content.replace(/<\/?span[^>]*>/g,'')
+			if ('metricsDisplay' == element) {
+				content = dom['metricsTitle'].innerHTML +'\n\n'+ content
 			}
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 			}, function() {
 				// clipboard write failed
-				copyExec()
 			})
 		} catch(e) {}
 	}
 }
 
-function hide_overlays() {
-	dom.modaloverlay.style.display = "none"
-	dom.overlay.style.display = "none"
-	dom.overlayresults.innerHTML = "" // clear so we always start at the top
-}
-
-function overlay_format(type) {
-	dom.overlayresults.innerHTML = ""
-	isJSONformat = type +""
-	showMetrics('fingerprint', isJSONscope)
-}
-
 function showhide(id, style) {
-	let items = document.getElementsByClassName("tog"+ id)
+	let items = document.getElementsByClassName('tog'+ id)
 	for (let i=0; i < items.length; i++) {items[i].style.display = style}
 }
 
 function togglerows(id, word) {
-	let items = document.getElementsByClassName("tog"+ id)
-	let	style = items[0].style.display == "table-row" ? "none" : "table-row"
+	let items = document.getElementsByClassName('tog'+ id)
+	let	style = items[0].style.display == 'table-row' ? 'none' : 'table-row'
 	for (let i=0; i < items.length; i++) {items[i].style.display = style}
-	if (word == "btn") {
-		word = "[ "+ (style == "none" ? "show" : "hide") +" ]"
+	if ('btn' == word) {
+		word = '[ '+ ('none' == style ? 'show' : 'hide') +' ]'
 	} else {
-		word = (style == "none" ? "&#9660; show " : "&#9650; hide ") + (word == "" || word === undefined ? "details" : word)
+		word = ('none' == style ? '&#9660; show ' : '&#9650; hide ') + ('' == word || word === undefined ? 'details' : word)
 	}
-	try {document.getElementById("label"+ id).innerHTML = word} catch(e) {}
+	try {dom['label'+ id].innerHTML = word} catch(e) {}
 }
 
-function filterMetrics(scope, value) {
-	// metric keys
-	// example: /(?=.*?(string1))(?=.*?(string2))/i;
-		// ToDo: regex: replace toLoweCasze() with leading+trailing / and an i (case insentitive)
-	let t0 = nowFn()
-	let data
-	let lookup = gData[zFP][scope +"_flat"]
-	let list = gData[zFP][scope + "_list"]
-	list.forEach(function(item) {
-		if ((item.toLowerCase()).match(value) !== null) {
-			if (data == undefined) {data = {}}
-			data[item] = lookup[item]
-		} else {
-			// check metric keys
-			if ("object" == typeof lookup[item]) {
-				try {
-					let tmpObj = {}
-					for (const key of Object.keys(lookup[item].metrics)) {
-						if ((key.toLowerCase()).match(value) !== null) {
-							tmpObj[key] = lookup[item]["metrics"][key]
-						} else {
-							// go deeper
-							let oNested = lookup[item]["metrics"][key]
-							if ("object" == typeof oNested) {
-								try {
-									let tmpNest = {}
-									for (const n of Object.keys(oNested)) {
-										if ((n.toLowerCase()).match(value) !== null) {
-											tmpNest[n] = oNested[n]
-										} // should we go deeper?
-									}
-									if (Object.keys(tmpNest).length) {tmpObj[key] = tmpNest}
-								} catch(e) {}
-							}
-						}
-					}
-					if (Object.keys(tmpObj).length) {
-						let newObj = {"hash": mini(tmpObj),"metrics": tmpObj}
-						if (data == undefined) {data = {}}
-						data[item] = newObj
-					}
-				} catch(e) {}
-			}
-		}
-	})
-	//console.log(performance.now() - t0, "filter")
-	return data
-}
+/*** METRICS DISPLAY ***/
 
-function showMetrics(name, scope, isConsole = false, isTyping = false) {
-	// do nothing if triggered by typing but filter is not selected
-	if (isTyping && isJSONformat !== "_filter") {return}
-
-	let t0 = nowFn()
-	let isVisible = dom.modaloverlay.style.display == "block"
-	let isShowFormat = false
-	let btn = "<span class='btn0 btnc' onClick='showMetrics(`"
-		+ name +"`,`" + scope +"`, true)'>[CONSOLE]</span>"
-
-	let data, showhash = true, results, color = 99
-	if (name == SECT98 || name == SECT99) { data = gData[name]
-	} else if (name == "fingerprint") {
-		isShowFormat = true
-		isJSONscope = scope
-		name += isJSONformat
-		if (isJSONformat == "_filter") {
-			let values = (dom.optFilter.value).split(`*`)
-			let search = "", value = []
-			values.forEach(function(v){
-				v = v.trim()
-				if (v.length > 2) {
-					search += '(?=.*?('+ v.toLowerCase() +'))'
-					value.push(v)
-				}
-			})
-			if (value.length) {
-				data = filterMetrics(scope, search)
-				name += "_"+ value.join("*").toLowerCase()
+function json_highlight(json, colorStrings = false) {
+	let colorTicks = false
+	if ('health' == overlayName) {
+		colorStrings = false
+		if ('_summary' == overlayHealth) {colorTicks = true}
+	}
+	if ('string' !== typeof json) {
+		json = json_stringify(json);
+	}
+	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+		var cls = 'number';
+		if (/^"/.test(match)) {
+			if (/:$/.test(match)) {
+				cls = 'key';
 			} else {
-				showhash = false
+				if (colorStrings) {
+					cls = 'string';
+				} else if (colorTicks) {
+					cls = ''
+					match = match.replace(tick, green_tick)
+					match = match.replace(cross, red_cross)
+				} else {
+					return match
+				}
 			}
-		} else {
-			data = gData[zFP][scope + isJSONformat]
+		} else if (/true|false/.test(match)) {
+			cls = 'boolean';
+		} else if (/null/.test(match)) {
+			cls = 'null';
 		}
-	} else if (name == "errors" || name == "health" || name == "lies") {
-		data = gData[name][scope]
-	} else if (name == "alerts") {data = gAlert; showhash = false
-	} else if (name.slice(0,6) == "errors") {
-		name = name.slice(6)
-		data = sData["errors"][scope][name]
-		name = name.toUpperCase() +": errors"
-		showhash = false
-	} else if (name.slice(0,4) == "lies") {
-		name = name.slice(4)
-		data = sData["lies"][scope][name]
-		name = name.toUpperCase() +": lies"
-		showhash = false
-	} else if (sectionNames.includes(name)) {
-		data = sData[zFP][scope][name]; name = name.toUpperCase()
-	} else {
-		data = sDetail[scope][name]
-	}
-	// log to console
-	if (isConsole) {
-		if (data !== undefined) {
-			console.log((scope == undefined ? "" : scope.toUpperCase() +": ") + name +": "+ (showhash ? mini(data) : ""), data)
-		}
-		return
-	}
-	let display
-	if (name == "fingerprint" || name == "fingerprint_flat") {
-		display = sDataTemp["cache"][scope + isJSONformat]
-	} else {
-		display = data !== undefined ? json_highlight(data) : ""
-	}
+		return '<span class="'+ cls +'">'+ match +'</span>';
+	})
+}
 
-	//add btn, show/hide options, display
-	dom.overlaytitle.innerHTML = (scope == undefined ? "" : scope.toUpperCase() +": ")
-		+ name +": "+ (showhash ? mini(data) : "")
-	if (isVisible) {
-		// avoid reflow
-		dom.overlayresults.innerHTML = display
+function json_stringify(passedObj, options = {}) {
+	/* https://github.com/lydell/json-stringify-pretty-compact */
+	const stringOrChar = /("(?:[^\\"]|\\.)*")|[:,]/g;
+	const indent = JSON.stringify(
+		[1],
+		undefined,
+		options.indent === undefined ? 2 : options.indent
+	).slice(2, -3);
+	const maxLength =
+		indent === ''
+			? Infinity
+			: options.maxLength === undefined
+			? 75 // was 80
+			: options.maxLength;
+	let { replacer } = options;
+
+	return (function _stringify(obj, currentIndent, reserved) {
+		if (obj && 'function' === typeof obj.toJSON) {
+			obj = obj.toJSON()
+		}
+		const string = JSON.stringify(obj, replacer);
+		if (string === undefined) {
+			return string
+		}
+		const length = maxLength - currentIndent.length - reserved;
+		if (string.length <= length) {
+			const prettified = string.replace(
+				stringOrChar,
+				(match, stringLiteral) => {
+					return stringLiteral || `${match} `;
+				}
+			);
+			if (prettified.length <= length) {
+				return prettified;
+			}
+		}
+		if (replacer != null) {
+			obj = JSON.parse(string);
+			replacer = undefined;
+		}
+		if ('object' == typeof obj && obj !== null) {
+			const nextIndent = currentIndent + indent;
+			const items = [];
+			let index = 0;
+			let start;
+			let end;
+			if (Array.isArray(obj)) {
+				start = '[';
+				end = ']';
+				const { length } = obj;
+				for (; index < length; index++) {
+					items.push(
+						_stringify(obj[index], nextIndent, index === length - 1 ? 0 : 1) ||
+						'null'
+					);
+				}
+			} else {
+				start = '{';
+				end = '}';
+				const keys = Object.keys(obj);
+				const { length } = keys;
+				for (; index < length; index++) {
+					const key = keys[index];
+					const keyPart = `${JSON.stringify(key)}: `;
+					const value = _stringify(
+						obj[key],
+						nextIndent,
+						keyPart.length + (index === length - 1 ? 0 : 1)
+					);
+					if (value !== undefined) {
+						items.push(keyPart + value);
+					}
+				}
+			}
+			if (items.length > 0) {
+				return [start, indent + items.join(`,\n${nextIndent}`), end].join(
+				`\n${currentIndent}`
+				);
+			}
+		}
+	return string;
+	})(passedObj, '', 0);
+}
+
+function metricsAction(type) {
+	if ('close' == type) {
+		dom.modaloverlay.style.display = 'none'
+		dom.overlay.style.display = 'none'
+		dom.metricsDisplay.innerHTML = '' // clear so we always start at the top
+	} else if ('console' == type) {
+		if (metricsData !== undefined) {console.log(metricsTitle, metricsData)}
+	} else if ('download' == type) {
+	if (metricsData == undefined) {return}
+		try {
+			let name = metricsPrefix + (metricsTitle.replaceAll(': ', '_')).toLowerCase()
+			var file = new Blob([JSON.stringify(metricsData, null, 2)], {type: 'application/json'})
+			var a = document.createElement('a')
+			a.href = URL.createObjectURL(file)
+			a.download = name
+			a.click()
+		} catch(e) {
+			console.error(e)
+		}
 	} else {
-		dom.overlaybutton.innerHTML = btn
-		dom.overlayoptions.style.display = (isShowFormat ? "block" : "none")
-		dom.modaloverlay.style.display = "block"
-		dom.overlay.style.display = "block"
-		// delay so overlay is painted
+		// user changed settings
+		dom.metricsDisplay.innerHTML = ''
+		// force delay so reflow = always start at the top
 		setTimeout(function() {
-			dom.overlayresults.innerHTML = display
+			metricsShow(overlayName, overlayScope)
 		}, 0)
 	}
-	//console.log(name, scope, performance.now() - t0, isVisible)
+}
+
+function metricsEvent(evt) {
+	if ('block' !== dom.modaloverlay.style.display) {return}
+	evt = evt || window.event
+	var isEscape = false
+	if ('key' in evt) {
+		isEscape = ('Escape' == evt.key || 'Esc' == evt.key)
+	} else {
+		isEscape = (27 == evt.keyCode)
+	}
+	if (isEscape) {metricsAction('close')
+	} else if ((evt.ctrlKey || evt.metaKey) && 67 == evt.keyCode) {
+		copyclip('metricsDisplay')
+		let target = dom.metricsBtnCopy
+		target.classList.add('btngood')
+		target.classList.remove('btn0')
+		setTimeout(function() {
+			target.classList.add('btn0')
+			target.classList.remove('btngood')
+		}, 500)
+	}
+}
+
+function metricsShow(name, scope) {
+	let t0 = nowFn()
+	overlayName = name
+	let isVisible = dom.modaloverlay.style.display == 'block'
+	let aShowFormat = ['fingerprint','health'] // lies need to be made into an object with metrics as key
+	let isSection = sectionNames.includes(name)
+	let isShowFormat = aShowFormat.includes(name) || isSection
+	let isHealth = name == 'health'
+
+	let target = name, overlayScope = scope
+	if (isShowFormat) {target = metricsUI(target, isVisible, isSection, isHealth)}
+
+	let data, color = 99, filter = ''
+	if (name == SECT98 || name == SECT99) {
+		// prototype/proxy
+		data = gData[name]
+	} else if (aShowFormat.includes(name)) {
+		// FP/health
+		if (isHealth) {
+			if (!dom.healthAll.checked) {filter = dom.healthPass.checked ? '_pass' : '_fail'}
+			if (overlayHealth == '_detail') {overlayHealth = ''; target = name}
+		} else {
+			if (overlayFP == '_detail') {overlayFP = ''; target = name}
+		}
+		data = gData[name][scope + (isHealth ? overlayHealth + filter : overlayFP)]
+	} else if (name == 'alerts' || name == 'errors' || name == 'lies') {
+		// global alerts/errors/lies
+		data = gData[name][scope]
+	} else if (isSection) {
+		// section
+		if (overlaySection == '_detail') {overlaySection = ''; target = name}
+		data = sData[zFP][scope + overlaySection][name]
+	} else {
+		// section alerts/errors/lies
+		let nameslice = name.slice(0,4)
+		if (nameslice == 'erro' || nameslice == 'aler' || nameslice == 'lies') {
+			let slicelen = nameslice == 'lies' ? 4 : 6
+			target = name.slice(0, slicelen)
+			name = name.slice(slicelen)
+			data = sData[target][scope][name]
+			target = target.toUpperCase() +': '+ name
+		} else {
+			// detail data
+			data = sDetail[scope][name]
+		}
+	}
+	metricsData = data
+	let isCache = (target == 'fingerprint' || target == 'fingerprint_flat')
+	let	display = data !== undefined ? (isCache ? sDataTemp['cache'][scope + overlayFP] : json_highlight(data, true)): ''
+
+	//add btn, show/hide options, display
+	let hash = mini(data)
+	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
+	dom.metricsTitle.innerHTML = metricsTitle
+	if (isVisible) {
+		// avoid reflow
+		dom.metricsDisplay.innerHTML = display
+	} else {
+		dom.metricDownload.style.display = isShowFormat ? 'inline' : 'none'
+		dom.metricOptions.style.display = isShowFormat ? 'block' : 'none'
+		dom.modaloverlay.style.display = 'block'
+		dom.overlay.style.display = 'block'
+		// delay so overlay is painted
+		setTimeout(function() {dom.metricsDisplay.innerHTML = display}, 0)
+	}
+	//console.log(overlayTitle, performance.now() - t0, isVisible)
+}
+
+function metricsUI(target, isVisible, isSection, isHealth) {
+	if (!isVisible) {
+		// tidy up options
+		dom.optFlat.style.display = target == 'fingerprint' ? 'block': 'none'
+		dom.optList.style.display = target == 'fingerprint' ? 'block': 'none'
+		dom.groupHealth.style.display = isHealth ? 'block' : 'none'
+
+		// ensure suitable options
+		let selected = ''
+		if (isSection) {
+			overlaySection = ('' == overlaySection ? '_detail' : '_summary')
+			selected = overlaySection
+		} else if (isHealth) {
+			overlayHealth = ('' == overlayHealth ? '_detail' : '_summary')
+			selected = overlayHealth
+		} else {
+			if (overlayFP == '') {overlayFP = '_detail'}
+			selected = overlayFP
+		}
+		dom['optFormat'+ selected].checked = true
+	}
+
+	// update final target to match checked item
+	let items = document.getElementsByName('optOverlay')
+	for (let i=0; i < items.length; i++) {
+		if (items[i].checked) {
+			target += items[i].value
+			let check = items[i].value
+			if (isSection) {overlaySection = check} else if (isHealth) {overlayHealth = check} else {overlayFP = check}
+		}
+	}
+	// return final target
+	return target
 }
 
 /*** OUTGOING ***/
 
-function output_health(scope) {
-	if (!isSmart) {return}
-	// sort sData to gData
-	let h = "health"
-	gData[h] = {}
-	gData[h][scope] = {}
-
+function lookup_health(sect, metric, scope, isPass) {
+	// return summary 'error/untrustworthy/str/hash' + detail (underlying data)
+	if ('window.caches' == metric) {metric = 'caches'}
+	let data = '', hash = ''
+	// error?
+	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
+	// lie? // ToDo: lookup detail: do we want to?
+	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, data])}} catch(e) {}
+	// nested, lookups, FP|detail data
 	try {
-		let total = 0
-		for (const type of Object.keys(sData[h][scope]).sort()) {
-			gData[h][scope][type] = {}
-			for (const sect of Object.keys(sData[h][scope][type]).sort()) {
-				let obj = sData[h][scope][type][sect]
-				if (type == "fail") {
-					if (sect == "_count") {
-						total += obj
-						gData[h][scope][type][sect] = obj
-					} else {
-						gData[h][scope][type][sect] = {}
-						// sort object
-						for (const metric of Object.keys(obj).sort()) {
-							let data = gData[zFP][scope][sect]["metrics"][metric]
-							// lookup fail details
-							if (data == zErr) {
-								try {
-									data = gData["errors"][sect][metric]
-								} catch(e) {}
-							} else if (metric == "fontnames") {
-								data = sDetail[scope]["fontnames_health"]
-							} else if (metric == "letterboxing" || metric == "new_window") {
-								data = gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerWidth"]
-									+" x "+ gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerHeight"]
-							} else if (metric == "screen_matches_inner") {
-								data = {
-									"inner": gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerWidth"]
-										+" x "+ gData[zFP][scope]["screen"]["metrics"]["window_sizes"]["metrics"]["innerHeight"],
-									"screen": gData[zFP][scope]["screen"]["metrics"]["screen_sizes"]["metrics"]["device-width"]
-										+" x "+ gData[zFP][scope]["screen"]["metrics"]["screen_sizes"]["metrics"]["device-height"],
-								}
-							} else {
-								let aList = ["devicePixelRatio", "-moz-device-pixel-ratio", "dpi", "dpcm", "dppx", "dpi_css"]
-								if (aList.includes(metric)) {
-									data = gData[zFP][scope]["screen"]["metrics"]["pixels"]["metrics"][metric]
-								}
-							}
-							// handle non data so at least it shows in JSON display
-							if (data == undefined) { data =""}
-							// ToDo: lookup untrustworthy details
-								// i.e we would store them in sDetail[scope]["untrustworthy"][metric] and then try/catch here
-							// ToDo: also add e.g. methods/fails such as unexpected fonts
-							gData[h][scope][type][sect][metric] = data
-						}
-					}
-				} else {
-					// sort array
-					if (sect == "_count") {total += obj}
-					gData[h][scope][type][sect] = (sect == "_count" ? obj : obj.sort())
+		let nested = '', tmpdata, sDetailTemp
+		if ('pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
+		if ('' !== nested) {
+			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
+		} else if (sDetail[scope].lookup[metric] !== undefined) {
+			data = sDetail[scope].lookup[metric]
+		} else {
+			data = gData[zFP][scope][sect]['metrics'][metric]
+		}
+		if (undefined !== data) {
+			let typeCheck = typeFn(data, true)
+			hash = data
+			// handle sDetailTemp: copy per run so it doesn't change in gData
+			if ('fontnames' == metric) {sDetailTemp = sDetail[scope]['fontnames_health']}
+			if ('timing_precision' == metric) {sDetailTemp = sDetail[scope][metric]}
+			if (undefined !== sDetailTemp) {
+				let tmpCheck = typeFn(sDetailTemp)
+				if ('object' == tmpCheck) {
+					data = {}
+					for (const k of Object.keys(sDetailTemp)) {data[k] = sDetailTemp[k]}
+				} else if ('array' == tmpCheck) {
+					data = []
+					sDetailTemp.forEach(function(item){data.push(item)})
 				}
 			}
+			if ('object' === typeCheck) {
+				try {hash = gData[zFP][scope][sect]['metrics'][metric].hash} catch(e) {}
+			}
+			return([hash, data])
 		}
+	} catch(e) {
+		console.log(metric,e)
+	}
+	return(['',''])
+}
 
-		// summary
-		let countPass = 0, countFail = 0
-		if (gData[h][scope]["pass"] !== undefined) {
-			countPass = gData[h][scope]["pass"]["_count"]
+function output_health(scope) {
+	// done after populating global FP, errors, lies
+	if (!isSmart) {return}
+	let h = "health", countPass = 0, countTotal = Object.keys(gData.health[scope +'_collect']).length
+	gData[h][scope] = {}
+	gData[h][scope +'_fail'] = {}
+	gData[h][scope +'_pass'] = {}
+	gData[h][scope +'_summary'] = {}
+	gData[h][scope +'_summary_fail'] = {}
+	gData[h][scope +'_summary_pass'] = {}
+
+	let target = gData.health[scope +'_collect']
+	try {
+		for (const metric of Object.keys(target).sort()) {
+			let sect = target[metric][0]
+			let isPass = target[metric][1]
+			if (isPass) {countPass++}
+			let symbol = isPass ? tick : cross
+			let sub = isPass ? '_pass' : '_fail'
+			// lookup
+			let data = lookup_health(sect, metric, scope, isPass)
+			let summary = data[0], detail = data[1]
+			if ('' !== summary) {summary = ' '+ summary}
+			// populate detail
+			if ('' == detail) {detail = symbol}
+			gData[h][scope][metric] = detail
+			gData[h][scope + sub][metric] = detail
+			// populate summary
+			gData[h][scope +'_summary'][metric] = symbol + summary
+			gData[h][scope +'_summary'+ sub][metric] = symbol + summary
 		}
-		if (gData[h][scope]["fail"] !== undefined) {
-			countFail = gData[h][scope]["fail"]["_count"]
+		if (countTotal > 0) {
+			let isAll = countPass == countTotal
+			dom[scope + h].innerHTML = addButton((isAll ? 'good' : 'bad'), h, countPass +'/'+ countTotal)
+			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
-		// all
-		total = countPass + countFail
-		if (total > 0) {
-			dom[scope + h].innerHTML = addButton((countPass == total ? "good" : "bad"), h, countPass +"/"+ total)
-		}
+		delete gData[h][scope +'_collect']
 	} catch(e) {
 		console.log(e)
 	}
@@ -1178,8 +1168,13 @@ function output_perf(id, click = false) {
 			// detail
 			if (isMore && 3 === type) {
 				name = name.replace(": "+ SECTNF,"")
+				if (name.length > pad) {
+					let parts = name.split(":")
+					let newlen = pad - (parts[1].length + 1)
+					name = name.slice(0, newlen) +":"+ parts[1]
+				}
 				if (id !== "all") {isStart = true}
-				time2 = isStart ? " |"+ s98 + time2.padStart(5) +" ms</span>" : ""
+				time2 = isStart ? " |"+ s98 + time2.padStart(5) +" ms</span>" : ''
 				let pretty = s98 + name.padStart(pad) + sc +":" + s98 + time1.padStart(5) +" ms</span>"
 					+ time2 + extra
 				aPretty.push(pretty)
@@ -1226,21 +1221,37 @@ function output_section(section, scope) {
 	}
 
 	// propagate data
-	let aMetricsList = [], flatdata = {}
+	let gList = {}, gFlat = {}
+	let summary = scope+"_summary"
+	if (gRun) {
+		gData[zFP][summary] = {}
+	}
+	sData[zFP][scope+"_list"] = {}
+	sData[zFP][summary] = {}
+
 	aSection.forEach(function(number) {
-		let data = {}, hash, count
+		let data = {}, datasummary = {}, hash, count, hashsummary
 		let name = sectionMap[number]
-		// FP
+		sData[zFP][summary][name] = {}
+		// section
 		try {
-			data = {}
+			data = {}, datasummary = {}
 			let obj = sDataTemp[zFP][scope][number]
 			for (const k of Object.keys(obj).sort()) {
 				data[k] = obj[k]
-				if (gRun) {flatdata[k] = obj[k]}
+				let value = ("object" == typeof data[k] && data[k] !== null ? data[k]["hash"] : data[k])
+				datasummary[k] = value
+				if (gRun) {
+					gFlat[k] = obj[k]
+					gList[k] = datasummary[k]
+				}
 			}
 			sData[zFP][scope][name] = data
 			hash = mini(data)
 			count = Object.keys(data).length
+
+			sData[zFP][summary][name] = datasummary
+			hashsummary = mini(datasummary)
 			// global
 			if (gRun) {
 				// FP
@@ -1248,14 +1259,9 @@ function output_section(section, scope) {
 				gData[zFP][scope][name]["hash"] = hash
 				gData[zFP][scope][name]["metrics"] = data
 				// summary
-				let summary = scope+"_summary"
 				gData[zFP][summary][name] = {}
-				gData[zFP][summary][name]["hash"] = hash
-				gData[zFP][summary][name]["metrics"] = {}
-				for (const k of Object.keys(data)) {
-					let value = ("object" == typeof data[k] && data[k] !== null ? data[k]["hash"] : data[k] )
-					gData[zFP][summary][name]["metrics"][k] = value
-				}
+				gData[zFP][summary][name]["hash"] = hashsummary
+				gData[zFP][summary][name]["metrics"] = datasummary
 			}
 		} catch(e) {
 			console.error(e)
@@ -1270,17 +1276,6 @@ function output_section(section, scope) {
 				} catch(e) {
 					console.error(d, str, e.name, e.emssage)
 				}
-				// log health on global runs
-				if (gRun && isSmart) {
-					if ("string" == typeof str && str.includes("class='health'")) {
-						let hType
-						if (str.includes(">"+ tick +"<")) {hType = "pass"
-						} else if (str.includes(">"+ cross +"<")) {hType = "fail"}
-						if (hType !== undefined) {
-							log_health(scope, hType, name, d)
-						}
-					}
-				}
 			}
 		} catch(e) {
 			console.error(e)
@@ -1292,44 +1287,36 @@ function output_section(section, scope) {
 		let aBtns = []
 		try {
 			btnList.forEach(function(item) {
-				let btn = "", source = {}, target = {}
+				let btn = ''
 				if (sDataTemp[item][scope] !== undefined && sDataTemp[item][scope][name] !== undefined) {
-					let len = 0
-						if (sData[item][scope] == undefined) {sData[item][scope] = {}}
-						if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
-					if (item == "errors") {
-						for (const m of Object.keys(sDataTemp[item][scope][name]).sort()) {
-							sData[item][scope][name][m] = sDataTemp[item][scope][name][m]
-						}
-						len = Object.keys(sData[item][scope][name]).length
-					} else {
-						let array = sDataTemp[item][scope][name].sort()
-						sData[item][scope][name] = array
-						len = array.length
+					if (sData[item][scope] == undefined) {sData[item][scope] = {}}
+					if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
+					let typeCheck = typeFn(sDataTemp[item][scope][name], true)
+					for (const m of Object.keys(sDataTemp[item][scope][name]).sort()) {
+						sData[item][scope][name][m] = sDataTemp[item][scope][name][m]
 					}
-					// catch zero length: e.g. object cleared not deleted
-					if (len > 0) {
-						let btnText = len + " "+ (len == 1 ? item.slice(0,-1) : item) // single/plural
-						btn = addButton(0, item + name, btnText, "btns", scope)
+					let count = Object.keys(sData[item][scope][name]).length
+					if (count > 0) {
+						let btnText = count + ' '+ (count == 1 ? item.slice(0,-1) : item) // single/plural
+						let color = ('alerts' === item) ? 'bad' : 0
+						btn = addButton(color, item + name, btnText, 'btns', scope)
 						aBtns.push(btn.trim())
 					}
 				}
 			})
-			document.getElementById(name +"hash").innerHTML = sHash + aBtns.join("")
+			dom[name +'hash'].innerHTML = sHash + aBtns.join('')
 		} catch(e) {
 			console.error(e)
 		}
+
 	})
 	if (gRun) {
-		// flat
-		let flat = scope+"_flat"
+		// flat + list
+		let flat = scope+'_flat', list = scope+'_list'
 		gData[zFP][flat] = {}
-		for (const k of Object.keys(flatdata).sort()) {
-			aMetricsList.push(k)
-			gData[zFP][flat][k] = flatdata[k]
-		}
-		// metric list
-		gData[zFP][scope +"_list"] = aMetricsList
+		gData[zFP][list] = {}
+		for (const k of Object.keys(gFlat).sort()) {gData[zFP][flat][k] = gFlat[k]}
+		for (const k of Object.keys(gList).sort()) {gData[zFP][list][k] = gList[k]}
 		// cache big jsons displays
 		sDataTemp["cache"] = {}
 		sDataTemp["cache"][scope] = json_highlight(gData[zFP][scope])
@@ -1337,136 +1324,181 @@ function output_section(section, scope) {
 	}
 }
 
-/*** INCOMING ***/
+/*** RECORD ***/
 
 function addButton(color, name, text = "details", btn = "btnc", scope = isScope) {
-	return " <span class='btn"+ color +" "+ btn +"' onClick='showMetrics(`"+ name +"`,`" + scope +"`)'>["+ text +"]</span>"
+	return " <span class='btn"+ color +" "+ btn +"' onClick='metricsShow(`"+ name +"`,`" + scope +"`)'>["+ text +"]</span>"
 }
 
-function addData(section, metric, data, hash = undefined, includeDetail = true) {
-	// return a new object with hash
-	if (section == "none") {
-		let obj = {}
-		obj["hash"] = hash
-		obj["metrics"] = data
-		return obj
+function addBoth(section, metric, str, btn ='', notation ='', data ='', isLies = false, donotuse ='x') {
+	//if ('x' !== donotuse) {console.log(metric, 'extra paramater passed')}
+	let display = str
+	// check: errors can't be lies
+	if (data == zErr || data == zErrLog || data == zErrShort) {
+		isLies = false
+		let sectionName = sectionMap[section]
+		// instead of logging errors in each function add them here
+		if (data == zErrLog || data == zErrShort) {
+			// 186 errors: 82e9678e (runST + runSI)
+			// 190 errors: 4440a20a (+ runSE)
+			display = log_error(section, metric, str)
+			if (data == zErrShort) {display = zErr}
+			data = zErr
+		}
 	}
-	if (hash == undefined) {
-		sDataTemp[zFP][isScope][section][metric] = data
+	// check: non obj can't have btns
+	if ('object' !== typeof data && '' !== btn) {
+		let typeCheck = typeFn(data, true), value
+		if ('object' !== typeCheck && 'array' !== typeCheck) {btn = ''}
+	}
+	addDisplay(section, metric, display, btn, notation, isLies)
+
+	// data = FP: if missing we use str/ which also doubles as our hash for objects
+	if (data == '') {data = str}
+	addData(section, metric, data, str, isLies)
+}
+
+function addData(section, metric, data, hash ='', isLies = false, donotuse ='x') {
+	//if ('x' !== donotuse) {console.log(metric, 'extra paramater passed')}
+	// check: basic mode/errors can't be lies
+	if (!isSmart || data == zErr) {isLies = false}
+	let typeCheck = typeFn(data, true), value
+	if ('object' === typeCheck || 'array' === typeCheck) {
+		addDetail(metric, data)
+		value = {'hash': hash, 'metrics': data}
 	} else {
-		// add an object as hash + detail
-		if (includeDetail) {
-			if (sDetail[isScope] == undefined) {sDetail[isScope] = {}}
-			sDetail[isScope][metric] = data
+		value = data
+	}
+	sDataTemp[zFP][isScope][section][metric] = isLies ? zLIE : value
+	// ToDo: instead of recording just the metric name, record the data
+	if (isLies) {log_known(section, metric, value)}
+}
+
+function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = false, donotuse ='x') {
+	//if ('x' !== donotuse) {console.log(metric, 'extra paramater passed')}
+	// check: basic mode can't be lies or have notation
+	if (!isSmart) {isLies = false; notation =''}
+	// style lies + ensure lies cannot be good health
+	if (isLies) {
+		str = "<span class='lies'>"+ str +"</span>"
+		notation = notation.replace("class='good'", "class='bad'")
+		notation = notation.replace(tick, cross)
+	}
+	sDataTemp['display'][isScope][section][metric] = str + btn + notation
+	// global health: just grab pass/fail
+	if (gRun && '' !== notation && notation.includes("class='health'")) {
+		let isPass
+		if (notation.includes(">"+ tick +"<")) {isPass = true} else if (notation.includes(">"+ cross +"<")) {isPass = false}
+		if (isPass !== undefined) {
+			gData['health'][isScope +'_collect'][metric] = [sectionMap[section], isPass]
 		}
-		sDataTemp[zFP][isScope][section][metric] = {}
-		sDataTemp[zFP][isScope][section][metric]["hash"] = hash
-		sDataTemp[zFP][isScope][section][metric]["metrics"] = data
 	}
 }
 
-function addDataDisplay(section, metric, data, scope = isScope) {
-	sDataTemp[zFP][scope][section][metric] = data
-	sDataTemp["display"][scope][section][metric] = data
-}
-
-function addDataFromArray(section, item, scope = isScope) {
-	// parse array(s) and add string(s)
-	if (Array.isArray(item) && item.length) {
-		if (Array.isArray(item[0])) {
-			item.forEach(function(pair) {
-				sDataTemp[zFP][scope][section][pair[0]] = pair[1]
-			})
-		} else {
-			sDataTemp[zFP][scope][section][item[0]] = item[1]
-		}
-	}
+function log_display(section, metric, str, btn = "", notation = "", isLies = false) {
+	if (!isSmart) {isLies = false; notation =''}
+	if (isLies) {str = "<span class='lies'>"+ str +"</span>"}
+	sDataTemp["display"][isScope][section][metric] = str + btn + notation
 }
 
 function addDetail(metric, data, scope = isScope) {
 	if (sDetail[scope] == undefined) {sDetail[scope] = {}}
 	sDetail[scope][metric] = data
+	if (gRun) {addTiming(metric)}
 }
 
-function log_alert(section, output, isOnce = false) {
-	output = section +": "+ output
-	if (isOnce) {
-		if (gRun) {gAlertOnce.push(output)} // global snapshot
-		console.error(output) // always console
+function addTiming(metric) {
+	let remainder = gCountTiming % 9, key, value
+	try {
+		if (1 == remainder) {key = 'now'; value = performance.now()
+		} else if (4 == remainder) {key = 'timestamp'; value = new Event('').timeStamp
+		} else if (5 == remainder) {key = 'date'
+			value = (new Date())[Symbol.toPrimitive]('number')
+		} else if (7 == remainder) {key = 'mark'; value = performance.mark('a').startTime
+		} else if (8 == remainder) {key = 'exslt'
+			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
+					+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
+					+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
+			const doc = (new DOMParser).parseFromString(xslText, "text/xml")
+			let xsltProcessor = new XSLTProcessor
+			xsltProcessor.importStylesheet(doc)
+			let fragment = xsltProcessor.transformToFragment(doc, document)
+			let str = (fragment.childNodes[0].nodeValue).slice(0,-6)
+			// we use epoch time so each entry is always moving forward in time
+			// we multiply by 10 since the ms has a leading 0 and has a 10ms precison
+			value = (new Date(str))[Symbol.toPrimitive]('number') * 10
+		}
+		if (runST) {value = undefined}
+		if (undefined !== key) {
+			gData.timing[key].push(value)
+		}
+	} catch(e) {
+		gData.timing[key] = e+''
+	}
+	gCountTiming++
+}
+
+function log_alert(section, metric, alert, scope = isScope, isOnce = false) {
+	if ('string' !== typeof section) {section = sectionMap[section]}
+	let key = 'alerts'
+	if (gRun && isOnce) {
+		key += 'once'
+		//if (gData[key][scope] == undefined) {gData[key][scope] = {}}
+		if (gData[key][scope][section] == undefined) {gData[key][scope][section] = {}}
+		gData[key][scope][section][metric] = alert
 	} else {
-		if (gRun) {gAlert.push(output)}
-		console.error(output)
+		if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
+		if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
+		sDataTemp[key][scope][section][metric] = alert
 	}
 }
 
-function log_display(section, id, str) {
-	sDataTemp["display"][isScope][section][id] = str
-	// catch undefined
-	if (str === undefined) {
-		log_alert(sectionMap[section], id +": undefined" )
-	}
-}
-
-function log_error(section, metric, error = zErr, scope = isScope, len = 50, isOnce = false) {
-	/*
-	if (len !== 50) {console.log(len, section, metric)}
-	if (len == "") {len = 50}
-	//*/
-	if (error == "" || error === null) {error = zErr} else {error += ""}
+function log_error(section, metric, error = zErr, scope = isScope, isOnce = false) {
+	if ('string' !== typeof section) {section = sectionMap[section]}
+	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
+	let len = 50
+	let aLen25 = [
+		'canPlayType','isTypeSuppo','font-format','font-tech',
+		'glyphs_actu','glyphs_emHe','glyphs_font','glyphs_hang','glyphs_ideo',
+	]
+	if (aLen25.includes(metric.slice(0,11))) {len = 25}
+	let key = 'errors'
 	// collect
 	if (gRun && isOnce) {
-		let key = "errorsonce"
+		key += 'once'
 		if (gData[key][scope] == undefined) {gData[key][scope] = {}}
 		if (gData[key][scope][section] == undefined) {gData[key][scope][section] = {}}
-		gData[key][scope][section][metric] =error
+		gData[key][scope][section][metric] = error
 	} else {
-		let obj = "errors"
-		if (sDataTemp[obj][scope] == undefined) {sDataTemp[obj][scope] = {}}
-		if (sDataTemp[obj][scope][section] == undefined) {sDataTemp[obj][scope][section] = {}}
-		sDataTemp[obj][scope][section][metric] =error
+		if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
+		if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
+		sDataTemp[key][scope][section][metric] = error
 	}
-	// return display
-	if (error.length > len) {
-		error = error.slice(0,len-3) + "..." // trim it
-	} else if (error.length < len && len == 25) {
-		error = error.padEnd(len, ' ') // only pad short stuff
-	}
-	//console.log("~" + error +"~", len)
+	// trim if required + return
+	if (error.length > len) {error = error.slice(0,len-3) + "..."}
 	return error
 }
 
-function log_health(scope, type, section, metric, h = "health") {
-	try {
-		if (sData[h][scope] == undefined) {sData[h][scope] = {}}
-		if (sData[h][scope][type] == undefined) {sData[h][scope][type] = {"_count": 0}}
-		sData[h][scope][type]["_count"] = sData[h][scope][type]["_count"] + 1
-		if (type == "fail") {
-			if (sData[h][scope][type][section] == undefined) {sData[h][scope][type][section] = {}}
-			let lookup = gData[zFP][scope][section]["metrics"][metric]
-			sData[h][scope][type][section][metric] = lookup
-		} else {
-			if (sData[h][scope][type][section] == undefined) {sData[h][scope][type][section] = []}
-			sData[h][scope][type][section].push(metric)
-		}
-	} catch(e) {
-		console.log(e)
-	}
+function log_known(section, metric, data ='', scope = isScope) {
+	if (!isSmart) {return data}
+	let key = 'lies'
+	if ('string' !== typeof section) {section = sectionMap[section]}
+	if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
+	if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
+	sDataTemp[key][scope][section][metric] = data
+	// color
+	return "<span class='lies'>"+ data +"</span>"
 }
 
-function log_known(section, metric, scope = isScope) {
-	let obj = "lies"
-	if (sDataTemp[obj][scope] == undefined) {sDataTemp[obj][scope] = {}}
-	if (sDataTemp[obj][scope][section] == undefined) {sDataTemp[obj][scope][section] = []}
-	sDataTemp[obj][scope][section].push(metric)
-}
-
-function log_perf(section, metric = "", time1, time2, extra) {
+function log_perf(section, metric ='', time1, time2, extra) {
 	if (!isPerf) {return}
+	if ('string' !== typeof section) {section = sectionMap[section]}
 	let tEnd = performance.now()
-	let str = metric === "" ? section : metric +": "+ section
+	let str = '' === metric ? section : metric +': '+ section
+
 	// GLOBAL
 	if (gRun || str.includes(SECTNF)) {
-		gData["perf"].push([3, str, time1, tEnd, extra])
+		gData.perf.push([3, str, time1, tEnd, extra])
 		return
 	}
 	// SECTION RERUNS
@@ -1474,10 +1506,10 @@ function log_perf(section, metric = "", time1, time2, extra) {
 	let type = sectionNames.includes(str) ? 2 : 3
 	time2 = tEnd - gt0
 	time1 = (2 === type) ? time2 : tEnd - time1
-	sDataTemp["perf"].push([type, str, time1, time2, extra])
+	sDataTemp.perf.push([type, str, time1, time2, extra])
 }
 
-function log_section(name, time, scope = isScope) {
+function log_section(name, time, scope = isScope, isResize = false) {
 	let t0 = nowFn()
 	let nameStr = "number" === typeof name ? sectionMap[name] : name
 	if (gRun) {gData["perf"].push([2, nameStr, time, t0])}
@@ -1486,7 +1518,7 @@ function log_section(name, time, scope = isScope) {
 
 	// SECTION RERUNS
 	if (!gRun) {
-		log_perf(nameStr, "", time)
+		if (!isResize) {log_perf(nameStr, "", time)}
 		output_section(name, scope)
 		outputPostSection(name) // trigger nonFP	
 		gClick = true
@@ -1495,40 +1527,50 @@ function log_section(name, time, scope = isScope) {
 
 	// GLOBAL
 	gCount++
-	if (gCount == gCountExpected) {
+	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
+	if (gCount == gSectionsExpected) {
 		gt1 = gt0
 		if (isPerf) {dom.perfAll = " "+ Math.round(performance.now()-gt0) +" ms"}
 		output_section("all", scope)
 
 		// FP
 		try {
-			let metricCount = gData[zFP][scope +"_list"].length
-			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(0, zFP, metricCount +" metrics")
+			let metricCount = Object.keys(gData[zFP][scope +"_flat"]).length
+			let color = metricCount == expectedMetrics ? 0 : 'bad'
+			dom[scope + "hash"].innerHTML = mini(gData[zFP][scope]) + addButton(color, zFP, metricCount +" metrics")
 		} catch(e) {
 			console.log(e)
 		}
 
-		// summaries
+		let aBtns = []
 		try {
 			btnList.forEach(function(item) {
-				let total = 0
+				let total = 0, oFlat = {}, oSummary = {}
 				// propagate sData to gData
 				if (sData[item][scope] !== undefined) {
-					if (gData[item][scope] == undefined) {gData[item][scope] = {}}
+					if (gData[item][scope] == undefined) {
+						gData[item][scope] = {}
+					}
 					for (const s of Object.keys(sData[item][scope]).sort()) {
 						// everything is already sorted
 						gData[item][scope][s] = sData[item][scope][s]
 						total += Object.keys(sData[item][scope][s]).length
+						for (const k of Object.keys(sData[item][scope][s])) {
+							let tmpData = sData[item][scope][s][k]
+							let value = ('object' == typeof tmpData && tmpData !== null ? sData[item][scope][s][k]['hash'] : sData[item][scope][s][k])
+						}
 					}
 				}
 				if (total > 0) {
 					let btnText = total +" "+ (total == 1 ? item.slice(0,-1) : item) // single/plural
-					dom[scope + item +"hash"].innerHTML = addButton(0, item, btnText, "btnc", scope)
+					let color = ('alerts' === item) ? 'bad' : 0
+					aBtns.push(addButton(color, item, btnText, 'btnc', scope))
 				}
 			})
 		} catch(e) {
 			console.error(e)
 		}
+		dom[scope +"btns"].innerHTML = aBtns.join("")
 
 		// prototype/proxy
 			// ToDo: isTB health
@@ -1545,14 +1587,6 @@ function log_section(name, time, scope = isScope) {
 			}
 		}
 
-		// all this below will slot into btnList + be auto handled
-		// persist runonce data, de-dupe, sort
-		gAlert = gAlert.concat(gAlertOnce)
-		gAlert = gAlert.filter(function(item, position) {return gAlert.indexOf(item) === position})
-		gAlert.sort()
-		// alerts
-		dom.allcheck = (gAlert.length ? "[ alerts ]" : "")
-
 		output_health(scope)
 
 		// trigger nonFP
@@ -1564,94 +1598,54 @@ function log_section(name, time, scope = isScope) {
 
 /*** RUN ***/
 
-function countJS(filename) {
-	if (!isGecko && !isAllowNonGecko) {
-		isBlock = true
-		run_block() // non-gecko
-		return
-	}
+function countJS(item) {
 	jsFiles++
-	if (jsFiles === 1) {
-		// esp in TB and F5 this helps ensure/force images are loaded in time
-		try {dom.InvalidImage.src = "images/InvalidImage.png"} catch(e) {}
-		try {dom.ScaledImage.src = "images/ScaledImage.png"} catch(e) {}
-
-		get_isVer() // as long as don't touch the dom this is fine here: required for isTB
+	if (1 == jsFiles) {
+		// non-gecko
+		if (!isGecko) {
+			if (isAllowNonGecko) {run_basic()} else {run_block(); return}
+		}
+		// helps ensure/force images are loaded in time
+		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch(e) {}
+		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch(e) {}
+		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
 		get_isSystemFont()
 		return
 	} else if (jsFiles === jsFilesExpected) {
-		dom["optFP"+ isJSONformat].checked = true // do once
-		if (isGecko) {gData["perf"].push([1, "RUN ONCE", nowFn()])}
-		let t0 = nowFn()
-		Promise.all([
-			get_isTB(),
-			get_isFileSystem(),
-			get_isAutoplay(),
-		]).then(function(results){
-			if ("boolean" !== typeof results[0] && zErr !== results[0]) {
-				let METRIC = "isTB"
-				log_error(SECT3, METRIC, zErrTime, isScope, 50, true) // persist error to sect3
-				log_perf(SECTG, METRIC, results[0], "", zErrTime)
-				log_alert(SECTG, METRIC +": "+ zErrTime, true)
-			}
-			// might allow non-Gecko later
-			if (isGecko) {
-				isBlock = isVer < isBlockMin[0]
-			} else {
-				isBlock = false // allow non-gecko
-				isSmart = false // force basic mode
-			}
-			if (isBlock) {
-				run_block() // old gecko
-				return
-			}
- 			if (isVer >= isSmartMin) {isSmart = true}
-			if (!isSmart) {run_basic()}
+		if (!isGecko && !isAllowNonGecko || isGecko && isBlock) {return}
+		isBlock = false
+		gData['perf'].push([1, 'RUN ONCE', nowFn()])
 
-			t0 = nowFn()
+		Promise.all([
+			get_isTB('isTB'),
+			get_isFileSystem('isFileSystem'),
+			get_isAutoplay('getAutoplayPolicy'),
+		]).then(function(){
 			Promise.all([
-				get_isOS(),
-			]).then(function(results){
-				if (results[0] == zErrTime) {
-					let METRIC = "isOS"
-					isOSErr = log_error(SECT3, "os", zErrTime, isScope, 50, true) // persist error to sect3
-					log_perf(SECTG, METRIC, t0, "", zErrTime)
-					log_alert(SECTG, METRIC +": "+ zErrTime, true)
-				}
+				get_isOS('isOS')
+			]).then(function(){
 				// tweak monospace size: ToDo: this is bad design
-				if (isOS === "windows" || isOS == "android") {
+				if ('windows' == isOS || 'abdroid' == isOS) {
 					try {
 						let items = document.querySelectorAll('.mono')
 						for (let i=0; i < items.length; i++) {
-							items[i].classList.add("monobigger")
-							items[i].classList.remove("mono")
+							items[i].classList.add('monobigger')
+							items[i].classList.remove('mono')
 						}
 					} catch(e) {}
 				}
 				// do once
 				let target = dom.pointertarget
-				target.addEventListener("pointerover", (event) => {
+				target.addEventListener('pointerover', (event) => {
 					get_pointer_event(event)
 				})
-
-				if (isOS == "android") {
-					dom.pointerlabel = "tap"
-					showhide("OS","table-row")
+				if ('android' == isOS) {
+					dom.pointerlabel = 'tap'
+					showhide('OS','table-row')
+				} else {
+					document.addEventListener('keydown', metricsEvent)
 				}
-				// escape to close
-				document.onkeydown = function(evt) {
-					evt = evt || window.event;
-					var isEscape = false;
-					if ("key" in evt) {
-						isEscape = (evt.key === "Escape" || evt.key === "Esc");
-					} else {
-						isEscape = (evt.keyCode === 27);
-					}
-					if (isEscape) {
-						hide_overlays()
-					}
-				}
-				outputSection("load")
+				outputSection('load')
 			})
 		})
 	}
@@ -1664,24 +1658,26 @@ function outputPostSection(id) {
 	if ("number" === typeof id) {id = sectionMap[id]}
 	if (gRun) {gData["perf"].push([1, SECTNF, nowFn()])}
 	let isLog = gRun // push perf
-	gRun = false // stop collecting things
+	gRun = false // stop collecting
 
-	if (id == "all" || id == "storage") {
+	if (id == "storage") {
 		test_worker_service(isLog) // doesn't return
-		test_worker_web(isFile, isLog)
+		test_worker_web(isLog)
 		test_worker_shared(isLog)
-		test_idb(isFile && isVer < 105, isLog)
-			// ^ FF104- file scheme = sanitizing issues
-	}
-	if (id == "all" || id == "ua") {
+		test_idb(isLog)
+	} else if (id == "ua") {
 		get_ua_iframes(isLog)
 		get_ua_workers()
-	}
-	if (id == "all" || id == "misc") {
+	} else if (id == "all") {
+		test_worker_service(isLog) // doesn't return
 		Promise.all([
-			get_perf_now(isLog),
+			test_worker_web(isLog),
+			test_worker_shared(isLog),
+			test_idb(isLog),
+			get_ua_iframes(isLog),
+			get_ua_workers(),
 		]).then(function(){
-			if (id == "all") {output_perf(id)}
+			output_perf(id)
 		})
 	}
 }
@@ -1689,25 +1685,24 @@ function outputPostSection(id) {
 function outputUser(fn) {
 	// user initiated
 	if (isBlock) {return}
-	if (fn == "goFS") { goFS()
-	} else if (fn == "goNW") { goNW()
-	} else if (fn == "goNW_UA") { goNW_UA()
-	} else if (fn == "outputAudioUser") {outputAudioUser()
-	} else if (fn == "get_storage_manager") { get_storage_manager()
-	} else if (fn == "get_pointer_event") { get_pointer_event()
+	if ('goFS' == fn) { goFS()
+	} else if ("goNW" == fn) { goNW()
+	} else if ('goNW_UA' == fn) { goNW_UA()
+	} else if ('outputAudioUser' == fn) {outputAudioUser()
+	} else if ('get_storage_manager' == fn) { get_storage_manager()
+	} else if ('get_pointer_event' == fn) { get_pointer_event()
 	}
 }
 
-function outputSection(id, cls) {
+function outputSection(id, isResize = false) {
 	if (isBlock || !gClick) {
-		output_perf("all")
+		output_perf('all')
 		return
 	}
 	// reset scope
 	isScope = zDOC
-
-	if (id == "load") {
-		// set sectionOrder, sectionNames, sectionNos
+	if ('load' == id) {
+		// set sectionOrder/Names/Nos
 		let tmpObj = {}
 		for (const k of Object.keys(sectionMap)) {sectionNos[sectionMap[k]] = k; tmpObj[sectionMap[k]] = k; sectionNames.push(sectionMap[k])}
 		for (const n of Object.keys(tmpObj).sort()) {sectionOrder.push(tmpObj[n])}
@@ -1715,87 +1710,90 @@ function outputSection(id, cls) {
 	}
 
 	gClick = false
-	if (cls == undefined || cls == "") {cls = "c"}
 	let delay = 100
-
 	// reset
-	if (id == "load" || id == "all") {
-		//gData = {} // don't wipe *once
-		/*
-		if (gData["errorsonce"][isScope] == undefined) {gData["errorsonce"][isScope] = {}}
-		gData["errorsonce"][isScope]["whack"] = {"idk":"something"}
-		gData["errorsonce"][isScope]["screen"] = {"bbb":"world"}
-		gData["errorsonce"][isScope]["_whack"] = {"idk":"something"}
-		gData["errorsonce"][isScope]["ua"] = {"t":"test","b":"test"}
-		gData["errorsonce"][isScope][SECTG] = {"zzz":"test","aa":"what"}
-		//*/
-		gData[zFP] = {"document":{}, "document_summary": {}}
-		gData["errors"] = {}
-		gData["lies"] = {}
+	if ('load' == id || 'all' == id) {
+		// gData
+		if (runSG) {
+			log_error('a', 'd', '4', isScope, true)
+			log_error('_a', 'a', '1', isScope, true)
+			log_error(2, 'z', '9', isScope, true)
+			log_error(2, 'y', '8', isScope, true)
+			log_error(SECTG, 'c', '3', isScope, true)
+			log_error(SECTG, 'b', '2', isScope, true)
+			log_alert(5, 'z', "p", isScope, true)
+			log_alert(5, '_a', "t", isScope, true)
+			log_alert(5, 'm', "z", isScope, true)
+		}
+		gData[zFP] = {'document': {}}
+		gData.health = {'document_collect': {}}
+		gTiming.forEach(function(item){gData.timing[item] = []})
+		btnList.forEach(function(item){gData[item] = {}})
 		if (!gLoad) { // don't wipe gLoad perf
-			gData["perf"] = []
+			gData['perf'] = []
 		}
 		// sData
 		sData = {
-			"errors": {},
-			"fingerprint": {"document":{}},
-			"health": {},
-			"lies": {},
+			'fingerprint': {'document': {}}
 		}
 		// sDataTemp
 		sDataTemp = {
-			"display": {"document":{}},
-			"errors": {},
-			"fingerprint": {"document":{}},
-			"lies": {},
-			"perf": [],
+			'display': {'document': {}},
+			'fingerprint': {"document": {}},
+			'perf': [],
 		}
-		sDetail = {}
+		btnList.forEach(function(item){
+			sData[item] = {'document': {}}
+			sDataTemp[item] = {'document': {}}
+		})
 		for (const name of Object.keys(sectionMap)) {
 			let sectionName = sectionMap[name]
 			sDataTemp[zFP][isScope][name] = {}
-			sDataTemp["display"][isScope][name] = {}
+			sDataTemp['display'][isScope][name] = {}
 		}
+		// sDetail
+		sDetail = {'document': {'lookup': {}}}
 	}
 
-	if (id == "load") {
+	if ('load' == id) {
 		// skip clear/reset
-		id = "all"
-		gRun = true
-		delay = 0
-	} else if (id == "all") {
+		id = 'all'
+		delay = (isDelay > 0 ? isDelay : 0) 
+	} else if ('all' == id) {
 		gRun = true
 		// clear
-		let items = document.getElementsByClassName("c")
-		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
-		items = document.getElementsByClassName("gc")
-		for (let i=0; i < items.length; i++) {items[i].innerHTML = "&nbsp"}
+		let items = document.getElementsByClassName('c')
+		for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
+		items = document.getElementsByClassName('cssc') // inline css notations we don't want to add an empty space
+		for (let i=0; i < items.length; i++) {items[i].innerHTML = ''}
+		items = document.getElementsByClassName('gc') // user actions
+		for (let i=0; i < items.length; i++) {items[i].innerHTML = '&nbsp'}
 		// reset global
 		gCount = 0
-		gAlert = []
-		// reset section
-		sDetail = {}
-		get_isDevices()
+		get_isDevices() // non gLoad warmup
 	} else {
 		// clear section data
 		let name = sectionMap[id]
 		try {sData[zFP][isScope][name] = {}} catch(e) {}
 		try {sDataTemp[zFP][isScope][id] = {}} catch(e) {}
-		try {sDataTemp["display"][isScope][id] = {}} catch(e) {}
-		try {delete sData["errors"][isScope][name]} catch(e) {}
-		try {delete sDataTemp["errors"][isScope][name]} catch(e) {}
-		try {delete sData["lies"][isScope][name]} catch(e) {}
-		try {delete sDataTemp["lies"][isScope][name]} catch(e) {}
-		let tbl = document.getElementById("tb"+ id)
-		tbl.querySelectorAll(`.${cls}`).forEach(e => {e.innerHTML = "&nbsp"})
+		try {sDataTemp['display'][isScope][id] = {}} catch(e) {}
+		btnList.forEach(function(item){
+			try {sData[item][isScope][name] = {}} catch(e) {}
+			try {sDataTemp[item][isScope][name] = {}} catch(e) {}
+		})
+		if (!isResize) {
+			let tbl = dom['tb'+ id]
+			tbl.querySelectorAll(`.c`).forEach(e => {e.innerHTML = '&nbsp'})
+			tbl.querySelectorAll('span.cssc').forEach(e => {e.innerHTML = ''})
+		}
 		gRun = false
 	}
 	// reset
-	if (id == "all" || id == 1) {dom.kbt.value = ""}
+	if ('all' == id || 1 == id) {dom.kbt.value = ''}
 
 	var promiseSection = async function(x) {
 		let n = Number.isInteger(x) ? x : sectionNos[x]
-		if (n == 1) { return(outputScreen())}
+		if (n == 1) { return(outputScreen(isResize))}
 		if (n == 2) { return(outputUA())}
 		if (n == 3) { return(outputFD())}
 		if (n == 4) { return(outputRegion())}
@@ -1809,39 +1807,57 @@ function outputSection(id, cls) {
 		if (n == 13) { return(outputMedia())}
 		if (n == 14) { return(outputCSS())}
 		if (n == 15) { return(outputElements())}
+		if (n == 17) { return(outputTiming())}
 		if (n == 18) { return(outputMisc())}
 	}
 
 	function output() {
-		if (id == "all") {
+		if ('all' == id) {
+			addTiming('start')
+			gCountTiming = 0
 			// run sequentially awaiting each before running the next
-			// order: use number or section name: names are easier to code with
-			// NOTE:
-				// always start with 3 (feature) as it sets isMullvad
-				// 3, 2, 1, 5, 18, 14 are fast and don't trip anything up
-			let order = [3, 2, 1, 5, 18, 14, 'canvas', 'media', 'storage', 'elements', 'audio', 'devices', 'webgl', 'fonts', 'region']
+			// order: use number or section name
+			let order = [
+				3, // first: sets isMullvad
+				2, 1, 5, 14, 13, // fast
+				'canvas',
+				'storage', // little slow: cache + permissions
+				'misc', // cold on load: iframe props
+				'elements', // cold on load: mathml
+				'audio',
+				'webgl',
+				'devices','fonts','region', // next to last: allow time for isDevices, font fallback, iframes
+				17 // last: uses data collected during gRun
+			]
 			const forEachSection = async (iterable, action) => {
 				for (const n of iterable) {
+					let t0 = nowFn()
 					await promiseSection(n)
+					let x = Number.isInteger(n) ? n : sectionNos[n] * 1
+					log_section(x, t0)
 				}
 			}
 			forEachSection(order, promiseSection)
 		} else {
 			gt0 = nowFn() // single section timer
-			promiseSection(id)
+			Promise.all([
+				promiseSection(id)
+			]).then(function(){
+				log_section(id, gt0, isScope, isResize)
+			})
 		}
 	}
 
-	if (gRun) {gData["perf"].push([1, "DOCUMENT START", nowFn()])}
+	let tDelay = nowFn()
 	setTimeout(function() {
 		get_isPerf()
+		if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
 		gt0 = nowFn()
 		Promise.all([
 			get_isDomRect(),
-			outputPrototypeLies(),
+			outputPrototypeLies(isResize),
 		]).then(function(){
 			if (isTB && gClear) {console.clear()}
-			if (runSL) {isProxy = true}
 			log_section(SECTP, gt0)
 			output()
 		})
@@ -1851,27 +1867,34 @@ function outputSection(id, cls) {
 function run_immediate() {
 	get_isPerf()
 	let t00 = nowFn()
-	gData["perf"].push([1, "IMMEDIATE", t00])
-	get_isGecko()
-	if (location.protocol == "file:") {isFile = true}
-	get_isRecursion()
-	get_isDevices()
-	try {navigator.storage.getDirectory()} catch(e) {}
-	// warm ups
-	try {let warmDTF = Intl.DateTimeFormat().resolvedOptions()} catch(e) {}
-	try {let warmTZ = Intl.DateTimeFormat(undefined, {timeZone: "Europe/London", timeZoneName: "shortGeneric"}).format(new Date)} catch(e) {}
-	// not sure if these extra Intls add any more gecko priming
-	try {
-		let warmNFcompact = new Intl.NumberFormat(undefined, {notation: "compact"}).format(1)
-		let warmNFunit = new Intl.NumberFormat(undefined, {style: "unit", unit: "hectare"}).format(1)
-	} catch(e) {}
-	try {let w = speechSynthesis.getVoices()} catch(e) {}
-	try {
-		const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
-		navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {}).catch(function(e){})
-	} catch(e) {}
-	get_isXML()
-	get_isArch()
+	zErrLog = rnd_string()
+	zErrShort = rnd_string()
+	gData['perf'].push([1, 'IMMEDIATE', t00])
+	Promise.all([
+		get_isGecko('isGecko')
+	]).then(function(){
+		if (!isGecko && !isAllowNonGecko) {return}
+		isFile = 'file:' == location.protocol
+		get_isRecursion()
+		// storage warm ups
+		try {navigator.storage.getDirectory()} catch(e) {}
+		try {window.caches.keys()} catch(e) {}
+		// other warm ups
+		get_isDevices()
+		try {let w = speechSynthesis.getVoices()} catch(e) {}
+		try {
+			const config = {initDataTypes: ['cenc'], videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}]}
+			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {}).catch(function(e){})
+		} catch(e) {}
+		try {
+			let warmDTF = Intl.DateTimeFormat().resolvedOptions()
+			let warmTZ = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
+			let warmNFcompact = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
+			let warmNFunit = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
+		} catch(e) {}
+		get_isXML('xml_messages')
+		get_isArch('isArch')
+	})
 }
 
 run_immediate()

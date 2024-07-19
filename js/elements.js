@@ -1,274 +1,192 @@
 'use strict';
 
-const get_element_keys = () => new Promise(resolve => {
-	const METRIC = "htmlelement_keys"
-	const id = "html-element-version"
-	let isTBSmart = (isSmart && isTB)
-	let notation = isTBSmart ? tb_red : ""
-
-	function cleanup() {
-		try {document.getElementById(id).remove()} catch(e) {}
-	}
+function get_element_keys(METRIC) {
+	const id = 'html-element-version'
+	let hash, btn ='', data = [], notation = isTB ? tb_red : '', isLies = false
 	try {
 		if (runSE) {foo++}
 		const element = document.createElement('a')
-		element.setAttribute("id", id)
+		element.setAttribute('id', id)
 		document.body.appendChild(element)
-		const htmlElement = document.getElementById(id)
-		const keys = []
-		for (const key in htmlElement) {keys.push(key)}
-		cleanup()
-		let hash = mini(keys) // 18527130
-		// cydec
-			// changes order, removes some keys
-			// got to be a better way than enumerating missing
-		const aExpected = ["scrollWidth","scrollHeight","clientWidth","clientHeight"]
-		if (isSmart && (keys.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {
-			hash = colorFn(hash)
-			log_known(SECT15, METRIC)
-			addDetail(METRIC, keys)
-			addData(15, METRIC, zLIE)
-		} else {
-			addData(15, METRIC, keys, hash)
-			if (isTBSmart) {
-				if (isOS === "android") {
-					// fa8b991f: NoScript 11.4.24 (+ 13 NS items e.g. get/value)
-					if (hash === "fa8b991f") {notation = tb_green}
-				} else {
-					// desktop NoScript 11.4.29
-					if (hash === "156e1033") {notation = tb_green}
-				}
+		let htmlElement = dom[id]
+		for (const key in htmlElement) {data.push(key)}
+		hash = mini(data); btn = addButton(15, METRIC, data.length)
+		// cydec: changes order, removes some keys
+			// ToDo: use post constructor when we enumerate all elements
+		const aExpected = ['scrollWidth','scrollHeight','clientWidth','clientHeight']
+		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
+		if (isTB) {
+			if ('android' == isOS) {
+				// still awaiting android isTB
+			} else {
+				// desktop
+				if (115 == isVer && '156e1033' == hash || 128 == isVer && 'eb81553d' == hash) {notation = tb_green}
 			}
 		}
-		log_display(15, METRIC, hash + addButton(15, METRIC, keys.length) + notation)
-		return resolve()
 	} catch (e) {
-		cleanup()
-		log_display(15, METRIC, log_error(SECT15, METRIC, e) + notation)
-		return resolve([METRIC, zErr])
+		hash = e; data = zErrLog
 	}
-})
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn, notation, data, isLies)
+	return
+}
 
-const get_lh = () => new Promise(resolve => {
+function get_lineheight(METRIC) {
 	let t0 = nowFn()
-	const METRIC = "line-height",
-		sizetype = "px",
-		fonts = ['cursive','emoji','fangsong','fantasy','monospace','sans-serif','serif','system-ui','ui-serif',]
-
-	let sizes = [2.9, 3.9, 4.9, 159.9, 201.9, 333.9]
-	// ToDo: tailor sizes per TB/FF and per platform
-	// ToDo: can we remove some fonts since 6 is the max groups
-		// e.g. ui-serif == serif
-
+	const id = `lh-fp`, sizetype = 'px',
+		sizes = [2.9, 3.9, 4.9, 159.9, 201.9, 333.9],
+		fonts = ['cursive','emoji','fangsong','fantasy','monospace','sans-serif','serif','system-ui']
+		// ToDo: fonts: e.g. 'ui-serif' = serif so far, so redundant
+	let hash, btn ='', data = {}
 	try {
-		if (runSE) {foo++}
 		const doc = document
-		const id = `lh-fingerprint`
 		const div = doc.createElement('div')
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
-		div.classList.add("measure")
+		div.classList.add('measure')
 
-		let oLine = {}, isLine = true, isErr = "", target, range, height
-		fonts.forEach(function(fontfamily) {
+		let oLine = {}, tmpobj = {}
+		fonts.forEach(function(family) {
+			let tmpsizes = {}, isFirst = family == fonts[0]
 			sizes.forEach(function(size) {
+				let isTypeCheck = isFirst && size == sizes[0]
 				size += sizetype
-				// create + measure each individually as previous elements can affect subsequent ones
-				dom[id].innerHTML = "<div style='font-size:"+ size +";' id='lhtarget' class='measureScale " + fontfamily +"'>.</div>"
-				if (isLine) {
-					target = dom["lhtarget"]
-					if (isDomRect > 1) {
-						range = document.createRange()
-						range.selectNode(target)
-					}
-					if (isDomRect < 1) {height = target.getBoundingClientRect().height
-					} else if (isDomRect == 1) {height = target.getClientRects()[0].height
-					} else if (isDomRect == 2) {height = range.getBoundingClientRect().height
-					} else if (isDomRect > 2) {height = range.getClientRects()[0].height
-					}
-					if (runSE) {foo++} else if (runST) {height = []}
-					let hType = typeFn(height)
-					if ("number" === hType) {
-						if (oLine[fontfamily] == undefined) {oLine[fontfamily] = {}}
-						oLine[fontfamily][size] = height
-					} else {
-						isLine = false
-						isErr = log_error(SECT15, METRIC, zErrType + hType)
-					}
-				}
-			})
-		})
-		try {document.getElementById("lh-fingerprint").remove()} catch(e) {} // remove element
-
-		let display = "", groupcount = 0
-		if (isErr !== "") {
-			display = isErr
-			addData(15, METRIC, zErr)
-		} else {
-			// hash/sort
-			let tmpobj = {}, newobj = {}
-			for (const k of Object.keys(oLine)) {
-				let hash = mini(oLine[k])
-				if (tmpobj[hash] == undefined) {
-					tmpobj[hash] = {"group": [k], "metrics": oLine[k]}
+				// create + measure each individually as preceeding elements can affect subsequent ones
+				dom[id].innerHTML = "<div style='font-size:"+ size +";' id='lhtarget' class='measureScale "+ family +"'>.</div>"
+				let height, target = dom.lhtarget
+				if (isDomRect < 1) {height = target.getBoundingClientRect().height
+				} else if (isDomRect == 1) {height = target.getClientRects()[0].height
 				} else {
-					tmpobj[hash]["group"].push(k)
+					let range = document.createRange()
+					range.selectNode(target)
+					if (isDomRect == 2) {height = range.getBoundingClientRect().height
+					} else if (isDomRect > 2) {height = range.getClientRects()[0].height}
 				}
-			}
-			for (const k of Object.keys(tmpobj).sort()) {newobj[k] = tmpobj[k]; groupcount++}
-			let hash = mini(newobj)
-			let btnTxt = groupcount + " group" + (groupcount > 1 ? "s" : "")
-			if (isSmart && isDomRect == -1) {
-				addData(15, METRIC, zLIE)
-				addDetail(METRIC, newobj)
-				display = colorFn(hash) + addButton(15, METRIC, btnTxt)
-				log_known(SECT15, METRIC)
-			} else {
-				display = hash + addButton(15, METRIC, btnTxt)
-				addData(15, METRIC, newobj, hash)
-			}
-		}
-		log_display(15, METRIC, display)
-		log_perf(SECT15, METRIC, t0)
-		return resolve()
-
+				if (isTypeCheck) {
+					if (runST) {height = '16'}
+					let typeCheck = typeFn(height)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				}
+				tmpsizes[size] = height
+			})
+			let sizehash = mini(tmpsizes)
+			if (oLine[sizehash] == undefined) {oLine[sizehash] = {data: tmpsizes, group: [family]}
+			} else {oLine[sizehash].group.push(family)}
+		})
+		// sort
+		for (const k of Object.keys(oLine)){tmpobj[oLine[k].group.join(' ')] = oLine[k].data}
+		for (const k of Object.keys(tmpobj).sort()) {data[k] = tmpobj[k]}
+		let count = Object.keys(data).length
+		hash = mini(data); btn = addButton(15, METRIC, count +' group'+ (count > 1 ? 's' : ''))
 	} catch(e) {
-		try {document.getElementById("lh-fingerprint").remove()} catch(e) {} // remove element
-		log_display(15, METRIC, log_error(SECT15, METRIC, e))
-		return resolve([METRIC, zErr])
+		hash = e; data = zErrLog
 	}
-})
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	log_perf(15, METRIC, t0)
+	return
+}
 
-const get_mathml = () => new Promise(resolve => {
+function get_mathml(METRIC) {
 	let t0 = nowFn()
-	const METRIC = "mathml",
-		sizetype = "px",
-		sizes = [33,99,111],
-		sizectl = sizes[0]
-
+	const id = `mathml-fp`, sizetype = 'px', sizes = [33,99,111], sizectl = sizes[0]
+	let hash, btn ='', data = {}, notation = isTB ? tb_slider_red : '', isLies = isDomRect == -1
 	try {
-		if (runSE) {foo++}
 		// create element
 		const doc = document
-		const id = `mathml-fingerprint`
 		const div = doc.createElement('div')
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
-		div.classList.add("measure")
-		div.style.fontFamily = "none"
+		div.classList.add('measure')
+		div.style.fontFamily = 'none'
  		let divcontrol = "<div id='mathmldivctrl' style='font-size: "
-			+ sizectl + sizetype +";' class='measureScale'>x=−b ±b2−4 ⁢a⁢c 2⁢a</div>"
+			+ sizectl + sizetype +";' class='measureScale'>x=−b ±b2−4 ac 2a</div>"
 		let mathmlstr = "<math><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo form='prefix'>&minus;</mo>"
 		+"<mi>b</mi><mo>&PlusMinus;</mo><msqrt><msup><mi>b</mi><mn>2</mn></msup><mo>&minus;</mo><mn>4</mn>"
 		+"<mo>&InvisibleTimes;</mo><mi>a</mi><mo>&InvisibleTimes;</mo><mi>c</mi></msqrt></mrow>"
 		+"<mrow><mn>2</mn><mo>&InvisibleTimes;</mo><mi>a</mi></mrow></mfrac></mrow></math>"
-		let divcontent = ""
+		let divcontent =''
 		sizes.forEach(function(size) {
 			divcontent += "<div id='mathmldiv"+ size +"' class='measureScale' style='font-size:"
-				+ size + sizetype +";'><span id='mathmlspan"+ size +"'>"+ mathmlstr +"</span></div>"
+			+ size + sizetype +";'><span id='mathmlspan"+ size +"'>"+ mathmlstr +"</span></div>"
 		})
 		doc.getElementById(id).innerHTML = divcontrol + divcontent
 
 		// measure
 		let control, width, height
 		let rangeC,	rangeW, rangeH
-		let targetC = dom["mathmldivctrl"], targetH, targetW
-		let oMath = {}, isMath = true, errMath = "", isDiff
-		let wType, hType
+		let targetC = dom['mathmldivctrl'], targetH, targetW
+		let isDiff, wType, hType
 		sizes.forEach(function(size) {
-			if (isMath) {
-				targetH = dom["mathmldiv"+size]
-				targetW = dom["mathmlspan"+size]
-				let isCtrlSize = size == sizectl
-				size = size + sizetype
-				if (isDomRect > 1) {
-					// test
-					rangeH = document.createRange()
-					rangeH.selectNode(targetH)
-					rangeW = document.createRange()
-					rangeW.selectNode(targetW)
-					// control
-					if (isCtrlSize) {
-						rangeC = document.createRange()
-						rangeC.selectNode(targetC)
-					}
+			targetH = dom['mathmldiv'+size]; targetW = dom['mathmlspan'+size]
+			let isCtrlSize = size == sizectl
+			size = size + sizetype
+			if (isDomRect > 1) {
+				// test
+				rangeH = document.createRange()
+				rangeH.selectNode(targetH)
+				rangeW = document.createRange()
+				rangeW.selectNode(targetW)
+				// control
+				if (isCtrlSize) {
+					rangeC = document.createRange()
+					rangeC.selectNode(targetC)
 				}
-				if (isDomRect < 1) { // get a result regardless
-					if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
-					height = targetH.getBoundingClientRect().height
-					width = targetW.getBoundingClientRect().width
-				} else if (isDomRect == 1) {
-					if (isCtrlSize) {control = targetC.getClientRects()[0].height}
-					height = targetH.getClientRects()[0].height
-					width = targetW.getClientRects()[0].width
-				} else if (isDomRect == 2) {
-					if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
-					height = rangeH.getBoundingClientRect().height
-					width = rangeW.getBoundingClientRect().width
-				} else if (isDomRect > 2) {
-					if (isCtrlSize) {control = targetC.getClientRects()[0].height}
-					height = rangeH.getClientRects()[0].height
-					width = rangeW.getClientRects()[0].width
-				}
+			}
+			if (isDomRect < 1) { // get a result regardless
+				if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
+				height = targetH.getBoundingClientRect().height
+				width = targetW.getBoundingClientRect().width
+			} else if (isDomRect == 1) {
+				if (isCtrlSize) {control = targetC.getClientRects()[0].height}
+				height = targetH.getClientRects()[0].height
+				width = targetW.getClientRects()[0].width
+			} else if (isDomRect == 2) {
+				if (isCtrlSize) {control = targetC.getBoundingClientRect().height}
+				height = rangeH.getBoundingClientRect().height
+				width = rangeW.getBoundingClientRect().width
+			} else if (isDomRect > 2) {
+				if (isCtrlSize) {control = targetC.getClientRects()[0].height}
+				height = rangeH.getClientRects()[0].height
+				width = rangeW.getClientRects()[0].width
+			}
+			// first item check/diff
+			if (isCtrlSize) {
 				if (runST) {width = {}, height = ' '}
-				wType = typeFn(width)
-				hType = typeFn(height)
-				if ("number" === wType && "number" === hType) {
-					if (isCtrlSize) {isDiff = height - control}
-					oMath[size] = [width, height]
-				} else {
-					isMath = false
-					errMath = log_error(SECT15, METRIC, zErrType + (wType == hType ? wType : wType +" x "+ hType))
+				wType = typeFn(width); hType = typeFn(height)
+				if ('number' !== wType || 'number' !== hType) {
+					throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
 				}
+				isDiff = height - control
 			}
+			data[size] = [width, height]
 		})
-		try {document.getElementById("mathml-fingerprint").remove()} catch(e) {} // remove element
-
-		let hash, display, displayEnabled = ""
-		if (isMath) {
-			let isZero = Math.abs(isDiff) > 0.001 ? false : true
-			displayEnabled = " ["+ (isZero ? zD : zE) +"]"
-			if (isSmart && isTB) {
-				displayEnabled += isZero ? tb_safer : tb_standard
-			}
-			if (isSmart && isDomRect == -1) {
-				hash = mini(oMath)
-				addData(15, METRIC, zLIE)
-				addDetail(METRIC, oMath)
-				display = colorFn(hash) + addButton(15, METRIC)
-				log_known(SECT15, METRIC)
-			} else {
-				oMath["enabled"] = !isZero
-				hash = mini(oMath)
-				display = hash + addButton(15, METRIC)
-				addData(15, METRIC, oMath, hash)
-			}
-		} else {
-			display = errMath
-			addData(15, METRIC, zErr)
+		removeElementFn(id)
+		let displayEnabled =''
+		let isEnabled = Math.abs(isDiff) > 0.001
+		if (!isSmart || !isLies) {
+			data['enabled'] = isEnabled
+			displayEnabled = ' ['+ (isEnabled ? zE : zD) +']'
 		}
-		log_display(15, METRIC, display + displayEnabled)
-		log_perf(SECT15, METRIC, t0)
-		return resolve()
-
+		if (isTB) {notation = isEnabled ? tb_standard : tb_safer}
+		hash = mini(data); btn = addButton(15, METRIC) + displayEnabled
 	} catch(e) {
-		try {document.getElementById("mathml-fingerprint").remove()} catch(e) {} // remove element
-		log_display(15, METRIC, log_error(SECT15, METRIC, e) + (isSmart & isTB ? tb_slider_red : ""))
-		return resolve([METRIC, zErr])
+		hash = e; data = zErrLog
 	}
-})
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn, notation, data, isLies)
+	log_perf(15, METRIC, t0)
+	return
+}
 
 const outputElements = () => new Promise(resolve => {
-	let t0 = nowFn()
 	Promise.all([
-		get_element_keys(),
-		get_lh(),
-		get_mathml(),
-	]).then(function(results){
-		results.forEach(function(item) {addDataFromArray(15, item)})
-		log_section(15, t0)
-		return resolve(SECT15)
+		get_element_keys('htmlelement_keys'),
+		get_lineheight('line-height'),
+		get_mathml('mathml'),
+	]).then(function(){
+		return resolve()
 	})
 })
 
-countJS(SECT15)
+countJS(15)

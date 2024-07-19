@@ -454,7 +454,7 @@ var gLocales = [
 "sbp,sangu",
 "seh,sena",
 "shi,tachelhit",
-"skr,saraiki", // 1808127
+"skr,saraiki", // 1808127, 1900150
 "ses,koyraboro senni",
 "szl,silesian", // 1691695
 "teo,teso",

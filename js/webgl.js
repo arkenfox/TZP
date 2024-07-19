@@ -236,7 +236,7 @@ function getWebGL(contextType) {
 			}
 		}
 	} catch (e) {
-		log_error(SECT10, contextType, e)
+		log_error(10, contextType, e)
 		errors.push('context blocked')
 		return [data, errors]
 	}
@@ -331,8 +331,6 @@ function getWebGL(contextType) {
 }
 
 const outputWebGL = () => new Promise(resolve => {
-	let t0 = nowFn()
-	log_section(10, t0)
 	return resolve()
 
 	Promise.all([
@@ -355,14 +353,12 @@ const outputWebGL = () => new Promise(resolve => {
 		//*/
 
 		// do something with the erorrs...
-		log_section(10, t0)
 		return resolve()
 
 	}).catch(error => {
 		console.error(error)
-		log_section(10, t0)
 		return resolve()
 	})
 })
 
-countJS(SECT10)
+countJS(10)

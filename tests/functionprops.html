@@ -13,6 +13,7 @@
 </head>
 
 <body>
+<span translate="no">
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html#misc">return to TZP index</a></td></tr>
@@ -341,6 +342,8 @@ let oList = {
 				items: [
 					'Button',
 						// future: popoverTargetElement, popoverTargetAction
+					'Details',
+						// 130n: name (1856460: dom.details_group.enabled)
 					'Frame',
 						// ext fuckery
 					'IFrame',
@@ -420,7 +423,7 @@ let oList = {
 				suffix: 'Element',
 				ignore: ['HTMLCollection','HTMLFormControlsCollection','HTMLOptionsCollection'], // 'Option', // = same as HTMLOptionElement
 				items: [
-					'Anchor','Area','Audio','BR','Base','DList','Data','DataList','Details',
+					'Anchor','Area','Audio','BR','Base','DList','Data','DataList',
 					'Dialog', // new 98 but not changed since
 					'Directory','Div','Embed','FieldSet','Font','HR','Head','Heading',
 					'Html','Label','LI','Legend','Map',
@@ -749,17 +752,16 @@ function run() {
 				let hash = mini(tmpData[group]), notation = ""
 				if (isFF && !optSort) {
 					if (optList === "Element") {
-						if (k == "6" && isVer > 110) { notation = (hash == "b0cb1af2") ? green_tick : zNEW
-						} else if (k == "7" && isVer > 91) { notation = (hash == "642e531a") ? green_tick : zNEW
-						} else if (k == "8" && isVer > 69) { notation = hash == "eb335cf8" ? green_tick : zNEW
+						if (k == "6" && isVer > 110) { notation = (hash == "b0cb1af2") ? green_tick : ' '+ zNEW
+						} else if (k == "7" && isVer > 91) { notation = (hash == "642e531a") ? green_tick : ' '+ zNEW
+						} else if (k == "8" && isVer > 69) { notation = hash == "eb335cf8" ? green_tick : ' '+ zNEW
 						} else if (k == "9") {
-							// we have 3 hashes since we added stable items since they were added
+							// we have 2 hashes since we added stable items since they were added
 							let good = [
-								"3f38465a", // FF98+ dialog added
-								"682df4ae", // FF65+ marquee added
-								"3cc158fb", // FF52-64 
+								"e4a773bb", // FF98+ dialog added
+								"1be9c8dc", // FF52-64 
 							]//3f38465a
-							notation = good.includes(hash) ? green_tick : zNEW
+							notation = good.includes(hash) ? green_tick : ' '+ zNEW
 						}
 					}
 				}
@@ -838,5 +840,7 @@ Promise.all([
 })
 
 </script>
+
+</span>
 </body>
 </html>

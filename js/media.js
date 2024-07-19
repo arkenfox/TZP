@@ -2,47 +2,55 @@
 
 let mediaBtn
 
-function get_autoplay() {
+function get_autoplay(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getAutoplayPolicy
 	// a check on a specific element is more reliable (though it doesn't matter on page load)
 
 	// cached from page load
-	const METRIC = "getAutoplayPolicy"
-	let notation = ""
-	if (isAutoPlayError === undefined) {
-		if (isSmart) {
-			// Note: android (120+ at least) returns "disallowed | disallowed" if phone is on "Do Not Disturb"
-			notation = mini(isAutoPlay) == "5be5c665" ? default_green : default_red
-		}
-		addData(13, METRIC, isAutoPlay)
-		log_display(13, METRIC, isAutoPlay + notation)
+	let value, data ='', notation = default_red
+	if (undefined == isAutoPlayError) {
+		// Note: android (120+ at least) returns 'disallowed | disallowed' if phone is on 'Do Not Disturb'
+		if ('5be5c665' == mini(isAutoPlay)) {notation = default_green}
+		value = isAutoPlay
 	} else {
-		addData(13, METRIC, isAutoPlay)
-		log_display(13, METRIC, isAutoPlayError + (isSmart ? default_red : ""))
+		value = isAutoPlayError; data = isAutoPlay
 	}
+	addBoth(13, METRIC, value,'', notation, data)
+
 	// user: not part of FP; don't record errors etc
-	const METRICuser = METRIC +"_user"
+	const METRICuser = METRIC +'_user'
 	if (gLoad) {
-		log_display(13, METRICuser, zNA)
+		addDisplay(13, METRICuser, zNA)
 		return
 	}
 	try {
 		let atest, mtest
-		let ares = navigator.getAutoplayPolicy("audiocontext")
+		let ares = navigator.getAutoplayPolicy('audiocontext')
 		try {atest = navigator.getAutoplayPolicy(dom.audiotest)} catch(e) {atest = zErr}
-		let mres = navigator.getAutoplayPolicy("mediaelement")
+		let mres = navigator.getAutoplayPolicy('mediaelement')
 		try {mtest = navigator.getAutoplayPolicy(dom.mediatest)} catch(e) {mtest = zErr}
-		log_display(13, METRICuser, (ares === atest ? ares : ares +", "+ atest) +" | "+ (mres === mtest ? mres : mres +", "+ mtest))
+		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
+		addDisplay(13, METRICuser, display)
 	} catch(e) {
-		log_display(13, METRICuser, (e+"").slice(0,47) + "...")
+		addDisplay(13, METRICuser, (e+'').slice(0,47) + '...')
 	}
 	return
 }
 
-const get_clearkey = () => new Promise(resolve => {
-	const METRIC = "clearkey"
-	let notation = ""
-	setTimeout(() => resolve([METRIC, zErrTime]), 100)
+const get_clearkey = (METRIC) => new Promise(resolve => {
+	let isDone = false
+	setTimeout(function() {
+		if (!isDone) {
+			notation = isTB ? tb_red : default_red 
+			exit(zErrTime)
+		}
+	}, 150)
+	function exit(value) {
+		isDone = true
+		let data = (value == zS ? '' : zErrLog) // if not success then it was an error
+		addBoth(13, METRIC, value,'', notation, data)
+		return resolve()
+	}
 	/*
 	https://w3c.github.io/encrypted-media/#common-key-systems
 	gecko only supports
@@ -55,54 +63,50 @@ const get_clearkey = () => new Promise(resolve => {
 		'com.adobe.primetime',
 		'com.adobe.access',
 		'com.apple.fairplay'
-	note: media.gmp-gmpopenh264.enabled (about:plugins: activate state) = no effect
+	note: media.gmp-gmpopenh264.enabled = no effect even after a restart
 	*/
 
-	// requestMediaKeySystemAccess is an expected nav property
-	let typecheck = typeof navigator.requestMediaKeySystemAccess
-	if ("function" !== typecheck) {
-		log_display(13, METRIC, log_error(SECT13, METRIC, zErrType + typecheck) + (isTB && isSmart ? tb_red: ""))
-		return resolve([METRIC, zErr])
-	}
-	const config = {
-		initDataTypes: ['cenc'],
-		videoCapabilities: [{
-			contentType: 'video/mp4;codecs="avc1.4D401E"'
-		}],
-		persistentState: "required"
-		// 1706121: PB mode currently throws an error
-	}
-	navigator.requestMediaKeySystemAccess("org.w3.clearkey", [config]).then((key) => {
-		if (isSmart) {
-			if (isTB) {notation = tb_red} else if (isOS == "android") {notation = default_red}
-		}
-		if (runSE) {key = {"keySystem" : "org.w3.clearkey"}}
-		if (key +"" !== "[object MediaKeySystemAccess]") {
-			log_display(13, METRIC, log_error(SECT13, METRIC, zErrInvalid +"expected [object MediaKeySystemAccess]"))
-			return resolve([METRIC, zErr])
-		} else {
-			log_display(13, METRIC, zS + notation)
-			return resolve([METRIC, zS])
-		}
-	})
-	.catch(function(e){
-		// "NotSupportedError: Key system is unsupported" = JShelter "media playback" (default unprotected)
-			// ^ strict (always) | little lies (12.5%)
-			// ^ we pick up on little lies in canPlayType
-
-		// "NotSupportedError: Key system configuration is not supported" = PB
-		if (isSmart) {
-			if (isTB) {
-				notation = e+"" === "NotSupportedError: CDM is not installed" ? tb_green: tb_red
-			} else if (isOS === "android") {
-				notation = e+"" === "NotSupportedError: CDM is not installed" ? default_green: default_red
-			} else {
-				notation = (e +"" !== "NotSupportedError: Key system configuration is not supported") ? default_red : ""
+	let notation = isTB ? tb_red: ''
+	if (!runTE) {
+		try {
+			const config = {
+				initDataTypes: ['cenc'],
+				videoCapabilities: [{contentType: 'video/mp4;codecs="avc1.4D401E"'}],
+				persistentState: 'required'
 			}
+			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {
+				if (runST) {key = null} else if (runSI) {key = {}}
+				let typeCheck = typeFn(key)
+				if ('empty object' !== typeCheck) {throw zErrType + typeCheck}
+				let expected = '[object MediaKeySystemAccess]'
+				if (key +'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ key}
+				if ('android' == isOS) {notation = default_red}
+				exit(zS)
+			}).catch(function(e){
+			/* expected
+					isTB   : "NotSupportedError: CDM is not installed"
+					Android: "NotSupportedError: CDM is not installed"
+					FF PB  : "NotSupportedError: Key system configuration is not supported"
+						^ 1706121: PB mode
+				unexpected
+					blocked: timed out
+					strict : "NotSupportedError: Key system is unsupported" (JShelter "multimedia playback")
+						^ little lies I think does this about 12.5% of the time: we pick up on little lies in canPlayType anyway
+				*/
+				// ToDo: FF128 1706121 PB mode fix landed
+				if (isTB) {
+					notation = e+'' === 'NotSupportedError: CDM is not installed' ? tb_green: tb_red
+				} else if ('android' == isOS) {
+					notation = e+'' === 'NotSupportedError: CDM is not installed' ? default_green: default_red
+				} else {
+					notation = (e +'' !== 'NotSupportedError: Key system configuration is not supported') ? default_red : '' // tampered
+				}
+				exit(e)
+			})
+		} catch(e) {
+			exit(e)
 		}
-		log_display(13, METRIC, log_error(SECT13, METRIC, e) + notation)
-		return resolve([METRIC, zErr])
-	})
+	}
 })
 
 function get_media(type) {
@@ -166,13 +170,6 @@ function get_media(type) {
 		v+'mp4; codecs="opus"',
 		v+'mp4; codecs="vp09.00.10.08"',
 		//v+'mp4; codecs=\'\'',
-		v+'ogg',
-		v+'ogg; codecs="flac"',
-		v+'ogg; codecs="opus"',
-		v+'ogg; codecs="theora"',
-		v+'ogg; codecs="theora, flac"',
-		v+'ogg; codecs="theora, speex"',
-		v+'ogg; codecs="theora, vorbis"',
 		v+'quicktime',
 		v+'webm',
 		v+'webm; codecs="av1"',
@@ -186,14 +183,26 @@ function get_media(type) {
 		v+'x-m4v',
 		v+'x-matroska',
 	]
-
+	if (isVer < 126) {
+		// 1860492: theora support removed
+		videolist.push(
+			v+'ogg',
+			v+'ogg; codecs="flac"',
+			v+'ogg; codecs="opus"',
+			v+'ogg; codecs="theora"',
+			v+'ogg; codecs="theora, flac"',
+			v+'ogg; codecs="theora, speex"',
+			v+'ogg; codecs="theora, vorbis"',
+		)
+		videolist.sort()
+	}
 	if (gRun && type == "audio") {
 		addDetail("audio_mimes", audiolist, "lists")
 		addDetail("video_mimes", videolist, "lists")
 		if (mediaBtn == undefined) {
 			mediaBtn = addButton(13, "audio_mimes", audiolist.length +" audio", "btnc", "lists")
 				+ addButton(13, "video_mimes", videolist.length +" video", "btnc", "lists")
-			log_display(13, "mediaBtn", mediaBtn)
+			addDisplay(13, "mediaBtn", mediaBtn)
 		}
 	}
 
@@ -206,6 +215,7 @@ function get_media(type) {
 	}
 
 	try {
+		if (runSE) {foo++}
 		var obj = document.createElement(type)
 		// collect
 		let go1 = true, go2 = true, go3 = true, err1, err2, err3
@@ -220,27 +230,35 @@ function get_media(type) {
 			let tmp = item.replace(type +"\/","") // strip "video/","audio/"
 			if (go1) {
 				try {
-					if (runSE) {foo++}
-					let str = obj.canPlayType(item)
-					if (str == "maybe" || str == "probably") {oMedia["canPlay"][str].push(tmp)}
+					let value = obj.canPlayType(item)
+					if (runST) {value = type == "audio" ? undefined : "  "}
+					let typeCheck = typeFn(value)
+					if ("string" !== typeCheck && "empty string" !== typeCheck) {throw zErrType + typeCheck}
+					if ("maybe" === value || "probably" === value) {oMedia["canPlay"][value].push(tmp)}
 				} catch(e) {
-					go1 = false; err1 = log_error(SECT13, "canPlay", e, isScope, 25)
+					go1 = false; err1 = log_error(13, METRICcan, e)
 				}
 			}
 			if (go2) {
 				try {
-					if (runSE) {foo++}
-					if (MediaRecorder.isTypeSupported(item)) {oMedia["isType"]["recorder"].push(tmp)}
+					let value = MediaRecorder.isTypeSupported(item)
+					if (runST) {value = type == "audio" ? undefined : ""}
+					let typeCheck = typeFn(value)
+					if ("boolean" !== typeCheck) {throw zErrType + typeCheck}
+					if (value) {oMedia["isType"]["recorder"].push(tmp)}
 				} catch(e) {
-					go2 = false; err2 = log_error(SECT13, "mediarecorder", e, isScope, 25)
+					go2 = false; err2 = log_error(13, METRICtype +"_MediaRecorder", e)
 				}
 			}
 			if (go3) {
 				try {
-					if (runSE) {foo++}
-					if (MediaSource.isTypeSupported(item)) {oMedia["isType"]["source"].push(tmp)}
+					let value = MediaSource.isTypeSupported(item)
+					if (runST) {value = type == "audio" ? 1 : null}
+					let typeCheck = typeFn(value)
+					if ("boolean" !== typeCheck) {throw zErrType + typeCheck}
+					if (value) {oMedia["isType"]["source"].push(tmp)}
 				} catch(e) {
-					go3 = false; err3 = log_error(SECT13, "mediasource", e, isScope, 25)
+					go3 = false; err3 = log_error(13, METRICtype +"_MediaSource", e)
 				}
 			}
 		})
@@ -254,8 +272,7 @@ function get_media(type) {
 			if (aMaybe.length == 0 && aProbably.length == 0) {
 				canDisplay = "none"
 				if (isSmart) {
-					log_known(SECT13, METRICcan)
-					canDisplay = colorFn(canDisplay)
+					canDisplay = log_known(13, METRICcan, canDisplay)
 					addData(13, METRICcan, zLIE)
 				} else {
 					addData(13, METRICcan, canDisplay)
@@ -284,17 +301,13 @@ function get_media(type) {
 						}
 					}
 					if (canLies) {
-						canHash = colorFn(canHash)
-						log_known(SECT13, METRICcan)
+						canHash = log_known(13, METRICcan, canHash)
+						addDetail(METRICcan, canobj, zDOC)
+						addData(13, METRICcan, zLIE)
 					}
 				}
+				if (!canLies) {addData(13, METRICcan, canobj, canHash)}
 				canDisplay = canHash + addButton(13, METRICcan, aMaybe.length +"/" + aProbably.length)
-				if (canLies) {
-					addDetail(METRICcan, canobj, zDOC)
-					addData(13, METRICcan, zLIE)
-				} else {
-					addData(13, METRICcan, canobj, canHash)
-				}
 			}
 		} else {
 			canDisplay = err1
@@ -305,7 +318,7 @@ function get_media(type) {
 		// isType
 		let typeDisplay, typeLies = false
 		if (!go2 && !go3) {
-			typeDisplay = err2 // just display first error
+			typeDisplay = zErr +"s"
 			addData(13, METRICtype, zErr)
 		} else {
 			if (runSL) {oMedia["isType"]["recorder"] = []}
@@ -314,8 +327,7 @@ function get_media(type) {
 			if (aRecorder.length == 0 && aSource.length == 0) {
 				typeDisplay = "none"
 				if (isSmart) {
-					log_known(SECT13, METRICtype)
-					typeDisplay = colorFn(typeDisplay)
+					typeDisplay = log_known(13, METRICtype, typeDisplay)
 					addData(13, METRICtype, zLIE)
 				} else {
 					addData(13, METRICcan, typeDisplay)
@@ -325,13 +337,11 @@ function get_media(type) {
 				if (go2 && aRecorder.length) {typeobj["MediaRecorder"] = aRecorder}
 				if (go3 && aSource.length) {typeobj["MediaSource"] = aSource}
 				let typeHash = mini(typeobj)
-
-				// gecko lies
+				// gecko lies: if only one is empty regardless of cause then you're fucking around, so untrustworthy
 				if (isSmart) {
-					if (aRecorder.length == 0 || aSource.length == 0) { // either is empty
+					if (aRecorder.length == 0 || aSource.length == 0) {
 						typeLies = true
-						typeHash = colorFn(typeHash)
-						log_known(SECT13, METRICtype)
+						typeHash = log_known(13, METRICtype, typeHash)
 					}
 				}
 				let notation = (go2 ? aRecorder.length : zErr) +"/"+ (go3 ? aSource.length : zErr)
@@ -345,13 +355,14 @@ function get_media(type) {
 			}
 		}
 		log_display(13, type +"type", typeDisplay)
-		log_perf(SECT13, type, t0)
+		log_perf(13, type, t0)
 
 		// ToDo: media: remove audio/video element?
 		return
 
 	} catch(e) {
-		let error = log_error(SECT13, type, e, 25)
+		let error = log_error(13, METRICcan, e)
+		log_error(13, METRICtype, e)
 		log_display(13, type +"can", error)
 		log_display(13, type +"type", error)
 		addData(13, METRICcan, zErr)
@@ -361,52 +372,44 @@ function get_media(type) {
 }
 
 const get_midi = () => new Promise(resolve => {
-	let notation = "", count = 0
-	function exit(name, value) {
+	// prompt, granted, denied
+	let count = 0
+	function exit(metric, value, data ='') {
 		count++
-			if (isSmart) {
-				notation = value == "prompt" ? default_green : default_red
-			}
-			addData(13, name, value)
-			log_display(13, name, value + notation)
-		if (count == 2) {
-			return resolve()
-		}
+		let notation = 'prompt' == value ? default_green : default_red
+		addBoth(13, metric, value,'', notation, data)
+		if (count == 2) {return resolve()}
 	}
-	[false, true].forEach(function(bool) {
-		let METRIC = "permission_midi" + (bool == true ? "_sysex" : "")
+	[false, true].forEach(function(isSysex) {
+		let METRIC = 'permission_midi' + (isSysex ? '_sysex' : '')
 		try {
-			if (runSE) {foo++}
-			navigator.permissions.query({name: "midi", sysex: bool}).then(function(r) {
+			navigator.permissions.query({name: 'midi', sysex: isSysex}).then(function(r) {
+				let value = r.state
+				if (runST) {value = true} else if (runSI) {value = 'allowed'}
+				let typeCheck = typeFn(value)
+				if ('string' !== typeCheck) {throw zErrType + typeCheck}
+				let aValid = ['prompt','granted','denied']
+				if (!aValid.includes(value)) {throw zErrInvalid +'got '+ value}
 				exit(METRIC, r.state)
-			}).catch(error => {
-				log_error(SECT13, METRIC, error)
-				exit(METRIC, zErr)
+			}).catch(e => {
+				exit(METRIC, e, zErrShort)
 			})
 		} catch(e) {
-			log_error(SECT13, METRIC, e)
-			exit(METRIC, zErr)
+			exit(METRIC, e, zErrShort)
 		}
 	})
 })
 
 const outputMedia = () => new Promise(resolve => {
-	let t0 = nowFn()
 	Promise.all([
-		get_clearkey(),
-		get_media("audio"),
-		get_media("video"),
-		get_midi("midi"),
-		get_autoplay(),
-	]).then(function(results){
-		// clearkey timeout
-		if (results[0][1] === zErrTime) {
-			log_display(13, "clearkey", log_error(SECT13, "clearkey", zErrTime) + (isSmart ? default_red : ""))
-		}
-		results.forEach(function(item) {addDataFromArray(13, item)})
-		log_section(13, t0)
+		get_clearkey('clearkey'),
+		get_media('audio'),
+		get_media('video'),
+		get_midi('midi'),
+		get_autoplay('getAutoplayPolicy'),
+	]).then(function(){
 		return resolve()
 	})
 })
 
-countJS(SECT13)
+countJS(13)

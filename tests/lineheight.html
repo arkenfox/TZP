@@ -95,28 +95,26 @@ let oPresets = {
 function buildpresets() {
 
 /*
-			// looks like the key is to use some small items
-				// with TB windows at least
-				// 2.9, 3.9, 4.9
-				// 159.487, 201.333, 333.666
-			let aAllow = [0.3, 0.9]
-			for (let i=1; i < 30; i++) {
-				// only add odd ones
-				if (i % 2) {
-					let extra = i/10
-					let decimal = Math.round((extra - Math.floor(extra)) * 10)
-					decimal = decimal/10
-					if (aAllow.includes(decimal)) {
-						let n = 2 + extra
-						sizes.push(n)
-					}
-				}
+	// looks like the key is to use some small items
+		// with TB windows at least
+		// 2.9, 3.9, 4.9
+		// 159.487, 201.333, 333.666
+	let aAllow = [0.3, 0.9]
+	for (let i=1; i < 30; i++) {
+		// only add odd ones
+		if (i % 2) {
+			let extra = i/10
+			let decimal = Math.round((extra - Math.floor(extra)) * 10)
+			decimal = decimal/10
+			if (aAllow.includes(decimal)) {
+				let n = 2 + extra
+				sizes.push(n)
 			}
+		}
+	}
 */
 }
 buildpresets()
-
-
 
 function get_lh() {
 	let t0 = performance.now()
@@ -131,15 +129,15 @@ function get_lh() {
 		'sans-serif',
 		'serif',
 		'system-ui',
-		'ui-serif',
 	]
 	if (dom.expand.checked) {
 		fonts.push(
 			'none',
 			'math',
 			'ui-monospace',
-      "ui-sans-serif",
-      "ui-rounded",
+			"ui-sans-serif",
+			'ui-serif',
+			"ui-rounded",
 		)
 	}
 	fonts.sort()

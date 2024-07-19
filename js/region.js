@@ -2,545 +2,485 @@
 
 /* HEADERS */
 
-const get_nav_connection = () => new Promise(resolve => {
-	const METRIC = "connection"
-	let notation = ""
-	function finish(value, display) {
-		if (isSmart) {notation = display == "undefined" ? default_green: default_red}
-		log_display(5, METRIC, display + notation)
-		return resolve([METRIC, value])
-	}
+function get_nav_connection(METRIC) {
+	let hash, btn = '', data ='', notation = default_red
 	try {
-		let nav = navigator.connection
-		if (runSE) {foo++
-		} else if (runST) {nav = null
-		} else if (runSL) {sData[SECT99].push("Navigator.connection")
-		}
-		if (nav === undefined || "object" === typeof nav) {
-			if (nav === undefined) {
-				nav +=""
-				let display = nav
-				if (isProxy && sData[SECT99].includes("Navigator.connection")) {
-					nav = zLIE
-					display = colorFn(display)
-					log_known(SECT5, METRIC)
-				}
-				finish(nav, display)
-			} else {
-				if (nav +"" === "[object NetworkInformation]") {
-					// at this point there should be no lies
-					let oTemp = {}, oNetwork = {}
-					// https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
-					let keyTypes = {
-						"addEventListener": "function",
-						"dispatchEvent": "function",
-						"ontypechange": "object",
-						"removeEventListener": "function",
-						"type": "string",
-					}
-					for (let key in navigator.connection) {
-						let keyValue = navigator.connection[key]
-						let keyType = typeof keyValue
-						if ("function" === keyType) {oTemp[key] = keyType} else {oTemp[key] = keyValue}
-					}
-					// sort
-					for (const k of Object.keys(oTemp).sort()) {oNetwork[k] = oTemp[k]}
-					if (Object.keys(oNetwork).length > 0) {
-						let hash = mini(oNetwork), isLies = false
-						if (isSmart) {
-							notation = default_red
-							if (isProxy && sData[SECT99].includes("Navigator.connection")) {
-								addDetail(METRIC, oNetwork)
-								log_display(5, METRIC, colorFn(hash) + addButton(5, METRIC) + notation)
-								log_known(SECT5, METRIC)
-								return resolve([METRIC, zLIE])
-							}
-						}
-						// yay!
-						addData(5, METRIC, oNetwork, hash)
-						log_display(5, METRIC, hash + addButton(5, METRIC) + notation)
-						return resolve()
-					} else {
-						// can't imagine this but who knows
-						finish(zErr, log_error(SECT5, METRIC, zErrEmpty +": "+ cleanFn(oNetwork)))
-					}
-				} else {
-					finish(zErr, log_error(SECT5, METRIC, zErrInvalid + cleanFn(nav)))
-				}
-			}
+		hash = navigator.connection
+		if (runST) {hash = null} else if (runSI) {hash = {}} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
+		if (undefined === hash) {
+				hash = hash+''; notation = default_green
 		} else {
-			finish(zErr, log_error(SECT5, METRIC, zErrType + typeof nav))
-		}
-	} catch(e) {
-		finish(zErr, log_error(SECT5, METRIC, e))
-	}
-})
-
-const get_nav_dnt = () => new Promise(resolve => {
-	// expected nav: i.e you can't remove it
-	const METRIC = "doNotTrack"
-	function exit(value, display) {
-		log_display(5, METRIC, display +"")
-		return resolve([METRIC, value])
-	}
-	try {
-		let value = navigator[METRIC]
-		if (runST) {value = 1}
-		let display = value
-		if (isGecko) {
-			if ("1" !== value && "unspecified" !== value) {
-				if ("string" === typeof value) {
-					display = log_error(SECT5, METRIC, zErrInvalid + cleanFn(value))
-				} else {
-					display = log_error(SECT5, METRIC, zErrType + typeof value)
-				}
-				value = zErr
+			let typeCheck = typeFn(hash, true)
+			if ('object' !== typeCheck) {throw zErrType + typeFn(hash)}
+			let expected = '[object NetworkInformation]'
+			if (hash+'' !== expected) {throw zErrInvalid + 'expected '+ expected +': got '+ hash}
+			/* https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation
+			// not worth leveraging type checks in gecko
+			let keyTypes = {
+				'addEventListener': 'function', 'dispatchEvent': 'function',
+				'ontypechange': 'object', 'removeEventListener': 'function', 'type': 'string',
 			}
+			//*/
+			let oTemp = {}
+			for (let key in navigator.connection) {
+				let keyValue = navigator.connection[key]
+				let keyType = typeof keyValue
+				if ('function' === keyType) {oTemp[key] = keyType} else {
+					if ('downlink' == key) {keyValue = Math.floor(keyValue)} // non-gecko stability
+					oTemp[key] = keyValue
+				}
+			}
+			data = {}
+			for (const k of Object.keys(oTemp).sort()) {data[k] = oTemp[k]}
+			hash = mini(data); btn = addButton(5, METRIC)
 		}
-		exit(value, display)
 	} catch(e) {
-		exit(zErr, log_error(SECT5, METRIC, e))
+		hash = e; data = zErrLog
 	}
-})
+	addBoth(5, METRIC, hash, btn, notation, data, isProxyLie('Navigator.'+ METRIC))
+	return
+}
 
-const get_nav_gpc = () => new Promise(resolve => {
+function get_nav_dnt(METRIC) {
+	// expected property
+	let hash, data =''
+	try {
+		hash = navigator[METRIC]
+		if (runST) {hash = 1} else if (runSI) {hash = '2'}
+		let typeCheck = typeFn(hash)
+		if ('string' !== typeCheck) {throw zErrType + typeCheck}
+		if ('1' !== hash && 'unspecified' !== hash) {throw zErrInvalid + 'expected 1 or unspecified: got ' + hash}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(5, METRIC, hash,'','', data)
+	return
+}
+
+function get_nav_gpc(METRIC) {
 	// GPC: 1670058
 		// privacy.globalprivacycontrol.functionality.enabled = navigator
 		// privacy.globalprivacycontrol.enabled = true/false
-	const METRIC = "globalPrivacyControl"
-	function exit(value, display) {
-		let notation = ""
-		if (isSmart) {
-			if (isVer < 120) {
-				notation = (value == "undefined" ? default_green : default_red)
-			}
-			// FF120+ desktop (not sure about android): gpc enabled: default false, but true pbmode
-			// since we can't really distinguish PBmode (cache aside for now) then don't both notating
-		}
-		log_display(5, METRIC, display + notation)
-		return resolve([METRIC, value])
-	}
+	// FF120+ desktop (?android): gpc enabled: false but true in pb mode
+	let hash, data='', notation = default_red
 	try {
-		let value = navigator[METRIC]
-		if ("boolean" !== typeof value) {value = cleanFn(value)}
-		if (runST) {value = zUQ} else if (runSL) {sData[SECT99].push("Navigator."+ METRIC)}
-		let display = value
-		if ("boolean" !== typeof value && value !== "undefined") {
-			value = zErr
-			display = log_error(SECT5, METRIC, zErrType + typeof value)
-		} else if (isProxy && sData[SECT99].includes("Navigator."+ METRIC)) {
-			value = zLIE
-			display = colorFn(display)
-			log_known(SECT5, METRIC)
+		hash = navigator[METRIC]
+		if (runST) {hash = null} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
+		if (undefined === hash) {
+			hash = hash+''
+			if (isVer < 120) {notation = default_green}
+		} else {
+			let typeCheck = typeFn(hash)
+			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
+			if (isVer > 119) {
+				// expected boolean but could be true or false, so don't notate
+				// except TB where we expect true due to pb mode
+				notation = isTB ? (true === hash ? default_green : default_red) : ''
+			}
 		}
-		exit(value, display)
 	} catch(e) {
-		exit(zErr, log_error(SECT5, METRIC, e))
+		hash = e; data = zErrLog
 	}
-})
+	addBoth(5, METRIC, hash,'', notation, data, isProxyLie('Navigator.'+ METRIC))
+	return
+}
 
 /* REGION */
 
-const set_isLanguageSmart = () => new Promise(resolve => {
+function set_isLanguageSmart() {
 	// set once: ignore android for now
-	if (isOS === "android" || !gLoad || !isSmart) {return}
+	if ('android' == isOS || !gLoad || !isSmart) {return}
 
-	// TB/MB always or FF if we the locale matches
+	// TB/MB always or FF if locale matches
 		// resource://gre/res/multilocale.txt
 	isLanguageSmart = isTB
 
-	const en = "en-US, en"
+	const en = 'en-US, en'
 	languagesSupported = {
 		// language = existing key | languages = key + value[0] | locale = key unless value[1] !== undefined
-		"ar": [en],
-		"ca": [en],
-		"cs": ["sk, "+ en],
-		"da": [en],
-		"de": [en],
-		"el-GR": ["el, "+ en, "el"],
-		"en-US": ["en"],
-		"es-ES": ["es, "+ en],
-		"fa-IR": ["fa, "+ en, "fa"],
-		"fi-FI": ["fi, "+ en, "fi"],
-		"fr": ["fr-FR, "+ en],
-		"ga-IE": ["ga, en-IE, en-GB, "+ en],
-		"he": ["he-IL, "+ en],
-		"hu-HU": ["hu, "+ en, "hu"],
-		"id": [en],
-		"is": [en],
-		"it-IT": ["it, "+ en, "it"],
-		"ja": [en],
-		"ka-GE": ["ka, "+ en, "ka"],
-		"ko-KR": ["ko, "+ en, "ko"],
-		"lt": [en +", ru, pl"],
-		"mk-MK": ["mk, "+ en, "mk"],
-		"ms": [en],
-		"my": ["en-GB, en"],
-		"nb-NO": ["nb, no-NO, no, nn-NO, nn, "+ en],
-		"nl": [en],
-		"pl": [en],
-		"pt-BR": ["pt, "+ en],
-		"ro-RO": ["ro, en-US, en-GB, en", "ro"],
-		"ru-RU": ["ru, "+ en, "ru"],
-		"sq": ["sq-AL, "+ en],
-		"sv-SE": ["sv, "+ en],
-		"th": [en],
-		"tr-TR": ["tr, "+ en, "tr"],
-		"uk-UA": ["uk, "+ en, "uk"],
-		"vi-VN": ["vi, "+ en, "vi"],
-		"zh-CN": ["zh, zh-TW, zh-HK, "+ en, "zh-Hans-CN"],
-		"zh-TW": ["zh, "+ en, "zh-Hant-TW"],
+		'ar': [en],
+		'be': [en],
+		'bg': [en],
+		'ca': [en],
+		'cs': ['sk, '+ en],
+		'da': [en],
+		'de': [en],
+		'el-GR': ['el, '+ en, 'el'],
+		'en-US': ['en'],
+		'es-ES': ['es, '+ en],
+		'fa-IR': ['fa, '+ en, 'fa'],
+		'fi-FI': ['fi, '+ en, 'fi'],
+		'fr': ['fr-FR, '+ en],
+		'ga-IE': ['ga, en-IE, en-GB, '+ en],
+		'he': ['he-IL, '+ en],
+		'hu-HU': ['hu, '+ en, 'hu'],
+		'id': [en],
+		'is': [en],
+		'it-IT': ['it, '+ en, 'it'],
+		'ja': [en],
+		'ka-GE': ['ka, '+ en, 'ka'],
+		'ko-KR': ['ko, '+ en, 'ko'],
+		'lt': [en +', ru, pl'],
+		'mk-MK': ['mk, '+ en, 'mk'],
+		'ms': [en],
+		'my': ['en-GB, en'],
+		'nb-NO': ['nb, no-NO, no, nn-NO, nn, '+ en],
+		'nl': [en],
+		'pl': [en],
+		'pt-BR': ['pt, '+ en],
+		'pt-PT': ['pt, en, en-US'],
+		'ro-RO': ['ro, en-US, en-GB, en', 'ro'],
+		'ru-RU': ['ru, '+ en, 'ru'],
+		'sq': ['sq-AL, '+ en],
+		'sv-SE': ['sv, '+ en],
+		'th': [en],
+		'tr-TR': ['tr, '+ en, 'tr'],
+		'uk-UA': ['uk, '+ en, 'uk'],
+		'vi-VN': ['vi, '+ en, 'vi'],
+		'zh-CN': ['zh, zh-TW, zh-HK, '+ en, 'zh-Hans-CN'],
+		'zh-TW': ['zh, '+ en, 'zh-Hant-TW'],
 	}
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		"ar": {m: "1f9a06e3", v: "1dfb5b8c", x: "ebfbdc43"},
-		"ca": {m: "d856d812", v: "6b3bb3d8", x: "81f31519"},
-		"cs": {m: "c92accb0", v: "de3ab0ad", x: "45f277f7"},
-		"da": {m: "39169214", v: "479797a1", x: "44535972"},
-		"de": {m: "298d11c6", v: "f9e2eae6", x: "f4b2a56f"},
-		// el: xml n30 = english but is would-be-n39 "reserved prefix (xmlns) must not be declared or undeclared"
+		'ar': {m: '1f9a06e3', v: '1dfb5b8c', x: 'ebfbdc43'},
+		'be': {m: '076d68e6', v: '4edeafab', x: 'b74b3840'},
+		'bg': {m: '2da6c02e', v: 'ce892c88', x: '914590a4'},
+		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '81f31519'},
+		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '45f277f7'},
+		'da': {m: '39169214', v: '479797a1', x: '44535972'},
+		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'f4b2a56f'},
+		// el: xml n30 = english but is would-be-n39 'reserved prefix (xmlns) must not be declared or undeclared'
 			// changing to spoof english returns n30.. phew!
-		"el": {m: "7053311d", v: "b1a88a13", x: "da8c80af"},
-		"en-US": {m: "05c30936", v: "41310558", x: "945f8952"},
-		"es-ES": {m: "96b78cbd", v: "97c3f5a9", x: "3eeba3bc"},
-		"fa": {m: "6648d919", v: "8ef57409", x: "113d0a7e"},
-		"fi": {m: "82d079c7", v: "3e29e6e7", x: "71abeeec"},
-		"fr": {m: "024d0fce", v: "34e28fa2", x: "74f5df3d"},
-		"ga-IE": {m: "97fca229", v: "2bf1321d", x: "d9761e70"},
+		'el': {m: '7053311d', v: 'b1a88a13', x: 'da8c80af'},
+		'en-US': {m: '05c30936', v: '41310558', x: '945f8952'},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: '3eeba3bc'},
+		'fa': {m: '6648d919', v: '8ef57409', x: '113d0a7e'},
+		'fi': {m: '82d079c7', v: '3e29e6e7', x: '71abeeec'},
+		'fr': {m: '024d0fce', v: '34e28fa2', x: '74f5df3d'},
+		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd9761e70'},
 		// he: xml n27 n28 n30 = english
-		"he": {m: "cdde832b", v: "e47dbb82", x: "786876d5"},
-		"hu": {m: "db7366e6", v: "dad6d689", x: "9f537fe6"},
-		"id": {m: "1e275882", v: "71224946", x: "79f3851e"},
-		"is": {m: "204c8f73", v: "d150027b", x: "7f3e38b8"},
-		"it": {m: "716e7242", v: "3b781f09", x: "469cb2af"},
-		"ja": {m: "ab56d7cb", v: "48645d06", x: "6823cee8"},
-		"ka": {m: "6961b7e4", v: "40feb44f", x: "4e712712"},
-		"ko": {m: "c758b027", v: "d3b54047", x: "fc4c50ed"},
-		"lt": {m: "c36fbafb", v: "d5f9b95d", x: "f50f2b50"},
+		'he': {m: 'cdde832b', v: 'e47dbb82', x: '786876d5'},
+		'hu': {m: 'db7366e6', v: 'dad6d689', x: '9f537fe6'},
+		'id': {m: '1e275882', v: '71224946', x: '79f3851e'},
+		'is': {m: '204c8f73', v: 'd150027b', x: '7f3e38b8'},
+		'it': {m: '716e7242', v: '3b781f09', x: '469cb2af'},
+		'ja': {m: 'ab56d7cb', v: '48645d06', x: '6823cee8'},
+		'ka': {m: '6961b7e4', v: '40feb44f', x: '4e712712'},
+		'ko': {m: 'c758b027', v: 'd3b54047', x: 'fc4c50ed'},
+		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'f50f2b50'},
 		// mk: v = english but not number format, and xml n30 = english but is would-be-n39 (same as el)
 			// and n27 n28 = english
-		"mk": {m: "78274f1b", v: "333aae58", x: "3b22df8b"},
-		"ms": {m: "3e26c6be", v: "9dadbc64", x: "f23d0969"},
+		'mk': {m: '78274f1b', v: '333aae58', x: '3b22df8b'},
+		'ms': {m: '3e26c6be', v: '9dadbc64', x: 'f23d0969'},
 		// my: two items in english: date+over/under
-		"my": {m: "939f2013", v: "43cc3aa3", x: "11d4d458"},
+		'my': {m: '939f2013', v: '43cc3aa3', x: '11d4d458'},
 		// nb-NO: xml most is english
-		"nb-NO": {m: "1d496fea", v: "84ce54eb", x: "50426960"},
-		"nl": {m: "e1d3b281", v: "326cbfd2", x: "b03574e4"},
-		"pl": {m: "0bd88e98", v: "95ad4851", x: "c1295e2b"},
-		"pt-BR": {m: "39835e93", v: "de2c3569", x: "96f79e68"},
-		"ro": {m: "3e321768", v: "d72a350b", x: "cf85bb64"},
-		"ru": {m: "8e9b7945", v: "2391fbec", x: "2178a2b6"},
-		"sq": {m: "91943e67", v: "e0259277", x: "a732eca1"},
-		"sv-SE": {m: "bc792ce2", v: "d9d7828b", x: "80f52165"},
-		"th": {m: "a32d70a7", v: "8448474c", x: "e29567ce"},
-		"tr": {m: "4217ef80", v: "169730ca", x: "1e9d0192"},
-		"uk": {m: "3e2b3e39", v: "24cce2c1", x: "cc85d2f5"},
-		"vi": {m: "bba6c980", v: "b8137d59", x: "7cf3c6f9"},
-		"zh-Hans-CN": {m: "550ea53e", v:"55d25655", x: "328cc79b"},
-		"zh-Hant-TW": {m: "66b515a4", v: "8e4cfa0e", x: "87abb9fa"},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: '50426960'},
+		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'b03574e4'},
+		'pl': {m: '0bd88e98', v: '95ad4851', x: 'c1295e2b'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '96f79e68'},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: 'b42389f7'},
+		'ro': {m: '3e321768', v: 'd72a350b', x: 'cf85bb64'},
+		'ru': {m: '8e9b7945', v: '2391fbec', x: '2178a2b6'},
+		'sq': {m: '91943e67', v: 'e0259277', x: 'a732eca1'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '80f52165'},
+		'th': {m: 'a32d70a7', v: '8448474c', x: 'e29567ce'},
+		'tr': {m: '4217ef80', v: '169730ca', x: '1e9d0192'},
+		'uk': {m: '3e2b3e39', v: '24cce2c1', x: 'cc85d2f5'},
+		'vi': {m: 'bba6c980', v: 'b8137d59', x: '7cf3c6f9'},
+		'zh-Hans-CN': {m: '550ea53e', v:'55d25655', x: '328cc79b'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '87abb9fa'},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
-	if (isOS == "mac") {
+	if ('mac' == isOS) {
 		languagesSupported['ja'].push('ja-JP')
 		let macvalue = localesSupported.ja
 		delete localesSupported['ja']
-		localesSupported["ja-JP"] = macvalue
+		localesSupported['ja-JP'] = macvalue
 	}
 	if (isMullvad) {
 		// 22 of 38 supported
 		let notSupported = [
 			// lang
-			"ca","cs","el-GR","ga-IE","he","hu-HU","id","is","ka-GE","lt","mk-MK","ms","ro-RO","sq","uk-UA","vi-VN",
+			'be','bg','ca','cs','el-GR','ga-IE','he','hu-HU','id','is','ka-GE','lt','mk-MK','ms','pt-PT','ro-RO','sq','uk-UA','vi-VN',
 			// + locales
-			"el","hu","ka","mk","ro","uk","vi",
+			'el','hu','ka','mk','ro','uk','vi',
 		]
 		notSupported.forEach(function(key){
 			delete languagesSupported[key]
 			delete localesSupported[key]
 		})
 	}
-	return resolve()
-})
+	return
+}
 
-const set_oIntlTests = () => new Promise(resolve => {
+function set_oIntlTests() {
 
-	let unitN = {"narrow": [1]}, unitL = {"long": [1]}, unitB = {"long": [1], "narrow": [1]}
-	let tzDays = [new Date("August 1, 2019 0:00:00 UTC")],
-		tzLG = {"longGeneric": tzDays},
-		tzSG = {"shortGeneric": tzDays}
-	let curN = {"name": [-1]},
-		curS = {"symbol": [1000]},
-		curB = {"name": [-1], "symbol": [1000]},
-		curA = {"accounting": [-1000], "name": [-1], "symbol": [1000]}
+	let unitN = {'narrow': [1]}, unitL = {'long': [1]}, unitB = {'long': [1], 'narrow': [1]}
+	let tzDays = [new Date('August 1, 2019 0:00:00 UTC')],
+		tzLG = {'longGeneric': tzDays},
+		tzSG = {'shortGeneric': tzDays}
+	let curN = {'name': [-1]},
+		curS = {'symbol': [1000]},
+		curB = {'name': [-1], 'symbol': [1000]},
+		curA = {'accounting': [-1000], 'name': [-1], 'symbol': [1000]}
 
 	// all dates must be timezone resistent: we do not want the noise: we are checking locales
 	// and want to maintain max entropy checks: timezone entropy == timezonename
 	let dates = {
-		FSD: new Date("2023-06-11T01:12:34.5678"), // no Z
+		FSD: new Date('2023-06-11T01:12:34.5678'), // no Z
 		Era: new Date(-1, -11, -30),
-		Jan: new Date("2023-01-15"),
-		Sep: new Date("2023-09-15"),
-		Nov: new Date("2023-11-15"),
-		Wed: new Date("January 18, 2023 1:00:00"), // doubles as hour 1
-		Fri: new Date("January 20, 2023 13:00:00"), // doubles as hour 13
+		Jan: new Date('2023-01-15'),
+		Sep: new Date('2023-09-15'),
+		Nov: new Date('2023-11-15'),
+		Wed: new Date('January 18, 2023 1:00:00'), // doubles as hour 1
+		Fri: new Date('January 20, 2023 13:00:00'), // doubles as hour 13
 	}
 
 	oIntlTests = {
-		"collation": [
-			'A','a','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u00E7\a','\u00EB','\u00ED','\u00EE','\u00F0',
-			'\u00F1','\u00F6','\u0107','\u0109','\u0137\a','\u0144','\u0149','\u01FB','\u025B','\u03B1','\u040E','\u0439','\u0453',
-			'\u0457','\u04F0','\u0503','\u0561','\u05EA','\u0627','\u0649','\u06C6','\u06C7','\u06CC','\u06FD','\u0934','\u0935',
-			'\u09A4','\u09CE','\u0A85','\u0B05','\u0B85','\u0C05','\u0C85','\u0D85','\u0E24','\u0E9A','\u10350','\u10D0','\u1208',
-			'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A',
-		],
-		"compact": {
-			"long": [0/0, 1000, 2e6, 6.6e12, 7e15],
-			"short": [-1100000000],
+		collation: {
+			search: ['\u0107','\u0109','\u1ED9','\u00F6'],
+			sort: [
+				'A','a','aa','ch','ez','kz','ng','ph','ts','tt','y','\u00E2','\u00E4','\u00E7\a','\u00EB','\u00ED','\u00EE','\u00F0',
+				'\u00F1','\u00F6','\u0107','\u0109','\u0137\a','\u0144','\u0149','\u01FB','\u025B','\u03B1','\u040E','\u0439','\u0453',
+				'\u0457','\u04F0','\u0503','\u0561','\u05EA','\u0627','\u0649','\u06C6','\u06C7','\u06CC','\u06FD','\u0934','\u0935',
+				'\u09A4','\u09CE','\u0A85','\u0B05','\u0B85','\u0C05','\u0C85','\u0D85','\u0E24','\u0E9A','\u10350','\u10D0','\u1208',
+				'\u1780','\u1820','\u1D95','\u1DD9','\u1ED9','\u1EE3','\u311A','\u3147','\u4E2D','\uA647','\uFB4A'
+			]
 		},
-		"currency": {"KES": curB, "MOP": curS, "USD": curA, "XXX": curN,},
-		"dayperiod": {"long": [8,22], "narrow": [8,15], "short": [12,15,18]},
-		"listformat": {
-			"narrow": ["conjunction","disjunction","unit"],
-			"short": ["conjunction","unit"]
+		compact: {
+			'long': [0/0, 1000, 2e6, 6.6e12, 7e15],
+			'short': [-1100000000],
 		},
-		"datetimeformat": {
-			"era": {
+		currency: {'KES': curB, 'MOP': curS, 'USD': curA, 'XXX': curN,},
+		dayperiod: {'long': [8,22], 'narrow': [8,15], 'short': [12,15,18]},
+		datetimeformat: {
+			era: {
 				// we need to control the date part so toLocaleString matches
-				"long": [{era: "long", year: "numeric", month: "numeric", day: "numeric"}, [dates.Era]]
+				'long': [{era: 'long', year: 'numeric', month: 'numeric', day: 'numeric'}, [dates.Era]]
 			},
-			"fractionalSecondDigits": {
-				"1": [{minute: "numeric", second: 'numeric', fractionalSecondDigits: 1}, [dates.FSD]]
+			fractionalSecondDigits: {
+				'1': [{minute: 'numeric', second: 'numeric', fractionalSecondDigits: 1}, [dates.FSD]]
 			},
-			"hour": {
-				"numeric": [{hour: "numeric"}, [dates.Wed]],
+			hour: {
+				'numeric': [{hour: 'numeric'}, [dates.Wed]],
 			},
-			"hourCycle": {
-				"h11-2-digit": [{hour: "2-digit", hourCycle: "h11"}, [dates.Wed]]
+			hourCycle: {
+				'h11-2-digit': [{hour: '2-digit', hourCycle: 'h11'}, [dates.Wed]]
 			},
-			"month": {
-				"narrow": [{month: "narrow"}, [dates.Nov] ],
-				"short": [{month: "short"}, [dates.Jan, dates.Sep]],
+			month: {
+				'narrow': [{month: 'narrow'}, [dates.Nov] ],
+				'short': [{month: 'short'}, [dates.Jan, dates.Sep]],
 			},
-			"weekday": {
-				"long": [{weekday: "long"}, [dates.Wed, dates.Fri]],
-				"narrow": [{weekday: "narrow"}, [dates.Wed, dates.Fri]],
-				"short": [{weekday: "short"}, [dates.Fri]],
+			weekday: {
+				'long': [{weekday: 'long'}, [dates.Wed, dates.Fri]],
+				'narrow': [{weekday: 'narrow'}, [dates.Wed, dates.Fri]],
+				'short': [{weekday: 'short'}, [dates.Fri]],
 			},
 		},
-		"notation": {
-			"scientific": {"decimal": []},
-			"standard": {"decimal": [0/0, -1000, 987654], "percent": [1000]},
+		listformat: {
+			'narrow': ['conjunction','disjunction','unit'],
+			'short': ['conjunction','unit']
 		},
-		"numberformat_ftp": {
-			"decimal": [1.2],"group": [1000, 99999],"infinity": [Infinity],"minusSign": [-5],"nan": ["a"]
+		notation: {
+			scientific: {'decimal': []},
+			standard: {'decimal': [0/0, -1000, 987654], 'percent': [1000]},
 		},
-		"pluralrules": {
-			"cardinal": [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74: add ordinal 81 to keep lij unique from it,sc
-			"ordinal": [1, 2, 3, 5, 8, 10, 81]
+		'numberformat_ftp': {
+			'decimal': [1.2],'group': [1000, 99999],'infinity': [Infinity],'minusSign': [-5],'nan': ['a']
 		},
-		"relativetimeformat": { // 8 of 12
-			"always": {"narrow": [[1, "day"], [0, "year"]]},
-			"auto": {"long": [[1, "second"]],"narrow": [[3,"day"],[0,"quarter"],[0,"second"],[1,"second"],[3,"second"]]},
+		pluralrules: {
+			cardinal: [0, 1, 2, 3, 7, 21, 100], // 1859752 ICU 74: add ordinal 81 to keep lij unique from it,sc
+			ordinal: [1, 2, 3, 5, 8, 10, 81]
 		},
-		"relativetimeformat_ftp": { // 4 of 12
-			"auto": {"narrow": [[0,"day"],[1,"day"],[1,"week"],[1,"year"]]}
+		relativetimeformat: { // 8 of 12
+			always: {'narrow': [[1, 'day'], [0, 'year']]},
+			auto: {'long': [[1, 'second']],'narrow': [[3,'day'],[0,'quarter'],[0,'second'],[1,'second'],[3,'second']]},
 		},
-		"sign": {"always": [-1, 0/0]},
-		"timezonename": {
-			"Africa/Douala": tzLG,
-			"Asia/Hong_Kong": tzSG,
-			"Asia/Muscat": tzSG,
-			"Asia/Seoul": tzLG,
-			"Europe/London": tzSG,
+		'relativetimeformat_ftp': { // 4 of 12
+			auto: {'narrow': [[0,'day'],[1,'day'],[1,'week'],[1,'year']]}
 		},
-		"unit": {
-			"byte": unitN, // ICU 74
-			"fahrenheit": unitB,
-			"foot": unitL,
-			"hectare": {"long": [1], "short": [987654]},
-			"kilometer-per-hour": unitN,
-			"millimeter": unitN,
-			"month": unitB,
-			"nanosecond": unitN,
-			"percent": unitB,
-			"second": {"long": [1], "narrow": [1], "short": [987654]},
-			"terabyte": unitL,
+		sign: {always: [-1, 0/0]},
+		timezonename: {
+			'Africa/Douala': tzLG,
+			'Asia/Hong_Kong': tzSG,
+			'Asia/Muscat': tzSG,
+			'Asia/Seoul': tzLG,
+			'Europe/London': tzSG,
+		},
+		unit: {
+			'byte': unitN, // ICU 74
+			'fahrenheit': unitB,
+			'foot': unitL,
+			'hectare': {'long': [1], 'short': [987654]},
+			'kilometer-per-hour': unitN,
+			'millimeter': unitN,
+			'month': unitB,
+			'nanosecond': unitN,
+			'percent': unitB,
+			'second': {'long': [1], 'narrow': [1], 'short': [987654]},
+			'terabyte': unitL,
 		}
 	}
-	try {oIntlTests["compact"]["long"].push(BigInt("987354000000000000"))} catch(e) {}
+	try {oIntlTests['compact']['long'].push(BigInt('987354000000000000'))} catch(e) {}
 	let nBig = 987654
-	try {nBig = BigInt("987354000000000000")} catch(e) {}
-	oIntlTests["notation"]["scientific"]["decimal"].push(nBig)
+	try {nBig = BigInt('987354000000000000')} catch(e) {}
+	oIntlTests['notation']['scientific']['decimal'].push(nBig)
+	// build keys
+	for (const k of Object.keys(oIntlTests)) {
+		oIntlKeys[k] = []
+		for (const j of Object.keys(oIntlTests[k]).sort()) {oIntlKeys[k].push(j)}
+	}
+}
 
-})
-
-const get_geo = () => new Promise(resolve => {
-	const METRIC = "geolocation"
+const get_geo = (METRIC) => new Promise(resolve => {
+	let res = [], value, notation = default_red, isLies = false
 	// nav
-	let value, display
 	try {
 		let keys = Object.keys(Object.getOwnPropertyDescriptors(Navigator.prototype))
-		/* test
-		keys = keys.filter(x => !["geolocation"].includes(x))
-		keys.push("geolocation")
-		//*/
+		if (runSL) {
+			keys = keys.filter(x => !['geolocation'].includes(x))
+			keys.push('geolocation')
+		}
 		value = keys.includes(METRIC) ? zE : zD
-		display = value
-		if (isSmart) {
-			// this only detects enabled as untrustworthy
-			if (keys.indexOf(METRIC) > keys.indexOf("constructor")) {
-				value = zLIE
-				display = colorFn(zE)
-				log_known(SECT4, METRIC +"_navigator")
-			}
+		// this only detects enabled as untrustworthy
+		if (keys.indexOf(METRIC) > keys.indexOf('constructor')) {
+			log_known(4, METRIC +'_navigator', value)
+			isLies = true
 		}
 	} catch(e) {
-		value = zErr, display = value
-		log_error(SECT4, METRIC +"_navigator", e)
+		log_error(4, METRIC +'_navigator', e); value = zErr
 	}
-	// window
-	let geoWin
-	try {
-		geoWin = "Geolocation" in window ? true : false
-	} catch(e) {
-		geoWin = zErr
-		log_error(SECT4, METRIC +"_window", e)
-	}
-	value += " | "+ geoWin
-	display += " | "+ geoWin
+	addDisplay(4, METRIC +'_navigator', value,'','', isLies) // display separate for notating lies
+	res.push(isLies? zLIE : value)
 
-	function exit() {
-		let notation = ""
-		if (isSmart) {
-			let rhash = mini(display) // use display
-			if (isTB) {
-				// TB ESR78+: disabled, true, prompt
-				notation = rhash == "94bf0c73" ? default_green : default_red
-			} else {
-				// FF72+: enabled, true, prompt
-				notation = rhash == "6046a6a8" ? default_green : default_red
-			}
+	// window
+	try {
+		value = 'Geolocation' in window ? true : false
+		if (value == true) {
+			let typeCheck = typeFn(window.Geolocation)
+			if (runST) {typeCheck = 'string'}
+			if ('function' !== typeCheck) {throw zErrType + typeCheck}
 		}
-		log_display(4, METRIC, display + notation)
-		addData(4, METRIC, value)
+	} catch(e) {
+		log_error(4, METRIC +'_window', e); value = zErr
+	}
+	res.push(value)
+
+	function exit(state) {
+		res.push(state)
+		let hash = mini(res)
+		if (isTB && hash == '5ce0a555') {
+			notation = default_green // TB ESR78+: disabled, true, prompt
+		} else if (!isTB && hash == 'e36e1742') {
+			notation = default_green // FF72+: enabled, true, prompt
+		}
+		addBoth(4, METRIC, res[1] +' | '+ res[2],'', notation, res.join(' | '))
 		return resolve()
 	}
-	function geoState(state) {
-		value += " | "+ state
-		display += " | "+ state
-		exit()
-	}
+
 	try {
 		if (runSE) {foo++}
-		navigator.permissions.query({name:"geolocation"}).then(e => geoState(e.state))
+		navigator.permissions.query({name:'geolocation'}).then(e => exit(e.state))
 	} catch(e) {
-		log_error(SECT4, METRIC +"_permission", e)
-		value += " | "+ zErr
-		display += " | "+ zErr
-		exit()
+		log_error(4, METRIC +'_permission', e)
+		exit(zErr)
 	}
 })
 
-const get_language_locale = () => new Promise(resolve => {
+function get_language_locale() {
 	// reset
 	isLocaleValid = false
 	isLocaleValue = undefined
+	isLocaleAlt = undefined
 
 	// LANGUAGES
 	function get_langmetric(m) {
 		try {
-			let test = navigator[m]
-			if (m == "language") {
-				if ("string" !== typeof test) {log_error(SECT4, m, zErrType + typeof test); return zErr} else {return test}
-			} else if ("object" !== typeof test) {
-				log_error(SECT4, m, zErrType + typeof check)
-				return zErr +" "+ check + " | "+ typeof check
-			} else {
-				return test.join(", ") // catch non-arrays
-			}
+			let value = navigator[m]
+			let expected = ('language' == m ? 'string' : 'array')
+			if (runST) {value = ('language' == m ? null : [])}
+			let typeCheck = typeFn(value)
+			if (expected !== typeCheck) {throw zErrType + typeCheck}
+			return ('language' == m ? value : value.join(', '))
 		} catch(e) {
-			log_error(SECT4, m, e)
-			return zErr
+			return [e]
 		}
 	}
-	let oData = {}, metrics = ['language','languages'], notation = ""
-	metrics.forEach(function(m) {oData[m] = cleanFn(get_langmetric(m))})
+	let oData = {}, metrics = ['language','languages'], notation = ''
+	metrics.forEach(function(m) {oData[m] = get_langmetric(m)})
 	Object.keys(oData).forEach(function(METRIC){
-		notation = ""
-		if (isLanguageSmart) {
+		if (isLanguageSmart && isTB) { // only notate TB/MB
 			notation = tb_red
 			if (languagesSupported[oData.language] !== undefined) {
-				if (METRIC == "language") {notation = tb_green
-				} else {if (oData[METRIC] == oData.language +", "+ languagesSupported[oData.language][0]) {notation = tb_green}
+				if ('language' == METRIC) {notation = tb_green
+				} else {if (oData[METRIC] == oData.language +', '+ languagesSupported[oData.language][0]) {notation = tb_green}
 				}
 			}
 		}
-		log_display(4, METRIC, oData[METRIC] + notation)
-		addData(4, METRIC, oData[METRIC])
+		let value = oData[METRIC], data =''
+		if ('array' == typeFn(value)) {value = value[0]; data = zErrLog}
+		addBoth(4, METRIC, value,'', notation, data)
 	})
 
 	// LOCALES
 	function get_locmetric(m) {
-		let METRIC = "locales_"+ m
-		let r
+		let METRIC = 'locales_'+ m, r
 		try {
-			if (m == "collator") {if (runSL) {r = "en-FAKE"} else {r = Intl.Collator().resolvedOptions().locale}
-			} else if (m == "datetimeformat") {r = Intl.DateTimeFormat().resolvedOptions().locale
-			} else if (m == "displaynames") {r = new Intl.DisplayNames(undefined, {type: "region"}).resolvedOptions().locale
-			} else if (m == "listformat") {r = new Intl.ListFormat().resolvedOptions().locale
-			} else if (m == "numberformat") {r = new Intl.NumberFormat().resolvedOptions().locale
-			} else if (m == "pluralrules") {r = new Intl.PluralRules().resolvedOptions().locale
-			} else if (m == "relativetimeformat") {r = new Intl.RelativeTimeFormat().resolvedOptions().locale
-			} else if (m == "segmenter") {r = new Intl.Segmenter().resolvedOptions().locale
+			if ('collator' == m) {if (runSL) {r = 'en-FAKE'} else {r = Intl.Collator().resolvedOptions().locale}
+			} else if ('datetimeformat' == m) {r = Intl.DateTimeFormat().resolvedOptions().locale
+			} else if ('displaynames' == m) {r = new Intl.DisplayNames(undefined, {type: 'region'}).resolvedOptions().locale
+			} else if ('listformat' == m) {r = new Intl.ListFormat().resolvedOptions().locale
+			} else if ('numberformat' == m) {r = new Intl.NumberFormat().resolvedOptions().locale
+			} else if ('pluralrules' == m) {r = new Intl.PluralRules().resolvedOptions().locale
+			} else if ('relativetimeformat' == m) {r = new Intl.RelativeTimeFormat().resolvedOptions().locale
+			} else if ('segmenter' == m) {r = new Intl.Segmenter().resolvedOptions().locale
 			}
-			//r="fa" // test returning all the same but a different locale to actual
-			if ("string" !== typeof r) {
-				log_error(SECT4, METRIC, zErrType + typeof r); r = zErr
-			} else if (!Intl.DateTimeFormat.supportedLocalesOf([r]).length) {
-				log_error(SECT4, METRIC, zErrInvalid + "locale not supported"); r = zErr
-			}
+			//r='fa' // test returning all the same but a different locale to actual
+			if (runST) {r = undefined} else if (runSI) {r = 'collator' !== m ? 'en-USA' : 'tzp'}
+			let typeCheck = typeFn(r)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			if (!Intl.DateTimeFormat.supportedLocalesOf([r]).length) {throw zErrInvalid + 'locale '+ r +' not supported'}
 			return r
 		} catch(e) {
-			log_error(SECT4, METRIC, e)
+			log_error(4, METRIC, e)
 			return zErr
 		}
 	}
 	let res = []
 	metrics = [
-		"collator","datetimeformat","displaynames","listformat",
-		"numberformat","pluralrules","relativetimeformat","segmenter",
+		'collator','datetimeformat','displaynames','listformat',
+		'numberformat','pluralrules','relativetimeformat','segmenter',
 	]
-	metrics.forEach(function(m) {
-		res.push(cleanFn(get_locmetric(m)))
-	})
+	metrics.forEach(function(m) {res.push(get_locmetric(m))})
 	// LOCALES
-	let METRIC = "locale", fpvalue
-	let value = res.join(" | ")
-	log_display(4, METRIC +"data", value)
+	let METRIC = 'locale'
+	let value = res.join(' | ')
+	addDisplay(4, METRIC +'data', value)
 
 	// LOCALE
-	notation = ""
 	// remove errors and dupes
 	res = res.filter(x => ![zErr].includes(x))
 	res = res.filter(function(item, position) {return res.indexOf(item) === position})
+	let isLies = false
 	if (res.length == 1) {
 		value = res[0]
-		fpvalue = value
 		isLocaleValue = value
-		isLocaleValid = true
+		// reduce en health false positives
+		// but only for isTB since as it only ships with en-US
+			// use isLocaleAlt in validation checks: allow e.g. en-CA to use en-US for lookup
+			// ^ we already have a health check for wrong locale
+		isLocaleAlt = (isTB && 'en-' == isLocaleValue.slice(0,3) ? 'en-US' : isLocaleValue)
+		if (isSmart) {isLocaleValid = true} // only set if smart
 	} else if (res.length == 0) {
-		value = zErr; fpvalue = zErr
+		value = zErr
 	} else {
-		value = "mixed"
-		fpvalue = "mixed"
-		if (isSmart) {
-			fpvalue = zLIE
-			value = colorFn(value)
-			log_known(SECT4, METRIC)
-		}
+		value = 'mixed'; isLies = true
 	}
-	addData(4, METRIC, fpvalue)
-	if (isLanguageSmart) {
+	if (gRun && res.length !== 0) {
+		sDetail[isScope].lookup[METRIC] = res.join(' | ')
+	}
+	if (isLanguageSmart && isTB) { // only notate TB/MB
 		notation = tb_red
 		let key = oData.language
 		// only green if TB supported
@@ -549,63 +489,71 @@ const get_language_locale = () => new Promise(resolve => {
 			if (value === expected) {notation = tb_green}
 		}
 	}
-	log_display(4, METRIC, value + notation)
-	return resolve()
-})
+	addBoth(4, METRIC, value,'', notation,'', isLies) 
+	return
+}
 
-const get_locale_intl = () => new Promise(resolve => {
+function get_locale_intl() {
 	function get_metric(m, code, isIntl) {
 		try {
-			let obj = {}, tests = oIntlTests[m], value
-			if (m == "collation") {
-				let data = tests.sort() // always re-sort
-				return data.sort(Intl.Collator(code).compare).join(", ")
-			} else if (m == "compact") {
-				Object.keys(tests).forEach(function(key) {
-					let option = {notation: m, compactDisplay: key, useGrouping: true}, data = [], formatter
+			let obj = {}, tests = oIntlTests[m], testkeys = oIntlKeys[m], value
+			if ('collation' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
+					let testdata = tests[key].sort() // always resort
+					obj[key] = [testdata.sort(Intl.Collator(code, {usage: key}).compare).join(', ')]
+				}
+			} else if ('compact' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = [], formatter
+					let option = {notation: m, compactDisplay: key, useGrouping: true}
 					if (isIntl) {formatter = new Intl.NumberFormat(code, option)}
 					tests[key].forEach(function(n) {
 						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
 					})
 					obj[key] = data
-				})
-			} else if (m == "currency") {
-				Object.keys(tests).forEach(function(key) {
+				}
+			} else if ('currency' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					obj[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						let option = s == "accounting" ? {style: m, currency: key, currencySign: s} : {style: m, currency: key, currencyDisplay: s}, data = []
+						let option = 'accounting' == s ? {style: m, currency: key, currencySign: s} : {style: m, currency: key, currencyDisplay: s}, data = []
 						tests[key][s].forEach(function(n) {
 							value = (isIntl ? Intl.NumberFormat(code, option).format(n) : (n).toLocaleString(code, option)); data.push(value)
 						})
 						obj[key][s] = data
 					})
-				})
-			} else if (m == "datetimeformat") {
-				Object.keys(tests).forEach(function(key) {
+				}
+			} else if ('datetimeformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					obj[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
-						let option = tests[key][s][0]
-						let formatter = new Intl.DateTimeFormat(code, option), data = []
+						let option = tests[key][s][0], formatter, data = []
+						if (isIntl) {formatter = new Intl.DateTimeFormat(code, option)}
 						tests[key][s][1].forEach(function(n){
 							value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, option)); data.push(value)
 						})
 						obj[key][s] = data
 					})
-				})
-			} else if (m == "dayperiod") {
-				Object.keys(tests).forEach(function(key) {
-					let formatter = new Intl.DateTimeFormat(code, {hourCycle: "h12", dayPeriod: key}), data = []
+				}
+			} else if ('dayperiod' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = []
+					let formatter = new Intl.DateTimeFormat(code, {hourCycle: 'h12', dayPeriod: key})
 					tests[key].forEach(function(item) {data.push(formatter.format(dayperiods[item]))})
 					obj[key] = data
-				})
-			} else if (m == "listformat") {
-				Object.keys(tests).forEach(function(key) {
-					let data = []
-					tests[key].forEach(function(item) {data.push(new Intl.ListFormat(code, {style: key, type: item}).format(["a","b","c"]))})
+				}
+			} else if ('listformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = []
+					tests[key].forEach(function(item) {data.push(new Intl.ListFormat(code, {style: key, type: item}).format(['a','b','c']))})
 					obj[key] = data
-				})
-			} else if (m == "notation") {
-				Object.keys(tests).forEach(function(key) {
+				}
+			} else if ('notation' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					obj[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
 						let formatter = (isIntl ? Intl.NumberFormat(code, {notation: key, style: s}) : undefined), data = []
@@ -614,223 +562,212 @@ const get_locale_intl = () => new Promise(resolve => {
 						})
 						obj[key][s] = data
 					})
-				})
-			} else if (m == "numberformat_ftp") {
+				}
+			} else if ('numberformat_ftp' == m) {
 				function get_value(type, aParts) {
-					for (let i = 0 ; i < aParts.length; i++) {
+					for (let i=0; i < aParts.length; i++) {
 						if (aParts[i].type === type) {str = aParts[i].value; return (str.length == 1 ? str.charCodeAt(0) : str)}
 					}
-					return "none"
+					return 'none'
 				}
 				let formatter = Intl.NumberFormat(code), str
-				Object.keys(tests).forEach(function(key){
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					let data = []
 					tests[key].forEach(function(num){data.push(get_value(key, formatter.formatToParts(num)))})
 					obj[key] = data
-				})
-			} else if (m == "pluralrules") {
-				for (const key of Object.keys(tests)) {
-					let formatter = new Intl.PluralRules(code, {type: key}), nos = tests[key], prev="", current="", data = []
+				}
+			} else if ('pluralrules' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = [], prev='', current=''
+					let formatter = new Intl.PluralRules(code, {type: key}), nos = tests[key]
 					nos.forEach(function(n) {
 						current = formatter.select(n)
-						if (prev !== current) {data.push(n +": "+ current)}
+						if (prev !== current) {data.push(n +': '+ current)}
 						prev = current
 					})
 					obj[key] = data
 				}
-			} else if (m == "relativetimeformat") {
-				Object.keys(tests).forEach(function(key) {
+			} else if ('relativetimeformat' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					obj[key] = {}
 					Object.keys(tests[key]).forEach(function(item) {
 						let formatter = new Intl.RelativeTimeFormat(code, {style: item, numeric: key}), data = []
 						tests[key][item].forEach(function(pair){data.push(formatter.format(pair[0], pair[1]))})
 						obj[key][item] = data
 					})
-				})
-			} else if (m == "relativetimeformat_ftp") {
+				}
+			} else if ('relativetimeformat_ftp' == m) {
 				function parts(length, value) {
-					let output = "", tmp = formatter.formatToParts(length, value)
+					let output = '', tmp = formatter.formatToParts(length, value)
 					for (let x=0; x < tmp.length; x++) {output += tmp[x].value}
 					return output
 				}
 				let formatter, data = []
-				Object.keys(tests).forEach(function(key) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					obj[key] = {}
 					Object.keys(tests[key]).forEach(function(s) {
 						formatter = new Intl.RelativeTimeFormat(code, {style: s, numeric: key}), data = []
 						tests[key][s].forEach(function(pair){data.push(parts(pair[0], pair[1]))})
 						obj[key][s] = data
 					})
-				})
-			} else if (m == "sign") {
-				Object.keys(tests).forEach(function(key) {
+				}
+			} else if ('sign' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i]
 					let formatter = (isIntl ? new Intl.NumberFormat(code, {signDisplay: key}) : undefined), data = []
 					tests[key].forEach(function(n){
 						value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {signDisplay: key})); data.push(value)
 					})
 					obj[key] = data
-				})
-			} else if (m == "timezonename") {
-				Object.keys(tests).forEach(function(tz){
-					let data = []
-					Object.keys(tests[tz]).forEach(function(tzn){
+				}
+			} else if ('timezonename' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = []
+					Object.keys(tests[key]).forEach(function(tzn){
 						try {
 							// use y+m+d numeric so toLocaleString matches
 							// use hour12 in case - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
-							let option = {year: "numeric", month: "numeric", day: "numeric", hour12: true, timeZone: tz, timeZoneName: tzn}
+							let option = {year: 'numeric', month: 'numeric', day: 'numeric', hour12: true, timeZone: key, timeZoneName: tzn}
 							let formatter = (isIntl ? Intl.DateTimeFormat(code, option) : undefined)
-							tests[tz][tzn].forEach(function(dte){
+							tests[key][tzn].forEach(function(dte){
 								value = (isIntl ? formatter.format(dte) : (dte).toLocaleString(code, option)); data.push(value)
 							})
 						} catch (e) {} // ignore invalid
-						if (data.length) {obj[tz] = data}
+						if (data.length) {obj[key] = data}
 					})
-				})
-				if (!Object.keys(obj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: "longGeneric"})} // trap error
-			} else if (m == "unit") {
-				Object.keys(tests).sort().forEach(function(u){
-					let data = []
-					Object.keys(tests[u]).forEach(function(ud){
+				}
+				if (!Object.keys(obj).length) {let trap = Intl.DateTimeFormat(code, {timeZoneName: 'longGeneric'})} // trap error
+			} else if ('unit' == m) {
+				for (let i=0; i < testkeys.length; i++) {
+					let key = testkeys[i], data = []
+					Object.keys(tests[key]).forEach(function(ud){
 						try {
-							let formatter = (isIntl ? Intl.NumberFormat(code, {style: "unit", unit: u, unitDisplay: ud}) : undefined)
-							tests[u][ud].forEach(function(n){
-								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: "unit", unit: u, unitDisplay: ud})); data.push(value)
+							let formatter = (isIntl ? Intl.NumberFormat(code, {style: 'unit', unit: key, unitDisplay: ud}) : undefined)
+							tests[key][ud].forEach(function(n){
+								value = (isIntl ? formatter.format(n) : (n).toLocaleString(code, {style: 'unit', unit: key, unitDisplay: ud})); data.push(value)
 							})
 						} catch (e) {} // ignore invalid
 					})
-					if (data.length) {obj[u] = data}
-				})
-				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(code, {style: "unit", unit: "day"})} // trap error
+					if (data.length) {obj[key] = data}
+				}
+				if (!Object.keys(obj).length) {let trap = Intl.NumberFormat(code, {style: 'unit', unit: 'day'})} // trap error
 			}
-			return {"hash": mini(obj), "metrics": obj}
+			return {'hash': mini(obj), 'metrics': obj}
 		} catch(e) {
-			log_error(SECT4, METRIC +"_"+ m, e)
+			log_error(4, METRIC +'_'+ m, e)
 			return zErr
 		}
 	}
 
 	const dayperiods = { // set per run
-		8: new Date("2019-01-30T08:00:00"),
-		12: new Date("2019-01-30T12:00:00"),
-		15: new Date("2019-01-30T15:00:00"),
-		18: new Date("2019-01-30T18:00:00"),
-		22: new Date("2019-01-30T22:00:00"),
+		8: new Date('2019-01-30T08:00:00'),
+		12: new Date('2019-01-30T12:00:00'),
+		15: new Date('2019-01-30T15:00:00'),
+		18: new Date('2019-01-30T18:00:00'),
+		22: new Date('2019-01-30T22:00:00'),
 	}
 	const oMetrics = {
-		"intl" : [
-			"collation","compact", "currency", "datetimeformat","dayperiod", "listformat","notation","numberformat_ftp",
-			"pluralrules","relativetimeformat","relativetimeformat_ftp","sign","timezonename","unit"
+		intl : [
+			'collation','compact', 'currency', 'datetimeformat','dayperiod', 'listformat','notation','numberformat_ftp',
+			'pluralrules','relativetimeformat','relativetimeformat_ftp','sign','timezonename','unit'
 		],
-		"tolocalestring": ["compact","currency","datetimeformat","notation","sign","timezonename","unit"],
+		tolocalestring: ['compact','currency','datetimeformat','notation','sign','timezonename','unit'],
 	}
-	let t0 = nowFn(), notation = ""
+	let t0 = nowFn()
 	let METRIC, oString = {}
 	Object.keys(oMetrics).forEach(function(list){
-		METRIC = "locale_"+ list
-		let t0 = nowFn(), isIntl = list == "intl", notation = ""
+		METRIC = 'locale_'+ list
+		let t0 = nowFn(), isIntl = 'intl' == list, notation = locale_red
 		let oData = {}, oCheck = {}
 		oMetrics[list].forEach(function(m) {
 			let value = get_metric(m, undefined, isIntl) 
 			oData[m] = value
-			if (isIntl && oMetrics["tolocalestring"].includes(m)) {oString[m] = value} // create an intl version of tolocalestring
+			if (isIntl && oMetrics['tolocalestring'].includes(m)) {oString[m] = value} // intl version of tolocalestring
 		})
-		if (isSmart && isLocaleValid) {oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isIntl)})}
-		let hash = mini(oData)
-		let isLies = false, btnDiff = ""
-		if (isSmart) {
-			if (!isIntl) {log_display(4, METRIC +"_matches_intl", (hash == mini(oString) ? intl_green : intl_red))}
-			notation = locale_red
-			if (isLocaleValid) {
-				if (hash == mini(oCheck)) {
-					notation = locale_green
-				} else {
-					addDetail(METRIC +"_check", oCheck)
-					btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
-				}
+		let hash = mini(oData), btnDiff = ''
+		if (!isIntl) {
+			addDisplay(4, METRIC +'_matches_intl','','', (hash == mini(oString) ? intl_green : intl_red))
+		}
+		if (isLocaleValid) {
+			oMetrics[list].forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue, isIntl)})
+			if (hash == mini(oCheck)) {
+				notation = locale_green
+			} else {
+				addDetail(METRIC +'_check', oCheck)
+				btnDiff = addButton(4, METRIC +'_check', isLocaleValue +' check')
 			}
 		}
-		addData(4, METRIC, oData, hash)
-		log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
-		log_perf(SECT4, METRIC, t0)
-		if (!isIntl) {return resolve()}
+		addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+		log_perf(4, METRIC, t0)
+		if (!isIntl) {return}
 	})
-})
+}
 
-const get_locale_resolvedoptions = () => new Promise(resolve => {
-	const METRIC = "locale_resolvedoptions"
+function get_locale_resolvedoptions(METRIC) {
 
 	function get_metric(m, code) {
 		let r
-		let type = "string"
+		let type = 'string'
 		try {
 			// collator
-			if (m == "caseFirst") {r = Intl.Collator(code).resolvedOptions().caseFirst
-			} else if (m == "ignorePunctuation") {type = "boolean"; r = Intl.Collator(code).resolvedOptions().ignorePunctuation
+			if (m == 'caseFirst') {r = Intl.Collator(code).resolvedOptions().caseFirst
+			} else if (m == 'ignorePunctuation') {type = 'boolean'; r = Intl.Collator(code).resolvedOptions().ignorePunctuation
 			// DTF
-			} else if (m == "calendar") {r = Intl.DateTimeFormat(code).resolvedOptions().calendar
-			} else if (m == "day") {r = Intl.DateTimeFormat(code).resolvedOptions().day
-			} else if (m == "hourCycle") {r = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
-			} else if (m == "month") {r = Intl.DateTimeFormat(code).resolvedOptions().month
-			} else if (m == "numberingSystem_dtf") {r = Intl.DateTimeFormat(code).resolvedOptions().numberingSystem
+			} else if (m == 'calendar') {r = Intl.DateTimeFormat(code).resolvedOptions().calendar
+			} else if (m == 'day') {r = Intl.DateTimeFormat(code).resolvedOptions().day
+			} else if (m == 'hourCycle') {r = Intl.DateTimeFormat(code, {hour: 'numeric'}).resolvedOptions().hourCycle
+			} else if (m == 'month') {r = Intl.DateTimeFormat(code).resolvedOptions().month
+			} else if (m == 'numberingSystem_dtf') {r = Intl.DateTimeFormat(code).resolvedOptions().numberingSystem
 			// NF
-			} else if (m == "numberingSystem_nf") {r = new Intl.NumberFormat(code).resolvedOptions().numberingSystem
+			} else if (m == 'numberingSystem_nf') {r = new Intl.NumberFormat(code).resolvedOptions().numberingSystem
 			// PR
-			} else if (m == "pluralCategories") {r = new Intl.PluralRules(code).resolvedOptions().pluralCategories.join(", ")
+			} else if (m == 'pluralCategories') {r = new Intl.PluralRules(code).resolvedOptions().pluralCategories.join(', ')
 			// RTF
-			} else if (m == "numberingSystem_rtf") {r = new Intl.RelativeTimeFormat(code).resolvedOptions().numberingSystem
+			} else if (m == 'numberingSystem_rtf') {r = new Intl.RelativeTimeFormat(code).resolvedOptions().numberingSystem
 			}
-			if (type !== typeof r) {
-				log_error(SECT4, METRIC +"_"+ m, zErrType + typeof r); r = zErr
-			} else if (r === "") {
-				log_error(SECT4, METRIC +"_"+ m, zErrInvalid + "empty string"); r = zErr
-			}
+			if (runST) {r = undefined}
+			let typeCheck = typeFn(r)
+			if (type !== typeCheck) {throw zErrType + typeCheck}
 			return r
 		} catch(e) {
-			log_error(SECT4, METRIC +"_"+ m, e)
+			log_error(4, METRIC +'_'+ m, e)
 			return zErr
 		}
 	}
 
-	let oData = {}, oCheck = {}, notation = ""
+	let oData = {}, oCheck = {}, notation = locale_red
 	let metrics = [
-		"calendar","caseFirst","day","hourCycle","ignorePunctuation","month",
-		"numberingSystem_dtf","numberingSystem_nf","numberingSystem_rtf","pluralCategories",
+		'calendar','caseFirst','day','hourCycle','ignorePunctuation','month',
+		'numberingSystem_dtf','numberingSystem_nf','numberingSystem_rtf','pluralCategories',
 	]
-	metrics.forEach(function(m) {
-		oData[m] = get_metric(m, undefined)
-	})
-	if (isSmart && isLocaleValid) {
-		metrics.forEach(function(m) {
-			oCheck[m] = get_metric(m, isLocaleValue)
-		})
+	metrics.forEach(function(m) {oData[m] = get_metric(m, undefined)})
+	if (isLocaleValid) {
+		metrics.forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue)})
 	}
-
-	let hash = mini(oData)
-	let isLies = false, btnDiff = ""
-	if (isSmart) {
-		notation = locale_red
-		if (isLocaleValid) {
-			if (hash == mini(oCheck)) {
-				notation = locale_green
-			} else {
-				addDetail(METRIC +"_check", oCheck)
-				btnDiff = addButton(4, METRIC +"_check", isLocaleValue +" check")
-			}
+	let hash = mini(oData), btnDiff = ''
+	if (isLocaleValid) {
+		if (hash == mini(oCheck)) {
+			notation = locale_green
+		} else {
+			addDetail(METRIC +'_check', oCheck)
+			btnDiff = addButton(4, METRIC +'_check', isLocaleValue +' check')
 		}
 	}
-	addData(4, METRIC, oData, hash)
-	log_display(4, METRIC, hash + addButton(4, METRIC) + btnDiff + notation)
-	return resolve()
-})
+	addBoth(4, METRIC, hash, addButton(4, METRIC) + btnDiff, notation, oData)
+	return
+}
 
-const get_timezone = () => new Promise(resolve => {
-	let t0 = nowFn(), notation = ""
-	const METRICtz = "timezone"
-	const METRIC = "timezone_offsets"
+function get_timezone(METRIC) {
+	let t0 = nowFn()
+	const METRICtz = 'timezone'
+
 	// reset
 	isTimeZoneValid = false
 	isTimeZoneValue = undefined
-	let days = ["January 1","July 1"], years = [1879, 1921, 1952, 1976, 2025]
+	let days = ['January 1','July 1'], years = [1879, 1921, 1952, 1976, 2025]
 	let aMethods = [
 		'date','date.parse','date.valueOf','getTime','getTimezoneOffset','Symbol.toPrimitive',
 	]
@@ -839,21 +776,14 @@ const get_timezone = () => new Promise(resolve => {
 	function get_tz() {
 		try {
 			let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-			if (runSE) {foo++} else if (runST) {tz = "groot"}
-			let tzType = typeFn(tz)
-			if ("string" !== tzType) {
-				return ([log_error(SECT4, METRICtz, zErrType + tzType)])
-			} else {
-				try {
-					let tztest = (new Date("January 1, 2018 13:00:00 UTC")).toLocaleString('en', {timeZone: tz})
-					isTimeZoneErr = false
-					return (tz)
-				} catch(e) {
-					return ([log_error(SECT4, METRICtz, e)]) // not supported
-				}
-			}
+			if (runST) {tz = undefined} else if (runSI) {tz = 'tzp'}
+			let typeCheck = typeFn(tz)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			let tztest = (new Date('January 1, 2018 13:00:00 UTC')).toLocaleString('en', {timeZone: tz})
+			isTimeZoneErr = false
+			return (tz)
 		} catch(e) {
-			return ([log_error(SECT4, METRICtz, e)])
+			return ([log_error(4, METRICtz, e)])
 		}
 	}
 
@@ -863,50 +793,48 @@ const get_timezone = () => new Promise(resolve => {
 			oData[method] = {}
 			years.forEach(function(year) {oData[method][year] = []})
 		})
-		years.forEach(function(year) {
-			days.forEach(function(day) {
-				try {
-					if (runSE) {foo++}
-					let datetime = day +", "+ year +" 13:00:00"
-					let control = new Date(datetime +" UTC")
+		try {
+			years.forEach(function(year) {
+				days.forEach(function(day) {
+					let isFirst = (year == years[0] && day == days[0])
+					let datetime = day +', '+ year +' 13:00:00'
+					let control = new Date(datetime +' UTC')
 					let test = new Date(datetime)
+					if (runSE) {foo++} else if (runST) {test = NaN}
 					aMethods.forEach(function(method) {
 						let offset, k = 60000
 						try {
-							if (method == "getTimezoneOffset") {
+							if (method == 'getTimezoneOffset') {
 								offset = test.getTimezoneOffset()
 								k = 1
 							} else {
-								if (method == "date.parse") {
+								if (method == 'date.parse') {
 									offset = Date.parse(test) - Date.parse(control)
-								} else if (method == "date.valueOf") {
+								} else if (method == 'date.valueOf') {
 									offset = test.valueOf() - control.valueOf()
-								} else if (method == "Symbol.toPrimitive") {
+								} else if (method == 'Symbol.toPrimitive') {
 									offset = test[Symbol.toPrimitive]('number') - control[Symbol.toPrimitive]('number')
-								} else if (method == "getTime") {
+								} else if (method == 'getTime') {
 									offset = test.getTime() - control.getTime()
-								} else if (method == "date") {
+								} else if (method == 'date') {
 									offset = test - control
 								}
 							}
-							if ("number" === typeof offset && !Number.isNaN(offset)) {
-								oData[method][year].push(offset/k)
-							} else {
-								let offsetType = Number.isNaN(offset) ? "NaN": typeof offset
-								oErrors[method] = log_error(SECT4, METRIC +"_"+ method, zErrType + offsetType)
+							if (isFirst) {
+								let typeCheck = typeFn(offset)
+								if ("number" !== typeCheck) {throw zErrType + typeCheck}
 							}
+							oData[method][year].push(offset/k)
 						} catch(e) {
-							oErrors[method] = log_error(SECT4, METRIC +"_"+ method, e)
+							oErrors[method] = log_error(4, METRIC +"_"+ method, e)
 						}
 					})
-				} catch(e) {
-					oData = log_error(SECT4, METRIC, e)
-				}
+				})
 			})
-		})
-		if (oData !== zErr) {
-			for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
+		} catch(e) {
+			oData = log_error(4, METRIC, e)
 		}
+		for (const k of Object.keys(oErrors)) {oData[k] = oErrors[k]}
 		return oData
 	}
 
@@ -916,25 +844,18 @@ const get_timezone = () => new Promise(resolve => {
 	]).then(function(res){
 
 		// TZ: we returned a string (valid but could be a lie) or an array [error]
-		let tz = res[0], tzdisplay = tz
-		if ("string" !== typeof tz) {tz = zErr} else {isTimeZoneValue = tz}
+		let tz = res[0]
+		if ("string" == typeof tz) {isTimeZoneValue = tz}
 
 		// OFFSETS
-		let oOffsets = res[1], offset = "", display = "", notation = ""
-		let go = true, aHash = {}, countErr = 0, allHash
-
+		let oOffsets = res[1], notation = tz_red, go = true, aHash = {}, countErr = 0, allHash
 		// stop: overall error
-		if ("string" == typeof oOffsets) {
-			if (isSmart) {notation = tz_red}
-			log_display(4, METRIC, oOffsets + notation)
-			addData(4, METRIC, zErr)
-			go = false
-		}
+		if ("string" == typeof oOffsets) {addBoth(4, METRIC, oOffsets,'', notation, zErr); go = false}
 		// display errors + collect hashes
 		if (go) {
 			for (const k of Object.keys(oOffsets)) {
 				if ("string" == typeof oOffsets[k]) {
-					log_display(4, k, oOffsets[k])
+					addDisplay(4, k, oOffsets[k])
 					countErr++
 				} else {
 					let hash = mini(oOffsets[k])
@@ -943,14 +864,8 @@ const get_timezone = () => new Promise(resolve => {
 				}
 			}
 			// stop: all errors
-			if (countErr == aMethods.length) {
-				if (isSmart) {notation = tz_red}
-				log_display(4, METRIC, zErr + notation)
-				addData(4, METRIC, zErr)
-				go = false
-			}
+			if (countErr == aMethods.length) {addBoth(4, METRIC, zErr,'', notation); go = false}
 		}
-
 		// display hashes + btns
 		if (go) {
 			let isHashMixed = (Object.keys(aHash).length > 1 || countErr > 0) ? true : false // includes errors
@@ -964,253 +879,282 @@ const get_timezone = () => new Promise(resolve => {
 						sDetail[isScope][METRIC +"_"+ metric] = oOffsets[metric]
 						btn = addButton(4, METRIC +"_"+ metric)
 					}
-					log_display(4, metric, k + btn)
+					addDisplay(4, metric, k, btn)
 				}
 			}
 			// stop: not all same + valid
-			if (isHashMixed) {
-				display = "mixed"
-				offset = display
-				if (isSmart) {
-					notation = tz_red
-					display = colorFn(display)
-					offset = zLIE
-					log_known(SECT4, METRIC)
-				}
-				log_display(4, METRIC, display + notation)
-				addData(4, METRIC, offset)
-				go = false
-			}
+			if (isHashMixed) {addBoth(4, METRIC, 'mixed','', notation,'', true); go = false}
 		}
 
 		// all valid + same
 		if (go) {
 			let isLies = false
-			if (isSmart) {
-				notation = tz_red
-				if (isTimeZoneValue !== undefined) {
-					try {
-						let oTest = {}
-						// just use date.parse
-						years.forEach(function(year) {
-							oTest[year] = []
-							days.forEach(function(day) {
-								let datetime = day +", "+ year +" 13:00:00"
-								let control = new Date(datetime)
-								let test = control.toLocaleString("en", {timeZone: "UTC"})
-								control = control.toLocaleString("en", {timeZone: isTimeZoneValue})
-								let diff = ((Date.parse(test) - Date.parse(control))/60000)
-								oTest[year].push(diff)
-							})
+			if (isTimeZoneValue !== undefined) {
+				try {
+					let oTest = {}
+					// just use date.parse
+					years.forEach(function(year) {
+						oTest[year] = []
+						days.forEach(function(day) {
+							let datetime = day +", "+ year +" 13:00:00"
+							let control = new Date(datetime)
+							let test = control.toLocaleString("en", {timeZone: "UTC"})
+							control = control.toLocaleString("en", {timeZone: isTimeZoneValue})
+							let diff = ((Date.parse(test) - Date.parse(control))/60000)
+							oTest[year].push(diff)
 						})
-						let testHash = mini(oTest)
-						notation = testHash === allHash ? tz_green : tz_red
-						if (testHash !== allHash) {
-							isLies = true
-						} else {
-							// finally
-								// legit timezonename
-								// legit looking offset values
-								// all offsets methods match
-								// a control matches using the timezonename
-							isTimeZoneValid = true
-						}
-					} catch(e) {}
-				}
+					})
+					let testHash = mini(oTest)
+					notation = testHash === allHash ? tz_green : tz_red
+					if (testHash !== allHash) {
+						isLies = true
+					} else if (isSmart) {
+						// legit timezonename
+						// legit looking offset values
+						// all offsets methods match
+						// a control matches using the timezonename
+					 isTimeZoneValid = true
+					}
+				} catch(e) {}
 			}
 			// display
-			let btn = addButton(4, METRIC) 
-			if (isLies) {
-				display = colorFn(allHash)
-				log_known(SECT4, METRIC)
-				sDetail[isScope][METRIC] = oOffsets["getTime"]
-				addData(4, METRIC, zLIE)
-			} else {
-				offset = allHash
-				display = offset
-				addData(4, METRIC, oOffsets["getTime"], allHash)
-			}
-			log_display(4, METRIC, display + btn + notation)
+			addBoth(4, METRIC, allHash, addButton(4, METRIC), notation, oOffsets["getTime"], isLies)
 		}
 
 		// TZ: after isTimeZoneValid
-		if (isSmart) {
-			if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
-				tzdisplay = colorFn(tzdisplay)
-				tz = zLIE
-				log_known(SECT4, METRICtz)
-				notation = rfp_red
-			} else {
-				let goodTZ = ['UTC']
-				if (isTB) {goodTZ = ['UTC','Atlantic/Reykjavik']} else if (isVer > 127) {goodTZ = ['Atlantic/Reykjavik']}
-				notation = goodTZ.includes(tz) ? rfp_green : rfp_red
-				// ToDo: use this once TB lands
-				//let goodTZ = (isTB || isVer > 127) ? 'Atlantic/Reykjavik' : 'UTC'
-				//notation = goodTZ == tz ? rfp_green : rfp_red
-			}
-		}
-		log_display(4, METRICtz, tzdisplay + notation)
-		addData(4, METRICtz, tz)
-
-		log_perf(SECT4, METRIC, t0)
-		return resolve()
-	})
-})
-
-const get_timezone_offset = () => new Promise(resolve => {
-	let notation = isSmart ? rfp_red : ""
-	const METRIC = "timezone_offset"
-	if (!isGecko) {
-		addDataDisplay(4, METRIC, zNA)
-		return resolve()
-	}
-	try {
-		function checkMatch() {
-			if (lastNew === xsltNew) {return true}
-			// diff it: without using new Date()
-			let lParts = lastNew.split(" "), lTime = lParts[1].split(":")
-			let xParts = xsltNew.split(" "), xTime = xParts[1].split(":")
-			if (lParts[0] == xParts[0]) {
-				// same day
-				let oDiff = {
-					h: (lTime[0] * 1) - (xTime[0] * 1),
-					min: (lTime[1] * 1) - (xTime[1] * 1),
-					s: (lTime[2] * 1) - (xTime[2] * 1),
-				}
-				// same date: only worry about time
-				// lets be cautious and allow up to 3 seconds: jank, also leap seconds
-				let secondsDiff = (oDiff.h * 3600) + (oDiff.min * 60) + oDiff.s
-				return (Math.abs(secondsDiff) < 4) // abs !important to cover being ahead or behind
-			} else {
-				return false
-			}
-		}
-		// setup
-		const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:date="http://exslt.org/dates-and-times"'
-			+' extension-element-prefixes="date"><xsl:output method="html" /><xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
-		let doc = (new DOMParser).parseFromString(xslText, "text/xml")
-		let xsltProcessor = new XSLTProcessor
-		// grab
-		xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
-		let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
-		let lastMod = doc.lastModified // quickly grab lastMod since it updates each time we call it
-		let date = new Date() // if we need it
-		let xsltMod = fragment.childNodes[0].nodeValue
-		// format mods
-		let lastNew = lastMod.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2")
-		let xOffset = xsltMod.slice(-6)
-		let xsltNew = (xsltMod.slice(0,-10)).replace('T',' ')
-		// check isMatch
-		let isMatch = checkMatch()
-		if (!isMatch) {
-			// ~0.2 ms used to grab our mods: only 1 in 86,400 seconds tick
-			// over a day so we'd have to be really unlucky to hit this
-				// try it again: we need a new processor
-			xsltProcessor = new XSLTProcessor
-			xsltProcessor.importStylesheet(doc)
-			fragment = xsltProcessor.transformToFragment(doc, document)
-			lastMod = doc.lastModified
-			xsltMod = fragment.childNodes[0].nodeValue
-			date = new Date()
-			lastNew = lastMod.replace(/(\d{2})\/(\d{2})\/(\d{4})/, "$3-$1-$2")
-			xOffset = xsltMod.slice(-6)
-			xsltNew = (xsltMod.slice(0,-10)).replace('T',' ')
-			isMatch = checkMatch()
-		}
-		// get xMinutes in getTimezoneoffset format
-			// we use this for timezone notation
-			// *1 works as it ignores leading 0's and returns a number
-			// flip the sign but drop if positive or 0 to match calculated or getTimezoneOffset
-		let xMinutes = ((xOffset.slice(1,3) * 1)*60) + (xOffset.slice(4,6)*1)
-		let xSign = (xOffset[0] == "+" ? (xMinutes == 0 ? "": "-") : "")
-		xMinutes = xSign + xMinutes
-		// collect all four data points
-		let oData = {
-			d: "",
-			l: "",
-			t: "",
-			x: xOffset + (xMinutes == "0" ? "" : " ["+ xMinutes +"]"),
-		}
-		if (isMatch) {oData.l = oData.x}
-		//try catch these
-			// l: if !isMatch get the offset for lastMod
-			// d: get the offset for the date using diff from utc vs now
-			// t: get the offset for the date using timezonename (leverage isTimeZoneValid/Value)
-			// chamelon causes date.parse to error (or lie)
-				// and getTimezoneOffset is spoofed
-				// but who knows what will happen with an initial empty new Date()
-
-		// ToDo: add the two other offset checks + adjust our data + notation check
-		// ToDo: add tz_red/green notation
-		let data
-		if (isMatch) {
-			data = oData.x
-			if (isSmart) {notation = data == "+00:00" ? rfp_green : rfp_red}
-			log_display(4, METRIC, data + notation)
-			addData(4, METRIC, data)
+		if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
+			addBoth(4, METRICtz, tz,'', rfp_red,'', true)
 		} else {
-			// ToDo: display something including all mismatches
-			// so I guess thats xslt, last, offset(utc-now), offset(using timezonename)
-			data = lastNew +" | "+ xsltNew +" ["+ xMinutes +"]"
-			let display = data
-			if (isSmart) {
-				log_known(SECT4, METRIC)
-				display = colorFn(display)
-				addData(4, METRIC, zLIE)
-			} else {
-				addData(4, METRIC, data)
-			}
-			log_display(4, METRIC, display + notation)
+			let goodTZ = (isTB || isVer > 127) ? 'Atlantic/Reykjavik' : 'UTC'
+			notation = goodTZ == tz ? rfp_green : rfp_red
+			addBoth(4, METRICtz, tz,'', notation, (isTimeZoneErr ? zErr : ''))
 		}
-		return resolve()
-	} catch(e) {
-		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
-		addData(4, METRIC, zErr)
-		return resolve()
-	}
-})
+		log_perf(4, METRIC, t0)
+		return
+	})
+}
 
-const get_media_messages = () => new Promise(resolve => {
-	const METRIC = "media_messages"
-	let notation = isLanguageSmart && !isFile ? locale_red : ""
+function get_timezone_offset(METRIC) {
+	if (!isGecko) {
+		addBoth(4, METRIC, zNA)
+		return
+	}
+	// setup
+	const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
+		+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
+		+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
+	const doc = (new DOMParser).parseFromString(xslText, 'text/xml')
+	let oData = {}, oErr = {}, oDisplay = {}, oLies = {}, xOffset, xMinutes, tz
+	let methods = ['control','date','exslt','iframe','string','unsafe']
+	let notation = tz_red
+
+	function checkValidDate(method, value) {
+		try {if (new Date(value) +'' == 'Invalid Date') {oErr[method] = 'Invalid Date: ' + value; return false}; return true
+		} catch(e) {oErr[method] = e+''; return false}
+	}
+
+	function display_detail() {
+		methods.forEach(function(k){
+			let n = METRIC +'_'+ k
+			let value, data ='', extra ='', isLies = false
+			if (oData.format[k] !== undefined) {
+				// style + record lies
+				// technically control isn't a lie, even if it can be tampered with
+				// and any tampering with the date object will already show up as lies vs exslt
+				if ('control' !== k && oLies[k] !== undefined) {
+					isLies = true
+					log_known(4, n, oData.format[k])
+				}
+				if ('exslt' == k) {extra = ' ['+ xOffset +']'} else if ('control' == k) {extra = ' ['+ tz +']'}
+				value = oData.format[k] + extra
+			} else {
+				// if exslt then we log as the metric error and final result
+				value = log_error(4, METRIC + ('exslt' == k ? '': '_'+ k), oErr[k])
+				if ('exslt' == k) {addBoth(4, METRIC, value,'', notation, zErr)}
+			}
+			addDisplay(4, n, value,'','', isLies)
+		})
+	}
+
+	function checkMatch(runNo) {
+		oLies = {}
+		// are they all the same
+		let aTmp = []
+		for (const k of Object.keys(oData.format)) {aTmp.push(oData.format[k])}
+		aTmp = aTmp.filter(function(item, position) {return aTmp.indexOf(item) === position})
+		if (aTmp.length == 1) {return true}
+		// get exslt parts
+		let xMod = oData.format.exslt
+		let xParts = xMod.split(' '), xTime = xParts[1].split(':')
+		// diff xMod vs the rest
+		let isSame = true
+		for (const k of Object.keys(oData.format)) {
+			if ('exslt' !== k) {
+				let mod = oData.format[k]
+				let mParts = mod.split(' '), mTime = mParts[1].split(':')
+				if (mParts[0] == xParts[0]) {
+					// same day: only worry about time
+					let tmpDiff = {
+						h: (mTime[0] * 1) - (xTime[0] * 1),
+						min: (mTime[1] * 1) - (xTime[1] * 1),
+						s: (mTime[2] * 1) - (xTime[2] * 1),
+					}
+					// allow 10 seconds: jank, also leap seconds
+					// abs !important to cover being ahead or behind
+					let secondsDiff = Math.abs((tmpDiff.h * 3600) + (tmpDiff.min * 60) + tmpDiff.s)
+					if (secondsDiff > 10) {isSame = false; oLies[k] = true}
+				} else {
+					isSame = false; oLies[k] = true
+				}
+			}
+		}
+		return isSame
+	}
+
+	function get_mods() {
+		// reset
+		oData = {'format': {}, 'raw': {}}, oErr = {}, xOffset = undefined, xMinutes = undefined
+		let option = {day: '2-digit', month: '2-digit', year: 'numeric', hour12: false, hour: '2-digit', minute: 'numeric', second: 'numeric'}
+		// grab
+		let id = 'iframelastmod'
+		try {
+			let el = document.createElement('iframe')
+			el.setAttribute('id', id)
+			document.body.appendChild(el)
+			let target = el.contentDocument
+			oData.raw['iframe'] = target.lastModified // contentWindow.document
+		} catch(e) {
+			oErr['iframe'] = e+''
+		}
+		removeElementFn(id)
+		try {
+			let xsltProcessor = new XSLTProcessor
+			xsltProcessor.importStylesheet(doc) // fragment sticky datetime is set here
+			let fragment = xsltProcessor.transformToFragment(doc, document) // toFragment is faster than toDocument
+			oData.raw['string'] = doc.lastModified // quickly grab lastMod since it updates each time we call it
+			oData.raw['exslt'] = fragment.childNodes[0].nodeValue
+		} catch(e) {
+			oErr['exslt'] = e+''
+			try {
+				oData.raw['string'] = (new DOMParser).parseFromString('','text/html').lastModified
+			} catch(e) {oErr['string'] = e+''}
+		}
+		try {oData.raw['unsafe'] = Document.parseHTMLUnsafe('').lastModified
+		} catch(e) {
+			// the error differs if the console is open vs closed
+			if (e.name == 'NS_ERROR_UNEXPECTED') {e = 'Error: Permission denied to access property \"lastModified\"'}
+			oErr['unsafe'] = e+''
+		}
+		try {
+			let test = (new Date()).toLocaleDateString('en', option)
+			oData.raw['date'] = test.replace(',','')
+		} catch(e) {
+			oErr['date'] = e+''
+		}
+		try {
+			tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+			option['timeZone'] = tz
+			let control = (new Date()).toLocaleDateString('en', option)
+			oData.raw['control'] = control.replace(',','')
+		} catch(e) {oErr['control'] = e+''}
+		// test
+		if (runST) {
+			oData.raw['date'] = {}
+			oData.raw['iframe'] = null
+			oData.raw['string'] = undefined
+			oData.raw['unsafe'] = '99-99-99' // invalid
+		}
+		// type check/format
+		methods.forEach(function(k){
+			if (oErr[k] == undefined) {
+				let typeCheck = typeFn(oData.raw[k])
+				if ('string' !== typeCheck) {
+					oErr[k] = zErrType + typeCheck
+				} else {
+					let formatted
+					if ('exslt' == k) {
+						// set xOffset
+						xOffset = (oData.raw.exslt).slice(-6)
+						// get xMinutes in getTimezoneoffset format
+							// *1 works as it ignores leading 0's and returns a number
+							// flip the sign but drop if positive or 0 to match calculated/getTimezoneOffset
+						xMinutes = ((xOffset.slice(1,3) * 1)*60) + (xOffset.slice(4,6)*1)
+						let xSign = (xOffset[0] == '+' ? (xMinutes == 0 ? '': '-') : '')
+						xMinutes = xSign + xMinutes
+						formatted = ((oData.raw[k]).slice(0,-10)).replace('T',' ')
+					} else {
+						formatted = (oData.raw[k]).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')
+					}
+					if (checkValidDate(k, formatted)) {oData.format[k] = formatted}
+				}
+			}
+		})
+	}
+
+	// run
+	get_mods()
+	if (undefined !== oData.format.exslt) {
+		let xValue = xMinutes + (xOffset == '+00:00' ? '' : ' ['+ xOffset +']')
+		let isMatch = checkMatch(1)
+		if (!isMatch) {
+			// ~0.3 ms to grab our mods: 1 in 86,400 seconds tick over a day
+			// so we'd have to be really unlucky to hit this: try again
+			get_mods()
+			isMatch = checkMatch(2)
+		}
+		let lieCount = Object.keys(oLies).length,
+			errCount = Object.keys(oErr).length
+		// no lies + no errors (allow one specific error in FF127 or lower)
+		let go = false
+		if (lieCount == 0) { // includes control even though we ignore it for display/recording
+			if (isVer > 127 && errCount == 0) {go = true}
+			if (isVer < 128 && errCount == 1) {
+				if (isVer > 122 && oErr["unsafe"] == 'Error: Permission denied to access property \"lastModified\"') {go = true}
+				if (isVer < 123 && oErr["unsafe"] == 'TypeError: Document.parseHTMLUnsafe is not a function') {go = true}
+			}
+			if (go) {notation = tz_green}
+		}
+		addBoth(4, METRIC, xValue,'', notation)
+	}
+	display_detail()
+	return
+}
+
+const get_media_messages = (METRIC) => new Promise(resolve => {
+	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ""
 	try {
 		let aList = ['Invalid','Scaled']
-		let data = {}
 		for (const k of aList) {
-			let name = k+"Image"
-			let target = dom[name], title = ""
-			if (k === "Scaled") {
+			let name = k +'Image'
+			let target = dom[name], title = ''
+			if ('Scaled' == k) {
 				title = target.contentWindow.document.title
-				title = title.replace(name +".png", "") // strip image name to reduce noise
+				title = title.replace(name +'.png', '') // strip image name to reduce noise
 			} else {
 				const image = target.contentWindow.document.querySelector('img')
 				title = image.alt
-				title = title.replace(target.src, "") // remove noise
+				title = title.replace(target.src, '') // remove noise
 			}
 			data[name] = title.trim()
 		}
-		let hash = mini(data)
-		addData(4, METRIC, data, hash)
+		hash = mini(data); btn = addButton(4, METRIC)
 		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
-				if (hash === localesSupported[isLocaleValue].m) {notation = locale_green}
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
 			}
 		}
-		log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
-		return resolve()
 	} catch(e) {
-		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
-		addData(4, METRIC, zErr)
-		return resolve()
+		hash = e; data = zErrLog
 	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return resolve()
 })
 
-const get_validation_messages = () => new Promise(resolve => {
-	const	METRIC = "validation_messages"
+function get_validation_messages(METRIC) {
 	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
 		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
 		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
-	const pString = "<input type='number' required>"
+	const input = "<input type='number' required>"
 		+ "<input type='checkbox' required>"
 		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
 		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
@@ -1225,61 +1169,49 @@ const get_validation_messages = () => new Promise(resolve => {
 		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
 		+ "<input type='text' required>"
 
-	let data = {}
-	let notation = isLanguageSmart ? locale_red : ""
+	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
 	try {
-		if (runSE) {foo++}
-		let collection = ((new DOMParser).parseFromString(pString, 'text/html')).body.children
+		let collection = ((new DOMParser).parseFromString(input, 'text/html')).body.children
 		let cType = typeFn(collection)
-		if ("object" === cType) {
-			for (const k of Object.keys(collection)) {
-				try {
-					let msg = collection[k].validationMessage
-					if (runST) {msg = undefined}
-					let sType = typeFn(msg)
-					data[aNames[k]] = ("string" == sType ? msg : zErrType + sType)
-				} catch(e) {
-					data[aNames[k]] = zErr
-				}
+		if ('object' !== cType) {throw zErrType + cType}
+		for (const k of Object.keys(collection)) {
+			let msg = collection[k].validationMessage
+			if (runST) {msg = undefined}
+			let typeCheck = typeFn(msg)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			data[aNames[k]] = msg
+		}
+		hash = mini(data)
+		let count = Object.keys(data).length
+		let details = count === aNames.length ? 'details' : count +'/' + aNames.length
+		btn = addButton(4, METRIC, details)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
 			}
-			let hash = mini(data)
-			let count = Object.keys(data).length
-			let details = count === aNames.length ? "details" : count +"/" + aNames.length
-			addData(4, METRIC, data, hash)
-			if (isLanguageSmart) {
-				if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
-					if (hash === localesSupported[isLocaleValue].v) {notation = locale_green}
-				}
-			}
-			log_display(4, METRIC, hash + addButton(4, METRIC, details) + notation)
-		} else {
-			log_display(4, METRIC, log_error(SECT4, METRIC, zErrType + cType) + notation)
 		}
 	} catch(e) {
-		log_display(4, METRIC, log_error(SECT4, METRIC, e) + notation)
-		addData(4, METRIC, zErr)
+		hash = e; data = zErrLog
 	}
-	return resolve()
-})
+	addBoth(4, METRIC, hash ,btn, notation, data)
+	return
+}
 
-const get_xml_messages = () => new Promise(resolve => {
-	const METRIC = "xml_messages"
-	let notation = isLanguageSmart ? locale_red : ""
-	if ("string" === typeof isXML) {
-		log_display(4, METRIC, isXML + notation)
-		addData(4, METRIC, (isXML == zNA ? zNA : zErr))
-		return resolve()
-	}
-	let hash = mini(isXML)
-	addData(4, METRIC, isXML, hash)
-	if (isLanguageSmart) {
-		if (isLocaleValid && localesSupported[isLocaleValue] !== undefined) {
-			if (hash === localesSupported[isLocaleValue].x) {notation = locale_green}
+function get_xml_messages(METRIC) {
+	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ""
+	if ('string' == typeof isXML) {
+		hash = isXML; data = isXML == zNA ? '' : zErrLog
+	} else {
+		hash = mini(isXML); btn = addButton(4, METRIC)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
+			}
 		}
 	}
-	log_display(4, METRIC, hash + addButton(4, METRIC) + notation)
-	return resolve()
-})
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return
+}
 
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
@@ -1293,33 +1225,31 @@ const get_dates = () => new Promise(resolve => {
 		let itemPad = "item "+ item
 		try {
 // STRINGS
-			if (item == 43) {return d.toTimeString()
-			} else if (item == 44) {return d // a date object
-			} else if (item == 45) {return d.toString() // redundant?
-			} else if (item == 46) {return d.toLocaleString(localecode, o)
-			} else if (item == 47) {return d.toLocaleDateString(localecode, o)
-			} else if (item == 48) {return d.toLocaleTimeString(localecode, o)
-			} else if (item == 49) {return d.toLocaleTimeString(localecode)
-			} else if (item == 50) {return d.toLocaleString(localecode)
-			} else if (item == 51) {return [d].toLocaleString(localecode)
+			if (item == 1) {return d.toTimeString()
+			} else if (item == 2) {return d // a date object
+			} else if (item == 3) {return d.toString() // redundant?
+			} else if (item == 4) {return d.toLocaleString(localecode, o)
+			} else if (item == 5) {return d.toLocaleDateString(localecode, o)
+			} else if (item == 6) {return d.toLocaleTimeString(localecode, o)
+			} else if (item == 7) {return d.toLocaleTimeString(localecode)
+			} else if (item == 8) {return d.toLocaleString(localecode)
+			} else if (item == 9) {return [d].toLocaleString(localecode)
 // DTF
-			} else if (item == 52) {return DTFo.format(d)
-			} else if (item == 53) {
+			} else if (item == 10) {return DTFo.format(d)
+			} else if (item == 11) {
 				let f = Intl.DateTimeFormat(localecode, { weekday: "long", month: "long", day: "numeric",
 					year: "numeric", hour: "numeric", minute: "numeric", second: "numeric", hour12: true, timeZoneName: "long" })
 				let temp = f.formatToParts(d)
 				return temp.map(function(entry){return entry.value}).join("")
-			} else if (item == 54) {return Intl.DateTimeFormat().format(d)
-			} else if (item == 55) {
+			} else if (item == 12) {return Intl.DateTimeFormat().format(d)
+			} else if (item == 13) {
 				// relatedYear, yearName
 				let tmp = Intl.DateTimeFormat(localecode, {relatedYear: "long"}).formatToParts(d)
 					tmp = tmp.map(function(entry){return entry.value}).join("")
 				let tmpb = Intl.DateTimeFormat(localecode, {year: "numeric", yearName: "long"}).formatToParts(d)
 					tmpb = tmpb.map(function(entry){return entry.value}).join("")
 				return tmp += " | "+ tmpb
-			} else if (item == 56) {
-				return "skip"
-			} else if (item == 57) {
+			} else if (item == 14) {
 				// FF91+: 1710429
 				// note: use hour12 - https://bugzilla.mozilla.org/show_bug.cgi?id=1645115#c9
 				// FF91: extended TZNs are type "unknown"
@@ -1336,7 +1266,7 @@ const get_dates = () => new Promise(resolve => {
 								tz = formatter.format(day)
 							} catch(e) {
 								if (day == tzDays[0]) {
-									log_error(SECT4, itemPad +": "+ name, e)
+									log_error(4, itemPad +": "+ name, e)
 								}
 								tz = zErr
 							}
@@ -1345,82 +1275,73 @@ const get_dates = () => new Promise(resolve => {
 					})
 					return tzRes.join(" | ")
 				} catch(e) {
-					log_error(SECT4, itemPad +": timeZoneName", e)
+					log_error(4, itemPad +": timeZoneName", e)
 					return zErr
 				}
-			} else if (item == 58) {
+			} else if (item == 15) {
 				// FF91+: 1653024: formatRange
 				let date1 = new Date(Date.UTC(2020, 0, 15, 11, 59, 59)),
 					date2 = new Date(Date.UTC(2020, 0, 15, 12, 0, 1)),
 					date3 = new Date(Date.UTC(2020, 8, 19, 23, 15, 30))
 				return DTFo.formatRange(date1, date2) +" | "+ DTFo.formatRange(date1, date3)
 			} else {
-				return "skip"
+				return zSKIP
 			}
 		} catch(e) {
-			log_error(SECT4, itemPad, e)
+			log_error(4, itemPad, e)
 			return zErr
 		}
 	}
 
-	for (let i=43; i < 60; i++) {
+	for (let i=1; i < 16; i++) {
 		let result = get_item(i)
-		if (result == zU) {result = zUQ
-		} else if (result === undefined) {result = zU
-		} else if (result === "") {result = "empty string"
-		}
-		if (result !== "skip") {
-			log_display(4, "ldt"+ i, result)
+		if (result !== zSKIP) {
+			let typeExpected = 2 == i ? 'empty object' : 'string'
+			let typeCheck = typeFn(result)
+			if (typeExpected !== typeCheck) {result = zErrType + typeCheck}
+			addDisplay(4, "ldt"+ i, result)
 		}
 	}
 	return resolve()
 })
 
 const outputRegion = () => new Promise(resolve => {
-	let t0 = nowFn()
 	set_isLanguageSmart() // required for TB/MB health in get_language_locale()
-
 	Promise.all([
-		get_geo(),
+		get_geo('geolocation'),
 		get_language_locale(), // sets isLocaleValid/Value
 	]).then(function(){
 		// add smarts if locale matches: i.e we can notate messages in FF
 		if (isGecko && isSmart && isOS !== "android") {
 			if (localesSupported[isLocaleValue] !== undefined) {isLanguageSmart = true}
 		}
-
 		Promise.all([
-			get_locale_resolvedoptions(),
+			get_locale_resolvedoptions('locale_resolvedoptions'),
 			get_locale_intl(),
-			get_timezone(), // sets isTimeZoneValid/Value
-			get_media_messages(),
-			get_validation_messages(),
-			get_xml_messages(),
-		]).then(function(results){
+			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
+			get_validation_messages('validation_messages'),
+			get_xml_messages('xml_messages'),
+		]).then(function(){
 			Promise.all([
-				get_timezone_offset(), // will use isTimeZomeValid/Value
-				get_dates(), // will use isTimeZomeValid/Value + isLocaleValid/Value
+				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
+				get_dates(), // will use isTimeZoneValid/Value + isLocaleValid/Value
+				get_media_messages('media_messages'),
 			]).then(function(){
-				log_section(4, t0)
-				return resolve(SECT4)
+				return resolve()
 			})
 		})
 	})
 })
 
 const outputHeaders = () => new Promise(resolve => {
-	let t0 = nowFn()
 	Promise.all([
-		get_nav_dnt(),
-		get_nav_gpc(),
-		get_nav_connection(),
-	]).then(function(results){
-		results.forEach(function(item) {addDataFromArray(5, item)})
-		log_section(5, t0)
-		return resolve(SECT5)
+		get_nav_dnt('doNotTrack'),
+		get_nav_gpc('globalPrivacyControl'),
+		get_nav_connection('connection'),
+	]).then(function(){
+		return resolve()
 	})
 })
 
 set_oIntlTests()
-countJS(SECT4)
-
+countJS(4)
