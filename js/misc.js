@@ -41,13 +41,17 @@ function get_timing(METRIC) {
 				typeCheck = typeFn(start)
 				if ('string' !== typeCheck) {throw zErrType + typeCheck}
 				// we use epoch time so each entry is always moving forward in time
-				// we multiply by 10 since the ms has a leading 0 and has a 10ms precison
-				start = (new Date(start))[Symbol.toPrimitive]('number') * 10
+				// and to remove the leading 0 in ms
+				start = start.slice(0,20) + start.slice(-2)+ '0'
+				start = (new Date(start))[Symbol.toPrimitive]('number')
 			}
 			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
-				if ('exslt' == k) {end = (new Date(end))[Symbol.toPrimitive]('number') * 10}
+				if ('exslt' == k) {
+					end = end.slice(0,20) + end.slice(-2)+ '0'
+					end = (new Date(end))[Symbol.toPrimitive]('number')
+				}
 				let diff = ((end - start) % 100).toFixed(1) * 1 // drop hundreds
 				if (1 == i) {
 					typeCheck = typeFn(diff)
@@ -67,9 +71,9 @@ function get_timing(METRIC) {
 			} else {
 				aFail.push(k)
 				//aDiffs = aDiffs.slice(0,10)
-				//aTotal = aTotal.slice(0,10)
+				aTotal = aTotal.slice(0,12)
 			}
-			str = 'exslt' == k ? aDiffs.join(', ') : aTotal.join(', ')
+			str = aTotal.join(', ')
 			data = aDiffs
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
