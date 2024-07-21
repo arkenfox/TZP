@@ -1408,12 +1408,22 @@ function addDetail(metric, data, scope = isScope) {
 function addTiming(metric) {
 	let remainder = gCountTiming % 9, key, value
 	try {
-		if (1 == remainder) {key = 'now'; value = performance.now()
+		if (0 == remainder) {
+			// get extra dates
+			try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+
+		} else if (1 == remainder) {key = 'now'; value = performance.now()
 		} else if (4 == remainder) {key = 'timestamp'; value = new Event('').timeStamp
 		} else if (5 == remainder) {key = 'date'
 			value = (new Date())[Symbol.toPrimitive]('number')
+			// get extra now
+			try {gData.timing['now'].push(performance.now())} catch(e) {}
 		} else if (7 == remainder) {key = 'mark'; value = performance.mark('a').startTime
-		} else if (8 == remainder) {key = 'exslt'
+		} else if (8 == remainder) {
+			// get extra timestamps
+			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+			// exslt
+			key = 'exslt'
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 				+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
 				+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
@@ -1423,8 +1433,8 @@ function addTiming(metric) {
 			let fragment = xsltProcessor.transformToFragment(doc, document)
 			value = (fragment.childNodes[0].nodeValue).slice(0,-6)
 		}
-		if (runST) {value = undefined}
 		if (undefined !== key) {
+			if (runST) {value = undefined}
 			gData.timing[key].push(value)
 		}
 	} catch(e) {
@@ -1854,7 +1864,7 @@ function outputSection(id, isResize = false) {
 			outputPrototypeLies(isResize),
 		]).then(function(){
 			if (isTB && gClear) {console.clear()}
-			log_section(SECTP, gt0)
+			if (isSmart) {log_section(SECTP, gt0)}
 			output()
 		})
 	}, delay)
