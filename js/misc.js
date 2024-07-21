@@ -28,7 +28,7 @@ function get_timing(METRIC) {
 		if (undefined == aGood) {aGood = oGood.other}
 		// don't add to health, we do that with the parent metric
 		str ='', notation = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc
-		let isMatch = true
+		let isMatch = true, typeCheck
 		try {
 			// use gData.timing
 			let aTimes = gData.timing[k]
@@ -36,14 +36,26 @@ function get_timing(METRIC) {
 			// get diffs
 			let aDiffs = [], aTotal = []
 			let start = aTimes[0] 
-			let typeCheck = typeFn(start)
-			if ('number' !== typeCheck) {throw zErrType + typeCheck}
-			if (aNotInteger.includes[k] && Number.isInteger(start)) {isMatch = false}
+			if ('exslt' == k) {
+				// check for a string so we don't multple null or a boolean
+				typeCheck = typeFn(start)
+				if ('string' !== typeCheck) {throw zErrType + typeCheck}
+				// we use epoch time so each entry is always moving forward in time
+				// we multiply by 10 since the ms has a leading 0 and has a 10ms precison
+				start = (new Date(start))[Symbol.toPrimitive]('number') * 10
+			}
+			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
-				let diff = ((aTimes[i] - start) % 100).toFixed(1) * 1 // drop hundreds
+				let end = aTimes[i]
+				if ('exslt' == k) {end = (new Date(end))[Symbol.toPrimitive]('number') * 10}
+				let diff = ((end - start) % 100).toFixed(1) * 1 // drop hundreds
+				if (1 == i) {
+					typeCheck = typeFn(diff)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				}
 				aDiffs.push(diff)
 				if (!aGood.includes(diff)) {isMatch = false}
-				let totaldiff = (aTimes[i] - start).toFixed(1) * 1
+				let totaldiff = (end - start).toFixed(1) * 1
 				aTotal.push(totaldiff)
 			}
 			// dedupe
@@ -54,9 +66,10 @@ function get_timing(METRIC) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 			} else {
 				aFail.push(k)
-				aDiffs = aDiffs.slice(0,10)
+				//aDiffs = aDiffs.slice(0,10)
+				//aTotal = aTotal.slice(0,10)
 			}
-			str = aDiffs.join(', ')
+			str = 'exslt' == k ? aDiffs.join(', ') : aTotal.join(', ')
 			data = aDiffs
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)

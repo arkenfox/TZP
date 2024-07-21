@@ -1024,8 +1024,6 @@ function lookup_health(sect, metric, scope, isPass) {
 	let data = '', hash = ''
 	// error?
 	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
-	// lie? // ToDo: lookup detail: do we want to?
-	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, data])}} catch(e) {}
 	// nested, lookups, FP|detail data
 	try {
 		let nested = '', tmpdata, sDetailTemp
@@ -1042,7 +1040,7 @@ function lookup_health(sect, metric, scope, isPass) {
 			hash = data
 			// handle sDetailTemp: copy per run so it doesn't change in gData
 			if ('fontnames' == metric) {sDetailTemp = sDetail[scope]['fontnames_health']}
-			if ('timing_precision' == metric) {sDetailTemp = sDetail[scope][metric]}
+			if (undefined !== sDetail[scope][metric]) {sDetailTemp = sDetail[scope][metric]}
 			if (undefined !== sDetailTemp) {
 				let tmpCheck = typeFn(sDetailTemp)
 				if ('object' == tmpCheck) {
@@ -1417,16 +1415,13 @@ function addTiming(metric) {
 		} else if (7 == remainder) {key = 'mark'; value = performance.mark('a').startTime
 		} else if (8 == remainder) {key = 'exslt'
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
-					+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
-					+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
+				+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
+				+' <xsl:template match="/"><xsl:value-of select="date:date-time()" /></xsl:template></xsl:stylesheet>'
 			const doc = (new DOMParser).parseFromString(xslText, "text/xml")
 			let xsltProcessor = new XSLTProcessor
 			xsltProcessor.importStylesheet(doc)
 			let fragment = xsltProcessor.transformToFragment(doc, document)
-			let str = (fragment.childNodes[0].nodeValue).slice(0,-6)
-			// we use epoch time so each entry is always moving forward in time
-			// we multiply by 10 since the ms has a leading 0 and has a 10ms precison
-			value = (new Date(str))[Symbol.toPrimitive]('number') * 10
+			value = (fragment.childNodes[0].nodeValue).slice(0,-6)
 		}
 		if (runST) {value = undefined}
 		if (undefined !== key) {
@@ -1485,6 +1480,7 @@ function log_known(section, metric, data ='', scope = isScope) {
 	if ('string' !== typeof section) {section = sectionMap[section]}
 	if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
 	if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
+	if (undefined !== sDetail[scope][metric]) {data = sDetail[scope][metric]}
 	sDataTemp[key][scope][section][metric] = data
 	// color
 	return "<span class='lies'>"+ data +"</span>"

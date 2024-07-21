@@ -425,7 +425,7 @@ function get_language_locale() {
 
 	// LOCALES
 	function get_locmetric(m) {
-		let METRIC = 'locales_'+ m, r
+		let METRIC = 'locale_'+ m, r
 		try {
 			if ('collator' == m) {if (runSL) {r = 'en-FAKE'} else {r = Intl.Collator().resolvedOptions().locale}
 			} else if ('datetimeformat' == m) {r = Intl.DateTimeFormat().resolvedOptions().locale
@@ -447,16 +447,20 @@ function get_language_locale() {
 			return zErr
 		}
 	}
-	let res = []
+	// LOCALES
+	let METRIC = 'locale', res = [], oRes = {}
 	metrics = [
 		'collator','datetimeformat','displaynames','listformat',
 		'numberformat','pluralrules','relativetimeformat','segmenter',
 	]
-	metrics.forEach(function(m) {res.push(get_locmetric(m))})
-	// LOCALES
-	let METRIC = 'locale'
+	metrics.forEach(function(m) {
+		let locale = get_locmetric(m)
+		res.push(locale)
+		oRes[m] = locale
+	})
+	sDetail.document[METRIC] = oRes
 	let value = res.join(' | ')
-	addDisplay(4, METRIC +'data', value)
+	addDisplay(4, 'locales', value)
 
 	// LOCALE
 	// remove errors and dupes
@@ -476,9 +480,6 @@ function get_language_locale() {
 		value = zErr
 	} else {
 		value = 'mixed'; isLies = true
-	}
-	if (gRun && res.length !== 0) {
-		sDetail[isScope].lookup[METRIC] = res.join(' | ')
 	}
 	if (isLanguageSmart && isTB) { // only notate TB/MB
 		notation = tb_red
