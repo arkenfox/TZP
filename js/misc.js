@@ -9,7 +9,15 @@ function get_timing(METRIC) {
 	if (runSI) {diff = 10}
 	if (0 !== diff) {throw zErrInvalid +'expected 0'}
 	*/
-	try {performance.clearMarks('a')} catch(e) {}
+
+	// get values as late as possible
+	try {gData.timing['now'].push(performance.now())} catch(e) {}
+	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+	try {
+		gData.timing['mark'].push(performance.mark('a').startTime)
+		performance.clearMarks('a')
+	} catch(e) {}
+	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
@@ -22,8 +30,6 @@ function get_timing(METRIC) {
 	sDetail.document[METRIC +'_data'] = {}
 
 	gTiming.forEach(function(k){
-		sDetail.document[METRIC +'_data'][k] = gData.timing[k]
-
 		let aGood = oGood[k]
 		if (undefined == aGood) {aGood = oGood.other}
 		// don't add to health, we do that with the parent metric
@@ -32,53 +38,56 @@ function get_timing(METRIC) {
 		try {
 			// use gData.timing
 			let aTimes = gData.timing[k]
+			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
+			sDetail.document[METRIC +'_data'][k] = aTimes
 			if ('string' == typeof aTimes) {throw aTimes}
-			// get diffs
-			let aDiffs = [], aTotal = []
-			let start = aTimes[0] 
+			// get diffs, check for null/boolean
+			let aDiffs = [], aTotal = [], start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
+			typeCheck = typeFn(start)
+			if (expected !== typeCheck) {throw zErrType + typeCheck}
+
 			if ('exslt' == k) {
-				// check for a string so we don't multple null or a boolean
-				typeCheck = typeFn(start)
-				if ('string' !== typeCheck) {throw zErrType + typeCheck}
 				// we use epoch time so each entry is always moving forward in time
 				// and to remove the leading 0 in ms
 				start = start.slice(0,20) + start.slice(-2)+ '0'
 				start = (new Date(start))[Symbol.toPrimitive]('number')
 			}
+
 			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
+				typeCheck = typeFn(end)
+				if (expected !== typeCheck) {throw zErrType + typeCheck}
 				if ('exslt' == k) {
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
 				let diff = ((end - start) % 100).toFixed(1) * 1 // drop hundreds
-				if (1 == i) {
-					typeCheck = typeFn(diff)
-					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				}
 				aDiffs.push(diff)
 				if (!aGood.includes(diff)) {isMatch = false}
 				let totaldiff = (end - start).toFixed(1) * 1
 				aTotal.push(totaldiff)
 			}
-			// dedupe
-			aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
-			aTotal = aTotal.filter(function(item, position) {return aTotal.indexOf(item) === position})
 			if (1 == aTotal.length) {isMatch = false}
 			if (isMatch) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 			} else {
 				aFail.push(k)
-				//aDiffs = aDiffs.slice(0,10)
-				aTotal = aTotal.slice(0,12)
+				// ToDo: provide minimum gap: e.g. jShelter 10ms or 100ms
 			}
-			str = aTotal.join(', ')
+			// display: always show the last two
+			let lasttwo = '', len = aTotal.length
+			if (len > 12) {
+				lasttwo = ' ... '+ aTotal[len-2] +', '+aTotal[len-1]
+				aTotal = aTotal.slice(0,10)
+			}
+			str = aTotal.join(', ') + lasttwo
 			data = aDiffs
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
 			isMatch = false
+			aFail.push(k)
 		}
 		sDetail.document[METRIC][k] = data
 		addDisplay(17, METRIC +'_'+ k, str,'', notation)
