@@ -1819,6 +1819,14 @@ function outputSection(id, isResize = false) {
 
 	function output() {
 		if ('all' == id) {
+			// get values as soon as possible
+			try {gData.timing['now'].push(performance.now())} catch(e) {}
+			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+			try {
+				gData.timing['mark'].push(performance.mark('a').startTime)
+				performance.clearMarks('a')
+			} catch(e) {}
+
 			addTiming('start')
 			gCountTiming = 0
 			// run sequentially awaiting each before running the next
