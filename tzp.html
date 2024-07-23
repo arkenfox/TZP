@@ -109,8 +109,10 @@
 		</div>
 		<div>
 			<canvas id="kcanvasGet" width="16" height="8"></canvas>
+			<canvas id="kcanvasGetSolid" width="16" height="8"></canvas>
 			<canvas id="kcanvasPath" width="16" height="8"></canvas>
 			<canvas id="kcanvasTo" width="16" height="8"></canvas>
+			<canvas id="kcanvasToSolid" width="16" height="8"></canvas>
 		</div>
 		<!-- hide tor items: !src = 0x0 but "offscreen" = image placeholder size -->
 		<div>
@@ -611,11 +613,14 @@
 		<tr><td><a class="blue" href="tests/canvasnoise.html" target="blank">[PoC]</a>
 			&nbsp; <div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">random per run</span></div>
 			&nbsp; getImageData</td><td class="c mono" id="getImageData"></td></tr>
+		<tr><td>[solid] getImageData</td><td class="c mono" id="getImageData_solid"></td></tr>
 		<tr><td>isPointInPath</td><td class="c mono" id="isPointInPath"></td></tr>
 		<tr><td>isPointInStroke</td><td class="c mono" id="isPointInStroke"></td></tr>
 		<tr><td>toBlob</td><td class="c mono" id="toBlob"></td></tr>
+		<tr><td>[solid] toBlob</td><td class="c mono" id="toBlob_solid"></td></tr>
 		<tr><td><a class="blue" href="tests/canvasrfp.html" target="blank">[PoC]</a>
 			&nbsp; toDataURL</td><td class="c mono" id="toDataURL"></td></tr>
+		<tr><td>[solid] toDataURL</td><td class="c mono" id="toDataURL_solid"></td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">canvas code based on work by </span>
 			<a target="_blank" class="blue" href="https://canvasblocker.kkapsner.de/test">kkapsner</a><span class="no_color"> & </span>

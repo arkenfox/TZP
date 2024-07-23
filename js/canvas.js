@@ -26,7 +26,9 @@ const outputCanvas = () => new Promise(resolve => {
 		'isPointInPath': 'db0e3f08',
 		'isPointInStroke': 'a77e328a',
 		'toBlob': '3afc375a',
+		'toBlob_solid': '56ea6104',
 		'toDataURL': '3afc375a',
+		'toDataURL_solid': '56ea6104',
 	}
 	let isCanvasGet = '', isCanvasGetChannels = '', isGetStealth = false
 
@@ -200,6 +202,48 @@ const outputCanvas = () => new Promise(resolve => {
 					}
 				},
 				{
+					name: 'toBlob_solid',
+					value: function(){
+						return new Promise(function(resolve, reject){
+							const METRIC = 'toBlob_solid'
+							if (aSkip.includes(METRIC)) {resolve('skip')}
+							try {
+								var timeout = window.setTimeout(function(){
+									oErrors[METRIC] = zErrTime
+									resolve(zErrTime)
+								}, 750)
+								if (!runTE) {
+									getKnownToSolid().canvas.toBlob(function(blob){
+										window.clearTimeout(timeout)
+										var reader = new FileReader()
+										reader.onload = function(){
+											let value = reader.result
+											if (runST) {value = ''}
+											let typeCheck = typeFn(value)
+											if ('string' === typeCheck ) {
+												oData[METRIC] = value
+												log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
+												resolve(mini(reader.result))
+											} else {
+												oErrors[METRIC] = zErrType + typeCheck
+												resolve(zErr)
+											}
+										}
+										reader.onerror = function(){
+											oErrors[METRIC] = zErr +' undefined [.onerror]'
+											reject(zErr)
+										}
+										reader.readAsDataURL(blob)
+									})
+								}
+							} catch(e) {
+								oErrors[METRIC] = e+''
+								resolve(zErr)
+							}
+						})
+					}
+				},
+				{
 					name: 'toDataURL',
 					value: function(){
 						let METRIC = 'toDataURL'
@@ -218,11 +262,31 @@ const outputCanvas = () => new Promise(resolve => {
 						}
 					}
 				},
+				{
+					name: 'toDataURL_solid',
+					value: function(){
+						let METRIC = 'toDataURL_solid'
+						if (aSkip.includes(METRIC)) {return 'skip'}
+						try {
+							let data = getKnownToSolid().canvas.toDataURL()
+							if (runST) {data = undefined}
+							let typeCheck = typeFn(data)
+							if ('string' !== typeCheck) {throw zErrType + typeCheck}
+							oData[METRIC] = data
+							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
+							return mini(data)
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
 			];
 			function isSupported(output){
-				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[output.name]
+				let key = output.name
+				if (key.includes('_solid')) {key = key.slice(0,-6)}
+				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[key]
 			}
-
 			function getKnownTo(){
 				let canvas = dom.kcanvasTo
 				let ctx = canvas.getContext('2d')
@@ -248,6 +312,16 @@ const outputCanvas = () => new Promise(resolve => {
 					}
 				}
 				oDrawn['to'] = true
+				return ctx
+			}
+			function getKnownToSolid(){
+				let canvas = dom.kcanvasToSolid
+				let ctx = canvas.getContext('2d')
+				if (oDrawn['to_solid']) {return ctx}
+				// color the background
+				ctx.fillStyle = 'rgba('+ solidPink +')'
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				oDrawn['to_solid'] = true
 				return ctx
 			}
 			function getKnownGet(){
@@ -333,7 +407,7 @@ const outputCanvas = () => new Promise(resolve => {
 
 	// oDrawn: only draw the canvas once per runNo
 		// if input is faked, it would also be faked the second time
-	let oDrawn = {'get': false, 'path': false, 'to': false}
+	let oDrawn = {'get': false, 'path': false, 'to': false, 'to_solid': false}
 	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
 	let solidPink = '224,33,138,255' // go Barbie!
 
@@ -390,6 +464,12 @@ const outputCanvas = () => new Promise(resolve => {
 	Promise.all([
 		known.createHashes(window, 1)
 	]).then(function(run1){
+		/*
+		console.log(run1)
+		console.log(oData)
+		console.log(oDrawn)
+		console.log(oErrors)
+		//*/
 		run1[0].forEach(function(item){
 			let name = item.name, value = item.displayValue, data ='', notation =''
 
@@ -465,7 +545,8 @@ const outputCanvas = () => new Promise(resolve => {
 							notation = rfp_red
 							// FPP: 119+ and no proxy lies and no getImageData stealth
 							// exclude TB14+ as PB mode falls back to FPP with canvas exceptions
-							if (isVer > 119 && !isTB) {
+							// exclude solids: FPP does not tamper with those
+							if (isVer > 119 && !isTB && !name.includes('_solid')) {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 									if (!isGetStealth) {notation = fpp_green}
 								}
