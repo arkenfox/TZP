@@ -32,7 +32,9 @@ const outputCanvas = () => new Promise(resolve => {
 	}
 	let isCanvasGet = '', isCanvasGetChannels = '', isGetStealth = false
 
-	function check_canvas_get(data, runNo) {
+	function check_canvas_get(dataname, runNo) {
+		let data = oData[dataname]
+		let dataDrawn = oDataDrawn[dataname]
 		let isMatch = mini(dataDrawn) == mini(data)
 		// run1 return if a match or not
 		if (runNo == 1) {return isMatch}
@@ -91,6 +93,28 @@ const outputCanvas = () => new Promise(resolve => {
 						if (aSkip.includes(METRIC)) {return 'skip'}
 						try {
 							var context = getKnownGet()
+							let imageData = context.getImageData(0,0, sizeW, sizeH)
+							if (runST) {imageData = null} else if (runSI) {imageData = {}}
+							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
+							let expected = '[object ImageData]'
+							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
+							oData[METRIC] = imageData.data
+							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
+							return mini(imageData.data)
+						} catch(e) {
+							oErrors[METRIC] = e+''
+							return zErr
+						}
+					}
+				},
+				{
+					class: window.CanvasRenderingContext2D,
+					name: 'getImageData_solid',
+					value: function(){
+						const METRIC = 'getImageData_solid'
+						if (aSkip.includes(METRIC)) {return 'skip'}
+						try {
+							var context = getKnownGetSolid()
 							let imageData = context.getImageData(0,0, sizeW, sizeH)
 							if (runST) {imageData = null} else if (runSI) {imageData = {}}
 							if ('object' !== typeFn(imageData, true)) {throw zErrType + typeFn(imageData)}
@@ -318,7 +342,6 @@ const outputCanvas = () => new Promise(resolve => {
 				let canvas = dom.kcanvasToSolid
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['to_solid']) {return ctx}
-				// color the background
 				ctx.fillStyle = 'rgba('+ solidPink +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
 				oDrawn['to_solid'] = true
@@ -361,6 +384,15 @@ const outputCanvas = () => new Promise(resolve => {
 					}
 				}
 				oDrawn['get'] = true
+				return ctx
+			}
+			function getKnownGetSolid(){
+				let canvas = dom.kcanvasGetSolid
+				let ctx = canvas.getContext('2d')
+				if (oDrawn['get_solid']) {return ctx}
+				ctx.fillStyle = 'rgba('+ solidClrs +')'
+				ctx.fillRect(0, 0, sizeW, sizeH)
+				oDrawn['get_solid'] = true
 				return ctx
 			}
 			function getKnownPath(){
@@ -407,12 +439,13 @@ const outputCanvas = () => new Promise(resolve => {
 
 	// oDrawn: only draw the canvas once per runNo
 		// if input is faked, it would also be faked the second time
-	let oDrawn = {'get': false, 'path': false, 'to': false, 'to_solid': false}
+	let oDrawn = {'get': false, 'get_solid': false, 'path': false, 'to': false, 'to_solid': false}
 	let oRes = {}, oFP = {}, oErrors = {}, oData = {}, aSkip = [], countFake = 0
 	let solidPink = '224,33,138,255' // go Barbie!
 
 	// random getImageData
-	let dataDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
+	let tmpDrawn = new Uint8ClampedArray(sizeW * sizeH * 4)
+	let tmpSolid = new Uint8ClampedArray(sizeW * sizeH * 4)
 	let dataToDraw = [], indexFont = []
 	let solidR = Math.floor(Math.random()*255),
 		solidG = Math.floor(Math.random()*255),
@@ -437,22 +470,28 @@ const outputCanvas = () => new Promise(resolve => {
 				let valueR = Math.floor(Math.random()*255),
 					valueG = Math.floor(Math.random()*255),
 					valueB = Math.floor(Math.random()*255)
-				dataDrawn[k] = valueR
-				dataDrawn[k+1] = valueG
-				dataDrawn[k+2] = valueB
-				dataDrawn[k+3] = 255
+				tmpDrawn[k] = valueR
+				tmpDrawn[k+1] = valueG
+				tmpDrawn[k+2] = valueB
+				tmpDrawn[k+3] = 255
 				dataToDraw.push('rgba('+ valueR +','+ valueG +','+ valueB +',255)')
 			} else {
 				indexFont.push(k)
 				// solid: 15
-				dataDrawn[k] = solidR
-				dataDrawn[k+1] = solidG
-				dataDrawn[k+2] = solidB
-				dataDrawn[k+3] = 255
+				tmpDrawn[k] = solidR
+				tmpDrawn[k+1] = solidG
+				tmpDrawn[k+2] = solidB
+				tmpDrawn[k+3] = 255
 				dataToDraw.push('rgba('+ solidClrs +')')
 			}
+			// solid
+			tmpSolid[k] = solidR
+			tmpSolid[k+1] = solidG
+			tmpSolid[k+2] = solidB
+			tmpSolid[k+3] = 255
 		}
 	}
+	let oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
 
 	function exit() {
 		for (const m of Object.keys(oFP)) {
@@ -464,15 +503,8 @@ const outputCanvas = () => new Promise(resolve => {
 	Promise.all([
 		known.createHashes(window, 1)
 	]).then(function(run1){
-		/*
-		console.log(run1)
-		console.log(oData)
-		console.log(oDrawn)
-		console.log(oErrors)
-		//*/
 		run1[0].forEach(function(item){
-			let name = item.name, value = item.displayValue, data ='', notation =''
-
+			let name = item.name, key = name.slice(0,2), value = item.displayValue, data ='', notation =''
 			oRes[name] = {}
 			oRes[name][1] = value
 
@@ -480,14 +512,15 @@ const outputCanvas = () => new Promise(resolve => {
 				aSkip.push(name)
 				value = oErrors[name]; notation = rfp_red; data = zErrLog
 			} else if (!isSmart) {
-				if ('getImageData' == name) {data = zNA} // test is random, return a stable FP
+				if ('ge' == key) {data = zNA} // test is random, return a stable FP
 			} else {
-				if ('getImageData' == name) {
+				if ('ge' == key) {
 					// run 1 check returns mini(dataDrawn) == mini(data)
-					let getCheck = check_canvas_get(oData['getImageData'], 1)
+					let getCheck = check_canvas_get(name, 1)
 					if (getCheck) {
 						data = 'trustworthy' // the test is random, return a stable FP
 						notation = rfp_red
+						aSkip.push(name)
 					} else {
 						data = 'protected'
 						countFake++
@@ -504,7 +537,6 @@ const outputCanvas = () => new Promise(resolve => {
 			}
 			oFP[name] = {'value': value, 'notation': notation, 'data': data}
 		})
-
 		if (!isSmart || countFake == 0) {
 			exit()
 			return
@@ -518,28 +550,29 @@ const outputCanvas = () => new Promise(resolve => {
 			toDataURL: 'HTMLCanvasElement',
 		}
 		// smart + some lies, do 2nd run
-		oDrawn = {'get': false, 'path': false, 'to': false}
+		// for non skips, force a redraw
+		oDrawn = {'get': false, 'get_solid': false, 'path': false, 'to': false, 'to_solid': false}
+
 		Promise.all([
 			known.createHashes(window, 2)
 		]).then(function(run2){
-
 			run2[0].forEach(function(item){
+				let name = item.name, key = name.slice(0,2)
 				let value = item.displayValue
 				let checkValue = value
 				// getImageData doesn't get a 'skip' so we handle it differently
 				// don't check if already skipped: e.g. type error null
 				// run2 check returns skip if nothing to do, or true/false if RFP-like
 				// why do I need this?
-				if (item.name == 'getImageData' && 'skip' !== checkValue) {
-					let getCheck = check_canvas_get(oData['getImageData'], 2)
+				if ('ge' == key && 'skip' !== checkValue) {
+					let getCheck = check_canvas_get(name, 2)
 					if ('skip' == getCheck) {checkValue = 'skip'}
 				}
 				if (checkValue !== 'skip') {
 					let	data ='', notation ='', stats ='', rfpvalue =''
-					name = item.name
 					if (oRes[name][1] == value) {
 						// persistent
-						if ('isP' == name.slice(0,3)) {
+						if ('is' == key) {
 							notation = (value === allZeros && !isProxyLie(proxyMap[name] +'.'+ name)) ? rfp_green : rfp_red // all zeros
 						} else {
 							notation = rfp_red
@@ -553,24 +586,21 @@ const outputCanvas = () => new Promise(resolve => {
 							}
 						}
 						rfpvalue = notation == rfp_green ? ' | RFP' : (notation == fpp_green ? ' | FPP' : '')
-						if ('getImageData' == name) {
+						if ('ge' == key) {
 							stats = isCanvasGet
 							rfpvalue += ' | '+ isCanvasGetChannels
 						}
 						notation += ' [persistent]'+ stats
 						data = 'protected | persistent'+ rfpvalue
 
-						//oFP[name] = "protected | persistent"+ rfpvalue
-						//addDisplay(9, name, value,'', note +" [persistent]"+ stats)
-
 					} else {
 						// per execution
-						if ('isP' == name.slice(0,3)) {
+						if ('is' == key) {
 							notation = rfp_red
-						} else if ('to' == name.slice(0,2)) {
+						} else if ('to' == key) {
 							notation = check_canvas_to(oData[name]) ? rfp_green : rfp_red
 						} else {
-							notation = check_canvas_get(oData[name], 2) ? rfp_green : rfp_red
+							notation = check_canvas_get(name, 2) ? rfp_green : rfp_red
 						}
 						rfpvalue = notation == rfp_green ? ' | RFP' : ''
 						if ('getImageData' == name) {
