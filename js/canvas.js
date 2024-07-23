@@ -72,16 +72,14 @@ const outputCanvas = () => new Promise(resolve => {
 		isCanvasGetChannels = (isGetStealth ? 'stealth | ' : '') + strFP
 		isCanvasGet = ' ['+ (isGetStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
 
-if ('getImageData_solid' == dataname) {
-	console.log(pixelcount, altP, altR, altG, altB, altA)
-}
-
-		// pixels: allow 1 collision
-		if (altP < (pixelcount - 1)) {return false}
+		// pixels: allow 2 collision
+		if (altP < (pixelcount - 2)) {return false}
 		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
-		if (altR < (pixelcount - 8)) {return false}
-		if (altG < (pixelcount - 8)) {return false}
-		if (altB < (pixelcount - 8)) {return false}
+			// with a solid, collisions are amplified: 112/128 seems to be the lowest given the pattern repeats
+		let maxCollisions = 'getImageData_solid' == dataname ? 24 : 8
+		if (altR < (pixelcount - maxCollisions)) {return false}
+		if (altG < (pixelcount - maxCollisions)) {return false}
+		if (altB < (pixelcount - maxCollisions)) {return false}
 		// alpha: not randomized: higher collisons: lowest 96/128: allow 33%
 		if ((altA / pixelcount) < .66) {return false}
 		return true // RFP traits
