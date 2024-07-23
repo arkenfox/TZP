@@ -71,6 +71,11 @@ const outputCanvas = () => new Promise(resolve => {
 		if (altA > 0) {strFP += 'a'; aNote.push('a'+ Math.floor((altA / pixelcount) * 100))}
 		isCanvasGetChannels = (isGetStealth ? 'stealth | ' : '') + strFP
 		isCanvasGet = ' ['+ (isGetStealth ? 'stealth ' : '')  +'%: '+ aNote.join(' ') +']'
+
+if ('getImageData_solid' == dataname) {
+	console.log(pixelcount, altP, altR, altG, altB, altA)
+}
+
 		// pixels: allow 1 collision
 		if (altP < (pixelcount - 1)) {return false}
 		// rgb: ran 100k tests: lowest 124/128: allow 8 collsions
