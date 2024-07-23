@@ -1164,14 +1164,11 @@ function get_fonts() {
 				oGroups[groupKey].push(k)
 			}
 		})
+		let grphash = 'unknown', grpbtn ='', grpdata =''
 		if (Object.keys(oGroups).length) {
-			let grphash = mini(oGroups)
-			let aGood = ['b2e75cc4','421e59bc'] // 4 x *Numbers can be the same
-			let grpNotation = !aGood.includes(grphash) ? default_red : '' // only notate badness
-			addBoth(12, METRICG, grphash, addButton(12, METRICG), grpNotation, oGroups)
-		} else {
-			addBoth(12, METRICG, 'unknown','', default_red,'', true)
+			grphash = mini(oGroups); grpbtn = addButton(12, METRICG); grpdata = oGroups
 		}
+		addBoth(12, METRICG, grphash, grpbtn, '', oGroups)
 		//console.log(oData)
 		//console.log(oValid)
 		//console.log(selected)
@@ -1229,32 +1226,34 @@ function get_fonts() {
 
 				// FP data: not lies
 				if (method == selected) {
-					let notation = goodnotation
-					// names: not needed in FP but include for upstream
-					let aNotInBase = oData[k][METRICN], aMissing = [], aMissingSystem = []
-					aNotInBase = aNotInBase.filter(x => !fntData.base.includes(x))
-					if (isTB) {
-						aMissing = fntData.bundled
-						aMissing = aMissing.filter(x => !oData[k][METRICN].includes(x))
-						if (fntData.system.length) {
-							aMissingSystem = fntData.system
-							aMissingSystem = aMissingSystem.filter(x => !oData[k][METRICN].includes(x))
+					let notation = ''
+					if (fntData.base.length) {
+						notation = goodnotation
+						// names: not needed in FP but include for upstream
+						let aNotInBase = oData[k][METRICN], aMissing = [], aMissingSystem = []
+						aNotInBase = aNotInBase.filter(x => !fntData.base.includes(x))
+						if (isTB) {
+							aMissing = fntData.bundled
+							aMissing = aMissing.filter(x => !oData[k][METRICN].includes(x))
+							if (fntData.system.length) {
+								aMissingSystem = fntData.system
+								aMissingSystem = aMissingSystem.filter(x => !oData[k][METRICN].includes(x))
+							}
 						}
-					}
-					let count = aNotInBase.length + aMissing.length + aMissingSystem.length
-					if (count > 0) {
-						let tmpName = METRICN +'_health', tmpObj = {}
-						if (aMissing.length) {tmpObj['missing_bundled'] = aMissing}
-						if (aMissingSystem.length) {tmpObj['missing_system'] = aMissingSystem}
-						if (aNotInBase.length) {tmpObj['unexpected'] = aNotInBase}
-						addDetail(tmpName, tmpObj)
-						let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
-						notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
-						// FF windows may fail RFP but may pass FPP
-						if (!isTB && 'windows' == isOS) {
-							// if all the unexpected are in baselang then we're fpp_green
-							let aNotInBaseLang = aNotInBase.filter(x => !fntData.baselang.includes(x))
-							if (aNotInBaseLang.length == 0) {notation = fpp_green}
+						let count = aNotInBase.length + aMissing.length + aMissingSystem.length
+						if (count > 0) {
+							let tmpName = METRICN +'_health', tmpObj = {}
+							if (aMissing.length) {tmpObj['missing_bundled'] = aMissing}
+							if (aMissingSystem.length) {tmpObj['missing_system'] = aMissingSystem}
+							if (aNotInBase.length) {tmpObj['unexpected'] = aNotInBase}
+							addDetail(tmpName, tmpObj)
+							let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
+							notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
+							// FFP if all unexpected are in baselang then we're fpp_green
+							if (fntData.baselang.length) {
+								let aNotInBaseLang = aNotInBase.filter(x => !fntData.baselang.includes(x))
+								if (aNotInBaseLang.length == 0) {notation = fpp_green}
+							}
 						}
 					}
 					// names
