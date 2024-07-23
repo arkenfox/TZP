@@ -76,9 +76,9 @@ function get_timing(METRIC) {
 			}
 			// display: always show the last two
 			let lasttwo = '', len = aTotal.length
-			if (len > 12) {
+			if (len > 11) {
 				lasttwo = ' ... '+ aTotal[len-2] +', '+aTotal[len-1]
-				aTotal = aTotal.slice(0,10)
+				aTotal = aTotal.slice(0,9)
 			}
 			str = aTotal.join(', ') + lasttwo
 			data = aDiffs
