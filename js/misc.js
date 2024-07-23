@@ -22,7 +22,7 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
 		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
-		'other': [0, 16.6, 16.7, 33.3, 33.4, 50, 66.6, 66.7, 83.3, 83.4]
+		'other': [0, 0.1, 16.6, 16.7, 33.3, 33.4, 50, 66.6, 66.7, 83.3, 83.4]
 	}
 	let aNotInteger = ['mark','now','timestamp']
 	let str, data, notation, aFail = []
@@ -52,7 +52,6 @@ function get_timing(METRIC) {
 				start = start.slice(0,20) + start.slice(-2)+ '0'
 				start = (new Date(start))[Symbol.toPrimitive]('number')
 			}
-
 			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
