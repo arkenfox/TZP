@@ -603,7 +603,7 @@ const outputCanvas = () => new Promise(resolve => {
 							notation = check_canvas_get(name, 2) ? rfp_green : rfp_red
 						}
 						rfpvalue = notation == rfp_green ? ' | RFP' : ''
-						if ('getImageData' == name) {
+						if ('ge' == key) {
 							stats = isCanvasGet
 							data += ' | '+ isCanvasGetChannels
 						}
