@@ -625,7 +625,7 @@ function get_document_fonts(METRIC) {
 	return
 }
 
-const get_font_sizes = (isMain = true) => new Promise(resolve => {
+const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(resolve => {
 	/* getDimensions code based on https://github.com/abrahamjuliot/creepjs */
 	const id = 'font-fp'
 	try {
@@ -703,7 +703,7 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 			const transform = style.transformOrigin.split(' ')
 			const perspective = style.perspectiveOrigin.split(' ')
 			const dimensions = {
-				// keep in order for fontsizes_base_reported
+				// keep in order for font_sizes_base_reported
 				clientHeight: span.clientHeight,
 				clientWidth: span.clientWidth,
 				domrectboundingHeight: span.getBoundingClientRect().height,
@@ -868,7 +868,7 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 			if (error !== undefined) {
 				item[1].clear()
 				item[1].add(zErr)
-				addDisplay(12, name, log_error(12, 'fontsizes_'+ (name.slice(5).toLowerCase()), error))
+				addDisplay(12, name, log_error(12, METRIC +'_'+ (name.slice(5).toLowerCase()), error))
 			}
 		})
 
@@ -947,7 +947,7 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 			if (error !== undefined) {
 				item[1].clear()
 				item[1].add(zErr)
-				addDisplay(12, name, log_error(12, 'fontsizes_'+ (name.slice(5).toLowerCase()), error))
+				addDisplay(12, name, log_error(12, METRIC +'_'+ (name.slice(5).toLowerCase()), error))
 				delete fntBasesValid[name]
 			}
 		})
@@ -986,17 +986,16 @@ const get_font_sizes = (isMain = true) => new Promise(resolve => {
 			fontsDomRectClientRange,
 		})
 	} catch(e) {
-		if (isMain) {log_error(12, 'fontsizes', e)} else {console.error(e)}
+		if (isMain) {log_error(12, METRIC, e)} else {console.error(e)}
 		return resolve(zErr)
 	}
 })
 
-function get_fonts() {
+function get_fonts(METRIC) {
 	let t0 = nowFn()
-	const METRIC = 'fontsizes'
 	const METRICG = METRIC +'_groups'
 	const METRICB = METRIC +'_base'
-	const METRICN = 'fontnames'
+	const METRICN = 'font_names'
 	let badnotation = isTB ? tb_red : rfp_red
 	let goodnotation = isTB ? tb_green : rfp_green
 	let oDomList = {
@@ -1078,7 +1077,7 @@ function get_fonts() {
 		//console.log(res)
 		let firstBaseFont = fntData['control_name'][0]
 		let oData = {}, oValid = {}
-		// note: do not sort: these are fontnames:size and fntList was already sorted
+		// note: do not sort: these are font_names:size and fntList was already sorted
 		for (let name in res) {
 			let data = res[name]
 			if (data.length > 1 && data[0] !== zErr) { // non-errors
@@ -1782,7 +1781,7 @@ const outputFonts = () => new Promise(resolve => {
 	Promise.all([
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
 		get_script_defaults('script_defaults'),
-		get_fonts(), // uses fntDocEnabled
+		get_fonts('font_sizes'), // uses fntDocEnabled
 		get_system_fonts('moz_fonts'),
 		get_system_fonts('system_fonts'),
 		get_widget_fonts('widget_fonts'),
