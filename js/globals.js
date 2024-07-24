@@ -14,12 +14,12 @@ let sectionOrder = [], // numerical order for objects
 	sectionNos = {} // lookup numbers by name
 
 // ToDo: expand: some info can go into lies but we could create new items such as methods/tampered-data
-	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. fontsizes
+	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. font sizes
 const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 150
+	expectedMetrics = 151
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
