@@ -179,11 +179,84 @@ function get_mathml(METRIC) {
 	return
 }
 
+function get_widget_sizes(METRIC) {
+	let t0 = nowFn()
+	let hash, btn ='', data = {}
+	const id = 'form-fp'
+	let oList = {
+		button: '<input type="button">',
+		checkbox: '<input type="checkbox">',
+		checkbox_unstyled: '<input type="checkbox">',
+		color: '<input type="color">',
+		date: '<input type="date">',
+		"datetime-local": '<input type="datetime-local">',
+		details: '<details></details>',
+		directory: '<input webkitdirectory directory type="file">',
+		file: '<input type="file">',
+		files: '<input multiple="" type="file">',
+		image: '<input type="image">',
+		number: '<input type="number">',
+		radio: '<input type="radio">',
+		radio_unstyled: '<input type="radio">',
+		reset: '<input type="reset">',
+		select: '<select><option id="Y"></option></select>',
+		select_empty: '<select multiple=""><option></option></select>',
+		select_empty_option: '<select multiple=""><option></option></select>',
+		select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
+		select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
+		select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
+		select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
+		select_unstyled: '<select><option id="Y"></option></select>',
+		submit: '<input type="submit">',
+		time: '<input type="time">',
+	}
+	let width, height, x, y, range, method
+	try {
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		div.classList.add('measure')
+		div.classList.add("measureScale")
+		let parent = dom[id]
+		for (const k of Object.keys(oList)) {
+			// important to clear the div so no other elements can affect measurements
+			parent.innerHTML = ""
+			try {
+				parent.innerHTML = oList[k]
+				let target = parent.firstChild
+				target.setAttribute("style","display:inline;")
+				if (k.includes('_unstyled')) {target.classList.add('unstyled')}
+				if (k.includes('_option')) {target = target.lastElementChild}
+				// method
+				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
+				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+				} else if (isDomRect == 1) {method = target.getClientRects()[0]
+				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+				} else if (isDomRect > 2) {method = range.getClientRects()[0]
+				}
+				data[k] = [method.width, method.height, method.x, method.y]
+			} catch(e) {
+				data[k] = zErr
+				log_error(15, METRIC +'_'+ k, e)
+			}
+		}
+		hash = mini(data), btn = addButton(15, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	removeElementFn(id)
+	addBoth(15, METRIC, hash, btn,'', data, (isDomRect == -1))
+	log_perf(15, METRIC, t0)
+	return
+}
+
 const outputElements = () => new Promise(resolve => {
 	Promise.all([
 		get_element_keys('htmlelement_keys'),
-		get_lineheight('line-height'),
-		get_mathml('mathml'),
+		get_lineheight('line-height_sizes'),
+		get_mathml('mathml_sizes'),
+		get_widget_sizes('widget_sizes'),
 	]).then(function(){
 		return resolve()
 	})

@@ -687,7 +687,6 @@ function get_isDomRect() {
 	if (runSL) {aDomRect = [false, false, false, false]}
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
-
 	log_perf(SECTP, "isDomRect",t0,"", aDomRect.join(", ") +" | "+ isDomRect)
 	return
 }
@@ -1039,8 +1038,8 @@ function lookup_health(sect, metric, scope, isPass) {
 			let typeCheck = typeFn(data, true)
 			hash = data
 			// handle sDetailTemp: copy per run so it doesn't change in gData
-			if ('fontnames' == metric) {sDetailTemp = sDetail[scope]['fontnames_health']}
 			if (undefined !== sDetail[scope][metric]) {sDetailTemp = sDetail[scope][metric]}
+			if ('font_names' == metric) {sDetailTemp = sDetail[scope]['font_names_health']}
 			if (undefined !== sDetailTemp) {
 				let tmpCheck = typeFn(sDetailTemp)
 				if ('object' == tmpCheck) {

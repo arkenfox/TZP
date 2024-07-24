@@ -332,7 +332,7 @@ div.scrollthin {scrollbar-width: thin;}
 #tbfp td:first-child {color: var(--test99);}
 #tbperf td:first-child {color: var(--test99);}
 
-#lh-fp, #mathml-fp {
+#lh-fp, #mathml-fp, #font-fp, #form-fp, #glyph-fp {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -352,6 +352,11 @@ div.scrollthin {scrollbar-width: thin;}
 }
 .measureScale {
 	transform: scale(1.1234567); /* cause decimals */
+}
+.unstyled {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
 }
 
 /* TZP main */
