@@ -23,8 +23,10 @@ const outputCanvas = () => new Promise(resolve => {
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = '93bd94c5'
 	// FF95+: compression changes 1724331 / 1737038 
 	const oKnown = {
+		'ge_white': 'd5f8f171',
 		'isPointInPath': 'db0e3f08',
 		'isPointInStroke': 'a77e328a',
+		'to_white': '35e41537',
 		'toBlob': '3afc375a',
 		'toBlob_solid': '56ea6104',
 		'toDataURL': '3afc375a',
@@ -575,16 +577,23 @@ const outputCanvas = () => new Promise(resolve => {
 					let	data ='', notation ='', stats ='', rfpvalue =''
 					if (oRes[name][1] == value) {
 						// persistent
+						let isWhite = false
 						if ('is' == key) {
 							notation = (value === allZeros && !isProxyLie(proxyMap[name] +'.'+ name)) ? rfp_green : rfp_red // all zeros
 						} else {
 							notation = rfp_red
+							// all white
+							if (oKnown[key +'_white'] == value) {isWhite = true}
 							// FPP: 119+ and no proxy lies and no getImageData stealth
 							// exclude TB14+ as PB mode falls back to FPP with canvas exceptions
 							// exclude solids: FPP does not tamper with those
-							if (isVer > 119 && !isTB && !name.includes('_solid')) {
+							// exclude if all white | exclude if proxy lies
+							// note: isGetStealth is getImageData
+							if (!isWhite && isVer > 119 && !isTB && !name.includes('_solid')) {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
-									if (!isGetStealth) {notation = fpp_green}
+									if ('ge' == key && !isGetStealth || 'ge' !== key) {
+										notation = fpp_green 
+									}
 								}
 							}
 						}
@@ -593,8 +602,8 @@ const outputCanvas = () => new Promise(resolve => {
 							stats = isCanvasGet
 							rfpvalue += ' | '+ isCanvasGetChannels
 						}
-						notation += ' [persistent]'+ stats
-						data = 'protected | persistent'+ rfpvalue
+						notation += ' [persistent' + (isWhite ? ' white]' : ']'+ stats)
+						data = 'protected | persistent'+ (isWhite ? ' white' : rfpvalue)
 
 					} else {
 						// per execution
