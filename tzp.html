@@ -47,7 +47,7 @@
 		<div class="cssGraphite" style="font-size: 300px;"><span id="testGraphite">+</span><span id="ctrlGraphite">-</span></div>
 		<div id="elementFS" width=0 height=0></div>
 		<div id='divDPI' style='height: 1in; width: 1in;'></div>
-		<div class="normalized">
+		<div id='glyph-fp' class="normalized">
 			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
 			<div><canvas id="ugCanvas"></canvas></div>
 			<div><span id="dfsize"></span></div>
@@ -709,10 +709,10 @@
 		</td></tr>
 		<!--fonts-->
 		<tr><td></td><td><span class="s12">fonts</span></td></tr>
-		<tr><td>[groups] fonts <sup>3</sup></td><td class="c mono" id="fontsizes_groups"></td></tr>
+		<tr><td>[groups] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_groups"></td></tr>
 		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[ show ]</span>
 			[sizes | names] fonts <sup>3</sup></td>
-			<td class="mono"><span class="c" id="fontsizes"></span> | <span class="c" id="fontnames"></span></td>
+			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
 		</tr>
 		<tr class="togF"><td>client</td><td class="c mono" id="fontsClient"></td></tr>
 		<tr class="togF"><td>offset</td><td class="c mono" id="fontsOffset"></td></tr>
@@ -730,7 +730,7 @@
 		<tr class="togF"><td>client</td><td class="c mono" id="fontsDomRectClient"></td></tr>
 		<tr class="togF"><td>client range</td><td class="c mono border-bottom" id="fontsDomRectClientRange"></td></tr>
 
-		<tr><td>[base sizes] fonts <sup>3</sup></td><td class="c mono" id="fontsizes_base"></td></tr>
+		<tr><td>[base sizes] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_base"></td></tr>
 		<tr><td>[moz] fonts</td><td class="c mono" id="moz_fonts"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="system_fonts"></td></tr>
 		<tr><td>[widget] fonts</td><td class="c mono" id="widget_fonts"></td></tr>
@@ -859,10 +859,12 @@
 			&nbsp; DOMRect</td><td class="c mono" id="domrect"></td></tr>
 		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="htmlelement_keys"></td></tr>
 		<tr><td><a class="blue" href="tests/lineheight.html" target="blank">[PoC]</a>
-			&nbsp; line-height</td><td class="c mono" id="line-height"></td></tr>
+			&nbsp; line-height</td><td class="c mono" id="line-height_sizes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp; mathml</td><td class="c mono" id="mathml"></td></tr>
+			&nbsp; mathml</td><td class="c mono" id="mathml_sizes"></td></tr>
+		<tr><td><a class="blue" href="tests/elementforms.html" target="blank">[PoC]</a>
+			&nbsp; widgets</td><td class="c mono" id="widget_sizes"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code by </span><a target="_blank" class="blue"
 			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
