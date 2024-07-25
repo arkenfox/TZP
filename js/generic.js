@@ -1329,6 +1329,7 @@ function addButton(color, name, text = "details", btn = "btnc", scope = isScope)
 
 function addBoth(section, metric, str, btn ='', notation ='', data ='', isLies = false, donotuse ='x') {
 	//if ('x' !== donotuse) {console.log(metric, 'extra paramater passed')}
+	if (undefined == str) {str += ''}
 	let display = str
 	// check: errors can't be lies
 	if (data == zErr || data == zErrLog || data == zErrShort) {
@@ -1351,7 +1352,7 @@ function addBoth(section, metric, str, btn ='', notation ='', data ='', isLies =
 	addDisplay(section, metric, display, btn, notation, isLies)
 
 	// data = FP: if missing we use str/ which also doubles as our hash for objects
-	if (data == '') {data = str}
+	if ('' == data || undefined == data) {data = str}
 	addData(section, metric, data, str, isLies)
 }
 
