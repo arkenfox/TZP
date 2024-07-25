@@ -504,7 +504,7 @@ function get_isVer(METRIC) {
 
 	isVer = cascade()
 	if (isVer < isBlockMin[0]) {isVerExtra = " or lower"
-	} else if (isVer == 129) {isVerExtra = "+"}
+	} else if (isVer == 130) {isVerExtra = "+"}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin[0]
@@ -515,6 +515,9 @@ function get_isVer(METRIC) {
 
 	function cascade() {
 		try {
+			try {new RegExp('[\\00]','u')} catch(e) {
+				if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
+			}
 			if ("function" === typeof CSS2Properties
 				&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
 
