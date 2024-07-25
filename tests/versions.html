@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 80, maxVer = 129, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 81, maxVer = 130, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -278,6 +278,15 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 130: 1907236
+		let t130 = performance.now(), ver130 = false
+		try {
+			new RegExp('[\\00]','u')
+		} catch(e) {
+			if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') {ver130 = true}
+		}
+		rec(130, 130, "1907236", ver130, performance.now()-t130) // 0.025ms
 
 		// 129: 1595620
 		let t129 = performance.now()
@@ -712,7 +721,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 56, oOther = {}
+	let countOther = 0, expectOther = 57, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -729,6 +738,15 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 130: 1907369
+		let t130 = performance.now(), ver130 = false
+		try {
+			eval('class X { constructor() {} constructor() {} }') // eww, eval
+		} catch(e) {
+			if (e+'' == 'SyntaxError: a class cannot have more than one constructor definition') {ver130 = true}
+		}
+		rec(130, 130, "1907369", ver130, performance.now()-t130) // 0.09ms
 
 		// 129: 1796785
 		let t129 = performance.now(), ver129 = false

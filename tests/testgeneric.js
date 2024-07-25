@@ -553,7 +553,10 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 129
+		isVerMax = 130
+		try {new RegExp('[\\00]','u')} catch(e) {
+			if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
+		}
 		if ("function" === typeof CSS2Properties
 			&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
 
