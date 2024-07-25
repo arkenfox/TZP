@@ -321,6 +321,27 @@ function get_computed_styles(METRIC) {
 	})
 }
 
+function get_link(METRIC) {
+	// FF120+ 1858397: layout.css.always_underline_links
+	let value, data =''
+	if (!isGecko || isVer < 120) {
+		value = zNA
+	} else {
+		try {
+			let property = getComputedStyle(dom.link).textDecoration
+			if (runST) {property = null} else if (runSI) {property = 'x'}
+			let typeCheck = typeFn(property)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			if (!property.includes('rgb(')) {throw zErrInvalid +'got ' + property}
+			value = 'underline' == property.slice(0,9) ? zE : zD
+		} catch(e) {
+			value = e; data = zErrLog
+		}
+	}
+	addBoth(14, METRIC, value,'','', data)
+	return
+}
+
 function get_mm_css() {
 	// https://searchfox.org/mozilla-central/source/servo/components/style/gecko/media_features.rs#690
 
@@ -391,6 +412,7 @@ const outputCSS = () => new Promise(resolve => {
 		get_mm_css(),
 		get_colors(),
 		get_computed_styles('computed_styles'),
+		get_link('underline_links')
 	]).then(function(){
 		return resolve()
 	})
