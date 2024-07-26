@@ -262,7 +262,7 @@ function get_navigator_keys(METRIC) {
 			if (isMullvad) {
 				// MB has mediaDevices, mediaSession
 				if (115 == isVer && '161c395f' == hash) {notation = tb_green // 13.5 39
-				} else if (128 == isVer && 'e86e86ed' == hash) {notation = tb_green} // 14 44
+				} else if (128 == isVer && '17ad3a75' == hash) {notation = tb_green} // 14 42
 			} else {
 				if ('android' == isOS) {
 					// awaiting isTB android fix
@@ -435,15 +435,18 @@ function get_window_props(METRIC) {
 				// on touch devices: 0 (all false) 1 or 2 (all true)
 
 			if (isMullvad) {
-				if ('666609cb' == hash || '969877a9' == hash) {notation = tb_green} // MB13.5: 825 standard | 824 safer
+				if (115 == isVer) {
+					if ('666609cb' == hash || '969877a9' == hash) {notation = tb_green} // MB13.5: 825 standard | 824 safer
+				} else if (128 == isVer) {
+					if ('ab3ba8af' == hash || '2e54008d' == hash) {notation = tb_green} // MB14: 820 standard | 819 safer
+				}
 			} else {
 				if (isOS == 'android') {
 					// ToDo: we can't detect isTB on android
 				} else {
 					if (115 == isVer) {
 						if ('7d50bf8c' == hash || '7a49e32a' == hash) {notation = tb_green} // TB13.5: 776 standard | 775 safer #42315
-					}
-					if (128 == isVer) {
+					} else if (128 == isVer) {
 						if ('f83a05b0' == hash || '86e2c34e' == hash) {notation = tb_green} // TB14: 787 standard | 786 safer
 					}
 				}
