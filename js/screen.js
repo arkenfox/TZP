@@ -1428,7 +1428,7 @@ const outputFD = () => new Promise(resolve => {
 
 	// set isMullvad for diffs between TB vs MB; otherwise it _is_ TB in tests
 	if (gLoad && !isTB && 'android' !== isOS) {
-		let aMBVersions = [102, 115]
+		let aMBVersions = [102, 115, 128]
 		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
 			isMullvad = true
 			isTB = true
@@ -1440,9 +1440,6 @@ const outputFD = () => new Promise(resolve => {
 	}
 	// browser
 	addBoth(3, 'browser', (isMullvad ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
-
-
-
 
 	// eval
 	let METRIC = 'eval.toString'
