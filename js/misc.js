@@ -22,9 +22,10 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
 		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
-		'other': [0, 0.1, 16.6, 16.7, 33.3, 33.4, 50, 66.6, 66.7, 83.3, 83.4]
+		'other': [0, 16.66, 33.33, 50, 66.66, 83.33]
 	}
 	let aNotInteger = ['mark','now','timestamp']
+	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?')
 	let str, data, notation, aFail = []
 	sDetail.document[METRIC] = {}
 	sDetail.document[METRIC +'_data'] = {}
@@ -42,7 +43,8 @@ function get_timing(METRIC) {
 			sDetail.document[METRIC +'_data'][k] = aTimes
 			if ('string' == typeof aTimes) {throw aTimes}
 			// get diffs, check for null/boolean
-			let aDiffs = [], aTotal = [], start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
+			let aDiffs = [], aTotal = []
+			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
 			typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 
@@ -61,11 +63,12 @@ function get_timing(METRIC) {
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
-				let diff = ((end - start) % 100).toFixed(1) * 1 // drop hundreds
+				// truncate to 2 decimal places
+				let totaldiff = ((end - start).toString().match(calc)[0]) * 1
+				aTotal.push(totaldiff)
+				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
 				aDiffs.push(diff)
 				if (!aGood.includes(diff)) {isMatch = false}
-				let totaldiff = (end - start).toFixed(1) * 1
-				aTotal.push(totaldiff)
 			}
 			if (1 == aTotal.length) {isMatch = false}
 			if (isMatch) {
