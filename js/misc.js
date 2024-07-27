@@ -22,10 +22,10 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
 		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
-		'other': [0, 16.66, 33.33, 50, 66.66, 83.33]
+		'other': [0, 16.6, 33.3, 50, 66.6, 83.3]
 	}
 	let aNotInteger = ['mark','now','timestamp']
-	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?')
+	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
 	let str, data, notation, aFail = []
 	sDetail.document[METRIC] = {}
 	sDetail.document[METRIC +'_data'] = {}
@@ -63,7 +63,7 @@ function get_timing(METRIC) {
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
-				// truncate to 2 decimal places
+				// truncate to 1 decimal place
 				let totaldiff = ((end - start).toString().match(calc)[0]) * 1
 				aTotal.push(totaldiff)
 				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
