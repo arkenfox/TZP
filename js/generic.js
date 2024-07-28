@@ -1410,12 +1410,13 @@ function addDetail(metric, data, scope = isScope) {
 
 function addTiming(metric) {
 	let remainder = gCountTiming % 9, key, value
-	try {
-		if (0 == remainder) {
-			// get extra dates
-			try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+	if (0 == gCountTiming % 3) {
+		// get extra dates
+		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+	}
 
-		} else if (1 == remainder) {key = 'now'; value = performance.now()
+	try {
+		if (1 == remainder) {key = 'now'; value = performance.now()
 		} else if (4 == remainder) {key = 'timestamp'; value = new Event('').timeStamp
 		} else if (5 == remainder) {key = 'date'
 			value = (new Date())[Symbol.toPrimitive]('number')
