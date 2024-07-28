@@ -45,9 +45,7 @@ function get_timing(METRIC) {
 		if (undefined == aGood) {aGood = oGood.other}
 		// don't add to health, we do that with the parent metric
 		str ='', notation = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc
-		let isMatch = true, typeCheck
 		try {
-			// use gData.timing
 			let aTimes = gData.timing[k]
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
 			sDetail.document[METRIC +'_data'][k] = aTimes
@@ -55,7 +53,7 @@ function get_timing(METRIC) {
 			// get diffs, check for null/boolean
 			let setDiffs = new Set, aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
-			typeCheck = typeFn(start)
+			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 			if ('exslt' == k) {
 				// we use epoch time so each entry is always moving forward in time
@@ -63,7 +61,6 @@ function get_timing(METRIC) {
 				start = start.slice(0,20) + start.slice(-2)+ '0'
 				start = (new Date(start))[Symbol.toPrimitive]('number')
 			}
-			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
 				typeCheck = typeFn(end)
@@ -78,34 +75,39 @@ function get_timing(METRIC) {
 				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
 				setDiffs.add(diff)
 			}
-			let aDiffs = Array.from(setDiffs).sort(function(a, b){return a - b})
-			if (1 == aTotal.length) {isMatch = false
-			} else {
-				for (let i=0; i < aDiffs.length; i++) {
-					if (!aGood.includes(aDiffs[i])) {isMatch = false; break}
-				}
+			let aDiffs = Array.from(setDiffs)
+			let isMatch = (aTotal.length > 1), is10 = true, is100 = true
+			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
+			for (let i=0; i < aDiffs.length; i++) {
+				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
+				if (is10 && !oGood.exslt.includes(aDiffs[i])) {is10 = false}
+				if (is100 && 0 !== aDiffs[i]) {is100 = false}
 			}
+			// dates: other tests we can rely on non-integer, but not dates
+				// but we measure enough dates to not all land on 0's
+			if (is100 && 'date' == k) {isMatch = false}
 			if (isMatch) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 			} else {
-				aFail.push(k)
-				// ToDo: provide minimum gap: e.g. jShelter 10ms or 100ms
+				// add entropy e.g. jShelter 10ms or 100ms
+				let gap = is100 ? ' 100ms' : (is10 ? ' 10ms' : '')
+				aFail.push(k + gap)
 			}
 			// display
 			str = aTotal.join(', ')
 			if (str.length > 60) {
+				let reduce = Math.floor((str.length - 60)/5)
 				let len = aTotal.length
 				let lasttwo = ' &#x2026 '+ aTotal[len-2] +', '+aTotal[len-1]
-				aTotal = aTotal.slice(0,9)
-				if ((aTotal.join(', ') + lasttwo).length > 60) {aTotal = aTotal.slice(0,8)}
-				str = aTotal.join(', ') + lasttwo
+				let newTotal = aTotal.slice(0, len - (reduce + 2))
+				if ((newTotal.join(', ') + lasttwo).length > 60) {newTotal = newTotal.slice(0, len - (reduce + 3))}
+				str = newTotal.join(', ') + lasttwo
 			}
 			data = aDiffs
-			console.log(k, aDiffs)
+			//console.log(k, aDiffs, aTotal)
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
-			isMatch = false
 			aFail.push(k)
 		}
 		sDetail.document[METRIC][k] = data
