@@ -22,7 +22,17 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
 		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
-		'other': [0, 16.6, 33.3, 50, 66.6, 83.3]
+		'other': [
+			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
+			// the longer since the first time, the more decimal points drift
+			// so 0's become 0.1's then 0.2's etc: 6s seems to limit drift to 1 decimal point
+			0, 0.1, 0.2,
+			16.6, 16.7, 16.8, //16.9,
+			33.3, 33.4, 33.5,
+			50, 50.1, 50.2,
+			66.6, 66.7, 66.8, //66.9,
+			83.3, 83.4, 83.5
+		]
 	}
 	let aNotInteger = ['mark','now','timestamp']
 	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
@@ -43,11 +53,10 @@ function get_timing(METRIC) {
 			sDetail.document[METRIC +'_data'][k] = aTimes
 			if ('string' == typeof aTimes) {throw aTimes}
 			// get diffs, check for null/boolean
-			let aDiffs = [], aTotal = []
+			let setDiffs = new Set, aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
 			typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
-
 			if ('exslt' == k) {
 				// we use epoch time so each entry is always moving forward in time
 				// and to remove the leading 0 in ms
@@ -67,10 +76,15 @@ function get_timing(METRIC) {
 				let totaldiff = ((end - start).toString().match(calc)[0]) * 1
 				aTotal.push(totaldiff)
 				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
-				aDiffs.push(diff)
-				if (!aGood.includes(diff)) {isMatch = false}
+				setDiffs.add(diff)
 			}
-			if (1 == aTotal.length) {isMatch = false}
+			let aDiffs = Array.from(setDiffs)
+			if (1 == aTotal.length) {isMatch = false
+			} else {
+				for (let i=0; i < aDiffs.length; i++) {
+					if (!aGood.includes(aDiffs[i])) {isMatch = false; break}
+				}
+			}
 			if (isMatch) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 			} else {
@@ -78,13 +92,16 @@ function get_timing(METRIC) {
 				// ToDo: provide minimum gap: e.g. jShelter 10ms or 100ms
 			}
 			// display: always show the last two
-			let lasttwo = '', len = aTotal.length
-			if (len > 11) {
-				lasttwo = ' ... '+ aTotal[len-2] +', '+aTotal[len-1]
+			str = aTotal.join(', ')
+			if (str.length > 60) {
+				let len = aTotal.length
+				let lasttwo = ' &#x2026 '+ aTotal[len-2] +', '+aTotal[len-1]
 				aTotal = aTotal.slice(0,9)
+				if ((aTotal.join(', ') + lasttwo).length > 60) {aTotal = aTotal.slice(0,8)}
+				str = aTotal.join(', ') + lasttwo
 			}
-			str = aTotal.join(', ') + lasttwo
 			data = aDiffs
+			//console.log(k, setDiffs)
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
