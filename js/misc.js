@@ -78,7 +78,7 @@ function get_timing(METRIC) {
 				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
 				setDiffs.add(diff)
 			}
-			let aDiffs = Array.from(setDiffs)
+			let aDiffs = Array.from(setDiffs).sort(function(a, b){return a - b})
 			if (1 == aTotal.length) {isMatch = false
 			} else {
 				for (let i=0; i < aDiffs.length; i++) {
@@ -91,7 +91,7 @@ function get_timing(METRIC) {
 				aFail.push(k)
 				// ToDo: provide minimum gap: e.g. jShelter 10ms or 100ms
 			}
-			// display: always show the last two
+			// display
 			str = aTotal.join(', ')
 			if (str.length > 60) {
 				let len = aTotal.length
@@ -101,7 +101,7 @@ function get_timing(METRIC) {
 				str = aTotal.join(', ') + lasttwo
 			}
 			data = aDiffs
-			//console.log(k, setDiffs)
+			console.log(k, aDiffs)
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
