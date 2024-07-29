@@ -4,7 +4,8 @@
 
 function check_timing(type) {
 	let setTiming = new Set(), value
-	for (let i=1; i < 6 ; i++) {
+	let max = isPerf ? 10 : 100
+	for (let i=1; i < max ; i++) {
 		try {
 			if ('now' == type) {value = performance.now() - performance.now()
 			} else if ('timestamp' == type) {
@@ -14,23 +15,28 @@ function check_timing(type) {
 			} else if ('mark' == type) {
 				value = performance.mark('a').startTime - performance.mark('a').startTime
 			}
-			setTiming.add(Math.trunc(value))
+			value = Math.trunc(value)
+			//if (Math.abs(value) > 1) {break; return false}
+			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
 			break; return false
 		}
 	}
 	// should only ever be 1 value and it is 0
+	console.log(type, max, setTiming)
 	return (1 == setTiming.size && setTiming.has(0))
 }
 
 function get_timing(METRIC) {
+	// check isPerf again
+	if (isPerf) {get_isPerf(); console.log('isPerf', isPerf)}
+
 	// get a last value for each to ensure a max diff
 	try {gData.timing['now'].push(performance.now())} catch(e) {}
 	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
 	try {
 		gData.timing['mark'].push(performance.mark('a').startTime)
-		performance.clearMarks('a')
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 
