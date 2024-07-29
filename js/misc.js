@@ -123,6 +123,7 @@ function get_timing(METRIC) {
 			} else {
 				let noise = ''
 				if (isNoise) {
+					if ('date' == k) {if (is100 || is10) {isDateNoise = false}}
 					if (!is100 && !is10 || 'exslt' == k) {
 						useNoise = true
 					}
