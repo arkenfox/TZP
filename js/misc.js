@@ -115,7 +115,10 @@ function get_timing(METRIC) {
 			if ('date' == k) {if (is100 || is10) {isMatch = false}}
 			if ('exslt' == k) {
 				if (is100) {isMatch = false}
-				if (isNoise) {is100 = false; is10 = false}
+				if (isNoise) {
+					is100 = false
+					if ('10ms' !== oData['date']) {is10 = false}
+				}
 			}
 
 			//console.log(k, isNoise)
