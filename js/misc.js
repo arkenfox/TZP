@@ -12,12 +12,8 @@ function get_timing(METRIC) {
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 
-	// catch noise: e.g. JShelter
-	try {
-		if (0 !== Math.trunc(performance.now() - performance.now())) {throw zErrInvalid +'expected 0'}
-	} catch(e) {
-		gData.timing['now'] = e+''
-	}
+	// catch noise
+	if (!isPerf) {gData.timing['now'] = zErrInvalid + 'tampered'}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
