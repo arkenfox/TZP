@@ -696,11 +696,13 @@ function get_isDomRect() {
 
 function get_isPerf() {
 	isPerf = false
-	let setTiming = new Set(), value
-	for (let i=1; i < 6 ; i++) {
-		try {setTiming.add(Math.trunc(performance.now() - performance.now()))} catch(e) {break; return}
+	for (let i=1; i < 50 ; i++) {
+		try {
+			let value = Math.trunc(performance.now() - performance.now())
+			if (Math.abs(value) > 1) {break; return}
+		} catch(e) {break; return}
 	}
-	isPerf = (1 == setTiming.size && setTiming.has(0))
+	isPerf = true
 }
 
 /** CLICKING **/
@@ -1106,7 +1108,6 @@ function output_health(scope) {
 }
 
 function output_perf(id, click = false) {
-	if (isPerf) {get_isPerf()}
 	if (!isPerf) {return}
 
 	let array = id == "all" ? gData["perf"] : sDataTemp["perf"]
