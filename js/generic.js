@@ -695,17 +695,12 @@ function get_isDomRect() {
 }
 
 function get_isPerf() {
-	try {
-		// run twice: sometimes we get a false positive since we run it so early
-		isPerf = Math.trunc(performance.now() - performance.now()) == 0
-		isPerf = Math.trunc(performance.now() - performance.now()) == 0
-		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
-		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
-		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
-		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
-	} catch(e) {
-		isPerf = false
+	isPerf = false
+	let setTiming = new Set(), value
+	for (let i=1; i < 6 ; i++) {
+		try {setTiming.add(Math.trunc(performance.now() - performance.now()))} catch(e) {break; return}
 	}
+	isPerf = (1 == setTiming.size && setTiming.has(0))
 }
 
 /** CLICKING **/
@@ -1827,16 +1822,16 @@ function outputSection(id, isResize = false) {
 
 	function output() {
 		if ('all' == id) {
-			// get values as soon as possible
+			// get a first value for each to ensure a max diff
 			try {gData.timing['now'].push(performance.now())} catch(e) {}
 			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
 			try {
-				gData.timing['mark'].push(performance.mark('a').startTime)
 				performance.clearMarks('a')
+				gData.timing['mark'].push(performance.mark('a').startTime)
 			} catch(e) {}
-
 			addTiming('start')
 			gCountTiming = 0
+
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
 			let order = [
