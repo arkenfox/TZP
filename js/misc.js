@@ -3,7 +3,6 @@
 /* TIMING */
 
 function check_timing(type) {
-console.log(type)
 	let setTiming = new Set(), value
 	for (let i=1; i < 6 ; i++) {
 		try {
