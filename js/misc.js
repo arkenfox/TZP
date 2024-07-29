@@ -58,7 +58,7 @@ function get_timing(METRIC) {
 	}
 	let aNotInteger = ['mark','now','timestamp']
 	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
-	let str, data, notation, aFail = []
+	let str, data, notation, oData = {}, countFail = 0
 	sDetail.document[METRIC] = {}
 	sDetail.document[METRIC +'_data'] = {}
 	let isDateNoise = false
@@ -79,7 +79,7 @@ function get_timing(METRIC) {
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 			// catch noise
-			let isNoise = 'exslt' == k ? false : check_timing(k)
+			let isNoise = 'exslt' == k ? false : !check_timing(k)
 			if ('date' == k) {isDateNoise = isNoise}
 			if ('exslt' == k) {
 				isNoise = isDateNoise
@@ -113,15 +113,24 @@ function get_timing(METRIC) {
 			// dates: other tests we can rely on non-integer, but not dates
 				// but we measure enough dates to not all land on 0's (or 50's and 100s)
 			if ('date' == k) {if (is100 || is10) {isMatch = false}}
-			if (isMatch) {
+			if ('exslt' == k && is100) {isMatch = false}
+
+			//console.log(k, isNoise)
+			let useNoise = false
+			if (isMatch && !isNoise) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
+				oData[k] = 'exslt' == k ? '10ms' : 'RFP'
 			} else {
-				if (!is100 && !is10) {
-					if (isNoise) {throw zErrInvalid + ' noise'}
+				let noise = ''
+				if (isNoise) {
+					if (!is100 && !is10 || 'exslt' == k) {
+						useNoise = true
+					}
 				}
-				// add entropy e.g. jShelter 10ms or 100ms
-				let gap = is100 ? ' 100ms' : (is10 ? ' 10ms' : '')
-				aFail.push(k + gap)
+				// add entropy e.g. jShelter 10ms or 100ms or noise
+				let gap = useNoise ? 'noise' : (is100 ? '100ms' : (is10 ? '10ms' : ''))
+				oData[k] = gap
+				countFail++
 			}
 			// display
 			str = aTotal.join(', ')
@@ -138,19 +147,20 @@ function get_timing(METRIC) {
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
-			aFail.push(k)
+			oData[k] = zErr
+			countFail++
 		}
 		sDetail.document[METRIC][k] = data
 		addDisplay(17, METRIC +'_'+ k, str,'', notation)
 	})
-	let countProtected = gTiming.length - aFail.length
+	// display
+	let countProtected = gTiming.length - countFail
 	let isProtected = countProtected == gTiming.length
 	notation = isProtected ? rfp_green : rfp_red
-	str = countProtected +'/' + gTiming.length +' protected'
-	data = isProtected ? 'protected' : 'unprotected: '+ aFail.join(', ')
-	let btn = addButton(17, METRIC +'_data', 'data')
-	// append the btn to str since the metric is not an object: see addBoth() logic
-	addBoth(17, METRIC, str + btn,'', notation, data)
+	str = countProtected +'/' + gTiming.length
+	let btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
+	// data
+	addBoth(17, METRIC, mini(oData), btn, notation, oData)
 	return
 }
 
