@@ -699,6 +699,10 @@ function get_isPerf() {
 		// run twice: sometimes we get a false positive since we run it so early
 		isPerf = Math.trunc(performance.now() - performance.now()) == 0
 		isPerf = Math.trunc(performance.now() - performance.now()) == 0
+		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
+		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
+		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
+		if (isPerf) {isPerf = Math.trunc(performance.now() - performance.now()) == 0}
 	} catch(e) {
 		isPerf = false
 	}
