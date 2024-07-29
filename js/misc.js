@@ -4,7 +4,7 @@
 
 function check_timing(type) {
 	let setTiming = new Set(), value, result = true
-	let max = isPerf ? 10 : 100
+	let max = isPerf ? 10 : 200
 	for (let i=1; i < max ; i++) {
 		try {
 			if ('now' == type) {value = performance.now() - performance.now()
@@ -16,15 +16,14 @@ function check_timing(type) {
 				value = performance.mark('a').startTime - performance.mark('a').startTime
 			}
 			value = Math.trunc(value)
-			if (0 !== value && -1 !== value) {result = false} //{break; return false}
+			if (0 !== value && -1 !== value) {result = false} //{return false}
 			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
-			break; return false
+			return false
 		}
 	}
-	// should only ever be 1 value and it is 0
-	console.log(type, max, setTiming)
+	if (false == result) {console.log(type, max, setTiming)}
 	return result
 }
 
@@ -62,6 +61,7 @@ function get_timing(METRIC) {
 	let str, data, notation, aFail = []
 	sDetail.document[METRIC] = {}
 	sDetail.document[METRIC +'_data'] = {}
+	let isDateNoise = false
 
 	gTiming.forEach(function(k){
 		let aGood = oGood[k]
@@ -79,11 +79,10 @@ function get_timing(METRIC) {
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
 			// catch noise
-			if ('exslt' !== k) {
-				let chk = check_timing(k)
-				if (!chk) {throw zErrInvalid + 'tampered'}
-			}
+			let isNoise = 'exslt' == k ? false : check_timing(k)
+			if ('date' == k) {isDateNoise = isNoise}
 			if ('exslt' == k) {
+				isNoise = isDateNoise
 				// we use epoch time so each entry is always moving forward in time
 				// and to remove the leading 0 in ms
 				start = start.slice(0,20) + start.slice(-2)+ '0'
@@ -112,11 +111,14 @@ function get_timing(METRIC) {
 				if (is100 && 0 !== aDiffs[i]) {is100 = false}
 			}
 			// dates: other tests we can rely on non-integer, but not dates
-				// but we measure enough dates to not all land on 0's
-			if (is100 && 'date' == k) {isMatch = false}
+				// but we measure enough dates to not all land on 0's (or 50's and 100s)
+			if ('date' == k) {if (is100 || is10) {isMatch = false}}
 			if (isMatch) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 			} else {
+				if (!is100 && !is10) {
+					if (isNoise) {throw zErrInvalid + ' noise'}
+				}
 				// add entropy e.g. jShelter 10ms or 100ms
 				let gap = is100 ? ' 100ms' : (is10 ? ' 10ms' : '')
 				aFail.push(k + gap)
