@@ -4,7 +4,7 @@
 
 function check_timing(type) {
 	let setTiming = new Set(), value, result = true
-	let max = isPerf ? 10 : 200
+	let max = isPerf ? 10 : 500
 	for (let i=1; i < max ; i++) {
 		try {
 			if ('now' == type) {value = performance.now() - performance.now()
@@ -116,20 +116,13 @@ function get_timing(METRIC) {
 			if ('exslt' == k && is100) {isMatch = false}
 
 			//console.log(k, isNoise)
-			let useNoise = false
 			if (isMatch && !isNoise) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
 				oData[k] = 'exslt' == k ? '10ms' : 'RFP'
 			} else {
-				let noise = ''
-				if (isNoise) {
-					if ('date' == k) {if (is100 || is10) {isDateNoise = false}}
-					if (!is100 && !is10 || 'exslt' == k) {
-						useNoise = true
-					}
-				}
 				// add entropy e.g. jShelter 10ms or 100ms or noise
-				let gap = useNoise ? 'noise' : (is100 ? '100ms' : (is10 ? '10ms' : ''))
+				// order is 100, 10, noise, nothing
+				let gap = is100 ? '100ms' : (is10 ? '10ms' : (isNoise ? 'noise' : ''))
 				oData[k] = gap
 				countFail++
 			}
