@@ -43,9 +43,9 @@ function get_timing(METRIC) {
 		str ='', notation = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc
 		try {
 			let aTimes = gData.timing[k]
+			if ('string' == typeof aTimes) {throw aTimes}
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
 			sDetail.document[METRIC +'_data'][k] = aTimes
-			if ('string' == typeof aTimes) {throw aTimes}
 			// get diffs, check for null/boolean
 			let setDiffs = new Set, aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
