@@ -2,6 +2,29 @@
 
 /* TIMING */
 
+function check_timing(type) {
+console.log(type)
+	let setTiming = new Set(), value
+	for (let i=1; i < 6 ; i++) {
+		try {
+			if ('now' == type) {value = performance.now() - performance.now()
+			} else if ('timestamp' == type) {
+				value = new Event('').timeStamp - new Event('').timeStamp
+			} else if ('date' == type) {
+				value = (new Date())[Symbol.toPrimitive]('number') - (new Date())[Symbol.toPrimitive]('number')
+			} else if ('mark' == type) {
+				value = performance.mark('a').startTime - performance.mark('a').startTime
+			}
+			setTiming.add(Math.trunc(value))
+		} catch(e) {
+			// we would have already captured errors
+			break; return false
+		}
+	}
+	// should only ever be 1 value and it is 0
+	return (1 == setTiming.size && setTiming.has(0))
+}
+
 function get_timing(METRIC) {
 	// get a last value for each to ensure a max diff
 	try {gData.timing['now'].push(performance.now())} catch(e) {}
@@ -11,9 +34,6 @@ function get_timing(METRIC) {
 		performance.clearMarks('a')
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
-
-	// catch noise
-	if (!isPerf) {gData.timing['now'] = zErrInvalid + 'tampered'}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
@@ -47,10 +67,15 @@ function get_timing(METRIC) {
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
 			sDetail.document[METRIC +'_data'][k] = aTimes
 			// get diffs, check for null/boolean
-			let setDiffs = new Set, aTotal = []
+			let setDiffs = new Set(), aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
+			// catch noise
+			if ('exslt' !== k) {
+				let chk = check_timing(k)
+				if (!chk) {throw zErrInvalid + 'tampered'}
+			}
 			if ('exslt' == k) {
 				// we use epoch time so each entry is always moving forward in time
 				// and to remove the leading 0 in ms
