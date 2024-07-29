@@ -1106,6 +1106,7 @@ function output_health(scope) {
 }
 
 function output_perf(id, click = false) {
+	if (isPerf) {get_isPerf()}
 	if (!isPerf) {return}
 
 	let array = id == "all" ? gData["perf"] : sDataTemp["perf"]
