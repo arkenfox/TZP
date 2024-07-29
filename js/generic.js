@@ -699,8 +699,8 @@ function get_isPerf() {
 	for (let i=1; i < 50 ; i++) {
 		try {
 			let value = Math.trunc(performance.now() - performance.now())
-			if (Math.abs(value) > 1) {break; return}
-		} catch(e) {break; return}
+			if (0 !== value && -1 !== value) {return}
+		} catch(e) {return}
 	}
 	isPerf = true
 }
