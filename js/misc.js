@@ -113,7 +113,10 @@ function get_timing(METRIC) {
 			// dates: other tests we can rely on non-integer, but not dates
 				// but we measure enough dates to not all land on 0's (or 50's and 100s)
 			if ('date' == k) {if (is100 || is10) {isMatch = false}}
-			if ('exslt' == k && is100) {isMatch = false}
+			if ('exslt' == k) {
+				if (is100) {isMatch = false}
+				if (isNoise) {is100 = false; is10 = false}
+			}
 
 			//console.log(k, isNoise)
 			if (isMatch && !isNoise) {
@@ -122,8 +125,7 @@ function get_timing(METRIC) {
 			} else {
 				// add entropy e.g. jShelter 10ms or 100ms or noise
 				// order is 100, 10, noise, nothing
-				let gap = is100 ? '100ms' : (is10 ? '10ms' : (isNoise ? 'noise' : ''))
-				oData[k] = gap
+				oData[k] = is100 ? '100ms' : (is10 ? '10ms' : (isNoise ? 'noise' : ''))
 				countFail++
 			}
 			// display
