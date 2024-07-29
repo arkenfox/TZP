@@ -3,7 +3,7 @@
 /* TIMING */
 
 function check_timing(type) {
-	let setTiming = new Set(), value
+	let setTiming = new Set(), value, result = true
 	let max = isPerf ? 10 : 100
 	for (let i=1; i < max ; i++) {
 		try {
@@ -16,7 +16,7 @@ function check_timing(type) {
 				value = performance.mark('a').startTime - performance.mark('a').startTime
 			}
 			value = Math.trunc(value)
-			//if (Math.abs(value) > 1) {break; return false}
+			if (0 !== value && -1 !== value) {result = false} //{break; return false}
 			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
@@ -25,12 +25,14 @@ function check_timing(type) {
 	}
 	// should only ever be 1 value and it is 0
 	console.log(type, max, setTiming)
-	return (1 == setTiming.size && setTiming.has(0))
+	return result
 }
 
 function get_timing(METRIC) {
 	// check isPerf again
-	if (isPerf) {get_isPerf(); console.log('isPerf', isPerf)}
+	if (isPerf) {
+		get_isPerf(); console.log('isPerf', isPerf)
+	}
 
 	// get a last value for each to ensure a max diff
 	try {gData.timing['now'].push(performance.now())} catch(e) {}
