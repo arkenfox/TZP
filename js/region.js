@@ -140,6 +140,9 @@ function set_isLanguageSmart() {
 		'zh-CN': ['zh, zh-TW, zh-HK, '+ en, 'zh-Hans-CN'],
 		'zh-TW': ['zh, '+ en, 'zh-Hant-TW'],
 	}
+	// these are current stable TB hashes since last checked
+		// note: upstream ESR seems to pick up stable l10n changes
+	// last checked 13.5.1
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
 		'ar': {m: '1f9a06e3', v: '1dfb5b8c', x: 'ebfbdc43'},
@@ -184,12 +187,18 @@ function set_isLanguageSmart() {
 		'ru': {m: '8e9b7945', v: '2391fbec', x: '2178a2b6'},
 		'sq': {m: '91943e67', v: 'e0259277', x: 'a732eca1'},
 		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '80f52165'},
-		'th': {m: 'a32d70a7', v: '8448474c', x: 'e29567ce'},
-		'tr': {m: '4217ef80', v: '169730ca', x: '1e9d0192'},
-		'uk': {m: '3e2b3e39', v: '24cce2c1', x: 'cc85d2f5'},
+		'th': {m: 'a32d70a7', v: '07358a87', x: 'e29567ce'},
+		'tr': {m: '4217ef80', v: '5048d312', x: 'e16dd3c7'},
+		'uk': {m: '3e2b3e39', v: '0163f51d', x: 'cc85d2f5'},
 		'vi': {m: 'bba6c980', v: 'b8137d59', x: '7cf3c6f9'},
-		'zh-Hans-CN': {m: '550ea53e', v:'55d25655', x: '328cc79b'},
+		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '328cc79b'},
 		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '87abb9fa'},
+	}
+	// 115 vs 128 changes
+	if (isVer > 115) {
+		localesSupported['is']['v'] = '6bbe7a8f'
+		localesSupported['ja']['x'] = '46faea8b'
+		localesSupported['uk']['v'] = '0163f51d'
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
