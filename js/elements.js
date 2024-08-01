@@ -198,6 +198,7 @@ function get_widget_sizes(METRIC) {
 		number: '',
 		radio: '',
 		radio_unstyled: '<input type="radio">',
+		range: '',
 		reset: '',
 		select: '<select><option></option></select>',
 		select_empty: '<select multiple=""><option></option></select>',
