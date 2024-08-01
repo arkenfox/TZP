@@ -11,10 +11,10 @@
 	<style>
 		table {width: 97%; min-width: 780px; max-width: 780px}
 		.formsfixed {
+			position: fixed;
 			top: 0;
 			left: 0;
 			padding: 0px;
-			position: fixed;
 			display: inline;
 			width:fit-content;
 			height:fit-content;
@@ -69,7 +69,8 @@
 					<select style="display:inline;" multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option></select> &nbsp;
 					<select style="display:inline;" multiple=""><option>Mōá?-&#xffff;</option></select>
 				</p>
-				<span class="native"><details style="display:inline;"></details></span>
+				<p class="native"><details style="display:inline;"></details></p>
+				<p class="native"><input style="display:inline;" type="range" min="0" max="2" value="1"></p>
 			</div>
 		</div>
 	</div>
@@ -92,7 +93,7 @@
 			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
 			<span class="no_color" id="custom">
 				<input id="optTransform" checked type="checkbox"> &nbsp; transform  &nbsp; <input id="optExpand" type="checkbox"> &nbsp; all inputs
-				<input id="optVertical" type="checkbox"> &nbsp; vertical  &nbsp; <input id="optUnstyled" type="checkbox"> &nbsp; unstyled
+				<input id="optVertical" checked type="checkbox"> &nbsp; vertical  &nbsp; <input id="optUnstyled" type="checkbox"> &nbsp; unstyled
 			</span> &nbsp; | &nbsp;
 			<span class="no_color">
 				<input id="optEverything" onChange="style_everything()" type="checkbox"> &nbsp; everything
@@ -116,7 +117,7 @@ let oData = {}
 dom.demoNative.checked = true
 dom.optTransform.checked = true
 dom.optExpand.checked = false
-dom.optVertical.checked = false
+dom.optVertical.checked = true
 dom.optUnstyled.checked = false
 dom.optEverything.checked = false
 
@@ -207,6 +208,7 @@ function get_elements() {
 		image: '<input id="X" type="image">',
 		number: '<input id="X" type="number">',
 		radio: '<input id="X" type="radio">',
+		range: '<input id="X" type="range">',
 		reset: '<input id="X" type="reset">',
 		submit: '<input id="X" type="submit">',
 		time: '<input id="X" type="time">',
@@ -221,6 +223,7 @@ function get_elements() {
 		// redundant: should always = number
 		datetime: '<input id="X" type="datetime">',
 		email: '<input id="X" type="email">',
+		hidden: '<input id="X" type="hidden">',
 		month: '<input id="X" type="month">',
 		password: '<input id="X" type="password">',
 		search: '<input id="X" type="search">',
@@ -373,7 +376,7 @@ function get_elements() {
 
 		if (isFile && isEverything && isLocale == "en-US") {
 			// checking TB13 spoof english on my setup
-			notation = (hash == "75ea12cd" ? green_tick: red_cross)
+			notation = (hash == "17146500" ? green_tick: red_cross)
 		}
 		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
 		let display = [], tmphash = ""
@@ -428,6 +431,10 @@ Promise.all([
 	get_globals()
 ]).then(function(){
 	run()
+	if (isFile) {
+		dom.optEverything.checked = true
+		style_everything()
+	}
 })
 
 </script>
