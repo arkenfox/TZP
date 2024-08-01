@@ -184,32 +184,45 @@ function get_widget_sizes(METRIC) {
 	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 	const id = 'form-fp'
 	let oList = {
-		button: '',
-		checkbox: '',
-		checkbox_unstyled: '<input type="checkbox">',
-		color: '',
-		date: '',
-		"datetime-local": '',
-		details: '<details></details>',
-		directory: '<input webkitdirectory directory type="file">',
-		file: '',
-		files: '<input multiple="" type="file">',
-		image: '',
-		number: '',
-		radio: '',
-		radio_unstyled: '<input type="radio">',
-		range: '',
-		reset: '',
-		select: '<select><option></option></select>',
-		select_empty: '<select multiple=""><option></option></select>',
-		select_empty_option: '<select multiple=""><option></option></select>',
-		select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-		select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
-		select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-		select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-		select_unstyled: '<select><option></option></select>',
-		submit: '',
-		time: '',
+		'native': {
+			button: '',
+			checkbox: '',
+			color: '',
+			date: '',
+			"datetime-local": '',
+			details: '<details></details>',
+			directory: '<input webkitdirectory directory type="file">',
+			file: '',
+			files: '<input multiple="" type="file">',
+			image: '',
+			month: '',
+			number: '',
+			progress: '<progress></progress>',
+			radio: '',
+			range: '',
+			reset: '',
+			select: '<select><option></option></select>',
+			select_empty: '<select multiple=""><option></option></select>',
+			select_empty_option: '<select multiple=""><option></option></select>',
+			select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
+			select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
+			select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
+			select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
+			submit: '',
+			textarea: '<textarea></textarea>',
+			textarea_3x5: '<textarea cols="5" rows="3"></textarea>',
+			time: '',
+			week: '',
+			// month + week are same as number but not in chrome | gecko may follow suit
+		},
+		'unstyled': {
+			// differ on windows
+			// ToDo: check linux/mac/android
+			checkbox: '',
+			progress: '<progress></progress>',
+			radio: '',
+			select: '<select><option></option></select>',
+		}
 	}
 	let width, height, x, y, range, method
 	try {
@@ -220,36 +233,42 @@ function get_widget_sizes(METRIC) {
 		div.classList.add('measure')
 		div.classList.add("measureScale")
 		let parent = dom[id]
-		for (const k of Object.keys(oList)) {
-			// important to clear the div so no other elements can affect measurements
-			parent.innerHTML = ""
-			try {
-				parent.innerHTML = ('' == oList[k] ? '<input type="'+ k +'">' : oList[k])
-				let target = parent.firstChild
-				// vertical seems to create subpixels in width before transform
-				target.setAttribute("style","display:inline; writing-mode: vertical-lr;") 
-				if (k.includes('_unstyled')) {target.classList.add('unstyled')}
-				if (k.includes('_option')) {target = target.lastElementChild}
-				// method
-				if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
-				if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
-				} else if (isDomRect == 1) {method = target.getClientRects()[0]
-				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
-				} else if (isDomRect > 2) {method = range.getClientRects()[0]
+		for (const key of Object.keys(oList)) {
+			tmpdata[key] = {}, newobj[key] = {}, data[key] = {}
+			for (const k of Object.keys(oList[key])) {
+				// important to clear the div so no other elements can affect measurements
+				parent.innerHTML = ""
+				try {
+					parent.innerHTML = ('' == oList[key][k] ? '<input type="'+ k +'">' : oList[key][k])
+					let target = parent.firstChild
+					// vertical seems to create subpixels in width before transform
+					target.setAttribute("style","display:inline; writing-mode: vertical-lr;") 
+					if ('unstyled' == key) {target.classList.add('unstyled')}
+					if (k.includes('_option')) {target = target.lastElementChild}
+					// method
+					if (isDomRect > 1) {range = document.createRange(); range.selectNode(target)}
+					if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+					} else if (isDomRect == 1) {method = target.getClientRects()[0]
+					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+					} else if (isDomRect > 2) {method = range.getClientRects()[0]
+					}
+					let itemdata = [method.width, method.height, method.x, method.y]
+					let itemhash = mini(itemdata)
+					if (undefined == tmpdata[key][itemhash]) {tmpdata[key][itemhash] = {'data': itemdata, 'group': [k]}
+					} else {tmpdata[key][itemhash]['group'].push(k)}
+				} catch(e) {
+					newobj[key][k] = zErr
+					log_error(15, METRIC +'_'+ k + ('unstyled' == key ? '_unstyled' : ''), e)
 				}
-				let itemdata = [method.width, method.height, method.x, method.y]
-				let itemhash = mini(itemdata)
-				if (undefined == tmpdata[itemhash]) {tmpdata[itemhash] = {'data': itemdata, 'group': [k]}
-				} else {tmpdata[itemhash]['group'].push(k)}
-			} catch(e) {
-				newobj[k] = zErr
-				log_error(15, METRIC +'_'+ k, e)
 			}
 		}
 		// group by results
-		let groupdata = {}
-		for (const k of Object.keys(tmpdata)) {newobj[tmpdata[k].group.join(' ')] = tmpdata[k]['data']}
-		for (const k of Object.keys(newobj).sort()) {data[k] = newobj[k]}
+		for (const key of Object.keys(tmpdata)) {
+			for (const k of Object.keys(tmpdata[key])) {newobj[key][tmpdata[key][k].group.join(' ')] = tmpdata[key][k]['data']}
+		}
+		for (const key of Object.keys(newobj)) {
+			for (const k of Object.keys(newobj[key]).sort()) {data[key][k] = newobj[key][k]}
+		}
 		hash = mini(data), btn = addButton(15, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
