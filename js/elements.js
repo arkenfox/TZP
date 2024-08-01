@@ -181,34 +181,34 @@ function get_mathml(METRIC) {
 
 function get_widget_sizes(METRIC) {
 	let t0 = nowFn()
-	let hash, btn ='', data = {}
+	let hash, btn ='', data = {}, tmpdata = {}, newobj = {}
 	const id = 'form-fp'
 	let oList = {
-		button: '<input type="button">',
-		checkbox: '<input type="checkbox">',
+		button: '',
+		checkbox: '',
 		checkbox_unstyled: '<input type="checkbox">',
-		color: '<input type="color">',
-		date: '<input type="date">',
-		"datetime-local": '<input type="datetime-local">',
+		color: '',
+		date: '',
+		"datetime-local": '',
 		details: '<details></details>',
 		directory: '<input webkitdirectory directory type="file">',
-		file: '<input type="file">',
+		file: '',
 		files: '<input multiple="" type="file">',
-		image: '<input type="image">',
-		number: '<input type="number">',
-		radio: '<input type="radio">',
+		image: '',
+		number: '',
+		radio: '',
 		radio_unstyled: '<input type="radio">',
-		reset: '<input type="reset">',
-		select: '<select><option id="Y"></option></select>',
+		reset: '',
+		select: '<select><option></option></select>',
 		select_empty: '<select multiple=""><option></option></select>',
 		select_empty_option: '<select multiple=""><option></option></select>',
 		select_spaces: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
 		select_spaces_option: '<select multiple=""><option> &nbsp;  &nbsp;  &nbsp; </option>"</select>',
 		select_string: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
 		select_string_option: '<select multiple=""><option>Mōá?-&#xffff;</option></select>',
-		select_unstyled: '<select><option id="Y"></option></select>',
-		submit: '<input type="submit">',
-		time: '<input type="time">',
+		select_unstyled: '<select><option></option></select>',
+		submit: '',
+		time: '',
 	}
 	let width, height, x, y, range, method
 	try {
@@ -223,9 +223,10 @@ function get_widget_sizes(METRIC) {
 			// important to clear the div so no other elements can affect measurements
 			parent.innerHTML = ""
 			try {
-				parent.innerHTML = oList[k]
+				parent.innerHTML = ('' == oList[k] ? '<input type="'+ k +'">' : oList[k])
 				let target = parent.firstChild
-				target.setAttribute("style","display:inline;")
+				// vertical seems to create subpixels in width before transform
+				target.setAttribute("style","display:inline; writing-mode: vertical-lr;") 
 				if (k.includes('_unstyled')) {target.classList.add('unstyled')}
 				if (k.includes('_option')) {target = target.lastElementChild}
 				// method
@@ -235,12 +236,19 @@ function get_widget_sizes(METRIC) {
 				} else if (isDomRect == 2) {method = range.getBoundingClientRect()
 				} else if (isDomRect > 2) {method = range.getClientRects()[0]
 				}
-				data[k] = [method.width, method.height, method.x, method.y]
+				let itemdata = [method.width, method.height, method.x, method.y]
+				let itemhash = mini(itemdata)
+				if (undefined == tmpdata[itemhash]) {tmpdata[itemhash] = {'data': itemdata, 'group': [k]}
+				} else {tmpdata[itemhash]['group'].push(k)}
 			} catch(e) {
-				data[k] = zErr
+				newobj[k] = zErr
 				log_error(15, METRIC +'_'+ k, e)
 			}
 		}
+		// group by results
+		let groupdata = {}
+		for (const k of Object.keys(tmpdata)) {newobj[tmpdata[k].group.join(' ')] = tmpdata[k]['data']}
+		for (const k of Object.keys(newobj).sort()) {data[k] = newobj[k]}
 		hash = mini(data), btn = addButton(15, METRIC)
 	} catch(e) {
 		hash = e; data = zErrLog
