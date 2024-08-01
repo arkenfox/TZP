@@ -59,6 +59,8 @@
 				</p>
 				<p class="native"><input style="display:inline;" type="date"> &nbsp; <input style="display:inline;" type="time"></p>
 				<p class="native"><input style="display:inline;" type="datetime-local"></p>
+				<!-- week/month for chrome-->
+				<p class="native"><input style="display:inline;" type="month"> &nbsp; <input style="display:inline;" type="week"></p>
 				<p class="native"><input style="display:inline;" type="file" webkitdirectory directory></p>
 				<p class="native"><input style="display:inline;" type="file" ></p>
 				<p class="native"><input style="display:inline;" type="file" multiple=""></p>
@@ -223,7 +225,6 @@ function get_elements() {
 		// redundant: should always = number
 		datetime: '<input id="X" type="datetime">',
 		email: '<input id="X" type="email">',
-		hidden: '<input id="X" type="hidden">',
 		month: '<input id="X" type="month">',
 		password: '<input id="X" type="password">',
 		search: '<input id="X" type="search">',
@@ -232,6 +233,7 @@ function get_elements() {
 		url: '<input id="X" type="url">',
 		week: '<input id="X" type="week">',
 		// last of the inputs/forms
+		hidden: '<input id="X" type="hidden">',
 		progress: '<progress id="X"></progress>',
 		textarea: '<textarea id="X"></textarea>',
 		textarea_3rows_5cols: '<textarea id="X" cols="5" rows="3"></textarea>',
@@ -375,8 +377,8 @@ function get_elements() {
 		dom.perf.innerHTML = Math.round(t1 - t0) +" ms"
 
 		if (isFile && isEverything && isLocale == "en-US") {
-			// checking TB13 spoof english on my setup
-			notation = (hash == "17146500" ? green_tick: red_cross)
+			// checking TB13/14 spoof english on my setup
+			notation = (hash == "17146500" || hash == "3a493a08") ? green_tick: red_cross
 		}
 		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
 		let display = [], tmphash = ""
@@ -395,15 +397,6 @@ function get_elements() {
 		}
 		dom.elements.innerHTML = hash + notation + strParam +"<br>"+ (isEverything ? "<br>" + display.join("<br>") : json_highlight(oData, 105))
 
-		/* check
-		NATIVE
-			HORIZONTAL-TB: 005e9b44
-			VERTICAL-LR: e3c51572
-		UNSTYLED
-			HORIZONTAL-TB: 16ee9028
-			VERTICAL-LR: fd94b06f
-		matches individual tests
-		*/
 		return
 	} catch(e) {
 		dom.elements = e+""
