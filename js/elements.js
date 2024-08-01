@@ -232,7 +232,7 @@ function get_widget_sizes(METRIC) {
 		doc.body.appendChild(div)
 		div.classList.add('measure')
 		div.classList.add("measureScale")
-		let parent = dom[id]
+		let parent = dom[id], isFirst = true
 		for (const key of Object.keys(oList)) {
 			tmpdata[key] = {}, newobj[key] = {}, data[key] = {}
 			for (const k of Object.keys(oList[key])) {
@@ -252,11 +252,22 @@ function get_widget_sizes(METRIC) {
 					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
 					} else if (isDomRect > 2) {method = range.getClientRects()[0]
 					}
+					// typecheck
 					let itemdata = [method.width, method.height, method.x, method.y]
+					if (isFirst) {
+						isFirst = false
+						if (runST) {itemdata = [null]}
+						itemdata.forEach(function(item){
+							let typeCheck = typeFn(item)
+							if ('number' !== typeCheck) {throw 'tzp'+ zErrType + typeCheck}
+						})
+					}
 					let itemhash = mini(itemdata)
 					if (undefined == tmpdata[key][itemhash]) {tmpdata[key][itemhash] = {'data': itemdata, 'group': [k]}
 					} else {tmpdata[key][itemhash]['group'].push(k)}
 				} catch(e) {
+					if ('tzpTypeError: ' == e.slice(0,14)) {throw e.slice(3)}
+
 					newobj[key][k] = zErr
 					log_error(15, METRIC +'_'+ k + ('unstyled' == key ? '_unstyled' : ''), e)
 				}
