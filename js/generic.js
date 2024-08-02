@@ -300,7 +300,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		if (!fntEnabled) {trysomethingelse(); return}
 		// test fonts
 		get_font_sizes(false).then(res => {
-			if ("array" == typeFn(res)) {
+			if ("array" == typeFn(res, true)) {
 				let aDetected = []
 				res.forEach(function(fnt){
 					aDetected.push(fnt.split(":")[0])
