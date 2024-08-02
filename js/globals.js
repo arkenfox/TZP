@@ -107,6 +107,7 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	match_green = sgtick+'match]'+sc,
 	match_red = sbx+'match]'+sc,
 	fpp_green = sgtick+'FPP]'+sc,
+	pb_green = sgtick+'PB]'+sc,
 	locale_green = sgtick+' locale]'+sc,
 	locale_red = sbx+' locale]'+sc,
 	intl_green = sgtick+' intl]'+sc,
