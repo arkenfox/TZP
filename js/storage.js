@@ -161,12 +161,13 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 
 const get_permissions = (item) => new Promise(resolve => {
 	const METRIC = 'permission_'+ item
+	const aGood = ['denied','granted','prompt']
 	function exit(display, value) {
 		if (value == undefined) {value = display}
 		let notation = value == 'prompt' ? default_green : default_red
 		addBoth(6, METRIC, display,'', notation, value)
 
-		if (item === 'persistent-storage' && value === 'granted') {
+		if ('persistent-storage' == item && 'granted' == value) {
 			// silent run manager to force granted quota when run
 			Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
 		} else {
@@ -175,12 +176,18 @@ const get_permissions = (item) => new Promise(resolve => {
 	}
 	try {
 		navigator.permissions.query({name:item}).then(function(r) {
-			exit(r.state)
+			let rstate = r.state
+			if (runST) {rstate = undefined} else if (runSI) {rstate = 'allowed'}
+			// checks
+			let typeCheck = typeFn(rstate)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			if (!aGood.includes(rstate)) {throw zErrInvalid +'expected '+ aGood.join(', ') +': got '+ rstate}
+			exit(rstate)
 		}).catch(e => {
-			exit(log_error(6, METRIC, e), zErr)
+			exit(e, zErrShort)
 		})
 	} catch(e) {
-		exit(log_error(6, METRIC, e), zErr)
+		exit(e, zErrShort)
 	}
 })
 
