@@ -331,12 +331,11 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		try {
 			if (runSG) {foo++}
 			let aIgnore = [
-			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined', undefined, '']
+				'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+				'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
+			]
 			let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
-			//font = "sans-serif" // simulate TB/RFP-when-it-gets-it
-			//font = '' // simulate TBA
-			if (aIgnore.includes(font)) {
+			if ('string' !== typeFn(font) || aIgnore.includes(font)) {
 				tryfonts(hadError)
 			} else {
 				let value = "linux"
