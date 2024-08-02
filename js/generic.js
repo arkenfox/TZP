@@ -711,13 +711,13 @@ function copyclip(element) {
 	if ('clipboard' in navigator) {
 		try {
 			let content = dom[element].innerHTML
+			if ('metricsDisplay' == element) {
+				content = dom['metricsTitle'].innerHTML +'\n\n'+ content
+			}
 			// remove spans, change linebreaks
 			let regex = /<br\s*[\/]?>/gi
 			content = content.replace(regex, '\r\n')
 			content = content.replace(/<\/?span[^>]*>/g,'')
-			if ('metricsDisplay' == element) {
-				content = dom['metricsTitle'].innerHTML +'\n\n'+ content
-			}
 			// get it
 			navigator.clipboard.writeText(content).then(function() {
 			}, function() {
@@ -917,7 +917,6 @@ function metricsEvent(evt) {
 }
 
 function metricsShow(name, scope) {
-	let t0 = nowFn()
 	overlayName = name
 	let isVisible = dom.modaloverlay.style.display == 'block'
 	let aShowFormat = ['fingerprint','health'] // lies need to be made into an object with metrics as key
@@ -969,7 +968,7 @@ function metricsShow(name, scope) {
 	//add btn, show/hide options, display
 	let hash = mini(data)
 	metricsTitle = (scope == undefined ? '' : scope.toUpperCase() +': ') + target + filter +': '+ hash
-	dom.metricsTitle.innerHTML = metricsTitle
+	dom.metricsTitle.innerHTML = metricsTitle + (isHealth ? overlayHealthCount : '')
 	if (isVisible) {
 		// avoid reflow
 		dom.metricsDisplay.innerHTML = display
@@ -981,7 +980,6 @@ function metricsShow(name, scope) {
 		// delay so overlay is painted
 		setTimeout(function() {dom.metricsDisplay.innerHTML = display}, 0)
 	}
-	//console.log(overlayTitle, performance.now() - t0, isVisible)
 }
 
 function metricsUI(target, isVisible, isSection, isHealth) {
@@ -1098,7 +1096,9 @@ function output_health(scope) {
 		}
 		if (countTotal > 0) {
 			let isAll = countPass == countTotal
-			dom[scope + h].innerHTML = addButton((isAll ? 'good' : 'bad'), h, countPass +'/'+ countTotal)
+			overlayHealthCount = countPass +'/'+ countTotal
+			dom[scope + h].innerHTML = addButton((isAll ? 'good' : 'bad'), h, overlayHealthCount)
+			overlayHealthCount = (isAll ? sg : sb) +'['+ overlayHealthCount +']'+ sc
 			if (isAll) {dom.healthAll.checked = true} else {dom.healthFail.checked = true}
 		}
 		delete gData[h][scope +'_collect']
