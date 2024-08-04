@@ -35,9 +35,11 @@ function get_domrect(METRIC) {
 			value = zLIE
 			// analyse noise
 			let oDiffs = {}, aProps = [], max = 0
+			let isNegative = false, isPositive = false
 			let test = oDomRect[k]['data']
 			for (const p of Object.keys(test)) {
 				let diff = control[p] - test[p]
+				if (diff > 0) {isPositive = true} else {isNegative = true}
 				if (Math.abs(diff) > max) {max = Math.abs(diff)}
 				if (0 !== diff) {
 					aProps.push(p)
@@ -49,14 +51,18 @@ function get_domrect(METRIC) {
 				if (oDiffs[m].length > 1) {multiples.push(oDiffs[m].join(' + '))}
 			}
 			console.log(k, oDiffs, multiples, max)
-			if (max > 0.1) {max = '> ±0.1'
+			// sign: chamelon seems to always be -, CB seems to always be ±
+			let sign = ''
+			if (isNegative && isPositive) {sign = '±'} else {
+				sign = isNegative ? '-' : '+'
+			}
+			if (max > 0.1) {max = '> '+ sign +'0.1'
 			} else {
 				// note max is always positive
 				var z = -Math.floor(Math.log10(max) + 1) // leading zeros
-				// chameleon varies from 6 to 9 in a few tests
-					// cap at 5
+				// cap at 5: chameleon varies from 6 to 9 in a few tests
 				z = z > 5 ? 5 : z
-				max = '< ±0.' + '0'.repeat(z-1) + '1'
+				max = '< '+ sign +'0.' + '0'.repeat(z-1) + '1'
 			}
 			value = {
 				'properties': aProps.length == 8 ? 'all' : aProps.join(', '),
