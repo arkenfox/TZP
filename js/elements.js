@@ -2,18 +2,66 @@
 
 function get_domrect(METRIC) {
 	// quick exits
-	let value
+	let hash, data = {}
 	if (!isGecko || !isSmart) {value = zNA} else if ('9e6f19c5' == mini(oDomRect)) {value = 'trustworthy'}
-	if (undefined !== value) {
-		addBoth(15, METRIC, value)
+	if (undefined !== hash) {
+		addBoth(15, METRIC, hash)
 		return
 	}
 
-	sDetail.document[METRIC +'_data'] = {}
-	for (const k of Object.keys(oDomRect).sort()) {sDetail.document[METRIC +'_data'][k] = oDomRect[k]}
-	let btn = addButton(15, METRIC +'_data', 'data')
+	let control = {
+		"bottom": 120.69999694824219,
+		"height": 141.41665649414062,
+		"left": -20.716659545898438,
+		"right": 120.69999694824219,
+		"top": -20.716659545898438,
+		"width": 141.41665649414062,
+		"x": -20.716659545898438,
+		"y": -20.716659545898438
+	}
 
-	addBoth(15, METRIC, 'TBA', '', btn)
+	// for each method per key in oDomRect we return either
+	// error, trustworthy, or some FPing on the diffs
+	// note: errors are already recorded
+	sDetail.document[METRIC +'_data'] = {}
+	let tmpdata = {}
+	let countPass = 0
+	for (const k of Object.keys(oDomRect).sort()) {
+		sDetail.document[METRIC +'_data'][k] = oDomRect[k]
+		let value = ''
+		if (zErr == k) {value = zErr
+		} else if ('642e7ef0' == k) {value = 'trustworthy'; countPass = oDomRect[k]['methods'].length
+		} else {
+			value = zLIE
+			// analyse noise
+			let aDiffs = [], aProps = []
+			let test = oDomRect[k]['data']
+			for (const p of Object.keys(test)) {
+				let diff = control[p] - test[p]
+				if (0 !== diff) {
+					aProps.push(p)
+					aDiffs.push(diff)
+				}
+			}
+			// dedupe
+			//console.log(METRIC, "all", aDiffs)
+				// x + left | top + right = the same in CB
+				// so even though we have 3 unique values, it returns 6 unique values
+				// ToDo: squeeze more entropy out: what pairs up? etc
+				// also how much things move: e.g. abs(0.005) is about the most for CB
+			aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
+			//console.log("deduped", aDiffs)
+
+			let propsChanged = aProps.length == 8 ? 'all' : aProps.join(', ')
+			value = zLIE +' | '+ propsChanged +' | '+ aDiffs.length
+		}
+		oDomRect[k].methods.forEach(function(method){tmpdata[method] = value})
+	}
+	let btnData = addButton(15, METRIC +'_data', 'data')
+	for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]}
+	hash = mini(data)
+	let btn = addButton(15, METRIC, countPass +'/4')
+	addBoth(15, METRIC, hash, btn + btnData, default_red, data)
 	return
 }
 
