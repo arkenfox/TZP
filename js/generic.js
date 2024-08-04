@@ -625,10 +625,10 @@ const get_isXML = (METRIC) => new Promise(resolve => {
 
 function get_isDomRect() {
 	if (!isGecko || !isSmart) {return}
-	// determine valid domrect methods
+	// determine valid domrect methods + grab data for analysis
 	let t0 = nowFn()
-	let aNames = ["element_getbounding", "element_getclient",
-		"range_getbounding", "range_getclient"]
+	const names = ['element_getbounding', 'element_getclient','range_getbounding','range_getclient']
+	const props = ['bottom','height','left','right','top','width','x','y']
 	// reset: assume lies
 	isDomRect = -1
 	aDomRect = [false, false, false, false]
@@ -636,60 +636,44 @@ function get_isDomRect() {
 
 	let el = dom.rect1
 	for (let i=0; i < 4; i++) {
-		let METRIC = aNames[i]
-		oDomRect[METRIC] = []
+		let METRIC = names[i]
+		let tmpobj = {}, hash
 		try {
-			let obj = ""
-			if (i == 0) {
+			let obj
+			if (0 == i) {
 				obj = el.getBoundingClientRect()
-			} else if (i == 1) {
+			} else if (1 == i) {
 				obj = el.getClientRects()[0]
 			} else {
 				let range = document.createRange()
 				range.selectNode(el)
-				obj = (i == 2 ? range.getBoundingClientRect() : range.getClientRects()[0] )
+				obj = (2 == i ? range.getBoundingClientRect() : range.getClientRects()[0] )
 			}
-			// 3 unique values but collect all
-			let eX = -20.716659545898438,
-				eW = 141.41665649414062,
-				eR = 120.69999694824219
-			let expected = [eX, eX, eX, eX, eW, eW, eR, eR]
-			let expectedNames = ["x", "left", "y", "top", "width", "height", "right", "bottom"]
-			let array = [obj.x, obj.left, obj.y, obj.top, obj.width, obj.height, obj.right, obj.bottom]
-			let hash = mini(array), isTrue = (hash == "8e0cf57b")
-			aDomRect[i] = isTrue
-			if (isTrue) {
-				oDomRect[METRIC] = hash
-			} else {
-				// analyse noise: variable/persistent across properties
-				let aDiffs = [], aProps = []
-				for (let i=0; i < array.length; i++) {
-					let diff = expected[i] - array[i]
-					if (diff !== 0) {
-						aProps.push(expectedNames[i])
-					}
-					aDiffs.push(diff)
-				}
-				// dedupe
-//console.log(METRIC, "all", aDiffs)
-				aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
-//console.log("deduped", aDiffs)
-				aProps.sort()
-				let what = aProps.length == 8 ? "all" : aProps.join(", ")
-				oDomRect[METRIC] = zLIE + " | " + what // + concat method: 
-			}
+			props.forEach(function(prop){
+				let value = obj[prop]
+				let typeCheck = typeFn(value)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				tmpobj[prop] = obj[prop]
+			})
+			hash = mini(tmpobj)
+			aDomRect[i] = ('642e7ef0' == hash)
 		} catch(e) {
-			log_error(15, aNames[i], e)
+			log_error(15, 'domrect_'+ METRIC, e)
 			aDomRect[i] = zErr
-			oDomRect[METRIC] = zErr
+			tmpobj = zErr
+			hash = zErr
+		}
+		if (undefined == oDomRect[hash]) {
+			oDomRect[hash] = {'data': tmpobj, 'methods': [METRIC]}
+		} else {
+			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
-	//console.log(oDomRect)
 	//aDomRect = [false, true, false, false]
 	if (runSL) {aDomRect = [false, false, false, false]}
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
-	log_perf(SECTP, "isDomRect",t0,"", aDomRect.join(", ") +" | "+ isDomRect)
+	log_perf(SECTP, 'isDomRect', t0,'', aDomRect.join(', '))
 	return
 }
 
@@ -1389,7 +1373,7 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 	// global health: just grab pass/fail
 	if (gRun && '' !== notation && notation.includes("class='health'")) {
 		let isPass
-		if (notation.includes(">"+ tick +"<")) {isPass = true} else if (notation.includes(">"+ cross +"<")) {isPass = false}
+		if (notation.includes('>'+ tick +'<')) {isPass = true} else if (notation.includes('>'+ cross +'<')) {isPass = false}
 		if (isPass !== undefined) {
 			gData['health'][isScope +'_collect'][metric] = [sectionMap[section], isPass]
 		}
