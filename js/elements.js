@@ -1,5 +1,22 @@
 'use strict';
 
+function get_domrect(METRIC) {
+	// quick exits
+	let value
+	if (!isGecko || !isSmart) {value = zNA} else if ('9e6f19c5' == mini(oDomRect)) {value = 'trustworthy'}
+	if (undefined !== value) {
+		addBoth(15, METRIC, value)
+		return
+	}
+
+	sDetail.document[METRIC +'_data'] = {}
+	for (const k of Object.keys(oDomRect).sort()) {sDetail.document[METRIC +'_data'][k] = oDomRect[k]}
+	let btn = addButton(15, METRIC +'_data', 'data')
+
+	addBoth(15, METRIC, 'TBA', '', btn)
+	return
+}
+
 function get_element_keys(METRIC) {
 	const id = 'html-element-version'
 	let hash, btn ='', data = [], notation = isTB ? tb_red : '', isLies = false
@@ -267,7 +284,6 @@ function get_widget_sizes(METRIC) {
 					} else {tmpdata[key][itemhash]['group'].push(k)}
 				} catch(e) {
 					if ('tzpTypeError: ' == e.slice(0,14)) {throw e.slice(3)}
-
 					newobj[key][k] = zErr
 					log_error(15, METRIC +'_'+ k + ('unstyled' == key ? '_unstyled' : ''), e)
 				}
@@ -292,6 +308,7 @@ function get_widget_sizes(METRIC) {
 
 const outputElements = () => new Promise(resolve => {
 	Promise.all([
+		get_domrect('domrect'),
 		get_element_keys('htmlelement_keys'),
 		get_lineheight('line-height_sizes'),
 		get_mathml('mathml_sizes'),
