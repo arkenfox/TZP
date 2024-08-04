@@ -49,10 +49,15 @@ function get_domrect(METRIC) {
 				if (oDiffs[m].length > 1) {multiples.push(oDiffs[m].join(' + '))}
 			}
 			console.log(k, oDiffs, multiples, max)
-			max = (max > 0.01 ? '>' : '<') + ' 0.01'
+			if (max > 0.1) {max = '> ±0.1'
+			} else {
+				// note max is always positive
+				var z = -Math.floor(Math.log10(max) + 1) // leading zeros
+				max = '< ±0.' + '0'.repeat(z-1) + '1'
+			}
 			value = {
 				'properties': aProps.length == 8 ? 'all' : aProps.join(', '),
-				'range': '± ' + max,
+				'range': max,
 				'same': (multiples.length ? multiples : 'none'),
 				'total': Object.keys(oDiffs).length
 			}
