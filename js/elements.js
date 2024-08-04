@@ -34,26 +34,28 @@ function get_domrect(METRIC) {
 		} else {
 			value = zLIE
 			// analyse noise
-			let aDiffs = [], aProps = []
+			let oDiffs = {}, aProps = [], max = 0
 			let test = oDomRect[k]['data']
 			for (const p of Object.keys(test)) {
 				let diff = control[p] - test[p]
+				if (Math.abs(diff) > max) {max = Math.abs(diff)}
 				if (0 !== diff) {
 					aProps.push(p)
-					aDiffs.push(diff)
+					if (undefined == oDiffs[diff]) {oDiffs[diff] = [p]} else {oDiffs[diff].push(p)}
 				}
 			}
-			// dedupe
-			//console.log(METRIC, "all", aDiffs)
-				// x + left | top + right = the same in CB
-				// so even though we have 3 unique values, it returns 6 unique values
-				// ToDo: squeeze more entropy out: what pairs up? etc
-				// also how much things move: e.g. abs(0.005) is about the most for CB
-			aDiffs = aDiffs.filter(function(item, position) {return aDiffs.indexOf(item) === position})
-			//console.log("deduped", aDiffs)
-
-			let propsChanged = aProps.length == 8 ? 'all' : aProps.join(', ')
-			value = zLIE +' | '+ propsChanged +' | '+ aDiffs.length
+			let multiples = []
+			for (const m of Object.keys(oDiffs)) {
+				if (oDiffs[m].length > 1) {multiples.push(oDiffs[m].join(' + '))}
+			}
+			console.log(k, oDiffs, multiples, max)
+			max = (max > 0.01 ? '>' : '<') + ' 0.01'
+			value = {
+				'properties': aProps.length == 8 ? 'all' : aProps.join(', '),
+				'range': '± ' + max,
+				'same': (multiples.length ? multiples : 'none'),
+				'total': Object.keys(oDiffs).length
+			}
 		}
 		oDomRect[k].methods.forEach(function(method){tmpdata[method] = value})
 	}
