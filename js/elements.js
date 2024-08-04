@@ -53,6 +53,9 @@ function get_domrect(METRIC) {
 			} else {
 				// note max is always positive
 				var z = -Math.floor(Math.log10(max) + 1) // leading zeros
+				// chameleon varies from 6 to 9 in a few tests
+					// cap at 5
+				z = z > 5 ? 5 : z
 				max = '< ±0.' + '0'.repeat(z-1) + '1'
 			}
 			value = {
