@@ -40,7 +40,6 @@
 			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
 			<span class="no_color" id="custom">
 				<input id="optTransform" checked type="checkbox"> &nbsp; transform  &nbsp;
-				<input id="optVertical" checked type="checkbox"> &nbsp; vertical
 				<input id="optExpand" type="checkbox"> &nbsp; expand
 			</span>
 		</td></tr>
@@ -62,13 +61,39 @@ function get_elements() {
 
 	oData = {}
 
+/*
+applet area
+base basefont bdi bdo
+col colgroup
+datalist dir
+element-details em
+figure form frame frameset
+head header hgroup
+img ins isindex
+kbd keygen
+label li link
+main map mark marquee menu menuitem meter
+nav nextid nobr noembed noframes noscript
+object ol optgroup option output
+param picture plaintext portal pre
+q
+rb rbc rp rt rtc ruby
+s samp script search section slot source style summary
+table tbody td template tfoot th thead time title tr track tt
+u ul
+var video
+wbr xmp
+*/
+
+
 	let isTransform = dom.optTransform.checked
-	let isVertical = dom.optVertical.checked
+	//let isVertical = dom.optVertical.checked
 	let isExpanded = dom.optExpand.checked
 	let params = []
 	if (isExpanded) {params.push("all")}
-	if (isVertical) {params.push("vertical")}
+	//if (isVertical) {params.push("vertical")}
 	if (isTransform) {params.push("transformed")}
+
 	let oListBase = {
 		// <key + value (if not blank)></key>
 		// e.g. audio: 'controls=""' -> <audio controls=""></audio>
@@ -93,25 +118,23 @@ function get_elements() {
 		// b+ we insert a char "." to force a height
 		'b': {
 			// insert a character; get height + y
-			'a': 'href=""',
+			'br': '<br>',
 			'fieldset': '<fieldset></fieldset>', // don't include char
-			'font1': '<font size="1">.</font>', // these are effectively line-height?
-			'font2': '<font size="2">.</font>',
-			'font3': '<font size="3">.</font>', // seems to == a
-			'font4': '<font size="4">.</font>',
-			'font5': '<font size="5">.</font>',
-			'font6': '<font size="6">.</font>', // seems to == h1 - may depend on language/os
-			'font7': '<font size="7">.</font>',
-/* grrrr
-			'font_xx-small': '<span style="font-size: xx-small">.</span>',
-			'font_x-small': '<span style="font-size: x-small">.</span>',
-			'font_small': '<span style="font-size: small">.</span>',
-			'font_medium': '<span style="font-size: medium">.</span>',
-			'font_large': '<span style="font-size: large">.</span>',
-			'font_x-large': '<span style="font-size: x-large">.</span>',
-			'font_xx-large': '<span style="font-size: xx-large">.</span>',
-			'font_xxx-large': '<span style="font-size: xxx-large">.</span>',
-*/
+			'font1': '<font size="1">.</font>', // = xx-small
+			'font2': '<font size="2">.</font>', // = x-small
+			'font4': '<font size="4">.</font>', // = large
+			'font5': '<font size="5">.</font>', // = x-large
+			'font6': '<font size="6">.</font>', // = xx-large = h1
+			'font7': '<font size="7">.</font>', // = xxx-large
+			'font_xx-small': '<div><span style="font-size: xx-small">.</span></div>',
+			'font_x-small': '<div><span style="font-size: x-small">.</span></div>',
+			'font_small': '<div><span style="font-size: small">.</span></div>',
+			'font_medium': '<div><span style="font-size: medium">.</span></div>',
+			'font_large': '<div><span style="font-size: large">.</span></div>',
+			'font_x-large': '<div><span style="font-size: x-large">.</span></div>',
+			'font_xx-large': '<div><span style="font-size: xx-large">.</span></div>',
+			'font_xxx-large': '<div><span style="font-size: xxx-large">.</span></div>',
+			'hr': '<hr>',
 		},
 		'd': {
 			'big_x2': '<big><big>.</big></big>',
@@ -124,24 +147,30 @@ function get_elements() {
 		}
 	}
 
+	// ok, I think we need to get both vertical and horizontal for font stuff
+
 	let oListExtra = {
-		'b': {},
+		'b': {
+			'a': 'href=""', // = font-medium
+			'font3': '<font size="3">.</font>', // = medium/default = a = h4
+		},
 		'd': {
 			'figcaption': '<figure><figcaption>.</figcaption></figure>', // == dt
 		},
 	}
 
 	let heightListBase = [
-		'big','blockquote','code',
-		'h1','h2','h3','h5','h6',
-
-
+		'big','blockquote',
+		'code',
+		'h2','h3','h5','h6',
+		'iframe',
+		'small','sub','sup',
 	]
 	let heightListExtra = [
-		'abbr','acronym','address','article','aside','b','cite',
-		'data','del','div','dfn','dl','em','footer','h4',
+		'abbr','acronym','address','article','aside','b','center','cite',
+		'data','del','div','dfn','dl','em','footer','h1','h4','i',
 		'p',
-		'span',
+		'span','strike','strong',
 	]
 	heightListBase.forEach(function(item){oListBase.b[item] = ''})
 	heightListExtra.forEach(function(item){oListExtra.b[item] = ''})
@@ -161,7 +190,7 @@ function get_elements() {
 	}
 	//console.log(oList)
 
-	let tmpdata = {}
+	let tmpdata = {}, elementdata = {}
 	try {
 		const parent = dom.elementsdiv
 		let target
@@ -177,53 +206,77 @@ function get_elements() {
 		for (const type of Object.keys(oList).sort()) {
 			for (const k of Object.keys(oList[type])) {
 				testCount++
-				// important to clear the div so no other elements can affect measurements
-				parent.innerHTML = ''
-				let itemdata
-				try {
-					let str = ''
-					let value = oList[type][k]
-					if ('' !== value && '<' == value[0]) {
-						str = value
-					} else {
-						let character = 'b' == type ? '.' : ''
-						str = '<'+ k + ('' == value ? '' : ' '+ value) +'>' + character +'</'+ k +'>'
-					}
-					//console.log(str)
-					parent.innerHTML = str
-					target = parent.firstChild
-					if ('caption' == k) {
-						target = target[k]
-					} else if ('d' == type || 'e' == type) {
-						target = target.children[0]
-						if ('e' == type) {target = target.children[0]}
-					}
-					target.setAttribute("style","display:inline; writing-mode: "+ (isVertical ? 'vertical-lr': 'horizontal-tb') +";")
-
-					if ('a' == type || 'c' == type) {
-						itemdata = [
-							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-						]
-					} else {
-						itemdata = [
-							//target.getBoundingClientRect().width,
-							target.getBoundingClientRect().height,
-							//target.getBoundingClientRect().x,
-							target.getBoundingClientRect().y,
-						]
-					}
-					oData[k]
-				} catch(e) {
-					itemdata = 'error'
-					console.log(k, e+'')
+				elementdata = []
+				let isBoth = 'font' == k.slice(0,4)
+				if ('font3' == k || 'font_medium' == k) {isBoth = false}
+				if ('h' == k[0]) {
+					if ('hr' !== k) {isBoth = true}
 				}
-				let itemhash = mini(itemdata)
-				if (undefined == tmpdata[itemhash]) {tmpdata[itemhash] = {'data': itemdata, 'group': [k]}
-				} else {tmpdata[itemhash]['group'].push(k)}
+				let oStyle = {
+					'h': 'horizontal-tb',
+					'v': 'vertical-lr',
+				}
+				if (isExpanded) {isBoth = true}
+				if (!isBoth) {
+					oStyle = {'v': 'vertical-lr'}
+				}
+				for (const style of Object.keys(oStyle).sort()) {
+					// important to clear the div so no other elements can affect measurements
+					parent.innerHTML = ''
+					let itemdata
+					try {
+						let str = ''
+						let value = oList[type][k]
+						if ('' !== value && '<' == value[0]) {
+							str = value
+						} else {
+							let character = 'b' == type ? '.' : ''
+							str = '<'+ k + ('' == value ? '' : ' '+ value) +'>' + character +'</'+ k +'>'
+						}
+						//console.log(str)
+						parent.innerHTML = str
+						target = parent.firstChild
+						if ('caption' == k) {
+							target = target[k]
+						} else if ('d' == type || 'e' == type) {
+							target = target.children[0]
+							if ('e' == type) {target = target.children[0]}
+						}
+						target.setAttribute("style","display:inline; writing-mode: "+ oStyle[style] +";")
+
+						if ('a' == type || 'c' == type) {
+							itemdata = [
+								target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+								target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+							]
+						} else {
+							itemdata = [
+								//target.getBoundingClientRect().width,
+								target.getBoundingClientRect().height,
+								//target.getBoundingClientRect().x,
+								target.getBoundingClientRect().y,
+							]
+						}
+
+						if (isBoth) {
+							elementdata.push(style)
+							itemdata.forEach(function(item){
+								elementdata.push(item)
+							})
+						} else {
+							elementdata = itemdata
+						}
+					} catch(e) {
+						elementdata = 'error'
+						console.log(k, e+'')
+					}
+				}
+				let elementhash = mini(elementdata)
+				if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
+				} else {tmpdata[elementhash]['group'].push(k)}
 			}
 		}
-		//parent.innerHTML = "" // just in case
+		parent.innerHTML = "" // just in case
 		//console.log(tmpdata)
 
 		// group by results
@@ -241,7 +294,7 @@ function get_elements() {
 
 		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
 		let display = [], tmphash = ""
-		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 105)
+		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 110)
 		return
 	} catch(e) {
 		dom.elements = e+""
@@ -268,7 +321,7 @@ function run() {
 Promise.all([
 	get_globals()
 ]).then(function(){
-	//dom.optVertical.checked = false // temp
+	dom.optExpand.checked = false // temp
 	run()
 })
 
