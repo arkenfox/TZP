@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>elements</title>
+  <link rel="stylesheet" type="text/css" href="testindex.css">
+	<link rel="stylesheet" href="chrome://global/locale/intl.css">
+  <script src="testglobals.js"></script>
+  <script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 780px; max-width: 780px}
+		.elementsfixed {
+			position: fixed;
+			top: 0;
+			left: 0;
+			padding: 0px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="elementsfixed normalized" id="elementsdiv"> </div>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+	</table>
+
+	<!-- app lang -->
+	<table id="tb15">
+		<col width="25%"></a><col width="75%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">elements
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+				<div class="nav-down"><span class="perf" id="locale"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
+			<span class="no_color" id="custom">
+				<input id="optTransform" checked type="checkbox"> &nbsp; transform  &nbsp;
+				<input id="optVertical" checked type="checkbox"> &nbsp; vertical
+				<input id="optExpand" type="checkbox"> &nbsp; expand
+			</span>
+		</td></tr>
+		<tr><td colspan="2"><hr><br></td></tr>
+		<tr><td colspan="2" style="text-align: left;">
+			<div class="c mono spaces no_color" id="elements"></div>
+		</td></tr>
+	</table>
+	<br>
+
+<script>
+'use strict';
+
+let isLocale = ""
+let oData = {}
+
+function get_elements() {
+	let t0 = performance.now()
+
+	oData = {}
+
+	let isTransform = dom.optTransform.checked
+	let isVertical = dom.optVertical.checked
+	let isExpanded = dom.optExpand.checked
+	let params = []
+	if (isExpanded) {params.push("all")}
+	if (isVertical) {params.push("vertical")}
+	if (isTransform) {params.push("transformed")}
+	let oListBase = {
+		// <key + value (if not blank)></key>
+		// e.g. audio: 'controls=""' -> <audio controls=""></audio>
+		// but if it starts with < then just use the whole string
+		'a': {
+			// get width + height
+			audio: 'controls=""',
+			canvas: '',
+			'caption': '<table><caption>.</caption></table>',
+			dialog: 'open=""'
+			/*
+				transform
+					v: "dialog": [-1104672, 42.68333435058594, 10052521, 0]
+					h: "dialog": [42.68333435058594, 42.68333435058594, 0, 0]
+				no-transform
+					v: "dialog": [0, 38, 8947849, 0]}
+					h: "dialog": [38, 38, 0, 0]}
+				so where does it get -1104672/8947849 from and wtf is 10052521
+			*/
+			},
+
+		// b+ we insert a char "." to force a height
+		'b': {
+			// insert a character; get height + y
+			'a': 'href=""',
+			'fieldset': '<fieldset></fieldset>', // don't include char
+			'font1': '<font size="1">.</font>', // these are effectively line-height?
+			'font2': '<font size="2">.</font>',
+			'font3': '<font size="3">.</font>', // seems to == a
+			'font4': '<font size="4">.</font>',
+			'font5': '<font size="5">.</font>',
+			'font6': '<font size="6">.</font>', // seems to == h1 - may depend on language/os
+			'font7': '<font size="7">.</font>',
+/* grrrr
+			'font_xx-small': '<span style="font-size: xx-small">.</span>',
+			'font_x-small': '<span style="font-size: x-small">.</span>',
+			'font_small': '<span style="font-size: small">.</span>',
+			'font_medium': '<span style="font-size: medium">.</span>',
+			'font_large': '<span style="font-size: large">.</span>',
+			'font_x-large': '<span style="font-size: x-large">.</span>',
+			'font_xx-large': '<span style="font-size: xx-large">.</span>',
+			'font_xxx-large': '<span style="font-size: xxx-large">.</span>',
+*/
+		},
+		'd': {
+			'big_x2': '<big><big>.</big></big>',
+			'dd': '<dl><dd>.</dd></dl>',
+			'dt': '<dl><dt>.</dt></dl>',
+			'legend': '<fieldset><legend>legend</legend></fieldset>',
+		},
+		'e': {
+			'big_x3': '<big><big><big>.</big></big></big>',
+		}
+	}
+
+	let oListExtra = {
+		'b': {},
+		'd': {
+			'figcaption': '<figure><figcaption>.</figcaption></figure>', // == dt
+		},
+	}
+
+	let heightListBase = [
+		'big','blockquote','code',
+		'h1','h2','h3','h5','h6',
+
+
+	]
+	let heightListExtra = [
+		'abbr','acronym','address','article','aside','b','cite',
+		'data','del','div','dfn','dl','em','footer','h4',
+		'p',
+		'span',
+	]
+	heightListBase.forEach(function(item){oListBase.b[item] = ''})
+	heightListExtra.forEach(function(item){oListExtra.b[item] = ''})
+
+	let oList = {}
+	for (const k of Object.keys(oListBase)) {oList[k] = oListBase[k]}
+	if (isExpanded) {
+		for (const k of Object.keys(oListExtra)) {
+			if (undefined == oList[k]) {
+				oList[k] = oListExtra[k]
+			} else {
+				for (const n of Object.keys(oListExtra[k])) {
+					oList[k][n] = oListExtra[k][n]
+				}
+			}
+		}
+	}
+	//console.log(oList)
+
+	let tmpdata = {}
+	try {
+		const parent = dom.elementsdiv
+		let target
+		// just skew the parent, this seems sufficient to transform all elements
+			// and bonus, we require this for input type image anyway
+		if (isTransform) {
+			parent.classList.add("measureScale")
+		} else {
+			parent.classList.remove("measureScale")
+		}
+
+		let testCount = 0
+		for (const type of Object.keys(oList).sort()) {
+			for (const k of Object.keys(oList[type])) {
+				testCount++
+				// important to clear the div so no other elements can affect measurements
+				parent.innerHTML = ''
+				let itemdata
+				try {
+					let str = ''
+					let value = oList[type][k]
+					if ('' !== value && '<' == value[0]) {
+						str = value
+					} else {
+						let character = 'b' == type ? '.' : ''
+						str = '<'+ k + ('' == value ? '' : ' '+ value) +'>' + character +'</'+ k +'>'
+					}
+					//console.log(str)
+					parent.innerHTML = str
+					target = parent.firstChild
+					if ('caption' == k) {
+						target = target[k]
+					} else if ('d' == type || 'e' == type) {
+						target = target.children[0]
+						if ('e' == type) {target = target.children[0]}
+					}
+					target.setAttribute("style","display:inline; writing-mode: "+ (isVertical ? 'vertical-lr': 'horizontal-tb') +";")
+
+					if ('a' == type || 'c' == type) {
+						itemdata = [
+							target.getBoundingClientRect().width, target.getBoundingClientRect().height,
+							target.getBoundingClientRect().x, target.getBoundingClientRect().y,
+						]
+					} else {
+						itemdata = [
+							//target.getBoundingClientRect().width,
+							target.getBoundingClientRect().height,
+							//target.getBoundingClientRect().x,
+							target.getBoundingClientRect().y,
+						]
+					}
+					oData[k]
+				} catch(e) {
+					itemdata = 'error'
+					console.log(k, e+'')
+				}
+				let itemhash = mini(itemdata)
+				if (undefined == tmpdata[itemhash]) {tmpdata[itemhash] = {'data': itemdata, 'group': [k]}
+				} else {tmpdata[itemhash]['group'].push(k)}
+			}
+		}
+		//parent.innerHTML = "" // just in case
+		//console.log(tmpdata)
+
+		// group by results
+		let newobj = {}
+		for (const k of Object.keys(tmpdata)) {
+			let keydata = tmpdata[k].group.sort()
+			newobj[keydata.join(' ')] = tmpdata[k]['data']
+		}
+		for (const k of Object.keys(newobj).sort()) {oData[k] = newobj[k]}
+		params.push(testCount +' elements')
+		params.push(Object.keys(oData).length +' results')
+		let hash = mini(oData), notation = ""
+		let t1 = performance.now()
+		dom.perf.innerHTML = Math.round(t1 - t0) +" ms"
+
+		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
+		let display = [], tmphash = ""
+		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 105)
+		return
+	} catch(e) {
+		dom.elements = e+""
+		return
+	}
+}
+
+try {
+	isLocale = Intl.DateTimeFormat().resolvedOptions().locale
+} catch(e) {
+	isLocale = zErr
+}
+dom.locale.innerHTML = isLocale
+
+function run() {
+	// clear
+	dom.elements.innerHTML = " &nbsp; "
+	// pause so users see change
+	setTimeout(function() {
+		get_elements()
+	}, 170)
+}
+
+Promise.all([
+	get_globals()
+]).then(function(){
+	//dom.optVertical.checked = false // temp
+	run()
+})
+
+</script>
+</body>
+</html>
