@@ -43,8 +43,7 @@
 			<span class="no_color" id="custom">
 				<input id="optTransform" checked type="checkbox"> &nbsp; transform  &nbsp;
 				<input id="optExpand" type="checkbox"> &nbsp; expand
-				&nbsp; | &nbsp; <span class="string">h</span>: horizontal &nbsp; <span class="string">v</span>: vertical
-				&nbsp; | &nbsp; vertical unless stated
+				&nbsp; | &nbsp; <span class="key">h</span>: horizontal &nbsp; <span class="key">v</span>: vertical
 			</span>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
@@ -210,7 +209,7 @@ wbr xmp
 		for (const type of Object.keys(oList).sort()) {
 			for (const k of Object.keys(oList[type])) {
 				testCount++
-				elementdata = []
+				elementdata = {}
 				let isBoth = 'font' == k.slice(0,4)
 				if ('font3' == k || 'font_medium' == k) {isBoth = false}
 				if ('h' == k[0]) {
@@ -247,29 +246,18 @@ wbr xmp
 							if ('e' == type) {target = target.children[0]}
 						}
 						target.setAttribute("style","display:inline; writing-mode: "+ oStyle[style] +";")
-
+						let method = target.getBoundingClientRect()
 						if ('a' == type || 'c' == type) {
-							itemdata = [
-								target.getBoundingClientRect().width, target.getBoundingClientRect().height,
-								target.getBoundingClientRect().x, target.getBoundingClientRect().y,
-							]
+							itemdata = {w: method.width, h: method.height, x: method.x, y: method.y,}
 						} else {
-							itemdata = [
-								//target.getBoundingClientRect().width,
-								target.getBoundingClientRect().height,
-								//target.getBoundingClientRect().x,
-								target.getBoundingClientRect().y,
-							]
+							itemdata = {
+								//method.width,
+								h: method.height,
+								//method.x,
+								y: method.y,
+							}
 						}
-
-						if (isBoth) {
-							elementdata.push(style)
-							itemdata.forEach(function(item){
-								elementdata.push(item)
-							})
-						} else {
-							elementdata = itemdata
-						}
+						elementdata[style] = itemdata
 					} catch(e) {
 						elementdata = 'error'
 						console.log(k, e+'')
