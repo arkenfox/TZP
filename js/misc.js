@@ -23,15 +23,15 @@ function check_timing(type) {
 			return false
 		}
 	}
+	// note: sometimes mark + timestamp "noise" mode are not caught
+	// ToDo: if !isPerf and return is true, perhaps we can try something else eg with a known delay
 	if (false == result) {console.log(type, max, setTiming)}
 	return result
 }
 
 function get_timing(METRIC) {
 	// check isPerf again
-	if (isPerf) {
-		get_isPerf(); console.log('isPerf', isPerf)
-	}
+	if (isPerf) {get_isPerf()}
 
 	// get a last value for each to ensure a max diff
 	try {gData.timing['now'].push(performance.now())} catch(e) {}
@@ -41,9 +41,15 @@ function get_timing(METRIC) {
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 
+	/* testing
+	gData.timing.date = [1723240561321]
+	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
+	//*/
+
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
-		'exslt': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], // for now
+		// 1912129: exslt diffs must be 1000, and all end in .000
+		'exslt': [0],
 		'other': [
 			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
 			// the longer since the first time, the more decimal points drift
@@ -54,12 +60,14 @@ function get_timing(METRIC) {
 			50, 50.1, 50.2,
 			66.6, 66.7, 66.8, //66.9,
 			83.3, 83.4, 83.5
-		]
+		],
+		'ten': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90],
 	}
+
 	let aNotInteger = ['mark','now','timestamp']
 	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
 	let str, data, notation, oData = {}, countFail = 0
-	sDetail.document[METRIC] = {}
+
 	sDetail.document[METRIC +'_data'] = {}
 	let isDateNoise = false
 
@@ -73,26 +81,37 @@ function get_timing(METRIC) {
 			if ('string' == typeof aTimes) {throw aTimes}
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
 			sDetail.document[METRIC +'_data'][k] = aTimes
-			// get diffs, check for null/boolean
+			// type check
 			let setDiffs = new Set(), aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
 			let typeCheck = typeFn(start)
 			if (expected !== typeCheck) {throw zErrType + typeCheck}
-			// catch noise
+			// check noise
 			let isNoise = 'exslt' == k ? false : !check_timing(k)
-			if ('date' == k) {isDateNoise = isNoise}
-			if ('exslt' == k) {
+			let isMatch = true
+			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
+			if ('date' == k) {
+				isDateNoise = isNoise
+			} else if ('exslt' == k) {
 				isNoise = isDateNoise
-				// we use epoch time so each entry is always moving forward in time
-				// and to remove the leading 0 in ms
+				if ('.000' !== start.slice(-4)) {isMatch = false}
+				// we use epoch time so each entry is always moving forward in time | remove leading 0 in ms
 				start = start.slice(0,20) + start.slice(-2)+ '0'
 				start = (new Date(start))[Symbol.toPrimitive]('number')
+			}
+			// get diffs
+			let isZero = false, is10 = true, is100 = true
+			if (1 == aTimes.length) {
+				aTotal.push(0) // make sure we display something
+				if ('exslt' !== k) {isMatch = false} // all non-exslt we expect multiple values
+				isZero = true
 			}
 			for (let i=1; i < aTimes.length ; i++) {
 				let end = aTimes[i]
 				typeCheck = typeFn(end)
 				if (expected !== typeCheck) {throw zErrType + typeCheck}
 				if ('exslt' == k) {
+					if ('.000' !== end.slice(-4)) {isMatch = false}
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
@@ -103,34 +122,39 @@ function get_timing(METRIC) {
 				setDiffs.add(diff)
 			}
 			let aDiffs = Array.from(setDiffs)
-			let isMatch = (aTotal.length > 1), is10 = true, is100 = true
-			if (aNotInteger.includes(k) && Number.isInteger(start)) {isMatch = false}
+			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
 				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
-				if (is10 && !oGood.exslt.includes(aDiffs[i])) {is10 = false}
+				if (is10 && !oGood.ten.includes(aDiffs[i])) {is10 = false}
 				if (is100 && 0 !== aDiffs[i]) {is100 = false}
 			}
 			// dates: other tests we can rely on non-integer, but not dates
 				// but we measure enough dates to not all land on 0's (or 50's and 100s)
 			if ('date' == k) {if (is100 || is10) {isMatch = false}}
+			// clean up exslt
 			if ('exslt' == k) {
-				if (is100) {isMatch = false}
 				if (isNoise) {
 					is100 = false
 					if ('10ms' !== oData['date']) {is10 = false}
 				}
 			}
-
 			//console.log(k, isNoise)
+			let value = ''
 			if (isMatch && !isNoise) {
-				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>'+ ('exslt' == k ? ' default]' : ']') + sc
-				oData[k] = 'exslt' == k ? '10ms' : 'RFP'
+				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc
+				value = 'RFP'
 			} else {
 				// add entropy e.g. jShelter 10ms or 100ms or noise
-				// order is 100, 10, noise, nothing
-				oData[k] = is100 ? '100ms' : (is10 ? '10ms' : (isNoise ? 'noise' : ''))
+				// order is 100+, 100, 10, noise, nothing
+				if (isZero) {value = '+100ms'
+				} else if (is100) {value = '100ms'
+				} else if (is10) {value = '10ms'
+				} else if (isNoise) {value = 'noise'
+				}
 				countFail++
 			}
+			oData[k] = value
+
 			// display
 			str = aTotal.join(', ')
 			if (str.length > 60) {
@@ -142,14 +166,14 @@ function get_timing(METRIC) {
 				str = newTotal.join(', ') + lasttwo
 			}
 			data = aDiffs
-			//console.log(k, aDiffs, aTotal)
+			console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
 			oData[k] = zErr
 			countFail++
 		}
-		sDetail.document[METRIC][k] = data
+		//sDetail.document[METRIC][k] = data
 		addDisplay(17, METRIC +'_'+ k, str,'', notation)
 	})
 	// display
