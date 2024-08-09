@@ -151,7 +151,11 @@ function get_timing(METRIC) {
 				} else if (is10) {value = '10ms'
 				} else if (isNoise) {value = 'noise'
 				}
-				countFail++
+				if ('exslt' == k && isVer < 128 && '10ms' == value) {
+					notation = sg + "[<span class='healthsilent'>"+ tick +'</span> default]'+ sc
+				} else {
+					countFail++
+				}
 			}
 			oData[k] = value
 
@@ -166,7 +170,7 @@ function get_timing(METRIC) {
 				str = newTotal.join(', ') + lasttwo
 			}
 			data = aDiffs
-			console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
+			//console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
 		} catch(e) {
 			str = log_error(17, METRIC +'_'+ k, e)
 			data = str
