@@ -502,8 +502,8 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer < isBlockMin[0]) {isVerExtra = " or lower"
-	} else if (isVer == 130) {isVerExtra = "+"}
+	if (isVer < isBlockMin[0]) {isVerExtra = ' or lower'
+	} else if (isVer == 130) {isVerExtra = '+'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin[0]
@@ -517,54 +517,54 @@ function get_isVer(METRIC) {
 			try {new RegExp('[\\00]','u')} catch(e) {
 				if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
 			}
-			if ("function" === typeof CSS2Properties
-				&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
+			if ('function' === typeof CSS2Properties
+				&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
 
 			// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
 			// ToDo: replace or add a fallback
 			try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
 
 			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
-			if ("function" === typeof URL.parse) {return 126}
-			try {if ("Invalid Date" == new Date("Sep 26 Thurs 1995 10:00")) return 125} catch(e) {} // 1872793
+			if ('function' === typeof URL.parse) {return 126}
+			try {if ('Invalid Date' == new Date('Sep 26 Thurs 1995 10:00')) return 125} catch(e) {} // 1872793
 			let el = document.documentElement
-			if (!CSS2Properties.prototype.hasOwnProperty("MozUserFocus")) {
+			if (!CSS2Properties.prototype.hasOwnProperty('MozUserFocus')) {
 				try {
-					el.style.zIndex = "calc(1 / max(-0, 0))"
+					el.style.zIndex = 'calc(1 / max(-0, 0))'
 					let test = getComputedStyle(el).zIndex
-					el.style.zIndex = "auto"
+					el.style.zIndex = 'auto'
 					if (test > 0) {return 124} // 1867569
 				} catch(e) {}
 				return 123 // 1871745
 			}
-			if ("function" === typeof Promise.withResolvers) {
+			if ('function' === typeof Promise.withResolvers) {
 				try {
-					el.style.zIndex = "calc(1 / abs(-0))"
+					el.style.zIndex = 'calc(1 / abs(-0))'
 					let test = getComputedStyle(el).zIndex
-					el.style.zIndex = "auto"
+					el.style.zIndex = 'auto'
 					if (test > 0) {return 122} // 1867558
 				} catch(e) {}
 				return 121 // 1845586
 			}
-			if (window.hasOwnProperty("UserActivation")) return 120 // 1791079
-			try {location.href = "http://a>b/"} catch(e) {if (e.name === "SyntaxError") return 119} // 1817591
-			if (CSS2Properties.prototype.hasOwnProperty("fontSynthesisPosition")) return 118 // 1849010
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("fontStretch")) return 117 // 1842467
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("textRendering")) return 116 // 1839614
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) return 115 // 1778909
-			if (CSS2Properties.prototype.hasOwnProperty("WebkitTextSecurity")) return 114 // 1826629
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("reset")) return 113 // 1709347
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("roundRect")) return 112 // 1756175
-			if (HTMLElement.prototype.hasOwnProperty("translate")) return 111 // 1418449
-			if ("object" === typeof ondeviceorientationabsolute) return 110 // 1689631
-			if (CSSKeyframesRule.prototype.hasOwnProperty("length")) return 109 // 1789776
-			if ("undefined" === typeof onloadend) return 108 // 1574487
-			if (!SVGSVGElement.prototype.hasOwnProperty("useCurrentView")) return 107 // 1174097
-			if (Element.prototype.hasOwnProperty("checkVisibility")) return 106 // 1777293
+			if (window.hasOwnProperty('UserActivation')) return 120 // 1791079
+			try {location.href = 'http://a>b/'} catch(e) {if (e.name === 'SyntaxError') return 119} // 1817591
+			if (CSS2Properties.prototype.hasOwnProperty('fontSynthesisPosition')) return 118 // 1849010
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('fontStretch')) return 117 // 1842467
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('textRendering')) return 116 // 1839614
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 115 // 1778909
+			if (CSS2Properties.prototype.hasOwnProperty('WebkitTextSecurity')) return 114 // 1826629
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('reset')) return 113 // 1709347
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('roundRect')) return 112 // 1756175
+			if (HTMLElement.prototype.hasOwnProperty('translate')) return 111 // 1418449
+			if ('object' === typeof ondeviceorientationabsolute) return 110 // 1689631
+			if (CSSKeyframesRule.prototype.hasOwnProperty('length')) return 109 // 1789776
+			if ('undefined' === typeof onloadend) return 108 // 1574487
+			if (!SVGSVGElement.prototype.hasOwnProperty('useCurrentView')) return 107 // 1174097
+			if (Element.prototype.hasOwnProperty('checkVisibility')) return 106 // 1777293
 			try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
-			if (SVGStyleElement.prototype.hasOwnProperty("disabled")) return 104 // 1712623
-			if (undefined === new ErrorEvent("error").error) return 103 // 1772494
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty("direction")) {
+			if (SVGStyleElement.prototype.hasOwnProperty('disabled')) return 104 // 1712623
+			if (undefined === new ErrorEvent('error').error) return 103 // 1772494
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty('direction')) {
 				if (Array(1).includes()) return 102 // 1767541: regression FF99
 			}
 			return 101
@@ -1398,18 +1398,8 @@ function addTiming(metric) {
 		// get extra dates
 		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 	}
-
 	try {
-		if (1 == remainder) {key = 'now'; value = performance.now()
-		} else if (4 == remainder) {key = 'timestamp'; value = new Event('').timeStamp
-		} else if (5 == remainder) {key = 'date'
-			value = (new Date())[Symbol.toPrimitive]('number')
-			// get extra now
-			try {gData.timing['now'].push(performance.now())} catch(e) {}
-		} else if (7 == remainder) {key = 'mark'; value = performance.mark('a').startTime
-		} else if (8 == remainder) {
-			// get extra timestamps
-			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+		if (0 == remainder) {
 			// exslt
 			key = 'exslt'
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
@@ -1420,7 +1410,21 @@ function addTiming(metric) {
 			xsltProcessor.importStylesheet(doc)
 			let fragment = xsltProcessor.transformToFragment(doc, document)
 			value = (fragment.childNodes[0].nodeValue).slice(0,-6)
+		} else if (1 == remainder) {
+			key = 'now'; value = performance.now()
+		} else if (3 == remainder) {
+			key = 'timestamp'; value = new Event('').timeStamp
+		} else if (4 == remainder) {
+			key = 'date'
+			value = (new Date())[Symbol.toPrimitive]('number')
+			// get extra now
+			try {gData.timing['now'].push(performance.now())} catch(e) {}
+		} else if (6 == remainder) {
+			key = 'mark'; value = performance.mark('a').startTime
+		} else if (7 == remainder) {
+			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
 		}
+
 		if (undefined !== key) {
 			if (runST) {value = undefined}
 			gData.timing[key].push(value)
@@ -1814,8 +1818,8 @@ function outputSection(id, isResize = false) {
 				performance.clearMarks('a')
 				gData.timing['mark'].push(performance.mark('a').startTime)
 			} catch(e) {}
-			addTiming('start')
 			gCountTiming = 0
+			addTiming('start')
 
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
