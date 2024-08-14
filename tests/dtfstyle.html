@@ -221,7 +221,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 		Nov: new Date("November 6, 2024 01:12:34"), // nov wed am
 
 		// testing: cover all months and weekdays
-		/*
+		//*
 		Feb: new Date("February 5, 2024 13:12:34"), //mon
 		Apr: new Date("April 10, 2024 13:12:34"), // apr, wed pm
 		Mar: new Date("March 5, 2024 13:12:34"), // tues
@@ -265,84 +265,75 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 	}
 
 	let testsAll = {
-		"date-&-timeStyle": {
-			// 16 tests, 4 options
-			dates: [
-				dates.Jan, dates.May, dates.Jul, dates.Sep, dates.Nov, // original
-				//dates.Jan, dates.Feb, dates.Mar, dates.Apr, dates.May, dates.Jun, dates.Jul, dates.Aug, dates.Sep, dates.Oct, dates.Nov, dates.Dec
-			],
-			options: {
-				"full": {dateStyle: "full", timeStyle: "full", timeZone: tz},
-				"long": {dateStyle: "long", timeStyle: "long", timeZone: tz},
-				"medium": {dateStyle: "medium", timeStyle: "medium", timeZone: tz},
-				"short": {dateStyle: "short", timeStyle: "short", timeZone: tz},
-			},
-		},
+		// ignore short in non-gregory
+		// ignore med + long in ethiopic
+		"ethiopic": [
+			[dates.Jan, ['F']],
+			[dates.May, ['F']],
+			[dates.Jul, ['F']],
+			[dates.Sep, ['F']],
+			[dates.Nov, ['F']],
+			/*
+			[dates.Feb, ['F']],
+			[dates.Apr, ['F']],
+			[dates.Mar, ['F']],
+			[dates.Jun, ['F']],
+			[dates.Aug, ['F']],
+			[dates.Oct, ['F']],
+			[dates.Dec, ['F']],
+			*/
+		],
+		"gregory": [
+			[dates.Jan, ['F','L','M','S']],
+			[dates.May, ['F','L','M','S']],
+			[dates.Jul, ['F','L','M','S']],
+			[dates.Sep, ['F','L','M','S']],
+			[dates.Nov, ['F','L','M','S']],
+			/*
+			[dates.Feb, ['F','L','M','S']],
+			[dates.Apr, ['F','L','M','S']],
+			[dates.Mar, ['F','L','M','S']],
+			[dates.Jun, ['F','L','M','S']],
+			[dates.Aug, ['F','L','M','S']],
+			[dates.Oct, ['F','L','M','S']],
+			[dates.Dec, ['F','L','M','S']],
+			*/
+		],
+		"japanese": [
+			[dates.Jan, ['F','M']],
+			[dates.May, ['F','M']],
+			[dates.Jul, ['F','M']],
+			[dates.Sep, ['F','M']],
+			[dates.Nov, ['F','M']],
+			/*
+			[dates.Feb, ['F','M']],
+			[dates.Apr, ['F','M']],
+			[dates.Mar, ['F','M']],
+			[dates.Jun, ['F','M']],
+			[dates.Aug, ['F','M']],
+			[dates.Oct, ['F','M']],
+			[dates.Dec, ['F','M']],
+			*/
+		],
 	}
+
+	// matches
 	let testsMin = {
-		"date-&-timeStyle": [
-			// 9 tests over 5 dates, 3 options (use as few combos of options as possible)
-				// this is pretty much it: can't inmprove and seems to always cover everything
-			[dates.Jan,
-				{
-					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
-					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to all 469 tz's
-					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
-					// ^ SF's timeStyle full adds entropy to Antarctica/Troll, Europe/Guernsey, Europe/Isle_of_Man, Europe/Jersey
-					// but we still need a dateStyle short somewhere
-/*
-					"DF": {dateStyle: "full", timeZone: tz},
-					"DL": {dateStyle: "long", timeZone: tz},
-					"DM": {dateStyle: "medium", timeZone: tz},
-					"DS": {dateStyle: "short", timeZone: tz},
-					"FF": {dateStyle: "full", timeStyle: "full", timeZone: tz},
-					"FL": {dateStyle: "full", timeStyle: "long", timeZone: tz},
-					"FS": {dateStyle: "full", timeStyle: "short", timeZone: tz},
-					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz},
-					"LF": {dateStyle: "long", timeStyle: "full", timeZone: tz},
-					"LL": {dateStyle: "long", timeStyle: "long", timeZone: tz},
-					"LM": {dateStyle: "long", timeStyle: "medium", timeZone: tz},
-					"LS": {dateStyle: "long", timeStyle: "short", timeZone: tz},
-					"MF": {dateStyle: "medium", timeStyle: "full", timeZone: tz},
-					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz},
-					"MM": {dateStyle: "medium", timeStyle: "medium", timeZone: tz},
-					"MS": {dateStyle: "medium", timeStyle: "short", timeZone: tz},
-					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
-					"SL": {dateStyle: "short", timeStyle: "long", timeZone: tz},
-					"SM": {dateStyle: "short", timeStyle: "medium", timeZone: tz},
-					"SS": {dateStyle: "short", timeStyle: "short", timeZone: tz},
-					"TF": {timeStyle: "full", timeZone: tz},
-					"TL": {timeStyle: "long", timeZone: tz},
-					"TM": {timeStyle: "medium", timeZone: tz},
-					"TS": {timeStyle: "short", timeZone: tz}
-//*/
-				}
-			],
-			[dates.May,
-				{
-					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
-				}
-			],
-			[dates.Jul,
-				{
-					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to 432 tz's
-				}
-			],
-			[dates.Sep,
-				{
-					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
-					"ML": {dateStyle: "medium", timeStyle: "long", timeZone: tz}, // adds entropy to all 469 tz's
-					"SF": {dateStyle: "short", timeStyle: "full", timeZone: tz},
-					// ^ SF adds entropy in Europe/Dublin via timeStyle full
-						// but we still need a dateStyle short somewhere
-						// and we don't want another constructor, so we'll just reuse SF
-				}
-			],
-			[dates.Nov,
-				{
-					"FM": {dateStyle: "full", timeStyle: "medium", timeZone: tz}, // adds entropy to all 469 tz's
-				}
-			],
+		// 10 tests over 5 dates + 3 calendars with 3 options (use as few combos of options as possible)
+			// this is pretty much it: can't inmprove and seems to always cover everything
+		"ethiopic": [
+			[dates.Jan, ["FM"]],
+		],
+		"gregory": [
+			[dates.Jan, ["ML","SF"]],
+			[dates.May, ["FM"]],
+			[dates.Jul, ["ML"]],
+			[dates.Sep, ["FM","SF"]],
+			[dates.Nov, ["FM"]],
+		],
+		"japanese": [
+			[dates.Jan, ["FM"]],
+			[dates.Sep, ["ML"]],
 		],
 	}
 
@@ -355,60 +346,45 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 	try {
 		aLocales.forEach(function(code) {
 			let oTempData = {}
-			Object.keys(tests).sort().forEach(function(test) {
-				oTempData[test] = {}
+			Object.keys(tests).sort().forEach(function(cal) {
+				// calendar in options really slows this down
+				oTempData[cal] = {}
 				if (method == "all") {
-					Object.keys(tests[test].options).forEach(function(opt) {
-						oTempData[test][opt] = []
-						let formatter = new Intl.DateTimeFormat(code, tests[test].options[opt])
-						let dates = tests[test].dates
-						dates.forEach(function(date){
-							oTempData[test][opt].push(formatter.format(date))
-						})
-					})
+					// 1044 times
+					try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+					if ('ethiopic' !== cal) {
+						// 696 times
+						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						if ('gregory' == cal) {
+							// 348 times
+							try {oConst.DaL = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
+							try {oConst.DaS = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+						}
+					}
 				} else {
-					/*
-					try {oConst.DaDF = new Intl.DateTimeFormat(code, {dateStyle: "full", timeZone: tz})} catch(e) {}
-					try {oConst.DaDL = new Intl.DateTimeFormat(code, {dateStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaDM = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaDS = new Intl.DateTimeFormat(code, {dateStyle: "short", timeZone: tz})} catch(e) {}
-					try {oConst.DaFF = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-					try {oConst.DaFL = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaFS = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "short", timeZone: tz})} catch(e) {}
-					try {oConst.DaLF = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "full", timeZone: tz})} catch(e) {}
-					try {oConst.DaLL = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaLM = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaLS = new Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "short", timeZone: tz})} catch(e) {}
-					try {oConst.DaMF = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "full", timeZone: tz})} catch(e) {}
-					try {oConst.DaMM = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaMS = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "short", timeZone: tz})} catch(e) {}
-					try {oConst.DaSL = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaSM = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaSS = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
-					try {oConst.DaTF = new Intl.DateTimeFormat(code, {timeStyle: "full", timeZone: tz})} catch(e) {}
-					try {oConst.DaTL = new Intl.DateTimeFormat(code, {timeStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaTM = new Intl.DateTimeFormat(code, {timeStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaTS = new Intl.DateTimeFormat(code, {timeStyle: "short", timeZone: tz})} catch(e) {}
-					//*/
-
-					try {oConst.DaFM = new Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
-					try {oConst.DaML = new Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
-					try {oConst.DaSF = new Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
-
-					let array = tests[test]
-					array.forEach(function(item) {
-						let date = item[0]
-						let styles = item[1]
-						Object.keys(styles).forEach(function(opt) {
-							if (oTempData[test][opt] == undefined) {
-								oTempData[test][opt] = []
-							}
-							let constructor = test.slice(0,1).toUpperCase() + test.slice(1,2) + opt.slice(0,2).toUpperCase()
-							let formatter = oConst[constructor]
-							oTempData[test][opt].push(formatter.format(date))
-						})
-					})
+					// 1044 times
+					try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
+					if ('ethiopic' !== cal) {
+						// 696 times
+						try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
+						if ('gregory' == cal) {
+							// 348 times
+							try {oConst.DaSF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
+						}
+					}
 				}
+
+				let array = tests[cal]
+				array.forEach(function(item) {
+					let date = item[0]
+					let aStyles = item[1]
+					aStyles.forEach(function(opt) {
+						if (oTempData[cal][opt] == undefined) {oTempData[cal][opt] = []}
+						let constructor = 'Da'+ opt
+						let formatter = oConst[constructor]
+						oTempData[cal][opt].push(formatter.format(date))
+					})
+				})
 			})
 			//console.log(oTempData)
 
@@ -447,14 +423,9 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			if (!isAuto) {
 				let str = ""
 				for (const p of Object.keys(oData[k]["data"])) {
-					//str += s14 + p +": "+ sc
+					str += s14 + p +": "+ sc
 					for (const i of Object.keys(oData[k]["data"][p]).sort()) {
-						let option
-						if (i.length == 2) {
-							option = (oOptions[i] !== undefined ? oOptions[i] : i.toLowerCase())
-						} else {
-							option = i+"-"+i
-						}
+						let option = (oOptions[i] !== undefined ? oOptions[i] : i.toLowerCase())
 						let linedata = "<li class='dates'>"+ oData[k]["data"][p][i].join("</li><li class='dates'>") + "</li>"
 						str += "<li>"+ s16 + option +": "+ sc + linedata +"</li>"
 					}
@@ -680,123 +651,128 @@ Promise.all([
 	}
 	// add additional locales to core locales for this test
 	let aListExtra = [
-		"af-na,afrikaans (namibia)",
-		"ar-ae,arabic (united arabic emirates)",
-		"ar-dz,arabic (algeria)",
-		"ar-il,arabic (israel)",
-		"ar-iq,arabic (iraq)",
-		"ar-km,arabic (cosmoros)",
-		"ar-ma,arabic (morocco)",
-		"ar-mr,arabic (mauritania)",
-		"ar-sa,arabic (saudi arabia)",
-		"az-cyrl,azerbaijani (cyrillic)",
-		"bn-in,bengali (india)",
-		"bo-in,tibetan (india)",
-		"bs-cyrl,bosnian (cyrillic)",
-		"ckb-ir,central kurdish (iran)",
-		"de-at,german (austria)",
-		"de-ch,german (switzerland)",
-		"ee-tg,éwé (togo)",
-		"en-001,english",
-		"en-150,english (europe)",
-		"en-ae,english (united arab emirates)",
-		"en-au,english (australia)",
-		"en-be,english (belgium)",
-		"en-bi,english (burundi)",
-		"en-bw,english (botswana)",
-		"en-bz,english (belize)",
-		"en-ca,english (canada)",
-		"en-ch,english (switzerland)",
-		"en-dk,english (denmark)",
-		"en-er,english (eritrea)",
-		"en-fi,english (finland)",
-		"en-gb,english (united kingdom)",
-		"en-gu,english (guam)",
-		"en-gy,english (guyana)",
-		"en-hk,english (hong kong)",
-		"en-ie,english (ireland)",
-		"en-il,english (israel)",
-		"en-in,english (india)",
-		"en-ke,english (kenya)",
-		"en-mh,english (marshall islands)",
-		"en-mo,english (macau)",
-		"en-mt,english (malta)",
-		"en-my,english (malaysia)",
-		"en-nz,english (new zealand)",
-		"en-pk,english (pakistan)",
-		"en-se,english (sweden)",
-		"en-sg,english (singapore)",
-		"en-za,english (south africa)",
-		"en-zw,english (zimbabwe)",
-		"es-ar,spanish (argentina)",
-		"es-bo,spanish (bolivia)",
-		"es-br,spanish (brazil)",
-		"es-cl,spanish (chile)",
-		"es-co,spanish (colombia)",
-		"es-do,spanish (dominican republic)",
-		"es-ec,spanish (ecuador)",
-		"es-gt,spanish (guatemala)",
-		"es-hn,spanish (honduras)",
-		"es-mx,spanish (mexico)",
-		"es-pa,spanish (panama)",
-		"es-pe,spanish (peru)",
-		"es-ph,spanish (philippines)",
-		"es-py,spanish (paraguay)",
-		"es-us,spanish (united states)",
-		"es-uy,spanish (uruguay)",
-		"es-ve,spanish (venezuela)",
-		"fa-af,persian (afghanistan)",
-		"ff-adlm,fulah (adlam)",
-		"ff-adlm-gh,fulah (adlam ghana)",
-		"ff-gh,fulah (ghana)",
-		"fr-be,french (belgium)",
-		"fr-ca,french (canada)",
-		"fr-ch,french (switzerland)",
-		"fr-dj,french (djibouti)",
-		"fr-gf,french (french guiana)",
-		"fr-ma,french (morocco)",
-		"fr-ml,french (mali)",
-		"ha-gh,hausa (ghana)",
-		"hi-latn,hindi (latin)",
-		"hr-ba,croatian (bosnia & herzegovina)",
-		"it-ch,italian (switzerland)",
-		"ko-kp,korean (north korea)",
-		"ks-deva,kashmiri (devanagari)",
-		"lrc-iq,northern luri (iraq)",
-		"ms-bn,malay (brunei)",
-		"ms-id,malay (indonesia)",
-		"ne-in,nepali (india)",
-		"nl-be,dutch (belgium)",
-		"nl-sr,dutch (suriname)",
-		"om-ke,oromo (kenya)",
-		"pa-arab,punjabi (arabic)",
-		"ps-pk,pashto (pakistan)",
-		"pt-ao,portuguese (angola)",
-		"pt-ch,portuguese (switzerland)",
-		"pt-mo,portuguese (macau)",
-		"qu-bo,quechua (bolivia)",
-		"qu-ec,quechua (ecuador)",
-		"sd-deva,sindhi (devanagari)",
-		"se-fi,northern sami (finland)",
-		"shi-latn,tachelhit (latin)",
-		"so-ke,somali (kenya)",
-		"sq-mk,albanian (macedonia)",
-		"sr-ba,serbian (bosnia & herzegovina)",
-		"sr-cyrl-me,serbian (cyrillic montenegro)",
-		"sr-latn,serbian (latin)",
-		"sr-latn-ba,serbian (latin bosnia & herzegovina)",
-		"sr-latn-me,serbian (latin montenegro)",
-		"sw-ke,swahili (kenya)",
-		"ta-lk,tamil (sri lanka)",
-		"ta-my,tamil (malaysia)",
-		"tr-cy,turkish (cyprus)",
-		"ur-in,urdu (india)",
-		"uz-arab,uzbek (arabic)",
-		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
-		"vai-latn,vai (latin)",
-		"yo-bj,yoruba (benin)",
-		"yue-cn,cantonese (china)",
-		"zh-hans-hk,chinese (simplified hong kong)",
+"af-na,afrikaans (namibia)",
+"ar-ae,arabic (united arabic emirates)",
+"ar-dz,arabic (algeria)",
+"ar-il,arabic (israel)",
+"ar-iq,arabic (iraq)",
+"ar-km,arabic (cosmoros)",
+"ar-ma,arabic (morocco)",
+"ar-mr,arabic (mauritania)",
+"ar-sa,arabic (saudi arabia)",
+"az-cyrl,azerbaijani (cyrillic)",
+"bn-in,bengali (india)",
+"bo-in,tibetan (india)",
+"bs-cyrl,bosnian (cyrillic)",
+"ckb-ir,central kurdish (iran)",
+"de-at,german (austria)",
+"de-ch,german (switzerland)",
+"ee-tg,éwé (togo)",
+"en-001,english",
+"en-150,english (europe)",
+"en-ae,english (united arab emirates)",
+"en-au,english (australia)",
+"en-be,english (belgium)",
+"en-bi,english (burundi)",
+"en-bw,english (botswana)",
+"en-bz,english (belize)",
+"en-ca,english (canada)",
+"en-ch,english (switzerland)",
+"en-dk,english (denmark)",
+"en-er,english (eritrea)",
+"en-fi,english (finland)",
+"en-gb,english (united kingdom)",
+"en-gu,english (guam)",
+"en-gy,english (guyana)",
+"en-hk,english (hong kong)",
+"en-ie,english (ireland)",
+"en-il,english (israel)",
+"en-in,english (india)",
+"en-ke,english (kenya)",
+"en-mh,english (marshall islands)",
+"en-mo,english (macau)",
+"en-mt,english (malta)",
+"en-my,english (malaysia)",
+"en-nz,english (new zealand)",
+"en-pk,english (pakistan)",
+"en-se,english (sweden)",
+"en-sg,english (singapore)",
+"en-za,english (south africa)",
+"en-zw,english (zimbabwe)",
+"es-ar,spanish (argentina)",
+"es-bo,spanish (bolivia)",
+"es-br,spanish (brazil)",
+"es-cl,spanish (chile)",
+"es-co,spanish (colombia)",
+"es-do,spanish (dominican republic)",
+"es-ec,spanish (ecuador)",
+"es-gt,spanish (guatemala)",
+"es-hn,spanish (honduras)",
+"es-mx,spanish (mexico)",
+"es-pa,spanish (panama)",
+"es-pe,spanish (peru)",
+"es-ph,spanish (philippines)",
+"es-py,spanish (paraguay)",
+"es-us,spanish (united states)",
+"es-uy,spanish (uruguay)",
+"es-ve,spanish (venezuela)",
+"fa-af,persian (afghanistan)",
+"ff-adlm,fulah (adlam)",
+"ff-adlm-gh,fulah (adlam ghana)",
+"ff-gh,fulah (ghana)",
+"ff-mr,fulah (mauritania)",
+"fr-be,french (belgium)",
+"fr-ca,french (canada)",
+"fr-ch,french (switzerland)",
+"fr-dj,french (djibouti)",
+"fr-gf,french (french guiana)",
+"fr-ma,french (morocco)",
+"fr-ml,french (mali)",
+"ha-gh,hausa (ghana)",
+"hi-latn,hindi (latin)",
+"hr-ba,croatian (bosnia & herzegovina)",
+"it-ch,italian (switzerland)",
+"ko-kp,korean (north korea)",
+"ks-deva,kashmiri (devanagari)",
+"lrc-iq,northern luri (iraq)",
+"ms-bn,malay (brunei)",
+"ms-id,malay (indonesia)",
+"ne-in,nepali (india)",
+"nl-be,dutch (belgium)",
+"nl-sr,dutch (suriname)",
+"om-ke,oromo (kenya)",
+"pa-arab,punjabi (arabic)",
+"ps-pk,pashto (pakistan)",
+"pt-ao,portuguese (angola)",
+"pt-ch,portuguese (switzerland)",
+"pt-mo,portuguese (macau)",
+"qu-bo,quechua (bolivia)",
+"qu-ec,quechua (ecuador)",
+"sd-deva,sindhi (devanagari)",
+"se-fi,northern sami (finland)",
+"shi-latn,tachelhit (latin)",
+"so-ke,somali (kenya)",
+"sq-mk,albanian (macedonia)",
+"sr-ba,serbian (bosnia & herzegovina)",
+"sr-cyrl-me,serbian (cyrillic montenegro)",
+"sr-cyrl-xk,serbian (cyrillic kosovo)",
+"sr-latn,serbian (latin)",
+"sr-latn-ba,serbian (latin bosnia & herzegovina)",
+"sr-latn-me,serbian (latin montenegro)",
+"sr-latn-xk,serbian (latin kosovo)",
+"sw-ke,swahili (kenya)",
+"ta-lk,tamil (sri lanka)",
+"ta-my,tamil (malaysia)",
+"ti-er,tigrinya (eritrea)",
+"tr-cy,turkish (cyprus)",
+"ur-in,urdu (india)",
+"uz-arab,uzbek (arabic)",
+"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
+"vai-latn,vai (latin)",
+"yo-bj,yoruba (benin)",
+"yue-cn,cantonese (china)",
+"zh-hans-hk,chinese (simplified hong kong)",
+"zh-hans-mo,chinese (simplified macau)",
 
 // unused usual suspects
 /*
@@ -866,7 +842,6 @@ Promise.all([
 "ff-adlm-ng,fulah (adlam nigeria)",
 "ff-adlm-sl,fulah (adlam sierra leone)",
 "ff-gn,fulah (guinea)",
-"ff-mr,fulah (mauritania)",
 "fo-dk,faroese (denmark)",
 "fr-bi,french (burundi)",
 "fr-cd,french (congo kinshasa)",
@@ -911,8 +886,6 @@ Promise.all([
 "so-dj,somali (djibouti)",
 "so-et,somali (ethiopia)",
 "sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
-"sr-cyrl-xk,serbian (cyrillic kosovo)",
-"sr-latn-xk,serbian (latin kosovo)",
 "sr-me,serbian (montenegro)",
 "sr-xk,serbian (kosovo)",
 "sv-fi,swedish (finland)",
@@ -920,17 +893,17 @@ Promise.all([
 "sw-ug,swahili (uganda)",
 "ta-sg,tamil (singapore)",
 "teo-ke,teso (kenya)",
-"ti-er,tigrinya (eritrea)",
 "tr-tr,turkish (turkey)",
 "uz-af,uzbek (afghanistan)",
 "yue-hans,cantonese (simplified)",
-"zh-hans-mo,chinese (simplified macau)",
 "zh-hant-mo,chinese (traditional macau)",
 //*/
 
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ['en,english']
+
 	legend()
 	if (isSupported) {
 		setBtn("all")
