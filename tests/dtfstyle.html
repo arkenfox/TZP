@@ -267,37 +267,19 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 	let testsAll = {
 		// ignore short in non-gregory
 		// ignore med + long in ethiopic
+		"default": [
+			[dates.Jan, ['F','L','M','S']],
+			[dates.May, ['F','L','M','S']],
+			[dates.Jul, ['F','L','M','S']],
+			[dates.Sep, ['F','L','M','S']],
+			[dates.Nov, ['F','L','M','S']],
+		],
 		"ethiopic": [
 			[dates.Jan, ['F']],
 			[dates.May, ['F']],
 			[dates.Jul, ['F']],
 			[dates.Sep, ['F']],
 			[dates.Nov, ['F']],
-			/*
-			[dates.Feb, ['F']],
-			[dates.Apr, ['F']],
-			[dates.Mar, ['F']],
-			[dates.Jun, ['F']],
-			[dates.Aug, ['F']],
-			[dates.Oct, ['F']],
-			[dates.Dec, ['F']],
-			*/
-		],
-		"gregory": [
-			[dates.Jan, ['F','L','M','S']],
-			[dates.May, ['F','L','M','S']],
-			[dates.Jul, ['F','L','M','S']],
-			[dates.Sep, ['F','L','M','S']],
-			[dates.Nov, ['F','L','M','S']],
-			/*
-			[dates.Feb, ['F','L','M','S']],
-			[dates.Apr, ['F','L','M','S']],
-			[dates.Mar, ['F','L','M','S']],
-			[dates.Jun, ['F','L','M','S']],
-			[dates.Aug, ['F','L','M','S']],
-			[dates.Oct, ['F','L','M','S']],
-			[dates.Dec, ['F','L','M','S']],
-			*/
 		],
 		"japanese": [
 			[dates.Jan, ['F','M']],
@@ -305,15 +287,6 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 			[dates.Jul, ['F','M']],
 			[dates.Sep, ['F','M']],
 			[dates.Nov, ['F','M']],
-			/*
-			[dates.Feb, ['F','M']],
-			[dates.Apr, ['F','M']],
-			[dates.Mar, ['F','M']],
-			[dates.Jun, ['F','M']],
-			[dates.Aug, ['F','M']],
-			[dates.Oct, ['F','M']],
-			[dates.Dec, ['F','M']],
-			*/
 		],
 	}
 
@@ -321,15 +294,15 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 	let testsMin = {
 		// 10 tests over 5 dates + 3 calendars with 3 options (use as few combos of options as possible)
 			// this is pretty much it: can't inmprove and seems to always cover everything
-		"ethiopic": [
-			[dates.Jan, ["FM"]],
-		],
-		"gregory": [
+		"default": [
 			[dates.Jan, ["ML","SF"]],
 			[dates.May, ["FM"]],
 			[dates.Jul, ["ML"]],
 			[dates.Sep, ["FM","SF"]],
 			[dates.Nov, ["FM"]],
+		],
+		"ethiopic": [
+			[dates.Jan, ["FM"]],
 		],
 		"japanese": [
 			[dates.Jan, ["FM"]],
@@ -347,34 +320,42 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 		aLocales.forEach(function(code) {
 			let oTempData = {}
 			Object.keys(tests).sort().forEach(function(cal) {
+				let src = cal
 				// calendar in options really slows this down
-				oTempData[cal] = {}
 				if (method == "all") {
-					// 1044 times
-					try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
-					if ('ethiopic' !== cal) {
-						// 696 times
-						try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
-						if ('gregory' == cal) {
-							// 348 times
-							try {oConst.DaL = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
-							try {oConst.DaS = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+					if ('default' == cal) {
+						try {oConst.DaF = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
+						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
+						cal = oConst.DaF.resolvedOptions().calendar
+						/* 
+							th = buddhist
+							ar-sa = islamic-umalqura
+							ckb-ir, fa, fa-af, lrc, msn, ps, uz-arab = persian
+						*/
+					} else {
+						try {oConst.DaF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "full", timeZone: tz})} catch(e) {}
+						if ('japanese' == cal) {
+							try {oConst.DaM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						}
 					}
 				} else {
-					// 1044 times
-					try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
-					if ('ethiopic' !== cal) {
-						// 696 times
-						try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
-						if ('gregory' == cal) {
-							// 348 times
-							try {oConst.DaSF = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
+					if ('default' == cal) {
+						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
+						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
+						cal = oConst.DaFM.resolvedOptions().calendar
+					} else {
+						try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
+						if ('japanese' == cal) {
+							try {oConst.DaML = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
 						}
 					}
 				}
+				oTempData[cal] = {}
 
-				let array = tests[cal]
+				let array = tests[src]
 				array.forEach(function(item) {
 					let date = item[0]
 					let aStyles = item[1]
@@ -382,7 +363,11 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 						if (oTempData[cal][opt] == undefined) {oTempData[cal][opt] = []}
 						let constructor = 'Da'+ opt
 						let formatter = oConst[constructor]
-						oTempData[cal][opt].push(formatter.format(date))
+						try {
+							oTempData[cal][opt].push(formatter.format(date))
+						} catch(e) {
+							oTempData[cal][opt].push('error')
+						}
 					})
 				})
 			})
@@ -902,7 +887,7 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
-	//list = ['en,english']
+	//list = ['ar-sa,arabic (saudi arabia)','en,english','fa,persian','th,thai',]
 
 	legend()
 	if (isSupported) {
