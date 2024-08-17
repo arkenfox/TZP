@@ -1209,9 +1209,8 @@ function output_section(section, scope) {
 	let summary = scope+"_summary"
 	if (gRun) {
 		gData[zFP][summary] = {}
+		sData[zFP][summary] = {}
 	}
-	sData[zFP][scope+"_list"] = {}
-	sData[zFP][summary] = {}
 
 	aSection.forEach(function(number) {
 		let data = {}, datasummary = {}, hash, count, hashsummary
