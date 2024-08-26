@@ -75,11 +75,11 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			} else if ('android' == isOS && '2b9d44b0' == hash) {notation = rfp_green // 0.02
 			} else if ('9b69969b' == hash) {notation = rfp_green} // 0.025 catchall incl linux
 		}
-		if (isTB && !isMullvad) {notation = tb_red} // TB should be an error
+		if (isTB && !isMullvad && isVer == 115) {notation = tb_red} // TB should be an error
 		if (isGecko && notation !== rfp_green) {data['ac-outputLatency'] = zNA; hash = mini(data)}
 		
 	} catch(e) {
-		if (isTB && !isMullvad) {notation = (e+'' === 'TypeError: window.AudioContext is not a constructor' ? tb_green : tb_red)}
+		if (isTB && !isMullvad && isVer == 115) {notation = (e+'' === 'TypeError: window.AudioContext is not a constructor' ? tb_green : tb_red)}
 		hash = log_error(11, METRIC, e); data = zErr
 	}
 	addBoth(11, METRIC, hash, btn, notation, data, isLies)
@@ -144,10 +144,8 @@ const get_audio_offline = () => new Promise(resolve => {
 					// lies
 					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
 					// notation
-					if (isTB && !isMullvad) {
-						notation = tb_red
-					} else if (isMullvad) {
-						if (isLies) {notation = tb_red}
+					if (isTB && 115 == isVer) {
+						if (!isMullvad || isLies) {notation = tb_red}
 					} else if (isVer > 117) {
 						notation = default_red
 						if (!isLies) {
@@ -171,7 +169,7 @@ const get_audio_offline = () => new Promise(resolve => {
 		}
 	} catch(e) {
 		if (gRun) {dom.oscillator_compressor = zNA; dom.oscillator = zNA; dom.audio_user = zNA}
-		if (isTB && !isMullvad) {
+		if (isTB && !isMullvad && isVer == 115) {
 			notation = e+'' === 'TypeError: window.OfflineAudioContext is not a constructor' ? tb_green : tb_red
 		} else {
 			notation = default_red
@@ -223,7 +221,7 @@ const get_oscillator = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (isTB && !isMullvad) {
+					if (isTB && !isMullvad && isVer == 115) {
 						notation = tb_red // TB should be an error
 					} else if (isVer > 123) {
 						if (hash == '5b3956a9') {notation = sgtick+'x86/amd]'+sc // 1877221
@@ -296,7 +294,7 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (isTB && !isMullvad) {
+					if (isTB && !isMullvad && isVer == 115) {
 						notation = tb_red // TB should be an error
 					} else if (isVer > 123) {
 						if (hash == 'e08487bf') {notation = sgtick+'x86/amd]'+sc // 1877221
@@ -307,22 +305,13 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 					}
 				}
 				exit(hash)
-				//dom[METRIC].innerHTML = hash + notation
-				//log_perf(11, METRIC, t0)
-				//return resolve([METRIC, hash])
 			} catch(e) {
 				exit(log_error(11, METRIC, e), e+'') // user test: reflect error entropy
-				//let eMsg = log_error(11, METRIC, e)
-				//dom[METRIC].innerHTML = eMsg + notation
-				//return resolve([METRIC, eMsg])
 			}
 		}
 		oscillator.start(0)
 	} catch(e) {
 		exit(log_error(11, METRIC, e), e+'') // user test: reflect error entropy
-		//let eMsg = log_error(11, METRIC, e)
-		//dom[METRIC].innerHTML = eMsg + notation
-		//return resolve([METRIC, eMsg]) 
 	}
 })
 
