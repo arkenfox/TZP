@@ -536,7 +536,7 @@ function get_window_props(METRIC) {
 					if (115 == isVer) {
 						if ('7d50bf8c' == hash || '7a49e32a' == hash) {notation = tb_green} // TB13.5: 776 standard | 775 safer #42315
 					} else if (128 == isVer) {
-						if ('f83a05b0' == hash || '86e2c34e' == hash) {notation = tb_green} // TB14: 787 standard | 786 safer
+						if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
 					}
 				}
 			}
