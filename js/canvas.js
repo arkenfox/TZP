@@ -356,17 +356,6 @@ const outputCanvas = () => new Promise(resolve => {
 				let canvas = dom.kcanvasGet
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['get']) {return ctx}
-
-				// ToDo: 1517786, #42996
-					// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes
-					// colorSpace s/be hardcoded to srgb
-					// willReadFrequently: indicates software vs hardware acceleration
-				try {
-					console.log(canvas.getContext('2d').getContextAttributes())
-				} catch(e) {
-					console.log(e+'')
-				}
-
 				// color the background
 				ctx.fillStyle = 'rgba('+ solidClrs +')'
 				ctx.fillRect(0, 0, sizeW, sizeH)
