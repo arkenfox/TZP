@@ -88,6 +88,7 @@ let fntMaster = {
 			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
 			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC',
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
+			// 'Arial Black','Arial Narrow', // hardcode these in once we are min Smart 128
 			// always
 			'-apple-system',
 			/* variants
@@ -140,8 +141,6 @@ let fntMaster = {
 			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
-			// not detected: we may whitelist these
-			'Arial Black','Arial Narrow',
 		],
 		windows: [
 			'Calibri', 'Candara', // 'Corbel','Ebrima','Gabriola', // system
@@ -509,6 +508,16 @@ function set_fntList() {
 				fntData.full = array
 				fntData.full.push(fntFake)
 			} else if (isTB) {
+				// TB #42494
+					// ToDo: when min Smart is 128, just hardcode into allowlist
+				if ('mac' == isOS) {
+					if (isVer > 115) {
+						fntMaster.allowlist.mac.push('Arial Black','Arial Narrow')
+					} else {
+						fntMaster.blocklist.mac.push('Arial Black','Arial Narrow')
+					}
+				}
+
 				// desktop TB
 				let aBundled = []
 				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -882,7 +891,7 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			}
 			for (const k of Object.keys(tmpBases).sort()) {fntBases[k] = tmpBases[k]}
 			if (runSF) {detectedViaTransform.add(fntFake +':'+ fntControl[0] +':700 x 800')} // fake font detected
-			if (!fntTest.length || fntDocEnabled == false) {
+			if (!fntTest.length || false == fntDocEnabled) {
 				return resolve('baseonly')
 			}
 		}
@@ -900,7 +909,6 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 					span.style.setProperty('--font', family)
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
-
 					basefont = basefont.split(',')[0] // switch to short generic name
 					aTestsValid.forEach(function(pair) {
 						let wName = pair[0] +'Width', hName = pair[0] +'Height'
