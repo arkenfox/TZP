@@ -981,9 +981,9 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 			h = zErr; w = zErr; wDisplay = ''
 			hDisplay = log_error(1, METRIC +'_'+ type, e)
 		}
+		oData[METRICh] = h
+		oData[METRICw] = w
 		if (!isHeight) {
-			oData[METRICh] = h
-			oData[METRICw] = w
 			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
 		}
 	}
