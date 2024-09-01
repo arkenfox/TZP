@@ -78,6 +78,7 @@
 	</div>
 	<!--hidden-->
 	<div class="hidden">
+		<iframe id="iFrameBlank"></iframe>
 		<span id="sColorElement"></span>
 		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
 		<div class="normalized">
@@ -196,6 +197,13 @@
 			<td class="mono border-bottom">
 				<span class="c" id="screen_orientation_-moz-device-orientation"></span> | <span class="c" id="screen_orientation_device-aspect-ratio"></span>
 			</td></tr>
+
+		<!--iframe-->
+		<tr><td>[iframe] available screen</td><td class="c mono" id="iAvailable"></td></tr>
+		<tr><td>[iframe] screen</td><td class="c mono" id="iScreen"></td></tr>
+		<tr><td>[iframe] outer window</td><td class="mono border-bottom">
+			<span class="c" id="iOuter"></span><span class="c" id="iframe_sizes_match_inner"></span>
+		</td></tr>
 
 		<!--screen: measurements-->
 		<tr><td>available screen</td>
