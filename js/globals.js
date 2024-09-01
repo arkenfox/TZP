@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 153
+	expectedMetrics = 154
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -119,7 +119,9 @@ const screen_green = sgtick+'screens match]'+sc,
 	window_green = sgtick+'windows match]'+sc,
 	window_red = sbx+'windows match]'+sc,
 	sizes_green = sgtick+'screen = inner]'+sc,
-	sizes_red = sbx+'screen = inner]'+sc
+	sizes_red = sbx+'screen = inner]'+sc,
+	isizes_green = sgtick+'iframes = inner]'+sc,
+	isizes_red = sbx+'iframes = inner]'+sc
 
 // dynamic TB/MB notation
 let tb_green = sgtick+'TB]'+sc,
