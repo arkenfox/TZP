@@ -236,8 +236,7 @@ function getWebGL(contextType) {
 			}
 		}
 	} catch (e) {
-		log_error(10, contextType, e)
-		errors.push('context blocked')
+		errors.push(['context', e+'']) // 'context blocked'
 		return [data, errors]
 	}
 
@@ -247,9 +246,8 @@ function getWebGL(contextType) {
 	let webGLExtensions
 	try {
 		webGLExtensions = context.getSupportedExtensions()
-	} catch (error) {
-		console.error(error)
-		errors.push('extensions blocked')
+	} catch (e) {
+		errors.push(['extensions', e+'']) // 'extensions blocked'
 	}
 
 	// get parameters
@@ -296,13 +294,13 @@ function getWebGL(contextType) {
 
 		parameters.DIRECT_3D = /Direct3D|D3D(\d+)/.test(parameters.UNMASKED_RENDERER_WEBGL)
 
-	} catch (error) {
-		console.error(error)
-		errors.push('parameters blocked')
+	} catch (e) {
+		log_error(10, contextType, e)
+		errors.push(['parameters', e+'']) // 'parameters blocked'
 	}
 
-	//const gpuVendor = parameters.UNMASKED_VENDOR_WEBGL
-	//const gpuRenderer = parameters.UNMASKED_RENDERER_WEBGL
+	const gpuVendor = parameters.UNMASKED_VENDOR_WEBGL
+	const gpuRenderer = parameters.UNMASKED_RENDERER_WEBGL
 
 	// Structure parameter data
 	let components = {}
@@ -322,8 +320,8 @@ function getWebGL(contextType) {
 	}
 
 	data = {
-		//gpuRenderer,
-		//gpuVendor,
+		gpuRenderer,
+		gpuVendor,
 		...components,
 		webGLExtensions
 	}
@@ -331,26 +329,44 @@ function getWebGL(contextType) {
 }
 
 const outputWebGL = () => new Promise(resolve => {
-	return resolve()
+	//return resolve()
 
 	Promise.all([
 		getWebGL('webgl'),
 		getWebGL('webgl2'),
 		getWebGL('experimental-webgl'),
 	]).then((response) => {
+
 		const [webGL, webGL2, experimentalWebGL] = response
 		const [webGLData, webGLErrors] = webGL
 		const [webGL2Data, webGL2Errors] = webGL2
 		const [experimentalWebGLData, experimentalWebGLErrors] = experimentalWebGL
 
-		/*
-		console.log('WebGLRenderingContext: ', mini(webGLData), webGLData)
+		//*
+		console.log('WebGL: ', mini(webGLData), webGLData)
 		if (webGLErrors.length) {console.log('webGL Errors',webGLErrors)}
-		console.log('WebGL2RenderingContext: ', webGL2Data)
+		console.log('WebGL2: ', mini(webGL2Data), webGL2Data)
 		if (webGL2Errors.length) {console.log('webGL2 Errors',webGL2Errors)}
 		console.log('Experimental: ', mini(experimentalWebGLData), experimentalWebGLData)
 		if (experimentalWebGLErrors.length) {console.log('Experimental Errors',experimentalWebGLErrors)}
 		//*/
+
+/*
+               RENDERER: ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar
+UNMASKED_RENDERER_WEBGL: ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar
+UNMASKED_VENDOR_WEBGL: Google Inc. (NVIDIA)
+               VENDOR: Mozilla
+*/
+
+		// check for NS click to play
+		let nsClickToPlay = false
+		try {
+			nsClickToPlay = !!document.querySelector('.__ns__pop2top [data-policy-type="webgl"]')
+		} catch(e) {
+			log_error(10, 'webgl_ns_clicktoplay', e)
+			nsClickToPlay = zErr
+		}
+		console.log('WebGL ClickToPlay', nsClickToPlay)
 
 		// do something with the erorrs...
 		return resolve()
