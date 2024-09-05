@@ -73,7 +73,7 @@ function get_colors() {
 		try {
 			if (runSE) {foo++}
 			let aTemp = [], oTemp = {}, aList = oList[type]
-			aList.forEach(function(style) {
+			aList.forEach(function(style){
 				element.style.backgroundColor = strColor // reset color
 				element.style.backgroundColor = style
 				let rgb = window.getComputedStyle(element, null).getPropertyValue('background-color')
@@ -323,7 +323,7 @@ function get_computed_styles(METRIC) {
 
 function get_link(METRIC) {
 	// FF120+ 1858397: layout.css.always_underline_links
-	let value, data =''
+	let value, data ='', notation = isVer < 120 ? '' : default_red
 	if (!isGecko || isVer < 120) {
 		value = zNA
 	} else {
@@ -334,11 +334,12 @@ function get_link(METRIC) {
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 			if (!property.includes('rgb(')) {throw zErrInvalid +'got ' + property}
 			value = 'underline' == property.slice(0,9) ? zE : zD
+			if (zD == value) {notation = default_green}
 		} catch(e) {
 			value = e; data = zErrLog
 		}
 	}
-	addBoth(14, METRIC, value,'','', data)
+	addBoth(14, METRIC, value,'', notation, data)
 	return
 }
 
