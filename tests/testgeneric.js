@@ -554,7 +554,7 @@ const get_isVer = () => new Promise(resolve => {
 
 	function cascade() {
 		isVerMax = 131
-		// note: false positives > FF78 (130) > FF79 (131)
+		// note: false positives < FF78 (130) < FF79 (131)
 			// so we'll wrap those in the FF129 check
 		if ('function' === typeof CSS2Properties
 			&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) {
