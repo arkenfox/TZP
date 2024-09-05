@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 81, maxVer = 130, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 82, maxVer = 131, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -279,12 +279,26 @@ function outputVersion() {
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
 
+		// 131: 1900196
+		// false posiitve in FF78 or lower
+		let t131 = performance.now(), ver131 = false
+		if (window.hasOwnProperty("UserActivation")) { // FF120+
+			try {
+				let test131 = new Intl.DateTimeFormat('zh', { calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
+				ver131 = '2033' == test131.slice(0,4)
+			} catch(e) {}
+		}
+		rec(131, 131, "1900196", ver131, performance.now()-t131, 'ex') // slow AF
+
 		// 130: 1907236
+		// false posiitve in FF77 or lower
 		let t130 = performance.now(), ver130 = false
-		try {
-			new RegExp('[\\00]','u')
-		} catch(e) {
-			if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') {ver130 = true}
+		if (window.hasOwnProperty("UserActivation")) { // FF120+
+			try {
+				new RegExp('[\\00]','u')
+			} catch(e) {
+				if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') {ver130 = true}
+			}
 		}
 		rec(130, 130, "1907236", ver130, performance.now()-t130) // 0.025ms
 

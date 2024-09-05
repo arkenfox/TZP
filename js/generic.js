@@ -503,7 +503,7 @@ function get_isVer(METRIC) {
 
 	isVer = cascade()
 	if (isVer < isBlockMin[0]) {isVerExtra = ' or lower'
-	} else if (isVer == 130) {isVerExtra = '+'}
+	} else if (isVer == 131) {isVerExtra = '+'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin[0]
@@ -514,11 +514,19 @@ function get_isVer(METRIC) {
 
 	function cascade() {
 		try {
-			try {new RegExp('[\\00]','u')} catch(e) {
-				if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
-			}
+			// note: false positives < FF78 (130) < FF79 (131)
+				// so we'll wrap those in the FF129 check
 			if ('function' === typeof CSS2Properties
-				&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
+				&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) {
+				try {
+					let test131 = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
+					if ('2033' == test131.slice(0,4)) return 131 // 1900196
+				} catch(e) {}
+				try {new RegExp('[\\00]','u')} catch(e) {
+					if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
+				}
+				return 129 // 1595620
+			}
 
 			// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
 			// ToDo: replace or add a fallback
