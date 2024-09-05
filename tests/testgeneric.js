@@ -553,12 +553,20 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 130
-		try {new RegExp('[\\00]','u')} catch(e) {
-			if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
+		isVerMax = 131
+		// note: false positives > FF78 (130) > FF79 (131)
+			// so we'll wrap those in the FF129 check
+		if ('function' === typeof CSS2Properties
+			&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) {
+			try {
+				let test131 = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
+				if ('2033' == test131.slice(0,4)) return 131 // 1900196
+			} catch(e) {}
+			try {new RegExp('[\\00]','u')} catch(e) {
+				if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
+			}
+			return 129 // 1595620
 		}
-		if ("function" === typeof CSS2Properties
-			&& CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings")) return 129 // 1595620
 
 		// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
 		// ToDo: replace or add a fallback
