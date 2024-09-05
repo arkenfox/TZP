@@ -1760,6 +1760,7 @@ function get_unicode() {
 			}
 		})
 	})
+	canvas.height = 0 // hide the fixed canvas after use
 	dom.ugSlot =''
 	output()
 }
