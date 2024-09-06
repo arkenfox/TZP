@@ -15,7 +15,7 @@ function check_timing(type) {
 			} else if ('mark' == type) {
 				value = performance.mark('a').startTime - performance.mark('a').startTime
 			} else if ('currenttime' == type) {
-				value = (new DocumentTimeline().currentTime) - (new DocumentTimeline().currentTime)
+				value = (gTimeline.currentTime) - (gTimeline.currentTime)
 			}
 			value = Math.trunc(value)
 			// should match or the clock ticks over, e.g. 1ms or 16/17ms
@@ -43,38 +43,31 @@ function get_timing(METRIC) {
 		gData.timing['mark'].push(performance.mark('a').startTime)
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
-	try {gData.timing['currenttime'].push(new DocumentTimeline().currentTime)} catch(e) {}
+	try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
 
 	/* testing
 	gData.timing.date = [1723240561321]
 	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
+	gData.timing.currenttime = [4800.096,4833.43,4850.097,4866.764,4883.431,4900.098,4916.765,4933.432,4950.099,4966.766,4983.433]
 	//*/
 
 	let oGood = {
-		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
-		// 1912129: exslt diffs must be 1000, and all end in .000
+		'date': [0, 1, 16, 17, 33, 34],
 		'currenttime': [
-			// we're 2 decimal places, no drift
-			0,
-			16.66, 16.67,
-			33.33, 33.34,
-			50,
-			66.66, 66.67,
-			83.33, 83.34,
+			0, 0.01, 0.02,
+			16.66, 16.67, 16.68,
+			33.33, 33.34, 33.35,
 		],
-		'exslt': [0],
+		'exslt': [0], // 1912129: exslt diffs must be 1000, and all end in .000
 		'other': [
 			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
 			// the longer since the first time, the more decimal points drift
 			// so 0's become 0.1's then 0.2's etc: 6s seems to limit drift to 1 decimal point
-			0, 0.1, 0.2,
-			16.6, 16.7, 16.8, //16.9,
-			33.3, 33.4, 33.5,
-			50, 50.1, 50.2,
-			66.6, 66.7, 66.8, //66.9,
-			83.3, 83.4, 83.5
+			0, 0.1, 0.2, 0.3,
+			16.6, 16.7, 16.8, 16.9,
+			33.3, 33.4, 33.5, 33.36,
 		],
-		'ten': [0, 10, 20, 30, 40, 50, 60, 70, 80, 90],
+		'ten': [0, 10, 20, 30, 40],
 	}
 
 	let aNotInteger = ['mark','now','timestamp']
@@ -132,11 +125,12 @@ function get_timing(METRIC) {
 				let totaldiff = (end - start)
 				totaldiff = ('currenttime' == k ? (totaldiff.toFixed(2)) : (totaldiff.toString().match(calc1)[0]) )  * 1
 				aTotal.push(totaldiff)
-				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
+				let diff = (totaldiff % 50).toFixed(2) * 1 // drop 50s
 				setDiffs.add(diff)
 			}
 			let aDiffs = Array.from(setDiffs)
 			//if ('currenttime' == k) {console.log(aDiffs)}
+
 			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
 				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
@@ -176,9 +170,10 @@ function get_timing(METRIC) {
 
 			// display
 			str = aTotal.join(', ')
-			if (str.length > 60) {
-				let reduce = Math.floor((str.length - 60)/5)
-				let len = aTotal.length
+			let strLen = str.length
+			if (strLen > 60) {
+				let len = aTotal.length, unitLen = strLen/(aTotal.length)
+				let reduce = Math.floor((str.length - 60)/unitLen)
 				let lasttwo = ' &#x2026 '+ aTotal[len-2] +', '+aTotal[len-1]
 				let newTotal = aTotal.slice(0, len - (reduce + 2))
 				if ((newTotal.join(', ') + lasttwo).length > 60) {newTotal = newTotal.slice(0, len - (reduce + 3))}
