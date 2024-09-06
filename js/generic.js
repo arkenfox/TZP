@@ -1401,13 +1401,12 @@ function addDetail(metric, data, scope = isScope) {
 
 function addTiming(metric) {
 	let remainder = gCountTiming % 9, key, value
-	if (0 == gCountTiming % 3) {
+	if (0 == gCountTiming % 5) {
 		// get extra dates
 		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 	}
 	try {
 		if (0 == remainder) {
-			// exslt
 			key = 'exslt'
 			const xslText = '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"'
 				+' xmlns:date="http://exslt.org/dates-and-times" extension-element-prefixes="date"><xsl:output method="html"/>'
@@ -1420,7 +1419,7 @@ function addTiming(metric) {
 		} else if (1 == remainder) {
 			key = 'now'; value = performance.now()
 		} else if (2 == remainder) {
-			key = 'currenttime'; value = new DocumentTimeline().currentTime
+			key = 'currenttime'; value = gTimeline.currentTime
 		} else if (3 == remainder) {
 			key = 'timestamp'; value = new Event('').timeStamp
 		} else if (4 == remainder) {
@@ -1433,7 +1432,6 @@ function addTiming(metric) {
 		} else if (7 == remainder) {
 			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
 		}
-
 		if (undefined !== key) {
 			if (runST) {value = undefined}
 			gData.timing[key].push(value)
@@ -1823,13 +1821,16 @@ function outputSection(id, isResize = false) {
 			// get a first value for each to ensure a max diff
 			try {gData.timing['now'].push(performance.now())} catch(e) {}
 			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
-			try {gData.timing['currenttime'].push(new DocumentTimeline().currentTime)} catch(e) {}
+			try {
+				gTimeline = new DocumentTimeline()
+				gData.timing['currenttime'].push(gTimeline.currentTime)
+			} catch(e) {}
 			try {
 				performance.clearMarks('a')
 				gData.timing['mark'].push(performance.mark('a').startTime)
 			} catch(e) {}
 			gCountTiming = 0
-			addTiming('start')
+			addTiming('start') // adds first exslt
 
 			// run sequentially awaiting each before running the next
 			// order: use number or section name
