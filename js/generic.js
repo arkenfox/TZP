@@ -1419,6 +1419,8 @@ function addTiming(metric) {
 			value = (fragment.childNodes[0].nodeValue).slice(0,-6)
 		} else if (1 == remainder) {
 			key = 'now'; value = performance.now()
+		} else if (2 == remainder) {
+			key = 'currenttime'; value = new DocumentTimeline().currentTime
 		} else if (3 == remainder) {
 			key = 'timestamp'; value = new Event('').timeStamp
 		} else if (4 == remainder) {
@@ -1821,6 +1823,7 @@ function outputSection(id, isResize = false) {
 			// get a first value for each to ensure a max diff
 			try {gData.timing['now'].push(performance.now())} catch(e) {}
 			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+			try {gData.timing['currenttime'].push(new DocumentTimeline().currentTime)} catch(e) {}
 			try {
 				performance.clearMarks('a')
 				gData.timing['mark'].push(performance.mark('a').startTime)
