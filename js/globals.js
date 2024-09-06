@@ -30,7 +30,7 @@ let gData = { // from sData
 	'perf': [],
 	'timing': {},
 }
-let gTiming = ['date','exslt','mark','now','timestamp']
+let gTiming = ['currenttime','date','exslt','mark','now','timestamp']
 
 // section
 let sData = {}, // final sorted section data: from sDataTemp
