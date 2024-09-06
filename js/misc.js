@@ -14,9 +14,12 @@ function check_timing(type) {
 				value = (new Date())[Symbol.toPrimitive]('number') - (new Date())[Symbol.toPrimitive]('number')
 			} else if ('mark' == type) {
 				value = performance.mark('a').startTime - performance.mark('a').startTime
+			} else if ('currenttime' == type) {
+				value = (new DocumentTimeline().currentTime) - (new DocumentTimeline().currentTime)
 			}
 			value = Math.trunc(value)
-			if (0 !== value && -1 !== value) {result = false} //{return false}
+			// should match or the clock ticks over, e.g. 1ms or 16/17ms
+			if (0 !== value && -1 !== value && -16 !== value) {result = false}
 			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
@@ -40,6 +43,7 @@ function get_timing(METRIC) {
 		gData.timing['mark'].push(performance.mark('a').startTime)
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+	try {gData.timing['currenttime'].push(new DocumentTimeline().currentTime)} catch(e) {}
 
 	/* testing
 	gData.timing.date = [1723240561321]
@@ -49,6 +53,15 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34, 50, 66, 67, 83, 84],
 		// 1912129: exslt diffs must be 1000, and all end in .000
+		'currenttime': [
+			// we're 2 decimal places, no drift
+			0,
+			16.66, 16.67,
+			33.33, 33.34,
+			50,
+			66.66, 66.67,
+			83.33, 83.34,
+		],
 		'exslt': [0],
 		'other': [
 			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
@@ -65,7 +78,7 @@ function get_timing(METRIC) {
 	}
 
 	let aNotInteger = ['mark','now','timestamp']
-	let calc = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
+	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
 	let str, data, notation, oData = {}, countFail = 0
 
 	sDetail.document[METRIC +'_data'] = {}
@@ -115,13 +128,15 @@ function get_timing(METRIC) {
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
-				// truncate to 1 decimal place
-				let totaldiff = ((end - start).toString().match(calc)[0]) * 1
+				// truncate to 1 decimal place or currenttime we fix at 2
+				let totaldiff = (end - start)
+				totaldiff = ('currenttime' == k ? (totaldiff.toFixed(2)) : (totaldiff.toString().match(calc1)[0]) )  * 1
 				aTotal.push(totaldiff)
 				let diff = (totaldiff % 100).toFixed(2) * 1 // drop hundreds
 				setDiffs.add(diff)
 			}
 			let aDiffs = Array.from(setDiffs)
+			//if ('currenttime' == k) {console.log(aDiffs)}
 			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
 				if (isMatch && !aGood.includes(aDiffs[i])) {isMatch = false}
