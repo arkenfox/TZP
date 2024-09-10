@@ -3,7 +3,10 @@
 /* TIMING */
 
 function check_timing(type) {
+	if ('perf_timing' == type) {return true}
+
 	let setTiming = new Set(), value, result = true
+	let aIgnore = [0, 1, 16, 17]
 	let max = isPerf ? 10 : 500
 	for (let i=1; i < max ; i++) {
 		try {
@@ -17,9 +20,9 @@ function check_timing(type) {
 			} else if ('currenttime' == type) {
 				value = (gTimeline.currentTime) - (gTimeline.currentTime)
 			}
-			value = Math.trunc(value)
+			value = Math.abs(Math.trunc(value))
 			// should match or the clock ticks over, e.g. 1ms or 16/17ms
-			if (0 !== value && -1 !== value && -16 !== value) {result = false}
+			if (!aIgnore.includes(value)) {result = false}
 			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
@@ -44,7 +47,6 @@ function get_timing(METRIC) {
 	} catch(e) {}
 	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 	try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
-
 	/* testing
 	gData.timing.date = [1723240561321]
 	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
@@ -53,8 +55,30 @@ function get_timing(METRIC) {
 	gData.timing.currenttime = [257788.489, 258121.829, 258438.502, 259021.847]
 	//*/
 
+	let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
+		'domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd','loadEventStart','navigationStart','redirectEnd','redirectStart',
+		'requestStart','responseEnd','responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart',]
+	let tmpTiming = []
+	try {
+		let tmpobj = performance.timing
+		if (0 === (tmpobj.loadEventEnd - tmpobj.navigationStart)) {
+			throw zD
+		} else {
+			aList.forEach(function(k){
+				let value = performance.timing[k]
+				if (undefined !== value && 0 !== value) {tmpTiming.push(value)}
+			})
+			tmpTiming = tmpTiming.filter(function(item, position) {return tmpTiming.indexOf(item) === position})
+			tmpTiming = tmpTiming.sort(function (a,b) { return a-b})
+			gData.timing['perf_timing'] = tmpTiming
+		}
+	} catch(e) {
+		gData.timing['perf_timing'] = e+''
+	}
+
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
+		'perf_timing': [0, 1, 16, 17, 33, 34],
 		'currenttime': [
 			0, 0.01, 0.02, 0.03, 0.04,
 			16.66, 16.67, 16.68, 16.69, 16.7,
@@ -184,9 +208,9 @@ function get_timing(METRIC) {
 			data = aDiffs
 			//console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
 		} catch(e) {
-			str = log_error(17, METRIC +'_'+ k, e)
+			str = zD == e ? zD : log_error(17, METRIC +'_'+ k, e)
 			data = str
-			oData[k] = zErr
+			oData[k] = zD == str ? zD : zErr
 			countFail++
 		}
 		//sDetail.document[METRIC][k] = data
@@ -200,20 +224,6 @@ function get_timing(METRIC) {
 	let btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 	// data
 	addBoth(17, METRIC, mini(oData), btn, notation, oData)
-	return
-}
-
-function get_perf_timing(METRIC) {
-	// dom.enable_performance
-	let str, data =''
-	try {
-		if (runSE) {foo++}
-		let timing = performance.timing
-		str = (timing.loadEventEnd - timing.navigationStart) == 0 ? zD : zE
-	} catch(e) {
-		str = e; data = zErrLog
-	}
-	addBoth(17, METRIC, str,'','', data)
 	return
 }
 
@@ -576,7 +586,6 @@ const outputTiming = () => new Promise(resolve => {
 	Promise.all([
 		get_timing('timing_precision'),
 		get_perf_resource('perf_resource'), // #42153, this function tests if API is working
-		get_perf_timing('perf_timing'),
 	]).then(function(){
 		return resolve()
 	})

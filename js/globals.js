@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 154
+	expectedMetrics = 153
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -30,7 +30,7 @@ let gData = { // from sData
 	'perf': [],
 	'timing': {},
 }
-let gTiming = ['currenttime','date','exslt','mark','now','timestamp']
+let gTiming = ['currenttime','date','exslt','mark','now','perf_timing','timestamp']
 let gTimeline
 
 // section
