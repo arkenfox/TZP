@@ -50,9 +50,7 @@ function get_timing(METRIC) {
 	/* testing
 	gData.timing.date = [1723240561321]
 	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
-	gData.timing.currenttime = [4800.096,4833.43,4850.097,4866.764,4883.431,4900.098,4916.765,4933.432,4950.099,4966.766,4983.433]
-	gData.timing.currenttime = [6800.136, 7966.826, 8633.506, 9633.526]
-	gData.timing.currenttime = [257788.489, 258121.829, 258438.502, 259021.847]
+	gData.timing.currenttime = [5133.436, 6233.458, 7833.49]
 	//*/
 
 	let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
@@ -80,9 +78,13 @@ function get_timing(METRIC) {
 		'date': [0, 1, 16, 17, 33, 34],
 		'perf_timing': [0, 1, 16, 17, 33, 34],
 		'currenttime': [
-			0, 0.01, 0.02, 0.03, 0.04,
-			16.66, 16.67, 16.68, 16.69, 16.7,
-			33.33, 33.34, 33.35, 33.36, 33.37, 33.38, 33.39
+			// if I make this 1 decimal place then we'll get a false positive on 60FPS monitors
+			// but if I allow too much drift for older/slower machines we might get the same
+			// and if I don't allow enough drift then we'll get false negatives
+			// ToDo: it would help if I could get more unique samples
+			0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
+			16.66, 16.67, 16.68, 16.69, 16.7, 16.71, 16.72, 16.73,
+			33.33, 33.34, 33.35, 33.36, 33.37, 33.38, 33.39, 33.4,
 		],
 		'exslt': [0], // 1912129: exslt diffs must be 1000, and all end in .000
 		'other': [
