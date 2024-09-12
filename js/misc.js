@@ -3,7 +3,7 @@
 /* TIMING */
 
 function check_timing(type) {
-	if ('perf_timing' == type) {return true}
+	if ('performance' == type) {return true}
 
 	let setTiming = new Set(), value, result = true
 	let aIgnore = [0, 1, 16, 17]
@@ -68,15 +68,15 @@ function get_timing(METRIC) {
 			})
 			tmpTiming = tmpTiming.filter(function(item, position) {return tmpTiming.indexOf(item) === position})
 			tmpTiming = tmpTiming.sort(function (a,b) { return a-b})
-			gData.timing['perf_timing'] = tmpTiming
+			gData.timing.performance = tmpTiming
 		}
 	} catch(e) {
-		gData.timing['perf_timing'] = e+''
+		gData.timing.performance = e+''
 	}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
-		'perf_timing': [0, 1, 16, 17, 33, 34],
+		'performance': [0, 1, 16, 17, 33, 34],
 		'currenttime': [
 			// if I make this 1 decimal place then we'll get a false positive on 60FPS monitors
 			// but if I allow too much drift for older/slower machines we might get the same
