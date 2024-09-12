@@ -524,7 +524,19 @@ function get_window_props(METRIC) {
 				addDetail(METRIC +'_tampered', aTampered.sort())
 				tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
 				// isLies: exempt exact NS hashes
-				if (!['c36227b3','d3ed1b76'].includes(mini(aTampered))) {isLies = true}
+				//console.log(mini(aTampered), aTampered.join(","))
+				/*
+				c36227b3 (standard)
+					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement
+				d3ed1b76 (safer) 11.4.35
+					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
+					MediaSource,OffscreenCanvas,Proxy,URL,webkitURL
+				97f1edb8 (safer) 11.4.37
+					Blob,Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
+					MediaSource,MessagePort,OffscreenCanvas,Promise,Proxy,SharedWorker,String,URL,Worker,XMLHttpRequest,
+					XMLHttpRequestEventTarget,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,escape,unescape,webkitURL
+				*/
+				if (!['c36227b3','d3ed1b76','97f1edb8'].includes(mini(aTampered))) {isLies = true}
 			}
 			// notate console
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
