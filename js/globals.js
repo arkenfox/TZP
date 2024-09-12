@@ -30,7 +30,7 @@ let gData = { // from sData
 	'perf': [],
 	'timing': {},
 }
-let gTiming = ['currenttime','date','exslt','mark','now','perf_timing','timestamp']
+let gTiming = ['currenttime','date','exslt','mark','now','performance','timestamp']
 let gTimeline
 
 // section
