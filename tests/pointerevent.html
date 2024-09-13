@@ -104,11 +104,9 @@ function run(event, type) {
 			value = event[k]
 			let	expected = oList[k]
 			if (typeof value !== expected) {
-				throw 'err'
+				value = 'err'
 			} else if ("number" == expected && Number.isNaN(value)) {
-				throw 'NaN'
-			} else {
-				value = cleanFn(value)
+				value = 'NaN'
 			}
 		} catch(e) {
 			value = e.name
@@ -121,7 +119,13 @@ function run(event, type) {
 	// build display
 	let lines = ["pressure", "pointerType", "tangentialPressure", "altitudeAngle"]
 	let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
-	let eventstr = ''
+	let eventstr = '',
+		isDown = Object.keys(oData['pointerdown']).length > 0,
+		isOver = Object.keys(oData['pointerover']).length > 0
+	if (isOver && !isDown) {eventstr = 'pointerover'
+	} else if (!isOver && isDown) {eventstr = 'pointerdown'
+	} else {eventstr = 'pointerover | down'}
+
 	for (const k of Object.keys(oList)) {
 		if (lines.includes(k)) {
 			oDisplay.push(divider)
@@ -130,19 +134,11 @@ function run(event, type) {
 		let valueDown = oData['pointerdown'][k],
 			valueOver = oData['pointerover'][k]
 		let str
-		if (valueDown == undefined) {
-			str = valueOver
-			eventstr = 'pointerover'
-		} else if (valueOver == undefined) {
-			str = valueDown + strActive
-			eventstr = 'pointerdown'
+		if (valueDown == undefined) {str = valueOver
+		} else if (valueOver == undefined) {str = valueDown + strActive
 		} else {
-			eventstr = 'pointerover | down'
-			if (valueDown == valueOver) {
-				str = valueDown
-			} else {
-				str = valueOver + " | " + valueDown + strActive
-			}
+			if (valueDown == valueOver) {str = valueDown
+			} else {str = valueOver + " | " + valueDown + strActive}
 		}
 		oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 	}
