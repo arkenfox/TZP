@@ -82,14 +82,21 @@ const get_scroll = () => new Promise(resolve => {
 	let eScrollCount = 0, eEndCount = 0, eEvents = []
 
 	function exit() {
+		dom.detail.innerHTML = eEvents.join("<br>")
 		return resolve(eScrollCount)
 	}
 
 	function onTargetScroll(e) {
 		eScrollCount++
 		dom.count = eScrollCount + (eScrollCount > 2 ? " (smooth scroll enabled)": "")
-		eEvents.push(eScrollCount +": "+ Math.round(performance.now() - t0) +" ms")
-		dom.detail.innerHTML = eEvents.join("<br>")
+
+		let x = Math.abs(dom.scrollinner.getBoundingClientRect().x)
+		eEvents.push((eScrollCount+'').padStart(2,' ')
+			+" : "+ (Math.round(performance.now() - t0) +" ms").padStart(6,' ')
+			+" : "+ x
+		)
+
+		//dom.detail.innerHTML = eEvents.join("<br>")
 		e.stopPropagation()
 		if (eScrollCount > 2) {exit()}
 	}
@@ -104,13 +111,14 @@ const get_scroll = () => new Promise(resolve => {
 		// recreate element: this means it's always at 0,0 and no need to run setup
 		try {document.getElementById("scrolltarget").remove()} catch(e) {}
 		const doc = document
-		const id = `scrolltarget`
+		const id = 'scrolltarget'
 		const div = doc.createElement('div')
 		div.setAttribute('id', id)
 		doc.body.appendChild(div)
 		doc.getElementById(id).innerHTML = "<div id='scrollinner'></div>"
 		// set element width
-		let len = document.querySelector('input[name="len"]:checked').value
+		let len = ((document.querySelector('input[name="len"]:checked').value) * 1) // + 1
+
 		// don't use len == 3 as this would be 2 scroll events which can periodically also happen without smooth scroll
 			// and if we don't use 3, then we don't need to reset the posiiton (1,1) because (0,0) is good
 		dom.scrollinner.style.width = len +"px"
