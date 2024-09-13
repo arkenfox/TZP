@@ -57,12 +57,14 @@
 			<td>
 				<div class="reset" id="reset"><div class="flex=item">RESET</div></div>
 				<div class="pointer" id="target">
-					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T<div>
+					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T</div>
 				</div>
 			</td>
-		<td class="mono spaces" style="text-align: left; vertical-align: top;" id="results"></td>
+			<td class="mono spaces" style="text-align: left; vertical-align: top;">
+				<div class="s6"><u>RESULTS</u></div><br><div class="no_color" id="results"></div>
+				<div class="s6"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
+			</td>
 		</tr>
-
 	</table>
 	<br>
 
@@ -72,10 +74,10 @@
 
 let padlen = 18
 let oData = {}
-let aEvents = []
+let setEvents = new Set()
 
 function run(event, type) {
-	aEvents.push(type)
+	addEvent(type)
 	let oList = {
 		isPrimary: "boolean", // RFP true
 		pressure: "number", // RFP: 0 if not active, 0.5 if active
@@ -116,13 +118,6 @@ function run(event, type) {
 			oTemp[k] = e.name
 		}
 	}
-	aEvents = aEvents.filter(function(item, position) {return aEvents.indexOf(item) === position})
-	oDisplay.push('<br>')
-	for (let i = 0; i < aEvents.length; i++){
-		let prefix = (i == 0 ? 'events' : '').padStart(padlen) +": "
-		if (i == 0) {prefix = s6 + prefix + sc}
-		oDisplay.push(prefix + aEvents[i])
-	}
 
 	// reorder so it matches TZP
 	for (const k of Object.keys(oTemp).sort()) {oData[k] = oTemp[k]}
@@ -134,9 +129,16 @@ function run(event, type) {
 
 }
 
+function addEvent(type) {
+	setEvents.add(type)
+	let aEvents = Array.from(setEvents)
+	dom.events.innerHTML = aEvents.join("<br>")
+}
+
 function reset() {
 	dom.results = ''
-	aEvents = []
+	dom.events = ''
+	setEvents.clear()
 }
 
 
@@ -146,16 +148,16 @@ targetreset.addEventListener("pointerover", (event) => {reset()})
 let target = dom.target
 target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
 target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
-target.addEventListener("pointermove", (event) => {aEvents.push('pointermove')})
-target.addEventListener("mouseover", (event) => {aEvents.push('mouseover')})
-target.addEventListener("mousedown", (event) => {aEvents.push('mousedown')})
-target.addEventListener("mouseup", (event) => {aEvents.push('mouseup')})
-target.addEventListener("mousemove", (event) => {aEvents.push('mousemove')})
+target.addEventListener("pointermove", (event) => {addEvent('pointermove')})
+target.addEventListener("mouseover", (event) => {addEvent('mouseover')})
+target.addEventListener("mousedown", (event) => {addEvent('mousedown')})
+target.addEventListener("mouseup", (event) => {addEvent('mouseup')})
+target.addEventListener("mousemove", (event) => {addEvent('mousemove')})
 
-target.addEventListener("touchstart", (event) => {aEvents.push('touchstart')})
-target.addEventListener("touchmove", (event) => {aEvents.push('touchmove')})
-target.addEventListener("touchend", (event) => {aEvents.push('touchend')})
-target.addEventListener("touchcancel", (event) => {aEvents.push('touchcancel')})
+target.addEventListener("touchstart", (event) => {addEvent('touchstart')})
+target.addEventListener("touchmove", (event) => {addEvent('touchmove')})
+target.addEventListener("touchend", (event) => {addEvent('touchend')})
+target.addEventListener("touchcancel", (event) => {addEvent('touchcancel')})
 
 
 </script>
