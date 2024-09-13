@@ -55,7 +55,7 @@
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>
-				<div class="reset" id="reset"><div class="flex=item">RESET</div></div>
+				<div class="reset" id="reset"><div class="flex=item" id="resettext">START</div></div>
 				<div class="pointer" id="target">
 					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T</div>
 				</div>
@@ -74,9 +74,12 @@
 
 let padlen = 18
 let oData = {}
+let isStart = true
 let setEvents = new Set()
 
 function run(event, type) {
+	if (0 !== Object.keys(oData[type]).length) {return}
+
 	addEvent(type)
 	let oList = {
 		isPrimary: "boolean", // RFP true
@@ -94,38 +97,60 @@ function run(event, type) {
 		azimuthAngle: "number",
 	}
 	let oTemp = {}, oDisplay = []
-	oData = {}
+
+	for (const k of Object.keys(oList)) {
+		let value
+		try {
+			value = event[k]
+			let	expected = oList[k]
+			if (typeof value !== expected) {
+				throw 'err'
+			} else if ("number" == expected && Number.isNaN(value)) {
+				throw 'NaN'
+			} else {
+				value = cleanFn(value)
+			}
+		} catch(e) {
+			value = e.name
+		}
+		oTemp[k] = value
+	}
+	// sort
+	for (const k of Object.keys(oTemp).sort()) {oData[type][k] = oTemp[k]}
+
+	// build display
 	let lines = ["pressure", "pointerType", "tangentialPressure", "altitudeAngle"]
 	let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
-
+	let eventstr = ''
 	for (const k of Object.keys(oList)) {
 		if (lines.includes(k)) {
 			oDisplay.push(divider)
 		}
-		try {
-			let value = event[k],
-				expected = oList[k]
-			if (typeof value !== expected) {
-				value = "err" // zErrType + typeof value
-			} else if ("number" == expected && Number.isNaN(value)) {
-				value = "NaN" // zErrType + typeof value
+		let strActive = k.includes('ressure') ? s6 +' [active]' + sc : ''
+		let valueDown = oData['pointerdown'][k],
+			valueOver = oData['pointerover'][k]
+		let str
+		if (valueDown == undefined) {
+			str = valueOver
+			eventstr = 'pointerover'
+		} else if (valueOver == undefined) {
+			str = valueDown + strActive
+			eventstr = 'pointerdown'
+		} else {
+			eventstr = 'pointerover | down'
+			if (valueDown == valueOver) {
+				str = valueDown
 			} else {
-				value = cleanFn(value)
+				str = valueOver + " | " + valueDown + strActive
 			}
-			oTemp[k] = value
-			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
-		} catch(e) {
-			oTemp[k] = e.name
 		}
+		oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 	}
-
-	// reorder so it matches TZP
-	for (const k of Object.keys(oTemp).sort()) {oData[k] = oTemp[k]}
+	// display
 	let hash = mini(oData)
 	let strHash = s6 + ("hash").padStart(padlen) +": "+ sc + hash
-		+ '<br>' + s6 + ("event").padStart(padlen) +": "+ sc + type + ('pointerdown' == type ? s6+' [active]'+ sc : '')
+		+ '<br>' + s6 + ("events").padStart(padlen) +": "+ sc + eventstr
 	dom.results.innerHTML = strHash + "<br><br>" + oDisplay.join("<br>")
-
 
 }
 
@@ -136,29 +161,39 @@ function addEvent(type) {
 }
 
 function reset() {
-	dom.results = ''
-	dom.events = ''
-	setEvents.clear()
+	oData['pointerdown'] = {}
+	oData['pointerover'] = {}
+
+	// force mouse out of target area
+	if (isStart) {
+		start()
+		dom.resettext.innerHTML = 'RESET'
+		isStart = false
+	} else {
+		dom.results = ''
+		dom.events = ''
+		setEvents.clear()
+	}
 }
 
+function start() {
+	let target = dom.target
+	target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
+	target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
+	target.addEventListener("pointermove", (event) => {addEvent('pointermove')})
+	target.addEventListener("mouseover", (event) => {addEvent('mouseover')})
+	target.addEventListener("mousedown", (event) => {addEvent('mousedown')})
+	target.addEventListener("mouseup", (event) => {addEvent('mouseup')})
+	target.addEventListener("mousemove", (event) => {addEvent('mousemove')})
+
+	target.addEventListener("touchstart", (event) => {addEvent('touchstart')})
+	target.addEventListener("touchmove", (event) => {addEvent('touchmove')})
+	target.addEventListener("touchend", (event) => {addEvent('touchend')})
+	target.addEventListener("touchcancel", (event) => {addEvent('touchcancel')})
+}
 
 let targetreset = dom.reset
 targetreset.addEventListener("pointerover", (event) => {reset()})
-
-let target = dom.target
-target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
-target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
-target.addEventListener("pointermove", (event) => {addEvent('pointermove')})
-target.addEventListener("mouseover", (event) => {addEvent('mouseover')})
-target.addEventListener("mousedown", (event) => {addEvent('mousedown')})
-target.addEventListener("mouseup", (event) => {addEvent('mouseup')})
-target.addEventListener("mousemove", (event) => {addEvent('mousemove')})
-
-target.addEventListener("touchstart", (event) => {addEvent('touchstart')})
-target.addEventListener("touchmove", (event) => {addEvent('touchmove')})
-target.addEventListener("touchend", (event) => {addEvent('touchend')})
-target.addEventListener("touchcancel", (event) => {addEvent('touchcancel')})
-
 
 </script>
 </body>
