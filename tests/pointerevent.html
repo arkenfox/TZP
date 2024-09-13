@@ -10,6 +10,18 @@
 	<!-- custom -->
 	<style>
 		table {width: 480px;}
+		.reset {
+			float: left;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 50px;
+			width: 100px;
+			color: var(--test0);
+			border: 2px solid var(--test7);
+			cursor: pointer;
+			margin-bottom: 20px;
+		}
 		.pointer {
 			float: left;
 			display: flex;
@@ -43,6 +55,7 @@
 		<tr><td colspan="2"></td></tr>
 		<tr>
 			<td>
+				<div class="reset" id="reset"><div class="flex=item">RESET</div></div>
 				<div class="pointer" id="target">
 					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T<div>
 				</div>
@@ -59,9 +72,10 @@
 
 let padlen = 18
 let oData = {}
-s6 = s6.trim()
+let aEvents = []
 
-function run(event) {
+function run(event, type) {
+	aEvents.push(type)
 	let oList = {
 		isPrimary: "boolean", // RFP true
 		pressure: "number", // RFP: 0 if not active, 0.5 if active
@@ -102,18 +116,47 @@ function run(event) {
 			oTemp[k] = e.name
 		}
 	}
+	aEvents = aEvents.filter(function(item, position) {return aEvents.indexOf(item) === position})
+	oDisplay.push('<br>')
+	for (let i = 0; i < aEvents.length; i++){
+		let prefix = (i == 0 ? 'events' : '').padStart(padlen) +": "
+		if (i == 0) {prefix = s6 + prefix + sc}
+		oDisplay.push(prefix + aEvents[i])
+	}
+
 	// reorder so it matches TZP
 	for (const k of Object.keys(oTemp).sort()) {oData[k] = oTemp[k]}
 	let hash = mini(oData)
 	let strHash = s6 + ("hash").padStart(padlen) +": "+ sc + hash
+		+ '<br>' + s6 + ("event").padStart(padlen) +": "+ sc + type + ('pointerdown' == type ? s6+' [active]'+ sc : '')
 	dom.results.innerHTML = strHash + "<br><br>" + oDisplay.join("<br>")
+
 
 }
 
+function reset() {
+	dom.results = ''
+	aEvents = []
+}
+
+
+let targetreset = dom.reset
+targetreset.addEventListener("pointerover", (event) => {reset()})
+
 let target = dom.target
-target.addEventListener("pointerover", (event) => {
-	run(event)
-})
+target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
+target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
+target.addEventListener("pointermove", (event) => {aEvents.push('pointermove')})
+target.addEventListener("mouseover", (event) => {aEvents.push('mouseover')})
+target.addEventListener("mousedown", (event) => {aEvents.push('mousedown')})
+target.addEventListener("mouseup", (event) => {aEvents.push('mouseup')})
+target.addEventListener("mousemove", (event) => {aEvents.push('mousemove')})
+
+target.addEventListener("touchstart", (event) => {aEvents.push('touchstart')})
+target.addEventListener("touchmove", (event) => {aEvents.push('touchmove')})
+target.addEventListener("touchend", (event) => {aEvents.push('touchend')})
+target.addEventListener("touchcancel", (event) => {aEvents.push('touchcancel')})
+
 
 </script>
 </body>
