@@ -74,10 +74,12 @@ function run(event) {
 		twist: "number", // RFP 0
 		width: "number", // RFP 1
 		height: "number", // RFP 1
+		altitudeAngle: "number",
+		azimuthAngle: "number",
 	}
 	let oTemp = {}, oDisplay = []
 	oData = {}
-	let lines = ["pressure", "pointerType", "tangentialPressure"]
+	let lines = ["pressure", "pointerType", "tangentialPressure", "altitudeAngle"]
 	let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
 
 	for (const k of Object.keys(oList)) {
