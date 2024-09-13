@@ -241,18 +241,16 @@ function get_pointer_event(event) {
 		twist: "number", // RFP 0
 		width: "number", // RFP 1
 		height: "number", // RFP 1
+		altitudeAngle: "number",
+		azimuthAngle: "number",
 	}
 	for (const k of Object.keys(oList).sort()) {
-		try {
-			let value = event[k], expected = oList[k]
-			if (typeFn(value) !== expected) {throw "err"}
-			oData[k] = value
-			oDisplay.push(value)
-		} catch(e) {
-			oData[k] = "err"
-		}
+		let value = event[k], expected = oList[k]
+		if (typeFn(value) !== expected) {value = "err"}
+		oData[k] = value
+		oDisplay.push(value)
 	}
-	dom.ptEvent.innerHTML = oDisplay.join(" | ") + sg +"["+ mini(oData) +"]"+ sc
+	dom.ptEvent.innerHTML = oDisplay.join(", ") //+ sg +"["+ mini(oData) +"]"+ sc
 }
 
 const get_speech_engines = (METRIC) => new Promise(resolve => {
