@@ -7,6 +7,7 @@ const newFn = x => typeof x != 'string' ? x : new Function(x)()
 function rnd_string() {return Math.random().toString(36).substring(2, 15)}
 function rnd_number() {return Math.floor((Math.random() * (99999-10000))+10000)}
 function count_decimals(value) {if(Math.floor(value) === value) return 0;return value.toString().split(".")[1].length || 0}
+function removeElementFn(id) {try {dom[id].remove()} catch(e) {}}
 
 function cleanFn(item, skipArray = false) {
 	// strings, tidy undefined, empty strings
