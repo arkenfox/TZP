@@ -50,7 +50,7 @@ function get_timing(METRIC) {
 	/* testing
 	gData.timing.date = [1723240561321]
 	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
-	gData.timing.currenttime = [5133.436, 6233.458, 7833.49]
+	gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 	//*/
 
 	let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
@@ -77,15 +77,6 @@ function get_timing(METRIC) {
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
 		'performance': [0, 1, 16, 17, 33, 34],
-		'currenttime': [
-			// if I make this 1 decimal place then we'll get a false positive on 60FPS monitors
-			// but if I allow too much drift for older/slower machines we might get the same
-			// and if I don't allow enough drift then we'll get false negatives
-			// ToDo: it would help if I could get more unique samples
-			0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07,
-			16.66, 16.67, 16.68, 16.69, 16.7, 16.71, 16.72, 16.73,
-			33.33, 33.34, 33.35, 33.36, 33.37, 33.38, 33.39, 33.4,
-		],
 		'exslt': [0], // 1912129: exslt diffs must be 1000, and all end in .000
 		'other': [
 			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
@@ -149,9 +140,8 @@ function get_timing(METRIC) {
 					end = end.slice(0,20) + end.slice(-2)+ '0'
 					end = (new Date(end))[Symbol.toPrimitive]('number')
 				}
-				// truncate to 1 decimal place or currenttime we fix at 2
-				let totaldiff = (end - start)
-				totaldiff = ('currenttime' == k ? (totaldiff.toFixed(2)) : (totaldiff.toString().match(calc1)[0]) )  * 1
+				// truncate to 1 decimal place
+				let totaldiff = ((end - start).toString().match(calc1)[0]) * 1
 				aTotal.push(totaldiff)
 				let diff = (totaldiff % 50).toFixed(2) * 1 // drop 50s
 				setDiffs.add(diff)
@@ -173,6 +163,13 @@ function get_timing(METRIC) {
 				if (isNoise) {
 					is100 = false
 					if ('10ms' !== oData['date']) {is10 = false}
+				}
+			}
+			// currenttime: 60FPS false positives: check for at least 1 x 3 decimal places
+			if (isMatch && 'currenttime' == k) {
+				isMatch = false
+				for (let i=0; i < aTimes.length; i++) {
+					if (!Number.isInteger(aTimes[i] * 100)) {isMatch = true; break}
 				}
 			}
 			//console.log(k, isNoise)
