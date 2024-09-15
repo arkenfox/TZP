@@ -63,6 +63,8 @@
 			<td class="mono spaces" style="text-align: left; vertical-align: top;">
 				<div class="s6"><u>RESULTS</u></div><br><div class="no_color" id="results"></div>
 				<div class="s6"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
+				<div class="s6"><u>'touch' PROPERTIES</u></div><br><div class="no_color" id="props"></div>
+				<div class="s6"><u>'touch' KEYS</u></div><br><div class="no_color" id="elementkeys"></div>
 			</td>
 		</tr>
 	</table>
@@ -174,22 +176,67 @@ function reset() {
 
 function start() {
 	let target = dom.target
-	target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
 	target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
-	target.addEventListener("pointermove", (event) => {addEvent('pointermove')})
-	target.addEventListener("mouseover", (event) => {addEvent('mouseover')})
-	target.addEventListener("mousedown", (event) => {addEvent('mousedown')})
-	target.addEventListener("mouseup", (event) => {addEvent('mouseup')})
-	target.addEventListener("mousemove", (event) => {addEvent('mousemove')})
+	target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
 
-	target.addEventListener("touchstart", (event) => {addEvent('touchstart')})
-	target.addEventListener("touchmove", (event) => {addEvent('touchmove')})
-	target.addEventListener("touchend", (event) => {addEvent('touchend')})
-	target.addEventListener("touchcancel", (event) => {addEvent('touchcancel')})
+	let oEvents = {
+		'mouse': ['down','enter','leave','move','out','over','up'],
+		'pointer': ['cancel','enter','leave','move','out','up'],
+		'touch': ['cancel','end','move','start'],
+	}
+	for (const k of Object.keys(oEvents)) {
+		let list = oEvents[k]
+		list.forEach(function(type){
+			target.addEventListener(k + type, (event) => {addEvent(k + type)})
+		})
+	}
+}
+
+function get_element_keys() {
+	try {
+		let parser = new DOMParser
+		let doc = parser.parseFromString('<div>', "text/html")
+		let htmlElement = doc.body.firstChild
+		//let data = Object.getOwnPropertyNames(contentWindow)
+		let data = []
+		for (const key in htmlElement) {
+			if (key.includes('Touch') || key.includes('touch')) {data.push(key)}
+		}
+		dom.elementkeys.innerHTML = (data.length > 0 ? data.join("<br>") : "none")
+	} catch(e) {
+		dom.elementkeys.innerHTML = e+''
+	}
+}
+
+function get_window_props() {
+	let id = 'iframe-window-version'
+	try {
+		// create & append
+		let el = document.createElement('iframe')
+		el.setAttribute('id', id)
+		el.setAttribute('style', 'display: none')
+		document.body.appendChild(el)
+		// get props
+		let iframe = dom[id]
+		let contentWindow = iframe.contentWindow
+		let data = Object.getOwnPropertyNames(contentWindow)
+		let props = []
+		data.forEach(function(item){
+			if (item.includes('Touch') || item.includes('touch')) {props.push(item)}
+		})
+		props = props.sort()
+		dom.props.innerHTML = (props.length > 0 ? props.join("<br>") : "none")
+	} catch(e) {
+		dom.props.innerHTML = e+''
+	}
+	removeElementFn(id)
+
 }
 
 let targetreset = dom.reset
 targetreset.addEventListener("pointerover", (event) => {reset()})
+get_window_props()
+get_element_keys()
 
 </script>
 </body>
