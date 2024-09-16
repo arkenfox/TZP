@@ -165,11 +165,12 @@ function get_timing(METRIC) {
 					if ('10ms' !== oData['date']) {is10 = false}
 				}
 			}
-			// currenttime: 60FPS false positives: check for at least 1 x 3 decimal places
+			// currenttime: 60FPS false positives: check for 3 decimal places
 			if (isMatch && 'currenttime' == k) {
 				isMatch = false
 				for (let i=0; i < aTimes.length; i++) {
-					if (!Number.isInteger(aTimes[i] * 100)) {isMatch = true; break}
+					let check = Math.floor(aTimes[i]) === aTimes[i] ? 0 : (aTimes[i]).toString().split(".")[1].length
+					if (3 === check) {isMatch = true; break}
 				}
 			}
 			//console.log(k, isNoise)
