@@ -130,8 +130,7 @@ let fntMaster = {
 	blocklist: {
 		android: [],
 		linux: [
-			'Arial','Courier New','Times New Roman', // aliases
-			'Courier','Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
+			'Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX', // fedora
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
@@ -510,12 +509,12 @@ function set_fntList() {
 			} else if (isTB) {
 				// TB #42494
 					// ToDo: when min Smart is 128, just hardcode into allowlist
-				if ('mac' == isOS) {
-					if (isVer > 115) {
-						fntMaster.allowlist.mac.push('Arial Black','Arial Narrow')
-					} else {
-						fntMaster.blocklist.mac.push('Arial Black','Arial Narrow')
-					}
+				if (isVer > 115) {
+					fntMaster.allowlist.mac.push('Arial Black','Arial Narrow')
+					fntMaster.allowlist.linux.push('Arial','Courier','Courier New','Helvetica','Times','Times New Roman')
+				} else {
+					fntMaster.blocklist.mac.push('Arial Black','Arial Narrow')
+					fntMaster.blocklist.linux.push('Arial','Courier','Courier New','Helvetica','Times','Times New Roman') // aliases
 				}
 
 				// desktop TB
@@ -586,7 +585,7 @@ function set_fntList() {
 			if ('android' == isOS) {
 				fntBtn = fntBtnAll
 			} else if (isTB) {
-				if ('linux' == isOS) {
+				if ('linux' == isOS && isVer < 128) {
 					fntBtn = fntBtnBundled +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
 				} else {
 					fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll					
