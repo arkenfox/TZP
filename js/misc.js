@@ -521,20 +521,26 @@ function get_window_props(METRIC) {
 			if (aTampered.length) {
 				addDetail(METRIC +'_tampered', aTampered.sort())
 				tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
-				// isLies: exempt exact NS hashes
+				// isLies: exempt exact NS hashes: 11.4.37
 				//console.log(mini(aTampered), aTampered.join(","))
 				/*
 				c36227b3 (standard)
 					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement
-				d3ed1b76 (safer) 11.4.35
-					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
-					MediaSource,OffscreenCanvas,Proxy,URL,webkitURL
-				97f1edb8 (safer) 11.4.37
+				97f1edb8 (safer) 
 					Blob,Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
 					MediaSource,MessagePort,OffscreenCanvas,Promise,Proxy,SharedWorker,String,URL,Worker,XMLHttpRequest,
 					XMLHttpRequestEventTarget,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,escape,unescape,webkitURL
+				18d6b7c6 (safer with allowing webgl clickToPlay)
+					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
+					MediaSource,URL,webkitURL
+
+				#42767 with offscreenCanvas disabled
+				78e565db (safer)
+					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
+					MediaSource,Proxy,URL,webkitURL
 				*/
-				if (!['c36227b3','d3ed1b76','97f1edb8'].includes(mini(aTampered))) {isLies = true}
+				let aGood = ['c36227b3','97f1edb8','78e565db','18d6b7c6']
+				if (!aGood.includes(mini(aTampered))) {isLies = true}
 			}
 			// notate console
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
@@ -562,6 +568,7 @@ function get_window_props(METRIC) {
 					if ('666609cb' == hash || '969877a9' == hash) {notation = tb_green} // MB13.5: 825 standard | 824 safer
 				} else if (128 == isVer) {
 					if ('ab3ba8af' == hash || '2e54008d' == hash) {notation = tb_green} // MB14: 820 standard | 819 safer
+					if ('da1ce8c4' == hash || 'ef3fd962' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
 				}
 			} else {
 				if (isOS == 'android') {
@@ -571,6 +578,7 @@ function get_window_props(METRIC) {
 						if ('7d50bf8c' == hash || '7a49e32a' == hash) {notation = tb_green} // TB13.5: 776 standard | 775 safer #42315
 					} else if (128 == isVer) {
 						if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
+						if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
 					}
 				}
 			}
