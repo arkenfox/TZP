@@ -57,7 +57,7 @@ function run_block() {
 		dom.tzpcontent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
 		let msg = "<center><br><span style='font-size: 14px;'><b>" + (isGecko ? 'Gah.' : 'Aw, Snap!')
-			+"<br><br>TZP requires "+ (isTB ? 'Tor Browser' : 'Firefox') +' v' + isBlockMin[(isTB ? 1 : 0)] +'+<b></span></center>'
+			+"<br><br>TZP requires Firefox " + isBlockMin +'+<b></span></center>'
 		dom.blockmsg.innerHTML = msg
 	} catch(e) {}
 }
@@ -352,7 +352,7 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		}
 	}
 
-	// FF89-123: isBlockMin is 102 so we don't care about < 89
+	// FF89-123: block min is 115 so we don't care about < 89
 		// 1280128: FF51+ win/mac | 1701257: FF89+ linux
 	// FF121+: 1855861
 	// FF124+:
@@ -484,7 +484,7 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 	if (!runSG) {
 		try {
 			// ToDo: TB13+: does not work on android
-			css.href = isVer > 102 ? "chrome://browser/content/abouttor/aboutTor.css" : "resource://torbutton-assets/aboutTor.css"
+			css.href = "chrome://browser/content/abouttor/aboutTor.css" // TB13+
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
@@ -502,17 +502,21 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer < isBlockMin[0]) {isVerExtra = ' or lower'
-	} else if (isVer == 131) {isVerExtra = '+'}
+	if (isVer == 132) {isVerExtra = '+'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
-	isBlock = isVer < isBlockMin[0]
+	isBlock = isVer < isBlockMin
 	if (isBlock) {run_block(); return}
 	// set basic mode
 	if (isVer >= isSmartMin) {isSmart = true} else {run_basic()}
 	return
 
 	function cascade() {
+		try {
+			const re = new RegExp('(?:)', 'gv');
+			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
+			for (let i=0; i < 3; i++) {if (true == test132.next().done) return 132} // 1899413
+		} catch(e) {}
 		try {
 			// note: false positives < FF78 (130) < FF79 (131)
 				// so we'll wrap those in the FF129 check
@@ -560,22 +564,7 @@ function get_isVer(METRIC) {
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('fontStretch')) return 117 // 1842467
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('textRendering')) return 116 // 1839614
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 115 // 1778909
-			if (CSS2Properties.prototype.hasOwnProperty('WebkitTextSecurity')) return 114 // 1826629
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('reset')) return 113 // 1709347
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('roundRect')) return 112 // 1756175
-			if (HTMLElement.prototype.hasOwnProperty('translate')) return 111 // 1418449
-			if ('object' === typeof ondeviceorientationabsolute) return 110 // 1689631
-			if (CSSKeyframesRule.prototype.hasOwnProperty('length')) return 109 // 1789776
-			if ('undefined' === typeof onloadend) return 108 // 1574487
-			if (!SVGSVGElement.prototype.hasOwnProperty('useCurrentView')) return 107 // 1174097
-			if (Element.prototype.hasOwnProperty('checkVisibility')) return 106 // 1777293
-			try {structuredClone((() => {}))} catch(e) {if (e.message.length == 36) return 105} // 830716
-			if (SVGStyleElement.prototype.hasOwnProperty('disabled')) return 104 // 1712623
-			if (undefined === new ErrorEvent('error').error) return 103 // 1772494
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('direction')) {
-				if (Array(1).includes()) return 102 // 1767541: regression FF99
-			}
-			return 101
+			return 114
 		} catch(e) {
 			console.error(e)
 			return 0
@@ -1416,7 +1405,7 @@ function addTiming(metric) {
 			xsltProcessor.importStylesheet(doc)
 			let fragment = xsltProcessor.transformToFragment(doc, document)
 			value = (fragment.childNodes[0].nodeValue).slice(0,-6)
-		} else if (1 == remainder) {
+		} else if (1 == remainder || 5 == remainder) {
 			key = 'now'; value = performance.now()
 		} else if (2 == remainder) {
 			key = 'currenttime'; value = gTimeline.currentTime
@@ -1425,12 +1414,8 @@ function addTiming(metric) {
 		} else if (4 == remainder) {
 			key = 'date'
 			value = (new Date())[Symbol.toPrimitive]('number')
-			// get extra now
-			try {gData.timing['now'].push(performance.now())} catch(e) {}
 		} else if (6 == remainder) {
 			key = 'mark'; value = performance.mark('a').startTime
-		} else if (7 == remainder) {
-			try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
 		}
 		if (undefined !== key) {
 			if (runST) {value = undefined}
