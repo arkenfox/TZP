@@ -516,7 +516,7 @@ const outputCanvas = () => new Promise(resolve => {
 			if (undefined !== oErrors[name]) {
 				aSkip.push(name)
 				value = oErrors[name]; notation = rfp_red; data = zErrLog
-			} else if (!isSmart) {
+			} else if (!isGecko) {
 				if ('ge' == key) {data = zNA} // test is random, return a stable FP
 			} else {
 				if ('ge' == key) {
