@@ -3,7 +3,7 @@
 /* TIMING */
 
 function check_timing(type) {
-	if ('performance' == type) {return true}
+	if ('performance' == type || 'resource' == type) {return true}
 
 	let setTiming = new Set(), value, result = true
 	let aIgnore = [0, 1, 16, 17]
@@ -35,9 +35,65 @@ function check_timing(type) {
 	return result
 }
 
+function get_timing_performance() {
+	// dom.enable_performance
+	try {
+		let tmpobj = performance.timing
+		if (0 === (tmpobj.loadEventEnd - tmpobj.navigationStart)) {
+			throw zD
+		} else {
+		let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
+			'domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd','loadEventStart','navigationStart','redirectEnd','redirectStart',
+			'requestStart','responseEnd','responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart',]
+		let tmpTiming = []
+			aList.forEach(function(k){
+				let value = performance.timing[k]
+				if (undefined !== value && 0 !== value) {tmpTiming.push(value)}
+			})
+			tmpTiming = tmpTiming.filter(function(item, position) {return tmpTiming.indexOf(item) === position})
+			tmpTiming = tmpTiming.sort(function (a,b) { return a-b})
+			gData.timing.performance = tmpTiming
+		}
+	} catch(e) {
+		gData.timing.performance = e+''
+	}
+}
+
+function get_timing_resource() {
+	// dom.enable_resource_timing
+	try {
+		let entries = performance.getEntriesByType('resource')
+		if (0 == entries.length) {
+			if (isFile) {throw zSKIP} else {throw zD}
+		} else {
+			let aList = ['duration','fetchStart','requestStart','responseEnd','responseStart','secureConnectionStart','startTime']
+			let tmpSet = new Set()
+			entries.forEach(function(obj){
+				aList.forEach(function(item){
+					let value = obj[item]
+					if (undefined !== value) {
+						let typeCheck = typeFn(value)
+						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						tmpSet.add(value)
+					}
+				})
+			})
+			let data = Array.from(tmpSet)
+			data = data.sort(function (a,b) { return a-b})
+			gData.timing.resource = data
+		}
+	} catch(e) {
+		gData.timing.resource = e+''
+	}
+}
+
 function get_timing(METRIC) {
 	// check isPerf again
 	if (isPerf) {get_isPerf()}
+
+	//
+	get_timing_performance()
+	get_timing_resource()
 
 	// get a last value for each to ensure a max diff
 	try {gData.timing['now'].push(performance.now())} catch(e) {}
@@ -52,27 +108,6 @@ function get_timing(METRIC) {
 	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
 	gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 	//*/
-
-	let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
-		'domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd','loadEventStart','navigationStart','redirectEnd','redirectStart',
-		'requestStart','responseEnd','responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart',]
-	let tmpTiming = []
-	try {
-		let tmpobj = performance.timing
-		if (0 === (tmpobj.loadEventEnd - tmpobj.navigationStart)) {
-			throw zD
-		} else {
-			aList.forEach(function(k){
-				let value = performance.timing[k]
-				if (undefined !== value && 0 !== value) {tmpTiming.push(value)}
-			})
-			tmpTiming = tmpTiming.filter(function(item, position) {return tmpTiming.indexOf(item) === position})
-			tmpTiming = tmpTiming.sort(function (a,b) { return a-b})
-			gData.timing.performance = tmpTiming
-		}
-	} catch(e) {
-		gData.timing.performance = e+''
-	}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
@@ -186,11 +221,7 @@ function get_timing(METRIC) {
 				} else if (is10) {value = '10ms'
 				} else if (isNoise) {value = 'noise'
 				}
-				if ('exslt' == k && isVer < 128 && '10ms' == value) {
-					notation = sg + "[<span class='healthsilent'>"+ tick +'</span> default]'+ sc
-				} else {
-					countFail++
-				}
+				countFail++
 			}
 			oData[k] = value
 
@@ -208,10 +239,10 @@ function get_timing(METRIC) {
 			data = aDiffs
 			//console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
 		} catch(e) {
-			str = zD == e ? zD : log_error(17, METRIC +'_'+ k, e)
+			str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
+			oData[k] = (zD == e || zSKIP == e) ? e : zErr
 			data = str
-			oData[k] = zD == str ? zD : zErr
-			countFail++
+			if (zSKIP !== e) {countFail++} else {notation = ''}
 		}
 		//sDetail.document[METRIC][k] = data
 		addDisplay(17, METRIC +'_'+ k, str,'', notation)
@@ -224,20 +255,6 @@ function get_timing(METRIC) {
 	let btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 	// data
 	addBoth(17, METRIC, mini(oData), btn, notation, oData)
-	return
-}
-
-function get_perf_resource(METRIC) {
-	// dom.enable_resource_timing
-	let str, data =''
-	try {
-		if (runSE) {foo++}
-		str = performance.getEntriesByType('resource').length > 0 ? zE : zD
-		if (isFile) (str = zSKIP)
-	} catch(e) {
-		str = e; data = zErrLog
-	}
-	addBoth(17, METRIC, str,'','', data)
 	return
 }
 
@@ -338,9 +355,9 @@ function get_navigator_keys(METRIC) {
 				'productSub','userAgent','vendor','vendorSub','hardwareConcurrency','language',
 				'languages','mimeTypes','onLine','plugins','taintEnabled','doNotTrack',
 				'cookieEnabled','pdfViewerEnabled','requestMediaKeySystemAccess',
+				'locks', // 1851539
+				'userActivation', // 1791079
 			]
-			if (isVer > 118) {expected.push('locks')} // 1851539
-			if (isVer > 119) {expected.push('userActivation')} // 1791079
 			if (runSL) {
 				data.push('iamfake','anotherfake') // +fake
 				data = data.filter(x => !['buildID'].includes(x)) // +missing
@@ -372,14 +389,12 @@ function get_navigator_keys(METRIC) {
 		if (isTB) {
 			if (isMullvad) {
 				// MB has mediaDevices, mediaSession
-				if (115 == isVer && '161c395f' == hash) {notation = tb_green // 13.5 39
-				} else if (128 == isVer && '17ad3a75' == hash) {notation = tb_green} // 14 42
+				if ('17ad3a75' == hash) {notation = tb_green} // 14 42
 			} else {
 				if ('android' == isOS) {
 					// awaiting isTB android fix
 				} else {
-					if (115 == isVer && '8181bb97' == hash) {notation = tb_green // 13.5 37
-					} else if (128 == isVer && 'b9ee3d3d' == hash) {notation = tb_green} // 14 40
+					if ('b9ee3d3d' == hash) {notation = tb_green} // 14 40
 				}
 			}
 		}
@@ -440,7 +455,7 @@ function get_pdf(METRIC) {
 		get_obj('plugins'),
 	]).then(function() {
 		// FF116 1838415 dropped RFP protection
-		let notation = (isVer < 116 ? rfp_red : default_red), isLies = false
+		let notation = default_red, isLies = false
 		if (runSL) {data = {'mimeTypes': 'none', 'pdfViewerEnabled': true, 'plugins': 'none'}}
 		let hash = mini(data)
 		if (!['91073152','beccb452'].includes(hash) || isProxyLie('Navigator.pdfViewerEnabled')) {
@@ -451,7 +466,7 @@ function get_pdf(METRIC) {
 				if (keys.indexOf('pdfViewerEnabled') > keys.indexOf('constructor')) {isLies = true}
 			} catch(e) {}
 		}
-		if ('91073152' == hash) {notation = isVer < 116 ? rfp_green : default_green}
+		if ('91073152' == hash) {notation = default_green}
 		addBoth(18, METRIC, hash, addButton(18, METRIC), notation, data, isLies)
 		return
 	})
@@ -564,22 +579,15 @@ function get_window_props(METRIC) {
 				// on touch devices: 0 (all false) 1 or 2 (all true)
 
 			if (isMullvad) {
-				if (115 == isVer) {
-					if ('666609cb' == hash || '969877a9' == hash) {notation = tb_green} // MB13.5: 825 standard | 824 safer
-				} else if (128 == isVer) {
-					if ('ab3ba8af' == hash || '2e54008d' == hash) {notation = tb_green} // MB14: 820 standard | 819 safer
-					if ('da1ce8c4' == hash || 'ef3fd962' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
-				}
+				if ('ab3ba8af' == hash || '2e54008d' == hash) {notation = tb_green} // MB14: 820 standard | 819 safer
+				if ('da1ce8c4' == hash || 'ef3fd962' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
+
 			} else {
 				if (isOS == 'android') {
 					// ToDo: we can't detect isTB on android
 				} else {
-					if (115 == isVer) {
-						if ('7d50bf8c' == hash || '7a49e32a' == hash) {notation = tb_green} // TB13.5: 776 standard | 775 safer #42315
-					} else if (128 == isVer) {
-						if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
-						if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
-					}
+					if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
+					if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
 				}
 			}
 		}
@@ -594,7 +602,6 @@ function get_window_props(METRIC) {
 
 const outputTiming = () => new Promise(resolve => {
 	if (!gRun) {return}
-
 	/* other perf prefs are in window properties
 		dom.enable_performance_observer: PerformanceObserver, PerformanceObserverEntryList
 		dom.enable_performance_navigation_timing: PerformanceNavigationTiming
@@ -605,7 +612,6 @@ const outputTiming = () => new Promise(resolve => {
 	*/
 	Promise.all([
 		get_timing('timing_precision'),
-		get_perf_resource('perf_resource'), // #42153, this function tests if API is working
 	]).then(function(){
 		return resolve()
 	})
