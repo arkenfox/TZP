@@ -75,11 +75,9 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 			} else if ('android' == isOS && '2b9d44b0' == hash) {notation = rfp_green // 0.02
 			} else if ('9b69969b' == hash) {notation = rfp_green} // 0.025 catchall incl linux
 		}
-		if (isTB && !isMullvad && isVer == 115) {notation = tb_red} // TB should be an error
 		if (isGecko && notation !== rfp_green) {data['ac-outputLatency'] = zNA; hash = mini(data)}
 		
 	} catch(e) {
-		if (isTB && !isMullvad && isVer == 115) {notation = (e+'' === 'TypeError: window.AudioContext is not a constructor' ? tb_green : tb_red)}
 		hash = log_error(11, METRIC, e); data = zErr
 	}
 	addBoth(11, METRIC, hash, btn, notation, data, isLies)
@@ -88,7 +86,7 @@ const get_audio_context = (METRIC) => new Promise(resolve => {
 })
 
 const get_audio_offline = () => new Promise(resolve => {
-	let t0 = nowFn(), notation ='', isLies = false
+	let t0 = nowFn(), notation = rfp_red, isLies = false
 	const METRIC = 'offlineAudioContext'
 
 	function outputErrors(display) {
@@ -143,19 +141,9 @@ const get_audio_offline = () => new Promise(resolve => {
 					let display = hashC +' | '+ hashG +' | '+ sum, value = hashG
 					// lies
 					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
-					// notation
-					if (isTB && 115 == isVer) {
-						if (!isMullvad || isLies) {notation = tb_red}
-					} else if (isVer > 117) {
-						notation = default_red
-						if (!isLies) {
-							// two results: ARM and non-ARM
-							notation = sbx +'undocumented]'+ sc
-							if (isVer > 123 && hashC == 'a7c1fbb6') {notation = sgtick+'x86/amd]'+sc // 1877221
-							} else if (hashC == '24fc63ce') {notation = sgtick+'x86/amd]'+sc
-							} else if (hashC == 'a34c73cd') {notation = sgtick+'ARM]'+sc}
-						}
-					}
+					// notation: two results: ARM and non-ARM
+					if (hashC == 'a7c1fbb6') {notation = sgtick+'x86/amd]'+sc // 1877221 FF123+
+					} else if (hashC == 'a34c73cd') {notation = sgtick+'ARM]'+sc}
 					addBoth(11, METRIC, display,'', notation, value, isLies)
 					log_perf(11, METRIC, t0)
 					return resolve()
@@ -169,11 +157,6 @@ const get_audio_offline = () => new Promise(resolve => {
 		}
 	} catch(e) {
 		if (gRun) {dom.oscillator_compressor = zNA; dom.oscillator = zNA; dom.audio_user = zNA}
-		if (isTB && !isMullvad && isVer == 115) {
-			notation = e+'' === 'TypeError: window.OfflineAudioContext is not a constructor' ? tb_green : tb_red
-		} else {
-			notation = default_red
-		}
 		outputErrors(log_error(11, METRIC, e))
 	}
 })
@@ -181,7 +164,7 @@ const get_audio_offline = () => new Promise(resolve => {
 const get_oscillator = () => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = 'oscillator'
-	let notation = (isSmart && isVer > 117) ? rfp_red : ''
+	let notation = isSmart ? rfp_red : ''
 
 	function exit(display, value) {
 		if (value == undefined) {value = display}
@@ -221,15 +204,8 @@ const get_oscillator = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (isTB && !isMullvad && isVer == 115) {
-						notation = tb_red // TB should be an error
-					} else if (isVer > 123) {
-						if (hash == '5b3956a9') {notation = sgtick+'x86/amd]'+sc // 1877221
-						} else if (hash == 'f263f055') {notation = sgtick+'RFP ARM]'+sc}
-					} else if (isVer > 117) {
-						if (hash == 'e9f98e24') {notation = sgtick+'RFP x86/amd]'+sc
-						} else if (hash == '1348e98d') {notation = sgtick+'RFP ARM]'+sc}
-					}
+					if (hash == '5b3956a9') {notation = sgtick+'x86/amd]'+sc // 1877221
+					} else if (hash == 'f263f055') {notation = sgtick+'RFP ARM]'+sc}
 				}
 				exit(hash)
 			} catch(e) {
@@ -245,7 +221,7 @@ const get_oscillator = () => new Promise(resolve => {
 const get_oscillator_compressor = () => new Promise(resolve => {
 	let t0 = nowFn()
 	const METRIC = 'oscillator_compressor'
-	let notation = (isSmart && isVer > 117) ? rfp_red : ''
+	let notation = isSmart ? rfp_red : ''
 
 	function exit(display, value) {
 		if (value == undefined) {value = display}
@@ -294,15 +270,8 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (isTB && !isMullvad && isVer == 115) {
-						notation = tb_red // TB should be an error
-					} else if (isVer > 123) {
-						if (hash == 'e08487bf') {notation = sgtick+'x86/amd]'+sc // 1877221
-						} else if (hash == '1f38e089') {notation = sgtick+'RFP ARM]'+sc}
-					} else if (isVer > 117) {
-						if (hash == 'bafe56d6') {notation = sgtick+'RFP x86/amd]'+sc
-						} else if (hash == 'c54b7aa9') {notation = sgtick+'RFP ARM]'+sc}
-					}
+					if (hash == 'e08487bf') {notation = sgtick+'x86/amd]'+sc // 1877221
+					} else if (hash == '1f38e089') {notation = sgtick+'RFP ARM]'+sc}
 				}
 				exit(hash)
 			} catch(e) {
