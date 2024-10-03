@@ -332,7 +332,7 @@
 		<tr><td id="lvendor">vendor</td><td class="c mono spaces" id="vendor"></td></tr>
 		<tr><td id="lvendorSub">vendorSub</td><td class="c mono spaces" id="vendorSub"></td></tr>
 		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
-		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[ show ]</span>
+		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[+]</span>
 			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
 			<tr class="togUA1"><td>[contentWindow] document root</td><td class="c mono" id="ua_content_docroot"></td></tr>
 			<tr class="togUA1"><td>[contentWindow] with URL</td><td class="c mono" id="ua_content_with_url"></td></tr>
@@ -341,7 +341,7 @@
 			<tr class="togUA1"><td>iframe access</td><td class="c mono" id="ua_iframe_access"></td></tr>
 			<tr class="togUA1"><td>nested</td><td class="c mono" id="ua_nested"></td></tr>
 			<tr class="togUA1"><td>window access</td><td class="c mono" id="ua_window_access"></td></tr>
-		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[ show ]</span>
+		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[+]</span>
 			workers</td><td class="mono s99" id="uaWorkers">summary not coded</td></tr>
 			<tr class="togUA2"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
 			<tr class="togUA2"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
@@ -419,7 +419,7 @@
 		<tr><td>language</td><td class="c mono" id="language"></td></tr>
 		<tr><td>languages</td><td class="c mono" id="languages"></td></tr>
 		<!--locale-->
-		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[ show ]</span>
+		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[+]</span>
 			locale</td><td class="c mono" id="locale"></td></tr>
 		<tr class="togLO"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
@@ -439,7 +439,7 @@
 		<tr><td>XSLT messages</td><td class="c mono" id="xslt_messages"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td><span id="labelTM" class="btn btn0" onClick="togglerows('TM','btn')">[ show ]</span>
+		<tr><td><span id="labelTM" class="btn btn0" onClick="togglerows('TM','btn')">[+]</span>
 			[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
 		<tr class="togTM"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
 		<tr class="togTM"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
@@ -447,7 +447,7 @@
 		<tr class="togTM"><td>parseFromString</td><td class="c mono" id="timezone_offset_string"></td></tr>
 		<tr class="togTM"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_unsafe"></td></tr>
 		<tr class="togTM"><td>EXSLT</td><td class="c mono" id="timezone_offset_exslt"></td></tr>
-		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[ show ]</span>
+		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[+]</span>
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
 		<tr class="togTO"><td>date</td><td class="c mono" id="date"></td></tr>
 		<tr class="togTO"><td><a class="blue" href="tests/timezones.html" target="blank">[PoC]</a>
@@ -718,7 +718,7 @@
 		<!--fonts-->
 		<tr><td></td><td><span class="s12">fonts</span></td></tr>
 		<tr><td>[groups] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_groups"></td></tr>
-		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[ show ]</span>
+		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[+]</span>
 			[sizes | names] fonts <sup>3</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
 		</tr>
@@ -825,7 +825,7 @@
 		<tr><td>[deprecated] colors</td><td class="c mono" id="colors_deprecated"></td></tr>
 		<tr><td><a class="blue" href="tests/csscolors.html" target="blank">[PoC]</a>
 			&nbsp; [-moz-] colors</td><td class="c mono" id="colors_moz"></td></tr>
-		<tr><td><span id="labelC" class="btn btn0" onClick="togglerows('C','btn')">[ show ]</span>
+		<tr><td><span id="labelC" class="btn btn0" onClick="togglerows('C','btn')">[+]</span>
 			computed styles <sup>1</sup></td><td class="c mono" id="computed_styles"></td></tr>
 		<tr class="togC"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="computed_styles_cssrulelist"></td></tr>
 		<tr class="togC"><td>DOMParser <sup>1</sup></td><td class="c mono" id="computed_styles_domparser"></td></tr>
@@ -918,7 +918,14 @@
 			<span class="c" id="timinghash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td><span id="labelT" class="btn btn0" onClick="togglerows('T','btn')">[ show ]</span>
+		<!--manual-->
+		<tr><td><span class="btn btn0" onClick="outputUser('get_timing_audio')">[ click ]</span>
+			<span id="labelT2" class="btn btn0" onClick="togglerows('T2','btn')">[+]</span>
+			audio</td><td class="c mono" id="timing_audio"></td></tr>
+		<tr class="togT2"><td>contexttime</td><td class="c mono" id="timing_audio_contexttime"></td></tr>
+		<tr class="togT2"><td>performancetime</td><td class="c mono" id="timing_audio_performancetime"></td></tr>
+		<!--auto-->
+		<tr><td><span id="labelT" class="btn btn0" onClick="togglerows('T','btn')">[+]</span>
 			timing precision</td><td class="c mono" id="timing_precision"></td></tr>
 		<tr class="togT"><td>currenttime</td><td class="c mono" id="timing_precision_currenttime"></td></tr>
 		<tr class="togT"><td>date</td><td class="c mono" id="timing_precision_date"></td></tr>
