@@ -621,7 +621,8 @@ const get_isXML = (METRIC) => new Promise(resolve => {
 /*** PREREQ ***/
 
 function get_isDomRect() {
-	if (!isGecko || !isSmart) {return}
+	if (!isGecko) {return}
+	// like canvas: this is only testing for protection, so always run in gecko including basic mode
 	// determine valid domrect methods + grab data for analysis
 	let t0 = nowFn()
 	const names = ['element_getbounding', 'element_getclient','range_getbounding','range_getclient']
