@@ -3,7 +3,7 @@
 function get_domrect(METRIC) {
 	// quick exits
 	let hash, data = {}
-	if (!isGecko || !isSmart) {hash = zNA} else if ('9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
+	if (!isGecko) {hash = zNA} else if ('9e6f19c5' == mini(oDomRect)) {hash = 'trustworthy'}
 	if (undefined !== hash) {
 		addBoth(15, METRIC, hash)
 		return
