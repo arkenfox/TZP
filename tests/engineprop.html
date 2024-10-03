@@ -582,7 +582,6 @@ function run() {
 		rec(typeof PERSISTENT, "PERSISTENT", code, "number")
 		rec(typeof TEMPORARY, "TEMPORARY", code, "number")
 		rec(typeof chrome, "chrome", code, "object") // edgeHTML
-		rec(typeof cookieStore, "cookieStore", code, "object")
 		rec(typeof onappinstalled, "onappinstalled", code, "object")
 		rec(typeof onbeforeinstallprompt, "onbeforeinstallprompt", code, "object")
 		rec(typeof onpointerrawupdate, "onpointerrawupdate", code, "object")
@@ -690,6 +689,7 @@ function run() {
 		// blink + gecko (not seen in webkit)
 		code = 50
 		rec(typeof cancelIdleCallback, "cancelIdleCallback", code, "function")
+		rec(typeof cookieStore, "cookieStore", code, "object") // FF132 nightly 1918643
 		rec(typeof external, "external", code, "object")
 		rec(typeof onauxclick, "onauxclick", code, "object")
 		rec(typeof onbeforeinput, "onbeforeinput", code, "object")
