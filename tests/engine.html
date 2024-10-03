@@ -1917,7 +1917,7 @@ function get_window_props(num1, num2, title) {
 		rec(num2, typeof PERSISTENT, "PERSISTENT")
 		rec(num2, typeof TEMPORARY, "TEMPORARY")
 		rec(num2, typeof chrome, "chrome")
-		rec(num2, typeof cookieStore, "cookieStore")
+		rec(num2, typeof cookieStore, "cookieStore") // FF132 nightly 1918643
 		rec(num2, typeof getScreenDetails, "getScreenDetails")
 		rec(num2, typeof launchQueue, "launchQueue")
 		rec(num2, typeof navigation, "navigation")
@@ -1950,6 +1950,10 @@ function get_window_props(num1, num2, title) {
 				// FF126: 1887729
 				resU = resU.filter(x => !["oncontextlost"].includes(x))
 				resU = resU.filter(x => !["oncontextrestored"].includes(x))
+			}
+			if (isVer > 131) {
+				// FF132 nightly 1918643
+				resU = resU.filter(x => !["cookieStore"].includes(x))
 			}
 		}
 
