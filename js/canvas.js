@@ -590,10 +590,10 @@ const outputCanvas = () => new Promise(resolve => {
 							// exclude solids: FPP does not tamper with those
 							// exclude if all white | exclude if proxy lies
 							// note: isGetStealth is getImageData
-							if (!isWhite && isVer > 119 && !isTB && !name.includes('_solid')) {
+							if (!isWhite && !isTB && !name.includes('_solid')) {
 								if (!isProxyLie(proxyMap[name] +'.'+ name)) {
 									if ('ge' == key && !isGetStealth || 'ge' !== key) {
-										notation = fpp_green 
+										notation = fpp_green
 									}
 								}
 							}
