@@ -554,7 +554,12 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 131
+		isVerMax = 132
+		try {
+			const re = new RegExp('(?:)', 'gv');
+			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
+			for (let i=0; i < 3; i++) {if (true == test132.next().done) return 132} // 1899413
+		} catch(e) {}
 		// note: false positives < FF78 (130) < FF79 (131)
 			// so we'll wrap those in the FF129 check
 		if ('function' === typeof CSS2Properties

@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 153
+	expectedMetrics = 152
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -30,7 +30,7 @@ let gData = { // from sData
 	'perf': [],
 	'timing': {},
 }
-let gTiming = ['currenttime','date','exslt','mark','now','performance','timestamp']
+let gTiming = ['currenttime','date','exslt','mark','now','performance','resource','timestamp']
 let gTimeline
 
 // section
@@ -127,9 +127,8 @@ const screen_green = sgtick+'screens match]'+sc,
 // dynamic TB/MB notation
 let tb_green = sgtick+'TB]'+sc,
 	tb_red = sbx+'TB]'+sc,
-	tb_slider_red = sbx+'TB Slider]'+sc
-
-let tb_standard = sg+'[TB Standard]'+sc,
+	tb_slider_red = sbx+'TB Slider]'+sc,
+	tb_standard = sg+'[TB Standard]'+sc,
 	tb_safer = sg+'[TB Safer]'+sc // don't tick/cross slider
 
 // run once
@@ -189,12 +188,12 @@ let gt0, gt1,
 	gClear = true, // clear console of xml and TB's prototype/proxy errors
 	isAllowNonGecko = false, // not supported: to see what other engines return
 	isBlock = true,
-	isBlockMin = [102, 12], // [FF, equivalent TB version] isVer only goes to 102
+	isBlockMin = 115,
 	isDelay = 0, // delay in ms to help give async font fallback more time
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
 	isSmart = false,
-	isSmartMin = 115 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
+	isSmartMin = 128 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
 /** DEV **/
 // simulate errors

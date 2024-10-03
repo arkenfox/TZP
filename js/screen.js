@@ -704,7 +704,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 			value = zErr
 		}
 		// FF127: 1554751
-		let notation = value == ((isTB || isVer > 126) ? 2 : 1) ? rfp_green : rfp_red
+		let notation = value == 2 ? rfp_green : rfp_red
 		addDisplay(1, METRIC +"_"+ item, display, '', notation)
 		oData[item] = value
 
@@ -1305,10 +1305,8 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	let oReported = {}, oComplex = {}
 	/*
 	windows:
-	- FF88+ 1693295: capped at 10.0
 	- FF116+ 1841425: windows hardcoded to 10.0 (patched 117 but 115 was last version for < win10)
 	mac:
-	- FF87+ 1679929: capped at 10.15
 	- FF116+ 1841215: mac hardcoded to 10.15 (patched 117 but 115 was last release for < 10.15)
 	android:
 	- FF122+ 1865766: hardcod to 10.0 - partially backed out
@@ -1317,6 +1315,10 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	linux:
 	- FF123+ 1861847: hardcode oscpu/platform to "Linux x86_64" (backed out? on hold? these are RFP's values anyway)
 	- FF127+ 1873273: report non-x86_64 CPUs (including 32-bit x86) as "x86_64"
+	*/
+
+	/*
+	- FF132+ 1711835 SPOOFED_PLATFORM dropped, is now hardcoded for all
 	*/
 
 	// RFP notation: nsRFPService.h
@@ -1331,30 +1333,19 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 			appVersion: '5.0 (Macintosh)', oscpu: 'Intel Mac OS X 10.15', platform: 'MacIntel', ua_os: 'Macintosh; Intel Mac OS X 10.15'
 		},
 		windows: {
-			appVersion: '5.0 (Windows)', platform: 'Win32', oscpu: 'Windows NT 10.0; Win64; x64', ua_os: 'Windows NT 10.0; Win64; x64'
+			appVersion: '5.0 (Windows)', oscpu: 'Windows NT 10.0; Win64; x64', platform: 'Win32', ua_os: 'Windows NT 10.0; Win64; x64'
 		}
 	}
 	if (os !== undefined) {
-		if (isVer < 123) {
-			oRFP.android.oscpu = 'Linux aarch64' // 1861847
-			oRFP.android.platform = 'Linux aarch64'
-		}
 		let uaVer = isVer, isDroid = isOS == 'android'
 		let uaRFP = 'Mozilla/5.0 (' + oRFP[os].ua_os +'; rv:' // base
 		let uaNext = uaRFP // only used if ver+
-
-		if (uaVer < 120) {
-			// 1818889: RFP 115-119 rv=109, droid version = 115
-			uaRFP += '109.0) Gecko/'+ (isDroid ? '115.0' : '20100101') +' Firefox/'+ (isDroid? '115' : uaVer) +'.0'
-		} else {
-			// 1806690: RFP 120+ drops frozen rv + droid version spoof
-			uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
-			// next
-			if ('+' == isVerExtra) {
-				let nxtVer = uaVer + 1
-				uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
-				oRFP[os]['userAgentNext'] = uaNext
-			}
+		uaRFP += uaVer +'.0) Gecko/' + (isDroid ? uaVer +'.0' : '20100101') +' Firefox/'+ uaVer +'.0'
+		// next
+		if ('+' == isVerExtra) {
+			let nxtVer = uaVer + 1
+			uaNext += nxtVer +'.0) Gecko/'+ (isDroid ? nxtVer +'.0' : '20100101') +' Firefox/'+ nxtVer +'.0'
+			oRFP[os]['userAgentNext'] = uaNext
 		}
 		oRFP[os]['userAgent'] = uaRFP
 	}
@@ -1467,12 +1458,13 @@ const outputFD = () => new Promise(resolve => {
 
 	// set isMullvad for diffs between TB vs MB; otherwise it _is_ TB in tests
 	if (gLoad && !isTB && 'android' !== isOS) {
-		let aMBVersions = [102, 115, 128]
+		let aMBVersions = [115, 128]
 		if (aMBVersions.includes(isVer) && isWordmark + isLogo == '400 x 32300 x 236') {
 			isMullvad = true
 			isTB = true
 			tb_green = sgtick+'MB]'+sc
 			tb_red = sbx+'MB]'+sc
+			tb_slider_red = sbx+'MB Slider]'+sc
 			tb_standard = sg+'[MB Standard]'+sc
 			tb_safer = sg+'[MB Safer]'+sc
 		}
@@ -1499,7 +1491,7 @@ const outputFD = () => new Promise(resolve => {
 	// arch: FF110+ pref removed: error means 32bit
 	let str = '64bit', data = 64
 	if (isArch !== true) {
-		if (isVer > 109 && 'RangeError: invalid array length' == isArch) {
+		if ('RangeError: invalid array length' == isArch) {
 			str = '32bit'; data = 32
 		} else {
 			str = isArch; data = zErr

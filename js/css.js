@@ -43,8 +43,6 @@ function get_colors() {
 			'-moz-buttondefault','-moz-dragtargetzone','-moz-mac-chrome-active','-moz-mac-chrome-inactive',
 			'-moz-mac-menuselect','-moz-mac-menushadow','-moz-mac-secondaryhighlight','-moz-menubartext',
 			'-moz-win-communicationstext','-moz-win-mediatext',
-			// removed FF103
-			'-moz-mac-vibrant-titlebar-dark','-moz-mac-vibrant-titlebar-light', 
 		)
 		oList.moz = aTmp.sort()
 	}
@@ -87,13 +85,7 @@ function get_colors() {
 			for (const k of Object.keys(tmpobj).sort()) {data[k] = tmpobj[k]; count += data[k].length} // sort/count
 			hash = mini(data); btn = addButton(14, METRIC, Object.keys(data).length +'/'+ count)
 			if ('moz' == type) {
-				let check = '283089dc' // 122+
-				if (isVer < 117) {check = '788e7d22' // 115-116
-				} else if (isVer < 119) {check = '5a00aa84' // 117-118
-				} else if (isVer < 121) {check = '47538602' // 119-120
-				} else if (isVer < 122) {check = '651a1b85' // 121
-				}
-				notation = hash == check ? rfp_green : rfp_red
+				notation = '283089dc' == hash ? rfp_green : rfp_red
 			}
 		} catch(e) {
 			hash = e; data = zErrLog
@@ -285,16 +277,7 @@ function get_computed_styles(METRIC) {
 						/* mac 1104 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
 						if ('75b00d93' == hash) {notation = tb_green} // TB 1104
 					} else {
-						/* win diff
-						layout.css.font-variations.enabled = locked false on win 7
-						fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
-						*/
-						if (115 == isVer) {
-							if ('e32d06bd' == hash) {notation = tb_green // TB/MB win11 + linux, TB android: 1102
-							} else if ('e14684e7' == hash) {notation = tb_green} // TB/MB win7 1098
-						} else if (128 == isVer) {
-							if ('d86abd90' == hash) {notation = tb_green}
-						}
+						if ('d86abd90' == hash) {notation = tb_green}
 					}
 				}
 			} else {
@@ -323,7 +306,7 @@ function get_computed_styles(METRIC) {
 
 function get_link(METRIC) {
 	// FF120+ 1858397: layout.css.always_underline_links
-	let value, data ='', notation = isVer < 120 ? '' : default_red
+	let value, data ='', notation = default_red
 	if (!isGecko || isVer < 120) {
 		value = zNA
 	} else {

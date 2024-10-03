@@ -14,10 +14,10 @@ function lookup_cookie(name) {
 
 const get_caches = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
-	let notation = isTB ? default_red : ''
+	let notation = default_red
 	function exit(display, value) {
 		// don't use caches for element name == window.caches !== a function
-		addDisplay(6, 'window.caches', display,'', notation)
+		addDisplay(6, 'window.caches', display,'', (isTB ? notation : ''))
 		addData(6, METRIC, value)
 		log_perf(6, METRIC, t0)
 		return resolve()
@@ -28,10 +28,9 @@ const get_caches = (METRIC) => new Promise(resolve => {
 	Promise.all([
 		window.caches.keys()
 	]).then(function(){
-		if (isTB && isVer > 121) {notation = default_green}
+		notation = default_green
 		exit(zE, zE)
 	}).catch(function(e){
-		if (isTB && isVer < 122 && e+'' == 'SecurityError: The operation is insecure.') {notation = default_green}
 		exit(log_error(6, METRIC, e), zErr)
 	})
 })

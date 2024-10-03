@@ -82,13 +82,14 @@ let fntMaster = {
 	// TB whitelist system
 	allowlist: {
 		android: [],
-		linux: [],
+		linux: [
+			'Arial','Courier','Courier New','Helvetica','Times','Times New Roman' // aliases
+		],
 		mac: [
-			'AppleGothic','Apple Color Emoji','Arial','Courier','Courier New',
+			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
 			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
 			'Kailasa','Lucida Grande','Menlo','Monaco','PingFang HK','PingFang SC','PingFang TC','Songti SC',
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
-			// 'Arial Black','Arial Narrow', // hardcode these in once we are min Smart 128
 			// always
 			'-apple-system',
 			/* variants
@@ -507,16 +508,6 @@ function set_fntList() {
 				fntData.full = array
 				fntData.full.push(fntFake)
 			} else if (isTB) {
-				// TB #42494
-					// ToDo: when min Smart is 128, just hardcode into allowlist
-				if (isVer > 115) {
-					fntMaster.allowlist.mac.push('Arial Black','Arial Narrow')
-					fntMaster.allowlist.linux.push('Arial','Courier','Courier New','Helvetica','Times','Times New Roman')
-				} else {
-					fntMaster.blocklist.mac.push('Arial Black','Arial Narrow')
-					fntMaster.blocklist.linux.push('Arial','Courier','Courier New','Helvetica','Times','Times New Roman') // aliases
-				}
-
 				// desktop TB
 				let aBundled = []
 				fntMaster.bundled.notoboth.forEach(function(fnt) {aBundled.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -585,11 +576,7 @@ function set_fntList() {
 			if ('android' == isOS) {
 				fntBtn = fntBtnAll
 			} else if (isTB) {
-				if ('linux' == isOS && isVer < 128) {
-					fntBtn = fntBtnBundled +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
-				} else {
-					fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll					
-				}
+				fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll					
  			} else if ('windows' == isOS) {
 				fntBtn = fntBtnBase +' + '+ fntBtnBaseLang +' = '+ fntBtnFPP +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
 			} else {
@@ -1407,8 +1394,7 @@ function get_system_fonts(METRIC) {
 		'system_fonts': ['caption','icon','menu','message-box','small-caption','status-bar']
 	}
 	let aProps = ['font-size','font-style','font-weight','font-family']
-	let hash, btn ='', data = {}, notation = ''
-	if ('moz_fonts' == METRIC) {notation = default_red} else if (isTB || isVer > 127) {notation = rfp_red}
+	let hash, btn ='', data = {}, notation = 'moz_fonts' == METRIC ? default_red : rfp_red
 
 	try {
 		let tmpdata = {}
@@ -1438,7 +1424,7 @@ function get_system_fonts(METRIC) {
 			} else if ('android' == isOS) {
 				if ('7e76c987' == hash) {notation = default_green} // 16px normal 400 sans-serif
 			}
-		} else if (isTB || isVer > 127) {
+		} else {
 			// RFP FF128+
 			if ('windows' == isOS) {
 				if ('a75e7a17' == hash) {notation = rfp_green} // 12px normal 400 sans-serif
@@ -1471,7 +1457,7 @@ function get_widget_fonts(METRIC) {
 		'password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
 	]
 	let aProps = ['font-family','font-size']
-	let hash, btn='', data = {}, notation = (isTB || isVer > 127)  ? rfp_red : ''
+	let hash, btn='', data = {}, notation = rfp_red
 	try {
 		let tmpdata = {}
 		aList.forEach(function(name) {
@@ -1495,28 +1481,26 @@ function get_widget_fonts(METRIC) {
 		hash = mini(data)
 		btn = addButton(12, METRIC, Object.keys(data).length +'/'+ count)
 		// RFP FF128+
-		if (isTB || isVer > 127) {
-			if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
-			/*monospace 13.3333px: [date, datetime-local, time],
-				monospace 13px: [textarea],
-				sans-serif 13.3333px: [19 items],
-				sans-serif 13px: [image]*/
-			} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
-			/*-apple-system 13.3333px: [19 items],
-				monospace 13.3333px: [date, datetime-local, time],
-				monospace 13px: [textarea],
-				sans-serif 13px: [image] */
-			} else if ('linux' == isOS && '99054729' == hash) {notation = rfp_green
-			/*monospace 12px: [textarea],
-				monospace 13.3333px: [date, datetime-local, time],
-				sans-serif 13.3333px: [19 items],
-				sans-serif 13px: [image]*/
-			} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
-			/*Roboto 13.3333px: [19 items],
-				monospace 12px: [textarea],
-				monospace 13.3333px: [date, datetime-local, time],
-				sans-serif 13px: [image]*/
-			}
+		if ('windows' == isOS && '24717aa8' == hash) {notation = rfp_green
+		/*monospace 13.3333px: [date, datetime-local, time],
+			monospace 13px: [textarea],
+			sans-serif 13.3333px: [19 items],
+			sans-serif 13px: [image]*/
+		} else if ('mac' == isOS && '12e7f88a' == hash) {notation = rfp_green
+		/*-apple-system 13.3333px: [19 items],
+			monospace 13.3333px: [date, datetime-local, time],
+			monospace 13px: [textarea],
+			sans-serif 13px: [image] */
+		} else if ('linux' == isOS && '99054729' == hash) {notation = rfp_green
+		/*monospace 12px: [textarea],
+			monospace 13.3333px: [date, datetime-local, time],
+			sans-serif 13.3333px: [19 items],
+			sans-serif 13px: [image]*/
+		} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
+		/*Roboto 13.3333px: [19 items],
+			monospace 12px: [textarea],
+			monospace 13.3333px: [date, datetime-local, time],
+			sans-serif 13px: [image]*/
 		}
 	} catch(e) {
 		hash = e; data = zErrLog

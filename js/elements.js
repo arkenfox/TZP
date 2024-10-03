@@ -101,7 +101,7 @@ function get_element_keys(METRIC) {
 				// still awaiting android isTB
 			} else {
 				// desktop
-				if (115 == isVer && '156e1033' == hash || 128 == isVer && 'eb81553d' == hash) {notation = tb_green}
+				if ('eb81553d' == hash) {notation = tb_green}
 			}
 		}
 	} catch (e) {
@@ -270,8 +270,9 @@ function get_widget_sizes(METRIC) {
 			checkbox: '',
 			color: '',
 			date: '',
-			"datetime-local": '',
+			'datetime-local': '',
 			details: '<details></details>',
+			'details_open': '<details open="">.</details>',
 			directory: '<input webkitdirectory directory type="file">',
 			file: '',
 			files: '<input multiple="" type="file">',

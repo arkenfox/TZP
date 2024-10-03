@@ -62,21 +62,18 @@ function get_nav_gpc(METRIC) {
 		// privacy.globalprivacycontrol.functionality.enabled = navigator
 		// privacy.globalprivacycontrol.enabled = true/false
 	// FF120+ desktop (?android): gpc enabled: false but true in pb mode
-	let hash, data='', notation = default_red
+	let hash, data='', notation = isTB ? default_red : ''
 	try {
 		hash = navigator[METRIC]
 		if (runST) {hash = null} else if (runSL) {addProxyLie('Navigator.'+ METRIC)}
 		if (undefined === hash) {
 			hash = hash+''
-			if (isVer < 120) {notation = default_green}
 		} else {
 			let typeCheck = typeFn(hash)
 			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
-			if (isVer > 119) {
-				// expected boolean but could be true or false, so don't notate
-				// except TB where we expect true due to pb mode
-				notation = isTB ? (true === hash ? default_green : default_red) : ''
-			}
+			// expected boolean but could be true or false, so don't notate
+			// except TB where we expect true due to pb mode
+			if (isTB && true === hash) {notation = default_green}
 		}
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -89,7 +86,7 @@ function get_nav_gpc(METRIC) {
 
 function set_isLanguageSmart() {
 	// set once: ignore android for now
-	if ('android' == isOS || !gLoad || !isSmart) {return}
+	if (!gLoad || !isSmart || 'android' == isOS) {return}
 
 	// TB/MB always or FF if locale matches
 		// resource://gre/res/multilocale.txt
@@ -165,9 +162,9 @@ function set_isLanguageSmart() {
 		'he': {m: 'cdde832b', v: 'e47dbb82', x: '786876d5'},
 		'hu': {m: 'db7366e6', v: 'dad6d689', x: '9f537fe6'},
 		'id': {m: '1e275882', v: '71224946', x: '79f3851e'},
-		'is': {m: '204c8f73', v: 'd150027b', x: '7f3e38b8'},
+		'is': {m: '204c8f73', v: '6bbe7a8f', x: '7f3e38b8'},
 		'it': {m: '716e7242', v: '3b781f09', x: '469cb2af'},
-		'ja': {m: 'ab56d7cb', v: '48645d06', x: '6823cee8'},
+		'ja': {m: 'ab56d7cb', v: '48645d06', x: '46faea8b'},
 		'ka': {m: '6961b7e4', v: '40feb44f', x: '4e712712'},
 		'ko': {m: 'c758b027', v: 'd3b54047', x: 'fc4c50ed'},
 		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'f50f2b50'},
@@ -193,12 +190,6 @@ function set_isLanguageSmart() {
 		'vi': {m: 'bba6c980', v: 'b8137d59', x: '7cf3c6f9'},
 		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '328cc79b'},
 		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '87abb9fa'},
-	}
-	// 115 vs 128 changes
-	if (isVer > 115) {
-		localesSupported['is']['v'] = '6bbe7a8f'
-		localesSupported['ja']['x'] = '46faea8b'
-		localesSupported['uk']['v'] = '0163f51d'
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -935,8 +926,7 @@ function get_timezone(METRIC) {
 		if (!isTimeZoneValid && !isTimeZoneErr) { // ignore error
 			addBoth(4, METRICtz, tz,'', rfp_red,'', true)
 		} else {
-			let goodTZ = (isTB || isVer > 127) ? 'Atlantic/Reykjavik' : 'UTC'
-			notation = goodTZ == tz ? rfp_green : rfp_red
+			notation = 'Atlantic/Reykjavik' == tz ? rfp_green : rfp_red
 			addBoth(4, METRICtz, tz,'', notation, (isTimeZoneErr ? zErr : ''))
 		}
 		log_perf(4, METRIC, t0)
@@ -1112,18 +1102,8 @@ function get_timezone_offset(METRIC) {
 			get_mods()
 			isMatch = checkMatch(2)
 		}
-		let lieCount = Object.keys(oLies).length,
-			errCount = Object.keys(oErr).length
-		// no lies + no errors (allow one specific error in FF127 or lower)
-		let go = false
-		if (lieCount == 0) { // includes control even though we ignore it for display/recording
-			if (isVer > 127 && errCount == 0) {go = true}
-			if (isVer < 128 && errCount == 1) {
-				if (isVer > 122 && oErr["unsafe"] == 'Error: Permission denied to access property \"lastModified\"') {go = true}
-				if (isVer < 123 && oErr["unsafe"] == 'TypeError: Document.parseHTMLUnsafe is not a function') {go = true}
-			}
-			if (go) {notation = tz_green}
-		}
+		// no lies + no errors: includes control even though we ignore it for display/recording
+		if (0 == Object.keys(oLies).length && 0 == Object.keys(oErr).length) {notation = tz_green}
 		addBoth(4, METRIC, xValue,'', notation)
 	}
 	display_detail()

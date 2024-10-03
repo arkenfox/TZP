@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 82, maxVer = 131, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 83, maxVer = 132, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -278,6 +278,15 @@ function outputVersion() {
 		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
 		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
 		*/
+
+		// 132: 1899413
+		let t132 = performance.now(), ver132 = false
+		try {
+			const re = new RegExp('(?:)', 'gv');
+			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
+			for (let i=0; i < 3; i++) {ver132 = test132.next().done}
+		} catch(e) {}
+		rec(132, 132, "1899413", ver132, performance.now()-t132) // 0.08ms | 0.03 if error
 
 		// 131: 1900196
 		// false posiitve in FF78 or lower
