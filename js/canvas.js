@@ -542,7 +542,10 @@ const outputCanvas = () => new Promise(resolve => {
 			}
 			oFP[name] = {'value': value, 'notation': notation, 'data': data}
 		})
-		if (!isSmart || countFake == 0) {
+
+		// we're testing for protection so always do two passes, including basic mode
+			//if (!isSmart || countFake == 0) {
+		if (countFake == 0) {
 			exit()
 			return
 		}
