@@ -119,9 +119,9 @@ function get_timing(METRIC) {
 			// tested 20/10mn timestamps over ~12s/6s = ~750/370 unique times
 			// the longer since the first time, the more decimal points drift
 			// so 0's become 0.1's then 0.2's etc: 6s seems to limit drift to 1 decimal point
-			0, 0.1, 0.2, 0.3,
-			16.6, 16.7, 16.8, 16.9,
-			33.3, 33.4, 33.5, 33.36,
+			0, 0.1, 0.2, 0.3, 0.4,
+			16.6, 16.7, 16.8, 16.9, 17,
+			33.3, 33.4, 33.5, 33.6, 33.7,
 		],
 		'ten': [0, 10, 20, 30, 40],
 	}
