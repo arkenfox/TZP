@@ -718,7 +718,7 @@ function togglerows(id, word) {
 	let	style = items[0].style.display == 'table-row' ? 'none' : 'table-row'
 	for (let i=0; i < items.length; i++) {items[i].style.display = style}
 	if ('btn' == word) {
-		word = '[ '+ ('none' == style ? 'show' : 'hide') +' ]'
+		word = '['+ ('none' == style ? '+' : '-') +']'
 	} else {
 		word = ('none' == style ? '&#9660; show ' : '&#9650; hide ') + ('' == word || word === undefined ? 'details' : word)
 	}
@@ -1682,6 +1682,7 @@ function outputUser(fn) {
 	} else if ('outputAudioUser' == fn) {outputAudioUser()
 	} else if ('get_storage_manager' == fn) { get_storage_manager()
 	} else if ('get_pointer_event' == fn) { get_pointer_event()
+	} else if ('get_timing_audio' == fn) { get_timing_audio()
 	}
 }
 

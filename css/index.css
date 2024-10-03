@@ -172,7 +172,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 }
 
 /* show/hide */
-.togC, .togF, .togL, .togLO, .togT, .togTM, .togTO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
+.togC, .togF, .togL, .togLO, .togT, .togT2, .togTM, .togTO, .togOS, .togUA1, .togUA2, .togZ {display: none;}
 
 /* run/re-run, click here */
 .btn {background-color: var(--bg0);
@@ -327,6 +327,7 @@ div.scrollthin {scrollbar-width: thin;}
 #tb16 td:first-child {color: var(--test16);}
 #tb17 td:first-child {color: var(--test17);}
 	#tb17 .togT td:first-child {color: var(--test99);}
+	#tb17 .togT2 td:first-child {color: var(--test99);}
 #tb18 td:first-child {color: var(--test18);}
 #tb99 td:first-child {color: var(--test99);}
 #tbfp td:first-child {color: var(--test99);}

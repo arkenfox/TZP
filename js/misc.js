@@ -3,7 +3,8 @@
 /* TIMING */
 
 function check_timing(type) {
-	if ('performance' == type || 'resource' == type) {return true}
+	let aReturn = ['performance', 'resource', 'contexttime', 'performancetime']
+	if (aReturn.includes(type)) {return true}
 
 	let setTiming = new Set(), value, result = true
 	let aIgnore = [0, 1, 16, 17]
@@ -33,6 +34,61 @@ function check_timing(type) {
 	// ToDo: if !isPerf and return is true, perhaps we can try something else eg with a known delay
 	if (false == result) {console.log(type, max, setTiming)}
 	return result
+}
+
+function get_timing_audio() {
+	if (!gClick) {return}
+	gClick = false
+
+	const METRIC = 'timing_audio'
+	let aList = ['contexttime','performancetime'], oTime = {}, audioCtx, source, rAF 
+
+	aList.forEach(function(k){
+		gData.timing[k] = []
+		oTime[k] = []
+		dom[METRIC +'_' + k.toLowerCase()] = ''
+	})
+	dom[METRIC].innerHTML = ''
+
+	// collect
+	function collectTimestamps() {
+		const ts = audioCtx.getOutputTimestamp();
+		oTime.contexttime.push(ts.contextTime * 1000)
+		oTime.performancetime.push(ts.performanceTime)
+		rAF = requestAnimationFrame(collectTimestamps); // Reregister itself
+		if (oTime.contexttime.length > 20) {stop()}
+	}
+
+	// record
+	try {
+		audioCtx = new AudioContext()
+		source = new AudioBufferSourceNode(audioCtx);
+		source.start(0);
+		rAF = requestAnimationFrame(collectTimestamps)
+	} catch(e) {
+		dom[METRIC].innerHTML = log_error(17, METRIC, e)
+		gClick = true
+	}
+
+	// finish
+	function stop() {
+		source.stop(0)
+		cancelAnimationFrame(rAF)
+		aList.forEach(function(k){
+			let data = oTime[k]
+			data = data.filter(function(item, position) {return data.indexOf(item) === position})
+			// contextTime: if the first value (we deduped) is 0 then we need to drop it
+				// otherwise the first diff causes an offset to our 60FPS timing as rAF catches up: e.g.
+				// 0, 10, 26.6, 43.3, 76.6, 110, 143.3, 160, 176.6, 193.3, 210, 243.3
+				// 0, 10, 26.6, 43.3
+				// ^ should be 0, 16.6, 33.3: i.e the [0, 10, 26.6...] we drop the start point of 0
+				// after that everythng is in sync
+			if ('contexttime' == k && 0 == data[0]) {data = data.slice(1)}
+			gData.timing[k] = data
+			get_timing(METRIC)
+		})
+		gClick = true
+	}
 }
 
 function get_timing_performance() {
@@ -92,24 +148,27 @@ function get_timing_resource() {
 }
 
 function get_timing(METRIC) {
-	// check isPerf again
-	if (isPerf) {get_isPerf()}
-	get_timing_performance()
-	get_timing_resource()
-
-	// get a last value for each to ensure a max diff
-	try {gData.timing['now'].push(performance.now())} catch(e) {}
-	try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
-	try {
-		gData.timing['mark'].push(performance.mark('a').startTime)
-	} catch(e) {}
-	try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
-	try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
-	/* testing
-	gData.timing.date = [1723240561321]
-	gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
-	gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
-	//*/
+	let aLoop = ['contexttime','performancetime']
+	if ('timing_precision' == METRIC) {
+		aLoop = gTiming
+		// check isPerf again
+		if (isPerf) {get_isPerf()}
+		get_timing_performance()
+		get_timing_resource()
+		// get a last value for each to ensure a max diff
+		try {gData.timing['now'].push(performance.now())} catch(e) {}
+		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
+		try {
+			gData.timing['mark'].push(performance.mark('a').startTime)
+		} catch(e) {}
+		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
+		try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
+		/* testing
+		gData.timing.date = [1723240561321]
+		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
+		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
+		//*/
+	}
 
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
@@ -133,7 +192,7 @@ function get_timing(METRIC) {
 	sDetail.document[METRIC +'_data'] = {}
 	let isDateNoise = false
 
-	gTiming.forEach(function(k){
+	aLoop.forEach(function(k){
 		let aGood = oGood[k]
 		if (undefined == aGood) {aGood = oGood.other}
 		// don't add to health, we do that with the parent metric
@@ -247,16 +306,26 @@ function get_timing(METRIC) {
 			if (zSKIP !== e) {countFail++} else {notation = ''}
 		}
 		//sDetail.document[METRIC][k] = data
-		addDisplay(17, METRIC +'_'+ k, str,'', notation)
+		if ('timing_precision' == METRIC) {
+			addDisplay(17, METRIC +'_'+ k, str,'', notation)
+		} else {
+			dom[METRIC +'_'+ k].innerHTML = str + (isSmart ? notation : '')
+		}
 	})
 	// display
-	let countProtected = gTiming.length - countFail
-	let isProtected = countProtected == gTiming.length
+	let countProtected = aLoop.length - countFail
+	let isProtected = countProtected == aLoop.length
 	notation = isProtected ? rfp_green : rfp_red
-	str = countProtected +'/' + gTiming.length
+	str = countProtected +'/' + aLoop.length
 	let btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 	// data
-	addBoth(17, METRIC, mini(oData), btn, notation, oData)
+	if ('timing_precision' == METRIC) {
+		addBoth(17, METRIC, mini(oData), btn, notation, oData)
+	} else {
+		sDetail.document[METRIC] = oData
+		dom[METRIC].innerHTML = mini(oData) + btn + (isSmart ? notation : '')
+		gClick = false
+	}
 	return
 }
 
