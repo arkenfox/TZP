@@ -74,6 +74,10 @@ function get_timing_resource() {
 					if (undefined !== value) {
 						let typeCheck = typeFn(value)
 						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						// fix to 3 decimal places: otherwise e.g.
+						// 33.33399999999999, 33.333999999999996 has a diff of 7.105427357601002e-15
+						// and diff (calc1) becomes 7.1 instead of basically 0
+						value = value.toFixed(3) * 1
 						tmpSet.add(value)
 					}
 				})
@@ -90,8 +94,6 @@ function get_timing_resource() {
 function get_timing(METRIC) {
 	// check isPerf again
 	if (isPerf) {get_isPerf()}
-
-	//
 	get_timing_performance()
 	get_timing_resource()
 
@@ -182,7 +184,7 @@ function get_timing(METRIC) {
 				setDiffs.add(diff)
 			}
 			let aDiffs = Array.from(setDiffs)
-			//if ('currenttime' == k) {console.log(aDiffs)}
+			//if ('resource' == k) {console.log(aDiffs, aTotal)}
 
 			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
