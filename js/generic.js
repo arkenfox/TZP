@@ -1416,7 +1416,7 @@ function addTiming(metric) {
 			key = 'date'
 			value = (new Date())[Symbol.toPrimitive]('number')
 		} else if (6 == remainder) {
-			key = 'mark'; value = performance.mark('a').startTime
+			performance.mark('a')
 		}
 		if (undefined !== key) {
 			if (runST) {value = undefined}
@@ -1814,7 +1814,7 @@ function outputSection(id, isResize = false) {
 			} catch(e) {}
 			try {
 				performance.clearMarks('a')
-				gData.timing['mark'].push(performance.mark('a').startTime)
+				performance.mark('a')
 			} catch(e) {}
 			gCountTiming = 0
 			addTiming('start') // adds first exslt
