@@ -28,7 +28,9 @@ function get_maxtouch(METRIC) {
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(7, METRIC, value,'', (0 == value ? rfp_green : rfp_red), data, isProxyLie('Navigator.'+ METRIC))
+	// 1826051: FF132+ 10 except mac
+	let rfpvalue = (isVer > 131 && 'mac' !== isOS) ? 10 : 0
+	addBoth(7, METRIC, value,'', (rfpvalue == value ? rfp_green : rfp_red), data, isProxyLie('Navigator.'+ METRIC))
 	return
 }
 
