@@ -603,6 +603,7 @@ const get_scr_orientation = () => new Promise(resolve => {
 				isErr = true
 			}
 			// css
+			// check matchmedia matches css
 			let cssvalue = getElementProp(1, cssID, METRIC +'_'+ cssitem)
 			let isErrCss = cssvalue == zErr
 			let isLies = (!isErr && !isErrCss && value !== cssvalue)
@@ -616,11 +617,13 @@ const get_scr_orientation = () => new Promise(resolve => {
 			oData[type][cssitem] = cssvalue
 		}
 	}
+	// try and get a valid css value
+	let check = oData.screen['-moz-device-orientation_css']
+	if (zErr == check) {check = oData.screen['device-aspect-ratio_css']}
+	if ('square' == check) {check = 'portrait'}
 
 	// screen
 	let items = ['mozOrientation', 'orientation.angle', 'orientation.type']
-	let aScreen = [], cssCheck = oData.screen['-moz-device-orientation_css']
-	if (zErr == cssCheck) {cssCheck = oData.screen['device-aspect-ratio_css']}
 	items.forEach(function(item) {
 		let value, expected = 'string', isAngle = 'orientation.angle' == item, isLies = false
 		try {
@@ -642,37 +645,28 @@ const get_scr_orientation = () => new Promise(resolve => {
 				}
 			}
 			// lies
-			// ignore for now, as this gets weird with RFP
-			/*
-			if (isSmart && zErr !== cssCheck) {
-				if ('string' == expected && value.split('-')[0] !== cssCheck) {
+			if (isSmart && zErr !== check) {
+				// check mozOrientation + .type matches css
+				// note: we can't check the angle, it could be anything - see Piero tablet tests
+				if ('string' == expected && value.split('-')[0] !== check) {
 					log_known(1, METRICs +'_'+ item, value)
 					isLies = true
 					lieCount++
 				}
 			}
-			*/
 		} catch(e) {
 			log_error(1, METRICs +'_'+ item, e)
 			value = zErr
 		}
 		oDisplay[METRICs +'_'+ item] = {'value': value, 'lies': isLies}
-		aScreen.push(value)
 		oData['screen'][item] = isLies ? zLIE : value
 	})
-	// notate: only aScreen value because the css changes based on inner
-	addDisplay(1, METRICs,'','', ('b6466993' == mini(aScreen) ? rfp_green : rfp_red))
 
 	// https://searchfox.org/mozilla-central/source/testing/web-platform/tests/screen-orientation/orientation-reading.html
 	// see expectedAnglesLandscape + expectedAnglesPortrait
 	// harden
-		// treat css as truthy
-		// 2 x matchmedia matches css - done
-		// mozOrientation + .type matches css - done
-		// ToDo: 2 x css match
-		// ToDo: 2 x matchmedia match (done if css is not an error)
-		// ToDo: mozOrientation + .type match (if not an error or lie)
-		// ignore: primary can only be 0/90 and secondary 180/270 - not true, see Piero tablet
+		// ToDo: 2 x css match | 2 x matchmedia match | 2 x mozOrientation + .type match
+		// this is done with aGood below, but for non-RFP, we could check
 	// and update oDisplay and oData and lieCount
 
 	for (const k of Object.keys(oDisplay)) {
@@ -680,7 +674,14 @@ const get_scr_orientation = () => new Promise(resolve => {
 	}
 
 	// objects are already sorted
-	addData(1, METRICs, oData.screen, mini(oData.screen))
+	let hash = mini(oData.screen)
+	// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to TB
+		// all seven metrics shoudl always return one of 3 hashes
+		// landscape, portrait, portrait but square
+	let aGood = ['a1de035c','ccc8dc6d','fb6084ad']
+	addDisplay(1, METRICs,'','', (aGood.includes(hash) ? orientation_green : orientation_red))
+
+	addData(1, METRICs, oData.screen, hash)
 	addData(1, METRICw, oData.window, mini(oData.window))
 
 	return resolve()
