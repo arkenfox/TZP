@@ -148,7 +148,7 @@ function get_timing_performance() {
 	// dom.enable_performance
 	try {
 		let entries = performance.timing
-		if (0 === (entries.loadEventEnd - entries.navigationStart)) {
+		if (0 === entries.loadEventEnd && 0 == entries.navigationStart) {
 			throw zD
 		} else {
 			let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart',
@@ -222,7 +222,6 @@ function get_timing(METRIC) {
 		get_timing_navigation()
 		get_timing_performance()
 		get_timing_resource()
-
 		/* testing
 		gData.timing.date = [1723240561321]
 		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
@@ -338,7 +337,9 @@ function get_timing(METRIC) {
 			} else {
 				// add entropy e.g. jShelter 10ms or 100ms or noise
 				// order is 100+, 100, 10, noise, nothing
-				if (isZero) {value = '+100ms'
+				// isZero could be is100: sometimes we just don't get enough data
+				// so it can be a little unstable with e.g. extension fuckery - that's OK
+				if (isZero) {value = 'not enough data'
 				} else if (is100) {value = '100ms'
 				} else if (is10) {value = '10ms'
 				} else if (isNoise) {value = 'noise'
@@ -359,7 +360,7 @@ function get_timing(METRIC) {
 				str = newTotal.join(', ') + lasttwo
 			}
 			data = aDiffs
-			//console.log(k, data, isZero, is10, is100, aDiffs, aTotal)
+			//console.log(k, data, is10, is100, aDiffs, aTotal)
 		} catch(e) {
 			str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
 			oData[k] = (zD == e || zSKIP == e) ? e : zErr
@@ -388,7 +389,6 @@ function get_timing(METRIC) {
 		gClick = false
 	}
 	// cleanup
-	//performance.clearMarks('a')
 	//performance.clearMeasures()
 	return
 }
