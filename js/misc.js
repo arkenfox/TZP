@@ -3,7 +3,7 @@
 /* TIMING */
 
 function check_timing(type) {
-	let aReturn = ['performance', 'resource', 'contexttime', 'performancetime']
+	let aReturn = ['performance', 'resource','navigation', 'contexttime', 'performancetime']
 	if (aReturn.includes(type)) {return true}
 
 	let setTiming = new Set(), value, result = true
@@ -94,24 +94,58 @@ function get_timing_audio() {
 function get_timing_performance() {
 	// dom.enable_performance
 	try {
-		let tmpobj = performance.timing
-		if (0 === (tmpobj.loadEventEnd - tmpobj.navigationStart)) {
+		let entries = performance.timing
+		if (0 === (entries.loadEventEnd - entries.navigationStart)) {
 			throw zD
 		} else {
-		let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart','domInteractive','domLoading',
-			'domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd','loadEventStart','navigationStart','redirectEnd','redirectStart',
-			'requestStart','responseEnd','responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart',]
-		let tmpTiming = []
+			let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart',
+				'domInteractive','domLoading','domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd',
+				'loadEventStart','navigationStart','redirectEnd','redirectStart','requestStart','responseEnd',
+				'responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart']
+			let tmpSet = new Set()
 			aList.forEach(function(k){
 				let value = performance.timing[k]
-				if (undefined !== value && 0 !== value) {tmpTiming.push(value)}
+				if (undefined !== value && 0 !== value) {
+					let typeCheck = typeFn(value)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					tmpSet.add(value)
+				}
 			})
-			tmpTiming = tmpTiming.filter(function(item, position) {return tmpTiming.indexOf(item) === position})
-			tmpTiming = tmpTiming.sort(function (a,b) { return a-b})
-			gData.timing.performance = tmpTiming
+			let data = Array.from(tmpSet)
+			data = data.sort(function (a,b) { return a-b})
+			gData.timing.performance = data
 		}
 	} catch(e) {
 		gData.timing.performance = e+''
+	}
+}
+
+function get_timing_navigation() {
+	// dom.enable_performance_navigation_timing
+	try {
+		let entries = performance.getEntries().find(({entryType})=>entryType==='navigation')
+		if (undefined === entries) {
+			throw zD
+		} else {
+			let aList = ['connectEnd','connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart',
+				'domInteractive','domainLookupEnd','domainLookupStart','duration','loadEventEnd','loadEventStart',
+				'requestStart','responseEnd','responseStart','secureConnectionStart','startTime','unloadEventEnd',
+				'unloadEventStart','workerStart']
+			let tmpSet = new Set()
+			aList.forEach(function(k){
+				let value = entries[k]
+				if (undefined !== value) {
+					let typeCheck = typeFn(value)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					tmpSet.add(value)
+				}
+			})
+			let data = Array.from(tmpSet)
+			data = data.sort(function (a,b) { return a-b})
+			gData.timing.navigation = data
+		}
+	} catch(e) {
+		gData.timing.navigation = e+''
 	}
 }
 
@@ -119,7 +153,7 @@ function get_timing_resource() {
 	// dom.enable_resource_timing
 	try {
 		let entries = performance.getEntriesByType('resource')
-		if (0 == entries.length) {
+		if (0 === entries.length) {
 			if (isFile) {throw zSKIP} else {throw zD}
 		} else {
 			let aList = ['duration','fetchStart','requestStart','responseEnd','responseStart','secureConnectionStart','startTime']
@@ -155,6 +189,8 @@ function get_timing(METRIC) {
 		if (isPerf) {get_isPerf()}
 		get_timing_performance()
 		get_timing_resource()
+		get_timing_navigation()
+
 		// get a last value for each to ensure a max diff
 		try {gData.timing['now'].push(performance.now())} catch(e) {}
 		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
@@ -201,7 +237,7 @@ function get_timing(METRIC) {
 			let aTimes = gData.timing[k]
 			if ('string' == typeof aTimes) {throw aTimes}
 			aTimes = aTimes.filter(function(item, position) {return aTimes.indexOf(item) === position})
-			sDetail.document[METRIC +'_data'][k] = aTimes
+			if (aTimes.length) {sDetail.document[METRIC +'_data'][k] = aTimes}
 			// type check
 			let setDiffs = new Set(), aTotal = []
 			let start = aTimes[0], expected = 'exslt' == k ? 'string' : 'number'
@@ -243,7 +279,7 @@ function get_timing(METRIC) {
 				setDiffs.add(diff)
 			}
 			let aDiffs = Array.from(setDiffs)
-			//if ('resource' == k) {console.log(aDiffs, aTotal)}
+			//if ('navigation' == k) {console.log(aDiffs, aTotal)}
 
 			// test intervals
 			for (let i=0; i < aDiffs.length; i++) {
