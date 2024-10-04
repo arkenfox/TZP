@@ -27,7 +27,7 @@ function check_timing(type) {
 			setTiming.add(value)
 		} catch(e) {
 			// we would have already captured errors
-			return false
+			return true
 		}
 	}
 	// note: sometimes mark + timestamp "noise" mode are not caught
@@ -91,32 +91,27 @@ function get_timing_audio() {
 	}
 }
 
-function get_timing_performance() {
-	// dom.enable_performance
+function get_timing_mark() {
 	try {
-		let entries = performance.timing
-		if (0 === (entries.loadEventEnd - entries.navigationStart)) {
+		let entries = performance.getEntriesByName("a","mark")
+		if (undefined === entries) {
 			throw zD
 		} else {
-			let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart',
-				'domInteractive','domLoading','domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd',
-				'loadEventStart','navigationStart','redirectEnd','redirectStart','requestStart','responseEnd',
-				'responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart']
 			let tmpSet = new Set()
-			aList.forEach(function(k){
-				let value = performance.timing[k]
-				if (undefined !== value && 0 !== value) {
+			entries.forEach(function(obj){
+				let value = obj.startTime
+				if (undefined !== value) {
 					let typeCheck = typeFn(value)
 					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-					tmpSet.add(value)
+						tmpSet.add(value)
 				}
 			})
 			let data = Array.from(tmpSet)
 			data = data.sort(function (a,b) { return a-b})
-			gData.timing.performance = data
+			gData.timing.mark = data
 		}
 	} catch(e) {
-		gData.timing.performance = e+''
+		gData.timing.mark = e+''
 	}
 }
 
@@ -146,6 +141,35 @@ function get_timing_navigation() {
 		}
 	} catch(e) {
 		gData.timing.navigation = e+''
+	}
+}
+
+function get_timing_performance() {
+	// dom.enable_performance
+	try {
+		let entries = performance.timing
+		if (0 === (entries.loadEventEnd - entries.navigationStart)) {
+			throw zD
+		} else {
+			let aList = ['connectStart','domComplete','domContentLoadedEventEnd','domContentLoadedEventStart',
+				'domInteractive','domLoading','domainLookupEnd','domainLookupStart','fetchStart','loadEventEnd',
+				'loadEventStart','navigationStart','redirectEnd','redirectStart','requestStart','responseEnd',
+				'responseStart','secureConnectionStart','unloadEventEnd','unloadEventStart']
+			let tmpSet = new Set()
+			aList.forEach(function(k){
+				let value = performance.timing[k]
+				if (undefined !== value && 0 !== value) {
+					let typeCheck = typeFn(value)
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					tmpSet.add(value)
+				}
+			})
+			let data = Array.from(tmpSet)
+			data = data.sort(function (a,b) { return a-b})
+			gData.timing.performance = data
+		}
+	} catch(e) {
+		gData.timing.performance = e+''
 	}
 }
 
@@ -187,18 +211,18 @@ function get_timing(METRIC) {
 		aLoop = gTiming
 		// check isPerf again
 		if (isPerf) {get_isPerf()}
-		get_timing_performance()
-		get_timing_resource()
-		get_timing_navigation()
-
 		// get a last value for each to ensure a max diff
 		try {gData.timing['now'].push(performance.now())} catch(e) {}
 		try {gData.timing['timestamp'].push(new Event('').timeStamp)} catch(e) {}
-		try {
-			gData.timing['mark'].push(performance.mark('a').startTime)
-		} catch(e) {}
+		try {performance.mark('a')} catch(e) {}
 		try {gData.timing['date'].push((new Date())[Symbol.toPrimitive]('number'))} catch(e) {}
 		try {gData.timing['currenttime'].push(gTimeline.currentTime)} catch(e) {}
+		// poulate some data
+		get_timing_mark()
+		get_timing_navigation()
+		get_timing_performance()
+		get_timing_resource()
+
 		/* testing
 		gData.timing.date = [1723240561321]
 		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
@@ -287,9 +311,10 @@ function get_timing(METRIC) {
 				if (is10 && !oGood.ten.includes(aDiffs[i])) {is10 = false}
 				if (is100 && 0 !== aDiffs[i]) {is100 = false}
 			}
-			// dates: other tests we can rely on non-integer, but not dates
-				// but we measure enough dates to not all land on 0's (or 50's and 100s)
-			if ('date' == k) {if (is100 || is10) {isMatch = false}}
+			// some tests we can rely on non-integer
+				// but others we measure enough to not all land on 0's (or 50's and 100s)
+			let a100 = ['date','performance','contexttime','performancetime']
+			if (a100.includes(k)) {if (is100 || is10) {isMatch = false}}
 			// clean up exslt
 			if ('exslt' == k) {
 				if (isNoise) {
@@ -362,6 +387,9 @@ function get_timing(METRIC) {
 		dom[METRIC].innerHTML = mini(oData) + btn + (isSmart ? notation : '')
 		gClick = false
 	}
+	// cleanup
+	//performance.clearMarks('a')
+	//performance.clearMeasures()
 	return
 }
 
