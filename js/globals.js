@@ -113,7 +113,9 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	intl_green = sgtick+' intl]'+sc,
 	intl_red = sbx+' intl]'+sc,
 	tz_green = sgtick+' timezone]'+sc,
-	tz_red = sbx+' timezone]'+sc
+	tz_red = sbx+' timezone]'+sc,
+	orientation_green = sgtick+' screen orientation]'+sc,
+	orientation_red = sbx+' screen orientation]'+sc
 
 const screen_green = sgtick+'screens match]'+sc,
 	screen_red = sbx+'screens match]'+sc,
