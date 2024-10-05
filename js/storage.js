@@ -12,7 +12,7 @@ function lookup_cookie(name) {
 	return ''
 }
 
-function get_caches(METRIC) {
+const get_caches = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn()
 	// PB mode: DOMException: The operation is insecure.
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
@@ -27,9 +27,9 @@ function get_caches(METRIC) {
 	function exit(str) {
 		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
 		log_perf(6, METRIC, t0)
-		return
+		return resolve()
 	}
-}
+})
 
 function get_cookies(METRIC, rndStr) {
 	let value
@@ -43,27 +43,28 @@ function get_cookies(METRIC, rndStr) {
 		log_error(6, METRIC, e); value = zErr
 	}
 
-	try {
-		document.cookie = 'session_'+ rndStr +'='+ rndStr +'; SameSite=Strict'
-		value += ' | '+ (lookup_cookie('session_'+ rndStr) == rndStr ? zS : zF)
-	} catch(e) {
-		log_error(6, METRIC +'_session', e); value += ' | '+ zErr
-	}
-	try {
-		let d = new Date()
-		d.setTime(d.getTime() + 172800000) // 2 days
-		document.cookie = 'persistent_'+ rndStr +'='+ rndStr +'; SameSite=Strict; expires='+ d.toUTCString()
-		value += ' | '+ (lookup_cookie('persistent_'+ rndStr) == rndStr ? zS : zF)
-	} catch(e) {
-		log_error(6, METRIC +'_persistent', e); value += ' | '+ zErr
-	}
+	let aTests = ['_session','_persistent']
+	aTests.forEach(function(k){
+		try {
+			let expires = ''
+			if ('_persistent' == k) {
+				let d = new Date()
+				d.setTime(d.getTime() + 172800000) // 2 days
+				expires = '; expires='+ d.toUTCString()
+			}
+			document.cookie = rndStr + k +'='+ rndStr +'; SameSite=Strict' + expires
+			value += ' | '+ (lookup_cookie(rndStr + k) == rndStr ? zS : zF)
+		} catch(e) {
+			log_error(6, METRIC + k, e); value += ' | '+ zErr
+		}
+	})
 	// don't use cookie in element names == adblockers might block display
 	addDisplay(6, 'ctest', value)
 	addData(6, METRIC, value)
 	return
 }
 
-function get_cookiestore(METRIC, rndStr) {
+const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 	// https://developer.mozilla.org/en-US/docs/Web/API/CookieStore
 	let value, obj = window[METRIC]
 	try {
@@ -71,22 +72,22 @@ function get_cookiestore(METRIC, rndStr) {
 	} catch(e) {
 		log_error(6, METRIC, e); value = zErr
 	}
-
-	try {
-		value += ' | ' + 'TBA'
-	} catch(e) {
-		log_error(6, METRIC +'_session', e); value += ' | '+ zErr
-	}
-	try {
-		value += ' | ' + 'TBA'
-	} catch(e) {
-		log_error(6, METRIC +'_persistent', e); value += ' | '+ zErr
-	}
+	// use a different suffix than cookies
+	let aTests = ['_session_store','_persistent_store']
+	aTests.forEach(function(k){
+		try {
+			value += ' | ' + 'TBA'
+		} catch(e) {
+			// slice "_store": consistent style to match cookies
+			// redundant to use "cookieStore_session_store"
+			log_error(6, METRIC + k.slice(0,-6), e); value += ' | '+ zErr
+		}
+	})
 	// don't use cookie in element names == adblockers might block display
 	addDisplay(6, 'cstest', value)
 	addData(6, METRIC, value)
-	return
-}
+	return resolve()
+})
 
 function get_filesystem(METRIC) {
 	let display = isFileSystem, notation = ''
@@ -106,8 +107,8 @@ function get_filesystem(METRIC) {
 
 function get_storage(METRIC, rndStr) {
 	// dom.storage.enabled
-	let value, prefix = ('localStorage' == METRIC ? 'local' : 'session')
-	let obj = window[prefix +'Storage']
+	let value, type = ('localStorage' == METRIC ? 'local' : 'session')
+	let obj = window[type +'Storage']
 	try {
 		value = 'object' == typeFn(obj, true) ? zE : zD
 	} catch(e) {
@@ -115,8 +116,9 @@ function get_storage(METRIC, rndStr) {
 	}
 
 	try {
-		obj.setItem(prefix +'_'+ rndStr, rndStr)
-		value += ' | '+ (obj.getItem(prefix +'_'+ rndStr) == rndStr ? zS : zF)
+		if (runSE) {foo++}
+		obj.setItem(rndStr +'_'+ type, rndStr)
+		value += ' | '+ (obj.getItem(rndStr +'_'+ type) == rndStr ? zS : zF)
 	} catch(e) {
 		log_error(6, METRIC +'_test', e); value += ' | '+ zErr
 	}
@@ -124,13 +126,13 @@ function get_storage(METRIC, rndStr) {
 	return
 }
 
-function get_storage_manager(delay = 170) {
+const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
 	dom[METRIC] = ''
 	function exit(value) {
 		dom[METRIC].innerHTML = value
-		return
+		return resolve()
 	}
 	setTimeout(function() {
 		try {
@@ -151,13 +153,13 @@ function get_storage_manager(delay = 170) {
 			}).catch(function(e){exit(log_error(6, METRIC, e))})
 		} catch(e) {exit(log_error(6, METRIC, e))}
 	}, delay)
-}
+})
 
-function get_storage_quota(METRIC) {
+const get_storage_quota = (METRIC) => new Promise(resolve => {
 	let isLies = false
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'','', value, isLies)
-		return
+		return resolve()
 	}
 	try {
 		navigator.storage.estimate().then(estimate => {
@@ -176,9 +178,9 @@ function get_storage_quota(METRIC) {
 	} catch(e) {
 		exit(log_error(6, METRIC, e), zErr)
 	}
-}
+})
 
-function get_permissions(item) {
+const get_permissions = (item) => new Promise(resolve => {
 	const METRIC = 'permission_'+ item
 	const aGood = ['denied','granted','prompt']
 	function exit(display, value) {
@@ -187,9 +189,9 @@ function get_permissions(item) {
 		addBoth(6, METRIC, display,'', notation, value)
 		// silent run manager to force granted quota when run
 		if ('persistent-storage' == item && 'granted' == value) {
-			Promise.all([get_storage_manager(0)]).then(function(){return})
+			Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
 		} else {
-			return
+			return resolve()
 		}
 	}
 	try {
@@ -207,7 +209,7 @@ function get_permissions(item) {
 	} catch(e) {
 		exit(e, zErrShort)
 	}
-}
+})
 
 function test_idb(log = false) {
 	let t0 = nowFn(), rndStr = rnd_string()
@@ -218,7 +220,7 @@ function test_idb(log = false) {
 		return
 	}
 	try {
-		let openIDB = indexedDB.open('idb_'+ rndStr)
+		let openIDB = indexedDB.open(rndStr +'_idb')
 		// create
 		openIDB.onupgradeneeded = function(event){
 			let dbObject = event.target.result
