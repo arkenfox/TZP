@@ -12,30 +12,26 @@ function lookup_cookie(name) {
 	return ''
 }
 
-const get_caches = (METRIC) => new Promise(resolve => {
+function get_caches(METRIC) {
 	let t0 = nowFn()
-	let notation = default_red
-	function exit(display, value) {
-		// don't use caches for element name == window.caches !== a function
-		addDisplay(6, 'window.caches', display,'', (isTB ? notation : ''))
-		addData(6, METRIC, value)
-		log_perf(6, METRIC, t0)
-		return resolve()
-	}
 	// PB mode: DOMException: The operation is insecure.
 		// FF122: 1864684: dom.cache.privatebrowsing.enabled
 		// also see 1742344 / 1714354
 	Promise.all([
 		window.caches.keys()
 	]).then(function(){
-		notation = default_green
-		exit(zE, zE)
+		exit(zE)
 	}).catch(function(e){
-		exit(log_error(6, METRIC, e), zErr)
+		exit(log_error(6, METRIC, e))
 	})
-})
+	function exit(str) {
+		addBoth(6, METRIC, str,'','', (str = zE ? str : zErr))
+		log_perf(6, METRIC, t0)
+		return
+	}
+}
 
-const get_cookies = (METRIC) => new Promise(resolve => {
+function get_cookies(METRIC, rndStr) {
 	let value
 	try {
 		let test = navigator.cookieEnabled
@@ -48,29 +44,51 @@ const get_cookies = (METRIC) => new Promise(resolve => {
 	}
 
 	try {
-		let rndA = 'session_'+ rnd_string(), rndB = rnd_string()
-		document.cookie = rndA +'='+ rndB +'; SameSite=Strict'
-		value += ' | '+ (lookup_cookie(rndA) == rndB ? zS : zF)
+		document.cookie = 'session_'+ rndStr +'='+ rndStr +'; SameSite=Strict'
+		value += ' | '+ (lookup_cookie('session_'+ rndStr) == rndStr ? zS : zF)
 	} catch(e) {
 		log_error(6, METRIC +'_session', e); value += ' | '+ zErr
 	}
 	try {
-		let rndC = 'persistent_'+ rnd_string(), rndD = rnd_string()
 		let d = new Date()
-		d.setTime(d.getTime() + 86400000) // 1 day
-		let expires = 'expires='+ d.toUTCString()
-		document.cookie = rndC +'='+ rndD +'; SameSite=Strict; '+ expires
-		value += ' | '+ (lookup_cookie(rndC) == rndD ? zS : zF)
+		d.setTime(d.getTime() + 172800000) // 2 days
+		document.cookie = 'persistent_'+ rndStr +'='+ rndStr +'; SameSite=Strict; expires='+ d.toUTCString()
+		value += ' | '+ (lookup_cookie('persistent_'+ rndStr) == rndStr ? zS : zF)
 	} catch(e) {
-		log_error(6, METRIC +' persistent', e); value += ' | '+ zErr
+		log_error(6, METRIC +'_persistent', e); value += ' | '+ zErr
 	}
 	// don't use cookie in element names == adblockers might block display
 	addDisplay(6, 'ctest', value)
 	addData(6, METRIC, value)
-	return resolve()
-})
+	return
+}
 
-const get_filesystem = (METRIC) => new Promise(resolve => {
+function get_cookiestore(METRIC, rndStr) {
+	// https://developer.mozilla.org/en-US/docs/Web/API/CookieStore
+	let value, obj = window[METRIC]
+	try {
+		value = 'object' == typeFn(obj, true) ? zE : zD
+	} catch(e) {
+		log_error(6, METRIC, e); value = zErr
+	}
+
+	try {
+		value += ' | ' + 'TBA'
+	} catch(e) {
+		log_error(6, METRIC +'_session', e); value += ' | '+ zErr
+	}
+	try {
+		value += ' | ' + 'TBA'
+	} catch(e) {
+		log_error(6, METRIC +'_persistent', e); value += ' | '+ zErr
+	}
+	// don't use cookie in element names == adblockers might block display
+	addDisplay(6, 'cstest', value)
+	addData(6, METRIC, value)
+	return
+}
+
+function get_filesystem(METRIC) {
 	let display = isFileSystem, notation = ''
 	if (isFileSystem === zErr) {
 		display = log_error(6, METRIC, isFileSystemError)
@@ -83,38 +101,36 @@ const get_filesystem = (METRIC) => new Promise(resolve => {
 		if (isFileSystem == zD) {notation = default_red}
 	}
 	addBoth(6, METRIC, display,'', notation, isFileSystem)
-	return resolve()
-})
+	return
+}
 
-const get_storage = (METRIC) => new Promise(resolve => {
+function get_storage(METRIC, rndStr) {
 	// dom.storage.enabled
-	let value
-	let item = ('localStorage' == METRIC ? localStorage : sessionStorage)
+	let value, prefix = ('localStorage' == METRIC ? 'local' : 'session')
+	let obj = window[prefix +'Storage']
 	try {
-		value = 'object' == typeFn(item, true) ? zE : zD
+		value = 'object' == typeFn(obj, true) ? zE : zD
 	} catch(e) {
 		log_error(6, METRIC, e); value = zErr
 	}
 
-	let prefix = ('localStorage' == METRIC ? 'local_' : 'session_')
 	try {
-		let rndA = prefix + rnd_string(), rndB = rnd_string()
-		item.setItem(rndA, rndB)
-		value += ' | '+ (item.getItem(rndA) == rndB ? zS : zF)
+		obj.setItem(prefix +'_'+ rndStr, rndStr)
+		value += ' | '+ (obj.getItem(prefix +'_'+ rndStr) == rndStr ? zS : zF)
 	} catch(e) {
-		log_error(6, METRIC +'_test', e.name); value += ' | '+ zErr
+		log_error(6, METRIC +'_test', e); value += ' | '+ zErr
 	}
 	addBoth(6, METRIC, value)
-	return resolve()
-})
+	return
+}
 
-const get_storage_manager = (delay = 170) => new Promise(resolve => {
+function get_storage_manager(delay = 170) {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
 	dom[METRIC] = ''
 	function exit(value) {
 		dom[METRIC].innerHTML = value
-		return resolve()
+		return
 	}
 	setTimeout(function() {
 		try {
@@ -135,13 +151,13 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 			}).catch(function(e){exit(log_error(6, METRIC, e))})
 		} catch(e) {exit(log_error(6, METRIC, e))}
 	}, delay)
-})
+}
 
-const get_storage_quota = (METRIC) => new Promise(resolve => {
+function get_storage_quota(METRIC) {
 	let isLies = false
 	function exit(display, value) {
 		addBoth(6, METRIC, display,'','', value, isLies)
-		return resolve()
+		return
 	}
 	try {
 		navigator.storage.estimate().then(estimate => {
@@ -154,23 +170,26 @@ const get_storage_quota = (METRIC) => new Promise(resolve => {
 			display = value +'GB ['+ display +' bytes]'
 			if (isProxyLie('StorageManager.estimate')) {isLies = true}
 			exit(display, value)
-		}).catch(function(e){exit(log_error(6, METRIC, e), zErr)})
-	} catch(e) {exit(log_error(6, METRIC, e), zErr)}
-})
+		}).catch(function(e){
+			exit(log_error(6, METRIC, e), zErr)
+		})
+	} catch(e) {
+		exit(log_error(6, METRIC, e), zErr)
+	}
+}
 
-const get_permissions = (item) => new Promise(resolve => {
+function get_permissions(item) {
 	const METRIC = 'permission_'+ item
 	const aGood = ['denied','granted','prompt']
 	function exit(display, value) {
 		if (value == undefined) {value = display}
 		let notation = value == 'prompt' ? default_green : default_red
 		addBoth(6, METRIC, display,'', notation, value)
-
+		// silent run manager to force granted quota when run
 		if ('persistent-storage' == item && 'granted' == value) {
-			// silent run manager to force granted quota when run
-			Promise.all([get_storage_manager(0)]).then(function(){return resolve()})
+			Promise.all([get_storage_manager(0)]).then(function(){return})
 		} else {
-			return resolve()
+			return
 		}
 	}
 	try {
@@ -188,37 +207,34 @@ const get_permissions = (item) => new Promise(resolve => {
 	} catch(e) {
 		exit(e, zErrShort)
 	}
-})
+}
 
-const test_idb = (log = false) => new Promise(resolve => {
-	let t0 = nowFn()
+function test_idb(log = false) {
+	let t0 = nowFn(), rndStr = rnd_string()
 	const METRIC = 'indexedDB_test'
 	function exit(value) {
 		dom[METRIC] = value
 		if (log) {log_perf(SECTNF, METRIC, t0)}
-		return resolve()
+		return
 	}
 	try {
-		let rndStrI = 'idb_'+ rnd_string()
-		let openIDB = indexedDB.open(rndStrI)
+		let openIDB = indexedDB.open('idb_'+ rndStr)
 		// create
 		openIDB.onupgradeneeded = function(event){
 			let dbObject = event.target.result
-			let dbStore = dbObject.createObjectStore(METRIC, {keyPath:'id'})
+			let dbStore = dbObject.createObjectStore(rndStr, {keyPath:'id'})
 		}
 		openIDB.onsuccess = function(event) {
 			let dbObject = event.target.result
 			// start
-			let dbTx = dbObject.transaction(METRIC, 'readwrite')
-			let dbStore = dbTx.objectStore(METRIC)
+			let dbTx = dbObject.transaction(rndStr, 'readwrite')
+			let dbStore = dbTx.objectStore(rndStr)
 			// add
-			let rndIndex = rnd_number()
-			let rndValue = rnd_string()
-			dbStore.put( {id: rndIndex, value: rndValue} )
+			dbStore.put({id: rndStr, value: rndStr})
 			// query
-			let getStr = dbStore.get(rndIndex)
+			let getStr = dbStore.get(rndStr)
 			getStr.onsuccess = function() {
-				exit(getStr.result.value == rndValue ? zS : zF)
+				exit(getStr.result.value == rndStr ? zS : zF)
 			}
 			// close
 			dbTx.oncomplete = function() {dbObject.close()}
@@ -227,7 +243,7 @@ const test_idb = (log = false) => new Promise(resolve => {
 	} catch(e) {
 		exit(zErr)
 	}
-})
+}
 
 const test_worker_service = (log = false) => new Promise(resolve => {
 	let t0 = performance.now()
@@ -303,10 +319,12 @@ const outputStorage = () => new Promise(resolve => {
 	addBoth(6, 'indexedDB', 'indexedDB' in window ? zE : zD)
 	addBoth(6, 'worker', 'function' == typeFn(Worker) ? zE : zD)
 
+	let rndStr = rnd_string()
 	Promise.all([
-		get_cookies('cookies'),
-		get_storage('localStorage'),
-		get_storage('sessionStorage'),
+		get_cookies('cookies', rndStr),
+		get_storage('localStorage', rndStr),
+		get_storage('sessionStorage', rndStr),
+		get_cookiestore('cookieStore', rndStr),
 		get_caches('caches'),
 		get_permissions('notifications'),
 		get_permissions('persistent-storage'),
