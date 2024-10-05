@@ -678,7 +678,20 @@ const get_scr_orientation = () => new Promise(resolve => {
 	// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to TB
 		// all seven metrics shoudl always return one of 3 hashes
 		// landscape, portrait, portrait but square
-	let aGood = ['a1de035c','ccc8dc6d','fb6084ad']
+
+	let aGood = [
+		'a1de035c', // 0, primary, landscape
+		'ccc8dc6d', // 90, primary, portrait
+		'fb6084ad', // 90, primary, portrait-square
+	]
+	// on android the angle of 0 vs 90 is reversed
+	if ('android' == isOS) {
+		aGood = [
+			'813838a9', // 90, primary, landscape
+			'360dd99a', // 0, primary, portrait
+			'fdc0295a', // 0, primary, portrait-square
+		]
+	}
 	addDisplay(1, METRICs,'','', (aGood.includes(hash) ? orientation_green : orientation_red))
 
 	addData(1, METRICs, oData.screen, hash)
