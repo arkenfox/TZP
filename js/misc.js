@@ -331,7 +331,7 @@ function get_timing(METRIC) {
 			}
 			//console.log(k, isNoise)
 			let value = ''
-			if (isMatch && !isNoise) {
+			if (isMatch && !isNoise && isGecko) {
 				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc
 				value = 'RFP'
 			} else {
