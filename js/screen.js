@@ -289,7 +289,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		// screen_size_matches_inner
 		let oCompare = {
 			'screen_size_matches_inner': [sizes_red, sizes_green, oScreen.width, oScreen.height, oWindow.innerWidth, oWindow.innerHeight],
-			'iframe_sizes_match_inner': [isizes_red, isizes_green,
+			'iframe_sizes_match_inner': [rfp_red, rfp_green,
 				oIframe.availWidth, oIframe.availHeight, oIframe.width, oIframe.height, oIframe.outerWidth, oIframe.outerHeight
 			],
 		}
@@ -329,8 +329,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		// ToDo: screen_sizes (_match)
 		// ToDo: window_sizes (_match)
 
-		//addDisplay(1, 'iframe_sizes_match_inner','','', isizes_red)
-
 		// simple health lookups
 		if (gRun) {
 			let strInner = oTmp.window.innerWidth +' x '+ oTmp.window.innerHeight
@@ -339,9 +337,9 @@ const get_scr_measure = () => new Promise(resolve => {
 			let initInner = isInitial.innerWidth + " x " + isInitial.innerHeight
 			let initOuter = isInitial.outerWidth + " x " + isInitial.outerHeight
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			let iframeMatch = "available: "+ oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight
-				+ " | screen: "+ oTmp.iframe.width +" x "+ oTmp.iframe.height
-				+ " | outer: "+ oTmp.iframe.outerWidth +" x "+ oTmp.window.outerHeight
+			let iframeMatch = oTmp.iframe.width +" x "+ oTmp.iframe.height
+				+ " | "+ oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight
+				+ " | "+ oTmp.iframe.outerWidth +" x "+ oTmp.window.outerHeight
 			if (isIframesSame) {iframeMatch = oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight}
 
 			sDetail[isScope].lookup['iframe_sizes_match_inner'] = iframeMatch
@@ -559,14 +557,11 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 	})
 })
 
-const get_scr_orientation = () => new Promise(resolve => {
+const get_scr_orientation = (METRIC) => new Promise(resolve => {
 	// NOTE: a screen.orientation.addEventListener('change'.. event
 		// does not detect css changes, but a resize event does, which
 		// is the only one we use, so treat css as truthy
-
-	let METRICs = 'screen_orientation', METRICw = 'window_orientation'
 	let oData = {'screen': {}, 'window': {}}, oDisplay = {}, lieCount = 0
-
 	// matchmedia: sorted names
 	let oTests = {
 		'screen': {'-moz-device-orientation': '#cssOm', 'device-aspect-ratio': '#cssDAR'},
@@ -575,7 +570,6 @@ const get_scr_orientation = () => new Promise(resolve => {
 	let l = 'landscape', p = 'portrait', q = '(orientation: ', s = 'square', a = 'aspect-ratio'
 
 	for (const type of Object.keys(oTests)) {
-		let METRIC = type +'_orientation'
 		for (const item of Object.keys(oTests[type])) {
 			let value, isErr = false
 			let cssitem = item +'_css', cssID = oTests[type][item]
@@ -649,16 +643,16 @@ const get_scr_orientation = () => new Promise(resolve => {
 				// check mozOrientation + .type matches css
 				// note: we can't check the angle, it could be anything - see Piero tablet tests
 				if ('string' == expected && value.split('-')[0] !== check) {
-					log_known(1, METRICs +'_'+ item, value)
+					log_known(1, METRIC +'_'+ item, value)
 					isLies = true
 					lieCount++
 				}
 			}
 		} catch(e) {
-			log_error(1, METRICs +'_'+ item, e)
+			log_error(1, METRIC +'_'+ item, e)
 			value = zErr
 		}
-		oDisplay[METRICs +'_'+ item] = {'value': value, 'lies': isLies}
+		oDisplay[METRIC +'_'+ item] = {'value': value, 'lies': isLies}
 		oData['screen'][item] = isLies ? zLIE : value
 	})
 
@@ -674,29 +668,25 @@ const get_scr_orientation = () => new Promise(resolve => {
 	}
 
 	// objects are already sorted
-	let hash = mini(oData.screen)
+	let hash = mini(oData)
 	// FF132+: 1607032 + 1918202 | FF133+: 1922204 | backported to TB
-		// all seven metrics shoudl always return one of 3 hashes
+		// all seven metrics should always return one of 3 hashes
 		// landscape, portrait, portrait but square
-
+	// RFP is always primary | on android the angle of 0 vs 90 is reversed
 	let aGood = [
-		'a1de035c', // 0, primary, landscape
-		'ccc8dc6d', // 90, primary, portrait
-		'fb6084ad', // 90, primary, portrait-square
+		'7a1ec766', //  0 landscape
+		'5c281761', // 90 portrait
+		'a55cb95d', // 90 portrait/square
 	]
-	// on android the angle of 0 vs 90 is reversed
 	if ('android' == isOS) {
 		aGood = [
-			'813838a9', // 90, primary, landscape
-			'360dd99a', // 0, primary, portrait
-			'fdc0295a', // 0, primary, portrait-square
+			'bd9328e9', // 90 landscape
+			'df6d41d8', //  0 portrait
+			'e6c593d4', //  0 portrait/square
 		]
 	}
-	addDisplay(1, METRICs,'','', (aGood.includes(hash) ? orientation_green : orientation_red))
-
-	addData(1, METRICs, oData.screen, hash)
-	addData(1, METRICw, oData.window, mini(oData.window))
-
+	addDisplay(1, METRIC,'','', (aGood.includes(hash) ? rfp_green : rfp_red))
+	addData(1, METRIC, oData, hash)
 	return resolve()
 })
 
@@ -832,17 +822,17 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 	})
 })
 
-const get_scr_positions = () => new Promise(resolve => {
+const get_scr_positions = (METRIC) => new Promise(resolve => {
 	let methods = {
 		// left/top = 0 depends on secondary monitor | availLeft/availTop = 0 depends on docker/taskbar
-		'screen': {check: '6b858c97', list: ['availLeft','availTop','left','top']},
+		'screen': ['availLeft','availTop','left','top'],
 		// FS = all 0 except sometimes mozInnerScreenY | maximized can include negatives for screenX/Y
-		'window': {check: '66a7ee25', list: ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']}
+		'window': ['mozInnerScreenX','mozInnerScreenY','screenX','screenY']
 	}
+	let oData = {'screen': {}, 'window': {}}
 	for (const m of Object.keys(methods)){
-		let METRIC = m +'_position'
-		let check = methods[m]['check'], data = {}, display = [], x
-		methods[m].list.forEach(function(k){
+		let display = [], x
+		methods[m].forEach(function(k){
 			try {
 				x = 'screen' == m ? screen[k] : window[k]
 				if (runST) {x = undefined}
@@ -851,22 +841,14 @@ const get_scr_positions = () => new Promise(resolve => {
 			} catch(e) {
 				log_error(1, METRIC +"_"+ k, e); x = zErr
 			}
-			data[k] = x; display.push(x)
+			oData[m][k] = x; display.push(x)
 		})
-		let hash = mini(data)
-		let notation = hash == check ? rfp_green : rfp_red
-		addDisplay(1, METRIC, display.join(', '),'', notation)
-		addData(1, METRIC, data, hash)
-		if (gRun) {
-			let str = ''
-			if ('window' == m) {
-				str = 'inner: '+ data.mozInnerScreenX +' x ' + data.mozInnerScreenY +' | screen: '+ data.screenX +' x ' + data.screenY
-			} else {
-				str = 'available: ' + data.availLeft +' x ' + data.availTop +' | '+ data.left +' x ' + data.top
-			}
-			sDetail[isScope].lookup[METRIC] = str
-		}
+		addDisplay(1, m +'_'+ METRIC, display.join(', '))
 	}
+	let hash = mini(oData)
+	let notation = '56aadb9d' == hash ? rfp_green : rfp_red
+	addDisplay(1, METRIC,'','', notation)
+	addData(1, METRIC, oData, hash)
 	return resolve()
 })
 
@@ -1519,10 +1501,10 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 	let runtype = isResize ? 'resize': 'screen'
 	Promise.all([
 		get_scr_fullscreen('fullscreen'),
-		get_scr_positions(),
+		get_scr_positions('positions'),
 		get_scr_pixels('pixels'),
 		get_scr_scrollbar('scrollbars', runtype), // gets viewport
-		get_scr_orientation(),
+		get_scr_orientation('orientation'),
 		get_scr_measure(),
 	]).then(function(){
 		// add listeners once
