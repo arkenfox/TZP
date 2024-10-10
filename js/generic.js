@@ -502,7 +502,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 132) {isVerExtra = '+'}
+	if (isVer == 133) {isVerExtra = '+'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -512,6 +512,7 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
+		try {if (null === dom.wgtselect.namedItem('')) return 133} catch(e) {} // 1837773
 		try {
 			const re = new RegExp('(?:)', 'gv');
 			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
