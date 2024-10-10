@@ -289,7 +289,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		// screen_size_matches_inner
 		let oCompare = {
 			'screen_size_matches_inner': [sizes_red, sizes_green, oScreen.width, oScreen.height, oWindow.innerWidth, oWindow.innerHeight],
-			'iframe_sizes_match_inner': [rfp_red, rfp_green,
+			'iframe_sizes_match_inner': [isizes_red, isizes_green,
 				oIframe.availWidth, oIframe.availHeight, oIframe.width, oIframe.height, oIframe.outerWidth, oIframe.outerHeight
 			],
 		}
@@ -328,6 +328,8 @@ const get_scr_measure = () => new Promise(resolve => {
 		}
 		// ToDo: screen_sizes (_match)
 		// ToDo: window_sizes (_match)
+		//dom.screen_sizes.innerHTML = screen_green
+		//dom.window_sizes.innerHTML = window_green
 
 		// simple health lookups
 		if (gRun) {
@@ -685,7 +687,7 @@ const get_scr_orientation = (METRIC) => new Promise(resolve => {
 			'e6c593d4', //  0 portrait/square
 		]
 	}
-	addDisplay(1, METRIC,'','', (aGood.includes(hash) ? rfp_green : rfp_red))
+	addDisplay(1, METRIC,'','', (aGood.includes(hash) ? orientation_green : orientation_red))
 	addData(1, METRIC, oData, hash)
 	return resolve()
 })
@@ -846,7 +848,7 @@ const get_scr_positions = (METRIC) => new Promise(resolve => {
 		addDisplay(1, m +'_'+ METRIC, display.join(', '))
 	}
 	let hash = mini(oData)
-	let notation = '56aadb9d' == hash ? rfp_green : rfp_red
+	let notation = '56aadb9d' == hash ? position_green : position_red
 	addDisplay(1, METRIC,'','', notation)
 	addData(1, METRIC, oData, hash)
 	return resolve()
