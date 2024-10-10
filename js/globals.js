@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 153
+	expectedMetrics = 151
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -114,17 +114,15 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	intl_red = sbx+' intl]'+sc,
 	tz_green = sgtick+' timezone]'+sc,
 	tz_red = sbx+' timezone]'+sc,
-	orientation_green = sgtick+' screen orientation]'+sc,
-	orientation_red = sbx+' screen orientation]'+sc
+	orientation_green = sgtick+' orientation]'+sc,
+	orientation_red = sbx+' orientation]'+sc
 
 const screen_green = sgtick+'screens match]'+sc,
 	screen_red = sbx+'screens match]'+sc,
 	window_green = sgtick+'windows match]'+sc,
 	window_red = sbx+'windows match]'+sc,
 	sizes_green = sgtick+'screen = inner]'+sc,
-	sizes_red = sbx+'screen = inner]'+sc,
-	isizes_green = sgtick+'iframes = inner]'+sc,
-	isizes_red = sbx+'iframes = inner]'+sc
+	sizes_red = sbx+'screen = inner]'+sc
 
 // dynamic TB/MB notation
 let tb_green = sgtick+'TB]'+sc,
