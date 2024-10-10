@@ -182,7 +182,7 @@
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
 				&nbsp; window</td><td class="mono border-bottom"><span class="c" id="window_positions"></span>
-				<div class="btn-right c" id="positions"></div>
+				<span class="c" id="positions"></span>
 			</td></tr>
 
 		<!--orientation-->
@@ -200,7 +200,6 @@
 			device-aspect-ratio</span></div> &nbsp; [css] screen</td>
 			<td class="mono">
 				<span id="cssOm"></span> | <span id="cssDAR"></span>
-				<div class="btn-right c" id="orientation"></div>
 			</td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
@@ -219,27 +218,28 @@
 			<td class="mono border-bottom">
 				<span class="c" id="orientation_aspect-ratio"></span>
 				| <span class="c" id="orientation_orientation"></span>
+				<span class="c" id="orientation"></span>
 			</td></tr>
 
 		<!--iframe-->
 		<tr><td>available screen</td><td class="mono"><span class="c" id="iAvailable"></span>
 			<div class="btn-right s99">iframes</div></td></tr></td></tr>
-		<tr><td>screen</td><td class="mono"><span class="c" id="iScreen"></span>
-			<div class="btn-right c" id="iframe_sizes_match_inner"></div></td></tr>
+		<tr><td>screen</td><td class="mono"><span class="c" id="iScreen"></span></td></tr>
 		<tr><td>outer window</td><td class="mono border-bottom">
 			<span class="c" id="iOuter"></span>
+			<span class="c" id="iframe_sizes_match_inner"></span>
 		</td></tr>
 
 		<!--screen: measurements-->
 		<tr><td>available screen</td>
 			<td class="mono"><span class="c" id="mAvailable"></span>
+			<span class="c" id="screen_sizes"></span>
 			<div class="btn-right s99">screens</div>
 			</td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-device-] screen <sup>1</sup></td>
-			<td class="mono"><span id="S"><span>
-			<div class="btn-right c" id="screen_sizes"></div></td></tr>
+			<td class="mono"><span id="S"><span></td></tr>
 		<tr><td>[matchMedia] screen <sup>2</sup></td><td class="c mono" id="mmScreen"></td></tr>
 		<tr><td>screen</td>
 			<td class="mono border-bottom">
@@ -250,11 +250,12 @@
 		<!--window: measurements > viewport/scrollbars > orientation > positions-->
 		<tr><td>outer</td>
 			<td class="mono"><span class="c" id="mOuter"></span>
+			<span class="c" id="window_sizes"></span>
 			<div class="btn-right s99">windows</div></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-] inner <sup>1, 3</sup></td>
-			<td class="mono"><span id="D"></span><div class="btn-right c" id="window_sizes"></div></td></tr>
+			<td class="mono"><span id="D"></span></td></tr>
 		<tr><td>[matchMedia] inner <sup>2</sup></td><td class="c mono" id="mmInner"></td></tr>
 		<tr><td>inner</td>
 			<td class="mono border-bottom">
