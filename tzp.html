@@ -173,42 +173,61 @@
 			<div class="btn-right"></div>
 		</td></tr>
 
-		<!--screen: positions-->
+		<!--position-->
+		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div> &nbsp; screen</td>
+			<td class="mono"><span class="c" id="screen_position"></span><div class="btn-right s1">positions</div></td></tr>
 		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div>
-			&nbsp; screen positions</td><td class="mono border-bottom"><span class="c" id="screen_position"></span></td></tr>
+			<div class="ttip"><span class="icon">[ i ]</span>
+				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
+			&nbsp; window</td><td class="mono border-bottom"><span class="c" id="window_position"></span></td></tr>
 
-		<!--screen: orientation-->
+		<!--orientation-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
-			&nbsp; orientation</td><td class="mono">
-				<span class="c" id="screen_orientation_mozOrientation"></span>
-				| <span class="c" id="screen_orientation_orientation.angle"></span>
-				| <span class="c" id="screen_orientation_orientation.type"></span>
+			&nbsp; screen</td><td class="mono">
+				<span class="c" id="orientation_mozOrientation"></span>
+				| <span class="c" id="orientation_orientation.angle"></span>
+				| <span class="c" id="orientation_orientation.type"></span>
+				<div class="btn-right s1">orientation</div></td></tr>
 			</td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
-			device-aspect-ratio</span></div> &nbsp; [css] orientation</td>
+			device-aspect-ratio</span></div> &nbsp; [css] screen</td>
 			<td class="mono"><span id="cssOm"></span> | <span id="cssDAR"></span></td></tr>
 		<tr>
 			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxtb">-moz-device-orientation<br>
-			device-aspect-ratio</span></div> &nbsp; [matchMedia] orientation</td>
+			device-aspect-ratio</span></div> &nbsp; [matchMedia] screen</td>
+			<td class="mono">
+				<span class="c" id="orientation_-moz-device-orientation"></span>
+				| <span class="c" id="orientation_device-aspect-ratio"></span>
+			</td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span>
+				</div> &nbsp; [css] window</td>
+			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
+		<tr>
+			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span>
+				</div> &nbsp; [matchMedia] window</td>
 			<td class="mono border-bottom">
-				<span class="c" id="screen_orientation_-moz-device-orientation"></span>
-				| <span class="c" id="screen_orientation_device-aspect-ratio"></span>
-				<span class="c" id="screen_orientation"></span>
+				<span class="c" id="orientation_aspect-ratio"></span>
+				| <span class="c" id="orientation_orientation"></span>
+				<span class="c" id="orientation"></span>
 			</td></tr>
 
 		<!--iframe-->
-		<tr><td>[iframe] available screen</td><td class="c mono" id="iAvailable"></td></tr>
-		<tr><td>[iframe] screen</td><td class="c mono" id="iScreen"></td></tr>
-		<tr><td>[iframe] outer window</td><td class="mono border-bottom">
+		<tr><td>available screen</td><td class="mono"><span class="c" id="iAvailable"></span>
+			<div class="btn-right s1">iframe</div></td></tr></td></tr>
+		<tr><td>screen</td><td class="c mono" id="iScreen"></td></tr>
+		<tr><td>outer window</td><td class="mono border-bottom">
 			<span class="c" id="iOuter"></span><span class="c" id="iframe_sizes_match_inner"></span>
 		</td></tr>
 
 		<!--screen: measurements-->
 		<tr><td>available screen</td>
-			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes"></span></td></tr>
+			<td class="mono"><span class="c" id="mAvailable"></span><span class="c" id="screen_sizes"></span>
+			<div class="btn-right s1">screen</div>
+			</td></tr>
 		<tr><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-device-] screen <sup>1</sup></td>
@@ -221,13 +240,14 @@
 		</td></tr>
 
 		<!--window: measurements > viewport/scrollbars > orientation > positions-->
-		<tr><td>outer window</td>
-			<td class="mono"><span class="c" id="mOuter"></span><span class="c" id="window_sizes"></span></td></tr>
+		<tr><td>outer</td>
+			<td class="mono"><span class="c" id="mOuter"></span><span class="c" id="window_sizes"></span>
+			<div class="btn-right s1">window</div></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">range 400-2560</span></div>
-			&nbsp; [css min-] inner window <sup>1, 3</sup></td><td class="mono" id="D"></td></tr>
-		<tr><td>[matchMedia] inner window <sup>2</sup></td><td class="c mono" id="mmInner"></td></tr>
-		<tr><td>inner window</td>
+			&nbsp; [css min-] inner <sup>1, 3</sup></td><td class="mono" id="D"></td></tr>
+		<tr><td>[matchMedia] inner <sup>2</sup></td><td class="c mono" id="mmInner"></td></tr>
+		<tr><td>inner</td>
 			<td class="mono border-bottom">
 				<span class="c" id="mInner"></span>
 				<span class="c" id="window_letterbox"></span>
@@ -241,18 +261,6 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)<br>viewport<br>visualViewport</span></div>
 			&nbsp; scrollbars</td><td class="c mono border-bottom" id="scrollbars"></td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span>
-				<span class="ttxt">mozInnerScreenX<br>mozInnerScreenY<br>screenX<br>screenY</span></div>
-			&nbsp; window position</td><td class="c mono" id="window_position"></td></tr>
-		<tr>
-			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp; [css] orientation</td>
-			<td class="mono"><span id="cssAR"></span> | <span id="cssO"></span></td></tr>
-		<tr>
-			<td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">aspect-ratio<br>orientation</span></div> &nbsp; [matchMedia] orientation</td>
-			<td class="mono border-bottom">
-				<span class="c" id="window_orientation_aspect-ratio"></span> | <span class="c" id="window_orientation_orientation"></span>
-			</td></tr>
 
 		<!-- the rest -->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -268,10 +276,11 @@
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW')">[ click ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
-			&nbsp; new window</td><td class="c mono" id="newWinLeak"></td></tr>
+			&nbsp; new window</td><td class="mono border-bottom"><span class="c" id="newWinLeak"></span></td></tr>
 
 		<!-- pixels-->
-		<tr><td>[div] dpi</td><td class="c mono" id="dpi_div"></td></tr>
+		<tr><td>[div] dpi</td><td class="mono"><span class="c" id="dpi_div"></span>
+			<div class="btn-right s1">pixels</div></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 40-400</span></div>
 			&nbsp; [css min-resolution] dpi</td><td class="mono"><span id="P"></span><span class="cssc" id="pixels_dpi_css"></span></td></tr>
 		<tr><td>[matchMedia] dpi</td><td class="mono">
