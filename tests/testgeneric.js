@@ -554,7 +554,11 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 132
+		isVerMax = 133
+		try {
+			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+			if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
+		} catch(e) {}
 		try {
 			const re = new RegExp('(?:)', 'gv');
 			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
