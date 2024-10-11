@@ -512,7 +512,11 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
-		try {if (null === dom.wgtselect.namedItem('')) return 133} catch(e) {} // 1837773
+		try {
+			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+			if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
+		} catch(e) {}
+
 		try {
 			const re = new RegExp('(?:)', 'gv');
 			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
