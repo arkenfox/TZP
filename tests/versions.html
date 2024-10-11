@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 83, maxVer = 132, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 84, maxVer = 133, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -265,19 +265,13 @@ function outputVersion() {
 			}
 		}
 
-		/* FYI: CSS diffs ignore
-			alignTracks + justifyTracks + masonryAutoFlow : layout.css.grid-template-masonry-value.enabled
-			contentVisibility: layout.css.content-visibility.enabled 
-			fontVariantEmoji : layout.css.font-variant-emoji.enabled
-			offsetPosition : layout.css.motion-path-offset-position.enabled
-		*/
-
-		/*
-		// 121: 1859752 backed out
-		let t121 = performance.now()
-		let ver121 = ("lij" === Intl.Collator.supportedLocalesOf("lij").join())
-		rec(121, 121, "1859752", ver121, performance.now()-t121) // 0.1
-		*/
+		// 133: 1837773
+		let t133 = performance.now(), ver133
+		try {
+			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+			ver133 = null === parser.body.firstChild.namedItem('')
+		} catch(e) {}
+		rec(133, 133, "1837773", ver133, performance.now()-t133) // 0.2ms
 
 		// 132: 1899413
 		let t132 = performance.now(), ver132 = false
