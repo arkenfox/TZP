@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 151
+	expectedMetrics = 152
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -108,6 +108,8 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	match_green = sgtick+'match]'+sc,
 	match_red = sbx+'match]'+sc,
 	fpp_green = sgtick+'FPP]'+sc,
+	lang_green = sgtick+' languages]'+sc,
+	lang_red = sbx+' languages]'+sc,
 	locale_green = sgtick+' locale]'+sc,
 	locale_red = sbx+' locale]'+sc,
 	intl_green = sgtick+' intl]'+sc,
@@ -158,6 +160,7 @@ let isArch = true,
 let languagesSupported = {},
 	localesSupported = {},
 	isLanguageSmart = false,
+	isLanguagesNav = [], // lowercase sorted to compare to systemLanguages
 	isLocaleValid,
 	isLocaleValue,
 	isLocaleAlt, // allow variants in checks e.g. en-CA checks en-US values
