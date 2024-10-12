@@ -13,7 +13,7 @@ let sectionOrder = [], // numerical order for objects
 	sectionNames = [], // lookup names by number
 	sectionNos = {} // lookup numbers by name
 
-// ToDo: expand: some info can go into lies but we could create new items such as methods/tampered-data
+// ToDo: expand: some info can go into lies but we could create new items e.g methods/tampered-data
 	// some 'methods/entropy' are in the FP: e.g. canvas/domrect or errors e.g. font sizes
 const btnList = ['alerts', 'errors', 'lies']
 
