@@ -2,7 +2,7 @@
 
 // https://searchfox.org/mozilla-central/source/intl/icu/source/data/lang/en.txt#44
 	// ^ note underscores in codes, replace with hyphens
-// 661: this is perf costly: 18ms on TZP but 4ms on a standalone test
+// 661: perf costly: 18ms on TZP but 4ms on a standalone test
 	// 16ms of the time is spent populating the element
 	// so we should populate it once on page load and only clear and reset it if navigator has new codes
 let aSystemBaseLang = [
