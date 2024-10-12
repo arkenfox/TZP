@@ -2,9 +2,6 @@
 
 // https://searchfox.org/mozilla-central/source/intl/icu/source/data/lang/en.txt#44
 	// ^ note underscores in codes, replace with hyphens
-// 661: perf costly: 18ms on TZP but 4ms on a standalone test
-	// 16ms of the time is spent populating the element
-	// so we should populate it once on page load and only clear and reset it if navigator has new codes
 let aSystemBaseLang = [
 	'aa','ab','ace','ach','ada','ady','ae','aeb','af','afh','agq','ain','ak','akk','akz','ale','aln','alt','am',
 	'an','ang','ann','anp','ar','ar-001','arc','arn','aro','arp','arq','ars','arw','ary','arz','as','asa','ase',
@@ -1408,13 +1405,13 @@ const outputRegion = () => new Promise(resolve => {
 			get_locale_resolvedoptions('locale_resolvedoptions'),
 			get_locale_intl(),
 			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
-			get_validation_messages('validation_messages'),
-			get_xml_messages('xml_messages'),
+			get_validation_messages('messages_validation'),
+			get_xml_messages('messages_xml'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates(), // will use isTimeZoneValid/Value + isLocaleValid/Value
-				get_media_messages('media_messages'),
+				get_media_messages('messages_media'),
 			]).then(function(){
 				return resolve()
 			})
