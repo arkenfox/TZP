@@ -93,13 +93,13 @@ function runtouch(event, type) {
 		let oDisplay = []
 		aList.forEach(function(k){
 			let value = event[k]
-			if ('number' !== typeof value) {
-				value = 'err'
-			} else if (Number.isNaN(value)) {
-				value = 'NaN'
-			}
+			//if ('number' !== typeof value) {
+			//	value = 'err'
+			//} else if (Number.isNaN(value)) {
+			//	value = 'NaN'
+			//}
 			oData[type][k] = value
-			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
+			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value + ' ['+ typeof value +']')
 		})
 		dom.touch.innerHTML = oDisplay.join("<br>")
 	} catch(e) {
