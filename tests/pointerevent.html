@@ -85,6 +85,7 @@ function runtouch(event, type) {
 	addEvent(type)
 
 	try {
+		let touch = event.changedTouches.item[0]
 		// these are all numbers
 		let aList = [
 			'force', // float 0.0 (no pressure) - 1.0 (max pressure)
@@ -92,7 +93,7 @@ function runtouch(event, type) {
 		]
 		let oDisplay = []
 		aList.forEach(function(k){
-			let value = event[k]
+			let value = touch[k]
 			//if ('number' !== typeof value) {
 			//	value = 'err'
 			//} else if (Number.isNaN(value)) {
