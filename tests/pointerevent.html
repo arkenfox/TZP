@@ -92,7 +92,7 @@ function runtouch(event, type) {
 		]
 		let oDisplay = []
 		aList.forEach(function(k){
-			value = event[k]
+			let value = event[k]
 			if ('number' !== typeof value) {
 				value = 'err'
 			} else if (Number.isNaN(value)) {
