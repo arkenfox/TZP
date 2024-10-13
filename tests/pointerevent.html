@@ -61,6 +61,7 @@
 				</div>
 			</td>
 			<td class="mono spaces" style="text-align: left; vertical-align: top;"><div class="s6"><u>RESULTS</u></div><br><div class="no_color" id="results"></div>
+<div class="s6"><u>TOUCH</u><span class="no_color" id="maxtouch"></span></div><br><div class="no_color" id="touch"></div>
 <div class="s6"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
 <div class="s6"><u>'touch' PROPERTIES</u></div><br><div class="no_color" id="props"></div>
 <div class="s6"><u>'touch' KEYS</u></div><br><div class="no_color" id="elementkeys"></div>
@@ -78,10 +79,39 @@ let oData = {}
 let isStart = true
 let setEvents = new Set()
 
-function run(event, type) {
+function runtouch(event, type) {
+	// return if we already captured it
 	if (0 !== Object.keys(oData[type]).length) {return}
-
 	addEvent(type)
+
+	try {
+		// these are all numbers
+		let aList = [
+			'force', // float 0.0 (no pressure) - 1.0 (max pressure)
+			'radiusX','radiusY'
+		]
+		let oDisplay = []
+		aList.forEach(function(k){
+			value = event[k]
+			if ('number' !== typeof value) {
+				value = 'err'
+			} else if (Number.isNaN(value)) {
+				value = 'NaN'
+			}
+			oData[type][k] = value
+			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
+		})
+		dom.touch.innerHTML = oDisplay.join("<br>")
+	} catch(e) {
+		dom.touch.innerHTML = e +''
+	}
+}
+
+function run(event, type) {
+	// return if we already captured it
+	if (0 !== Object.keys(oData[type]).length) {return}
+	addEvent(type)
+
 	let oList = {
 		isPrimary: "boolean", // RFP true
 		pressure: "number", // RFP: 0 if not active, 0.5 if active
@@ -160,6 +190,7 @@ function addEvent(type) {
 function reset() {
 	oData['pointerdown'] = {}
 	oData['pointerover'] = {}
+	oData['touchstart'] = {}
 
 	// force mouse out of target area
 	if (isStart) {
@@ -168,6 +199,7 @@ function reset() {
 		isStart = false
 	} else {
 		dom.results = ''
+		dom.touch = ''
 		dom.events = ''
 		setEvents.clear()
 	}
@@ -177,11 +209,12 @@ function start() {
 	let target = dom.target
 	target.addEventListener("pointerdown", (event) => {run(event, 'pointerdown')})
 	target.addEventListener("pointerover", (event) => {run(event, 'pointerover')})
+	target.addEventListener("touchstart", (event) => {runtouch(event, 'touchstart')})
 
 	let oEvents = {
 		'mouse': ['down','enter','leave','move','out','over','up'],
 		'pointer': ['cancel','enter','leave','move','out','up'],
-		'touch': ['cancel','end','move','start'],
+		'touch': ['cancel','end','move'],
 	}
 	for (const k of Object.keys(oEvents)) {
 		let list = oEvents[k]
@@ -236,6 +269,10 @@ let targetreset = dom.reset
 targetreset.addEventListener("pointerover", (event) => {reset()})
 get_window_props()
 get_element_keys()
+try {
+	dom.maxtouch.innerHTML = " [maxTouchPoints: " + navigator.maxTouchPoints +"]"
+	
+} catch(e){}
 
 </script>
 </body>
