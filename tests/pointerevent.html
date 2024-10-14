@@ -90,20 +90,20 @@ function runtouch(event, type) {
 		let aList = [
 			'force', // float 0.0 (no pressure) - 1.0 (max pressure)
 			'radiusX','radiusY',
-			'rotatationAngle',
+			'rotationAngle',
 			'screenX','clientX', // RFP these should match
 			'screenY','clientY', // ^ ditto
 		]
 		let oDisplay = []
 		aList.forEach(function(k){
 			let value = touch[k]
-			//if ('number' !== typeof value) {
-			//	value = 'err'
-			//} else if (Number.isNaN(value)) {
-			//	value = 'NaN'
-			//}
+			if ('number' !== typeof value) {
+				value = 'err'
+			} else if (Number.isNaN(value)) {
+				value = 'NaN'
+			}
 			oData[type][k] = value
-			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value + ' ['+ typeof value +']')
+			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
 		})
 		dom.touch.innerHTML = oDisplay.join("<br>")
 	} catch(e) {
