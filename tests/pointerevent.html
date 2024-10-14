@@ -27,7 +27,7 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			height: 220px;
+			height: 240px;
 			width: 100px;
 			color: var(--test0);
 			border: 2px solid var(--test7);
@@ -57,14 +57,18 @@
 			<td>
 				<div class="reset" id="reset"><div class="flex=item" id="resettext">START</div></div>
 				<div class="pointer" id="target">
-					<div class="flex-item">T<br><br>A<br><br>R<br><br>G<br><br>E<br><br>T</div>
+					<div class="flex-item"><br>CLICK<br><br>or<br><br>TOUCH<br><br>this<br><br>TARGET</div>
 				</div>
 			</td>
-			<td class="mono spaces" style="text-align: left; vertical-align: top;"><div class="s6"><u>RESULTS</u></div><br><div class="no_color" id="results"></div>
-<div class="s6"><u>TOUCH</u><span class="no_color" id="maxtouch"></span></div><br><div class="no_color" id="touch"></div>
-<div class="s6"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
-<div class="s6"><u>'touch' PROPERTIES</u></div><br><div class="no_color" id="props"></div>
-<div class="s6"><u>'touch' KEYS</u></div><br><div class="no_color" id="elementkeys"></div>
+			<td class="mono" style="text-align: left; vertical-align: top;">
+				<div class="s6">OVERALL HASH <span class="no_color" id="hash"></span></div><br></div>
+				<div class="s4"><u>POINTER</u> <span class="no_color" id="pointerhash"></span></div><br><div class="no_color spaces" id="results"></div>
+				<div class="s4"><u>TOUCH</u><span class="no_color" id="touchhash"></span></div><br><div class="no_color" id="touch"></div>
+<hr><br>
+				<div class="s6 spaces">  maxTouchPoints <span class="no_color" id="maxTouchPoints"></span></div></div><br>
+				<div class="s6 spaces">touch properties <span class="no_color" id="touch_properties"></span></div><br>
+				<div class="s6 spaces">      touch keys <span class="no_color" id="touch_keys"></span></div><br><hr><br>
+				<div class="s4"><u>EVENTS</u></div><br><div class="no_color" id="events"></div>
 			</td>
 		</tr>
 	</table>
@@ -75,15 +79,37 @@
 // https://bugzilla.mozilla.org/show_bug.cgi?id=1363508
 
 let padlen = 18
-let oData = {}
+let oData = {} // pointer
+let oTouch = {} // touch! doh!!
+let oHash = {
+	'pointer': '',
+	'maxTouchPoints': '',
+	'touch': '',
+	'touch_properties': '',
+	'touch_keys': '',
+}
 let isStart = true
 let setEvents = new Set()
 
+function finish() {
+	if (0 == Object.keys(oData['pointerdown']).length) {return}
+	if (0 == Object.keys(oData['pointerover']).length) {return}
+	if (oHash['touch_keys'] !== 'none' && 0 == Object.keys(oData['touchstart']).length) {return}
+	// yay
+	let hash = mini(oHash)
+	dom.hash = hash
+	console.log('hash\n', oHash)
+	console.log('pointer\n', oData)
+	console.log('touch\n', oTouch)
+}
+
+
 function runtouch(event, type) {
 	// return if we already captured it
-	if (0 !== Object.keys(oData[type]).length) {return}
+	if (0 !== Object.keys(oTouch).length) {return}
 	addEvent(type)
 
+	let oTemp = [], oDisplay = []
 	try {
 		let touch = event.touches[0]
 		// these are all numbers
@@ -94,20 +120,44 @@ function runtouch(event, type) {
 			'screenX','clientX', // RFP these should match
 			'screenY','clientY', // ^ ditto
 		]
-		let oDisplay = []
 		aList.forEach(function(k){
-			let value = touch[k]
-			if ('number' !== typeof value) {
-				value = 'err'
-			} else if (Number.isNaN(value)) {
-				value = 'NaN'
+			let value
+			try {
+				value = touch[k]
+				if ('number' !== typeof value) {
+					value = 'err'
+				} else if (Number.isNaN(value)) {
+					value = 'NaN'
+				}
+			} catch(e) {
+				value = e.name
 			}
-			oData[type][k] = value
+			oTemp[k] = value
+		})
+		// merge
+		let matchX = false, matchY = false
+		let A = oTemp['clientX'], B = oTemp['screenX']
+		if ('number' == A && 'number' == B) {matchX = A == B}
+		oData[type]['client_screenX'] = matchX
+		oDisplay.push(s6 + ('client|screen X').padStart(padlen) +": "+ sc + A +' | '+ B +' '+ (matchX ? '[valid match]' : '[!match]'))
+
+		let C = oTemp['clientY'], D = oTemp['screenY']
+		if ('number' == C && 'number' == D) {matchY = C == D}
+		oTouch['client_screenY'] = matchY
+		oDisplay.push(s6 + ('client|screen Y').padStart(padlen) +": "+ sc + C +' | '+ D +' '+ (matchY ? '[valid match]' : '[!match]'))
+
+		let aRemainder = ['force','radiusX','radiusY','rotationAngle']
+		aRemainder.forEach(function(k){
+			let value = oTemp[k]
+			oTouch[k] = value
 			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
 		})
-		dom.touch.innerHTML = oDisplay.join("<br>")
+		dom.touch.innerHTML = oDisplay.join("<br>") + '<br><br>'
+		let hash = mini(oTouch)
+		dom.touchhash = hash
+		finish()
 	} catch(e) {
-		dom.touch.innerHTML = e +''
+		dom.touch.innerHTML = e+''
 	}
 }
 
@@ -165,7 +215,7 @@ function run(event, type) {
 		if (lines.includes(k)) {
 			oDisplay.push(divider)
 		}
-		let strActive = k.includes('ressure') ? s6 +' [active]' + sc : ''
+		let strActive = k.includes('ressure') ? ' [active]' : ''
 		let valueDown = oData['pointerdown'][k],
 			valueOver = oData['pointerover'][k]
 		let str
@@ -178,11 +228,14 @@ function run(event, type) {
 		oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 	}
 	// display
-	let hash = mini(oData)
-	let strHash = s6 + ("hash").padStart(padlen) +": "+ sc + hash
-		+ '<br>' + s6 + ("events").padStart(padlen) +": "+ sc + eventstr
-	dom.results.innerHTML = strHash + "<br><br>" + oDisplay.join("<br>")
-
+	// only display when we have both events
+	if (setEvents.has('pointerover') && setEvents.has('pointerdown')) {
+		let hash = mini(oData)
+		oHash['pointer'] = hash
+		dom.pointerhash.innerHTML = hash
+		dom.results.innerHTML = oDisplay.join("<br>") + '<br><br>'
+		finish()
+	}
 }
 
 function addEvent(type) {
@@ -194,7 +247,10 @@ function addEvent(type) {
 function reset() {
 	oData['pointerdown'] = {}
 	oData['pointerover'] = {}
-	oData['touchstart'] = {}
+	oTouch = {}
+
+	oHash.pointer = ''
+	oHash.touch = ''
 
 	// force mouse out of target area
 	if (isStart) {
@@ -205,6 +261,9 @@ function reset() {
 		dom.results = ''
 		dom.touch = ''
 		dom.events = ''
+		dom.hash = ''
+		dom.touchhash = ''
+		dom.pointerhash = ''
 		setEvents.clear()
 	}
 }
@@ -228,7 +287,19 @@ function start() {
 	}
 }
 
-function get_element_keys() {
+function run_once() {
+	let hash
+	// maxtouchpoints
+	try {
+		hash = navigator.maxTouchPoints
+	} catch(e){
+		hash = zErr
+	}
+	oHash['maxTouchPoints'] = hash
+	dom['maxTouchPoints'].innerHTML = hash
+	// keys
+	hash = ''
+	let list = ''
 	try {
 		let parser = new DOMParser
 		let doc = parser.parseFromString('<div>', "text/html")
@@ -238,14 +309,17 @@ function get_element_keys() {
 		for (const key in htmlElement) {
 			if (key.includes('Touch') || key.includes('touch')) {data.push(key)}
 		}
-		dom.elementkeys.innerHTML = (data.length > 0 ? data.join("<br>") : "none")
+		hash = (data.length > 0 ? mini(data) : "none")
+		list = (data.length > 0 ? '<br><br>'+ data.join("<br>") : '')
 	} catch(e) {
-		dom.elementkeys.innerHTML = e+''
+		list = e+''
+		hash = zErr
 	}
-}
-
-function get_window_props() {
+	oHash['touch_keys'] = hash
+	dom['touch_keys'].innerHTML = hash + list
+	// properties
 	let id = 'iframe-window-version'
+	hash = '', list = ''
 	try {
 		// create & append
 		let el = document.createElement('iframe')
@@ -261,22 +335,25 @@ function get_window_props() {
 			if (item.includes('Touch') || item.includes('touch')) {props.push(item)}
 		})
 		props = props.sort()
-		dom.props.innerHTML = (props.length > 0 ? props.join("<br>") : "none")
+		hash = (props.length > 0 ? mini(props) : "none")
+		list = (props.length > 0 ? '<br><br>'+ props.join("<br>") : '')
 	} catch(e) {
-		dom.props.innerHTML = e+''
+		list = e+''
+		hash = zErr
 	}
 	removeElementFn(id)
+	oHash['touch_properties'] = hash
+	dom['touch_properties'].innerHTML = hash + list
+}
+
+function get_window_props() {
 
 }
 
 let targetreset = dom.reset
 targetreset.addEventListener("pointerover", (event) => {reset()})
-get_window_props()
-get_element_keys()
-try {
-	dom.maxtouch.innerHTML = " [maxTouchPoints: " + navigator.maxTouchPoints +"]"
-	
-} catch(e){}
+run_once()
+
 
 </script>
 </body>
