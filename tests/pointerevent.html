@@ -138,7 +138,7 @@ function runtouch(event, type) {
 		let matchX = false, matchY = false
 		let A = oTemp['clientX'], B = oTemp['screenX']
 		if ('number' == A && 'number' == B) {matchX = A == B}
-		oData[type]['client_screenX'] = matchX
+		oTouch['client_screenX'] = matchX
 		oDisplay.push(s6 + ('client|screen X').padStart(padlen) +": "+ sc + A +' | '+ B +' '+ (matchX ? '[valid match]' : '[!match]'))
 
 		let C = oTemp['clientY'], D = oTemp['screenY']
