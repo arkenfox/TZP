@@ -90,6 +90,9 @@ function runtouch(event, type) {
 		let aList = [
 			'force', // float 0.0 (no pressure) - 1.0 (max pressure)
 			'radiusX','radiusY'
+			'rotatationAngle',
+			'screenX','clientX', // RFP these should match
+			'screenY','clientY', // ^ ditto
 		]
 		let oDisplay = []
 		aList.forEach(function(k){
