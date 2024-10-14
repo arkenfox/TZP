@@ -142,8 +142,8 @@ const get_audio_offline = () => new Promise(resolve => {
 					// lies
 					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
 					// notation: two results: ARM and non-ARM
-					if (hashC == 'a7c1fbb6') {notation = sgtick+'x86/AMD 64bit]'+sc // 1877221 FF123+
-					} else if (hashC == '24fc63ce') {notation = sgtick+'x86/AMD 32bit]'+sc
+					if (hashC == 'a7c1fbb6') {notation = sgtick+'x86_64/amd_64]'+sc // 1877221 FF123+
+					} else if (hashC == '24fc63ce') {notation = sgtick+'x86/i686/ARMv7]'+sc
 					} else if (hashC == 'a34c73cd') {notation = sgtick+'ARM]'+sc
 					}
 					addBoth(11, METRIC, display,'', notation, value, isLies)
