@@ -183,9 +183,8 @@ function get_media(type) {
 		v+'x-m4v',
 		v+'x-matroska',
 	]
-	// theora this still shows up in TB14
-	//if (isVer < 126) {
-		// 1860492: theora support removed
+	if (isVer < 130) {
+		// theora support: FF126 1860492 prep + FF130 1890370 remove
 		videolist.push(
 			v+'ogg',
 			v+'ogg; codecs="flac"',
@@ -196,7 +195,7 @@ function get_media(type) {
 			v+'ogg; codecs="theora, vorbis"',
 		)
 		videolist.sort()
-	//}
+	}
 	if (gRun && type == "audio") {
 		addDetail("audio_mimes", audiolist, "lists")
 		addDetail("video_mimes", videolist, "lists")
