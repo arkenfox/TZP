@@ -199,35 +199,40 @@ function run(event, type) {
 	// sort
 	for (const k of Object.keys(oTemp).sort()) {oData[type][k] = oTemp[k]}
 
-	// build display
-	let lines = ["pressure", "pointerType", "tangentialPressure", "altitudeAngle"]
-	let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
-	let eventstr = '',
-		isDown = Object.keys(oData['pointerdown']).length > 0,
-		isOver = Object.keys(oData['pointerover']).length > 0
-	if (isOver && !isDown) {eventstr = 'pointerover'
-	} else if (!isOver && isDown) {eventstr = 'pointerdown'
-	} else {eventstr = 'pointerover | down'}
-
-	for (const k of Object.keys(oList)) {
-		if (lines.includes(k)) {
-			oDisplay.push(divider)
-		}
-		let strActive = k.includes('ressure') ? ' [active]' : ''
-		let valueDown = oData['pointerdown'][k],
-			valueOver = oData['pointerover'][k]
-		let str
-		if (valueDown == undefined) {str = valueOver
-		} else if (valueOver == undefined) {str = valueDown + strActive
-		} else {
-			if (valueDown == valueOver) {str = valueDown
-			} else {str = valueOver + " | " + valueDown + strActive}
-		}
-		oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
-	}
 	// display
 	// only display when we have both events
 	if (setEvents.has('pointerover') && setEvents.has('pointerdown')) {
+		let lines = ["pressure", "pointerType", "tangentialPressure", "altitudeAngle"]
+		let divider = "<span class='faint'>" + "----------".padStart(padlen) +"--------"+ sc
+		let eventstr = '',
+			isDown = Object.keys(oData['pointerdown']).length > 0,
+			isOver = Object.keys(oData['pointerover']).length > 0
+		if (isOver && !isDown) {eventstr = 'pointerover'
+		} else if (!isOver && isDown) {eventstr = 'pointerdown'
+		} else {eventstr = 'pointerover | down'}
+
+		for (const k of Object.keys(oList)) {
+			if (lines.includes(k)) {oDisplay.push(divider)}
+			let valueDown = oData['pointerdown'][k],
+				valueOver = oData['pointerover'][k], str
+			if (valueDown == valueOver) {
+				str = valueDown
+			} else {
+				let strActive = ('pressure' == k || 'mozPressure' == k) ? ' [active]' : ''
+				// this should only ever differ with pressure/mozPressure
+				// but we compare everything in over vs down
+				str = valueOver + " | " + valueDown + strActive
+				if ('pressure' == k || 'mozPressure' == k) {
+					// active pen pressure is not stable
+					let aStable = [0, 0.5, 1]
+					if (!aStable.includes(valueDown)) {
+						oData['pointerdown'][k] = 'variable'
+					}
+				}
+			}
+			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
+		}
+
 		let hash = mini(oData)
 		oHash['pointer'] = hash
 		dom.pointerhash.innerHTML = hash
