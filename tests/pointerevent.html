@@ -146,8 +146,12 @@ function runtouch(event, type) {
 		let aRemainder = ['force','radiusX','radiusY','rotationAngle']
 		aRemainder.forEach(function(k){
 			let value = oTemp[k]
-			oTouch[k] = value
 			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + value)
+			// force is variable, so alter our hash to make it stable
+			if ('force' == k) {
+				if (0 !== value && 1 !== value) {value = 'variable'}
+			}
+			oTouch[k] = value
 		})
 		dom.touch.innerHTML = oDisplay.join("<br>") + '<br><br>'
 		let hash = mini(oTouch)
