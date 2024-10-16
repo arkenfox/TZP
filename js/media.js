@@ -183,7 +183,8 @@ function get_media(type) {
 		v+'x-m4v',
 		v+'x-matroska',
 	]
-	if (isVer < 126) {
+	// theora this still shows up in TB14
+	//if (isVer < 126) {
 		// 1860492: theora support removed
 		videolist.push(
 			v+'ogg',
@@ -195,7 +196,7 @@ function get_media(type) {
 			v+'ogg; codecs="theora, vorbis"',
 		)
 		videolist.sort()
-	}
+	//}
 	if (gRun && type == "audio") {
 		addDetail("audio_mimes", audiolist, "lists")
 		addDetail("video_mimes", videolist, "lists")
