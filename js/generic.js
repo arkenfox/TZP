@@ -422,12 +422,10 @@ const get_isRecursion = () => new Promise(resolve => {
 })
 
 const get_isSystemFont = () => new Promise(resolve => {
-	if (!isGecko) {
-		return resolve()
-	}
+	if (!isGecko) {return resolve()}
 	let t0 = nowFn()
 	function exit(value) {
-		log_perf(SECTG, "isSystemFont", t0, "", value)
+		log_perf(SECTG, 'isSystemFont', t0,'', value)
 		return resolve()
 	}
 	// first aFont per computed family
@@ -440,18 +438,17 @@ const get_isSystemFont = () => new Promise(resolve => {
 	try {
 		let el = dom.sysFont, data = []
 		aFonts.forEach(function(font){
-			el.style.font = "" // always clear in case a font is invalid/deprecated
+			el.style.font = '' // always clear in case a font is invalid/deprecated
 			el.style.font = font
-			let family = getComputedStyle(el)["font-family"]
+			let family = getComputedStyle(el)['font-family']
 			if (!data.includes(family)) {
 				data.push(family)
 				isSystemFont.push(font)
 			}
 		})
-		exit(isSystemFont.join(", "))
+		exit(isSystemFont.join(', '))
 	} catch(e) {
-		// log nothing: we run in fonts later
-		exit(e.name)
+		exit(e.name) // log nothing: we run in fonts later
 	}
 })
 
@@ -471,8 +468,8 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 	function exit(value) {
 		isDone = true
 		try {document.head.removeChild(css)} catch(e) {}
-		if ("boolean" === typeFn(value)) {isTB = value}
-		log_perf(SECTG, METRIC, t0, "", value)
+		if ('boolean' == typeFn(value)) {isTB = value}
+		log_perf(SECTG, METRIC, t0,'', value)
 		return resolve(value)
 	}
 	// FF121+: 1855861
@@ -480,19 +477,17 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		css.onload = function() {exit(true)}
 		css.onerror = function() {exit(false)}
 	})
-	let css = document.createElement("link")
+	let css = document.createElement('link')
 	if (!runSG) {
 		try {
 			// note: we do not know the OS yet
 			// TB13: does not work on android
 			let path = 'chrome://browser/content/abouttor/aboutTor.css'
-			// TB14 (added TB13.5)
-			if (isVer > 127) {
-				path = 'chrome://global/content/torconnect/aboutTorConnect.css'
-			}
+			// TB14 (added TB13.5) .. aaaaaaand still no good on android
+			//if (isVer > 127) {path = 'chrome://global/content/torconnect/aboutTorConnect.css'}
 			css.href = path
-			css.type = "text/css"
-			css.rel = "stylesheet"
+			css.type = 'text/css'
+			css.rel = 'stylesheet'
 			document.head.appendChild(css)
 			get_event()
 		} catch(e) {
