@@ -483,8 +483,14 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 	let css = document.createElement("link")
 	if (!runSG) {
 		try {
-			// ToDo: TB13+: does not work on android
-			css.href = "chrome://browser/content/abouttor/aboutTor.css" // TB13+
+			// note: we do not know the OS yet
+			// TB13: does not work on android
+			let path = 'chrome://browser/content/abouttor/aboutTor.css'
+			// TB14 (added TB13.5)
+			if (isVer > 127) {
+				path = 'chrome://global/content/torconnect/aboutTorConnect.css'
+			}
+			css.href = path
 			css.type = "text/css"
 			css.rel = "stylesheet"
 			document.head.appendChild(css)
