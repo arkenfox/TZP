@@ -181,10 +181,17 @@ function runtouch(event, type) {
 				} else if (Number.isNaN(value)) {
 					value = 'NaN'
 				}
+				oTemp[input][type][k] = value
 			} catch(e) {
-				value = e.name
+				// touchcancel and touchend don't have values except for force
+					// so don't record them if we catch a TypeError
+					// this means we can now properly compare valid matches in screen/client X/Y
+				if (e.name == 'TypeError' && k !== 'force') {
+					// record nothing
+				} else {
+					oTemp[input][type][k] = e.name
+				}
 			}
-			oTemp[input][type][k] = value
 		})
 
 		// display when we have all events
