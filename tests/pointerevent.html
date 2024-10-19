@@ -163,39 +163,28 @@ function finish() {
 
 }
 
-function runtouchtest() {
+function runtouch(event, type) {
 	// return if we already captured it
 	let input = 'touch'
-	oTemp[input]['touchcancel'] = {}
-	oTemp[input]['touchend'] = {}
-	oTemp[input]['touchmove'] = {}
-	oTemp[input]['touchstart'] = {}
+	if (undefined !== oTemp[input][type]) {return}
+	addEvent(type)
+	oTemp[input][type] = {}
 
 	try {
+		let touch = event.touches[0]
 		aList.forEach(function(k){
-			let value = 0
+			let value
 			try {
+				value = touch[k]
 				if ('number' !== typeof value) {
 					value = 'err'
 				} else if (Number.isNaN(value)) {
 					value = 'NaN'
 				}
-
 			} catch(e) {
 				value = e.name
 			}
-			// test
-			let newvalue = value
-			if (k == 'force') {newvalue = 0.012423423}
-			if (k == 'screenX') {newvalue = 123}
-			if (k == 'screenY') {newvalue = 87}
-			if (k == 'clientX') {newvalue = 123}
-			if (k == 'clientY') {newvalue = 87}
-
-			oTemp[input]['touchcancel'][k] = value
-			oTemp[input]['touchend'][k] = newvalue
-			oTemp[input]['touchmove'][k] = value
-			oTemp[input]['touchstart'][k] = value
+			oTemp[input][type][k] = value
 		})
 
 		// display when we have all events
@@ -221,7 +210,6 @@ function runtouchtest() {
 				oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 				oTmpFP[k] = fp
 			})
-
 			// modify the FP by replacing screen/clientX/Y with booleans for valid matches
 			let aCoords = ['X','Y']
 			aCoords.forEach(function(k){
@@ -239,16 +227,12 @@ function runtouchtest() {
 					if ('number' !== typeB) {isAValid = false}
 				}
 				if (isAValid && isBValid) {isMatch = mini(A) === mini(B)}
-
-				console.log(k, A, typeA, isAValid, B, typeB, isBValid, isMatch)
-
 				// remove
 				delete oTmpFP['client' +k]
 				delete oTmpFP['screen' +k]
 				// add
 				oTmpFP['client_screen_'+ k +'_match'] = isMatch
 			})
-
 			// sort FP data into overall FP
 			for (const k of Object.keys(oTmpFP).sort()) {oFP[input][k] = oTmpFP[k]}
 			dom.touch.innerHTML = oDisplay.join("<br>") + '<br><br>'
