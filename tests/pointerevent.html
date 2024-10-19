@@ -205,11 +205,13 @@ function runtouch(event, type) {
 				// if all tests are the same value just display one value
 				let aSet = new Set(), aArray = []
 				for (const p of Object.keys(oTemp[input]).sort()) { // sort so array is in order when needed
-					let x = oTemp[input][p][k]
-					// force is variable
-					if ('force' == k) {if (!aStable.includes(x)) {x = 'float'}}
-					aSet.add(x)
-					aArray.push(x)
+					if (undefined !== oTemp[input][p][k]) {
+						let x = oTemp[input][p][k]
+						// force is variable
+						if ('force' == k) {if (!aStable.includes(x)) {x = 'float'}}
+						aSet.add(x)
+						aArray.push(x)
+					}
 				}
 				let fp = aArray
 				if (1 == aSet.size) {aArray = Array.from(aSet); fp = aArray[0]}
