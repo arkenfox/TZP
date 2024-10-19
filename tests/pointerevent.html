@@ -91,7 +91,6 @@
 let padlen = 18
 let oTemp = {'pointer':{},'touch':{}}
 let oData = {} // sorted oTemp for display and oFP
-let oDataEvents = {}
 let oFP = {
 	'pointer': {},
 	'maxTouchPoints': '',
@@ -110,6 +109,7 @@ let aList = [
 	'screenX',
 	'screenY', // RFP = matches clientX/Y
 ]
+// not sorted: so we group display items
 let oList = {
 	pointerId: "number", //
 	isPrimary: "boolean", // RFP true
@@ -125,6 +125,11 @@ let oList = {
 	height: "number", // RFP 1
 	altitudeAngle: "number",
 	azimuthAngle: "number",
+}
+// events we want to catch data on
+let oDataEvents = {
+	'pointer': ['down','enter','leave','move','over','out','up'],
+	'touch': ['cancel','end','move','start'],
 }
 
 function finish() {
@@ -158,28 +163,39 @@ function finish() {
 
 }
 
-function runtouch(event, type) {
+function runtouchtest() {
 	// return if we already captured it
 	let input = 'touch'
-	if (undefined !== oTemp[input][type]) {return}
-	addEvent(type)
-	oTemp[input][type] = {}
+	oTemp[input]['touchcancel'] = {}
+	oTemp[input]['touchend'] = {}
+	oTemp[input]['touchmove'] = {}
+	oTemp[input]['touchstart'] = {}
 
 	try {
-		let touch = event.touches[0]
 		aList.forEach(function(k){
-			let value
+			let value = 0
 			try {
-				value = touch[k]
 				if ('number' !== typeof value) {
 					value = 'err'
 				} else if (Number.isNaN(value)) {
 					value = 'NaN'
 				}
+
 			} catch(e) {
 				value = e.name
 			}
-			oTemp[input][type][k] = value
+			// test
+			let newvalue = value
+			if (k == 'force') {newvalue = 0.012423423}
+			if (k == 'screenX') {newvalue = 123}
+			if (k == 'screenY') {newvalue = 87}
+			if (k == 'clientX') {newvalue = 123}
+			if (k == 'clientY') {newvalue = 87}
+
+			oTemp[input]['touchcancel'][k] = value
+			oTemp[input]['touchend'][k] = newvalue
+			oTemp[input]['touchmove'][k] = value
+			oTemp[input]['touchstart'][k] = value
 		})
 
 		// display when we have all events
@@ -205,34 +221,41 @@ function runtouch(event, type) {
 				oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 				oTmpFP[k] = fp
 			})
+
 			// modify the FP by replacing screen/clientX/Y with booleans for valid matches
-			['X','Y'].forEach(function(k){
+			let aCoords = ['X','Y']
+			aCoords.forEach(function(k){
 				let isMatch = false, isAValid = true, isBValid = true
-				let A = oTmp['client' +k], B = oTmp['screen'+ k]
-				if ('object' == typeof A) {
-					A.forEach(function(m){if ('number' !== m) {isAValid = false}})
+				let A = oTmpFP['client' +k], B = oTmpFP['screen'+ k]
+				let typeA = typeof A, typeB = typeof B
+				if ('object' == typeA) {
+					A.forEach(function(m){if ('number' !== typeof m) {isAValid = false}})
 				} else {
-					if ('number' !== A) {isAValid = false}
+					if ('number' !== typeA) {isAValid = false}
 				}
-				if ('object' == typeof B) {
-					B.forEach(function(m){if ('number' !== m) {isBValid = false}})
+				if ('object' == typeB) {
+					B.forEach(function(m){if ('number' !== typeof m) {isBValid = false}})
 				} else {
-					if ('number' !== B) {isAValid = false}
+					if ('number' !== typeB) {isAValid = false}
 				}
 				if (isAValid && isBValid) {isMatch = mini(A) === mini(B)}
+
+				console.log(k, A, typeA, isAValid, B, typeB, isBValid, isMatch)
+
 				// remove
-				delete oTmp['client' +k]
-				delete oTmp['screen' +k]
+				delete oTmpFP['client' +k]
+				delete oTmpFP['screen' +k]
 				// add
-				oTmp['client_screen_'+ k +'_match'] = isMatch
+				oTmpFP['client_screen_'+ k +'_match'] = isMatch
 			})
+
 			// sort FP data into overall FP
 			for (const k of Object.keys(oTmpFP).sort()) {oFP[input][k] = oTmpFP[k]}
 			dom.touch.innerHTML = oDisplay.join("<br>") + '<br><br>'
 			finish()
 		}
 	} catch(e) {
-		dom.touch.innerHTML = e+'<br>'
+		dom.touch.innerHTML = e+'<br><br>'
 	}
 }
 
@@ -340,11 +363,6 @@ function start() {
 		list.forEach(function(type){
 			target.addEventListener(k + type, (event) => {addEvent(k + type)})
 		})
-	}
-	// events we want to catch data on
-	oDataEvents = {
-		'pointer': ['down','enter','leave','move','over','out','up'],
-		'touch': ['cancel','end','move','start'],
 	}
 	for (const k of Object.keys(oDataEvents)) {
 		let list = oDataEvents[k]
