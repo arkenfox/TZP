@@ -101,6 +101,32 @@ let oFP = {
 let isStart = true, hasKeys = false
 let setEvents = new Set()
 
+// sorted list: these are all numbers
+let aList = [
+	'clientX','clientY',
+	'force', // float 0.0 (no pressure) - 1.0 (max pressure)
+	'radiusX','radiusY',
+	'rotationAngle',
+	'screenX',
+	'screenY', // RFP = matches clientX/Y
+]
+let oList = {
+	pointerId: "number", //
+	isPrimary: "boolean", // RFP true
+	pressure: "number", // RFP: 0 if not active, 0.5 if active
+	mozPressure: "number", // RFP should always return 0.5 now
+	pointerType: "string", // RFP mouse
+	mozInputSource: "number", // RFP should be 1 now
+	tangentialPressure: "number", // RFP 0
+	tiltX: "number", // RFP 0
+	tiltY: "number", // RFP 0
+	twist: "number", // RFP 0
+	width: "number", // RFP 1
+	height: "number", // RFP 1
+	altitudeAngle: "number",
+	azimuthAngle: "number",
+}
+
 function finish() {
 	// check all events have been recorded
 		// pointer
@@ -138,16 +164,6 @@ function runtouch(event, type) {
 	if (undefined !== oTemp[input][type]) {return}
 	addEvent(type)
 	oTemp[input][type] = {}
-
-	// sorted list: these are all numbers
-	let aList = [
-		'clientX','clientY',
-		'force', // float 0.0 (no pressure) - 1.0 (max pressure)
-		'radiusX','radiusY',
-		'rotationAngle',
-		'screenX',
-		'screenY', // RFP = matches clientX/Y
-	]
 
 	try {
 		let touch = event.touches[0]
@@ -229,23 +245,6 @@ function run(event, type) {
 
 	// isPrimary: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/isPrimary
 		// pen/touch can be true or false: as discovered in tests
-
-	let oList = {
-		pointerId: "number", //
-		isPrimary: "boolean", // RFP true
-		pressure: "number", // RFP: 0 if not active, 0.5 if active
-		mozPressure: "number", // RFP should always return 0.5 now
-		pointerType: "string", // RFP mouse
-		mozInputSource: "number", // RFP should be 1 now
-		tangentialPressure: "number", // RFP 0
-		tiltX: "number", // RFP 0
-		tiltY: "number", // RFP 0
-		twist: "number", // RFP 0
-		width: "number", // RFP 1
-		height: "number", // RFP 1
-		altitudeAngle: "number",
-		azimuthAngle: "number",
-	}
 	let oEvent = {}
 
 	for (const k of Object.keys(oList)) {
