@@ -179,7 +179,7 @@ function runtouch(event, type) {
 				for (const p of Object.keys(oTemp[input]).sort()) { // sort so array is in order when needed
 					let x = oTemp[input][p][k]
 					// force is variable
-					if ('force' == p) {if (!aStable.includes(x)) {x = 'float'}}
+					if ('force' == k) {if (!aStable.includes(x)) {x = 'float'}}
 					aSet.add(x)
 					aArray.push(x)
 				}
@@ -283,7 +283,9 @@ function run(event, type) {
 			for (const p of Object.keys(oTemp[input]).sort()) { // sort so array is in order when needed
 				let x = oTemp[input][p][k]
 				// active pen pressure is variable between 0-1
-				if ('pressure' == p || 'mozPressure' == p) {if (!aStable.includes(x)) {x = 'float'}}
+				if ('pressure' == k || 'mozPressure' == k) {
+					if (!aStable.includes(x)) {x = 'float'}
+				}
 				aSet.add(x)
 				aArray.push(x)
 			}
