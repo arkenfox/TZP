@@ -58,9 +58,7 @@
 			<td>
 				<div class="reset" id="reset"><div class="flex=item" id="resettext">1: START</div></div>
 				<div class="pointer" id="target">
-					<div class="flex-item"><br>2: CLICK<br>
-					<br><span class='s3'>MOUSE</span><br>middle or<br>context<br>
-					<br><span class='s3'>TOUCH | PEN</span><br>tap + drag a bit<br>tap again</div>
+					<div class="flex-item"><br>2: CLICK<br><br>context click<br>(if you can)<br><br>otherwise<br><br>keep stabbing<br>and moving</div>
 				</div>
 				<div class="reset"><div class="flex=item">3: FINISH</div></div>
 			</td>
@@ -126,10 +124,15 @@ let oList = {
 	altitudeAngle: "number",
 	azimuthAngle: "number",
 }
-// events we want to catch data on
+// events
 let oDataEvents = {
 	'pointer': ['down','enter','leave','move','over','out','up'],
 	'touch': ['cancel','end','move','start'],
+}
+let oNonDataEvents = {
+	'mouse': ['down','enter','leave','move','out','over','up'],
+	'pointer': ['cancel'],
+	//'touch': ['cancel'],
 }
 
 function finish() {
@@ -172,6 +175,10 @@ function runtouch(event, type) {
 
 	try {
 		let touch = event.touches[0]
+		// touchcancel + touchend don't have touch data
+		if (undefined == touch) {
+			touch = event.changedTouches[0]
+		}
 		aList.forEach(function(k){
 			let value
 			try {
@@ -183,14 +190,7 @@ function runtouch(event, type) {
 				}
 				oTemp[input][type][k] = value
 			} catch(e) {
-				// touchcancel and touchend don't have values except for force
-					// so don't record them if we catch a TypeError
-					// this means we can now properly compare valid matches in screen/client X/Y
-				if (e.name == 'TypeError' && k !== 'force') {
-					// record nothing
-				} else {
-					oTemp[input][type][k] = e.name
-				}
+				oTemp[input][type][k] = e.name
 			}
 		})
 
@@ -205,13 +205,11 @@ function runtouch(event, type) {
 				// if all tests are the same value just display one value
 				let aSet = new Set(), aArray = []
 				for (const p of Object.keys(oTemp[input]).sort()) { // sort so array is in order when needed
-					if (undefined !== oTemp[input][p][k]) {
-						let x = oTemp[input][p][k]
-						// force is variable
-						if ('force' == k) {if (!aStable.includes(x)) {x = 'float'}}
-						aSet.add(x)
-						aArray.push(x)
-					}
+					let x = oTemp[input][p][k]
+					// force is variable
+					if ('force' == k) {if ('number' == typeof x && !aStable.includes(x)) {x = 'float'}}
+					aSet.add(x)
+					aArray.push(x)
 				}
 				let fp = aArray
 				if (1 == aSet.size) {aArray = Array.from(aSet); fp = aArray[0]}
@@ -299,7 +297,7 @@ function run(event, type) {
 				let x = oTemp[input][p][k]
 				// active pen pressure is variable between 0-1
 				if ('pressure' == k || 'mozPressure' == k) {
-					if (!aStable.includes(x)) {x = 'float'}
+					if ('number' == typeof x && !aStable.includes(x)) {x = 'float'}
 				}
 				aSet.add(x)
 				aArray.push(x)
@@ -346,17 +344,14 @@ function reset() {
 
 function start() {
 	let target = dom.target
-	// just record the event happening
-	let oEvents = {
-		'mouse': ['down','enter','leave','move','out','over','up'],
-		'pointer': ['cancel']
-	}
-	for (const k of Object.keys(oEvents)) {
-		let list = oEvents[k]
+	// record the event happening
+	for (const k of Object.keys(oNonDataEvents)) {
+		let list = oNonDataEvents[k]
 		list.forEach(function(type){
 			target.addEventListener(k + type, (event) => {addEvent(k + type)})
 		})
 	}
+	// record data on these events
 	for (const k of Object.keys(oDataEvents)) {
 		let list = oDataEvents[k]
 		dom[k +'events'].innerHTML = ' [' + list.join('|') +'] '
