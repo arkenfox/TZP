@@ -305,6 +305,12 @@ function run(event, type) {
 			let fp = aArray
 			if (1 == aSet.size) {aArray = Array.from(aSet); fp = aArray[0]}
 			let str = aArray.join(' | ')
+			// tweak the fp width/height for less entropy/stability (e.g touch)
+				// but still show real values in display str
+			if ('width' == k || 'height' == k) {
+				if ('object' == typeof fp) {fp = 'mixed'}
+			}
+
 			oDisplay.push(s6 + k.padStart(padlen) +": "+ sc + str)
 			oTmpFP[k] = fp
 		}
