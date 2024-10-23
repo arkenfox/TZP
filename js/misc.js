@@ -672,25 +672,32 @@ function get_window_props(METRIC) {
 				addDetail(METRIC +'_tampered', aTampered.sort())
 				tamperBtn = addButton(18, METRIC +'_tampered', aTampered.length + ' tampered')
 				// isLies: exempt exact NS hashes: 11.4.37
-				//console.log(mini(aTampered), aTampered.join(","))
 				/*
+				IDK why I get too pre-clicktoplay safers
 				c36227b3 (standard)
 					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement
-				97f1edb8 (safer) 
+				78e565db (safer: sometimes)
+					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
+					MediaSource,Proxy,URL,webkitURL
+				e530ee88 (safer + offscreencanvas: sometimes)
 					Blob,Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
-					MediaSource,MessagePort,OffscreenCanvas,Promise,Proxy,SharedWorker,String,URL,Worker,XMLHttpRequest,
-					XMLHttpRequestEventTarget,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,escape,unescape,webkitURL
+					MediaSource,OffscreenCanvas,Promise,Proxy,SharedWorker,String,URL,Worker,XMLHttpRequest,
+					XMLHttpRequestEventTarget,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,escape,
+					unescape,webkitURL
 				18d6b7c6 (safer with allowing webgl clickToPlay)
 					Element,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
 					MediaSource,URL,webkitURL
-
-				#42767 with offscreenCanvas disabled
-				78e565db (safer)
-					Element,HTMLCanvasElement,HTMLElement,HTMLFrameElement,HTMLIFrameElement,HTMLObjectElement,
-					MediaSource,Proxy,URL,webkitURL
 				*/
-				let aGood = ['c36227b3','97f1edb8','78e565db','18d6b7c6']
-				if (!aGood.includes(mini(aTampered))) {isLies = true}
+				/* #42767 with offscreenCanvas disabled
+				97f1edb8 (safer: sometimes) 
+					same as e530ee88 but without OffscreenCanvas
+				*/
+				let aGood = ['c36227b3','e530ee88','18d6b7c6','78e565db']
+				if (isTB) {aGood.push('97f1edb8')} // ToDo: remove once offscreencanvas is enabled in TB
+				if (!aGood.includes(mini(aTampered))) {
+					isLies = true
+					console.log(mini(aTampered), aTampered.join(","))
+				}
 			}
 			// notate console
 			if (!isLies && isOS !== 'android' && isOS !== undefined) {
@@ -714,14 +721,15 @@ function get_window_props(METRIC) {
 				// on touch devices: 0 (all false) 1 or 2 (all true)
 
 			if (isMullvad) {
-				if ('ab3ba8af' == hash || '2e54008d' == hash) {notation = tb_green} // MB14: 820 standard | 819 safer
-				if ('da1ce8c4' == hash || 'ef3fd962' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
+				// this is with webRTC: windows can just fail until it's added back in: diff 20x RTC*
+				//if ('3240d823' == hash || 'ce268b01' == hash) {notation = tb_green} // MB14: 840 standard | 839 safer
+				if ('e3d2df78' == hash || '2c04db16' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
 
 			} else {
 				if (isOS == 'android') {
 					// ToDo: we can't detect isTB on android
 				} else {
-					if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
+					//if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
 					if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
 				}
 			}
