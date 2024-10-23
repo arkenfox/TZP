@@ -510,6 +510,8 @@ function get_language_system(METRIC) {
 	let t0 = nowFn()
 	let value, data = '', el = dom.svgswitch
 	try {
+		// sort so results are sorted
+		isLanguagesNav.sort()
 		// populate
 		let el = dom.svgswitch
 		el.innerHTML = ''
@@ -529,14 +531,12 @@ function get_language_system(METRIC) {
 			throw zErrType + 'empty array'
 		} else if (aDetected.length > 1) {
 			aDetected = aDetected.filter(x => !['unknown'].includes(x))
-			aDetected.sort()
 		}
 		value = aDetected.join(', ')
 	} catch(e) {
 		value = e; data = zErrLog
 	}
 	// tidy nav string to compare to
-	isLanguagesNav.sort()
 	isLanguagesNav = isLanguagesNav.join(', ')
 	addBoth(4, METRIC, value,'', (value == isLanguagesNav ? lang_green : lang_red), data)
 	log_perf(4, METRIC, t0)
