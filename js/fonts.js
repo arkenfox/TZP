@@ -1437,7 +1437,12 @@ function get_system_fonts(METRIC) {
 				13px normal 400 -apple-system: [caption, menu]
 				*/
 			} else if ('linux' == isOS) {
-				if ('48e3d1b4' == hash) {notation = rfp_green} // 15px normal 400 sans-serif
+				if (isTB) {
+					// TB14: due to font config aliases
+					if ('ea0ea5d7' == hash) {notation = rfp_green} // 15px normal 400 Arimo
+				} else {
+					if ('48e3d1b4' == hash) {notation = rfp_green} // 15px normal 400 sans-serif
+				}
 			} else if ('android' == isOS) {
 				if ('7e83ef35' == hash) {notation = rfp_green} // 12px normal 400 Roboto
 			}
@@ -1491,11 +1496,21 @@ function get_widget_fonts(METRIC) {
 			monospace 13.3333px: [date, datetime-local, time],
 			monospace 13px: [textarea],
 			sans-serif 13px: [image] */
-		} else if ('linux' == isOS && '99054729' == hash) {notation = rfp_green
-		/*monospace 12px: [textarea],
-			monospace 13.3333px: [date, datetime-local, time],
-			sans-serif 13.3333px: [19 items],
-			sans-serif 13px: [image]*/
+		} else if ('linux' == isOS) {
+			if (isTB) {
+			// TB14: due to font config aliases
+			/*Arimo 13.3333px: [19 items],
+				monospace 12px: [textarea],
+				monospace 13.3333px: [date, datetime-local, time],
+				sans-serif 13px: [image]*/
+				if ('edeba276' == hash) {notation = rfp_green}
+			} else {
+			/*monospace 12px: [textarea],
+				monospace 13.3333px: [date, datetime-local, time],
+				sans-serif 13.3333px: [19 items],
+				sans-serif 13px: [image]*/
+				if ('99054729' == hash) {notation = rfp_green}
+			}
 		} else if ('android' == isOS && '0833dc19' == hash) {notation = rfp_green
 		/*Roboto 13.3333px: [19 items],
 			monospace 12px: [textarea],
