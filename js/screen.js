@@ -4,7 +4,6 @@
 
 function return_lb(w,h,isNew) {
 	// LB
-		// TB13 aligns with newwin steps
 	let wstep = 200, hstep = 200, bw = false, bh = false
 	if (w < 501) {wstep = 50} else if (w < 1601) {wstep = isNew ? 200: 100}
 	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
@@ -15,7 +14,6 @@ function return_lb(w,h,isNew) {
 
 function return_nw(w,h, isNew) {
 	// NW
-		// TB13 changes to 1400 x 900 max
 	let wstep = 200, hstep = 100, bw = false, bh = false
 	if (w < (isNew ? 1401 : 1001)) {bw = Number.isInteger(w/wstep)}
 	if (h < (isNew ? 901 : 1001)) {bh = Number.isInteger(h/hstep)}
@@ -302,8 +300,9 @@ const get_scr_measure = () => new Promise(resolve => {
 			initData = isInitial; initHash = mini(isInitial)
 		} else {
 			// LB/NW
-			addDisplay(1, 'window_letterbox','','', return_lb(oTmp.window.innerWidth, oTmp.window.innerHeight, isTB))
-			addDisplay(1, 'window_newwin','','', return_nw(oTmp.window.innerWidth, oTmp.window.innerHeight, isTB))
+			let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
+			addDisplay(1, 'window_letterbox','','', return_lb(oTmp.window.innerWidth, oTmp.window.innerHeight, isNew))
+			addDisplay(1, 'window_newwin','','', return_nw(oTmp.window.innerWidth, oTmp.window.innerHeight, isNew))
 		}
 		let isIframesSame = false
 		for (const k of Object.keys(oCompare)) {
