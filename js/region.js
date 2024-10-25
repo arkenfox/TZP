@@ -142,54 +142,47 @@ function set_isLanguageSmart() {
 	// last checked 13.5.1
 	localesSupported = {
 		// v hashes are with localized NumberRangeOver/Underflow
-		'ar': {m: '1f9a06e3', v: '1dfb5b8c', x: 'ebfbdc43'},
-		'be': {m: '076d68e6', v: '4edeafab', x: 'b74b3840'},
-		'bg': {m: '2da6c02e', v: 'ce892c88', x: '914590a4'},
-		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '81f31519'},
-		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '45f277f7'},
-		'da': {m: '39169214', v: '479797a1', x: '44535972'},
-		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'f4b2a56f'},
-		// el: xml n30 = english but is would-be-n39 'reserved prefix (xmlns) must not be declared or undeclared'
-			// changing to spoof english returns n30.. phew!
-		'el': {m: '7053311d', v: 'b1a88a13', x: 'da8c80af'},
-		'en-US': {m: '05c30936', v: '41310558', x: '945f8952'},
-		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: '3eeba3bc'},
-		'fa': {m: '6648d919', v: '8ef57409', x: '113d0a7e'},
-		'fi': {m: '82d079c7', v: '3e29e6e7', x: '71abeeec'},
-		'fr': {m: '024d0fce', v: '34e28fa2', x: '74f5df3d'},
-		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd9761e70'},
-		// he: xml n27 n28 n30 = english
-		'he': {m: 'cdde832b', v: 'e47dbb82', x: '786876d5'},
-		'hu': {m: 'db7366e6', v: 'dad6d689', x: '9f537fe6'},
-		'id': {m: '1e275882', v: '71224946', x: '79f3851e'},
-		'is': {m: '204c8f73', v: '6bbe7a8f', x: '7f3e38b8'},
-		'it': {m: '716e7242', v: '3b781f09', x: '469cb2af'},
-		'ja': {m: 'ab56d7cb', v: '48645d06', x: '46faea8b'},
-		'ka': {m: '6961b7e4', v: '40feb44f', x: '4e712712'},
-		'ko': {m: 'c758b027', v: 'd3b54047', x: 'fc4c50ed'},
-		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'f50f2b50'},
-		// mk: v = english but not number format, and xml n30 = english but is would-be-n39 (same as el)
-			// and n27 n28 = english
-		'mk': {m: '78274f1b', v: '333aae58', x: '3b22df8b'},
-		'ms': {m: '3e26c6be', v: '9dadbc64', x: 'f23d0969'},
-		// my: two items in english: date+over/under
-		'my': {m: '939f2013', v: '43cc3aa3', x: '11d4d458'},
-		// nb-NO: xml most is english
-		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: '50426960'},
-		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'b03574e4'},
-		'pl': {m: '0bd88e98', v: '95ad4851', x: 'c1295e2b'},
-		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '96f79e68'},
-		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: 'b42389f7'},
-		'ro': {m: '3e321768', v: 'd72a350b', x: 'cf85bb64'},
-		'ru': {m: '8e9b7945', v: '2391fbec', x: '2178a2b6'},
-		'sq': {m: '91943e67', v: 'e0259277', x: 'a732eca1'},
-		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '80f52165'},
-		'th': {m: 'a32d70a7', v: '07358a87', x: 'e29567ce'},
-		'tr': {m: '4217ef80', v: '5048d312', x: 'e16dd3c7'},
-		'uk': {m: '3e2b3e39', v: '0163f51d', x: 'cc85d2f5'},
-		'vi': {m: 'bba6c980', v: 'b8137d59', x: '7cf3c6f9'},
-		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '328cc79b'},
-		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '87abb9fa'},
+		'ar': {m: '1f9a06e3', v: '1dfb5b8c', x: '71982b47'},
+		'be': {m: '076d68e6', v: '4edeafab', x: '42583d22'},
+		'bg': {m: '2da6c02e', v: 'ce892c88', x: 'c4f06f98'},
+		'ca': {m: 'd856d812', v: '6b3bb3d8', x: '77a62a49'},
+		'cs': {m: 'c92accb0', v: 'de3ab0ad', x: '81c91d49'},
+		'da': {m: '39169214', v: '479797a1', x: 'a30818e8'},
+		'de': {m: '298d11c6', v: 'f9e2eae6', x: 'c1ce6571'},
+		'el': {m: '7053311d', v: 'b1a88a13', x: '493f7225'},
+		'en-US': {m: '05c30936', v: '41310558', x: '544e1ae8'},
+		'es-ES': {m: '96b78cbd', v: '97c3f5a9', x: 'ed807f70'},
+		'fa': {m: '6648d919', v: '8ef57409', x: '1ed34bca'},
+		'fi': {m: '82d079c7', v: '3e29e6e7', x: '859efc32'},
+		'fr': {m: '024d0fce', v: '34e28fa2', x: '1d2050d3'},
+		'ga-IE': {m: '97fca229', v: '2bf1321d', x: 'd3af2cd8'},
+		'he': {m: 'cdde832b', v: 'e47dbb82', x: 'c7274a3e'},
+		'hu': {m: 'db7366e6', v: 'dad6d689', x: 'e4f85168'},
+		'id': {m: '1e275882', v: '71224946', x: 'a70cd23c'},
+		'is': {m: '204c8f73', v: '6bbe7a8f', x: 'edb8b212'},
+		'it': {m: '716e7242', v: '3b781f09', x: 'c567f479'},
+		'ja': {m: 'ab56d7cb', v: '48645d06', x: 'a58f6165'},
+		'ka': {m: '6961b7e4', v: '40feb44f', x: 'bfbc28c2'},
+		'ko': {m: 'c758b027', v: 'd3b54047', x: '1235e26d'},
+		'lt': {m: 'c36fbafb', v: 'd5f9b95d', x: 'b0e8a3bc'},
+		'mk': {m: '78274f1b', v: '333aae58', x: 'b6020ec1'},
+		'ms': {m: '3e26c6be', v: '9dadbc64', x: '15e6148f'},
+		'my': {m: '939f2013', v: '43cc3aa3', x: 'a6571ec7'},
+		'nb-NO': {m: '1d496fea', v: '84ce54eb', x: 'e0d34e04'},
+		'nl': {m: 'e1d3b281', v: '326cbfd2', x: 'caef95fc'},
+		'pl': {m: '0bd88e98', v: '95ad4851', x: '2a45177d'},
+		'pt-BR': {m: '39835e93', v: 'de2c3569', x: '68f80c66'},
+		'pt-PT': {m: '6ae9a13a', v: 'b21f3984', x: '0aa2a309'},
+		'ro': {m: '3e321768', v: 'd72a350b', x: 'a9da3416'},
+		'ru': {m: '8e9b7945', v: '2391fbec', x: '26f663da'},
+		'sq': {m: '91943e67', v: 'e0259277', x: '4e0bbdcd'},
+		'sv-SE': {m: 'bc792ce2', v: 'd9d7828b', x: '4af3452f'},
+		'th': {m: 'a32d70a7', v: '07358a87', x: '2a04071a'},
+		'tr': {m: '4217ef80', v: '5048d312', x: '55daef93'},
+		'uk': {m: '3e2b3e39', v: '0163f51d', x: '4f817ea3'},
+		'vi': {m: 'bba6c980', v: 'b8137d59', x: '80da1efb'},
+		'zh-Hans-CN': {m: '550ea53e', v:'0e58f82a', x: '536abb21'},
+		'zh-Hant-TW': {m: '66b515a4', v: '8e4cfa0e', x: '9ad3338c'},
 	}
 	// mac: japanese languages are the same but the locale is 'ja-JP' not 'ja'
 	if ('mac' == isOS) {
@@ -809,6 +802,99 @@ function get_locale_resolvedoptions(METRIC) {
 	return
 }
 
+const get_messages_media = (METRIC) => new Promise(resolve => {
+	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ""
+	try {
+		let aList = ['Invalid','Scaled']
+		for (const k of aList) {
+			let name = k +'Image'
+			let target = dom[name], title = ''
+			if ('Scaled' == k) {
+				title = target.contentWindow.document.title
+				title = title.replace(name +'.png', '') // strip image name to reduce noise
+			} else {
+				const image = target.contentWindow.document.querySelector('img')
+				title = image.alt
+				title = title.replace(target.src, '') // remove noise
+			}
+			data[name] = title.trim()
+		}
+		hash = mini(data); btn = addButton(4, METRIC)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
+			}
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return resolve()
+})
+
+function get_messages_validation(METRIC) {
+	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
+		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
+		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
+	const input = "<input type='number' required>"
+		+ "<input type='checkbox' required>"
+		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
+		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
+		+ "<input type='file' required>"
+		+ "<input type='email' value='a'>"
+		+ "<input type='url' value='a'>"
+		+ "<input type='number' max='1974.3' value='2000'>"
+		+ "<input type='number' min='8026.5' value='1'>"
+		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
+		+ "<input type='radio' required name='radiogroup'>"
+		+ "<select required><option></option></select>"
+		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
+		+ "<input type='text' required>"
+
+	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
+	try {
+		let collection = ((new DOMParser).parseFromString(input, 'text/html')).body.children
+		let cType = typeFn(collection)
+		if ('object' !== cType) {throw zErrType + cType}
+		for (const k of Object.keys(collection)) {
+			let msg = collection[k].validationMessage
+			if (runST) {msg = undefined}
+			let typeCheck = typeFn(msg)
+			if ('string' !== typeCheck) {throw zErrType + typeCheck}
+			data[aNames[k]] = msg
+		}
+		hash = mini(data)
+		let count = Object.keys(data).length
+		let details = count === aNames.length ? 'details' : count +'/' + aNames.length
+		btn = addButton(4, METRIC, details)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
+			}
+		}
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	addBoth(4, METRIC, hash ,btn, notation, data)
+	return
+}
+
+function get_messages_xml(METRIC) {
+	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ""
+	if ('string' == typeof isXML) {
+		hash = isXML; data = isXML == zNA ? '' : zErrLog
+	} else {
+		hash = mini(isXML); btn = addButton(4, METRIC)
+		if (isLanguageSmart) {
+			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
+				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
+			}
+		}
+	}
+	addBoth(4, METRIC, hash, btn, notation, data)
+	return
+}
+
 function get_timezone(METRIC) {
 	let t0 = nowFn()
 	const METRICtz = 'timezone'
@@ -1158,99 +1244,6 @@ function get_timezone_offset(METRIC) {
 	return
 }
 
-const get_media_messages = (METRIC) => new Promise(resolve => {
-	let hash, btn='', data = {}, notation = isLanguageSmart ? locale_red : ""
-	try {
-		let aList = ['Invalid','Scaled']
-		for (const k of aList) {
-			let name = k +'Image'
-			let target = dom[name], title = ''
-			if ('Scaled' == k) {
-				title = target.contentWindow.document.title
-				title = title.replace(name +'.png', '') // strip image name to reduce noise
-			} else {
-				const image = target.contentWindow.document.querySelector('img')
-				title = image.alt
-				title = title.replace(target.src, '') // remove noise
-			}
-			data[name] = title.trim()
-		}
-		hash = mini(data); btn = addButton(4, METRIC)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].m) {notation = locale_green}
-			}
-		}
-	} catch(e) {
-		hash = e; data = zErrLog
-	}
-	addBoth(4, METRIC, hash, btn, notation, data)
-	return resolve()
-})
-
-function get_validation_messages(METRIC) {
-	const aNames = ['BadInputNumber','CheckboxMissing','DateTimeRangeOverflow','DateTimeRangeUnderflow',
-		'FileMissing','InvalidEmail','InvalidURL','NumberRangeOverflow','NumberRangeUnderflow',
-		'PatternMismatch','RadioMissing','SelectMissing','StepMismatch','ValueMissing',]
-	const input = "<input type='number' required>"
-		+ "<input type='checkbox' required>"
-		+ "<input type='date' value='2024-01-01' max='2023-12-31'>"
-		+ "<input type='date' value='2022-01-01' min='2023-12-31'>"
-		+ "<input type='file' required>"
-		+ "<input type='email' value='a'>"
-		+ "<input type='url' value='a'>"
-		+ "<input type='number' max='1974.3' value='2000'>"
-		+ "<input type='number' min='8026.5' value='1'>"
-		+ "<input type='tel' pattern='[0-9]{1}' value='a'>"
-		+ "<input type='radio' required name='radiogroup'>"
-		+ "<select required><option></option></select>"
-		+ "<input type='number' min='1.2345' step='1005.5545' value='2'>"
-		+ "<input type='text' required>"
-
-	let hash, btn ='', data = {}, notation = isLanguageSmart ? locale_red : ''
-	try {
-		let collection = ((new DOMParser).parseFromString(input, 'text/html')).body.children
-		let cType = typeFn(collection)
-		if ('object' !== cType) {throw zErrType + cType}
-		for (const k of Object.keys(collection)) {
-			let msg = collection[k].validationMessage
-			if (runST) {msg = undefined}
-			let typeCheck = typeFn(msg)
-			if ('string' !== typeCheck) {throw zErrType + typeCheck}
-			data[aNames[k]] = msg
-		}
-		hash = mini(data)
-		let count = Object.keys(data).length
-		let details = count === aNames.length ? 'details' : count +'/' + aNames.length
-		btn = addButton(4, METRIC, details)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].v) {notation = locale_green}
-			}
-		}
-	} catch(e) {
-		hash = e; data = zErrLog
-	}
-	addBoth(4, METRIC, hash ,btn, notation, data)
-	return
-}
-
-function get_xml_messages(METRIC) {
-	let hash, btn ='', data = isXML, notation = isLanguageSmart ? locale_red : ""
-	if ('string' == typeof isXML) {
-		hash = isXML; data = isXML == zNA ? '' : zErrLog
-	} else {
-		hash = mini(isXML); btn = addButton(4, METRIC)
-		if (isLanguageSmart) {
-			if (isLocaleValid && localesSupported[isLocaleAlt] !== undefined) {
-				if (hash === localesSupported[isLocaleAlt].x) {notation = locale_green}
-			}
-		}
-	}
-	addBoth(4, METRIC, hash, btn, notation, data)
-	return
-}
-
 const get_dates = () => new Promise(resolve => {
 	let d = new Date(Date.UTC(2023, 0, 1, 0, 0, 1)) //
 	let o = {weekday: "long", month: "long", day: "numeric", year: "numeric", hour: "numeric",
@@ -1358,13 +1351,13 @@ const outputRegion = () => new Promise(resolve => {
 			get_locale_resolvedoptions('locale_resolvedoptions'),
 			get_locale_intl(),
 			get_timezone('timezone_offsets'), // sets isTimeZoneValid/Value
-			get_validation_messages('messages_validation'),
-			get_xml_messages('messages_xml'),
+			get_messages_validation('messages_validation'),
+			get_messages_xml('messages_xml'),
 		]).then(function(){
 			Promise.all([
 				get_timezone_offset('timezone_offset'), // might use isTimeZoneValid/Value
 				get_dates(), // will use isTimeZoneValid/Value + isLocaleValid/Value
-				get_media_messages('messages_media'),
+				get_messages_media('messages_media'),
 			]).then(function(){
 				return resolve()
 			})
