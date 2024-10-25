@@ -578,7 +578,7 @@ function get_isVer(METRIC) {
 	}
 }
 
-const get_isXML = (METRIC) => new Promise(resolve => {
+const get_isXML = () => new Promise(resolve => {
 	if (!isGecko) {isXML = zNA; return resolve()}
 	// get once ASAP +clear console: not going to change between tests
 		// e.g. change app lang and it requires closing and a new tab
@@ -599,22 +599,34 @@ const get_isXML = (METRIC) => new Promise(resolve => {
 			//split into parts: works back to FF52 and works with LTR
 			let parts = str.split('\n')
 			if ('n02' == k) {
-				// programatically determine delimiter
-					// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = "-"
-				let strLoc = parts[1]
-				let schema = isFile ? 'file://' : 'https://'
-				let index = strLoc.indexOf(schema) - 2
-				if (strLoc.charAt(index + 1) !== ' ') {index++} // zh-Hans-CN has no space: e.g. "位置：http://"
-				if (strLoc.charAt(index) == ' ') {index = index -1} // jfc: ms has a double space: "Lokasi:  http"
-				delimiter = strLoc.charAt(index)
-				strLoc = ': '+ strLoc.slice(0, index)
-				let strName = parts[0].split(delimiter)[0]
-				let strLine = parts[2] == undefined ? '' : ': '+ parts[2] // eg hebrew is only 2 lines
-				isXML['n00'] = strName + strLoc + strLine
-				isXML['n01'] = delimiter +' (' + delimiter.charCodeAt(0) +')'
+				// ensure 3 parts: e.g. hebrew only has 2 lines
+				let tmpStr = parts[1]
+				let loc = window.location+'', locLen = loc.length, locStart = tmpStr.indexOf(loc)
+				if (undefined == parts[2]) {
+					let position = locLen+ locStart
+					parts[1] = (tmpStr.slice(0, position)).trim()
+					parts.push((tmpStr.slice(-(tmpStr.length - position))).trim())
+				}
+				// set delimiter: should aways be the last item in parts[1] after we strip location
+					// usually = ":" (charCode 58) but zh-Hans-CN = "：" (charCode 65306) and my = " -"
+				let strLoc = (parts[1].slice(0, locStart)).trim() // trim
+				delimiter = strLoc.slice(-1) // last char
+				// concat some bits
+					// don't trim strName prior to +delimiter (which is length 1)
+					// e.g. 'fr','my' have a preceeding space, so capture that
+				let strName = parts[0].split(delimiter)[0] + delimiter
+				// use an object as joining for a string can get weird with RTL
+				let oData = {
+					'delimiter': delimiter +' (' + delimiter.charCodeAt(0) +')', // redundant but record it for debugging
+					'error': strName,
+					'line': parts[2].trim(),
+					'location': strLoc,
+				}
+ 				isXML['n00'] = oData
 			}
-			// this is always the error message
-			isXML[k] = parts[0].split(delimiter)[1].trim()
+			// parts[0] is always the error message
+			let value = parts[0], trimLen = parts[0].split(delimiter)[0].length + 1
+			isXML[k] = value.slice(trimLen).trim()
 		}
 	} catch(e) {
 		isXML = e+''
@@ -1902,7 +1914,7 @@ function run_immediate() {
 			let warmNFcompact = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
 			let warmNFunit = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
 		} catch(e) {}
-		get_isXML('xml_messages')
+		get_isXML()
 		get_isArch('isArch')
 	})
 }
