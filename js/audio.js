@@ -141,7 +141,7 @@ const get_audio_offline = () => new Promise(resolve => {
 					let display = hashC +' | '+ hashG +' | '+ sum, value = hashG
 					// lies
 					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
-					// notation: three results since 1877221 FF124+ exposed 32bit
+					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArch: true = large arrays else it's an error string
 					if (isArch) {
 						if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
