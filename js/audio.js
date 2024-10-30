@@ -143,7 +143,7 @@ const get_audio_offline = () => new Promise(resolve => {
 					if (hashG !== hashC) {isLies = true} else {isLies = check_audioLies()}
 					// notation: three results since 1877221 FF124+ split x86 into 32/64 bitness
 						// isArch: true = large arrays else it's an error string
-					if (isArch) {
+					if (true === isArch) {
 						if ('a7c1fbb6' == hashC) {notation = sgtick+'x86_64/amd_64]'+sc
 						} else if ('a34c73cd' == hashC) {notation = sgtick+'ARM64/aarch64]'+sc}
 					} else {
@@ -209,8 +209,12 @@ const get_oscillator = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (hash == '5b3956a9') {notation = sgtick+'x86/amd]'+sc // 1877221
-					} else if (hash == 'f263f055') {notation = sgtick+'RFP ARM]'+sc}
+					if (true === isArch) {
+						if ('5b3956a9' == hash) {notation = sgtick+'x86_64/amd_64]'+sc
+						} else if ('f263f055' == hash) {notation = sgtick+'ARM64/aarch64]'+sc}
+					} else {
+						if ('e9f98e24' == hash) {notation = sgtick+'x86/i686/ARMv7]'+sc}
+					}
 				}
 				exit(hash)
 			} catch(e) {
@@ -275,8 +279,12 @@ const get_oscillator_compressor = () => new Promise(resolve => {
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				let hash = mini(results)
 				if (isSmart) {
-					if (hash == 'e08487bf') {notation = sgtick+'x86/amd]'+sc // 1877221
-					} else if (hash == '1f38e089') {notation = sgtick+'RFP ARM]'+sc}
+					if (true === isArch) {
+						if ('e08487bf' == hash) {notation = sgtick+'x86_64/amd_64]'+sc
+						} else if ('1f38e089' == hash) {notation = sgtick+'ARM64/aarch64]'+sc}
+					} else {
+						if ('bafe56d6' == hash) {notation = sgtick+'x86/i686/ARMv7]'+sc}
+					}
 				}
 				exit(hash)
 			} catch(e) {
