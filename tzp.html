@@ -400,6 +400,7 @@
 		<tr><td>[css] branding</td><td class="mono" id="fdBrandingCss"></td></tr>
 		<tr><td>[css] browser</td><td class="mono" id="fdResourceCss"></td></tr>
 		<tr><td>[browser] architecture</td><td class="c mono" id="browser_architecture"></td></tr>
+		<tr><td>[infinity] architecture</td><td class="c mono" id="infinity_architecture"></td></tr>
 		<tr><td>browser</td><td class="mono">
 			<span class="c" id="browser"></span> | <span class="c" id="logo"></span> | <span class="c" id="wordmark"></span>
 			</td></tr>
@@ -739,11 +740,14 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">proportional font<br>monospace size<br>sans-serif size<br>serif size</span></div>
 			&nbsp; script defaults</td><td class="c mono" id="script_defaults"></td></tr>
-		<tr><td>[css | test] woff2 <sup>2</sup></td><td class="mono"><span id="cssWoff2"></span> | <span class="c" id="woff2"></span>
+		<tr><td>[css | test] woff2 <sup>2</sup></td><td class="mono border-bottom">
+			<span id="cssWoff2"></span> | <span class="c" id="woff2">
+		</span>
 		</td></tr>
 		<!--fonts-->
-		<tr><td></td><td><span class="s12">fonts</span></td></tr>
-		<tr><td>[groups] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_groups"></td></tr>
+		<tr><td>[groups] fonts <sup>3</sup></td>
+			<td class="mono"><span class="c" id="font_sizes_groups"></span>
+			<div class="btn-right s99">fonts</div></td></tr>
 		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[+]</span>
 			[sizes | names] fonts <sup>3</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
@@ -765,18 +769,19 @@
 		<tr class="togF"><td>client range</td><td class="c mono border-bottom" id="fontsDomRectClientRange"></td></tr>
 
 		<tr><td>[base sizes] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_base"></td></tr>
-		<tr><td>[moz] fonts</td><td class="c mono" id="moz_fonts"></td></tr>
-		<tr><td>[system] fonts</td><td class="c mono" id="system_fonts"></td></tr>
-		<tr><td>[widget] fonts</td><td class="c mono" id="widget_fonts"></td></tr>
+		<tr><td>[moz] fonts</td><td class="c mono" id="fonts_moz"></td></tr>
+		<tr><td>[system] fonts</td><td class="c mono" id="fonts_system"></td></tr>
+		<tr><td>[widget] fonts</td><td class="mono border-bottom"><span class="c" id="fonts_widget"></span></td></tr>
 		<!--glyphs-->
-		<tr><td></td><td><span class="s12">glyphs</span></td></tr>
-		<tr><td>clientrect <sup>4</sup></td><td class="c mono" id="glyphs_clientrect"></td></tr>
-		<tr><td>[measureText] width <sup>4</sup></td><td class="c mono" id="glyphs_width"></td></tr>
+		<tr><td>clientrect <sup>4</sup></td>
+			<td class="mono"><span class="c" id="glyphs_clientrect"></span>
+			<div class="btn-right s99">glyphs</div></td></tr>
+		<tr><td>[measureText] width <sup>4</sup></td><td class="mono border-bottom"><span class="c" id="glyphs_width"></span></td></tr>
 		<!--tm-->
-		<tr><td></td><td><span class="s12">textmetrics</span></td></tr>
 		<tr><td>actualBoundingBoxAscent | Descent</td>
 			<td class="mono"><span class="c spaces" id="glyphs_actualBoundingBoxAscent"></span>
 			| <span class="c" id="glyphs_actualBoundingBoxDescent"></span>
+			<div class="btn-right s99">textmetrics</div>
 		</td></tr>
 		<tr><td>actualBoundingBoxLeft | Right</td><td class="mono">
 			<span class="c spaces" id="glyphs_actualBoundingBoxLeft"></span>
@@ -1041,9 +1046,8 @@
 					<p id="optDetail">detail <input type="radio" name="optOverlay" id="optFormat_detail" value="_detail" checked onchange="metricsAction()"></p>
 					<p>summary <input type="radio" name="optOverlay" id="optFormat_summary" value="_summary" onchange="metricsAction()"></p>
 					<p id="optFlat">flat <input type="radio" name="optOverlay" id="optFormat_flat" value="_flat" onchange="metricsAction()"></p>
-					<p id="optList">list <input type="radio" name="optOverlay" id="optFormat_list"value="_list" onchange="metricsAction()"></p>
-					<span id="groupHealth">
-						–––<p>all <input type="radio" name="optHealth" checked id="healthAll" onchange="metricsAction()"></p>
+					<p id="optList">list <input type="radio" name="optOverlay" id="optFormat_list" value="_list" onchange="metricsAction()"></p>
+					<span id="groupHealth">–––<p>all <input type="radio" name="optHealth" checked id="healthAll" onchange="metricsAction()"></p>
 						<p><span class="good">✓ </span><input type="radio" name="optHealth" id="healthPass" onchange="metricsAction()"></p>
 						<p><span class="bad">✗ </span><input type="radio" name="optHealth" id="healthFail" onchange="metricsAction()"></p>
 					</span>
