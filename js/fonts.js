@@ -1387,11 +1387,11 @@ function get_system_fonts(METRIC) {
 	// 1802957: FF109+: -moz no longer applied but keep for regression testing
 		// add bogus '-default-font' to check they are falling back to actual default
 	let oList = {
-		'moz_fonts': [
+		'fonts_moz': [
 			'-default-font','-moz-bullet-font','-moz-button','-moz-button-group','-moz-desktop','-moz-dialog','-moz-document',
 			'-moz-field','-moz-info','-moz-list','-moz-message-bar','-moz-pull-down-menu','-moz-window','-moz-workspace',
 		],
-		'system_fonts': ['caption','icon','menu','message-box','small-caption','status-bar']
+		'fonts_system': ['caption','icon','menu','message-box','small-caption','status-bar']
 	}
 	let aProps = ['font-size','font-style','font-weight','font-family']
 	let hash, btn ='', data = {}, notation = 'moz_fonts' == METRIC ? default_red : rfp_red
@@ -1418,7 +1418,7 @@ function get_system_fonts(METRIC) {
 		for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]; count += tmpdata[k].length}
 		hash = mini(data)
 		// moz: defaults since at least 115 on win/linux: assume android/mac the same: i.e switch to generic font-families
-		if ('moz_fonts' == METRIC) {
+		if ('fonts_moz' == METRIC) {
 			if ('windows' == isOS || 'mac' == isOS || 'linux' == isOS) {
 				if ('fe778289' == hash) {notation = default_green} // 16px normal 400 serif
 			} else if ('android' == isOS) {
@@ -1447,6 +1447,7 @@ function get_system_fonts(METRIC) {
 				if ('7e83ef35' == hash) {notation = rfp_green} // 12px normal 400 Roboto
 			}
 		}
+		if (isSmart) {count = (count +'').padStart(2,' ')} // aesthetics: align the last three "font" health metrics
 		btn = addButton(12, METRIC, Object.keys(data).length +'/'+ count)
 	} catch(e) {
 		hash = e; data = zErrLog
@@ -1526,8 +1527,19 @@ function get_widget_fonts(METRIC) {
 
 function get_unicode() {
 	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
-	// FF86+: 1676966: gfx.font_rendering.fallback.async
-		// set chars directly in HTML to force fallback ASAP
+	/* NOTES
+	FF86+: 1676966: gfx.font_rendering.fallback.async
+		- set chars directly in HTML to force fallback ASAP
+  FF131+ nightly: 1900175 + 1403931 ride the train
+		- Enable USER_RESTRICTED for content processes on Nightly
+		- security.sandbox.content.level > 7
+		- this affected (FF win11 at least) clientrect/offset + actualBounding
+			- 0x3095 + 0x532D (2 CJK chars)
+			- almost always both in every style except cursive never affected
+			- only changed in http(s), file:// not affected
+		- so reminder that generally we should always be using https for final testing/analysis
+	*/
+
 	let t0 = nowFn()
 	let styles = ['cursive','monospace','sans-serif','serif','system-ui'] // system-ui = FF92+
 	// don't use 'none': this is default style + font per style for each language
@@ -1648,16 +1660,20 @@ function get_unicode() {
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot,
 		canvas = dom.ugCanvas, ctx = canvas.getContext('2d')
 	let rangeH, rangeW, wType, hType, width, height
-	// each char
-	fntCodes.forEach(function(code) {
-		let	codeString = String.fromCodePoint(code)
-		slot.textContent = codeString // set once
-		let isFirst = code == fntCodes[0]
-		// each style
-		styles.forEach(function(stylename) {
-			slot.style.fontFamily = stylename
+
+	// each style
+	styles.forEach(function(stylename) {
+		slot.style.fontFamily = stylename
+		let isFirst = stylename == styles[0]
+		// each code
+		fntCodes.forEach(function(code) {
+			let	codeString = String.fromCodePoint(code)
+			slot.textContent = codeString // set once
+			//slot.style.fontFamily = stylename			
+
 			// only typecheck once: first char on first style
-			let isTypeCheck = (isFirst && stylename == styles[0])
+			let isFirstCode = code == fntCodes[0]
+			let isTypeCheck = (isFirst && isFirstCode)
 			// offset: span width, div height
 				// offset is just purely for info purposes: redundant with clientrect
 			if (isOffset) {
@@ -1726,7 +1742,7 @@ function get_unicode() {
 						if (oTM[k]['proceed']) {
 							let prefix = k == 'width' ? 'glyphs_' : ''
 							try {
-								let isOnce = oTM[k]['all'] == false && isFirst
+								let isOnce = oTM[k]['all'] == false && isFirstCode
 								if (oTM[k]['all'] || isOnce) {
 									let measure = tm[k]
 									if (isTypeCheck) {
@@ -1789,9 +1805,9 @@ const outputFonts = () => new Promise(resolve => {
 		get_document_fonts('document_fonts'), // sets fntDocEnabled
 		get_script_defaults('script_defaults'),
 		get_fonts('font_sizes'), // uses fntDocEnabled
-		get_system_fonts('moz_fonts'),
-		get_system_fonts('system_fonts'),
-		get_widget_fonts('widget_fonts'),
+		get_system_fonts('fonts_moz'),
+		get_system_fonts('fonts_system'),
+		get_widget_fonts('fonts_widget'),
 		get_formats(),
 		get_woff2('woff2'),
 		get_graphite('graphite'), // uses fntDocEnabled
