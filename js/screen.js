@@ -1412,16 +1412,14 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 })
 
 const outputFD = () => new Promise(resolve => {
-	let METRIC = 'infinity_architecture', res
+	let METRIC = 'infinity_architecture', value, data = ''
 	try {
-		const f = new Float32Array(1)
-		const u8 = new Uint8Array(f.buffer)
-  	f[0] = Infinity - Infinity
-  	res = u8[3]
+  	const f = new Float32Array([Infinity - Infinity])
+  	value = new Uint8Array(f.buffer)[3]
   } catch(e) {
-  	res = e+''
+  	value = e; data = zErrLog
   }
-	addBoth(3, METRIC, res)
+	addBoth(3, METRIC, value,'','', data)
 
 	if (!isGecko) {
 		let aList = ['browser','logo','wordmark','browser_architecture','os','version']
@@ -1497,7 +1495,7 @@ const outputFD = () => new Promise(resolve => {
 		metricsPrefix = (isMullvad ? 'MB' : (isTB ? 'TB': 'FF')) + isVer + isVerExtra +'-'+ (isOS !== undefined ? isOS : 'unknown') +'-'
 	}
 	// arch: FF110+ pref removed: error means 32bit
-	let str = '64bit', data = 64
+	let str = '64bit'; data = 64
 	if (isArch !== true) {
 		if ('RangeError: invalid array length' == isArch) {
 			str = '32bit'; data = 32
