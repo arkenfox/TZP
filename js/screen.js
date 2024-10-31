@@ -1412,6 +1412,17 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 })
 
 const outputFD = () => new Promise(resolve => {
+	let METRIC = 'infinity_architecture', res
+	try {
+		const f = new Float32Array(1)
+		const u8 = new Uint8Array(f.buffer)
+  	f[0] = Infinity - Infinity
+  	res = u8[3]
+  } catch(e) {
+  	res = e+''
+  }
+	addBoth(3, METRIC, res)
+
 	if (!isGecko) {
 		let aList = ['browser','logo','wordmark','browser_architecture','os','version']
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
@@ -1470,7 +1481,7 @@ const outputFD = () => new Promise(resolve => {
 	addBoth(3, 'browser', (isMullvad ? 'Mullvad Browser' : (isTB ? 'Tor Browser' : 'Firefox')))
 
 	// eval
-	let METRIC = 'eval.toString'
+	METRIC = 'eval.toString'
 	try {
 		let len = eval.toString().length
 		if (runST) {len = 43}
