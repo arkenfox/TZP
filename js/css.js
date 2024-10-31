@@ -274,10 +274,13 @@ function get_computed_styles(METRIC) {
 				// notate
 				if (isTB) {
 					if ('mac' == isOS) {
-						/* mac 1104 vs win 1102: mac has: MozOsxFontSmoothing, -moz-osx-font-smoothing */
-						if ('75b00d93' == hash) {notation = tb_green} // TB 1104
+						/* mac has
+							MozOsxFontSmoothing,-moz-osx-font-smoothing,
+							WebkitFontSmoothing,-webkit-font-smoothing,webkitFontSmoothing
+						*/
+						if ('9f958210' == hash) {notation = tb_green} // TB14 1106
 					} else {
-						if ('d86abd90' == hash) {notation = tb_green}
+						if ('d86abd90' == hash) {notation = tb_green} // TB14 1101
 					}
 				}
 			} else {
