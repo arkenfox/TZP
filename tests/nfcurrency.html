@@ -504,29 +504,29 @@ function run_main(method) {
 			} else {
 				localesHashAll = localesHash
 			}
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					if (optExpanded) {
-						// expanded results
-						if (resultsHash == "66ef5f0b") {resultsHash += s14 +" [FF115+]"+ sc
-						} else {resultsHash += zNEW
-						}
-						// expanded locales
-						if (localesHash == "44f9fbce") {localesHash += s14 +" [FF115+]"+ sc
-						} else if (isFF) {localesHash += zNEW
-						}
-					} else {
-						// results
-						if (resultsHash == "0455c360") {resultsHash += s14 +" [FF115+]"+ sc
-						} else {resultsHash += zNEW
-						}
-						// locales
-						if (localesHash == "32e62521") {localesHash += s14 +" [FF115+]"+ sc
-						} else if (isFF) {localesHash += zNEW
-						}
+			// notate new if 128+
+			if (isVer > 127) {
+				if (optExpanded) {
+					// expanded results
+					if (resultsHash == "d0c0d1cb") { // FF134+
+					} else if (resultsHash == "73a88357") { // FF128-133
+					} else {resultsHash += ' '+ zNEW
+					}
+					// expanded locales
+					if (localesHash == "f5dd6740") { // FF134+: 414
+					} else if (localesHash == "30f39f6e") { // FF128-133: 407
+					} else if (isFF) {localesHash += ' '+ zNEW
+					}
+				} else {
+					// results
+					if (resultsHash == "dfb8aa9d") { //[FF134+
+					} else if (resultsHash == "0455c360") { // FF128-133
+					} else {resultsHash += ' '+ zNEW
+					}
+					// locales
+					if (localesHash == "5d72c66f") { // FF134+: 218
+					} else if (localesHash == "32e62521") { // FF128-133: 213
+					} else if (isFF) {localesHash += ' '+ zNEW
 					}
 				}
 			}
@@ -586,6 +586,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 
 	dom.optCurrency.checked = false
 	dom.optExpanded.checked = false
@@ -624,6 +625,7 @@ Promise.all([
 	let listExtra = [
 		"af-na,afrikaans (namibia)",
 		"ar-ae,arabic (united arabic emirates)",
+		"ar-bh,arabic (bahrain)",
 		"ar-dj,arabic (djibouti)",
 		"ar-dz,arabic (algeria)",
 		"ar-er,arabic (eritrea)",
