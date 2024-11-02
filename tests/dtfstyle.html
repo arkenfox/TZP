@@ -328,7 +328,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 						try {oConst.DaM = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						try {oConst.DaL = Intl.DateTimeFormat(code, {dateStyle: "long", timeStyle: "long", timeZone: tz})} catch(e) {}
 						try {oConst.DaS = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "short", timeZone: tz})} catch(e) {}
-						cal = oConst.DaF.resolvedOptions().calendar
+						cal += '-'+ oConst.DaF.resolvedOptions().calendar
 						/* 
 							th = buddhist
 							ar-sa = islamic-umalqura
@@ -345,7 +345,7 @@ const run_main = (method = "all", tz) => new Promise(resolve => {
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						try {oConst.DaML = Intl.DateTimeFormat(code, {dateStyle: "medium", timeStyle: "long", timeZone: tz})} catch(e) {}
 						try {oConst.DaSF = Intl.DateTimeFormat(code, {dateStyle: "short", timeStyle: "full", timeZone: tz})} catch(e) {}
-						cal = oConst.DaFM.resolvedOptions().calendar
+						cal += '-'+ oConst.DaFM.resolvedOptions().calendar
 					} else {
 						try {oConst.DaFM = Intl.DateTimeFormat(code, {calendar: cal, dateStyle: "full", timeStyle: "medium", timeZone: tz})} catch(e) {}
 						if ('japanese' == cal) {
@@ -621,6 +621,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	try {
 		// pointless if we can't use the feature being tested: FF58+
 		let formatF = new Intl.DateTimeFormat('en', {dateStyle: "full", timeStyle: "full"})
@@ -758,137 +759,10 @@ Promise.all([
 "yue-cn,cantonese (china)",
 "zh-hans-hk,chinese (simplified hong kong)",
 "zh-hans-mo,chinese (simplified macau)",
-
-// unused usual suspects
-/*
-"ar-bh,arabic (bahrain)",
-"ar-dj,arabic (djibouti)",
-"ar-er,arabic (eritrea)",
-"ar-lb,arabic (lebanon)",
-"ar-ly,arabic (libya)",
-"ar-so,arabic (somalia)",
-"ar-ss,arabic (south sudan)",
-"ar-tn,arabic (tunisia)",
-"ca-fr,catalan (france)",
-"de-li,german (liechtenstein)",
-"de-lu,german (luxembourg)",
-"dyo-sn,jola-fonyl (senegal)",
-"en-ag,english (antigua & barbuda)",
-"en-ai,english (anguilla)",
-"en-at,english (austria)",
-"en-bb,english (barbados)",
-"en-bm,english (bermuda)",
-"en-bs,english (bahamas)",
-"en-cc,english (cocos islands)",
-"en-fj,english (fiji)",
-"en-fk,english (falkland islands)",
-"en-gg,english (guernsey)",
-"en-gh,english (ghana)",
-"en-gi,english (gibraltar)",
-"en-gm,english (gambia)",
-"en-jm,english (jamaica)",
-"en-ky,english (cayman islands)",
-"en-lr,english (liberia)",
-"en-ls,english (lesotho)",
-"en-mg,english (madagascar)",
-"en-mu,english (mauritius)",
-"en-mw,english (malawai)",
-"en-na,english (namibia)",
-"en-ng,english (nigeria)",
-"en-pg,english (papua new guinea)",
-"en-pr,english (puerto rico)",
-"en-rw,english (rwanda)",
-"en-sb,english (solomon islands)",
-"en-sc,english (seychelles)",
-"en-sh,english (saint helena)",
-"en-sl,english (sierra leone)",
-"en-ss,english (south sudan)",
-"en-sx,english (sint maarten)",
-"en-sz,english (swaziland)",
-"en-to,english (tonga)",
-"en-tt,english (trinidad & tobago)",
-"en-tz,english (tanzania)",
-"en-ug,english (uganda)",
-"en-vu,english (vanuatu)",
-"en-ws,english (samoa)",
-"en-zm,english (zambia)",
-"es-419,spanish (latin america and the caribbean)",
-"es-bz,spanish (belize)",
-"es-cr,spanish (costa rica)",
-"es-cu,spanish (cuba)",
-"es-gq,spanish (equatorial guinea)",
-"es-ni,spanish (nicaragua)",
-"es-pr,spanish (puerto rico)",
-"es-sv,spanish (el salvador)",
-"ff-adlm-bf,fulah (adlam burkina faso)",
-"ff-adlm-gm,fulah (adlam gambia)",
-"ff-adlm-lr,fulah (adlamd liberia)",
-"ff-adlm-mr,fulah (adlam mauritania)",
-"ff-adlm-ng,fulah (adlam nigeria)",
-"ff-adlm-sl,fulah (adlam sierra leone)",
-"ff-gn,fulah (guinea)",
-"fo-dk,faroese (denmark)",
-"fr-bi,french (burundi)",
-"fr-cd,french (congo kinshasa)",
-"fr-cm,french (cameroon)",
-"fr-dz,french (algeria)",
-"fr-gn,french (guinea)",
-"fr-gp,french (guadeloupe)",
-"fr-ht,french (haiti)",
-"fr-km,french (comoros)",
-"fr-lu,french (luxembourg)",
-"fr-mg,french (madagascar)",
-"fr-mr,french (mauritania)",
-"fr-mu,french (mauritius)",
-"fr-rw,french (rwanda)",
-"fr-sc,french (seychelles)",
-"fr-sn,french (senegal)",
-"fr-sy,french (syria)",
-"fr-tn,french (tunisia)",
-"fr-vu,french (vanuatu)",
-"kea-cv,kabuverdianu (cape verde)",
-"ln-ao,lingala (angola)",
-"mas-tz,masia (tanzania)",
-"ms-sg,malay (singapore)",
-"nl-aw,dutch (aruba)",
-"nl-bq,dutch (caribbean netherlands)",
-"nl-cw,dutch (curaçao)",
-"os-ru,ossetian (russia)",
-"pa-pk,punjabi (pakistan)",
-"pt-cv,portuguese (cape verde)",
-"pt-gw,portuguese (guinea-bissau)",
-"pt-lu,portuguese (luxembourg)",
-"pt-mz,portuguese (mazambique)",
-"pt-pt,portuguese (portugal)",
-"pt-st,portuguese (são tomé & príncipe)",
-"ro-md,romanian (moldova)",
-"ru-by,russian (belarus)",
-"ru-kg,russian (kyrgyzstan)",
-"ru-kz,russian (kazakhstan)",
-"ru-md,russian (moldova)",
-"ru-ua,russian (ukraine)",
-"se-se,northern sami",
-"so-dj,somali (djibouti)",
-"so-et,somali (ethiopia)",
-"sr-cyrl-ba,serbian (cyrillic bosnia & herzegovina)",
-"sr-me,serbian (montenegro)",
-"sr-xk,serbian (kosovo)",
-"sv-fi,swedish (finland)",
-"sw-cd,swahili (congo kinshasa)",
-"sw-ug,swahili (uganda)",
-"ta-sg,tamil (singapore)",
-"teo-ke,teso (kenya)",
-"tr-tr,turkish (turkey)",
-"uz-af,uzbek (afghanistan)",
-"yue-hans,cantonese (simplified)",
-"zh-hant-mo,chinese (traditional macau)",
-//*/
-
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	//list = ['ar-sa,arabic (saudi arabia)','en,english','fa,persian','th,thai',]
-
 	legend()
 	if (isSupported) {
 		setBtn("all")

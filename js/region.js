@@ -224,6 +224,7 @@ function set_oIntlTests() {
 		FSD: new Date('2023-06-11T01:12:34.5678'), // no Z
 		Era: new Date(-1, -11, -30),
 		Jan: new Date('2023-01-15'),
+		Jun: new Date("2023-06-15"),
 		Sep: new Date('2023-09-15'),
 		Nov: new Date('2023-11-15'),
 		Wed: new Date('January 18, 2023 1:00:00'), // doubles as hour 1
@@ -243,7 +244,7 @@ function set_oIntlTests() {
 		},
 		compact: {
 			'long': [0/0, 1000, 2e6, 6.6e12, 7e15],
-			'short': [-1100000000],
+			'short': [-1100000000, -1000],
 		},
 		currency: {'KES': curB, 'MOP': curS, 'USD': curA, 'XXX': curN,},
 		dayperiod: {'long': [8,22], 'narrow': [8,15], 'short': [12,15,18]},
@@ -263,7 +264,7 @@ function set_oIntlTests() {
 			},
 			month: {
 				'narrow': [{month: 'narrow'}, [dates.Nov] ],
-				'short': [{month: 'short'}, [dates.Jan, dates.Sep]],
+				'short': [{month: 'short'}, [dates.Jan, dates.Jun, dates.Sep]],
 			},
 			weekday: {
 				'long': [{weekday: 'long'}, [dates.Wed, dates.Fri]],
@@ -749,46 +750,51 @@ function get_locale_intl() {
 }
 
 function get_locale_resolvedoptions(METRIC) {
-
-	function get_metric(m, code) {
-		let r
-		let type = 'string'
-		try {
-			// collator
-			if (m == 'caseFirst') {r = Intl.Collator(code).resolvedOptions().caseFirst
-			} else if (m == 'ignorePunctuation') {type = 'boolean'; r = Intl.Collator(code).resolvedOptions().ignorePunctuation
-			// DTF
-			} else if (m == 'calendar') {r = Intl.DateTimeFormat(code).resolvedOptions().calendar
-			} else if (m == 'day') {r = Intl.DateTimeFormat(code).resolvedOptions().day
-			} else if (m == 'hourCycle') {r = Intl.DateTimeFormat(code, {hour: 'numeric'}).resolvedOptions().hourCycle
-			} else if (m == 'month') {r = Intl.DateTimeFormat(code).resolvedOptions().month
-			} else if (m == 'numberingSystem_dtf') {r = Intl.DateTimeFormat(code).resolvedOptions().numberingSystem
-			// NF
-			} else if (m == 'numberingSystem_nf') {r = new Intl.NumberFormat(code).resolvedOptions().numberingSystem
-			// PR
-			} else if (m == 'pluralCategories') {r = new Intl.PluralRules(code).resolvedOptions().pluralCategories.join(', ')
-			// RTF
-			} else if (m == 'numberingSystem_rtf') {r = new Intl.RelativeTimeFormat(code).resolvedOptions().numberingSystem
+	// already sorted
+	let oTests = {
+		collator: ['caseFirst'],
+		datetimeformat: ['calendar','day','hourcycle','month','numberingSystem'],
+		pluralrules: ['pluralCategories'],
+	}
+	function get_metrics(code) {
+		let tmpData = {}
+		for (const k of Object.keys(oTests)) {
+			tmpData[k] = {}
+			let metrics = oTests[k]
+			try {
+				// set constructor
+				let constructor
+				if ('collator' == k) {constructor = Intl.Collator(code).resolvedOptions()
+				} else if ('datetimeformat' == k) {constructor = Intl.DateTimeFormat(code).resolvedOptions()
+				} else if ('pluralrules' == k) {constructor = new Intl.PluralRules(code).resolvedOptions()
+				}
+				// get values
+				metrics.forEach(function(m) {
+					try {
+						let value
+						if ('hourcycle' == m) {
+							value = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
+						} else if ('pluralCategories' == m) {
+							value = constructor[m].join(', ')
+						} else {
+							value = constructor[m]
+						}
+						tmpData[k][m] = value
+					} catch(e) {
+						log_error(4, METRIC +'_'+ k + '_'+ m, e)
+						tmpData[k][m] = zErr
+					}
+				})
+			} catch(e) {
+				log_error(4, METRIC +'_'+ k, e)
+				tmpData[k] = zErr
 			}
-			if (runST) {r = undefined}
-			let typeCheck = typeFn(r)
-			if (type !== typeCheck) {throw zErrType + typeCheck}
-			return r
-		} catch(e) {
-			log_error(4, METRIC +'_'+ m, e)
-			return zErr
 		}
+		return tmpData
 	}
 
-	let oData = {}, oCheck = {}, notation = locale_red
-	let metrics = [
-		'calendar','caseFirst','day','hourCycle','ignorePunctuation','month',
-		'numberingSystem_dtf','numberingSystem_nf','numberingSystem_rtf','pluralCategories',
-	]
-	metrics.forEach(function(m) {oData[m] = get_metric(m, undefined)})
-	if (isLocaleValid) {
-		metrics.forEach(function(m) {oCheck[m] = get_metric(m, isLocaleValue)})
-	}
+	let oData = get_metrics(undefined), oCheck = {}, notation = locale_red
+	if (isLocaleValid) {oCheck = get_metrics(isLocaleValue)}
 	let hash = mini(oData), btnDiff = ''
 	if (isLocaleValid) {
 		if (hash == mini(oCheck)) {

@@ -354,20 +354,18 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					// ignore if non-supported used, which return same as undefined = user's resolved options
-					// results
-					if (resultsHash == "ecee9fda") {resultsHash += s14 +" [FF115+]"+ sc
-					} else {resultsHash += zNEW
-					}
-					// locales
-					if (localesHash == "f89a86b9") {localesHash += s14 +" [FF115+]"+ sc
-					} else if (isFF) {localesHash += zNEW
-					}
+			// notate new if 128+
+			if (isVer > 127) {
+				// ignore if non-supported used, which return same as undefined = user's resolved options
+				// results
+				if (resultsHash == "3c9b24da") { // FF134+
+				} else if (resultsHash == "d928a063") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "59849c68") { // FF134+: 242
+				} else if (localesHash == "9d09c1ea") { // FF128-133: 238
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
@@ -428,9 +426,9 @@ Promise.all([
 		// add additional locales to core locales for this test
 		let aListExtra = [
 			"ar-ae,arabic (united arabic emirates)",
+			"ar-dj,arabic (djibouti)",
 			"ar-dz,arabic (algeria)",
 			"bs-cyrl,bosnian (cyrillic)",
-			//"dyo-sn,jola-fonyl (senegal)",
 			"en-at,english (austria)",
 			"en-au,english (australia)",
 			"en-ca,english (canada)",
@@ -443,6 +441,7 @@ Promise.all([
 			"ff-adlm,fulah (adlam)",
 			"fr-ca,french (canada)",
 			"hi-latn,hindi (latin)",
+			"kok-latn,konkani (latin)",
 			"ks-deva,kashmiri (devanagari)",
 			"pa-pk,punjabi (pakistan)",
 			"ps-pk,pashto (pakistan)",

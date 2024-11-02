@@ -523,16 +523,13 @@ function collator() {
 				let ff = ""
 				// don't notate unless it's our own preset
 				if (isFF && thisHash == exampleHash) {
-					// only hash notate if 102+
-					let is102 = (CanvasRenderingContext2D.prototype.hasOwnProperty("direction") && Array(1).includes())
-					if (is102) {
-						if (localesHash == "a7d80e7c") {ff = "110+"
-						} else if (localesHash == "ec4e8131") {ff = "102-109"
-						} else {ff = zNEW}
-						if (ff !== zNEW) {ff = s14 +"[FF"+ ff + "]"+ sc}
+					// notate new if 128+
+					if (isVer > 127) {
+						if (localesHash == "a7d80e7c") { // FF128+
+						} else {localesHash += ' '+ zNEW}
 					}
 				}
-				strItem = s12 +"locales: "+ sc + localesHash +" "+ ff +"<br>"
+				strItem = s12 +"locales: "+ sc + localesHash +"<br>"
 				output.push(strItem)
 
 				// details
@@ -554,6 +551,7 @@ check_example()
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	// add additional locales to core locales for this test
 	let aListExtra = [
 		"bs-cyrl,bosnian (cyrillic)",

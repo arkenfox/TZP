@@ -243,19 +243,17 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					// results
-					if (resultsHash == "c967767a") {resultsHash += s14 +" [FF115+]"+ sc
-					} else {resultsHash += zNEW
-					}
-					// locales
-					if (localesHash == "5520ad5a") {localesHash += s14 +" [FF115+]"+ sc
-					} else if (isFF) {localesHash += zNEW
-					}
+			// notate new if 128+
+			if (isVer > 127) {
+				// results
+				if (resultsHash == "86d07210") { // FF134+
+				} else if (resultsHash == "c967767a") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "b7e10450") { // FF134+: 145
+				} else if (localesHash == "5520ad5a") { // FF128-133: 140
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "custom") {
@@ -325,6 +323,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	// support
 	try {
 		let test = new Intl.ListFormat(undefined, {style: "short", type: "conjunction"}).format(["a","b","c"])
