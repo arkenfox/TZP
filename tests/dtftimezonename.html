@@ -528,6 +528,7 @@ function run_main(method) {
 				"America/Toronto": tzLG,
 				"America/Winnipeg": tzLG,
 				"Asia/Dili": tzSG,
+				"Asia/Chongqing": tzSG,
 				"Asia/Hong_Kong": tzSG,
 				"Asia/Kolkata": tzSG,
 				"Asia/Kuching": tzSG,
@@ -556,7 +557,7 @@ function run_main(method) {
 			let newTZs = [
 			]
 			newTZs.forEach(function(tz) {
-				tests["Europe/"+tz] = everything
+				tests["Asia/"+tz] = everything
 			})
 			//*/
 		} else {
@@ -565,6 +566,7 @@ function run_main(method) {
 				"Africa/Lusaka": tzSG,
 				"Africa/Nairobi": tzSG,
 				"America/La_Paz": tzSG,
+				"Asia/Chongqing": tzSG,
 				"Asia/Phnom_Penh": tzSG,
 				"Asia/Seoul": tzLG,
 				"Asia/Yerevan": tzSG,
@@ -747,33 +749,31 @@ function run_main(method) {
 			} else {
 				localesHashAll = localesHash
 			}
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					if (optExpanded) {
-						// expanded results
-						if (resultsHash == "e1a66021") {resultsHash += s14 +" [FF133+]"+ sc
-						} else if (resultsHash == "a6ce91a0") {resultsHash += s14 +" [FF124-132 | ESR115]"+ sc
-						} else if (resultsHash == "531d45af") {resultsHash += s14 +" [FF115-123]"+ sc
-						} else {resultsHash += ' '+ zNEW
-						}
-						// expanded locales
-						if (localesHash == "489b276a") {localesHash += s14 +" [FF115+]"+ sc
-						} else if (isFF) {localesHash += ' '+ zNEW
-						}
-					} else {
-						// results
-						if (resultsHash == "63c222e7") {resultsHash += s14 +" [FF133+]"+ sc
-						} else if (resultsHash == "746d3f7f") {resultsHash += s14 +" [FF124-132 | ESR115]"+ sc
-						} else if (resultsHash == "e295da2b") {resultsHash += s14 +" [FF115-123]"+ sc // 121
-						} else {resultsHash += ' '+ zNEW
-						}
-						// locales
-						if (localesHash == "2b77fc8d") {localesHash += s14 +" [FF115+]"+ sc
-						} else if (isFF) {localesHash += ' '+ zNEW
-						}
+			// notate new if 128+
+			if (isVer > 127) {
+				if (optExpanded) {
+					// expanded results
+					if (resultsHash == "47586fc8") { // FF134+
+					} else if (resultsHash == "8194bdd4") { // FF133
+					} else if (resultsHash == "c75c23bb") { // FF128-132
+					} else {resultsHash += ' '+ zNEW
+					}
+					// expanded locales
+					if (localesHash == "5202321d") { // FF133: 321
+					} else if (localesHash == "97fc8c69") { // FF128-133: 311
+					} else if (isFF) {localesHash += ' '+ zNEW
+					}
+				} else {
+					// results
+					if (resultsHash == "67286a15") { // FF134+
+					} else if (resultsHash == "63c222e7") { // FF133
+					} else if (resultsHash == "746d3f7f") { // FF128-132
+					} else {resultsHash += ' '+ zNEW
+					}
+					// locales
+					if (localesHash == "3d661dc5") { // FF134+: 221
+					} else if (localesHash == "2b77fc8d") { // FF128-133: 213
+					} else if (isFF) {localesHash += ' '+ zNEW
 					}
 				}
 			}
@@ -847,7 +847,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
-
+	get_isVer()
 	dom.optExpanded.checked = false
 
 	try {
@@ -870,6 +870,7 @@ Promise.all([
 	let listExtra = [
 		"ar-ae,arabic (united arabic emirates)",
 		"ar-bh,arabic (bahrain)",
+		"ar-eg,arabic (egypt)",
 		"ar-ly,arabic (libya)",
 		"ar-sa,arabic (saudi arabia)",
 		"ar-tn,arabic (tunisia)",
@@ -929,6 +930,7 @@ Promise.all([
 		"fr-tn,french (tunisia)",
 		"hi-latn,hindi (latin)",
 		"ko-kp,korean (north korea)",
+		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
 		"lrc-iq,northern luri (iraq)",
 		"ms-id,malay (indonesia)",
