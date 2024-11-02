@@ -145,7 +145,10 @@ function run_main(method) {
 		tests = { // FF78+
 			"true": {
 				"long": [0/0, 1000, 2e6, 6.6e12, 7e15], // force group on trillions
-				"short": [-1100000000], // we need one negative, and force a short decimal
+				"short": [
+					-1100000000, // only needed for FF133 or lower
+					-1000, // FF134+
+				],
 			}
 		}
 		// FF77 or lower: add 1/10
@@ -247,20 +250,17 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					// results
-					if (resultsHash == "c70db6cd") {resultsHash += s14 +" [FF116+]"+ sc
-					} else if (resultsHash == "04fa9a89") {resultsHash += s14 +" [FF115]"+ sc
-					} else {resultsHash += zNEW
-					}
-					// locales
-					if (localesHash == "193159e8") {localesHash += s14 +" [FF115+]"+ sc
-					} else if (isFF) {localesHash += zNEW
-					}
+			// notate new if 128+
+			if (isVer > 127) {
+				// results
+				if (resultsHash == "6daf8610") { // FF134+ ICU76 1927706
+				} else if (resultsHash == "71f7ad5a") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "1ecbef17") { // FF134+: 164
+				} else if (localesHash == "b97a506b") { // FF128-133: 158
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
@@ -306,9 +306,11 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	// add additional locales to core locales for this test
 	let aListExtra = [
 		"ar-ae,arabic (united arabic emirates)",
+		"ar-bh,arabic (bahrain)",
 		"ar-dz,arabic (algeria)",
 		"bs-cyrl,bosnian (cyrillic)",
 		"de-at,german (austria)",
@@ -326,6 +328,7 @@ Promise.all([
 		"fr-lu,french (luxembourg)",
 		"hi-latn,hindi (latin)",
 		"it-ch,italian (switzerland)",
+		"kok-latn,konkani (latin)",
 		"ms-bn,malay (brunei)",
 		"pt-pt,portuguese (portugal)",
 		"se-fi,northern sami (finland)",
