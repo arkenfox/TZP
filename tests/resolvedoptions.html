@@ -32,8 +32,10 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-			<hr><br>
-			<span id ="results"></span>
+				<span id="ball" class="btn4 btn" onClick="run('all')">[ ALL ]</span>
+				<span id="bmin" class="btn4 btn" onClick="run('min')">[ MIN ]</span>
+			<br><br><hr><br>
+				<span id ="results"></span>
 			</td></tr>
 	</table>
 	<br>
@@ -44,7 +46,9 @@
 var list = gLocales,
 	aLegend = [],
 	aLocales = [],
-	oData = {}
+	oData = {},
+	oTests = {},
+	localesHashAll = "" // to compare min to
 
 function log_console(name) {
 	let hash = mini(sDetail[name])
@@ -89,78 +93,78 @@ function legend() {
 	dom.legend.innerHTML = header + aLegend.join("<br>")
 }
 
-
-function run_main() {
+function run_main(method) {
 	let t0 = performance.now()
 	oData = {}
 	let oTempData = {}
-	let spacer = "<br><br>"
+	let spacer = '<br><br>'
 
-	function get_metric(m, code) {
-		let r
-		try {
-			let DTF = Intl.DateTimeFormat(code).resolvedOptions()
-			let Collator = Intl.Collator(code).resolvedOptions()
-			// collator
-			if (m == "caseFirst") {r = Collator.caseFirst
-			} else if (m == "ignorePunctuation") {r = Collator.ignorePunctuation
-			// DTF
-			} else if (m == "calendar") {r = DTF.calendar
-			} else if (m == "day") {r = DTF.day
-			} else if (m == "hourcycle") {r = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
-			} else if (m == "month") {r = DTF.month
-			} else if (m == "numberingsystem_dtf") {r = DTF.numberingSystem
-			// NF
-			} else if (m == "numberingsystem_nf") {r = new Intl.NumberFormat(code).resolvedOptions().numberingSystem
-			// PR
-			} else if (m == "pluralCategories") {r = new Intl.PluralRules(code).resolvedOptions().pluralCategories.join(", ")
-			// RTF
-			} else if (m == "numberingsystem_rtf") {r = new Intl.RelativeTimeFormat(code).resolvedOptions().numberingSystem
+	function get_metrics(code) {
+		let oTest = {}
+		for (const k of Object.keys(oTests)) {
+			oTest[k] = {}
+			let metrics = oTests[k]
+			try {
+				// set constructor
+				let constructor
+				if ('collator' == k) {constructor = Intl.Collator(code).resolvedOptions()
+				} else if ('datetimeformat' == k) {constructor = Intl.DateTimeFormat(code).resolvedOptions()
+				} else if ('numberformat' == k) {constructor = new Intl.NumberFormat(code).resolvedOptions()
+				} else if ('pluralrules' == k) {constructor = new Intl.PluralRules(code).resolvedOptions()
+				} else if ('relativetimeformat' == k) {constructor = new Intl.RelativeTimeFormat(code).resolvedOptions()
+				} else if ('segmenter' == k) {constructor = new Intl.Segmenter(code).resolvedOptions()
+				}
+				// get values
+				metrics.forEach(function(m) {
+					try {
+						let value
+						if ('hourcycle' == m) {
+							value = Intl.DateTimeFormat(code, {hour: "numeric"}).resolvedOptions().hourCycle
+						} else if ('pluralCategories' == m) {
+							value = constructor[m].join(', ')
+						} else {
+							value = constructor[m]
+						}
+						oTest[k][m] = value
+					} catch(e) {
+						oTest[k][m] = zErr
+					}
+				})
+			} catch(e) {
+				oTest[k] = zErr
 			}
-			return r
-		} catch(e) {
-			return zErr
 		}
+		return oTest
 	}
-	let metrics = [
-		// collation (3)
-			/* ignore: "sensitivity","collation","numeric","usage" = no entropy */
-		"caseFirst", // 2		
-		"ignorePunctuation", // 2
-		// DTF (27)
-			/* ignore: year = no entropy	*/
-		"calendar", // 4
-		"day", // 2
-		"hourcycle", // 2
-		"month", // 2
 
-		"numberingsystem_dtf", // 10
-		// NF (10)
-			/*
-				ignore: maximumFractionDigits, minimumFractionDigits, minimumIntegerDigits, notation, roundingIncrement
-				roundingMode, roundingPriority, signDisplay, style, trailingZeroDisplay, useGrouping = no entropy
-			*/
-		"numberingsystem_nf", // 10
-		// PR (10)
-			/*
-				ignore: maximumFractionDigits, minimumFractionDigits, minimumIntegerDigits,
-				roundingIncrement, roundingMode, roundingPriority, trailingZeroDisplay, type = no entropy
-			*/
-		"pluralCategories",
-		// RFT (10)
-			/* ignore: numeric, style = no entropy */
-		"numberingsystem_rtf", // 10
-		// Segmenter: ignore granularity = no entropy
-	]
-	metrics.sort()
+	let oMin = {
+		'collator': ['caseFirst'],
+		'datetimeformat': ['calendar','day','hourcycle','month','numberingSystem'],
+		'pluralrules': ['pluralCategories'],
+	}
+	let oMax = {
+		'collator': ['caseFirst','collation','ignorePunctuation','numeric','sensitivity','usage'],
+		"datetimeformat": ['calendar','day','hourcycle','month','numberingSystem','year'],
+		'numberformat': [
+			'maximumFractionDigits','minimumFractionDigits','minimumIntegerDigits',
+			'roundingIncrement','roundingMode','roundingPriority','trailingZeroDisplay',
+			'notation','numberingSystem','signDisplay','style','useGrouping'
+		],
+		'pluralrules': [
+			'maximumFractionDigits','minimumFractionDigits','minimumIntegerDigits','pluralCategories',
+			'roundingIncrement','roundingMode','roundingPriority','trailingZeroDisplay','type'
+		],
+		'relativetimeformat': ['numberingSystem','nnumeric','style'],
+		'segmenter': ['granularity'],
+	}
 
 	try {
+		oTests = method == 'all' ? oMax : oMin
+
 		let aHashes = []
 		aLocales.forEach(function(code) {
-			let oTest = {}
-			metrics.forEach(function(m) {
-				oTest[m] = get_metric(m, code)
-			})
+			let oTest = get_metrics(code)
+
 			let hash = mini(oTest)
 			if (oTempData[hash] == undefined) {
 				aHashes.push(hash)
@@ -188,8 +192,13 @@ function run_main() {
 			let localeCount = oData[k].locales.length
 			let str = ""
 			for (const j of Object.keys(oData[k].data).sort()) {
-				str += "<li>"+ s16 + j + sc +": "+ oData[k].data[j] +"</li>"
+				str += s14 + j + sc // +": "+ oData[k].data[j] +"</li>"
+				for (const m of Object.keys(oData[k].data[j]).sort()) {
+					str += "<li>"+ s99 + m + sc +": "+ oData[k].data[j][m] +"</li>"
+				}
 			}
+			// wrap into details for long lists
+			if ('all' == method) {str = "<details><summary>details</summary>"+ str +"</details>"}
 			displaylist.push(
 				s12 + k + sc + s4 + " ["+ localeCount +"]"+ sc +"<br>"
 					+ "<ul class='main'>"+ str
@@ -207,27 +216,30 @@ function run_main() {
 		let localesHash = mini(localeGroups)
 
 		// notations
-		if (isFF) {
-			// only hash notate if 115+
-			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-			if (is115) {
-				// track FF version changes
+		let localesMatch = ""
+		if (method == "all") {
+			localesHashAll = localesHash
+			// notate new if 128+
+			if (isVer > 127) {
 				// results
-				if (resultsHash == "7f7a9769") {resultsHash += s14 +" [FF121+]"+ sc
-				} else if (resultsHash == "09a9661a") {resultsHash += s14 +" [FF115-120]"+ sc
-				} else {resultsHash += zNEW
+				if (resultsHash == "d2088ade") { //FF134+
+				} else if (resultsHash == "422c656d") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
-				if (localesHash == "706f17d6") {localesHash += s14 +" [FF115+]"+ sc
-				} else if (isFF) {localesHash += zNEW
+				if (localesHash == "17e099a0") { // FF134+: 57
+				} else if (localesHash == "706f17d6") { // FF128-133: 58
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
+		} else {
+			localesMatch = localesHash == localesHashAll ? green_tick : red_cross
 		}
 
 		// display
 		let display = s4 + Object.keys(oData).length + sc +" from "+ s4 + aLocales.length + sc
 			+ spacer + s16 +"results: "+ sc + resultsHash +" " + resultsBtn +"<br>"
-			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + spacer
+			+ s12 +"locales: "+ sc + localesHash +" "+ localesBtn + localesMatch + spacer
 		dom.results.innerHTML = display + "<br>" + displaylist.join("<br>")
 
 	} catch(e) {
@@ -235,19 +247,34 @@ function run_main() {
 	}
 }
 
-function run() {
+function run(method) {
 	//reset
+	setBtn(method)
 	dom.perf = ""
 	dom.results = ""
 	// delay so users see change and allow paint
 	setTimeout(function() {
-		run_main()
+		run_main(method)
 	}, 1)
+}
+
+function setBtn(method) {
+	// reset btns
+	let items = document.getElementsByClassName("btn8")
+	for (let i=0; i < items.length; i++) {
+		items[i].classList.add("btn4")
+		items[i].classList.remove("btn8")
+	}
+	// set btn
+	let el = document.getElementById("b"+ method)
+	el.classList.add("btn8")
+	el.classList.remove("btn4")
 }
 
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	// add additional locales to core locales for this test
 	let aListExtra = [
 		"ar-ae,arabic (united arabic emirates)",
@@ -266,8 +293,9 @@ Promise.all([
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
 	legend()
+	setBtn("all")
 	setTimeout(function() {
-		run()
+		run_main("all")
 	}, 100)
 })
 
