@@ -238,18 +238,17 @@ function run_main(method) {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// results
-					if (resultsHash == "34d56154") {resultsHash += s14 +" [FF115+]"+ sc
-					} else {resultsHash += zNEW
-					}
-					// locales
-					if (localesHash == "e0099d08") {localesHash += s14 +" [FF115+]"+ sc
-					} else if (isFF) {localesHash += zNEW
-					}
+			// notate new if 128+
+			if (isVer > 127) {
+				// results
+				if (resultsHash == "7f536f4e") { // FF134+
+				} else if (resultsHash == "0f7f07b9") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "827736eb") { // FF134+: 77
+				} else if (localesHash == "f1dcf731") { // FF128-133: 74
+				} else if (isFF) {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
@@ -298,6 +297,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat
 	// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
 
@@ -324,12 +324,14 @@ Promise.all([
 	// add additional locales to core locales for this test
 	let aListExtra = [
 		"ar-ae,arabic (united arabic emirates)",
+		"ar-dj,arabic (djibouti)",
 		"ar-dz,arabic (algeria)",
 		"de-ch,german (switzerland)",
 		"en-au,english (australia)",
 		"en-se,english (sweden)",
 		"ff-adlm,fulah (adlam)",
 		"fr-ch,french (switzerland)",
+		"it-ch,italian (switzerland)",
 		"ru-ua,russian (ukraine)",
 		"ur-in,urdu (india)",
 		"uz-cyrl-uz,uzbek (cyrillic uzbekistan)",
