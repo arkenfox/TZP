@@ -243,12 +243,13 @@ function run_main(method = "all") {
 		],
 		"month": [
 			[new Date("2023-01-15"), {"short": {month: "short"}}],
+			[new Date("2023-06-15"), {"short": {month: "short"}}],
 			[new Date("2023-09-15"), {"short": {month: "short"}}],
 			[new Date("2023-11-15"), {"narrow": {month: "narrow"}}],
 		],
 		"weekday": [
 			[dateA, {"narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
-			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}]
+			[dateB, {"short": {weekday: "short"}, "narrow": {weekday: "narrow"}, "long": {weekday: "long"}}],
 		],
 	}
 
@@ -278,6 +279,7 @@ function run_main(method = "all") {
 					try {oConst.WeL = new Intl.DateTimeFormat(code, {weekday: "long"})} catch(e) {}
 					try {oConst.MoS = new Intl.DateTimeFormat(code, {month: "short"})} catch(e) {}
 					try {oConst.MoN = new Intl.DateTimeFormat(code, {month: "narrow"})} catch(e) {}
+					//try {oConst.MoL = new Intl.DateTimeFormat(code, {month: "long"})} catch(e) {}
 					try {oConst.HoN = new Intl.DateTimeFormat(code, {hour: "numeric"})} catch(e) {}
 					try {oConst.HoH = new Intl.DateTimeFormat(code, {hour: "2-digit", hourCycle: "h11"})} catch(e) {}
 					try {oConst.ErL = new Intl.DateTimeFormat(code, {era: "long"})} catch(e) {}
@@ -361,21 +363,18 @@ function run_main(method = "all") {
 		let localesMatch = ""
 		if (method == "all") {
 			localesHashAll = localesHash
-			if (isFF) {
-				// only hash notate if 115+
-				let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
-				if (is115) {
-					// track FF version changes
-					// ignore if non-supported used, which return same as undefined = user's resolved options
-					// results
-					if (resultsHash == "80c3fd6b") {resultsHash += s14 +" [FF127+]"+ sc
-					} else if (resultsHash == "72c1b3f5") {resultsHash += s14 +" [FF115-126]"+ sc
-					} else {resultsHash += ' '+ zNEW
-					}
-					// locales
-					if (localesHash == "86c0f15f") {localesHash += s14 +" [FF115+]"+ sc
-					} else {localesHash += ' '+ zNEW
-					}
+			// notate new if 128+
+			if (isVer > 127) {
+				// ignore if non-supported used, which return same as undefined = user's resolved options
+				// results
+				if (resultsHash == "b33bb78b") { // FF134+
+				} else if (resultsHash == "0095da8a") { // FF128-133
+				} else {resultsHash += ' '+ zNEW
+				}
+				// locales
+				if (localesHash == "eef79c58") { // FF134+: 310
+				} else if (localesHash == "0c9d407a") { // FF128-133: 301
+				} else {localesHash += ' '+ zNEW
 				}
 			}
 		} else if (method == "min") {
@@ -422,6 +421,7 @@ function setBtn(method) {
 Promise.all([
 	get_globals()
 ]).then(function(){
+	get_isVer()
 	try {
 		// pointless if we can't use the feature being tested: FF58+
 		let test = new Intl.DateTimeFormat("en").formatToParts(new Date)
@@ -457,13 +457,16 @@ Promise.all([
 		"en-ca,english (canada)",
 		"en-ch,english (switzerland)",
 		"en-dk,english (denmark)",
+		"en-gb,english (united kingdom)",
 		"en-ie,english (ireland)",
 		"en-il,english (israel)",
 		"es-419,spanish (latin america and the caribbean)",
 		"es-ar,spanish (argentina)",
+		"es-bz,spanish (belize)",
 		"es-cl,spanish (chile)",
 		"es-co,spanish (colombia)",
 		"es-do,spanish (dominican republic)",
+		"es-mx,spanish (mexico)",
 		"es-pe,spanish (peru)",
 		"es-ph,spanish (philippines)",
 		"es-uy,spanish (uruguay)",
@@ -480,6 +483,7 @@ Promise.all([
 		"hi-latn,hindi (latin)",
 		"hr-ba,croatian (bosnia & herzegovina)",
 		"it-ch,italian (switzerland)",
+		"kok-latn,konkani (latin)",
 		"ks-deva,kashmiri (devanagari)",
 		"lrc-iq,northern luri (iraq)",
 		"ms-bn,malay (brunei)",
