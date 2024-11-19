@@ -381,7 +381,7 @@ let fntMaster = {
 			'Bitstream Charter','C059','Courier 10 Pitch','D050000L',
 			'DejaVu Math TeX Gyre','Nimbus Mono PS','Nimbus Roman',
 			'Nimbus Sans','P052','Quicksand','Standard Symbols PS',
-			'Symbola','URW Bookman','URW Gothic','Z003',
+			'URW Bookman','URW Gothic','Z003',
 			// ToDo: expand
 		],
 		mac: [
