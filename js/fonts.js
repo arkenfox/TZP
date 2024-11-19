@@ -346,6 +346,10 @@ let fntMaster = {
 				// western/symbols
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX','STIX Two Text','Symbola', // fedora
 			'Dingbats','FreeMono','Jamrul','Kinnari','Ubuntu', // ubuntu
+				// other
+			'OpenSymbol', // openoffice
+			'Amiri', // libreoffice
+			'Liberation Mono','Liberation Sans','Liberation Serif',
 				// scripts
 				// ubuntu
 			'KacstNaskh','PakType Naskh Basic', // arabic
@@ -373,10 +377,11 @@ let fntMaster = {
 			'Droid Sans Tamil', // tamil
 			'Droid Sans Thai', // thai
 			'Nuosu SIL', // yi
-				// other
-			'Liberation Mono','Liberation Sans','Liberation Serif',
-			'OpenSymbol', // openoffice
-			'Amiri', // libreoffice
+			// debian
+			'Bitstream Charter','C059','Courier 10 Pitch','D050000L',
+			'DejaVu Math TeX Gyre','Nimbus Mono PS','Nimbus Roman',
+			'Nimbus Sans','P052','Quicksand','Standard Symbols PS',
+			'Symbola','URW Bookman','URW Gothic','Z003',
 			// ToDo: expand
 		],
 		mac: [
