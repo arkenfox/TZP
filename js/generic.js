@@ -485,6 +485,7 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 			let path = 'chrome://browser/content/abouttor/aboutTor.css'
 			// TB14 (added TB13.5) .. aaaaaaand still no good on android
 			//if (isVer > 127) {path = 'chrome://global/content/torconnect/aboutTorConnect.css'}
+			if (isVer > 127) {path = 'chrome://global/skin/tor-colors.css'}
 			css.href = path
 			css.type = 'text/css'
 			css.rel = 'stylesheet'
