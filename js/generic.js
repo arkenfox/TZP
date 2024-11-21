@@ -465,31 +465,31 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		}
 	}, 150)
 
+	let el;
 	function exit(value) {
 		isDone = true
-		try {document.head.removeChild(css)} catch(e) {}
+		try {el.remove()} catch(e) {}
 		if ('boolean' == typeFn(value)) {isTB = value}
 		log_perf(SECTG, METRIC, t0,'', value)
 		return resolve(value)
 	}
-	// FF121+: 1855861
 	const get_event = () => new Promise(resolve => {
-		css.onload = function() {exit(true)}
-		css.onerror = function() {exit(false)}
+		el.onload = function() {exit(true)}
+		el.onerror = function() {exit(false)}
 	})
-	let css = document.createElement('link')
 	if (!runSG) {
 		try {
-			// note: we do not know the OS yet
-			// TB13: does not work on android
-			let path = 'chrome://browser/content/abouttor/aboutTor.css'
-			// TB14 (added TB13.5) .. aaaaaaand still no good on android
-			//if (isVer > 127) {path = 'chrome://global/content/torconnect/aboutTorConnect.css'}
-			if (isVer > 127) {path = 'chrome://global/skin/tor-colors.css'}
-			css.href = path
-			css.type = 'text/css'
-			css.rel = 'stylesheet'
-			document.head.appendChild(css)
+			if (isVer > 127) {
+				el = new Image();
+				el.src = 'chrome://global/content/torconnect/tor-connect.svg'
+				document.body.appendChild(el)
+			} else {
+				el = document.createElement('link')
+				el.href = 'chrome://browser/content/abouttor/aboutTor.css';
+				el.type = 'text/css'
+				el.rel = 'stylesheet'
+				document.head.appendChild(el)
+			}
 			get_event()
 		} catch(e) {
 			log_error(3, METRIC, e, isScope, true) // persist error to sect3
