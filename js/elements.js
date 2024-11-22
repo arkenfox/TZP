@@ -98,7 +98,7 @@ function get_element_keys(METRIC) {
 		if ((data.reduce((a, c) => a + aExpected.includes(c), 0)) < aExpected.length) {isLies = true}
 		if (isTB) {
 			if ('android' == isOS) {
-				// still awaiting android isTB
+				if ('7766b529' == hash) {notation = tb_green}
 			} else {
 				// desktop
 				if ('eb81553d' == hash) {notation = tb_green}
