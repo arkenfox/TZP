@@ -527,7 +527,7 @@ function get_navigator_keys(METRIC) {
 				if ('17ad3a75' == hash) {notation = tb_green} // 14 42
 			} else {
 				if ('android' == isOS) {
-					// awaiting isTB android fix
+					if ('adc88f1f' == hash) {notation = tb_green} // 14 42
 				} else {
 					if ('b9ee3d3d' == hash) {notation = tb_green} // 14 40
 				}
@@ -721,13 +721,12 @@ function get_window_props(METRIC) {
 				// on touch devices: 0 (all false) 1 or 2 (all true)
 
 			if (isMullvad) {
-				// this is with webRTC: windows can just fail until it's added back in: diff 20x RTC*
 				//if ('3240d823' == hash || 'ce268b01' == hash) {notation = tb_green} // MB14: 840 standard | 839 safer
 				if ('e3d2df78' == hash || '2c04db16' == hash) {notation = tb_green} // MB14: #42767 offScreenCanvas disabled
 
 			} else {
 				if (isOS == 'android') {
-					// ToDo: we can't detect isTB on android
+					if ('8835233b' == hash || '16ca79d9' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
 				} else {
 					//if ('5dc788bc' == hash || '9d354b5a' == hash) {notation = tb_green} // TB14: 817 standard | 816 safer
 					if ('e0f2c491' == hash || 'beeaafef' == hash) {notation = tb_green} // TB14: #42767 offScreenCanvas disabled
