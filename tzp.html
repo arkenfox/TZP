@@ -26,39 +26,47 @@
 			position: fixed;
 			z-index: -1;
 		}
+		#tzpResource {
+			background-image: url("about:logo"), url("");
+			background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
+		}
+		#tzpWordmark {
+			background-image: url("chrome://branding/content/about-wordmark.svg"), url("");
+			background-size: auto 100%; background-repeat: no-repeat; background-position: 10px 0px;
+		}
+		#tzpScroll {width: 100px; overflow-y: scroll;}
+		#tzpRect {
+			position: fixed;
+			top: 0; left: 0;
+			width:100px; height:100px;
+			transform: rotate(45deg);
+			padding: 0px;
+			z-index: -1; 
+		}
 	</style>
 </head>
 
 <body>
 	<span translate="no">
-	<!--domrect-->
-	<div id="divrect" class="divrect1">
-		<div class="testRect" id="rect1"></div>
-	</div>
+	<div id="tzpRect"></div>
 	<!--offscreen-->
 	<div class="offscreen">
-		<div>
-			<!--ScaledImage.png can't be hidden otherwise "Scaled..." is not in the title-->
-			<iframe id="InvalidImage" width="100" height="30" src="images/InvalidImage.png"></iframe>
-			<iframe id="ScaledImage" width="100" height="30" src="images/ScaledImage.png"></iframe>
-		</div>
-		<div id="sysFont"></div>
-		<div class="cssDocFont" id="divDocFont"></div>
-		<div class="cssGraphite" style="font-size: 300px;"><span id="testGraphite">+</span><span id="ctrlGraphite">-</span></div>
-		<div id="elementFS" width=0 height=0></div>
-		<div id='divDPI' style='height: 1in; width: 1in;'></div>
-		<div id='glyph-fp' class="normalized">
-			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
-			<div><canvas id="ugCanvas"></canvas></div>
-			<div><span id="dfsize"></span></div>
-		</div>
-		<div><span id="dfproportion"></span></div>
-		<div id="svgDiv"></div>
-		<div id="scrollauto" class="scroll scrollauto"><div id="innerscrollauto"></div></div>
-		<div id="scrollthin" class="scroll scrollthin"><div id="innerscrollthin"></div></div>
-		<div><svg id="svgswitch" width="0px" height="0px" viewBox="0 0 0 0"></svg></div>
-
-		<!-- ensure codepoints have time for async fallback -->
+		<div id="tzpFS" width=0 height=0></div>
+		<iframe id="tzpInvalidImage" width="100" height="30" src="images/InvalidImage.png"></iframe>
+		<iframe id="tzpScaledImage" width="100" height="30" src="images/ScaledImage.png"></iframe>
+		<iframe id="tzpIframe" width="100" height="30"></iframe>
+		<audio id="tzpAudio"></audio><video id="tzpMedia" width="20px"></video>
+		<div id="tzpDiv"></div>
+		<div id="tzpSVG"></div>
+		<div id="tzpScroll"><div></div></div>
+		<span id="tzpScript"></span>
+		<div class="normalized"><canvas id="tzpTextmetrics"></canvas></div>
+		<svg id="tzpSwitch" width="0px" height="0px" viewBox="0 0 0 0"></svg>
+		<div id='tzpGraphite' style="font-family: 'graphite';"><span>+</span><span>-</span></div>
+		<div id='tzpDPI' style='height: 1in; width: 1in;'></div>
+		<img id="tzpBrand" src="chrome://branding/content/about-wordmark.svg">
+		<img id="tzpAbout" src="about:logo">
+		<!--for async fallback-->
 		<div>
 			<span> &#x007F; </span><span> &#x0218; </span><span> &#x058F; </span><span> &#x05C6; </span>
 			<span> &#x061C; </span><span> &#x0700; </span><span> &#x08E4; </span><span> &#x097F; </span>
@@ -72,54 +80,43 @@
 			<span> &#xA830; </span><span> &#xF003; </span><span> &#xF810; </span><span> &#xFBEE; </span>
 			<span> &#xFFF9; </span><span> &#xFFFD; </span><span> &#xFFFF; </span>
 		</div>
-		<!-- don't hide: some forks can't detect it -->
-		<div><img id="branding" src="chrome://branding/content/about-wordmark.svg"></div>
-		<div><img id="aboutlogo" src="about:logo"></div>
-		<div><video id="mediatest"></video><audio id="audiotest"></audio></div>
 	</div>
 	<!--hidden-->
 	<div class="hidden">
-		<iframe id="iFrameBlank"></iframe>
-		<span id="sColorElement"></span>
-		<div id="dprBorder" style="border: 0.1px solid;">foo</div>
-		<div class="normalized">
-			<!--widget fonts-->
-			<input type="reset" id="wgtbutton">
-			<input type="checkbox" id="wgtcheckbox">
-			<input type="color" id="wgtcolor">
-			<input type="date" id="wgtdate">
-			<input type="datetime-local" id="wgtdatetime-local">
-			<input type="email" id="wgtemail">
-			<input type="file" id="wgtfile">
-			<input type="hidden" id="wgthidden">
-			<input type="image" id="wgtimage">
-			<input type="month" id="wgtmonth">
-			<input type="number" id="wgtnumber">
-			<input type="password" id="wgtpassword">
-			<input type="radio" id="wgtradio">
-			<input type="range" id="wgtrange">
-			<input type="reset" id="wgtreset">
-			<input type="search" id="wgtsearch">
-			<select id="wgtselect"><option name=''></option></select>
-			<input type="submit" id="wgtsubmit">
-			<input type="tel" id="wgttel">
-			<input type="text" id="wgttext">
-			<textarea id="wgttextarea"></textarea>
-			<input type="time" id="wgttime">
-			<input type="url" id="wgturl">
-			<input type="week" id="wgtweek">
+		<canvas id="tzpCanvasGet"></canvas>
+		<canvas id="tzpCanvasGetSolid"></canvas>
+		<canvas id="tzpCanvasPath"></canvas>
+		<canvas id="tzpCanvasTo"></canvas>
+		<canvas id="tzpCanvasToSolid"></canvas>
+		<span id="tzpColor"></span>
+		<div id="tzpDPR" style="border: 0.1px solid;">foo</div>
+		<div id="tzpWidget" class="normalized">
+			<input type="reset">
+			<input type="checkbox">
+			<input type="color">
+			<input type="date">
+			<input type="datetime-local">
+			<input type="email">
+			<input type="file">
+			<input type="hidden">
+			<input type="image">
+			<input type="month">
+			<input type="number">
+			<input type="password">
+			<input type="radio">
+			<input type="range">
+			<input type="reset">
+			<input type="search">
+			<select></select>
+			<input type="submit">
+			<input type="tel">
+			<input type="text">
+			<textarea></textarea>
+			<input type="time">
+			<input type="url">
+			<input type="week">
 		</div>
-		<div>
-			<canvas id="kcanvasGet" width="16" height="8"></canvas>
-			<canvas id="kcanvasGetSolid" width="16" height="8"></canvas>
-			<canvas id="kcanvasPath" width="16" height="8"></canvas>
-			<canvas id="kcanvasTo" width="16" height="8"></canvas>
-			<canvas id="kcanvasToSolid" width="16" height="8"></canvas>
-		</div>
-		<!-- hide tor items: !src = 0x0 but "offscreen" = image placeholder size -->
-		<div>
-			<img id="brandinghidden" src="chrome://branding/content/about-wordmark.svg">
-		</div>
+		<div><img id="tzpBrandHidden" src="chrome://branding/content/about-wordmark.svg"></div>
 	</div>
 
 	<table>
@@ -127,7 +124,7 @@
 		<tr><td class="blurb" id="index"><a id="link" class="return" href="index.html">return to TZP index</a></td></tr>
 	</table>
 
-	<span id="tzpcontent">
+	<span id="tzpContent">
 	<!--FPs-->
 	<table id="tbfp">
 		<col width="27%"><col width="73%">
@@ -173,7 +170,6 @@
 			<span class="c" id="screenhash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
-
 		<!--position-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">availLeft<br>availTop<br>left<br>top</span></div> &nbsp; screen</td>
@@ -185,7 +181,6 @@
 				&nbsp; window</td><td class="mono border-bottom"><span class="c" id="window_positions"></span>
 				<span class="c" id="positions"></span>
 			</td></tr>
-
 		<!--orientation-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mozOrientation<br>orientation.angle<br>orientation.type</span></div>
@@ -221,7 +216,6 @@
 				| <span class="c" id="orientation_orientation"></span>
 				<span class="c" id="orientation"></span>
 			</td></tr>
-
 		<!--iframe-->
 		<tr><td>available screen</td><td class="mono"><span class="c" id="iAvailable"></span>
 			<div class="btn-right s99">iframes</div></td></tr></td></tr>
@@ -230,7 +224,6 @@
 			<span class="c" id="iOuter"></span>
 			<span class="c" id="iframe_sizes_match_inner"></span>
 		</td></tr>
-
 		<!--screen: measurements-->
 		<tr><td>available screen</td>
 			<td class="mono"><span class="c" id="mAvailable"></span>
@@ -247,8 +240,7 @@
 				<span class="c" id="mScreen"></span>
 				<span class="c" id="screen_size_matches_inner"></span>
 		</td></tr>
-
-		<!--window: measurements > viewport/scrollbars > orientation > positions-->
+		<!--windows-->
 		<tr><td>outer</td>
 			<td class="mono"><span class="c" id="mOuter"></span>
 			<span class="c" id="window_sizes"></span>
@@ -264,16 +256,16 @@
 				<span class="c" id="window_letterbox"></span>
 				<span class="c" id="window_newwin"></span>
 			</td></tr>
-		<tr class="togOS"><td>[initial] outer window</span></td><td class="mono" id="initialOuter"></td></tr>
-		<tr class="togOS"><td>inner window</td><td class="mono border-bottom"><span id="initialInner"></span>
+		<tr class="togDROID"><td>[initial] outer window</span></td><td class="mono" id="initialOuter"></td></tr>
+		<tr class="togDROID"><td>inner window</td><td class="mono border-bottom"><span id="initialInner"></span>
 			<span class="c" id="window_sizes_initial"></span></td></tr>
+		<!--viewport/scrollbars-->
 		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
 		<tr><td>visualViewport</td><td class="c mono" id="vp_visualViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)<br>viewport<br>visualViewport</span></div>
 			&nbsp; scrollbars</td><td class="c mono border-bottom" id="scrollbars"></td></tr>
-
-		<!-- the rest -->
+		<!--other-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">[css] display-mode<br>display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>
 			&nbsp; display-mode | fullscreen</td>
@@ -288,7 +280,6 @@
 			<div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">attempts to open a new blank<br>window as big as possible<br>and grab the dimensions</span></div>
 			&nbsp; new window</td><td class="mono border-bottom"><span class="c" id="newWinLeak"></span></td></tr>
-
 		<!-- pixels-->
 		<tr><td>[div] dpi</td><td class="mono"><span class="c" id="dpi_div"></span>
 			<div class="btn-right s99">pixels</div></td></tr>
@@ -308,12 +299,12 @@
 		<tr><td>[border] devicePixelRatio</td><td class="mono"><span class="c" id="devicePixelRatio_border"></span></td></tr>
 		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
 
-		<tr class="togOS"><td colspan="2" class="center">--- android ---</td></tr>
-		<tr class="togOS"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
-		<tr class="togOS"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
-		<tr class="togOS"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
-		<tr class="togOS"><td>toolbar height</td><td class="c mono" id="tbh"></td></tr>
-		<tr><td colspan="2"></td></tr> <!-- spacer -->
+		<tr class="togDROID"><td colspan="2" class="center">--- android ---</td></tr>
+		<tr class="togDROID"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
+		<tr class="togDROID"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
+		<tr class="togDROID"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
+		<tr class="togDROID"><td>toolbar height</td><td class="c mono" id="tbh"></td></tr>
+		<tr><td colspan="2"></td></tr> <!--space-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
 			<span class="no_color">, </span>
@@ -353,22 +344,22 @@
 		<tr><td id="lvendor">vendor</td><td class="c mono spaces" id="vendor"></td></tr>
 		<tr><td id="lvendorSub">vendorSub</td><td class="c mono spaces" id="vendorSub"></td></tr>
 		<tr><td colspan="2" class="center">--- other methods ---</td></tr>
-		<tr><td><span id="labelUA1" class="btn btn0" onClick="togglerows('UA1','btn')">[+]</span>
+		<tr><td><span id="labelUAI" class="btn btn0" onClick="togglerows('UAI','btn')">[+]</span>
 			iframes <sup>1</sup></td><td class="c mono" id="uaIframes"></td></tr>
-			<tr class="togUA1"><td>[contentWindow] document root</td><td class="c mono" id="ua_content_docroot"></td></tr>
-			<tr class="togUA1"><td>[contentWindow] with URL</td><td class="c mono" id="ua_content_with_url"></td></tr>
-			<tr class="togUA1"><td>[window] document root</td><td class="c mono" id="ua_window_docroot"></td></tr>
-			<tr class="togUA1"><td>[window] with URL</td><td class="c mono" id="ua_window_with_url"></td></tr>
-			<tr class="togUA1"><td>iframe access</td><td class="c mono" id="ua_iframe_access"></td></tr>
-			<tr class="togUA1"><td>nested</td><td class="c mono" id="ua_nested"></td></tr>
-			<tr class="togUA1"><td>window access</td><td class="c mono" id="ua_window_access"></td></tr>
-		<tr><td><span id="labelUA2" class="btn btn0" onClick="togglerows('UA2','btn')">[+]</span>
+			<tr class="togUAI"><td>[contentWindow] document root</td><td class="c mono" id="ua_content_docroot"></td></tr>
+			<tr class="togUAI"><td>[contentWindow] with URL</td><td class="c mono" id="ua_content_with_url"></td></tr>
+			<tr class="togUAI"><td>[window] document root</td><td class="c mono" id="ua_window_docroot"></td></tr>
+			<tr class="togUAI"><td>[window] with URL</td><td class="c mono" id="ua_window_with_url"></td></tr>
+			<tr class="togUAI"><td>iframe access</td><td class="c mono" id="ua_iframe_access"></td></tr>
+			<tr class="togUAI"><td>nested</td><td class="c mono" id="ua_nested"></td></tr>
+			<tr class="togUAI"><td>window access</td><td class="c mono" id="ua_window_access"></td></tr>
+		<tr><td><span id="labelUAW" class="btn btn0" onClick="togglerows('UAW','btn')">[+]</span>
 			workers</td><td class="mono s99" id="uaWorkers">summary not coded</td></tr>
-			<tr class="togUA2"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
-			<tr class="togUA2"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
-			<tr class="togUA2"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
-			<tr class="togUA2"><td>nested worker</td><td class="mono s99" id="uaWorker3">test to come</td></tr>
-			<tr class="togUA2"><td>worker from blob</td><td class="mono s99" id="uaWorker4">test to come</td></tr>
+			<tr class="togUAW"><td>web worker</td><td class="c mono" id="uaWorker0"></td></tr>
+			<tr class="togUAW"><td>shared worker</td><td class="c mono" id="uaWorker1"></td></tr>
+			<tr class="togUAW"><td>service worker</td><td class="c mono" id="uaWorker2"></td></tr>
+			<tr class="togUAW"><td>nested worker</td><td class="mono s99" id="uaWorker3">test to come</td></tr>
+			<tr class="togUAW"><td>worker from blob</td><td class="mono s99" id="uaWorker4">test to come</td></tr>
 		<tr><td><span class="btn btn0" onClick="outputUser('goNW_UA')">[ click ]</span>
 			window.open</td><td class="c mono" id="uaHashOpen"></td></tr>
 		<tr><td colspan="3"><span class="no_color">iframe code based on work by </span>
@@ -397,10 +388,10 @@
 			<span class="c" id="featurehash"></span>
 			<div class="btn-right"></div>
 		</td></tr>
-		<tr><td>[css] branding</td><td class="mono" id="fdBrandingCss"></td></tr>
-		<tr><td>[css] browser</td><td class="mono" id="fdResourceCss"></td></tr>
+		<tr><td>[css] branding</td><td class="mono" id="tzpWordmark"></td></tr>
+		<tr><td>[css] browser</td><td class="mono" id="tzpResource"></td></tr>
 		<tr><td>[browser] architecture</td><td class="c mono" id="browser_architecture"></td></tr>
-		<tr><td>[infinity] architecture</td><td class="c mono" id="infinity_architecture"></td></tr>
+		<tr><td>[&infin;] architecture</td><td class="c mono" id="infinity_architecture"></td></tr>
 		<tr><td>browser</td><td class="mono">
 			<span class="c" id="browser"></span> | <span class="c" id="logo"></span> | <span class="c" id="wordmark"></span>
 			</td></tr>
@@ -443,11 +434,7 @@
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">lowercase + sorted</div> &nbsp; [system] languages</td><td class="c mono" id="languages_system"></td></tr>
 		<!--locale-->
-		<tr><td><span id="labelLO" class="btn btn0" onClick="togglerows('LO','btn')">[+]</span>
-			locale</td><td class="c mono" id="locale"></td></tr>
-		<tr class="togLO"><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">Collator<br>DateTimeFormat<br>DisplayNames<br>ListFormat<br>NumberFormat<br>PluralRules
-			<br>RelativeTimeFormat<br>Segmenter</span></div> &nbsp; locales</td><td class="c" id="locales"></td></tr>
+		<tr><td>locale</td><td class="c mono" id="locale"></td></tr>
 		<tr><td>[intl] locale</td><td class="c mono" id="locale_intl"></td></tr>
 		<tr><td>[resolvedoptions] locale</td><td class="c mono" id="locale_resolvedoptions"></td></tr>
 		<tr><td>[tolocalstring] locale</td><td class="mono">
@@ -463,14 +450,14 @@
 		<tr><td>XSLT messages</td><td class="c mono" id="messages_xslt"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td><span id="labelTM" class="btn btn0" onClick="togglerows('TM','btn')">[+]</span>
+		<tr><td><span id="labelLM" class="btn btn0" onClick="togglerows('TL','btn')">[+]</span>
 			[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
-		<tr class="togTM"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
-		<tr class="togTM"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
-		<tr class="togTM"><td>iframe</td><td class="c mono" id="timezone_offset_iframe"></td></tr>
-		<tr class="togTM"><td>parseFromString</td><td class="c mono" id="timezone_offset_string"></td></tr>
-		<tr class="togTM"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_unsafe"></td></tr>
-		<tr class="togTM"><td>EXSLT</td><td class="c mono" id="timezone_offset_exslt"></td></tr>
+		<tr class="togTL"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
+		<tr class="togTL"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
+		<tr class="togTL"><td>iframe</td><td class="c mono" id="timezone_offset_iframe"></td></tr>
+		<tr class="togTL"><td>parseFromString</td><td class="c mono" id="timezone_offset_string"></td></tr>
+		<tr class="togTL"><td>parseHTMLUnsafe</td><td class="c mono" id="timezone_offset_unsafe"></td></tr>
+		<tr class="togTL"><td>EXSLT</td><td class="c mono" id="timezone_offset_exslt"></td></tr>
 		<tr><td><span id="labelTO" class="btn btn0" onClick="togglerows('TO','btn')">[+]</span>
 			[offsets] timezone</td><td class="c mono" id="timezone_offsets"></td></tr>
 		<tr class="togTO"><td>date</td><td class="c mono" id="date"></td></tr>
@@ -480,7 +467,6 @@
 		<tr class="togTO"><td>getTime</td><td class="c mono" id="getTime"></td></tr>
 		<tr class="togTO"><td>getTimezoneOffset</td><td class="c mono" id="getTimezoneOffset"></td></tr>
 		<tr class="togTO"><td>Symbol.toPrimitive</td><td class="c mono" id="Symbol.toPrimitive"></td></tr>
-
 		<!--details-->
 		<tr><td colspan="2" class="showhide">
 			<span id="labelL" class="btnb" onClick="togglerows('L')">&#9660; show details</span></td></tr>
@@ -495,7 +481,6 @@
 			<tr class="togL"><td>toLocaleTimeString</td><td class="c" id="ldt7"></td></tr>
 			<tr class="togL"><td>toLocaleString</td><td class="c" id="ldt8"></td></tr>
 			<tr class="togL"><td>[Typed Array] toLocaleString</td><td class="c" id="ldt9"></td></tr>
-
 		<!--Intl.DateTimeFormat-->
 		<tr class="togL"><td></td><td class="s4">[intl] dates</td></tr>
 			<tr class="togL"><td>DateTimeFormat</td><td class="c" id="ldt10"></td></tr>
@@ -603,7 +588,7 @@
 		<tr><td>any-pointer</td><td class="mono"><span id="cssAP"></span>
 			<span class="cssc" id="any-pointer_css"></span> | <span class="c" id="any-pointer"></span></td></tr>
 		<tr><td>pointer</td><td class="mono"><span id="cssP"></span><span class="cssc" id="pointer_css"></span> | <span class="c" id="pointer"></span></td></tr>
-		<tr><td id="pointertarget"><span class="btn btn0">[ <span id="pointerlabel">mouse</span> ]</span>
+		<tr><td id="tzpPointer"><span class="btn btn0">[ <span>click</span> ]</span>
 			<div class="ttip"><span class="icon">[ i ]</span>
 				<span class="ttxt">altitudeAngle<br>azimuthAngle<br>height<br>isPrimary<br>mozInputSource<br>
 				mozPressure<br>pointerType<br>pressure<br>tangentialPressure<br>tiltX<br>tiltY<br>twist<br>width</span>
@@ -744,66 +729,61 @@
 			<span id="cssWoff2"></span> | <span class="c" id="woff2">
 		</span>
 		</td></tr>
-		<!--fonts-->
-		<tr><td>[groups] fonts <sup>3</sup></td>
-			<td class="mono"><span class="c" id="font_sizes_groups"></span>
+		<!--fontsizes-->
+		<tr><td>[methods] fonts <sup>3</sup></td>
+			<td class="mono"><span class="c" id="font_sizes_methods"></span>
 			<div class="btn-right s99">fonts</div></td></tr>
-		<tr><td><span id="labelF" class="btn btn0" onClick="togglerows('F','btn')">[+]</span>
+		<tr><td><span id="labelFS" class="btn btn0" onClick="togglerows('FS','btn')">[+]</span>
 			[sizes | names] fonts <sup>3</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
 		</tr>
-		<tr class="togF"><td>client</td><td class="c mono" id="fontsClient"></td></tr>
-		<tr class="togF"><td>offset</td><td class="c mono" id="fontsOffset"></td></tr>
-		<tr class="togF"><td>perspective</td><td class="c mono" id="fontsPerspective"></td></tr>
-		<tr class="togF"><td>pixel</td><td class="c mono" id="fontsPixel"></td></tr>
-		<tr class="togF"><td>pixelsize</td><td class="c mono" id="fontsPixelSize"></td></tr>
-		<tr class="togF"><td>scroll</td><td class="c mono" id="fontsScroll"></td></tr>
-		<tr class="togF"><td>transform</td><td class="c mono border-bottom" id="fontsTransform"></td></tr>
-		<tr class="togF"><td>[number] pixel</td><td class="c mono" id="fontsPixelNumber"></td></tr>
-		<tr class="togF"><td>pixelsize</td><td class="c mono border-bottom" id="fontsPixelSizeNumber"></td></tr>
-		<tr class="togF"><td>[number] perspective</td><td class="c mono" id="fontsPerspectiveNumber"></td></tr>
-		<tr class="togF"><td>transform</td><td class="c mono border-bottom" id="fontsTransformNumber"></td></tr>
-		<tr class="togF"><td>[domrect] bounding</td><td class="c mono" id="fontsDomRectBounding"></td></tr>
-		<tr class="togF"><td>bounding range</td><td class="c mono" id="fontsDomRectBoundingRange"></td></tr>
-		<tr class="togF"><td>client</td><td class="c mono" id="fontsDomRectClient"></td></tr>
-		<tr class="togF"><td>client range</td><td class="c mono border-bottom" id="fontsDomRectClientRange"></td></tr>
-
-		<tr><td>[base sizes] fonts <sup>3</sup></td><td class="c mono" id="font_sizes_base"></td></tr>
+		<tr class="togFS"><td>client</td><td class="c mono" id="font_sizes_client"></td></tr>
+		<tr class="togFS"><td>offset</td><td class="c mono" id="font_sizes_offset"></td></tr>
+		<tr class="togFS"><td>scroll</td><td class="c mono border-bottom" id="font_sizes_scroll"></td></tr>
+		<tr class="togFS"><td>pixel</td><td class="c mono" id="font_sizes_pixel"></td></tr>
+		<tr class="togFS"><td>pixelsize</td><td class="c mono border-bottom" id="font_sizes_pixelsize"></td></tr>
+		<tr class="togFS"><td>perspective</td><td class="c mono" id="font_sizes_perspective"></td></tr>
+		<tr class="togFS"><td>transform</td><td class="c mono border-bottom" id="font_sizes_transform"></td></tr>
+		<tr class="togFS"><td>[domrect] bounding</td><td class="c mono" id="font_sizes_domrectbounding"></td></tr>
+		<tr class="togFS"><td>bounding range</td><td class="c mono" id="font_sizes_domrectboundingrange"></td></tr>
+		<tr class="togFS"><td>client</td><td class="c mono" id="font_sizes_domrectclient"></td></tr>
+		<tr class="togFS"><td>client range</td><td class="c mono border-bottom" id="font_sizes_domrectclientrange"></td></tr>
+		<tr><td>[base sizes] fonts <sup>3</sup></td><td class=" mono">
+			<span class="c" id="font_sizes_base"></span> | <span class="c" id="font_sizes_base_reported"></span>
+		</td></tr>
 		<tr><td>[moz] fonts</td><td class="c mono" id="fonts_moz"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="fonts_system"></td></tr>
-		<tr><td>[widget] fonts</td><td class="mono border-bottom"><span class="c" id="fonts_widget"></span></td></tr>
-		<!--glyphs-->
-		<tr><td>clientrect <sup>4</sup></td>
-			<td class="mono"><span class="c" id="glyphs_clientrect"></span>
-			<div class="btn-right s99">glyphs</div></td></tr>
-		<tr><td>[measureText] width <sup>4</sup></td><td class="mono border-bottom"><span class="c" id="glyphs_width"></span></td></tr>
+		<tr><td>[widget] fonts</td><td class="c mono" id="fonts_widget"></td></tr>
+		<tr><td>glyphs <sup>4</sup></td><td class="mono border-bottom"><span class="c" id="glyphs"></span></td></tr>
 		<!--tm-->
+		<tr><td>[measureText] width <sup>4</sup></td>
+			<td class="mono"><span class="c" id="textmetrics_width"></span>
+			<div class="btn-right s99">textmetrics</div></td></tr>
 		<tr><td>actualBoundingBoxAscent | Descent</td>
-			<td class="mono"><span class="c spaces" id="glyphs_actualBoundingBoxAscent"></span>
-			| <span class="c" id="glyphs_actualBoundingBoxDescent"></span>
-			<div class="btn-right s99">textmetrics</div>
+			<td class="mono"><span class="c spaces" id="textmetrics_actualBoundingBoxAscent"></span>
+			| <span class="c" id="textmetrics_actualBoundingBoxDescent"></span>
 		</td></tr>
 		<tr><td>actualBoundingBoxLeft | Right</td><td class="mono">
-			<span class="c spaces" id="glyphs_actualBoundingBoxLeft"></span>
-			| <span class="c" id="glyphs_actualBoundingBoxRight"></span>
+			<span class="c spaces" id="textmetrics_actualBoundingBoxLeft"></span>
+			| <span class="c" id="textmetrics_actualBoundingBoxRight"></span>
 			</td></tr>
-		<tr><td>alphabeticBaseline</td><td class="c mono" id="glyphs_alphabeticBaseline"></td></tr>
+		<tr><td>alphabeticBaseline</td><td class="c mono" id="textmetrics_alphabeticBaseline"></td></tr>
 		<tr><td>emHeightAscent | Descent</td><td class="mono">
-			<span class="c spaces" id="glyphs_emHeightAscent"></span>
-			| <span class="c" id="glyphs_emHeightDescent"></span>
+			<span class="c spaces" id="textmetrics_emHeightAscent"></span>
+			| <span class="c" id="textmetrics_emHeightDescent"></span>
 			</td></tr>
 		<tr><td>fontBoundingBoxAscent | Descent</td><td class="mono">
-			<span class="c spaces" id="glyphs_fontBoundingBoxAscent"></span>
-			| <span class="c" id="glyphs_fontBoundingBoxDescent"></span>
+			<span class="c spaces" id="textmetrics_fontBoundingBoxAscent"></span>
+			| <span class="c" id="textmetrics_fontBoundingBoxDescent"></span>
 			</td></tr>
 		<tr><td>hanging | ideographicBaseline</td><td class="mono">
-			<span class="c spaces" id="glyphs_hangingBaseline"></span>
-			| <span class="c" id="glyphs_ideographicBaseline"></span>
+			<span class="c spaces" id="textmetrics_hangingBaseline"></span>
+			| <span class="c" id="textmetrics_ideographicBaseline"></span>
 			</td></tr>
 		<tr><td colspan="2"></td></tr>
 		<!--creds-->
-		<tr><td colspan="2"><span class="no_color">font from </span>
-			<a target="_blank" class="blue"	href="https://scripts.sil.org/cms/scripts/page.php?site_id=projects&item_id=graphite_fontdemo">SIL</a> <sup>1</sup>
+		<tr><td colspan="2"><span class="no_color">custom font from </span>
+			<a target="_blank" class="blue"	href="https://graphite.sil.org/">SIL</a> <sup>1</sup>
 			<span class="no_color"> and code based on work by </span>
 			<a target="_blank" class="blue" href="https://github.com/filamentgroup/woff2-feature-test">Filament Group</a> <sup>2</sup>
 			<span class="no_color">, </span>
@@ -856,12 +836,12 @@
 		<tr><td>[deprecated] colors</td><td class="c mono" id="colors_deprecated"></td></tr>
 		<tr><td><a class="blue" href="tests/csscolors.html" target="blank">[PoC]</a>
 			&nbsp; [-moz-] colors</td><td class="c mono" id="colors_moz"></td></tr>
-		<tr><td><span id="labelC" class="btn btn0" onClick="togglerows('C','btn')">[+]</span>
+		<tr><td><span id="labelCS" class="btn btn0" onClick="togglerows('CS','btn')">[+]</span>
 			computed styles <sup>1</sup></td><td class="c mono" id="computed_styles"></td></tr>
-		<tr class="togC"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="computed_styles_cssrulelist"></td></tr>
-		<tr class="togC"><td>DOMParser <sup>1</sup></td><td class="c mono" id="computed_styles_domparser"></td></tr>
-		<tr class="togC"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="computed_styles_getcomputed"></td></tr>
-		<tr class="togC"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="computed_styles_htmlelement"></td></tr>
+		<tr class="togCS"><td>CSSRuleList.style <sup>1</sup></td><td class="c mono" id="computed_styles_cssrulelist"></td></tr>
+		<tr class="togCS"><td>DOMParser <sup>1</sup></td><td class="c mono" id="computed_styles_domparser"></td></tr>
+		<tr class="togCS"><td>getComputedStyle <sup>1</sup></td><td class="c mono" id="computed_styles_getcomputed"></td></tr>
+		<tr class="togCS"><td>HTMLElement.style <sup>1</sup></td><td class="c mono" id="computed_styles_htmlelement"></td></tr>
 		<tr><td>forced-colors</td><td class="mono">
 			<span id="cssFC"></span><span class="cssc" id="forced-colors_css"></span>
 			| <span class="c" id="forced-colors"></span></td></tr>
@@ -911,13 +891,13 @@
 		<tr><td><a class="blue" href="tests/domrectspoof.html" target="blank">[PoC]</a>
 			&nbsp; DOMRect</td><td class="c mono" id="domrect"></td></tr>
 		<tr><td>HTMLElement keys <sup>1</sup></td><td class="c mono" id="htmlelement_keys"></td></tr>
-		<tr><td><a class="blue" href="tests/lineheight.html" target="blank">[PoC]</a>
-			&nbsp; line-height</td><td class="c mono" id="line-height_sizes"></td></tr>
+		<tr><td><a class="blue" href="tests/elementfont.html" target="blank">[PoC]</a>
+			&nbsp; font</td><td class="c mono" id="element_font"></td></tr>
+		<tr><td><a class="blue" href="tests/elementforms.html" target="blank">[PoC]</a>
+			&nbsp; forms</td><td class="c mono" id="element_forms"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">mathml.disabled</span></div>
-			&nbsp; mathml</td><td class="c mono" id="mathml_sizes"></td></tr>
-		<tr><td><a class="blue" href="tests/elementforms.html" target="blank">[PoC]</a>
-			&nbsp; widgets</td><td class="c mono" id="widget_sizes"></td></tr>
+			&nbsp; mathml</td><td class="c mono" id="element_mathml"></td></tr>
 		<tr><td colspan="2"><span class="no_color">code by </span><a target="_blank" class="blue"
 			href="https://github.com/abrahamjuliot/creepjs">CreepJS</a> <sup>1</sup>
 		</td></tr>
@@ -951,28 +931,31 @@
 		</td></tr>
 		<!--manual-->
 		<tr><td><span class="btn btn0" onClick="outputUser('get_timing_audio')">[ click ]</span>
-			<span id="labelT2" class="btn btn0" onClick="togglerows('T2','btn')">[+]</span>
+			<span id="labelTA" class="btn btn0" onClick="togglerows('TA','btn')">[+]</span>
 			audio</td><td class="c mono" id="timing_audio"></td></tr>
-		<tr class="togT2"><td>contexttime</td><td class="c mono" id="timing_audio_contexttime"></td></tr>
-		<tr class="togT2"><td>performancetime</td><td class="c mono" id="timing_audio_performancetime"></td></tr>
+		<tr class="togTA"><td>contexttime</td><td class="c mono" id="timing_audio_contexttime"></td></tr>
+		<tr class="togTA"><td>performancetime</td><td class="c mono" id="timing_audio_performancetime"></td></tr>
 		<!--auto-->
-		<tr><td><span id="labelT" class="btn btn0" onClick="togglerows('T','btn')">[+]</span>
+		<tr><td><span id="labelTP" class="btn btn0" onClick="togglerows('TP','btn')">[+]</span>
 			timing precision</td><td class="c mono" id="timing_precision"></td></tr>
-		<tr class="togT"><td>currenttime</td><td class="c mono" id="timing_precision_currenttime"></td></tr>
-		<tr class="togT"><td>date</td><td class="c mono" id="timing_precision_date"></td></tr>
-		<tr class="togT"><td>EXSLT</td><td class="c mono" id="timing_precision_exslt"></td></tr>
-		<tr class="togT"><td>mark</td><td class="c mono" id="timing_precision_mark"></td></tr>
-		<tr class="togT"><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togTP"><td>currenttime</td><td class="c mono" id="timing_precision_currenttime"></td></tr>
+		<tr class="togTP"><td>date</td><td class="c mono" id="timing_precision_date"></td></tr>
+		<tr class="togTP"><td>EXSLT</td><td class="c mono" id="timing_precision_exslt"></td></tr>
+		<tr class="togTP"><td>mark</td><td class="c mono" id="timing_precision_mark"></td></tr>
+		<tr class="togTP"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtx">dom.enable_performance_navigation_timing</span></div>
 			&nbsp; navigation</td><td class="c mono" id="timing_precision_navigation"></td></tr>
-		<tr class="togT"><td>now</td><td class="c mono" id="timing_precision_now"></td></tr>
-		<tr class="togT"><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togTP"><td>now</td><td class="c mono" id="timing_precision_now"></td></tr>
+		<tr class="togTP"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.enable_performance</span></div>
 			&nbsp; performance</td><td class="c mono" id="timing_precision_performance"></td></tr>
-		<tr class="togT"><td><div class="ttip"><span class="icon">[ i ]</span>
+		<tr class="togTP"><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxtb">privacy*reduceTimerPrecision</span></div>
+			&nbsp; reducetimer</td><td class="c mono" id="timing_precision_reducetimer"></td></tr>
+		<tr class="togTP"><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">dom.enable_resource_timing</span></div>
 			&nbsp; resource</td><td class="c mono" id="timing_precision_resource"></td></tr>
-		<tr class="togT"><td>timestamp</td><td class="c mono" id="timing_precision_timestamp"></td></tr>
+		<tr class="togTP"><td>timestamp</td><td class="c mono" id="timing_precision_timestamp"></td></tr>
 	</table>
 
 	<!--misc-->
@@ -1017,23 +1000,23 @@
 	<table id="tbperf">
 		<col width="1%"><col width="10%"><col width="89%">
 		<thead><tr><th colspan="3" class="showhide">
-			<span id="labelZ" class="btnb" onClick="togglerows('Z','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
-		<tr class="togZ"><td colspan="2">global perf
+			<span id="labelPERF" class="btnb" onClick="togglerows('PERF','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
+		<tr class="togPERF"><td colspan="2">global perf
 			<br><span class="btnb mono no_color" onClick="output_perf('all',true)">[<span id="perfGBtn">more</span>]</span>
 			</td><td class="mono spaces gc" id="perfG"></td></tr>
-		<tr class="togZ"><td colspan="2">click perf
+		<tr class="togPERF"><td colspan="2">click perf
 			<br><span class="btnb mono no_color" onClick="output_perf('x',true)">[<span id="perfSBtn">more</span>]</span>
 			</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
 	</table>
 	<a name="theend" id="theend"></a><br>
-	</span> <!-- end of "tzpcontent" span-->
+	</span> <!--end tzpcontent-->
 
 	<!--block-->
 	<div id='blockmsg' style="display: none;"></div>
 
 	<!--overlay-->
 	<div id="modaloverlay" onClick="metricsAction('close')"></div>
-	<div id="overlay" class='mono shadow'>
+	<div id="overlay" class='mono'>
 		<div id="overlaytop">
 			<span id="metricsTitle"></span>
 			<span id="overlaybuttons">
