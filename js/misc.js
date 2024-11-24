@@ -227,8 +227,17 @@ function get_timing(METRIC) {
 		gData.timing.exslt = ['2024-08-09T20:23:10.000','2024-08-09T20:23:11.000']
 		gData.timing.currenttime = [83.34, 116.72, 150, 233.4] // 60FPS but no 3 decimal places
 		//*/
-	}
 
+		// isDecimal
+		isDecimal = false
+		if (isPerf) {
+			try {
+				for (let i=0; i < gData.timing.now.length; i++) {
+					if (!Number.isInteger(gData.timing.now[i])) {isDecimal = true; break}
+				}
+			} catch(e) {console.log(e+'')}
+		}
+	}
 	let oGood = {
 		'date': [0, 1, 16, 17, 33, 34],
 		'performance': [0, 1, 16, 17, 33, 34],
@@ -243,7 +252,6 @@ function get_timing(METRIC) {
 		],
 		'ten': [0, 10, 20, 30, 40],
 	}
-
 	let aNotInteger = ['mark','now','timestamp']
 	let calc1 = new RegExp('^-?\\d+(?:\.\\d{0,' + (1 || -1) + '})?')
 	let str, data, notation, oData = {}, countFail = 0
@@ -255,7 +263,7 @@ function get_timing(METRIC) {
 		let aGood = oGood[k]
 		if (undefined == aGood) {aGood = oGood.other}
 		// don't add to health, we do that with the parent metric
-		str ='', notation = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc
+		str ='', notation = silent_red
 		try {
 			let aTimes = gData.timing[k]
 			if ('string' == typeof aTimes) {throw aTimes}
@@ -330,9 +338,9 @@ function get_timing(METRIC) {
 				}
 			}
 			//console.log(k, isNoise)
-			let value = ''
+			let value =''
 			if (isMatch && !isNoise && isGecko) {
-				notation = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc
+				notation = silent_green
 				value = 'RFP'
 			} else {
 				// add entropy e.g. jShelter 10ms or 100ms or noise
@@ -362,28 +370,58 @@ function get_timing(METRIC) {
 			data = aDiffs
 			//console.log(k, data, is10, is100, aDiffs, aTotal)
 		} catch(e) {
-			str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
-			oData[k] = (zD == e || zSKIP == e) ? e : zErr
-			data = str
-			if (zSKIP !== e) {countFail++} else {notation = ''}
+			oData[k] = ''
+			if ('reducetimer' !== k) {
+				str = (zD == e || zSKIP == e) ? e : log_error(17, METRIC +'_'+ k, e)
+				oData[k] = (zD == e || zSKIP == e) ? e : zErr
+				data = str
+				if (zSKIP !== e) {countFail++} else {notation = ''}
+			}
 		}
 		//sDetail.document[METRIC][k] = data
 		if ('timing_precision' == METRIC) {
-			addDisplay(17, METRIC +'_'+ k, str,'', notation)
+			if ('reducetimer' !== k) {
+				addDisplay(17, METRIC +'_'+ k, str,'', notation)
+			}
 		} else {
 			dom[METRIC +'_'+ k].innerHTML = str + (isSmart ? notation : '')
 		}
 	})
 	// display
+	let btn = ''
 	let countProtected = aLoop.length - countFail
-	let isProtected = countProtected == aLoop.length
-	notation = isProtected ? rfp_green : rfp_red
-	str = countProtected +'/' + aLoop.length
-	let btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
+
 	// data
 	if ('timing_precision' == METRIC) {
+		// reducetimer: privacy.reduceTimerPrecision
+		// we didn't countFail reducetimer so RFP will zero fails
+		let isProtected = countProtected == aLoop.length
+		let rtvalue
+		notation = silent_green
+		if (isProtected && isDecimal) {
+			// if RFP which is also isDecimal, then we can't tell
+			rtvalue = zNA
+			// RFP with decimals looks silly
+			isDecimal = false
+		} else {
+			rtvalue = !isDecimal
+			if (isDecimal) {countFail++; notation = silent_red}
+		}
+		// reducetimer data/display
+		addDisplay(17, METRIC +'_reducetimer', rtvalue,'', notation)
+		oData['reducetimer'] = rtvalue
+		// update counts
+		countProtected = aLoop.length - countFail
+		isProtected = countProtected == aLoop.length
+		notation = isProtected ? rfp_green : rfp_red
+		str = countProtected +'/' + aLoop.length
+		// add
+		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 		addBoth(17, METRIC, mini(oData), btn, notation, oData)
 	} else {
+		notation = countProtected == aLoop.length ? rfp_green : rfp_red
+		str = countProtected +'/' + aLoop.length
+		btn = addButton(17, METRIC, str) + addButton(17, METRIC +'_data', 'data')
 		sDetail.document[METRIC] = oData
 		dom[METRIC].innerHTML = mini(oData) + btn + (isSmart ? notation : '')
 		gClick = false
@@ -608,22 +646,22 @@ function get_pdf(METRIC) {
 }
 
 function get_svg(METRIC) {
-	let hash, data =''
+	let hash, data ='', target = dom.tzpSVG
 	try {
 		if (runSE) {foo++}
-		dom.svgDiv.innerHTML =''
+		target.innerHTML =''
 		const svgns = 'http://www.w3.org/2000/svg'
 		let shape = document.createElementNS(svgns,'svg')
 		let rect = document.createElementNS(svgns,'rect')
 		rect.setAttribute('width',20)
 		rect.setAttribute('height',20)
 		shape.appendChild(rect)
-		dom.svgDiv.appendChild(shape)
-		hash = dom.svgDiv.offsetHeight > 0 ? zE : zD
+		target.appendChild(shape)
+		hash = target.offsetHeight > 0 ? zE : zD
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-	try {dom.svgDiv.innerHTML =''} catch(e){}
+	try {target.innerHTML =''} catch(e){}
 	addBoth(18, METRIC, hash,'','', data)
 	return
 }
@@ -696,7 +734,7 @@ function get_window_props(METRIC) {
 				if (isTB) {aGood.push('97f1edb8')} // ToDo: remove once offscreencanvas is enabled in TB
 				if (!aGood.includes(mini(aTampered))) {
 					isLies = true
-					console.log(mini(aTampered), aTampered.join(","))
+					//console.log(mini(aTampered), aTampered.join(","))
 				}
 			}
 			// notate console
