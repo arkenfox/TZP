@@ -336,11 +336,15 @@ const outputWebGL = () => new Promise(resolve => {
 		getWebGL('webgl2'),
 		getWebGL('experimental-webgl'),
 	]).then((response) => {
-
 		const [webGL, webGL2, experimentalWebGL] = response
 		const [webGLData, webGLErrors] = webGL
 		const [webGL2Data, webGL2Errors] = webGL2
 		const [experimentalWebGLData, experimentalWebGLErrors] = experimentalWebGL
+
+		// NS click to play: not entropy: only guaranteed on FIRST session page load assuming the
+			// exception hasn't been permanently saved. We already have entropy on safer vs standard
+			// and NS, so a Safer with allowed webgl implies clickedToPlay
+		//let isClickToPlay = !!document.querySelector('.__ns__pop2top [data-policy-type="webgl"]')
 
 		//*
 		console.log('WebGL: ', mini(webGLData), webGLData)
@@ -351,26 +355,8 @@ const outputWebGL = () => new Promise(resolve => {
 		if (experimentalWebGLErrors.length) {console.log('Experimental Errors',experimentalWebGLErrors)}
 		//*/
 
-/*
-               RENDERER: ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar
-UNMASKED_RENDERER_WEBGL: ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar
-UNMASKED_VENDOR_WEBGL: Google Inc. (NVIDIA)
-               VENDOR: Mozilla
-*/
-
-		// check for NS click to play
-		let nsClickToPlay = false
-		try {
-			nsClickToPlay = !!document.querySelector('.__ns__pop2top [data-policy-type="webgl"]')
-		} catch(e) {
-			log_error(10, 'webgl_ns_clicktoplay', e)
-			nsClickToPlay = zErr
-		}
-		console.log('WebGL ClickToPlay', nsClickToPlay)
-
 		// do something with the erorrs...
 		return resolve()
-
 	}).catch(error => {
 		console.error(error)
 		return resolve()
