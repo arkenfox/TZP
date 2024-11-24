@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 153
+	expectedMetrics = 152
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -30,7 +30,7 @@ let gData = { // from sData
 	'perf': [],
 	'timing': {},
 }
-let gTiming = ['currenttime','date','exslt','mark','navigation','now','performance','resource','timestamp']
+let gTiming = ['currenttime','date','exslt','mark','navigation','now','performance','reducetimer','resource','timestamp']
 let gTimeline
 
 // section
@@ -99,6 +99,8 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	sbx = sb +"[<span class='health'>" + cross +'</span> ',
 	rfp_green = sgtick+'RFP]'+sc,
 	rfp_red = sbx+'RFP]'+sc,
+	silent_green = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc,
+	silent_red = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc,
 	lb_green = sgtick+'LB]'+sc,
 	lb_red = sbx+'LB]'+sc,
 	nw_green = sgtick+'RFP newwin]'+sc,
@@ -141,7 +143,7 @@ let tb_green = sgtick+'TB]'+sc,
 let isArch = true,
 	isAutoPlay,
 	isAutoPlayError,
-	isDevices = undefined,
+	isDevices,
 	isFile = false,
 	isFileSystem,
 	isFileSystemError,
@@ -173,6 +175,7 @@ let languagesSupported = {},
 let aDomRect = [true, true, true, true],
 	isDomRect = 0, // default non-gecko
 	oDomRect = {},
+	isDecimal = false,
 	isPerf = false
 
 // overlay metrics
@@ -193,10 +196,9 @@ let gt0, gt1,
 	gClick = true,
 	gFS = false, // don't run FS measurements if already tiggered
 	gClear = true, // clear console of xml and TB's prototype/proxy errors
-	isAllowNonGecko = false, // not supported: to see what other engines return
+	isAllowNonGecko = false, // not supported
 	isBlock = true,
 	isBlockMin = 115,
-	isDelay = 0, // delay in ms to help give async font fallback more time
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
 	isSmart = false,
@@ -211,4 +213,3 @@ let runSG = false, // globals: break separately eg isTB, isOS
 	runTE = false, // cause timeout
 	runSF = false, // font enumeration tests
 	runSL = false // lies
-
