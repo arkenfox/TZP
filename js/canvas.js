@@ -18,10 +18,9 @@ function check_canvas_to(data) {
 
 const outputCanvas = () => new Promise(resolve => {
 	let t0 = nowFn()
-	let aStart = {}
 
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = '93bd94c5'
-	// FF95+: compression changes 1724331 / 1737038 
+	// FF95+: compression 1724331 / 1737038 
 	const oKnown = {
 		'ge_white': 'd5f8f171',
 		'isPointInPath': 'db0e3f08',
@@ -104,7 +103,6 @@ const outputCanvas = () => new Promise(resolve => {
 							let expected = '[object ImageData]'
 							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
 							oData[METRIC] = imageData.data
-							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 							return mini(imageData.data)
 						} catch(e) {
 							oErrors[METRIC] = e+''
@@ -126,7 +124,6 @@ const outputCanvas = () => new Promise(resolve => {
 							let expected = '[object ImageData]'
 							if (imageData+'' !== expected) {throw zErrInvalid +'expected '+ expected +': got '+ imageData+''}
 							oData[METRIC] = imageData.data
-							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 							return mini(imageData.data)
 						} catch(e) {
 							oErrors[METRIC] = e+''
@@ -209,7 +206,6 @@ const outputCanvas = () => new Promise(resolve => {
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
 												oData[METRIC] = value
-												log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 												resolve(mini(reader.result))
 											} else {
 												oErrors[METRIC] = zErrType + typeCheck
@@ -251,7 +247,6 @@ const outputCanvas = () => new Promise(resolve => {
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
 												oData[METRIC] = value
-												log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 												resolve(mini(reader.result))
 											} else {
 												oErrors[METRIC] = zErrType + typeCheck
@@ -283,7 +278,6 @@ const outputCanvas = () => new Promise(resolve => {
 							let typeCheck = typeFn(data)
 							if ('string' !== typeCheck) {throw zErrType + typeCheck}
 							oData[METRIC] = data
-							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 							return mini(data)
 						} catch(e) {
 							oErrors[METRIC] = e+''
@@ -302,7 +296,6 @@ const outputCanvas = () => new Promise(resolve => {
 							let typeCheck = typeFn(data)
 							if ('string' !== typeCheck) {throw zErrType + typeCheck}
 							oData[METRIC] = data
-							log_perf(9, METRIC +' ['+ runNo +']', aStart[METRIC])
 							return mini(data)
 						} catch(e) {
 							oErrors[METRIC] = e+''
@@ -317,7 +310,7 @@ const outputCanvas = () => new Promise(resolve => {
 				return !!(output.class? output.class: window.HTMLCanvasElement).prototype[key]
 			}
 			function getKnownTo(){
-				let canvas = dom.kcanvasTo
+				let canvas = dom.tzpCanvasTo
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['to']) {return ctx}
 				// color the background
@@ -344,7 +337,7 @@ const outputCanvas = () => new Promise(resolve => {
 				return ctx
 			}
 			function getKnownToSolid(){
-				let canvas = dom.kcanvasToSolid
+				let canvas = dom.tzpCanvasToSolid
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['to_solid']) {return ctx}
 				ctx.fillStyle = 'rgba('+ solidPink +')'
@@ -353,7 +346,7 @@ const outputCanvas = () => new Promise(resolve => {
 				return ctx
 			}
 			function getKnownGet(){
-				let canvas = dom.kcanvasGet
+				let canvas = dom.tzpCanvasGet
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['get']) {return ctx}
 				// color the background
@@ -392,7 +385,7 @@ const outputCanvas = () => new Promise(resolve => {
 				return ctx
 			}
 			function getKnownGetSolid(){
-				let canvas = dom.kcanvasGetSolid
+				let canvas = dom.tzpCanvasGetSolid
 				let ctx = canvas.getContext('2d')
 				if (oDrawn['get_solid']) {return ctx}
 				ctx.fillStyle = 'rgba('+ solidClrs +')'
@@ -401,7 +394,7 @@ const outputCanvas = () => new Promise(resolve => {
 				return ctx
 			}
 			function getKnownPath(){
-				let ctx = dom.kcanvasPath.getContext('2d')
+				let ctx = dom.tzpCanvasPath.getContext('2d')
 				if (oDrawn['path']) {return ctx}
 				ctx.fillStyle = 'rgba(255,255,255,255)'
 				ctx.beginPath()
@@ -414,7 +407,6 @@ const outputCanvas = () => new Promise(resolve => {
 
 			var finished = Promise.all(outputs.map(function(output){
 				return new Promise(function(resolve, reject){
-					aStart[output.name] = nowFn() // start perf here
 					var displayValue
 					try {
 						var supported = output.supported? output.supported(): isSupported(output);
@@ -497,6 +489,10 @@ const outputCanvas = () => new Promise(resolve => {
 		}
 	}
 	let oDataDrawn = {'getImageData': tmpDrawn, 'getImageData_solid': tmpSolid}
+
+	// ensure sizes
+	let aCanvas = ['Get','GetSolid','Path','To','ToSolid']
+	aCanvas.forEach(function(k){let el = dom['tzpCanvas'+ k]; el.width = sizeW; el.height = sizeH})
 
 	function exit() {
 		for (const m of Object.keys(oFP)) {
