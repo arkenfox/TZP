@@ -54,7 +54,7 @@ function testtypeFn(isSimple = false) {
 function run_block() {
 	log_perf(SECTG, 'isBlock','')
 	try {
-		dom.tzpcontent.style.display = 'none'
+		dom.tzpContent.style.display = 'none'
 		dom.blockmsg.style.display = 'block'
 		let msg = "<center><br><span style='font-size: 14px;'><b>" + (isGecko ? 'Gah.' : 'Aw, Snap!')
 			+"<br><br>TZP requires Firefox " + isBlockMin +'+<b></span></center>'
@@ -134,15 +134,13 @@ const promiseRaceFulfilled = async ({
 
 function get_isArch(METRIC) {
 	if (!isGecko) {return}
-	// FF89-109: javascript.options.large_arraybuffers
-	// note: pref change requires new origin/tab/reload: so we can run once
 	let t0 = nowFn(), value
 	try {
 		if (runSG) {foo++}
 		let test = new ArrayBuffer(Math.pow(2,32))
 		value = 64
 	} catch(e) {
-		isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist error to sect3
+		isArch = log_error(3, 'browser_architecture', e, isScope, true) // persist sect3
 		value = zErr
 	}
 	log_perf(SECTG, METRIC, t0,'', value)
@@ -156,24 +154,24 @@ function get_isAutoplay(METRIC) {
 		let aPolicy = navigator.getAutoplayPolicy('audiocontext')
 		try {
 			if (runSG) {foo++}
-			aTest = navigator.getAutoplayPolicy(dom.audiotest)
+			aTest = navigator.getAutoplayPolicy(dom.tzpAudio)
 		} catch(e) {
-			log_error(13, METRIC +'_audio', e, isScope, true) // persist error to sect13
+			log_error(13, METRIC +'_audio', e, isScope, true) // persist sect13
 			aTest = zErr
 		}
 		let mPolicy = navigator.getAutoplayPolicy('mediaelement')
 		try {
 			if (runSG) {bar++}
-			mTest = navigator.getAutoplayPolicy(dom.mediatest)
+			mTest = navigator.getAutoplayPolicy(dom.tzpMedia)
 		} catch(e) {
-			log_error(13, METRIC +'_media', e, isScope, true) // persist error to sect13
+			log_error(13, METRIC +'_media', e, isScope, true) // persist sect13
 			mTest = zErr
 		}
 		// combine
 		isAutoPlay = (aPolicy === aTest ? aPolicy : aPolicy +', '+ aTest) +' | '+ (mPolicy === mTest ? mPolicy : mPolicy +', '+ mTest)
 	} catch(e) {
 		isAutoPlay = zErr
-		isAutoPlayError = log_error(13, METRIC, e, isScope, true) // persist error to sect13
+		isAutoPlayError = log_error(13, METRIC, e, isScope, true) // persist sect13
 	}
 	log_perf(SECTG, 'isAutoPlay', t0,'', (isAutoPlay == zErr ? zErr : ''))
 	return
@@ -186,7 +184,7 @@ function get_isDevices() {
 		if (runSG) {foo++}
 		navigator.mediaDevices.enumerateDevices().then(function(devices) {
 			isDevices = devices
-			if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', Math.round(nowFn()))}
+			if (gLoad) {log_perf(SECTG, 'isDevices', t0,'', nowFn())}
 		}
 	)} catch(e) {}
 }
@@ -254,26 +252,16 @@ function get_isGecko(METRIC) {
 }
 
 const get_isOS = (METRIC) => new Promise(resolve => {
-	if (!isGecko) {
-		return resolve()
-	}
-	let t0 = nowFn(), failed = 0, isDone = false
-	//setTimeout(() => resolve(zErrTime), 100)
-	setTimeout(function() {
-		// if we haven't moved onto widgets or finished
-		if (!isDone) {
-			isOSErr = log_error(3, "os", zErrTime, isScope, true) // persist timeout error to sect3
-			trywidget(true)
-		}
-	}, 100)
+	if (!isGecko) {return resolve()	}
 
+	let t0 = nowFn()
 	function exit(value) {
-		isDone = true // block timeout
-		let pngURL = "url('chrome://branding/content/"+ (value == "android" ? "fav" : "") + "icon64.png')"
-		dom.fdResourceCss.style.backgroundImage = pngURL // set icon
 		isOS = value
-		log_perf(SECTG, METRIC, t0, "", isOS +"")
-		if (isOS == undefined) {
+		dom.tzpResource.style.backgroundImage = "url('chrome://branding/content/"
+			+ ('android' == isOS ? 'fav' : '') + "icon64.png')" // set icon
+		log_perf(SECTG, METRIC, t0, '', isOS +'')
+		if (undefined == isOS) {
+			isOSErr = log_error(3, "os", zErrType +'undefined', isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, "undefined", isScope, true)
 		}
 		return resolve()
@@ -284,118 +272,58 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		exit()
 	}
 
-	function tryfonts(hadError = false) {
-		// FF124+ desktop: check for '-apple-system', 'MS Shell Dlg \\32'
-		// check doc fonts enabled
+	// 2: fonts
+	function tryfonts() {
+		// check doc fonts
 		let fntEnabled = false
 		try {
 			if (runSG) {foo++}
-			let fntTest = "\"Arial Black\""
-			let font = getComputedStyle(dom.divDocFont).getPropertyValue("font-family")
-			fntEnabled = (font == fntTest ? true : false)
-			if (!fntEnabled) {
-				if (font.slice(0,11) == "Arial Black") {fntEnabled = true} // ext may strip quotes marks
-			}
+			let fntTest = '\"test font name\"'
+			dom.tzpDiv.style.fontFamily = fntTest
+			let font = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family'),
+				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
+			fntEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
 		} catch(e) {}
 		if (!fntEnabled) {trysomethingelse(); return}
-		// test fonts
-		get_font_sizes(false).then(res => {
-			if ("array" == typeFn(res, true)) {
+
+		// check fonts
+		get_fonts_size(false).then(res => {
+			if ('object' == typeFn(res, true)) {
 				let aDetected = []
-				res.forEach(function(fnt){
-					aDetected.push(fnt.split(":")[0])
-				})
+				for (const k of Object.keys(res)) {aDetected.push(k)}
 				let expected = aDetected[0]
 				if (aDetected.length == 1) {
-					let value = "android"
-					if (expected == "MS Shell Dlg \\32") {value = "windows"
-					} else if (expected == "-apple-system") {value = "mac"}
-					exit(value)
+					if (expected == 'MS Shell Dlg \\32') {exit('windows')
+					} else if (expected == '-apple-system') {exit('mac')
+					} else {exit('android')}
 				} else if (aDetected.length == 0) {
-					exit("linux")
+					exit('linux')
 				} else {
 					trysomethingelse()
 				}
 			} else {
-				// don't record error: we do this test in fonts with base
 				trysomethingelse()
 			}
 		})
 	}
 
-	function trywidget(hadError = false) {
-		isDone = true // block timeout
-		// FF124+ desktop
-			// note: TB hides system fonts on linux/windows but not mac
-			// getComputedStyle can report the wrong font, but FF itself reports one of these two
-		try {
-			if (runSG) {foo++}
-			let aIgnore = [
-				'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
-				'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
-			]
-			let font = getComputedStyle(dom.wgtradio).getPropertyValue("font-family")
-			if ('string' !== typeFn(font) || aIgnore.includes(font)) {
-				tryfonts(hadError)
-			} else {
-				let value = "linux"
-				if (font.slice(0,12) == "MS Shell Dlg") {value = "windows"
-				} else if (font == "-apple-system") {value = "mac"}
-				// hadError means chrome test failed (error/timeout)
-				// so we can't rely on android already detected
-				if (hadError && font == "Roboto") {value = "android"}
-				exit(value)
-			}
-		} catch(e) {
-			// don't record error: we do this test in fonts
-			tryfonts(hadError)
+	// widget font: mac/linux
+	try {
+		if (runSG) {foo++}
+		let aIgnore = [
+			'cursive','emoji','fangsong','fantasy','math','monospace','none','sans-serif',
+			'serif','system-ui','ui-monospace','ui-rounded','ui-serif','undefined'
+		]
+		let font = getComputedStyle(dom.tzpWidget.children[0]).getPropertyValue('font-family')
+		if ('string' !== typeFn(font) || aIgnore.includes(font)) {
+			throw zErr
+		} else {
+			if (font.slice(0,12) == "MS Shell Dlg") {exit('windows')
+			} else if (font == '-apple-system') {exit('mac')
+			} else {throw zErr}
 		}
-	}
-
-	// FF89-123: block min is 115 so we don't care about < 89
-		// 1280128: FF51+ win/mac | 1701257: FF89+ linux
-	// FF121+: 1855861
-	// FF124+:
-		// chrome://browser/content/extension.css
-		// chrome://browser/content/extension-popup-panel.css (fallback FF124+: 1874232)
-		// ^ both these are desktop only
-	let path = "chrome://browser/content/extension-", suffix = "-panel.css", list = ["win","mac","linux"]
-	if (isVer > 123) {path = "chrome://browser/content/", suffix = ".css", list = ['extension']}
-	const get_event = (css, item) => new Promise(resolve => {
-		css.onload = function() {
-			document.head.removeChild(css)
-			// we only need the first
-			if (isVer > 123) {
-				trywidget()
-			} else {
-				if (item == "win") {item = "windows"}
-				exit(item)
-			}
-			return resolve()
-		}
-		css.onerror = function() {
-			failed++
-			document.head.removeChild(css)
-			if (failed == list.length) {exit("android")} // all failed
-			return resolve()
-		}
-	})
-	if (!runTE) {
-		// we could timeout or error: either way we move to trywidget
-		try {
-			let css
-			list.forEach(function(item) {
-				if (!runSG) {css = document.createElement("link")}
-				css.type = "text/css"
-				css.rel = "stylesheet"
-				css.href = path + item + suffix
-				document.head.appendChild(css)
-				get_event(css, item)
-			})
-		} catch(e) {
-			isOSErr = log_error(3, "os", e, isScope, true) // persist error to sect3
-			trywidget(true)
-		}
+	} catch(e) {
+		tryfonts()
 	}
 })
 
@@ -436,7 +364,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 		'-moz-workspace','caption','icon','menu','message-box','small-caption','status-bar',
 	]
 	try {
-		let el = dom.sysFont, data = []
+		let el = dom.tzpDiv, data = []
 		aFonts.forEach(function(font){
 			el.style.font = '' // always clear in case a font is invalid/deprecated
 			el.style.font = font
@@ -459,13 +387,13 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 	let t0 = nowFn(), isDone = false
 	setTimeout(function() {
 		if (!isDone) {
-			log_error(3, METRIC, zErrTime, isScope, true) // persist error to sect3
+			log_error(3, METRIC, zErrTime, isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, zErrTime, isScope, true)
 			exit(zErrTime)
 		}
 	}, 150)
 
-	let el;
+	let el
 	function exit(value) {
 		isDone = true
 		try {el.remove()} catch(e) {}
@@ -473,6 +401,7 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		log_perf(SECTG, METRIC, t0,'', value)
 		return resolve(value)
 	}
+	// FF121+: 1855861
 	const get_event = () => new Promise(resolve => {
 		el.onload = function() {exit(true)}
 		el.onerror = function() {exit(false)}
@@ -481,9 +410,10 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 		try {
 			if (isVer > 127) {
 				el = new Image();
-				el.src = 'chrome://global/content/torconnect/tor-connect.svg'
+				el.src = 'chrome://global/content/torconnect/tor-connect.svg' // TB13.5
 				document.body.appendChild(el)
 			} else {
+				// support TB13 until we raise minVer next ESR
 				el = document.createElement('link')
 				el.href = 'chrome://browser/content/abouttor/aboutTor.css';
 				el.type = 'text/css'
@@ -492,7 +422,7 @@ const get_isTB = (METRIC) => new Promise(resolve => {
 			}
 			get_event()
 		} catch(e) {
-			log_error(3, METRIC, e, isScope, true) // persist error to sect3
+			log_error(3, METRIC, e, isScope, true) // persist sect3
 			log_alert(SECTG, METRIC, e.name, isScope, true)
 			exit(zErr)
 		}
@@ -504,7 +434,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 133) {isVerExtra = '+'}
+	if (isVer == 134) {isVerExtra = '+'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -514,11 +444,11 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
+		try {if ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join()) {return 134}} catch(e) {} // 1927706
 		try {
 			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 			if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
 		} catch(e) {}
-
 		try {
 			const re = new RegExp('(?:)', 'gv');
 			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
@@ -651,7 +581,7 @@ function get_isDomRect() {
 	aDomRect = [false, false, false, false]
 	oDomRect = {}
 
-	let el = dom.rect1
+	let el = dom.tzpRect
 	for (let i=0; i < 4; i++) {
 		let METRIC = names[i]
 		let tmpobj = {}, hash
@@ -670,7 +600,7 @@ function get_isDomRect() {
 				let value = obj[prop]
 				let typeCheck = typeFn(value)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				tmpobj[prop] = obj[prop]
+				tmpobj[prop] = value
 			})
 			hash = mini(tmpobj)
 			aDomRect[i] = ('642e7ef0' == hash)
@@ -746,11 +676,11 @@ function togglerows(id, word) {
 
 /*** METRICS DISPLAY ***/
 
-function json_highlight(json, colorStrings = false) {
-	let colorTicks = false
+function json_highlight(json, clrValues = false) {
+	let clrSymbols = false
 	if ('health' == overlayName) {
-		colorStrings = false
-		if ('_summary' == overlayHealth) {colorTicks = true}
+		clrValues = false
+		if ('_summary' == overlayHealth) {clrSymbols = true}
 	}
 	if ('string' !== typeof json) {
 		json = json_stringify(json);
@@ -762,9 +692,9 @@ function json_highlight(json, colorStrings = false) {
 			if (/:$/.test(match)) {
 				cls = 'key';
 			} else {
-				if (colorStrings) {
+				if (clrValues) {
 					cls = 'string';
-				} else if (colorTicks) {
+				} else if (clrSymbols) {
 					cls = ''
 					match = match.replace(tick, green_tick)
 					match = match.replace(cross, red_cross)
@@ -793,7 +723,7 @@ function json_stringify(passedObj, options = {}) {
 		indent === ''
 			? Infinity
 			: options.maxLength === undefined
-			? 75 // was 80
+			? 80
 			: options.maxLength;
 	let { replacer } = options;
 
@@ -1035,14 +965,21 @@ function lookup_health(sect, metric, scope, isPass) {
 			data = sDetail[scope].lookup[metric]
 		} else {
 			data = gData[zFP][scope][sect]['metrics'][metric]
+			if ('font_names' == metric) {data = ''} // force font_names for next if statement
 		}
 		if (undefined !== data) {
 			let typeCheck = typeFn(data, true)
 			hash = data
 			// handle sDetailTemp: copy per run so it doesn't change in gData
-			if (undefined !== sDetail[scope][metric]) {sDetailTemp = sDetail[scope][metric]}
-			if ('font_names' == metric) {sDetailTemp = sDetail[scope]['font_names_health']}
-			if (undefined !== sDetailTemp) {
+			if (undefined !== sDetail[scope][metric]) {
+				sDetailTemp = sDetail[scope][metric]
+				if ('font_names' == metric && '' == data) {
+					// hash is always the FP: i.e full enumeration: for consistency + all/pass/fail + compares
+					// but detail needs to reflect isPass: can't just check for !== undefined
+					// e.g. windows FPP will still have unexpected data (for RFP)
+					hash = mini(sDetailTemp)
+					if (!isPass) {sDetailTemp = sDetail[scope]['font_names_health']}
+				}
 				let tmpCheck = typeFn(sDetailTemp)
 				if ('object' == tmpCheck) {
 					data = {}
@@ -1127,8 +1064,10 @@ function output_perf(id, click = false) {
 		s98 = "<span class='s99'>", // trimmed
 		pageLoad = false,
 		isStart = false,
-		pad = 15
-	if (isMore) {pad = 30}
+		nFix = isDecimal ? 2 : 0,
+		pad = isDecimal ? 18 : 15,
+		padFix = isDecimal ? 3 : 0
+	if (isMore) {pad = 32}
 
 	try {
 		array.forEach(function(array) {
@@ -1137,13 +1076,9 @@ function output_perf(id, click = false) {
 				time1 = array[2],
 				time2 = array[3],
 				extra = array[4]
+			if ('string' == typeof extra) {extra = extra.trim()}
+			extra = undefined == extra  ? '' : extra !== '' ? ' | '+ extra : ''
 
-			// RFP causes decimals
-			try {gt1 = Math.round(gt1)} catch(e) {}
-			try {time1 = Math.round(time1)} catch(e) {}
-			try {time2 = Math.round(time2)} catch(e) {}
-
-			extra = extra === undefined ? "" : " | "+ extra
 			// header
 			if (isMore && 1 === type) {
 				if ("IMMEDIATE" == name) {pageLoad = true}
@@ -1153,13 +1088,17 @@ function output_perf(id, click = false) {
 			}
 			// section/detail
 			if (type > 1) {
-				time1 = (id !== "all") ? time1.toString() : (time2-time1).toString()
-				time2 = (id !== "all") ? time2.toString() : (time2-gt1).toString() // use gt1: only reset on global runs
+				if (id == 'all') {
+					time1 = time2 - time1
+					time2 = time2 - gt1 // use gt1: only reset on global runs
+				}
+				time1 = Number(time1).toFixed(nFix)
+				time2 = Number(time2).toFixed(nFix)
 			}
 			// section
 			if (2 === type) {
-				time2 = id == "all" ? " |"+ s2 + time2.padStart(4) +" ms</span>" : ""
-				let pretty = name.padStart(pad) +":"+ s4 + time1.padStart(4) +"</span> ms"
+				time2 = id == "all" ? " |"+ s2 + time2.padStart(4 + padFix) +" ms</span>" : ""
+				let pretty = name.padStart(pad) +":"+ s4 + time1.padStart(4 + padFix) +"</span> ms"
 					+ time2 + extra
 				aPretty.push(pretty)
 				if (sectionNames.includes(name)) {
@@ -1175,8 +1114,8 @@ function output_perf(id, click = false) {
 					name = name.slice(0, newlen) +":"+ parts[1]
 				}
 				if (id !== "all") {isStart = true}
-				time2 = isStart ? " |"+ s98 + time2.padStart(5) +" ms</span>" : ''
-				let pretty = s98 + name.padStart(pad) + sc +":" + s98 + time1.padStart(5) +" ms</span>"
+				time2 = isStart ? " |"+ s98 + time2.padStart(5 + padFix) +" ms</span>" : ''
+				let pretty = s98 + name.padStart(pad) + sc +":" + s98 + time1.padStart(5 + padFix) +" ms</span>"
 					+ time2 + extra
 				aPretty.push(pretty)
 			}
@@ -1371,8 +1310,12 @@ function addData(section, metric, data, hash ='', isLies = false, donotuse ='x')
 		value = data
 	}
 	sDataTemp[zFP][isScope][section][metric] = isLies ? zLIE : value
-	// ToDo: instead of recording just the metric name, record the data
-	if (isLies) {log_known(section, metric, value)}
+	if (isLies) {
+		// don't add spoofed domrect data
+		let aIgnore = ['element_font','element_forms','element_mathml','glyphs_clientrect']
+		if (aIgnore.includes(metric)) {value = ''}
+		log_known(section, metric, value)
+	}
 }
 
 function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = false, donotuse ='x') {
@@ -1467,8 +1410,7 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	if ('' == error || null == error || undefined == error) {error = zErr} else {error += ''}
 	let len = 50
 	let aLen25 = [
-		'canPlayType','isTypeSuppo','font-format','font-tech',
-		'glyphs_actu','glyphs_emHe','glyphs_font','glyphs_hang','glyphs_ideo',
+		'canPlayType','isTypeSuppo','font-format','font-tech','textmetrics',
 	]
 	if (aLen25.includes(metric.slice(0,11))) {len = 25}
 	let key = 'errors'
@@ -1488,13 +1430,15 @@ function log_error(section, metric, error = zErr, scope = isScope, isOnce = fals
 	return error
 }
 
-function log_known(section, metric, data ='', scope = isScope) {
+function log_known(section, metric, data, scope = isScope) {
 	if (!isSmart) {return data}
 	let key = 'lies'
 	if ('string' !== typeof section) {section = sectionMap[section]}
 	if (sDataTemp[key][scope] == undefined) {sDataTemp[key][scope] = {}}
 	if (sDataTemp[key][scope][section] == undefined) {sDataTemp[key][scope][section] = {}}
-	if (undefined !== sDetail[scope][metric]) {data = sDetail[scope][metric]}
+	if (undefined == data) {
+		if (undefined !== sDetail[scope][metric]) {data = sDetail[scope][metric]}
+	}
 	sDataTemp[key][scope][section][metric] = data
 	// color
 	return "<span class='lies'>"+ data +"</span>"
@@ -1540,7 +1484,7 @@ function log_section(name, time, scope = isScope, isResize = false) {
 	//console.log(sectionMap[name], gCount ,"/", gSectionsExpected)
 	if (gCount == gSectionsExpected) {
 		gt1 = gt0
-		if (isPerf) {dom.perfAll = " "+ Math.round(performance.now()-gt0) +" ms"}
+		if (isPerf) {dom.perfAll = " "+ (performance.now()-gt0).toFixed(isDecimal ? 2 : 0) +" ms"}
 		output_section("all", scope)
 
 		// FP
@@ -1615,7 +1559,7 @@ function countJS(item) {
 		if (!isGecko) {
 			if (isAllowNonGecko) {run_basic()} else {run_block(); return}
 		}
-		// helps ensure/force images are loaded in time
+		// help ensure/force images are loaded in time
 		try {dom.InvalidImage.src = 'images/InvalidImage.png'} catch(e) {}
 		try {dom.ScaledImage.src = 'images/ScaledImage.png'} catch(e) {}
 		get_isVer('isVer') // if PoCs don't touch the dom this is fine here: required for isTB
@@ -1645,13 +1589,9 @@ function countJS(item) {
 					} catch(e) {}
 				}
 				// do once
-				let target = dom.pointertarget
-				target.addEventListener('pointerover', (event) => {
-					get_pointer_event(event)
-				})
+				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
-					dom.pointerlabel = 'tap'
-					showhide('OS','table-row')
+					showhide('DROID','table-row')
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
@@ -1769,7 +1709,7 @@ function outputSection(id, isResize = false) {
 	if ('load' == id) {
 		// skip clear/reset
 		id = 'all'
-		delay = (isDelay > 0 ? isDelay : 0) 
+		delay = 0 
 	} else if ('all' == id) {
 		gRun = true
 		// clear

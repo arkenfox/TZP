@@ -46,7 +46,7 @@ function get_cookies(METRIC, rndStr) {
 	let aTests = ['_session','_persistent']
 	aTests.forEach(function(k){
 		try {
-			let expires = ''
+			let expires =''
 			if ('_persistent' == k) {
 				let d = new Date()
 				d.setTime(d.getTime() + 172800000) // 2 days
@@ -90,7 +90,7 @@ const get_cookiestore = (METRIC, rndStr) => new Promise(resolve => {
 })
 
 function get_filesystem(METRIC) {
-	let display = isFileSystem, notation = ''
+	let display = isFileSystem, notation =''
 	if (isFileSystem === zErr) {
 		display = log_error(6, METRIC, isFileSystemError)
 	}

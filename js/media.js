@@ -26,9 +26,9 @@ function get_autoplay(METRIC) {
 	try {
 		let atest, mtest
 		let ares = navigator.getAutoplayPolicy('audiocontext')
-		try {atest = navigator.getAutoplayPolicy(dom.audiotest)} catch(e) {atest = zErr}
+		try {atest = navigator.getAutoplayPolicy(dom.tzpAudio)} catch(e) {atest = zErr}
 		let mres = navigator.getAutoplayPolicy('mediaelement')
-		try {mtest = navigator.getAutoplayPolicy(dom.mediatest)} catch(e) {mtest = zErr}
+		try {mtest = navigator.getAutoplayPolicy(dom.tzpMedia)} catch(e) {mtest = zErr}
 		let display = (ares === atest ? ares : ares +', '+ atest) +' | '+ (mres === mtest ? mres : mres +', '+ mtest)
 		addDisplay(13, METRICuser, display)
 	} catch(e) {

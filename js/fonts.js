@@ -1,10 +1,5 @@
 'use strict';
 
-let fntCodePoints = {
-	tofu: ['0xFFFF'],
-	tbwindows: ['0x0374'], // or '0x0375': +1 more size: not worth it
-}
-
 let fntCodes = [ // sorted
 	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
 	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
@@ -20,13 +15,14 @@ let fntCodes = [ // sorted
 
 let fntData = {},
 	fntSize = '512px',
-	fntString = 'Mōá?-'+ get_fntCodes('tofu'),
+	fntString = '-\uffff',
 	fntBtn = '',
 	fntFake,
 	fntDocEnabled = false,
-	fntBases = {},
-	fntBasesRaw = {},
-	fntBasesValid = {}
+	fntBase = {},
+	fntBaseInvalid = {},
+	fntBaseMin = [],
+	fntPlatformFont // undefined
 
 let fntMaster = {
 	// android core noto
@@ -107,7 +103,7 @@ let fntMaster = {
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 				// should always be the same but lets test everything in TB
 			'MS Serif','Courier','Small Fonts','Roman', // TNR, Courier New, Arial, TNR
-			// isPlatformFont
+			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// FontSubstitutes
 				// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes
@@ -237,7 +233,7 @@ let fntMaster = {
 			'Bahnschrift','HoloLens MDL2 Assets','Segoe MDL2 Assets','Segoe UI Historic','Yu Gothic UI',
 			// localized: kBase: detected FF119+: 1850672
 			'微软雅黑','ＭＳ ゴシック','ＭＳ Ｐゴシック','宋体','游ゴシック', // Microsoft YaHei, MS Gothic, MS PGothic, SimSun, Yu Gothic 
-			// isPlatformFont
+			// fntPlatformFont
 			'MS Shell Dlg \\32',
 			// common FontSubstitutes that point to kBase fonts
 			'MS Shell Dlg','MS Shell Dlg 2', // can differ
@@ -440,12 +436,6 @@ let fntMaster = {
 	],
 }
 
-function get_fntCodes(name) {
-	let list = fntCodePoints[name], str =''
-	list.forEach(function(code) {str += String.fromCodePoint(code)})
-	return str
-}
-
 function set_fntList() {
 	let fntListBaseName = isTB ? 'allowlist' : 'kBaseFonts'
 	let build = (gLoad || isFontSizesMore !== isFontSizesPrevious)
@@ -454,51 +444,58 @@ function set_fntList() {
 		isFontSizesPrevious = isFontSizesMore
 		fntData = {
 			system: [], bundled: [], base: [], baselang: [], fpp: [], unexpected: [], full: [],
-			control: [], 'control_name': [], generic: [], 
+			control: [], 'control_name': [], generic: [], 'generic_name': []
 		}
 
+		// fntString
+		if (isTB || 'android' == isOS || 'linux' == isOS) {
+			//  isTB: all maxed: linux: 120/140 | windows 131/183 | mac 135/150
+			// nonTB: seems to work well so far
+			fntString = '-'
+		} else {
+			if ('windows' == isOS) {fntString = 'MōΩ' // 158/190 = max
+			} else {fntString = 'Mō-'} // mac: 441/464 = almost max | Mōá?- + tofu = 443
+		}
+		fntString = fntString +'\uffff'
+
 		// baseSize: add fallback for misconfigured/missing
-		// isPlatformFont: expected + isn't/can't be blocked
-			// no entropy loss: size collisions of expected system fonts e.g. Tahoma
-			// means not detected/recorded - but we _know_ it should be there
-		let isPlatformFont
+		// fntPlatformFont: expected + isn't/can't be blocked
+			// when used forces a single fallback font to compare to instead of trying up to
+			// three (monospace, sans-serif, serif). No entropy is lost as lack of aliases or
+			// FontSubtitutes (e.g. Tahoma) is expected - we _know_ they are there
 		let baseSize = ['monospace','sans-serif','serif']
-		let tofu = get_fntCodes('tofu')
+		fntPlatformFont = undefined // reset
 		if ('windows' == isOS) {
-			// Mō + tofu = 157/189 fonts win11 || áΩ
-			fntString = isTB ? '?-'+ tofu : 'Mō'+ tofu
-			if (!isFontSizesMore) {isPlatformFont = 'MS Shell Dlg \\32'}
-			if (isTB) {isPlatformFont = undefined} // force TB to detect all fonts for health
+			if (!isFontSizesMore) {fntPlatformFont = 'MS Shell Dlg \\32'}
+			if (isTB) {fntPlatformFont = undefined} // force TB to detect all fonts for health
 			baseSize = [
 				'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"',
 				'sans-serif, Arial',
 				'serif, Times, Roman'
 			]
 		} else if ('mac' == isOS) {
-			if (!isFontSizesMore) {isPlatformFont = '-apple-system'}
-			baseSize = ['monospace, Menlo, Courier, \"Courier New\", Monaco','sans-serif','serif']
+			if (!isFontSizesMore) {fntPlatformFont = '-apple-system'}
+			baseSize = [
+				'monospace, Menlo, Courier, \"Courier New\", Monaco',
+				'sans-serif',
+				'serif'
+			]
 		} else if ('android' == isOS) {
 			// Roboto is not guaranteed unless Android 9+
-			if (!isFontSizesMore) {isPlatformFont = 'Dancing Script'}
-			fntString = '?-'+ tofu
+			if (!isFontSizesMore) {fntPlatformFont = 'Dancing Script'}
 		}
 
-		// baseCtrl: 1-pass or 3-pass
-		// baseCtrlNames: remove fallback e.g. 'serif, X' -> 'serif'
-		let baseCtrl = isPlatformFont == undefined ? baseSize : [isPlatformFont]
-		fntData.control = baseCtrl
-		let baseCtrlNames = []
-		baseCtrl.forEach(function(name) {
-			baseCtrlNames.push(name.split(',')[0])
-		})
-		fntData['control_name'] = baseCtrlNames
+		// control: 1-pass or 3-pass | control_name: remove fallbacks e.g. 'serif, X' -> 'serif'
+		fntData.control = fntPlatformFont == undefined ? baseSize : [fntPlatformFont]
+		fntData.control.forEach(function(name) {fntData['control_name'].push(name.split(',')[0])})
 		
 		// generic: expand baseSize
 			//'ui-monospace','ui-rounded','ui-serif','math','emoji','none' // redundant
 		baseSize = baseSize.concat(['cursive','fantasy','fangsong','system-ui'])
 		baseSize = baseSize.concat(isSystemFont)
-		if (isPlatformFont !== undefined) {baseSize.push(isPlatformFont)}
+		if (fntPlatformFont !== undefined) {baseSize.push(fntPlatformFont)}
 		fntData.generic = baseSize.sort()
+		baseSize.forEach(function(name) {fntData['generic_name'].push(name.split(',')[0])})
 
 		// lists
 		if (isOS !== undefined) {
@@ -540,15 +537,14 @@ function set_fntList() {
 				array = array.concat(fntMaster.system[isOS])
 				fntData.unexpected = fntMaster.system[isOS]
 				fntData.full = array
-
 			}
 			// -control from lists
-			if (isPlatformFont !== undefined) {
+			if (fntPlatformFont !== undefined) {
 				let fntKeys = ['base','full','fpp','system','bundled']
 				fntKeys.forEach(function(key) {
 					if (fntData[key] !== undefined) {
 					let array = fntData[key]
-					 fntData[key] = array.filter(x => ![isPlatformFont].includes(x))
+					 fntData[key] = array.filter(x => ![fntPlatformFont].includes(x))
 					}
 				})
 			}
@@ -608,33 +604,107 @@ function set_fntList() {
 
 function get_document_fonts(METRIC) {
 	fntDocEnabled = false // reset
-	const fntTest = '\"Arial Black\"'
-	let value, data, notation = default_red
+	let value, data, fntTest = '\"test font name\"'
 	try {
 		if (runSE) {foo++}
-		let font = getComputedStyle(dom.divDocFont).getPropertyValue('font-family')
-		fntDocEnabled = (font == fntTest ? true : false)
-		if (!fntDocEnabled) {
-			if ('Arial Black' == font.slice(0,11)) {fntDocEnabled = true} // ext may strip quotes marks
-		}
+		dom.tzpDiv.style.fontFamily = fntTest
+		let font = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family'),
+			fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
+		fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
 		value = (fntDocEnabled ? zE : zD) +' | '+ font
-		if (zE +' | '+ fntTest == value) {notation = default_green}
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(12, METRIC, value,'', notation, data)
+	addBoth(12, METRIC, value,'', (fntDocEnabled ? default_green : default_red), data)
 	return
 }
 
-const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(resolve => {
-	/* getDimensions code based on https://github.com/abrahamjuliot/creepjs */
-	const id = 'font-fp'
-	try {
-		// reset
-		fntBases = {} 
-		fntBasesRaw = {}
-		fntBasesValid = {}
+function get_fonts_base(METRICB, selected) {
+	// selected can be: 'unknown', 'n/a' or any of the domrect or perspective or pixel
 
+	// if n/a: try to calculate selected: same logic as font_sizes
+		// in order, exclude lies + errors, limit to domrect + perspective or pixel
+	if (selected == zNA) {
+		let oDomList = {0: 'domrectbounding', 1: 'domrectclient', 2: 'domrectboundingrange', 3: 'domrectclientrange'}
+		let order = [
+			'domrectbounding','domrectboundingrange','domrectclient','domrectclientrange','perspective','pixel'
+		]
+		if (isSmart) {
+			for (const k of Object.keys(oDomList)) {
+				if (!aDomRect[k]) {order = order.filter(x => ![oDomList[k]].includes(x))} // remove from list
+			}
+		}
+		for (let i=0; i < order.length; i++) {
+			let value = order[i]
+			if (!fntBaseInvalid.hasOwnProperty(order[i])) {selected = value; break}
+		}
+	}
+	let isSelected = selected !== zNA && selected !== 'unknown'
+	// if we have fntBaseMin data _and_ nothing is invalid, output one of each method group
+	let useMin = fntBaseMin.length > 0 && Object.keys(fntBaseInvalid).length == 0
+
+	// rebuild base fonts sizes: fntBase is already ordered: do first so hashes are correct
+	// for each base combine w + h, replace with fntBaseInvalid errors (but not lies)
+	let newBase = {}, hashBase = {}, finalBase = {}, selectBase = {}
+	for (const base in fntBase) {
+		newBase[base] = {}
+		for (const m of Object.keys(fntBase[base])) {
+			if ('Width' == m.slice(-5)) { // for each pair
+				let method = m.slice(0,-5), value
+				if(zLIE !== fntBaseInvalid[method]) {value = fntBaseInvalid[method]}
+				if (undefined == value) {value = [fntBase[base][m], fntBase[base][method +'Height']]}
+				if (useMin && fntBaseMin.includes(method) || !useMin) {
+					newBase[base][method] = value
+				}
+			}
+		}
+	}
+	// group by hash
+	for (const base in newBase) {
+		let tmphash = mini(newBase[base])
+		if (undefined == hashBase[tmphash]) {hashBase[tmphash] = {'bases': [base], 'data': newBase[base]}
+		} else {hashBase[tmphash].bases.push(base)}
+	}
+	// use base as keys | bases are already sorted since fntData.generic is too
+	for (const oldhash in hashBase) {
+		let newhash = mini(hashBase[oldhash].data)
+		finalBase[hashBase[oldhash].bases.join(' ')] = {'hash': newhash, 'metrics': hashBase[oldhash].data}
+		// build selected
+		if (isSelected) {selectBase[hashBase[oldhash].bases] = hashBase[oldhash].data[selected]}
+	}
+	//console.log('newBase', newBase)
+	//console.log('hashBase', hashBase)
+	//console.log('finalBase', finalBase)
+	//console.log('selectBase', selectBase)
+
+	// display all that hard work!!
+		// unless we had an error which means we never end up here, we will have fntBase data
+	let btnAll = addButton(12, METRICB +'_reported', Object.keys(finalBase).length +'/'+ fntData.generic_name.length)
+	addDetail(METRICB +'_reported', finalBase)
+	addDisplay(12, METRICB+ '_reported', mini(finalBase), btnAll)
+
+	// add selected/unknown/n/a
+	if (isSelected) {
+		let newobj = {}
+		newobj[selected] = selectBase
+		let hash = mini(newobj)
+		let btn = addButton(12, METRICB, Object.keys(selectBase).length +'/'+ fntData.generic_name.length)
+		addBoth(12, METRICB, hash, btn,'', newobj)
+	} else {
+		//function addBoth(section, metric, str, btn =''
+		addBoth(12, METRICB, selected)
+	}
+}
+
+const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(resolve => {
+	/* getDimensions code based on https://github.com/abrahamjuliot/creepjs */
+	//let t0 = nowFn()
+	// reset
+	fntBaseInvalid = {}
+	fntBaseMin = []
+	const id = 'element-fp'
+	// note: element-fp has a transform: this only affects domrect
+	try {
 		if (runSE) {foo++}
 		const doc = document // or iframe.contentWindow.document
 		const div = doc.createElement('div')
@@ -677,25 +747,8 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			<span id="${id}-detector"></span>`
 
 		const span = doc.getElementById(`${id}-detector`)
-		const pixelsToInt = pixels => Math.round(+pixels.replace('px',''))
 		const pixelsToNumber = pixels => +pixels.replace('px','')
-		const originPixelsToInt = pixels => Math.round(2*pixels.replace('px', ''))
 		const originPixelsToNumber = pixels => 2*pixels.replace('px', '')
-		const detectedViaPixel = new Set()
-		const detectedViaPixelNumber = new Set()
-		const detectedViaPixelSize = new Set()
-		const detectedViaPixelSizeNumber = new Set()
-		const detectedViaScroll = new Set()
-		const detectedViaOffset = new Set()
-		const detectedViaClient = new Set()
-		const detectedViaTransform = new Set()
-		const detectedViaTransformNumber = new Set()
-		const detectedViaPerspective = new Set()
-		const detectedViaPerspectiveNumber = new Set()
-		const detectedViaDomRectBounding = new Set()
-		const detectedViaDomRectBoundingRange = new Set()
-		const detectedViaDomRectClient = new Set()
-		const detectedViaDomRectClientRange = new Set()
 		const style = getComputedStyle(span)
 		const range = document.createRange()
 		range.selectNode(span)
@@ -704,7 +757,7 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			const transform = style.transformOrigin.split(' ')
 			const perspective = style.perspectiveOrigin.split(' ')
 			const dimensions = {
-				// keep in order for font_sizes_base_reported
+				// keep sorted for font_sizes_base_reported
 				clientHeight: span.clientHeight,
 				clientWidth: span.clientWidth,
 				domrectboundingHeight: span.getBoundingClientRect().height,
@@ -715,105 +768,94 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 				domrectclientWidth: span.getClientRects()[0].width,
 				domrectclientrangeHeight: range.getClientRects()[0].height,
 				domrectclientrangeWidth: range.getClientRects()[0].width,
-				nperspectiveHeight: originPixelsToNumber(perspective[1]),
-				nperspectiveWidth: originPixelsToNumber(perspective[0]),
-				npixelHeight: pixelsToNumber(style.height),
-				npixelWidth: pixelsToNumber(style.width),
-				npixelsizeHeight: pixelsToNumber(style.blockSize),
-				npixelsizeWidth: pixelsToNumber(style.inlineSize),
-				ntransformHeight: originPixelsToNumber(transform[1]),
-				ntransformWidth: originPixelsToNumber(transform[0]),
 				offsetHeight: span.offsetHeight,
 				offsetWidth: span.offsetWidth,
-				perspectiveHeight: originPixelsToInt(perspective[1]),
-				perspectiveWidth: originPixelsToInt(perspective[0]),
-				pixelHeight: pixelsToInt(style.height),
-				pixelWidth: pixelsToInt(style.width),
-				pixelsizeHeight: pixelsToInt(style.blockSize),
-				pixelsizeWidth: pixelsToInt(style.inlineSize),
+				perspectiveHeight: originPixelsToNumber(perspective[1]),
+				perspectiveWidth: originPixelsToNumber(perspective[0]),
+				pixelHeight: pixelsToNumber(style.height),
+				pixelWidth: pixelsToNumber(style.width),
+				pixelsizeHeight: pixelsToNumber(style.blockSize),
+				pixelsizeWidth: pixelsToNumber(style.inlineSize),
 				scrollHeight: span.scrollHeight,
 				scrollWidth: span.scrollWidth,
-				transformHeight: originPixelsToInt(transform[1]),
-				transformWidth: originPixelsToInt(transform[0]),
+				transformHeight: originPixelsToNumber(transform[1]),
+				transformWidth: originPixelsToNumber(transform[0]),
 			}
 			return dimensions
 		}
 
-		if (isMain && runSF) {
+		// simulate errors: don't test isFontSizesMore not used in production
+		if (runSF && isMain && !isFontSizesMore) {
 			getDimensions = (span, style) => {
 				const transform = style.transformOrigin.split(' ')
 				const perspective = style.perspectiveOrigin.split(' ')
 				const dimensions = {
-					clientHeight: span.clientHeight,
+					clientHeight: span.clientHeight, // same size: engineered below
 					clientWidth: span.clientWidth,
-					domrectboundingHeight: null,
+					domrectboundingHeight: null, // TypeError: empty string x null
 					domrectboundingWidth: '',
 					domrectboundingrangeHeight: range.getBoundingClientRect().height,
 					domrectboundingrangeWidth: range.getBoundingClientRect().width,
-					domrectclientHeight: span.getClientRects()[0].height, // same size: engineered below
+					domrectclientHeight: span.getClientRects()[0].height, // fake font detected: engineered below
 					domrectclientWidth: span.getClientRects()[0].width,
-					domrectclientrangeHeight: range.getClientRects()[0].height,
-					domrectclientrangeWidth: range.getClientRects()[0].width,
-					nperspectiveHeight: originPixelsToNumber(perspective[1]),
-					nperspectiveWidth: originPixelsToNumber(perspective[0]),
-					npixelHeight: pixelsToNumber(style.height),
-					npixelWidth: pixelsToNumber(style.width),
-					npixelsizeHeight: pixelsToNumber(style.blockSize),
-					npixelsizeWidth: pixelsToNumber(style.inlineSize),
-					ntransformHeight: originPixelsToNumber(transform[1]),
-					ntransformWidth: originPixelsToNumber(transform[0]),
+					domrectclientrangeHeight: 100, // none
+					domrectclientrangeWidth: 200,
 					offsetHeight: NaN, // TypeError: NaN (same)
 					offsetWidth: NaN,
 					perspectiveHeight: undefined, // TypeError: Infinity x undefined (different)
 					perspectiveWidth: Infinity,
-					pixelHeight: pixelsToInt(style.height) + ((Math.random() * 100) / 100), // all
-					pixelWidth: pixelsToInt(style.width),
-					pixelsizeHeight: 100, // none
-					pixelsizeWidth: 200,
+					pixelHeight: pixelsToNumber(style.height),
+					pixelWidth: pixelsToNumber(style.width),
+					pixelsizeHeight: pixelsToNumber(style.blockSize),
+					pixelsizeWidth: pixelsToNumber(style.inlineSize),
 					scrollHeight: 0, // Invalid: width or height < 1
 					scrollWidth: 50,
-					transformHeight: originPixelsToInt(transform[1]), // fake font detected: engineered below
-					transformWidth: originPixelsToInt(transform[0]),
+					transformHeight: originPixelsToNumber(transform[1]) + ((Math.random() * 100) / 100), // all
+					transformWidth: originPixelsToNumber(transform[0]),
 				}
 				return dimensions
 			}
 		}
 
-		let fntGeneric = [], fntTest = [], fntControl = []
-		let aTests = [], aTestsValid = []
+		// set parameters
+		let fntGeneric = [], fntTest = [], fntControl = [], fntControlObj = {}, oTests = {}, aTests = []
 		if (isMain) {
-			fntControl = fntData.control
+			fntData.control.forEach(function(item) {
+				let key = item.split(',')[0]
+				fntControl.push(key)
+				fntControlObj[key] = item
+			})
 			fntGeneric = fntData.generic
 			fntTest = fntData.full
-			aTests = [
-				['client', detectedViaClient, 'fontsClient'],
-				['domrectbounding', detectedViaDomRectBounding, 'fontsDomRectBounding'],
-				['domrectboundingrange', detectedViaDomRectBoundingRange, 'fontsDomRectBoundingRange'],
-				['domrectclient', detectedViaDomRectClient, 'fontsDomRectClient'],
-				['domrectclientrange', detectedViaDomRectClientRange, 'fontsDomRectClientRange'],
-				['offset', detectedViaOffset, 'fontsOffset'],
-				['npixel', detectedViaPixelNumber, 'fontsPixelNumber'],
-				['npixelsize', detectedViaPixelSizeNumber, 'fontsPixelSizeNumber'],
-				['nperspective', detectedViaPerspectiveNumber, 'fontsPerspectiveNumber'],
-				['ntransform', detectedViaTransformNumber, 'fontsTransformNumber'],
-				['pixel', detectedViaPixel, 'fontsPixel'],
-				['pixelsize', detectedViaPixelSize, 'fontsPixelSize'],
-				['perspective', detectedViaPerspective, 'fontsPerspective'],
-				['scroll', detectedViaScroll, 'fontsScroll'],
-				['transform', detectedViaTransform, 'fontsTransform'],
-			]
+			// match display order so btn links = first of each hash
+			oTests = {
+				'client': {},
+				'offset': {},
+				'scroll': {},
+				'pixel': {},
+				'pixelsize': {},
+				'perspective': {},
+				'transform': {},
+				'domrectbounding': {},
+				'domrectboundingrange': {},
+				'domrectclient': {},
+				'domrectclientrange': {},
+			}
 		} else {
-			fntControl = ['monospace, Consolas, Menlo, \"Courier New\"','sans-serif, Arial','serif, \"Times New Roman\"']
+			fntControl = ['monospace', "sans-serif", "serif"]
+			fntControlObj = {
+				"monospace": 'monospace, Consolas, Courier, "Courier New", "Lucida Console"',
+				"sans-serif": 'sans-serif, Arial',
+				"serif": 'serif, "Times New Roman\"',
+			}
 			fntGeneric = fntControl
 			fntTest = ['--00'+ rnd_string()]
 			fntTest = fntTest.concat(fntMaster.mini)
-			aTests = [
-				['nperspective', detectedViaPerspectiveNumber],
-			]
+			oTests = {'perspective': {}}
 		}
 
 		// base sizes
-		let base = fntGeneric.reduce((acc, font) => {
+		fntBase = fntGeneric.reduce((acc, font) => {
 			if (isSystemFont.includes(font)) { // not a family
 				span.style.setProperty('--font', '')
 				span.style.font = font
@@ -827,401 +869,285 @@ const get_font_sizes = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 		}, {})
 		span.style.font ='' // reset
 
-		// group base by hash
-		let oTempBase = {}
-		if (isMain) {
-			for (const k of Object.keys(base)) {
-				fntBasesRaw[k] = {}
-				for (const j of Object.keys(base[k])) {fntBasesRaw[k][j] = base[k][j]}
-			}
-			for (const k of Object.keys(fntBasesRaw)) {
-				let tmpHash = mini(fntBasesRaw[k])
-				if (oTempBase[tmpHash] == undefined) {
-					oTempBase[tmpHash] = {bases: [k], metrics: fntBasesRaw[k]}
-				} else {
-					oTempBase[tmpHash].bases.push(k)
-				}
+		// test validity
+		for (const k of Object.keys(oTests)) {
+			// assume we always have fntBase.monospace
+			let wValue = fntBase.monospace[k +'Width'], wType = typeFn(wValue),
+				hValue = fntBase.monospace[k +'Height'], hType = typeFn(hValue)
+			try {
+				if ('number' !== wType || 'number' !== hType) {
+					throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
+				} else if (wValue < 1 || hValue < 1) {throw zErrInvalid + 'width or height < 1'
+				} else if (wValue == hValue < 1) {throw zErrInvalid + 'width == height'}
+				aTests.push(k)
+			} catch(e) {
+				fntBaseInvalid[k] = zErr
+				oTests[k]['error'] = e+''
+				addDisplay(12, METRIC +'_'+ k, log_error(12, METRIC +'_'+ k, e))
 			}
 		}
-		//console.log(base)
-		//console.log(oTempBase)
 
-		// test validity
-		let baseStyle = 'monospace' // we need a base style: we'll always have monospace
-		aTests.forEach(function(item) {
-			let name = item[2], error
-			let wName = item[0] +'Width', hName = item[0] +'Height'
-			let wValue = base[baseStyle][wName], hValue = base[baseStyle][hName]
-			let wType = typeFn(wValue)
-			let hType = typeFn(hValue)
-			if ('number' == wType && 'number' == hType) {
-				if (wValue < 1 || hValue < 1) {
-					error = zErrInvalid + 'width or height < 1'
-				} else if (wValue == hValue < 1) {
-					error = zErrInvalid + 'width == height'
-				} else {
-					aTestsValid.push(item)
-					fntBasesValid[name] = item[0]
-				}
-			} else {
-				error = zErrType + (wType == hType ? wType : wType +' x '+ hType)
-			}
-			if (error !== undefined) {
-				item[1].clear()
-				item[1].add(zErr)
-				addDisplay(12, name, log_error(12, METRIC +'_'+ (name.slice(5).toLowerCase()), error))
-			}
-		})
-
+		// base only: after validity so we know what to use in lookup
 		if (isMain) {
-			// reorder oTempBase => fntBases
-			let tmpBases = {}
-			for (const h of Object.keys(oTempBase)) {
-				let key = oTempBase[h].bases.join(' ')
-				let hash = mini(oTempBase[h].metrics)
-				tmpBases[key] = {hash: hash, metrics: oTempBase[h].metrics}
-			}
-			for (const k of Object.keys(tmpBases).sort()) {fntBases[k] = tmpBases[k]}
-			if (runSF) {detectedViaTransform.add(fntFake +':'+ fntControl[0] +':700 x 800')} // fake font detected
 			if (!fntTest.length || false == fntDocEnabled) {
+				removeElementFn(id)
 				return resolve('baseonly')
 			}
 		}
 
 		// measure
-		if (aTestsValid.length) {
-			let isDetected = false, intDetected = 0, intDetectedMax = aTestsValid.length
+		if (aTests.length) {
+			let intDetected = 0, intDetectedMax = aTests.length
 			fntTest.forEach(font => {
-				isDetected = false // have we found it
-				intDetected = 0 // in all valid methods
-				fntControl.forEach(basefont => {
-					if (isDetected) {return}
+				intDetected = 0 // reset per font
+				for (const basefont of fntControl) {
 					intDetected = 0 // reset per control
-					const family = "'"+ font +"', "+ basefont	
-					span.style.setProperty('--font', family)
+					span.style.setProperty('--font', "'"+ font +"', "+ fntControlObj[basefont])
 					const style = getComputedStyle(span)
 					const dimensions = getDimensions(span, style)
-					basefont = basefont.split(',')[0] // switch to short generic name
-					aTestsValid.forEach(function(pair) {
-						let wName = pair[0] +'Width', hName = pair[0] +'Height'
-						if (dimensions[wName] != base[basefont][wName] || dimensions[hName] != base[basefont][hName]) {
-							pair[1].add(font +':'+ basefont +':'+ dimensions[wName] +' x '+ dimensions[hName])
+					aTests.forEach(function(method) {
+						let wName = method +'Width', hName = method +'Height'
+						if (dimensions[wName] != fntBase[basefont][wName] || dimensions[hName] != fntBase[basefont][hName]) {
+							if (isFontSizesMore) {
+								// every basefont result
+								if (undefined == oTests[method][font]) {oTests[method][font] = {}}
+								oTests[method][font][basefont] = [dimensions[wName], dimensions[hName]]
+							} else {
+								// always one result per font
+								oTests[method][font] = [dimensions[wName], dimensions[hName]]
+							}
 							intDetected++
 						}
 					})
-					if (intDetected == intDetectedMax && !isFontSizesMore) {isDetected = true}
-					//isDetected = false // force max passes per font
-				})
+					if (intDetected == intDetectedMax && !isFontSizesMore) {break}
+				}
 			})
 		}
+
 		// exit isOS check
 		if (!isMain) {
-			return resolve([...detectedViaPerspectiveNumber])
+			removeElementFn(id)
+			return resolve(oTests['perspective'])
 		}
 
-		if (runSF) {
-			// modify domrect client so all the sizes are the same
-			let tmp = []
-			detectedViaDomRectClient.forEach(function(item) {
-				let parts = item.split(':')
-				tmp.push(parts[0] +':'+ parts[1] +':700 x 800')
-			})
-			detectedViaDomRectClient.clear()
-			tmp.forEach(function(item) {
-				detectedViaDomRectClient.add(item)
-			})
+		// sim fake font + same sizes
+		if (runSF && !isFontSizesMore) {
+			oTests['domrectclient'][fntFake] = [700, 800]
+			for (const k of Object.keys(oTests['client'])) {oTests['client'][k] = [700, 800]}
 		}
 
-		aTestsValid.forEach(function(item) {
-			let name = item[2], error
-			if (0 == item[1].size) {
-				error = zErrInvalid +'none'
-			} else if (item[1].size == fntData.full.length) {
-				error = zErrInvalid +'all'
-			} else {
-				let firstDetected = [...item[1]][0]
-				if (firstDetected.includes(fntFake)) {
-					error = zErrInvalid +'fake font detected'
-				}
+		// catch more errors
+		for (const k of Object.keys(oTests)) {
+			let obj = oTests[k],
+				objcount = Object.keys(obj).length
+			try {
+				if (0 == objcount) {throw zErrInvalid +'none'
+				} else if (objcount == fntData.full.length) {throw zErrInvalid +'all'
+				} else if (obj.hasOwnProperty(fntFake)) {throw zErrInvalid +'fake font detected'}
+			} catch(e) {
+				// we don't have to emmpty it
+				for (const prop in obj) {if (obj.hasOwnProperty(prop)) {delete obj[prop]}} 
+				fntBaseInvalid[k] = zErr
+				oTests[k]['error'] = e+''
+				addDisplay(12, METRIC +'_'+ k, log_error(12, METRIC +'_'+ k, e))
 			}
-			if (error !== undefined) {
-				item[1].clear()
-				item[1].add(zErr)
-				addDisplay(12, name, log_error(12, METRIC +'_'+ (name.slice(5).toLowerCase()), error))
-				delete fntBasesValid[name]
-			}
-		})
+		}
 
-		const fontsScroll = [...detectedViaScroll]
-		const fontsOffset = [...detectedViaOffset]
-		const fontsClient = [...detectedViaClient]
-		const fontsPixel = [...detectedViaPixel]
-		const fontsPixelSize = [...detectedViaPixelSize]
-		const fontsPerspective = [...detectedViaPerspective]
-		const fontsTransform = [...detectedViaTransform]
-		const fontsPixelNumber = [...detectedViaPixelNumber]
-		const fontsPixelSizeNumber = [...detectedViaPixelSizeNumber]
-		const fontsPerspectiveNumber = [...detectedViaPerspectiveNumber]
-		const fontsTransformNumber = [...detectedViaTransformNumber]
-		const fontsDomRectBounding = [...detectedViaDomRectBounding]
-		const fontsDomRectBoundingRange = [...detectedViaDomRectBoundingRange]
-		const fontsDomRectClient = [...detectedViaDomRectClient]
-		const fontsDomRectClientRange = [...detectedViaDomRectClientRange]
-		return resolve({
-			// match display order so btn links = first of each hash
-			fontsClient,
-			fontsOffset,
-			fontsPerspective,
-			fontsPixel,
-			fontsPixelSize,
-			fontsScroll,
-			fontsTransform,
-			fontsPixelNumber,
-			fontsPixelSizeNumber,
-			fontsPerspectiveNumber,
-			fontsTransformNumber,
-			fontsDomRectBounding,
-			fontsDomRectBoundingRange,
-			fontsDomRectClient,
-			fontsDomRectClientRange,
-		})
+		// add domrect lies if not already an error
+		if (isSmart) {
+			// in order of aDomRect
+			let domrectnames = ['domrectbounding','domrectclient','domrectboundingrange','domrectclientrange']
+			for (let i=0; i < domrectnames.length; i++) {
+				let name = domrectnames[i]
+				if (!aDomRect[i] && undefined == fntBaseInvalid[name]) {fntBaseInvalid[name] = zLIE}
+			}
+		}
+
+		//console.log(nowFn() - t0 +' ms')
+		removeElementFn(id)
+		return resolve(oTests)
 	} catch(e) {
-		if (isMain) {log_error(12, METRIC, e)} else {console.error(e)}
+		removeElementFn(id)
+		if (isMain) {
+			log_error(12, METRIC, e)
+			log_error(12, METRIC +'_methods', e)
+			log_error(12, METRIC +'_base', e)
+		}
 		return resolve(zErr)
 	}
 })
 
 function get_fonts(METRIC) {
+	/*
+	- only notate font_names == not a metric but is picked up health
+	- sizes we record all errors and lies per method. This is all we need for method
+		results/entropy - sizes is either something or unknown: so never notate or zLIES
+	- sizes_base + sizes_methos: never notate or zLIES: it is simply a reflection
+		of what happened in sizes
+	*/
+
 	let t0 = nowFn()
-	const METRICG = METRIC +'_groups'
+	const METRICM = METRIC +'_methods'
 	const METRICB = METRIC +'_base'
 	const METRICN = 'font_names'
 	let badnotation = isTB ? tb_red : rfp_red
 	let goodnotation = isTB ? tb_green : rfp_green
-	let oDomList = {
-		0: 'fontsDomRectBounding',
-		1: 'fontsDomRectClient',
-		2: 'fontsDomRectBoundingRange',
-		3: 'fontsDomRectClientRange',
-	}
 
 	// functions
 	function exit(value) {
 		addBoth(12, METRIC, value)
-		addBoth(12, METRICN, value,'', badnotation)
-		addBoth(12, METRICG, value,'', badnotation)
+		addBoth(12, METRICM, value)
+		add_font_names(value)
 		if (value == zNA) {
-			add_basesizes(value)
+			get_fonts_base(METRICB, value)
 		} else {
 			addBoth(12, METRICB, value)
 		}
 		log_perf(12, METRIC, t0)
 		return
 	}
-
-	function add_basesizes(type) {
-		let select
-		if (type == zNA) {
-			let order = [
-				'fontsDomRectBounding','fontsDomRectBoundingRange','fontsDomRectClient','fontsDomRectClientRange',
-				'fontsPerspectiveNumber','fontsTransformNumber','fontsPixelNumber','fontsPixelSizeNumber'
-			]
-			// exclude domrect lies
-			for (const k of Object.keys(oDomList)) {
-				if (!aDomRect[k]) {order = order.filter(x => ![oDomList[k]].includes(x))} // remove from list
-			}
-			for (let i=0; i < order.length; i++) {
-				let value = fntBasesValid[order[i]]
-				if (value !== undefined) {select = value; type = order[i]; break}
-			}
-		} else {
-			select = fntBasesValid[type]
-		}
-
-		let hashAll = mini(fntBases)
-		let lookup = fntData.generic
-		let btnBaseAll = ' | '+ hashAll + addButton(12, METRICB +'_reported', Object.keys(fntBases).length +'/'+ lookup.length)
-		addDetail(METRICB +'_reported', fntBases)
-
-		if (select !== undefined) {
-			// rebuild: base names from fntData.generic, data from fntBase
-			let oHash = {}, oFont = {}, newobj = {}, lookup = fntData.generic
-			// get select method + group by hash
-			for (let i=0; i < lookup.length; i++) {
-				let font = lookup[i].split(',')[0], items = fntBasesRaw[font]
-				let w = items[select +'Width'], h = items[select +'Height']
-				let tmphash = mini([w, h])
-				if (oHash[tmphash] == undefined) {oHash[tmphash] = {data: [w, h], group: [font]}} else {oHash[tmphash]['group'].push(font)}
-			}
-			// group by fonts, then sort
-			for (const k of Object.keys(oHash)) {oFont[oHash[k].group.join(' ')] = oHash[k].data}
-			for (const k of Object.keys(oFont).sort()) {newobj[k] = oFont[k]}
-			//console.log(oHash, oFont)
-			let hash = mini(newobj)
-			let method = ' ['+ type.slice(5).toLowerCase() +']'
-			let btn = addButton(12, METRICB, Object.keys(newobj).length +'/'+ lookup.length)
-			addBoth(12, METRICB, hash, btn + method + btnBaseAll,'', newobj)
-		} else {
-			addBoth(12, METRICB, 'unknown', btnBaseAll,'','', true)
-		}
+	function add_font_names(value) {
+		// fontnames: always notate for health
+		// display only: so always add a lookup
+		sDetail.document.lookup[METRICN] = value
+		addDisplay(12, METRICN, value,'', badnotation)
 	}
 
-	// run
-	get_font_sizes().then(res => {
-		removeElementFn('font-fp')
+	get_fonts_size().then(res => {
+		//console.log("res", res)
 		// quick exits
 		let typeCheck = typeFn(res)
 		if ('string' === typeCheck) {exit(('baseonly' == res ? zNA : zErr)); return}
 		if ('object' !== typeCheck) {log_error(12, METRIC, zErrType + typeCheck); exit(zErr); return}
 
-		//console.log(res)
-		let firstBaseFont = fntData['control_name'][0]
+		// organize oData: note: everything is already sorted
 		let oData = {}, oValid = {}
-		// note: do not sort: these are font_names:size and fntList was already sorted
 		for (let name in res) {
 			let data = res[name]
-			if (data.length > 1 && data[0] !== zErr) { // non-errors
+			if (!data.hasOwnProperty('error')) {
 				// group by hash
 				let hash = mini(data)
 				oValid[name] = hash
-				if (oData[hash] == undefined) {oData[hash] = {'names': [], 'rawdata': data}}
-				oData[hash].names.push(name)
+				if (oData[hash] == undefined) {oData[hash] = {'names': [name], 'data': data}
+				} else {oData[hash].names.push(name)}
 			}
 		}
-		// per hash: collect size buckets, font names, handle isFontSizesMore etc
-		for (const k of Object.keys(oData)) {
-			let aOriginal = oData[k].rawdata
-			let aFontNames = []
-			let oSizes = {}
-			aOriginal.forEach(function(item) {
-				let font = item.split(':')[0],
-					basefont = item.split(':')[1],
-					size = item.split(':')[2]
-				aFontNames.push(font)
-				let fontitem = (basefont == firstBaseFont && !isFontSizesMore ? font : font +' '+ basefont) // strip off 1st pass noise
-				if (isFontSizesMore) {
-					// just record each font + size
-					if (oSizes[font] == undefined) {oSizes[font] = {}}
-					oSizes[font][basefont] =[size.split(' x ')[0] *1, size.split(' x ')[1] *1]
-				} else {
-					if (oSizes[size] == undefined) {oSizes[size] = []}
-					oSizes[size].push(fontitem)
+
+		// per hash: do stuff: font names, same size, handle isFontSizesMore
+		for (const h of Object.keys(oData)) {
+			oData[h].datacount = Object.keys(oData[h].data).length
+			oData[h].datafonts = []
+			let oTmpSize = {}, setSize = new Set(), oGroups = {}
+			for (const f of Object.keys(oData[h].data)) {
+				oData[h].datafonts.push(f)
+				// only do size buckets if not isFontSizesMore
+				if (!isFontSizesMore) {
+					let sizekey = oData[h].data[f].join('x')
+					if (undefined == oTmpSize[sizekey]) {oTmpSize[sizekey] = [f], setSize.add(sizekey)
+					} else {oTmpSize[sizekey].push(f)}
 				}
-			})
-			// use sizebuckets to catch more fuckery
-			let sizebuckets = Object.keys(oSizes).length
-			if (1 == sizebuckets) {
-				(oData[k].names).forEach(function(name) {
-					let error = zErrInvalid +'same size ['+ Object.keys(oSizes)[0].trim() +']'
-					addDisplay(12, name, log_error(12, METRIC +'_'+ (name.slice(5).toLowerCase()), error))
-					delete oValid[name]
-					delete fntBasesValid[name]
-				})
-				delete oData[k]
+			}
+			// use size buckets to detect more garbage
+			if (isFontSizesMore || setSize.size > 1) {
+				oData[h].sizedata = [] // for detailed items
+				oData[h].sizecount = setSize.size
+				for (const k of Object.keys(oTmpSize)) {
+					let tmpFonts = oTmpSize[k]
+					let tmpSize = oData[h].data[tmpFonts[0]]
+					oData[h].sizedata.push([tmpFonts, tmpSize])
+				}
 			} else {
-				let aNew = {}
-				for (const j of Object.keys(oSizes).sort()) {aNew[j] = oSizes[j]}
-				oData[k].newdata = aNew
-				oData[k].sizecount = Object.keys(oSizes).length
-				oData[k].hash = mini(aNew)
-				// dedupe
-				if (isFontSizesMore) {
-					aFontNames = aFontNames.filter(function(item, position) {return aFontNames.indexOf(item) === position})
-				}
-				oData[k][METRICN] = aFontNames
+				(oData[h].names).forEach(function(name) {
+					let lookup = oData[h].data[oData[h].datafonts[0]]
+					let error = zErrInvalid +'same size ['+ lookup.join(' x ') +']'
+					fntBaseInvalid[name] = zErr
+					addDisplay(12, METRIC +'_'+ name, log_error(12, METRIC +'_'+ name, error))
+				})
+				delete oData[h]
 			}
 		}
 
-		// 1st choice: domrect that is not a lie
-			// remove any lies from valid
+		// sync fntBaseInvalid and oValid
+		for (name in fntBaseInvalid) {delete oValid[name]}
+		
+		// fallback: first valid domrect in order of display as that gets the btn
+			// fntBaseInvalid: is errors, plus lies if not an error and isSmart
 		let selected
-		let aDomOrder = [3,1,2,0] // reverse order so final match is highest index
-		aDomOrder.forEach(function(key) {
-			let method = oDomList[key]
-			if (aDomRect[key] == true && oValid[method] !== undefined) {selected = method} else {delete oValid[method]}
-		})
+		let aDomList = ['domrectbounding','domrectboundingrange','domrectclient','domrectclientrange']
+		for (let i=0; i < aDomList.length; i++) {
+			let domname = aDomList[i]
+			if (undefined !== oValid[domname]) {selected = domname; break}
+		}
 
-		// fontsize_group: this gives us any tampering entropy
+		// font_size_methods: this gives us any tampering entropy
 			// not to be confused with errors/lies which are already recorded
+		let oMethods = {}, oIndex = {}, counter = 0
 		let aNames = [ // sorted by expected group then name
-			'Client','Offset','Perspective','Pixel','PixelSize','Scroll','Transform',
-			'PixelNumber','PixelSizeNumber',
-			'PerspectiveNumber','TransformNumber',
-			'DomRectBounding','DomRectBoundingRange','DomRectClient','DomRectClientRange',
+			'client','offset','scroll','pixel','pixelsize','perspective','transform',
+			'domrectbounding','domrectboundingrange','domrectclient','domrectclientrange',
 		]
-		let oGroups = {}, oIndex = {}, counter = 0
-		aNames.forEach(function(n) {
-			let k = 'fonts'+ n
-			if (oValid[k] !== undefined) {
-				let indexKey = oData[oValid[k]].hash
+		aNames.forEach(function(k) {
+			if (undefined !== oValid[k]) {
+				let indexKey = oValid[k] // the method hash
 				if (oIndex[indexKey] == undefined) {
-					counter++
-					oIndex[indexKey] = (counter+'').padStart(2,'0')
+					oIndex[indexKey] = (counter+'').padStart(2,'0'); counter++
 				}
-				let groupKey = oIndex[indexKey]
-				if (oGroups[groupKey] == undefined) {oGroups[groupKey] = []}
-				oGroups[groupKey].push(k)
+				let mKey = oIndex[indexKey]
+				if (oMethods[mKey] == undefined) {
+					oMethods[mKey] = [k]
+					fntBaseMin.push(k) // first of each
+				} else {
+					oMethods[mKey].push(k)
+				}
 			}
 		})
-		let grphash = 'unknown', grpbtn ='', grpdata =''
-		if (Object.keys(oGroups).length) {
-			grphash = mini(oGroups); grpbtn = addButton(12, METRICG); grpdata = oGroups
+		let mHash = 'unknown', mBtn ='', mData =''
+		if (Object.keys(oMethods).length) {
+			mHash = mini(oMethods); mBtn = addButton(12, METRICM); mData = oMethods
 		}
-		addBoth(12, METRICG, grphash, grpbtn, '', oGroups)
-		//console.log(oData)
-		//console.log(oValid)
-		//console.log(selected)
+		addBoth(12, METRICM, mHash, mBtn, '', mData)
 
-		// fallbacks
+		// fallbacks: matching valid *Number pairs
 		if (selected == undefined) {
-			// use raw initial data hashes from remaining oValid (i.e not errors/lies)
-			let items = [
-				['Perspective', 'Transform', ['Client','Offset','Pixel','PixelSize','Scroll']],
-				['Pixel', 'PixelSize', ['Client','Offset','Perspective','Scroll','Transform']],
-			]
+			let items = [['perspective', 'transform'], ['pixel', 'pixelsize']]
 			for (let i=0; i < items.length; i++) {
-				let ctrlName = 'fonts'+ items[i][0], ctrlHash = oValid[ctrlName +'Number']
-				let testName = 'fonts'+ items[i][1], testHash = oValid[testName +'Number']
-				// *Number versions are not undefined + hashes match
+				let ctrlName = items[i][0], ctrlHash = oValid[ctrlName]
+				let testName = items[i][1], testHash = oValid[testName]
 				if (ctrlHash !== undefined && ctrlHash == testHash) {
-					// base versions are not undefined and match
-					ctrlHash = oValid[ctrlName]
-					if (ctrlHash !== undefined && ctrlHash == oValid[testName]) {
-						// at least 2/5 more bases versions must match for a majority of 4/7
-						let baseTests = items[i][2], matchCount = 0
-						for (let j=0; j < baseTests.length; j++) {
-							if (ctrlHash == oValid['fonts'+ baseTests[j]]) {matchCount++}
-						}
-						if (matchCount > 1) {selected = ctrlName +'Number'; break}
-					}
+					selected = ctrlName; break // we have a valid *Number pair
 				}
 			}
 		}
+		//console.log('oData', oData)
+		//console.log('oValid', oValid)
+		//console.log('fntBaseInvalid', fntBaseInvalid)
 
 		// no more fallbacks
-		// output basesizes
-		add_basesizes(selected)
-
 		// output oData = not-errors
 		for (const k of Object.keys(oData)) {
 			let aList = oData[k].names
 			for (let i=0; i < aList.length; i++) {
 				let method = aList[i]
-				// display lines
-					// style + record lies to be consistent
+				let fntmethod = METRIC +'_'+ method
+				// style + record lies to be consistent
 				let isLies = false, btn =''
-				if (!aDomRect[0] && 'fontsDomRectBounding' == method) {isLies = true
-				} else if (!aDomRect[1] && 'fontsDomRectClient' == method) {isLies = true
-				} else if (!aDomRect[2] && 'fontsDomRectBoundingRange' == method) {isLies = true
-				} else if (!aDomRect[3] && 'fontsDomRectClientRange' == method) {isLies = true}
-				let fntmethod = METRIC +'_'+ (method.slice(5).toLowerCase())
-				if (isLies) {log_known(12, fntmethod, {'hash': oData[k].hash, 'metrics': oData[k].newdata})}
+				if ('domrect' == method.slice(0,7)) {
+					isLies = fntBaseInvalid.hasOwnProperty(method)
+					if (isLies) {
+						// we don't need to record domrect lie data: just that its a lie
+						log_known(12, fntmethod, '')
+					}
+				}
 				//add btn to first of each hash
 				if (i == 0) {
-					addDetail(fntmethod, oData[k].newdata)
-					btn = addButton(12, fntmethod, oData[k].sizecount)
+					addDetail(fntmethod, oData[k].data)
+					btn = addButton(12, fntmethod, oData[k].datacount)
+					if (!isFontSizesMore) {
+						addDetail(fntmethod +'_grouped', oData[k].sizedata)
+						btn += addButton(12, fntmethod +'_grouped', oData[k].sizecount)
+					}
 				}
-				addDisplay(12, method, oData[k].hash, btn,'', isLies)
+				addDisplay(12, fntmethod, k, btn,'', isLies)
 
 				// FP data: not lies
 				if (method == selected) {
@@ -1229,14 +1155,14 @@ function get_fonts(METRIC) {
 					if (fntData.base.length) {
 						notation = goodnotation
 						// names: not needed in FP but include for upstream
-						let aNotInBase = oData[k][METRICN], aMissing = [], aMissingSystem = []
+						let aNotInBase = oData[k].datafonts, aMissing = [], aMissingSystem = []
 						aNotInBase = aNotInBase.filter(x => !fntData.base.includes(x))
 						if (isTB) {
 							aMissing = fntData.bundled
-							aMissing = aMissing.filter(x => !oData[k][METRICN].includes(x))
+							aMissing = aMissing.filter(x => !oData[k].datafonts.includes(x))
 							if (fntData.system.length) {
 								aMissingSystem = fntData.system
-								aMissingSystem = aMissingSystem.filter(x => !oData[k][METRICN].includes(x))
+								aMissingSystem = aMissingSystem.filter(x => !oData[k].datafonts.includes(x))
 							}
 						}
 						let count = aNotInBase.length + aMissing.length + aMissingSystem.length
@@ -1256,21 +1182,30 @@ function get_fonts(METRIC) {
 						}
 					}
 					// names
-					let hash = mini(oData[k][METRICN])
-					let btn = addButton(12, METRICN, oData[k][METRICN].length)
-					addBoth(12, METRICN, hash, btn, notation, oData[k][METRICN])
-					// sizes
-					let sizeHash = oData[k].hash
-					let sizeBtn = addButton(12, METRIC, oData[k].sizecount)
-					addBoth(12, METRIC, sizeHash, sizeBtn,'', oData[k].newdata)
+					let btn = addButton(12, METRICN, oData[k].datacount)
+					sDetail.document[METRICN] = oData[k].datafonts
+					addDisplay(12, METRICN, mini(oData[k].datafonts), btn, notation)
+
+					// data
+					btn = addButton(12, METRIC, oData[k].datacount)
+					if (!isFontSizesMore) {
+						addDetail(METRIC +'_grouped', oData[k].sizedata)
+						btn += addButton(12, METRIC +'_grouped', oData[k].sizecount)
+					}
+					addBoth(12, METRIC, k, btn,'', oData[k].data)
 				}
 			}
 		}
+
 		// nothing
 		if (!Object.keys(oData).length || selected == undefined) {
-			addBoth(12, METRIC, 'unknown','','','', true)
-			addBoth(12, METRICN, 'unknown','','','', true)
+			addBoth(12, METRIC, 'unknown')
+			add_font_names('unknown')
+			get_fonts_base(METRICB, 'unknown')
+		} else {
+			get_fonts_base(METRICB, selected)
 		}
+
 		log_perf(12, METRIC, t0)
 		return
 	})
@@ -1308,8 +1243,9 @@ function get_graphite(METRIC) {
 	try {
 		if (!fntDocEnabled) {throw zErrInvalid + 'document fonts disabled'}
 		// ToDo: handle when font face is blocked
-		let test = dom.testGraphite.offsetWidth,
-			control = dom.ctrlGraphite.offsetWidth
+		let el = dom.tzpGraphite,
+			test = el.children[0].offsetWidth,
+			control = el.children[1].offsetWidth
 		if (runST) {test = NaN; control = NaN}
 		let wType = typeFn(test), hType = typeFn(control)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' | '+ hType}
@@ -1323,29 +1259,33 @@ function get_graphite(METRIC) {
 }
 
 function get_script_defaults(METRIC) {
+	// this is zoom resistant
+		// except with "zoom text only" and you zoom from default
+
 	const styles = ['monospace','sans-serif','serif']
 	const scripts = {
 		arabic: 'ar', armenian: 'hy', bengali: 'bn', cyrillic: 'ru', devanagari: 'hi', ethiopic: 'gez',
 		georgian: 'ka', greek: 'el', gujurati: 'gu', gurmukhi: 'pa', hebrew: 'he', japanese: 'ja',
 		kannada: 'kn', khmer: 'km', korean: 'ko', latin: 'en', malayalam: 'ml', mathematics: 'x-math',
 		odia: 'or', other: 'my', 'simplified chinese': 'zh-CN', sinhala: 'si', tamil: 'ta', telugu: 'te',
-		thai: 'th', tibetan: 'bo','traditional chinese (hong kong)': 'zh-HK',
-		'traditional chinese (taiwan)': 'zh-TW','unified canadian syllabary': 'cr',
+		thai: 'th', tibetan: 'bo', 'traditional chinese (hong kong)': 'zh-HK',
+		'traditional chinese (taiwan)': 'zh-TW', 'unified canadian syllabary': 'cr',
 	}
+
 	let hash = zNA, btn ='', data = '', notation = default_red
 	if (isGecko) {
 		data = {}
 		try {
-			const el = dom.dfsize,
-				elpro = dom.dfproportion
-			let tmpdata = {}
+			const el = dom.tzpScript
+
 			// family typecheck
-			let test = getComputedStyle(elpro).getPropertyValue('font-family')
+			let test = getComputedStyle(el).getPropertyValue('font-family')
 			if (runST) {test = ''}
 			let typeCheck = typeFn(test)
 			if ('string' !== typeCheck) {throw zErrType + 'font-family: '+ typeCheck}
+
 			// size typecheck
-			test = getComputedStyle(el).getPropertyValue('font-size')
+			test = getComputedStyle(el).getPropertyValue('font-size').trim()
 			if (runSI) {test = '16ppx'}
 			let originalvalue = test
 			typeCheck = typeFn(test)
@@ -1354,18 +1294,17 @@ function get_script_defaults(METRIC) {
 			test = test.slice(0, -2)
 			if (test.length > 0) {test = test * 1}
 			if ('number' !== typeFn(test)) {throw zErrInvalid + 'got '+ originalvalue} // missing number
+
 			// loop
+			let tmpdata = {}
+			el.style.fontSize = '' // reset size
 			for (const k of Object.keys(scripts)) {
 				let lang = scripts[k]
-				elpro.style.fontFamily = ''
-				elpro.setAttribute('lang', lang)
-				let font = getComputedStyle(elpro).getPropertyValue('font-family')
-				let tmp = [font]
+				el.style.fontFamily = '' // each lang reset fanily
 				el.setAttribute('lang', lang)
+				let font = getComputedStyle(el).getPropertyValue('font-family')
+				let tmp = [font]
 				styles.forEach(function(style) {
-					el.style.fontSize = '' // always clear
-					el.removeAttribute('font-family')
-					el.style.fontFamily = ''
 					el.style.fontFamily = style
 					let size = getComputedStyle(el).getPropertyValue('font-size').slice(0,-2)
 					tmp.push(size)
@@ -1404,7 +1343,7 @@ function get_system_fonts(METRIC) {
 
 	try {
 		let tmpdata = {}
-		let el = dom.sysFont
+		let el = dom.tzpDiv
 		// typecheck
 		for (const j of aProps) {
 			let test = getComputedStyle(el)[j]
@@ -1464,6 +1403,7 @@ function get_system_fonts(METRIC) {
 
 function get_widget_fonts(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
+let t0 = nowFn()
 	let aList = [
 		'button','checkbox','color','date','datetime-local','email','file','hidden','image','month','number',
 		'password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
@@ -1472,8 +1412,9 @@ function get_widget_fonts(METRIC) {
 	let hash, btn='', data = {}, notation = rfp_red
 	try {
 		let tmpdata = {}
-		aList.forEach(function(name) {
-			let el = dom['wgt'+ name]
+		let target = dom.tzpWidget
+		for (let i=0; i < aList.length; i++) {
+			let el = target.children[i], name = aList[i]
 			let aKeys = []
 			for (const j of aProps) {
 				let value = getComputedStyle(el)[j]
@@ -1487,7 +1428,7 @@ function get_widget_fonts(METRIC) {
 			}
 			let key = aKeys.join(' ')
 			if (tmpdata[key] == undefined) {tmpdata[key] = [name]} else {tmpdata[key].push(name)}
-		})
+		}
 		let count = 0
 		for (const k of Object.keys(tmpdata).sort()) {data[k] = tmpdata[k]; count += tmpdata[k].length}
 		hash = mini(data)
@@ -1527,23 +1468,112 @@ function get_widget_fonts(METRIC) {
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
+log_perf(12, METRIC, t0)
 	addBoth(12, METRIC, hash, btn, notation, data)
 	return
 }
 
-function get_unicode() {
-	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
+function get_glyphs(METRIC) {
 	/* NOTES
-	FF86+: 1676966: gfx.font_rendering.fallback.async
-		- set chars directly in HTML to force fallback ASAP
-  FF131+ nightly: 1900175 + 1403931 ride the train
+	FF131+ nightly: 1900175 + 1403931 ride the train
 		- Enable USER_RESTRICTED for content processes on Nightly
 		- security.sandbox.content.level > 7
-		- this affected (FF win11 at least) clientrect/offset + actualBounding
+		- this affected (FF win11 at least) clientrect
 			- 0x3095 + 0x532D (2 CJK chars)
 			- almost always both in every style except cursive never affected
 			- only changed in http(s), file:// not affected
 		- so reminder that generally we should always be using https for final testing/analysis
+	*/
+	let t0 = nowFn()
+	let styles = ['cursive','monospace','sans-serif','serif','system-ui',]
+	/* Notes
+		unique sizes: win11 all system fonts FF
+		sans-serif = 34 + cursive = 66 + serif = 84 + system-ui = 102 + monospace = 112 + fantasy = 115
+	
+	- all the same: 'emoji','math','none','ui-monospace','ui-rounded','ui-sans-serif','ui-serif'
+		- ui-* not added to gecko yet
+		- math is basically slated for deprecation
+		- emoji - we're not testing any emojis here
+		- do not increase unique sizes
+	- 'fangsong': does not add to unique sizes, we would need a different set of code points
+	- 'fantasy': only added 3 more sizes
+	*/
+
+	const id = 'element-fp'
+	let hash, btn ='', data = {}, strSizes = ''
+	try {
+		if (runSE) {foo++}
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		div.innerHTML = '<span id="glyphs-span" style="font-size: 22000px;"><span id="glyphs-slot"></span></span>'
+		const span = dom['glyphs-span'], slot = dom['glyphs-slot']
+
+		let oData = {}, newobj = {}, setSize = new Set()
+		let methoddiv, methodspan, rangeH, rangeW, width, height
+		styles.forEach(function(stylename) {
+			slot.style.fontFamily = stylename
+			oData[stylename] = {}
+			let isFirst = stylename == styles[0]
+			fntCodes.forEach(function(code) {
+				let codeString = String.fromCodePoint(code)
+				slot.textContent = codeString
+				// always get span width, div height
+				if (isDomRect > 1) {
+					rangeH = document.createRange()
+					rangeH.selectNode(div)
+					rangeW = document.createRange()
+					rangeW.selectNode(span)
+				}
+				if (isDomRect < 1) { // get a result regardless
+					methoddiv = div.getBoundingClientRect()
+					methodspan = span.getBoundingClientRect()
+				} else if (isDomRect == 1) {
+					methoddiv = div.getClientRects()[0]
+					methodspan = span.getClientRects()[0]
+				} else if (isDomRect == 2) {
+					methoddiv = rangeH.getBoundingClientRect()
+					methodspan = rangeW.getBoundingClientRect()
+				} else if (isDomRect > 2) {
+					methoddiv = rangeH.getClientRects()[0]
+					methodspan = rangeW.getClientRects()[0]
+				}
+				width = methodspan.width, height = methoddiv.height
+				// only typecheck once: first char on first style
+				if (code == fntCodes[0] && isFirst) {
+					if (runST) {width = NaN, height = [1]}
+					let wType = typeFn(width), hType = typeFn(height)
+					if ('number' !== wType || 'number' !== hType) {
+						throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
+					}
+				}
+				oData[stylename][code] = [width, height]
+				setSize.add(width+'x'+height)
+			})
+		})
+		for (const k of Object.keys(oData)) {
+			let hash = mini(oData[k])
+			if (newobj[hash] == undefined) {newobj[hash] = {'names': [k], 'data': oData[k]}
+			} else {newobj[hash].names.push(k)}
+		}
+		for (const k of Object.keys(newobj)) {data[newobj[k].names.join(' ')] = newobj[k].data}
+		hash = mini(data), strSizes = gRun ? setSize.size + ' unique sizes' : ''
+		btn = addButton(12, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	removeElementFn(id)
+	addBoth(12, METRIC, hash, btn,'', data, (isDomRect == -1))
+	log_perf(12, METRIC, t0,'', strSizes)
+	return
+}
+
+function get_unicode(METRIC) {
+	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
+	/* NOTES
+	FF86+: 1676966: gfx.font_rendering.fallback.async
+		- set chars directly in HTML to force fallback ASAP
 	*/
 
 	let t0 = nowFn()
@@ -1552,75 +1582,51 @@ function get_unicode() {
 		// and is already present in covering monospace/sans-serif/serif
 		// fantasy vs sans-serif | fangsong vs serif both add very little
 
-	function group(name, objname, data) {
+	function group(name, metricname, data) {
 		// group by style then char
 		let newobj = {}
 		styles.forEach(function(style) {newobj[style] = {}})
-		if ('offset' == name || 'clientrect' == name) {
-			data.forEach(function(item) {
-				newobj[item[0]][item[1]] = [item[2], item[3]] // width + height
-			})
-		} else {
-			// width only
-			data.forEach(function(item) {
-				if (oTM[name]['all']) {
-					newobj[item[0]][item[1]] = item[2]
-				} else {
-					newobj[item[0]] = item[1]
-				}
-			})
-		}
+		// width only
+		data.forEach(function(item) {
+			if (oTM[name]['all']) {
+				newobj[item[0]][item[1]] = item[2]
+			} else {
+				newobj[item[0]] = item[1]
+			}
+		})
 		let hash = mini(newobj)
 		// record valid results
-		oObject[objname] = {'data': newobj, 'hash': hash}
+		oObject[metricname] = {'data': newobj, 'hash': hash}
 		return hash
 	}
 
-	let oObject = {}
 	function output() {
-		// offset first so we can get the str to append to clientrect
-		let aList = [['offset', aOffset], ['clientrect', aClient]], offsetStr = ''
-		for (const n of Object.keys(oTM)) {	aList.push([n])}
-		aList.forEach(function(array) {
-			const name = array[0]
-			let prefix = 'glyphs_'
-			const METRIC = prefix + name
-			let data = array[1] == undefined ? oTM[name]['data'] : array[1]
-
+		for (const name of Object.keys(oTM)) {
+			let metricname = METRIC +'_'+ name
+			let data = oTM[name].data
 			let str ='', btn ='', isLies = false
 			if (oCatch[name] !== undefined) {
 				str = oCatch[name]; data = zErrLog
 			} else if (0 == data.length) {
 				// empty object
-				if ('offset' !== name && 'clientrect' !== name) {
-					if (!TextMetrics.prototype.hasOwnProperty(name)) {
-						str = zNA; data = zNA
-					}
+				if (!TextMetrics.prototype.hasOwnProperty(name)) {
+					str = zNA; data = zNA
 				}
 			} else {
 				// group into new obj
-				str = group(name, METRIC, data); btn = addButton(12, METRIC, ('offset' == name ? 'offset' : 'details'))
-				data = oObject[METRIC]['data']
-				if ('offset' == name) {
-					offsetStr = ' | '+ str + btn
-					sDetail.document[METRIC] = data
-				}
+				str = group(name, metricname, data); btn = addButton(12, metricname)
+				data = oObject[metricname]['data']
 				// lies
-				if (isDomRect == -1 && 'clientrect' == name) {isLies = true
-				} else if (isProxyLie('TextMetrics.' + name)) {isLies = true}
+				if (isProxyLie('TextMetrics.' + name)) {isLies = true}
 			}
-			if ('offset' !== name) {
-				if ('clientrect' == name) {btn += offsetStr}
-				addBoth(12, METRIC, str, btn,'', data, isLies)
-			}
-		})
-		log_perf(12, 'glyphs', t0)
+			addBoth(12, metricname, str, btn,'', data, isLies)
+		}
+		log_perf(12, METRIC, t0)
 		return
 	}
 
 	// vars
-	let oCatch = {}, aOffset = [], aClient = []
-	let isClient = true, isOffset = true, isCanvas = true
+	let oObject = {}, oCatch = {}, isCanvas = true
 	let oTM = {
 		width: {},
 		actualBoundingBoxAscent: {},
@@ -1664,79 +1670,16 @@ function get_unicode() {
 	}
 
 	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot,
-		canvas = dom.ugCanvas, ctx = canvas.getContext('2d')
+		canvas = dom.tzpTextmetrics, ctx = canvas.getContext('2d')
 	let rangeH, rangeW, wType, hType, width, height
 
 	// each style
 	styles.forEach(function(stylename) {
-		slot.style.fontFamily = stylename
 		let isFirst = stylename == styles[0]
 		// each code
 		fntCodes.forEach(function(code) {
-			let	codeString = String.fromCodePoint(code)
-			slot.textContent = codeString // set once
-			//slot.style.fontFamily = stylename			
-
-			// only typecheck once: first char on first style
+			let codeString = String.fromCodePoint(code)
 			let isFirstCode = code == fntCodes[0]
-			let isTypeCheck = (isFirst && isFirstCode)
-			// offset: span width, div height
-				// offset is just purely for info purposes: redundant with clientrect
-			if (isOffset) {
-				try {
-					width = span.offsetWidth
-					height = div.offsetHeight
-					if (isTypeCheck) {
-						if (runST) {width = null, height = true}
-						wType = typeFn(width)
-						hType = typeFn(height)
-						if ('number' !== wType || 'number' !== hType) {
-							throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
-						}
-					}
-					aOffset.push([stylename, code, width, height])
-				} catch(e) {
-					// don't log offset error, we catch this in other tests
-					//oCatch['offset'] = e
-					isOffset = false
-				}
-			}
-			// clientrect
-			if (isClient) {
-				try {
-					if (isDomRect > 1) {
-						rangeH = document.createRange()
-						rangeH.selectNode(div)
-						rangeW = document.createRange()
-						rangeW.selectNode(span)
-					}
-					if (isDomRect < 1) { // get a result regardless
-						height = div.getBoundingClientRect().height
-						width = span.getBoundingClientRect().width
-					} else if (isDomRect == 1) {
-						height = div.getClientRects()[0].height
-						width = span.getClientRects()[0].width
-					} else if (isDomRect == 2) {
-						height = rangeH.getBoundingClientRect().height
-						width = rangeW.getBoundingClientRect().width
-					} else if (isDomRect > 2) {
-						height = rangeH.getClientRects()[0].height
-						width = rangeW.getClientRects()[0].width
-					}
-					if (isTypeCheck) {
-						if (runST) {width = NaN, height = [1]}
-						wType = typeFn(width)
-						hType = typeFn(height)
-						if ('number' !== wType || 'number' !== hType) {
-							throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
-						}
-					}
-					aClient.push([stylename, code, width, height])
-				} catch(e) {
-					oCatch['clientrect'] = e
-					isClient = false
-				}
-			}
 			// canvas
 			if (isCanvas) {
 				try {
@@ -1746,12 +1689,12 @@ function get_unicode() {
 					// textmetrics
 					for (const k of Object.keys(oTM)) {
 						if (oTM[k]['proceed']) {
-							let prefix = k == 'width' ? 'glyphs_' : ''
 							try {
 								let isOnce = oTM[k]['all'] == false && isFirstCode
 								if (oTM[k]['all'] || isOnce) {
 									let measure = tm[k]
-									if (isTypeCheck) {
+									// only typecheck once: first char on first style
+									if (isFirst && isFirstCode) {
 										if (runST) {measure = oTypeTest[k]}
 										let typeCheck = typeFn(measure)
 										if ('number' !== typeCheck) {throw zErrType + typeCheck}
@@ -1769,19 +1712,13 @@ function get_unicode() {
 						}
 					}
 				} catch(e) {
-					for (const k of Object.keys(oTM)) {
-						if (oTM[k]['proceed']) {
-							let m = (k == 'width' ? 'glyphs_' : '') + k
-							oCatch[k] = e
-						}
-					}
+					for (const k of Object.keys(oTM)) {if (oTM[k]['proceed']) {oCatch[k] = e}}
 					isCanvas = false
 				}
 			}
 		})
 	})
 	canvas.height = 0 // hide the fixed canvas after use
-	dom.ugSlot =''
 	output()
 }
 
@@ -1818,10 +1755,11 @@ const outputFonts = () => new Promise(resolve => {
 		get_woff2('woff2'),
 		get_graphite('graphite'), // uses fntDocEnabled
 	]).then(function(){
+		// allow more time for font async fallback
 		Promise.all([
-			get_unicode() // allow more time for font async fallback
+			get_glyphs('glyphs'),
+			get_unicode('textmetrics')
 		]).then(function(){
-			removeElementFn('font-fp')
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
 		})

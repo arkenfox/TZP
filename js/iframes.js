@@ -2,8 +2,8 @@
 
 function getDynamicIframeWindow({
 	context,
-	source = "",
-	test = "",
+	source ='',
+	test ='',
 	contentWindow = false,
 	nestIframeInContainerDiv = false,
 	violateSOP = true, // SameOriginPolicy
@@ -41,7 +41,7 @@ function getDynamicIframeWindow({
 			list.forEach(function(p) {
 				try {
 					r = navigator[p]
-					if ("string" !== typeof r) {throw zErr}
+					if ('string' !== typeof r) {throw zErr}
 					if ('' == r) {r = 'empty string'}
 				} catch(e) {
 					r = e
@@ -60,29 +60,29 @@ function get_ua_iframes(log = false) {
 	// runs post FP
 	let t0 = nowFn()
 
-	let aNames = ["content_docroot", "content_with_url", "window_docroot",
-		"window_with_url", "iframe_access", "nested", "window_access"]
+	let aNames = ['content_docroot', 'content_with_url', 'window_docroot',
+		'window_with_url', 'iframe_access', 'nested', 'window_access']
 
 	// get data
 	Promise.all([
-		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: "ua"}), // docroot contentWindow
-		getDynamicIframeWindow({context: window, contentWindow: true, source: "?", violateSOP: false, test: "ua"}), // with URL contentWindow
-		getDynamicIframeWindow({context: window, violateSOP: false, test: "ua"}), // docroot
-		getDynamicIframeWindow({context: window, source: "?", violateSOP: false, test: "ua"}), // with URL
-		getDynamicIframeWindow({context: frames, test: "ua"}), // iframe access
-		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: "ua"}), // nested
-		getDynamicIframeWindow({context: window, test: "ua"}), // window access
+		getDynamicIframeWindow({context: window, contentWindow: true, violateSOP: false, test: 'ua'}), // docroot contentWindow
+		getDynamicIframeWindow({context: window, contentWindow: true, source: '?', violateSOP: false, test: 'ua'}), // with URL contentWindow
+		getDynamicIframeWindow({context: window, violateSOP: false, test: 'ua'}), // docroot
+		getDynamicIframeWindow({context: window, source: '?', violateSOP: false, test: 'ua'}), // with URL
+		getDynamicIframeWindow({context: frames, test: 'ua'}), // iframe access
+		getDynamicIframeWindow({context: window, nestIframeInContainerDiv: true, test: 'ua'}), // nested
+		getDynamicIframeWindow({context: window, test: 'ua'}), // window access
 	]).then(function(results){
 		const ctrlHash = mini(sDetail.document.ua_reported)
 		/* test some errors
-		results[0] = "i am not groot"
-		results[2] = "i am groot"
+		results[0] = 'i am not groot'
+		results[2] = 'i am groot'
 		//*/
 		/* test some different hashes
-		results[4].data.appCodeName = "Godzilla"
+		results[4].data.appCodeName = 'Godzilla'
 		let tmpHash = mini(results[4].data)
 		results[4].hash = tmpHash
-		results[6].data.appName = "Navigator"
+		results[6].data.appName = 'Navigator'
 		tmpHash = mini(results[6].data)
 		results[6].hash = tmpHash
 		//*/
@@ -90,22 +90,22 @@ function get_ua_iframes(log = false) {
 		let oData = {}, oDisplay = {}, oHashes = {}, countErrors = 0
 		for (let i=0; i < results.length; i++) {
 			let item = results[i]
-			let name = "ua_"+ aNames[i]
-			if ("string" === typeof item) {
+			let name = 'ua_'+ aNames[i]
+			if ('string' == typeof item) {
 				dom[name].innerHTML = item
 				countErrors++
 			} else {
 				if (oHashes[item.hash] == undefined) {
-					oHashes[item.hash] = {"group": [name], "data": item.data}
+					oHashes[item.hash] = {'group': [name], 'data': item.data}
 				} else {
-					oHashes[item.hash]["group"].push(name)
+					oHashes[item.hash]['group'].push(name)
 				}
 			}
 		}
 
-		let summary = "", btn = "", errString = ""
+		let summary ='', btn ='', errString =''
 		if (countErrors > 0 && countErrors < results.length) {
-			errString += " <span class='s2'>["+ countErrors +" error"+ (countErrors > 1 ? "s" : "") +"]</span>"+ sc
+			errString += " <span class='s2'>["+ countErrors +' error'+ (countErrors > 1 ? 's' : '') +']</span>'+ sc
 		}
 		if (countErrors == results.length) {
 			// all errors
@@ -117,8 +117,8 @@ function get_ua_iframes(log = false) {
 				singleHash = k
 				if (k !== ctrlHash) {
 					notation = match_red
-					btn = addButton(2, "ua_iframe", "details", "btnc", zIFRAME)
-					addDetail("ua_iframe", oHashes[k].data, zIFRAME)
+					btn = addButton(2, 'ua_iframe', 'details', 'btnc', zIFRAME)
+					addDetail('ua_iframe', oHashes[k].data, zIFRAME)
 				}
 				let items = oHashes[k].group
 				items.forEach(function(item) {oDisplay[item] = k})
@@ -130,22 +130,22 @@ function get_ua_iframes(log = false) {
 				let items = oHashes[k].group
 				for (let i=0; i < items.length; i++) {
 					// reset
-					btn = ""
+					btn = ''
 					let name = items[i]
 					// 1st of each non-match: add details
 					if (i == 0 && k !== ctrlHash) {
-						btn = addButton(2, name, "details", "btnc", zIFRAME)
+						btn = addButton(2, name, 'details', 'btnc', zIFRAME)
 						addDetail(name, oHashes[k].data, zIFRAME)
 					}
 					oDisplay[name] = k + btn
 				}
-				summary = "mixed results" + match_red
+				summary = 'mixed'+ match_red
 			}
 		}
 		for (const k of Object.keys(oDisplay)) {dom[k].innerHTML = oDisplay[k]}
 		dom.uaIframes.innerHTML = summary + errString
-		if (log) {log_perf(SECTNF, "ua iframes", t0)}
+		if (log) {log_perf(SECTNF, 'ua iframes', t0)}
 	})
 }
 
-countJS("iframes")
+countJS('iframes')

@@ -68,7 +68,7 @@ function get_scr_fs_measure() {
 	// initial size
 	let size = measure()
 	let output = isElementFS ? dom.fsElement : dom.fsSize
-	output.innerHTML = ''
+	output.innerHTML =''
 
 	function check_size() {
 		clearInterval(checking)
@@ -135,10 +135,10 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 			let typeCheck = typeFn(data)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 			if (isSmart && !isErrCss && data !== cssvalue) {
-				log_known(1, METRIC +"_"+ item, data); isLies = true
+				log_known(1, METRIC +'_'+ item, data); isLies = true
 			}
 		} catch(e) {
-			log_error(1, METRIC +"_"+ item, e); data = zErr
+			log_error(1, METRIC +'_'+ item, e); data = zErr
 		}
 		addDisplay(1, item, data,'','', isLies)
 		oRes[item] = isLies ? zLIE : data
@@ -164,11 +164,11 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 			let boolCss = 'fullscreen' == cssvalue ? true : false
 			if (runSL) {data = !boolCss}
 			if (isSmart && !isErrCss && boolCss !== data) {
-				log_known(1, METRIC +"_"+ item, data)
+				log_known(1, METRIC +'_'+ item, data)
 				isLies = true
 			}
 		} catch(e) {
-			log_error(1, METRIC +"_"+ item, e); data = zErr
+			log_error(1, METRIC +'_'+ item, e); data = zErr
 		}
 		// can't use fullScreen because blink returns window.fullScreen as the element id='fullScreen'
 		addDisplay(1, 'window'+ item, data,'','', isLies)
@@ -184,7 +184,7 @@ const get_scr_fullscreen = (METRIC) => new Promise(resolve => {
 			let typeCheck = typeFn(data)
 			if ('boolean' !== typeCheck) {throw zErrType + typeCheck}
 		} catch(e) {
-			log_error(1, METRIC +"_"+ item, e); data = zErr
+			log_error(1, METRIC +'_'+ item, e); data = zErr
 		}
 		addDisplay(1, item, data)
 		oRes[item] = data
@@ -204,18 +204,18 @@ const get_scr_measure = () => new Promise(resolve => {
 	]).then(function(mmres){
 		let oTmp = {'screen': {}, 'window': {}, 'iframe': {}}, oIframe = {}, oScreen = {}, oWindow = {}
 		// matchmedia
-		oTmp.screen["device-height"] = mmres[0]["device-height"]
-		oTmp.screen["device-width"] = mmres[0]["device-width"]
-		oTmp.window["height"] = mmres[0]["height"]
-		oTmp.window["width"] = mmres[0]["width"]
+		oTmp.screen['device-height'] = mmres[0]['device-height']
+		oTmp.screen['device-width'] = mmres[0]['device-width']
+		oTmp.window.height = mmres[0].height
+		oTmp.window.width = mmres[0].width
 		// screen/window
 		let oList = {
-			'screen': ["width","height","availWidth","availHeight"],
-			'window': ["outerWidth","outerHeight","innerWidth","innerHeight"],
-			"iframe": ["width","height","availWidth","availHeight","outerWidth","outerHeight"],
+			screen: ['width','height','availWidth','availHeight'],
+			window: ['outerWidth','outerHeight','innerWidth','innerHeight'],
+			iframe: ['width','height','availWidth','availHeight','outerWidth','outerHeight'],
 		}
 		let iTarget
-		try {iTarget = dom.iFrameBlank.contentWindow} catch(e) {}
+		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
 
 //runST = true
 		for (const k of Object.keys(oList)) {
@@ -229,11 +229,11 @@ const get_scr_measure = () => new Promise(resolve => {
 						if (i < 4) {x = iTarget.screen[p]} else {x = iTarget.window[p]}
 					}
 					if (runST) {
-						let oTest = {1: NaN, 2: Infinity, 3: "", 4: "6", 5: null, 6: false, 7: [1], 8: {1:1}}
+						let oTest = {1: NaN, 2: Infinity, 3: '', 4: '6', 5: null, 6: false, 7: [1], 8: {1:1}}
 						x = oTest[i]
 					}
 					let typeCheck = typeFn(x)
-					if ("number" !== typeCheck) {throw zErrType + typeCheck}
+					if ('number' !== typeCheck) {throw zErrType + typeCheck}
 				} catch (e) {
 					log_error(1, k +'_sizes_' + p, e)
 					x = zErr
@@ -255,26 +255,26 @@ const get_scr_measure = () => new Promise(resolve => {
 			let value = getElementProp(1, cssID, metric +'_sizes_'+ item, pseudo)
 			if (value !== zErr && '?' !== value) {
 				let cType = typeFn(value)
-				if ("number" !== cType) {
+				if ('number' !== cType) {
 					log_error(1, metric +'_sizes_'+ item, zErrType + cType)
 					value = zErr
 				}
 			}
-			if (array[0] == "#S") {oTmp.screen[item] = value} else {oTmp.window[item] = value}
+			if ('#S' == array[0]) {oTmp.screen[item] = value} else {oTmp.window[item] = value}
 		})
 		// default display
 		let oDisplay = {
-			"iAvailable": oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight,
-			"iScreen": oTmp.iframe.width +" x "+ oTmp.iframe.height,
-			"iOuter": oTmp.iframe.outerWidth +" x "+ oTmp.iframe.outerHeight,
-			"mAvailable": oTmp.screen.availWidth +" x "+ oTmp.screen.availHeight,
-			"mmScreen": oTmp.screen["device-width"] +" x "+ oTmp.screen["device-height"],
-			"mScreen": oTmp.screen.width +" x "+ oTmp.screen.height,
-			"mOuter": oTmp.window.outerWidth +" x "+ oTmp.window.outerHeight,
-			"mmInner": oTmp.window.width +" x "+ oTmp.window.height,
-			"mInner": oTmp.window.innerWidth +" x "+ oTmp.window.innerHeight,
-			"initialInner": isInitial.innerWidth + " x " + isInitial.innerHeight,
-			"initialOuter": isInitial.outerWidth + " x " + isInitial.outerHeight,
+			iAvailable: oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight,
+			iScreen: oTmp.iframe.width +' x '+ oTmp.iframe.height,
+			iOuter: oTmp.iframe.outerWidth +' x '+ oTmp.iframe.outerHeight,
+			mAvailable: oTmp.screen.availWidth +' x '+ oTmp.screen.availHeight,
+			mmScreen: oTmp.screen['device-width'] +' x '+ oTmp.screen['device-height'],
+			mScreen: oTmp.screen.width +' x '+ oTmp.screen.height,
+			mOuter: oTmp.window.outerWidth +' x '+ oTmp.window.outerHeight,
+			mmInner: oTmp.window.width +' x '+ oTmp.window.height,
+			mInner: oTmp.window.innerWidth +' x '+ oTmp.window.innerHeight,
+			initialInner: isInitial.innerWidth + ' x ' + isInitial.innerHeight,
+			initialOuter: isInitial.outerWidth + ' x ' + isInitial.outerHeight,
 		}
 
 		// order into new objects
@@ -308,7 +308,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		for (const k of Object.keys(oCompare)) {
 			let isValid = true, data = oCompare[k]
 			notation = data[0]
-			for (let i=2; i < oCompare[k].length; i++) {if ("number" !== typeFn(data[i])) {isValid = false; break}}
+			for (let i=2; i < oCompare[k].length; i++) {if ('number' !== typeFn(data[i])) {isValid = false; break}}
 			if (isValid) {
 				let isGood = false
 				let test1 = data[2] +''+ data[3], test2 = data[4] +''+ data[5]
@@ -335,13 +335,13 @@ const get_scr_measure = () => new Promise(resolve => {
 			let strInner = oTmp.window.innerWidth +' x '+ oTmp.window.innerHeight
 			let strScreen = oTmp.screen['device-width'] +' x '+ oTmp.screen['device-height']
 			let scrMatch = strInner == strScreen ? strInner : 'inner: '+ strInner +' | screen: '+ strScreen
-			let initInner = isInitial.innerWidth + " x " + isInitial.innerHeight
-			let initOuter = isInitial.outerWidth + " x " + isInitial.outerHeight
+			let initInner = isInitial.innerWidth +' x '+ isInitial.innerHeight
+			let initOuter = isInitial.outerWidth +' x '+ isInitial.outerHeight
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			let iframeMatch = oTmp.iframe.width +" x "+ oTmp.iframe.height
-				+ " | "+ oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight
-				+ " | "+ oTmp.iframe.outerWidth +" x "+ oTmp.window.outerHeight
-			if (isIframesSame) {iframeMatch = oTmp.iframe.availWidth +" x "+ oTmp.iframe.availHeight}
+			let iframeMatch = oTmp.iframe.width +' x '+ oTmp.iframe.height
+				+ ' | '+ oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight
+				+ ' | '+ oTmp.iframe.outerWidth +' x '+ oTmp.window.outerHeight
+			if (isIframesSame) {iframeMatch = oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight}
 
 			sDetail[isScope].lookup['iframe_sizes_match_inner'] = iframeMatch
 			sDetail[isScope].lookup['screen_size_matches_inner'] = scrMatch
@@ -351,15 +351,15 @@ const get_scr_measure = () => new Promise(resolve => {
 		}
 		// add data/display
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
-		addData(1, "screen_sizes", oScreen, mini(oScreen))
-		addData(1, "window_sizes", oWindow, mini(oWindow))
-		addData(1, "iframe_sizes", oIframe, mini(oIframe))
-		addData(1, "window_sizes_initial", initData, initHash)
+		addData(1, 'screen_sizes', oScreen, mini(oScreen))
+		addData(1, 'window_sizes', oWindow, mini(oWindow))
+		addData(1, 'iframe_sizes', oIframe, mini(oIframe))
+		addData(1, 'window_sizes_initial', initData, initHash)
 		return resolve()
 	})
 
 	/* // old compare code
-	let match = true, r = ""
+	let match = true, r =''
 	if (mScreen !== mAvailable) {match = false
 	}	else if (mAvailable !== mOuter) {match = false
 	}	else if (mOuter !== mInner) {match = false
@@ -422,40 +422,40 @@ const get_scr_measure = () => new Promise(resolve => {
 })
 
 const get_scr_mm = (datatype) => new Promise(resolve => {
-	const unable = "unable to find upper bound"
+	const unable = 'unable to find upper bound'
 	const oList = {
-		"measure": [
-			['screen_sizes', "device-width", "device-width", "max-device-width", "px", 512, 0.01],
-			['screen_sizes', "device-height", "device-height", "max-device-height", "px", 512, 0.01],
-			['window_sizes', "width", "width", "max-width", "px", 512, 0.01],
-			['window_sizes', "height", "height", "max-height", "px", 512, 0.01],
+		measure: [
+			['screen_sizes', 'device-width', 'device-width', 'max-device-width', 'px', 512, 0.01],
+			['screen_sizes', 'device-height', 'device-height', 'max-device-height', 'px', 512, 0.01],
+			['window_sizes', 'width', 'width', 'max-width', 'px', 512, 0.01],
+			['window_sizes', 'height', 'height', 'max-height', 'px', 512, 0.01],
 		],
-		"pixels": [
-			['pixels', "-moz-device-pixel-ratio", "-moz-device-pixel-ratio", "max--moz-device-pixel-ratio", "", 4, 0.0000001],
-			['pixels', "-webkit-min-device-pixel-ratio", "-webkit-min-device-pixel-ratio", "-webkit-max-device-pixel-ratio", "", 4, 0.01],
+		pixels: [
+			['pixels', '-moz-device-pixel-ratio', '-moz-device-pixel-ratio', 'max--moz-device-pixel-ratio', '', 4, 0.0000001],
+			['pixels', '-webkit-min-device-pixel-ratio', '-webkit-min-device-pixel-ratio', '-webkit-max-device-pixel-ratio', '', 4, 0.01],
 				// ^ webkit seems limited to and rounds down to 0.25, 0.5, 1, 2, 4
-			['pixels', "dpcm", "resolution", "max-resolution", "dpcm", 1e-5, 0.0000001],
-			['pixels', "dpi", "resolution", "max-resolution", "dpi", 1e-5, 0.0000001],
-			['pixels', "dppx", "resolution", "max-resolution", "dppx", 1e-5, 0.0000001],
+			['pixels', 'dpcm', 'resolution', 'max-resolution', 'dpcm', 1e-5, 0.0000001],
+			['pixels', 'dpi', 'resolution', 'max-resolution', 'dpi', 1e-5, 0.0000001],
+			['pixels', 'dppx', 'resolution', 'max-resolution', 'dppx', 1e-5, 0.0000001],
 		]
 	}
 	const oPrefixes = {
-		"device-width": 'screen_sizes',
-		"device-height": 'screen_sizes',
-		"width": 'window_sizes',
-		"height": 'window_sizes',
-		"-moz-device-pixel-ratio": 'pixels',
-		"-webkit-min-device-pixel-ratio": 'pixels',
-		"dpcm": 'pixels',
-		"dpi": 'pixels',
-		"dppx": 'pixels',
+		'device-width': 'screen_sizes',
+		'device-height': 'screen_sizes',
+		width: 'window_sizes',
+		height: 'window_sizes',
+		'-moz-device-pixel-ratio': 'pixels',
+		'-webkit-min-device-pixel-ratio': 'pixels',
+		dpcm: 'pixels',
+		dpi: 'pixels',
+		dppx: 'pixels',
 	}
 
 	let list = oList[datatype], maxCount = oList[datatype].length, count = 0, oData = {}
 	function exit(id, value) {
 		if (value == unable) {
 			let prefix = oPrefixes[id]
-			log_error(1, prefix +"_"+ id, unable)
+			log_error(1, prefix +'_'+ id, unable)
 			value = zErr
 		}
 		oData[id] = value
@@ -510,7 +510,7 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 						return tester(maxValue).then(function(testResult) {
 							if (testResult.isEqual) {return maxValue
 							} else {
-								return Promise.resolve(minValue) // +" to "+ maxValue // just return min
+								return Promise.resolve(minValue) // +' to '+ maxValue // just return min
 							}
 						})
 					}
@@ -542,9 +542,9 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		return searchValue(function(valueToTest) {
 			try {
 				if (runSE) {foo++}
-				if (window.matchMedia("("+ prefix +": "+ valueToTest + suffix+")").matches){
+				if (window.matchMedia('('+ prefix +': '+ valueToTest + suffix+')').matches){
 					return Promise.resolve(searchValue.isEqual)
-				} else if (window.matchMedia("("+ maxPrefix +": "+ valueToTest + suffix+")").matches){
+				} else if (window.matchMedia('('+ maxPrefix +': '+ valueToTest + suffix+')').matches){
 					return Promise.resolve(searchValue.isSmaller)
 				} else {
 					return Promise.resolve(searchValue.isBigger)
@@ -704,19 +704,19 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 			display = value
 			varDPR = value
 		} catch(e) {
-			log_error(1, METRIC +"_"+ item, e)
+			log_error(1, METRIC +'_'+ item, e)
 			display = zErr
 			value = zErr
 		}
 		// FF127: 1554751
 		let notation = value == 2 ? rfp_green : rfp_red
-		addDisplay(1, METRIC +"_"+ item, display, '', notation)
+		addDisplay(1, METRIC +'_'+ item, display, '', notation)
 		oData[item] = value
 
 		// DPR border: 477157: don't notate this for health
 		value = undefined, display = undefined, item = 'devicePixelRatio_border'
 		try {
-			value = getComputedStyle(dom.dprBorder).borderTopWidth // e.g. '1px'
+			value = getComputedStyle(dom.tzpDPR).borderTopWidth // e.g. '1px'
 			if (runST) {value = undefined} else if (runSI) {value = '123'}
 			let originalvalue = value
 			let typeCheck = typeFn(value)
@@ -733,7 +733,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 				throw zErrInvalid + 'got '+ (1/value) // negative/Infinity
 			}
 		} catch(e) {
-			display = log_error(1, METRIC +"_"+ item, e)
+			display = log_error(1, METRIC +'_'+ item, e)
 			value = zErr
 		}
 		addDisplay(1, item, display)
@@ -748,10 +748,11 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		// ignore errors (already caught) and of out of range (entirely possible?)
 		if (value !== '?' && value !== zErr) {
 			if ('number' !== typeCheck) {
-				log_error(1, METRIC +"_"+ item, zErrType + typeCheck), value = zErr
+				log_error(1, METRIC +'_'+ item, zErrType + typeCheck), value = zErr
 			}
 		}
-		addDisplay(1, METRIC +"_"+ item,'','', (value == 96 || '?' == value ? rfp_green : rfp_red)) // css motate
+		let rfpvalue = isVer > 133 ? 192 : 96
+		addDisplay(1, METRIC +'_'+ item,'','', (value == rfpvalue || '?' == value ? rfp_green : rfp_red)) // css notate
 		oData[item] = value
 
 	}
@@ -760,12 +761,12 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 	function get_dpi_div(item) {
 		let display, value
 		try {
-			try {value = Math.round(dom.divDPI.offsetHeight * varDPR)} catch(e) {}
+			try {value = Math.round(dom.tzpDPI.offsetHeight * varDPR)} catch(e) {}
 			let typeCheck = typeFn(value)
 			if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			display = value
 		} catch(e) {
-			display = log_error(1, METRIC +"_"+  item, e), value = zErr
+			display = log_error(1, METRIC +'_'+ item, e), value = zErr
 		}
 		addDisplay(1, item, display)
 		oData[item] = value
@@ -783,7 +784,7 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 			display = value
 			if ('number' !== typeof value) {throw zErrType + typeCheck}
 		} catch(e) {
-			display = log_error(1, METRIC +"_"+ item, e)
+			display = log_error(1, METRIC +'_'+ item, e)
 			value = zErr
 		}
 		addDisplay(1, item, display)
@@ -805,12 +806,13 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 				'dpi': 96.00000000000003,
 				'dppx': 1,
 			}
-			let value = results[0][k], notation = ''
+			let value = results[0][k], notation =''
 			if (oMatch[k] !== undefined) {
-				notation = value == oMatch[k] ? rfp_green : rfp_red
+				let rfpvalue = isVer > 133 ? oMatch[k] * 2 : oMatch[k]
+				notation = value == rfpvalue ? rfp_green : rfp_red
 			}
 			oData[k] = value
-			addDisplay(1, METRIC +"_"+ k, value, '', notation)
+			addDisplay(1, METRIC +'_'+ k, value,'', notation)
 		}
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
@@ -840,7 +842,7 @@ const get_scr_positions = (METRIC) => new Promise(resolve => {
 				let typeCheck = typeFn(x)
 				if ('number' !== typeCheck) {throw zErrType + typeCheck}
 			} catch(e) {
-				log_error(1, METRIC +"_"+ k, e); x = zErr
+				log_error(1, METRIC +'_'+ k, e); x = zErr
 			}
 			oData[m][k] = x; display.push(x)
 		})
@@ -869,11 +871,15 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		let list = ['auto','thin']
 
 		// scrollWidth
-		function get_scrollwidth(item) {
+		function get_scroll() {
+			let element
 			list.forEach(function(p) {
-				let value, display
+				// scrollWidth
+				let value, display, item = 'scrollWidth'
 				try {
-					value = 100 - dom['scroll'+p].scrollWidth
+					element = dom.tzpScroll
+					element.style['scrollbar-width'] = p
+					value = 100 - element.scrollWidth
 					if (runST) {value = NaN} else if (runSI) {value = -1}
 					let typeCheck = typeFn(value)
 					if ('number' !== typeCheck) {throw zErrType + typeCheck}
@@ -881,18 +887,15 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 					display = value
 				} catch(e) {
 					value = zErr, display = zErr
-					log_error(1, METRIC +"_"+ item +'_'+p, e)
+					log_error(1, METRIC +'_'+ item +'_'+p, e)
 				}
 				oData[item +'_'+ p] = value
 				aDisplay.push(display)
-			})
-		}
 
-		function get_scrollelement(item) {
-			list.forEach(function(p) {
-				let value, display
+				// element
+				value = undefined, display = undefined, item = 'element'
 				try {
-					let target = dom['innerscroll'+ p]
+					let target = element.children[0]
 					let range, width
 					if (isDomRect == -1) {
 						width = target.offsetWidth
@@ -915,7 +918,7 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 					display = value
 				} catch(e) {
 					value = zErr, display = zErr
-					log_error(1, METRIC +"_"+ item +'_'+ p, e)
+					log_error(1, METRIC +'_'+ item +'_'+ p, e)
 				}
 				oData[item +'_'+ p] = value
 				aDisplay.push(display)
@@ -945,14 +948,13 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 				}
 			} catch(e) {
 				value = zErr; display = zErr
-				log_error(1, METRIC +"_"+ item, e)
+				log_error(1, METRIC +'_'+ item, e)
 			}
 			oData[item] = value
 			aDisplay.push(display)
 		}
 
-		get_scrollelement('element')
-		get_scrollwidth('scrollWidth')
+		get_scroll()
 		get_viewport('viewport')
 		get_viewport('visualViewport')
 		addDisplay(1, METRIC, aDisplay.join(', '))
@@ -967,7 +969,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 
 	function get_viewport(type) {
 		let METRICh = type +'_'+ 'height', METRICw = type +'_'+ 'width'
-		let w, h, wDisplay = '', hDisplay, range
+		let w, h, wDisplay ='', hDisplay, range
 		try {
 			if (type == 'element') {
 				let target = document.createElement('div')
@@ -1014,7 +1016,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 			hDisplay = h, wDisplay = w
 			if (gLoad) {avh = h} // get android height once
 		} catch(e) {
-			h = zErr; w = zErr; wDisplay = ''
+			h = zErr; w = zErr; wDisplay =''
 			hDisplay = log_error(1, METRIC +'_'+ type, e)
 		}
 		oData[METRICh] = h
@@ -1056,7 +1058,7 @@ function get_ua_workers() {
 	let control = mini(oCtrl)
 
 	// web
-	let el0 = dom.uaWorker0, test0 = ''
+	let el0 = dom.uaWorker0, test0 =''
 	if (isFile) {
 		el0.innerHTML = zSKIP
 	} else {
@@ -1064,7 +1066,7 @@ function get_ua_workers() {
 			let workernav = new Worker('js/worker_ua.js')
 			el0.innerHTML = zF
 			workernav.addEventListener('message', function(e) {
-				//console.log("ua worker", e.data)
+				//console.log('ua worker', e.data)
 				test0 = mini(e.data)
 				el0.innerHTML = test0 + (test0 == control ? match_green : match_red)
 				workernav.terminate
@@ -1075,12 +1077,12 @@ function get_ua_workers() {
 		}
 	}
 	// shared
-	let el1 = dom.uaWorker1, test1 = ''
+	let el1 = dom.uaWorker1, test1 =''
 	try {
 		let sharednav = new SharedWorker('js/workershared_ua.js')
 		el1.innerHTML = zF
 		sharednav.port.addEventListener('message', function(e) {
-			//console.log("ua shared", e.data)
+			//console.log('ua shared', e.data)
 			test1 = mini(e.data)
 			el1.innerHTML = test1 + (test1 == control ? match_green : match_red)
 			sharednav.port.close()
@@ -1091,7 +1093,7 @@ function get_ua_workers() {
 		el1.innerHTML = log_error(1, 'shared worker', e, 'shared_worker')
 	}
 	// service
-	let el2 = dom.uaWorker2, test2 = ''
+	let el2 = dom.uaWorker2, test2 =''
 	el2.innerHTML = zF // assume failure
 	try {
 		// register
@@ -1109,7 +1111,7 @@ function get_ua_workers() {
 				// listen
 				let channel = new BroadcastChannel('sw-ua')
 				channel.addEventListener('message', event => {
-					//console.log("ua service", event.data.msg)
+					//console.log('ua service', event.data.msg)
 					test2 = mini(event.data.msg)
 					el2.innerHTML = test2 + (test2 == control ? match_green : match_red)
 					// unregister & close
@@ -1131,16 +1133,16 @@ function get_ua_workers() {
 /* OS SPECIFIC */
 
 function get_android_tbh() {
-	// toolbar height if user has chosen to "hide the toolbar when scrolling down a page"
+	// toolbar height if user has chosen to 'hide the toolbar when scrolling down a page'
 	// avh global var s/be with toolbar visible: hence use new value > avh
-	// We only need one diff since the viewport size "snaps" to the new value
+	// We only need one diff since the viewport size 'snaps' to the new value
 	window.addEventListener('scroll', toolbarScroll)
 	function toolbarScroll() {
 		// ignore fullscreen
 		if (window.fullScreen == false) {
 			// delay: allow time for toolbar change
 			setTimeout(function() {
-				let vh_new = get_scr_viewport("height")
+				let vh_new = get_scr_viewport('height')
 				if (vh_new > avh) {
 					dom.tbh = (vh_new - avh)
 				}
@@ -1164,7 +1166,7 @@ function get_android_tap() {
 			let vh = result[0]
 			dom.kbh = avh +' | '+ vh +' | '+ (avh - vh)
 			// ToDo: keyboard height: use setInterval
-			// keyboard can be slow to open + it "slides" (stepped changes)
+			// keyboard can be slow to open + it slides (stepped changes)
 			// instead check x times + return max diff
 
 			// also grab the inner window
@@ -1184,7 +1186,7 @@ function get_android_tap() {
 function goFS() {
 	gFS = false
 	try {
-		let element = dom.elementFS
+		let element = dom.tzpFS
 		element.style.opacity = 0
 		Promise.all([
 			element.requestFullscreen()
@@ -1195,11 +1197,11 @@ function goFS() {
 }
 
 function goNW() {
-	dom.newWinLeak = ''
+	dom.newWinLeak =''
 	let sizesi = [], // inner history
 		sizeso = [], // outer history
 		n = 1, // setInterval counter
-		newWinLeak = ''
+		newWinLeak =''
 
 	// open
 		// was: tests/newwin.html
@@ -1264,8 +1266,7 @@ function goNW() {
 }
 
 function goNW_UA() {
-	dom.uaHashOpen = ''
-
+	dom.uaHashOpen =''
 	let list = ['appCodeName','appName','appVersion','buildID','oscpu',
 		'platform','product','productSub','userAgent','vendor','vendorSub']
 	let data = {}, r
@@ -1364,7 +1365,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 
 	for (const p of Object.keys(list)) {
 		let expected = list[p][0], sim = list[p][1]
-		let isErr = false, str = ''
+		let isErr = false, str =''
 		try {
 			str = navigator[p]
 			if (runST) {str = sim} else if (runSL) {addProxyLie('Navigator.'+ p)}
@@ -1412,7 +1413,7 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 })
 
 const outputFD = () => new Promise(resolve => {
-	let METRIC = 'infinity_architecture', value, data = ''
+	let METRIC = 'infinity_architecture', value, data =''
 	try {
   	const f = new Float32Array([Infinity - Infinity])
   	value = new Uint8Array(f.buffer)[3]
@@ -1424,7 +1425,7 @@ const outputFD = () => new Promise(resolve => {
 	if (!isGecko) {
 		let aList = ['browser','logo','wordmark','browser_architecture','os','version']
 		aList.forEach(function(item) {addBoth(3, item, zNA)})
-		aList = ['fdBrandingCss','fdResourceCss']
+		aList = ['tzpWordmark','tzpResource']
 		aList.forEach(function(item) {addDisplay(3, item, zNA)})
 		return resolve()
 	}
@@ -1432,7 +1433,7 @@ const outputFD = () => new Promise(resolve => {
 	// logo
 	let wType, hType, w, h, isLogo, isLogoData =''
 	try {
-		w = dom.aboutlogo.width, h = dom.aboutlogo.height
+		w = dom.tzpAbout.width, h = dom.tzpAbout.height
 		if (runST) {w += '', h = null}
 		wType = typeFn(w), hType = typeFn(h)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' x '+ hType}
@@ -1448,13 +1449,13 @@ const outputFD = () => new Promise(resolve => {
 	try {
 		let isHidden, isOffscreen
 		// hidden
-		w = dom.brandinghidden.width, h = dom.brandinghidden.height
+		w = dom.tzpBrandHidden.width, h = dom.tzpBrandHidden.height
 		if (runST) {w = true, h += ''}
 		wType = typeFn(w), hType = typeFn(h)
 		if ('number' !== wType || 'number' !== hType) {throw zErrType + wType +' x '+ hType}
 		isHidden = w +' x '+ h
 		// offscreen
-		isOffscreen = dom.branding.width +' x '+ dom.branding.height
+		isOffscreen = dom.tzpBrand.width +' x '+ dom.tzpBrand.height
 		if (isHidden !== isOffscreen) {isHidden += ' | ' + isOffscreen}
 		isWordmark = isHidden
 	} catch(e) {

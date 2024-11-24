@@ -3,9 +3,7 @@
 function get_colors() {
 	let t0 = nowFn()
 	/* https://www.w3.org/TR/css-color-4/ */
-	/* 95+: test_bug232227.html */
-	// sorted lists
-	let oList = {
+	let oList = {	// sorted
 		css4: [
 			'-moz-activehyperlinktext','-moz-default-color','-moz-default-background-color',
 			'-moz-hyperlinktext','-moz-visitedhyperlinktext',
@@ -28,7 +26,7 @@ function get_colors() {
 	}
 	if (!isGecko) {
 		delete oList.moz
-		addBoth(14, 'colors_moz', zNA)
+		addBoth(14,'colors_moz', zNA)
 	} else if (isVer < 122) {
 		let aTmp = oList.moz
 		aTmp.push (
@@ -63,7 +61,7 @@ function get_colors() {
 	}
 
 	for (const type of Object.keys(oList)) {
-		const element = dom.sColorElement
+		const element = dom.tzpColor
 		const strColor = 'rgba(1, 2, 3, 0.5)'
 		const METRIC = 'colors_'+ type
 
