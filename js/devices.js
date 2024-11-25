@@ -123,40 +123,40 @@ function get_mm_pointer(group, type, id, rfpvalue) {
 }
 
 const get_media_devices = (METRIC) => new Promise(resolve => {
-	let t0 = nowFn(), isLegacy = false
+	let t0 = nowFn()
 
-	function set_notation(value = "") {
-		let legacy = isLegacy ? " [gUM legacy]" : ""
-		if (isTB && !isMullvad) { // TB
-			return value == "TypeError: navigator.mediaDevices is undefined" ? tb_green : tb_red
-		} else { // RFP
-			let rfplegacy = "54a59537", rfpnew = "75e77887"
+	function set_notation(value ='') {
+		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
+		let notation =''
+		if (isTB && !isMullvad) {
+			return value == 'TypeError: navigator.mediaDevices is undefined' ? tb_green : tb_red
+		} else {
+			let rfplegacy = '54a59537', rfpnew = '75e77887'
 			if (isMullvad) {
 				// tor-browser#42043
-				return (value == rfpnew ? tb_green : tb_red) + legacy
+				notation = value == rfpnew ? tb_green : tb_red
+			} else if (isVer > 131) {
+				// 1916993: FF132+ default false
+				notation = value == rfpnew ? rfp_green : rfp_red
 			} else {
-				// FF: ToDo: 1843434: add version check when flipped
-				return ((value == rfplegacy || value == rfpnew) ? rfp_green : rfp_red) + legacy
+				notation = (value == rfplegacy ? sgtick : sbx) + ' RFP gUM legacy]' + sc
 			}
 		}
-		return ''+ legacy
+		return notation
 	}
 
 	function analyse(devices) {
-		// 1528042: FF115+ media.devices.enumerate.legacy.enabled
-		// 1843434: flipped FF119/120?
-		// the only difference in device objects is the id length, incl. RFP
 		let hash ='none', btn ='', data =''
 		try {
 			if (runST) {devices = undefined} else if (runSI) {devices = [{}]}
 			let typeCheck = typeFn(devices, true)
-			if ("array" !== typeCheck) {throw zErrType + typeFn(devices)}
+			if ('array' !== typeCheck) {throw zErrType + typeFn(devices)}
 			if (devices.length > 0) {
 				// tampered
-				let aSplit = (devices +"").split(",")
-				let expected = "[object MediaDeviceInfo]"
+				let aSplit = (devices +'').split(',')
+				let expected = '[object MediaDeviceInfo]'
 				for (let i=0; i < aSplit.length; i++) {
-					if (aSplit[i] !== expected ) {throw zErrInvalid +"expected "+ expected +": got "+ aSplit[i]}
+					if (aSplit[i] !== expected ) {throw zErrInvalid +'expected '+ expected +': got '+ aSplit[i]}
 				}
 				// enumerate
 					// don't combine kind, keep order, record length not strings
@@ -167,23 +167,20 @@ const get_media_devices = (METRIC) => new Promise(resolve => {
 					let kind = d.kind, kindtest = kind.length,
 						dLen = d.deviceId.length,
 						gLen = d.groupId.length,
-						indexKey = (index+"").padStart(2,"0")
-					data[indexKey+"-"+kind] = [dLen, gLen, d.label.length]
+						indexKey = (index+'').padStart(2,'0')
+					data[indexKey +'-'+ kind] = [dLen, gLen, d.label.length]
 					sLen.add(dLen)
 					sLen.add(gLen)
 					index ++
-					// we could check valid lengths (0 or 44 in 115+, else 44: labels always 0)
-						// and if 44 is valid then the last char is "=", and we could type check
+					// we could check valid lengths (0 or 44 in 115+: labels always 0)
+						// and if 44 is valid then the last char is '=', and we could type check
 				})
-				// should be a single item, either 44 or 0
-				// lets just keep it simple and get the first
-				isLegacy = [...sLen][0] !== 0
 				hash = mini(data); btn = addButton(7, METRIC, data.length)
 			}
 		} catch(e) {
 			hash = e; data = zErrLog
 		}
-		addBoth(7, METRIC, hash, btn, set_notation(hash), data, isProxyLie("MediaDevices.enumerateDevices"))
+		addBoth(7, METRIC, hash, btn, set_notation(hash), data, isProxyLie('MediaDevices.enumerateDevices'))
 		log_perf(7, METRIC, t0)
 		return resolve()
 	}
@@ -226,33 +223,33 @@ function get_pointer_event(event) {
 	*/
 
 	if (window.PointerEvent === undefined) {
-		dom.ptEvent.innerHTML = "undefined"
+		dom.ptEvent.innerHTML = 'undefined'
 		return
 	}
 
 	let oData = {}, oDisplay = []
 	let oList = {
-		isPrimary: "boolean", // RFP true
-		pressure: "number", // RFP: 0 if not active, 0.5 if active
-		mozPressure: "number",
-		pointerType: "string", // RFP mouse
-		mozInputSource: "number", // mouse = 1, pen = 2, touch = 5
-		tangentialPressure: "number", // RFP 0
-		tiltX: "number", // RFP 0
-		tiltY: "number", // RFP 0
-		twist: "number", // RFP 0
-		width: "number", // RFP 1
-		height: "number", // RFP 1
-		altitudeAngle: "number",
-		azimuthAngle: "number",
+		isPrimary: 'boolean', // RFP true
+		pressure: 'number', // RFP: 0 if not active, 0.5 if active
+		mozPressure: 'number',
+		pointerType: 'string', // RFP mouse
+		mozInputSource: 'number', // mouse = 1, pen = 2, touch = 5
+		tangentialPressure: 'number', // RFP 0
+		tiltX: 'number', // RFP 0
+		tiltY: 'number', // RFP 0
+		twist: 'number', // RFP 0
+		width: 'number', // RFP 1
+		height: 'number', // RFP 1
+		altitudeAngle: 'number',
+		azimuthAngle: 'number',
 	}
 	for (const k of Object.keys(oList).sort()) {
 		let value = event[k], expected = oList[k]
-		if (typeFn(value) !== expected) {value = "err"}
+		if (typeFn(value) !== expected) {value = 'err'}
 		oData[k] = value
 		oDisplay.push(value)
 	}
-	dom.ptEvent.innerHTML = oDisplay.join(", ") //+ sg +"["+ mini(oData) +"]"+ sc
+	dom.ptEvent.innerHTML = oDisplay.join(', ') //+ sg +'['+ mini(oData) +']'+ sc
 }
 
 const get_speech_engines = (METRIC) => new Promise(resolve => {
@@ -266,9 +263,9 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 	function populateVoiceList() {
 		let res = [], ignoreLen, ignoreStr
 		/* examples
-			"moz-tts:android:hr_HR"
-			"urn:moz-tts:sapi:Microsoft David - English (United States)?en-US"
-			"urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy"
+			moz-tts:android:hr_HR
+			urn:moz-tts:sapi:Microsoft David - English (United States)?en-US
+			urn:moz-tts:osx:com.apple.eloquence.en-US.Eddy
 		*/
 		let oIgnore = {
 			android: 'moz-tts:android:',
@@ -281,12 +278,12 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 		}
 		try {
 			let v = speechSynthesis.getVoices()
-			if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie("speechSynthesis.getVoices")}
+			if (runST) {v = null} else if (runSI) {v = [{}]} else if (runSL) {addProxyLie('speechSynthesis.getVoices')}
 			let typeCheck = typeFn(v, true)
-			if ("array" !== typeCheck) {throw zErrType + typeFn(v)}
+			if ('array' !== typeCheck) {throw zErrType + typeFn(v)}
 			if (v.length) {
-				let expected = "[object SpeechSynthesisVoice]"
-				if ((v+"").slice(0,29) !== "[object SpeechSynthesisVoice]") {throw zErrInvalid +"expected "+ expected}
+				let expected = '[object SpeechSynthesisVoice]'
+				if ((v +'').slice(0,29) !== '[object SpeechSynthesisVoice]') {throw zErrInvalid +'expected '+ expected}
 			}
 			if (v.length == 0) {
 				notation = rfp_green
@@ -298,11 +295,11 @@ const get_speech_engines = (METRIC) => new Promise(resolve => {
 					let uriStr = i.voiceURI, isURI = true
 					if (ignoreStr !== undefined && uriStr.slice(0,ignoreLen) === ignoreStr) {isURI = false}
 					res.push(
-						i.name +" | " + i.lang + (i.default ? " | default" : "") + (i.localService ? "" : " | false") + (isURI ? " | "+ uriStr : "")
+						i.name +' | '+ i.lang + (i.default ? ' | default' : '') + (i.localService ? '' : ' | false') + (isURI ? ' | '+ uriStr : '')
 					)
 				})
 				let hash = mini(res)
-				addBoth(7, METRIC, hash, addButton(7, METRIC, res.length), notation, res, isProxyLie("speechSynthesis.getVoices"))
+				addBoth(7, METRIC, hash, addButton(7, METRIC, res.length), notation, res, isProxyLie('speechSynthesis.getVoices'))
 				log_perf(7, METRIC, t0)
 				return resolve()
 			}
