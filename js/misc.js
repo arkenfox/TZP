@@ -46,9 +46,9 @@ function get_timing_audio() {
 	aList.forEach(function(k){
 		gData.timing[k] = []
 		oTime[k] = []
-		dom[METRIC +'_' + k.toLowerCase()] = ''
+		dom[METRIC +'_'+ k.toLowerCase()] =''
 	})
-	dom[METRIC].innerHTML = ''
+	dom[METRIC].innerHTML =''
 
 	// collect
 	function collectTimestamps() {
