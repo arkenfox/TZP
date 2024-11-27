@@ -278,6 +278,10 @@ function get_computed_styles(METRIC) {
 						*/
 						if ('9f958210' == hash) {notation = tb_green} // TB14 1106
 					} else {
+						// https://gitlab.torproject.org/tpo/applications/tor-browser/-/issues/41347
+							// some older (mostly unsupported) win10 and android <= 6 will lack
+							// fontOpticalSizing, font-optical-sizing, fontVariationSettings, font-variation-settings
+							// but I consider these out-of-scope
 						if ('d86abd90' == hash) {notation = tb_green} // TB14 1101
 					}
 				}

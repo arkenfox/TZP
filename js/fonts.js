@@ -1,22 +1,29 @@
 'use strict';
 
-let fntCodes = [ // sorted
-	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
-	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
-	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
-	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-	'0xA830','0xF003','0xF810','0xFBEE',
-	/* ignore: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
-		problematic e.g windows 1st use /applying translations
-		'0xFFF9','0xFFFD',
-	//*/
-	'0xFFFF',
-]
+let fntCodes = { // sorted
+	// actualBoundingBox, width
+	a: [
+		'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
+		'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
+		'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
+		'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
+		'0xA830','0xF003','0xF810','0xFBEE',
+		/* ignore: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+			problematic e.g windows 1st use
+			'0xFFF9','0xFFFD',
+		//*/
+		'0xFFFF',
+	],
+	// baseline, emHeight, fontBoundingBox
+	b: ['0xFFFF'],
+	e: [],
+	f: [],
+}
 
 let fntData = {},
 	fntSize = '512px',
 	fntString = '-\uffff',
-	fntBtn = '',
+	fntBtn ='',
 	fntFake,
 	fntDocEnabled = false,
 	fntBase = {},
@@ -1151,7 +1158,7 @@ function get_fonts(METRIC) {
 
 				// FP data: not lies
 				if (method == selected) {
-					let notation = ''
+					let notation =''
 					if (fntData.base.length) {
 						notation = goodnotation
 						// names: not needed in FP but include for upstream
@@ -1167,11 +1174,11 @@ function get_fonts(METRIC) {
 						}
 						let count = aNotInBase.length + aMissing.length + aMissingSystem.length
 						if (count > 0) {
-							let tmpName = METRICN +'_health', tmpObj = {}
-							if (aMissing.length) {tmpObj['missing_bundled'] = aMissing}
-							if (aMissingSystem.length) {tmpObj['missing_system'] = aMissingSystem}
-							if (aNotInBase.length) {tmpObj['unexpected'] = aNotInBase}
-							addDetail(tmpName, tmpObj)
+							let tmpName = METRICN +'_health', tmpobj = {}
+							if (aMissing.length) {tmpobj['missing_bundled'] = aMissing}
+							if (aMissingSystem.length) {tmpobj['missing_system'] = aMissingSystem}
+							if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
+							addDetail(tmpName, tmpobj)
 							let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
 							notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
 							// FFP if all unexpected are in baselang then we're fpp_green
@@ -1221,7 +1228,7 @@ function get_formats() {
 	for (const k of Object.keys(oList)) {
 		let list = oList[k]
 		const METRIC = k
-		let hash, btn = '', data = []
+		let hash, btn ='', data = []
 		try {
 			if (runSE) {foo++}
 			list.forEach(function(item) {if (CSS.supports(k +'('+ item + ')')) {data.push(item)}})
@@ -1235,6 +1242,104 @@ function get_formats() {
 		}
 		addBoth(12, METRIC, hash, btn,'', data)
 	}
+	return
+}
+
+function get_glyphs(METRIC) {
+	/* NOTES
+	FF131+ nightly: 1900175 + 1403931 ride the train
+		- Enable USER_RESTRICTED for content processes on Nightly
+		- security.sandbox.content.level > 7
+		- this affected (FF win11 at least) clientrect
+			- 0x3095 + 0x532D (2 CJK chars)
+			- almost always both in every style except cursive never affected
+			- only changed in http(s), file:// not affected
+		- so reminder that generally we should always be using https for final testing/analysis
+	*/
+	let t0 = nowFn()
+	let styles = ['cursive','monospace','sans-serif','serif','system-ui',]
+	/* Notes
+		unique sizes: win11 all system fonts FF
+		sans-serif = 34 + cursive = 66 + serif = 84 + system-ui = 102 + monospace = 112 + fantasy = 115
+	
+	- all the same: 'emoji','math','none','ui-monospace','ui-rounded','ui-sans-serif','ui-serif'
+		- ui-* not added to gecko yet
+		- math is basically slated for deprecation
+		- emoji - we're not testing any emojis here
+		- do not increase unique sizes
+	- 'fangsong': does not add to unique sizes, we would need a different set of code points
+	- 'fantasy': only added 3 more sizes
+	*/
+
+	const id = 'element-fp'
+	let hash, btn ='', data = {}, strSizes =''
+	try {
+		if (runSE) {foo++}
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		div.innerHTML = '<span id="glyphs-span" style="font-size: 22000px;"><span id="glyphs-slot"></span></span>'
+		const span = dom['glyphs-span'], slot = dom['glyphs-slot']
+
+		let oData = {}, tmpobj = {}, newobj = {}, setSize = new Set(), aCodes = fntCodes.a
+		let methoddiv, methodspan, rangeH, rangeW, width, height
+		styles.forEach(function(stylename) {
+			slot.style.fontFamily = stylename
+			oData[stylename] = {}
+			let isFirst = stylename == styles[0]
+			aCodes.forEach(function(code) {
+				let codeString = String.fromCodePoint(code)
+				slot.textContent = codeString
+				// always get span width, div height
+				if (isDomRect > 1) {
+					rangeH = document.createRange()
+					rangeH.selectNode(div)
+					rangeW = document.createRange()
+					rangeW.selectNode(span)
+				}
+				if (isDomRect < 1) { // get a result regardless
+					methoddiv = div.getBoundingClientRect()
+					methodspan = span.getBoundingClientRect()
+				} else if (isDomRect == 1) {
+					methoddiv = div.getClientRects()[0]
+					methodspan = span.getClientRects()[0]
+				} else if (isDomRect == 2) {
+					methoddiv = rangeH.getBoundingClientRect()
+					methodspan = rangeW.getBoundingClientRect()
+				} else if (isDomRect > 2) {
+					methoddiv = rangeH.getClientRects()[0]
+					methodspan = rangeW.getClientRects()[0]
+				}
+				width = methodspan.width, height = methoddiv.height
+				// only typecheck once: first char on first style
+				if (code == aCodes[0] && isFirst) {
+					if (runST) {width = NaN, height = [1]}
+					let wType = typeFn(width), hType = typeFn(height)
+					if ('number' !== wType || 'number' !== hType) {
+						throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
+					}
+				}
+				oData[stylename][code] = [width, height]
+				setSize.add(width+'x'+height)
+			})
+		})
+		for (const k of Object.keys(oData)) {
+			let hash = mini(oData[k])
+			if (tmpobj[hash] == undefined) {tmpobj[hash] = {'names': [k], 'data': oData[k]}
+			} else {tmpobj[hash].names.push(k)}
+		}
+		for (const k of Object.keys(tmpobj)) {newobj[tmpobj[k].names.join(' ')] = tmpobj[k].data}
+		for (const k of Object.keys(newobj).sort()) {data[k] = newobj[k]}
+
+		hash = mini(data), strSizes = gRun ? setSize.size + ' unique sizes' : ''
+		btn = addButton(12, METRIC)
+	} catch(e) {
+		hash = e; data = zErrLog
+	}
+	removeElementFn(id)
+	addBoth(12, METRIC, hash, btn,'', data, (isDomRect == -1))
+	log_perf(12, METRIC, t0,'', strSizes)
 	return
 }
 
@@ -1272,7 +1377,7 @@ function get_script_defaults(METRIC) {
 		'traditional chinese (taiwan)': 'zh-TW', 'unified canadian syllabary': 'cr',
 	}
 
-	let hash = zNA, btn ='', data = '', notation = default_red
+	let hash = zNA, btn ='', data ='', notation = default_red
 	if (isGecko) {
 		data = {}
 		try {
@@ -1280,7 +1385,7 @@ function get_script_defaults(METRIC) {
 
 			// family typecheck
 			let test = getComputedStyle(el).getPropertyValue('font-family')
-			if (runST) {test = ''}
+			if (runST) {test =''}
 			let typeCheck = typeFn(test)
 			if ('string' !== typeCheck) {throw zErrType + 'font-family: '+ typeCheck}
 
@@ -1297,10 +1402,10 @@ function get_script_defaults(METRIC) {
 
 			// loop
 			let tmpdata = {}
-			el.style.fontSize = '' // reset size
+			el.style.fontSize ='' // reset size
 			for (const k of Object.keys(scripts)) {
 				let lang = scripts[k]
-				el.style.fontFamily = '' // each lang reset fanily
+				el.style.fontFamily ='' // each lang reset fanily
 				el.setAttribute('lang', lang)
 				let font = getComputedStyle(el).getPropertyValue('font-family')
 				let tmp = [font]
@@ -1347,13 +1452,13 @@ function get_system_fonts(METRIC) {
 		// typecheck
 		for (const j of aProps) {
 			let test = getComputedStyle(el)[j]
-			if (runST) {test = ''}
+			if (runST) {test =''}
 			let typeCheck = typeFn(test)
 			if ('string' !== typeCheck) {throw zErrType + j +': '+ typeCheck}
 		}
 		oList[METRIC].forEach(function(name){
 			let aKeys = []
-			el.style.font = '' // always clear in case a font is invalid/deprecated
+			el.style.font ='' // always clear in case a font is invalid/deprecated
 			el.style.font = name
 			for (const j of aProps) {aKeys.push(getComputedStyle(el)[j])}
 			let key = aKeys.join(' ')
@@ -1401,9 +1506,150 @@ function get_system_fonts(METRIC) {
 	return
 }
 
+function get_textmetrics(METRIC) {
+	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
+	/* NOTES
+	FF86+: 1676966: gfx.font_rendering.fallback.async
+		- set chars directly in HTML to force fallback ASAP
+	*/
+	let t0 = nowFn()
+	let oMetrics = {
+		actualboundingbox: ['actualBoundingBoxAscent','actualBoundingBoxDescent','actualBoundingBoxLeft','actualBoundingBoxRight'],
+		baseline: ['alphabeticBaseline','hangingBaseline','ideographicBaseline'],
+		emheight: ['emHeightAscent','emHeightDescent'],
+		fontboundingbox: ['fontBoundingBoxAscent','fontBoundingBoxDescent'],
+		// width is mostly identical to glyphs domrect width (untransformed). A handful of font widths
+		// differ by a tiny amount e.g. ±0.0001220703125 or -0.00006103515625. This is not going to add
+		// much entropy if any, so drop for now
+		//width: ['width'],
+	}
+	let oData = {}, aValid = [], aCodes
+
+	try {
+		if (runSE) {foo++}
+		// check supported + type
+		let aNonsense = ['', Infinity,' ', [], true, undefined, {1:2}, null, 'a']
+		let canvas = dom.tzpTextmetrics, ctx = canvas.getContext('2d')
+		// transform: skew(1.787542deg, 3.263901deg)
+		let tm = ctx.measureText('a')
+		ctx.setTransform(1, 0.2, 0.8, 1, 0, 0)
+		for (const k of Object.keys(oMetrics)) {
+			oData[k] = {}
+			let oSet = new Set()
+			for (const j of oMetrics[k]) {
+				let isSupported = runST ? Math.random() < 0.5 : TextMetrics.prototype.hasOwnProperty(j)
+				if (isSupported) {
+					let typeCheck = typeFn(tm[j])
+					if (runST && Math.random() < 0.5) {
+						let x = aNonsense[Math.floor(Math.random() *10 )]
+						typeCheck = typeFn(x)
+					}
+					if ('number' !== typeCheck) {
+						isSupported = zErr
+						let suffix = 'baseline' == k ? j.slice(0, j.length-8) : j.slice(k.length)
+						if ('width' == k) {
+							addBoth(12, METRIC +'_'+ k, log_error(12, METRIC +'_'+ k, zErrType + typeCheck))
+						} else {
+							log_error(12, METRIC +'_'+ k +'_'+ suffix.toLowerCase(), zErrType + typeCheck)
+						}
+					}
+				}
+				oData[k][j] = isSupported
+				oSet.add(isSupported)
+			}
+			if (1 == oSet.size && oSet.has(true)) {aValid.push(k) // test
+			} else if (1 == oSet.size && oSet.has(false)) {addBoth(12, METRIC +'_'+ k, zNA) // not supported
+			} else if ('width' == k) { // error: we already added width
+			} else if (1 == oSet.size && oSet.has(zErr)) {addBoth(12, METRIC +'_'+ k, zErr +'s') // errors
+			} else {
+				let summary = []
+				for (const j of oMetrics[k]) {summary.push(oData[k][j])}
+				addBoth(12, METRIC +'_'+ k, summary.join(', ')) // mixed
+			}
+		}
+		if (0 == aValid.length) {return}
+
+		let styles = ['cursive','monospace','sans-serif','serif','system-ui']
+		// don't use 'none': this is default style + font per style for each language
+			// and is already present in covering monospace/sans-serif/serif
+			// fantasy vs sans-serif | fangsong vs serif both add very little
+
+		oData = {} // clear
+		aValid.forEach(function(k){
+			oData[k] = {}
+			styles.forEach(function(s){oData[k][s] = {}})
+		})
+
+		let aSet = [], aList = ['actualboundingbox', 'width']
+		aList.forEach(function(m) {if (aValid.includes(m)) {aSet.push(m)}})
+		if (aSet.length) {
+			aCodes = fntCodes.a
+			styles.forEach(function(s) { // each style
+				aCodes.forEach(function(code) { // each code
+					let codeString = String.fromCodePoint(code)
+					ctx.font = 'normal normal 22000px '+ s
+					let tm = ctx.measureText(codeString)
+					// textmetrics
+					aSet.forEach(function(k){
+						let data = [], props = oMetrics[k]
+						props.forEach(function(p) {data.push(tm[p])})
+						oData[k][s][code] = data
+					})
+				})
+			})
+		}
+
+		// ToDo: use a different set of unicode points (per aList if need be) that give different results
+			// for now just return one value
+		aSet = [], aList = ['baseline', 'emheight', 'fontboundingbox']
+		aList.forEach(function(m) {if (aValid.includes(m)) {aSet.push(m)}})
+		if (aSet.length) {
+			aCodes = [] = fntCodes.b
+			styles.forEach(function(s) { // each style
+				aCodes.forEach(function(code) { // each code
+					let codeString = String.fromCodePoint(code)
+					ctx.font = 'normal normal 22000px '+ s
+					let tm = ctx.measureText(codeString)
+					// textmetrics
+					aSet.forEach(function(k){
+						let data = [], props = oMetrics[k]
+						props.forEach(function(p) {data.push(tm[p])})
+						//oData[k][s][code] = data
+						oData[k][s] = data // we're only getting a single codepoint
+					})
+				})
+			})
+		}
+		//console.log(oData)
+
+		aValid.forEach(function(k) {
+			let tmpobj = {}, newobj = {}, data = {}, isLies = false
+			// group hashes
+			for (const s of Object.keys(oData[k])) {
+				let hash = mini(oData[k][s])
+				if (undefined == tmpobj[hash]) {tmpobj[hash] = {'data': oData[k][s], 'names': [s]}
+				} else {tmpobj[hash].names.push(s)}
+			}
+			for (const k of Object.keys(tmpobj)) {newobj[tmpobj[k].names.join(' ')] = tmpobj[k].data} // group by name
+			for (const k of Object.keys(newobj).sort()) {data[k] = newobj[k]} // sort by name
+			oMetrics[k].forEach(function(name){if (isProxyLie('TextMetrics.' + name)) {isLies = true}})
+			let hash = mini(data), btn = addButton(12, METRIC +'_'+ k)
+			addBoth(12, METRIC +'_'+ k, hash, btn,'', data, isLies)
+		})
+	
+
+	} catch(e) {
+		for (const k of Object.keys(oMetrics)) {
+			addBoth(12, METRIC +'_'+ k, log_error(12, METRIC +'_'+ k, e))
+		}
+	}
+	log_perf(12, METRIC, t0)
+	try {dom.tzpTextmetrics.height = 0} catch(e) {} // hide the fixed canvas after use
+	return
+}
+
 function get_widget_fonts(METRIC) {
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input
-let t0 = nowFn()
 	let aList = [
 		'button','checkbox','color','date','datetime-local','email','file','hidden','image','month','number',
 		'password','radio','range','reset','search','select','submit','tel','text','textarea','time','url','week',
@@ -1420,7 +1666,7 @@ let t0 = nowFn()
 				let value = getComputedStyle(el)[j]
 				// type check first item
 				if (name == aList[0]) {
-					if (runST) {value = ''}
+					if (runST) {value =''}
 					let typeCheck = typeFn(value)
 					if ('string' !== typeCheck) {throw zErrType + j +': '+ typeCheck}
 				}
@@ -1468,258 +1714,8 @@ let t0 = nowFn()
 	} catch(e) {
 		hash = e; data = zErrLog
 	}
-log_perf(12, METRIC, t0)
 	addBoth(12, METRIC, hash, btn, notation, data)
 	return
-}
-
-function get_glyphs(METRIC) {
-	/* NOTES
-	FF131+ nightly: 1900175 + 1403931 ride the train
-		- Enable USER_RESTRICTED for content processes on Nightly
-		- security.sandbox.content.level > 7
-		- this affected (FF win11 at least) clientrect
-			- 0x3095 + 0x532D (2 CJK chars)
-			- almost always both in every style except cursive never affected
-			- only changed in http(s), file:// not affected
-		- so reminder that generally we should always be using https for final testing/analysis
-	*/
-	let t0 = nowFn()
-	let styles = ['cursive','monospace','sans-serif','serif','system-ui',]
-	/* Notes
-		unique sizes: win11 all system fonts FF
-		sans-serif = 34 + cursive = 66 + serif = 84 + system-ui = 102 + monospace = 112 + fantasy = 115
-	
-	- all the same: 'emoji','math','none','ui-monospace','ui-rounded','ui-sans-serif','ui-serif'
-		- ui-* not added to gecko yet
-		- math is basically slated for deprecation
-		- emoji - we're not testing any emojis here
-		- do not increase unique sizes
-	- 'fangsong': does not add to unique sizes, we would need a different set of code points
-	- 'fantasy': only added 3 more sizes
-	*/
-
-	const id = 'element-fp'
-	let hash, btn ='', data = {}, strSizes = ''
-	try {
-		if (runSE) {foo++}
-		const doc = document
-		const div = doc.createElement('div')
-		div.setAttribute('id', id)
-		doc.body.appendChild(div)
-		div.innerHTML = '<span id="glyphs-span" style="font-size: 22000px;"><span id="glyphs-slot"></span></span>'
-		const span = dom['glyphs-span'], slot = dom['glyphs-slot']
-
-		let oData = {}, newobj = {}, setSize = new Set()
-		let methoddiv, methodspan, rangeH, rangeW, width, height
-		styles.forEach(function(stylename) {
-			slot.style.fontFamily = stylename
-			oData[stylename] = {}
-			let isFirst = stylename == styles[0]
-			fntCodes.forEach(function(code) {
-				let codeString = String.fromCodePoint(code)
-				slot.textContent = codeString
-				// always get span width, div height
-				if (isDomRect > 1) {
-					rangeH = document.createRange()
-					rangeH.selectNode(div)
-					rangeW = document.createRange()
-					rangeW.selectNode(span)
-				}
-				if (isDomRect < 1) { // get a result regardless
-					methoddiv = div.getBoundingClientRect()
-					methodspan = span.getBoundingClientRect()
-				} else if (isDomRect == 1) {
-					methoddiv = div.getClientRects()[0]
-					methodspan = span.getClientRects()[0]
-				} else if (isDomRect == 2) {
-					methoddiv = rangeH.getBoundingClientRect()
-					methodspan = rangeW.getBoundingClientRect()
-				} else if (isDomRect > 2) {
-					methoddiv = rangeH.getClientRects()[0]
-					methodspan = rangeW.getClientRects()[0]
-				}
-				width = methodspan.width, height = methoddiv.height
-				// only typecheck once: first char on first style
-				if (code == fntCodes[0] && isFirst) {
-					if (runST) {width = NaN, height = [1]}
-					let wType = typeFn(width), hType = typeFn(height)
-					if ('number' !== wType || 'number' !== hType) {
-						throw zErrType + (wType == hType ? wType : wType +' x '+ hType)
-					}
-				}
-				oData[stylename][code] = [width, height]
-				setSize.add(width+'x'+height)
-			})
-		})
-		for (const k of Object.keys(oData)) {
-			let hash = mini(oData[k])
-			if (newobj[hash] == undefined) {newobj[hash] = {'names': [k], 'data': oData[k]}
-			} else {newobj[hash].names.push(k)}
-		}
-		for (const k of Object.keys(newobj)) {data[newobj[k].names.join(' ')] = newobj[k].data}
-		hash = mini(data), strSizes = gRun ? setSize.size + ' unique sizes' : ''
-		btn = addButton(12, METRIC)
-	} catch(e) {
-		hash = e; data = zErrLog
-	}
-	removeElementFn(id)
-	addBoth(12, METRIC, hash, btn,'', data, (isDomRect == -1))
-	log_perf(12, METRIC, t0,'', strSizes)
-	return
-}
-
-function get_unicode(METRIC) {
-	/* https://www.bamsoftware.com/talks/fc15-fontfp/fontfp.html#demo */
-	/* NOTES
-	FF86+: 1676966: gfx.font_rendering.fallback.async
-		- set chars directly in HTML to force fallback ASAP
-	*/
-
-	let t0 = nowFn()
-	let styles = ['cursive','monospace','sans-serif','serif','system-ui'] // system-ui = FF92+
-	// don't use 'none': this is default style + font per style for each language
-		// and is already present in covering monospace/sans-serif/serif
-		// fantasy vs sans-serif | fangsong vs serif both add very little
-
-	function group(name, metricname, data) {
-		// group by style then char
-		let newobj = {}
-		styles.forEach(function(style) {newobj[style] = {}})
-		// width only
-		data.forEach(function(item) {
-			if (oTM[name]['all']) {
-				newobj[item[0]][item[1]] = item[2]
-			} else {
-				newobj[item[0]] = item[1]
-			}
-		})
-		let hash = mini(newobj)
-		// record valid results
-		oObject[metricname] = {'data': newobj, 'hash': hash}
-		return hash
-	}
-
-	function output() {
-		for (const name of Object.keys(oTM)) {
-			let metricname = METRIC +'_'+ name
-			let data = oTM[name].data
-			let str ='', btn ='', isLies = false
-			if (oCatch[name] !== undefined) {
-				str = oCatch[name]; data = zErrLog
-			} else if (0 == data.length) {
-				// empty object
-				if (!TextMetrics.prototype.hasOwnProperty(name)) {
-					str = zNA; data = zNA
-				}
-			} else {
-				// group into new obj
-				str = group(name, metricname, data); btn = addButton(12, metricname)
-				data = oObject[metricname]['data']
-				// lies
-				if (isProxyLie('TextMetrics.' + name)) {isLies = true}
-			}
-			addBoth(12, metricname, str, btn,'', data, isLies)
-		}
-		log_perf(12, METRIC, t0)
-		return
-	}
-
-	// vars
-	let oObject = {}, oCatch = {}, isCanvas = true
-	let oTM = {
-		width: {},
-		actualBoundingBoxAscent: {},
-		actualBoundingBoxDescent: {},
-		actualBoundingBoxLeft: {},
-		actualBoundingBoxRight: {},
-		alphabeticBaseline: {},
-		emHeightAscent: {},
-		emHeightDescent: {},
-		fontBoundingBoxAscent: {},
-		fontBoundingBoxDescent: {},
-		hangingBaseline: {},
-		ideographicBaseline: {},
-	}
-	// items not in aAll only get the first glyph measurement
-	let aAll = [
-		'width','actualBoundingBoxAscent','actualBoundingBoxDescent',
-		'actualBoundingBoxLeft','actualBoundingBoxRight',
-	]
-	for (const k of Object.keys(oTM)) {
-		oTM[k]['data'] = []
-		oTM[k]['proceed'] = TextMetrics.prototype.hasOwnProperty(k)
-		oTM[k]['all'] = aAll.includes(k)
-	}
-
-	let bigint = 9007199254740991
-	try {bigint = BigInt(9007199254740991)} catch(e) {}
-	const oTypeTest = {
-		width: bigint,
-		actualBoundingBoxAscent: '',
-		actualBoundingBoxDescent: Infinity,
-		actualBoundingBoxLeft: 'a',
-		actualBoundingBoxRight: ' ',
-		alphabeticBaseline: [],
-		emHeightAscent: {},
-		emHeightDescent: [1],
-		fontBoundingBoxAscent: {1:2},
-		fontBoundingBoxDescent: null,
-		hangingBaseline: true,
-		ideographicBaseline: undefined,
-	}
-
-	let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot,
-		canvas = dom.tzpTextmetrics, ctx = canvas.getContext('2d')
-	let rangeH, rangeW, wType, hType, width, height
-
-	// each style
-	styles.forEach(function(stylename) {
-		let isFirst = stylename == styles[0]
-		// each code
-		fntCodes.forEach(function(code) {
-			let codeString = String.fromCodePoint(code)
-			let isFirstCode = code == fntCodes[0]
-			// canvas
-			if (isCanvas) {
-				try {
-					ctx.font = 'normal normal 22000px '+ stylename
-					if (runSE) {foo++}
-					let tm = ctx.measureText(codeString)
-					// textmetrics
-					for (const k of Object.keys(oTM)) {
-						if (oTM[k]['proceed']) {
-							try {
-								let isOnce = oTM[k]['all'] == false && isFirstCode
-								if (oTM[k]['all'] || isOnce) {
-									let measure = tm[k]
-									// only typecheck once: first char on first style
-									if (isFirst && isFirstCode) {
-										if (runST) {measure = oTypeTest[k]}
-										let typeCheck = typeFn(measure)
-										if ('number' !== typeCheck) {throw zErrType + typeCheck}
-									}
-									if (isOnce) {
-										oTM[k]['data'].push([stylename, measure])
-									} else {
-										oTM[k]['data'].push([stylename, code, measure])
-									}
-								}
-							} catch(e) {
-								oCatch[k] = e
-								oTM[k]['proceed'] = false
-							}
-						}
-					}
-				} catch(e) {
-					for (const k of Object.keys(oTM)) {if (oTM[k]['proceed']) {oCatch[k] = e}}
-					isCanvas = false
-				}
-			}
-		})
-	})
-	canvas.height = 0 // hide the fixed canvas after use
-	output()
 }
 
 const get_woff2 = (METRIC) => new Promise(resolve => {
@@ -1758,7 +1754,7 @@ const outputFonts = () => new Promise(resolve => {
 		// allow more time for font async fallback
 		Promise.all([
 			get_glyphs('glyphs'),
-			get_unicode('textmetrics')
+			get_textmetrics('textmetrics')
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
