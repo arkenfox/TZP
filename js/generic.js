@@ -366,7 +366,7 @@ const get_isSystemFont = () => new Promise(resolve => {
 	try {
 		let el = dom.tzpDiv, data = []
 		aFonts.forEach(function(font){
-			el.style.font = '' // always clear in case a font is invalid/deprecated
+			el.style.font ='' // always clear in case a font is invalid/deprecated
 			el.style.font = font
 			let family = getComputedStyle(el)['font-family']
 			if (!data.includes(family)) {
@@ -434,7 +434,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 134) {isVerExtra = '+'}
+	if (isVer == 134) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -444,33 +444,31 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
-		try {if ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join()) {return 134}} catch(e) {} // 1927706
 		try {
-			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
-			if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
-		} catch(e) {}
-		try {
-			const re = new RegExp('(?:)', 'gv');
-			let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
-			for (let i=0; i < 3; i++) {if (true == test132.next().done) return 132} // 1899413
-		} catch(e) {}
-		try {
-			// note: false positives < FF78 (130) < FF79 (131)
-				// so we'll wrap those in the FF129 check
-			if ('function' === typeof CSS2Properties
-				&& CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) {
-				try {
-					let test131 = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
-					if ('2033' == test131.slice(0,4)) return 131 // 1900196
-				} catch(e) {}
-				try {new RegExp('[\\00]','u')} catch(e) {
-					if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130 // 1907236
-				}
-				return 129 // 1595620
-			}
+			// old-timey check: avoid false postives: must be 115 or higher
+			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 
-			// 128: relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
-			// ToDo: replace or add a fallback
+			// now cascade
+			try {
+				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
+			} catch(e){}
+			try {
+				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
+			} catch(e) {}
+			try {
+				const re = new RegExp('(?:)', 'gv');
+				let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
+				for (let i=0; i < 3; i++) {if (true == test132.next().done) return 132} // 1899413
+			} catch(e) {}
+			try {
+				let test131 = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
+				if ('2033' == test131.slice(0,4)) return 131 // 1900196
+			} catch(e) {}
+			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
+			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
+
+			// ToDo: replace or add a fallback: 128 relies on dom.webcomponents.shadowdom.declarative.enabled (flipped true in FF123)
 			try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
 
 			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
@@ -500,8 +498,7 @@ function get_isVer(METRIC) {
 			if (CSS2Properties.prototype.hasOwnProperty('fontSynthesisPosition')) return 118 // 1849010
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('fontStretch')) return 117 // 1842467
 			if (CanvasRenderingContext2D.prototype.hasOwnProperty('textRendering')) return 116 // 1839614
-			if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 115 // 1778909
-			return 114
+			return 115
 		} catch(e) {
 			console.error(e)
 			return 0
@@ -524,7 +521,7 @@ const get_isXML = () => new Promise(resolve => {
 		for (const k of Object.keys(list)) {
 			let doc = parser.parseFromString(list[k], 'application/xml')
 			let str = (doc.getElementsByTagName('parsererror')[0].firstChild.textContent)
-			if (runST) {str = ''}
+			if (runST) {str =''}
 			let typeCheck = typeFn(str)
 			if ('string' !== typeCheck) {throw zErrType + typeCheck}
 			//split into parts: works back to FF52 and works with LTR
@@ -695,7 +692,7 @@ function json_highlight(json, clrValues = false) {
 				if (clrValues) {
 					cls = 'string';
 				} else if (clrSymbols) {
-					cls = ''
+					cls =''
 					match = match.replace(tick, green_tick)
 					match = match.replace(cross, red_cross)
 				} else {
@@ -952,12 +949,12 @@ function metricsUI(target, isVisible, isSection, isHealth) {
 function lookup_health(sect, metric, scope, isPass) {
 	// return summary 'error/untrustworthy/str/hash' + detail (underlying data)
 	if ('window.caches' == metric) {metric = 'caches'}
-	let data = '', hash = ''
+	let data ='', hash =''
 	// error?
 	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
 	// nested, lookups, FP|detail data
 	try {
-		let nested = '', tmpdata, sDetailTemp
+		let nested ='', tmpdata, sDetailTemp
 		if ('pixels_' == metric.slice(0,7)) {nested = 'pixels'; metric = metric.replace('pixels_','')}
 		if ('' !== nested) {
 			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
@@ -965,7 +962,7 @@ function lookup_health(sect, metric, scope, isPass) {
 			data = sDetail[scope].lookup[metric]
 		} else {
 			data = gData[zFP][scope][sect]['metrics'][metric]
-			if ('font_names' == metric) {data = ''} // force font_names for next if statement
+			if ('font_names' == metric) {data =''} // force font_names for next if statement
 		}
 		if (undefined !== data) {
 			let typeCheck = typeFn(data, true)
@@ -1226,7 +1223,7 @@ function output_section(section, scope) {
 		let aBtns = []
 		try {
 			btnList.forEach(function(item) {
-				let btn = ''
+				let btn =''
 				if (sDataTemp[item][scope] !== undefined && sDataTemp[item][scope][name] !== undefined) {
 					if (sData[item][scope] == undefined) {sData[item][scope] = {}}
 					if (sData[item][scope][name] == undefined) {sData[item][scope][name] = {}}
@@ -1289,7 +1286,7 @@ function addBoth(section, metric, str, btn ='', notation ='', data ='', isLies =
 	// check: non obj can't have btns
 	if ('object' !== typeof data && '' !== btn) {
 		let typeCheck = typeFn(data, true), value
-		if ('object' !== typeCheck && 'array' !== typeCheck) {btn = ''}
+		if ('object' !== typeCheck && 'array' !== typeCheck) {btn =''}
 	}
 	addDisplay(section, metric, display, btn, notation, isLies)
 
@@ -1339,10 +1336,10 @@ function addDisplay(section, metric, str ='', btn ='', notation ='', isLies = fa
 	}
 }
 
-function log_display(section, metric, str, btn = "", notation = "", isLies = false) {
+function log_display(section, metric, str, btn ='', notation ='', isLies = false) {
 	if (!isSmart) {isLies = false; notation =''}
 	if (isLies) {str = "<span class='lies'>"+ str +"</span>"}
-	sDataTemp["display"][isScope][section][metric] = str + btn + notation
+	sDataTemp['display'][isScope][section][metric] = str + btn + notation
 }
 
 function addDetail(metric, data, scope = isScope) {
@@ -1740,7 +1737,7 @@ function outputSection(id, isResize = false) {
 		gRun = false
 	}
 	// reset
-	if ('all' == id || 1 == id) {dom.kbt.value = ''}
+	if ('all' == id || 1 == id) {dom.kbt.value =''}
 
 	var promiseSection = async function(x) {
 		let n = Number.isInteger(x) ? x : sectionNos[x]
@@ -1811,7 +1808,6 @@ function outputSection(id, isResize = false) {
 		}
 	}
 
-	let tDelay = nowFn()
 	setTimeout(function() {
 		get_isPerf()
 		if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
@@ -1850,10 +1846,11 @@ function run_immediate() {
 			navigator.requestMediaKeySystemAccess('org.w3.clearkey', [config]).then((key) => {}).catch(function(e){})
 		} catch(e) {}
 		try {
-			let warmDTF = Intl.DateTimeFormat().resolvedOptions()
-			let warmTZ = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
-			let warmNFcompact = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
-			let warmNFunit = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
+			let warm = Intl.DateTimeFormat().resolvedOptions()
+			warm = Intl.DateTimeFormat(undefined, {timeZone: 'Europe/London', timeZoneName: 'shortGeneric'}).format(new Date)
+			warm = new Intl.NumberFormat(undefined, {notation: 'compact'}).format(1)
+			warm = new Intl.NumberFormat(undefined, {style: 'unit', unit: 'hectare'}).format(1)
+			warm = (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'}) // v134 test
 		} catch(e) {}
 		get_isXML()
 		get_isArch('isArch')
