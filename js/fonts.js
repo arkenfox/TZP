@@ -677,7 +677,7 @@ function get_fonts_base(METRICB, selected) {
 		let newhash = mini(hashBase[oldhash].data)
 		finalBase[hashBase[oldhash].bases.join(' ')] = {'hash': newhash, 'metrics': hashBase[oldhash].data}
 		// build selected
-		if (isSelected) {selectBase[hashBase[oldhash].bases] = hashBase[oldhash].data[selected]}
+		if (isSelected) {selectBase[hashBase[oldhash].bases.join(' ')] = hashBase[oldhash].data[selected]}
 	}
 	//console.log('newBase', newBase)
 	//console.log('hashBase', hashBase)
