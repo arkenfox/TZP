@@ -109,6 +109,8 @@ function run_main(method) {
 				let constructor
 				if ('collator' == k) {constructor = Intl.Collator(code).resolvedOptions()
 				} else if ('datetimeformat' == k) {constructor = Intl.DateTimeFormat(code).resolvedOptions()
+				} else if ('durationformat' == k) {constructor = new Intl.DurationFormat(code).resolvedOptions()
+				} else if ('listformat' == k) {constructor = new Intl.ListFormat(code).resolvedOptions()
 				} else if ('numberformat' == k) {constructor = new Intl.NumberFormat(code).resolvedOptions()
 				} else if ('pluralrules' == k) {constructor = new Intl.PluralRules(code).resolvedOptions()
 				} else if ('relativetimeformat' == k) {constructor = new Intl.RelativeTimeFormat(code).resolvedOptions()
@@ -145,16 +147,41 @@ function run_main(method) {
 	let oMax = {
 		'collator': ['caseFirst','collation','ignorePunctuation','numeric','sensitivity','usage'],
 		"datetimeformat": ['calendar','day','hourcycle','month','numberingSystem','year'],
+		/* NOTE: displaynames: https://tc39.es/ecma402/#intl-displaynames-objects
+			- four types: currency, language, region, script
+				-	e.g. new Intl.DisplayNames(code, {type: 'language'}).resolvedOptions()
+			- second options parameter
+				- fallback: default is code
+				- style: default is long
+				- languageDisplay (for use with type 'language'): default is dialect
+			- so nothing is gained here as all codes are indentical
+			- but we can use this API to get results per locale using 'of' e.g.
+				> let l = new Intl.DisplayNames(code, {type: 'language'}).resolvedOptions()
+				> s.of('en-US') = "American English" // code: en-US
+				> s.of('en-US') = "anglais américain" // code: fr
+				> and we can of course pass undefined as the code
+		*/
+		'durationformat': [ // creates 10 buckets on it's own
+			'days','daysDisplay','hours','hoursDisplay','microseconds','microsecondsDisplay',
+			'milliseconds','millisecondsDisplay','minutes','minutesDisplay','months','monthsDisplay',
+			'nanoseconds','nanosecondsDisplay','numberingSystem','seconds','secondsDisplay',
+			'style','weeks','weeksDisplay','years','yearsDisplay'
+		],
+		/* listformat: https://tc39.es/ecma402/#listformat-objects
+				- options are defaults
+				- style = long, type = conjunction
+				- i.e user must set them
+		*/
 		'numberformat': [
 			'maximumFractionDigits','minimumFractionDigits','minimumIntegerDigits',
 			'roundingIncrement','roundingMode','roundingPriority','trailingZeroDisplay',
-			'notation','numberingSystem','signDisplay','style','useGrouping'
+			'notation','numberingSystem','signDisplay','style','useGrouping',
 		],
 		'pluralrules': [
 			'maximumFractionDigits','minimumFractionDigits','minimumIntegerDigits','pluralCategories',
 			'roundingIncrement','roundingMode','roundingPriority','trailingZeroDisplay','type'
 		],
-		'relativetimeformat': ['numberingSystem','nnumeric','style'],
+		'relativetimeformat': ['numberingSystem','numeric','style'],
 		'segmenter': ['granularity'],
 	}
 
@@ -222,8 +249,9 @@ function run_main(method) {
 			// notate new if 128+
 			if (isVer > 127) {
 				// results
-				if (resultsHash == "d2088ade") { //FF134+
-				} else if (resultsHash == "422c656d") { // FF128-133
+				if (resultsHash == "5d643afe") { // FF134+ with Intl.DurationFormat enabled
+				} else if (resultsHash == "4e1cb92a") { // FF134+ without Intl.DurationFormat
+				} else if (resultsHash == "d39ce60e") { // FF128-133
 				} else {resultsHash += ' '+ zNEW
 				}
 				// locales
@@ -292,6 +320,7 @@ Promise.all([
 	]
 	list = list.concat(aListExtra)
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	//list = ["en,english"]
 	legend()
 	setBtn("all")
 	setTimeout(function() {
