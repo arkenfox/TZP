@@ -72,8 +72,12 @@ function run() {
 			// only hash notate if 115+
 			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
 			if (is115) {
-				if (hash == "deb2f155") {code = s14 +" [FF115+]"+ sc
-				} else {code = zNEW
+				if (hash == "13652de1") {code = s14 +" [FF134+]"+ sc
+					// +2 currency: adds XCG, ZWG
+					// +8 numberingSystem: adds gara, gukh, krai, mymrepka, mymrpao, onao, outlined, sunu
+				} else if (hash == "59e3994e") {code = s14 +" [FF133]"+ sc // timezone Asia/Choibalsan dropped
+				} else if (hash == "deb2f155") {code = s14 +" [FF115-132]"+ sc
+				} else {code = ' '+ zNEW
 				}
 			}
 		}
