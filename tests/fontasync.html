@@ -53,11 +53,7 @@
 </head>
 
 <body>
-	<div class="offscreen">
-		<div class="normalized">
-			<div id="ugDiv"><span id="ugSpan"><span id="ugSlot"></span></span></div>
-		</div>
-	</div>
+	<div id="element-fp"><span id="glyphs-span" style="font-size: 22000px;"><span id="glyphs-slot"></span></span></div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
@@ -118,7 +114,7 @@ let fntCodes = [
 
 let styles = ["cursive","monospace","sans-serif","serif","system-ui"]
 let oData = {}, counter = 0
-let div = dom.ugDiv, span = dom.ugSpan, slot = dom.ugSlot
+let div = dom['element-fp'], span = dom['glyphs-span'], slot = dom['glyphs-slot']
 
 function build(style) {
 	let tmpArray = []
