@@ -80,9 +80,6 @@
 	right: 25px;
 	z-index: 1010;
 }
-div.pad {
-	padding: 0px 25px 15px /* top left+right bottom */
-}
 
 /* JSON */
 .string {color: var(--jstring);}
@@ -96,6 +93,7 @@ code {
 	background: rgba(142, 142, 145, 0.25) !important;
 	padding: 2px 6px; /* top+bottom | left+ right */
 }
+
 a {color: black; text-decoration: none;}
 a.blue {color: var(--test12); text-decoration: none;}
 a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-height: 1.2em}
@@ -138,18 +136,19 @@ a.return {color: var(--test12); text-decoration: none;  font-size: 14px; line-he
 .ui-serif {font-family: ui-serif;}
 
 .normalized {
-	font-family: none;
-  font-style: normal;
-	font-variant: normal;
-  font-weight: normal;
-  line-height: normal;
-  text-transform: none;
-  text-align: left;
-  text-decoration: none;
-  text-shadow: none;
-  white-space: normal;
-  word-break: normal;
-  word-spacing: normal;
+	font-family: none !important;
+	font-size: initial !important; /* testing */
+	font-style: normal !important;
+	font-variant: normal !important;
+	font-weight: normal !important;
+	line-height: normal !important;
+	text-transform: none !important;
+	text-align: left !important;
+	text-decoration: none !important;
+	text-shadow: none !important;
+	white-space: normal !important;
+	word-break: normal !important;
+	word-spacing: normal !important;
 }
 
 /* run/re-run, click here */
@@ -313,15 +312,12 @@ table td.bottom {vertical-align: bottom;}
 #tb4 hr {color: var(--test4);}
 #tb18 hr {color: var(--test18);}
 
-
-#lh-fingerprint, #mathml-fingerprint {
+#element-fp {
 	position: fixed;
 	top: 0;
 	left: 0;
-}
-.measure {
-	font-size: 16px;
 	font-family: none;
+	font-size: initial;
 	font-style: normal;
 	font-variant: normal;
 	font-weight: normal;
@@ -331,9 +327,15 @@ table td.bottom {vertical-align: bottom;}
 	text-decoration: none;
 	text-shadow: none;
 	white-space: nowrap;
+	/* domrect */
+	/*transform: scale(1.1234567);*/
+	transform: skew(1.787542deg,3.263901deg);
 }
-.measureScale {
-	transform: scale(1.1234567); /* cause decimals */
+#element-fp .unstyled {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
 }
-
-.cssDocFont {font-family: "Arial Black";}
+.skew {
+	transform: skew(1.787542deg,3.263901deg);
+}

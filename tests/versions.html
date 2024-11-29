@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 84, maxVer = 133, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 85, maxVer = 134, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -264,6 +264,16 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 134: 1927706 (see 1931044)
+		let t134 = performance.now(), ver134
+		try {
+			// avoid old timey false positives e.g FF78-109
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) { // FF115+
+				ver134 = '$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})
+			}
+		} catch(e) {}
+		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.2ms
 
 		// 133: 1837773
 		let t133 = performance.now(), ver133
@@ -738,7 +748,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 57, oOther = {}
+	let countOther = 0, expectOther = 58, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -755,6 +765,12 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 134: 1927706 : ie, lij, oc, st, szl, tn, za
+		// packages that use --with-system-icu can cause issues
+		let t134 = performance.now(), ver134
+		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch(e) {}
+		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.125ms
 
 		// 130: 1907369
 		let t130 = performance.now(), ver130 = false
@@ -821,9 +837,12 @@ function outputVersion() {
 		// 101: 1752808
 		let t101 = performance.now(), ver101
 		try {
-			let test101 = new Intl.NumberFormat("en", {style:"currency", currency:"USD", maximumFractionDigits:2, notation:"compact"}).format(1773500)
-			ver101 = (test101 == "$1.77M")
-			debug.push("101 1752808 : "+ test101)
+			// avoid old timey false positives under FF93
+			if ("function" === typeof self.structuredClone) { // FF94+
+				let test101 = new Intl.NumberFormat("en", {style:"currency", currency:"USD", maximumFractionDigits:2, notation:"compact"}).format(1773500)
+				ver101 = (test101 == "$1.77M")
+				debug.push("101 1752808 : "+ test101)
+			}
 		} catch(e) {}
 		rec(101, 101, "1752808", ver101, performance.now()-t101)
 

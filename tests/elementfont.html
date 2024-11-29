@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=500">
+	<title>element font</title>
+	<link rel="stylesheet" type="text/css" href="testindex.css">
+	<script src="testglobals.js"></script>
+	<script src="testgeneric.js"></script>
+	<style>
+		table {width: 97%; min-width: 480px; max-width: 780px;}
+	</style>
+</head>
+
+<body>
+
+	<table>
+	<tr><td><h2>TorZillaPrint</h2></td></tr>
+	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
+	</table>
+
+	<table id="tb15">
+		<col width="15%"><col width="85%">
+		<thead><tr><th colspan="2">
+			<div class="nav-title">element font
+				<div class="nav-up"><span class="c perf" id="perf"></span></div>
+			</div>
+		</th></tr></thead>
+		<tr><td colspan="2" class="intro">
+			<span class="no_color">basic font element test, using clientrect, with different variables</span>
+			&nbsp; | &nbsp; <input type="checkbox" name="expand" style="margin: 0; height: 12px" onClick='run()'> <span class="no_color">expand font-styles
+			</span> &nbsp;
+			<br><br>
+			<span class="no_color">
+				<span class="btnfirst btn15" onClick="run()">[ run ]</span>
+				<!--
+				&nbsp;<input type="text" style="width: 45%" id="sizes">
+				&nbsp;<span class="btn btn15" onClick="resetsizes()">[ reset ]</span>
+				<span class="btn btn15" onClick="clearsizes()">[ clear ]</span>
+				-->
+			</span>
+		</td></tr>
+		<tr>
+			<td colspan="2" style="text-align: left;">
+			<hr><br>
+			<span class="no_color c mono spaces" id="results"></span></td>
+		</tr>
+	</table>
+	<br>
+
+
+<script>
+'use strict';
+let sizeA = ['3.9pt','141.7pt','266.6pt',]
+let sizeB = ['3.9pt','xx-small','x-small','small','medium','large','x-large','xx-large','xxx-large','141.7pt','266.6pt']
+let oList = {
+	// keep in sorted order
+	// https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family
+	'cursive': sizeA,
+	'emoji': sizeA, // windows: emoji = serif
+	'fangsong': sizeA,
+	'fantasy': sizeA, // windows: fantasy = sans
+	'monospace': sizeB,
+	'sans-serif': sizeB,
+	'serif': sizeB,
+	'system-ui': sizeA,
+}
+let aExpand = [
+	'none',
+	'math',
+	'ui-monospace',
+	"ui-sans-serif",
+	'ui-serif',
+	"ui-rounded"
+]
+
+function get_element_font() {
+	let t0 = performance.now()
+	let oUsed = {}
+	for (const k of Object.keys(oList)) {oUsed[k] = oList[k]}
+	if (dom.expand.checked) {aExpand.forEach(function(k){oUsed[k] = sizeB})}
+
+	const id = 'element-fp'
+	let hash, data = {}, method
+	try {
+		const doc = document
+		const div = doc.createElement('div')
+		div.setAttribute('id', id)
+		doc.body.appendChild(div)
+		let oData = {}, tmpobj = {}
+		for (const k of Object.keys(oUsed).sort()) {
+			let sizes = oUsed[k]
+			let tmpsizes = []
+			sizes.forEach(function(size) {
+				// create + measure each individually as preceeding elements can affect subsequent ones
+				dom[id].innerHTML = "<div style='font-size:"+ size +";' class='"+ k +"'>...</div>"
+				let target = div.firstChild
+				// method
+				method = target.getBoundingClientRect()
+				// width+height = max entropy
+				tmpsizes.push([size, method.width, method.height, method.x, method.y])
+			})
+			let sizehash = mini(tmpsizes)
+			if (oData[sizehash] == undefined) {oData[sizehash] = {data: tmpsizes, group: [k]}
+			} else {oData[sizehash].group.push(k)}
+		}
+		// group by styles
+		for (const k of Object.keys(oData)){data[oData[k].group.join(' ')] = oData[k].data}
+		let count = Object.keys(data).length
+		hash = mini(data)
+
+		dom.results.innerHTML = s15 + hash + sc +'<br>'+ json_highlight(data, 105)
+	} catch(e) {
+		dom.results.innerHTML = e+''
+	}
+	removeElementFn(id)
+	dom.perf.innerHTML = Math.round(performance.now() -t0) +" ms"
+}
+
+function run() {
+	dom.results = ""
+	dom.perf = ""
+	setTimeout(function() {
+		get_element_font()
+	}, 170)
+}
+
+dom.expand.checked = false
+get_element_font()
+
+//make it easy to check all zoom values
+if (isFile) {
+	window.addEventListener("resize", get_element_font)
+}
+
+</script>
+</body>
+</html>
