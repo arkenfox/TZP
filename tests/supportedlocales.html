@@ -9,6 +9,7 @@
 	<script src="testgeneric.js"></script>
 	<style>
 		table {width: 780px;}
+		.btn, .btnfirst {padding-right: 0px;}
 	</style>
 </head>
 
@@ -33,16 +34,17 @@
 		<tr>
 			<td class="mono spaces" id="legend" style="text-align: left; vertical-align: top; color: #b3b3b3; font-size: 11px"></td>
 			<td class="mono" style="text-align: left; vertical-align: top;">
-				<span id="bC" class="btn4 btnfirst" onClick="run('C')">[ C ]</span>
+				<span id="bC" class="btn4 btnfirst" onClick="run('C')">[C]</span>
 				<span id="bDTF" class="btn4 btn" onClick="run('DTF')">[DTF]</span>
 				<span id="bDN" class="btn4 btn" onClick="run('DN')">[DN]</span>
+				<span id="bDF" class="btn4 btn" onClick="run('DF')">[DF]</span>
 				<span id="bLF" class="btn4 btn" onClick="run('LF')">[LF]</span>
-				<!--<span id="bLI" class="btn4 btn" onClick="run('LI')">[LI]</span>-->
 				<span id="bNF" class="btn4 btn" onClick="run('NF')">[NF]</span>
 				<span id="bPR" class="btn4 btn" onClick="run('PR')">[PR]</span>
 				<span id="bRTF" class="btn4 btn" onClick="run('RTF')">[RTF]</span>
-				<span id="bS" class="btn4 btn" onClick="run('S')">[ S ]</span>
+				<span id="bS" class="btn4 btn" onClick="run('S')">[S]</span>
 				<span id="bALL" class="btn4 btn" onClick="run('ALL')">[ALL]</span>
+				<input type="checkbox" id="optExpanded" onChange="run()"> expand
 				<br><br><hr><br>
 				<span id ="results"></span>
 			</td></tr>
@@ -53,19 +55,31 @@
 'use strict';
 
 var list = [],
+	listExpanded = [],
 	aLegend = [],
+	aLegendExpanded = [],
+	lastMethod,
 	aLocales = [],
-	aSummary = []
+	aLocalesExpanded = [],
+	aSummary = [],
+	aSupported = [],
+	aNotSupported = []
 
 function legend() {
 	// build once
-	if (aLegend.length == 0) {
-		list.sort()
-		for (let i = 0 ; i < list.length; i++) {
-			let str = list[i].toLowerCase()
+	let isExpanded = dom.optExpanded.checked
+	if (!isExpanded && aLegend.length == 0 || isExpanded && aLegendExpanded.length == 0) {
+		let listUsed = isExpanded ? listExpanded : list
+		listUsed.sort()
+		for (let i = 0 ; i < listUsed.length; i++) {
+			let str = listUsed[i].toLowerCase()
 			let code = str.split(",")[0].trim()
 			let name = str.split(",")[1].trim()
-			aLocales.push(code)
+			if (isExpanded) {
+				aLocalesExpanded.push(code)
+			} else {
+				aLocales.push(code)
+			}
 			let isSplit = (name.includes("(") && (name.length + code.length) > 32)
 			if (name.includes("(")) {
 				let name0 = name.split("(")[0].trim()
@@ -80,11 +94,16 @@ function legend() {
 					name = name0 +" "+ name1
 				}
 			}
-			aLegend.push(code.padStart(7) +": "+ name)
+			if (isExpanded) {
+				aLegendExpanded.push(code.padStart(7) +": "+ name)
+			} else {
+				aLegend.push(code.padStart(7) +": "+ name)
+			}
 		}
 	}
+	let legendUsed = isExpanded ? aLegendExpanded : aLegend
 	// output
-	dom.legend.innerHTML = s4 +"LEGEND ["+ aLegend.length +"]"+ sc +"<br><br>"+ aLegend.join("<br>")
+	dom.legend.innerHTML = s4 +"LEGEND ["+ legendUsed.length +"]"+ sc +"<br><br>"+ legendUsed.join("<br>")
 }
 
 function run_main(method, isLoopy) {
@@ -92,14 +111,17 @@ function run_main(method, isLoopy) {
 	let legend = [], data = [], map = [], nocase = [], nocasemap = [], all = []
 	let spacer = "<br><br>", hashLookup = "", lookupSummary = ""
 	let display = []
+	let isExpanded = dom.optExpanded.checked
+	aSupported = []
+	aNotSupported = []
 
 	function getPretty(method) {
 		let pretty = ""
 		if (method == "C") {pretty = "collator"
 		} else if (method == "DTF") {pretty = "datetimeformat"
 		} else if (method == "DN") {pretty = "displaynames"
+		} else if (method == "DF") {pretty = "durationformat"
 		} else if (method == "LF") {pretty = "listformat"
-		} else if (method == "LI") {pretty = "localeinfo"
 		} else if (method == "NF") {pretty = "numberformat"
 		} else if (method == "PR") {pretty = "pluralrules"
 		} else if (method == "RTF") {pretty = "relativetimeformat"
@@ -111,19 +133,19 @@ function run_main(method, isLoopy) {
 	try {
 		// hash
 		function getNotation(hash, method) {
-			if (!isFF) return ""
+			if (!isFF || isExpanded) return ""
 			// only hash notate if 115+
 			let is115 = (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing"))
 			if (!is115) {return ""}
 			let notation = ""
 			if (method == "C") {
-				//if (hash == "248fdca9") {notation = " [FF121+]" // lij
-				if (hash == "51bba16a") {notation = " [FF115+]"
+				if (hash == "7f97af66") {notation = " [FF134+]" // 122 (added lij, st, tn)
+				} else if (hash == "51bba16a") {notation = " [FF115-133]" // 119
 				} else { notation = " "+ zNEW
 				}
 			} else {
-				//if (hash == "13d29895") {notation = " [FF121+]" // lij
-				if (hash == "2f20e446") {notation = " [FF115+]"
+				if (hash == "23fb2f50") {notation = " [FF134+]" // 233 (added ie, lij, oc, st, szl, tn, za)
+				} else if (hash == "2f20e446") {notation = " [FF115-133]" // 226
 				} else { notation = " "+ zNEW
 				}
 			}
@@ -131,14 +153,16 @@ function run_main(method, isLoopy) {
 			return notation
 		}
 		// get data
+		let listUsed = isExpanded ? listExpanded : list
+		let aLocalesUsed = isExpanded ? aLocalesExpanded : aLocales
 		function getSupported(type, method) {
 			data = []
 			map = []
 			all = []
-			for (let i = 0 ; i < list.length; i++) {
+			for (let i = 0 ; i < listUsed.length; i++) {
 				// split: code, name
-				let code = list[i].split(",")[0]
-				let name = list[i].split(",")[1]
+				let code = listUsed[i].split(",")[0]
+				let name = listUsed[i].split(",")[1]
 				// test
 				let test = ""
 				if (method == "C") {
@@ -147,10 +171,10 @@ function run_main(method, isLoopy) {
 					test = Intl.DateTimeFormat.supportedLocalesOf([code], {localeMatcher: type})
 				} else if (method == "DN") {
 					test = Intl.DisplayNames.supportedLocalesOf([code], {localeMatcher: type})
+				} else if (method == "DF") {
+					test = Intl.DurationFormat.supportedLocalesOf([code], {localeMatcher: type})
 				} else if (method == "LF") {
 					test = Intl.ListFormat.supportedLocalesOf([code], {localeMatcher: type})
-				} else if (method == "LI") {
-					test = Intl.LocaleInfo.supportedLocalesOf([code], {localeMatcher: type})
 				} else if (method == "NF") {
 					test = Intl.NumberFormat.supportedLocalesOf([code], {localeMatcher: type})
 				} else if (method == "PR") {
@@ -172,8 +196,10 @@ function run_main(method, isLoopy) {
 					if (code.toLowerCase() !== found.toLowerCase()) {
 						map.push(code +" -> "+ found)
 						data.push(code +" -> "+ found)
+						if ('lookup' == type) {aSupported.push(found.toLowerCase())}
 					} else {
 						data.push(found)
+						if ('lookup' == type) {aSupported.push(found.toLowerCase())}
 					}
 				}
 			}
@@ -207,11 +233,12 @@ function run_main(method, isLoopy) {
 			for (let i = 0 ; i < map.length; i++) {
 				let x = map[i].split(" -> ")[0] // tested
 				let y = map[i].split(" -> ")[1] // found
-				if (!aLocales.includes(y.toLowerCase())) { // case insenstive
+				if (!aLocalesUsed.includes(y.toLowerCase())) { // case insenstive
 					notlist.push(s16 + y + sc +" ["+ x +"]")
 					notlistclean.push(y)
 				}
 				map2.push(s12 + x + sc + " -> "+ y)
+				if ('lookup' == type) {aSupported.push(x.toLowerCase())}
 			}
 			// color up results
 			if (!isLoopy) {
@@ -254,7 +281,15 @@ function run_main(method, isLoopy) {
 				}
 			} else {
 				str = s4 + type.toUpperCase() + sc
+				let strNotSupported = ''
 				if (type == "lookup") {
+					
+					aNotSupported = aLocalesUsed.filter(x => !aSupported.includes(x))
+					if (aNotSupported.length) {
+						strNotSupported = spacer + s16 + 'NOT SUPPORTED '+ sc + mini(aNotSupported) + ' ['+ aNotSupported.length + ']'
+							+ spacer + "<span class='faint'>" + aNotSupported.join(", ") +"</span>"
+					}
+
 					str = s4 + getPretty(method).toUpperCase() + sc + spacer + str + spacer
 					str += sg + hash + sc + s4 +" ["+ data.length +"]"+ sc + getNotation(hash, method)
 					// nocase used to color legend items
@@ -270,6 +305,7 @@ function run_main(method, isLoopy) {
 				if (map2.length) {str += spacer + s12 +"MAPPED"+ sc + spacer + map2.join("<br>")}
 				if (dupes.length) {str += spacer + s14 +"DUPES"+ sc + spacer + dupes.join("<br>")}
 				if (notlist.length) {str += spacer + s16 +"NOT LISTED"+ sc + spacer + notlist.join("<br>")}
+				str += strNotSupported
 				display.push(str)
 			}
 		}
@@ -280,9 +316,9 @@ function run_main(method, isLoopy) {
 		if (!isLoopy) {
 			dom.results.innerHTML = display.join("<br>")
 			// build + color legend
-			for (let i = 0 ; i < list.length; i++) {
+			for (let i = 0 ; i < listUsed.length; i++) {
 				// split: code, name
-				let str = list[i].toLowerCase()
+				let str = listUsed[i].toLowerCase()
 				let code = str.split(",")[0].trim()
 				let name = str.split(",")[1].trim()
 				if (nocase.includes(code.toLowerCase())) {
@@ -333,7 +369,9 @@ function run(method) {
 	legend()
 	dom.results = ""
 	dom.perf = ""
-	setBtn(method)
+	let delay = 250
+	if (undefined == method) {method = lastMethod; delay = 0} else {setBtn(method)}
+	lastMethod = method
 	// delay so users see change and allow paint
 	setTimeout(function() {
 		if (method == "ALL") {
@@ -341,7 +379,7 @@ function run(method) {
 		} else {
 			run_main(method, false)
 		}
-	}, 250)
+	}, delay)
 }
 
 function run_all() {
@@ -350,8 +388,8 @@ function run_all() {
 	run_main("C", true)
 	run_main("DTF", true)
 	run_main("DN", true)
+	run_main("DF", true)
 	run_main("LF", true)
-	//run_main("LI", true)
 	run_main("NF", true)
 	run_main("PR", true)
 	run_main("RTF", true)
@@ -362,6 +400,7 @@ function run_all() {
 }
 
 function setBtn(method) {
+	if (undefined == method) {return}
 	// reset btns
 	let items = document.getElementsByClassName("btn8")
 	for (let i=0; i < items.length; i++) {
@@ -380,6 +419,8 @@ Promise.all([
 ]).then(function(){
 	list = gLocales
 	list = list.filter(function(item, position) {return list.indexOf(item) === position})
+	listExpanded = gLocales = gLocales.concat(gLocalesExpand)
+	listExpanded = listExpanded.filter(function(item, position) {return listExpanded.indexOf(item) === position})
 	run("ALL")
 })
 
