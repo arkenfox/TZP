@@ -4,32 +4,65 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=500">
 	<title>elements</title>
-  <link rel="stylesheet" type="text/css" href="testindex.css">
-	<link rel="stylesheet" href="chrome://global/locale/intl.css">
+  <link rel="stylesheet" type="text/css" href="testindex.css"> <!-- -->
   <script src="testglobals.js"></script>
   <script src="testgeneric.js"></script>
 	<style>
 		table {width: 97%; min-width: 780px; max-width: 780px}
-		.elementsfixed {
-			position: fixed;
-			top: 0;
-			left: 0;
-			padding: 0px;
+
+		/* make sure we specify #element-fp so the previous #element-fp ones are ovewritten */
+		/* https://developer.mozilla.org/en-US/docs/Web/CSS/all */
+		#element-fp .revert {
+			all: revert;
 		}
+		/*** custom styles so we can check they are removed ***/
+		/* this covers everything so far: they all change
+			but caption and legend are off to begin with .. again
+		*/
+		#element-fp a,
+		#element-fp b,
+		#element-fp code,
+		#element-fp div,
+		#element-fp hr,
+		#element-fp i,
+		#element-fp span,
+		audio, abbr, acronym, address, applet, article, aside,
+		base, basefont,
+		center, cite, data, del, dfn, em, footer,
+		strike, strong, u {
+			margin: 2px; padding: 2px;
+		}
+		#element-fp div>span {font-size: 2.9em;}
+		#element-fp font[size="1"] {font-size: 1.1em;}
+		#element-fp font[size="2"] {font-size: 1.2em;}
+		#element-fp font[size="3"] {font-size: 1.3em;}
+		#element-fp font[size="4"] {font-size: 1.4em;}
+		#element-fp font[size="5"] {font-size: 1.5em;}
+		#element-fp font[size="6"] {font-size: 1.6em;}
+		#element-fp font[size="7"] {font-size: 1.7em;}
+
+		#element-fp br, #element-fp small, #element-fp sub,
+		#element-fp sup, #element-fp h1, #element-fp h2, #element-fp h3,
+		#element-fp h4, #element-fp h5, #element-fp h6, big, blockquote,
+		caption, dd, dialog, dl, dt, figcaption, fieldset, legend {
+ 			margin: 2px;
+			padding: 2px;
+		}
+		canvas, iframe {width: 75px;}
+
 	</style>
 </head>
 
 <body>
-	<div class="elementsfixed normalized" id="elementsdiv"> </div>
+	<div id="element-fp"></div>
 
 	<table>
 	<tr><td><h2>TorZillaPrint</h2></td></tr>
 	<tr><td class="blurb"><a class="return" href="../index.html#elements">return to TZP index</a></td></tr>
 	</table>
 
-	<!-- app lang -->
 	<table id="tb15">
-		<col width="25%"></a><col width="75%">
+		<col width="25%"><col width="75%">
 		<thead><tr><th colspan="2">
 			<div class="nav-title">elements
 				<div class="nav-up"><span class="c perf" id="perf"></span></div>
@@ -41,9 +74,8 @@
 				<a class="blue" target="_blank" href="elementforms.html">elememt forms</a></span><br><br>
 			<span class="btn15 btnfirst" onClick="run()">[ run ]</span>
 			<span class="no_color" id="custom">
-				<input id="optTransform" checked type="checkbox"> &nbsp; transform  &nbsp;
-				<input id="optExpand" type="checkbox"> &nbsp; expand
-				&nbsp; | &nbsp; <span class="key">h</span>: horizontal &nbsp; <span class="key">v</span>: vertical
+				<input id="optVertical" checked type="checkbox"> &nbsp; vertical  &nbsp;
+				<input id="optEverything" type="checkbox" onChange="style_everything()"> &nbsp; everything
 			</span>
 		</td></tr>
 		<tr><td colspan="2"><hr><br></td></tr>
@@ -55,132 +87,103 @@
 
 <script>
 'use strict';
+/*
+	// ignore
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+	area: used in map and sets it's own size
+	bdi/bdo: bidirectional elements
+
+	// the rest
+	col colgroup
+	datalist dir
+	element-details em
+	figure form frame frameset
+	head header hgroup
+	img ins isindex
+	kbd keygen
+	label li link
+	main map mark marquee menu menuitem meter
+	nav nextid nobr noembed noframes noscript
+	object ol optgroup option output
+	param picture plaintext portal pre
+	q
+	rb rbc rp rt rtc ruby
+	s samp script search section slot source style summary
+	table tbody td template tfoot th thead time title tr track tt
+	ul
+	var video
+	wbr xmp
+*/
 
 let isLocale = ""
+let isRevert = true
+let isNotateStyle = false
 let oData = {}
+
+// note: some elements we insert a char "." to force a height
+	// always use the same char
+let oListBase = {
+	a: '<a href="">.</a>',
+	base: '<base href=""/>', // empty: width/x are zero but height/y are intesring
+	audio: '<audio controls=""></audio>',
+	big_x2: '<big><big>.</big></big>',
+	big_x3: '<big><big><big>.</big></big></big>',
+	br: '<br>',
+	canvas: '<canvas></canvas>',
+	// always revert tables because we have that in our inline style in the plain test
+	caption: '<table class="revert"><caption>.</caption></table>',
+	dd: '<dl><dd>.</dd></dl>',
+	dialog: '<dialog open=""></dialog>',
+	dt: '<dl><dt>.</dt></dl>',
+	fieldset: '<fieldset></fieldset>', // don't include char
+	figcaption: '<figure><figcaption>.</figcaption></figure>',
+	hr: '<hr>',
+	legend: '<fieldset><legend>.</legend></fieldset>',
+}
+let aListBaseAdd = [
+	'big','blockquote','code','dl',
+	'h1','h2','h3','h4','h5','h6',
+	'iframe','small','sub','sup',
+]
+
+// redundant
+let oListExtra = {
+	basefont: '<basefont color="#FF0000"/>',
+}
+let oListExtraAdd = [
+	'abbr','acronym','address','applet','article','aside',
+	'b','center','cite',
+	'data','del','div','dfn','em','footer','i',
+	'p','span','strike','strong',
+	'u',
+]
+aListBaseAdd.forEach(function(item){oListBase[item] = '<'+item+'>.</'+item+'>'})
+oListExtraAdd.forEach(function(item){oListExtra[item] = '<'+item+'>.</'+item+'>'})
+
+function style_everything() {
+	let isEverything = dom.optEverything.checked
+	dom.optVertical.disabled = isEverything
+}
+style_everything()
 
 function get_elements() {
 	let t0 = performance.now()
-
 	oData = {}
 
-/*
-applet area
-base basefont bdi bdo
-col colgroup
-datalist dir
-element-details em
-figure form frame frameset
-head header hgroup
-img ins isindex
-kbd keygen
-label li link
-main map mark marquee menu menuitem meter
-nav nextid nobr noembed noframes noscript
-object ol optgroup option output
-param picture plaintext portal pre
-q
-rb rbc rp rt rtc ruby
-s samp script search section slot source style summary
-table tbody td template tfoot th thead time title tr track tt
-u ul
-var video
-wbr xmp
-*/
-
-
-	let isTransform = dom.optTransform.checked
-	//let isVertical = dom.optVertical.checked
-	let isExpanded = dom.optExpand.checked
+	let isVertical = dom.optVertical.checked
+	let isEverything = dom.optEverything.checked
 	let params = []
-	if (isExpanded) {params.push("all")}
-	//if (isVertical) {params.push("vertical")}
-	if (isTransform) {params.push("transformed")}
 
-	let oListBase = {
-		// <key + value (if not blank)></key>
-		// e.g. audio: 'controls=""' -> <audio controls=""></audio>
-		// but if it starts with < then just use the whole string
-		'a': {
-			// get width + height
-			audio: 'controls=""',
-			canvas: '',
-			'caption': '<table><caption>.</caption></table>',
-			dialog: 'open=""'
-			/*
-				transform
-					v: "dialog": [-1104672, 42.68333435058594, 10052521, 0]
-					h: "dialog": [42.68333435058594, 42.68333435058594, 0, 0]
-				no-transform
-					v: "dialog": [0, 38, 8947849, 0]}
-					h: "dialog": [38, 38, 0, 0]}
-				so where does it get -1104672/8947849 from and wtf is 10052521
-			*/
-			},
-
-		// b+ we insert a char "." to force a height
-		'b': {
-			// insert a character; get height + y
-			'br': '<br>',
-			'fieldset': '<fieldset></fieldset>', // don't include char
-			'font1': '<font size="1">.</font>', // = xx-small
-			'font2': '<font size="2">.</font>', // = x-small
-			'font4': '<font size="4">.</font>', // = large
-			'font5': '<font size="5">.</font>', // = x-large
-			'font6': '<font size="6">.</font>', // = xx-large = h1
-			'font7': '<font size="7">.</font>', // = xxx-large
-			'font_xx-small': '<div><span style="font-size: xx-small">.</span></div>',
-			'font_x-small': '<div><span style="font-size: x-small">.</span></div>',
-			'font_small': '<div><span style="font-size: small">.</span></div>',
-			'font_medium': '<div><span style="font-size: medium">.</span></div>',
-			'font_large': '<div><span style="font-size: large">.</span></div>',
-			'font_x-large': '<div><span style="font-size: x-large">.</span></div>',
-			'font_xx-large': '<div><span style="font-size: xx-large">.</span></div>',
-			'font_xxx-large': '<div><span style="font-size: xxx-large">.</span></div>',
-			'hr': '<hr>',
-		},
-		'd': {
-			'big_x2': '<big><big>.</big></big>',
-			'dd': '<dl><dd>.</dd></dl>',
-			'dt': '<dl><dt>.</dt></dl>',
-			'legend': '<fieldset><legend>legend</legend></fieldset>',
-		},
-		'e': {
-			'big_x3': '<big><big><big>.</big></big></big>',
-		}
+	if (isEverything) {
+		params.push("all")
+	} else {
+		if (isVertical) {params.push("vertical")} else {params.push("horizontal")}
 	}
-
-	// ok, I think we need to get both vertical and horizontal for font stuff
-
-	let oListExtra = {
-		'b': {
-			'a': 'href=""', // = font-medium
-			'font3': '<font size="3">.</font>', // = medium/default = a = h4
-		},
-		'd': {
-			'figcaption': '<figure><figcaption>.</figcaption></figure>', // == dt
-		},
-	}
-
-	let heightListBase = [
-		'big','blockquote',
-		'code',
-		'h2','h3','h5','h6',
-		'iframe',
-		'small','sub','sup',
-	]
-	let heightListExtra = [
-		'abbr','acronym','address','article','aside','b','center','cite',
-		'data','del','div','dfn','dl','em','footer','h1','h4','i',
-		'p',
-		'span','strike','strong',
-	]
-	heightListBase.forEach(function(item){oListBase.b[item] = ''})
-	heightListExtra.forEach(function(item){oListExtra.b[item] = ''})
+	style_everything()
 
 	let oList = {}
 	for (const k of Object.keys(oListBase)) {oList[k] = oListBase[k]}
-	if (isExpanded) {
+	if (isEverything) {
 		for (const k of Object.keys(oListExtra)) {
 			if (undefined == oList[k]) {
 				oList[k] = oListExtra[k]
@@ -192,83 +195,83 @@ wbr xmp
 		}
 	}
 	//console.log(oList)
-
-	let tmpdata = {}, elementdata = {}
+	let tmpdata = {}
+	const parent = dom['element-fp']
 	try {
-		const parent = dom.elementsdiv
 		let target
-		// just skew the parent, this seems sufficient to transform all elements
-			// and bonus, we require this for input type image anyway
-		if (isTransform) {
-			parent.classList.add("measureScale")
-		} else {
-			parent.classList.remove("measureScale")
-		}
-
 		let testCount = 0
-		for (const type of Object.keys(oList).sort()) {
-			for (const k of Object.keys(oList[type])) {
-				testCount++
-				elementdata = {}
-				let isBoth = 'font' == k.slice(0,4)
-				if ('font3' == k || 'font_medium' == k) {isBoth = false}
-				if ('h' == k[0]) {
-					if ('hr' !== k) {isBoth = true}
+		for (const k of Object.keys(oList)) {
+			testCount++
+			let aStyle = isVertical ? ['vertical-lr'] : ['horizontal-tb']
+			if (isEverything) {
+				aStyle = ['horizontal-tb','vertical-lr']
+			}
+			let elementdata = isEverything ? {} : []
+
+			// set parent, determine target to measure and as we walk
+			// the children, ensure no other css affects any element
+			parent.innerHTML = ''
+			parent.innerHTML = oList[k]
+			target = parent.firstChild
+			if (isRevert) {target.classList.add('revert')}
+			let newtarget = target.children[0]
+			if (undefined !== newtarget) {
+				target = newtarget
+				if (isRevert) {target.classList.add('revert')}
+				newtarget = target.children[0]
+				if (undefined !== newtarget) {
+					target = newtarget
+					if (isRevert) {target.classList.add('revert')}
 				}
-				let oStyle = {
-					'h': 'horizontal-tb',
-					'v': 'vertical-lr',
-				}
-				if (isExpanded) {isBoth = true}
-				if (!isBoth) {
-					oStyle = {'v': 'vertical-lr'}
-				}
-				for (const style of Object.keys(oStyle).sort()) {
-					// important to clear the div so no other elements can affect measurements
-					parent.innerHTML = ''
-					let itemdata
-					try {
-						let str = ''
-						let value = oList[type][k]
-						if ('' !== value && '<' == value[0]) {
-							str = value
+			}
+			//console.log(k, target)
+
+			aStyle.sort()
+			let isOneStyle = aStyle.length == 1
+			for (let i=0; i < aStyle.length; i++) {
+				let style = aStyle[i]
+				let styleCode = style.slice(0, 1)
+				try {
+					target.setAttribute("style","display:inline; writing-mode: "+ style +";")
+					let method = target.getBoundingClientRect()
+					let data = [method.height, method.width, method.x, method.y]
+					data = isNotateStyle ? [styleCode].concat(data) : data
+					// always use x as this helps ensure entropy regardless of isVertical
+					let dataExtra = isNotateStyle ? [styleCode, method.x] : [method.x]
+					if (isEverything) {
+						style = style.slice(0, -3)
+						elementdata[style] = data
+					} else {
+						// the order is always horizontal then vertical
+						if (i == 0) {
+							// this is always horizontal
+							if (isVertical && !isOneStyle) {
+								// if we are doing vertical then we only
+								// want the horizontal x value
+								data = dataExtra
+							}
+							elementdata = data
 						} else {
-							let character = 'b' == type ? '.' : ''
-							str = '<'+ k + ('' == value ? '' : ' '+ value) +'>' + character +'</'+ k +'>'
-						}
-						//console.log(str)
-						parent.innerHTML = str
-						target = parent.firstChild
-						if ('caption' == k) {
-							target = target[k]
-						} else if ('d' == type || 'e' == type) {
-							target = target.children[0]
-							if ('e' == type) {target = target.children[0]}
-						}
-						target.setAttribute("style","display:inline; writing-mode: "+ oStyle[style] +";")
-						let method = target.getBoundingClientRect()
-						if ('a' == type || 'c' == type) {
-							itemdata = {w: method.width, h: method.height, x: method.x, y: method.y,}
-						} else {
-							itemdata = {
-								//method.width,
-								h: method.height,
-								//method.x,
-								y: method.y,
+							// this is always vertical
+							if (isVertical) {
+								// if we are doing vertical then we want all values put first
+								elementdata = data.concat(elementdata)
+							} else {
+								// otherwise we just want to add the vertical x value
+								elementdata = elementdata.concat(dataExtra)
 							}
 						}
-						elementdata[style] = itemdata
-					} catch(e) {
-						elementdata = 'error'
-						console.log(k, e+'')
 					}
+				} catch(e) {
+					elementdata = 'error'
+					console.log(k, e+'')
 				}
-				let elementhash = mini(elementdata)
-				if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
-				} else {tmpdata[elementhash]['group'].push(k)}
 			}
+			let elementhash = mini(elementdata)
+			if (undefined == tmpdata[elementhash]) {tmpdata[elementhash] = {'data': elementdata, 'group': [k]}
+			} else {tmpdata[elementhash]['group'].push(k)}
 		}
-		parent.innerHTML = "" // just in case
+		parent.innerHTML = "" // clear display
 		//console.log(tmpdata)
 
 		// group by results
@@ -282,24 +285,18 @@ wbr xmp
 		params.push(Object.keys(oData).length +' results')
 		let hash = mini(oData), notation = ""
 		let t1 = performance.now()
-		dom.perf.innerHTML = Math.round(t1 - t0) +" ms"
+		try {dom.perf.innerHTML = Math.round(t1 - t0) +" ms"} catch(e) {}
 
-		let strParam = (params.length ? " ["+ params.join(" ") +"]" : "")
+		let strParam = (params.length ? " ["+ params.join(" | ") +"]" : "")
 		let display = [], tmphash = ""
-		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 110)
+		dom.elements.innerHTML = hash + strParam +"<br><br>"+ json_highlight(oData, 120)
 		return
 	} catch(e) {
+		parent.innerHTML = "" // clear display
 		dom.elements = e+""
 		return
 	}
 }
-
-try {
-	isLocale = Intl.DateTimeFormat().resolvedOptions().locale
-} catch(e) {
-	isLocale = zErr
-}
-dom.locale.innerHTML = isLocale
 
 function run() {
 	// clear
@@ -310,10 +307,13 @@ function run() {
 	}, 170)
 }
 
+try {isLocale = Intl.DateTimeFormat().resolvedOptions().locale} catch(e) {isLocale = zErr}
+try {dom.locale.innerHTML = isLocale} catch(e) {}
+
 Promise.all([
 	get_globals()
 ]).then(function(){
-	dom.optExpand.checked = false // temp
+	dom.optEverything.checked = false
 	run()
 })
 
