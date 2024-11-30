@@ -602,7 +602,7 @@ unique:  48 groups (>1) 171 timezones <- less shared
 function start() {
 	get_globals()
 	// chrome has more groups with full vs supported
-	dom.useSupported.checked = isFF ? true : false 
+	dom.useSupported.checked = true
 
 	// remove any sloppy duplicates
 	gTimezones = gTimezones.filter(function(item, position) {return gTimezones.indexOf(item) === position})
