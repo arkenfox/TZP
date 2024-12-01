@@ -596,32 +596,35 @@ function get_intl_supportedlocales(num) {
 			'an','lij','vo', // chrome only: not needed
 		]
 	*/
-	// MAC supportedlocales == FF91+
-		// but .compare for mt is not hooked up (the other locales seem to be working)
-	let aCollator = []
-	let control = (["c","C"]).sort(Intl.Collator("mt").compare)
-	if (control.join("") == "Cc") {aCollator = ['mt']} // so while Mac !== Cc then only FF will test and report mt
+	let oList = {
+		'Collator': {errVer: 50, expected: 'f7e01839', list: ['eo','gl','ka','om']},
+		'DateTimeFormat': {errVer: 50, expected: '2d45bfd6', list: ['as','fo','ln','ne','to', 'co','nr','st','tig']},
+		'DisplayNames': {errVer: 86, expected: '502f87c2', list: ['br','eu','ii','ks','ps','gn','iu','nv','tn']},
+		'ListFormat': {errVer: 78, expected: 'a2d97917', list: ['ee','gd','kk','lo','yi','ba','io','oc','ve']},
+		'NumberFormat': {errVer: 50, expected: '3709a703', list: ['bo','ha','lb','my','sq','dv','ny','oc','ts']},
+		'PluralRules': {errVer: 58, expected: '73b49209', list: ['ki','lu','qu','rn','rw','ba','co','gn','oc']},
+		'RelativeTimeFormat': {errVer: 65, expected: 'fc7fa0cc', list: ['cy','km','mg','os','sn','gn','nso','ss','wa']},
+	}
+	let control = (['c','C']).sort(Intl.Collator('mt').compare)
+	if (control.join('') == 'Cc') {oList['Collator']['list'].push('mt')}
 
-	let aList = [
-		["f7e01839", 50, ['eo','gl','ka','om'], aCollator, "Collator"],
-		["2d45bfd6", 50, ['as','fo','ln','ne','to'], ['co','nr','st','tig'], "DateTimeFormat"],
-		["502f87c2", 86, ['br','eu','ii','ks','ps'], ['gn','iu','nv','tn' ], "DisplayNames"],
-		["a2d97917", 78, ['ee','gd','kk','lo','yi'], ['ba','io','oc','ve' ], "ListFormat"],
-		["3709a703", 50, ['bo','ha','lb','my','sq'], ['dv','ny','oc','ts' ], "NumberFormat"],
-		["73b49209", 58, ['ki','lu','qu','rn','rw'], ['ba','co','gn','oc' ], "PluralRules"],
-		["fc7fa0cc", 65, ['cy','km','mg','os','sn'], ['gn','nso','ss','wa'], "RelativeTimeFormat"],
-	]
+	if (isVer > 133) {
+		oList.DateTimeFormat.expected = 'd240302d'
+		oList.DisplayNames.expected = 'ccf106a6'
+		oList.ListFormat.expected = '52f07243'
+		oList.NumberFormat.expected = '741aaeb3'
+		oList.PluralRules.expected = '2d5fb02b'
+		oList.RelativeTimeFormat.expected = '98ac597e'
+	}
 
 	num = (num - 5)
-	aList.forEach(function(array) {
+	for (const type of Object.keys(oList)) {
 		num += 5
-		let t0 = performance.now()
-		let expected = array[0],
-			errVer = array[1],
-			list = array[2].concat(array[3]).sort(),
-			type = array[4],
-			res = []
-		let title = "Intl."+ type
+		let t0 = performance.now(), res = [], title = "Intl."+ type
+		let errVer = oList[type].errVer,
+			expected = oList[type].expected,
+			list = oList[type].list.sort()
+
 		try {
 			if (bBlock) {bB = 1}
 			if (type == "Collator") { res = Intl.Collator.supportedLocalesOf(list)
@@ -661,100 +664,10 @@ function get_intl_supportedlocales(num) {
 				fnRecord(num, title, zNA +": not supported", zNA)
 			}
 		}
-	})
+	}
 }
 
 function get_intl_supportedvaluesof(num, title) {
-	// just use timeZone, the others are either identical or changed too much
-		/* 
-			gecko only
-Africa/Asmara - vs Africa/Asmera
-Africa/Timbuktu
-America/Argentina/Buenos_Aires - vs America/Buenos_Aires
-America/Argentina/Catamarca - vs America/Catamarca
-America/Argentina/ComodRivadavia
-America/Argentina/Cordoba - vs America/Cordoba
-America/Argentina/Jujuy
-America/Argentina/Mendoza
-America/Atikokan
-America/Ensenada
-America/Indiana/Indianapolis - vs America/Indianapolis
-America/Kentucky/Louisville - vs America/Louisville
-America/Nuuk
-America/Rosario
-Asia/Chongqing
-Asia/Harbin
-Asia/Ho_Chi_Minh - vs Asia/Saigon
-Asia/Kashgar
-Asia/Kathmandu - vs Asia/Katmandu
-Asia/Kolkata - vs Asia/Calcutta
-Asia/Tel_Aviv
-Asia/Yangon - vs Asia/Rangoon
-Atlantic/Faroe - vs Atlantic/Faeroe
-Atlantic/Jan_Mayen
-CET
-CST6CDT
-EET
-EST
-EST5EDT
-Etc/GMT+1
-Etc/GMT+10
-Etc/GMT+11
-Etc/GMT+12
-Etc/GMT+2
-Etc/GMT+3
-Etc/GMT+4
-Etc/GMT+5
-Etc/GMT+6
-Etc/GMT+7
-Etc/GMT+8
-Etc/GMT+9
-Etc/GMT-1
-Etc/GMT-10
-Etc/GMT-11
-Etc/GMT-12
-Etc/GMT-13
-Etc/GMT-14
-Etc/GMT-2
-Etc/GMT-3
-Etc/GMT-4
-Etc/GMT-5
-Etc/GMT-6
-Etc/GMT-7
-Etc/GMT-8
-Etc/GMT-9
-Europe/Belfast
-Europe/Kyiv - vs Europe/Kiev (changed in gecko FF109)
-Europe/Tiraspol
-Factory
-HST
-MET
-MST
-MST7MDT
-PST8PDT
-Pacific/Chuuk - vs Pacific/Truk
-Pacific/Kanton (added at some stage after 93)
-Pacific/Pohnpei - vs Pacific/Ponape
-WET
-
-		gecko does not have
-America/Godthab
-America/Jujuy
-America/Kralendijk
-America/Lower_Princes
-America/Marigot
-America/Mendoza
-America/Santa_Isabel
-America/St_Barthelemy
-Arctic/Longyearbyen
-Europe/Bratislava
-Europe/Busingen
-Europe/Mariehamn
-Europe/Podgorica
-Europe/San_Marino
-Europe/Vatican
-*/
-
 	try {
 		let t0 = performance.now()
 		if (bBlock) {bB = 1}
@@ -773,7 +686,16 @@ Europe/Vatican
 				hash += buildButton(3, "specific_"+ title, res.length)
 			}
 		}
+		if (isVer > 134) {
+			bool = zNA
+			hash = zNA +": FF109 or lower "+ s3 +"["+ hash +"]"+ sc
+		} else if (!isFF) {
+			bool = zNA
+			hash += " [FF109 or lower]"
+		}
 		fnRecord(num, title, hash, bool, "skip", t0)
+		//fnRecord(num, title, hash, bool, "skip", t0)
+
 	} catch(e) {
 		// FF92- not supported
 		if (isVer < 93) {
