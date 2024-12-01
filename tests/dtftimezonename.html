@@ -316,20 +316,32 @@ function run_main(method) {
 			"Asia/Muscat": tzSG,
 		}
 	} else {
-		// supported?
+		// test valid timezone
+		try {
+			let testDate = new Date()
+			let test = new Intl.DateTimeFormat('en', {timeZone: method}).format(testDate)
+		} catch(e) {
+			console.log(e)
+			dom.results.innerHTML = s16 + e.name +": "+ sc + e.message
+			return
+		}
+		/*
+		// only allow supported
 		let methodtest = method.toLowerCase()
 		if (!aTimezonesSupportedLowerCase.includes(methodtest)) {
 			dom.results.innerHTML = s3 + method +": "+ sc +'not supported'
 			return
 		}
+		//*/
 		tests = {}
 		tests[method] = both
 	}
-	// remove unsupported: e.g. from tiny/min lists
-	for (const k of Object.keys(tests)) {
-		if (!aTimezonesLowerCase.includes(k.toLowerCase())) {delete tests[k]}
+	if ('all' == method || 'min' == method || 'tiny' == method) {
+		// remove unsupported: e.g. from tiny/min lists
+		for (const k of Object.keys(tests)) {
+			if (!aTimezonesLowerCase.includes(k.toLowerCase())) {delete tests[k]}
+		}
 	}
-
 
 	let tzUsed = []
 	Object.keys(tests).forEach(function(tz) {
