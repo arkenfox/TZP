@@ -275,13 +275,13 @@ function outputVersion() {
 		} catch(e) {}
 		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.2ms
 
-		// 133: 1922503
+		// 133: 1837773
 		let t133 = performance.now(), ver133
 		try {
-			let date133 = new Date('jan 15 2000')
-			ver133 = date133.toLocaleString("en", {timeZone: "Asia/Choibalsan"}) == date133.toLocaleString("en", {timeZone: "Asia/Ulaanbaatar"})
+			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+			ver133 = null === parser.body.firstChild.namedItem('')
 		} catch(e) {}
-		rec(133, 133, "1922503", ver133, performance.now()-t133) // 0.3ms
+		rec(133, 133, "1837773", ver133, performance.now()-t133) // 0.2ms
 
 		// 132: 1899413
 		let t132 = performance.now(), ver132 = false
@@ -748,7 +748,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 59, oOther = {}
+	let countOther = 0, expectOther = 60, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -780,6 +780,14 @@ function outputVersion() {
 		let t134 = performance.now(), ver134
 		try {ver134 = ("lij" == Intl.PluralRules.supportedLocalesOf("lij").join())} catch(e) {}
 		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.125ms
+
+		// 133: 1922503
+		let t133 = performance.now(), ver133
+		try {
+			let date133 = new Date('jan 15 2000')
+			ver133 = date133.toLocaleString("en", {timeZone: "Asia/Choibalsan"}) == date133.toLocaleString("en", {timeZone: "Asia/Ulaanbaatar"})
+		} catch(e) {}
+		rec(133, 133, "1922503", ver133, performance.now()-t133) // 0.3ms
 
 		// 130: 1907369
 		let t130 = performance.now(), ver130 = false
