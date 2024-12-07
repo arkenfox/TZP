@@ -444,26 +444,27 @@ function get_isVer(METRIC) {
 	return
 
 	function cascade() {
+		let test
 		try {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
-
 			// now cascade
 			try {
 				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
 			} catch(e){}
 			try {
+				// this works on my windows, android, mac but seems to fail in linux (debain)
 				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
 				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
 			} catch(e) {}
 			try {
 				const re = new RegExp('(?:)', 'gv');
-				let test132 = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
-				for (let i=0; i < 3; i++) {if (true == test132.next().done) return 132} // 1899413
+				test = RegExp.prototype[Symbol.matchAll].call(re, '𠮷')
+				for (let i=0; i < 3; i++) {if (true == test.next().done) return 132} // 1899413
 			} catch(e) {}
 			try {
-				let test131 = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
-				if ('2033' == test131.slice(0,4)) return 131 // 1900196
+				test = new Intl.DateTimeFormat('zh', {calendar: 'chinese', dateStyle: 'medium'}).format(new Date(2033, 9, 1))
+				if ('2033' == test.slice(0,4)) return 131 // 1900196
 			} catch(e) {}
 			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
 			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
@@ -478,7 +479,7 @@ function get_isVer(METRIC) {
 			if (!CSS2Properties.prototype.hasOwnProperty('MozUserFocus')) {
 				try {
 					el.style.zIndex = 'calc(1 / max(-0, 0))'
-					let test = getComputedStyle(el).zIndex
+					test = getComputedStyle(el).zIndex
 					el.style.zIndex = 'auto'
 					if (test > 0) {return 124} // 1867569
 				} catch(e) {}
@@ -487,7 +488,7 @@ function get_isVer(METRIC) {
 			if ('function' === typeof Promise.withResolvers) {
 				try {
 					el.style.zIndex = 'calc(1 / abs(-0))'
-					let test = getComputedStyle(el).zIndex
+					test = getComputedStyle(el).zIndex
 					el.style.zIndex = 'auto'
 					if (test > 0) {return 122} // 1867558
 				} catch(e) {}
@@ -720,7 +721,7 @@ function json_stringify(passedObj, options = {}) {
 		indent === ''
 			? Infinity
 			: options.maxLength === undefined
-			? 80
+			? 88
 			: options.maxLength;
 	let { replacer } = options;
 

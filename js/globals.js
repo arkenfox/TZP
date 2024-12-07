@@ -71,19 +71,23 @@ let zErrLog = '', // log error in addBoth
 	zErrShort = '' // log error in addBoth but display zErr in addDisplay
 
 // grab as soon as possible
-let isInitial = {}
+let isInitial = {height: {}, width: {}}
 function get_scr_initial() {
 	// we don't need any error entropy: we get these properties again later
-	let x, aList = ['innerHeight', 'innerWidth', 'outerHeight', 'outerWidth']
-	aList.forEach(function(k){
-		try {
-			x = window[k]
-			if ('number' !== typeof x || Number.isNaN(x)) {x = zErr}
-		} catch(e) {
-			x = zErr
-		}
-		isInitial[k] = x
-	})
+	let x, oList = {height: ['innerHeight','outerHeight'], width: ['innerWidth','outerWidth']}
+	for (const axis of Object.keys(oList)) {
+		let aList = oList[axis]
+		aList.forEach(function(k){
+			try {
+				x = window[k]
+				if ('number' !== typeof x || Number.isNaN(x)) {x = zErr}
+			} catch(e) {
+				x = zErr
+			}
+			if (k.includes('inner')) {k = 'inner'} else {k = 'outer'}
+			isInitial[axis][k] = x
+		})
+	}
 }
 get_scr_initial()
 let avh = 'undefined' // android
