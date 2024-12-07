@@ -217,16 +217,16 @@
 				<span class="c" id="orientation"></span>
 			</td></tr>
 		<!--iframe-->
-		<tr><td>available screen</td><td class="mono"><span class="c" id="iAvailable"></span>
+		<tr><td>available screen</td><td class="mono"><span class="c" id="iframe_available"></span>
 			<div class="btn-right s99">iframes</div></td></tr></td></tr>
-		<tr><td>screen</td><td class="mono"><span class="c" id="iScreen"></span></td></tr>
+		<tr><td>screen</td><td class="mono"><span class="c" id="iframe_screen"></span></td></tr>
 		<tr><td>outer window</td><td class="mono border-bottom">
-			<span class="c" id="iOuter"></span>
+			<span class="c" id="iframe_outer"></span>
 			<span class="c" id="iframe_sizes_match_inner"></span>
 		</td></tr>
 		<!--screen: measurements-->
 		<tr><td>available screen</td>
-			<td class="mono"><span class="c" id="mAvailable"></span>
+			<td class="mono"><span class="c" id="screen_available"></span>
 			<span class="c" id="screen_sizes"></span>
 			<div class="btn-right s99">screens</div>
 			</td></tr>
@@ -234,30 +234,30 @@
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-device-] screen <sup>1</sup></td>
 			<td class="mono"><span id="S"><span></td></tr>
-		<tr><td>[matchMedia] screen <sup>2</sup></td><td class="c mono" id="mmScreen"></td></tr>
+		<tr><td>[matchMedia] screen <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
 		<tr><td>screen</td>
 			<td class="mono border-bottom">
-				<span class="c" id="mScreen"></span>
+				<span class="c" id="screen_screen"></span>
 				<span class="c" id="screen_size_matches_inner"></span>
 		</td></tr>
 		<!--windows-->
 		<tr><td>outer</td>
-			<td class="mono"><span class="c" id="mOuter"></span>
+			<td class="mono"><span class="c" id="window_outer"></span>
 			<span class="c" id="window_sizes"></span>
 			<div class="btn-right s99">windows</div></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">range 400-2560</span></div>
 			&nbsp; [css min-] inner <sup>1, 3</sup></td>
 			<td class="mono"><span id="D"></span></td></tr>
-		<tr><td>[matchMedia] inner <sup>2</sup></td><td class="c mono" id="mmInner"></td></tr>
+		<tr><td>[matchMedia] inner <sup>2</sup></td><td class="c mono" id="window_media"></td></tr>
 		<tr><td>inner</td>
 			<td class="mono border-bottom">
-				<span class="c" id="mInner"></span>
+				<span class="c" id="window_inner"></span>
 				<span class="c" id="window_letterbox"></span>
 				<span class="c" id="window_newwin"></span>
 			</td></tr>
-		<tr class="togDROID"><td>[initial] outer window</span></td><td class="mono" id="initialOuter"></td></tr>
-		<tr class="togDROID"><td>inner window</td><td class="mono border-bottom"><span id="initialInner"></span>
+		<tr class="togDROID"><td>[initial] outer window</span></td><td class="mono" id="initial_outer"></td></tr>
+		<tr class="togDROID"><td>inner window</td><td class="mono border-bottom"><span id="initial_inner"></span>
 			<span class="c" id="window_sizes_initial"></span></td></tr>
 		<!--viewport/scrollbars-->
 		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
@@ -450,7 +450,7 @@
 		<tr><td>XSLT messages</td><td class="c mono" id="messages_xslt"></td></tr>
 		<!--tz-->
 		<tr><td>timezone</td><td class="c mono" id="timezone"></td></tr>
-		<tr><td><span id="labelLM" class="btn btn0" onClick="togglerows('TL','btn')">[+]</span>
+		<tr><td><span id="labelTL" class="btn btn0" onClick="togglerows('TL','btn')">[+]</span>
 			[offset] timezone</td><td class="c mono" id="timezone_offset"></td></tr>
 		<tr class="togTL"><td>date</td><td class="c mono" id="timezone_offset_date"></td></tr>
 		<tr class="togTL"><td>control date</td><td class="c mono" id="timezone_offset_control"></td></tr>
