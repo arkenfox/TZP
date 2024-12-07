@@ -453,8 +453,8 @@ function get_isVer(METRIC) {
 				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
 			} catch(e){}
 			try {
-				test = new Date('jan 15 2000')
-				if (test.toLocaleString("en", {timeZone: "Asia/Choibalsan"}) == test.toLocaleString("en", {timeZone: "Asia/Ulaanbaatar"})) return 133 // 1922503
+				let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
+				if (null === parser.body.firstChild.namedItem('')) return 133 // 1837773
 			} catch(e) {}
 			try {
 				const re = new RegExp('(?:)', 'gv');
