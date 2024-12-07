@@ -202,147 +202,166 @@ const get_scr_measure = () => new Promise(resolve => {
 	Promise.all([
 		get_scr_mm('measure'),
 	]).then(function(mmres){
-		let oTmp = {'screen': {}, 'window': {}, 'iframe': {}}, oIframe = {}, oScreen = {}, oWindow = {}
+		let oTmp = {
+			screen: {height: {}, width: {}},
+			window: {height: {}, width: {}},
+			iframe: {height: {}, width: {}}
+		}
 		// matchmedia
-		oTmp.screen['device-height'] = mmres[0]['device-height']
-		oTmp.screen['device-width'] = mmres[0]['device-width']
-		oTmp.window.height = mmres[0].height
-		oTmp.window.width = mmres[0].width
+		oTmp.screen.height.media = mmres[0]['device-height']
+		oTmp.screen.width.media = mmres[0]['device-width']
+		oTmp.window.height.media = mmres[0].height
+		oTmp.window.width.media = mmres[0].width
 		// screen/window
 		let oList = {
-			screen: ['width','height','availWidth','availHeight'],
-			window: ['outerWidth','outerHeight','innerWidth','innerHeight'],
-			iframe: ['width','height','availWidth','availHeight','outerWidth','outerHeight'],
+			screen: {
+				height: ['availHeight','height'],
+				width: ['availWidth','width'] 
+			},
+			window: {
+				height: ['innerHeight','outerHeight'],
+				width: ['innerWidth','outerWidth']
+			},
+			iframe: {
+				height: ['availHeight','outerHeight','height'],
+				width: ['availWidth','outerWidth','width'] 
+			},
 		}
 		let iTarget
 		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
 
-//runST = true
 		for (const k of Object.keys(oList)) {
-			let aList = oList[k]
-			for (let i=0; i < aList.length; i++) {
-				let x, p = aList[i]
-				try {
-					if ('screen' == k) {x = screen[p]
-					} else if ('window' == k) {x = window[p]
-					} else {
-						if (i < 4) {x = iTarget.screen[p]} else {x = iTarget.window[p]}
+			for (const axis of Object.keys(oList[k])) {
+				let aList = oList[k][axis]
+				for (let i=0; i < aList.length; i++) {
+					let x, r, p = aList[i]
+					if ('width' == p || 'height' == p) {r = 'screen'
+					} else if (p.includes('inner')) {r = 'inner'
+					} else if (p.includes('outer')) {r = 'outer'
+					} else if (p.includes('avail')) {r = 'available'
 					}
-					if (runST) {
-						let oTest = {1: NaN, 2: Infinity, 3: '', 4: '6', 5: null, 6: false, 7: [1], 8: {1:1}}
-						x = oTest[i]
+					try {
+						if ('screen' == k) {x = screen[p]
+						} else if ('window' == k) {x = window[p]
+						} else {
+							if (!p.includes('outer')) {x = iTarget.screen[p]} else {x = iTarget.window[p]}
+						}
+						if (runST) {
+							let oTest = {1: NaN, 2: Infinity, 3: '', 4: '6', 5: null, 6: false, 7: [1], 8: {1:1}}
+							x = oTest[i]
+						}
+						let typeCheck = typeFn(x)
+						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+					} catch (e) {
+						log_error(1, k +'_sizes_'+ axis +'_'+ r, e)
+						x = zErr
 					}
-					let typeCheck = typeFn(x)
-					if ('number' !== typeCheck) {throw zErrType + typeCheck}
-				} catch (e) {
-					log_error(1, k +'_sizes_' + p, e)
-					x = zErr
+					oTmp[k][axis][r] = x
 				}
-				oTmp[k][p] = x
 			}
 		}
 
-//runST = false
 		// css
-		let cssList = [
-			['#S', ':before', 'device-width_css', 'screen'],
-			['#S', ':after', 'device-height_css', 'screen'],
-			['#D', ':before', 'width_css', 'window'],
-			['#D', ':after', 'height_css', 'window'],
-		]
+		let cssList = [['#S',':before'],['#S',':after'],['#D',':before'],['#D',':after']]
 		cssList.forEach(function(array) {
-			let cssID = array[0], pseudo = array[1], item = array[2], metric = array[3]
-			let value = getElementProp(1, cssID, metric +'_sizes_'+ item, pseudo)
+			let cssID = array[0], pseudo = array[1]
+			let axis = ':before' == pseudo ? 'width' : 'height'
+			let metric = '#S' == cssID ? 'screen' : 'window'
+			let value = getElementProp(1, cssID, metric +'_sizes_'+ axis +'_css', pseudo)
 			if (value !== zErr && '?' !== value) {
 				let cType = typeFn(value)
 				if ('number' !== cType) {
-					log_error(1, metric +'_sizes_'+ item, zErrType + cType)
+					log_error(1, metric +'_sizes_'+ axis +'_css', zErrType + cType)
 					value = zErr
 				}
 			}
-			if ('#S' == array[0]) {oTmp.screen[item] = value} else {oTmp.window[item] = value}
+			if ('#S' == array[0]) {oTmp.screen[axis].css = value} else {oTmp.window[axis].css = value}
 		})
-		// default display
-		let oDisplay = {
-			iAvailable: oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight,
-			iScreen: oTmp.iframe.width +' x '+ oTmp.iframe.height,
-			iOuter: oTmp.iframe.outerWidth +' x '+ oTmp.iframe.outerHeight,
-			mAvailable: oTmp.screen.availWidth +' x '+ oTmp.screen.availHeight,
-			mmScreen: oTmp.screen['device-width'] +' x '+ oTmp.screen['device-height'],
-			mScreen: oTmp.screen.width +' x '+ oTmp.screen.height,
-			mOuter: oTmp.window.outerWidth +' x '+ oTmp.window.outerHeight,
-			mmInner: oTmp.window.width +' x '+ oTmp.window.height,
-			mInner: oTmp.window.innerWidth +' x '+ oTmp.window.innerHeight,
-			initialInner: isInitial.innerWidth + ' x ' + isInitial.innerHeight,
-			initialOuter: isInitial.outerWidth + ' x ' + isInitial.outerHeight,
-		}
 
-		// order into new objects
-		for (const k of Object.keys(oTmp.screen).sort()) {oScreen[k] = oTmp.screen[k]}
-		for (const k of Object.keys(oTmp.window).sort()) {oWindow[k] = oTmp.window[k]}
-		for (const k of Object.keys(oTmp.iframe).sort()) {oIframe[k] = oTmp.iframe[k]}
+		// sort into new obj, build default display
+		let oData = {}, oDisplay = {}
+		for (const k of Object.keys(oTmp)) {
+			oData[k] = {}
+			for (const j of Object.keys(oTmp[k])) {
+				oData[k][j] = {}
+				for (const m of Object.keys(oTmp[k][j]).sort()) {
+					oData[k][j][m] = oTmp[k][j][m]
+					if ('width' == j && 'css' !== m) {oDisplay[k +'_'+m] = oTmp[k][j][m] +' x '+ oTmp[k]['height'][m]}
+				}
+			}
+		}
+		oDisplay['initial_inner'] = isInitial.width.inner + ' x ' + isInitial.height.inner
+		oDisplay['initial_outer'] = isInitial.width.outer + ' x ' + isInitial.height.outer
+		//console.log('oData', oData)
+		//console.log('oDisplay', oDisplay)
 
 		// notations
 		let notation ='', initData = zNA, initHash =''
+		let innerw = oData.window.width.inner, innerh = oData.window.height.inner
 		// screen_size_matches_inner
 		let oCompare = {
-			'screen_size_matches_inner': [sizes_red, sizes_green, oScreen.width, oScreen.height, oWindow.innerWidth, oWindow.innerHeight],
+			'screen_size_matches_inner': [sizes_red, sizes_green,
+				oData.screen.width.screen, oData.screen.height.screen,
+				innerw, innerh
+			],
 			'iframe_sizes_match_inner': [isizes_red, isizes_green,
-				oIframe.availWidth, oIframe.availHeight, oIframe.width, oIframe.height, oIframe.outerWidth, oIframe.outerHeight
+				oData.iframe.width.available, oData.iframe.height.available,
+				oData.iframe.width.screen, oData.iframe.height.screen,
+				oData.iframe.width.outer, oData.iframe.height.outer
 			],
 		}
 		// window_sizes_initial
 		if ('android' == isOS) {
 			oCompare['window_sizes_initial'] = [window_red, window_green,
-				isInitial.innerWidth, isInitial.innerHeight, isInitial.outerWidth, isInitial.outerHeight
+				isInitial.width.inner, isInitial.height.inner,
+				isInitial.width.outer, isInitial.height.outer
 			]
 			// FP data
 			initData = isInitial; initHash = mini(isInitial)
 		} else {
 			// LB/NW
 			let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
-			addDisplay(1, 'window_letterbox','','', return_lb(oTmp.window.innerWidth, oTmp.window.innerHeight, isNew))
-			addDisplay(1, 'window_newwin','','', return_nw(oTmp.window.innerWidth, oTmp.window.innerHeight, isNew))
+			addDisplay(1, 'window_letterbox','','', return_lb(innerw, innerh, isNew))
+			addDisplay(1, 'window_newwin','','', return_nw(innerw, innerh, isNew))
 		}
+
 		let isIframesSame = false
 		for (const k of Object.keys(oCompare)) {
-			let isValid = true, data = oCompare[k]
-			notation = data[0]
+			let isValid = true, isGood = false, data = oCompare[k]
 			for (let i=2; i < oCompare[k].length; i++) {if ('number' !== typeFn(data[i])) {isValid = false; break}}
 			if (isValid) {
-				let isGood = false
 				let test1 = data[2] +''+ data[3], test2 = data[4] +''+ data[5]
 				if ('iframe_sizes_match_inner' == k) {
 					let test3 = data[6] +''+ data[7]
 					if (test1 === test2 && test1 == test3) {
 						isIframesSame = true
-						if (test1 === oWindow.innerWidth +''+ oWindow.innerHeight) {isGood = true}
+						if (test1 === innerw +''+ innerh) {isGood = true}
 					}
 				} else {
 					if (test1 === test2) {isGood = true}
 				}
-				if (isGood) {notation = data[1]}
 			}
-			addDisplay(1, k,'','', notation)
+			addDisplay(1, k,'','', (isGood ? data[1] : data[0]))
 		}
+
 		// ToDo: screen_sizes (_match)
 		// ToDo: window_sizes (_match)
-		//dom.screen_sizes.innerHTML = screen_green
-		//dom.window_sizes.innerHTML = window_green
-
+		//addDisplay(1, 'screen_sizes','','', screen_red)
+		//addDisplay(1, 'window_sizes','','', window_green)
+		
 		// simple health lookups
 		if (gRun) {
-			let strInner = oTmp.window.innerWidth +' x '+ oTmp.window.innerHeight
-			let strScreen = oTmp.screen['device-width'] +' x '+ oTmp.screen['device-height']
-			let scrMatch = strInner == strScreen ? strInner : 'inner: '+ strInner +' | screen: '+ strScreen
-			let initInner = isInitial.innerWidth +' x '+ isInitial.innerHeight
-			let initOuter = isInitial.outerWidth +' x '+ isInitial.outerHeight
+			let strInner = oTmp.window.width.inner +' x '+ oTmp.window.height.inner
+			let strScreen = oTmp.screen.width.screen +' x '+ oTmp.screen.height.screen
+			let scrMatch = strScreen + (strInner == strScreen ? '' : ' vs '+ strInner)
+			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
+			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			let iframeMatch = oTmp.iframe.width +' x '+ oTmp.iframe.height
-				+ ' | '+ oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight
-				+ ' | '+ oTmp.iframe.outerWidth +' x '+ oTmp.window.outerHeight
-			if (isIframesSame) {iframeMatch = oTmp.iframe.availWidth +' x '+ oTmp.iframe.availHeight}
-
+			let iframeMatch = oTmp.iframe.width.screen +' x '+ oTmp.iframe.height.screen
+				+ ' | '+ oTmp.iframe.width.available +' x '+ oTmp.iframe.height.available
+				+ ' | '+ oTmp.iframe.width.outer +' x '+ oTmp.iframe.height.outer
+				+ ' vs '+ oTmp.window.width.inner +' x '+ oTmp.window.height.inner
+			if (isIframesSame) {iframeMatch = oTmp.iframe.width.screen +' x '+ oTmp.iframe.height.screen}
 			sDetail[isScope].lookup['iframe_sizes_match_inner'] = iframeMatch
 			sDetail[isScope].lookup['screen_size_matches_inner'] = scrMatch
 			sDetail[isScope].lookup['window_letterbox'] = strInner
@@ -351,9 +370,9 @@ const get_scr_measure = () => new Promise(resolve => {
 		}
 		// add data/display
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
-		addData(1, 'screen_sizes', oScreen, mini(oScreen))
-		addData(1, 'window_sizes', oWindow, mini(oWindow))
-		addData(1, 'iframe_sizes', oIframe, mini(oIframe))
+		addData(1, 'screen_sizes', oData.screen, mini(oData.screen))
+		addData(1, 'window_sizes', oData.window, mini(oData.window))
+		addData(1, 'iframe_sizes', oData.iframe, mini(oData.iframe))
 		addData(1, 'window_sizes_initial', initData, initHash)
 		return resolve()
 	})
@@ -440,10 +459,10 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		]
 	}
 	const oPrefixes = {
-		'device-width': 'screen_sizes',
-		'device-height': 'screen_sizes',
-		width: 'window_sizes',
-		height: 'window_sizes',
+		'device-width': 'screen_sizes_width',
+		'device-height': 'screen_sizes_height',
+		width: 'window_sizes_width',
+		height: 'window_sizes_height',
 		'-moz-device-pixel-ratio': 'pixels',
 		'-webkit-min-device-pixel-ratio': 'pixels',
 		dpcm: 'pixels',
@@ -454,8 +473,9 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 	let list = oList[datatype], maxCount = oList[datatype].length, count = 0, oData = {}
 	function exit(id, value) {
 		if (value == unable) {
-			let prefix = oPrefixes[id]
-			log_error(1, prefix +'_'+ id, unable)
+			let suffix = (id.includes('width') || id.includes('height')) ? 'media' : id
+			let metric = oPrefixes[id] +'_'+ suffix
+			log_error(1, metric, unable)
 			value = zErr
 		}
 		oData[id] = value
@@ -550,8 +570,9 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 					return Promise.resolve(searchValue.isBigger)
 				}
 			} catch(e) {
-				let item = 'resolution' == prefix ? suffix : prefix
-				log_error(1, group +'_'+ item, e, isScope)
+				let metric = oPrefixes[prefix] +'_media'
+				if ('pixels' == group) {metric = group +'_'+ ('resolution' == prefix ? suffix : prefix)}
+				log_error(1, metric, e, isScope)
 				return Promise.reject(zErr)
 			}
 		}, maxValue, precision)
@@ -856,18 +877,17 @@ const get_scr_positions = (METRIC) => new Promise(resolve => {
 })
 
 const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
-  // ui.useOverlayScrollbars: 0 = no, 1 = yes use-overlays
-	// win11 = overlay = very thin scrollbar
-
+  // ui.useOverlayScrollbars: 0 = no, 1 = yes
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
 		// widget.non-native-theme.scrollbar.style = values 1 to 5
-		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only?
+		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only
 
 	Promise.all([
 		// get the viewport width: we only return zErr or a number
 		get_scr_viewport(runtype)
 	]).then(function(res) {
-		let oData = {}, aDisplay = []
+		let oData = {'element': {}, 'scrollWidth': {}}
+		let aDisplay = []
 		let list = ['auto','thin']
 
 		// scrollWidth
@@ -889,7 +909,7 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 					value = zErr, display = zErr
 					log_error(1, METRIC +'_'+ item +'_'+p, e)
 				}
-				oData[item +'_'+ p] = value
+				oData[item][p] = value
 				aDisplay.push(display)
 
 				// element
@@ -920,7 +940,7 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 					value = zErr, display = zErr
 					log_error(1, METRIC +'_'+ item +'_'+ p, e)
 				}
-				oData[item +'_'+ p] = value
+				oData[item][p] = value
 				aDisplay.push(display)
 			})
 		}
@@ -964,11 +984,10 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 })
 
 const get_scr_viewport = (runtype) => new Promise(resolve => {
-	let oData = {}, aDisplay = []
+	let oData = {height: {}, width: {}}, aDisplay = []
 	const METRIC = 'viewport', isHeight = 'height' == runtype, id= 'vp-element'
 
 	function get_viewport(type) {
-		let METRICh = type +'_'+ 'height', METRICw = type +'_'+ 'width'
 		let w, h, wDisplay ='', hDisplay, range
 		try {
 			if (type == 'element') {
@@ -998,19 +1017,18 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 						h = range.getClientRects()[0].height
 					}
 				}
-				//document.documentElement.removeChild(target)
 			} else {
-				w = window.visualViewport.width
+				w = window.visualViewport.width 
 				h = window.visualViewport.height
 			}
 			if (runST) {w = NaN, h = undefined}
 			let wType = typeFn(w), hType = typeFn(h)
 			if ('number' !== wType) {
-				if (!isHeight) {log_error(1, METRIC +'_'+ METRICw, zErrType + wType)}
+				if (!isHeight) {log_error(1, METRIC +'_width_'+ type, zErrType + wType)}
 				w = zErr
 			}
 			if ('number' !== hType) {
-				if (!isHeight) {log_error(1, METRIC +'_'+ METRICh, zErrType + hType)}
+				if (!isHeight) {log_error(1, METRIC +'_height_'+ type, zErrType + hType)}
 				h = zErr
 			}
 			hDisplay = h, wDisplay = w
@@ -1019,8 +1037,8 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 			h = zErr; w = zErr; wDisplay =''
 			hDisplay = log_error(1, METRIC +'_'+ type, e)
 		}
-		oData[METRICh] = h
-		oData[METRICw] = w
+		oData.height[type] = h
+		oData.width[type] = w
 		if (!isHeight) {
 			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
 		}
@@ -1031,11 +1049,11 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 	removeElementFn(id)
 	// return
 	if (isHeight) {
-		let vvh = oData['visualViewport_height']
-		return resolve(vvh !== zErr ? vvh : oData['element_height']) // android tests
+		let vvh = oData.height.visualViewport
+		return resolve(vvh !== zErr ? vvh : oData.height.element) // android tests
 	} else {
 		addData(1, METRIC, oData, mini(oData))
-		return resolve([oData['element_width'], oData['visualViewport_width']]) // for scrollbar
+		return resolve([oData.width.element, oData.width.visualViewport]) // for scrollbar
 	}
 })
 
