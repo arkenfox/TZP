@@ -275,13 +275,13 @@ function outputVersion() {
 		} catch(e) {}
 		rec(134, 134, "1927706", ver134, performance.now()-t134) // 0.2ms
 
-		// 133: 1837773
+		// 133: 1922503
 		let t133 = performance.now(), ver133
 		try {
-			let parser = (new DOMParser).parseFromString("<select><option name=''></option></select>", 'text/html')
-			ver133 = null === parser.body.firstChild.namedItem('')
+			let date133 = new Date('jan 15 2000')
+			ver133 = date133.toLocaleString("en", {timeZone: "Asia/Choibalsan"}) == date133.toLocaleString("en", {timeZone: "Asia/Ulaanbaatar"})
 		} catch(e) {}
-		rec(133, 133, "1837773", ver133, performance.now()-t133) // 0.2ms
+		rec(133, 133, "1922503", ver133, performance.now()-t133) // 0.3ms
 
 		// 132: 1899413
 		let t132 = performance.now(), ver132 = false
@@ -748,7 +748,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 58, oOther = {}
+	let countOther = 0, expectOther = 59, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -765,6 +765,15 @@ function outputVersion() {
 				dom.alertother1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectOther +" got "+ countOther + sc
 			}
 		}
+
+		// 135: 1930466
+		let t135 = performance.now(), ver135 = false
+		try {
+			let test135 = new Intl.DateTimeFormat('en', {timeZone: 'Factory'}).format(new Date())
+		} catch(e) {
+			if ('RangeError: invalid time zone in DateTimeFormat(): Factory' == e+'') ver135 = true
+		}
+		rec(135, 135, "1930466", ver135, performance.now()-t135) // very slow if not an error, slow if an eror
 
 		// 134: 1927706 : ie, lij, oc, st, szl, tn, za
 		// packages that use --with-system-icu can cause issues
