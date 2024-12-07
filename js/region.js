@@ -446,11 +446,12 @@ function get_language_locale() {
 		} catch(e) {
 			oRes[m] = e+''
 			log_error(4, METRIC, e)
+			oErr[m] = e+''
 			return zErr
 		}
 	}
 	// LOCALES
-	let METRIC = 'locale', value ='', res = [], oRes = {}
+	let METRIC = 'locale', value ='', res = [], oRes = {}, oErr = {}
 	metrics = [
 		'collator','datetimeformat','displaynames','durationformat','listformat',
 		'numberformat','pluralrules','relativetimeformat','segmenter',
@@ -480,11 +481,16 @@ function get_language_locale() {
 	}
 	if (isLanguageSmart && isTB) { // only notate TB/MB
 		notation = tb_red
-		let key = oData.language
-		// only green if TB supported
-		if (languagesSupported[key] !== undefined) {
-			let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
-			if (value === expected) {notation = tb_green}
+		let errHash = mini(oErr)
+		//61a9b098: { durationformat: "TypeError: Intl.DurationFormat is not a constructor" }
+		// we only expect 1 exact error for TB14
+		if ('61a9b098' == errHash) {
+			let key = oData.language
+			// only green if TB supported
+			if (languagesSupported[key] !== undefined) {
+				let expected = languagesSupported[key][1] == undefined ? key : languagesSupported[key][1]
+				if (value === expected) {notation = tb_green}
+			}
 		}
 	}
 	addDisplay(4, METRIC, value, btn, notation, isLies)
