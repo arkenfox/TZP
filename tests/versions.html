@@ -320,18 +320,13 @@ function outputVersion() {
 		let ver129 = ("function" === typeof CSS2Properties && CSS2Properties.prototype.hasOwnProperty("WebkitFontFeatureSettings"))
 		rec(129, 129, "1595620", ver129, performance.now()-t129) // 0.6ms
 
-		// 128: 1887817
-			// FF123-27: Error: Permission denied to access property "lastModified"
-			// ^ if console closed: NS_ERROR_UNEXPECTED:
-			// ^ we need to check a property otherwise no error is thrown if the console is open
-			// FF52-122: TypeError: Document.parseHTMLUnsafe is not a function
-		// relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
+		// 128: 1896509
 		let t128 = performance.now(), ver128 = false
 		try {
-			let test128 = Document.parseHTMLUnsafe('<p></p>').lastModified
+			let test128 = (new Blob()).bytes()
 			ver128 = true
 		} catch(e) {}
-		rec(128, 128, "1887817", ver128, performance.now()-t128) // 0.08ms
+		rec(128, 128, "1896509", ver128, performance.now()-t128) // 0.03ms
 
 		// 127: 1894248
 		let t127 = performance.now(), ver127 = false
@@ -748,7 +743,7 @@ function outputVersion() {
 	}
 	run_tzp()
 
-	let countOther = 0, expectOther = 60, oOther = {}
+	let countOther = 0, expectOther = 61, oOther = {}
 	function run_other() {
 		// start global timer
 		gOther = performance.now()
@@ -804,6 +799,19 @@ function outputVersion() {
 			ver129 = ("function" === typeof PerformanceResourceTiming && PerformanceResourceTiming.prototype.hasOwnProperty("responseStatus"))
 		} catch(e) {}
 		rec(129, 129, "1796785", ver129, performance.now()-t129) // 0.04ms
+
+		// 128: 1887817
+			// FF123-27: Error: Permission denied to access property "lastModified"
+			// ^ if console closed: NS_ERROR_UNEXPECTED:
+			// ^ we need to check a property otherwise no error is thrown if the console is open
+			// FF52-122: TypeError: Document.parseHTMLUnsafe is not a function
+		// relies on dom.webcomponents.shadowdom.declarative.enabled = true (flipped true in FF123)
+		let t128 = performance.now(), ver128 = false
+		try {
+			let test128 = Document.parseHTMLUnsafe('<p></p>').lastModified
+			ver128 = true
+		} catch(e) {}
+		rec(128, 128, "1887817", ver128, performance.now()-t128) // 0.08ms
 
 		// 122: 1862910
 		let t122 = performance.now()

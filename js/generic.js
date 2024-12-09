@@ -467,10 +467,7 @@ function get_isVer(METRIC) {
 			} catch(e) {}
 			try {new RegExp('[\\00]','u')} catch(e) {if (e+'' == 'SyntaxError: invalid decimal escape in regular expression') return 130} // 1907236
 			if (CSS2Properties.prototype.hasOwnProperty('WebkitFontFeatureSettings')) return 129 // 1595620
-
-			// ToDo: replace or add a fallback: 128 relies on dom.webcomponents.shadowdom.declarative.enabled (flipped true in FF123)
-			try {Document.parseHTMLUnsafe('<p></p>').lastModified; return 128} catch(e) {} // 1887817
-
+			try {let test128 = (new Blob()).bytes(); return 128} catch(e) {} // 1896509
 			try {if ((new Date('15Jan0024')).getYear() > 0) return 127} catch(e) {} // 1894248
 			if ('function' === typeof URL.parse) {return 126}
 			try {if ('Invalid Date' == new Date('Sep 26 Thurs 1995 10:00')) return 125} catch(e) {} // 1872793
