@@ -21,6 +21,7 @@ let fntCodes = { // sorted
 }
 
 let fntData = {},
+	fntFaceData = {},
 	fntSize = '512px',
 	fntString = '-\uffff',
 	fntBtn ='',
@@ -122,12 +123,12 @@ let fntMaster = {
 			'Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Serif Greek','Small Fonts Greek',
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
-			/* variants
-				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
-				'Segoe UI Semilight', // 8
-				'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
-				'Malgun Gothic Semilight', // 10
-			*/
+		],
+		windowsface: [
+			'Arial Black','Segoe UI Light','Segoe UI Semibold', // 7
+			'Segoe UI Semilight', // 8
+			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
+			'Malgun Gothic Semilight', // 10
 		],
 	},
 	// TB unexpected
@@ -150,6 +151,12 @@ let fntMaster = {
 			'MS Dlg Shell', // system that should point to Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
 			'Noto Serif Hmong Nyiakeng', // 'Noto Sans Symbols2', // TB12 fontnames
+		],
+		windowsface: [
+			// 'Arial Narrow', // ToDo: uncomment once we block it
+			'Calibri Light', // 8
+			'Microsoft JhengHei UI Light','Nirmala UI Semilight', // 8.1
+			'Candara Light','Corbel Light','Yu Gothic UI Light', // 10
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -259,18 +266,22 @@ let fntMaster = {
 			// system aliases: should always be the same AFAICT
 				// https://searchfox.org/mozilla-central/source/gfx/thebes/gfxDWriteFontList.cpp#1990
 				'MS Sans Serif','MS Serif','Courier','Small Fonts','Roman', // Microsoft Sans Serif, TNR, Courier New, Arial, TNR
-			// variants
-				'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
-				'Franklin Gothic Medium', // 7 not detected if font-vis < 3: 1720408
-				'Calibri Light','Calibri Light Italic','Segoe UI Semilight', // 8
-				// 8.1
-				'Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
-				'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Yu Gothic Light',
-				// 10
-				'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight','Candara Light','Corbel Light',
-				'Malgun Gothic Semilight','Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
-			*/
+			//'Franklin Gothic Medium', // 7 not detected if font-vis < 3: 1720408
+			//*/
 		],
+		windowsface :[
+			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
+			'Calibri Light','Segoe UI Semilight', // 8
+			// 8.1
+			'Leelawadee UI Semilight','Microsoft JhengHei Light','Microsoft JhengHei UI Light',
+			'Microsoft YaHei Light','Microsoft YaHei UI Light','Nirmala UI Semilight','Segoe UI Black','Yu Gothic Light',
+			// 10
+			'Candara Light','Corbel Light','Malgun Gothic Semilight',
+			'Yu Gothic Medium','Yu Gothic UI Light','Yu Gothic UI Semilight','Yu Gothic UI Semibold',
+			/* ignore: not detected by font face
+				'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight',
+			//*/
+		]
 	},
 	// kLangPackFonts
 	baselang: {
@@ -301,6 +312,9 @@ let fntMaster = {
 			// fontSubs redundant
 				// '標準明朝', // ＭＳ 明朝 -> MS Mincho
 				// 'FangSong_GB2312',
+		],
+		windowsface: [
+			'BIZ UDMincho Medium','BIZ UDPMincho Medium','DengXian Light','Yu Mincho Demibold','Yu Mincho Light'
 		],
 	},
 	system: {
@@ -434,6 +448,17 @@ let fntMaster = {
 			// MS downloads
 			'Cascadia Code','Cascadia Mono', // 11
 		],
+		windowsface: [
+			'Arial Nova Cond','Arial Nova Light',
+			'Georgia Pro Black','Georgia Pro Cond','Georgia Pro Light','Georgia Pro Semibold',
+			'Gill Sans Nova Cond','Gill Sans Nova Light',
+			//'Neue Haas Grotesk Text Pro UltraThin','Neue Haas Grotesk Text Pro Light',
+			'Rockwell Nova Cond','Rockwell Nova Extra Bold','Rockwell Nova Light',
+			'Verdana Pro Black','Verdana Pro Light',
+			// the above are all supplemental, so to properly test font face is not leaking
+			// we need to add some non-weighted fonts: not much to work with :-(
+			'Ink Free'
+		],
 	},
 	// isOS
 	mini: [
@@ -450,9 +475,11 @@ function set_fntList() {
 	if (build) {
 		isFontSizesPrevious = isFontSizesMore
 		fntData = {
-			system: [], bundled: [], base: [], baselang: [], fpp: [], unexpected: [], full: [],
-			control: [], 'control_name': [], generic: [], 'generic_name': []
+			bundled: [], base: [], baselang: [],
+			control: [], 'control_name': [], generic: [], 'generic_name': [],
+			fpp: [], full: [], system: [], unexpected: [], 
 		}
+		fntFaceData = {base: [], baselang: [], fpp: [], full: [], unexpected: []}
 
 		// fntString
 		if (isTB || 'android' == isOS || 'linux' == isOS) {
@@ -507,7 +534,7 @@ function set_fntList() {
 		// lists
 		if (isOS !== undefined) {
 			fntFake = '--00'+ rnd_string()
-			let array = []
+			let array = [], osface = isOS +'face'
 			if ('android' == isOS) {
 				// notos
 				fntMaster.android.notoboth.forEach(function(fnt) {array.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -533,6 +560,14 @@ function set_fntList() {
 				fntData.unexpected = fntMaster.blocklist[isOS]
 				array = array.concat(fntMaster.blocklist[isOS])
 				fntData.full = array
+				// faces
+				array = fntMaster.allowlist[osface]
+				if (undefined !== array) {
+					fntFaceData.base = array.sort()
+					let aUnexpected = fntMaster.blocklist[osface]
+					fntFaceData.unexpected = aUnexpected.sort()
+					fntFaceData.full = array.concat(aUnexpected).sort()
+				}
 			} else {
 				// desktop FF
 				array = fntMaster.base[isOS]
@@ -544,6 +579,19 @@ function set_fntList() {
 				array = array.concat(fntMaster.system[isOS])
 				fntData.unexpected = fntMaster.system[isOS]
 				fntData.full = array
+				// faces
+				array = fntMaster.base[osface]
+				if (undefined !== array) {
+					fntFaceData.base = array.sort()
+					let aBaseLang = fntMaster.baselang[osface]
+					fntFaceData.baselang = aBaseLang.sort()
+					array = array.concat(aBaseLang)
+					fntFaceData.fpp = array.sort()
+					let aUnexpected = fntMaster.system[osface]
+					fntFaceData.unexpected = aUnexpected.sort()
+					array = array.concat(aUnexpected)
+					fntFaceData.full = array.sort()
+				}
 			}
 			// -control from lists
 			if (fntPlatformFont !== undefined) {
@@ -626,6 +674,69 @@ function get_document_fonts(METRIC) {
 	return
 }
 
+const get_fontfaces = (METRIC) => new Promise(resolve => {
+	// testing non regular fonts + font face leaks
+		// it is problematic to test weighted fonts because you don't know
+		// if it's synthesized, a variable font, or an actual font(name)
+	// blocking document fonts does not affect this test
+
+	let t0 = nowFn()
+	// start with a letter or it throws "SyntaxError: An invalid or illegal string was specified"
+	let fntFaceFake = 'a'+ rnd_string()
+	async function testLocalFontFamily(font) {
+		try {
+			const fontFace = new FontFace(font, `local("${font}")`)
+			await fontFace.load()
+			return fntFaceFake
+		} catch(e) {
+			return e+''
+		}
+	}
+	function getLocalFontFamily(font) {
+		return new FontFace(font, `local("${font}")`)
+			.load()
+			.then((font) => font.family)
+			.catch(() => null)
+	}
+	function loadFonts(fonts) {
+		return Promise.all(fonts.map(getLocalFontFamily))
+			.then(list => list.filter(font => font !== null))
+	}
+	function exit(value, btn, notation, data, isLies) {
+		addBoth(12, METRIC, value, btn, notation, data, isLies)
+		log_perf(12, METRIC, t0)
+		return resolve()
+	}
+
+	Promise.all([
+		testLocalFontFamily(fntFaceFake),
+	]).then(function(res){
+		let value ='', data = '', btn='', notation = '', isLies = false
+		try {
+			let test = res[0]
+			let fntList = fntFaceData.full
+			if (fntFaceFake == test) {throw zErrInvalid +'fake font detected'
+			} else if ('NetworkError: A network error occurred.' !== test) {throw test
+			} else if (0 == fntList.length) {
+				exit(zNA, btn, notation, data, isLies)
+			} else {
+				loadFonts(fntFaceData.full).then(function(results){
+					if (results.length) {
+						if (results.includes(fntFaceFake)) {isLies = true}
+						data = results, value = mini(results)
+						btn = addButton(12, METRIC, results.length)
+					} else {
+						value = 'none'
+					}
+					exit(value, btn, notation, data, isLies)
+				})
+			}
+		} catch(e) {
+			exit(log_error(12, METRIC, e), btn, notation, zErr, false)
+		}
+	})
+})
+
 function get_fonts_base(METRICB, selected) {
 	// selected can be: 'unknown', 'n/a' or any of the domrect or perspective or pixel
 
@@ -698,14 +809,12 @@ function get_fonts_base(METRICB, selected) {
 		let btn = addButton(12, METRICB, Object.keys(selectBase).length +'/'+ fntData.generic_name.length)
 		addBoth(12, METRICB, hash, btn,'', newobj)
 	} else {
-		//function addBoth(section, metric, str, btn =''
 		addBoth(12, METRICB, selected)
 	}
 }
 
 const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(resolve => {
 	/* getDimensions code based on https://github.com/abrahamjuliot/creepjs */
-	//let t0 = nowFn()
 	// reset
 	fntBaseInvalid = {}
 	fntBaseMin = []
@@ -970,7 +1079,6 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 			}
 		}
 
-		//console.log(nowFn() - t0 +' ms')
 		removeElementFn(id)
 		return resolve(oTests)
 	} catch(e) {
@@ -987,9 +1095,9 @@ const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(res
 function get_fonts(METRIC) {
 	/*
 	- only notate font_names == not a metric but is picked up health
-	- sizes we record all errors and lies per method. This is all we need for method
-		results/entropy - sizes is either something or unknown: so never notate or zLIES
-	- sizes_base + sizes_methos: never notate or zLIES: it is simply a reflection
+	- sizes we record all errors + lies per method. This is all we need for method
+		results/entropy - sizes is either something or unknown: so never notate or lies
+	- sizes_base + sizes_methods: never notate or lies: it is simply a reflection
 		of what happened in sizes
 	*/
 
@@ -1753,8 +1861,9 @@ const outputFonts = () => new Promise(resolve => {
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
+			get_fontfaces('font_faces'),
 			get_glyphs('glyphs'),
-			get_textmetrics('textmetrics')
+			get_textmetrics('textmetrics'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()

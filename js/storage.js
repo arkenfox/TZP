@@ -248,7 +248,7 @@ function test_idb(log = false) {
 }
 
 const test_worker_service = (log = false) => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0 = nowFn()
 	const METRIC = 'service_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
@@ -266,7 +266,7 @@ const test_worker_service = (log = false) => new Promise(resolve => {
 })
 
 const test_worker_shared = (log = false) => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0 = nowFn()
 	const METRIC = 'shared_worker_test'
 	function exit(value) {
 		dom[METRIC] = value
@@ -290,7 +290,7 @@ const test_worker_shared = (log = false) => new Promise(resolve => {
 })
 
 const test_worker_web = (log = false) => new Promise(resolve => {
-	let t0 = performance.now()
+	let t0 = nowFn()
 	const METRIC = 'web_worker_test'
 	function exit(value) {
 		dom[METRIC] = value

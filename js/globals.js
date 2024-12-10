@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 144
+	expectedMetrics = 145
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -67,8 +67,8 @@ const zD = 'disabled',
 	zLIE = 'untrustworthy',
 	zSKIP = 'skipped'
 
-let zErrLog = '', // log error in addBoth
-	zErrShort = '' // log error in addBoth but display zErr in addDisplay
+let zErrLog = '', // log error in add/Both
+	zErrShort = '' // log error in add/Both but display zErr in add/Display
 
 // grab as soon as possible
 let isInitial = {height: {}, width: {}}
