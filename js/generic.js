@@ -957,22 +957,23 @@ function lookup_health(sect, metric, scope, isPass) {
 			data = gData[zFP][scope][sect]['metrics'][nested]['metrics'][metric]
 		} else if (sDetail[scope].lookup[metric] !== undefined) {
 			data = sDetail[scope].lookup[metric]
+		} else if ('font_names' == metric) {
+			// special case font names: not in FP / hash = full enumeration
+			data = sDetail[scope][metric]
+			hash = mini(data)
 		} else {
 			data = gData[zFP][scope][sect]['metrics'][metric]
-			if ('font_names' == metric) {data =''} // force font_names for next if statement
 		}
 		if (undefined !== data) {
 			let typeCheck = typeFn(data, true)
-			hash = data
+			hash = '' == hash ? data : hash
 			// handle sDetailTemp: copy per run so it doesn't change in gData
 			if (undefined !== sDetail[scope][metric]) {
 				sDetailTemp = sDetail[scope][metric]
-				if ('font_names' == metric && '' == data) {
-					// hash is always the FP: i.e full enumeration: for consistency + all/pass/fail + compares
-					// but detail needs to reflect isPass: can't just check for !== undefined
+				if (!isPass) {
+					// special case font names/faces: detail should reflect isPass: can't just check for !== undefined
 					// e.g. windows FPP will still have unexpected data (for RFP)
-					hash = mini(sDetailTemp)
-					if (!isPass) {sDetailTemp = sDetail[scope]['font_names_health']}
+					if ('font_faces' == metric || 'font_names' == metric) {sDetailTemp = sDetail[scope][metric +'_health']}
 				}
 				let tmpCheck = typeFn(sDetailTemp)
 				if ('object' == tmpCheck) {
