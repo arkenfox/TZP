@@ -633,11 +633,26 @@ function set_fntList() {
 			if ('android' == isOS) {
 				fntBtn = fntBtnAll
 			} else if (isTB) {
-				fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll					
+				fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
  			} else if ('windows' == isOS) {
 				fntBtn = fntBtnBase +' + '+ fntBtnBaseLang +' = '+ fntBtnFPP +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
 			} else {
 				fntBtn = (isOS !== 'linux' ? fntBtnBase : '') + fntBtnAll
+			}
+			// fntBtnFaces
+			let fntBtnFaces = '', strface = 'font_faces_'+ isOS
+			if (fntFaceData.full.length) {
+				fntBtnUnexpected = addButton(12, strface +'_unexpected', fntFaceData.unexpected.length, 'btnc', 'lists')
+				fntBtnBase = addButton(12, strface +'_'+ fntListBaseName, fntFaceData.base.length, 'btnc', 'lists')
+				fntBtnBaseLang = addButton(12, strface +'_kLangPackFonts', fntFaceData.baselang.length, 'btnc', 'lists')
+				fntBtnFPP = addButton(12, strface +'_FPP', fntFaceData.fpp.length, 'btnc', 'lists')
+				fntBtnAll = addButton(12, strface, fntFaceData.full.length, 'btnc', 'lists')
+				if (isTB) {
+					fntBtnFaces = fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
+				} else {
+					fntBtnFaces = fntBtnBase +' + '+ fntBtnBaseLang +' = '+ fntBtnFPP +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
+				}
+				fntBtn = fntBtnFaces +' | '+ fntBtn 
 			}
 		}
 	}
@@ -647,6 +662,7 @@ function set_fntList() {
 	// fnt*Btn data
 	if (gRun || build) {
 		let str = 'fonts_'+ isOS
+		let strface = 'font_faces_'+ isOS
 		addDetail(str +'_system', fntData.system, 'lists')
 		addDetail(str +'_bundled', fntData.bundled, 'lists')
 		addDetail(str +'_'+ fntListBaseName, fntData.base, 'lists')
@@ -654,6 +670,13 @@ function set_fntList() {
 		addDetail(str +'_FPP', fntData.fpp, 'lists')
 		addDetail(str +'_unexpected', fntData.unexpected, 'lists')
 		addDetail(str, fntData.full, 'lists')
+		if (fntFaceData.full.length) {
+			addDetail(strface +'_'+ fntListBaseName, fntFaceData.base, 'lists')
+			addDetail(strface +'_kLangPackFonts', fntFaceData.baselang, 'lists')
+			addDetail(strface +'_FPP', fntFaceData.fpp, 'lists')
+			addDetail(strface +'_unexpected', fntFaceData.unexpected, 'lists')
+			addDetail(strface, fntFaceData.full, 'lists')
+		}
 	}
 }
 
@@ -712,20 +735,50 @@ const get_fontfaces = (METRIC) => new Promise(resolve => {
 		testLocalFontFamily(fntFaceFake),
 	]).then(function(res){
 		let value ='', data = '', btn='', notation = '', isLies = false
+		let fntList = fntFaceData.full
+		let isNotate = fntList.length > 0
+		// only notate if we're testing it
+		let badnotation = !isNotate ? '' : isTB ? tb_red : rfp_red
+		let goodnotation = !isNotate ? '' : isTB ? tb_green : rfp_green
+
 		try {
 			let test = res[0]
-			let fntList = fntFaceData.full
 			if (fntFaceFake == test) {throw zErrInvalid +'fake font detected'
 			} else if ('NetworkError: A network error occurred.' !== test) {throw test
 			} else if (0 == fntList.length) {
-				exit(zNA, btn, notation, data, isLies)
+				exit(zNA, btn, badnotation, data, isLies)
 			} else {
 				loadFonts(fntFaceData.full).then(function(results){
 					if (results.length) {
 						if (results.includes(fntFaceFake)) {isLies = true}
 						data = results, value = mini(results)
 						btn = addButton(12, METRIC, results.length)
+						if (fntFaceData.base.length) {
+							notation = goodnotation
+							let aNotInBase = results, aMissing = []
+							aNotInBase = aNotInBase.filter(x => !fntFaceData.base.includes(x))
+								if (isTB) {
+								aMissing = fntFaceData.base
+								aMissing = aMissing.filter(x => !results.includes(x))
+							}
+							let count = aNotInBase.length + aMissing.length
+							if (count > 0) {
+								let tmpName = METRIC +'_health', tmpobj = {}
+								if (aMissing.length) {tmpobj['missing'] = aMissing}
+								if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
+								addDetail(tmpName, tmpobj)
+								let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
+								notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
+								// FFP if all unexpected are in baselang then we're fpp_green
+								if (fntFaceData.baselang.length) {
+									let aNotInBaseLang = aNotInBase.filter(x => !fntFaceData.baselang.includes(x))
+									if (aNotInBaseLang.length == 0) {notation = fpp_green}
+								}
+							}
+						}
 					} else {
+						// ToDo: once we allow fontFace in TB this will always be badnotation
+						notation = isTB ? goodnotation : badnotation
 						value = 'none'
 					}
 					exit(value, btn, notation, data, isLies)
@@ -1269,7 +1322,6 @@ function get_fonts(METRIC) {
 					let notation =''
 					if (fntData.base.length) {
 						notation = goodnotation
-						// names: not needed in FP but include for upstream
 						let aNotInBase = oData[k].datafonts, aMissing = [], aMissingSystem = []
 						aNotInBase = aNotInBase.filter(x => !fntData.base.includes(x))
 						if (isTB) {
