@@ -88,7 +88,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	display: inline-block;
 	font-size: 12px;
 	font-family: monospace, "Courier New";
-	padding-left: 6px;
+	padding-left: 4px;
 	padding-right: 6px;
 	cursor: pointer;
 }
@@ -226,7 +226,7 @@ table td.secthash {
 	text-align: left;
 	vertical-align: top;
 	line-height: 1.2em;
-	padding-bottom: 5px;
+	padding-bottom: 8px;
 	font-family: monospace, "Courier New";
 	font-size: 12px;
 }
