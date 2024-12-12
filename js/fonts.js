@@ -125,10 +125,14 @@ let fntMaster = {
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
 		],
 		windowsface: [
+			// weighted
 			'Arial Black','Segoe UI Light','Segoe UI Semibold', // 7
 			'Segoe UI Semilight', // 8
 			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
 			'Malgun Gothic Semilight', // 10
+			// other
+			'Georgia','MS Gothic','Tahoma', // system
+			'Noto Sans Gujarati','Noto Serif Dogra','Twemoji Mozilla',	// bundled
 		],
 	},
 	// TB unexpected
@@ -138,6 +142,7 @@ let fntMaster = {
 			'Noto Color Emoji','Noto Emoji','Noto Mono','Noto Sans','Noto Serif', // notos
 			'Cantarell','DejaVu Sans','DejaVu Serif','Droid Sans','STIX', // fedora
 			'Dingbats','FreeMono','Ubuntu', // ubuntu
+			'Bitstream Charter','C059','Nimbus Sans','P052','Quicksand', // debian
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 		],
@@ -147,16 +152,24 @@ let fntMaster = {
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
 		windows: [
-			'Calibri', 'Candara', // 'Corbel','Ebrima','Gabriola', // system
-			'MS Dlg Shell', // system that should point to Microsoft Sans Serif
+			'Calibri','Candara', // system
+			'MS Shell Dlg', // system alias == Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
-			'Noto Serif Hmong Nyiakeng', // 'Noto Sans Symbols2', // TB12 fontnames
+			// other
+			'Noto Sans Symbols2', // TB12 bundled
 		],
 		windowsface: [
+			// weighted
 			// 'Arial Narrow', // ToDo: uncomment once we block it
 			'Calibri Light', // 8
 			'Microsoft JhengHei UI Light','Nirmala UI Semilight', // 8.1
 			'Candara Light','Corbel Light','Yu Gothic UI Light', // 10
+			// other
+			'Corbel','Ebrima', // system
+			'Gill Sans','Gill Sans MT', // MS bundled
+			'Noto Serif Hmong Nyiakeng', // TB12 bundled
+			'Arabic Transparent', // fontSubstitutes do not apply even if allowed
+			'MS Serif','Roman', // system aliases do not apply even if allowed
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -270,6 +283,7 @@ let fntMaster = {
 			//*/
 		],
 		windowsface :[
+			// weighted
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
 			'Calibri Light','Segoe UI Semilight', // 8
 			// 8.1
@@ -297,7 +311,7 @@ let fntMaster = {
 			'Shonar Bangla','Shruti','SimHei','Simplified Arabic','Traditional Arabic','Tunga','UD Digi Kyokasho N-B','UD Digi Kyokasho N-R',
 			'UD Digi Kyokasho NK-B','UD Digi Kyokasho NK-R','UD Digi Kyokasho NP-B','UD Digi Kyokasho NP-R','Urdu Typesetting','Utsaah',
 			'Vani','Vijaya','Vrinda','Yu Mincho',
-			// localized ^
+			// localized from ^
 			'바탕', // Batang
 			'BIZ UDPゴシック', // BIZ UDPGothic
 			'굴림', // Gulim
@@ -469,7 +483,6 @@ let fntMaster = {
 }
 
 function set_fntList() {
-	let fntListBaseName = isTB ? 'allowlist' : 'kBaseFonts'
 	let build = (gLoad || isFontSizesMore !== isFontSizesPrevious)
 
 	if (build) {
@@ -620,39 +633,52 @@ function set_fntList() {
 			fntData.baselang.sort()
 			fntData.fpp.sort()
 			fntData.full.sort()
-			// fntBtns
-			let str = 'fonts_'+ isOS, fntBtnBundled, fntBtnSystem, fntBtnBase, fntBtnBaseLang, fntBtnFPP, fntBtnUnexpected, fntBtnAll
-			fntBtnBundled = addButton(12, str +'_bundled', fntData.bundled.length, 'btnc', 'lists')
-			fntBtnSystem = addButton(12, str +'_system', fntData.system.length, 'btnc', 'lists')
-			fntBtnUnexpected = addButton(12, str +'_unexpected', fntData.unexpected.length, 'btnc', 'lists')
-			fntBtnBase = addButton(12, str +'_'+ fntListBaseName, fntData.base.length, 'btnc', 'lists')
-			fntBtnBaseLang = addButton(12, str +'_kLangPackFonts', fntData.baselang.length, 'btnc', 'lists')
-			fntBtnFPP = addButton(12, str +'_FPP', fntData.fpp.length, 'btnc', 'lists')
-			fntBtnAll = addButton(12, str, fntData.full.length, 'btnc', 'lists')
+
 			// fntBtn
-			if ('android' == isOS) {
-				fntBtn = fntBtnAll
-			} else if (isTB) {
-				fntBtn = fntBtnSystem +' + '+ fntBtnBundled +' = '+ fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
- 			} else if ('windows' == isOS) {
-				fntBtn = fntBtnBase +' + '+ fntBtnBaseLang +' = '+ fntBtnFPP +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
-			} else {
-				fntBtn = (isOS !== 'linux' ? fntBtnBase : '') + fntBtnAll
-			}
-			// fntBtnFaces
-			let fntBtnFaces = '', strface = 'font_faces_'+ isOS
-			if (fntFaceData.full.length) {
-				fntBtnUnexpected = addButton(12, strface +'_unexpected', fntFaceData.unexpected.length, 'btnc', 'lists')
-				fntBtnBase = addButton(12, strface +'_'+ fntListBaseName, fntFaceData.base.length, 'btnc', 'lists')
-				fntBtnBaseLang = addButton(12, strface +'_kLangPackFonts', fntFaceData.baselang.length, 'btnc', 'lists')
-				fntBtnFPP = addButton(12, strface +'_FPP', fntFaceData.fpp.length, 'btnc', 'lists')
-				fntBtnAll = addButton(12, strface, fntFaceData.full.length, 'btnc', 'lists')
+			let fntobj = {}
+			if ('android' == isOS || !isTB && 'linux' == isOS) {
+				fntobj = fntData.full
+			} else if (isTB || 'windows' == isOS) {
 				if (isTB) {
-					fntBtnFaces = fntBtnBase +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
+					fntobj = {'1. system': {count: fntData.system.length, 'fonts': fntData.system},
+						'2. bundled': {count: fntData.bundled.length, 'fonts': fntData.bundled},
+						'3. allowlist': {count: fntData.base.length, 'fonts': fntData.base},
+					}
 				} else {
-					fntBtnFaces = fntBtnBase +' + '+ fntBtnBaseLang +' = '+ fntBtnFPP +' + '+ fntBtnUnexpected +' = '+ fntBtnAll
+					fntobj = {'1. kBaseFonts': {count: fntData.base.length, 'fonts': fntData.base},
+					'2. kLangPackFonts': {count: fntData.baselang.length, 'fonts': fntData.baselang},
+					'3. FPP': {count: fntData.fpp.length, 'fonts': fntData.fpp},
+					}
 				}
-				fntBtn = fntBtnFaces +' | '+ fntBtn 
+				fntobj['4. unexpected'] = {count: fntData.unexpected.length, 'fonts': fntData.unexpected}
+				fntobj['5. tested'] = {count: fntData.full.length, 'fonts': fntData.full}
+			} else {
+				//mac
+				fntobj = {'1. kBaseFonts': {count: fntData.base.length, 'fonts': fntData.base},
+					'2. unexpected': {count: fntData.unexpected.length, 'fonts': fntData.unexpected},
+					'3. tested': {count: fntData.full.length, 'fonts': fntData.full},
+				}
+			}
+			fntData['summary'] = fntobj
+			fntBtn = addButton(12, 'fonts_'+ isOS, fntData.full.length +' fonts', 'btnc', 'lists')
+
+			// fontFaces
+			if (fntFaceData.full.length) {
+				if (isTB) {
+					fntobj = {'1. allowlist': {count: fntFaceData.base.length, 'fonts': fntFaceData.base},
+						'2. unexpected': {count: fntFaceData.unexpected.length, 'fonts': fntFaceData.unexpected},
+						'3. tested': {count: fntFaceData.full.length, 'fonts': fntFaceData.full}
+					}
+				} else {
+					fntobj = {'1. kBaseFonts': {count: fntFaceData.base.length, 'fonts': fntFaceData.base},
+						'2. kLangPackFonts': {count: fntFaceData.baselang.length, 'fonts': fntFaceData.baselang},
+						'3. FPP': {count: fntFaceData.fpp.length, 'fonts': fntFaceData.fpp},
+						'4. unexpected': {count: fntFaceData.unexpected.length, 'fonts': fntFaceData.unexpected},
+						'5. tested': {count: fntFaceData.full.length, 'fonts': fntFaceData.full}
+					}
+				}
+				fntFaceData['summary'] = fntobj
+				fntBtn = addButton(12, 'font_faces_'+ isOS, fntFaceData.full.length +' faces', 'btnc', 'lists') +' | '+ fntBtn 
 			}
 		}
 	}
@@ -661,22 +687,8 @@ function set_fntList() {
 
 	// fnt*Btn data
 	if (gRun || build) {
-		let str = 'fonts_'+ isOS
-		let strface = 'font_faces_'+ isOS
-		addDetail(str +'_system', fntData.system, 'lists')
-		addDetail(str +'_bundled', fntData.bundled, 'lists')
-		addDetail(str +'_'+ fntListBaseName, fntData.base, 'lists')
-		addDetail(str +'_kLangPackFonts', fntData.baselang, 'lists')
-		addDetail(str +'_FPP', fntData.fpp, 'lists')
-		addDetail(str +'_unexpected', fntData.unexpected, 'lists')
-		addDetail(str, fntData.full, 'lists')
-		if (fntFaceData.full.length) {
-			addDetail(strface +'_'+ fntListBaseName, fntFaceData.base, 'lists')
-			addDetail(strface +'_kLangPackFonts', fntFaceData.baselang, 'lists')
-			addDetail(strface +'_FPP', fntFaceData.fpp, 'lists')
-			addDetail(strface +'_unexpected', fntFaceData.unexpected, 'lists')
-			addDetail(strface, fntFaceData.full, 'lists')
-		}
+		addDetail('fonts_'+ isOS, fntData.summary, 'lists')
+		addDetail('font_faces_'+ isOS, fntFaceData.summary, 'lists')
 	}
 }
 
@@ -698,7 +710,7 @@ function get_document_fonts(METRIC) {
 }
 
 const get_fontfaces = (METRIC) => new Promise(resolve => {
-	// testing non regular fonts + font face leaks
+	// testing non regular fonts + font face leaks (i.e not just light/black etc)
 		// it is problematic to test weighted fonts because you don't know
 		// if it's synthesized, a variable font, or an actual font(name)
 	// blocking document fonts does not affect this test
