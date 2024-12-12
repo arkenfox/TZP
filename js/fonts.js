@@ -90,8 +90,8 @@ let fntMaster = {
 			'Arial','Courier','Courier New','Helvetica','Times','Times New Roman' // aliases
 		],
 		linuxface: [
-			// Bundled
-			'Arimo Regular', 'Cousine', 'Cousine Regular', 'Tinos', 'Tinos Regular',
+			// bundled
+			'Arimo Regular','Cousine','Cousine Regular','Tinos','Tinos Regular',
 		],
 		mac: [
 			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
@@ -136,7 +136,7 @@ let fntMaster = {
 			'Malgun Gothic Semilight', // 10
 			// other
 			'Georgia','MS Gothic','Tahoma', // system
-			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla',	// bundled
+			'Noto Sans Gujarati','Noto Serif Dogra','Twemoji Mozilla', // bundled
 		],
 	},
 	// TB unexpected
@@ -152,10 +152,12 @@ let fntMaster = {
 		],
 		linuxface: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
-			'Arial', 'Arial Regular', 'Courier New', 'Courier New Regular', // Aliases, expected not to work!
-			// Common Linux fonts - if we find them we have a leak
-			'DejaVu Sans', 'FreeSans', 'Liberation Sans', 'Nimbus Sans Regular',
-			'Nimbus Sans', 'Cantarell Regular', 'Ubuntu',
+			'Arial','Arial Regular','Courier New','Courier New Regular', // aliases, expected not to work!
+			// common linux fonts
+			'Cantarell Regular','DejaVu Sans', // fedora
+			'Ubuntu', // ubuntu
+			'Nimbus Sans','Nimbus Sans Regular', // debian
+			'FreeSans','Liberation Sans', // popular
 		],
 		mac: [
 			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
