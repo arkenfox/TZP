@@ -89,6 +89,10 @@ let fntMaster = {
 		linux: [
 			'Arial','Courier','Courier New','Helvetica','Times','Times New Roman' // aliases
 		],
+		linuxface: [
+			// Bundled
+			'Arimo Regular', 'Cousine', 'Cousine Regular', 'Tinos', 'Tinos Regular',
+		],
 		mac: [
 			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
 			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
@@ -145,6 +149,13 @@ let fntMaster = {
 			'Bitstream Charter','C059','Nimbus Sans','P052','Quicksand', // debian
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
+		],
+		linuxface: [
+			'Arimo', // Arimo without regular seems not to work, double check it.
+			'Arial', 'Arial Regular', 'Courier New', 'Courier New Regular', // Aliases, expected not to work!
+			// Common Linux fonts - if we find them we have a leak
+			'DejaVu Sans', 'FreeSans', 'Liberation Sans', 'Nimbus Sans Regular',
+			'Nimbus Sans', 'Cantarell Regular', 'Ubuntu',
 		],
 		mac: [
 			'Apple Symbols','Avenir','Charter','Impact','Palatino','Rockwell', // system
