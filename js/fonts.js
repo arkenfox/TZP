@@ -132,7 +132,7 @@ let fntMaster = {
 			'Malgun Gothic Semilight', // 10
 			// other
 			'Georgia','MS Gothic','Tahoma', // system
-			'Noto Sans Gujarati','Noto Serif Dogra','Twemoji Mozilla',	// bundled
+			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla',	// bundled
 		],
 	},
 	// TB unexpected
