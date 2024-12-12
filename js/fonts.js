@@ -91,7 +91,7 @@ let fntMaster = {
 		],
 		linuxface: [
 			// bundled
-			'Arimo Regular','Cousine','Cousine Regular','Tinos','Tinos Regular',
+			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP', 'Noto Sans Symbols Regular','Tinos','Tinos Regular',
 		],
 		mac: [
 			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
