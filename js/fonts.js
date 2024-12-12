@@ -91,7 +91,7 @@ let fntMaster = {
 		],
 		linuxface: [
 			// bundled
-			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP', 'Noto Sans Symbols Regular','Tinos','Tinos Regular',
+			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP','Noto Sans Symbols Regular','Tinos','Tinos Regular',
 		],
 		mac: [
 			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
@@ -136,7 +136,7 @@ let fntMaster = {
 			'Malgun Gothic Semilight', // 10
 			// other
 			'Georgia','MS Gothic','Tahoma', // system
-			'Noto Sans Gujarati','Noto Serif Dogra','Twemoji Mozilla', // bundled
+			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla', // bundled
 		],
 	},
 	// TB unexpected
