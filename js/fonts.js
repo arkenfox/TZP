@@ -126,7 +126,7 @@ let fntMaster = {
 			'Times','Times New Roman (Hebrew)','Times New Roman Baltic','Times New Roman CE','Times New Roman CYR',
 			'Times New Roman Greek','Times New Roman TUR','Tms Rmn','MS Serif Greek','Small Fonts Greek',
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
-			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier - >Courier New
+			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier -> Courier New
 		],
 		windowsface: [
 			// weighted
@@ -180,7 +180,7 @@ let fntMaster = {
 			// other
 			'Corbel','Ebrima', // system
 			'Gill Sans','Gill Sans MT', // MS bundled
-			'Noto Serif Hmong Nyiakeng', // TB12 bundled
+			'Noto Serif Hmong Nyiakeng Regular', // TB12 bundled
 			'Arabic Transparent', // fontSubstitutes do not apply even if allowed
 			'MS Serif','Roman', // system aliases do not apply even if allowed
 		],
@@ -484,7 +484,9 @@ let fntMaster = {
 			'Verdana Pro Black','Verdana Pro Light',
 			// the above are all supplemental, so to properly test font face is not leaking
 			// we need to add some non-weighted fonts: not much to work with :-(
-			'Ink Free'
+			'Ink Free',
+			// MS bundled
+			'Gill Sans','Gill Sans MT',
 		],
 	},
 	// isOS
