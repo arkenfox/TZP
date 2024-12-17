@@ -973,7 +973,9 @@ function lookup_health(sect, metric, scope, isPass) {
 				if (!isPass) {
 					// special case font names/faces: detail should reflect isPass: can't just check for !== undefined
 					// e.g. windows FPP will still have unexpected data (for RFP)
-					if ('font_faces' == metric || 'font_names' == metric) {sDetailTemp = sDetail[scope][metric +'_health']}
+					if ('font_faces' == metric || 'font_names' == metric || 'font_offscreen' == metric) {
+						sDetailTemp = sDetail[scope][metric +'_health']
+					}
 				}
 				let tmpCheck = typeFn(sDetailTemp)
 				if ('object' == tmpCheck) {
@@ -1806,6 +1808,15 @@ function outputSection(id, isResize = false) {
 		}
 	}
 
+	// TB + fontvis at least on windows seems to require **LOTS**
+	// more time for font async fallback
+		// 1: see if adding bundled to the fontvis list helps
+		// 2: see if upstream can fix the perf cliff
+	/*
+	if (gLoad && isTB && isVer > 127) {
+		if ('windows' == isOS || 'mac' == isOS) {delay = 1000}
+	}
+	//*/
 	setTimeout(function() {
 		get_isPerf()
 		if (gRun) {gData['perf'].push([1, 'DOCUMENT START', nowFn()])}
