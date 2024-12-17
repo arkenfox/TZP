@@ -21,7 +21,6 @@ let fntCodes = { // sorted
 }
 
 let fntData = {},
-	fntFaceData = {},
 	fntSize = '512px',
 	fntString = '-\uffff',
 	fntBtn ='',
@@ -89,7 +88,7 @@ let fntMaster = {
 		linux: [
 			'Arial','Courier','Courier New','Helvetica','Times','Times New Roman' // aliases
 		],
-		linuxface: [
+		linuxfaces: [
 			// bundled
 			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP','Noto Sans Symbols Regular','Tinos','Tinos Regular',
 		],
@@ -128,7 +127,7 @@ let fntMaster = {
 			'標準ゴシック','ゴシック','ｺﾞｼｯｸ', // ＭＳ ゴシック -> MS Gothic
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier -> Courier New
 		],
-		windowsface: [
+		windowsfaces: [
 			// weighted
 			'Arial Black','Segoe UI Light','Segoe UI Semibold', // 7
 			'Segoe UI Semilight', // 8
@@ -137,6 +136,13 @@ let fntMaster = {
 			// other
 			'Georgia','MS Gothic','Tahoma', // system
 			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla', // bundled
+		],
+		windowsoffscreen: [
+			// porportional only: we test once against monospace
+			'Arial','Cambria Math','MS PGothic','Malgun Gothic','Microsoft JhengHei','Microsoft YaHei',
+			'Segoe UI','Sylfaen','Times New Roman','Verdana',
+			// some bundled fonts
+			'Noto Sans Batak','Noto Sans Multani','Noto Serif Bengali','Twemoji Mozilla',
 		],
 	},
 	// TB unexpected
@@ -150,7 +156,7 @@ let fntMaster = {
 			'Liberation Mono','Liberation Sans','Liberation Serif', // popular
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 		],
-		linuxface: [
+		linuxfaces: [
 			'Arimo', // Arimo without regular seems not to work, double check it.
 			'Arial','Arial Regular','Courier New','Courier New Regular', // aliases, expected not to work!
 			// common linux fonts
@@ -171,7 +177,7 @@ let fntMaster = {
 			// other
 			'Noto Sans Symbols2', // TB12 bundled
 		],
-		windowsface: [
+		windowsfaces: [
 			// weighted
 			// 'Arial Narrow', // ToDo: uncomment once we block it
 			'Calibri Light', // 8
@@ -183,6 +189,14 @@ let fntMaster = {
 			'Noto Serif Hmong Nyiakeng Regular', // TB12 bundled
 			'Arabic Transparent', // fontSubstitutes do not apply even if allowed
 			'MS Serif','Roman', // system aliases do not apply even if allowed
+		],
+		windowsoffscreen: [
+			// porportional only: we test once against monospace
+			'Cambria','Comic Sans MS','Gabriola','Impact','Webdings', // system
+			'MS Shell Dlg', // system alias == Microsoft Sans Serif
+			'Gill Sans','Gill Sans MT', // MS bundled
+			// other
+			'Noto Sans Symbols2', // TB12 bundled
 		],
 	},
 	// kBaseFonts: https://searchfox.org/mozilla-central/search?path=StandardFonts*.inc
@@ -295,7 +309,7 @@ let fntMaster = {
 			//'Franklin Gothic Medium', // 7 not detected if font-vis < 3: 1720408
 			//*/
 		],
-		windowsface :[
+		windowsfaces: [
 			// weighted
 			'Arial Black','Arial Narrow','Segoe UI Light','Segoe UI Semibold', // 7
 			'Calibri Light','Segoe UI Semilight', // 8
@@ -308,6 +322,9 @@ let fntMaster = {
 			/* ignore: not detected by font face
 				'Bahnschrift Light','Bahnschrift SemiBold','Bahnschrift SemiLight',
 			//*/
+		],
+		windowsoffscreen: [
+			'Cambria','Georgia','Impact','Marlett','NSimSun','Segoe UI','Verdana'
 		]
 	},
 	// kLangPackFonts
@@ -340,9 +357,16 @@ let fntMaster = {
 				// '標準明朝', // ＭＳ 明朝 -> MS Mincho
 				// 'FangSong_GB2312',
 		],
-		windowsface: [
+		windowsfaces: [
 			'BIZ UDMincho Medium','BIZ UDPMincho Medium','DengXian Light','Yu Mincho Demibold','Yu Mincho Light'
 		],
+		windowsoffscreen: [
+			// to check if RFP/FPP leak, not determine RFP vs FPP: no gurantee of supplemental kLangPackFonts
+			// add a token range of scripts in win10+ that were in win7/8 (more likely if user upgraded?)
+			'Aldhabi','Aparajita','Batang','David','Estrangelo Edessa','Euphemia','FangSong','Gautami','Iskoola Pota',
+			'Kalinga','Kartika','Khmer UI','Lao UI','Latha','Leelawadee','Meiryo','MingLiU','Nyala','Plantagenet Cherokee',
+			'Raavi','Shonar Bangla','Shruti','Tunga',
+		]
 	},
 	system: {
 		android: [
@@ -475,7 +499,7 @@ let fntMaster = {
 			// MS downloads
 			'Cascadia Code','Cascadia Mono', // 11
 		],
-		windowsface: [
+		windowsfaces: [
 			'Arial Nova Cond','Arial Nova Light',
 			'Georgia Pro Black','Georgia Pro Cond','Georgia Pro Light','Georgia Pro Semibold',
 			'Gill Sans Nova Cond','Gill Sans Nova Light',
@@ -484,9 +508,20 @@ let fntMaster = {
 			'Verdana Pro Black','Verdana Pro Light',
 			// the above are all supplemental, so to properly test font face is not leaking
 			// we need to add some non-weighted fonts: not much to work with :-(
-			'Ink Free',
-			// MS bundled
-			'Gill Sans','Gill Sans MT',
+			'Ink Free','Sans Serif Collection',
+			// MS products
+			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
+		],
+		windowsoffscreen: [
+			'Arial Nova','Georgia Pro','Gill Sans Nova','Ink Free','Neue Haas Grotesk Text Pro','Rockwell Nova',
+			'Segoe Fluent Icons','Segoe UI Variable Display','Segoe UI Variable Small','Segoe UI Variable Text',
+			'Simplified Arabic Fixed','Verdana Pro',
+			// win11
+			'Sans Serif Collection',
+			// MS products
+			'Arial Unicode MS','MS Reference Specialty','MS Outlook','Gill Sans','Gill Sans MT',
+			// MS downloads
+			'Cascadia Code','Cascadia Mono', // 11
 		],
 	},
 	// isOS
@@ -504,10 +539,13 @@ function set_fntList() {
 		isFontSizesPrevious = isFontSizesMore
 		fntData = {
 			bundled: [], base: [], baselang: [],
-			control: [], 'control_name': [], generic: [], 'generic_name': [],
-			fpp: [], full: [], system: [], unexpected: [], 
+			control: [], 'control_name': [],
+			faces: {base: [], baselang: [], fpp: [], full: [], unexpected: []},
+			fpp: [], full: [],
+			generic: [], 'generic_name': [],
+			offscreen: {base: [], baselang: [], fpp: [], full: [], unexpected: []},
+			system: [], unexpected: [],
 		}
-		fntFaceData = {base: [], baselang: [], fpp: [], full: [], unexpected: []}
 
 		// fntString
 		if (isTB || 'android' == isOS || 'linux' == isOS) {
@@ -562,7 +600,7 @@ function set_fntList() {
 		// lists
 		if (isOS !== undefined) {
 			fntFake = '--00'+ rnd_string()
-			let array = [], osface = isOS +'face'
+			let array = [], aExtraTests = ['faces','offscreen']
 			if ('android' == isOS) {
 				// notos
 				fntMaster.android.notoboth.forEach(function(fnt) {array.push('Noto Sans '+ fnt, 'Noto Serif '+ fnt)})
@@ -588,14 +626,17 @@ function set_fntList() {
 				fntData.unexpected = fntMaster.blocklist[isOS]
 				array = array.concat(fntMaster.blocklist[isOS])
 				fntData.full = array
-				// faces
-				array = fntMaster.allowlist[osface]
-				if (undefined !== array) {
-					fntFaceData.base = array.sort()
-					let aUnexpected = fntMaster.blocklist[osface]
-					fntFaceData.unexpected = aUnexpected.sort()
-					fntFaceData.full = array.concat(aUnexpected).sort()
-				}
+				// faces.offscreen
+				aExtraTests.forEach(function(item) {
+					let key = isOS + item
+					array = fntMaster.allowlist[key]
+					if (undefined !== array) {
+						let aUnexpected = fntMaster.blocklist[key]
+						fntData[item].base = array.sort()
+						fntData[item].unexpected = aUnexpected.sort()
+						fntData[item].full = array.concat(aUnexpected).sort()
+					}
+				})
 			} else {
 				// desktop FF
 				array = fntMaster.base[isOS]
@@ -607,19 +648,21 @@ function set_fntList() {
 				array = array.concat(fntMaster.system[isOS])
 				fntData.unexpected = fntMaster.system[isOS]
 				fntData.full = array
-				// faces
-				array = fntMaster.base[osface]
-				if (undefined !== array) {
-					fntFaceData.base = array.sort()
-					let aBaseLang = fntMaster.baselang[osface]
-					fntFaceData.baselang = aBaseLang.sort()
-					array = array.concat(aBaseLang)
-					fntFaceData.fpp = array.sort()
-					let aUnexpected = fntMaster.system[osface]
-					fntFaceData.unexpected = aUnexpected.sort()
-					array = array.concat(aUnexpected)
-					fntFaceData.full = array.sort()
-				}
+				// faces/offscreen
+				aExtraTests.forEach(function(item) {
+					let key = isOS + item
+					array = fntMaster.base[key]
+					if (undefined !== array) {
+						let aBaseLang = fntMaster.baselang[key]
+						let aFPP = array.concat(aBaseLang)
+						let aUnexpected = fntMaster.system[key]
+						fntData[item].base = array.sort()
+						fntData[item].baselang = aBaseLang.sort()
+						fntData[item].fpp = aFPP.sort()
+						fntData[item].unexpected = aUnexpected.sort()
+						fntData[item].full = aFPP.concat(aUnexpected).sort()
+					}
+				})
 			}
 			// -control from lists
 			if (fntPlatformFont !== undefined) {
@@ -677,24 +720,27 @@ function set_fntList() {
 			fntData['summary'] = fntobj
 			fntBtn = addButton(12, 'fonts_'+ isOS, fntData.full.length +' fonts', 'btnc', 'lists')
 
-			// fontFaces
-			if (fntFaceData.full.length) {
-				if (isTB) {
-					fntobj = {'1. allowlist': {count: fntFaceData.base.length, 'fonts': fntFaceData.base},
-						'2. unexpected': {count: fntFaceData.unexpected.length, 'fonts': fntFaceData.unexpected},
-						'3. tested': {count: fntFaceData.full.length, 'fonts': fntFaceData.full}
+			// faces/offscreen
+			aExtraTests.forEach(function(item) {
+				let obj = fntData[item]
+				if (obj.full.length) {
+					if (isTB) {
+						fntobj = {'1. allowlist': {count: obj.base.length, 'fonts': obj.base},
+							'2. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
+							'3. tested': {count: obj.full.length, 'fonts': obj.full}
+						}
+					} else {
+						fntobj = {'1. kBaseFonts': {count: obj.base.length, 'fonts': obj.base},
+							'2. kLangPackFonts': {count: obj.baselang.length, 'fonts': obj.baselang},
+							'3. FPP': {count: obj.fpp.length, 'fonts': obj.fpp},
+							'4. unexpected': {count: obj.unexpected.length, 'fonts': obj.unexpected},
+							'5. tested': {count: obj.full.length, 'fonts': obj.full}
+						}
 					}
-				} else {
-					fntobj = {'1. kBaseFonts': {count: fntFaceData.base.length, 'fonts': fntFaceData.base},
-						'2. kLangPackFonts': {count: fntFaceData.baselang.length, 'fonts': fntFaceData.baselang},
-						'3. FPP': {count: fntFaceData.fpp.length, 'fonts': fntFaceData.fpp},
-						'4. unexpected': {count: fntFaceData.unexpected.length, 'fonts': fntFaceData.unexpected},
-						'5. tested': {count: fntFaceData.full.length, 'fonts': fntFaceData.full}
-					}
+					fntData[item]['summary'] = fntobj
+					fntBtn = addButton(12, 'font_' + item +'_'+ isOS, fntData[item].full.length +' '+ item, 'btnc', 'lists') + fntBtn 
 				}
-				fntFaceData['summary'] = fntobj
-				fntBtn = addButton(12, 'font_faces_'+ isOS, fntFaceData.full.length +' faces', 'btnc', 'lists') +' | '+ fntBtn 
-			}
+			})
 		}
 	}
 	// bail
@@ -703,7 +749,8 @@ function set_fntList() {
 	// fnt*Btn data
 	if (gRun || build) {
 		addDetail('fonts_'+ isOS, fntData.summary, 'lists')
-		addDetail('font_faces_'+ isOS, fntFaceData.summary, 'lists')
+		addDetail('font_faces_'+ isOS, fntData.faces.summary, 'lists')
+		addDetail('font_offscreen_'+ isOS, fntData.offscreen.summary, 'lists')
 	}
 }
 
@@ -724,98 +771,41 @@ function get_document_fonts(METRIC) {
 	return
 }
 
-const get_fontfaces = (METRIC) => new Promise(resolve => {
-	// testing non regular fonts + font face leaks (i.e not just light/black etc)
-		// it is problematic to test weighted fonts because you don't know
-		// if it's synthesized, a variable font, or an actual font(name)
-	// blocking document fonts does not affect this test
+function get_font_notation(METRIC, data) {
+	let badnotation = isTB ? tb_red : rfp_red
+	let goodnotation = isTB ? tb_green : rfp_green
+	let isSizes = 'font_sizes' == METRIC
+	let obj = isSizes ? fntData : ('font_faces' == METRIC ? fntData.faces : fntData.offscreen)
+	let notation = goodnotation
 
-	let t0 = nowFn()
-	// start with a letter or it throws "SyntaxError: An invalid or illegal string was specified"
-	let fntFaceFake = 'a'+ rnd_string()
-	async function testLocalFontFamily(font) {
-		try {
-			const fontFace = new FontFace(font, `local("${font}")`)
-			await fontFace.load()
-			return fntFaceFake
-		} catch(e) {
-			return e+''
+	let aNotInBase = data, aMissing = [], aMissingSystem = []
+	aNotInBase = aNotInBase.filter(x => !obj.base.includes(x))
+	if (isTB) {
+		aMissing = isSizes == METRIC ? obj.bundled : obj.base
+		aMissing = aMissing.filter(x => !data.includes(x))
+		if (isSizes && fntData.system.length) {
+			aMissingSystem = fntData.system
+			aMissingSystem = aMissingSystem.filter(x => !data.includes(x))
 		}
 	}
-	function getLocalFontFamily(font) {
-		return new FontFace(font, `local("${font}")`)
-			.load()
-			.then((font) => font.family)
-			.catch(() => null)
-	}
-	function loadFonts(fonts) {
-		return Promise.all(fonts.map(getLocalFontFamily))
-			.then(list => list.filter(font => font !== null))
-	}
-	function exit(value, btn, notation, data, isLies) {
-		addBoth(12, METRIC, value, btn, notation, data, isLies)
-		log_perf(12, METRIC, t0)
-		return resolve()
-	}
-
-	Promise.all([
-		testLocalFontFamily(fntFaceFake),
-	]).then(function(res){
-		let value ='', data = '', btn='', notation = '', isLies = false
-		let fntList = fntFaceData.full
-		let isNotate = fntList.length > 0
-		// only notate if we're testing it
-		let badnotation = !isNotate ? '' : isTB ? tb_red : rfp_red
-		let goodnotation = !isNotate ? '' : isTB ? tb_green : rfp_green
-
-		try {
-			let test = res[0]
-			if (fntFaceFake == test) {throw zErrInvalid +'fake font detected'
-			} else if ('NetworkError: A network error occurred.' !== test) {throw test
-			} else if (0 == fntList.length) {
-				exit(zNA, btn, badnotation, data, isLies)
-			} else {
-				loadFonts(fntFaceData.full).then(function(results){
-					if (results.length) {
-						if (results.includes(fntFaceFake)) {isLies = true}
-						data = results, value = mini(results)
-						btn = addButton(12, METRIC, results.length)
-						if (fntFaceData.base.length) {
-							notation = goodnotation
-							let aNotInBase = results, aMissing = []
-							aNotInBase = aNotInBase.filter(x => !fntFaceData.base.includes(x))
-								if (isTB) {
-								aMissing = fntFaceData.base
-								aMissing = aMissing.filter(x => !results.includes(x))
-							}
-							let count = aNotInBase.length + aMissing.length
-							if (count > 0) {
-								let tmpName = METRIC +'_health', tmpobj = {}
-								if (aMissing.length) {tmpobj['missing'] = aMissing}
-								if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
-								addDetail(tmpName, tmpobj)
-								let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
-								notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
-								// FFP if all unexpected are in baselang then we're fpp_green
-								if (fntFaceData.baselang.length) {
-									let aNotInBaseLang = aNotInBase.filter(x => !fntFaceData.baselang.includes(x))
-									if (aNotInBaseLang.length == 0) {notation = fpp_green}
-								}
-							}
-						}
-					} else {
-						// ToDo: once we allow fontFace in TB this will always be badnotation
-						notation = isTB ? goodnotation : badnotation
-						value = 'none'
-					}
-					exit(value, btn, notation, data, isLies)
-				})
-			}
-		} catch(e) {
-			exit(log_error(12, METRIC, e), btn, notation, zErr, false)
+	let count = aNotInBase.length + aMissing.length + aMissingSystem.length
+	if (count > 0) {
+		let tmpName = METRIC +'_health', tmpobj = {}
+		let suffix = isSizes ? '_bundled' : ''
+		if (aMissing.length) {tmpobj['missing' + suffix] = aMissing}
+		if (aMissingSystem.length) {tmpobj['missing_system'] = aMissingSystem}
+		if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
+		addDetail(tmpName, tmpobj)
+		let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
+		notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
+		// FFP if all unexpected are in baselang then we're fpp_green
+		if (obj.baselang.length) {
+			let aNotInBaseLang = aNotInBase.filter(x => !obj.baselang.includes(x))
+			if (aNotInBaseLang.length == 0) {notation = fpp_green}
 		}
-	})
-})
+	}
+	return notation
+}
 
 function get_fonts_base(METRICB, selected) {
 	// selected can be: 'unknown', 'n/a' or any of the domrect or perspective or pixel
@@ -891,6 +881,132 @@ function get_fonts_base(METRICB, selected) {
 	} else {
 		addBoth(12, METRICB, selected)
 	}
+}
+
+const get_fonts_faces = (METRIC) => new Promise(resolve => {
+	// testing non regular fonts + font face leaks (i.e not just light/black etc)
+		// it is problematic to test weighted fonts because you don't know
+		// if it's synthesized, a variable font, or an actual font(name)
+	// blocking document fonts does not affect this test
+
+	let t0 = nowFn()
+	// start with a letter or it throws "SyntaxError: An invalid or illegal string was specified"
+	let fntFaceFake = 'a'+ rnd_string()
+	async function testLocalFontFamily(font) {
+		try {
+			const fontFace = new FontFace(font, `local("${font}")`)
+			await fontFace.load()
+			return fntFaceFake
+		} catch(e) {
+			return e+''
+		}
+	}
+	function getLocalFontFamily(font) {
+		return new FontFace(font, `local("${font}")`)
+			.load()
+			.then((font) => font.family)
+			//.then((font) => font.unicodeRange +': '+ font.family)
+			.catch(() => null)
+	}
+	function loadFonts(fonts) {
+		return Promise.all(fonts.map(getLocalFontFamily))
+		.then(list => list.filter(font => font !== null))
+	}
+	function exit(value, btn, notation, data) {
+		addBoth(12, METRIC, value, btn, notation, data)
+		log_perf(12, METRIC, t0)
+		return resolve()
+	}
+
+	Promise.all([
+		testLocalFontFamily(fntFaceFake),
+	]).then(function(res){
+		let value ='', data = '', btn='', notation = ''
+		let fntList = fntData.faces.full
+		let isNotate = fntList.length > 0
+		// only notate if we're testing it
+		let badnotation = !isNotate ? '' : isTB ? tb_red : rfp_red
+		let goodnotation = !isNotate ? '' : isTB ? tb_green : rfp_green
+
+		try {
+			let test = res[0]
+			if (fntFaceFake == test) {throw zErrInvalid +'fake font detected'
+			} else if ('NetworkError: A network error occurred.' !== test) {throw test
+			} else if (!isNotate) {
+				exit(zNA, btn, badnotation, data)
+			} else {
+				loadFonts(fntData.faces.full).then(function(results){
+					if (results.length) {
+						data = results, value = mini(results)
+						btn = addButton(12, METRIC, results.length)
+						if (fntData.faces.base.length) {notation = get_font_notation(METRIC, data)}
+					} else {
+						// ToDo: once we allow fontFace in TB this will always be badnotation
+						notation = isTB ? goodnotation : badnotation
+						value = 'none'
+					}
+					exit(value, btn, notation, data)
+				})
+			}
+		} catch(e) {
+			exit(log_error(12, METRIC, e), btn, notation, zErr)
+		}
+	})
+})
+
+function get_fonts_offscreen(METRIC) {
+	// test RFP/FPP do not leak
+		// note: document fonts does not affect this test
+	let t0 = nowFn()
+	let fntList = fntData.offscreen.full
+	if (0 == fntList.length) {
+		addBoth(12, METRIC, zNA)
+		return
+	}
+	let badnotation = isTB ? tb_red : rfp_red
+	let goodnotation = isTB ? tb_green : rfp_green
+
+	let value = '', data ='', btn='', notation = rfp_red
+	try {
+		// set canvas
+		let canvas = new OffscreenCanvas(0,0)
+		let ctx = canvas.getContext('2d')
+		let fntOffscreen = undefined == fntPlatformFont ? 'monospace' : fntPlatformFont
+		// get base
+		ctx.font = 'normal normal normal 512px '+ fntOffscreen
+		let base = ctx.measureText(fntString).width
+		// check base
+		if (runST) {base = undefined}
+		let typeCheck = typeFn(base)
+		if ('number' !== typeCheck) {throw zErrType + typeCheck}
+		// check fake font
+		ctx.font = 'normal normal normal 512px '+ fntFake +', '+ fntOffscreen
+		let fake = ctx.measureText(fntString).width
+		if (runSI) {fake = base}
+		if (fake !== base) {throw zErrInvalid +'fake font detected'}
+		// loop font list
+		data = []
+		fntList.forEach(function(font){
+			ctx.font = 'normal normal normal 512px '+ font +', '+ fntOffscreen
+			if (ctx.measureText(fntString).width !== base) {data.push(font)}
+		})
+		if (data.length) {
+			value = mini(data)
+			btn = addButton(12, METRIC, data.length)
+			if (fntData.offscreen.base.length) {notation = get_font_notation(METRIC, data)}
+		} else {
+			// ToDo: once we allow fontFace in TB this will always be badnotation
+			notation = isTB ? goodnotation : badnotation
+			value = 'none'
+		}
+	} catch(e) {
+		value = e; data = zErrLog
+		// tmp until we enable offscreen canvas in TB
+		if (isTB && 'ReferenceError: OffscreenCanvas is not defined' == value) {notation = ''}
+	}
+	addBoth(12, METRIC, value, btn, notation, data)
+	log_perf(12, METRIC, t0)
+	return
 }
 
 const get_fonts_size = (isMain = true, METRIC = 'font_sizes') => new Promise(resolve => {
@@ -1347,34 +1463,7 @@ function get_fonts(METRIC) {
 				// FP data: not lies
 				if (method == selected) {
 					let notation =''
-					if (fntData.base.length) {
-						notation = goodnotation
-						let aNotInBase = oData[k].datafonts, aMissing = [], aMissingSystem = []
-						aNotInBase = aNotInBase.filter(x => !fntData.base.includes(x))
-						if (isTB) {
-							aMissing = fntData.bundled
-							aMissing = aMissing.filter(x => !oData[k].datafonts.includes(x))
-							if (fntData.system.length) {
-								aMissingSystem = fntData.system
-								aMissingSystem = aMissingSystem.filter(x => !oData[k].datafonts.includes(x))
-							}
-						}
-						let count = aNotInBase.length + aMissing.length + aMissingSystem.length
-						if (count > 0) {
-							let tmpName = METRICN +'_health', tmpobj = {}
-							if (aMissing.length) {tmpobj['missing_bundled'] = aMissing}
-							if (aMissingSystem.length) {tmpobj['missing_system'] = aMissingSystem}
-							if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
-							addDetail(tmpName, tmpobj)
-							let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
-							notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
-							// FFP if all unexpected are in baselang then we're fpp_green
-							if (fntData.baselang.length) {
-								let aNotInBaseLang = aNotInBase.filter(x => !fntData.baselang.includes(x))
-								if (aNotInBaseLang.length == 0) {notation = fpp_green}
-							}
-						}
-					}
+					if (fntData.base.length) {notation = get_font_notation(METRIC, oData[k].datafonts)}
 					// names
 					let btn = addButton(12, METRICN, oData[k].datacount)
 					sDetail.document[METRICN] = oData[k].datafonts
@@ -1403,6 +1492,46 @@ function get_fonts(METRIC) {
 		log_perf(12, METRIC, t0)
 		return
 	})
+}
+
+function get_fonts_max(METRIC) {
+	let t0 = nowFn()
+	let value = zNA, data ='', btn=''
+	let el = dom.tzpFontMax
+	try {
+		data = {}
+		let styles = ['cursive','fangsong','monospace','sans-serif','serif','system-ui']
+		let range, method
+		styles.forEach(function(stylename) {
+			el.innerHTML = '<span class="'+ stylename +'" style="font-size: 20000px">.</span>'
+			let target = el.children[0]
+			if (isDomRect > 1) {
+				range = document.createRange()
+				range.selectNode(target)
+			}
+			if (isDomRect < 1) { // get a result regardless
+				method = target.getBoundingClientRect()
+			} else if (isDomRect == 1) {
+				method = target.getClientRects()[0]
+			} else if (isDomRect == 2) {
+				method = range.getBoundingClientRect()
+			} else if (isDomRect > 2) {
+				method = range.getClientRects()[0]
+			}
+			value = method.height
+			if (runST) {value += ''}
+			let typeCheck = typeFn(value)
+			if ('number' !== typeCheck) {throw zErrInvalid + 'got '+ typeCheck}
+			data[stylename] = value
+		})
+		value = mini(data); btn = addButton(12, METRIC)
+	} catch(e) {
+		value = e; data = zErrLog
+	}
+	el.innerHTML =''
+	addBoth(12, METRIC, value, btn,'', data, (isDomRect == -1))
+	log_perf(12, METRIC, t0)
+	return
 }
 
 function get_formats() {
@@ -1717,9 +1846,7 @@ function get_textmetrics(METRIC) {
 		// check supported + type
 		let aNonsense = ['', Infinity,' ', [], true, undefined, {1:2}, null, 'a']
 		let canvas = dom.tzpTextmetrics, ctx = canvas.getContext('2d')
-		// transform: skew(1.787542deg, 3.263901deg)
 		let tm = ctx.measureText('a')
-		ctx.setTransform(1, 0.2, 0.8, 1, 0, 0)
 		for (const k of Object.keys(oMetrics)) {
 			oData[k] = {}
 			let oSet = new Set()
@@ -1940,9 +2067,11 @@ const outputFonts = () => new Promise(resolve => {
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
-			get_fontfaces('font_faces'),
+			get_fonts_max('max_font_sizes'),
+			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),
+			//get_fonts_offscreen('font_offscreen'),
 		]).then(function(){
 			if (fntBtn.length) {addDisplay(12, 'fntBtn', fntBtn)}
 			return resolve()
