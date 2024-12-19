@@ -790,11 +790,22 @@ function get_font_notation(METRIC, data) {
 	}
 	let count = aNotInBase.length + aMissing.length + aMissingSystem.length
 	if (count > 0) {
-		let tmpName = METRIC +'_health', tmpobj = {}
+		let tmpName = (isSizes ? 'font_names' : METRIC) +'_health', tmpobj = {}
 		let suffix = isSizes ? '_bundled' : ''
 		if (aMissing.length) {tmpobj['missing' + suffix] = aMissing}
 		if (aMissingSystem.length) {tmpobj['missing_system'] = aMissingSystem}
-		if (aNotInBase.length) {tmpobj['unexpected'] = aNotInBase}
+		if (aNotInBase.length) {
+			if (isTB) {
+				tmpobj['unexpected'] = aNotInBase
+			} else {
+				// FF: break into FPP vs non FPP
+				tmpobj['unexpected'] = {}
+				let aLangPack = aNotInBase.filter(x => obj.baselang.includes(x))
+				let aOther = aNotInBase.filter(x => !aLangPack.includes(x))
+				if (aLangPack.length) {tmpobj.unexpected['kLangPackFonts'] = aLangPack}
+				if (aOther.length) {tmpobj.unexpected['other'] = aOther}
+			}
+		}
 		addDetail(tmpName, tmpobj)
 		let brand = isTB ? (isMullvad ? 'MB' : 'TB') : 'RFP'
 		notation = addButton('bad', tmpName, "<span class='health'>"+ cross + '</span> '+ count +' '+ brand)
@@ -1509,14 +1520,10 @@ function get_fonts_max(METRIC) {
 				range = document.createRange()
 				range.selectNode(target)
 			}
-			if (isDomRect < 1) { // get a result regardless
-				method = target.getBoundingClientRect()
-			} else if (isDomRect == 1) {
-				method = target.getClientRects()[0]
-			} else if (isDomRect == 2) {
-				method = range.getBoundingClientRect()
-			} else if (isDomRect > 2) {
-				method = range.getClientRects()[0]
+			if (isDomRect < 1) {method = target.getBoundingClientRect() // get a result regardless
+			} else if (isDomRect == 1) {method = target.getClientRects()[0]
+			} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+			} else if (isDomRect > 2) {	method = range.getClientRects()[0]
 			}
 			value = method.height
 			if (runST) {value += ''}
