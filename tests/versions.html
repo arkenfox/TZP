@@ -203,7 +203,7 @@ function outputVersion() {
 		if (debug.length) {dom.debug.innerHTML = debug.join("<br>")}
 	}
 
-	let countTZP = 0, expectTZP = 85, maxVer = 134, oTZP = {}, oResults = {}
+	let countTZP = 0, expectTZP = 86, maxVer = 135, oTZP = {}, oResults = {}
 	function run_tzp() {
 		// start global timer
 		gTZP = performance.now()
@@ -264,6 +264,18 @@ function outputVersion() {
 				dom.alerttzp1.innerHTML = sb.trim() + " RESULT ALERT: expected "+ expectTZP +" got "+ countTZP + sc
 			}
 		}
+
+		// 135: 1930464
+		let t135 = performance.now(), ver135
+		try {
+			// returns 2 in FF52 but lets avoid any possible old-timey regressions/changes
+			// tested FF115-135
+			if (CanvasRenderingContext2D.prototype.hasOwnProperty("letterSpacing")) { // FF115+
+				let test135 = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
+				ver135 = 0 == test135.resolvedOptions().minimumFractionDigits
+			}
+		} catch(e) {}
+		rec(135, 135, "1930464", ver135, performance.now()-t135) // 0.2ms
 
 		// 134: 1927706 (see 1931044)
 		let t134 = performance.now(), ver134
