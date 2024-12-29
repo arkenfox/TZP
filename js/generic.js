@@ -434,7 +434,7 @@ function get_isVer(METRIC) {
 	let t0 = nowFn()
 
 	isVer = cascade()
-	if (isVer == 134) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
+	if (isVer == 135) {isVerExtra = '+'} else if (isVer == 114) {isVerExtra = ' or lower'}
 	log_perf(SECTG, METRIC, t0,'', isVer + isVerExtra)
 	// gecko block mode
 	isBlock = isVer < isBlockMin
@@ -449,6 +449,10 @@ function get_isVer(METRIC) {
 			// old-timey check: avoid false postives: must be 115 or higher
 			if (!CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) return 114 // 1778909
 			// now cascade
+			try {
+				test = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
+				if (0 == test.resolvedOptions().minimumFractionDigits) return 135 // 1930464
+			} catch(e) {}
 			try {
 				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
 			} catch(e){}
@@ -610,7 +614,7 @@ function get_isDomRect() {
 			oDomRect[hash]['methods'].push(METRIC)
 		}
 	}
-	//aDomRect = [false, true, false, false]
+	//aDomRect = [false, false, false, false]
 	if (runSL) {aDomRect = [false, false, false, false]}
 	isDomRect = aDomRect.indexOf(true)
 	//console.log(isDomRect, aDomRect)
@@ -1643,6 +1647,7 @@ function outputUser(fn) {
 }
 
 function outputSection(id, isResize = false) {
+
 	if (isBlock || !gClick) {
 		output_perf('all')
 		return
