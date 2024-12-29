@@ -554,10 +554,14 @@ const get_isVer = () => new Promise(resolve => {
 	output(cascade())
 
 	function cascade() {
-		isVerMax = 134
+		isVerMax = 135
 
 		// old-timey check: avoid false postives
 		if (CanvasRenderingContext2D.prototype.hasOwnProperty('letterSpacing')) {
+			try {
+				let test135 = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', notation:'scientific'})
+				if (0 == test135.resolvedOptions().minimumFractionDigits) return 135 // 1930464
+			} catch(e) {}
 			try {
 				if ('$1.00' == (1).toLocaleString('en-CA', {style: 'currency', currencyDisplay: 'narrowSymbol', currency: 'USD'})) return 134 // 1927706
 			} catch(e){}
