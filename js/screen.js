@@ -990,7 +990,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 	function get_viewport(type) {
 		let w, h, wDisplay ='', hDisplay, range
 		try {
-			if (type == 'element') {
+			if ('element' == type) {
 				let target = document.createElement('div')
 				target.setAttribute('id', id)
 				target.style.cssText = 'position:fixed;top:0;left:0;bottom:0;right:0;'

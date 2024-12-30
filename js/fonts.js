@@ -1,24 +1,18 @@
 'use strict';
 
-let fntCodes = { // sorted
+let fntCodes = [ // sorted
 	// actualBoundingBox, width
-	a: [
-		'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
-		'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
-		'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
-		'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
-		'0xA830','0xF003','0xF810','0xFBEE',
-		/* ignore: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
-			problematic e.g windows 1st use
-			'0xFFF9','0xFFFD',
-		//*/
-		'0xFFFF',
-	],
-	// baseline, emHeight, fontBoundingBox
-	b: ['0xFFFF'],
-	e: [],
-	f: [],
-}
+	'0x007F','0x0218','0x058F','0x05C6','0x061C','0x0700','0x08E4','0x097F','0x09B3',
+	'0x0B82','0x0D02','0x10A0','0x115A','0x17DD','0x1950','0x1C50','0x1CDA','0x1D790',
+	'0x1E9E','0x20B0','0x20B8','0x20B9','0x20BA','0x20BD','0x20E3','0x21E4','0x23AE',
+	'0x2425','0x2581','0x2619','0x2B06','0x2C7B','0x302E','0x3095','0x532D','0xA73D',
+	'0xA830','0xF003','0xF810','0xFBEE',
+	/* ignore: https://en.wikipedia.org/wiki/Specials_(Unicode_block)#Replacement_character
+		problematic e.g windows 1st use
+		'0xFFF9','0xFFFD',
+	//*/
+	'0xFFFF',
+]
 
 let fntData = {},
 	fntSize = '512px',
@@ -92,6 +86,13 @@ let fntMaster = {
 			// bundled
 			'Arimo Regular','Cousine','Cousine Regular','Noto Sans JP','Noto Sans Symbols Regular','Tinos','Tinos Regular',
 		],
+		// MAC: NOTE: except 10.15, lists don't distinguish between built-in vs downloadable
+		// 10.15: https://support.apple.com/en-us/101429
+		//    11: ?
+		//    12: https://support.apple.com/en-us/103203
+		//    13: https://support.apple.com/en-nz/103197
+		//    14: https://support.apple.com/en-nz/108939
+		//    15: https://support.apple.com/en-us/120414
 		mac: [
 			'AppleGothic','Apple Color Emoji','Arial','Arial Black','Arial Narrow','Courier','Courier New',
 			'Geneva','Georgia','Heiti TC','Helvetica','Helvetica Neue','Hiragino Kaku Gothic ProN',
@@ -99,9 +100,37 @@ let fntMaster = {
 			'Songti TC','Tahoma','Thonburi','Times','Times New Roman','Verdana',
 			// always
 			'-apple-system',
-			/* variants
+		],
+		macfaces: [
+			// weighted/styles
+			'Arial Bold','Arial Bold Italic','Arial Italic',
+			'Arial Narrow Bold','Arial Narrow Bold Italic','Arial Narrow Italic',
+			'Courier Bold','Courier Bold Oblique','Courier Oblique',
+			'Courier New Bold','Courier New Bold Italic','Courier New Italic',
+			'Georgia Bold','Georgia Bold Italic','Georgia Italic',
+			'Heiti TC Light','Heiti TC Medium',
+			'Helvetica Bold','Helvetica Bold Oblique','Helvetica Light','Helvetica Light Oblique','Helvetica Oblique',
+			'Helvetica Neue Bold','Helvetica Neue Bold Italic','Helvetica Neue Italic','Helvetica Neue Light',
+				'Helvetica Neue Light Italic','Helvetica Neue Medium','Helvetica Neue Medium Italic','Helvetica Neue Thin',
+				'Helvetica Neue Thin Italic','Helvetica Neue UltraLight','Helvetica Neue UltraLight Italic',
 			'Hiragino Kaku Gothic ProN W3','Hiragino Kaku Gothic ProN W6',
-			*/
+			'Kailasa Bold',
+			'Lucida Grande Bold',
+			'Menlo Bold','Menlo Bold Italic','Menlo Italic',
+			'PingFang HK Light','PingFang HK Medium','PingFang HK Semibold','PingFang HK Thin','PingFang HK Ultralight',
+			'PingFang SC Light','PingFang SC Medium','PingFang SC Semibold','PingFang SC Thin','PingFang SC Ultralight',
+			'PingFang TC Light','PingFang TC Medium','PingFang TC Semibold','PingFang TC Thin','PingFang TC Ultralight',
+			'Songti SC Black','Songti SC Bold','Songti SC Light',
+			'Songti TC Bold','Songti TC Light',
+			'Tahoma Bold',
+			'Thonburi Bold','Thonburi Light',
+			'Times Bold','Times Bold Italic','Times Italic',
+			'Times New Roman Bold','Times New Roman Bold Italic','Times New Roman Italic',
+			'Verdana Bold','Verdana Bold Italic','Verdana Italic',
+			// other: system
+			'AppleGothic Regular','Geneva','Monaco',
+			// other: bundled not in macOS/kBaseFonts
+			'Noto Sans Hebrew Regular','Noto Serif Armenian Regular',
 		],
 		windows: [
 			// 7
@@ -128,21 +157,30 @@ let fntMaster = {
 			'ﾍﾙﾍﾞﾁｶ','ﾀｲﾑｽﾞﾛﾏﾝ','ｸｰﾘｴ', // Arial, TNR, Courier -> Courier New
 		],
 		windowsfaces: [
-			// weighted
-			'Arial Black','Segoe UI Light','Segoe UI Semibold', // 7
-			'Segoe UI Semilight', // 8
-			'Microsoft JhengHei Light','Microsoft YaHei Light','Segoe UI Black', // 8.1
-			'Malgun Gothic Semilight', // 10
+			// weighted/styles
+			'Arial Black','Arial Bold','Arial Bold Italic','Arial Italic',
+			'Consolas Bold','Consolas Bold Italic','Consolas Italic',
+			'Courier New Bold','Courier New Bold Italic','Courier New Italic',
+			'Georgia Bold','Georgia Bold Italic','Georgia Italic',
+			'Malgun Gothic Bold','Malgun Gothic Semilight',
+			'Microsoft JhengHei Bold','Microsoft JhengHei Light',
+			'Microsoft YaHei Bold','Microsoft YaHei Light',
+			'Segoe UI Black','Segoe UI Black Italic','Segoe UI Bold','Segoe UI Bold Italic',
+				'Segoe UI Italic','Segoe UI Light','Segoe UI Light Italic','Segoe UI Semibold',
+				'Segoe UI Semibold Italic','Segoe UI Semilight','Segoe UI Semilight Italic',
+			'Tahoma Bold',
+			'Times New Roman Bold','Times New Roman Bold Italic','Times New Roman Italic',
+			'Verdana Bold','Verdana Bold Italic','Verdana Italic',
 			// other
-			'Georgia','MS Gothic','Tahoma', // system
+			'Cambria Math','Lucida Console','MS Gothic', // system
 			'Noto Sans Gujarati Regular','Noto Serif Dogra Regular','Twemoji Mozilla', // bundled
 		],
 		windowsoffscreen: [
-			// porportional only: we test once against monospace
+			// proportional only: in TB we test once against monospace + fallbacks
 			'Arial','Cambria Math','MS PGothic','Malgun Gothic','Microsoft JhengHei','Microsoft YaHei',
 			'Segoe UI','Sylfaen','Times New Roman','Verdana',
-			// some bundled fonts
-			'Noto Sans Batak','Noto Sans Multani','Noto Serif Bengali','Twemoji Mozilla',
+			// some windows-only bundled fonts + twemoji
+			'Noto Naskh Arabic','Noto Sans','Noto Serif','Twemoji Mozilla',
 		],
 	},
 	// TB unexpected
@@ -170,8 +208,16 @@ let fntMaster = {
 			'Noto Serif Hmong Nyiakeng','Noto Sans Symbols2','STIX Math', // TB12 fontnames
 			'.Helvetica Neue DeskInterface', // dot-prefixed font families on mac = hidden // tb#42377
 		],
+		macfaces: [
+			// weighted
+			'Avenir Light','Charter Black','Damascus Medium','Gill Sans Light','Hiragino Sans W3',
+
+			// other
+			'Apple Braille','Trebuchet MS','Webdings','Wingdings','Zapfino', // system
+			'Noto Sans Symbols2', // TB12 bundled
+		],
 		windows: [
-			'Calibri','Candara', // system
+			'Calibri','Candara','Microsoft JhengHei UI','MS UI Gothic','Microsoft YaHei UI','NSimSun','Segoe UI Emoji','SimSun-ExtB', // system
 			'MS Shell Dlg', // system alias == Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
 			// other
@@ -184,14 +230,15 @@ let fntMaster = {
 			'Microsoft JhengHei UI Light','Nirmala UI Semilight', // 8.1
 			'Candara Light','Corbel Light','Yu Gothic UI Light', // 10
 			// other
-			'Corbel','Ebrima', // system
+			'MS UI Gothic','Microsoft YaHei UI','NSimSun','SimSun-ExtB', // system
 			'Gill Sans','Gill Sans MT', // MS bundled
 			'Noto Serif Hmong Nyiakeng Regular', // TB12 bundled
-			'Arabic Transparent', // fontSubstitutes do not apply even if allowed
-			'MS Serif','Roman', // system aliases do not apply even if allowed
+			'Arabic Transparent', // fontSubstitutes
+			'Courier','MS Serif','Roman', // aliases
+			'微软雅黑','ＭＳ ゴシック', // localized
 		],
 		windowsoffscreen: [
-			// porportional only: we test once against monospace
+			// proportional only: in TB we test once against monospace + fallbacks
 			'Cambria','Comic Sans MS','Gabriola','Impact','Webdings', // system
 			'MS Shell Dlg', // system alias == Microsoft Sans Serif
 			'Gill Sans','Gill Sans MT', // MS bundled
@@ -324,7 +371,8 @@ let fntMaster = {
 			//*/
 		],
 		windowsoffscreen: [
-			'Cambria','Georgia','Impact','Marlett','NSimSun','Segoe UI','Verdana'
+			// vs MS Shell Dlg \32
+			'Calibri','Cambria','Georgia','MV Boli','Marlett','NSimSun','Sylfaen',
 		]
 	},
 	// kLangPackFonts
@@ -576,7 +624,7 @@ function set_fntList() {
 		} else if ('mac' == isOS) {
 			if (!isFontSizesMore) {fntPlatformFont = '-apple-system'}
 			baseSize = [
-				'monospace, Menlo, Courier, \"Courier New\", Monaco',
+				'monospace, Menlo, \"Courier New\", Monaco',
 				'sans-serif',
 				'serif'
 			]
@@ -759,8 +807,8 @@ function get_document_fonts(METRIC) {
 	let value, data, fntTest = '\"test font name\"'
 	try {
 		if (runSE) {foo++}
-		dom.tzpDiv.style.fontFamily = fntTest
-		let font = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family'),
+		//dom.tzpDocFont.style.fontFamily = fntTest
+		let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 			fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 		fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
 		value = (fntDocEnabled ? zE : zD) +' | '+ font
@@ -781,7 +829,7 @@ function get_font_notation(METRIC, data) {
 	let aNotInBase = data, aMissing = [], aMissingSystem = []
 	aNotInBase = aNotInBase.filter(x => !obj.base.includes(x))
 	if (isTB) {
-		aMissing = isSizes == METRIC ? obj.bundled : obj.base
+		aMissing = isSizes ? obj.bundled : obj.base
 		aMissing = aMissing.filter(x => !data.includes(x))
 		if (isSizes && fntData.system.length) {
 			aMissingSystem = fntData.system
@@ -974,15 +1022,26 @@ function get_fonts_offscreen(METRIC) {
 		addBoth(12, METRIC, zNA)
 		return
 	}
-	let badnotation = isTB ? tb_red : rfp_red
-	let goodnotation = isTB ? tb_green : rfp_green
+
+	// do a single pass
+		// use fntPlatformFont if possible otherwise use monospace (with fallbacks if possible)
+	let fntOffscreen = 'monospace'
+	if (undefined !== fntPlatformFont) {
+		fntOffscreen = fntPlatformFont
+	} else if ('windows' == isOS) {
+		fntOffscreen = 'monospace, Consolas, Courier, \"Courier New\", \"Lucida Console\"'
+	} else if ('mac' == isOS) {
+		fntOffscreen = 'monospace, Menlo, \"Courier New\", Monaco'
+	}
 
 	let value = '', data ='', btn='', notation = rfp_red
+	let badnotation = isTB ? tb_red : rfp_red
+	let goodnotation = isTB ? tb_green : rfp_green
 	try {
 		// set canvas
 		let canvas = new OffscreenCanvas(0,0)
 		let ctx = canvas.getContext('2d')
-		let fntOffscreen = undefined == fntPlatformFont ? 'monospace' : fntPlatformFont
+
 		// get base
 		ctx.font = 'normal normal normal 512px '+ fntOffscreen
 		let base = ctx.measureText(fntString).width
@@ -1605,13 +1664,13 @@ function get_glyphs(METRIC) {
 		div.innerHTML = '<span id="glyphs-span" style="font-size: 22000px;"><span id="glyphs-slot"></span></span>'
 		const span = dom['glyphs-span'], slot = dom['glyphs-slot']
 
-		let oData = {}, tmpobj = {}, newobj = {}, setSize = new Set(), aCodes = fntCodes.a
+		let oData = {}, tmpobj = {}, newobj = {}, setSize = new Set()
 		let methoddiv, methodspan, rangeH, rangeW, width, height
 		styles.forEach(function(stylename) {
 			slot.style.fontFamily = stylename
 			oData[stylename] = {}
 			let isFirst = stylename == styles[0]
-			aCodes.forEach(function(code) {
+			fntCodes.forEach(function(code) {
 				let codeString = String.fromCodePoint(code)
 				slot.textContent = codeString
 				// always get span width, div height
@@ -1636,7 +1695,7 @@ function get_glyphs(METRIC) {
 				}
 				width = methodspan.width, height = methoddiv.height
 				// only typecheck once: first char on first style
-				if (code == aCodes[0] && isFirst) {
+				if (code == fntCodes[0] && isFirst) {
 					if (runST) {width = NaN, height = [1]}
 					let wType = typeFn(width), hType = typeFn(height)
 					if ('number' !== wType || 'number' !== hType) {
@@ -1846,7 +1905,7 @@ function get_textmetrics(METRIC) {
 		// much entropy if any, so drop for now
 		//width: ['width'],
 	}
-	let oData = {}, aValid = [], aCodes
+	let oData = {}, aValid = []
 
 	try {
 		if (runSE) {foo++}
@@ -1900,16 +1959,18 @@ function get_textmetrics(METRIC) {
 			oData[k] = {}
 			styles.forEach(function(s){oData[k][s] = {}})
 		})
-
 		let aSet = [], aList = ['actualboundingbox', 'width']
 		aList.forEach(function(m) {if (aValid.includes(m)) {aSet.push(m)}})
-		if (aSet.length) {
-			aCodes = fntCodes.a
-			styles.forEach(function(s) { // each style
-				aCodes.forEach(function(code) { // each code
+		let bSet = [], bList = ['baseline', 'emheight', 'fontboundingbox']
+		bList.forEach(function(m) {if (aValid.includes(m)) {bSet.push(m)}})
+
+		styles.forEach(function(s) { // each style
+			ctx.font = 'normal normal 22000px '+ s
+			if (aSet.length) {
+				fntCodes.forEach(function(code) { // each code
 					let codeString = String.fromCodePoint(code)
-					ctx.font = 'normal normal 22000px '+ s
-					let tm = ctx.measureText(codeString)
+
+					tm = ctx.measureText(codeString)
 					// textmetrics
 					aSet.forEach(function(k){
 						let data = [], props = oMetrics[k]
@@ -1917,30 +1978,16 @@ function get_textmetrics(METRIC) {
 						oData[k][s][code] = data
 					})
 				})
-			})
-		}
-
-		// ToDo: use a different set of unicode points (per aList if need be) that give different results
-			// for now just return one value
-		aSet = [], aList = ['baseline', 'emheight', 'fontboundingbox']
-		aList.forEach(function(m) {if (aValid.includes(m)) {aSet.push(m)}})
-		if (aSet.length) {
-			aCodes = [] = fntCodes.b
-			styles.forEach(function(s) { // each style
-				aCodes.forEach(function(code) { // each code
-					let codeString = String.fromCodePoint(code)
-					ctx.font = 'normal normal 22000px '+ s
-					let tm = ctx.measureText(codeString)
-					// textmetrics
-					aSet.forEach(function(k){
-						let data = [], props = oMetrics[k]
-						props.forEach(function(p) {data.push(tm[p])})
-						//oData[k][s][code] = data
-						oData[k][s] = data // we're only getting a single codepoint
-					})
+			}
+			if (bSet.length) {
+				tm = ctx.measureText('a')
+				bSet.forEach(function(k){
+					let data = [], props = oMetrics[k]
+					props.forEach(function(p) {data.push(tm[p])})
+					oData[k][s] = data // we're only getting a single codepoint
 				})
-			})
-		}
+			}
+		})
 		//console.log(oData)
 
 		aValid.forEach(function(k) {
@@ -2074,7 +2121,7 @@ const outputFonts = () => new Promise(resolve => {
 	]).then(function(){
 		// allow more time for font async fallback
 		Promise.all([
-			get_fonts_max('max_font_sizes'),
+			get_fonts_max('font_sizes_max'),
 			get_fonts_faces('font_faces'),
 			get_glyphs('glyphs'),
 			get_textmetrics('textmetrics'),

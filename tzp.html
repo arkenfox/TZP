@@ -57,10 +57,10 @@
 		<iframe id="tzpIframe" width="100" height="30"></iframe>
 		<audio id="tzpAudio"></audio><video id="tzpMedia" width="20px"></video>
 		<div id="tzpDiv"></div>
+		<div id="tzpDocFont" style="font-family: 'test font name'"></div>
 		<div id="tzpSVG"></div>
 		<div id="tzpScroll"><div></div></div>
 		<span id="tzpScript"></span>
-		<div class="normalized"><canvas id="tzpTextmetrics"></canvas></div>
 		<svg id="tzpSwitch" width="0px" height="0px" viewBox="0 0 0 0"></svg>
 		<div id='tzpGraphite' style="font-family: 'graphite';"><span>+</span><span>-</span></div>
 		<div id='tzpDPI' style='height: 1in; width: 1in;'></div>
@@ -89,6 +89,7 @@
 		<canvas id="tzpCanvasPath"></canvas>
 		<canvas id="tzpCanvasTo"></canvas>
 		<canvas id="tzpCanvasToSolid"></canvas>
+		<div class="normalized"><canvas id="tzpTextmetrics"></canvas></div>
 		<span id="tzpColor"></span>
 		<div id="tzpDPR" style="border: 0.1px solid;">foo</div>
 		<div id="tzpWidget" class="normalized">
@@ -261,7 +262,7 @@
 		<tr class="togDROID"><td>inner window</td><td class="mono border-bottom"><span id="initial_inner"></span>
 			<span class="c" id="window_sizes_initial"></span></td></tr>
 		<!--viewport/scrollbars-->
-		<tr><td>viewport <sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
+		<tr><td>[element] viewport<sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
 		<tr><td>visualViewport</td><td class="c mono" id="vp_visualViewport"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)<br>viewport<br>visualViewport</span></div>
@@ -724,6 +725,7 @@
 		</td></tr>
 		<!--fonts-->
 		<tr><td>[faces] fonts</td><td class="mono" id="font_faces"></td></tr>
+		<!--<tr><td>[offscreen] fonts</td><td class="mono" id="font_offscreen"></td></tr>-->
 		<tr><td><span id="labelFS" class="btn btn0" onClick="togglerows('FS','btn')">[+]</span>
 			[sizes | names] fonts <sup>1</sup></td>
 			<td class="mono"><span class="c" id="font_sizes"></span> | <span class="c" id="font_names"></span></td>
@@ -742,13 +744,13 @@
 		<tr><td>[base sizes] fonts <sup>1</sup></td><td class=" mono">
 			<span class="c" id="font_sizes_base"></span> | <span class="c" id="font_sizes_base_reported"></span>
 		</td></tr>
+		<tr><td>[maximum sizes] fonts</td><td class="c mono" id="font_sizes_max"></td></tr>
 		<tr><td>[methods] fonts <sup>1</sup></td><td class="c mono" id="font_sizes_methods"></td></tr>
 		<tr><td>[moz] fonts</td><td class="c mono" id="fonts_moz"></td></tr>
 		<tr><td>[system] fonts</td><td class="c mono" id="fonts_system"></td></tr>
 		<tr><td>[widget] fonts</td><td class="c mono" id="fonts_widget"></td></tr>
 		<tr><td>glyphs <sup>2</sup></td><td class="c mono" id="glyphs"></td></tr>
 		<tr><td>[test] graphite <sup>3</sup></td><td class="c mono" id="graphite"></td></tr>
-		<tr><td>maximum font sizes</td><td class="c mono" id="max_font_sizes"></td></tr>
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxt">proportional font<br>monospace size<br>sans-serif size<br>serif size</span></div>
 			&nbsp; script defaults</td><td class="c mono" id="script_defaults"></td></tr>
