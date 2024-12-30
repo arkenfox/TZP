@@ -279,8 +279,8 @@ const get_isOS = (METRIC) => new Promise(resolve => {
 		try {
 			if (runSG) {foo++}
 			let fntTest = '\"test font name\"'
-			dom.tzpDiv.style.fontFamily = fntTest
-			let font = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family'),
+			//dom.tzpDocFont.style.fontFamily = fntTest
+			let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 				fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 			fntEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
 		} catch(e) {}
