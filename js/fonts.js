@@ -811,14 +811,13 @@ function get_document_fonts(METRIC) {
 		let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 			fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 		fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
-		// now test setting
+		// test setting it: catches e.g. chameleon
 		dom.tzpDiv.style.fontFamily = fntTest
 		let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
-		// notate: only default if font matches, not noquotes
-		if (fntDocEnabled && font == fntTest) {notation = default_green}
 		// tidy
-		if (font !== font2) {font += ' | ' + font2}
-		value = (fntDocEnabled ? zE : zD) +' | '+ font
+		value = (fntDocEnabled ? zE : zD) +' | '+ font + (font !== font2 ? ' | '+ font2 : '')
+		// notate: only default if exact match
+		if ('enabled | \"test font name\"' == value) {notation = default_green}
 	} catch(e) {
 		value = e; data = zErrLog
 	}
