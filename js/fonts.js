@@ -804,18 +804,25 @@ function set_fntList() {
 
 function get_document_fonts(METRIC) {
 	fntDocEnabled = false // reset
-	let value, data, fntTest = '\"test font name\"'
+	let value, data, notation = default_red, fntTest = '\"test font name\"'
 	try {
 		if (runSE) {foo++}
-		//dom.tzpDocFont.style.fontFamily = fntTest
+		// dedicated div, hardcoded style
 		let font = getComputedStyle(dom.tzpDocFont).getPropertyValue('font-family'),
 			fontnoquotes = font.slice(0, fntTest.length - 2) // ext may strip quotes marks
 		fntDocEnabled = (font == fntTest || fontnoquotes == fntTest ? true : false)
+		// now test setting
+		dom.tzpDiv.style.fontFamily = fntTest
+		let font2 = getComputedStyle(dom.tzpDiv).getPropertyValue('font-family')
+		// notate: only default if font matches, not noquotes
+		if (fntDocEnabled && font == fntTest) {notation = default_green}
+		// tidy
+		if (font !== font2) {font += ' | ' + font2}
 		value = (fntDocEnabled ? zE : zD) +' | '+ font
 	} catch(e) {
 		value = e; data = zErrLog
 	}
-	addBoth(12, METRIC, value,'', (fntDocEnabled ? default_green : default_red), data)
+	addBoth(12, METRIC, value,'', notation, data)
 	return
 }
 
