@@ -88,7 +88,7 @@ function analyse() {
 		}
 	}
 	fntsEncountered = fntsEncountered.filter(function(item, position) {return fntsEncountered.indexOf(item) === position})
-	aDisplay.push(s14 +'ANALYSIS: '+ sc + s12 + start + sc + ' to '+ s12 + end + sc +' | '+ fntsEncountered.length +'<br>')
+	aDisplay.push(s14 +'ANALYSIS: '+ sc + s12 + start + sc + ' to '+ s12 + end + sc +' ['+ fntsEncountered.length +']<br>')
 
 	// TB
 	let aTB = fntTB.list
@@ -97,16 +97,16 @@ function analyse() {
 	// common
 	let objCommon = group(aCommon)
 	let aCommonDisplay = group_display(objCommon)
-	aDisplay.push('<details><summary>'+ s12 +'IN COMMON ' + sc + aCommon.length
-		+'</summary><p>' + aCommonDisplay.join('<br>') +'</p></details>')
-	aDisplay.push('<details><summary>'+ s12 +'TB SYSTEM FONTS ' + sc + fntTB.list.length
-		+ strTB +'</summary><p>' + fntTB.group.join('<br>') +'</p></details>')
+	aDisplay.push('<details><summary>'+ s12 +'IN COMMON ' + sc + '['+ aCommon.length
+		+']</summary><p>' + aCommonDisplay.join('<br>') +'</p></details>')
+	aDisplay.push('<details><summary>'+ s12 +'TB SYSTEM FONTS ' + sc +'['+ fntTB.list.length
+		+ strTB +']</summary><p>' + fntTB.group.join('<br>') +'</p></details>')
 	// TB missing
 	if (aNotInTB.length) {
 		let objNotTB = group(aNotInTB)
 		let aNotTB = group_display(objNotTB)
 		aDisplay.push(sb +'TB SYSTEM FONTS not IN COMMON '+ sc
-			+ aNotInTB.length +'<br><br>' + aNotTB.join('<br>') +'<br>'
+			+ '['+ aNotInTB.length +']<br><br>' + aNotTB.join('<br>') +'<br>'
 		)
 	}
 	// DIFFS
@@ -114,7 +114,7 @@ function analyse() {
 	//console.log(fntDiffs)
 	for (const k of Object.keys(fntDiffs)) {
 		// assume some changes
-		aDisplay.push(s12 + fntData[k].version + sc +'<br>')
+		aDisplay.push(s12 + fntData[k].version +' '+ fntData[k].name + sc +'<br>')
 		for (const j of Object.keys(fntDiffs[k]).sort()) {
 			let list = fntDiffs[k][j]
 			if (list.length) {
@@ -131,6 +131,14 @@ function analyse() {
 			}
 		}
 	}
+	// ALL
+	let objEncountered = group(fntsEncountered)
+	let aEncountered = group_display(objEncountered)
+	aDisplay.push('<hr></br>')
+	aDisplay.push('<details><summary>'+ s14 + 'ALL FONTS'+ sc +' since '
+			+ s14 + start +sc +' ['+ fntsEncountered.length +']</summary><p>'
+			+ aEncountered.join('<br>') +'</p></details>')
+	
 	currentDisplay = newDisplay
 	dom.results.innerHTML = aDisplay.join('<br>')
 	//console.log('displaying:', newDisplay)
@@ -150,11 +158,11 @@ function get_list() {
 			} else { end = fntData[k].version +' '+ fntData[k].name
 			}
 		}
-		aDisplay.push(s12 + start + sc + ' to '+ s12 + end + sc +' | '+ fntAll.list.length +'<br>')
+		aDisplay.push(s12 + start + sc + ' to '+ s12 + end + sc +' ['+ fntAll.list.length +']<br>')
 		obj = fntAll
 	} else {
 		let link = '<a class="blue" target="_blank" href="'+ fntData[k].url+ '">support link</a>'
-		aDisplay.push(s12 + fntData[k].version +' '+ fntData[k].name + sc +' | '+ fntData[k].count +' | '+ link +'<br>')
+		aDisplay.push(s12 + fntData[k].version +' '+ fntData[k].name + sc +' ['+ fntData[k].count +'] '+ link +'<br>')
 		obj = fntData[k]
 	}
 
@@ -247,7 +255,7 @@ function run_once() {
 	fntTB.group = group_display(objTB)
 
 	// display something
-	get_list()
+	analyse()
 }
 
 let fntTB = {
