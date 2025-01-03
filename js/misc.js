@@ -6,8 +6,8 @@ function check_timing(type) {
 	let aAllow = ['currenttime', 'date', 'mark', 'now', 'timestamp']
 	if (!aAllow.includes(type)) {return true}
 
-	let setTiming = new Set(), value, v1, v2, result = true
-	let aIgnore = [0, -1, -16, -17]
+	let setTiming = new Set(), value, result = true
+	let aIgnore = [0, -0, -1, -16, -17]
 	let max = isPerf ? 10 : 500
 	for (let i=1; i < max ; i++) {
 		try {
@@ -22,7 +22,7 @@ function check_timing(type) {
 				value = (gTimeline.currentTime) - (gTimeline.currentTime)
 			}
 			value = Math.trunc(value)
-			// we're subtracting the second measurement from the first so any diff !== 0 would be negative
+			// we're subtracting the second measurement from the first so any value !== 0/-0 would be negative
 			if (!aIgnore.includes(value)) {result = false}
 			setTiming.add(value)
 		} catch(e) {
