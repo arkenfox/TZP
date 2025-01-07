@@ -60,8 +60,9 @@
 			<hr>
 			<br>
 			<div class="spaces" style="color: #b3b3b3;" id="base"></div>
-			<div class="spaces" style="color: #b3b3b3;" id="font"></div>
+			<div class="spaces" style="color: #b3b3b3;" id="info"></div>
 			<div class="spaces visual" style="color: #b3b3b3;" id="visual"></div>
+			<div class="spaces" style="color: #b3b3b3;" id="font"></div>
 			<div class="spaces" style="color: #b3b3b3;" id="detail"></div>
 			</td>
 		</tr>
@@ -207,13 +208,15 @@ function run() {
 					dom.visual.style.font = ''
 					dom.visual.style.fontFamily = font
 				}
-				dom.visual.innerHTML = "<span style ='white-space: nowrap; font-weight:"+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
+				dom.info.innerHTML = '<br><hr>unstyled | styled'
+				dom.visual.innerHTML = "<br><span style ='white-space: nowrap;'>"+ fntStringUsed +"</span>"
+					+ "<span style ='white-space: nowrap; margin-left: 30px; font-weight: "+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
 				dom.valueF.value = font
 				fntList = [font]
 				getFonts()
 				let strDetected = (fntEverDetected ? sg +' [' : sb +' [NO ') + 'CHANGE DETECTED]' + sc
-				dom.font.innerHTML = '<br><hr><br>'+ s12 +'FONT: '+ sc + font
-					+' [font-weight: '+ s3 + fntWeight + sc +' | font-style: ' + s3 + fntStyle + sc +'] '+ strDetected +'<br><br>'
+				dom.font.innerHTML = '<br><br><hr><br>'+ s12 +'FONT: '+ sc + font
+					+' [font-weight: '+ s3 + fntWeight + sc +' | font-style: ' + s3 + fntStyle + sc +'] '+ strDetected
 			}, 150)
 		}
 	} else {
@@ -306,7 +309,7 @@ function getFonts() {
 			}
 			display.push('<p>'+ s3 + k.padStart(20) +": "+ sc + strResult +'</p>')
 		}
-		dom.detail.innerHTML = '<br><br><hr><br>' + s12 +'DETAIL: '+ sc + mini(results) + display.join('')
+		dom.detail.innerHTML = '<br>' + s12 +'DETAIL: '+ sc + mini(results) + display.join('')
 	} catch(e) {
 		removeElementFn(id)
 		console.debug(e.name, e.message)
