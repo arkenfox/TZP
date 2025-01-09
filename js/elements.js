@@ -28,7 +28,7 @@ function get_domrect(METRIC) {
 	let countPass = 0
 	for (const k of Object.keys(oDomRect).sort()) {
 		sDetail.document[METRIC +'_data'][k] = oDomRect[k]
-		let value = ''
+		let value =''
 		if (zErr == k) {value = zErr
 		} else if ('642e7ef0' == k) {value = 'trustworthy'; countPass = oDomRect[k]['methods'].length
 		} else {
@@ -52,7 +52,7 @@ function get_domrect(METRIC) {
 			}
 			console.log(k, oDiffs, multiples, max)
 			// sign: chamelon seems to always be -, CB seems to always be ±
-			let sign = ''
+			let sign =''
 			if (isNegative && isPositive) {sign = '±'} else {
 				sign = isNegative ? '-' : '+'
 			}
@@ -101,7 +101,8 @@ function get_element_keys(METRIC) {
 				if ('7766b529' == hash) {notation = tb_green}
 			} else {
 				// desktop
-				if ('eb81553d' == hash) {notation = tb_green}
+				//if ('eb81553d' == hash) {notation = tb_green} // NS 11.5.2
+				if ('1817fdbe' == hash) {notation = tb_green} // NS NS 12.1.1 drops all the set/value tampering
 			}
 		}
 	} catch (e) {
@@ -246,11 +247,11 @@ function get_element_forms(METRIC) {
 			tmpdata[key] = {}, newobj[key] = {}, data[key] = {}
 			for (const k of Object.keys(oList[key])) {
 				// important to clear the div so no other elements can affect measurements
-				parent.innerHTML = ""
+				parent.innerHTML =''
 				parent.innerHTML = ('' == oList[key][k] ? '<input type="'+ k +'">' : oList[key][k])
 				let target = parent.firstChild
 				// vertical seems to create subpixels in width before transform
-				target.setAttribute("style","display:inline; writing-mode: vertical-lr;") 
+				target.setAttribute('style', 'display:inline; writing-mode: vertical-lr;') 
 				if ('unstyled' == key) {target.classList.add('unstyled')}
 				if (k.includes('_option')) {target = target.lastElementChild}
 				// method
