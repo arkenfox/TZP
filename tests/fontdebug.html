@@ -55,7 +55,8 @@
 
 		</td></tr>
 		<tr><td colspan="2" class="mono" style="text-align: left; vertical-align: top;">
-			<span class="btn12 btnfirst" onClick="run()">[ run ]</span>
+			<span class="btn12 btnfirst" onClick="run('family')">[ font-family ]</span>
+			<span class="btn12 btnfirst" onClick="run('face')">[ FontFace ]</span>
 			<span class="spaces faint">some characters: M  ō  á  Ω  -  ? &#xFFFF;</span>
 			<hr>
 			<br>
@@ -80,12 +81,135 @@ let fntList = [],
 	fntStyle,
 	fntWeight,
 	fntSize = "512px",
-	fntEverDetected = false
+	fntEverDetected = false,
+	fntTestType = 'family' // default
+
+let aFaces = [] // history
 
 let fntSystem = ['caption','icon','menu','message-box','small-caption','status-bar',
 	'-moz-window', '-moz-desktop', '-moz-document', '-moz-workspace', '-moz-info',
 	'-moz-pull-down-menu', '-moz-dialog', '-moz-button', '-moz-list', '-moz-field',
 ]
+
+function get_fontFace(font) {
+	try {
+		async function testLocalFontFamily(font) {
+			try {
+				const fontFace = new FontFace(font, `local("${font}")`)
+				await fontFace.load()
+				return font
+			} catch(e) {
+				return e+''
+			}
+		}
+		Promise.all([
+			testLocalFontFamily(font),
+		]).then(function(res){
+			let item = res[0], isDetected = true, strErr = ''
+			if (font !== item) {
+				isDetected = false
+				if ('NetworkError: A network error occurred.' !== item) {strErr = item}
+			}
+			let str = isDetected ? green_tick : red_cross
+			aFaces.push(str +' '+ font +' '+ strErr)
+			dom.base.innerHTML = s12 + 'FONT FACE: results history'+ sc +'<br><br>'+ aFaces.join('<br>')
+		})
+	} catch(e) {
+		dom.base = e+''
+	}
+}
+
+function get_fontFamily(font) {
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/font
+	if (fntSystem.includes(font)) {
+		dom.visual.style.font = ''
+		dom.visual.style.setProperty('--font', '')
+		dom.visual.style.font = font
+	} else {
+		dom.visual.style.font = ''
+		dom.visual.style.fontFamily = font
+	}
+	dom.info.innerHTML = '<br><hr>unstyled | styled'
+	dom.visual.innerHTML = "<br><span style ='white-space: nowrap;'>"+ fntStringUsed +"</span>"
+		+ "<span style ='white-space: nowrap; margin-left: 30px; font-weight: "
+		+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
+	dom.valueF.value = font
+	fntList = [font]
+	getFonts()
+	let strDetected = (fntEverDetected ? sg +' [' : sb +' [NO ') + 'CHANGE DETECTED]' + sc
+	dom.font.innerHTML = '<br><br><hr><br>'+ s12 +'FONT: '+ sc + font
+		+' [font-weight: '+ s3 + fntWeight + sc +' | font-style: ' + s3 + fntStyle + sc +'] '+ strDetected
+}
+
+function run(type) {
+	// if enter key use last test type
+	if ('enter' == type) {type = fntTestType}
+
+	// set fntStringUsed
+	if ((dom.valueT.value).trim() == '') {
+		fntStringUsed = fntString
+	} else {
+		fntStringUsed = (dom.valueT.value).trim()
+	}
+	// replace multiple spaces
+	//fntStringUsed = fntStringUsed.replace(/\s\s+/g, ' ');
+	// remove all spaces
+	fntStringUsed = fntStringUsed.replace(/ /g,'')
+	dom.valueT.value = fntStringUsed
+
+	let isStillFace = false, delay = 150
+	if ('face' == type && type == fntTestType) {
+		isStillFace = true, delay = 0
+	}
+	fntTestType = type
+
+	// reset
+	fntList = []
+	dom.font = ''
+	dom.info = ''
+	if (isStillFace) {dom.base = ''}
+	dom.visual = ''
+	dom.detail = ''
+	fntEverDetected = false
+	fntWeight = dom.weight.value
+	fntStyle = dom.styles.value
+
+	// make sure we have a font
+	let valueF = dom.valueF.value
+	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
+	valueF = valueF.trim()
+
+	if (valueF.length) {
+		// only get the first font if multiple
+		let tmpArr = valueF.split(",")
+		for (let i = 0 ; i < tmpArr.length; i++) {
+			let trimmed = tmpArr[i].trim()
+			if (trimmed.length) {
+				fntList.push(trimmed)
+			}
+		}
+		// make sure we have at least one item
+		fntList = fntList.filter(function (item, position) {
+			return fntList.indexOf(item) === position
+		})
+		if (!fntList.length) {
+			dom.base = 'aww, snap! try adding a font'
+			return
+		} else {
+			let font = fntList[0].toLowerCase()
+			setTimeout(function() {
+				if ('family' == type) {
+					get_fontFamily(font)
+				} else {
+					get_fontFace(font)
+				}
+			}, delay)
+		}
+	} else {
+		dom.base = 'aww, snap! try adding a font'
+		return
+	}
+}
 
 function run_once() {
 	// populate font weights
@@ -148,82 +272,10 @@ function run_once() {
 		baseFonts.sort()
 	} catch(e) {
 	}
-	// add enter kete vent to font field
-	dom.valueF.addEventListener("keypress", function(event) {if (event.key === "Enter") {run()}})
+	// add enter key event to font field
+	dom.valueF.addEventListener("keypress", function(event) {if (event.key === "Enter") {run('enter')}})
 }
 run_once()
-
-function run() {
-	// set fntStringUsed
-	if ((dom.valueT.value).trim() == '') {
-		fntStringUsed = fntString
-	} else {
-		fntStringUsed = (dom.valueT.value).trim()
-	}
-	// replace multiple spaces
-	//fntStringUsed = fntStringUsed.replace(/\s\s+/g, ' ');
-	// remove all spaces
-	fntStringUsed = fntStringUsed.replace(/ /g,'')
-	dom.valueT.value = fntStringUsed
-
-	// reset
-	fntList = []
-	dom.font = ''
-	dom.base = ''
-	dom.visual = ''
-	dom.detail = ''
-	fntEverDetected = false
-	fntWeight = dom.weight.value
-	fntStyle = dom.styles.value
-
-	// make sure we have a font
-	let valueF = dom.valueF.value
-	valueF = valueF.replace(/['"]+/g, "") // remove all quote marks
-	valueF = valueF.trim()
-	if (valueF.length) {
-		let tmpArr = valueF.split(",")
-		for (let i = 0 ; i < tmpArr.length; i++) {
-			let trimmed = tmpArr[i].trim()
-			if (trimmed.length) {
-				fntList.push(trimmed)
-			}
-		}
-		// make sure we have at least one item
-		fntList = fntList.filter(function (item, position) {
-			return fntList.indexOf(item) === position
-		})
-		if (!fntList.length) {
-			dom.base = 'aww, snap! try adding a font'
-			return
-		} else {
-			// only use the first one
-			setTimeout(function() {
-				let font = fntList[0].toLowerCase()
-				//https://developer.mozilla.org/en-US/docs/Web/CSS/font
-				if (fntSystem.includes(font)) {
-					dom.visual.style.font = ''
-					dom.visual.style.setProperty('--font', '')
-					dom.visual.style.font = font
-				} else {
-					dom.visual.style.font = ''
-					dom.visual.style.fontFamily = font
-				}
-				dom.info.innerHTML = '<br><hr>unstyled | styled'
-				dom.visual.innerHTML = "<br><span style ='white-space: nowrap;'>"+ fntStringUsed +"</span>"
-					+ "<span style ='white-space: nowrap; margin-left: 30px; font-weight: "+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
-				dom.valueF.value = font
-				fntList = [font]
-				getFonts()
-				let strDetected = (fntEverDetected ? sg +' [' : sb +' [NO ') + 'CHANGE DETECTED]' + sc
-				dom.font.innerHTML = '<br><br><hr><br>'+ s12 +'FONT: '+ sc + font
-					+' [font-weight: '+ s3 + fntWeight + sc +' | font-style: ' + s3 + fntStyle + sc +'] '+ strDetected
-			}, 150)
-		}
-	} else {
-		dom.base = 'aww, snap! try adding a font'
-		return
-	}
-}
 
 function getFonts() {
 	const id = 'element-fp'
