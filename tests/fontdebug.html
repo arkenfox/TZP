@@ -127,9 +127,9 @@ function get_fontFamily(font) {
 		dom.visual.style.font = font
 	} else {
 		dom.visual.style.font = ''
-		dom.visual.style.fontFamily = font
+		dom.visual.style.fontFamily = "'"+ font +"'"
 	}
-	dom.info.innerHTML = '<br><hr>unstyled | styled'
+	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font
 	dom.visual.innerHTML = "<br><span style ='white-space: nowrap;'>"+ fntStringUsed +"</span>"
 		+ "<span style ='white-space: nowrap; margin-left: 30px; font-weight: "
 		+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
@@ -306,7 +306,7 @@ function getFonts() {
 			span.style.font =''
 			span.style.setProperty('--font', font)
 			baseDisplay[font] = '<span style="white-space: nowrap; font-size: 24px; font-weight: ' + fntWeight
-			+ '; font-style: ' + fntStyle + '; font-family: '+ font + '">'+ fntStringBase +'<span>'
+			+ '; font-style: ' + fntStyle + '; font-family: \''+ font + '\';">'+ fntStringBase +'<span>'
 			const dimensions = getDimensions(span, style)
 			acc[font.split(',')[0]] = dimensions // use only first name, i.e w/o fallback
 			return acc
@@ -334,7 +334,7 @@ function getFonts() {
 					span.style.setProperty('--font', "")
 					span.style.font = font
 				} else {
-					const family = "'"+ font +"', "+ basefont	
+					const family = "'"+ font +"', '"+ basefont +"'"
 					span.style.font = ""
 					span.style.setProperty('--font', family)
 				}
