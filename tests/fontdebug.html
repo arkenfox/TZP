@@ -137,7 +137,11 @@ function get_fontFamily(font) {
 	}
 	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font +'<br>'
 	dom.visual1.innerHTML = fntStringUsed
+	dom.visual1.style.fontSize = '96px'
+
 	dom.visual2.innerHTML = fntStringUsed 
+	dom.visual2.style.fontSize = '96px'
+
 	dom.visual2.style.fontWeight = fntWeight
 	dom.visual2.style.fontStyle = fntStyle
 	dom.valueF.value = font
