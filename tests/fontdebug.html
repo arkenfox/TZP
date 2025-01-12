@@ -10,6 +10,7 @@
 	<style>
 		table {width: 730px;}
 		.visual {
+			color: #b3b3b3;
 			font-size: 96px !important;
 			font-style: normal !important;
 			letter-spacing: normal !important;
@@ -61,8 +62,8 @@
 			<hr>
 			<br>
 			<div class="spaces" style="color: #b3b3b3;" id="base"></div>
-			<div class="spaces" style="color: #b3b3b3;" id="info"></div>
-			<div class="spaces visual" style="color: #b3b3b3;" id="visual"></div>
+			<div class="spaces" style="color: #b3b3b3;" id="info"></div><br><br>
+			<div class="visual"><span id="visual1"></span> <span id="visual2"></span></div>
 			<div class="spaces" style="color: #b3b3b3;" id="font"></div>
 			<div class="spaces" style="color: #b3b3b3;" id="detail"></div>
 			</td>
@@ -122,17 +123,23 @@ function get_fontFace(font) {
 function get_fontFamily(font) {
 	//https://developer.mozilla.org/en-US/docs/Web/CSS/font
 	if (fntSystem.includes(font)) {
-		dom.visual.style.font = ''
-		dom.visual.style.setProperty('--font', '')
-		dom.visual.style.font = font
+		dom.visual1.style.font = ''
+		dom.visual1.style.setProperty('--font', '')
+		dom.visual1.style.font = font
+		dom.visual2.style.font = ''
+		dom.visual2.style.setProperty('--font', '')
+		dom.visual2.style.font = font
 	} else {
-		dom.visual.style.font = ''
-		dom.visual.style.fontFamily = "'"+ font +"'"
+		dom.visual1.style.font = ''
+		dom.visual1.style.fontFamily = "'"+ font +"'"
+		dom.visual2.style.font = ''
+		dom.visual2.style.fontFamily = "'"+ font +"'"
 	}
-	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font
-	dom.visual.innerHTML = "<br><span style ='white-space: nowrap;'>"+ fntStringUsed +"</span>"
-		+ "<span style ='white-space: nowrap; margin-left: 30px; font-weight: "
-		+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
+	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font +'<br>'
+	dom.visual1.innerHTML = fntStringUsed
+	dom.visual2.innerHTML = fntStringUsed 
+	dom.visual2.style.fontWeight = fntWeight
+	dom.visual2.style.fontStyle = fntStyle
 	dom.valueF.value = font
 	fntList = [font]
 	getFonts()
@@ -168,7 +175,8 @@ function run(type) {
 	dom.font = ''
 	dom.info = ''
 	if (isStillFace) {dom.base = ''}
-	dom.visual = ''
+	dom.visual1 = ''
+	dom.visual2 = ''
 	dom.detail = ''
 	fntEverDetected = false
 	fntWeight = dom.weight.value
