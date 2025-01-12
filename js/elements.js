@@ -100,9 +100,10 @@ function get_element_keys(METRIC) {
 			if ('android' == isOS) {
 				if ('7766b529' == hash) {notation = tb_green}
 			} else {
-				// desktop
-				//if ('eb81553d' == hash) {notation = tb_green} // NS 11.5.2
-				if ('1817fdbe' == hash) {notation = tb_green} // NS NS 12.1.1 drops all the set/value tampering
+				// NS 12.1.1 only exposes all the set/value tampering on safer
+					// eb81553d: 353 safer
+					// 1817fdbe: 340 standard
+				if ('eb81553d' == hash || '1817fdbe' == hash) {notation = tb_green}
 			}
 		}
 	} catch (e) {
