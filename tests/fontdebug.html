@@ -18,7 +18,11 @@
 			line-height: 50% !important;
 			text-transform: none !important;
 			text-align: left !important;
+			/*
+				this is just a visual: we already strip out spaces
+				and I want a gap between unstyled and styled
 			white-space: normal !important;
+			*/
 			word-break: normal !important;
 			word-spacing: normal !important;
 		}
@@ -62,8 +66,8 @@
 			<hr>
 			<br>
 			<div class="spaces" style="color: #b3b3b3;" id="base"></div>
-			<div class="spaces" style="color: #b3b3b3;" id="info"></div><br><br>
-			<div class="visual"><span id="visual1"></span> <span id="visual2"></span></div>
+			<div class="spaces" style="color: #b3b3b3;" id="info"></div>
+			<div class="spaces visual" id="visual"></div>
 			<div class="spaces" style="color: #b3b3b3;" id="font"></div>
 			<div class="spaces" style="color: #b3b3b3;" id="detail"></div>
 			</td>
@@ -122,28 +126,16 @@ function get_fontFace(font) {
 
 function get_fontFamily(font) {
 	//https://developer.mozilla.org/en-US/docs/Web/CSS/font
+	dom.visual.style.font = ''
+	dom.visual.style.setProperty('--font', '')
 	if (fntSystem.includes(font)) {
-		dom.visual1.style.font = ''
-		dom.visual1.style.setProperty('--font', '')
-		dom.visual1.style.font = font
-		dom.visual2.style.font = ''
-		dom.visual2.style.setProperty('--font', '')
-		dom.visual2.style.font = font
+		dom.visual.style.font = font
 	} else {
-		dom.visual1.style.font = ''
-		dom.visual1.style.fontFamily = "'"+ font +"'"
-		dom.visual2.style.font = ''
-		dom.visual2.style.fontFamily = "'"+ font +"'"
+		dom.visual.style.fontFamily = "'"+ font +"'"
 	}
-	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font +'<br>'
-	dom.visual1.innerHTML = fntStringUsed
-	dom.visual1.style.fontSize = '96px'
-
-	dom.visual2.innerHTML = fntStringUsed 
-	dom.visual2.style.fontSize = '96px'
-
-	dom.visual2.style.fontWeight = fntWeight
-	dom.visual2.style.fontStyle = fntStyle
+	dom.info.innerHTML = '<br><hr>unstyled | styled | '+ font
+	dom.visual.innerHTML = "<br><span>"+ fntStringUsed +"  </span><span style ='font-weight: "
+		+ fntWeight +"; font-style:" + fntStyle + ";'>"+ fntStringUsed +"</span>"
 	dom.valueF.value = font
 	fntList = [font]
 	getFonts()
@@ -179,8 +171,7 @@ function run(type) {
 	dom.font = ''
 	dom.info = ''
 	if (isStillFace) {dom.base = ''}
-	dom.visual1 = ''
-	dom.visual2 = ''
+	dom.visual = ''
 	dom.detail = ''
 	fntEverDetected = false
 	fntWeight = dom.weight.value
