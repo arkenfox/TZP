@@ -130,8 +130,10 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 	// note: delay = 0 = silent run if permission granted
 	const METRIC = 'storage_manager'
 	dom[METRIC] = ''
+	let notation = isTB ? tb_red : ''
+
 	function exit(value) {
-		dom[METRIC].innerHTML = value
+		dom[METRIC].innerHTML = value + notation
 		return resolve()
 	}
 	setTimeout(function() {
@@ -139,12 +141,16 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 			navigator.storage.persist().then(function(persistent) {
 				navigator.storage.estimate().then(estimate => {
 					// we don't care about estimate.usage
-					let value = estimate.quota
-					let typeCheck = typeFn(value)
-					if ('number' === typeCheck && Number.isInteger(value)) {
-						value = Math.floor(estimate.quota/(1073741824) * 10)/10 // round down
-						value += 'GB ['+ estimate.quota +' bytes]'
-						if (isProxyLie('StorageManager.estimate')) {value = log_known(6, METRIC, value)}
+					let bytes = estimate.quota
+					let typeCheck = typeFn(bytes)
+					if ('number' === typeCheck && Number.isInteger(bytes)) {
+						let value = Math.floor(bytes/(1073741824) * 10)/10 // round down
+						value += 'GB ['+ bytes +' bytes]'
+						if (isProxyLie('StorageManager.estimate')) {
+							value = log_known(6, METRIC, value)
+						} else if (isTB && 10737418240 == bytes) { // not a lie, exact match
+							notation = tb_green
+						}
 						exit(value)
 					} else {
 						throw zErrType + typeCheck
@@ -156,21 +162,22 @@ const get_storage_manager = (delay = 170) => new Promise(resolve => {
 })
 
 const get_storage_quota = (METRIC) => new Promise(resolve => {
-	let isLies = false
+	let isLies = false, notation = isTB ? tb_red : ''
 	function exit(display, value) {
-		addBoth(6, METRIC, display,'','', value, isLies)
+		addBoth(6, METRIC, display,'', notation, value, isLies)
 		return resolve()
 	}
 	try {
 		navigator.storage.estimate().then(estimate => {
-			let value = estimate.quota
-			if (runST) {value = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
-			let typeCheck = typeFn(value)
-			if ('number' !== typeCheck && !Number.isInteger(value)) {throw zErrType + typeCheck}
-			let display = value
-			value = Math.floor(value/(1073741824) * 10)/10 // round down
-			display = value +'GB ['+ display +' bytes]'
+			let bytes = estimate.quota
+			if (runST) {bytes = undefined} else if (runSL) {addProxyLie('StorageManager.estimate')}
+			let typeCheck = typeFn(bytes)
+			if ('number' !== typeCheck && !Number.isInteger(bytes)) {throw zErrType + typeCheck}
+			let value = Math.floor(bytes/(1073741824) * 10)/10 // round down so even 1 byte less !== 10
+			let display = value +'GB ['+ bytes +' bytes]'
 			if (isProxyLie('StorageManager.estimate')) {isLies = true}
+			if (isTB && 10737418240 == bytes) {notation = tb_green}
+			sDetail.document.lookup[METRIC] = display
 			exit(display, value)
 		}).catch(function(e){
 			exit(log_error(6, METRIC, e), zErr)
