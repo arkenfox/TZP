@@ -14,6 +14,10 @@
 	<script src="js/globals.js"></script>
 	<script src="js/generic.js"></script>
 	<style>
+		/*
+		html {height: 100%;}
+		body {min-height: 100%;}
+		*/
 		body::after {
 			content: "";
 			background: url('chrome://global/skin/onion-pattern.svg');
@@ -25,6 +29,13 @@
 			right: 0;
 			position: fixed;
 			z-index: -1;
+		}
+		#tzpIframeInner {
+			height: 100vh;
+			width: 100vw;
+			position: fixed;
+			left: 0;
+			border: 0px;
 		}
 		#tzpResource {
 			background-image: url("about:logo"), url("");
@@ -47,14 +58,15 @@
 </head>
 
 <body>
-	<span translate="no">
+	<span translate="no" id="tzpDocument">
 	<div id="tzpRect"></div>
 	<!--offscreen-->
 	<div class="offscreen">
 		<div id="tzpFS" width=0 height=0></div>
 		<iframe id="tzpInvalidImage" width="100" height="30" src="images/InvalidImage.png"></iframe>
 		<iframe id="tzpScaledImage" width="100" height="30" src="images/ScaledImage.png"></iframe>
-		<iframe id="tzpIframe" width="100" height="30"></iframe>
+		<iframe id="tzpIframe" width="0" height="0"></iframe>
+		<iframe id="tzpIframeInner" width="100vw" height="100vh"></iframe>
 		<audio id="tzpAudio"></audio><video id="tzpMedia" width="20px"></video>
 		<div id="tzpDiv"></div>
 		<div id="tzpDocFont" style="font-family: 'test font name'"></div>
@@ -146,7 +158,7 @@
 				<span class="c" id="documenthash"></span>
 				<span class="c" id="documentbtns"></span>
 				<div class="btn-right c" id="documenthealth"></div>
-			</td></tr>
+		</td></tr>
 		<tr><td colspan="2"></td></tr>
 		<tr><td colspan="2"><span class="no_color">fingerprints are always 
 			<a target="_blank" class="blue" href="https://github.com/arkenfox/TZP/#-fingerprints-are-always-loose">loose</a>
@@ -217,56 +229,93 @@
 				<span class="c" id="orientation_aspect-ratio"></span>
 				| <span class="c" id="orientation_orientation"></span>
 				<span class="c" id="orientation"></span>
-			</td></tr>
-		<!--iframe-->
-		<tr><td>available screen</td><td class="mono"><span class="c" id="iframe_available"></span>
-			<div class="btn-right s99">iframes</div></td></tr></td></tr>
-		<tr><td>screen</td><td class="mono"><span class="c" id="iframe_screen"></span></td></tr>
-		<tr><td>outer window</td><td class="mono border-bottom">
-			<span class="c" id="iframe_outer"></span>
-			<span class="c" id="iframe_sizes_match_inner"></span>
 		</td></tr>
-		<!--screen: measurements-->
-		<tr><td>available screen</td>
-			<td class="mono"><span class="c" id="screen_available"></span>
-			<span class="c" id="screen_sizes"></span>
-			<div class="btn-right s99">screens</div>
-			</td></tr>
-		<tr><td>
-			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
-			&nbsp; [css min-device-] screen <sup>1</sup></td>
-			<td class="mono"><span id="S"><span></td></tr>
-		<tr><td>[matchMedia] screen <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
+
+		<!--screen-->
 		<tr><td>screen</td>
+			<td class="mono">
+				<span class="c" id="screen_summary"></span>
+				<span class="c" id="sizes_screen"></span>
+				<div class="btn-right s99"><span id="labelS" class="btn btnright" onClick="togglerows('S','btn')">[+]</span></div>
+		</td></tr>
+		<tr class="togS"><td>
+			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
+			&nbsp; [min-device-] css <sup>1</sup></td>
+			<td class="mono"><span id="S"><span>
+			<div class="btn-right s99">screen</div>
+		</td></tr>
+		<tr class="togS"><td>iframe</td><td class="mono"><span class="c" id="screen_iframe"></span></td></tr>
+		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
+		<tr class="togS"><td>screen</td>
 			<td class="mono border-bottom">
 				<span class="c" id="screen_screen"></span>
-				<span class="c" id="screen_size_matches_inner"></span>
 		</td></tr>
-		<!--windows-->
-		<tr><td>outer</td>
-			<td class="mono"><span class="c" id="window_outer"></span>
-			<span class="c" id="window_sizes"></span>
-			<div class="btn-right s99">windows</div></td></tr>
-		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
-			<span class="ttxt">range 400-2560</span></div>
-			&nbsp; [css min-] inner <sup>1, 3</sup></td>
-			<td class="mono"><span id="D"></span></td></tr>
-		<tr><td>[matchMedia] inner <sup>2</sup></td><td class="c mono" id="window_media"></td></tr>
-		<tr><td>inner</td>
-			<td class="mono border-bottom">
-				<span class="c" id="window_inner"></span>
-				<span class="c" id="window_letterbox"></span>
-				<span class="c" id="window_newwin"></span>
+		<!--available-->
+		<tr><td>available</td>
+			<td class="mono">
+				<span class="c" id="available_summary"></span>
+				<span class="c" id="sizes_available"></span>
+		</td></tr>
+		<tr class="togS"><td>iframe</td>
+			<td class="mono">
+				<span class="c" id="available_iframe"></span>
+				<div class="btn-right s99">available</div>
+				<span class="c" id="screen_sizes"></span>
 			</td></tr>
-		<tr class="togDROID"><td>[initial] outer window</span></td><td class="mono" id="initial_outer"></td></tr>
-		<tr class="togDROID"><td>inner window</td><td class="mono border-bottom"><span id="initial_inner"></span>
-			<span class="c" id="window_sizes_initial"></span></td></tr>
-		<!--viewport/scrollbars-->
-		<tr><td>[element] viewport<sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
-		<tr><td>visualViewport</td><td class="c mono" id="vp_visualViewport"></td></tr>
+		</td></tr>
+		<tr class="togS"><td>screen</td>
+			<td class="mono border-bottom">
+			<span class="c" id="available_screen"></span>
+		</td></tr>
+		<!--outer-->
+		<tr class="togDROID"><td>[initial] outer</span></td><td class="mono" id="initial_outer"></td></tr>
+		<tr><td>outer</td>
+			<td class="mono">
+				<span class="c" id="outer_summary"></span>
+				<span class="c" id="sizes_outer"></span>
+		</td></tr>
+		<tr class="togS"><td>iframe</td>
+			<td class="mono">
+			<span class="c" id="outer_iframe"></span>
+			<div class="btn-right s99">outer</div>
+		</td></tr>
+		<tr class="togS"><td>window</td>
+			<td class="mono border-bottom">
+			<span class="c" id="outer_window"></span>
+			<span class="c" id="window_sizes"></span>
+		</td></tr>
+		<!--inner-->
+		<tr class="togDROID"><td>[intial] inner</td><td class="mono"><span id="initial_inner"></span></td></tr>
+		<tr><td>inner</td>
+			<td class="mono">
+			<span class="c" id="inner_summary"></span>
+			<span class="c" id="sizes_inner"></span>
+			<span class="c" id="size_letterbox"></span>
+			<span class="c" id="size_newwin"></span>
+		</td></tr>
+		<tr class="togS"><td><div class="ttip"><span class="icon">[ i ]</span>
+			<span class="ttxt">range 400-2560</span></div>
+			&nbsp; [min-] css <sup>1, 3</sup></td>
+			<td class="mono"><span id="D"></span>
+			<div class="btn-right s99">inner</div></td></tr>
+		<tr class="togS"><td>[viewport units] iframe</td><td class="c mono" id="inner_iframe"></td></tr>
+		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="inner_media"></td></tr>
+		<tr class="togS"><td>window</td>
+			<td class="mono border-bottom"><span class="c" id="inner_window"></span></td></tr>
+		<!--viewport-->
+		<tr><td>viewport</td><td class="c mono" id="vp_summary"></td></tr>
+		<tr class="togS"><td>document</td><td class="mono">
+			<span class="c" id="vp_document"></span>
+			<div class="btn-right s99">viewport</div>
+		</td></tr>
+		<tr class="togS"><td>element<sup>4</sup></td><td class="c mono" id="vp_element"></td></tr>
+		<tr class="togS"><td>visualViewport</td><td class="c mono" id="vp_visualViewport"></td></tr>
+
+		<!--scrollbars-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">element (auto | thin)<br>scrollWidth (auto | thin)<br>viewport<br>visualViewport</span></div>
 			&nbsp; scrollbars</td><td class="c mono border-bottom" id="scrollbars"></td></tr>
+
 		<!--other-->
 		<tr><td><div class="ttip"><span class="icon">[ i ]</span>
 			<span class="ttxtb">[css] display-mode<br>display-mode<br>fullScreen<br>mozFullScreenEnabled</span></div>

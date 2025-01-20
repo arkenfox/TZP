@@ -953,6 +953,8 @@ function lookup_health(sect, metric, scope, isPass) {
 	let data ='', hash =''
 	// error?
 	try {data = gData['errors'][scope][sect][metric]; if (undefined !== data) {return([zErr, data])}} catch(e) {}
+	// lie?
+	try {data = gData['lies'][scope][sect][metric]; if (undefined !== data) {return([zLIE, zLIE])}} catch(e) {}
 	// nested, lookups, FP|detail data
 	try {
 		let nested ='', tmpdata, sDetailTemp
@@ -1464,7 +1466,7 @@ function log_perf(section, metric ='', time1, time2, extra) {
 	sDataTemp.perf.push([type, str, time1, time2, extra])
 }
 
-function log_section(name, time, scope = isScope, isResize = false) {
+function log_section(name, time, scope = isScope) {
 	let t0 = nowFn()
 	let nameStr = "number" === typeof name ? sectionMap[name] : name
 	if (gRun) {gData["perf"].push([2, nameStr, time, t0])}
@@ -1473,7 +1475,7 @@ function log_section(name, time, scope = isScope, isResize = false) {
 
 	// SECTION RERUNS
 	if (!gRun) {
-		if (!isResize) {log_perf(nameStr, "", time)}
+		log_perf(nameStr,'', time)
 		output_section(name, scope)
 		outputPostSection(name) // trigger nonFP	
 		gClick = true
@@ -1830,7 +1832,7 @@ function outputSection(id, isResize = false) {
 			get_isDomRect(),
 			outputPrototypeLies(isResize),
 		]).then(function(){
-			if (isTB && gClear) {console.clear()}
+			if (isTB && gClear && 'all' == id) {console.clear()}
 			if (isSmart) {log_section(SECTP, gt0)}
 			output()
 		})

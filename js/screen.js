@@ -204,89 +204,113 @@ const get_scr_measure = () => new Promise(resolve => {
 	]).then(function(mmres){
 		let oTmp = {
 			screen: {height: {}, width: {}},
-			window: {height: {}, width: {}},
-			iframe: {height: {}, width: {}}
+			available: {height: {}, width: {}},
+			inner: {height: {}, width: {}},
+			outer: {height: {}, width: {}},
 		}
 		// matchmedia
 		oTmp.screen.height.media = mmres[0]['device-height']
 		oTmp.screen.width.media = mmres[0]['device-width']
-		oTmp.window.height.media = mmres[0].height
-		oTmp.window.width.media = mmres[0].width
-		// screen/window
-		let oList = {
-			screen: {
-				height: ['availHeight','height'],
-				width: ['availWidth','width'] 
-			},
-			window: {
-				height: ['innerHeight','outerHeight'],
-				width: ['innerWidth','outerWidth']
-			},
-			iframe: {
-				height: ['availHeight','outerHeight','height'],
-				width: ['availWidth','outerWidth','width'] 
-			},
-		}
-		let iTarget
-		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
+		oTmp.inner.height.media = mmres[0].height
+		oTmp.inner.width.media = mmres[0].width
 
-		for (const k of Object.keys(oList)) {
-			for (const axis of Object.keys(oList[k])) {
-				let aList = oList[k][axis]
-				for (let i=0; i < aList.length; i++) {
-					let x, r, p = aList[i]
-					if ('width' == p || 'height' == p) {r = 'screen'
-					} else if (p.includes('inner')) {r = 'inner'
-					} else if (p.includes('outer')) {r = 'outer'
-					} else if (p.includes('avail')) {r = 'available'
-					}
+		// screen/window
+		// order matters: so property targets are correct
+		let aList = ['iframe','doc'] // iframe first
+		let oList = {
+			// screens first
+			screen: ['height','width'],
+			available: ['availHeight','availWidth'],
+			// then windows with inner last
+			outer: ['outerHeight','outerWidth'],
+			inner: ['innerHeight','innerWidth'],
+		}
+		let iTarget, iTargetInner, target
+		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
+		try {iTargetInner = dom.tzpIframeInner.contentWindow} catch(e) {}
+		try {target = iTarget.screen} catch(e) {} // initial iframe target
+		aList.forEach(function(name) {
+			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target after iframe
+			for (const k of Object.keys(oList)) {
+				if ('iframe' !== name) {
+					if ('outer' == k) {target = window; name = 'window'} // switch non-iframe target
+				}
+				let aItems = oList[k]
+				for (let i=0; i < aItems.length; i++) {
+					let p = aItems[i], x
+					let axis = p.includes('idth') ? 'width' : 'height'
 					try {
-						if ('screen' == k) {x = screen[p]
-						} else if ('window' == k) {x = window[p]
-						} else {
-							if (!p.includes('outer')) {x = iTarget.screen[p]} else {x = iTarget.window[p]}
+						// switch iframe target
+						if ('iframe' == name) {
+							if ('outer' == k) {target = iTarget.window} else if ('inner' == k) {target = iTargetInner.window}
 						}
-						if (runST) {
-							let oTest = {1: NaN, 2: Infinity, 3: '', 4: '6', 5: null, 6: false, 7: [1], 8: {1:1}}
-							x = oTest[i]
-						}
+						x = target[p]
+						if (runST) {x = undfined}
+						/* cause one error
+						if (name == 'screen' && k == 'screen' && axis == 'width') {x = undefined} // fail one screen
+						if (name == 'screen' && k == 'available' && axis == 'height') {x = undefined} // fail one availbe
+						if (name == 'window' && k == 'outer' && axis == 'width') {x = undefined} // fail one outer
+						if (name == 'window' && k == 'inner' && axis == 'height') {x = undefined} // fail one inner
+						//*/
+						/* change one value: a little moot once we compare to css for zLIEs etc
+						if (name == 'screen' && k == 'screen' && axis == 'width') {x = x + 100} // fail one screen
+						if (name == 'screen' && k == 'available' && axis == 'height') {x = x + 20} // fail one availbe
+						if (name == 'window' && k == 'outer' && axis == 'width') {x = x - 30} // fail one outer
+						if (name == 'window' && k == 'inner' && axis == 'height') {x = x - 30} // fail one inner
+						//*/
 						let typeCheck = typeFn(x)
 						if ('number' !== typeCheck) {throw zErrType + typeCheck}
+						// only matchmedia can be non Integer
+						if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
 					} catch (e) {
-						log_error(1, k +'_sizes_'+ axis +'_'+ r, e)
+						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ name, e)
 						x = zErr
 					}
-					oTmp[k][axis][r] = x
+					oTmp[k][axis][name] = x
 				}
 			}
-		}
+		})
 
 		// css
 		let cssList = [['#S',':before'],['#S',':after'],['#D',':before'],['#D',':after']]
 		cssList.forEach(function(array) {
 			let cssID = array[0], pseudo = array[1]
 			let axis = ':before' == pseudo ? 'width' : 'height'
-			let metric = '#S' == cssID ? 'screen' : 'window'
-			let value = getElementProp(1, cssID, metric +'_sizes_'+ axis +'_css', pseudo)
+			let metric = '#S' == cssID ? 'screen' : 'inner'
+			let value = getElementProp(1, cssID, 'sizes_'+ metric +'_'+ axis +'_css', pseudo)
 			if (value !== zErr && '?' !== value) {
 				let cType = typeFn(value)
 				if ('number' !== cType) {
-					log_error(1, metric +'_sizes_'+ axis +'_css', zErrType + cType)
+					log_error(1, 'sizes_'+ metric +'_'+ axis +'_css', zErrType + cType)
+					value = zErr
+				} else if (!Number.isInteger(value)) {
+					// only matchmedia can be non integer
+					log_error(1, 'sizes_'+ metric +'_'+ axis +'_css', zErrInvalid + 'expected Integer: got '+ cType)
 					value = zErr
 				}
 			}
-			if ('#S' == array[0]) {oTmp.screen[axis].css = value} else {oTmp.window[axis].css = value}
+			if ('#S' == array[0]) {oTmp.screen[axis].css = value} else {oTmp.inner[axis].css = value}
 		})
 
 		// sort into new obj, build default display
-		let oData = {}, oDisplay = {}
+		let oData = {}, oDisplay = {}, oSummary = {}
 		for (const k of Object.keys(oTmp)) {
 			oData[k] = {}
+			oSummary[k] = {}
 			for (const j of Object.keys(oTmp[k])) {
 				oData[k][j] = {}
+				oSummary[k][j] = undefined
 				for (const m of Object.keys(oTmp[k][j]).sort()) {
-					oData[k][j][m] = oTmp[k][j][m]
-					if ('width' == j && 'css' !== m) {oDisplay[k +'_'+m] = oTmp[k][j][m] +' x '+ oTmp[k]['height'][m]}
+					let value = oTmp[k][j][m]
+					oData[k][j][m] = value
+					if ('width' == j && 'css' !== m) {
+						oDisplay[k +'_'+m] = value +' x '+ oTmp[k]['height'][m]
+					}
+					// any error to oSummary
+					if ('string' == typeof value) {
+						// ignore out of range css
+						if ('css' == m && '?' == value) {} else {oSummary[k][j] = zErr}
+					}
 				}
 			}
 		}
@@ -295,85 +319,116 @@ const get_scr_measure = () => new Promise(resolve => {
 		//console.log('oData', oData)
 		//console.log('oDisplay', oDisplay)
 
-		// notations
+		// ToDo: update oData/oDisplay with lies
+
+		// notation
 		let notation ='', initData = zNA, initHash =''
-		let innerw = oData.window.width.inner, innerh = oData.window.height.inner
-		// screen_size_matches_inner
-		let oCompare = {
-			'screen_size_matches_inner': [sizes_red, sizes_green,
-				oData.screen.width.screen, oData.screen.height.screen,
-				innerw, innerh
-			],
-			'iframe_sizes_match_inner': [isizes_red, isizes_green,
-				oData.iframe.width.available, oData.iframe.height.available,
-				oData.iframe.width.screen, oData.iframe.height.screen,
-				oData.iframe.width.outer, oData.iframe.height.outer
-			],
-		}
-		// window_sizes_initial
+		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
+		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
+
 		if ('android' == isOS) {
-			oCompare['window_sizes_initial'] = [window_red, window_green,
-				isInitial.width.inner, isInitial.height.inner,
-				isInitial.width.outer, isInitial.height.outer
-			]
-			// FP data
+			// initial_sizes
+			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
 		} else {
 			// LB/NW
 			let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
-			addDisplay(1, 'window_letterbox','','', return_lb(innerw, innerh, isNew))
-			addDisplay(1, 'window_newwin','','', return_nw(innerw, innerh, isNew))
+			addDisplay(1, 'size_letterbox','','', return_lb(innerw, innerh, isNew))
+			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh, isNew))
 		}
 
-		let isIframesSame = false
-		for (const k of Object.keys(oCompare)) {
-			let isValid = true, isGood = false, data = oCompare[k]
-			for (let i=2; i < oCompare[k].length; i++) {if ('number' !== typeFn(data[i])) {isValid = false; break}}
-			if (isValid) {
-				let test1 = data[2] +''+ data[3], test2 = data[4] +''+ data[5]
-				if ('iframe_sizes_match_inner' == k) {
-					let test3 = data[6] +''+ data[7]
-					if (test1 === test2 && test1 == test3) {
-						isIframesSame = true
-						if (test1 === innerw +''+ innerh) {isGood = true}
+		let isInnerValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
+		// RFP/match
+		for (const k of Object.keys(oData)) {
+			let isSame = true
+			// for each axis
+			for (const j of Object.keys(oData[k])) {
+				let tmpSet = new Set
+				for (const n of Object.keys(oData[k][j])) {
+					let value = oData[k][j][n]
+					//console.log(k, j, n, value)
+					// ignore css out of range
+					let isIgnore = '?' == value && 'css' == n
+					if (zErr == value || zLIE == value) {
+						isSame = false // errors and lies = fail
+						isIgnore = true // don't add errors or lies to our set
+						if (zErr == value) {oSummary[k][j] = zErr}
 					}
+					if (!isIgnore) {
+						// media can be non-integer | css can be off by 1 | both only screen + inner metrics
+						// match them to our inner or screen if within 1
+						if ('media' == n || 'css' == n) {
+							value = Math.round(value) // to remove non-integer
+							let control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
+							if ('inner' == k) {control = 'width' == j ? innerw : innerh}
+							if (1 == Math.abs(value - control)) {value = control} // match control
+						}
+						tmpSet.add(value)
+					}
+				}
+				let aSet = Array.from(tmpSet)
+				// if the array is empty, isSame should already be false
+				// we already rounded + matched non-integers, there should only be one
+
+				if (aSet.length !== 1) {
+					if (undefined == oSummary[k][j]) {oSummary[k][j] = 'mixed'}
+					isSame = false
 				} else {
-					if (test1 === test2) {isGood = true}
+					if (undefined == oSummary[k][j]) {oSummary[k][j] = aSet[0]}
+				}
+
+				// if all the same then does it match _based_ on inner
+						// innerw and innerh must be valid, to compare to
+				if (isSame && isInnerValid) {
+					//console.log(k, j, aSet)
+					// we can refine these rules later per key/OS
+					let match = 'width' == j ? innerw : innerh
+					if (aSet[0] !== match) {isSame = false}
 				}
 			}
-			addDisplay(1, k,'','', (isGood ? data[1] : data[0]))
+			addDisplay(1, 'sizes_'+ k, '','', (isSame ? rfp_green : rfp_red))
 		}
 
-		// ToDo: screen_sizes (_match)
-		// ToDo: window_sizes (_match)
-		//addDisplay(1, 'screen_sizes','','', screen_red)
-		//addDisplay(1, 'window_sizes','','', window_green)
-		
+		// summary
+		//console.log('oSummary', oSummary)
+		for (const k of Object.keys(oSummary)) {oDisplay[k +'_summary'] = oSummary[k].width +' x '+ oSummary[k].height}
+
 		// simple health lookups
 		if (gRun) {
-			let strInner = oTmp.window.width.inner +' x '+ oTmp.window.height.inner
-			let strScreen = oTmp.screen.width.screen +' x '+ oTmp.screen.height.screen
-			let scrMatch = strScreen + (strInner == strScreen ? '' : ' vs '+ strInner)
+			let strInner = oTmp.inner.width.window +' x '+ oTmp.inner.height.window
 			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
 			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			let iframeMatch = oTmp.iframe.width.screen +' x '+ oTmp.iframe.height.screen
-				+ ' | '+ oTmp.iframe.width.available +' x '+ oTmp.iframe.height.available
-				+ ' | '+ oTmp.iframe.width.outer +' x '+ oTmp.iframe.height.outer
-				+ ' vs '+ oTmp.window.width.inner +' x '+ oTmp.window.height.inner
-			if (isIframesSame) {iframeMatch = oTmp.iframe.width.screen +' x '+ oTmp.iframe.height.screen}
-			sDetail[isScope].lookup['iframe_sizes_match_inner'] = iframeMatch
-			sDetail[isScope].lookup['screen_size_matches_inner'] = scrMatch
-			sDetail[isScope].lookup['window_letterbox'] = strInner
-			sDetail[isScope].lookup['window_newwin'] = strInner
-			sDetail[isScope].lookup['window_sizes_initial'] = initMatch
+			sDetail[isScope].lookup['size_letterbox'] = strInner
+			sDetail[isScope].lookup['size_newwin'] = strInner
+			sDetail[isScope].lookup['sizes_initial'] = initMatch
 		}
-		// add data/display
+		// data
+		for (const k of Object.keys(oData)) {addData(1, 'sizes_'+ k, oData[k], mini(oData[k]))}
+		addData(1, 'sizes_initial', initData, initHash)
+		// display
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
-		addData(1, 'screen_sizes', oData.screen, mini(oData.screen))
-		addData(1, 'window_sizes', oData.window, mini(oData.window))
-		addData(1, 'iframe_sizes', oData.iframe, mini(oData.iframe))
-		addData(1, 'window_sizes_initial', initData, initHash)
+
+		// temp dev logging
+		function log_screen_details() {
+			let dpr = window.devicePixelRatio
+			dpr = Math.round((dpr + Number.EPSILON) * 100)
+			if (109 == dpr) {dpr = 110} else if (171 == dpr) {dpr = 175}
+			let tbHorizontal = oData.screen.height.screen - oData.available.height.screen
+			let tbVertical = oData.screen.width.screen - oData.available.width.screen
+			let chromewidth = oData.outer.width.window - oData.inner.width.window
+			let chromeheight = oData.outer.height.window - oData.inner.height.window
+			console.log(
+				'zoom', dpr,
+				'\nscreen', oData.screen.width.screen, 'x', oData.screen.height.screen,
+				'| available', oData.available.width.screen, 'x', oData.available.height.screen,
+				'| taskbar', tbVertical, 'x', tbHorizontal,
+				'\nouter', oData.outer.width.window, 'x', oData.outer.height.window,
+				'| inner', oData.inner.width.window, 'x', oData.inner.height.window,
+				'| chrome', chromewidth, 'x', chromeheight
+			)
+		}
+		if (isScreenLog) {log_screen_details()}
 		return resolve()
 	})
 
@@ -444,10 +499,10 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 	const unable = 'unable to find upper bound'
 	const oList = {
 		measure: [
-			['screen_sizes', 'device-width', 'device-width', 'max-device-width', 'px', 512, 0.01],
-			['screen_sizes', 'device-height', 'device-height', 'max-device-height', 'px', 512, 0.01],
-			['window_sizes', 'width', 'width', 'max-width', 'px', 512, 0.01],
-			['window_sizes', 'height', 'height', 'max-height', 'px', 512, 0.01],
+			['sizes_screen', 'device-width', 'device-width', 'max-device-width', 'px', 512, 0.01],
+			['sizes_screen', 'device-height', 'device-height', 'max-device-height', 'px', 512, 0.01],
+			['sizes_inner', 'width', 'width', 'max-width', 'px', 512, 0.01],
+			['sizes_inner', 'height', 'height', 'max-height', 'px', 512, 0.01],
 		],
 		pixels: [
 			['pixels', '-moz-device-pixel-ratio', '-moz-device-pixel-ratio', 'max--moz-device-pixel-ratio', '', 4, 0.0000001],
@@ -461,8 +516,8 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 	const oPrefixes = {
 		'device-width': 'screen_sizes_width',
 		'device-height': 'screen_sizes_height',
-		width: 'window_sizes_width',
-		height: 'window_sizes_height',
+		width: 'sizes_inner_width',
+		height: 'sizes_inner_height',
 		'-moz-device-pixel-ratio': 'pixels',
 		'-webkit-min-device-pixel-ratio': 'pixels',
 		dpcm: 'pixels',
@@ -881,7 +936,6 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1786665
 		// widget.non-native-theme.scrollbar.style = values 1 to 5
 		// widget.non-native-theme.scrollbar.size.override <-- non-overlay only
-
 	Promise.all([
 		// get the viewport width: we only return zErr or a number
 		get_scr_viewport(runtype)
@@ -977,6 +1031,11 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		get_scroll()
 		get_viewport('viewport')
 		get_viewport('visualViewport')
+		/*
+		let isScrollbarOverlay = false
+		aDisplay.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
+		*/
+		// output
 		addDisplay(1, METRIC, aDisplay.join(', '))
 		addData(1, METRIC, oData, mini(oData))
 		return resolve()
@@ -985,13 +1044,13 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 
 const get_scr_viewport = (runtype) => new Promise(resolve => {
 	let oData = {height: {}, width: {}}, aDisplay = []
-	const METRIC = 'viewport', isHeight = 'height' == runtype, id= 'vp-element'
+	const METRIC = 'sizes_viewport', isHeight = 'height' == runtype, id= 'vp-element'
 
 	function get_viewport(type) {
-		let w, h, wDisplay ='', hDisplay, range
+		let w, h, wDisplay ='', hDisplay, range, method, target
 		try {
 			if ('element' == type) {
-				let target = document.createElement('div')
+				target = document.createElement('div')
 				target.setAttribute('id', id)
 				target.style.cssText = 'position:fixed;top:0;left:0;bottom:0;right:0;'
 				document.documentElement.insertBefore(target,document.documentElement.firstChild)
@@ -1003,24 +1062,47 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 						range = document.createRange()
 						range.selectNode(target)
 					}
-					if (isDomRect < 1) {
-						w = target.getBoundingClientRect().width
-						h = target.getBoundingClientRect().height
-					} else if (isDomRect == 1) {
-						w = target.getClientRects()[0].width
-						h = target.getClientRects()[0].height
-					} else if (isDomRect == 2) {
-						w = range.getBoundingClientRect().width
-						h = range.getBoundingClientRect().height
-					} else if (isDomRect > 2) {
-						w = range.getClientRects()[0].width
-						h = range.getClientRects()[0].height
+					if (isDomRect < 1) {method = target.getBoundingClientRect()
+					} else if (isDomRect == 1) {method = target.getClientRects()[0]
+					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+					} else if (isDomRect > 2) {method = range.getClientRects()[0]
 					}
+					w = method.width
+					h = method.height
+				}
+			} else if ('document' == type) {
+				// using document.documentElement + domrect
+				// width:
+					// if we hide the content this removes the scrollbar which defeats the purpose
+					// but we should be good due to css, so we should get that first
+				// height
+					// if we don't hiding the content height is the complete doc e.g. 5000px
+					// if we do hide it: then height is the bare minimum: 8px or whatever
+					// what if hid the content but achored a visible element to the bottom
+					// would that force the content to be full height
+
+				target = document.documentElement
+				h = target.clientHeight
+				if (isDomRect == -1) {
+					w = target.clientWidth
+				} else {
+					if (isDomRect > 1) {
+						range = document.createRange()
+						range.selectNode(target)
+					}
+					if (isDomRect < 1) {method = target.getBoundingClientRect()
+					} else if (isDomRect == 1) {method = target.getClientRects()[0]
+					} else if (isDomRect == 2) {method = range.getBoundingClientRect()
+					} else if (isDomRect > 2) {method = range.getClientRects()[0]
+					}
+					w = method.width
+					//h = method.height
 				}
 			} else {
 				w = window.visualViewport.width 
 				h = window.visualViewport.height
 			}
+
 			if (runST) {w = NaN, h = undefined}
 			let wType = typeFn(w), hType = typeFn(h)
 			if ('number' !== wType) {
@@ -1041,9 +1123,14 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 		oData.width[type] = w
 		if (!isHeight) {
 			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+			if ('visualViewport' == type) {
+				addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+			}
 		}
 	}
 
+	// ToDo: we could also use size observer / IntersectionObserverEntry
+	get_viewport('document')
 	get_viewport('element')
 	get_viewport('visualViewport')
 	removeElementFn(id)
@@ -1411,7 +1498,8 @@ const outputUA = (os = isOS) => new Promise(resolve => {
 	for (const k of Object.keys(oComplex)) {
 		let reported = oComplex[k][0], isErr = oComplex[k][1]
 		oReported[k] = (isErr ? zErr : reported) // for uaDoc
-		let isLies = isProxyLie('Navigator.'+ k), notation = isLies ? rfp_red : '' // in case os is sundefined
+		let isLies = isProxyLie('Navigator.'+ k)
+		let notation = isLies ? rfp_red : '' // in case os is undefined
 		if (os !== undefined) {
 			let rfpvalue = oRFP[os][k]
 			let isMatch = rfpvalue === reported

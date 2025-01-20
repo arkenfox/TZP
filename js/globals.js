@@ -19,7 +19,7 @@ const btnList = ['alerts', 'errors', 'lies']
 
 const jsFilesExpected = 14,
 	gSectionsExpected = 16,
-	expectedMetrics = 146
+	expectedMetrics = 147
 let jsFiles = 0, gCount = 0, gCountTiming = 0
 
 // global
@@ -127,15 +127,6 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	orientation_green = sgtick+'RFP orientation]'+sc,
 	orientation_red = sbx+'RFP orientation]'+sc
 
-const screen_green = sgtick+'screens match]'+sc,
-	screen_red = sbx+'screens match]'+sc,
-	window_green = sgtick+'windows match]'+sc,
-	window_red = sbx+'windows match]'+sc,
-	sizes_green = sgtick+'screen = inner]'+sc,
-	sizes_red = sbx+'screen = inner]'+sc,
-	isizes_green = sgtick+'iframes = inner]'+sc,
-	isizes_red = sbx+'iframes = inner]'+sc
-
 // dynamic TB/MB notation
 let tb_green = sgtick+'TB]'+sc,
 	tb_red = sbx+'TB]'+sc,
@@ -184,7 +175,7 @@ let aDomRect = [true, true, true, true],
 
 // overlay metrics
 let overlayScope = 'document',
-	overlayFP = '_summary',
+	overlayFP = '_list',
 	overlayHealth = '_summary',
 	overlayHealthCount = '',
 	overlaySection = '',
@@ -205,6 +196,7 @@ let gt0, gt1,
 	isBlockMin = 115,
 	isFontSizesMore = false, // when true: force 3-pass and group/order by name then generic-font-family
 	isFontSizesPrevious = false, 
+	isScreenLog = false, // console log screen/window/taskbar/chrome
 	isSmart = false,
 	isSmartMin = 128 // we can't treat TB differently as we haven't gotten isMullvad yet which if true then sets isTB
 
