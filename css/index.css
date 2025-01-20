@@ -92,6 +92,9 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	padding-right: 6px;
 	cursor: pointer;
 }
+.btnright {
+	padding-right: 0px;
+}
 .btnb {cursor: pointer;}
 /* item metrics/counts: dotted, no padding, normal */
 .btnc {
@@ -106,7 +109,7 @@ a.return {color: var(--link); text-decoration: none;  font-size: 14px; line-heig
 	padding-right: 8px;
 	cursor: pointer;
 }
-.btn0 {border-color: var(--test0); color: var(--test0);}
+.btn0, .s0 {border-color: var(--test0); color: var(--test0);}
 .btn1, .s1 {border-color: var(--test1); color: var(--test1);}
 .btn2, .s2 {border-color: var(--test2); color: var(--test2);}
 .btn3, .s3 {border-color: var(--test3); color: var(--test3);}
@@ -259,10 +262,11 @@ tr td.border-bottom {
 #tbperf th {background-color: var(--bg99);}
 #tbblock th {background-color: var(--bg99);}
 
-.togCS, .togFS, .togL, .togTP, .togTA, .togTL, .togTO, .togUAI, .togUAW,
+.togCS, .togFS, .togL, .togS, .togTP, .togTA, .togTL, .togTO, .togUAI, .togUAW,
 .togDROID, .togPERF {display: none;}
 
 #tb1 td:first-child {color: var(--test1);}
+	#tb1 .togS td:first-child {color: var(--test99);} /* screen/window/viewport */
 #tb2 td:first-child {color: var(--test2);}
 	#tb2 .togUAI td:first-child {color: var(--test99);} /* user agent iframes */
 	#tb2 .togUAW td:first-child {color: var(--test99);} /* user agent workers */
