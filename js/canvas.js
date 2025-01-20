@@ -16,8 +16,7 @@ function check_canvas_to(data) {
 	return false
 }
 
-const outputCanvas = () => new Promise(resolve => {
-	let t0 = nowFn()
+const get_canvas = () => new Promise(resolve => {
 
 	const sizeW = 16, sizeH = 8, pixelcount = sizeW * sizeH, allZeros = '93bd94c5'
 	// FF95+: compression 1724331 / 1737038 
@@ -31,7 +30,7 @@ const outputCanvas = () => new Promise(resolve => {
 		'toDataURL': '3afc375a',
 		'toDataURL_solid': '56ea6104',
 	}
-	let isCanvasGet = '', isCanvasGetChannels = '', isGetStealth = false
+	let isCanvasGet ='', isCanvasGetChannels ='', isGetStealth = false
 
 	function check_canvas_get(dataname, runNo) {
 		let data = oData[dataname]
@@ -64,7 +63,7 @@ const outputCanvas = () => new Promise(resolve => {
 		isGetStealth = aNotInFonts.length == 0
 
 		// noise FP
-		let strFP = '', aNote = []
+		let strFP ='', aNote = []
 		aNote.push('p'+ Math.floor((altP / pixelcount) * 100))
 		if (altR > 0) {strFP += 'r'; aNote.push('r'+Math.floor((altR / pixelcount) * 100))}
 		if (altG > 0) {strFP += 'g'; aNote.push('g'+ Math.floor((altG / pixelcount) * 100))}
@@ -202,7 +201,7 @@ const outputCanvas = () => new Promise(resolve => {
 										var reader = new FileReader()
 										reader.onload = function(){
 											let value = reader.result
-											if (runST) {value = ''}
+											if (runST) {value =''}
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
 												oData[METRIC] = value
@@ -243,7 +242,7 @@ const outputCanvas = () => new Promise(resolve => {
 										var reader = new FileReader()
 										reader.onload = function(){
 											let value = reader.result
-											if (runST) {value = ''}
+											if (runST) {value =''}
 											let typeCheck = typeFn(value)
 											if ('string' === typeCheck ) {
 												oData[METRIC] = value
@@ -629,5 +628,14 @@ const outputCanvas = () => new Promise(resolve => {
 		})
 	})
 })
+
+const outputCanvas = () => new Promise(resolve => {
+	Promise.all([
+		get_canvas()
+	]).then(function(){
+		return resolve()
+	})
+})
+
 
 countJS(9)
