@@ -232,11 +232,10 @@
 		</td></tr>
 
 		<!--screen-->
-		<tr><td>screen</td>
-			<td class="mono">
-				<span class="c" id="screen_summary"></span>
-				<span class="c" id="sizes_screen"></span>
-				<div class="btn-right s99"><span id="labelS" class="btn btnright" onClick="togglerows('S','btn')">[+]</span></div>
+		<tr><td>screen</td><td class="mono">
+			<span class="c" id="screen_summary"></span>
+			<span class="c" id="sizes_screen"></span>
+			<div class="btn-right s99"><span id="labelS" class="btn btnright" onClick="togglerows('S','btn')">[+]</span></div>
 		</td></tr>
 		<tr class="togS"><td>
 			<div class="ttip"><span class="icon">[ i ]</span><span class="ttxt">range 400-2560</span></div>
@@ -244,53 +243,44 @@
 			<td class="mono"><span id="S"><span>
 			<div class="btn-right s99">screen</div>
 		</td></tr>
-		<tr class="togS"><td>iframe</td><td class="mono"><span class="c" id="screen_iframe"></span></td></tr>
+		<tr class="togS"><td>iframe</td><td class="c mono" id="screen_iframe"></td></tr>
 		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="screen_media"></td></tr>
-		<tr class="togS"><td>screen</td>
-			<td class="mono border-bottom">
-				<span class="c" id="screen_screen"></span>
+		<tr class="togS"><td>screen</td><td class="mono border-bottom">
+			<span class="c" id="screen_screen"></span>
 		</td></tr>
 		<!--available-->
-		<tr><td>available</td>
-			<td class="mono">
-				<span class="c" id="available_summary"></span>
-				<span class="c" id="sizes_available"></span>
+		<tr><td>available</td><td class="mono">
+			<span class="c" id="available_summary"></span>
+			<span class="c" id="sizes_available"></span>
 		</td></tr>
-		<tr class="togS"><td>iframe</td>
-			<td class="mono">
-				<span class="c" id="available_iframe"></span>
-				<div class="btn-right s99">available</div>
-				<span class="c" id="screen_sizes"></span>
-			</td></tr>
+		<tr class="togS"><td>iframe</td><td class="mono">
+			<span class="c" id="available_iframe"></span>
+			<div class="btn-right s99">available</div>
+			<span class="c" id="screen_sizes"></span>
 		</td></tr>
-		<tr class="togS"><td>screen</td>
-			<td class="mono border-bottom">
+		</td></tr>
+		<tr class="togS"><td>screen</td><td class="mono border-bottom">
 			<span class="c" id="available_screen"></span>
 		</td></tr>
 		<!--outer-->
-		<tr class="togDROID"><td>initial outer</span></td><td class="mono" id="initial_outer"></td></tr>
-		<tr><td>outer</td>
-			<td class="mono">
+		<tr class="togA"><td>initial outer</span></td><td class="mono" id="initial_outer"></td></tr>
+		<tr><td>outer</td><td class="mono">
 				<span class="c" id="outer_summary"></span>
 				<span class="c" id="sizes_outer"></span>
 		</td></tr>
-		<tr class="togS"><td>iframe</td>
-			<td class="mono">
+		<tr class="togS"><td>iframe</td><td class="mono">
 			<span class="c" id="outer_iframe"></span>
 			<div class="btn-right s99">outer</div>
 		</td></tr>
-		<tr class="togS"><td>window</td>
-			<td class="mono border-bottom">
+		<tr class="togS"><td>window</td><td class="mono border-bottom">
 			<span class="c" id="outer_window"></span>
 			<span class="c" id="window_sizes"></span>
 		</td></tr>
 		<!--inner-->
-		<tr class="togDROID"><td>intial inner</td><td class="mono"><span id="initial_inner"></span></td></tr>
-		<tr><td>inner</td>
-			<td class="mono">
+		<tr class="togA"><td>intial inner</td><td class="c mono" id="initial_inner"></td></tr>
+		<tr><td>inner</td><td class="mono">
 			<span class="c" id="inner_summary"></span>
 			<span class="c" id="sizes_inner"></span>
-			<span class="c" id="size_letterbox"></span>
 			<span class="c" id="size_newwin"></span>
 		</td></tr>
 		<tr class="togS"><td><div class="ttip"><span class="icon">[ i ]</span>
@@ -299,11 +289,11 @@
 			<td class="mono"><span id="D"></span>
 			<div class="btn-right s99">inner</div></td></tr>
 		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="inner_media"></td></tr>
-		<tr id="androidhide1" class="togS"><td>viewport units</td><td class="c mono" id="inner_viewport"></td></tr>
+		<tr id="A1" class="togS"><td>viewport units</td><td class="c mono" id="inner_viewport"></td></tr>
 		<tr class="togS"><td>window</td>
 			<td class="mono border-bottom"><span class="c" id="inner_window"></span></td></tr>
 		<!--viewport-->
-		<tr id="androidshow1" class="hidden">
+		<tr id="A2" class="hidden">
 			<td>viewport units</td><td class="c mono" id="sizes_viewport_units"></td>
 		</tr>
 		<tr><td>viewport</td><td class="c mono" id="vp_summary"></td></tr>
@@ -353,11 +343,12 @@
 		<tr><td>[border] devicePixelRatio</td><td class="mono"><span class="c" id="devicePixelRatio_border"></span></td></tr>
 		<tr><td>visualViewport scale</td><td class="c mono" id="visualViewport_scale"></td></tr>
 
-		<tr class="togDROID"><td colspan="2" class="center">--- android ---</td></tr>
-		<tr class="togDROID"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
-		<tr class="togDROID"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
-		<tr class="togDROID"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
-		<tr class="togDROID"><td>toolbar height</td><td class="c mono" id="tbh"></td></tr>
+		<tr class="togA"><td colspan="2" class="center">--- android ---</td></tr>
+		<tr class="togA"><td></td><td><input type="text" id="kbt" placeholder="tap in here" onfocus="get_android_tap()"></td></tr>
+		<tr class="togA"><td>[tap] inner window</td><td class="c mono" id="tiw"></td></tr>
+		<tr class="togA"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
+		<tr class="togA"><td>keyboard height</td><td class="c mono" id="kbh"></td></tr>
+
 		<tr><td colspan="2"></td></tr> <!--space-->
 		<tr><td colspan="2"><span class="no_color">code based on work by </span><a target="_blank" class="blue"
 			href="https://arthuredelstein.github.io/tordemos/media-query-fingerprint.html">Arthur Edelstein</a> <sup>1</sup>
@@ -1037,11 +1028,11 @@
 	<table id="tbperf">
 		<col width="1%"><col width="10%"><col width="89%">
 		<thead><tr><th colspan="3" class="showhide">
-			<span id="labelPERF" class="btnb" onClick="togglerows('PERF','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
-		<tr class="togPERF"><td colspan="2">global perf
+			<span id="labelPERF" class="btnb" onClick="togglerows('P','perf & debugging')">&#9660; show perf & debugging</span></th></tr></thead>
+		<tr class="togP"><td colspan="2">global perf
 			<br><span class="btnb mono no_color" onClick="output_perf('all',true)">[<span id="perfGBtn">more</span>]</span>
 			</td><td class="mono spaces gc" id="perfG"></td></tr>
-		<tr class="togPERF"><td colspan="2">click perf
+		<tr class="togP"><td colspan="2">click perf
 			<br><span class="btnb mono no_color" onClick="output_perf('x',true)">[<span id="perfSBtn">more</span>]</span>
 			</td><td colspan="2" class="mono spaces gc" id="perfS"></td></tr>
 	</table>
