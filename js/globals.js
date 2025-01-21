@@ -105,8 +105,6 @@ const tick = '✓', // ✓ u2713, 🗸 u1F5F8
 	rfp_red = sbx+'RFP]'+sc,
 	silent_green = sg +"[<span class='healthsilent'>"+ tick +'</span>]'+ sc,
 	silent_red = sb +"[<span class='healthsilent'>" + cross +'</span>]'+ sc,
-	lb_green = sgtick+'LB]'+sc,
-	lb_red = sbx+'LB]'+sc,
 	nw_green = sgtick+'RFP newwin]'+sc,
 	nw_red = sbx+'RFP newwin]'+sc,
 	default_green = sgtick+'default]'+sc,
