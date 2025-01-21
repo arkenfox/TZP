@@ -9,7 +9,7 @@ function return_lb(w,h,isNew) {
 	if (h < 501) {hstep = 50} else if (h < 1601) {hstep = 100}
 	bw = Number.isInteger(w/wstep)
 	bh = Number.isInteger(h/hstep)
-	return (bw && bh) ? lb_green : lb_red
+	return (bw && bh) ? true : false
 }
 
 function return_nw(w,h, isNew) {
@@ -213,16 +213,20 @@ const get_scr_measure = () => new Promise(resolve => {
 		oTmp.screen.width.media = mmres[0]['device-width']
 		oTmp.inner.height.media = mmres[0].height
 		oTmp.inner.width.media = mmres[0].width
-		// test css/media value is up to 1px higher: we should only allow a lower value
+		// test: css/media value is up to 1px higher: we should only allow a lower value
 		//oTmp.screen.width.media = mmres[0]['device-width'] + 1
 
 		// viewport units
-			// this is the same as viewport but it ignores scollbars, so adds information
-			// is a more precise measurement of matchMedia
-		if ('android' !== isOS) {
-			let vwhData = get_scr_viewport_units('inner')
+		let vuMETRIC = 'sizes_viewport_units'
+		let vuType = 'android' == isOS ? vuMETRIC : 'inner'
+		let vwhData = get_scr_viewport_units(vuType)
+		if ('inner' == vuType) {
+			// desktop: same as viewport but it ignores scollbars, so can
+			// add information and is a more precise measurement of matchMedia
 			oTmp.inner.width['vw'] = vwhData.width
 			oTmp.inner.height['vh'] = vwhData.height
+			// n/a: standalone android metric
+			addData(1, vuMETRIC, zNA)
 		}
 
 		// screen/window
@@ -240,7 +244,7 @@ const get_scr_measure = () => new Promise(resolve => {
 		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
 		try {target = iTarget.screen} catch(e) {} // initial iframe target
 		aList.forEach(function(name) {
-			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target after iframe
+			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target post iframe
 			for (const k of Object.keys(oList)) {
 				if ('iframe' !== name) {
 					if ('outer' == k) {target = window; name = 'window'} // switch non-iframe target
@@ -250,24 +254,16 @@ const get_scr_measure = () => new Promise(resolve => {
 					let p = aItems[i], x, isSkip = false
 					let axis = p.includes('idth') ? 'width' : 'height'
 					try {
-						// skip iframe inner
-						if ('iframe' == name && 'inner' == k) {isSkip = true}
+						if ('iframe' == name && 'inner' == k) {isSkip = true} // skip iframe inner
 						if (!isSkip) {
-							// switch iframe target
-							if ('iframe' == name && 'outer' == k) {target = iTarget.window}
+							if ('iframe' == name && 'outer' == k) {target = iTarget.window} // switch iframe target
 							x = target[p]
 							if (runST) {x = undefined}
 							/* cause one error
 							if (name == 'screen' && k == 'screen' && axis == 'width') {x = undefined} // fail one screen
-							if (name == 'screen' && k == 'available' && axis == 'height') {x = undefined} // fail one availbe
-							if (name == 'window' && k == 'outer' && axis == 'width') {x = undefined} // fail one outer
-							if (name == 'window' && k == 'inner' && axis == 'height') {x = undefined} // fail one inner
 							//*/
 							/* change one value: a little moot once we compare to css for zLIEs etc
-							if (name == 'screen' && k == 'screen' && axis == 'width') {x = x + 100} // fail one screen
-							if (name == 'screen' && k == 'available' && axis == 'height') {x = x + 20} // fail one availbe
 							if (name == 'window' && k == 'outer' && axis == 'width') {x = x - 30} // fail one outer
-							if (name == 'window' && k == 'inner' && axis == 'height') {x = x - 30} // fail one inner
 							//*/
 							let typeCheck = typeFn(x)
 							if ('number' !== typeCheck) {throw zErrType + typeCheck}
@@ -319,9 +315,8 @@ const get_scr_measure = () => new Promise(resolve => {
 						if ('vw' == m) {oDisplay[k +'_viewport'] = value +' x '+ oTmp[k]['height']['vh']
 						} else {oDisplay[k +'_'+ m] = value +' x '+ oTmp[k]['height'][m]}
 					}
-					// any error to oSummary
+					// any error to oSummary, but ignore out of range css
 					if ('string' == typeof value) {
-						// ignore out of range css
 						if ('css' == m && '?' == value) {} else {oSummary[k][j] = zErr}
 					}
 				}
@@ -332,25 +327,22 @@ const get_scr_measure = () => new Promise(resolve => {
 		//console.log('oData', oData)
 		//console.log('oDisplay', oDisplay)
 
-		// ToDo: update oData/oDisplay with lies
-
 		// notation
 		let notation ='', initData = zNA, initHash =''
 		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
 		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
+		let isInnerValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
+		let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
 
 		if ('android' == isOS) {
 			// initial_sizes
 			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
 		} else {
-			// LB/NW
-			let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
-			addDisplay(1, 'size_letterbox','','', return_lb(innerw, innerh, isNew))
+			// NW
 			addDisplay(1, 'size_newwin','','', return_nw(innerw, innerh, isNew))
 		}
 
-		let isInnerValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
 		// RFP/match
 		for (const k of Object.keys(oData)) {
 			let isSame = true
@@ -382,9 +374,9 @@ const get_scr_measure = () => new Promise(resolve => {
 					}
 				}
 				let aSet = Array.from(tmpSet)
+				// summary
 				// if the array is empty, isSame should already be false
 				// we already rounded + matched non-integers, there should only be one
-
 				if (aSet.length !== 1) {
 					if (undefined == oSummary[k][j]) {oSummary[k][j] = 'mixed'}
 					isSame = false
@@ -392,13 +384,19 @@ const get_scr_measure = () => new Promise(resolve => {
 					if (undefined == oSummary[k][j]) {oSummary[k][j] = aSet[0]}
 				}
 
-				// if all the same then does it match _based_ on inner
-						// innerw and innerh must be valid, to compare to
+				// notation
+					// if all the same then does it match _based_ on inner
+					// innerw and innerh must be valid, to compare to
 				if (isSame && isInnerValid) {
-					//console.log(k, j, aSet)
-					// we can refine these rules later per key/OS
-					let match = 'width' == j ? innerw : innerh
-					if (aSet[0] !== match) {isSame = false}
+					// if inner: does it match LBing
+					if ('inner' == k) {
+						isSame = return_lb(innerw, innerh, isNew)
+					} else {
+						// we can refine these rules later per key/OS
+						// currently: does it match inner
+						let match = 'width' == j ? innerw : innerh
+						if (aSet[0] !== match) {isSame = false}
+					}
 				}
 			}
 			let notation = isSame ? rfp_green : rfp_red
@@ -406,25 +404,42 @@ const get_scr_measure = () => new Promise(resolve => {
 			addDisplay(1, 'sizes_'+ k, '','', notation)
 		}
 
-		// summary
-		//console.log('oSummary', oSummary)
-		for (const k of Object.keys(oSummary)) {oDisplay[k +'_summary'] = oSummary[k].width +' x '+ oSummary[k].height}
-
-		// simple health lookups
+		// health lookups
 		if (gRun) {
 			let strInner = oTmp.inner.width.window +' x '+ oTmp.inner.height.window
 			let initInner = isInitial.width.inner +' x '+ isInitial.height.inner
 			let initOuter = isInitial.width.outer +' x '+ isInitial.height.outer
 			let initMatch = initInner == initOuter ? initInner : 'inner: '+ initInner +' | outer: '+ initOuter
-			sDetail[isScope].lookup['size_letterbox'] = strInner
 			sDetail[isScope].lookup['size_newwin'] = strInner
 			sDetail[isScope].lookup['sizes_initial'] = initMatch
 		}
+
+		/* ToDo: update oData/oDisplay/oSummary with lies
+			i.e detect them, change oData to zLIE, color them
+			sData[SECT99] covers "Screen.width","Screen.height","Screen.availWidth","Screen.availHeight"
+			and we have if css is valid and it's not "isSame" i.e it matches within 1
+			about the only one we really can't tell is outer
+		*/
+
 		// data
 		for (const k of Object.keys(oData)) {addData(1, 'sizes_'+ k, oData[k], mini(oData[k]))}
 		addData(1, 'sizes_initial', initData, initHash)
 		// display
+		for (const k of Object.keys(oSummary)) {oDisplay[k +'_summary'] = oSummary[k].width +' x '+ oSummary[k].height}
 		for (const k of Object.keys(oDisplay)) {addDisplay(1, k, oDisplay[k])}
+
+		// android viewport units
+		if ('inner' !== vuType) {
+			// urlbar
+			let strUrlbar = zNA
+			let isVUValid = 'number' == typeFn(vwhData.vw) && 'number' == typeFn(vwhData.vh)
+			if (isInnerValid && isVUValid) {
+				strUrlbar = (vwhData.vw - innerw) +' x '+ (vwhData.vh - innerh)
+			}
+			addDisplay(1, 'sizes_urlbar', strUrlbar)
+			addDisplay(1, vuMETRIC, vwhData.vw + ' x '+ vwhData.vh)
+			addData(1, vuMETRIC, vwhData, mini(vwhData))
+		}
 
 		// temp dev logging
 		function log_screen_details() {
@@ -448,68 +463,6 @@ const get_scr_measure = () => new Promise(resolve => {
 		if (isScreenLog) {log_screen_details()}
 		return resolve()
 	})
-
-	/* // old compare code
-	let match = true, r =''
-	if (mScreen !== mAvailable) {match = false
-	}	else if (mAvailable !== mOuter) {match = false
-	}	else if (mOuter !== mInner) {match = false
-	} else {
-		aMeasures.forEach(function(value) {
-			if (Number.isNaN(value)) {match = false}
-		})
-	}
-	r = match ? screen_green : screen_red
-	dom.scrmatch.innerHTML = r
-
-	// inner
-	let newW = getElementProp(1, "#D",":before"),
-		newH = getElementProp(1, "#D"),
-		isLies = 0, oldW = w4, oldH = h4
-	if (newW !== "?") {
-		newW = newW * 1
-		if (newW == oldW-1) {newW = oldW}
-		if (newW !== oldW) {isLies++}
-	}
-	if (newH !== "?") {
-		newH = newH.slice(3) * 1
-		if (newH == oldH-1) {newH = oldH}
-		if (newH !== oldH) {isLies++}
-	}
-	if (isLies > 0) {
-		dom.mInner.innerHTML = log_known(1, "window inner", mInner)
-	}
-	res["window_inner"] = (isLies > 0 ? zLIE : mInner)
-
-	// screen
-	newW = getElementProp(1, "#S",":before")
-	newH = getElementProp(1, "#S")
-	isLies = 0, oldW = w1, oldH = h1
-	if (newW !== "?") {
-		newW = newW * 1
-		if (newW == oldW-1) {newW = oldW}
-		if (newW !== oldW) {isLies++}
-	}
-	if (newH !== "?") {
-		newH = newH.slice(3) * 1
-		if (newH == oldH-1) {newH = oldH}
-		if (newH !== oldH) {isLies++}
-	}
-	if (["Screen.width","Screen.height"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {isLies++}
-	if (isLies > 0) {
-		dom.mScreen.innerHTML = log_known(1, "screen", mScreen)
-	}
-	res["screen"] = (isLies > 0 ? zLIE : mScreen)
-
-	// screen available
-	isLies = false
-	if (["Screen.availWidth","Screen.availHeight"].some(lie => sData[SECT99].indexOf(lie) >= 0)) {
-		isLies = true
-		dom.mAvailable.innerHTML = log_known(1, "screen available", mAvailable)
-	}
-	res["screen_available"] = (isLies > 0 ? zLIE : mAvailable)
-
-	*/
 })
 
 const get_scr_mm = (datatype) => new Promise(resolve => {
@@ -1060,18 +1013,13 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 })
 
 function get_scr_viewport_units(METRIC) {
-	if ('inner' !== METRIC && 'android' !== isOS) {
-		addBoth(1, METRIC, zNA)
-		return
-	}
-
-	// 100vw/100vh element
-	// we use this for
-		// inner on desktop: it provides a different value with subpixels
-		// viewport on android
-			// because if used as inner, it will never match due to it ignoring the urlbar
-			// so instead we will record it here and add that means inner can get a green RFP
-			// and we still get the entropy (and can even output an android urlbar height for display)
+	// 100vw/100vh element: we use this for
+	// inner_viewport on desktop
+		// it provides a different value with subpixels but isSame
+	// viewport_units on android
+		// if used as inner_viewport, it is never isSame due to it ignoring the urlbar
+		// so we will record it separately so inner is isSame and the summary is valid
+		// this provides android entropy and we even display the urlbar height as a FYI
 	let data = {}, aList = ['width','height']
 	let vwhTarget
 	try {vwhTarget = dom.tzpVWH} catch(e) {}
@@ -1108,14 +1056,7 @@ function get_scr_viewport_units(METRIC) {
 			data[name] = zErr
 		}
 	})
-	if ('inner' == METRIC) {
-		return data
-	} else {
-		addDisplay(1, METRIC, data.vw + ' x '+ data.vh)
-		addData(1, METRIC, data, mini(data))
-		console.log(data)
-		return
-	}
+	return data
 }
 
 const get_scr_viewport = (runtype) => new Promise(resolve => {
@@ -1312,25 +1253,6 @@ function get_ua_workers() {
 }
 
 /* OS SPECIFIC */
-
-function get_android_tbh() {
-	// toolbar height if user has chosen to 'hide the toolbar when scrolling down a page'
-	// avh global var s/be with toolbar visible: hence use new value > avh
-	// We only need one diff since the viewport size 'snaps' to the new value
-	window.addEventListener('scroll', toolbarScroll)
-	function toolbarScroll() {
-		// ignore fullscreen
-		if (window.fullScreen == false) {
-			// delay: allow time for toolbar change
-			setTimeout(function() {
-				let vh_new = get_scr_viewport('height')
-				if (vh_new > avh) {
-					dom.tbh = (vh_new - avh)
-				}
-			}, 800)
-		}
-	}
-}
 
 function get_android_tap() {
 	if (isBlock || 'android' !== isOS) {
@@ -1699,13 +1621,10 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_scrollbar('scrollbars', runtype), // gets viewport
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
-		get_scr_viewport_units('sizes_viewport_units'),
 	]).then(function(){
 		// add listeners once
 		if (gLoad) {
-			if ('android' == isOS) {
-				get_android_tbh()
-			} else {
+			if ('android' !== isOS) {
 				window.addEventListener('resize', function(){outputSection(1, true)})
 			}
 		}
