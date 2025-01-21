@@ -1594,10 +1594,9 @@ function countJS(item) {
 				// do once
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
-					showhide('DROID','table-row')
-					dom.androidhide1.style.display = 'none'
-					dom.androidhide1.classList.remove('togS')
-					dom.androidshow1.classList.remove('hidden')
+					showhide('A','table-row')
+					dom.A1.style.display = 'none'
+					dom.A1.classList.remove('togS') // inner_viewport
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
@@ -1716,7 +1715,7 @@ function outputSection(id, isResize = false) {
 	if ('load' == id) {
 		// skip clear/reset
 		id = 'all'
-		delay = 0 
+		delay = 0
 	} else if ('all' == id) {
 		gRun = true
 		// clear
