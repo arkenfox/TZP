@@ -401,7 +401,9 @@ const get_scr_measure = () => new Promise(resolve => {
 					if (aSet[0] !== match) {isSame = false}
 				}
 			}
-			addDisplay(1, 'sizes_'+ k, '','', (isSame ? rfp_green : rfp_red))
+			let notation = isSame ? rfp_green : rfp_red
+			if ('inner' == k && 'android' == isOS) {notation = ''}
+			addDisplay(1, 'sizes_'+ k, '','', notation)
 		}
 
 		// summary
