@@ -213,6 +213,17 @@ const get_scr_measure = () => new Promise(resolve => {
 		oTmp.screen.width.media = mmres[0]['device-width']
 		oTmp.inner.height.media = mmres[0].height
 		oTmp.inner.width.media = mmres[0].width
+		// test css/media value is up to 1px higher: we should only allow a lower value
+		//oTmp.screen.width.media = mmres[0]['device-width'] + 1
+
+		// viewport units
+			// this is the same as viewport but it ignores scollbars, so adds information
+			// is a more precise measurement of matchMedia
+		if ('android' !== isOS) {
+			let vwhData = get_scr_viewport_units('inner')
+			oTmp.inner.width['vw'] = vwhData.width
+			oTmp.inner.height['vh'] = vwhData.height
+		}
 
 		// screen/window
 		// order matters: so property targets are correct
@@ -225,9 +236,8 @@ const get_scr_measure = () => new Promise(resolve => {
 			outer: ['outerHeight','outerWidth'],
 			inner: ['innerHeight','innerWidth'],
 		}
-		let iTarget, iTargetInner, target
+		let iTarget, target
 		try {iTarget = dom.tzpIframe.contentWindow} catch(e) {}
-		try {iTargetInner = dom.tzpIframeInner.contentWindow} catch(e) {}
 		try {target = iTarget.screen} catch(e) {} // initial iframe target
 		aList.forEach(function(name) {
 			if ('iframe' !== name) {target = screen; name = 'screen'} // initial target after iframe
@@ -237,36 +247,38 @@ const get_scr_measure = () => new Promise(resolve => {
 				}
 				let aItems = oList[k]
 				for (let i=0; i < aItems.length; i++) {
-					let p = aItems[i], x
+					let p = aItems[i], x, isSkip = false
 					let axis = p.includes('idth') ? 'width' : 'height'
 					try {
-						// switch iframe target
-						if ('iframe' == name) {
-							if ('outer' == k) {target = iTarget.window} else if ('inner' == k) {target = iTargetInner.window}
+						// skip iframe inner
+						if ('iframe' == name && 'inner' == k) {isSkip = true}
+						if (!isSkip) {
+							// switch iframe target
+							if ('iframe' == name && 'outer' == k) {target = iTarget.window}
+							x = target[p]
+							if (runST) {x = undefined}
+							/* cause one error
+							if (name == 'screen' && k == 'screen' && axis == 'width') {x = undefined} // fail one screen
+							if (name == 'screen' && k == 'available' && axis == 'height') {x = undefined} // fail one availbe
+							if (name == 'window' && k == 'outer' && axis == 'width') {x = undefined} // fail one outer
+							if (name == 'window' && k == 'inner' && axis == 'height') {x = undefined} // fail one inner
+							//*/
+							/* change one value: a little moot once we compare to css for zLIEs etc
+							if (name == 'screen' && k == 'screen' && axis == 'width') {x = x + 100} // fail one screen
+							if (name == 'screen' && k == 'available' && axis == 'height') {x = x + 20} // fail one availbe
+							if (name == 'window' && k == 'outer' && axis == 'width') {x = x - 30} // fail one outer
+							if (name == 'window' && k == 'inner' && axis == 'height') {x = x - 30} // fail one inner
+							//*/
+							let typeCheck = typeFn(x)
+							if ('number' !== typeCheck) {throw zErrType + typeCheck}
+							// only matchmedia can be non Integer
+							if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
 						}
-						x = target[p]
-						if (runST) {x = undfined}
-						/* cause one error
-						if (name == 'screen' && k == 'screen' && axis == 'width') {x = undefined} // fail one screen
-						if (name == 'screen' && k == 'available' && axis == 'height') {x = undefined} // fail one availbe
-						if (name == 'window' && k == 'outer' && axis == 'width') {x = undefined} // fail one outer
-						if (name == 'window' && k == 'inner' && axis == 'height') {x = undefined} // fail one inner
-						//*/
-						/* change one value: a little moot once we compare to css for zLIEs etc
-						if (name == 'screen' && k == 'screen' && axis == 'width') {x = x + 100} // fail one screen
-						if (name == 'screen' && k == 'available' && axis == 'height') {x = x + 20} // fail one availbe
-						if (name == 'window' && k == 'outer' && axis == 'width') {x = x - 30} // fail one outer
-						if (name == 'window' && k == 'inner' && axis == 'height') {x = x - 30} // fail one inner
-						//*/
-						let typeCheck = typeFn(x)
-						if ('number' !== typeCheck) {throw zErrType + typeCheck}
-						// only matchmedia can be non Integer
-						if (!Number.isInteger(x)) {throw zErrInvalid + 'expected Integer: got '+ typeCheck}
 					} catch (e) {
 						log_error(1, 'sizes_'+ k +'_'+ axis +'_'+ name, e)
 						x = zErr
 					}
-					oTmp[k][axis][name] = x
+					if (!isSkip) {oTmp[k][axis][name] = x}
 				}
 			}
 		})
@@ -304,7 +316,8 @@ const get_scr_measure = () => new Promise(resolve => {
 					let value = oTmp[k][j][m]
 					oData[k][j][m] = value
 					if ('width' == j && 'css' !== m) {
-						oDisplay[k +'_'+m] = value +' x '+ oTmp[k]['height'][m]
+						if ('vw' == m) {oDisplay[k +'_viewport'] = value +' x '+ oTmp[k]['height']['vh']
+						} else {oDisplay[k +'_'+ m] = value +' x '+ oTmp[k]['height'][m]}
 					}
 					// any error to oSummary
 					if ('string' == typeof value) {
@@ -355,13 +368,15 @@ const get_scr_measure = () => new Promise(resolve => {
 						if (zErr == value) {oSummary[k][j] = zErr}
 					}
 					if (!isIgnore) {
+						// vw/vh can be non-integer in inner
 						// media can be non-integer | css can be off by 1 | both only screen + inner metrics
 						// match them to our inner or screen if within 1
-						if ('media' == n || 'css' == n) {
-							value = Math.round(value) // to remove non-integer
+						if ('media' == n || 'css' == n || 'vh' == n || 'vw' == n) {
+							value = Math.floor(value) // to remove non-integers + ensure valid diffs are positive
 							let control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
 							if ('inner' == k) {control = 'width' == j ? innerw : innerh}
-							if (1 == Math.abs(value - control)) {value = control} // match control
+							// we floored so any valid diff must be 1 or 0 because we substract value from control
+							if (1 == control - value) {value = control} // match control
 						}
 						tmpSet.add(value)
 					}
@@ -1042,6 +1057,65 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 	})
 })
 
+function get_scr_viewport_units(METRIC) {
+	if ('inner' !== METRIC && 'android' !== isOS) {
+		addBoth(1, METRIC, zNA)
+		return
+	}
+
+	// 100vw/100vh element
+	// we use this for
+		// inner on desktop: it provides a different value with subpixels
+		// viewport on android
+			// because if used as inner, it will never match due to it ignoring the urlbar
+			// so instead we will record it here and add that means inner can get a green RFP
+			// and we still get the entropy (and can even output an android urlbar height for display)
+	let data = {}, aList = ['width','height']
+	let vwhTarget
+	try {vwhTarget = dom.tzpVWH} catch(e) {}
+	let range, method
+	aList.forEach(function(p) {
+		let name = 'inner' == METRIC ? p : 'v'+ p.slice(0,1)
+		try {
+			let x
+			if (isDomRect == -1) {
+				x = p == 'width' ? vwhTarget.offsetWidth : vwhTarget.offsetHeight
+			} else {
+				if (isDomRect > 1) {
+					range = document.createRange()
+					range.selectNode(target)
+				}
+				if (isDomRect < 1) {method = vwhTarget.getBoundingClientRect()
+				} else if (isDomRect == 1) {method = vwhTarget.getClientRects()[0]
+				} else if (isDomRect == 2) {method = vwhTarget.getBoundingClientRect()
+				} else if (isDomRect > 2) {method = vwhTarget.getClientRects()[0]
+				}
+				x = 'width' == p ? method.width : method.height
+				//type check
+				if (runST) {x = p == 'width' ? undefined : '' }
+				let typeCheck = typeFn(x)
+				if ('number' !== typeCheck) {throw zErrType + typeCheck}
+				data[name] = x
+			}
+		} catch(e) {
+			if ('inner' == METRIC) {
+				log_error(1, 'sizes_inner_'+ p +'_v'+ p.slice(0,1), e)
+			} else {
+				log_error(1, METRIC +'_'+ name, e)
+			}
+			data[name] = zErr
+		}
+	})
+	if ('inner' == METRIC) {
+		return data
+	} else {
+		addDisplay(1, METRIC, data.vw + ' x '+ data.vh)
+		addData(1, METRIC, data, mini(data))
+		console.log(data)
+		return
+	}
+}
+
 const get_scr_viewport = (runtype) => new Promise(resolve => {
 	let oData = {height: {}, width: {}}, aDisplay = []
 	const METRIC = 'sizes_viewport', isHeight = 'height' == runtype, id= 'vp-element'
@@ -1623,6 +1697,7 @@ const outputScreen = (isResize = false) => new Promise(resolve => {
 		get_scr_scrollbar('scrollbars', runtype), // gets viewport
 		get_scr_orientation('orientation'),
 		get_scr_measure(),
+		get_scr_viewport_units('sizes_viewport_units'),
 	]).then(function(){
 		// add listeners once
 		if (gLoad) {

@@ -1595,6 +1595,9 @@ function countJS(item) {
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
 					showhide('DROID','table-row')
+					dom.androidhide1.style.display = 'none'
+					dom.androidhide1.classList.remove('togS')
+					dom.androidshow1.classList.remove('hidden')
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
