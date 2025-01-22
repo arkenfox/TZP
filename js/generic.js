@@ -1595,8 +1595,23 @@ function countJS(item) {
 				dom.tzpPointer.addEventListener('pointerdown', (event) => {get_pointer_event(event)})
 				if ('android' == isOS) {
 					showhide('A','table-row')
-					dom.A1.style.display = 'none'
-					dom.A1.classList.remove('togS') // inner_viewport
+					// A1 inner_document: html class hidden - only used by android
+					// add class togS so it shows when expanding, remove hidden class
+					dom.A1.classList.add('togS')
+					dom.A1.classList.remove('hidden')
+					// A2 inner_viewport units + A3 viewport_doc: html class togS - not used by android
+					// hide, remove togS so it can't be shown when expanding
+					dom.A2.style.display = 'none'
+					dom.A2.classList.remove('togS')
+					dom.A3.style.display = 'none'
+					dom.A3.classList.remove('togS')
+					// A4 viewport summary - not used by android
+						// hide and remove class togS from it's remaining two children
+						// and rename element
+					dom.A4.style.display = 'none'
+					dom.A5.classList.remove('togS')
+					dom.A6.classList.remove('togS')
+					dom.A7.innerHTML = 'viewport '
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
