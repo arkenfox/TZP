@@ -227,6 +227,10 @@ const get_scr_measure = () => new Promise(resolve => {
 			oTmp.inner.height['vh'] = vwhData.height
 			// n/a: standalone android metric
 			addData(1, vuMETRIC, zNA)
+		} else {
+		// document: android only
+			oTmp.inner.width['document'] = adoc.width
+			oTmp.inner.height['document'] = adoc.height
 		}
 
 		// screen/window
@@ -331,10 +335,18 @@ const get_scr_measure = () => new Promise(resolve => {
 		let notation ='', initData = zNA, initHash =''
 		let innerw = oData.inner.width.window, innerh = oData.inner.height.window
 		let screenw = oData.screen.width.screen, screenh = oData.screen.height.screen
-		let isInnerValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
-		let isNew = isTB || isVer > 132 // 1556002 newWin & LB step alignment
+		let isNew = (isTB || isVer > 132) // 1556002 newWin & LB step alignment
+		// valid defaults
+		let isCompareValid = 'number' == typeFn(innerw) && 'number' == typeFn(innerh)
+		let controlw = innerw,
+			controlh = innerh
 
 		if ('android' == isOS) {
+			// on android window.inner can differ due to dynamic urlbar, so we use doc
+			let docw = oData.inner.width.document, doch = oData.inner.height.document
+			isCompareValid = 'number' == typeFn(docw) && 'number' == typeFn(doch)
+			controlw = docw
+			controlh = doch
 			// initial_sizes
 			// ToDo: add notation
 			initData = isInitial; initHash = mini(isInitial)
@@ -366,7 +378,7 @@ const get_scr_measure = () => new Promise(resolve => {
 						if ('media' == n || 'css' == n || 'vh' == n || 'vw' == n) {
 							value = Math.floor(value) // to remove non-integers + ensure valid diffs are positive
 							let control = 'width' == j ? screenw : screenh // if these are invalid diff == NaN
-							if ('inner' == k) {control = 'width' == j ? innerw : innerh}
+							if ('inner' == k) {control = 'width' == j ? controlw : controlh}
 							// we floored so any valid diff must be 1 or 0 because we substract value from control
 							if (1 == control - value) {value = control} // match control
 						}
@@ -383,18 +395,15 @@ const get_scr_measure = () => new Promise(resolve => {
 				} else {
 					if (undefined == oSummary[k][j]) {oSummary[k][j] = aSet[0]}
 				}
-
 				// notation
 					// if all the same then does it match _based_ on inner
-					// innerw and innerh must be valid, to compare to
-				if (isSame && isInnerValid) {
+				if (isSame && isCompareValid) {
 					// if inner: does it match LBing
 					if ('inner' == k) {
-						isSame = return_lb(innerw, innerh, isNew)
+						isSame = return_lb(controlw, controlh, isNew)
 					} else {
-						// we can refine these rules later per key/OS
-						// currently: does it match inner
-						let match = 'width' == j ? innerw : innerh
+						// we can refine these rules later per key/OS: currently does it == inner
+						let match = 'width' == j ? controlw : controlh
 						if (aSet[0] !== match) {isSame = false}
 					}
 				}
@@ -430,15 +439,24 @@ const get_scr_measure = () => new Promise(resolve => {
 
 		// android viewport units
 		if ('inner' !== vuType) {
-			// urlbar
-			let strUrlbar = zNA
+			// dynamic urlbar
+			let strDynamic = zNA
 			let isVUValid = 'number' == typeFn(vwhData.vw) && 'number' == typeFn(vwhData.vh)
-			if (isInnerValid && isVUValid) {
-				strUrlbar = (vwhData.vw - innerw) +' x '+ (vwhData.vh - innerh)
-			}
-			addDisplay(1, 'sizes_urlbar', strUrlbar)
+			let toolbarw = vwhData.vw - controlw, toolbarh = vwhData.vh - controlh
+			// remove part decimals under 1px diff due to subpixels
+			if (Math.abs(toolbarw) < 1) {toolbarw = 0}
+			if (Math.abs(toolbarh) < 1) {toolbarh = 0}
+			strDynamic = toolbarw +' x '+ toolbarh
+			addDisplay(1, 'dynamic_urlbar', strDynamic)
 			addDisplay(1, vuMETRIC, vwhData.vw + ' x '+ vwhData.vh)
 			addData(1, vuMETRIC, vwhData, mini(vwhData))
+			// notate window.inner
+				// if window.inner == viewport units (only height will differ) then notate
+				// that dynamic urlbar is hidden. if inner !valid then it doesn't need a notation
+			if ('number' == typeFn(vwhData.vh)) {
+				let diff = vwhData.vh - controlh // vh will always be higher
+				if (diff > 1) {addDisplay(1, 'dynamic_note', ' [mismatch: dynamic urlbar hidden]')}
+			}
 		}
 
 		// temp dev logging
@@ -484,8 +502,8 @@ const get_scr_mm = (datatype) => new Promise(resolve => {
 		]
 	}
 	const oPrefixes = {
-		'device-width': 'screen_sizes_width',
-		'device-height': 'screen_sizes_height',
+		'device-width': 'sizes_screen_width',
+		'device-height': 'sizes_screen_height',
 		width: 'sizes_inner_width',
 		height: 'sizes_inner_height',
 		'-moz-device-pixel-ratio': 'pixels',
@@ -1062,9 +1080,12 @@ function get_scr_viewport_units(METRIC) {
 const get_scr_viewport = (runtype) => new Promise(resolve => {
 	let oData = {height: {}, width: {}}, aDisplay = []
 	const METRIC = 'sizes_viewport', isHeight = 'height' == runtype, id= 'vp-element'
+	const aMETRIC = 'sizes_inner'
 
 	function get_viewport(type) {
 		let w, h, wDisplay ='', hDisplay, range, method, target
+		let metric = 'document' == type && 'android' == isOS ? aMETRIC : METRIC
+
 		try {
 			if ('element' == type) {
 				target = document.createElement('div')
@@ -1088,16 +1109,8 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 					h = method.height
 				}
 			} else if ('document' == type) {
-				// using document.documentElement + domrect
-				// width:
-					// if we hide the content this removes the scrollbar which defeats the purpose
-					// but we should be good due to css, so we should get that first
-				// height
-					// if we don't hiding the content height is the complete doc e.g. 5000px
-					// if we do hide it: then height is the bare minimum: 8px or whatever
-					// what if hid the content but achored a visible element to the bottom
-					// would that force the content to be full height
-
+				// using document.documentElement + domrect = the full webcont dimensions
+				// we can only get width as we know that is fixed | height must be clientHeight
 				target = document.documentElement
 				h = target.clientHeight
 				if (isDomRect == -1) {
@@ -1113,7 +1126,6 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 					} else if (isDomRect > 2) {method = range.getClientRects()[0]
 					}
 					w = method.width
-					//h = method.height
 				}
 			} else {
 				w = window.visualViewport.width 
@@ -1123,25 +1135,42 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 			if (runST) {w = NaN, h = undefined}
 			let wType = typeFn(w), hType = typeFn(h)
 			if ('number' !== wType) {
-				if (!isHeight) {log_error(1, METRIC +'_width_'+ type, zErrType + wType)}
+				if (!isHeight) {log_error(1, metric +'_width_'+ type, zErrType + wType)}
 				w = zErr
 			}
 			if ('number' !== hType) {
-				if (!isHeight) {log_error(1, METRIC +'_height_'+ type, zErrType + hType)}
+				if (!isHeight) {log_error(1, metric +'_height_'+ type, zErrType + hType)}
 				h = zErr
 			}
 			hDisplay = h, wDisplay = w
-			if (gLoad) {avh = h} // get android height once
+			// get android with/height once
+			if (gLoad && 'visualViewport' == type) {
+				avw = w
+				avh = h
+			}
 		} catch(e) {
 			h = zErr; w = zErr; wDisplay =''
-			hDisplay = log_error(1, METRIC +'_'+ type, e)
+			if ('document' == type && 'android' == isOS) {
+				log_error(1, metric +'_width_'+ type, e)
+				log_error(1, metric +'_height_'+ type, e)
+			} else {
+				hDisplay = log_error(1, metric +'_'+ type, e)
+			}
 		}
-		oData.height[type] = h
-		oData.width[type] = w
-		if (!isHeight) {
-			addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
-			if ('visualViewport' == type) {
-				addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+		// in  android the document metric is in inner section
+		if ('document' == type && 'android' == isOS) {
+			adoc['height'] = h
+			adoc['width'] = w
+		} else {
+			oData.height[type] = h
+			oData.width[type] = w
+			if (!isHeight) {
+				addDisplay(1, 'vp_'+ type, ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+				// only do a summary for desktop
+				// android with dynamic urlbar & pinch to zoom can get all funky
+				if ('android' !== isOS && 'visualViewport' == type) {
+					addDisplay(1, 'vp_summary', ('' == wDisplay ? hDisplay : wDisplay +' x '+ hDisplay))
+				}
 			}
 		}
 	}
@@ -1263,7 +1292,8 @@ function get_android_tap() {
 		Promise.all([
 			get_scr_viewport('height')
 		]).then(function(result){
-			// avh: captured once on first load: s/be with toolbar visible at set width
+			// avh: visualViewport: captured once on first load
+			// should be with toolbar visible at set width
 			// since the tap event exits FS, we can rely on avh
 			// event also triggered by losing focus
 			let vh = result[0]
