@@ -1025,8 +1025,16 @@ const get_scr_scrollbar = (METRIC, runtype) => new Promise(resolve => {
 		}
 
 		get_scroll()
-		get_viewport('viewport')
-		get_viewport('visualViewport')
+		// android
+			// will always be zero or almost zero
+			// visualViewport changes with pinch-zoom and is redundant with viewport
+			// viewport is almost stable but pull to refresh and pinch-zoom is causing
+			// it to vary between 0 and some fraction, so ignore them. We already have
+			// lots of other subpixel entropy
+		if ('android' !== isOS) {
+			get_viewport('viewport')
+			get_viewport('visualViewport')
+		}
 		/*
 		let isScrollbarOverlay = false
 		aDisplay.forEach(function(item) {if (0 !== Math.floor(Math.abs(item))) {isScrollbarOverlay = true}})
@@ -1295,6 +1303,8 @@ function get_android_tap() {
 	if (isBlock || 'android' !== isOS) {
 		return
 	}
+	dom.tiw.innerHTML = ''
+	dom.kbh.innerHTML = ''
 	setTimeout(function() {
 		// use viewport: doesn't change on zoom
 		Promise.all([
