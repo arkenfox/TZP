@@ -238,6 +238,10 @@ tr td.border-bottom {
 	border-bottom: 1px solid var(--test99);
 	border-bottom-style: dashed;
 }
+tr td.border-top {
+	border-top: 1px solid var(--test99);
+	border-top-style: dashed;
+}
 
 #tb1 th {background-color: var(--bg1);}
 #tb2 th {background-color: var(--bg2);}
