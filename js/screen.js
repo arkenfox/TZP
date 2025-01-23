@@ -829,8 +829,6 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 
 	// visualViewport scale
 	function get_vv_scale(item) {
-		// FF63+: dom.visualviewport.enabled
-		// FF91+: default true (desktop at least)
 		let value, display
 		try {
 			value = visualViewport.scale
@@ -872,7 +870,10 @@ const get_scr_pixels = (METRIC) => new Promise(resolve => {
 		get_dpr() // sets varDPR used in dpi_div
 		get_dpi_css('dpi_css')
 		get_dpi_div('dpi_div')
-		get_vv_scale('visualViewport_scale')
+		if ('android' !== isOS) {
+			// android: useless, not stable as it is affected by zoom
+			get_vv_scale('visualViewport_scale')
+		}
 		let newobj = {}
 		for (const k of Object.keys(oData).sort()) {newobj[k] = oData[k]}
 		addData(1, METRIC, newobj, mini(newobj))
