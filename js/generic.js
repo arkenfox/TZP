@@ -1599,19 +1599,12 @@ function countJS(item) {
 					// add class togS so it shows when expanding, remove hidden class
 					dom.A1.classList.add('togS')
 					dom.A1.classList.remove('hidden')
-					// A2 inner_viewport units + A3 viewport_doc: html class togS - not used by android
-					// hide, remove togS so it can't be shown when expanding
-					dom.A2.style.display = 'none'
-					dom.A2.classList.remove('togS')
-					dom.A3.style.display = 'none'
-					dom.A3.classList.remove('togS')
-					// A4 viewport summary - not used by android
-						// hide and remove class togS from it's remaining two children
-						// and rename element
-					dom.A4.style.display = 'none'
-					dom.A5.classList.remove('togS')
-					dom.A6.classList.remove('togS')
-					dom.A7.innerHTML = 'viewport '
+					// hide and remove togS on the entire viewport section - not used by android
+					let items = document.getElementsByClassName('A2')
+					for (let i=0; i < items.length; i++) {
+						items[i].classList.remove('togS')
+						items[i].classList.add('hidden')
+					}
 				} else {
 					document.addEventListener('keydown', metricsEvent)
 				}
@@ -1760,8 +1753,6 @@ function outputSection(id, isResize = false) {
 		}
 		gRun = false
 	}
-	// reset
-	if ('all' == id || 1 == id) {dom.kbt.value =''}
 
 	var promiseSection = async function(x) {
 		let n = Number.isInteger(x) ? x : sectionNos[x]
