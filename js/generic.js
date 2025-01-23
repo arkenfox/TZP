@@ -1599,7 +1599,7 @@ function countJS(item) {
 					// add class togS so it shows when expanding, remove hidden class
 					dom.A1.classList.add('togS')
 					dom.A1.classList.remove('hidden')
-					// hide and remove togS on the entire viewport section - not used by android
+					// hide and remove togS on the entire viewport section + also window.inner - not used by android
 					let items = document.getElementsByClassName('A2')
 					for (let i=0; i < items.length; i++) {
 						items[i].classList.remove('togS')

@@ -30,9 +30,16 @@
 			position: fixed;
 			z-index: -1;
 		}
-		#tzpVWH {
-			height: 100vh;
-			width: 100vw;
+		#tzpLV {
+			height: 100lvh;
+			width: 100lvw;
+			position: fixed;
+			left: 0;
+			z-index: -6000;
+		}
+		#tzpSV {
+			height: 100svh;
+			width: 100svw;
 			position: fixed;
 			left: 0;
 			z-index: -6000;
@@ -60,7 +67,8 @@
 <body>
 	<span translate="no">
 	<div id="tzpRect"></div>
-	<div id="tzpVWH"></div>
+	<div id="tzpLV"></div>
+	<div id="tzpSV"></div>
 	<!--offscreen-->
 	<div class="offscreen">
 		<div id="tzpFS" width=0 height=0></div>
@@ -290,17 +298,19 @@
 			<div class="btn-right s99">inner</div></td></tr>
 		<tr id="A1" class="hidden"><td>document</td><td class="c mono" id="inner_document"></td></tr>
 		<tr class="togS"><td>matchMedia <sup>2</sup></td><td class="c mono" id="inner_media"></td></tr>
-		<tr class="A2 togS"><td>viewport units</td><td class="c mono" id="inner_viewport"></td></tr>
-		<tr class="togS"><td>window</td>
+		<tr class="togS"><td>[small viewport] sv*</td><td class="c mono" id="inner_viewport"></td></tr>
+		<tr class="A2 togS"><td>window</td>
 			<td class="mono border-bottom">
 			<span class="c" id="inner_window"></span><span class="c" id="dynamic_note"></span>
 			</td></tr>
+
 		<!--viewport-->
-		<tr class="togA"><td>dynamic urlbar</td><td class="c mono" id="dynamic_urlbar"></td></tr>
-		<tr class="togA"><td>viewport units</td><td class="mono">
-			<span id="sizes_viewport_units"></span>
-			<div class="togS btn-right s99">viewport</div>
+		<tr class="togA"><td>[large viewport] lv*</td><td class="mono border-top">
+			<span id="viewport_large"></span>
+			<div class="btn-right s99">viewport</div>
 		</td></tr>
+		<tr class="togA"><td>dynamic toolbar</td><td class="c mono" id="dynamic_toolbar"></td></tr>
+
 		<tr class="A2"><td>viewport</td><td class="c mono" id="vp_summary"></td></tr>
 		<tr class="A2 togS"><td>document</td><td class="mono">
 			<span class="c" id="vp_document"></span>
