@@ -90,8 +90,7 @@ function get_scr_initial() {
 	}
 }
 get_scr_initial()
-let avh, avw, // android visualViewport dimensions on gLoad
-	adoc = {} // android document sizes
+let adoc = {} // android document sizes
 
 // notation
 	// https://en.wikipedia.org/wiki/Check_mark

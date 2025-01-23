@@ -1100,7 +1100,7 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 
 	function get_viewport(type) {
 		let w, h, wDisplay ='', hDisplay, range, method, target
-		let metric = 'document' == type && 'android' == isOS ? aMETRIC : METRIC
+		let metric = 'android' == isOS ? aMETRIC : METRIC
 
 		try {
 			if ('element' == type) {
@@ -1159,22 +1159,17 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 				h = zErr
 			}
 			hDisplay = h, wDisplay = w
-			// get android with/height once
-			if (gLoad && 'visualViewport' == type) {
-				avw = w
-				avh = h
-			}
 		} catch(e) {
 			h = zErr; w = zErr; wDisplay =''
-			if ('document' == type && 'android' == isOS) {
+			if ('android' == isOS) {
 				log_error(1, metric +'_width_'+ type, e)
 				log_error(1, metric +'_height_'+ type, e)
 			} else {
 				hDisplay = log_error(1, metric +'_'+ type, e)
 			}
 		}
-		// in  android the document metric is in inner section
-		if ('document' == type && 'android' == isOS) {
+		// android only calls document and uses it in inner section
+		if ('android' == isOS) {
 			adoc['height'] = h
 			adoc['width'] = w
 		} else {
@@ -1192,7 +1187,17 @@ const get_scr_viewport = (runtype) => new Promise(resolve => {
 	}
 
 	// ToDo: we could also use size observer / IntersectionObserverEntry
+
+	// all
 	get_viewport('document')
+	// android: there is no viewport section: document becomes part of inner section.
+		// element + visualViewport are redundant with a TZP clean load (new tab etc) and
+		// can be or are unstable with dynamic urlbar/toolbar and pinch to zoom/reruns combos etc
+	if ('android' == isOS) {
+		addData(1, METRIC, zNA)
+		return resolve()
+	}
+	//desktop
 	get_viewport('element')
 	get_viewport('visualViewport')
 	removeElementFn(id)
@@ -1295,41 +1300,6 @@ function get_ua_workers() {
 	} catch(e) {
 		el2.innerHTML = log_error(1, 'service worker', e, 'service_worker')
 	}
-}
-
-/* OS SPECIFIC */
-
-function get_android_tap() {
-	if (isBlock || 'android' !== isOS) {
-		return
-	}
-	dom.tiw.innerHTML = ''
-	dom.kbh.innerHTML = ''
-	setTimeout(function() {
-		// use viewport: doesn't change on zoom
-		Promise.all([
-			get_scr_viewport('height')
-		]).then(function(result){
-			// avh: visualViewport: captured once on first load
-			// should be with toolbar visible at set width
-			// since the tap event exits FS, we can rely on avh
-			// event also triggered by losing focus
-			let vh = result[0]
-			dom.kbh = avh +' | '+ vh +' | '+ (avh - vh)
-			// ToDo: keyboard height: use setInterval
-			// keyboard can be slow to open + it slides (stepped changes)
-			// instead check x times + return max diff
-
-			// also grab the inner window
-			let iw
-			try {
-				iw = window.innerWidth +' x '+ window.innerHeight
-			} catch(e) {
-				iw = log_error(1, 'tap', e)
-			}
-			dom.tiw = iw
-		})
-	}, 1000) // wait for keyboard
 }
 
 /* USER TESTS */
