@@ -1600,6 +1600,7 @@ function countJS(item) {
 					dom.A1.classList.add('togS')
 					dom.A1.classList.remove('hidden')
 					// hide and remove togS on the entire viewport section + also window.inner - not used by android
+					// + visualViewportScale
 					let items = document.getElementsByClassName('A2')
 					for (let i=0; i < items.length; i++) {
 						items[i].classList.remove('togS')
