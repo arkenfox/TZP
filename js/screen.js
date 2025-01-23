@@ -371,6 +371,13 @@ const get_scr_measure = () => new Promise(resolve => {
 						isIgnore = true // don't add errors or lies to our set
 						if (zErr == value) {oSummary[k][j] = zErr}
 					}
+					// android window.inner
+						// a non-match doesn't matter for notation: we don't notate RFP inner on android yet
+						// it does cause a "mixed" in summary which with a green RFP is misleading, so ignore
+						// Note: once we add lies logic to our data, handled just above, we also won't be
+						// letting a possible genuine mismatch thru by not checking it for sameness
+					if ('android' == isOS && 'inner' == k && 'window' == n) {isIgnore = true}
+
 					if (!isIgnore) {
 						// vw/vh can be non-integer in inner
 						// media can be non-integer | css can be off by 1 | both only screen + inner metrics
@@ -453,9 +460,10 @@ const get_scr_measure = () => new Promise(resolve => {
 			// notate window.inner
 				// if window.inner == viewport units (only height will differ) then notate
 				// that dynamic urlbar is hidden. if inner !valid then it doesn't need a notation
-			if ('number' == typeFn(vwhData.vh)) {
-				let diff = vwhData.vh - controlh // vh will always be higher
-				if (diff > 1) {addDisplay(1, 'dynamic_note', ' [mismatch: dynamic urlbar hidden]')}
+				// if not the same, then vh will be a lot higher, so subtract inner from vh
+			if ('number' == typeFn(innerh) && 'number' == typeFn(vwhData.vh)) {
+				let diff = vwhData.vh - innerh
+				if (diff < 1) {addDisplay(1, 'dynamic_note', ' [mismatch: dynamic urlbar hidden]')}
 			}
 		}
 
